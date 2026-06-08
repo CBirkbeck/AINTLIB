@@ -1,0 +1,8 @@
+.DS_Store
+.lake/
+build/
+*.olean
+node_modules/
+_site/
+blueprint/print/
+.venv/
