@@ -1,0 +1,168 @@
+stars	fullName	description
+311	AlexKontorovich/PrimeNumberTheoremAnd	Blueprint for the PNT+ Project
+96	emilyriehl/infinity-cosmos	A blueprint for a formalization of infinity-cosmos theory in Lean.
+62	leanprover-community/flt-regular	Fermat's Last Theorem for regular primes
+49	hanwenzhu/LeanArchitect	LeanArchitect extracts a blueprint directly from Lean source.
+15	leanprover/verso-blueprint	Build structured Proof Blueprints with Verso
+14	kbuzzard/ClassFieldTheory	Github repository for the 2025 Clay Summer School on Formalizing Class Field Theory
+10	ykonstant1/InfinitePrimes	A proof of the infinitude of primes in Lean 4 from first principles
+10	b-mehta/PrimeCert	Formal prime certificates in Lean 4
+9	ImperialCollegeLondon/tcc-lean-alg-geom-2022	Experiments in algebraic geometry as part of the EPSRC Taught Course Centre course on formalising number theory and geometry
+9	ImperialCollegeLondon/diophantine	Solving Diophantine equations in Lean
+9	AxiomMath/ramanujan-tau-misses-primes	Lean formalizations for the paper "ABC implies that Ramanujan's Tau function misses almost all primes"
+6	wupr/order-p-q	Lean formalisation of the classification of the groups of order `p * q` where `p` and `q` are prime numbers.
+6	mariainesdff/LocalClassFieldTheory	Formalization of local fields, and eventually LCFT 
+6	laughinggas/p-adic-L-functions	Describes formalization of p-adic L-functions in Lean 3
+5	utensil/LeanBlueprintExample	
+5	mariainesdff/local_class_field_theory	Formalization of local fields, and eventually LCFT
+5	AxiomMath/partial-regularity	Lean formalizations for the paper "Almost all primes are partially regular"
+4	NeilStrickland/lean_primes	Proof in Lean that there are infinitely many primes
+4	ikelax/algebraic-complexity	A blueprint for a formalization of Algebraic Complexity in Lean. 
+4	daira/CompElliptic	Computable elliptic-curve abstractions for Lean 4
+4	CBirkbeck/ModularForms_Lean4	
+3	tangentstorm/leansieve	A formally verified prime number sieve in Lean4.
+3	lean-forward/class-group-and-mordell-equation	Formalized Class Group Computations and Integral Points on Mordell Elliptic Curves
+3	kkaunda/spgf	Structure in Prime Gaps - Formalized
+3	KisaraBlue/ec-tate-lean	Elliptic curve algorithm verification project built on mathib4
+3	cymcymcymcym/Unique_Factorization_Lean4	A lean 4 proof of unique prime factorization in well-ordered rings, starting from ring axioms.
+3	amosturchet/diophantine_approx	Lean project for Diophantine Approximation
+2	thefundamentaltheor3m/Groups_of_ord_psq	Proof in Lean that all groups of order p² (p prime) are abelian.
+2	schmittj/balanced-vectors-blueprint	Lean Blueprint for technical lemma on maxima and minimal of certain log-concave functions
+2	rwbarton/lean-elementary-number-theory	Ancient Lean proof of FLT for n=4
+2	riccardobrasca/KummerCriterion	Proof of Kummer's criterion for regularity of a prime in Lean
+2	QDU-Math-in-lean/elementary-number-theory	elementary number theory
+2	pitmonticone/QuadraticIntegers	Formalising the Ring of Integers in Quadratic Fields in the Lean proof assistant.
+2	LeastAuthority/WHIR	SC: Ethereum - zk(E)VM Verification - WHIR Lean Blueprint
+2	kckennylau/EllipticCurve	Towards a general definition of elliptic curve over schemes
+2	GhostDriftTheory/adic-lean-proof-replay	
+2	Eloitor/four-squares-modular-forms	Proving the four squares theorem using modular forms. Assuming intermediate propositions, ideally as little as possible.
+1	Vierkantor/mersenne-primes	A bijection between Mersenne primes and even perfect numbers
+1	veyselusta/functional-programming-in-lean	Code samples and exercises for the docs provided by Lean community for people to learn functional programming in Lean
+1	ryan-charette/number-theory-proof-verification	Introduction to Lean via elementary number theory
+1	runtimeverification/aeneas-field-arithmetic	Plonky3 prime field arithmetic verification with Aeneas
+1	pouriahwoarang-ship-it/RNT-Structural-Verification	A mechanical analysis demonstrating the structural inapplicability of the Riemann Hypothesis under historically accurate prime definitions. 
+1	lean-summer-research/finalized	Finalized Lean for Mathlib (with Blueprint)
+1	James-Oswald/Functional-Programming-In-Lean	My solutions for selected exercises in Christiansen's Book "Functional Programming In Lean"
+1	grthomson/silverman-tate	Lean formalisation and verification of theorems in Silverman & Tate -- "Rational Points on Elliptic Curves"
+1	FormalFrontier/Sutherland-NumberTheory-verso	Verso rendering of Sutherland Number Theory Lecture 1
+1	FormalFrontier/Sutherland-NumberTheory-Lecture2-draft1	
+1	FormalFrontier/Sutherland-NumberTheory-Lecture1-draft2	
+1	FormalFrontier/Sutherland-NumberTheory-Lecture1-draft1	
+1	ejgallego/verso-noperthedron	Standalone Verso Blueprint example for the Rupert counterexample project
+1	dobronx1325/Daboussi_Pnt	Lean 4 Formalization of the Daboussi Prime Number Theorem
+1	crvdgc/functional_programming_in_lean_examples	Examples and excersises for https://leanprover.github.io/functional_programming_in_lean/ (Lean 4)
+1	chenyili0818/optlib-dependency_graph	Blueprint for Formalization of Convergence Rates of Four First-order Algorithms for Convex Optimization (JAR)
+1	CBirkbeck/LeanModularForms	
+1	CBirkbeck/flt-regular-bernoulli	Private downstream project for formalising the Bernoulli criterion for regular primes
+1	Axiomatic-AI/lean-qkd	Lean blueprint a result in quantum key distribution
+1	Axiomatic-AI/lean-branch-number	Contains lean blueprint for a result on branch numbers. 
+1	AEjonanonymous/OPN	A Formal Proof of the Non-Existence of Odd Perfect Numbers for Euler Primes p ≥ 5 via Structural Divisibility Constraints.
+1	AEjonanonymous/Beal-Conjecture	The Beal Symmetry Collision: A Machine-Certified Solution via p-adic Valuations
+0	Zer0dyn/SemiprimeInterleaving	Lean 4 formalization of semiprime interleaving and twin prime detection
+0	Yunzhe21/functional_programming_in_lean_ex	
+0	yannpequignot/lean-wqo-continuous-functions	Lean 4 formalization of a well-quasi-order for continuous functions (arXiv:2410.13150)
+0	Xinze-Li-Moqian/astrolabe-template-strongpnt	Strong Prime Number Theorem (Lean 4) - Astrolabe visualization template
+0	XintaoYu/p_adic_L_function	
+0	xhalo32/NumberTheoryInLean	
+0	TudorTitan/Lean_ElementaryNT	Module for elementary number theory (where we only study ring of integers for rationals) with focus on modular arithmetic unique prime factorisation.
+0	timmyjose-learning/functional-programming-in-lean	https://leanprover.github.io/functional_programming_in_lean/
+0	TechProoo/functional-language-interpreter	
+0	Sujingqiao/Blueprint	my lean4 workshop
+0	stevenecreech/Furstenbergs_Proof_of_Infinite_Primes	
+0	SteamPunkPhysics/Primes-as-Forbidden-Harmonics	These are the lean files for the number theory proof paper: "Every Prime is a Forbidden Harmonic How Icosahedral Geometry Forces the Supersingular Primes: Machine-Verified Proofs in Lean 4"
+0	stagiralabs/eval_NumberTheory	Agora evaluation dataset for NumberTheory
+0	Square-t/elementary_number_theory_in_lean	This project aims to formalize the core content of Elementary Number Theory by Gareth A. Jones and J. Mary Jones using the Lean4 theorem prover. 
+0	Sparsa/FunctionalProgrammingLean	This repo contains the work book for function programming in lean 
+0	SnO2WMaN/lean4-as-functional-programming-language-practice	
+0	Seasawher/number-theory-with-lean-archived	作業中 : WIP
+0	ryanncode/tensor-sieve	Evaluating the Riemann Hypothesis in Lean 4 via p-adic shift operators and tensor networks.
+0	rootkiller6788/mini-number-theory-arithmetic-geometry	Number theory and arithmetic geometry built from scratch, learn arithmetic foundations via practical Lean 4 coding
+0	rohankumar1999/Infinite-Primes-using-LEAN	Infinite Primes using LEAN
+0	rntpooriahassanpour-ship-it/3-Millennium-Problems-closed_lean-green	Reflective Number Theory, with the highest level of formal mathematical mechanical verification, declares that classical number theory is based on a false definition of primes, which has given rise to such game problems as the Riemann Hypothesis and P vs NP conjectures and Navier-Stokes conjectures. 
+0	rileytao/eulerbox	A work in progress formalization of the proof that euler boxes cannot have semiprime sides, with the intent of expanding the proof to products of 3 primes with computational assistance.
+0	riccardobrasca/cyclotomic	
+0	renatolm/NumberTheory	Studies on Number Theory using Lean / Estudos sobre Teoria dos Números usando Lean
+0	ramhuw/PadicInverseLimit	Inverse limit implementation of the p-adic integers with Lean
+0	rabe1028/functional-programming-in-lean	
+0	Quiller-Anonymous/Triple-interface	Primes experiments
+0	pooriahassanpour0-bit/RIEMANN-HYPOTHESIS-WAS-A-165-Year-Pseudo-Problem	The Riemann Hypothesis (RH) is fundamentally a logical artifact, not a deep mystery of number theory, born from a **Circular Reasoning** fallacy in the classical definition of prime numbers. This paper, grounded in **Reflective Number Theory (RNT)** and formally verified in the Lean 4 Theorem Prover
+0	pooriahassanpour0-bit/Reflective_Number_Theory	Reflective Number Theory and the Foundational Collapse of Classical Prime Theory Pooria HassanpourCreator of the Reflective Paradigm (RNT); N-Genesis Foundation.
+0	pfaffelh/probability	Verso Blueprint describing Lean/Mathlib results in probability theory
+0	pechersky/gouvea	Formalizing Gouvea's p-adic numbers textbook
+0	open-lattice-lab/Lambda-SNARK-R	Post-quantum SNARK system based on Module-LWE/SIS for R1CS over cyclotomic rings, with zero-knowledge and succinct proofs.
+0	oleanpic/Olibrary	Collection of lemmata for Number Theory in Lean4
+0	nwsrnbr/blueprint_test	
+0	novaspivack/primes-in-greedy-B3	Proof: Every prime number is admitted into the greedy multiplicative B₃ sequence (OEIS A079852) — proof and Lean 4 formalization.
+0	muttener/functional-pearls-in-lean	
+0	mmasdeu/lean-nt	Formalization of number theory results in Lean
+0	mkohlhaas/Functional-Programming-in-Lean	
+0	michael-roe/number-theory	Lean theorems for number theory
+0	metinersin/AutoBlueprint	
+0	martinuhor/lean4-sunflower-alwz	A Lean 4 structural blueprint of the ALWZ information-theoretic bound for the Erdős-Rado Sunflower Lemma.
+0	mariotrevi/cubic-frobenius-lean	A repo for formal proofs in Lean relating to a conjecture in explicit class field theory.
+0	manitgupta27/determinstic_ede_lean_formalization	This is a formal verification of the core algorithms for a new algorithm to solve a class of exponential Diophantine equations.
+0	manishmurthi67/gap-prime-proof	Formal proof in Lean 4 that all natural numbers ≥2 are gap-prime
+0	loefflerd/ModularFormDimensions	Finite-dimensionality of modular forms spaces
+0	lisoleg/lean-prime-zero-duality	Lean 4 formalization of arXiv:2604.14596 — Prime-Zero Duality: Fractal Geometry, RG Flow, and Information-Ontological Framework for Number Theory
+0	leoca42/Lean-Basic-Number-Theory	A collection of basic number theory proofs written in Lean, used as a exercise to learn Lean.
+0	Leandr0ER/factorial-positive-verso	test using verso-blueprint
+0	laughinggas/padic-L-functions4	
+0	lambda-feedback/evaluation-function-boilerplate-lean	Boilerplate repository for evaluation functions written in Lean 4
+0	kewowski/twin-primes-proof	Formal Lean 4 proof that there are infinitely many twin primes
+0	kewowski/lean-bounded-prime-gaps	Formalizing the core combinatorial engine of Maynard–Tao (bounded prime gaps) in Lean 4/mathlib: Stage 2/3 inequalities, window/prime façades, and an extensible analytic interface that later accepts BV/EH inputs—kept always green with fast, robust proofs.
+0	Kazuki-Okamura/Lean4_Furstenberg-proof-of-the-infinitude-of-primes	A lean4 code for Furstenberg's proof of the infinitude of primes is given. 
+0	Kazuki-Okamura/Lean4_Cauchy-functional-equation	This project contains a lean 4 formalization of a basic result for the Cauchy functional equation.
+0	jupiterzw/infinitude-of-primes	UCL Year 1 Lean Project -- Proof of infinitude of primes using Lean3
+0	JonatanBeiruty15/Krasner-s-lemma	lean4- p-adic numbers Krasner's lemma
+0	jarredbarber/erdos-1094	Erdős Problem 1094: least prime factor of binomial coefficients (autonomous agent proof)
+0	jamesa9283/Generalised-Trigonometric-Functions-for-Lean	This a summer project as part of the Xena Project's summer project sessions ran in the summer of 2020. That was a lot of summers! I am formalising and placing the generalised trigonometric functions into Lean and proving simple lemmas about them.
+0	inventor1975/VRCycle	Lean 4 formalisation of the VR Cycle — ten works: arithmetic, numbers, sets, forms, Hahn–Banach audit, non-well-founded sets (AFA as theorem), methodological apparatus, algebra, formal topology, transit. 14 Zenodo records; browsable blueprint with dependency graph.
+0	heng-zhong-2003/Purely-Functional-Data-Structures-Lean	Data structures and algorithms in Chris Okasaki's «Purely Functional Data Structures» implemented in Lean 4. Verified.
+0	hcWang942/gametheory-blueprint	
+0	haglobah/functional-programming-lean	
+0	gullapallirishi/Infinite-Primes---Math300	Rutgers Math 300 H Final Project to formalize Infinite Primes in Lean.
+0	GrahamStrickland/functional_lean	Exercises and examples from "Functional Programming in Lean" - David Thrane Christiansen
+0	gotrevor/bounded_gaps	Lean 4 formalization scaffold for Polymath8b (bounded gaps between primes)
+0	GhostDriftTheory/adic-lean-proof	
+0	FormalFrontier/Sutherland-NumberTheory-Lecture1-draft3	
+0	ferrandf/valenceformula	Work on the valence formula for modular forms
+0	fderuiter/JIBLM_DIY_INTRO_NUMBER_THEORY	
+0	eluckydog/flt-from-scratch	A study project tracing Fermat’s Last Theorem from first principles — Frey curve, modular forms, Galois representations, Serre-Ribet-Wiles contradiction — via a 487-node knowledge graph, 43/43 Python verification tests, and Lean 4 concept references. Built through human–AI collaboration using natural language alone. Not peer-reviewed.
+0	ejgallego/verso-sphere-packing	Standalone Verso Blueprint example for the Sphere Packing in Lean project
+0	ejgallego/verso-algebraic-combinatorics	Verso port and integration repo for the Algebraic Combinatorics blueprint
+0	dstoeckel/lean_primes	Proofs about prime numbers in Lean 4.
+0	doxtor6/MerLean_NumberTheory	
+0	doccaico/Functional-Programming-in-Lean	Learn Lean by Functional Programming in Lean
+0	dlnnlsn/modular_forms_lean	Formal Methods in Mathematics project on Modular Forms
+0	dhruvbhatia00/ReduceModN	A basic tactic in Lean to prove nonexistence of solutions to diophantine equations by reducing mod n.
+0	DavidFox998/lean-theorema-aureum-143	Opera Numerorum: Theorema Aureum for X_0(143) -- GRH and exceptional primes
+0	ChrisHughes24/numbertheory	Proof of coursework 1 for the Imperial number theory course
+0	chris-anto-froeschl/elligator	Formalization of 'Elligator: Elliptic-curve points indistinguishable from uniform random strings'
+0	chinmayhegde/lea-hadamard	Blueprint-driven Lea-prover formalization of arXiv:2603.30013 (Davis, partial Hadamard counting in the cubic regime)
+0	chabulhwi/isprime	A Lean program that tests whether a natural number is prime
+0	Carlre2804/Beal-Conjecture	Explore a Beal Conjecture proof using p-adic valuation to show why coprime powers cannot satisfy a^x + b^y = c^z
+0	cammarasana123/PrimePowerFree-Fibonacci	We validate the Prime-Power-Free demonstrations through Lean 4
+0	Camille1024/Truel-Blueprint	Lean 4 formalization of the Truel problem (三人决斗博弈) with LeanArchitect blueprint
+0	buronsuave/coproof-infinitely-many-primes-v2	Testing DB after creating test suit
+0	Bilal-Waraich/Lean4-Functional-Programming	A repository of all the hours Lean4 and I have spent together
+0	bicmr-ai4math/group-9-Number-Theory-P1	group-9-Number-Theory-P1
+0	Beneficial-AI-Foundation/well-known-primes	
+0	beautiful-numbers/lehmer-lean	Formal Lean development for Lehmer’s totient problem based on the prime-cost pivot method.
+0	BaDaaS/primavera	Formal verification of prime number encodings for algebraic and combinatorial structures
+0	avg-lebesgue-enjoyer/lean-functional-programming-notes	have
+0	Arkamouli1996/Lean-projects---number-theory	Lean projects for number theoretic problems
+0	ANR-FALSE/PadicModForms	p-adic modular forms in Lean
+0	ANR-FALSE/PadicAnalysis	p-adic analysis in Lean
+0	Andrew-Kim-173/Euclid-infinite-primes	
+0	ananbaobeichicun/Functional_Programming_in_Lean	
+0	amellendijk/lean-bombieri-vinogradov	A Lean blueprint documenting a formalization of Bombieri-Vinogradov
+0	AlexBrodbelt/LeanIntroToNumberTheory	
+0	alegator-cs/infinite_twin_primes	lean4 formalized proof (attempt) of infinite twin primes
+0	adriruiz12/math199-lean-pnt	Lean 4 formalization of Chebyshev and prime-counting error bounds, developed as a Math 199 independent study at UCLA. Contribution to AlexKontorovich/PrimeNumberTheoremAnd.
+0	adimchimma/lean-wilsons-theorem-primes	
+0	42Pupusas/elliptic-curve-proofs	Lean experiments on elliptic curves
+0	1r0nw1ll/qa-symbolic-math	Formal symbolic harmonic number theory using Lean 4
+1006	google-deepmind/formal-conjectures	A collection of formalized statements of conjectures in Lean (includes extensive NT/Erdős problems)
+214	teorth/pfr	Formalization of the Polynomial Freiman-Ruzsa conjecture and related additive combinatorics results
+1769	teorth/analysis	A Lean companion to Analysis I (Terence Tao)
+106	leanprover-community/LeanProject	A template for blueprint-driven formalization projects in Lean
