@@ -18,7 +18,61 @@ open Informal
 
 #doc (Manual) "Diophantine Equations and Transcendence" =>
 
-This chapter covers four interlocking topics: the ring $`\mathbb{Z}[\sqrt{d}]` and its norm, Pell's equation $`x^2 - dy^2 = 1`, the theory of continued fractions and their convergents, and Liouville's theorem on transcendental numbers. Throughout, $`d` denotes a non-square positive integer, $`\mathbb{Z}` the integers, and $`\mathbb{R}` the real numbers. Results in Gelfond–Schneider, full Lindemann–Weierstrass, and Newton polygons are forthcoming mathlib PRs or the `NewtonPolys` project (Phase 3) and are not blueprinted here.
+This chapter covers four interlocking topics: the ring $`\mathbb{Z}[\sqrt{d}]` and its norm, Pell's equation $`x^2 - dy^2 = 1`, the theory of continued fractions and their convergents, and Liouville's theorem on transcendental numbers. Throughout, $`d` denotes a non-square positive integer, $`\mathbb{Z}` the integers, and $`\mathbb{R}` the real numbers. The Newton polygon theory of $`p`-adic power series is blueprinted in Phase 3 below, drawing on the `NewtonPolys` project. Results in Gelfond–Schneider and full Lindemann–Weierstrass remain forthcoming mathlib PRs and are not yet blueprinted.
+
+# Newton polygons (NewtonPolys)
+
+The nodes below are *informal*: the `NewtonPolys` project ([`CBirkbeck/NewtonPoly`](https://github.com/CBirkbeck/NewtonPoly), main branch) is built against mathlib v4.28.0-rc1 and carries no `(lean := …)` reference here. Each node records where the result is formalised and the current sorry-free status. The cross-chapter edges to {bpref "valuation"}[] and {bpref "padic-val-rat"}[] reflect genuine mathematical dependence: the Newton polygon of a $`p`-adic power series is constructed from the $`p`-adic valuation ({bpref "valuation"}[]) of its coefficients, and its slopes record the $`p`-adic valuations ({bpref "padic-val-rat"}[]) of the roots.
+
+## The Newton polygon of a $`p`-adic power series
+
+:::definition "newton-polygon"
+Let $`K` be a field with a non-archimedean valuation $`v : K \to \mathbb{Z} \cup \{\infty\}` ({uses "valuation"}[]), and let $`f(X) = \sum_{i \ge 0} a_i X^i` be a power series with coefficients in $`K`. Plot the points $`(i, v(a_i)) \in \mathbb{N} \times (\mathbb{Z} \cup \{\infty\})` for all $`i` with $`a_i \ne 0`. The *Newton polygon of $`f`* is the lower convex hull of these points: starting from the leftmost point $`(i_0, v(a_{i_0}))`, one rotates a line counterclockwise about the current vertex until it hits another lattice point, which becomes the next vertex, and the process continues. The slopes of the successive segments are non-decreasing rationals; the polygon may end in a *final ray* if the infimum of remaining slopes is not attained.
+
+Formally, the Newton polygon is encoded as a `NewtonPolygonData` record comprising a list of `Segment`s (each with start and end index and valuation) and an optional `FinalRay`; a polygon is *well-formed* if consecutive segments share an endpoint, slopes are non-decreasing, and the ray slope (if present) is at least the last segment slope.
+Formalised in [`NewtonPolys`](https://github.com/CBirkbeck/NewtonPoly) (sorry-free).
+:::
+
+:::definition "newton-polygon-valseq"
+The *valuation sequence* of a power series $`f = \sum a_i X^i` over a ring $`R` equipped with a map $`v : R \to \mathbb{Z} \cup \{\infty\}` ({uses "valuation"}[]) is the function $`\mathrm{vs}_f : \mathbb{N} \to \mathbb{Z} \cup \{\infty\}` defined by $`\mathrm{vs}_f(i) = v(a_i)`. The value $`\infty` (encoded as $`\top` in Lean) indicates a zero coefficient. The Newton polygon ({uses "newton-polygon"}[]) is computed solely from the valuation sequence.
+
+The $`p`-adic valuation sequence ({uses "padic-val-rat"}[]) of $`f \in K\llbracket X \rrbracket` over a $`p`-adic field $`K` gives the standard instance: $`\mathrm{vs}_f(i) = v_p(a_i)`.
+Formalised in [`NewtonPolys`](https://github.com/CBirkbeck/NewtonPoly) (sorry-free).
+:::
+
+:::theorem "newton-polygon-wellformed"
+The rotating-line algorithm that builds the Newton polygon ({uses "newton-polygon"}[]) from a valuation sequence ({uses "newton-polygon-valseq"}[]) produces a well-formed `NewtonPolygonData`: consecutive segments share their boundary vertex, segment slopes are non-decreasing, and when a final ray is present its slope is at least the last segment slope.
+
+Moreover, every segment is *supporting*: all lattice points $`(i, v(a_i))` with $`i` beyond the left endpoint of the segment lie on or above the line extending the segment. The supporting property is the geometric content of the infimum characterisation of each slope.
+Formalised in [`NewtonPolys`](https://github.com/CBirkbeck/NewtonPoly) (sorry-free).
+:::
+
+:::proof "newton-polygon-wellformed"
+Well-formedness of the empty polygon is immediate. For a single segment from $`(i_0, v_0)` to $`(i_1, v_1)`, the slope is $`m = (v_1 - v_0)/(i_1 - i_0) \in \mathbb{Q}`. By construction $`m` is the infimum of the real slope set $`\{(v(a_i) - v_0)/(i - i_0) : i > i_0,\, a_i \ne 0\}`; since $`\mathbb{R}` is conditionally complete, this infimum exists and is attained when the achieving set is finite and nonempty. The `Segment.tight_of_slope` lemma confirms that the endpoint lies exactly on its own line. Nondecreasing slopes follow inductively: at each step the minimum slope from the new vertex is at least the slope just used, because the algorithm moves to the rightmost minimiser before proceeding.
+
+The supporting property is the content of `minSlope_supporting`: if $`m = \mathrm{sInf}\, S` for the slope set $`S` from vertex $`(i_0, v_0)`, then for all $`i > i_0` with $`a_i \ne 0`
+$$`v(a_i) \ge v_0 + m(i - i_0),`
+an immediate consequence of $`m \le` (every element of $`S`) and the positivity of $`i - i_0`.
+:::
+
+:::theorem "newton-slopes-valuations"
+*(Newton polygon theorem, Gouvêa §7.4.)* Let $`f(X) = \sum a_i X^i` be a power series over a complete non-archimedean field $`K` with $`p`-adic-style integer valuation ({uses "padic-val-rat"}[]). The Newton polygon ({uses "newton-polygon"}[]) of $`f` determines the radii of convergence of $`f`: if $`m` is the slope of a segment of length $`\ell`, then $`f` has $`\ell` roots of $`p`-adic absolute value $`p^{-m}`.
+
+More precisely, the *convergence direction* (Gouvêa Lemma 7.4.8): if there exists a supporting line of slope $`s` from some vertex $`(i_0, v_0)` and $`b < s`, then
+$$`v(a_i) - b\,i \;\to\; +\infty \quad (i \to \infty),`
+so $`f` converges on the closed ball $`\{x : |x| \le p^b\}`. The *divergence direction*: if $`b > m` and infinitely many coefficients satisfy $`v(a_i) = m \cdot i`, then $`f` diverges at $`|x| = p^b`.
+Formalised in [`NewtonPolys`](https://github.com/CBirkbeck/NewtonPoly) (sorry-free).
+:::
+
+:::proof "newton-slopes-valuations"
+**Convergence.** Given a supporting line of slope $`s > b` from $`(i_0, v_0)`, for all $`i \ge i_0` with $`a_i \ne 0`
+$$`v(a_i) \ge v_0 + s(i - i_0).`
+Set $`C' = C - v_0 + s \cdot i_0`. Since $`s - b > 0`, the linear expression $`(s - b) \cdot i` eventually exceeds $`C'`; the lower bound then gives $`v(a_i) - b \cdot i > C` for all large $`i`. This is `lemma_7_4_8_convergence` ({uses "newton-polygon-wellformed"}[]).
+
+**Divergence.** If $`b > m` and points $`(i, v(a_i))` lie on the line $`y = m \cdot x` for a cofinal set of indices, then $`v(a_i) - b \cdot i = (m - b) \cdot i < 0` for all large $`i`, contradicting convergence. This is `lemma_7_4_8_divergence`.
+
+The radius of convergence $`p^m` (where $`m` is the supremum of Newton polygon slopes) follows by combining both directions: convergence for $`|x| < p^m` and divergence for $`|x| = p^b` with $`b > m` whenever the polygon has infinitely many points on a line of limiting slope.
+:::
 
 # The ring $`\mathbb{Z}[\sqrt{d}]` and its norm
 

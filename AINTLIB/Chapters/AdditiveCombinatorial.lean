@@ -23,9 +23,10 @@ cardinality of $`A`. For a positive integer $`m`, we write $`mA` for the $`m`-fo
 $`A + A + \cdots + A`.
 
 The **Polynomial Freiman–Ruzsa (PFR) theorem** — asserting that a subset of
-$`\mathbb{F}_2^n` with small doubling is efficiently covered by a coset of a subgroup —
-is supplied by the separate `teorth/pfr` project and will be integrated in Phase 3 of
-this library. No blueprint node for PFR appears here.
+$`\mathbb{F}_2^n` with small doubling is efficiently covered by boundedly many cosets of a
+subgroup — is supplied by the `teorth/pfr` project (Phase 3). The PFR proof passes through
+an *entropic* formulation in which set-doubling is replaced by Ruzsa distance between random
+variables; this entropic route is what ties PFR directly to the Ruzsa calculus developed above.
 
 # Erdős–Ginzburg–Ziv
 
@@ -158,4 +159,122 @@ The commutativity $`aH = Ha` is a consequence of $`A \cdot A^{-1} = A^{-1} \cdot
 
 The threshold $`3/2` is sharp: the set $`\{0, 1\} \subseteq \mathbb{Z}` has doubling
 exactly $`3/2` and cannot be covered by a subgroup of size at most $`2`.
+:::
+
+# Phase 3: Polynomial Freiman–Ruzsa (teorth/pfr)
+
+The nodes below are *informal*: the `teorth/pfr` project is built against a different
+Mathlib version, so they carry no `(lean := …)` reference. Each records the relevant
+declaration name and whether the formalisation is sorry-free. They connect into the
+dependency graph through the Mathlib-backed Plünnecke–Ruzsa and small-doubling nodes
+above via `{uses}` edges.
+
+## Ruzsa distance
+
+:::definition "ruzsa-distance"
+Let $`X` and $`Y` be $`G`-valued random variables on probability spaces $`(\Omega, \mathbb{P})`
+and $`(\Omega', \mathbb{P}')` respectively, where $`G` is a countable abelian group.
+The *Ruzsa distance* between $`X` and $`Y` is
+$$`d[X \,;\, Y] \;\coloneqq\; H[X' - Y'] \;-\; \tfrac12 H[X'] \;-\; \tfrac12 H[Y'],`
+where $`X', Y'` are independent copies of $`X, Y` (placed on a common space), and $`H[\,\cdot\,]`
+denotes Shannon entropy. For finite sets $`A, B \subseteq G` the *set Ruzsa distance* is
+$`d_u[A \,;\, B] \coloneqq d[U_A \,;\, U_B]`, where $`U_A, U_B` are uniform random variables on
+$`A` and $`B`.
+
+Note that $`d[X \,;\, X] = \tfrac12 H[X - X'] - H[X]` where $`X'` is an independent copy of
+$`X`; for a set this equals $`\log|A - A| - \log|A| = \log(|A - A|/|A|)`, so $`\exp(2d_u[A;A])`
+is the doubling constant $`|A+A|/|A|` in the $`\mathbb{F}_2^n` setting.
+Formalised in [`pfr`](https://github.com/teorth/pfr) (sorry-free).
+:::
+
+## Entropic Ruzsa triangle inequality
+
+:::lemma_ "entropic-ruzsa-triangle"
+*(Entropic Ruzsa triangle inequality.)* For $`G`-valued random variables $`X`, $`Y`, $`Z`
+on respective probability spaces,
+$$`d[X \,;\, Z] \;\le\; d[X \,;\, Y] + d[Y \,;\, Z].`
+Formalised in [`pfr`](https://github.com/teorth/pfr) (sorry-free).
+:::
+
+:::proof "entropic-ruzsa-triangle"
+Work with independent copies $`X', Y', Z'` of $`X, Y, Z` placed on a common probability
+space. By the submodularity of entropy,
+$$`H[X' - Z'] \;\le\; H[X' - Y'] + H[Y' - Z'] - H[Y'].`
+Expanding $`d[X';Z']`, $`d[X';Y']`, $`d[Y';Z']` in terms of entropy and rearranging gives
+the triangle inequality.
+
+This is the entropy-theoretic analogue of the set-combinatorial Ruzsa triangle inequality
+({uses "ruzsa-triangle"}[]): in the deterministic set setting, replacing $`H` by $`\log`-cardinality
+recovers $`|A - C| \cdot |B| \le |A - B| \cdot |B - C|`.
+Formalised in [`pfr`](https://github.com/teorth/pfr) (sorry-free).
+:::
+
+## Entropic Polynomial Freiman–Ruzsa conjecture
+
+:::theorem "entropic-pfr"
+*(Entropic PFR conjecture / Marton's conjecture, entropic form.)* Let $`G` be an elementary
+abelian $`2`-group (i.e. $`G \cong \mathbb{F}_2^n` for some $`n`) and let $`X^0_1, X^0_2`
+be $`G`-valued random variables. Then there exists a subgroup $`H \le G` and a random
+variable $`U_H` uniformly distributed on $`H` such that
+$$`d[X^0_1 \,;\, U_H] + d[X^0_2 \,;\, U_H] \;\le\; 11 \cdot d[X^0_1 \,;\, X^0_2].`
+In the improved form (Liao), the constant $`11` may be replaced by $`10`.
+Formalised in [`pfr`](https://github.com/teorth/pfr) (sorry-free).
+:::
+
+:::proof "entropic-pfr"
+The proof minimises a *tau-functional*
+$$`\tau[X_1 \,;\, X_2] \;\coloneqq\; d[X_1 \,;\, X_2] + \eta\bigl(d[X^0_1 \,;\, X_1] + d[X^0_2 \,;\, X_2]\bigr),`
+with $`\eta = 1/9`, over all pairs of $`G`-valued random variables $`(X_1, X_2)`. A tau-minimiser
+exists by compactness (the group is finite); the crux is showing that if $`d[X_1 \,;\, X_2] > 0`
+at a minimiser then $`\tau` can be strictly decreased — a contradiction.
+
+The decreasing construction combines four independently chosen copies of the minimiser, forms
+four sums, and bounds their combined entropy using the entropic Ruzsa triangle inequality
+({uses "entropic-ruzsa-triangle"}[]) together with a fibring argument. The bound forces
+$`d[X_1 \,;\, X_2] = 0` at any minimiser.
+
+From $`d[X_1 \,;\, X_2] = 0`, the **100% theorem** produces a subgroup $`H` and a uniform
+$`U_H` with $`d[X_1 \,;\, U_H] = d[X_2 \,;\, U_H] = 0`. Transferring back via the
+tau-functional bound and the Ruzsa triangle inequality ({uses "entropic-ruzsa-triangle"}[])
+gives the stated $`11 d[X^0_1 \,;\, X^0_2]` bound.
+
+The proof is independent of the Plünnecke–Ruzsa and small-doubling results in the
+deterministic setting above, but the underlying Ruzsa calculus — in particular the
+symmetry and triangle inequality of Ruzsa distance — is the same conceptual machinery
+({uses "pluennecke-ruzsa"}[], {uses "ruzsa-triangle"}[]).
+Formalised in [`pfr`](https://github.com/teorth/pfr) (sorry-free).
+:::
+
+## Polynomial Freiman–Ruzsa conjecture
+
+:::theorem "pfr-conjecture"
+*(Polynomial Freiman–Ruzsa conjecture, Marton 1999, proved 2023.)* Let $`G = \mathbb{F}_2^n`
+and let $`A \subseteq G` be a nonempty set with doubling constant $`|A + A| \le K|A|`.
+Then there exists a subgroup $`H \le G` and a set of coset representatives $`c` with
+$`|c| < 2K^{12}` and $`|H| \le |A|` such that $`A \subseteq c + H`.
+
+Equivalently, any set of small doubling in $`\mathbb{F}_2^n` is covered by at most
+$`2K^{12}` cosets of a subgroup of cardinality at most $`|A|`. In the improved form
+(Liao), the exponent $`12` can be replaced by $`11`, and a further refinement yields $`9`.
+Formalised in [`pfr`](https://github.com/teorth/pfr) (sorry-free).
+:::
+
+:::proof "pfr-conjecture"
+The proof reduces the set problem to the entropic setting. If $`U_A` is uniform on $`A`,
+then the self-Ruzsa distance satisfies $`d[U_A \,;\, U_A] \le \log K` (using the doubling
+hypothesis and the fact that $`\log|A + A| - \log|A| \le \log K`). The entropic PFR
+conjecture ({uses "entropic-pfr"}[]) then produces a subgroup $`H` with
+$$`d[U_A \,;\, U_H] + d[U_A \,;\, U_H] = 2d[U_A \,;\, U_H] \;\le\; 11 \log K.`
+From the Ruzsa distance bound and entropy comparisons one deduces
+$`|A \cap (H + x_0)|` is at least $`K^{-11/2}|A|^{1/2}|H|^{1/2}` for some translate
+$`x_0`. The **Ruzsa covering lemma** (from Mathlib, based on
+{uses "pluennecke-ruzsa"}[]) then covers $`A` by
+$`|A + (H + x_0)|/|A \cap (H + x_0)| \le K^{13/2}|A|^{1/2}|H|^{-1/2}`
+translates of $`H`. Balancing $`|H|` against $`|A|` yields the stated $`2K^{12}` bound.
+
+The connection to the small-doubling structure theorem ({uses "small-doubling-three-halves"}[])
+is conceptual: both results characterise small-doubling sets as lying close to a subgroup,
+with PFR giving a polynomial-in-$`K` bound in $`\mathbb{F}_2^n` while
+{uses "small-doubling-three-halves"}[] gives the sharp constant $`3/2` in general groups.
+Formalised in [`pfr`](https://github.com/teorth/pfr) (sorry-free).
 :::

@@ -137,3 +137,142 @@ Bertrand's postulate sharpens the infinitude of primes ({uses "infinitude-of-pri
 For small $`n < 512` the postulate is verified directly by exhibiting explicit primes: the sequence $`2, 3, 5, 7, 13, 23, 43, 83, 163, 317, 631` covers all gaps up to $`521` (each prime is less than twice the previous).
 :::
 
+# Phase 3 (external projects, not yet in Mathlib)
+
+The nodes below are *informal*: the external projects are built against Lean toolchains or Mathlib versions incompatible with AINTLIB, so they carry no `(lean := …)` reference. Each records where the result is formalised and its sorry-free / in-progress status. They connect into the dependency graph through the Mathlib-backed nodes above.
+
+## Euler products, Wiener–Ikehara, and conditional PNT (EulerProducts)
+
+:::definition "euler-product-general"
+For a weakly multiplicative arithmetic function $`f : \mathbb{N} \to \mathbb{C}` with $`f(1) = 1`, if the $`L`-series $`L(f, s) = \sum_{n \ge 1} f(n) n^{-s}` converges absolutely at $`s`, then
+$$`L(f,s) = \prod_{p} \sum_{e \ge 0} f(p^e)\, p^{-es}.`
+When $`f` is completely multiplicative the local factor simplifies to $`(1 - f(p)\,p^{-s})^{-1}`.
+Formalised in [`EulerProducts`](https://github.com/MichaelStollBayreuth/EulerProducts) (sorry-free).
+:::
+
+:::theorem "wiener-ikehara"
+*(Wiener–Ikehara Tauberian theorem.)* Let $`f : \mathbb{N} \to \mathbb{R}` be a non-negative arithmetic function with $`L`-series $`L(f, s)`. Suppose there exists $`A \in \mathbb{R}` and a function $`F` that is continuous on $`\{\operatorname{Re}(s) \ge 1\}` and satisfies
+$$`F(s) = L(f, s) - \frac{A}{s - 1}, \qquad \operatorname{Re}(s) > 1.`
+Then $`\sum_{n \le N} f(n) \sim AN` as $`N \to \infty`.
+Formalised in [`EulerProducts`](https://github.com/MichaelStollBayreuth/EulerProducts) (sorry-free).
+:::
+
+:::proof "wiener-ikehara"
+The proof is a Fourier-analytic argument due to Wiener and Ikehara. One writes the partial sum $`S(N) = \sum_{n \le N} f(n)` as an inverse Mellin-type integral along the line $`\operatorname{Re}(s) = 1 + \varepsilon`, then shifts the contour left. The hypothesis that $`F` extends continuously to the closed half-plane $`\operatorname{Re}(s) \ge 1` (rather than just analytically) is enough: applying a Bochner-type criterion and the Riemann–Lebesgue lemma to a smoothed version of the partial sum shows the error vanishes as $`N \to \infty`, leaving the residue contribution $`A` at $`s = 1` ({uses "riemann-zeta"}[]).
+:::
+
+:::theorem "pnt-von-mangoldt-conditional"
+*(Prime Number Theorem via Wiener–Ikehara.)* Assume the Wiener–Ikehara theorem ({uses "wiener-ikehara"}[]). Then
+$$`\psi(N) \;\coloneqq\; \sum_{n \le N} \Lambda(n) \;\sim\; N`
+as $`N \to \infty`, where $`\Lambda` denotes the von Mangoldt function ({uses "von-mangoldt"}[]).
+Formalised in [`EulerProducts`](https://github.com/MichaelStollBayreuth/EulerProducts) (sorry-free).
+:::
+
+:::proof "pnt-von-mangoldt-conditional"
+One applies the Wiener–Ikehara theorem ({uses "wiener-ikehara"}[]) to $`f = \Lambda`. The non-vanishing of $`\zeta(s)` on $`\operatorname{Re}(s) = 1` ({uses "lfunction-nonvanishing"}[]) ensures that $`-\zeta'(s)/\zeta(s)` extends continuously to that line, so the hypothesis is satisfied with $`A = 1`. The Euler product ({uses "zeta-euler-product"}[]) identifies $`L(\Lambda, s) = -\zeta'(s)/\zeta(s)` for $`\operatorname{Re}(s) > 1`, and the conclusion follows.
+:::
+
+## Non-vanishing of Dirichlet L-functions on the critical line (DirichletNonvanishing)
+
+:::theorem "dirichlet-lfunction-nonvanishing-line"
+*(Non-vanishing on $`\operatorname{Re}(s) = 1`.)* Let $`\chi` be a Dirichlet character ({uses "dirichlet-character"}[]) and $`t \in \mathbb{R}`. If $`\chi \ne 1` or $`t \ne 0`, then
+$$`L(\chi,\, 1 + it) \;\ne\; 0.`
+In particular, for every non-trivial $`\chi` the Dirichlet $`L`-function ({uses "dirichlet-lfunction"}[]) has no zero on the entire line $`\operatorname{Re}(s) = 1`.
+Formalised in [`DirichletNonvanishing`](https://github.com/CBirkbeck/DirichletNonvanishing) (sorry-free).
+:::
+
+:::proof "dirichlet-lfunction-nonvanishing-line"
+The proof splits into two cases. If $`\chi^2 \ne 1` or $`t \ne 0`, a trigonometric positivity argument applied to $`|L(1,s)^3 L(\chi,s)^4 L(\chi^2,s)|` shows the product is bounded below by $`1` for $`\operatorname{Re}(s) > 1`; a zero at $`1 + it` would force this product to zero as $`\operatorname{Re}(s) \to 1^+`, a contradiction.
+
+For a quadratic character $`\chi^2 = 1` with $`t = 0`, assume for contradiction $`L(\chi,1) = 0`. Define the entire function $`F(s) = \zeta(s) L(\chi, s)` (the simple zero of $`L(\chi, s)` at $`s = 1` cancels the pole of $`\zeta`). For $`\operatorname{Re}(s) > 1`, $`F` agrees with the $`L`-series of the Dirichlet convolution $`\mathbf{1} * \chi`, which takes non-negative values. A classical lemma relating the sign of iterated derivatives to coefficient positivity shows $`(-1)^m F^{(m)}(2) \ge 0` for all $`m \ge 0`, forcing $`F(x) > 0` for all real $`x \le 2`. But the trivial zero of $`\zeta` gives $`F(-2) = \zeta(-2) L(\chi,-2) = 0`, a contradiction ({uses "lfunction-one-nonvanishing"}[]).
+:::
+
+## The Prime Number Theorem and Chebyshev bounds (PrimeNumberTheoremAnd)
+
+:::theorem "chebyshev-bounds"
+*(Chebyshev's bounds.)* There exist positive constants $`c_1, c_2` such that for all $`x \ge 2`,
+$$`c_1 x \;\le\; \psi(x) \;\le\; c_2 x,`
+where $`\psi(x) = \sum_{n \le x} \Lambda(n)` is the Chebyshev $`\psi`-function ({uses "von-mangoldt"}[]). One may take $`c_1 = 1` and $`c_2 = \log 4 + 4` in the formalization.
+Formalised in [`PrimeNumberTheoremAnd`](https://github.com/AlexKontorovich/PrimeNumberTheoremAnd) (sorry-free).
+:::
+
+:::proof "chebyshev-bounds"
+The upper bound $`\psi(x) \le (\log 4 + 4)x` follows from a comparison with central binomial coefficients: $`\binom{2n}{n} \ge 4^n / (2n+1)`, so $`\prod_{n < p \le 2n} p \le \binom{2n}{n}`, and the right-hand side is at most $`4^n`, giving the bound by induction on dyadic blocks.
+
+The lower bound comes from the von Mangoldt convolution identity ({uses "von-mangoldt-zeta-identity"}[]): summing $`\sum_{d \mid n} \Lambda(d) = \log n` over $`n \le x` and comparing with bounds on $`\log\lfloor x \rfloor!` via the Legendre valuation formula yields $`\psi(x) \ge x \log 2 - O(\sqrt{x})`, establishing the lower bound.
+:::
+
+:::theorem "mertens-first"
+*(Mertens' first theorem.)* As $`x \to \infty`,
+$$`\sum_{n \le x} \frac{\Lambda(n)}{n} = \log x + O(1).`
+Equivalently, $`\sum_{p \le x} \frac{\log p}{p} = \log x + O(1)` ({uses "von-mangoldt"}[]).
+Formalised in [`PrimeNumberTheoremAnd`](https://github.com/AlexKontorovich/PrimeNumberTheoremAnd) (sorry-free; explicit constant $`\log 4 + 4`).
+:::
+
+:::proof "mertens-first"
+The identity $`\sum_{d \mid n} \Lambda(d) = \log n` ({uses "von-mangoldt-zeta-identity"}[]) gives, after summation by parts (Abel summation applied to $`\sum_{n \le x} \frac{1}{n} \sum_{d \mid n} \Lambda(d)`), the formula $`\sum_{n \le x} \frac{\Lambda(n)}{n} = \log x - \sum_{n \le x} \frac{\Lambda(n)}{n}\big(\frac{n}{\lfloor n \rfloor} - 1\big) + E` where $`E` collects a tail bounded by the Chebyshev upper bound ({uses "chebyshev-bounds"}[]). The net error is bounded by an explicit constant.
+:::
+
+:::theorem "mertens-second"
+*(Mertens' second theorem.)* As $`x \to \infty`,
+$$`\sum_{p \le x} \frac{1}{p} = \log \log x + M + O\!\left(\frac{1}{\log x}\right),`
+where $`M` is the Meissel–Mertens constant $`M = \gamma + \sum_p \bigl(\log(1 - p^{-1}) + p^{-1}\bigr)`.
+Formalised in [`PrimeNumberTheoremAnd`](https://github.com/AlexKontorovich/PrimeNumberTheoremAnd) (in progress; two technical lemmas carry sorry).
+:::
+
+:::proof "mertens-second"
+From Mertens' first theorem ({uses "mertens-first"}[]) and partial summation, the sum $`\sum_{n \le x} \frac{\Lambda(n)}{n \log n}` is asymptotic to $`\log \log x + \gamma + O(1/\log x)`. The discrepancy between $`\sum_{n \le x} \frac{\Lambda(n)}{n \log n}` and $`\sum_{p \le x} \frac{1}{p}` is $`\sum_{j \ge 2} \sum_{p : p^j \le x} \frac{1}{j p^j}`, which converges to the correction constant as $`x \to \infty`. The result follows by combining these two limits and identifying the Meissel–Mertens constant via the Euler–Mascheroni constant $`\gamma`.
+:::
+
+:::theorem "prime-number-theorem"
+*(Prime Number Theorem, PNT.)* As $`x \to \infty`,
+$$`\psi(x) \;\sim\; x, \qquad \pi(x) \;\sim\; \frac{x}{\log x},`
+where $`\psi(x) = \sum_{n \le x} \Lambda(n)` ({uses "von-mangoldt"}[]) and $`\pi(x)` counts primes up to $`x`. More precisely the Kontorovich–PrimeNumberTheoremAnd project establishes a power-of-log saving:
+$$`\psi(x) = x + O\!\left(x\,\exp\!\bigl(-c\,(\log x)^{1/10}\bigr)\right)`
+for some explicit $`c > 0`.
+Formalised in [`PrimeNumberTheoremAnd`](https://github.com/AlexKontorovich/PrimeNumberTheoremAnd) (sorry-free for the $`\psi`-form; the $`\pi`-equivalence and Wiener–Ikehara PNT are also sorry-free via the Wiener approach).
+:::
+
+:::proof "prime-number-theorem"
+Two routes are formalised. The Wiener–Ikehara route ({uses "pnt-von-mangoldt-conditional"}[], {uses "wiener-ikehara"}[]) gives $`\psi(N)/N \to 1` by applying the Tauberian theorem to $`\Lambda` with non-vanishing input ({uses "lfunction-nonvanishing"}[]). The contour-integral route (MediumPNT) gives the sharper error: one inverts the Mellin transform of a smooth truncation of the Chebyshev function via a rectangle contour, uses bounds on $`\zeta'(s)/\zeta(s)` in a zero-free region of the form $`\operatorname{Re}(s) \ge 1 - c/\log(|\operatorname{Im}(s)| + 2)`, and applies a Borel–Carathéodory argument to bound the logarithmic derivative. The $`\pi(x) \sim x/\log x` equivalence then follows from $`\psi \sim x` by partial summation ({uses "chebyshev-bounds"}[]).
+:::
+
+## Brun–Titchmarsh inequality and the Selberg sieve (PrimeNumberTheoremAnd)
+
+:::theorem "brun-titchmarsh"
+*(Brun–Titchmarsh inequality.)* For any real $`x > 0`, $`y > 0`, and $`z > 1`, the number of primes in the interval $`(x, x + y]` satisfies
+$$`\pi(x+y) - \pi(x) \;\le\; \frac{2y}{\log z} + 6z\,(1 + \log z)^3.`
+In particular, taking $`z = \sqrt{y}` gives $`\pi(x+y) - \pi(x) \ll y/\log y`.
+Formalised in [`PrimeNumberTheoremAnd`](https://github.com/AlexKontorovich/PrimeNumberTheoremAnd) (sorry-free).
+:::
+
+:::proof "brun-titchmarsh"
+One applies the Selberg sieve to sift the interval $`(x, x+y]` by primes up to $`z`. The Selberg sieve gives an upper bound on the count of unsifted elements in terms of $`y / S(z)` plus a remainder sum, where $`S(z) = \sum_{d \le z,\, d \mid \mathrm{rad}} \lambda_d^2 / \nu(d)` is the Selberg bounding sum. A lower bound $`S(z) \ge \log(z)/2` follows from the primorial structure of the sieve support (each prime $`p \le z` contributes $`1/p` to $`\nu`). The remainder is bounded by $`5z(1 + \log z)^3` using divisor-sum estimates, and combining the two gives the stated inequality. Non-sifted elements not accounted for by the sieve are at most $`z`, adding the correction term.
+:::
+
+## Non-vanishing and Dirichlet's theorem, analytic route (DirichletNonvanishing)
+
+:::theorem "lfunction-nonvanishing-full"
+*(Full non-vanishing on the closed half-plane.)* For a Dirichlet character $`\chi` ({uses "dirichlet-character"}[]) and any $`t \in \mathbb{R}`,
+$$`L(\chi, 1 + it) \ne 0`
+unless $`\chi = 1` and $`t = 0` (where $`L` has a pole rather than a zero). This strengthens {uses "lfunction-one-nonvanishing"}[] and is the analytic engine behind {uses "dirichlets-theorem"}[].
+Formalised in [`DirichletNonvanishing`](https://github.com/CBirkbeck/DirichletNonvanishing) (sorry-free).
+:::
+
+:::proof "lfunction-nonvanishing-full"
+This is exactly the content of {uses "dirichlet-lfunction-nonvanishing-line"}[]. The non-quadratic and non-zero imaginary part cases are handled by the $`3`-$`4`-$`1` positivity bound ({uses "dirichlet-lfunction-euler-product"}[]). The remaining quadratic case $`\chi^2 = 1`, $`t = 0` is the deeper assertion proved via the entire-function $`F = \zeta \cdot L(\chi, \cdot)` with positive coefficients and a trivial zero of $`\zeta` at $`s = -2`.
+:::
+
+## Bombieri–Vinogradov theorem (lean-bombieri-vinogradov)
+
+:::theorem "bombieri-vinogradov"
+*(Bombieri–Vinogradov theorem.)* For any fixed $`A \ge 0` there exists an implied constant $`C_A` such that, uniformly over $`x \ge 2` and $`1 \le Q \le x^{1/2}/(\log x)^{A+3}`,
+$$`\sum_{q \le Q} \max_{y \le x} \max_{a \in (\mathbb{Z}/q\mathbb{Z})^\times} \left|\psi(y; q, a) - \frac{y}{\varphi(q)}\right| \;\le\; \frac{C_A \, x}{(\log x)^A},`
+where $`\psi(y;q,a) = \sum_{n \le y,\, n \equiv a \pmod{q}} \Lambda(n)` ({uses "von-mangoldt"}[]) and $`\varphi(q)` is Euler's totient function. This shows that primes are equidistributed in arithmetic progressions ({uses "dirichlets-theorem"}[]) on average over moduli up to $`x^{1/2-\varepsilon}`, with the same quality of error term as the Generalised Riemann Hypothesis would give individually.
+Formalised in [`lean-bombieri-vinogradov`](https://github.com/amellendijk/lean-bombieri-vinogradov) (in progress; the top-level theorem `bombieri_vinogradov` and the $`\Delta_\Lambda`-intermediate `BV_Delta_Lambda` are stated but carry `sorry`; the Siegel–Walfisz theorem and the large sieve inequality are taken as axioms).
+:::
+
+:::proof "bombieri-vinogradov"
+The proof follows the Vaughan decomposition: one writes $`\Lambda = \Lambda^\sharp + \Lambda^\flat + \Lambda_{\le U}` for suitable parameters $`U, V` with $`UV \le \sqrt{x}` and $`U, V \ge e^{\sqrt{\log x}}`. The small-primes contribution $`\Lambda_{\le U}` is bounded trivially. The Type I sum $`\Lambda^\sharp` (a smooth truncation of $`\Lambda`) is bounded via Abel summation, using the fact that partial sums of character values are small (an input requiring Siegel–Walfisz). The Type II sum $`\Lambda^\flat` is a Dirichlet convolution bounded via the large sieve inequality: after decomposing into character sums via orthogonality of Dirichlet characters ({uses "dirichlet-character"}[]) and applying the large sieve to bound the sum of squared character sums over all characters of moduli $`q \le Q`, one sums the three contributions to obtain the claimed uniform bound.
+:::
+

@@ -205,3 +205,151 @@ where $`\Psi\!\mathrm{Sq}_n = \mathrm{pre}\Psi_n^2 \cdot \Psi_2^{\,2}` (even) or
 $`\mathrm{pre}\Psi_n^2` (odd). In the coordinate ring, $`\Phi_n` coincides with $`\phi_n`
 ({uses "division-polynomial-Psi"}[]).
 :::
+
+# Phase 3 (external projects, not yet in Mathlib)
+
+The nodes below record headline results from three external Lean formalisation
+projects. None carries `(lean := …)` because the external projects target
+Mathlib versions incompatible with this blueprint's toolchain. Each node names
+the repository, states whether the formalisation is sorry-free or in progress,
+and connects into the dependency graph through the Mathlib-backed nodes of this
+chapter.
+
+## Nagell–Lutz theorem (Nagel--Lutz project)
+
+:::theorem "nagell-lutz"
+*(Nagell–Lutz theorem.)* Let $`A, B \in \mathbb{Z}` with discriminant
+$`\Delta_{A,B} = -16(4A^3 + 27B^2) \ne 0`. Let $`E` be the elliptic curve
+({uses "is-elliptic"}[]) over $`\mathbb{Q}` given by $`y^2 = x^3 + Ax + B`
+({uses "weierstrass-curve"}[]). If $`(x, y)` is a nonidentity rational point
+of finite order in $`E(\mathbb{Q})` ({uses "affine-points-abelian-group"}[]),
+then there exist $`x_0, y_0 \in \mathbb{Z}` with $`x = x_0` and $`y = y_0`,
+and either $`y_0 = 0` or $`y_0^2 \mid \Delta_{A,B}`.
+Formalised in [`LutzNagell`](https://github.com/CBirkbeck/LutzNagell) (sorry-free).
+:::
+
+:::proof "nagell-lutz"
+The proof divides into two parts. For *integrality*: if the torsion order has an
+odd prime factor $`p`, form the point $`Q = (m/p) \cdot P` with $`p`-power
+torsion; a $`p`-adic valuation argument using the formal group of $`E`
+({uses "weierstrass-curve"}[]) forces the coordinates of $`Q` into $`\mathbb{Z}`,
+and a descent through integer scalar multiples ({uses "affine-points-abelian-group"}[])
+gives integrality of $`P` itself. If the torsion order is a power of $`2`, a
+separate order-4 argument using the doubling formula handles the case.
+For *discriminant divisibility*: writing $`\kappa_0 = 2y_0 + a_1 x_0 + a_3`
+(which equals $`2y_0` in the short Weierstrass case), the curve equation gives
+$`\kappa_0^2 = \Psi_2^2(x_0)`. Integrality of the double $`2 \cdot P` yields
+$`\kappa_0^2 \mid 4\psi_3(x_0)`, and a polynomial identity
+$`h(x)^2 + 4\psi_3(x) = (12x + b_2)\Psi_2^2(x)` together with a
+Bézout identity $`d_1(x)\Psi_2^2(x) + d_2(x)h(x)^2 = 4\Delta` produces
+$`\kappa_0^2 \mid 4\Delta`. Specialising $`a_1 = a_3 = 0` gives $`\kappa_0 = 2y_0`,
+and dividing by $`4` yields $`y_0^2 \mid \Delta_{A,B}`.
+:::
+
+## Hasse–Weil bound (Hasse-Weil project)
+
+:::definition "point-count"
+For an elliptic curve $`E` ({uses "is-elliptic"}[]) over a finite field $`\mathbb{F}_q`,
+the *point count* is the cardinality $`\#E(\mathbb{F}_q)` of the finite abelian group
+({uses "affine-points-abelian-group"}[]) of $`\mathbb{F}_q`-rational affine points together
+with the point at infinity.
+:::
+
+:::definition "frobenius-isogeny"
+For an elliptic curve $`E` ({uses "is-elliptic"}[]) over $`\mathbb{F}_q`, the
+*Frobenius endomorphism* $`\pi : E \to E` is the isogeny acting on coordinates
+by the $`q`-power map: on affine points $`\pi(x,y) = (x^q, y^q)`. Its degree is
+$`q` (Silverman III.4.6), and $`\ker(\pi - 1) = E(\mathbb{F}_q)` as sets.
+The *trace of Frobenius* is
+$$`t = q + 1 - \#E(\mathbb{F}_q),`
+so $`\#E(\mathbb{F}_q) = q + 1 - t` ({uses "point-count"}[]).
+:::
+
+:::theorem "hasse-bound"
+*(Hasse's theorem.)* For an elliptic curve $`E` ({uses "is-elliptic"}[]) over a
+finite field $`\mathbb{F}_q` with trace of Frobenius $`t = q + 1 - \#E(\mathbb{F}_q)`
+({uses "frobenius-isogeny"}[], {uses "point-count"}[]),
+$$`\bigl|\,\#E(\mathbb{F}_q) - (q+1)\,\bigr| \;\le\; 2\sqrt{q},`
+equivalently $`t^2 \le 4q`.
+Formalised in [`Hasse-Weil`](https://github.com/CBirkbeck/Hasse-Weil) (in progress — the
+discriminant-bound and real-algebra steps are sorry-free; two geometric deferred witnesses
+remain: the quadratic-form non-negativity of the degree map on $`\mathrm{End}(E)`, and
+the identification of $`\#\ker(1-\pi)` with $`\#E(\mathbb{F}_q)`).
+:::
+
+:::proof "hasse-bound"
+Write the Frobenius isogeny as $`\pi` and consider the endomorphism $`r\pi - s`
+for integers $`r, s`. Because the degree map on $`\mathrm{End}(E)` is a positive
+semi-definite quadratic form (Silverman III.6.3), one has
+$$`\deg(r\pi - s) = qr^2 - tr \cdot s + s^2 \;\ge\; 0 \quad\text{for all } r, s \in \mathbb{Z}.`
+Setting $`r = t` and $`s = 2q` shows the discriminant $`t^2 - 4q \le 0`, i.e.
+$`t^2 \le 4q`. The real bound $`|t| \le 2\sqrt{q}` follows by taking square roots.
+The identification $`\deg(1-\pi) = \#E(\mathbb{F}_q)` rests on
+$`\ker(1-\pi) = E(\mathbb{F}_q)` and separability of $`1-\pi` (for $`q \ge 2`),
+which gives $`\deg(1-\pi) = \#\ker(1-\pi) = \#E(\mathbb{F}_q)`.
+:::
+
+## Hasse–Weil zeta function and Weil conjectures (WeilConjectures project)
+
+:::definition "hasse-weil-zeta"
+For a smooth projective scheme $`X` over $`\mathbb{F}_q`, write
+$`N_n = \#X(\mathbb{F}_{q^n})` for the number of rational points over the
+degree-$`n` extension. The *Hasse–Weil zeta function* of $`X` is the formal
+power series
+$$`Z(X/\mathbb{F}_q,\, t) \;=\; \exp\!\Bigl(\sum_{n \ge 1} \frac{N_n}{n}\, t^n\Bigr) \;\in\; \mathbb{Q}[\![t]\!].`
+For an elliptic curve $`E` ({uses "is-elliptic"}[]) with trace of Frobenius $`t_0`
+({uses "frobenius-isogeny"}[]), the zeta function takes the rational form
+$$`Z(E/\mathbb{F}_q,\, t) \;=\; \frac{1 - t_0\, t + q\, t^2}{(1-t)(1-qt)}.`
+:::
+
+:::theorem "weil-conjectures"
+*(Weil conjectures for smooth projective varieties over $`\mathbb{F}_q`.)* Given a
+Weil cohomology theory $`H^\bullet` with Frobenius action on a smooth projective variety
+$`X/\mathbb{F}_q` of pure dimension $`d`, writing $`P_i(t) = \det(1 - t\cdot \mathrm{Fr}^* \mid H^i(X))`:
+
+(i) *Rationality*: $`Z(X/\mathbb{F}_q, t) = \prod_{i \text{ odd}} P_i(t)^{-1} \cdot \prod_{i \text{ even}} P_i(t)^{-1}`
+is a ratio of polynomials in $`\mathbb{Q}(t)`.
+
+(ii) *Functional equation*: $`Z(X/\mathbb{F}_q,\, q^{-d} t^{-1}) = \pm\, q^{d\chi/2}\, t^{\chi}\, Z(X/\mathbb{F}_q, t)`
+with $`\chi` the Euler characteristic.
+
+(iii) *Riemann hypothesis for curves* ($`d = 1`): The roots of $`P_1(t)` have
+absolute value $`q^{-1/2}`, equivalently $`|\#E(\mathbb{F}_{q^n}) - (q^n+1)| \le 2g\sqrt{q^n}` for
+all $`n \ge 1` ({uses "hasse-bound"}[]).
+Formalised in [`WeilConjectures`](https://github.com/CBirkbeck/WeilConjectures) (in progress —
+rationality, functional equation, and curve Riemann hypothesis follow from the abstract Weil
+cohomology axioms; two sorries remain in the rationality bridge: the chain rule for formal
+$`\exp` and the ODE uniqueness step connecting the geometric and cohomological zeta functions).
+:::
+
+:::proof "weil-conjectures"
+The proof is an abstract deduction from the axioms of a Weil cohomology theory.
+Rationality: the Lefschetz trace formula $`N_n = \sum_i (-1)^i \mathrm{tr}(\mathrm{Fr}^{*n} \mid H^i)` yields
+$`\log Z(X,t) = \sum_n N_n t^n/n = \sum_i (-1)^i \log\det(1-t\cdot\mathrm{Fr}^*\mid H^i)^{-1}`.
+Taking exponentials gives the product formula for $`Z` in terms of the $`P_i`. The ODE
+$`Z'/Z = \sum_n N_n t^{n-1}` and the ODE satisfied by $`\prod P_i^{\pm 1}` both follow
+the same linear ODE; ODE uniqueness with matching initial value $`Z(0)=1` identifies the two
+expressions ({uses "hasse-weil-zeta"}[]). Functional equation: Poincaré duality for $`H^\bullet`
+gives a perfect pairing $`H^i \times H^{2d-i} \to H^{2d} \cong K(-d)`, exchanging $`\mathrm{Fr}^*`
+with $`q^d (\mathrm{Fr}^*)^{-1}`; the resulting symmetry $`P_{2d-i}(t) = (-1)^{b_i}\det(\mathrm{Fr}^*\mid H^i)\cdot P_i(q^d t)^{-1} \cdot c` is the functional equation.
+Curve Riemann hypothesis: for $`d=1`, the Hodge index theorem (Weil's Castelnuovo argument)
+gives positivity of the associated bilinear form, forcing all eigenvalues of $`\mathrm{Fr}^*\mid H^1`
+to have absolute value $`\sqrt q`; this is the Hasse bound ({uses "hasse-bound"}[]) for all $`n`.
+:::
+
+:::lemma_ "hasse-weil-zeta-rational-for-EC"
+For an elliptic curve $`E` ({uses "is-elliptic"}[]) over $`\mathbb{F}_q`, the
+Hasse–Weil zeta function ({uses "hasse-weil-zeta"}[]) is explicitly rational:
+$$`Z(E/\mathbb{F}_q,\, t) \;=\; \frac{1 - t_0\, t + q\, t^2}{(1-t)(1-qt)}`
+with $`t_0 = q + 1 - \#E(\mathbb{F}_q)` the trace of Frobenius
+({uses "frobenius-isogeny"}[], {uses "point-count"}[]).
+:::
+
+:::proof "hasse-weil-zeta-rational-for-EC"
+The denominator factor $`(1-t)(1-qt)^{-1}` comes from the degree-0 and degree-2 cohomology
+groups $`H^0 \cong K` and $`H^2 \cong K(-1)`, whose Frobenius eigenvalues are $`1` and $`q`
+respectively. The numerator $`1 - t_0 t + q t^2` is $`P_1(t) = \det(1 - t\cdot\mathrm{Fr}^*\mid H^1(E))`,
+which has trace $`t_0` and determinant $`q` (Weil pairing). The Hasse bound
+({uses "hasse-bound"}[]) is equivalent to the roots of $`P_1` having absolute value
+$`q^{-1/2}`, consistent with the rationality formula.
+:::
