@@ -332,7 +332,7 @@ acts on any modular form of odd weight by $`-1`, so $`f = -f`, hence $`f = 0`, a
 is again zero.
 :::
 
-# Phase 3 (LeanModularForms — external project)
+# Results from external Lean projects
 
 The nodes below formalise results whose proofs require substantially more machinery than is
 currently in Mathlib v4.30.0-rc2. They are drawn from the **LeanModularForms** project
@@ -467,7 +467,7 @@ Shimura's anti-involution argument for the Atkin–Lehner-conjugated transpose.
 :::definition "eigenform-newform"
 *Eigenforms and normalised newforms.*
 An *eigenform* of weight $`k` and level $`\Gamma_1(N)` is a cusp form $`f` carrying a
-Nebentypus character $`\chi` (so $`f \in S_k(N,\chi)$`) that is a simultaneous eigenfunction
+Nebentypus character $`\chi` (so $`f \in S_k(N,\chi)`) that is a simultaneous eigenfunction
 of all Hecke operators $`T(n)` with $`(n,N) = 1`: for each such $`n` there is a scalar
 $`\lambda_n \in \mathbb{C}` with $`T(n) f = \lambda_n f`. The *old subspace*
 $`S_k^\flat(N)` is the span of all level-raising images $`f(\ell z)` from proper divisors of
@@ -481,8 +481,8 @@ Depends on: {uses "cusp-form"}[] {uses "hecke-operator"}[]
 :::theorem "eigenvalue-equals-fourier-coeff"
 *Eigenvalue equals Fourier coefficient for a normalised newform.*
 Let $`f` be a normalised newform of weight $`k` and level $`\Gamma_1(N)` with Nebentypus
-character $`\chi$`. For every $`n \ge 1` coprime to $`N`, the Hecke eigenvalue at $`n` equals
-the $`n$`-th $`q$`-expansion coefficient:
+character $`\chi`. For every $`n \ge 1` coprime to $`N`, the Hecke eigenvalue at $`n` equals
+the $`n`-th $`q`-expansion coefficient:
 $$`
   \lambda_n(f) \;=\; a_n(f).
 `
@@ -507,7 +507,7 @@ follows from $`T(mn) = T(m) T(n)` ({uses "hecke-operator-multiplicativity"}[]).
 
 :::theorem "strong-multiplicity-one"
 *Strong Multiplicity One (Miyake 4.6.12 / Diamond–Shurman 5.8.2).*
-Let $`f` be a normalised newform in $`S_k(N, \chi)$` and let $`g` be any cusp-form Hecke
+Let $`f` be a normalised newform in $`S_k(N, \chi)` and let $`g` be any cusp-form Hecke
 eigenfunction in $`S_k(N, \chi)`. If $`f` and $`g` share the same Hecke eigenvalue
 $`\lambda_n` for every $`n` with $`(n,N) = 1` outside a finite set, then $`g = c f` for
 some $`c \in \mathbb{C}`. In particular, two normalised newforms in $`S_k(N, \chi)` that
@@ -518,16 +518,16 @@ Depends on: {uses "eigenform-newform"}[] {uses "hecke-operator"}[]
 :::
 
 :::proof "strong-multiplicity-one"
-Split $`g = g^\flat + g^\sharp$` along the Petersson-orthogonal old/new decomposition. Since
+Split $`g = g^\flat + g^\sharp` along the Petersson-orthogonal old/new decomposition. Since
 both subspaces are stable under the Hecke operators, each piece is again a common eigenfunction
-sharing $`f$`'s eigenvalues off the finite set. For the new part: a difference
-$`(a_1(g^\sharp))^{-1} g^\sharp - f$` (assuming $`g^\sharp \ne 0$`) has vanishing Fourier
-coefficients at all indices coprime to $`N$` by the Miyake 4.5.15(1) identity
-$`a_n = a_1 \lambda_n$` and the shared eigenvalues; such a form lies in the old subspace
-({uses "eigenform-newform"}[]), but is also new, so it is zero, giving $`g^\sharp = a_1(g^\sharp) f$`.
-For the old part: if $`g^\flat \ne 0$` one descends to a nonzero new eigenform at a proper
-divisor of $`N$` whose eigenvalues match $`f$`'s, then shows $`f$` would be old — a
-contradiction. Hence $`g^\flat = 0$` and $`g = c f$`.
+sharing $`f`'s eigenvalues off the finite set. For the new part: a difference
+$`(a_1(g^\sharp))^{-1} g^\sharp - f` (assuming $`g^\sharp \ne 0`) has vanishing Fourier
+coefficients at all indices coprime to $`N` by the Miyake 4.5.15(1) identity
+$`a_n = a_1 \lambda_n` and the shared eigenvalues; such a form lies in the old subspace
+({uses "eigenform-newform"}[]), but is also new, so it is zero, giving $`g^\sharp = a_1(g^\sharp) f`.
+For the old part: if $`g^\flat \ne 0` one descends to a nonzero new eigenform at a proper
+divisor of $`N` whose eigenvalues match $`f`'s, then shows $`f` would be old — a
+contradiction. Hence $`g^\flat = 0` and $`g = c f`.
 :::
 
 ## Atkin–Lehner theory and the old/new decomposition
@@ -538,7 +538,7 @@ The cusp space at level $`\Gamma_1(N)` decomposes as an internal direct sum,
 $$`
   S_k(\Gamma_1(N)) \;=\; S_k^\flat(N) \;\oplus\; S_k^\sharp(N),
 `
-where $`S_k^\flat(N)$` is the old subspace and $`S_k^\sharp(N) = (S_k^\flat(N))^\perp$` is
+where $`S_k^\flat(N)` is the old subspace and $`S_k^\sharp(N) = (S_k^\flat(N))^\perp` is
 its Petersson orthogonal complement (the new subspace).
 Formalised in [`LeanModularForms`](https://github.com/CBirkbeck/LeanModularForms) on branch `hecke-ring` (sorry-free).
 
@@ -546,50 +546,50 @@ Depends on: {uses "cusp-form"}[] {uses "eigenform-newform"}[]
 :::
 
 :::proof "old-new-decomposition"
-Trivial intersection $`S_k^\flat(N) \cap S_k^\sharp(N) = 0$` follows immediately from
+Trivial intersection $`S_k^\flat(N) \cap S_k^\sharp(N) = 0` follows immediately from
 positive-definiteness of the Petersson inner product: a form lying in both a subspace and its
 orthogonal complement is orthogonal to itself, hence has Petersson norm zero, hence is zero.
 The spanning property holds on any finite-dimensional space carrying a nondegenerate reflexive
 form: a subspace and its orthogonal complement are always complementary. The Petersson inner
-product is nondegenerate and positive-definite on $`S_k(\Gamma_1(N))$` ({uses "cusp-form"}[]),
+product is nondegenerate and positive-definite on $`S_k(\Gamma_1(N))` ({uses "cusp-form"}[]),
 so these abstract linear-algebra facts apply, giving the direct-sum decomposition.
 :::
 
 :::theorem "atkin-lehner-main-lemma"
 *Atkin–Lehner Main Lemma (Diamond–Shurman 5.7.1 / Miyake 4.6.8).*
-Let $`f \in S_k(\Gamma_1(N))$` be a cusp form whose Fourier coefficients vanish at all indices
+Let $`f \in S_k(\Gamma_1(N))` be a cusp form whose Fourier coefficients vanish at all indices
 coprime to the level:
 $$`
   a_n(f) \;=\; 0 \quad \text{for all } n \ge 1 \text{ with } \gcd(n,N) = 1.
 `
-Then $`f$` is an oldform: $`f \in S_k^\flat(N)$`.
+Then $`f` is an oldform: $`f \in S_k^\flat(N)`.
 Formalised in [`LeanModularForms`](https://github.com/CBirkbeck/LeanModularForms) on branch `hecke-ring` (in progress — the Petersson adjoint input is not yet available).
 
 Depends on: {uses "eigenform-newform"}[] {uses "old-new-decomposition"}[] {uses "q-expansion"}[]
 :::
 
 :::proof "atkin-lehner-main-lemma"
-Split $`f = f^\flat + f^\sharp$` and aim to show $`f^\sharp = 0$`. Subtracting the old part
-$`f^\flat$` does not affect coefficients at indices coprime to $`N$` (level-raising only inserts
-factors $`\ell > 1$` dividing $`N$`), so $`a_n(f^\sharp) = 0$` for all $`(n,N) = 1$` as well.
-To show $`f^\sharp$` is orthogonal to the whole new subspace, fix an eigenform $`g \in S_k^\sharp(N)$`.
-The Petersson adjoint relation $`\langle T(n) h, g \rangle = \overline{\lambda_n(g)} \langle h, g \rangle$`
-lets one move $`T(n)$` across the inner product; since $`a_n(f^\sharp) = 0$` and the eigenvalue
-of $`T(n)$` on $`f^\sharp$` at index $`1$` equals $`a_n(f^\sharp)$` via the Miyake identity
-({uses "eigenvalue-equals-fourier-coeff"}[]), a nonzero eigenvalue $`\lambda_n(g)$` forces
-$`\langle f^\sharp, g \rangle = 0$`. Positivity then gives $`f^\sharp = 0$`.
+Split $`f = f^\flat + f^\sharp` and aim to show $`f^\sharp = 0`. Subtracting the old part
+$`f^\flat` does not affect coefficients at indices coprime to $`N` (level-raising only inserts
+factors $`\ell > 1` dividing $`N`), so $`a_n(f^\sharp) = 0` for all $`(n,N) = 1` as well.
+To show $`f^\sharp` is orthogonal to the whole new subspace, fix an eigenform $`g \in S_k^\sharp(N)`.
+The Petersson adjoint relation $`\langle T(n) h, g \rangle = \overline{\lambda_n(g)} \langle h, g \rangle`
+lets one move $`T(n)` across the inner product; since $`a_n(f^\sharp) = 0` and the eigenvalue
+of $`T(n)` on $`f^\sharp` at index $`1` equals $`a_n(f^\sharp)` via the Miyake identity
+({uses "eigenvalue-equals-fourier-coeff"}[]), a nonzero eigenvalue $`\lambda_n(g)` forces
+$`\langle f^\sharp, g \rangle = 0`. Positivity then gives $`f^\sharp = 0`.
 :::
 
 ## The Shimura surjection
 
 :::theorem "shimura-surjection"
-*Shimura surjection $`R(\Gamma, \Delta) \twoheadrightarrow R(\Gamma_0(N), \Delta_0(N))$` (Shimura 3.35).*
-Write $`\Gamma = \mathrm{SL}_2(\mathbb{Z})$` and let $`\Delta$` be the monoid of integral
-$`2 \times 2$` matrices with positive determinant. There is a surjective ring homomorphism
+*Shimura surjection $`R(\Gamma, \Delta) \twoheadrightarrow R(\Gamma_0(N), \Delta_0(N))` (Shimura 3.35).*
+Write $`\Gamma = \mathrm{SL}_2(\mathbb{Z})` and let $`\Delta` be the monoid of integral
+$`2 \times 2` matrices with positive determinant. There is a surjective ring homomorphism
 $$`
   \varphi \;\colon\; R(\Gamma, \Delta) \;\twoheadrightarrow\; R(\Gamma_0(N), \Delta_0(N))
 `
-from the full $`\mathrm{GL}_2$` Hecke ring to the level-$`N$` congruence Hecke ring. Every
+from the full $`\mathrm{GL}_2` Hecke ring to the level-$`N` congruence Hecke ring. Every
 element of the congruence ring is the image of a full-level Hecke operator.
 Formalised in [`LeanModularForms`](https://github.com/CBirkbeck/LeanModularForms) on branch `hecke-ring` (sorry-free).
 
@@ -598,36 +598,36 @@ Depends on: {uses "hecke-algebra-action"}[]
 
 :::proof "shimura-surjection"
 The proof uses the polynomial presentation of the full Hecke ring. Over the prime generators
-$`X_{p,0}, X_{p,1}$` there is a surjection
-$`\pi \colon \mathbb{Z}[X_{p,k}] \twoheadrightarrow R(\Gamma,\Delta)$` sending each
+$`X_{p,0}, X_{p,1}` there is a surjection
+$`\pi \colon \mathbb{Z}[X_{p,k}] \twoheadrightarrow R(\Gamma,\Delta)` sending each
 generator to the corresponding prime-power Hecke class. Define a second homomorphism
-$`\psi$` on the same generators, sending $`X_{p,0}$` to the class of
-$`\operatorname{diag}(1,p)$` and $`X_{p,1}$` to $`\operatorname{diag}(p,p)$` for $`p \nmid N$`
-(zero otherwise). Since the prime-power generators are algebraically independent, $`\pi$` is
-injective and $`\psi$` factors through $`R(\Gamma,\Delta)$`, producing $`\varphi$`. Surjectivity
-holds because every basis class of $`R(\Gamma_0(N), \Delta_0(N))$` admits a diagonal
-representative $`\operatorname{diag}(a,b)$` with $`a \mid b$` and $`\gcd(a,N) = 1$`, and the
-identification of level-$`N$` classes with coprime-determinant full-level classes (Shimura
+$`\psi` on the same generators, sending $`X_{p,0}` to the class of
+$`\operatorname{diag}(1,p)` and $`X_{p,1}` to $`\operatorname{diag}(p,p)` for $`p \nmid N`
+(zero otherwise). Since the prime-power generators are algebraically independent, $`\pi` is
+injective and $`\psi` factors through $`R(\Gamma,\Delta)`, producing $`\varphi`. Surjectivity
+holds because every basis class of $`R(\Gamma_0(N), \Delta_0(N))` admits a diagonal
+representative $`\operatorname{diag}(a,b)` with $`a \mid b` and $`\gcd(a,N) = 1`, and the
+identification of level-$`N` classes with coprime-determinant full-level classes (Shimura
 Prop. 3.31) together with multiplicativity of the bad classes (Shimura Prop. 3.33) reduces
-every such class to a product of prime-power images of $`\psi$`.
+every such class to a product of prime-power images of $`\psi`.
 :::
 
-# Phase 3 (ModFormDims — external project)
+# Results from external Lean projects
 
 The node below is drawn from the **ModFormDims** project
 ([`https://github.com/CBirkbeck/ModFormDims`](https://github.com/CBirkbeck/ModFormDims)),
-which extends the modular-forms library with Petersson-product tools, $`q$`-expansion
+which extends the modular-forms library with Petersson-product tools, $`q`-expansion
 comparisons, and preliminary dimension-formula infrastructure for congruence subgroups.
 
-## Dimension formula and $`q$`-expansion comparison
+## Dimension formula and $`q`-expansion comparison
 
 :::theorem "neg-weight-rank-zero"
 *Modular forms of negative weight vanish.*
-For any integer $`k < 0$`, the space $`M_k(\mathrm{SL}_2(\mathbb{Z}))$` is zero:
+For any integer $`k < 0`, the space $`M_k(\mathrm{SL}_2(\mathbb{Z}))` is zero:
 $$`
   \operatorname{rank}_{\mathbb{C}} M_k(\mathrm{SL}_2(\mathbb{Z})) \;=\; 0.
 `
-Equivalently, every modular form of negative weight and level $`\Gamma(1)$` is identically
+Equivalently, every modular form of negative weight and level $`\Gamma(1)` is identically
 zero.
 Formalised in [`ModFormDims`](https://github.com/CBirkbeck/ModFormDims) (sorry-free).
 
@@ -635,15 +635,15 @@ Depends on: {uses "modular-form"}[] {uses "q-expansion"}[]
 :::
 
 :::proof "neg-weight-rank-zero"
-By the maximum modulus principle applied to the cusp function. For $`k \le 0$` and any
-modular form $`f$` of weight $`k$` for $`\Gamma(1)$`, the function $`|f(z)| \cdot \operatorname{Im}(z)^{k/2}$`
-is $`\mathrm{SL}_2(\mathbb{Z})$`-invariant; the reduction theory for the fundamental domain shows
-there exists a translate of $`z$` to the standard fundamental domain $`\mathcal{D}$`
-with $`\operatorname{Im}(z') \ge \sqrt{3}/2$`. The $`q$`-expansion of $`f$`
-({uses "q-expansion"}[]) expresses $`f$` through the cusp function $`F(q)$` satisfying
-$`f(z) = F(e^{2\pi i z})$`. Since $`f$` is bounded at the cusp, $`F$` extends holomorphically
-to the closed unit disc. The maximum modulus principle forces $`F$` to be constant; for $`k < 0$`
-the slash-invariance forces that constant to be zero ({uses "slash-action"}[]), giving $`f = 0$`.
+By the maximum modulus principle applied to the cusp function. For $`k \le 0` and any
+modular form $`f` of weight $`k` for $`\Gamma(1)`, the function $`|f(z)| \cdot \operatorname{Im}(z)^{k/2}`
+is $`\mathrm{SL}_2(\mathbb{Z})`-invariant; the reduction theory for the fundamental domain shows
+there exists a translate of $`z` to the standard fundamental domain $`\mathcal{D}`
+with $`\operatorname{Im}(z') \ge \sqrt{3}/2`. The $`q`-expansion of $`f`
+({uses "q-expansion"}[]) expresses $`f` through the cusp function $`F(q)` satisfying
+$`f(z) = F(e^{2\pi i z})`. Since $`f` is bounded at the cusp, $`F` extends holomorphically
+to the closed unit disc. The maximum modulus principle forces $`F` to be constant; for $`k < 0`
+the slash-invariance forces that constant to be zero ({uses "slash-action"}[]), giving $`f = 0`.
 The rank-zero statement follows.
 :::
 

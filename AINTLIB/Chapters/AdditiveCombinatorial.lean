@@ -161,7 +161,7 @@ The threshold $`3/2` is sharp: the set $`\{0, 1\} \subseteq \mathbb{Z}` has doub
 exactly $`3/2` and cannot be covered by a subgroup of size at most $`2`.
 :::
 
-# Phase 3: Polynomial Freiman–Ruzsa (teorth/pfr)
+# The polynomial Freiman–Ruzsa theorem
 
 The nodes below are *informal*: the `teorth/pfr` project is built against a different
 Mathlib version, so they carry no `(lean := …)` reference. Each records the relevant

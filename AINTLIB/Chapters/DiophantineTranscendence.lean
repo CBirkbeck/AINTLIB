@@ -20,7 +20,7 @@ open Informal
 
 This chapter covers four interlocking topics: the ring $`\mathbb{Z}[\sqrt{d}]` and its norm, Pell's equation $`x^2 - dy^2 = 1`, the theory of continued fractions and their convergents, and Liouville's theorem on transcendental numbers. Throughout, $`d` denotes a non-square positive integer, $`\mathbb{Z}` the integers, and $`\mathbb{R}` the real numbers. The Newton polygon theory of $`p`-adic power series is blueprinted in Phase 3 below, drawing on the `NewtonPolys` project. Results in Gelfond–Schneider and full Lindemann–Weierstrass remain forthcoming mathlib PRs and are not yet blueprinted.
 
-# Newton polygons (NewtonPolys)
+# Newton polygons
 
 The nodes below are *informal*: the `NewtonPolys` project ([`CBirkbeck/NewtonPoly`](https://github.com/CBirkbeck/NewtonPoly), main branch) is built against mathlib v4.28.0-rc1 and carries no `(lean := …)` reference here. Each node records where the result is formalised and the current sorry-free status. The cross-chapter edges to {bpref "valuation"}[] and {bpref "padic-val-rat"}[] reflect genuine mathematical dependence: the Newton polygon of a $`p`-adic power series is constructed from the $`p`-adic valuation ({bpref "valuation"}[]) of its coefficients, and its slopes record the $`p`-adic valuations ({bpref "padic-val-rat"}[]) of the roots.
 

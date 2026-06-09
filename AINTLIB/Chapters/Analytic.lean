@@ -137,11 +137,11 @@ Bertrand's postulate sharpens the infinitude of primes ({uses "infinitude-of-pri
 For small $`n < 512` the postulate is verified directly by exhibiting explicit primes: the sequence $`2, 3, 5, 7, 13, 23, 43, 83, 163, 317, 631` covers all gaps up to $`521` (each prime is less than twice the previous).
 :::
 
-# Phase 3 (external projects, not yet in Mathlib)
+# Results from external Lean projects
 
 The nodes below are *informal*: the external projects are built against Lean toolchains or Mathlib versions incompatible with AINTLIB, so they carry no `(lean := …)` reference. Each records where the result is formalised and its sorry-free / in-progress status. They connect into the dependency graph through the Mathlib-backed nodes above.
 
-## Euler products, Wiener–Ikehara, and conditional PNT (EulerProducts)
+## Euler products, Wiener–Ikehara, and conditional PNT
 
 :::definition "euler-product-general"
 For a weakly multiplicative arithmetic function $`f : \mathbb{N} \to \mathbb{C}` with $`f(1) = 1`, if the $`L`-series $`L(f, s) = \sum_{n \ge 1} f(n) n^{-s}` ({uses "lseries"}[]) converges absolutely at $`s`, then
@@ -172,7 +172,7 @@ Formalised in [`EulerProducts`](https://github.com/MichaelStollBayreuth/EulerPro
 One applies the Wiener–Ikehara theorem ({uses "wiener-ikehara"}[]) to $`f = \Lambda`. The non-vanishing of $`\zeta(s)` on $`\operatorname{Re}(s) = 1` ({uses "lfunction-nonvanishing"}[]) ensures that $`-\zeta'(s)/\zeta(s)` extends continuously to that line, so the hypothesis is satisfied with $`A = 1`. The Euler product ({uses "zeta-euler-product"}[]) identifies $`L(\Lambda, s) = -\zeta'(s)/\zeta(s)` for $`\operatorname{Re}(s) > 1`, and the conclusion follows.
 :::
 
-## Non-vanishing of Dirichlet L-functions on the critical line (DirichletNonvanishing)
+## Non-vanishing of Dirichlet L-functions on the critical line
 
 :::theorem "dirichlet-lfunction-nonvanishing-line"
 *(Non-vanishing on $`\operatorname{Re}(s) = 1`.)* Let $`\chi` be a Dirichlet character ({uses "dirichlet-character"}[]) and $`t \in \mathbb{R}`. If $`\chi \ne 1` or $`t \ne 0`, then
@@ -187,7 +187,7 @@ The proof splits into two cases. If $`\chi^2 \ne 1` or $`t \ne 0`, a trigonometr
 For a quadratic character $`\chi^2 = 1` with $`t = 0`, assume for contradiction $`L(\chi,1) = 0`. Define the entire function $`F(s) = \zeta(s) L(\chi, s)` (the simple zero of $`L(\chi, s)` at $`s = 1` cancels the pole of $`\zeta`). For $`\operatorname{Re}(s) > 1`, $`F` agrees with the $`L`-series of the Dirichlet convolution $`\mathbf{1} * \chi`, which takes non-negative values. A classical lemma relating the sign of iterated derivatives to coefficient positivity shows $`(-1)^m F^{(m)}(2) \ge 0` for all $`m \ge 0`, forcing $`F(x) > 0` for all real $`x \le 2`. But the trivial zero of $`\zeta` gives $`F(-2) = \zeta(-2) L(\chi,-2) = 0`, a contradiction ({uses "lfunction-one-nonvanishing"}[]).
 :::
 
-## The Prime Number Theorem and Chebyshev bounds (PrimeNumberTheoremAnd)
+## The Prime Number Theorem and Chebyshev bounds
 
 :::theorem "chebyshev-bounds"
 *(Chebyshev's bounds.)* There exist positive constants $`c_1, c_2` such that for all $`x \ge 2`,
@@ -237,7 +237,7 @@ Formalised in [`PrimeNumberTheoremAnd`](https://github.com/AlexKontorovich/Prime
 Two routes are formalised. The Wiener–Ikehara route ({uses "pnt-von-mangoldt-conditional"}[], {uses "wiener-ikehara"}[]) gives $`\psi(N)/N \to 1` by applying the Tauberian theorem to $`\Lambda` with non-vanishing input ({uses "lfunction-nonvanishing"}[]). The contour-integral route (MediumPNT) gives the sharper error: one inverts the Mellin transform of a smooth truncation of the Chebyshev function via a rectangle contour, uses bounds on $`\zeta'(s)/\zeta(s)` in a zero-free region of the form $`\operatorname{Re}(s) \ge 1 - c/\log(|\operatorname{Im}(s)| + 2)`, and applies a Borel–Carathéodory argument to bound the logarithmic derivative. The $`\pi(x) \sim x/\log x` equivalence then follows from $`\psi \sim x` by partial summation ({uses "chebyshev-bounds"}[]).
 :::
 
-## Brun–Titchmarsh inequality and the Selberg sieve (PrimeNumberTheoremAnd)
+## Brun–Titchmarsh inequality and the Selberg sieve
 
 :::theorem "brun-titchmarsh"
 *(Brun–Titchmarsh inequality.)* For any real $`x > 0`, $`y > 0`, and $`z > 1`, the number of primes in the interval $`(x, x + y]` satisfies
@@ -250,7 +250,7 @@ Formalised in [`PrimeNumberTheoremAnd`](https://github.com/AlexKontorovich/Prime
 One applies the Selberg sieve ({uses "selberg-sieve"}[]) to sift the interval $`(x, x+y]` by primes up to $`z`. The Selberg sieve gives an upper bound on the count of unsifted elements in terms of $`y / S(z)` plus a remainder sum, where $`S(z) = \sum_{d \le z,\, d \mid \mathrm{rad}} \lambda_d^2 / \nu(d)` is the Selberg bounding sum. A lower bound $`S(z) \ge \log(z)/2` follows from the primorial structure of the sieve support (each prime $`p \le z` contributes $`1/p` to $`\nu`). The remainder is bounded by $`5z(1 + \log z)^3` using divisor-sum estimates, and combining the two gives the stated inequality. Non-sifted elements not accounted for by the sieve are at most $`z`, adding the correction term. Converting the resulting bound on the number of primes in $`(x, x+y]` into the stated $`\ll y/\log y` form, and controlling the prime-counting tails, uses Chebyshev-type prime-counting estimates ({uses "chebyshev-bounds"}[]).
 :::
 
-## Non-vanishing and Dirichlet's theorem, analytic route (DirichletNonvanishing)
+## Non-vanishing and Dirichlet's theorem, analytic route
 
 :::theorem "lfunction-nonvanishing-full"
 *(Full non-vanishing on the closed half-plane.)* For a Dirichlet character $`\chi` ({uses "dirichlet-character"}[]) and any $`t \in \mathbb{R}`,
@@ -263,7 +263,7 @@ Formalised in [`DirichletNonvanishing`](https://github.com/CBirkbeck/DirichletNo
 This is exactly the content of {uses "dirichlet-lfunction-nonvanishing-line"}[]. The non-quadratic and non-zero imaginary part cases are handled by the $`3`-$`4`-$`1` positivity bound ({uses "dirichlet-lfunction-euler-product"}[]). The remaining quadratic case $`\chi^2 = 1`, $`t = 0` is the deeper assertion proved via the entire-function $`F = \zeta \cdot L(\chi, \cdot)` with positive coefficients and a trivial zero of $`\zeta` at $`s = -2`.
 :::
 
-## Bombieri–Vinogradov theorem (lean-bombieri-vinogradov)
+## Bombieri–Vinogradov theorem
 
 :::theorem "bombieri-vinogradov"
 *(Bombieri–Vinogradov theorem.)* For any fixed $`A \ge 0` there exists an implied constant $`C_A` such that, uniformly over $`x \ge 2` and $`1 \le Q \le x^{1/2}/(\log x)^{A+3}`,

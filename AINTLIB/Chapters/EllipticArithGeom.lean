@@ -206,7 +206,7 @@ $`\mathrm{pre}\Psi_n^2` (odd). In the coordinate ring, $`\Phi_n` coincides with 
 ({uses "division-polynomial-Psi"}[]).
 :::
 
-# Phase 3 (external projects, not yet in Mathlib)
+# Results from external Lean projects
 
 The nodes below record headline results from three external Lean formalisation
 projects. None carries `(lean := …)` because the external projects target
@@ -215,7 +215,7 @@ the repository, states whether the formalisation is sorry-free or in progress,
 and connects into the dependency graph through the Mathlib-backed nodes of this
 chapter.
 
-## Nagell–Lutz theorem (Nagel--Lutz project)
+## Nagell–Lutz theorem
 
 :::theorem "nagell-lutz"
 *(Nagell–Lutz theorem.)* Let $`A, B \in \mathbb{Z}` with discriminant
@@ -246,7 +246,7 @@ $`\kappa_0^2 \mid 4\Delta`. Specialising $`a_1 = a_3 = 0` gives $`\kappa_0 = 2y_
 and dividing by $`4` yields $`y_0^2 \mid \Delta_{A,B}`.
 :::
 
-## Hasse–Weil bound (Hasse-Weil project)
+## Hasse–Weil bound
 
 :::definition "point-count"
 For an elliptic curve $`E` ({uses "is-elliptic"}[]) over a finite field $`\mathbb{F}_q`,
@@ -289,7 +289,7 @@ $`\ker(1-\pi) = E(\mathbb{F}_q)` and separability of $`1-\pi` (for $`q \ge 2`),
 which gives $`\deg(1-\pi) = \#\ker(1-\pi) = \#E(\mathbb{F}_q)`.
 :::
 
-## Hasse–Weil zeta function and Weil conjectures (WeilConjectures project)
+## Hasse–Weil zeta function and Weil conjectures
 
 :::definition "hasse-weil-zeta"
 For a smooth projective scheme $`X` over $`\mathbb{F}_q`, write

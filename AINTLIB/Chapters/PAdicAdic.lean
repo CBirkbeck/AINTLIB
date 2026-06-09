@@ -201,7 +201,7 @@ A calculation using the $`n`-adic expansion of any integer in base $`n` shows th
 $`|\cdot|` is a power of the ordinary absolute value; hence it is equivalent to $`|\cdot|_\infty`.
 :::
 
-# Adic spaces (beyond mathlib)
+# Adic spaces
 
 The constructions above — valuations, the $`p`-adic numbers,
 and the DVR structure of $`\mathbb{Z}_p` —

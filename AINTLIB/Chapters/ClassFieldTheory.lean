@@ -168,7 +168,7 @@ $`x^q \bmod Q'`, making $`\tau\sigma\tau^{-1}` a Frobenius at $`Q'`. The class i
 well-defined up to conjugacy.
 :::
 
-# Phase 3 (not yet in Mathlib)
+# Results from external Lean projects
 
 The nodes below record results from four external projects that extend the Galois and class-field
 machinery of this chapter beyond what is currently in Mathlib.
@@ -177,7 +177,7 @@ Mathlib versions incompatible with the current AINTLIB build.
 Each node carries a `Formalised in` provenance line and connects to the dep-graph through the
 Mathlib-backed nodes above.
 
-## Chebotarev density theorem (chebotarev-density)
+## Chebotarev density theorem
 
 The `chebotarev-density` project (Birkbeck–Brasca–Roblot) formalises the full Chebotarev density
 theorem without using class field theory, following Sharifi §7.2 and Stevenhagen–Lenstra.
@@ -254,7 +254,7 @@ conjugacy class is a singleton, so the Chebotarev density at $`\{a\}` is
 $`1/|(\mathbb{Z}/n\mathbb{Z})^\times| = 1/\varphi(n)`.
 :::
 
-## Local fields and complete DVRs (LocalClassFieldTheory)
+## Local fields and complete DVRs
 
 The `LocalClassFieldTheory` project (Birkbeck) formalises the basic theory of local fields, their
 ramification and inertia structure, and—building on the Buzzard cohomological approach—the
@@ -309,7 +309,7 @@ characteristic $`0`, while the residue field of $`\mathfrak{p}` is finite of cha
 $`p = \mathrm{char}(R/\mathfrak{p})`.
 :::
 
-## Group cohomology, Tate cohomology, Herbrand quotients, and local CFT (ClassFieldTheory-buzzard)
+## Group cohomology, Tate cohomology, Herbrand quotients, and local CFT
 
 The `ClassFieldTheory` Clay-school project (Buzzard et al., 2025) develops a cohomological proof
 of local class field theory. The group-cohomology and Tate-cohomology foundations are sorry-free;
@@ -396,7 +396,7 @@ and the norm-subgroup ordering ({uses "local-reciprocity"}[]) forces $`l` into
 $`\mathbb{Q}_p(\zeta_{p^f-1}, \zeta_{p^n})`.
 :::
 
-## Power residue symbols (power_residue_symbols)
+## Power residue symbols
 
 The `power_residue_symbols` project (Birkbeck) formalises power residue symbols for number
 fields. The main construction is sorry-free; a full reciprocity statement for power residue

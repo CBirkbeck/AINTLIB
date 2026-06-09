@@ -19,7 +19,7 @@ Throughout, $`n, a, b, c` denote natural numbers (or integers as context demands
 # Statement of Fermat's Last Theorem
 
 :::definition "flt-with" (lean := "FermatLastTheoremWith")
-Let $`R` be a semiring and $`n` a natural number. We say the *Fermat equation with exponent $`n$* holds over $`R$* if the only solutions to
+Let $`R` be a semiring and $`n` a natural number. We say the *Fermat equation with exponent $`n$* holds over `R$* if the only solutions to
 $$`a^n + b^n = c^n, \quad a, b, c \in R`
 are those in which at least one of $`a, b, c` is zero. This is denoted $`\texttt{FermatLastTheoremWith}\; R\; n`.
 
@@ -82,7 +82,7 @@ in $`\mathbb{Z}[\zeta_3]` leads to a contradiction modulo $`9`, since the three 
 For *Case 2* (when exactly one of $`a, b, c` is divisible by $`3`, which is $`3 \mid c` after possible relabelling), one reduces to the *generalised equation* $`a^3 + b^3 = u \cdot c^3` where $`u` is a unit of $`\mathbb{Z}[\zeta_3]`. The same factorisation, combined with unique factorisation in $`\mathbb{Z}[\zeta_3]`, shows that each factor is (up to a unit) a perfect cube. Extracting cube roots yields a new triple $`(a', b', c')` with $`a'^3 + b'^3 = u' c'^3` and $`|c'| < |c|`. Since $`|c|` cannot decrease indefinitely among positive integers, no minimal solution exists, and the equation has no solutions.
 :::
 
-# Phase 3 (not yet in Mathlib)
+# Results from external Lean projects
 
 The formalisation of Fermat's Last Theorem for regular primes via Kummer's criterion — which characterises *regular* primes $`p` by the condition that $`p` does not divide any of the Bernoulli numbers $`B_2, B_4, \ldots, B_{p-3}` — is being developed in the flt-regular and flt-regular-bernoulli projects, and is not yet part of Mathlib. The full proof of Fermat's Last Theorem via the Wiles–Taylor theorem (modularity of semistable elliptic curves over $`\mathbb{Q}`) is the goal of the Imperial College FLT project, also not yet in Mathlib.
 
@@ -113,7 +113,7 @@ Formalised in [`flt-regular-bernoulli`](https://github.com/CBirkbeck/flt-regular
 Expanding the product $`\tau(\chi)\tau(\bar\chi) = \sum_{a,b} \chi(a)\bar\chi(b)\, e^{2\pi i (a+b)/p}` and substituting $`a = tb` on the terms with $`b \ne 0`, the inner sum over $`b` vanishes unless $`t = -1`, leaving $`\chi(-1)\,p`. Since $`\overline{\tau(\chi)} = \chi(-1)\tau(\bar\chi)`, the absolute-value identity $`|\tau(\chi)|^2 = p` follows.
 :::
 
-## Fermat's Last Theorem for regular primes (flt-regular)
+## Fermat's Last Theorem for regular primes
 
 :::definition "regular-prime"
 An odd prime $`p` is *regular* if it does not divide the class number of the cyclotomic field $`\mathbb{Q}(\zeta_p)` ({uses "cyclotomic-extension"}[]) — equivalently, $`p \nmid \#\mathrm{Cl}(\mathcal{O}_{\mathbb{Q}(\zeta_p)})` ({uses "class-group"}[]). The smallest irregular primes are $`37, 59, 67, 101, 103, \ldots`. Regularity is the precise hypothesis under which Kummer's nineteenth-century descent argument for Fermat's Last Theorem goes through.
@@ -183,7 +183,7 @@ Formalised in [`flt-regular`](https://github.com/leanprover-community/flt-regula
 Any integer solution falls into one of two cases according to whether $`p \mid xyz`. The case $`p \nmid xyz` is excluded by Case I ({uses "flt-regular-case-one"}[]) and the case $`p \mid xyz` by Case II ({uses "flt-regular-case-two"}[]). Together with the reduction of Fermat's Last Theorem to odd prime exponents ({uses "flt-odd-primes-suffice"}[]), this proves {uses "fermat-last-theorem"}[] for every regular prime exponent.
 :::
 
-## Kummer's criterion (KummerCriterion / flt-regular-bernoulli)
+## Kummer's criterion
 
 :::theorem "class-number-splitting"
 Let $`p` be an odd prime, $`K = \mathbb{Q}(\zeta_p)` the $`p`-th cyclotomic field ({uses "cyclotomic-extension"}[]), and $`K^+` its maximal real subfield. Writing $`h = h(K)` and $`h^+ = h(K^+)` for the two class numbers ({uses "class-group"}[]), the inclusion $`\mathcal{O}_{K^+} \subseteq \mathcal{O}_K` induces an injection of class groups, so
@@ -239,7 +239,7 @@ Formalised in [`KummerCriterion`](https://github.com/riccardobrasca/KummerCriter
 By definition $`p` is regular iff $`p \nmid h`, and $`h = h^+ h^-` ({uses "class-number-splitting"}[]). The cyclotomic-unit saturation result ({uses "cyclotomic-units-saturation"}[]) together with Sinnott's prime-conductor index theorem $`p \mid [\mathcal{O}_{K^+}^\times : C^+] \iff p \mid h^+` shows that non-divisibility of all the Bernoulli numerators forces $`p \nmid h^+`; combined with the minus class-number criterion ({uses "minus-class-number-criterion"}[]) this gives $`p \mid h \iff \exists k,\ p \mid \operatorname{num}(B_{2k})`. Negating both sides yields the stated equivalence.
 :::
 
-## Stickelberger, Herbrand–Ribet, Thaine and reflection (flt-regular-bernoulli)
+## Stickelberger, Herbrand–Ribet, Thaine and reflection
 
 :::theorem "stickelberger"
 *(Stickelberger's theorem.)* For an odd prime $`p`, the integral Stickelberger ideal $`I_\theta \subseteq \mathbb{Z}[(\mathbb{Z}/p\mathbb{Z})^\times]` attached to the Stickelberger element $`\theta = \sum_{a} \langle a/p\rangle\, \sigma_a^{-1}` annihilates the ideal class group ({uses "class-group"}[]) of $`\mathbb{Q}(\zeta_p)`: for any prime $`\mathfrak{l} \nmid p` and any $`\beta \in I_\theta`, the ideal $`\mathfrak{l}^\beta` is principal.
@@ -279,7 +279,7 @@ Formalised in [`flt-regular-bernoulli`](https://github.com/CBirkbeck/flt-regular
 Write $`A = \mathrm{Cl}(\mathcal{O}_K)/p\,\mathrm{Cl}(\mathcal{O}_K)` with its action of $`\Delta = \mathrm{Gal}(K/\mathbb{Q}) \cong (\mathbb{Z}/p)^\times` ({uses "class-number-splitting"}[]). The reflection principle compares the $`i`-th and $`(1-i)`-th eigencomponents: a nonzero even component forces a nonzero odd reflected component, built from a locally-$`p`-th-power singular pseudo-unit $`\eta` with $`(\eta) = \mathfrak{b}^p` whose $`p`-th-power residue symbol defines a nonzero character of $`A` supported on the reflected index. If $`p \mid h^+` but $`p \nmid h^-`, complex conjugation acts trivially on the minus side, so no odd component can be nonzero — contradicting the reflected component produced from the (necessarily even) nonzero component. The reciprocity input that makes the residue-symbol character well defined is the one-sided Kummer–Furtwängler principal reciprocity law, which remains to be fully discharged.
 :::
 
-## Infinitely many irregular primes and FLT for p = 37 (flt-regular-bernoulli)
+## Infinitely many irregular primes and FLT for p = 37
 
 :::theorem "infinitely-many-irregular-primes"
 *(Carlitz.)* There are infinitely many irregular primes: the set
@@ -303,7 +303,7 @@ Formalised in [`flt-regular-bernoulli`](https://github.com/CBirkbeck/flt-regular
 The unique irregular index of $`37` is $`2k = 32`, so $`k = 16` is even and $`37 \equiv 1 \pmod 4`; thus Vandiver's Theorem III applies, reducing $`\mathrm{FLT}_{37}` to a first case ($`37 \nmid abc`) and a second case ($`37 \mid abc`). Case I runs the Mirimanoff polynomials $`\varphi_n(t) = \sum_j j^{n-1} t^j` against Stickelberger's annihilator ({uses "stickelberger"}[]) and the Bernoulli parity hypothesis. Case II is the Washington–Lehmer–Vandiver descent on $`\sigma`-stable real cyclotomic data, which requires $`37 \nmid h^+`; this last fact is proved *unconditionally* here from Sinnott's index formula ({uses "cyclotomic-units-saturation"}[]) and a direct congruence check on $`B_{32} \bmod 37^2`. The two cases are reduced to explicit cyclotomic-integer hypotheses at $`p = 37` (the Mirimanoff–Bernoulli conclusion and the case-II descent lemma) whose discharge is the remaining work.
 :::
 
-## Reduction to modularity (Imperial College FLT)
+## Reduction to modularity
 
 :::definition "frey-curve"
 A *Frey package* $`(a, b, c, p)` is a triple of pairwise-coprime nonzero integers with $`a \equiv 3 \pmod 4`, $`b \equiv 0 \pmod 2`, together with a prime $`p \ge 5`, such that $`a^p + b^p = c^p`. The associated *Frey curve* (Hellegouarch–Frey) is the elliptic curve ({uses "is-elliptic"}[]) over $`\mathbb{Q}` given by the Weierstrass equation ({uses "weierstrass-curve"}[])
