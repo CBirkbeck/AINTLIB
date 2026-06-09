@@ -32,7 +32,7 @@ A *number field* is a field $`K` that is finite-dimensional over $`\mathbb{Q}`. 
 :::
 
 :::definition "ring-of-integers" (lean := "NumberField.RingOfIntegers")
-The *ring of integers* $`\mathcal{O}_K` of a number field $`K` is the integral closure of $`\mathbb{Z}` in $`K`: the subring of all elements of $`K` that satisfy a monic polynomial equation with integer coefficients. As a $`\mathbb{Z}`-module, $`\mathcal{O}_K` is free of rank $`[K : \mathbb{Q}]`.
+The *ring of integers* $`\mathcal{O}_K` of a number field $`K` ({uses "number-field"}[]) is the integral closure of $`\mathbb{Z}` in $`K`: the subring of all elements of $`K` that satisfy a monic polynomial equation with integer coefficients. As a $`\mathbb{Z}`-module, $`\mathcal{O}_K` is free of rank $`[K : \mathbb{Q}]`.
 :::
 
 # Dedekind domains and unique factorisation of ideals
@@ -46,7 +46,7 @@ The ring of integers $`\mathcal{O}_K` of any number field $`K` is a Dedekind dom
 :::
 
 :::proof "ring-of-integers-is-dedekind"
-By general integral closure theory, $`\mathcal{O}_K = \overline{\mathbb{Z}}^K` is integrally closed. The extension $`K/\mathbb{Q}` is finite and separable (as $`\mathrm{char}\,\mathbb{Q} = 0`), so $`\mathcal{O}_K` is a finite $`\mathbb{Z}`-module ({uses "ring-of-integers"}[]); in particular it is Noetherian. Every nonzero prime ideal of $`\mathcal{O}_K` is maximal because $`\mathcal{O}_K / \mathfrak{p}` is a finite integral domain, hence a field.
+We verify the three defining properties of a Dedekind domain ({uses "dedekind-domain"}[]). By general integral closure theory, $`\mathcal{O}_K = \overline{\mathbb{Z}}^K` is integrally closed. The extension $`K/\mathbb{Q}` is finite and separable (as $`\mathrm{char}\,\mathbb{Q} = 0`), so $`\mathcal{O}_K` is a finite $`\mathbb{Z}`-module ({uses "ring-of-integers"}[]); in particular it is Noetherian. Every nonzero prime ideal of $`\mathcal{O}_K` is maximal because $`\mathcal{O}_K / \mathfrak{p}` is a finite integral domain, hence a field.
 :::
 
 :::theorem "ideal-unique-factorization" (lean := "Ideal.uniqueFactorizationMonoid")
@@ -56,13 +56,13 @@ with the $`\mathfrak{p}_i` distinct prime ideals and $`e_i \ge 1`.
 :::
 
 :::proof "ideal-unique-factorization"
-Existence of a prime factorisation follows from the ascending chain condition (Noetherian) together with the fact that every maximal ideal is prime and every proper ideal is contained in a maximal one. Uniqueness follows from the cancellation law for fractional ideals, which holds in any Dedekind domain because the group of fractional ideals is free abelian on the set of nonzero prime ideals ({uses "dedekind-domain"}[]).
+This is the ideal-theoretic generalisation of the fundamental theorem of arithmetic ({uses "fta-existence"}[]): in $`\mathbb{Z}` prime factorisation of *elements* recovers unique factorisation, while in a general Dedekind domain — where elements need not factor uniquely — the correct objects are *ideals*. Existence of a prime factorisation follows from the ascending chain condition (Noetherian) together with the fact that every maximal ideal is prime and every proper ideal is contained in a maximal one. Uniqueness follows from the cancellation law for fractional ideals, which holds in any Dedekind domain because the group of fractional ideals is free abelian on the set of nonzero prime ideals ({uses "dedekind-domain"}[]).
 :::
 
 # The class group and its finiteness
 
 :::definition "class-group" (lean := "ClassGroup")
-The *class group* $`\mathrm{Cl}(K)` of a Dedekind domain $`R` (e.g. $`R = \mathcal{O}_K`) is the quotient of the group of invertible fractional ideals by its subgroup of principal fractional ideals:
+The *class group* $`\mathrm{Cl}(K)` of a Dedekind domain $`R` ({uses "dedekind-domain"}[]) (e.g. $`R = \mathcal{O}_K`) is the quotient of the group of invertible fractional ideals by its subgroup of principal fractional ideals:
 $$`\mathrm{Cl}(K) = \{\text{invertible fractional ideals of } \mathcal{O}_K\} \;/\; \{\alpha \mathcal{O}_K : \alpha \in K^\times\}.`
 The class group is trivial if and only if $`\mathcal{O}_K` is a principal ideal domain.
 :::
@@ -72,7 +72,7 @@ The class group $`\mathrm{Cl}(K)` of any number field $`K` is finite.
 :::
 
 :::proof "class-group-finite"
-The proof uses Minkowski's geometry-of-numbers bound ({uses "minkowski-bound"}[]): every ideal class contains an ideal of norm at most the Minkowski bound
+The proof bounds the number of ideal classes ({uses "class-group"}[]) using Minkowski's geometry-of-numbers bound ({uses "minkowski-bound"}[]): every ideal class contains an ideal of norm at most the Minkowski bound
 $$`M_K = \left(\frac{4}{\pi}\right)^{r_2} \frac{n!}{n^n} \sqrt{|\mathrm{disc}(K)|},`
 where $`n = [K:\mathbb{Q}]` and $`r_2` is the number of pairs of complex embeddings. Since there are only finitely many ideals of bounded norm in $`\mathcal{O}_K`, the class group is represented by finitely many ideal classes.
 :::
@@ -82,7 +82,7 @@ where $`n = [K:\mathbb{Q}]` and $`r_2` is the number of pairs of complex embeddi
 :::definition "discriminant" (lean := "NumberField.discr")
 The *discriminant* $`\mathrm{disc}(K)` of a number field $`K` is the integer
 $$`\mathrm{disc}(K) = \det\bigl(\mathrm{Tr}_{K/\mathbb{Q}}(\omega_i \omega_j)\bigr)_{1 \le i,j \le n},`
-where $`\omega_1, \dots, \omega_n` is any $`\mathbb{Z}`-basis of $`\mathcal{O}_K`. The discriminant is independent of the choice of basis (up to squares of units), and its absolute value measures the arithmetic complexity of $`K`.
+where $`\omega_1, \dots, \omega_n` is any $`\mathbb{Z}`-basis of the ring of integers $`\mathcal{O}_K` ({uses "ring-of-integers"}[]). The discriminant is independent of the choice of basis (up to squares of units), and its absolute value measures the arithmetic complexity of $`K`.
 :::
 
 # Minkowski's bound
@@ -126,7 +126,7 @@ $$`\sum_{\mathfrak{P} \mid \mathfrak{p}} e(\mathfrak{P}|\mathfrak{p})\, f(\mathf
 :::
 
 :::proof "fundamental-identity"
-By unique factorisation of ideals ({uses "ideal-unique-factorization"}[]), $`\mathfrak{p} S` factors as $`\prod_i \mathfrak{P}_i^{e_i}`. The Chinese remainder theorem (for ideals) gives a ring isomorphism
+By unique factorisation of ideals ({uses "ideal-unique-factorization"}[]), $`\mathfrak{p} S` factors as $`\prod_i \mathfrak{P}_i^{e_i}`, where each ramification index $`e_i` is exactly the $`\mathfrak{P}_i`-adic valuation ({uses "valuation"}[]) of $`\mathfrak{p}` — the local measure of how $`\mathfrak{p}` ramifies at $`\mathfrak{P}_i`. The Chinese remainder theorem (for ideals) gives a ring isomorphism
 $$`S / \mathfrak{p} S \;\cong\; \prod_i S / \mathfrak{P}_i^{e_i}.`
 Each factor $`S/\mathfrak{P}_i^{e_i}` has $`R/\mathfrak{p}`-dimension $`e_i f_i`, as follows from the filtration by powers of $`\mathfrak{P}_i` and the identification of each successive quotient with the residue field $`S/\mathfrak{P}_i`. Summing over $`i` gives $`[S/\mathfrak{p}S : R/\mathfrak{p}] = \sum_i e_i f_i`. Comparing with the $`K`-dimension of $`L` via the flatness of $`L \cong K \otimes_R S` yields $`\sum_i e_i f_i = [L:K]`.
 :::
@@ -142,5 +142,5 @@ The cyclotomic field $`\mathbb{Q}(\zeta_n)` has degree $`\varphi(n) = [\mathbb{Q
 :::
 
 :::proof "cyclotomic-finrank"
-The minimal polynomial of $`\zeta_n` over $`\mathbb{Q}` is the $`n`-th cyclotomic polynomial $`\Phi_n(X)`, which has degree $`\varphi(n)`. When $`\Phi_n` is irreducible over $`K` — in particular for $`K = \mathbb{Q}` by Gauss's classical argument — the extension $`L = K(\zeta_n)` satisfies $`[L:K] = \deg \Phi_n = \varphi(n)`. The proof uses the power basis generated by a primitive $`n`-th root of unity together with the fact that its minimal polynomial is $`\Phi_n` ({uses "cyclotomic-extension"}[]).
+The minimal polynomial of $`\zeta_n` over $`\mathbb{Q}` is the $`n`-th cyclotomic polynomial $`\Phi_n(X)`, whose degree is the value $`\varphi(n)` of Euler's totient ({uses "totient"}[]) — the number of primitive $`n`-th roots of unity. When $`\Phi_n` is irreducible over $`K` — in particular for $`K = \mathbb{Q}` by Gauss's classical argument — the extension $`L = K(\zeta_n)` satisfies $`[L:K] = \deg \Phi_n = \varphi(n)`. The proof uses the power basis generated by a primitive $`n`-th root of unity together with the fact that its minimal polynomial is $`\Phi_n` ({uses "cyclotomic-extension"}[]).
 :::

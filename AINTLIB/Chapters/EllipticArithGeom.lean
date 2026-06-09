@@ -37,7 +37,8 @@ and higher invariants $`c_4, c_6` built from the $`b_i`.
 :::
 
 :::definition "weierstrass-discriminant" (lean := "WeierstrassCurve.Δ")
-The *discriminant* of a Weierstrass curve $`E` over $`R` is
+The *discriminant* of a Weierstrass curve $`E` over $`R` ({uses "weierstrass-curve"}[]) is
+built from the auxiliary quantities $`b_2, b_4, b_6, b_8` of the curve:
 $$`\Delta \;=\; -b_2^2 b_8 - 8 b_4^3 - 27 b_6^2 + 9 b_2 b_4 b_6 \;\in R.`
 If $`R` is a field, $`\Delta = 0` if and only if the cubic curve is singular. One has
 the identity $`1728\,\Delta = c_4^3 - c_6^2`, relating the discriminant to the higher
@@ -45,9 +46,9 @@ invariants $`c_4` and $`c_6`.
 :::
 
 :::definition "is-elliptic" (lean := "WeierstrassCurve.IsElliptic")
-A Weierstrass curve $`E` over $`R` is *elliptic* if its discriminant $`\Delta` is a
-unit in $`R`. When $`R` is a field this is equivalent to $`\Delta \ne 0`, i.e. the
-cubic is nonsingular.
+A Weierstrass curve $`E` over $`R` is *elliptic* if its discriminant $`\Delta`
+({uses "weierstrass-discriminant"}[]) is a unit in $`R`. When $`R` is a field this is
+equivalent to $`\Delta \ne 0`, i.e. the cubic is nonsingular.
 :::
 
 :::lemma_ "two-torsion-discriminant" (lean := "WeierstrassCurve.twoTorsionPolynomial_discr")
@@ -61,15 +62,16 @@ are distinct.
 
 :::proof "two-torsion-discriminant"
 This is a polynomial identity in the coefficients $`a_i`, verified by expanding both
-sides using the standard formula for the discriminant of a cubic. The constant factor
+sides using the standard formula for the discriminant of a cubic and the definition of
+the curve discriminant $`\Delta` ({uses "weierstrass-discriminant"}[]). The constant factor
 $`16 = 2^4` reflects the leading coefficient $`4` of the 2-torsion polynomial.
 :::
 
 # The $`j`-invariant
 
 :::definition "j-invariant" (lean := "WeierstrassCurve.j")
-Let $`E` be an elliptic curve over $`R` (so $`\Delta` is a unit). The *$`j`-invariant* of
-$`E` is
+Let $`E` be an elliptic curve over $`R`, so its discriminant $`\Delta`
+({uses "weierstrass-discriminant"}[]) is a unit. The *$`j`-invariant* of $`E` is
 $$`j(E) \;=\; \Delta^{-1} \cdot c_4^3 \;\in R.`
 It satisfies $`j(E) = 0` if and only if $`c_4 = 0` (when $`R` is reduced).
 :::
@@ -82,9 +84,9 @@ $$`j(C \cdot E) \;=\; j(E).`
 
 :::proof "j-invariant-under-variable-change"
 Under a change of variables with unit parameter $`u`, one checks that $`c_4` scales
-as $`u^{-4} c_4` and $`\Delta` scales as $`u^{-12} \Delta`. Hence
-$`\Delta^{-1} c_4^3` is multiplied by $`u^{12} \cdot u^{-12} = 1`, leaving $`j`
-unchanged.
+as $`u^{-4} c_4` and $`\Delta` scales as $`u^{-12} \Delta`. Hence the $`j`-invariant
+$`j = \Delta^{-1} c_4^3` ({uses "j-invariant"}[]) is multiplied by
+$`u^{12} \cdot u^{-12} = 1`, leaving $`j` unchanged.
 :::
 
 :::theorem "j-isom-criterion" (lean := "WeierstrassCurve.exists_variableChange_of_j_eq")
@@ -106,10 +108,10 @@ for the parameters using the separable closedness of $`F`.
 # Base change
 
 :::definition "base-change" (lean := "WeierstrassCurve.baseChange")
-Let $`W` be a Weierstrass curve over $`R` and let $`A` be an $`R`-algebra. The *base
-change* $`W_A` is the Weierstrass curve over $`A` obtained by applying the structure
-map $`R \to A` to each coefficient $`a_i`. If $`\phi : R \to S` is any ring
-homomorphism one similarly forms $`W_S = W.{\rm map}(\phi)`.
+Let $`W` be a Weierstrass curve over $`R` ({uses "weierstrass-curve"}[]) and let $`A` be
+an $`R`-algebra. The *base change* $`W_A` is the Weierstrass curve over $`A` obtained by
+applying the structure map $`R \to A` to each coefficient $`a_i`. If $`\phi : R \to S` is
+any ring homomorphism one similarly forms $`W_S = W.{\rm map}(\phi)`.
 :::
 
 :::lemma_ "base-change-discriminant" (lean := "WeierstrassCurve.map_Δ")
@@ -120,9 +122,10 @@ is a unit in $`A`, so an elliptic curve remains elliptic after base change.
 :::
 
 :::proof "base-change-discriminant"
-The discriminant is a polynomial in the $`a_i`, so applying $`\phi` to each coefficient
-and then computing $`\Delta` gives the same result as computing $`\Delta` first and then
-applying $`\phi`, by ring-homomorphism functoriality.
+The discriminant $`\Delta` ({uses "weierstrass-discriminant"}[]) is a polynomial in the
+coefficients $`a_i`, so for the base change $`W_A` ({uses "base-change"}[]), applying $`\phi`
+to each coefficient and then computing $`\Delta` gives the same result as computing $`\Delta`
+first and then applying $`\phi`, by ring-homomorphism functoriality.
 :::
 
 :::lemma_ "base-change-j" (lean := "WeierstrassCurve.map_j")
@@ -168,7 +171,8 @@ structure of the ideal class group.
 
 :::definition "division-polynomial-psi" (lean := "WeierstrassCurve.ψ")
 For an integer $`n`, the *$`n`-th division polynomial* $`\psi_n \in R[X, Y]` of a
-Weierstrass curve $`W` over $`R` is defined by the recurrence of a normalised
+Weierstrass curve $`W` over $`R` ({uses "weierstrass-curve"}[]) — whose auxiliary quantities
+$`b_2, b_4, b_6, b_8` enter the initial terms below — is defined by the recurrence of a normalised
 elliptic divisibility sequence with initial values
 $$`\psi_0 = 0,\quad \psi_1 = 1,\quad \psi_2 = 2Y + a_1 X + a_3,`
 $$`\psi_3 = 3X^4 + b_2 X^3 + 3b_4 X^2 + 3b_6 X + b_8,`

@@ -35,7 +35,7 @@ where the product is taken over all primes $`p` and converges absolutely.
 :::
 
 :::proof "zeta-euler-product"
-For $`\operatorname{Re}(s) > 1` the series $`\sum_{n \ge 1} n^{-s}` converges absolutely, and unique factorization ({uses "riemann-zeta"}[]) together with the multiplicativity of $`n \mapsto n^{-s}` allows one to re-expand the series as an Euler product. Specifically, each local factor $`\sum_{k \ge 0} p^{-ks} = (1 - p^{-s})^{-1}` converges geometrically since $`|p^{-s}| = p^{-\operatorname{Re}(s)} < 1`, and absolute convergence lets one rearrange the double sum over primes and exponents into the original Dirichlet series.
+For $`\operatorname{Re}(s) > 1` the series $`\sum_{n \ge 1} n^{-s}` defining $`\zeta` ({uses "riemann-zeta"}[]) converges absolutely. The Euler product is exactly the analytic incarnation of unique factorisation ({uses "fta-uniqueness"}[]): because every $`n \ge 1` is uniquely a product of prime powers, expanding the product $`\prod_p \sum_{k \ge 0} p^{-ks}` and using the multiplicativity of $`n \mapsto n^{-s}` reproduces each term $`n^{-s}` exactly once. Each local factor $`\sum_{k \ge 0} p^{-ks} = (1 - p^{-s})^{-1}` converges geometrically since $`|p^{-s}| = p^{-\operatorname{Re}(s)} < 1`, and absolute convergence lets one rearrange the double sum over primes and exponents into the original Dirichlet series.
 :::
 
 # Dirichlet characters and $`L`-functions
@@ -51,7 +51,7 @@ defined at those $`s \in \mathbb{C}` for which the series converges absolutely.
 :::
 
 :::definition "dirichlet-lfunction" (lean := "DirichletCharacter.LFunction")
-For a Dirichlet character $`\chi` of modulus $`q`, the *Dirichlet $`L`-function* $`L(s, \chi)` is the meromorphic continuation to all of $`\mathbb{C}` of the Dirichlet series
+For a Dirichlet character $`\chi` of modulus $`q` ({uses "dirichlet-character"}[]), the *Dirichlet $`L`-function* $`L(s, \chi)` is the meromorphic continuation to all of $`\mathbb{C}` of the $`L`-series ({uses "lseries"}[]) of $`\chi`,
 $$`L(s, \chi) = \sum_{n=1}^{\infty} \frac{\chi(n)}{n^s}, \qquad \operatorname{Re}(s) > 1.`
 When $`\chi` is non-trivial the continuation is entire; when $`\chi` is the trivial character of modulus $`q` the function has a simple pole at $`s = 1` and agrees (up to finitely many Euler factors) with $`\zeta(s)`.
 :::
@@ -82,7 +82,7 @@ $$`\sum_{d \mid n} \Lambda(d) = \log n.`
 :::
 
 :::proof "von-mangoldt-zeta-identity"
-The identity $`\sum_{d \mid n} \Lambda(d) = \log n` follows by comparing the unique factorization of $`n`: writing $`n = \prod_{p \mid n} p^{v_p(n)}`, the sum $`\sum_{d \mid n} \Lambda(d)` picks up a contribution $`\log p` for each prime power divisor $`p^k` with $`k \ge 1`, and the total is $`\sum_{p \mid n} v_p(n) \log p = \log \prod_p p^{v_p(n)} = \log n` ({uses "von-mangoldt"}[]).
+The identity $`\sum_{d \mid n} \Lambda(d) = \log n` follows by comparing the unique factorization of $`n` ({uses "fta-existence"}[]): writing $`n = \prod_{p \mid n} p^{v_p(n)}`, the sum $`\sum_{d \mid n} \Lambda(d)` picks up a contribution $`\log p` for each prime power divisor $`p^k` with $`k \ge 1`, and the total is $`\sum_{p \mid n} v_p(n) \log p = \log \prod_p p^{v_p(n)} = \log n` ({uses "von-mangoldt"}[]). Dually, inverting the convolution $`\Lambda * \mathbf{1} = \log` against the Möbius function ({uses "moebius"}[]), the inverse of $`\mathbf{1}`, recovers $`\Lambda = \mu * \log`, i.e. $`\Lambda(n) = \sum_{d \mid n} \mu(n/d) \log d`.
 :::
 
 # Non-vanishing of $`L`-functions on $`\operatorname{Re}(s) \ge 1`
@@ -112,13 +112,17 @@ This is the special case $`s = 1` of {uses "lfunction-nonvanishing"}[]. It is al
 :::
 
 :::proof "dirichlets-theorem"
-The proof uses the analytic properties of Dirichlet $`L`-functions. For each character $`\chi` of modulus $`q` one forms the logarithmic sum $`\sum_p \chi(p) p^{-s}`. Via the Euler product ({uses "dirichlet-lfunction-euler-product"}[]) this is asymptotically $`-\log L(s, \chi)` plus a convergent error as $`s \to 1^+`.
+The proof uses the analytic properties of Dirichlet $`L`-functions ({uses "dirichlet-lfunction"}[]). For each Dirichlet character $`\chi` of modulus $`q` ({uses "dirichlet-character"}[]) one forms the logarithmic sum $`\sum_p \chi(p) p^{-s}`. Via the Euler product ({uses "dirichlet-lfunction-euler-product"}[]) this is asymptotically $`-\log L(s, \chi)` plus a convergent error as $`s \to 1^+`.
 
 Orthogonality of characters then isolates the contribution from the residue class $`a`: the sum $`\sum_{p \equiv a \pmod{q}} p^{-s}` equals $`\frac{1}{\varphi(q)} \sum_\chi \overline{\chi}(a) (-\log L(s, \chi) + \text{convergent})`. The trivial character contributes a $`\log\frac{1}{s-1}` term (from the pole of $`\zeta`), while the non-trivial characters contribute finite limits at $`s = 1` because $`L(1, \chi) \ne 0` ({uses "lfunction-one-nonvanishing"}[]). Hence the full sum diverges as $`s \to 1^+`, proving the residue class contains infinitely many primes.
 :::
 
 :::corollary "dirichlets-theorem-gt" (lean := "Nat.forall_exists_prime_gt_and_modEq")
 Let $`q` be a positive integer, $`a` a natural number coprime to $`q`, and $`n` any natural number. Then there exists a prime $`p > n` with $`p \equiv a \pmod{q}`.
+:::
+
+:::proof "dirichlets-theorem-gt"
+By Dirichlet's theorem ({uses "dirichlets-theorem"}[]) the residue class $`a \bmod q` contains infinitely many primes. An infinite set of primes is unbounded, so for any threshold $`n` at least one of them exceeds $`n`; this is the asserted prime $`p > n` with $`p \equiv a \pmod q`.
 :::
 
 # Bertrand's postulate
@@ -128,7 +132,7 @@ Let $`q` be a positive integer, $`a` a natural number coprime to $`q`, and $`n` 
 :::
 
 :::proof "bertrand"
-The proof is elementary and proceeds in two stages. For large $`n` (specifically $`n \ge 512`), one analyses the central binomial coefficient $`\binom{2n}{n}`. On the one hand $`\binom{2n}{n} \ge \frac{4^n}{2n+1}`, which grows exponentially. On the other hand, if no prime lies in $`(n, 2n]`, then every prime factor of $`\binom{2n}{n}` is at most $`n`, and a careful count of prime-power factors (using the Legendre formula for the $`p`-adic valuation of a factorial) yields the upper bound $`\binom{2n}{n} \le \prod_{p \le \sqrt{2n}} (2n)^{1/\log p} \cdot \prod_{\sqrt{2n} < p \le 2n/3} p`, which grows subexponentially. For $`n \ge 512` these bounds contradict each other, so a prime in $`(n, 2n]` must exist.
+Bertrand's postulate sharpens the infinitude of primes ({uses "infinitude-of-primes"}[]), guaranteeing a prime not merely beyond $`n` but inside the dyadic window $`(n, 2n]`. The proof is elementary and proceeds in two stages. For large $`n` (specifically $`n \ge 512`), one analyses the central binomial coefficient $`\binom{2n}{n}`. On the one hand $`\binom{2n}{n} \ge \frac{4^n}{2n+1}`, which grows exponentially. On the other hand, if no prime lies in $`(n, 2n]`, then every prime factor of $`\binom{2n}{n}` is at most $`n`, and a careful count of prime-power factors — using the Legendre formula $`v_p(m!) = \sum_{k \ge 1} \lfloor m/p^k \rfloor` for the $`p`-adic valuation ({uses "padic-val-nat"}[]) of a factorial — yields the upper bound $`\binom{2n}{n} \le \prod_{p \le \sqrt{2n}} (2n)^{1/\log p} \cdot \prod_{\sqrt{2n} < p \le 2n/3} p`, which grows subexponentially. For $`n \ge 512` these bounds contradict each other, so a prime in $`(n, 2n]` must exist.
 
 For small $`n < 512` the postulate is verified directly by exhibiting explicit primes: the sequence $`2, 3, 5, 7, 13, 23, 43, 83, 163, 317, 631` covers all gaps up to $`521` (each prime is less than twice the previous).
 :::

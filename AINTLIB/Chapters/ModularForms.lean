@@ -70,7 +70,8 @@ $`c_{gh}(z) = c_g(h \cdot z) \cdot c_h(z)`, where $`c_g(z) = cz + d` is the deno
 For an integer $`k`, a matrix $`g \in \mathrm{GL}_2(\mathbb{R})`, and a function
 $`f : \mathbb{H} \to \mathbb{C}`, the *weight-$`k` slash action* is
 $$`(f \mid_k g)(z) \;=\; \det(g)^{k/2} \, (cz + d)^{-k} \, f(g \cdot z),`
-where $`c, d` are the bottom-row entries of $`g`. This extends to an action on functions
+where $`c, d` are the bottom-row entries of $`g` and $`g \cdot z` is the Möbius action
+({uses "sl2-action"}[]) of $`g` on the upper half-plane. This extends to an action on functions
 $`\mathbb{H} \to \mathbb{C}`. The product rule
 $$`(fg) \mid_{k_1 + k_2} g \;=\; (f \mid_{k_1} g) \cdot (g \mid_{k_2} g)`
 holds for any two functions $`f, g`.
@@ -148,6 +149,14 @@ $`h`: if $`\sum_n c_n \, e^{2\pi i n z/h} = f(z)` for all $`z \in \mathbb{H}`, t
 for all $`n`.
 :::
 
+:::proof "q-expansion-unique"
+Both the given series and the $`q`-expansion ({uses "q-expansion"}[]) represent $`f` as a power
+series in $`q = e^{2\pi i z/h}` convergent on the punctured unit disc ({uses "q-expansion-convergence"}[]).
+A holomorphic function on the disc has a unique Taylor expansion, so two convergent power series in
+$`q` that agree as functions of $`z` — equivalently as functions of $`q` on a punctured neighbourhood
+of $`0` — must have identical coefficients; hence $`c_n = a_n` for every $`n`.
+:::
+
 # Eisenstein series
 
 :::definition "eisenstein-series" (lean := "ModularForm.eisensteinSeriesMF, ModularForm.E")
@@ -165,9 +174,10 @@ $`\mathcal{E}_{k,a}` defines a modular form in $`M_k(\Gamma(N))`.
 :::
 
 :::proof "eisenstein-is-modular-form"
-The slash-invariance under $`\Gamma(N)` follows from the fact that the set of coprime pairs
-congruent to $`a` mod $`N` is preserved under the row-vector action of $`\Gamma(N)`
-({uses "slash-invariant-form"}[]). Holomorphicity on $`\mathbb{H}` comes from the uniform
+The slash-invariance of the Eisenstein series ({uses "eisenstein-series"}[]) under $`\Gamma(N)`
+follows from the fact that the set of coprime pairs congruent to $`a` mod $`N` is preserved under
+the row-vector action of $`\Gamma(N)` ({uses "slash-invariant-form"}[]). Holomorphicity on
+$`\mathbb{H}` comes from the uniform
 convergence of the defining series on compact subsets of $`\mathbb{H}`, which in turn follows from
 the estimate $`|mz + n|^{-k} \le C \cdot \mathrm{Im}(z)^{-k/2}` on compact sets. Boundedness at
 the cusps uses the explicit analysis of the cusp-function transform ({uses "q-expansion"}[]).
@@ -197,10 +207,11 @@ the divisor-power sum.
 :::proof "eisenstein-q-expansion"
 The key identity is the Lipschitz formula
 $$`\sum_{n \in \mathbb{Z}} (z + n)^{-k} \;=\; \frac{(-2\pi i)^k}{(k-1)!} \sum_{m=1}^{\infty} m^{k-1} e^{2\pi i m z},`
-which converts the defining sum over coprime pairs into a sum of divisor-power sums via the
-Riemann zeta factorisation. Specifically, summing over all integer pairs (not just coprime ones)
-and factoring out the zeta value at $`k`, then applying Möbius inversion, yields the coefficient
-formula. The stated form follows from the value $`\zeta(k) = -(2\pi i)^k B_k / (2 \cdot k!)`.
+which converts the defining sum of the normalised Eisenstein series ({uses "eisenstein-series"}[])
+over coprime pairs into a sum of divisor-power sums. Summing instead over *all* nonzero integer
+pairs factors as $`2\zeta(k)` ({uses "riemann-zeta"}[]) times the coprime sum; isolating the coprime
+contribution by Möbius inversion ({uses "moebius-inversion"}[]) over the gcd then yields the
+coefficient formula. The stated form follows from the value $`\zeta(k) = -(2\pi i)^k B_k / (2 \cdot k!)`.
 :::
 
 # The discriminant modular form
@@ -212,6 +223,10 @@ $$`\Delta(z) \;=\; e^{2\pi i z} \prod_{n=1}^{\infty} (1 - e^{2\pi i n z})^{24}
               \;=\; \eta(z)^{24},`
 where $`\eta(z) = e^{\pi i z/12} \prod_{n=1}^{\infty}(1 - e^{2\pi i n z})` is the Dedekind
 eta function. In particular $`\Delta` is a cusp form in $`S_{12}(\mathrm{SL}_2(\mathbb{Z}))`.
+At a point $`\tau \in \mathbb{H}`, the value $`\Delta(\tau)` is, up to the standard normalisation,
+the discriminant ({uses "weierstrass-discriminant"}[]) of the elliptic curve
+$`\mathbb{C}/(\mathbb{Z} + \mathbb{Z}\tau)` in its Weierstrass model $`y^2 = 4x^3 - g_2 x - g_3`;
+indeed $`(2\pi)^{12}\Delta = g_2^3 - 27 g_3^2`, the discriminant of that cubic.
 :::
 
 :::theorem "discriminant-e4-e6" (lean := "ModularForm.discriminant_eq_E₄_cube_sub_E₆_sq")

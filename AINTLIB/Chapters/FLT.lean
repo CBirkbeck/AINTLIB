@@ -27,7 +27,7 @@ Note that the statement can fail for small or continuous rings: $`\texttt{Fermat
 :::
 
 :::definition "flt-for" (lean := "FermatLastTheoremFor")
-For a natural number $`n`, the *Fermat property for exponent $`n`* is the assertion that the equation $`a^n + b^n = c^n` has no solution in positive natural numbers. Formally, $`\texttt{FermatLastTheoremFor}\; n` is $`\texttt{FermatLastTheoremWith}\; \mathbb{N}\; n`.
+For a natural number $`n`, the *Fermat property for exponent $`n`* is the assertion that the equation $`a^n + b^n = c^n` has no solution in positive natural numbers. Formally, $`\texttt{FermatLastTheoremFor}\; n` is the Fermat equation with exponent $`n` over $`\mathbb{N}` ({uses "flt-with"}[]), i.e. $`\texttt{FermatLastTheoremWith}\; \mathbb{N}\; n`.
 :::
 
 :::definition "fermat-last-theorem" (lean := "FermatLastTheorem")
@@ -75,7 +75,7 @@ $$`a^3 + b^3 = c^3.`
 :::
 
 :::proof "flt-three"
-The argument uses infinite descent in the ring $`\mathbb{Z}[\zeta_3]` of Eisenstein integers, where $`\zeta_3` is a primitive cube root of unity. One first handles *Case 1* (when $`3 \nmid abc`): the factorisation
+This establishes the Fermat property ({uses "flt-for"}[]) at the exponent $`3`. The argument uses infinite descent in the ring $`\mathbb{Z}[\zeta_3]` of Eisenstein integers — the ring of integers of the cyclotomic field $`\mathbb{Q}(\zeta_3)` ({uses "cyclotomic-extension"}[]), where $`\zeta_3` is a primitive cube root of unity. One first handles *Case 1* (when $`3 \nmid abc`): the factorisation
 $$`a^3 + b^3 = (a + b)(a + \zeta_3 b)(a + \zeta_3^2 b)`
 in $`\mathbb{Z}[\zeta_3]` leads to a contradiction modulo $`9`, since the three factors are pairwise coprime and their product is a cube, forcing each to be a unit times a cube, but no Eisenstein integer is simultaneously a cube and congruent to the required residue modulo $`9`.
 

@@ -26,7 +26,7 @@ This chapter covers four interlocking topics: the ring $`\mathbb{Z}[\sqrt{d}]` a
 For an integer $`d`, the *ring $`\mathbb{Z}[\sqrt{d}]`* consists of formal expressions $`a + b\sqrt{d}` with $`a, b \in \mathbb{Z}`. Addition and multiplication are defined by
 $$`(a + b\sqrt{d}) + (a' + b'\sqrt{d}) = (a + a') + (b + b')\sqrt{d}`
 $$`(a + b\sqrt{d})(a' + b'\sqrt{d}) = (aa' + dbb') + (ab' + ba')\sqrt{d}.`
-The components $`a` and $`b` are called the *real part* (`.re`) and the *imaginary part* (`.im`) respectively.
+The components $`a` and $`b` are called the *real part* (`.re`) and the *imaginary part* (`.im`) respectively. For $`d` a non-square with $`d \equiv 2, 3 \pmod 4`, this is exactly the ring of integers ({uses "ring-of-integers"}[]) of the real quadratic field $`\mathbb{Q}(\sqrt{d})`.
 :::
 
 :::definition "zsqrtd-norm" (lean := "Zsqrtd.norm")
@@ -68,7 +68,7 @@ If $`d > 0` is not a perfect square, there exists a unique fundamental solution.
 :::
 
 :::proof "pell-fundamental-exists"
-Existence follows from {uses "pell-exists"}[]: the non-trivial solutions with $`x > 1` and $`y > 0` form a non-empty set, and $`x` takes a minimum value since solutions with bounded $`x` are finite. Uniqueness: if $`(x_1, y_1)` and $`(x_1', y_1')` are both fundamental, then $`x_1 \le x_1' \le x_1`, hence $`x_1 = x_1'`, and the Pell equation forces $`y_1^2 = y_1'^2`, giving $`y_1 = y_1'` since both are positive.
+Existence of the fundamental solution ({uses "pell-fundamental"}[]) follows from {uses "pell-exists"}[]: the non-trivial solutions with $`x > 1` and $`y > 0` form a non-empty set, and $`x` takes a minimum value since solutions with bounded $`x` are finite, so the defining minimality condition is met. Uniqueness: if $`(x_1, y_1)` and $`(x_1', y_1')` are both fundamental, then $`x_1 \le x_1' \le x_1`, hence $`x_1 = x_1'`, and the Pell equation forces $`y_1^2 = y_1'^2`, giving $`y_1 = y_1'` since both are positive.
 :::
 
 :::theorem "pell-group-structure" (lean := "Pell.IsFundamental.eq_zpow_or_neg_zpow")
@@ -90,7 +90,7 @@ with *head term* $`h \in \alpha` and a (possibly infinite) sequence of *partial 
 :::
 
 :::definition "gcf-convergents" (lean := "GenContFract.convs")
-The *$`n`-th convergent* $`C_n` of a generalised continued fraction is the rational number obtained by truncating the expansion after the $`n`-th partial denominator. Convergents are computed by the recurrence
+The *$`n`-th convergent* $`C_n` of a generalised continued fraction ({uses "gcf"}[]) is the rational number obtained by truncating the expansion after the $`n`-th partial denominator. Convergents are computed by the recurrence
 $$`A_{-1} = 1,\quad A_0 = h,\quad A_n = b_{n-1}A_{n-1} + a_{n-1}A_{n-2}`
 $$`B_{-1} = 0,\quad B_0 = 1,\quad B_n = b_{n-1}B_{n-1} + a_{n-1}B_{n-2}`
 $$`C_n = A_n / B_n,`
@@ -135,7 +135,7 @@ then $`p/r` is a convergent of the continued fraction expansion of $`\xi`.
 :::
 
 :::proof "legendre-convergent"
-Among all fractions with denominator at most $`r`, the convergents $`A_n/B_n` are the best approximations. If $`|p/r - \xi|` is smaller than $`1/(2r^2)`, it is in particular smaller than $`|A_n/B_n - \xi|` for all $`n` with $`B_n \le r`; tracing through the continued fraction algorithm ({uses "gcf-convergents"}[]) shows $`p/r` must itself appear as a convergent.
+This is the converse to the best-approximation property quantified by Dirichlet's approximation theorem ({uses "dirichlet-approx"}[]): among all fractions with denominator at most $`r`, the convergents $`A_n/B_n` are the best approximations. If $`|p/r - \xi|` is smaller than $`1/(2r^2)`, it is in particular smaller than $`|A_n/B_n - \xi|` for all $`n` with $`B_n \le r`; tracing through the continued fraction algorithm ({uses "gcf-convergents"}[]) shows $`p/r` must itself appear as a convergent.
 :::
 
 # Liouville numbers and transcendence
@@ -160,7 +160,7 @@ Suppose $`x = p/q` is rational with $`q > 0`. Take $`n = q + 1`. Any approximati
 :::proof "liouville-transcendental"
 Suppose $`x` is a Liouville number ({uses "liouville-number"}[]) and suppose for contradiction that $`x` is algebraic over $`\mathbb{Z}`, a root of a nonzero polynomial $`f \in \mathbb{Z}[X]` of degree $`d`. Since $`x` is irrational ({uses "liouville-irrational"}[]) and $`f` has finitely many roots, there is a positive $`A` such that for all integers $`a, b` with $`b > 0`:
 $$`\left|\frac{a}{b} - x\right| \ge \frac{A}{b^d}.`
-This lower bound—coming from the fact that $`f(a/b)` is a nonzero integer divided by $`b^d`, together with Lipschitz continuity of $`f` near $`x`—contradicts the definition of a Liouville number for $`n` larger than $`d + \log_2(1/A)`.
+This Liouville inequality is the exact counterpoint to Dirichlet's approximation theorem ({uses "dirichlet-approx"}[]): whereas Dirichlet guarantees *every* irrational is approximable to order $`2`, an algebraic irrational of degree $`d` cannot be approximated past order $`d`. The lower bound—coming from the fact that $`f(a/b)` is a nonzero integer divided by $`b^d`, together with Lipschitz continuity of $`f` near $`x`—contradicts the definition of a Liouville number for $`n` larger than $`d + \log_2(1/A)`, which produces approximations far better than order $`d`.
 :::
 
 :::definition "liouville-constant" (lean := "liouvilleNumber")

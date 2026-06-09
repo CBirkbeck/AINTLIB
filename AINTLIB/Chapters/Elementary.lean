@@ -29,7 +29,7 @@ There are infinitely many primes: for every natural number $`n` there exists a p
 :::
 
 :::proof "infinitude-of-primes"
-This is Euclid's argument. Given $`n`, consider $`N = n! + 1`. Any prime factor $`p` of $`N` must satisfy $`p \ge n`, for if $`p < n` then $`p \mid n!`, and since $`p \mid N` we would get $`p \mid (N - n!) = 1`, which is impossible. Since $`N \ge 2` has at least one prime factor, such a $`p` exists, and it is at least $`n`.
+This is Euclid's argument. Given $`n`, consider $`N = n! + 1`. Any prime factor $`p` of $`N` must satisfy $`p \ge n`, for if $`p < n` then $`p \mid n!`, and since $`p \mid N` we would get $`p \mid (N - n!) = 1`, which is impossible. Since $`N \ge 2` has at least one prime factor — the smallest prime in its factorization ({uses "factorization"}[]) — such a $`p` exists, and it is at least $`n`.
 :::
 
 :::definition "factorization" (lean := "Nat.factorization")
@@ -65,6 +65,10 @@ Equivalently, $`\varphi(n)` is the number of units of $`\mathbb{Z}/n\mathbb{Z}`.
 :::lemma_ "totient-prime" (lean := "Nat.totient_prime")
 For a prime $`p`, every nonzero residue below $`p` is coprime to $`p`, so
 $$`\varphi(p) = p - 1.`
+:::
+
+:::proof "totient-prime"
+By the definition of the totient ({uses "totient"}[]), $`\varphi(p)` counts the integers in $`\{0, 1, \dots, p-1\}` coprime to $`p`. Since $`p` is prime, the only such integer that fails to be coprime to $`p` is $`0`; the remaining $`p - 1` residues $`1, \dots, p-1` are all coprime to $`p`. Hence $`\varphi(p) = p - 1`.
 :::
 
 :::lemma_ "totient-prime-pow" (lean := "Nat.totient_prime_pow")
@@ -130,7 +134,7 @@ $$`(p-1)! \equiv -1 \pmod{p}.`
 :::
 
 :::proof "wilson"
-Work in the field $`\mathbb{Z}/p\mathbb{Z}`. In the product $`(p-1)! = \prod_{a=1}^{p-1} a` of all nonzero residues, pair each $`a` with its multiplicative inverse $`a^{-1}`. The only residues that are their own inverse are the solutions of $`a^2 = 1`, namely $`a = \pm 1`. Every other residue cancels against its distinct inverse, leaving $`(p-1)! \equiv 1 \cdot (-1) = -1 \pmod{p}`.
+Work in the field $`\mathbb{Z}/p\mathbb{Z}`, whose nonzero residues form a multiplicative group of order $`p - 1` in which every element has a unique inverse ({uses "fermat-little-units"}[]). In the product $`(p-1)! = \prod_{a=1}^{p-1} a` of all nonzero residues, pair each $`a` with its multiplicative inverse $`a^{-1}`. The only residues that are their own inverse are the solutions of $`a^2 = 1`; since $`\mathbb{Z}/p\mathbb{Z}` is a field, $`(a-1)(a+1) = 0` forces $`a = \pm 1`. Every other residue cancels against its distinct inverse, leaving $`(p-1)! \equiv 1 \cdot (-1) = -1 \pmod{p}`.
 :::
 
 :::theorem "chinese-remainder" (lean := "ZMod.chineseRemainder")
@@ -155,7 +159,7 @@ $$`\sum_{d \mid n} \mu(d) = [\,n = 1\,].`
 :::
 
 :::proof "moebius-zeta"
-For $`n = 1` the sum is $`\mu(1) = 1`. For $`n > 1`, only the squarefree divisors contribute. Writing $`n` with $`r \ge 1` distinct prime factors, the squarefree divisors are products of subsets of these primes, and a subset of size $`j` contributes $`(-1)^j`. Hence the sum is $`\sum_{j=0}^{r} \binom{r}{j} (-1)^j = (1 - 1)^r = 0`.
+For $`n = 1` the sum is $`\mu(1) = 1`. For $`n > 1`, only the squarefree divisors contribute, since $`\mu` vanishes on any divisor divisible by the square of a prime ({uses "moebius"}[]). Writing $`n` with $`r \ge 1` distinct prime factors, the squarefree divisors are products of subsets of these primes, and a subset of size $`j` contributes $`(-1)^j`. Hence the sum is $`\sum_{j=0}^{r} \binom{r}{j} (-1)^j = (1 - 1)^r = 0`.
 :::
 
 :::theorem "moebius-inversion" (lean := "ArithmeticFunction.sum_eq_iff_sum_mul_moebius_eq")
@@ -182,7 +186,7 @@ Consequently $`\left(\frac{a}{p}\right) \equiv a^{(p-1)/2} \pmod{p}`.
 :::
 
 :::proof "euler-criterion"
-The multiplicative group of $`\mathbb{Z}/p\mathbb{Z}` is cyclic of order $`p - 1`. By Fermat's little theorem ({uses "fermat-little-units"}[]) every nonzero $`a` satisfies $`a^{p-1} = 1`, so $`a^{(p-1)/2} = \pm 1`. Picking a generator $`g`, write $`a = g^k`; then $`a^{(p-1)/2} = 1` iff $`(p-1) \mid k(p-1)/2` iff $`k` is even, which is exactly the condition for $`a` to be a square.
+The multiplicative group of $`\mathbb{Z}/p\mathbb{Z}` is cyclic of order $`p - 1`. By Fermat's little theorem ({uses "fermat-little-units"}[]) every nonzero $`a` satisfies $`a^{p-1} = 1`, so $`a^{(p-1)/2} = \pm 1`. Picking a generator $`g`, write $`a = g^k`; then $`a^{(p-1)/2} = 1` iff $`(p-1) \mid k(p-1)/2` iff $`k` is even, which is exactly the condition for $`a` to be a square. The resulting value $`a^{(p-1)/2} \in \{\pm 1\}` is precisely the Legendre symbol $`\left(\frac{a}{p}\right)` ({uses "legendre-symbol"}[]), which records whether the nonzero $`a` is a quadratic residue.
 :::
 
 :::theorem "quadratic-reciprocity" (lean := "legendreSym.quadratic_reciprocity")
@@ -210,7 +214,7 @@ $$`\left(\frac{2}{p}\right) = (-1)^{(p^2 - 1)/8} = \begin{cases} +1 & p \equiv \
 :::
 
 :::proof "legendre-two"
-This is the Gauss-lemma computation for $`a = 2`. Counting how many of $`2, 4, \dots, p-1` exceed $`p/2` (when reduced to the range $`(-p/2, p/2)` they change sign) yields the exponent $`(p^2-1)/8 \pmod 2`, whose value depends only on $`p \bmod 8` as displayed.
+This is the Gauss-lemma computation for the Legendre symbol ({uses "legendre-symbol"}[]) at $`a = 2`. Gauss's lemma evaluates $`\left(\frac{2}{p}\right)` by counting how many of $`2, 4, \dots, p-1` exceed $`p/2` (when reduced to the range $`(-p/2, p/2)` they change sign); this yields the exponent $`(p^2-1)/8 \pmod 2`, whose value depends only on $`p \bmod 8` as displayed. Equivalently, by Euler's criterion ({uses "euler-criterion"}[]) the symbol equals $`2^{(p-1)/2} \bmod p`, and both routes give the same sign.
 :::
 
 # Sums of squares
@@ -231,5 +235,5 @@ $$`n = a^2 + b^2 + c^2 + d^2.`
 :::
 
 :::proof "four-square"
-By Euler's four-square identity, the sums of four squares are closed under multiplication, so it suffices to treat $`n = 0, 1` and each prime $`p`. For an odd prime $`p`, a pigeonhole argument produces $`x, y` with $`x^2 + y^2 + 1 \equiv 0 \pmod p`, so some multiple $`mp` with $`1 \le m < p` is a sum of four squares. A descent step then shows the least such $`m` must be $`1`: if $`m > 1` one constructs, from a representation of $`mp`, a representation of $`m'p` with $`0 < m' < m`, contradicting minimality. Hence $`p` itself is a sum of four squares.
+By Euler's four-square identity, the sums of four squares are closed under multiplication — the four-square analogue of the norm-multiplicativity that drives the two-square theorem ({uses "two-square"}[]) — so it suffices to treat $`n = 0, 1` and each prime $`p`. For an odd prime $`p`, the same kind of counting of quadratic residues that underlies the two-square case produces, by pigeonhole, $`x, y` with $`x^2 + y^2 + 1 \equiv 0 \pmod p`, so some multiple $`mp` with $`1 \le m < p` is a sum of four squares. A descent step then shows the least such $`m` must be $`1`: if $`m > 1` one constructs, from a representation of $`mp`, a representation of $`m'p` with $`0 < m' < m`, contradicting minimality. Hence $`p` itself is a sum of four squares.
 :::

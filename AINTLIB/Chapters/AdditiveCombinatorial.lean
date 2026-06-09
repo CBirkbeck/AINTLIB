@@ -51,6 +51,14 @@ zero $`(x_1, \dots, x_{2p-1}) \ne 0`. The indices $`i` with $`x_i \ne 0` form a 
 $`T` of size exactly $`p` (from $`f_1 = 0` using Fermat's little theorem) with
 $`\sum_{i \in T} a_i = 0` (from $`f_2 = 0`).
 
+The prime case is exactly the threshold instance of an iterated sumset bound, and can
+equivalently be derived from the Cauchy–Davenport theorem ({uses "cauchy-davenport"}[]):
+applying $`|A_1 + \dots + A_{2p-1}| \ge \min(p, \sum(|A_i| - 1) + 1)` to the two-element
+sets $`A_i = \{0, a_i\}` forces a zero-sum of length $`p` once the partial sums fill all of
+$`\mathbb{Z}/p\mathbb{Z}`. The step $`|T| = p` above uses Fermat's little theorem
+({uses "fermat-little"}[]), since $`f_1(x) = \sum x_i^{p-1}` counts, modulo $`p`, the nonzero
+coordinates of a common zero.
+
 The general composite case follows by induction on the prime factorisation of $`n`:
 for $`n = mn'`, use the induction hypothesis on $`n'` to extract $`2m - 1` disjoint
 subsequences of length $`n'` each summing to $`0` modulo $`n'`, then apply the induction
@@ -72,7 +80,9 @@ $`A, B \subseteq G`, one has
 $$`\min(\mathrm{minOrder}(G),\; |A| + |B| - 1) \;\le\; |A + B|,`
 where $`\mathrm{minOrder}(G)` is the order of the smallest nontrivial subgroup of $`G`.
 The $`\mathbb{Z}/p\mathbb{Z}` statement follows because the smallest nontrivial subgroup
-has order $`p`.
+has order $`p` — for $`p` prime the additive group $`\mathbb{F}_p` has no proper nontrivial
+subgroup, the same primality of the field $`\mathbb{F}_p` that powers Fermat's little theorem
+({uses "fermat-little"}[]).
 
 The general bound is proved by the **e-transform method** of DeVos. One picks a
 nonidentity element $`g` such that $`A` intersects its translate $`g + A`, and replaces
@@ -137,9 +147,11 @@ must overlap since their union has size less than $`2|A|`). This symmetry implie
 is closed under multiplication and inversion.
 
 For the bound $`|H| < \tfrac{3}{2}|A|`, one counts pairs $`(a, b) \in A \times A` for
-each element of $`H = A^{-1} A`, using the intersection bound to show the average
-representation count exceeds $`\tfrac{1}{2}|A|`, which forces $`|H| < 2|A|`; the sharper
-bound $`\tfrac{3}{2}` follows from a more careful version of the same double-counting.
+each element of $`H = A^{-1} A`. The size of this difference set is controlled by Ruzsa's
+triangle inequality ({uses "ruzsa-triangle"}[]), which bounds $`|A^{-1}A|` in terms of
+$`|A^{-1}A^{-1}|` and $`|A A|`; combined with the intersection bound this shows the average
+representation count exceeds $`\tfrac{1}{2}|A|`, forcing $`|H| < 2|A|`. The sharper bound
+$`\tfrac{3}{2}` follows from a more careful version of the same double-counting.
 
 Finally, $`A \subseteq a H` for every $`a \in A` because $`a^{-1} A \subseteq A^{-1} A = H`.
 The commutativity $`aH = Ha` is a consequence of $`A \cdot A^{-1} = A^{-1} \cdot A`.
