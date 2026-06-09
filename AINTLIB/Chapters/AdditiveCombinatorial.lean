@@ -121,13 +121,17 @@ second argument, leaving exactly $`|A| + |B| - 1 \le |A \cdot B|`.
 *(Cauchy–Davenport, 1813/1935.)* Let $`p` be a prime and let $`A, B \subseteq \mathbb{Z}/p\mathbb{Z}`
 be nonempty. Then
 $$`|A + B| \;\ge\; \min\!\bigl(p,\; |A| + |B| - 1\bigr).`
+This is the sharp lower bound on the sumset cardinality $`|A + B|`, complementing the trivial bound
+$`|A + B| \ge |A|` recorded by the doubling constant ({uses "doubling-constant"}[]) $`\sigma[A, B] =
+|A + B|/|A|`: below the threshold $`p` it forces $`\sigma[A, B] \ge (|A| + |B| - 1)/|A|`.
 :::
 
 :::proof "cauchy-davenport-zmod"
 This is the additive bound ({uses "cauchy-davenport-min-order"}[]) specialised to $`G = \mathbb{Z}/p\mathbb{Z}`.
 For $`p` prime the additive group $`\mathbb{F}_p` has no proper nontrivial subgroup, so
-$`\operatorname{minOrder}(\mathbb{Z}/p\mathbb{Z}) = p` (mathlib's `ZMod.minOrder_of_prime` — the same
-primality of the field $`\mathbb{F}_p` that powers Fermat's little theorem). Substituting
+$`\operatorname{minOrder}(\mathbb{Z}/p\mathbb{Z}) = p` (mathlib's `ZMod.minOrder_of_prime` — resting on the
+same prime-field structure of $`\mathbb{F}_p = \mathbb{Z}/p\mathbb{Z}` that powers Fermat's little
+theorem, {uses "fermat-little"}[]). Substituting
 $`\operatorname{minOrder} = p` into $`\min(\operatorname{minOrder},\, |A|+|B|-1) \le |A+B|` gives the
 stated $`\min(p,\, |A|+|B|-1)` bound.
 :::
@@ -145,8 +149,9 @@ terms whose sum is divisible by $`n` (`Int.erdos_ginzburg_ziv`).
 :::
 
 :::proof "egz"
-The prime case is the heart of the argument and is proved via the **Chevalley–Warning theorem**.
-Given a sequence $`a_1, \dots, a_{2p-1}` in $`\mathbb{Z}/p\mathbb{Z}` indexed by $`s`, form the two
+The prime case is the heart of the argument and is proved via the **Chevalley–Warning theorem**
+({uses "chevalley-warning"}[]). Given a sequence $`a_1, \dots, a_{2p-1}` in $`\mathbb{Z}/p\mathbb{Z}`
+indexed by $`s`, form the two
 multivariate polynomials
 $$`f_1 = \sum_{i \in s} x_i^{\,p-1}, \qquad f_2 = \sum_{i \in s} a_i\, x_i^{\,p-1}`
 in $`\mathbb{F}_p[(x_i)_{i \in s}]`. Each has total degree $`p - 1` (`totalDegree_f₁_add_totalDegree_f₂`),
@@ -285,7 +290,10 @@ product relation is preserved *and reflected*:
 $$`f(x_1)\cdots f(x_n) = f(y_1)\cdots f(y_n) \iff x_1 \cdots x_n = y_1 \cdots y_n`
 for all $`x_i, y_j \in A`. Every Freiman isomorphism is in particular a Freiman homomorphism
 ({uses "freiman-hom"}[]), and every monoid isomorphism is an $`n`-Freiman isomorphism. Two sets that
-are Freiman isomorphic are indistinguishable by their additive structure up to order $`n`.
+are Freiman isomorphic are indistinguishable by their additive structure up to order $`n`; in
+particular a $`2`-Freiman isomorphism preserves the sizes of all sumsets and difference sets, hence
+the doubling and difference constants ({uses "doubling-constant"}[]) on which the structure theory of
+small-doubling sets rests.
 :::
 
 :::theorem "freiman-hom-two" (lean := "isMulFreimanHom_two")
@@ -340,7 +348,8 @@ arbitrary group $`G`.
 
 :::theorem "no-doubling" (lean := "Finset.smul_stabilizer_of_no_doubling")
 *(Doubling exactly one.)* Let $`A` be a nonempty finite subset of a group $`G` with no doubling,
-$`|A \cdot A| \le |A|`. Then for every $`a \in A`,
+$`|A \cdot A| \le |A|` — equivalently doubling constant $`\sigma[A] = 1` ({uses "doubling-constant"}[]).
+Then for every $`a \in A`,
 $$`a \cdot \operatorname{Stab}_G(A) \;=\; A,`
 where $`\operatorname{Stab}_G(A) = \{g : gA = A\}` is the stabiliser subgroup. That is, a set of
 doubling $`1` is exactly a left coset of a finite subgroup (its own stabiliser), and symmetrically a
@@ -394,7 +403,7 @@ $`A A^{-1} = A^{-1}A` ({uses "doubling-lt-two-symmetry"}[]).
 
 :::theorem "small-doubling-three-halves" (lean := "Finset.doubling_lt_three_halves")
 *(Structure of sets of doubling below $`3/2`; Tointon, Theorem 2.2.1.)* Let $`A` be a finite subset
-of a group $`G` with
+of a group $`G` of doubling constant ({uses "doubling-constant"}[]) below $`3/2`,
 $$`|A \cdot A| \;<\; \tfrac{3}{2}\,|A|.`
 Then there is a finite subgroup $`H \le G` with $`|H| < \tfrac{3}{2}\,|A|` such that, for every
 $`a \in A`,
@@ -417,7 +426,8 @@ witnesses ({uses "inv-mul-subgroup"}[]).
 
 :::theorem "small-doubling-golden" (lean := "Finset.doubling_lt_golden_ratio")
 *(Doubling below the golden ratio.)* Let $`\varphi = (1+\sqrt5)/2` and $`\psi = (1-\sqrt5)/2` be the
-roots of $`t^2 = t + 1`. If $`A` is a finite subset of a group with $`1 < K < \varphi` and
+roots of $`t^2 = t + 1`. If $`A` is a finite subset of a group whose difference constant
+({uses "doubling-constant"}[]) satisfies $`1 < K < \varphi` and
 $$`|A^{-1}\cdot A| \le K\,|A|, \qquad |A \cdot A^{-1}| \le K\,|A|,`
 then $`A \cdot A^{-1}` is covered by boundedly many cosets of a finite subgroup: there is a finite
 subgroup $`H \le G` and a finite set $`Z` with
@@ -440,7 +450,7 @@ elements lie in $`H`, giving $`|H| \ge \ell` and the cover.
 
 :::theorem "small-doubling-two-eps" (lean := "Finset.doubling_lt_two")
 *(Doubling below $`2 - \varepsilon`.)* Let $`0 < \varepsilon \le 1` and let $`A` be a nonempty finite
-subset of a group with
+subset of a group of doubling constant ({uses "doubling-constant"}[]) at most $`2 - \varepsilon`,
 $$`|A \cdot A| \;\le\; (2 - \varepsilon)\,|A|.`
 Then there is a finite subgroup $`H \le G` and a finite set $`Z` with
 $$`|H| \;\le\; \Bigl(\tfrac{2}{\varepsilon} - 1\Bigr)|A|, \qquad |Z| \;\le\; \tfrac{2}{\varepsilon} - 1, \qquad A \;\subseteq\; H \cdot Z.`

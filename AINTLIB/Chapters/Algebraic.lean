@@ -512,8 +512,9 @@ nontrivial zero.
 :::proof "chevalley-warning"
 mathlib counts solutions through the finite-field identity $`\sum_{x \in \mathbb{F}_q} x^{k} =
 -1` if $`(q-1) \mid k` with $`k > 0`, and $`0` otherwise (`FiniteField.sum_pow_units`-type
-sums). The indicator of $`\{f = 0\}` is $`1 - f^{\,q-1}` modulo $`p` (by Fermat's little theorem
-$`a^{q-1} \in \{0,1\}` on $`\mathbb{F}_q`), so the number of solutions is $`\sum_x (1 -
+sums). The indicator of $`\{f = 0\}` is $`1 - f^{\,q-1}` modulo $`p` (by Fermat's little theorem on the
+finite field $`\mathbb{F}_q`, {uses "fermat-little"}[], every $`a \in \mathbb{F}_q` satisfies
+$`a^{q} = a`, hence $`a^{q-1} \in \{0,1\}`), so the number of solutions is $`\sum_x (1 -
 f(x)^{q-1})` in $`\mathbb{F}_q`. Expanding $`f^{q-1}` into monomials and summing each monomial
 $`\prod_i x_i^{d_i}` over $`\mathbb{F}_q^{\,s}` gives a nonzero contribution only when every
 exponent $`d_i` is a positive multiple of $`q-1`, forcing $`\sum_i d_i \ge s(q-1)`; but
@@ -682,7 +683,10 @@ then computed by induction on the length
 ([`card_LinearInependent_subtype`](https://github.com/CBirkbeck/GLn_F_q/blob/3fc5ad9ff7643fa20c3484e7774d4e4d7fabde22/GLnFQ/card_GLn_Fq.lean#L47)):
 given $`k` independent vectors, the $`(k+1)`-th may be any vector outside their $`k`-dimensional
 span, and the complement of a $`k`-dimensional subspace of $`\mathbb{F}_q^{\,n}` has exactly
-$`q^n - q^k` elements
+$`q^n - q^k` elements (the count throughout rests on the cardinality $`q` of the finite field
+$`\mathbb{F}_q`; the base case $`n = 1` already records $`|\mathrm{GL}_1(\mathbb{F}_q)| = q - 1 =
+|\mathbb{F}_q^\times|`, the order of the unit group underlying Fermat's little theorem,
+{uses "fermat-little-units"}[])
 ([`complement_card`](https://github.com/CBirkbeck/GLn_F_q/blob/3fc5ad9ff7643fa20c3484e7774d4e4d7fabde22/GLnFQ/card_GLn_Fq.lean#L24),
 using $`\#V = q^{\dim V}` for a finite $`\mathbb{F}_q`-space). The inductive step
 ([`inductiveStepEquiv`](https://github.com/CBirkbeck/GLn_F_q/blob/3fc5ad9ff7643fa20c3484e7774d4e4d7fabde22/GLnFQ/card_GLn_Fq.lean#L32))

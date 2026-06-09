@@ -395,7 +395,8 @@ $`\vartheta(x) \le \log(4^{\lfloor x\rfloor}) = \lfloor x\rfloor \log 4 \le x \l
 :::
 
 :::theorem "chebyshev-psi-upper" (lean := "Chebyshev.psi_le_const_mul_self")
-*(Chebyshev's upper bound for $`\psi`.)* For every $`x \ge 0`,
+*(Chebyshev's upper bound for $`\psi`.)* For every $`x \ge 0`, the summatory von Mangoldt function
+({uses "von-mangoldt"}[]) satisfies
 $$`\psi(x) = \sum_{n \le x} \Lambda(n) \;\le\; (\log 4 + 4)\,x.`
 A sharper main term, $`\psi(x) \le (\log 4)\,x + 2\sqrt{x}\,\log x`, also holds.
 :::
