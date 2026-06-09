@@ -198,7 +198,8 @@ Formalised in [`pfr`](https://github.com/teorth/pfr) (sorry-free).
 
 :::proof "entropic-ruzsa-triangle"
 Work with independent copies $`X', Y', Z'` of $`X, Y, Z` placed on a common probability
-space. By the submodularity of entropy,
+space. Unfolding the Ruzsa distance ({uses "ruzsa-distance"}[]) of each pair and using the
+submodularity of entropy,
 $$`H[X' - Z'] \;\le\; H[X' - Y'] + H[Y' - Z'] - H[Y'].`
 Expanding $`d[X';Z']`, $`d[X';Y']`, $`d[Y';Z']` in terms of entropy and rearranging gives
 the triangle inequality.
@@ -222,7 +223,7 @@ Formalised in [`pfr`](https://github.com/teorth/pfr) (sorry-free).
 :::
 
 :::proof "entropic-pfr"
-The proof minimises a *tau-functional*
+The proof minimises a *tau-functional*, built from the Ruzsa distance ({uses "ruzsa-distance"}[]),
 $$`\tau[X_1 \,;\, X_2] \;\coloneqq\; d[X_1 \,;\, X_2] + \eta\bigl(d[X^0_1 \,;\, X_1] + d[X^0_2 \,;\, X_2]\bigr),`
 with $`\eta = 1/9`, over all pairs of $`G`-valued random variables $`(X_1, X_2)`. A tau-minimiser
 exists by compactness (the group is finite); the crux is showing that if $`d[X_1 \,;\, X_2] > 0`

@@ -646,3 +646,63 @@ to the closed unit disc. The maximum modulus principle forces $`F$` to be consta
 the slash-invariance forces that constant to be zero ({uses "slash-action"}[]), giving $`f = 0$`.
 The rank-zero statement follows.
 :::
+
+# Forthcoming in mathlib
+
+The nodes below are *informal* statements of results that are the subject of open mathlib
+pull requests (the `t-number-theory` queue, as of June 2026). Each carries a `pr_url` pointing
+at the live PR and **no** `(lean := …)` reference: the declarations are not yet in mathlib
+v4.30.0-rc2. They connect into the dependency graph through the Mathlib-backed modular-forms
+nodes of this chapter via `{uses}` edges, and should be re-pointed to `(lean := …)` once the
+corresponding PR merges.
+
+:::theorem "e4-e6-graded-ring" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/38813")
+*($`E_4` and $`E_6` generate the graded ring of level-one modular forms, freely.)* The graded
+$`\mathbb{C}`-algebra of modular forms of level $`\mathrm{SL}_2(\mathbb{Z})`,
+$`M_*(\mathrm{SL}_2(\mathbb{Z})) = \bigoplus_{k} M_k(\mathrm{SL}_2(\mathbb{Z}))`, is a free
+polynomial algebra on the two Eisenstein series $`E_4` and $`E_6` ({uses "eisenstein-series"}[]):
+$$`M_*(\mathrm{SL}_2(\mathbb{Z})) \;=\; \mathbb{C}[E_4, E_6],`
+with $`E_4, E_6` algebraically independent. Concretely, the monomials $`E_4^a E_6^b` with
+$`4a + 6b = k` form a $`\mathbb{C}`-basis of $`M_k(\mathrm{SL}_2(\mathbb{Z}))` for every even
+$`k \ge 0`.
+
+PR #38813 proves both that $`E_4, E_6` generate and that they are free (no algebraic relations),
+upgrading the numerical dimension formula ({uses "dimension-level-one"}[]) to an explicit ring
+presentation. Freeness is equivalent to the discriminant identity
+$`\Delta = (E_4^3 - E_6^2)/1728` ({uses "discriminant-e4-e6"}[]) cutting out the cusp ideal.
+In review — [mathlib PR #38813](https://github.com/leanprover-community/mathlib4/pull/38813).
+:::
+
+:::theorem "sturm-bound" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/39000")
+*(Sturm bound.)* Let $`\Gamma \le \mathrm{SL}_2(\mathbb{Z})` be a finite-index subgroup and
+$`f \in M_k(\Gamma)` a modular form ({uses "modular-form"}[]) of weight $`k`. If the
+$`q`-expansion ({uses "q-expansion"}[]) of $`f` at the cusp $`\infty` vanishes to order
+exceeding the *Sturm bound*
+$$`B(\Gamma, k) \;=\; \left\lfloor \frac{k}{12}\,[\mathrm{SL}_2(\mathbb{Z}) : \Gamma] \right\rfloor,`
+i.e. $`a_n(f) = 0` for all $`n \le B(\Gamma, k)`, then $`f = 0`. Consequently two modular forms
+of weight $`k` and level $`\Gamma` agreeing up to the Sturm bound are equal.
+
+The bound is a direct consequence of the valence (weight) formula ({uses "valence-formula"}[]):
+a nonzero form of weight $`k` cannot vanish at $`\infty` to order exceeding its total allowed
+order of vanishing $`\tfrac{k}{12}[\mathrm{SL}_2 : \Gamma]`. PR #39000 establishes the bound for
+finite-index subgroups, the standard finite check for equality of modular forms and Hecke
+eigensystems.
+In review — [mathlib PR #39000](https://github.com/leanprover-community/mathlib4/pull/39000).
+:::
+
+:::definition "serre-derivative" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/36963")
+For an integer $`k`, the *Serre derivative* $`\vartheta_k` sends a weight-$`k` modular form
+({uses "modular-form"}[]) to a weight-$`(k+2)` modular form by correcting the naive $`q`-derivative
+with the quasimodular Eisenstein series $`E_2`:
+$$`\vartheta_k f \;=\; q\,\frac{d f}{d q} \;-\; \frac{k}{12}\, E_2\, f, \qquad q = e^{2\pi i z},`
+where $`E_2(z) = 1 - 24\sum_{n \ge 1} \sigma_1(n) q^n` ({uses "eisenstein-series"}[]). Although
+$`q\,\tfrac{df}{dq}` and $`E_2 f` are each only quasimodular, the $`E_2`-correction cancels the
+anomaly so that $`\vartheta_k f` transforms with weight $`k + 2` under the slash action
+({uses "slash-action"}[]); on $`q`-expansions ({uses "q-expansion"}[]) it acts as
+$`\sum a_n q^n \mapsto \sum n\,a_n q^n` plus the $`E_2`-term.
+
+PR #36963 sets up the $`\mathrm{SL}_2` action on the relevant function spaces and defines the
+Serre derivative, the basic weight-raising operator underlying the Rankin–Cohen brackets and the
+ring of quasimodular forms.
+In review — [mathlib PR #36963](https://github.com/leanprover-community/mathlib4/pull/36963).
+:::

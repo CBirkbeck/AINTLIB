@@ -353,3 +353,58 @@ which has trace $`t_0` and determinant $`q` (Weil pairing). The Hasse bound
 ({uses "hasse-bound"}[]) is equivalent to the roots of $`P_1` having absolute value
 $`q^{-1/2}`, consistent with the rationality formula.
 :::
+
+# Forthcoming in mathlib
+
+The nodes below are *informal* statements of results that are the subject of open mathlib
+pull requests (the `t-number-theory` queue, as of June 2026). Each carries a `pr_url` pointing
+at the live PR and **no** `(lean := …)` reference: the declarations are not yet in mathlib
+v4.30.0-rc2. They connect into the dependency graph through the Mathlib-backed nodes of this
+chapter (and, where noted, the Algebraic and $`p`-adic chapters) via `{uses}` edges, and should
+be re-pointed to `(lean := …)` once the corresponding PR merges.
+
+:::definition "newton-polygon-mathlib" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/38050")
+Mathlib's *Newton polygon* of a polynomial (or power series) $`f = \sum_i a_i X^i` over a field
+with a valuation $`v` ({uses "valuation"}[]) is the lower convex hull of the points
+$`(i, v(a_i))` for $`a_i \ne 0`. The slopes of its edges record the valuations of the roots of
+$`f` (counted with multiplicity), so an edge of slope $`m` and horizontal length $`\ell`
+corresponds to $`\ell` roots of valuation $`-m`.
+
+PR #38050 introduces the Newton-polygon API in mathlib itself, the same combinatorial object
+developed for $`p`-adic power series in the `NewtonPolys` project
+({bpref "newton-polygon"}[informal node]); once merged it supplies the in-library foundation for
+ramification, factorisation of $`p`-adic polynomials, and slope decompositions of elliptic-curve
+formal groups.
+In review — [mathlib PR #38050](https://github.com/leanprover-community/mathlib4/pull/38050).
+:::
+
+:::theorem "elliptic-divisibility-sequence" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/13057")
+*(Characterisation of elliptic divisibility sequences.)* An *elliptic divisibility sequence*
+(EDS) is a sequence $`(W_n)_{n \in \mathbb{Z}}` in a commutative ring satisfying $`W_0 = 0`,
+$`W_1 = 1`, and the recurrence
+$$`W_{m+n}\,W_{m-n}\,W_1^2 \;=\; W_{m+1}\,W_{m-1}\,W_n^2 \;-\; W_{n+1}\,W_{n-1}\,W_m^2 \quad (m \ge n).`
+The PR proves that the full elliptic recurrence is *equivalent* to the pair of even/odd
+duplication recurrences (in $`W_{2n+1}` and $`W_{2n}`), so an EDS is determined by its initial
+values together with these two recursions. The division polynomials $`\psi_n` of a Weierstrass
+curve ({uses "division-polynomial-psi"}[]) form the universal EDS, and evaluating an EDS along a
+point records the denominators of its multiples on the curve
+({uses "affine-points-abelian-group"}[]).
+
+PR #13057 characterises EDS via the even-odd recursion, the algebraic backbone for working with
+division polynomials and torsion on elliptic curves.
+In review — [mathlib PR #13057](https://github.com/leanprover-community/mathlib4/pull/13057).
+:::
+
+:::theorem "northcott-property" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/39744")
+*(Northcott property.)* Equip the algebraic numbers with the absolute (multiplicative or
+logarithmic) Weil height $`H`. The *Northcott property* states that for every pair of real bounds
+$`B \ge 0` and $`D \ge 1`, the set
+$$`\{\, \alpha \in \overline{\mathbb{Q}} \;:\; H(\alpha) \le B \ \text{ and } \ [\mathbb{Q}(\alpha):\mathbb{Q}] \le D \,\}`
+is **finite**. In particular a number field ({uses "number-field"}[]) contains only finitely
+many elements of bounded height.
+
+This finiteness is the engine behind the Mordell–Weil theorem and the finiteness of bounded-height
+rational points on an elliptic curve ({bpref "affine-points-abelian-group"}[]). PR #39744
+establishes the Northcott property for the height on number fields.
+In review — [mathlib PR #39744](https://github.com/leanprover-community/mathlib4/pull/39744).
+:::

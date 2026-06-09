@@ -144,9 +144,9 @@ The nodes below are *informal*: the external projects are built against Lean too
 ## Euler products, Wiener–Ikehara, and conditional PNT (EulerProducts)
 
 :::definition "euler-product-general"
-For a weakly multiplicative arithmetic function $`f : \mathbb{N} \to \mathbb{C}` with $`f(1) = 1`, if the $`L`-series $`L(f, s) = \sum_{n \ge 1} f(n) n^{-s}` converges absolutely at $`s`, then
+For a weakly multiplicative arithmetic function $`f : \mathbb{N} \to \mathbb{C}` with $`f(1) = 1`, if the $`L`-series $`L(f, s) = \sum_{n \ge 1} f(n) n^{-s}` ({uses "lseries"}[]) converges absolutely at $`s`, then
 $$`L(f,s) = \prod_{p} \sum_{e \ge 0} f(p^e)\, p^{-es}.`
-When $`f` is completely multiplicative the local factor simplifies to $`(1 - f(p)\,p^{-s})^{-1}`.
+When $`f` is completely multiplicative the local factor simplifies to $`(1 - f(p)\,p^{-s})^{-1}`. This is the general analytic incarnation of unique factorisation ({uses "fta-uniqueness"}[]): expanding the product and grouping by $`n = \prod_p p^{e_p}` reproduces each Dirichlet coefficient $`f(n) n^{-s}` exactly once. The Euler products for $`\zeta` ({bpref "zeta-euler-product"}[]) and for Dirichlet $`L`-functions ({bpref "dirichlet-lfunction-euler-product"}[]) are the completely-multiplicative special cases.
 Formalised in [`EulerProducts`](https://github.com/MichaelStollBayreuth/EulerProducts) (sorry-free).
 :::
 
@@ -247,7 +247,7 @@ Formalised in [`PrimeNumberTheoremAnd`](https://github.com/AlexKontorovich/Prime
 :::
 
 :::proof "brun-titchmarsh"
-One applies the Selberg sieve to sift the interval $`(x, x+y]` by primes up to $`z`. The Selberg sieve gives an upper bound on the count of unsifted elements in terms of $`y / S(z)` plus a remainder sum, where $`S(z) = \sum_{d \le z,\, d \mid \mathrm{rad}} \lambda_d^2 / \nu(d)` is the Selberg bounding sum. A lower bound $`S(z) \ge \log(z)/2` follows from the primorial structure of the sieve support (each prime $`p \le z` contributes $`1/p` to $`\nu`). The remainder is bounded by $`5z(1 + \log z)^3` using divisor-sum estimates, and combining the two gives the stated inequality. Non-sifted elements not accounted for by the sieve are at most $`z`, adding the correction term.
+One applies the Selberg sieve ({uses "selberg-sieve"}[]) to sift the interval $`(x, x+y]` by primes up to $`z`. The Selberg sieve gives an upper bound on the count of unsifted elements in terms of $`y / S(z)` plus a remainder sum, where $`S(z) = \sum_{d \le z,\, d \mid \mathrm{rad}} \lambda_d^2 / \nu(d)` is the Selberg bounding sum. A lower bound $`S(z) \ge \log(z)/2` follows from the primorial structure of the sieve support (each prime $`p \le z` contributes $`1/p` to $`\nu`). The remainder is bounded by $`5z(1 + \log z)^3` using divisor-sum estimates, and combining the two gives the stated inequality. Non-sifted elements not accounted for by the sieve are at most $`z`, adding the correction term. Converting the resulting bound on the number of primes in $`(x, x+y]` into the stated $`\ll y/\log y` form, and controlling the prime-counting tails, uses Chebyshev-type prime-counting estimates ({uses "chebyshev-bounds"}[]).
 :::
 
 ## Non-vanishing and Dirichlet's theorem, analytic route (DirichletNonvanishing)
@@ -274,5 +274,63 @@ Formalised in [`lean-bombieri-vinogradov`](https://github.com/amellendijk/lean-b
 
 :::proof "bombieri-vinogradov"
 The proof follows the Vaughan decomposition: one writes $`\Lambda = \Lambda^\sharp + \Lambda^\flat + \Lambda_{\le U}` for suitable parameters $`U, V` with $`UV \le \sqrt{x}` and $`U, V \ge e^{\sqrt{\log x}}`. The small-primes contribution $`\Lambda_{\le U}` is bounded trivially. The Type I sum $`\Lambda^\sharp` (a smooth truncation of $`\Lambda`) is bounded via Abel summation, using the fact that partial sums of character values are small (an input requiring Siegel–Walfisz). The Type II sum $`\Lambda^\flat` is a Dirichlet convolution bounded via the large sieve inequality: after decomposing into character sums via orthogonality of Dirichlet characters ({uses "dirichlet-character"}[]) and applying the large sieve to bound the sum of squared character sums over all characters of moduli $`q \le Q`, one sums the three contributions to obtain the claimed uniform bound.
+:::
+
+# Forthcoming in mathlib
+
+The nodes below are *informal* statements of results that are the subject of open mathlib
+pull requests (the `t-number-theory` queue, as of June 2026). Each carries a `pr_url` pointing
+at the live PR and **no** `(lean := …)` reference: the declarations are not yet in mathlib
+v4.30.0-rc2. They connect into the dependency graph through the Mathlib-backed nodes of this
+chapter (and, for the modular $`L`-series, the Modular Forms chapter) via `{uses}` edges, and
+should be re-pointed to `(lean := …)` once the corresponding PR merges.
+
+:::definition "selberg-sieve" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/20008")
+*(The Selberg $`\lambda^2` sieve.)* Let $`\mathcal{A}` be a finite integer sequence to be sifted
+by a set of primes, with $`|\mathcal{A}_d|` the number of terms divisible by $`d`, modelled as
+$`|\mathcal{A}_d| = (g(d))^{-1} X + R_d` for a multiplicative density $`g` and remainder $`R_d`.
+For a real *level* $`z`, the *Selberg sieve* chooses real weights $`(\lambda_d)_{d \le z}` with
+$`\lambda_1 = 1`, supported on squarefree $`d \le z` dividing the sifting radical, so as to
+minimise the quadratic form bounding the sifted count. The optimal choice gives the upper bound
+$$`\#\{\,a \in \mathcal{A} : a \text{ unsifted}\,\} \;\le\; \frac{X}{S(z)} \;+\; \sum_{d_1, d_2 \le z} |\lambda_{d_1}\lambda_{d_2}|\,|R_{[d_1,d_2]}|, \qquad S(z) = \sum_{d \le z} \frac{\mu^2(d)}{g_1(d)},`
+where $`g_1` is the multiplicative function attached to $`g` and the main term is governed by
+the Möbius function ({uses "moebius"}[]) through the squarefree support.
+
+PR #20008 defines the Selberg weights and proves the fundamental bound and the lower bound on
+$`S(z)`. It is the engine behind upper-bound sieve estimates such as the Brun–Titchmarsh
+inequality ({bpref "brun-titchmarsh"}[]).
+In review — [mathlib PR #20008](https://github.com/leanprover-community/mathlib4/pull/20008).
+:::
+
+:::theorem "robin-lagarias-rh" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/37585")
+*(Robin's and Lagarias' inequalities equivalent to the Riemann hypothesis.)* Let
+$`\sigma(n) = \sum_{d \mid n} d` be the sum-of-divisors function and $`H_n = \sum_{k=1}^n 1/k`
+the $`n`-th harmonic number. The Riemann hypothesis for $`\zeta` ({uses "riemann-zeta"}[]) is
+equivalent to each of the following elementary inequalities:
+$$`\textbf{(Robin)}\quad \sigma(n) \;<\; e^{\gamma}\, n \log\log n \quad (n \ge 5041),`
+$$`\textbf{(Lagarias)}\quad \sigma(n) \;\le\; H_n + e^{H_n}\log H_n \quad (n \ge 1),`
+with equality in Lagarias' form only at $`n = 1`. Here $`\gamma` is the Euler–Mascheroni
+constant.
+
+PR #37585 formalises the *statements* of Robin's and Lagarias' inequalities and their formal
+equivalence to the Riemann hypothesis, packaging a celebrated elementary reformulation of RH;
+it does not prove RH.
+In review — [mathlib PR #37585](https://github.com/leanprover-community/mathlib4/pull/37585).
+:::
+
+:::definition "lseries-modular-form" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/31187")
+For a modular form $`f` ({uses "modular-form"}[]) with $`q`-expansion
+$`f = \sum_{n \ge 0} a_n q^n`, the *$`L`-series of $`f`* is the Dirichlet series
+({uses "lseries"}[]) built from its Fourier coefficients,
+$$`L(f, s) \;=\; \sum_{n=1}^{\infty} \frac{a_n}{n^{s}},`
+convergent in a right half-plane (for $`\operatorname{Re}(s)` large, by the polynomial growth of
+the $`a_n`). For a normalised Hecke eigenform the multiplicativity of the coefficients yields an
+Euler product $`L(f,s) = \prod_p (1 - a_p p^{-s} + p^{k-1-2s})^{-1}`, and $`L(f,s)` continues to
+an entire function with a functional equation relating $`s` and $`k - s`.
+
+PR #31187 defines $`L(f,s)` for a modular form by feeding its $`q`-expansion coefficients into
+the existing $`L`-series machinery, the first step toward Hecke $`L`-functions and their
+analytic continuation in mathlib.
+In review — [mathlib PR #31187](https://github.com/leanprover-community/mathlib4/pull/31187).
 :::
 

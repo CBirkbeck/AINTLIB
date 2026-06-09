@@ -237,3 +237,92 @@ $$`n = a^2 + b^2 + c^2 + d^2.`
 :::proof "four-square"
 By Euler's four-square identity, the sums of four squares are closed under multiplication — the four-square analogue of the norm-multiplicativity that drives the two-square theorem ({uses "two-square"}[]) — so it suffices to treat $`n = 0, 1` and each prime $`p`. For an odd prime $`p`, the same kind of counting of quadratic residues that underlies the two-square case produces, by pigeonhole, $`x, y` with $`x^2 + y^2 + 1 \equiv 0 \pmod p`, so some multiple $`mp` with $`1 \le m < p` is a sum of four squares. A descent step then shows the least such $`m` must be $`1`: if $`m > 1` one constructs, from a representation of $`mp`, a representation of $`m'p` with $`0 < m' < m`, contradicting minimality. Hence $`p` itself is a sum of four squares.
 :::
+
+# Forthcoming in mathlib
+
+The nodes below are *informal* statements of results that are the subject of open mathlib
+pull requests (the `t-number-theory` queue, as of June 2026). Each carries a `pr_url` pointing
+at the live PR and **no** `(lean := …)` reference: the declarations are not yet in mathlib
+v4.30.0-rc2. They connect into the dependency graph through the Mathlib-backed nodes of this
+chapter via `{uses}` edges, and should be re-pointed to `(lean := …)` once the corresponding
+PR merges.
+
+:::theorem "aks-primality" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/34507")
+*(AKS primality test, Agrawal–Kayal–Saxena.)* Let $`n \ge 2` be an integer that is not a perfect
+power, let $`r` be a suitable auxiliary modulus (the smallest $`r` for which the multiplicative
+order of $`n` modulo $`r` exceeds $`(\log_2 n)^2`), and suppose $`n` has no prime factor
+$`\le r`. Then $`n` is prime if and only if the *introspective congruence*
+$$`(X + a)^n \;\equiv\; X^n + a \pmod{\,n,\ X^r - 1\,}`
+holds for every integer $`a` with $`1 \le a \le \lfloor \sqrt{\varphi(r)}\,\log_2 n \rfloor`.
+This yields a deterministic polynomial-time primality test.
+
+The introspective congruence is the polynomial-ring generalisation of Fermat's little theorem
+({uses "fermat-little"}[]): for $`n` prime it holds for *all* $`a` by the Frobenius identity
+$`(X+a)^n \equiv X^n + a^n \equiv X^n + a \pmod n`, and the content of AKS is that checking it
+on a short range of $`a`, modulo $`X^r - 1`, already forces $`n` to be prime. PR #34507 builds
+the introspective machinery; the prime-power exclusion uses the factorization
+({uses "factorization"}[]) of $`n`.
+In review — [mathlib PR #34507](https://github.com/leanprover-community/mathlib4/pull/34507).
+:::
+
+:::definition "farey-sequence" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/40246")
+For a positive integer $`n`, the *Farey sequence* $`F_n` is the set of reduced fractions
+$`a/b \in [0,1]` with denominator $`b \le n`, listed in increasing order. Two consecutive terms
+$`\tfrac{a}{b} < \tfrac{c}{d}` of $`F_n` are *Farey neighbours*, characterised by the
+determinant identity
+$$`bc - ad \;=\; 1,`
+and their *mediant* $`\tfrac{a+c}{b+d}` is the fraction with smallest denominator strictly
+between them. The number of terms is
+$$`|F_n| \;=\; 1 + \sum_{k=1}^{n} \varphi(k),`
+counting the reduced fractions of each denominator by Euler's totient ({uses "totient"}[]).
+
+PR #40246 develops Farey sequences, the mediant operation, and the neighbour theorem
+(the $`bc - ad = 1` characterisation of adjacency), the combinatorial backbone of the
+Stern–Brocot tree and of best-approximation arguments.
+In review — [mathlib PR #40246](https://github.com/leanprover-community/mathlib4/pull/40246).
+:::
+
+:::theorem "three-gap" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/40037")
+*(Three-gap / Steinhaus theorem.)* Let $`\alpha \in \mathbb{R}` and $`N \ge 1`. Place the $`N`
+points $`\{\alpha\}, \{2\alpha\}, \ldots, \{N\alpha\}` on the circle $`\mathbb{R}/\mathbb{Z}`,
+where $`\{\,\cdot\,\}` denotes the fractional part. Then the gaps between consecutive points take
+**at most three distinct values**, and when there are three the largest is the sum of the other
+two.
+
+The widths of the gaps are controlled by the best rational approximations of $`\alpha`, so the
+theorem is governed by Diophantine approximation ({uses "dirichlet-approx"}[]): the two
+fundamental gap lengths are $`\|q_k\alpha\|` for consecutive continued-fraction denominators
+$`q_k`, and the third is their sum. PR #40037 formalises the gap-counting argument directly on
+the circle.
+In review — [mathlib PR #40037](https://github.com/leanprover-community/mathlib4/pull/40037).
+:::
+
+:::definition "almost-prime" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/39903")
+For a positive integer $`k`, a natural number $`n` is *$`k`-almost prime* if it has exactly $`k`
+prime factors counted with multiplicity:
+$$`\Omega(n) \;=\; \sum_{p} v_p(n) \;=\; k,`
+where $`v_p(n)` is the exponent of $`p` in the factorization of $`n` ({uses "factorization"}[]).
+The $`1`-almost primes are the primes, and the $`2`-almost primes are the *semiprimes*. A number
+is *almost prime* if it is $`k`-almost prime for some bounded $`k`.
+
+PR #39903 introduces the predicate $`\Omega(n) = k` and its basic API (behaviour under
+multiplication by a prime, the recursive characterisation), the elementary substrate for sieve
+statements such as Chen's theorem.
+In review — [mathlib PR #39903](https://github.com/leanprover-community/mathlib4/pull/39903).
+:::
+
+:::theorem "chebyshev-primorial" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/37299")
+*(Chebyshev's lower bound on the primorial.)* For every integer $`n \ge 1`, the *primorial*
+— the product of all primes up to $`n` — satisfies an exponential lower bound
+$$`\prod_{p \le n} p \;\ge\; 2^{\,n}`
+for $`n` sufficiently large (more precisely, $`\vartheta(n) = \sum_{p \le n} \log p \ge cn` for
+an explicit constant $`c > 0`). This is a quantitative sharpening of the infinitude of primes
+({uses "infinitude-of-primes"}[]): not merely are there infinitely many primes, their product
+to $`n` grows at least geometrically in $`n`.
+
+The proof bounds the central binomial coefficient $`\binom{2n}{n}`, whose prime factorization
+({uses "fta-existence"}[]) is supported on primes $`\le 2n`, between $`2^n` and the primorial of
+$`2n`. PR #37299 supplies this lower bound, a standard ingredient of Chebyshev-type prime-counting
+estimates and of Bertrand's postulate.
+In review — [mathlib PR #37299](https://github.com/leanprover-community/mathlib4/pull/37299).
+:::

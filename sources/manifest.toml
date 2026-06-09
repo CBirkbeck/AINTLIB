@@ -3,7 +3,7 @@
 # One [[source]] per source repo we mine for the blueprint. `commit` pins the exact
 # revision the blueprint's prose + (lean := …) references were authored against;
 # `https://<remote>/tree/<commit>` is a stable permalink. Repos are read locally for
-# mining (not vendored). `status = "candidate"` flips to "confirmed" after the
+# mining (not vendored). `status = "confirmed"` flips to "confirmed" after the
 # catalogue sign-off (see sources/catalogue.md).
 #
 # Fields: name, kind (local|external), status (confirmed|candidate), remote, commit,
@@ -23,6 +23,7 @@ chapters = ["PAdicAdic"]
 
 [[source]]
 name = "chebotarev-density"
+branch = "development"   # real content is on this non-default branch
 kind = "local"
 status = "confirmed"
 remote = "https://github.com/CBirkbeck/chebotarev-density"
@@ -43,6 +44,7 @@ chapters = ["FLT"]
 
 [[source]]
 name = "LeanModularForms"
+branch = "hecke-ring"   # Hecke/valence/strong-mult-one content is on this non-default branch
 kind = "local"
 status = "confirmed"
 remote = "https://github.com/CBirkbeck/LeanModularForms"
@@ -85,6 +87,7 @@ chapters = ["FLT"]
 
 [[source]]
 name = "Hasse-Weil"
+branch = "worker-tensor-isom"   # active development on this non-default branch
 kind = "local"
 status = "confirmed"
 remote = "https://github.com/CBirkbeck/Hasse-Weil"
@@ -210,7 +213,7 @@ chapters = ["FLT"]
 [[source]]
 name = "QuadraticIntegers"
 kind = "external"
-status = "candidate"
+status = "confirmed"
 remote = "https://github.com/pitmonticone/QuadraticIntegers"
 commit = "205ad5a"
 lean = "v4.24.0"
@@ -220,9 +223,42 @@ chapters = ["Algebraic"]
 [[source]]
 name = "lean-bombieri-vinogradov"
 kind = "external"
-status = "candidate"
+status = "confirmed"
 remote = "https://github.com/amellendijk/lean-bombieri-vinogradov"
 commit = "08696dd"
 lean = "v4.28.0"
 has_blueprint = false
 chapters = ["Analytic"]
+
+# ---------- Confirmed: external additions (Phase 3 vetting) ----------
+
+[[source]]
+name = "ClassFieldTheory-buzzard"
+kind = "external"
+status = "confirmed"
+remote = "https://github.com/kbuzzard/ClassFieldTheory"
+commit = "d5c1d04"
+has_blueprint = false
+chapters = ["ClassFieldTheory"]
+note = "2025 Clay summer-school CFT: group cohomology, Herbrand quotient, local CFT"
+
+[[source]]
+name = "KummerCriterion"
+kind = "external"
+status = "confirmed"
+remote = "https://github.com/riccardobrasca/KummerCriterion"
+commit = "88e6dd6"
+has_blueprint = false
+chapters = ["FLT"]
+
+[[source]]
+name = "pfr"
+kind = "external"
+status = "confirmed"
+remote = "https://github.com/teorth/pfr"
+commit = "901bc69"
+has_blueprint = true
+chapters = ["AdditiveCombinatorial"]
+note = "Polynomial Freiman-Ruzsa (Marton's conjecture), sorry-free"
+
+# Dropped after vetting (Lean 3, unusable): lean-forward/class-group-and-mordell-equation; ImperialCollegeLondon/diophantine.

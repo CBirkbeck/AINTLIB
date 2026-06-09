@@ -16,9 +16,11 @@ human-readable *unformalised* statements and paragraph-level proof sketches.
 
 - **Phase 0 — Discovery & sync:** ✅ all source repos pulled/cloned, GitHub/web discovery, mathlib NT PRs snapshotted, source catalogue.
 - **Phase 1 — Scaffold:** ✅ Lean project on mathlib, verso-blueprint building & rendering, 10-chapter skeleton.
-- **Phase 2 — mathlib core:** ✅ **146 nodes across 10 chapters, 98 dependency edges**, sorry-free status auto-tracked.
-- **Phase 3 — Repos as linked chapters:** ⏳ (chebotarev, FLT/flt-regular, LeanModularForms, LocalClassFieldTheory, PNT+, Hasse-Weil, …).
-- **Phase 4 — Frontier & polish:** ⏳ forthcoming-mathlib nodes, source colouring, overview map.
+- **Phase 2 — mathlib core:** ✅ the mathlib number-theory backbone, sorry-free status auto-tracked.
+- **Phase 3 — Repos as linked chapters:** ✅ 22 external projects folded in (chebotarev density, flt-regular + bernoulli, Imperial FLT, Kummer criterion, LeanModularForms Hecke ring, LocalClassFieldTheory, Buzzard CFT, PNT+, DirichletNonvanishing, adic spaces, Hasse–Weil, Nagell–Lutz, pfr, …) — **all branches vetted; only repos with substantive Lean content included.**
+- **Phase 4 — Frontier & polish:** ✅ forthcoming-in-mathlib PR nodes, connected dependency graph, overview map.
+
+**Current size: 256 nodes · 432 dependency edges · 10 chapters** — mathlib core (146) + 22 external projects + 22 forthcoming-mathlib results, 249 in one connected component.
 
 ## The atlas model
 

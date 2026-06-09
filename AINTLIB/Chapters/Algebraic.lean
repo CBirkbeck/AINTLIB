@@ -176,4 +176,61 @@ Formalised in [`GLn_F_q`](https://github.com/CBirkbeck/GLn_F_q) (sorry-free).
 
 :::proof "order-gln-fq"
 An $`n \times n` matrix over $`\mathbb{F}_q` is invertible if and only if its columns form an ordered basis of $`\mathbb{F}_q^n`. The first column can be any nonzero vector: $`q^n - 1` choices. Given the first $`k` linearly independent columns, the $(k+1)$-th column may be any vector outside their $`k`-dimensional span, giving $`q^n - q^k` choices. Multiplying over $`k = 0, 1, \ldots, n-1` yields the product formula. In the formalisation, an explicit equivalence between $`\mathrm{GL}_n(\mathbb{F}_q)` and the type of ordered linearly independent $`n`-tuples of vectors in $`\mathbb{F}_q^n` is constructed; the cardinality of the complement of a $`k`-dimensional subspace of $`\mathbb{F}_q^n` is $`q^n - q^k`, and the inductive step multiplies these counts.
+
+Every count here is a power of $`q = |\mathbb{F}_q|`, and this cardinality is exactly the structural fact that $`\mathbb{F}_q` is the finite field on which Fermat's little theorem holds in the form $`x^q = x` for all $`x \in \mathbb{F}_q` ({uses "fermat-little"}[]); it is this field-of-$`q`-elements structure that makes each $`k`-dimensional subspace have $`q^k` elements and its complement $`q^n - q^k`.
+:::
+
+# Forthcoming in mathlib
+
+The nodes below are *informal* statements of results that are the subject of open mathlib
+pull requests (the `t-number-theory` queue, as of June 2026). Each carries a `pr_url`
+pointing at the live PR and **no** `(lean := …)` reference: the declarations are not yet in
+mathlib v4.30.0-rc2. They connect into the dependency graph through the Mathlib-backed nodes
+of this chapter via `{uses}` edges. Statements should be re-pointed to `(lean := …)` once the
+corresponding PR merges.
+
+:::theorem "quadratic-number-field" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/36347")
+A *quadratic number field* is a number field ({uses "number-field"}[]) of degree $`2` over
+$`\mathbb{Q}`. Every such field is isomorphic to $`\mathbb{Q}(\sqrt{d})` for a unique squarefree
+integer $`d \ne 0, 1`, presented uniformly as the quadratic $`\mathbb{Q}`-algebra
+$$`\mathbb{Q}[\sqrt{d}] \;=\; \mathrm{QuadraticAlgebra}\,\mathbb{Q}\,d\,0 \;=\; \mathbb{Q}[x]/(x^2 - d),`
+the free $`\mathbb{Q}`-algebra on a single generator $`\sqrt{d}` with $`\sqrt{d}^2 = d`. The
+discriminant of $`K = \mathbb{Q}(\sqrt{d})` is $`d` when $`d \equiv 1 \pmod 4` and $`4d`
+otherwise.
+
+The PR sets up quadratic number fields as `QuadraticAlgebra ℚ d 0`, giving a uniform model in
+which the ring of integers, units, and class number of a real or imaginary quadratic field can
+be developed. Parameter uniqueness (the squarefree $`d` is determined by $`K`) is the companion
+PR #36387.
+In review — [mathlib PR #36347](https://github.com/leanprover-community/mathlib4/pull/36347).
+:::
+
+:::theorem "hilbert-unramified-compositum" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/36843")
+*(Hilbert theory — unramified compositum.)* Let $`A` be a Dedekind domain with fraction field
+$`K`, let $`\mathfrak{p}` be a nonzero prime of $`A`, and let $`L_1, L_2` be two finite separable
+extensions of $`K` in which $`\mathfrak{p}` is unramified — that is, every prime above
+$`\mathfrak{p}` has ramification index $`1` ({uses "ramification-index"}[]). Then $`\mathfrak{p}`
+is unramified in the compositum $`L_1 L_2` as well.
+
+This is part of the Hilbert-theory development of decomposition and inertia. The proof reduces,
+via the fundamental identity ({uses "fundamental-identity"}[]) and the multiplicativity of
+ramification in towers, to the statement that the inertia subgroups attached to $`L_1` and
+$`L_2` generate, so their intersection-of-fixed-fields carries no ramification.
+In review — [mathlib PR #36843](https://github.com/leanprover-community/mathlib4/pull/36843).
+:::
+
+:::theorem "cyclotomic-inertia-field" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/37031")
+*(Inertia field of a cyclotomic field.)* Let $`n = p^k m` with $`p \nmid m`, and let
+$`K = \mathbb{Q}(\zeta_n)` be the $`n`-th cyclotomic field ({uses "cyclotomic-extension"}[]).
+The inertia field of the prime $`p` in $`K` — the largest subextension in which $`p` is
+unramified — is $`\mathbb{Q}(\zeta_m)`, and the ramification index of $`p` in $`K` is
+$`e = \varphi(p^k)` ({uses "ramification-index"}[]), while its inertia degree
+({uses "inertia-degree"}[]) is the multiplicative order of $`p` modulo $`m`. Equivalently,
+$`p` is totally ramified in $`\mathbb{Q}(\zeta_{p^k})/\mathbb{Q}` and unramified in
+$`\mathbb{Q}(\zeta_m)/\mathbb{Q}`, and the two extensions are linearly disjoint over
+$`\mathbb{Q}`.
+
+The PR computes the inertia field explicitly inside the cyclotomic tower, giving the splitting
+of a rational prime $`p` in $`\mathbb{Q}(\zeta_n)` in terms of $`p \bmod m`.
+In review — [mathlib PR #37031](https://github.com/leanprover-community/mathlib4/pull/37031).
 :::

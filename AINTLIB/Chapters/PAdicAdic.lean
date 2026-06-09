@@ -385,3 +385,61 @@ pseudo-uniformiser $`p^{1/p^\infty}` (a compatible system of $`p`-power roots of
 Formalised in [`Adic-Spaces`](https://github.com/CBirkbeck/Adic-Spaces) (sorry-free
 for the definition); see `IsPerfectoidRing`, `IsPerfectoidField`.
 :::
+
+# Forthcoming in mathlib
+
+The nodes below are *informal* statements of results that are the subject of open mathlib
+pull requests (the `t-number-theory` queue, as of June 2026). Each carries a `pr_url` pointing
+at the live PR and **no** `(lean := …)` reference: the declarations are not yet in mathlib
+v4.30.0-rc2. They connect into the dependency graph through the Mathlib-backed valuation and
+$`p`-adic nodes of this chapter via `{uses}` edges, and should be re-pointed to `(lean := …)`
+once the corresponding PR merges.
+
+:::theorem "completion-rat-padic" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/21950")
+*(The completion of $`\mathbb{Q}` at a finite place is $`\mathbb{Q}_p`.)* By Ostrowski's theorem
+({uses "ostrowski"}[]) the nontrivial places of $`\mathbb{Q}` are the archimedean place and one
+finite place for each prime $`p`, the latter given by the $`p`-adic absolute value
+({uses "padic-norm"}[]). For each prime $`p`, the completion of $`\mathbb{Q}` at the finite place
+$`p` — the completion of $`\mathbb{Q}` with respect to the $`p`-adic absolute value, formed as a
+valued field via its adic valuation — is canonically isomorphic, as a valued (indeed topological)
+field, to the field of $`p`-adic numbers:
+$$`\widehat{\mathbb{Q}}^{(p)} \;\cong\; \mathbb{Q}_p.`
+The isomorphism is compatible with the valuations and carries the completion of $`\mathbb{Z}_{(p)}`
+onto $`\mathbb{Z}_p` ({uses "padic-integers"}[]).
+
+PR #21950 identifies the abstract place-completion of $`\mathbb{Q}` with the concrete
+$`\mathbb{Q}_p` ({uses "padic-numbers"}[]), reconciling the adic-valuation construction with
+mathlib's `Padic`. This is the bridge that lets number-field place-completions specialise
+correctly to $`\mathbb{Q}`.
+In review — [mathlib PR #21950](https://github.com/leanprover-community/mathlib4/pull/21950).
+:::
+
+:::theorem "amice-transform" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/23772")
+*(Amice transform / Amice equivalence.)* The *Amice transform* sends a $`p`-adic measure $`\mu`
+on $`\mathbb{Z}_p` ({uses "padic-integers"}[]) — equivalently a bounded $`\mathbb{Q}_p`-valued
+distribution — to the power series
+$$`A_\mu(T) \;=\; \int_{\mathbb{Z}_p} (1 + T)^{x}\, d\mu(x) \;=\; \sum_{n \ge 0} \left(\int_{\mathbb{Z}_p} \binom{x}{n}\, d\mu(x)\right) T^{n}.`
+The Amice equivalence is the resulting isomorphism of $`\mathbb{Q}_p`-Banach algebras
+({uses "padic-numbers"}[])
+$$`\mathcal{M}(\mathbb{Z}_p, \mathbb{Q}_p) \;\xrightarrow{\;\sim\;}\; \mathbb{Q}_p\langle\langle T \rangle\rangle^{b}`
+between measures on $`\mathbb{Z}_p` and bounded power series (rigid functions on the open unit
+disc), under which convolution of measures corresponds to multiplication of power series.
+
+PR #23772 (with its companion #23791) constructs the Amice transform and proves it is an
+isomorphism, the analytic foundation for $`p`-adic $`L`-functions and Iwasawa theory.
+In review — [mathlib PR #23772](https://github.com/leanprover-community/mathlib4/pull/23772).
+:::
+
+:::definition "valuative-rel-padic" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/26886")
+A *valuative relation* on a field axiomatises the comparison $`v(x) \le v(y)` of a valuation
+({uses "valuation"}[]) without naming the value group, packaging the divisibility preorder that a
+valuation induces. PR #26886 equips the $`p`-adic numbers $`\mathbb{Q}_p`
+({uses "padic-numbers"}[]) with their canonical `ValuativeRel` instance: the relation
+$$`x \preccurlyeq y \;\iff\; |x|_p \le |y|_p \;\iff\; v_p(x) \ge v_p(y),`
+together with the compatibility showing this valuative relation induces the standard $`p`-adic
+topology and recovers $`\mathbb{Z}_p` ({uses "padic-integers"}[]) as its ring of integers.
+
+This places $`\mathbb{Q}_p` inside the `ValuativeRel` framework, so that results stated for
+abstract valued fields apply uniformly to the $`p`-adic numbers.
+In review — [mathlib PR #26886](https://github.com/leanprover-community/mathlib4/pull/26886).
+:::

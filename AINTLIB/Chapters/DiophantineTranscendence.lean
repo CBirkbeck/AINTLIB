@@ -230,3 +230,31 @@ For every integer $`m \ge 2`, the Liouville constant $`L_m` is transcendental.
 :::proof "liouville-constant-transcendental"
 It suffices to show $`L_m` is a Liouville number ({uses "liouville-transcendental"}[]), i.e.\ that it is super-well-approximable by rationals. For each $`n`, truncate the series at index $`k = n`: the partial sum $`\sum_{i=0}^n m^{-i!}` is a rational with denominator $`m^{n!}`. The tail $`\sum_{i > n} m^{-i!}` is bounded above by a geometric series giving $`\text{tail} < 1/(m^{n!})^n`, which is $`(m^{n!})^{-n}`. Since the denominator is $`b = m^{n!}`, this approximation satisfies $`|L_m - p/b| < b^{-n}`, confirming the Liouville condition ({uses "liouville-constant"}[]).
 :::
+
+# Forthcoming in mathlib
+
+The node below is an *informal* statement of a result that is the subject of an open mathlib
+pull request (the `t-number-theory` queue, as of June 2026). It carries a `pr_url` pointing at
+the live PR and **no** `(lean := …)` reference: the declarations are not yet in mathlib
+v4.30.0-rc2. It connects into the dependency graph through the Mathlib-backed transcendence and
+Diophantine-approximation nodes of this chapter via `{uses}` edges, and should be re-pointed to
+`(lean := …)` once the PR merges.
+
+:::theorem "gelfond-schneider" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/35735")
+*(Gelfond–Schneider theorem, Hilbert's seventh problem.)* Let $`\alpha, \beta` be algebraic
+numbers with $`\alpha \ne 0`, $`\alpha \ne 1`, and $`\beta \notin \mathbb{Q}`. Then any value of
+$$`\alpha^{\beta} \;=\; \exp(\beta \log \alpha)`
+is transcendental. In particular $`2^{\sqrt{2}}` (the Gelfond–Schneider constant) and
+$`e^{\pi} = (-1)^{-i}` are transcendental.
+
+The proof is the auxiliary-function method: assuming $`\alpha^\beta` algebraic, one builds an
+auxiliary polynomial in $`\alpha^x` and $`\alpha^{\beta x}` that vanishes to high order at many
+integer points, then derives a contradiction from an arithmetic lower bound on its nonzero
+derivatives versus an analytic upper bound — the same tension between good rational/algebraic
+approximation and transcendence that drives Liouville's theorem
+({uses "liouville-transcendental"}[]), with the pigeonhole construction of the auxiliary function
+resting on Diophantine approximation ({uses "dirichlet-approx"}[]). PR #35735 formalises the
+analytic core: the non-vanishing and lower bounds for the Gelfond–Schneider auxiliary function
+(the companion PRs #33050, #35743, #35744 supply further analytic lemmas).
+In review — [mathlib PR #35735](https://github.com/leanprover-community/mathlib4/pull/35735).
+:::
