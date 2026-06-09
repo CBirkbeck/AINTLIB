@@ -42,6 +42,8 @@ $`\operatorname{card}` bound that its endgame literally invokes.
 
 # Cardinality of product sets and the doubling constant
 
+## Submultiplicativity of the Product Set
+
 :::theorem "card-mul-le" (lean := "Finset.card_mul_le")
 *(Submultiplicativity of the product set.)* For finite subsets $`A, B` of a group,
 $$`|A \cdot B| \;\le\; |A|\cdot|B|.`
@@ -56,6 +58,8 @@ identify pairs, never create new values. Specialising the operation to multiplic
 bound.
 :::
 
+## Submultiplicativity of the Quotient Set
+
 :::theorem "card-div-le" (lean := "Finset.card_div_le")
 For finite subsets $`A, B` of a group,
 $$`|A / B| \;\le\; |A|\cdot|B|,`
@@ -69,6 +73,8 @@ $`A \times B` under $`(a, b) \mapsto a b^{-1}`, so `Finset.card_image₂_le` bou
 $`|A|\cdot|B|`.
 :::
 
+## The Doubling Constant
+
 :::definition "doubling-constant" (lean := "Finset.mulConst, Finset.divConst")
 For finite subsets $`A, B` of a group with $`A` nonempty, the *doubling constant* and
 *difference constant* are the rationals
@@ -81,6 +87,8 @@ a coset of a finite subgroup. In the additive setting these are `Finset.addConst
 :::
 
 # The Cauchy–Davenport theorem
+
+## The Cauchy–Davenport Theorem for Arbitrary Groups
 
 :::theorem "cauchy-davenport-min-order" (lean := "cauchy_davenport_minOrder_mul")
 *(Cauchy–Davenport for arbitrary groups, DeVos.)* Let $`A, B` be nonempty finite subsets of a
@@ -105,6 +113,8 @@ shows at least one of the two new pairs is strictly smaller in the induction ord
 induction hypothesis to that pair gives the bound.
 :::
 
+## The Cauchy–Davenport Theorem in Torsion-Free Groups
+
 :::theorem "cauchy-davenport-torsion-free" (lean := "cauchy_davenport_of_isMulTorsionFree")
 *(Cauchy–Davenport in torsion-free groups.)* If $`G` is a torsion-free group and $`A, B` are
 nonempty finite subsets, then
@@ -116,6 +126,8 @@ In a torsion-free group there is no nontrivial finite subgroup, so $`\operatorna
 The minimum in the general bound ({uses "cauchy-davenport-min-order"}[]) is then attained by the
 second argument, leaving exactly $`|A| + |B| - 1 \le |A \cdot B|`.
 :::
+
+## The Cauchy–Davenport Theorem
 
 :::theorem "cauchy-davenport-zmod" (lean := "ZMod.cauchy_davenport")
 *(Cauchy–Davenport, 1813/1935.)* Let $`p` be a prime and let $`A, B \subseteq \mathbb{Z}/p\mathbb{Z}`
@@ -137,6 +149,8 @@ stated $`\min(p,\, |A|+|B|-1)` bound.
 :::
 
 # The Erdős–Ginzburg–Ziv theorem
+
+## The Erdos–Ginzburg–Ziv Theorem
 
 :::theorem "egz" (lean := "ZMod.erdos_ginzburg_ziv")
 *(Erdős–Ginzburg–Ziv, 1961.)* Let $`n` be a positive integer. Among any $`2n - 1` elements of
@@ -174,6 +188,8 @@ the integer statement read modulo $`n` via `ZMod.intCast_zmod_eq_zero_iff_dvd`.
 
 # The Plünnecke–Ruzsa inequality
 
+## The Ruzsa Triangle Inequality
+
 :::theorem "ruzsa-triangle" (lean := "Finset.ruzsa_triangle_inequality_div_div_div")
 *(Ruzsa's triangle inequality.)* For finite sets $`A, B, C` in a group,
 $$`|A / C| \cdot |B| \;\le\; |A / B| \cdot |C / B|,`
@@ -192,6 +208,8 @@ $`|A/C|\cdot|B|` by the size $`|A/B|\cdot|C/B|` of the ambient product. The vari
 versions are obtained by substituting $`B \mapsto B^{-1}` and using $`|B^{-1}| = |B|`.
 :::
 
+## Difference Constant Bounded by Square of Doubling Constant
+
 :::theorem "ruzsa-doubling-difference" (lean := "Finset.divConst_le_mulConst_sq")
 For a nonempty finite subset $`A` of a commutative group, the difference constant
 ({uses "doubling-constant"}[]) is controlled by the square of the doubling constant:
@@ -204,6 +222,8 @@ sum-version triangle inequality with all three sets equal to $`A` reads
 $`|A - A|\cdot|A| \le |A + A|^2`, and dividing by $`|A|^2` yields
 $`\delta[A] = |A-A|/|A| \le (|A+A|/|A|)^2 = \sigma[A]^2`.
 :::
+
+## The Pluennecke–Petridis Inequality
 
 :::theorem "pluennecke-petridis" (lean := "Finset.pluennecke_petridis_inequality_mul")
 *(Plünnecke–Petridis inequality.)* Let $`A, B` be finite sets in a group, and suppose every nonempty
@@ -226,6 +246,8 @@ itself is produced by `Finset.exists_min_image` over the nonempty subsets, which
 hypothesis fed to this lemma in the Plünnecke–Ruzsa proof.
 :::
 
+## The Pluennecke–Ruzsa Inequality
+
 :::theorem "pluennecke-ruzsa" (lean := "Finset.pluennecke_ruzsa_inequality_nsmul_sub_nsmul_add")
 *(Plünnecke–Ruzsa inequality.)* Let $`A` be a nonempty finite set and $`B` a finite set in an
 additive commutative group, and let $`K = |A + B| / |A|` be the doubling constant
@@ -247,6 +269,8 @@ Dividing by $`|A'|` and replacing the minimal ratio $`|A'+B|/|A'|` by the larger
 (again by minimality) gives $`|mB - nB| \le K^{m+n}\,|A|`. The pure-sum special case is the slice
 $`n = 0`.
 :::
+
+## The Ruzsa Covering Lemma
 
 :::theorem "ruzsa-covering" (lean := "Finset.ruzsa_covering_mul")
 *(Ruzsa's covering lemma.)* Let $`A, B` be finite subsets of a group with $`B` nonempty, and
@@ -271,6 +295,8 @@ intersection back to a bounded cover.
 
 # Freiman homomorphisms
 
+## Freiman Homomorphisms
+
 :::definition "freiman-hom" (lean := "IsMulFreimanHom")
 For a natural number $`n` and subsets $`A \subseteq \alpha`, $`B \subseteq \beta` of commutative
 monoids, a map $`f : \alpha \to \beta` is an *$`n`-Freiman homomorphism from $`A` to $`B`* if it
@@ -284,6 +310,8 @@ and the condition strengthens as $`n` grows. Freiman homomorphisms are the struc
 of additive combinatorics: every monoid homomorphism is an $`n`-Freiman homomorphism for all $`n`.
 :::
 
+## Freiman Isomorphisms
+
 :::definition "freiman-iso" (lean := "IsMulFreimanIso")
 An *$`n`-Freiman isomorphism from $`A` to $`B`* is a bijection $`f : A \to B` for which the $`n`-fold
 product relation is preserved *and reflected*:
@@ -295,6 +323,8 @@ particular a $`2`-Freiman isomorphism preserves the sizes of all sumsets and dif
 the doubling and difference constants ({uses "doubling-constant"}[]) on which the structure theory of
 small-doubling sets rests.
 :::
+
+## Characterisation of Two-Freiman Homomorphisms
 
 :::theorem "freiman-hom-two" (lean := "isMulFreimanHom_two")
 *(Characterisation of $`2`-Freiman homomorphisms.)* A map $`f` is a $`2`-Freiman homomorphism from
@@ -310,6 +340,8 @@ since any multiset of cardinality $`2` is such a pair (`Finset.card_eq_two`), th
 reconstructs the full multiset condition for $`n = 2`.
 :::
 
+## Monotonicity of Freiman Homomorphisms in the Order
+
 :::theorem "freiman-hom-mono" (lean := "IsMulFreimanHom.mono")
 *(Monotonicity in the order.)* If $`m \le n` and $`f` is an $`n`-Freiman homomorphism from $`A` to
 $`B` ({uses "freiman-hom"}[]), then $`f` is also an $`m`-Freiman homomorphism from $`A` to $`B`.
@@ -323,6 +355,8 @@ $`f(x_1)\cdots f(x_m)\,f(a_0)^{n-m} = f(y_1)\cdots f(y_m)\,f(a_0)^{n-m}`; cancel
 $`f(a_0)^{n-m}` (the ambient monoid is commutative) gives the $`m`-fold conclusion. The case $`A = \emptyset`
 is handled separately since then there is no padding element.
 :::
+
+## Monoid Homomorphisms Are Freiman Homomorphisms
 
 :::theorem "monoid-hom-freiman" (lean := "MonoidHomClass.isMulFreimanHom")
 Every monoid homomorphism is a Freiman homomorphism: if $`f : \alpha \to \beta` is a monoid
@@ -346,6 +380,8 @@ $`1` (no doubling) through $`3/2` and the golden ratio $`\varphi = (1+\sqrt5)/2`
 following Tointon's monograph and Tao's non-commutative Freiman theorem. They are stated for an
 arbitrary group $`G`.
 
+## Sets of Doubling Exactly One
+
 :::theorem "no-doubling" (lean := "Finset.smul_stabilizer_of_no_doubling")
 *(Doubling exactly one.)* Let $`A` be a nonempty finite subset of a group $`G` with no doubling,
 $`|A \cdot A| \le |A|` — equivalently doubling constant $`\sigma[A] = 1` ({uses "doubling-constant"}[]).
@@ -366,6 +402,8 @@ left-multiplying it into $`a^{-1}A` stays in $`A`. Rearranging $`a^{-1}A = H` yi
 and the right-handed version follows by the same computation with $`smul`/`op_smul` swapped.
 :::
 
+## Symmetry of Difference Sets Under Doubling Below Two
+
 :::theorem "doubling-lt-two-symmetry" (lean := "Finset.mul_inv_eq_inv_mul_of_doubling_lt_two")
 Let $`A` be a finite subset of a group with doubling strictly less than $`2`:
 $$`|A \cdot A| \;<\; 2\,|A|.`
@@ -381,6 +419,8 @@ to be nonempty (`lt_card_smul_inter_smul` with $`K = 2`). Picking $`t` with $`xt
 for some $`z, w \in A` exhibits $`x^{-1}y = z w^{-1} \in A A^{-1}`. The reverse inclusion comes from the
 same statement applied to $`A^{-1}` (whose doubling is also $`< 2`), giving equality.
 :::
+
+## The Inverse-Product Subgroup
 
 :::definition "inv-mul-subgroup" (lean := "Finset.invMulSubgroup")
 For a finite subset $`A` of a group with $`|A \cdot A| < \tfrac32\,|A|`, the set
@@ -400,6 +440,8 @@ every pairwise intersection of translates large, $`\tfrac12|A| < |xA \cap yA|`
 $`t` produces the witness exhibiting $`(a^{-1}b)(c^{-1}d) \in A^{-1}A`, using the symmetry
 $`A A^{-1} = A^{-1}A` ({uses "doubling-lt-two-symmetry"}[]).
 :::
+
+## Structure of Sets of Doubling Below Three Halves
 
 :::theorem "small-doubling-three-halves" (lean := "Finset.doubling_lt_three_halves")
 *(Structure of sets of doubling below $`3/2`; Tointon, Theorem 2.2.1.)* Let $`A` be a finite subset
@@ -424,6 +466,8 @@ upgrades to $`|H| = |A\cdot A| < \tfrac32|A|`. The threshold is sharp, as $`A = 
 witnesses ({uses "inv-mul-subgroup"}[]).
 :::
 
+## Structure of Sets of Doubling Below the Golden Ratio
+
 :::theorem "small-doubling-golden" (lean := "Finset.doubling_lt_golden_ratio")
 *(Doubling below the golden ratio.)* Let $`\varphi = (1+\sqrt5)/2` and $`\psi = (1-\sqrt5)/2` be the
 roots of $`t^2 = t + 1`. If $`A` is a finite subset of a group whose difference constant
@@ -447,6 +491,8 @@ then shows every high-representation $`z` stabilises $`S`: since $`r(w) \ge (2-K
 of $`A` overlap, certifying $`zw \in S` for every $`w`, i.e. $`z \in H`. Hence the high-representation
 elements lie in $`H`, giving $`|H| \ge \ell` and the cover.
 :::
+
+## Structure of Sets of Doubling Below Two
 
 :::theorem "small-doubling-two-eps" (lean := "Finset.doubling_lt_two")
 *(Doubling below $`2 - \varepsilon`.)* Let $`0 < \varepsilon \le 1` and let $`A` be a nonempty finite

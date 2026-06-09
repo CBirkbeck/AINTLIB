@@ -45,6 +45,8 @@ projects build against newer mathlib toolchains than the current AINTLIB build, 
 
 # The Riemann zeta function
 
+## The L-series of an arithmetic function
+
 :::definition "lseries" (lean := "LSeries")
 For a function $`f : \mathbb{N} \to \mathbb{C}`, the *$`L`-series* (Dirichlet series) of $`f` is
 $$`L(f, s) = \sum_{n=1}^{\infty} \frac{f(n)}{n^s},`
@@ -53,6 +55,8 @@ series is evaluated wherever it converges absolutely (`LSeriesSummable`); below 
 absolute convergence mathlib sets its value to $`0`. The Riemann zeta function, the Dirichlet
 $`L`-functions, and the $`L`-series of the von Mangoldt function are all instances.
 :::
+
+## The Riemann zeta function
 
 :::definition "riemann-zeta" (lean := "riemannZeta")
 The *Riemann zeta function* $`\zeta(s)` is the meromorphic continuation to all of $`\mathbb{C}` of
@@ -64,6 +68,8 @@ holomorphic away from $`s = 1`, where it has a simple pole, and its value at $`s
 $`\zeta(0) = -\tfrac12`.
 :::
 
+## The completed Riemann zeta function
+
 :::definition "completed-zeta" (lean := "completedRiemannZeta")
 The *completed Riemann zeta function* $`\Lambda(s)` is
 $$`\Lambda(s) = \pi^{-s/2}\,\Gamma\!\left(\tfrac{s}{2}\right)\zeta(s),`
@@ -72,6 +78,8 @@ $`\zeta(s) = \Lambda(s)/\Gamma_\mathbb{R}(s)` away from $`s = 0` ({uses "riemann
 $`\Lambda_0(s) = \Lambda(s) + \tfrac1s - \tfrac1{s-1}` (`completedRiemannZeta₀`) removes both poles and
 is entire; $`\Lambda` itself is holomorphic away from $`s \in \{0, 1\}`, where it has simple poles.
 :::
+
+## Agreement of the Dirichlet series with the zeta function for Re(s) greater than 1
 
 :::theorem "zeta-tsum" (lean := "ArithmeticFunction.LSeries_zeta_eq_riemannZeta")
 For $`\operatorname{Re}(s) > 1` the continuation $`\zeta(s)` agrees with the convergent Dirichlet
@@ -87,6 +95,8 @@ rewrites $`\zeta(s)` in the convergence range as the tsum $`\sum_{n} 1/n^s` via
 discarding the $`n = 0` term, which gives `LSeries_zeta_eq_riemannZeta`. Pushing the coercion of the
 constant sequence through then yields the constant-$`1` form `LSeries_one_eq_riemannZeta`.
 :::
+
+## Euler product for the Riemann zeta function
 
 :::theorem "zeta-euler-product" (lean := "riemannZeta_eulerProduct_tprod")
 *(Euler product for $`\zeta`.)* For $`\operatorname{Re}(s) > 1`,
@@ -107,6 +117,8 @@ $`|p^{-s}| = p^{-\operatorname{Re}(s)} < 1`. The `tprod` form is the `HasProd` s
 `riemannZeta_eulerProduct_hasProd` packaged through `HasProd.tprod_eq`.
 :::
 
+## Value of zeta at 2 (the Basel problem)
+
 :::theorem "zeta-two" (lean := "riemannZeta_two")
 *(Basel problem.)* The value of $`\zeta` at $`2` is
 $$`\zeta(2) = \sum_{n=1}^{\infty} \frac{1}{n^2} = \frac{\pi^2}{6}.`
@@ -122,6 +134,8 @@ $`\zeta(2k) = (-1)^{k+1}\,2^{2k-1}\,\pi^{2k}\,B_{2k}/(2k)!` in terms of the Bern
 $`B_{2k}` ({uses "bernoulli-number"}[]).
 :::
 
+## Simple pole of zeta at s = 1 with residue 1
+
 :::theorem "zeta-residue" (lean := "riemannZeta_residue_one")
 The function $`\zeta` has a simple pole at $`s = 1` with residue $`1`:
 $$`\lim_{s \to 1} (s - 1)\,\zeta(s) = 1.`
@@ -133,6 +147,8 @@ specialised to $`\zeta = \texttt{hurwitzZetaEven}\,0` ({uses "riemann-zeta"}[]).
 is in turn read off from the residue of the completed zeta function ({uses "completed-zeta"}[]) at
 $`s = 1` against the $`\Gamma`-factor, which is regular and nonzero there.
 :::
+
+## Functional equation of the Riemann zeta function
 
 :::theorem "zeta-functional-equation" (lean := "completedRiemannZeta_one_sub")
 *(Functional equation.)* The completed zeta function ({uses "completed-zeta"}[]) is invariant under
@@ -152,6 +168,8 @@ converts this into the asymmetric form for $`\zeta`, which mathlib records separ
 `riemannZeta_one_sub`.
 :::
 
+## Trivial zeros of the Riemann zeta function
+
 :::theorem "zeta-trivial-zeros" (lean := "riemannZeta_neg_two_mul_nat_add_one")
 *(Trivial zeros.)* For every natural number $`n`,
 $$`\zeta(-2(n+1)) = 0.`
@@ -166,6 +184,8 @@ obtains it directly as the corresponding vanishing of the even Hurwitz zeta func
 `hurwitzZetaEven_neg_two_mul_nat_add_one`.
 :::
 
+## The Riemann Hypothesis
+
 :::definition "riemann-hypothesis" (lean := "RiemannHypothesis")
 The *Riemann Hypothesis* is the assertion that every zero of $`\zeta` ({uses "riemann-zeta"}[]) other
 than the trivial zeros ({uses "zeta-trivial-zeros"}[]) and the pole at $`s = 1` lies on the critical
@@ -176,6 +196,8 @@ This is recorded in mathlib as a `Prop`; it is not proved.
 
 # Dirichlet characters and L-functions
 
+## Dirichlet characters
+
 :::definition "dirichlet-character" (lean := "DirichletCharacter")
 A *Dirichlet character modulo $`q`* with values in a commutative monoid-with-zero $`R` is a
 multiplicative character of $`\mathbb{Z}/q\mathbb{Z}`, that is, a monoid homomorphism
@@ -184,6 +206,8 @@ $`\chi : (\mathbb{Z}/q\mathbb{Z})^\times \to R^\times` extended by $`0` on non-u
 $`R = \mathbb{C}`. Such a $`\chi` is completely multiplicative as a function on $`\mathbb{N}`, with
 $`\chi(n) = 0` exactly when $`\gcd(n, q) > 1`.
 :::
+
+## L-series of a Dirichlet convolution is the product of the L-series
 
 :::theorem "lseries-convolution" (lean := "LSeries_convolution', ArithmeticFunction.LSeries_mul")
 The $`L`-series of a Dirichlet convolution ({uses "dirichlet-convolution"}[]) is the product of the
@@ -202,6 +226,8 @@ rearrangement. The arithmetic-function form `ArithmeticFunction.LSeries_mul` is 
 $`f, g` are arithmetic functions and $`*` is their ring multiplication, via `coe_mul`.
 :::
 
+## Dirichlet L-functions
+
 :::definition "dirichlet-lfunction" (lean := "DirichletCharacter.LFunction")
 For a Dirichlet character $`\chi` modulo $`q` ({uses "dirichlet-character"}[]), the *Dirichlet
 $`L`-function* $`L(\chi, s)` is the unique meromorphic function on $`\mathbb{C}` agreeing with the
@@ -212,6 +238,8 @@ $`\operatorname{Re}(s) > 1` (`LFunction_eq_LSeries`). When $`\chi` is non-trivia
 entire; the unique character modulo $`1` gives back the Riemann zeta function, $`L(\chi_1, \cdot) = \zeta`
 (`LFunction_modOne_eq`), with its simple pole at $`s = 1`.
 :::
+
+## Euler product for Dirichlet L-functions
 
 :::theorem "dirichlet-lfunction-euler-product" (lean := "DirichletCharacter.LSeries_eulerProduct_tprod")
 *(Euler product for $`L(\chi, s)`.)* For $`\operatorname{Re}(s) > 1`,
@@ -232,6 +260,8 @@ $`\sum_{k \ge 0} \chi(p)^k p^{-ks} = (1 - \chi(p) p^{-s})^{-1}`; the `tprod` for
 `HasProd.tprod_eq`.
 :::
 
+## Functional equation for Dirichlet L-functions
+
 :::theorem "dirichlet-lfunction-functional-equation" (lean := "DirichletCharacter.IsPrimitive.completedLFunction_one_sub")
 *(Functional equation for $`L(\chi, s)`.)* Let $`\chi` be a primitive Dirichlet character modulo
 $`N` ({uses "dirichlet-character"}[]). Then the completed $`L`-function satisfies
@@ -251,6 +281,8 @@ primitivity is exactly the hypothesis `IsPrimitive`). The scaling $`N^{s-1/2}` i
 introduced when normalising the archimedean and finite parts.
 :::
 
+## Trivial zeros of Dirichlet L-functions
+
 :::theorem "dirichlet-lfunction-trivial-zeros" (lean := "DirichletCharacter.Even.LFunction_neg_two_mul_nat")
 *(Trivial zeros of $`L(\chi, s)`.)* If $`\chi` is an even Dirichlet character modulo $`N`
 ({uses "dirichlet-character"}[]), then for every positive integer $`n`,
@@ -269,6 +301,8 @@ $`\chi(-1) = 1` selects which arithmetic progression of negative integers carrie
 
 # The von Mangoldt function
 
+## The von Mangoldt function
+
 :::definition "von-mangoldt" (lean := "ArithmeticFunction.vonMangoldt")
 The *von Mangoldt function* $`\Lambda : \mathbb{N} \to \mathbb{R}` is defined by
 $$`\Lambda(n) = \begin{cases} \log p & \text{if } n = p^k \text{ for a prime } p \text{ and } k \ge 1, \\ 0 & \text{otherwise.}\end{cases}`
@@ -276,6 +310,8 @@ In mathlib $`\Lambda(n) = \log(\operatorname{minFac} n)` when $`n` is a prime po
 where $`\operatorname{minFac} n` is the smallest prime factor. At a prime $`n = p` the value is
 $`\Lambda(p) = \log p`.
 :::
+
+## Divisor sum of the von Mangoldt function equals the logarithm
 
 :::theorem "von-mangoldt-sum" (lean := "ArithmeticFunction.vonMangoldt_sum")
 For every positive integer $`n`,
@@ -291,6 +327,8 @@ divisors of $`ab` supported on prime powers split disjointly between those of $`
 (`mul_divisors_filter_prime_pow`), and $`\log(ab) = \log a + \log b` matches the sum splitting. This
 is the additive shadow of unique factorisation ({uses "fta-existence"}[]).
 :::
+
+## Convolution identity relating the von Mangoldt function and the logarithm
 
 :::theorem "von-mangoldt-zeta-identity" (lean := "ArithmeticFunction.vonMangoldt_mul_zeta")
 The von Mangoldt function is the Dirichlet convolution of $`\Lambda` with the constant function: as
@@ -310,6 +348,8 @@ Dirichlet inverse of $`\zeta_{\mathrm{ar}}`, inverts the relation: `log_mul_moeb
 gives $`\log * \mu = \Lambda`, i.e. $`\Lambda(n) = \sum_{d \mid n} \mu(n/d)\log d`, the Möbius
 inversion of the previous identity ({uses "dirichlet-convolution"}[]).
 :::
+
+## L-series of the von Mangoldt function as the negative logarithmic derivative of zeta
 
 :::theorem "von-mangoldt-lseries" (lean := "ArithmeticFunction.LSeries_vonMangoldt_eq_deriv_riemannZeta_div")
 For $`\operatorname{Re}(s) > 1`, the $`L`-series ({uses "lseries"}[]) of the von Mangoldt function is
@@ -331,6 +371,8 @@ giving $`L(\Lambda, s) = -\zeta'(s)/\zeta(s)`.
 :::
 
 # Non-vanishing of L-functions on the closed right half-plane
+
+## Non-vanishing of Dirichlet L-functions on the closed half-plane Re(s) at least 1
 
 :::theorem "lfunction-nonvanishing" (lean := "DirichletCharacter.LFunction_ne_zero_of_one_le_re")
 Let $`\chi` be a Dirichlet character ({uses "dirichlet-character"}[]) and $`s \in \mathbb{C}` with
@@ -358,6 +400,8 @@ $`x > 0` (`norm_LFunction_product_ge_one`), so a zero at $`1 + iy` would force t
 $`0` as $`x \downarrow 0`, an asymptotic contradiction (`LFunction_ne_zero_of_not_quadratic_or_ne_one`).
 :::
 
+## Non-vanishing of L(chi, 1) for non-trivial characters
+
 :::theorem "lfunction-one-nonvanishing" (lean := "DirichletCharacter.LFunction_apply_one_ne_zero")
 For a non-trivial Dirichlet character $`\chi`, the value $`L(\chi, 1)` is nonzero.
 :::
@@ -373,6 +417,8 @@ character-weighted prime sum isolating a residue class would converge rather tha
 
 # Chebyshev's bounds
 
+## The Chebyshev psi and theta functions
+
 :::definition "chebyshev-psi-theta" (lean := "Chebyshev.psi, Chebyshev.theta")
 The two *Chebyshev functions* are the summatory functions of the von Mangoldt function
 ({uses "von-mangoldt"}[]) and of $`\log p` over primes:
@@ -380,6 +426,8 @@ $$`\psi(x) = \sum_{n \le x} \Lambda(n), \qquad \vartheta(x) = \sum_{p \le x} \lo
 They differ only by the contributions of higher prime powers; in mathlib these are the scoped
 notations `ψ` and `θ` in the `Chebyshev` namespace.
 :::
+
+## Chebyshev's upper bound for the theta function
 
 :::theorem "chebyshev-theta-upper" (lean := "Chebyshev.theta_le_log4_mul_x")
 *(Chebyshev's upper bound for $`\vartheta`.)* For every $`x \ge 0`,
@@ -393,6 +441,8 @@ of primes up to $`m` (`theta_eq_log_primorial`). The combinatorial bound $`\#m \
 central binomial coefficient $`\binom{m}{\lfloor m/2\rfloor}`) then gives
 $`\vartheta(x) \le \log(4^{\lfloor x\rfloor}) = \lfloor x\rfloor \log 4 \le x \log 4`.
 :::
+
+## Chebyshev's upper bound for the psi function
 
 :::theorem "chebyshev-psi-upper" (lean := "Chebyshev.psi_le_const_mul_self")
 *(Chebyshev's upper bound for $`\psi`.)* For every $`x \ge 0`, the summatory von Mangoldt function
@@ -412,6 +462,8 @@ the sharp form $`\psi(x) \le (\log 4)x + 2\sqrt{x}\log x` (`psi_le`). Coarsening
 
 # The Selberg sieve
 
+## The Selberg sieve
+
 :::definition "selberg-sieve" (lean := "SelbergSieve")
 A *Selberg sieve* packages the data needed to bound, from above, the number of elements of a finite
 weighted sequence that survive sifting by a set of primes. In mathlib a `SelbergSieve` extends a
@@ -423,6 +475,8 @@ $$`S = \sum_{d} \big[\gcd(\texttt{prodPrimes}, d) = 1\big]\,w_d`
 $`R_d = \big(\sum_{d \mid n} w_n\big) - \nu(d)\,\texttt{totalMass}` measure the failure of the density
 model.
 :::
+
+## Fundamental upper-bound inequality of the Selberg sieve
 
 :::theorem "selberg-sieve-bound" (lean := "BoundingSieve.siftedSum_le_mainSum_errSum_of_upperMoebius")
 *(Fundamental upper-bound-sieve inequality.)* Let $`(\mu^+_d)` be any *upper-Möbius* weight system,
@@ -446,6 +500,8 @@ Brun–Titchmarsh inequality ({bpref "brun-titchmarsh"}[]).
 :::
 
 # Dirichlet's theorem on primes in arithmetic progressions
+
+## Dirichlet's theorem on primes in arithmetic progressions
 
 :::theorem "dirichlets-theorem" (lean := "Nat.infinite_setOf_prime_and_eq_mod")
 *(Dirichlet's theorem.)* Let $`q` be a positive integer and $`a \in \mathbb{Z}/q\mathbb{Z}` a unit.
@@ -471,6 +527,8 @@ a zero would create a logarithmic pole. The non-prime prime-power contribution c
 finiteness.
 :::
 
+## Existence of primes in arithmetic progressions above any given bound
+
 :::corollary "dirichlets-theorem-gt" (lean := "Nat.forall_exists_prime_gt_and_modEq")
 Let $`q` be a positive integer, $`a` a natural number coprime to $`q`, and $`n` any natural number.
 Then there exists a prime $`p > n` with $`p \equiv a \pmod{q}`.
@@ -486,6 +544,8 @@ natural-number `[MOD q]` form `forall_exists_prime_gt_and_modEq`).
 :::
 
 # Bertrand's postulate
+
+## Bertrand's postulate
 
 :::theorem "bertrand" (lean := "Nat.exists_prime_lt_and_le_two_mul")
 *(Bertrand's postulate.)* For every positive integer $`n`, there exists a prime $`p` with
@@ -514,6 +574,8 @@ which is taken as a hypothesis (the Tauberian theorem itself is proved analytica
 PrimeNumberTheoremAnd). The nodes below are *informal*; each links to its exact source declaration at
 commit `7376f1a` and connects into the dependency graph through the mathlib-backed nodes above.
 
+## Euler product for a multiplicative L-series
+
 :::theorem "euler-product-general"
 *(Euler product for a multiplicative $`L`-series.)* Let $`f : \mathbb{N} \to \mathbb{C}` be weakly
 multiplicative with $`f(1) = 1`, and suppose the $`L`-series $`L(f, s) = \sum_{n \ge 1} f(n) n^{-s}`
@@ -534,6 +596,8 @@ rearrangement of the double sum. The Euler products for $`\zeta` ({bpref "zeta-e
 for Dirichlet $`L`-functions ({bpref "dirichlet-lfunction-euler-product"}[]) are the
 completely-multiplicative special cases, now part of mathlib.
 :::
+
+## The Wiener-Ikehara Tauberian theorem
 
 :::theorem "wiener-ikehara"
 *(Wiener–Ikehara Tauberian theorem, as a hypothesis.)* Let $`f : \mathbb{N} \to \mathbb{R}` be a
@@ -557,6 +621,8 @@ leaving the residue $`A` from the simple pole at $`s = 1` ({uses "riemann-zeta"}
 this is not reproved; it is named as the hypothesis `WienerIkeharaTheorem` and consumed by the PNT and
 Dirichlet derivations.
 :::
+
+## Prime Number Theorem via the Wiener-Ikehara theorem (conditional)
 
 :::theorem "pnt-von-mangoldt-conditional"
 *(Prime Number Theorem via Wiener–Ikehara.)* Assume the Wiener–Ikehara theorem
@@ -586,6 +652,8 @@ The `DirichletNonvanishing` project (Birkbeck) gives a self-contained, sorry-fre
 $`L`-functions do not vanish anywhere on the line $`\operatorname{Re}(s) = 1` (other than the pole of
 $`\zeta`). The nodes below are *informal*; each links to its exact source declaration at commit
 `fb3e6ac` and connects into the graph through the mathlib non-vanishing nodes above.
+
+## Non-vanishing of Dirichlet L-functions on the line Re(s) = 1
 
 :::theorem "dirichlet-lfunction-nonvanishing-line"
 *(Non-vanishing on $`\operatorname{Re}(s) = 1`.)* Let $`\chi` be a Dirichlet character modulo $`N`
@@ -621,6 +689,8 @@ number theory: the Wiener–Ikehara Tauberian theorem, the Prime Number Theorem 
 asymptotics, and the Brun–Titchmarsh inequality. The nodes below are *informal*; each links to its
 exact source declaration at commit `9824b74`.
 
+## The Prime Number Theorem
+
 :::theorem "prime-number-theorem"
 *(Prime Number Theorem.)* As $`N \to \infty`,
 $$`\psi(N) = \sum_{n < N} \Lambda(n) \;\sim\; N,`
@@ -641,6 +711,8 @@ region of the form $`\operatorname{Re}(s) \ge 1 - c/\log(|\operatorname{Im}(s)| 
 Borel–Carathéodory estimate to control the logarithmic derivative.
 :::
 
+## Chebyshev asymptotic and the prime-counting function
+
 :::theorem "chebyshev-asymptotic"
 *(Chebyshev asymptotic.)* The first Chebyshev function ({uses "chebyshev-psi-theta"}[]) is asymptotic
 to the identity:
@@ -658,6 +730,8 @@ $`\vartheta` differ only by the higher prime powers, $`|\psi(x) - \vartheta(x)| 
 prime-counting form $`\pi(x) \sim x/\log x` then follows by partial summation, integrating
 $`\vartheta` against $`1/(t\log^2 t)` (the identity `Chebyshev.primeCounting_eq_theta_div_log_add_integral`).
 :::
+
+## Mertens' first theorem
 
 :::theorem "mertens-first"
 *(Mertens' first theorem.)* As $`x \to \infty`,
@@ -677,6 +751,8 @@ $`\sum_{d \le x}\Lambda(d)/d = \log x + E_{1,\Lambda}(x)` with $`E_{1,\Lambda}` 
 $`-2` and $`\log 4 + 4`; the upper bound uses the mathlib Chebyshev estimate $`\psi(x) \le (\log 4 + 4)x`
 ({bpref "chebyshev-psi-upper"}[]).
 :::
+
+## Mertens' second theorem
 
 :::theorem "mertens-second"
 *(Mertens' second theorem.)* As $`x \to \infty`,
@@ -698,6 +774,8 @@ e^{-\gamma}/\log x` is the companion `E₃.bound''`.
 :::
 
 # The Brun–Titchmarsh inequality
+
+## The Brun-Titchmarsh inequality
 
 :::theorem "brun-titchmarsh"
 *(Brun–Titchmarsh inequality.)* For real $`x`, $`y > 0` and a sieving level $`z > 1`, the number of
@@ -727,6 +805,8 @@ theorem and its $`\Delta_\Lambda`-intermediate are stated and the proof skeleton
 decomposition) is in place but still carries `sorry`; the Siegel–Walfisz theorem and the large sieve
 inequality are taken as axioms. The node below is *informal*, linking to its source at commit
 `08696dd`.
+
+## The Bombieri-Vinogradov theorem
 
 :::theorem "bombieri-vinogradov"
 *(Bombieri–Vinogradov theorem.)* For each fixed $`A \ge 0` there is an implied constant $`C_A` such
@@ -759,6 +839,8 @@ requests (the `t-number-theory` queue). Each carries a `pr_url` pointing at the 
 dependency graph through the mathlib-backed nodes of this chapter (and, for the modular $`L`-series,
 the Modular Forms chapter), and should be re-pointed to `(lean := …)` once the corresponding PR merges.
 
+## Robin's and Lagarias' inequalities equivalent to the Riemann Hypothesis
+
 :::theorem "robin-lagarias-rh" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/37585")
 *(Robin's and Lagarias' inequalities equivalent to the Riemann hypothesis.)* Let
 $`\sigma(n) = \sum_{d \mid n} d` be the sum-of-divisors function and $`H_n = \sum_{k=1}^n 1/k` the
@@ -773,6 +855,8 @@ equivalence to the Riemann hypothesis, packaging a celebrated elementary reformu
 not prove RH.
 In review — [mathlib PR #37585](https://github.com/leanprover-community/mathlib4/pull/37585).
 :::
+
+## L-series of a modular form
 
 :::definition "lseries-modular-form" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/31187")
 For a modular form $`f` ({uses "modular-form"}[]) with $`q`-expansion $`f = \sum_{n \ge 0} a_n q^n`, the

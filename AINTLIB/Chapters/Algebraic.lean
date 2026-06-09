@@ -54,11 +54,15 @@ permalink, and whether that formalisation is sorry-free or still in progress.
 
 # Number fields and their rings of integers
 
+## Number Field
+
 :::definition "number-field" (lean := "NumberField")
 A *number field* is a field $`K` that is of characteristic zero and finite-dimensional over
 $`\mathbb{Q}`. Equivalently, $`K` is a finite algebraic extension of $`\mathbb{Q}`, and its
 degree $`[K : \mathbb{Q}]` is a positive integer.
 :::
+
+## Ring of Integers
 
 :::definition "ring-of-integers" (lean := "NumberField.RingOfIntegers")
 The *ring of integers* $`\mathcal{O}_K` of a number field $`K` ({uses "number-field"}[]) is
@@ -66,6 +70,8 @@ the integral closure of $`\mathbb{Z}` in $`K`: the subring of all elements of $`
 satisfy a monic polynomial equation with integer coefficients. In mathlib $`\mathcal{O}_K`
 is the type `integralClosure ℤ K`, equipped with its induced commutative-ring structure.
 :::
+
+## The Ring of Integers Is a Free Module
 
 :::theorem "ring-of-integers-free" (lean := "NumberField.RingOfIntegers.basis, NumberField.integralBasis")
 As a $`\mathbb{Z}`-module, $`\mathcal{O}_K` ({uses "ring-of-integers"}[]) is free of finite
@@ -85,6 +91,8 @@ Localising a chosen $`\mathbb{Z}`-basis at the nonzero divisors of $`\mathbb{Z}`
 `integralBasis`; in particular the rank equals $`[K:\mathbb{Q}]`.
 :::
 
+## Trace, Norm, and Trace Form
+
 :::definition "trace-norm-form" (lean := "Algebra.trace, Algebra.norm, Algebra.traceForm")
 For a finite extension $`K/\mathbb{Q}` and $`x \in K`, the *trace* $`\mathrm{Tr}_{K/\mathbb{Q}}(x)`
 and *norm* $`N_{K/\mathbb{Q}}(x)` are the trace and determinant of the $`\mathbb{Q}`-linear
@@ -96,12 +104,16 @@ which is nondegenerate exactly because $`K/\mathbb{Q}` is separable.
 
 # Dedekind domains and unique factorisation of ideals
 
+## Dedekind Domain
+
 :::definition "dedekind-domain" (lean := "IsDedekindDomain")
 A *Dedekind domain* is a Noetherian, integrally closed integral domain of Krull dimension at
 most one — equivalently, in which every nonzero prime ideal is maximal. Such a domain is
 characterised by the property that every nonzero ideal factors uniquely as a product of prime
 ideals.
 :::
+
+## The Ring of Integers Is a Dedekind Domain
 
 :::theorem "ring-of-integers-is-dedekind" (lean := "IsIntegralClosure.isDedekindDomain")
 The ring of integers $`\mathcal{O}_K` of any number field $`K` is a Dedekind domain.
@@ -119,6 +131,8 @@ maximal because $`C` is integral over the dimension-one domain $`A`
 (`IsIntegralClosure.isMaximal_of_isMaximal_comap` together with the going-up property), so
 $`\mathcal{O}_K/\mathfrak{p}` is a field.
 :::
+
+## Unique Factorisation of Ideals
 
 :::theorem "ideal-unique-factorization" (lean := "Ideal.uniqueFactorizationMonoid")
 In any Dedekind domain $`R` ({uses "dedekind-domain"}[]) — in particular in $`\mathcal{O}_K` —
@@ -142,6 +156,8 @@ prime factors, which is exactly the invertibility supplied by the fractional-ide
 
 # Fractional ideals and the class group
 
+## Fractional Ideals
+
 :::definition "fractional-ideal" (lean := "FractionalIdeal")
 Let $`R` be a domain with fraction field $`K`. A *fractional ideal* of $`R` is an
 $`R`-submodule $`J \subseteq K` for which there exists a nonzero $`d \in R` with $`dJ
@@ -149,6 +165,8 @@ $`R`-submodule $`J \subseteq K` for which there exists a nonzero $`d \in R` with
 fractional ideals; products and (for a Dedekind domain) inverses of fractional ideals are
 again fractional ideals.
 :::
+
+## Nonzero Fractional Ideals Form an Abelian Group
 
 :::theorem "fractional-ideal-group" (lean := "IsDedekindDomainInv.commGroupWithZero")
 For a Dedekind domain $`R` ({uses "dedekind-domain"}[]) with fraction field $`K`, the nonzero
@@ -170,6 +188,8 @@ valuation at each prime, giving an isomorphism with the free abelian group $`\bi
 p}\mathbb{Z}`.
 :::
 
+## The Ideal Class Group
+
 :::definition "class-group" (lean := "ClassGroup")
 The *class group* $`\mathrm{Cl}(R)` of a Dedekind domain $`R` (e.g. $`R = \mathcal{O}_K`,
 {uses "ring-of-integers"}[]) is the quotient of the group of nonzero fractional ideals
@@ -181,6 +201,8 @@ $`\mathrm{Cl}(R)` is realised as the cokernel of the map $`K^\times \to (\mathrm
 
 # The absolute ideal norm and bounded-norm finiteness
 
+## The Absolute Ideal Norm
+
 :::definition "absolute-norm" (lean := "Ideal.absNorm")
 The *absolute norm* of an ideal $`I` of $`\mathcal{O}_K` is the cardinality of the finite
 quotient ring,
@@ -190,6 +212,8 @@ $`[\mathcal{O}_K : I]` (`Submodule.cardQuot`) and bundles it as a monoid-with-ze
 $`\mathrm{absNorm} : \mathrm{Ideal}(\mathcal{O}_K) \to^{*0} \mathbb{N}`, so $`N(\{0\}) = 0`,
 $`N(\mathcal{O}_K) = 1`, and $`N(IJ) = N(I)\,N(J)`.
 :::
+
+## Norm of a Principal Ideal Equals the Absolute Value of the Field Norm
 
 :::lemma_ "absnorm-span-singleton" (lean := "Ideal.absNorm_span_singleton")
 For a principal ideal the absolute norm is the absolute value of the field norm: for $`r \in
@@ -206,6 +230,8 @@ value of the determinant of multiplication by $`r` written in that basis
 $`N_{K/\mathbb{Q}}(r)` ({uses "trace-norm-form"}[]). For $`r = 0` both sides are $`0`.
 :::
 
+## Larger Ideals Have Smaller Norm
+
 :::lemma_ "absnorm-monotone" (lean := "Ideal.absNorm_dvd_absNorm_of_le")
 If $`J \subseteq I` are ideals of $`\mathcal{O}_K`, then $`N(I) \mid N(J)`
 ({uses "absolute-norm"}[]). In particular a larger ideal has a smaller norm, and $`N(I) = 1`
@@ -219,6 +245,8 @@ multiplicativity of the subgroup index along the tower $`J \le I \le \mathcal{O}
 (`AddSubgroup.index_dvd_of_le`). Unwinding the definition of `absNorm`
 ({uses "absolute-norm"}[]) gives $`N(I) \mid N(J)`.
 :::
+
+## Finitely Many Ideals of Bounded Norm
 
 :::theorem "finite-ideals-bounded-norm" (lean := "Ideal.finite_setOf_absNorm_le")
 For every bound $`B \in \mathbb{N}`, there are only finitely many ideals of $`\mathcal{O}_K`
@@ -238,6 +266,8 @@ $`\mathcal{O}_K/(m)` is finite for $`m \ne 0`.
 
 # The discriminant and the different ideal
 
+## The Discriminant of a Number Field
+
 :::definition "discriminant" (lean := "NumberField.discr")
 The *discriminant* $`\mathrm{disc}(K)` of a number field $`K` is the determinant of the trace
 form ({uses "trace-norm-form"}[]) in an integral basis $`\omega_1, \dots, \omega_n` of
@@ -247,6 +277,8 @@ It is independent of the chosen integral basis (two integral bases differ by a m
 $`\mathrm{GL}_n(\mathbb{Z})`, whose determinant is $`\pm 1`), and its absolute value measures
 the arithmetic complexity of $`K`.
 :::
+
+## Discriminant Agrees with the Trace Form Discriminant
 
 :::theorem "discriminant-integral-basis" (lean := "NumberField.coe_discr")
 The integer discriminant ({uses "discriminant"}[]) agrees with the discriminant of the trace
@@ -263,6 +295,8 @@ discriminant is invariant under this localisation (`Algebra.discr_localizationLo
 giving the stated equality after the canonical inclusion $`\mathbb{Z} \hookrightarrow \mathbb{Q}`.
 :::
 
+## The Different Ideal
+
 :::definition "different-ideal" (lean := "differentIdeal")
 For an extension $`B/A` of Dedekind domains, the *different ideal* $`\mathfrak{d}_{B/A}
 \subseteq B` is the inverse of the dual of $`B` with respect to the trace pairing
@@ -272,6 +306,8 @@ $$`\mathfrak{d}_{B/A} = (B^\vee)^{-1}.`
 For $`B/A = \mathcal{O}_K/\mathbb{Z}` it is an integral ideal whose prime factorisation records
 the ramification of $`K/\mathbb{Q}`.
 :::
+
+## The Norm of the Different Equals the Absolute Discriminant
 
 :::theorem "different-discriminant" (lean := "NumberField.absNorm_differentIdeal")
 The absolute norm ({uses "absolute-norm"}[]) of the different ideal
@@ -290,6 +326,8 @@ fractional-ideal quotient $`\mathcal{O}_K/\mathfrak{d} \cong \mathcal{O}_K^\vee/
 (`FractionalIdeal.quotientEquiv`) has the same finite cardinality, namely
 $`N(\mathfrak{d}) = |\mathrm{disc}(K)|`.
 :::
+
+## Transitivity of the Different
 
 :::theorem "different-tower" (lean := "differentIdeal_eq_differentIdeal_mul_differentIdeal")
 *(Transitivity of the different.)* For a tower $`A \subseteq B \subseteq C` of Dedekind
@@ -311,6 +349,8 @@ N(\mathfrak{d}_{C/B})\cdot|\mathrm{disc}(B/A)|^{[C:B]}` ({uses "different-discri
 
 # Minkowski's bound and Hermite's theorem
 
+## The Minkowski Bound
+
 :::definition "minkowski-bound" (lean := "NumberField.mixedEmbedding.minkowskiBound")
 For a number field $`K` and a nonzero fractional ideal $`I` ({uses "fractional-ideal"}[]), the
 *Minkowski bound* is the covolume threshold
@@ -321,6 +361,8 @@ symmetric convex body of volume exceeding this bound contains a nonzero point of
 which produces a nonzero element of $`I` of controlled archimedean size and hence of bounded
 absolute norm ({uses "absolute-norm"}[]).
 :::
+
+## The Hermite–Minkowski Theorem
 
 :::theorem "hermite-minkowski" (lean := "NumberField.abs_discr_gt_two")
 *(Hermite–Minkowski.)* Every number field $`K` of degree $`[K:\mathbb{Q}] > 1` has
@@ -340,6 +382,8 @@ increasing in $`n`, one gets $`|\mathrm{disc}(K)| > 2` whenever $`n > 1`; the pr
 `nlinarith`/`gcongr` chain `abs_discr_gt_two` from $`\pi > 3`.
 :::
 
+## Hermite's Theorem
+
 :::theorem "hermite-finite" (lean := "NumberField.finite_of_discr_bdd")
 *(Hermite's theorem.)* For every bound $`N \in \mathbb{N}`, there are only finitely many number
 fields $`K` (inside a fixed algebraic closure of $`\mathbb{Q}`) with
@@ -356,6 +400,8 @@ $`K = \mathbb{Q}(x)`. The bounded conjugates confine the minimal polynomial of $
 set of integer polynomials (`finite_of_finite_generating_set`), so only finitely many fields
 arise; assembling the two cases is `finite_of_discr_bdd`.
 :::
+
+## Kronecker's Theorem
 
 :::theorem "kronecker" (lean := "NumberField.Embeddings.pow_eq_one_of_norm_le_one")
 *(Kronecker's theorem.)* Let $`K` be a number field and $`x \in K` a nonzero algebraic integer
@@ -377,6 +423,8 @@ nonzero $`x^b` in the domain $`K` yields $`x^{a-b} = 1` with $`a - b \ge 1`. Thi
 
 # Finiteness of the class group
 
+## The Class Group Is Finite
+
 :::theorem "class-group-finite" (lean := "NumberField.RingOfIntegers.instFintypeClassGroup")
 The class group $`\mathrm{Cl}(K)` ({uses "class-group"}[]) of the ring of integers of any number
 field $`K` is finite.
@@ -394,6 +442,8 @@ ideals of bounded norm ({uses "finite-ideals-bounded-norm"}[]), the class group 
 finitely many classes, so it is finite.
 :::
 
+## The Class Number
+
 :::definition "class-number" (lean := "NumberField.classNumber")
 The *class number* $`h_K` of a number field $`K` is the cardinality of its (finite) class group
 ({uses "class-group-finite"}[]):
@@ -403,6 +453,8 @@ $`h_K` measures the failure of unique factorisation of elements in $`\mathcal{O}
 :::
 
 # The Dirichlet unit theorem
+
+## Dirichlet's Unit Theorem
 
 :::theorem "dirichlet-unit-theorem" (lean := "NumberField.Units.exist_unique_eq_mul_prod")
 *(Dirichlet's unit theorem.)* Let $`K` be a number field with $`r_1` real embeddings and
@@ -428,6 +480,8 @@ gives the unique decomposition `exist_unique_eq_mul_prod`.
 
 # Ramification and the fundamental identity
 
+## Ramification Index
+
 :::definition "ramification-index" (lean := "Ideal.ramificationIdx")
 Let $`R \subseteq S` be an extension of Dedekind domains and $`\mathfrak{p} \subseteq R` a
 nonzero prime. For a prime $`\mathfrak{P}` of $`S` over $`\mathfrak{p}`, the *ramification
@@ -437,11 +491,15 @@ $$`\mathfrak{p}S = \mathfrak{P}_1^{e_1} \cdots \mathfrak{P}_g^{e_g}, \quad e_i =
 If $`e(\mathfrak{P}|\mathfrak{p}) > 1`, the prime $`\mathfrak{p}` *ramifies* in $`S`.
 :::
 
+## Inertia Degree
+
 :::definition "inertia-degree" (lean := "Ideal.inertiaDeg")
 With notation as in {uses "ramification-index"}[], the *inertia degree* (residue degree)
 $`f(\mathfrak{P}|\mathfrak{p})` is the degree of the residue-field extension:
 $$`f(\mathfrak{P}|\mathfrak{p}) = [\,S/\mathfrak{P} : R/\mathfrak{p}\,].`
 :::
+
+## The Fundamental Identity of Ramification
 
 :::theorem "fundamental-identity" (lean := "Ideal.sum_ramification_inertia")
 *(Fundamental identity of ramification.)* Let $`S/R` be a finite extension of Dedekind domains
@@ -465,12 +523,16 @@ $`R_{\mathfrak{p}}` (flatness of $`L \cong K \otimes_R S`). This is mathlib's
 
 # Adic valuations and the height-one spectrum
 
+## The Height-One Spectrum
+
 :::definition "height-one-spectrum" (lean := "IsDedekindDomain.HeightOneSpectrum")
 For a Dedekind domain $`R` ({uses "dedekind-domain"}[]), the *height-one spectrum* is the set
 of nonzero prime ideals of $`R` — equivalently, the maximal ideals, since $`R` has dimension
 $`\le 1`. Each such $`\mathfrak{p}` is the data of a discrete place of $`\mathrm{Frac}(R)`. For
 $`R = \mathcal{O}_K` these are exactly the finite places of the number field $`K`.
 :::
+
+## The Adic Valuation
 
 :::definition "adic-valuation" (lean := "IsDedekindDomain.HeightOneSpectrum.valuation")
 Each prime $`\mathfrak{p}` of the height-one spectrum ({uses "height-one-spectrum"}[]) carries a
@@ -499,6 +561,8 @@ $`\mathrm{ord}_{\mathfrak p}(r) \ge 0` and $`\mathrm{ord}_{\mathfrak p}(r) \ge 1
 
 # Chevalley–Warning over finite fields
 
+## The Chevalley–Warning Theorem
+
 :::theorem "chevalley-warning" (lean := "char_dvd_card_solutions")
 *(Chevalley–Warning.)* Let $`\mathbb{F}_q` be a finite field of characteristic $`p`, and let
 $`f \in \mathbb{F}_q[X_1, \dots, X_s]` be a polynomial whose total degree is strictly less than
@@ -525,6 +589,8 @@ the solution count is $`0` in $`\mathbb{F}_q`, i.e. divisible by $`p`. This is
 
 # Cyclotomic extensions
 
+## Cyclotomic Extensions
+
 :::definition "cyclotomic-extension" (lean := "IsCyclotomicExtension")
 Let $`S` be a set of positive integers and $`A \subseteq B` a ring extension. We say $`B` is an
 *$`S`-cyclotomic extension* of $`A` (written $`\mathrm{IsCyclotomicExtension}(S, A, B)`) if for
@@ -533,6 +599,8 @@ $`A` by all $`n`-th roots of unity for $`n \in S`. For a single integer $`n` the
 cyclotomic field* over $`\mathbb{Q}` is $`\mathbb{Q}(\zeta_n)`, the splitting field of the
 cyclotomic polynomial $`\Phi_n`.
 :::
+
+## Degree of a Cyclotomic Extension Is Euler's Totient
 
 :::theorem "cyclotomic-finrank" (lean := "IsCyclotomicExtension.finrank")
 When $`\Phi_n` is irreducible over the base field $`K` (in particular for $`K = \mathbb{Q}` by
@@ -550,6 +618,8 @@ $`\zeta_n` (`IsPrimitiveRoot.powerBasis`); this is mathlib's `IsCyclotomicExtens
 degree of $`\Phi_n` is $`\varphi(n) = \#(\mathbb{Z}/n\mathbb{Z})^\times`, the number of primitive
 $`n`-th roots of unity.
 :::
+
+## Galois Group of a Cyclotomic Field
 
 :::theorem "cyclotomic-galois-zmod" (lean := "IsCyclotomicExtension.Rat.galEquivZMod")
 For the $`n`-th cyclotomic field $`K = \mathbb{Q}(\zeta_n)` ({uses "cyclotomic-extension"}[]),
@@ -569,6 +639,8 @@ which is injective because $`\zeta_n` generates $`K` and surjective by a cardina
 both groups have order $`\varphi(n)` ({uses "cyclotomic-finrank"}[], using irreducibility of
 $`\Phi_n` over $`\mathbb{Q}`). The named abbreviation `galEquivZMod` packages this equivalence.
 :::
+
+## A Prime Is Totally Ramified in the Cyclotomic Field of a Prime Power
 
 :::theorem "cyclotomic-prime-totally-ramified" (lean := "IsCyclotomicExtension.Rat.ramificationIdxIn_eq_of_prime_pow, IsCyclotomicExtension.Rat.inertiaDegIn_eq_of_prime_pow")
 Let $`p` be a prime and $`K = \mathbb{Q}(\zeta_{p^{k+1}})` ({uses "cyclotomic-extension"}[]).
@@ -591,6 +663,8 @@ the Galois fundamental identity ({uses "fundamental-identity"}[]) $`r\cdot e\cdo
 \varphi(p^{k+1})` ({uses "cyclotomic-finrank"}[]) with $`e = \varphi(p^{k+1})`, $`f = 1`, forcing
 $`r = 1` (`ncard_primesOver_of_prime_pow`).
 :::
+
+## Splitting of Primes in Cyclotomic Fields
 
 :::theorem "cyclotomic-prime-splitting" (lean := "IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd, IsCyclotomicExtension.Rat.ramificationIdxIn_eq")
 Let $`K = \mathbb{Q}(\zeta_n)` ({uses "cyclotomic-extension"}[]) and write $`n = p^{k+1}m` with
@@ -703,6 +777,8 @@ v4.30.0-rc2. They connect into the dependency graph through the Mathlib-backed n
 chapter via `{uses}` edges. Statements should be re-pointed to `(lean := …)` once the
 corresponding PR merges.
 
+## Quadratic Number Fields
+
 :::theorem "quadratic-number-field" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/36347")
 A *quadratic number field* is a number field ({uses "number-field"}[]) of degree $`2` over
 $`\mathbb{Q}`. Every such field is isomorphic to $`\mathbb{Q}(\sqrt{d})` for a unique squarefree
@@ -718,6 +794,8 @@ determined by $`K`) is the companion PR #36387.
 In review — [mathlib PR #36347](https://github.com/leanprover-community/mathlib4/pull/36347).
 :::
 
+## Unramifiedness Is Preserved under Compositum
+
 :::theorem "hilbert-unramified-compositum" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/36843")
 *(Hilbert theory — unramified compositum.)* Let $`A` be a Dedekind domain
 ({uses "dedekind-domain"}[]) with fraction field $`K`, let $`\mathfrak{p}` be a nonzero prime of
@@ -732,6 +810,8 @@ ramification in towers, to the statement that the inertia subgroups attached to 
 $`L_2` generate, so their compositum carries no ramification.
 In review — [mathlib PR #36843](https://github.com/leanprover-community/mathlib4/pull/36843).
 :::
+
+## Inertia Field of a Cyclotomic Extension
 
 :::theorem "cyclotomic-inertia-field" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/37031")
 *(Inertia field of a cyclotomic field.)* Let $`n = p^k m` with $`p \nmid m`, and let $`K =
@@ -749,6 +829,8 @@ of a rational prime $`p` in $`\mathbb{Q}(\zeta_n)` recorded by `galEquivZMod`
 ({uses "cyclotomic-galois-zmod"}[]) into the language of the decomposition and inertia fields.
 In review — [mathlib PR #37031](https://github.com/leanprover-community/mathlib4/pull/37031).
 :::
+
+## Ring-of-Integers Typeclass Instances
 
 :::theorem "ring-of-integers-instances" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/9444")
 *(Ring-of-integers instances.)* For a number field $`K` ({uses "number-field"}[]) the ring of

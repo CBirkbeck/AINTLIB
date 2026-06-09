@@ -32,6 +32,8 @@ inertia degree, and $`N\mathfrak{p}` for the absolute norm of $`\mathfrak{p}`.
 
 # Galois extensions and the fundamental theorem
 
+## Galois Extensions
+
 :::definition "is-galois" (lean := "IsGalois")
 A finite-dimensional field extension $`L/K` is *Galois* if it is both separable and normal: every
 element of $`L` is separable over $`K`, and the minimal polynomial over $`K` of every element of
@@ -39,6 +41,8 @@ $`L` splits completely in $`L`. (In mathlib a separable extension is by definiti
 these two conditions are exactly the data of the `IsGalois` class.) We write
 $`\mathrm{Gal}(L/K)` for the group of field automorphisms of $`L` fixing $`K` pointwise.
 :::
+
+## Order of the Galois Group Equals the Degree
 
 :::theorem "galois-card-aut" (lean := "IsGalois.card_aut_eq_finrank")
 Let $`L/K` be a finite Galois extension. Then the order of the Galois group equals the degree:
@@ -56,6 +60,8 @@ roots and normality forces them all into $`L`, so this count is exactly $`\deg \
 and target have equal finite dimension), so $`|\mathrm{Gal}(L/K)|` equals that count of homomorphisms,
 which is $`[L:K]`.
 :::
+
+## The Fundamental Theorem of Galois Theory
 
 :::theorem "galois-correspondence" (lean := "IsGalois.intermediateFieldEquivSubgroup")
 *(Fundamental theorem of Galois theory.)* Let $`L/K` be a finite Galois extension with
@@ -79,6 +85,8 @@ group $`H`. Order-reversal is immediate: a larger intermediate field is fixed by
 The degree formulas follow from {uses "galois-card-aut"}[] applied to $`L/M`.
 :::
 
+## Order of the Fixing Subgroup
+
 :::theorem "fixing-subgroup-card" (lean := "IsGalois.card_fixingSubgroup_eq_finrank")
 Let $`L/K` be a finite Galois extension and $`K \subseteq M \subseteq L` an intermediate field.
 Then the subgroup of $`G = \mathrm{Gal}(L/K)` fixing $`M` pointwise has order $`[L : M]`:
@@ -100,6 +108,8 @@ Throughout this section $`B/A` is a finite extension of Dedekind domains with $`
 $`A`, $`G` a finite group acting on $`B` by ring automorphisms with fixed subring $`A` (a *Galois
 group* for $`B/A` in mathlib's sense), and the residue extensions are taken separable.
 
+## The Inertia Group
+
 :::definition "inertia-group" (lean := "Ideal.inertia")
 Let $`G` be a group acting on a ring $`S` and let $`I` be an ideal of $`S`. The *inertia group* of
 $`I` is the subgroup of $`G` acting trivially on $`S/I`:
@@ -108,6 +118,8 @@ For $`I = \mathfrak{P}` a prime of $`B` over $`\mathfrak{p}`, this is the kernel
 from the decomposition group (the stabiliser of $`\mathfrak{P}`) to the automorphism group of the
 residue field extension $`k(\mathfrak{P})/k(\mathfrak{p})`.
 :::
+
+## Transitivity of the Galois Action on Primes
 
 :::lemma_ "galois-transitive" (lean := "Ideal.exists_smul_eq_of_isGaloisGroup")
 Let $`G` be a finite Galois group for $`B/A` and let $`\mathfrak{P}, \mathfrak{Q}` be primes of
@@ -124,6 +136,8 @@ statement `IsInvariant.exists_smul_of_under_eq`. The hypothesis $`\mathfrak{P} \
 required $`\sigma`. Transitivity of the induced action on the finite set of primes over
 $`\mathfrak{p}` is the immediate consequence used throughout the rest of the section.
 :::
+
+## Common Ramification Index and Inertia Degree
 
 :::lemma_ "ramification-inertia-common" (lean := "Ideal.ramificationIdx_eq_of_isGaloisGroup, Ideal.inertiaDeg_eq_of_isGaloisGroup")
 Let $`G` be a finite Galois group for $`B/A` and let $`\mathfrak{P}, \mathfrak{Q}` be primes of
@@ -143,6 +157,8 @@ algebra automorphism attached to $`\sigma`. Hence both invariants are constant o
 primes over $`\mathfrak{p}`, justifying the definitions of the common values $`e` and $`f`.
 :::
 
+## The Fundamental Identity in the Galois Case
+
 :::theorem "galois-efr-identity" (lean := "Ideal.ncard_primesOver_mul_ramificationIdxIn_mul_inertiaDegIn")
 *(Fundamental identity, Galois form.)* Let $`G` be a finite Galois group for $`B/A` and let
 $`\mathfrak{p}` be a nonzero maximal prime of $`A`. Writing $`r` for the number of primes of $`B`
@@ -160,6 +176,8 @@ gives $`|G| = [L:K]` (the order of a Galois group equals the degree, {uses "galo
 transported through `IsGaloisGroup.card_eq_finrank` to the fraction-field extension), so
 $`r \cdot e \cdot f = |G|`.
 :::
+
+## Order of the Inertia Group
 
 :::lemma_ "inertia-card" (lean := "Ideal.card_inertia_eq_ramificationIdxIn")
 With $`G`, $`\mathfrak{p}`, $`\mathfrak{P}` as above (and $`B/A` Dedekind, the residue extension
@@ -183,6 +201,8 @@ $`|\mathrm{inertia}(G,\mathfrak{P})| = e`. (The cancellation is where the Dedeki
 hypotheses enter, ensuring $`r, f \neq 0`.)
 :::
 
+## Order of the Decomposition Group
+
 :::theorem "decomposition-card" (lean := "Ideal.card_stabilizer_eq")
 Let $`G` be a finite Galois group for $`B/A`, $`\mathfrak{p}` a nonzero prime of $`A`, and
 $`\mathfrak{P}` a prime of $`B` over $`\mathfrak{p}`. The decomposition group (the stabiliser of
@@ -202,6 +222,8 @@ inertia–residue factorisation with the inertia-cardinality lemma.
 
 # Frobenius elements
 
+## The Frobenius Endomorphism
+
 :::definition "frobenius-endomorphism" (lean := "frobenius")
 Let $`R` be a commutative semiring with exponential characteristic $`p` (so $`p` is either $`1` or
 a prime, recorded by the `ExpChar R p` class). The *Frobenius endomorphism* is the ring
@@ -212,6 +234,8 @@ freshman's-dream identity $`(x + y)^{p} = x^{p} + y^{p}` (mathlib's `add_pow_exp
 is the monoid-homomorphism property of $`x \mapsto x^{p}`.
 :::
 
+## Arithmetic Frobenius Elements
+
 :::definition "arith-frob-at" (lean := "IsArithFrobAt")
 Let a monoid $`M` act on a ring $`S` by ring automorphisms, with the action trivial on a subring
 $`R`, and let $`Q` be an ideal of $`S` whose contraction $`P = Q \cap R` has finite residue field of
@@ -221,6 +245,8 @@ $$`\sigma(x) - x^{q} \in Q \qquad \text{for all } x \in S.`
 Equivalently $`\sigma` reduces to the Frobenius endomorphism ({uses "frobenius-endomorphism"}[]) of
 $`S/Q` relative to $`R/P`.
 :::
+
+## Existence of Arithmetic Frobenius Elements
 
 :::lemma_ "arith-frob-exists" (lean := "IsArithFrobAt.exists_of_isInvariant")
 Let $`G` be a finite group acting on a ring $`S` with fixed subring $`R`, and let $`Q` be a prime
@@ -241,6 +267,8 @@ automorphism on $`S/Q`; unwinding the surjectivity gives the congruence $`\sigma
 \pmod Q`, exhibiting $`\sigma` as a Frobenius at $`Q` ({uses "arith-frob-at"}[]).
 :::
 
+## Frobenius Elements Differ by an Inertia Element
+
 :::lemma_ "arith-frob-inertia" (lean := "IsArithFrobAt.mul_inv_mem_inertia")
 Any two arithmetic Frobenius elements at the same prime $`Q` differ by an element of the inertia
 group of $`Q`: if $`\sigma` and $`\sigma'` are both Frobenius at $`Q`, then $`\sigma\sigma'^{-1} \in
@@ -256,6 +284,8 @@ exactly the condition $`\sigma\sigma'^{-1} \in \mathrm{inertia}(G, Q)`. When $`Q
 inertia group is trivial ({uses "inertia-card"}[] gives $`|\mathrm{inertia}| = e = 1`), so the two
 Frobenius elements coincide.
 :::
+
+## Frobenius Action on Roots of Unity
 
 :::lemma_ "arith-frob-roots-of-unity" (lean := "AlgHom.IsArithFrobAt.apply_of_pow_eq_one")
 Suppose $`S` is a domain and $`\varphi \colon S \to S` is an arithmetic Frobenius at a prime $`Q`
@@ -274,6 +304,8 @@ $`\varphi(\zeta) = \zeta^{i}` for some $`i`. The congruence forces $`\zeta^{i} \
 $`S/Q`, so $`i \equiv q` and hence $`\varphi(\zeta) = \zeta^{q}` already in $`S`. This is the
 algebraic mechanism that ties Frobenius elements to power residue symbols below.
 :::
+
+## Conjugacy of Frobenius Elements Over the Same Prime
 
 :::lemma_ "arith-frob-conjugate" (lean := "isConj_arithFrobAt")
 Let $`G` be a finite group acting on $`S` with fixed subring $`R`, and let $`Q, Q'` be primes of
@@ -304,6 +336,8 @@ and Dirichlet's theorem on primes in arithmetic progressions — are sorry-free 
 a newer mathlib than the current AINTLIB build; each links to its exact source declaration and
 connects into the dependency graph through the mathlib-backed Galois and Frobenius nodes above.
 
+## Dirichlet Density of a Set of Primes
+
 :::definition "dirichlet-density"
 Let $`K` be a number field with ring of integers $`\mathcal{O}_K`. A set $`S` of nonzero prime
 ideals of $`\mathcal{O}_K` has *Dirichlet density* $`\delta \in \mathbb{R}`, written
@@ -319,6 +353,8 @@ measures the logarithmic proportion of $`S` among all primes.
 Formalised in [`chebotarev-density`](https://github.com/CBirkbeck/chebotarev-density): [`Chebotarev.HasDirichletDensity`](https://github.com/CBirkbeck/chebotarev-density/blob/836b1320988b2333191da1a008ab444f6ecb93e2/CebotarevDensity/Density.lean#L64) — sorry-free.
 :::
 
+## The Frobenius Conjugacy Class
+
 :::definition "frobenius-class"
 Let $`L/K` be a finite Galois extension of number fields and $`\mathfrak{p}` a nonzero prime of
 $`\mathcal{O}_K` unramified in $`L`. The decomposition group of any prime $`\mathfrak{P}` of
@@ -329,6 +365,8 @@ The *Frobenius conjugacy class* $`\mathrm{Frob}_{\mathfrak{p}} \in \mathrm{Conj}
 is this class.
 Formalised in [`chebotarev-density`](https://github.com/CBirkbeck/chebotarev-density): [`Chebotarev.frobeniusClass`](https://github.com/CBirkbeck/chebotarev-density/blob/836b1320988b2333191da1a008ab444f6ecb93e2/CebotarevDensity/Frobenius.lean#L199) — sorry-free.
 :::
+
+## The Chebotarev Density Theorem
 
 :::theorem "chebotarev-density"
 *(Chebotarev density theorem.)* Let $`L/K` be a finite Galois extension of number fields with
@@ -358,6 +396,8 @@ Transporting densities between $`K` and $`E` along the asymptotic $`\sum N\mathf
 $`\delta_K(C) = (f\,|C|/|G|)\cdot(1/f) = |C|/|G|`.
 :::
 
+## Density of Completely Split Primes
+
 :::theorem "chebotarev-split-completely"
 *(Completely split primes.)* For a finite Galois extension $`L/K` of number fields
 ({uses "is-galois"}[]), the Dirichlet density of primes of $`\mathcal{O}_K` that split completely
@@ -374,6 +414,8 @@ Frobenius, i.e. its Frobenius conjugacy class is the identity class $`\{1\}`. Ap
 $`|G| = [L:K]` by {uses "galois-card-aut"}[] — exactly the rewrite by `IsGalois.card_aut_eq_finrank`
 that the Lean proof performs.
 :::
+
+## Dirichlet Density in Arithmetic Progressions
 
 :::theorem "dirichlet-density-ap"
 *(Dirichlet's theorem, density form.)* For $`n \ge 1` and a unit $`a \in (\mathbb{Z}/n\mathbb{Z})^\times`,
@@ -395,6 +437,8 @@ Because Dirichlet density is insensitive to finite symmetric differences (`hasDi
 discarding those bad primes leaves density $`1/|(\mathbb{Z}/n\mathbb{Z})^\times| = 1/\varphi(n)`. (A
 small case split handles $`n \equiv 2 \pmod 4`, where $`\mathbb{Q}(\zeta_n) = \mathbb{Q}(\zeta_{n/2})`.)
 :::
+
+## Infinitely Many Primes in Each Frobenius Class
 
 :::theorem "chebotarev-infinitude"
 *(Infinitely many primes in each Frobenius class.)* For a finite Galois extension $`L/K` of number
@@ -420,6 +464,8 @@ integral closure with the unit ball, and the two flavours (mixed and equal chara
 *not* contain the local reciprocity map; the cohomological construction of local reciprocity is the
 subject of the Buzzard project in the next section. The core files are sorry-free.
 
+## Local Fields and Complete Discrete Valuation Rings
+
 :::definition "local-field"
 A *(nonarchimedean) local field* is a field $`K` that is complete with respect to a discrete
 valuation $`v` and has finite residue field. A *mixed characteristic local field* is a finite
@@ -428,6 +474,8 @@ is a finite extension of the field $`\mathbb{F}_p((t))` of formal Laurent series
 $`\mathbb{F}_p`.
 Formalised in [`LocalClassFieldTheory`](https://github.com/CBirkbeck/LocalClassFieldTheory): [`LocalField`](https://github.com/CBirkbeck/LocalClassFieldTheory/blob/e7d457c0c9e5facbb4ef8a3b66268a3a9b217dd8/LocalClassFieldTheory/LocalField.lean#L33), [`MixedCharLocalField`](https://github.com/CBirkbeck/LocalClassFieldTheory/blob/e7d457c0c9e5facbb4ef8a3b66268a3a9b217dd8/LocalClassFieldTheory/MixedCharacteristic/Basic.lean#L40), [`EqCharLocalField`](https://github.com/CBirkbeck/LocalClassFieldTheory/blob/e7d457c0c9e5facbb4ef8a3b66268a3a9b217dd8/LocalClassFieldTheory/EqCharacteristic/Basic.lean#L349) — sorry-free.
 :::
+
+## Extensions of Complete Discrete Valuation Rings
 
 :::theorem "local-field-extension-dvr"
 Let $`K` be complete with respect to a discrete valuation $`v` and let $`L/K` be a finite extension.
@@ -455,6 +503,8 @@ $`[L:K]` is the structure theorem for finitely generated torsion-free modules ov
 valuation ring, and the local $`ef = [L:K]` formula is the single-prime case of the fundamental
 identity ({uses "fundamental-identity"}[]).
 :::
+
+## Localization at a Prime Produces a Discrete Valuation Ring
 
 :::theorem "local-field-localization-dvr"
 Let $`R` be a Dedekind domain (or any domain with a height-one prime) and $`\mathfrak{p}` a nonzero
@@ -486,6 +536,8 @@ the construction of the *global* local-field class formation and the explicit lo
 are still in progress. The nodes below are *informal*; each links to its exact source declaration and
 states whether that declaration is currently sorry-free.
 
+## Tate Cohomology
+
 :::definition "tate-cohomology"
 Let $`G` be a finite group and $`M` a $`\mathbb{Z}[G]`-module. The *Tate cohomology* groups
 $`\widehat{H}^n(G, M)` are defined for all $`n \in \mathbb{Z}` by splicing the homological and
@@ -496,6 +548,8 @@ $`\widehat{H}^{-1}(G,M) = \ker(N_G)/I_G M` where $`I_G M` is spanned by the diff
 $`g \cdot m - m`.
 Formalised in [`ClassFieldTheory`](https://github.com/kbuzzard/ClassFieldTheory): [`tateComplex`](https://github.com/kbuzzard/ClassFieldTheory/blob/d5c1d044e770994e426e49256a050cb7dfb3f7cb/ClassFieldTheory/Cohomology/TateCohomology.lean#L71) — sorry-free.
 :::
+
+## The Herbrand Quotient
 
 :::definition "herbrand-quotient"
 Let $`G` be a *finite cyclic* group and $`M` a $`\mathbb{Z}[G]`-module. Tate cohomology of a cyclic
@@ -508,6 +562,8 @@ $`0` if either group is infinite. For the trivial module $`\mathbb{Z}`, $`h(G, \
 It is multiplicative on short exact sequences, which is what makes it computable.
 Formalised in [`ClassFieldTheory`](https://github.com/kbuzzard/ClassFieldTheory): [`Rep.herbrandQuotient`](https://github.com/kbuzzard/ClassFieldTheory/blob/d5c1d044e770994e426e49256a050cb7dfb3f7cb/ClassFieldTheory/Cohomology/FiniteCyclic/HerbrandQuotient/Defs.lean#L58) — sorry-free.
 :::
+
+## Herbrand Quotients of Local Field Unit Groups
 
 :::theorem "herbrand-local-units"
 Let $`l/k` be a cyclic extension of nonarchimedean local fields ({uses "local-field"}[]) with
@@ -533,6 +589,8 @@ $`h(G,\mathbb{Z}) = |G| = [l:k]`. The Lean development carries out exactly this 
 the first step is the part still under construction.
 :::
 
+## The Reciprocity Isomorphism of a Class Formation
+
 :::theorem "tate-reciprocity-iso"
 *(Reciprocity isomorphism of a class formation.)* Let $`G` be a finite group and let $`N` be a
 $`\mathbb{Z}[G]`-module equipped with a class $`\tau \in H^2(G, N)` making $`(G, N)` a *finite class
@@ -552,6 +610,8 @@ $`\widehat{H}^0(G, N)` with $`\widehat{H}^{-2}(G, \mathbb{Z})`, which is the fir
 $`H_1(G, \mathbb{Z}) \cong G^{\mathrm{ab}}` of the trivial module. Composing these canonical
 isomorphisms produces the stated reciprocity isomorphism.
 :::
+
+## Local Reciprocity and Local Class Field Theory
 
 :::theorem "local-reciprocity"
 *(Local reciprocity / local class field theory.)* For every finite Galois extension $`l/k` of
@@ -578,6 +638,8 @@ k^\times/N(l^\times) \cong G^{\mathrm{ab}}`. The norm-subgroup ordering is funct
 construction in $`l`.
 :::
 
+## The Local Kronecker-Weber Theorem
+
 :::theorem "local-kronecker-weber"
 *(Local Kronecker–Weber.)* Every finite abelian extension $`l/\mathbb{Q}_p` ({uses "is-galois"}[])
 embeds over $`\mathbb{Q}_p` into a cyclotomic extension $`\mathbb{Q}_p(\zeta_n)`
@@ -602,6 +664,8 @@ number fields containing the $`n`-th roots of unity. The construction of the sym
 goal; it is currently in progress (the uniqueness of the defining root of unity still rests on
 `sorry`s in the supporting lemmas), and no reciprocity law for the symbol is stated in the project.
 
+## The Power Residue Symbol
+
 :::definition "power-residue-symbol"
 Let $`F` be a number field, $`\zeta_n \in \mathcal{O}_F` a primitive $`n`-th root of unity, and
 $`\mathfrak{p}` a prime of $`\mathcal{O}_F` whose absolute norm is coprime to $`n`. For
@@ -625,6 +689,8 @@ request. It carries a `pr_url` pointing at the live PR and **no** `(lean := …)
 declaration is not yet in mathlib v4.30.0-rc2. It connects into the dependency graph through the
 mathlib-backed Galois and inertia nodes of this chapter, and should be re-pointed to
 `(lean := …)` once the PR merges.
+
+## The Galois Group Is Generated by Inertia Subgroups
 
 :::theorem "galois-generated-by-inertia" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/33992")
 *(The Galois group is generated by inertia.)* Let $`L/K` be a finite Galois extension of number

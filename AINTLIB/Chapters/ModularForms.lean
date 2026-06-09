@@ -45,6 +45,8 @@ through the mathlib-backed modular-forms nodes of this chapter.
 
 # The upper half-plane and the Möbius action
 
+## The upper half-plane
+
 :::definition "upper-half-plane" (lean := "UpperHalfPlane")
 The *upper half-plane* $`\mathbb{H}` is the set of complex numbers with strictly positive imaginary
 part:
@@ -52,6 +54,8 @@ $$`\mathbb{H} \;=\; \{\, z \in \mathbb{C} \;\mid\; \operatorname{Im}(z) > 0 \,\}
 It is realised in mathlib as the subtype of $`\mathbb{C}` carrying the positivity condition
 $`0 < \operatorname{Im}(z)`.
 :::
+
+## The Mobius action of the modular group
 
 :::definition "sl2-action" (lean := "UpperHalfPlane.glAction, UpperHalfPlane.SLAction")
 Let $`g = \begin{pmatrix} a & b \\ c & d \end{pmatrix} \in \mathrm{GL}_2(\mathbb{R})` with
@@ -72,6 +76,8 @@ $`c_{gh}(z) = c_g(h \cdot z)\,c_h(z)`, where $`c_g(z) = cz + d` is the denominat
 
 # The weight-k slash action
 
+## The weight-k slash action
+
 :::definition "slash-action" (lean := "SlashAction, ModularForm.slash_apply")
 For an integer $`k`, a matrix $`g \in \mathrm{GL}_2(\mathbb{R})`, and a function
 $`f : \mathbb{H} \to \mathbb{C}`, mathlib's *weight-$`k` slash action* is the right action
@@ -85,6 +91,8 @@ product of two functions it satisfies
 $$`(fh) \mid_{k_1 + k_2} g \;=\; (f \mid_{k_1} g)\,(h \mid_{k_2} g).`
 :::
 
+## Slash-invariant forms
+
 :::definition "slash-invariant-form" (lean := "SlashInvariantForm")
 A *slash-invariant form* of weight $`k` and level a subgroup $`\Gamma \le \mathrm{GL}_2(\mathbb{R})`
 is a function $`f : \mathbb{H} \to \mathbb{C}` invariant under the slash action of every
@@ -93,6 +101,8 @@ $$`f \mid_k \gamma \;=\; f \qquad \text{for all } \gamma \in \Gamma.`
 :::
 
 # Modular forms and cusp forms
+
+## Modular forms
 
 :::definition "modular-form" (lean := "ModularForm")
 A *modular form* of weight $`k \in \mathbb{Z}` and level $`\Gamma` is a slash-invariant form
@@ -106,12 +116,16 @@ A *modular form* of weight $`k \in \mathbb{Z}` and level $`\Gamma` is a slash-in
 The space of all such forms is a $`\mathbb{C}`-vector space denoted $`M_k(\Gamma)`.
 :::
 
+## Cusp forms
+
 :::definition "cusp-form" (lean := "CuspForm")
 A *cusp form* of weight $`k` and level $`\Gamma` is a slash-invariant form
 ({uses "slash-invariant-form"}[]) that is holomorphic on $`\mathbb{H}` and *vanishes at every cusp*:
 the same $`f \mid_k g` tends to $`0` as $`\operatorname{Im}(z) \to \infty`. The subspace of cusp
 forms is denoted $`S_k(\Gamma) \subseteq M_k(\Gamma)`.
 :::
+
+## Cusp forms as a submodule
 
 :::lemma_ "cusp-form-submodule" (lean := "ModularForm.CuspForm.equivCuspFormSubmodule")
 The space of cusp forms $`S_k(\Gamma)` embeds into $`M_k(\Gamma)` as a $`\mathbb{C}`-submodule, and
@@ -130,6 +144,8 @@ a domain onto the range of an injective linear map.
 
 # The q-expansion
 
+## The q-expansion of a periodic holomorphic function
+
 :::definition "q-expansion" (lean := "UpperHalfPlane.qExpansion")
 Let $`f : \mathbb{H} \to \mathbb{C}` and let $`h > 0`. The *$`q`-expansion of $`f` with parameter
 $`h`* is the formal power series
@@ -137,6 +153,8 @@ $$`\mathrm{qExp}_h(f) \;=\; \sum_{n=0}^{\infty} a_n\, q^n \;\in\; \mathbb{C}[[q]
 where $`q = e^{2\pi i z / h}` and the coefficients $`a_n` are the Taylor coefficients at $`0` of the
 analytic function $`F` satisfying $`f(z) = F(e^{2\pi i z/h})` near the cusp.
 :::
+
+## Convergence of the q-expansion
 
 :::lemma_ "q-expansion-convergence" (lean := "UpperHalfPlane.hasSum_qExpansion")
 Let $`f : \mathbb{H} \to \mathbb{C}` be periodic with period $`h > 0`, holomorphic, and bounded as
@@ -152,6 +170,8 @@ cusp removes the singularity, so $`F` extends analytically across $`0` and its T
 converges on the whole open unit disc. Substituting $`q = e^{2\pi i z/h}`, which lies in that disc
 for $`z \in \mathbb{H}`, yields the stated sum.
 :::
+
+## Uniqueness of q-expansion coefficients
 
 :::lemma_ "q-expansion-unique" (lean := "UpperHalfPlane.qExpansion_coeff_unique")
 Under the same hypotheses, the $`q`-expansion coefficients are uniquely determined by $`f` and
@@ -169,6 +189,8 @@ functions of $`q` — must have identical coefficients; hence $`c_n = a_n` for e
 
 # Eisenstein series
 
+## Eisenstein series
+
 :::definition "eisenstein-series" (lean := "ModularForm.eisensteinSeriesMF, ModularForm.E")
 For an integer $`k \ge 3`, a positive integer $`N`, and a congruence datum
 $`a \in (\mathbb{Z}/N\mathbb{Z})^2`, the *Eisenstein series of weight $`k`, level $`\Gamma(N)`, and
@@ -180,6 +202,8 @@ $$`E_k(z) \;=\; \sum_{\substack{(c,d) \in \mathbb{Z}^2 \\ (c,d) \neq (0,0)}} \fr
               \Big/ \Bigl(\,2\,\zeta(k)\,\Bigr),`
 the level-one Eisenstein series rescaled to have constant $`q`-coefficient $`1`.
 :::
+
+## Eisenstein series are modular forms
 
 :::theorem "eisenstein-is-modular-form" (lean := "ModularForm.eisensteinSeriesMF")
 For any $`k \ge 3`, $`N \ge 1`, and $`a \in (\mathbb{Z}/N\mathbb{Z})^2`, the Eisenstein series
@@ -196,6 +220,8 @@ sets together with $`k \ge 3`. Boundedness at the cusps is read off from the exp
 the cusp-function transform ({uses "q-expansion"}[]).
 :::
 
+## Nonvanishing of the normalised Eisenstein series
+
 :::theorem "eisenstein-nonzero" (lean := "EisensteinSeries.E_ne_zero")
 For every even $`k \ge 3`, the normalised Eisenstein series $`E_k` is nonzero.
 :::
@@ -206,10 +232,14 @@ The constant term of the $`q`-expansion of $`E_k` is $`1`
 would vanish identically, contradicting a nonzero constant term. Hence $`E_k \neq 0`.
 :::
 
+## Constant term of the Eisenstein q-expansion
+
 :::lemma_ "eisenstein-q-expansion-coeff-zero" (lean := "EisensteinSeries.E_qExpansion_coeff_zero")
 For even $`k \ge 3`, the constant term of the $`q`-expansion of $`E_k` is
 $$`a_0(E_k) \;=\; 1.`
 :::
+
+## Fourier coefficients of Eisenstein series
 
 :::lemma_ "eisenstein-q-expansion" (lean := "EisensteinSeries.E_qExpansion_coeff")
 For even $`k \ge 3` and every $`m \ge 1`, the $`m`-th $`q`-expansion coefficient of $`E_k` is
@@ -232,6 +262,8 @@ the same summation identity.
 
 # The discriminant modular form
 
+## The modular discriminant
+
 :::definition "modular-discriminant" (lean := "CuspForm.discriminant")
 The *modular discriminant* $`\Delta` is the nonzero cusp form of weight $`12` and level $`1` given
 by the Dedekind eta product
@@ -244,11 +276,15 @@ $`\mathbb{C}/(\mathbb{Z} + \mathbb{Z}\tau)` in its Weierstrass model $`y^2 = 4x^
 indeed $`(2\pi)^{12}\Delta = g_2^3 - 27 g_3^2`.
 :::
 
+## Leading q-expansion coefficient of the discriminant
+
 :::lemma_ "discriminant-q-coeff-one" (lean := "ModularForm.discriminant_qExpansion_coeff_one")
 The first $`q`-expansion coefficient of $`\Delta` is $`1`:
 $$`\Delta(z) \;=\; q + \sum_{n=2}^{\infty} \tau(n)\, q^n, \qquad q = e^{2\pi i z},`
 where $`\tau` is the Ramanujan tau function.
 :::
+
+## The discriminant as a combination of Eisenstein series
 
 :::theorem "discriminant-e4-e6" (lean := "ModularForm.discriminant_eq_E₄_cube_sub_E₆_sq")
 The modular discriminant satisfies the identity
@@ -269,6 +305,8 @@ the coefficient of $`q^1`: a direct expansion gives $`(E_4^3 - E_6^2)` coefficie
 
 # Dimension formula for level-one modular forms
 
+## Division by the discriminant
+
 :::theorem "discriminant-equiv" (lean := "CuspForm.discriminantEquiv, CuspForm.ofMulDiscriminant")
 For any weight $`k`, division by the discriminant $`\Delta` is a $`\mathbb{C}`-linear isomorphism
 $$`S_k(\mathrm{SL}_2(\mathbb{Z})) \;\xrightarrow{\;\sim\;}\; M_{k-12}(\mathrm{SL}_2(\mathbb{Z})),
@@ -288,6 +326,8 @@ $`\Delta`) are mutually inverse by $`\Delta\cdot(f/\Delta) = f` and $`(\Delta g)
 $`\Delta(z) \neq 0`.
 :::
 
+## One-dimensionality of weight-twelve cusp forms
+
 :::lemma_ "cusp-form-weight-twelve-rank-one" (lean := "CuspForm.rank_eq_one_of_weight_eq_twelve")
 The space $`S_{12}(\mathrm{SL}_2(\mathbb{Z}))` is one-dimensional over $`\mathbb{C}`.
 :::
@@ -300,6 +340,8 @@ rank $`1`; transporting along the isomorphism gives $`\dim S_{12} = 1`. (The non
 itself, {uses "modular-discriminant"}[], is the corresponding basis vector.)
 :::
 
+## Vanishing of cusp forms below weight twelve
+
 :::lemma_ "cusp-form-rank-zero-lt-twelve" (lean := "CuspForm.rank_eq_zero_of_weight_lt_twelve")
 For $`k < 12`, the space $`S_k(\mathrm{SL}_2(\mathbb{Z}))` is zero.
 :::
@@ -309,6 +351,8 @@ The discriminant isomorphism ({uses "discriminant-equiv"}[]) identifies $`S_k` w
 for $`k < 12` the weight $`k - 12` is negative. Level-one modular forms of negative weight vanish
 ({uses "neg-weight-rank-zero"}[]), so $`M_{k-12} = 0` and hence $`S_k = 0`.
 :::
+
+## Dimension of modular forms in terms of cusp forms
 
 :::lemma_ "rank-one-plus-rank-cusp" (lean := "ModularForm.rank_eq_one_add_rank_cuspForm")
 For every even $`k \ge 3`, the dimension of $`M_k(\mathrm{SL}_2(\mathbb{Z}))` satisfies
@@ -325,6 +369,8 @@ the quotient: it is nonzero there because $`E_k` has constant $`q`-coefficient $
 differs from $`a_0(f)\,E_k` by a form with vanishing constant term, i.e. a cusp form. Thus the
 quotient is the line spanned by $`[E_k]`.
 :::
+
+## The dimension formula for level-one modular forms
 
 :::theorem "dimension-level-one" (lean := "ModularForm.dimension_level_one")
 For every even natural number $`k`, the dimension of $`M_k(\mathrm{SL}_2(\mathbb{Z}))` over
@@ -350,6 +396,8 @@ For $`k \ge 12` the same splitting and the discriminant isomorphism $`S_k \simeq
 floor identity $`\lfloor k/12 \rfloor = 1 + \lfloor (k-12)/12 \rfloor` and the invariance of
 $`k \bmod 12` then propagate the closed form.
 :::
+
+## Finite-dimensionality of spaces of modular forms
 
 :::theorem "finite-dimensional-modular-forms" (lean := "ModularForm.dimension_level_one, ModularForm.levelOne_odd_weight_rank_zero")
 For every weight $`k \in \mathbb{Z}`, the space $`M_k(\mathrm{SL}_2(\mathbb{Z}))` is
@@ -401,6 +449,8 @@ Formalised in [`LeanModularForms`](https://github.com/CBirkbeck/LeanModularForms
 [`HeckeRing.DoubleCoset.doubleCoset_eq_iUnion_leftCosets`](https://github.com/CBirkbeck/LeanModularForms/blob/720d950b8c31ffd69b2cc7aa5323bccaefad62e1/LeanModularForms/HeckeRIngs/AbstractHeckeRing/Basic.lean#L256) — sorry-free.
 :::
 
+## The Hecke ring
+
 :::theorem "hecke-ring"
 *The Hecke ring of a Hecke pair.*
 For a Hecke pair $`(G, H, \Delta)` ({uses "hecke-pair"}[]), the free $`\mathbb{Z}`-module
@@ -426,6 +476,8 @@ double coset $`H` decomposes into the single left coset $`H`, whence $`[H]\cdot[
 on basis elements, extended to a two-sided identity by bilinearity ({uses "hecke-pair"}[]).
 :::
 
+## The degree homomorphism on the Hecke ring
+
 :::theorem "hecke-degree"
 *The degree homomorphism.*
 Counting left cosets defines a ring homomorphism $`\deg : \mathbb{T} \to \mathbb{Z}` sending each
@@ -445,6 +497,8 @@ left cosets occurring in the product double coset. Grouping these by the right a
 the left cosets of $`D_1`, each of the $`\deg D_1` orbits contributes exactly $`\deg D_2` cosets (an
 orbit-size computation), so the total is $`\deg D_1\,\deg D_2`.
 :::
+
+## Commutativity of the Hecke algebra
 
 :::theorem "hecke-commutativity"
 *Commutativity via anti-involutions, and the $`\mathrm{GL}_n` algebra.*
@@ -489,6 +543,8 @@ elements [`HeckeRing.GL2.T_ad`](https://github.com/CBirkbeck/LeanModularForms/bl
 
 Depends on: {uses "modular-form"}[] {uses "slash-action"}[] {uses "hecke-commutativity"}[]
 :::
+
+## Shimura's multiplication table
 
 :::theorem "hecke-multiplication-table"
 *Shimura's multiplication table (Theorem 3.24).*
@@ -543,6 +599,8 @@ Formalised in [`LeanModularForms`](https://github.com/CBirkbeck/LeanModularForms
 Depends on: {uses "cusp-form"}[] {uses "hecke-operator"}[]
 :::
 
+## Eigenvalues equal Fourier coefficients for newforms
+
 :::theorem "eigenvalue-equals-fourier-coeff"
 *Eigenvalue equals Fourier coefficient for a normalised newform.*
 Let $`f` be a normalised newform of weight $`k` and level $`\Gamma_1(N)` with Nebentypus $`\chi`.
@@ -590,6 +648,8 @@ with a nondegenerate inner product. Together these give the internal direct sum 
 old/new decomposition.
 :::
 
+## The Atkin-Lehner main lemma
+
 :::theorem "atkin-lehner-main-lemma"
 *Atkin–Lehner Main Lemma (Miyake 4.6.8 / Diamond–Shurman 5.7.1).*
 Let $`f \in S_k(\Gamma_1(N))` be a cusp form whose Fourier coefficients vanish at all indices
@@ -614,6 +674,8 @@ nonzero ({uses "eigenvalue-equals-fourier-coeff"}[]), and $`h - c_1' f` then has
 coefficients, forcing $`f` itself into the old subspace — i.e. $`f \in S_k^{\flat}(N)`. This is
 sorry-free; the spectral/adjoint inputs that the alternative proof would need are sidestepped.
 :::
+
+## Strong multiplicity one
 
 :::theorem "strong-multiplicity-one"
 *Strong Multiplicity One (Miyake 4.6.12 / Diamond–Shurman 5.8.2).*
@@ -709,6 +771,8 @@ The node below is drawn from the **ModFormDims** project
 develops $`q`-expansion comparison tools and dimension-formula infrastructure for the modular-forms
 library. It is informal here for the same reason as the LeanModularForms nodes.
 
+## Vanishing of modular forms of negative weight
+
 :::theorem "neg-weight-rank-zero"
 *Modular forms of negative weight vanish.*
 For any integer $`k < 0`, the space $`M_k(\mathrm{SL}_2(\mathbb{Z}))` is zero:
@@ -738,6 +802,8 @@ PR and **no** `(lean := …)` reference: the declarations are not yet in mathlib
 connect into the dependency graph through the mathlib-backed modular-forms nodes of this chapter via
 `{uses}` edges, and should be re-pointed to `(lean := …)` once the corresponding PR merges.
 
+## The graded ring of level-one modular forms
+
 :::theorem "e4-e6-graded-ring" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/38813")
 *($`E_4` and $`E_6` generate the graded ring of level-one modular forms, freely.)* The graded
 $`\mathbb{C}`-algebra of modular forms of level $`\mathrm{SL}_2(\mathbb{Z})`,
@@ -755,6 +821,8 @@ $`\Delta = (E_4^3 - E_6^2)/1728` ({uses "discriminant-e4-e6"}[]) cutting out the
 In review — [mathlib PR #38813](https://github.com/leanprover-community/mathlib4/pull/38813).
 :::
 
+## The Sturm bound
+
 :::theorem "sturm-bound" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/39000")
 *(Sturm bound.)* Let $`\Gamma \le \mathrm{SL}_2(\mathbb{Z})` be a finite-index subgroup and
 $`f \in M_k(\Gamma)` a modular form ({uses "modular-form"}[]) of weight $`k`. If the $`q`-expansion
@@ -769,6 +837,8 @@ vanishing $`\tfrac{k}{12}[\mathrm{SL}_2 : \Gamma]`. PR #39000 establishes the bo
 subgroups, the standard finite check for equality of modular forms and Hecke eigensystems.
 In review — [mathlib PR #39000](https://github.com/leanprover-community/mathlib4/pull/39000).
 :::
+
+## The Serre derivative
 
 :::definition "serre-derivative" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/36963")
 For an integer $`k`, the *Serre derivative* $`\vartheta_k` sends a weight-$`k` modular form

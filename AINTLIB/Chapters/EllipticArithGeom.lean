@@ -50,12 +50,16 @@ requests.
 
 # Weierstrass equations and the discriminant
 
+## Weierstrass curves
+
 :::definition "weierstrass-curve" (lean := "WeierstrassCurve")
 A *Weierstrass curve* over a commutative ring $`R` is the plane cubic
 $$`Y^2 + a_1 XY + a_3 Y \;=\; X^3 + a_2 X^2 + a_4 X + a_6,`
 specified by the tuple of coefficients $`(a_1, a_2, a_3, a_4, a_6) \in R^5`. In mathlib this is
 the structure `WeierstrassCurve R` with fields `a₁, a₂, a₃, a₄, a₆`.
 :::
+
+## Standard Quantities of a Weierstrass Curve
 
 :::definition "weierstrass-quantities" (lean := "WeierstrassCurve.b₂, WeierstrassCurve.b₄, WeierstrassCurve.b₆, WeierstrassCurve.b₈, WeierstrassCurve.c₄, WeierstrassCurve.c₆")
 From the coefficients of a Weierstrass curve $`W` ({uses "weierstrass-curve"}[]) one forms the
@@ -67,6 +71,8 @@ $$`c_4 = b_2^2 - 24 b_4,\qquad c_6 = -b_2^3 + 36 b_2 b_4 - 216 b_6.`
 These satisfy the relation $`4 b_8 = b_2 b_6 - b_4^2` (`WeierstrassCurve.b_relation`).
 :::
 
+## The Discriminant
+
 :::definition "weierstrass-discriminant" (lean := "WeierstrassCurve.Δ")
 The *discriminant* of a Weierstrass curve $`W` over $`R` is built from the standard quantities
 $`b_2, b_4, b_6, b_8` ({uses "weierstrass-quantities"}[]):
@@ -74,6 +80,8 @@ $$`\Delta \;=\; -b_2^2 b_8 - 8 b_4^3 - 27 b_6^2 + 9 b_2 b_4 b_6 \;\in\; R.`
 If $`R` is a field then $`\Delta = 0` exactly when the cubic curve is singular. (The sign
 convention is the one used by the LMFDB.)
 :::
+
+## Relation Between the Discriminant and Higher Invariants
 
 :::lemma_ "c-relation" (lean := "WeierstrassCurve.c_relation")
 The discriminant is tied to the higher invariants $`c_4, c_6` ({uses "weierstrass-quantities"}[])
@@ -90,6 +98,8 @@ the $`a_i` reduces the claim to a single polynomial identity, which mathlib clos
 mechanism proves the companion relation $`4 b_8 = b_2 b_6 - b_4^2`.
 :::
 
+## Elliptic Curves
+
 :::definition "is-elliptic" (lean := "WeierstrassCurve.IsElliptic")
 A Weierstrass curve $`W` over $`R` is *elliptic* if its discriminant $`\Delta`
 ({uses "weierstrass-discriminant"}[]) is a unit in $`R`. In mathlib this is the typeclass
@@ -97,6 +107,8 @@ A Weierstrass curve $`W` over $`R` is *elliptic* if its discriminant $`\Delta`
 equivalent to $`\Delta \ne 0`, i.e. nonsingularity of the cubic. When $`W` is elliptic one
 writes $`\Delta'` for the chosen unit lifting $`\Delta` (`WeierstrassCurve.Δ'`).
 :::
+
+## The Two-Torsion Polynomial
 
 :::definition "two-torsion-polynomial" (lean := "WeierstrassCurve.twoTorsionPolynomial")
 The *2-torsion polynomial* of a Weierstrass curve $`W` ({uses "weierstrass-curve"}[]) is the
@@ -106,6 +118,8 @@ recorded in mathlib as the `Cubic` with coefficients $`(4, b_2, 2b_4, b_6)`. Ove
 characteristic $`\ne 2`, its roots over a splitting field are exactly the $`X`-coordinates of
 the nonzero $`2`-torsion points of $`W`.
 :::
+
+## Discriminant of the Two-Torsion Polynomial
 
 :::lemma_ "two-torsion-discriminant" (lean := "WeierstrassCurve.twoTorsionPolynomial_discr")
 The cubic discriminant of the 2-torsion polynomial ({uses "two-torsion-polynomial"}[]) is a
@@ -126,12 +140,16 @@ $`16 = 2^4` out of the product and using that a power of the unit $`2` is a unit
 
 # The j-invariant
 
+## The j-Invariant
+
 :::definition "j-invariant" (lean := "WeierstrassCurve.j")
 Let $`W` be an elliptic curve over $`R`, so its discriminant $`\Delta`
 ({uses "is-elliptic"}[]) is a unit with chosen lift $`\Delta'`. The *$`j`-invariant* of $`W` is
 $$`j \;=\; \Delta'^{-1} \cdot c_4^3 \;\in\; R,`
 with $`c_4` the higher invariant of $`W` ({uses "weierstrass-quantities"}[]).
 :::
+
+## Vanishing Criterion for the j-Invariant
 
 :::lemma_ "j-zero-criterion" (lean := "WeierstrassCurve.j_eq_zero_iff")
 For an elliptic curve $`W` over a reduced ring $`R`, the $`j`-invariant
@@ -148,6 +166,8 @@ reducedness hypothesis one only gets the variant $`j = 0 \iff c_4^3 = 0`.
 
 # Change of variables and normal forms
 
+## Admissible Changes of Variables
+
 :::definition "variable-change" (lean := "WeierstrassCurve.VariableChange")
 An *admissible change of variables* over $`R` is a tuple $`(u, r, s, t)` with $`u \in R^\times`
 and $`r, s, t \in R`, acting on coordinates by
@@ -157,6 +177,8 @@ under composition (matrix multiplication of the corresponding affine matrices) a
 Weierstrass curves $`W` ({uses "weierstrass-curve"}[]) by the scalar action $`C \bullet W`,
 which is a `MulAction`.
 :::
+
+## Transformation of the Discriminant Under Variable Change
 
 :::lemma_ "variable-change-quantities" (lean := "WeierstrassCurve.variableChange_c₄, WeierstrassCurve.variableChange_Δ")
 Under a change of variables $`C = (u, r, s, t)` ({uses "variable-change"}[]), the higher
@@ -175,6 +197,8 @@ again gives the displayed scalings. The instance `(C • W).IsElliptic` then fol
 $`u^{-12}` is a unit and the product of units is a unit ({uses "is-elliptic"}[]).
 :::
 
+## Invariance of the j-Invariant
+
 :::theorem "j-invariant-under-variable-change" (lean := "WeierstrassCurve.variableChange_j")
 The $`j`-invariant is invariant under every admissible change of variables: for any
 $`C` ({uses "variable-change"}[]),
@@ -191,6 +215,8 @@ $`u^{12} \cdot (u^{-4})^3 = u^{12} u^{-12} = 1`, so $`j` is unchanged. This is m
 `variableChange_c₄` and cancelling the powers of $`u`.
 :::
 
+## Short Weierstrass Normal Form
+
 :::definition "short-weierstrass" (lean := "WeierstrassCurve.IsShortNF")
 A Weierstrass curve is in *short normal form* if $`a_1 = a_2 = a_3 = 0`, i.e. it is
 $$`Y^2 = X^3 + a_4 X + a_6.`
@@ -201,6 +227,8 @@ characteristic $`\ne 2, 3` (and also in characteristic $`3` with $`j = 0`). math
 provides the characteristic-2 and characteristic-3 normal forms (`IsCharTwoNF`,
 `IsCharThreeNF`) and the intermediate `IsCharNeTwoNF` $`Y^2 = X^3 + a_2 X^2 + a_4 X + a_6`.
 :::
+
+## Reduction to Short Normal Form
 
 :::theorem "exists-short-weierstrass" (lean := "WeierstrassCurve.exists_variableChange_isShortNF")
 If $`2` and $`3` are units in $`R` (for instance over a field of characteristic $`\ne 2, 3`),
@@ -221,6 +249,8 @@ characteristics $`2` and $`3` produce the corresponding normal forms.
 
 # Models with prescribed j-invariant
 
+## Models with Prescribed j-Invariant
+
 :::definition "models-with-j" (lean := "WeierstrassCurve.ofJ0, WeierstrassCurve.ofJ1728, WeierstrassCurve.ofJNe0Or1728, WeierstrassCurve.ofJ")
 For a field $`F` and $`j \in F`, mathlib builds an explicit Weierstrass curve
 ({uses "weierstrass-curve"}[]) realising $`j`. The building blocks are
@@ -230,6 +260,8 @@ the last having $`\Delta = j^2(j-1728)^9` and $`c_4 = j(j-1728)^3`. The combined
 $`\mathrm{ofJ}(j)` selects among these by cases on whether $`j = 0`, $`j = 1728`, and on the
 characteristic, and is elliptic ({uses "is-elliptic"}[]) for every $`j`.
 :::
+
+## Surjectivity of the j-Invariant
 
 :::theorem "j-surjective" (lean := "WeierstrassCurve.ofJ_j")
 Every element of a field is the $`j`-invariant of an elliptic curve: for all $`j \in F`,
@@ -246,6 +278,8 @@ when $`2` is a unit), with the small-characteristic degeneracies (where $`0` and
 coincide with each other or where $`\mathrm{ofJ0}` and $`\mathrm{ofJ1728}` swap roles) handled
 by the lemmas `ofJ_0_of_three_eq_zero`, `ofJ_1728_of_two_eq_zero`, and their kin.
 :::
+
+## Isomorphism Criterion via the j-Invariant
 
 :::theorem "isom-of-j" (lean := "WeierstrassCurve.exists_variableChange_of_j_eq")
 *(Isomorphism criterion via the $`j`-invariant.)* Let $`E` and $`E'` be elliptic curves over a
@@ -268,6 +302,8 @@ separable-closedness (`IsSepClosed.exists_root_C_mul_X_pow_add_C_mul_X_add_C'`).
 
 # Affine points and the Weierstrass equation
 
+## The Affine Weierstrass Equation
+
 :::definition "affine-equation" (lean := "WeierstrassCurve.Affine.Equation, WeierstrassCurve.Affine.Nonsingular")
 Working in affine coordinates with the polynomial
 $$`W(X, Y) := Y^2 + a_1 XY + a_3 Y - (X^3 + a_2 X^2 + a_4 X + a_6),`
@@ -277,6 +313,8 @@ a pair $`(x, y) \in R^2` *satisfies the Weierstrass equation* of $`W`
 derivatives $`W_X(x, y)` and $`W_Y(x, y)` do not both vanish
 (`WeierstrassCurve.Affine.Nonsingular`).
 :::
+
+## Nonsingularity of Elliptic Curves
 
 :::lemma_ "equation-iff-nonsingular" (lean := "WeierstrassCurve.Affine.equation_iff_nonsingular")
 Over a field, an elliptic curve has no singular points: if $`W` is elliptic
@@ -294,6 +332,8 @@ $`(1, x, 0, y)` to the point at the origin (`equation_iff_nonsingular_zero` afte
 $`(0,0)` lay on the curve but were singular then $`a_3 = a_4 = a_6 = 0`, forcing $`\Delta = 0`,
 contradiction.
 :::
+
+## Chord-and-Tangent Formulae
 
 :::definition "group-law-formulae" (lean := "WeierstrassCurve.Affine.negY, WeierstrassCurve.Affine.slope, WeierstrassCurve.Affine.addX, WeierstrassCurve.Affine.addY")
 The chord-and-tangent operations are given by explicit formulae. The negation of $`(x, y)` has
@@ -313,6 +353,8 @@ where $`\ell` is the slope. mathlib proves these preserve nonsingularity
 
 # The coordinate ring and the group law
 
+## The Affine Coordinate Ring
+
 :::definition "coordinate-ring" (lean := "WeierstrassCurve.Affine.CoordinateRing")
 The *affine coordinate ring* of a Weierstrass curve $`W` ({uses "weierstrass-curve"}[]) is
 $$`R[W] := R[X, Y]/\langle W(X, Y)\rangle,`
@@ -321,6 +363,8 @@ rank-two module over $`R[X]` with the *power basis* $`\{1, Y\}`
 (`WeierstrassCurve.Affine.CoordinateRing.basis`), so every element is $`p + qY` with
 $`p, q \in R[X]`; its fraction field is the *function field* $`R(W)`.
 :::
+
+## The Coordinate Ring Is a Domain
 
 :::lemma_ "coordinate-ring-domain"
 If $`R` is an integral domain, then the affine coordinate ring $`R[W]`
@@ -336,6 +380,8 @@ element, it is a domain (`AdjoinRoot.isDomain_of_prime`), and the injective ring
 $`R[W] \hookrightarrow (W_{\mathrm{Frac}\,R})[W]` (`CoordinateRing.map_injective`) carries the
 domain property back, giving `instIsDomainCoordinateRing`.
 :::
+
+## Degree of the Norm in the Coordinate Ring
 
 :::lemma_ "coordinate-ring-norm-degree" (lean := "WeierstrassCurve.Affine.CoordinateRing.degree_norm_smul_basis")
 For $`p, q \in R[X]` over a domain, the $`R[X]`-algebra norm of $`p + qY \in R[W]`
@@ -356,6 +402,8 @@ degrees are even and $`\equiv 3 \pmod 2`, their maximum is never $`1`, which is
 `degree_norm_ne_one`.
 :::
 
+## Affine Points of a Weierstrass Curve
+
 :::definition "affine-point" (lean := "WeierstrassCurve.Affine.Point")
 The type $`W(F)` of *nonsingular affine points* of a Weierstrass curve $`W` over a field $`F`
 is the inductive with two constructors: the distinguished *point at infinity* $`\mathcal{O}`,
@@ -363,6 +411,8 @@ and affine points $`(x, y)` together with a proof that $`(x, y)` is nonsingular
 ({uses "affine-equation"}[]). When $`W` is elliptic the nonsingularity proof is automatic for
 any solution ({uses "equation-iff-nonsingular"}[]).
 :::
+
+## The Group Law on Affine Points
 
 :::theorem "affine-points-abelian-group" (lean := "WeierstrassCurve.Affine.Point.instAddCommGroup")
 The set $`W(F)` of nonsingular affine points (including $`\mathcal{O}`) of a Weierstrass curve
@@ -392,12 +442,16 @@ abelian group $`\mathrm{Cl}(F[W])` (`add_comm`, `add_assoc`, `neg_add_cancel`, t
 
 # Maps, base change, and reduction
 
+## Map and Base Change
+
 :::definition "map-base-change" (lean := "WeierstrassCurve.map, WeierstrassCurve.baseChange")
 For a ring homomorphism $`\phi : R \to A`, the *map* $`W.\mathrm{map}\,\phi`
 ({uses "weierstrass-curve"}[]) is the Weierstrass curve over $`A` obtained by applying $`\phi`
 to each coefficient $`a_i`; for an $`R`-algebra $`A` the *base change* $`W_A` is
 $`W.\mathrm{map}(\mathrm{algebraMap}\,R\,A)`.
 :::
+
+## Naturality of the Discriminant and j-Invariant
 
 :::lemma_ "map-discriminant-j" (lean := "WeierstrassCurve.map_Δ, WeierstrassCurve.map_j")
 Both the discriminant and the $`j`-invariant commute with maps: for $`\phi : R \to A`,
@@ -416,6 +470,8 @@ $`\phi(\Delta')^{-1}\phi(c_4)^3 = \phi(j)`; this is `map_j`. The instance
 `(W.map f).IsElliptic` records that $`\phi(\Delta)`, the image of a unit, is a unit.
 :::
 
+## Minimal Models Over Discrete Valuation Rings
+
 :::definition "minimal-model" (lean := "WeierstrassCurve.IsIntegral, WeierstrassCurve.IsMinimal, WeierstrassCurve.reduction")
 Let $`R` be a discrete valuation ring with fraction field $`K` and residue field $`\kappa`. A
 Weierstrass curve $`W` over $`K` ({uses "weierstrass-curve"}[]) is *integral* (`IsIntegral`) if
@@ -426,6 +482,8 @@ it is the base change of a curve over $`R` ({uses "map-base-change"}[]), and *mi
 (`WeierstrassCurve.reduction`) of a minimal model is its integral model base changed to
 $`\kappa`.
 :::
+
+## Existence of Minimal Models
 
 :::theorem "exists-minimal-model" (lean := "WeierstrassCurve.exists_isIntegral, WeierstrassCurve.exists_isMinimal")
 Over a discrete valuation ring $`R` with fraction field $`K`, every Weierstrass curve over $`K`
@@ -444,6 +502,8 @@ values in a well-ordered set bounded above by $`1` on integral models, so a maxi
 (`exists_maximalFor_of_wellFoundedGT`); translating that maximiser through the group action of
 changes of variables yields a minimal model (`exists_isMinimal`).
 :::
+
+## Reduction Types of Elliptic Curves
 
 :::theorem "reduction-types" (lean := "WeierstrassCurve.hasGoodReduction_or_hasMultiplicativeReduction_or_hasAdditiveReduction")
 A minimal Weierstrass curve over the fraction field of a discrete valuation ring has exactly one
@@ -469,6 +529,8 @@ inequalities.
 
 # Division polynomials and elliptic divisibility sequences
 
+## Elliptic Divisibility Sequences
+
 :::definition "elliptic-divisibility-sequence" (lean := "IsEllSequence, IsDivSequence, normEDS")
 An *elliptic sequence* is a sequence $`(W_n)_{n \in \mathbb{Z}}` in a commutative ring
 (`IsEllSequence`) satisfying, for all $`m, n, r`,
@@ -479,6 +541,8 @@ $`W_0 = 0`, $`W_1 = 1`, $`W_2 = b`, $`W_3 = c`, $`W_4 = bd`, built from the auxi
 sequence `preNormEDS (b^4) c d` (which agrees with `normEDS` at odd indices and differs by a
 factor $`b` at even indices), so that ring division is never needed.
 :::
+
+## Division Polynomials
 
 :::definition "division-polynomial-psi" (lean := "WeierstrassCurve.ψ")
 For an integer $`n`, the *$`n`-th division polynomial* $`\psi_n \in R[X, Y]` of a Weierstrass
@@ -493,12 +557,16 @@ $`\psi_4 = \mathrm{pre}\Psi_4 \cdot \psi_2`, the parity $`\psi_{-n} = -\psi_n`, 
 EDS recurrences (`ψ_even`, `ψ_odd`).
 :::
 
+## The x-Coordinate Numerator Polynomials
+
 :::definition "division-polynomial-phi" (lean := "WeierstrassCurve.φ")
 The associated *$`x`-coordinate numerators* $`\phi_n \in R[X, Y]` are
 $$`\phi_n := X \cdot \psi_n^2 - \psi_{n+1}\,\psi_{n-1}`
 ({uses "division-polynomial-psi"}[]), so that on the curve the $`x`-coordinate of $`n \cdot P`
 is $`\phi_n/\psi_n^2`. They satisfy $`\phi_0 = 1`, $`\phi_1 = X`, $`\phi_{-n} = \phi_n`.
 :::
+
+## Univariate Companions to Division Polynomials
 
 :::definition "division-polynomial-companion" (lean := "WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.preΨ, WeierstrassCurve.Ψ, WeierstrassCurve.ΨSq, WeierstrassCurve.Φ")
 Because $`\psi_2^2` is congruent in $`R[W]` ({uses "coordinate-ring"}[]) to the univariate
@@ -514,6 +582,8 @@ In $`R[W]` these companions coincide with the bivariate polynomials:
 $`\psi_n \equiv \Psi_n`, $`\psi_n^2 \equiv \Psi\mathrm{Sq}_n`, and $`\phi_n \equiv \Phi_n`
 ({uses "division-polynomial-psi"}[], {uses "division-polynomial-phi"}[]).
 :::
+
+## Division Polynomials in the Coordinate Ring
 
 :::lemma_ "division-polynomial-congruence" (lean := "WeierstrassCurve.Affine.CoordinateRing.mk_ψ, WeierstrassCurve.Affine.CoordinateRing.mk_φ")
 In the coordinate ring $`R[W]` ({uses "coordinate-ring"}[]), the bivariate division polynomials
@@ -534,6 +604,8 @@ substituted for $`\psi_2^2` ({uses "elliptic-divisibility-sequence"}[]), expandi
 
 # The L-function of a Weierstrass curve
 
+## The Local Polynomial
+
 :::definition "local-polynomial" (lean := "WeierstrassCurve.localPolynomial")
 Let $`R` be a discrete valuation ring with residue field $`\kappa` of cardinality $`q`, and
 $`W` a Weierstrass curve over its fraction field ({uses "weierstrass-curve"}[]). The *local
@@ -550,6 +622,8 @@ where $`\#\widetilde{W}(\kappa)` counts the points of the reduction
 obtained from the inverse power series of this polynomial.
 :::
 
+## The L-Function of a Weierstrass Curve
+
 :::definition "weierstrass-l-function" (lean := "WeierstrassCurve.LFunction, WeierstrassCurve.LSeries")
 For a Weierstrass curve $`W` over a number field $`K` ({uses "number-field"}[]), the
 *$`L`-function* is the formal Dirichlet series given by the Euler product over the prime ideals
@@ -560,6 +634,8 @@ Its associated complex Dirichlet $`L`-series ({bpref "lseries"}[]) is `Weierstra
 :::
 
 # The Nagell–Lutz theorem
+
+## The Nagell-Lutz Theorem
 
 :::theorem "nagell-lutz"
 *(Nagell–Lutz theorem.)* Let $`A, B \in \mathbb{Z}` with discriminant
@@ -596,6 +672,8 @@ $`\kappa_0^2 \mid 4\Delta`; dividing by $`4` gives $`y_0^2 \mid \Delta_{A,B}`.
 
 # The Hasse bound
 
+## Point Count Over Finite Fields
+
 :::definition "point-count" (lean := "WeierstrassCurve.Affine.Point")
 For a Weierstrass curve $`W` over a finite field $`K = \mathbb{F}_q` whose affine point type is
 finite, the *point count* $`\#W(\mathbb{F}_q)` is the cardinality of the finite abelian group
@@ -603,6 +681,8 @@ $`W(\mathbb{F}_q)` ({uses "affine-points-abelian-group"}[]) of $`\mathbb{F}_q`-r
 nonsingular affine points together with the point at infinity. In `Hasse-Weil` this is
 `pointCount E := Fintype.card E.Point`.
 :::
+
+## The Frobenius Endomorphism
 
 :::definition "frobenius-isogeny"
 For an elliptic curve $`E` ({uses "is-elliptic"}[]) over $`\mathbb{F}_q`, the *Frobenius
@@ -616,6 +696,8 @@ Formalised in `Hasse-Weil` (**private repo — link requires access**): `frobeni
 Frobenius pullback $`f \mapsto f^q` is sorry-free (`frobeniusIsog_pullback_apply`), built on
 `FiniteField.frobeniusAlgHom`.
 :::
+
+## The Hasse Bound
 
 :::theorem "hasse-bound"
 *(Hasse's theorem.)* For an elliptic curve $`E` ({uses "is-elliptic"}[]) over a finite field
@@ -649,6 +731,8 @@ conditional on them (`hasse_bound_of_all_witnesses`).
 
 # The Weil conjectures and the Hasse–Weil zeta function
 
+## The Hasse-Weil Zeta Function
+
 :::definition "hasse-weil-zeta"
 For a smooth projective scheme $`X` over $`\mathbb{F}_q`, writing $`N_n = \#X(\mathbb{F}_{q^n})`
 for the number of rational points over the degree-$`n` extension, the *Hasse–Weil zeta function*
@@ -659,6 +743,8 @@ Formalised in `WeilConjectures` (**private repo — link requires access**):
 `#L39`, commit `b8464ee`) — sorry-free; defined as $`\exp` of the logarithmic series
 $`\sum_n (N_n/n)\,t^n`.
 :::
+
+## The Weil Conjectures
 
 :::theorem "weil-conjectures"
 *(Weil conjectures for smooth projective varieties over $`\mathbb{F}_q`.)* Given a Weil
@@ -695,6 +781,8 @@ Poincaré pairing $`H^i \times H^{2d-i} \to K` is nondegenerate (`poincare_left`
 $`(N_n - (q^n+1))^2 \le (2g)^2 q^n`, the Hasse–Weil bound ({uses "hasse-bound"}[]) for all $`n`.
 :::
 
+## Rationality of the Zeta Function for Elliptic Curves
+
 :::lemma_ "hasse-weil-zeta-rational-for-EC"
 For an elliptic curve $`E` ({uses "is-elliptic"}[]) over $`\mathbb{F}_q`, the Hasse–Weil zeta
 function ({uses "hasse-weil-zeta"}[]) is explicitly rational:
@@ -721,6 +809,8 @@ v4.30.0-rc2. They connect into the dependency graph through the mathlib-backed n
 chapter via `{uses}` edges, and should be re-pointed to `(lean := …)` once the corresponding PR
 merges.
 
+## Characterisation of Elliptic Divisibility Sequences
+
 :::theorem "eds-characterisation" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/13057")
 *(Characterisation of elliptic divisibility sequences.)* An elliptic divisibility sequence
 ({uses "elliptic-divisibility-sequence"}[]) $`(W_n)` with $`W_0 = 0`, $`W_1 = 1` is determined
@@ -735,6 +825,8 @@ division polynomials and torsion.
 In review — [mathlib PR #13057](https://github.com/leanprover-community/mathlib4/pull/13057).
 :::
 
+## Newton Polygons
+
 :::definition "newton-polygon-mathlib" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/38050")
 Mathlib's *Newton polygon* of a polynomial (or power series) $`f = \sum_i a_i X^i` over a
 valued field ({uses "valuation"}[]) is the lower convex hull of the points $`(i, v(a_i))` for
@@ -747,6 +839,8 @@ once merged it supplies the in-library foundation for ramification, factorisatio
 polynomials, and slope decompositions of elliptic-curve formal groups.
 In review — [mathlib PR #38050](https://github.com/leanprover-community/mathlib4/pull/38050).
 :::
+
+## The Northcott Property
 
 :::theorem "northcott-property" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/39744")
 *(Northcott property.)* Equip the algebraic numbers with the absolute Weil height $`H`. For

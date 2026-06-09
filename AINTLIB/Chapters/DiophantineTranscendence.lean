@@ -39,6 +39,7 @@ mathlib pull request and is blueprinted informally as forthcoming.
 
 # The ring of integers of a real quadratic field and its norm
 
+## The ring of quadratic integers
 :::definition "zsqrtd" (lean := "Zsqrtd")
 For an integer $`d`, the *ring $`\mathbb{Z}[\sqrt{d}]`* (written $`\mathbb{Z}\sqrt{d}` or `ℤ√d` in
 Lean) consists of formal expressions $`a + b\sqrt{d}` with $`a, b \in \mathbb{Z}`. Addition and
@@ -52,6 +53,7 @@ $`a + b\sqrt{d} \mapsto a - b\sqrt{d}` is the `star` operation, making $`\mathbb
 `StarRing`.
 :::
 
+## The norm on quadratic integers
 :::definition "zsqrtd-norm" (lean := "Zsqrtd.norm")
 The *norm* of an element $`\alpha = a + b\sqrt{d} \in \mathbb{Z}[\sqrt{d}]` ({uses "zsqrtd"}[]) is the
 integer
@@ -60,6 +62,7 @@ computed in Lean from the real and imaginary parts as `n.re * n.re - d * n.im * 
 product $`\alpha\,\bar\alpha` of $`\alpha` with its conjugate, cast back to $`\mathbb{Z}`.
 :::
 
+## Norm as Product with Conjugate
 :::lemma_ "zsqrtd-norm-conj" (lean := "Zsqrtd.norm_eq_mul_conj")
 The norm of $`\alpha \in \mathbb{Z}[\sqrt{d}]` is the product of $`\alpha` with its conjugate: as
 elements of $`\mathbb{Z}[\sqrt{d}]`,
@@ -74,6 +77,7 @@ the cast of $`N(\alpha)` into $`\mathbb{Z}[\sqrt{d}]`. mathlib's `norm_eq_mul_co
 `ext <;> simp [norm, star, mul_comm, sub_eq_add_neg]` ({uses "zsqrtd"}[]).
 :::
 
+## Multiplicativity of the Norm
 :::lemma_ "zsqrtd-norm-mul" (lean := "Zsqrtd.norm_mul")
 The norm is multiplicative: for all $`\alpha, \beta \in \mathbb{Z}[\sqrt{d}]`,
 $$`N(\alpha\beta) = N(\alpha)\, N(\beta).`
@@ -89,6 +93,7 @@ the Brahmagupta–Fibonacci identity, closed by `ring`. mathlib's proof is exact
 $`N(1) = 1`.
 :::
 
+## Norm One Iff Unitary
 :::lemma_ "zsqrtd-norm-unitary" (lean := "Zsqrtd.norm_eq_one_iff_mem_unitary")
 An element $`\alpha \in \mathbb{Z}[\sqrt{d}]` has norm $`1` if and only if it is *unitary*, i.e.
 $`\alpha\,\overline{\alpha} = 1`:
@@ -107,6 +112,7 @@ $`\mathbb{Z}[\sqrt{d}]`.
 
 # Generalised continued fractions and their convergents
 
+## Generalised Continued Fractions
 :::definition "gcf" (lean := "GenContFract")
 A *generalised continued fraction* over a type $`\alpha` is an expression
 $$`h + \cfrac{a_0}{b_0 + \cfrac{a_1}{b_1 + \cfrac{a_2}{b_2 + \cdots}}}`
@@ -117,6 +123,7 @@ numerator–denominator pairs* $`(a_i, b_i)`. It is a *simple continued fraction
 *terminates at $`n`* (`TerminatedAt`) if the sequence of pairs has run out by index $`n`.
 :::
 
+## Convergents of a Continued Fraction
 :::definition "gcf-convergents" (lean := "GenContFract.convs")
 The *$`n`-th convergent* $`A_n/B_n` of a generalised continued fraction ({uses "gcf"}[]) is computed
 from the *continuants* $`(A_n, B_n)` — the numerator (`nums`) and denominator (`dens`) — via the
@@ -128,6 +135,7 @@ as the stream `contsAux`, with `conts`, `nums`, `dens`, and `convs` derived from
 `convs'` evaluates the truncated fraction directly, and the two agree.
 :::
 
+## Determinant Formula for Continuants
 :::theorem "cf-determinant" (lean := "SimpContFract.determinant")
 *(Determinant formula.)* For a simple continued fraction ({uses "gcf"}[]) that does not terminate at
 $`n`, the consecutive continuants ({uses "gcf-convergents"}[]) satisfy
@@ -147,6 +155,7 @@ $`pA(ppB + b_n\,pB) - pB(ppA + b_n\,pA) = (-1)^{n+1}` reduces by `ring` to $`ppA
 `terminated_stable`).
 :::
 
+## Convergence of Continued Fractions
 :::theorem "cf-convergence" (lean := "GenContFract.of_convergence")
 *(Convergence of the continued fraction expansion.)* Let $`v` lie in a linearly ordered, Archimedean
 field with order topology. The convergents of the regular continued fraction expansion
@@ -168,6 +177,7 @@ $`N' > 1/\varepsilon`, forcing $`1/(B_n B_{n+1}) < \varepsilon`.
 
 # Dirichlet's approximation theorem and Legendre's converse
 
+## Dirichlet's Approximation Theorem
 :::theorem "dirichlet-approx" (lean := "Real.exists_int_int_abs_mul_sub_le")
 *(Dirichlet's approximation theorem.)* For any real number $`\xi` and any positive integer $`n`,
 there exist integers $`j` and $`k` with $`0 < k \le n` such that
@@ -188,6 +198,7 @@ since $`|\mathrm{fract}(\xi y) - \mathrm{fract}(\xi x)|\cdot(n+1) \le 1`
 `Real.exists_rat_abs_sub_le_and_den_le`.
 :::
 
+## Infinitely Many Good Rational Approximations
 :::lemma_ "dirichlet-good-approx" (lean := "Real.infinite_rat_abs_sub_lt_one_div_den_sq_of_irrational")
 *(Infinitely many good approximations.)* An irrational real number $`\xi` has infinitely many
 rational approximations $`q` (in lowest terms) with
@@ -205,6 +216,7 @@ exhaustive, so infinitely many exist. This is the infinitude that drives the exi
 Pell solutions.
 :::
 
+## Real Convergents
 :::definition "real-convergent" (lean := "Real.convergent")
 For a real number $`\xi`, mathlib gives a *direct recursive* definition of the convergents of its
 continued fraction expansion as rational numbers (so that Legendre's theorem can be stated without
@@ -215,6 +227,7 @@ This agrees with $`(\mathrm{of}\,\xi).\mathrm{convs}` ({uses "gcf-convergents"}[
 defined (`Real.convs_eq_convergent`), using the convention $`1/0 = 0` to make it total.
 :::
 
+## Legendre's Theorem on Best Approximations
 :::theorem "legendre-convergent" (lean := "Real.exists_rat_eq_convergent")
 *(Legendre's theorem.)* If a rational $`q` satisfies
 $$`\left|\xi - q\right| < \frac{1}{2\,q.\mathrm{den}^2},`
@@ -238,6 +251,7 @@ $`2` forces the approximant to be a convergent.
 
 # Pell's equation, its solution group, and the fundamental solution
 
+## Pell's Equation
 :::definition "pell-ispell" (lean := "Pell.IsPell")
 For an integer $`d`, an element $`\alpha = x + y\sqrt{d} \in \mathbb{Z}[\sqrt{d}]` ({uses "zsqrtd"}[])
 *is a Pell solution* (`Pell.IsPell`) when
@@ -249,6 +263,7 @@ solutions are therefore closed under multiplication (`Pell.isPell_mul`) and conj
 source of their group structure.
 :::
 
+## The Type of Pell Solutions
 :::definition "pell-solution" (lean := "Pell.Solution₁")
 For an integer $`d`, the type $`\mathrm{Solution}_1(d)` (`Pell.Solution₁`) is the subtype of unitary
 elements of $`\mathbb{Z}[\sqrt{d}]` ({uses "zsqrtd-norm-unitary"}[]) — equivalently the pairs
@@ -256,6 +271,7 @@ $`(x, y)` of integers solving $`x^2 - dy^2 = 1` ({uses "pell-ispell"}[]). An ele
 coordinates $`a.x` and $`a.y` with $`a.x^2 - d\,a.y^2 = 1` (`Pell.Solution₁.prop`).
 :::
 
+## Group Structure of Pell Solutions
 :::theorem "pell-group" (lean := "Pell.Solution₁.instCommGroup")
 The set $`\mathrm{Solution}_1(d)` ({uses "pell-solution"}[]) of solutions to Pell's equation is a
 commutative group under the multiplication inherited from $`\mathbb{Z}[\sqrt{d}]` ({uses "zsqrtd"}[]):
@@ -274,6 +290,7 @@ coordinates is `Pell.Solution₁.x_mul`, `Pell.Solution₁.y_mul` and the invers
 $`\mathbb{Z}[\sqrt{d}]` ({uses "pell-ispell"}[]).
 :::
 
+## Existence of Nontrivial Pell Solutions
 :::theorem "pell-exists" (lean := "Pell.exists_of_not_isSquare")
 If $`d > 0` is not a perfect square, then the equation $`x^2 - dy^2 = 1` has a solution with
 $`y \ne 0`.
@@ -297,12 +314,14 @@ equivalence — a nontrivial solution exists iff $`d` is not a square — is
 `Pell.exists_iff_not_isSquare`.
 :::
 
+## The Fundamental Solution
 :::definition "pell-fundamental" (lean := "Pell.IsFundamental")
 A solution $`a \in \mathrm{Solution}_1(d)` ({uses "pell-solution"}[]) with $`d > 0` non-square is the
 *fundamental solution* (`Pell.IsFundamental`) if $`a.x > 1`, $`a.y > 0`, and $`a.x` is least among
 the $`x`-coordinates of all solutions with $`x > 1`.
 :::
 
+## Existence of the Fundamental Solution
 :::theorem "pell-fundamental-exists" (lean := "Pell.IsFundamental.exists_of_not_isSquare")
 If $`d > 0` is not a perfect square, a fundamental solution exists
 ({uses "pell-fundamental"}[]).
@@ -316,6 +335,7 @@ that occurs as the $`x`-coordinate of a positive solution, together with its $`y
 fundamental, the minimality clause being exactly `Nat.find_min'`.
 :::
 
+## Uniqueness of the Fundamental Solution
 :::theorem "pell-fundamental-unique" (lean := "Pell.IsFundamental.subsingleton")
 The fundamental solution ({uses "pell-fundamental"}[]) is unique: any two fundamental solutions are
 equal.
@@ -328,6 +348,7 @@ $`d > 0` ({uses "pell-fundamental"}[]) and both $`y`-coordinates are positive, $
 $`a = b` (`Pell.Solution₁.ext`).
 :::
 
+## Strict Monotonicity of Pell y-Coordinates
 :::lemma_ "pell-y-strictmono" (lean := "Pell.IsFundamental.y_strictMono")
 Let $`a` be the fundamental solution ({uses "pell-fundamental"}[]). The map $`n \mapsto (a^n).y` from
 $`\mathbb{Z}` to $`\mathbb{Z}` is strictly increasing.
@@ -344,6 +365,7 @@ monotonicity makes distinct powers distinct and underlies the uniqueness of the 
 classification of the solution group.
 :::
 
+## Structure of the Solution Group
 :::theorem "pell-classification" (lean := "Pell.IsFundamental.eq_zpow_or_neg_zpow")
 *(Structure of the solution group.)* Let $`d > 0` be non-square with fundamental solution $`a_1`
 ({uses "pell-fundamental"}[]). Every solution $`a \in \mathrm{Solution}_1(d)` satisfies
@@ -372,6 +394,7 @@ variant of Matiyasevich's theorem and the Diophantine definition of the power fu
 ingredient of the negative answer to Hilbert's tenth problem (the DPRM theorem). The nodes here use
 $`d = a^2 - 1` throughout.
 
+## Pell Sequences
 :::definition "pell-sequence" (lean := "Pell.xn")
 Fix $`a > 1` and put $`d = a^2 - 1`. The *Pell sequences* $`x_n` (`Pell.xn`) and $`y_n` (`Pell.yn`)
 are defined by the simultaneous recurrence starting from the trivial solution $`(1, 0)`:
@@ -380,6 +403,7 @@ equivalently $`x_n + y_n\sqrt{d} = (a + \sqrt{d})^n` in $`\mathbb{Z}[\sqrt{d}]` 
 Each pair is a Pell solution, $`x_n^2 - d\,y_n^2 = 1` (`Pell.pell_eq`, {uses "pell-ispell"}[]).
 :::
 
+## Every Pell Solution Is a Pell Sequence Term
 :::theorem "pell-eq-pell" (lean := "Pell.eq_pell")
 For $`d = a^2 - 1` with $`a > 1`, every natural-number solution of Pell's equation is a term of the
 Pell sequence ({uses "pell-sequence"}[]): if $`x^2 - d\,y^2 = 1` then $`x = x_n` and $`y = y_n` for
@@ -395,6 +419,7 @@ nontrivial solution $`a + \sqrt{d}`, exactly as in the general classification
 coordinates gives $`x = x_n`, $`y = y_n`.
 :::
 
+## Matiyasevich's Theorem
 :::theorem "matiyasevic" (lean := "Pell.matiyasevic")
 *(Matiyasevich's theorem, Davis's form.)* For naturals $`a, k, x, y`, the statement "$`a > 1` and
 $`(x, y) = (x_k, y_k)`" ({uses "pell-sequence"}[]) is equivalent to a finite system of Pell equations
@@ -420,6 +445,7 @@ Pell relations are the unitary-element identities of the respective $`\mathbb{Z}
 ({uses "pell-ispell"}[]).
 :::
 
+## The Power Function Is Diophantine
 :::theorem "pow-diophantine" (lean := "Pell.eq_pow_of_pell")
 *(The power function is Diophantine.)* For naturals $`m, n, k`, the relation $`n^k = m` is equivalent
 to a system of Pell equations and congruences in finitely many auxiliary natural variables; concretely
@@ -445,6 +471,7 @@ shows every recursively enumerable set is Diophantine, so Hilbert's tenth proble
 
 # Algebraic and transcendental numbers
 
+## Algebraic and Transcendental Elements
 :::definition "transcendental-def" (lean := "Transcendental")
 Let $`A` be an algebra over a commutative ring $`R`. An element $`x \in A` is *algebraic* over $`R`
 (`IsAlgebraic`) if it is a root of some nonzero polynomial $`p \in R[X]`, i.e.
@@ -455,6 +482,7 @@ A real number is transcendental in the usual sense precisely when it is transcen
 $`\mathbb{Z}` (equivalently over $`\mathbb{Q}`).
 :::
 
+## Liouville Numbers
 :::definition "liouville-number" (lean := "Liouville")
 A real number $`x` is a *Liouville number* (`Liouville`) if for every $`n \in \mathbb{N}` there exist
 integers $`a, b` with $`b > 1` such that
@@ -464,6 +492,7 @@ rationals to *every* order — far better than Dirichlet's universal order $`2`
 ({uses "dirichlet-approx"}[]).
 :::
 
+## Liouville Numbers Are Irrational
 :::theorem "liouville-irrational" (lean := "Liouville.irrational")
 Every Liouville number ({uses "liouville-number"}[]) is irrational.
 :::
@@ -477,6 +506,7 @@ $`|aq - bp|\cdot q^{b+1} < bq` while $`|aq-bp| \ge 1` and $`q > 1` force $`bq \l
 (`Nat.mul_lt_mul_pow_succ`), a contradiction.
 :::
 
+## Liouville's Theorem on Transcendence
 :::theorem "liouville-transcendental" (lean := "Liouville.transcendental")
 *(Liouville's theorem.)* Every Liouville number ({uses "liouville-number"}[]) is transcendental over
 $`\mathbb{Z}` ({uses "transcendental-def"}[]).
@@ -501,6 +531,7 @@ counterpoint to Dirichlet's theorem ({uses "dirichlet-approx"}[]): an algebraic 
 $`d` cannot be approximated past order $`d`.
 :::
 
+## Liouville's Constant
 :::definition "liouville-constant" (lean := "liouvilleNumber")
 For a real number $`m`, the *Liouville constant to base $`m`* is the series
 $$`L_m \coloneqq \sum_{i=0}^{\infty} \frac{1}{m^{\,i!}}.`
@@ -508,6 +539,7 @@ The series converges for $`m > 1`; for other $`m` the sum is defined to be $`0` 
 convention). The classical Liouville number is $`L_2 = 0.1100010000\ldots_2`.
 :::
 
+## Transcendence of Liouville's Constant
 :::theorem "liouville-constant-transcendental" (lean := "transcendental_liouvilleNumber")
 For every integer $`m \ge 2`, the Liouville constant $`L_m` ({uses "liouville-constant"}[]) is
 transcendental over $`\mathbb{Z}` ({uses "transcendental-def"}[]).
@@ -539,6 +571,7 @@ its slopes encode the $`p`-adic valuations ({bpref "padic-val-rat"}[]) of the ro
 defined but the root-counting theorem itself is recorded only as Gouvêa-cited motivation, not as a
 proved statement.
 
+## Valuation Sequences
 :::definition "newton-valseq"
 The *valuation sequence* of a power series $`f = \sum_i a_i X^i` over a ring equipped with a map
 $`v` to $`\mathbb{Z} \cup \{\infty\}` ({uses "valuation"}[]) is the function
@@ -551,6 +584,7 @@ solely from this sequence; the $`p`-adic instance takes $`\mathrm{vs}_f(i) = v_p
 Formalised in [`NewtonPolys`](https://github.com/CBirkbeck/NewtonPoly): [`NewtonPolygon.ValSeq`](https://github.com/CBirkbeck/NewtonPoly/blob/a6d9970de20a9c1ba2a5340d666aaaaba8a94517/NewtonPolys/NewtonPolygon.lean#L99), [`NewtonPolygon.toValSeq`](https://github.com/CBirkbeck/NewtonPoly/blob/a6d9970de20a9c1ba2a5340d666aaaaba8a94517/NewtonPolys/NewtonPolygon.lean#L448) — sorry-free.
 :::
 
+## Newton Polygons
 :::definition "newton-polygon"
 Let $`f(X) = \sum_{i \ge 0} a_i X^i` be a power series over a field with a non-archimedean valuation
 $`v` ({uses "valuation"}[]). Plot the points $`(i, v(a_i))` for $`a_i \ne 0` and take their lower
@@ -565,6 +599,7 @@ and branches on whether it is attained, attained infinitely often, or not attain
 Formalised in [`NewtonPolys`](https://github.com/CBirkbeck/NewtonPoly): [`NewtonPolygon.NewtonPolygonData`](https://github.com/CBirkbeck/NewtonPoly/blob/a6d9970de20a9c1ba2a5340d666aaaaba8a94517/NewtonPolys/NewtonPolygon.lean#L240), [`NewtonPolygon.nextStep`](https://github.com/CBirkbeck/NewtonPoly/blob/a6d9970de20a9c1ba2a5340d666aaaaba8a94517/NewtonPolys/NewtonPolygon.lean#L168) — sorry-free.
 :::
 
+## Supporting Property of the Newton Polygon
 :::theorem "newton-supporting"
 The Newton polygon ({uses "newton-polygon"}[]) is *well-formed* and its segments are *supporting*. A
 `NewtonPolygonData` is well-formed when consecutive segments share a vertex, segment slopes are
@@ -590,6 +625,7 @@ clauses being vacuous. (The project proves these supporting facts about the rota
 does not prove that the fully iterated `buildNewtonPolygon` output is well-formed.)
 :::
 
+## Radius of Convergence via the Newton Polygon
 :::theorem "newton-convergence"
 *(Radius of convergence, Gouvêa Lemma 7.4.8.)* The Newton polygon ({uses "newton-polygon"}[]) governs
 where a $`p`-adic power series $`f = \sum a_i X^i` converges. Convergence on a closed ball is the
@@ -626,6 +662,7 @@ and **no** `(lean := …)` reference: the declarations are not yet in mathlib v4
 into the dependency graph through the mathlib-backed transcendence and Diophantine-approximation nodes
 of this chapter via `{uses}` edges, and should be re-pointed to `(lean := …)` once the PR merges.
 
+## The Gelfond-Schneider Theorem
 :::theorem "gelfond-schneider" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/35735")
 *(Gelfond–Schneider theorem, Hilbert's seventh problem.)* Let $`\alpha, \beta` be algebraic numbers
 ({uses "transcendental-def"}[]) with $`\alpha \ne 0`, $`\alpha \ne 1`, and $`\beta \notin \mathbb{Q}`.

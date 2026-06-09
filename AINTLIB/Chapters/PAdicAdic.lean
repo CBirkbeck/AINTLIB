@@ -54,6 +54,8 @@ even though they may not yet resolve publicly.
 
 # Valuations and valued rings
 
+## Valuations on commutative rings
+
 :::definition "valuation" (lean := "Valuation")
 Let $`R` be a commutative ring and $`\Gamma_0` a linearly ordered commutative monoid with zero.
 A *valuation* on $`R` with values in $`\Gamma_0` is a map $`v : R \to \Gamma_0` satisfying
@@ -64,6 +66,8 @@ The last condition is the *ultrametric* (non-archimedean) inequality. The bundle
 `Valuation R Γ₀` is the monoid homomorphism $`R \to \Gamma_0` carrying this extra additivity bound.
 :::
 
+## Valuative relations
+
 :::definition "valuative-rel" (lean := "ValuativeRel")
 A *valuative relation* on a commutative ring $`R` axiomatises the comparison $`v(x) \le v(y)` of a
 valuation ({uses "valuation"}[]) without naming the value group. It is a binary relation
@@ -73,6 +77,8 @@ Every valuation induces one; conversely a valuative relation is induced by a can
 into a quotient value monoid, so the two encode the same data up to equivalence. This is mathlib's
 preferred framework for *abstract* valued fields, letting results be stated once and specialised.
 :::
+
+## Valued rings and the valuation topology
 
 :::definition "valued-ring" (lean := "Valued")
 A ring $`R` is a *valued ring* (with value group $`\Gamma_0`) if it is equipped with a distinguished
@@ -85,6 +91,8 @@ $`0`, making $`R` a topological ring.
 
 # The p-adic valuation and norm
 
+## The p-adic valuation on natural numbers
+
 :::definition "padic-val-nat" (lean := "padicValNat")
 For a prime $`p` and a nonzero natural number $`n`, the *$`p`-adic valuation* $`v_p(n)` is the
 largest exponent $`k \ge 0` with $`p^k \mid n`. Such a largest $`k` exists because $`n` has a finite
@@ -93,6 +101,8 @@ multiplicity $`\mathrm{multiplicity}\ p\ n`, the count of $`p` in that factorisa
 $`v_p(0) = 0` and $`v_p(n) = 0` when $`p` is not prime or $`n = 0`.
 :::
 
+## The p-adic valuation on integers
+
 :::definition "padic-val-int" (lean := "padicValInt")
 For a prime $`p` and an integer $`z`, the *$`p`-adic valuation* of $`z` is that of its absolute
 value:
@@ -100,6 +110,8 @@ $$`v_p(z) = v_p(|z|) \in \mathbb{N},`
 reducing to the natural-number valuation ({uses "padic-val-nat"}[]) on $`|z|`. It satisfies
 $`p^{\,v_p(z)} \mid z`, is additive on products, and equals $`1` at $`z = p`.
 :::
+
+## The p-adic valuation on rationals
 
 :::definition "padic-val-rat" (lean := "padicValRat")
 For a prime $`p` and a rational number $`q`, the *$`p`-adic valuation* is the difference of the
@@ -110,11 +122,15 @@ $`v_p(qr) = v_p(q) + v_p(r)`, and satisfies the ultrametric bound
 $`v_p(q + r) \ge \min(v_p(q), v_p(r))`.
 :::
 
+## The p-adic norm on the rationals
+
 :::definition "padic-norm" (lean := "padicNorm")
 The *$`p`-adic norm* on $`\mathbb{Q}` is
 $$`|q|_p = p^{-v_p(q)} \quad (q \ne 0), \qquad |0|_p = 0,`
 built from the rational $`p`-adic valuation ({uses "padic-val-rat"}[]).
 :::
+
+## Non-archimedean and multiplicative property of the p-adic norm
 
 :::lemma_ "padic-norm-nonarchimedean" (lean := "padicNorm.nonarchimedean")
 The $`p`-adic norm is non-archimedean and multiplicative: for all $`q, r \in \mathbb{Q}`,
@@ -133,6 +149,8 @@ $`q + r`; the degenerate cases where one term is $`0` are checked directly.
 
 # The p-adic numbers and integers
 
+## The p-adic numbers
+
 :::definition "padic-numbers" (lean := "Padic")
 The field $`\mathbb{Q}_p` of *$`p`-adic numbers* is the completion of $`\mathbb{Q}` with respect to
 the $`p`-adic norm $`|\cdot|_p` ({uses "padic-norm"}[]). Mathlib constructs it as the ring of Cauchy
@@ -141,6 +159,8 @@ converging to $`0`; this quotient is a field. There is a canonical isometric emb
 $`\mathbb{Q} \hookrightarrow \mathbb{Q}_p`, and the norm extends to $`\mathbb{Q}_p` via the limiting
 value `padicNormE`.
 :::
+
+## The additive p-adic valuation on the p-adic numbers
 
 :::definition "padic-numbers-valuation" (lean := "Padic.addValuation")
 The *additive $`p`-adic valuation* on $`\mathbb{Q}_p` is the additive valuation
@@ -152,12 +172,16 @@ in valuation-theoretic form (with values in $`\mathbb{Z} \cup \{\infty\}` rather
 multiplicative $`p^{\mathbb{Z}}`).
 :::
 
+## The p-adic integers
+
 :::definition "padic-integers" (lean := "PadicInt")
 The ring $`\mathbb{Z}_p` of *$`p`-adic integers* is the closed unit ball in $`\mathbb{Q}_p`:
 $$`\mathbb{Z}_p = \{ x \in \mathbb{Q}_p : \|x\|_p \le 1 \}.`
 It is a subring of $`\mathbb{Q}_p` ({uses "padic-numbers"}[]) containing $`\mathbb{Z}` as a dense
 subring, and $`\mathbb{Q}_p` is its field of fractions ({uses "zp-fraction-field"}[]).
 :::
+
+## The p-adic numbers as the fraction field of the p-adic integers
 
 :::lemma_ "zp-fraction-field" (lean := "PadicInt.isFractionRing")
 The field of fractions of $`\mathbb{Z}_p` is $`\mathbb{Q}_p`: the inclusion
@@ -175,6 +199,8 @@ fraction, the denominators being powers of $`p`.
 
 # Metric, compactness, and analytic properties
 
+## The ultrametric inequality for the p-adic numbers
+
 :::lemma_ "qp-nonarchimedean" (lean := "Padic.nonarchimedean")
 For all $`q, r \in \mathbb{Q}_p`,
 $$`\|q + r\|_p \le \max(\|q\|_p,\, \|r\|_p).`
@@ -188,6 +214,8 @@ rationals, the bound passes to the limit because $`\max` is continuous and the e
 `padicNormE` is the limit of the rational norms; mathlib transports the rational ultrametric
 inequality through this limiting process.
 :::
+
+## Completeness of the p-adic numbers
 
 :::theorem "qp-complete" (lean := "Padic.complete'")
 The field $`\mathbb{Q}_p` is complete: every Cauchy sequence in $`\mathbb{Q}_p` converges. Concretely,
@@ -203,6 +231,8 @@ $`q \in \mathbb{Q}_p`, and the triangle inequality shows the original sequence c
 The packaged instance `Padic.complete : CauSeq.IsComplete ℚ_[p] norm` records this completeness.
 :::
 
+## Completeness of the p-adic integers
+
 :::theorem "zp-complete" (lean := "PadicInt.completeSpace")
 The ring $`\mathbb{Z}_p` is complete as a metric space.
 :::
@@ -213,6 +243,8 @@ The unit ball $`\mathbb{Z}_p = \{x : \|x\|_p \le 1\} \subseteq \mathbb{Q}_p`
 continuous norm. A closed subspace of the complete space $`\mathbb{Q}_p` ({uses "qp-complete"}[]) is
 itself complete, which is what `PadicInt.completeSpace` derives.
 :::
+
+## Compactness of the p-adic integers
 
 :::theorem "zp-compact" (lean := "PadicInt.compactSpace, PadicInt.totallyBounded_univ")
 The ring of $`p`-adic integers $`\mathbb{Z}_p` is compact.
@@ -228,6 +260,8 @@ boundedness together with completeness ({uses "zp-complete"}[]) gives compactnes
 (`compactSpace`); this is the statement that $`\mathbb{Z}_p` is the inverse limit of the finite rings
 $`\mathbb{Z}/p^k\mathbb{Z}`.
 :::
+
+## Local compactness and properness of the p-adic numbers
 
 :::theorem "qp-proper" (lean := "Padic.instProperSpace")
 The field $`\mathbb{Q}_p` is a *proper* metric space: every closed ball is compact. Consequently
@@ -245,6 +279,8 @@ of $`0`.
 
 # Discrete valuation ring structure
 
+## Discrete valuation rings
+
 :::definition "dvr" (lean := "IsDiscreteValuationRing")
 A commutative integral domain $`R` is a *discrete valuation ring* (DVR) if it is a local principal
 ideal domain that is not a field. Equivalently $`R` is a noetherian local domain whose maximal ideal
@@ -252,6 +288,8 @@ is principal and nonzero. Such an $`R` carries a discrete valuation ({uses "valu
 which it is the valuation ring: there is a unique nonzero prime ideal $`\mathfrak{m}`, every nonzero
 ideal is a power $`\mathfrak{m}^n`, and $`\mathfrak{m}` is generated by a single *uniformiser* $`\pi`.
 :::
+
+## The p-adic integers form a discrete valuation ring
 
 :::theorem "zp-is-dvr" (lean := "PadicInt.instIsDiscreteValuationRing")
 The ring $`\mathbb{Z}_p` is a discrete valuation ring ({uses "dvr"}[]) with uniformiser $`p`.
@@ -265,6 +303,8 @@ $`\pi = p`, which is irreducible (`PadicInt.irreducible_p`, from `prime_p`,
 where $`v(x)` is the integer valuation of $`x` and `unitCoeff x` is the unit $`x / p^{v(x)}` of norm
 $`1` ({uses "padic-integers"}[]). This exhibits $`\mathbb{Z}_p` as a DVR.
 :::
+
+## The maximal ideal and residue field of the p-adic integers
 
 :::lemma_ "zp-maximal-ideal" (lean := "PadicInt.maximalIdeal_eq_span_p, PadicInt.prime_p")
 The element $`p` is prime in $`\mathbb{Z}_p` and generates the maximal ideal:
@@ -282,6 +322,8 @@ because $`\mathrm{span}\{p\}` is then a nonzero maximal, hence prime, ideal. The
 $`\mathbb{Z}_p/p\mathbb{Z}_p` has $`p` elements, the residues $`0, \dots, p-1`, so is $`\mathbb{F}_p`.
 :::
 
+## Ideals of the p-adic integers are powers of the maximal ideal
+
 :::lemma_ "zp-ideals" (lean := "PadicInt.ideal_eq_span_pow_p")
 Every nonzero ideal of $`\mathbb{Z}_p` is a power of the maximal ideal: for $`\mathfrak{a} \ne 0`
 there is $`n \ge 0` with
@@ -297,6 +339,8 @@ where $`n` is the minimal valuation attained on $`\mathfrak{a}`.
 :::
 
 # Hensel's lemma
+
+## Hensel's lemma
 
 :::theorem "hensels-lemma" (lean := "hensels_lemma")
 *(Hensel's lemma over $`\mathbb{Z}_p`.)* Let $`F \in \mathbb{Z}_p[X]` be a polynomial and
@@ -322,6 +366,8 @@ forcing their difference to $`0`.
 
 # Mahler's theorem
 
+## The Mahler basis functions
+
 :::definition "mahler-basis" (lean := "mahler")
 For each $`k \in \mathbb{N}` the *Mahler basis function* $`\binom{x}{k}` is the unique continuous
 map $`\mathbb{Z}_p \to \mathbb{Z}_p` agreeing with the binomial coefficient $`n \mapsto \binom{n}{k}`
@@ -329,6 +375,8 @@ on the dense subset $`\mathbb{N} \subseteq \mathbb{Z}_p`. It is realised as the 
 coefficient $`\mathrm{Ring.choose}\ x\ k`, a polynomial of degree $`k` in $`x` with rational
 coefficients that nonetheless takes $`p`-adic integer values.
 :::
+
+## Mahler's theorem on continuous functions on the p-adic integers
 
 :::theorem "mahler-theorem" (lean := "PadicInt.mahlerEquiv")
 *(Mahler's theorem.)* Let $`E` be a normed $`\mathbb{Z}_p`-module that is complete. Every continuous
@@ -357,6 +405,8 @@ yielding the isometric Banach-space isomorphism `mahlerEquiv`.
 
 # The p-adic complex numbers and Krasner's lemma
 
+## The p-adic complex numbers
+
 :::definition "padic-complex" (lean := "PadicComplex")
 The field $`\mathbb{C}_p` of *$`p`-adic complex numbers* is the completion of an algebraic closure of
 $`\mathbb{Q}_p`:
@@ -367,6 +417,8 @@ absolute value (the spectral norm). $`\mathbb{C}_p` carries both a normed-field 
 ({uses "valued-ring"}[]) structure; its ring of integers $`\mathcal{O}_{\mathbb{C}_p}` is the closed
 unit ball.
 :::
+
+## The norm on the p-adic complex numbers extends and is non-archimedean
 
 :::lemma_ "padic-complex-norm" (lean := "PadicComplex.norm_extends, PadicComplex.isNonarchimedean")
 The norm on $`\mathbb{C}_p` extends the $`p`-adic norm on $`\mathbb{Q}_p` ({uses "padic-norm"}[]) and
@@ -384,6 +436,8 @@ is a closed condition, so it persists in $`\mathbb{C}_p`, and the norm of a limi
 norms, so the extension property persists too.
 :::
 
+## The Krasner property for field extensions
+
 :::definition "krasner-property" (lean := "IsKrasner")
 For a field extension $`L/K` with $`L` a normed field, the predicate $`\mathrm{IsKrasner}\ K\ L`
 abstracts the conclusion of Krasner's lemma: whenever $`x \in L` is separable over $`K` with all its
@@ -392,6 +446,8 @@ any other conjugate root,
 $$`\|x - y\| < \|x - x'\| \text{ for every conjugate } x' \ne x \;\Longrightarrow\; x \in K(y),`
 then $`x` lies in the subfield $`K(y)` generated by $`y`.
 :::
+
+## Krasner's lemma
 
 :::theorem "krasner" (lean := "IsKrasner.of_completeSpace")
 *(Krasner's lemma.)* Let $`K` be a complete, non-trivially valued, ultrametric (non-archimedean)
@@ -413,6 +469,8 @@ using the ultrametric bound and $`\|\sigma(x-y)\| = \|x-y\|`. This contradicts t
 $`\|x - y\| < \|x - x'\|`. Hence $`x \in K(y)`.
 :::
 
+## Algebraic closure of the p-adic complex numbers
+
 :::theorem "padic-complex-alg-closed" (lean := "PadicComplex.isAlgClosed")
 The field $`\mathbb{C}_p` is algebraically closed.
 :::
@@ -431,6 +489,8 @@ polynomial splits and $`\mathbb{C}_p` is algebraically closed.
 :::
 
 # Ostrowski's theorem and the adic completion of the rationals
+
+## Ostrowski's theorem
 
 :::theorem "ostrowski" (lean := "Rat.AbsoluteValue.equiv_real_or_padic")
 *(Ostrowski's theorem.)* Every non-trivial absolute value on $`\mathbb{Q}` is equivalent to either
@@ -455,6 +515,8 @@ base-$`n` expansions of large integers bounds $`f(m) \le C\,m^{s}` with $`s = \l
 independent of $`m`; pushing this through powers $`m^k` and taking $`k`-th roots removes the constant,
 giving $`f(m) = m^{s} = |m|_\infty^{\,s}`, so $`f` is equivalent to the real absolute value.
 :::
+
+## The adic completion of the rationals at a finite place is the p-adic numbers
 
 :::theorem "completion-rat-padic" (lean := "Padic.adicCompletionEquiv, Rat.HeightOneSpectrum.adicCompletion.padicEquiv")
 *(The completion of $`\mathbb{Q}` at a finite place is $`\mathbb{Q}_p`.)* By Ostrowski's theorem
@@ -482,6 +544,8 @@ concrete `Padic`, the bridge that lets number-field place-completions specialise
 $`\mathbb{Q}`.
 :::
 
+## The valuative relation on the p-adic numbers
+
 :::definition "padic-valuative-rel" (lean := "Padic.instValuativeRel")
 The $`p`-adic numbers carry a canonical *valuative relation* ({uses "valuative-rel"}[]): the relation
 $$`x \preccurlyeq y \;\iff\; \|x\|_p \le \|y\|_p \;\iff\; v_p(x) \ge v_p(y)`
@@ -504,6 +568,8 @@ version, so they carry no `(lean := …)` reference. Each records the relevant L
 exact-source permalink (pinned to commit `fb55cd8`), and its true sorry-status, and connects into the
 graph through the Mathlib-backed valuation nodes above.
 
+## Huber rings
+
 :::definition "huber-ring"
 A topological ring $`A` is a *Huber ring* (or *$`f`-adic ring*) if it admits a *pair of definition*:
 an open subring $`A_0 \subseteq A` together with a finitely generated ideal $`I \subseteq A_0` such
@@ -513,6 +579,8 @@ $`I` an *ideal of definition*; $`I` is not unique, but any two ideals of definit
 the same radical, and the topologically nilpotent elements of $`I` are open. Following Wedhorn §6.
 Formalised in [`Adic-Spaces`](https://github.com/CBirkbeck/Adic-Spaces): [`PairOfDefinition`](https://github.com/CBirkbeck/Adic-Spaces/blob/fb55cd85e70cc7bf5f968b9b06197dc01d4b89fd/Adic%20spaces/HuberRings.lean#L56), [`IsHuberRing`](https://github.com/CBirkbeck/Adic-Spaces/blob/fb55cd85e70cc7bf5f968b9b06197dc01d4b89fd/Adic%20spaces/HuberRings.lean#L70) — sorry-free.
 :::
+
+## Tate rings
 
 :::definition "tate-ring"
 A *Tate ring* is a Huber ring ({uses "huber-ring"}[]) that contains a *topologically nilpotent unit*:
@@ -526,6 +594,8 @@ Formalised in [`Adic-Spaces`](https://github.com/CBirkbeck/Adic-Spaces): [`IsTat
 
 # The valuation spectrum and continuous valuations
 
+## The valuation spectrum
+
 :::definition "valuation-spectrum"
 The *valuation spectrum* $`\mathrm{Spv}(A)` of a commutative ring $`A` is the set of equivalence
 classes of valuations ({uses "valuation"}[]) on $`A`, where $`v_1` and $`v_2` are equivalent if
@@ -537,6 +607,8 @@ and the support map $`v \mapsto \{a : v(a) = 0\}` is a continuous map
 $`\mathrm{Spv}(A) \to \mathrm{Spec}(A)`. Following Wedhorn Definition 4.1.
 Formalised in [`Adic-Spaces`](https://github.com/CBirkbeck/Adic-Spaces): [`ValuationSpectrum`](https://github.com/CBirkbeck/Adic-Spaces/blob/fb55cd85e70cc7bf5f968b9b06197dc01d4b89fd/Adic%20spaces/ValuationSpectrum.lean#L33), [`basicOpen`](https://github.com/CBirkbeck/Adic-Spaces/blob/fb55cd85e70cc7bf5f968b9b06197dc01d4b89fd/Adic%20spaces/ValuationSpectrum.lean#L54), [`supp`](https://github.com/CBirkbeck/Adic-Spaces/blob/fb55cd85e70cc7bf5f968b9b06197dc01d4b89fd/Adic%20spaces/ValuationSpectrum.lean#L132) — sorry-free.
 :::
+
+## Continuous valuations
 
 :::definition "continuous-valuation"
 Let $`A` be a topological ring and $`v : A \to \Gamma_0` a valuation ({uses "valuation"}[]). Then
@@ -550,6 +622,8 @@ Formalised in [`Adic-Spaces`](https://github.com/CBirkbeck/Adic-Spaces): [`Valua
 
 # The adic spectrum
 
+## Affinoid rings and rings of integral elements
+
 :::definition "affinoid-ring"
 Let $`A` be a topological ring. A subring $`A^{+} \subseteq A` is a *ring of integral elements* if it
 is open, integrally closed in $`A`, and contained in the subring $`A^{\circ}` of power-bounded
@@ -558,6 +632,8 @@ elements automatically contains all topologically nilpotent elements. Following 
 Definition 7.14, Remark 7.15.
 Formalised in [`Adic-Spaces`](https://github.com/CBirkbeck/Adic-Spaces): [`IsRingOfIntegralElements`](https://github.com/CBirkbeck/Adic-Spaces/blob/fb55cd85e70cc7bf5f968b9b06197dc01d4b89fd/Adic%20spaces/AffinoidRings.lean#L42), [`IsAffinoidRing`](https://github.com/CBirkbeck/Adic-Spaces/blob/fb55cd85e70cc7bf5f968b9b06197dc01d4b89fd/Adic%20spaces/AffinoidRings.lean#L77) — sorry-free.
 :::
+
+## The adic spectrum
 
 :::definition "adic-spectrum"
 Let $`(A, A^{+})` be an affinoid ring ({uses "affinoid-ring"}[]). The *adic spectrum*
@@ -569,6 +645,8 @@ functor of Huber's theory; its rational subsets are defined in {uses "rational-s
 Wedhorn Definition 7.23.
 Formalised in [`Adic-Spaces`](https://github.com/CBirkbeck/Adic-Spaces): [`Spa`](https://github.com/CBirkbeck/Adic-Spaces/blob/fb55cd85e70cc7bf5f968b9b06197dc01d4b89fd/Adic%20spaces/AdicSpectrum.lean#L110), [`PlusSubring`](https://github.com/CBirkbeck/Adic-Spaces/blob/fb55cd85e70cc7bf5f968b9b06197dc01d4b89fd/Adic%20spaces/AdicSpectrum.lean#L96) — sorry-free.
 :::
+
+## Surjectivity of the support map on the adic spectrum
 
 :::theorem "spa-support-surjective"
 *(Wedhorn Proposition 7.51.)* For an affinoid ring $`(A, A^{+})` ({uses "affinoid-ring"}[]), every
@@ -590,6 +668,8 @@ $`\mathfrak{m}` holds in a Tate ring ({uses "tate-ring"}[]) because there the to
 elements, contained in every maximal ideal, are open.
 :::
 
+## Rational subsets of the adic spectrum
+
 :::definition "rational-subsets"
 Let $`X = \mathrm{Spa}(A, A^{+})` ({uses "adic-spectrum"}[]), $`T \subseteq A` a finite subset, and
 $`s \in A`. The *rational subset*
@@ -600,6 +680,8 @@ They are the building blocks of the structure sheaf. Following Wedhorn Definitio
 Theorem 7.35(2).
 Formalised in [`Adic-Spaces`](https://github.com/CBirkbeck/Adic-Spaces): [`rationalOpen`](https://github.com/CBirkbeck/Adic-Spaces/blob/fb55cd85e70cc7bf5f968b9b06197dc01d4b89fd/Adic%20spaces/AdicSpectrum.lean#L230), [`IsRationalSubset.inter`](https://github.com/CBirkbeck/Adic-Spaces/blob/fb55cd85e70cc7bf5f968b9b06197dc01d4b89fd/Adic%20spaces/RationalSubsets.lean#L58) — sorry-free.
 :::
+
+## Analytic points of the adic spectrum
 
 :::theorem "spa-analytic"
 *(Wedhorn Proposition 8.36.)* A point $`v \in \mathrm{Spv}(A)` is *analytic* if its support
@@ -617,6 +699,8 @@ it would contain a neighbourhood of $`0`, hence some power $`u^{n}`, making $`v(
 $`v(u) = 0` — contradiction. Therefore $`\mathrm{supp}(v)` is never open, i.e. every point is
 analytic. This is the content of `IsTateRing.isAnalytic`.
 :::
+
+## Quasi-compactness of the adic spectrum
 
 :::theorem "spa-quasicompact"
 *(Quasi-compactness of the adic spectrum.)* For a Tate affinoid ring $`(A, A^{+})` with
@@ -639,6 +723,8 @@ pseudo-uniformiser is what supplies the discrete-on-value-groups input the embed
 
 # Tate algebras and the structure sheaf
 
+## Tate algebras
+
 :::definition "tate-algebra"
 Let $`A` be a non-archimedean Tate ring ({uses "tate-ring"}[]) with pseudo-uniformiser $`\pi`. The
 *Tate algebra in one variable*
@@ -650,6 +736,8 @@ convergent power series on the closed unit $`p`-adic disc. The bivariate version
 \rangle/(XY - 1)` inverts the variable. Following Wedhorn §6.9, §8.29–8.33.
 Formalised in [`Adic-Spaces`](https://github.com/CBirkbeck/Adic-Spaces): [`TateAlgebra`](https://github.com/CBirkbeck/Adic-Spaces/blob/fb55cd85e70cc7bf5f968b9b06197dc01d4b89fd/Adic%20spaces/TateAlgebra.lean#L76), [`TateAlgebra₂`](https://github.com/CBirkbeck/Adic-Spaces/blob/fb55cd85e70cc7bf5f968b9b06197dc01d4b89fd/Adic%20spaces/TateAlgebra.lean#L142), [`LaurentTateAlgebra`](https://github.com/CBirkbeck/Adic-Spaces/blob/fb55cd85e70cc7bf5f968b9b06197dc01d4b89fd/Adic%20spaces/TateAlgebra.lean#L177) — sorry-free.
 :::
+
+## The structure sheaf on strongly noetherian Tate rings
 
 :::theorem "sheafy-strongly-noetherian"
 *(Wedhorn Theorem 8.28(b).)* Let $`(A, A^{+})` be a *strongly noetherian* Tate ring
@@ -685,6 +773,8 @@ covers to all rational covers, and Prop A.4 packages acyclicity into the sheaf p
 
 # Perfectoid rings and spaces
 
+## Perfectoid rings
+
 :::definition "perfectoid-ring"
 Let $`p` be a prime and $`A` a complete, separated, uniform Tate ring ({uses "tate-ring"}[]) of
 characteristic $`0`. Then $`A` is *perfectoid* (for $`p`) if there is a pseudo-uniformiser $`\varpi`
@@ -700,6 +790,8 @@ Definition 3.5; this is the Scholze (Frobenius-on-$`A^\circ/p`) formulation.
 Formalised in [`Adic-Spaces`](https://github.com/CBirkbeck/Adic-Spaces): [`IsPerfectoidRing`](https://github.com/CBirkbeck/Adic-Spaces/blob/fb55cd85e70cc7bf5f968b9b06197dc01d4b89fd/Adic%20spaces/PerfectoidRing.lean#L66), [`IsPerfectoidField`](https://github.com/CBirkbeck/Adic-Spaces/blob/fb55cd85e70cc7bf5f968b9b06197dc01d4b89fd/Adic%20spaces/PerfectoidRing.lean#L106) — sorry-free (the definition).
 :::
 
+## Perfectoid spaces
+
 :::definition "perfectoid-space"
 An *affinoid perfectoid space* is $`\mathrm{Spa}(A, A^{+})` ({uses "adic-spectrum"}[]) for a
 perfectoid ring $`A` ({uses "perfectoid-ring"}[]). A *perfectoid space* is an adic space every point
@@ -709,6 +801,8 @@ Formalised in [`Adic-Spaces`](https://github.com/CBirkbeck/Adic-Spaces): [`Affin
 :::
 
 # Witt vectors, tilting, and the Fargues–Fontaine curve
+
+## Primitive Witt vectors
 
 :::definition "witt-primitive"
 Let $`k` be a perfect ring of characteristic $`p` and $`\mathbb{W}(k)` its ring of $`p`-typical Witt
@@ -720,6 +814,8 @@ nonzero, and does not lie in $`(p)`. These elements generate the kernels of Font
 Following Scholze–Weinstein, *Berkeley Lectures*, Definitions 6.2.9–6.2.10.
 Formalised in [`Adic-Spaces`](https://github.com/CBirkbeck/Adic-Spaces): [`WittVector.IsPrimitive`](https://github.com/CBirkbeck/Adic-Spaces/blob/fb55cd85e70cc7bf5f968b9b06197dc01d4b89fd/Adic%20spaces/WittVectorPrimitive.lean#L52), [`WittVector.IsPrimitive.not_mem_span_p_of`](https://github.com/CBirkbeck/Adic-Spaces/blob/fb55cd85e70cc7bf5f968b9b06197dc01d4b89fd/Adic%20spaces/WittVectorPrimitive.lean#L89) — sorry-free.
 :::
+
+## The kernel of a Witt vector map generated by a primitive element
 
 :::theorem "witt-ker-principal"
 *(Scholze–Weinstein, Berkeley Lectures, Lemma 6.2.8.)* Let $`\theta : \mathbb{W}(k) \to R` be a ring
@@ -745,6 +841,8 @@ This is the algebraic core of Berkeley Lectures Lemma 6.2.8, and is exactly the 
 formalised proof carries out.
 :::
 
+## Tilting and the period ring
+
 :::definition "tilt"
 Let $`A` be a perfectoid ring ({uses "perfectoid-ring"}[]) for $`p`. Its *tilt* is the perfection
 $$`A^{\flat} = \varprojlim_{x \mapsto x^{p}} A^{\circ}/(p),`
@@ -756,6 +854,8 @@ whose kernel is principal, generated by a primitive element of degree $`1`
 tilting is an equivalence of categories. Following Scholze, *Perfectoid Spaces*, §3.
 Formalised in [`Adic-Spaces`](https://github.com/CBirkbeck/Adic-Spaces): [`PerfectoidRing.tilt`](https://github.com/CBirkbeck/Adic-Spaces/blob/fb55cd85e70cc7bf5f968b9b06197dc01d4b89fd/Adic%20spaces/Tilting.lean#L91), [`PerfectoidRing.theta`](https://github.com/CBirkbeck/Adic-Spaces/blob/fb55cd85e70cc7bf5f968b9b06197dc01d4b89fd/Adic%20spaces/Tilting.lean#L213) — in progress (surjectivity of theta, [`theta_surjective`](https://github.com/CBirkbeck/Adic-Spaces/blob/fb55cd85e70cc7bf5f968b9b06197dc01d4b89fd/Adic%20spaces/Tilting.lean#L246), and principality of its kernel, [`ker_theta_principal`](https://github.com/CBirkbeck/Adic-Spaces/blob/fb55cd85e70cc7bf5f968b9b06197dc01d4b89fd/Adic%20spaces/Tilting.lean#L429), still rest on `sorry`s).
 :::
+
+## The Fargues-Fontaine curve
 
 :::definition "fargues-fontaine-curve"
 Fix a perfectoid field $`E` of characteristic $`p` with ring of integers $`\mathcal{O}_E` and
@@ -777,6 +877,8 @@ requests (the `t-number-theory` queue). Each carries a `pr_url` pointing at the 
 `(lean := …)` reference: the declarations are not yet in mathlib v4.30.0-rc2. They connect into the
 dependency graph through the Mathlib-backed $`p`-adic nodes of this chapter via `{uses}` edges, and
 should be re-pointed to `(lean := …)` once the corresponding PR merges.
+
+## The Amice transform and Amice equivalence
 
 :::theorem "amice-transform" (pr_url := "https://github.com/leanprover-community/mathlib4/pull/23772")
 *(Amice transform / Amice equivalence.)* The *Amice transform* sends a $`p`-adic measure $`\mu` on
