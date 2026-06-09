@@ -1,0 +1,228 @@
+# AINTLIB sources manifest
+#
+# One [[source]] per source repo we mine for the blueprint. `commit` pins the exact
+# revision the blueprint's prose + (lean := …) references were authored against;
+# `https://<remote>/tree/<commit>` is a stable permalink. Repos are read locally for
+# mining (not vendored). `status = "candidate"` flips to "confirmed" after the
+# catalogue sign-off (see sources/catalogue.md).
+#
+# Fields: name, kind (local|external), status (confirmed|candidate), remote, commit,
+#         lean (toolchain), has_blueprint (own blueprint dir), chapters (target chapters).
+
+# ---------- Confirmed: local repos ----------
+
+[[source]]
+name = "Adic spaces"
+kind = "local"
+status = "confirmed"
+remote = "https://github.com/CBirkbeck/Adic-Spaces"
+commit = "fb55cd8"
+lean = "v4.29.0-rc6"
+has_blueprint = false
+chapters = ["PAdicAdic"]
+
+[[source]]
+name = "chebotarev-density"
+kind = "local"
+status = "confirmed"
+remote = "https://github.com/CBirkbeck/chebotarev-density"
+commit = "9ddb80d"
+lean = "v4.31.0-rc1"
+has_blueprint = true
+chapters = ["ClassFieldTheory"]
+
+[[source]]
+name = "flt-regular-bernoulli"
+kind = "local"
+status = "confirmed"
+remote = "https://github.com/CBirkbeck/flt-regular-bernoulli"
+commit = "888f2259"
+lean = "v4.30.0-rc2"
+has_blueprint = true
+chapters = ["FLT"]
+
+[[source]]
+name = "LeanModularForms"
+kind = "local"
+status = "confirmed"
+remote = "https://github.com/CBirkbeck/LeanModularForms"
+commit = "0fc82eb"
+lean = "v4.30.0-rc2"
+has_blueprint = true
+chapters = ["ModularForms"]
+
+[[source]]
+name = "LeanModularForms-hecke"
+kind = "local"
+status = "confirmed"
+remote = "https://github.com/CBirkbeck/LeanModularForms"
+commit = "3c0ac6c"
+lean = "v4.30.0"
+has_blueprint = true
+chapters = ["ModularForms"]
+note = "git worktree of LeanModularForms (Hecke-operators branch)"
+
+[[source]]
+name = "FLT"
+kind = "local"
+status = "confirmed"
+remote = "https://github.com/ImperialCollegeLondon/FLT"
+commit = "9deae05"
+lean = "v4.9.0-rc2"
+has_blueprint = true
+chapters = ["FLT"]
+note = "older local copy; FLT-imperial tracks upstream"
+
+[[source]]
+name = "flt-regular"
+kind = "local"
+status = "confirmed"
+remote = "https://github.com/leanprover-community/flt-regular"
+commit = "6ade127"
+lean = "v4.31.0-rc1"
+has_blueprint = true
+chapters = ["FLT"]
+
+[[source]]
+name = "Hasse-Weil"
+kind = "local"
+status = "confirmed"
+remote = "https://github.com/CBirkbeck/Hasse-Weil"
+commit = "03003e7"
+lean = "v4.29.0-rc6"
+has_blueprint = false
+chapters = ["EllipticArithGeom"]
+
+[[source]]
+name = "WeilConjectures"
+kind = "local"
+status = "confirmed"
+remote = "https://github.com/CBirkbeck/WeilConjectures"
+commit = "b8464ee"
+lean = "v4.28.0-rc1"
+has_blueprint = false
+chapters = ["EllipticArithGeom"]
+
+[[source]]
+name = "EulerProducts"
+kind = "local"
+status = "confirmed"
+remote = "https://github.com/MichaelStollBayreuth/EulerProducts"
+commit = "7376f1a"
+lean = "v4.24.0"
+has_blueprint = false
+chapters = ["Analytic"]
+
+[[source]]
+name = "DirichletNonvanishing"
+kind = "local"
+status = "confirmed"
+remote = "https://github.com/CBirkbeck/DirichletNonvanishing"
+commit = "fb3e6ac"
+lean = "v4.13.0-rc3"
+has_blueprint = true
+chapters = ["Analytic"]
+
+[[source]]
+name = "LocalClassFieldTheory"
+kind = "local"
+status = "confirmed"
+remote = "https://github.com/CBirkbeck/LocalClassFieldTheory"
+commit = "e7d457c"
+lean = "v4.7.0-rc2"
+has_blueprint = true
+chapters = ["ClassFieldTheory", "PAdicAdic"]
+
+[[source]]
+name = "Nagel--Lutz"
+kind = "local"
+status = "confirmed"
+remote = "https://github.com/CBirkbeck/LutzNagell"
+commit = "c58fbfa"
+lean = "v4.29.0-rc7"
+has_blueprint = false
+chapters = ["EllipticArithGeom"]
+
+[[source]]
+name = "NewtonPolys"
+kind = "local"
+status = "confirmed"
+remote = "https://github.com/CBirkbeck/NewtonPoly"
+commit = "a6d9970"
+lean = "v4.28.0-rc1"
+has_blueprint = false
+chapters = ["DiophantineTranscendence"]
+
+[[source]]
+name = "power_reside_symbols"
+kind = "local"
+status = "confirmed"
+remote = "https://github.com/CBirkbeck/power_residue_symbols"
+commit = "0b573a4"
+lean = "v4.7.0-rc2"
+has_blueprint = false
+chapters = ["ClassFieldTheory"]
+
+[[source]]
+name = "GLn_F_q"
+kind = "local"
+status = "confirmed"
+remote = "https://github.com/CBirkbeck/GLn_F_q"
+commit = "3fc5ad9"
+lean = "v4.8.0-rc2"
+has_blueprint = false
+chapters = ["Algebraic"]
+
+[[source]]
+name = "ModFormDims"
+kind = "local"
+status = "confirmed"
+remote = "https://github.com/CBirkbeck/ModFormDims"
+commit = "10bab48"
+lean = "v4.13.0-rc3"
+has_blueprint = false
+chapters = ["ModularForms"]
+
+# ---------- Confirmed: external (cloned as siblings) ----------
+
+[[source]]
+name = "PrimeNumberTheoremAnd"
+kind = "external"
+status = "confirmed"
+remote = "https://github.com/AlexKontorovich/PrimeNumberTheoremAnd"
+commit = "9824b74"
+lean = "v4.30.0"
+has_blueprint = true
+chapters = ["Analytic"]
+
+[[source]]
+name = "FLT-imperial"
+kind = "external"
+status = "confirmed"
+remote = "https://github.com/ImperialCollegeLondon/FLT"
+commit = "6cffefe"
+lean = "v4.31.0-rc1"
+has_blueprint = true
+chapters = ["FLT"]
+
+# ---------- Candidates (pending catalogue sign-off; already cloned) ----------
+
+[[source]]
+name = "QuadraticIntegers"
+kind = "external"
+status = "candidate"
+remote = "https://github.com/pitmonticone/QuadraticIntegers"
+commit = "205ad5a"
+lean = "v4.24.0"
+has_blueprint = false
+chapters = ["Algebraic"]
+
+[[source]]
+name = "lean-bombieri-vinogradov"
+kind = "external"
+status = "candidate"
+remote = "https://github.com/amellendijk/lean-bombieri-vinogradov"
+commit = "08696dd"
+lean = "v4.28.0"
+has_blueprint = false
+chapters = ["Analytic"]
