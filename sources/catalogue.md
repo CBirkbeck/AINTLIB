@@ -1,7 +1,12 @@
 # AINTLIB Source Catalogue (Phase 0)
 
 Generated from `_scan.tsv` (local repos, pulled to latest), `discovery.tsv` (GitHub/web
-search), and `mathlib-nt-prs.json` (open `t-number-theory` PRs). **Awaiting user sign-off.**
+search), and `mathlib-nt-prs.json` (open `t-number-theory` PRs).
+
+**Inclusion rule (user, 2026-06-09):** only map repos with *actual, substantive Lean
+content*. Before authoring a repo's chapter in Phase 3, vet it (real theorems present,
+not an empty scaffold or all-`sorry`); drop stubs and abandoned projects. WeilConverse is
+excluded on this basis (never completed).
 
 Legend: ✦ = ships its own blueprint. Chapters use the §5 names.
 
@@ -67,7 +72,7 @@ Excluded as noise/crank or pure learning exercises (RNT/"Reflective Number Theor
 
 | Folder | Remote | Note | R |
 |---|---|---|---|
-| WeilConverse | CBirkbeck/WeilConverse (4.11) ✦ | **Weil converse theorem** (L-function ⟹ modularity) | **include** → ModularForms/Analytic |
+| WeilConverse | CBirkbeck/WeilConverse (4.11) ✦ | Weil converse theorem — **never completed; no substantive Lean code** | **EXCLUDED** (user, 2026-06-09) |
 | formal-conjectures / …NEW | CBirkbeck fork / google-deepmind upstream | NT conjecture statements | include upstream (= Table 2) |
 | AACConjecture | riccardobrasca/AACConjecture (4.27) | a specific conjecture (needs a look) | **your call** |
 | FLTNEW | ImperialCollegeLondon/FLT (4.24) ✦ | newer local copy of Imperial FLT | fold into FLT-imperial |
