@@ -1,0 +1,17 @@
+repo	lean	commit	remote	blueprint_dir
+Adic spaces	leanprover/lean4:v4.29.0-rc6	fb55cd8	https://github.com/CBirkbeck/Adic-Spaces.git	
+chebotarev-density	leanprover/lean4:v4.31.0-rc1	9ddb80d	https://github.com/CBirkbeck/chebotarev-density.git	blueprint
+flt-regular-bernoulli	leanprover/lean4:v4.30.0-rc2	888f2259	https://github.com/CBirkbeck/flt-regular-bernoulli.git	blueprint
+LeanModularForms	leanprover/lean4:v4.30.0-rc2	0fc82eb	https://github.com/CBirkbeck/LeanModularForms.git	blueprint
+FLT	leanprover/lean4:v4.9.0-rc2	9deae05	https://github.com/ImperialCollegeLondon/FLT.git	blueprint
+flt-regular	leanprover/lean4:v4.31.0-rc1	6ade127	https://github.com/leanprover-community/flt-regular.git	blueprint
+Hasse-Weil	leanprover/lean4:v4.29.0-rc6	03003e7	https://github.com/CBirkbeck/Hasse-Weil.git	
+WeilConjectures	leanprover/lean4:v4.28.0-rc1	b8464ee	https://github.com/CBirkbeck/WeilConjectures.git	
+EulerProducts	leanprover/lean4:v4.24.0	7376f1a	https://github.com/MichaelStollBayreuth/EulerProducts.git	
+DirichletNonvanishing	leanprover/lean4:v4.13.0-rc3	fb3e6ac	https://github.com/CBirkbeck/DirichletNonvanishing.git	blueprint
+LocalClassFieldTheory	leanprover/lean4:v4.7.0-rc2	e7d457c	https://github.com/CBirkbeck/LocalClassFieldTheory.git	blueprint
+Nagel--Lutz	leanprover/lean4:v4.29.0-rc7	c58fbfa	https://github.com/CBirkbeck/LutzNagell.git	
+NewtonPolys	leanprover/lean4:v4.28.0-rc1	a6d9970	https://github.com/CBirkbeck/NewtonPoly.git	
+power_reside_symbols	leanprover/lean4:v4.7.0-rc2	0b573a4	https://github.com/CBirkbeck/power_residue_symbols.git	
+GLn_F_q	leanprover/lean4:v4.8.0-rc2	3fc5ad9	https://github.com/CBirkbeck/GLn_F_q.git	
+ModFormDims	leanprover/lean4:v4.13.0-rc3	10bab48	https://github.com/CBirkbeck/ModFormDims.git	
