@@ -1,0 +1,23 @@
+{
+  "path": "./HasseWeil/InvariantDifferential.lean",
+  "totalDecls": 8,
+  "defs": 1,
+  "lemmas": 6,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [
+    "D_x_ne_zero (line 80): 3200000 [NO-COMMENT]"
+  ],
+  "longProofs": [
+    { "name": "D_x_ne_zero", "lines": 140 },
+    { "name": "denom_ne_zero", "lines": 59 }
+  ],
+  "unused": [],
+  "keyApi": [
+    "invariantDifferential",
+    "invariantDifferential_ne_zero",
+    "D_x_ne_zero"
+  ],
+  "scratchWritten": true,
+  "notes": "The file formalizes ω = dx/(2y+a₁x+a₃) for an elliptic curve over a field. The core lemma D_x_ne_zero (140 lines, maxHeartbeats 3200000) proves D(x) ≠ 0 via a formally-unramified/transcendence contradiction argument; its inner hne subproof is essentially duplicated verbatim in denom_ne_zero. The three public declarations (D_x_ne_zero, denom_ne_zero, invariantDifferential/invariantDifferential_ne_zero) are all heavily used downstream across the project."
+}

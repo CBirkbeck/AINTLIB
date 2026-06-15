@@ -1,0 +1,28 @@
+{
+  "path": "./HasseWeil/FormalGroup/MulByNat.lean",
+  "totalDecls": 20,
+  "defs": 3,
+  "lemmas": 16,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [
+    "fAdd₂_assoc (line 73): 800000 [Deeply nested MvPowerSeries.subst expressions; the default limit is exceeded while unifying the Fin 3 → MvPowerSeries (Fin 2) R specialization of F.assoc]"
+  ],
+  "longProofs": [
+    { "name": "fAdd₂_assoc", "lines": 70 },
+    { "name": "preservesAddCondition_step", "lines": 63 }
+  ],
+  "unused": [
+    "subst_F_applied_to_X",
+    "subst_Xi_applied_to_X"
+  ],
+  "keyApi": [
+    "fAdd₂",
+    "mv_subst_X_of_unit",
+    "PreservesAddCondition",
+    "constantCoeff_fAdd₂",
+    "fAdd₂_assoc"
+  ],
+  "scratchWritten": true,
+  "notes": "The file's mathematical core is an interchange/Eckmann-Hilton argument (fAdd₂_interchange) that bootstraps preservation of addition for [n] from the formal group axioms by induction on n. Two private lemmas (subst_F_applied_to_X, subst_Xi_applied_to_X) are defined but never referenced within the file. The maxHeartbeats bump on fAdd₂_assoc is well-motivated by the triply-nested MvPowerSeries.subst unification problem."
+}

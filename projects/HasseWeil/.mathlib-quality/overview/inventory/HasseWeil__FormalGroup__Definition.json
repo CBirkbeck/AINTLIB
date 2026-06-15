@@ -1,0 +1,37 @@
+{
+  "path": "./HasseWeil/FormalGroup/Definition.lean",
+  "totalDecls": 25,
+  "defs": 4,
+  "lemmas": 19,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [
+    "fAdd_assoc (line 676): 800000 [NO-COMMENT]",
+    "mulByNatSeries_add (line 787): 1600000 [NO-COMMENT]"
+  ],
+  "longProofs": [
+    {"name": "additiveFormalGroup", "lines": 85},
+    {"name": "multiplicativeFormalGroup", "lines": 107},
+    {"name": "coeff_one_fAdd", "lines": 50},
+    {"name": "fAdd_assoc", "lines": 107}
+  ],
+  "unused": [
+    "FormalGroupHom",
+    "additiveFormalGroup",
+    "multiplicativeFormalGroup",
+    "mulByNatSeries_one",
+    "formalGroup_preserves_positive_order",
+    "fAdd_comm",
+    "coeff_one_mulByNatSeries",
+    "mulByNatSeries_add"
+  ],
+  "keyApi": [
+    "fAdd",
+    "hasSubst_pair",
+    "constantCoeff_FG_toSeries",
+    "constantCoeff_subst_vanishing",
+    "constantCoeff_mulByNatSeries"
+  ],
+  "scratchWritten": true,
+  "notes": "Pure foundational file: defines formal group laws over a commutative ring via MvPowerSeries.subst (Fin 2 and Fin 3 variables), with additive and multiplicative examples and the mulByNatSeries API proving [n](T)=nT+O(T^2). The two maxHeartbeats bumps (800k and 1.6M) for fAdd_assoc and mulByNatSeries_add have no justifying comments. FormalGroupHom is defined but never referenced in this file."
+}

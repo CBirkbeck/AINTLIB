@@ -1,0 +1,23 @@
+{
+  "path": "./HasseWeil/Verschiebung/PurelyInsep.lean",
+  "totalDecls": 12,
+  "defs": 2,
+  "lemmas": 9,
+  "instances": 1,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "mulByInt_q_apply_mem_range",
+    "mem_frobeniusIsog_intermediateField_iff",
+    "frobeniusIsog_intermediateField_isPurelyInseparable",
+    "frobeniusIsog_intermediateField_eq_fieldRange",
+    "mulByInt_q_pullback_image_subset_frobenius_of_element_witness"
+  ],
+  "keyApi": [
+    "frobeniusIsog_subalgebra",
+    "frobeniusIsog_intermediateField"
+  ],
+  "scratchWritten": true,
+  "notes": "Small scaffolding file (244 lines, 12 decls) establishing IsPurelyInseparable for K(E)/Im(π*) via isPurelyInseparable_iff_pow_mem. The set_option backward.isDefEq.respectTransparency false on the instance has no justifying comment. The final theorem mulByInt_q_pullback_image_subset_frobenius_of_element_witness is a witness-parametric re-export of a FieldTower.lean lemma; the unconditional form awaits Silverman III.6.1."
+}

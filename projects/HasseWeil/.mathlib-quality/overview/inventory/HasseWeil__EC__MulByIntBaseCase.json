@@ -1,0 +1,25 @@
+{
+  "path": "./HasseWeil/EC/MulByIntBaseCase.lean",
+  "totalDecls": 13,
+  "defs": 0,
+  "lemmas": 13,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "mulByInt_pullback_unique", "lines": 38 }
+  ],
+  "unused": [
+    "mulByInt_one_eq_id",
+    "mulByInt_succ_toAddMonoidHom",
+    "mulByInt_one_comp_eq_mulByInt_degree",
+    "mulByInt_pullback_unique",
+    "mulByInt_pullback_mulByInt_x"
+  ],
+  "keyApi": [
+    "mulByInt_one_pullback_eq_id",
+    "algHom_apply_polynomial"
+  ],
+  "scratchWritten": true,
+  "notes": "Foundational base-case file for the [1]=id isogeny identity, building up from division-polynomial rewrites to full Isogeny struct equality; also provides the uniqueness characterisation of (mulByInt W n).pullback (38-line proof) and substitution lemmas for Φ_ff/ΨSq_ff. No sorries, no maxHeartbeats overrides; five of the thirteen declarations have no callers within this file (all are public API consumed by MulByIntComp and other files)."
+}

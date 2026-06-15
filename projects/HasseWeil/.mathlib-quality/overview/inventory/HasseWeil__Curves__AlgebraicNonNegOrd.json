@@ -1,0 +1,20 @@
+{
+  "path": "./HasseWeil/Curves/AlgebraicNonNegOrd.lean",
+  "totalDecls": 3,
+  "defs": 0,
+  "lemmas": 3,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "ord_P_nonneg_of_isAlgebraic", "lines": 44 }
+  ],
+  "unused": [
+    "transcendental_of_neg_ord_P"
+  ],
+  "keyApi": [
+    "pointValuation_algebraMap_F_le_one"
+  ],
+  "scratchWritten": true,
+  "notes": "Tiny 3-declaration file proving the algebraic-Liouville inequality at finite places (Silverman II.1) and its contrapositive. `pointValuation_algebraMap_F_le_one` is the project's canonical scalar-tower bridge for constants entering valuation rings, used heavily across SamePlace, TranslateLocalRing, TranslateValuation, TranslationOrd, and other files. No sorries, no maxHeartbeats overrides."
+}

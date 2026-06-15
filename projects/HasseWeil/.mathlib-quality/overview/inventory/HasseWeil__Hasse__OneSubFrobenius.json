@@ -1,0 +1,17 @@
+{
+  "path": "./HasseWeil/Hasse/OneSubFrobenius.lean",
+  "totalDecls": 2,
+  "defs": 0,
+  "lemmas": 2,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "isogOneSub_negFrobenius_isSeparable_of_witnesses",
+    "isogOneSub_negFrobenius_sepDegree_eq_pointCount_of_witnesses"
+  ],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "Thin specialisation layer (113 lines, 2 theorems) pinning the generic witness-parametric separability and sepDegree=pointCount results from Separability.lean and PointFix.lean to the concrete isogOneSub_negFrobenius isogeny. Both theorems are called exclusively from other files (AdditionPullback/Differential.lean and Hasse/HoleE.lean), so both appear as dead code within this file. No sorries, no maxHeartbeats overrides, no long proofs."
+}

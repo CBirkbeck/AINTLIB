@@ -1,0 +1,20 @@
+{
+  "path": "./HasseWeil/WeilPairing/HasseAssembly.lean",
+  "totalDecls": 4,
+  "defs": 0,
+  "lemmas": 4,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [],
+  "keyApi": [
+    "isogTrace",
+    "frobeniusIsog",
+    "isogOneSub_negFrobenius",
+    "hasse_bound_of_full_qf_nonneg_witnesses",
+    "ker_deg_skeleton"
+  ],
+  "scratchWritten": true,
+  "notes": "Pure capstone assembly glue: 4 theorems, all proofs ≤11 lines, no sorry, no maxHeartbeats. The two '_both' (coprime-BOTH locus) variants exist to bypass the inseparable p∣r pencil sorry via reviewer round-23 Route B. All declarations are consumed by FrobMatrixData.lean."
+}

@@ -1,0 +1,17 @@
+{
+  "path": "./HasseWeil/Hasse/Final.lean",
+  "totalDecls": 2,
+  "defs": 0,
+  "lemmas": 2,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "hasse_bound_of_witnesses",
+    "hasse_bound_sq_of_witnesses"
+  ],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "Thin two-theorem adapter bridging HasseWitnesses to HoleE chain; both theorems are public API consumed only by other files (OpenLemmas.lean, L6ViaPoleDivisor.lean). The haveI block establishing Finite (isogOneSub_negFrobenius).kernel is copy-pasted identically in both proofs and could be extracted into a private lemma."
+}

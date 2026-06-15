@@ -1,0 +1,27 @@
+{
+  "path": "./HasseWeil/AdditionPullback/Differential.lean",
+  "totalDecls": 21,
+  "defs": 0,
+  "lemmas": 21,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "isogOneSub_negFrobenius_isAlgebraic_synonym", "lines": 33 }
+  ],
+  "unused": [
+    "isogOneSub_negFrobenius_toAddMonoidHom_decomposition",
+    "isogOneSub_negFrobenius_isSeparable_of_additivity_finiteDim_bridge",
+    "isogOneSub_negFrobenius_isSeparable_of_h_add_only",
+    "isogOneSub_negFrobenius_sepDegree_eq_pointCount_of_sep_and_fiber",
+    "isogOneSub_negFrobenius_fiber_witness_of_sepDegree_eq_pointCount",
+    "isogOneSub_negFrobenius_isSeparable_via_leading_witnesses"
+  ],
+  "keyApi": [
+    "isogOneSub_negFrobenius_finiteDimensional",
+    "isogOneSub_negFrobenius_isSeparable_of_additivity_and_T2_4_004",
+    "isogOneSub_negFrobenius_isSeparable_iff_omegaPullbackCoeff_ne_zero"
+  ],
+  "scratchWritten": true,
+  "notes": "All 21 declarations are sorry-free and no set_option maxHeartbeats appears anywhere. The file is a witness-parametric staging area: it closes Witness #2 (FiniteDimensional) unconditionally and reduces Witness #1 (separability) to three progressively simpler open hypotheses (additivity sum, omega-coeff bridge, or leading-coefficient additivity of formal series), with six leaf theorems unused within the file itself. The main chain runs through a transcendence-basis argument (trdeg K(E)=1 + AlgIndep -> IsTranscendenceBasis -> IsAlgebraic -> FiniteDimensional)."
+}

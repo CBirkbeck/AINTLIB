@@ -1,0 +1,24 @@
+{
+  "path": "./HasseWeil/Hasse/IsogOneSubXyFamily.lean",
+  "totalDecls": 40,
+  "defs": 1,
+  "lemmas": 39,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "genericPoint_sub_frobeniusW_KE_apply", "lines": 34 },
+    { "name": "some_sub_frobeniusW_KE_some_apply", "lines": 38 },
+    { "name": "genericPoint_add_lift_eq_some", "lines": 34 }
+  ],
+  "unused": [
+    "map_negY_K_algHom"
+  ],
+  "keyApi": [
+    "W_KE_map_K_algHom",
+    "map_negFrobeniusIsog_pullback_x_gen_K_algHom",
+    "frobeniusW_KE"
+  ],
+  "scratchWritten": true,
+  "notes": "The file discharges the xy_family hypothesis for isogOneSub_negFrobenius unconditionally via a four-stage chain: K-AlgHom distribution over curve formulas, σ-commutation (Frobenius pullback = q-th power), curve-group-law identity (id−π translation-invariant for K-rational shifts), and Affine.Point.some.injEq extraction. The key export xy_family_isogOneSub_negFrobenius is used by PoleDivisorFallback.lean and PoleDivisor2Tor.lean; frobeniusW_KE and genericPoint_sub_frobeniusW_KE_apply are also consumed by GapSpines.lean and WallAGeometricRealization.lean. One declaration (map_negY_K_algHom) is dead code not referenced anywhere in the project."
+}

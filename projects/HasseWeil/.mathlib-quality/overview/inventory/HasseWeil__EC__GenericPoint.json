@@ -1,0 +1,14 @@
+{
+  "path": "./HasseWeil/EC/GenericPoint.lean",
+  "totalDecls": 3,
+  "defs": 1,
+  "lemmas": 2,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": ["genericPoint_xOf_some"],
+  "keyApi": ["generic_nonsingular", "genericPoint"],
+  "scratchWritten": true,
+  "notes": "Tiny 3-declaration wrapper file that packages the generic K(E)-rational point of the base-changed curve W_KE; all proofs are one-liners delegating to MulByIntPullback infrastructure. Note that MulByIntPullback.lean already contains a private duplicate `generic_nonsingular'` (line 95) with the same proof body, suggesting this file exists purely to expose a public API surface."
+}

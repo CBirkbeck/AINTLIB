@@ -1,0 +1,14 @@
+{
+  "path": "./HasseWeil/HasseBound.lean",
+  "totalDecls": 2,
+  "defs": 0,
+  "lemmas": 2,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": ["trace_sq_le_four_mul_deg", "abs_le_two_sqrt_of_sq_le"],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "Minimal two-theorem file: pure-algebra discriminant bound and its real-sqrt corollary, both consumed exclusively by files outside this one (BoundOfWitnesses.lean and QuadraticForm.lean). The file was pruned of its former geometric content (placeholder-based hasse_bound etc.) in 2026-05-28; what remains is correct and axiom-clean."
+}

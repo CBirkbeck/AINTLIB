@@ -1,0 +1,29 @@
+{
+  "path": "./HasseWeil/FormalGroup/Hom.lean",
+  "totalDecls": 23,
+  "defs": 3,
+  "lemmas": 20,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "FormalGroupHom.id", "lines": 45 },
+    { "name": "FormalGroupHom.comp", "lines": 97 },
+    { "name": "FormalGroup.subst_mulByNatHom_mulByNatInvSeries", "lines": 45 },
+    { "name": "FormalGroup.mulByNatHom_subst_injective_of_unit", "lines": 31 }
+  ],
+  "unused": [
+    "FormalGroupHom.coeff_one_id",
+    "FormalGroup.mulByNatHom_one_isIso",
+    "FormalGroup.mulByNatHom_one_exists_inverse",
+    "FormalGroup.mulByNatHom_hasInverse",
+    "FormalGroup.mulByNatHom_hasInverse'",
+    "FormalGroup.mulByNatHom_subst_injective_of_unit"
+  ],
+  "keyApi": [
+    "FormalGroupHom.id_toSeries",
+    "FormalGroup.mulByNatInvSeries"
+  ],
+  "scratchWritten": true,
+  "notes": "The file builds the category-theoretic API (id, comp, identity laws) for FormalGroupHom and then develops the series-level right- and left-inverse theory for mulByNatHom when (n : R) is a unit, culminating in series injectivity. The left-inverse proof uses a bootstrap: a second application of compInverseOfUnit to g derives h = f from associativity, avoiding any need to prove left-inverse directly. Six of 23 declarations are terminal API lemmas unused within the file (designed for downstream consumers T-IV-2-008/T-IV-3-007); packaging the inverse as a FormalGroupHom (requiring preserves_add for the inverse series) is explicitly deferred."
+}

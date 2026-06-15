@@ -1,0 +1,25 @@
+{
+  "path": "./HasseWeil/Curves/Valuation.lean",
+  "totalDecls": 26,
+  "defs": 5,
+  "lemmas": 18,
+  "instances": 3,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "ord_P_eq_top_iff",
+    "one_le_ord_P_iff_pointValuation_lt_one",
+    "ord_P_sub_eq_of_lt",
+    "exists_K_uniformizer",
+    "Uniformizer.unit_quotient",
+    "Uniformizer.exists_ord_P_eq"
+  ],
+  "keyApi": [
+    "ord_P_of_ne",
+    "pointValuation",
+    "ord_P"
+  ],
+  "scratchWritten": true,
+  "notes": "Clean file (no sorry, no maxHeartbeats) implementing the additive valuation ord_P on F(C) via mathlib's DVR/HeightOneSpectrum adic-valuation machinery; the private lemma ord_P_of_ne is the internal workhorse used by 8 public declarations. Six public declarations appear unused within this file and are likely consumed by downstream files (CurveMap, OrdAtPoint, etc.)."
+}

@@ -1,0 +1,31 @@
+{
+  "path": "./HasseWeil/Curves/MillerAllChar.lean",
+  "totalDecls": 19,
+  "defs": 4,
+  "lemmas": 15,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "divisorOf_coordX_sub_const_apply_eq_finsupp_allChar", "lines": 48},
+    {"name": "projectiveDivisorOf_coordX_sub_const_allChar", "lines": 34},
+    {"name": "count_YClass_linePolynomial_eq_allChar", "lines": 126},
+    {"name": "divisorOf_coordY_sub_algMap_linePolynomial_apply_eq_finsupp_allChar", "lines": 32},
+    {"name": "projectiveDivisorOf_coordY_sub_algMap_linePolynomial_allChar", "lines": 48},
+    {"name": "miller_at_addSmoothPoint_principal_allChar", "lines": 41},
+    {"name": "miller_at_some_some_degen_allChar", "lines": 48},
+    {"name": "general_kappa_reduce_of_miller", "lines": 113}
+  ],
+  "unused": [
+    "miller_at_neg_of_some_allChar",
+    "picZeroIsoE_allChar",
+    "picZeroIsoE_of_AFInputs_witness_pdz_allChar"
+  ],
+  "keyApi": [
+    "vertical_line_principal_allChar",
+    "miller_hypothesis_holds_allChar",
+    "divZeroReduce_holds_allChar"
+  ],
+  "scratchWritten": true,
+  "notes": "Entire file is a char-uniform re-proof of Miller.lean dropping inert [NeZero 2/3] typeclasses; all 19 declarations are sorry-free with no maxHeartbeats overrides. miller_at_neg_of_some_allChar is dead code within the file (not called by miller_hypothesis_holds_allChar). picZeroIsoE_of_AFInputs_witness_pdz_allChar is a parked parametric variant for sub-ticket T10-SUB-PRINCIPAL-DEGZERO-ALLCHAR, nearly duplicating picZeroIsoE_of_AFInputs_allChar."
+}

@@ -1,0 +1,25 @@
+{
+  "path": "./HasseWeil/Curves/FiniteOverKx.lean",
+  "totalDecls": 18,
+  "defs": 2,
+  "lemmas": 6,
+  "instances": 10,
+  "sorries": [],
+  "maxHeartbeats": [
+    "faithfulSMul_polynomialX_functionField: 40000 [Instance synthesis climbs through the F[X] → F[C] → F(C) tower with multiple Algebra/IsScalarTower steps, requiring extra heartbeats]"
+  ],
+  "longProofs": [],
+  "unused": [
+    "isNoetherianRing_coordinateRing",
+    "finrank_functionField_over_fracPolynomialX",
+    "coordX_ne_zero",
+    "coordY_ne_zero",
+    "transcendental_coordX"
+  ],
+  "keyApi": [
+    "coordinateRing_finite_over_polynomialX",
+    "algebraMap_polynomialX_functionField_injective"
+  ],
+  "scratchWritten": true,
+  "notes": "Clean ladder of algebra/localization instances from F[X]-finiteness (rank-2 basis {1,Y}) up to the degree-2 function-field extension F(C)/F(x), without any IsElliptic hypothesis — generalizing HasseWeil/Basic.lean. One justified synthInstance.maxHeartbeats bump for the F[X]→F[C]→F(C) tower. No sorries, no long proofs; the unused declarations are all public API consumed by other project files."
+}

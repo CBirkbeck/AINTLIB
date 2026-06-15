@@ -1,0 +1,44 @@
+{
+  "path": "./HasseWeil/Hasse/PoleDivisor2Tor.lean",
+  "totalDecls": 42,
+  "defs": 0,
+  "lemmas": 41,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [
+    "ord_P_translateY_xy_eq_neg_three_at_2tor: 1600000 [NO-COMMENT]"
+  ],
+  "longProofs": [
+    {"name": "ord_P_translateY_xy_eq_neg_three_at_2tor", "lines": 362},
+    {"name": "bridge_at_negFrobeniusIsog_pullback_y_gen_of_2_tor", "lines": 148},
+    {"name": "bridge_at_addPullbackNumerator_negFrobenius_of_2_tor", "lines": 103},
+    {"name": "bridge_at_T5_a1_x_pi_y_add_pi_x_y_of_2_tor", "lines": 87},
+    {"name": "ord_P_translateX_xy_eq_neg_two_at_2tor", "lines": 118},
+    {"name": "ord_P_x_gen_sub_const_ge_two_at_2tor", "lines": 88},
+    {"name": "ord_P_x_gen_sub_const_eq_two_at_2tor", "lines": 79},
+    {"name": "bridge_at_x_pi_y_add_pi_x_y_of_2_tor", "lines": 66},
+    {"name": "ord_P_translateSlope_xy_eq_neg_one_at_2tor", "lines": 59},
+    {"name": "ord_P_A_eq_one_at_2tor", "lines": 51},
+    {"name": "bridge_at_addPullback_x_negFrobenius_of_2_tor", "lines": 44},
+    {"name": "bridge_at_y_gen_sub_y_gen_pow_card_of_2_tor_of_witness", "lines": 43},
+    {"name": "ord_T_translateAlgEquivOfPoint_neg_x_gen_eq_neg_two_at_2tor", "lines": 48},
+    {"name": "bridge_at_y_gen_of_2_tor_of_witness", "lines": 37},
+    {"name": "bridge_at_x_gen_mul_negFrobeniusIsog_pullback_x_gen_of_2_tor", "lines": 32},
+    {"name": "bridge_at_T4_two_y_pi_y_of_2_tor", "lines": 31}
+  ],
+  "unused": ["lemma3_pole_at_T_at_2tor"],
+  "keyApi": [
+    "bridge_at_x_gen_of_2_tor",
+    "bridge_at_y_gen_of_2_tor",
+    "bridge_at_negFrobeniusIsog_pullback_y_gen_of_2_tor",
+    "bridge_at_y_gen_pow_card_of_2_tor",
+    "bridge_at_x_gen_pow_card_of_2_tor",
+    "twoTorYValueWitness_discharge",
+    "bridge_at_negFrobeniusIsog_pullback_x_gen_of_2_tor",
+    "ord_P_A_eq_one_at_2tor",
+    "bridge_at_y_gen_of_2_tor_of_witness",
+    "ord_P_translateY_xy_eq_neg_three_at_2tor"
+  ],
+  "scratchWritten": true,
+  "notes": "2-torsion analogue of the addPullbackNumerator_negFrobenius bridge chain; fully sorry-free. The file has one maxHeartbeats bump (1600000, no comment) on the 362-line ord_P_translateY_xy_eq_neg_three_at_2tor proof. `bridge_at_T5_a1_x_pi_y_add_pi_x_y_of_2_tor` and `bridge_at_x_pi_y_add_pi_x_y_of_2_tor` contain a notable duplication of the πy/πx non-zero + ordAtInfty strict-comparison argument that could be extracted into a helper lemma."
+}

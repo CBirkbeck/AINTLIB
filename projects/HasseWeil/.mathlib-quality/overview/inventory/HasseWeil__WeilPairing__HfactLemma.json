@@ -1,0 +1,25 @@
+{
+  "path": "./HasseWeil/WeilPairing/HfactLemma.lean",
+  "totalDecls": 6,
+  "defs": 1,
+  "lemmas": 5,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "hfact_projectiveDivisorOf_eq", "lines": 33},
+    {"name": "hfact_of_picDualDivisorClass", "lines": 31}
+  ],
+  "unused": [
+    "pullbackDivisor_comm",
+    "pullbackDivisor_kappaDivisor_local",
+    "weilFunction_divisor_eq_pullbackDivisor_kappaDivisor",
+    "weilPairing_adjoint_of_picDualDivisorClass"
+  ],
+  "keyApi": [
+    "PicDualDivisorClass",
+    "weilFunction_divisor_eq_pullbackDivisor_kappaDivisor"
+  ],
+  "scratchWritten": true,
+  "notes": "Central file for the hfact discharge (Silverman III.8.2): it isolates PicDualDivisorClass as the single carried projective-model residual of III.6.1b, then builds the full factorisation phi^*(g_T) = c*(g_{phi-hat T}*[ell]^*k) on top of it. No sorry, no set_option maxHeartbeats. The _local suffix on pullbackDivisor_kappaDivisor_local exists purely to avoid a name clash with PairingNondeg when both files are imported by SeparableScaling."
+}

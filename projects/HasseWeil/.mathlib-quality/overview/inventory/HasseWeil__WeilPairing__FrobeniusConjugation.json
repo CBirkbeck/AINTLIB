@@ -1,0 +1,32 @@
+{
+  "path": "./HasseWeil/WeilPairing/FrobeniusConjugation.lean",
+  "totalDecls": 20,
+  "defs": 3,
+  "lemmas": 16,
+  "instances": 1,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "ringHom_ext_base_x_y_gen", "lines": 36},
+    {"name": "sigmaConjugation_x_y_gen", "lines": 32}
+  ],
+  "unused": [
+    "coordRingMap_X",
+    "coordRingMap_root",
+    "frobeniusFunctionFieldEquiv_baseField",
+    "map_genericPoint_some",
+    "sigmaConjugation_tau_mapW",
+    "sigmaConjugation_lift_twist",
+    "sigmaConjugation_fix_genericPoint",
+    "sigmaConjugation_x_y_gen",
+    "frob_comp_tau_apply",
+    "tau_comp_frob_apply",
+    "frobeniusFunctionFieldEquiv_conj"
+  ],
+  "keyApi": [
+    "frobeniusFunctionFieldEquivK",
+    "sigmaFunctionFieldPointKbar"
+  ],
+  "scratchWritten": true,
+  "notes": "Completes leaf 1 of Route 2A axiom-clean: proves Silverman III.8.1d (sigma-tau conjugation) via ring-hom ext on x_gen/y_gen/base, with careful avoidance of whnf explosions on the heavy RingEquiv.trans Frobenius. No sorries, no heartbeat overrides. The two general lemmas coordRingMap_X/root have potential mathlib overlap."
+}

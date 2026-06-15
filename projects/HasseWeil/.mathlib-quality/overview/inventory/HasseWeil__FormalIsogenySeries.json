@@ -1,0 +1,54 @@
+{
+  "path": "./HasseWeil/FormalIsogenySeries.lean",
+  "totalDecls": 51,
+  "defs": 1,
+  "lemmas": 50,
+  "instances": 0,
+  "sorries": [
+    "omegaPullbackCoeff_eq_formalIsogenyLeading",
+    "formalIsogenySeries_add"
+  ],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "coeff_one_subst_bivariate", "lines": 73},
+    {"name": "ord_pullback_x_neg_of_localParam_pos", "lines": 105},
+    {"name": "ordAtInfty_y_ne_zero_of_equation_of_ord_x_neg", "lines": 65},
+    {"name": "ordAtInfty_y_lt_ordAtInfty_x_of_equation_of_ord_x_neg", "lines": 116},
+    {"name": "ordAtInfty_x_neg_of_equation_of_neg_div_pos", "lines": 94},
+    {"name": "orderTop_localExpand_algebraMap_fracPolyX", "lines": 75},
+    {"name": "orderTop_localExpand_basis_eq_min", "lines": 43},
+    {"name": "constantCoeff_formalIsogenySeries_mulByInt_via_bridge_003", "lines": 38},
+    {"name": "coeff_one_formalIsogenySeries_mulByInt_via_bridge_003", "lines": 37},
+    {"name": "formalIsogenySeries_add_of_split_coeff_witness", "lines": 31},
+    {"name": "formalIsogenySeries_add_coeff_zero_via_genuine", "lines": 35},
+    {"name": "orderTop_ofPowerSeries_pos_of_order_pos", "lines": 28},
+    {"name": "formalIsogenySeries_mulByInt_one", "lines": 42}
+  ],
+  "unused": [
+    "omegaPullbackCoeff_eq_formalIsogenyLeading_of_witness",
+    "omegaPullbackCoeff_eq_formalIsogenyLeading_of_constant_witness",
+    "omegaPullbackCoeff_eq_formalIsogenyLeading_add_witness",
+    "formalIsogenySeries_add_of_split_coeff_witness",
+    "formalIsogenySeries_add_coeff_zero_via_genuine",
+    "formalIsogenySeries_add_coeff_one_via_FGL",
+    "omegaPullbackCoeff_add_of_leading_witness",
+    "omegaPullbackCoeff_add_via_bridge_of_constCoeff",
+    "coeff_one_formalIsogenySeries_id",
+    "omegaPullbackCoeff_eq_formalIsogenyLeading_id",
+    "coeff_one_formalIsogenySeries_mulByInt_via_bridge_003",
+    "ordAtInfty_y_ne_zero_of_equation_of_ord_x_neg",
+    "ordAtInfty_x_neg_of_equation_of_neg_div_pos",
+    "ordAtInfty_neg_of_orderTop_localExpand_neg",
+    "ordAtInfty_pullback_x_gen_neg_of_orderTop_pos_of_base",
+    "orderTop_localExpand_z_sum_pos_of_iv14_identity"
+  ],
+  "keyApi": [
+    "constantCoeff_formalGroupLaw",
+    "ord_algebraMap_F_nonneg",
+    "ord_coeff_mul_ge",
+    "coeff_one_subst_bivariate",
+    "orderTop_localExpand_eq_ordAtInfty"
+  ],
+  "scratchWritten": true,
+  "notes": "Contains two sorry-carrying BRIDGE theorems (BRIDGE-001: omega-pullback-coeff equals formal series leading coefficient; BRIDGE-003: formal series of sum equals FGL substitution), plus a large body of axiom-clean valuation infrastructure (R5b: orderTop_localExpand_eq_ordAtInfty proves the two valuations coincide on all K(E)) and valuation-balance arguments on the Weierstrass equation. Roughly 16 declarations are dead code within the file (API stubs / witness parametric variants intended for downstream callers). The Weierstrass-equation valuation arguments in ord_pullback_x_neg_of_localParam_pos, ordAtInfty_y_lt_ordAtInfty_x_of_equation_of_ord_x_neg, and ordAtInfty_x_neg_of_equation_of_neg_div_pos share a common proof pattern that is repeated three times without extraction into a common helper."
+}

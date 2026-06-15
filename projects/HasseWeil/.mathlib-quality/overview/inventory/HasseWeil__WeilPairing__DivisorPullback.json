@@ -1,0 +1,32 @@
+{
+  "path": "./HasseWeil/WeilPairing/DivisorPullback.lean",
+  "totalDecls": 30,
+  "defs": 6,
+  "lemmas": 24,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "pullbackDiv_apply_affine", "lines": 43},
+    {"name": "pullbackDiv_apply", "lines": 37},
+    {"name": "inftyOrdTransport_mulByInt", "lines": 61},
+    {"name": "comap_pointValuation_mulByInt_eq_affine", "lines": 31},
+    {"name": "ordTransport_affine_mulByInt", "lines": 54}
+  ],
+  "unused": [
+    "projOrdAt_some",
+    "projOrdAt_zero",
+    "ord_P_mulByInt_pullback_eq_affine",
+    "ord_P_mulByInt_pullback_eq_infty",
+    "projOrdTransport_mulByInt",
+    "projectiveDivisorOf_pullback_weilFunction",
+    "projectiveDivisorOf_pullback_bilinFunction"
+  ],
+  "keyApi": [
+    "pullbackDivisor",
+    "ProjOrdTransport",
+    "projOrdAt"
+  ],
+  "scratchWritten": true,
+  "notes": "This file provides axiom-clean divisor-pullback functoriality for the separable [ℓ] isogeny: the main theorem `projectiveDivisorOf_pullback_eq_pullbackDivisor` assembles from the per-place `ProjOrdTransport` predicate, which is discharged for `mulByInt W ℓ` via `eq_ordAtInftyValuation_of_x_y` (infinity half) and the comap-valuation identity `comap_pointValuation_mulByInt_eq_affine` (affine half, which in turn rests on `mulByInt_comap_pointValuation_isEquiv_affine` + `ord_P_mulByInt_x/y_sub_const_eq_one` from imported files). The three predicates `OrdTransport`, `ProjOrdTransport`, `InftyOrdTransport` serve as the project's interface for isogeny unramifiedness and are consumed by IsogenySurjective, HfactLemma, PairingNondeg, PairingProps, ProjOrdTransportLocal, and PencilComapWitnesses."
+}

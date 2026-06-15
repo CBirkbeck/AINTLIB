@@ -1,0 +1,31 @@
+{
+  "path": "./HasseWeil/EC/MulByIntUnramified.lean",
+  "totalDecls": 33,
+  "defs": 1,
+  "lemmas": 32,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "smulEval_facts_of_zsmul_eq_some", "lines": 42},
+    {"name": "psi_evalEval_ne_zero_of_zsmul_ne_zero", "lines": 31},
+    {"name": "fibrePoly_derivative_eval_ne_zero", "lines": 32},
+    {"name": "one_le_ord_P_algebraMap_of_evalAt_zero", "lines": 32},
+    {"name": "ord_P_ψ_ff_two_mul_eq_one", "lines": 75},
+    {"name": "ord_P_y_numerator_eq_zero", "lines": 58},
+    {"name": "ord_P_mulByInt_y_sub_const_eq_one", "lines": 308}
+  ],
+  "unused": [
+    "ord_P_mulByInt_x_sub_const_eq_one",
+    "ord_P_mulByInt_y_sub_const_eq_one"
+  ],
+  "keyApi": [
+    "smulEval_facts_of_zsmul_eq_some",
+    "ord_P_algebraMap_poly_eq_zero_of_eval_ne",
+    "fibrePoly",
+    "Φ_ff_eq_algebraMap",
+    "ΨSq_ff_eq_algebraMap"
+  ],
+  "scratchWritten": true,
+  "notes": "The file proves the 'e=1 unramifiedness' of [ℓ] at both affine non-2-torsion and affine 2-torsion image points, providing two key exported theorems (ord_P_mulByInt_x_sub_const_eq_one and ord_P_mulByInt_y_sub_const_eq_one) that feed IsogenyOrdTransport. The char-2 branch of the 2-torsion case routes through DifferentialOrd.lean (ord_P_mulByInt_y_sub_const_le_one) for the upper bound, making that branch entirely sorry-free; the Wronskian-based separability argument (wronskian_Φ_ΨSq_general) is axiom-clean. No sorry appears anywhere in the file."
+}

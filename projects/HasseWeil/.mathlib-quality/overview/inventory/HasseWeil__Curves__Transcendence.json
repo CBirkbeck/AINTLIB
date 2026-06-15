@@ -1,0 +1,20 @@
+{
+  "path": "./HasseWeil/Curves/Transcendence.lean",
+  "totalDecls": 4,
+  "defs": 0,
+  "lemmas": 4,
+  "instances": 2,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "notMem_pthPowers_of_uniformizer", "lines": 33 }
+  ],
+  "unused": [
+    "isAlgebraic_polynomialX_functionField",
+    "isIntegral_fracPolynomialX_functionField",
+    "notMem_pthPowers_of_uniformizer"
+  ],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "Four-declaration leaf file; all axiom-clean, no sorry. CurveMap is imported for context but not used in any proof body. Only functionField_trdeg_eq_one has a downstream caller (Differentials.lean); the other two instances and the uniformizer theorem appear to be parked/experimental with no current callers."
+}

@@ -1,0 +1,14 @@
+{
+  "path": "./HasseWeil/Hasse/TorsionCard.lean",
+  "totalDecls": 2,
+  "defs": 0,
+  "lemmas": 2,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [],
+  "keyApi": ["torsionSubgroup_card_of_witness"],
+  "scratchWritten": true,
+  "notes": "Thin 71-line glue file closing Silverman III.6.4(a) in witness-parametric form; the two theorems are a simple reduction chain from kernel-degree witness to #E[m]=m^2 via mulByInt_degree and Isogeny.card_kernel_eq_degree_of_separable_witness. No sorries, no maxHeartbeats, no dead code."
+}

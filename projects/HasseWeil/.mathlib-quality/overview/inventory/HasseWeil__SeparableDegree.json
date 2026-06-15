@@ -1,0 +1,14 @@
+{
+  "path": "./HasseWeil/SeparableDegree.lean",
+  "totalDecls": 4,
+  "defs": 2,
+  "lemmas": 2,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": ["sepDegree_dvd_degree", "sepDegree_le_degree"],
+  "keyApi": ["sepDegree", "IsSeparable"],
+  "scratchWritten": true,
+  "notes": "Thin adapter layer (4 decls, 63 lines) wrapping mathlib's Field.finSepDegree for the project's PullbackIsogeny type. The two theorem results (sepDegree_dvd_degree, sepDegree_le_degree) are unused within this file but exported as API. The richer separability API (isSeparable_iff_sepDegree_eq_degree, sepDegree_eq_card_emb) lives in EC/IsogenyKernel.lean, not here."
+}

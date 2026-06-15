@@ -1,0 +1,26 @@
+{
+  "path": "./HasseWeil/EC/TranslateOrdInfty.lean",
+  "totalDecls": 12,
+  "defs": 0,
+  "lemmas": 12,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "valuation_aeval_eq_exp", "lines": 33},
+    {"name": "valuation_algebraMap_fracPolyX_eq_ordAtInftyValuation", "lines": 63},
+    {"name": "ordAtInftyValuation_basis_summands_distinct", "lines": 44},
+    {"name": "eq_ordAtInftyValuation_of_x_y", "lines": 64},
+    {"name": "pointValuation_comap_translateAlgEquivOfPoint_some_eq_ordAtInftyValuation", "lines": 47}
+  ],
+  "unused": [
+    "isTranslateOrdAtInftyCompatible_translateAlgEquivOfPoint"
+  ],
+  "keyApi": [
+    "pointValuation_eq_exp_neg_of_ord_P_eq",
+    "valuation_aeval_eq_exp",
+    "valuation_algebraMap_polynomial_eq_exp"
+  ],
+  "scratchWritten": true,
+  "notes": "All 12 declarations are theorems (no defs/instances). The file implements a valuation-uniqueness argument: `eq_ordAtInftyValuation_of_x_y` pins any valuation to `ordAtInftyValuation` by its values on `x_gen` and `y_gen`, and the main theorem `isTranslateOrdAtInftyCompatible_translateAlgEquivOfPoint` is the export used by 8+ downstream files in the Weil-pairing stack. `pointValuation_eq_exp_neg_of_ord_P_eq` is a local duplicate of `Curves.SmoothPlaneCurve.pointValuation_eq_exp_neg_of_ord_P_eq` defined in `L6Witnesses.lean` — consolidation candidate."
+}

@@ -1,0 +1,18 @@
+{
+  "path": "./HasseWeil/WeilPairing/FrobeniusGalois.lean",
+  "totalDecls": 3,
+  "defs": 1,
+  "lemmas": 2,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "frobeniusScaling_of_witnesses"
+  ],
+  "keyApi": [
+    "weilPairing_scaling_core"
+  ],
+  "scratchWritten": true,
+  "notes": "Three-declaration leaf file: a CoordHom-free Weil-pairing scaling core theorem (weilPairing_scaling_core), a bundled geometric witness predicate (FrobeniusScalingWitnesses), and the discharged Frobenius scaling theorem (frobeniusScaling_of_witnesses). No sorries, no maxHeartbeats overrides; all proofs are short and axiom-clean."
+}

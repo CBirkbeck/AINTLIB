@@ -1,0 +1,22 @@
+{
+  "path": "./HasseWeil/Curves/FunctionElementAlgebra.lean",
+  "totalDecls": 6,
+  "defs": 1,
+  "lemmas": 5,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "algebraOfFunctionElement_algebraMap",
+    "algebraOfFunctionElement_X",
+    "algebraOfFunctionElement_injective",
+    "aeval_injective_of_transcendental",
+    "algebraOfFunctionElement_coordX_agrees"
+  ],
+  "keyApi": [
+    "algebraOfFunctionElement"
+  ],
+  "scratchWritten": true,
+  "notes": "Small 6-declaration stub file providing `Polynomial F`-algebra structure on `K(C)` via an arbitrary function element `f`; all five theorems are leaf exports with no intra-file callers. `algebraOfFunctionElement_coordX_agrees` is a tautology as stated (LHS = RHS literally), and `aeval_injective_of_transcendental` largely duplicates `algebraOfFunctionElement_injective`. The file is explicitly marked as the first piece of a deferred multi-session Computation A arc with FaithfulSMul and integral-closure steps parked for future work."
+}

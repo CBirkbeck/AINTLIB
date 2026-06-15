@@ -1,0 +1,22 @@
+{
+  "path": "./HasseWeil/WeilPairing/Discriminant.lean",
+  "totalDecls": 3,
+  "defs": 0,
+  "lemmas": 3,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "qf_nonneg_of_nonneg_on_coprime", "lines": 36 },
+    { "name": "qf_nonneg_of_nonneg_on_coprime_both", "lines": 48 }
+  ],
+  "unused": [
+    "exists_int_balanced"
+  ],
+  "keyApi": [
+    "qf_nonneg_of_nonneg_on_coprime",
+    "qf_nonneg_of_nonneg_on_coprime_both"
+  ],
+  "scratchWritten": true,
+  "notes": "Pure arithmetic leaf file with no project imports; provides two forms of Silverman V.1.1 (the discriminant lemma lifting Q≥0 from a p-coprime sublattice to all integers). Both long proofs follow the same two-step pattern (force t²≤4q, then PSD). The second theorem (qf_nonneg_of_nonneg_on_coprime_both) is a Route-B strengthening with a weaker hypothesis that avoids the balanced-remainder helper; exists_int_balanced is used only inside the file by qf_nonneg_of_nonneg_on_coprime and is not referenced externally."
+}

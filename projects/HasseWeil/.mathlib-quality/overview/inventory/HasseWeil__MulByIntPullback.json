@@ -1,0 +1,29 @@
+{
+  "path": "./HasseWeil/MulByIntPullback.lean",
+  "totalDecls": 38,
+  "defs": 13,
+  "lemmas": 24,
+  "instances": 1,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "Ψ_ne_zero", "lines": 50 },
+    { "name": "mulByInt_x_transcendental", "lines": 61 },
+    { "name": "mulByInt_coordHom_injective", "lines": 92 },
+    { "name": "mulByInt_pullbackAlgHom", "lines": 35 },
+    { "name": "mulByInt_weierstrass", "lines": 32 }
+  ],
+  "unused": [
+    "jacobian_equation_smulEval",
+    "Φ_ff_transcendental"
+  ],
+  "keyApi": [
+    "evalEval_generic_eq_mk",
+    "ψ_ff_sq_eq_ΨSq_ff",
+    "mulByInt_coordHom",
+    "mulByInt_xHom",
+    "ψ_ff"
+  ],
+  "scratchWritten": true,
+  "notes": "Constructs the pullback algebra hom [n]* : K(E) →ₐ[F] K(E) via division polynomial formulas (Φ_n/ΨSq_n, ω_n/ψ_n³) using AdjoinRoot.lift + IsLocalization.lift; key machinery is Jacobian smulEval at the generic point and an integral-closure transcendence argument for injectivity. Two dead-code private lemmas: jacobian_equation_smulEval (the proof of mulByInt_weierstrass duplicates the argument inline) and Φ_ff_transcendental (proved but never called). The set_option backward.isDefEq.respectTransparency false on mulByInt_x_transcendental has no justifying comment."
+}

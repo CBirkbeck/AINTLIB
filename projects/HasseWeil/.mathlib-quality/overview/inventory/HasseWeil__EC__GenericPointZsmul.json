@@ -1,0 +1,34 @@
+{
+  "path": "./HasseWeil/EC/GenericPointZsmul.lean",
+  "totalDecls": 47,
+  "defs": 1,
+  "lemmas": 46,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "zsmul_genericPoint_eq", "lines": 89 },
+    { "name": "zsmul_affine_point_eq", "lines": 64 },
+    { "name": "ψ_m_evalEval_mulByInt_ne_zero", "lines": 57 },
+    { "name": "mulByInt_pullback_mulByInt_x_eq_mul", "lines": 31 }
+  ],
+  "unused": [
+    "zsmul_genericPoint_one",
+    "mulByInt_x_ne_mulByInt_x",
+    "addX_mulByInt_one_mulByInt_one",
+    "zsmul_genericPoint_neg_of_pos",
+    "zsmul_genericPoint_add_one_of_witness",
+    "zsmul_genericPoint_two_of_witness",
+    "mulByInt_xy_inj",
+    "mulByInt_comp_eq_mul",
+    "addX_addY_genericPoint_mulByInt_eq_succ"
+  ],
+  "keyApi": [
+    "zsmul_genericPoint_eq",
+    "slopeOne",
+    "mulByInt_x_eq",
+    "ψ_m_evalEval_mulByInt_ne_zero"
+  ],
+  "scratchWritten": true,
+  "notes": "Central file connecting division-polynomial coordinates to the group-law via the Jacobian-affine equivalence (zsmul_eq_smulEval); the main proof zsmul_genericPoint_eq and its generalization zsmul_affine_point_eq share nearly identical 60-90 line Jacobian roundtrip arguments that are strong refactoring candidates. Several witness-parametric theorems (zsmul_genericPoint_neg_of_pos, zsmul_genericPoint_add_one_of_witness, zsmul_genericPoint_two_of_witness) appear to be superseded scaffolding from before the Jacobian route was taken and are not called within the file."
+}

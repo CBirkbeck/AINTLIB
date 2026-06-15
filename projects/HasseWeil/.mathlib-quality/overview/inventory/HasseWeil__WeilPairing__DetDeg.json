@@ -1,0 +1,34 @@
+{
+  "path": "./HasseWeil/WeilPairing/DetDeg.lean",
+  "totalDecls": 34,
+  "defs": 11,
+  "lemmas": 23,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "pairingRou_mul_left",
+    "pairingRou_mul_right",
+    "logRou_mul",
+    "omegaFun_add_left",
+    "omegaFun_add_right",
+    "omegaRightHom",
+    "omegaRightLin",
+    "omegaRightLin_apply",
+    "omegaLeftHom",
+    "omegaForm_antisymm",
+    "primRou",
+    "primRou_isPrimitiveRoot"
+  ],
+  "keyApi": [
+    "zsmul_eq_zero_of_mem_torsion",
+    "omegaFun",
+    "omegaForm",
+    "omegaForm_apply",
+    "pairingRou_coe",
+    "WeilScales"
+  ],
+  "scratchWritten": true,
+  "notes": "Clean, axiom-free DET-DEG capstone: builds the additive symplectic form omegaForm from the Weil pairing via discrete logarithm, proves it alternating/nondegenerate/scaling, and derives det(rho_ell psi) = deg psi. WeilScales is widely used as the standard interface by FrobMatrixData, SeparableScaling, SeparableTransportBridge, and other files. No sorries, no set_option maxHeartbeats, and no proofs exceeding 30 lines."
+}

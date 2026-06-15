@@ -1,0 +1,24 @@
+{
+  "path": "./HasseWeil/Curves/SmoothPointTranslate.lean",
+  "totalDecls": 14,
+  "defs": 2,
+  "lemmas": 12,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "Affine.Point.some_isSome",
+    "Affine.Point.zero_not_isSome",
+    "SmoothPoint.translate_of_finite_x",
+    "SmoothPoint.translate_of_finite_y",
+    "comap_pointValuation_eq_of_pointwise_transport",
+    "pointValuation_translate_of_smul_eq_of_valuation_witness",
+    "comap_pointValuation_refl_eq"
+  ],
+  "keyApi": [
+    "SmoothPoint.translate_of_finite_toAffinePoint"
+  ],
+  "scratchWritten": true,
+  "notes": "Clean Step (A)+(B) scaffold for the ord-transport arc with no sorries or heartbeat bumps. The Conditional namespace wraps Step (B) as witness-parametric stubs deferring the substantive maximal-ideal-transport to downstream files. The translate_of_finite_x / translate_of_finite_y pair is a mild duplication (differ only in first vs second projection of Affine.Point.some.injEq)."
+}

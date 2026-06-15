@@ -1,0 +1,31 @@
+{
+  "path": "./HasseWeil/Valuation.lean",
+  "totalDecls": 11,
+  "defs": 1,
+  "lemmas": 10,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [
+    "yclass_mul_quot_in_xclass_span (line 51): 800000 [\"Type class synthesis in CoordinateRing is expensive.\"]",
+    "quot_evalEval_eq_polynomialY (line 75): 800000 [NO-COMMENT]",
+    "xclass_mul_C_g_in_yclass_span (line 140): 800000 [NO-COMMENT]",
+    "mk_C_g_not_mem (line 177): 800000 [NO-COMMENT]",
+    "localRing_isDVR (line 235): 3200000 [NO-COMMENT]"
+  ],
+  "longProofs": [
+    { "name": "xclass_mul_C_g_in_yclass_span", "lines": 35 },
+    { "name": "mk_C_g_not_mem", "lines": 45 },
+    { "name": "localRing_isDVR", "lines": 140 }
+  ],
+  "unused": [
+    "xclass_mul_C_g_in_yclass_span",
+    "mk_C_g_not_mem"
+  ],
+  "keyApi": [
+    "eval_poly_deriv_eq_polynomialX_eval",
+    "pointIdeal",
+    "pointIdeal_isMaximal"
+  ],
+  "scratchWritten": true,
+  "notes": "The file proves the local ring at a nonsingular affine point is a DVR using the TFAE characterization from Mathlib.RingTheory.DiscreteValuationRing.TFAE. The two X-side helper lemmas (xclass_mul_C_g_in_yclass_span, mk_C_g_not_mem) are dead code within the file because localRing_isDVR inlines their proofs verbatim in the polynomialX-branch; this duplication inflates the main proof to ~140 lines and requires a 3.2M heartbeat budget. No sorries."
+}

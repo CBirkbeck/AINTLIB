@@ -1,0 +1,16 @@
+{
+  "path": "./HasseWeil/Curves/DVR.lean",
+  "totalDecls": 1,
+  "defs": 0,
+  "lemmas": 1,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "SmoothPlaneCurve.localRing_isDVR_of_smooth"
+  ],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "Minimal 35-line wrapper file with a single one-line theorem delegating Silverman II.1.1 (DVR at smooth point) to HasseWeil.localRing_isDVR in Valuation.lean. The declaration is unused within this file but is called externally by HasseWeil/Curves/Valuation.lean. No sorries, no heartbeat overrides, no long proofs."
+}

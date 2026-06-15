@@ -1,0 +1,14 @@
+{
+  "path": "./HasseWeil/EC/PointMapSurjective.lean",
+  "totalDecls": 4,
+  "defs": 0,
+  "lemmas": 3,
+  "instances": 1,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": ["geomFrobeniusPoint_bijective"],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "Short self-contained file (123 lines, 4 declarations) establishing surjectivity and bijectivity of the geometric Frobenius point map over the algebraic closure. No sorries, no maxHeartbeats overrides, all proofs are at most 18 lines. The file is a clean building-block: it imports only FrobeniusFixedPoint and exports three theorems used downstream by other WeilPairing files."
+}

@@ -1,0 +1,17 @@
+{
+  "path": "./HasseWeil/Curves/InertiaDegAtAlgClosed.lean",
+  "totalDecls": 2,
+  "defs": 0,
+  "lemmas": 2,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "residue_algebraMap_surjective_of_isAlgClosed",
+    "residue_finrank_le_one_of_surjective"
+  ],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "Both theorems are partial building blocks for an 'inertiaDeg = 1' result that is explicitly described as blocked (Module.Finite instance-search issue with coordHom.toAlgebra). Neither theorem references the other, and grep finds no callers in the wider project. The `variable` block declares SmoothPlaneCurve variables that go unused in both theorems."
+}

@@ -1,0 +1,37 @@
+{
+  "path": "./HasseWeil/EC/DifferentialOrd.lean",
+  "totalDecls": 34,
+  "defs": 2,
+  "lemmas": 32,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "ord_P_Dω_nonneg", "lines": 52 },
+    { "name": "one_le_ord_P_Dω_of_two_le", "lines": 46 },
+    { "name": "two_le_ord_P_of_Dω_vanishes_of_uniformizer", "lines": 43 },
+    { "name": "ord_P_isog_pullback_x_sub_const_le_one", "lines": 31 },
+    { "name": "ord_P_isog_pullback_y_sub_const_le_one", "lines": 35 },
+    { "name": "ord_P_mulByInt_y_sub_const_le_one", "lines": 36 }
+  ],
+  "unused": [
+    "Dω_smul",
+    "Dω_neg",
+    "Dω_inv",
+    "two_le_ord_P_of_Dω_vanishes_of_uniformizer",
+    "ord_P_isog_pullback_x_sub_const_le_one",
+    "ord_P_isog_pullback_y_sub_const_le_one",
+    "ord_P_mulByInt_y_sub_const_le_one"
+  ],
+  "keyApi": [
+    "Dω_eq_of_smul",
+    "Dω_spec",
+    "Dω_mul",
+    "Dω_algebraMap",
+    "one_le_ord_P_Dω_of_two_le",
+    "algebraMap_F_mem_Rimg",
+    "x_gen_mem_Rimg"
+  ],
+  "scratchWritten": true,
+  "notes": "This file defines the ω-derivative Dω : K(E) → K(E) via the 1-dimensionality of Kähler differentials, proves all derivation laws, establishes that Dω preserves the coordinate ring (via polynomial induction on the bivariate presentation), and derives the key order inequality ord_P(Dω f) ≥ ord_P(f) − 1. The main outputs are the characteristic-free e ≤ 1 bounds for general isogenies (x- and y-coordinate variants) and the specialisation to [ℓ] (ord_P_mulByInt_y_sub_const_le_one), consumed by MulByIntUnramified and SamePlace. No sorry and no maxHeartbeats overrides; two set_option linter.unusedDecidableInType false appear without comments."
+}

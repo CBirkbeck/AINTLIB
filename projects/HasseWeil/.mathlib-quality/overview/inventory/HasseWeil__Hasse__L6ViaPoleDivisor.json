@@ -1,0 +1,22 @@
+{
+  "path": "./HasseWeil/Hasse/L6ViaPoleDivisor.lean",
+  "totalDecls": 6,
+  "defs": 0,
+  "lemmas": 6,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "finrank_pullback_fieldRange_eq_degree",
+    "bridgeA_intermediateField_finrank_eq_two_mul_degree_of_witness",
+    "witness_pc_sepDeg_of_witnesses",
+    "l6_v_1_1_sepDegree_eq_pointCount_of_primitive_witnesses",
+    "hasse_bound_from_L6_witnesses"
+  ],
+  "keyApi": [
+    "l6_v_1_1_sepDegree_eq_pointCount_of_witnesses"
+  ],
+  "scratchWritten": true,
+  "notes": "Pure assembly file: 6 theorems, 0 defs/instances/sorries, no maxHeartbeats. All declarations are witness-parametric closures forwarding to composers in PoleDivisorFallback/OpenLemmaPrimitives; only l6_v_1_1_sepDegree_eq_pointCount_of_witnesses is referenced within the file (by 3 others). Five of six declarations are unused within the file and serve as external entry points; finrank_pullback_fieldRange_eq_degree is the most isolated (an upper-tower-step helper whose lower-step composition was deferred per the in-file comment)."
+}

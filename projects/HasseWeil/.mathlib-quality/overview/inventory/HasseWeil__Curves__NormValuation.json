@@ -1,0 +1,51 @@
+{
+  "path": "./HasseWeil/Curves/NormValuation.lean",
+  "totalDecls": 63,
+  "defs": 4,
+  "lemmas": 58,
+  "instances": 1,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "algebraMap_quotient_maximalIdealAt_surjective", "lines": 43},
+    {"name": "inertiaDeg_maximalIdealAt", "lines": 40},
+    {"name": "equation_of_coordinates", "lines": 66},
+    {"name": "equation_of_coordinates_of_field", "lines": 46},
+    {"name": "exists_smoothPoint_of_isMaximal_of_surjective", "lines": 38},
+    {"name": "maximalIdealAt_injective", "lines": 44},
+    {"name": "sum_ramificationIdx_eq_finrank", "lines": 71},
+    {"name": "smoothPoint_fiber_eq_primesOver", "lines": 44},
+    {"name": "relNorm_maximalIdealAt", "lines": 105},
+    {"name": "relNorm_eq_X_sub_C_of_primesOver", "lines": 47},
+    {"name": "map_eq_localRing_max_pow_count", "lines": 38},
+    {"name": "pointValuation_algebraMap_eq_exp_count", "lines": 43},
+    {"name": "count_relNorm_singleton_eq_sum_count_fiber", "lines": 215},
+    {"name": "count_X_sub_C_eq_rootMultiplicity", "lines": 56},
+    {"name": "fiber_sum_divisorOf_algMap_eq_count_norm", "lines": 94},
+    {"name": "divisorOf_algMap_degree_eq_natDegree_norm", "lines": 59},
+    {"name": "helperB", "lines": 44}
+  ],
+  "unused": [
+    "finrank_quotientMaximalIdealAt",
+    "finrank_quotientSpanXSubC",
+    "exists_coordinates_of_isMaximal",
+    "equation_of_coordinates",
+    "smoothPointEquivMaxIdeal_apply",
+    "maximalIdealAt_range",
+    "smoothPoint_fiber_eq_primesOver",
+    "count_preservation_M_pow",
+    "Conditional.count_preservation_localization_of_witness",
+    "toProjective_eq_projectiveDivisorOf",
+    "toProjective_eq_projectiveDivisorOf_witness",
+    "principal_mem_degZero"
+  ],
+  "keyApi": [
+    "maximalIdealAt_liesOver",
+    "exists_smoothPoint_of_isMaximal",
+    "relNorm_maximalIdealAt",
+    "helperB",
+    "count_self_pow_heightOneSpectrum"
+  ],
+  "scratchWritten": true,
+  "notes": "This file builds the full Silverman II.3.1(b) norm-valuation bridge (Helper B) from scratch, with the keystone being relNorm_maximalIdealAt (inertia degree 1 at every smooth point) proved by a combinatorial contradiction on fiber exponents. The count_relNorm_singleton_eq_sum_count_fiber proof (215 lines) is the longest in the project inventory seen so far, requiring a detailed HeightOneSpectrum re-indexing argument. Several declarations (equation_of_coordinates, exists_coordinates_of_isMaximal) are superseded by their IsAlgClosed-free counterparts introduced in the V.1.3 deep pass, and both duplicates are retained. There is no sorry and no set_option maxHeartbeats anywhere in the file."
+}

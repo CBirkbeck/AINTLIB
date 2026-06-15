@@ -1,0 +1,25 @@
+{
+  "path": "./HasseWeil/Auxiliary/PullbackKaehler.lean",
+  "totalDecls": 26,
+  "defs": 3,
+  "lemmas": 14,
+  "instances": 9,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "pullbackKaehler_smul_R",
+    "pullbackKaehler_id",
+    "pullbackKaehler_comp"
+  ],
+  "keyApi": [
+    "TwistedKaehler.out_smul_S",
+    "derivationCompHom",
+    "pullbackKaehler",
+    "ext_of_D",
+    "pullbackKaehler_smul_S",
+    "pullbackKaehler_D"
+  ],
+  "scratchWritten": true,
+  "notes": "Self-contained auxiliary file defining AlgHom.pullbackKaehler via a twisted-module wrapper TwistedKaehler to avoid Module S Ω[S/R] typeclass conflicts; the universal property Derivation.liftKaehlerDifferential is the key mathlib lemma. No sorries, no maxHeartbeats overrides, no long proofs (longest ~19 lines for derivationCompHom). This construction may overlap with or be a precursor to mathlib's Algebra.Kaehler.Basic pullback machinery."
+}

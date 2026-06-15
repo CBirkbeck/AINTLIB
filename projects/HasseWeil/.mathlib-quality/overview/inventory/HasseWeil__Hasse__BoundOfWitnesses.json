@@ -1,0 +1,21 @@
+{
+  "path": "./HasseWeil/Hasse/BoundOfWitnesses.lean",
+  "totalDecls": 6,
+  "defs": 0,
+  "lemmas": 6,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "hasse_bound_of_all_witnesses",
+    "hasse_bound_sq_of_all_witnesses"
+  ],
+  "keyApi": [
+    "traceOfFrobenius_sq_le_of_witness",
+    "hasse_bound_of_full_witnesses",
+    "Isogeny.card_kernel_eq_degree_of_separable_witness"
+  ],
+  "scratchWritten": true,
+  "notes": "Pure glue/API file: all 6 theorems are one-step compositions of lemmas from HasseBound.lean and Hasse/PointFix.lean, with no mathematical content of their own. No sorries, no maxHeartbeats overrides, no proof exceeds 10 lines. The hasse_bound_of_all_witnesses docstring contains a detailed witness-to-Silverman-ticket mapping table."
+}

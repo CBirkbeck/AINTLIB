@@ -1,0 +1,23 @@
+{
+  "path": "./HasseWeil/Endomorphism.lean",
+  "totalDecls": 10,
+  "defs": 3,
+  "lemmas": 7,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "isogOneSub_mulByInt_pullback",
+    "isogOneSub_mulByInt_degree",
+    "isogSmulSub_mulByInt_pullback",
+    "degree_quadratic_mulByInt_nonneg"
+  ],
+  "keyApi": [
+    "mulByInt",
+    "isogTrace",
+    "isogSmulSub_mulByInt"
+  ],
+  "scratchWritten": true,
+  "notes": "Thin glue file (175 lines, 10 decls) providing scalar specializations of endomorphism trace and the Silverman III.6.3 degree quadratic form restricted to the mulByInt case; all proofs are rfl or short ring computations with no sorry or heartbeat overrides. Heavy external consumers include DegreeQuadraticForm.lean, GapSpines.lean, Frobenius.lean and numerous Hasse/WeilPairing files. A comment records that general 1-alpha / r*alpha-s placeholders were deleted 2026-05-28 because no genuine function-field pullback exists for non-scalar endomorphisms."
+}

@@ -1,0 +1,59 @@
+{
+  "path": "./HasseWeil/Basic.lean",
+  "totalDecls": 67,
+  "defs": 14,
+  "lemmas": 43,
+  "instances": 10,
+  "sorries": [],
+  "maxHeartbeats": [
+    "comp: 400000 [Synthesis of `AlgHom.comp` on `FunctionField` needs extra heartbeats.]",
+    "comp_degree: 800000 [The tower law for `FunctionField` needs extra heartbeats.]",
+    "mulByInt_faithfulSMal_poly_ff: synthInstance 40000 [NO-COMMENT]",
+    "max_natDegree_num_denom_mulByInt: 800000 [NO-COMMENT]",
+    "mulByInt_finrank: 1600000 [NO-COMMENT] (also backward.isDefEq.respectTransparency false)",
+    "mulByInt_degree: 800000 [NO-COMMENT] (also backward.isDefEq.respectTransparency false)"
+  ],
+  "longProofs": [
+    { "name": "mulByInt_finrank", "lines": 192 },
+    { "name": "adjoin_algebraMap_X_eq_top", "lines": 31 },
+    { "name": "max_natDegree_num_denom_mulByInt", "lines": 33 },
+    { "name": "mulByInt_degree", "lines": 31 }
+  ],
+  "unused": [
+    "comp_toAddMonoidHom",
+    "comp_apply",
+    "comp_degree_pos",
+    "id_toAddMonoidHom",
+    "id_pullback",
+    "id_degree",
+    "apply_def",
+    "apply_add",
+    "apply_zero",
+    "apply_neg",
+    "apply_zsmul",
+    "asAddMonoidHom",
+    "asAddMonoidHom_apply",
+    "WeierstrassCurve.degree_functionField_over_kx",
+    "WeierstrassCurve.degree_coordinateRing_over_polyX",
+    "mulByInt_degree_ne_zero",
+    "Isogeny.zsmul_toAddMonoidHom",
+    "Isogeny.zsmul_apply",
+    "Isogeny.zsmul_degree_pos",
+    "torsionSubgroup_one",
+    "torsionSubgroup_zero",
+    "torsionSubgroup_neg",
+    "torsionSubgroup_le_mul",
+    "torsionSubgroup_finite",
+    "torsionSubgroup_inf",
+    "Isogeny.toEnd",
+    "Isogeny.toEnd_apply"
+  ],
+  "keyApi": [
+    "mulByIntFracRange",
+    "mulByIntCompAlgHom",
+    "mem_torsionSubgroup",
+    "comp_degree"
+  ],
+  "scratchWritten": true,
+  "notes": "The file's main content is the proof that deg([n]) = n^2 (mulByInt_finrank, 192 lines of active proof + a 323-line commented-out alternative draft parked inside the declaration body). There is a large commented-out proof block (lines 792-1115) inside mulByInt_finrank that is dead code. The public API surface (Isogeny structure, mulByInt, torsionSubgroup, degree, comp) is heavily used by downstream files, but many convenience lemmas (apply_*, comp_apply, toEnd, etc.) appear unused within this file itself."
+}

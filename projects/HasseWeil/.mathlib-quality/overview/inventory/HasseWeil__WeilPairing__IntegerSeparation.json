@@ -1,0 +1,14 @@
+{
+  "path": "./HasseWeil/WeilPairing/IntegerSeparation.lean",
+  "totalDecls": 2,
+  "defs": 0,
+  "lemmas": 2,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": ["int_eq_of_congr_all_primes_ne"],
+  "keyApi": ["int_eq_zero_of_dvd_all_primes_ne"],
+  "scratchWritten": true,
+  "notes": "Entirely self-contained arithmetic file with no elliptic-curve content; only two theorems implementing Silverman V.2.3.1 integer-separation. Both are axiom-clean, no sorries, no maxHeartbeats overrides. `int_eq_of_congr_all_primes_ne` is the external API exported to `Reduction.lean` (used twice there)."
+}

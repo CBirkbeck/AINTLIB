@@ -1,0 +1,25 @@
+{
+  "path": "./HasseWeil/SingularPoint.lean",
+  "totalDecls": 14,
+  "defs": 4,
+  "lemmas": 10,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "exists_singular_of_Δ_eq_zero", "lines": 74}
+  ],
+  "unused": [
+    "exists_singular_iff_Δ_eq_zero",
+    "hasNode_iff",
+    "hasCusp_iff"
+  ],
+  "keyApi": [
+    "Singular",
+    "tangentConeDisc",
+    "c₄_eq_tangentConeDisc_sq_of_singular",
+    "Δ_eq_zero_of_singular"
+  ],
+  "scratchWritten": true,
+  "notes": "Self-contained file covering Silverman III.1.4 (singular point characterization, node/cusp dichotomy). Not imported by any other file in the project — all public declarations are dead code with respect to the rest of the codebase, suggesting this is intended for mathlib upstream contribution. The main existence proof has three structurally identical branches for the three duplicate-root cases that could be refactored into a single helper."
+}

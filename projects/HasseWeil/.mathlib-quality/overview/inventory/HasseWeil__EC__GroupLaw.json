@@ -1,0 +1,19 @@
+{
+  "path": "./HasseWeil/EC/GroupLaw.lean",
+  "totalDecls": 2,
+  "defs": 1,
+  "lemmas": 0,
+  "instances": 1,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "WeierstrassCurve.nonsingularLocus",
+    "instance AddCommGroup E.nonsingularLocus"
+  ],
+  "keyApi": [
+    "WeierstrassCurve.nonsingularLocus"
+  ],
+  "scratchWritten": true,
+  "notes": "Thin two-declaration wrapper introducing Silverman's E_ns notation as Set.univ on WeierstrassCurve.Affine.Point and transferring the AddCommGroup instance via Equiv.Set.univ. No other project files currently import this module (grep finds zero importers), making both declarations dead code candidates relative to the current build graph."
+}

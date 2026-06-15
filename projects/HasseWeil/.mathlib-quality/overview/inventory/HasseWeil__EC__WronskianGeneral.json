@@ -1,0 +1,16 @@
+{
+  "path": "./HasseWeil/EC/WronskianGeneral.lean",
+  "totalDecls": 2,
+  "defs": 0,
+  "lemmas": 2,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "wronskian_Φ_ΨSq_general", "lines": 42}
+  ],
+  "unused": ["wronskian_Φ_ΨSq_general"],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "Two-declaration axiom-clean wrapper re-proving the division-polynomial Wronskian identity by routing through the function field (omegaCoeff_mulByInt + two bridge lemmas from OmegaPullbackCoeff) to avoid the EDS addition formula. algebraMap_polynomial_KE_injective is a public duplicate of a private lemma in OrdAtInftyBridge.lean. No sorries, no maxHeartbeats; one set_option linter.unusedDecidableInType suppression without explicit justifying comment."
+}

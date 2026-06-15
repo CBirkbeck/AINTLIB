@@ -1,0 +1,56 @@
+{
+  "path": "./HasseWeil/Hasse/OpenLemmas.lean",
+  "totalDecls": 35,
+  "defs": 3,
+  "lemmas": 31,
+  "instances": 0,
+  "sorries": [
+    "omegaPullbackCoeff_add_genuine",
+    "bridge_Bi_kernelToPrime",
+    "bridge_Bi_isPrime",
+    "bridge_Bi_liesOver",
+    "bridge_Bii_bijective",
+    "bridge_Biii_ord_eq_neg_two",
+    "bridge_Biv_inertia_eq_one",
+    "v_1_3_sepDegree_eq_pointCount",
+    "verschiebung_isDualOf_frobenius",
+    "Polynomial.scalarExtensionEquiv",
+    "AdjoinRoot_tensorAlgEquiv_exists",
+    "witness_qf_nonneg"
+  ],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "function_field_x_separable", "lines": 118 },
+    { "name": "trace_eq_pi_plus_dualFrobenius_of_dual_additivity_witness", "lines": 33 }
+  ],
+  "unused": [
+    "Isogeny.eq_of_components",
+    "bridge_Bii_bijective",
+    "bridge_Biii_ord_eq_neg_two",
+    "bridge_Biv_inertia_eq_one",
+    "isSeparable_LinfAt_pullback_x_gen_of_isSeparable",
+    "function_field_x_separable",
+    "verschiebung_isDualOf_frobenius_of_qth_root_witness",
+    "trace_eq_pi_plus_dualFrobenius_of_dual_additivity_witness",
+    "line_principal",
+    "miller_principal",
+    "degree_zero_divisor_reduce",
+    "point_minus_O_principal_eq_zero",
+    "coordRingImage_ordAtInfty_ne_neg_one",
+    "isogeny_degree_baseChange_eq",
+    "frobenius_isog_iterate",
+    "AddHomProperty_descent",
+    "AdjoinRoot_tensorAlgEquiv_exists",
+    "witness_pc_sep_from_open_lemmas",
+    "additivity_witness_for_pc_sep",
+    "hasse_bound_from_pack",
+    "hasse_bound_from_open_lemmas",
+    "hasse_bound_sq_from_open_lemmas"
+  ],
+  "keyApi": [
+    "Isogeny_eq_of_components",
+    "witnessBundle"
+  ],
+  "scratchWritten": true,
+  "notes": "This file is an open-lemma staging area: 12 of 35 declarations carry sorry (Witnesses #3 and #4 fully open; L1, bridge B(i)-(iv), L15 open; L9 is a duplicate of the shipped verschiebung_dual_exists blocked by an import cycle). The longest non-sorry proof is function_field_x_separable (~118 lines), a char-uniform K(E)/K(x) separability argument using irreducibility + derivative criterion + finrank comparison; trace_eq_pi_plus_dualFrobenius_of_dual_additivity_witness (33 lines) is a conditional scaffold for the trace formula. Many of the 22 unused-in-file declarations are pack-field shadows or STALE/deprecated routes (witness_pc_sep_from_open_lemmas, additivity_witness_for_pc_sep, hasse_bound_from_open_lemmas) that are dead-code candidates once the pack-based API is the canonical entry point."
+}

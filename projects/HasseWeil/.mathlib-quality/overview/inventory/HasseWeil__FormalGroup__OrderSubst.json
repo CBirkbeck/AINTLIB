@@ -1,0 +1,16 @@
+{
+  "path": "./HasseWeil/FormalGroup/OrderSubst.lean",
+  "totalDecls": 2,
+  "defs": 0,
+  "lemmas": 2,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "order_subst", "lines": 77}
+  ],
+  "unused": ["order_subst"],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "Tiny two-declaration file: a private helper `constantCoeff_subst_univariate` and the public theorem `order_subst` (order of substitution = product of orders, strengthening mathlib's `le_order_subst` inequality to equality under `NoZeroDivisors`). Used exclusively by `HasseWeil/FormalGroup/Height.lean` for formal-group height additivity. Strong mathlib-contribution candidate."
+}

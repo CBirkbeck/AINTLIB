@@ -1,0 +1,35 @@
+{
+  "path": "./HasseWeil/Curves/Maps.lean",
+  "totalDecls": 33,
+  "defs": 9,
+  "lemmas": 4,
+  "instances": 3,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "frobeniusRelativeCoordRingHom_injective", "lines": 79},
+    {"name": "frobeniusRelativeCoordRingHom_comp_map", "lines": 49}
+  ],
+  "unused": [
+    "iterateFrobeniusTwist",
+    "WeierstrassCurve.frobeniusTwist_isElliptic",
+    "frobeniusIsog_relative_apply_some",
+    "frobeniusIsog_relative_apply_zero",
+    "x_gen_pow_p_mem_fieldRange",
+    "y_gen_pow_p_mem_fieldRange",
+    "algebraMap_k_mem_fieldRange",
+    "frobeniusIsog_relative_pow_p_mem_fieldRange",
+    "Conditional.mulByNat_p_factors_through_frobenius_of_silvermanII212",
+    "Conditional.mulByNat_p_factors_through_frobenius_of_witnesses"
+  ],
+  "keyApi": [
+    "WeierstrassCurve.frobeniusTwist",
+    "frobeniusRelativeCoordRingHom",
+    "frobeniusIsog_relative",
+    "frobeniusRelativeBaseHom",
+    "frobeniusTwist_polynomial_eval₂_zero",
+    "frobeniusRelativeCoordAlgHom_y"
+  ],
+  "scratchWritten": true,
+  "notes": "File constructs the relative p-Frobenius isogeny F_{E/k}: E → E^{(p)} end-to-end (coefficient twist, coord-ring hom, function-field pullback, point map, packaged Isogeny), with zero sorries and no maxHeartbeats overrides. The longest proof (frobeniusRelativeCoordRingHom_injective, 79 lines) mirrors the mulByInt_coordHom_injective pattern from the project using degree_norm_smul_basis. The Conditional namespace contains two identity stubs for Silverman II.2.12 that carry the separable-factor hypothesis without proving it, explicitly marking the upstream dependency on Worker C content."
+}

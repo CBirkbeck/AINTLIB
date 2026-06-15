@@ -1,0 +1,57 @@
+{
+  "path": "./HasseWeil/GapSpines.lean",
+  "totalDecls": 67,
+  "defs": 7,
+  "lemmas": 60,
+  "instances": 0,
+  "sorries": ["genuineIsogSmulSub_degree_eq_signed"],
+  "maxHeartbeats": [
+    "l6_B3_tower (line 71): 800000 [NO-COMMENT in set_option line; docstring mentions opaque instance transparency issue]",
+    "l6_B3_tower synthInstance (line 70): 800000 [NO-COMMENT in set_option line; same docstring context]",
+    "mulByInt_isGenuineWith (line 1445): 4000000 [NO-COMMENT in set_option line; docstring mentions DecidableEq instance alignment for genericPoint elaboration]",
+    "zsmul_frobeniusIsog_isGenuineWith (line 1490): 4000000 [NO-COMMENT in set_option line; docstring explains multi-layer pullback computation at generic point]",
+    "emb_le_card_kernel (line 1068): 1600000 [comment at 1065-1067: threads Affine.Point / gamma.toAlgebra / Ore-localization instance layers]"
+  ],
+  "longProofs": [
+    {"name": "l6_B3_tower", "lines": 119},
+    {"name": "moduleFinite_linfAt_gamma_pullback_x", "lines": 32},
+    {"name": "l6_computationA", "lines": 65},
+    {"name": "isogOneSub_negFrobenius_pointCount_le_degree", "lines": 76},
+    {"name": "emb_le_card_kernel", "lines": 66},
+    {"name": "genuine_dual_comp_toAddMonoidHom_eq_mulByInt", "lines": 39},
+    {"name": "zsmul_frobeniusIsog_isGenuineWith", "lines": 46},
+    {"name": "genuineIsogSmulSub_degree_eq_signed_via_walls", "lines": 29}
+  ],
+  "unused": [
+    "verschiebung_dual_exists",
+    "sepDegree_oneSub_eq_pointCount",
+    "ker_deg_skeleton",
+    "isogOneSub_negFrobenius_embToPointOmega_eq",
+    "embCurveBaseChange",
+    "isogOneSub_negFrobenius_emb_le_card_kernel_gap",
+    "includePtOmega_injective",
+    "Sinf_sum_inertiaDeg_over_xIdeal_eq_pointCount_via_tower",
+    "mulByInt_isGenuine",
+    "genuineIsogSmulSub_isGenuine",
+    "genuineIsogSmulSub_isSeparable",
+    "genuine_isogeny_ext",
+    "zsmulPointHom_apply",
+    "genuineIsogSmulSub_degree_eq_signed_of_full_pivot_chain",
+    "genuineIsogSmulSub_degree_eq_signed_of_pivot_witness",
+    "genuineIsogSmulSub_degree_eq_signed_via_walls'",
+    "degree_quadratic_exists_edge_of_witness",
+    "qf_nonneg_skeleton",
+    "qf_nonneg_skeleton_of_pivot_chain",
+    "l6_computationA"
+  ],
+  "keyApi": [
+    "IsGenuineWith",
+    "zsmulPointHom",
+    "isogOneSub_negFrobenius_degree_eq_pointCount",
+    "l6_B3_tower",
+    "isogOneSub_negFrobenius_sepDegree_eq_card_kernel",
+    "geomFrobOmega"
+  ],
+  "scratchWritten": true,
+  "notes": "The file is the central spine assembly of the Hasse bound proof: it proves deg(1-pi)=#E(Fq) via the embeddings-classification route (including the HARD half emb_le_card_kernel, a 66-line torsor argument over Omega=AlgClosure K(E)), and develops the IsGenuineWith/FunctorialAtImage framework for the GAP-QF Wall-B killer. One sorry remains in genuineIsogSmulSub_degree_eq_signed (the unconditional signed degree identity, gated on Wall-A/BRIDGE-003); all other declarations are axiom-clean. The file contains ~400 lines of prose documentation explaining the V.1.3 residual analysis and routing decisions."
+}

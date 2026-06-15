@@ -1,0 +1,26 @@
+{
+  "path": "./HasseWeil/EC/PointMap.lean",
+  "totalDecls": 15,
+  "defs": 0,
+  "lemmas": 15,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "HasseWeil.liftPointToKE_neg",
+    "HasseWeil.liftPointToKE_sub",
+    "HasseWeil.liftPointToKE_zsmul",
+    "HasseWeil.liftPointToKE_nsmul",
+    "HasseWeil.map_genericFF_add",
+    "HasseWeil.map_genericFF_neg",
+    "HasseWeil.map_genericFF_sub",
+    "HasseWeil.map_genericFF_zsmul",
+    "HasseWeil.map_translate_add",
+    "HasseWeil.map_translate_zsmul",
+    "WeierstrassCurve.Affine.Point.map_nsmul"
+  ],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "Pure thin-wrapper file — all 15 proofs are one-liners delegating to mathlib's AddMonoidHom API; heavy mathlib duplication is intentional (provides short rewrite names in project namespaces). No sorries, no heartbeat overrides, no long proofs. The file is only imported via the top-level HasseWeil.lean barrel; none of the HasseWeil-namespaced declarations appear to have confirmed callers within the project yet (new file), making them potential dead-code candidates if SeparableKernelTorsor.lean is not yet complete."
+}

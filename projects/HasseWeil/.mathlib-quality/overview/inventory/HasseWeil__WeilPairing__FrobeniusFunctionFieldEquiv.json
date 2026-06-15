@@ -1,0 +1,14 @@
+{
+  "path": "./HasseWeil/WeilPairing/FrobeniusFunctionFieldEquiv.lean",
+  "totalDecls": 15,
+  "defs": 4,
+  "lemmas": 11,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": ["frobeniusFunctionFieldEquiv_algebraMap"],
+  "keyApi": ["coeffFrobEquiv"],
+  "scratchWritten": true,
+  "notes": "Pure leaf file: axiom-clean construction of the arithmetic Frobenius ring automorphism of K̄(E), used as the 'q-power on constants' leaf for FrobeniusGaloisData in FrobeniusGaloisScaling.lean and FrobeniusConjugation.lean. The key design choice (RingEquiv.cast for codomain transport instead of ▸) avoids whnf timeout on the curve-indexed FunctionField type. No sorries, no maxHeartbeats bumps, no long proofs."
+}

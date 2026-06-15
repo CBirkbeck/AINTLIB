@@ -1,0 +1,14 @@
+{
+  "path": "./HasseWeil.lean",
+  "totalDecls": 0,
+  "defs": 0,
+  "lemmas": 0,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "HasseWeil.lean is a pure import-aggregator (umbrella/façade module): 88 import lines, zero declarations, no proofs, no sorry, no set_option. All mathematical content lives in the 88 imported sub-modules."
+}

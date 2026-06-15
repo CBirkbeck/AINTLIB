@@ -1,0 +1,18 @@
+{
+  "path": "./HasseWeil/WeilPairing/MapTranslateGenericAdditive.lean",
+  "totalDecls": 4,
+  "defs": 0,
+  "lemmas": 4,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "mapTranslateGenericPoint_add",
+    "mapTranslateGenericPoint_canonical_of_genuine",
+    "frobeniusAlgHom_translate_commute_ringHom"
+  ],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "A thin structural bridge file with 4 short theorems and no sorries. `frobeniusAlgHom_translate_commute` is the only intra-file callee (used once by `frobeniusAlgHom_translate_commute_ringHom`); the other three declarations are leaf API consumed exclusively by callers in other files (`PencilCovariance`, `WallAGeometricRealization`, `PencilComapWitnesses`, `FrobeniusGenericCovariance`). No set_option maxHeartbeats, no long proofs."
+}

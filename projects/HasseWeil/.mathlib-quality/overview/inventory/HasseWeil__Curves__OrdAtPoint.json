@@ -1,0 +1,27 @@
+{
+  "path": "./HasseWeil/Curves/OrdAtPoint.lean",
+  "totalDecls": 11,
+  "defs": 1,
+  "lemmas": 10,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "ordAtPoint_zero_eq_ordAtInfty",
+    "ordAtPoint_some_eq_ord_P",
+    "ordAtPoint_zero_function",
+    "ordAtPoint_one",
+    "ordAtPoint_eq_top_iff",
+    "ordAtPoint_mul",
+    "ordAtPoint_add_le",
+    "ordAtPoint_inv",
+    "ordAtPoint_algebraMap_F_of_ne_zero",
+    "ordAtPoint_add_eq_of_lt"
+  ],
+  "keyApi": [
+    "ordAtPoint"
+  ],
+  "scratchWritten": true,
+  "notes": "Thin adapter file that unifies ordAtInfty (Curves/Infinity.lean) and ord_P (Curves/Valuation.lean) into a single ordAtPoint by pattern-matching on C.toAffine.Point; all proofs are trivial case-splits with no new mathematics. No sorries, no maxHeartbeats overrides, no proof exceeds 11 lines. All 10 theorems are dead-code within this file but are actively consumed by Hasse/L6Witnesses.lean and Hasse/OpenLemmaPrimitives.lean."
+}

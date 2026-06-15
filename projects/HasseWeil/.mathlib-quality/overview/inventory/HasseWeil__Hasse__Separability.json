@@ -1,0 +1,27 @@
+{
+  "path": "./HasseWeil/Hasse/Separability.lean",
+  "totalDecls": 15,
+  "defs": 1,
+  "lemmas": 14,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "Isogeny.inseparableDegree_eq_one_iff_isSeparable", "lines": 33},
+    {"name": "Isogeny.inseparableDegree_isPow_of_charP", "lines": 34}
+  ],
+  "unused": [
+    "mulByInt_pullbackKaehler_invariantDifferential_of_witness",
+    "translation_pullbackKaehler_invariantDifferential_of_witness",
+    "mulByInt_isSeparable_of_witness",
+    "mulByInt_p_inseparableDegree_eq_pow",
+    "Conditional.mulByNat_p_not_isSeparable_of_algKaehler_witness"
+  ],
+  "keyApi": [
+    "isSeparable_iff_of_coeff_witness",
+    "pullbackKaehler_invariantDifferential_of_coeff_witness",
+    "Isogeny.inseparableDegree"
+  ],
+  "scratchWritten": true,
+  "notes": "Witness-parametric wrappers for Silverman III.5.5, V.1.2, III.5.3, III.5.4, II.2.10. The Isogeny.inseparableDegree def and its two main theorems (inseparableDegree_eq_one_iff_isSeparable, inseparableDegree_isPow_of_charP) are likely duplication of parallel declarations in Curves/InseparableDegree.lean for the HasseWeil.EC.Isogeny type. No sorries anywhere; no maxHeartbeats overrides."
+}

@@ -1,0 +1,33 @@
+{
+  "path": "./HasseWeil/Curves/IntegralClosure.lean",
+  "totalDecls": 42,
+  "defs": 6,
+  "lemmas": 32,
+  "instances": 4,
+  "sorries": [],
+  "maxHeartbeats": [
+    "isIntegrallyClosed_coordinateRing_of_IsElliptic: 3200000 [NO-COMMENT]"
+  ],
+  "longProofs": [
+    {"name": "Polynomial.fractionRing_mem_range_of_sq_mul_squarefree", "lines": 44},
+    {"name": "polynomialDiscriminant_natDegree", "lines": 41},
+    {"name": "polynomialDiscriminant_squarefree", "lines": 44},
+    {"name": "decomp_from_quadratic", "lines": 44},
+    {"name": "isIntegrallyClosed_coordinateRing_of_IsElliptic", "lines": 207}
+  ],
+  "unused": [
+    "isIntegral_coordYInFunctionField_fracPoly",
+    "algebra_isSeparable_functionField",
+    "mem_coordinateRing_of_isIntegral_polynomialX",
+    "mem_coordinateRing_of_valuation_le_one",
+    "SmoothPoint.toHeightOneSpectrum",
+    "algebra_norm_fracPolyX_algebraMap"
+  ],
+  "keyApi": [
+    "coordYInFunctionField",
+    "polynomialDiscriminant",
+    "functionFieldBasis"
+  ],
+  "scratchWritten": true,
+  "notes": "The file's central theorem is `isIntegrallyClosed_coordinateRing_of_IsElliptic` (207-line proof, maxHeartbeats 3200000 with no justifying comment), which establishes integral closedness via a squarefree discriminant extraction argument. Two declarations (`Polynomial.fractionRing_mem_range_of_sq_mul_squarefree` and `Polynomial.Monic.eq_X_sq_add_C_mul_X_add_C_of_natDegree_two`) are placed in the `Polynomial` namespace and are likely candidates for upstreaming to mathlib. Six declared items have no in-file callers and serve as infrastructure for future tasks or external consumers."
+}

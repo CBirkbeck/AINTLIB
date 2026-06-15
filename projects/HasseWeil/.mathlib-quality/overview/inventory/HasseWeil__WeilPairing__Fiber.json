@@ -1,0 +1,14 @@
+{
+  "path": "./HasseWeil/WeilPairing/Fiber.lean",
+  "totalDecls": 3,
+  "defs": 1,
+  "lemmas": 2,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": ["fiber_finite", "fiber_card_eq_ker_card"],
+  "keyApi": ["fiberEquivKer"],
+  "scratchWritten": true,
+  "notes": "Minimal 51-line self-contained kernel-coset utility (Silverman III.4): fiberEquivKer builds the Equiv, fiber_finite and fiber_card_eq_ker_card export the finiteness and cardinality consequences. No project imports, no sorries, no heartbeat overrides, no long proofs. Both theorems are exported API likely consumed by separable-degree or Weil-pairing pullback files."
+}

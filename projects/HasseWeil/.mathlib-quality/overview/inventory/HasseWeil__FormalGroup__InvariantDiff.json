@@ -1,0 +1,23 @@
+{
+  "path": "./HasseWeil/FormalGroup/InvariantDiff.lean",
+  "totalDecls": 13,
+  "defs": 4,
+  "lemmas": 9,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "FormalGroup.normalizedDifferential_isNormalized",
+    "InvariantDifferential.eq_smul_normalized",
+    "FormalGroupHom.invariantDifferential_chain",
+    "FormalGroup.normalizedDifferential_unique'"
+  ],
+  "keyApi": [
+    "InvariantDifferential.scalar",
+    "InvariantDifferential.IsNormalized",
+    "FormalGroup.normalizedDifferential"
+  ],
+  "scratchWritten": true,
+  "notes": "A thin wrapper file (186 lines, no sorries, no set_option maxHeartbeats) that packages the underlying Differential.lean series `F.invariantDiff` into a typed structure and proves Silverman IV.4.2–4.3. All proofs are short (≤12 lines), delegating the heavy lifting to Differential.lean lemmas (`invariantDiff_chain`, `dX_at_zero_mul_invariantDiff`, etc.). Four declarations are unused within this file but serve as API for downstream files (`Logarithm.lean`, `CharP.lean`)."
+}

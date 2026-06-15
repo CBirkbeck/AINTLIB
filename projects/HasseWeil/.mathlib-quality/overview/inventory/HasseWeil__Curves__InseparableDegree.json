@@ -1,0 +1,28 @@
+{
+  "path": "./HasseWeil/Curves/InseparableDegree.lean",
+  "totalDecls": 10,
+  "defs": 1,
+  "lemmas": 9,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [
+    "separableSubfield (line 166): set_option backward.isDefEq.respectTransparency false [NO-COMMENT]",
+    "separableSubfield_includes_pullbackRange (line 173): set_option backward.isDefEq.respectTransparency false [NO-COMMENT]",
+    "function_field_over_separableSubfield_purely_inseparable (line 178): set_option backward.isDefEq.respectTransparency false [NO-COMMENT]"
+  ],
+  "longProofs": [],
+  "unused": [
+    "inseparableDegree_dvd_degree",
+    "inseparableDegree_eq_one_iff_separable",
+    "inseparableDegree_isPow_of_charP",
+    "separableSubfield_includes_pullbackRange",
+    "function_field_over_separableSubfield_purely_inseparable"
+  ],
+  "keyApi": [
+    "separableDegree_mul_finInsepDegree",
+    "separableDegree_eq_finSepDegree",
+    "separableSubfield"
+  ],
+  "scratchWritten": true,
+  "notes": "Small bridging file (10 decls, no sorries, no proofs > 30 lines) connecting the project's Isogeny.degree/separableDegree/inseparableDegree definitional API to mathlib's Field.finSepDegree/finInsepDegree/finrank. Three declarations use set_option backward.isDefEq.respectTransparency false without explanatory comments. The separableSubfield cluster (def + 2 trivial lemmas) appears parked/placeholder: separableSubfield_includes_pullbackRange is merely bot_le and function_field_over_separableSubfield_purely_inseparable carries an explicit Algebra.IsAlgebraic hypothesis that should be automatic for finite isogenies."
+}

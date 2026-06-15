@@ -1,0 +1,20 @@
+{
+  "path": "./HasseWeil/Pic0/RouteCAssembly.lean",
+  "totalDecls": 9,
+  "defs": 0,
+  "lemmas": 9,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "picDual_eq_pointMap",
+    "qf_nonneg_generic_via_picDual",
+    "qf_nonneg_generic_via_picDual_reduced"
+  ],
+  "keyApi": [
+    "comp_eq_mulByInt_of_genuine"
+  ],
+  "scratchWritten": true,
+  "notes": "Pure assembly file with no sorry, no set_option maxHeartbeats, and no proofs longer than 30 lines; all 9 declarations are theorems. The file provides two parallel top-level versions of the Route-C Leaf-1 conclusion (one with all six genuineness witnesses exposed, one with the three scalar-side witnesses discharged by mulByInt_isGenuineWith), and is likely used externally by a qf_nonneg or HasseBound caller. The comp_eq_mulByInt_of_genuine wrapper is the key intra-file building block used by three other declarations."
+}

@@ -1,0 +1,30 @@
+{
+  "path": "./HasseWeil/WeilPairing/DivisorTranslate.lean",
+  "totalDecls": 27,
+  "defs": 2,
+  "lemmas": 25,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "placeTranslate_affine_eq_infinity", "lines": 36},
+    {"name": "ordProj_translate_infinity", "lines": 77},
+    {"name": "ordProj_translate", "lines": 44},
+    {"name": "pullbackDiv_apply", "lines": 41}
+  ],
+  "unused": [
+    "placeTranslate_affine",
+    "projectiveDivisorOf_translate_mapDomain",
+    "divisorOf_translate_apply",
+    "equivMapDomain_placeTranslate_pullbackDiv",
+    "projectiveDivisorOf_translate_weilFunction_div_eq_zero"
+  ],
+  "keyApi": [
+    "placeTranslate",
+    "placeTranslate_apply",
+    "ordProj",
+    "ordProj_affine"
+  ],
+  "scratchWritten": true,
+  "notes": "This file is a sorry-free, axiom-clean foundation for Silverman III.8 divisor transport under translation. The dominant structure is a pipeline: placeTranslate (the bijection of projective places) → ordProj (unified order function) → ordProj_translate_infinity (the single residual for infinity-touching places, the longest proof at 77 lines relying on the upstream isTranslateOrdAtInftyCompatible_translateAlgEquivOfPoint) → ordProj_translate → projectiveDivisorOf_translate → fibre-invariance chain → capstone. Five public declarations are not referenced internally and serve as the exported API for downstream consumers (Constancy.lean, pairing_const_of_transport)."
+}

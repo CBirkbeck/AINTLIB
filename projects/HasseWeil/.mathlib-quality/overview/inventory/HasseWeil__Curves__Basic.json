@@ -1,0 +1,20 @@
+{
+  "path": "./HasseWeil/Curves/Basic.lean",
+  "totalDecls": 6,
+  "defs": 5,
+  "lemmas": 1,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "FunctionField"
+  ],
+  "keyApi": [
+    "SmoothPlaneCurve",
+    "SmoothPoint",
+    "maximalIdealAt"
+  ],
+  "scratchWritten": true,
+  "notes": "Thin 75-line foundation file; all 6 declarations are wrappers or near-trivial delegations to mathlib's WeierstrassCurve.Affine. No sorries, no set_option, no long proofs. SmoothPlaneCurve and SmoothPoint are the load-bearing types for the entire Curves/ hierarchy and beyond."
+}

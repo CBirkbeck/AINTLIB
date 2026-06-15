@@ -1,0 +1,17 @@
+{
+  "path": "./HasseWeil/Curves/QuotientCurve.lean",
+  "totalDecls": 2,
+  "defs": 0,
+  "lemmas": 2,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "separable_isogeny_factors_quotient",
+    "frobeniusTwist_eq_self_of_prime_field"
+  ],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "Both theorems are trivial 4-7 line proofs wiring existing project lemmas; neither is referenced by any other file in the project. frobeniusTwist_eq_self_of_prime_field appears to duplicate IsogenyBaseChange.frobeniusTwist_eq_self_of_card_eq_p. separable_isogeny_factors_quotient formalises only the degenerate (self-quotient) case of the P0-C plan item."
+}

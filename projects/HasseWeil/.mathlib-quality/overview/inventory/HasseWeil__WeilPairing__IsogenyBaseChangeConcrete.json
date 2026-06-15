@@ -1,0 +1,26 @@
+{
+  "path": "./HasseWeil/WeilPairing/IsogenyBaseChangeConcrete.lean",
+  "totalDecls": 29,
+  "defs": 9,
+  "lemmas": 12,
+  "instances": 5,
+  "sorries": [],
+  "maxHeartbeats": [
+    "finrankBaseChange (line 260): 1600000 [NO-COMMENT]"
+  ],
+  "longProofs": [
+    { "name": "finrankBaseChange", "lines": 105 }
+  ],
+  "unused": [
+    "Twist.ofB_add",
+    "Twist.lTensorMap_tmul"
+  ],
+  "keyApi": [
+    "tensorFunctionFieldEquiv",
+    "lTensorMap",
+    "baseChangePullback",
+    "Twist.toB_injective"
+  ],
+  "scratchWritten": true,
+  "notes": "The file provides a CoordHom-free base-change of an arbitrary function-field endomorphism via the 'Twist' type-synonym machinery plus Module.finrank_baseChange, culminating in a concrete pullback_L for the 1−π isogeny. The finrankBaseChange proof (105 lines, maxHeartbeats 1600000) is the mathematical core: it explicitly constructs a LinearEquiv between (L⊗K(C))⊗_{K(C)} Twist f and Twist(id_L⊗f) by giving both forward and inverse maps with inductive verification. No sorries; all declarations are axiom-clean."
+}

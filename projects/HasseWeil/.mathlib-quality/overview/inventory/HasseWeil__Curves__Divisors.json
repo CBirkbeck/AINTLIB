@@ -1,0 +1,43 @@
+{
+  "path": "./HasseWeil/Curves/Divisors.lean",
+  "totalDecls": 38,
+  "defs": 13,
+  "lemmas": 25,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "ord_P_algebraMap_F_of_ne_zero", "lines": 33 }
+  ],
+  "unused": [
+    "degreeHom_apply",
+    "degree_neg",
+    "degree_sub",
+    "mem_degZero",
+    "isEffective_zero",
+    "IsEffective.add",
+    "degree_nonneg_of_isEffective",
+    "Divisor₀",
+    "divisorOf_pow",
+    "divisorHom",
+    "mem_principalSubgroup",
+    "LinearlyEquiv.refl",
+    "LinearlyEquiv.symm",
+    "LinearlyEquiv.trans",
+    "divisorOf_algebraMap_F",
+    "const_of_valuation_le_one_of_ordAtInfty_nonneg",
+    "Pic",
+    "Pic₀"
+  ],
+  "keyApi": [
+    "divisorOf_apply",
+    "divisorOf",
+    "degree",
+    "IsPrincipal",
+    "principalSubgroup",
+    "degreeHom",
+    "degZero"
+  ],
+  "scratchWritten": true,
+  "notes": "Clean foundational file: no sorries, no maxHeartbeats overrides. The one proof over 30 lines (ord_P_algebraMap_F_of_ne_zero) navigates the F → CoordinateRing → FunctionField scalar tower carefully. About half the declarations are unused within this file but are public API consumed by downstream files (GaloisAction, ProjectiveDivisor, AlgebraicNonNegOrd, WeilPairing/Constancy); Pic and Pic₀ are definition stubs with T-II-3-009 (principal divisors have degree 0) still pending."
+}

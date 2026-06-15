@@ -1,0 +1,22 @@
+{
+  "path": "./HasseWeil/Curves/GaloisAction.lean",
+  "totalDecls": 13,
+  "defs": 6,
+  "lemmas": 7,
+  "instances": 2,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "mapPoint_x",
+    "mapPoint_y",
+    "smul_x",
+    "smul_y",
+    "mem_divisorF_iff"
+  ],
+  "keyApi": [
+    "divisor_mulAction"
+  ],
+  "scratchWritten": true,
+  "notes": "Small self-contained file (131 lines, 13 declarations) defining the Galois group action on L-rational points and divisors of a smooth plane curve over F, with the Galois-fixed divisor subgroup. No sorries, no maxHeartbeats overrides, all proofs are ≤10 lines; the file is only imported by the root HasseWeil.lean umbrella and none of its declarations are referenced by other project files, making the entire file effectively external-API-only."
+}

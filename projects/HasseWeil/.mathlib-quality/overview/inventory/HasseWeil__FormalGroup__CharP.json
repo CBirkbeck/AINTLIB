@@ -1,0 +1,20 @@
+{
+  "path": "./HasseWeil/FormalGroup/CharP.lean",
+  "totalDecls": 5,
+  "defs": 0,
+  "lemmas": 4,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "FormalGroup.mulByP_decomposition"
+  ],
+  "keyApi": [
+    "exists_expand_of_coeff_vanishing",
+    "coeff_eq_zero_of_derivative_eq_zero_charP",
+    "constantCoeff_subst_zero_const"
+  ],
+  "scratchWritten": true,
+  "notes": "Short focused file (143 lines, 5 declarations) proving Silverman IV.4.4 that [p](T) lies in R[[T^p]] for a formal group over a characteristic-p ring. The main theorem mulByP_exists_expand uses the invariant-differential chain rule from InvariantDiff.lean as its key engine. mulByP_decomposition is a trivially weaker Silverman-shaped corollary with no known callers in the project."
+}

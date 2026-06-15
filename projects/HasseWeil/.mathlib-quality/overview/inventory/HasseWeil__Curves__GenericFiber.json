@@ -1,0 +1,25 @@
+{
+  "path": "./HasseWeil/Curves/GenericFiber.lean",
+  "totalDecls": 12,
+  "defs": 0,
+  "lemmas": 12,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [
+    "primesOverFinset_card_eq_degree_of_unramified: 1600000 [NO-COMMENT]",
+    "primesOverFinset_card_eq_degree_of_unramified (synthInstance): 200000 [NO-COMMENT]"
+  ],
+  "longProofs": [],
+  "unused": [
+    "IsDedekindDomain.exists_unramifiedPrime_ramificationIdx_eq_one",
+    "SmoothPlaneCurve.heightOneSpectrum_infinite",
+    "CurveMap.finrank_quotientMaximalIdealAt_eq_one",
+    "CurveMap.exists_heightOneSpectrum_fiber_card_eq_sepDegree"
+  ],
+  "keyApi": [
+    "primesOverFinset_card_eq_degree_of_unramified",
+    "primesOverFinset_card_eq_sepDegree_of_separable_and_unramified"
+  ],
+  "scratchWritten": true,
+  "notes": "All 12 declarations are sorry-free; the file is a clean algebraic-geometric scaffold for T-II-2-009 / Silverman II.2.6(b), building from abstract Dedekind-domain lemmas (Pieces 1-5, thin mathlib wrappers) up to the curve-specific pieces (6-8). The one set_option maxHeartbeats 1600000 on primesOverFinset_card_eq_degree_of_unramified has no justifying comment. The file deliberately defers the Module.Free typeclass diamond for inertiaDeg=1 (Piece 9) to ResidueFieldAtSmoothPoint.lean; the four 'unused' declarations in this file are the primary API consumed by that downstream file."
+}

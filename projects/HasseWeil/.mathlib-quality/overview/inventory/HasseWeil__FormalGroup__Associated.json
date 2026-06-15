@@ -1,0 +1,35 @@
+{
+  "path": "./HasseWeil/FormalGroup/Associated.lean",
+  "totalDecls": 35,
+  "defs": 7,
+  "lemmas": 26,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "FormalGroup.EvalGroup.nsmul_val", "lines": 80},
+    {"name": "FormalGroup.evalAdd_sub_add_mem_pow_succ", "lines": 85},
+    {"name": "FormalGroup.eval_mulByNatHom_injective_of_unit", "lines": 40},
+    {"name": "FormalGroup.EvalGroup.addOrderOf_isPowOf", "lines": 32},
+    {"name": "multiplicativeFormalGroup_EvalGroup_mulEquiv", "lines": 34}
+  ],
+  "unused": [
+    "evalNeg_additiveFormalGroup",
+    "FormalGroup.evalGroup_powerIdeal_mono",
+    "FormalGroup.evalNeg_add_mem_pow_succ",
+    "FormalGroup.evalGroup_powerIdeal_toQuot_ker",
+    "FormalGroup.evalGroup_powerIdeal_toQuot_range",
+    "FormalGroup.evalGroup_powerIdeal_quotKerEquivRange",
+    "multiplicativeFormalGroup_EvalGroup_mulEquiv",
+    "FormalGroup.EvalGroup.addOrderOf_isPowOf_residueChar"
+  ],
+  "keyApi": [
+    "maximalIdeal_pow_isClosed",
+    "FormalGroup.evalGroup_powerIdeal",
+    "FormalGroup.evalGroup_powerIdeal_toQuot",
+    "lowDegFinset",
+    "oneAddUnit"
+  ],
+  "scratchWritten": true,
+  "notes": "Formalises Silverman IV.3.1–IV.3.2 (additive/multiplicative formal groups and their associated groups) and IV.6.1 (torsion p-power theorem); all 35 declarations are sorry-free and axiom-clean. The file is not imported by any other project file (only the top-level HasseWeil.lean aggregator imports it), so all public declarations are effectively unused within the project beyond that barrel import. The nsmul/formal-[n] bridge (nsmul_val, ~80 lines) uses the MvPowerSeries substitution bridge eval₂_subst_bridge as its central technical tool."
+}

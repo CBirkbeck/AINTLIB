@@ -1,0 +1,26 @@
+{
+  "path": "./HasseWeil/EC/IsogenySurjective.lean",
+  "totalDecls": 17,
+  "defs": 2,
+  "lemmas": 15,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "projValuation_injective", "lines": 31},
+    {"name": "comap_isNontrivial_of_finiteDimensional", "lines": 43}
+  ],
+  "unused": [
+    "projValuation_zero",
+    "projValuation_some",
+    "comap_isNontrivial_of_finiteDimensional",
+    "exists_valuationSubring_comap_le",
+    "surjective_of_finite_comorphism_and_hproj"
+  ],
+  "keyApi": [
+    "projValuation",
+    "ordAtInftyValuation_ne_pointValuation"
+  ],
+  "scratchWritten": true,
+  "notes": "Pure place-theoretic surjectivity argument (no CoordHom); comap_isNontrivial_of_finiteDimensional and exists_valuationSubring_comap_le are general valuation-theory results not directly called in the file (they document the route to PlaceLift but are not wired in). surjective_of_finite_comorphism_and_hproj is a verbatim alias of surjective_of_PlaceLift_and_hproj, existing only as a named API endpoint; the file is not imported by any other file in the project."
+}

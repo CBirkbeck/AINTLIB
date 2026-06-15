@@ -1,0 +1,41 @@
+{
+  "path": "./HasseWeil/EC/TranslateLocalRing.lean",
+  "totalDecls": 30,
+  "defs": 0,
+  "lemmas": 30,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "xy_gen_sub_const_mem_localRingAt_image",
+    "add_mem_localRingAt_image",
+    "sub_mem_localRingAt_image",
+    "mul_mem_localRingAt_image",
+    "x_gen_pow_mem_localRingAt_image",
+    "y_gen_pow_mem_localRingAt_image",
+    "x_gen_pow_mul_y_gen_pow_mem_localRingAt_image",
+    "algebraMap_F_mul_x_gen_pow_mul_y_gen_pow_mem_localRingAt_image",
+    "zero_mem_localRingAt_image",
+    "one_mem_localRingAt_image",
+    "neg_mem_localRingAt_image",
+    "pointValuation_mul_lt_one_of_le_and_lt",
+    "mem_localRingAt_image_iff_le_one",
+    "algebraMap_localRingAt_injective",
+    "algebraMap_CoordinateRing_mem_localRingAt_image",
+    "x_gen_pow_sub_const_mem_localRingAt_image",
+    "y_gen_pow_sub_const_mem_localRingAt_image",
+    "pointValuation_pow_le_one",
+    "linear_combination_mem_localRingAt_image",
+    "neg_x_gen_add_const_mem_localRingAt_image",
+    "const_sub_x_gen_mem_localRingAt_image",
+    "const_sub_y_gen_mem_localRingAt_image"
+  ],
+  "keyApi": [
+    "pointValuation_add_le_one",
+    "pow_mem_localRingAt_image",
+    "pointValuation_linear_combination_le_one"
+  ],
+  "scratchWritten": true,
+  "notes": "Pure API collection of 30 short theorems characterising which K(E) elements lift to the local ring at a smooth point via pointValuation ≤ 1. No sorries, no maxHeartbeats overrides, no proofs longer than 14 lines. Most declarations have no callers within the file but are heavily used by TranslateValuation.lean and SamePlace.lean; pointValuation_mul_lt_one_of_le_and_lt is the most widely imported. The file is entirely a convenience API layer over mem_localRingAt_image_of_pointValuation_le_one from TranslationOrd."
+}

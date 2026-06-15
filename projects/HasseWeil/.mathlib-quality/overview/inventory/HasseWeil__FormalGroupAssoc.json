@@ -1,0 +1,28 @@
+{
+  "path": "./HasseWeil/FormalGroupAssoc.lean",
+  "totalDecls": 21,
+  "defs": 8,
+  "lemmas": 13,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "formalGroupEval",
+    "formalInverseEval",
+    "bivarComp",
+    "pullbackCoeff_mulByInt",
+    "univPow_one_eq_zero",
+    "pullbackCoeff_add",
+    "pullbackCoeff_comp",
+    "comp_coeff_one",
+    "dual_additivity_algebraic"
+  ],
+  "keyApi": [
+    "univPow",
+    "uconv",
+    "fgl_coeff"
+  ],
+  "scratchWritten": true,
+  "notes": "Mostly scaffolding and stubs: pullbackCoeff_comp has a tautological proof (rfl on f 1 * g 1 = f 1 * g 1) making it a parked placeholder. formalMulByInt_coeff carries an acknowledged correctness gap (higher coefficients for negative m are not properly composed with formalInverse_coeff). dual_additivity_algebraic has three declared hypotheses (ha, hb, hab) that are unused in its proof body, and is the only declaration actively used by another file (PullbackCoeff.lean)."
+}

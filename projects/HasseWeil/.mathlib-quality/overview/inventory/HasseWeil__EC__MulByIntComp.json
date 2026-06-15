@@ -1,0 +1,24 @@
+{
+  "path": "./HasseWeil/EC/MulByIntComp.lean",
+  "totalDecls": 11,
+  "defs": 0,
+  "lemmas": 11,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "mulByInt_comp_pullback_x_neg_one", "lines": 31 }
+  ],
+  "unused": [
+    "mulByInt_comp_mulByInt_one_right",
+    "mulByInt_one_comp_mulByInt_left",
+    "mulByInt_comp_eq_mul_of_generator_witness",
+    "mulByInt_comp_pullback_x_neg_one",
+    "mulByInt_comp_pullback_x_neg_one_neg_one",
+    "mulByInt_comp_pullback_x_one_right",
+    "mulByInt_comp_pullback_x_one_left"
+  ],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "Small 11-theorem file providing the composition law for [m]∘[n]=[m*n] isogenies: unconditional identity cases, a witness-parametric reduction to pullback/generator data, and several concrete [-1]/[1] x-coordinate composition instances as scaffolding for T-III-4-020b. No sorries, no maxHeartbeats. The declarations mulByInt_pullback_x_neg_one and mulByInt_x_neg are heavily referenced externally (Frobenius.lean, Differential.lean, etc.) but have limited intra-file cross-reference (no declaration is used by 3+ others within this file)."
+}

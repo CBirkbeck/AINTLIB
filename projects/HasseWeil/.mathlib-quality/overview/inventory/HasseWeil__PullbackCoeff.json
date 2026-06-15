@@ -1,0 +1,22 @@
+{
+  "path": "./HasseWeil/PullbackCoeff.lean",
+  "totalDecls": 8,
+  "defs": 2,
+  "lemmas": 6,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "D_x",
+    "D_x_ne_zero'",
+    "isogPullbackCoeff_spec",
+    "isogPullbackCoeff_dual_mul",
+    "isogDual_add_pullbackCoeff"
+  ],
+  "keyApi": [
+    "isogPullbackCoeff"
+  ],
+  "scratchWritten": true,
+  "notes": "This file is a thin wrapper/alias layer over `omegaPullbackCoeff` (from OmegaPullbackCoeff.lean) and `dual_additivity_algebraic` (from FormalGroupAssoc.lean); most proofs are one-liners. The `D_x`/`D_x_ne_zero'` pair is dead scaffolding from a superseded D(x)-based design. No external callers of any exported declaration were found in the project."
+}

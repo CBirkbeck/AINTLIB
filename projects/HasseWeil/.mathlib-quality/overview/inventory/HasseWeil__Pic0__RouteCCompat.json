@@ -1,0 +1,24 @@
+{
+  "path": "./HasseWeil/Pic0/RouteCCompat.lean",
+  "totalDecls": 6,
+  "defs": 2,
+  "lemmas": 4,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [
+    "frobeniusCurveMap_toPointMap: 800000 [NO-COMMENT]"
+  ],
+  "longProofs": [
+    { "name": "frobeniusCurveMap_toPointMap", "lines": 44 }
+  ],
+  "unused": [
+    "frobeniusCurveMap_pullback",
+    "frobeniusCurveMapCoordHom_toAlgHom",
+    "frobeniusIsog_toPointMap_compat"
+  ],
+  "keyApi": [
+    "frobeniusCurveMapCoordHom"
+  ],
+  "scratchWritten": true,
+  "notes": "Small 6-declaration file that proves the Frobenius hcompat building block completely and axiom-cleanly; mulByInt and addIsog hcompat blocks are explicitly noted as residuals. The long proof of frobeniusCurveMap_toPointMap is verbose due to repeated manual change unfoldings for both coordinates and could be compressed. The maxHeartbeats 800000 is set without a justifying comment."
+}

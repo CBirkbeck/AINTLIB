@@ -1,0 +1,16 @@
+{
+  "path": "./HasseWeil/Curves/AFConditional.lean",
+  "totalDecls": 13,
+  "defs": 5,
+  "lemmas": 8,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "pointMinusO_of_bridge", "lines": 50 }
+  ],
+  "unused": ["AddHomProperty_of_AFInputs"],
+  "keyApi": ["DivZeroReduce", "kappaDivisor", "projectiveDivisorSum", "PointMinusOPrincipalEqZero", "NoFinitePolesBridge"],
+  "scratchWritten": true,
+  "notes": "Conditional witness file for B-4-003: all three Prop predicates (DivZeroReduce, NoFinitePolesBridge, PrincipalImpliesDegZero) are outstanding tickets rather than proven results, making every theorem here conditional scaffolding. The longest proof (pointMinusO_of_bridge, ~50 lines) is a detailed Finsupp casework on kappaDivisor values; the rest are short wrappers or one-liners. No sorry, no maxHeartbeats."
+}

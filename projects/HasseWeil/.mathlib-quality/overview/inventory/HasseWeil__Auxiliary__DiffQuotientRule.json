@@ -1,0 +1,14 @@
+{
+  "path": "./HasseWeil/Auxiliary/DiffQuotientRule.lean",
+  "totalDecls": 2,
+  "defs": 0,
+  "lemmas": 2,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": ["D_mul_inv_smul"],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "Tiny 2-theorem file providing the Kähler-derivation inverse rule (D_inv_smul) and quotient rule (D_mul_inv_smul) for the function field of an elliptic curve; no sorries, no heartbeat overrides. Both proofs are trivial compositions of Derivation.leibniz and mul_inv_cancel₀. Standard calculus identities that could plausibly already exist in Mathlib for general derivations (suspected mild Mathlib overlap)."
+}

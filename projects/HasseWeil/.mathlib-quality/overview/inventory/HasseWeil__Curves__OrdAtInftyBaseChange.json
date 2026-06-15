@@ -1,0 +1,14 @@
+{
+  "path": "./HasseWeil/Curves/OrdAtInftyBaseChange.lean",
+  "totalDecls": 4,
+  "defs": 0,
+  "lemmas": 4,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": ["ordAtInfty_functionFieldMap"],
+  "keyApi": ["ordAtInfty_algebraMap_coordRingMap"],
+  "scratchWritten": true,
+  "notes": "A focused 127-line, 4-theorem pipeline proving ord_∞ is preserved by function-field base change (K(C) → L(C_L)), via norm transport using mathlib's explicit norm_smul_basis formula. All declarations are axiom-clean with no sorry. The file is directly mirrored in FrobeniusDivisorGalois.lean for the Frobenius σ setting, and its main theorem ordAtInfty_functionFieldMap is consumed by OneSubInftyResidues.lean."
+}

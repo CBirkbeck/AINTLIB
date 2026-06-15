@@ -1,0 +1,23 @@
+{
+  "path": "./HasseWeil/EC/IsogenyAG/HomProperty.lean",
+  "totalDecls": 5,
+  "defs": 2,
+  "lemmas": 3,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "AddHomProperty_of_picZero_witnesses", "lines": 65 }
+  ],
+  "unused": [
+    "picZeroOfPoint_pushforwardPicZero",
+    "pushforwardPicZeroOfWitness",
+    "AddHomProperty_of_picZero_witnesses"
+  ],
+  "keyApi": [
+    "picZeroSumOfWitness",
+    "picZeroSumOfWitness_picZeroOfPoint"
+  ],
+  "scratchWritten": true,
+  "notes": "Witness-parametric formalization of Silverman III.4.8 (isogenies are group homomorphisms), factoring through Pic⁰ via three open tickets (T-PIC-A-002, T-PIC-C-003, T-III-3-003). No sorries, no maxHeartbeats overrides; the main theorem AddHomProperty_of_picZero_witnesses is a 65-line calc-chain diagram chase. The file is an API bridge: picZeroSumOfWitness and picZeroSumOfWitness_picZeroOfPoint are consumed by at least three other files (NoFinitePolesBridge, AFConditional, MillerAllChar), while pushforwardPicZeroOfWitness and picZeroOfPoint_pushforwardPicZero appear unused outside this file except through AddHomProperty_of_picZero_witnesses."
+}

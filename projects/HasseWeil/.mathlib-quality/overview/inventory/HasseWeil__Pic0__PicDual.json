@@ -1,0 +1,35 @@
+{
+  "path": "./HasseWeil/Pic0/PicDual.lean",
+  "totalDecls": 31,
+  "defs": 4,
+  "lemmas": 27,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [
+    "mk0_relNorm0_XYIdeal_eq_mk0_comap (line 372): 1600000 [residue-field finrank bookkeeping + twisted R →[α*] R instance chain need extra room]"
+  ],
+  "longProofs": [
+    {"name": "mk0_relNorm0_XYIdeal_eq_mk0_comap", "lines": 33},
+    {"name": "picDual_zsmul_eq_zsmul_of_comp_eq", "lines": 40}
+  ],
+  "unused": [
+    "picDual_apply",
+    "Naturality_of_toClassEquiv'_some_eq_relNorm0",
+    "toAddMonoidHom_comp_picDual_degree",
+    "naturality_of_coordHom",
+    "picDual_eq_of_comp_toAddMonoidHom_eq",
+    "picDual_zsmul_eq_zsmul_of_isDual",
+    "picDual_eq_smul_sub_of_sum_trace",
+    "picDual_comp_toAddMonoidHom"
+  ],
+  "keyApi": [
+    "classTransport",
+    "Naturality",
+    "toAddMonoidHom_eq_picPushforward_iff",
+    "picPushforward_comp_picDual",
+    "classTransport_comp_eq",
+    "eq_of_comp_eq_of_surjective"
+  ],
+  "scratchWritten": true,
+  "notes": "Implements the Pic0 dual isogeny φ̂ = κ⁻¹ ∘ φ* ∘ κ (Silverman III.6.1) and the dual relation α ∘ α̂ = [deg α], plus uniqueness, companion order, and Route-C dual-additivity engines. No sorries. Several 'unused-in-file' declarations are clearly intended for external Route-C/assembly callers (naturality_of_coordHom, picDual_eq_smul_sub_of_sum_trace, etc.). The Naturality predicate def is the central carried hypothesis used by ≥10 theorems."
+}

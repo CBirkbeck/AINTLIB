@@ -1,0 +1,28 @@
+{
+  "path": "./HasseWeil/WeilPairing/OneSubInftyResidues.lean",
+  "totalDecls": 13,
+  "defs": 1,
+  "lemmas": 11,
+  "instances": 1,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "inftyOrdTransport_of_ordAtInfty_x_y", "lines": 56 },
+    { "name": "comap_pointValuation_eq_infty_of_ordAtInfty_x_y_of_kernelInvariant", "lines": 46 }
+  ],
+  "unused": [
+    "OrdAtInftyBaseChange",
+    "ordAtInfty_isogOneSub_negFrobenius_pullback_x_gen_K",
+    "ordAtInfty_isogOneSub_negFrobenius_pullback_y_gen_K",
+    "neg_mem_kernel_of_image_zero",
+    "inftyOrdTransport_of_ordAtInfty_x_y",
+    "comap_pointValuation_eq_infty_of_ordAtInfty_x_y_of_kernelInvariant"
+  ],
+  "keyApi": [
+    "ordAtInftyBaseChange_holds",
+    "ordAtInfty_oneSub_pullback_x_gen",
+    "ordAtInfty_oneSub_pullback_y_gen"
+  ],
+  "scratchWritten": true,
+  "notes": "File provides the infinity-field half of the ComapPointValuationWitness for (1-pi) over K-bar, with two field-general abstractions (inftyOrdTransport_of_ordAtInfty_x_y and comap_pointValuation_eq_infty_of_ordAtInfty_x_y_of_kernelInvariant) that are reused by PencilComapWitnesses.lean for the pencil case. No sorry, no maxHeartbeats overrides; ordAtInftyBaseChange_holds discharges a previously-carried hypothesis making every declaration axiom-clean."
+}

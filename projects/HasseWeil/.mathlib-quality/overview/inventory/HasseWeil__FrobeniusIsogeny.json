@@ -1,0 +1,29 @@
+{
+  "path": "./HasseWeil/FrobeniusIsogeny.lean",
+  "totalDecls": 26,
+  "defs": 3,
+  "lemmas": 13,
+  "instances": 10,
+  "sorries": [],
+  "maxHeartbeats": [
+    "FaithfulSMul K[X] FunctionField instance (line 144): synthInstance.maxHeartbeats 40000 [NO-COMMENT]",
+    "frobeniusAlgHom_comp_comm (line 209): maxHeartbeats 1600000 [NO-COMMENT]",
+    "finrank_over_frobenius_image (line 307): maxHeartbeats 800000 [NO-COMMENT]"
+  ],
+  "longProofs": [
+    { "name": "frobenius_fieldRange_ratFunc", "lines": 43 },
+    { "name": "finrank_over_frobenius_image", "lines": 153 }
+  ],
+  "unused": [
+    "frobeniusIsogeny_degree",
+    "frobeniusIsogeny_pow_mem_fieldRange",
+    "frobeniusIsogeny_pullback_range"
+  ],
+  "keyApi": [
+    "finrank_functionField_eq_two",
+    "frobFracRange",
+    "frobeniusRangeEquiv"
+  ],
+  "scratchWritten": true,
+  "notes": "The file proves [K(E):K(E)^q]=q via a tower-law through K(x^q), using Algebra.finrank_eq_of_equiv_equiv to transfer finranks across ring equivalences — a pattern later copied in Basic.lean for mulByInt. The 153-line central proof finrank_over_frobenius_image uses three nested sub-computations and two set_option overrides with no justifying comments. No sorries anywhere in the file."
+}

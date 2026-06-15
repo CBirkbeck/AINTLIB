@@ -1,0 +1,14 @@
+{
+  "path": "./HasseWeil/HahnSeriesAux.lean",
+  "totalDecls": 4,
+  "defs": 0,
+  "lemmas": 4,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": ["orderTop_div", "leadingCoeff_div"],
+  "keyApi": ["orderTop_inv_eq_neg", "leadingCoeff_inv"],
+  "scratchWritten": true,
+  "notes": "Four theorems filling gaps in Mathlib's HahnSeries API (orderTop and leadingCoeff for inv/div), explicitly flagged as upstream candidates in the module docstring. All proofs are short (≤19 lines) and axiom-clean. The 'unused' entries (orderTop_div, leadingCoeff_div) are used extensively by BridgeMulByInt.lean and SilvermanIV14.lean but have no callers within this file itself."
+}

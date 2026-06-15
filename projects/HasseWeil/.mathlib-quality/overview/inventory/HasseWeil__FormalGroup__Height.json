@@ -1,0 +1,21 @@
+{
+  "path": "./HasseWeil/FormalGroup/Height.lean",
+  "totalDecls": 7,
+  "defs": 2,
+  "lemmas": 5,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "FormalGroupHom.height_zero_toSeries",
+    "FormalGroupHom.height_of_ne_zero",
+    "FormalGroup.height_eq",
+    "FormalGroupHom.height_comp"
+  ],
+  "keyApi": [
+    "FormalGroupHom.height"
+  ],
+  "scratchWritten": true,
+  "notes": "Implements Silverman IV.7 height of formal group homomorphisms: two noncomputable defs (FormalGroupHom.height, FormalGroup.height) and five lemmas including the main additivity result height_comp. The private helper ENat.map_padicValNat_mul distributes padicValNat over ℕ∞-multiplication; the file is only imported by the top-level barrel HasseWeil.lean, so all public declarations are API leaves with no internal consumers beyond this file."
+}

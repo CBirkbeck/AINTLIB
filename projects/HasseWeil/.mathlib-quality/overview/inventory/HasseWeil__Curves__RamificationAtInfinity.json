@@ -1,0 +1,34 @@
+{
+  "path": "./HasseWeil/Curves/RamificationAtInfinity.lean",
+  "totalDecls": 33,
+  "defs": 10,
+  "lemmas": 15,
+  "instances": 8,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "Sinf.inertiaDeg_eq_one_of_algebraMap_surjective", "lines": 34}
+  ],
+  "unused": [
+    "polyToFieldOfInv_ne_zero_of_ne_zero",
+    "ratFunToFieldOfInv_injective",
+    "algebraMap_polynomial_apply",
+    "algebraMap_fractionRing_apply",
+    "Sinf.ofIntegralClosure",
+    "Sinf.inertiaDeg_eq_finrank_kappa",
+    "finrank_residue_eq_finrank_k",
+    "Sinf.algBaseFromCarrier",
+    "Sinf.inertiaDeg_eq_one_of_algebraMap_surjective",
+    "finrank_eq_weighted_poleDegree_of_nonconstant"
+  ],
+  "keyApi": [
+    "polyToFieldOfInv",
+    "polyToFieldOfInv_injective_of_transcendental",
+    "ratFunToFieldOfInv",
+    "LinfAt",
+    "xIdeal",
+    "Sinf"
+  ],
+  "scratchWritten": true,
+  "notes": "The file's central device is the type synonym `LinfAt` plus the record `Sinf`, which together bypass a Lean 4 `Meta.SynthInstance.tryResolve` negative-cache failure on `↥(integralClosure …)` Subalgebra coercions (documented comment references commit 538ff64 and Mathlib NormalClosure pattern). No sorries, no `set_option maxHeartbeats`; the only non-default option is `set_option backward.isDefEq.respectTransparency false` scoped to `section SinfConstruction`. The 10 declarations marked unused within this file are all consumed by `GapSpines.lean`, `L6Witnesses.lean`, and `PoleDivisorFallback.lean`."
+}

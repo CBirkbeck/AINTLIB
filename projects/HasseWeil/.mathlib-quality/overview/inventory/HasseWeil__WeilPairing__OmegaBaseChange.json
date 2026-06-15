@@ -1,0 +1,22 @@
+{
+  "path": "./HasseWeil/WeilPairing/OmegaBaseChange.lean",
+  "totalDecls": 13,
+  "defs": 2,
+  "lemmas": 8,
+  "instances": 3,
+  "sorries": [],
+  "maxHeartbeats": [
+    "smulCommFunctionFieldBaseChange: 1000000 [NO-COMMENT]",
+    "functionFieldMap_u_gen: 1000000 [NO-COMMENT]",
+    "omegaDiffMap_invariantDifferential: 1000000 [NO-COMMENT]"
+  ],
+  "longProofs": [],
+  "unused": [],
+  "keyApi": [
+    "omegaDiffMap",
+    "algebraMap_functionField_baseChange_eq",
+    "omegaDiffMap_smul"
+  ],
+  "scratchWritten": true,
+  "notes": "A focused 13-declaration file that proves the invariant-differential pullback coefficient is stable under field base change (Silverman III.5), serving as the differential analogue of finrank base change. All proofs are sorry-free and axiom-clean; the three synthInstance.maxHeartbeats overrides (all 1000000, no comments) reflect instance-search pressure from the KaehlerDifferential.map square. The capstone theorem omegaPullbackCoeff_baseChangePullback is a key external API used by PencilSeparable, OneSubComapConcrete, and PencilComapWitnesses to discharge the OmegaBaseChangeNeZero hypothesis."
+}

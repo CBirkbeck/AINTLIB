@@ -1,0 +1,14 @@
+{
+  "path": "./HasseWeil/HasseWeilSkeleton.lean",
+  "totalDecls": 1,
+  "defs": 0,
+  "lemmas": 1,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": ["hasse_bound_skeleton"],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "Single-declaration milestone assembly file: wires GapSpines (ker_deg_skeleton, qf_nonneg_skeleton, isogOneSub_negFrobenius) and Hasse.QuadraticForm (hasse_bound_of_full_qf_nonneg_witnesses) into the top-level Hasse bound. The body is a 4-line term-mode application with no sorry; sorryAx traces only to the qf_nonneg_skeleton leaf."
+}

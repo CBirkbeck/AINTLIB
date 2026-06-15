@@ -1,0 +1,21 @@
+{
+  "path": "./HasseWeil/Hasse/SumTrace.lean",
+  "totalDecls": 2,
+  "defs": 0,
+  "lemmas": 2,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "sum_trace_frobenius_witness", "lines": 31 }
+  ],
+  "unused": ["dual_comp_frobenius_witness"],
+  "keyApi": [
+    "verschiebungIsog_of_witness_isDualOf_frobenius",
+    "mulByInt_apply",
+    "isogOneSub_negFrobenius_toAddMonoidHom",
+    "trace_identity_of_dual_chain"
+  ],
+  "scratchWritten": true,
+  "notes": "Two-declaration witness-parametric bridge for Silverman III.6.2(b): π+V=[tr π]. `sum_trace_frobenius_witness` carries IsDualOf(1−V)(1−π) as a hypothesis (the hard bilinear piece). `dual_comp_frobenius_witness` (V∘π=[deg π] pointwise) has no external callers and is a dead-code candidate."
+}

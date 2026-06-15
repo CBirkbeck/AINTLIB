@@ -1,0 +1,21 @@
+{
+  "path": "./HasseWeil/WeilPairing/OneSubScaling.lean",
+  "totalDecls": 8,
+  "defs": 1,
+  "lemmas": 5,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "oneSubFrobeniusIsogBaseChange_pullback",
+    "oneSubFrobeniusIsogBaseChange_degree_eq_of_finrank",
+    "oneSubFrobeniusIsogBaseChange_toAddMonoidHom_eq_baseChange",
+    "oneSubFrobeniusScaling_of_data"
+  ],
+  "keyApi": [
+    "oneSubFrobeniusIsogBaseChange"
+  ],
+  "scratchWritten": true,
+  "notes": "Thin discharge file: constructs the concrete base-changed isogeny (1−π)_{K̄} via Isogeny.mkBaseChange, bundles all CoordHom-free geometric residuals into OneSubScalingData, and derives OneSubFrobeniusScaling via weilScales_of_dualComp. No sorries, no maxHeartbeats overrides, no proof exceeds 20 lines. Three theorems (pullback simp, degree-finrank reduction, toAddMonoidHom_eq_baseChange) are unused within the file and serve as API for downstream callers."
+}
