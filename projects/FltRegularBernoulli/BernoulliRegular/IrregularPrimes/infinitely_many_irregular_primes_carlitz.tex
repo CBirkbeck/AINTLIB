@@ -1,0 +1,437 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{microtype}
+
+\hypersetup{colorlinks=true, linkcolor=blue!55!black, urlcolor=blue!55!black, citecolor=blue!55!black}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{definition}[theorem]{Definition}
+
+\newcommand{\Z}{\mathbf Z}
+\newcommand{\Q}{\mathbf Q}
+\newcommand{\N}{\mathbf N}
+\newcommand{\ord}{\operatorname{ord}}
+\newcommand{\num}{\operatorname{num}}
+\newcommand{\den}{\operatorname{den}}
+\newcommand{\lcm}{\operatorname{lcm}}
+\newcommand{\vphantomBig}{\vphantom{\Big|}}
+
+\title{A Carlitz-style proof that there are infinitely many irregular primes\\
+\large Avoiding $p$-adic $L$-functions, class field theory, Chebotarev, and reciprocity laws}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This note gives a formalization-oriented proof that there are infinitely many irregular primes.  The proof is the classical Carlitz argument.  It uses only Bernoulli-number congruences, the von Staudt--Clausen theorem, and the elementary asymptotic growth of Bernoulli numbers.  It does not use $p$-adic $L$-functions, class field theory, Chebotarev density, Hilbert symbols, Artin reciprocity, or power reciprocity.  The only substantial congruence input is the standard Kummer congruence for divided Bernoulli numbers.  That congruence is a classical theorem of Bernoulli arithmetic and can be proved by elementary finite-difference or Voronoi/Faulhaber methods; it is not a class-field-theoretic statement.
+\end{abstract}
+
+\tableofcontents
+
+\section{The intended theorem}
+
+We use the Bernoulli numbers $B_n\in \Q$ defined by
+\[
+  \frac{T}{e^T-1}=\sum_{n\ge 0} B_n\frac{T^n}{n!}.
+\]
+Thus $B_0=1$, $B_1=-1/2$, and $B_{2n+1}=0$ for $n\ge 1$.
+
+\begin{definition}[Bernoulli-irregular prime]
+Let $p$ be an odd prime.  We say that $p$ is \emph{irregular} if there is an even integer $m$ with
+\[
+  2\le m\le p-3
+\]
+such that $p$ divides the numerator of $B_m$.
+Equivalently, $p$ divides the numerator of $B_m/m$, since $m<p$ in this range.
+\end{definition}
+
+The theorem to prove is the following.
+
+\begin{theorem}[Infinitude of irregular primes]
+There are infinitely many irregular primes.
+\end{theorem}
+
+The proof below establishes this theorem directly in the Bernoulli-number sense.  If one has already formalized Kummer's criterion relating this Bernoulli definition to divisibility of the cyclotomic class number, then the same theorem gives the corresponding class-number formulation.
+
+\section{The elementary Bernoulli inputs}
+
+The Carlitz proof uses three classical congruence facts.  I state them as an explicit formalization package.  None of them uses $p$-adic $L$-functions, class field theory, Chebotarev, or reciprocity laws.
+
+\subsection{von Staudt--Clausen}
+
+\begin{theorem}[von Staudt--Clausen]
+Let $m\ge 2$ be even.  Then
+\[
+  B_m+\sum_{\ell-1\mid m}\frac{1}{\ell}\in \Z,
+\]
+where the sum is over rational primes $\ell$ such that $\ell-1$ divides $m$.
+Equivalently,
+\[
+  \den(B_m)=\prod_{\ell-1\mid m}\ell.
+\]
+In particular the denominator of $B_m$ is squarefree and is divisible by $2$.
+\end{theorem}
+
+\begin{corollary}\label{cor:numerator_odd}
+For every even $m\ge 2$, the numerator of $B_m$ is odd.  Consequently, if
+\[
+  \frac{B_m}{m}=\frac{C_m}{D_m}
+\]
+in lowest terms with $D_m>0$, then $C_m$ is odd.
+\end{corollary}
+
+\begin{proof}
+By von Staudt--Clausen, the reduced denominator of $B_m$ is divisible by $2$.  Since numerator and denominator are coprime, the numerator of $B_m$ is odd.  The numerator of $B_m/m$ is obtained from the numerator of $B_m$ by dividing by a positive integer, so it is again odd.
+\end{proof}
+
+\begin{corollary}\label{cor:p_denom_when_p_minus_one_divides}
+Let $p$ be an odd prime and $m\ge 2$ be even.  If
+\[
+  p-1\mid m,
+\]
+then
+\[
+  v_p(B_m)=-1.
+\]
+In particular,
+\[
+  v_p(B_m/m)<0,
+\]
+so $p$ does not divide the numerator of $B_m/m$.
+\end{corollary}
+
+\begin{proof}
+By von Staudt--Clausen, $p$ occurs exactly once in the denominator of $B_m$.  Hence $v_p(B_m)=-1$.  Dividing by $m$ lowers the $p$-adic valuation further by $v_p(m)\ge 0$, so
+\[
+  v_p(B_m/m)=-1-v_p(m)<0.
+\]
+Thus $p$ is a denominator prime of $B_m/m$, not a numerator prime.
+\end{proof}
+
+\subsection{Kummer congruence for divided Bernoulli numbers}
+
+The second input is the standard Kummer congruence in its mod-$p$ form.
+
+\begin{theorem}[Kummer congruence, mod $p$]\label{thm:kummer_congruence}
+Let $p$ be an odd prime.  Let $m,n$ be positive even integers such that
+\[
+  m\equiv n \pmod{p-1}
+\]
+and
+\[
+  (p-1)\nmid n.
+\]
+Then $B_m/m$ and $B_n/n$ are $p$-integral and
+\[
+  \frac{B_m}{m}\equiv \frac{B_n}{n}\pmod p.
+\]
+Equivalently, in the localization $\Z_{(p)}$,
+\[
+  \frac{B_m}{m}-\frac{B_n}{n}\in p\Z_{(p)}.
+\]
+\end{theorem}
+
+\begin{remark}[Why this is allowed in a non-$p$-adic-$L$ proof]
+Theorem~\ref{thm:kummer_congruence} is the classical Kummer congruence.  It predates $p$-adic $L$-functions.  It may be proved by elementary Bernoulli-polynomial and finite-difference methods, for example by deriving congruences for power sums from Faulhaber's formula and then passing to Bernoulli numbers.  For a Lean development, this theorem should be isolated as a Bernoulli-congruence theorem.  The Carlitz proof below uses only its mod-$p$ instance.
+\end{remark}
+
+\subsection{Adams divisibility}
+
+The following consequence is often called Adams' theorem in this context.
+
+\begin{theorem}[Adams divisibility]\label{thm:adams}
+Let $p$ be an odd prime, $m>0$ be even, and $r\ge 1$.  If
+\[
+  p^r\mid m,
+  \qquad
+  (p-1)\nmid m,
+\]
+then
+\[
+  B_m\equiv 0\pmod{p^r},
+\]
+in the sense that $v_p(B_m)\ge r$.
+\end{theorem}
+
+\begin{remark}
+The proof of the infinitude theorem below does not really need the full Adams divisibility theorem if one uses Theorem~\ref{thm:kummer_congruence} plus the standard $p$-integrality of $B_m/m$ for $(p-1)\nmid m$.  However, Adams' divisibility is part of the classical Carlitz package and is a useful theorem to have separately in a formalization.
+\end{remark}
+
+\section{A key equivalence: numerator divisors of $B_m/m$ are irregular}
+
+The following lemma is the main Bernoulli-congruence bridge.
+
+\begin{lemma}\label{lem:prime_divisor_divided_Bernoulli_irregular}
+Let $q$ be an odd prime.  Then $q$ is irregular if and only if $q$ divides the numerator of $B_m/m$ for some positive even integer $m$.
+\end{lemma}
+
+\begin{proof}
+First suppose that $q$ is irregular.  Then there exists an even integer $m_0$ with
+\[
+  2\le m_0\le q-3
+\]
+such that $q$ divides the numerator of $B_{m_0}$.  Since $m_0<q$, the integer $m_0$ is a $q$-adic unit.  Therefore $q$ also divides the numerator of $B_{m_0}/m_0$.
+
+Conversely, suppose that $q$ divides the numerator of $B_m/m$ for some positive even $m$.  We first show that $(q-1)\nmid m$.  Indeed, if $q-1\mid m$, then Corollary~\ref{cor:p_denom_when_p_minus_one_divides} gives
+\[
+  v_q(B_m/m)<0,
+\]
+which means that $q$ occurs in the denominator, not in the numerator.  This contradicts the assumption.
+
+Thus $(q-1)\nmid m$.  Let $m_0$ be the unique even representative of the residue class of $m$ modulo $q-1$ satisfying
+\[
+  2\le m_0\le q-3.
+\]
+Since $m\equiv m_0\pmod{q-1}$ and the common residue class is nonzero modulo $q-1$, Kummer's congruence gives
+\[
+  \frac{B_m}{m}\equiv \frac{B_{m_0}}{m_0}\pmod q.
+\]
+By hypothesis, the left-hand side is congruent to $0$ modulo $q$.  Hence
+\[
+  \frac{B_{m_0}}{m_0}\equiv 0\pmod q.
+\]
+Since $m_0<q$, this is equivalent to saying that $q$ divides the numerator of $B_{m_0}$.  Therefore $q$ is irregular.
+\end{proof}
+
+\begin{remark}[Formalization note]
+The nonzero residue-class representative $m_0$ is easy to construct in Lean because $m$ is even and $q-1$ is even.  If $(q-1)\nmid m$, then the even residue is not $0$, so it lies among
+\[
+  2,4,\dots,q-3.
+\]
+\end{remark}
+
+\section{Archimedean growth of Bernoulli numbers}
+
+We need a very weak growth statement: for sufficiently large even $M$,
+\[
+  \left|\frac{B_M}{M}\right|>1.
+\]
+This is elementary from Euler's formula for $\zeta(2n)$.
+
+\begin{theorem}[Euler's formula for even Bernoulli numbers]\label{thm:euler_formula}
+For every integer $N\ge 1$,
+\[
+  B_{2N}=(-1)^{N+1}\frac{2(2N)!}{(2\pi)^{2N}}\zeta(2N).
+\]
+Consequently,
+\[
+  \left|\frac{B_{2N}}{2N}\right|
+  =\frac{2(2N-1)!}{(2\pi)^{2N}}\zeta(2N).
+\]
+\end{theorem}
+
+\begin{lemma}\label{lem:Bernoulli_growth}
+There exists an even integer $M_0$ such that for every even $M\ge M_0$,
+\[
+  \left|\frac{B_M}{M}\right|>1.
+\]
+More explicitly, one may take any even $M=2N$ with $N\ge 65$, using only the elementary bound $\pi<4$.
+\end{lemma}
+
+\begin{proof}
+Let $M=2N$.  By Theorem~\ref{thm:euler_formula},
+\[
+  \left|\frac{B_{2N}}{2N}\right|
+  =\frac{2(2N-1)!}{(2\pi)^{2N}}\zeta(2N).
+\]
+Since $\zeta(2N)>1$, it is enough to prove
+\[
+  \frac{2(2N-1)!}{(2\pi)^{2N}}>1.
+\]
+For $N\ge 1$,
+\[
+  (2N-1)! =1\cdot 2\cdots (2N-1)\ge N(N+1)\cdots(2N-1)\ge N^N.
+\]
+Using $\pi<4$, hence $2\pi<8$, we get
+\[
+  \frac{2(2N-1)!}{(2\pi)^{2N}}
+  > \frac{2N^N}{8^{2N} }
+  = 2\left(\frac{N}{64}\right)^N.
+\]
+If $N\ge 65$, then $N/64>1$, so this expression is greater than $2$, and in particular greater than $1$.
+\end{proof}
+
+\section{Carlitz's contradiction argument}
+
+We now prove the infinitude theorem.
+
+\begin{theorem}\label{thm:infinite_irregular}
+There are infinitely many irregular primes.
+\end{theorem}
+
+\begin{proof}
+Assume, for contradiction, that there are only finitely many irregular primes.  Let
+\[
+  S=\{p_1,\dots,p_k\}
+\]
+be the finite set of all irregular primes.  If $S$ is empty, set
+\[
+  L=2.
+\]
+Otherwise set
+\[
+  L=\lcm(p_1-1,\dots,p_k-1).
+\]
+In either case, $L$ is a positive even integer.
+
+Choose an even integer $M$ such that
+\[
+  L\mid M
+\]
+and
+\[
+  M\ge M_0,
+\]
+where $M_0$ is as in Lemma~\ref{lem:Bernoulli_growth}.  For example, one can take a sufficiently large even multiple of $L$.
+
+Write
+\[
+  \left|\frac{B_M}{M}\right|=\frac{C_M}{D_M}
+\]
+in lowest terms, with
+\[
+  C_M,D_M\in\Z_{>0},\qquad \gcd(C_M,D_M)=1.
+\]
+By Lemma~\ref{lem:Bernoulli_growth},
+\[
+  \frac{C_M}{D_M}>1.
+\]
+Thus
+\[
+  C_M>D_M\ge 1,
+\]
+so
+\[
+  C_M>1.
+\]
+By Corollary~\ref{cor:numerator_odd}, $C_M$ is odd.  Hence $C_M$ has at least one odd prime divisor.  Let $q$ be an odd prime with
+\[
+  q\mid C_M.
+\]
+Then $q$ divides the numerator of $B_M/M$.  By Lemma~\ref{lem:prime_divisor_divided_Bernoulli_irregular}, $q$ is irregular.  Hence $q\in S$.
+
+But since $q\in S$, we have
+\[
+  q-1\mid L\mid M.
+\]
+By Corollary~\ref{cor:p_denom_when_p_minus_one_divides},
+\[
+  v_q(B_M/M)<0.
+\]
+Therefore $q$ cannot divide the numerator of $B_M/M$, contradicting $q\mid C_M$.
+
+This contradiction shows that the set of irregular primes cannot be finite.
+\end{proof}
+
+\section{Why this avoids the forbidden tools}
+
+The proof used only the following ingredients:
+\begin{enumerate}[label=(\arabic*)]
+  \item von Staudt--Clausen for denominators of Bernoulli numbers;
+  \item the mod-$p$ Kummer congruence for divided Bernoulli numbers;
+  \item Euler's formula for $B_{2N}$ and the elementary growth of factorials;
+  \item unique factorization in $\Z$ and elementary $p$-adic valuation bookkeeping in rational numbers.
+\end{enumerate}
+
+It did not use:
+\begin{enumerate}[label=(\alph*)]
+  \item $p$-adic $L$-functions;
+  \item class field theory;
+  \item Chebotarev density;
+  \item Artin reciprocity;
+  \item Hilbert symbols;
+  \item cyclotomic class groups;
+  \item cyclotomic units or regulators.
+\end{enumerate}
+
+The only serious congruence theorem is Kummer's congruence.  If one wants a completely from-scratch formalization, that theorem is the component to formalize next.  But it is strictly a Bernoulli-number congruence theorem, and it has classical elementary proofs independent of $p$-adic $L$-functions.
+
+\section{Lean-oriented theorem dependency graph}
+
+For a Lean formalization, the proof can be organized as follows.
+
+\subsection*{Module A: Bernoulli denominators}
+
+Formalize von Staudt--Clausen:
+\[
+  B_m+\sum_{\ell-1\mid m}\frac1\ell\in\Z.
+\]
+Derive:
+\begin{enumerate}[label=(A\arabic*)]
+  \item the denominator formula for $B_m$;
+  \item if $p-1\mid m$, then $v_p(B_m)=-1$;
+  \item the numerator of $B_m/m$ is odd.
+\end{enumerate}
+
+\subsection*{Module B: Kummer congruence}
+
+Formalize the mod-$p$ Kummer congruence:
+\[
+  m\equiv n\pmod{p-1},\quad (p-1)\nmid n
+  \quad\Longrightarrow\quad
+  \frac{B_m}{m}\equiv\frac{B_n}{n}\pmod p.
+\]
+For the infinitude proof, only the mod-$p$ case is needed.
+
+\subsection*{Module C: irregularity criterion}
+
+Prove Lemma~\ref{lem:prime_divisor_divided_Bernoulli_irregular}:
+\[
+  q\text{ irregular}
+  \quad\Longleftrightarrow\quad
+  \exists m>0\text{ even},\ q\mid \num(B_m/m).
+\]
+The forward direction is immediate.  The reverse direction uses Module A to exclude $(q-1)\mid m$ and Module B to reduce $m$ to the unique even representative in $[2,q-3]$.
+
+\subsection*{Module D: Bernoulli growth}
+
+Formalize Euler's formula
+\[
+  \left|\frac{B_{2N}}{2N}\right|
+  =\frac{2(2N-1)!}{(2\pi)^{2N}}\zeta(2N)
+\]
+and the elementary lower bound
+\[
+  \left|\frac{B_{2N}}{2N}\right|>1
+\]
+for all sufficiently large $N$.
+
+For a Lean development where Euler's formula or real analysis is inconvenient, it is enough to prove the existence of infinitely many even $M$ with $|B_M/M|>1$.  Euler's formula is the standard shortest route.
+
+\subsection*{Module E: Carlitz contradiction}
+
+Assume finitely many irregular primes.  Choose $M$ a large even multiple of all $p_i-1$.  Then:
+\begin{enumerate}[label=(E\arabic*)]
+  \item growth gives the numerator $C_M$ of $|B_M|/M$ is $>1$;
+  \item the numerator is odd, hence has an odd prime divisor $q$;
+  \item by Module C, $q$ is irregular;
+  \item by construction, $q-1\mid M$;
+  \item by Module A, $q$ is a denominator prime of $B_M/M$, contradiction.
+\end{enumerate}
+
+\section{Comparison with the $p$-adic $L$-function route}
+
+The proof above does not give the full Kummer congruence from $p$-adic continuity of $L_p(s,\chi)$.  Instead, it assumes Kummer's classical congruence as an elementary Bernoulli theorem.  Thus it is suitable when the goal is to avoid new $p$-adic analytic infrastructure.
+
+However, if one's development currently lacks unrestricted Kummer congruences, then the missing theorem is precisely Module B.  Trying to prove infinitude from restricted Voronoi congruences with extra hypotheses will not be enough, because Carlitz's Lemma~\ref{lem:prime_divisor_divided_Bernoulli_irregular} needs the unrestricted mod-$p$ Kummer congruence for arbitrary even $m$ with $(p-1)\nmid m$.
+
+\section{References}
+
+The proof given here is the classical argument of Carlitz.  The modern paper by Luca, Pizarro-Madariaga, and Pomerance recalls Carlitz's proof and explicitly lists the three congruence inputs used in it.  See:
+\begin{itemize}
+  \item L. Carlitz, \emph{Note on irregular primes}, Proc. Amer. Math. Soc. 5 (1954), 329--331.
+  \item F. Luca, J. Pizarro-Madariaga, and C. Pomerance, \emph{On the counting function of irregular primes}, Indag. Math. 26 (2015), 147--161.
+  \item Ireland--Rosen, \emph{A Classical Introduction to Modern Number Theory}, Chapter 15, for Bernoulli numbers, von Staudt--Clausen, Kummer congruences, and irregular primes.
+\end{itemize}
+
+\end{document}

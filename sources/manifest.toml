@@ -1,264 +1,78 @@
-# AINTLIB sources manifest
+# AINTLIB consolidation monorepo — vendored-source provenance.
 #
-# One [[source]] per source repo we mine for the blueprint. `commit` pins the exact
-# revision the blueprint's prose + (lean := …) references were authored against;
-# `https://<remote>/tree/<commit>` is a stable permalink. Repos are read locally for
-# mining (not vendored). `status = "confirmed"` flips to "confirmed" after the
-# catalogue sign-off (see sources/catalogue.md).
+# One record per vendored project: where it came from (origin repo + canonical branch +
+# the exact commit synced), where it lives in the workspace, and its bump status relative
+# to the pinned mathlib. `scripts/pr-back.sh` reads `origin` + `branch` to route cleaned
+# results back upstream.
 #
-# Fields: name, kind (local|external), status (confirmed|candidate), remote, commit,
-#         lean (toolchain), has_blueprint (own blueprint dir), chapters (target chapters).
+# (The blueprint atlas's richer source catalogue is preserved on the `blueprint-atlas` branch.)
+#
+# Pinned mathlib for the whole workspace: d90090f647ca (v4.31.0-rc2). Vendored 2026-06-15.
 
-# ---------- Confirmed: local repos ----------
+pinned_mathlib = "d90090f647ca"
+toolchain = "leanprover/lean4:v4.31.0-rc2"
 
-[[source]]
-name = "Adic spaces"
-kind = "local"
-status = "confirmed"
-remote = "https://github.com/CBirkbeck/Adic-Spaces"
-commit = "fb55cd8"
-lean = "v4.29.0-rc6"
-has_blueprint = false
-chapters = ["PAdicAdic"]
+[projects.FltRegularBernoulli]
+origin = "https://github.com/CBirkbeck/flt-regular-bernoulli.git"
+branch = "master"
+synced_commit = "1cb08c4efa44"
+origin_mathlib = "1680840431e2"          # rc2, different commit → tiny reconcile to the pin
+dir = "projects/FltRegularBernoulli"
+lib = "BernoulliRegular"
+external_require = "flt-regular @ 29a3bb88f596"   # imports FltRegular.* (42×)
+status = "needs-reconcile"               # 1680840 → d90090f + flt-regular against d90090f
 
-[[source]]
-name = "chebotarev-density"
-branch = "development"   # real content is on this non-default branch
-kind = "local"
-status = "confirmed"
-remote = "https://github.com/CBirkbeck/chebotarev-density"
-commit = "9ddb80d"
-lean = "v4.31.0-rc1"
-has_blueprint = true
-chapters = ["ClassFieldTheory"]
+[projects.LeanModularForms]
+origin = "https://github.com/CBirkbeck/LeanModularForms.git"
+branch = "master"
+synced_commit = "7c41b9b1747d"
+origin_mathlib = "d90090f647ca"
+dir = "projects/LeanModularForms"
+lib = "LeanModularForms"
+status = "aligned"                       # already on the pin
 
-[[source]]
-name = "flt-regular-bernoulli"
-kind = "local"
-status = "confirmed"
-remote = "https://github.com/CBirkbeck/flt-regular-bernoulli"
-commit = "888f2259"
-lean = "v4.30.0-rc2"
-has_blueprint = true
-chapters = ["FLT"]
+[projects.HasseWeil]
+origin = "https://github.com/CBirkbeck/Hasse-Weil.git"
+branch = "silverman-development"
+synced_commit = "94f6d72eeea3"
+origin_mathlib = "d90090f647ca"
+dir = "projects/HasseWeil"
+lib = "HasseWeil"
+status = "aligned"
 
-[[source]]
-name = "LeanModularForms"
-branch = "hecke-ring"   # Hecke/valence/strong-mult-one content is on this non-default branch
-kind = "local"
-status = "confirmed"
-remote = "https://github.com/CBirkbeck/LeanModularForms"
-commit = "0fc82eb"
-lean = "v4.30.0-rc2"
-has_blueprint = true
-chapters = ["ModularForms"]
+[projects.AdicSpaces]
+origin = "https://github.com/CBirkbeck/Adic-Spaces.git"
+branch = "faithful-LL-pairfree"
+synced_commit = "516de9a0479b"
+origin_mathlib = "d90090f647ca"
+dir = "projects/AdicSpaces"
+lib = "«Adic spaces»"
+status = "aligned"
 
-[[source]]
-name = "LeanModularForms-hecke"
-kind = "local"
-status = "confirmed"
-remote = "https://github.com/CBirkbeck/LeanModularForms"
-commit = "3c0ac6c"
-lean = "v4.30.0"
-has_blueprint = true
-chapters = ["ModularForms"]
-note = "git worktree of LeanModularForms (Hecke-operators branch)"
+[projects.NagellLutz]
+origin = "https://github.com/CBirkbeck/LutzNagell.git"
+branch = "main"
+synced_commit = "c58fbfabb725"
+origin_mathlib = "c5edb8d3738a"          # v4.29.0-rc7
+dir = "projects/NagellLutz"
+lib = "LutzNagell"
+status = "needs-bump"                    # v4.29 → rc2, the heaviest bump; done in the monorepo
 
-[[source]]
-name = "FLT"
-kind = "local"
-status = "confirmed"
-remote = "https://github.com/ImperialCollegeLondon/FLT"
-commit = "9deae05"
-lean = "v4.9.0-rc2"
-has_blueprint = true
-chapters = ["FLT"]
-note = "older local copy; FLT-imperial tracks upstream"
+[projects.PadicLFunctions]
+origin = "https://github.com/CBirkbeck/padic-L-functions.git"
+branch = "main"
+synced_commit = "7097bc6ba345"
+origin_mathlib = "66748b489336"          # v4.31.0-rc1
+dir = "projects/PadicLFunctions"
+lib = "PadicLFunctions"
+internal_require = "LeanModularForms"    # imports the level-raising operator → now a direct import
+status = "needs-bump"                    # rc1 → rc2
 
-[[source]]
-name = "flt-regular"
-kind = "local"
-status = "confirmed"
-remote = "https://github.com/leanprover-community/flt-regular"
-commit = "6ade127"
-lean = "v4.31.0-rc1"
-has_blueprint = true
-chapters = ["FLT"]
-
-[[source]]
-name = "Hasse-Weil"
-branch = "worker-tensor-isom"   # active development on this non-default branch
-kind = "local"
-status = "confirmed"
-remote = "https://github.com/CBirkbeck/Hasse-Weil"
-commit = "03003e7"
-lean = "v4.29.0-rc6"
-has_blueprint = false
-chapters = ["EllipticArithGeom"]
-
-[[source]]
-name = "WeilConjectures"
-kind = "local"
-status = "confirmed"
-remote = "https://github.com/CBirkbeck/WeilConjectures"
-commit = "b8464ee"
-lean = "v4.28.0-rc1"
-has_blueprint = false
-chapters = ["EllipticArithGeom"]
-
-[[source]]
-name = "EulerProducts"
-kind = "local"
-status = "confirmed"
-remote = "https://github.com/MichaelStollBayreuth/EulerProducts"
-commit = "7376f1a"
-lean = "v4.24.0"
-has_blueprint = false
-chapters = ["Analytic"]
-
-[[source]]
-name = "DirichletNonvanishing"
-kind = "local"
-status = "confirmed"
-remote = "https://github.com/CBirkbeck/DirichletNonvanishing"
-commit = "fb3e6ac"
-lean = "v4.13.0-rc3"
-has_blueprint = true
-chapters = ["Analytic"]
-
-[[source]]
-name = "LocalClassFieldTheory"
-kind = "local"
-status = "confirmed"
-remote = "https://github.com/CBirkbeck/LocalClassFieldTheory"
-commit = "e7d457c"
-lean = "v4.7.0-rc2"
-has_blueprint = true
-chapters = ["ClassFieldTheory", "PAdicAdic"]
-
-[[source]]
-name = "Nagel--Lutz"
-kind = "local"
-status = "confirmed"
-remote = "https://github.com/CBirkbeck/LutzNagell"
-commit = "c58fbfa"
-lean = "v4.29.0-rc7"
-has_blueprint = false
-chapters = ["EllipticArithGeom"]
-
-[[source]]
-name = "NewtonPolys"
-kind = "local"
-status = "confirmed"
-remote = "https://github.com/CBirkbeck/NewtonPoly"
-commit = "a6d9970"
-lean = "v4.28.0-rc1"
-has_blueprint = false
-chapters = ["DiophantineTranscendence"]
-
-[[source]]
-name = "power_reside_symbols"
-kind = "local"
-status = "confirmed"
-remote = "https://github.com/CBirkbeck/power_residue_symbols"
-commit = "0b573a4"
-lean = "v4.7.0-rc2"
-has_blueprint = false
-chapters = ["ClassFieldTheory"]
-
-[[source]]
-name = "GLn_F_q"
-kind = "local"
-status = "confirmed"
-remote = "https://github.com/CBirkbeck/GLn_F_q"
-commit = "3fc5ad9"
-lean = "v4.8.0-rc2"
-has_blueprint = false
-chapters = ["Algebraic"]
-
-[[source]]
-name = "ModFormDims"
-kind = "local"
-status = "confirmed"
-remote = "https://github.com/CBirkbeck/ModFormDims"
-commit = "10bab48"
-lean = "v4.13.0-rc3"
-has_blueprint = false
-chapters = ["ModularForms"]
-
-# ---------- Confirmed: external (cloned as siblings) ----------
-
-[[source]]
-name = "PrimeNumberTheoremAnd"
-kind = "external"
-status = "confirmed"
-remote = "https://github.com/AlexKontorovich/PrimeNumberTheoremAnd"
-commit = "9824b74"
-lean = "v4.30.0"
-has_blueprint = true
-chapters = ["Analytic"]
-
-[[source]]
-name = "FLT-imperial"
-kind = "external"
-status = "confirmed"
-remote = "https://github.com/ImperialCollegeLondon/FLT"
-commit = "6cffefe"
-lean = "v4.31.0-rc1"
-has_blueprint = true
-chapters = ["FLT"]
-
-# ---------- Candidates (pending catalogue sign-off; already cloned) ----------
-
-[[source]]
-name = "QuadraticIntegers"
-kind = "external"
-status = "confirmed"
-remote = "https://github.com/pitmonticone/QuadraticIntegers"
-commit = "205ad5a"
-lean = "v4.24.0"
-has_blueprint = false
-chapters = ["Algebraic"]
-
-[[source]]
-name = "lean-bombieri-vinogradov"
-kind = "external"
-status = "confirmed"
-remote = "https://github.com/amellendijk/lean-bombieri-vinogradov"
-commit = "08696dd"
-lean = "v4.28.0"
-has_blueprint = false
-chapters = ["Analytic"]
-
-# ---------- Confirmed: external additions (Phase 3 vetting) ----------
-
-[[source]]
-name = "ClassFieldTheory-buzzard"
-kind = "external"
-status = "confirmed"
-remote = "https://github.com/kbuzzard/ClassFieldTheory"
-commit = "d5c1d04"
-has_blueprint = false
-chapters = ["ClassFieldTheory"]
-note = "2025 Clay summer-school CFT: group cohomology, Herbrand quotient, local CFT"
-
-[[source]]
-name = "KummerCriterion"
-kind = "external"
-status = "confirmed"
-remote = "https://github.com/riccardobrasca/KummerCriterion"
-commit = "88e6dd6"
-has_blueprint = false
-chapters = ["FLT"]
-
-[[source]]
-name = "pfr"
-kind = "external"
-status = "confirmed"
-remote = "https://github.com/teorth/pfr"
-commit = "901bc69"
-has_blueprint = true
-chapters = ["AdditiveCombinatorial"]
-note = "Polynomial Freiman-Ruzsa (Marton's conjecture), sorry-free"
-
-# Dropped after vetting (Lean 3, unusable): lean-forward/class-group-and-mordell-equation; ImperialCollegeLondon/diophantine.
+[projects.Chebotarev]
+origin = "https://github.com/CBirkbeck/chebotarev-density.git"
+branch = "development"
+synced_commit = "a00054a0e6bb"
+origin_mathlib = "66748b489336"          # v4.31.0-rc1
+dir = "projects/Chebotarev"
+lib = "CebotarevDensity"
+status = "needs-bump"                    # rc1 → rc2

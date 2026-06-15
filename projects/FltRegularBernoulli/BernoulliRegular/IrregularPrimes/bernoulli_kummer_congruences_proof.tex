@@ -1,0 +1,573 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{definition}[theorem]{Definition}
+
+\newcommand{\Z}{\mathbf Z}
+\newcommand{\Q}{\mathbf Q}
+\newcommand{\Fp}{\mathbf F_p}
+\newcommand{\Zp}{\mathbf Z_{(p)}}
+\newcommand{\ord}{\operatorname{ord}}
+\newcommand{\Bern}{B}
+\newcommand{\floor}[1]{\left\lfloor #1\right\rfloor}
+
+\title{An Elementary Voronoi Proof of the Unrestricted Kummer Congruence for Bernoulli Numbers}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section*{Purpose}
+
+This note proves the Bernoulli congruence needed in the irregular-prime
+argument, without using $p$-adic $L$-functions, class field theory,
+Chebotarev, Hilbert symbols, or cyclotomic units.  The proof is the classical
+Voronoi proof of Kummer's congruence, but written carefully enough to remove
+side conditions such as $p\nmid m$ or $p\nmid m+1$.
+
+The main theorem is the following.
+
+\begin{theorem}[Kummer congruence for $\Bern_m/m$]\label{thm:kummer}
+Let $p\ge 5$ be prime.  Let $m,n>0$ be even integers.  Assume
+\[
+  m\equiv n \pmod {p-1}
+  \qquad\text{and}\qquad
+  (p-1)\nmid n.
+\]
+Then $\Bern_m/m$ and $\Bern_n/n$ are $p$-integral and
+\[
+  \frac{\Bern_m}{m}\equiv \frac{\Bern_n}{n}\pmod p.
+\]
+Equivalently,
+\[
+  \frac{\Bern_m}{m}-\frac{\Bern_n}{n}\in p\Z_{(p)}.
+\]
+\end{theorem}
+
+The important point is that no hypothesis like $p\nmid m$, $p\nmid n$,
+$p\nmid m+1$, or $p\nmid n+1$ is present.  This is exactly what is needed when
+large indices such as $m=p r+1$ or $m=r+1$ may be divisible by $p$.
+
+We also extract the special comparison that often appears as Diekmann's
+Corollary 34.
+
+\begin{corollary}[The comparison $\Bern_{pr+1}$ versus $\Bern_{r+1}/(r+1)$]
+\label{cor:pr-plus-one}
+Let $p\ge 5$ be prime.  Let $r>0$ be odd and assume
+\[
+  (p-1)\nmid r+1.
+\]
+Then
+\[
+  \Bern_{pr+1}\equiv \frac{\Bern_{r+1}}{r+1}\pmod p.
+\]
+Equivalently,
+\[
+  \Bern_{pr+1}-\frac{\Bern_{r+1}}{r+1}\in p\Z_{(p)}.
+\]
+\end{corollary}
+
+\section{Conventions and basic inputs}
+
+We use the Bernoulli numbers defined by
+\[
+  \frac{T}{e^T-1}=\sum_{n\ge 0}\Bern_n\frac{T^n}{n!},
+\]
+so that
+\[
+  \Bern_1=-\frac12.
+\]
+
+For rational numbers $x,y\in\Q$, we write
+\[
+  x\equiv y\pmod p
+\]
+if
+\[
+  x-y\in p\Z_{(p)},
+\]
+where
+\[
+  \Z_{(p)}=\left\{\frac ab\in\Q: p\nmid b\right\}
+\]
+is the localization of $\Z$ at $p$.
+
+We use two standard elementary facts about Bernoulli numbers.
+
+\begin{theorem}[Faulhaber's formula]\label{thm:faulhaber}
+For $h\ge 1$ and $N\ge 1$,
+\[
+  \sum_{x=1}^{N-1}x^h
+  =
+  \frac{1}{h+1}
+  \sum_{j=0}^{h}
+  {h+1\choose j}\Bern_j N^{h+1-j}.
+\]
+\end{theorem}
+
+\begin{theorem}[von Staudt--Clausen denominator consequence]\label{thm:vsc}
+For every $j\ge 0$ and every prime $p$, one has
+\[
+  v_p(\Bern_j)\ge -1.
+\]
+Moreover, if $j>0$ is even, then
+\[
+  v_p(\Bern_j)=-1
+  \quad\Longleftrightarrow\quad
+  (p-1)\mid j.
+\]
+In particular, if $j>0$ is even and $(p-1)\nmid j$, then
+\[
+  \Bern_j\in \Z_{(p)}.
+\]
+\end{theorem}
+
+\begin{remark}
+For the proof below, we only need the displayed consequences of
+von Staudt--Clausen.  If a formal development already has
+von Staudt--Clausen, this theorem is the only Bernoulli-denominator input.
+\end{remark}
+
+\section{A strong power-sum congruence}
+
+The key technical point is that the usual congruence
+\[
+  \sum_{x=1}^{p-1}x^h\equiv p\Bern_h\pmod {p^2}
+\]
+is not strong enough when $p\mid h$.  To divide by $h$ later in Voronoi's
+argument, we need the stronger modulus $h p^2$.
+
+\begin{lemma}[A valuation estimate]\label{lem:valuation-estimate}
+Let $p\ge 5$ be prime and let $s\ge 2$.  Then
+\[
+  s-v_p(s)-v_p(s+1)\ge 2.
+\]
+\end{lemma}
+
+\begin{proof}
+The cases $s=2,3,4$ are immediate, since $p\ge5$.
+Assume $s\ge5$.  For any integer $N\ge4$, we have
+\[
+  v_p(N)\le \frac{N}{4}.
+\]
+Indeed, if $v_p(N)=0$ this is clear.  If $v_p(N)=e\ge1$, then
+$p^e\mid N$, so $5^e\le p^e\le N$, and $4e\le 5^e\le N$.
+Therefore
+\[
+  v_p(s)+v_p(s+1)
+  \le \frac{s}{4}+\frac{s+1}{4}
+  =\frac{2s+1}{4}.
+\]
+For $s\ge5$,
+\[
+  \frac{2s+1}{4}\le s-2.
+\]
+Hence
+\[
+  v_p(s)+v_p(s+1)\le s-2,
+\]
+which is equivalent to the desired inequality.
+\end{proof}
+
+\begin{lemma}[Strong power-sum congruence]\label{lem:power-sum-strong}
+Let $p\ge5$ be prime.  Let $h>0$ be even and assume
+\[
+  (p-1)\nmid h.
+\]
+Put
+\[
+  S_h(p)=\sum_{x=1}^{p-1}x^h.
+\]
+Then
+\[
+  S_h(p)-p\Bern_h\in h p^2\Z_{(p)}.
+\]
+Equivalently,
+\[
+  S_h(p)\equiv p\Bern_h\pmod {h p^2}.
+\]
+\end{lemma}
+
+\begin{proof}
+By Faulhaber's formula with $N=p$,
+\[
+  S_h(p)
+  =
+  \frac{1}{h+1}
+  \sum_{j=0}^{h}{h+1\choose j}\Bern_j p^{h+1-j}.
+\]
+The term with $j=h$ is exactly
+\[
+  p\Bern_h.
+\]
+It remains to show that every term with $j<h$ lies in $h p^2\Z_{(p)}$.
+
+Write $j=h-s$, where $1\le s\le h$.  Then the corresponding term is
+\[
+  T_s
+  =
+  {h\choose s}\frac{\Bern_{h-s}}{s+1}p^{s+1},
+\]
+because
+\[
+  \frac{1}{h+1}{h+1\choose h-s}
+  =
+  \frac{1}{s+1}{h\choose s}.
+\]
+
+First consider $s=1$.  Then
+\[
+  T_1=\frac{h}{2}\Bern_{h-1}p^2.
+\]
+If $h>2$, then $h-1>1$ is odd, so $\Bern_{h-1}=0$.
+If $h=2$, then $\Bern_{1}=-1/2$, and
+\[
+  T_1=-\frac{h p^2}{4}\in h p^2\Z_{(p)},
+\]
+since $p\ge5$.
+
+Now let $s\ge2$.  By von Staudt--Clausen,
+\[
+  v_p(\Bern_{h-s})\ge -1.
+\]
+Also
+\[
+  {h\choose s}=\frac{h}{s}{h-1\choose s-1},
+\]
+so
+\[
+  v_p\left({h\choose s}\right)
+  \ge v_p(h)-v_p(s).
+\]
+Therefore
+\[
+\begin{aligned}
+  v_p(T_s)
+  &\ge
+  v_p(h)-v_p(s)+(s+1)-v_p(s+1)-1 \\
+  &=
+  v_p(h)+s-v_p(s)-v_p(s+1).
+\end{aligned}
+\]
+By Lemma~\ref{lem:valuation-estimate},
+\[
+  s-v_p(s)-v_p(s+1)\ge2.
+\]
+Hence
+\[
+  v_p(T_s)\ge v_p(h)+2,
+\]
+which is precisely
+\[
+  T_s\in h p^2\Z_{(p)}.
+\]
+Thus every term except $p\Bern_h$ lies in $hp^2\Z_{(p)}$, and the lemma follows.
+\end{proof}
+
+\section{Voronoi's congruence without auxiliary side conditions}
+
+We now prove the congruence that removes the unwanted restrictions such as
+$p\nmid h$ or $p\nmid h+1$.
+
+\begin{theorem}[Voronoi congruence]\label{thm:voronoi}
+Let $p\ge5$ be prime.  Let $h>0$ be even and assume
+\[
+  (p-1)\nmid h.
+\]
+Let $a\in\Z$ be prime to $p$.  For $1\le x\le p-1$, set
+\[
+  q_x=\floor{\frac{a x}{p}}.
+\]
+Then
+\[
+  \boxed{
+  (a^h-1)\frac{\Bern_h}{h}
+  \equiv
+  a^{h-1}\sum_{x=1}^{p-1}q_x x^{h-1}
+  \pmod p.}
+\]
+In particular, if $a^h\not\equiv1\pmod p$, then $\Bern_h/h\in\Z_{(p)}$.
+\end{theorem}
+
+\begin{proof}
+For $1\le x\le p-1$, define the least positive residue
+\[
+  r_x=a x-pq_x.
+\]
+Since $a$ is prime to $p$, the numbers $r_x$ are a permutation of
+$1,2,\dots,p-1$.  Hence
+\[
+  \sum_{x=1}^{p-1}r_x^h=S_h(p).
+\]
+
+We claim that, for each $x$,
+\[
+  r_x^h
+  \equiv
+  a^h x^h-hp a^{h-1}q_x x^{h-1}
+  \pmod {h p^2\Z_{(p)}}.
+\]
+Indeed, expanding
+\[
+  r_x^h=(a x-pq_x)^h
+\]
+by the binomial theorem, the terms of order $0$ and $1$ in $pq_x$ are exactly
+\[
+  a^h x^h
+  \quad\text{and}\quad
+  -hp a^{h-1}q_x x^{h-1}.
+\]
+For a term of order $\nu\ge2$, the coefficient contains
+\[
+  {h\choose \nu}p^\nu.
+\]
+Since
+\[
+  {h\choose \nu}=\frac{h}{\nu}{h-1\choose \nu-1},
+\]
+we have
+\[
+  v_p\left({h\choose \nu}p^\nu\right)
+  \ge v_p(h)-v_p(\nu)+\nu.
+\]
+For $\nu\ge2$ and $p\ge5$, one has
+\[
+  \nu-v_p(\nu)\ge2.
+\]
+Therefore every higher-order term is in $h p^2\Z_{(p)}$.
+
+Summing over $x$ gives
+\[
+  S_h(p)
+  \equiv
+  a^h S_h(p)-hp a^{h-1}\sum_{x=1}^{p-1}q_xx^{h-1}
+  \pmod {h p^2\Z_{(p)}}.
+\]
+Thus
+\[
+  (a^h-1)S_h(p)
+  \equiv
+  hp a^{h-1}\sum_{x=1}^{p-1}q_xx^{h-1}
+  \pmod {h p^2\Z_{(p)}}.
+\]
+By Lemma~\ref{lem:power-sum-strong},
+\[
+  S_h(p)\equiv p\Bern_h\pmod {h p^2\Z_{(p)}}.
+\]
+Substituting this congruence yields
+\[
+  (a^h-1)p\Bern_h
+  \equiv
+  hp a^{h-1}\sum_{x=1}^{p-1}q_xx^{h-1}
+  \pmod {h p^2\Z_{(p)}}.
+\]
+Dividing by $hp$ in $\Q$ gives
+\[
+  (a^h-1)\frac{\Bern_h}{h}
+  \equiv
+  a^{h-1}\sum_{x=1}^{p-1}q_xx^{h-1}
+  \pmod p.
+\]
+This proves the congruence.
+
+If $a^h\not\equiv1\pmod p$, then $a^h-1$ is a unit in $\Z_{(p)}$.
+The right-hand side is an integer, so the congruence implies that
+$\Bern_h/h\in\Z_{(p)}$.
+\end{proof}
+
+\section{Kummer's congruence}
+
+\begin{theorem}[Unrestricted Kummer congruence]\label{thm:kummer-proof}
+Let $p\ge5$ be prime.  Let $m,n>0$ be even integers.  Assume
+\[
+  m\equiv n\pmod {p-1}
+  \qquad\text{and}\qquad
+  (p-1)\nmid n.
+\]
+Then
+\[
+  \frac{\Bern_m}{m},\frac{\Bern_n}{n}\in\Z_{(p)}
+\]
+and
+\[
+  \frac{\Bern_m}{m}\equiv\frac{\Bern_n}{n}\pmod p.
+\]
+\end{theorem}
+
+\begin{proof}
+Because $m\equiv n\pmod {p-1}$, the condition $(p-1)\nmid n$ also implies
+\[
+  (p-1)\nmid m.
+\]
+Choose an integer $a$ whose image in $\Fp^\times$ is a generator.  Then
+\[
+  a^m\not\equiv1\pmod p
+  \qquad\text{and}\qquad
+  a^n\not\equiv1\pmod p.
+\]
+By Voronoi's congruence,
+\[
+  (a^m-1)\frac{\Bern_m}{m}
+  \equiv
+  a^{m-1}\sum_{x=1}^{p-1}\floor{\frac{a x}{p}}x^{m-1}
+  \pmod p,
+\]
+and
+\[
+  (a^n-1)\frac{\Bern_n}{n}
+  \equiv
+  a^{n-1}\sum_{x=1}^{p-1}\floor{\frac{a x}{p}}x^{n-1}
+  \pmod p.
+\]
+Since
+\[
+  m\equiv n\pmod {p-1},
+\]
+we have
+\[
+  a^m\equiv a^n\pmod p,
+  \qquad
+  a^{m-1}\equiv a^{n-1}\pmod p,
+\]
+and for every $1\le x\le p-1$,
+\[
+  x^{m-1}\equiv x^{n-1}\pmod p.
+\]
+Thus the right-hand sides of the two Voronoi congruences are equal modulo
+$p$, and the factors $a^m-1$ and $a^n-1$ are equal nonzero elements of
+$\Fp$.  Therefore
+\[
+  \frac{\Bern_m}{m}\equiv\frac{\Bern_n}{n}\pmod p.
+\]
+The $p$-integrality of both quotients follows from the final assertion of
+Theorem~\ref{thm:voronoi}, since $a^m-1$ and $a^n-1$ are units modulo $p$.
+\end{proof}
+
+This is exactly Theorem~\ref{thm:kummer}.
+
+\section{The special comparison $\Bern_{pr+1}\equiv\Bern_{r+1}/(r+1)$}
+
+We now prove the exact corollary needed in the infinitude argument.
+
+\begin{corollary}\label{cor:special}
+Let $p\ge5$ be prime.  Let $r>0$ be odd and assume
+\[
+  (p-1)\nmid r+1.
+\]
+Then
+\[
+  \Bern_{pr+1}\equiv \frac{\Bern_{r+1}}{r+1}\pmod p.
+\]
+\end{corollary}
+
+\begin{proof}
+Set
+\[
+  m=pr+1,
+  \qquad
+  n=r+1.
+\]
+Since $p$ and $r$ are both odd, $pr$ is odd, so $m=pr+1$ is even.
+Also $n=r+1$ is even.  Moreover,
+\[
+  m=pr+1\equiv r+1=n\pmod {p-1},
+\]
+because $p\equiv1\pmod {p-1}$.  By hypothesis,
+\[
+  (p-1)\nmid n.
+\]
+Therefore Theorem~\ref{thm:kummer-proof} gives
+\[
+  \frac{\Bern_{pr+1}}{pr+1}
+  \equiv
+  \frac{\Bern_{r+1}}{r+1}
+  \pmod p.
+\]
+But
+\[
+  pr+1\equiv1\pmod p,
+\]
+so multiplication by $(pr+1)^{-1}$ is the same as multiplication by $1$
+modulo $p$.  Hence
+\[
+  \frac{\Bern_{pr+1}}{pr+1}
+  \equiv
+  \Bern_{pr+1}
+  \pmod p.
+\]
+Combining these congruences gives
+\[
+  \Bern_{pr+1}
+  \equiv
+  \frac{\Bern_{r+1}}{r+1}
+  \pmod p.
+\]
+\end{proof}
+
+\section{Lean-facing theorem statements}
+
+The main theorem should be formalized as an unrestricted Kummer congruence,
+not as a Voronoi theorem with auxiliary side conditions.
+
+A possible target statement is:
+\[
+\begin{gathered}
+  p\ge5,\quad p\text{ prime},\quad m,n>0,\quad m,n\text{ even},\\
+  m\equiv n\pmod {p-1},\quad (p-1)\nmid n
+\end{gathered}
+\]
+implies
+\[
+  \exists z\in\Z_{(p)},\qquad
+  \frac{\Bern_m}{m}-\frac{\Bern_n}{n}=p z.
+\]
+
+The special corollary should be stated as:
+\[
+\begin{gathered}
+  p\ge5,\quad p\text{ prime},\quad r>0,\quad r\text{ odd},\quad (p-1)\nmid r+1
+\end{gathered}
+\]
+implies
+\[
+  \exists z\in\Z_{(p)},\qquad
+  \Bern_{pr+1}-\frac{\Bern_{r+1}}{r+1}=p z.
+\]
+
+The dependency graph is:
+\[
+\boxed{\text{Faulhaber}}
+\quad+
+\boxed{\text{von Staudt--Clausen denominator bound}}
+\Longrightarrow
+\boxed{S_h(p)\equiv p\Bern_h\pmod {hp^2}}
+\]
+\[
+\Longrightarrow
+\boxed{\text{Voronoi congruence without side conditions}}
+\Longrightarrow
+\boxed{\text{Kummer congruence}}
+\Longrightarrow
+\boxed{\Bern_{pr+1}\equiv\Bern_{r+1}/(r+1)\pmod p}.
+\]
+
+This proof is elementary: it uses only Bernoulli power-sum formulas,
+von Staudt--Clausen, the binomial theorem, and finite-field cyclicity.
+It does not use $p$-adic $L$-functions, class field theory, Chebotarev,
+cyclotomic units, Hilbert symbols, or reciprocity laws.
+
+\end{document}

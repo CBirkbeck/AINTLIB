@@ -1,0 +1,615 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\Z}{\mathbf Z}
+\newcommand{\Q}{\mathbf Q}
+\newcommand{\Fp}{\mathbf F_p}
+\newcommand{\ord}{\operatorname{ord}}
+\newcommand{\num}{\operatorname{num}}
+\newcommand{\den}{\operatorname{den}}
+\newcommand{\lcm}{\operatorname{lcm}}
+\newcommand{\vp}{v_p}
+\newcommand{\vl}{v_\ell}
+
+\title{A Bernoulli-Congruence Proof of the Infinitude of Irregular Primes}
+\author{Formalization-oriented note}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This note gives a self-contained, formalization-oriented proof that there are infinitely many irregular primes, assuming only standard Bernoulli-number congruences: von Staudt--Clausen and the unrestricted Kummer congruence for $B_m/m$.  No $p$-adic $L$-functions, class field theory, Chebotarev theorem, Hilbert symbols, or cyclotomic-unit regulators are used in the infinitude argument.  The note also isolates the exact congruence needed in Diekmann/Carlitz-style proofs, namely
+\[
+  B_{pr+1} \equiv \frac{B_{r+1}}{r+1} \pmod p
+\]
+for $r>0$ odd and $(p-1)\nmid r+1$.
+\end{abstract}
+
+\tableofcontents
+
+\section{Conventions and statement of the goal}
+
+We use the Bernoulli numbers $B_n\in\Q$ defined by
+\[
+  \frac{t}{e^t-1}=\sum_{n\ge 0}B_n\frac{t^n}{n!}.
+\]
+Thus $B_1=-1/2$, and $B_n=0$ for odd $n>1$.
+
+For a rational number $x\ne0$, write
+\[
+  x=\frac{a}{b},\qquad a\in\Z,
+  \quad b\in\Z_{>0},\quad \gcd(a,b)=1.
+\]
+We write
+\[
+  \num(x)=a,
+  \qquad
+  \den(x)=b.
+\]
+For a prime $\ell$, let $v_\ell(x)$ be the usual additive valuation on $\Q$, normalized by $v_\ell(\ell)=1$.
+
+\begin{definition}[Irregular prime]
+An odd prime $\ell$ is called \emph{irregular} if there exists an even integer $m$ with
+\[
+  2\le m\le \ell-3
+\]
+such that
+\[
+  \ell\mid \num(B_m).
+\]
+Equivalently, $\ell$ divides the numerator of one of
+\[
+  B_2,B_4,\dots,B_{\ell-3}.
+\]
+\end{definition}
+
+The aim is to prove the following theorem.
+
+\begin{theorem}[Infinitely many irregular primes]
+There are infinitely many irregular primes.
+\end{theorem}
+
+The proof below is the Carlitz-style Bernoulli-congruence argument.  The only serious Bernoulli congruence input is the unrestricted Kummer congruence for $B_m/m$, stated explicitly in Section~\ref{sec:inputs}.
+
+\section{The Bernoulli congruence inputs}\label{sec:inputs}
+
+The proof uses two standard congruence theorems for Bernoulli numbers.
+
+\subsection{Von Staudt--Clausen}
+
+\begin{theorem}[von Staudt--Clausen]
+For every positive even integer $m$,
+\[
+  B_m+\sum_{\ell-1\mid m}\frac{1}{\ell}\in\Z,
+\]
+where the sum is over all primes $\ell$ such that $\ell-1\mid m$.
+\end{theorem}
+
+The following consequences are the only ones used later.
+
+\begin{corollary}[Denominator consequence]
+Let $m>0$ be even and let $\ell$ be prime.  If
+\[
+  \ell-1\mid m,
+\]
+then
+\[
+  v_\ell(B_m)=-1.
+\]
+If
+\[
+  \ell-1\nmid m,
+\]
+then
+\[
+  v_\ell(B_m)\ge0.
+\]
+\end{corollary}
+
+\begin{proof}
+The von Staudt--Clausen theorem says that the fractional part of $B_m$ is exactly
+\[
+  -\sum_{\ell-1\mid m}\frac{1}{\ell}
+\]
+modulo $\Z$.  In particular, a prime $\ell$ appears in the denominator of $B_m$ if and only if $\ell-1\mid m$, and in that case it appears to the first power.  Hence $v_\ell(B_m)=-1$ if $\ell-1\mid m$, and $v_\ell(B_m)\ge0$ otherwise.
+\end{proof}
+
+\subsection{Unrestricted Kummer congruence}
+
+This is the essential congruence input.
+
+\begin{theorem}[Kummer congruence for $B_m/m$]\label{thm:kummer}
+Let $\ell$ be an odd prime.  Let $m,n$ be positive even integers.  Assume
+\[
+  m\equiv n\pmod{\ell-1}
+\]
+and
+\[
+  \ell-1\nmid m.
+\]
+Then both $B_m/m$ and $B_n/n$ are $\ell$-integral, and
+\[
+  \frac{B_m}{m}\equiv \frac{B_n}{n}\pmod \ell.
+\]
+Equivalently,
+\[
+  v_\ell\left(\frac{B_m}{m}-\frac{B_n}{n}\right)>0.
+\]
+\end{theorem}
+
+\begin{remark}[Why the unrestricted form matters]
+The theorem has no side conditions such as $\ell\nmid m+1$ or $\ell\nmid n+1$.  Those conditions often appear in elementary Voronoi/Faulhaber proofs as artifacts of the method.  They are not part of the true Kummer congruence and are unusable in the infinitude argument, where the indices are intentionally chosen large and may have high $\ell$-adic divisibility.
+\end{remark}
+
+\section{A useful Kummer congruence corollary}\label{sec:dieckmann-corollary}
+
+The following is the concrete congruence often needed in Diekmann/Carlitz-style infinitude arguments.
+
+\begin{proposition}[The $pr+1$ comparison]\label{prop:prplusone}
+Let $p$ be an odd prime.  Let $r>0$ be odd and assume
+\[
+  (p-1)\nmid r+1.
+\]
+Then
+\[
+  B_{pr+1}\equiv \frac{B_{r+1}}{r+1}\pmod p,
+\]
+in the sense that both sides are $p$-integral and their difference lies in $p\Z_{(p)}$.
+\end{proposition}
+
+\begin{proof}
+Set
+\[
+  m=pr+1,
+  \qquad
+  n=r+1.
+\]
+Since $p$ and $r$ are odd, $pr$ is odd, so $m=pr+1$ is even.  Since $r$ is odd, $n=r+1$ is also even.  Both are positive.
+
+Because
+\[
+  p\equiv 1\pmod{p-1},
+\]
+we have
+\[
+  m=pr+1\equiv r+1=n\pmod{p-1}.
+\]
+By hypothesis,
+\[
+  (p-1)\nmid n.
+\]
+Therefore Kummer's congruence, Theorem~\ref{thm:kummer}, gives
+\[
+  \frac{B_m}{m}\equiv \frac{B_n}{n}\pmod p.
+\]
+That is,
+\[
+  \frac{B_{pr+1}}{pr+1}\equiv \frac{B_{r+1}}{r+1}\pmod p.
+\]
+But
+\[
+  pr+1\equiv 1\pmod p,
+\]
+so
+\[
+  \frac{1}{pr+1}\equiv 1\pmod p.
+\]
+Hence
+\[
+  \frac{B_{pr+1}}{pr+1}\equiv B_{pr+1}\pmod p.
+\]
+Combining the two congruences gives
+\[
+  B_{pr+1}\equiv \frac{B_{r+1}}{r+1}\pmod p.
+\]
+\end{proof}
+
+\begin{remark}[Formalization note]
+A Lean theorem corresponding to Proposition~\ref{prop:prplusone} should not be proved by the old Voronoi route with hypotheses $p\nmid r+1$ or $p\nmid r+2$.  It is a direct corollary of the unrestricted Kummer congruence for $B_m/m$.
+\end{remark}
+
+\section{Irregular primes and numerators of $B_m/m$}
+
+The next lemma is the key bridge between Bernoulli congruences and irregular primes.
+
+\begin{lemma}[Numerators of $B_m/m$ detect irregularity]\label{lem:detect-irregular}
+Let $\ell$ be an odd prime.  Then $\ell$ is irregular if and only if there exists a positive even integer $m$ such that
+\[
+  \ell\mid \num\left(\frac{B_m}{m}\right).
+\]
+\end{lemma}
+
+\begin{proof}
+First suppose $\ell$ is irregular.  Then there is an even $m_0$ with
+\[
+  2\le m_0\le \ell-3
+\]
+and
+\[
+  \ell\mid \num(B_{m_0}).
+\]
+Since $m_0<\ell$, the integer $m_0$ is a unit modulo $\ell$.  Therefore dividing by $m_0$ does not remove the factor $\ell$ from the numerator, and
+\[
+  \ell\mid \num\left(\frac{B_{m_0}}{m_0}\right).
+\]
+
+Conversely, suppose there exists a positive even integer $m$ such that
+\[
+  \ell\mid \num\left(\frac{B_m}{m}\right).
+\]
+Equivalently,
+\[
+  v_\ell\left(\frac{B_m}{m}\right)>0.
+\]
+We first show that
+\[
+  \ell-1\nmid m.
+\]
+Indeed, if $\ell-1\mid m$, then by von Staudt--Clausen
+\[
+  v_\ell(B_m)=-1.
+\]
+Thus
+\[
+  v_\ell\left(\frac{B_m}{m}\right)
+  =v_\ell(B_m)-v_\ell(m)
+  =-1-v_\ell(m)<0,
+\]
+contradicting $v_\ell(B_m/m)>0$.
+
+Therefore $\ell-1\nmid m$.  Since $m$ is even, its residue class modulo $\ell-1$ is an even nonzero residue class.  Thus there is a unique even integer $m_0$ with
+\[
+  2\le m_0\le \ell-3
+\]
+and
+\[
+  m_0\equiv m\pmod{\ell-1}.
+\]
+Here, if $\ell=3$, there is no such residue, because every positive even integer is divisible by $\ell-1=2$; this case was already excluded by $\ell-1\nmid m$.  Hence necessarily $\ell\ge5$.
+
+By Kummer's congruence,
+\[
+  \frac{B_m}{m}\equiv \frac{B_{m_0}}{m_0}\pmod\ell.
+\]
+Since $\ell$ divides the numerator of $B_m/m$, the left-hand side is congruent to $0$ modulo $\ell$.  Hence
+\[
+  \frac{B_{m_0}}{m_0}\equiv0\pmod\ell.
+\]
+Because $m_0<\ell$, $m_0$ is invertible modulo $\ell$.  Also $\ell-1\nmid m_0$, so von Staudt--Clausen implies that $B_{m_0}$ is $\ell$-integral.  Therefore
+\[
+  \ell\mid \num(B_{m_0}).
+\]
+Since $2\le m_0\le\ell-3$, this proves that $\ell$ is irregular.
+\end{proof}
+
+\begin{lemma}[Primes with $\ell-1\mid M$ do not divide the numerator of $B_M/M$]\label{lem:exclude-old}
+Let $M>0$ be even, and let $\ell$ be an odd prime.  If
+\[
+  \ell-1\mid M,
+\]
+then
+\[
+  \ell\nmid \num\left(\frac{B_M}{M}\right).
+\]
+\end{lemma}
+
+\begin{proof}
+By von Staudt--Clausen,
+\[
+  v_\ell(B_M)=-1.
+\]
+Therefore
+\[
+  v_\ell\left(\frac{B_M}{M}\right)
+  =-1-v_\ell(M)<0.
+\]
+Thus $\ell$ occurs in the denominator of $B_M/M$, not in its numerator.
+\end{proof}
+
+\begin{lemma}[Numerator primes of $B_M/M$ are irregular]\label{lem:numer-primes-irreg}
+Let $M>0$ be even.  Write
+\[
+  \frac{|B_M|}{M}=\frac{C_M}{D_M}
+\]
+in lowest terms with $C_M,D_M\in\Z_{>0}$.  If an odd prime $\ell$ divides $C_M$, then $\ell$ is irregular.
+\end{lemma}
+
+\begin{proof}
+The condition $\ell\mid C_M$ is equivalent to
+\[
+  v_\ell\left(\frac{B_M}{M}\right)>0.
+\]
+By Lemma~\ref{lem:detect-irregular}, $\ell$ is irregular.
+\end{proof}
+
+\section{A parity lemma for the numerator}
+
+\begin{lemma}[The numerator of $|B_M|/M$ is odd]\label{lem:odd-num}
+Let $M>0$ be even and write
+\[
+  \frac{|B_M|}{M}=\frac{C_M}{D_M}
+\]
+in lowest terms with $C_M,D_M\in\Z_{>0}$.  Then $C_M$ is odd.
+\end{lemma}
+
+\begin{proof}
+Since $M$ is positive and even, the condition $2-1=1\mid M$ holds.  By von Staudt--Clausen, the prime $2$ appears in the denominator of $B_M$ and appears only to the first power.  Hence the numerator of $B_M$, in lowest terms, is odd.
+
+Now dividing $B_M$ by $M$ gives
+\[
+  \frac{B_M}{M}.
+\]
+Reducing this fraction to lowest terms can only divide the old numerator by a common divisor with the enlarged denominator.  Therefore the final numerator $C_M$ divides the numerator of $B_M$ up to sign.  Since the latter is odd, $C_M$ is odd.
+\end{proof}
+
+\section{A size estimate for Bernoulli numbers}
+
+The congruence argument produces a numerator $C_M$ whose prime divisors are irregular and new.  We still need to know that $C_M>1$, so that it has a prime divisor.  This is the only archimedean estimate in the proof.
+
+\begin{lemma}[Growth estimate]\label{lem:growth}
+For every even integer $M\ge49$,
+\[
+  \frac{|B_M|}{M}>1.
+\]
+\end{lemma}
+
+\begin{proof}
+Euler's formula gives, for even $M>0$,
+\[
+  |B_M|=\frac{2M!}{(2\pi)^M}\zeta(M).
+\]
+Thus
+\[
+  \frac{|B_M|}{M}
+  =\frac{2(M-1)!}{(2\pi)^M}\zeta(M).
+\]
+Since $\zeta(M)>1$,
+\[
+  \frac{|B_M|}{M}>
+  \frac{2(M-1)!}{(2\pi)^M}.
+\]
+Using the elementary estimates
+\[
+  (M-1)!>\left(\frac{M-1}{e}\right)^{M-1},
+  \qquad e<3,
+  \qquad \pi<4,
+\]
+we get
+\[
+  \frac{|B_M|}{M}
+  >\frac{2\left(\frac{M-1}{3}\right)^{M-1}}{8^M}.
+\]
+If $M\ge49$, then
+\[
+  \frac{M-1}{3}\ge16.
+\]
+Therefore
+\[
+  \frac{|B_M|}{M}
+  >\frac{2\cdot 16^{M-1}}{8^M}
+  =\frac{2\cdot 2^{4M-4}}{2^{3M}}
+  =2^{M-3}>1.
+\]
+This proves the estimate.
+\end{proof}
+
+\begin{remark}[Formalization note]
+For Lean, Lemma~\ref{lem:growth} can be replaced by any already available explicit lower bound proving $|B_M|/M>1$ for all sufficiently large even $M$.  The exact constant is not important.  In the main proof below, $M\ge690$, so there is enormous room in the estimate.
+\end{remark}
+
+\section{The seed irregular prime}
+
+We use the classical value
+\[
+  B_{12}=-\frac{691}{2730}.
+\]
+
+\begin{lemma}[The seed]
+The prime $691$ is irregular.
+\end{lemma}
+
+\begin{proof}
+The integer $12$ is even and satisfies
+\[
+  2\le 12\le 691-3.
+\]
+Since
+\[
+  B_{12}=-\frac{691}{2730},
+\]
+we have
+\[
+  691\mid \num(B_{12}).
+\]
+Therefore $691$ is irregular.
+\end{proof}
+
+\section{Infinitude of irregular primes}
+
+We now prove the main theorem.
+
+\begin{theorem}
+There are infinitely many irregular primes.
+\end{theorem}
+
+\begin{proof}
+It is enough to show that every finite set of irregular primes misses another irregular prime.
+
+Let $S$ be a finite set of irregular primes.  Define
+\[
+  S_0=S\cup\{691\}.
+\]
+Then $S_0$ is a nonempty finite set of irregular primes.
+
+Define
+\[
+  M=\lcm\{\ell-1:\ell\in S_0\}.
+\]
+Since every $\ell\in S_0$ is an odd prime, each $\ell-1$ is even.  Hence $M$ is even.  Also, since $691\in S_0$,
+\[
+  690=691-1\mid M,
+\]
+so
+\[
+  M\ge690>49.
+\]
+
+Write
+\[
+  \frac{|B_M|}{M}=\frac{C_M}{D_M}
+\]
+in lowest terms, with $C_M,D_M\in\Z_{>0}$.
+
+By Lemma~\ref{lem:growth},
+\[
+  \frac{|B_M|}{M}>1.
+\]
+Therefore
+\[
+  C_M>D_M\ge1,
+\]
+so
+\[
+  C_M>1.
+\]
+By Lemma~\ref{lem:odd-num}, $C_M$ is odd.  Hence $C_M$ has an odd prime divisor.  Choose an odd prime $q$ with
+\[
+  q\mid C_M.
+\]
+
+By Lemma~\ref{lem:numer-primes-irreg}, the prime $q$ is irregular.
+
+We claim that $q\notin S_0$.  Suppose for contradiction that $q\in S_0$.  By the definition of $M$,
+\[
+  q-1\mid M.
+\]
+Then Lemma~\ref{lem:exclude-old} gives
+\[
+  q\nmid \num\left(\frac{B_M}{M}\right).
+\]
+But $C_M$ is exactly the positive numerator of $|B_M|/M$, so this contradicts
+\[
+  q\mid C_M.
+\]
+Therefore
+\[
+  q\notin S_0.
+\]
+Since $S\subseteq S_0$, we also have
+\[
+  q\notin S.
+\]
+Thus for every finite set $S$ of irregular primes, there is an irregular prime outside $S$.  Hence there are infinitely many irregular primes.
+\end{proof}
+
+\section{Lean-oriented theorem dependency summary}
+
+The proof above can be decomposed into the following formalization units.
+
+\subsection*{Input theorems}
+
+\begin{enumerate}[label=\textbf{Input \arabic*.}]
+\item \textbf{von Staudt--Clausen.}
+For positive even $m$,
+\[
+  B_m+\sum_{\ell-1\mid m}\frac1\ell\in\Z.
+\]
+
+\item \textbf{Unrestricted Kummer congruence.}
+For odd prime $\ell$ and positive even $m,n$,
+\[
+  m\equiv n\pmod{\ell-1},\qquad \ell-1\nmid m
+\]
+imply
+\[
+  \frac{B_m}{m}\equiv\frac{B_n}{n}\pmod\ell.
+\]
+
+\item \textbf{Seed value.}
+\[
+  B_{12}=-\frac{691}{2730}.
+\]
+
+\item \textbf{Bernoulli growth.}
+For even $M\ge49$,
+\[
+  |B_M|/M>1.
+\]
+\end{enumerate}
+
+\subsection*{Derived lemmas}
+
+\begin{enumerate}[label=\textbf{Derived \arabic*.}]
+\item \textbf{Irregular iff numerator divisor of $B_m/m$.}
+For odd prime $\ell$,
+\[
+  \ell\text{ irregular}
+  \iff
+  \exists m>0\text{ even},\ \ell\mid\num(B_m/m).
+\]
+
+\item \textbf{Old primes excluded.}
+If $\ell-1\mid M$, then
+\[
+  \ell\nmid\num(B_M/M).
+\]
+
+\item \textbf{Numerator primes are irregular.}
+If an odd prime divides the numerator of $|B_M|/M$, then it is irregular.
+
+\item \textbf{Numerator is odd.}
+For even $M>0$, the numerator of $|B_M|/M$ is odd.
+
+\item \textbf{Finite-set escape.}
+Given finite $S$, set
+\[
+  M=\lcm\{\ell-1:\ell\in S\cup\{691\}\}.
+\]
+Then the numerator of $|B_M|/M$ has an odd prime divisor $q$, and this $q$ is irregular and not in $S$.
+\end{enumerate}
+
+\subsection*{Suggested Lean names}
+
+A possible naming scheme is:
+
+\begin{verbatim}
+theorem bernoulli_vpadic_eq_neg_one_of_sub_one_dvd
+
+theorem kummer_congruence_bernoulli_div
+
+theorem bernoulli_pr_plus_one_congr
+
+theorem irregular_iff_exists_prime_dvd_num_bernoulli_div
+
+theorem numerator_prime_irregular_of_dvd_num_bernoulli_div
+
+theorem old_irregular_prime_not_dvd_num_B_M_div_M
+
+theorem numerator_abs_bernoulli_div_odd
+
+theorem bernoulli_abs_div_gt_one_large_even
+
+theorem exists_irregular_prime_notin_finite_set
+
+theorem infinitely_many_irregular_primes
+\end{verbatim}
+
+\section{Conclusion}
+
+The proof of infinitude is elementary once the unrestricted Kummer congruence is available.  It does not use $p$-adic $L$-functions, class field theory, Chebotarev, Hilbert symbols, Artin reciprocity, or cyclotomic-unit regulators.  The genuinely indispensable congruence input is the side-condition-free Kummer congruence for $B_m/m$.  The old Voronoi lemmas with auxiliary divisibility hypotheses are insufficient for this argument.
+
+\end{document}

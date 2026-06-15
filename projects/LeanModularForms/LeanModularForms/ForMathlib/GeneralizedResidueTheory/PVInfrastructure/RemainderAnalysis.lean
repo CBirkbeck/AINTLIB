@@ -1,0 +1,192 @@
+/-
+Copyright (c) 2024. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors:
+-/
+import Mathlib.Analysis.Calculus.ContDiff.Defs
+import Mathlib.Analysis.Normed.Operator.NormedSpace
+import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
+import LeanModularForms.ForMathlib.GeneralizedResidueTheory.PVInfrastructure.GammaAnalysis
+
+/-!
+# PV Infrastructure: Remainder Analysis
+
+Taylor expansion and C² remainder bounds for the PV integrand.
+The key result `remainder_bounded_of_C2` shows that the remainder
+`r(t) = (γ-γ₀)⁻¹γ' - (t-t₀)⁻¹` is bounded (O(1)) near t₀.
+
+## Main Results
+
+* `remainder_bounded_of_C2` — bounded remainder from C² smoothness
+* `numerator_quadratic_bound` — numerator is O(|t-t₀|²)
+* `quadratic_approx_of_contDiffAt_two` — quadratic Taylor approximation
+-/
+
+open Complex MeasureTheory Set Filter Topology
+open scoped Real Interval
+
+noncomputable section
+
+/-- C¹ regularity of `deriv γ` from C² regularity of `γ`. -/
+lemma contDiffAt_one_deriv_of_contDiffAt_two {γ : ℝ → ℂ} {t₀ : ℝ}
+    (hγ_C2 : ContDiffAt ℝ 2 γ t₀) : ContDiffAt ℝ 1 (deriv γ) t₀ := by
+  have hfderiv : ContDiffAt ℝ 1 (fderiv ℝ γ) t₀ :=
+    hγ_C2.fderiv_right (by norm_num)
+  have h := hfderiv.clm_apply (contDiffAt_const (c := (1 : ℝ)))
+  simp only [fderiv_apply_one_eq_deriv] at h
+  exact h
+
+/-- Lipschitz-type bound on `deriv γ` deviation from C². -/
+lemma deriv_deviation_bound_of_C2 {γ : ℝ → ℂ} {t₀ : ℝ} {L : ℂ}
+    (hγ_C2 : ContDiffAt ℝ 2 γ t₀) (hγ_deriv : deriv γ t₀ = L) :
+    ∃ K δ, 0 < δ ∧ ∀ t, |t - t₀| < δ → ‖deriv γ t - L‖ ≤ K * |t - t₀| := by
+  obtain ⟨K, s, hs_nhds, h_lip⟩ :=
+    (contDiffAt_one_deriv_of_contDiffAt_two hγ_C2).exists_lipschitzOnWith
+  obtain ⟨δ, hδ_pos, hball_sub⟩ := Metric.mem_nhds_iff.mp hs_nhds
+  refine ⟨K, δ, hδ_pos, fun t ht => ?_⟩
+  have h := h_lip.dist_le_mul t
+    (hball_sub (Metric.mem_ball.mpr (by rwa [Real.dist_eq])))
+    t₀ (hball_sub (Metric.mem_ball_self hδ_pos))
+  rwa [dist_eq_norm, hγ_deriv, Real.dist_eq] at h
+
+/-- Quadratic Taylor approximation from C² smoothness. -/
+lemma quadratic_approx_of_contDiffAt_two {γ : ℝ → ℂ} {t₀ : ℝ} {L : ℂ}
+    (hγ_C2 : ContDiffAt ℝ 2 γ t₀) (hγ_deriv : deriv γ t₀ = L) :
+    ∃ K δ, 0 < δ ∧ 0 < K ∧ ∀ t, |t - t₀| < δ →
+      ‖γ t - γ t₀ - (t - t₀) • L‖ ≤ K * |t - t₀| ^ 2 := by
+  obtain ⟨M, δ₁, hδ₁_pos, h_deriv_dev⟩ := deriv_deviation_bound_of_C2 hγ_C2 hγ_deriv
+  have h_evt_diff : ∀ᶠ s in 𝓝 t₀, DifferentiableAt ℝ γ s :=
+    ((hγ_C2.of_le one_le_two).eventually (by simp : (1 : WithTop ℕ∞) ≠ ↑(⊤ : ℕ∞))).mono
+      (fun _ hs => hs.differentiableAt one_ne_zero)
+  obtain ⟨δ₂, hδ₂_pos, h_diff_ball⟩ := Metric.eventually_nhds_iff.mp h_evt_diff
+  let δ := min δ₁ δ₂
+  have hδ_pos : 0 < δ := lt_min hδ₁_pos hδ₂_pos
+  let K := M + 1
+  have hM_nonneg : 0 ≤ M := by
+    have h_t : |(t₀ + δ₁ / 2) - t₀| < δ₁ := by
+      simp [abs_of_pos (half_pos hδ₁_pos), half_lt_self hδ₁_pos]
+    have h_t_pos : 0 < |(t₀ + δ₁ / 2) - t₀| := by
+      simp [abs_of_pos (half_pos hδ₁_pos), half_pos hδ₁_pos]
+    nlinarith [h_deriv_dev (t₀ + δ₁ / 2) h_t, norm_nonneg (deriv γ (t₀ + δ₁ / 2) - L)]
+  have hK_pos : 0 < K := by linarith
+  use K, δ, hδ_pos, hK_pos
+  intro t ht
+  by_cases ht_eq : t = t₀
+  · simp [ht_eq]
+  let f₂ : ℝ → ℂ := fun _ => γ t₀
+  let f₃ : ℝ → ℂ := fun s => (s - t₀) • L
+  let h := fun s => γ s - f₂ s - f₃ s
+  have ht_lt_δ₁ : |t - t₀| < δ₁ := lt_of_lt_of_le ht (min_le_left _ _)
+  have ht_lt_δ₂ : |t - t₀| < δ₂ := lt_of_lt_of_le ht (min_le_right _ _)
+  have h_uIcc_sub_ball : Set.uIcc t₀ t ⊆ Metric.ball t₀ δ₂ := by
+    intro s hs
+    rw [Metric.mem_ball, Real.dist_eq]
+    exact lt_of_le_of_lt (Set.abs_sub_left_of_mem_uIcc hs) ht_lt_δ₂
+  have h_γ_diff_on : ∀ s ∈ Set.uIcc t₀ t, DifferentiableAt ℝ γ s :=
+    fun s hs => h_diff_ball (h_uIcc_sub_ball hs)
+  have h_f₂_diff : ∀ s, DifferentiableAt ℝ f₂ s := fun _ => differentiableAt_const _
+  have h_f₃_diff : ∀ s, DifferentiableAt ℝ f₃ s :=
+    fun _ => (differentiableAt_id.sub (differentiableAt_const _)).smul_const _
+  have h_diff : ∀ s ∈ Set.uIcc t₀ t, DifferentiableAt ℝ h s :=
+    fun s hs => ((h_γ_diff_on s hs).sub (h_f₂_diff s)).sub (h_f₃_diff s)
+  have h_deriv_f₂ : ∀ s, deriv f₂ s = 0 := fun s => deriv_const s (γ t₀)
+  have h_deriv_f₃ : ∀ s, deriv f₃ s = L := fun s => by
+    have h₀ : HasDerivAt f₃ ((1 : ℝ) • L) s :=
+      ((hasDerivAt_id s).sub_const t₀).smul_const L
+    simpa using h₀.deriv
+  have h_deriv : ∀ s ∈ Set.uIcc t₀ t, deriv h s = deriv γ s - L := by
+    intro s hs
+    have hs_diff : DifferentiableAt ℝ γ s := h_γ_diff_on s hs
+    have step2 : deriv (fun s => (γ s - f₂ s) - f₃ s) s =
+        deriv (fun s => γ s - f₂ s) s - deriv f₃ s :=
+      deriv_sub (hs_diff.sub (h_f₂_diff s)) (h_f₃_diff s)
+    have step3 : deriv (fun s => γ s - f₂ s) s = deriv γ s - deriv f₂ s :=
+      deriv_sub hs_diff (h_f₂_diff s)
+    simp only [show h = fun s => (γ s - f₂ s) - f₃ s from rfl, step2, step3,
+      h_deriv_f₂, h_deriv_f₃, sub_zero]
+  have h_at_t₀ : h t₀ = 0 := by simp [h, f₂, f₃]
+  have h_deriv_bound : ∀ s ∈ Set.uIcc t₀ t, ‖deriv h s‖ ≤ M * |t - t₀| := by
+    intro s hs
+    rw [h_deriv s hs]
+    have hs_bound : |s - t₀| ≤ |t - t₀| := Set.abs_sub_left_of_mem_uIcc hs
+    calc ‖deriv γ s - L‖
+        ≤ M * |s - t₀| := h_deriv_dev s (lt_of_le_of_lt hs_bound ht_lt_δ₁)
+      _ ≤ M * |t - t₀| := mul_le_mul_of_nonneg_left hs_bound hM_nonneg
+  have h_bound := Convex.norm_image_sub_le_of_norm_deriv_le h_diff h_deriv_bound
+    (convex_uIcc t₀ t) Set.left_mem_uIcc Set.right_mem_uIcc
+  rw [h_at_t₀, sub_zero, Real.norm_eq_abs] at h_bound
+  calc ‖γ t - γ t₀ - (t - t₀) • L‖
+      = ‖h t‖ := rfl
+    _ ≤ M * |t - t₀| * |t - t₀| := h_bound
+    _ ≤ K * |t - t₀| ^ 2 := by nlinarith [sq_nonneg |t - t₀|]
+
+/-- Numerator quadratic bound for `(t-t₀)γ'(t) - (γt - γt₀)`. -/
+lemma numerator_quadratic_bound {γ : ℝ → ℂ} {t₀ : ℝ} {L : ℂ}
+    (hγ_C2 : ContDiffAt ℝ 2 γ t₀) (hγ_deriv : deriv γ t₀ = L) :
+    ∃ K δ, 0 < δ ∧ ∀ t, |t - t₀| < δ →
+      ‖(↑(t - t₀) : ℂ) * deriv γ t - (γ t - γ t₀)‖ ≤ K * |t - t₀| ^ 2 := by
+  obtain ⟨K₁, δ₁, hδ₁_pos, _, h_quad⟩ := quadratic_approx_of_contDiffAt_two hγ_C2 hγ_deriv
+  obtain ⟨K₂, δ₂, hδ₂_pos, h_deriv⟩ := deriv_deviation_bound_of_C2 hγ_C2 hγ_deriv
+  let δ := min δ₁ δ₂
+  have hδ_pos : 0 < δ := lt_min hδ₁_pos hδ₂_pos
+  refine ⟨K₁ + K₂ + 1, δ, hδ_pos, fun t ht => ?_⟩
+  have ht₁ : |t - t₀| < δ₁ := lt_of_lt_of_le ht (min_le_left _ _)
+  have ht₂ : |t - t₀| < δ₂ := lt_of_lt_of_le ht (min_le_right _ _)
+  have h_identity : (↑(t - t₀) : ℂ) * deriv γ t - (γ t - γ t₀) =
+      (↑(t - t₀) : ℂ) * (deriv γ t - L) - (γ t - γ t₀ - (t - t₀) • L) := by
+    rw [Complex.real_smul]; ring
+  rw [h_identity]
+  have h1 : ‖(↑(t - t₀) : ℂ) * (deriv γ t - L)‖ ≤ |t - t₀| * (K₂ * |t - t₀|) := by
+    rw [norm_mul, Complex.norm_real]
+    exact mul_le_mul_of_nonneg_left (h_deriv t ht₂) (abs_nonneg _)
+  have h2 : ‖γ t - γ t₀ - (t - t₀) • L‖ ≤ K₁ * |t - t₀| ^ 2 := h_quad t ht₁
+  calc ‖(↑(t - t₀) : ℂ) * (deriv γ t - L) - (γ t - γ t₀ - (t - t₀) • L)‖
+      ≤ ‖(↑(t - t₀) : ℂ) * (deriv γ t - L)‖ + ‖γ t - γ t₀ - (t - t₀) • L‖ :=
+        norm_sub_le _ _
+    _ ≤ |t - t₀| * (K₂ * |t - t₀|) + K₁ * |t - t₀| ^ 2 := add_le_add h1 h2
+    _ ≤ (K₁ + K₂ + 1) * |t - t₀| ^ 2 := by nlinarith [sq_nonneg |t - t₀|]
+
+/-- Bounded remainder from C² smoothness. -/
+lemma remainder_bounded_of_C2 {γ : ℝ → ℂ} {t₀ : ℝ} {L : ℂ} (hL : L ≠ 0)
+    (hγ_C2 : ContDiffAt ℝ 2 γ t₀) (hγ_deriv : deriv γ t₀ = L) :
+    ∃ C δ, 0 < δ ∧ ∀ t, 0 < |t - t₀| → |t - t₀| < δ →
+      ‖(γ t - γ t₀)⁻¹ * deriv γ t - (↑(t - t₀))⁻¹‖ ≤ C := by
+  have hL_norm_pos : 0 < ‖L‖ := norm_pos_iff.mpr hL
+  have hγ_hasderiv : HasDerivAt γ L t₀ := by
+    rw [← hγ_deriv]; exact (hγ_C2.differentiableAt two_ne_zero).hasDerivAt
+  obtain ⟨δ₁, hδ₁_pos, h_lower⟩ := gamma_lower_bound_of_hasDerivAt hL hγ_hasderiv
+  obtain ⟨K, δ₂, hδ₂_pos, h_numer⟩ := numerator_quadratic_bound hγ_C2 hγ_deriv
+  let δ := min δ₁ δ₂
+  have hδ_pos : 0 < δ := lt_min hδ₁_pos hδ₂_pos
+  refine ⟨2 * K / ‖L‖, δ, hδ_pos, fun t ht_pos ht_lt => ?_⟩
+  have ht₁ : |t - t₀| < δ₁ := lt_of_lt_of_le ht_lt (min_le_left _ _)
+  have ht₂ : |t - t₀| < δ₂ := lt_of_lt_of_le ht_lt (min_le_right _ _)
+  have h_Δγ_ne : γ t - γ t₀ ≠ 0 := by
+    have h := h_lower t ht_pos ht₁
+    intro heq
+    rw [heq, norm_zero] at h
+    linarith [mul_pos (half_pos hL_norm_pos) ht_pos]
+  have ht_ne : (↑(t - t₀) : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr (abs_pos.mp ht_pos)
+  have h_identity : (γ t - γ t₀)⁻¹ * deriv γ t - (↑(t - t₀))⁻¹ =
+      ((↑(t - t₀) : ℂ) * deriv γ t - (γ t - γ t₀)) / ((γ t - γ t₀) * (↑(t - t₀))) := by
+    field_simp [h_Δγ_ne, ht_ne]
+  rw [h_identity, norm_div]
+  have h_numer_bound : ‖(↑(t - t₀) : ℂ) * deriv γ t - (γ t - γ t₀)‖ ≤ K * |t - t₀| ^ 2 :=
+    h_numer t ht₂
+  have h_denom_lower :
+      (‖L‖ / 2) * |t - t₀| ^ 2 ≤ ‖(γ t - γ t₀) * (↑(t - t₀))‖ := by
+    rw [norm_mul, Complex.norm_real]
+    have h := h_lower t ht_pos ht₁
+    calc (‖L‖ / 2) * |t - t₀| ^ 2
+        = (‖L‖ / 2 * |t - t₀|) * |t - t₀| := by ring
+      _ ≤ ‖γ t - γ t₀‖ * |t - t₀| := mul_le_mul_of_nonneg_right h (abs_nonneg _)
+  have h_sq_pos : 0 < |t - t₀| ^ 2 := sq_pos_of_pos ht_pos
+  have h_K_nonneg : 0 ≤ K * |t - t₀| ^ 2 := le_trans (norm_nonneg _) h_numer_bound
+  have h_d_pos : 0 < (‖L‖ / 2) * |t - t₀| ^ 2 :=
+    mul_pos (half_pos hL_norm_pos) h_sq_pos
+  calc ‖(↑(t - t₀) : ℂ) * deriv γ t - (γ t - γ t₀)‖ / ‖(γ t - γ t₀) * (↑(t - t₀))‖
+      ≤ (K * |t - t₀| ^ 2) / ((‖L‖ / 2) * |t - t₀| ^ 2) :=
+        div_le_div₀ h_K_nonneg h_numer_bound h_d_pos h_denom_lower
+    _ = 2 * K / ‖L‖ := by field_simp
+
+end

@@ -1,0 +1,4 @@
+import LutzNagell.Basic
+import LutzNagell.LutzNagellTheorem.Main
+import LutzNagell.LutzNagellTheorem.GeneralMain
+import LutzNagell.LutzNagellTheorem.GeneralDiscriminant

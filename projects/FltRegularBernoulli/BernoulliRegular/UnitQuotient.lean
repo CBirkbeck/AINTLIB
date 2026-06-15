@@ -1,0 +1,30 @@
+module
+
+public import BernoulliRegular.UnitQuotient.Torsion
+public import BernoulliRegular.UnitQuotient.Components
+public import BernoulliRegular.UnitQuotient.DeltaAction
+public import BernoulliRegular.UnitQuotient.FreeCharacterProfile
+public import BernoulliRegular.UnitQuotient.FreeAction
+public import BernoulliRegular.UnitQuotient.FreeLatticeComparison
+public import BernoulliRegular.UnitQuotient.FreeLatticeComparison.Augmentation
+public import BernoulliRegular.UnitQuotient.FreeLatticeComparison.AugmentationTrace
+public import BernoulliRegular.UnitQuotient.FreeLatticeComparison.ConjugationTrace
+public import BernoulliRegular.UnitQuotient.FreeLatticeComparison.Eigenspaces
+public import BernoulliRegular.UnitQuotient.FreeLatticeComparison.FreeTrace
+public import BernoulliRegular.UnitQuotient.FreeLatticeComparison.ModPRepresentation
+public import BernoulliRegular.UnitQuotient.FreeProjectorRanges
+public import BernoulliRegular.UnitQuotient.GlobalUnitDimension
+public import BernoulliRegular.UnitQuotient.LogEmbeddingAction
+public import BernoulliRegular.UnitQuotient.ModPReduction
+public import BernoulliRegular.UnitQuotient.PermutationCharacters
+public import BernoulliRegular.UnitQuotient.Structure
+public import BernoulliRegular.UnitQuotient.TorsionQuotient
+public import BernoulliRegular.UnitQuotient.TorsionCharacter
+public import BernoulliRegular.UnitQuotient.Vanishing
+
+/-!
+# Unit quotient infrastructure
+
+Umbrella module for the `T040` unit quotient package and the `T041`
+odd-component vanishing interface built on it.
+-/

@@ -1,0 +1,3 @@
+module
+
+public import BernoulliRegular.Reflection.Kummer.CoprimeCharacterSplitting.Part2

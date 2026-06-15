@@ -1,0 +1,3 @@
+module
+
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.DworkFactorization.FlexibleFiniteArtinHasseHomogeneous.Part2
