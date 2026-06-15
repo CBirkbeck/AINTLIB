@@ -18,6 +18,25 @@ follow that section.
   and are worked by the cleanup fleet. The handoff between them is **merging a dev branch into
   `main`**.
 
+## Your working copy — all workers share ONE clone on this machine
+Do **not** clone AINTLIB per worker. Use a **git worktree** per dev branch, so every worker runs in
+parallel off the same `.git`:
+
+    # once, from the main AINTLIB checkout (which stays on `main`):
+    git worktree add ../aintlib-adic   dev/adic-spaces
+    git worktree add ../aintlib-padic  dev/padic
+    git worktree add ../aintlib-hasse  dev/hasse-weil
+
+Each worker then lives in its own directory (`../aintlib-<proj>`) on its own branch — separate files
+and a separate `.lake` build, fully isolated, no clobbering. In your worktree: `lake exe cache get`,
+then build. Commit on your dev branch; PR to `main` when a ticket is done; `git rebase main` after
+the daily bump (your worktree shares all of `main`'s refs locally — no fetch needed). Until AINTLIB
+publishes its own olean cache, the *first* build in each worktree compiles the project tree from
+source once (mathlib still comes from cache); after that it is incremental.
+
+Workers on a *different* machine instead `git clone` AINTLIB and `git checkout dev/<project>` — all
+the same rules apply from there.
+
 ## If you are a PRODUCER (proving new theorems)
 You are on a `dev/<project>` branch, editing `projects/<YourProject>/`.
 - **Prove theorems. That is the whole job.** Track the work in your project's dev tickets.
