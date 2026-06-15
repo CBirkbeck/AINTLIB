@@ -1,0 +1,88 @@
+# AINTLIB consolidation monorepo — one Lake workspace, one mathlib, vendored NT projects.
+# Canonical branch + synced commit per project live in sources/manifest.toml.
+# The blueprint atlas is preserved on the `blueprint-atlas` branch.
+name = "AINTLIB"
+defaultTargets = ["Common", "HasseWeil", "LeanModularForms", "«Adic spaces»", "BernoulliRegular"]
+
+[leanOptions]
+pp.unicode.fun = true   # universal across all origin projects
+
+# mathlib is the ONLY external require — flt-regular is vendored (projects/FltRegular) like the
+# other projects, so the proofwidgets/batteries reconciliation that broke `cache get` is gone.
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4.git"
+rev = "d90090f647ca"     # the rc2 commit already shared by HasseWeil, LeanModularForms, AdicSpaces
+
+# ───────────────────────── shared, refactored-out lemmas ─────────────────────────
+[[lean_lib]]
+name = "Common"
+srcDir = "Common"
+[lean_lib.leanOptions]
+autoImplicit = false
+relaxedAutoImplicit = false
+
+# flt-regular (leanprover-community), vendored so it's editable on d90090f; BernoulliRegular imports it.
+[[lean_lib]]
+name = "FltRegular"
+srcDir = "projects/FltRegular"
+globs = ["FltRegular"]
+[lean_lib.leanOptions]
+autoImplicit = false
+relaxedAutoImplicit = false
+maxSynthPendingDepth = 3
+
+# ───────── already on the pinned mathlib (d90090f) → default build targets ─────────
+[[lean_lib]]
+name = "HasseWeil"
+srcDir = "projects/HasseWeil"
+[lean_lib.leanOptions]
+relaxedAutoImplicit = false
+maxSynthPendingDepth = 3
+
+[[lean_lib]]
+name = "LeanModularForms"
+srcDir = "projects/LeanModularForms"
+
+[[lean_lib]]
+name = "«Adic spaces»"
+srcDir = "projects/AdicSpaces"
+[lean_lib.leanOptions]
+relaxedAutoImplicit = false
+maxSynthPendingDepth = 3
+
+# BernoulliRegular — builds on the external flt-regular package required above.
+[[lean_lib]]
+name = "BernoulliRegular"
+srcDir = "projects/FltRegularBernoulli"
+globs = ["BernoulliRegular"]
+[lean_lib.leanOptions]
+autoImplicit = false
+relaxedAutoImplicit = false
+maxSynthPendingDepth = 3
+
+# ───────── need a mathlib bump to compile on d90090f → declared, built on demand ─────────
+[[lean_lib]]
+name = "PadicLFunctions"
+srcDir = "projects/PadicLFunctions"
+globs = ["PadicLFunctions"]
+[lean_lib.leanOptions]
+autoImplicit = false
+relaxedAutoImplicit = false
+maxSynthPendingDepth = 3
+
+[[lean_lib]]
+name = "LutzNagell"
+srcDir = "projects/NagellLutz"
+[lean_lib.leanOptions]
+relaxedAutoImplicit = false
+maxSynthPendingDepth = 3
+
+[[lean_lib]]
+name = "CebotarevDensity"
+srcDir = "projects/Chebotarev"
+globs = ["CebotarevDensity"]
+[lean_lib.leanOptions]
+autoImplicit = false
+relaxedAutoImplicit = false
+maxSynthPendingDepth = 3
