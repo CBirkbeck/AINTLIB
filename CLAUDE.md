@@ -64,6 +64,24 @@ You are working an AINTLIB cleanup ticket.
   green. No statement changes, no new sorries.
 - Refresh and publish AINTLIB's olean cache so cross-machine clones build fast.
 
+## Project context, tickets & reference material
+Each project keeps its working context next to its code, under `projects/<P>/` on its
+`dev/<project>` branch:
+- **`.mathlib-quality/`** — the project's plan / ticket / expert-review system. **This is your dev
+  ticket system** — keep using it exactly as before.
+- **`docs/`, `blueprint/`, `scripts/`** — notes, the LaTeX blueprint, helper scripts.
+
+All of it is non-`.lean` (no build impact) and stays on the **dev branches** — it is process, not the
+cleaned library, so it is **not** merged into `main`.
+
+**Reference PDFs and books are LOCAL ONLY — never committed, never pushed to GitHub.** They live in
+`refs/<project>/` in the main checkout, which is gitignored (and `*.pdf` is ignored everywhere, so a
+stray PDF can never be pushed). To read them from your worktree, symlink the shared store once:
+
+    ln -s ../AINTLIB/refs refs
+
+Then `refs/<project>/` is available to read and will never be committed.
+
 ## Build & conventions
 - Toolchain in `lean-toolchain`; mathlib pinned in `lakefile.toml` (moves with the daily bump).
 - `lake exe cache get` for mathlib oleans; build one target at a time (builds are incremental).

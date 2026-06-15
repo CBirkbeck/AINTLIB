@@ -8,3 +8,5 @@ _site/
 blueprint/print/
 .venv/
 /.lake/
+*.pdf
+/refs
