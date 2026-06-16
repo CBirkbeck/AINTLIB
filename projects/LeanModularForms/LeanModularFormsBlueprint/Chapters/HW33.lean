@@ -167,7 +167,7 @@ Then
 $$`\operatorname{PV}_S\!\!\int_\gamma f(z)\,\mathrm{d}z \;=\; \sum_{s \in S} 2 \pi i \, \operatorname{gWN}(\gamma, s) \, \operatorname{Res}(f, s).`
 This is the maximally general paper-faithful form of Hungerbühler–Wasem 2018,
 Theorem 3.3, with all six oracle hypotheses of the intermediate
-*hw_3_3_paper* formulation discharged.
+`hw_3_3_paper` formulation discharged.
 
 {uses "residue-paper-faithful-clean"}[] {uses "closed-pwc1-immersion"}[] {uses "null-homologous"}[] {uses "has-cauchy-pv-on"}[] {uses "generalized-winding-number"}[] {uses "condition-a-prime"}[] {uses "condition-b"}[]
 :::

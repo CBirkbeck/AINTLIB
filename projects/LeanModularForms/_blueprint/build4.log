@@ -1,6 +1,0 @@
-warning: VersoBlueprint: repository '/Users/mcu22seu/Documents/GitHub/AINTLIB/projects/LeanModularForms/_blueprint/.lake/packages/VersoBlueprint' has local changes
-✖ [0/1] Running job computation
-error: LeanModularFormsBlueprint: some modules have bad imports
-Some required targets logged failures:
-- job computation
-error: build failed
