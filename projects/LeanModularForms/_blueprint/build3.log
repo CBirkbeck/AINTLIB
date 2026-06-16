@@ -1,0 +1,6 @@
+✖ [0/1] Running job computation
+error: LeanModularFormsBlueprint: some modules have bad imports
+✔ [1/1] Ran LeanModularFormsBlueprintBuild/LeanModularFormsBlueprint:default
+Some required targets logged failures:
+- job computation
+error: build failed

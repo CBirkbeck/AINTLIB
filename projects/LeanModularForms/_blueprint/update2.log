@@ -1,0 +1,47 @@
+info: LeanModularFormsBlueprintBuild: no previous manifest, creating one from scratch
+info: VersoBlueprint: cloning https://github.com/leanprover/verso-blueprint
+info: VersoBlueprint: checking out revision 'fdccf1340444d40b3e92a4d4ef59f353dfa6b9cf'
+info: toolchain not updated; already up-to-date
+info: plausible: cloning https://github.com/leanprover-community/plausible
+info: plausible: checking out revision '744117af710b1c0400cd297c9ce91f8d0ad3a347'
+info: LeanSearchClient: cloning https://github.com/leanprover-community/LeanSearchClient
+info: LeanSearchClient: checking out revision 'c5d5b8fe6e5158def25cd28eb94e4141ad97c843'
+info: importGraph: cloning https://github.com/leanprover-community/import-graph
+info: importGraph: checking out revision '99c763c8a96d3d44fb4994e96eaa51ca4568449d'
+info: proofwidgets: cloning https://github.com/leanprover-community/ProofWidgets4
+info: proofwidgets: checking out revision '1537e3fc7e680d64e06fe5fb95c4c9edee7941c2'
+info: aesop: cloning https://github.com/leanprover-community/aesop
+info: aesop: checking out revision '7897ea6e5cfc6522d355083bdfa798377ab35e11'
+info: Qq: cloning https://github.com/leanprover-community/quote4
+info: Qq: checking out revision '94346b7b49c36ae871639d1434232f057c193d60'
+info: batteries: cloning https://github.com/leanprover-community/batteries
+info: batteries: checking out revision '460b61adc7d183e43db2b99ac6c1dede9f7a76df'
+info: verso-slides: cloning https://github.com/leanprover/verso-slides.git
+info: verso-slides: checking out revision '2b5ce1ffa9f22743057068128e20aee96a798976'
+info: verso: cloning https://github.com/ejgallego/verso
+info: verso: checking out revision 'a61eb8993e8d1a617a60c502020f95f3525e6c9d'
+info: Cli: cloning https://github.com/leanprover/lean4-cli
+info: Cli: checking out revision 'baf3e62fbb3502305076ca077e004aea78157c63'
+info: illuminate: cloning https://github.com/leanprover/illuminate
+info: illuminate: checking out revision '99ada816d9929a51132d5b5dc4f43c51f16d67d8'
+info: MD4Lean: cloning https://github.com/acmepjz/md4lean
+info: MD4Lean: checking out revision '6a3fb240133bcb7e1a066fdc784b3fdc304e3fc5'
+info: subverso: cloning https://github.com/leanprover/subverso
+info: subverso: checking out revision 'ce893b9042128037e2d3c0158b9567fab9fae268'
+warning: subverso: ignoring missing manifest:
+  /Users/mcu22seu/Documents/GitHub/AINTLIB/projects/LeanModularForms/_blueprint/.lake/packages/subverso/lake-manifest.json
+info: mathlib: running post-update hooks
+✔ [8/24] Built Batteries.Data.String.Basic (684ms)
+✔ [9/24] Built Batteries.Data.Array.Match (864ms)
+✔ [10/24] Built Batteries.Data.Array.Match:c.o (170ms)
+✔ [11/24] Built Batteries.Data.String.Basic:c.o (327ms)
+✔ [12/24] Built Batteries.Tactic.OpenPrivate (1.2s)
+✔ [17/24] Built Batteries.Data.String.Matcher (508ms)
+✔ [22/24] Built Batteries.Data.String.Matcher:c.o (108ms)
+✔ [23/24] Built Batteries.Tactic.OpenPrivate:c.o (560ms)
+Decompressing 367 already-cached file(s) (8181 already decompressed)
+Current branch: HEAD
+Using cache (Azure) from origin: (some leanprover-community/mathlib4)
+No files to download
+Decompressed 367 already-cached file(s)
+Completed successfully in 11357 ms!
