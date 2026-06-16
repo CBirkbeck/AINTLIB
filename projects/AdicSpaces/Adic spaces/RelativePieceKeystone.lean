@@ -1369,6 +1369,38 @@ theorem presheafValue_flat_of_unitDatum_faithful (P : PairOfDefinition A) (f : A
       right_inv := e.apply_symm_apply }
 
 omit [CompatiblePlusSubring A] in
+/-- **coUnit engine — `presheafValue(R(1/f))` is flat over `A`, ARBITRARY `f`** (Wedhorn Lemma 8.31(2),
+oneSubfX shape; the dual of `presheafValue_flat_of_unitDatum_faithful`). Transports the proven
+`lemma_8_31_oneSubfX_flat` (`A⟨X⟩/(1 − fX)` flat over `A`) across the faithful oneSubfX iso
+`coUnitDatum_quotEquiv` (`presheafValue (coUnitDatum P f) ≃+* A⟨X⟩/(1 − fX)`). This is the
+dominating-unit base step `X₀ = {1 ≤ x(s/u)} = coUnitDatum(s·u⁻¹)` of the Remark-7.55 chain. -/
+theorem presheafValue_flat_of_coUnitDatum_faithful (P : PairOfDefinition A) (f : A) :
+    @Module.Flat A (presheafValue (coUnitDatum P f)) _ _
+      (RingHom.toModule (coUnitDatum P f).canonicalMap) := by
+  haveI hflat_quot : Module.Flat A (↥(TateAlgebra A) ⧸
+      Ideal.span {1 - algebraMap A ↥(TateAlgebra A) f * TateAlgebra.X}) :=
+    lemma_8_31_oneSubfX_flat (A := A) f
+  let e := coUnitDatum_quotEquiv P f
+  change @Module.Flat A (presheafValue (coUnitDatum P f)) _ _
+    (RingHom.toModule (coUnitDatum P f).canonicalMap)
+  letI : Module A (presheafValue (coUnitDatum P f)) :=
+    RingHom.toModule (coUnitDatum P f).canonicalMap
+  have he_smul : ∀ (a : A) (x : presheafValue (coUnitDatum P f)), e (a • x) = a • e x := by
+    intro a x
+    change e ((coUnitDatum P f).canonicalMap a * x) =
+      (Ideal.Quotient.mk (Ideal.span {1 - algebraMap A ↥(TateAlgebra A) f * TateAlgebra.X}))
+        (algebraMap A ↥(TateAlgebra A) a) * e x
+    rw [e.map_mul]; congr 1
+    exact coUnitDatum_quotEquiv_canonicalMap P f a
+  exact @Module.Flat.of_linearEquiv A
+    (↥(TateAlgebra A) ⧸ Ideal.span {1 - algebraMap A ↥(TateAlgebra A) f * TateAlgebra.X})
+    (presheafValue (coUnitDatum P f)) _ _ _ _ _ hflat_quot
+    { toLinearMap := { toFun := e, map_add' := e.map_add, map_smul' := he_smul }
+      invFun := e.symm
+      left_inv := e.symm_apply_apply
+      right_inv := e.apply_symm_apply }
+
+omit [CompatiblePlusSubring A] in
 /-- **Remark 7.55, step 0 — the dominating unit over `B = 𝒪_X(D)`** (Wedhorn p.70: *"Since `U` is
 quasi-compact, there exists by Corollary 7.32 a unit `u ∈ A×` such that `|u(x)| < |s(x)|` for all
 `x ∈ U`"*). For the image piece `W := imagePieceDatum D E.T E.s hspanE` of the whole space `Spa B`,
