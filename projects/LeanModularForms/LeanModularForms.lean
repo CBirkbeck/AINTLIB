@@ -49,3 +49,4 @@ import LeanModularForms.ForMathlib.ValenceFormulaFinal
 import LeanModularForms.ForMathlib.HW33Clean
 import LeanModularForms.Labels.Encoding
 import LeanModularForms.Labels.CharacterOrbit
+import LeanModularForms.Labels.NewformOrbit

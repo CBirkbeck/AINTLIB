@@ -50,7 +50,18 @@ The character-orbit label `a` is **canonical**: `charOrbitLabel` is proven both 
 orbits** (`charOrbitLabel_eq_of_isGaloisConj`) and **injective on orbits** (`charOrbitLabel_injOn_orbits`)
 — `orbitIndex_inj` via a generic `rank_injOn` (rank map strictly monotone), and `orbitRankKey_injOn_orbits`
 via mathlib `linearIndependent_monoidHom` (Artin–Dedekind: the trace tuple `Σ_{ψ∈orbit} ψ(j)` separates
-distinct orbits). Zero sorries in `Labels/`. NEXT: Phase 2 (newform-orbit label `x`).
+distinct orbits). Zero sorries in `Labels/{Encoding,CharacterOrbit}`.
+
+**Phase 2 (`Labels/NewformOrbit.lean`) — framework DONE, build green.** Mirrors Phase 1: Galois-conjugacy
+`Setoid` → `galoisOrbit` → orbit-invariant `traceSeqAt` (= `Tr_{K_f/ℚ}(aₙ)`) → `orbitIndex` → `newformOrbitLabel`,
+with `newformOrbitLabel_eq_of_isGaloisConj` proven (orbit-invariant) and `newformOrbitLabel_injOn_orbits`
+reduced to `traceSeq_injOn_orbits`. The SMO-separation `coeffSeq_injOn_charSpace` is **sorry-free from
+`strongMultiplicityOne_axiom_clean`**. **4 isolated deep-NT sorries:** `coeffSeq_isIntegral` (Hecke eigenvalues
+are algebraic integers — Shimura 3.52/Deligne), `instFiniteDimensionalCoeffField` (`[K_f:ℚ]<∞`),
+`instFiniteNewform` (finitely many newforms — reachable via `exists_simultaneous_eigenform_basis`), and
+`traceSeq_injOn_orbits` (distinct orbits ⇒ distinct trace sequences — newform analogue of
+`linearIndependent_monoidHom`, reachable via SMO + linear independence). NEXT: Phase 3 assembly + close the two
+reachable sorries (finiteness, separation).
 - Deliverable: `charOrbitLabel : DirichletCharacter ℂ N → String`; well-defined (constant on
   orbits) + injective on orbits.
 
