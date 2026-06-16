@@ -60,8 +60,17 @@ reduced to `traceSeq_injOn_orbits`. The SMO-separation `coeffSeq_injOn_charSpace
 are algebraic integers — Shimura 3.52/Deligne), `instFiniteDimensionalCoeffField` (`[K_f:ℚ]<∞`),
 `instFiniteNewform` (finitely many newforms — reachable via `exists_simultaneous_eigenform_basis`), and
 `traceSeq_injOn_orbits` (distinct orbits ⇒ distinct trace sequences — newform analogue of
-`linearIndependent_monoidHom`, reachable via SMO + linear independence). NEXT: Phase 3 assembly + close the two
-reachable sorries (finiteness, separation).
+`linearIndependent_monoidHom`, reachable via SMO + linear independence). **Phase 3 (`Labels/Label.lean`) — DONE, sorry-free.** `Newform.lmfdbLabel f = "N.k.{charOrbitLabel χ_f}.{newformOrbitLabel f}"`
+(χ_f = `Eigenform.χ` via `Newform.dirichletLift`), with `lmfdbLabel_eq_of_isGaloisConj` (Galois-invariant, axiom-clean,
+composing Phase 1 + Phase 2) and `lmfdbLabel_injOn_orbits` (via label-parsing back to components). Full canonical label map in place.
+
+**⚠️ FINDING / blocker for finiteness+injectivity (owner decision needed).** `instFiniteNewform` and `traceSeq_injOn_orbits`
+are **false as currently stated**: `Eigenform` carries `ringEigenvalue : ℕ+ → ℂ` as a DATA field with `isRingEigen` only
+constraining indices coprime to N — so bad-prime values are FREE, giving infinitely many `Newform` terms over one underlying
+form, and `f ↦ f.toCuspForm`/`coeffSeq` is NOT injective on `Newform`. Fix = constrain the eigenvalues at ALL n (or derive
+`ringEigenvalue` from the form), which makes finiteness + coeffSeq-injectivity + `traceSeq_injOn_orbits` provable — but it's a
+change to the shared `Eigenform`/`Newform` definition (affects MainLemma/SMO), so flag to owner. The 2 genuinely-deep sorries
+remain regardless: `coeffSeq_isIntegral` (eigenvalues alg. integers) + `instFiniteDimensionalCoeffField` (`[K_f:ℚ]<∞`).
 - Deliverable: `charOrbitLabel : DirichletCharacter ℂ N → String`; well-defined (constant on
   orbits) + injective on orbits.
 

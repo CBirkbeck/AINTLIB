@@ -50,3 +50,4 @@ import LeanModularForms.ForMathlib.HW33Clean
 import LeanModularForms.Labels.Encoding
 import LeanModularForms.Labels.CharacterOrbit
 import LeanModularForms.Labels.NewformOrbit
+import LeanModularForms.Labels.Label
