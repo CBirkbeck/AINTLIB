@@ -1529,6 +1529,42 @@ theorem flat_imagePieceDatum_denomGen [DecidableEq A] (D₀ : RationalLocData A)
       right_inv := e.apply_symm_apply }
 
 omit [CompatiblePlusSubring A] in
+/-- **Per-step of the Remark 7.55 chain** — `flat(𝒪(D₀ ∩ R({g,s}/s)) over 𝒪 D₀)` when `s` is a unit
+on `𝒪 D₀`. The step locale `D₀.interSamePair (genPieceDatum D₀.P {g,s} s)` has structure ring
+`≅ 𝒪_{𝒪 D₀}(imagePieceDatum D₀ {g,s} s)` (`genPiece_relative_equiv`, Wedhorn Prop 8.2), flat over `𝒪 D₀`
+by `flat_imagePieceDatum_denomGen` (s-absorption + fSubX engine); the iso intertwines restriction with
+`canonicalMap` (`genPiece_relative_equiv_restrictionMap`), transporting flatness. -/
+theorem flat_chainStep [DecidableEq A] (D₀ : RationalLocData A) (g s : A)
+    (hspan : Ideal.span (({g, s} : Finset A) : Set A) = ⊤)
+    (hs_unit : IsUnit (D₀.canonicalMap s)) :
+    @Module.Flat (presheafValue D₀)
+      (presheafValue (D₀.interSamePair (genPieceDatum D₀.P {g, s} s hspan) rfl)) _ _
+      (restrictionMapHom D₀ (D₀.interSamePair (genPieceDatum D₀.P {g, s} s hspan) rfl)
+        (RationalLocData.interSamePair_subset_left _ _ _)).toModule := by
+  set D' := D₀.interSamePair (genPieceDatum D₀.P {g, s} s hspan) rfl with hD'
+  set Wimg := imagePieceDatum D₀ {g, s} s hspan with hWimg
+  haveI hflat_img : @Module.Flat (presheafValue D₀) (presheafValue Wimg) _ _
+      (RingHom.toModule Wimg.canonicalMap) :=
+    flat_imagePieceDatum_denomGen D₀ g s hspan hs_unit
+  let e := genPiece_relative_equiv D₀ {g, s} s hspan
+  letI : Module (presheafValue D₀) (presheafValue D') :=
+    (restrictionMapHom D₀ D' (RationalLocData.interSamePair_subset_left _ _ _)).toModule
+  letI : Module (presheafValue D₀) (presheafValue Wimg) := RingHom.toModule Wimg.canonicalMap
+  have he_smul : ∀ (a : presheafValue D₀) (x : presheafValue D'), e (a • x) = a • e x := by
+    intro a x
+    change e (restrictionMapHom D₀ D' (RationalLocData.interSamePair_subset_left _ _ _) a * x) =
+      Wimg.canonicalMap a * e x
+    rw [e.map_mul]; congr 1
+    exact genPiece_relative_equiv_restrictionMap D₀ {g, s} s hspan a
+  exact @Module.Flat.of_linearEquiv (presheafValue D₀)
+    (presheafValue Wimg) (presheafValue D')
+    _ _ _ _ _ hflat_img
+    { toLinearMap := { toFun := e, map_add' := e.map_add, map_smul' := he_smul }
+      invFun := e.symm
+      left_inv := e.symm_apply_apply
+      right_inv := e.apply_symm_apply }
+
+omit [CompatiblePlusSubring A] in
 /-- **GENUINE RESIDUAL — whole-space Prop 8.30 over `B = 𝒪_X(D)` (Remark-7.55 chain)**
 (Wedhorn Remark 7.55, `wedhorn.txt:3504`–`3517`).
 
