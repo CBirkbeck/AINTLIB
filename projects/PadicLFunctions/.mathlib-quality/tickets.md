@@ -6546,6 +6546,12 @@ E+M. G/E/M are cluster milestones — decompose-when-reached via a follow-on /de
   candidate to lift into AINTLIB `Common/` later — flag at dev→main PR)
 - `IwasawaProof/GaloisModules.lean` (Stage G), `IwasawaProof/MainConjecture.lean` (statement + Stage M)
 
+**Skeleton status (2026-06-17, dev/padic, full LSP)**: Stage-S skeleton built and
+`lake build PadicLFunctions` green — all of `Iwasawa/StructureTheory/{IwasawaAlgebra,
+PseudoIso,StructureTheorem,CharIdeal,Isotypic}.lean` landed as `:= by sorry` (16 sorries,
+0 errors). S1–S5 statements are now the proving contract; ready for `/beastmode`.
+S3 (structure theorem) and S5 (isotypic) sub-leaves to be decomposed at execution.
+
 ### Stage S — Λ-module structure theory + characteristic ideals (§13.1, Washington Ch.13)
 
 #### [S13-S1] Iwasawa algebra Λ = 𝒪_L⟦T⟧ + distinguished-polynomial API

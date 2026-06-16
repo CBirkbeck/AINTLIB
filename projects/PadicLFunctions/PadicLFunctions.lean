@@ -44,6 +44,11 @@ import PadicLFunctions.Iwasawa.PlusPart
 import PadicLFunctions.Iwasawa.ZetaGalois
 import PadicLFunctions.Iwasawa.LocalUnits
 import PadicLFunctions.Iwasawa.CyclotomicUnits
+import PadicLFunctions.Iwasawa.StructureTheory.IwasawaAlgebra
+import PadicLFunctions.Iwasawa.StructureTheory.PseudoIso
+import PadicLFunctions.Iwasawa.StructureTheory.StructureTheorem
+import PadicLFunctions.Iwasawa.StructureTheory.CharIdeal
+import PadicLFunctions.Iwasawa.StructureTheory.Isotypic
 import PadicLFunctions.IwasawaProof.GaloisAction
 import PadicLFunctions.IwasawaProof.LogDerivative
 import PadicLFunctions.IwasawaProof.Equivariance
