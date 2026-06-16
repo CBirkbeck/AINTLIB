@@ -1473,6 +1473,63 @@ theorem imagePieceDatum_denomGen_rationalOpen_eq [DecidableEq A] (D₀ : Rationa
     · exact w.vle_refl cs
 
 omit [CompatiblePlusSubring A] in
+/-- **domUnit `rationalOpen`-eq (Remark 7.55 chain step over `B`, two-level)** — the image piece
+`imagePieceDatum D₀ {g, ↑u, s} s` (denominator `s`, generators `g`, the *unit* `↑u`, and `s`; so
+`span{g,↑u,s} = ⊤` is free via `↑u`) has the SAME `rationalOpen` over `Spa B` as the single
+`unitDatum (canMap g · (canMap s)⁻¹)`. The `↑u`-generator constraint `w.vle (canMap ↑u)(canMap s)` is
+REDUNDANT: every Spa-`B` point `w` pulls back (`comap_canonicalMap_mem_rationalOpen`) to a point of
+`rationalOpen D₀`, where `h_dom` (the chain invariant `D₀ ⊆ {x(u) ≤ x(s)}`) forces `↑u ≤ᵥ s`; the
+`s`-generator is reflexive and `¬w.vle (canMap s) 0` holds since `canMap s` is a unit. This is the
+domUnit analogue of `imagePieceDatum_denomGen_rationalOpen_eq` — it lets the chain run at base `B`
+(span⊤ from the unit `↑u`, not from `s` being a unit), keeping every piece two-level. -/
+theorem imagePieceDatum_domUnit_rationalOpen_eq [DecidableEq A] (D₀ : RationalLocData A) (g s u : A)
+    (hspan : Ideal.span (({g, u} : Finset A) : Set A) = ⊤)
+    (hs_unit : IsUnit (D₀.canonicalMap s))
+    (h_pb : D₀.canonicalMap u * Ring.inverse (D₀.canonicalMap s) ∈ (presheafValue D₀)⁺) :
+    rationalOpen (imagePieceDatum D₀ {g, u} s hspan).T
+        (imagePieceDatum D₀ {g, u} s hspan).s =
+      rationalOpen ({D₀.canonicalMap g * Ring.inverse (D₀.canonicalMap s)} :
+        Finset (presheafValue D₀)) 1 := by
+  letI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_concrete D₀
+  letI : DecidableEq (presheafValue D₀) := Classical.decEq _
+  have hT : (imagePieceDatum D₀ {g, u} s hspan).T =
+      ({g, u} : Finset A).image D₀.canonicalMap := rfl
+  have hSs : (imagePieceDatum D₀ {g, u} s hspan).s = D₀.canonicalMap s := rfl
+  set cs := D₀.canonicalMap s with hcs
+  set cg := D₀.canonicalMap g with hcg
+  have hsi : cs * Ring.inverse cs = 1 := Ring.mul_inverse_cancel cs hs_unit
+  have his : Ring.inverse cs * cs = 1 := Ring.inverse_mul_cancel cs hs_unit
+  rw [hT, hSs]
+  apply Set.ext
+  intro w
+  rw [rationalOpen, rationalOpen, Set.mem_sep_iff, Set.mem_sep_iff]
+  refine and_congr_right fun hspa => ?_
+  constructor
+  · rintro ⟨hgen, _⟩
+    refine ⟨?_, not_vle_zero_of_isUnit isUnit_one w⟩
+    intro t ht
+    rw [Finset.mem_singleton] at ht; subst ht
+    have hcgs : w.vle cg cs :=
+      hgen cg (Finset.mem_image_of_mem _ (Finset.mem_insert_self g {u}))
+    have h2 := w.mul_vle_mul_left hcgs (Ring.inverse cs)
+    rwa [hsi] at h2
+  · rintro ⟨hg, _⟩
+    refine ⟨?_, not_vle_zero_of_isUnit hs_unit w⟩
+    intro t ht
+    rw [Finset.mem_image] at ht
+    obtain ⟨x, hx, rfl⟩ := ht
+    have hg1 : w.vle (cg * Ring.inverse cs) 1 := hg _ (Finset.mem_singleton_self _)
+    rw [Finset.mem_insert, Finset.mem_singleton] at hx
+    rcases hx with rfl | rfl
+    · have h2 := w.mul_vle_mul_left hg1 cs
+      rw [one_mul, mul_assoc, his, mul_one] at h2
+      exact h2
+    · have hle := vle_one_of_mem_spa hspa h_pb
+      have h2 := w.mul_vle_mul_left hle cs
+      rw [one_mul, mul_assoc, his, mul_one] at h2
+      exact h2
+
+omit [CompatiblePlusSubring A] in
 /-- **Per-step core (Remark 7.55, the A1a fSubX step over `B`)** — `𝒪_B(imagePieceDatum D₀ {f,s} s)`
 is flat over `B = presheafValue D₀`. The image piece equals (same `rationalOpen`, by
 `imagePieceDatum_denomGen_rationalOpen_eq`) the single `unitDatum (canMap f·(canMap s)⁻¹)`, which is
@@ -1556,6 +1613,97 @@ theorem flat_chainStep [DecidableEq A] (D₀ : RationalLocData A) (g s : A)
       Wimg.canonicalMap a * e x
     rw [e.map_mul]; congr 1
     exact genPiece_relative_equiv_restrictionMap D₀ {g, s} s hspan a
+  exact @Module.Flat.of_linearEquiv (presheafValue D₀)
+    (presheafValue Wimg) (presheafValue D')
+    _ _ _ _ _ hflat_img
+    { toLinearMap := { toFun := e, map_add' := e.map_add, map_smul' := he_smul }
+      invFun := e.symm
+      left_inv := e.symm_apply_apply
+      right_inv := e.apply_symm_apply }
+
+omit [CompatiblePlusSubring A] in
+/-- **domUnit per-step core** — `𝒪_B(imagePieceDatum D₀ {g,u} s)` is flat over `B`, when `s` is a unit
+on `B` and the unit `u` is dominated by `s` on `rationalOpen D₀` (`h_dom`). The image piece equals the
+single `unitDatum (canMap g · (canMap s)⁻¹)` (`imagePieceDatum_domUnit_rationalOpen_eq`, the
+`u`-redundancy), flat over `B` by the arbitrary-`f` engine; flatness transports across the restriction
+iso. The domUnit analogue of `flat_imagePieceDatum_denomGen` — keeps the chain at base `B` (span⊤ from
+the unit `u`, not from `s` being a unit). -/
+theorem flat_imagePieceDatum_domUnit [DecidableEq A] (D₀ : RationalLocData A) (g s u : A)
+    (hspan : Ideal.span (({g, u} : Finset A) : Set A) = ⊤)
+    (hs_unit : IsUnit (D₀.canonicalMap s))
+    (h_pb : D₀.canonicalMap u * Ring.inverse (D₀.canonicalMap s) ∈ (presheafValue D₀)⁺) :
+    @Module.Flat (presheafValue D₀) (presheafValue (imagePieceDatum D₀ {g, u} s hspan)) _ _
+      (RingHom.toModule (imagePieceDatum D₀ {g, u} s hspan).canonicalMap) := by
+  classical
+  letI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_concrete D₀
+  haveI : IsNoetherianRing (presheafValue D₀) := presheafValue_isNoetherianRing_faithful D₀
+  haveI : IsStronglyNoetherian (presheafValue D₀) := presheafValue_isStronglyNoetherian_faithful D₀
+  haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  letI : DecidableEq (presheafValue D₀) := Classical.decEq _
+  haveI hCompleteB : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  set gg : presheafValue D₀ := D₀.canonicalMap g * Ring.inverse (D₀.canonicalMap s) with hgg
+  set W := imagePieceDatum D₀ {g, u} s hspan with hW
+  set U : RationalLocData (presheafValue D₀) :=
+    unitDatum (presheafValue_concretePair D₀) gg with hU
+  have h_ro : rationalOpen W.T W.s = rationalOpen U.T U.s := by
+    rw [hW, hU]
+    change rationalOpen (imagePieceDatum D₀ {g, u} s hspan).T
+        (imagePieceDatum D₀ {g, u} s hspan).s =
+      rationalOpen ({gg} : Finset (presheafValue D₀)) 1
+    rw [hgg]; exact imagePieceDatum_domUnit_rationalOpen_eq D₀ g s u hspan hs_unit h_pb
+  haveI hflat_U : @Module.Flat (presheafValue D₀) (presheafValue U) _ _
+      (RingHom.toModule U.canonicalMap) := by
+    rw [hU]; exact presheafValue_flat_of_unitDatum_faithful (presheafValue_concretePair D₀) gg
+  let e : presheafValue W ≃+* presheafValue U :=
+    RingEquiv.ofBijective (restrictionMapHom W U h_ro.symm.le)
+      (restrictionMap_bijective_of_rationalOpen_eq W U h_ro)
+  letI : Module (presheafValue D₀) (presheafValue W) := RingHom.toModule W.canonicalMap
+  letI : Module (presheafValue D₀) (presheafValue U) := RingHom.toModule U.canonicalMap
+  have he_smul : ∀ (a : presheafValue D₀) (x : presheafValue W), e (a • x) = a • e x := by
+    intro a x
+    change e (W.canonicalMap a * x) = U.canonicalMap a * e x
+    rw [e.map_mul]; congr 1
+    change restrictionMapHom W U h_ro.symm.le (W.canonicalMap a) = U.canonicalMap a
+    exact restrictionMapHom_canonicalMap W U h_ro.symm.le a
+  exact @Module.Flat.of_linearEquiv (presheafValue D₀) (presheafValue U) (presheafValue W)
+    _ _ _ _ _ hflat_U
+    { toLinearMap := { toFun := e, map_add' := e.map_add, map_smul' := he_smul }
+      invFun := e.symm
+      left_inv := e.symm_apply_apply
+      right_inv := e.apply_symm_apply }
+
+omit [CompatiblePlusSubring A] in
+/-- **domUnit chain step (Remark 7.55, two-level over `B`)** — `flat(𝒪(D₀ ∩ R({g,u}/s)) over 𝒪 D₀)`
+when `s` is a unit on `𝒪 D₀` and the unit `u` is dominated by `s` on `rationalOpen D₀`. Span⊤ comes
+from the UNIT `u` (not from `s`), so this applies at base `B` where `s = canMap E.s` is NOT a unit —
+keeping every chain piece two-level. The step locale `≅ 𝒪_{𝒪 D₀}(imagePieceDatum D₀ {g,u} s)`
+(`genPiece_relative_equiv`), flat by `flat_imagePieceDatum_domUnit`; transported across the restriction
+iso. The domUnit analogue of `flat_chainStep`. -/
+theorem flat_chainStep_domUnit [DecidableEq A] (D₀ : RationalLocData A) (g s u : A)
+    (hspan : Ideal.span (({g, u} : Finset A) : Set A) = ⊤)
+    (hs_unit : IsUnit (D₀.canonicalMap s))
+    (h_pb : D₀.canonicalMap u * Ring.inverse (D₀.canonicalMap s) ∈ (presheafValue D₀)⁺) :
+    @Module.Flat (presheafValue D₀)
+      (presheafValue (D₀.interSamePair (genPieceDatum D₀.P {g, u} s hspan) rfl)) _ _
+      (restrictionMapHom D₀ (D₀.interSamePair (genPieceDatum D₀.P {g, u} s hspan) rfl)
+        (RationalLocData.interSamePair_subset_left _ _ _)).toModule := by
+  set D' := D₀.interSamePair (genPieceDatum D₀.P {g, u} s hspan) rfl with hD'
+  set Wimg := imagePieceDatum D₀ {g, u} s hspan with hWimg
+  haveI hflat_img : @Module.Flat (presheafValue D₀) (presheafValue Wimg) _ _
+      (RingHom.toModule Wimg.canonicalMap) :=
+    flat_imagePieceDatum_domUnit D₀ g s u hspan hs_unit h_pb
+  let e := genPiece_relative_equiv D₀ {g, u} s hspan
+  letI : Module (presheafValue D₀) (presheafValue D') :=
+    (restrictionMapHom D₀ D' (RationalLocData.interSamePair_subset_left _ _ _)).toModule
+  letI : Module (presheafValue D₀) (presheafValue Wimg) := RingHom.toModule Wimg.canonicalMap
+  have he_smul : ∀ (a : presheafValue D₀) (x : presheafValue D'), e (a • x) = a • e x := by
+    intro a x
+    change e (restrictionMapHom D₀ D' (RationalLocData.interSamePair_subset_left _ _ _) a * x) =
+      Wimg.canonicalMap a * e x
+    rw [e.map_mul]; congr 1
+    exact genPiece_relative_equiv_restrictionMap D₀ {g, u} s hspan a
   exact @Module.Flat.of_linearEquiv (presheafValue D₀)
     (presheafValue Wimg) (presheafValue D')
     _ _ _ _ _ hflat_img
