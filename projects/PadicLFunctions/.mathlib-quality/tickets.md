@@ -6525,3 +6525,10 @@ Unfold `Col u = unitsCmul (invCM) ((𝒜⁻¹(dlog (colemanSeries u))).comp exte
   PadicLFunctionsBlueprint + ci-pages), full ticket done-markings (T1206/T1206c/T1207/T1220-T1228),
   CLEANUP-124/131. NOTE: T1224' was proved by a worktree agent in degraded (no-lean-lsp) main
   session; a tooled /cleanup pass on the new Generators bridge + Main assembly is advisable.
+
+- **WRAP-UP 2026-06-16 (resumed)**: T1228 blueprint wiring DONE — `iwproof-iwasawa-final` →
+  (iwasawa_theorem, iwasawa_exact_sequence), `iwasawa-zeros-theorem` → iwasawa_theorem;
+  `lake build PadicLFunctionsBlueprint` green (4154 jobs), refs resolve, milestone nodes render
+  green. T1206/T1206c/T1207/T1220-T1228 are all effectively DONE (covered by the MILESTONE COMPLETE
+  record above). Remaining §12 follow-ups: ci-pages re-render (when convenient) + a tooled /cleanup
+  of the T1224' Generators bridge + Main assembly (written degraded). Next: /develop §13 (IMC).
