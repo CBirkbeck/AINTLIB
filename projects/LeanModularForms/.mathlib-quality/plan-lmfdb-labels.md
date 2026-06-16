@@ -37,9 +37,19 @@ trace-sequence ordering; the base-26 letter encoding; the label assembly + canon
   it — likely build). Order of a character.
 - 1b. Galois action on characters: `χ ↦ χ^t`, `t` coprime to `ord χ`; the **Galois orbit** =
   `{χ^t}`. (Equivalently the `(ZMod (ord χ))ˣ`-orbit.) Finiteness, orbit invariants.
-- 1c. LMFDB orbit ordering: order orbits of modulus `N` by **(order of χ ascending, then a
-  canonical tiebreak)** → letter via Phase 0. ⚠️ CONFIRM the exact tiebreak from lmfdb source
-  (github.com/LMFDB/lmfdb — `lmfdb/characters`; believed: sorted Conrey indices / trace vector).
+- 1c. LMFDB orbit ordering — **CONFIRMED** (arXiv:2002.04717 §Labels + knowl
+  `character.dirichlet.galois_orbit_label`): orbits of modulus `N` are ordered **lexicographically
+  by `(ord χ, Tr χ(1), Tr χ(2), Tr χ(3), …)`**, the absolute-trace tuple `Tr_{ℚ(χ)/ℚ}`. (NOT
+  "sorted Conrey indices" — that's only LMFDB's canonical orbit *representative*, not the ordering
+  key.) Encoded structurally as `orbitTraceAt χ j := Σ_{ψ∈orbit} ψ(j)` (= `Tr χ(j)`, orbit-invariant);
+  letter = base-26 of `index-1` via Phase 0.
+
+**STATUS (2026-06-16): Phase 0 + Phase 1 foundations DONE, build green.** Files
+`Labels/Encoding.lean` (sorry-free) + `Labels/CharacterOrbit.lean` (wired into `LeanModularForms.lean`).
+`charOrbitLabel` defined + proven **constant on Galois orbits** (`charOrbitLabel_eq_of_isGaloisConj`).
+Two precise sorries remain for full injectivity: `orbitRankKey_injOn_orbits` (the trace tuple separates
+distinct orbits — character-level number theory) and `orbitIndex_inj` (strict-monotonicity of the Finset
+rank — pure order theory).
 - Deliverable: `charOrbitLabel : DirichletCharacter ℂ N → String`; well-defined (constant on
   orbits) + injective on orbits.
 
@@ -66,9 +76,9 @@ trace-sequence ordering; the base-26 letter encoding; the label assembly + canon
 - **Exact LMFDB ordering keys** (1c tiebreak, 2d trace-order details) — must match lmfdb source
   verbatim to legitimately be "LMFDB labels"; confirm against github.com/LMFDB/lmfdb before fixing
   the definitions.
-- **Structural vs executable.** Easiest target: a *canonical labeling function + well-definedness*
-  (provable). Actually *computing* a label for a concrete form (`23.1.b.a`) is a further
-  decidability/computation layer — decide scope.
+- **Structural vs executable — DECIDED (owner, 2026-06-16): canonical labeling function +
+  well-definedness** (provable target). NOT the executable computation layer (decidable equality on
+  coefficient fields, computing a concrete form's `23.1.b.a`) — that's explicitly out of scope.
 - **Conrey correspondence** likely needs building (mathlib gap); reusable → `Common/`.
 - Phase 2 is the heavy, mostly-greenfield half (Galois-on-newforms + coefficient fields); Phase 1
   is self-contained and the right place to start.
