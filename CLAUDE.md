@@ -14,9 +14,9 @@ follow that section.
 - **`dev/<project>` branches** — each project's frontier, where new theorems are proved. Each
   carries its own dev ticket system.
 - **Two ticket systems.** *Dev tickets* (per project, on its `dev/<project>` branch) track new
-  math. *Cleanup tickets* (on `main`) track dedup / golf / style / sorry-discharge / cross-linking
-  and are worked by the cleanup fleet. The handoff between them is **merging a dev branch into
-  `main`**.
+  math. *Cleanup tickets* (on `main`) are **GitHub issues labelled by lane** (see **Worker system**
+  below) and track dedup / golf / style / sorry-discharge / cross-linking / generalisation /
+  proof-decomposition. The handoff between them is **merging a dev branch into `main`**.
 
 ## Your working copy — all workers share ONE clone on this machine
 Do **not** clone AINTLIB per worker. Use a **git worktree** per dev branch, so every worker runs in
@@ -63,6 +63,39 @@ You are working an AINTLIB cleanup ticket.
   `lake exe cache get`, then mechanically repair the fallout (renamed decls, signature skew) until
   green. No statement changes, no new sorries.
 - Refresh and publish AINTLIB's olean cache so cross-machine clones build fast.
+
+## Worker system — how the on-`main` fleet is coordinated
+
+The cleanup fleet runs as **4 Claude accounts**: a **coordinator** + **3 lane workers**. Cleanup
+tickets are **GitHub issues** on `CBirkbeck/AINTLIB`, labelled by lane + state. Full design:
+`docs/superpowers/specs/2026-06-16-aintlib-worker-system-design.md`.
+
+- **Coordinator** — files issues (from `/overview`), runs the daily **bump**, does cross-cutting
+  **renames**, **reviews + merges the `/generalise` PRs**, and reverts bad auto-merges.
+- **Lane workers** (one account each):
+  - `lane:cleanup` → `/cleanup` (golf/style) — **auto-merges on green**
+  - `lane:decompose` → `/decompose-proof` (extracts helpers; statement unchanged) — **auto-merges on green**
+  - `lane:generalise` → `/generalise` (changes the statement) — **stops at `state:review`; coordinator merges**
+
+**Worker loop — each cron firing:**
+1. **Freeze check** — if any open issue has `freeze:active`, do nothing and exit.
+2. **Claim (atomic)** — `gh issue list --label lane:<mine> --label state:todo`, pick an unassigned one,
+   `gh issue edit <n> --add-assignee @me`, relabel `state:todo`→`state:in-progress`. (Assignment is atomic;
+   if two workers race, only one wins — the other re-queries.)
+3. **Work** — branch `<lane>/<issue#>` off the latest `origin/main` in your worktree; run your skill on the target.
+4. **Verify (the bar)** — `lake build` green, **zero new `sorry`**, `#print axioms` unchanged
+   (only `propext` / `Classical.choice` / `Quot.sound`).
+5. **Merge** — re-check freeze; `git fetch origin main`, rebase if it moved, re-verify; push + open a PR. Then:
+   - `lane:cleanup` / `lane:decompose` → `gh pr merge --squash --delete-branch`, close the issue.
+   - `lane:generalise` → relabel `state:review` and STOP — the coordinator reviews the statement change + merges.
+6. **Loop** — take the next `state:todo` in your lane until it is empty or a freeze is active, then exit.
+
+**Freeze rule (for the coordinator's bump + renames):** before a bump or a cross-cutting rename, open an
+issue labelled `freeze:active`. Workers finish + merge their *current* ticket, then idle — no new claims or
+merges. Do the op on `main`, push, then close the freeze issue; workers resume and rebase. A soft
+drain-and-pause, never a kill; a missed freeze costs only a rebase.
+
+**Branch namespaces:** `cleanup/*`, `generalise/*`, `decompose/*` — never shared, so worktrees never collide.
 
 ## Project context, tickets & reference material
 Each project keeps its working context next to its code, under `projects/<P>/` on its
