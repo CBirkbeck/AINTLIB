@@ -44,12 +44,13 @@ trace-sequence ordering; the base-26 letter encoding; the label assembly + canon
   key.) Encoded structurally as `orbitTraceAt χ j := Σ_{ψ∈orbit} ψ(j)` (= `Tr χ(j)`, orbit-invariant);
   letter = base-26 of `index-1` via Phase 0.
 
-**STATUS (2026-06-16): Phase 0 + Phase 1 foundations DONE, build green.** Files
-`Labels/Encoding.lean` (sorry-free) + `Labels/CharacterOrbit.lean` (wired into `LeanModularForms.lean`).
-`charOrbitLabel` defined + proven **constant on Galois orbits** (`charOrbitLabel_eq_of_isGaloisConj`).
-Two precise sorries remain for full injectivity: `orbitRankKey_injOn_orbits` (the trace tuple separates
-distinct orbits — character-level number theory) and `orbitIndex_inj` (strict-monotonicity of the Finset
-rank — pure order theory).
+**STATUS (2026-06-17): Phase 0 + Phase 1 COMPLETE — sorry-free, build green.** Files
+`Labels/Encoding.lean` + `Labels/CharacterOrbit.lean` (wired into `LeanModularForms.lean`).
+The character-orbit label `a` is **canonical**: `charOrbitLabel` is proven both **constant on Galois
+orbits** (`charOrbitLabel_eq_of_isGaloisConj`) and **injective on orbits** (`charOrbitLabel_injOn_orbits`)
+— `orbitIndex_inj` via a generic `rank_injOn` (rank map strictly monotone), and `orbitRankKey_injOn_orbits`
+via mathlib `linearIndependent_monoidHom` (Artin–Dedekind: the trace tuple `Σ_{ψ∈orbit} ψ(j)` separates
+distinct orbits). Zero sorries in `Labels/`. NEXT: Phase 2 (newform-orbit label `x`).
 - Deliverable: `charOrbitLabel : DirichletCharacter ℂ N → String`; well-defined (constant on
   orbits) + injective on orbits.
 

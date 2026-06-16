@@ -71,14 +71,16 @@ Nebentypus convention `(ZMod N)ˣ →* ℂˣ` (used in `cuspFormCharSpace` / `mo
 * `orbitTraceAt` is constant on Galois orbits (`orbitTraceAt_eq_of_isGaloisConj`).
 * `charOrbitLabel` is constant on Galois orbits (`charOrbitLabel_eq_of_isGaloisConj`).
 
-## Remaining `sorry`s (documented)
+## Injectivity (the label is canonical)
 
-* `orbitRankKey_injOn_orbits` — that the orbit invariant `(ord, orbitTraceAt)` separates distinct
-  orbits, equivalently that the LMFDB order is a *strict total order on orbits*.  This is the
-  number-field-theoretic content (the trace tuple determines the orbit); it is the analogue of
-  multiplicity-one for characters.
+* `orbitRankKey_injOn_orbits` — the orbit invariant `(ord, orbitTraceAt)` separates distinct
+  orbits, equivalently the LMFDB order is a *strict total order on orbits*.  This is the
+  number-field-theoretic content (the trace tuple determines the orbit), the analogue of
+  multiplicity-one for characters; it is proved here from Artin–Dedekind linear independence of the
+  distinct multiplicative characters (`linearIndependent_monoidHom`).
 * `charOrbitLabel_injOn_orbits` — injectivity of the label on distinct orbits, which follows from
-  `orbitRankKey_injOn_orbits` together with injectivity of the ranking and of `letterEncode`.
+  `orbitRankKey_injOn_orbits` together with injectivity of the ranking (`orbitIndex_inj`) and of
+  `letterEncode`.
 -/
 
 open scoped BigOperators
@@ -239,15 +241,65 @@ lemma orbitRankKey_eq_of_isGaloisConj {χ ψ : DirichletCharacter ℂ N} (h : Is
   funext j
   exact orbitTraceAt_eq_of_isGaloisConj h j
 
-/-- **Orbit-separation (documented `sorry`).**  The orbit invariant `t([χ])` separates distinct
-Galois orbits: if two characters of modulus `N` have the same order *and* the same trace tuple,
-they are Galois-conjugate.  Equivalently, the LMFDB lexicographic order on `t([χ])` is a *strict
-total order on orbits*.  This is the number-field content (the absolute-trace tuple of character
-values determines the Galois orbit) and is the analogue of multiplicity one at the character level;
-it is deferred to the coefficient-field development. -/
+/-- **Orbit-separation.**  The orbit invariant `t([χ])` separates distinct Galois orbits: if two
+characters of modulus `N` have the same order *and* the same trace tuple, they are Galois-conjugate.
+Equivalently, the LMFDB lexicographic order on `t([χ])` is a *strict total order on orbits*.  This
+is the number-field content (the absolute-trace tuple of character values determines the Galois
+orbit) and is the analogue of multiplicity one at the character level.
+
+The proof is Artin–Dedekind linear independence of distinct multiplicative characters: each
+character induces a monoid hom `(ZMod N)ˣ →* ℂ` (`MulChar.equivToUnitHom` followed by
+`Units.coeHom`); distinct characters give distinct such homs, which are `ℂ`-linearly independent
+(`linearIndependent_monoidHom`).  Since `orbitTraceAt χ j = Σ_{ρ ∈ galoisOrbit χ} ρ(j)` is the
+value at `j` of the `{0,1}`-indicator-weighted sum of these homs over the orbit, equal trace tuples
+force equal indicator coefficients, hence `galoisOrbit χ = galoisOrbit ψ`, hence Galois conjugacy. -/
 lemma orbitRankKey_injOn_orbits {χ ψ : DirichletCharacter ℂ N}
     (h : orbitRankKey χ = orbitRankKey ψ) : IsGaloisConj χ ψ := by
-  sorry
+  classical
+  -- `DirichletCharacter ℂ N` is finite, so we may sum/quantify over all characters.
+  haveI : Fintype (DirichletCharacter ℂ N) := Fintype.ofFinite _
+  -- The map sending a character to the monoid hom `(ZMod N)ˣ →* ℂ` it induces on units.
+  let G : DirichletCharacter ℂ N → ((ZMod N)ˣ →* ℂ) :=
+    fun χ => (Units.coeHom ℂ).comp (MulChar.equivToUnitHom χ)
+  have hGapp : ∀ (χ : DirichletCharacter ℂ N) (j : (ZMod N)ˣ), G χ j = χ (j : ZMod N) := by
+    intro χ j
+    simp only [G, MonoidHom.comp_apply, Units.coeHom_apply]
+    exact MulChar.coe_equivToUnitHom χ j
+  -- `G` is injective: a Dirichlet character is determined by its values on units (`MulChar.ext`).
+  have hGinj : Function.Injective G := by
+    intro χ ψ hχψ
+    refine MulChar.ext fun a => ?_
+    have := congrArg (fun (F : (ZMod N)ˣ →* ℂ) => F a) hχψ
+    simpa [hGapp] using this
+  -- Artin–Dedekind: the induced monoid homs are linearly independent over `ℂ`.
+  have hLI : LinearIndependent ℂ (fun χ : DirichletCharacter ℂ N => ⇑(G χ)) :=
+    (linearIndependent_monoidHom ((ZMod N)ˣ) ℂ).comp G hGinj
+  -- Indicator coefficient functions of the two orbits.
+  set f : DirichletCharacter ℂ N → ℂ := fun ρ => if ρ ∈ galoisOrbit χ then 1 else 0 with hf
+  set g : DirichletCharacter ℂ N → ℂ := fun ρ => if ρ ∈ galoisOrbit ψ then 1 else 0 with hg
+  have htrace : orbitTraceAt χ = orbitTraceAt ψ := (Prod.ext_iff.mp h).2
+  -- An indicator-weighted sum of the induced homs reproduces the orbit-trace function `Σ_{ρ} ρ(j)`.
+  have key : ∀ (A : Finset (DirichletCharacter ℂ N)) (j : (ZMod N)ˣ),
+      (∑ i, (if i ∈ A then (1 : ℂ) else 0) • (G i j)) = ∑ ρ ∈ A, ρ (j : ZMod N) := by
+    intro A j
+    simp only [smul_eq_mul, boole_mul]
+    rw [Finset.sum_ite_mem, Finset.univ_inter]
+    exact Finset.sum_congr rfl (fun ρ _ => hGapp ρ j)
+  have hsum : ∑ i, f i • (⇑(G i)) = ∑ i, g i • (⇑(G i)) := by
+    funext j
+    simp only [Finset.sum_apply, Pi.smul_apply, hf, hg]
+    rw [key (galoisOrbit χ) j, key (galoisOrbit ψ) j]
+    simpa [orbitTraceAt] using congrFun htrace j
+  -- Linear independence forces the indicator coefficients to agree everywhere.
+  have hcoeff := (Fintype.linearIndependent_iffₛ.mp hLI) f g hsum
+  -- Hence the two Galois orbits coincide as `Finset`s.
+  have horb : galoisOrbit χ = galoisOrbit ψ := by
+    ext ρ
+    have hρ := hcoeff ρ
+    simp only [hf, hg] at hρ
+    by_cases h1 : ρ ∈ galoisOrbit χ <;> by_cases h2 : ρ ∈ galoisOrbit ψ <;> simp_all
+  -- `ψ ∈ galoisOrbit ψ = galoisOrbit χ`, i.e. `ψ` is Galois-conjugate to `χ`.
+  exact mem_galoisOrbit_iff.mp (horb ▸ self_mem_galoisOrbit ψ)
 
 /-! ### The label
 
@@ -291,20 +343,39 @@ lemma charOrbitLabel_eq_of_isGaloisConj {χ ψ : DirichletCharacter ℂ N} (h : 
   unfold charOrbitLabel orbitIndex
   rw [orbitRankKey_eq_of_isGaloisConj h]
 
-/-- **Rank-injectivity (documented `sorry`).**  Equal orbit indices force equal ordering keys.
-This is the order-theoretic fact that the strictly-monotone rank function `key ↦ #{realised keys
-strictly below it}` is injective on the finite set of realised keys; combined with
-`orbitRankKey_injOn_orbits` it gives injectivity of the label on orbits.  (Provable from
-`Finset` rank-function monotonicity; left as an explicit gap for Phase 1.) -/
+/-- On a finite linearly ordered set `S`, the rank function `a ↦ #{x ∈ S | x < a}` is strictly
+monotone, hence injective, on `S`. -/
+private lemma rank_injOn {α : Type*} [LinearOrder α] (S : Finset α) {a b : α}
+    (ha : a ∈ S) (hb : b ∈ S)
+    (hcard : (S.filter (· < a)).card = (S.filter (· < b)).card) : a = b := by
+  classical
+  have mono : ∀ x y : α, x ∈ S → x < y →
+      (S.filter (· < x)).card < (S.filter (· < y)).card := by
+    intro x y hx hxy
+    refine Finset.card_lt_card <| (Finset.ssubset_iff_of_subset
+      (Finset.monotone_filter_right S (fun z _ hz => lt_trans hz hxy))).mpr ?_
+    exact ⟨x, Finset.mem_filter.mpr ⟨hx, hxy⟩,
+      fun hmem => lt_irrefl x (Finset.mem_filter.mp hmem).2⟩
+  rcases lt_trichotomy a b with hlt | heq | hgt
+  · exact absurd hcard (ne_of_lt (mono a b ha hlt))
+  · exact heq
+  · exact absurd hcard.symm (ne_of_lt (mono b a hb hgt))
+
+/-- **Rank-injectivity.**  Equal orbit indices force equal ordering keys.  This is the
+order-theoretic fact that the strictly-monotone rank function `key ↦ #{realised keys strictly below
+it}` is injective on the finite set of realised keys (`rank_injOn`); combined with
+`orbitRankKey_injOn_orbits` it gives injectivity of the label on orbits. -/
 lemma orbitIndex_inj {χ ψ : DirichletCharacter ℂ N} (h : orbitIndex χ = orbitIndex ψ) :
     orbitRankKey χ = orbitRankKey ψ := by
-  sorry
+  -- `orbitIndex` is the rank of `orbitRankKey` in the finite set of realised keys; this rank is
+  -- injective on that set (`rank_injOn`), and both keys are realised.
+  exact rank_injOn _ (Finset.mem_image_of_mem _ (Finset.mem_univ _))
+    (Finset.mem_image_of_mem _ (Finset.mem_univ _)) h
 
 /-- **The label is injective on distinct orbits.**  If two characters have the same label they are
-Galois-conjugate.  This is a clean reduction: `letterEncode` is injective (Phase 0), so equal
-labels give equal `orbitIndex`; `orbitIndex_inj` then gives equal ordering keys; and
-`orbitRankKey_injOn_orbits` concludes Galois conjugacy.  The only unproven inputs are the two
-documented `sorry`s `orbitIndex_inj` and `orbitRankKey_injOn_orbits`. -/
+Galois-conjugate.  This is a clean reduction: `letterEncode` is injective (`letterEncode_injective`),
+so equal labels give equal `orbitIndex`; `orbitIndex_inj` then gives equal ordering keys; and
+`orbitRankKey_injOn_orbits` concludes Galois conjugacy. -/
 lemma charOrbitLabel_injOn_orbits {χ ψ : DirichletCharacter ℂ N}
     (h : charOrbitLabel χ = charOrbitLabel ψ) : IsGaloisConj χ ψ := by
   have hidx : orbitIndex χ = orbitIndex ψ :=
