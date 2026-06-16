@@ -15,6 +15,12 @@
 #
 # NOTE: until AINTLIB publishes an olean cache, each side-build compiles the AINTLIB libs it needs
 # from source (via the path-require) — slow. The cache makes this fast; CI also caches .lake/packages.
+#
+# LOCAL builds: this script's `lake update` re-resolves mathlib and (on a near-full disk) tries to
+# clone ~7 GB and fails. To render a single blueprint locally against THIS already-built checkout
+# without any clone, use  scripts/render-blueprint-local.sh <ProjectDir> <BlueprintLib>  instead
+# (mathlib via path, verso packages hardlinked). That is the path actually used to publish the
+# four live blueprints; build-blueprints.sh is the CI-on-a-fresh-runner path.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="$ROOT/_site"; rm -rf "$OUT"; mkdir -p "$OUT"
@@ -25,7 +31,13 @@ PATCH="$ROOT/scripts/patches/verso-blueprint-v4.30-on-v4.31-toolchain.patch"
 BLUEPRINTS=(
   "padic|dev/padic|projects/PadicLFunctions/_blueprint|PadicLFunctionsBlueprint|PadicLFunctionsBlueprintMain|padic"
   "leanmodularforms|dev/leanmodularforms|projects/LeanModularForms/_blueprint|LeanModularFormsBlueprint|LeanModularFormsBlueprintMain|leanmodularforms"
-  # "chebotarev|dev/chebotarev|projects/Chebotarev/_blueprint|CebotarevBlueprint|CebotarevBlueprintMain|chebotarev"
+  # chebotarev + flt-bernoulli are migrated, built green, and LIVE, but their sources currently sit on
+  # dev/leanmodularforms (the build host) rather than their own dev branches — so their worktree rows are
+  # commented until the per-project branches exist (each row needs a distinct branch to worktree). Render
+  # them locally with: scripts/render-blueprint-local.sh Chebotarev CebotarevDensityBlueprint
+  #                    scripts/render-blueprint-local.sh FltRegularBernoulli BernoulliRegularBlueprint
+  # "chebotarev|dev/chebotarev|projects/Chebotarev/_blueprint|CebotarevDensityBlueprint|CebotarevDensityBlueprintMain|chebotarev"
+  # "flt-bernoulli|dev/flt-bernoulli|projects/FltRegularBernoulli/_blueprint|BernoulliRegularBlueprint|BernoulliRegularBlueprintMain|flt-bernoulli"
 )
 
 build_one() {
