@@ -465,6 +465,42 @@ private theorem quotient_oneSubfXIdeal_completeSpace_faithful [IsStronglyNoether
   exact @QuotientAddGroup.completeSpace_right' ↥(TateAlgebra A) _ τ haddgrp ‹_›
     (oneSubfXIdeal s).toAddSubgroup inferInstance hCS
 
+omit [PlusSubring A] [HasLocLiftPowerBounded A] [IsNoetherianRing A] [CompatiblePlusSubring A] in
+/-- **Faithful: the fSubX quotient `A⟨X⟩/(b − X)` is T2** — the fSubX analogue of
+`quotient_oneSubfXIdeal_t2Space_faithful`, via the faithful general closed-ideal
+`tateAlgebra_isClosed_ideal_faithful` applied to `plusFSubXIdeal A b` (no `pairSubring`-noeth). -/
+private theorem quotient_plusFSubXIdeal_t2Space_faithful [IsStronglyNoetherian A]
+    (hA_complete : @CompleteSpace A (IsTopologicalAddGroup.rightUniformSpace A)) (b : A) :
+    @T2Space (↥(TateAlgebra A) ⧸ plusFSubXIdeal A b) (quotientPlusFSubXIdealTopology A b) := by
+  haveI : IsClosed ((plusFSubXIdeal A b).toAddSubgroup : Set ↥(TateAlgebra A)) :=
+    tateAlgebra_isClosed_ideal_faithful hA_complete (plusFSubXIdeal A b)
+  letI : TopologicalSpace (↥(TateAlgebra A) ⧸ plusFSubXIdeal A b) :=
+    quotientPlusFSubXIdealTopology A b
+  haveI : IsTopologicalAddGroup (↥(TateAlgebra A) ⧸ plusFSubXIdeal A b) :=
+    quotientPlusFSubXIdealTopology_isTopologicalAddGroup A b
+  infer_instance
+
+omit [PlusSubring A] [HasLocLiftPowerBounded A] [IsNoetherianRing A] [CompatiblePlusSubring A] in
+/-- **Faithful: the fSubX quotient `A⟨X⟩/(b − X)` is complete** under the canonical quotient
+topology — fSubX analogue of `quotient_oneSubfXIdeal_completeSpace_faithful`, via the faithful
+general closed-ideal `tateAlgebra_isClosed_ideal_faithful` (no `pairSubring`-noeth). -/
+private theorem quotient_plusFSubXIdeal_completeSpace_faithful [IsStronglyNoetherian A]
+    (hA_complete : @CompleteSpace A (IsTopologicalAddGroup.rightUniformSpace A)) (b : A) :
+    @CompleteSpace (↥(TateAlgebra A) ⧸ plusFSubXIdeal A b)
+      (quotientPlusFSubXIdealUniformSpace A b) := by
+  letI τ : TopologicalSpace ↥(TateAlgebra A) := instTopologicalSpaceTateAlgebra
+  haveI _hring : IsTopologicalRing ↥(TateAlgebra A) := instIsTopologicalRingTateAlgebra
+  haveI haddgrp : IsTopologicalAddGroup ↥(TateAlgebra A) :=
+    IsTopologicalRing.to_topologicalAddGroup
+  haveI : FirstCountableTopology ↥(TateAlgebra A) := instFirstCountableTopologyTateAlgebra
+  haveI hCS : @CompleteSpace ↥(TateAlgebra A)
+      (IsTopologicalAddGroup.rightUniformSpace ↥(TateAlgebra A)) :=
+    tateAlgebraTopology'_completeSpace hA_complete
+  haveI : IsClosed ((plusFSubXIdeal A b).toAddSubgroup : Set ↥(TateAlgebra A)) :=
+    tateAlgebra_isClosed_ideal_faithful hA_complete (plusFSubXIdeal A b)
+  exact @QuotientAddGroup.completeSpace_right' ↥(TateAlgebra A) _ τ haddgrp ‹_›
+    (plusFSubXIdeal A b).toAddSubgroup inferInstance hCS
+
 omit [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A] [CompatiblePlusSubring A] in
 /-- **Faithful forward completion map** `presheafValue D →+* A⟨X⟩/(1−sX)` — faithful (case-(b))
 replacement for `presheafValueToCanonicalQuotient`, which threads `hnoeth`. The localization
@@ -2783,6 +2819,521 @@ there from the proven general-base acyclicity `every_rational_cover_is_OXAcyclic
 (Wedhorn 7.54 + 8.34(i)–(iv) + Prop A.3 + the R2-transport via Prop 8.16), and the
 import direction (`WedhornCechAcyclicity` imports this file for the Cor-8.32
 embedding half) forces the assembly to live there. -/
+
+
+/-! ### Example 6.38 explicit kernel — relocated from `WedhornCechAcyclicity`
+
+The faithful `R(f/1)`/`R(1/f)` quotient isomorphisms `presheafValue (unitDatum P b) ≃+*
+A⟨ζ⟩/(b − ζ)` (and the minus form) — Wedhorn Example 6.38/6.39. Moved up from
+`WedhornCechAcyclicity` so the upstream Remark-7.55 per-step flatness engine in
+`RelativePieceKeystone` can consume them. All dependencies (`example638_evalHom*`,
+`mvQuot*`) live in this file or `MvTateAlgebraTopology`. -/
+
+omit [CompatiblePlusSubring A] in
+set_option linter.unusedSectionVars false in
+/-- For the plus-half `unitDatum P b` (`T = {b}`, `s = 1`), the unique rational
+generator is `b/1 = canonicalMap b`. -/
+theorem unitDatum_genTuple_eq [IsTateRing A] [IsNoetherianRing A]
+    (P : PairOfDefinition A) (b : A) (i : Fin (unitDatum P b).T.card) :
+    example638_genTuple (unitDatum P b) i = (unitDatum P b).canonicalMap b := by
+  have hval : ((((unitDatum P b).T.equivFin.symm i) :
+      ((unitDatum P b).T : Finset A)) : A) = b :=
+    Finset.mem_singleton.mp ((unitDatum P b).T.equivFin.symm i).2
+  show (unitDatum P b).coeRingHom (divByS _ (unitDatum P b).s) = _
+  rw [hval]
+  show (unitDatum P b).coeRingHom (divByS b 1) = _
+  rw [divByS_eq_algebraMap]
+  rfl
+
+omit [CompatiblePlusSubring A] in
+set_option linter.unusedSectionVars false in
+/-- For the minus-half `coUnitDatum P b` (`T = {1}`, `s = b`), the unique rational
+generator is `1/b`. -/
+theorem coUnitDatum_genTuple_eq [IsTateRing A] [IsNoetherianRing A]
+    (P : PairOfDefinition A) (b : A) (i : Fin (coUnitDatum P b).T.card) :
+    example638_genTuple (coUnitDatum P b) i =
+      (coUnitDatum P b).coeRingHom (divByS 1 b) := by
+  have hval : ((((coUnitDatum P b).T.equivFin.symm i) :
+      ((coUnitDatum P b).T : Finset A)) : A) = 1 :=
+    Finset.mem_singleton.mp ((coUnitDatum P b).T.equivFin.symm i).2
+  show (coUnitDatum P b).coeRingHom (divByS _ (coUnitDatum P b).s) = _
+  rw [hval]
+  rfl
+
+omit [CompatiblePlusSubring A] in
+set_option linter.unusedSectionVars false in
+/-- `⊇` of (8.2.1)-plus: the generator `algebraMap b − ζ` is killed by the
+evaluation (`ζ ↦ b/1 = canonicalMap b`, `example638_evalHom_X` +
+`unitDatum_genTuple_eq`). -/
+theorem unitDatum_span_le_ker
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (P : PairOfDefinition A) (b : A) :
+    Ideal.span {algebraMap A ↥(TateAlgebra A) b - TateAlgebra.X} ≤
+      RingHom.ker (example638_evalHom (unitDatum P b)) := by
+  rw [Ideal.span_le, Set.singleton_subset_iff, SetLike.mem_coe, RingHom.mem_ker]
+  erw [map_sub, example638_evalHom_algebraMap,
+    example638_evalHom_X (unitDatum P b) ((0 : Fin 1) : Fin (unitDatum P b).T.card),
+    unitDatum_genTuple_eq]
+  exact sub_self _
+
+omit [CompatiblePlusSubring A] in
+set_option linter.unusedSectionVars false in
+/-- `⊇` of (8.2.1)-minus: the generator `1 − algebraMap b · η` is killed by the
+evaluation (`η ↦ 1/b`, and `b · (1/b) = 1` in the localization). -/
+theorem coUnitDatum_span_le_ker
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (P : PairOfDefinition A) (b : A) :
+    Ideal.span {1 - algebraMap A ↥(TateAlgebra A) b * TateAlgebra.X} ≤
+      RingHom.ker (example638_evalHom (coUnitDatum P b)) := by
+  rw [Ideal.span_le, Set.singleton_subset_iff, SetLike.mem_coe, RingHom.mem_ker]
+  erw [map_sub, map_one, map_mul, example638_evalHom_algebraMap,
+    example638_evalHom_X (coUnitDatum P b) ((0 : Fin 1) : Fin (coUnitDatum P b).T.card),
+    coUnitDatum_genTuple_eq]
+  -- `canonicalMap b · (1/b) = (b/1)·(1/b) = b/b = 1` in the localization image.
+  have hmul : (coUnitDatum P b).canonicalMap b *
+      (coUnitDatum P b).coeRingHom (divByS 1 b) = 1 := by
+    show (coUnitDatum P b).coeRingHom (algebraMap A (Localization.Away b) b) *
+        (coUnitDatum P b).coeRingHom (divByS 1 b) = 1
+    rw [← map_mul, ← map_one (coUnitDatum P b).coeRingHom]
+    congr 1
+    unfold divByS
+    exact (IsLocalization.mk'_spec' (Localization.Away b) 1
+      ⟨b, Submonoid.mem_powers b⟩).trans (map_one _)
+  rw [hmul, sub_self]
+
+omit [CompatiblePlusSubring A] in
+set_option maxHeartbeats 1000000 in
+set_option linter.unusedSectionVars false in
+/-- `⊆` of (8.2.1)-plus — the completion comparison. The quotient
+`A⟨ζ⟩ ⧸ (b − ζ)` is complete Hausdorff (the principal ideal is closed by Prop 6.17
+over the strongly noetherian base); the localization `A[1/s] = A[1/1]` lifts to it
+continuously (`s = 1` is trivially a unit mod the ideal); the lift extends to the
+completion `presheafValue (unitDatum P b)` (`UniformSpace.Completion.extensionHom`);
+and the extension factors `mk` through `example638_evalHom` on the dense polynomial
+subring (`mvPolynomialToTate_denseRange`). Hence `evalHom h = 0 ⟹ mk h = 0`. -/
+theorem unitDatum_ker_le_span
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (P : PairOfDefinition A) (b : A) :
+    RingHom.ker (example638_evalHom (unitDatum P b)) ≤
+      Ideal.span {algebraMap A ↥(TateAlgebra A) b - TateAlgebra.X} := by
+  classical
+  set D := unitDatum P b with hD
+  set aI : Ideal ↥(restrictedMvPowerSeriesSubring 1 A) :=
+    Ideal.span {algebraMap A ↥(TateAlgebra A) b - TateAlgebra.X} with haI
+  -- source instances
+  letI τC : TopologicalSpace ↥(restrictedMvPowerSeriesSubring 1 A) :=
+    MvTateAlgebra.mvTateAlgebraTopology' 1
+  haveI hringC : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring 1 A) :=
+    MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing 1
+  have hA_complete : @CompleteSpace A (IsTopologicalAddGroup.rightUniformSpace A) := ‹_›
+  have haI_closed : IsClosed (aI : Set ↥(restrictedMvPowerSeriesSubring 1 A)) :=
+    MvTateAlgebra.mvTate_isClosed_ideal 1 hA_complete aI
+  -- quotient instances (complete Hausdorff topological ring)
+  letI τQ : TopologicalSpace (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) :=
+    mvQuotTopology 1 aI
+  letI uQ : UniformSpace (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) :=
+    mvQuotUniformSpace 1 aI
+  haveI hringQ : @IsTopologicalRing _ τQ _ := mvQuot_isTopologicalRing 1 aI
+  haveI : @IsUniformAddGroup _ uQ _ := mvQuot_isUniformAddGroup 1 aI
+  haveI : @CompleteSpace _ uQ := mvQuot_completeSpace 1 aI hA_complete
+  haveI hT2Q : @T2Space _ τQ := mvQuot_t2Space 1 aI haI_closed
+  haveI : @T0Space _ τQ := @T1Space.t0Space _ τQ (@T2Space.t1Space _ τQ hT2Q)
+  haveI hNAQ : @NonarchimedeanRing _ _ τQ := mvQuot_nonarchimedean 1 aI
+  -- the localization lift `ψ` (the denominator `D.s = 1` is trivially a unit)
+  have hUnit1 : IsUnit ((Ideal.Quotient.mk aI).comp
+      (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A)) D.s) := by
+    show IsUnit ((Ideal.Quotient.mk aI).comp
+      (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A)) 1)
+    rw [map_one]; exact isUnit_one
+  set ψ : Localization.Away D.s →+* (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) :=
+    IsLocalization.Away.lift (x := D.s)
+      (g := (Ideal.Quotient.mk aI).comp
+        (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A))) hUnit1 with hψ
+  have hψ_alg : ∀ x : A, ψ (algebraMap A (Localization.Away D.s) x) =
+      Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) x) := by
+    intro x
+    rw [hψ, IsLocalization.Away.lift_eq]
+    rfl
+  -- the key congruence: `mk (algebraMap b) = mk ζ` modulo the principal ideal
+  have hmk_bX : Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) b) =
+      Ideal.Quotient.mk aI (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+        ↥(restrictedMvPowerSeriesSubring 1 A)) := by
+    rw [Ideal.Quotient.eq]
+    exact Ideal.subset_span (Set.mem_singleton _)
+  -- `ψ` is continuous for the localization topology
+  have hψ_cont : @Continuous _ _ D.topology τQ ψ := by
+    change @Continuous _ _ (locTopology D.P D.T D.s D.hopen) τQ ψ
+    refine locTopology_continuous_lift D.P D.T D.s D.hopen ψ ?_ ?_
+    · have heq : ψ.comp (algebraMap A (Localization.Away D.s)) =
+          (Ideal.Quotient.mk aI).comp
+            (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A)) := by
+        ext x; exact hψ_alg x
+      rw [heq]
+      exact continuous_quotient_mk'.comp
+        (MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (A := A) 1)
+    · intro t ht
+      rw [show (D.T : Finset A) = {b} from rfl, Finset.mem_singleton] at ht
+      subst ht
+      have h1 : ψ (divByS t D.s) = Ideal.Quotient.mk aI
+          (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+            ↥(restrictedMvPowerSeriesSubring 1 A)) := by
+        erw [divByS_eq_algebraMap, hψ_alg]
+        exact hmk_bX
+      rw [h1]
+      exact isPowerBounded_map_of_isOpenMap (Ideal.Quotient.mk aI)
+        continuous_quotient_mk' (@QuotientRing.isOpenMap_coe _ τC _ aI hringC)
+        (MvTateAlgebra.mvPowerSeries_X_isBounded (0 : Fin 1))
+  -- Opaquify the evaluation as a `Fin 1`-typed hom `Φ`: the `D.T.card ≡ 1` defeq is
+  -- paid ONCE here; every later composite is then cheaply `Fin 1`-typed (leaving the
+  -- evaluation at the `D.T.card`-type makes each `RingHom.comp` unification re-pay
+  -- the structural defeq and blow up `whnf`).
+  obtain ⟨Φ, hΦ_cont, hΦ_alg, hΦ_X, hΦ_ker⟩ :
+      ∃ Φ : ↥(restrictedMvPowerSeriesSubring 1 A) →+* presheafValue D,
+        @Continuous _ _ τC _ ⇑Φ ∧
+        (∀ x : A, Φ (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) x) =
+          D.canonicalMap x) ∧
+        (Φ (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+            ↥(restrictedMvPowerSeriesSubring 1 A)) =
+          D.coeRingHom (algebraMap A (Localization.Away D.s) b)) ∧
+        RingHom.ker (example638_evalHom D) = RingHom.ker Φ := by
+    refine ⟨example638_evalHom D, example638_evalHom_continuous D,
+      fun x => example638_evalHom_algebraMap D x, ?_, rfl⟩
+    erw [example638_evalHom_X D ((0 : Fin 1) : Fin D.T.card), unitDatum_genTuple_eq]
+    rfl
+  -- extend to the completion, then make the extension OPAQUE (an existential
+  -- `obtain` yields a fresh `β` carrying only the two facts the rest needs —
+  -- unfolding the `extensionHom` term in every later unification blows up `whnf`)
+  letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+  obtain ⟨β, hβ_coe, hβ_cont⟩ :
+      ∃ β : presheafValue D →+* (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI),
+        (∀ y : Localization.Away D.s, β (D.coeRingHom y) = ψ y) ∧
+          @Continuous _ _ _ τQ ⇑β := by
+    refine ⟨@UniformSpace.Completion.extensionHom (Localization.Away D.s) _ D.uniformSpace _ _
+      (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) uQ _ (mvQuot_isUniformAddGroup 1 aI)
+      (mvQuot_isTopologicalRing 1 aI) ψ hψ_cont ‹_› ‹_›, fun y => ?_, ?_⟩
+    · exact @UniformSpace.Completion.extensionHom_coe (Localization.Away D.s) _ D.uniformSpace
+        _ _ (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) uQ _ (mvQuot_isUniformAddGroup 1 aI)
+        (mvQuot_isTopologicalRing 1 aI) ψ hψ_cont ‹_› ‹_› y
+    · exact @UniformSpace.Completion.continuous_extension (Localization.Away D.s)
+        D.uniformSpace _ uQ (⇑ψ) ‹_›
+  -- `β ∘ Φ = mk` (continuous ring homs agreeing on the dense polynomials)
+  have hext : (⇑β ∘ ⇑Φ :
+      ↥(restrictedMvPowerSeriesSubring 1 A) → _) = ⇑(Ideal.Quotient.mk aI) := by
+    refine Continuous.ext_on
+      (MvTateAlgebra.mvPolynomialToTate_denseRange (A := A) 1)
+      (hβ_cont.comp hΦ_cont) continuous_quotient_mk' ?_
+    rintro _ ⟨p, rfl⟩
+    have hcomp : ((β.comp Φ).comp
+        (MvTateAlgebra.mvPolynomialToTate (A := A) 1)) =
+        (Ideal.Quotient.mk aI).comp (MvTateAlgebra.mvPolynomialToTate (A := A) 1) := by
+      refine MvPolynomial.ringHom_ext (fun c => ?_) (fun j => ?_)
+      · simp only [RingHom.comp_apply, MvTateAlgebra.mvPolynomialToTate_C]
+        rw [hΦ_alg]
+        show β (D.coeRingHom (algebraMap A (Localization.Away D.s) c)) = _
+        rw [hβ_coe, hψ_alg]
+      · simp only [RingHom.comp_apply, MvTateAlgebra.mvPolynomialToTate_X]
+        have hj : j = 0 := Subsingleton.elim j 0
+        subst hj
+        rw [hΦ_X, hβ_coe, hψ_alg, hmk_bX]
+    exact RingHom.congr_fun hcomp p
+  -- conclude: `Φ h = 0 ⟹ mk h = 0 ⟹ h ∈ span`
+  rw [hΦ_ker]
+  intro h hh
+  have hh' : Φ h = 0 := hh
+  have hfun := congrFun hext h
+  simp only [Function.comp_apply, hh', map_zero] at hfun
+  exact Ideal.Quotient.eq_zero_iff_mem.mp hfun.symm
+
+omit [CompatiblePlusSubring A] in
+set_option maxHeartbeats 1000000 in
+set_option linter.unusedSectionVars false in
+/-- `⊆` of (8.2.1)-minus — the completion comparison, mirror of
+`unitDatum_ker_le_span`. Here `s = b` and the lift exists because `b` is a unit
+modulo `(1 − bη)` (with inverse `η`). -/
+theorem coUnitDatum_ker_le_span
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (P : PairOfDefinition A) (b : A) :
+    RingHom.ker (example638_evalHom (coUnitDatum P b)) ≤
+      Ideal.span {1 - algebraMap A ↥(TateAlgebra A) b * TateAlgebra.X} := by
+  classical
+  set D := coUnitDatum P b with hD
+  set aI : Ideal ↥(restrictedMvPowerSeriesSubring 1 A) :=
+    Ideal.span {1 - algebraMap A ↥(TateAlgebra A) b * TateAlgebra.X} with haI
+  letI τC : TopologicalSpace ↥(restrictedMvPowerSeriesSubring 1 A) :=
+    MvTateAlgebra.mvTateAlgebraTopology' 1
+  haveI hringC : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring 1 A) :=
+    MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing 1
+  have hA_complete : @CompleteSpace A (IsTopologicalAddGroup.rightUniformSpace A) := ‹_›
+  have haI_closed : IsClosed (aI : Set ↥(restrictedMvPowerSeriesSubring 1 A)) :=
+    MvTateAlgebra.mvTate_isClosed_ideal 1 hA_complete aI
+  letI τQ : TopologicalSpace (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) :=
+    mvQuotTopology 1 aI
+  letI uQ : UniformSpace (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) :=
+    mvQuotUniformSpace 1 aI
+  haveI hringQ : @IsTopologicalRing _ τQ _ := mvQuot_isTopologicalRing 1 aI
+  haveI : @IsUniformAddGroup _ uQ _ := mvQuot_isUniformAddGroup 1 aI
+  haveI : @CompleteSpace _ uQ := mvQuot_completeSpace 1 aI hA_complete
+  haveI hT2Q : @T2Space _ τQ := mvQuot_t2Space 1 aI haI_closed
+  haveI : @T0Space _ τQ := @T1Space.t0Space _ τQ (@T2Space.t1Space _ τQ hT2Q)
+  haveI hNAQ : @NonarchimedeanRing _ _ τQ := mvQuot_nonarchimedean 1 aI
+  -- `mk (algebraMap b) · mk η = 1` modulo `(1 − bη)`
+  have hmkX_mul : Ideal.Quotient.mk aI
+        (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) b) *
+      Ideal.Quotient.mk aI
+        (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+          ↥(restrictedMvPowerSeriesSubring 1 A)) = 1 := by
+    rw [← map_mul, show (1 : ↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) =
+      Ideal.Quotient.mk aI 1 from (map_one _).symm, Ideal.Quotient.eq]
+    have hgen : (1 - algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) b *
+        (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+          ↥(restrictedMvPowerSeriesSubring 1 A))) ∈ aI :=
+      Ideal.subset_span (Set.mem_singleton _)
+    have hneg := aI.neg_mem hgen
+    rwa [neg_sub] at hneg
+  -- the localization lift `ψ` (`D.s = b` is a unit mod `(1 − bη)`)
+  have hUnitb : IsUnit ((Ideal.Quotient.mk aI).comp
+      (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A)) D.s) := by
+    rw [isUnit_iff_exists_inv]
+    exact ⟨Ideal.Quotient.mk aI
+      (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+        ↥(restrictedMvPowerSeriesSubring 1 A)), hmkX_mul⟩
+  set ψ : Localization.Away D.s →+* (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) :=
+    IsLocalization.Away.lift (x := D.s)
+      (g := (Ideal.Quotient.mk aI).comp
+        (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A))) hUnitb with hψ
+  have hψ_alg : ∀ x : A, ψ (algebraMap A (Localization.Away D.s) x) =
+      Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) x) := by
+    intro x
+    rw [hψ, IsLocalization.Away.lift_eq]
+    rfl
+  -- `ψ (1/b) = mk η` (cancel the unit `mk (algebraMap b)`)
+  have hψ_div : ψ (divByS (1 : A) D.s) = Ideal.Quotient.mk aI
+      (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+        ↥(restrictedMvPowerSeriesSubring 1 A)) := by
+    have hloc : algebraMap A (Localization.Away D.s) b * divByS (1 : A) D.s = 1 := by
+      erw [show divByS (1 : A) D.s = IsLocalization.mk' (Localization.Away b) (1 : A)
+        (⟨b, Submonoid.mem_powers b⟩ : Submonoid.powers b) from rfl]
+      exact (IsLocalization.mk'_spec' (Localization.Away b) 1
+        ⟨b, Submonoid.mem_powers b⟩).trans (map_one _)
+    have h1 : ψ (algebraMap A (Localization.Away D.s) b) * ψ (divByS (1 : A) D.s) = 1 := by
+      rw [← map_mul, hloc, map_one]
+    rw [hψ_alg] at h1
+    have hu : IsUnit (Ideal.Quotient.mk aI
+        (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) b)) :=
+      isUnit_iff_exists_inv.mpr ⟨_, hmkX_mul⟩
+    exact hu.mul_left_cancel (h1.trans hmkX_mul.symm)
+  -- `ψ` is continuous for the localization topology
+  have hψ_cont : @Continuous _ _ D.topology τQ ψ := by
+    change @Continuous _ _ (locTopology D.P D.T D.s D.hopen) τQ ψ
+    refine locTopology_continuous_lift D.P D.T D.s D.hopen ψ ?_ ?_
+    · have heq : ψ.comp (algebraMap A (Localization.Away D.s)) =
+          (Ideal.Quotient.mk aI).comp
+            (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A)) := by
+        ext x; exact hψ_alg x
+      rw [heq]
+      exact continuous_quotient_mk'.comp
+        (MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (A := A) 1)
+    · intro t ht
+      rw [show (D.T : Finset A) = {1} from rfl, Finset.mem_singleton] at ht
+      subst ht
+      rw [hψ_div]
+      exact isPowerBounded_map_of_isOpenMap (Ideal.Quotient.mk aI)
+        continuous_quotient_mk' (@QuotientRing.isOpenMap_coe _ τC _ aI hringC)
+        (MvTateAlgebra.mvPowerSeries_X_isBounded (0 : Fin 1))
+  -- opaquify the evaluation (pay the `D.T.card ≡ 1` defeq once)
+  obtain ⟨Φ, hΦ_cont, hΦ_alg, hΦ_X, hΦ_ker⟩ :
+      ∃ Φ : ↥(restrictedMvPowerSeriesSubring 1 A) →+* presheafValue D,
+        @Continuous _ _ τC _ ⇑Φ ∧
+        (∀ x : A, Φ (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) x) =
+          D.canonicalMap x) ∧
+        (Φ (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+            ↥(restrictedMvPowerSeriesSubring 1 A)) =
+          D.coeRingHom (divByS (1 : A) D.s)) ∧
+        RingHom.ker (example638_evalHom (coUnitDatum P b)) = RingHom.ker Φ := by
+    refine ⟨example638_evalHom D, example638_evalHom_continuous D,
+      fun x => example638_evalHom_algebraMap D x, ?_, rfl⟩
+    erw [example638_evalHom_X D ((0 : Fin 1) : Fin D.T.card), coUnitDatum_genTuple_eq]
+    rfl
+  -- extend to the completion, opaquely
+  letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+  obtain ⟨β, hβ_coe, hβ_cont⟩ :
+      ∃ β : presheafValue D →+* (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI),
+        (∀ y : Localization.Away D.s, β (D.coeRingHom y) = ψ y) ∧
+          @Continuous _ _ _ τQ ⇑β := by
+    refine ⟨@UniformSpace.Completion.extensionHom (Localization.Away D.s) _ D.uniformSpace _ _
+      (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) uQ _ (mvQuot_isUniformAddGroup 1 aI)
+      (mvQuot_isTopologicalRing 1 aI) ψ hψ_cont ‹_› ‹_›, fun y => ?_, ?_⟩
+    · exact @UniformSpace.Completion.extensionHom_coe (Localization.Away D.s) _ D.uniformSpace
+        _ _ (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) uQ _ (mvQuot_isUniformAddGroup 1 aI)
+        (mvQuot_isTopologicalRing 1 aI) ψ hψ_cont ‹_› ‹_› y
+    · exact @UniformSpace.Completion.continuous_extension (Localization.Away D.s)
+        D.uniformSpace _ uQ (⇑ψ) ‹_›
+  -- `β ∘ Φ = mk` on the dense polynomials
+  have hext : (⇑β ∘ ⇑Φ :
+      ↥(restrictedMvPowerSeriesSubring 1 A) → _) = ⇑(Ideal.Quotient.mk aI) := by
+    refine Continuous.ext_on
+      (MvTateAlgebra.mvPolynomialToTate_denseRange (A := A) 1)
+      (hβ_cont.comp hΦ_cont) continuous_quotient_mk' ?_
+    rintro _ ⟨p, rfl⟩
+    have hcomp : ((β.comp Φ).comp
+        (MvTateAlgebra.mvPolynomialToTate (A := A) 1)) =
+        (Ideal.Quotient.mk aI).comp (MvTateAlgebra.mvPolynomialToTate (A := A) 1) := by
+      refine MvPolynomial.ringHom_ext (fun c => ?_) (fun j => ?_)
+      · simp only [RingHom.comp_apply, MvTateAlgebra.mvPolynomialToTate_C]
+        rw [hΦ_alg]
+        show β (D.coeRingHom (algebraMap A (Localization.Away D.s) c)) = _
+        rw [hβ_coe, hψ_alg]
+      · simp only [RingHom.comp_apply, MvTateAlgebra.mvPolynomialToTate_X]
+        have hj : j = 0 := Subsingleton.elim j 0
+        subst hj
+        rw [hΦ_X, hβ_coe, hψ_div]
+    exact RingHom.congr_fun hcomp p
+  -- conclude
+  rw [hΦ_ker]
+  intro h hh
+  have hh2 : Φ h = 0 := hh
+  have hfun := congrFun hext h
+  simp only [Function.comp_apply, hh2, map_zero] at hfun
+  exact Ideal.Quotient.eq_zero_iff_mem.mp hfun.symm
+
+omit [CompatiblePlusSubring A] in
+set_option linter.unusedSectionVars false in
+/-- **Wedhorn (8.2.1)-plus, explicit kernel**: `ker(evalHom) = (b − ζ)` for the
+plus-half `R(b/1)`. -/
+theorem unitDatum_ker_eq_span
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (P : PairOfDefinition A) (b : A) :
+    RingHom.ker (example638_evalHom (unitDatum P b)) =
+      Ideal.span {algebraMap A ↥(TateAlgebra A) b - TateAlgebra.X} :=
+  le_antisymm (unitDatum_ker_le_span P b) (unitDatum_span_le_ker P b)
+
+omit [CompatiblePlusSubring A] in
+set_option linter.unusedSectionVars false in
+/-- **Wedhorn (8.2.1)-minus, explicit kernel**: `ker(evalHom) = (1 − bη)` for the
+minus-half `R(1/b)`. -/
+theorem coUnitDatum_ker_eq_span
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (P : PairOfDefinition A) (b : A) :
+    RingHom.ker (example638_evalHom (coUnitDatum P b)) =
+      Ideal.span {1 - algebraMap A ↥(TateAlgebra A) b * TateAlgebra.X} :=
+  le_antisymm (coUnitDatum_ker_le_span P b) (coUnitDatum_span_le_ker P b)
+
+omit [CompatiblePlusSubring A] in
+set_option linter.unusedSectionVars false in
+/-- **Wedhorn Example 6.38, plus form (any strongly noetherian Tate base)**:
+`O_X(R(b/1)) ≃+* A⟨ζ⟩/(b − ζ)` — surjectivity (`example638_evalHom_surjective`)
+plus the explicit kernel (`unitDatum_ker_eq_span`). -/
+noncomputable def unitDatum_quotEquiv
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (P : PairOfDefinition A) (b : A) :
+    presheafValue (unitDatum P b) ≃+*
+      (↥(TateAlgebra A) ⧸ Ideal.span {algebraMap A ↥(TateAlgebra A) b - TateAlgebra.X}) :=
+  ((RingHom.quotientKerEquivOfSurjective
+      (example638_evalHom_surjective (unitDatum P b))).symm).trans
+    (Ideal.quotEquivOfEq (unitDatum_ker_eq_span P b))
+
+omit [CompatiblePlusSubring A] in
+set_option linter.unusedSectionVars false in
+/-- **Wedhorn Example 6.39, minus form (any strongly noetherian Tate base)**:
+`O_X(R(1/b)) ≃+* A⟨η⟩/(1 − bη)`. -/
+noncomputable def coUnitDatum_quotEquiv
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (P : PairOfDefinition A) (b : A) :
+    presheafValue (coUnitDatum P b) ≃+*
+      (↥(TateAlgebra A) ⧸ Ideal.span {1 - algebraMap A ↥(TateAlgebra A) b * TateAlgebra.X}) :=
+  ((RingHom.quotientKerEquivOfSurjective
+      (example638_evalHom_surjective (coUnitDatum P b))).symm).trans
+    (Ideal.quotEquivOfEq (coUnitDatum_ker_eq_span P b))
+
+omit [CompatiblePlusSubring A] in
+set_option linter.unusedSectionVars false in
+/-- The plus equivalence sends `canonicalMap x` to the constant class
+`mk (algebraMap x)`. -/
+theorem unitDatum_quotEquiv_canonicalMap
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (P : PairOfDefinition A) (b : A) (x : A) :
+    unitDatum_quotEquiv P b ((unitDatum P b).canonicalMap x) =
+      Ideal.Quotient.mk _ (algebraMap A ↥(TateAlgebra A) x) := by
+  have h1 : (unitDatum P b).canonicalMap x =
+      example638_evalHom (unitDatum P b)
+        (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) x) :=
+    (example638_evalHom_algebraMap _ x).symm
+  have h2 : (RingHom.quotientKerEquivOfSurjective
+      (example638_evalHom_surjective (unitDatum P b))).symm
+        (example638_evalHom (unitDatum P b)
+          (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) x)) =
+      Ideal.Quotient.mk (RingHom.ker (example638_evalHom (unitDatum P b)))
+        (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) x) := by
+    rw [RingEquiv.symm_apply_eq]
+    rfl
+  show (Ideal.quotEquivOfEq (unitDatum_ker_eq_span P b))
+      ((RingHom.quotientKerEquivOfSurjective
+        (example638_evalHom_surjective (unitDatum P b))).symm
+          ((unitDatum P b).canonicalMap x)) = _
+  rw [h1, h2]
+  erw [Ideal.quotEquivOfEq_mk]
+
+omit [CompatiblePlusSubring A] in
+set_option linter.unusedSectionVars false in
+/-- The minus equivalence sends `canonicalMap x` to the constant class
+`mk (algebraMap x)`. -/
+theorem coUnitDatum_quotEquiv_canonicalMap
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (P : PairOfDefinition A) (b : A) (x : A) :
+    coUnitDatum_quotEquiv P b ((coUnitDatum P b).canonicalMap x) =
+      Ideal.Quotient.mk _ (algebraMap A ↥(TateAlgebra A) x) := by
+  have h1 : (coUnitDatum P b).canonicalMap x =
+      example638_evalHom (coUnitDatum P b)
+        (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) x) :=
+    (example638_evalHom_algebraMap _ x).symm
+  have h2 : (RingHom.quotientKerEquivOfSurjective
+      (example638_evalHom_surjective (coUnitDatum P b))).symm
+        (example638_evalHom (coUnitDatum P b)
+          (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) x)) =
+      Ideal.Quotient.mk (RingHom.ker (example638_evalHom (coUnitDatum P b)))
+        (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) x) := by
+    rw [RingEquiv.symm_apply_eq]
+    rfl
+  show (Ideal.quotEquivOfEq (coUnitDatum_ker_eq_span P b))
+      ((RingHom.quotientKerEquivOfSurjective
+        (example638_evalHom_surjective (coUnitDatum P b))).symm
+          ((coUnitDatum P b).canonicalMap x)) = _
+  rw [h1, h2]
+  erw [Ideal.quotEquivOfEq_mk]
 
 end Wedhorn828
 

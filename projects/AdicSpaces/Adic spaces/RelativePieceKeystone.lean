@@ -1334,6 +1334,41 @@ theorem prop_8_30_basic_laurent_step_flat
       right_inv := e.apply_symm_apply }
 
 omit [CompatiblePlusSubring A] in
+/-- **A1a engine — `presheafValue(R(f/1))` is flat over `A`, ARBITRARY `f`** (Wedhorn Lemma 8.31(2),
+fSubX shape). Transports the proven faithful `lemma_8_31_fSubX_flat` (`A⟨X⟩/(f − X)` flat over `A`,
+`[IsNoetherianRing A]`-only, arbitrary `f`) across the faithful fSubX iso `unitDatum_quotEquiv`
+(Wedhorn Example 6.38, the `R(f/1)` quotient comparison `presheafValue (unitDatum P f) ≃+* A⟨X⟩/(f −
+X)`, relocated up to `Wedhorn828` so this upstream engine can consume it). This is the per-step engine
+the Remark-7.55 chain needs where the new generator `f = tᵢ/s` is NOT power-bounded in the base — the
+gap `prop_8_30_basic_laurent_step_flat` (which requires `D'.T ⊆ E.P.A₀`) cannot fill. NO `hT_pb`. All
+instance hypotheses (incl. completeness) come from the `Wedhorn828Tail` section variables. -/
+theorem presheafValue_flat_of_unitDatum_faithful (P : PairOfDefinition A) (f : A) :
+    @Module.Flat A (presheafValue (unitDatum P f)) _ _
+      (RingHom.toModule (unitDatum P f).canonicalMap) := by
+  haveI hflat_quot : Module.Flat A (↥(TateAlgebra A) ⧸
+      Ideal.span {algebraMap A ↥(TateAlgebra A) f - TateAlgebra.X}) :=
+    lemma_8_31_fSubX_flat (A := A) f
+  let e := unitDatum_quotEquiv P f
+  change @Module.Flat A (presheafValue (unitDatum P f)) _ _
+    (RingHom.toModule (unitDatum P f).canonicalMap)
+  letI : Module A (presheafValue (unitDatum P f)) :=
+    RingHom.toModule (unitDatum P f).canonicalMap
+  have he_smul : ∀ (a : A) (x : presheafValue (unitDatum P f)), e (a • x) = a • e x := by
+    intro a x
+    change e ((unitDatum P f).canonicalMap a * x) =
+      (Ideal.Quotient.mk (Ideal.span {algebraMap A ↥(TateAlgebra A) f - TateAlgebra.X}))
+        (algebraMap A ↥(TateAlgebra A) a) * e x
+    rw [e.map_mul]; congr 1
+    exact unitDatum_quotEquiv_canonicalMap P f a
+  exact @Module.Flat.of_linearEquiv A
+    (↥(TateAlgebra A) ⧸ Ideal.span {algebraMap A ↥(TateAlgebra A) f - TateAlgebra.X})
+    (presheafValue (unitDatum P f)) _ _ _ _ _ hflat_quot
+    { toLinearMap := { toFun := e, map_add' := e.map_add, map_smul' := he_smul }
+      invFun := e.symm
+      left_inv := e.symm_apply_apply
+      right_inv := e.apply_symm_apply }
+
+omit [CompatiblePlusSubring A] in
 /-- **Remark 7.55, step 0 — the dominating unit over `B = 𝒪_X(D)`** (Wedhorn p.70: *"Since `U` is
 quasi-compact, there exists by Corollary 7.32 a unit `u ∈ A×` such that `|u(x)| < |s(x)|` for all
 `x ∈ U`"*). For the image piece `W := imagePieceDatum D E.T E.s hspanE` of the whole space `Spa B`,
@@ -1358,6 +1393,110 @@ theorem remark755_dominating_unit_over_presheafValue
   exact ⟨u, fun y hy => hu y (Set.mem_preimage.mpr hy)⟩
 
 omit [CompatiblePlusSubring A] in
+/-- **`s`-absorption `rationalOpen` equality** (Remark 7.55 single-step over `B = 𝒪_X(D₀)`).
+The image piece `imagePieceDatum D₀ {f, s} s` (the `genPiece` with the denominator `s` included
+among the generators, so `span{f,s} = ⊤` is free) has the SAME `rationalOpen` over `Spa B` as the
+single `unitDatum (canMap f · (canMap s)⁻¹)`: the `canMap s`-generator constraint `w.vle (canMap s)
+(canMap s)` is reflexivity (vacuous), `¬w.vle (canMap s) 0` holds since `canMap s` is a unit, and
+`w.vle (canMap f)(canMap s) ⟺ w.vle (canMap f·(canMap s)⁻¹) 1` by unit cancellation. Isolated `sorry`
+(the `vle` set-equality; all constraints are free for Spa points). -/
+theorem imagePieceDatum_denomGen_rationalOpen_eq [DecidableEq A] (D₀ : RationalLocData A) (f s : A)
+    (hspan : Ideal.span (({f, s} : Finset A) : Set A) = ⊤)
+    (hs_unit : IsUnit (D₀.canonicalMap s)) :
+    rationalOpen (imagePieceDatum D₀ {f, s} s hspan).T (imagePieceDatum D₀ {f, s} s hspan).s =
+      rationalOpen ({D₀.canonicalMap f * Ring.inverse (D₀.canonicalMap s)} : Finset (presheafValue D₀)) 1 := by
+  letI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_concrete D₀
+  letI : DecidableEq (presheafValue D₀) := Classical.decEq _
+  have hT : (imagePieceDatum D₀ {f, s} s hspan).T = ({f, s} : Finset A).image D₀.canonicalMap := rfl
+  have hSs : (imagePieceDatum D₀ {f, s} s hspan).s = D₀.canonicalMap s := rfl
+  set cs := D₀.canonicalMap s with hcs
+  set cf := D₀.canonicalMap f with hcf
+  have hsi : cs * Ring.inverse cs = 1 := Ring.mul_inverse_cancel cs hs_unit
+  have his : Ring.inverse cs * cs = 1 := Ring.inverse_mul_cancel cs hs_unit
+  rw [hT, hSs]
+  apply Set.ext
+  intro w
+  rw [rationalOpen, rationalOpen, Set.mem_sep_iff, Set.mem_sep_iff]
+  refine and_congr_right fun _ => ?_
+  constructor
+  · rintro ⟨hgen, _⟩
+    refine ⟨?_, not_vle_zero_of_isUnit isUnit_one w⟩
+    intro t ht
+    rw [Finset.mem_singleton] at ht; subst ht
+    have hcf : w.vle cf cs :=
+      hgen cf (Finset.mem_image_of_mem _ (Finset.mem_insert_self f {s}))
+    have h2 := w.mul_vle_mul_left hcf (Ring.inverse cs)
+    rwa [hsi] at h2
+  · rintro ⟨hg, _⟩
+    refine ⟨?_, not_vle_zero_of_isUnit hs_unit w⟩
+    intro t ht
+    rw [Finset.mem_image] at ht
+    obtain ⟨x, hx, rfl⟩ := ht
+    have hg1 : w.vle (cf * Ring.inverse cs) 1 := hg _ (Finset.mem_singleton_self _)
+    rw [Finset.mem_insert, Finset.mem_singleton] at hx
+    rcases hx with rfl | rfl
+    · have h2 := w.mul_vle_mul_left hg1 cs
+      rw [one_mul, mul_assoc, his, mul_one] at h2
+      exact h2
+    · exact w.vle_refl cs
+
+omit [CompatiblePlusSubring A] in
+/-- **Per-step core (Remark 7.55, the A1a fSubX step over `B`)** — `𝒪_B(imagePieceDatum D₀ {f,s} s)`
+is flat over `B = presheafValue D₀`. The image piece equals (same `rationalOpen`, by
+`imagePieceDatum_denomGen_rationalOpen_eq`) the single `unitDatum (canMap f·(canMap s)⁻¹)`, which is
+flat over `B` by the arbitrary-`f` engine `presheafValue_flat_of_unitDatum_faithful`; flatness
+transports across the restriction iso (which intertwines the two `canonicalMap`s). This is the genuine
+per-step the Remark-7.55 chain folds; the denominator `s` need not be power-bounded. -/
+theorem flat_imagePieceDatum_denomGen [DecidableEq A] (D₀ : RationalLocData A) (f s : A)
+    (hspan : Ideal.span (({f, s} : Finset A) : Set A) = ⊤)
+    (hs_unit : IsUnit (D₀.canonicalMap s)) :
+    @Module.Flat (presheafValue D₀) (presheafValue (imagePieceDatum D₀ {f, s} s hspan)) _ _
+      (RingHom.toModule (imagePieceDatum D₀ {f, s} s hspan).canonicalMap) := by
+  classical
+  letI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_concrete D₀
+  haveI : IsNoetherianRing (presheafValue D₀) := presheafValue_isNoetherianRing_faithful D₀
+  haveI : IsStronglyNoetherian (presheafValue D₀) := presheafValue_isStronglyNoetherian_faithful D₀
+  haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  letI : DecidableEq (presheafValue D₀) := Classical.decEq _
+  haveI hCompleteB : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  set g : presheafValue D₀ := D₀.canonicalMap f * Ring.inverse (D₀.canonicalMap s) with hg
+  set W := imagePieceDatum D₀ {f, s} s hspan with hW
+  set U : RationalLocData (presheafValue D₀) :=
+    unitDatum (presheafValue_concretePair D₀) g with hU
+  -- The image piece and the unit datum have equal `rationalOpen` (the `s`-absorption).
+  have h_ro : rationalOpen W.T W.s = rationalOpen U.T U.s := by
+    rw [hW, hU]
+    change rationalOpen (imagePieceDatum D₀ {f, s} s hspan).T
+        (imagePieceDatum D₀ {f, s} s hspan).s =
+      rationalOpen ({g} : Finset (presheafValue D₀)) 1
+    rw [hg]; exact imagePieceDatum_denomGen_rationalOpen_eq D₀ f s hspan hs_unit
+  -- `𝒪(U) = 𝒪(unitDatum g)` is flat over `B` by the arbitrary-`f` engine.
+  haveI hflat_U : @Module.Flat (presheafValue D₀) (presheafValue U) _ _
+      (RingHom.toModule U.canonicalMap) := by
+    rw [hU]; exact presheafValue_flat_of_unitDatum_faithful (presheafValue_concretePair D₀) g
+  -- Transport flatness across the restriction iso `e : 𝒪(W) ≃+* 𝒪(U)` (equal `rationalOpen`),
+  -- which intertwines `W.canonicalMap` with `U.canonicalMap` (`restrictionMapHom_canonicalMap`).
+  let e : presheafValue W ≃+* presheafValue U :=
+    RingEquiv.ofBijective (restrictionMapHom W U h_ro.symm.le)
+      (restrictionMap_bijective_of_rationalOpen_eq W U h_ro)
+  letI : Module (presheafValue D₀) (presheafValue W) := RingHom.toModule W.canonicalMap
+  letI : Module (presheafValue D₀) (presheafValue U) := RingHom.toModule U.canonicalMap
+  have he_smul : ∀ (a : presheafValue D₀) (x : presheafValue W), e (a • x) = a • e x := by
+    intro a x
+    change e (W.canonicalMap a * x) = U.canonicalMap a * e x
+    rw [e.map_mul]; congr 1
+    change restrictionMapHom W U h_ro.symm.le (W.canonicalMap a) = U.canonicalMap a
+    exact restrictionMapHom_canonicalMap W U h_ro.symm.le a
+  exact @Module.Flat.of_linearEquiv (presheafValue D₀) (presheafValue U) (presheafValue W)
+    _ _ _ _ _ hflat_U
+    { toLinearMap := { toFun := e, map_add' := e.map_add, map_smul' := he_smul }
+      invFun := e.symm
+      left_inv := e.symm_apply_apply
+      right_inv := e.apply_symm_apply }
+
+omit [CompatiblePlusSubring A] in
 /-- **GENUINE RESIDUAL — whole-space Prop 8.30 over `B = 𝒪_X(D)` (Remark-7.55 chain)**
 (Wedhorn Remark 7.55, `wedhorn.txt:3504`–`3517`).
 
@@ -1365,18 +1504,30 @@ This is the *second* of Wedhorn's two reductions, AFTER "we may assume `X = V`"
 (`prop_8_30_remark755_chain`'s keystone base change): for the rational subset `im E`
 of the *whole space* `Spa B`, the canonical restriction `B → 𝒪_B(im E)` is flat.
 
-Wedhorn (Remark 7.55) decomposes `Spa B ⊇ X₀ ⊇ X₁ ⊇ ⋯ ⊇ Xₙ = im E` into *basic-Laurent*
-steps: `X₀ = {1 ≤ x(s/u)}` for the dominating unit `u ∈ B×` (Cor 7.32) and
-`Xᵢ = Xᵢ₋₁ ∩ {x(tᵢ) ≤ x(s)}`. Each step `Xᵢ ⊆ Xᵢ₋₁` is a single `LaurentNormalized`
-generator, flat by `prop_8_30_basic_laurent_step_flat` (PROVEN); the composite
-`B → 𝒪_B(im E)` folds by `Module.Flat.trans`.
+Wedhorn (Remark 7.55, **read verbatim from the PDF p.70**) decomposes
+`Spa B ⊇ X₀ ⊇ X₁ ⊇ ⋯ ⊇ Xₙ = im E`: `X₀ = {1 ≤ x(s/u)}` for the dominating unit
+`u ∈ B×` (Cor 7.32, `remark755_dominating_unit_over_presheafValue` PROVEN), on which `s`
+becomes a unit (Prop 7.52); then `Xᵢ = Xᵢ₋₁ ∩ {x(tᵢ/s) ≤ 1}`.
 
-**Why isolated.** The per-step engine is sorry-free; what remains is the *geometric*
-chain-object: the inductive sequence `Xᵢ` over the intermediate bases `𝒪_B(Xᵢ₋₁)`
-(`cor_7_32_dominating_unit` supplies `X₀`, sorry-free; the inductive `Xᵢ`-chain + the
-`LaurentNormalized`/generators-in-`A₀` discharge per step are the missing content).
-NO added hypothesis (the `B`-instances are derived from the faithful instances).
-Isolated per the CLAUDE.md sub-lemma-with-`sorry` rule. -/
+**FAITHFUL per-step (the A1a engine, PROVEN).** Over `Bᵢ₋₁ := 𝒪_B(Xᵢ₋₁)` (where `s` is a
+unit), each step is the single basic piece `R((tᵢ/s)/1) = unitDatum(tᵢ/s)`, with `tᵢ/s`
+**NOT power-bounded** in `Bᵢ₋₁`. So it is `presheafValue_flat_of_unitDatum_faithful` (the
+relocated faithful Example-6.38 fSubX iso `unitDatum_quotEquiv` + `lemma_8_31_fSubX_flat`,
+arbitrary `f`), **NOT** `prop_8_30_basic_laurent_step_flat` — the latter requires
+`hD'_T_pb : D'.T ⊆ E.P.A₀` (`LaurentNormalized`, generators power-bounded), which `tᵢ/s`
+**fails**, so that route is unavailable here.
+
+**Remaining content (the chain assembly).** The per-step identification
+`𝒪(Xᵢ) ≅ 𝒪_{Bᵢ₋₁}(unitDatum(tᵢ/s))` is the **relative single-step Example 6.38**: via the
+Spa-correspondence `Spa(Bᵢ₋₁) ≅ rationalOpen(Xᵢ₋₁)` (Step 1, sorry-free) the absorption is
+all-free for Spa points — `comap_canonicalMap_vle` (Presheaf:485) gives `w.vle (canMap tⱼ)
+(canMap s)` ∀`tⱼ∈Xᵢ₋₁.T`, and `canonicalMap_s_isUnit` gives `¬w.vle (canMap s) 0` — so
+`rationalOpen` collapses to the single `unitDatum`, `restrictionMap_bijective_of_rationalOpen_eq`
+(GeometricReduction:411) gives the iso, then the A1a engine finishes. Fold via
+`restrictionMap_flat_chain`. **⚠ Do NOT** route through a general multivariate
+`A⟨X₁..Xₘ⟩/(s·Xᵢ−tᵢ)` flatness — that needs a restricted-power-series **Fubini** absent from
+mathlib (the CLAUDE.md case-study divergence trap). Isolated per the CLAUDE.md
+sub-lemma-with-`sorry` rule; NO added hypothesis. -/
 theorem prop_8_30_imagePiece_wholeSpace_flat
     (D E : RationalLocData A) (hspanE : Ideal.span (E.T : Set A) = ⊤) :
     @Module.Flat (presheafValue D) (presheafValue (imagePieceDatum D E.T E.s hspanE)) _ _
