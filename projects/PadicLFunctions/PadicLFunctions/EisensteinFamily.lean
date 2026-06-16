@@ -244,7 +244,8 @@ private lemma coe_inv_two (hp2 : p ≠ 2) :
   have h3 : (2 : ℚ_[p]) * (((u⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) : ℚ_[p]) = 1 := by
     have := congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) h2
     push_cast at this
-    convert this using 2 <;> norm_cast
+    convert this using 2
+    rfl
   exact eq_inv_of_mul_eq_one_left (by rw [mul_comm]; exact h3)
 
 /-- The canonical witness equation behind both the twisted-pseudo-measure property

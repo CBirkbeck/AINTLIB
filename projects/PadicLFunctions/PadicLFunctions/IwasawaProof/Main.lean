@@ -36,6 +36,8 @@ remaining input for `col_image_cycloTower1_eq_zetaIdeal` and hence for the miles
 
 open PadicLFunctions PadicLFunctions.Coleman
 
+open scoped IntermediateField
+
 noncomputable section
 
 namespace PadicLFunctions.Coleman
@@ -497,13 +499,388 @@ theorem col_mem_zetaIdeal_of_mem_cycloTower1Plus (hp2 : p ≠ 2) {u : NormCompat
   rintro _ ⟨v, hv, rfl⟩
   exact cycloGenSubgroup_le_colPreimageZeta p hp2 hv
 
+/-! ## RJW lem:cyc units gen (ii): the `c`-anti-invariant part of `𝒞_{∞,1}` is `ℤ_p(1)`
+
+`𝒟_n = ⟨ξ_{p^n}⟩ · 𝒟⁺_n`, and complex conjugation `σ_{-1}` acts by `−1` on `⟨ξ⟩` and fixes
+`𝒟⁺_n`, so the `σ_{-1}`-anti-invariant part of the closure `𝒞_{n,1}` is the `ξ`-power tower
+`ℤ_p(1)_n`. The level-`n` mechanism is the explicit conjugation formula on cyclotomic units:
+for `v ∈ 𝒟_n` the "antisymmetrisation" `v · σ_{-1}(v)⁻¹` lands in the finite group `⟨±ξ_n⟩`
+(`anti_mem_negZeta_of_mem_cycloUnits` below), so — by continuity through the closure — for a
+*principal* `σ_{-1}`-anti-invariant limit `z_n ∈ 𝒞_{n,1}` (where `v·σ_{-1}(v)⁻¹` specialises to
+`z_n²`) the square `z_n²` is a `ξ`-power, and the unique `ℤ_p`-square root (`2` a unit, `p`
+odd) makes `z_n` itself a `ξ`-power. The level exponents then assemble (`ℤ_p = lim ℤ/p^nℤ`) to
+a single `a ∈ ℤ_p`.
+
+The level-norm substrate `levelNorm_zetaSys`/`levelNorm_zpPow_zetaSys` is re-derived here as
+the existing forms in `FundamentalSequence`/`GaloisAction` are `private`; both proofs use only
+public Tower/Galois lemmas and carry `hp2 : p ≠ 2` (errata #14). -/
+
+/-- `‖ξ_n − 1‖ < 1` for `n ≥ 1` (`ξ_n − 1 = π_n`, the uniformiser). -/
+private theorem norm_zetaSysM_sub_one_lt_one {n : ℕ} (hn : 1 ≤ n) :
+    ‖zetaSys p n - 1‖ < 1 := by
+  have := norm_pi_lt_one p hn; rwa [pi] at this
+
+/-- `zpPow ξ_n c = ξ_n^{(toZModPow n c).val}` (the `p^n`-periodicity of `ξ_n^·`): both sides
+are continuous in `c` and agree on `c ∈ ℕ` (`zpPow_natCast` / `ξ_n^{k mod p^n} = ξ_n^k`).
+Re-derivation of the `private` `GaloisAction.zpPow_zetaSys`. -/
+private theorem zpPow_zetaSysM {n : ℕ} (hn : 1 ≤ n) (c : ℤ_[p]) :
+    zpPow p (zetaSys p n) c
+      = zetaSys p n ^ ((PadicInt.toZModPow n c : ZMod (p ^ n)).val) := by
+  have hz1 : ‖zetaSys p n - 1‖ < 1 := norm_zetaSysM_sub_one_lt_one p hn
+  have hcontL : Continuous (zpPow p (zetaSys p n)) := by
+    have h : zpPow p (zetaSys p n) = (PadicInt.addChar_of_value_at_one (zetaSys p n - 1)
+        (tendsto_pow_atTop_nhds_zero_iff_norm_lt_one.mpr hz1) : ℤ_[p] → ℂ_[p]) := by
+      funext a; rw [zpPow, dif_pos (tendsto_pow_atTop_nhds_zero_iff_norm_lt_one.mpr hz1)]
+    rw [h]; exact PadicInt.continuous_addChar_of_value_at_one _
+  have hcontR : Continuous fun c : ℤ_[p] =>
+      zetaSys p n ^ ((PadicInt.toZModPow n c : ZMod (p ^ n)).val) := by
+    have hlcZ : IsLocallyConstant fun c : ℤ_[p] => (PadicInt.toZModPow n c : ZMod (p ^ n)) :=
+      fun s => by
+        rw [← Set.biUnion_preimage_singleton]
+        exact isOpen_biUnion fun a _ => PadicMeasure.isOpen_toZModPow_fiber p n a
+    exact ((hlcZ.comp ZMod.val).comp fun k => zetaSys p n ^ k).continuous
+  have hnat : ∀ k : ℕ, zpPow p (zetaSys p n) (k : ℤ_[p])
+      = zetaSys p n ^ ((PadicInt.toZModPow n (k : ℤ_[p]) : ZMod (p ^ n)).val) := by
+    intro k
+    rw [zpPow_natCast p hz1]
+    refine zetaSys_pow_eq_pow_of_modEq p ?_
+    rw [← ZMod.natCast_eq_natCast_iff, ZMod.natCast_zmod_val, map_natCast]
+  exact congrFun (PadicInt.denseRange_natCast.equalizer hcontL hcontR (funext hnat)) c
+
+-- the `Algebra.norm`/minimal-polynomial computation over the relative extension
+-- `K_{n+1}/K_n` (PowerBasis + `minpoly_extendScalars_of_pow`) is heartbeat-heavy
+set_option maxHeartbeats 1000000 in
+/-- **The cyclotomic norm of `ξ_{n+1}`** (RJW TeX 2581–2585): `N_{n+1,n}(ξ_{n+1}) = ξ_n` for
+`n ≥ 1`, `p` odd. `ξ_{n+1}` generates `K_{n+1}/K_n` with minimal polynomial `X^p − C(ξ_n)`
+(`zetaSys_pow_p`), so its norm is `(−1)^p·(−ξ_n) = ξ_n` (`p` odd). Re-derivation of the
+`private` `FundamentalSequence.levelNorm_zetaSys`. -/
+private theorem levelNorm_zetaSysM (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n) :
+    levelNorm p n (zetaSys p (n + 1)) = zetaSys p n := by
+  haveI : FiniteDimensional ℚ_[p] (IntermediateField.extendScalars (K_le_succ p n)) :=
+    IsCyclotomicExtension.finiteDimensional {p ^ (n + 1)} ℚ_[p] (K p (n + 1))
+  haveI : FiniteDimensional (K p n) (IntermediateField.extendScalars (K_le_succ p n)) :=
+    FiniteDimensional.right ℚ_[p] (K p n) _
+  have hp0 : p ≠ 0 := hp.out.ne_zero
+  have hwK : zetaSys p (n + 1) ∈ K p (n + 1) := zetaSys_mem_K p (n + 1)
+  have hcK : zetaSys p n ∈ K p n := zetaSys_mem_K p n
+  set W : IntermediateField.extendScalars (K_le_succ p n) :=
+    ⟨zetaSys p (n + 1), (IntermediateField.mem_extendScalars (K_le_succ p n)).2 hwK⟩ with hW
+  set c : K p n := ⟨zetaSys p n, hcK⟩ with hc
+  have hWc : W ^ p = algebraMap (K p n) (IntermediateField.extendScalars (K_le_succ p n)) c := by
+    apply Subtype.ext
+    change (zetaSys p (n + 1)) ^ p = (zetaSys p n : ℂ_[p])
+    rw [zetaSys_pow_p]
+  have hWbot : (W : ℂ_[p]) ∉ K p n :=
+    primitiveRoot_notMem_K p hn (zetaSys_primitiveRoot p (n + 1))
+  have hWtop : (K p n)⟮W⟯ = ⊤ := extendScalars_adjoin_eq_top p hn hWbot
+  have hmpW : minpoly (K p n) W = (Polynomial.X : Polynomial (K p n)) ^ p - Polynomial.C c :=
+    minpoly_extendScalars_of_pow p hn hWc hWtop
+  have hroot : (Polynomial.aeval W) ((Polynomial.X : Polynomial (K p n)) ^ p - Polynomial.C c)
+      = 0 := by
+    rw [map_sub, map_pow, Polynomial.aeval_X, Polynomial.aeval_C, hWc, sub_self]
+  have hint : IsIntegral (K p n) W := ⟨_, Polynomial.monic_X_pow_sub_C c hp0, hroot⟩
+  have hdeg : (minpoly (K p n) W).natDegree = p := by
+    rw [hmpW, Polynomial.natDegree_X_pow_sub_C]
+  have hnorm : Algebra.norm (K p n) W
+      = (-1) ^ (minpoly (K p n) W).natDegree * (minpoly (K p n) W).coeff 0 := by
+    rw [Algebra.norm_eq_norm_adjoin (K p n) W]
+    have hrank : Module.finrank (↥(K p n)⟮W⟯)
+        (IntermediateField.extendScalars (K_le_succ p n)) = 1 := by
+      rw [hWtop]; exact IntermediateField.finrank_top
+    rw [hrank, pow_one]
+    have hpb := Algebra.PowerBasis.norm_gen_eq_coeff_zero_minpoly
+      (IntermediateField.adjoin.powerBasis hint)
+    rwa [IntermediateField.adjoin.powerBasis_gen, IntermediateField.adjoin.powerBasis_dim,
+      IntermediateField.minpoly_gen] at hpb
+  have hnval : Algebra.norm (K p n) W = c := by
+    rw [hnorm, hdeg, hmpW, Polynomial.coeff_sub, Polynomial.coeff_C_zero,
+      Polynomial.coeff_X_pow, if_neg (show ¬(0 = p) by omega), zero_sub,
+      (hp.out.odd_of_ne_two hp2).neg_one_pow, neg_one_mul, neg_neg]
+  rw [levelNorm_apply p n hwK]
+  change (Algebra.norm (K p n) W : ℂ_[p]) = zetaSys p n
+  rw [hnval, hc]
+
+/-- `N_{n+1,n}(ξ_{n+1}^k) = ξ_n^k` (`levelNorm` multiplicativity + `levelNorm_zetaSysM`). -/
+private theorem levelNorm_zetaSysM_pow (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n) (k : ℕ) :
+    levelNorm p n (zetaSys p (n + 1) ^ k) = zetaSys p n ^ k := by
+  induction k with
+  | zero => rw [pow_zero, pow_zero, levelNorm_one]
+  | succ m ih =>
+    rw [pow_succ, pow_succ, levelNorm_mul p n
+      (pow_mem (zetaSys_mem_K p (n + 1)) m) (zetaSys_mem_K p (n + 1)), ih,
+      levelNorm_zetaSysM p hp2 hn]
+
+/-- **The cyclotomic norm of `zpPow`**: `N_{n+1,n}(ξ_{n+1}^a) = ξ_n^a` for `a : ℤ_p`, `n ≥ 1`,
+`p` odd. Reduces to the `ℕ`-power case via the `ξ^{(toZModPow…).val}` form (`zpPow_zetaSysM`)
+and `p^n`-periodicity. -/
+private theorem levelNorm_zpPow_zetaSysM (hp2 : p ≠ 2) (a : ℤ_[p]) {n : ℕ} (hn : 1 ≤ n) :
+    levelNorm p n (zpPow p (zetaSys p (n + 1)) a) = zpPow p (zetaSys p n) a := by
+  rw [zpPow_zetaSysM p (by omega : 1 ≤ n + 1) a, levelNorm_zetaSysM_pow p hp2 hn,
+    zpPow_zetaSysM p hn a]
+  refine zetaSys_pow_eq_pow_of_modEq p ?_
+  rw [← ZMod.natCast_eq_natCast_iff, ZMod.natCast_zmod_val, ZMod.natCast_val,
+    PadicInt.cast_toZModPow n (n + 1) (by omega)]
+
+/-- `ξ_n` as a unit of `ℂ_[p]ˣ` (nonzero primitive root). -/
+private noncomputable def zetaU (n : ℕ) : ℂ_[p]ˣ :=
+  Units.mk0 (zetaSys p n) ((zetaSys_primitiveRoot p n).ne_zero (pow_pos hp.out.pos n).ne')
+
+@[simp] private theorem zetaU_val (n : ℕ) : (zetaU p n : ℂ_[p]) = zetaSys p n := Units.val_mk0 _
+
+/-- `−ξ_n` as a unit of `ℂ_[p]ˣ`. Its powers `(−ξ_n)^k = ±ξ_n^k` are the finite group
+`⟨±ξ_n⟩`, the `σ_{-1}`-antisymmetrisation target of the cyclotomic generators. -/
+private noncomputable def negZetaU (n : ℕ) : ℂ_[p]ˣ :=
+  Units.mk0 (-(zetaSys p n))
+    (neg_ne_zero.2 ((zetaSys_primitiveRoot p n).ne_zero (pow_pos hp.out.pos n).ne'))
+
+@[simp] private theorem negZetaU_val (n : ℕ) : (negZetaU p n : ℂ_[p]) = -(zetaSys p n) :=
+  Units.val_mk0 _
+
+/-- `p^n` is odd for `p` odd. -/
+private theorem odd_p_pow (hp2 : p ≠ 2) (n : ℕ) : Odd (p ^ n) :=
+  (hp.out.odd_of_ne_two hp2).pow
+
+/-- `(−ξ_n)^{p^n} = −1` (as a unit), since `(−1)^{p^n} = −1` (`p^n` odd) and `ξ_n^{p^n} = 1`. -/
+private theorem negZetaU_pow_pn (hp2 : p ≠ 2) (n : ℕ) :
+    negZetaU p n ^ (p ^ n) = -1 := by
+  refine Units.ext ?_
+  rw [Units.val_pow_eq_pow_val, negZetaU_val, neg_pow, (zetaSys_primitiveRoot p n).pow_eq_one,
+    mul_one, (odd_p_pow p hp2 n).neg_one_pow, Units.val_neg, Units.val_one]
+
+/-- `−ξ_n` has finite order (`(−ξ_n)^{2 p^n} = 1`): a root of unity. -/
+private theorem isOfFinOrder_negZetaU (hp2 : p ≠ 2) (n : ℕ) : IsOfFinOrder (negZetaU p n) := by
+  rw [isOfFinOrder_iff_pow_eq_one]
+  refine ⟨2 * p ^ n, mul_pos two_pos (pow_pos hp.out.pos n), ?_⟩
+  rw [two_mul, pow_add, negZetaU_pow_pn p hp2 n, neg_mul_neg, one_mul]
+
+/-- `−1 ∈ ⟨−ξ_n⟩`: `−1 = (−ξ_n)^{p^n}` (`p^n` odd). -/
+private theorem negOne_mem_zpowers_negZetaU (hp2 : p ≠ 2) (n : ℕ) :
+    (-1 : ℂ_[p]ˣ) ∈ Subgroup.zpowers (negZetaU p n) :=
+  ⟨(↑(p ^ n) : ℤ), by simp only [zpow_natCast]; exact negZetaU_pow_pn p hp2 n⟩
+
+/-- `ξ_n ∈ ⟨−ξ_n⟩`: `ξ_n = (−ξ_n)^{p^n + 1}` (`(−ξ)^{p^n} = −1`, so `(−ξ)^{p^n+1} = −1·(−ξ) =
+ξ`). -/
+private theorem zetaU_mem_zpowers_negZetaU (hp2 : p ≠ 2) (n : ℕ) :
+    zetaU p n ∈ Subgroup.zpowers (negZetaU p n) := by
+  refine ⟨(↑(p ^ n + 1) : ℤ), ?_⟩
+  simp only [zpow_natCast]
+  rw [pow_succ, negZetaU_pow_pn p hp2 n]
+  refine Units.ext ?_
+  rw [Units.val_mul, Units.val_neg, Units.val_one, negZetaU_val, zetaU_val, neg_one_mul, neg_neg]
+
+/-- `‖(2 : ℂ_[p])‖ = 1` for `p` odd: `2` is a `ℤ_p`-unit (`isUnit_two_padicInt`) and the
+embedding `toCp : ℤ_[p] → ℂ_[p]` is isometric, so `‖toCp 2‖ = ‖(2:ℤ_[p])‖ = 1`. -/
+private theorem norm_two_Cp (hp2 : p ≠ 2) : ‖(2 : ℂ_[p])‖ = 1 := by
+  have h2 : ‖(2 : ℤ_[p])‖ = 1 := by
+    rw [← PadicInt.isUnit_iff]; exact PadicLFunctions.isUnit_two_padicInt p hp2
+  have htoCp : toCp p (2 : ℤ_[p]) = (2 : ℂ_[p]) := map_ofNat (toCp p) 2
+  rw [← htoCp, norm_toCp, h2]
+
+/-- **Unique principal square root**: in `ℂ_[p]` with `p` odd, two principal units with the
+same square are equal. From `x² = y²` we get `(x − y)(x + y) = 0`; `x + y = (x−1)+(y−1)+2`
+has norm `1` (ultrametric, `‖2‖ = 1`, `‖x−1‖,‖y−1‖ < 1`), so `x = y`. -/
+private theorem eq_of_sq_eq_of_norm_sub_one_lt_one (hp2 : p ≠ 2) {x y : ℂ_[p]}
+    (hx : ‖x - 1‖ < 1) (hy : ‖y - 1‖ < 1) (hsq : x ^ 2 = y ^ 2) : x = y := by
+  have hsum : x + y ≠ 0 := by
+    intro h
+    have hxy : x + y = (x - 1) + (y - 1) + 2 := by ring
+    rw [h] at hxy
+    have : ‖(0 : ℂ_[p])‖ = 1 := by
+      rw [hxy]
+      have h1 : ‖(x - 1) + (y - 1)‖ < 1 :=
+        lt_of_le_of_lt (IsUltrametricDist.norm_add_le_max _ _) (max_lt hx hy)
+      rw [show (x - 1) + (y - 1) + 2 = 2 + ((x - 1) + (y - 1)) from by ring]
+      rw [show ‖2 + ((x - 1) + (y - 1))‖ = ‖(2 : ℂ_[p])‖ from
+        IsUltrametricDist.norm_add_eq_max_of_norm_ne_norm
+          (by rw [norm_two_Cp p hp2]; exact ne_of_gt h1) |>.trans
+          (max_eq_left (by rw [norm_two_Cp p hp2]; exact h1.le)), norm_two_Cp p hp2]
+    rw [norm_zero] at this; exact zero_ne_one this
+  have hfac : (x - y) * (x + y) = 0 := by linear_combination hsq
+  rcases mul_eq_zero.1 hfac with h | h
+  · exact sub_eq_zero.1 h
+  · exact absurd h hsum
+
+/-- The `ℤ`-power `ξ_n^m` (in `ℂ_[p]`) equals the binomial `zpPow ξ_n (m : ℤ_[p])`: both
+equal `ξ_n^{(toZModPow n m).val}` (the `p^n`-periodicity of `ξ_n^·`, `zpPow_zetaSysM` and
+`IsPrimitiveRoot.zpow_eq_one_iff_dvd`). -/
+private theorem zpow_zetaSysM_eq_zpPow {n : ℕ} (hn : 1 ≤ n) (m : ℤ) :
+    (zetaSys p n : ℂ_[p]) ^ m = zpPow p (zetaSys p n) (m : ℤ_[p]) := by
+  rw [zpPow_zetaSysM p hn (m : ℤ_[p])]
+  set j : ℕ := (PadicInt.toZModPow n (m : ℤ_[p]) : ZMod (p ^ n)).val with hj
+  -- `ξ_n^m = ξ_n^j` ⟺ `ξ_n^{m − j} = 1` ⟺ `(p^n) ∣ (m − j)`, holds since `j ≡ m`.
+  rw [← zpow_natCast (zetaSys p n) j]
+  have hξ0 : (zetaSys p n : ℂ_[p]) ≠ 0 :=
+    (zetaSys_primitiveRoot p n).ne_zero (pow_pos hp.out.pos n).ne'
+  have hdvd : (↑(p ^ n) : ℤ) ∣ (m - (j : ℤ)) := by
+    rw [← ZMod.intCast_zmod_eq_zero_iff_dvd]
+    push_cast
+    rw [hj, ZMod.natCast_val, ZMod.cast_id']
+    simp only [id_eq]
+    have hmcast : (PadicInt.toZModPow n (m : ℤ_[p]) : ZMod (p ^ n)) = (m : ZMod (p ^ n)) := by
+      rw [show (m : ℤ_[p]) = ((m : ℤ) : ℤ_[p]) from rfl, map_intCast]
+    rw [hmcast]; ring
+  rw [show (zetaSys p n : ℂ_[p]) ^ m = (zetaSys p n : ℂ_[p]) ^ (j : ℤ) *
+    ((zetaSys p n : ℂ_[p]) ^ (m - (j : ℤ))) from by rw [← zpow_add₀ hξ0]; ring_nf]
+  rw [(zetaSys_primitiveRoot p n).zpow_eq_one_iff_dvd (m - (j : ℤ)) |>.2 hdvd, mul_one]
+
+/-- `‖ξ_n^m − 1‖ < 1` for `m : ℤ` (`ξ_n` is a principal `1`-unit; its `ℤ`-powers
+`ξ_n^m = zpPow ξ_n (m : ℤ_[p])` stay in the `1`-unit ball, `norm_zpPow_sub_one_lt_one`). -/
+private theorem norm_zpow_zetaSysM_sub_one_lt_one {n : ℕ} (hn : 1 ≤ n) (m : ℤ) :
+    ‖(zetaSys p n : ℂ_[p]) ^ m - 1‖ < 1 := by
+  rw [zpow_zetaSysM_eq_zpPow p hn m]
+  exact norm_zpPow_sub_one_lt_one p (norm_zetaSysM_sub_one_lt_one p hn) (m : ℤ_[p])
+
+/-- **The antisymmetrisation is a `ξ`-power (no sign)**: if the `c`-antisymmetrisation
+value `(-ξ_n)^m` is a principal `1`-unit (which it always is on the `c`-anti-invariant
+tower), then `m` is forced even and `(-ξ_n)^m = ξ_n^m`. Indeed, were `m` odd,
+`(-ξ_n)^m = -ξ_n^m` and `-ξ_n^m − 1 = -(ξ_n^m − 1) − 2` would have norm `‖2‖ = 1`
+(p odd, ultrametric), contradicting principality. -/
+private theorem neg_zpow_zetaSysM_eq_zpow (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n) {m : ℤ}
+    (hprin : ‖(-(zetaSys p n : ℂ_[p])) ^ m - 1‖ < 1) :
+    (-(zetaSys p n : ℂ_[p])) ^ m = (zetaSys p n : ℂ_[p]) ^ m := by
+  rcases Int.even_or_odd m with hm | hm
+  · exact hm.neg_zpow _
+  · exfalso
+    rw [hm.neg_zpow] at hprin
+    -- `-ξ^m − 1 = -(ξ^m − 1) − 2`, norm `= ‖2‖ = 1` since `‖ξ^m − 1‖ < 1`
+    have hξm : ‖(zetaSys p n : ℂ_[p]) ^ m - 1‖ < 1 :=
+      norm_zpow_zetaSysM_sub_one_lt_one p hn m
+    have heq : -(zetaSys p n : ℂ_[p]) ^ m - 1
+        = (-(2 : ℂ_[p])) + (-((zetaSys p n : ℂ_[p]) ^ m - 1)) := by ring
+    rw [heq] at hprin
+    have hne : ‖(-(2 : ℂ_[p]))‖ ≠ ‖(-((zetaSys p n : ℂ_[p]) ^ m - 1))‖ := by
+      rw [norm_neg, norm_neg, norm_two_Cp p hp2]; exact (ne_of_gt hξm)
+    rw [IsUltrametricDist.norm_add_eq_max_of_norm_ne_norm hne, norm_neg, norm_neg,
+      norm_two_Cp p hp2] at hprin
+    rw [max_eq_left hξm.le] at hprin
+    exact absurd hprin (by norm_num)
+
+/-- `zpPow ξ_n` is injective on residues mod `p^n`: `zpPow ξ_n a = zpPow ξ_n b ⟹
+toZModPow n a = toZModPow n b` (`zpPow ξ_n a = ξ_n^{(toZModPow n a).val}` and `ξ_n` is a
+primitive `p^n`-th root, so its powers separate residues; `ZMod.val` is injective). -/
+private theorem toZModPow_eq_of_zpPow_zetaSysM_eq {n : ℕ} (hn : 1 ≤ n) {a b : ℤ_[p]}
+    (h : zpPow p (zetaSys p n) a = zpPow p (zetaSys p n) b) :
+    PadicInt.toZModPow n a = PadicInt.toZModPow n b := by
+  rw [zpPow_zetaSysM p hn a, zpPow_zetaSysM p hn b] at h
+  have hval := (zetaSys_primitiveRoot p n).pow_inj (ZMod.val_lt _) (ZMod.val_lt _) h
+  exact ZMod.val_injective _ hval
+
+/-- The `ℤ_p`-inverse of `2` (`p` odd, `isUnit_two_padicInt`). -/
+private noncomputable def halfZp (hp2 : p ≠ 2) : ℤ_[p] :=
+  ((PadicLFunctions.isUnit_two_padicInt p hp2).unit⁻¹ : ℤ_[p]ˣ)
+
+private theorem two_mul_halfZp (hp2 : p ≠ 2) : (2 : ℤ_[p]) * halfZp p hp2 = 1 := by
+  set u : ℤ_[p]ˣ := (PadicLFunctions.isUnit_two_padicInt p hp2).unit with hu
+  have hv : (u : ℤ_[p]) = 2 := (PadicLFunctions.isUnit_two_padicInt p hp2).unit_spec
+  calc (2 : ℤ_[p]) * halfZp p hp2 = (u : ℤ_[p]) * ((u⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) := by
+        rw [hv, halfZp, ← hu]
+    _ = 1 := by rw [← Units.val_mul, mul_inv_cancel, Units.val_one]
+
+/-- **Per-level `ξ`-power extraction.** For a cyclotomic-tower unit `z` that is
+`c`-anti-invariant (`σ_{-1}(z) = z⁻¹`), each level value `z_n` is a single `ξ_n`-power:
+`(z_n : ℂ_[p]) = zpPow ξ_n a_n` with `a_n = m·2⁻¹`. The antisymmetrisation
+`z_n·σ_{-1}(z_n)⁻¹ = z_n²` is `(−ξ_n)^m` (bridge `cycloUnits_anti_mem_zpowers_negZeta`);
+`z_n²` is principal, so `m` is even and `(−ξ_n)^m = ξ_n^m` (`neg_zpow_zetaSysM_eq_zpow`);
+the unique principal square root (`2⁻¹∈ℤ_p`, `p` odd) gives `z_n = ξ_n^{m·2⁻¹}` as a
+`zpPow`. -/
+private theorem exists_zpPow_eq_elems (hp2 : p ≠ 2) {z : NormCompatUnits p}
+    (hz : z ∈ cycloTower1 p) (hc : galNCU p (-1) z = z⁻¹) {n : ℕ} (hn : 1 ≤ n) :
+    ∃ a : ℤ_[p], ((z.elems n : ℂ_[p]ˣ) : ℂ_[p]) = zpPow p (zetaSys p n) a := by
+  -- `z_n ∈ 𝒞_{n,1}`: principal and in the cyclotomic closure
+  have hmem := hz n hn
+  rw [cycloClosureOne, Subgroup.mem_inf, cycloClosure, Subgroup.mem_inf] at hmem
+  have hclos : z.elems n ∈ (cycloUnits p n).topologicalClosure := hmem.1.1
+  have hprin : z.elems n ∈ localUnitsOne p n := hmem.2
+  have hz1 : ‖((z.elems n : ℂ_[p]ˣ) : ℂ_[p]) - 1‖ < 1 := hprin.2
+  -- `σ_{-1}(z_n) = z_n⁻¹` at level `n`
+  have hcn : galAutValU p (-1) n (z.elems n) = (z.elems n)⁻¹ := by
+    have h : (galNCU p (-1) z).elems n = (z⁻¹).elems n := by rw [hc]
+    rwa [galNCU_elems_eq_galAutValU] at h
+  -- antisymmetrisation value `z_n · σ_{-1}(z_n)⁻¹ = z_n²`
+  have hAval :
+      ((z.elems n : ℂ_[p]ˣ) : ℂ_[p]) * ((galAutValU p (-1) n (z.elems n))⁻¹ : ℂ_[p]ˣ)
+        = ((z.elems n : ℂ_[p]ˣ) : ℂ_[p]) ^ 2 := by
+    rw [hcn, inv_inv]; ring
+  -- bridge: `z_n² = (−ξ_n)^m`
+  obtain ⟨m, hm⟩ := cycloUnits_anti_mem_zpowers_negZeta p hp2 hn hclos
+  rw [hAval] at hm
+  -- `z_n²` principal ⟹ `(−ξ_n)^m` principal ⟹ `(−ξ_n)^m = ξ_n^m`
+  have hsqprin : ‖((z.elems n : ℂ_[p]ˣ) : ℂ_[p]) ^ 2 - 1‖ < 1 := by
+    rw [show ((z.elems n : ℂ_[p]ˣ) : ℂ_[p]) ^ 2 - 1
+        = ((z.elems n : ℂ_[p]ˣ) : ℂ_[p]) * (((z.elems n : ℂ_[p]ˣ) : ℂ_[p]) - 1)
+          + (((z.elems n : ℂ_[p]ˣ) : ℂ_[p]) - 1) from by ring]
+    refine lt_of_le_of_lt (IsUltrametricDist.norm_add_le_max _ _) (max_lt ?_ hz1)
+    rw [norm_mul, norm_eq_one_of_mem_localUnits p hprin.1, one_mul]; exact hz1
+  have hnegprin : ‖(-(zetaSys p n : ℂ_[p])) ^ m - 1‖ < 1 := by rw [← hm]; exact hsqprin
+  have hξm : (-(zetaSys p n : ℂ_[p])) ^ m = (zetaSys p n : ℂ_[p]) ^ m :=
+    neg_zpow_zetaSysM_eq_zpow p hp2 hn hnegprin
+  -- so `z_n² = ξ_n^m`
+  have hsq : ((z.elems n : ℂ_[p]ˣ) : ℂ_[p]) ^ 2 = (zetaSys p n : ℂ_[p]) ^ m := by
+    rw [hm, hξm]
+  -- the candidate square root `w = ξ_n^{m·2⁻¹}` as a `zpPow`
+  set a : ℤ_[p] := (m : ℤ_[p]) * halfZp p hp2 with ha
+  have hz1' : ‖zetaSys p n - 1‖ < 1 := norm_zetaSysM_sub_one_lt_one p hn
+  have haa : a + a = (m : ℤ_[p]) := by
+    rw [ha, show (m : ℤ_[p]) * halfZp p hp2 + (m : ℤ_[p]) * halfZp p hp2
+        = (m : ℤ_[p]) * (2 * halfZp p hp2) from by ring, two_mul_halfZp p hp2, mul_one]
+  have hwsq : (zpPow p (zetaSys p n) a) ^ 2 = (zetaSys p n : ℂ_[p]) ^ m := by
+    rw [sq, ← zpPow_add p hz1', haa, ← zpow_zetaSysM_eq_zpPow p hn m]
+  -- unique principal square root: `z_n = w`
+  have hwprin : ‖zpPow p (zetaSys p n) a - 1‖ < 1 := norm_zpPow_sub_one_lt_one p hz1' a
+  exact ⟨a, eq_of_sq_eq_of_norm_sub_one_lt_one p hp2 hz1 hwprin (by rw [hsq, hwsq])⟩
+
 /-- **T1224' — the minus part of `𝒞_{∞,1}` is `ℤ_p(1)`** (RJW lem:cyc units gen (ii): `𝒟_n =
 ⟨ξ,𝒟⁺_n⟩`, so the `c`-anti-invariant part of the cyclotomic closure is the `ξ`-power tower). A
 cyclotomic-tower unit `z` fixed up to inversion by complex conjugation `σ_{-1}` lies in
 `ℤ_p(1) = ZpOne`. -/
 theorem mem_ZpOne_of_mem_cycloTower1_cAnti (hp2 : p ≠ 2) {z : NormCompatUnits p}
     (hz : z ∈ cycloTower1 p) (hc : galNCU p (-1) z = z⁻¹) : z ∈ ZpOne p := by
-  sorry
+  -- per-level exponents `A n` with `z_n = ξ_n^{A n}` (junk `0` at `n = 0`)
+  classical
+  set A : ℕ → ℤ_[p] :=
+    fun n => if hn : 1 ≤ n then (exists_zpPow_eq_elems p hp2 hz hc hn).choose else 0 with hAdef
+  have hA : ∀ n, 1 ≤ n → ((z.elems n : ℂ_[p]ˣ) : ℂ_[p]) = zpPow p (zetaSys p n) (A n) :=
+    fun n hn => by
+      rw [hAdef]; simp only [dif_pos hn]
+      exact (exists_zpPow_eq_elems p hp2 hz hc hn).choose_spec
+  -- level compatibility `toZModPow n (A (n+1)) = toZModPow n (A n)` from the norm relation
+  have hcompat : ∀ n, 1 ≤ n →
+      PadicInt.toZModPow n (A (n + 1)) = PadicInt.toZModPow n (A n) := by
+    intro n hn
+    refine toZModPow_eq_of_zpPow_zetaSysM_eq p hn ?_
+    -- `N_{n+1,n}(ξ_{n+1}^{A(n+1)}) = ξ_n^{A(n+1)}`, and `= N(z_{n+1}) = z_n = ξ_n^{A n}`
+    have hnorm : levelNorm p n (zpPow p (zetaSys p (n + 1)) (A (n + 1)))
+        = zpPow p (zetaSys p n) (A (n + 1)) := levelNorm_zpPow_zetaSysM p hp2 (A (n + 1)) hn
+    have hcz : levelNorm p n ((z.elems (n + 1) : ℂ_[p]ˣ) : ℂ_[p])
+        = ((z.elems n : ℂ_[p]ˣ) : ℂ_[p]) := z.compat n hn
+    rw [hA (n + 1) (by omega)] at hcz
+    rw [hnorm] at hcz
+    rw [hcz, hA n hn]
+  -- the integer residue sequence and its `ℤ_p`-limit `a`
+  set g : ℕ → ℤ := fun n => ((PadicInt.toZModPow n (A n) : ZMod (p ^ n)).val : ℤ) with hgdef
+  have hgdvd : ∀ i, (p : ℤ) ^ i ∣ g (i + 1) - g i := by
+    intro i
+    rcases Nat.eq_zero_or_pos i with hi0 | hi1
+    · subst hi0; simp
+    · rw [show ((p : ℤ) ^ i) = ((p ^ i : ℕ) : ℤ) from by push_cast; ring,
+        ← ZMod.intCast_zmod_eq_zero_iff_dvd, hgdef]
+      simp only [Int.cast_sub, ZMod.natCast_val, ZMod.intCast_cast]
+      -- `(toZModPow (i+1) (A (i+1))).cast = toZModPow i (A (i+1)) = toZModPow i (A i)`
+      have hcast : (ZMod.cast (PadicInt.toZModPow (i + 1) (A (i + 1))) : ZMod (p ^ i))
+          = PadicInt.toZModPow i (A (i + 1)) := by
+        rw [← ZMod.castHom_apply (R := ZMod (p ^ i)) (h := pow_dvd_pow p (Nat.le_succ i)),
+          ← RingHom.comp_apply, PadicInt.zmod_cast_comp_toZModPow _ _ (Nat.le_succ i)]
+      rw [hcast, ZMod.cast_id, hcompat i hi1, sub_self]
+  set a : ℤ_[p] := PadicInt.ofIntSeq g (PadicInt.isCauSeq_padicNorm_of_pow_dvd_sub g p hgdvd)
+    with hadef
+  have hatoZ : ∀ n, PadicInt.toZModPow n a = PadicInt.toZModPow n (A n) := by
+    intro n
+    rw [hadef, PadicInt.toZModPow_ofIntSeq_of_pow_dvd_sub g p hgdvd n, hgdef]
+    simp only [ZMod.natCast_val, ZMod.intCast_cast]
+    rw [ZMod.cast_id]
+  -- `a` is the single exponent: `z_n = ξ_n^{A n} = ξ_n^a` (same residue mod `p^n`)
+  refine ⟨a, fun n hn => ?_⟩
+  rw [hA n hn, zpPow_zetaSysM p hn (A n), zpPow_zetaSysM p hn a, hatoZ n]
 
 /-- **`u ∈ 𝒞_{∞,1} ⟹ Col u ∈ I(𝒢)ζ_p`** (RJW §12.5, the well-definedness half). Currently still
 derived from the image identity `col_image_cycloTower1_eq_zetaIdeal` (whose `⊆` branch carries the
@@ -858,33 +1235,85 @@ theorem colDescentPlusMul_injective (hp2 : p ≠ 2) :
     rw [QuotientGroup.eq_one_iff, Subgroup.mem_subgroupOf]
     exact hcycloPlus
 
-/-- **RJW thm:iwasawa 2 (ii) — the milestone bijectivity**: the plus-descent
-`colDescentPlusMul : 𝒰⁺_{∞,1}/𝒞⁺_{∞,1} → Λ(𝒢⁺)/I(𝒢⁺)ζ_p` is bijective. The injectivity is
-proved (`colDescentPlusMul_injective`), enabled by the Galois fixed-field characterisation
-`K_n⁺ = (K_n)^{⟨σ_{-1}⟩}` (`mem_localUnitsOnePlus_iff_galAut_fixed`, `GaloisAction.lean`).
+/-- **The `c`-plus part of a principal tower unit is a plus tower unit**: for
+`u ∈ 𝒰_{∞,1}`, the symmetrisation `u·σ_{-1}(u) ∈ 𝒰⁺_{∞,1}`. Membership: `σ_{-1}` preserves
+`𝒰_{∞,1}` (`galNCU_mem_unitsTower1`), the product is `σ_{-1}`-fixed (`σ_{-1}` involutive,
+`galNCU_neg_one_involutive`, plus commutativity), and a `σ_{-1}`-fixed principal unit is
+totally real (`galNCU_neg_one_fixed_mem_unitsTower1Plus`). This is the unit-side `(1+c)`
+projector feeding the `⟨c⟩`-collapse surjectivity. -/
+private theorem mul_galNCU_neg_one_mem_unitsTower1Plus (hp2 : p ≠ 2) {u : NormCompatUnits p}
+    (hu : u ∈ unitsTower1 p) : u * galNCU p (-1) u ∈ unitsTower1Plus p := by
+  have hcmem : galNCU p (-1) u ∈ unitsTower1 p := galNCU_mem_unitsTower1 p (-1) hu
+  have hfix : galNCU p (-1) (u * galNCU p (-1) u) = u * galNCU p (-1) u := by
+    rw [galNCU_mul, galNCU_neg_one_involutive p hp2, mul_comm]
+  exact galNCU_neg_one_fixed_mem_unitsTower1Plus p hp2 (mul_mem hu hcmem) hfix
 
-Surjectivity is the one remaining gap, and it reduces to the **single** deferred identity
-`col_image_cycloTower1_eq_zetaIdeal` (Main.lean): RJW's `(−)^{⟨c⟩}`-collapse of the
-fundamental sequence (i) `0 → 𝒰_{∞,1}/𝒞_{∞,1} → Λ(𝒢)/I(𝒢)ζ_p → ℤ_p(1) → 0` makes
-`colDescentPlusMul` onto because `ℤ_p(1)^{⟨c⟩} = 0` (`p` odd), and the (i) image
-`range Col = ker(χ-moment)` (`range_Col_eq_ker_chiMoment`) together with the image
-computation `col_image_cycloTower1_eq_zetaIdeal` pins the cokernel. With that identity in
-hand (the §13/IMC-deferred core, the SAME blocker as the injectivity input
-`col_mem_zetaIdeal_iff_mem_cycloTower1`), both halves close — the milestone bottlenecks on
-exactly `col_image_cycloTower1_eq_zetaIdeal`. -/
+/-- **The Coleman image of the `(1+c)` symmetrisation collapses the `c`-action**: for a
+`c`-invariant target `μ ∈ Λ(𝒢)⁺` realised as `μ = Col u` (`u ∈ 𝒰_{∞,1}`),
+`Col(u·σ_{-1}(u)) = (1+[−1])·μ = 2·μ`, since `[−1]·μ = μ` on the plus part. The RJW `(1+c)`
+half of the `⟨c⟩`-projection on the fundamental sequence. -/
+private theorem col_mul_galNCU_neg_one_of_plusPart {u : NormCompatUnits p}
+    (hu : Col p u ∈ PadicMeasure.plusPart p) :
+    Col p (u * galNCU p (-1) u) = (2 : ℤ_[p]) • Col p u := by
+  have hColc : Col p (galNCU p (-1) u) = PadicMeasure.dirac p (-1) * Col p u :=
+    Col_galNCU_eq_dirac_mul p (-1) u
+  have hfix : PadicMeasure.dirac p (-1) * Col p u = Col p u :=
+    (PadicMeasure.mem_plusPart_iff p).1 hu
+  rw [Col_add, hColc, hfix, two_smul]
+
+/-- **RJW thm:iwasawa 2 (ii) — the milestone bijectivity**: the plus-descent
+`colDescentPlusMul : 𝒰⁺_{∞,1}/𝒞⁺_{∞,1} → Λ(𝒢⁺)/I(𝒢⁺)ζ_p` is bijective.
+
+Injectivity is `colDescentPlusMul_injective`, enabled by the Galois fixed-field
+characterisation `K_n⁺ = (K_n)^{⟨σ_{-1}⟩}` (`mem_localUnitsOnePlus_iff_galAut_fixed`).
+
+**Surjectivity is RJW's `(−)^{⟨c⟩}`-collapse of the fundamental sequence (i)** (TeX 3587–3608),
+and goes *directly* through the right-exactness `range(Col|𝒰_{∞,1}) = ker(χ-moment)`
+(`range_Col_eq_ker_chiMoment`) — it does **not** need the deferred image identity
+`col_image_cycloTower1_eq_zetaIdeal`. Given a target class `[ν⁺]` with `ν⁺ ∈ Λ(𝒢⁺)`:
+* lift `ν := σ(ν⁺) ∈ Λ(𝒢)⁺` with `π_*(ν) = ν⁺` (`plusSection`, `projPlus_plusSection`);
+* the scaled plus measure `μ := 2⁻¹·ν ∈ Λ(𝒢)⁺` has vanishing χ-moment `μ(unitsPowCM 1) = 0`
+  (odd moments of plus measures vanish, `mem_plusPart_iff_forall_odd_moment`, `1` odd), so by
+  right-exactness there is `u ∈ 𝒰_{∞,1}` with `Col u = μ`;
+* the symmetrisation `w := u·σ_{-1}(u) ∈ 𝒰⁺_{∞,1}` (`mul_galNCU_neg_one_mem_unitsTower1Plus`)
+  has `Col w = (1+[−1])·μ = 2·μ = ν` (`col_mul_galNCU_neg_one_of_plusPart`, `[−1]·μ = μ`);
+* hence `colDescentPlusMul [w] = [π_*(Col w)] = [π_*(ν)] = [ν⁺]`.
+The `ℤ_p(1)^{⟨c⟩} = 0` step of RJW is *internalised* here: it is exactly why `μ` (and not just
+`2·μ`) is forced into `range Col`, via the odd-moment vanishing on the plus part. The previously
+deferred `col_image_cycloTower1_eq_zetaIdeal` is *not* on this path. -/
 theorem colDescentPlusMul_bijective (hp2 : p ≠ 2) :
-    Function.Bijective (colDescentPlusMul p hp2) :=
-  ⟨colDescentPlusMul_injective p hp2, by
-    -- DEFERRED: surjectivity reduces to the `⊆` half of `col_image_cycloTower1_eq_zetaIdeal`
-    -- (the well-definedness/cokernel pin). The `⊇` half (density-crossing) is now PROVED
-    -- (`zetaIdeal_le_col_image`, via `Coleman/ColContinuity.lean`: `Col '' 𝒞_{∞,1}` closed +
-    -- Dirac span dense), and the injectivity input `mem_cycloTower1_of_col_mem_zetaIdeal` is
-    -- now axiom-clean. The remaining `⊆` is the deferred cyclic-module density
-    -- `𝒞_{∞,1} = closure(Λ(𝒢)·wγ(a₀))` (RJW LemmaGeneratorCinfty1, TeX 3573–3578); with it the
-    -- `(−)^{⟨c⟩}`-collapse of the fundamental sequence (i) (`ℤ_p(1)^{⟨c⟩} = 0`,
-    -- `range_Col_eq_ker_chiMoment`) gives surjectivity. The continuity layer alone does not
-    -- supply this tower-level algebraic density.
-    sorry⟩
+    Function.Bijective (colDescentPlusMul p hp2) := by
+  refine ⟨colDescentPlusMul_injective p hp2, ?_⟩
+  -- write the target as `ofAdd [ν⁺]` for some `ν⁺ ∈ Λ(𝒢⁺)`
+  rintro y
+  obtain ⟨z, rfl⟩ := Multiplicative.toAdd.surjective y
+  obtain ⟨νplus, rfl⟩ := Ideal.Quotient.mk_surjective z
+  -- lift `ν⁺` to the plus part of `Λ(𝒢)` and scale by `2⁻¹`
+  set ν : PadicMeasure p ℤ_[p]ˣ := PadicMeasure.plusSection p hp2 νplus with hν
+  have hνplus : ν ∈ PadicMeasure.plusPart p := PadicMeasure.plusSection_mem_plusPart p hp2 νplus
+  have hprojν : PadicMeasure.projPlus p ν = νplus := PadicMeasure.projPlus_plusSection p hp2 νplus
+  set μ : PadicMeasure p ℤ_[p]ˣ :=
+    (((PadicLFunctions.isUnit_two_padicInt p hp2).unit⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) • ν with hμ
+  have hμplus : μ ∈ PadicMeasure.plusPart p := (PadicMeasure.plusPart p).smul_mem _ hνplus
+  -- `μ(unitsPowCM 1) = 0`: `1` is odd and `μ ∈ Λ(𝒢)⁺`
+  have hχ : μ (PadicMeasure.unitsPowCM p 1) = 0 :=
+    (PadicMeasure.mem_plusPart_iff_forall_odd_moment p).1 hμplus 1 ⟨0, by ring⟩
+  -- right-exactness: `μ ∈ range(Col|𝒰_{∞,1})`
+  obtain ⟨u, huU, hCol⟩ := (range_Col_eq_ker_chiMoment p μ).2 hχ
+  -- the symmetrisation `w := u·σ_{-1}(u) ∈ 𝒰⁺_{∞,1}` has `Col w = 2·μ = ν`
+  have hwplus : u * galNCU p (-1) u ∈ unitsTower1Plus p :=
+    mul_galNCU_neg_one_mem_unitsTower1Plus p hp2 huU
+  have hColmem : Col p u ∈ PadicMeasure.plusPart p := hCol ▸ hμplus
+  have hColw : Col p (u * galNCU p (-1) u) = ν := by
+    rw [col_mul_galNCU_neg_one_of_plusPart p hColmem, hCol, hμ, smul_smul,
+      show (2 : ℤ_[p]) * (((PadicLFunctions.isUnit_two_padicInt p hp2).unit⁻¹ : ℤ_[p]ˣ) : ℤ_[p])
+          = 1 from by
+        rw [mul_comm]; exact (PadicLFunctions.isUnit_two_padicInt p hp2).val_inv_mul, one_smul]
+  -- `colDescentPlusMul [w] = ofAdd [π_*(Col w)] = ofAdd [π_*(ν)] = ofAdd [ν⁺]`
+  refine ⟨QuotientGroup.mk ⟨u * galNCU p (-1) u, hwplus⟩, ?_⟩
+  rw [colDescentPlusMul, QuotientGroup.lift_mk, MonoidHom.comp_apply,
+    (unitsTower1Plus p).coe_subtype, ColPlusMul_apply, hColw, hprojν]
+  rfl
 
 /-- **RJW thm:iwasawa 2 (ii) — THE MILESTONE (TeX 3592–3593)**: the Coleman map induces an
 isomorphism of `Λ(𝒢^+)`-modules `𝒰_{∞,1}^+/𝒞_{∞,1}^+ ≅ Λ(𝒢^+)/I(𝒢^+)ζ_p`. This is

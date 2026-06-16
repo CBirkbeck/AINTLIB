@@ -330,7 +330,7 @@ private theorem isClosed_K (n : ℕ) : IsClosed ((K p n : Set ℂ_[p])) := by
     (by rw [finrank_K]; exact Nat.totient_pos.2 (pow_pos hp.out.pos n))
   have h := Submodule.closed_of_finiteDimensional ((K p n).toSubalgebra.toSubmodule)
   convert h using 1
-  simp [Subalgebra.coe_toSubmodule, IntermediateField.coe_toSubalgebra]
+  rw [Subalgebra.coe_toSubmodule, IntermediateField.coe_toSubalgebra]
 
 /-- The integral coefficient image `toCp p c` lies in `K_n` (it is in the
 `algebraMap ℚ_[p] ℂ_[p]` image, which `K_n ⊇ ℚ_p` contains). -/

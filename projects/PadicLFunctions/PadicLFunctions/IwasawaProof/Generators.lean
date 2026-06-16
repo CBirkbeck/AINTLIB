@@ -1643,13 +1643,118 @@ theorem galNCU_neg_one_fixed_mem_unitsTower1Plus (hp2 : p ≠ 2) {w : NormCompat
   have hev := congrArg (fun x : ℂ_[p]ˣ => (x : ℂ_[p])) he
   rwa [galAutValU_val_mem p (-1) hmem, galAutVal_mem p (-1) hmem] at hev
 
+/-! ## `σ_{-1}` preserves the cyclotomic tower `𝒞_{∞,1}` (RJW §12.4, general preservation)
+
+The general statement `galNCU_neg_one_mem_cycloTower1`: complex conjugation `σ_{-1}` stabilises
+the whole tower `𝒞_{∞,1}` (not merely the cyclotomic generator `wγ(a₀)`). Unlike
+`galNCU_wGamma_mem_cycloTower1` — where the `(p−1)`-power lands in the *un-closed* discrete
+`𝒟_n`, so no closure preservation is needed — here a general element `u.elems n` lies in the
+*topological closure* `𝒞_n` of `𝒟_n`, and we must show `σ_{-1}` preserves that closure. This is
+the genuine closure argument: `σ_{-1}` (`galAut`) is a `ContinuousOn` map on the closed set `K_n`
+that maps `𝒟_n` into `𝒟_n` (`galAutValU_mem_cycloUnits`), so it maps `closure 𝒟_n` into
+`closure 𝒟_n` (`Set.MapsTo.closure_of_continuousOn`). The local- and principal-unit factors come
+for free from `galNCU_mem_unitsTower1` (isometry `norm_galAut`). -/
+
+/-- **`σ_a` (value map `galAutVal`) is continuous on the closed set `K_n`.** On `K_n` the total
+value map `galAutVal a n` is the subtype coercion composed with `galAut a n` and the (continuous)
+subtype identification, and `galAut a n` is continuous as a `ℚ_p`-linear endomorphism of the
+finite-dimensional `K_n` (`continuous_of_finiteDimensional`). -/
+private theorem continuousOn_galAutVal_K (a : ℤ_[p]ˣ) (n : ℕ) :
+    ContinuousOn (galAutVal p a n) (K p n : Set ℂ_[p]) := by
+  rw [continuousOn_iff_continuous_restrict]
+  have hcont : Continuous (galAut p a n) :=
+    (galAut p a n).toLinearMap.continuous_of_finiteDimensional
+  -- the subtype identification `↥(↑K_n) → K_n`, `x ↦ ⟨x.1, x.2⟩`, is continuous
+  have hid : Continuous (fun x : (K p n : Set ℂ_[p]) => (⟨x.1, x.2⟩ : K p n)) :=
+    continuous_induced_rng.mpr continuous_induced_dom
+  -- `(↑K_n).restrict (galAutVal a n) = (↑·) ∘ galAut a n ∘ (subtype id)`
+  have heq : (K p n : Set ℂ_[p]).restrict (galAutVal p a n)
+      = fun x : (K p n : Set ℂ_[p]) => ((galAut p a n ⟨x.1, x.2⟩ : K p n) : ℂ_[p]) :=
+    funext fun x => galAutVal_mem p a x.2
+  rw [heq]
+  exact continuous_induced_dom.comp (hcont.comp hid)
+
+/-- **`σ_a` (`galAutValU`) is continuous on the `K_n`-valued units.** Through the inducing
+embedding `embedProduct : ℂ_[p]ˣ → ℂ_[p] × (ℂ_[p])ᵐᵒᵖ` (`Units.isInducing_embedProduct`), it
+suffices that both coordinates `↑(σ_a v)` and `↑(σ_a v)⁻¹` are continuous on `{v | ↑v ∈ K_n}`;
+both factor through `galAutVal a n ∘ (·)`, continuous on `K_n` (`continuousOn_galAutVal_K`). -/
+private theorem continuousOn_galAutValU_K (a : ℤ_[p]ˣ) (n : ℕ) :
+    ContinuousOn (galAutValU p a n) {v : ℂ_[p]ˣ | (v : ℂ_[p]) ∈ K p n} := by
+  rw [Units.isInducing_embedProduct.continuousOn_iff]
+  -- `↑v ∈ K_n` on the set, so `↑(σ_a v) = galAutVal a n ↑v` and `↑(σ_a v)⁻¹ = galAutVal a n ↑v⁻¹`
+  have hval : ∀ v ∈ {v : ℂ_[p]ˣ | (v : ℂ_[p]) ∈ K p n},
+      ((galAutValU p a n v : ℂ_[p]ˣ) : ℂ_[p]) = galAutVal p a n (v : ℂ_[p]) :=
+    fun v hv => galAutValU_val_mem p a hv
+  have hinv : ∀ v ∈ {v : ℂ_[p]ˣ | (v : ℂ_[p]) ∈ K p n},
+      (((galAutValU p a n v)⁻¹ : ℂ_[p]ˣ) : ℂ_[p]) = galAutVal p a n ((v : ℂ_[p])⁻¹) := by
+    intro v hv
+    rw [Units.val_inv_eq_inv_val, galAutValU_val_mem p a hv, ← galAutVal_inv p a hv]
+  -- both coordinate maps are `galAutVal a n ∘ (continuous, K_n-valued)`, continuous on the set
+  -- field-inverse coercion `v ↦ (↑v)⁻¹` is continuous (it equals the unit-inverse coercion)
+  have hcoeinv : Continuous (fun v : ℂ_[p]ˣ => ((v : ℂ_[p])⁻¹)) := by
+    simp_rw [← Units.val_inv_eq_inv_val]; exact Units.continuous_coe_inv
+  refine ContinuousOn.prodMk ?_ (MulOpposite.continuous_op.comp_continuousOn ?_)
+  · exact ((continuousOn_galAutVal_K p a n).comp Units.continuous_val.continuousOn
+      (fun v hv => hv)).congr hval
+  · exact ((continuousOn_galAutVal_K p a n).comp hcoeinv.continuousOn
+      (fun v hv => (K p n).inv_mem hv)).congr hinv
+
+/-- **`σ_a` preserves the `p`-adic closure `𝒞_n = closure(𝒟_n)` of the cyclotomic units.** `σ_a`
+maps `𝒟_n` (`cycloUnits`) into itself (`galAutValU_mem_cycloUnits`) and is continuous on the
+closed set `{v | ↑v ∈ K_n}` (`continuousOn_galAutValU_K`), which contains `closure 𝒟_n` (every
+cyclotomic unit has value in `K_n`, and the set is closed by `isClosed_KCp`). So
+`Set.MapsTo.closure_of_continuousOn` carries the topological closure into itself. -/
+private theorem galAutValU_mem_topologicalClosure_cycloUnits (a : ℤ_[p]ˣ) {n : ℕ} (hn : 1 ≤ n)
+    {v : ℂ_[p]ˣ} (hv : v ∈ (cycloUnits p n).topologicalClosure) :
+    galAutValU p a n v ∈ (cycloUnits p n).topologicalClosure := by
+  rw [← SetLike.mem_coe, Subgroup.topologicalClosure_coe] at hv ⊢
+  -- `𝒟_n ⊆ {v | ↑v ∈ K_n}` (cyclotomic units have value in `K_n`)
+  have hsubK : (cycloUnits p n : Set ℂ_[p]ˣ) ⊆ {v : ℂ_[p]ˣ | (v : ℂ_[p]) ∈ K p n} := by
+    intro w hw
+    exact mem_K_of_mem_closure_cycloGenSet p (Subgroup.mem_inf.1 hw).1
+  -- `{v | ↑v ∈ K_n}` is closed (preimage of the closed `K_n` under the continuous coercion);
+  -- `K_n` is closed as a finite-dimensional `ℚ_p`-subspace of the complete field `ℂ_p`.
+  have hKc : IsClosed ((K p n : Set ℂ_[p])) := by
+    haveI : FiniteDimensional ℚ_[p] (K p n) := Module.finite_of_finrank_pos (R := ℚ_[p])
+      (by rw [finrank_K]; exact Nat.totient_pos.2 (pow_pos hp.out.pos n))
+    have h := Submodule.closed_of_finiteDimensional ((K p n).toSubalgebra.toSubmodule)
+    convert h using 1
+    rw [Subalgebra.coe_toSubmodule, IntermediateField.coe_toSubalgebra]
+  have hKclosed : IsClosed {v : ℂ_[p]ˣ | (v : ℂ_[p]) ∈ K p n} :=
+    hKc.preimage Units.continuous_val
+  -- `closure 𝒟_n ⊆ {v | ↑v ∈ K_n}`, so `galAutValU` is `ContinuousOn (closure 𝒟_n)`
+  have hclosureK : closure (cycloUnits p n : Set ℂ_[p]ˣ) ⊆ {v : ℂ_[p]ˣ | (v : ℂ_[p]) ∈ K p n} :=
+    closure_minimal hsubK hKclosed
+  -- `σ_a` maps `𝒟_n` into `𝒟_n` levelwise
+  have hmaps : Set.MapsTo (galAutValU p a n) (cycloUnits p n : Set ℂ_[p]ˣ)
+      (cycloUnits p n : Set ℂ_[p]ˣ) :=
+    fun w hw => galAutValU_mem_cycloUnits p a hn hw
+  exact hmaps.closure_of_continuousOn ((continuousOn_galAutValU_K p a n).mono hclosureK) hv
+
 /-- **(H1) `σ_{-1}` preserves the cyclotomic tower** `𝒞_{∞,1}`: the Galois action permutes the
 cyclotomic units (`galAutValU_mem_cycloUnits`), preserves the local units (`galAut_mem_O`) and the
 principal units (`σ` is an isometry, `norm_galAut`), and is continuous, so it preserves the p-adic
-closure `cycloClosureOne` levelwise. -/
+closure `cycloClosureOne` levelwise. The closure factor is the genuine content
+(`galAutValU_mem_topologicalClosure_cycloUnits`); the local/principal factors are
+`galNCU_mem_unitsTower1`. -/
 theorem galNCU_neg_one_mem_cycloTower1 {u : NormCompatUnits p} (hu : u ∈ cycloTower1 p) :
     galNCU p (-1) u ∈ cycloTower1 p := by
-  sorry
+  intro n hn
+  -- the level value of `σ_{-1} u`
+  rw [galNCU_elems_eq_galAutValU]
+  -- `v = u.elems n` lies in `𝒞_{n,1} = closure(𝒟_n) ⊓ 𝒰_n ⊓ 𝒰_{n,1}`
+  have hv := hu n hn
+  rw [cycloClosureOne, Subgroup.mem_inf, cycloClosure, Subgroup.mem_inf] at hv
+  obtain ⟨⟨hvclos, _⟩, _⟩ := hv
+  -- principal/local factors come from `galNCU_mem_unitsTower1` (isometry, `norm_galAut`)
+  have hone : (galNCU p (-1) u).elems n ∈ localUnitsOne p n :=
+    galNCU_mem_unitsTower1 p (-1) (cycloTower1_le_unitsTower1 p hu) n hn
+  rw [galNCU_elems_eq_galAutValU] at hone
+  -- the closure factor: `σ_{-1}` preserves `closure(𝒟_n)`
+  have hclos : galAutValU p (-1) n (u.elems n) ∈ (cycloUnits p n).topologicalClosure :=
+    galAutValU_mem_topologicalClosure_cycloUnits p (-1) hn hvclos
+  rw [cycloClosureOne, Subgroup.mem_inf, cycloClosure, Subgroup.mem_inf]
+  exact ⟨⟨hclos, ((mem_localUnitsOne_iff p).1 hone).1⟩, hone⟩
 
 /-! ## The Teichmüller-corrected cyclotomic generator `wγ(a₀)` (RJW LemmaGeneratorCinfty1)
 
@@ -1881,16 +1986,626 @@ theorem cycloUnitU_a0_generates (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n)
     rw [← this]
   exact cycloUnit_mem_cycloTranslateSubgroup p u₀ hn (a0_not_dvd p hp2) hres hb' hbb'
 
+/-! ## Assembling LemmaGeneratorCinfty1(i): `𝒞⁺_{n,1} ⊆ closure(⟨σ_c·wγ(a₀)⟩)` (T1222)
+
+The proof in fact establishes the *stronger* `𝒞_{n,1} ⊆ closure(H)` (full cyclotomic closure, no
+"+"-condition needed), where `H = cycloTranslateSubgroup p n (wγ(a₀).elems n)`. The chain is:
+
+1. `c_n(b)^{p−1} ∈ H` for every `p ∤ b` (`cycloUnitU_pow_mem`): the single generator
+   `(wγ(a₀))^{p−1} = c_n(a₀)^{p−1}` `ℤ[𝒢_n]`-generates the `(p−1)`-powers of all `c_n`
+   (`cycloUnitU_a0_generates` + the telescoping, mapped through `(·)^{p−1}`).
+2. `ξ_n^{p−1} ∈ H` (`zetaSysUnit_pow_mem`): the ratio `σ_{−1}(c_n(2))^{p−1}/c_n(2)^{p−1}` has value
+   `ξ_n^{(1−2)(p−1)} = ξ_n^{−(p−1)}`, with `σ_{−1}(c_n(2))` a `c_n`-ratio (so its `(p−1)`-power is
+   in `H` by step 1). Hence the *full* `ξ_n`-power group lies in `H`.
+3. `γ_{n,b}^{p−1} ∈ H` (`gammaUnit_pow_mem`): `γ_{n,b}^{p−1} = ξ_n^{·(p−1)}·c_n(b)^{p−1}`, both
+   factors in `H` (steps 1–2).
+4. `d^{p−1} ∈ H` for every `d ∈ 𝒟_n` (`cycloUnits_pow_mem`): the normal form `d = ξ_n^D·h` with
+   `h ∈ closure(gammaGenSet)` (the `δ`-exponent is killed by `valHom`, `cycloUnits_normalForm`),
+   so `d^{p−1} = ξ_n^{D(p−1)}·h^{p−1}` with both factors in `H` (steps 2–3).
+5. p-adic closure: `(·)^{p−1}` is continuous, so `u^{p−1} ∈ closure(H)` for `u ∈ 𝒞_{n,1}`; with `u`
+   principal and `p−1 ∈ ℤ_p^×`, the unique `(p−1)`-root `u = zpPow(u^{p−1})((p−1)⁻¹)` stays in the
+   `zpPow`-closed `closure(H)` (`closure_zpPow_mem`). -/
+
+/-- `galAutValU c` is multiplicative on `K_n`-valued units. -/
+private theorem galAutValU_mul (c : ℤ_[p]ˣ) {n : ℕ} {u v : ℂ_[p]ˣ} (hu : (u : ℂ_[p]) ∈ K p n)
+    (hv : (v : ℂ_[p]) ∈ K p n) :
+    galAutValU p c n (u * v) = galAutValU p c n u * galAutValU p c n v := by
+  refine Units.ext ?_
+  rw [Units.val_mul, galAutValU_val_mem p c (by rw [Units.val_mul]; exact mul_mem hu hv),
+    galAutValU_val_mem p c hu, galAutValU_val_mem p c hv, Units.val_mul,
+    galAutVal_mul p c hu hv]
+
+/-- `galAutValU c` commutes with natural powers of `K_n`-valued units. -/
+private theorem galAutValU_pow (c : ℤ_[p]ˣ) {n : ℕ} {u : ℂ_[p]ˣ} (hu : (u : ℂ_[p]) ∈ K p n)
+    (k : ℕ) : galAutValU p c n (u ^ k) = (galAutValU p c n u) ^ k := by
+  induction k with
+  | zero =>
+    rw [pow_zero, pow_zero]
+    exact Units.ext (by rw [galAutValU_val_mem p c (one_mem _), Units.val_one,
+      galAutVal_mem p c (one_mem _),
+      show (⟨(1 : ℂ_[p]), one_mem _⟩ : K p n) = 1 from rfl, map_one, IntermediateField.coe_one])
+  | succ m ih => rw [pow_succ, pow_succ, galAutValU_mul p c (pow_mem hu m) hu, ih]
+
+/-- `cycloUnitU b ∈ K_n` (its value is the `K_n`-element `c_n(b)`). -/
+private theorem cycloUnitU_val_mem_K {b : ℕ} (hb : ¬ (p : ℕ) ∣ b) {n : ℕ} (hn : 1 ≤ n) :
+    (cycloUnitU p hb hn : ℂ_[p]) ∈ K p n := by
+  rw [cycloUnitU_val]; exact cycloUnit_mem_K p b hn
+
+/-- The image of the `c_n(a₀)`-translate subgroup under `(·)^{p−1}` lands in the `wγ(a₀)`-translate
+subgroup `H`: each translate `σ_c(c_n(a₀))^{p−1} = σ_c((c_n(a₀))^{p−1}) = σ_c((wγ(a₀).elems n)^{p−1})
+= σ_c(wγ(a₀).elems n)^{p−1}` is the `(p−1)`-power of a `σ`-translate of the generator `wγ(a₀)`. -/
+private theorem map_pow_cycloTranslate_a0_le (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n) :
+    Subgroup.map (powMonoidHom (p - 1))
+        (cycloTranslateSubgroup p n (cycloUnitU p (a0_not_dvd p hp2) hn))
+      ≤ cycloTranslateSubgroup p n ((wGamma p hp2).elems n) := by
+  set g₀ : ℂ_[p]ˣ := (wGamma p hp2).elems n with hg₀
+  -- `(cycloUnitU a₀)^{p−1} = g₀^{p−1}` as units (equal values, `wGamma_elems_pow_eq_cycloUnit_pow`)
+  have hbase : (cycloUnitU p (a0_not_dvd p hp2) hn) ^ (p - 1) = g₀ ^ (p - 1) := by
+    refine Units.ext ?_
+    rw [Units.val_pow_eq_pow_val, cycloUnitU_val, Units.val_pow_eq_pow_val,
+      wGamma_elems_pow_eq_cycloUnit_pow p hp2 hn]
+  have hg₀K : (g₀ : ℂ_[p]) ∈ K p n := (Subring.mem_inf.1 ((wGamma p hp2).mem n)).1
+  rw [cycloTranslateSubgroup, MonoidHom.map_closure, Subgroup.closure_le]
+  rintro _ ⟨_, ⟨c, rfl⟩, rfl⟩
+  -- the image point is `σ_c(cycloUnitU a₀)^{p−1} = σ_c(g₀)^{p−1} ∈ H`
+  rw [powMonoidHom_apply,
+    ← galAutValU_pow p c (cycloUnitU_val_mem_K p (a0_not_dvd p hp2) hn) (p - 1), hbase,
+    galAutValU_pow p c hg₀K (p - 1)]
+  rw [cycloTranslateSubgroup]
+  refine pow_mem (Subgroup.subset_closure ?_) (p - 1)
+  exact ⟨c, rfl⟩
+
+/-- **Step 1**: `c_n(b)^{p−1} ∈ H` for every `p ∤ b`. The single `c_n(a₀)` `ℤ[𝒢_n]`-generates all
+`c_n(b)` (`cycloUnitU_a0_generates`); applying the `(p−1)`-power homomorphism and
+`map_pow_cycloTranslate_a0_le` lands `c_n(b)^{p−1}` in the `wγ(a₀)`-translate subgroup. -/
+private theorem cycloUnitU_pow_mem (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n) {b : ℕ}
+    (hb : ¬ (p : ℕ) ∣ b) :
+    (cycloUnitU p hb hn) ^ (p - 1) ∈ cycloTranslateSubgroup p n ((wGamma p hp2).elems n) := by
+  refine map_pow_cycloTranslate_a0_le p hp2 hn ⟨cycloUnitU p hb hn, ?_, ?_⟩
+  · exact cycloUnitU_a0_generates p hp2 hn hb
+  · rw [powMonoidHom_apply]
+
+/-- The cyclotomic-character exponent `t = (−1 mod p^n).val` of complex conjugation, and `p ∤ t`. -/
+private theorem unitsToZModPow_neg_one_val_not_dvd {n : ℕ} (hn : 1 ≤ n) :
+    ¬ (p : ℕ) ∣ ((PadicMeasure.unitsToZModPow p n (-1) : (ZMod (p ^ n))ˣ) : ZMod (p ^ n)).val := by
+  haveI : NeZero (p ^ n) := ⟨(pow_pos hp.out.pos n).ne'⟩
+  have hcop : Nat.Coprime
+      ((PadicMeasure.unitsToZModPow p n (-1) : (ZMod (p ^ n))ˣ) : ZMod (p ^ n)).val (p ^ n) :=
+    ZMod.val_coe_unit_coprime _
+  have hcp : Nat.Coprime
+      ((PadicMeasure.unitsToZModPow p n (-1) : (ZMod (p ^ n))ˣ) : ZMod (p ^ n)).val p :=
+    hcop.coprime_dvd_right (dvd_pow_self p (by omega))
+  rw [Nat.coprime_comm] at hcp
+  exact (hp.out.coprime_iff_not_dvd).1 hcp
+
+/-- **Step 1' (`σ_{−1}`-image is a `c_n`-ratio)**: `σ_{−1}(c_n(b))` lies in the `c_n(a₀)`-translate
+subgroup, because its value `(ξ^{t·b}−1)/(ξ^t−1)` (`galAutVal_cycloUnit`, `t = (−1 mod p^n).val`) is
+the `c_n`-ratio `c_n(t·b)·c_n(t)⁻¹`, each factor in the translate subgroup
+(`cycloUnitU_a0_generates`). -/
+private theorem galAutNegOne_cycloUnitU_mem (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n) {b : ℕ}
+    (hb : ¬ (p : ℕ) ∣ b) :
+    galAutValU p (-1) n (cycloUnitU p hb hn)
+      ∈ cycloTranslateSubgroup p n (cycloUnitU p (a0_not_dvd p hp2) hn) := by
+  set t : ℕ := ((PadicMeasure.unitsToZModPow p n (-1) : (ZMod (p ^ n))ˣ) : ZMod (p ^ n)).val with ht
+  have htnd : ¬ (p : ℕ) ∣ t := unitsToZModPow_neg_one_val_not_dvd p hn
+  have htbnd : ¬ (p : ℕ) ∣ (t * b) := by
+    rw [hp.out.prime.dvd_mul]; push_neg; exact ⟨htnd, hb⟩
+  -- `σ_{−1}(c_n(b)) = c_n(t·b)·c_n(t)⁻¹` as units (equal values)
+  have hword : galAutValU p (-1) n (cycloUnitU p hb hn)
+      = cycloUnitU p htbnd hn * (cycloUnitU p htnd hn)⁻¹ := by
+    refine Units.ext ?_
+    rw [galAutValU_val_mem p (-1) (cycloUnitU_val_mem_K p hb hn), cycloUnitU_val,
+      galAutVal_cycloUnit p (-1) hn b, Units.val_mul, Units.val_inv_eq_inv_val, cycloUnitU_val,
+      cycloUnitU_val, cycloUnit, cycloUnit, ← ht]
+    have hden : zetaSys p n - 1 ≠ 0 :=
+      sub_ne_zero_of_ne ((zetaSys_primitiveRoot p n).ne_one (one_lt_pow₀ hp.out.one_lt (by omega)))
+    have htnum : zetaSys p n ^ t - 1 ≠ 0 := by
+      refine sub_ne_zero_of_ne fun h => htnd ?_
+      have hord := orderOf_dvd_of_pow_eq_one h
+      rw [← (zetaSys_primitiveRoot p n).eq_orderOf] at hord
+      exact (dvd_pow_self p (by omega : n ≠ 0)).trans hord
+    -- clear denominators: both sides equal `(ξ^{t·b}−1)/(ξ^t−1)`
+    field_simp
+  rw [hword]
+  exact mul_mem (cycloUnitU_a0_generates p hp2 hn htbnd)
+    (Subgroup.inv_mem _ (cycloUnitU_a0_generates p hp2 hn htnd))
+
+/-- `ξ_n^t = ξ_n⁻¹` for `t = (−1 mod p^n).val` (complex conjugation's cyclotomic exponent):
+`galAut_zetaSys` computes `σ_{−1}(ξ_n) = ξ_n^t` and `galAutNegOne_zetaSys` computes it as `ξ_n⁻¹`. -/
+private theorem zetaSys_pow_neg_one_val {n : ℕ} (hn : 1 ≤ n) :
+    zetaSys p n ^ ((PadicMeasure.unitsToZModPow p n (-1) : (ZMod (p ^ n))ˣ) : ZMod (p ^ n)).val
+      = (zetaSys p n)⁻¹ := by
+  have h1 := galAut_zetaSys p (-1) hn
+  rw [galAutNegOne_zetaSys p hn] at h1
+  exact h1.symm
+
+/-- `ξ_n ≠ −1` for `p` odd (`n ≥ 1`): else `ξ_n^2 = 1`, forcing `p^n ∣ 2`, impossible for `p ≥ 3`. -/
+private theorem zetaSys_ne_neg_one (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n) :
+    zetaSys p n ≠ -1 := by
+  intro h
+  have hsq : zetaSys p n ^ 2 = 1 := by rw [h]; ring
+  have hdvd : p ^ n ∣ 2 := (zetaSys_primitiveRoot p n).dvd_of_pow_eq_one 2 hsq
+  have hp3 : 3 ≤ p := by have := hp.out.two_le; omega
+  have : 3 ≤ p ^ n := le_trans hp3 (le_self_pow (by omega) (by omega))
+  exact absurd (Nat.le_of_dvd (by norm_num) hdvd) (by omega)
+
+/-- `σ_{−1}(c_n(2))` has value `(1 + ξ_n⁻¹)`; combined with `c_n(2) = ξ_n + 1` this gives the clean
+ratio `c_n(2) · σ_{−1}(c_n(2))⁻¹ = ξ_n` used to land the `ξ_n`-power group in `H`. -/
+private theorem zetaSys_eq_cycloUnit_two_ratio (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n) :
+    zetaSys p n
+      = cycloUnit p 2 n * (galAutVal p (-1) n (cycloUnit p 2 n))⁻¹ := by
+  have hξ0 : zetaSys p n ≠ 0 := zetaSys_ne_zero p n
+  have hξ1 : zetaSys p n ≠ 1 :=
+    (zetaSys_primitiveRoot p n).ne_one (one_lt_pow₀ hp.out.one_lt (by omega))
+  have hden : zetaSys p n - 1 ≠ 0 := sub_ne_zero_of_ne hξ1
+  -- `c_n(2) = ξ + 1`
+  have hc2 : cycloUnit p 2 n = zetaSys p n + 1 := by
+    rw [cycloUnit, div_eq_iff hden]; ring
+  -- `σ_{−1}(c_n(2)) = (ξ^{t·2}−1)/(ξ^t−1) = ((ξ⁻¹)²−1)/(ξ⁻¹−1) = 1 + ξ⁻¹`
+  have hinvne : (zetaSys p n)⁻¹ - 1 ≠ 0 :=
+    sub_ne_zero_of_ne (fun h => hξ1 (by rw [← inv_inv (zetaSys p n), h, inv_one]))
+  have hσ : galAutVal p (-1) n (cycloUnit p 2 n) = 1 + (zetaSys p n)⁻¹ := by
+    rw [galAutVal_cycloUnit p (-1) hn 2, pow_mul, zetaSys_pow_neg_one_val p hn, div_eq_iff hinvne]
+    ring
+  -- `1 + ξ⁻¹ ≠ 0` since `ξ ≠ −1`
+  have h1inv : (1 : ℂ_[p]) + (zetaSys p n)⁻¹ ≠ 0 := by
+    intro h
+    apply zetaSys_ne_neg_one p hp2 hn
+    have hinv : (zetaSys p n)⁻¹ = -1 := by linear_combination h
+    rw [← inv_inv (zetaSys p n), hinv, inv_neg, inv_one]
+  -- `ξ · σ_{−1}(c_n(2)) = c_n(2)` clears the inverse
+  rw [hσ, hc2, ← div_eq_mul_inv, eq_div_iff h1inv, mul_add, mul_one, mul_inv_cancel₀ hξ0]
+
+/-- `p ∤ 2` for `p` odd prime. -/
+private theorem not_dvd_two (hp2 : p ≠ 2) : ¬ (p : ℕ) ∣ 2 := by
+  intro h
+  have := (Nat.prime_dvd_prime_iff_eq hp.out Nat.prime_two).1 h
+  exact hp2 this
+
+/-- The `(p−1)`-power of `σ_{−1}(c_n(b))` lies in `H` (`σ_{−1}(c_n(b))` is a `c_n`-translate,
+`galAutNegOne_cycloUnitU_mem`, then `map_pow_cycloTranslate_a0_le`). -/
+private theorem galAutNegOne_cycloUnitU_pow_mem (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n) {b : ℕ}
+    (hb : ¬ (p : ℕ) ∣ b) :
+    (galAutValU p (-1) n (cycloUnitU p hb hn)) ^ (p - 1)
+      ∈ cycloTranslateSubgroup p n ((wGamma p hp2).elems n) := by
+  refine map_pow_cycloTranslate_a0_le p hp2 hn ⟨galAutValU p (-1) n (cycloUnitU p hb hn), ?_, ?_⟩
+  · exact galAutNegOne_cycloUnitU_mem p hp2 hn hb
+  · rw [powMonoidHom_apply]
+
+/-- **Step 2**: `ξ_n^{p−1} ∈ H`. The ratio `c_n(2)^{p−1} · (σ_{−1}(c_n(2))^{p−1})⁻¹` has value
+`(c_n(2)·σ_{−1}(c_n(2))⁻¹)^{p−1} = ξ_n^{p−1}` (`zetaSys_eq_cycloUnit_two_ratio`), and both factors
+lie in `H` (`cycloUnitU_pow_mem`, `galAutNegOne_cycloUnitU_pow_mem`). -/
+private theorem zetaSysUnit_pow_mem (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n) :
+    zetaSysUnit p n ^ (p - 1) ∈ cycloTranslateSubgroup p n ((wGamma p hp2).elems n) := by
+  have h2 : ¬ (p : ℕ) ∣ 2 := not_dvd_two p hp2
+  -- `ξ^{p−1} = c_n(2)^{p−1} · (σ_{−1}(c_n(2))^{p−1})⁻¹` as units
+  have hword : zetaSysUnit p n ^ (p - 1)
+      = (cycloUnitU p h2 hn) ^ (p - 1) * ((galAutValU p (-1) n (cycloUnitU p h2 hn)) ^ (p - 1))⁻¹ := by
+    refine Units.ext ?_
+    rw [Units.val_pow_eq_pow_val, zetaSysUnit_val, Units.val_mul, Units.val_pow_eq_pow_val,
+      cycloUnitU_val, Units.val_inv_eq_inv_val, Units.val_pow_eq_pow_val,
+      galAutValU_val_mem p (-1) (cycloUnitU_val_mem_K p h2 hn), cycloUnitU_val, ← inv_pow,
+      ← mul_pow, ← zetaSys_eq_cycloUnit_two_ratio p hp2 hn]
+  rw [hword]
+  exact mul_mem (cycloUnitU_pow_mem p hp2 hn h2)
+    (Subgroup.inv_mem _ (galAutNegOne_cycloUnitU_pow_mem p hp2 hn h2))
+
+/-- **The `𝒟_n`-normal form** (RJW lem:cyc units gen (i)): every `d ∈ 𝒟_n` is `ξ_n^D · h` with
+`h ∈ closure(gammaGenSet)`. From the augmented normal form `d = ξ_n^D·δ^E·h` (`mem_aug_normal_form`,
+through `closure_cycloGenSet_le_aug`), the `δ`-exponent is killed by `valHom` (`valHom d = 1` for a
+global unit, `valHom ξ_n = 1`, `valHom h = 1`, `valHom δ ≠ 1`), so `E = 0`. -/
+private theorem cycloUnits_normalForm (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n) {d : ℂ_[p]ˣ}
+    (hd : d ∈ cycloUnits p n) :
+    ∃ (D : ℤ) (h : ℂ_[p]ˣ), h ∈ Subgroup.closure (gammaGenSet p n)
+      ∧ d = zetaSysUnit p n ^ D * h := by
+  rw [cycloUnits, Subgroup.mem_inf] at hd
+  obtain ⟨hdClosure, hdGlobal⟩ := hd
+  have hdAug : d ∈ Subgroup.closure (augGenSet p hn) :=
+    closure_cycloGenSet_le_aug p hp2 hn hdClosure
+  obtain ⟨D, E, h, hh, hDEh⟩ := mem_aug_normal_form p hn hdAug
+  -- `valHom d = 1` (global unit ⟹ norm 1)
+  have hdNorm : ‖(d : ℂ_[p])‖ = 1 := by
+    obtain ⟨_, hint, hintInv⟩ := hdGlobal
+    have h1 : ‖(d : ℂ_[p])‖ ≤ 1 := norm_le_one_of_isIntegral_int p hint
+    have h2 : ‖((d⁻¹ : ℂ_[p]ˣ) : ℂ_[p])‖ ≤ 1 := norm_le_one_of_isIntegral_int p hintInv
+    rw [Units.val_inv_eq_inv_val, norm_inv] at h2
+    have hpos : 0 < ‖(d : ℂ_[p])‖ := norm_pos_iff.mpr d.ne_zero
+    exact le_antisymm h1 ((inv_le_one₀ hpos).mp h2)
+  have hdVal : valHom p d = 1 := valHom_eq_one_of_norm_one p hdNorm
+  have hξVal : valHom p (zetaSysUnit p n) = 1 :=
+    valHom_eq_one_of_norm_one p (by rw [zetaSysUnit_val, norm_zetaSys_eq_one])
+  have hhVal : valHom p h = 1 := valHom_eq_one_of_mem_closure_gammaGenSet p hn hh
+  -- `valHom δ ^ E = 1` with `valHom δ ≠ 1` ⟹ `E = 0`
+  have hδpow : valHom p (deltaUnit p hn) ^ E = 1 := by
+    have := congrArg (valHom p) hDEh
+    rw [hdVal, map_mul, map_mul, map_zpow, map_zpow, hξVal, hhVal, one_zpow, one_mul,
+      mul_one] at this
+    exact this.symm
+  have hE0 : E = 0 := by
+    by_contra hE
+    apply valHom_deltaUnit_ne_one p hn
+    set c : ℝ := -Real.log ‖(deltaUnit p hn : ℂ_[p])‖ with hc
+    have hval : valHom p (deltaUnit p hn) = Multiplicative.ofAdd c := rfl
+    rw [hval, ← ofAdd_zsmul, ofAdd_eq_one, zsmul_eq_mul] at hδpow
+    rw [hval, ofAdd_eq_one]
+    rcases mul_eq_zero.mp hδpow with hEz | hcz
+    · exact absurd (by exact_mod_cast hEz) hE
+    · exact hcz
+  refine ⟨D, h, hh, ?_⟩
+  rw [hDEh, hE0, zpow_zero, mul_one]
+
+/-- **Step 3**: `γ_{n,b}^{p−1} ∈ H` for `p ∤ b`. Writing `γ_{n,b} = ξ_n^{(halfExp).val}·c_n(b)` as a
+unit, `γ_{n,b}^{p−1} = (ξ_n^{p−1})^{(halfExp).val}·c_n(b)^{p−1}`, both factors in `H` (Steps 1–2). -/
+private theorem gammaUnit_pow_mem (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n) {b : ℕ}
+    (hb : ¬ (p : ℕ) ∣ b) {g : ℂ_[p]ˣ} (hgv : (g : ℂ_[p]) = gammaUnit p b n) :
+    g ^ (p - 1) ∈ cycloTranslateSubgroup p n ((wGamma p hp2).elems n) := by
+  -- `g = ξ_n^{(halfExp).val} · cycloUnitU b` (as units)
+  have hword : g = zetaSysUnit p n ^ ((halfExp p b n).val) * cycloUnitU p hb hn := by
+    refine Units.ext ?_
+    rw [Units.val_mul, Units.val_pow_eq_pow_val, zetaSysUnit_val, cycloUnitU_val, hgv, gammaUnit,
+      show zetaSys p n ^ ((halfExp p b n).val) = zhp p (halfExp p b n) from rfl]
+  rw [hword, mul_pow]
+  refine mul_mem ?_ (cycloUnitU_pow_mem p hp2 hn hb)
+  -- `(ξ_n^{(halfExp).val})^{p−1} = (ξ_n^{p−1})^{(halfExp).val} ∈ H`
+  rw [← pow_mul, mul_comm, pow_mul]
+  exact pow_mem (zetaSysUnit_pow_mem p hp2 hn) _
+
+/-- The image of `closure(gammaGenSet)` under `(·)^{p−1}` lands in `H`: each generator (a `γ_{n,b}`
+or `−1`) has its `(p−1)`-power in `H` (`gammaUnit_pow_mem`, and `(−1)^{p−1} = 1` since `p−1` even). -/
+private theorem map_pow_gammaGenSet_le (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n) :
+    Subgroup.map (powMonoidHom (p - 1)) (Subgroup.closure (gammaGenSet p n))
+      ≤ cycloTranslateSubgroup p n ((wGamma p hp2).elems n) := by
+  rw [MonoidHom.map_closure, Subgroup.closure_le]
+  rintro _ ⟨g, hg, rfl⟩
+  rw [powMonoidHom_apply]
+  rcases hg with ⟨b, hb, hgv⟩ | hgv
+  · exact gammaUnit_pow_mem p hp2 hn hb hgv
+  · -- `g = −1`, `(−1)^{p−1} = 1` (`p−1` even for `p` odd)
+    have hg1 : g = -1 := Units.ext (by rw [hgv]; simp)
+    rw [hg1, Even.neg_one_pow (Nat.Prime.even_sub_one hp.out hp2)]
+    exact one_mem _
+
+/-- **Step 4**: `d^{p−1} ∈ H` for every `d ∈ 𝒟_n`. The normal form `d = ξ_n^D·h`
+(`cycloUnits_normalForm`) gives `d^{p−1} = (ξ_n^{p−1})^D·h^{p−1}`, with `(ξ_n^{p−1})^D ∈ H`
+(`zetaSysUnit_pow_mem` + `zpow_mem`) and `h^{p−1} ∈ H` (`map_pow_gammaGenSet_le`). -/
+private theorem cycloUnits_pow_mem (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n) {d : ℂ_[p]ˣ}
+    (hd : d ∈ cycloUnits p n) :
+    d ^ (p - 1) ∈ cycloTranslateSubgroup p n ((wGamma p hp2).elems n) := by
+  obtain ⟨D, h, hh, hDh⟩ := cycloUnits_normalForm p hp2 hn hd
+  have hξD : (zetaSysUnit p n ^ D) ^ (p - 1) = (zetaSysUnit p n ^ (p - 1)) ^ D := by
+    rw [← zpow_natCast (zetaSysUnit p n ^ D) (p - 1), ← zpow_mul, mul_comm, zpow_mul,
+      zpow_natCast]
+  rw [hDh, mul_pow, hξD]
+  refine mul_mem (zpow_mem (zetaSysUnit_pow_mem p hp2 hn) D) ?_
+  exact map_pow_gammaGenSet_le p hp2 hn ⟨h, hh, by rw [powMonoidHom_apply]⟩
+
+/-- **The p-adic closure of a subgroup is `zpPow`-closed** (the `lem:closure` mechanism, RJW TeX
+3503, for a general closed subgroup): if a principal unit `y` lies in `G.topologicalClosure`, so
+does every `ℤ_p`-power `y^a = zpPow y a`. The continuous unit-power map `F c = ⟨y^c, y^{−c}⟩` sends
+the dense naturals to `y^k ∈ G.topologicalClosure` (a subgroup), hence its range lies in the closed
+`G.topologicalClosure`. (Same density argument as `zpPow_mem_cycloUnits_topologicalClosure`.) -/
+private theorem closure_zpPow_mem (G : Subgroup ℂ_[p]ˣ) {y : ℂ_[p]ˣ}
+    (hyc : ‖(y : ℂ_[p]) - 1‖ < 1) (hyclos : y ∈ G.topologicalClosure)
+    (a : ℤ_[p]) {x : ℂ_[p]ˣ} (hx : (x : ℂ_[p]) = zpPow p (y : ℂ_[p]) a) :
+    x ∈ G.topologicalClosure := by
+  have hcont : Continuous (zpPow p (y : ℂ_[p])) := by
+    have h : zpPow p (y : ℂ_[p]) = (PadicInt.addChar_of_value_at_one ((y : ℂ_[p]) - 1)
+        (tendsto_pow_atTop_nhds_zero_iff_norm_lt_one.mpr hyc) : ℤ_[p] → ℂ_[p]) := by
+      funext c; rw [zpPow, dif_pos (tendsto_pow_atTop_nhds_zero_iff_norm_lt_one.mpr hyc)]
+    rw [h]; exact PadicInt.continuous_addChar_of_value_at_one _
+  set F : ℤ_[p] → ℂ_[p]ˣ := fun c => ⟨zpPow p (y : ℂ_[p]) c, zpPow p (y : ℂ_[p]) (-c),
+    by rw [← zpPow_add p hyc, add_neg_cancel, show (0 : ℤ_[p]) = ((0 : ℕ) : ℤ_[p]) by norm_cast,
+      zpPow_natCast p hyc, pow_zero],
+    by rw [← zpPow_add p hyc, neg_add_cancel, show (0 : ℤ_[p]) = ((0 : ℕ) : ℤ_[p]) by norm_cast,
+      zpPow_natCast p hyc, pow_zero]⟩ with hF
+  have hFval : ∀ c, (F c : ℂ_[p]) = zpPow p (y : ℂ_[p]) c := fun _ => rfl
+  have hFcont : Continuous F := Units.continuous_iff.2 ⟨hcont, hcont.comp continuous_neg⟩
+  have hFnat : ∀ k : ℕ, F (k : ℤ_[p]) = y ^ k := by
+    intro k; refine Units.ext ?_
+    rw [hFval, zpPow_natCast p hyc, Units.val_pow_eq_pow_val]
+  have hxF : x = F a := Units.ext (by rw [hFval]; exact hx)
+  have hrange : Set.range F ⊆ closure ((G.topologicalClosure) : Set ℂ_[p]ˣ) := by
+    have h1 : Set.range F = F '' (closure (Set.range (Nat.cast : ℕ → ℤ_[p]))) := by
+      rw [PadicInt.denseRange_natCast.closure_range, Set.image_univ]
+    rw [h1]
+    refine (image_closure_subset_closure_image hFcont).trans (closure_mono ?_)
+    rw [← Set.range_comp]
+    rintro _ ⟨k, rfl⟩
+    show (F ∘ Nat.cast) k ∈ ((G.topologicalClosure) : Set ℂ_[p]ˣ)
+    rw [Function.comp_apply, hFnat k]
+    exact pow_mem hyclos k
+  have hxmem : x ∈ closure ((G.topologicalClosure) : Set ℂ_[p]ˣ) := by
+    rw [hxF]; exact hrange ⟨a, rfl⟩
+  rwa [(Subgroup.isClosed_topologicalClosure _).closure_eq, SetLike.mem_coe] at hxmem
+
 /-- **T1222 — level-`n` PLUS density** (RJW LemmaGeneratorCinfty1(i), TeX 3553–3572): the principal
 plus cyclotomic closure `𝒞⁺_{n,1}` lies in the topological closure of the `𝒢_n`-translate subgroup
-of `wγ(a₀)` at level `n`. By `cycloUnitsPlus_eq_closure_gammas` the group `𝒟⁺_n` is generated by the
-`γ_{n,b}` and `−1`; `lem:global generators 2(ii)` (`(wγ)^{p−1} = c_n(a₀)^{p−1}` generates
-`(p−1)𝒟⁺_n`), `(p−1)` invertible in `ℤ_p`, and `closure_zspan_eq_zpspan` (lem:closure) assemble the
-cyclic generation; `cycloUnit_mem_cycloTranslateSubgroup`/`cycloUnitU_a0_generates` give that the
-single `c_n(a₀)` `ℤ[𝒢_n]`-generates the `c_n`'s. -/
+of `wγ(a₀)` at level `n` (in fact the *full* `𝒞_{n,1}` does). By `cycloUnitsPlus_eq_closure_gammas`
+the group `𝒟⁺_n` is generated by the `γ_{n,b}` and `−1`; `lem:global generators 2(ii)`
+(`(wγ)^{p−1} = c_n(a₀)^{p−1}` generates `(p−1)𝒟_n` over `ℤ[𝒢_n]`), `(p−1)` invertible in `ℤ_p`, and
+the `lem:closure` `zpPow`-closure assemble the cyclic generation;
+`cycloUnit_mem_cycloTranslateSubgroup`/`cycloUnitU_a0_generates` give that the single `c_n(a₀)`
+`ℤ[𝒢_n]`-generates the `c_n`'s.
+
+Proof: `u ∈ 𝒞⁺_{n,1} ⊆ 𝒞_{n,1}` is a principal limit of `d_j ∈ 𝒟_n`. The continuous `(·)^{p−1}`
+sends each `d_j^{p−1}` into the translate subgroup `H` (`cycloUnits_pow_mem`), so the limit
+`u^{p−1} ∈ closure(H)`. As `p−1 ∈ ℤ_p^×` (`PadicInt.norm_natCast_p_sub_one`) and `u` is principal,
+`u = zpPow(u^{p−1})((p−1)⁻¹)` is the unique `(p−1)`-th root, lying in the `zpPow`-closed `closure(H)`
+(`closure_zpPow_mem`). -/
 theorem cycloClosureOnePlus_le_closure_wGammaTranslate (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n) :
     (cycloClosureOnePlus p n : Set ℂ_[p]ˣ) ⊆
       _root_.closure (cycloTranslateSubgroup p n ((wGamma p hp2).elems n) : Set ℂ_[p]ˣ) := by
-  sorry
+  set H : Subgroup ℂ_[p]ˣ := cycloTranslateSubgroup p n ((wGamma p hp2).elems n) with hH
+  intro u hu
+  rw [SetLike.mem_coe, cycloClosureOnePlus, Subgroup.mem_inf, cycloClosurePlus,
+    Subgroup.mem_inf, cycloClosure, Subgroup.mem_inf] at hu
+  obtain ⟨⟨⟨huClos, _⟩, _⟩, huOne⟩ := hu
+  -- `u` is principal
+  have hgc : ‖(u : ℂ_[p]) - 1‖ < 1 := ((mem_localUnitsOne_iff p).1 huOne).2
+  -- `(·)^{p−1}` is continuous and sends `𝒟_n` into `H`, so `u^{p−1} ∈ closure(H)`
+  have hpw : Continuous (fun v : ℂ_[p]ˣ => v ^ (p - 1)) := continuous_pow (p - 1)
+  have himg : (fun v : ℂ_[p]ˣ => v ^ (p - 1)) '' (cycloUnits p n : Set ℂ_[p]ˣ) ⊆ (H : Set ℂ_[p]ˣ) := by
+    rintro _ ⟨d, hd, rfl⟩
+    exact cycloUnits_pow_mem p hp2 hn hd
+  have huClos' : u ∈ closure ((cycloUnits p n) : Set ℂ_[p]ˣ) := by
+    rwa [← Subgroup.topologicalClosure_coe, SetLike.mem_coe]
+  have hupow : u ^ (p - 1) ∈ _root_.closure (H : Set ℂ_[p]ˣ) := by
+    have h1 : u ^ (p - 1) ∈ (fun v : ℂ_[p]ˣ => v ^ (p - 1)) '' closure ((cycloUnits p n) : Set ℂ_[p]ˣ) :=
+      ⟨u, huClos', rfl⟩
+    have h2 := image_closure_subset_closure_image hpw h1
+    exact closure_mono himg h2
+  -- `p−1 ∈ ℤ_p^×`; `c` its inverse, and `u = zpPow(u^{p−1}) c`
+  have hunit : IsUnit ((p - 1 : ℕ) : ℤ_[p]) :=
+    PadicInt.isUnit_iff.mpr PadicInt.norm_natCast_p_sub_one
+  obtain ⟨c, hc⟩ := hunit.exists_left_inv
+  have hupowc : ‖((u ^ (p - 1) : ℂ_[p]ˣ) : ℂ_[p]) - 1‖ < 1 := by
+    rw [Units.val_pow_eq_pow_val, ← zpPow_natCast p hgc]
+    exact norm_zpPow_sub_one_lt_one p hgc _
+  have hueq : (u : ℂ_[p]) = zpPow p ((u ^ (p - 1) : ℂ_[p]ˣ) : ℂ_[p]) c := by
+    rw [Units.val_pow_eq_pow_val]
+    have hpow : (u : ℂ_[p]) ^ (p - 1) = zpPow p (u : ℂ_[p]) ((p - 1 : ℕ) : ℤ_[p]) :=
+      (zpPow_natCast p hgc (p - 1)).symm
+    rw [hpow, ← zpPow_mul p hgc, mul_comm, hc,
+      show (1 : ℤ_[p]) = ((1 : ℕ) : ℤ_[p]) by norm_cast, zpPow_natCast p hgc, pow_one]
+  -- `closure(H) = H.topologicalClosure` carrier; apply `zpPow`-closedness
+  rw [← Subgroup.topologicalClosure_coe, SetLike.mem_coe] at hupow
+  rw [← Subgroup.topologicalClosure_coe, SetLike.mem_coe]
+  exact closure_zpPow_mem p H hupowc hupow c hueq
+
+/-! ## The `σ_{-1}`-antisymmetrisation of cyclotomic units lands in `⟨−ξ_n⟩` (T1224')
+
+The "minus part" of `𝒞_{∞,1}` is `ℤ_p(1)`: a cyclotomic-tower unit fixed up to inversion by
+complex conjugation `σ_{-1}` is a `ξ`-power system. The level-`n` mechanism is the
+antisymmetrisation map `A w = w · σ_{-1}(w)⁻¹`, a homomorphism on the `K_n`-valued cyclotomic
+units (ℂ_[p]ˣ abelian, `galAutValU (-1) n` multiplicative on `K_n`), which maps every cyclotomic
+generator into the finite group `⟨−ξ_n⟩` (`σ_{-1}(ξ) = ξ⁻¹` gives `A(ξ)=A(−ξ)=ξ²`,
+`A(ξ^a−1) = −ξ^a`); by continuity it carries the whole closure `𝒞_n` into `⟨−ξ_n⟩`. -/
+
+/-- `−ξ_{p^n}` as a unit of `ℂ_[p]ˣ` (the generator of the finite antisymmetrisation target). -/
+private noncomputable def negZetaSysUnit (n : ℕ) : ℂ_[p]ˣ := -(zetaSysUnit p n)
+
+private theorem negZetaSysUnit_val (n : ℕ) : (negZetaSysUnit p n : ℂ_[p]) = -(zetaSys p n) := by
+  rw [negZetaSysUnit, Units.val_neg, zetaSysUnit_val]
+
+/-- `(−ξ_n)^{p^n} = −1` (`p^n` odd, `ξ^{p^n} = 1`). -/
+private theorem negZetaSysUnit_pow_pn (hp2 : p ≠ 2) (n : ℕ) :
+    negZetaSysUnit p n ^ (p ^ n) = -1 := by
+  refine Units.ext ?_
+  rw [Units.val_pow_eq_pow_val, negZetaSysUnit_val, neg_pow,
+    (zetaSys_primitiveRoot p n).pow_eq_one, mul_one,
+    ((hp.out.odd_of_ne_two hp2).pow).neg_one_pow, Units.val_neg, Units.val_one]
+
+/-- `(−ξ_n)^{p^n + 1} = ξ_n` (so `ξ_n ∈ ⟨−ξ_n⟩`). -/
+private theorem negZetaSysUnit_pow_pn_succ (hp2 : p ≠ 2) (n : ℕ) :
+    negZetaSysUnit p n ^ (p ^ n + 1) = zetaSysUnit p n := by
+  rw [pow_succ, negZetaSysUnit_pow_pn p hp2 n]
+  refine Units.ext ?_
+  rw [Units.val_mul, Units.val_neg, Units.val_one, negZetaSysUnit_val, zetaSysUnit_val,
+    neg_one_mul, neg_neg]
+
+/-- `−1 ∈ ⟨−ξ_n⟩`. -/
+private theorem negOne_mem_zpowers_negZetaSysUnit (hp2 : p ≠ 2) (n : ℕ) :
+    (-1 : ℂ_[p]ˣ) ∈ Subgroup.zpowers (negZetaSysUnit p n) :=
+  ⟨(↑(p ^ n) : ℤ), by simp only [zpow_natCast]; exact negZetaSysUnit_pow_pn p hp2 n⟩
+
+/-- `ξ_n ∈ ⟨−ξ_n⟩`. -/
+private theorem zetaSysUnit_mem_zpowers_negZetaSysUnit (hp2 : p ≠ 2) (n : ℕ) :
+    zetaSysUnit p n ∈ Subgroup.zpowers (negZetaSysUnit p n) :=
+  ⟨(↑(p ^ n + 1) : ℤ), by simp only [zpow_natCast]; exact negZetaSysUnit_pow_pn_succ p hp2 n⟩
+
+/-- `−ξ_n` has finite order (`(−ξ_n)^{2 p^n} = 1`). -/
+private theorem isOfFinOrder_negZetaSysUnit (hp2 : p ≠ 2) (n : ℕ) :
+    IsOfFinOrder (negZetaSysUnit p n) := by
+  rw [isOfFinOrder_iff_pow_eq_one]
+  refine ⟨2 * p ^ n, mul_pos two_pos (pow_pos hp.out.pos n), ?_⟩
+  rw [two_mul, pow_add, negZetaSysUnit_pow_pn p hp2 n, neg_mul_neg, one_mul]
+
+/-- `⟨−ξ_n⟩` is closed (finite, hence closed in the Hausdorff group `ℂ_[p]ˣ`). -/
+private theorem isClosed_zpowers_negZetaSysUnit (hp2 : p ≠ 2) (n : ℕ) :
+    IsClosed (Subgroup.zpowers (negZetaSysUnit p n) : Set ℂ_[p]ˣ) :=
+  ((isOfFinOrder_negZetaSysUnit p hp2 n).finite_zpowers).isClosed
+
+/-- `σ_{-1}(ξ_n) = ξ_n⁻¹` (value form). -/
+private theorem galAutVal_neg_one_zetaSys {n : ℕ} (hn : 1 ≤ n) :
+    galAutVal p (-1) n (zetaSys p n) = (zetaSys p n)⁻¹ := by
+  rw [galAutVal_mem p (-1) (zetaSys_mem_K p n), galAutNegOne_zetaSys p hn]
+
+/-- `σ_{-1}(ξ_n^a) = ξ_n^{-a}` (value form): conjugation sends `ξ ↦ ξ⁻¹`. -/
+private theorem galAutVal_neg_one_zetaSys_pow {n : ℕ} (hn : 1 ≤ n) (a : ℕ) :
+    galAutVal p (-1) n (zetaSys p n ^ a) = (zetaSys p n)⁻¹ ^ a := by
+  rw [galAutVal_zetaSys_pow p (-1) hn a, pow_mul, zetaSys_pow_neg_one_val p hn]
+
+/-- The antisymmetrisation value of `ξ_n^a − 1`: `(ξ^a−1)·σ_{-1}(ξ^a−1)⁻¹ = −ξ_n^a`.
+Here `σ_{-1}(ξ^a−1) = ξ^{-a}−1 = −ξ^{-a}(ξ^a−1)`, so the quotient is `−ξ^a` (`n ≥ 1`,
+`1 ≤ a ≤ p^n−1` ⟹ `ξ^a ≠ 1` so the denominator is nonzero). -/
+private theorem anti_val_zetaSys_pow_sub_one {n : ℕ} (hn : 1 ≤ n) {a : ℕ}
+    (ha1 : 1 ≤ a) (ha2 : a ≤ p ^ n - 1) :
+    (zetaSys p n ^ a - 1) * (galAutVal p (-1) n (zetaSys p n ^ a - 1))⁻¹
+      = -(zetaSys p n ^ a) := by
+  have hξa : (zetaSys p n ^ a : ℂ_[p]) ∈ K p n := pow_mem (zetaSys_mem_K p n) a
+  have hξ0 : zetaSys p n ≠ 0 := zetaSys_ne_zero p n
+  -- `ξ^a ≠ 1` (a not a multiple of `p^n` in the range `1 ≤ a ≤ p^n−1`)
+  have hane : zetaSys p n ^ a ≠ 1 := by
+    intro h
+    have hdvd : p ^ n ∣ a := (zetaSys_primitiveRoot p n).dvd_of_pow_eq_one a h
+    have hple : p ^ n ≤ a := Nat.le_of_dvd (by omega) hdvd
+    have : a < p ^ n := by have := Nat.one_le_iff_ne_zero.mp (pow_pos hp.out.pos n); omega
+    omega
+  have hden : zetaSys p n ^ a - 1 ≠ 0 := sub_ne_zero_of_ne hane
+  -- `σ_{-1}(ξ^a − 1) = ξ^{-a} − 1`
+  have hσ : galAutVal p (-1) n (zetaSys p n ^ a - 1) = (zetaSys p n)⁻¹ ^ a - 1 := by
+    rw [show (zetaSys p n ^ a - 1 : ℂ_[p]) = zetaSys p n ^ a + (-1) from by ring,
+      galAutVal_add p (-1) hξa (neg_mem (one_mem _)), galAutVal_neg_one p (-1),
+      galAutVal_neg_one_zetaSys_pow p hn a]
+    ring
+  rw [hσ]
+  -- `(ξ^a − 1) = −ξ^a · (ξ^{-a} − 1)`, so the quotient is `−ξ^a`
+  have hpa0 : (zetaSys p n) ^ a ≠ 0 := pow_ne_zero a hξ0
+  have hbinv : (zetaSys p n)⁻¹ ^ a * zetaSys p n ^ a = 1 := by
+    rw [inv_pow, inv_mul_cancel₀ hpa0]
+  -- the denominator `ξ^{-a} − 1` is nonzero (else `ξ^a = 1`)
+  have hden' : (zetaSys p n)⁻¹ ^ a - 1 ≠ 0 := by
+    intro h
+    have hb1 : (zetaSys p n)⁻¹ ^ a = 1 := sub_eq_zero.mp h
+    have hh := hbinv
+    rw [hb1, one_mul] at hh
+    exact hane hh
+  have hbinv' : zetaSys p n ^ a * (zetaSys p n)⁻¹ ^ a = 1 := by rw [mul_comm]; exact hbinv
+  have hfac : zetaSys p n ^ a - 1 = -(zetaSys p n ^ a) * ((zetaSys p n)⁻¹ ^ a - 1) := by
+    rw [neg_mul, mul_sub, mul_one, hbinv']; ring
+  rw [hfac, mul_assoc, mul_inv_cancel₀ hden', mul_one]
+
+/-- `galAutValU c n 1 = 1` (`1 ∈ K_n`, `σ_c(1) = 1`). -/
+private theorem galAutValU_one (c : ℤ_[p]ˣ) (n : ℕ) : galAutValU p c n 1 = 1 :=
+  Units.ext (by
+    rw [galAutValU_val_mem p c (by rw [Units.val_one]; exact one_mem _), Units.val_one,
+      galAutVal_mem p c (one_mem _),
+      show (⟨(1 : ℂ_[p]), one_mem _⟩ : K p n) = 1 from rfl, map_one, IntermediateField.coe_one])
+
+/-- `galAutValU c` commutes with the inverse of a `K_n`-valued unit. -/
+private theorem galAutValU_inv (c : ℤ_[p]ˣ) {n : ℕ} {v : ℂ_[p]ˣ} (hv : (v : ℂ_[p]) ∈ K p n) :
+    galAutValU p c n v⁻¹ = (galAutValU p c n v)⁻¹ :=
+  Units.ext (by
+    rw [galAutValU_val_mem p c (by rw [Units.val_inv_eq_inv_val]; exact (K p n).inv_mem hv),
+      Units.val_inv_eq_inv_val, Units.val_inv_eq_inv_val, galAutValU_val_mem p c hv,
+      ← galAutVal_inv p c hv])
+
+/-- The antisymmetrisation map `A w = w · σ_{-1}(w)⁻¹` carries `closure(cycloGenSet n)` into the
+finite group `⟨−ξ_n⟩`. The three generator types map as `A(ξ)=A(−ξ)=ξ²`, `A(ξ^a−1) = −ξ^a`, all
+in `⟨−ξ_n⟩` (`ξ, −1 ∈ ⟨−ξ_n⟩`); multiplicativity is `galAutValU (-1) n`-multiplicativity on `K_n`
+(`galAutValU_mul`/closure values in `K_n`) plus commutativity of `ℂ_[p]ˣ`. -/
+private theorem anti_mem_zpowers_negZetaSysUnit (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n) {w : ℂ_[p]ˣ}
+    (hw : w ∈ Subgroup.closure (cycloGenSet p n)) :
+    w * (galAutValU p (-1) n w)⁻¹ ∈ Subgroup.zpowers (negZetaSysUnit p n) := by
+  induction hw using Subgroup.closure_induction with
+  | mem z hz =>
+      -- value of `A z` is `ξ²` (for `±ξ`) or `−ξ^a` (for `ξ^a−1`); place into `⟨−ξ_n⟩`
+      have hzK : (z : ℂ_[p]) ∈ K p n := mem_K_of_mem_closure_cycloGenSet p
+        (Subgroup.subset_closure hz)
+      rcases hz with hξ | hξ | ⟨a, ha1, ha2, hav⟩
+      · -- value `↑z = ξ` gives `A z = ξ²`
+        have hAval : (z : ℂ_[p]) * ((galAutValU p (-1) n z)⁻¹ : ℂ_[p]) = zetaSys p n ^ 2 := by
+          rw [galAutValU_val_mem p (-1) hzK, hξ, galAutVal_neg_one_zetaSys p hn, inv_inv]
+          ring
+        -- `ξ² = (−ξ)^{2(p^n+1)} ∈ ⟨−ξ_n⟩`
+        have hsq : z * (galAutValU p (-1) n z)⁻¹ = zetaSysUnit p n ^ 2 :=
+          Units.ext (by rw [Units.val_mul, Units.val_inv_eq_inv_val, hAval,
+            Units.val_pow_eq_pow_val, zetaSysUnit_val])
+        rw [hsq]
+        exact pow_mem (zetaSysUnit_mem_zpowers_negZetaSysUnit p hp2 n) 2
+      · -- value `↑z = −ξ` gives `A z = ξ²`
+        have hAval : (z : ℂ_[p]) * ((galAutValU p (-1) n z)⁻¹ : ℂ_[p]) = zetaSys p n ^ 2 := by
+          rw [galAutValU_val_mem p (-1) hzK, hξ,
+            show galAutVal p (-1) n (-(zetaSys p n)) = -(zetaSys p n)⁻¹ from by
+              rw [show (-(zetaSys p n) : ℂ_[p]) = (-1) * zetaSys p n from by ring,
+                galAutVal_mul p (-1) (neg_mem (one_mem _)) (zetaSys_mem_K p n),
+                galAutVal_neg_one p (-1), galAutVal_neg_one_zetaSys p hn]; ring,
+            show (-(zetaSys p n)⁻¹)⁻¹ = -(zetaSys p n) from by rw [inv_neg, inv_inv]]
+          ring
+        have hsq : z * (galAutValU p (-1) n z)⁻¹ = zetaSysUnit p n ^ 2 :=
+          Units.ext (by rw [Units.val_mul, Units.val_inv_eq_inv_val, hAval,
+            Units.val_pow_eq_pow_val, zetaSysUnit_val])
+        rw [hsq]
+        exact pow_mem (zetaSysUnit_mem_zpowers_negZetaSysUnit p hp2 n) 2
+      · -- value `↑z = ξ^a − 1` gives `A z = −ξ^a`
+        have hAval : (z : ℂ_[p]) * ((galAutValU p (-1) n z)⁻¹ : ℂ_[p])
+            = -(zetaSys p n ^ a) := by
+          rw [galAutValU_val_mem p (-1) hzK, hav]
+          exact anti_val_zetaSys_pow_sub_one p hn ha1 ha2
+        -- `−ξ^a = (−1)·ξ^a ∈ ⟨−ξ_n⟩`
+        have hna : z * (galAutValU p (-1) n z)⁻¹ = (-1) * zetaSysUnit p n ^ a :=
+          Units.ext (by rw [Units.val_mul, Units.val_inv_eq_inv_val, hAval, Units.val_mul,
+            Units.val_neg, Units.val_one, Units.val_pow_eq_pow_val, zetaSysUnit_val]; ring)
+        rw [hna]
+        exact mul_mem (negOne_mem_zpowers_negZetaSysUnit p hp2 n)
+          (pow_mem (zetaSysUnit_mem_zpowers_negZetaSysUnit p hp2 n) a)
+  | one =>
+      rw [galAutValU_one, inv_one, mul_one]
+      exact one_mem _
+  | mul z₁ z₂ hz₁ hz₂ ih₁ ih₂ =>
+      have hK₁ : (z₁ : ℂ_[p]) ∈ K p n := mem_K_of_mem_closure_cycloGenSet p hz₁
+      have hK₂ : (z₂ : ℂ_[p]) ∈ K p n := mem_K_of_mem_closure_cycloGenSet p hz₂
+      rw [galAutValU_mul p (-1) hK₁ hK₂, mul_inv,
+        mul_mul_mul_comm z₁ z₂ (galAutValU p (-1) n z₁)⁻¹ (galAutValU p (-1) n z₂)⁻¹]
+      exact mul_mem ih₁ ih₂
+  | inv z hz ih =>
+      have hKz : (z : ℂ_[p]) ∈ K p n := mem_K_of_mem_closure_cycloGenSet p hz
+      rw [galAutValU_inv p (-1) hKz, inv_inv]
+      rw [show z⁻¹ * galAutValU p (-1) n z = (z * (galAutValU p (-1) n z)⁻¹)⁻¹ from by
+        rw [mul_inv_rev, inv_inv, mul_comm]]
+      exact (Subgroup.zpowers (negZetaSysUnit p n)).inv_mem ih
+
+/-- **T1224' bridge (Generators side)** — the `σ_{-1}`-antisymmetrisation `w · σ_{-1}(w)⁻¹` of a
+unit in the cyclotomic closure `𝒞_n = closure(𝒟_n)` is a power of `−ξ_n`. Stated in value form
+so `Main` needs no private names. Proof: `A w ∈ ⟨−ξ_n⟩` on the discrete `closure(cycloGenSet)`
+(`anti_mem_zpowers_negZetaSysUnit`); `A` is continuous on the closed set `{v | ↑v ∈ K_n} ⊇
+closure(𝒟_n)` (`continuousOn_galAutValU_K`, `Units.continuous_val`) and `⟨−ξ_n⟩` is closed
+(finite); `Set.MapsTo.closure_of_continuousOn` extends across the topological closure; then
+`Subgroup.mem_zpowers_iff` + `Units.val_zpow` convert to the value form. -/
+theorem cycloUnits_anti_mem_zpowers_negZeta (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n)
+    {w : ℂ_[p]ˣ} (hw : w ∈ (cycloUnits p n).topologicalClosure) :
+    ∃ m : ℤ, (w * (galAutValU p (-1) n w)⁻¹ : ℂ_[p]) = (-(zetaSys p n)) ^ m := by
+  -- the antisymmetrisation map `A w = w · σ_{-1}(w)⁻¹`
+  set A : ℂ_[p]ˣ → ℂ_[p]ˣ := fun w => w * (galAutValU p (-1) n w)⁻¹ with hA
+  set s : Set ℂ_[p]ˣ := (Subgroup.closure (cycloGenSet p n) : Set ℂ_[p]ˣ) with hs
+  -- `closure(cycloGenSet) ⊆ {v | ↑v ∈ K_n}`, a closed set
+  have hsK : s ⊆ {v : ℂ_[p]ˣ | (v : ℂ_[p]) ∈ K p n} := fun v hv =>
+    mem_K_of_mem_closure_cycloGenSet p hv
+  have hKc : IsClosed ((K p n : Set ℂ_[p])) := by
+    haveI : FiniteDimensional ℚ_[p] (K p n) := Module.finite_of_finrank_pos (R := ℚ_[p])
+      (by rw [finrank_K]; exact Nat.totient_pos.2 (pow_pos hp.out.pos n))
+    have h := Submodule.closed_of_finiteDimensional ((K p n).toSubalgebra.toSubmodule)
+    convert h using 1
+    rw [Subalgebra.coe_toSubmodule, IntermediateField.coe_toSubalgebra]
+  have hKclosed : IsClosed {v : ℂ_[p]ˣ | (v : ℂ_[p]) ∈ K p n} :=
+    hKc.preimage Units.continuous_val
+  have hclosureK : closure s ⊆ {v : ℂ_[p]ˣ | (v : ℂ_[p]) ∈ K p n} :=
+    closure_minimal hsK hKclosed
+  -- `A` is continuous on `{v | ↑v ∈ K_n}` (identity times the inverse of `galAutValU`)
+  have hAcont : ContinuousOn A {v : ℂ_[p]ˣ | (v : ℂ_[p]) ∈ K p n} :=
+    continuousOn_id.mul ((continuousOn_galAutValU_K p (-1) n).inv)
+  -- `A` maps `closure(cycloGenSet)` into the closed finite group `⟨−ξ_n⟩`
+  have hmaps : Set.MapsTo A s (Subgroup.zpowers (negZetaSysUnit p n) : Set ℂ_[p]ˣ) :=
+    fun v hv => anti_mem_zpowers_negZetaSysUnit p hp2 hn hv
+  have hclosed_t : closure (Subgroup.zpowers (negZetaSysUnit p n) : Set ℂ_[p]ˣ)
+      = (Subgroup.zpowers (negZetaSysUnit p n) : Set ℂ_[p]ˣ) :=
+    (isClosed_zpowers_negZetaSysUnit p hp2 n).closure_eq
+  have hmapsClosure : Set.MapsTo A (closure s)
+      (Subgroup.zpowers (negZetaSysUnit p n) : Set ℂ_[p]ˣ) := by
+    have := hmaps.closure_of_continuousOn (hAcont.mono hclosureK)
+    rwa [hclosed_t] at this
+  -- `w ∈ closure(cycloUnits) ⊆ closure(closure(cycloGenSet)) = closure s`
+  have hwcl : w ∈ closure s := by
+    rw [← SetLike.mem_coe, Subgroup.topologicalClosure_coe] at hw
+    refine closure_mono ?_ hw
+    intro v hv
+    exact (Subgroup.mem_inf.1 hv).1
+  -- so `A w ∈ ⟨−ξ_n⟩`; convert to the value form
+  have hAw : A w ∈ Subgroup.zpowers (negZetaSysUnit p n) := hmapsClosure hwcl
+  rw [Subgroup.mem_zpowers_iff] at hAw
+  obtain ⟨m, hm⟩ := hAw
+  refine ⟨m, ?_⟩
+  have hval : (A w : ℂ_[p]) = (w * (galAutValU p (-1) n w)⁻¹ : ℂ_[p]) := rfl
+  rw [← hval, ← hm, Units.val_zpow_eq_zpow_val, negZetaSysUnit_val]
 
 end PadicLFunctions.Coleman
