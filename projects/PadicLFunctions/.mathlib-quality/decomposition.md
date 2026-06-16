@@ -3879,3 +3879,55 @@ NO leaf requires the deferred Λ-module structure theorem (that's §13). The
 board stages E12.1 and E12.2 first as the gating clusters; the milestone
 thm:iwasawa 2 is reachable once they land. PASS (staged), with the two flags
 recorded for the execution session.
+
+# §13 Stage S — Λ-module structure theory + characteristic ideals (decomposed 2026-06-16)
+
+**Source situation**: RJW §13.1 (TeX 3627–3684) gives the STATEMENTS only ("Here we state without
+proof"). The proofs are Washington *Cyclotomic Fields* Ch.13 (Thm 13.12 etc.) + CS06 App A.1; no local
+Washington PDF, so S3's proof is decomposed from the standard Iwasawa-theory outline (height-1
+localisation → DVR → PID structure → pseudo-iso gluing). **Skeleton files**: `Iwasawa/StructureTheory/`.
+
+## Reuse map (verified by grep in .lake/packages/mathlib, 2026-06-16)
+- `Mathlib.RingTheory.PowerSeries.*` — Λ = 𝒪_L⟦T⟧ (`PowerSeries 𝒪_L`); Order, Inverse, NoZeroDivisors, etc.
+- `Mathlib.RingTheory.Polynomial.Eisenstein.Distinguished` — `Polynomial.IsDistinguishedAt (f : R[X]) (I : Ideal R)` + `mul`, `map_eq_X_pow`.
+- `Mathlib.RingTheory.PowerSeries.WeierstrassPreparation` — `IsWeierstrassDivisorAt`, `IsDistinguishedAt.isWeierstrassDivisorAt`, division `seq`.
+- `Mathlib.Algebra.Module.PID` — `Module.equiv_directSum_of_isTorsion` (f.g. torsion / PID), `equiv_free_prod_directSum`, `Submodule.isInternal_prime_power_torsion_of_pid`. **TEMPLATE for the localised (DVR) case of S3.**
+
+## Leaves
+
+### S13-S1 (mostly REUSE): Iwasawa algebra + distinguished polynomials
+- Lean (skeleton target, `IwasawaAlgebra.lean`):
+  `abbrev IwasawaAlgebra (𝒪 : Type*) [CommRing 𝒪] : Type _ := PowerSeries 𝒪` (notation `Λ`); reuse
+  `Polynomial.IsDistinguishedAt` for distinguished polys; Weierstrass preparation = `IsDistinguishedAt.isWeierstrassDivisorAt` + `seq`.
+- Source: RJW 3631 (Λ ≅ 𝒪_L⟦T⟧), 3644 (distinguished def). Discharge: mathlib (above) — **leaf, reuse**.
+- Adversarial: mathlib's `IsDistinguishedAt` is relative to an ideal `I`; for Λ take `I = 𝔪 = (p)` (max ideal of 𝒪_L). Confirm `𝒪_L` local (it is — ring of integers of a p-adic field). No drift.
+
+### S13-S2 (NEW, small): pseudo-isomorphism
+- Lean (`PseudoIso.lean`): `def IsPseudoIso (M M' : Type*) [AddCommGroup M] [Module Λ M] … : Prop := ∃ f : M →ₗ[Λ] M', (Set.Finite (LinearMap.ker f)) ∧ (Set.Finite (M' ⧸ LinearMap.range f))` (finite kernel + cokernel). API: it's an equiv-reln on f.g. TORSION Λ-modules (not in general).
+- Source: RJW 3631–3635 (verbatim: "homomorphism M → M' with finite kernel and cokernel"; "is an equivalence relation between finitely generated, torsion Λ-modules"). Discharge: **new, small** (compose finite ker/coker; symmetry uses f.g.+torsion). 
+- Adversarial: NOT symmetric in general (RJW Warning §13.2) — only restrict the equiv-reln claim to f.g. torsion. Edge: M=0 → trivially pseudo-iso to 0.
+
+### S13-S3 (NEW, HARD): structure theorem (Washington Thm 13.12) — SUB-CLUSTER
+- Lean (`StructureTheorem.lean`): `theorem fg_pseudoIso_canonical (M) [Module.Finite Λ M] : ∃ (r s t) (n : Fin s → ℕ) (f : Fin t → Polynomial 𝒪_L) (m : Fin t → ℕ), (∀ j, (f j).IsDistinguishedAt 𝔪 ∧ Irreducible (f j)) ∧ IsPseudoIso M (Λ^r × (⨁ i, Λ ⧸ Ideal.span {(p)^(n i)}) × (⨁ j, Λ ⧸ Ideal.span {(f j)^(m j)}))`.
+- Source: RJW 3637–3642 = Washington Thm 13.12. **NOT a direct mathlib hit** (Λ is dim-2, not a PID).
+- Sub-leaves (the standard proof; decompose at execution):
+  * S3a: Λ ring-theory — Λ is a Noetherian, integrally-closed (Krull) local domain of dim 2, UFD (mathlib: `PowerSeries` over a DVR/PID; check `UniqueFactorizationMonoid (PowerSeries 𝒪)` / regular-local instances).
+  * S3b: height-1 primes 𝔭 ⊂ Λ; `Λ_𝔭` is a DVR (hence PID). (mathlib localisation + DVR-at-height-1 for Krull/regular.)
+  * S3c: at each `Λ_𝔭`, apply mathlib `Module.equiv_directSum_of_isTorsion` (PID structure) — the elementary divisors.
+  * S3d: pseudo-iso gluing — a f.g. torsion Λ-module is pseudo-iso to ⊕ Λ/(𝔮^k) over the finite set of height-1 primes in its support; the finite ker/coker is the "pseudo-null" discrepancy. (The genuine new content.)
+- Adversarial: pseudo-iso (not iso!) — the finite ker/coker is essential (Λ-modules are NOT ⊕-decomposable on the nose, unlike PID). r=0 for torsion. Distinguished+irreducible fⱼ unique up to the char ideal (not the module).
+
+### S13-S4 (NEW): characteristic ideal + multiplicativity
+- Lean (`CharIdeal.lean`): `def charIdeal (M) [Module.Finite Λ M] [Module.IsTorsion …] : Ideal Λ := Ideal.span {(p)^n} * ∏ j, Ideal.span {(f j)^(m j)}` (from S3's data); `theorem charIdeal_mul_of_exact {0→M'→M→M''→0 exact} : charIdeal M = charIdeal M' * charIdeal M''`.
+- Source: RJW 3652–3657 (def), 3679–3681 (CS06 A.1 Prop 1, multiplicativity). Discharge: **new**, on S3. 
+- Adversarial: well-defined? charIdeal must be invariant under pseudo-iso (finite modules have trivial char ideal = (1)) — so it factors through ~. Multiplicativity: the additive count n and the fⱼ-exponents add across exact sequences.
+
+### S13-S5 (NEW): equivariant isotypic decomposition + Ch_{Λ(𝒢)}
+- Lean (`Isotypic.lean`): for `𝒢 = H × Γ'` (H = μ_{p-1} prime-to-p, Γ' ≅ ℤ_p), `Λ(𝒢) ≅ 𝒪_L[H] ⊗ Λ`; idempotents `e_ω = |H|⁻¹ Σ_{a} ω⁻¹(a) [a]`; `M = ⨁_{ω ∈ Ĥ} (e_ω • M)`, each f.g. torsion over Λ; `charIdeal_G M := ⨁_ω charIdeal (e_ω • M)`.
+- Source: RJW 3659–3676 (CS06 A.1 lemma). Reuse: mathlib group-algebra idempotents (`|H|` invertible since prime-to-p; mathlib `MonoidAlgebra`/`RepresentationTheory` orthogonal idempotents). Discharge: **new**, reuses idempotent machinery.
+- Adversarial: needs `|H|` invertible in 𝒪_L — holds (H prime-to-p, 𝒪_L is p-adic). The ω-values may need extending L — note the field-extension caveat (RJW 3664 "after extending L").
+
+## Provability gate (Stage S)
+- S1: reuse (mathlib). S2: new-small. S3: new-HARD (sub-cluster S3a–S3d; S3a/S3b/S3c reuse mathlib PowerSeries/localisation/PID, S3d is the new pseudo-iso content). S4/S5: new, on S3.
+- The one genuine deep build is **S3d** (pseudo-iso gluing over height-1 primes) — the Λ-analogue mathlib lacks. Everything else is reuse or small. Feasible; S3 is the focus.
+- Skeleton: write S1+S2 now (statable), S3–S5 statements drafted as `sorry` during S13-S1/S2 execution (S3's exact form is part of the work). `lake build PadicLFunctions` must stay green (sorries OK).
