@@ -1565,6 +1565,25 @@ theorem flat_chainStep [DecidableEq A] (D₀ : RationalLocData A) (g s : A)
       right_inv := e.apply_symm_apply }
 
 omit [CompatiblePlusSubring A] in
+/-- **X₁ coUnit step over `B = 𝒪_X(D)`** (Remark 7.55 dominating-unit base): `𝒪_B(coUnitDatum f)`
+is flat over `B`, for any `f ∈ B`. The coUnit engine `presheafValue_flat_of_coUnitDatum_faithful`
+instantiated at the base `B = presheafValue D` (with `B`'s faithful bundle). Separated as its own
+lemma so the chain assembly composes it by reference (avoiding inline `whnf` on the nested
+`presheafValue`). -/
+theorem flat_presheafValue_coUnitDatum_at_base (D : RationalLocData A) (f : presheafValue D) :
+    @Module.Flat (presheafValue D)
+      (presheafValue (coUnitDatum (presheafValue_concretePair D) f)) _ _
+      (RingHom.toModule (coUnitDatum (presheafValue_concretePair D) f).canonicalMap) := by
+  letI hTateB : IsTateRing (presheafValue D) := presheafValue_isTateRing_concrete D
+  haveI : IsNoetherianRing (presheafValue D) := presheafValue_isNoetherianRing_faithful D
+  haveI : IsStronglyNoetherian (presheafValue D) := presheafValue_isStronglyNoetherian_faithful D
+  haveI : IsHuberRing (presheafValue D) := hTateB.toIsHuberRing
+  haveI hCompleteB : @CompleteSpace (presheafValue D)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D)) :=
+    presheafValue_completeSpace_rightUniformSpace D
+  exact presheafValue_flat_of_coUnitDatum_faithful (presheafValue_concretePair D) f
+
+omit [CompatiblePlusSubring A] in
 /-- **GENUINE RESIDUAL — whole-space Prop 8.30 over `B = 𝒪_X(D)` (Remark-7.55 chain)**
 (Wedhorn Remark 7.55, `wedhorn.txt:3504`–`3517`).
 
