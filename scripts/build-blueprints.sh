@@ -31,13 +31,12 @@ PATCH="$ROOT/scripts/patches/verso-blueprint-v4.30-on-v4.31-toolchain.patch"
 BLUEPRINTS=(
   "padic|dev/padic|projects/PadicLFunctions/_blueprint|PadicLFunctionsBlueprint|PadicLFunctionsBlueprintMain|padic"
   "leanmodularforms|dev/leanmodularforms|projects/LeanModularForms/_blueprint|LeanModularFormsBlueprint|LeanModularFormsBlueprintMain|leanmodularforms"
-  # chebotarev + flt-bernoulli are migrated, built green, and LIVE, but their sources currently sit on
-  # dev/leanmodularforms (the build host) rather than their own dev branches — so their worktree rows are
-  # commented until the per-project branches exist (each row needs a distinct branch to worktree). Render
-  # them locally with: scripts/render-blueprint-local.sh Chebotarev CebotarevDensityBlueprint
-  #                    scripts/render-blueprint-local.sh FltRegularBernoulli BernoulliRegularBlueprint
-  # "chebotarev|dev/chebotarev|projects/Chebotarev/_blueprint|CebotarevDensityBlueprint|CebotarevDensityBlueprintMain|chebotarev"
-  # "flt-bernoulli|dev/flt-bernoulli|projects/FltRegularBernoulli/_blueprint|BernoulliRegularBlueprint|BernoulliRegularBlueprintMain|flt-bernoulli"
+  # Each blueprint lives on its own dev/<project> branch (one blueprint per branch), so each row gets
+  # its own throwaway worktree. NB this CI path runs `lake update` and needs a fresh runner with disk +
+  # an olean cache; to render a single blueprint locally on the dev machine (no clone), use
+  # scripts/render-blueprint-local.sh <ProjectDir> <BlueprintLib> instead.
+  "chebotarev|dev/chebotarev|projects/Chebotarev/_blueprint|CebotarevDensityBlueprint|CebotarevDensityBlueprintMain|chebotarev"
+  "flt-bernoulli|dev/flt-bernoulli|projects/FltRegularBernoulli/_blueprint|BernoulliRegularBlueprint|BernoulliRegularBlueprintMain|flt-bernoulli"
 )
 
 build_one() {
