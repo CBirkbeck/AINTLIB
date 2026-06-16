@@ -6532,3 +6532,65 @@ Unfold `Col u = unitsCmul (invCM) ((𝒜⁻¹(dlog (colemanSeries u))).comp exte
   green. T1206/T1206c/T1207/T1220-T1228 are all effectively DONE (covered by the MILESTONE COMPLETE
   record above). Remaining §12 follow-ups: ci-pages re-render (when convenient) + a tooled /cleanup
   of the T1224' Generators bridge + Main assembly (written degraded). Next: /develop §13 (IMC).
+
+## §13 board — Iwasawa Main Conjecture (full, unconditional) — created 2026-06-16 (/develop, AINTLIB monorepo)
+
+**AINTLIB note**: this is the dev/padic PRODUCER board. NO CLEANUP/CLEANUP-ALL tickets here — golf/
+dedup/style/sorry-discharge is the central fleet's job on `main` (handed off via a dev→main PR when a
+cluster lands). `sorry`-as-WIP is allowed. Reuse-don't-duplicate: each ticket names the monorepo/mathlib
+decls to import. **Staging**: S → G → E → M; Thm IMC is STATED after S+G (S13-STMT), proof filled across
+E+M. G/E/M are cluster milestones — decompose-when-reached via a follow-on /develop pass.
+
+### New files (projects/PadicLFunctions/PadicLFunctions/)
+- `Iwasawa/StructureTheory/{IwasawaAlgebra,PseudoIso,StructureTheorem,CharIdeal,Isotypic}.lean` (Stage S;
+  candidate to lift into AINTLIB `Common/` later — flag at dev→main PR)
+- `IwasawaProof/GaloisModules.lean` (Stage G), `IwasawaProof/MainConjecture.lean` (statement + Stage M)
+
+### Stage S — Λ-module structure theory + characteristic ideals (§13.1, Washington Ch.13)
+
+#### [S13-S1] Iwasawa algebra Λ = 𝒪_L⟦T⟧ + distinguished-polynomial API
+- **Status**: open | **File**: Iwasawa/StructureTheory/IwasawaAlgebra.lean | **Depends on**: — | **Type**: def+API
+- **Reuse**: mathlib `RingTheory/PowerSeries/*`, `Polynomial/Eisenstein/Distinguished`, `PowerSeries/WeierstrassPreparation`.
+- Define `Λ := 𝒪_L⟦T⟧` (PowerSeries over 𝒪_L); distinguished-polynomial predicate (RJW 3644: monic, lower
+  coeffs in 𝔭) + Weierstrass-preparation wrapper (`f = unit · distinguished`). **Source**: Washington §13.1; RJW 3631–3644.
+
+#### [S13-S2] pseudo-isomorphism `M ~ M'`
+- **Status**: open | **File**: Iwasawa/StructureTheory/PseudoIso.lean | **Depends on**: S13-S1 | **Type**: def+API
+- `M ~ M' := ∃ (0→A→M→M'→B→0) with A,B finite`; show it's an equivalence relation on f.g. torsion Λ-modules
+  (Washington §13.2 Warning — NOT general). **Source**: RJW 3631–3635.
+
+#### [S13-S3] STRUCTURE THEOREM (Washington Thm 13.12) — CLUSTER, decompose at execution
+- **Status**: open | **File**: Iwasawa/StructureTheory/StructureTheorem.lean | **Depends on**: S13-S1,S2 | **Type**: theorem (HARD core)
+- f.g. Λ-module `M ~ Λ^r ⊕ ⊕ᵢ Λ/(pⁿⁱ) ⊕ ⊕ⱼ Λ/(fⱼ^{mⱼ})`, fⱼ distinguished irreducible. Build on mathlib
+  `Algebra/Module/PID` (template) + Weierstrass (S1): Λ is a 2-dim regular local UFD; sub-leaves at execution
+  (prime factorisation in Λ, the finite-kernel/cokernel reduction, the elementary-divisor analogue). **Source**: Washington Thm 13.12.
+
+#### [S13-S4] characteristic ideal + multiplicativity
+- **Status**: open | **File**: Iwasawa/StructureTheory/CharIdeal.lean | **Depends on**: S13-S3 | **Type**: def+theorem
+- `Ch_Λ(M) := (pⁿ)∏ⱼ(fⱼ^{mⱼ})` for f.g. torsion M (n=Σnᵢ); MULTIPLICATIVITY in exact sequences (CS06 A.1 Prop 1).
+  **Source**: RJW 3652–3657, 3679–3681.
+
+#### [S13-S5] equivariant isotypic decomposition + `Ch_{Λ(𝒢)}`
+- **Status**: open | **File**: Iwasawa/StructureTheory/Isotypic.lean | **Depends on**: S13-S4 | **Type**: def+theorem
+- `Λ(𝒢) ≅ 𝒪_L[H]⊗Λ` (H=μ_{p-1} prime-to-p); projectors `e_ω=|H|⁻¹Σω⁻¹(a)[a]`; `M=⊕_ω M^(ω)` each f.g. torsion Λ;
+  `Ch_{Λ(𝒢)}(M):=⊕_ω Ch_Λ(M^(ω))`. **Reuse**: mathlib `RepresentationTheory` group-algebra idempotents. **Source**: RJW 3659–3676 (CS06 A.1).
+
+### Statement
+#### [S13-STMT] state Thm IMC + define `𝒳⁺_∞` (after S + G)
+- **Status**: blocked (needs S13-S5 + S13-G) | **File**: IwasawaProof/MainConjecture.lean | **Type**: theorem statement (sorry proof)
+- `theorem iwasawa_main_conjecture : (𝒳⁺_∞ f.g. torsion Λ(𝒢⁺)) ∧ Ch_{Λ(𝒢⁺)}(𝒳⁺_∞) = I(𝒢⁺)ζ_p := by sorry`.
+  Wire blueprint node in `MainConjecture.lean` chapter once sorry-free-on-the-statement. **Source**: RJW Thm IMC 3740.
+
+### Cluster milestones (decompose-when-reached — own /develop sub-pass each)
+#### [S13-G] Stage G — Galois Λ-modules + class field theory (§13.2) | Depends on: S13-S5
+- Define 𝓜⁺/𝓛⁺, 𝒳⁺_∞/𝒴⁺_∞ + Λ(𝒢)-action; G1 `𝒴⁺_n≅Cl(F⁺_n)_p` (REUSE FltRegular Unramified/Hilbert94, mathlib ClassGroup);
+  G2 CFT seq (Washington Cor 13.6 — ramified CFT, hardest; via Chebotarev infra or axiomatise); G3 coinvariants
+  (Washington 13.22, mathlib Coinvariants); G4 Cor CFTunits2.
+
+#### [S13-E] Stage E — Euler system / Thaine (Washington Ch.15 / Rubin) | Depends on: S13-G
+- E1 Thaine annihilation (REUSE FRB Thaine/{AnnihilatorDescent,SingleCharacter}); E2 Euler-system→char-ideal
+  divisibility `Ch(𝒳⁺_∞) | I(𝒢⁺)ζ_p` (deepest new build); E3 pin to 𝒳⁺_∞.
+
+#### [S13-M] Stage M — assembly | Depends on: S13-E, §12 (done)
+- M1 analytic class-number-formula / cyclotomic-unit index = class number (reverse divisibility; REUSE FRB + our §11);
+  M2 combine E+M1+S4-multiplicativity → `Ch(𝒳⁺_∞)=I(𝒢⁺)ζ_p`, wire §12; M3 f.g.-torsion-ness. Closes S13-STMT + the milestone.

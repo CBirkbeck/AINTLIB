@@ -833,3 +833,76 @@ principal-unit normalisation the §11 note flagged — §12.4 resolves it native
   (replan R11.1 continues); §12's "𝒢" is ℤ_[p]ˣ with c = −1, and the LOCAL
   finite Gal(K_n/ℚ_p) ≅ (ℤ/p^n)^× is realised concretely (E12.1) only as far
   as the action on the tower needs — no abstract global Galois group is built.
+
+# §13 pre-plan addendum (2026-06-16, /develop pass, AINTLIB monorepo) — the Iwasawa Main Conjecture (full, unconditional)
+
+## Scope (user decision 2026-06-16)
+FULL unconditional IMC via the Euler-system (Thaine) route + the FULL Λ-module structure theorem.
+AINTLIB producer rules: reuse-don't-duplicate (import from any project), sorry-as-WIP OK, no
+golf/clean/bump (central on main). STAGED execution S → G → E → M.
+
+## Goal
+Thm IMC (RJW `IMC`, TeX 3740): `𝒳⁺_∞` is a finitely generated torsion `Λ(𝒢⁺)`-module and
+`Ch_{Λ(𝒢⁺)}(𝒳⁺_∞) = I(𝒢⁺)ζ_p`. Unconditional (no Vandiver hypothesis), via Rubin's Euler system.
+
+## Sources (the project's source RJW does NOT prove §13 — fallback-chain to Washington/Rubin)
+- RJW §13 (sec:IMC, TeX 3617–3885): the STATEMENTS (structure thy §13.1; Galois modules §13.2;
+  Thm IMC §13.3) + the Vandiver-CONDITIONAL proof §13.4. RJW states the structure theorem WITHOUT
+  proof (cites Washington Thm 13.12) and OMITS the unconditional proof (TeX 3882 cites CS06, Lang90).
+- Washington, *Intro to Cyclotomic Fields* (2nd ed): Ch.13 (structure theory Thm 13.12; coinvariants
+  Prop 13.22; CFT sequence Cor 13.6), **Ch.15 (the Main Conjecture proof via Euler systems)** — PRIMARY
+  for Stages E/M.
+- CS06 (Coates–Sujatha) App A.1: char-ideal isotypic decomposition + multiplicativity in exact seqs.
+- Rubin, appendix in Lang's *Cyclotomic Fields* — alternative Euler-system source for Stage E.
+- §12 (ours, DONE, axiom-clean): the ANALYTIC input `𝒰⁺_{∞,1}/𝒞⁺_{∞,1} ≅ Λ(𝒢⁺)/I(𝒢⁺)ζ_p`.
+
+## The four stages (dependency: S → G → E → M; §12 feeds M)
+
+### Stage S — Λ-module structure theory + characteristic ideals (§13.1 / Washington Ch.13)
+Foundations ON SHELF in mathlib: `RingTheory/PowerSeries/*` (Λ = 𝒪_L⟦T⟧), `PowerSeries/WeierstrassPreparation`,
+`Polynomial/Eisenstein/Distinguished`, `Algebra/Module/PID` (the f.g.-module-over-PID structure theorem =
+the TEMPLATE to mirror). NEW builds:
+- S1: the Iwasawa algebra `Λ ≅ 𝒪_L⟦T⟧` + distinguished-polynomial API (on mathlib Weierstrass/Distinguished).
+- S2: pseudo-isomorphism `M ~ M'` (∃ `0→A→M→M'→B→0`, A,B finite); equiv reln on f.g. torsion (Washington §13.2).
+- S3: STRUCTURE THEOREM (Washington Thm 13.12): f.g. Λ-module `~ Λ^r ⊕ ⊕ᵢΛ/(pⁿⁱ) ⊕ ⊕ⱼΛ/(fⱼ^{mⱼ})`,
+  fⱼ distinguished irreducible. [The hard core; Λ is a 2-dim regular local UFD — build on mathlib's
+  PID-module structure theorem + Weierstrass. Real mathlib-grade contribution.]
+- S4: `Ch_Λ(M)` for torsion M `= (pⁿ)∏(fⱼ^{mⱼ})`; MULTIPLICATIVITY in exact sequences (CS06 A.1 Prop 1).
+- S5: equivariant `Λ(𝒢) ≅ 𝒪_L[H]⊗Λ` (H=μ_{p-1}, prime-to-p), isotypic `e_ω`-decomposition `M=⊕_ω M^(ω)`
+  (CS06 A.1), `Ch_{Λ(𝒢)}(M)=⊕_ω Ch_Λ(M^(ω))`.
+Candidate for AINTLIB `Common/` (shared infra — FltRegularBernoulli may want it). Effort: large but feasible.
+
+### Stage G — Galois Λ-modules + class field theory (§13.2)
+Define `𝓜⁺_n` (max abelian p-ext of F⁺_n unramified outside 𝔭⁺), `𝓛⁺_n` (max unramified ab. p-ext),
+`𝒳⁺_∞=Gal(𝓜⁺_∞/F⁺_∞)`, `𝒴⁺_∞=Gal(𝓛⁺_∞/F⁺_∞)`, with the `Λ(𝒢)`-action (inner automorphisms, Rem 3.x).
+- G1: `𝒴⁺_n ≅ Cl(F⁺_n)⊗ℤ_p` (Hilbert class field ↔ class group). REUSE: FltRegular `Unramified`
+  (`dvd_card_classGroup_of_unramified_isCyclic`), `Hilbert94`; mathlib `ClassGroup`; FRB `ClassGroupExtension`.
+- G2: CFT sequence `0→𝓔⁺_{n,1}→𝒰⁺_{n,1}→Gal(𝓜⁺_n/𝓛⁺_n)→0` (Washington Cor 13.6) + inv-limit (Prop CFTunits1).
+  [Item 1 — the genuine RAMIFIED CFT; hardest reuse gap. Build via Chebotarev ramification infra +
+  FltRegular, or AXIOMATIZE à la RJW's own omission as a stopgap.]
+- G3: coinvariants `(𝒴⁺_∞)_{𝒢⁺_n}=𝒴⁺_n` (Washington Prop 13.22). REUSE mathlib `RepresentationTheory/Coinvariants`.
+- G4: Cor CFTunits2 `0→𝓔⁺_{∞,1}/𝒞⁺_{∞,1}→𝒰⁺_{∞,1}/𝒞⁺_{∞,1}→𝒳⁺_∞→𝒴⁺_∞→0`.
+REUSE: FltRegular (Unramified/Hilbert92/94), Chebotarev (unramifiedIn/Frobenius), FRB, mathlib ClassGroup/Coinvariants.
+
+### Stage E — Euler system / Thaine (the unconditional divisibility) — source Washington Ch.15 / Rubin
+- E1: Thaine — cyclotomic units annihilate `Cl(F⁺_n)_p`. REUSE FRB `Thaine/{AnnihilatorDescent,SingleCharacter}`.
+- E2: Euler-system / Kolyvagin-derivative bound → char-ideal divisibility `Ch(𝒳⁺_∞) | I(𝒢⁺)ζ_p`.
+  [DEEPEST new build; FRB Thaine is the seed, the full Rubin argument is new.]
+- E3: pin to `𝒳⁺_∞`/`𝒴⁺_∞` via Stage G.
+REUSE: FRB Thaine/HMinus/class-numbers. New: the Euler-system→char-ideal machinery.
+
+### Stage M — Assembly (§13.3 + reverse divisibility)
+- M1: analytic class number formula / cyclotomic-unit index = class number (RJW `thm:cyclo units class number`,
+  Item 4) — the reverse divisibility. REUSE FRB class numbers + our §11.
+- M2: combine E (one divisibility) + M1 (the other) + S4 multiplicativity → `Ch(𝒳⁺_∞)=I(𝒢⁺)ζ_p`. Wire §12.
+- M3: f.g.-torsion-ness of `𝒳⁺_∞` (from S + G).
+
+## Generality
+- 𝒪_L = ℤ_p (L = ℚ_p) standing; Stage S stated over general 𝒪_L where free (mathlib-grade). p odd (hp2) throughout.
+- 𝒢⁺ = Gal(F⁺_∞/ℚ); the H×Γ' decomposition (H = μ_{p-1}/±1 prime-to-p, Γ' ≅ ℤ_p).
+
+## Feasibility / staging
+Largest + deepest section (research-level). S is feasible (mathlib Weierstrass + Distinguished + PID-template
+present). G2 (ramified CFT) and E2 (Euler system) are the hardest new builds. Execute STAGED, each a
+/develop sub-pass decomposed-when-reached; STATE Thm IMC early (after S+G) so the headline is on the board,
+fill the proof across E+M. sorry-as-WIP (AINTLIB). Reuse maximally (FltRegular, FRB, Chebotarev, mathlib).
