@@ -94,6 +94,7 @@ import HasseWeil.EC.IsogenyAG.GroupHom
 import HasseWeil.EC.IsogenyAG.GroupHomDescend
 import HasseWeil.EC.IsogenyAG.Dual
 import HasseWeil.EC.IsogenyAG.IsogenyClass
+import HasseWeil.EC.IsogenyAG.IsogenyClassLabel
 import HasseWeil.EC.IsogenyAG.DualGalois
 import HasseWeil.EC.IsogenyAG.Bridge
 import HasseWeil.Curves.OrdAtInftyRamification
