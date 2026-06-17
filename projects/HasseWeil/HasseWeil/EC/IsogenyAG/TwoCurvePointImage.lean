@@ -539,4 +539,210 @@ theorem nonsingular_of_evaluatesTo_generators [IsAlgClosed F]
   WeierstrassCurve.Affine.equation_iff_nonsingular.mp
     (twoCurve_equation_of_evaluatesTo φ hx hy)
 
+/-! ### Phase 6 — the concrete place-restriction point map (TASK A)
+
+We now build the **concrete total point map** `placeRestrictionPointMap φ : E₁ → E₂` and prove,
+sorry-free, the `PullbackEvaluation_twoCurve` coherence for it (with `bad = twoCurvePoleLocus φ`).
+This makes the realization concrete and reduces PE-1 to *exactly* the group-hom property of
+`placeRestrictionPointMap` (TASK B).
+
+The map is:
+* `O ↦ O` (the point at infinity);
+* an affine smooth `P = (x, y)` whose `SmoothPoint` `⟨x, y, h⟩` lies in the affine kernel
+  (`twoCurvePoleLocus φ`, where the pulled-back generators have poles) `↦ O`;
+* an affine smooth `P = (x, y)` *off* the pole locus `↦` the **residue-value point**
+  `(cx, cy)` of the regular pulled-back generators (`exists_evaluatesTo_of_pointValuation_le_one`),
+  which is a point of `E₂` (`twoCurve_equation_of_evaluatesTo` / `nonsingular_of_evaluatesTo_generators`).
+
+The point-map agreement of `PullbackEvaluation_twoCurve` is then **not literally `rfl`** (the
+coherence theorem quantifies over *arbitrary* residue values `cx cy`, while the map picks
+`Classical.choose`-witnesses), but it is a one-line consequence of the *uniqueness* of the value
+at a point (`EvaluatesTo.unique`). -/
+
+section ConcretePointMap
+
+-- Classical decidability of pole-locus membership, used to define the place-restriction point
+-- map by `dite` on the (a priori undecidable) condition "`P` is in the affine kernel".
+attribute [local instance] Classical.propDecidable
+
+variable [IsAlgClosed F]
+
+/-- **Off the pole locus, the `x`-generator pullback is regular.** -/
+private theorem pointValuation_pullback_x_gen_le_one_of_notMem
+    (φ : HasseWeil.Isogeny W₁ W₂) {SP : (W_smooth W₁).SmoothPoint}
+    (hSP : SP ∉ twoCurvePoleLocus φ) :
+    (W_smooth W₁).pointValuation SP (φ.pullback (x_gen W₂)) ≤ 1 := by
+  by_contra hc; exact hSP (Set.mem_union_left _ hc)
+
+/-- **Off the pole locus, the `y`-generator pullback is regular.** -/
+private theorem pointValuation_pullback_y_gen_le_one_of_notMem
+    (φ : HasseWeil.Isogeny W₁ W₂) {SP : (W_smooth W₁).SmoothPoint}
+    (hSP : SP ∉ twoCurvePoleLocus φ) :
+    (W_smooth W₁).pointValuation SP (φ.pullback (y_gen W₂)) ≤ 1 := by
+  by_contra hc; exact hSP (Set.mem_union_right _ hc)
+
+/-- **The residue `x`-value** of `φ` at a good smooth point `SP` (off the pole locus): the value
+to which the regular pulled-back generator `φ^*(x_gen₂)` evaluates at `SP`. -/
+private noncomputable def placeRestrictionResidueX
+    (φ : HasseWeil.Isogeny W₁ W₂) (SP : (W_smooth W₁).SmoothPoint)
+    (hSP : SP ∉ twoCurvePoleLocus φ) : F :=
+  Classical.choose (exists_evaluatesTo_of_pointValuation_le_one W₁
+    (pointValuation_pullback_x_gen_le_one_of_notMem φ hSP))
+
+/-- **The residue `y`-value** of `φ` at a good smooth point `SP`. -/
+private noncomputable def placeRestrictionResidueY
+    (φ : HasseWeil.Isogeny W₁ W₂) (SP : (W_smooth W₁).SmoothPoint)
+    (hSP : SP ∉ twoCurvePoleLocus φ) : F :=
+  Classical.choose (exists_evaluatesTo_of_pointValuation_le_one W₁
+    (pointValuation_pullback_y_gen_le_one_of_notMem φ hSP))
+
+/-- The residue `x`-value witnesses the evaluation. -/
+private theorem evaluatesTo_placeRestrictionResidueX
+    (φ : HasseWeil.Isogeny W₁ W₂) (SP : (W_smooth W₁).SmoothPoint)
+    (hSP : SP ∉ twoCurvePoleLocus φ) :
+    EvaluatesTo W₁ SP (φ.pullback (x_gen W₂)) (placeRestrictionResidueX φ SP hSP) :=
+  Classical.choose_spec (exists_evaluatesTo_of_pointValuation_le_one W₁
+    (pointValuation_pullback_x_gen_le_one_of_notMem φ hSP))
+
+/-- The residue `y`-value witnesses the evaluation. -/
+private theorem evaluatesTo_placeRestrictionResidueY
+    (φ : HasseWeil.Isogeny W₁ W₂) (SP : (W_smooth W₁).SmoothPoint)
+    (hSP : SP ∉ twoCurvePoleLocus φ) :
+    EvaluatesTo W₁ SP (φ.pullback (y_gen W₂)) (placeRestrictionResidueY φ SP hSP) :=
+  Classical.choose_spec (exists_evaluatesTo_of_pointValuation_le_one W₁
+    (pointValuation_pullback_y_gen_le_one_of_notMem φ hSP))
+
+/-- **The residue-value point** of `φ` at a good smooth point `SP` (off the pole locus): the
+*finite* point `(cx, cy) ∈ E₂` whose coordinates are the residue values of the pulled-back
+generators.  Its nonsingularity is automatic (`nonsingular_of_evaluatesTo_generators`). -/
+private noncomputable def placeRestrictionResiduePoint
+    (φ : HasseWeil.Isogeny W₁ W₂) (SP : (W_smooth W₁).SmoothPoint)
+    (hSP : SP ∉ twoCurvePoleLocus φ) : W₂.toAffine.Point :=
+  Affine.Point.some (placeRestrictionResidueX φ SP hSP) (placeRestrictionResidueY φ SP hSP)
+    (nonsingular_of_evaluatesTo_generators φ
+      (evaluatesTo_placeRestrictionResidueX φ SP hSP)
+      (evaluatesTo_placeRestrictionResidueY φ SP hSP))
+
+/-- **The concrete CoordHom-free geometric point map of `φ` (place-restriction map).**
+
+`O ↦ O`; an affine `P = (x, y)` in the affine kernel (`twoCurvePoleLocus φ`) `↦ O`; an affine
+`P` off the pole locus `↦` its residue-value point `(cx, cy) ∈ E₂`.  This is the geometric
+realization of `φ.pullback` on points, built *without* a `CoordHom`, purely from the
+function-field pullback (Silverman III.4.8, the affine-kernel case).  Its group-hom property is
+TASK B. -/
+noncomputable def placeRestrictionPointMap
+    (φ : HasseWeil.Isogeny W₁ W₂) : W₁.toAffine.Point → W₂.toAffine.Point
+  | Affine.Point.zero => Affine.Point.zero
+  | Affine.Point.some x y h =>
+    if hSP : (⟨x, y, h⟩ : (W_smooth W₁).SmoothPoint) ∈ twoCurvePoleLocus φ then
+      Affine.Point.zero
+    else
+      placeRestrictionResiduePoint φ ⟨x, y, h⟩ hSP
+
+@[simp] theorem placeRestrictionPointMap_zero (φ : HasseWeil.Isogeny W₁ W₂) :
+    placeRestrictionPointMap φ Affine.Point.zero = Affine.Point.zero := rfl
+
+theorem placeRestrictionPointMap_some_of_mem (φ : HasseWeil.Isogeny W₁ W₂)
+    {x y : F} {h : W₁.toAffine.Nonsingular x y}
+    (hSP : (⟨x, y, h⟩ : (W_smooth W₁).SmoothPoint) ∈ twoCurvePoleLocus φ) :
+    placeRestrictionPointMap φ (Affine.Point.some x y h) = Affine.Point.zero := by
+  show (if _ : (⟨x, y, h⟩ : (W_smooth W₁).SmoothPoint) ∈ twoCurvePoleLocus φ then
+    Affine.Point.zero else placeRestrictionResiduePoint φ ⟨x, y, h⟩ _) = Affine.Point.zero
+  rw [dif_pos hSP]
+
+theorem placeRestrictionPointMap_some_of_notMem (φ : HasseWeil.Isogeny W₁ W₂)
+    {x y : F} {h : W₁.toAffine.Nonsingular x y}
+    (hSP : (⟨x, y, h⟩ : (W_smooth W₁).SmoothPoint) ∉ twoCurvePoleLocus φ) :
+    placeRestrictionPointMap φ (Affine.Point.some x y h) =
+      placeRestrictionResiduePoint φ ⟨x, y, h⟩ hSP := by
+  show (if _ : (⟨x, y, h⟩ : (W_smooth W₁).SmoothPoint) ∈ twoCurvePoleLocus φ then
+    Affine.Point.zero else placeRestrictionResiduePoint φ ⟨x, y, h⟩ _) =
+      placeRestrictionResiduePoint φ ⟨x, y, h⟩ hSP
+  rw [dif_neg hSP]
+
+/-- **The residue-value-point agreement for `placeRestrictionPointMap`.**  At a good smooth point
+`SP = (x, y)` off the pole locus, with *any* residue values `cx cy` of the two pulled-back
+generators, the map sends `(x, y)` to `(cx, cy)`.  This is the residue agreement consumed by
+`pullbackEvaluation_twoCurve_of_residue_agreement`; it is a one-line consequence of the
+*uniqueness* of the value at a point (`EvaluatesTo.unique`), since the map picks its own
+`Classical.choose` residue witnesses. -/
+theorem placeRestrictionPointMap_residue_agreement
+    (φ : HasseWeil.Isogeny W₁ W₂) (SP : (W_smooth W₁).SmoothPoint)
+    (hSP : SP ∉ twoCurvePoleLocus φ) {cx cy : F}
+    (hx : EvaluatesTo W₁ SP (φ.pullback (x_gen W₂)) cx)
+    (hy : EvaluatesTo W₁ SP (φ.pullback (y_gen W₂)) cy) :
+    ∃ h' : W₂.toAffine.Nonsingular cx cy,
+      placeRestrictionPointMap φ SP.toAffinePoint = Affine.Point.some cx cy h' := by
+  -- the chosen residue values equal `cx`, `cy` by uniqueness of the value at `SP`
+  have hxeq : placeRestrictionResidueX φ SP hSP = cx :=
+    (evaluatesTo_placeRestrictionResidueX φ SP hSP).unique hx
+  have hyeq : placeRestrictionResidueY φ SP hSP = cy :=
+    (evaluatesTo_placeRestrictionResidueY φ SP hSP).unique hy
+  -- substituting `cx`, `cy` by the chosen residue values turns the goal into a `rfl` on the
+  -- residue-value point (the nonsingularity proofs match by proof irrelevance).
+  subst hxeq hyeq
+  refine ⟨nonsingular_of_evaluatesTo_generators φ hx hy, ?_⟩
+  -- the map at the affine point `SP` is exactly the residue-value point.
+  have hmap : placeRestrictionPointMap φ SP.toAffinePoint =
+      placeRestrictionResiduePoint φ SP hSP := by
+    rcases SP with ⟨x, y, h⟩
+    exact placeRestrictionPointMap_some_of_notMem φ (h := h) hSP
+  rw [hmap, placeRestrictionResiduePoint]
+
+/-- **The concrete place-restriction realization of `φ` as a `HasseWeil.Isogeny`**, given the
+group-hom property (TASK B) of `placeRestrictionPointMap φ`.  Its `pullback` is `φ.pullback` and
+its `toAddMonoidHom` is the concrete CoordHom-free geometric point map `placeRestrictionPointMap φ`.
+This is `placeRestrictionIsogeny` specialised to the concrete map. -/
+noncomputable def placeRestrictionRealization
+    (φ : HasseWeil.Isogeny W₁ W₂)
+    (hgrouphom : ∀ P Q : W₁.toAffine.Point,
+      placeRestrictionPointMap φ (P + Q) =
+        placeRestrictionPointMap φ P + placeRestrictionPointMap φ Q) :
+    HasseWeil.Isogeny W₁ W₂ :=
+  placeRestrictionIsogeny φ.pullback (placeRestrictionPointMap φ) hgrouphom
+    (placeRestrictionPointMap_zero φ)
+
+@[simp] theorem placeRestrictionRealization_pullback
+    (φ : HasseWeil.Isogeny W₁ W₂)
+    (hgrouphom : ∀ P Q : W₁.toAffine.Point,
+      placeRestrictionPointMap φ (P + Q) =
+        placeRestrictionPointMap φ P + placeRestrictionPointMap φ Q) :
+    (placeRestrictionRealization φ hgrouphom).pullback = φ.pullback := rfl
+
+@[simp] theorem placeRestrictionRealization_toAddMonoidHom_apply
+    (φ : HasseWeil.Isogeny W₁ W₂)
+    (hgrouphom : ∀ P Q : W₁.toAffine.Point,
+      placeRestrictionPointMap φ (P + Q) =
+        placeRestrictionPointMap φ P + placeRestrictionPointMap φ Q)
+    (P : W₁.toAffine.Point) :
+    (placeRestrictionRealization φ hgrouphom).toAddMonoidHom P = placeRestrictionPointMap φ P :=
+  rfl
+
+/-- **TASK A deliverable — the `PullbackEvaluation_twoCurve` coherence of the concrete
+place-restriction realization.**  For the realization `placeRestrictionRealization φ hgrouphom`
+(stored map `placeRestrictionPointMap φ`, function-field pullback `φ.pullback`), the two-curve
+cofinite pullback-evaluation witness holds with `bad = twoCurvePoleLocus φ` (finite), **sorry-free**.
+
+The proof is `pullbackEvaluation_twoCurve_of_residue_agreement` fed with the residue agreement
+`placeRestrictionPointMap_residue_agreement`: the residue-value point on the right (whose
+coordinates are the values of `φ^*(x_gen₂)`, `φ^*(y_gen₂)` at `P`) *is* the value of the stored
+map at `P`, by construction (modulo the uniqueness of the value, `EvaluatesTo.unique`).
+
+This makes the realization concrete and reduces PE-1 to **exactly** the group-hom property
+`hgrouphom` of `placeRestrictionPointMap φ` (TASK B): the *only* remaining input is `hgrouphom`. -/
+theorem pullbackEvaluation_twoCurve_placeRestrictionRealization
+    (φ : HasseWeil.Isogeny W₁ W₂)
+    (hgrouphom : ∀ P Q : W₁.toAffine.Point,
+      placeRestrictionPointMap φ (P + Q) =
+        placeRestrictionPointMap φ P + placeRestrictionPointMap φ Q) :
+    PullbackEvaluation_twoCurve W₁ W₂ (placeRestrictionRealization φ hgrouphom)
+      (twoCurvePoleLocus φ) := by
+  -- the realization shares `φ`'s pullback, so the pole locus and the residue values are the same
+  apply pullbackEvaluation_twoCurve_of_residue_agreement (placeRestrictionRealization φ hgrouphom)
+  intro P hP cx cy hx hy
+  -- the stored map of the realization is `placeRestrictionPointMap φ`; supply the residue agreement
+  exact placeRestrictionPointMap_residue_agreement φ P hP hx hy
+
+end ConcretePointMap
+
 end HasseWeil.WeilPairing
