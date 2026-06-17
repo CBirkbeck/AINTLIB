@@ -141,6 +141,22 @@ theorem prop_8_30_imagePiece_assembled
     (D E : RationalLocData A) (hspanE : Ideal.span (E.T : Set A) = ⊤) :
     @Module.Flat (presheafValue D) (presheafValue (imagePieceDatum D E.T E.s hspanE)) _ _
       ((imagePieceDatum D E.T E.s hspanE).canonicalMap).toModule := by
+  classical
+  haveI hTateB : IsTateRing (presheafValue D) := presheafValue_isTateRing_concrete D
+  haveI : IsNoetherianRing (presheafValue D) := presheafValue_isNoetherianRing_faithful D
+  haveI : IsStronglyNoetherian (presheafValue D) := presheafValue_isStronglyNoetherian_faithful D
+  haveI : IsHuberRing (presheafValue D) := hTateB.toIsHuberRing
+  haveI hCompleteB : @CompleteSpace (presheafValue D)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D)) :=
+    presheafValue_completeSpace_rightUniformSpace D
+  -- Remark 7.55 dominating unit `u` (`|u| ≤ |sB|` on `rationalOpen (im E)`).
+  obtain ⟨u, hu⟩ := remark755_dominating_unit_over_presheafValue D E hspanE
+  have hspan_u : Ideal.span (({(↑u : presheafValue D)} : Finset (presheafValue D)) :
+      Set (presheafValue D)) = ⊤ := by
+    rw [Finset.coe_singleton]; exact Ideal.span_singleton_eq_top.mpr u.isUnit
+  -- X₀ = R({↑u}/sB), flat over B (the dominating-unit base; genPieceUnit engine at A := B).
+  have hX0 := presheafValue_flat_of_genPieceUnit_faithful (presheafValue_concretePair D) u
+    (imagePieceDatum D E.T E.s hspanE).s hspan_u
   sorry
 
 end ValuationSpectrum
