@@ -86,8 +86,7 @@ theorem dirac_neg_one_sub_one_mul_padicZeta (hp2 : p ≠ 2) :
     · -- odd moments: the interpolation factor vanishes
       rw [mul_assoc, odd_moment_factor_eq_zero p ho, mul_zero] at hm
       rw [hm]; norm_num
-  rw [hzero, map_zero] at hν
-  exact hν
+  rwa [hzero, map_zero] at hν
 
 /-- Witness symmetry: the witnesses of `([g]−[1])·ζ_p` and `([−g]−[1])·ζ_p`
 coincide — the well-definedness of pushing witnesses to `𝒢⁺`. -/
@@ -116,8 +115,7 @@ theorem padicZeta_witness_neg (hp2 : p ≠ 2) (g : ℤ_[p]ˣ)
         rw [← map_mul, ← hfac, ← map_sub]
         ring_nf
       rw [this, mul_assoc, dirac_neg_one_sub_one_mul_padicZeta p hp2, mul_zero]
-    rw [sub_eq_zero] at hsub
-    exact hsub
+    rwa [sub_eq_zero] at hsub
   exact (IsFractionRing.injective (PadicMeasure p ℤ_[p]ˣ) (QuotientField p) hkey).symm
 
 /-! ## ζ_p as a pseudo-measure on 𝒢⁺ (RJW corollary, TeX 3033–3039) -/
@@ -235,8 +233,7 @@ theorem projPlus_padicZeta_witness (hp2 : p ≠ 2) (g : ℤ_[p]ˣ)
     ← map_mul, ← map_mul]
   -- now it is `algebraMap` applied to the pushed-forward 𝒢-side identity (`hkeyP`).
   congr 1
-  rw [hkeyP]
-  ring
+  linear_combination hkeyP
 
 /-- **RJW §11.1, Corollary (TeX 3033–3039)**: the p-adic zeta function is a
 pseudo-measure on `𝒢⁺`. -/
