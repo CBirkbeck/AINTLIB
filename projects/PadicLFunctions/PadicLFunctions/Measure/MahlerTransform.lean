@@ -64,10 +64,8 @@ Source: RJW Thm. 3.20, proof, first display (TeX lines 995–998). -/
 theorem apply_eq_tsum (μ : PadicMeasure p ℤ_[p]) (f : C(ℤ_[p], ℤ_[p])) :
     μ f = ∑' n, Δ_[1]^[n] (⇑f) 0 * mahlerCoeff p μ n := by
   have hterm : ∀ (a : ℤ_[p]) (n : ℕ),
-      (PadicInt.mahlerTerm a n : C(ℤ_[p], ℤ_[p])) = a • mahler n := by
-    intro a n
-    ext x
-    simp [PadicInt.mahlerTerm_apply, smul_eq_mul, mul_comm]
+      (PadicInt.mahlerTerm a n : C(ℤ_[p], ℤ_[p])) = a • mahler n := fun a n => by
+    ext x; simp [PadicInt.mahlerTerm_apply, smul_eq_mul, mul_comm]
   have h2 : HasSum (fun n => μ (PadicInt.mahlerTerm (Δ_[1]^[n] (⇑f) 0) n)) (μ f) :=
     (PadicInt.hasSum_mahler f).map μ.toAddMonoidHom (continuous p μ)
   refine h2.tsum_eq.symm.trans (tsum_congr fun n => ?_)
@@ -90,9 +88,8 @@ theorem mahlerTransform_injective : Function.Injective (mahlerTransform p) := by
   refine LinearMap.ext fun f => ?_
   rw [apply_eq_tsum p μ f, apply_eq_tsum p ν f]
   refine tsum_congr fun n => ?_
-  have hn : μ (mahler n) = ν (mahler n) := by
-    simpa using congrArg (PowerSeries.coeff n) h
-  rw [mahlerCoeff, mahlerCoeff, hn]
+  rw [mahlerCoeff, mahlerCoeff, show μ (mahler n) = ν (mahler n) from by
+    simpa using congrArg (PowerSeries.coeff n) h]
 
 /-- The summand `Δⁿf(0)·gₙ` of `ofPowerSeries` is summable: the Mahler coefficients
 tend to zero and the power-series coefficients are bounded by 1. -/
@@ -105,9 +102,8 @@ private lemma summable_fwdDiff_mul (f : C(ℤ_[p], ℤ_[p])) (g : PowerSeries �
   refine squeeze_zero (fun n => norm_nonneg _) (fun n => ?_) h
   calc ‖Δ_[1]^[n] (⇑f) 0 * PowerSeries.coeff n g‖
       = ‖Δ_[1]^[n] (⇑f) 0‖ * ‖PowerSeries.coeff n g‖ := norm_mul _ _
-    _ ≤ ‖Δ_[1]^[n] (⇑f) 0‖ * 1 :=
-        mul_le_mul_of_nonneg_left (PadicInt.norm_le_one _) (norm_nonneg _)
-    _ = ‖Δ_[1]^[n] (⇑f) 0‖ := mul_one _
+    _ ≤ ‖Δ_[1]^[n] (⇑f) 0‖ := by
+        simpa using mul_le_mul_of_nonneg_left (PadicInt.norm_le_one _) (norm_nonneg _)
 
 /-- The measure `μ_g` attached to a power series `g`: `φ ↦ ∑' n, Δⁿφ(0) * g_n`.
 The series converges because `Δⁿφ(0) → 0` (mathlib's `PadicInt.fwdDiff_tendsto_zero`)
@@ -153,8 +149,7 @@ theorem mahlerTransform_ofPowerSeries (g : PowerSeries ℤ_[p]) :
   rw [coeff_mahlerTransform]
   change ∑' n, Δ_[1]^[n] (⇑(mahler k : C(ℤ_[p], ℤ_[p]))) 0 * PowerSeries.coeff n g
       = PowerSeries.coeff k g
-  simp_rw [fwdDiff_iter_mahler_zero, ite_mul, one_mul, zero_mul]
-  exact tsum_ite_eq k _
+  simp_rw [fwdDiff_iter_mahler_zero, ite_mul, one_mul, zero_mul, tsum_ite_eq]
 
 /-- **RJW Theorem 3.20 (`thm:mahler`), linear part**: the Mahler transform is a
 `ℤ_[p]`-linear equivalence `ℳ(ℤ_p, ℤ_p) ≃ ℤ_p[[T]]`. (Upgraded to a ring isomorphism
