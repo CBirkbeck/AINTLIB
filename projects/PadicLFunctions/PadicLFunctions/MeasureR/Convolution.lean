@@ -66,13 +66,13 @@ omit [CompleteSpace K] in
 @[simp]
 theorem mahlerTransform_add (μ ν : MeasureR K ℤ_[p]) :
     mahlerTransform p K (μ + ν) = mahlerTransform p K μ + mahlerTransform p K ν := by
-  refine PowerSeries.ext fun n => ?_
+  ext n
   simp
 
 omit [CompleteSpace K] in
 @[simp]
 theorem mahlerTransform_zero : mahlerTransform p K (0 : MeasureR K ℤ_[p]) = 0 := by
-  refine PowerSeries.ext fun n => ?_
+  ext n
   simp
 
 variable (p K)
@@ -121,15 +121,12 @@ theorem mul_apply (μ ν : MeasureR K ℤ_[p]) (f : C(ℤ_[p], integerRing K)) :
   set ρ : MeasureR K ℤ_[p] :=
     { toFun := fun f => μ (convInner p K ν f)
       map_add' := fun f g => by
-        have h : convInner p K ν (f + g) = convInner p K ν f + convInner p K ν g :=
-          ContinuousMap.ext fun x => by
-            simp [ContinuousMap.add_comp]
-        rw [h, map_add]
+        rw [show convInner p K ν (f + g) = convInner p K ν f + convInner p K ν g from
+          ContinuousMap.ext fun x => by simp [ContinuousMap.add_comp], map_add]
       map_smul' := fun c f => by
-        have h : convInner p K ν (c • f) = c • convInner p K ν f :=
-          ContinuousMap.ext fun x => by
-            simp [ContinuousMap.smul_comp]
-        rw [h, map_smul, RingHom.id_apply] } with hρ
+        rw [show convInner p K ν (c • f) = c • convInner p K ν f from
+          ContinuousMap.ext fun x => by simp [ContinuousMap.smul_comp], map_smul,
+          RingHom.id_apply] }
   suffices h : μ * ν = ρ by rw [h]; rfl
   apply mahlerTransform_injective
   refine PowerSeries.ext fun n => ?_
