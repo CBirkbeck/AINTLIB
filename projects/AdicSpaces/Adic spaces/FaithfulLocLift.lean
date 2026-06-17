@@ -1,0 +1,171 @@
+/-
+Copyright (c) 2026. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+-/
+import «Adic spaces».Cor832
+import «Adic spaces».PresheafTateStructure
+
+/-!
+# Faithful `HasLocLiftPowerBounded` (Wedhorn 7.52, source-justified)
+
+The faithful replacement for the two opaque `sorry`s carried by the generic
+`hasLocLiftPowerBounded_of_stronglyNoetherianTate'` instance (`Presheaf.lean`): its
+`isUnit_canonicalMap_s_of_tate` (T001 `spa_point_nonOpen`) and
+`locLift_divByS_isPowerBounded_completion_of_tate` (bare `sorry`, Wedhorn 7.41). This file
+provides, for a **complete** strongly-noetherian Tate affinoid ring, both fields of
+`HasLocLiftPowerBounded` resting on exactly two source-justified Wedhorn leaves:
+
+* **(LL-unit)** `isUnit_canonicalMap_s_faithful` — Wedhorn 7.52(2) via the pair-free complete-affinoid
+  unit criterion (Lemma 7.45 / Prop 7.49 route), sorry-free.
+* **(LL-bdd)** `locLift_divByS_isPowerBounded_faithful` — Wedhorn 7.52(1)/7.18, reducing to the single
+  external integral criterion `isPowerBounded_of_forall_vle_one_spa_of_complete` = [Hu2] Lemma 3.3
+  (cited, not reproved, in Wedhorn).
+
+Relocated upstream of `RelativePieceKeystone` (from `WedhornCechAcyclicity`, where the decls were
+defined but never wired) so the Remark-7.55 flatness chain's per-step lemmas can
+`haveI := hasLocLiftPowerBounded_faithful` and route their `restrictionMapHom`-over-`presheafValue`
+through the source-justified route instead of the two opaque `sorry`s. Kept a `theorem` (not an
+`instance`): the `CompleteSpace`-w.r.t.-right-uniformity binder is not instance-synthesizable for a
+generic base, but for a concrete completion `presheafValue D` it is discharged locally by
+`presheafValue_completeSpace_rightUniformSpace`.
+
+## References
+
+* [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Prop 7.52, Prop 7.18, Prop 7.49, Lemma 7.45.
+* [R. Huber, *Continuous valuations*][huber1993], Lemma 3.3 (the (LL-bdd) external leaf).
+-/
+
+namespace ValuationSpectrum
+
+open Pointwise
+
+variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
+  [PlusSubring A] [IsHuberRing A]
+
+set_option linter.unusedSectionVars false in
+/-- **Faithful (LL-unit), Wedhorn 7.52(2) / Prop 8.2.** For `R(D'.T/D'.s) ⊆ R(D.T/D.s)`
+and `A⁺ ⊆ D'.P.A₀`, the image `D'.canonicalMap D.s` is a unit in `presheafValue D'`.
+
+Routes through the pair-free complete-affinoid unit criterion
+(`isUnit_iff_forall_not_vle_zero_of_complete_pairFree`, Lemma 7.45) + the **sorry-free**
+`Spa(𝒪(D')) → rationalOpen(D')` pullback (`comap_canonicalMap_mem_rationalOpen`): every Spa-point `w`
+of `𝒪(D')` pulls back into `rationalOpen(D') ⊆ rationalOpen(D)`, where `D.s` does not vanish, so
+`w(D'.canonicalMap D.s) ≠ 0`. The reduction is complete; it bottoms at the single source-justified
+leaf Prop 7.51(2)/7.49 (`exists_spa_point_supp_eq_maxIdeal_of_complete`) carried by the unit
+criterion. NO `IsDomain`, NO noeth-`A₀`, NO T001 algebraic route — this is the reviewer-recommended
+faithful replacement for `isUnit_canonicalMap_s_of_huber` (whose `spa_point_nonOpen` sorry is opaque). -/
+theorem isUnit_canonicalMap_s_faithful
+    [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    (D D' : RationalLocData A)
+    (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s) :
+    IsUnit (D'.canonicalMap D.s) := by
+  haveI hTate : IsTateRing (presheafValue D') := presheafValue_isTateRing_concrete D'
+  haveI : IsHuberRing (presheafValue D') := hTate.toIsHuberRing
+  haveI : T2Space (presheafValue D') := inferInstance
+  haveI : NonarchimedeanRing (presheafValue D') := inferInstance
+  rw [isUnit_iff_forall_not_vle_zero_of_complete_pairFree (D'.canonicalMap D.s)]
+  intro w hw hvle
+  have hmem := comap_canonicalMap_mem_rationalOpen D' (canonicalMap_continuous D') hw
+  exact (h hmem).2.2 (by simpa only [comap_vle, map_zero] using hvle)
+
+set_option linter.unusedSectionVars false in
+/-- **Integral / power-bounded criterion (Wedhorn 7.52(1) = Prop 7.18(1) = [Hu2] Lemma 3.3).**
+In the complete affinoid ring `B = presheafValue D'`, an element `x` with `v(x) ≤ 1` at every
+Spa point is power-bounded.
+
+Wedhorn 7.52(1) (p. 74) states `f ∈ B⁺ ⟺ |f(x)| ≤ 1 ∀ x ∈ Spa B` (a reformulation of
+Prop 7.18(1)); combined with `B⁺ ⊆ B°` (Def 7.14(1), integral elements are power-bounded) this
+gives the stated criterion. Wedhorn proves 7.18(1) by citing [Hu2] Lemma 3.3, which is NOT
+reproved in Wedhorn — so this is the single, source-justified external leaf of the faithful
+(LL-bdd) (reviewer (LL-bdd) reply, Q-bdd-1: "all Spa valuations ≤ 1 ⇒ x ∈ B⁺ (Prop 7.18) ⇒
+x ∈ B° (B⁺ ⊆ power-bounded, Def 7.14) ⇒ power-bounded").
+
+-- EXTERNAL (Wedhorn cites [Hu2] Lemma 3.3; not reproved in Wedhorn). -/
+theorem isPowerBounded_of_forall_vle_one_spa_of_complete
+    [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    (D' : RationalLocData A) (x : presheafValue D')
+    (hx : ∀ w : Spv (presheafValue D'),
+      w ∈ Spa (presheafValue D') (presheafValue D')⁺ → w.vle x 1) :
+    @TopologicalRing.IsPowerBounded (presheafValue D') _ inferInstance x :=
+  sorry
+
+set_option linter.unusedSectionVars false in
+/-- **Faithful (LL-bdd), Wedhorn 7.52(1)/7.18 + Prop 8.2.** For `R(D'.T/D'.s) ⊆ R(D.T/D.s)`,
+`A⁺ ⊆ D'.P.A₀`, and `t ∈ D.T`, the localization lift of `t/D.s` is power-bounded in the
+completion `presheafValue D'`.
+
+Faithful reduction (reviewer (LL-bdd) Q-bdd-1) to the single external criterion
+`isPowerBounded_of_forall_vle_one_spa_of_complete`: every Spa point `w` of `O_X(D')` pulls back
+(`comap_canonicalMap_mem_rationalOpen`) into `rationalOpen(D') ⊆ rationalOpen(D)`, where
+`w(t) ≤ w(D.s)` (`t ∈ D.T`); the lift `x` satisfies `x · canMap(D.s) = canMap(t)` and `canMap(D.s)`
+is a unit, so `w(x) ≤ 1`. NO `IsDomain`, NO noeth-`A₀`. The sorry-free (modulo the one external
+[Hu2]-3.3 leaf) faithful replacement for `locLift_divByS_isPowerBounded_completion_of_tate`
+(Presheaf.lean, bare `sorry`). -/
+theorem locLift_divByS_isPowerBounded_faithful
+    [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    (D D' : RationalLocData A)
+    (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
+    (t : A) (ht : t ∈ D.T) :
+    @TopologicalRing.IsPowerBounded (presheafValue D') _ inferInstance
+      (IsLocalization.Away.lift D.s (isUnit_canonicalMap_s_faithful D D' h)
+        (divByS t D.s)) := by
+  set hu := isUnit_canonicalMap_s_faithful D D' h with hu_def
+  set x := IsLocalization.Away.lift D.s hu (divByS t D.s) with hx_def
+  apply isPowerBounded_of_forall_vle_one_spa_of_complete D' x
+  intro w hw
+  -- Pull back: `comap w ∈ rationalOpen D' ⊆ rationalOpen D`, giving `w(t) ≤ w(D.s)`.
+  have hmem := comap_canonicalMap_mem_rationalOpen D' (canonicalMap_continuous D') hw
+  have hvle0 : (comap D'.canonicalMap w).vle t D.s := (h hmem).2.1 t ht
+  rw [comap_vle] at hvle0
+  -- Lift spec: `x · D'.canonicalMap D.s = D'.canonicalMap t`.
+  have hspec_alg : divByS t D.s * algebraMap A (Localization.Away D.s) D.s =
+      algebraMap A (Localization.Away D.s) t :=
+    IsLocalization.mk'_spec _ t ⟨D.s, Submonoid.mem_powers D.s⟩
+  have hspec : x * D'.canonicalMap D.s = D'.canonicalMap t := by
+    have e1 : x * IsLocalization.Away.lift D.s hu
+          (algebraMap A (Localization.Away D.s) D.s) =
+        IsLocalization.Away.lift D.s hu (algebraMap A (Localization.Away D.s) t) := by
+      rw [hx_def, ← map_mul, hspec_alg]
+    rwa [IsLocalization.Away.lift_eq, IsLocalization.Away.lift_eq] at e1
+  -- Cancel the unit `D'.canonicalMap D.s` to get `w(x) ≤ 1`.
+  rw [← hspec] at hvle0
+  -- `hvle0 : w.vle (x * D'.canonicalMap D.s) (D'.canonicalMap D.s)`.
+  obtain ⟨cinv, hcinv⟩ := hu.exists_right_inv
+  have hmul := w.mul_vle_mul_left hvle0 cinv
+  rwa [mul_assoc, hcinv, mul_one] at hmul
+
+set_option linter.unusedSectionVars false in
+/-- **Faithful `HasLocLiftPowerBounded` (Wedhorn 7.52 + Prop 8.2).** For a complete strongly
+noetherian Tate affinoid ring, both fields of `HasLocLiftPowerBounded` hold faithfully:
+
+* **(LL-unit)** `isUnit_canonicalMap_s_faithful` (Wedhorn 7.52(2), sorry-free): `D.s` is a unit in
+  the completion `O_X(D')` because it has no zero on `Spa(O_X(D'))`.
+* **(LL-bdd)** `locLift_divByS_isPowerBounded_faithful` (Wedhorn 7.52(1)/7.18): each lift `t/D.s`
+  has `v ≤ 1` on `Spa(O_X(D'))`, hence is power-bounded — modulo the single external integral
+  criterion [Hu2] Lemma 3.3 (`isPowerBounded_of_forall_vle_one_spa_of_complete`).
+
+**Pair-free** — `[CompatiblePlusSubring A]` is GONE (the (LL-unit) now routes through the pair-free
+7.52(2) `isUnit_iff_forall_not_vle_zero_of_complete_pairFree`, Wedhorn's actual 7.51 route). This is
+the faithful replacement for `hasLocLiftPowerBounded_of_stronglyNoetherianTate'` (Presheaf.lean),
+whose `isUnit_canonicalMap_s_of_tate` carries the T001 `spa_point_nonOpen` sorry and whose
+`locLift_divByS_isPowerBounded_completion_of_tate` is a bare `sorry`: this version replaces BOTH
+opaque sorries by exactly two source-justified Wedhorn leaves — the pair-free Prop 7.51(2)
+`exists_spa_point_supp_eq_maxIdeal_of_complete` (Prop 7.49 route) and [Hu2] 3.3.
+
+Crucially this needs NO `[CompatiblePlusSubring (presheafValue D)]` (false-in-general for
+completions), so it APPLIES to `B = presheafValue D`: callers `haveI := hasLocLiftPowerBounded_faithful`
+(supplying `CompleteSpace` via `presheafValue_completeSpace_rightUniformSpace`) to shadow the
+sorry-bearing Presheaf instance. Kept a `theorem` (not `instance`): the `CompleteSpace`-w.r.t.-
+right-uniformity binder is not instance-synthesizable. -/
+theorem hasLocLiftPowerBounded_faithful
+    [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] :
+    HasLocLiftPowerBounded A where
+  isUnit_canonicalMap_s := fun D D' h => isUnit_canonicalMap_s_faithful D D' h
+  locLift_divByS_isPowerBounded := fun D D' h t ht =>
+    locLift_divByS_isPowerBounded_faithful D D' h t ht
+
+end ValuationSpectrum

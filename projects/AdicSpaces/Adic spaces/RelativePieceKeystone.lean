@@ -7,6 +7,7 @@ import «Adic spaces».LaurentRefinementCore
 import «Adic spaces».GeometricReduction
 import «Adic spaces».PresheafIdentification
 import «Adic spaces».RestrictionFlatness
+import «Adic spaces».FaithfulLocLift
 
 /-!
 # The relative-piece keystone (Wedhorn Prop 8.2 / Prop 8.16) and Prop 8.30 / Cor 8.32
@@ -1551,6 +1552,12 @@ theorem flat_imagePieceDatum_denomGen [DecidableEq A] (D₀ : RationalLocData A)
   haveI hCompleteB : @CompleteSpace (presheafValue D₀)
       (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
     presheafValue_completeSpace_rightUniformSpace D₀
+  -- FAITHFUL re-wiring: shadow the generic `hasLocLiftPowerBounded_of_stronglyNoetherianTate`
+  -- instance (whose 2 fields are opaque sorries 7.52(2)/7.41) with the source-justified faithful
+  -- route (7.51(2) + [Hu2] 3.3); the internal `restrictionMapHom W U`/`restrictionMap_bijective`
+  -- over `presheafValue D₀` (in `e` below) then route through it. The conclusion is about
+  -- `W.canonicalMap` (instance-independent), so this is diamond-free.
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hasLocLiftPowerBounded_faithful
   set g : presheafValue D₀ := D₀.canonicalMap f * Ring.inverse (D₀.canonicalMap s) with hg
   set W := imagePieceDatum D₀ {f, s} s hspan with hW
   set U : RationalLocData (presheafValue D₀) :=
@@ -1644,6 +1651,9 @@ theorem flat_imagePieceDatum_domUnit [DecidableEq A] (D₀ : RationalLocData A) 
   haveI hCompleteB : @CompleteSpace (presheafValue D₀)
       (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
     presheafValue_completeSpace_rightUniformSpace D₀
+  -- FAITHFUL re-wiring (see `flat_imagePieceDatum_denomGen`): route the internal
+  -- `restrictionMapHom`-over-`presheafValue D₀` through the source-justified faithful `HasLocLift`.
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hasLocLiftPowerBounded_faithful
   set gg : presheafValue D₀ := D₀.canonicalMap g * Ring.inverse (D₀.canonicalMap s) with hgg
   set W := imagePieceDatum D₀ {g, u} s hspan with hW
   set U : RationalLocData (presheafValue D₀) :=
