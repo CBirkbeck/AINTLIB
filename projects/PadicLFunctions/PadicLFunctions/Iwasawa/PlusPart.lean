@@ -82,8 +82,7 @@ theorem isCompl_invariants_antiInvariants [Invertible (2 : R)] (σ : M →ₗ[R]
     intro x hx hx'
     rw [mem_invariants_iff] at hx
     rw [mem_antiInvariants_iff] at hx'
-    have hxx : x = -x := hx.symm.trans hx'
-    have h2 : (2 : R) • x = 0 := by rw [two_smul]; exact add_eq_zero_iff_eq_neg.2 hxx
+    have h2 : (2 : R) • x = 0 := by rw [two_smul]; exact add_eq_zero_iff_eq_neg.2 (hx.symm.trans hx')
     have := invOf_smul_smul (2 : R) x
     rwa [h2, smul_zero, eq_comm] at this
   · -- Codisjointness: `x = ⅟2•(x+σx) + ⅟2•(x−σx)` with parts in the two eigenspaces.
@@ -265,9 +264,9 @@ private lemma dirac_neg_one_mul_apply (μ : PadicMeasure p ℤ_[p]ˣ) (f : C(ℤ
     (dirac p (-1 : ℤ_[p]ˣ) * μ) f = μ (f.comp (negTranslate p)) := by
   rw [conv_mul_apply, dirac_apply, innerInt_apply]
   congr 1
-  exact ContinuousMap.ext fun u => by
-    change f ((-1 : ℤ_[p]ˣ) * u) = f (-u)
-    rw [neg_one_mul]
+  refine ContinuousMap.ext fun u => ?_
+  change f ((-1 : ℤ_[p]ˣ) * u) = f (-u)
+  rw [neg_one_mul]
 
 /-- The even part of a continuous function on `𝒢`: `f ↦ (f + f∘c)/2` (`p ≠ 2`). -/
 def evenPart (hp2 : p ≠ 2) (f : C(ℤ_[p]ˣ, ℤ_[p])) : C(ℤ_[p]ˣ, ℤ_[p]) :=
@@ -285,12 +284,9 @@ def descendEven (g : C(ℤ_[p]ˣ, ℤ_[p])) (hg : ∀ u : ℤ_[p]ˣ, g (-u) = g 
     obtain ⟨k, hk⟩ := hxy
     rcases Int.even_or_odd k with hke | hko
     · rw [hke.neg_one_zpow] at hk
-      have hyx : y = x := by
-        have h := hk.symm; rw [inv_mul_eq_one] at h; exact h.symm
-      rw [hyx]
+      rw [(inv_mul_eq_one.1 hk.symm).symm]
     · rw [hko.neg_one_zpow] at hk
-      have hy : y = -x := by
-        have h := hk.symm; rw [inv_mul_eq_iff_eq_mul] at h; rw [h, mul_neg_one]
+      have hy : y = -x := by rw [inv_mul_eq_iff_eq_mul.1 hk.symm, mul_neg_one]
       rw [hy, hg]), by
     -- continuity: `mk` is a quotient map, and the lift composed with `mk` is `g`
     have hmk := QuotientGroup.isQuotientMap_mk (Subgroup.zpowers (-1 : ℤ_[p]ˣ))
@@ -451,14 +447,10 @@ def plusEquiv (hp2 : p ≠ 2) :
   LinearEquiv.ofLinear
     (pushforward p (quotientMk p) ∘ₗ (plusPart p).subtype)
     ((plusSection p hp2).codRestrict (plusPart p) (plusSection_mem_plusPart p hp2))
-    (by
-      -- `π_* ∘ σ = id` (note `pushforward (quotientMk) = projPlus` definitionally)
-      refine LinearMap.ext fun ν => ?_
-      exact projPlus_plusSection p hp2 ν)
-    (by
-      -- `σ ∘ π_* = id` on the plus part, via `Subtype.ext`
-      refine LinearMap.ext fun μ => ?_
-      exact Subtype.ext (plusSection_projPlus p hp2 μ.2))
+    -- `π_* ∘ σ = id` (note `pushforward (quotientMk) = projPlus` definitionally)
+    (LinearMap.ext fun ν => projPlus_plusSection p hp2 ν)
+    -- `σ ∘ π_* = id` on the plus part, via `Subtype.ext`
+    (LinearMap.ext fun μ => Subtype.ext (plusSection_projPlus p hp2 μ.2))
 
 /-- The projection kills the minus part: an even pullback `g∘mk` is integrated to `0`
 by a `c`-anti-invariant measure (it equals its own negative). -/
@@ -468,9 +460,7 @@ private lemma projPlus_eq_zero_of_mem_minusPart {ρ : PadicMeasure p ℤ_[p]ˣ}
   rw [projPlus_apply, LinearMap.zero_apply]
   -- the pullback `g ∘ mk` is even, hence fixed by the `c`-translation
   have heven : (g.comp (quotientMk p)).comp (negTranslate p) = g.comp (quotientMk p) :=
-    ContinuousMap.ext fun u => by
-      change (g.comp (quotientMk p)) (-u) = (g.comp (quotientMk p)) u
-      exact comp_quotientMk_even p g u
+    ContinuousMap.ext fun u => comp_quotientMk_even p g u
   -- but on a `c`-anti-invariant measure this value equals its negative
   have hneg : ρ (g.comp (quotientMk p)) = -ρ (g.comp (quotientMk p)) := by
     have h := dirac_neg_one_mul_apply p ρ (g.comp (quotientMk p))
