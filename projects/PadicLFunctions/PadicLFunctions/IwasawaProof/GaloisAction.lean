@@ -146,13 +146,6 @@ theorem galAut_zetaSys (a : ℤ_[p]ˣ) {n : ℕ} (hn : 1 ≤ n) :
   rw [SubmonoidClass.coe_pow] at hcoe
   exact hcoe.symm
 
-/-! ### Complex conjugation `σ_{-1}` and the Galois structure of `K_n` (RJW §12 material)
-
-The automorphism `σ_{-1} = galAut p (-1) n` is *complex conjugation* on the cyclotomic
-tower: it sends `ξ_n ↦ ξ_n⁻¹`. For `p` odd and `n ≥ 1` it has order exactly `2`
-(`ξ_n ≠ ξ_n⁻¹`), and `K_n/ℚ_p` is (abelian) Galois (`IsCyclotomicExtension.isGalois`).
-These feed the fixed-field characterisation `K_n⁺ = (K_n)^{⟨σ_{-1}⟩}` of `LocalUnits.lean`. -/
-
 /-- **Complex conjugation** `σ_{-1}` sends `ξ_{p^n} ↦ ξ_{p^n}⁻¹` (the cyclotomic-character
 value `-1`, read through `unitsToZModPow (-1) = -1` and `ξ^{(-1).val} = ξ⁻¹`). RJW TeX 3185. -/
 theorem galAut_neg_one_zetaSys {n : ℕ} (hn : 1 ≤ n) :
@@ -261,18 +254,6 @@ theorem orderOf_galAut_neg_one (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n) :
       rw [hone]; rfl
     rw [galAut_neg_one_zetaSys p hn] at this
     exact zetaSys_ne_inv p hp2 hn this.symm
-
-/-! ### The fixed-field characterisation `K_n⁺ = (K_n)^{⟨σ_{-1}⟩}` (RJW §12 material)
-
-The maximal totally real subfield `K_n⁺ = ℚ_p(ξ + ξ⁻¹)` (`LocalUnits.KPlus`) is the fixed
-field of complex conjugation `σ_{-1}`. This is the §12 Galois characterisation flagged in
-`LocalUnits.lean`. It lives here (rather than in `LocalUnits`) because it couples `KPlus`
-(`LocalUnits`) with `galAut` (this file, which imports `LocalUnits`).
-
-`(⊆)` is the reality of `K_n⁺`: `σ_{-1}` fixes the generator `ξ + ξ⁻¹`. The equality is the
-Galois correspondence: `[K_n : (K_n)^{⟨σ_{-1}⟩}] = |⟨σ_{-1}⟩| = 2` (`σ_{-1}` order 2) and
-`[K_n : K_n⁺] ≤ 2` (`ξ` is a root of `X² − (ξ+ξ⁻¹)X + 1` over `K_n⁺`), so the two subfields,
-one inside the other, have the same `ℚ_p`-dimension. -/
 
 /-- `K_n⁺` viewed as an intermediate field of `K_n / ℚ_p` (it sits inside `K_n` by
 `KPlus_le_K`). Reducible so that the relative-algebra instances on `K_n` over it resolve. -/
@@ -628,13 +609,6 @@ theorem levelNorm_galAut (a : ℤ_[p]ˣ) {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]}
     = (galAut p a n ⟨levelNorm p n x, levelNorm_mem p n hx⟩ : ℂ_[p])
   rw [hrhsK]
 
-/-! ### `σ_a` is an isometry (it preserves `O_n` and the unit norm)
-
-The `ℂ_p`-norm restricted to the finite extension `K_n` is the spectral norm
-(`spectralNorm_unique_field_norm_ext`), which depends only on the `ℚ_p`-minimal
-polynomial; a `ℚ_p`-algebra automorphism preserves minimal polynomials
-(`minpoly.algEquiv_eq`), hence the norm: `‖σ_a y‖ = ‖y‖`. -/
-
 /-- The restriction of the `ℂ_p`-norm to `K_n`, as an `AbsoluteValue (K p n) ℝ`
 (mirrors `Tower.restrictAbs`, which is private). -/
 private noncomputable def restrictAbsK (n : ℕ) : AbsoluteValue (K p n) ℝ where
@@ -759,8 +733,6 @@ theorem hasSubst_galSubstend (a : ℤ_[p]ˣ) : PowerSeries.HasSubst (galSubstend
 `PowerSeries.subst` of the binomial substituend `galSubstend a = (1+T)^a − 1`. -/
 noncomputable def galSeries (a : ℤ_[p]ˣ) (f : PowerSeries ℤ_[p]) : PowerSeries ℤ_[p] :=
   f.subst (galSubstend p a)
-
-/-! ### The evaluation bridge `evalPi (galSeries a f) n = σ_a(f(π_n))` -/
 
 /-- `‖coeff k (G^d)‖ ≤ 1` for an integral-coefficient series `G` (ultrametric Cauchy
 product; re-derivation of `ResidueZeta.norm_coeff_pow_le_one`). -/
@@ -1140,16 +1112,6 @@ theorem colemanSeries_galNCU (a : ℤ_[p]ˣ) (u : NormCompatUnits p) :
 `Λ(ℤ_[p]ˣ)` is the pushforward along this map (RJW TeX 3217–3234). -/
 def unitsMulLeftCM (a : ℤ_[p]ˣ) : C(ℤ_[p]ˣ, ℤ_[p]ˣ) :=
   ⟨fun v => a * v, continuous_const.mul continuous_id⟩
-
-/-! ### The measure-side derivation of `Col_galNCU`
-
-The proof reduces to four algebraic facts (RJW TeX 3217–3234):
-* the binomial-series derivative identity `(1+T)·(binomialSeries r)' = r·binomialSeries r`
-  (`one_add_X_mul_derivative_binomialSeries`);
-* the `∂log` chain rule under `σ_a`, `∂log(σ_a f) = a·σ_a(∂log f)`
-  (`dlog_galSeries`, for `f` a unit);
-* the inverse Mahler bridge `𝒜⁻¹(σ_a g) = sigma a (𝒜⁻¹ g)` (`mahlerSymm_galSeries`);
-* the `a`/`a⁻¹` cancellation in the units-multiplication step (inside `Col_galNCU`). -/
 
 /-- The descending-Pochhammer recursion for `Ring.choose` over `ℤ_[p]`:
 `(n+1)·binom(r, n+1) = (r − n)·binom(r, n)`. Engine for the binomial-series derivative
