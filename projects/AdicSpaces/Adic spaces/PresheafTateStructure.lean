@@ -283,6 +283,316 @@ private theorem locNhd_sub_idealOfDef_pow_val (D₀ : RationalLocData A) (n : �
   change ((locSubringToRingOfDef D₀) d).val = x
   exact hyx ▸ congrArg D₀.coeRingHom hdy
 
+omit [PlusSubring A] in
+/-- The subspace topology on `locSubring` (induced from `presheafValue`/the localization) coincides
+with the `J`-adic topology, where `J = locIdeal`. This is the topological shadow of
+`locSubring_subspace_eq_adic` (which states it at the level of uniformities). -/
+private theorem locSubring_induced_eq_adicTopology (D₀ : RationalLocData A) :
+    TopologicalSpace.induced (locSubring D₀.P D₀.T D₀.s).subtype D₀.topology =
+      (locIdeal D₀.P D₀.T D₀.s).adicTopology := by
+  have hunif := locSubring_subspace_eq_adic D₀
+  have h1 : @UniformSpace.toTopologicalSpace _
+      (UniformSpace.comap (locSubring D₀.P D₀.T D₀.s).subtype D₀.uniformSpace) =
+    @UniformSpace.toTopologicalSpace _
+      (@IsTopologicalAddGroup.rightUniformSpace _ _
+        (locIdeal D₀.P D₀.T D₀.s).adicTopology inferInstance) :=
+    congrArg (fun u => @UniformSpace.toTopologicalSpace _ u) hunif
+  rw [UniformSpace.toTopologicalSpace_comap] at h1
+  exact h1
+
+omit [PlusSubring A] in
+/-- Helper for `idealOfDef_pow_val_isClosed` (⊆ direction): `idealOfDef^n` is contained in the
+closure of `g '' (J^n)`, where `g = locSubringToRingOfDef` and `J = locIdeal`. Proved by
+`Submodule.span_induction`: generators land in the closure, the closure is closed under addition,
+and scalar multiplication stays in the closure by density of `g` together with ideal absorption. -/
+private theorem idealOfDef_pow_subset_closure (D₀ : RationalLocData A) (n : ℕ)
+    (hg_dense : DenseRange (locSubringToRingOfDef D₀)) :
+    ((presheafValue_idealOfDef D₀ ^ n : Ideal (presheafValue_ringOfDef D₀)) :
+      Set (presheafValue_ringOfDef D₀)) ⊆
+    closure ((locSubringToRingOfDef D₀) ''
+      (↑((locIdeal D₀.P D₀.T D₀.s) ^ n) : Set (locSubring D₀.P D₀.T D₀.s))) := by
+  letI := D₀.uniformSpace; letI := D₀.isUniformAddGroup; letI := D₀.isTopologicalRing
+  haveI : IsTopologicalRing (presheafValue_ringOfDef D₀) :=
+    Subring.instIsTopologicalRing _
+  set J := locIdeal D₀.P D₀.T D₀.s with hJ_def
+  set g := locSubringToRingOfDef D₀ with hg_def
+  set gJn := g '' (↑(J ^ n) : Set (locSubring D₀.P D₀.T D₀.s)) with hgJn_def
+  have hact : ∀ a ∈ Set.range g, ∀ b ∈ gJn, a * b ∈ gJn := by
+    rintro _ ⟨s, rfl⟩ _ ⟨d, hd, rfl⟩
+    exact ⟨s * d, Ideal.mul_mem_left _ s hd, map_mul g s d⟩
+  rw [show presheafValue_idealOfDef D₀ = Ideal.map g J from rfl,
+      (Ideal.map_pow g J n).symm]
+  intro y hy
+  refine Submodule.span_induction (p := fun y _ => y ∈ closure gJn) ?_ ?_ ?_ ?_ hy
+  · rintro y ⟨d, hd, rfl⟩; exact subset_closure ⟨d, hd, rfl⟩
+  · exact subset_closure ⟨0, (J ^ n).zero_mem, map_zero g⟩
+  · intro a b _ _ ha hb
+    exact ((J ^ n).toAddSubgroup.map g.toAddMonoidHom).topologicalClosure.add_mem ha hb
+  · intro ⟨r, hr_mem⟩ y _ hy
+    exact map_mem_closure₂' (fun _ => continuous_const_mul _)
+      (fun _ => continuous_mul_const _)
+      (hg_dense.closure_eq ▸ Set.mem_univ _) hy hact
+
+set_option maxHeartbeats 4000000 in
+-- The AdicCompletion bridge proof has deep elaboration chains through ring equivs.
+omit [PlusSubring A] in
+/-- Helper for `idealOfDef_pow_val_isClosed` (⊇ direction): `idealOfDef^n` is closed in the
+subspace topology on `ringOfDef`.
+
+This is the AdicCompletion-bridge argument: the subspace topology on `locSubring` equals the
+`J`-adic topology, so `ringOfDef` is the `J`-adic completion of `locSubring`; via
+`AdicCompletionBridge.adicCompletionRingEquiv` and `AdicCompletion.map_exact` the ideal
+`idealOfDef^n = Ideal.map g (J^n)` is the kernel `ker(evalₐ n)` of evaluation into the discrete
+quotient `locSubring/J^n`, hence closed. -/
+private theorem idealOfDef_pow_isClosed_aux (D₀ : RationalLocData A) (n : ℕ) :
+    IsClosed ((presheafValue_idealOfDef D₀ ^ n :
+      Ideal (presheafValue_ringOfDef D₀)) :
+      Set (presheafValue_ringOfDef D₀)) := by
+  letI := D₀.uniformSpace; letI := D₀.isUniformAddGroup; letI := D₀.isTopologicalRing
+  have hclosed_ring : IsClosed (presheafValue_ringOfDef D₀ : Set (presheafValue D₀)) :=
+    Subring.isClosed_topologicalClosure _
+  haveI : IsTopologicalRing (presheafValue_ringOfDef D₀) :=
+    Subring.instIsTopologicalRing _
+  have hadic_eq := locSubring_induced_eq_adicTopology D₀
+  set J := locIdeal D₀.P D₀.T D₀.s with hJ_def
+  set g := locSubringToRingOfDef D₀ with hg_def
+  set gJn := g '' (↑(J ^ n) : Set (locSubring D₀.P D₀.T D₀.s)) with hgJn_def
+  have hg_dense : DenseRange g := by
+    intro ⟨z, hz⟩
+    have hval_range : Subtype.val '' Set.range g =
+        ((D₀.coeRingHom.comp (locSubring D₀.P D₀.T D₀.s).subtype).range :
+          Set (presheafValue D₀)) := by
+      ext w; constructor
+      · rintro ⟨y, ⟨d, hd⟩, hw⟩; exact ⟨d, by rw [← hw, ← hd]; rfl⟩
+      · rintro ⟨d, hd⟩; exact ⟨g d, ⟨d, rfl⟩, hd⟩
+    have h1 : z ∈ closure (Subtype.val '' Set.range g) := hval_range ▸ hz
+    simp only [closure_subtype]
+    exact h1
+  -- Proof: idealOfDef^n = ker(π) for a continuous ring hom
+  --   π : ringOfDef → locSubring ⧸ (J ^ n)
+  -- and ker(π) is closed since the target is discrete (T₁).
+  --
+  -- Construction of π: g : locSubring → ringOfDef is a dense uniform
+  -- inducing (locSubring_subspace_eq_adic). The quotient
+  -- q = Ideal.Quotient.mk(J^n) extends to π by the completion universal
+  -- property (target is discrete, hence complete T₂).
+  --
+  -- ker(π) = idealOfDef^n = Ideal.map g (J^n):
+  -- (⊆) π is a ring hom (density + T₂) killing g(J^n), so the generated
+  --     ideal Ideal.map g (J^n) = idealOfDef^n ⊆ ker(π).
+  -- (⊇) By AdicCompletion.map_exact (Mathlib.RingTheory.AdicCompletion.Exactness)
+  --     on 0 → J^n → locSubring → locSubring/J^n → 0, using IsNoetherianRing.
+  --     Transported through adicCompletionRingEquiv (AdicCompletionBridge.lean).
+  -- Step A: g : locSubring -> ringOfDef is IsUniformInducing.
+  have hg_ui : @IsUniformInducing _ _
+      (UniformSpace.comap (locSubring D₀.P D₀.T D₀.s).subtype D₀.uniformSpace)
+      (UniformSpace.comap Subtype.val inferInstance) g := by
+    have h_comp : (Subtype.val : presheafValue_ringOfDef D₀ → presheafValue D₀) ∘ g =
+        (D₀.coeRingHom : Localization.Away D₀.s → presheafValue D₀) ∘
+        (locSubring D₀.P D₀.T D₀.s).subtype := by ext d; rfl
+    have h_valg_ui : @IsUniformInducing _ _
+        (UniformSpace.comap (locSubring D₀.P D₀.T D₀.s).subtype D₀.uniformSpace)
+        (inferInstance : UniformSpace (presheafValue D₀))
+        (Subtype.val ∘ g) := h_comp ▸
+      (UniformSpace.Completion.isUniformInducing_coe _).comp ⟨rfl⟩
+    have hval_ui : @IsUniformInducing _ _
+        (UniformSpace.comap Subtype.val inferInstance)
+        (inferInstance : UniformSpace (presheafValue D₀))
+        (Subtype.val : presheafValue_ringOfDef D₀ → presheafValue D₀) := ⟨rfl⟩
+    constructor
+    rw [← hval_ui.comap_uniformity, Filter.comap_comap]
+    exact h_valg_ui.comap_uniformity
+  -- Step B: ringOfDef is complete (closed subspace of complete space).
+  have hcomplete : @CompleteSpace (presheafValue_ringOfDef D₀)
+      (UniformSpace.comap Subtype.val inferInstance) :=
+    (Subring.isClosed_topologicalClosure
+      (D₀.coeRingHom.comp (locSubring D₀.P D₀.T D₀.s).subtype).range).completeSpace_coe
+  -- Step C: Package (g, ringOfDef) as AbstractCompletion of locSubring.
+  let pkg : @AbstractCompletion (locSubring D₀.P D₀.T D₀.s)
+      (UniformSpace.comap (locSubring D₀.P D₀.T D₀.s).subtype D₀.uniformSpace) :=
+    ⟨_, g, UniformSpace.comap Subtype.val inferInstance,
+     hcomplete, inferInstance, hg_ui, hg_dense⟩
+  -- Step D: Use completionRingEquiv to build a ring equiv ringOfDef ≃+* Completion.
+  have hg_cont : Continuous g := by
+    have : Continuous (Subtype.val ∘ g : locSubring D₀.P D₀.T D₀.s →
+        presheafValue D₀) := UniformSpace.Completion.isDenseInducing_coe.continuous.comp
+      continuous_subtype_val
+    exact continuous_induced_rng.mpr this
+  haveI : IsUniformAddGroup (presheafValue_ringOfDef D₀) :=
+    AddSubgroup.isUniformAddGroup (presheafValue_ringOfDef D₀).toAddSubgroup
+  haveI : IsUniformAddGroup (locSubring D₀.P D₀.T D₀.s) :=
+    AddSubgroup.isUniformAddGroup (locSubring D₀.P D₀.T D₀.s).toAddSubgroup
+  let eRE := (AdicCompletionBridge.completionRingEquiv g hg_cont
+    hg_ui hg_dense).symm
+  have htop_eq : (instTopologicalSpaceSubtype :
+      TopologicalSpace (locSubring D₀.P D₀.T D₀.s)) = J.adicTopology := by
+    exact hadic_eq
+  have hJn_open : IsOpen (SetLike.coe (J ^ n).toAddSubgroup :
+      Set (locSubring D₀.P D₀.T D₀.s)) := by
+    rw [show instTopologicalSpaceSubtype =
+        (J.adicTopology : TopologicalSpace _) from htop_eq]
+    letI : TopologicalSpace (locSubring D₀.P D₀.T D₀.s) := J.adicTopology
+    haveI : IsTopologicalAddGroup (locSubring D₀.P D₀.T D₀.s) :=
+      @IsTopologicalRing.to_topologicalAddGroup _ _ J.adicTopology
+        (RingFilterBasis.isTopologicalRing
+          J.adic_basis.toRing_subgroups_basis.toRingFilterBasis)
+    exact AddSubgroup.isOpen_of_mem_nhds _
+      (J.hasBasis_nhds_zero_adic.mem_of_mem (i := n) trivial)
+  haveI hdisc : DiscreteTopology (locSubring D₀.P D₀.T D₀.s ⧸ J ^ n) :=
+    QuotientAddGroup.discreteTopology hJn_open
+  haveI : @IsTopologicalAddGroup (locSubring D₀.P D₀.T D₀.s ⧸ J ^ n)
+      inferInstance _ :=
+    @IsTopologicalRing.to_topologicalAddGroup _ _ inferInstance inferInstance
+  letI : UniformSpace (locSubring D₀.P D₀.T D₀.s ⧸ J ^ n) :=
+    @IsTopologicalAddGroup.rightUniformSpace _ _ inferInstance inferInstance
+  haveI : @IsUniformAddGroup (locSubring D₀.P D₀.T D₀.s ⧸ J ^ n) _ _ :=
+    @isUniformAddGroup_of_addCommGroup _ _ inferInstance inferInstance
+  have hrus_bot : @IsTopologicalAddGroup.rightUniformSpace
+      (locSubring D₀.P D₀.T D₀.s ⧸ J ^ n) _ _ _ = ⊥ := by
+    apply @UniformSpace.ext _ _ ⊥
+    rw [uniformity_eq_comap_nhds_zero' _, nhds_discrete, Filter.comap_pure]
+    congr 1; ext ⟨a, b⟩; simp [add_neg_eq_zero, eq_comm]
+  haveI hcs : CompleteSpace (locSubring D₀.P D₀.T D₀.s ⧸ J ^ n) := by
+    change @CompleteSpace _ (@IsTopologicalAddGroup.rightUniformSpace _ _ _ _)
+    rw [hrus_bot]; infer_instance
+  let πc := @UniformSpace.Completion.extensionHom
+    (locSubring D₀.P D₀.T D₀.s) _ _ _ _
+    (locSubring D₀.P D₀.T D₀.s ⧸ J ^ n) _ _ _ _
+    (Ideal.Quotient.mk (J ^ n)) continuous_quotient_mk' hcs inferInstance
+  let π := πc.comp eRE.toRingHom
+  have hge : (presheafValue_idealOfDef D₀ ^ n :
+      Ideal _) ≤ RingHom.ker π := by
+    rw [show presheafValue_idealOfDef D₀ = Ideal.map g J from rfl,
+      (Ideal.map_pow g J n).symm, Ideal.map_le_iff_le_comap]
+    intro a ha; rw [Ideal.mem_comap, RingHom.mem_ker]
+    change πc (eRE (g a)) = 0
+    have : eRE (g a) = (↑a : UniformSpace.Completion _) := by
+      change (AdicCompletionBridge.completionRingEquiv g hg_cont hg_ui hg_dense).symm
+        (g a) = ↑a
+      rw [(AdicCompletionBridge.completionRingEquiv g hg_cont hg_ui hg_dense).symm_apply_eq]
+      exact (UniformSpace.Completion.extensionHom_coe g hg_cont a).symm
+    rw [this]
+    haveI : T0Space (locSubring D₀.P D₀.T D₀.s ⧸ J ^ n) := by
+      haveI := hdisc; infer_instance
+    change πc (↑a) = 0
+    change (UniformSpace.Completion.extensionHom
+      (Ideal.Quotient.mk (J ^ n)) continuous_quotient_mk') (↑a) = 0
+    rw [UniformSpace.Completion.extensionHom_coe]
+    exact Ideal.Quotient.eq_zero_iff_mem.mpr ha
+  have hle : RingHom.ker π ≤ (presheafValue_idealOfDef D₀ ^ n :
+      Ideal _) := by
+    have hadic_loc : @IsAdic (locSubring D₀.P D₀.T D₀.s) _
+        instTopologicalSpaceSubtype J := hadic_eq
+    let eAC := @AdicCompletionBridge.adicCompletionRingEquiv
+      (locSubring D₀.P D₀.T D₀.s) _ J instUniformSpaceSubtype
+      inferInstance inferInstance hadic_loc
+    rw [show presheafValue_idealOfDef D₀ = Ideal.map g J from rfl,
+      (Ideal.map_pow g J n).symm]
+    letI := (@UniformSpace.Completion.cPkg
+      (locSubring D₀.P D₀.T D₀.s) _).uniformStruct
+    haveI := (@UniformSpace.Completion.cPkg
+      (locSubring D₀.P D₀.T D₀.s) _).complete
+    haveI := (@UniformSpace.Completion.cPkg
+      (locSubring D₀.P D₀.T D₀.s) _).separation
+    have hπc_eq : ∀ y, πc y = (AdicCompletion.evalₐ J n) (eAC y) := by
+      refine fun y => UniformSpace.Completion.induction_on y ?_ ?_
+      · haveI := hdisc
+        exact isClosed_eq
+          UniformSpace.Completion.continuous_extension
+          (by
+              letI := (@UniformSpace.Completion.cPkg
+                (locSubring D₀.P D₀.T D₀.s)
+                (UniformSpace.comap (locSubring D₀.P D₀.T D₀.s).subtype
+                  D₀.uniformSpace)).uniformStruct
+              haveI := (@UniformSpace.Completion.cPkg
+                (locSubring D₀.P D₀.T D₀.s)
+                (UniformSpace.comap (locSubring D₀.P D₀.T D₀.s).subtype
+                  D₀.uniformSpace)).complete
+              haveI := (@UniformSpace.Completion.cPkg
+                (locSubring D₀.P D₀.T D₀.s)
+                (UniformSpace.comap (locSubring D₀.P D₀.T D₀.s).subtype
+                  D₀.uniformSpace)).separation
+              letI := (AdicCompletionBridge.adicAbstractCompletion J hadic_loc).uniformStruct
+              haveI := (AdicCompletionBridge.adicAbstractCompletion J hadic_loc).complete
+              haveI := (AdicCompletionBridge.adicAbstractCompletion J hadic_loc).separation
+              have heAC_cont : Continuous eAC :=
+                (AbstractCompletion.uniformContinuous_compare
+                  (@UniformSpace.Completion.cPkg _ _)
+                  (AdicCompletionBridge.adicAbstractCompletion J hadic_loc)).continuous
+              have hevalₐ_cont : Continuous (AdicCompletion.evalₐ J n) := by
+                unfold AdicCompletion.evalₐ
+                simp only []
+                letI : ∀ i, TopologicalSpace
+                    (locSubring D₀.P D₀.T D₀.s ⧸ J ^ i • ⊤) :=
+                  fun i => (AdicCompletionBridge.quotientDiscreteTopology J i)
+                haveI : DiscreteTopology
+                    (locSubring D₀.P D₀.T D₀.s ⧸ J ^ n • ⊤) :=
+                  AdicCompletionBridge.quotientDiscrete J n
+                have h1 : Continuous
+                    (AdicCompletion.eval J (locSubring D₀.P D₀.T D₀.s) n) :=
+                  (continuous_apply n).comp continuous_subtype_val
+                have h2 : Continuous (Ideal.quotientEquivAlgOfEq
+                    (locSubring D₀.P D₀.T D₀.s)
+                    (AdicCompletionBridge.ideal_smul_top_eq_self J n)) :=
+                  continuous_of_discreteTopology
+                exact h2.comp h1
+              exact hevalₐ_cont.comp heAC_cont)
+      · intro a
+        show πc (↑a) = (AdicCompletion.evalₐ J n) (eAC (↑a))
+        rw [UniformSpace.Completion.extensionHom_coe,
+          show eAC (↑a) = AdicCompletion.of J _ a from
+            AbstractCompletion.compare_coe _ _ a,
+          AdicCompletion.evalₐ_of]
+    intro x hx; rw [RingHom.mem_ker] at hx
+    have hmem_ker : eAC (eRE x) ∈ RingHom.ker (AdicCompletion.evalₐ J n) := by
+      rw [RingHom.mem_ker]; rwa [← hπc_eq]
+    rw [AdicCompletionBridge.ker_evalₐ_eq_of_fg J (locIdeal_fg D₀.P D₀.T D₀.s) n] at hmem_ker
+    have hx_eq : x = (eRE.symm.toRingHom.comp eAC.symm.toRingHom) (eAC (eRE x)) := by
+      simp [RingHom.comp_apply, RingEquiv.symm_apply_apply]
+    have h_map_eq : Ideal.map (eRE.symm.toRingHom.comp eAC.symm.toRingHom)
+        (Ideal.map (algebraMap _ _) (J ^ n)) = Ideal.map g (J ^ n) := by
+      rw [Ideal.map_map]; congr 1
+      ext a; simp only [RingHom.comp_apply, RingEquiv.toRingHom_eq_coe,
+        RingHom.coe_coe]
+      have h1 : eAC.symm (algebraMap _ _ a) =
+          (↑a : UniformSpace.Completion _) := by
+        rw [eAC.symm_apply_eq]
+        exact (AbstractCompletion.compare_coe
+          (@UniformSpace.Completion.cPkg _ _)
+          (AdicCompletionBridge.adicAbstractCompletion J hadic_loc) a).symm
+      have h2 : eRE.symm (↑a : UniformSpace.Completion _) = g a := by
+        change (AdicCompletionBridge.completionRingEquiv g hg_cont hg_ui
+          hg_dense).symm.symm (↑a) = g a
+        rw [RingEquiv.symm_symm]
+        exact UniformSpace.Completion.extensionHom_coe g hg_cont a
+      rw [h1, h2]
+    rw [hx_eq, ← h_map_eq]
+    exact Ideal.mem_map_of_mem _ hmem_ker
+  have hset : (↑(presheafValue_idealOfDef D₀ ^ n) :
+      Set (presheafValue_ringOfDef D₀)) = ↑(RingHom.ker π) :=
+    SetLike.coe_set_eq.mpr (le_antisymm hge hle)
+  rw [hset]
+  have hπ_cont : Continuous π := by
+    change Continuous (πc ∘ eRE)
+    letI := (@UniformSpace.Completion.cPkg
+      (locSubring D₀.P D₀.T D₀.s)
+      (UniformSpace.comap (locSubring D₀.P D₀.T D₀.s).subtype
+        D₀.uniformSpace)).uniformStruct
+    haveI := (@UniformSpace.Completion.cPkg
+      (locSubring D₀.P D₀.T D₀.s)
+      (UniformSpace.comap (locSubring D₀.P D₀.T D₀.s).subtype
+        D₀.uniformSpace)).complete
+    haveI := (@UniformSpace.Completion.cPkg
+      (locSubring D₀.P D₀.T D₀.s)
+      (UniformSpace.comap (locSubring D₀.P D₀.T D₀.s).subtype
+        D₀.uniformSpace)).separation
+    exact UniformSpace.Completion.continuous_extension.comp
+      (AbstractCompletion.uniformContinuous_compare pkg
+        (@UniformSpace.Completion.cPkg _ _)).continuous
+  rw [show (↑(RingHom.ker π) : Set _) = π ⁻¹' {0} from by
+    ext x; exact ⟨id, id⟩]
+  exact isClosed_singleton.preimage hπ_cont
+
 set_option maxHeartbeats 4000000 in
 -- The AdicCompletion bridge proof has deep elaboration chains through ring equivs.
 omit [PlusSubring A] in
@@ -332,17 +642,7 @@ private theorem idealOfDef_pow_val_isClosed (D₀ : RationalLocData A) (n : ℕ)
   -- The construction uses the J-adic completion of locSubring and the bridge
   -- to AdicCompletion, where AdicCompletion.map_exact gives the kernel identity.
   -- STEP 1: The subspace topology on locSubring = J-adic topology.
-  have hadic_eq : TopologicalSpace.induced (locSubring D₀.P D₀.T D₀.s).subtype D₀.topology =
-      (locIdeal D₀.P D₀.T D₀.s).adicTopology := by
-    have hunif := locSubring_subspace_eq_adic D₀
-    have h1 : @UniformSpace.toTopologicalSpace _
-        (UniformSpace.comap (locSubring D₀.P D₀.T D₀.s).subtype D₀.uniformSpace) =
-      @UniformSpace.toTopologicalSpace _
-        (@IsTopologicalAddGroup.rightUniformSpace _ _
-          (locIdeal D₀.P D₀.T D₀.s).adicTopology inferInstance) :=
-      congrArg (fun u => @UniformSpace.toTopologicalSpace _ u) hunif
-    rw [UniformSpace.toTopologicalSpace_comap] at h1
-    exact h1
+  have hadic_eq := locSubring_induced_eq_adicTopology D₀
   -- STEP 2: Show idealOfDef^n = closure(g(J^n)) in ringOfDef, hence closed.
   set J := locIdeal D₀.P D₀.T D₀.s with hJ_def
   set g := locSubringToRingOfDef D₀ with hg_def
@@ -365,25 +665,9 @@ private theorem idealOfDef_pow_val_isClosed (D₀ : RationalLocData A) (n : ℕ)
     -- closure in induced topology = preimage of closure in ambient
     simp only [closure_subtype]
     exact h1
-  -- range(g) * gJn ⊆ gJn (ideal absorption).
-  have hact : ∀ a ∈ Set.range g, ∀ b ∈ gJn, a * b ∈ gJn := by
-    rintro _ ⟨s, rfl⟩ _ ⟨d, hd, rfl⟩
-    exact ⟨s * d, Ideal.mul_mem_left _ s hd, map_mul g s d⟩
   apply Set.Subset.antisymm
   · -- ⊆: idealOfDef^n ⊆ closure(gJn)
-    -- span_induction: generators → closure, add → closure, smul → closure (density).
-    rw [show presheafValue_idealOfDef D₀ = Ideal.map g J from rfl,
-        (Ideal.map_pow g J n).symm]
-    intro y hy
-    refine Submodule.span_induction (p := fun y _ => y ∈ closure gJn) ?_ ?_ ?_ ?_ hy
-    · rintro y ⟨d, hd, rfl⟩; exact subset_closure ⟨d, hd, rfl⟩
-    · exact subset_closure ⟨0, (J ^ n).zero_mem, map_zero g⟩
-    · intro a b _ _ ha hb
-      exact ((J ^ n).toAddSubgroup.map g.toAddMonoidHom).topologicalClosure.add_mem ha hb
-    · intro ⟨r, hr_mem⟩ y _ hy
-      exact map_mem_closure₂' (fun _ => continuous_const_mul _)
-        (fun _ => continuous_mul_const _)
-        (hg_dense.closure_eq ▸ Set.mem_univ _) hy hact
+    exact idealOfDef_pow_subset_closure D₀ n hg_dense
   · -- ⊇: closure(gJn) ⊆ idealOfDef^n
     -- Step 1: gJn ⊆ idealOfDef^n (trivial: g(J^n) ⊆ Ideal.map g (J^n)).
     have hgJn_sub : gJn ⊆ ((presheafValue_idealOfDef D₀ ^ n :
@@ -425,337 +709,8 @@ private theorem idealOfDef_pow_val_isClosed (D₀ : RationalLocData A) (n : ℕ)
     -- kernel computation in steps 4-5. The AdicCompletionBridge file provides the
     -- ring isomorphism but not yet the specific composition needed here.
     have hclosed : IsClosed ((presheafValue_idealOfDef D₀ ^ n :
-        Ideal (presheafValue_ringOfDef D₀)) : Set (presheafValue_ringOfDef D₀)) := by
-      -- Proof: idealOfDef^n = ker(π) for a continuous ring hom
-      --   π : ringOfDef → locSubring ⧸ (J ^ n)
-      -- and ker(π) is closed since the target is discrete (T₁).
-      --
-      -- Construction of π: g : locSubring → ringOfDef is a dense uniform
-      -- inducing (locSubring_subspace_eq_adic). The quotient
-      -- q = Ideal.Quotient.mk(J^n) extends to π by the completion universal
-      -- property (target is discrete, hence complete T₂).
-      --
-      -- ker(π) = idealOfDef^n = Ideal.map g (J^n):
-      -- (⊆) π is a ring hom (density + T₂) killing g(J^n), so the generated
-      --     ideal Ideal.map g (J^n) = idealOfDef^n ⊆ ker(π).
-      -- (⊇) By AdicCompletion.map_exact (Mathlib.RingTheory.AdicCompletion.Exactness)
-      --     on 0 → J^n → locSubring → locSubring/J^n → 0, using IsNoetherianRing.
-      --     Transported through adicCompletionRingEquiv (AdicCompletionBridge.lean).
-      --
-      -- Proof: idealOfDef^n is closed in ringOfDef because it equals
-      -- a closed set in the J-adic completion, transported through two
-      -- homeomorphisms. In AdicCompletion J locSubring (bridge topology),
-      -- Ideal.map (of J) (J^n) = ker(map J mkQ) (by map_exact for the
-      -- SES 0 -> J^n -> locSubring -> locSubring/J^n -> 0, combined with
-      -- ofTensorProduct_surjective). ker(map J mkQ) is closed since map J mkQ
-      -- is continuous (componentwise quotient maps between discrete types)
-      -- and {0} is closed in the T2 target. Transport through the bridge
-      -- homeomorphism Completion(locSubring) ~= AdicCompletion(J, locSubring)
-      -- and the AbstractCompletion comparison ringOfDef ~= Completion(locSubring)
-      -- preserves closedness, giving IsClosed(idealOfDef^n) in ringOfDef.
-      --
-      -- The composed identification maps of(r) |-> coe(r) |-> g(r) for
-      -- r in locSubring, so Ideal.map of (J^n) |-> Ideal.map g (J^n) = idealOfDef^n.
-      --
-      -- Key Mathlib results used:
-      -- * AdicCompletion.map_exact (Exactness.lean): exactness on f.g. modules
-      -- * AdicCompletion.ofTensorProduct_surjective_of_finite (AsTensorProduct.lean):
-      --   surjectivity identifying range(map) with ideal image
-      -- * AdicCompletionBridge.adicCompletionRingEquiv: bridge homeomorphism
-      -- * AbstractCompletion.compareEquiv: completion comparison homeomorphism
-      --
-      -- Step A: g : locSubring -> ringOfDef is IsUniformInducing.
-      -- val . g = coeRingHom . subtype is uniform inducing (composition
-      -- of Completion.coe and subtype embedding). Since val is a subtype
-      -- embedding (hence injective uniform inducing), g is uniform inducing.
-      have hg_ui : @IsUniformInducing _ _
-          (UniformSpace.comap (locSubring D₀.P D₀.T D₀.s).subtype D₀.uniformSpace)
-          (UniformSpace.comap Subtype.val inferInstance) g := by
-        have h_comp : (Subtype.val : presheafValue_ringOfDef D₀ → presheafValue D₀) ∘ g =
-            (D₀.coeRingHom : Localization.Away D₀.s → presheafValue D₀) ∘
-            (locSubring D₀.P D₀.T D₀.s).subtype := by ext d; rfl
-        have h_valg_ui : @IsUniformInducing _ _
-            (UniformSpace.comap (locSubring D₀.P D₀.T D₀.s).subtype D₀.uniformSpace)
-            (inferInstance : UniformSpace (presheafValue D₀))
-            (Subtype.val ∘ g) := h_comp ▸
-          (UniformSpace.Completion.isUniformInducing_coe _).comp ⟨rfl⟩
-        -- If h ∘ g is uniform inducing and h is uniform inducing, g is uniform inducing.
-        have hval_ui : @IsUniformInducing _ _
-            (UniformSpace.comap Subtype.val inferInstance)
-            (inferInstance : UniformSpace (presheafValue D₀))
-            (Subtype.val : presheafValue_ringOfDef D₀ → presheafValue D₀) := ⟨rfl⟩
-        constructor
-        rw [← hval_ui.comap_uniformity, Filter.comap_comap]
-        exact h_valg_ui.comap_uniformity
-      -- Step B: ringOfDef is complete (closed subspace of complete space).
-      have hcomplete : @CompleteSpace (presheafValue_ringOfDef D₀)
-          (UniformSpace.comap Subtype.val inferInstance) :=
-        (Subring.isClosed_topologicalClosure
-          (D₀.coeRingHom.comp (locSubring D₀.P D₀.T D₀.s).subtype).range).completeSpace_coe
-      -- Step C: Package (g, ringOfDef) as AbstractCompletion of locSubring.
-      let pkg : @AbstractCompletion (locSubring D₀.P D₀.T D₀.s)
-          (UniformSpace.comap (locSubring D₀.P D₀.T D₀.s).subtype D₀.uniformSpace) :=
-        ⟨_, g, UniformSpace.comap Subtype.val inferInstance,
-         hcomplete, inferInstance, hg_ui, hg_dense⟩
-      -- Step D: Use completionRingEquiv to build a ring equiv ringOfDef ≃+* Completion.
-      -- Then compose with extensionHom (quotient map extended to Completion)
-      -- to get a continuous ring hom π : ringOfDef →+* locSubring/J^n.
-      -- ker(π) = idealOfDef^n (by ker_evalₐ_eq + ring equiv transport).
-      -- Conclude IsClosed from continuous hom to discrete T₁ target.
-      -- Ring equiv: ringOfDef ≃+* Completion(locSubring)
-      -- (g is continuous: val ∘ g = coeRingHom ∘ subtype, both continuous)
-      have hg_cont : Continuous g := by
-        have : Continuous (Subtype.val ∘ g : locSubring D₀.P D₀.T D₀.s →
-            presheafValue D₀) := UniformSpace.Completion.isDenseInducing_coe.continuous.comp
-          continuous_subtype_val
-        exact continuous_induced_rng.mpr this
-      haveI : IsUniformAddGroup (presheafValue_ringOfDef D₀) :=
-        AddSubgroup.isUniformAddGroup (presheafValue_ringOfDef D₀).toAddSubgroup
-      haveI : IsUniformAddGroup (locSubring D₀.P D₀.T D₀.s) :=
-        AddSubgroup.isUniformAddGroup (locSubring D₀.P D₀.T D₀.s).toAddSubgroup
-      let eRE := (AdicCompletionBridge.completionRingEquiv g hg_cont
-        hg_ui hg_dense).symm
-      -- Extend quotient map to Completion.
-      -- Follow TopologyComparison.lean pattern: derive UniformSpace on R/J^n
-      -- from the quotient topology via rightUniformSpace (no diamond).
-      -- First show the quotient is discrete (J^n is open).
-      have htop_eq : (instTopologicalSpaceSubtype :
-          TopologicalSpace (locSubring D₀.P D₀.T D₀.s)) = J.adicTopology := by
-        exact hadic_eq
-      -- R/J^n is discrete: J^n is open (adic nhd), quotient map is open.
-      have hJn_open : IsOpen (SetLike.coe (J ^ n).toAddSubgroup :
-          Set (locSubring D₀.P D₀.T D₀.s)) := by
-        rw [show instTopologicalSpaceSubtype =
-            (J.adicTopology : TopologicalSpace _) from htop_eq]
-        letI : TopologicalSpace (locSubring D₀.P D₀.T D₀.s) := J.adicTopology
-        haveI : IsTopologicalAddGroup (locSubring D₀.P D₀.T D₀.s) :=
-          @IsTopologicalRing.to_topologicalAddGroup _ _ J.adicTopology
-            (RingFilterBasis.isTopologicalRing
-              J.adic_basis.toRing_subgroups_basis.toRingFilterBasis)
-        exact AddSubgroup.isOpen_of_mem_nhds _
-          (J.hasBasis_nhds_zero_adic.mem_of_mem (i := n) trivial)
-      haveI hdisc : DiscreteTopology (locSubring D₀.P D₀.T D₀.s ⧸ J ^ n) :=
-        QuotientAddGroup.discreteTopology hJn_open
-      -- Derive uniform space instances from TopologyComparison.lean pattern:
-      haveI : @IsTopologicalAddGroup (locSubring D₀.P D₀.T D₀.s ⧸ J ^ n)
-          inferInstance _ :=
-        @IsTopologicalRing.to_topologicalAddGroup _ _ inferInstance inferInstance
-      letI : UniformSpace (locSubring D₀.P D₀.T D₀.s ⧸ J ^ n) :=
-        @IsTopologicalAddGroup.rightUniformSpace _ _ inferInstance inferInstance
-      haveI : @IsUniformAddGroup (locSubring D₀.P D₀.T D₀.s ⧸ J ^ n) _ _ :=
-        @isUniformAddGroup_of_addCommGroup _ _ inferInstance inferInstance
-      -- Factor out: rightUniformSpace on discrete quotient = ⊥.
-      have hrus_bot : @IsTopologicalAddGroup.rightUniformSpace
-          (locSubring D₀.P D₀.T D₀.s ⧸ J ^ n) _ _ _ = ⊥ := by
-        apply @UniformSpace.ext _ _ ⊥
-        rw [uniformity_eq_comap_nhds_zero' _, nhds_discrete, Filter.comap_pure]
-        congr 1; ext ⟨a, b⟩; simp [add_neg_eq_zero, eq_comm]
-      haveI hcs : CompleteSpace (locSubring D₀.P D₀.T D₀.s ⧸ J ^ n) := by
-        change @CompleteSpace _ (@IsTopologicalAddGroup.rightUniformSpace _ _ _ _)
-        rw [hrus_bot]; infer_instance
-      let πc := @UniformSpace.Completion.extensionHom
-        (locSubring D₀.P D₀.T D₀.s) _ _ _ _
-        (locSubring D₀.P D₀.T D₀.s ⧸ J ^ n) _ _ _ _
-        (Ideal.Quotient.mk (J ^ n)) continuous_quotient_mk' hcs inferInstance
-      -- Compose: π = πc ∘ eRE : ringOfDef →+* locSubring/J^n
-      let π := πc.comp eRE.toRingHom
-      -- ker(π) ⊇ idealOfDef^n:
-      have hge : (presheafValue_idealOfDef D₀ ^ n :
-          Ideal _) ≤ RingHom.ker π := by
-        rw [show presheafValue_idealOfDef D₀ = Ideal.map g J from rfl,
-          (Ideal.map_pow g J n).symm, Ideal.map_le_iff_le_comap]
-        intro a ha; rw [Ideal.mem_comap, RingHom.mem_ker]
-        change πc (eRE (g a)) = 0
-        -- eRE(g a) = (completionRingEquiv g).symm(g a) = coe(a)
-        have : eRE (g a) = (↑a : UniformSpace.Completion _) := by
-          change (AdicCompletionBridge.completionRingEquiv g hg_cont hg_ui hg_dense).symm
-            (g a) = ↑a
-          rw [(AdicCompletionBridge.completionRingEquiv g hg_cont hg_ui hg_dense).symm_apply_eq]
-          exact (UniformSpace.Completion.extensionHom_coe g hg_cont a).symm
-        rw [this]
-        haveI : T0Space (locSubring D₀.P D₀.T D₀.s ⧸ J ^ n) := by
-          haveI := hdisc; infer_instance
-        change πc (↑a) = 0
-        change (UniformSpace.Completion.extensionHom
-          (Ideal.Quotient.mk (J ^ n)) continuous_quotient_mk') (↑a) = 0
-        rw [UniformSpace.Completion.extensionHom_coe]
-        exact Ideal.Quotient.eq_zero_iff_mem.mpr ha
-      -- ker(π) ⊆ idealOfDef^n:
-      -- eRE is a ring iso, so ker(π) = eRE⁻¹(ker πc) = eRE⁻¹(Ideal.map coe (J^n))
-      -- = Ideal.map (eRE⁻¹ ∘ coe) (J^n) = Ideal.map g (J^n) = idealOfDef^n.
-      -- (This uses ker_evalₐ_eq through the bridge to identify ker πc.)
-      have hle : RingHom.ker π ≤ (presheafValue_idealOfDef D₀ ^ n :
-          Ideal _) := by
-        -- Factor πc through the bridge: πc = evalₐ ∘ eAC (by uniqueness).
-        -- Then ker(π) = eRE⁻¹(eAC⁻¹(ker(evalₐ))) = idealOfDef^n.
-        -- Set up the bridge: Completion(locSubring) ≃+* AdicCompletion(J, locSubring).
-        -- Needs IsAdic J on locSubring (from hadic_eq) and compatible instances.
-        have hadic_loc : @IsAdic (locSubring D₀.P D₀.T D₀.s) _
-            instTopologicalSpaceSubtype J := hadic_eq
-        let eAC := @AdicCompletionBridge.adicCompletionRingEquiv
-          (locSubring D₀.P D₀.T D₀.s) _ J instUniformSpaceSubtype
-          inferInstance inferInstance hadic_loc
-        -- Transport: ker(π) = eRE⁻¹(eAC⁻¹(ker(evalₐ))) = idealOfDef^n.
-        -- π = πc ∘ eRE, so ker(π) = Ideal.comap eRE (ker πc).
-        -- For ker(πc): πc = evalₐ ∘ eAC (both extend q, T₂ uniqueness),
-        -- so ker(πc) = Ideal.comap eAC (ker evalₐ).
-        -- ker(evalₐ) = Ideal.map algebraMap (J^n) by ker_evalₐ_eq.
-        -- Composing the comap chain and using the ring equiv properties:
-        -- ker(π) = Ideal.comap (eRE ∘ eAC⁻¹ ∘ algebraMap) ...
-        --       = Ideal.map g (J^n).
-        -- We use: for a ring equiv e, Ideal.comap e I = Ideal.map e.symm I.
-        -- And the composition eRE⁻¹ ∘ eAC⁻¹ ∘ of maps r ↦ coe(r) ↦ g(r).
-        -- ker(π) = ker(πc ∘ eRE) = Ideal.comap eRE (ker πc).
-        -- Step 1: πc = evalₐ ∘ eAC (both extend mk along coe, target T₂).
-        -- Step 2: ker(πc) = Ideal.comap eAC (ker evalₐ)
-        --       = Ideal.comap eAC (Ideal.map algebraMap (J^n)).
-        -- Step 3: ker(π) = Ideal.comap eRE (Ideal.comap eAC (Ideal.map algebraMap (J^n)))
-        --        = Ideal.comap (eAC ∘ eRE) (Ideal.map algebraMap (J^n))
-        --        = Ideal.map g (J^n) (since eAC ∘ eRE ∘ g = algebraMap, ring equivs).
-        -- We combine the transport through the two ring equivs.
-        rw [show presheafValue_idealOfDef D₀ = Ideal.map g J from rfl,
-          (Ideal.map_pow g J n).symm]
-        -- Step 1: πc = (evalₐ J n).toRingHom ∘ eAC (by Completion.induction_on).
-        -- Both are continuous ring homs Completion → locSubring/J^n that extend
-        -- Ideal.Quotient.mk (J^n) along coe. Target is T₂ (discrete). So equal.
-        letI := (@UniformSpace.Completion.cPkg
-          (locSubring D₀.P D₀.T D₀.s) _).uniformStruct
-        haveI := (@UniformSpace.Completion.cPkg
-          (locSubring D₀.P D₀.T D₀.s) _).complete
-        haveI := (@UniformSpace.Completion.cPkg
-          (locSubring D₀.P D₀.T D₀.s) _).separation
-        have hπc_eq : ∀ y, πc y = (AdicCompletion.evalₐ J n) (eAC y) := by
-          refine fun y => UniformSpace.Completion.induction_on y ?_ ?_
-          · -- Both sides are continuous to T₂ (discrete) target.
-            haveI := hdisc
-            exact isClosed_eq
-              UniformSpace.Completion.continuous_extension
-              (by -- evalₐ ∘ eAC : Completion → locSubring/J^n is continuous.
-                  -- eAC = bridge comparison (uniformly continuous).
-                  -- evalₐ = component projection (continuous for bridge topology).
-                  -- Install cPkg instances for the comparison:
-                  letI := (@UniformSpace.Completion.cPkg
-                    (locSubring D₀.P D₀.T D₀.s)
-                    (UniformSpace.comap (locSubring D₀.P D₀.T D₀.s).subtype
-                      D₀.uniformSpace)).uniformStruct
-                  haveI := (@UniformSpace.Completion.cPkg
-                    (locSubring D₀.P D₀.T D₀.s)
-                    (UniformSpace.comap (locSubring D₀.P D₀.T D₀.s).subtype
-                      D₀.uniformSpace)).complete
-                  haveI := (@UniformSpace.Completion.cPkg
-                    (locSubring D₀.P D₀.T D₀.s)
-                    (UniformSpace.comap (locSubring D₀.P D₀.T D₀.s).subtype
-                      D₀.uniformSpace)).separation
-                  -- Install adicAbstractCompletion instances:
-                  letI := (AdicCompletionBridge.adicAbstractCompletion J hadic_loc).uniformStruct
-                  haveI := (AdicCompletionBridge.adicAbstractCompletion J hadic_loc).complete
-                  haveI := (AdicCompletionBridge.adicAbstractCompletion J hadic_loc).separation
-                  -- eAC is continuous (bridge comparison):
-                  have heAC_cont : Continuous eAC :=
-                    (AbstractCompletion.uniformContinuous_compare
-                      (@UniformSpace.Completion.cPkg _ _)
-                      (AdicCompletionBridge.adicAbstractCompletion J hadic_loc)).continuous
-                  -- evalₐ is continuous (component projection in bridge topology):
-                  -- evalₐ J n = Ideal.quotientEquivAlgOfEq ∘ eval J R n
-                  -- eval extracts the n-th component (continuous in product topology).
-                  -- evalₐ J n : AdicCompletion → R/J^n.
-                  -- evalₐ = quotientEquivAlgOfEq ∘ eval.
-                  -- eval = (·.val n) = (continuous_apply n).comp continuous_subtype_val.
-                  -- quotientEquivAlgOfEq : from discrete R/J^n•⊤ to discrete R/J^n.
-                  have hevalₐ_cont : Continuous (AdicCompletion.evalₐ J n) := by
-                    unfold AdicCompletion.evalₐ
-                    simp only []
-                    letI : ∀ i, TopologicalSpace
-                        (locSubring D₀.P D₀.T D₀.s ⧸ J ^ i • ⊤) :=
-                      fun i => (AdicCompletionBridge.quotientDiscreteTopology J i)
-                    haveI : DiscreteTopology
-                        (locSubring D₀.P D₀.T D₀.s ⧸ J ^ n • ⊤) :=
-                      AdicCompletionBridge.quotientDiscrete J n
-                    have h1 : Continuous
-                        (AdicCompletion.eval J (locSubring D₀.P D₀.T D₀.s) n) :=
-                      (continuous_apply n).comp continuous_subtype_val
-                    have h2 : Continuous (Ideal.quotientEquivAlgOfEq
-                        (locSubring D₀.P D₀.T D₀.s)
-                        (AdicCompletionBridge.ideal_smul_top_eq_self J n)) :=
-                      continuous_of_discreteTopology
-                    exact h2.comp h1
-                  exact hevalₐ_cont.comp heAC_cont)
-          · intro a
-            show πc (↑a) = (AdicCompletion.evalₐ J n) (eAC (↑a))
-            rw [UniformSpace.Completion.extensionHom_coe,
-              show eAC (↑a) = AdicCompletion.of J _ a from
-                AbstractCompletion.compare_coe _ _ a,
-              AdicCompletion.evalₐ_of]
-        -- Step 2: ker(πc) = Ideal.comap eAC (ker evalₐ).
-        -- Step 3: ker(π) = Ideal.comap eRE (ker πc)
-        --   = Ideal.comap eRE (Ideal.comap eAC (ker evalₐ))
-        --   = Ideal.comap eRE (Ideal.comap eAC (Ideal.map algebraMap (J^n)))
-        --   [by ker_evalₐ_eq]
-        -- Step 4: Transport: Ideal.comap (eAC ∘ eRE) (Ideal.map algebraMap (J^n))
-        --   = Ideal.map ((eAC ∘ eRE).symm) (Ideal.map algebraMap (J^n))  [ring equiv]
-        --   = Ideal.map g (J^n)
-        --   [since (eAC ∘ eRE).symm ∘ algebraMap = g: eRE.symm(eAC.symm(of r)) = g(r)]
-        intro x hx; rw [RingHom.mem_ker] at hx
-        -- hx : πc (eRE x) = 0. By hπc_eq: evalₐ (eAC (eRE x)) = 0.
-        have hmem_ker : eAC (eRE x) ∈ RingHom.ker (AdicCompletion.evalₐ J n) := by
-          rw [RingHom.mem_ker]; rwa [← hπc_eq]
-        rw [AdicCompletionBridge.ker_evalₐ_eq_of_fg J (locIdeal_fg D₀.P D₀.T D₀.s) n] at hmem_ker
-        -- hmem_ker : eAC (eRE x) ∈ Ideal.map algebraMap (J^n)
-        -- x = eRE.symm (eAC.symm (eAC (eRE x)))
-        -- x = (eRE.symm ∘ eAC.symm)(eAC(eRE(x))):
-        have hx_eq : x = (eRE.symm.toRingHom.comp eAC.symm.toRingHom) (eAC (eRE x)) := by
-          simp [RingHom.comp_apply, RingEquiv.symm_apply_apply]
-        -- Ideal.map (eRE.symm ∘ eAC.symm) (Ideal.map algebraMap (J^n))
-        --   = Ideal.map (eRE.symm ∘ eAC.symm ∘ algebraMap) (J^n)  [by map_map]
-        --   = Ideal.map g (J^n)  [since eRE.symm(eAC.symm(of a)) = g(a)]
-        have h_map_eq : Ideal.map (eRE.symm.toRingHom.comp eAC.symm.toRingHom)
-            (Ideal.map (algebraMap _ _) (J ^ n)) = Ideal.map g (J ^ n) := by
-          rw [Ideal.map_map]; congr 1
-          ext a; simp only [RingHom.comp_apply, RingEquiv.toRingHom_eq_coe,
-            RingHom.coe_coe]
-          -- eAC.symm(algebraMap a) = coe(a), eRE.symm(coe a) = g(a).
-          -- eAC = bridge (compare cPkg adicPkg), eRE = completionRingEquiv.symm.
-          have h1 : eAC.symm (algebraMap _ _ a) =
-              (↑a : UniformSpace.Completion _) := by
-            rw [eAC.symm_apply_eq]
-            -- Goal: algebraMap a = eAC (↑a). eAC(coe a) = of(a) = algebraMap a.
-            exact (AbstractCompletion.compare_coe
-              (@UniformSpace.Completion.cPkg _ _)
-              (AdicCompletionBridge.adicAbstractCompletion J hadic_loc) a).symm
-          have h2 : eRE.symm (↑a : UniformSpace.Completion _) = g a := by
-            change (AdicCompletionBridge.completionRingEquiv g hg_cont hg_ui
-              hg_dense).symm.symm (↑a) = g a
-            rw [RingEquiv.symm_symm]
-            exact UniformSpace.Completion.extensionHom_coe g hg_cont a
-          rw [h1, h2]
-        rw [hx_eq, ← h_map_eq]
-        exact Ideal.mem_map_of_mem _ hmem_ker
-      have hset : (↑(presheafValue_idealOfDef D₀ ^ n) :
-          Set (presheafValue_ringOfDef D₀)) = ↑(RingHom.ker π) :=
-        SetLike.coe_set_eq.mpr (le_antisymm hge hle)
-      rw [hset]
-      -- IsClosed (ker π): π is continuous to discrete T₁ target.
-      have hπ_cont : Continuous π := by
-        change Continuous (πc ∘ eRE)
-        -- Install cPkg instances (same pattern as completionRingEquiv):
-        letI := (@UniformSpace.Completion.cPkg
-          (locSubring D₀.P D₀.T D₀.s)
-          (UniformSpace.comap (locSubring D₀.P D₀.T D₀.s).subtype
-            D₀.uniformSpace)).uniformStruct
-        haveI := (@UniformSpace.Completion.cPkg
-          (locSubring D₀.P D₀.T D₀.s)
-          (UniformSpace.comap (locSubring D₀.P D₀.T D₀.s).subtype
-            D₀.uniformSpace)).complete
-        haveI := (@UniformSpace.Completion.cPkg
-          (locSubring D₀.P D₀.T D₀.s)
-          (UniformSpace.comap (locSubring D₀.P D₀.T D₀.s).subtype
-            D₀.uniformSpace)).separation
-        exact UniformSpace.Completion.continuous_extension.comp
-          (AbstractCompletion.uniformContinuous_compare pkg
-            (@UniformSpace.Completion.cPkg _ _)).continuous
-      rw [show (↑(RingHom.ker π) : Set _) = π ⁻¹' {0} from by
-        ext x; exact ⟨id, id⟩]
-      exact isClosed_singleton.preimage hπ_cont
+        Ideal (presheafValue_ringOfDef D₀)) : Set (presheafValue_ringOfDef D₀)) :=
+      idealOfDef_pow_isClosed_aux D₀ n
     -- Step 3: closure_minimal.
     exact closure_minimal hgJn_sub hclosed
 
