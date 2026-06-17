@@ -435,20 +435,16 @@ theorem mem_localUnitsOnePlus_iff_galAut_fixed (hp2 : p ≠ 2) {n : ℕ} (hn : 1
 theorem galAut_compat (a : ℤ_[p]ˣ) {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]} (hx : x ∈ K p n) :
     (galAut p a (n + 1) ⟨x, (K_le_succ p n) hx⟩ : ℂ_[p])
       = (galAut p a n ⟨x, hx⟩ : ℂ_[p]) := by
-  -- two `ℚ_p`-algebra homs `K_n → ℂ_[p]`: restrict `σ_a^{(n+1)}` to `K_n`, and `σ_a^{(n)}`
   set incl : (K p n) →ₐ[ℚ_[p]] (K p (n + 1)) := IntermediateField.inclusion (K_le_succ p n)
     with hincl
   set F1 : (K p n) →ₐ[ℚ_[p]] ℂ_[p] :=
     ((K p (n + 1)).val).comp ((galAut p a (n + 1)).toAlgHom.comp incl) with hF1
   set F2 : (K p n) →ₐ[ℚ_[p]] ℂ_[p] := ((K p n).val).comp (galAut p a n).toAlgHom with hF2
-  -- they agree on the generator `⟨ξ_n,_⟩`
   set ζξ : K p n := ⟨zetaSys p n, zetaSys_mem_K p n⟩ with hζξ
   have hagree : F1 ζξ = F2 ζξ := by
-    -- `F2 ζξ = σ_a^{(n)}(ξ_n) = ξ_n^{t_n.val}`
     have hF2val : F2 ζξ = zetaSys p n ^
         ((PadicMeasure.unitsToZModPow p n a : (ZMod (p ^ n))ˣ) : ZMod (p ^ n)).val := by
       rw [hF2]; change (galAut p a n ζξ : ℂ_[p]) = _; rw [galAut_zetaSys p a hn]
-    -- `F1 ζξ = σ_a^{(n+1)}(ξ_n) = σ_a^{(n+1)}(ξ_{n+1}^p) = (ξ_{n+1}^{t_{n+1}.val})^p`
     have hF1val : F1 ζξ = (zetaSys p (n + 1) ^
         ((PadicMeasure.unitsToZModPow p (n + 1) a : (ZMod (p ^ (n + 1)))ˣ) :
           ZMod (p ^ (n + 1))).val) ^ p := by
@@ -469,15 +465,12 @@ theorem galAut_compat (a : ℤ_[p]ˣ) {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]} (hx
       congr 1
       exact galAut_zetaSys p a (by omega)
     rw [hF1val, hF2val, ← pow_mul]
-    -- exponents: `t_{n+1}.val · p ≡ t_n.val (mod p^n)`, with `ξ_n = ξ_{n+1}^p`
     rw [show (zetaSys p (n + 1) ^
         (((PadicMeasure.unitsToZModPow p (n + 1) a : (ZMod (p ^ (n + 1)))ˣ) :
           ZMod (p ^ (n + 1))).val * p))
         = (zetaSys p (n + 1) ^ p) ^
           ((PadicMeasure.unitsToZModPow p (n + 1) a : (ZMod (p ^ (n + 1)))ˣ) :
             ZMod (p ^ (n + 1))).val from by rw [← pow_mul, mul_comm], zetaSys_pow_p]
-    -- now `ξ_n ^ t_{n+1}.val = ξ_n ^ t_n.val`, via the reduction compatibility mod `p^n`
-    -- `t_{n+1}.val ≡ t_n.val (mod p^n)` (reductions are compatible, `unitsToZModPow_le`)
     have hred : (PadicMeasure.unitsToZModPow p n a : (ZMod (p ^ n))ˣ)
         = ZMod.unitsMap (pow_dvd_pow p (Nat.le_succ n))
           (PadicMeasure.unitsToZModPow p (n + 1) a) :=
@@ -489,14 +482,11 @@ theorem galAut_compat (a : ℤ_[p]ˣ) {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]} (hx
       rw [← ZMod.natCast_eq_natCast_iff, ZMod.natCast_zmod_val, hred, ZMod.unitsMap_val,
         ZMod.natCast_val]
     exact zetaSys_pow_eq_pow_of_modEq p hmod
-  -- `F1 = F2` since they agree on the generator `⟨ξ_n,_⟩`, which generates `K_n`
   have hFeq : F1 = F2 :=
     AlgHom.ext_of_adjoin_eq_top (adjoin_zetaSysK_eq_top p n)
       (by rintro y (rfl : y = ζξ); exact hagree)
-  -- evaluate at `⟨x, hx⟩`
   have hev := congrFun (congrArg (fun (F : (K p n) →ₐ[ℚ_[p]] ℂ_[p]) => (F : K p n → ℂ_[p]))
     hFeq) ⟨x, hx⟩
-  -- unfold both sides; `incl ⟨x,hx⟩ = ⟨x, K_le_succ hx⟩` by `rfl`
   rw [hF1, hF2] at hev
   exact hev
 
@@ -523,26 +513,21 @@ theorem levelNorm_galAut (a : ℤ_[p]ˣ) {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]}
     (hx : x ∈ K p (n + 1)) :
     levelNorm p n (galAut p a (n + 1) ⟨x, hx⟩ : ℂ_[p])
       = (galAut p a n ⟨levelNorm p n x, levelNorm_mem p n hx⟩ : ℂ_[p]) := by
-  -- package the extendScalars element of `x`
   set xes : IntermediateField.extendScalars (K_le_succ p n) :=
     ⟨x, (IntermediateField.mem_extendScalars (K_le_succ p n)).2 hx⟩ with hxes
-  -- `galAut p a n` as a ring equiv `K_n ≃+* K_n`, semilinear-compatible with `galAutES`
   set e : (K p n) ≃+* (K p n) := (galAut p a n).toRingEquiv with he
-  -- the compatibility: `algebraMap K_n ES ∘ e = (galAutES) ∘ algebraMap K_n ES` on the base
   have hcompat : ∀ c : K p n,
       (galAutES p a hn) (algebraMap (K p n)
           (IntermediateField.extendScalars (K_le_succ p n)) c)
         = algebraMap (K p n) (IntermediateField.extendScalars (K_le_succ p n)) (e c) := by
     intro c
     apply Subtype.ext
-    -- both are in `K_{n+1}`; compare via `galAut_compat` (σ_a^{(n+1)}|_{K_n} = σ_a^{(n)})
     rw [galAutES_apply]
     change (galAut p a (n + 1) ⟨(c : ℂ_[p]), _⟩ : ℂ_[p]) = (e c : ℂ_[p])
     rw [he]
     change (galAut p a (n + 1) ⟨(c : ℂ_[p]), (K_le_succ p n) c.2⟩ : ℂ_[p])
       = (galAut p a n ⟨(c : ℂ_[p]), c.2⟩ : ℂ_[p])
     exact galAut_compat p a hn c.2
-  -- `he'` is the hypothesis shape of `Algebra.norm_eq_of_equiv_equiv`
   have he' : (algebraMap (K p n) (IntermediateField.extendScalars (K_le_succ p n))).comp
         (e : (K p n) →+* (K p n))
       = (galAutES p a hn : IntermediateField.extendScalars (K_le_succ p n) →+*
@@ -551,20 +536,16 @@ theorem levelNorm_galAut (a : ℤ_[p]ˣ) {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]}
     refine RingHom.ext fun c => ?_
     simp only [RingHom.coe_comp, RingHom.coe_coe, Function.comp_apply]
     exact (hcompat c).symm
-  -- `Algebra.norm_eq_of_equiv_equiv`: `norm x = e₁.symm (norm (e₂ x))`
   have hkey := Algebra.norm_eq_of_equiv_equiv e (galAutES p a hn) he' xes
-  -- rearrange to `e (norm x) = norm (galAutES xes)`
   have hkey2 : e (Algebra.norm (K p n) xes)
       = Algebra.norm (K p n) (galAutES p a hn xes) := by
     rw [hkey, RingEquiv.apply_symm_apply]
-  -- the LHS `levelNorm p n (σ_a x) = (norm (galAutES xes) : K_n)` coerced
   have hgalmem : (galAut p a (n + 1) ⟨x, hx⟩ : ℂ_[p]) ∈ K p (n + 1) :=
     (galAut p a (n + 1) ⟨x, hx⟩).2
   have hlhs : levelNorm p n (galAut p a (n + 1) ⟨x, hx⟩ : ℂ_[p])
       = (Algebra.norm (K p n) (galAutES p a hn xes) : K p n) := by
     rw [levelNorm_apply p n hgalmem]
     congr 1
-  -- the RHS inner `levelNorm p n x = (norm xes : K_n)` (as `K_n`-elements)
   have hrhsK : (⟨levelNorm p n x, levelNorm_mem p n hx⟩ : K p n)
       = Algebra.norm (K p n) xes := by
     apply Subtype.ext; exact levelNorm_apply p n hx
@@ -642,7 +623,6 @@ theorem galAutUnit_inv_val (a : ℤ_[p]ˣ) {n : ℕ} (v : ℂ_[p]ˣ)
     (((galAutUnit p a v hv)⁻¹ : ℂ_[p]ˣ) : ℂ_[p])
       = (galAut p a n ⟨((v : ℂ_[p]))⁻¹, (K p n).inv_mem hv⟩ : ℂ_[p]) := by
   rw [Units.val_inv_eq_inv_val, galAutUnit_val]
-  -- `(σ_a w)⁻¹ = σ_a (w⁻¹)` (field auto), and `w⁻¹ = ⟨(↑v)⁻¹, _⟩` in `K_n`
   have hinvK : (⟨(v : ℂ_[p]), hv⟩ : K p n)⁻¹ = ⟨((v : ℂ_[p]))⁻¹, (K p n).inv_mem hv⟩ :=
     Subtype.ext (by rw [IntermediateField.coe_inv])
   rw [show (galAut p a n ⟨((v : ℂ_[p]))⁻¹, (K p n).inv_mem hv⟩ : ℂ_[p])
@@ -667,16 +647,13 @@ def galNCU (a : ℤ_[p]ˣ) (u : NormCompatUnits p) : NormCompatUnits p where
     exact galAut_mem_O p a (u.mem n)
   inv_mem n := by
     rw [galAutUnit_inv_val']
-    -- `(u_n)⁻¹ ∈ O_n` (note `((u_n)⁻¹ : ℂ_[p]ˣ) = (u_n : ℂ_[p])⁻¹`), so `σ_a((u_n)⁻¹) ∈ O_n`
     have h := galAut_mem_O p a (u.inv_mem n)
     simpa only [Units.val_inv_eq_inv_val] using h
   compat n hn := by
-    -- `N_{n+1,n}(σ_a u_{n+1}) = σ_a(N_{n+1,n} u_{n+1}) = σ_a(u_n)` (`levelNorm_galAut` + `compat`)
     have hxK : (u.elems (n + 1) : ℂ_[p]) ∈ K p (n + 1) := (Subring.mem_inf.1 (u.mem _)).1
     change levelNorm p n ((galAutUnit p a (u.elems (n + 1)) hxK : ℂ_[p]ˣ) : ℂ_[p])
       = ((galAutUnit p a (u.elems n) (Subring.mem_inf.1 (u.mem n)).1 : ℂ_[p]ˣ) : ℂ_[p])
     rw [galAutUnit_val, galAutUnit_val, levelNorm_galAut p a hn hxK]
-    -- the `K_n`-arguments `⟨levelNorm u_{n+1}, _⟩` and `⟨u_n, _⟩` agree (`u.compat`)
     congr 2
     exact Subtype.ext (u.compat n hn)
 
