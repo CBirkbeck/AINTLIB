@@ -1094,7 +1094,6 @@ private theorem subst_inverse_of_isUnit {f G : PowerSeries ℤ_[p]} (hf : IsUnit
     (hg : PowerSeries.HasSubst G) :
     (Ring.inverse f).subst G = Ring.inverse (f.subst G) := by
   obtain ⟨v, rfl⟩ := hf
-  -- `f.subst G = ↑(Units.map φ v)` is a unit, with inverse `↑(v⁻¹).subst G`
   set φ : PowerSeries ℤ_[p] →* PowerSeries ℤ_[p] :=
     ((PowerSeries.substAlgHom hg : PowerSeries ℤ_[p] →ₐ[ℤ_[p]] PowerSeries ℤ_[p]) :
       PowerSeries ℤ_[p] →+* PowerSeries ℤ_[p]).toMonoidHom with hφ
@@ -1115,7 +1114,6 @@ private theorem dlog_galSeries (a : ℤ_[p]ˣ) {f : PowerSeries ℤ_[p]} (hf : I
   classical
   set G : PowerSeries ℤ_[p] := galSubstend p a with hG
   have hg : PowerSeries.HasSubst G := hasSubst_galSubstend p a
-  -- `(1+T)·G′ = a·(1+T+G−... )` : the binomial identity, `1+G = binomialSeries a`
   have hBG : (1 : PowerSeries ℤ_[p]) + G = PowerSeries.binomialSeries ℤ_[p] (a : ℤ_[p]) := by
     rw [hG, galSubstend, add_sub_cancel]
   have hGderiv : (1 + PowerSeries.X) * PowerSeries.derivativeFun G
@@ -1129,23 +1127,19 @@ private theorem dlog_galSeries (a : ℤ_[p]ˣ) {f : PowerSeries ℤ_[p]} (hf : I
         show (-1 : PowerSeries ℤ_[p]) = PowerSeries.C (-1 : ℤ_[p]) by simp,
         PowerSeries.derivativeFun_C, add_zero]
     rw [hdG, one_add_X_mul_derivative_binomialSeries p (a : ℤ_[p])]
-  -- chain rule for the derivative of `f.subst G` (`d⁄dX` is defeq to `derivativeFun`)
   have hchain : PowerSeries.derivativeFun (f.subst G)
       = (PowerSeries.derivativeFun f).subst G * PowerSeries.derivativeFun G :=
     PowerSeries.derivative_subst ℤ_[p] hg
   have hsubstX : (1 + PowerSeries.X : PowerSeries ℤ_[p]).subst G = 1 + G := by
     rw [PowerSeries.subst_add hg, PowerSeries.subst_X hg,
       ← PowerSeries.coe_substAlgHom hg, map_one]
-  -- abbreviations: `D := f'.subst G`, `I := inv(f.subst G)`
   set D : PowerSeries ℤ_[p] := (PowerSeries.derivativeFun f).subst G with hD
   set I : PowerSeries ℤ_[p] := Ring.inverse (f.subst G) with hI
-  -- LHS `= (1+X)·(D·G')·I`; reduce `(1+X)·G' = a•binomialSeries a`
   have hLHS : dlog p (galSeries p a f)
       = ((a : ℤ_[p]) • PowerSeries.binomialSeries ℤ_[p] (a : ℤ_[p])) * D * I := by
     rw [dlog, galSeries, hchain]
     rw [show (1 + PowerSeries.X) * (D * PowerSeries.derivativeFun G) * I
         = ((1 + PowerSeries.X) * PowerSeries.derivativeFun G) * D * I by ring, hGderiv]
-  -- RHS `= a•((1+X)·f'·inv f).subst G = a•((1+G)·D·inv(f.subst G))`
   have hRHS : (a : ℤ_[p]) • galSeries p a (dlog p f)
       = ((a : ℤ_[p]) • PowerSeries.binomialSeries ℤ_[p] (a : ℤ_[p])) * D * I := by
     rw [dlog, galSeries, PowerSeries.subst_mul hg, PowerSeries.subst_mul hg, hsubstX,
@@ -1161,13 +1155,11 @@ private theorem mahlerSymm_galSeries (a : ℤ_[p]ˣ) (g : PowerSeries ℤ_[p]) :
     (PadicMeasure.mahlerLinearEquiv p).symm (galSeries p a g)
       = PadicMeasure.sigma p a ((PadicMeasure.mahlerLinearEquiv p).symm g) := by
   set μ : PadicMeasure p ℤ_[p] := (PadicMeasure.mahlerLinearEquiv p).symm g with hμ
-  -- `𝒜(σ_a μ) = galSeries a (𝒜 μ)`, and `𝒜 μ = g`
   have hmt : PadicMeasure.mahlerTransform p (PadicMeasure.sigma p a μ)
       = galSeries p a g := by
     rw [PadicMeasure.mahlerTransform_sigma, galSeries, galSubstend]
     congr 1
     rw [hμ, ← PadicMeasure.mahlerLinearEquiv_apply, LinearEquiv.apply_symm_apply]
-  -- apply `𝒜⁻¹` to both sides
   rw [← hmt, ← PadicMeasure.mahlerLinearEquiv_apply, LinearEquiv.symm_apply_apply]
 
 /-- **The `a`/`a⁻¹` cancellation** at the level of test functions (RJW TeX 3223): for
@@ -1182,16 +1174,13 @@ private theorem cancel_a_extendByZero (a : ℤ_[p]ˣ) (f : C(ℤ_[p]ˣ, ℤ_[p])
   classical
   ext x
   simp only [ContinuousMap.smul_apply, ContinuousMap.comp_apply, smul_eq_mul]
-  -- `mulCM a x = a·x`
   change (a : ℤ_[p]) * PadicMeasure.extendByZero p (PadicMeasure.invCM p * f) ((a : ℤ_[p]) * x)
       = PadicMeasure.extendByZero p (PadicMeasure.invCM p * f.comp (unitsMulLeftCM p a)) x
   by_cases hx : IsUnit x
-  · -- `x = ↑hx.unit`; `a·x = ↑(a * hx.unit)`, both units
-    obtain ⟨w, rfl⟩ := hx
+  · obtain ⟨w, rfl⟩ := hx
     have hax : ((a : ℤ_[p]) * (w : ℤ_[p])) = ((a * w : ℤ_[p]ˣ) : ℤ_[p]) := by
       rw [Units.val_mul]
     rw [hax, PadicMeasure.extendByZero_coe_unit, PadicMeasure.extendByZero_coe_unit]
-    -- `a · ((a*w)⁻¹ · f(a*w)) = w⁻¹ · f(a*w)`
     simp only [ContinuousMap.mul_apply, ContinuousMap.comp_apply]
     have hfa : f (unitsMulLeftCM p a w) = f (a * w) := rfl
     have hinvaw : PadicMeasure.invCM p (a * w) = (((a * w)⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) := rfl
@@ -1203,8 +1192,7 @@ private theorem cancel_a_extendByZero (a : ℤ_[p]ˣ) (f : C(ℤ_[p]ˣ, ℤ_[p])
           * f (a * w))
         = (((w⁻¹ : ℤ_[p]ˣ) : ℤ_[p])) * ((a : ℤ_[p]) * ((a⁻¹ : ℤ_[p]ˣ) : ℤ_[p]))
           * f (a * w) by ring, haa, mul_one]
-  · -- `a·x` not a unit (else `x = a⁻¹·(a·x)` would be); both `extendByZero`s vanish
-    have hax : ¬ IsUnit ((a : ℤ_[p]) * x) := by
+  · have hax : ¬ IsUnit ((a : ℤ_[p]) * x) := by
       intro h
       refine hx ?_
       have := (a⁻¹ : ℤ_[p]ˣ).isUnit.mul h
@@ -1230,7 +1218,6 @@ private theorem unitsCmul_smul_sigma_eq_pushforward (a : ℤ_[p]ˣ)
           (PadicMeasure.invCM p) (μ.comp (PadicMeasure.extendByZero p))) := by
   refine LinearMap.ext fun f => ?_
   rw [PadicMeasure.pushforward_apply, PadicMeasure.unitsCmul_apply, PadicMeasure.unitsCmul_apply]
-  -- LHS `= ((a•σ_a μ).comp E)(invCM·f) = a·μ((E(invCM·f)).comp(mulCM a))`
   change ((a : ℤ_[p]) • PadicMeasure.sigma p a μ)
       (PadicMeasure.extendByZero p (PadicMeasure.invCM p * f))
     = μ (PadicMeasure.extendByZero p
@@ -1249,10 +1236,8 @@ action is pushforward along `v ↦ a·v`). -/
 theorem Col_galNCU (a : ℤ_[p]ˣ) (u : NormCompatUnits p) :
     Col p (galNCU p a u)
       = PadicMeasure.pushforward p (unitsMulLeftCM p a) (Col p u) := by
-  -- unfold `Col`, intertwine the Coleman series, apply the `∂log` chain rule + Mahler bridge
   rw [Col, Col, colemanSeries_galNCU p a u,
     dlog_galSeries p a (colemanSeries_isUnit p u), map_smul, mahlerSymm_galSeries p a]
-  -- reduce to the μ-generic measure identity with `μ = 𝒜⁻¹(∂log f_u)`
   exact unitsCmul_smul_sigma_eq_pushforward p a
     ((PadicMeasure.mahlerLinearEquiv p).symm (dlog p (colemanSeries p u)))
 
