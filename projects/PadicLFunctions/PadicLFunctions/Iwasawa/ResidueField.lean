@@ -40,10 +40,6 @@ namespace PadicLFunctions.Coleman
 
 variable (p : ℕ) [hp : Fact p.Prime]
 
-/-! ## Norm-residue compatibility: the relative norm of a principal unit is principal -/
-
-/-- A product (over a finset) of elements that are `≡ 1 mod 𝔭` (norm `≤ 1`, `‖·−1‖ < 1`) is
-itself `≡ 1 mod 𝔭` (ultrametric: `ab − 1 = a(b−1) + (a−1)`). -/
 private theorem prod_sub_one_lt_one {ι : Type*} (s : Finset ι) (f : ι → ℂ_[p])
     (hle : ∀ i ∈ s, ‖f i‖ ≤ 1) (hone : ∀ i ∈ s, ‖f i - 1‖ < 1) :
     ‖(∏ i ∈ s, f i) - 1‖ < 1 := by
@@ -51,21 +47,17 @@ private theorem prod_sub_one_lt_one {ι : Type*} (s : Finset ι) (f : ι → ℂ
   induction s using Finset.induction with
   | empty => simp
   | insert a t ha ih =>
-    rw [Finset.prod_insert ha]
-    have hih := ih (fun i hi => hle i (Finset.mem_insert_of_mem hi))
-      (fun i hi => hone i (Finset.mem_insert_of_mem hi))
-    rw [show f a * (∏ i ∈ t, f i) - 1 = f a * ((∏ i ∈ t, f i) - 1) + (f a - 1) by ring]
+    rw [Finset.prod_insert ha,
+      show f a * (∏ i ∈ t, f i) - 1 = f a * ((∏ i ∈ t, f i) - 1) + (f a - 1) by ring]
     refine lt_of_le_of_lt (IsUltrametricDist.norm_add_le_max _ _) (max_lt ?_ ?_)
     · rw [norm_mul]
       calc ‖f a‖ * ‖(∏ i ∈ t, f i) - 1‖ ≤ 1 * ‖(∏ i ∈ t, f i) - 1‖ :=
             mul_le_mul_of_nonneg_right (hle a (Finset.mem_insert_self a t)) (norm_nonneg _)
         _ = ‖(∏ i ∈ t, f i) - 1‖ := one_mul _
-        _ < 1 := hih
+        _ < 1 := ih (fun i hi => hle i (Finset.mem_insert_of_mem hi))
+            (fun i hi => hone i (Finset.mem_insert_of_mem hi))
     · exact hone a (Finset.mem_insert_self a t)
 
-/-- The restriction of the `ℂ_p`-norm to the relative extension
-`extendScalars (K_n ≤ K_{n+1})`, as an `AbsoluteValue ℝ` (mirrors `Tower.restrictAbs` /
-`GaloisAction.restrictAbsK`). -/
 private noncomputable def restrictAbsES {n : ℕ} :
     AbsoluteValue (IntermediateField.extendScalars (K_le_succ p n)) ℝ where
   toFun z := ‖(z : ℂ_[p])‖
@@ -78,9 +70,6 @@ private noncomputable def restrictAbsES {n : ℕ} :
 set_option synthInstance.maxHeartbeats 1000000 in
 -- the `spectralNorm`/`finiteDimensional` reasoning runs through the nested
 -- `IntermediateField (K p n) (extendScalars …)` layer; instance synthesis exceeds defaults
-set_option maxHeartbeats 1000000 in
-/-- The `ℂ_p`-norm of `z` in the relative extension `extendScalars (K_n ≤ K_{n+1})` is its
-`ℚ_p`-spectral norm (the `ℂ_p`-norm is the unique `ℚ_p`-algebra norm extension). -/
 private theorem norm_coe_eq_spectralNorm_ES {n : ℕ}
     (z : IntermediateField.extendScalars (K_le_succ p n)) :
     ‖(z : ℂ_[p])‖ = spectralNorm ℚ_[p] (IntermediateField.extendScalars (K_le_succ p n)) z := by
@@ -90,16 +79,12 @@ private theorem norm_coe_eq_spectralNorm_ES {n : ℕ}
     (L := IntermediateField.extendScalars (K_le_succ p n)) (f := restrictAbsES p) (fun k => ?_) z
   change ‖((algebraMap ℚ_[p] (IntermediateField.extendScalars (K_le_succ p n)) k) : ℂ_[p])‖ = ‖k‖
   rw [show ((algebraMap ℚ_[p] (IntermediateField.extendScalars (K_le_succ p n)) k) : ℂ_[p])
-      = algebraMap ℚ_[p] ℂ_[p] k from by rw [← IntermediateField.algebraMap_apply]; rfl]
+      = algebraMap ℚ_[p] ℂ_[p] k by rw [← IntermediateField.algebraMap_apply]; rfl]
   simp
 
 set_option synthInstance.maxHeartbeats 1000000 in
 -- the `minpoly`/`spectralNorm` reasoning runs through the nested
 -- `IntermediateField (K p n) (extendScalars …)` layer; instance synthesis exceeds defaults
-set_option maxHeartbeats 1000000 in
-/-- A `ℚ_p`-algebra automorphism of the relative extension `extendScalars (K_n ≤ K_{n+1})` is a
-`ℂ_p`-isometry: `‖σ z‖ = ‖z‖` (the spectral norm depends only on the `ℚ_p`-minimal polynomial,
-preserved by `minpoly.algEquiv_eq`). -/
 private theorem norm_algEquiv_ES {n : ℕ}
     (σ : (IntermediateField.extendScalars (K_le_succ p n)) ≃ₐ[ℚ_[p]]
          (IntermediateField.extendScalars (K_le_succ p n)))
@@ -111,13 +96,9 @@ private theorem norm_algEquiv_ES {n : ℕ}
 set_option synthInstance.maxHeartbeats 1000000 in
 -- the `IsGalois`/`norm_eq_prod_automorphisms` reasoning runs through the nested
 -- `IntermediateField (K p n) (extendScalars …)` layer; instance synthesis exceeds defaults
-set_option maxHeartbeats 1000000 in
 /-- **Norm-residue compatibility** (RJW §12.1, TeX 3162 — totally-ramified ⟹ trivial residue
 extension): the relative norm of a principal unit is principal. For `w ∈ K_{n+1}` with
-`‖w − 1‖ < 1`, `‖N_{n+1,n}(w) − 1‖ < 1`. Since `K_{n+1}/K_n` is Galois (cyclotomic),
-`N_{n+1,n}(w) = ∏_{σ ∈ Gal} σ(w)` (`Algebra.norm_eq_prod_automorphisms`); each `σ` is a
-`ℂ_p`-isometry fixing `1` (`norm_algEquiv_ES`), so `‖σ(w) − 1‖ = ‖w − 1‖ < 1`, and the product
-of principal units is principal (`prod_sub_one_lt_one`). -/
+`‖w − 1‖ < 1`, `‖N_{n+1,n}(w) − 1‖ < 1`. -/
 theorem norm_levelNorm_sub_one_lt_one {n : ℕ} {w : ℂ_[p]} (hw : w ∈ K p (n + 1))
     (hwone : ‖w - 1‖ < 1) :
     ‖levelNorm p n w - 1‖ < 1 := by
@@ -125,17 +106,12 @@ theorem norm_levelNorm_sub_one_lt_one {n : ℕ} {w : ℂ_[p]} (hw : w ∈ K p (n
     finiteDimensional_K p (n + 1)
   haveI : FiniteDimensional (K p n) (IntermediateField.extendScalars (K_le_succ p n)) :=
     FiniteDimensional.right ℚ_[p] (K p n) _
-  haveI hgalQ : IsGalois ℚ_[p] (IntermediateField.extendScalars (K_le_succ p n)) := by
-    have heq : (IntermediateField.extendScalars (K_le_succ p n)).restrictScalars ℚ_[p]
-        = K p (n + 1) := rfl
-    have h2 : IsGalois ℚ_[p]
-        ((IntermediateField.extendScalars (K_le_succ p n)).restrictScalars ℚ_[p]) := by
-      rw [heq]; exact isGalois_K p (n + 1)
-    exact h2
+  haveI hgalQ : IsGalois ℚ_[p] (IntermediateField.extendScalars (K_le_succ p n)) :=
+    isGalois_K p (n + 1)
   haveI : IsGalois (K p n) (IntermediateField.extendScalars (K_le_succ p n)) :=
     IsGalois.tower_top_of_isGalois ℚ_[p] (K p n) _
   set W : IntermediateField.extendScalars (K_le_succ p n) :=
-    ⟨w, (IntermediateField.mem_extendScalars (K_le_succ p n)).2 hw⟩ with hW
+    ⟨w, (IntermediateField.mem_extendScalars (K_le_succ p n)).2 hw⟩
   have hwnorm : ‖w‖ = 1 := by
     have hle : ‖w‖ ≤ 1 := by
       have h := IsUltrametricDist.norm_add_le_max (w - 1) (1 : ℂ_[p])
@@ -144,7 +120,7 @@ theorem norm_levelNorm_sub_one_lt_one {n : ℕ} {w : ℂ_[p]} (hw : w ∈ K p (n
     have hge : 1 ≤ ‖w‖ := by
       have h := IsUltrametricDist.norm_add_le_max w (1 - w)
       rw [add_sub_cancel, norm_one] at h
-      have h1w : ‖(1 : ℂ_[p]) - w‖ < 1 := by rw [norm_sub_rev]; exact hwone
+      have h1w : ‖(1 : ℂ_[p]) - w‖ < 1 := by rwa [norm_sub_rev]
       rcases le_max_iff.mp h with hh | hh
       · exact hh
       · linarith
@@ -160,19 +136,13 @@ theorem norm_levelNorm_sub_one_lt_one {n : ℕ} {w : ℂ_[p]} (hw : w ∈ K p (n
   rw [hcoe]
   refine prod_sub_one_lt_one p _ _ (fun σ _ => ?_) (fun σ _ => ?_)
   · rw [show (σ W : ℂ_[p]) = ((σ.restrictScalars ℚ_[p]) W : ℂ_[p]) from rfl,
-      norm_algEquiv_ES p (σ.restrictScalars ℚ_[p]) W]
-    rw [show (W : ℂ_[p]) = w from rfl, hwnorm]
+      norm_algEquiv_ES p (σ.restrictScalars ℚ_[p]) W, show (W : ℂ_[p]) = w from rfl, hwnorm]
   · have hσ1 : (σ W : ℂ_[p]) - 1 = (σ (W - 1) : ℂ_[p]) := by rw [map_sub, map_one]; rfl
-    rw [hσ1, show (σ (W - 1) : ℂ_[p]) = ((σ.restrictScalars ℚ_[p]) (W - 1) : ℂ_[p]) from rfl,
-      norm_algEquiv_ES p (σ.restrictScalars ℚ_[p]) (W - 1)]
-    rw [show ((W - 1 : IntermediateField.extendScalars (K_le_succ p n)) : ℂ_[p]) = w - 1 from by
+    rwa [hσ1, show (σ (W - 1) : ℂ_[p]) = ((σ.restrictScalars ℚ_[p]) (W - 1) : ℂ_[p]) from rfl,
+      norm_algEquiv_ES p (σ.restrictScalars ℚ_[p]) (W - 1),
+      show ((W - 1 : IntermediateField.extendScalars (K_le_succ p n)) : ℂ_[p]) = w - 1 by
       push_cast; rfl]
-    exact hwone
 
-/-! ## The `ℤ_p`-residue of a tower-unit level and its constancy -/
-
-/-- The `ℤ_p`-residue of the level-`n` value of a norm-compatible unit: the `a : ℤ_p`
-with `‖u.elems n − toCp a‖ ≤ ‖π_n‖ < 1`, from `exists_residue_pi` (`𝒪_n/𝔭_n ≅ 𝔽_p`). -/
 private noncomputable def residueZp (u : NormCompatUnits p) (n : ℕ) (hn : 1 ≤ n) : ℤ_[p] :=
   (exists_residue_pi p hn (Subring.mem_inf.1 (u.mem n)).1 (Subring.mem_inf.1 (u.mem n)).2).choose
 
@@ -181,20 +151,14 @@ private theorem residueZp_spec (u : NormCompatUnits p) (n : ℕ) (hn : 1 ≤ n) 
   (exists_residue_pi p hn (Subring.mem_inf.1 (u.mem n)).1
     (Subring.mem_inf.1 (u.mem n)).2).choose_spec
 
-set_option maxHeartbeats 1000000 in
 -- the `levelNorm`/`norm_levelNorm_sub_one_lt_one` chain elaborates through the nested
 -- `IntermediateField (K p n) (extendScalars …)` Galois-product layer, exceeding the default
-/-- **Norm-residue constancy step** (totally-ramified tower): the residue of `u.elems (n+1)`
-agrees with that of `u.elems n` mod `p`. Write `u_{n+1} = toCp(a₁)·w` with `w` principal
-(`a₁ = residueZp u (n+1)`); then `u_n = N(u_{n+1}) = (toCp a₁)^p·N(w)` with `N(w)` principal
-(`norm_levelNorm_sub_one_lt_one`), so `u_n ≡ (toCp a₁)^p mod 𝔭_n`. Comparing with
-`u_n ≡ toCp(a₀)` gives `a₀ ≡ a₁^p mod p`, and Fermat `a₁^p ≡ a₁ mod p` finishes. -/
 private theorem toZMod_residueZp_succ (u : NormCompatUnits p) {n : ℕ} (hn : 1 ≤ n)
     (hn1 : 1 ≤ n + 1) :
     PadicInt.toZMod (residueZp p u (n + 1) hn1) = PadicInt.toZMod (residueZp p u n hn) := by
-  set c : ℂ_[p] := (u.elems (n + 1) : ℂ_[p]) with hc
-  set a₁ : ℤ_[p] := residueZp p u (n + 1) hn1 with ha1
-  set a₀ : ℤ_[p] := residueZp p u n hn with ha0
+  set c : ℂ_[p] := (u.elems (n + 1) : ℂ_[p])
+  set a₁ : ℤ_[p] := residueZp p u (n + 1) hn1
+  set a₀ : ℤ_[p] := residueZp p u n hn
   have hcK : c ∈ K p (n + 1) := (Subring.mem_inf.1 (u.mem (n + 1))).1
   have hcnorm : ‖c‖ = 1 := norm_eq_one_of_mem_localUnits p
     ((mem_localUnits_iff p).2
@@ -241,14 +205,13 @@ private theorem toZMod_residueZp_succ (u : NormCompatUnits p) {n : ℕ} (hn : 1 
     · rw [norm_mul, norm_pow, norm_toCp, ha1norm, one_pow, one_mul]
       exact hNw
   have hkey3 : ‖a₀ - a₁ ^ p‖ < 1 := by
-    rw [← norm_toCp p (a₀ - a₁ ^ p), map_sub, map_pow]; exact hkey2
+    rwa [← norm_toCp p (a₀ - a₁ ^ p), map_sub, map_pow]
   have hmem : a₀ - a₁ ^ p ∈ IsLocalRing.maximalIdeal ℤ_[p] := by
-    rw [PadicInt.maximalIdeal_eq_span_p, Ideal.mem_span_singleton, ← PadicInt.norm_lt_one_iff_dvd]
-    exact hkey3
+    rwa [PadicInt.maximalIdeal_eq_span_p, Ideal.mem_span_singleton, ← PadicInt.norm_lt_one_iff_dvd]
   have hz : PadicInt.toZMod a₀ = PadicInt.toZMod (a₁ ^ p) := by
     have h0 : PadicInt.toZMod (a₀ - a₁ ^ p) = 0 := by
-      rw [← RingHom.mem_ker, PadicInt.ker_toZMod]; exact hmem
-    rw [map_sub, sub_eq_zero] at h0; exact h0
+      rwa [← RingHom.mem_ker, PadicInt.ker_toZMod]
+    rwa [map_sub, sub_eq_zero] at h0
   rw [hz, map_pow, ZMod.pow_card]
 
 /-- **Norm-residue constancy** (totally-ramified tower): `toZMod(residueZp u n)` is constant in
@@ -264,12 +227,9 @@ private theorem toZMod_residueZp_eq_one (u : NormCompatUnits p) {n : ℕ} (hn : 
     · have hm0 : m = 0 := by omega
       subst hm0; congr 1
 
-/-! ## The constant Teichmüller `NormCompatUnits` system `ω(b)` -/
-
 /-- The constant Teichmüller `NormCompatUnits` system `ω(b)` for `b : ℤ_[p]ˣ`: every level is
-`toCp(ω(b))`. Norm-compatible because `N_{n+1,n}(ω(b)) = ω(b)^p = ω(b)`
-(`levelNorm_const_eq_pow` + `ω(b)^{p−1} = 1`). Parallel to `FundamentalSequence.teichNCU`,
-exported here for the §12.1/§12.5 split. -/
+`toCp(ω(b))`. Parallel to `FundamentalSequence.teichNCU`, exported here for the §12.1/§12.5
+split. -/
 noncomputable def omegaNCU (b : ℤ_[p]ˣ) : NormCompatUnits p where
   elems _ := Units.map (toCp p).toMonoidHom (PadicInt.isUnit_teichmullerFun p b).unit
   mem n := by
@@ -296,13 +256,13 @@ noncomputable def omegaNCU (b : ℤ_[p]ˣ) : NormCompatUnits p where
     congr 1
     have hpow : ((PadicInt.isUnit_teichmullerFun p b).unit : ℤ_[p]) ^ (p - 1) = 1 := by
       rw [IsUnit.unit_spec]; exact PadicInt.teichmullerFun_pow_card_sub_one p b
-    have hpsucc : (p - 1) + 1 = p := Nat.sub_add_cancel hp.out.one_le
     rw [show ((PadicInt.isUnit_teichmullerFun p b).unit : ℤ_[p]) ^ p
         = ((PadicInt.isUnit_teichmullerFun p b).unit : ℤ_[p]) ^ (p - 1)
-          * ((PadicInt.isUnit_teichmullerFun p b).unit : ℤ_[p]) from by rw [← pow_succ, hpsucc],
+          * ((PadicInt.isUnit_teichmullerFun p b).unit : ℤ_[p]) by
+        rw [← pow_succ, Nat.sub_add_cancel hp.out.one_le],
       hpow, one_mul]
 
-/-- `ω(b)` is `(p−1)`-torsion at every level (`teichmullerFun_pow_card_sub_one`). -/
+/-- `ω(b)` is `(p−1)`-torsion at every level. -/
 theorem omegaNCU_torsion (b : ℤ_[p]ˣ) (n : ℕ) : (omegaNCU p b).elems n ^ (p - 1) = 1 := by
   apply Units.ext
   rw [Units.val_pow_eq_pow_val, Units.val_one]
@@ -315,12 +275,9 @@ theorem omegaNCU_elems (b : ℤ_[p]ˣ) (n : ℕ) :
   change (toCp p ((PadicInt.isUnit_teichmullerFun p b).unit : ℤ_[p])) = _
   rw [IsUnit.unit_spec]
 
-/-! ## The Teichmüller split `u = ω(b)·w` -/
-
-/-- The residue of `u.elems n` has `ℤ_p`-norm `1` (it is the residue of a unit of `𝒪_n`). -/
 private theorem norm_residueZp (u : NormCompatUnits p) {n : ℕ} (hn : 1 ≤ n) :
     ‖residueZp p u n hn‖ = 1 := by
-  set c : ℂ_[p] := (u.elems n : ℂ_[p]) with hc
+  set c : ℂ_[p] := (u.elems n : ℂ_[p])
   have hcnorm : ‖c‖ = 1 := norm_eq_one_of_mem_localUnits p
     ((mem_localUnits_iff p).2 ⟨u.mem n, by rw [Units.val_inv_eq_inv_val]; exact u.inv_mem n⟩)
   have hsmall : ‖c - toCp p (residueZp p u n hn)‖ < 1 :=
@@ -334,20 +291,15 @@ private theorem norm_residueZp (u : NormCompatUnits p) {n : ℕ} (hn : 1 ≤ n) 
   · linarith [hcnorm.ge]
   · linarith [hsmall]
 
-/-- The chosen Teichmüller unit `b = residueZp u 1 ∈ ℤ_[p]ˣ` (a unit, `‖residueZp u 1‖ = 1`). -/
 private noncomputable def teichUnit (u : NormCompatUnits p) : ℤ_[p]ˣ :=
   (PadicInt.isUnit_iff.2 (norm_residueZp p u (le_refl 1))).unit
 
 private theorem teichUnit_val (u : NormCompatUnits p) :
     (teichUnit p u : ℤ_[p]) = residueZp p u 1 (le_refl 1) := IsUnit.unit_spec _
 
-/-- **The principality input**: `u.elems n ≡ toCp(ω(b)) mod 𝔭_n` for all `n ≥ 1`
-(`b = teichUnit u`). The residue of `u.elems n` equals that of `b` (constancy
-`toZMod_residueZp_eq_one`), and `ω` depends only on the residue mod `p`, while
-`b ≡ ω(b) mod p` (`teichmullerFun_sub_self_mem`). -/
 private theorem norm_elems_sub_omega_lt_one (u : NormCompatUnits p) {n : ℕ} (hn : 1 ≤ n) :
     ‖(u.elems n : ℂ_[p]) - toCp p (PadicInt.teichmullerFun p (teichUnit p u : ℤ_[p]))‖ < 1 := by
-  set a₀ : ℤ_[p] := residueZp p u n hn with ha0
+  set a₀ : ℤ_[p] := residueZp p u n hn
   set b : ℤ_[p] := (teichUnit p u : ℤ_[p]) with hb
   have h1 : ‖(u.elems n : ℂ_[p]) - toCp p a₀‖ < 1 :=
     lt_of_le_of_lt (residueZp_spec p u n hn) (norm_pi_lt_one p hn)
@@ -361,8 +313,7 @@ private theorem norm_elems_sub_omega_lt_one (u : NormCompatUnits p) {n : ℕ} (h
       rw [show a₀ - PadicInt.teichmullerFun p a₀
           = -(PadicInt.teichmullerFun p a₀ - a₀) by ring, neg_mem_iff]
       exact PadicInt.teichmullerFun_sub_self_mem p a₀
-    rw [Ideal.mem_span_singleton, ← PadicInt.norm_lt_one_iff_dvd] at hmem
-    exact hmem
+    rwa [Ideal.mem_span_singleton, ← PadicInt.norm_lt_one_iff_dvd] at hmem
   rw [show (u.elems n : ℂ_[p]) - toCp p (PadicInt.teichmullerFun p b)
       = ((u.elems n : ℂ_[p]) - toCp p a₀)
         + (toCp p a₀ - toCp p (PadicInt.teichmullerFun p b)) by ring]
@@ -371,17 +322,12 @@ private theorem norm_elems_sub_omega_lt_one (u : NormCompatUnits p) {n : ℕ} (h
 /-- **RJW §12.1 Lemma (TeX 3159–3168)**: `𝒰_∞ = μ_{p−1} × 𝒰_{∞,1}` (Teichmüller split of
 the reduction-mod-`𝔭_n` SES `1 → 𝒰_{n,1} → 𝒰_n → μ_{p−1} → 1`). Every tower unit `u` splits as
 `u = v·w` with `v = ω(b)` `(p−1)`-torsion (`b = residueZp u 1`, the residue Teichmüller lift)
-and `w ∈ 𝒰_{∞,1}` principal.
-
-This closes the §12.1 deferred blocker: the `𝒪_n`-residue Teichmüller section is built from
-`exists_residue_pi` (`𝒪_n/𝔭_n ≅ 𝔽_p`, total ramification), the norm-residue compatibility
-`norm_levelNorm_sub_one_lt_one`, and the `ℤ_p`-Teichmüller `teichmullerFun`
-(`Interpolation/Branches.lean`). -/
+and `w ∈ 𝒰_{∞,1}` principal. -/
 theorem normCompat_eq_teichmuller_mul_principal (u : NormCompatUnits p) :
     ∃ v w : NormCompatUnits p, w ∈ unitsTower1 p ∧
       (∀ n, (v.elems n) ^ (p - 1) = 1) ∧ u = v * w := by
-  set b : ℤ_[p]ˣ := teichUnit p u with hb
-  set v : NormCompatUnits p := omegaNCU p b with hv
+  set b : ℤ_[p]ˣ := teichUnit p u
+  set v : NormCompatUnits p := omegaNCU p b
   set w : NormCompatUnits p := v⁻¹ * u with hw
   refine ⟨v, w, ?_, fun n => omegaNCU_torsion p b n, ?_⟩
   · intro n hn
