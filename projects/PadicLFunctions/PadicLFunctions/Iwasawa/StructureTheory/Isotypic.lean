@@ -52,8 +52,9 @@ local notation "Λ𝒢" => IwasawaAlgebraGroup 𝒪 H
 /-- The **isotypic idempotent** `e_ω = |H|⁻¹ Σ_{a ∈ H} ω⁻¹(a)·[a] ∈ Λ(𝒢)` attached
 to a character `ω : H → 𝒪^×`.  Well-defined since `|H|` is invertible in `𝒪`
 (prime-to-`p`).  (RJW TeX 3661.) -/
-def isotypicIdempotent [Invertible (Fintype.card H : 𝒪)] (ω : H →* 𝒪ˣ) : Λ𝒢 :=
-  sorry
+noncomputable def isotypicIdempotent [Invertible (Fintype.card H : 𝒪)] (ω : H →* 𝒪ˣ) : Λ𝒢 :=
+  ∑ a : H, MonoidAlgebra.single a
+    (algebraMap 𝒪 (IwasawaAlgebra 𝒪) (⅟(Fintype.card H : 𝒪) * ((ω a)⁻¹ : 𝒪ˣ)))
 
 /-- The idempotents `e_ω` are genuine idempotents: `e_ω² = e_ω`. -/
 theorem isIdempotentElem_isotypicIdempotent [Invertible (Fintype.card H : 𝒪)]
@@ -66,10 +67,12 @@ theorem isotypicIdempotent_orthogonal [Invertible (Fintype.card H : 𝒪)]
     isotypicIdempotent 𝒪 H ω * isotypicIdempotent 𝒪 H ψ = 0 := by
   sorry
 
-/-- The **`ω`-isotypic component** `M^{(ω)} = e_ω · M` of a `Λ(𝒢)`-module. -/
-def isotypicComponent (ω : H →* 𝒪ˣ) (M : Type*) [AddCommGroup M]
-    [Module (IwasawaAlgebraGroup 𝒪 H) M] : Submodule (IwasawaAlgebraGroup 𝒪 H) M :=
-  sorry
+/-- The **`ω`-isotypic component** `M^{(ω)} = e_ω · M` of a `Λ(𝒢)`-module — the image of
+multiplication by the idempotent `e_ω` (a `Λ(𝒢)`-linear map, as `Λ(𝒢)` is commutative). -/
+noncomputable def isotypicComponent [Invertible (Fintype.card H : 𝒪)] (ω : H →* 𝒪ˣ)
+    (M : Type*) [AddCommGroup M] [Module (IwasawaAlgebraGroup 𝒪 H) M] :
+    Submodule (IwasawaAlgebraGroup 𝒪 H) M :=
+  LinearMap.range (LinearMap.lsmul (IwasawaAlgebraGroup 𝒪 H) M (isotypicIdempotent 𝒪 H ω))
 
 /-- **The equivariant isotypic decomposition** `M = ⨁_ω M^{(ω)}` (RJW TeX 3662–3666):
 the isotypic components give an internal direct-sum decomposition of any
