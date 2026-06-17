@@ -11,6 +11,8 @@ your lane's GitHub-issue queue, then exit. Your worktree is on a branch in the `
 
 **Guardrail:** prefix every `git checkout`, `git push`, and `gh pr merge` with `LEAN4_GUARDRAILS_BYPASS=1` (e.g. `LEAN4_GUARDRAILS_BYPASS=1 git checkout -b cleanup/<n> origin/main`) — the Lean hook blocks those commands otherwise, and a cron-fired session won't have it exported.
 
+**Self-schedule (do this first, once — it makes you autonomous).** Check your existing scheduled jobs (e.g. with `CronList`). If you do **not** already have a recurring job for the cleanup lane, create one with `CronCreate`: **every 30 minutes**, whose task is exactly *"In `<DIR>`, read `docs/worker-prompts/cleanup-worker.md` and do exactly what it says"* — where `<DIR>` is this worktree's absolute path (get it with `pwd`). If such a job already exists, skip it — never create a duplicate. Then continue.
+
 Loop until your lane is empty or a freeze is active:
 
 1. **Freeze check.** `gh issue list --repo CBirkbeck/AINTLIB --label freeze:active --state open`.
