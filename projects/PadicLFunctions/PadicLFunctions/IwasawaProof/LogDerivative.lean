@@ -949,9 +949,7 @@ private theorem digits_unique_zmod {G H : Fin p → PowerSeries (ZMod p)}
   -- `(1+T)^j E_j = 0` and `1+T` a unit give `E_j = 0`, i.e. `φ(G_j) = φ(H_j)`
   have hunit : IsUnit ((1 + PowerSeries.X : PowerSeries (ZMod p)) ^ (j : ℕ)) := by
     refine IsUnit.pow _ ?_; rw [PowerSeries.isUnit_iff_constantCoeff]; simp
-  have hEj : E j = 0 := by
-    have h2 := congrArg (Ring.inverse ((1 + PowerSeries.X) ^ (j : ℕ)) * ·) hisolate
-    simpa only [mul_zero, ← mul_assoc, Ring.inverse_mul_cancel _ hunit, one_mul] using h2
+  have hEj : E j = 0 := hunit.mul_right_eq_zero.mp hisolate
   have hphi : phiSeries p (G j) = phiSeries p (H j) := sub_eq_zero.1 (hEval j ▸ hEj)
   -- `φ` is injective over `ZMod p` (it is the Frobenius `g ↦ g^p`)
   haveI : CharP (PowerSeries (ZMod p)) p := charP_of_injective_algebraMap' (ZMod p) p
@@ -1136,13 +1134,8 @@ private theorem psiId_one_add_X_div_X_phi_eq_zero {b c : PowerSeries (ZMod p)}
   have heq2 : e * (1 + PowerSeries.X)
       = (1 + PowerSeries.X) * (PowerSeries.X ^ (p - 1) * phiSeries p e) := by
     rw [← hpsib, hbform]; ring
-  rcases hunit.exists_left_inv with ⟨u, hu⟩
-  have hecancel : e = PowerSeries.X ^ (p - 1) * phiSeries p e := by
-    calc e = u * (1 + PowerSeries.X) * e := by rw [hu, one_mul]
-      _ = u * (e * (1 + PowerSeries.X)) := by ring
-      _ = u * ((1 + PowerSeries.X) * (PowerSeries.X ^ (p - 1) * phiSeries p e)) := by rw [heq2]
-      _ = u * (1 + PowerSeries.X) * (PowerSeries.X ^ (p - 1) * phiSeries p e) := by ring
-      _ = PowerSeries.X ^ (p - 1) * phiSeries p e := by rw [hu, one_mul]
+  have hecancel : e = PowerSeries.X ^ (p - 1) * phiSeries p e :=
+    hunit.mul_right_inj.mp (by rw [mul_comm (1 + PowerSeries.X) e]; exact heq2)
   have he0 : e = 0 :=
     eq_zero_of_eq_X_pow_mul_pow p (hecancel.trans (by rw [phiSeries_eq_pow_zmod]))
   -- `e = 0 ⟹ d = 0 ⟹ c = 0 ⟹ b = 0`
@@ -1621,24 +1614,8 @@ applying `ψ` (using `ψ φ = id` and `ψ F = 0`). -/
 the constant coefficient (`[T¹]f = [T⁰](∂f)`). -/
 private theorem coeff_one_one_add_X_pow :
     PowerSeries.coeff 1 ((1 + PowerSeries.X : PowerSeries ℤ_[p]) ^ p) = (p : ℤ_[p]) := by
-  have hDoneX : derivativeFun (1 + PowerSeries.X : PowerSeries ℤ_[p]) = 1 := by
-    rw [derivativeFun_add, derivativeFun_one, zero_add]; exact derivative_X
-  have key : ∀ a : ℕ, (1 + PowerSeries.X)
-      * derivativeFun ((1 + PowerSeries.X : PowerSeries ℤ_[p]) ^ a)
-      = (a : PowerSeries ℤ_[p]) * (1 + PowerSeries.X) ^ a := by
-    intro a
-    induction a with
-    | zero => simp [derivativeFun_one]
-    | succ a ih =>
-      rw [pow_succ, derivativeFun_mul, hDoneX, smul_eq_mul, smul_eq_mul, mul_one]
-      have hpow : (1 + PowerSeries.X) * ((1 + PowerSeries.X) ^ a
-          + (1 + PowerSeries.X) * derivativeFun ((1 + PowerSeries.X : PowerSeries ℤ_[p]) ^ a))
-          = (1 + PowerSeries.X) ^ (a + 1) + (1 + PowerSeries.X)
-            * ((1 + PowerSeries.X) * derivativeFun ((1 + PowerSeries.X) ^ a)) := by
-        rw [pow_succ]; ring
-      rw [hpow, mul_left_comm (1 + PowerSeries.X) (1 + PowerSeries.X) (derivativeFun _), ih]
-      push_cast; ring
-  have h0 := congrArg (PowerSeries.coeff 0) (key p)
+  have h0 := congrArg (PowerSeries.coeff 0) (del_one_add_X_pow p p)
+  rw [PadicMeasure.del] at h0
   rw [show (1 + PowerSeries.X : PowerSeries ℤ_[p]) * derivativeFun ((1 + PowerSeries.X) ^ p)
       = derivativeFun ((1 + PowerSeries.X) ^ p)
         + PowerSeries.X * derivativeFun ((1 + PowerSeries.X) ^ p) from by ring,
