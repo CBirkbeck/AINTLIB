@@ -500,9 +500,7 @@ private theorem phiHom_fixed_eq_C {F : PowerSeries ℤ_[p]} (h : F - phiHom p F 
       -- now `F_n = F_n · pⁿ`, i.e. `(1 − pⁿ)F_n = 0`, and `1 − pⁿ` is a unit
       have hzero : (1 - (p : ℤ_[p]) ^ n) * PowerSeries.coeff n F = 0 := by
         rw [sub_mul, one_mul]; nth_rewrite 1 [hcoeff]; rw [smul_eq_mul, mul_comm, sub_self]
-      rcases mul_eq_zero.1 hzero with h1 | h2
-      · exact absurd h1 (isUnit_one_sub_p_pow p hn).ne_zero
-      · exact h2
+      exact (mul_eq_zero.1 hzero).resolve_left (isUnit_one_sub_p_pow p hn).ne_zero
   ext n
   cases n with
   | zero => rw [PowerSeries.coeff_zero_eq_constantCoeff_apply,
@@ -627,11 +625,8 @@ private theorem eq_C_constantCoeff_of_derivativeFun_zero {g : PowerSeries ℤ_[p
     have hcoeff := congrArg (PowerSeries.coeff m) h
     rw [PowerSeries.coeff_derivativeFun, map_zero] at hcoeff
     have hne : ((m : ℤ_[p]) + 1) ≠ 0 := by
-      have : ((m + 1 : ℕ) : ℤ_[p]) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.succ_ne_zero m)
-      push_cast at this; exact this
-    rcases mul_eq_zero.1 hcoeff with h1 | h2
-    · exact h1
-    · exact absurd h2 hne
+      exact_mod_cast Nat.succ_ne_zero m
+    exact (mul_eq_zero.1 hcoeff).resolve_right hne
 
 /-- **The `∂log = C c` ODE**: a unit `g` with `∂log g = C c` is `C(g₀)·binomialSeries c`,
 `g₀ = constantCoeff g`. Both `g` and `C(g₀)·binomialSeries c` are units with the same `∂log`
@@ -659,10 +654,8 @@ private theorem eq_C_mul_binomialSeries_of_dlog_eq_C {g : PowerSeries ℤ_[p]} (
     have hmulh : (1 + PowerSeries.X) * PowerSeries.derivativeFun h
         * (Ring.inverse h * h) = 0 := by rw [← mul_assoc, hd0, zero_mul]
     rw [Ring.inverse_mul_cancel _ hhu, mul_one] at hmulh
-    rcases hunit1.exists_left_inv with ⟨w, hw⟩
-    have := congrArg (w * ·) hmulh
-    simp only [mul_zero, ← mul_assoc, hw, one_mul] at this
-    exact this
+    obtain ⟨w, hw⟩ := hunit1.exists_left_inv
+    simpa only [mul_zero, ← mul_assoc, hw, one_mul] using congrArg (w * ·) hmulh
   have hhC : h = PowerSeries.C (PowerSeries.constantCoeff (R := ℤ_[p]) h) :=
     eq_C_constantCoeff_of_derivativeFun_zero p hh'
   -- `g = h·B`, `h₀ = g₀` (since `B₀ = 1`)
@@ -673,8 +666,7 @@ private theorem eq_C_mul_binomialSeries_of_dlog_eq_C {g : PowerSeries ℤ_[p]} (
       Ring.choose_zero_right]
   have hBi0 : PowerSeries.constantCoeff (R := ℤ_[p]) Bi = 1 := by
     have := congrArg (PowerSeries.constantCoeff (R := ℤ_[p])) hBBi
-    rw [map_mul, hB0, one_mul, map_one] at this
-    exact this
+    rwa [map_mul, hB0, one_mul, map_one] at this
   have hh0 : PowerSeries.constantCoeff (R := ℤ_[p]) h
       = PowerSeries.constantCoeff (R := ℤ_[p]) g := by
     rw [hh, map_mul, hBi0, mul_one]
@@ -728,23 +720,13 @@ private theorem Col_eq_zero_iff (u : NormCompatUnits p) :
   set F := dlog p g with hF
   have hFpsi : psiSeries p F = F := dlog_mem_psiIdSeries p (colemanSeries_isUnit p u)
     (normOp_colemanSeries p u)
-  rw [Col, unitsCmul_invCM_eq_zero_iff]
-  rw [show ((PadicMeasure.mahlerLinearEquiv p).symm (dlog p g)).comp
-      (PadicMeasure.extendByZero p) = 0
-      ↔ PadicMeasure.iota p (((PadicMeasure.mahlerLinearEquiv p).symm
-          (dlog p g)).comp (PadicMeasure.extendByZero p)) = 0 from
-    ⟨fun h => by rw [h]; exact map_zero _, fun h => PadicMeasure.iota_injective p (by
-      rw [h]; exact (map_zero _).symm)⟩]
-  rw [iota_comp_extendByZero]
-  rw [show PadicMeasure.res p (PadicMeasure.isClopen_units p)
-        ((PadicMeasure.mahlerLinearEquiv p).symm (dlog p g)) = 0
-      ↔ PadicMeasure.mahlerTransform p (PadicMeasure.res p (PadicMeasure.isClopen_units p)
-          ((PadicMeasure.mahlerLinearEquiv p).symm (dlog p g))) = 0 from
-    ⟨fun h => by rw [h]; exact PadicMeasure.mahlerTransform_zero p,
-      fun h => PadicMeasure.mahlerTransform_injective p (by
-        rw [h, PadicMeasure.mahlerTransform_zero])⟩]
-  rw [mahlerTransform_res_units, PadicMeasure.mahlerLinearEquiv_symm_apply,
-    PadicMeasure.mahlerTransform_ofPowerSeries, hFpsi, phiHom_apply]
+  rw [Col, unitsCmul_invCM_eq_zero_iff,
+    ← LinearMap.map_eq_zero_iff (PadicMeasure.iota p) (PadicMeasure.iota_injective p),
+    iota_comp_extendByZero]
+  rw [← EmbeddingLike.map_eq_zero_iff (f := PadicMeasure.mahlerLinearEquiv p),
+    PadicMeasure.mahlerLinearEquiv_apply, mahlerTransform_res_units,
+    PadicMeasure.mahlerLinearEquiv_symm_apply, PadicMeasure.mahlerTransform_ofPowerSeries,
+    hFpsi, phiHom_apply]
 
 /-- A principal unit (`‖x − 1‖ < 1`) that is a `(p−1)`-th root of unity is `1`: factor
 `x^{p−1} − 1 = (∑_{i<p−1} xⁱ)·(x − 1)`; the geometric sum is `≡ p−1 mod (x−1)`, hence a
@@ -787,8 +769,7 @@ private theorem oneUnit_pow_p_sub_one_eq_one {x : ℤ_[p]} (hx : ‖x - 1‖ < 1
   -- `x^{p−1} − 1 = S·(x − 1) = 0`, and `S` is a unit, so `x − 1 = 0`
   have hfact : S * (x - 1) = S * 0 := by rw [mul_zero, hS, geom_sum_mul, hpow, sub_self]
   have hSunit : IsUnit S := by rw [PadicInt.isUnit_iff, hSnorm]
-  have hx0 := hSunit.mul_left_cancel hfact
-  rw [sub_eq_zero] at hx0; exact hx0
+  exact sub_eq_zero.1 (hSunit.mul_left_cancel hfact)
 
 /-- **RJW thm:fund exact seq (TeX 3411–3418), left-exactness**: the kernel of `Col` on
 `𝒰_{∞,1}` is `ℤ_p(1)`.
@@ -854,23 +835,21 @@ theorem mem_ker_Col_iff_mem_ZpOne (hp2 : p ≠ 2) {u : NormCompatUnits p}
           rw [sub_mul, mul_inv_cancel₀ hzcunit, htoCpval]
         rw [hkey, norm_mul, norm_inv, hzcnorm, inv_one, mul_one]; exact hsub
       rw [← norm_toCp p (g₀ - 1), map_sub, map_one]; exact hnormtoCp
-    -- `g₀` is a unit (norm `1`)
-    have hg0norm : ‖g₀‖ = 1 := by
-      have hne : ‖(1 : ℤ_[p])‖ ≠ ‖g₀ - 1‖ := by rw [norm_one]; exact (ne_of_lt hg0unit).symm
-      rw [show g₀ = 1 + (g₀ - 1) from by ring,
-        IsUltrametricDist.norm_add_eq_max_of_norm_ne_norm hne, norm_one, max_eq_left hg0unit.le]
-    have hg0u : IsUnit g₀ := by rw [PadicInt.isUnit_iff, hg0norm]
+    -- `g₀ = 1 − (1 − g₀)` is a unit (`1 − g₀` is a nonunit, norm `< 1`)
+    have hg0u : IsUnit g₀ := by
+      rw [show g₀ = 1 - (1 - g₀) by ring]
+      refine IsLocalRing.isUnit_one_sub_self_of_mem_nonunits _ ?_
+      rw [mem_nonunits_iff, PadicInt.isUnit_iff, show (1 : ℤ_[p]) - g₀ = -(g₀ - 1) by ring, norm_neg]
+      exact hg0unit.ne
     -- `𝒩`-fixedness forces `g₀^p = g₀`
     have hg0pow : g₀ ^ p = g₀ := by
       have hNg := normOp_colemanSeries p u
       rw [hgODE, normOp_mul, normOp_C, normOp_binomialSeries p hp2] at hNg
       have hBu : IsUnit (PowerSeries.binomialSeries ℤ_[p] c) := isUnit_binomialSeries p c
       exact PowerSeries.C_injective (hBu.mul_right_cancel (by rw [hNg]))
-    have hg0one : g₀ = 1 := by
-      have hpsucc : (p - 1) + 1 = p := Nat.sub_add_cancel hp.out.one_le
-      have hkk : g₀ ^ (p - 1) * g₀ = 1 * g₀ := by
-        rw [one_mul, ← pow_succ, hpsucc]; exact hg0pow
-      exact oneUnit_pow_p_sub_one_eq_one p hg0unit (mul_right_cancel₀ hg0u.ne_zero hkk)
+    have hg0one : g₀ = 1 := oneUnit_pow_p_sub_one_eq_one p hg0unit
+      (mul_right_cancel₀ hg0u.ne_zero
+        (by rw [← pow_succ, Nat.sub_add_cancel hp.out.one_le, one_mul, hg0pow]))
     -- `g = binomialSeries c`, so `u_n = ξ_n^c`
     have hgbin : g = PowerSeries.binomialSeries ℤ_[p] c := by
       rw [hg0one, map_one, one_mul] at hgODE; exact hgODE
@@ -942,7 +921,7 @@ private theorem evalPi_unit_ne_zero {g : PowerSeries ℤ_[p]} (hg : IsUnit g) {n
   obtain ⟨v, rfl⟩ := hg
   have hmul : evalPi p (v : PowerSeries ℤ_[p]) n * evalPi p (↑v⁻¹) n = 1 := by
     rw [← evalPi_mul p _ _ hn, ← Units.val_mul, mul_inv_cancel, Units.val_one, evalPi_one]
-  intro h0; rw [h0, zero_mul] at hmul; exact zero_ne_one hmul
+  exact left_ne_zero_of_mul_eq_one hmul
 
 /-- **The inverse Coleman map (core construction)**: from a `𝒩`-fixed unit power series `g`,
 the norm-compatible system of units `u` with `u_n = g(π_n)` (`evalPi g n`) for `n ≥ 1`
@@ -1129,11 +1108,9 @@ private theorem norm_evalPi_sub_constantCoeff_lt_one (g : PowerSeries ℤ_[p]) {
     rw [← evalPi_C p g₀ n, ← evalPi_sub p g (PowerSeries.C g₀) hn, hU,
       evalPi_mul p _ _ hn, evalPi_X]
   rw [hrw, norm_mul]
-  have hUle : ‖evalPi p U n‖ ≤ 1 := (Subring.mem_inf.1 (evalPi_mem_O p U hn)).2
-  calc ‖pi p n‖ * ‖evalPi p U n‖ ≤ ‖pi p n‖ * 1 :=
-        mul_le_mul_of_nonneg_left hUle (norm_nonneg _)
-    _ = ‖pi p n‖ := mul_one _
-    _ < 1 := norm_pi_lt_one p hn
+  exact lt_of_le_of_lt
+    (mul_le_of_le_one_right (norm_nonneg _) (Subring.mem_inf.1 (evalPi_mem_O p U hn)).2)
+    (norm_pi_lt_one p hn)
 
 /-- **RJW thm:fund exact seq, right-exactness / cokernel**: the image of `Col` on
 `𝒰_{∞,1}` is the kernel of the `χ`-moment `μ ↦ ∫_𝒢 χ·μ = μ(x)` (cokernel `ℤ_p(1)`).
