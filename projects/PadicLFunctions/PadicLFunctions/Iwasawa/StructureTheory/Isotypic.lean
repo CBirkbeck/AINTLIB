@@ -56,16 +56,110 @@ noncomputable def isotypicIdempotent [Invertible (Fintype.card H : 𝒪)] (ω : 
   ∑ a : H, MonoidAlgebra.single a
     (algebraMap 𝒪 (IwasawaAlgebra 𝒪) (⅟(Fintype.card H : 𝒪) * ((ω a)⁻¹ : 𝒪ˣ)))
 
+/-- **Orthogonality relation for characters** (the crux of idempotent orthogonality): the
+sum over a finite abelian group `H` of a *nontrivial* character `χ : H →* 𝒪ˣ` (valued in the
+units of a domain `𝒪`) vanishes.  Proof: pick `b` with `χ b ≠ 1`; reindexing `a ↦ b·a`
+gives `χ(b)·Σ = Σ`, so `(χ(b) − 1)·Σ = 0`, and `χ(b) − 1 ≠ 0` in the domain forces `Σ = 0`. -/
+theorem charSum_eq_zero [IsDomain 𝒪] {χ : H →* 𝒪ˣ} (hχ : χ ≠ 1) :
+    ∑ a : H, ((χ a : 𝒪)) = 0 := by
+  obtain ⟨b, hb⟩ : ∃ b, χ b ≠ 1 := by
+    by_contra h; push_neg at h; exact hχ (MonoidHom.ext h)
+  have hreindex : ∑ a : H, ((χ (b * a) : 𝒪)) = ∑ a : H, ((χ a : 𝒪)) :=
+    Equiv.sum_comp (Equiv.mulLeft b) (fun a => ((χ a : 𝒪)))
+  have key : ((χ b : 𝒪) - 1) * (∑ a : H, (χ a : 𝒪)) = 0 := by
+    rw [sub_mul, one_mul, Finset.mul_sum]
+    have hstep : ∑ a : H, (χ b : 𝒪) * (χ a : 𝒪) = ∑ a : H, ((χ a : 𝒪)) := by
+      rw [← hreindex]; refine Finset.sum_congr rfl fun a _ => ?_
+      rw [map_mul, Units.val_mul]
+    rw [hstep, sub_self]
+  rcases mul_eq_zero.mp key with h | h
+  · rw [sub_eq_zero] at h
+    exact absurd (Units.val_eq_one.mp h) hb
+  · exact h
+
+/-- **The convolution product of two isotypic idempotents.**  Expanding
+`e_ω·e_ψ = Σ_a Σ_b [ab]·(N⁻¹ω(a)⁻¹)(N⁻¹ψ(b)⁻¹)`, reindexing `b ↦ a⁻¹g` and using
+`ψ(a⁻¹g)⁻¹ = ψ(a)ψ(g)⁻¹` collects the coefficient of `[g]` into
+`N⁻²·ψ(g)⁻¹·Σ_a ω(a)⁻¹ψ(a)`.  The character-sum `Σ_a ω(a)⁻¹ψ(a)` is `N` when `ψ = ω`
+(idempotency) and `0` when `ψ ≠ ω` (orthogonality, via `charSum_eq_zero`). -/
+theorem isotypicIdempotent_mul [Invertible (Fintype.card H : 𝒪)] (ω ψ : H →* 𝒪ˣ) :
+    isotypicIdempotent 𝒪 H ω * isotypicIdempotent 𝒪 H ψ
+      = ∑ g : H, MonoidAlgebra.single g (algebraMap 𝒪 (IwasawaAlgebra 𝒪)
+          (⅟(Fintype.card H : 𝒪) * ⅟(Fintype.card H : 𝒪) * (((ψ g)⁻¹ : 𝒪ˣ) : 𝒪)
+            * ∑ a : H, ((((ω a)⁻¹ : 𝒪ˣ) : 𝒪) * (((ψ a) : 𝒪ˣ) : 𝒪)))) := by
+  unfold isotypicIdempotent
+  rw [Finset.sum_mul_sum]
+  simp_rw [MonoidAlgebra.single_mul_single]
+  have hreindex : ∀ a : H,
+      (∑ b : H, MonoidAlgebra.single (a * b)
+        ((algebraMap 𝒪 Λ) (⅟(Fintype.card H : 𝒪) * ((ω a)⁻¹ : 𝒪ˣ))
+          * (algebraMap 𝒪 Λ) (⅟(Fintype.card H : 𝒪) * ((ψ b)⁻¹ : 𝒪ˣ))))
+      = ∑ g : H, MonoidAlgebra.single g
+        ((algebraMap 𝒪 Λ) (⅟(Fintype.card H : 𝒪) * ((ω a)⁻¹ : 𝒪ˣ))
+          * (algebraMap 𝒪 Λ) (⅟(Fintype.card H : 𝒪) * ((ψ (a⁻¹ * g))⁻¹ : 𝒪ˣ))) := by
+    intro a
+    rw [← Equiv.sum_comp (Equiv.mulLeft a) (fun g : H => MonoidAlgebra.single g
+        ((algebraMap 𝒪 Λ) (⅟(Fintype.card H : 𝒪) * ((ω a)⁻¹ : 𝒪ˣ))
+          * (algebraMap 𝒪 Λ) (⅟(Fintype.card H : 𝒪) * ((ψ (a⁻¹ * g))⁻¹ : 𝒪ˣ))))]
+    refine Finset.sum_congr rfl fun b _ => ?_
+    simp only [Equiv.coe_mulLeft, inv_mul_cancel_left]
+  simp_rw [hreindex]
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl fun g _ => ?_
+  rw [show (∑ a : H, MonoidAlgebra.single g
+        ((algebraMap 𝒪 Λ) (⅟(Fintype.card H : 𝒪) * ((ω a)⁻¹ : 𝒪ˣ))
+          * (algebraMap 𝒪 Λ) (⅟(Fintype.card H : 𝒪) * ((ψ (a⁻¹ * g))⁻¹ : 𝒪ˣ))))
+      = Finsupp.singleAddHom g (∑ a : H,
+        ((algebraMap 𝒪 Λ) (⅟(Fintype.card H : 𝒪) * ((ω a)⁻¹ : 𝒪ˣ))
+          * (algebraMap 𝒪 Λ) (⅟(Fintype.card H : 𝒪) * ((ψ (a⁻¹ * g))⁻¹ : 𝒪ˣ))))
+      from (map_sum (Finsupp.singleAddHom g) _ _).symm]
+  rw [Finsupp.singleAddHom_apply]
+  congr 1
+  simp_rw [← map_mul]
+  rw [← map_sum]
+  congr 1
+  have hkey : ∀ x : H, ((ψ (x⁻¹ * g))⁻¹ : 𝒪ˣ) = ψ x * (ψ g)⁻¹ := by
+    intro x
+    rw [map_mul, map_inv, mul_inv, inv_inv, mul_comm]
+  simp_rw [hkey, Units.val_mul, Finset.mul_sum]
+  refine Finset.sum_congr rfl fun x _ => ?_
+  ring
+
 /-- The idempotents `e_ω` are genuine idempotents: `e_ω² = e_ω`. -/
 theorem isIdempotentElem_isotypicIdempotent [Invertible (Fintype.card H : 𝒪)]
     (ω : H →* 𝒪ˣ) : IsIdempotentElem (isotypicIdempotent 𝒪 H ω) := by
-  sorry
+  rw [IsIdempotentElem, isotypicIdempotent_mul]
+  have hsum : (∑ a : H, (((ω a)⁻¹ : 𝒪ˣ) : 𝒪) * (((ω a) : 𝒪ˣ) : 𝒪)) = (Fintype.card H : 𝒪) := by
+    simp_rw [Units.inv_mul]
+    rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul, mul_one]
+  rw [hsum]
+  unfold isotypicIdempotent
+  refine Finset.sum_congr rfl fun g _ => ?_
+  congr 2
+  rw [show ⅟(Fintype.card H : 𝒪) * ⅟(Fintype.card H : 𝒪) * (((ω g)⁻¹ : 𝒪ˣ) : 𝒪)
+        * (Fintype.card H : 𝒪)
+      = ⅟(Fintype.card H : 𝒪) * (((ω g)⁻¹ : 𝒪ˣ) : 𝒪)
+        * (⅟(Fintype.card H : 𝒪) * (Fintype.card H : 𝒪)) by ring,
+    invOf_mul_self, mul_one]
 
-/-- Orthogonality of the isotypic idempotents: `e_ω · e_ψ = 0` for `ω ≠ ψ`. -/
-theorem isotypicIdempotent_orthogonal [Invertible (Fintype.card H : 𝒪)]
+/-- Orthogonality of the isotypic idempotents: `e_ω · e_ψ = 0` for `ω ≠ ψ` (over a domain
+`𝒪`, where `charSum_eq_zero` applies to the nontrivial character `ω⁻¹·ψ`). -/
+theorem isotypicIdempotent_orthogonal [IsDomain 𝒪] [Invertible (Fintype.card H : 𝒪)]
     {ω ψ : H →* 𝒪ˣ} (h : ω ≠ ψ) :
     isotypicIdempotent 𝒪 H ω * isotypicIdempotent 𝒪 H ψ = 0 := by
-  sorry
+  have hχ : (ω⁻¹ * ψ : H →* 𝒪ˣ) ≠ 1 := by
+    intro hc
+    apply h
+    have : (ω⁻¹ * ψ : H →* 𝒪ˣ) = 1 ↔ ω = ψ := inv_mul_eq_one
+    exact this.mp hc
+  have hinner : (∑ a : H, (((ω a)⁻¹ : 𝒪ˣ) : 𝒪) * (((ψ a) : 𝒪ˣ) : 𝒪)) = 0 := by
+    have hzero := charSum_eq_zero 𝒪 H hχ
+    rw [← hzero]
+    refine Finset.sum_congr rfl fun a _ => ?_
+    rw [MonoidHom.mul_apply, MonoidHom.inv_apply, Units.val_mul]
+  rw [isotypicIdempotent_mul]
+  refine Finset.sum_eq_zero fun g _ => ?_
+  rw [hinner, mul_zero, map_zero, MonoidAlgebra.single_zero]
 
 /-- The **`ω`-isotypic component** `M^{(ω)} = e_ω · M` of a `Λ(𝒢)`-module — the image of
 multiplication by the idempotent `e_ω` (a `Λ(𝒢)`-linear map, as `Λ(𝒢)` is commutative). -/
