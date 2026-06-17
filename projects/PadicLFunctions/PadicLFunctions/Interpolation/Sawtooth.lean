@@ -656,38 +656,28 @@ theorem sinZeta_one_eq_boundary {x : ℝ} (hx₀ : 0 < x) (hx₁ : x < 1) :
     intro s hs
     by_cases hs1 : s = 1
     · simpa [S, G, hs1, boundary] using tendsto_sum_range_shifted_sin_one (x := x) hx₀ hx₁
-    · have hslt : 1 < s := lt_of_le_of_ne hs (by simpa [eq_comm] using hs1)
-      simpa [S, G, hs1] using (hasSum_shifted_sinZeta (x := x) s hslt).tendsto_sum_nat
-  have hunif : TendstoUniformlyOn S G atTop (Set.Ici 1) :=
-    hCauchy.tendstoUniformlyOn_of_tendsto hpoint
+    · simpa [S, G, hs1] using (hasSum_shifted_sinZeta (x := x) s
+        (lt_of_le_of_ne hs (by simpa [eq_comm] using hs1))).tendsto_sum_nat
   have hcont : ContinuousOn G (Set.Ici (1 : ℝ)) := by
-    apply hunif.continuousOn
+    apply (hCauchy.tendstoUniformlyOn_of_tendsto hpoint).continuousOn
     refine Frequently.of_forall fun n => ?_
     classical
     dsimp [S]
     exact Continuous.continuousOn <|
       continuous_finsetSum _ fun i _ => continuous_shiftedSinTerm x i
-  have hG_right : Tendsto G (𝓝[Set.Ioi 1] 1) (𝓝 boundary) := by
-    have hG_Ici : Tendsto G (𝓝[Set.Ici 1] 1) (𝓝 boundary) := by
-      simpa [G, boundary] using (hcont 1 (by simp)).tendsto
-    exact hG_Ici.mono_left (nhdsWithin_mono _ Set.Ioi_subset_Ici_self)
-  have hG_eq : G =ᶠ[𝓝[Set.Ioi 1] 1] fun s : ℝ => HurwitzZeta.sinZeta x s := by
-    filter_upwards [eventually_mem_nhdsWithin] with s hs
-    have hslt : 1 < s := by simpa using hs
-    simp [G, ne_of_gt hslt]
+  have hG_right : Tendsto G (𝓝[Set.Ioi 1] 1) (𝓝 boundary) :=
+    ((by simpa [G, boundary] using (hcont 1 (by simp)).tendsto :
+        Tendsto G (𝓝[Set.Ici 1] 1) (𝓝 boundary))).mono_left
+      (nhdsWithin_mono _ Set.Ioi_subset_Ici_self)
   have hsin_right : Tendsto (fun s : ℝ => HurwitzZeta.sinZeta x s) (𝓝[Set.Ioi 1] 1)
       (𝓝 boundary) :=
-    Tendsto.congr' hG_eq hG_right
+    hG_right.congr' <| by
+      filter_upwards [eventually_mem_nhdsWithin] with s hs
+      simp [G, ne_of_gt (show 1 < s by simpa using hs)]
   have hsin_cont : Tendsto (fun s : ℝ => HurwitzZeta.sinZeta x s) (𝓝[Set.Ioi 1] 1)
-      (𝓝 (HurwitzZeta.sinZeta x 1)) := by
-    have hcomplex : Tendsto (fun z : ℂ => HurwitzZeta.sinZeta x z) (𝓝 (1 : ℂ))
-        (𝓝 (HurwitzZeta.sinZeta x 1)) :=
-      ((HurwitzZeta.differentiableAt_sinZeta x) (1 : ℂ)).continuousAt.tendsto
-    have hreal : Tendsto (fun s : ℝ => (s : ℂ)) (𝓝 (1 : ℝ)) (𝓝 (1 : ℂ)) :=
-      Complex.continuous_ofReal.continuousAt.tendsto
-    have hcomp : Tendsto (fun s : ℝ => HurwitzZeta.sinZeta x (s : ℂ)) (𝓝 (1 : ℝ))
-        (𝓝 (HurwitzZeta.sinZeta x 1)) := hcomplex.comp hreal
-    exact hcomp.mono_left nhdsWithin_le_nhds
+      (𝓝 (HurwitzZeta.sinZeta x 1)) :=
+    ((HurwitzZeta.differentiableAt_sinZeta x 1).continuousAt.tendsto.comp
+      Complex.continuous_ofReal.continuousAt.tendsto).mono_left nhdsWithin_le_nhds
   simpa [boundary] using (tendsto_nhds_unique hsin_right hsin_cont).symm
 
 /-! ### `hurwitzZeta` at `s = 0` on the open interval -/
