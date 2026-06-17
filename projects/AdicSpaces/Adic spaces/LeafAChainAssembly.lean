@@ -36,6 +36,7 @@ stays two-level — the `𝒪(X₀)`-relative chain would be three-level and exc
 namespace ValuationSpectrum
 
 open Pointwise
+open Classical
 
 universe u
 
@@ -188,6 +189,38 @@ theorem canonicalMap_isUnit_of_dvd_s (D : RationalLocData A) (sB c : A) (hs : D.
   isUnit_of_mul_isUnit_left
     (show IsUnit (D.canonicalMap sB * D.canonicalMap c) by
       rw [← map_mul, ← hs]; exact D.canonicalMap_s_isUnit)
+
+/-- `span{g, ↑u} = ⊤` for `↑u` a unit (the dominating unit makes every chain-step piece rational). -/
+theorem span_pair_unit_eq_top (g : A) (u : Aˣ) :
+    Ideal.span ((({g, (↑u : A)} : Finset A)) : Set A) = ⊤ :=
+  Ideal.eq_top_of_isUnit_mem _ (Ideal.subset_span (by simp)) u.isUnit
+
+/-- One Remark-7.55 chain step: intersect `D'` with the dominating-unit piece `R({g, ↑u}/sB)`
+(`interSamePair`, so the denominator becomes `D'.s · sB`). -/
+noncomputable def chainStep (u : Aˣ) (sB : A)
+    (D' : RationalLocData A) (g : A) : RationalLocData A :=
+  D'.interSamePair (genPieceDatum D'.P {g, (↑u : A)} sB (span_pair_unit_eq_top g u)) rfl
+
+/-- `interSamePair`'s generator set as a pointwise product `(insert D₁.s D₁.T) * (insert D₂.s D₂.T)`
+(symbolic in `D₂`, so applying it to a concrete second datum avoids reducing that datum's `hopen`). -/
+theorem interSamePair_T_mul (D₁ D₂ : RationalLocData A) (hP : D₂.P = D₁.P) :
+    (D₁.interSamePair D₂ hP).T = (insert D₁.s D₁.T) * (insert D₂.s D₂.T) := by
+  rw [Finset.mul_def]; rfl
+
+/-- **Chain invariant propagation** — the structural witness `∃c, D.s = sB·c ∧ ↑u·c ∈ D.T` survives
+one `chainStep`: the denominator multiplies by `sB` (new cofactor `c·sB`) and `(↑u·c)·sB` lands in the
+product generator set. This is what keeps `h_pb`/`hs_unit` structural along the whole fold. -/
+theorem chainStep_invariant (u : Aˣ) (sB c : A)
+    (D' : RationalLocData A) (g : A) (hs : D'.s = sB * c) (hmem : (↑u : A) * c ∈ D'.T) :
+    (chainStep u sB D' g).s = sB * (c * sB) ∧
+      (↑u : A) * (c * sB) ∈ (chainStep u sB D' g).T := by
+  refine ⟨by show D'.s * sB = sB * (c * sB); rw [hs]; ring, ?_⟩
+  have hrw : (↑u : A) * (c * sB) = ((↑u : A) * c) * sB := by ring
+  rw [hrw,
+    show (chainStep u sB D' g).T = _ from
+      interSamePair_T_mul D' (genPieceDatum D'.P {g, (↑u : A)} sB (span_pair_unit_eq_top g u)) rfl,
+    genPieceDatum_s, genPieceDatum_T]
+  exact Finset.mul_mem_mul (Finset.mem_insert_of_mem hmem) (Finset.mem_insert_self _ _)
 
 /-- **Whole-space Prop 8.30 (Remark 7.55 chain), assembled downstream.**
 `𝒪_B(im E)` is flat over `B = 𝒪_X(D)`, for `im E = imagePieceDatum D E.T E.s` the whole-space
