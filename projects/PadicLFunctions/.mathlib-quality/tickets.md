@@ -6580,6 +6580,38 @@ reusable lemma:
   `Algebra/Module/PID` (template) + Weierstrass (S1): Λ is a 2-dim regular local UFD; sub-leaves at execution
   (prime factorisation in Λ, the finite-kernel/cokernel reduction, the elementary-divisor analogue). **Source**: Washington Thm 13.12.
 
+##### S13-S3 execution decomposition (beastmode, 2026-06-17)
+**S3a foundation — DONE**: `iwasawaAlgebra_isNoetherianRing`, `_isDomain`,
+`_uniqueFactorizationMonoid` (Λ is a UFD for 𝒪 a DVR), `_isLocalRing` — all proven via
+mathlib instances in StructureTheorem.lean. Λ is a Noetherian local UFD domain.
+
+**Mathlib-gap finding (verified by 4 searches)**: mathlib has **no** `IsKrullDomain` class,
+no divisorial ideals, no reflexive hull, no pseudo-isomorphism module theory, and the
+DVR-at-prime-localization lemma is Dedekind-only (`IsLocalization.AtPrime.isDiscreteValuationRing_of_dedekind_domain`,
+dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 5 / Washington
+13.12) thus needs the height-1-localization + pseudo-iso-gluing apparatus built. Sub-tickets:
+
+###### [S13-S3b] Localization of the UFD Λ at a height-one (principal prime) ideal is a DVR
+- **Status**: open | **File**: Iwasawa/StructureTheory/StructureTheorem.lean | **Depends on**: S13-S1 | **Parent**: S13-S3 | **Type**: theorem
+- **Statement**: `theorem iwasawaAlgebra_localization_atPrime_isDVR {π : Λ} (hπ : Prime π) (Λₚ) [CommRing Λₚ] [Algebra Λ Λₚ] [IsLocalization.AtPrime Λₚ (Ideal.span {π})] : IsDiscreteValuationRing Λₚ`
+- **Proof sketch**: Λₚ is a local domain (localization of domain at prime), Noetherian (localization of Noetherian); its maximal ideal is `(π)` which is principal; a Noetherian local domain with principal nonzero maximal ideal that is not a field is a DVR. Use the DVR characterisation `IsDiscreteValuationRing.of_*` (Noetherian + local + maximal ideal principal + not field). The height-one prime `(π)` is principal because Λ is a UFD (`iwasawaAlgebra_uniqueFactorizationMonoid`).
+- **Mathlib**: `IsLocalization.AtPrime` API, `IsDiscreteValuationRing` characterisations, UFD prime-ideal facts.
+- **Generality**: minimal — over `𝒪` a DVR so Λ is a UFD.
+
+###### [S13-S3c] f.g. torsion module over a DVR is a finite direct sum of cyclic prime-power quotients
+- **Status**: open | **File**: Iwasawa/StructureTheory/StructureTheorem.lean | **Depends on**: S13-S3b | **Parent**: S13-S3 | **Type**: theorem
+- **Statement**: REUSE mathlib `Module.equiv_directSum_of_isTorsion` over the DVR `Λₚ` (a PID). Wrap it to produce the elementary-divisor data at each height-one prime.
+- **Proof sketch**: a DVR is a PID; `Module.equiv_directSum_of_isTorsion` gives `⊕ Λₚ/(πᵉ)`. Localise `M` at `(π)`, apply.
+- **Mathlib**: `Module.equiv_directSum_of_isTorsion`, `IsLocalizedModule`.
+
+###### [S13-S3d] Pseudo-isomorphism gluing (the genuinely new content)
+- **Status**: open | **File**: Iwasawa/StructureTheory/StructureTheorem.lean | **Depends on**: S13-S3b, S13-S3c | **Parent**: S13-S3 | **Type**: theorem (deep core)
+- **Statement**: f.g. torsion Λ-module `M` is pseudo-isomorphic to `⊕_{π ∈ supp M} (⊕ Λ/(πᵉ))`, the support being the finite set of height-one primes in `Ass(M)` (`associatedPrimes.finite`). The map's kernel/cokernel is supported on height-≥2 primes (pseudo-null = finite).
+- **Proof sketch**: (1) `associatedPrimes.finite` gives finite support. (2) For each height-one `(π)`, the localised data from S3c. (3) Assemble the global map `M → ⊕_π (local pieces)`; its kernel/cokernel localise to 0 at every height-one prime, hence are pseudo-null (finite, since Λ/(height-≥2) is finite over 𝒪... ). This is Bourbaki VII §4.4 Thm 5 — needs divisorial-ideal / reflexive machinery NOT in mathlib; build the minimal version here.
+- **Mathlib**: `associatedPrimes.finite`, `IsLocalizedModule`, localization-is-exact. Most of the gluing is new project infrastructure.
+- **Generality**: minimal — Λ = 𝒪⟦T⟧, 𝒪 a DVR.
+- **Note**: this is the multi-step deep build; expect further sub-tickets at execution (support finiteness as height-one primes, the pseudo-null = finite-over-𝒪 lemma, the global-map exactness).
+
 #### [S13-S4] characteristic ideal + multiplicativity
 - **Status**: open | **File**: Iwasawa/StructureTheory/CharIdeal.lean | **Depends on**: S13-S3 | **Type**: def+theorem
 - `Ch_Λ(M) := (pⁿ)∏ⱼ(fⱼ^{mⱼ})` for f.g. torsion M (n=Σnᵢ); MULTIPLICATIVITY in exact sequences (CS06 A.1 Prop 1).
