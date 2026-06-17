@@ -158,6 +158,41 @@ def BPrimeValuationCoordGenLeOne : Prop :=
     v.valuation C₁.FunctionField (coordXFun C₁) ≤ 1 ∧
     v.valuation C₁.FunctionField (coordYFun C₁) ≤ 1
 
+/-- **The sharp irreducible place classification (the genuine remaining wall)**: the valuation of
+every height-one prime `v` of `B`, as a valuation on `K(C₁)`, is *either* a point valuation
+`C₁.pointValuation P` (the affine case) *or* the place at infinity `C₁.ordAtInftyValuation` (the
+`∞` case).  This is the function-field completeness statement for the smooth curve `C₁` (every
+`F`-trivial DVR of `K(C₁)` is a point or `∞`), restricted to `B`-primes — the project's standing
+place-classification wall in its sharpest form.  Note: the `∞` alternative is *vacuous* once `hreg`
+is in play (`exists_smoothPoint_under` plus the ramification-at-`∞` pullback formula exclude it at
+the concrete isogeny level), so this is exactly the missing content of
+`BPrimeValuationCoordGenLeOne`. -/
+def BPrimePlaceClassification : Prop :=
+  ∀ v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)),
+    (∃ P : C₁.SmoothPoint, v.valuation C₁.FunctionField = C₁.pointValuation P) ∨
+      v.valuation C₁.FunctionField = C₁.ordAtInftyValuation
+
+/-- **The reduction of the place dictionary to its sharp form** (structural, axiom-clean): given the
+place classification `BPrimePlaceClassification` *and* the `∞`-exclusion `hinf` (no `B`-prime is the
+place at infinity of `C₁`), the place-dictionary residual `BPrimeValuationCoordGenLeOne` follows.
+In the point case the coordinate generators are regular (they are `algebraMap`-images of
+coordinate-ring elements, `pointValuation_algebraMap_le_one`); the `∞` case is excluded by `hinf`.
+
+This isolates the genuine content into the two clean hypotheses: the *curve-completeness*
+classification `BPrimePlaceClassification` (no `hreg`), and the *geometric* `∞`-exclusion `hinf`
+(discharged at the concrete isogeny level by the ramification-at-`∞` pullback formula, where the
+pullback of `coordX C₂` — a base-ring element, hence `v`-integral — has a pole at `∞` of `C₁`). -/
+theorem bPrimeValuationCoordGenLeOne_of_classification
+    (hclass : BPrimePlaceClassification (C₁ := C₁) (C₂ := C₂))
+    (hinf : ∀ v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)),
+      v.valuation C₁.FunctionField ≠ C₁.ordAtInftyValuation) :
+    BPrimeValuationCoordGenLeOne (C₁ := C₁) (C₂ := C₂) := by
+  intro v
+  rcases hclass v with ⟨P, hP⟩ | hP
+  · rw [hP]
+    exact ⟨C₁.pointValuation_algebraMap_le_one _ P, C₁.pointValuation_algebraMap_le_one _ P⟩
+  · exact absurd hP (hinf v)
+
 /-- **Structural valuative-criterion reduction**: an element `z ∈ K(C₁)` lies in `B` as soon as it
 is `v`-integral (valuation `≤ 1`) at every height-one prime `v` of `B`.  Direct from mathlib's
 `mem_integers_of_valuation_le_one` for the Dedekind domain `B` with fraction field `K(C₁)`, plus
