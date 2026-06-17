@@ -6653,9 +6653,20 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
   **Source**: RJW 3652–3657, 3679–3681.
 
 #### [S13-S5] equivariant isotypic decomposition + `Ch_{Λ(𝒢)}`
-- **Status**: open | **File**: Iwasawa/StructureTheory/Isotypic.lean | **Depends on**: S13-S4 | **Type**: def+theorem
+- **Status**: PARTIAL — idempotent algebra DONE; isInternal hit **B2**; charIdealGroup blocked on the B2 fix
+  | **File**: Iwasawa/StructureTheory/Isotypic.lean | **Depends on**: S13-S4 | **Type**: def+theorem
 - `Λ(𝒢) ≅ 𝒪_L[H]⊗Λ` (H=μ_{p-1} prime-to-p); projectors `e_ω=|H|⁻¹Σω⁻¹(a)[a]`; `M=⊕_ω M^(ω)` each f.g. torsion Λ;
   `Ch_{Λ(𝒢)}(M):=⊕_ω Ch_Λ(M^(ω))`. **Reuse**: mathlib `RepresentationTheory` group-algebra idempotents. **Source**: RJW 3659–3676 (CS06 A.1).
+- **DONE (2026-06-17, sorry-free, axioms clean)**: `isotypicIdempotent` (def), `isotypicComponent` (def, = range e_ω•·),
+  `charSum_eq_zero` (Σ nontrivial char = 0 over a domain), `isotypicIdempotent_mul` (the convolution),
+  `isIdempotentElem_isotypicIdempotent` (e_ω²=e_ω), `isotypicIdempotent_orthogonal` (e_ω·e_ψ=0, ω≠ψ, needs [IsDomain 𝒪]).
+- **B2 (2026-06-17, logged)**: `isInternal_isotypicComponent` is FALSE as stated — `DirectSum.IsInternal` needs
+  `iSup = ⊤` i.e. `Σ_ω e_ω = 1` (character completeness), which fails without enough roots of unity in 𝒪.
+  Counterexample 𝒪=ℚ, H=ℤ/3 (only the trivial character). **Fix (user decision)**: add `[Fintype (H →* 𝒪ˣ)]`
+  + completeness hyp `∑ ω, isotypicIdempotent 𝒪 H ω = 1` (assume μ_{|H|} ⊆ 𝒪, as the docstring caveat anticipates),
+  then prove IsInternal via `CompleteOrthogonalIdempotents` + `isInternal_submodule_iff_iSupIndep_and_iSup_eq_top`
+  (the idempotent→module-IsInternal step is NOT in mathlib — a ~60-100 line sub-build). `charIdealGroup` def should
+  take the same completeness hypothesis and is blocked until the encoding is chosen.
 
 ### Statement
 #### [S13-STMT] state Thm IMC + define `𝒳⁺_∞` (after S + G)
