@@ -1,61 +1,57 @@
-# AINTLIB — An Atlas of Number Theory in Lean
+# AINTLIB — an AI-reviewed number-theory library
 
-A single [Verso blueprint](https://github.com/leanprover/verso-blueprint) mapping the
-**main (Wikipedia-level) results of number theory as formalised in Lean** — across
-**mathlib**, the maintainer's local number-theory projects, and external projects
-(PNT+, Imperial FLT, …) — into one interactive, cross-project **dependency graph** with
-human-readable *unformalised* statements and paragraph-level proof sketches.
+**AINTLIB is a "mathlib for number theory," maintained by AI agents.** It is **one Lake workspace**
+with every number-theory project side by side under `projects/<P>/`, all on a **single mathlib that is
+bumped to latest daily**. Because it is one build unit, any result can `import` any other — that is the
+point. Standards are deliberately relaxed (AI reviewers; `sorry` is allowed as a work-in-progress
+marker), and a continuous fleet of Claude agents cleans, generalises, and decomposes results as the
+projects grow.
 
-## 🔗 Live blueprint
+## 🔗 Live blueprints
 
-**https://cbirkbeck.github.io/AINTLIB-blueprint/**
+Each project has a [Verso](https://github.com/leanprover/verso-blueprint) blueprint, published as
+subdirectories of one site:
+
+**https://cbirkbeck.github.io/AINTLIB-blueprints/**
+
+- [p-adic L-functions](https://cbirkbeck.github.io/AINTLIB-blueprints/padic/)
+- [Modular forms — the valence formula](https://cbirkbeck.github.io/AINTLIB-blueprints/leanmodularforms/)
+- [Chebotarev density theorem](https://cbirkbeck.github.io/AINTLIB-blueprints/chebotarev/)
+- [Kummer's criterion & regular primes](https://cbirkbeck.github.io/AINTLIB-blueprints/flt-bernoulli/)
 
 (Public site; this source repo is private.)
 
-## Status
+## Structure
 
-- **Phase 0 — Discovery & sync:** ✅ all source repos pulled/cloned, GitHub/web discovery, mathlib NT PRs snapshotted, source catalogue.
-- **Phase 1 — Scaffold:** ✅ Lean project on mathlib, verso-blueprint building & rendering, 10-chapter skeleton.
-- **Phase 2 — mathlib core:** ✅ the mathlib number-theory backbone, sorry-free status auto-tracked.
-- **Phase 3 — Repos as linked chapters:** ✅ 22 external projects folded in (chebotarev density, flt-regular + bernoulli, Imperial FLT, Kummer criterion, LeanModularForms Hecke ring, LocalClassFieldTheory, Buzzard CFT, PNT+, DirichletNonvanishing, adic spaces, Hasse–Weil, Nagell–Lutz, pfr, …) — **all branches vetted; only repos with substantive Lean content included.**
-- **Phase 4 — Frontier & polish:** ✅ forthcoming-in-mathlib PR nodes, connected dependency graph, overview map.
+- **`main`** — the integrated library. Always builds. Bumped to latest mathlib daily and centrally.
+  `sorry` is allowed here as an explicit work-in-progress marker.
+- **`dev/<project>` branches** — each project's frontier, where new theorems are proved.
 
-**Current size: 256 nodes · 432 dependency edges · 10 chapters** — mathlib core (146) + 22 external projects + 22 forthcoming-mathlib results, 249 in one connected component.
+It is maintained by a **4-account Claude fleet**: a coordinator (writes tickets, bumps mathlib, reviews
+generalisations) + universal workers that pull GitHub-issue tickets and run `/cleanup`, `/generalise`,
+or `/decompose-proof` per the ticket's lane. The binding rules are in `CLAUDE.md`; the full design is
+`docs/superpowers/specs/2026-06-16-aintlib-worker-system-design.md`.
 
-## The atlas model
+## Projects (`projects/<P>/`)
 
-The source repos span Lean v4.7 → v4.31 and cannot all compile together, so AINTLIB is an
-**atlas**, not a unified build:
+PadicLFunctions · AdicSpaces · Chebotarev · FltRegularBernoulli · HasseWeil · LeanModularForms ·
+NagellLutz · FltRegular · Common.
 
-- The **mathlib number-theory core is live-built** (this project depends on one mathlib), so
-  every `(lean := "Mathlib.NumberTheory.…")` reference is auto-tracked sorry-free.
-- Each **other repo is a linked chapter**: nodes reference its declarations by name and link
-  out to the repo (and its own blueprint), woven into the same dependency graph.
-
-## Chapters
-
-Elementary · Analytic · Algebraic · Class Field Theory & Galois · p-adic & Adic Spaces ·
-Modular & Automorphic Forms · Elliptic Curves & Arithmetic Geometry · Fermat's Last Theorem
-& Regular Primes · Diophantine & Transcendence · Additive & Combinatorial.
-
-## Build & render
+## Build
 
 ```bash
-lake exe cache get          # fetch mathlib oleans
-./scripts/ci-pages.sh       # build + render → _out/site/html-multi/
-python3 -m http.server -d _out/site/html-multi/   # preview locally
+lake exe cache get            # mathlib oleans
+lake build PadicLFunctions    # any project's lib; builds are incremental
 ```
 
-Pinned: Lean **v4.30.0-rc2**, mathlib **@229580e**, VersoBlueprint **@v4.30.0** (a proven
-verso-blueprint ↔ mathlib pairing).
+Pinned: Lean **v4.31.0-rc2**, mathlib **@d90090f** (moves with the daily bump).
 
 ## Layout
 
-- `AINTLIB/Chapters/*.lean` — the blueprint chapters (Verso directives).
-- `AINTLIB/Blueprint.lean` — assembles chapters + dependency graph + progress summary.
-- `AINTLIB/Core.lean` — imports the cited mathlib modules so references resolve.
-- `sources/manifest.toml` — every source repo (URL @ commit, Lean version, chapters).
-- `sources/catalogue.md` — source decisions; `sources/mathlib-nt-prs.json` — the frontier.
-- `docs/superpowers/specs/` + `docs/superpowers/plans/` — design & implementation plan.
+- `projects/<P>/<Lib>/…` — each project's Lean source.
+- `projects/<P>/_blueprint/` + `projects/<P>/<Lib>Blueprint/` — that project's Verso blueprint side-build.
+- `scripts/render-blueprint-local.sh` — render one project's blueprint locally (disk-safe recipe);
+  `scripts/build-blueprints.sh` — assemble the multi-blueprint site for Pages.
+- `docs/worker-prompts/` — the worker fleet prompts; `docs/superpowers/specs/` — designs.
 
 Built with [Claude Code](https://claude.com/claude-code).
