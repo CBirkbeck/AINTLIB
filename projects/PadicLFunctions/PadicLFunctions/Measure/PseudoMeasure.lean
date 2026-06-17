@@ -375,9 +375,8 @@ lemma levelMap_eq_zero_iff (n : ℕ) (μ : PadicMeasure p ℤ_[p]ˣ) :
 lemma sum_levelChar (n : ℕ) :
     (∑ g : (ZMod (p ^ n))ˣ, levelChar p n g) = (1 : C(ℤ_[p]ˣ, ℤ_[p])) := by
   ext u
-  rw [show (∑ g : (ZMod (p ^ n))ˣ, levelChar p n g) u
-      = ∑ g : (ZMod (p ^ n))ˣ, levelChar p n g u from by
-    simp [Finset.sum_apply], Finset.sum_eq_single (unitsToZModPow p n u)]
+  simp only [ContinuousMap.coe_sum, Finset.sum_apply]
+  rw [Finset.sum_eq_single (unitsToZModPow p n u)]
   · rw [levelChar_apply_eq p rfl, ContinuousMap.one_apply]
   · intro c _ hcu
     exact levelChar_apply_ne p fun hc => hcu hc.symm
@@ -508,23 +507,14 @@ theorem levelMap_jointly_injective (μ : PadicMeasure p ℤ_[p]ˣ)
       = ∑ c : (ZMod (p ^ N))ˣ,
           g ((unitsToZModPow_surjective p N hN c).choose) • levelChar p N c := by
     ext u
-    have hval : (∑ c : (ZMod (p ^ N))ˣ,
-        g ((unitsToZModPow_surjective p N hN c).choose) • levelChar p N c) u
-        = ∑ c : (ZMod (p ^ N))ˣ,
-          g ((unitsToZModPow_surjective p N hN c).choose) * levelChar p N c u := by
-      simp only [ContinuousMap.coe_sum, Finset.sum_apply, ContinuousMap.coe_smul,
-        Pi.smul_apply, smul_eq_mul]
-    rw [hval]
-    have hsum : (∑ c : (ZMod (p ^ N))ˣ,
-        g ((unitsToZModPow_surjective p N hN c).choose) * levelChar p N c u) = g u := by
-      rw [Finset.sum_eq_single (unitsToZModPow p N u)]
-      · rw [levelChar_apply_eq p rfl, mul_one]
-        exact hfac _ u ((unitsToZModPow_surjective p N hN _).choose_spec)
-      · intro c _ hcu
-        rw [levelChar_apply_ne p fun hc => hcu hc.symm, mul_zero]
-      · exact fun hu => absurd (Finset.mem_univ _) hu
-    rw [hsum]
-    rfl
+    simp only [ContinuousMap.coe_sum, Finset.sum_apply, ContinuousMap.coe_smul,
+      Pi.smul_apply, smul_eq_mul]
+    rw [Finset.sum_eq_single (unitsToZModPow p N u)]
+    · rw [levelChar_apply_eq p rfl, mul_one]
+      exact (hfac _ u ((unitsToZModPow_surjective p N hN _).choose_spec)).symm
+    · intro c _ hcu
+      rw [levelChar_apply_ne p fun hc => hcu hc.symm, mul_zero]
+    · exact fun hu => absurd (Finset.mem_univ _) hu
   rw [hg, map_sum]
   refine Finset.sum_eq_zero fun c _ => ?_
   rw [map_smul, hcoeff N c, smul_zero]
@@ -536,12 +526,7 @@ lemma sum_levelChar_fiber {n m : ℕ} (h : n ≤ m) (cbar : (ZMod (p ^ n))ˣ) :
       levelChar p m c) = levelChar p n cbar := by
   classical
   ext u
-  rw [show (∑ c ∈ Finset.univ.filter
-      (fun c : (ZMod (p ^ m))ˣ => ZMod.unitsMap (pow_dvd_pow p h) c = cbar),
-      levelChar p m c) u
-      = ∑ c ∈ Finset.univ.filter
-        (fun c : (ZMod (p ^ m))ˣ => ZMod.unitsMap (pow_dvd_pow p h) c = cbar),
-        levelChar p m c u from by simp [Finset.sum_apply]]
+  simp only [ContinuousMap.coe_sum, Finset.sum_apply]
   by_cases hu : unitsToZModPow p n u = cbar
   · rw [levelChar_apply_eq p hu, Finset.sum_eq_single (unitsToZModPow p m u)]
     · exact levelChar_apply_eq p rfl
@@ -564,10 +549,7 @@ lemma mapDomain_levelMap {n m : ℕ} (h : n ≤ m) (μ : PadicMeasure p ℤ_[p]�
   change Finsupp.mapDomain _
       (∑ c : (ZMod (p ^ m))ˣ, MonoidAlgebra.single c (μ (levelChar p m c))) = _
   rw [Finsupp.mapDomain_finsetSum]
-  simp_rw [show ∀ c : (ZMod (p ^ m))ˣ, Finsupp.mapDomain
-      (ZMod.unitsMap (pow_dvd_pow p h)) (MonoidAlgebra.single c (μ (levelChar p m c)))
-      = MonoidAlgebra.single (ZMod.unitsMap (pow_dvd_pow p h) c) (μ (levelChar p m c)) from
-    fun c => Finsupp.mapDomain_single]
+  simp only [Finsupp.mapDomain_single]
   rw [← Finset.sum_fiberwise_of_maps_to
     (g := fun c : (ZMod (p ^ m))ˣ => ZMod.unitsMap (pow_dvd_pow p h) c)
     (t := Finset.univ) (fun c _ => Finset.mem_univ _)]
