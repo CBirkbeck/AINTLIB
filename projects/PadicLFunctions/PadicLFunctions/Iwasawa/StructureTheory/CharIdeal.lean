@@ -206,8 +206,17 @@ theorem localMult_eq_zero_of_finite [IsDomain 𝒪] [IsDiscreteValuationRing �
   intro hle
   -- `Λ/Ann F` is finite (faithful action on the finite `F`); `Ann F ≤ P` makes `Λ/P` finite too,
   -- hence (a finite domain is a field) `P` is maximal — contradicting `height P = 1 < 2 ≤ dim Λ`.
-  -- `Λ/Ann F` is finite: the faithful action embeds it into the finite `F →+ F`.  [standard]
-  haveI : Finite (IwasawaAlgebra 𝒪 ⧸ Module.annihilator (IwasawaAlgebra 𝒪) F) := sorry
+  -- `Λ/Ann F` is finite: the action `Λ → AddMonoid.End F` has kernel `Ann F`, and `AddMonoid.End F`
+  -- is finite since `F` is.
+  haveI : Finite (AddMonoid.End F) := Finite.of_injective _ DFunLike.coe_injective
+  haveI : Finite (IwasawaAlgebra 𝒪 ⧸ Module.annihilator (IwasawaAlgebra 𝒪) F) := by
+    have hker : Module.annihilator (IwasawaAlgebra 𝒪) F
+        = RingHom.ker (Module.toAddMonoidEnd (IwasawaAlgebra 𝒪) F) := by
+      ext r
+      rw [Module.mem_annihilator, RingHom.mem_ker]
+      exact ⟨fun h => AddMonoidHom.ext fun x => h x, fun h x => DFunLike.congr_fun h x⟩
+    rw [hker]
+    exact Finite.of_injective _ (RingHom.kerLift_injective (Module.toAddMonoidEnd (IwasawaAlgebra 𝒪) F))
   haveI : Finite (IwasawaAlgebra 𝒪 ⧸ P) :=
     Finite.of_surjective _ (Ideal.Quotient.factor_surjective hle)
   haveI : IsField (IwasawaAlgebra 𝒪 ⧸ P) := Finite.isField_of_domain _
