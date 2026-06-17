@@ -41,8 +41,16 @@ which is manifestly orbit-invariant; this is the key we rank by.
 The labeling *machinery and its well-definedness reductions* are proved here sorry-free (in
 particular the label is provably **constant on Galois orbits**, and the single-form Strong
 Multiplicity One separation is discharged directly from `strongMultiplicityOne_axiom_clean`).
-Exactly **four** declarations carry `sorry`, each genuine number theory absent from mathlib and
-each isolated into a precisely stated declaration with a one-line statement of the input it needs:
+Moreover the finiteness of the space of newforms (`instFiniteNewform`) and the orbit-separation
+underlying label *injectivity* (`Newform.traceSeq_injOn_orbits`) are now **proved** here, both via
+the linear independence of distinct newforms (`linearIndependent_toCuspForm` /
+`linearIndependent_coeffSeq`), itself obtained from Petersson orthogonality of distinct newforms
+(`petN_toCuspForm_eq_zero_of_ne`) together with Strong Multiplicity One — the newform analogue of
+the Artin–Dedekind `linearIndependent_monoidHom` used for the character label.
+
+Exactly **two** declarations remain carrying `sorry`, each genuine number theory absent from mathlib
+and each isolated into a precisely stated declaration with a one-line statement of the input it
+needs:
 
 * `Newform.coeffSeq_isIntegral` — **each Hecke eigenvalue is an algebraic integer**
   (`IsIntegral ℤ aₙ`, hence `IsIntegral ℚ aₙ`).  The standard fact that Hecke eigenvalues of a
@@ -53,17 +61,6 @@ each isolated into a precisely stated declaration with a one-line statement of t
   newform is a number field (the eigenvalues lie in a fixed finite extension; equivalently the
   Hecke algebra acting on the finite-dimensional space `S_k(Γ₁(N))` is a finite-rank ℤ-algebra).
   Absent from mathlib.
-* `instFiniteNewform` — **there are only finitely many newforms of level `N`, weight `k`**
-  (`Finite (Newform N k)`), because `S_k(Γ₁(N))` is finite-dimensional and normalised eigenforms
-  are linearly independent, hence finite in number.  Needed only to form the Galois-orbit `Finset`
-  and to *rank* the finitely many orbit keys; it is carried as the explicit hypothesis
-  `[Fintype (Newform N k)]` by the orbit/ranking lemmas, so that they stay axiom-clean and this
-  `sorry` is the sole finiteness input.  Absent from mathlib at this level of packaging.
-* `Newform.traceSeq_injOn_orbits` — **the orbit trace sequence separates distinct orbits**
-  (equal trace sequences ⇒ Galois conjugate).  This is the orbit-level upgrade of the (sorry-free)
-  single-form separation `coeffSeq_injOn_charSpace`; promoting it requires the linear independence
-  of the distinct newform coefficient systems (the newform analogue of `linearIndependent_monoidHom`
-  used for the character label), which is the residual deep input for label *injectivity*.
 
 The Galois action `f ↦ σf` (conjugate the `aₙ` by `σ ∈ Gal(ℂ/ℚ)`) is modelled by the relation
 `Newform.IsGaloisConj`; its *well-definedness* (that `σf` is again a `Newform` of the same `N, k`
@@ -89,8 +86,16 @@ structure built on it is real and sorry-free.
 * `Newform.coeffSeq_injOn_charSpace` — **Strong Multiplicity One separation** (sorry-free): two
   newforms in the same Nebentypus eigenspace with equal coefficient sequences are equal.  This is
   the single-form separation discharged directly from `strongMultiplicityOne_axiom_clean`.
-* `Newform.newformOrbitLabel_injOn_orbits` — injectivity of the label on distinct orbits, reduced
-  to the orbit-level trace separation `Newform.traceSeq_injOn_orbits`.
+* `Newform.ext_of_toCuspForm` / `Newform.coeffSeq_injective` — **a newform is determined by its
+  underlying form** (resp. its coefficient sequence): `f ↦ f.toCuspForm` and `coeffSeq` are
+  injective on `Newform N k` (the character and ring eigenvalues are pinned by the nonzero form).
+* `Newform.petN_toCuspForm_eq_zero_of_ne` / `Newform.linearIndependent_toCuspForm` /
+  `Newform.linearIndependent_coeffSeq` — distinct newforms are **Petersson-orthogonal** and hence
+  **linearly independent** (the newform analogue of `linearIndependent_monoidHom`).
+* `Newform.instFiniteNewform` — **there are only finitely many newforms** (proved, via linear
+  independence in the finite-dimensional cusp-form space).
+* `Newform.newformOrbitLabel_injOn_orbits` — injectivity of the label on distinct orbits, via the
+  orbit-level trace separation `Newform.traceSeq_injOn_orbits` (proved).
 -/
 
 open scoped BigOperators
@@ -99,7 +104,7 @@ noncomputable section
 
 namespace HeckeRing.GL2.Newform
 
-open HeckeRing.GL2 CongruenceSubgroup
+open HeckeRing.GL2 CongruenceSubgroup Matrix.SpecialLinearGroup
 
 variable {N : ℕ} [NeZero N] {k : ℤ}
 
@@ -147,6 +152,273 @@ lemma coeffSeq_injOn_charSpace {f g : Newform N k} (χ : (ZMod N)ˣ →* ℂˣ)
   intro n hn _
   rw [← coeffSeq_coprime_eq_eigenvalue f n hn χ hfχ,
     ← coeffSeq_coprime_eq_eigenvalue g n hn χ hgχ, h]
+
+/-! ### The underlying form determines the (eigen/new)form
+
+An `Eigenform` (and hence a `Newform`) is determined by its underlying cusp form, provided that
+form is nonzero.  Three ingredients combine, via the `@[ext]` lemmas, with all remaining fields
+being `Prop` (proof-irrelevant):
+
+* the Nebentypus character `χ` is pinned by `mem_charSpace` (the diamond operators act by `χ(d)` on
+  the nonzero form, so two characters agreeing through the same form coincide);
+* the ring eigenvalue `ringEigenvalue` is pinned at good `n` by `isRingEigen`/`isEigen` (the smul of
+  the nonzero form by the eigenvalue is determined) and at bad `n` by `ringEigen_bad` (`= 0`).
+
+Since `Newform`s are normalised (`isNorm`, so `a₁ = 1`) their underlying form is nonzero, hence
+`f ↦ f.toCuspForm`, and therefore `coeffSeq`, are injective on `Newform N k`. -/
+
+/-- The Nebentypus character of an `Eigenform` is determined by its underlying form, provided that
+form is nonzero: if `f.toCuspForm = g.toCuspForm ≠ 0` then `f.χ = g.χ`.  The diamond operators act
+by `χ(d)` on the (shared, nonzero) form, so the two scalars `f.χ d` and `g.χ d` agree. -/
+lemma _root_.HeckeRing.GL2.Eigenform.χ_eq_of_toCuspForm {f g : Eigenform N k}
+    (hfg : f.toCuspForm = g.toCuspForm) (hne : f.toCuspForm ≠ 0) : f.χ = g.χ := by
+  have hf : f.toCuspForm ∈ cuspFormCharSpace k f.χ :=
+    Unified.cuspFormCharSpace_of_toModularForm'_mem f.mem_charSpace
+  have hg : g.toCuspForm ∈ cuspFormCharSpace k g.χ :=
+    Unified.cuspFormCharSpace_of_toModularForm'_mem g.mem_charSpace
+  refine MonoidHom.ext fun d => Units.ext ?_
+  have hfd : diamondOpCuspHom k d f.toCuspForm = (↑(f.χ d) : ℂ) • f.toCuspForm :=
+    diamondOpCusp_apply_charSpace k f.χ d hf
+  have hgd : diamondOpCuspHom k d g.toCuspForm = (↑(g.χ d) : ℂ) • g.toCuspForm :=
+    diamondOpCusp_apply_charSpace k g.χ d hg
+  rw [hfg] at hfd
+  have hsmul : ((↑(f.χ d) : ℂ) - (↑(g.χ d) : ℂ)) • g.toCuspForm = 0 := by
+    rw [sub_smul, ← hfd, ← hgd, sub_self]
+  exact sub_eq_zero.mp <| (smul_eq_zero.mp hsmul).resolve_right (hfg ▸ hne)
+
+/-- The ring eigenvalue of an `Eigenform` is determined by its underlying form, provided that form
+is nonzero.  At good `n` the smul of the (shared, nonzero) form by the eigenvalue is fixed by
+`isRingEigen`/`isEigen`; at bad `n` both eigenvalues are `0` by `ringEigen_bad`. -/
+lemma _root_.HeckeRing.GL2.Eigenform.ringEigenvalue_eq_of_toCuspForm {f g : Eigenform N k}
+    (hfg : f.toCuspForm = g.toCuspForm) (hne : f.toCuspForm ≠ 0) :
+    f.ringEigenvalue = g.ringEigenvalue := by
+  funext n
+  by_cases hn : Nat.Coprime n.val N
+  · haveI : NeZero n.val := ⟨n.pos.ne'⟩
+    -- The character agrees, so the classical eigenvalues agree, hence the ring eigenvalues.
+    have hχ : f.χ = g.χ := Eigenform.χ_eq_of_toCuspForm hfg hne
+    have hf := f.isEigen n hn
+    have hg := g.isEigen n hn
+    rw [hfg] at hf
+    have hval : f.eigenvalue n = g.eigenvalue n := by
+      have hsmul : (f.eigenvalue n - g.eigenvalue n) • g.toCuspForm = 0 := by
+        rw [sub_smul, ← hf, ← hg, sub_self]
+      exact sub_eq_zero.mp <| (smul_eq_zero.mp hsmul).resolve_right (hfg ▸ hne)
+    -- `eigenvalue n = χ(n) • ringEigenvalue n` with `χ(n)` a unit, and `f.χ = g.χ`.
+    rw [Eigenform.eigenvalue, Eigenform.eigenvalue, dif_pos hn, dif_pos hn, hχ] at hval
+    exact mul_left_cancel₀ (by exact_mod_cast (g.χ (ZMod.unitOfCoprime n.val hn)).ne_zero) hval
+  · rw [f.ringEigen_bad n hn, g.ringEigen_bad n hn]
+
+/-- **An `Eigenform` is determined by its underlying form** (when nonzero): if
+`f.toCuspForm = g.toCuspForm ≠ 0` then `f = g`.  Combines `χ_eq_of_toCuspForm`,
+`ringEigenvalue_eq_of_toCuspForm`, and proof-irrelevance of the remaining `Prop` fields via
+`Eigenform.ext`. -/
+lemma _root_.HeckeRing.GL2.Eigenform.ext_of_toCuspForm {f g : Eigenform N k}
+    (hfg : f.toCuspForm = g.toCuspForm) (hne : f.toCuspForm ≠ 0) : f = g :=
+  Eigenform.ext (by rw [hfg]) (Eigenform.χ_eq_of_toCuspForm hfg hne)
+    (Eigenform.ringEigenvalue_eq_of_toCuspForm hfg hne)
+
+/-- The underlying form of a `Newform` is nonzero: normalisation `a₁ = 1` (`isNorm`) forces a
+nonzero `q`-expansion, hence a nonzero form. -/
+lemma toCuspForm_ne_zero (f : Newform N k) : f.toCuspForm ≠ 0 := fun hF_zero => by
+  have h1 : (UpperHalfPlane.qExpansion (1 : ℝ) f.toCuspForm).coeff 1 = 1 := f.isNorm
+  rw [show (⇑f.toCuspForm : UpperHalfPlane → ℂ) = (0 : UpperHalfPlane → ℂ) by rw [hF_zero]; rfl,
+    UpperHalfPlane.qExpansion_zero] at h1
+  simp at h1
+
+/-- **A `Newform` is determined by its underlying form**: if `f.toCuspForm = g.toCuspForm` then
+`f = g`.  Newforms are normalised, hence nonzero, so the `Eigenform` data fields are pinned by
+`χ_eq_of_toCuspForm`/`ringEigenvalue_eq_of_toCuspForm`; the extra `Prop` fields `isNew`/`isNorm`
+are proof-irrelevant (`Newform.ext`). -/
+lemma ext_of_toCuspForm {f g : Newform N k} (hfg : f.toCuspForm = g.toCuspForm) : f = g :=
+  Newform.ext (by rw [hfg])
+    (Eigenform.χ_eq_of_toCuspForm hfg f.toCuspForm_ne_zero)
+    (Eigenform.ringEigenvalue_eq_of_toCuspForm hfg f.toCuspForm_ne_zero)
+
+/-- **`f ↦ f.toCuspForm` is injective on `Newform N k`.** -/
+lemma toCuspForm_injective :
+    Function.Injective (fun f : Newform N k => f.toCuspForm) :=
+  fun _ _ h => ext_of_toCuspForm h
+
+/-- **`coeffSeq` is injective on `Newform N k`.**  The coefficient sequence is read off the
+underlying form, which determines the newform (`Newform.toCuspForm_injective`). -/
+lemma coeffSeq_injective : Function.Injective (coeffSeq (N := N) (k := k)) := by
+  intro f g h
+  -- The difference of the `ModularForm` coercions has vanishing `q`-expansion: every coefficient
+  -- agrees (the positive ones by `h`, the `0`-th by cuspidality), so the difference is `0`.
+  have hsub : f.toCuspForm.toModularForm' - g.toCuspForm.toModularForm' = 0 := by
+    rw [← ModularForm.qExpansion_eq_zero_iff one_pos (one_mem_strictPeriods_Gamma1_map N)]
+    refine PowerSeries.ext fun n => ?_
+    rw [map_zero,
+      show (⇑(f.toCuspForm.toModularForm' - g.toCuspForm.toModularForm') : UpperHalfPlane → ℂ) =
+        ⇑f.toCuspForm.toModularForm' - ⇑g.toCuspForm.toModularForm' from
+        ModularForm.coe_sub _ _,
+      ModularForm.qExpansion_sub one_pos (one_mem_strictPeriods_Gamma1_map N), map_sub, sub_eq_zero]
+    rcases Nat.eq_zero_or_pos n with hn | hn
+    · subst hn
+      rw [show (⇑f.toCuspForm.toModularForm' : UpperHalfPlane → ℂ) = ⇑f.toCuspForm from rfl,
+        show (⇑g.toCuspForm.toModularForm' : UpperHalfPlane → ℂ) = ⇑g.toCuspForm from rfl,
+        CuspFormClass.qExpansion_coeff_zero f.toCuspForm one_pos
+          (one_mem_strictPeriods_Gamma1_map N),
+        CuspFormClass.qExpansion_coeff_zero g.toCuspForm one_pos
+          (one_mem_strictPeriods_Gamma1_map N)]
+    · exact congrFun h ⟨n, hn⟩
+  exact ext_of_toCuspForm (cuspFormToModularFormLin_injective (sub_eq_zero.mp hsub))
+
+/-! ### Petersson orthogonality and linear independence of newforms
+
+Distinct newforms are pairwise Petersson-orthogonal, hence linearly independent.  Two cases:
+
+* **Same character**: by Strong Multiplicity One (`coeffSeq_injOn_charSpace`) distinct newforms in
+  the same eigenspace have a *distinct Hecke eigenvalue at some good `n`*, so they are orthogonal by
+  the spectral orthogonality `eigenforms_orthogonal_of_ne_eigenvalues`.
+* **Different characters**: the diamond operators are `petN`-unitary
+  (`diamondOp_petersson_unitary`) and act by the (norm-`1`) scalars `χ(d)`; choosing `d` with
+  `f.χ d ≠ g.χ d` forces `petN f g = 0`.
+
+Linear independence then follows by the elementary Petersson-pairing argument (pairing a vanishing
+combination with each form and using `petN`-definiteness), with no inner-product-space instance
+needed.  This is the newform analogue of `linearIndependent_monoidHom`. -/
+
+/-- Values of a character of the finite group `(ZMod N)ˣ` are roots of unity, so
+`conj (χ d) · χ d = 1`. -/
+private lemma conj_char_mul_self (χ : (ZMod N)ˣ →* ℂˣ) (d : (ZMod N)ˣ) :
+    (starRingEnd ℂ) (↑(χ d) : ℂ) * (↑(χ d) : ℂ) = 1 := by
+  have hnorm : ‖(↑(χ d) : ℂ)‖ = 1 :=
+    Complex.norm_eq_one_of_pow_eq_one (n := Fintype.card (ZMod N)ˣ)
+      (by rw [← Units.val_pow_eq_pow_val, ← map_pow, pow_card_eq_one, map_one, Units.val_one])
+      Fintype.card_ne_zero
+  rw [Complex.conj_mul', hnorm, Complex.ofReal_one, one_pow]
+
+/-- `petN` distributes over finite sums in its second (linear) argument. -/
+private lemma petN_sum_right {ι : Type*} (s : Finset ι)
+    (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
+    (x : ι → CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
+    petN f (∑ i ∈ s, x i) = ∑ i ∈ s, petN f (x i) := by
+  induction s using Finset.cons_induction with
+  | empty => simp [petN_zero_right]
+  | cons _ _ _ ih => rw [Finset.sum_cons, petN_add_right, ih, Finset.sum_cons]
+
+/-- **Petersson orthogonality of distinct newforms.**  Two distinct newforms of level `N`,
+weight `k` are orthogonal for the level-`N` Petersson product. -/
+lemma petN_toCuspForm_eq_zero_of_ne {f g : Newform N k} (hfg : f ≠ g) :
+    petN f.toCuspForm g.toCuspForm = 0 := by
+  by_cases hχ : f.χ = g.χ
+  · -- Same character: SMO forces a distinct good-prime eigenvalue; apply spectral orthogonality.
+    have hf_char : f.toCuspForm ∈ cuspFormCharSpace k f.χ :=
+      Unified.cuspFormCharSpace_of_toModularForm'_mem f.mem_charSpace
+    have hg_char : g.toCuspForm ∈ cuspFormCharSpace k g.χ :=
+      Unified.cuspFormCharSpace_of_toModularForm'_mem g.mem_charSpace
+    rw [hχ] at hf_char
+    -- Some good-prime eigenvalue differs, else `f = g` by Strong Multiplicity One + Task-2.
+    have : ∃ n : ℕ+, Nat.Coprime n.val N ∧ f.eigenvalue n ≠ g.eigenvalue n := by
+      by_contra hcon
+      push_neg at hcon
+      refine hfg (ext_of_toCuspForm (strongMultiplicityOne_axiom_clean f g g.χ
+        (hχ ▸ f.mem_charSpace) g.mem_charSpace ∅ fun n hn _ => hcon n hn))
+    obtain ⟨n, hn, hne⟩ := this
+    haveI : NeZero n.val := ⟨n.pos.ne'⟩
+    exact eigenforms_orthogonal_of_ne_eigenvalues g.χ hf_char hg_char
+      f.toCuspForm_ne_zero g.toCuspForm_ne_zero hn (f.isEigen n hn) (g.isEigen n hn) hne
+  · -- Different characters: use diamond unitarity and norm-`1` character values.
+    obtain ⟨d, hd⟩ := DFunLike.ne_iff.mp hχ
+    have hf_char : f.toCuspForm ∈ cuspFormCharSpace k f.χ :=
+      Unified.cuspFormCharSpace_of_toModularForm'_mem f.mem_charSpace
+    have hg_char : g.toCuspForm ∈ cuspFormCharSpace k g.χ :=
+      Unified.cuspFormCharSpace_of_toModularForm'_mem g.mem_charSpace
+    have hdf : diamondOp_cusp k d f.toCuspForm = (↑(f.χ d) : ℂ) • f.toCuspForm :=
+      diamondOpCusp_apply_charSpace k f.χ d hf_char
+    have hdg : diamondOp_cusp k d g.toCuspForm = (↑(g.χ d) : ℂ) • g.toCuspForm :=
+      diamondOpCusp_apply_charSpace k g.χ d hg_char
+    -- Unitarity + (conjugate-)linearity give `conj(χf d) · χg d · petN = petN`.
+    have hu := diamondOp_petersson_unitary d f.toCuspForm g.toCuspForm
+    rw [hdf, hdg, petN_conj_smul_left, petN_smul_right] at hu
+    -- So `(conj(χf d) · χg d − 1) · petN = 0`; the scalar is nonzero since `χf d ≠ χg d`.
+    have hcoeff_ne : (starRingEnd ℂ) (↑(f.χ d) : ℂ) * (↑(g.χ d) : ℂ) ≠ 1 := by
+      intro hc
+      -- Multiply by `χf d` and use `conj(χf d) · χf d = 1` to get `χg d = χf d`.
+      apply hd
+      apply Units.ext
+      have := congrArg (· * (↑(f.χ d) : ℂ)) hc
+      simp only [one_mul] at this
+      rw [mul_right_comm, conj_char_mul_self f.χ d, one_mul] at this
+      exact this.symm
+    have : ((starRingEnd ℂ) (↑(f.χ d) : ℂ) * (↑(g.χ d) : ℂ) - 1) *
+        petN f.toCuspForm g.toCuspForm = 0 := by
+      rw [sub_mul, one_mul, mul_assoc, hu, sub_self]
+    exact (mul_eq_zero.mp this).resolve_left (sub_ne_zero.mpr hcoeff_ne)
+
+/-- **Linear independence of newforms.**  The underlying cusp forms of the newforms of level `N`,
+weight `k` are `ℂ`-linearly independent: a vanishing linear combination, paired with each form via
+`petN`, forces every coefficient to vanish (orthogonality + `petN`-definiteness).  No finiteness is
+assumed (the index type is the bare `Newform N k`). -/
+lemma linearIndependent_toCuspForm :
+    LinearIndependent ℂ (fun f : Newform N k => f.toCuspForm) := by
+  classical
+  rw [linearIndependent_iff']
+  intro s c hc f₀ hf₀
+  -- Pair the vanishing combination `∑ f∈s, c f • f.toCuspForm = 0` with `f₀` on the right.
+  have hpair : petN f₀.toCuspForm (∑ f ∈ s, c f • f.toCuspForm) = 0 := by rw [hc, petN_zero_right]
+  -- The pairing collapses to the single diagonal term `c f₀ • petN f₀ f₀`.
+  have hsum : petN f₀.toCuspForm (∑ f ∈ s, c f • f.toCuspForm) =
+      c f₀ * petN f₀.toCuspForm f₀.toCuspForm := by
+    rw [petN_sum_right, Finset.sum_eq_single f₀]
+    · rw [petN_smul_right]
+    · intro f _ hf
+      rw [petN_smul_right, petN_toCuspForm_eq_zero_of_ne (Ne.symm hf), mul_zero]
+    · exact fun h => absurd hf₀ h
+  rw [hsum] at hpair
+  -- `petN f₀ f₀ ≠ 0` since `f₀.toCuspForm ≠ 0`, so `c f₀ = 0`.
+  exact (mul_eq_zero.mp hpair).resolve_right (fun h => f₀.toCuspForm_ne_zero (petN_definite _ h))
+
+/-- The `q`-expansion (period `1`) as a `ℂ`-linear map `S_k(Γ₁(N)) → ℂ⟦X⟧`, with trivial kernel
+(a cusp form is determined by its `q`-expansion).  Used to transfer linear independence from the
+underlying forms to the coefficient sequences. -/
+def qExpansionLin : CuspForm ((Gamma1 N).map (mapGL ℝ)) k →ₗ[ℂ] PowerSeries ℂ where
+  toFun F := UpperHalfPlane.qExpansion (1 : ℝ) F
+  map_add' F G :=
+    ModularForm.qExpansion_add one_pos (one_mem_strictPeriods_Gamma1_map N) F G
+  map_smul' c F := by
+    rw [RingHom.id_apply]
+    exact ModularForm.qExpansion_smul one_pos (one_mem_strictPeriods_Gamma1_map N) c F
+
+/-- The coefficient-sequence extraction as a `ℂ`-linear map `S_k(Γ₁(N)) → (ℕ⁺ → ℂ)`
+(`F ↦ fun n ↦ aₙ(F)`), with trivial kernel.  Restricted to newforms it is `coeffSeq`. -/
+def coeffSeqLin : CuspForm ((Gamma1 N).map (mapGL ℝ)) k →ₗ[ℂ] (ℕ+ → ℂ) where
+  toFun F n := (qExpansionLin F).coeff n.val
+  map_add' F G := by funext n; simp [map_add]
+  map_smul' c F := by funext n; simp [map_smul]
+
+lemma coeffSeqLin_ker_eq_bot :
+    LinearMap.ker (coeffSeqLin (N := N) (k := k)) = ⊥ := by
+  rw [LinearMap.ker_eq_bot']
+  intro F hF
+  -- `coeffSeqLin F = 0` ⇒ all positive `q`-coefficients vanish; with cuspidality (coeff `0`) this
+  -- forces the whole `q`-expansion to vanish, hence the form is `0`.
+  have hcoeff : ∀ n : ℕ+, (UpperHalfPlane.qExpansion (1 : ℝ) F).coeff n.val = 0 :=
+    fun n => congrFun hF n
+  apply cuspFormToModularFormLin_injective
+  rw [map_zero,
+    show cuspFormToModularFormLin F = F.toModularForm' from rfl,
+    ← ModularForm.qExpansion_eq_zero_iff one_pos (one_mem_strictPeriods_Gamma1_map N)]
+  refine PowerSeries.ext fun n => ?_
+  rw [map_zero, show (⇑F.toModularForm' : UpperHalfPlane → ℂ) = ⇑F from rfl]
+  rcases Nat.eq_zero_or_pos n with hn | hn
+  · subst hn
+    exact CuspFormClass.qExpansion_coeff_zero F one_pos (one_mem_strictPeriods_Gamma1_map N)
+  · exact hcoeff ⟨n, hn⟩
+
+lemma coeffSeq_eq_coeffSeqLin (f : Newform N k) : coeffSeq f = coeffSeqLin f.toCuspForm := rfl
+
+/-- **Linear independence of newform coefficient sequences.**  The normalised Fourier coefficient
+sequences `coeffSeq f` of the newforms of level `N`, weight `k` are `ℂ`-linearly independent.  This
+transfers `linearIndependent_toCuspForm` along the injective linear map `coeffSeqLin`
+(`q`-expansion determines the form), and is the newform analogue of `linearIndependent_monoidHom`. -/
+lemma linearIndependent_coeffSeq :
+    LinearIndependent ℂ (coeffSeq (N := N) (k := k)) := by
+  have h := linearIndependent_toCuspForm (N := N) (k := k) |>.map'
+    coeffSeqLin coeffSeqLin_ker_eq_bot
+  exact h
 
 /-! ### The coefficient (Hecke eigenvalue) field `K_f = ℚ(aₙ : n)`
 
@@ -219,18 +491,22 @@ def galoisSetoid (N : ℕ) [NeZero N] (k : ℤ) : Setoid (Newform N k) where
   r := IsGaloisConj
   iseqv := ⟨isGaloisConj_refl, isGaloisConj_symm, isGaloisConj_trans⟩
 
-/-- **DEEP INPUT (finiteness of the space of newforms).**  There are only finitely many newforms
-of level `N` and weight `k`.  This holds because the cusp-form space `S_k(Γ₁(N))` is
-finite-dimensional and distinct normalised eigenforms are linearly independent, hence finite in
-number.  It is the canonical witness for the `[Fintype (Newform N k)]` hypothesis carried by the
-orbit/ranking machinery below; not available in mathlib at this level of packaging.
+/-- **Finiteness of the space of newforms.**  There are only finitely many newforms of level `N`
+and weight `k`.  Proved here: the cusp-form space `S_k(Γ₁(N))` is finite-dimensional
+(`cuspForm_finiteDimensional`) and distinct newforms are `ℂ`-linearly independent
+(`linearIndependent_toCuspForm`, via Petersson orthogonality + Strong Multiplicity One), so the
+injective family `f ↦ f.toCuspForm` has a finite index type (`LinearIndependent.finite`).
 
-It is deliberately **not** registered as a global instance (only `@[reducible]`), so that the
-orbit/ranking lemmas — which take `[Fintype (Newform N k)]` as an explicit hypothesis — stay
-axiom-clean (they use the hypothesis, not this `sorry`).  Supply it
+It is the canonical witness for the `[Fintype (Newform N k)]` hypothesis carried by the
+orbit/ranking machinery below.  It is deliberately **not** registered as a global instance (only
+`@[reducible]`), so that the orbit/ranking lemmas — which take `[Fintype (Newform N k)]` as an
+explicit hypothesis — keep that finiteness localised; supply it
 (`haveI := Newform.instFiniteNewform`) to specialise the machinery to the genuine, finite space of
 newforms. -/
-@[reducible] def instFiniteNewform : Finite (Newform N k) := sorry
+@[reducible] def instFiniteNewform : Finite (Newform N k) :=
+  haveI : FiniteDimensional ℂ (CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :=
+    cuspForm_finiteDimensional
+  linearIndependent_toCuspForm.finite
 
 /-! The Galois-orbit and ranking constructions below need a `Fintype` structure on `Newform N k`
 to enumerate orbits.  We carry it as an **explicit hypothesis** `[Fintype (Newform N k)]` rather
@@ -351,17 +627,43 @@ Nebentypus eigenspace `modFormCharSpace k χ`) have the *same orbit trace sequen
 on the trace tuple is a strict total order on orbits.
 
 This is the orbit-level upgrade of the single-form Strong Multiplicity One separation
-`coeffSeq_injOn_charSpace`: the trace sequence is a sum of the (distinct) coefficient systems over
-the orbit, and equal trace sequences force equal orbits.  Mirrors the Artin–Dedekind separation
-`orbitRankKey_injOn_orbits` used for the character label; promoting it from the single-form
-separation requires the linear independence of the distinct newform coefficient systems sharing a
-character (the newform analogue of `linearIndependent_monoidHom`), which is the residual deep
-input here. -/
+`coeffSeq_injOn_charSpace`: the trace sequence is the orbit-indicator-weighted sum of the (linearly
+independent) coefficient systems, and equal trace sequences force equal indicator coefficients,
+hence equal orbits.  Mirrors the Artin–Dedekind separation `orbitRankKey_injOn_orbits` used for the
+character label, with `linearIndependent_coeffSeq` (the newform analogue of
+`linearIndependent_monoidHom`, proved via Petersson orthogonality + Strong Multiplicity One) playing
+the role of `linearIndependent_monoidHom`.  The character hypotheses are not needed: the coefficient
+systems are linearly independent globally. -/
 private lemma traceSeq_injOn_orbits {f g : Newform N k} (χ : (ZMod N)ˣ →* ℂˣ)
     (hfχ : f.toCuspForm.toModularForm' ∈ modFormCharSpace k χ)
     (hgχ : g.toCuspForm.toModularForm' ∈ modFormCharSpace k χ)
-    (h : orbitRankKey f = orbitRankKey g) : IsGaloisConj f g :=
-  sorry
+    (h : orbitRankKey f = orbitRankKey g) : IsGaloisConj f g := by
+  classical
+  -- Indicator coefficient functions of the two orbits.
+  set F : Newform N k → ℂ := fun ρ => if ρ ∈ galoisOrbit f then 1 else 0 with hF
+  set G : Newform N k → ℂ := fun ρ => if ρ ∈ galoisOrbit g then 1 else 0 with hG
+  have htrace : traceSeqAt f = traceSeqAt g := h
+  -- An indicator-weighted sum of the coefficient systems reproduces the orbit-trace sequence.
+  have key : ∀ (A : Finset (Newform N k)) (n : ℕ+),
+      (∑ i, (if i ∈ A then (1 : ℂ) else 0) • coeffSeq i n) = ∑ ρ ∈ A, coeffSeq ρ n := by
+    intro A n
+    simp only [smul_eq_mul, boole_mul]
+    rw [Finset.sum_ite_mem, Finset.univ_inter]
+  have hsum : ∑ i, F i • coeffSeq i = ∑ i, G i • coeffSeq i := by
+    funext n
+    simp only [Finset.sum_apply, Pi.smul_apply, hF, hG]
+    rw [key (galoisOrbit f) n, key (galoisOrbit g) n]
+    simpa only [traceSeqAt] using congrFun htrace n
+  -- Linear independence of the coefficient systems forces equal indicator coefficients.
+  have hcoeff := (Fintype.linearIndependent_iffₛ.mp linearIndependent_coeffSeq) F G hsum
+  -- Hence the two Galois orbits coincide as `Finset`s.
+  have horb : galoisOrbit f = galoisOrbit g := by
+    ext ρ
+    have hρ := hcoeff ρ
+    simp only [hF, hG] at hρ
+    by_cases h1 : ρ ∈ galoisOrbit f <;> by_cases h2 : ρ ∈ galoisOrbit g <;> simp_all
+  -- `g ∈ galoisOrbit g = galoisOrbit f`, i.e. `g` is Galois-conjugate to `f`.
+  exact mem_galoisOrbit_iff.mp (horb ▸ self_mem_galoisOrbit g)
 
 /-- **Rank-injectivity.**  Equal orbit indices force equal ordering keys: the strictly-monotone
 rank function `key ↦ #{realised keys strictly below it}` is injective on the finite set of realised
