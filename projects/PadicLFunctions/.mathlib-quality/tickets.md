@@ -6633,7 +6633,12 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
     (b) axiomatize the structure theorem as a project hypothesis, or (c) reroute the IMC to avoid it.
 
 #### [S13-S4] characteristic ideal + multiplicativity
-- **Status**: open (REROUTED via Module.length — no longer depends on the S3 structure theorem) | **File**: Iwasawa/StructureTheory/CharIdeal.lean | **Depends on**: S13-S3b | **Type**: def+theorem
+- **Status**: DONE (2026-06-17, REROUTED via Module.length — no structure theorem) | **File**: Iwasawa/StructureTheory/CharIdeal.lean | **Depends on**: S13-S3b | **Type**: def+theorem
+- **COMPLETE**: CharIdeal.lean entirely sorry-free. `charIdeal` (∏ᶠ P^localMult over height-1 primes),
+  `localMult` + `_add_of_exact` + `_ne_top` + `_pow_mulSupport_finite` + `_eq_zero_of_finite` +
+  `_eq_of_pseudoIso`, `charIdeal_mul_of_exact` (MULTIPLICATIVITY), `charIdeal_eq_of_pseudoIso`
+  (WELL-DEFINEDNESS). Pure module-length route. Pseudo-iso lemmas need `[IsDiscreteValuationRing 𝒪]`
+  (standing 𝒪 = ℤ_p). The S3 structure theorem (fg_pseudoIso_canonical) is NOT needed for §13.
 - **REROUTE (2026-06-17)**: `charIdeal` redefined as `∏ᶠ_{ht P = 1} P^(localMult P M).toNat`,
   where `localMult P M := Module.length Λ_P M_P` (the order of vanishing). PROVEN sorry-free:
   `localMult` (def), `localMult_add_of_exact` (per-prime additivity = localization-exact +
