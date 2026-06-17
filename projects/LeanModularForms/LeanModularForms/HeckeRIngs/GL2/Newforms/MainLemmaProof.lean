@@ -234,26 +234,67 @@ private lemma eigensystems_linearIndependent
     (c : ι → ℂ)
     (h_rel : ∀ m : ℕ+, Nat.Coprime m.val N → ∑ i, c i * ev i m = 0) :
     ∀ i, c i = 0 :=
-  -- MISSING INGREDIENT (one lemma): linear independence of distinct Hecke eigensystems FROM the
-  -- single-index relation — i.e. distinct multiplicative arithmetic functions that ALSO satisfy the
-  -- Hecke prime-power recursion are ℂ-linearly independent (the prime-power / Vandermonde separation
-  -- argument for such functions).  This is absent from mathlib and is genuine new infrastructure.
+  -- HONEST `sorry`.  This is the genuine classical theorem (DS Thm 5.8.2 / Miyake Thm 4.6.12's
+  -- linear-independence step), and a faithful proof needs major new infrastructure that does not yet
+  -- exist in this repo or mathlib.  The obstruction was re-derived from scratch (DS §5.8, Miyake
+  -- §4.6); below is exactly what is missing and why each available route stalls, so the next worker
+  -- can build the right lemmas.
   --
-  -- Why the natural Dedekind route does NOT close it cheaply here.  Each nonzero common eigenfunction
-  -- `H i` gives a character `χᵢ : 𝕋 →* ℂ` of the Hecke algebra `𝕋 ⊆ End ℂ (CuspForm …)`
-  -- (`χᵢ(T) = ` eigenvalue of `T` on `H i`), and `linearIndependent_monoidHom 𝕋 ℂ` (Dedekind) makes
-  -- the distinct `χᵢ` ℂ-linearly independent as functions `𝕋 → ℂ`.  But `h_rel` only controls the
-  -- ℂ-LINEAR functional `∑ᵢ cᵢ·χᵢ` on the SINGLE generators `{heckeT_n_cusp k m : coprime m}`, not on
-  -- products/all of `𝕋`; bootstrapping from generators to all of `𝕋` would need `{T_m}` to ℂ-SPAN
-  -- `𝕋` (product-closure of `span{T_m}`), which is FALSE: the recursion
-  -- `T_{p^{r+2}} = T_p·T_{p^{r+1}} − p^{k-1}·(⟨p⟩·T_{p^r})` (`heckeT_ppow_succ_succ`, cf.
-  -- `heckeT_n_prime_sq_eq_heckeT_p_sq_sub_diamond`) injects the diamond `⟨p⟩ ∉ span{T_n}` (it acts as
-  -- the per-character scalar `χ(p)`, which differs across the `H i` as they may lie in DIFFERENT
-  -- nebentypus spaces).  Enlarging to the full Hecke algebra WITH diamonds does not help either,
-  -- since `h_rel` still only constrains the `T_m` generators.  The abstract Γ₀(N) Hecke ring
-  -- `𝕋(Γ₀(N))` (`Gamma0RingDn`/`RingTransport`) + `heckeRingHomCharSpace` give the character/algebra
-  -- structure only PER CHARACTER, so they do not directly close this cross-character family.  Left as
-  -- an honest `sorry` per scope.
+  -- THE FUNCTION-vs-FORM DUALITY (the crux).  `h_rel` is a relation among the eigenvalue *functions*
+  -- `m ↦ ev i m`: it constrains only the SCALAR `∑ᵢ cᵢ·evᵢ(m)` (equivalently the "all-ones"
+  -- functional `φ(Tₘ S)` of `S := ∑ᵢ cᵢ·Hᵢ`, with `φ Hⱼ = 1`).  But the textbook proofs run on the
+  -- *forms*: from a minimal relation `∑ᵢ cᵢ fᵢ = 0` they apply the operator `(Tₚ − aₚ(f₁))`, getting
+  -- `∑_{i≠1} cᵢ(aₚ(f₁) − aₚ(fᵢ)) fᵢ = 0` with strictly fewer terms, hence (minimality) `aₚ(fᵢ) =
+  -- aₚ(f₁)` for every `i` and prime `p`, so `fᵢ = f₁` — a contradiction.  This works because on FORMS
+  -- `Tₚ fᵢ = aₚ(fᵢ)·fᵢ` holds with NO coprimality restriction.  L3 is the DUAL (function) statement
+  -- and does not inherit that clean argument.  Multiplicativity alone is provably insufficient (see
+  -- the docstring's `1,2,3 / 5,7,9` counterexample), so the Hecke prime-power recursion is essential.
+  --
+  -- THE COPRIMALITY GAP.  Mirroring the textbook reduction on the FUNCTIONS: pick `i₁,i₂` in
+  -- `support c` separated by a coprime `m₀` (`evᵢ₁(m₀) ≠ evᵢ₂(m₀)`, from `h_distinct`) and set
+  -- `c'ᵢ := cᵢ·(evᵢ(m₀) − evᵢ₁(m₀))`.  Then `∑ᵢ c'ᵢ·evᵢ(m) = ∑ᵢ cᵢ·evᵢ(m)·evᵢ(m₀) −
+  -- evᵢ₁(m₀)·h_rel(m)`; the second term vanishes, but the first needs `∑ᵢ cᵢ·evᵢ(m)·evᵢ(m₀) = 0`.
+  -- For `m` COPRIME to `m₀` this is `h_rel(m·m₀)` (multiplicativity, `heckeT_n_mul_coprime`); for `m`
+  -- NOT coprime to `m₀` it is NOT, because `evᵢ(p)·evᵢ(pᵃ) = evᵢ(p^{a+1}) + p^{k-1}·χᵢ(p)·evᵢ(p^{a-1})`
+  -- carries the diamond eigenvalue `χᵢ(p)`.  Carrying a growing "excluded-prime set" through the
+  -- induction fails: two distinct eigensystems may differ ONLY at primes already excluded (exactly the
+  -- counterexample's shape), so the separating `m₀` need not be coprime to the excluded set.
+  --
+  -- WHAT ACTUALLY CLOSES IT (per character) — the route to build.  If all `Hᵢ` lay in ONE character
+  -- space `χ` (extra data L3 does NOT carry — `Hᵢ` is here only a `Tₘ`-eigenform, never assumed a
+  -- diamond/`⟨d⟩`-eigenform), then `χᵢ(p) = χ(p)` is a single CONSTANT, and the gap term becomes
+  -- `∑ᵢ cᵢ·evᵢ(p)·evᵢ(m) = h_rel(p^{a+1}m') + p^{k-1}·χ(p)·h_rel(p^{a-1}m') = 0` for EVERY coprime `m`
+  -- (`m = pᵃ·m'`).  The gap closes and the minimal-relation/Dedekind induction goes through, giving
+  -- per-character independence.  This needs (i) the general eigenvalue recursion
+  -- `evᵢ(p^{a+2}) = evᵢ(p)·evᵢ(p^{a+1}) − p^{k-1}·χ(p)·evᵢ(pᵃ)` (a several-dozen-line generalisation of
+  -- the `a = 0` computation already done in `eigensystem_determines_char`'s `core`, via
+  -- `heckeT_ppow_succ_succ` + the diamond acting by `χ(p)` on the character space + cancelling the
+  -- nonzero form), and (ii) a ~150-line minimal-support induction on `support c`.
+  --
+  -- WHY THE CROSS-CHARACTER CASE STILL NEEDS HEAVY MACHINERY.  L3's family spans several characters
+  -- (at the call site `charPiece_coeff_sum_eq_zero`, the witnesses `H (wit s)` lie in DIFFERENT
+  -- `cuspFormCharSpace k (tag s)`).  Separating characters textbook-style uses the DIAMOND
+  -- `(⟨d⟩ − χ₁(d))` (DS Exercise 5.8.5(a)) — but `h_rel` is a `Tₘ`-only functional with no `⟨d⟩` in
+  -- the index `m`, so the diamond cannot be applied to it; and the gap-closure above breaks once the
+  -- `χᵢ(p)` differ across `i`.  A faithful proof therefore must FIRST reconstruct that each `Tₘ`-eigen
+  -- witness is a diamond eigenform / decompose the family into character spaces (cf.
+  -- `exists_eigenform_decomposition_of_invariant` + L2 `eigensystem_determines_char`, both available),
+  -- THEN run the per-character argument, THEN assemble.  Equivalently, strengthen L3's signature with
+  -- `(tag : ι → (ZMod N)ˣ →* ℂˣ)` and `Hᵢ ∈ cuspFormCharSpace k (tag i)` (data the call site HAS but
+  -- currently discards) and re-thread the caller.  Either way this is ~300–500 LOC of new
+  -- infrastructure (eigenvalue recursion + character reconstruction + minimal-support induction +
+  -- cross-character assembly), well beyond a bounded fix.
+  --
+  -- DEAD ENDS confirmed: `linearIndependent_monoidHom` does NOT apply — `evᵢ` is only COPRIME-
+  -- multiplicative, not completely multiplicative, so it is not a monoid hom out of `(ℕ₍N₎, ×)` nor
+  -- out of the free monoid on primes ∤ N (the free-monoid hom would need `evᵢ(p²) = evᵢ(p)²`, which
+  -- is precisely false and is the counterexample).  The q-expansion/normalisation route
+  -- (`S := ∑ cᵢ Hᵢ` normalised, `aₙ(S) = ∑ cᵢ evᵢ(n) = 0`, so `S` is old by the Main Lemma, hence `0`)
+  -- is CIRCULAR — it invokes `mainLemma`, which L3 is being used to prove — and is forbidden.  The
+  -- orthogonality of the `Hᵢ` (`eigenforms_orthogonal_of_ne_eigenvalues`) only re-proves that the
+  -- FORMS are independent (`dim span{Hᵢ} = |ι|`), which does NOT imply the eigenvalue FUNCTIONS are
+  -- independent (`rank[evᵢ(m)]ₘᵢ = |ι|`): those ranks differ exactly by the counterexample, so the
+  -- scalar `h_rel` cannot be discharged from form-independence alone.
   sorry
 
 omit [NeZero N] in
