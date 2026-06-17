@@ -254,14 +254,15 @@ theorem mul_isotypicIdempotent [Invertible (Fintype.card H : 𝒪)] (ω : H →*
   sorry
 
 /-- The idempotent `e_ω` is nonzero — its ω-augmentation is `1`. -/
-theorem isotypicIdempotent_ne_zero [Invertible (Fintype.card H : 𝒪)] (ω : H →* 𝒪ˣ) :
-    isotypicIdempotent 𝒪 H ω ≠ 0 := by
+theorem isotypicIdempotent_ne_zero [Nontrivial 𝒪] [Invertible (Fintype.card H : 𝒪)]
+    (ω : H →* 𝒪ˣ) : isotypicIdempotent 𝒪 H ω ≠ 0 := by
   sorry
 
 /-- Each isotypic component `M^{(ω)}` is **torsion over `Λ`** (RJW TeX 3669): the `Λ(𝒢)`-action
 factors through `φ_ω`, and a non-zero-divisor `s` with `s•x = 0` has `φ_ω(s) ≠ 0` (else
 `s·e_ω = 0` with `e_ω ≠ 0`), so `φ_ω(s)` is a nonzero `Λ`-annihilator of `x`. -/
-theorem isotypicComponent_isTorsion_Λ [Invertible (Fintype.card H : 𝒪)] (ω : H →* 𝒪ˣ)
+theorem isotypicComponent_isTorsion_Λ [IsDomain 𝒪] [Invertible (Fintype.card H : 𝒪)]
+    (ω : H →* 𝒪ˣ)
     (M : Type*) [AddCommGroup M] [Module (IwasawaAlgebraGroup 𝒪 H) M]
     (hM : Module.IsTorsion (IwasawaAlgebraGroup 𝒪 H) M) :
     Module.IsTorsion (IwasawaAlgebra 𝒪)
@@ -282,7 +283,8 @@ theorem isotypicComponent_finite_Λ [Invertible (Fintype.card H : 𝒪)] [IsNoet
 
 /-- The **`Λ`-characteristic ideal of the ω-component** `Ch_Λ(M^{(ω)}) ⊆ Λ` (S13-S4 applied to
 the finitely generated torsion `Λ`-module `M^{(ω)}`). -/
-noncomputable def charIdealComponent [Invertible (Fintype.card H : 𝒪)] [IsNoetherianRing 𝒪]
+noncomputable def charIdealComponent [IsDomain 𝒪] [Invertible (Fintype.card H : 𝒪)]
+    [IsNoetherianRing 𝒪]
     (ω : H →* 𝒪ˣ) (M : Type*) [AddCommGroup M] [Module (IwasawaAlgebraGroup 𝒪 H) M]
     [Module.Finite (IwasawaAlgebraGroup 𝒪 H) M]
     (hM : Module.IsTorsion (IwasawaAlgebraGroup 𝒪 H) M) :
@@ -295,7 +297,8 @@ noncomputable def charIdealComponent [Invertible (Fintype.card H : 𝒪)] [IsNoe
 /-- The **equivariant characteristic ideal** `Ch_{Λ(𝒢)}(M) = ⨁_ω Ch_Λ(M^{(ω)})`
 (RJW TeX 3672–3676): under `Λ(𝒢) ≅ ∏_ω Λ` this is the product of the component characteristic
 ideals `Ch_Λ(M^{(ω)})` (S13-S4), realised as `⨅_ω φ_ω⁻¹(Ch_Λ(M^{(ω)}))`. -/
-noncomputable def charIdealGroup [Invertible (Fintype.card H : 𝒪)] [IsNoetherianRing 𝒪]
+noncomputable def charIdealGroup [IsDomain 𝒪] [Invertible (Fintype.card H : 𝒪)]
+    [IsNoetherianRing 𝒪]
     (M : Type*) [AddCommGroup M] [Module (IwasawaAlgebraGroup 𝒪 H) M]
     [Module.Finite (IwasawaAlgebraGroup 𝒪 H) M]
     (hM : Module.IsTorsion (IwasawaAlgebraGroup 𝒪 H) M) :
