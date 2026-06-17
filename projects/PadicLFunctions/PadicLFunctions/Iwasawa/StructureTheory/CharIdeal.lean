@@ -178,14 +178,28 @@ variable {M M' M'' : Type*}
   [AddCommGroup M'] [Module (IwasawaAlgebra 𝒪) M'] [Module.Finite (IwasawaAlgebra 𝒪) M']
   [AddCommGroup M''] [Module (IwasawaAlgebra 𝒪) M''] [Module.Finite (IwasawaAlgebra 𝒪) M'']
 
+/-- **`localMult` is a pseudo-isomorphism invariant.**  At a height-one prime `P`, the finite
+kernel and cokernel of the comparison map `M → M'` vanish on localising (a finite Λ-module
+localises to `0` away from the maximal ideal — its annihilator has finite index, hence is not
+contained in the height-one `P`), so `M_P ≅ M'_P` and the local multiplicities agree.
+Assembled from `localMult_add_of_exact` on the two short exact sequences `0 → ker f → M →
+im f → 0` and `0 → im f → M' → coker f → 0`. -/
+theorem localMult_eq_of_pseudoIso [IsDomain 𝒪] [IsPrincipalIdealRing 𝒪]
+    (P : Ideal (IwasawaAlgebra 𝒪)) [P.IsPrime] (hP1 : P.height = 1)
+    (h : IsPseudoIso 𝒪 M M') : localMult 𝒪 P M = localMult 𝒪 P M' := by
+  sorry
+
 /-- **Well-definedness of the characteristic ideal**: it depends only on the
-pseudo-isomorphism class of `M`.  In particular a finite (pseudo-null) module has
-characteristic ideal `⊤ = (1)`.  (The `gᵢ^eᵢ` data is the pseudo-iso invariant of
-the structure theorem.) -/
-theorem charIdeal_eq_of_pseudoIso (hM : Module.IsTorsion (IwasawaAlgebra 𝒪) M)
+pseudo-isomorphism class of `M` (`localMult_eq_of_pseudoIso` at each height-one prime).  In
+particular a finite (pseudo-null) module has characteristic ideal `⊤ = (1)`. -/
+theorem charIdeal_eq_of_pseudoIso [IsDomain 𝒪] [IsPrincipalIdealRing 𝒪]
+    (hM : Module.IsTorsion (IwasawaAlgebra 𝒪) M)
     (hM' : Module.IsTorsion (IwasawaAlgebra 𝒪) M') (h : IsPseudoIso 𝒪 M M') :
     charIdeal 𝒪 M hM = charIdeal 𝒪 M' hM' := by
-  sorry
+  rw [charIdeal, charIdeal]
+  refine finprod_congr (fun P => ?_)
+  haveI := P.2.1
+  rw [localMult_eq_of_pseudoIso P.1 P.2.2 h]
 
 /-- **Multiplicativity of the characteristic ideal in short exact sequences**
 (CS06, App. A.1, Prop 1; RJW TeX 3679–3681): given `0 → M' → M → M'' → 0` with
