@@ -395,6 +395,346 @@ private theorem discreteTopology_presheafValue {A : Type*} [CommRing A]
       rw [Set.image_preimage_eq _ hsurj]]
     exact hopen.isOpenMap _ (isOpen_discrete _)⟩
 
+open Classical in
+/-- The images `{algebraMap A (Away C.base.s) D.s | D ∈ C.covers}` generate the unit
+ideal in `Away C.base.s`. This is the covering-implies-unit-ideal condition: if the
+span were proper it would sit in a maximal (hence prime) ideal `q`; pulling `q` back
+to a prime `p` of `A` with `C.base.s ∉ p` and all `D.s ∈ p` produces a trivial
+valuation in `rationalOpen C.base.T C.base.s` not covered by any piece, contradicting
+`C.hcover`. Extracted from the `hspan_top` step of `discrete_gluing`. -/
+private theorem discrete_gluing_span_top {A : Type*} [CommRing A]
+    [TopologicalSpace A] [IsTopologicalRing A] [PlusSubring A] [DiscreteTopology A]
+    [IsHuberRing A] (C : RationalCovering A) :
+    Ideal.span (↑(C.covers.image
+      (fun D ↦ algebraMap A (Localization.Away C.base.s) D.s)) :
+      Set (Localization.Away C.base.s)) = ⊤ := by
+  classical
+  -- C.base.s is in the radical of span {D.s | D ∈ covers} in A
+  -- (by the covering condition + trivial valuation at primes).
+  -- So C.base.s^M ∈ span {D.s} for some M.
+  -- In Away C.base.s, algebraMap(C.base.s)^M is a unit, so 1 ∈ span {algebraMap D.s}.
+  -- Direct proof via by_contra: if span ≠ ⊤, it's contained in a maximal (prime) ideal.
+  -- Pull back to A to get a prime p of A not containing C.base.s but containing all D.s.
+  -- The covering condition gives a contradiction.
+  by_contra hne
+  obtain ⟨q, hq_max, hq_le⟩ := Ideal.exists_le_maximal _ hne
+  haveI : q.IsPrime := Ideal.IsMaximal.isPrime hq_max
+  -- q is a prime of Away C.base.s containing all algebraMap(D.s).
+  -- The comap p = q.comap(algebraMap) is a prime of A with C.base.s ∉ p.
+  set p := q.comap (algebraMap A (Localization.Away C.base.s)) with hp_def
+  have hp_prime : p.IsPrime := Ideal.IsPrime.comap _
+  have hDs_in : ∀ D ∈ C.covers, D.s ∈ p := by
+    intro D hD
+    exact hq_le (Ideal.subset_span
+      (Finset.mem_coe.mpr (Finset.mem_image.mpr ⟨D, hD, rfl⟩)))
+  have hbs_notin : C.base.s ∉ p := by
+    intro hmem
+    -- hmem : C.base.s ∈ p = q.comap(algebraMap), so algebraMap(C.base.s) ∈ q
+    have : algebraMap A (Localization.Away C.base.s) C.base.s ∈ q := hmem
+    exact Ideal.IsMaximal.ne_top hq_max (Ideal.eq_top_of_isUnit_mem q this
+      (IsLocalization.map_units (Localization.Away C.base.s)
+        (⟨C.base.s, 1, pow_one _⟩ : Submonoid.powers C.base.s)))
+  -- Use the covering condition to get a contradiction.
+  haveI := hp_prime
+  haveI : IsDomain (A ⧸ p) := Ideal.Quotient.isDomain p
+  let φ : A →+* FractionRing (A ⧸ p) :=
+    (algebraMap (A ⧸ p) (FractionRing (A ⧸ p))).comp (Ideal.Quotient.mk p)
+  let w : Valuation A (WithZero (Multiplicative ℤ)) :=
+    (1 : Valuation (FractionRing (A ⧸ p)) _).comap φ
+  let v := ofValuation w
+  have hv_spa : v ∈ Spa A A⁺ := by
+    refine ⟨?_, ?_⟩
+    · apply isContinuous_ofValuation_of; intro γ; exact isOpen_discrete _
+    · intro f _; change w f ≤ w 1
+      simp only [w, Valuation.comap_apply, map_one]; exact Valuation.one_apply_le_one _
+  have hv_supp : v.supp = p := by
+    rw [supp_ofValuation]; ext b
+    simp only [Valuation.mem_supp_iff, w, Valuation.comap_apply, φ,
+      RingHom.comp_apply, Valuation.one_apply_eq_zero_iff]
+    exact ⟨fun h ↦ Ideal.Quotient.eq_zero_iff_mem.mp
+      ((IsFractionRing.injective (A ⧸ p) (FractionRing (A ⧸ p))).eq_iff.mp
+        (by rwa [map_zero])),
+      fun hb ↦ by rw [Ideal.Quotient.eq_zero_iff_mem.mpr hb, map_zero]⟩
+  have hw_s : w C.base.s = 1 := by
+    simp only [w, Valuation.comap_apply, φ, RingHom.comp_apply]
+    apply Valuation.one_apply_of_ne_zero; intro heq; apply hbs_notin
+    exact Ideal.Quotient.eq_zero_iff_mem.mp
+      ((IsFractionRing.injective (A ⧸ p) (FractionRing (A ⧸ p))).eq_iff.mp
+        (by rwa [map_zero]))
+  have hv_rat : v ∈ rationalOpen C.base.T C.base.s :=
+    ⟨hv_spa,
+      fun t _ ↦ by
+        change w t ≤ w C.base.s; rw [hw_s]
+        simp only [w, Valuation.comap_apply]
+        exact Valuation.one_apply_le_one _,
+      by change ¬ (w C.base.s ≤ w 0)
+         simp only [hw_s, map_zero, le_zero_iff, one_ne_zero, not_false_eq_true, w]⟩
+  obtain ⟨D, hD, hv_D⟩ := C.hcover v hv_rat
+  exact (fun hDs ↦ hv_D.2.2 ((v.mem_supp_iff D.s).mp (hv_supp ▸ hDs)))
+    (hDs_in D hD)
+
+/-- **Numerator compatibility** for the discrete gluing core. Given local fractions
+`g D = algebraMap (r' D) / D.s^N₀` realizing `f` (via `hg : f D = D.coeRingHom (g D)`),
+for each pair `(D₁, D₂)` the numerators agree up to a power of `D₁.s * D₂.s`:
+`∃ k, (D₁.s * D₂.s)^k * (r' D₁ * D₂.s^N₀) = (D₁.s * D₂.s)^k * (r' D₂ * D₁.s^N₀)`.
+The proof builds the common refinement `D₃` with `s₃ = D₁.s * D₂.s` (its `hopen` is
+vacuous because `D₁.P.I` is nilpotent in the discrete case), transports `hcompat` to
+`ψ₁ (g D₁) = ψ₂ (g D₂)` in `Away D₃.s` through the bijective `coeRingHom`, cross-multiplies
+with `hr'`, and reads off the annihilating power via `IsLocalization.Away.exists_of_eq`.
+Extracted from the `hcompat_pow` step of `discrete_gluing`. -/
+private theorem discrete_gluing_numerator_compat {A : Type*} [CommRing A]
+    [TopologicalSpace A] [IsTopologicalRing A] [PlusSubring A] [DiscreteTopology A]
+    [IsHuberRing A] (C : RationalCovering A)
+    (f : ∀ (D : ↥C.covers), presheafValue D.1)
+    (hcompat : ∀ (D₁ D₂ : ↥C.covers) (D₃ : RationalLocData A)
+       (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
+       (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₂.1.T D₂.1.s),
+       restrictionMap D₁.1 D₃ h₃₁ (f D₁) = restrictionMap D₂.1 D₃ h₃₂ (f D₂))
+    (g : ∀ D : ↥C.covers, Localization.Away D.1.s)
+    (hg : ∀ D : ↥C.covers, f D = D.1.coeRingHom (g D))
+    (N₀ : ℕ) (r' : ↥C.covers → A)
+    (hr' : ∀ D : ↥C.covers,
+        g D * (algebraMap A (Localization.Away D.1.s) D.1.s) ^ N₀ =
+        algebraMap A _ (r' D)) :
+    ∀ (D₁ D₂ : ↥C.covers), ∃ k : ℕ,
+        (D₁.1.s * D₂.1.s) ^ k * (r' D₁ * D₂.1.s ^ N₀) =
+        (D₁.1.s * D₂.1.s) ^ k * (r' D₂ * D₁.1.s ^ N₀) := by
+  open scoped Pointwise in
+  intro D₁ D₂
+  -- Construct the common refinement D₃ : RationalLocData A with s₃ = D₁.s * D₂.s.
+  -- For discrete rings, the pair of definition has nilpotent I, making hopen vacuous.
+  have hI_nilp : ∃ M : ℕ, D₁.1.P.I ^ M = ⊥ := by
+    have hI_le : D₁.1.P.I ≤ nilradical D₁.1.P.A₀ := by
+      intro ⟨a, ha⟩ haI
+      have htn := D₁.1.P.isTopologicallyNilpotent_of_mem haI
+      have h0 : ({0} : Set A) ∈ nhds (0 : A) := (isOpen_discrete {0}).mem_nhds rfl
+      obtain ⟨N, hN⟩ := Filter.mem_atTop_sets.mp (htn h0)
+      exact ⟨N, Subtype.val_injective (by
+        simp only [SubmonoidClass.mk_pow, Set.mem_singleton_iff.mp (hN N le_rfl),
+          ZeroMemClass.coe_zero])⟩
+    exact (Ideal.FG.isNilpotent_iff_le_nilradical D₁.1.P.fg).mpr hI_le
+  obtain ⟨M, hIM⟩ := hI_nilp
+  haveI : DecidableEq A := Classical.decEq A
+  let D₃ : RationalLocData A :=
+    { P := D₁.1.P
+      T := insert D₁.1.s D₁.1.T * insert D₂.1.s D₂.1.T
+      s := D₁.1.s * D₂.1.s
+      hopen := ⟨M, fun b hb ↦ by
+        have hb0 : (b : D₁.1.P.A₀) = 0 := by
+          have := hIM ▸ hb; rwa [Ideal.mem_bot] at this
+        rw [show (↑b : A) = 0 from by rw [hb0]; rfl]
+        unfold divByS
+        rw [IsLocalization.mk'_zero]
+        exact (locSubring D₁.1.P _ _).zero_mem⟩ }
+  -- D₃ refines both D₁ and D₂ via rationalOpen_inter.
+  have h₃ : rationalOpen D₃.T D₃.s =
+      rationalOpen D₁.1.T D₁.1.s ∩ rationalOpen D₂.1.T D₂.1.s := by
+    change rationalOpen (insert D₁.1.s D₁.1.T * insert D₂.1.s D₂.1.T) (D₁.1.s * D₂.1.s) =
+      rationalOpen D₁.1.T D₁.1.s ∩ rationalOpen D₂.1.T D₂.1.s
+    rw [← rationalOpen_inter _ _ _ _ (Finset.mem_insert_self _ _)
+      (Finset.mem_insert_self _ _), rationalOpen_insert_s, rationalOpen_insert_s]
+  have h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s :=
+    h₃ ▸ Set.inter_subset_left
+  have h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₂.1.T D₂.1.s :=
+    h₃ ▸ Set.inter_subset_right
+  -- From hcompat: the restrictions of f D₁ and f D₂ to D₃ agree.
+  have hcompat₃ := hcompat D₁ D₂ D₃ h₃₁ h₃₂
+  -- Transport to the localization level: restrictionMapAlg sends g to g.
+  -- restrictionMap = restrictionMapHom = extensionHom(restrictionMapAlg).
+  -- For discrete rings, coeRingHom is bijective, so
+  -- restrictionMap(coeRingHom x) = coeRingHom(restrictionMapAlg x).
+  -- Since coeRingHom is injective, the equality of restrictions implies
+  -- restrictionMapAlg D₁ D₃ (g D₁) = restrictionMapAlg D₂ D₃ (g D₂).
+  have hbij₃ := coeRingHom_bijective_of_discrete D₃
+  -- The lifts from Away(D_i.s) to Away(D₃.s)
+  have hunit_prod : IsUnit (algebraMap A (Localization.Away D₃.s) (D₁.1.s * D₂.1.s)) :=
+    IsLocalization.Away.algebraMap_isUnit D₃.s
+  rw [map_mul] at hunit_prod
+  set ψ₁ : Localization.Away D₁.1.s →+* Localization.Away D₃.s :=
+    IsLocalization.Away.lift D₁.1.s (isUnit_of_mul_isUnit_left hunit_prod)
+  set ψ₂ : Localization.Away D₂.1.s →+* Localization.Away D₃.s :=
+    IsLocalization.Away.lift D₂.1.s (isUnit_of_mul_isUnit_right hunit_prod)
+  -- Key property: ψ_i ∘ algebraMap = algebraMap
+  have hψ₁_alg : ∀ a : A, ψ₁ (algebraMap A _ a) = algebraMap A _ a := by
+    intro a; exact IsLocalization.Away.lift_eq
+      (x := D₁.1.s) (isUnit_of_mul_isUnit_left hunit_prod) a
+  have hψ₂_alg : ∀ a : A, ψ₂ (algebraMap A _ a) = algebraMap A _ a := by
+    intro a; exact IsLocalization.Away.lift_eq
+      (x := D₂.1.s) (isUnit_of_mul_isUnit_right hunit_prod) a
+  -- From hcompat₃ and bijectivity: ψ₁(g D₁) = ψ₂(g D₂) in Away(D₃.s).
+  have hg_eq : ψ₁ (g D₁) = ψ₂ (g D₂) := by
+    -- restrictionMap D_i D₃ h (f D_i) passes through coeRingHom and restrictionMapAlg.
+    -- restrictionMapAlg D_i D₃ = IsLocalization.Away.lift D_i.s (isUnit_canonicalMap_s ...)
+    -- But canonicalMap_s = coeRingHom ∘ algebraMap, and isUnit comes from the subset.
+    -- We need to identify restrictionMapAlg D_i D₃ with the same map as ψ_i.
+    -- Both are determined by their action on A (via algebraMap) and the unit condition.
+    have hψ₁_eq : (restrictionMapAlg D₁.1 D₃ h₃₁ :
+        Localization.Away D₁.1.s →+* presheafValue D₃) =
+        D₃.coeRingHom.comp ψ₁ := by
+      apply IsLocalization.ringHom_ext (Submonoid.powers D₁.1.s); ext a
+      simp [restrictionMapAlg, RationalLocData.canonicalMap,
+        RationalLocData.coeRingHom, hψ₁_alg]
+    have hψ₂_eq : (restrictionMapAlg D₂.1 D₃ h₃₂ :
+        Localization.Away D₂.1.s →+* presheafValue D₃) =
+        D₃.coeRingHom.comp ψ₂ := by
+      apply IsLocalization.ringHom_ext (Submonoid.powers D₂.1.s); ext a
+      simp [restrictionMapAlg, RationalLocData.canonicalMap,
+        RationalLocData.coeRingHom, hψ₂_alg]
+    -- From hcompat₃: restrictionMap D₁ D₃ h₃₁ (f D₁) = restrictionMap D₂ D₃ h₃₂ (f D₂)
+    -- f D_i = e(D_i)(g D_i) = D_i.coeRingHom(g D_i)
+    -- restrictionMap(coeRingHom(g D_i)) = restrictionMapAlg(g D_i) (by restrictionMapHom_coe)
+    have hLHS : restrictionMap D₁.1 D₃ h₃₁ (f D₁) =
+        restrictionMapAlg D₁.1 D₃ h₃₁ (g D₁) := by
+      change restrictionMapHom D₁.1 D₃ h₃₁ (f D₁) = _
+      have hf₁ : f D₁ = D₁.1.coeRingHom (g D₁) := hg D₁
+      rw [hf₁]
+      letI := D₁.1.uniformSpace; letI := D₁.1.isTopologicalRing
+      letI := D₁.1.isUniformAddGroup
+      letI := D₃.uniformSpace; letI := D₃.isTopologicalRing
+      letI := D₃.isUniformAddGroup
+      exact UniformSpace.Completion.extensionHom_coe
+        (restrictionMapAlg D₁.1 D₃ h₃₁)
+        (restrictionMapAlg_continuous D₁.1 D₃ h₃₁) (g D₁)
+    have hRHS : restrictionMap D₂.1 D₃ h₃₂ (f D₂) =
+        restrictionMapAlg D₂.1 D₃ h₃₂ (g D₂) := by
+      change restrictionMapHom D₂.1 D₃ h₃₂ (f D₂) = _
+      have hf₂ : f D₂ = D₂.1.coeRingHom (g D₂) := hg D₂
+      rw [hf₂]
+      letI := D₂.1.uniformSpace; letI := D₂.1.isTopologicalRing
+      letI := D₂.1.isUniformAddGroup
+      letI := D₃.uniformSpace; letI := D₃.isTopologicalRing
+      letI := D₃.isUniformAddGroup
+      exact UniformSpace.Completion.extensionHom_coe
+        (restrictionMapAlg D₂.1 D₃ h₃₂)
+        (restrictionMapAlg_continuous D₂.1 D₃ h₃₂) (g D₂)
+    rw [hLHS, hRHS] at hcompat₃
+    -- Now hcompat₃ : restrictionMapAlg D₁ D₃ (g D₁) = restrictionMapAlg D₂ D₃ (g D₂)
+    -- Using hψ₁_eq, hψ₂_eq: D₃.coeRingHom(ψ₁(g D₁)) = D₃.coeRingHom(ψ₂(g D₂))
+    rw [hψ₁_eq, hψ₂_eq] at hcompat₃
+    simp only [RingHom.comp_apply] at hcompat₃
+    exact hbij₃.1 hcompat₃
+  -- From hr' and the lifts: ψ_i(algebraMap(r' D_i)) = algebraMap(r' D_i) in Away(D₃.s).
+  -- And ψ_i(g D_i * algebraMap(D_i.s)^N₀) = ψ_i(g D_i) * algebraMap(D_i.s)^N₀.
+  -- So algebraMap(r' D₁) = ψ₁(g D₁) * algebraMap(D₁.s)^N₀ in Away(D₃.s).
+  have hcross : algebraMap A (Localization.Away D₃.s) (r' D₁ * D₂.1.s ^ N₀) =
+      algebraMap A (Localization.Away D₃.s) (r' D₂ * D₁.1.s ^ N₀) := by
+    have hr₁ : ψ₁ (g D₁) * (algebraMap A (Localization.Away D₃.s) D₁.1.s) ^ N₀ =
+        algebraMap A _ (r' D₁) := by
+      have := congr_arg ψ₁ (hr' D₁)
+      simp only [map_mul, map_pow, hψ₁_alg] at this; exact this
+    have hr₂ : ψ₂ (g D₂) * (algebraMap A (Localization.Away D₃.s) D₂.1.s) ^ N₀ =
+        algebraMap A _ (r' D₂) := by
+      have := congr_arg ψ₂ (hr' D₂)
+      simp only [map_mul, map_pow, hψ₂_alg] at this; exact this
+    -- Cross-multiply: both sides equal ψ₁(g D₁) * D₁.s^N₀ * D₂.s^N₀.
+    simp only [map_mul, map_pow]
+    calc algebraMap A _ (r' D₁) * algebraMap A _ D₂.1.s ^ N₀
+        = ψ₁ (g D₁) * (algebraMap A _ D₁.1.s) ^ N₀ * (algebraMap A _ D₂.1.s) ^ N₀ := by
+          rw [hr₁]
+      _ = ψ₂ (g D₂) * (algebraMap A _ D₁.1.s) ^ N₀ * (algebraMap A _ D₂.1.s) ^ N₀ := by
+          rw [hg_eq]
+      _ = ψ₂ (g D₂) * (algebraMap A _ D₂.1.s) ^ N₀ * (algebraMap A _ D₁.1.s) ^ N₀ := by
+          ring
+      _ = algebraMap A _ (r' D₂) * (algebraMap A _ D₁.1.s) ^ N₀ := by
+          rw [hr₂]
+  -- Extract the power annihilation from the localization equality.
+  -- In Away(D₁.s * D₂.s), equality means ∃ k, (D₁.s * D₂.s)^k * diff = 0.
+  exact IsLocalization.Away.exists_of_eq (x := D₁.1.s * D₂.1.s) hcross
+
+open Classical in
+/-- **Partition-of-unity construction** for the discrete gluing core. Given lift maps
+`φ D : Away C.base.s →+* Away D.s` over `algebraMap` (`hφ_alg`), uniform numerators `r''`
+with `g D * algebraMap(D.s)^N = algebraMap(r'' D)` (`hr''`) that are pairwise compatible
+(`hcompat_r''`), and the unit-ideal span (`hspan_top`), there is a single
+`x' : Away C.base.s` with `φ D' x' = g D'` for every `D'`. Choose a partition
+`∑ c_D * algebraMap(D.s)^N = 1` from `hspan_top`, set `x' = ∑ c_D * algebraMap(r'' D)`,
+and verify `φ D'` after multiplying by the unit `algebraMap(D'.s)^N`, using `hcompat_r''`
+to move the numerator past the sum. Extracted from the partition-of-unity tail of
+`discrete_gluing`. -/
+private theorem discrete_gluing_partition_of_unity {A : Type*} [CommRing A]
+    [TopologicalSpace A] [IsTopologicalRing A] [PlusSubring A] [DiscreteTopology A]
+    [IsHuberRing A] (C : RationalCovering A)
+    (g : ∀ D : ↥C.covers, Localization.Away D.1.s)
+    (φ : ∀ D : ↥C.covers, Localization.Away C.base.s →+* Localization.Away D.1.s)
+    (hφ_alg : ∀ (D : ↥C.covers) (a : A),
+        φ D (algebraMap A (Localization.Away C.base.s) a) = algebraMap A _ a)
+    (N : ℕ) (r'' : ↥C.covers → A)
+    (hr'' : ∀ D : ↥C.covers,
+        g D * (algebraMap A (Localization.Away D.1.s) D.1.s) ^ N =
+        algebraMap A _ (r'' D))
+    (hcompat_r'' : ∀ (D₁ D₂ : ↥C.covers),
+        algebraMap A (Localization.Away C.base.s) (r'' D₁ * D₂.1.s ^ N) =
+        algebraMap A (Localization.Away C.base.s) (r'' D₂ * D₁.1.s ^ N))
+    (hspan_top : Ideal.span (↑(C.covers.image
+      (fun D ↦ algebraMap A (Localization.Away C.base.s) D.s)) :
+      Set (Localization.Away C.base.s)) = ⊤) :
+    ∃ x' : Localization.Away C.base.s, ∀ D' : ↥C.covers, φ D' x' = g D' := by
+  classical
+  -- Step 5: Partition of unity.
+  have hspan_range : Ideal.span (Set.range
+      (fun D : ↥C.covers ↦ (algebraMap A (Localization.Away C.base.s) D.1.s) ^ N)) = ⊤ := by
+    rw [eq_top_iff, ← Ideal.span_pow_eq_top _ hspan_top N]
+    apply Ideal.span_mono
+    intro x hx
+    -- hx : x ∈ (fun x ↦ x ^ N) '' ↑(C.covers.image (fun D ↦ algebraMap A R D.s))
+    obtain ⟨y, hy, rfl⟩ := hx
+    have hmem := hy
+    rw [Finset.mem_coe, Finset.mem_image] at hmem
+    obtain ⟨D, hD, rfl⟩ := hmem
+    exact ⟨⟨D, hD⟩, rfl⟩
+  rw [Ideal.eq_top_iff_one] at hspan_range
+  obtain ⟨c, hc⟩ := Ideal.mem_span_range_iff_exists_fun.mp hspan_range
+  -- hc : ∑ D, c D * (algebraMap A R D.1.s) ^ N = 1
+  -- Step 6: Define x'.
+  -- x' = ∑ D, c D * algebraMap A R (r'' D)
+  refine ⟨∑ D : ↥C.covers, c D * algebraMap A (Localization.Away C.base.s) (r'' D),
+    fun D' ↦ ?_⟩
+  -- Step 7: Verify φ_{D'}(x') = g D'.
+  -- φ_{D'}(x') * (algebraMap D'.s)^N = algebraMap(r'' D'), and
+  -- g D' * (algebraMap D'.s)^N = algebraMap(r'' D'), so cancel the unit.
+  -- (algebraMap D'.s)^N is a unit in Away D'.s
+  have hunit_N : IsUnit ((algebraMap A (Localization.Away D'.1.s) D'.1.s) ^ N) :=
+    IsUnit.pow N (IsLocalization.Away.algebraMap_isUnit D'.1.s)
+  apply hunit_N.mul_left_cancel
+  rw [mul_comm _ (g D'), hr'' D']
+  -- Goal: (algebraMap D'.s)^N * φ(∑ c_D * algebraMap(r'' D)) = algebraMap(r'' D')
+  -- φ distributes over the sum.
+  simp only [map_sum, map_mul, hφ_alg]
+  -- After map_sum, map_mul, hφ_alg, the goal is:
+  -- (algebraMap D'.s)^N * ∑ D, φ D' (c D) * algebraMap A _ (r'' D) = algebraMap(r'' D')
+  rw [Finset.mul_sum]
+  -- Goal: ∑ D, (algebraMap D'.s)^N * (φ D' (c D) * algebraMap(r'' D)) = algebraMap(r'' D')
+  -- Rewrite each summand using hcompat_r''.
+  have key : ∀ D : ↥C.covers,
+      (algebraMap A (Localization.Away D'.1.s) D'.1.s) ^ N *
+      (φ D' (c D) * algebraMap A _ (r'' D)) =
+      φ D' (c D) * (algebraMap A _ (r'' D') *
+        (algebraMap A (Localization.Away D'.1.s) D.1.s) ^ N) := by
+    intro D
+    rw [← mul_assoc, mul_comm ((algebraMap A _ D'.1.s) ^ N) _, mul_assoc]
+    congr 1
+    -- Need: (algebraMap D'.s)^N * algebraMap(r'' D) = algebraMap(r'' D') * (algebraMap D.s)^N
+    -- From hcompat_r'': algebraMap A R (r'' D * D'.s^N) = algebraMap A R (r'' D' * D.s^N)
+    -- Apply φ D' to both sides, using hφ_alg.
+    have h := congr_arg (φ D') (hcompat_r'' D D')
+    simp only [map_mul, map_pow, hφ_alg] at h
+    -- h : algebraMap(r'' D) * algebraMap(D'.s)^N = algebraMap(r'' D') * algebraMap(D.s)^N
+    rw [mul_comm]; exact h
+  simp_rw [key]
+  -- Goal: ∑ D, φ D' (c D) * (algebraMap(r'' D') * (algebraMap D.s)^N) = algebraMap(r'' D')
+  simp_rw [mul_comm (algebraMap A _ (r'' D')) _, ← mul_assoc, ← Finset.sum_mul,
+    mul_comm _ (algebraMap A _ (r'' D'))]
+  -- Goal: (∑ D, φ D' (c D) * (algebraMap D.s)^N) * algebraMap(r'' D') = algebraMap(r'' D')
+  suffices hone : (∑ D, φ D' (c D) *
+      (algebraMap A (Localization.Away D'.1.s) D.1.s) ^ N) = 1 by
+    rw [hone, mul_one]
+  -- The sum equals φ D' (∑ D, c D * (algebraMap A R D.s)^N) = φ D' 1 = 1.
+  have : ∀ D : ↥C.covers,
+      φ D' (c D) * (algebraMap A (Localization.Away D'.1.s) D.1.s) ^ N =
+      φ D' (c D * (algebraMap A (Localization.Away C.base.s) D.1.s) ^ N) := by
+    intro D; rw [map_mul, map_pow, hφ_alg]
+  simp_rw [this, ← map_sum, hc, map_one]
+
 /-- **Discrete gluing lemma**: given compatible sections in presheafValues of cover
 pieces, there exists a global section in the base presheafValue that restricts to
 each given section.
@@ -474,70 +814,8 @@ private theorem discrete_gluing {A : Type*} [CommRing A]
   -- Uses: C.base.s ∈ radical(span {D.s}) in A ⟹ span = ⊤ in Away C.base.s.
   have hspan_top : Ideal.span (↑(C.covers.image
     (fun D ↦ algebraMap A (Localization.Away C.base.s) D.s)) :
-    Set (Localization.Away C.base.s)) = ⊤ := by
-    -- C.base.s is in the radical of span {D.s | D ∈ covers} in A
-    -- (by the covering condition + trivial valuation at primes).
-    -- So C.base.s^M ∈ span {D.s} for some M.
-    -- In Away C.base.s, algebraMap(C.base.s)^M is a unit, so 1 ∈ span {algebraMap D.s}.
-    -- Direct proof via by_contra: if span ≠ ⊤, it's contained in a maximal (prime) ideal.
-    -- Pull back to A to get a prime p of A not containing C.base.s but containing all D.s.
-    -- The covering condition gives a contradiction.
-    by_contra hne
-    obtain ⟨q, hq_max, hq_le⟩ := Ideal.exists_le_maximal _ hne
-    haveI : q.IsPrime := Ideal.IsMaximal.isPrime hq_max
-    -- q is a prime of Away C.base.s containing all algebraMap(D.s).
-    -- The comap p = q.comap(algebraMap) is a prime of A with C.base.s ∉ p.
-    set p := q.comap (algebraMap A (Localization.Away C.base.s)) with hp_def
-    have hp_prime : p.IsPrime := Ideal.IsPrime.comap _
-    have hDs_in : ∀ D ∈ C.covers, D.s ∈ p := by
-      intro D hD
-      exact hq_le (Ideal.subset_span
-        (Finset.mem_coe.mpr (Finset.mem_image.mpr ⟨D, hD, rfl⟩)))
-    have hbs_notin : C.base.s ∉ p := by
-      intro hmem
-      -- hmem : C.base.s ∈ p = q.comap(algebraMap), so algebraMap(C.base.s) ∈ q
-      have : algebraMap A (Localization.Away C.base.s) C.base.s ∈ q := hmem
-      exact Ideal.IsMaximal.ne_top hq_max (Ideal.eq_top_of_isUnit_mem q this
-        (IsLocalization.map_units (Localization.Away C.base.s)
-          (⟨C.base.s, 1, pow_one _⟩ : Submonoid.powers C.base.s)))
-    -- Use the covering condition to get a contradiction.
-    haveI := hp_prime
-    haveI : IsDomain (A ⧸ p) := Ideal.Quotient.isDomain p
-    let φ : A →+* FractionRing (A ⧸ p) :=
-      (algebraMap (A ⧸ p) (FractionRing (A ⧸ p))).comp (Ideal.Quotient.mk p)
-    let w : Valuation A (WithZero (Multiplicative ℤ)) :=
-      (1 : Valuation (FractionRing (A ⧸ p)) _).comap φ
-    let v := ofValuation w
-    have hv_spa : v ∈ Spa A A⁺ := by
-      refine ⟨?_, ?_⟩
-      · apply isContinuous_ofValuation_of; intro γ; exact isOpen_discrete _
-      · intro f _; change w f ≤ w 1
-        simp only [w, Valuation.comap_apply, map_one]; exact Valuation.one_apply_le_one _
-    have hv_supp : v.supp = p := by
-      rw [supp_ofValuation]; ext b
-      simp only [Valuation.mem_supp_iff, w, Valuation.comap_apply, φ,
-        RingHom.comp_apply, Valuation.one_apply_eq_zero_iff]
-      exact ⟨fun h ↦ Ideal.Quotient.eq_zero_iff_mem.mp
-        ((IsFractionRing.injective (A ⧸ p) (FractionRing (A ⧸ p))).eq_iff.mp
-          (by rwa [map_zero])),
-        fun hb ↦ by rw [Ideal.Quotient.eq_zero_iff_mem.mpr hb, map_zero]⟩
-    have hw_s : w C.base.s = 1 := by
-      simp only [w, Valuation.comap_apply, φ, RingHom.comp_apply]
-      apply Valuation.one_apply_of_ne_zero; intro heq; apply hbs_notin
-      exact Ideal.Quotient.eq_zero_iff_mem.mp
-        ((IsFractionRing.injective (A ⧸ p) (FractionRing (A ⧸ p))).eq_iff.mp
-          (by rwa [map_zero]))
-    have hv_rat : v ∈ rationalOpen C.base.T C.base.s :=
-      ⟨hv_spa,
-        fun t _ ↦ by
-          change w t ≤ w C.base.s; rw [hw_s]
-          simp only [w, Valuation.comap_apply]
-          exact Valuation.one_apply_le_one _,
-        by change ¬ (w C.base.s ≤ w 0)
-           simp only [hw_s, map_zero, le_zero_iff, one_ne_zero, not_false_eq_true, w]⟩
-    obtain ⟨D, hD, hv_D⟩ := C.hcover v hv_rat
-    exact (fun hDs ↦ hv_D.2.2 ((v.mem_supp_iff D.s).mp (hv_supp ▸ hDs)))
-      (hDs_in D hD)
+    Set (Localization.Away C.base.s)) = ⊤ :=
+    discrete_gluing_span_top C
   -- Step 5: Apply the gluing theorem.
   -- For each D ∈ covers, Away D.s = (Away C.base.s)[1/(algebraMap D.s)]
   -- by isLocAway_of_isUnit.
@@ -637,148 +915,9 @@ private theorem discrete_gluing {A : Type*} [CommRing A]
     -- Step 3a: Compatibility in Away(D₁.s * D₂.s) for each pair.
     have hcompat_pow : ∀ (D₁ D₂ : ↥C.covers), ∃ k : ℕ,
         (D₁.1.s * D₂.1.s) ^ k * (r' D₁ * D₂.1.s ^ N₀) =
-        (D₁.1.s * D₂.1.s) ^ k * (r' D₂ * D₁.1.s ^ N₀) := by
-      open scoped Pointwise in
-      intro D₁ D₂
-      -- Construct the common refinement D₃ : RationalLocData A with s₃ = D₁.s * D₂.s.
-      -- For discrete rings, the pair of definition has nilpotent I, making hopen vacuous.
-      have hI_nilp : ∃ M : ℕ, D₁.1.P.I ^ M = ⊥ := by
-        have hI_le : D₁.1.P.I ≤ nilradical D₁.1.P.A₀ := by
-          intro ⟨a, ha⟩ haI
-          have htn := D₁.1.P.isTopologicallyNilpotent_of_mem haI
-          have h0 : ({0} : Set A) ∈ nhds (0 : A) := (isOpen_discrete {0}).mem_nhds rfl
-          obtain ⟨N, hN⟩ := Filter.mem_atTop_sets.mp (htn h0)
-          exact ⟨N, Subtype.val_injective (by
-            simp only [SubmonoidClass.mk_pow, Set.mem_singleton_iff.mp (hN N le_rfl),
-              ZeroMemClass.coe_zero])⟩
-        exact (Ideal.FG.isNilpotent_iff_le_nilradical D₁.1.P.fg).mpr hI_le
-      obtain ⟨M, hIM⟩ := hI_nilp
-      haveI : DecidableEq A := Classical.decEq A
-      let D₃ : RationalLocData A :=
-        { P := D₁.1.P
-          T := insert D₁.1.s D₁.1.T * insert D₂.1.s D₂.1.T
-          s := D₁.1.s * D₂.1.s
-          hopen := ⟨M, fun b hb ↦ by
-            have hb0 : (b : D₁.1.P.A₀) = 0 := by
-              have := hIM ▸ hb; rwa [Ideal.mem_bot] at this
-            rw [show (↑b : A) = 0 from by rw [hb0]; rfl]
-            unfold divByS
-            rw [IsLocalization.mk'_zero]
-            exact (locSubring D₁.1.P _ _).zero_mem⟩ }
-      -- D₃ refines both D₁ and D₂ via rationalOpen_inter.
-      have h₃ : rationalOpen D₃.T D₃.s =
-          rationalOpen D₁.1.T D₁.1.s ∩ rationalOpen D₂.1.T D₂.1.s := by
-        change rationalOpen (insert D₁.1.s D₁.1.T * insert D₂.1.s D₂.1.T) (D₁.1.s * D₂.1.s) =
-          rationalOpen D₁.1.T D₁.1.s ∩ rationalOpen D₂.1.T D₂.1.s
-        rw [← rationalOpen_inter _ _ _ _ (Finset.mem_insert_self _ _)
-          (Finset.mem_insert_self _ _), rationalOpen_insert_s, rationalOpen_insert_s]
-      have h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s :=
-        h₃ ▸ Set.inter_subset_left
-      have h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₂.1.T D₂.1.s :=
-        h₃ ▸ Set.inter_subset_right
-      -- From hcompat: the restrictions of f D₁ and f D₂ to D₃ agree.
-      have hcompat₃ := hcompat D₁ D₂ D₃ h₃₁ h₃₂
-      -- Transport to the localization level: restrictionMapAlg sends g to g.
-      -- restrictionMap = restrictionMapHom = extensionHom(restrictionMapAlg).
-      -- For discrete rings, coeRingHom is bijective, so
-      -- restrictionMap(coeRingHom x) = coeRingHom(restrictionMapAlg x).
-      -- Since coeRingHom is injective, the equality of restrictions implies
-      -- restrictionMapAlg D₁ D₃ (g D₁) = restrictionMapAlg D₂ D₃ (g D₂).
-      have hbij₃ := coeRingHom_bijective_of_discrete D₃
-      -- The lifts from Away(D_i.s) to Away(D₃.s)
-      have hunit_prod : IsUnit (algebraMap A (Localization.Away D₃.s) (D₁.1.s * D₂.1.s)) :=
-        IsLocalization.Away.algebraMap_isUnit D₃.s
-      rw [map_mul] at hunit_prod
-      set ψ₁ : Localization.Away D₁.1.s →+* Localization.Away D₃.s :=
-        IsLocalization.Away.lift D₁.1.s (isUnit_of_mul_isUnit_left hunit_prod)
-      set ψ₂ : Localization.Away D₂.1.s →+* Localization.Away D₃.s :=
-        IsLocalization.Away.lift D₂.1.s (isUnit_of_mul_isUnit_right hunit_prod)
-      -- Key property: ψ_i ∘ algebraMap = algebraMap
-      have hψ₁_alg : ∀ a : A, ψ₁ (algebraMap A _ a) = algebraMap A _ a := by
-        intro a; exact IsLocalization.Away.lift_eq
-          (x := D₁.1.s) (isUnit_of_mul_isUnit_left hunit_prod) a
-      have hψ₂_alg : ∀ a : A, ψ₂ (algebraMap A _ a) = algebraMap A _ a := by
-        intro a; exact IsLocalization.Away.lift_eq
-          (x := D₂.1.s) (isUnit_of_mul_isUnit_right hunit_prod) a
-      -- From hcompat₃ and bijectivity: ψ₁(g D₁) = ψ₂(g D₂) in Away(D₃.s).
-      have hg_eq : ψ₁ (g D₁) = ψ₂ (g D₂) := by
-        -- restrictionMap D_i D₃ h (f D_i) passes through coeRingHom and restrictionMapAlg.
-        -- restrictionMapAlg D_i D₃ = IsLocalization.Away.lift D_i.s (isUnit_canonicalMap_s ...)
-        -- But canonicalMap_s = coeRingHom ∘ algebraMap, and isUnit comes from the subset.
-        -- We need to identify restrictionMapAlg D_i D₃ with the same map as ψ_i.
-        -- Both are determined by their action on A (via algebraMap) and the unit condition.
-        have hψ₁_eq : (restrictionMapAlg D₁.1 D₃ h₃₁ :
-            Localization.Away D₁.1.s →+* presheafValue D₃) =
-            D₃.coeRingHom.comp ψ₁ := by
-          apply IsLocalization.ringHom_ext (Submonoid.powers D₁.1.s); ext a
-          simp [restrictionMapAlg, RationalLocData.canonicalMap,
-            RationalLocData.coeRingHom, hψ₁_alg]
-        have hψ₂_eq : (restrictionMapAlg D₂.1 D₃ h₃₂ :
-            Localization.Away D₂.1.s →+* presheafValue D₃) =
-            D₃.coeRingHom.comp ψ₂ := by
-          apply IsLocalization.ringHom_ext (Submonoid.powers D₂.1.s); ext a
-          simp [restrictionMapAlg, RationalLocData.canonicalMap,
-            RationalLocData.coeRingHom, hψ₂_alg]
-        -- From hcompat₃: restrictionMap D₁ D₃ h₃₁ (f D₁) = restrictionMap D₂ D₃ h₃₂ (f D₂)
-        -- f D_i = e(D_i)(g D_i) = D_i.coeRingHom(g D_i)
-        -- restrictionMap(coeRingHom(g D_i)) = restrictionMapAlg(g D_i) (by restrictionMapHom_coe)
-        have hLHS : restrictionMap D₁.1 D₃ h₃₁ (f D₁) =
-            restrictionMapAlg D₁.1 D₃ h₃₁ (g D₁) := by
-          change restrictionMapHom D₁.1 D₃ h₃₁ (f D₁) = _
-          have hf₁ : f D₁ = D₁.1.coeRingHom (g D₁) := ((e D₁.1).apply_symm_apply (f D₁)).symm
-          rw [hf₁]
-          letI := D₁.1.uniformSpace; letI := D₁.1.isTopologicalRing
-          letI := D₁.1.isUniformAddGroup
-          letI := D₃.uniformSpace; letI := D₃.isTopologicalRing
-          letI := D₃.isUniformAddGroup
-          exact UniformSpace.Completion.extensionHom_coe
-            (restrictionMapAlg D₁.1 D₃ h₃₁)
-            (restrictionMapAlg_continuous D₁.1 D₃ h₃₁) (g D₁)
-        have hRHS : restrictionMap D₂.1 D₃ h₃₂ (f D₂) =
-            restrictionMapAlg D₂.1 D₃ h₃₂ (g D₂) := by
-          change restrictionMapHom D₂.1 D₃ h₃₂ (f D₂) = _
-          have hf₂ : f D₂ = D₂.1.coeRingHom (g D₂) := ((e D₂.1).apply_symm_apply (f D₂)).symm
-          rw [hf₂]
-          letI := D₂.1.uniformSpace; letI := D₂.1.isTopologicalRing
-          letI := D₂.1.isUniformAddGroup
-          letI := D₃.uniformSpace; letI := D₃.isTopologicalRing
-          letI := D₃.isUniformAddGroup
-          exact UniformSpace.Completion.extensionHom_coe
-            (restrictionMapAlg D₂.1 D₃ h₃₂)
-            (restrictionMapAlg_continuous D₂.1 D₃ h₃₂) (g D₂)
-        rw [hLHS, hRHS] at hcompat₃
-        -- Now hcompat₃ : restrictionMapAlg D₁ D₃ (g D₁) = restrictionMapAlg D₂ D₃ (g D₂)
-        -- Using hψ₁_eq, hψ₂_eq: D₃.coeRingHom(ψ₁(g D₁)) = D₃.coeRingHom(ψ₂(g D₂))
-        rw [hψ₁_eq, hψ₂_eq] at hcompat₃
-        simp only [RingHom.comp_apply] at hcompat₃
-        exact hbij₃.1 hcompat₃
-      -- From hr' and the lifts: ψ_i(algebraMap(r' D_i)) = algebraMap(r' D_i) in Away(D₃.s).
-      -- And ψ_i(g D_i * algebraMap(D_i.s)^N₀) = ψ_i(g D_i) * algebraMap(D_i.s)^N₀.
-      -- So algebraMap(r' D₁) = ψ₁(g D₁) * algebraMap(D₁.s)^N₀ in Away(D₃.s).
-      have hcross : algebraMap A (Localization.Away D₃.s) (r' D₁ * D₂.1.s ^ N₀) =
-          algebraMap A (Localization.Away D₃.s) (r' D₂ * D₁.1.s ^ N₀) := by
-        have hr₁ : ψ₁ (g D₁) * (algebraMap A (Localization.Away D₃.s) D₁.1.s) ^ N₀ =
-            algebraMap A _ (r' D₁) := by
-          have := congr_arg ψ₁ (hr' D₁)
-          simp only [map_mul, map_pow, hψ₁_alg] at this; exact this
-        have hr₂ : ψ₂ (g D₂) * (algebraMap A (Localization.Away D₃.s) D₂.1.s) ^ N₀ =
-            algebraMap A _ (r' D₂) := by
-          have := congr_arg ψ₂ (hr' D₂)
-          simp only [map_mul, map_pow, hψ₂_alg] at this; exact this
-        -- Cross-multiply: both sides equal ψ₁(g D₁) * D₁.s^N₀ * D₂.s^N₀.
-        simp only [map_mul, map_pow]
-        calc algebraMap A _ (r' D₁) * algebraMap A _ D₂.1.s ^ N₀
-            = ψ₁ (g D₁) * (algebraMap A _ D₁.1.s) ^ N₀ * (algebraMap A _ D₂.1.s) ^ N₀ := by
-              rw [hr₁]
-          _ = ψ₂ (g D₂) * (algebraMap A _ D₁.1.s) ^ N₀ * (algebraMap A _ D₂.1.s) ^ N₀ := by
-              rw [hg_eq]
-          _ = ψ₂ (g D₂) * (algebraMap A _ D₂.1.s) ^ N₀ * (algebraMap A _ D₁.1.s) ^ N₀ := by
-              ring
-          _ = algebraMap A _ (r' D₂) * (algebraMap A _ D₁.1.s) ^ N₀ := by
-              rw [hr₂]
-      -- Extract the power annihilation from the localization equality.
-      -- In Away(D₁.s * D₂.s), equality means ∃ k, (D₁.s * D₂.s)^k * diff = 0.
-      exact IsLocalization.Away.exists_of_eq (x := D₁.1.s * D₂.1.s) hcross
+        (D₁.1.s * D₂.1.s) ^ k * (r' D₂ * D₁.1.s ^ N₀) :=
+      discrete_gluing_numerator_compat C f hcompat g
+        (fun D ↦ ((e D.1).apply_symm_apply (f D)).symm) N₀ r' hr'
     -- Step 3b: Uniform power K and absorption.
     -- Take K as the sup over all pairs.
     choose kD hkD using fun (p : ↥C.covers × ↥C.covers) ↦ hcompat_pow p.1 p.2
@@ -842,101 +981,16 @@ private theorem discrete_gluing {A : Type*} [CommRing A]
       have hexpand₂ : D₂.1.s ^ K * r' D₂ * D₁.1.s ^ (N₀ + K) =
           D₁.1.s ^ K * D₂.1.s ^ K * (r' D₂ * D₁.1.s ^ N₀) := by ring
       rw [hexpand₁, hexpand₂, hann_K]
-    -- Step 5: Partition of unity.
-    have hspan_range : Ideal.span (Set.range
-        (fun D : ↥C.covers ↦ (algebraMap A R D.1.s) ^ N)) = ⊤ := by
-      rw [eq_top_iff, ← Ideal.span_pow_eq_top _ hspan_top N]
-      apply Ideal.span_mono
-      intro x hx
-      -- hx : x ∈ (fun x ↦ x ^ N) '' ↑(C.covers.image (fun D ↦ algebraMap A R D.s))
-      obtain ⟨y, hy, rfl⟩ := hx
-      have hmem := hy
-      rw [Finset.mem_coe, Finset.mem_image] at hmem
-      obtain ⟨D, hD, rfl⟩ := hmem
-      exact ⟨⟨D, hD⟩, rfl⟩
-    rw [Ideal.eq_top_iff_one] at hspan_range
-    obtain ⟨c, hc⟩ := Ideal.mem_span_range_iff_exists_fun.mp hspan_range
-    -- hc : ∑ D, c D * (algebraMap A R D.1.s) ^ N = 1
-    -- Step 6: Define x'.
-    -- x' = ∑ D, c D * algebraMap A R (r'' D)
-    refine ⟨∑ D : ↥C.covers, c D * algebraMap A R (r'' D), fun D' ↦ ?_⟩
-    -- Step 7: Verify φ_{D'}(x') = g D'.
-    -- φ_{D'} is a ring hom, so φ_{D'}(x') = ∑ c_D * φ_{D'}(algebraMap A R (r'' D))
-    -- = ∑ c_D * algebraMap A (Away D'.s) (r'' D) (by hφ_alg).
-    -- Then multiply both sides by (algebraMap D'.s)^N:
-    -- φ_{D'}(x') * (algebraMap D'.s)^N
-    --   = ∑ c_D * algebraMap(r'' D * D'.s^N) (using map_mul, map_pow)
-    --   = ∑ c_D * algebraMap(r'' D' * D.s^N) (by hcompat_r'')
-    --   = algebraMap(r'' D') * ∑ c_D * algebraMap(D.s)^N (by map_mul)
-    --   = algebraMap(r'' D') * φ_{D'}(1) (applying φ_{D'} to hc)
-    --   = algebraMap(r'' D')
-    -- Also: g D' * (algebraMap D'.s)^N = algebraMap(r'' D') (by hr'').
-    -- Since (algebraMap D'.s) is a unit, cancel to get φ_{D'}(x') = g D'.
-    -- Reduce: restrictionMapAlg = coeRingHom ∘ lift, so goal ↔ lift x' = g D'.
-    rw [lift_factor D'.1 D'.2, RingHom.comp_apply]
-    -- Goal: D'.1.coeRingHom(φ D' x') = f D'
-    -- Since f D' = coeRingHom(g D'), the goal becomes coeRingHom(φ D' x') = coeRingHom(g D').
-    -- Apply injectivity of coeRingHom.
-    suffices h : φ D' (∑ D, c D * algebraMap A R (r'' D)) = g D' by
-      rw [h]; exact (e D'.1).apply_symm_apply (f D')
-    -- Goal: φ D' (∑ D, c D * algebraMap A R (r'' D)) = g D'
-    -- Goal: φ D' (∑ D, c D * algebraMap A R (r'' D)) = g D'
-    -- (algebraMap D'.s)^N is a unit in Away D'.s
-    have hunit_N : IsUnit ((algebraMap A (Localization.Away D'.1.s) D'.1.s) ^ N) :=
-      IsUnit.pow N (IsLocalization.Away.algebraMap_isUnit D'.1.s)
-    apply hunit_N.mul_left_cancel
-    rw [mul_comm _ (g D'), hr'' D']
-    -- Goal: (algebraMap D'.s)^N * φ(∑ c_D * algebraMap(r'' D)) = algebraMap(r'' D')
-    -- φ distributes over the sum.
-    simp only [map_sum, map_mul, hφ_alg]
-    -- Goal: ∑ D, φ(c D) * algebraMap(r'' D) * ... wait, c D ∈ R, not A.
-    -- Actually: φ D' (c D * algebraMap A R (r'' D)) = φ D' (c D) * φ D' (algebraMap A R (r'' D))
-    -- = φ D' (c D) * algebraMap A (Away D'.s) (r'' D).
-    -- Then multiply by (algebraMap D'.s)^N:
-    -- (algebraMap D'.s)^N * (∑ φ(c D) * algebraMap(r'' D))
-    -- = ∑ φ(c D) * algebraMap(r'' D) * (algebraMap D'.s)^N
-    -- = ∑ φ(c D) * algebraMap(r'' D * D'.s^N)
-    -- = ∑ φ(c D) * algebraMap(r'' D' * D.s^N)  (hcompat_r'')
-    -- = algebraMap(r'' D') * ∑ φ(c D) * algebraMap(D.s)^N
-    -- = algebraMap(r'' D') * ∑ φ(c D) * φ(algebraMap(D.s)^N)
-    -- = algebraMap(r'' D') * φ(∑ c D * algebraMap(D.s)^N)
-    -- = algebraMap(r'' D') * φ(1) = algebraMap(r'' D').
-    -- But we need to work in the ring (Away D'.s), not in R!
-    -- After map_sum, map_mul, hφ_alg, the goal should be:
-    -- (algebraMap D'.s)^N * ∑ D, φ D' (c D) * algebraMap A _ (r'' D) = algebraMap(r'' D')
-    -- Let's work with this form.
-    rw [Finset.mul_sum]
-    -- Goal: ∑ D, (algebraMap D'.s)^N * (φ D' (c D) * algebraMap(r'' D)) = algebraMap(r'' D')
-    -- Rewrite each summand using hcompat_r''.
-    have key : ∀ D : ↥C.covers,
-        (algebraMap A (Localization.Away D'.1.s) D'.1.s) ^ N *
-        (φ D' (c D) * algebraMap A _ (r'' D)) =
-        φ D' (c D) * (algebraMap A _ (r'' D') *
-          (algebraMap A (Localization.Away D'.1.s) D.1.s) ^ N) := by
-      intro D
-      rw [← mul_assoc, mul_comm ((algebraMap A _ D'.1.s) ^ N) _, mul_assoc]
-      congr 1
-      -- Need: (algebraMap D'.s)^N * algebraMap(r'' D) = algebraMap(r'' D') * (algebraMap D.s)^N
-      -- From hcompat_r'': algebraMap A R (r'' D * D'.s^N) = algebraMap A R (r'' D' * D.s^N)
-      -- Apply φ D' to both sides, using hφ_alg.
-      have h := congr_arg (φ D') (hcompat_r'' D D')
-      simp only [map_mul, map_pow, hφ_alg] at h
-      -- h : algebraMap(r'' D) * algebraMap(D'.s)^N = algebraMap(r'' D') * algebraMap(D.s)^N
-      rw [mul_comm]; exact h
-    simp_rw [key]
-    -- Goal: ∑ D, φ D' (c D) * (algebraMap(r'' D') * (algebraMap D.s)^N) = algebraMap(r'' D')
-    simp_rw [mul_comm (algebraMap A _ (r'' D')) _, ← mul_assoc, ← Finset.sum_mul,
-      mul_comm _ (algebraMap A _ (r'' D'))]
-    -- Goal: (∑ D, φ D' (c D) * (algebraMap D.s)^N) * algebraMap(r'' D') = algebraMap(r'' D')
-    suffices hone : (∑ D, φ D' (c D) *
-        (algebraMap A (Localization.Away D'.1.s) D.1.s) ^ N) = 1 by
-      rw [hone, mul_one]
-    -- The sum equals φ D' (∑ D, c D * (algebraMap A R D.s)^N) = φ D' 1 = 1.
-    have : ∀ D : ↥C.covers,
-        φ D' (c D) * (algebraMap A (Localization.Away D'.1.s) D.1.s) ^ N =
-        φ D' (c D * (algebraMap A R D.1.s) ^ N) := by
-      intro D; rw [map_mul, map_pow, hφ_alg]
-    simp_rw [this, ← map_sum, hc, map_one]
+    -- Step 5: Partition of unity (extracted to discrete_gluing_partition_of_unity):
+    -- a single x'' : R with φ D' x'' = g D' for every D'.
+    obtain ⟨x'', hx''⟩ : ∃ x' : Localization.Away C.base.s,
+        ∀ D' : ↥C.covers, φ D' x' = g D' :=
+      discrete_gluing_partition_of_unity C g φ hφ_alg N r'' hr'' hcompat_r'' hspan_top
+    -- Reduce: restrictionMapAlg = coeRingHom ∘ lift, so goal ↔ lift x'' = g D';
+    -- and f D' = coeRingHom (g D').
+    refine ⟨x'', fun D' ↦ ?_⟩
+    rw [lift_factor D'.1 D'.2, RingHom.comp_apply, hx'' D']
+    exact (e D'.1).apply_symm_apply (f D')
   -- Layer (B): Transport back via coeRingHom.
   -- restrictionMap base D h (coeRingHom x') = extensionHom(restrictionMapAlg)(coeRingHom x')
   --   = restrictionMapAlg x'   (by extensionHom_coe)
