@@ -21,8 +21,6 @@ noncomputable section
 
 namespace PadicMeasure
 
-/-- The range of `Units.embedProduct` is the closed set of pairs `(a, op b)` with
-`a*b = 1 = b*a`. -/
 private lemma isClosed_range_embedProduct :
     IsClosed (Set.range (Units.embedProduct ℤ_[p])) := by
   have hrange : Set.range (Units.embedProduct ℤ_[p])
@@ -114,8 +112,7 @@ lemma extendByZero_coe_unit (g : C(ℤ_[p]ˣ, ℤ_[p])) (u : ℤ_[p]ˣ) :
   have hx : IsUnit ((u : ℤ_[p])) := u.isUnit
   change (if h : IsUnit ((u : ℤ_[p])) then g h.unit else 0) = g u
   rw [dif_pos hx]
-  congr 1
-  exact Units.ext (IsUnit.unit_spec hx)
+  exact congrArg g (Units.ext (IsUnit.unit_spec hx))
 
 /-- The embedding `ι : Λ(ℤ_p^×) → Λ(ℤ_p)`:
 `∫_{ℤ_p} φ d(ιμ) = ∫_{ℤ_p^×} φ|_{ℤ_p^×} dμ`.
@@ -127,7 +124,7 @@ noncomputable def iota : PadicMeasure p ℤ_[p]ˣ →ₗ[ℤ_[p]] PadicMeasure p
 /-- Restriction of the zero-extension recovers the original function. -/
 lemma extendByZero_comp_val (g : C(ℤ_[p]ˣ, ℤ_[p])) :
     (extendByZero p g).comp (unitsValCM p) = g :=
-  ContinuousMap.ext fun u => extendByZero_coe_unit p g u
+  ContinuousMap.ext (extendByZero_coe_unit p g)
 
 /-- `ι` is injective (restriction `C(ℤ_p, ℤ_p) → C(ℤ_p^×, ℤ_p)` is surjective, via
 extension by zero). Source: RJW Rem. 3.33: "we can identify `Λ(ℤ_p^×)` with its
@@ -135,8 +132,8 @@ image". -/
 theorem iota_injective : Function.Injective (iota p) := by
   intro μ ν h
   refine LinearMap.ext fun g => ?_
-  have happ := LinearMap.congr_fun h (extendByZero p g)
-  simpa only [iota, pushforward_apply, extendByZero_comp_val] using happ
+  simpa only [iota, pushforward_apply, extendByZero_comp_val] using
+    LinearMap.congr_fun h (extendByZero p g)
 
 /-- `Res_{ℤ_p^×} ∘ ι = ι`: the image of `ι` consists of measures supported on the
 units. Source: RJW Rem. 3.33 ("`Res_{ℤ_p^×} ∘ ι` is the identity on `Λ(ℤ_p^×)`"). -/
@@ -149,8 +146,8 @@ theorem res_iota (μ : PadicMeasure p ℤ_[p]ˣ) :
   ext u
   simp only [ContinuousMap.comp_apply, ContinuousMap.mul_apply,
     LocallyConstant.coe_continuousMap, LocallyConstant.coe_charFn, unitsValCM,
-    ContinuousMap.coe_mk]
-  rw [Set.indicator_of_mem (show ((u : ℤ_[p])) ∈ {x : ℤ_[p] | IsUnit x} from u.isUnit),
+    ContinuousMap.coe_mk,
+    Set.indicator_of_mem (show ((u : ℤ_[p])) ∈ {x : ℤ_[p] | IsUnit x} from u.isUnit),
     Pi.one_apply, one_mul]
 
 open Classical in
@@ -161,15 +158,13 @@ lemma extendByZero_comp_unitsVal (f : C(ℤ_[p], ℤ_[p])) :
   ext x
   change (if h : IsUnit x then (f.comp (unitsValCM p)) h.unit else 0) = _
   by_cases hx : IsUnit x
-  · rw [dif_pos hx]
-    simp only [ContinuousMap.comp_apply, unitsValCM, ContinuousMap.coe_mk,
-      ContinuousMap.mul_apply, LocallyConstant.coe_continuousMap, LocallyConstant.coe_charFn]
-    rw [Set.indicator_of_mem (show x ∈ {y : ℤ_[p] | IsUnit y} from hx), Pi.one_apply, one_mul,
+  · simp only [dif_pos hx, ContinuousMap.comp_apply, unitsValCM, ContinuousMap.coe_mk,
+      ContinuousMap.mul_apply, LocallyConstant.coe_continuousMap, LocallyConstant.coe_charFn,
+      Set.indicator_of_mem (show x ∈ {y : ℤ_[p] | IsUnit y} from hx), Pi.one_apply, one_mul,
       IsUnit.unit_spec]
-  · rw [dif_neg hx]
-    simp only [ContinuousMap.mul_apply, LocallyConstant.coe_continuousMap,
-      LocallyConstant.coe_charFn]
-    rw [Set.indicator_of_notMem (show x ∉ {y : ℤ_[p] | IsUnit y} from hx), zero_mul]
+  · simp only [dif_neg hx, ContinuousMap.mul_apply, LocallyConstant.coe_continuousMap,
+      LocallyConstant.coe_charFn,
+      Set.indicator_of_notMem (show x ∉ {y : ℤ_[p] | IsUnit y} from hx), zero_mul]
 
 /-- **The image of `ι` is `ker ψ`**: `μ ∈ range ι ↔ ψ(μ) = 0`.
 
