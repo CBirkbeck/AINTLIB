@@ -60,9 +60,7 @@ theorem continuous_iff_eval {Y : Type*} [TopologicalSpace Y] (g : Y → PadicMea
 /-- `PadicMeasure p X` is Hausdorff (weak-*): two measures equal at every `f` are equal. -/
 instance instT2Space : T2Space (PadicMeasure p X) := by
   refine ⟨fun μ ν hμν => ?_⟩
-  have hinj : Function.Injective (DFunLike.coe : PadicMeasure p X → (C(X, ℤ_[p]) → ℤ_[p])) :=
-    DFunLike.coe_injective
-  exact separated_by_continuous continuous_induced_dom (fun h => hμν (hinj h))
+  exact separated_by_continuous continuous_induced_dom (fun h => hμν (DFunLike.coe_injective h))
 
 /-- Right multiplication `s ↦ s * ν` is weak-* continuous on `Λ(ℤ_p^×)`: by the convolution
 formula `(s * ν) f = s (innerInt ν (f.comp mulCM₂))`, it is the (continuous) evaluation of `s`
@@ -122,8 +120,7 @@ def approxDirac (μ : PadicMeasure p ℤ_[p]ˣ) (n : ℕ) : PadicMeasure p ℤ_[
 theorem approxDirac_levelChar {μ : PadicMeasure p ℤ_[p]ˣ} {n : ℕ} (hn : 0 < n)
     (h : (ZMod (p ^ n))ˣ) : approxDirac p μ n (levelChar p n h) = μ (levelChar p n h) := by
   classical
-  rw [approxDirac, dif_pos hn]
-  rw [show (∑ g : (ZMod (p ^ n))ˣ, μ (levelChar p n g) •
+  rw [approxDirac, dif_pos hn, show (∑ g : (ZMod (p ^ n))ˣ, μ (levelChar p n g) •
         dirac p ((unitsToZModPow_surjective p n hn g).choose)) (levelChar p n h)
       = ∑ g : (ZMod (p ^ n))ˣ, μ (levelChar p n g) *
           (dirac p ((unitsToZModPow_surjective p n hn g).choose)) (levelChar p n h) from by
@@ -437,8 +434,7 @@ theorem continuous_iff_elems {Y : Type*} [TopologicalSpace Y] (g : Y → NormCom
 instance instT2Space : T2Space (NormCompatUnits p) := by
   refine ⟨fun u v huv => ?_⟩
   refine separated_by_continuous continuous_induced_dom (fun h => huv ?_)
-  refine NormCompatUnits.ext (funext fun n => Units.ext ?_)
-  exact congrFun h n
+  exact NormCompatUnits.ext (funext fun n => Units.ext (congrFun h n))
 
 /-- **The unit-valued level coordinate `u ↦ u.elems n : ℂ_[p]ˣ` is continuous** on `𝒰_∞`. Since
 `Units.val : ℂ_[p]ˣ → ℂ_[p]` is a topological embedding on the normed field `ℂ_[p]`
@@ -564,8 +560,7 @@ theorem continuous_ofPowerSeries_apply (ψ : C(ℤ_[p], ℤ_[p])) :
   -- the tail bound `‖∑'_{n≥N} Δⁿψ(0)·gₙ‖ ≤ sup_{n≥N} ‖Δⁿψ(0)‖` and `Δⁿψ(0) → 0`
   have hΔ : Filter.Tendsto (fun n => ‖Δ_[1]^[n] (⇑ψ) 0‖) Filter.atTop (nhds 0) := by
     have h := PadicInt.fwdDiff_tendsto_zero ψ
-    rw [tendsto_zero_iff_norm_tendsto_zero] at h
-    exact h
+    rwa [tendsto_zero_iff_norm_tendsto_zero] at h
   refine continuous_of_uniform_approx_of_continuous (fun U hU => ?_)
   -- reduce the uniformity `U` to a metric ball of radius `ε`
   rw [Metric.mem_uniformity_dist] at hU
@@ -600,8 +595,8 @@ theorem continuous_ofPowerSeries_apply (ψ : C(ℤ_[p], ℤ_[p])) :
     have hterm : ‖Δ_[1]^[n + N] (⇑ψ) 0‖ < ε / 2 := by
       have h := hN (n + N) (by omega)
       rwa [Real.dist_eq, sub_zero, abs_of_nonneg (norm_nonneg _)] at h
-    refine le_of_lt (lt_of_le_of_lt ?_ hterm)
-    exact mul_le_of_le_one_right (norm_nonneg _) (PadicInt.norm_le_one _)
+    exact le_of_lt (lt_of_le_of_lt
+      (mul_le_of_le_one_right (norm_nonneg _) (PadicInt.norm_le_one _)) hterm)
 
 /-- **The measure-side Coleman pipeline, paired form**: from a series `f` and its inverse
 `finv` (kept as a separate argument to sidestep the discontinuity of `Ring.inverse`), the
@@ -700,23 +695,17 @@ theorem continuous_colEval : Continuous (colEval p) := by
   rw [continuous_iff_elems]
   intro n
   by_cases hn : 1 ≤ n
-  · have heq : (fun f : normFixedUnits p => (((colEval p f).elems n : ℂ_[p]ˣ) : ℂ_[p]))
-        = fun f : normFixedUnits p => evalPi p (f : PowerSeries ℤ_[p]) n := by
-      funext f; simp only [colEval, invColeman, dif_pos hn, Units.val_mk0]
-    rw [heq]
-    exact (continuous_evalPi p hn).comp continuous_subtype_val
-  · have heq : (fun f : normFixedUnits p => (((colEval p f).elems n : ℂ_[p]ˣ) : ℂ_[p]))
-        = fun _ : normFixedUnits p => (1 : ℂ_[p]) := by
-      funext f; simp only [colEval, invColeman, dif_neg hn, Units.val_one]
-    rw [heq]; exact continuous_const
+  · exact ((continuous_evalPi p hn).comp continuous_subtype_val).congr fun f => by
+      simp only [Function.comp_apply, colEval, invColeman, dif_pos hn, Units.val_mk0]
+  · exact (continuous_const (y := (1 : ℂ_[p]))).congr fun f => by
+      simp only [colEval, invColeman, dif_neg hn, Units.val_one]
 
 /-- **`E` is injective**: if `invColeman f = invColeman g`, their level values agree, so
 `f = colemanSeries (E f) = colemanSeries (E g) = g` (`colemanSeries_colEval`,
 `evalPi_injective`). -/
 theorem injective_colEval : Function.Injective (colEval p) := by
   intro f g hfg
-  apply Subtype.ext
-  refine evalPi_injective p (fun n hn => ?_)
+  refine Subtype.ext (evalPi_injective p (fun n hn => ?_))
   rw [← colemanSeries_colEval p f, ← colemanSeries_colEval p g, hfg]
 
 /-- The section `u ↦ colemanSeries u` packaged into `𝒲ˣ` (`colemanSeries` lands in the
@@ -735,21 +724,13 @@ theorem continuous_colSec : Continuous (colSec p) := by
   rw [hemb.continuous_iff, continuous_iff_elems]
   intro n
   by_cases hn : 1 ≤ n
-  · have heq : (fun u : NormCompatUnits p =>
-        ((((colEval p ∘ colSec p) u).elems n : ℂ_[p]ˣ) : ℂ_[p]))
-        = fun u => ((u.elems n : ℂ_[p]ˣ) : ℂ_[p]) := by
-      funext u
-      change (((colEval p (colSec p u)).elems n : ℂ_[p]ˣ) : ℂ_[p]) = _
-      simp only [colEval, colSec, invColeman, dif_pos hn, Units.val_mk0]
-      exact evalPi_colemanSeries p u hn
-    rw [heq]; exact continuous_elems p n
-  · have heq : (fun u : NormCompatUnits p =>
-        ((((colEval p ∘ colSec p) u).elems n : ℂ_[p]ˣ) : ℂ_[p]))
-        = fun _ : NormCompatUnits p => (1 : ℂ_[p]) := by
-      funext u
-      change (((colEval p (colSec p u)).elems n : ℂ_[p]ˣ) : ℂ_[p]) = _
-      simp only [colEval, colSec, invColeman, dif_neg hn, Units.val_one]
-    rw [heq]; exact continuous_const
+  · refine (continuous_elems p n).congr fun u => ?_
+    change ((u.elems n : ℂ_[p]ˣ) : ℂ_[p]) = (((colEval p (colSec p u)).elems n : ℂ_[p]ˣ) : ℂ_[p])
+    simp only [colEval, colSec, invColeman, dif_pos hn, Units.val_mk0]
+    exact (evalPi_colemanSeries p u hn).symm
+  · refine (continuous_const (y := (1 : ℂ_[p]))).congr fun u => ?_
+    change (1 : ℂ_[p]) = (((colEval p (colSec p u)).elems n : ℂ_[p]ˣ) : ℂ_[p])
+    simp only [colEval, colSec, invColeman, dif_neg hn, Units.val_one]
 
 /-- **`colemanSeries : 𝒰_∞ → ℤ_p⟦T⟧` is continuous** (coefficientwise/`WithPiTopology`). It is
 `Subtype.val ∘ colSec` with `colSec` continuous (`continuous_colSec`). The opacity of the
@@ -774,13 +755,7 @@ theorem inverse_colemanSeries (u : NormCompatUnits p) :
     Ring.inverse (colemanSeries p u) = colemanSeries p u⁻¹ := by
   have hmul : colemanSeries p u * colemanSeries p u⁻¹ = 1 := by
     rw [← colemanSeries_mul p, mul_inv_cancel, colemanSeries_one' p]
-  calc Ring.inverse (colemanSeries p u)
-      = Ring.inverse (colemanSeries p u) * (colemanSeries p u * colemanSeries p u⁻¹) := by
-        rw [hmul, mul_one]
-    _ = (Ring.inverse (colemanSeries p u) * colemanSeries p u) * colemanSeries p u⁻¹ := by
-        rw [mul_assoc]
-    _ = colemanSeries p u⁻¹ := by
-        rw [Ring.inverse_mul_cancel _ (colemanSeries_isUnit p u), one_mul]
+  exact left_inv_eq_right_inv (Ring.inverse_mul_cancel _ (colemanSeries_isUnit p u)) hmul
 
 /-- **Inversion `u ↦ u⁻¹` is continuous on `𝒰_∞`** (it is a `CommGroup` with pointwise inverse).
 By `continuous_iff_elems`, each level coordinate is `u ↦ (u.elems n)⁻¹ : ℂ_[p]`, continuous as
@@ -800,11 +775,9 @@ colemanSeries)` (`colemanPipe2_eq_Col`): the pairing is continuous — `colemanS
 theorem continuous_Col : Continuous (Col p) := by
   have hpair : Continuous (fun u : NormCompatUnits p =>
       (colemanSeries p u, Ring.inverse (colemanSeries p u))) := by
-    refine (continuous_colemanSeries p).prodMk ?_
-    have heq : (fun u : NormCompatUnits p => Ring.inverse (colemanSeries p u))
-        = fun u => colemanSeries p u⁻¹ := by funext u; exact inverse_colemanSeries p u
-    rw [heq]
-    exact (continuous_colemanSeries p).comp (continuous_inv_NCU p)
+    refine (continuous_colemanSeries p).prodMk
+      (((continuous_colemanSeries p).comp (continuous_inv_NCU p)).congr
+        (fun u => (inverse_colemanSeries p u).symm))
   have hcol : (Col p) = (Function.uncurry (colemanPipe2 p)) ∘
       (fun u : NormCompatUnits p => (colemanSeries p u, Ring.inverse (colemanSeries p u))) := by
     funext u
@@ -826,18 +799,15 @@ theorem isClosed_KCp (n : ℕ) : IsClosed (X := ℂ_[p]) (K p n : Set ℂ_[p]) :
 
 /-- `O p n` is closed in `ℂ_[p]` (`K p n` closed ∩ the closed unit ball). -/
 theorem isClosed_OCp (n : ℕ) : IsClosed (X := ℂ_[p]) (O p n : Set ℂ_[p]) := by
-  have h : (O p n : Set ℂ_[p]) = (K p n : Set ℂ_[p]) ∩ {x : ℂ_[p] | ‖x‖ ≤ 1} := rfl
-  rw [h]
+  show IsClosed ((K p n : Set ℂ_[p]) ∩ {x : ℂ_[p] | ‖x‖ ≤ 1})
   exact (isClosed_KCp p n).inter (isClosed_le continuous_norm continuous_const)
 
 /-- `localUnits p n` is closed in `ℂ_[p]ˣ`: both `(u : ℂ_[p]) ∈ O p n` and
 `(u⁻¹ : ℂ_[p]) ∈ O p n` are closed conditions (`val`/`inv∘val` continuous, `O p n` closed). -/
 theorem isClosed_localUnits (n : ℕ) :
     IsClosed (localUnits p n : Set ℂ_[p]ˣ) := by
-  have h : (localUnits p n : Set ℂ_[p]ˣ)
-      = (fun u : ℂ_[p]ˣ => (u : ℂ_[p])) ⁻¹' (O p n : Set ℂ_[p])
-        ∩ (fun u : ℂ_[p]ˣ => ((u⁻¹ : ℂ_[p]ˣ) : ℂ_[p])) ⁻¹' (O p n : Set ℂ_[p]) := rfl
-  rw [h]
+  show IsClosed ((fun u : ℂ_[p]ˣ => (u : ℂ_[p])) ⁻¹' (O p n : Set ℂ_[p])
+        ∩ (fun u : ℂ_[p]ˣ => ((u⁻¹ : ℂ_[p]ˣ) : ℂ_[p])) ⁻¹' (O p n : Set ℂ_[p]))
   refine ((isClosed_OCp p n).preimage Units.continuous_val).inter
     ((isClosed_OCp p n).preimage ?_)
   exact Units.continuous_val.comp continuous_inv
@@ -846,10 +816,7 @@ theorem isClosed_localUnits (n : ℕ) :
 `‖(u:ℂ_[p]) − 1‖ < 1` (an ultrametric ball, hence clopen). -/
 theorem isClosed_localUnitsOne (n : ℕ) :
     IsClosed (localUnitsOne p n : Set ℂ_[p]ˣ) := by
-  have h : (localUnitsOne p n : Set ℂ_[p]ˣ)
-      = (localUnits p n : Set ℂ_[p]ˣ)
-        ∩ {u : ℂ_[p]ˣ | ‖(u : ℂ_[p]) - 1‖ < 1} := rfl
-  rw [h]
+  show IsClosed ((localUnits p n : Set ℂ_[p]ˣ) ∩ {u : ℂ_[p]ˣ | ‖(u : ℂ_[p]) - 1‖ < 1})
   refine (isClosed_localUnits p n).inter ?_
   -- `{u | ‖val u − 1‖ < 1}` is the preimage of the clopen ultrametric ball `B(1,1) ⊆ ℂ_[p]`
   have hclopen : IsClosed {x : ℂ_[p] | ‖x - 1‖ < 1} := by
@@ -857,9 +824,6 @@ theorem isClosed_localUnitsOne (n : ℕ) :
       ext x; rw [Set.mem_setOf_eq, Metric.mem_ball, dist_eq_norm]
     rw [heq]
     exact IsUltrametricDist.isClosed_ball (1 : ℂ_[p]) 1
-  have hpre : {u : ℂ_[p]ˣ | ‖(u : ℂ_[p]) - 1‖ < 1}
-      = (fun u : ℂ_[p]ˣ => (u : ℂ_[p])) ⁻¹' {x : ℂ_[p] | ‖x - 1‖ < 1} := rfl
-  rw [hpre]
   exact hclopen.preimage Units.continuous_val
 
 /-- `cycloClosureOne p n` is closed in `ℂ_[p]ˣ`: the intersection of the (closed) topological
@@ -990,11 +954,8 @@ theorem col_image_eq_pipe_image :
   · -- `⊇`: `(f, finv) ↦ invColeman f`
     rintro _ ⟨⟨f, finv⟩, ⟨hfinv, hN, hC⟩, rfl⟩
     have hfunit : IsUnit f := IsUnit.of_mul_eq_one finv hfinv
-    have hfinveq : finv = Ring.inverse f := by
-      have hinv : Ring.inverse f * f = 1 := Ring.inverse_mul_cancel f hfunit
-      calc finv = (Ring.inverse f * f) * finv := by rw [hinv, one_mul]
-        _ = Ring.inverse f * (f * finv) := by rw [mul_assoc]
-        _ = Ring.inverse f := by rw [hfinv, mul_one]
+    have hfinveq : finv = Ring.inverse f :=
+      (left_inv_eq_right_inv (Ring.inverse_mul_cancel f hfunit) hfinv).symm
     set c := invColeman p f hfunit hN with hc
     have hcs : colemanSeries p c = f := colemanSeries_invColeman p f hfunit hN
     -- `c ∈ 𝒞_{∞,1}`: each `c.elems n ∈ 𝒞_{n,1}`
