@@ -359,11 +359,7 @@ private theorem trace_D_N_zero {n : ℕ} (M N : Matrix (Fin n) (Fin n) (PowerSer
     (hMN : M * N = 1) (hNM : N * M = 1) :
     ∑ i : Fin n, ∑ k : Fin n,
       ((i : ℤ_[p]) - (k : ℤ_[p])) • (M i k * N k i) = 0 := by
-  have hexp : ∀ i k : Fin n, ((i : ℤ_[p]) - (k : ℤ_[p])) • (M i k * N k i)
-      = (i : ℤ_[p]) • (M i k * N k i) - (k : ℤ_[p]) • (M i k * N k i) :=
-    fun i k => sub_smul _ _ _
-  rw [Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun k _ => hexp i k))]
-  simp only [Finset.sum_sub_distrib]
+  simp only [sub_smul, Finset.sum_sub_distrib]
   have hA : (∑ i : Fin n, ∑ k : Fin n, (i : ℤ_[p]) • (M i k * N k i))
       = ∑ i : Fin n, (i : ℤ_[p]) • (1 : PowerSeries ℤ_[p]) := by
     refine Finset.sum_congr rfl (fun i _ => ?_)
@@ -1655,14 +1651,8 @@ formula, finite because `((1+T)^p − 1)^d` has order `d`). -/
 private theorem coeff_phiSeries_split (G : PowerSeries ℤ_[p]) (n : ℕ) :
     PowerSeries.coeff n (phiSeries p G)
       = ∑ d ∈ Finset.range (n + 1), (PowerSeries.coeff d G) •
-          PowerSeries.coeff n (((1 + PowerSeries.X) ^ p - 1 : PowerSeries ℤ_[p]) ^ d) := by
-  rw [phiSeries, PowerSeries.coeff_subst' (hasSubst_one_add_X_pow_sub_one p)]
-  refine finsum_eq_finsetSum_of_support_subset _ (fun d hd => ?_)
-  simp only [Function.mem_support] at hd
-  rw [Finset.coe_range, Set.mem_Iio]
-  by_contra hcon
-  push Not at hcon
-  exact hd (by rw [coeff_S_pow_vanish p (by omega), smul_zero])
+          PowerSeries.coeff n (((1 + PowerSeries.X) ^ p - 1 : PowerSeries ℤ_[p]) ^ d) :=
+  coeff_phiSeries_finite (p := p) G n
 
 /-- `1 − pⁿ` is a unit of `ℤ_[p]` for `n ≥ 1` (it is `1 − (maximal ideal element)`). -/
 private theorem isUnit_one_sub_p_pow {n : ℕ} (hn : 1 ≤ n) : IsUnit (1 - (p : ℤ_[p]) ^ n) := by
