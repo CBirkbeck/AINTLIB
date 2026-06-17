@@ -3,6 +3,7 @@ import Mathlib.RingTheory.Length
 import Mathlib.RingTheory.Localization.Module
 import Mathlib.Algebra.Module.LocalizedModule.Exact
 import Mathlib.RingTheory.Ideal.Height
+import Mathlib.RingTheory.OrderOfVanishing.Basic
 
 /-!
 # The characteristic ideal and its multiplicativity  (S13-S4)
@@ -59,6 +60,33 @@ theorem localMult_add_of_exact (P : Ideal (IwasawaAlgebra 𝒪)) [P.IsPrime]
     (LocalizedModule.map P.primeCompl f) (LocalizedModule.map P.primeCompl g)
     (LocalizedModule.map_injective _ f hf) (LocalizedModule.map_surjective _ g hg)
     (LocalizedModule.map_exact _ f g hfg)
+
+/-- **Finiteness of the local multiplicity**: for a finitely generated torsion `Λ`-module `M`
+and a height-one prime `P`, `localMult P M` is finite.  `Λ_P` is Noetherian of Krull
+dimension `1` (`IsLocalization.AtPrime.ringKrullDim_eq_height`), `M` is killed by a nonzero
+`c` (`iwasawaAlgebra_exists_ne_zero_smul_eq_zero`), so `M_P` is finite length: it is a
+finitely generated module over the Artinian ring `Λ_P/(c)` (a one-dimensional Noetherian
+domain modulo a nonzero element, `isFiniteLength_quotient_span_singleton`).  This makes
+`.toNat` additive, completing the multiplicativity. -/
+theorem localMult_ne_top [IsDomain 𝒪] [IsPrincipalIdealRing 𝒪]
+    (P : Ideal (IwasawaAlgebra 𝒪)) [P.IsPrime] (hP1 : P.height = 1)
+    (M : Type*) [AddCommGroup M] [Module (IwasawaAlgebra 𝒪) M]
+    [Module.Finite (IwasawaAlgebra 𝒪) M] (hM : Module.IsTorsion (IwasawaAlgebra 𝒪) M) :
+    localMult 𝒪 P M ≠ ⊤ := by
+  haveI hNoeth : IsNoetherianRing (Localization.AtPrime P) :=
+    IsLocalization.isNoetherianRing P.primeCompl _ inferInstance
+  haveI hKdim : Ring.KrullDimLE 1 (Localization.AtPrime P) := by
+    refine Ring.krullDimLE_iff.mpr ?_
+    rw [IsLocalization.AtPrime.ringKrullDim_eq_height P (Localization.AtPrime P), hP1]
+    norm_cast
+  rw [localMult, Module.length_ne_top_iff]
+  -- `M_P` is finitely generated over `Λ_P` (instance) and killed by the image of the nonzero
+  -- annihilator `c` of `M` (`iwasawaAlgebra_exists_ne_zero_smul_eq_zero`); hence it is a
+  -- finitely generated module over the Artinian ring `Λ_P/(c)` (`isFiniteLength_quotient_span_singleton`
+  -- since `Λ_P` is Noetherian of Krull dimension ≤ 1, just shown), so it is Artinian
+  -- (`isArtinian_of_fg_of_artinian'`, transferred along `Λ_P ↠ Λ_P/(c)` by `isArtinian_of_tower`)
+  -- and Noetherian, i.e. finite length.  [Standard f.g.-torsion-over-1-dim-Noetherian fact.]
+  sorry
 
 /-- The **characteristic ideal** `Ch_Λ(M) ⊆ Λ` of a finitely generated torsion `Λ`-module,
 defined the length-theoretic way: the product over height-one primes `P` of
