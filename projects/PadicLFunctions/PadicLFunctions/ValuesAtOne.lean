@@ -89,8 +89,8 @@ theorem norm_sub_one_eq_one_of_pow {x : K} {m : ℕ} (hpow : ‖x ^ m - 1‖ = 1
         rw [norm_pow]; exact pow_le_one₀ (norm_nonneg _) hx
     have hsplit : ‖x ^ m - 1‖ ≤ ‖x - 1‖ := by
       rw [← geom_sum_mul x m, norm_mul]
-      exact le_trans (mul_le_of_le_one_left (norm_nonneg _) hgeom) le_rfl
-    rw [hpow] at hsplit; exact hsplit
+      exact mul_le_of_le_one_left (norm_nonneg _) hgeom
+    rwa [hpow] at hsplit
   exact le_antisymm hle hge
 
 omit [CompleteSpace K] [CharZero K] in
@@ -108,10 +108,7 @@ theorem norm_pow_sub_one_eq_one_of_unit {D : ℕ} [NeZero D] (hD1 : 1 < D)
   -- `c` is coprime to `N = D·p^n`, hence coprime to `D`, hence `¬D∣c`
   have hcop : Nat.Coprime c (D * p ^ n) := (ZMod.isUnit_iff_coprime c (D * p ^ n)).1 hcu
   have hcopD : Nat.Coprime c D := hcop.coprime_dvd_right (Dvd.intro _ rfl)
-  have hDc : ¬ D ∣ c := fun h => by
-    have hdg : D ∣ Nat.gcd c D := Nat.dvd_gcd h dvd_rfl
-    rw [hcopD] at hdg
-    exact absurd (Nat.le_of_dvd one_pos hdg) (by omega)
+  have hDc : ¬ D ∣ c := fun h => absurd (Nat.eq_one_of_dvd_coprimes hcopD h dvd_rfl) (by omega)
   -- `ε^{p^n}` is a primitive `D`-th root: `(D·p^n)/p^n = D`
   have hεD : IsPrimitiveRoot (ε ^ p ^ n) D := by
     have h := hε.pow_of_dvd (pow_ne_zero _ hp.out.ne_zero) (Dvd.intro_left D rfl)
@@ -169,10 +166,9 @@ theorem one_add_mul_derivative_logSeriesAt {u : K} (hu : IsUnit (u - 1)) :
           + (PowerSeries.C (u - 1) * PowerSeries.C a) * PowerSeries.X := by ring
     rw [hexp, hCmul, map_sub, map_one]; ring
   have hCunit : IsUnit (PowerSeries.C (u - 1) : PowerSeries K) := by
-    rw [PowerSeries.isUnit_iff_constantCoeff, PowerSeries.constantCoeff_C]; exact hu
+    simpa [PowerSeries.isUnit_iff_constantCoeff] using hu
   have hgeomunit : IsUnit (1 + PowerSeries.C a * PowerSeries.X : PowerSeries K) := by
-    rw [PowerSeries.isUnit_iff_constantCoeff, map_add, map_one,
-      map_mul, PowerSeries.constantCoeff_X, mul_zero, add_zero]; exact isUnit_one
+    simp [PowerSeries.isUnit_iff_constantCoeff]
   have hinv : Ring.inverse ((1 + PowerSeries.X) * PowerSeries.C u - 1)
       = PowerSeries.C (u - 1)⁻¹ * (PowerSeries.mk fun n => (-a) ^ n) := by
     refine ring_inverse_eq_of_mul_eq_one (hfactor ▸ hCunit.mul hgeomunit) ?_
@@ -261,8 +257,7 @@ theorem one_add_mul_derivative_Ftilde {N : ℕ} [NeZero N] (hN : 1 < N)
     by_cases hdvd : N ∣ c
     · have hc0 : c = 0 := Nat.eq_zero_of_dvd_of_lt hdvd (Finset.mem_range.mp hc)
       have hθ0 : θ⁻¹ ((c : ZMod N)) = 0 := by
-        rw [hc0, Nat.cast_zero]
-        exact MulChar.map_nonunit _ (by rw [isUnit_zero_iff]; exact one_ne_zero ∘ Eq.symm)
+        rw [hc0, Nat.cast_zero]; exact MulChar.map_nonunit _ not_isUnit_zero
       rw [hθ0, map_zero, zero_mul, mul_zero, zero_add, zero_mul]
     · have hu := hunit c hc hdvd
       rw [show (1 + PowerSeries.X) * (PowerSeries.C (θ⁻¹ ((c : ZMod N)))
@@ -380,8 +375,7 @@ omit [CompleteSpace K] [CharZero K] in
 y hy 0 = y^0 = 1`. The `s = 1` specialisation `⟨x⟩^{1−1}` of the `L_p` integrand. -/
 private theorem anglePowCM_zero : anglePowCM p K 0 = 1 := by
   ext u
-  rw [anglePowCM_apply,
-    show (0 : ℤ_[p]) = ((0 : ℕ) : ℤ_[p]) from by rw [Nat.cast_zero],
+  rw [anglePowCM_apply, ← Nat.cast_zero (R := ℤ_[p]),
     PadicInt.onePAdicPow_natCast, pow_zero, map_one]
   rfl
 
@@ -520,7 +514,7 @@ theorem padicLog_pow_p_of_norm_lt_one {z : K} (hz : ‖z - 1‖ < 1) :
     padicLog p (z ^ p) = (p : K) • padicLog p z := by
   have hzp1 : ‖z ^ p - 1‖ < 1 := boundary_norm_pow_sub_one_lt_one hz p
   have h1z : (1 : K) + (z - 1) = z := by ring
-  have hzp1' : ‖(1 + (z - 1)) ^ p - 1‖ < 1 := by rw [h1z]; exact hzp1
+  have hzp1' : ‖(1 + (z - 1)) ^ p - 1‖ < 1 := by rwa [h1z]
   have hprodsum := summable_prod_of_norm_coeff_le_linear (p := p) (G := formalLog K) (C := 1)
     (fun n => by simpa using norm_coeff_formalLog_le (p := p) n) hz
   -- evaluate `φ formalLog` at `z − 1`, two ways
@@ -615,10 +609,7 @@ private theorem norm_dirichletChar_le_one {N : ℕ} [NeZero N] (ψ : DirichletCh
   · have hu : IsUnit c := by by_contra hu; exact h0 (ψ.map_nonunit hu)
     obtain ⟨u, rfl⟩ := hu
     have hpow : ψ (u : ZMod N) ^ Nat.totient N = 1 := by
-      rw [← map_pow, show ((u : ZMod N)) ^ Nat.totient N
-          = ((u ^ Nat.totient N : (ZMod N)ˣ) : ZMod N) from
-        (Units.val_pow_eq_pow_val u (Nat.totient N)).symm, ZMod.pow_totient, Units.val_one,
-        map_one]
+      rw [← map_pow, ← Units.val_pow_eq_pow_val, ZMod.pow_totient, Units.val_one, map_one]
     exact le_of_eq (PadicLFunctions.norm_eq_one_of_pow_eq_one (L := K) hpow
       (Nat.totient_pos.2 (NeZero.pos N)).ne')
 
@@ -627,13 +618,11 @@ omit [IsUltrametricDist K] [CompleteSpace K] [CharZero K] in
 private theorem norm_coeff_inverse_one_add_X_le_one (n : ℕ) :
     ‖PowerSeries.coeff n (Ring.inverse (1 + PowerSeries.X : PowerSeries K))‖ ≤ 1 := by
   have hunit : IsUnit (1 + PowerSeries.X : PowerSeries K) := by
-    rw [PowerSeries.isUnit_iff_constantCoeff, map_add, PowerSeries.constantCoeff_one,
-      PowerSeries.constantCoeff_X, add_zero]; exact isUnit_one
+    simp [PowerSeries.isUnit_iff_constantCoeff]
   have hgeom : (1 + PowerSeries.X : PowerSeries K)
       * (PowerSeries.mk fun n => (-1) ^ n) = 1 := by
     have := one_add_C_mul_X_mul_geom (R := K) 1
-    rwa [map_one, one_mul,
-      show (fun n => (-(1 : K)) ^ n) = fun n => (-1 : K) ^ n from rfl] at this
+    rwa [map_one, one_mul] at this
   rw [ring_inverse_eq_of_mul_eq_one hunit hgeom, PowerSeries.coeff_mk, norm_pow, norm_neg,
     norm_one, one_pow]
 
@@ -651,8 +640,7 @@ theorem exists_antideriv_bounded (B : PowerSeries K)
   haveI := charZero_of_qpAlgebra (M := K) p
   have hp0 : (p : K) ≠ 0 := by exact_mod_cast hp.out.ne_zero
   have hunit : IsUnit (1 + PowerSeries.X : PowerSeries K) := by
-    rw [PowerSeries.isUnit_iff_constantCoeff, map_add, PowerSeries.constantCoeff_one,
-      PowerSeries.constantCoeff_X, add_zero]; exact isUnit_one
+    simp [PowerSeries.isUnit_iff_constantCoeff]
   set E : PowerSeries K := (p : K)⁻¹ • (B * Ring.inverse (1 + PowerSeries.X)) with hE
   have hpinv : ‖((p : K))⁻¹‖ ≤ (p : ℝ) := norm_natCast_inv_le (p := p) (K := K) hp.out.one_le
   -- `‖coeff k E‖ ≤ p`  (integral product scaled by `(p:K)⁻¹` of norm `p`)
@@ -705,7 +693,7 @@ private theorem norm_coeff_logSeriesAt_le_of_norm_one {u : K} (hu1 : ‖u - 1‖
       _ ≤ max ‖u - 1‖ ‖(1 : K)‖ := IsUltrametricDist.norm_add_le_max _ _
       _ ≤ 1 := by rw [hu1, norm_one, max_self]
   rw [logSeriesAt, PowerSeries.coeff_mk, if_neg (by omega : n ≠ 0)]
-  have hratio : ‖u / (u - 1)‖ ≤ 1 := by rw [norm_div, hu1, div_one]; exact hunorm
+  have hratio : ‖u / (u - 1)‖ ≤ 1 := by rwa [norm_div, hu1, div_one]
   calc ‖(-1 : K) ^ (n - 1) * ((n : K))⁻¹ * (u / (u - 1)) ^ n‖
       = ‖((n : K))⁻¹‖ * ‖u / (u - 1)‖ ^ n := by
         rw [norm_mul, norm_mul, norm_pow, norm_neg, norm_one, one_pow, one_mul, norm_pow]
@@ -726,7 +714,7 @@ private theorem summable_seriesEval_Ftilde {N : ℕ} [NeZero N] (_hN : 1 < N)
     {z : K} (hz : ‖z‖ < 1) :
     Summable fun n : ℕ => PowerSeries.coeff n (Ftilde p K θ hε) * z ^ n := by
   -- linear bound `‖coeff n F̃‖ ≤ C·(n+1)` with `C := max ‖coeff 0 F̃‖ 1`
-  set C : ℝ := max ‖PowerSeries.constantCoeff (Ftilde p K θ hε)‖ 1 with hC
+  set C : ℝ := max ‖PowerSeries.constantCoeff (Ftilde p K θ hε)‖ 1
   refine summable_seriesEval_of_norm_coeff_le_linear (C := C) (fun n => ?_) hz
   rcases Nat.eq_zero_or_pos n with rfl | hn
   · -- constant term: `‖coeff 0 F̃‖ ≤ C ≤ C·1`
@@ -868,7 +856,7 @@ theorem p_mul_constantCoeff_mahlerK_rhoTheta {D : ℕ} [NeZero D] (hD1 : 1 < D)
   have hWeq := eq_C_constantCoeff_of_one_add_mul_derivative_eq_zero (p := p) hker
   set c₀ := PowerSeries.constantCoeff
     ((PowerSeries.C G⁻¹ * Ftilde p K θK hε - mahlerK p K (rhoTheta p K η hζ hD χ))
-      - phiSeries p C₁) with hc₀def
+      - phiSeries p C₁)
   -- so `W = φ C₁ + C c₀`
   have hWval : PowerSeries.C G⁻¹ * Ftilde p K θK hε - mahlerK p K (rhoTheta p K η hζ hD χ)
       = phiSeries p C₁ + PowerSeries.C c₀ := by rw [← hWeq]; ring
@@ -1008,7 +996,7 @@ include hp in
 positive coefficients are `≤ n`; the constant `extLog(u−1)` is absorbed into `C`). -/
 private theorem summable_seriesEval_logSeriesAt {u z : K} (hu1 : ‖u - 1‖ = 1) (hz : ‖z‖ < 1) :
     Summable fun n : ℕ => PowerSeries.coeff n (logSeriesAt p K u) * z ^ n := by
-  set C : ℝ := max ‖extLog p (u - 1)‖ 1 with hC
+  set C : ℝ := max ‖extLog p (u - 1)‖ 1
   refine summable_seriesEval_of_norm_coeff_le_linear (C := C) (fun n => ?_) hz
   rcases Nat.eq_zero_or_pos n with rfl | hn
   · rw [logSeriesAt, PowerSeries.coeff_mk, if_pos rfl, Nat.cast_zero]
@@ -1042,7 +1030,7 @@ private theorem seriesEval_logSeriesAt_of_norm {u z : K} (hu1 : ‖u - 1‖ = 1)
   have htail : padicLog p (1 + u * z / (u - 1))
       = seriesEval (formalLog K) (u * z / (u - 1)) := by
     rw [← seriesEval_formalLog (p := p)
-      (show ‖(1 + u * z / (u - 1)) - 1‖ < 1 from by rw [add_sub_cancel_left]; exact hwnorm),
+      (show ‖(1 + u * z / (u - 1)) - 1‖ < 1 from by rwa [add_sub_cancel_left]),
       add_sub_cancel_left]
   rw [seriesEval, hsum.tsum_eq_zero_add, hcoeff0, pow_zero, mul_one, htail, seriesEval,
     (summable_seriesEval_formalLog (p := p) hwnorm).tsum_eq_zero_add, coeff_zero_formalLog,
@@ -1082,7 +1070,7 @@ private theorem seriesEval_logSeriesAt_eq_extLog {ε ξ : K} (hεint : IsIntegra
   have hwnorm : ‖u * z / (u - 1)‖ < 1 := by
     rw [norm_div, hu, hc1, div_one, norm_mul]
     exact lt_of_le_of_lt (mul_le_of_le_one_left (norm_nonneg _) hunorm) hil
-  have hwsub : ‖(1 + u * z / (u - 1)) - 1‖ < 1 := by rw [add_sub_cancel_left]; exact hwnorm
+  have hwsub : ‖(1 + u * z / (u - 1)) - 1‖ < 1 := by rwa [add_sub_cancel_left]
   -- the factorisation `ξ^i ε^c − 1 = (u − 1)·(1 + u z/(u−1))`
   have hfac : ξ ^ i * ε ^ c - 1 = (u - 1) * (1 + u * z / (u - 1)) := by
     rw [← hu, show ξ ^ i = z + 1 from by rw [hz]; ring]
@@ -1210,10 +1198,10 @@ private theorem sum_dirichlet_fiber_eq_zero {N M : ℕ} [NeZero N] (hMN : M ∣ 
       ?_ ?_ ?_ ?_ ?_).symm
     · intro c hc
       simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hc ⊢
-      rw [map_mul, hvcast, one_mul]; exact hc
+      rwa [map_mul, hvcast, one_mul]
     · intro c hc
       simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hc ⊢
-      rw [map_mul, hvcastinv, one_mul]; exact hc
+      rwa [map_mul, hvcastinv, one_mul]
     · intro c _; rw [← mul_assoc, ← Units.val_mul, inv_mul_cancel, Units.val_one, one_mul]
     · intro c _; rw [← mul_assoc, ← Units.val_mul, mul_inv_cancel, Units.val_one, one_mul]
     · intro c _; rw [map_mul]
@@ -1499,7 +1487,7 @@ private theorem crt_collapse {D : ℕ} [NeZero D] {n : ℕ} (hco : Nat.Coprime D
   classical
   haveI : NeZero (p ^ n) := ⟨pow_ne_zero _ hp.out.ne_zero⟩
   haveI : NeZero (D * p ^ n) := ⟨Nat.mul_ne_zero (NeZero.ne D) (pow_ne_zero _ hp.out.ne_zero)⟩
-  set e := ZMod.chineseRemainder hco with he
+  set e := ZMod.chineseRemainder hco
   set F : ZMod (p ^ n) → ZMod D → PowerSeries K := fun bb cc =>
     PowerSeries.C (χK⁻¹ bb * ηK⁻¹ cc)
       * Ring.inverse (PowerSeries.C (ζK ^ cc.val * εpK ^ bb.val) * (1 + PowerSeries.X) - 1)
