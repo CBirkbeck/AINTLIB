@@ -41,13 +41,6 @@ namespace Coleman
 
 variable (p : ℕ) [hp : Fact p.Prime]
 
-/-! ## Norm of the cyclotomic numerator and denominator
-
-RJW TeX 2573–2576. Both `ξ_{p^n}^a − 1` and `ξ_{p^n} − 1` are of the form
-`η − 1` with `η` a primitive `p^n`-th root of unity (`a` coprime to `p`), hence
-have equal `ℂ_p`-norm. The three lemmas below reproduce the (private) Tower
-helpers `norm_primitiveRoot_eq_one`/`norm_pow_sub_one_le`/`norm_sub_one_eq`. -/
-
 /-- The norm of a primitive `p^n`-th root of unity in `ℂ_p` is `1`
 (`‖ξ‖^{p^n} = 1` forces `‖ξ‖ = 1`). (Reproduced from `Tower`'s private helper.) -/
 private theorem norm_primitiveRoot_eq_one {n : ℕ} {ξ : ℂ_[p]}
@@ -55,8 +48,8 @@ private theorem norm_primitiveRoot_eq_one {n : ℕ} {ξ : ℂ_[p]}
   have h1 : ‖ξ‖ ^ (p ^ n) = 1 := by rw [← norm_pow, hξ.pow_eq_one, norm_one]
   have hne : p ^ n ≠ 0 := (pow_pos hp.out.pos n).ne'
   refine le_antisymm ?_ ?_
-  · by_contra h; rw [not_le] at h; exact absurd h1 (one_lt_pow₀ h hne).ne'
-  · by_contra h; rw [not_le] at h; exact absurd h1 (pow_lt_one₀ (norm_nonneg ξ) h hne).ne
+  · by_contra! h; exact absurd h1 (one_lt_pow₀ h hne).ne'
+  · by_contra! h; exact absurd h1 (pow_lt_one₀ (norm_nonneg ξ) h hne).ne
 
 /-- For a norm-one element `ξ` of `ℂ_p`, `‖ξ^c − 1‖ ≤ ‖ξ − 1‖`: factor
 `ξ^c − 1 = (∑_{i<c} ξ^i)(ξ − 1)` and bound the geometric factor by `1`
@@ -68,7 +61,7 @@ private theorem norm_pow_sub_one_le {ξ : ℂ_[p]} (hξ1 : ‖ξ‖ = 1) (c : �
   have hgeom : ‖∑ i ∈ Finset.range c, ξ ^ i‖ ≤ 1 :=
     IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg zero_le_one
       (fun i _ => by rw [norm_pow, hξ1, one_pow])
-  nlinarith [norm_nonneg (ξ - 1), hgeom]
+  exact mul_le_of_le_one_left (norm_nonneg _) hgeom
 
 /-- Any two primitive `p^n`-th roots of unity `ξ, η` in `ℂ_p` satisfy
 `‖ξ − 1‖ = ‖η − 1‖`: each is a power of the other (same cyclic group), so
@@ -76,7 +69,7 @@ private theorem norm_pow_sub_one_le {ξ : ℂ_[p]} (hξ1 : ‖ξ‖ = 1) (c : �
 private theorem norm_sub_one_eq {n : ℕ} {ξ η : ℂ_[p]}
     (hξ : IsPrimitiveRoot ξ (p ^ n)) (hη : IsPrimitiveRoot η (p ^ n)) :
     ‖ξ - 1‖ = ‖η - 1‖ := by
-  haveI : NeZero (p ^ n) := ⟨(pow_pos hp.out.pos n).ne'⟩
+  have : NeZero (p ^ n) := ⟨(pow_pos hp.out.pos n).ne'⟩
   obtain ⟨i, _, hi⟩ := hξ.eq_pow_of_pow_eq_one hη.pow_eq_one
   obtain ⟨j, _, hj⟩ := hη.eq_pow_of_pow_eq_one hξ.pow_eq_one
   refine le_antisymm ?_ ?_
@@ -96,8 +89,6 @@ root `η`, so `norm_sub_one_eq` applies. -/
 private theorem norm_zetaSys_pow_sub_one_eq {a : ℕ} (ha : ¬ (p : ℕ) ∣ a) (n : ℕ) :
     ‖zetaSys p n ^ a - 1‖ = ‖zetaSys p n - 1‖ :=
   norm_sub_one_eq p (zetaSys_pow_primitiveRoot p ha n) (zetaSys_primitiveRoot p n)
-
-/-! ## The cyclotomic unit `c_n(a)` (RJW TeX 2573) -/
 
 /-- **RJW TeX 2573**: the cyclotomic unit `c_n(a) = (ξ_{p^n}^a − 1)/(ξ_{p^n} − 1)`
 of the local field `K_n`. (At level `0` it is the junk value `0/0 = 0`; the
@@ -135,8 +126,7 @@ theorem cycloUnit_ne_zero {a : ℕ} (ha : ¬ (p : ℕ) ∣ a) {n : ℕ} (hn : 1 
 theorem cycloUnit_mem_O {a : ℕ} (ha : ¬ (p : ℕ) ∣ a) {n : ℕ} (hn : 1 ≤ n) :
     cycloUnit p a n ∈ O p n := by
   rw [O, Subring.mem_inf]
-  exact ⟨cycloUnit_mem_K p a hn, show ‖cycloUnit p a n‖ ≤ 1 from
-    (norm_cycloUnit p ha hn).le⟩
+  exact ⟨cycloUnit_mem_K p a hn, (norm_cycloUnit p ha hn).le⟩
 
 /-- `c_n(a)⁻¹ = (ξ_{p^n} − 1)/(ξ_{p^n}^a − 1) ∈ 𝒪_n` — the same argument with
 numerator and denominator swapped (norm `1`, in `K_n`). -/
@@ -147,8 +137,6 @@ theorem inv_cycloUnit_mem_O {a : ℕ} (ha : ¬ (p : ℕ) ∣ a) {n : ℕ} (hn : 
     show ‖(cycloUnit p a n)⁻¹‖ ≤ 1 from ?_⟩
   rw [norm_inv, norm_cycloUnit p ha hn, inv_one]
 
-/-! ## The packaged cyclotomic-unit tower `c(a)` (RJW TeX 2577) -/
-
 /-- The level norm of an inverse in `K_{n+1}`: for `x ∈ K_{n+1}` with
 `levelNorm p n x ≠ 0`, `levelNorm p n x⁻¹ = (levelNorm p n x)⁻¹`. From
 multiplicativity `levelNorm x · levelNorm x⁻¹ = levelNorm 1 = 1` (`x⁻¹ ∈ K_{n+1}`
@@ -156,10 +144,9 @@ as `K_{n+1}` is a field). -/
 private theorem levelNorm_inv {n : ℕ} {x : ℂ_[p]} (hx : x ∈ K p (n + 1))
     (hx0 : x ≠ 0) :
     levelNorm p n x⁻¹ = (levelNorm p n x)⁻¹ := by
-  have hxinv : x⁻¹ ∈ K p (n + 1) := (K p (n + 1)).inv_mem hx
   have hmul : levelNorm p n x * levelNorm p n x⁻¹ = 1 := by
-    rw [← levelNorm_mul p n hx hxinv, mul_inv_cancel₀ hx0, levelNorm_one]
-  exact eq_inv_of_mul_eq_one_left (by rw [mul_comm]; exact hmul)
+    rw [← levelNorm_mul p n hx ((K p (n + 1)).inv_mem hx), mul_inv_cancel₀ hx0, levelNorm_one]
+  exact eq_inv_of_mul_eq_one_left (by rwa [mul_comm])
 
 /-- The level norm of a quotient in `K_{n+1}`: for `x, y ∈ K_{n+1}` with
 `y ≠ 0`, `levelNorm p n (x/y) = levelNorm p n x / levelNorm p n y`. -/
@@ -179,7 +166,6 @@ theorem levelNorm_cycloUnit {a : ℕ} (ha : ¬ (p : ℕ) ∣ a) (hp2 : p ≠ 2) 
     sub_mem (pow_mem (zetaSys_mem_K p (n + 1)) a) (one_mem _)
   have hdenK : zetaSys p (n + 1) - 1 ∈ K p (n + 1) :=
     sub_mem (zetaSys_mem_K p (n + 1)) (one_mem _)
-  -- the denominator's level norm is `π_n = ξ_n − 1`, via `levelNorm_pi`
   have hden : levelNorm p n (zetaSys p (n + 1) - 1) = zetaSys p n - 1 := by
     have h := levelNorm_pi p hn hp2
     rwa [pi, pi] at h
@@ -201,24 +187,14 @@ noncomputable def cyclo {a : ℕ} (ha : ¬ (p : ℕ) ∣ a) (hp2 : p ≠ 2) :
     · rw [dif_neg hn]; exact one_mem _
   inv_mem n := by
     by_cases hn : 1 ≤ n
-    · rw [dif_pos hn,
-        show ((Units.mk0 (cycloUnit p a n) (cycloUnit_ne_zero p ha hn))⁻¹ : ℂ_[p])
-          = (cycloUnit p a n)⁻¹ from rfl]
+    · rw [dif_pos hn]
       exact inv_cycloUnit_mem_O p ha hn
-    · rw [dif_neg hn,
-        show (((1 : ℂ_[p]ˣ) : ℂ_[p]))⁻¹ = 1 from by rw [Units.val_one, inv_one]]
+    · rw [dif_neg hn, Units.val_one, inv_one]
       exact one_mem _
   compat n hn := by
     have hn1 : 1 ≤ n + 1 := by omega
     rw [dif_pos hn1, dif_pos hn, Units.val_mk0, Units.val_mk0]
     exact levelNorm_cycloUnit p ha hp2 hn
-
-/-! ## The logarithmic derivative of `f_{c(a)} = geomSum a` (RJW TeX 2595–2608)
-
-The Coleman power series of `c(a)` is `f_{c(a)} = geomSum a = ((1+T)^a−1)/T` (RJW
-prop:coleman zetap). Its logarithmic derivative `∂log f := (1+T)·f′/f` equals
-`(a−1) − F_a`; cleared of the `f`-denominator (and of the `Ring.inverse` junk in
-`F_a`) this is `(1+T)·(geomSum a)′ = ((a−1) − F_a)·geomSum a`. -/
 
 /-- `(1+T)·∂((1+T)^a) = a·(1+T)^a` over any commutative ring — the Leibniz rule by
 induction on `a` (`∂(1+T) = 1`). Used as the `hQ`-step of the cleared logarithmic
@@ -252,10 +228,8 @@ theorem one_add_mul_derivative_log_geomSum {a : ℕ} (ha : ¬ (p : ℕ) ∣ a) (
     (1 + X) * derivativeFun (PadicMeasure.geomSum p a)
       = (((a : PowerSeries ℤ_[p]) - 1) - PadicMeasure.Fa p a)
           * PadicMeasure.geomSum p a := by
-  set G := PadicMeasure.geomSum p a with hG
-  -- `G·X = (1+X)^a − 1`
+  set G := PadicMeasure.geomSum p a
   have hGX : G * X = (1 + X) ^ a - 1 := PadicMeasure.geomSum_mul_X p a
-  -- differentiate it: `(G)′·X + G = ∂((1+X)^a)`
   have hDX : derivativeFun (X : PowerSeries ℤ_[p]) = 1 := derivative_X
   have hdiff : derivativeFun G * X + G = derivativeFun ((1 + X : PowerSeries ℤ_[p]) ^ a) := by
     have h := congrArg derivativeFun hGX
@@ -267,39 +241,25 @@ theorem one_add_mul_derivative_log_geomSum {a : ℕ} (ha : ¬ (p : ℕ) ∣ a) (
           show (-1 : PowerSeries ℤ_[p]) = PowerSeries.C (-1 : ℤ_[p]) by simp,
           derivativeFun_C, add_zero]] at h
     rw [← h]; ring
-  -- `(1+X)·∂((1+X)^a) = a·(1+X)^a`
   have hQ : (1 + X) * derivativeFun ((1 + X : PowerSeries ℤ_[p]) ^ a)
       = (a : PowerSeries ℤ_[p]) * (1 + X) ^ a :=
     one_add_X_mul_derivativeFun_one_add_X_pow p a
-  -- the characterising identity
   have hFa : ((1 + X) ^ a - 1) * PadicMeasure.Fa p a = G - (a : PowerSeries ℤ_[p]) :=
     PadicMeasure.one_add_X_pow_sub_one_mul_Fa p ha
-  -- cancel the regular element `X`; reduce both sides multiplied by `X`
   refine mul_right_cancel₀ (X_ne_zero (R := ℤ_[p])) ?_
-  -- LHS·X = (1+X)·(G′·X) = (1+X)·(∂((1+X)^a) − G) = a(1+X)^a − (1+X)·G
   have hL : (1 + X) * derivativeFun G * X
       = (a : PowerSeries ℤ_[p]) * (1 + X) ^ a - (1 + X) * G := by
     have : (1 + X) * derivativeFun G * X
         = (1 + X) * (derivativeFun ((1 + X : PowerSeries ℤ_[p]) ^ a) - G) := by
       rw [← hdiff]; ring
     rw [this, mul_sub, hQ]
-  -- RHS·X = ((a−1) − Fa)·(G·X) = (a−1)((1+X)^a − 1) − (G − a)
   have hR : (((a : PowerSeries ℤ_[p]) - 1) - PadicMeasure.Fa p a) * G * X
       = ((a : PowerSeries ℤ_[p]) - 1) * ((1 + X) ^ a - 1) - (G - (a : PowerSeries ℤ_[p])) := by
     rw [mul_assoc, hGX, sub_mul, mul_comm (PadicMeasure.Fa p a) _, hFa]
   rw [hL, hR]
-  -- both sides are now polynomials in `G, X, ↑a`; `(1+X)^a = G·X + 1`
   have h1pX : (1 + X : PowerSeries ℤ_[p]) ^ a = G * X + 1 := by rw [hGX]; ring
   rw [h1pX]
   ring
-
-/-! ## The residue relation `Res(μ_{∂log f}) = −Res(μ_a)` (RJW TeX 2611–2624)
-
-RJW lem:relate cyclo to mua: the residue at `ℤ_p^×` of the measure attached to
-the cleared logarithmic derivative `(a−1) − F_a` equals `−Res_{ℤ_p^×}(μ_a)`. The
-constant series `a−1` contributes nothing: it is the Mahler transform of
-`(a−1)·δ_0` (`δ_0 = 1` has Mahler transform `(1+T)^0 = 1`), and `0 ∉ ℤ_p^×`, so
-its restriction to `ℤ_p^×` vanishes. -/
 
 /-- `Res_U` is additive (`res = cmul`, evaluated pointwise via `LinearMap.sub_apply`). -/
 private theorem res_sub {U : Set ℤ_[p]} (hU : IsClopen U) (μ ν : PadicMeasure p ℤ_[p]) :
@@ -358,21 +318,10 @@ theorem res_derivative_log_geomSum {a : ℕ} (_ha : ¬ (p : ℕ) ∣ a) (_ha0 : 
         ((PadicMeasure.mahlerLinearEquiv p).symm
           (((a : PowerSeries ℤ_[p]) - 1) - PadicMeasure.Fa p a))
       = - PadicMeasure.res p (PadicMeasure.isClopen_units p) (PadicMeasure.muA p a) := by
-  -- the constant series `(a : ℤ_p⟦T⟧) − 1 = C ((a : ℤ_p) − 1)`
   have hconst : ((a : PowerSeries ℤ_[p]) - 1)
       = PowerSeries.C (R := ℤ_[p]) ((a : ℤ_[p]) - 1) := by
     rw [map_sub, map_one, ← map_natCast (PowerSeries.C (R := ℤ_[p])) a]
   rw [hconst, map_sub, PadicMeasure.muA, res_sub, res_units_symm_C, zero_sub]
-
-/-! ## The Coleman series of `c(a)` is `geomSum a` (RJW TeX 2589–2592)
-
-RJW prop:coleman zetap (TeX 2589–2592): the Coleman power series of the cyclotomic
-tower `c(a)` is `f_{c(a)} = ((1+T)^a − 1)/T = geomSum a` — "and is even a polynomial".
-We prove `colemanSeries (cyclo a) = geomSum a` from the uniqueness of the Coleman
-series (`coleman_existsUnique`): `geomSum a` is a unit (`isUnit_geomSum`), is
-`𝒩`-invariant (it interpolates the norm-compatible `cycloUnit`-tower, so `evalPi_normOp`
-collapses to `levelNorm_cycloUnit` and `evalPi_injective` forces `𝒩`-fixedness), and
-interpolates `c(a)` (`evalPi_geomSum`). -/
 
 /-- **RJW TeX 2589–2592**: the geometric sum `geomSum a` evaluates at the uniformiser
 `π_m` (for `m ≥ 1`) to the cyclotomic unit `c_m(a) = cycloUnit p a m`. From
@@ -382,11 +331,9 @@ interpolates `c(a)` (`evalPi_geomSum`). -/
 theorem evalPi_geomSum (a : ℕ) {m : ℕ} (hm : 1 ≤ m) :
     evalPi p (PadicMeasure.geomSum p a) m = cycloUnit p a m := by
   have hpi : pi p m ≠ 0 := pi_ne_zero p hm
-  -- evaluate `geomSum a · X = (1+X)^a − 1` at `π_m`
   have hkey : evalPi p (PadicMeasure.geomSum p a) m * pi p m = zetaSys p m ^ a - 1 := by
     rw [← evalPi_X p m, ← evalPi_mul p _ _ hm, PadicMeasure.geomSum_mul_X,
       evalPi_sub p _ _ hm, evalPi_one_add_X_pow a hm, evalPi_one]
-  -- divide by `π_m = ξ_m − 1`
   rw [cycloUnit, show zetaSys p m - 1 = pi p m from rfl, eq_div_iff hpi, hkey]
 
 /-- **RJW prop:coleman zetap (TeX 2589–2592)**: the Coleman power series of the
@@ -404,15 +351,11 @@ satisfies all three defining clauses of `colemanSeries (cyclo a)`:
   (`evalPi_geomSum`; `(cyclo a).elems n = cycloUnit p a n` at `n ≥ 1`). -/
 theorem colemanSeries_cyclo {a : ℕ} (ha : ¬ (p : ℕ) ∣ a) (hp2 : p ≠ 2) :
     colemanSeries p (cyclo p ha hp2) = PadicMeasure.geomSum p a := by
-  -- the interpolation clause: `(geomSum a)(π_n) = (cyclo a).elems n` for `n ≥ 1`
   have heval : ∀ n, 1 ≤ n →
       evalPi p (PadicMeasure.geomSum p a) n = ((cyclo p ha hp2).elems n : ℂ_[p]) := by
     intro n hn
     rw [evalPi_geomSum p a hn]
-    change cycloUnit p a n = ((if hn : 1 ≤ n then Units.mk0 (cycloUnit p a n)
-      (cycloUnit_ne_zero p ha hn) else 1 : ℂ_[p]ˣ) : ℂ_[p])
-    rw [dif_pos hn, Units.val_mk0]
-  -- the `𝒩`-invariance clause, via `evalPi_injective`
+    simp only [cyclo, dif_pos hn, Units.val_mk0]
   have hnorm : normOp (PadicMeasure.geomSum p a) = PadicMeasure.geomSum p a := by
     refine evalPi_injective p (fun n hn => ?_)
     rw [evalPi_normOp _ hn, evalPi_geomSum p a (by omega : 1 ≤ n + 1), evalPi_geomSum p a hn,
@@ -420,21 +363,6 @@ theorem colemanSeries_cyclo {a : ℕ} (ha : ¬ (p : ℕ) ∣ a) (hp2 : p ≠ 2) 
   exact (coleman_existsUnique p (cyclo p ha hp2)).unique
     (coleman_existsUnique p (cyclo p ha hp2)).choose_spec.1
     ⟨PadicMeasure.isUnit_geomSum p ha, hnorm, heval⟩
-
-/-! ## The Coleman map `Col` (RJW Def:coleman map, TeX 2813–2832)
-
-RJW's Coleman map (Def:coleman map, TeX 2826–2832) is the composite
-```
-𝒰_∞ --u ↦ f_u--> (ℤ_p⟦T⟧^×)^{𝒩=id} --∂log--> ℤ_p⟦T⟧ --1−φψ--> ℤ_p⟦T⟧^{ψ=0}
-       --∂⁻¹--> ℤ_p⟦T⟧^{ψ=0} --𝒜⁻¹--> Λ(ℤ_p^×),
-```
-where (TeX 2825) on the measure side step `(1−φψ)` is *restriction to* `ℤ_p^×` and
-step `∂⁻¹` is *multiplication by* `x⁻¹`. We realise the composite measure-side,
-avoiding the `∂⁻¹`-indeterminacy: `Col u` is the units-measure
-`x⁻¹ · Res_{ℤ_p^×}(𝒜⁻¹(∂log f_u))`, built (exactly as the §4 `zetaNum`/`muAUnits`
-pattern) by precomposing the `ℤ_p`-measure `𝒜⁻¹(∂log f_u)` with `extendByZero` (the
-units-section realising restriction-to-`ℤ_p^×`, `iota_comp_extendByZero`) and then
-multiplying by `invCM = x⁻¹` (`unitsCmul`). -/
 
 /-- The logarithmic derivative `∂log f = (1+T)·f′·f⁻¹` of a power series (RJW §10.2,
 the second arrow of Def:coleman map, TeX 2829). For a *unit* `f` (the case of interest,
@@ -467,20 +395,6 @@ noncomputable def Col (u : NormCompatUnits p) : PadicMeasure p ℤ_[p]ˣ :=
     (((PadicMeasure.mahlerLinearEquiv p).symm (dlog p (colemanSeries p u))).comp
       (PadicMeasure.extendByZero p))
 
-/-! ## `ζ_p = Col(c(a))/θ_a` (RJW thm:coleman to kl, TeX 2836–2841)
-
-The final identity. The board-flagged **sign** is resolved here from the source: RJW's
-`θ_a` is `[a] − [1]` (TeX 1551), and `ζ_p := (x⁻¹Res μ_a)/θ_a` (DefZetap, TeX 1565–1568)
-— exactly the project's `padicZeta = mk'(zetaNum, [a]−1)` with `θ_a = dirac u − 1`, no
-sign twist. But `∂log f_{c(a)} = (a−1) − F_a` gives (RJW lem:relate cyclo to mua, TeX
-2614 — *the notes' own minus*) `Res_{ℤ_p^×}(μ_{∂log f}) = −Res_{ℤ_p^×}(μ_a)`, whence
-`Col(c(a)) = x⁻¹·Res(μ_{∂log f}) = −x⁻¹Res(μ_a) = −zetaNum a`. Thm:coleman to kl (TeX
-2839) states `ζ_p = Col(c(a))/θ_a` with *no* sign; combined with TeX 2614's minus this
-would give `ζ_p = −(x⁻¹Res μ_a)/θ_a`, contradicting DefZetap (TeX 1568). The display at
-TeX 2839 therefore drops a minus sign relative to its own lem:relate cyclo to mua
-(errata #12). The honest identity is `ζ_p = −Col(c(a))/θ_a`, i.e.
-`([a]−1)·ζ_p = −Col(c(a))`. -/
-
 /-- `∂log (geomSum a) = (a−1) − F_a` (RJW prop:coleman zetap, TeX 2595–2608): the
 cleared identity `(1+T)·(geomSum a)′ = ((a−1)−F_a)·geomSum a`
 (`one_add_mul_derivative_log_geomSum`) becomes, on multiplying by `geomSum a⁻¹`
@@ -509,7 +423,6 @@ The minus is RJW lem:relate cyclo to mua (TeX 2614). -/
 theorem Col_cyclo {a : ℕ} (ha : ¬ (p : ℕ) ∣ a) (hp2 : p ≠ 2) :
     Col p (cyclo p ha hp2) = -PadicMeasure.zetaNum p a := by
   have ha0 : a ≠ 0 := fun h => ha (h ▸ dvd_zero p)
-  -- the units-measure of `∂log f_{c(a)}` equals `−muAUnits a` (pin down via `ι` injective)
   have hmeasure :
       ((PadicMeasure.mahlerLinearEquiv p).symm
             (dlog p (colemanSeries p (cyclo p ha hp2)))).comp (PadicMeasure.extendByZero p)
@@ -542,7 +455,6 @@ theorem coleman_to_kl (hp2 : p ≠ 2) :
           hp2)) := by
   obtain ⟨hpm, _huv, _hgen⟩ :=
     (PadicMeasure.exists_nat_topological_generator p hp2).choose_spec.choose_spec
-  -- the localisation relation `([u]−1)·ζ_p = zetaNum m`
   have hspec : algebraMap _ (PadicMeasure.QuotientField p)
         (PadicMeasure.dirac p
           (PadicMeasure.exists_nat_topological_generator p hp2).choose_spec.choose - 1)
