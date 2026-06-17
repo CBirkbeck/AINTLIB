@@ -2,6 +2,7 @@ import HasseWeil.EC.IsogenyAG.IsogenyClass
 import HasseWeil.EC.IsogenyAG.MulByIntBasepoint
 import HasseWeil.EC.IsogenyAG.TwistedFactorization
 import HasseWeil.EC.IsogenyAG.BaseChange
+import HasseWeil.EC.IsogenyAG.TwoCurveDualRange
 import HasseWeil.Curves.CurveMapBaseChange
 import HasseWeil.Curves.NoFinitePolesBridge
 import HasseWeil.Curves.OrdAtInftyBaseChange
@@ -562,6 +563,11 @@ theorem descendFun_eq_iff {C₁ C₂ : SmoothPlaneCurve F}
   · intro h; exact C₁.functionFieldMap_injective L
       ((functionFieldMap_descendFun L hξ f).trans h.symm)
 
+set_option synthInstance.maxHeartbeats 400000 in
+-- Importing the two-curve fixed-field machinery (`TwoCurveDualRange`) transitively brings the
+-- kernel-translation `MulSemiringAction` on `FunctionField` into scope, which expands instance
+-- search through the `Submodule` lattice during this `AlgHom`-structure elaboration — the same
+-- `synthInstance` pressure handled identically in `EC/KernelCountGeneral.lean`.
 /-- **DUAL-Q2(b)** — the descended pullback `ξ↓ : F(E₂) →ₐ[F] F(E₁)`, packaged as an `F`-algebra
 hom. The ring/algebra structure is forced by the round-trip `functionFieldMap_descendFun` and the
 injectivity of `functionFieldMap`: `ξ↓` is the unique map making the base-change square commute, and
@@ -574,10 +580,14 @@ noncomputable def descendPullback {C₁ C₂ : SmoothPlaneCurve F}
     (hξ : GalEquivariant L ξ) :
     C₂.FunctionField →ₐ[F] C₁.FunctionField where
   toFun := descendFun L hξ
-  map_one' := (descendFun_eq_iff L hξ 1 1).2 (by simp)
-  map_mul' a b := (descendFun_eq_iff L hξ (a * b) _).2 (by simp)
-  map_zero' := (descendFun_eq_iff L hξ 0 0).2 (by simp)
-  map_add' a b := (descendFun_eq_iff L hξ (a + b) _).2 (by simp)
+  map_one' := (descendFun_eq_iff L hξ 1 1).2 (by
+    simp only [map_one])
+  map_mul' a b := (descendFun_eq_iff L hξ (a * b) _).2 (by
+    simp only [map_mul, functionFieldMap_descendFun])
+  map_zero' := (descendFun_eq_iff L hξ 0 0).2 (by
+    simp only [map_zero])
+  map_add' a b := (descendFun_eq_iff L hξ (a + b) _).2 (by
+    simp only [map_add, functionFieldMap_descendFun])
   commutes' r := (descendFun_eq_iff L hξ (algebraMap F C₂.FunctionField r)
       (algebraMap F C₁.FunctionField r)).2 (by
     rw [SmoothPlaneCurve.functionFieldMap_algebraMap_F,
@@ -1437,24 +1447,160 @@ private structure TwoCurveKbarRangeInclData {F : Type u} [Field F] [DecidableEq 
         (by exact_mod_cast φ.degree_pos'.ne')).range ≤
       (TwoCurveBaseChange.psiL W₁ W₂ φ L).range
 
-/-- **The single residual leaf — the `L`-level two-curve `K̄`-dual range inclusion (REVIEW-PENDING).**
-Produces a `TwoCurveKbarRangeInclData`: a concrete finite Galois `L ⊆ K̄` together with the range
-inclusion `Im([deg φ]_L*) ⊆ Im(ψ_L)` over it.
+/-- **The genuine two-curve geometric leaf** (Silverman III.4.10c, the *only* remaining
+infrastructure after this pass).  Over a concrete finite Galois `L ⊆ K̄`, it packages a
+points-bearing realization `βL : Basic.Isogeny (E₁_L) (E₂_L)` of the function-field base-change
+`ψ_L = (bcIsog).pullback` together with the two genuinely-geometric facts of III.4.10c read for the
+two-curve `βL`:
 
-This is the **two-curve `K̄`-dual** `Im([m]_K̄*) ⊆ Im(φ_K̄*)` (Silverman III.6.1 over an algebraically
-closed field) restricted to a finite Galois `L`. The project's K̄-dual machinery
-(`exists_dual_of_pullbackEvaluation_general`, `EC/KernelCountGeneral.lean`; the
-`HasMulByIntDualWitness.hincl`) is **endomorphism-only** (`W → W`); a *two-curve* `φ_K̄ : E₁_K̄ → E₂_K̄`
-has no codebase dual, so this range inclusion is the irreducible remaining infrastructure. Everything
-else of the two-curve `DescentData` is proven this pass: the L-linear `ψ_L`
-(`TwoCurveBaseChange.psiL`), `[m]_L*` (`TwoCurveBaseChange.mPbL`), their base-change naturalities
-(`psiL_nat`, `mPbL_nat`), `ψ_L`'s injectivity (`psiL_injective`), and `ψ_L`'s full
-`Gal(L/F)`-equivariance (`psiL_galEquivariant`). -/
+* `h_pbL` — `βL.pullback = ψ_L` (the points-bearing realization of `ψ_L`, as `L`-algebra homs;
+  i.e. a point map for `bcIsog` over `L`).  For an `EC.Isogeny` built by `ofEquation` over `K̄ ⊇ L`
+  this is exactly the affine-kernel / `PullbackEvaluation` point-map content;
+* `h_xy_family` — the per-`βL` kernel-translation covariance on `x_gen₂`/`y_gen₂` (Silverman
+  III.4.10b, the generic-point covariance for the two-curve `βL`);
+* `h_card` — the cardinality match `#ker βL = deg βL` (Silverman III.4.10c, via the *two-curve*
+  good-fibre count `Curves.LocalizedDictionary` — already two-curve — fed to the two-curve
+  `card_kernel_eq_degree_of_separable_witness`);
+* `h_mPbL` — the structural identification `[deg φ]_L* = [deg βL]_{E₁_L}*` (`mPbL` is the L-base
+  change of `[deg φ]*` via `bcIsog`; matching it to the endomorphism `[deg βL]` over `E₁_L` and
+  `deg βL = deg φ` is base-change-of-`mulByInt` + degree preservation, separable plumbing).
+
+Everything else — the fixed-field equality `Fix(ker βL) = Im(βL*)`, the easy inclusion
+`Im([m]*) ⊆ Fix(ker βL)`, and the assembled K̄-dual range inclusion
+`Im([m]*) ⊆ Im(βL*)` — is **proven, two-curve, axiom-clean** in
+`HasseWeil.Isogeny.mulByInt_deg_rangeIncl_twoCurve` (`EC/IsogenyAG/TwoCurveDualRange.lean`), built on
+the two-curve fixed-field core `EC/IsogenyAG/TwoCurveFixedField.lean`. -/
+private structure TwoCurveGeometricDualData {F : Type u} [Field F] [DecidableEq F] [CharZero F]
+    {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
+    (φ : EC.Isogeny W₁ W₂) where
+  /-- The concrete finite Galois field of definition `L ⊆ K̄`. -/
+  L : IntermediateField F (AlgebraicClosure F)
+  /-- `L/F` is finite. -/
+  [finL : FiniteDimensional F L]
+  /-- `L/F` is Galois. -/
+  [galL : IsGalois F L]
+  /-- A decidability instance on `L` (for the `ofEquation` construction). -/
+  decL : DecidableEq L
+  /-- The points-bearing realization of `ψ_L` over `L`. -/
+  βL :
+    letI := decL
+    HasseWeil.Isogeny (W₁.baseChange L).toAffine (W₂.baseChange L).toAffine
+  /-- `βL.pullback` is `ψ_L` (the `L`-algebra pullback of the base-changed isogeny). -/
+  h_pbL :
+    letI := decL
+    βL.pullback = (TwoCurveBaseChange.bcIsog W₁ W₂ φ L).toCurveMap.pullback
+  /-- The per-`βL` kernel-translation covariance (Silverman III.4.10b). -/
+  h_xy_family :
+    letI := decL
+    ∀ k : βL.kernel,
+      (HasseWeil.translateAlgEquivOfPoint (W₁.baseChange L) k.val
+          (βL.pullback (HasseWeil.x_gen (W₂.baseChange L))) =
+        βL.pullback (HasseWeil.x_gen (W₂.baseChange L))) ∧
+      (HasseWeil.translateAlgEquivOfPoint (W₁.baseChange L) k.val
+          (βL.pullback (HasseWeil.y_gen (W₂.baseChange L))) =
+        βL.pullback (HasseWeil.y_gen (W₂.baseChange L)))
+  /-- The cardinality match `#ker βL = deg βL` (Silverman III.4.10c). -/
+  h_card :
+    letI := decL
+    Nat.card βL.kernel = βL.degree
+  /-- `βL` has the same degree as `φ` (base-change preserves degree). -/
+  h_deg :
+    letI := decL
+    βL.degree = φ.degree
+  /-- `[deg φ]_L*` (the base-changed `mulByInt` pullback) is the source-`E₁_L` endomorphism
+  `[deg βL]_{E₁_L}*` — the structural `mulByInt` base-change + degree-preservation identification. -/
+  h_mPbL :
+    letI := decL
+    (TwoCurveBaseChange.mPbL W₁ L (n := (φ.degree : ℤ))
+        (by exact_mod_cast φ.degree_pos'.ne') :
+      (W₁.baseChange L).toAffine.FunctionField →ₐ[F] (W₁.baseChange L).toAffine.FunctionField) =
+      (HasseWeil.mulByInt_pullbackAlgHom (W₁.baseChange L) (βL.degree : ℤ)
+        (by exact_mod_cast (HasseWeil.Isogeny.degree_pos_twoCurve βL).ne')).restrictScalars F
+
+/-- **The two-curve `K̄`-dual range inclusion, from the genuine geometric leaf.** Consuming the
+`TwoCurveGeometricDualData` (the points-bearing realization + `xy_family` + `#ker = deg` + the two
+structural identifications), the `L`-level inclusion `Im([deg φ]_L*) ⊆ Im(ψ_L)` is **proven** via the
+two-curve fixed-field range inclusion `HasseWeil.Isogeny.mulByInt_deg_rangeIncl_twoCurve`. -/
+private noncomputable def twoCurveKbarRangeInclData_of_geometric {F : Type u} [Field F]
+    [DecidableEq F] [CharZero F] {W₁ W₂ : WeierstrassCurve.Affine F}
+    [W₁.IsElliptic] [W₂.IsElliptic] {φ : EC.Isogeny W₁ W₂}
+    (d : TwoCurveGeometricDualData φ) : TwoCurveKbarRangeInclData φ :=
+  letI := d.finL
+  letI := d.galL
+  letI : DecidableEq d.L := d.decL
+  { L := d.L
+    finL := d.finL
+    galL := d.galL
+    decL := d.decL
+    hLincl := by
+      -- the two-curve fixed-field range inclusion for the points-bearing `βL`, over the base `L`
+      have hincl := HasseWeil.Isogeny.mulByInt_deg_rangeIncl_twoCurve d.βL d.h_xy_family d.h_card
+      -- elementwise (the `Subalgebra` ranges are over different base rings `F` vs `L`, but the
+      -- underlying *sets* `{z | ∃ x, f x = z}` agree under `restrictScalars`)
+      rintro z hz
+      rw [AlgHom.mem_range] at hz
+      obtain ⟨u, hu⟩ := hz
+      -- rewrite `mPbL` to `[deg βL]_{E₁_L}*` (restrictScalars `F`) *pointwise*; the underlying
+      -- function is the bare `mulByInt_pullbackAlgHom`, so `z` lies in its `L`-range
+      have hu' : (HasseWeil.mulByInt_pullbackAlgHom (W₁.baseChange d.L) (d.βL.degree : ℤ)
+          (by exact_mod_cast (HasseWeil.Isogeny.degree_pos_twoCurve d.βL).ne')) u = z := by
+        rw [← hu]; exact (DFunLike.congr_fun d.h_mPbL u).symm
+      have hzmemL : z ∈ (HasseWeil.mulByInt_pullbackAlgHom (W₁.baseChange d.L)
+          (d.βL.degree : ℤ)
+          (by exact_mod_cast (HasseWeil.Isogeny.degree_pos_twoCurve d.βL).ne')).range :=
+        ⟨u, hu'⟩
+      obtain ⟨w, hw⟩ := hincl hzmemL
+      -- `z = βL.pullback w = ψ_L w`, so `z ∈ Im(ψ_L)`
+      rw [AlgHom.mem_range]
+      refine ⟨w, ?_⟩
+      -- `ψ_L = (bcIsog).pullback.restrictScalars F`, applied is defeq to `(bcIsog).pullback w`;
+      -- and `(bcIsog).pullback = βL.pullback` by `d.h_pbL`
+      show (TwoCurveBaseChange.bcIsog W₁ W₂ φ d.L).toCurveMap.pullback w = z
+      rw [← d.h_pbL]; exact hw }
+
+/-- **The single residual leaf — the `L`-level two-curve `K̄`-dual range inclusion (REVIEW-PENDING),
+narrowed to the genuine two-curve geometric data.** Produces a `TwoCurveKbarRangeInclData` from the
+`TwoCurveGeometricDualData` leaf: a points-bearing realization of `ψ_L` over a finite Galois
+`L ⊆ K̄`, with the two III.4.10c geometric facts (`xy_family`, `#ker = deg`) and the structural
+`mulByInt` base-change identifications.
+
+**This pass — the fixed-field route is now PROVEN two-curve.** The entire Silverman III.6.1 dual
+range inclusion `Im([m]_K̄*) ⊆ Im(φ_K̄*)` for a *two-curve* `φ_K̄ : E₁_K̄ → E₂_K̄` is reduced to the
+two genuine geometric facts (`xy_family`, `#ker = deg`) plus a points-bearing realization, via the
+new two-curve fixed-field machinery (`EC/IsogenyAG/TwoCurveFixedField.lean`,
+`EC/IsogenyAG/TwoCurveDualRange.lean`, all axiom-clean):
+
+* the project's endo-only fixed-field chain (`pullback_fieldRange_eq_fixedField_general`,
+  `fixedField_hfix_general`, `finrank_pullback_fieldRange_eq_degree`) is **successfully relaxed to
+  two curves** — every step is source-natural (the kernel `ker φ ⊆ E₁` acts on `K(E₁)` by
+  translation; the only cross-curve object is `φ.pullback`);
+* the easy inclusion `Im([m]*) ⊆ Fix(ker φ)` (Lagrange `ker φ ⊆ E₁[m]` + the source-`E₁`
+  endomorphism `[m]`-covariance) is **proven two-curve**;
+* the two-curve `#ker = deg` reduces (`card_kernel_eq_degree_of_separable_witness`, already
+  two-curve in `EC/IsogenyKernel.lean`) to the two-curve good-fibre count
+  (`Curves.LocalizedDictionary`, already two-curve).
+
+**The remaining `sorry` (`TwoCurveGeometricDualData`)** is exactly the genuinely cross-curve
+generic-point machinery: a *point map* for the `ofEquation`-built `bcIsog` over `K̄` (the affine-kernel
+`PullbackEvaluation` obstruction) and its generic-point covariance (`xy_family`) — i.e. relaxing
+`mapTranslateGenericPoint_of_pullbackEvaluation` (`WeilPairing/GenericCovarianceGeneral.lean`) and the
+kernel-translation torsor (`EC/SeparableKernelTorsor.lean`) to two curves, plus the structural
+`mulByInt` base-change identifications.  This is the large multi-file generalization of the
+cross-curve generic-point engine; it is isolated here as the named residual. -/
+private noncomputable def twoCurveGeometricDualData {F : Type u} [Field F] [DecidableEq F]
+    [CharZero F] {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
+    (φ : EC.Isogeny W₁ W₂) (hsep : φ.IsSeparable) :
+    TwoCurveGeometricDualData φ :=
+  sorry
+
+/-- **The `L`-level two-curve `K̄`-dual range inclusion** — now a thin assembly over the proven
+two-curve fixed-field route (`twoCurveKbarRangeInclData_of_geometric`) and the single genuine
+geometric leaf (`twoCurveGeometricDualData`). -/
 private noncomputable def twoCurveKbarRangeIncl_descended {F : Type u} [Field F] [DecidableEq F]
     [CharZero F] {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
     (φ : EC.Isogeny W₁ W₂) (hsep : φ.IsSeparable) :
     TwoCurveKbarRangeInclData φ :=
-  sorry
+  twoCurveKbarRangeInclData_of_geometric (twoCurveGeometricDualData φ hsep)
 
 private noncomputable def descentData_over_kbar_intermediate {F : Type u} [Field F] [DecidableEq F]
     [CharZero F] {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
