@@ -8003,6 +8003,513 @@ theorem wedhorn_lemma_834_propA3_part1_separation
   rw [h_factored₂, hx D hD_in_C]
   exact (restrictionMapHom D D' hD'_sub_D).map_zero
 
+set_option linter.unusedSectionVars false in
+/-- **Prop A.3(1) gluing, Step 2 (helper)**: the restricted family `gVj` at
+each `Vj ∈ V.covers` is compatible on `(C_restr_at Vj).covers`. Here `gVj Vj D'`
+is `f` pulled back through the chosen containing `C`-piece `chooseC Vj D'`
+(characterised by `hgVj_def`), so compatibility is `h_compat` composed through
+the two choices. Extracted from `wedhorn_lemma_834_propA3_part1_gluing`. -/
+private theorem wedhorn_propA3_gluing_gVj_compat
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (C : RationalCovering A) {V : RationalCovering A}
+    (C_restr_at : ↥V.covers → RationalCovering A)
+    (f : ∀ (D : ↥C.covers), presheafValue D.1)
+    (h_compat : ∀ (D₁ D₂ : ↥C.covers) (D₃ : RationalLocData A)
+      (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
+      (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₂.1.T D₂.1.s),
+      restrictionMap D₁.1 D₃ h₃₁ (f D₁) = restrictionMap D₂.1 D₃ h₃₂ (f D₂))
+    (chooseC : ∀ (Vj : ↥V.covers) (D' : ↥(C_restr_at Vj).covers),
+      { D : ↥C.covers //
+        rationalOpen D'.1.T D'.1.s ⊆ rationalOpen D.1.T D.1.s })
+    (gVj : ∀ (Vj : ↥V.covers) (D' : ↥(C_restr_at Vj).covers),
+      presheafValue D'.1)
+    (hgVj_def : ∀ (Vj : ↥V.covers) (D' : ↥(C_restr_at Vj).covers),
+      gVj Vj D' = restrictionMap (chooseC Vj D').1.1 D'.1 (chooseC Vj D').2
+        (f (chooseC Vj D').1)) :
+    ∀ (Vj : ↥V.covers)
+      (D'₁ D'₂ : ↥(C_restr_at Vj).covers)
+      (D'₃ : RationalLocData A)
+      (h₃₁ : rationalOpen D'₃.T D'₃.s ⊆ rationalOpen D'₁.1.T D'₁.1.s)
+      (h₃₂ : rationalOpen D'₃.T D'₃.s ⊆ rationalOpen D'₂.1.T D'₂.1.s),
+      restrictionMap D'₁.1 D'₃ h₃₁ (gVj Vj D'₁) =
+        restrictionMap D'₂.1 D'₃ h₃₂ (gVj Vj D'₂) := by
+  intro Vj D'₁ D'₂ D'₃ h₃₁ h₃₂
+  rw [hgVj_def Vj D'₁, hgVj_def Vj D'₂]
+  show restrictionMap D'₁.1 D'₃ h₃₁
+        (restrictionMap (chooseC Vj D'₁).1.1 D'₁.1 (chooseC Vj D'₁).2
+          (f (chooseC Vj D'₁).1))
+      = restrictionMap D'₂.1 D'₃ h₃₂
+        (restrictionMap (chooseC Vj D'₂).1.1 D'₂.1 (chooseC Vj D'₂).2
+          (f (chooseC Vj D'₂).1))
+  have h_lhs := restrictionMap_comp (chooseC Vj D'₁).1.1 D'₁.1 D'₃
+    (chooseC Vj D'₁).2 h₃₁
+  have h_rhs := restrictionMap_comp (chooseC Vj D'₂).1.1 D'₂.1 D'₃
+    (chooseC Vj D'₂).2 h₃₂
+  rw [show restrictionMap D'₁.1 D'₃ h₃₁
+        (restrictionMap (chooseC Vj D'₁).1.1 D'₁.1 (chooseC Vj D'₁).2
+          (f (chooseC Vj D'₁).1))
+      = restrictionMap (chooseC Vj D'₁).1.1 D'₃
+        (h₃₁.trans (chooseC Vj D'₁).2) (f (chooseC Vj D'₁).1)
+    from congrFun h_lhs _,
+    show restrictionMap D'₂.1 D'₃ h₃₂
+        (restrictionMap (chooseC Vj D'₂).1.1 D'₂.1 (chooseC Vj D'₂).2
+          (f (chooseC Vj D'₂).1))
+      = restrictionMap (chooseC Vj D'₂).1.1 D'₃
+        (h₃₂.trans (chooseC Vj D'₂).2) (f (chooseC Vj D'₂).1)
+    from congrFun h_rhs _]
+  exact h_compat (chooseC Vj D'₁).1 (chooseC Vj D'₂).1 D'₃
+    (h₃₁.trans (chooseC Vj D'₁).2) (h₃₂.trans (chooseC Vj D'₂).2)
+
+set_option linter.unusedSectionVars false in
+/-- **Prop A.3(1) gluing, Step 5 (helper)**: the per-`Vj` glued sections `yV`
+are compatible on overlaps of `V`. The chase reduces an arbitrary common
+rational subset `Vj₃` to the canonical intersection `I_at Vj₁ Vj₂`, then
+SEPARATES over the acyclic pair-cover `W_at Vj₁ Vj₂`: on each `W`-piece both
+sides become restrictions of `f`-values through single `C_restr`-pieces, closed
+by `h_compat`. `yV`, `gVj`, `yVj` enter only through their characterising
+equations (`hyV_def`, `hgVj_def`) and the glue spec (`hyVj_spec`). Extracted
+from `wedhorn_lemma_834_propA3_part1_gluing`. -/
+private theorem wedhorn_propA3_gluing_yV_compat
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (C : RationalCovering A) {V : RationalCovering A}
+    (C_restr_at : ↥V.covers → RationalCovering A)
+    (_hC_restr_base : ∀ Vj : ↥V.covers, (C_restr_at Vj).base = Vj.1)
+    (f : ∀ (D : ↥C.covers), presheafValue D.1)
+    (h_compat : ∀ (D₁ D₂ : ↥C.covers) (D₃ : RationalLocData A)
+      (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
+      (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₂.1.T D₂.1.s),
+      restrictionMap D₁.1 D₃ h₃₁ (f D₁) = restrictionMap D₂.1 D₃ h₃₂ (f D₂))
+    (I_at : ↥V.covers → ↥V.covers → RationalLocData A)
+    (hI_open : ∀ Vj₁ Vj₂ : ↥V.covers,
+      rationalOpen (I_at Vj₁ Vj₂).T (I_at Vj₁ Vj₂).s =
+        rationalOpen Vj₁.1.T Vj₁.1.s ∩ rationalOpen Vj₂.1.T Vj₂.1.s)
+    (W_at : ↥V.covers → ↥V.covers → RationalCovering A)
+    (hW_base : ∀ Vj₁ Vj₂ : ↥V.covers, (W_at Vj₁ Vj₂).base = I_at Vj₁ Vj₂)
+    (hW_pieces₁ : ∀ Vj₁ Vj₂ : ↥V.covers, ∀ W' ∈ (W_at Vj₁ Vj₂).covers,
+      ∃ D'₁ ∈ (C_restr_at Vj₁).covers,
+        rationalOpen W'.T W'.s ⊆ rationalOpen D'₁.T D'₁.s)
+    (hW_pieces₂ : ∀ Vj₁ Vj₂ : ↥V.covers, ∀ W' ∈ (W_at Vj₁ Vj₂).covers,
+      ∃ D'₂ ∈ (C_restr_at Vj₂).covers,
+        rationalOpen W'.T W'.s ⊆ rationalOpen D'₂.T D'₂.s)
+    (hW_acyclic : ∀ Vj₁ Vj₂ : ↥V.covers, (W_at Vj₁ Vj₂).IsOXAcyclic)
+    (chooseC : ∀ (Vj : ↥V.covers) (D' : ↥(C_restr_at Vj).covers),
+      { D : ↥C.covers //
+        rationalOpen D'.1.T D'.1.s ⊆ rationalOpen D.1.T D.1.s })
+    (gVj : ∀ (Vj : ↥V.covers) (D' : ↥(C_restr_at Vj).covers),
+      presheafValue D'.1)
+    (yVj : ∀ (Vj : ↥V.covers), presheafValue (C_restr_at Vj).base)
+    (yV : ∀ (Vj : ↥V.covers), presheafValue Vj.1)
+    (hgVj_def : ∀ (Vj : ↥V.covers) (D' : ↥(C_restr_at Vj).covers),
+      gVj Vj D' = restrictionMap (chooseC Vj D').1.1 D'.1 (chooseC Vj D').2
+        (f (chooseC Vj D').1))
+    (hyV_def : ∀ (Vj : ↥V.covers), yV Vj =
+      @Eq.rec (RationalLocData A) (C_restr_at Vj).base
+        (fun b _ => presheafValue b) (yVj Vj) Vj.1 (_hC_restr_base Vj))
+    (hyVj_spec : ∀ (Vj : ↥V.covers) (D'' : ↥(C_restr_at Vj).covers),
+      restrictionMap (C_restr_at Vj).base D''.1
+        ((C_restr_at Vj).hsubset D''.1 D''.2) (yVj Vj) = gVj Vj D'') :
+    ∀ (Vj₁ Vj₂ : ↥V.covers)
+      (Vj₃ : RationalLocData A)
+      (h₃₁ : rationalOpen Vj₃.T Vj₃.s ⊆ rationalOpen Vj₁.1.T Vj₁.1.s)
+      (h₃₂ : rationalOpen Vj₃.T Vj₃.s ⊆ rationalOpen Vj₂.1.T Vj₂.1.s),
+      restrictionMap Vj₁.1 Vj₃ h₃₁ (yV Vj₁) =
+        restrictionMap Vj₂.1 Vj₃ h₃₂ (yV Vj₂) := by
+  intro Vj₁ Vj₂ Vj₃ h₃₁ h₃₂
+  have hyVj_spec₁ : ∀ (D'' : ↥(C_restr_at Vj₁).covers),
+      restrictionMap (C_restr_at Vj₁).base D''.1
+        ((C_restr_at Vj₁).hsubset D''.1 D''.2) (yVj Vj₁) = gVj Vj₁ D'' :=
+    hyVj_spec Vj₁
+  have hyVj_spec₂ : ∀ (D'' : ↥(C_restr_at Vj₂).covers),
+      restrictionMap (C_restr_at Vj₂).base D''.1
+        ((C_restr_at Vj₂).hsubset D''.1 D''.2) (yVj Vj₂) = gVj Vj₂ D'' :=
+    hyVj_spec Vj₂
+  have hI_sub₁ : rationalOpen (I_at Vj₁ Vj₂).T (I_at Vj₁ Vj₂).s ⊆
+      rationalOpen Vj₁.1.T Vj₁.1.s := by
+    rw [hI_open Vj₁ Vj₂]; exact Set.inter_subset_left
+  have hI_sub₂ : rationalOpen (I_at Vj₁ Vj₂).T (I_at Vj₁ Vj₂).s ⊆
+      rationalOpen Vj₂.1.T Vj₂.1.s := by
+    rw [hI_open Vj₁ Vj₂]; exact Set.inter_subset_right
+  have h₃I : rationalOpen Vj₃.T Vj₃.s ⊆
+      rationalOpen (I_at Vj₁ Vj₂).T (I_at Vj₁ Vj₂).s := by
+    rw [hI_open Vj₁ Vj₂]; exact Set.subset_inter h₃₁ h₃₂
+  -- Reduce to agreement on the canonical intersection I.
+  suffices h_on_I : restrictionMap Vj₁.1 (I_at Vj₁ Vj₂) hI_sub₁ (yV Vj₁) =
+      restrictionMap Vj₂.1 (I_at Vj₁ Vj₂) hI_sub₂ (yV Vj₂) by
+    have hL : restrictionMap Vj₁.1 Vj₃ h₃₁ (yV Vj₁) =
+        restrictionMap (I_at Vj₁ Vj₂) Vj₃ h₃I
+          (restrictionMap Vj₁.1 (I_at Vj₁ Vj₂) hI_sub₁ (yV Vj₁)) :=
+      (congrFun (restrictionMap_comp Vj₁.1 (I_at Vj₁ Vj₂) Vj₃ hI_sub₁ h₃I)
+        (yV Vj₁)).symm
+    have hR : restrictionMap Vj₂.1 Vj₃ h₃₂ (yV Vj₂) =
+        restrictionMap (I_at Vj₁ Vj₂) Vj₃ h₃I
+          (restrictionMap Vj₂.1 (I_at Vj₁ Vj₂) hI_sub₂ (yV Vj₂)) :=
+      (congrFun (restrictionMap_comp Vj₂.1 (I_at Vj₁ Vj₂) Vj₃ hI_sub₂ h₃I)
+        (yV Vj₂)).symm
+    rw [hL, hR, h_on_I]
+  -- Agreement on I via SEPARATION over the acyclic W_at Vj₁ Vj₂.
+  rw [← sub_eq_zero]
+  rw [← RationalCovering.presheafValue_eqRec_eq_zero_iff (I_at Vj₁ Vj₂)
+    (W_at Vj₁ Vj₂).base (hW_base Vj₁ Vj₂).symm
+    (restrictionMap Vj₁.1 (I_at Vj₁ Vj₂) hI_sub₁ (yV Vj₁) -
+      restrictionMap Vj₂.1 (I_at Vj₁ Vj₂) hI_sub₂ (yV Vj₂))]
+  apply (hW_acyclic Vj₁ Vj₂).separation
+  intro W' hW'
+  have hsub_I : rationalOpen W'.T W'.s ⊆
+      rationalOpen (I_at Vj₁ Vj₂).T (I_at Vj₁ Vj₂).s := by
+    rw [← hW_base Vj₁ Vj₂]; exact (W_at Vj₁ Vj₂).hsubset W' hW'
+  rw [RationalCovering.eqRec_restrictionMap_direct (I_at Vj₁ Vj₂)
+    (W_at Vj₁ Vj₂).base (hW_base Vj₁ Vj₂).symm W' hsub_I
+    ((W_at Vj₁ Vj₂).hsubset W' hW')
+    (restrictionMap Vj₁.1 (I_at Vj₁ Vj₂) hI_sub₁ (yV Vj₁) -
+      restrictionMap Vj₂.1 (I_at Vj₁ Vj₂) hI_sub₂ (yV Vj₂))]
+  show (restrictionMapHom (I_at Vj₁ Vj₂) W' hsub_I) _ = 0
+  rw [map_sub, sub_eq_zero]
+  change restrictionMap (I_at Vj₁ Vj₂) W' hsub_I
+      (restrictionMap Vj₁.1 (I_at Vj₁ Vj₂) hI_sub₁ (yV Vj₁)) =
+    restrictionMap (I_at Vj₁ Vj₂) W' hsub_I
+      (restrictionMap Vj₂.1 (I_at Vj₁ Vj₂) hI_sub₂ (yV Vj₂))
+  obtain ⟨D'₁, hD'₁_in, hW'_sub_D'₁⟩ := hW_pieces₁ Vj₁ Vj₂ W' hW'
+  obtain ⟨D'₂, hD'₂_in, hW'_sub_D'₂⟩ := hW_pieces₂ Vj₁ Vj₂ W' hW'
+  have hD'₁_sub : rationalOpen D'₁.T D'₁.s ⊆ rationalOpen Vj₁.1.T Vj₁.1.s := by
+    have := (C_restr_at Vj₁).hsubset D'₁ hD'₁_in
+    rw [_hC_restr_base Vj₁] at this
+    exact this
+  have hD'₂_sub : rationalOpen D'₂.T D'₂.s ⊆ rationalOpen Vj₂.1.T Vj₂.1.s := by
+    have := (C_restr_at Vj₂).hsubset D'₂ hD'₂_in
+    rw [_hC_restr_base Vj₂] at this
+    exact this
+  -- Collapse the I-leg, then factor each side through its C_restr-piece.
+  rw [show restrictionMap (I_at Vj₁ Vj₂) W' hsub_I
+        (restrictionMap Vj₁.1 (I_at Vj₁ Vj₂) hI_sub₁ (yV Vj₁)) =
+      restrictionMap Vj₁.1 W' (hsub_I.trans hI_sub₁) (yV Vj₁)
+    from congrFun (restrictionMap_comp Vj₁.1 (I_at Vj₁ Vj₂) W' hI_sub₁ hsub_I)
+      (yV Vj₁),
+    show restrictionMap (I_at Vj₁ Vj₂) W' hsub_I
+        (restrictionMap Vj₂.1 (I_at Vj₁ Vj₂) hI_sub₂ (yV Vj₂)) =
+      restrictionMap Vj₂.1 W' (hsub_I.trans hI_sub₂) (yV Vj₂)
+    from congrFun (restrictionMap_comp Vj₂.1 (I_at Vj₁ Vj₂) W' hI_sub₂ hsub_I)
+      (yV Vj₂),
+    show restrictionMap Vj₁.1 W' (hsub_I.trans hI_sub₁) (yV Vj₁) =
+      restrictionMap D'₁ W' hW'_sub_D'₁
+        (restrictionMap Vj₁.1 D'₁ hD'₁_sub (yV Vj₁))
+    from (congrFun (restrictionMap_comp Vj₁.1 D'₁ W' hD'₁_sub hW'_sub_D'₁)
+      (yV Vj₁)).symm,
+    show restrictionMap Vj₂.1 W' (hsub_I.trans hI_sub₂) (yV Vj₂) =
+      restrictionMap D'₂ W' hW'_sub_D'₂
+        (restrictionMap Vj₂.1 D'₂ hD'₂_sub (yV Vj₂))
+    from (congrFun (restrictionMap_comp Vj₂.1 D'₂ W' hD'₂_sub hW'_sub_D'₂)
+      (yV Vj₂)).symm]
+  -- Evaluate (yV Vjᵢ)|D'ᵢ via the glued specs (cast-compat).
+  have h_inner₁ : restrictionMap Vj₁.1 D'₁ hD'₁_sub (yV Vj₁) =
+      gVj Vj₁ ⟨D'₁, hD'₁_in⟩ := by
+    rw [hyV_def Vj₁]
+    rw [RationalCovering.eqRec_restrictionMap_direct (C_restr_at Vj₁).base
+      Vj₁.1 (_hC_restr_base Vj₁) D'₁ ((C_restr_at Vj₁).hsubset D'₁ hD'₁_in)
+      hD'₁_sub (yVj Vj₁)]
+    exact hyVj_spec₁ ⟨D'₁, hD'₁_in⟩
+  have h_inner₂ : restrictionMap Vj₂.1 D'₂ hD'₂_sub (yV Vj₂) =
+      gVj Vj₂ ⟨D'₂, hD'₂_in⟩ := by
+    rw [hyV_def Vj₂]
+    rw [RationalCovering.eqRec_restrictionMap_direct (C_restr_at Vj₂).base
+      Vj₂.1 (_hC_restr_base Vj₂) D'₂ ((C_restr_at Vj₂).hsubset D'₂ hD'₂_in)
+      hD'₂_sub (yVj Vj₂)]
+    exact hyVj_spec₂ ⟨D'₂, hD'₂_in⟩
+  rw [h_inner₁, h_inner₂]
+  -- Unfold gVj to the f-restrictions and collapse the final comps.
+  rw [hgVj_def Vj₁ ⟨D'₁, hD'₁_in⟩, hgVj_def Vj₂ ⟨D'₂, hD'₂_in⟩]
+  rw [show restrictionMap D'₁ W' hW'_sub_D'₁
+        (restrictionMap (chooseC Vj₁ ⟨D'₁, hD'₁_in⟩).1.1 D'₁
+          (chooseC Vj₁ ⟨D'₁, hD'₁_in⟩).2 (f (chooseC Vj₁ ⟨D'₁, hD'₁_in⟩).1)) =
+      restrictionMap (chooseC Vj₁ ⟨D'₁, hD'₁_in⟩).1.1 W'
+        (hW'_sub_D'₁.trans (chooseC Vj₁ ⟨D'₁, hD'₁_in⟩).2)
+        (f (chooseC Vj₁ ⟨D'₁, hD'₁_in⟩).1)
+    from congrFun (restrictionMap_comp (chooseC Vj₁ ⟨D'₁, hD'₁_in⟩).1.1 D'₁ W'
+      (chooseC Vj₁ ⟨D'₁, hD'₁_in⟩).2 hW'_sub_D'₁) _,
+    show restrictionMap D'₂ W' hW'_sub_D'₂
+        (restrictionMap (chooseC Vj₂ ⟨D'₂, hD'₂_in⟩).1.1 D'₂
+          (chooseC Vj₂ ⟨D'₂, hD'₂_in⟩).2 (f (chooseC Vj₂ ⟨D'₂, hD'₂_in⟩).1)) =
+      restrictionMap (chooseC Vj₂ ⟨D'₂, hD'₂_in⟩).1.1 W'
+        (hW'_sub_D'₂.trans (chooseC Vj₂ ⟨D'₂, hD'₂_in⟩).2)
+        (f (chooseC Vj₂ ⟨D'₂, hD'₂_in⟩).1)
+    from congrFun (restrictionMap_comp (chooseC Vj₂ ⟨D'₂, hD'₂_in⟩).1.1 D'₂ W'
+      (chooseC Vj₂ ⟨D'₂, hD'₂_in⟩).2 hW'_sub_D'₂) _]
+  exact h_compat (chooseC Vj₁ ⟨D'₁, hD'₁_in⟩).1 (chooseC Vj₂ ⟨D'₂, hD'₂_in⟩).1
+    W' (hW'_sub_D'₁.trans (chooseC Vj₁ ⟨D'₁, hD'₁_in⟩).2)
+    (hW'_sub_D'₂.trans (chooseC Vj₂ ⟨D'₂, hD'₂_in⟩).2)
+
+set_option linter.unusedSectionVars false in
+/-- **Prop A.3(1) gluing, Step 8 mixed identity (helper)**: on the trace
+`M_at D Vj` of a `C`-piece `D` and a `V`-piece `Vj`, the glued section
+`yV Vj` and the target value `f D` agree. SEPARATE over the acyclic mixed
+cover `M_at D Vj`: on each piece `E`, both sides factor through a single
+`C_restr`-piece `D''` and become `f`-values equated by `h_compat`. `yV`,
+`gVj`, `yVj` enter only through `hyV_def`, `hgVj_def`, `hyVj_spec`. Extracted
+from `wedhorn_lemma_834_propA3_part1_gluing` (the `h_mixed` step). -/
+private theorem wedhorn_propA3_gluing_mixed
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (C : RationalCovering A) {V : RationalCovering A}
+    (C_restr_at : ↥V.covers → RationalCovering A)
+    (_hC_restr_base : ∀ Vj : ↥V.covers, (C_restr_at Vj).base = Vj.1)
+    (f : ∀ (D : ↥C.covers), presheafValue D.1)
+    (h_compat : ∀ (D₁ D₂ : ↥C.covers) (D₃ : RationalLocData A)
+      (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
+      (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₂.1.T D₂.1.s),
+      restrictionMap D₁.1 D₃ h₃₁ (f D₁) = restrictionMap D₂.1 D₃ h₃₂ (f D₂))
+    (M_at : ↥C.covers → ↥V.covers → RationalCovering A)
+    (hM_pieces : ∀ (U : ↥C.covers) (Vj : ↥V.covers),
+      ∀ E ∈ (M_at U Vj).covers, ∃ D'' ∈ (C_restr_at Vj).covers,
+        rationalOpen E.T E.s ⊆ rationalOpen D''.T D''.s)
+    (hM_acyclic : ∀ (U : ↥C.covers) (Vj : ↥V.covers),
+      (M_at U Vj).IsOXAcyclic)
+    (chooseC : ∀ (Vj : ↥V.covers) (D' : ↥(C_restr_at Vj).covers),
+      { D : ↥C.covers //
+        rationalOpen D'.1.T D'.1.s ⊆ rationalOpen D.1.T D.1.s })
+    (gVj : ∀ (Vj : ↥V.covers) (D' : ↥(C_restr_at Vj).covers),
+      presheafValue D'.1)
+    (yVj : ∀ (Vj : ↥V.covers), presheafValue (C_restr_at Vj).base)
+    (yV : ∀ (Vj : ↥V.covers), presheafValue Vj.1)
+    (hgVj_def : ∀ (Vj : ↥V.covers) (D' : ↥(C_restr_at Vj).covers),
+      gVj Vj D' = restrictionMap (chooseC Vj D').1.1 D'.1 (chooseC Vj D').2
+        (f (chooseC Vj D').1))
+    (hyV_def : ∀ (Vj : ↥V.covers), yV Vj =
+      @Eq.rec (RationalLocData A) (C_restr_at Vj).base
+        (fun b _ => presheafValue b) (yVj Vj) Vj.1 (_hC_restr_base Vj))
+    (hyVj_spec : ∀ (Vj : ↥V.covers) (D'' : ↥(C_restr_at Vj).covers),
+      restrictionMap (C_restr_at Vj).base D''.1
+        ((C_restr_at Vj).hsubset D''.1 D''.2) (yVj Vj) = gVj Vj D'')
+    (D : ↥C.covers) (Vj : RationalLocData A) (hVj : Vj ∈ V.covers)
+    (h_I_sub_Vj : rationalOpen (M_at D ⟨Vj, hVj⟩).base.T
+      (M_at D ⟨Vj, hVj⟩).base.s ⊆ rationalOpen Vj.T Vj.s)
+    (h_I_sub_D : rationalOpen (M_at D ⟨Vj, hVj⟩).base.T
+      (M_at D ⟨Vj, hVj⟩).base.s ⊆ rationalOpen D.1.T D.1.s) :
+    restrictionMap Vj (M_at D ⟨Vj, hVj⟩).base h_I_sub_Vj
+      (yV ⟨Vj, hVj⟩) =
+      restrictionMap D.1 (M_at D ⟨Vj, hVj⟩).base h_I_sub_D (f D) := by
+  rw [← sub_eq_zero]
+  apply (hM_acyclic D ⟨Vj, hVj⟩).separation
+  intro E hE
+  show (restrictionMapHom (M_at D ⟨Vj, hVj⟩).base E
+    ((M_at D ⟨Vj, hVj⟩).hsubset E hE)) _ = 0
+  rw [map_sub, sub_eq_zero]
+  change restrictionMap (M_at D ⟨Vj, hVj⟩).base E
+      ((M_at D ⟨Vj, hVj⟩).hsubset E hE)
+      (restrictionMap Vj (M_at D ⟨Vj, hVj⟩).base h_I_sub_Vj
+        (yV ⟨Vj, hVj⟩)) =
+    restrictionMap (M_at D ⟨Vj, hVj⟩).base E
+      ((M_at D ⟨Vj, hVj⟩).hsubset E hE)
+      (restrictionMap D.1 (M_at D ⟨Vj, hVj⟩).base h_I_sub_D (f D))
+  obtain ⟨D'', hD''_in, h_E_sub_D''⟩ := hM_pieces D ⟨Vj, hVj⟩ E hE
+  have h_E_sub_I : rationalOpen E.T E.s ⊆
+      rationalOpen (M_at D ⟨Vj, hVj⟩).base.T (M_at D ⟨Vj, hVj⟩).base.s :=
+    (M_at D ⟨Vj, hVj⟩).hsubset E hE
+  have hD''_sub_Vj : rationalOpen D''.T D''.s ⊆
+      rationalOpen Vj.T Vj.s := by
+    have := (C_restr_at ⟨Vj, hVj⟩).hsubset D'' hD''_in
+    rw [_hC_restr_base ⟨Vj, hVj⟩] at this
+    exact this
+  rw [show restrictionMap (M_at D ⟨Vj, hVj⟩).base E
+        ((M_at D ⟨Vj, hVj⟩).hsubset E hE)
+        (restrictionMap Vj (M_at D ⟨Vj, hVj⟩).base h_I_sub_Vj
+          (yV ⟨Vj, hVj⟩)) =
+      restrictionMap Vj E (h_E_sub_I.trans h_I_sub_Vj) (yV ⟨Vj, hVj⟩)
+    from congrFun (restrictionMap_comp Vj (M_at D ⟨Vj, hVj⟩).base E
+      h_I_sub_Vj ((M_at D ⟨Vj, hVj⟩).hsubset E hE)) _,
+    show restrictionMap (M_at D ⟨Vj, hVj⟩).base E
+        ((M_at D ⟨Vj, hVj⟩).hsubset E hE)
+        (restrictionMap D.1 (M_at D ⟨Vj, hVj⟩).base h_I_sub_D (f D)) =
+      restrictionMap D.1 E (h_E_sub_I.trans h_I_sub_D) (f D)
+    from congrFun (restrictionMap_comp D.1 (M_at D ⟨Vj, hVj⟩).base E
+      h_I_sub_D ((M_at D ⟨Vj, hVj⟩).hsubset E hE)) _,
+    show restrictionMap Vj E (h_E_sub_I.trans h_I_sub_Vj) (yV ⟨Vj, hVj⟩) =
+      restrictionMap D'' E h_E_sub_D''
+        (restrictionMap Vj D'' hD''_sub_Vj (yV ⟨Vj, hVj⟩))
+    from (congrFun (restrictionMap_comp Vj D'' E hD''_sub_Vj
+      h_E_sub_D'') _).symm]
+  have h_inner : restrictionMap Vj D'' hD''_sub_Vj (yV ⟨Vj, hVj⟩) =
+      gVj ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩ := by
+    rw [hyV_def ⟨Vj, hVj⟩]
+    rw [RationalCovering.eqRec_restrictionMap_direct
+      (C_restr_at ⟨Vj, hVj⟩).base Vj (_hC_restr_base ⟨Vj, hVj⟩) D''
+      ((C_restr_at ⟨Vj, hVj⟩).hsubset D'' hD''_in) hD''_sub_Vj
+      (yVj ⟨Vj, hVj⟩)]
+    exact hyVj_spec ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩
+  rw [h_inner]
+  rw [hgVj_def ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩]
+  rw [show restrictionMap D'' E h_E_sub_D''
+      (restrictionMap (chooseC ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩).1.1 D''
+        (chooseC ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩).2
+        (f (chooseC ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩).1)) =
+      restrictionMap (chooseC ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩).1.1 E
+        (h_E_sub_D''.trans (chooseC ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩).2)
+        (f (chooseC ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩).1)
+    from congrFun (restrictionMap_comp
+      (chooseC ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩).1.1 D'' E
+      (chooseC ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩).2 h_E_sub_D'') _]
+  exact h_compat (chooseC ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩).1 D E
+    (h_E_sub_D''.trans (chooseC ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩).2)
+    (h_E_sub_I.trans h_I_sub_D)
+
+set_option linter.unusedSectionVars false in
+/-- **Prop A.3(1) gluing, Step 8 verification (helper)**: the glued global
+section `x` (transported from `x'` on `V.base` via `hx_def`) restricts to the
+target family `f` on every `C`-piece `D`. For each `D`, SEPARATE over the
+trace cover `V_restr_at D`: each trace piece `V'` sits in a `V`-piece `Vj`,
+the glue `hx'` rewrites `x'|Vj` to `yV Vj`, and the mixed identity
+(`wedhorn_propA3_gluing_mixed`) on `M_at D Vj` equates `(yV Vj)|_{D∩Vj}` with
+`(f D)|_{D∩Vj}`, which restricts to `V'`. Extracted from
+`wedhorn_lemma_834_propA3_part1_gluing` (Step 8). -/
+private theorem wedhorn_propA3_gluing_x_restricts
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (C : RationalCovering A) {V : RationalCovering A}
+    (_hV_base : V.base = C.base)
+    (V_restr_at : ↥C.covers → RationalCovering A)
+    (_hV_restr_base : ∀ U : ↥C.covers, (V_restr_at U).base = U.1)
+    (_hV_restr_pieces : ∀ U : ↥C.covers, ∀ V' ∈ (V_restr_at U).covers,
+      ∃ V'' ∈ V.covers,
+        rationalOpen V'.T V'.s ⊆ rationalOpen V''.T V''.s)
+    (_hV_restr_acyclic : ∀ U : ↥C.covers, (V_restr_at U).IsOXAcyclic)
+    (C_restr_at : ↥V.covers → RationalCovering A)
+    (_hC_restr_base : ∀ Vj : ↥V.covers, (C_restr_at Vj).base = Vj.1)
+    (f : ∀ (D : ↥C.covers), presheafValue D.1)
+    (h_compat : ∀ (D₁ D₂ : ↥C.covers) (D₃ : RationalLocData A)
+      (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
+      (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₂.1.T D₂.1.s),
+      restrictionMap D₁.1 D₃ h₃₁ (f D₁) = restrictionMap D₂.1 D₃ h₃₂ (f D₂))
+    (M_at : ↥C.covers → ↥V.covers → RationalCovering A)
+    (hM_base_open : ∀ (U : ↥C.covers) (Vj : ↥V.covers),
+      rationalOpen (M_at U Vj).base.T (M_at U Vj).base.s =
+        rationalOpen U.1.T U.1.s ∩ rationalOpen Vj.1.T Vj.1.s)
+    (hM_pieces : ∀ (U : ↥C.covers) (Vj : ↥V.covers),
+      ∀ E ∈ (M_at U Vj).covers, ∃ D'' ∈ (C_restr_at Vj).covers,
+        rationalOpen E.T E.s ⊆ rationalOpen D''.T D''.s)
+    (hM_acyclic : ∀ (U : ↥C.covers) (Vj : ↥V.covers),
+      (M_at U Vj).IsOXAcyclic)
+    (chooseC : ∀ (Vj : ↥V.covers) (D' : ↥(C_restr_at Vj).covers),
+      { D : ↥C.covers //
+        rationalOpen D'.1.T D'.1.s ⊆ rationalOpen D.1.T D.1.s })
+    (gVj : ∀ (Vj : ↥V.covers) (D' : ↥(C_restr_at Vj).covers),
+      presheafValue D'.1)
+    (yVj : ∀ (Vj : ↥V.covers), presheafValue (C_restr_at Vj).base)
+    (yV : ∀ (Vj : ↥V.covers), presheafValue Vj.1)
+    (hgVj_def : ∀ (Vj : ↥V.covers) (D' : ↥(C_restr_at Vj).covers),
+      gVj Vj D' = restrictionMap (chooseC Vj D').1.1 D'.1 (chooseC Vj D').2
+        (f (chooseC Vj D').1))
+    (hyV_def : ∀ (Vj : ↥V.covers), yV Vj =
+      @Eq.rec (RationalLocData A) (C_restr_at Vj).base
+        (fun b _ => presheafValue b) (yVj Vj) Vj.1 (_hC_restr_base Vj))
+    (hyVj_spec : ∀ (Vj : ↥V.covers) (D'' : ↥(C_restr_at Vj).covers),
+      restrictionMap (C_restr_at Vj).base D''.1
+        ((C_restr_at Vj).hsubset D''.1 D''.2) (yVj Vj) = gVj Vj D'')
+    (x' : presheafValue V.base) (x : presheafValue C.base)
+    (hx_def : (RationalCovering.presheafValueCast (C := C) (C' := V)
+      _hV_base) x = x')
+    (hx' : ∀ (D : ↥V.covers), restrictionMap V.base D.1
+      (V.hsubset D.1 D.2) x' = yV D) :
+    ∀ (D : ↥C.covers),
+      restrictionMap C.base D.1 (C.hsubset D.1 D.2) x = f D := by
+  intro D
+  rw [← sub_eq_zero]
+  have h_base_eq : (V_restr_at D).base = D.1 := _hV_restr_base D
+  set diff_D : presheafValue D.1 :=
+    restrictionMap C.base D.1 (C.hsubset D.1 D.2) x - f D
+  let diff_cast : presheafValue (V_restr_at D).base :=
+    @Eq.rec (RationalLocData A) D.1
+      (fun b _ => presheafValue b) diff_D (V_restr_at D).base h_base_eq.symm
+  suffices h_diff_cast_zero : diff_cast = 0 by
+    show diff_D = 0
+    have key : ∀ (b : RationalLocData A) (h : D.1 = b)
+        (_ : @Eq.rec (RationalLocData A) D.1 (fun b _ => presheafValue b)
+          diff_D b h = 0),
+        diff_D = 0 := by
+      intro b h z
+      subst h
+      exact z
+    exact key (V_restr_at D).base h_base_eq.symm h_diff_cast_zero
+  apply (_hV_restr_acyclic D).separation
+  intro V' hV'_in
+  obtain ⟨Vj, hVj, h_V'_sub_Vj⟩ := _hV_restr_pieces D V' hV'_in
+  have h_V'_sub_D : rationalOpen V'.T V'.s ⊆ rationalOpen D.1.T D.1.s := by
+    have := (V_restr_at D).hsubset V' hV'_in
+    rw [h_base_eq] at this
+    exact this
+  rw [show restrictionMap (V_restr_at D).base V'
+      ((V_restr_at D).hsubset V' hV'_in) diff_cast =
+      restrictionMap D.1 V' h_V'_sub_D diff_D from
+    RationalCovering.eqRec_restrictionMap_direct D.1 (V_restr_at D).base
+      h_base_eq.symm V' h_V'_sub_D ((V_restr_at D).hsubset V' hV'_in) diff_D]
+  show (restrictionMapHom D.1 V' h_V'_sub_D) _ = 0
+  rw [map_sub, sub_eq_zero]
+  change restrictionMap D.1 V' h_V'_sub_D
+      (restrictionMap C.base D.1 (C.hsubset D.1 D.2) x) =
+    restrictionMap D.1 V' h_V'_sub_D (f D)
+  rw [show restrictionMap D.1 V' h_V'_sub_D
+      (restrictionMap C.base D.1 (C.hsubset D.1 D.2) x) =
+      restrictionMap C.base V' (h_V'_sub_D.trans (C.hsubset D.1 D.2)) x
+    from congrFun (restrictionMap_comp C.base D.1 V' (C.hsubset D.1 D.2)
+      h_V'_sub_D) _]
+  have hsubV : rationalOpen V'.T V'.s ⊆ rationalOpen V.base.T V.base.s := by
+    rw [_hV_base]; exact h_V'_sub_D.trans (C.hsubset D.1 D.2)
+  have h_cast_x : restrictionMap V.base V' hsubV x' =
+      restrictionMap C.base V' (h_V'_sub_D.trans (C.hsubset D.1 D.2)) x := by
+    have key := RationalCovering.presheafValueCast_restrictionMap
+      C.base V.base _hV_base V' (h_V'_sub_D.trans (C.hsubset D.1 D.2)) hsubV x
+    rw [show
+      (@Eq.rec (RationalLocData A) C.base
+        (fun b _ => presheafValue C.base ≃+* presheafValue b)
+        (RingEquiv.refl _) V.base _hV_base.symm x) =
+        ((RationalCovering.presheafValueCast (C := C) (C' := V) _hV_base) x)
+      from rfl, hx_def] at key
+    exact key
+  rw [← h_cast_x]
+  -- x-side: factor through the containing V-piece Vj and use the V-glue.
+  rw [show restrictionMap V.base V' hsubV x' =
+      restrictionMap Vj V' h_V'_sub_Vj
+        (restrictionMap V.base Vj (V.hsubset Vj hVj) x')
+    from (congrFun (restrictionMap_comp V.base Vj V' (V.hsubset Vj hVj)
+      h_V'_sub_Vj) x').symm,
+    hx' ⟨Vj, hVj⟩]
+  -- the MIXED identity on the trace I := (M_at D ⟨Vj,hVj⟩).base.
+  have h_I_open := hM_base_open D ⟨Vj, hVj⟩
+  have h_I_sub_Vj : rationalOpen (M_at D ⟨Vj, hVj⟩).base.T
+      (M_at D ⟨Vj, hVj⟩).base.s ⊆ rationalOpen Vj.T Vj.s := by
+    rw [h_I_open]; exact Set.inter_subset_right
+  have h_I_sub_D : rationalOpen (M_at D ⟨Vj, hVj⟩).base.T
+      (M_at D ⟨Vj, hVj⟩).base.s ⊆ rationalOpen D.1.T D.1.s := by
+    rw [h_I_open]; exact Set.inter_subset_left
+  have h_V'_sub_I : rationalOpen V'.T V'.s ⊆
+      rationalOpen (M_at D ⟨Vj, hVj⟩).base.T (M_at D ⟨Vj, hVj⟩).base.s := by
+    rw [h_I_open]; exact Set.subset_inter h_V'_sub_D h_V'_sub_Vj
+  have h_mixed : restrictionMap Vj (M_at D ⟨Vj, hVj⟩).base h_I_sub_Vj
+      (yV ⟨Vj, hVj⟩) =
+      restrictionMap D.1 (M_at D ⟨Vj, hVj⟩).base h_I_sub_D (f D) :=
+    wedhorn_propA3_gluing_mixed C C_restr_at _hC_restr_base f h_compat
+      M_at hM_pieces hM_acyclic chooseC gVj yVj yV hgVj_def hyV_def hyVj_spec
+      D Vj hVj h_I_sub_Vj h_I_sub_D
+  -- conclude: restrict the mixed identity to V'.
+  rw [show restrictionMap Vj V' h_V'_sub_Vj (yV ⟨Vj, hVj⟩) =
+      restrictionMap (M_at D ⟨Vj, hVj⟩).base V' h_V'_sub_I
+        (restrictionMap Vj (M_at D ⟨Vj, hVj⟩).base h_I_sub_Vj (yV ⟨Vj, hVj⟩))
+    from (congrFun (restrictionMap_comp Vj (M_at D ⟨Vj, hVj⟩).base V'
+      h_I_sub_Vj h_V'_sub_I) _).symm,
+    h_mixed,
+    show restrictionMap (M_at D ⟨Vj, hVj⟩).base V' h_V'_sub_I
+        (restrictionMap D.1 (M_at D ⟨Vj, hVj⟩).base h_I_sub_D (f D)) =
+      restrictionMap D.1 V' h_V'_sub_D (f D)
+    from congrFun (restrictionMap_comp D.1 (M_at D ⟨Vj, hVj⟩).base V'
+      h_I_sub_D h_V'_sub_I) _]
+
 /-- **Part (iv) sub-lemma (c) sub-(glu)**: under the bilateral
 refinement-acyclicity hypotheses, gluing transfers from `V` (with
 restriction acyclicity) to `C`. -/
@@ -8099,32 +8606,9 @@ theorem wedhorn_lemma_834_propA3_part1_gluing
       (h₃₁ : rationalOpen D'₃.T D'₃.s ⊆ rationalOpen D'₁.1.T D'₁.1.s)
       (h₃₂ : rationalOpen D'₃.T D'₃.s ⊆ rationalOpen D'₂.1.T D'₂.1.s),
       restrictionMap D'₁.1 D'₃ h₃₁ (gVj Vj D'₁) =
-        restrictionMap D'₂.1 D'₃ h₃₂ (gVj Vj D'₂) := by
-    intro Vj D'₁ D'₂ D'₃ h₃₁ h₃₂
-    show restrictionMap D'₁.1 D'₃ h₃₁
-          (restrictionMap (chooseC Vj D'₁).1.1 D'₁.1 (chooseC Vj D'₁).2
-            (f (chooseC Vj D'₁).1))
-        = restrictionMap D'₂.1 D'₃ h₃₂
-          (restrictionMap (chooseC Vj D'₂).1.1 D'₂.1 (chooseC Vj D'₂).2
-            (f (chooseC Vj D'₂).1))
-    have h_lhs := restrictionMap_comp (chooseC Vj D'₁).1.1 D'₁.1 D'₃
-      (chooseC Vj D'₁).2 h₃₁
-    have h_rhs := restrictionMap_comp (chooseC Vj D'₂).1.1 D'₂.1 D'₃
-      (chooseC Vj D'₂).2 h₃₂
-    rw [show restrictionMap D'₁.1 D'₃ h₃₁
-          (restrictionMap (chooseC Vj D'₁).1.1 D'₁.1 (chooseC Vj D'₁).2
-            (f (chooseC Vj D'₁).1))
-        = restrictionMap (chooseC Vj D'₁).1.1 D'₃
-          (h₃₁.trans (chooseC Vj D'₁).2) (f (chooseC Vj D'₁).1)
-      from congrFun h_lhs _,
-      show restrictionMap D'₂.1 D'₃ h₃₂
-          (restrictionMap (chooseC Vj D'₂).1.1 D'₂.1 (chooseC Vj D'₂).2
-            (f (chooseC Vj D'₂).1))
-        = restrictionMap (chooseC Vj D'₂).1.1 D'₃
-          (h₃₂.trans (chooseC Vj D'₂).2) (f (chooseC Vj D'₂).1)
-      from congrFun h_rhs _]
-    exact h_compat (chooseC Vj D'₁).1 (chooseC Vj D'₂).1 D'₃
-      (h₃₁.trans (chooseC Vj D'₁).2) (h₃₂.trans (chooseC Vj D'₂).2)
+        restrictionMap D'₂.1 D'₃ h₃₂ (gVj Vj D'₂) :=
+    wedhorn_propA3_gluing_gVj_compat C C_restr_at f h_compat chooseC gVj
+      (fun _ _ => rfl)
   -- Step 3: apply C_restr_at(Vj).IsOXAcyclic.gluing to obtain yVj on Vj.
   -- _hC_restr_acyclic gives (C_restr_at Vj).IsOXAcyclic; .gluing extracts.
   let yVj : ∀ (Vj : ↥V.covers), presheafValue (C_restr_at Vj).base := fun Vj =>
@@ -8146,140 +8630,12 @@ theorem wedhorn_lemma_834_propA3_part1_gluing
       (h₃₁ : rationalOpen Vj₃.T Vj₃.s ⊆ rationalOpen Vj₁.1.T Vj₁.1.s)
       (h₃₂ : rationalOpen Vj₃.T Vj₃.s ⊆ rationalOpen Vj₂.1.T Vj₂.1.s),
       restrictionMap Vj₁.1 Vj₃ h₃₁ (yV Vj₁) =
-        restrictionMap Vj₂.1 Vj₃ h₃₂ (yV Vj₂) := by
-    intro Vj₁ Vj₂ Vj₃ h₃₁ h₃₂
-    have hyVj_spec₁ : ∀ (D'' : ↥(C_restr_at Vj₁).covers),
-        restrictionMap (C_restr_at Vj₁).base D''.1
-          ((C_restr_at Vj₁).hsubset D''.1 D''.2) (yVj Vj₁) = gVj Vj₁ D'' :=
-      ((_hC_restr_acyclic Vj₁).gluing (gVj Vj₁) (h_gVj_compat Vj₁)).choose_spec
-    have hyVj_spec₂ : ∀ (D'' : ↥(C_restr_at Vj₂).covers),
-        restrictionMap (C_restr_at Vj₂).base D''.1
-          ((C_restr_at Vj₂).hsubset D''.1 D''.2) (yVj Vj₂) = gVj Vj₂ D'' :=
-      ((_hC_restr_acyclic Vj₂).gluing (gVj Vj₂) (h_gVj_compat Vj₂)).choose_spec
-    have hI_sub₁ : rationalOpen (I_at Vj₁ Vj₂).T (I_at Vj₁ Vj₂).s ⊆
-        rationalOpen Vj₁.1.T Vj₁.1.s := by
-      rw [hI_open Vj₁ Vj₂]; exact Set.inter_subset_left
-    have hI_sub₂ : rationalOpen (I_at Vj₁ Vj₂).T (I_at Vj₁ Vj₂).s ⊆
-        rationalOpen Vj₂.1.T Vj₂.1.s := by
-      rw [hI_open Vj₁ Vj₂]; exact Set.inter_subset_right
-    have h₃I : rationalOpen Vj₃.T Vj₃.s ⊆
-        rationalOpen (I_at Vj₁ Vj₂).T (I_at Vj₁ Vj₂).s := by
-      rw [hI_open Vj₁ Vj₂]; exact Set.subset_inter h₃₁ h₃₂
-    -- Reduce to agreement on the canonical intersection I.
-    suffices h_on_I : restrictionMap Vj₁.1 (I_at Vj₁ Vj₂) hI_sub₁ (yV Vj₁) =
-        restrictionMap Vj₂.1 (I_at Vj₁ Vj₂) hI_sub₂ (yV Vj₂) by
-      have hL : restrictionMap Vj₁.1 Vj₃ h₃₁ (yV Vj₁) =
-          restrictionMap (I_at Vj₁ Vj₂) Vj₃ h₃I
-            (restrictionMap Vj₁.1 (I_at Vj₁ Vj₂) hI_sub₁ (yV Vj₁)) :=
-        (congrFun (restrictionMap_comp Vj₁.1 (I_at Vj₁ Vj₂) Vj₃ hI_sub₁ h₃I)
-          (yV Vj₁)).symm
-      have hR : restrictionMap Vj₂.1 Vj₃ h₃₂ (yV Vj₂) =
-          restrictionMap (I_at Vj₁ Vj₂) Vj₃ h₃I
-            (restrictionMap Vj₂.1 (I_at Vj₁ Vj₂) hI_sub₂ (yV Vj₂)) :=
-        (congrFun (restrictionMap_comp Vj₂.1 (I_at Vj₁ Vj₂) Vj₃ hI_sub₂ h₃I)
-          (yV Vj₂)).symm
-      rw [hL, hR, h_on_I]
-    -- Agreement on I via SEPARATION over the acyclic W_at Vj₁ Vj₂.
-    rw [← sub_eq_zero]
-    rw [← RationalCovering.presheafValue_eqRec_eq_zero_iff (I_at Vj₁ Vj₂)
-      (W_at Vj₁ Vj₂).base (hW_base Vj₁ Vj₂).symm
-      (restrictionMap Vj₁.1 (I_at Vj₁ Vj₂) hI_sub₁ (yV Vj₁) -
-        restrictionMap Vj₂.1 (I_at Vj₁ Vj₂) hI_sub₂ (yV Vj₂))]
-    apply (hW_acyclic Vj₁ Vj₂).separation
-    intro W' hW'
-    have hsub_I : rationalOpen W'.T W'.s ⊆
-        rationalOpen (I_at Vj₁ Vj₂).T (I_at Vj₁ Vj₂).s := by
-      rw [← hW_base Vj₁ Vj₂]; exact (W_at Vj₁ Vj₂).hsubset W' hW'
-    rw [RationalCovering.eqRec_restrictionMap_direct (I_at Vj₁ Vj₂)
-      (W_at Vj₁ Vj₂).base (hW_base Vj₁ Vj₂).symm W' hsub_I
-      ((W_at Vj₁ Vj₂).hsubset W' hW')
-      (restrictionMap Vj₁.1 (I_at Vj₁ Vj₂) hI_sub₁ (yV Vj₁) -
-        restrictionMap Vj₂.1 (I_at Vj₁ Vj₂) hI_sub₂ (yV Vj₂))]
-    show (restrictionMapHom (I_at Vj₁ Vj₂) W' hsub_I) _ = 0
-    rw [map_sub, sub_eq_zero]
-    change restrictionMap (I_at Vj₁ Vj₂) W' hsub_I
-        (restrictionMap Vj₁.1 (I_at Vj₁ Vj₂) hI_sub₁ (yV Vj₁)) =
-      restrictionMap (I_at Vj₁ Vj₂) W' hsub_I
-        (restrictionMap Vj₂.1 (I_at Vj₁ Vj₂) hI_sub₂ (yV Vj₂))
-    obtain ⟨D'₁, hD'₁_in, hW'_sub_D'₁⟩ := hW_pieces₁ Vj₁ Vj₂ W' hW'
-    obtain ⟨D'₂, hD'₂_in, hW'_sub_D'₂⟩ := hW_pieces₂ Vj₁ Vj₂ W' hW'
-    have hD'₁_sub : rationalOpen D'₁.T D'₁.s ⊆ rationalOpen Vj₁.1.T Vj₁.1.s := by
-      have := (C_restr_at Vj₁).hsubset D'₁ hD'₁_in
-      rw [_hC_restr_base Vj₁] at this
-      exact this
-    have hD'₂_sub : rationalOpen D'₂.T D'₂.s ⊆ rationalOpen Vj₂.1.T Vj₂.1.s := by
-      have := (C_restr_at Vj₂).hsubset D'₂ hD'₂_in
-      rw [_hC_restr_base Vj₂] at this
-      exact this
-    -- Collapse the I-leg, then factor each side through its C_restr-piece.
-    rw [show restrictionMap (I_at Vj₁ Vj₂) W' hsub_I
-          (restrictionMap Vj₁.1 (I_at Vj₁ Vj₂) hI_sub₁ (yV Vj₁)) =
-        restrictionMap Vj₁.1 W' (hsub_I.trans hI_sub₁) (yV Vj₁)
-      from congrFun (restrictionMap_comp Vj₁.1 (I_at Vj₁ Vj₂) W' hI_sub₁ hsub_I)
-        (yV Vj₁),
-      show restrictionMap (I_at Vj₁ Vj₂) W' hsub_I
-          (restrictionMap Vj₂.1 (I_at Vj₁ Vj₂) hI_sub₂ (yV Vj₂)) =
-        restrictionMap Vj₂.1 W' (hsub_I.trans hI_sub₂) (yV Vj₂)
-      from congrFun (restrictionMap_comp Vj₂.1 (I_at Vj₁ Vj₂) W' hI_sub₂ hsub_I)
-        (yV Vj₂),
-      show restrictionMap Vj₁.1 W' (hsub_I.trans hI_sub₁) (yV Vj₁) =
-        restrictionMap D'₁ W' hW'_sub_D'₁
-          (restrictionMap Vj₁.1 D'₁ hD'₁_sub (yV Vj₁))
-      from (congrFun (restrictionMap_comp Vj₁.1 D'₁ W' hD'₁_sub hW'_sub_D'₁)
-        (yV Vj₁)).symm,
-      show restrictionMap Vj₂.1 W' (hsub_I.trans hI_sub₂) (yV Vj₂) =
-        restrictionMap D'₂ W' hW'_sub_D'₂
-          (restrictionMap Vj₂.1 D'₂ hD'₂_sub (yV Vj₂))
-      from (congrFun (restrictionMap_comp Vj₂.1 D'₂ W' hD'₂_sub hW'_sub_D'₂)
-        (yV Vj₂)).symm]
-    -- Evaluate (yV Vjᵢ)|D'ᵢ via the glued specs (cast-compat).
-    have h_inner₁ : restrictionMap Vj₁.1 D'₁ hD'₁_sub (yV Vj₁) =
-        gVj Vj₁ ⟨D'₁, hD'₁_in⟩ := by
-      show restrictionMap Vj₁.1 D'₁ hD'₁_sub
-          (@Eq.rec (RationalLocData A) (C_restr_at Vj₁).base
-            (fun b _ => presheafValue b) (yVj Vj₁) Vj₁.1 (_hC_restr_base Vj₁)) =
-        gVj Vj₁ ⟨D'₁, hD'₁_in⟩
-      rw [RationalCovering.eqRec_restrictionMap_direct (C_restr_at Vj₁).base
-        Vj₁.1 (_hC_restr_base Vj₁) D'₁ ((C_restr_at Vj₁).hsubset D'₁ hD'₁_in)
-        hD'₁_sub (yVj Vj₁)]
-      exact hyVj_spec₁ ⟨D'₁, hD'₁_in⟩
-    have h_inner₂ : restrictionMap Vj₂.1 D'₂ hD'₂_sub (yV Vj₂) =
-        gVj Vj₂ ⟨D'₂, hD'₂_in⟩ := by
-      show restrictionMap Vj₂.1 D'₂ hD'₂_sub
-          (@Eq.rec (RationalLocData A) (C_restr_at Vj₂).base
-            (fun b _ => presheafValue b) (yVj Vj₂) Vj₂.1 (_hC_restr_base Vj₂)) =
-        gVj Vj₂ ⟨D'₂, hD'₂_in⟩
-      rw [RationalCovering.eqRec_restrictionMap_direct (C_restr_at Vj₂).base
-        Vj₂.1 (_hC_restr_base Vj₂) D'₂ ((C_restr_at Vj₂).hsubset D'₂ hD'₂_in)
-        hD'₂_sub (yVj Vj₂)]
-      exact hyVj_spec₂ ⟨D'₂, hD'₂_in⟩
-    rw [h_inner₁, h_inner₂]
-    -- Unfold gVj to the f-restrictions and collapse the final comps.
-    show restrictionMap D'₁ W' hW'_sub_D'₁
-        (restrictionMap (chooseC Vj₁ ⟨D'₁, hD'₁_in⟩).1.1 D'₁
-          (chooseC Vj₁ ⟨D'₁, hD'₁_in⟩).2 (f (chooseC Vj₁ ⟨D'₁, hD'₁_in⟩).1)) =
-      restrictionMap D'₂ W' hW'_sub_D'₂
-        (restrictionMap (chooseC Vj₂ ⟨D'₂, hD'₂_in⟩).1.1 D'₂
-          (chooseC Vj₂ ⟨D'₂, hD'₂_in⟩).2 (f (chooseC Vj₂ ⟨D'₂, hD'₂_in⟩).1))
-    rw [show restrictionMap D'₁ W' hW'_sub_D'₁
-          (restrictionMap (chooseC Vj₁ ⟨D'₁, hD'₁_in⟩).1.1 D'₁
-            (chooseC Vj₁ ⟨D'₁, hD'₁_in⟩).2 (f (chooseC Vj₁ ⟨D'₁, hD'₁_in⟩).1)) =
-        restrictionMap (chooseC Vj₁ ⟨D'₁, hD'₁_in⟩).1.1 W'
-          (hW'_sub_D'₁.trans (chooseC Vj₁ ⟨D'₁, hD'₁_in⟩).2)
-          (f (chooseC Vj₁ ⟨D'₁, hD'₁_in⟩).1)
-      from congrFun (restrictionMap_comp (chooseC Vj₁ ⟨D'₁, hD'₁_in⟩).1.1 D'₁ W'
-        (chooseC Vj₁ ⟨D'₁, hD'₁_in⟩).2 hW'_sub_D'₁) _,
-      show restrictionMap D'₂ W' hW'_sub_D'₂
-          (restrictionMap (chooseC Vj₂ ⟨D'₂, hD'₂_in⟩).1.1 D'₂
-            (chooseC Vj₂ ⟨D'₂, hD'₂_in⟩).2 (f (chooseC Vj₂ ⟨D'₂, hD'₂_in⟩).1)) =
-        restrictionMap (chooseC Vj₂ ⟨D'₂, hD'₂_in⟩).1.1 W'
-          (hW'_sub_D'₂.trans (chooseC Vj₂ ⟨D'₂, hD'₂_in⟩).2)
-          (f (chooseC Vj₂ ⟨D'₂, hD'₂_in⟩).1)
-      from congrFun (restrictionMap_comp (chooseC Vj₂ ⟨D'₂, hD'₂_in⟩).1.1 D'₂ W'
-        (chooseC Vj₂ ⟨D'₂, hD'₂_in⟩).2 hW'_sub_D'₂) _]
-    exact h_compat (chooseC Vj₁ ⟨D'₁, hD'₁_in⟩).1 (chooseC Vj₂ ⟨D'₂, hD'₂_in⟩).1
-      W' (hW'_sub_D'₁.trans (chooseC Vj₁ ⟨D'₁, hD'₁_in⟩).2)
-      (hW'_sub_D'₂.trans (chooseC Vj₂ ⟨D'₂, hD'₂_in⟩).2)
+        restrictionMap Vj₂.1 Vj₃ h₃₂ (yV Vj₂) :=
+    wedhorn_propA3_gluing_yV_compat C C_restr_at _hC_restr_base f h_compat
+      I_at hI_open W_at hW_base hW_pieces₁ hW_pieces₂ hW_acyclic
+      chooseC gVj yVj yV (fun _ _ => rfl) (fun _ => rfl)
+      (fun Vj => ((_hC_restr_acyclic Vj).gluing (gVj Vj)
+        (h_gVj_compat Vj)).choose_spec)
   -- Step 6: apply V.IsOXAcyclic.gluing to (yV, h_yV_compat) to get x' on V.base.
   obtain ⟨x', hx'⟩ := _hV_acyclic.gluing yV h_yV_compat
   -- Step 7: cast x' to x : presheafValue C.base via presheafValueCast on _hV_base.
@@ -8292,173 +8648,13 @@ theorem wedhorn_lemma_834_propA3_part1_gluing
   -- the MIXED (D,Vj)-package equates (yV Vj)|_{D∩Vj} with (f D)|_{D∩Vj} by
   -- separating over M_at D Vj (both sides become f-values via the gVj-spec
   -- and h_compat — the q=1-chase pattern).
-  intro D
-  rw [← sub_eq_zero]
-  have h_base_eq : (V_restr_at D).base = D.1 := _hV_restr_base D
-  set diff_D : presheafValue D.1 :=
-    restrictionMap C.base D.1 (C.hsubset D.1 D.2) x - f D
-  let diff_cast : presheafValue (V_restr_at D).base :=
-    @Eq.rec (RationalLocData A) D.1
-      (fun b _ => presheafValue b) diff_D (V_restr_at D).base h_base_eq.symm
-  suffices h_diff_cast_zero : diff_cast = 0 by
-    show diff_D = 0
-    have key : ∀ (b : RationalLocData A) (h : D.1 = b)
-        (_ : @Eq.rec (RationalLocData A) D.1 (fun b _ => presheafValue b)
-          diff_D b h = 0),
-        diff_D = 0 := by
-      intro b h z
-      subst h
-      exact z
-    exact key (V_restr_at D).base h_base_eq.symm h_diff_cast_zero
-  apply (_hV_restr_acyclic D).separation
-  intro V' hV'_in
-  obtain ⟨Vj, hVj, h_V'_sub_Vj⟩ := _hV_restr_pieces D V' hV'_in
-  have h_V'_sub_D : rationalOpen V'.T V'.s ⊆ rationalOpen D.1.T D.1.s := by
-    have := (V_restr_at D).hsubset V' hV'_in
-    rw [h_base_eq] at this
-    exact this
-  rw [show restrictionMap (V_restr_at D).base V'
-      ((V_restr_at D).hsubset V' hV'_in) diff_cast =
-      restrictionMap D.1 V' h_V'_sub_D diff_D from
-    RationalCovering.eqRec_restrictionMap_direct D.1 (V_restr_at D).base
-      h_base_eq.symm V' h_V'_sub_D ((V_restr_at D).hsubset V' hV'_in) diff_D]
-  show (restrictionMapHom D.1 V' h_V'_sub_D) _ = 0
-  rw [map_sub, sub_eq_zero]
-  change restrictionMap D.1 V' h_V'_sub_D
-      (restrictionMap C.base D.1 (C.hsubset D.1 D.2) x) =
-    restrictionMap D.1 V' h_V'_sub_D (f D)
-  rw [show restrictionMap D.1 V' h_V'_sub_D
-      (restrictionMap C.base D.1 (C.hsubset D.1 D.2) x) =
-      restrictionMap C.base V' (h_V'_sub_D.trans (C.hsubset D.1 D.2)) x
-    from congrFun (restrictionMap_comp C.base D.1 V' (C.hsubset D.1 D.2)
-      h_V'_sub_D) _]
-  have hsubV : rationalOpen V'.T V'.s ⊆ rationalOpen V.base.T V.base.s := by
-    rw [_hV_base]; exact h_V'_sub_D.trans (C.hsubset D.1 D.2)
-  have h_cast_x : restrictionMap V.base V' hsubV x' =
-      restrictionMap C.base V' (h_V'_sub_D.trans (C.hsubset D.1 D.2)) x := by
-    have key := RationalCovering.presheafValueCast_restrictionMap
-      C.base V.base _hV_base V' (h_V'_sub_D.trans (C.hsubset D.1 D.2)) hsubV x
-    have h_cast_cancel :
-        (RationalCovering.presheafValueCast (C := C) (C' := V) _hV_base) x
-          = x' := by
-      simp only [x, RingEquiv.apply_symm_apply]
-    rw [show
-      (@Eq.rec (RationalLocData A) C.base
-        (fun b _ => presheafValue C.base ≃+* presheafValue b)
-        (RingEquiv.refl _) V.base _hV_base.symm x) =
-        ((RationalCovering.presheafValueCast (C := C) (C' := V) _hV_base) x)
-      from rfl, h_cast_cancel] at key
-    exact key
-  rw [← h_cast_x]
-  -- x-side: factor through the containing V-piece Vj and use the V-glue.
-  rw [show restrictionMap V.base V' hsubV x' =
-      restrictionMap Vj V' h_V'_sub_Vj
-        (restrictionMap V.base Vj (V.hsubset Vj hVj) x')
-    from (congrFun (restrictionMap_comp V.base Vj V' (V.hsubset Vj hVj)
-      h_V'_sub_Vj) x').symm,
-    hx' ⟨Vj, hVj⟩]
-  -- the MIXED identity on the trace I := (M_at D ⟨Vj,hVj⟩).base.
-  have hyVj_spec : ∀ (D'' : ↥(C_restr_at ⟨Vj, hVj⟩).covers),
-      restrictionMap (C_restr_at ⟨Vj, hVj⟩).base D''.1
-        ((C_restr_at ⟨Vj, hVj⟩).hsubset D''.1 D''.2) (yVj ⟨Vj, hVj⟩) =
-        gVj ⟨Vj, hVj⟩ D'' :=
-    ((_hC_restr_acyclic ⟨Vj, hVj⟩).gluing (gVj ⟨Vj, hVj⟩)
-      (h_gVj_compat ⟨Vj, hVj⟩)).choose_spec
-  have h_I_open := hM_base_open D ⟨Vj, hVj⟩
-  have h_I_sub_Vj : rationalOpen (M_at D ⟨Vj, hVj⟩).base.T
-      (M_at D ⟨Vj, hVj⟩).base.s ⊆ rationalOpen Vj.T Vj.s := by
-    rw [h_I_open]; exact Set.inter_subset_right
-  have h_I_sub_D : rationalOpen (M_at D ⟨Vj, hVj⟩).base.T
-      (M_at D ⟨Vj, hVj⟩).base.s ⊆ rationalOpen D.1.T D.1.s := by
-    rw [h_I_open]; exact Set.inter_subset_left
-  have h_V'_sub_I : rationalOpen V'.T V'.s ⊆
-      rationalOpen (M_at D ⟨Vj, hVj⟩).base.T (M_at D ⟨Vj, hVj⟩).base.s := by
-    rw [h_I_open]; exact Set.subset_inter h_V'_sub_D h_V'_sub_Vj
-  have h_mixed : restrictionMap Vj (M_at D ⟨Vj, hVj⟩).base h_I_sub_Vj
-      (yV ⟨Vj, hVj⟩) =
-      restrictionMap D.1 (M_at D ⟨Vj, hVj⟩).base h_I_sub_D (f D) := by
-    rw [← sub_eq_zero]
-    apply (hM_acyclic D ⟨Vj, hVj⟩).separation
-    intro E hE
-    show (restrictionMapHom (M_at D ⟨Vj, hVj⟩).base E
-      ((M_at D ⟨Vj, hVj⟩).hsubset E hE)) _ = 0
-    rw [map_sub, sub_eq_zero]
-    change restrictionMap (M_at D ⟨Vj, hVj⟩).base E
-        ((M_at D ⟨Vj, hVj⟩).hsubset E hE)
-        (restrictionMap Vj (M_at D ⟨Vj, hVj⟩).base h_I_sub_Vj
-          (yV ⟨Vj, hVj⟩)) =
-      restrictionMap (M_at D ⟨Vj, hVj⟩).base E
-        ((M_at D ⟨Vj, hVj⟩).hsubset E hE)
-        (restrictionMap D.1 (M_at D ⟨Vj, hVj⟩).base h_I_sub_D (f D))
-    obtain ⟨D'', hD''_in, h_E_sub_D''⟩ := hM_pieces D ⟨Vj, hVj⟩ E hE
-    have h_E_sub_I : rationalOpen E.T E.s ⊆
-        rationalOpen (M_at D ⟨Vj, hVj⟩).base.T (M_at D ⟨Vj, hVj⟩).base.s :=
-      (M_at D ⟨Vj, hVj⟩).hsubset E hE
-    have hD''_sub_Vj : rationalOpen D''.T D''.s ⊆
-        rationalOpen Vj.T Vj.s := by
-      have := (C_restr_at ⟨Vj, hVj⟩).hsubset D'' hD''_in
-      rw [_hC_restr_base ⟨Vj, hVj⟩] at this
-      exact this
-    rw [show restrictionMap (M_at D ⟨Vj, hVj⟩).base E
-          ((M_at D ⟨Vj, hVj⟩).hsubset E hE)
-          (restrictionMap Vj (M_at D ⟨Vj, hVj⟩).base h_I_sub_Vj
-            (yV ⟨Vj, hVj⟩)) =
-        restrictionMap Vj E (h_E_sub_I.trans h_I_sub_Vj) (yV ⟨Vj, hVj⟩)
-      from congrFun (restrictionMap_comp Vj (M_at D ⟨Vj, hVj⟩).base E
-        h_I_sub_Vj ((M_at D ⟨Vj, hVj⟩).hsubset E hE)) _,
-      show restrictionMap (M_at D ⟨Vj, hVj⟩).base E
-          ((M_at D ⟨Vj, hVj⟩).hsubset E hE)
-          (restrictionMap D.1 (M_at D ⟨Vj, hVj⟩).base h_I_sub_D (f D)) =
-        restrictionMap D.1 E (h_E_sub_I.trans h_I_sub_D) (f D)
-      from congrFun (restrictionMap_comp D.1 (M_at D ⟨Vj, hVj⟩).base E
-        h_I_sub_D ((M_at D ⟨Vj, hVj⟩).hsubset E hE)) _,
-      show restrictionMap Vj E (h_E_sub_I.trans h_I_sub_Vj) (yV ⟨Vj, hVj⟩) =
-        restrictionMap D'' E h_E_sub_D''
-          (restrictionMap Vj D'' hD''_sub_Vj (yV ⟨Vj, hVj⟩))
-      from (congrFun (restrictionMap_comp Vj D'' E hD''_sub_Vj
-        h_E_sub_D'') _).symm]
-    have h_inner : restrictionMap Vj D'' hD''_sub_Vj (yV ⟨Vj, hVj⟩) =
-        gVj ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩ := by
-      show restrictionMap Vj D'' hD''_sub_Vj
-          (@Eq.rec (RationalLocData A) (C_restr_at ⟨Vj, hVj⟩).base
-            (fun b _ => presheafValue b) (yVj ⟨Vj, hVj⟩) Vj
-            (_hC_restr_base ⟨Vj, hVj⟩)) = gVj ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩
-      rw [RationalCovering.eqRec_restrictionMap_direct
-        (C_restr_at ⟨Vj, hVj⟩).base Vj (_hC_restr_base ⟨Vj, hVj⟩) D''
-        ((C_restr_at ⟨Vj, hVj⟩).hsubset D'' hD''_in) hD''_sub_Vj
-        (yVj ⟨Vj, hVj⟩)]
-      exact hyVj_spec ⟨D'', hD''_in⟩
-    rw [h_inner]
-    show restrictionMap D'' E h_E_sub_D''
-        (restrictionMap (chooseC ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩).1.1 D''
-          (chooseC ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩).2
-          (f (chooseC ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩).1)) =
-      restrictionMap D.1 E (h_E_sub_I.trans h_I_sub_D) (f D)
-    rw [show restrictionMap D'' E h_E_sub_D''
-        (restrictionMap (chooseC ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩).1.1 D''
-          (chooseC ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩).2
-          (f (chooseC ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩).1)) =
-        restrictionMap (chooseC ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩).1.1 E
-          (h_E_sub_D''.trans (chooseC ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩).2)
-          (f (chooseC ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩).1)
-      from congrFun (restrictionMap_comp
-        (chooseC ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩).1.1 D'' E
-        (chooseC ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩).2 h_E_sub_D'') _]
-    exact h_compat (chooseC ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩).1 D E
-      (h_E_sub_D''.trans (chooseC ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩).2)
-      (h_E_sub_I.trans h_I_sub_D)
-  -- conclude: restrict the mixed identity to V'.
-  rw [show restrictionMap Vj V' h_V'_sub_Vj (yV ⟨Vj, hVj⟩) =
-      restrictionMap (M_at D ⟨Vj, hVj⟩).base V' h_V'_sub_I
-        (restrictionMap Vj (M_at D ⟨Vj, hVj⟩).base h_I_sub_Vj (yV ⟨Vj, hVj⟩))
-    from (congrFun (restrictionMap_comp Vj (M_at D ⟨Vj, hVj⟩).base V'
-      h_I_sub_Vj h_V'_sub_I) _).symm,
-    h_mixed,
-    show restrictionMap (M_at D ⟨Vj, hVj⟩).base V' h_V'_sub_I
-        (restrictionMap D.1 (M_at D ⟨Vj, hVj⟩).base h_I_sub_D (f D)) =
-      restrictionMap D.1 V' h_V'_sub_D (f D)
-    from congrFun (restrictionMap_comp D.1 (M_at D ⟨Vj, hVj⟩).base V'
-      h_I_sub_D h_V'_sub_I) _]
+  exact wedhorn_propA3_gluing_x_restricts C _hV_base V_restr_at _hV_restr_base
+    _hV_restr_pieces _hV_restr_acyclic C_restr_at _hC_restr_base f h_compat
+    M_at hM_base_open hM_pieces hM_acyclic chooseC gVj yVj yV (fun _ _ => rfl)
+    (fun _ => rfl)
+    (fun Vj => ((_hC_restr_acyclic Vj).gluing (gVj Vj)
+      (h_gVj_compat Vj)).choose_spec)
+    x' x (by simp only [x, RingEquiv.apply_symm_apply]) hx'
 
 /-- **Part (iv) sub-lemma (c)**: the Prop A.3(1) bridge step. Given a
 Laurent cover `V` of `C.base` that's `O_X`-acyclic, with a specific
