@@ -275,14 +275,12 @@ private theorem exists_C_pow_mul (d : PowerSeries ℤ_[p]) (hd : d ≠ 0) :
     obtain ⟨k, hk⟩ := hex; exact ⟨(coeff k d).valuation, k, hk, rfl⟩
   set m := sInf S with hm
   obtain ⟨k₀, hk₀ne, hk₀val⟩ := Nat.sInf_mem hSne
-  have hsp : ∀ (x : ℤ_[p]) (j : ℕ), (p : ℤ_[p]) ^ j ∣ x ↔
-      x ∈ (Ideal.span {(p : ℤ_[p]) ^ j} : Ideal ℤ_[p]) :=
-    fun _ _ => Ideal.mem_span_singleton.symm
   have hdvd : ∀ k, (p : ℤ_[p]) ^ m ∣ coeff k d := by
     intro k
     by_cases hk : coeff k d = 0
     · rw [hk]; exact dvd_zero _
-    · rw [hsp, PadicInt.mem_span_pow_iff_le_valuation _ hk]; exact Nat.sInf_le ⟨k, hk, rfl⟩
+    · rw [← Ideal.mem_span_singleton, PadicInt.mem_span_pow_iff_le_valuation _ hk]
+      exact Nat.sInf_le ⟨k, hk, rfl⟩
   classical
   refine ⟨m, PowerSeries.mk fun k => (hdvd k).choose, PowerSeries.ext fun k => ?_, k₀, ?_⟩
   · rw [PowerSeries.coeff_C_mul, PowerSeries.coeff_mk, ← (hdvd k).choose_spec]
@@ -292,7 +290,8 @@ private theorem exists_C_pow_mul (d : PowerSeries ℤ_[p]) (hd : d ≠ 0) :
     have hkey : coeff k₀ d = (p : ℤ_[p]) ^ (m + 1) * c := by
       rw [(hdvd k₀).choose_spec, hc, pow_succ]; ring
     have hval : m + 1 ≤ (coeff k₀ d).valuation := by
-      rw [← PadicInt.mem_span_pow_iff_le_valuation _ hk₀ne, ← hsp]; exact ⟨c, hkey⟩
+      rw [← PadicInt.mem_span_pow_iff_le_valuation _ hk₀ne, Ideal.mem_span_singleton]
+      exact ⟨c, hkey⟩
     omega
 
 /-- **Uniqueness of the interpolating series** (RJW lem:unique-coleman, TeX 2635–2642):
@@ -329,26 +328,20 @@ theorem evalPi_injective {f g : PowerSeries ℤ_[p]}
   -- the mapped polynomial vanishes at every `π_n`, `n ≥ 1`
   have hrooteval : ∀ n, 1 ≤ n → r'.eval (pi p n) = 0 := by
     intro n hn
-    have hdfact : d = PowerSeries.C ((p : ℤ_[p]) ^ m) * ((r : PowerSeries ℤ_[p]) * u) := by
-      rw [hdC, H.eq_mul]
     have heval : evalPi p d n
         = toCp p ((p : ℤ_[p]) ^ m) * (evalPi p (r : PowerSeries ℤ_[p]) n * evalPi p u n) := by
-      rw [hdfact, evalPi_mul p _ _ hn, evalPi_C p, evalPi_mul p (r : PowerSeries ℤ_[p]) u hn]
+      rw [hdC, H.eq_mul, evalPi_mul p _ _ hn, evalPi_C p, evalPi_mul p (r : PowerSeries ℤ_[p]) u hn]
     rw [hzero n hn] at heval
     have hpm : toCp p ((p : ℤ_[p]) ^ m) ≠ 0 := by
       rw [map_pow, map_natCast]; exact pow_ne_zero _ (by exact_mod_cast hp.out.ne_zero)
     -- `u(π_n) ≠ 0`: `u(π_n) · u⁻¹(π_n) = 1` (`u` a unit)
     have hun : evalPi p u n ≠ 0 := by
       obtain ⟨v, hv⟩ := H.isUnit
-      have hvv : (v : PowerSeries ℤ_[p]) * (↑v⁻¹ : PowerSeries ℤ_[p]) = 1 := by
-        rw [← Units.val_mul, mul_inv_cancel, Units.val_one]
       have hinv : evalPi p u n * evalPi p (↑v⁻¹ : PowerSeries ℤ_[p]) n = 1 := by
-        rw [← evalPi_mul p u _ hn, ← hv, hvv, evalPi_one]
+        rw [← evalPi_mul p u _ hn, ← hv, v.mul_inv, evalPi_one]
       intro h0; rw [h0, zero_mul] at hinv; exact one_ne_zero hinv.symm
-    have hr0 : evalPi p (r : PowerSeries ℤ_[p]) n = 0 := by
-      rcases mul_eq_zero.1 heval.symm with h1 | h2
-      · exact absurd h1 hpm
-      · exact (mul_eq_zero.1 h2).resolve_right hun
+    have hr0 : evalPi p (r : PowerSeries ℤ_[p]) n = 0 :=
+      (mul_eq_zero.1 ((mul_eq_zero.1 heval.symm).resolve_left hpm)).resolve_right hun
     rwa [evalPi_coe_polynomial p r] at hr0
   -- infinitely many distinct roots `π_{n+1}` force `r' = 0`, contradiction
   refine hr'ne (Polynomial.eq_zero_of_infinite_isRoot _
@@ -404,18 +397,13 @@ private theorem term_norm_le_pi {n : ℕ} (hn : 1 ≤ n) (q : ℚ_[p]) {i : ℕ}
   rcases eq_or_ne q 0 with hq0 | hq0
   · rw [hq0, norm_zero, zero_mul]; exact hqpos.le
   obtain ⟨k, hk⟩ : ∃ k : ℤ, ‖q‖ = (p:ℝ) ^ k := ⟨-q.valuation, Padic.norm_eq_zpow_neg_valuation hq0⟩
-  have hpos : (0:ℝ) ≤ ‖q‖ * ‖pi p n‖ ^ i := by positivity
-  have hraiseM : (‖q‖ * ‖pi p n‖ ^ i) ^ M ≤ 1 := by
-    calc (‖q‖ * ‖pi p n‖ ^ i) ^ M ≤ 1 ^ M := pow_le_pow_left₀ hpos hle M
-      _ = 1 := one_pow _
+  have hraiseM : (‖q‖ * ‖pi p n‖ ^ i) ^ M ≤ 1 := pow_le_one₀ (by positivity) hle
   rw [mul_pow] at hraiseM
   have hqM : ‖q‖ ^ M = (p:ℝ) ^ (k * M) := by rw [hk, ← zpow_natCast ((p:ℝ)^k) M, ← zpow_mul]
   have hpiM : (‖pi p n‖ ^ i) ^ M = (p:ℝ) ^ (-(i:ℤ)) := by
     rw [← pow_mul, mul_comm i M, pow_mul, hqpM, ← zpow_natCast ((p:ℝ)⁻¹) i, inv_zpow, ← zpow_neg]
   rw [hqM, hpiM, ← zpow_add₀ hp0.ne'] at hraiseM
-  have hle0 : k * M + (-(i:ℤ)) ≤ 0 := by
-    by_contra h; push Not at h
-    exact absurd hraiseM (not_le.2 (one_lt_zpow₀ hpgt1 (by omega)))
+  have hle0 : k * M + (-(i:ℤ)) ≤ 0 := (zpow_le_one_iff_right₀ hpgt1).1 hraiseM
   have hkle : k ≤ 0 := by nlinarith [hle0, (by exact_mod_cast hMpos : (0:ℤ) < M), hiM]
   have hexp_le : k * M + (-(i:ℤ)) ≤ -1 := by
     nlinarith [hkle, (by exact_mod_cast hMpos : (0:ℤ) < M), hi1]
@@ -461,11 +449,8 @@ private theorem term_norm_distinct {n : ℕ} (hn : 1 ≤ n) {qa qb : ℚ_[p]} {a
   have hbnd : |((a:ℤ) - b)| < M := by rw [abs_lt]; omega
   rcases eq_or_ne (ka - kb) 0 with h0 | h0
   · rw [h0, zero_mul] at hfactor; omega
-  · exfalso
-    have hge : (M : ℤ) ≤ |(ka - kb) * M| := by
-      rw [abs_mul, abs_of_pos hMz]
-      calc (M : ℤ) = 1 * M := (one_mul _).symm
-        _ ≤ |ka - kb| * M := mul_le_mul_of_nonneg_right (Int.one_le_abs h0) hMz.le
+  · have hge : (M : ℤ) ≤ |(ka - kb) * M| := by
+      rw [abs_mul, abs_of_pos hMz]; exact le_mul_of_one_le_left hMz.le (Int.one_le_abs h0)
     rw [hfactor] at hge; omega
 
 set_option synthInstance.maxHeartbeats 1000000 in
