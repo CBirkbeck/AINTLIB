@@ -339,12 +339,11 @@ private theorem del_det_eq_smul_trace {n : ℕ}
       = M.det • Matrix.trace ((M.map (PadicMeasure.del p)) * N) := by
   rw [PadicMeasure.del,
     show M.det.derivativeFun = (PowerSeries.derivative ℤ_[p]) M.det from rfl,
-    derivation_det (PowerSeries.derivative ℤ_[p]) M, Finset.mul_sum]
-  rw [Finset.sum_congr rfl (fun i _ => del_row_smul p M i)]
-  rw [Finset.sum_congr rfl (fun i _ => det_updateRow_eq_sum_adjugate M i
-    (fun j => PadicMeasure.del p (M i j)))]
-  rw [adjugate_eq_det_smul_inv p M N hNM]
-  rw [Matrix.trace]
+    derivation_det (PowerSeries.derivative ℤ_[p]) M, Finset.mul_sum,
+    Finset.sum_congr rfl (fun i _ => del_row_smul p M i),
+    Finset.sum_congr rfl (fun i _ => det_updateRow_eq_sum_adjugate M i
+      (fun j => PadicMeasure.del p (M i j))),
+    adjugate_eq_det_smul_inv p M N hNM, Matrix.trace]
   simp only [Matrix.diag_apply, Matrix.mul_apply, Matrix.map_apply, Matrix.smul_apply,
     smul_eq_mul, Finset.mul_sum]
   exact Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => by ring))
@@ -427,9 +426,7 @@ theorem dlog_mem_psiIdSeries {f : PowerSeries ℤ_[p]} (hf : IsUnit f) (hN : nor
     rw [Matrix.trace]
     simp only [Matrix.diag_apply, Matrix.mul_apply]
     rw [Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun k _ => by
-      rw [show digitMatrix (PadicMeasure.del p f) i k
-          = digitMatrix (PadicMeasure.del p f) i k from rfl,
-        digitMatrix_del p f i k, ← hM]))]
+      rw [digitMatrix_del p f i k, ← hM]))]
     rw [show (∑ i : Fin p, ∑ k : Fin p,
           (((i : ℤ_[p]) - (k : ℤ_[p])) • M i k
             + (p : PowerSeries ℤ_[p]) * PadicMeasure.del p (M i k)) * N k i)
@@ -1235,9 +1232,7 @@ private theorem exists_approx_step {f : PowerSeries ℤ_[p]} (hf : psiSeries p f
   have hpne : (PowerSeries.C (p : ℤ_[p]) : PowerSeries ℤ_[p]) ≠ 0 := by
     rw [Ne, ← map_zero (PowerSeries.C (R := ℤ_[p]))]
     exact fun h => (Nat.cast_ne_zero.mpr hp.out.ne_zero) (PowerSeries.C_injective h)
-  rcases mul_eq_zero.1 hpz with h | h
-  · exact absurd h hpne
-  · exact sub_eq_zero.1 h
+  exact sub_eq_zero.1 ((mul_eq_zero.1 hpz).resolve_left hpne)
 
 /-- The successive-approximation sequences (`lem:log der red mod p`): `gₙ ∈ 𝒲`, `fₙ ∈ (ψ=id)`,
 `f₀ = F`, and `Δ(g_{n+1}) = f_n + p·f_{n+1}` for all `n`. -/
