@@ -738,7 +738,6 @@ private theorem seriesEval_subst {f G : PowerSeries ℂ_[p]}
     seriesEval (f.subst G) z = seriesEval f (seriesEval G z) := by
   have hS : PowerSeries.HasSubst G := PowerSeries.HasSubst.of_constantCoeff_zero' hG0
   have hw : ‖seriesEval G z‖ < 1 := norm_seriesEval_lt p hG hG0 hz
-  -- the total family `T n k = coeff n f · coeff k (Gⁿ) · zᵏ`, summable over `ℕ × ℕ`
   let T : ℕ → ℕ → ℂ_[p] := fun n k =>
     PowerSeries.coeff n f * PowerSeries.coeff k (G ^ n) * z ^ k
   have hTbd : ∀ n k, ‖T n k‖ ≤ ‖z‖ ^ k := by
@@ -774,7 +773,6 @@ private theorem seriesEval_subst {f G : PowerSeries ℂ_[p]}
       exact absurd (lt_of_le_of_lt (le_trans hnk (hTbd nk.1 nk.2)) (hN nk.2 (by omega)))
         (lt_irrefl ε)
     exact Set.mem_prod.2 ⟨lt_of_le_of_lt hnk1 hk, hk⟩
-  -- LHS coefficientwise: `coeff k (f.subst G) · zᵏ = ∑' n, T n k`
   have hLHScoeff : ∀ k : ℕ,
       PowerSeries.coeff k (f.subst G) * z ^ k = ∑' n : ℕ, T n k := by
     intro k
@@ -792,13 +790,10 @@ private theorem seriesEval_subst {f G : PowerSeries ℂ_[p]}
     refine Finset.sum_congr rfl fun n _ => ?_
     change PowerSeries.coeff n f • _ * z ^ k = _
     rw [smul_eq_mul]
-  -- assemble and swap the order of summation
   rw [seriesEval]
   simp_rw [hLHScoeff]
-  rw [Summable.tsum_comm hprod]
-  rw [seriesEval]
+  rw [Summable.tsum_comm hprod, seriesEval]
   refine tsum_congr fun n => ?_
-  -- inner: `∑'_k T n k = coeff n f · (seriesEval G z)^n`
   rw [show (fun k : ℕ => T n k)
       = fun k : ℕ => PowerSeries.coeff n f * (PowerSeries.coeff k (G ^ n) * z ^ k) from by
     funext k; rw [show T n k = _ from rfl]; ring,
@@ -838,7 +833,6 @@ theorem seriesEval_map_binomialSeries (c : ℤ_[p]) {z : ℂ_[p]} (hz : ‖z‖ 
     seriesEval (PowerSeries.map (toCp p) (PowerSeries.binomialSeries ℤ_[p] c)) z
       = zpPow p (1 + z) c := by
   have hz1 : ‖(1 + z) - 1‖ < 1 := by rwa [add_sub_cancel_left]
-  -- continuity of the LHS in the exponent `c`
   have hcontL : Continuous fun c : ℤ_[p] =>
       seriesEval (PowerSeries.map (toCp p) (PowerSeries.binomialSeries ℤ_[p] c)) z := by
     simp only [seriesEval, PowerSeries.coeff_map, PowerSeries.binomialSeries_coeff, smul_eq_mul,
@@ -848,14 +842,12 @@ theorem seriesEval_map_binomialSeries (c : ℤ_[p]) {z : ℂ_[p]} (hz : ‖z‖ 
     · exact ((continuous_toCp p).comp (PadicInt.continuous_choose k)).mul continuous_const
     · rw [norm_mul, norm_pow, norm_toCp]
       exact mul_le_of_le_one_left (by positivity) (PadicInt.norm_le_one _)
-  -- agreement on `c ∈ ℕ`, then density
   have hnat : ∀ k : ℕ,
       seriesEval (PowerSeries.map (toCp p) (PowerSeries.binomialSeries ℤ_[p] (k : ℤ_[p]))) z
         = zpPow p (1 + z) (k : ℤ_[p]) := by
     intro k
     rw [PowerSeries.binomialSeries_nat, zpPow_natCast p hz1,
-      show (1 + z) ^ k = (1 + z) ^ k from rfl]
-    rw [show PowerSeries.map (toCp p) ((1 + PowerSeries.X) ^ k : PowerSeries ℤ_[p])
+      show PowerSeries.map (toCp p) ((1 + PowerSeries.X) ^ k : PowerSeries ℤ_[p])
         = ((1 + PowerSeries.X) ^ k : PowerSeries ℂ_[p]) from by
       simp only [map_pow, map_add, map_one, PowerSeries.map_X],
       seriesEval_one_add_X_pow]
@@ -921,7 +913,6 @@ private theorem galAut_evalPi (a : ℤ_[p]ˣ) (f : PowerSeries ℤ_[p]) {n : ℕ
   haveI : FiniteDimensional ℚ_[p] (K p n) := Module.finite_of_finrank_pos (R := ℚ_[p])
     (by rw [finrank_K]; exact Nat.totient_pos.2 (pow_pos hp.out.pos n))
   set t : ℕ := ((PadicMeasure.unitsToZModPow p n a : (ZMod (p ^ n))ˣ) : ZMod (p ^ n)).val with ht
-  -- `σ_a(π_n) = ξ_n^t − 1` (`galAut_zetaSys`, with `π_n = ξ_n − 1`)
   have hσπ : (galAut p a n ⟨pi p n, pi_mem_K p n⟩ : ℂ_[p]) = zetaSys p n ^ t - 1 := by
     have hζ := galAut_zetaSys p a hn
     have hsub : (⟨pi p n, pi_mem_K p n⟩ : K p n)
@@ -930,13 +921,11 @@ private theorem galAut_evalPi (a : ℤ_[p]ˣ) (f : PowerSeries ℤ_[p]) {n : ℕ
     rw [hsub, map_sub, map_one]
     change (galAut p a n ⟨zetaSys p n, zetaSys_mem_K p n⟩ : ℂ_[p]) - 1 = _
     rw [hζ]
-  -- the coefficient `c_k` and its `K_n`-membership; the `K_n`-element `⟨c_k, _⟩`
   set c : ℕ → ℂ_[p] := fun k => PowerSeries.coeff k (PowerSeries.map (toCp p) f) with hc
   have hcK : ∀ k, c k ∈ K p n := fun k => by
     change PowerSeries.coeff k (PowerSeries.map (toCp p) f) ∈ K p n
     rw [PowerSeries.coeff_map, toCp, RingHom.comp_apply]
     exact IntermediateField.algebraMap_mem (K p n) _
-  -- `galAut` fixes the `ℚ_p`-coefficient `c_k` (it is in the `algebraMap ℚ_p`-image)
   have hgalc : ∀ k, (galAut p a n ⟨c k, hcK k⟩ : ℂ_[p]) = c k := by
     intro k
     obtain ⟨q, hq⟩ : ∃ q : ℚ_[p], algebraMap ℚ_[p] ℂ_[p] q = c k := by
@@ -948,33 +937,27 @@ private theorem galAut_evalPi (a : ℤ_[p]ˣ) (f : PowerSeries ℤ_[p]) {n : ℕ
       change c k = ((algebraMap ℚ_[p] (K p n) q : K p n) : ℂ_[p])
       rw [IntermediateField.coe_algebraMap_apply, hq]
     rw [hmk, AlgEquiv.commutes, IntermediateField.coe_algebraMap_apply, hq]
-  -- partial sums `S_m = ∑_{k<m} c_k π_n^k` (in `K_n`), tending to `evalPi f n`
   set S : ℕ → K p n := fun m => ∑ k ∈ Finset.range m,
     ⟨c k, hcK k⟩ * ⟨pi p n, pi_mem_K p n⟩ ^ k with hS
   have hScoe : ∀ m, ((S m : K p n) : ℂ_[p]) = ∑ k ∈ Finset.range m, c k * pi p n ^ k := by
     intro m; rw [hS]; push_cast; rfl
-  -- the `ℂ_[p]` partial sums tend to `evalPi f n`
   have hevalC : evalPi p f n = ∑' k, c k * pi p n ^ k := rfl
   have htendC : Filter.Tendsto (fun m => ∑ k ∈ Finset.range m, c k * pi p n ^ k)
       Filter.atTop (nhds (evalPi p f n)) := by
     rw [hevalC]
     exact (summable_evalPi p f hn).hasSum.tendsto_sum_nat
-  -- transport to the subtype `K_n` (inducing topology): `⟨S_m, _⟩ → ⟨evalPi f n, _⟩`
   have htendK : Filter.Tendsto S Filter.atTop
       (nhds (⟨evalPi p f n, (Subring.mem_inf.1 (evalPi_mem_O p f hn)).1⟩ : K p n)) := by
     rw [tendsto_subtype_rng]
     refine htendC.congr (fun m => (hScoe m).symm)
-  -- `galAut` is continuous (finite-dim), so `galAut S_m → galAut ⟨evalPi f n, _⟩`
   have hcont : Continuous (galAut p a n) :=
     (galAut p a n).toLinearMap.continuous_of_finiteDimensional
   have htendGal : Filter.Tendsto (fun m => galAut p a n (S m)) Filter.atTop
       (nhds (galAut p a n ⟨evalPi p f n, (Subring.mem_inf.1 (evalPi_mem_O p f hn)).1⟩)) :=
     (hcont.tendsto _).comp htendK
-  -- coerce to `ℂ_[p]`: `galAut S_m → galAut ⟨evalPi,_⟩` in `ℂ_[p]`
   have htendGalC : Filter.Tendsto (fun m => (galAut p a n (S m) : ℂ_[p])) Filter.atTop
       (nhds (galAut p a n ⟨evalPi p f n, (Subring.mem_inf.1 (evalPi_mem_O p f hn)).1⟩ : ℂ_[p])) :=
     (continuous_subtype_val.tendsto _).comp htendGal
-  -- compute `galAut S_m = ∑_{k<m} c_k (σ_a π_n)^k` (ring hom, fixes ℚ_p-coeffs)
   have hgalS : ∀ m, (galAut p a n (S m) : ℂ_[p])
       = ∑ k ∈ Finset.range m, c k * (zetaSys p n ^ t - 1) ^ k := by
     intro m
@@ -982,9 +965,7 @@ private theorem galAut_evalPi (a : ℤ_[p]ˣ) (f : PowerSeries ℤ_[p]) {n : ℕ
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [map_mul, map_pow, IntermediateField.coe_mul, IntermediateField.coe_pow, hgalc k,
       show (galAut p a n ⟨pi p n, pi_mem_K p n⟩ : ℂ_[p]) = zetaSys p n ^ t - 1 from hσπ]
-  -- the RHS partial sums tend to `seriesEval (map f) (ξ_n^t − 1)`
   have hzt : ‖zetaSys p n ^ t - 1‖ < 1 := by
-    -- `‖ξ_n^t − 1‖ ≤ ‖ξ_n − 1‖ = ‖π_n‖ < 1` (geometric factor, `‖ξ_n‖ = 1`)
     have hξ1 : ‖zetaSys p n‖ = 1 := by
       have h1 : ‖zetaSys p n‖ ^ (p ^ n) = 1 := by
         rw [← norm_pow, (zetaSys_primitiveRoot p n).pow_eq_one, norm_one]
@@ -1008,7 +989,6 @@ private theorem galAut_evalPi (a : ℤ_[p]ˣ) (f : PowerSeries ℤ_[p]) {n : ℕ
     rw [seriesEval]
     exact (summable_seriesEval_of_norm_coeff_le_one (norm_coeff_map_le_one p f) hzt).hasSum
       |>.tendsto_sum_nat
-  -- conclude by uniqueness of limits
   have hgalScongr : Filter.Tendsto (fun m => (galAut p a n (S m) : ℂ_[p])) Filter.atTop
       (nhds (seriesEval (PowerSeries.map (toCp p) f) (zetaSys p n ^ t - 1))) :=
     htendR.congr (fun m => (hgalS m).symm)
@@ -1042,10 +1022,8 @@ theorem colemanSeries_galNCU (a : ℤ_[p]ˣ) (u : NormCompatUnits p) :
     colemanSeries p (galNCU p a u) = galSeries p a (colemanSeries p u) := by
   refine evalPi_injective p (fun n hn => ?_)
   rw [evalPi_colemanSeries p (galNCU p a u) hn, evalPi_galSeries p a (colemanSeries p u) hn]
-  -- both equal `σ_a(u_n)`: LHS is `(galNCU a u).elems n`, RHS is `σ_a(colemanSeries u (π_n))`
   change ((galAutUnit p a (u.elems n) (Subring.mem_inf.1 (u.mem n)).1 : ℂ_[p]ˣ) : ℂ_[p]) = _
   rw [galAutUnit_val]
-  -- `σ_a ⟨u_n,_⟩ = σ_a ⟨colemanSeries u (π_n), _⟩` since `colemanSeries u (π_n) = u_n`
   congr 2
   apply Subtype.ext
   exact (evalPi_colemanSeries p u hn).symm
@@ -1060,7 +1038,6 @@ def unitsMulLeftCM (a : ℤ_[p]ˣ) : C(ℤ_[p]ˣ, ℤ_[p]ˣ) :=
 identity. -/
 private theorem succ_mul_ringChoose (r : ℤ_[p]) (n : ℕ) :
     ((n : ℤ_[p]) + 1) * Ring.choose r (n + 1) = (r - (n : ℤ_[p])) * Ring.choose r n := by
-  -- clear factorials: `(n+1)!·choose r (n+1) = (n!·choose r n)·(r − n)`
   have h1 : (descPochhammer ℤ (n + 1)).smeval r
       = ((n + 1).factorial : ℤ_[p]) * Ring.choose r (n + 1) := by
     rw [Ring.descPochhammer_eq_factorial_smul_choose r (n + 1), nsmul_eq_mul]
@@ -1073,7 +1050,6 @@ private theorem succ_mul_ringChoose (r : ℤ_[p]) (n : ℕ) :
   have hkey : ((n + 1).factorial : ℤ_[p]) * Ring.choose r (n + 1)
       = ((n.factorial : ℤ_[p]) * Ring.choose r n) * (r - (n : ℤ_[p])) := by
     rw [← h1, descPochhammer_succ_right, Polynomial.smeval_mul, h2, hX]
-  -- cancel `n!`: `(n+1)·n!·choose r (n+1) = n!·choose r n·(r−n)`, divide by the non-zero `n!`
   rw [Nat.factorial_succ, Nat.cast_mul, Nat.cast_add, Nat.cast_one] at hkey
   have hfac : (n.factorial : ℤ_[p]) ≠ 0 := Nat.cast_ne_zero.2 (Nat.factorial_ne_zero n)
   refine mul_left_cancel₀ hfac ?_
@@ -1098,15 +1074,12 @@ private theorem one_add_X_mul_derivative_binomialSeries (r : ℤ_[p]) :
   rw [PowerSeries.coeff_derivativeFun, hB, coeff_binomialSeries']
   cases n with
   | zero =>
-    -- `coeff 0 ((1+X)·B') = coeff 0 B' = choose r 1 = r·choose r 0 = coeff 0 (r·B)`
     rw [PowerSeries.coeff_zero_X_mul, add_zero, Ring.choose_one_right, Ring.choose_zero_right,
       mul_one]
     push_cast
     ring
   | succ m =>
-    -- `coeff (m+1) B' + coeff (m+1) (X·B') = (m+2)·choose r (m+2) + (m+1)·choose r (m+1)`
     rw [PowerSeries.coeff_succ_X_mul, PowerSeries.coeff_derivativeFun, coeff_binomialSeries']
-    -- target: `(m+2)·choose r (m+2) + (m+1)·choose r (m+1) = r·choose r (m+1)`
     have h : ((m : ℤ_[p]) + 1 + 1) * Ring.choose r (m + 1 + 1)
         = (r - ((m : ℤ_[p]) + 1)) * Ring.choose r (m + 1) := by
       have := succ_mul_ringChoose p r (m + 1)
