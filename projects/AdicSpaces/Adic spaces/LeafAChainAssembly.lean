@@ -127,6 +127,42 @@ theorem presheafValue_flat_of_genPieceUnit_faithful
   have hflat := presheafValue_flat_of_coUnitDatum_faithful P (sB * ↑u⁻¹)
   exact flat_of_rationalOpen_eq _ _ h_ro hflat
 
+/-- **Per-step `h_pb` discharge** — `canMap t · (canMap (D₀.s))⁻¹ ∈ D₀⁺` for any generator
+`t ∈ D₀.T`. STRUCTURAL: `t/(D₀.s) = divByS t (D₀.s) ∈ locPlusSubring` (the generator-over-denominator
+is a defining generator of the plus-subring, `divByS_mem_locPlusSubring`), and its `coeRingHom`-image
+lies in `completedPlusSubring = (presheafValue D₀)⁺` (`coeRingHom_mem_completedPlusSubring`). The
+element equals `coeRingHom (divByS t (D₀.s))` since `canMap = coeRingHom ∘ algebraMap`,
+`Ring.inverse (canMap (D₀.s)) = invS`, `invS = coeRingHom (divByS 1 (D₀.s))`, and `divByS t (D₀.s)
+= algebraMap t · divByS 1 (D₀.s)`. -/
+theorem domUnit_invDenom_mem_completedPlus (D₀ : RationalLocData A) {t : A} (ht : t ∈ D₀.T) :
+    D₀.canonicalMap t * Ring.inverse (D₀.canonicalMap D₀.s) ∈ D₀.completedPlusSubring := by
+  have e1 := algebraMap_s_mul_divByS D₀ t
+  have e2 := algebraMap_s_mul_divByS D₀ (1 : A)
+  rw [map_one] at e2
+  have hb : divByS t D₀.s =
+      algebraMap A (Localization.Away D₀.s) t * divByS (1 : A) D₀.s := by
+    calc divByS t D₀.s
+        = (algebraMap A (Localization.Away D₀.s) D₀.s * divByS (1 : A) D₀.s) * divByS t D₀.s := by
+            rw [e2, one_mul]
+      _ = divByS (1 : A) D₀.s *
+            (algebraMap A (Localization.Away D₀.s) D₀.s * divByS t D₀.s) := by ring
+      _ = divByS (1 : A) D₀.s * algebraMap A (Localization.Away D₀.s) t := by rw [e1]
+      _ = algebraMap A (Localization.Away D₀.s) t * divByS (1 : A) D₀.s := by ring
+  have hinv : Ring.inverse (D₀.canonicalMap D₀.s) = invS D₀ := by
+    have h1 : Ring.inverse (D₀.canonicalMap D₀.s) * D₀.canonicalMap D₀.s = 1 :=
+      Ring.inverse_mul_cancel _ D₀.canonicalMap_s_isUnit
+    calc Ring.inverse (D₀.canonicalMap D₀.s)
+        = Ring.inverse (D₀.canonicalMap D₀.s) * (D₀.canonicalMap D₀.s * invS D₀) := by
+            rw [canonicalMap_s_mul_invS, mul_one]
+      _ = Ring.inverse (D₀.canonicalMap D₀.s) * D₀.canonicalMap D₀.s * invS D₀ := by ring
+      _ = invS D₀ := by rw [h1, one_mul]
+  have heq : D₀.canonicalMap t * Ring.inverse (D₀.canonicalMap D₀.s) =
+      D₀.coeRingHom (divByS t D₀.s) := by
+    rw [hinv, invS_eq_coeRingHom_divByS_one, hb, map_mul]
+    simp only [RationalLocData.canonicalMap, RingHom.comp_apply]
+  rw [heq]
+  exact D₀.coeRingHom_mem_completedPlusSubring (D₀.divByS_mem_locPlusSubring ht)
+
 /-- **Whole-space Prop 8.30 (Remark 7.55 chain), assembled downstream.**
 `𝒪_B(im E)` is flat over `B = 𝒪_X(D)`, for `im E = imagePieceDatum D E.T E.s` the whole-space
 image of a `span = ⊤` rational piece. Proven by folding `flat_chainStep_domUnit` over `E.T`'s
