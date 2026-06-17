@@ -6581,6 +6581,13 @@ reusable lemma:
   (prime factorisation in Λ, the finite-kernel/cokernel reduction, the elementary-divisor analogue). **Source**: Washington Thm 13.12.
 
 ##### S13-S3 execution decomposition (beastmode, 2026-06-17)
+**B2 resolved (2026-06-17)**: `fg_pseudoIso_canonical`/`_washington` were false for general
+`[CommRing 𝒪]` (IsPseudoIso uses cardinality-Finite ⇒ pseudo-null must be finite ⇒ needs
+finite residue field; counterexample `M = Λ/𝔪` over `𝒪 = k⟦s⟧`, `k` infinite). **Fixed**:
+added `[IsLocalRing 𝒪] [Finite (IsLocalRing.ResidueField 𝒪)]` to both (standing `𝒪 = ℤ_p`,
+residue `𝔽_p`). Logged in `b2_log.jsonl`. Statements now true; build green.
+**S3b — DONE**: `iwasawaAlgebra_localization_atPrime_isDVR` proven sorry-free.
+
 **S3a foundation — DONE**: `iwasawaAlgebra_isNoetherianRing`, `_isDomain`,
 `_uniqueFactorizationMonoid` (Λ is a UFD for 𝒪 a DVR), `_isLocalRing` — all proven via
 mathlib instances in StructureTheorem.lean. Λ is a Noetherian local UFD domain.

@@ -110,8 +110,15 @@ theorem iwasawaAlgebra_localization_atPrime_isDVR
 /-- **The structure theorem (clean form), S13-S3 / Washington Thm 13.12.**
 Every finitely generated `Λ`-module `M` is pseudo-isomorphic to `Λ^r ⊕ ⨁ᵢ Λ/(gᵢ^eᵢ)`
 for a free rank `r` and finitely many cyclic prime-power quotients (`gᵢ` prime in
-`Λ`).  For a *torsion* module `r = 0`.  (RJW TeX 3637–3642.) -/
+`Λ`).  For a *torsion* module `r = 0`.  (RJW TeX 3637–3642.)
+
+The **finite residue field** hypothesis `[Finite (ResidueField 𝒪)]` is essential: since
+`IsPseudoIso` uses finite (cardinality) kernel/cokernel, the conclusion forces pseudo-null
+modules to be finite, which holds iff `𝒪/𝔪` is finite (the standing case `𝒪 = ℤ_p`,
+`ResidueField = 𝔽_p`).  Without it the statement is false — e.g. `M = Λ/𝔪` over `𝒪 = k⟦s⟧`
+with `k` infinite is f.g. torsion but admits no pseudo-isomorphism to any such sum. -/
 theorem fg_pseudoIso_canonical
+    [IsLocalRing 𝒪] [Finite (IsLocalRing.ResidueField 𝒪)]
     (M : Type*) [AddCommGroup M] [Module (IwasawaAlgebra 𝒪) M]
     [Module.Finite (IwasawaAlgebra 𝒪) M] :
     ∃ (r k : ℕ) (g : Fin k → IwasawaAlgebra 𝒪) (e : Fin k → ℕ),
@@ -135,7 +142,8 @@ every finitely generated `Λ`-module is pseudo-isomorphic to
 `Λ^r ⊕ ⨁ᵢ Λ/(ϖ^nᵢ) ⊕ ⨁ⱼ Λ/(fⱼ^mⱼ)`, where `ϖ` is a uniformiser of `𝒪` (the μ-part)
 and the `fⱼ` are distinguished irreducible polynomials (the λ-part).  This is RJW
 TeX 3637–3642 / Washington, *Cyclotomic Fields*, Thm 13.12, verbatim. -/
-theorem fg_pseudoIso_washington (ϖ : 𝒪) (hϖ : Irreducible ϖ)
+theorem fg_pseudoIso_washington [Finite (IsLocalRing.ResidueField 𝒪)]
+    (ϖ : 𝒪) (hϖ : Irreducible ϖ)
     (M : Type*) [AddCommGroup M] [Module (IwasawaAlgebra 𝒪) M]
     [Module.Finite (IwasawaAlgebra 𝒪) M] :
     ∃ (r s t : ℕ) (n : Fin s → ℕ) (f : Fin t → Polynomial 𝒪) (m : Fin t → ℕ),
