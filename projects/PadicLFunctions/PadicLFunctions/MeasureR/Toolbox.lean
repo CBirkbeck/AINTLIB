@@ -83,11 +83,8 @@ theorem mahlerTransform_cmul_X (μ : MeasureR K ℤ_[p]) :
     simp only [ContinuousMap.mul_apply, mahlerCM_apply, mahler_apply,
       ContinuousMap.add_apply, ContinuousMap.smul_apply, smul_eq_mul]
     refine congrArg Subtype.val ?_
-    have h1 : Ring.choose x 1 = x := by
-      simp []
-    rw [← map_mul]
-    rw [show (Ring.choose x 1 * Ring.choose x n) = x * Ring.choose x n by rw [h1]]
-    rw [PadicMeasure.mul_choose_eq p x n, map_add, map_mul, map_mul]
+    rw [Ring.choose_one_right, ← map_mul, PadicMeasure.mul_choose_eq p x n, map_add,
+      map_mul, map_mul]
     push_cast
     ring
   rw [cmul_apply, hpt, map_add, map_smul, map_smul, smul_eq_mul, smul_eq_mul, coeff_del,
@@ -124,10 +121,7 @@ theorem apply_powCM (μ : MeasureR K ℤ_[p]) (k : ℕ) :
       ext x
       simp only [powCM_apply, ContinuousMap.mul_apply, mahlerCM_apply, mahler_apply]
       refine congrArg Subtype.val ?_
-      rw [← map_mul]
-      congr 1
-      rw [show Ring.choose x 1 = x by simp [], pow_succ,
-        mul_comm]
+      rw [Ring.choose_one_right, ← map_mul, pow_succ, mul_comm]
     rw [h1, ← cmul_apply, ih (cmul p K (mahlerCM p K 1) μ), mahlerTransform_cmul_X,
       Function.iterate_succ_apply]
 
@@ -272,12 +266,10 @@ lemma psi_dirac_zero : psi p K (dirac K ℤ_[p] 0) = dirac K ℤ_[p] 0 := by
     * f.comp (PadicMeasure.shiftDiv p)) = dirac K ℤ_[p] 0 f
   rw [dirac_apply, dirac_apply, ContinuousMap.mul_apply, charFnCM_apply,
     ContinuousMap.comp_apply,
-    Set.indicator_of_mem (show (0 : ℤ_[p]) ∈ {y : ℤ_[p] | ‖y‖ < 1} from by
-      simp [Set.mem_setOf_eq]),
+    Set.indicator_of_mem (show (0 : ℤ_[p]) ∈ {y : ℤ_[p] | ‖y‖ < 1} from by simp),
     Pi.one_apply, one_mul,
     show PadicMeasure.shiftDiv p (0 : ℤ_[p]) = 0 from by
-      have h := PadicMeasure.shiftDiv_mul p (0 : ℤ_[p])
-      rwa [mul_zero] at h]
+      simpa using PadicMeasure.shiftDiv_mul p (0 : ℤ_[p])]
 
 /-- **RJW Cor 3.32** over `R`: supported on `ℤ_p^×` iff `ψμ = 0`
 (TeX 1161–1167). -/
@@ -341,16 +333,11 @@ theorem psi_phi_mul (ν μ : MeasureR K ℤ_[p]) :
     rw [show (p : ℤ_[p]) * x + y = (p : ℤ_[p]) * (x + PadicMeasure.shiftDiv p y)
         from by rw [mul_add, PadicMeasure.mul_shiftDiv_of_mem p hy],
       PadicMeasure.shiftDiv_mul]
-  · have hsum : ((p : ℤ_[p]) * x + y) ∉ {z : ℤ_[p] | ‖z‖ < 1} := by
-      intro hmem
-      refine hy ?_
-      have hpx : ‖(p : ℤ_[p]) * x‖ < 1 := PadicMeasure.mem_pZp_of_mul p
-      calc ‖y‖ = ‖(p : ℤ_[p]) * x + y + -((p : ℤ_[p]) * x)‖ := by
-            rw [show (p : ℤ_[p]) * x + y + -((p : ℤ_[p]) * x) = y from by ring]
-        _ ≤ max ‖(p : ℤ_[p]) * x + y‖ ‖-((p : ℤ_[p]) * x)‖ :=
-            IsUltrametricDist.norm_add_le_max _ _
-        _ = max ‖(p : ℤ_[p]) * x + y‖ ‖(p : ℤ_[p]) * x‖ := by rw [norm_neg]
-        _ < 1 := max_lt hmem hpx
+  · have hpx : ‖(p : ℤ_[p]) * x‖ < 1 := PadicMeasure.mem_pZp_of_mul p
+    have hsum : ((p : ℤ_[p]) * x + y) ∉ {z : ℤ_[p] | ‖z‖ < 1} := by
+      rw [Set.mem_setOf_eq, IsUltrametricDist.norm_add_eq_max_of_norm_ne_norm
+        (hpx.trans_le (not_lt.1 hy)).ne, max_lt_iff, not_and]
+      exact fun _ => hy
     rw [Set.indicator_of_notMem hsum, Set.indicator_of_notMem
       (show y ∉ {z : ℤ_[p] | ‖z‖ < 1} from hy), zero_mul, zero_mul]
 
