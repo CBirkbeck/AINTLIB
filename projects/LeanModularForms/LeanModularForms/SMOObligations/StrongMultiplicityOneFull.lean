@@ -968,8 +968,14 @@ private noncomputable def eigenformOfIsEigenform {M : ℕ} [NeZero M] {k : ℤ}
   toCuspForm := h
   χ := ψ
   mem_charSpace := Unified.cuspFormCharSpace_toModularForm'_mem (χ := ψ) hψ
-  ringEigenvalue := (Unified.isRingEigenvector_of_isEigenform (χ := ψ) hψ hev).choose
-  isRingEigen := (Unified.isRingEigenvector_of_isEigenform (χ := ψ) hψ hev).choose_spec
+  ringEigenvalue := fun n =>
+    if Nat.Coprime n.val M then
+      (Unified.isRingEigenvector_of_isEigenform (χ := ψ) hψ hev).choose n
+    else 0
+  isRingEigen := fun n hn => by
+    rw [if_pos hn]
+    exact (Unified.isRingEigenvector_of_isEigenform (χ := ψ) hψ hev).choose_spec n hn
+  ringEigen_bad := fun n hn => if_neg hn
 
 private theorem eigenformOfIsEigenform_eigenvalue {M : ℕ} [NeZero M] {k : ℤ}
     (ψ : (ZMod M)ˣ →* ℂˣ) (h : CuspForm ((Gamma1 M).map (mapGL ℝ)) k)
