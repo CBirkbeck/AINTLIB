@@ -1971,6 +1971,525 @@ theorem presheafValue_isNoetherianRing_faithful
     IsNoetherianRing (presheafValue D) :=
   presheafValue_isNoetherianRing_residual D
 
+omit [CompatiblePlusSubring A] in
+/-- **Density of the dense subring** `U = (Localization.Away D.s)[Y₁..Yₘ] → B⟨Y⟩` (helper for
+`presheafValue_mvRestricted_surjection`). The polynomial evaluation hom `iU` (coefficients via
+`coeRingHom`, the `Yⱼ` to the unit-disc variables) has dense range: its closure is a closed subring
+containing every constant series (`range coeRingHom` is dense), every variable, hence (being a
+subring) every box-supported polynomial — and those are dense. -/
+private lemma presheafValue_mvRestricted_iU_denseRange
+    (D : RationalLocData A) [IsTateRing (presheafValue D)] (m : ℕ)
+    (iU : MvPolynomial (Fin m) (Localization.Away D.s) →+*
+        restrictedMvPowerSeriesSubring m (presheafValue D))
+    (hiU_C : ∀ c : Localization.Away D.s, iU (MvPolynomial.C c) =
+      (algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))).comp
+        D.coeRingHom c)
+    (hiU_X : ∀ j, iU (MvPolynomial.X j) =
+      (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
+        restrictedMvPowerSeriesSubring m (presheafValue D))) :
+    @DenseRange (restrictedMvPowerSeriesSubring m (presheafValue D))
+      (MvTateAlgebra.mvTateAlgebraTopology' m) _ iU := by
+  letI τT : TopologicalSpace (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
+    MvTateAlgebra.mvTateAlgebraTopology' m
+  haveI hringT : IsTopologicalRing (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
+    MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing m
+  classical
+  -- `R := closure(range iU)`, a closed subring of `T`. We show `R = ⊤` by exhibiting that it
+  -- contains the (dense) box-supported polynomials.
+  set R : Subring (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
+    iU.range.topologicalClosure with hR
+  have hiU_le : iU.range ≤ R := Subring.le_topologicalClosure _
+  -- Step 1: every constant series `algebraMap _ T x` (x : presheafValue D) lies in `R`, because
+  -- `range coeRingHom` is dense in `presheafValue D`, `algebraMap _ T` is continuous, and
+  -- `algebraMap _ T (coeRingHom c) = iU (C c) ∈ R`.
+  have hconst : ∀ x : presheafValue D,
+      algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D)) x ∈ R :=
+      by
+    have hcont : Continuous
+        (algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))) :=
+      MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (A := presheafValue D) m
+    -- the preimage subring `R.comap (algebraMap _ T)` is closed and contains `range coeRingHom`.
+    have hclosed : IsClosed
+        ((algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D)) ⁻¹'
+          (R : Set _)) : Set (presheafValue D)) :=
+      (Subring.isClosed_topologicalClosure _).preimage hcont
+    have hdense : DenseRange (D.coeRingHom : Localization.Away D.s → presheafValue D) := by
+      letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
+      letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+      change DenseRange (UniformSpace.Completion.coeRingHom :
+        Localization.Away D.s → presheafValue D)
+      exact UniformSpace.Completion.denseRange_coe
+    intro x
+    -- `x ∈ closure(range coeRingHom)`; the preimage set is closed, contains `range coeRingHom`.
+    have hx_cl : x ∈ closure (Set.range (D.coeRingHom)) := hdense x
+    have hsub : Set.range (D.coeRingHom) ⊆
+        algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D)) ⁻¹'
+          (R : Set _) := by
+      rintro _ ⟨c, rfl⟩
+      change algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
+        (D.coeRingHom c) ∈ R
+      exact hiU_le ⟨MvPolynomial.C c, by rw [hiU_C c]; rfl⟩
+    exact hclosed.closure_subset_iff.mpr hsub hx_cl
+  -- Step 2: each variable `⟨Xⱼ, _⟩` lies in `R` (`= iU (X j) ∈ range iU ≤ R`).
+  have hX : ∀ j : Fin m, (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
+      restrictedMvPowerSeriesSubring m (presheafValue D)) ∈ R :=
+    fun j => hiU_le ⟨MvPolynomial.X j, hiU_X j⟩
+  -- Step 3: each box-supported polynomial `g` lies in `R`, via the finite monomial decomposition
+  -- `g = ∑_{v ∈ box} (algebraMap _ T (g.val v)) · ∏ⱼ ⟨Xⱼ,_⟩^(vⱼ)` (`R` is a subring).
+  have hbox : ∀ g : restrictedMvPowerSeriesSubring m (presheafValue D),
+      (∃ N, ∀ l : Fin m →₀ ℕ, (∃ i, N ≤ l i) → g.val l = 0) →
+      g ∈ R := by
+    rintro g ⟨N, hN⟩
+    -- the finite box index set `{l | ∀ i, l i < N}`.
+    set box : Finset (Fin m →₀ ℕ) :=
+      (Finset.univ : Finset (Fin m → Fin N)).image
+        (fun f => Finsupp.equivFunOnFinite.symm (fun i => (f i : ℕ))) with hbox_def
+    -- membership: `l ∈ box ↔ ∀ i, l i < N`.
+    have hmem_box : ∀ l : Fin m →₀ ℕ, l ∈ box ↔ ∀ i, l i < N := by
+      intro l
+      simp only [hbox_def, Finset.mem_image, Finset.mem_univ, true_and]
+      constructor
+      · rintro ⟨f, rfl⟩ i
+        exact (f i).2
+      · intro hlt
+        exact ⟨fun i => ⟨l i, hlt i⟩, by ext i; simp [Finsupp.equivFunOnFinite]⟩
+    -- the monomial summand `term v = algebraMap _ T (g.val v) · ∏ⱼ ⟨Xⱼ,_⟩^(vⱼ) ∈ T`.
+    set term : (Fin m →₀ ℕ) → restrictedMvPowerSeriesSubring m (presheafValue D) :=
+      fun v => algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
+          (g.val v) *
+        ∏ j : Fin m, (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
+          restrictedMvPowerSeriesSubring m (presheafValue D)) ^ (v j) with hterm_def
+    -- `(term v).val = monomial v (g.val v)`.
+    have hterm_val : ∀ v, (term v).val = MvPowerSeries.monomial v (g.val v) := by
+      intro v
+      rw [hterm_def]
+      simp only
+      rw [Subring.coe_mul, MvPowerSeries.monomial_eq']
+      have hprod : (↑(∏ j : Fin m, (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
+            restrictedMvPowerSeriesSubring m (presheafValue D)) ^ (v j)) :
+            MvPowerSeries (Fin m) (presheafValue D)) =
+          v.prod fun s e => MvPowerSeries.X s ^ e := by
+        rw [SubmonoidClass.coe_finset_prod, Finsupp.prod_fintype]
+        · refine Finset.prod_congr rfl (fun j _ => ?_)
+          rw [SubmonoidClass.coe_pow]
+        · intro j; rw [pow_zero]
+      have hC : (↑(algebraMap (presheafValue D)
+            (restrictedMvPowerSeriesSubring m (presheafValue D)) (g.val v)) :
+            MvPowerSeries (Fin m) (presheafValue D)) = MvPowerSeries.C (g.val v) :=
+        MvPowerSeries.algebraMap_apply
+      rw [hC, hprod]
+    -- each `term v ∈ R` (constant ∈ R, variables ∈ R, `R` a subring).
+    have hterm_mem : ∀ v, term v ∈ R := fun v =>
+      R.mul_mem (hconst (g.val v)) (Subring.prod_mem _ (fun j _ => R.pow_mem (hX j) (v j)))
+    -- `g = ∑_{v ∈ box} term v` in the restricted subring (coefficient-wise check, going through
+    -- the `MvPolynomial` coe ring hom so `map_sum` lands on a `RingHom`).
+    have hg_sum : g = ∑ v ∈ box, term v := by
+      apply Subtype.ext
+      rw [AddSubmonoidClass.coe_finset_sum]
+      simp only [hterm_val]
+      -- `∑ v∈box, monomial v (g.val v) = ↑(∑ v∈box, MvPolynomial.monomial v (g.val v))`.
+      rw [show (∑ v ∈ box, MvPowerSeries.monomial v (g.val v) :
+            MvPowerSeries (Fin m) (presheafValue D)) =
+          MvPolynomial.coeToMvPowerSeries.ringHom
+            (∑ v ∈ box, MvPolynomial.monomial v (g.val v)) from by
+        rw [map_sum]
+        refine Finset.sum_congr rfl (fun v _ => ?_)
+        rw [MvPolynomial.coeToMvPowerSeries.ringHom_apply, MvPolynomial.coe_monomial]]
+      rw [MvPolynomial.coeToMvPowerSeries.ringHom_apply]
+      ext w
+      rw [MvPolynomial.coeff_coe, show MvPowerSeries.coeff w g.val = g.val w from
+        MvPowerSeries.coeff_apply g.val w]
+      rw [show MvPolynomial.coeff w (∑ v ∈ box, MvPolynomial.monomial v (g.val v)) =
+          ∑ v ∈ box, MvPolynomial.coeff w (MvPolynomial.monomial v (g.val v)) from
+        MvPolynomial.coeff_sum _ _ _]
+      by_cases hw : ∀ i, w i < N
+      · rw [Finset.sum_eq_single w]
+        · rw [MvPolynomial.coeff_monomial, if_pos rfl]
+        · intro v _ hvw
+          rw [MvPolynomial.coeff_monomial, if_neg hvw]
+        · intro hw_notin
+          exact absurd ((hmem_box w).mpr hw) hw_notin
+      · -- `w` outside the box: `g.val w = 0` and every monomial term vanishes at `w`.
+        push_neg at hw
+        obtain ⟨i, hi⟩ := hw
+        rw [hN w ⟨i, hi⟩]
+        symm
+        refine Finset.sum_eq_zero (fun v hv => ?_)
+        rw [MvPolynomial.coeff_monomial, if_neg]
+        intro hwv
+        exact absurd ((hmem_box v).mp hv i) (by rw [hwv]; omega)
+    rw [hg_sum]
+    exact Subring.sum_mem _ (fun v _ => hterm_mem v)
+  -- Conclude: the dense box-polynomials are ⊆ `R = closure(range iU)`, so `closure(range iU)`
+  -- contains a dense set, hence `= univ`; thus `DenseRange iU`.
+  rw [denseRange_iff_closure_range]
+  refine Set.eq_univ_of_univ_subset ?_
+  rw [← (MvTateAlgebra.mvTateAlgebra_polynomials_dense (A := presheafValue D) m).closure_eq]
+  refine closure_minimal (fun g hg => ?_) isClosed_closure
+  exact hbox g hg
+
+set_option maxHeartbeats 1600000 in
+omit [CompatiblePlusSubring A] in
+/-- **`mk(s)` is a unit in the quotient `γ = source ⧸ ker Ψ`** (helper for
+`presheafValue_mvRestricted_surjection`). Mirrors `example638_isUnit_mk_s`: the relation
+`algebraMap _ B⟨Y⟩ ∘ example638_evalHom D = Ψ ∘ ι` (pushed termwise through the evaluation tsum, using
+the three characterizing facts `hΨ_cont`/`hΨ_alg`/`hΨ_genX` of the bounded evaluation hom `Ψ`) plus
+`invS D ∈ range (example638_evalHom D)` exhibit `mk(ι c)` as the inverse of `mk(algebraMap s)`.
+`Ψ` is opaque; its evaluation behaviour enters only through the three facts, so the conclusion is
+topology-free and matches the caller's `RingHom.ker Ψ`. -/
+private lemma presheafValue_mvRestricted_isUnit_mk_s
+    (D : RationalLocData A) [IsTateRing (presheafValue D)] (m : ℕ)
+    (hA_complete : @CompleteSpace A (IsTopologicalAddGroup.rightUniformSpace A))
+    (Ψ : restrictedMvPowerSeriesSubring (D.T.card + m) A →+*
+      restrictedMvPowerSeriesSubring m (presheafValue D))
+    (hΨ_cont : @Continuous _ _ (MvTateAlgebra.mvTateAlgebraTopology' (D.T.card + m))
+      (MvTateAlgebra.mvTateAlgebraTopology' m) Ψ)
+    (hΨ_alg : ∀ x, Ψ (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A) x) =
+      algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
+        (D.canonicalMap x))
+    (hΨ_genX : ∀ i : Fin D.T.card, Ψ (⟨MvPowerSeries.X (Fin.castAdd m i),
+        MvPowerSeries.X_isRestricted _⟩ : restrictedMvPowerSeriesSubring (D.T.card + m) A) =
+      algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
+        (example638_genTuple D i)) :
+    IsUnit ((Ideal.Quotient.mk (RingHom.ker Ψ)).comp
+      (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A)) D.s) := by
+  haveI hT2B : T2Space (presheafValue D) := inferInstance
+  letI τT : TopologicalSpace (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
+    MvTateAlgebra.mvTateAlgebraTopology' m
+  haveI hringT : IsTopologicalRing (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
+    MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing m
+  letI uT : UniformSpace (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
+    MvTateAlgebra.mvTateUniformSpace m
+  haveI : IsUniformAddGroup (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
+    MvTateAlgebra.mvTate_isUniformAddGroup m
+  haveI : T2Space (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
+    MvTateAlgebra.mvTate_t2Space m
+  haveI : T0Space (restrictedMvPowerSeriesSubring m (presheafValue D)) := inferInstance
+  -- Install the source-ring (`A⟨X₁..Xₙ₊ₘ⟩`) topology/uniform/complete/nonarch/T0 instances so that
+  -- `mvEvalHomBounded` can build the variable-inclusion `ι`.
+  letI τS : TopologicalSpace (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+    MvTateAlgebra.mvTateAlgebraTopology' (D.T.card + m)
+  haveI hringS : IsTopologicalRing (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+    MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing (D.T.card + m)
+  letI uS : UniformSpace (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+    MvTateAlgebra.mvTateUniformSpace (D.T.card + m)
+  haveI : IsUniformAddGroup (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+    MvTateAlgebra.mvTate_isUniformAddGroup (D.T.card + m)
+  haveI : CompleteSpace (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+    MvTateAlgebra.mvTate_completeSpace (D.T.card + m) hA_complete
+  haveI : NonarchimedeanRing (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+    MvTateAlgebra.mvTate_nonarchimedean (D.T.card + m)
+  haveI : T2Space (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+    MvTateAlgebra.mvTate_t2Space (D.T.card + m)
+  haveI : T0Space (restrictedMvPowerSeriesSubring (D.T.card + m) A) := inferInstance
+  -- `ι : A⟨X₁..Xₙ⟩ → A⟨X₁..Xₙ₊ₘ⟩`, `Xᵢ ↦ X (castAdd m i)`, `algebraMap a ↦ algebraMap a`.
+  let bι : Fin D.T.card → restrictedMvPowerSeriesSubring (D.T.card + m) A :=
+    fun i => ⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩
+  have hbι : ∀ i, TopologicalRing.IsBounded
+      (Set.range (bι i ^ · : ℕ → restrictedMvPowerSeriesSubring (D.T.card + m) A)) :=
+    fun i => MvTateAlgebra.mvPowerSeries_X_isBounded (Fin.castAdd m i)
+  let ι : restrictedMvPowerSeriesSubring D.T.card A →+*
+      restrictedMvPowerSeriesSubring (D.T.card + m) A :=
+    mvEvalHomBounded (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A))
+      (MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (D.T.card + m)) bι hbι
+  -- `algebraMap _ T ∘ example638_evalHom D = Ψ ∘ ι` POINTWISE (push the continuous additive maps
+  -- through the single evaluation `tsum`, termwise — NO Fubini).
+  have hkey : ∀ h : restrictedMvPowerSeriesSubring D.T.card A,
+      algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
+          (example638_evalHom D h) = Ψ (ι h) := by
+    intro h
+    -- LHS: push `algebraMap _ T` through the `example638_evalHom` tsum.
+    have hL : algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
+          (example638_evalHom D h) =
+        ∑' v, algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
+          (mvEvalTerm D.canonicalMap (example638_genTuple D) h v) := by
+      change algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
+        (∑' v, mvEvalTerm D.canonicalMap (example638_genTuple D) h v) = _
+      exact (mvEvalTerm_summable D.canonicalMap (canonicalMap_continuous D)
+        (example638_genTuple D) (example638_genTuple_isBounded D) h).map_tsum
+        (algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D)))
+        (MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (A := presheafValue D) m)
+    -- RHS: push `Ψ` through the `ι` tsum.
+    have hR : Ψ (ι h) =
+        ∑' v, Ψ (mvEvalTerm (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A))
+          bι h v) := by
+      change Ψ (∑' v, mvEvalTerm
+        (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A)) bι h v) = _
+      exact (mvEvalTerm_summable
+        (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A))
+        (MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (D.T.card + m)) bι hbι h).map_tsum
+        Ψ hΨ_cont
+    rw [hL, hR]
+    -- termwise equality of the two evaluation series.
+    refine tsum_congr (fun v => ?_)
+    -- LHS term: `algebraMap _ T (canonicalMap(coeffᵥ) · ∏ (tᵢ/s)^vᵢ)`.
+    rw [mvEvalTerm, mvEvalTerm, map_mul, map_prod]
+    rw [map_mul]
+    -- generators on `Ψ`: `Ψ(algebraMap a) = algebraMap _ T (canonicalMap a)` (`hΨ_alg`).
+    rw [hΨ_alg (MvPowerSeries.coeff v h.val)]
+    congr 1
+    rw [map_prod]
+    refine Finset.prod_congr rfl (fun i _ => ?_)
+    rw [map_pow, map_pow]
+    congr 1
+    -- `Ψ(bι i) = algebraMap _ T (example638_genTuple D i)` (`hΨ_genX`).
+    exact (hΨ_genX i).symm
+  -- Finish like `example638_isUnit_mk_s`: `invS D = example638_evalHom D c`, so
+  -- `algebraMap _ T (invS D) = Ψ (ι c) ∈ range Ψ`; the inverse of `mk(alg s)` is `mk(ι c)`.
+  obtain ⟨c, hc⟩ := invS_mem_range D
+  rw [isUnit_iff_exists_inv]
+  refine ⟨Ideal.Quotient.mk (RingHom.ker Ψ) (ι c), ?_⟩
+  apply RingHom.kerLift_injective Ψ
+  rw [map_one, map_mul, RingHom.comp_apply]
+  rw [show RingHom.kerLift Ψ (Ideal.Quotient.mk (RingHom.ker Ψ)
+      ((algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A)) D.s)) =
+      Ψ ((algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A)) D.s) from
+    RingHom.kerLift_mk Ψ _]
+  rw [show RingHom.kerLift Ψ (Ideal.Quotient.mk (RingHom.ker Ψ) (ι c)) = Ψ (ι c) from
+    RingHom.kerLift_mk Ψ _]
+  rw [← hkey c]; erw [hc]
+  -- `Ψ(algebraMap s) = algebraMap _ T (canonicalMap s)` (`hΨ_alg`); goal:
+  -- `algebraMap _ T (canonicalMap s) · algebraMap _ T (invS D) = 1`.
+  rw [hΨ_alg D.s]
+  rw [← map_mul, canonicalMap_s_mul_invS, map_one]
+
+set_option maxHeartbeats 1600000 in
+omit [CompatiblePlusSubring A] in
+/-- **Uniform continuity of `fU : U → γ`** (helper for `presheafValue_mvRestricted_surjection`),
+where `U = (Localization.Away D.s)[Y]` carries the pullback uniformity along `iU` and
+`γ = source ⧸ ker Ψ`. Reduces (additive-group hom) to continuity at `0`; the localization lift `ψγ`
+is continuous (`locTopology_continuous_lift` from `hψγ_alg` + power-boundedness of `ψγ(tᵢ/s)`), the
+coefficient maps `fU(Xⱼ)` are power-bounded so the monomial-product range is bounded, and a basic
+`0`-nbhd of `U` (pulled back through `iU`'s coefficient formula `hiU_coeff`) maps into any open
+subgroup of `γ`. All evaluation/lift behaviour enters through the opaque-friendly hypotheses
+`hΨ_genX`/`hψγ_alg`/`hψ_round'`/`hfU_eval`/`hfU_X`/`hiU_C`/`hiU_X`. -/
+private lemma presheafValue_mvRestricted_fU_uniformContinuous
+    (D : RationalLocData A) [IsTateRing (presheafValue D)] (m : ℕ)
+    (Ψ : restrictedMvPowerSeriesSubring (D.T.card + m) A →+*
+      restrictedMvPowerSeriesSubring m (presheafValue D))
+    (ψγ : Localization.Away D.s →+*
+      (restrictedMvPowerSeriesSubring (D.T.card + m) A ⧸ RingHom.ker Ψ))
+    (iU : MvPolynomial (Fin m) (Localization.Away D.s) →+*
+      restrictedMvPowerSeriesSubring m (presheafValue D))
+    (fU : MvPolynomial (Fin m) (Localization.Away D.s) →+*
+      (restrictedMvPowerSeriesSubring (D.T.card + m) A ⧸ RingHom.ker Ψ))
+    (hΨ_genX : ∀ i : Fin D.T.card, Ψ (⟨MvPowerSeries.X (Fin.castAdd m i),
+        MvPowerSeries.X_isRestricted _⟩ : restrictedMvPowerSeriesSubring (D.T.card + m) A) =
+      algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
+        (example638_genTuple D i))
+    (hψγ_alg : ψγ.comp (algebraMap A (Localization.Away D.s)) =
+      (Ideal.Quotient.mk (RingHom.ker Ψ)).comp
+        (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A)))
+    (hψ_round' : (RingHom.kerLift Ψ).comp ψγ =
+      (algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))).comp
+        D.coeRingHom)
+    (hiU_C : ∀ c : Localization.Away D.s, iU (MvPolynomial.C c) =
+      (algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))).comp
+        D.coeRingHom c)
+    (hiU_X : ∀ j, iU (MvPolynomial.X j) =
+      (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
+        restrictedMvPowerSeriesSubring m (presheafValue D)))
+    (hfU_X : ∀ j, fU (MvPolynomial.X j) =
+      Ideal.Quotient.mk (RingHom.ker Ψ)
+        (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
+          restrictedMvPowerSeriesSubring (D.T.card + m) A))
+    (hfU_eval : ⇑fU = MvPolynomial.eval₂ ψγ
+      (fun j => Ideal.Quotient.mk (RingHom.ker Ψ)
+        (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
+          restrictedMvPowerSeriesSubring (D.T.card + m) A))) :
+    @UniformContinuous _ _
+      (UniformSpace.comap iU (MvTateAlgebra.mvTateUniformSpace m))
+      (mvQuotUniformSpace (D.T.card + m) (RingHom.ker Ψ)) fU := by
+  classical
+  letI τT : TopologicalSpace (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
+    MvTateAlgebra.mvTateAlgebraTopology' m
+  letI uT : UniformSpace (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
+    MvTateAlgebra.mvTateUniformSpace m
+  haveI : IsUniformAddGroup (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
+    MvTateAlgebra.mvTate_isUniformAddGroup m
+  letI τS : TopologicalSpace (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+    MvTateAlgebra.mvTateAlgebraTopology' (D.T.card + m)
+  haveI hringS : IsTopologicalRing (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+    MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing (D.T.card + m)
+  letI τQ : TopologicalSpace (restrictedMvPowerSeriesSubring (D.T.card + m) A ⧸ RingHom.ker Ψ) :=
+    mvQuotTopology (D.T.card + m) (RingHom.ker Ψ)
+  letI uQ : UniformSpace (restrictedMvPowerSeriesSubring (D.T.card + m) A ⧸ RingHom.ker Ψ) :=
+    mvQuotUniformSpace (D.T.card + m) (RingHom.ker Ψ)
+  haveI hringQ : @IsTopologicalRing _ τQ _ :=
+    mvQuot_isTopologicalRing (D.T.card + m) (RingHom.ker Ψ)
+  letI uU : UniformSpace (MvPolynomial (Fin m) (Localization.Away D.s)) :=
+    UniformSpace.comap iU uT
+  have hi_ind : IsUniformInducing iU := ⟨rfl⟩
+  -- `uU = comap iU uT` is a uniform add group (pullback of the uniform add group `uT`).
+  haveI huug : @IsUniformAddGroup (MvPolynomial (Fin m) (Localization.Away D.s)) uU _ :=
+    IsUniformAddGroup.comap iU
+  haveI hNAQ : @NonarchimedeanRing _ _ τQ := mvQuot_nonarchimedean (D.T.card + m) (RingHom.ker Ψ)
+  haveI hUQ : @IsUniformAddGroup _ uQ _ := mvQuot_isUniformAddGroup (D.T.card + m) (RingHom.ker Ψ)
+  -- `P_T = principal pair of `presheafValue D``, `P_S = principal pair of `A``.
+  set P_T := (IsTateRing.principalPair (presheafValue D)).toPairOfDefinition with hP_T
+  -- (i) `ψγ : Loc → γ` is continuous (relative analogue of `example638_locToQuot_continuous`).
+  have hψγ_cont : @Continuous _ _ D.topology τQ ψγ := by
+    change @Continuous _ _ (locTopology D.P D.T D.s D.hopen) τQ ψγ
+    refine locTopology_continuous_lift D.P D.T D.s D.hopen ψγ ?_ ?_
+    · -- (a) `ψγ ∘ algebraMap A = mk ∘ algebraMap A source` is continuous.
+      rw [hψγ_alg]
+      exact (continuous_quotient_mk'.comp
+        (MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (D.T.card + m)))
+    · -- (b) `ψγ(tᵢ/s) = mk(X (castAdd i))` is power-bounded in `γ`.
+      intro t ht
+      set i := D.T.equivFin ⟨t, ht⟩ with hi
+      -- `ψγ(divByS t s) = mk(X (castAdd i))`, from injectivity of `ē = kerLift Ψ`.
+      have hψγval : ψγ (divByS (↑(D.T.equivFin.symm i) : A) D.s) =
+          Ideal.Quotient.mk (RingHom.ker Ψ)
+            (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
+              restrictedMvPowerSeriesSubring (D.T.card + m) A) := by
+        apply RingHom.kerLift_injective Ψ
+        rw [show RingHom.kerLift Ψ (ψγ (divByS (↑(D.T.equivFin.symm i) : A) D.s)) =
+            ((algebraMap (presheafValue D)
+                (restrictedMvPowerSeriesSubring m (presheafValue D))).comp D.coeRingHom)
+              (divByS (↑(D.T.equivFin.symm i) : A) D.s) from
+          RingHom.congr_fun hψ_round' (divByS (↑(D.T.equivFin.symm i) : A) D.s)]
+        rw [show RingHom.kerLift Ψ (Ideal.Quotient.mk (RingHom.ker Ψ)
+            (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
+              restrictedMvPowerSeriesSubring (D.T.card + m) A)) =
+            Ψ (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
+              restrictedMvPowerSeriesSubring (D.T.card + m) A) from RingHom.kerLift_mk Ψ _]
+        rw [hΨ_genX i, RingHom.comp_apply, example638_genTuple]
+      have htval : t = (↑(D.T.equivFin.symm i) : A) := by rw [hi, Equiv.symm_apply_apply]
+      rw [htval, hψγval]
+      -- `X (castAdd i)` ∈ pair-subring of source ⟹ power-bounded ⟹ `mk` power-bounded.
+      have hXi_mem : (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
+          restrictedMvPowerSeriesSubring (D.T.card + m) A) ∈
+          MvTateAlgebra.mvPairSubring (D.T.card + m)
+            (IsTateRing.principalPair A).toPairOfDefinition := by
+        intro l
+        change MvPowerSeries.coeff l (MvPowerSeries.X (Fin.castAdd m i)) ∈ _
+        rw [MvPowerSeries.coeff_X]
+        split
+        · exact (IsTateRing.principalPair A).toPairOfDefinition.A₀.one_mem
+        · exact (IsTateRing.principalPair A).toPairOfDefinition.A₀.zero_mem
+      have hXi_pb : @TopologicalRing.IsPowerBounded _ _ τS
+          (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
+            restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+        (MvTateAlgebra.mvTateAlgebra_pairOfDefinition (D.T.card + m)).mem_powerBoundedSubring
+          hXi_mem
+      exact @isPowerBounded_map_of_isOpenMap _ _ _ τS _ τQ hringQ
+        (Ideal.Quotient.mk (RingHom.ker Ψ)) continuous_quotient_mk'
+        (@QuotientRing.isOpenMap_coe _ τS _ (RingHom.ker Ψ) hringS) _ hXi_pb
+  -- (ii) `iU p`'s coefficient at `v` is `coeRingHom (coeff_v p)` (`iU = coe ∘ map coeRingHom`).
+  have hiU_coeff : ∀ (p : MvPolynomial (Fin m) (Localization.Away D.s)) (v : Fin m →₀ ℕ),
+      MvPowerSeries.coeff v (iU p).val = D.coeRingHom (MvPolynomial.coeff v p) := by
+    -- `(iU p).val = ↑(MvPolynomial.map coeRingHom p)` (coe to power series), coeff-wise.
+    have hiU_val : ∀ p : MvPolynomial (Fin m) (Localization.Away D.s),
+        (iU p).val = (↑(MvPolynomial.map D.coeRingHom p) :
+          MvPowerSeries (Fin m) (presheafValue D)) := by
+      have hiU_eq : (restrictedMvPowerSeriesSubring m (presheafValue D)).subtype.comp iU =
+          (MvPolynomial.coeToMvPowerSeries.ringHom).comp (MvPolynomial.map D.coeRingHom) := by
+        refine MvPolynomial.ringHom_ext (fun c => ?_) (fun j => ?_)
+        · rw [RingHom.comp_apply, RingHom.comp_apply, hiU_C c]
+          change (algebraMap (presheafValue D) (MvPowerSeries (Fin m) (presheafValue D)))
+            (D.coeRingHom c) = _
+          rw [MvPolynomial.coeToMvPowerSeries.ringHom_apply, MvPolynomial.map_C,
+            MvPolynomial.coe_C, MvPowerSeries.algebraMap_apply, Algebra.algebraMap_self_apply]
+        · rw [RingHom.comp_apply, RingHom.comp_apply, hiU_X j]
+          change (MvPowerSeries.X j : MvPowerSeries (Fin m) (presheafValue D)) = _
+          rw [MvPolynomial.coeToMvPowerSeries.ringHom_apply, MvPolynomial.map_X,
+            MvPolynomial.coe_X]
+      intro p
+      have hp := RingHom.congr_fun hiU_eq p
+      simpa only [RingHom.comp_apply, MvPolynomial.coeToMvPowerSeries.ringHom_apply,
+        Subring.coe_subtype] using hp
+    intro p v
+    rw [hiU_val p, MvPolynomial.coeff_coe, MvPolynomial.coeff_map]
+  -- (iii) each `fU (X j) = mk (Z_{n+j})` is power-bounded in `γ`, so the product-power range is.
+  have hfUX_pb : ∀ j : Fin m, @TopologicalRing.IsPowerBounded _ _ τQ (fU (MvPolynomial.X j)) := by
+    intro j
+    rw [hfU_X j]
+    have hZ_mem : (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
+        restrictedMvPowerSeriesSubring (D.T.card + m) A) ∈
+        MvTateAlgebra.mvPairSubring (D.T.card + m)
+          (IsTateRing.principalPair A).toPairOfDefinition := by
+      intro l
+      change MvPowerSeries.coeff l (MvPowerSeries.X (Fin.natAdd D.T.card j)) ∈ _
+      rw [MvPowerSeries.coeff_X]
+      split
+      · exact (IsTateRing.principalPair A).toPairOfDefinition.A₀.one_mem
+      · exact (IsTateRing.principalPair A).toPairOfDefinition.A₀.zero_mem
+    have hZ_pb : @TopologicalRing.IsPowerBounded _ _ τS
+        (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
+          restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+      (MvTateAlgebra.mvTateAlgebra_pairOfDefinition (D.T.card + m)).mem_powerBoundedSubring hZ_mem
+    exact @isPowerBounded_map_of_isOpenMap _ _ _ τS _ τQ hringQ
+      (Ideal.Quotient.mk (RingHom.ker Ψ)) continuous_quotient_mk'
+      (@QuotientRing.isOpenMap_coe _ τS _ (RingHom.ker Ψ) hringS) _ hZ_pb
+  have hRbdd : @TopologicalRing.IsBounded _ _ τQ
+      (Set.range (fun v : Fin m →₀ ℕ => ∏ j, fU (MvPolynomial.X j) ^ (v j))) :=
+    mvRangeProd_isBounded (fun j => fU (MvPolynomial.X j)) hfUX_pb
+  -- Reduce to continuity of `fU` at `0` (additive-group hom).
+  refine @uniformContinuous_of_continuousAt_zero _ _ uU _ huug _ uQ _ hUQ _ _ fU ?_
+  -- `ContinuousAt fU 0`: `Tendsto fU (nhds 0) (nhds 0)`; source `nhds 0 = comap iU (nhds 0)`.
+  have hnhds0 : @nhds _ (uU.toTopologicalSpace)
+      (0 : MvPolynomial (Fin m) (Localization.Away D.s)) =
+      Filter.comap iU (@nhds _ τT (0 : restrictedMvPowerSeriesSubring m (presheafValue D))) := by
+    have := hi_ind.isInducing.nhds_eq_comap
+      (0 : MvPolynomial (Fin m) (Localization.Away D.s))
+    rw [this, map_zero]
+  rw [ContinuousAt, map_zero, Filter.tendsto_def]
+  intro V hV
+  rw [hnhds0, Filter.mem_comap]
+  -- `V` is a `γ`-`0`-nbhd; take an open subgroup `Vg ⊆ V` (γ nonarchimedean).
+  obtain ⟨Vg, hVgV⟩ := @NonarchimedeanRing.is_nonarchimedean _ _ τQ hNAQ V hV
+  -- absorb the bounded product-power range `R_γ` into `Vg`: `R_γ · V' ⊆ Vg`.
+  obtain ⟨V', hV', hV'R⟩ := hRbdd (Vg : Set _) (Vg.isOpen.mem_nhds Vg.zero_mem)
+  -- `ψγ⁻¹ V'` is a `Loc`-`0`-nbhd; via `coeRingHom` inducing, pull back to `presheafValue D`.
+  letI tLoc : TopologicalSpace (Localization.Away D.s) := D.topology
+  have hψpre : ψγ ⁻¹' V' ∈ @nhds _ tLoc (0 : Localization.Away D.s) :=
+    (hψγ_cont.continuousAt (x := (0 : Localization.Away D.s))).preimage_mem_nhds
+      (by rw [map_zero]; exact hV')
+  -- `coeRingHom` is uniform-inducing (completion coe) ⟹ `Loc`-topology = comap of `presheafValue`.
+  have hcoe_ind : @Topology.IsInducing _ _ tLoc _ (D.coeRingHom) := by
+    letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
+    letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+    exact (UniformSpace.Completion.isUniformInducing_coe (Localization.Away D.s)).isInducing
+  have hcoe_nhds : @nhds _ tLoc (0 : Localization.Away D.s) =
+      Filter.comap D.coeRingHom (@nhds _ _ (0 : presheafValue D)) := by
+    have := hcoe_ind.nhds_eq_comap (0 : Localization.Away D.s)
+    rw [this, map_zero]
+  rw [hcoe_nhds, Filter.mem_comap] at hψpre
+  obtain ⟨O, hO, hO_sub⟩ := hψpre
+  -- choose `k` with `image(P_T.I^k) ⊆ O` (basic `0`-nbhds of `presheafValue D`).
+  obtain ⟨k, -, hk⟩ := P_T.hasBasis_nhds_zero.mem_iff.mp hO
+  refine ⟨(MvTateAlgebra.mvTateAlgNhd m P_T k : Set _),
+    (MvTateAlgebra.mvTateAlgBasis' m).hasBasis_nhds_zero.mem_of_mem (i := k) trivial, ?_⟩
+  -- `iU p ∈ mvTateAlgNhd m P_T k` ⟹ `fU p ∈ Vg ⊆ V`.
+  intro p hp
+  rw [Set.mem_preimage]
+  apply hVgV
+  -- expand `fU p = ∑_{v ∈ supp p} ψγ(coeff_v p) · ∏ⱼ (fU Xⱼ)^(vⱼ)`.
+  rw [show fU p = ∑ v ∈ p.support, ψγ (MvPolynomial.coeff v p) *
+      ∏ j, fU (MvPolynomial.X j) ^ (v j) from by
+    have hfe : fU p = MvPolynomial.eval₂ ψγ (fun j => fU (MvPolynomial.X j)) p := by
+      have hvar : (fun j => fU (MvPolynomial.X j)) =
+          (fun j => Ideal.Quotient.mk (RingHom.ker Ψ)
+            (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
+              restrictedMvPowerSeriesSubring (D.T.card + m) A)) := funext hfU_X
+      rw [hvar]
+      change (fU p : _) = _
+      rw [hfU_eval]
+    rw [hfe, MvPolynomial.eval₂_eq']]
+  -- each term lies in `Vg` (open subgroup), so the sum does.
+  refine AddSubgroup.sum_mem _ (fun v hv => ?_)
+  -- `coeff_v(iU p) = coeRingHom(coeff_v p) ∈ image(P_T.I^k) ⊆ O`, so `coeff_v p ∈ ψγ⁻¹ V'`.
+  have hcoeffO : D.coeRingHom (MvPolynomial.coeff v p) ∈ O := by
+    apply hk
+    obtain ⟨bb, hbI, hbeq⟩ := MvTateAlgebra.mvTateAlgNhd_coeff_mem m P_T k hp v
+    rw [← hiU_coeff p v, ← hbeq]
+    exact ⟨bb, hbI, rfl⟩
+  have hψV' : ψγ (MvPolynomial.coeff v p) ∈ V' := hO_sub hcoeffO
+  -- term `= (∏ⱼ (fU Xⱼ)^vⱼ) · ψγ(coeff_v p) ∈ R_γ · V' ⊆ Vg`.
+  rw [mul_comm]
+  exact hV'R (Set.mul_mem_mul ⟨v, rfl⟩ hψV')
+
 -- Large unified proof: the relative Example-6.38 surjection bundles three nonarchimedean
 -- nbhd-basis chases (`hUnitS`, `hi_dense`, `hf_unif`) over the heavy reducible quotient-Tate
 -- uniform structures on `γ = C ⧸ ker Ψ`; the cumulative `isDefEq`/`whnf` cost exceeds the default
@@ -2108,101 +2627,13 @@ private theorem presheafValue_mvRestricted_surjection
   -- (via `f`); the backward map extends `f` along the dense embedding `i`.
   -- `mk_s` is a unit in `γ`, so the localization lift `ψ : Loc → γ` exists.
   have hUnitS : IsUnit ((Ideal.Quotient.mk (RingHom.ker Ψ)).comp
-      (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A)) D.s) := by
-    -- Install the source-ring (`A⟨X₁..Xₙ₊ₘ⟩`) uniform/complete/nonarch/T0 instances so that
-    -- `mvEvalHomBounded` can build the variable-inclusion `ι`.
-    letI uS : UniformSpace (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
-      MvTateAlgebra.mvTateUniformSpace (D.T.card + m)
-    haveI : IsUniformAddGroup (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
-      MvTateAlgebra.mvTate_isUniformAddGroup (D.T.card + m)
-    haveI : CompleteSpace (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
-      MvTateAlgebra.mvTate_completeSpace (D.T.card + m) hA_complete
-    haveI : NonarchimedeanRing (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
-      MvTateAlgebra.mvTate_nonarchimedean (D.T.card + m)
-    haveI : T2Space (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
-      MvTateAlgebra.mvTate_t2Space (D.T.card + m)
-    haveI : T0Space (restrictedMvPowerSeriesSubring (D.T.card + m) A) := inferInstance
-    -- `ι : A⟨X₁..Xₙ⟩ → A⟨X₁..Xₙ₊ₘ⟩`, `Xᵢ ↦ X (castAdd m i)`, `algebraMap a ↦ algebraMap a`.
-    let bι : Fin D.T.card → restrictedMvPowerSeriesSubring (D.T.card + m) A :=
-      fun i => ⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩
-    have hbι : ∀ i, TopologicalRing.IsBounded
-        (Set.range (bι i ^ · : ℕ → restrictedMvPowerSeriesSubring (D.T.card + m) A)) :=
-      fun i => MvTateAlgebra.mvPowerSeries_X_isBounded (Fin.castAdd m i)
-    let ι : restrictedMvPowerSeriesSubring D.T.card A →+*
-        restrictedMvPowerSeriesSubring (D.T.card + m) A :=
-      mvEvalHomBounded (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A))
-        (MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (D.T.card + m)) bι hbι
-    -- `algebraMap _ T ∘ example638_evalHom D = Ψ ∘ ι` POINTWISE (push the continuous additive maps
-    -- through the single evaluation `tsum`, termwise — NO Fubini).
-    have hkey : ∀ h : restrictedMvPowerSeriesSubring D.T.card A,
-        algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
-            (example638_evalHom D h) = Ψ (ι h) := by
-      intro h
-      -- LHS: push `algebraMap _ T` through the `example638_evalHom` tsum.
-      have hL : algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
-            (example638_evalHom D h) =
-          ∑' v, algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
-            (mvEvalTerm D.canonicalMap (example638_genTuple D) h v) := by
-        change algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
-          (∑' v, mvEvalTerm D.canonicalMap (example638_genTuple D) h v) = _
-        exact (mvEvalTerm_summable D.canonicalMap (canonicalMap_continuous D)
-          (example638_genTuple D) (example638_genTuple_isBounded D) h).map_tsum
-          (algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D)))
-          (MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (A := presheafValue D) m)
-      -- RHS: push `Ψ` through the `ι` tsum.
-      have hR : Ψ (ι h) =
-          ∑' v, Ψ (mvEvalTerm (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A))
-            bι h v) := by
-        change Ψ (∑' v, mvEvalTerm
-          (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A)) bι h v) = _
-        exact (mvEvalTerm_summable
-          (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A))
-          (MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (D.T.card + m)) bι hbι h).map_tsum
-          Ψ (by rw [hΨ]; exact mvEvalHomBounded_continuous g hg b hb)
-      rw [hL, hR]
-      -- termwise equality of the two evaluation series.
-      refine tsum_congr (fun v => ?_)
-      -- LHS term: `algebraMap _ T (canonicalMap(coeffᵥ) · ∏ (tᵢ/s)^vᵢ)`.
-      rw [mvEvalTerm, mvEvalTerm, map_mul, map_prod]
-      rw [map_mul]
-      -- generators on `Ψ`: `Ψ(algebraMap a) = g a`, `Ψ(bι i) = b (castAdd i)`.
-      rw [show Ψ (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A)
-          (MvPowerSeries.coeff v h.val)) = g (MvPowerSeries.coeff v h.val) from by
-        rw [hΨ]; exact mvEvalHomBounded_algebraMap g hg b hb (MvPowerSeries.coeff v h.val)]
-      -- `g a = algebraMap _ T (canonicalMap a)`.
-      rw [show g (MvPowerSeries.coeff v h.val) =
-          algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
-            (D.canonicalMap (MvPowerSeries.coeff v h.val)) from rfl]
-      congr 1
-      rw [map_prod]
-      refine Finset.prod_congr rfl (fun i _ => ?_)
-      rw [map_pow, map_pow]
-      congr 1
-      -- `Ψ(bι i) = b (castAdd i) = algebraMap _ T (example638_genTuple D i)`.
-      rw [show Ψ (bι i) = b (Fin.castAdd m i) from by
-        rw [hΨ]; exact mvEvalHomBounded_X g hg b hb (Fin.castAdd m i)]
-      simp only [b, Fin.addCases_left]
-    -- Finish like `example638_isUnit_mk_s`: `invS D = example638_evalHom D c`, so
-    -- `algebraMap _ T (invS D) = Ψ (ι c) ∈ range Ψ`; the inverse of `mk(alg s)` is `mk(ι c)`.
-    obtain ⟨c, hc⟩ := invS_mem_range D
-    rw [isUnit_iff_exists_inv]
-    refine ⟨Ideal.Quotient.mk (RingHom.ker Ψ) (ι c), ?_⟩
-    apply RingHom.kerLift_injective Ψ
-    rw [map_one, map_mul, RingHom.comp_apply]
-    rw [show RingHom.kerLift Ψ (Ideal.Quotient.mk (RingHom.ker Ψ)
-        ((algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A)) D.s)) =
-        Ψ ((algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A)) D.s) from
-      RingHom.kerLift_mk Ψ _]
-    rw [show RingHom.kerLift Ψ (Ideal.Quotient.mk (RingHom.ker Ψ) (ι c)) = Ψ (ι c) from
-      RingHom.kerLift_mk Ψ _]
-    rw [← hkey c]; erw [hc]
-    -- `Ψ(algebraMap s) = g s = algebraMap _ T (canonicalMap s)`; goal:
-    -- `algebraMap _ T (canonicalMap s) · algebraMap _ T (invS D) = 1`.
-    rw [show Ψ ((algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A)) D.s) =
-        algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
-          (D.canonicalMap D.s) from by
-      rw [hΨ]; exact mvEvalHomBounded_algebraMap g hg b hb D.s]
-    rw [← map_mul, canonicalMap_s_mul_invS, map_one]
+      (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A)) D.s) :=
+    presheafValue_mvRestricted_isUnit_mk_s D m hA_complete Ψ
+      (by rw [hΨ]; exact mvEvalHomBounded_continuous g hg b hb)
+      (fun x => by rw [hΨ]; exact mvEvalHomBounded_algebraMap g hg b hb x)
+      (fun i => by
+        rw [hΨ, mvEvalHomBounded_X g hg b hb (Fin.castAdd m i)]
+        simp only [b, Fin.addCases_left])
   -- `ψ : Loc → γ`, the localization lift (mirror of `example638_locToQuot`).
   let ψγ : Localization.Away D.s →+*
       (restrictedMvPowerSeriesSubring (D.T.card + m) A ⧸ RingHom.ker Ψ) :=
@@ -2241,334 +2672,20 @@ private theorem presheafValue_mvRestricted_surjection
   letI uU : UniformSpace (MvPolynomial (Fin m) (Localization.Away D.s)) :=
     UniformSpace.comap iU uT
   have hi_ind : IsUniformInducing iU := ⟨rfl⟩
-  have hi_dense : DenseRange iU := by
-    classical
-    -- `R := closure(range iU)`, a closed subring of `T`. We show `R = ⊤` by exhibiting that it
-    -- contains the (dense) box-supported polynomials.
-    set R : Subring (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
-      iU.range.topologicalClosure with hR
-    have hiU_le : iU.range ≤ R := Subring.le_topologicalClosure _
-    -- Step 1: every constant series `algebraMap _ T x` (x : presheafValue D) lies in `R`, because
-    -- `range coeRingHom` is dense in `presheafValue D`, `algebraMap _ T` is continuous, and
-    -- `algebraMap _ T (coeRingHom c) = iU (C c) ∈ R`.
-    have hconst : ∀ x : presheafValue D,
-        algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D)) x ∈ R :=
-        by
-      have hcont : Continuous
-          (algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))) :=
-        MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (A := presheafValue D) m
-      -- the preimage subring `R.comap (algebraMap _ T)` is closed and contains `range coeRingHom`.
-      have hclosed : IsClosed
-          ((algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D)) ⁻¹'
-            (R : Set _)) : Set (presheafValue D)) :=
-        (Subring.isClosed_topologicalClosure _).preimage hcont
-      have hdense : DenseRange (D.coeRingHom : Localization.Away D.s → presheafValue D) := by
-        letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
-        letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
-        change DenseRange (UniformSpace.Completion.coeRingHom :
-          Localization.Away D.s → presheafValue D)
-        exact UniformSpace.Completion.denseRange_coe
-      intro x
-      -- `x ∈ closure(range coeRingHom)`; the preimage set is closed, contains `range coeRingHom`.
-      have hx_cl : x ∈ closure (Set.range (D.coeRingHom)) := hdense x
-      have hsub : Set.range (D.coeRingHom) ⊆
-          algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D)) ⁻¹'
-            (R : Set _) := by
-        rintro _ ⟨c, rfl⟩
-        change algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
-          (D.coeRingHom c) ∈ R
-        exact hiU_le ⟨MvPolynomial.C c, by rw [hiU_C c]; rfl⟩
-      exact hclosed.closure_subset_iff.mpr hsub hx_cl
-    -- Step 2: each variable `⟨Xⱼ, _⟩` lies in `R` (`= iU (X j) ∈ range iU ≤ R`).
-    have hX : ∀ j : Fin m, (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
-        restrictedMvPowerSeriesSubring m (presheafValue D)) ∈ R :=
-      fun j => hiU_le ⟨MvPolynomial.X j, hiU_X j⟩
-    -- Step 3: each box-supported polynomial `g` lies in `R`, via the finite monomial decomposition
-    -- `g = ∑_{v ∈ box} (algebraMap _ T (g.val v)) · ∏ⱼ ⟨Xⱼ,_⟩^(vⱼ)` (`R` is a subring).
-    have hbox : ∀ g : restrictedMvPowerSeriesSubring m (presheafValue D),
-        (∃ N, ∀ l : Fin m →₀ ℕ, (∃ i, N ≤ l i) → g.val l = 0) →
-        g ∈ R := by
-      rintro g ⟨N, hN⟩
-      -- the finite box index set `{l | ∀ i, l i < N}`.
-      set box : Finset (Fin m →₀ ℕ) :=
-        (Finset.univ : Finset (Fin m → Fin N)).image
-          (fun f => Finsupp.equivFunOnFinite.symm (fun i => (f i : ℕ))) with hbox_def
-      -- membership: `l ∈ box ↔ ∀ i, l i < N`.
-      have hmem_box : ∀ l : Fin m →₀ ℕ, l ∈ box ↔ ∀ i, l i < N := by
-        intro l
-        simp only [hbox_def, Finset.mem_image, Finset.mem_univ, true_and]
-        constructor
-        · rintro ⟨f, rfl⟩ i
-          exact (f i).2
-        · intro hlt
-          exact ⟨fun i => ⟨l i, hlt i⟩, by ext i; simp [Finsupp.equivFunOnFinite]⟩
-      -- the monomial summand `term v = algebraMap _ T (g.val v) · ∏ⱼ ⟨Xⱼ,_⟩^(vⱼ) ∈ T`.
-      set term : (Fin m →₀ ℕ) → restrictedMvPowerSeriesSubring m (presheafValue D) :=
-        fun v => algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
-            (g.val v) *
-          ∏ j : Fin m, (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
-            restrictedMvPowerSeriesSubring m (presheafValue D)) ^ (v j) with hterm_def
-      -- `(term v).val = monomial v (g.val v)`.
-      have hterm_val : ∀ v, (term v).val = MvPowerSeries.monomial v (g.val v) := by
-        intro v
-        rw [hterm_def]
-        simp only
-        rw [Subring.coe_mul, MvPowerSeries.monomial_eq']
-        have hprod : (↑(∏ j : Fin m, (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
-              restrictedMvPowerSeriesSubring m (presheafValue D)) ^ (v j)) :
-              MvPowerSeries (Fin m) (presheafValue D)) =
-            v.prod fun s e => MvPowerSeries.X s ^ e := by
-          rw [SubmonoidClass.coe_finset_prod, Finsupp.prod_fintype]
-          · refine Finset.prod_congr rfl (fun j _ => ?_)
-            rw [SubmonoidClass.coe_pow]
-          · intro j; rw [pow_zero]
-        have hC : (↑(algebraMap (presheafValue D)
-              (restrictedMvPowerSeriesSubring m (presheafValue D)) (g.val v)) :
-              MvPowerSeries (Fin m) (presheafValue D)) = MvPowerSeries.C (g.val v) :=
-          MvPowerSeries.algebraMap_apply
-        rw [hC, hprod]
-      -- each `term v ∈ R` (constant ∈ R, variables ∈ R, `R` a subring).
-      have hterm_mem : ∀ v, term v ∈ R := fun v =>
-        R.mul_mem (hconst (g.val v)) (Subring.prod_mem _ (fun j _ => R.pow_mem (hX j) (v j)))
-      -- `g = ∑_{v ∈ box} term v` in the restricted subring (coefficient-wise check, going through
-      -- the `MvPolynomial` coe ring hom so `map_sum` lands on a `RingHom`).
-      have hg_sum : g = ∑ v ∈ box, term v := by
-        apply Subtype.ext
-        rw [AddSubmonoidClass.coe_finset_sum]
-        simp only [hterm_val]
-        -- `∑ v∈box, monomial v (g.val v) = ↑(∑ v∈box, MvPolynomial.monomial v (g.val v))`.
-        rw [show (∑ v ∈ box, MvPowerSeries.monomial v (g.val v) :
-              MvPowerSeries (Fin m) (presheafValue D)) =
-            MvPolynomial.coeToMvPowerSeries.ringHom
-              (∑ v ∈ box, MvPolynomial.monomial v (g.val v)) from by
-          rw [map_sum]
-          refine Finset.sum_congr rfl (fun v _ => ?_)
-          rw [MvPolynomial.coeToMvPowerSeries.ringHom_apply, MvPolynomial.coe_monomial]]
-        rw [MvPolynomial.coeToMvPowerSeries.ringHom_apply]
-        ext w
-        rw [MvPolynomial.coeff_coe, show MvPowerSeries.coeff w g.val = g.val w from
-          MvPowerSeries.coeff_apply g.val w]
-        rw [show MvPolynomial.coeff w (∑ v ∈ box, MvPolynomial.monomial v (g.val v)) =
-            ∑ v ∈ box, MvPolynomial.coeff w (MvPolynomial.monomial v (g.val v)) from
-          MvPolynomial.coeff_sum _ _ _]
-        by_cases hw : ∀ i, w i < N
-        · rw [Finset.sum_eq_single w]
-          · rw [MvPolynomial.coeff_monomial, if_pos rfl]
-          · intro v _ hvw
-            rw [MvPolynomial.coeff_monomial, if_neg hvw]
-          · intro hw_notin
-            exact absurd ((hmem_box w).mpr hw) hw_notin
-        · -- `w` outside the box: `g.val w = 0` and every monomial term vanishes at `w`.
-          push_neg at hw
-          obtain ⟨i, hi⟩ := hw
-          rw [hN w ⟨i, hi⟩]
-          symm
-          refine Finset.sum_eq_zero (fun v hv => ?_)
-          rw [MvPolynomial.coeff_monomial, if_neg]
-          intro hwv
-          exact absurd ((hmem_box v).mp hv i) (by rw [hwv]; omega)
-      rw [hg_sum]
-      exact Subring.sum_mem _ (fun v _ => hterm_mem v)
-    -- Conclude: the dense box-polynomials are ⊆ `R = closure(range iU)`, so `closure(range iU)`
-    -- contains a dense set, hence `= univ`; thus `DenseRange iU`.
-    rw [denseRange_iff_closure_range]
-    refine Set.eq_univ_of_univ_subset ?_
-    rw [← (MvTateAlgebra.mvTateAlgebra_polynomials_dense (A := presheafValue D) m).closure_eq]
-    refine closure_minimal (fun g hg => ?_) isClosed_closure
-    exact hbox g hg
-  have hf_unif : UniformContinuous fU := by
-    classical
-    -- `uU = comap iU uT` is a uniform add group (pullback of the uniform add group `uT`).
-    haveI huug : @IsUniformAddGroup (MvPolynomial (Fin m) (Localization.Away D.s)) uU _ :=
-      IsUniformAddGroup.comap iU
-    haveI hNAQ : @NonarchimedeanRing _ _ τQ := mvQuot_nonarchimedean (D.T.card + m) (RingHom.ker Ψ)
-    haveI hUQ : @IsUniformAddGroup _ uQ _ := mvQuot_isUniformAddGroup (D.T.card + m) (RingHom.ker Ψ)
-    -- `P_T = principal pair of `presheafValue D``, `P_S = principal pair of `A``.
-    set P_T := (IsTateRing.principalPair (presheafValue D)).toPairOfDefinition with hP_T
-    -- (i) `ψγ : Loc → γ` is continuous (relative analogue of `example638_locToQuot_continuous`).
-    have hψγ_cont : @Continuous _ _ D.topology τQ ψγ := by
-      change @Continuous _ _ (locTopology D.P D.T D.s D.hopen) τQ ψγ
-      refine locTopology_continuous_lift D.P D.T D.s D.hopen ψγ ?_ ?_
-      · -- (a) `ψγ ∘ algebraMap A = mk ∘ algebraMap A source` is continuous.
-        have heq : ψγ.comp (algebraMap A (Localization.Away D.s)) =
-            (Ideal.Quotient.mk (RingHom.ker Ψ)).comp
-              (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A)) := by
-          ext a
-          simp only [RingHom.comp_apply, ψγ, IsLocalization.Away.lift_eq]
-        rw [heq]
-        exact (continuous_quotient_mk'.comp
-          (MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (D.T.card + m)))
-      · -- (b) `ψγ(tᵢ/s) = mk(X (castAdd i))` is power-bounded in `γ`.
-        intro t ht
-        set i := D.T.equivFin ⟨t, ht⟩ with hi
-        -- `ē ∘ ψγ = algebraMap _ T ∘ coeRingHom` (round-trip on the localization, inlined).
-        have hψ_round' : (RingHom.kerLift Ψ).comp ψγ =
-            (algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))).comp
-              D.coeRingHom := by
-          apply IsLocalization.ringHom_ext (Submonoid.powers D.s)
-          ext a
-          simp only [RingHom.comp_apply, ψγ, IsLocalization.Away.lift_eq, RingHom.kerLift_mk,
-            hΨ, mvEvalHomBounded_algebraMap, g, RationalLocData.canonicalMap]
-        -- `ψγ(divByS t s) = mk(X (castAdd i))`, from injectivity of `ē = kerLift Ψ`.
-        have hψγval : ψγ (divByS (↑(D.T.equivFin.symm i) : A) D.s) =
-            Ideal.Quotient.mk (RingHom.ker Ψ)
-              (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
-                restrictedMvPowerSeriesSubring (D.T.card + m) A) := by
-          apply RingHom.kerLift_injective Ψ
-          rw [show RingHom.kerLift Ψ (ψγ (divByS (↑(D.T.equivFin.symm i) : A) D.s)) =
-              ((algebraMap (presheafValue D)
-                  (restrictedMvPowerSeriesSubring m (presheafValue D))).comp D.coeRingHom)
-                (divByS (↑(D.T.equivFin.symm i) : A) D.s) from
-            RingHom.congr_fun hψ_round' (divByS (↑(D.T.equivFin.symm i) : A) D.s)]
-          rw [show RingHom.kerLift Ψ (Ideal.Quotient.mk (RingHom.ker Ψ)
-              (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
-                restrictedMvPowerSeriesSubring (D.T.card + m) A)) =
-              Ψ (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
-                restrictedMvPowerSeriesSubring (D.T.card + m) A) from RingHom.kerLift_mk Ψ _]
-          rw [hΨ, mvEvalHomBounded_X]
-          -- both `= algebraMap _ T (genTuple i) = b (castAdd i)`.
-          rw [show b (Fin.castAdd m i) =
-              algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
-                (example638_genTuple D i) from by simp only [b, Fin.addCases_left]]
-          rw [RingHom.comp_apply, example638_genTuple]
-        have htval : t = (↑(D.T.equivFin.symm i) : A) := by rw [hi, Equiv.symm_apply_apply]
-        rw [htval, hψγval]
-        -- `X (castAdd i)` ∈ pair-subring of source ⟹ power-bounded ⟹ `mk` power-bounded.
-        have hXi_mem : (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
-            restrictedMvPowerSeriesSubring (D.T.card + m) A) ∈
-            MvTateAlgebra.mvPairSubring (D.T.card + m)
-              (IsTateRing.principalPair A).toPairOfDefinition := by
-          intro l
-          change MvPowerSeries.coeff l (MvPowerSeries.X (Fin.castAdd m i)) ∈ _
-          rw [MvPowerSeries.coeff_X]
-          split
-          · exact (IsTateRing.principalPair A).toPairOfDefinition.A₀.one_mem
-          · exact (IsTateRing.principalPair A).toPairOfDefinition.A₀.zero_mem
-        have hXi_pb : @TopologicalRing.IsPowerBounded _ _ τS
-            (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
-              restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
-          (MvTateAlgebra.mvTateAlgebra_pairOfDefinition (D.T.card + m)).mem_powerBoundedSubring
-            hXi_mem
-        exact @isPowerBounded_map_of_isOpenMap _ _ _ τS _ τQ hringQ
-          (Ideal.Quotient.mk (RingHom.ker Ψ)) continuous_quotient_mk'
-          (@QuotientRing.isOpenMap_coe _ τS _ (RingHom.ker Ψ) hringS) _ hXi_pb
-    -- (ii) `iU p`'s coefficient at `v` is `coeRingHom (coeff_v p)` (`iU = coe ∘ map coeRingHom`).
-    have hiU_coeff : ∀ (p : MvPolynomial (Fin m) (Localization.Away D.s)) (v : Fin m →₀ ℕ),
-        MvPowerSeries.coeff v (iU p).val = D.coeRingHom (MvPolynomial.coeff v p) := by
-      -- `(iU p).val = ↑(MvPolynomial.map coeRingHom p)` (coe to power series), coeff-wise.
-      have hiU_val : ∀ p : MvPolynomial (Fin m) (Localization.Away D.s),
-          (iU p).val = (↑(MvPolynomial.map D.coeRingHom p) :
-            MvPowerSeries (Fin m) (presheafValue D)) := by
-        have hiU_eq : (restrictedMvPowerSeriesSubring m (presheafValue D)).subtype.comp iU =
-            (MvPolynomial.coeToMvPowerSeries.ringHom).comp (MvPolynomial.map D.coeRingHom) := by
-          refine MvPolynomial.ringHom_ext (fun c => ?_) (fun j => ?_)
-          · rw [RingHom.comp_apply, RingHom.comp_apply, hiU_C c]
-            change (algebraMap (presheafValue D) (MvPowerSeries (Fin m) (presheafValue D)))
-              (D.coeRingHom c) = _
-            rw [MvPolynomial.coeToMvPowerSeries.ringHom_apply, MvPolynomial.map_C,
-              MvPolynomial.coe_C, MvPowerSeries.algebraMap_apply, Algebra.algebraMap_self_apply]
-          · rw [RingHom.comp_apply, RingHom.comp_apply, hiU_X j]
-            change (MvPowerSeries.X j : MvPowerSeries (Fin m) (presheafValue D)) = _
-            rw [MvPolynomial.coeToMvPowerSeries.ringHom_apply, MvPolynomial.map_X,
-              MvPolynomial.coe_X]
-        intro p
-        have hp := RingHom.congr_fun hiU_eq p
-        simpa only [RingHom.comp_apply, MvPolynomial.coeToMvPowerSeries.ringHom_apply,
-          Subring.coe_subtype] using hp
-      intro p v
-      rw [hiU_val p, MvPolynomial.coeff_coe, MvPolynomial.coeff_map]
-    -- (iii) each `fU (X j) = mk (Z_{n+j})` is power-bounded in `γ`, so the product-power range is.
-    have hfUX_pb : ∀ j : Fin m, @TopologicalRing.IsPowerBounded _ _ τQ (fU (MvPolynomial.X j)) := by
-      intro j
-      rw [hfU_X j]
-      have hZ_mem : (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
-          restrictedMvPowerSeriesSubring (D.T.card + m) A) ∈
-          MvTateAlgebra.mvPairSubring (D.T.card + m)
-            (IsTateRing.principalPair A).toPairOfDefinition := by
-        intro l
-        change MvPowerSeries.coeff l (MvPowerSeries.X (Fin.natAdd D.T.card j)) ∈ _
-        rw [MvPowerSeries.coeff_X]
-        split
-        · exact (IsTateRing.principalPair A).toPairOfDefinition.A₀.one_mem
-        · exact (IsTateRing.principalPair A).toPairOfDefinition.A₀.zero_mem
-      have hZ_pb : @TopologicalRing.IsPowerBounded _ _ τS
-          (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
-            restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
-        (MvTateAlgebra.mvTateAlgebra_pairOfDefinition (D.T.card + m)).mem_powerBoundedSubring hZ_mem
-      exact @isPowerBounded_map_of_isOpenMap _ _ _ τS _ τQ hringQ
-        (Ideal.Quotient.mk (RingHom.ker Ψ)) continuous_quotient_mk'
-        (@QuotientRing.isOpenMap_coe _ τS _ (RingHom.ker Ψ) hringS) _ hZ_pb
-    have hRbdd : @TopologicalRing.IsBounded _ _ τQ
-        (Set.range (fun v : Fin m →₀ ℕ => ∏ j, fU (MvPolynomial.X j) ^ (v j))) :=
-      mvRangeProd_isBounded (fun j => fU (MvPolynomial.X j)) hfUX_pb
-    -- Reduce to continuity of `fU` at `0` (additive-group hom).
-    refine @uniformContinuous_of_continuousAt_zero _ _ uU _ huug _ uQ _ hUQ _ _ fU ?_
-    -- `ContinuousAt fU 0`: `Tendsto fU (nhds 0) (nhds 0)`; source `nhds 0 = comap iU (nhds 0)`.
-    have hnhds0 : @nhds _ (uU.toTopologicalSpace)
-        (0 : MvPolynomial (Fin m) (Localization.Away D.s)) =
-        Filter.comap iU (@nhds _ τT (0 : restrictedMvPowerSeriesSubring m (presheafValue D))) := by
-      have := hi_ind.isInducing.nhds_eq_comap
-        (0 : MvPolynomial (Fin m) (Localization.Away D.s))
-      rw [this, map_zero]
-    rw [ContinuousAt, map_zero, Filter.tendsto_def]
-    intro V hV
-    rw [hnhds0, Filter.mem_comap]
-    -- `V` is a `γ`-`0`-nbhd; take an open subgroup `Vg ⊆ V` (γ nonarchimedean).
-    obtain ⟨Vg, hVgV⟩ := @NonarchimedeanRing.is_nonarchimedean _ _ τQ hNAQ V hV
-    -- absorb the bounded product-power range `R_γ` into `Vg`: `R_γ · V' ⊆ Vg`.
-    obtain ⟨V', hV', hV'R⟩ := hRbdd (Vg : Set _) (Vg.isOpen.mem_nhds Vg.zero_mem)
-    -- `ψγ⁻¹ V'` is a `Loc`-`0`-nbhd; via `coeRingHom` inducing, pull back to `presheafValue D`.
-    letI tLoc : TopologicalSpace (Localization.Away D.s) := D.topology
-    have hψpre : ψγ ⁻¹' V' ∈ @nhds _ tLoc (0 : Localization.Away D.s) :=
-      (hψγ_cont.continuousAt (x := (0 : Localization.Away D.s))).preimage_mem_nhds
-        (by rw [map_zero]; exact hV')
-    -- `coeRingHom` is uniform-inducing (completion coe) ⟹ `Loc`-topology = comap of `presheafValue`.
-    have hcoe_ind : @Topology.IsInducing _ _ tLoc _ (D.coeRingHom) := by
-      letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
-      letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
-      exact (UniformSpace.Completion.isUniformInducing_coe (Localization.Away D.s)).isInducing
-    have hcoe_nhds : @nhds _ tLoc (0 : Localization.Away D.s) =
-        Filter.comap D.coeRingHom (@nhds _ _ (0 : presheafValue D)) := by
-      have := hcoe_ind.nhds_eq_comap (0 : Localization.Away D.s)
-      rw [this, map_zero]
-    rw [hcoe_nhds, Filter.mem_comap] at hψpre
-    obtain ⟨O, hO, hO_sub⟩ := hψpre
-    -- choose `k` with `image(P_T.I^k) ⊆ O` (basic `0`-nbhds of `presheafValue D`).
-    obtain ⟨k, -, hk⟩ := P_T.hasBasis_nhds_zero.mem_iff.mp hO
-    refine ⟨(MvTateAlgebra.mvTateAlgNhd m P_T k : Set _),
-      (MvTateAlgebra.mvTateAlgBasis' m).hasBasis_nhds_zero.mem_of_mem (i := k) trivial, ?_⟩
-    -- `iU p ∈ mvTateAlgNhd m P_T k` ⟹ `fU p ∈ Vg ⊆ V`.
-    intro p hp
-    rw [Set.mem_preimage]
-    apply hVgV
-    -- expand `fU p = ∑_{v ∈ supp p} ψγ(coeff_v p) · ∏ⱼ (fU Xⱼ)^(vⱼ)`.
-    rw [show fU p = ∑ v ∈ p.support, ψγ (MvPolynomial.coeff v p) *
-        ∏ j, fU (MvPolynomial.X j) ^ (v j) from by
-      have hfe : fU p = MvPolynomial.eval₂ ψγ (fun j => fU (MvPolynomial.X j)) p := by
-        have hvar : (fun j => fU (MvPolynomial.X j)) =
-            (fun j => Ideal.Quotient.mk (RingHom.ker Ψ)
-              (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
-                restrictedMvPowerSeriesSubring (D.T.card + m) A)) := funext hfU_X
-        rw [hvar]
-        change (fU p : _) = _
-        rw [show ⇑fU = MvPolynomial.eval₂ ψγ
-          (fun j => Ideal.Quotient.mk (RingHom.ker Ψ)
-            (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
-              restrictedMvPowerSeriesSubring (D.T.card + m) A)) from
-          MvPolynomial.coe_eval₂Hom _ _]
-      rw [hfe, MvPolynomial.eval₂_eq']]
-    -- each term lies in `Vg` (open subgroup), so the sum does.
-    refine AddSubgroup.sum_mem _ (fun v hv => ?_)
-    -- `coeff_v(iU p) = coeRingHom(coeff_v p) ∈ image(P_T.I^k) ⊆ O`, so `coeff_v p ∈ ψγ⁻¹ V'`.
-    have hcoeffO : D.coeRingHom (MvPolynomial.coeff v p) ∈ O := by
-      apply hk
-      obtain ⟨bb, hbI, hbeq⟩ := MvTateAlgebra.mvTateAlgNhd_coeff_mem m P_T k hp v
-      rw [← hiU_coeff p v, ← hbeq]
-      exact ⟨bb, hbI, rfl⟩
-    have hψV' : ψγ (MvPolynomial.coeff v p) ∈ V' := hO_sub hcoeffO
-    -- term `= (∏ⱼ (fU Xⱼ)^vⱼ) · ψγ(coeff_v p) ∈ R_γ · V' ⊆ Vg`.
-    rw [mul_comm]
-    exact hV'R (Set.mul_mem_mul ⟨v, rfl⟩ hψV')
+  have hi_dense : DenseRange iU :=
+    presheafValue_mvRestricted_iU_denseRange D m iU hiU_C hiU_X
+  have hf_unif : UniformContinuous fU :=
+    presheafValue_mvRestricted_fU_uniformContinuous D m Ψ ψγ iU fU
+      (fun i => by
+        rw [hΨ, mvEvalHomBounded_X g hg b hb (Fin.castAdd m i)]
+        simp only [b, Fin.addCases_left])
+      (by ext a; simp only [RingHom.comp_apply, ψγ, IsLocalization.Away.lift_eq])
+      (by
+        apply IsLocalization.ringHom_ext (Submonoid.powers D.s)
+        ext a
+        simp only [RingHom.comp_apply, ψγ, IsLocalization.Away.lift_eq, RingHom.kerLift_mk,
+          hΨ, mvEvalHomBounded_algebraMap, g, RationalLocData.canonicalMap])
+      hiU_C hiU_X hfU_X (MvPolynomial.coe_eval₂Hom _ _)
   -- round-trip on the dense subring: `ē ∘ f = i` as ring homs `U → T`.
   have hround_U : (ē.comp fU) = iU := by
     -- on the localization coefficients, `ē ∘ ψγ = const ∘ coeRingHom` (relative loc round-trip)
