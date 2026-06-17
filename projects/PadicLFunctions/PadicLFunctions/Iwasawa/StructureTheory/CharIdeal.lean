@@ -145,7 +145,7 @@ theorem charIdeal_eq_of_pseudoIso (hM : Module.IsTorsion (IwasawaAlgebra 𝒪) M
 (CS06, App. A.1, Prop 1; RJW TeX 3679–3681): given `0 → M' → M → M'' → 0` with
 `M', M, M''` finitely generated torsion `Λ`-modules,
 `Ch_Λ(M) = Ch_Λ(M') · Ch_Λ(M'')`. -/
-theorem charIdeal_mul_of_exact
+theorem charIdeal_mul_of_exact [IsDomain 𝒪] [IsPrincipalIdealRing 𝒪]
     (hM : Module.IsTorsion (IwasawaAlgebra 𝒪) M)
     (hM' : Module.IsTorsion (IwasawaAlgebra 𝒪) M')
     (hM'' : Module.IsTorsion (IwasawaAlgebra 𝒪) M'')
@@ -153,6 +153,22 @@ theorem charIdeal_mul_of_exact
     (hf : Function.Injective f) (hg : Function.Surjective g)
     (hfg : LinearMap.range f = LinearMap.ker g) :
     charIdeal 𝒪 M hM = charIdeal 𝒪 M' hM' * charIdeal 𝒪 M'' hM'' := by
-  sorry
+  have hexact : Function.Exact f g := LinearMap.exact_iff.mpr hfg.symm
+  -- at each height-one prime the exponents add: `localMult` is additive (`localMult_add_of_exact`)
+  -- and finite (`localMult_ne_top`), so `.toNat` is additive
+  have hadd : ∀ P : {P : Ideal (IwasawaAlgebra 𝒪) // P.IsPrime ∧ P.height = 1},
+      (letI : P.1.IsPrime := P.2.1; P.1 ^ (localMult 𝒪 P.1 M).toNat)
+        = (letI : P.1.IsPrime := P.2.1; P.1 ^ (localMult 𝒪 P.1 M').toNat)
+          * (letI : P.1.IsPrime := P.2.1; P.1 ^ (localMult 𝒪 P.1 M'').toNat) := by
+    rintro ⟨P, hP, hP1⟩
+    haveI := hP
+    rw [← pow_add, localMult_add_of_exact 𝒪 P f g hf hg hexact,
+      ENat.toNat_add (localMult_ne_top 𝒪 P hP1 M' hM') (localMult_ne_top 𝒪 P hP1 M'' hM'')]
+  have hfs' : (Function.mulSupport fun P : {P : Ideal (IwasawaAlgebra 𝒪) // P.IsPrime ∧ P.height = 1} =>
+      letI : P.1.IsPrime := P.2.1; P.1 ^ (localMult 𝒪 P.1 M').toNat).Finite := sorry
+  have hfs'' : (Function.mulSupport fun P : {P : Ideal (IwasawaAlgebra 𝒪) // P.IsPrime ∧ P.height = 1} =>
+      letI : P.1.IsPrime := P.2.1; P.1 ^ (localMult 𝒪 P.1 M'').toNat).Finite := sorry
+  rw [charIdeal, charIdeal, charIdeal, ← finprod_mul_distrib hfs' hfs'']
+  exact finprod_congr hadd
 
 end Iwasawa
