@@ -15,7 +15,7 @@ follow that section.
   carries its own dev ticket system.
 - **Two ticket systems.** *Dev tickets* (per project, on its `dev/<project>` branch) track new
   math. *Cleanup tickets* (on `main`) are **GitHub issues labelled by lane** (see **Worker system**
-  below) and track dedup / golf / style / sorry-discharge / cross-linking / generalisation /
+  below) and track dedup / golf / style / cross-linking / generalisation /
   proof-decomposition. The handoff between them is **merging a dev branch into `main`**.
 
 ## Your working copy — all workers share ONE clone on this machine
@@ -52,8 +52,9 @@ You are on a `dev/<project>` branch, editing `projects/<YourProject>/`.
 
 ## If you are a CLEANER (the fleet, on `main`)
 You are working an AINTLIB cleanup ticket.
-- Deduplicate across projects, golf, apply mathlib style, discharge `sorry`s where the work is
-  mechanical, cross-link consumers, and repair daily-bump fallout.
+- Deduplicate across projects, golf, apply mathlib style, generalise, decompose long proofs, cross-link
+  consumers, and repair daily-bump fallout. **Leave `sorry`s alone** — they are the owning producer's WIP,
+  never fleet work (only operate on sorry-free results).
 - **Keep `main` green.** **Never** change a theorem/def statement to make something pass, and
   **never** add `sorry`/`admit`. If a `sorry` needs genuine new math, file a *dev* ticket to the
   owning project instead of forcing it.
@@ -82,7 +83,9 @@ tickets are **GitHub issues** on `CBirkbeck/AINTLIB`, labelled by lane + state. 
 2. **Claim (atomic)** — `gh issue list --label lane:<mine> --label state:todo`, pick an unassigned one,
    `gh issue edit <n> --add-assignee @me`, relabel `state:todo`→`state:in-progress`. (Assignment is atomic;
    if two workers race, only one wins — the other re-queries.)
-3. **Work** — branch `<lane>/<issue#>` off the latest `origin/main` in your worktree; run your skill on the target.
+3. **Work** — branch `<lane>/<issue#>` off the latest `origin/main` in your worktree; run your skill on the
+   target. **Skip any target whose proof contains a `sorry`** (comment, return it to `state:todo`) — `sorry`s
+   are the owning producer's WIP, never fleet work.
 4. **Verify (the bar)** — `lake build` green, **zero new `sorry`**, `#print axioms` unchanged
    (only `propext` / `Classical.choice` / `Quot.sound`).
 5. **Merge** — re-check freeze; `git fetch origin main`, rebase if it moved, re-verify; push + open a PR. Then:

@@ -21,7 +21,9 @@ Loop until your lane is empty or a freeze is active:
    `gh issue edit <n> --repo CBirkbeck/AINTLIB --add-assignee @me --add-label state:in-progress --remove-label state:todo`,
    then comment "claimed". If already assigned, re-query.
 3. **Work.** `git fetch origin main`; branch `generalise/<n>` off `origin/main`. Read the issue body for
-   the target declaration(s)/file. Run **`/generalise`** on that target.
+   the target declaration(s)/file. **If the target's proof contains a `sorry`, skip it** — comment,
+   relabel back to `state:todo`, unassign — `sorry`s are the owning producer's WIP, never fleet work.
+   Otherwise run **`/generalise`** on that target.
 4. **Verify (hard bar):** `lake build <lib>` green; **zero new `sorry`**; `#print axioms` unchanged
    (only `propext` / `Classical.choice` / `Quot.sound`); **every prior consumer of the declaration still
    compiles** (you generalised, so the old statement must follow from the new one). If you can't meet the
