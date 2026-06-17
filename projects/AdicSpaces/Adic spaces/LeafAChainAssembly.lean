@@ -222,6 +222,46 @@ theorem chainStep_invariant (u : Aˣ) (sB c : A)
     genPieceDatum_s, genPieceDatum_T]
   exact Finset.mul_mem_mul (Finset.mem_insert_of_mem hmem) (Finset.mem_insert_self _ _)
 
+/-- The fold's `rationalOpen` shrinks: `R(foldl gens D₀) ⊆ R(D₀)` (each step is an intersection). -/
+theorem foldl_chainStep_subset (u : Aˣ) (sB : A) (gens : List A) (D₀ : RationalLocData A) :
+    rationalOpen (gens.foldl (chainStep u sB) D₀).T (gens.foldl (chainStep u sB) D₀).s ⊆
+      rationalOpen D₀.T D₀.s := by
+  induction gens generalizing D₀ with
+  | nil => exact subset_refl _
+  | cons g gs ih =>
+    exact (ih (chainStep u sB D₀ g)).trans
+      (RationalLocData.interSamePair_subset_left D₀
+        (genPieceDatum D₀.P {g, (↑u : A)} sB (span_pair_unit_eq_top g u)) rfl)
+
+/-- **The Remark-7.55 fold (list-induction core).** Folding `chainStep` over `gens` keeps `𝒪(foldl)`
+flat over `𝒪(D₀)`: each step is `flat_chainStep_domUnit` (the `CompatiblePlusSubring`-free domUnit
+step, whose `hs_unit`/`h_pb` are discharged structurally from the carried invariant `D₀.s = sB·c ∧
+↑u·c ∈ D₀.T`), composed by `restrictionMap_flat_trans`; the invariant propagates by
+`chainStep_invariant`. No added hypothesis on the headline — `c` is the cofactor witness, discharged
+at the call site (`c = 1` for `X₀`). -/
+theorem flat_domUnit_listFold
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    (u : Aˣ) (sB : A) (gens : List A) (D₀ : RationalLocData A) (c : A)
+    (hs : D₀.s = sB * c) (hmem : (↑u : A) * c ∈ D₀.T) :
+    @Module.Flat (presheafValue D₀) (presheafValue (gens.foldl (chainStep u sB) D₀)) _ _
+      (restrictionMapHom D₀ (gens.foldl (chainStep u sB) D₀)
+        (foldl_chainStep_subset u sB gens D₀)).toModule := by
+  induction gens generalizing D₀ c with
+  | nil => exact restrictionMapHom_refl_flat D₀ (foldl_chainStep_subset u sB [] D₀)
+  | cons g gs ih =>
+    obtain ⟨hs', hmem'⟩ := chainStep_invariant u sB c D₀ g hs hmem
+    exact restrictionMap_flat_trans D₀ (chainStep u sB D₀ g)
+      (gs.foldl (chainStep u sB) (chainStep u sB D₀ g))
+      (RationalLocData.interSamePair_subset_left D₀
+        (genPieceDatum D₀.P {g, (↑u : A)} sB (span_pair_unit_eq_top g u)) rfl)
+      (foldl_chainStep_subset u sB gs (chainStep u sB D₀ g))
+      (flat_chainStep_domUnit D₀ g sB (↑u) (span_pair_unit_eq_top g u)
+        (canonicalMap_isUnit_of_dvd_s D₀ sB c hs)
+        (domUnit_invDenom_mem_completedPlus_general D₀ (↑u) sB c hs hmem))
+      (ih (chainStep u sB D₀ g) (c * sB) hs' hmem')
+
 /-- **Whole-space Prop 8.30 (Remark 7.55 chain), assembled downstream.**
 `𝒪_B(im E)` is flat over `B = 𝒪_X(D)`, for `im E = imagePieceDatum D E.T E.s` the whole-space
 image of a `span = ⊤` rational piece. Proven by folding `flat_chainStep_domUnit` over `E.T`'s
