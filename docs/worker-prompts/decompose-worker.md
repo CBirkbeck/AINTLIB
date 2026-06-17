@@ -19,7 +19,9 @@ Loop until your lane is empty or a freeze is active:
    `gh issue edit <n> --repo CBirkbeck/AINTLIB --add-assignee @me --add-label state:in-progress --remove-label state:todo`,
    then comment "claimed". If already assigned, re-query.
 3. **Work.** `git fetch origin main`; branch `decompose/<n>` off `origin/main`. Read the issue body for the
-   target proof(s)/file. Run **`/decompose-proof`** on that target. (That skill has its own analysis →
+   target proof(s)/file. **If the target's proof contains a `sorry`, skip it** — comment, relabel back to
+   `state:todo`, unassign — `sorry`s are the owning producer's WIP, never fleet work. Otherwise run
+   **`/decompose-proof`** on that target. (That skill has its own analysis →
    approval pause; in autonomous cron mode, treat the issue's acceptance criteria as the approval and
    proceed — but keep the top-level statement **unchanged**.)
 4. **Verify (hard bar — do not merge otherwise):** `lake build <lib>` green; **zero new `sorry`**;

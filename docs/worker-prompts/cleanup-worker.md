@@ -18,7 +18,9 @@ Loop until your lane is empty or a freeze is active:
    `gh issue edit <n> --repo CBirkbeck/AINTLIB --add-assignee @me --add-label state:in-progress --remove-label state:todo`,
    then comment "claimed". If the edit shows it's already assigned, re-query (someone beat you).
 3. **Work.** `git fetch origin main`; create branch `cleanup/<n>` off `origin/main`. Read the issue body
-   for the target declaration(s)/file. Run **`/cleanup`** on that target.
+   for the target declaration(s)/file. **If the target's proof contains a `sorry`, skip it** — comment,
+   relabel `state:in-progress`→`state:todo`, unassign — `sorry`s are the owning producer's WIP, never
+   fleet work. Otherwise run **`/cleanup`** on that target.
 4. **Verify (hard bar — do not merge otherwise):** `lake build <lib>` green; **zero new `sorry`**;
    `#print axioms` on the touched declarations shows only `propext` / `Classical.choice` / `Quot.sound`.
    If you can't meet the bar, comment why, relabel `state:in-progress`→`state:todo`, unassign, move on.
