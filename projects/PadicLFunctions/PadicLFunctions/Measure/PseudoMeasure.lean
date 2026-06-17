@@ -397,11 +397,7 @@ lemma levelMap_smul (n : ℕ) (c : ℤ_[p]) (μ : PadicMeasure p ℤ_[p]ˣ) :
       = c • ∑ g : (ZMod (p ^ n))ˣ, MonoidAlgebra.single g (μ (levelChar p n g))
   rw [Finset.smul_sum]
   refine Finset.sum_congr rfl fun g _ => ?_
-  rw [LinearMap.smul_apply, smul_eq_mul]
-  rw [show c • (MonoidAlgebra.single g (μ (levelChar p n g)) :
-      MonoidAlgebra ℤ_[p] (ZMod (p ^ n))ˣ)
-      = MonoidAlgebra.single g (c • μ (levelChar p n g)) from
-    MonoidAlgebra.smul_single c g _, smul_eq_mul]
+  rw [LinearMap.smul_apply, smul_eq_mul, MonoidAlgebra.smul_single, smul_eq_mul]
 
 /-- Compatibility of the reductions: level `n` factors through any level `m ≥ n`. -/
 lemma unitsToZModPow_le {n m : ℕ} (h : n ≤ m) (a : ℤ_[p]ˣ) :
@@ -577,9 +573,8 @@ lemma single_sub_one_mem_span {n : ℕ} {gbar : (ZMod (p ^ n))ˣ}
     (hg : Subgroup.zpowers gbar = ⊤) (c : (ZMod (p ^ n))ˣ) :
     (MonoidAlgebra.single c 1 - 1 : MonoidAlgebra ℤ_[p] (ZMod (p ^ n))ˣ)
       ∈ Ideal.span {MonoidAlgebra.single gbar 1 - 1} := by
-  obtain ⟨k, hk⟩ : ∃ k : ℕ, gbar ^ k = c := by
-    have hmem : c ∈ Subgroup.zpowers gbar := hg ▸ Subgroup.mem_top c
-    exact mem_powers_iff_mem_zpowers.2 hmem
+  obtain ⟨k, hk⟩ : ∃ k : ℕ, gbar ^ k = c :=
+    mem_powers_iff_mem_zpowers.2 (hg ▸ Subgroup.mem_top c)
   subst hk
   induction k with
   | zero =>
@@ -1058,8 +1053,7 @@ theorem isPseudoMeasure_iff_exists {a : ℤ_[p]ˣ}
     obtain ⟨ν, hν⟩ := hq a
     refine ⟨ν, ?_⟩
     rw [IsLocalization.eq_mk'_iff_mul_eq]
-    rw [mul_comm] at hν
-    exact hν
+    rwa [mul_comm] at hν
   · rintro ⟨μ, rfl⟩
     exact isPseudoMeasure_mk' p ha hreg μ
 
