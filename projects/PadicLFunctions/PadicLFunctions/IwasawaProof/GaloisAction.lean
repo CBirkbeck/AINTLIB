@@ -57,7 +57,7 @@ theorem zetaSys_pow_eq_pow_of_modEq {n i j : ℕ} (h : i ≡ j [MOD p ^ n]) :
   have hζuprim : IsPrimitiveRoot ζu (p ^ n) := by
     rw [← IsPrimitiveRoot.coe_units_iff, hζuval]; exact zetaSys_primitiveRoot p n
   have hu : ζu ^ i = ζu ^ j := by
-    rw [pow_eq_pow_iff_modEq, ← hζuprim.eq_orderOf]; exact h
+    rwa [pow_eq_pow_iff_modEq, ← hζuprim.eq_orderOf]
   have := congrArg (Units.val) hu
   rwa [Units.val_pow_eq_pow_val, Units.val_pow_eq_pow_val, hζuval] at this
 
@@ -85,7 +85,7 @@ theorem autToPow_zetaSys_eq {n : ℕ} (f : (K p n) ≃ₐ[ℚ_[p]] (K p n)) :
   set m' := hζ.autToPow ℚ_[p] f with hm'
   obtain ⟨c, _, hc⟩ := hξ.eq_pow_of_pow_eq_one hζ.pow_eq_one
   have hcop : Nat.Coprime c (p ^ n) := by
-    rw [← hξ.pow_iff_coprime (pow_pos hp.out.pos n) c, hc]; exact hζ
+    rwa [← hξ.pow_iff_coprime (pow_pos hp.out.pos n) c, hc]
   have hspecξ : ζξ ^ (m : ZMod (p ^ n)).val = f ζξ := hξ.autToPow_spec ℚ_[p] f
   have hspecζ : (zeta (p ^ n) ℚ_[p] (K p n)) ^ (m' : ZMod (p ^ n)).val = f (zeta _ _ _) :=
     hζ.autToPow_spec ℚ_[p] f
@@ -107,7 +107,7 @@ theorem autToPow_zetaSys_eq {n : ℕ} (f : (K p n) ≃ₐ[ℚ_[p]] (K p n)) :
   rw [pow_eq_pow_iff_modEq, ← hζuprim.eq_orderOf, ← ZMod.natCast_eq_natCast_iff] at hpowU
   push_cast at hpowU
   have hcunit : IsUnit (c : ZMod (p ^ n)) := by
-    rw [ZMod.isUnit_iff_coprime]; exact hcop
+    rwa [ZMod.isUnit_iff_coprime]
   have hvaleq : ((m : ZMod (p ^ n)).val : ZMod (p ^ n))
       = ((m' : ZMod (p ^ n)).val : ZMod (p ^ n)) :=
     hcunit.mul_left_cancel hpowU
@@ -201,7 +201,7 @@ private theorem adjoin_zetaSysK_eq_top (n : ℕ) :
     exact hy
   obtain ⟨z, hz, hzy⟩ := hmap
   have hzeq : (⟨y, hy⟩ : K p n) = z := Subtype.ext hzy.symm
-  rw [hzeq]; exact hz
+  rwa [hzeq]
 
 /-- **`σ_{-1}` has order `2`** (RJW §12, `p` odd, `n ≥ 1`): it is an involution
 (`σ_{-1}^2 = id` since `(-1)·(-1) = 1`) and is non-trivial (`σ_{-1}(ξ) = ξ⁻¹ ≠ ξ`). -/
@@ -547,10 +547,9 @@ theorem levelNorm_galAut (a : ℤ_[p]ˣ) {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]}
     rw [levelNorm_apply p n hgalmem]
     congr 1
   have hrhsK : (⟨levelNorm p n x, levelNorm_mem p n hx⟩ : K p n)
-      = Algebra.norm (K p n) xes := by
-    apply Subtype.ext; exact levelNorm_apply p n hx
+      = Algebra.norm (K p n) xes :=
+    Subtype.ext (levelNorm_apply p n hx)
   rw [hlhs, ← hkey2, he]
-  -- both sides are `galAut p a n` applied to the same `K_n`-element `norm xes`
   change (galAut p a n (Algebra.norm (K p n) xes) : ℂ_[p])
     = (galAut p a n ⟨levelNorm p n x, levelNorm_mem p n hx⟩ : ℂ_[p])
   rw [hrhsK]
