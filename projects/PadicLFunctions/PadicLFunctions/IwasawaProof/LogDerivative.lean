@@ -207,18 +207,14 @@ private theorem del_one_add_X_pow (j : ℕ) :
       = (j : PowerSeries ℤ_[p]) * (1 + PowerSeries.X) ^ j := by
   have hDoneX : derivativeFun (1 + PowerSeries.X : PowerSeries ℤ_[p]) = 1 := by
     rw [derivativeFun_add, derivativeFun_one, zero_add]; exact derivative_X
-  rw [PadicMeasure.del]
-  induction j with
-  | zero => simp [derivativeFun_one]
-  | succ a ih =>
-    rw [pow_succ, derivativeFun_mul, hDoneX, smul_eq_mul, smul_eq_mul, mul_one]
-    have hpow : (1 + PowerSeries.X) * ((1 + PowerSeries.X) ^ a
-        + (1 + PowerSeries.X) * derivativeFun ((1 + PowerSeries.X : PowerSeries ℤ_[p]) ^ a))
-        = (1 + PowerSeries.X) ^ (a + 1) + (1 + PowerSeries.X)
-          * ((1 + PowerSeries.X) * derivativeFun ((1 + PowerSeries.X) ^ a)) := by
-      rw [pow_succ]; ring
-    rw [hpow, mul_left_comm (1 + PowerSeries.X) (1 + PowerSeries.X) (derivativeFun _), ih]
-    push_cast; ring
+  rw [PadicMeasure.del,
+    show derivativeFun ((1 + PowerSeries.X : PowerSeries ℤ_[p]) ^ j)
+      = d⁄dX ℤ_[p] ((1 + PowerSeries.X) ^ j) from rfl, derivative_pow,
+    show d⁄dX ℤ_[p] (1 + PowerSeries.X : PowerSeries ℤ_[p]) = derivativeFun (1 + PowerSeries.X)
+      from rfl, hDoneX, mul_one]
+  cases j with
+  | zero => simp
+  | succ a => rw [Nat.add_sub_cancel]; push_cast; ring
 
 /-- `Δ(φg) = p·φ(Δg)` in the additive `Δ = del` form (the `del`-shaped `del_phiHom`). -/
 private theorem del_phiSeries (g : PowerSeries ℤ_[p]) :
@@ -339,12 +335,11 @@ private theorem del_det_eq_smul_trace {n : ℕ}
       = M.det • Matrix.trace ((M.map (PadicMeasure.del p)) * N) := by
   rw [PadicMeasure.del,
     show M.det.derivativeFun = (PowerSeries.derivative ℤ_[p]) M.det from rfl,
-    derivation_det (PowerSeries.derivative ℤ_[p]) M, Finset.mul_sum]
-  rw [Finset.sum_congr rfl (fun i _ => del_row_smul p M i)]
-  rw [Finset.sum_congr rfl (fun i _ => det_updateRow_eq_sum_adjugate M i
-    (fun j => PadicMeasure.del p (M i j)))]
-  rw [adjugate_eq_det_smul_inv p M N hNM]
-  rw [Matrix.trace]
+    derivation_det (PowerSeries.derivative ℤ_[p]) M, Finset.mul_sum,
+    Finset.sum_congr rfl (fun i _ => del_row_smul p M i),
+    Finset.sum_congr rfl (fun i _ => det_updateRow_eq_sum_adjugate M i
+      (fun j => PadicMeasure.del p (M i j))),
+    adjugate_eq_det_smul_inv p M N hNM, Matrix.trace]
   simp only [Matrix.diag_apply, Matrix.mul_apply, Matrix.map_apply, Matrix.smul_apply,
     smul_eq_mul, Finset.mul_sum]
   exact Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => by ring))
@@ -360,11 +355,7 @@ private theorem trace_D_N_zero {n : ℕ} (M N : Matrix (Fin n) (Fin n) (PowerSer
     (hMN : M * N = 1) (hNM : N * M = 1) :
     ∑ i : Fin n, ∑ k : Fin n,
       ((i : ℤ_[p]) - (k : ℤ_[p])) • (M i k * N k i) = 0 := by
-  have hexp : ∀ i k : Fin n, ((i : ℤ_[p]) - (k : ℤ_[p])) • (M i k * N k i)
-      = (i : ℤ_[p]) • (M i k * N k i) - (k : ℤ_[p]) • (M i k * N k i) :=
-    fun i k => sub_smul _ _ _
-  rw [Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun k _ => hexp i k))]
-  simp only [Finset.sum_sub_distrib]
+  simp only [sub_smul, Finset.sum_sub_distrib]
   have hA : (∑ i : Fin n, ∑ k : Fin n, (i : ℤ_[p]) • (M i k * N k i))
       = ∑ i : Fin n, (i : ℤ_[p]) • (1 : PowerSeries ℤ_[p]) := by
     refine Finset.sum_congr rfl (fun i _ => ?_)
@@ -386,9 +377,7 @@ private theorem mul_p_cancel {a b : PowerSeries ℤ_[p]}
     (h : (p : PowerSeries ℤ_[p]) * a = (p : PowerSeries ℤ_[p]) * b) : a = b := by
   have hp0 : (p : PowerSeries ℤ_[p]) ≠ 0 := by
     rw [show (p : PowerSeries ℤ_[p]) = PowerSeries.C (p : ℤ_[p]) from by rw [map_natCast]]
-    intro hc
-    exact (by exact_mod_cast hp.out.ne_zero : (p : ℤ_[p]) ≠ 0)
-      (PowerSeries.C_injective (by rw [hc, map_zero]))
+    exact (map_ne_zero_iff _ PowerSeries.C_injective).mpr (Nat.cast_ne_zero.mpr hp.out.ne_zero)
   exact mul_left_cancel₀ hp0 h
 
 /-- **RJW lem:log der 1 (TeX 3292–3306)**: `Δ(𝒲) ⊆ ℤ_p⟦T⟧^{ψ=id}`, where
@@ -427,9 +416,7 @@ theorem dlog_mem_psiIdSeries {f : PowerSeries ℤ_[p]} (hf : IsUnit f) (hN : nor
     rw [Matrix.trace]
     simp only [Matrix.diag_apply, Matrix.mul_apply]
     rw [Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun k _ => by
-      rw [show digitMatrix (PadicMeasure.del p f) i k
-          = digitMatrix (PadicMeasure.del p f) i k from rfl,
-        digitMatrix_del p f i k, ← hM]))]
+      rw [digitMatrix_del p f i k, ← hM]))]
     rw [show (∑ i : Fin p, ∑ k : Fin p,
           (((i : ℤ_[p]) - (k : ℤ_[p])) • M i k
             + (p : PowerSeries ℤ_[p]) * PadicMeasure.del p (M i k)) * N k i)
@@ -949,9 +936,7 @@ private theorem digits_unique_zmod {G H : Fin p → PowerSeries (ZMod p)}
   -- `(1+T)^j E_j = 0` and `1+T` a unit give `E_j = 0`, i.e. `φ(G_j) = φ(H_j)`
   have hunit : IsUnit ((1 + PowerSeries.X : PowerSeries (ZMod p)) ^ (j : ℕ)) := by
     refine IsUnit.pow _ ?_; rw [PowerSeries.isUnit_iff_constantCoeff]; simp
-  have hEj : E j = 0 := by
-    have h2 := congrArg (Ring.inverse ((1 + PowerSeries.X) ^ (j : ℕ)) * ·) hisolate
-    simpa only [mul_zero, ← mul_assoc, Ring.inverse_mul_cancel _ hunit, one_mul] using h2
+  have hEj : E j = 0 := hunit.mul_right_eq_zero.mp hisolate
   have hphi : phiSeries p (G j) = phiSeries p (H j) := sub_eq_zero.1 (hEval j ▸ hEj)
   -- `φ` is injective over `ZMod p` (it is the Frobenius `g ↦ g^p`)
   haveI : CharP (PowerSeries (ZMod p)) p := charP_of_injective_algebraMap' (ZMod p) p
@@ -1136,13 +1121,8 @@ private theorem psiId_one_add_X_div_X_phi_eq_zero {b c : PowerSeries (ZMod p)}
   have heq2 : e * (1 + PowerSeries.X)
       = (1 + PowerSeries.X) * (PowerSeries.X ^ (p - 1) * phiSeries p e) := by
     rw [← hpsib, hbform]; ring
-  rcases hunit.exists_left_inv with ⟨u, hu⟩
-  have hecancel : e = PowerSeries.X ^ (p - 1) * phiSeries p e := by
-    calc e = u * (1 + PowerSeries.X) * e := by rw [hu, one_mul]
-      _ = u * (e * (1 + PowerSeries.X)) := by ring
-      _ = u * ((1 + PowerSeries.X) * (PowerSeries.X ^ (p - 1) * phiSeries p e)) := by rw [heq2]
-      _ = u * (1 + PowerSeries.X) * (PowerSeries.X ^ (p - 1) * phiSeries p e) := by ring
-      _ = PowerSeries.X ^ (p - 1) * phiSeries p e := by rw [hu, one_mul]
+  have hecancel : e = PowerSeries.X ^ (p - 1) * phiSeries p e :=
+    hunit.mul_right_inj.mp (by rw [mul_comm (1 + PowerSeries.X) e]; exact heq2)
   have he0 : e = 0 :=
     eq_zero_of_eq_X_pow_mul_pow p (hecancel.trans (by rw [phiSeries_eq_pow_zmod]))
   -- `e = 0 ⟹ d = 0 ⟹ c = 0 ⟹ b = 0`
@@ -1239,12 +1219,9 @@ private theorem exists_approx_step {f : PowerSeries ℤ_[p]} (hf : psiSeries p f
   -- `C(p)·(ψ f' − f') = 0`, and `C(p)` is a non-zero-divisor, so `ψ f' = f'`
   have hpz : PowerSeries.C (p : ℤ_[p]) * (psiSeries p f' - f') = 0 := by
     rw [mul_sub, hdiff, sub_self]
-  have hpne : (PowerSeries.C (p : ℤ_[p]) : PowerSeries ℤ_[p]) ≠ 0 := by
-    rw [Ne, ← map_zero (PowerSeries.C (R := ℤ_[p]))]
-    exact fun h => (Nat.cast_ne_zero.mpr hp.out.ne_zero) (PowerSeries.C_injective h)
-  rcases mul_eq_zero.1 hpz with h | h
-  · exact absurd h hpne
-  · exact sub_eq_zero.1 h
+  have hpne : (PowerSeries.C (p : ℤ_[p]) : PowerSeries ℤ_[p]) ≠ 0 :=
+    (map_ne_zero_iff _ PowerSeries.C_injective).mpr (Nat.cast_ne_zero.mpr hp.out.ne_zero)
+  exact sub_eq_zero.1 ((mul_eq_zero.1 hpz).resolve_left hpne)
 
 /-- The successive-approximation sequences (`lem:log der red mod p`): `gₙ ∈ 𝒲`, `fₙ ∈ (ψ=id)`,
 `f₀ = F`, and `Δ(g_{n+1}) = f_n + p·f_{n+1}` for all `n`. -/
@@ -1287,10 +1264,8 @@ private theorem normOp_inverse {g : PowerSeries ℤ_[p]} (hg : IsUnit g) (h : no
     have h1 : normOp (Ring.inverse g) * normOp g = 1 := by
       rw [← normOp_mul, Ring.inverse_mul_cancel _ hg, normOp_one]
     rwa [h] at h1
-  calc normOp (Ring.inverse g) = normOp (Ring.inverse g) * (g * Ring.inverse g) := by
-          rw [Ring.mul_inverse_cancel _ hg, mul_one]
-    _ = (normOp (Ring.inverse g) * g) * Ring.inverse g := by ring
-    _ = Ring.inverse g := by rw [hu, one_mul]
+  nth_rewrite 2 [← one_mul (Ring.inverse g)]
+  rw [← hu, mul_assoc, Ring.mul_inverse_cancel _ hg, mul_one]
 
 /-- The `n`-th factor `g_{n+1}^{(−1)ⁿ pⁿ}` of `hₙ = ∏_{k=1}^n g_k^{(−1)^{k−1}p^{k−1}}`
 (the negative-sign factors realised by `Ring.inverse`). -/
@@ -1445,9 +1420,8 @@ private theorem digitMatrix_eq_symm (f : PowerSeries ℤ_[p]) (j : Fin p) :
 theorem digitMatrix_continuous (i j : Fin p) :
     Continuous (fun f : PowerSeries ℤ_[p] => digitMatrix f i j) := by
   rw [show (fun f : PowerSeries ℤ_[p] => digitMatrix f i j)
-      = fun f => (digitHomeo p).symm (f * (1 + PowerSeries.X) ^ (j : ℕ)) i from by
-    funext f; rw [show digitMatrix f i j = (fun i => digitMatrix f i j) i from rfl,
-      digitMatrix_eq_symm p f j]]
+      = fun f => (digitHomeo p).symm (f * (1 + PowerSeries.X) ^ (j : ℕ)) i from
+    funext fun f => congrFun (digitMatrix_eq_symm p f j) i]
   exact (continuous_apply i).comp ((digitHomeo p).symm.continuous.comp
     (continuous_id.mul continuous_const))
 
@@ -1539,9 +1513,7 @@ theorem dlog_surjective_onto_psiId {F : PowerSeries ℤ_[p]} (hF : F ∈ psiIdSe
       refine squeeze_zero (fun j => norm_nonneg _) (fun j => ?_)
         (g := fun j => ((p : ℝ)⁻¹) ^ (φ j)) ?_
       · rw [norm_mul, norm_pow, norm_neg, PadicInt.norm_p]
-        calc (p : ℝ)⁻¹ ^ (φ j) * ‖PowerSeries.coeff m (fseq (φ j))‖
-            ≤ (p : ℝ)⁻¹ ^ (φ j) * 1 := by gcongr; exact PadicInt.norm_le_one _
-          _ = (p : ℝ)⁻¹ ^ (φ j) := mul_one _
+        exact mul_le_of_le_one_right (by positivity) (PadicInt.norm_le_one _)
       · exact (tendsto_pow_atTop_nhds_zero_of_lt_one (by positivity)
           (inv_lt_one_of_one_lt₀ (by exact_mod_cast hp.out.one_lt))).comp hφmono.tendsto_atTop
     -- RHS `(F − (−p)^{φj} f_{φj})·h_{φj} → F·h`
@@ -1574,12 +1546,7 @@ private theorem eq_C_constantCoeff_of_derivativeFun_zero (g : PowerSeries ℤ_[p
     rw [PowerSeries.coeff_C, if_neg (Nat.succ_ne_zero m)]
     have hcoeff := congrArg (PowerSeries.coeff m) h
     rw [PowerSeries.coeff_derivativeFun, map_zero] at hcoeff
-    have hne : ((m : ℤ_[p]) + 1) ≠ 0 := by
-      have : ((m + 1 : ℕ) : ℤ_[p]) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.succ_ne_zero m)
-      push_cast at this; exact this
-    rcases mul_eq_zero.mp hcoeff with h1 | h2
-    · exact h1
-    · exact absurd h2 hne
+    exact (mul_eq_zero.mp hcoeff).resolve_right (Nat.cast_add_one_ne_zero m)
 
 /-- `𝒩(C c) = C (c^p)`: the digit matrix of a constant is the scalar `C c • 1`, so its
 determinant (`= 𝒩`) is `(C c)^p = C (c^p)`. -/
@@ -1598,13 +1565,11 @@ theorem dlog_eq_zero_normOp_fixed {g : PowerSeries ℤ_[p]} (hg : IsUnit g)
   -- `dlog g = (1+X)·g'·g⁻¹ = 0`; cancel the two units `(1+X)` and `Ring.inverse g`
   have hgz : PowerSeries.derivativeFun g = 0 := by
     have hd' : (1 + PowerSeries.X) * PowerSeries.derivativeFun g * Ring.inverse g = 0 := hd
-    have hmulg : (1 + PowerSeries.X) * PowerSeries.derivativeFun g
-        * (Ring.inverse g * g) = 0 := by rw [← mul_assoc, hd', zero_mul]
-    rw [Ring.inverse_mul_cancel _ hg, mul_one] at hmulg
-    rcases hunit1.exists_left_inv with ⟨u, hu⟩
-    have := congrArg (fun x => u * x) hmulg
-    simp only [mul_zero, ← mul_assoc, hu, one_mul] at this
-    exact this
+    rw [mul_eq_zero, mul_eq_zero] at hd'
+    rcases hd' with (h1 | h2) | h3
+    · exact absurd h1 hunit1.ne_zero
+    · exact h2
+    · exact absurd h3 (isUnit_ringInverse.mpr hg).ne_zero
   set c := PowerSeries.constantCoeff (R := ℤ_[p]) g with hc
   have hgC : g = PowerSeries.C c := eq_C_constantCoeff_of_derivativeFun_zero p g hgz
   refine ⟨c, ?_, hgC⟩
@@ -1627,24 +1592,8 @@ applying `ψ` (using `ψ φ = id` and `ψ F = 0`). -/
 the constant coefficient (`[T¹]f = [T⁰](∂f)`). -/
 private theorem coeff_one_one_add_X_pow :
     PowerSeries.coeff 1 ((1 + PowerSeries.X : PowerSeries ℤ_[p]) ^ p) = (p : ℤ_[p]) := by
-  have hDoneX : derivativeFun (1 + PowerSeries.X : PowerSeries ℤ_[p]) = 1 := by
-    rw [derivativeFun_add, derivativeFun_one, zero_add]; exact derivative_X
-  have key : ∀ a : ℕ, (1 + PowerSeries.X)
-      * derivativeFun ((1 + PowerSeries.X : PowerSeries ℤ_[p]) ^ a)
-      = (a : PowerSeries ℤ_[p]) * (1 + PowerSeries.X) ^ a := by
-    intro a
-    induction a with
-    | zero => simp [derivativeFun_one]
-    | succ a ih =>
-      rw [pow_succ, derivativeFun_mul, hDoneX, smul_eq_mul, smul_eq_mul, mul_one]
-      have hpow : (1 + PowerSeries.X) * ((1 + PowerSeries.X) ^ a
-          + (1 + PowerSeries.X) * derivativeFun ((1 + PowerSeries.X : PowerSeries ℤ_[p]) ^ a))
-          = (1 + PowerSeries.X) ^ (a + 1) + (1 + PowerSeries.X)
-            * ((1 + PowerSeries.X) * derivativeFun ((1 + PowerSeries.X) ^ a)) := by
-        rw [pow_succ]; ring
-      rw [hpow, mul_left_comm (1 + PowerSeries.X) (1 + PowerSeries.X) (derivativeFun _), ih]
-      push_cast; ring
-  have h0 := congrArg (PowerSeries.coeff 0) (key p)
+  have h0 := congrArg (PowerSeries.coeff 0) (del_one_add_X_pow p p)
+  rw [PadicMeasure.del] at h0
   rw [show (1 + PowerSeries.X : PowerSeries ℤ_[p]) * derivativeFun ((1 + PowerSeries.X) ^ p)
       = derivativeFun ((1 + PowerSeries.X) ^ p)
         + PowerSeries.X * derivativeFun ((1 + PowerSeries.X) ^ p) from by ring,
@@ -1689,14 +1638,8 @@ formula, finite because `((1+T)^p − 1)^d` has order `d`). -/
 private theorem coeff_phiSeries_split (G : PowerSeries ℤ_[p]) (n : ℕ) :
     PowerSeries.coeff n (phiSeries p G)
       = ∑ d ∈ Finset.range (n + 1), (PowerSeries.coeff d G) •
-          PowerSeries.coeff n (((1 + PowerSeries.X) ^ p - 1 : PowerSeries ℤ_[p]) ^ d) := by
-  rw [phiSeries, PowerSeries.coeff_subst' (hasSubst_one_add_X_pow_sub_one p)]
-  refine finsum_eq_finsetSum_of_support_subset _ (fun d hd => ?_)
-  simp only [Function.mem_support] at hd
-  rw [Finset.coe_range, Set.mem_Iio]
-  by_contra hcon
-  push Not at hcon
-  exact hd (by rw [coeff_S_pow_vanish p (by omega), smul_zero])
+          PowerSeries.coeff n (((1 + PowerSeries.X) ^ p - 1 : PowerSeries ℤ_[p]) ^ d) :=
+  coeff_phiSeries_finite (p := p) G n
 
 /-- `1 − pⁿ` is a unit of `ℤ_[p]` for `n ≥ 1` (it is `1 − (maximal ideal element)`). -/
 private theorem isUnit_one_sub_p_pow {n : ℕ} (hn : 1 ≤ n) : IsUnit (1 - (p : ℤ_[p]) ^ n) := by
