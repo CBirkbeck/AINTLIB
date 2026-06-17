@@ -209,40 +209,51 @@ private lemma eigensystem_determines_char
     rw [hu]; exact hunit _ (ZMod.val_coe_unit_coprime u)
   exact_mod_cast hcast
 
-/-- **L3 (linear independence of distinct *multiplicative* eigensystems).**  *Isolated `sorry`.*
+/-- **L3 (linear independence of distinct Hecke eigensystems).**  *Isolated `sorry`.*
 
-A finite family of *multiplicative* eigensystems (`ev i : ℕ⁺ → ℂ`, the prime-to-level Hecke
-eigenvalues — each a multiplicative arithmetic function: `ev i 1 = 1` and
-`ev i (m·m') = ev i m · ev i m'` whenever `m, m'` are **mutually coprime** and both coprime to `N`)
-that are pairwise distinct at *some* coprime index is `ℂ`-linearly independent *as eigensystems*:
-any scalars `c` for which the eigensystem combination `∑ᵢ cᵢ · evᵢ(m)` vanishes at every coprime
-`m` must all vanish.
+A finite family `H i` of **nonzero common Hecke eigenfunctions** (each `H i` is a `T_m`-eigenvector
+for every index `m` coprime to `N`, with eigenvalue `ev i m`, recorded by `hev`) that are pairwise
+distinct at *some* coprime index (`h_distinct`) is `ℂ`-linearly independent *as eigensystems*: any
+scalars `c` for which the eigensystem combination `∑ᵢ cᵢ · evᵢ(m)` vanishes at every coprime `m`
+(`h_rel`) must all vanish.
 
-This is the classical fact that distinct multiplicative arithmetic functions (Hecke eigensystems)
-are `ℂ`-linearly independent — the eigenvalue-sequence form of the linear independence of distinct
-Hecke eigenforms.
-
-The multiplicativity hypotheses are essential: without them the statement is **false** (e.g.
-`ev₂ = ev₀ + ev₁` is distinct from both yet `1·ev₀ + 1·ev₁ - 1·ev₂ = 0`).  They are discharged in
-the assembly because the eigensystem of a common Hecke eigenfunction is multiplicative on mutually
-coprime indices (`T_{mm'} = T_m T_{m'}` for coprime `m, m'`, the cusp form analogue of
-`heckeT_n_mul_coprime`). -/
+This is the classical linear independence of distinct Hecke eigenforms, in its eigenvalue-sequence
+form.  Carrying the eigenfunction witnesses `H i` (rather than just the abstract multiplicative
+functions `ev i`) is **essential**: distinct *multiplicative arithmetic functions* alone are NOT
+`ℂ`-linearly independent (e.g. over one prime `p`, the multiplicative functions
+`f₁(p),f₂(p),f₃(p) = 1,2,3`, `f₁(p²),f₂(p²),f₃(p²) = 5,7,9`, all `= 1` elsewhere, satisfy
+`f₁ − 2f₂ + f₃ = 0`).  Real Hecke eigensystems additionally satisfy the prime-power recursion — they
+are characters of the Hecke algebra — which is what the eigenfunction witnesses supply. -/
 private lemma eigensystems_linearIndependent
-    {ι : Type} [Fintype ι] (ev : ι → ℕ+ → ℂ) (c : ι → ℂ)
-    (h_one : ∀ i : ι, ev i 1 = 1)
-    (h_mul : ∀ (i : ι) (m m' : ℕ+), Nat.Coprime m.val m'.val →
-      Nat.Coprime m.val N → Nat.Coprime m'.val N →
-      ev i (m * m') = ev i m * ev i m')
-    (h_distinct : ∀ i j : ι, i ≠ j → ∃ m : ℕ+, Nat.Coprime m.val N ∧ ev i m ≠ ev j m)
+    {ι : Type} [Fintype ι]
+    (H : ι → CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (hH_ne : ∀ i, H i ≠ 0)
+    (ev : ι → ℕ+ → ℂ)
+    (hev : ∀ i (m : ℕ+) (_ : NeZero m.val), Nat.Coprime m.val N →
+       heckeT_n_cusp k m.val (H i) = ev i m • H i)
+    (h_distinct : ∀ i j, i ≠ j → ∃ m : ℕ+, Nat.Coprime m.val N ∧ ev i m ≠ ev j m)
+    (c : ι → ℂ)
     (h_rel : ∀ m : ℕ+, Nat.Coprime m.val N → ∑ i, c i * ev i m = 0) :
     ∀ i, c i = 0 :=
-  -- MISSING INGREDIENT: linear independence of distinct *multiplicative arithmetic functions*
-  -- (Artin/Dedekind for multiplicative — NOT completely-multiplicative — functions).  The Artin
-  -- shift `∑ᵢ cᵢ(evᵢ(m₀)−evⱼ(m₀))evᵢ(m) = 0` (from `h_mul` at the separating index `m₀`) only holds
-  -- for `m` coprime to `m₀`, where pairwise distinctness is *not* preserved; closing the induction
-  -- needs prime-power separation bookkeeping (distinct multiplicative functions differ at some
-  -- prime power `pᵉ`, p∤N).  This abstract lemma is absent from mathlib and is genuine new
-  -- infrastructure; left as an honest `sorry` per scope.
+  -- MISSING INGREDIENT (one lemma): linear independence of distinct Hecke eigensystems FROM the
+  -- single-index relation — i.e. distinct multiplicative arithmetic functions that ALSO satisfy the
+  -- Hecke prime-power recursion are ℂ-linearly independent (the prime-power / Vandermonde separation
+  -- argument for such functions).  This is absent from mathlib and is genuine new infrastructure.
+  --
+  -- Why the natural Dedekind route does NOT close it cheaply here.  Each nonzero common eigenfunction
+  -- `H i` gives a character `χᵢ : 𝕋 →* ℂ` of the Hecke algebra `𝕋 ⊆ End ℂ (CuspForm …)`
+  -- (`χᵢ(T) = ` eigenvalue of `T` on `H i`), and `linearIndependent_monoidHom 𝕋 ℂ` (Dedekind) makes
+  -- the distinct `χᵢ` ℂ-linearly independent as functions `𝕋 → ℂ`.  But `h_rel` only controls the
+  -- ℂ-LINEAR functional `∑ᵢ cᵢ·χᵢ` on the SINGLE generators `{heckeT_n_cusp k m : coprime m}`, not on
+  -- products/all of `𝕋`; bootstrapping from generators to all of `𝕋` would need `{T_m}` to ℂ-SPAN
+  -- `𝕋` (product-closure of `span{T_m}`), which is FALSE: the recursion
+  -- `T_{p^{r+2}} = T_p·T_{p^{r+1}} − p^{k-1}·(⟨p⟩·T_{p^r})` (`heckeT_ppow_succ_succ`, cf.
+  -- `heckeT_n_prime_sq_eq_heckeT_p_sq_sub_diamond`) injects the diamond `⟨p⟩ ∉ span{T_n}` (it acts as
+  -- the per-character scalar `χ(p)`, which differs across the `H i` as they may lie in DIFFERENT
+  -- nebentypus spaces).  Enlarging to the full Hecke algebra WITH diamonds does not help either,
+  -- since `h_rel` still only constrains the `T_m` generators.  The abstract Γ₀(N) Hecke ring
+  -- `𝕋(Γ₀(N))` (`Gamma0RingDn`/`RingTransport`) + `heckeRingHomCharSpace` give the character/algebra
+  -- structure only PER CHARACTER, so they do not directly close this cross-character family.  Left as
+  -- an honest `sorry` per scope.
   sorry
 
 omit [NeZero N] in
@@ -289,9 +300,6 @@ private lemma charPiece_coeff_sum_eq_zero
       haveI : NeZero m.val := ⟨m.pos.ne'⟩
       heckeT_n_cusp k m.val (H k0) = EV k0 m • H k0)
     (hEV_zero : ∀ (k0 : K) (m : ℕ+), ¬ Nat.Coprime m.val N → EV k0 m = 0)
-    (hEV_one : ∀ k0 : K, EV k0 1 = 1)
-    (hEV_mul : ∀ (k0 : K) (m m' : ℕ+), Nat.Coprime m.val m'.val →
-      Nat.Coprime m.val N → Nat.Coprime m'.val N → EV k0 (m * m') = EV k0 m * EV k0 m')
     (hcoeff_piece : ∀ (m : ℕ+), Nat.Coprime m.val N → ∀ k0 : K,
       (UpperHalfPlane.qExpansion (1 : ℝ) (H k0)).coeff m.val =
         EV k0 m * (UpperHalfPlane.qExpansion (1 : ℝ) (H k0)).coeff 1)
@@ -314,54 +322,88 @@ private lemma charPiece_coeff_sum_eq_zero
   -- The `χ₀`-restricted contribution of each eigensystem value `s`.
   set D : (ℕ+ → ℂ) → ℂ := fun s ↦
     ∑ k0 ∈ Finset.univ.filter (fun k0 ↦ tag k0 = χ₀ ∧ EV k0 = s), A1 k0 with hD_def
+  -- A zero piece has vanishing first coefficient `A1` (contrapositive of `hH_ne_char`).
+  have hA1_zero_of_H_zero : ∀ k0 : K, H k0 = 0 → A1 k0 = 0 := fun k0 h0 ↦ by
+    by_contra hA1; exact (hH_ne_char k0 hA1).2 h0
   -- **L3**: each occurring eigensystem value contributes `0` to the global sum, i.e. `C s = 0`.
   have hC_zero : ∀ s : ℕ+ → ℂ, C s = 0 := by
+    -- Eigensystem values not in the image contribute nothing.
     have hC_img : ∀ s, s ∉ img → C s = 0 := by
       intro s hs
       apply Finset.sum_eq_zero
       intro k0 hk0
       simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hk0
       exact absurd (hk0 ▸ hmem_img k0) hs
-    -- Linear independence of the distinct occurring eigensystems (**L3**).
-    have key : ∀ s : ↥img, C s.val = 0 :=
+    -- Eigensystem values realised *only* by zero pieces also contribute nothing (each summand has
+    -- `A1 = 0`).  These are precisely the `s` for which the new L3 has no nonzero witness, so they
+    -- are filtered out of the L3 index set and handled here directly.
+    have hC_allzero : ∀ s, (∀ k0 : K, EV k0 = s → H k0 = 0) → C s = 0 := by
+      intro s hs
+      apply Finset.sum_eq_zero
+      intro k0 hk0
+      simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hk0
+      exact hA1_zero_of_H_zero k0 (hs k0 hk0)
+    -- The L3 index: occurring eigensystem values that are realised by at least one *nonzero* piece.
+    set J : Finset (ℕ+ → ℂ) := img.filter (fun s ↦ ∃ k0 : K, EV k0 = s ∧ H k0 ≠ 0) with hJ_def
+    -- For each `s ∈ J`, choose a nonzero witness `k0` with `EV k0 = s`.
+    have hJ_wit : ∀ s ∈ J, ∃ k0 : K, EV k0 = s ∧ H k0 ≠ 0 := fun s hs ↦
+      (Finset.mem_filter.mp hs).2
+    choose wit hwit_ev hwit_ne using hJ_wit
+    -- Linear independence of the distinct occurring eigensystems (**L3**), indexed by `↥J`.
+    have key : ∀ s : ↥J, C s.val = 0 :=
       eigensystems_linearIndependent (N := N)
-        (ι := ↥img) (fun s ↦ s.val) (fun s ↦ C s.val)
-        (by -- normalisation `s 1 = 1`: choose a representative `k0` with `EV k0 = s`
-          rintro ⟨s, hs⟩
-          obtain ⟨k0, _, hk0⟩ := Finset.mem_image.mp hs
-          exact hk0 ▸ hEV_one k0)
-        (by -- multiplicativity on mutually coprime indices, via a representative `k0`
-          rintro ⟨s, hs⟩ m m' hmm' hm hm'
-          obtain ⟨k0, _, hk0⟩ := Finset.mem_image.mp hs
-          simp only at hk0 ⊢
-          rw [← hk0]; exact hEV_mul k0 m m' hmm' hm hm')
+        (ι := ↥J) (fun s ↦ H (wit s.val s.2)) (fun s ↦ hwit_ne s.val s.2)
+        (fun s ↦ s.val) (fun s m _ hm ↦ by
+          -- eigenvalue equation for the chosen nonzero witness, with `EV (wit s) = s`
+          haveI : NeZero m.val := ⟨m.pos.ne'⟩
+          rw [hEV_spec (wit s.val s.2) m hm, hwit_ev s.val s.2])
         (by -- distinctness: distinct occurring values differ at a coprime index
           rintro ⟨s, hs⟩ ⟨s', hs'⟩ hne
           by_contra hcon
           push_neg at hcon
           refine hne (Subtype.ext ?_)
-          obtain ⟨k0, _, hk0⟩ := Finset.mem_image.mp hs
-          obtain ⟨k0', _, hk0'⟩ := Finset.mem_image.mp hs'
+          obtain ⟨k0, _, hk0⟩ := Finset.mem_image.mp (Finset.mem_of_mem_filter _ hs)
+          obtain ⟨k0', _, hk0'⟩ := Finset.mem_image.mp (Finset.mem_of_mem_filter _ hs')
           have hEVeq : EV k0 = EV k0' :=
             eigensystem_funext_of_coprime_agree (N := N) EV hEV_zero (fun m hm ↦
               (congrFun hk0 m).trans ((hcon m hm).trans (congrFun hk0' m).symm))
           exact hk0.symm.trans (hEVeq.trans hk0'))
-        (by -- relation: `∑_s C s · s(m) = 0` for coprime `m`
+        (fun s ↦ C s.val)
+        (by -- relation: `∑_{s ∈ J} C s · s(m) = 0` for coprime `m`
           intro m hm
+          -- The global fiberwise relation `∑_{s ∈ img} C s · s(m) = 0`.
           have hfb := Finset.sum_fiberwise_eq_sum_filter (Finset.univ : Finset K) img EV
             (fun k0 ↦ EV k0 m * A1 k0)
           rw [Finset.filter_true_of_mem (fun k0 _ ↦ hmem_img k0)] at hfb
-          -- rewrite the `↥img` sum as a `Finset` sum and match the fiber weighting
-          rw [Finset.sum_coe_sort img (fun s ↦ C s * s m)]
-          rw [← hrel m hm, ← hfb]
-          refine Finset.sum_congr rfl fun s _ ↦ ?_
-          rw [hC_def, Finset.sum_mul]
-          refine Finset.sum_congr rfl fun k0 hk0 ↦ ?_
-          simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hk0
-          rw [hk0]; ring)
+          have hglob : ∑ s ∈ img, C s * s m = 0 := by
+            rw [← hrel m hm, ← hfb]
+            refine Finset.sum_congr rfl fun s _ ↦ ?_
+            rw [hC_def, Finset.sum_mul]
+            refine Finset.sum_congr rfl fun k0 hk0 ↦ ?_
+            simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hk0
+            rw [hk0]; ring
+          -- Restrict to `J`: the dropped values `img \ J` are realised only by zero pieces.
+          rw [Finset.sum_coe_sort J (fun s ↦ C s * s m)]
+          have hJ_sub : J ⊆ img := hJ_def ▸ Finset.filter_subset _ _
+          -- a dropped value `s ∈ img \ J` is realised only by zero pieces, so `C s · s m = 0`.
+          have hdrop : ∀ s ∈ img, s ∉ J → C s * s m = 0 := by
+            intro s hs hsJ
+            have hz : ∀ k0 : K, EV k0 = s → H k0 = 0 := by
+              intro k0 hk0
+              by_contra h0
+              exact hsJ (Finset.mem_filter.mpr ⟨hs, ⟨k0, hk0, h0⟩⟩)
+            rw [hC_allzero s hz, zero_mul]
+          rw [Finset.sum_subset hJ_sub hdrop, hglob])
+    -- Assemble `C s = 0` for every `s`, splitting on `s ∈ J` / realised-only-by-zero / `s ∉ img`.
     intro s
     by_cases hs : s ∈ img
-    · exact key ⟨s, hs⟩
+    · by_cases hsJ : s ∈ J
+      · exact key ⟨s, hsJ⟩
+      · -- `s ∈ img \ J`: realised only by zero pieces.
+        apply hC_allzero s
+        intro k0 hk0
+        by_contra h0
+        exact hsJ (Finset.mem_filter.mpr ⟨hs, ⟨k0, hk0, h0⟩⟩)
     · exact hC_img s hs
   -- **L2**: each eigensystem value occurs in a unique character, so `D s = C s = 0`.
   have hD_zero : ∀ s : ℕ+ → ℂ, D s = 0 := by
@@ -509,50 +551,6 @@ private lemma qExpansion_charComponent_coprime_eq_zero
     intro k0 m hm
     show (if hm : Nat.Coprime m.val N then _ else 0) = 0
     rw [dif_neg hm]
-  -- `EV k0 1 = 1`: at coprime index `1` the operator `T₁` is the identity, so `1 • h = EV k0 1 • h`.
-  have hEV_one : ∀ k0 : K, EV k0 1 = 1 := by
-    intro k0
-    show (if hm : Nat.Coprime (1 : ℕ+).val N then (if H k0 = 0 then 1 else _) else 0) = 1
-    rw [dif_pos (by simpa using Nat.coprime_one_left N)]
-    by_cases h0 : H k0 = 0
-    · rw [if_pos h0]
-    · rw [if_neg h0]
-      refine smul_eq_smul_cancel (N := N) (k := k) h0 ?_
-      have hsp := Classical.choose_spec (hH_eig k0 1 (by simpa using Nat.coprime_one_left N))
-      rw [← hsp, one_smul]
-      exact CuspForm.ext fun τ ↦ by
-        change (heckeT_n k (↑1) (H k0).toModularForm').toFun τ = (H k0) τ
-        rw [heckeT_n_one]; rfl
-  -- Multiplicativity of `EV k0` on **mutually coprime** indices, from `T_{mm'} = T_m T_{m'}`.
-  have hEV_mul : ∀ (k0 : K) (m m' : ℕ+), Nat.Coprime m.val m'.val →
-      Nat.Coprime m.val N → Nat.Coprime m'.val N → EV k0 (m * m') = EV k0 m * EV k0 m' := by
-    intro k0 m m' hmm' hm hm'
-    haveI : NeZero m.val := ⟨m.pos.ne'⟩
-    haveI : NeZero m'.val := ⟨m'.pos.ne'⟩
-    haveI : NeZero (m * m').val := ⟨(m * m').pos.ne'⟩
-    have hcopN : Nat.Coprime (m * m').val N := by
-      rw [PNat.mul_coe]; exact Nat.Coprime.mul_left hm hm'
-    by_cases h0 : H k0 = 0
-    · -- trivial-character branch: `1 = 1 · 1`
-      simp only [EV, dif_pos hm, dif_pos hm', dif_pos hcopN, if_pos h0, mul_one]
-    · -- eigenvalue branch: cancel the nonzero `H k0` from `T_{mm'} h = T_m (T_{m'} h)`.
-      refine smul_eq_smul_cancel (N := N) (k := k) h0 ?_
-      -- `T_{mm'} h = T_m (T_{m'} h)` from operator-level coprime multiplicativity.
-      have hcusp_mul : heckeT_n_cusp k (m * m').val (H k0) =
-          heckeT_n_cusp k m.val (heckeT_n_cusp k m'.val (H k0)) := by
-        refine CuspForm.ext fun τ ↦ ?_
-        have hop := DFunLike.congr_fun
-          (heckeT_n_mul_coprime (N := N) k m.val m'.val hmm' hm hm') (H k0).toModularForm'
-        change (heckeT_n k (m.val * m'.val) (H k0).toModularForm').toFun τ =
-          (heckeT_n k m.val (heckeT_n k m'.val (H k0).toModularForm')).toFun τ
-        rw [hop]; rfl
-      calc EV k0 (m * m') • H k0
-          = heckeT_n_cusp k (m * m').val (H k0) := (hEV_spec k0 (m * m') hcopN).symm
-        _ = heckeT_n_cusp k m.val (heckeT_n_cusp k m'.val (H k0)) := hcusp_mul
-        _ = heckeT_n_cusp k m.val (EV k0 m' • H k0) := by rw [hEV_spec k0 m' hm']
-        _ = EV k0 m' • heckeT_n_cusp k m.val (H k0) := heckeT_n_cusp_smul _ _ _
-        _ = EV k0 m' • (EV k0 m • H k0) := by rw [hEV_spec k0 m hm]
-        _ = (EV k0 m * EV k0 m') • H k0 := by rw [smul_smul, mul_comm]
   -- **L1 applied to each piece**: for coprime `m`, `aₘ(H k0) = EV k0 m · a₁(H k0)`.
   have hcoeff_piece : ∀ (m : ℕ+), Nat.Coprime m.val N → ∀ k0 : K,
       (UpperHalfPlane.qExpansion (1 : ℝ) (H k0)).coeff m.val =
@@ -625,7 +623,7 @@ private lemma qExpansion_charComponent_coprime_eq_zero
   -- Apply the combinatorial core.
   exact charPiece_coeff_sum_eq_zero (N := N) (k := k) H tag EV
     (fun k0 hk0 ↦ ⟨hH_char k0, fun h0 ↦ hk0 (by rw [h0, qExpansion_one_zero_coeff])⟩)
-    hEV_spec hEV_zero hEV_one hEV_mul hcoeff_piece hrel χ₀ n hn
+    hEV_spec hEV_zero hcoeff_piece hrel χ₀ n hn
 
 /-- **Per-character Main Lemma (route-B ingredient 2).**  A cusp form `g ∈ S_k(Γ₁(N), χ)` whose
 canonical (period-1) `q`-expansion vanishes at every index coprime to `N` is an oldform.
