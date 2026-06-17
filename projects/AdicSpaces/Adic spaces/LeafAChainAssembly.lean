@@ -81,6 +81,52 @@ theorem genPieceUnit_coUnit_rationalOpen_eq (P : PairOfDefinition A) (u : Aˣ) (
       exact hnz (by have h2 := w.mul_vle_mul_left h0 (↑u⁻¹ : A)
                     rwa [zero_mul] at h2)
 
+/-- **Flat transport across equal `rationalOpen`** — generic in `D₁ D₂`: if they have the same
+`rationalOpen` and `𝒪(D₁)` is flat over `A`, so is `𝒪(D₂)`. The restriction `𝒪(D₂) ≃+* 𝒪(D₁)` is
+the iso (`restrictionMap_bijective_of_rationalOpen_eq`); flatness transports
+(`Module.Flat.of_linearEquiv`). Generic so the transport elaborates ONCE for OPAQUE data — applied to
+specific datums it is a direct `exact`, sidestepping the per-datum (two-nontrivial-denominator) `whnf`
+blow-up that an inline transport hits. -/
+theorem flat_of_rationalOpen_eq
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    (D₁ D₂ : RationalLocData A)
+    (h_ro : rationalOpen D₂.T D₂.s = rationalOpen D₁.T D₁.s)
+    (hflat : @Module.Flat A (presheafValue D₁) _ _ (RingHom.toModule D₁.canonicalMap)) :
+    @Module.Flat A (presheafValue D₂) _ _ (RingHom.toModule D₂.canonicalMap) := by
+  let e : presheafValue D₂ ≃+* presheafValue D₁ :=
+    RingEquiv.ofBijective (restrictionMapHom D₂ D₁ h_ro.symm.le)
+      (restrictionMap_bijective_of_rationalOpen_eq D₂ D₁ h_ro)
+  letI : Module A (presheafValue D₁) := RingHom.toModule D₁.canonicalMap
+  letI : Module A (presheafValue D₂) := RingHom.toModule D₂.canonicalMap
+  have he_smul : ∀ (a : A) (x : presheafValue D₂), e (a • x) = a • e x := by
+    intro a x
+    change e (D₂.canonicalMap a * x) = D₁.canonicalMap a * e x
+    rw [e.map_mul]; congr 1
+    exact restrictionMapHom_canonicalMap D₂ D₁ h_ro.symm.le a
+  exact @Module.Flat.of_linearEquiv A (presheafValue D₁) (presheafValue D₂)
+    _ _ _ _ _ hflat
+    { toLinearMap := { toFun := e, map_add' := e.map_add, map_smul' := he_smul }
+      invFun := e.symm
+      left_inv := e.symm_apply_apply
+      right_inv := e.apply_symm_apply }
+
+/-- **genPieceUnit engine** — `𝒪(genPieceDatum P {↑u} sB)` flat over `A` (`↑u` a unit). Same
+`rationalOpen` as `coUnitDatum (sB·↑u⁻¹)`, flat by the coUnit engine; one-line transport via the
+generic `flat_of_rationalOpen_eq`. -/
+theorem presheafValue_flat_of_genPieceUnit_faithful
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    (P : PairOfDefinition A) (u : Aˣ) (sB : A)
+    (hspan : Ideal.span (({(↑u : A)} : Finset A) : Set A) = ⊤) :
+    @Module.Flat A (presheafValue (genPieceDatum P {(↑u : A)} sB hspan)) _ _
+      (RingHom.toModule (genPieceDatum P {(↑u : A)} sB hspan).canonicalMap) := by
+  have h_ro := genPieceUnit_coUnit_rationalOpen_eq P u sB hspan
+  have hflat := presheafValue_flat_of_coUnitDatum_faithful P (sB * ↑u⁻¹)
+  exact flat_of_rationalOpen_eq _ _ h_ro hflat
+
 /-- **Whole-space Prop 8.30 (Remark 7.55 chain), assembled downstream.**
 `𝒪_B(im E)` is flat over `B = 𝒪_X(D)`, for `im E = imagePieceDatum D E.T E.s` the whole-space
 image of a `span = ⊤` rational piece. Proven by folding `flat_chainStep_domUnit` over `E.T`'s
