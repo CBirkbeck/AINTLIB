@@ -40,19 +40,16 @@ variable (L : Type*) [NormedField L] [NormedAlgebra ℚ_[p] L]
 finite extension `L/ℚ_p` this is `𝒪_L` (RJW §3.1, TeX 690). -/
 def integerRing : Subring L where
   carrier := {x : L | ‖x‖ ≤ 1}
-  mul_mem' {x y} hx hy := by
-    simpa using mul_le_one₀ hx (norm_nonneg _) hy
+  mul_mem' {x y} hx hy := by simpa using mul_le_one₀ hx (norm_nonneg _) hy
   one_mem' := by simp
-  add_mem' {x y} hx hy := by
-    exact (IsUltrametricDist.norm_add_le_max x y).trans (max_le hx hy)
+  add_mem' {x y} hx hy := (IsUltrametricDist.norm_add_le_max x y).trans (max_le hx hy)
   zero_mem' := by simp
   neg_mem' {x} hx := by simpa using hx
 
 namespace integerRing
 
 instance : IsUltrametricDist (integerRing L) :=
-  ⟨fun x y z => by
-    simpa [Subtype.dist_eq] using IsUltrametricDist.dist_triangle_max (x : L) y z⟩
+  ⟨fun x y z => by simpa [Subtype.dist_eq] using IsUltrametricDist.dist_triangle_max (x : L) y z⟩
 
 instance : CompleteSpace (integerRing L) :=
   completeSpace_coe_iff_isComplete.2 <|
@@ -63,24 +60,19 @@ instance : CompleteSpace (integerRing L) :=
 noncomputable instance : Algebra ℤ_[p] (integerRing L) :=
   RingHom.toAlgebra <|
     ((algebraMap ℚ_[p] L).comp PadicInt.Coe.ringHom).codRestrict (integerRing L) fun x =>
-      show ‖algebraMap ℚ_[p] L (x : ℚ_[p])‖ ≤ 1 by
-        rw [norm_algebraMap']
-        exact x.norm_le_one
+      show ‖algebraMap ℚ_[p] L (x : ℚ_[p])‖ ≤ 1 by rw [norm_algebraMap']; exact x.norm_le_one
 
 /-- The closed ball of radius `ε` in the integer ring, as an ideal — the norm
 is ultrametric and multiplicative, so the balls absorb multiplication by the
 unit ball. -/
 noncomputable def ballIdeal (ε : ℝ) : Ideal (integerRing L) where
   carrier := {x : integerRing L | ‖(x : L)‖ ≤ max ε 0}
-  add_mem' {x y} hx hy :=
-    (IsUltrametricDist.norm_add_le_max (x : L) y).trans (max_le hx hy)
+  add_mem' {x y} hx hy := (IsUltrametricDist.norm_add_le_max (x : L) y).trans (max_le hx hy)
   zero_mem' := by simp
   smul_mem' r x hx := by
-    have h : ‖(r : L)‖ * ‖(x : L)‖ ≤ 1 * max ε 0 :=
-      mul_le_mul r.2 hx (norm_nonneg _) zero_le_one
     change ‖((r * x : integerRing L) : L)‖ ≤ max ε 0
     rw [MulMemClass.coe_mul, norm_mul]
-    exact h.trans_eq (one_mul _)
+    exact (mul_le_mul r.2 hx (norm_nonneg _) zero_le_one).trans_eq (one_mul _)
 
 /-- The norm topology on the integer ring is linear: the balls
 `{x | ‖x‖ ≤ ε}` are ideals (ultrametric + multiplicative norm). Needed for
@@ -89,14 +81,12 @@ instance : IsLinearTopology (integerRing L) (integerRing L) := by
   refine IsLinearTopology.mk_of_hasBasis' (integerRing L)
     (S := Ideal (integerRing L)) (p := fun ε : ℝ => 0 < ε)
     (s := fun ε => ballIdeal L ε) ?_ fun s r m hm => s.smul_mem r hm
-  have h := Metric.nhds_basis_closedBall (α := integerRing L) (x := 0)
-  refine h.congr (fun ε => Iff.rfl) fun ε hε => ?_
+  refine (Metric.nhds_basis_closedBall (α := integerRing L) (x := 0)).congr
+    (fun ε => Iff.rfl) fun ε hε => ?_
   ext x
-  have hmax : max ε 0 = ε := max_eq_left hε.le
-  simp [ballIdeal, Metric.mem_closedBall, dist_zero_right, hmax,
+  simp [ballIdeal, Metric.mem_closedBall, dist_zero_right, max_eq_left hε.le,
     AddSubgroupClass.coe_norm]
 
-omit [CompleteSpace L] in
 omit [CompleteSpace L] in
 /-- The algebra map `ℤ_[p] → integerRing L` is an isometry (it is the
 restriction of the scalar embedding `ℚ_[p] → L`). -/
@@ -130,12 +120,9 @@ omit [NormedAlgebra ℚ_[p] L] [CompleteSpace L] in
 theorem integerRing.not_isUnit_of_norm_lt_one {x : integerRing L}
     (hx : ‖(x : L)‖ < 1) : ¬ IsUnit x := fun h => by
   obtain ⟨y, hy⟩ := h.exists_right_inv
-  have h1 : ((x : L)) * ((y : L)) = 1 := by exact_mod_cast congrArg Subtype.val hy
+  have h1 : (x : L) * (y : L) = 1 := by exact_mod_cast congrArg Subtype.val hy
   have h2 : ‖(x : L)‖ * ‖(y : L)‖ = 1 := by rw [← norm_mul, h1, norm_one]
-  have h3 : ‖(x : L)‖ * ‖(y : L)‖ ≤ ‖(x : L)‖ :=
-    mul_le_of_le_one_right (norm_nonneg _) y.2
-  rw [h2] at h3
-  exact absurd (h3.trans_lt hx) (lt_irrefl _)
+  nlinarith [mul_le_of_le_one_right (norm_nonneg (x : L)) y.2]
 
 omit [NormedAlgebra ℚ_[p] L] [CompleteSpace L] in
 /-- An element of the integer ring of norm one is a unit: its field inverse
@@ -151,9 +138,8 @@ omit [IsUltrametricDist L] [CompleteSpace L] in
 /-- In a normed `ℚ_[p]`-algebra, `‖p‖ = p⁻¹ < 1` (the algebra map is an
 isometry on scalars). -/
 theorem norm_natCast_self_lt_one : ‖((p : ℕ) : L)‖ < 1 := by
-  have h : ((p : ℕ) : L) = algebraMap ℚ_[p] L ((p : ℕ) : ℚ_[p]) := by
-    simp [map_natCast]
-  rw [h, norm_algebraMap']
+  rw [show ((p : ℕ) : L) = algebraMap ℚ_[p] L ((p : ℕ) : ℚ_[p]) by simp [map_natCast],
+    norm_algebraMap']
   simpa using Padic.norm_p_lt_one (p := p)
 
 omit [CompleteSpace L] in
@@ -167,14 +153,12 @@ theorem _root_.IsPrimitiveRoot.norm_sub_one_lt {ζ : L} {n : ℕ}
   by_contra hcon
   push Not at hcon
   set x : L := ζ - 1 with hxdef
-  set N : ℕ := p ^ n with hNdef
-  have hN2 : 2 ≤ N := le_trans hp.out.two_le (Nat.le_self_pow (by omega) p)
+  set N : ℕ := p ^ n
+  have hN2 : 2 ≤ N := hp.out.two_le.trans (Nat.le_self_pow (by omega) p)
   -- binomial expansion of `1 = ζ^N = (x+1)^N`, with the `k = 0` term peeled off
   have hpow : ∑ k ∈ Finset.range N, x ^ (k + 1) * ((N.choose (k + 1) : ℕ) : L) = 0 := by
-    have h1 : (x + 1) ^ N = 1 := by
-      simpa [hxdef] using hζ.pow_eq_one
+    have h1 : (x + 1) ^ N = 1 := by simpa [hxdef] using hζ.pow_eq_one
     have hexp := add_pow x 1 N
-    simp only [one_pow, mul_one] at hexp
     rw [h1, Finset.sum_range_succ'] at hexp
     simpa using hexp.symm
   -- isolate the top term `x^N`
@@ -182,42 +166,34 @@ theorem _root_.IsPrimitiveRoot.norm_sub_one_lt {ζ : L} {n : ℕ}
       = -∑ k ∈ Finset.range (N - 1), x ^ (k + 1) * ((N.choose (k + 1) : ℕ) : L) := by
     have hsplit := Finset.sum_range_succ
       (fun k => x ^ (k + 1) * ((N.choose (k + 1) : ℕ) : L)) (N - 1)
-    have hN1 : N - 1 + 1 = N := by omega
-    rw [hN1, hpow] at hsplit
+    rw [show N - 1 + 1 = N by omega, hpow] at hsplit
     simp only [Nat.choose_self, Nat.cast_one, mul_one] at hsplit
-    rw [eq_neg_iff_add_eq_zero, add_comm]
-    exact hsplit.symm
+    exact eq_neg_of_add_eq_zero_right hsplit.symm
   -- ultrametric bound: the sum is dominated by one of its terms
   obtain ⟨i, hi, hile⟩ := IsUltrametricDist.exists_norm_finsetSum_le_of_nonempty
     (t := Finset.range (N - 1)) ⟨0, Finset.mem_range.2 (by omega)⟩
     (fun k => x ^ (k + 1) * ((N.choose (k + 1) : ℕ) : L))
   -- each coefficient is divisible by `p`
-  have hidvd : (p : ℕ) ∣ N.choose (i + 1) := by
-    refine hp.out.dvd_choose_pow (by omega) ?_
-    have := Finset.mem_range.1 hi
-    omega
-  obtain ⟨m, hm⟩ := hidvd
+  have hilt := Finset.mem_range.1 hi
+  obtain ⟨m, hm⟩ : (p : ℕ) ∣ N.choose (i + 1) := hp.out.dvd_choose_pow (by omega) (by omega)
   have hcoeff : ‖((N.choose (i + 1) : ℕ) : L)‖ ≤ ‖((p : ℕ) : L)‖ := by
-    rw [hm]
-    push_cast
-    rw [norm_mul]
+    rw [hm, Nat.cast_mul, norm_mul]
     exact mul_le_of_le_one_right (norm_nonneg _)
       (IsUltrametricDist.norm_natCast_le_one L m)
   -- assemble the contradiction `‖x‖^N ≤ ‖p‖·‖x‖^N < ‖x‖^N`
-  have hxpos : (0 : ℝ) < ‖x‖ ^ N := pow_pos (lt_of_lt_of_le one_pos hcon) N
+  have hxpos : (0 : ℝ) < ‖x‖ ^ N := pow_pos (one_pos.trans_le hcon) N
   have hbound : ‖x‖ ^ N ≤ ‖((p : ℕ) : L)‖ * ‖x‖ ^ N := by
     calc ‖x‖ ^ N = ‖x ^ N‖ := (norm_pow x N).symm
       _ ≤ ‖x ^ (i + 1) * ((N.choose (i + 1) : ℕ) : L)‖ := by
           rw [htop, norm_neg]; exact hile
       _ = ‖x‖ ^ (i + 1) * ‖((N.choose (i + 1) : ℕ) : L)‖ := by
           rw [norm_mul, norm_pow]
-      _ ≤ ‖x‖ ^ N * ‖((p : ℕ) : L)‖ := by
-          refine mul_le_mul ?_ hcoeff (norm_nonneg _) (by positivity)
-          exact pow_le_pow_right₀ hcon (by have := Finset.mem_range.1 hi; omega)
+      _ ≤ ‖x‖ ^ N * ‖((p : ℕ) : L)‖ :=
+          mul_le_mul (pow_le_pow_right₀ hcon (by omega)) hcoeff (norm_nonneg _) (by positivity)
       _ = ‖((p : ℕ) : L)‖ * ‖x‖ ^ N := mul_comm _ _
   have hple : (1 : ℝ) ≤ ‖((p : ℕ) : L)‖ :=
     le_of_mul_le_mul_right (by simpa using hbound) hxpos
-  exact absurd (lt_of_le_of_lt hple norm_natCast_self_lt_one) (lt_irrefl _)
+  exact (hple.trans_lt norm_natCast_self_lt_one).false
 
 omit [CompleteSpace L] in
 /-- W2': hence `ζ - 1` is topologically nilpotent (powers tend to `0`). -/
@@ -239,44 +215,33 @@ theorem _root_.IsPrimitiveRoot.norm_pow_sub_one_eq_one {ζ : L} {D : ℕ}
   obtain ⟨n, rfl⟩ : ∃ n, D = n + 1 := ⟨D - 1, by omega⟩
   -- all the factors `1 - ζ^(k+1)` have norm at most one
   have hζ1 : ‖ζ‖ = 1 := by
-    have h1 : ‖ζ‖ ^ (n + 1) = 1 := by rw [← norm_pow, hζ.pow_eq_one, norm_one]
-    refine le_antisymm ?_ ?_
-    · by_contra h
-      push Not at h
-      exact absurd h1 (one_lt_pow₀ h (Nat.succ_ne_zero n)).ne'
-    · by_contra h
-      push Not at h
-      exact absurd h1 (pow_lt_one₀ (norm_nonneg ζ) h (Nat.succ_ne_zero n)).ne
+    rw [← pow_eq_one_iff_of_nonneg (norm_nonneg ζ) (Nat.succ_ne_zero n), ← norm_pow,
+      hζ.pow_eq_one, norm_one]
   have hfac : ∀ k, ‖1 - ζ ^ (k + 1)‖ ≤ 1 := fun k => by
     rw [sub_eq_add_neg]
-    refine (IsUltrametricDist.norm_add_le_max 1 (-(ζ ^ (k + 1)))).trans ?_
-    simp [norm_pow, hζ1]
+    exact (IsUltrametricDist.norm_add_le_max 1 _).trans (by simp [norm_pow, hζ1])
   -- the product of the factors is `D`, whose norm is one since `p ∤ D`
   have hprodD : ‖∏ k ∈ Finset.range n, (1 - ζ ^ (k + 1))‖ = 1 := by
-    rw [hζ.prod_one_sub_pow_eq_order]
-    have h : ((n : L) + 1) = algebraMap ℚ_[p] L ((n + 1 : ℕ) : ℚ_[p]) := by
-      push_cast [map_natCast]
-      ring
-    rw [h, norm_algebraMap', Padic.norm_natCast_eq_one_iff]
+    rw [hζ.prod_one_sub_pow_eq_order,
+      show ((n : L) + 1) = algebraMap ℚ_[p] L ((n + 1 : ℕ) : ℚ_[p]) by push_cast [map_natCast]; ring,
+      norm_algebraMap', Padic.norm_natCast_eq_one_iff]
     exact (Nat.Prime.coprime_iff_not_dvd hp.out).2 hD
   -- hence every individual factor has norm exactly one
   have hone : ∀ i ∈ Finset.range n, ‖1 - ζ ^ (i + 1)‖ = 1 := by
     intro i hi
     refine le_antisymm (hfac i) ?_
-    have hP : ∏ k ∈ Finset.range n, ‖1 - ζ ^ (k + 1)‖ = 1 := by
-      rw [← norm_prod]; exact hprodD
+    have hP : ∏ k ∈ Finset.range n, ‖1 - ζ ^ (k + 1)‖ = 1 := by rw [← norm_prod]; exact hprodD
     have hsplit : ‖1 - ζ ^ (i + 1)‖ *
         ∏ k ∈ (Finset.range n).erase i, ‖1 - ζ ^ (k + 1)‖ = 1 :=
-      (Finset.mul_prod_erase (Finset.range n)
-        (fun k => ‖1 - ζ ^ (k + 1)‖) hi).trans hP
-    have hrest : ∏ k ∈ (Finset.range n).erase i, ‖1 - ζ ^ (k + 1)‖ ≤ 1 :=
-      Finset.prod_le_one (fun k _ => norm_nonneg _) (fun k _ => hfac k)
-    nlinarith [norm_nonneg (1 - ζ ^ (i + 1)),
+      (Finset.mul_prod_erase _ (fun k => ‖1 - ζ ^ (k + 1)‖) hi).trans hP
+    nlinarith [hsplit, norm_nonneg (1 - ζ ^ (i + 1)),
+      Finset.prod_le_one (s := (Finset.range n).erase i)
+        (fun k _ => norm_nonneg (1 - ζ ^ (k + 1))) (fun k _ => hfac k),
       Finset.prod_nonneg
         (fun k (_ : k ∈ (Finset.range n).erase i) => norm_nonneg (1 - ζ ^ (k + 1)))]
   -- reduce the exponent mod `D` and read off the factor
   have hred : ζ ^ c = ζ ^ (c % (n + 1)) := by
-    conv_lhs => rw [← Nat.div_add_mod c (n + 1)]
+    nth_rewrite 1 [← Nat.div_add_mod c (n + 1)]
     rw [pow_add, pow_mul, hζ.pow_eq_one, one_pow, one_mul]
   have hr0 : c % (n + 1) ≠ 0 := fun h => hc (Nat.dvd_of_mod_eq_zero h)
   have hrlt : c % (n + 1) < n + 1 := Nat.mod_lt _ (by omega)
