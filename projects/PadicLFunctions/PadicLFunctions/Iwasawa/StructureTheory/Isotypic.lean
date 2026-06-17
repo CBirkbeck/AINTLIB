@@ -227,6 +227,21 @@ theorem isInternal_isotypicComponent [IsDomain 𝒪] [Invertible (Fintype.card H
       ortho := fun _ _ hne => isotypicIdempotent_orthogonal 𝒪 H hne
       complete := hcomplete }
 
+/-- The **ω-augmentation** ring hom `Λ(𝒢) = Λ[H] →+* Λ`, `[a] ↦ ω(a)` (character values
+mapped into `Λ` via `𝒪 → Λ`).  It is the projection onto the ω-component of the splitting
+`Λ(𝒢) ≅ ∏_ω Λ`: it sends `e_ω ↦ 1` and `e_ψ ↦ 0` for `ψ ≠ ω`. -/
+noncomputable def charAugmentation (ω : H →* 𝒪ˣ) :
+    IwasawaAlgebraGroup 𝒪 H →+* IwasawaAlgebra 𝒪 :=
+  (MonoidAlgebra.lift (IwasawaAlgebra 𝒪) (IwasawaAlgebra 𝒪) H
+    ((algebraMap 𝒪 (IwasawaAlgebra 𝒪)).toMonoidHom.comp
+      ((Units.coeHom 𝒪).comp ω))).toRingHom
+
+@[simp] theorem charAugmentation_single (ω : H →* 𝒪ˣ) (a : H) (c : IwasawaAlgebra 𝒪) :
+    charAugmentation 𝒪 H ω (MonoidAlgebra.single a c)
+      = c * algebraMap 𝒪 (IwasawaAlgebra 𝒪) ((ω a : 𝒪)) := by
+  rw [charAugmentation, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, MonoidAlgebra.lift_single]
+  simp [smul_eq_mul]
+
 /-- The **equivariant characteristic ideal** `Ch_{Λ(𝒢)}(M) = ⨁_ω Ch_Λ(M^{(ω)})`
 (RJW TeX 3672–3676): assembled from the characteristic ideals (S13-S4) of the
 isotypic components, each of which is finitely generated and torsion over `Λ`. -/
