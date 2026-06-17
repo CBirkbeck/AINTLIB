@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import HasseWeil.Curves.LocalizedDictionary
 import HasseWeil.Curves.PushforwardDivisor
 import HasseWeil.Curves.RamificationFinite
+import Mathlib.RingTheory.Valuation.Discrete.IsDiscreteValuationRing
 
 /-!
 # The norm–conorm count over the integral closure `B` (CoordHom-free, Silverman II.3.6)
@@ -169,6 +170,91 @@ theorem mem_B_of_forall_valuation_le_one (z : C₁.FunctionField)
     IsDedekindDomain.HeightOneSpectrum.mem_integers_of_valuation_le_one C₁.FunctionField z hz
   obtain ⟨⟨y, hy⟩, rfl⟩ := hmem
   exact hy
+
+/-! #### The place-classification structural facts for `B`-primes (reusable, axiom-clean)
+
+The following lemmas are the *structural half* of the global-`B` place dictionary: they pin down
+the relationship between a height-one prime `v` of `B` and the curve geometry, *without* the
+coordinate-ring membership (so non-circular, available before `BPrimeValuationCoordGenLeOne`).
+
+The decisive structural fact is the **center on `C₂`**: every height-one prime of `B` lies over a
+*nonzero* (hence maximal, hence a smooth point `Q`) prime of `C₂.CoordinateRing` — because the only
+prime of the *affine* coordinate ring `C₂.CoordinateRing` below `⊥` is `⊥`, and `B`-primes are
+nonzero.  This is what excludes the `∞`-place of `C₁` once `hreg` is in play (the `∞`-place of `C₁`
+lies over the `∞`-place of `C₂`, which is *not* in `Spec C₂.CoordinateRing`).  Together with the
+DVR structure of the `v`-adic valuation subring and the `valuation ≤ 1` on the base-ring image, this
+reduces the place dictionary to the single irreducible classification "an `F`-trivial DVR of `K(C₁)`
+that is *not* the place at `∞` is a point valuation". -/
+
+/-- **`v`-valuation `≤ 1` on the base-ring image**: every height-one prime `v` of `B` has
+`v.valuation ≤ 1` on the image of `C₂.CoordinateRing` in `K(C₁)` (these elements lie in `B`, the
+base ring, so are `v`-adic integers).  Direct from `valuation_le_one`. -/
+theorem valuation_algebraMap_coordinateRing_le_one
+    (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)))
+    (b : C₂.CoordinateRing) :
+    v.valuation C₁.FunctionField (algebraMap C₂.CoordinateRing C₁.FunctionField b) ≤ 1 := by
+  have key : algebraMap C₂.CoordinateRing C₁.FunctionField b =
+      algebraMap (B (C₁ := C₁) (C₂ := C₂)) C₁.FunctionField
+        (algebraMap C₂.CoordinateRing (B (C₁ := C₁) (C₂ := C₂)) b) :=
+    IsScalarTower.algebraMap_apply C₂.CoordinateRing (B (C₁ := C₁) (C₂ := C₂))
+      C₁.FunctionField b
+  rw [key]
+  exact v.valuation_le_one (K := C₁.FunctionField)
+    (algebraMap C₂.CoordinateRing (B (C₁ := C₁) (C₂ := C₂)) b)
+
+/-- **The under-prime of a `B`-prime is nonzero**: for a height-one prime `v` of `B`, the
+contraction `v.asIdeal.under C₂.CoordinateRing` is `≠ ⊥`.  Because `B`-primes are nonzero and
+`algebraMap C₂.CoordinateRing B` is injective (its `comap ⊥ = ⊥`). -/
+theorem under_ne_bot (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂))) :
+    v.asIdeal.under C₂.CoordinateRing ≠ ⊥ := by
+  intro h_eq
+  exact v.ne_bot (Ideal.eq_bot_of_comap_eq_bot (R := C₂.CoordinateRing)
+    (S := B (C₁ := C₁) (C₂ := C₂)) h_eq)
+
+/-- **The center of a `B`-prime on `C₂` is a smooth point** (the affine-place restriction): every
+height-one prime `v` of `B` lies over the maximal ideal `m_Q` of *some* smooth point `Q` of `C₂`.
+This is the key structural fact excluding the `∞`-place: a `B`-prime never restricts to the
+`∞`-place of `C₂` (which is absent from `Spec C₂.CoordinateRing`).  The under-prime is maximal
+(`isMaximal_comap_of_isIntegral_of_isMaximal`, as `B/C₂.CoordinateRing` is integral) and nonzero
+(`under_ne_bot`), hence a smooth point (`exists_smoothPoint_of_isMaximal`). -/
+theorem exists_smoothPoint_under
+    (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂))) :
+    ∃ Q : C₂.SmoothPoint, v.asIdeal.under C₂.CoordinateRing = C₂.maximalIdealAt Q := by
+  haveI hPunder_max : (v.asIdeal.under C₂.CoordinateRing).IsMaximal :=
+    Ideal.isMaximal_comap_of_isIntegral_of_isMaximal v.asIdeal
+  obtain ⟨Q, hQ⟩ := C₂.exists_smoothPoint_of_isMaximal hPunder_max
+  exact ⟨Q, hQ.symm⟩
+
+/-- **The `v`-adic valuation subring of a `B`-prime is a DVR** (rank-one).  The `v`-adic valuation
+on `K(C₁)` is surjective onto `ℤᵐ⁰` (mathlib's `valuation_surjective`), so its value group is `⊤`,
+hence cyclic and nontrivial, hence the valuation subring is a discrete valuation ring
+(`Valuation.valuationSubring_isDiscreteValuationRing`).  This is the rank-one input demanded by the
+DVR-domination engine `rankOne_valuationSubring_le_eq_of_ne_top`. -/
+theorem valuationSubring_isDVR
+    (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂))) :
+    IsDiscreteValuationRing (v.valuation C₁.FunctionField).valuationSubring := by
+  have hsurj : Function.Surjective (v.valuation C₁.FunctionField) :=
+    v.valuation_surjective C₁.FunctionField
+  set w := v.valuation C₁.FunctionField with hw
+  have hvg : MonoidWithZeroHom.valueGroup (.ofClass w) = ⊤ := by
+    rw [eq_top_iff]
+    intro y _
+    rw [MonoidWithZeroHom.mem_valueGroup_iff_of_comm]
+    refine ⟨1, by simp, ?_⟩
+    obtain ⟨x, hx⟩ := hsurj (y : WithZero (Multiplicative ℤ))
+    exact ⟨x, by rw [map_one, one_mul]; exact hx.symm⟩
+  haveI : IsCyclic (WithZero (Multiplicative ℤ))ˣ :=
+    isCyclic_of_surjective WithZero.unitsWithZeroEquiv.symm.toMonoidHom
+      WithZero.unitsWithZeroEquiv.symm.surjective
+  haveI : Nontrivial (WithZero (Multiplicative ℤ))ˣ :=
+    WithZero.unitsWithZeroEquiv.symm.toEquiv.nontrivial
+  haveI : IsCyclic (MonoidWithZeroHom.valueGroup (.ofClass w)) := by
+    rw [hvg]
+    exact isCyclic_of_surjective Subgroup.topEquiv.symm.toMonoidHom
+      Subgroup.topEquiv.symm.surjective
+  haveI : Nontrivial (MonoidWithZeroHom.valueGroup (.ofClass w)) := by
+    rw [hvg]; exact Subgroup.topEquiv.symm.toEquiv.nontrivial
+  exact Valuation.valuationSubring_isDiscreteValuationRing w
 
 /-- **The `x`-generator of `C₁` is integral over `C₂.CoordinateRing`** (regular at every place
 of `C₁` over an affine place of `C₂`).  Reduced — *non-circularly*, via the valuative criterion
