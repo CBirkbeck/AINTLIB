@@ -1427,9 +1427,8 @@ private theorem digitMatrix_eq_symm (f : PowerSeries ℤ_[p]) (j : Fin p) :
 theorem digitMatrix_continuous (i j : Fin p) :
     Continuous (fun f : PowerSeries ℤ_[p] => digitMatrix f i j) := by
   rw [show (fun f : PowerSeries ℤ_[p] => digitMatrix f i j)
-      = fun f => (digitHomeo p).symm (f * (1 + PowerSeries.X) ^ (j : ℕ)) i from by
-    funext f; rw [show digitMatrix f i j = (fun i => digitMatrix f i j) i from rfl,
-      digitMatrix_eq_symm p f j]]
+      = fun f => (digitHomeo p).symm (f * (1 + PowerSeries.X) ^ (j : ℕ)) i from
+    funext fun f => congrFun (digitMatrix_eq_symm p f j) i]
   exact (continuous_apply i).comp ((digitHomeo p).symm.continuous.comp
     (continuous_id.mul continuous_const))
 
