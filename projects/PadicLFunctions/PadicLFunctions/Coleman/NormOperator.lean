@@ -218,8 +218,7 @@ theorem toPS_symm_apply (F : PowerSeries ℤ_[p]) : (toPS p).symm F = F := rfl
 theorem toPS_algebraMap (c : PowerSeries ℤ_[p]) :
     toPS p (algebraMap (PowerSeries ℤ_[p]) (PhiAlg p) c) = phiSeries p c := by
   rw [RingHom.algebraMap_toAlgebra]
-  change phiHom p c = phiSeries p c
-  rw [phiHom_apply]
+  exact phiHom_apply p c
 
 /-- The `φ`-`smul` on `PhiAlg p` is multiplication by the `φ`-image. -/
 theorem smul_def (c : PowerSeries ℤ_[p]) (x : PhiAlg p) :
@@ -301,9 +300,7 @@ noncomputable def normOp (f : PowerSeries ℤ_[p]) : PowerSeries ℤ_[p] :=
 /-- `𝒩` is multiplicative (the relative norm is a monoid hom). RJW TeX 2660. -/
 theorem normOp_mul (f g : PowerSeries ℤ_[p]) :
     normOp (f * g) = normOp f * normOp g := by
-  unfold normOp
-  rw [show (PhiAlg.toPS p).symm (f * g)
-      = (PhiAlg.toPS p).symm f * (PhiAlg.toPS p).symm g from map_mul _ _ _, map_mul]
+  simp only [normOp, map_mul]
 
 /-- `𝒩 1 = 1`. -/
 @[simp]
@@ -443,16 +440,12 @@ is a ring hom, so a unit congruence `f = 1 + C(p^k)·h` gives
 /-- `digitMatrix` is additive (it is `leftMulMatrix ∘ (toPS).symm`, both additive). -/
 theorem digitMatrix_add (f g : PowerSeries ℤ_[p]) :
     digitMatrix (f + g) = digitMatrix f + digitMatrix g := by
-  unfold digitMatrix
-  rw [show (PhiAlg.toPS p).symm (f + g)
-      = (PhiAlg.toPS p).symm f + (PhiAlg.toPS p).symm g from map_add _ _ _, map_add]
+  simp only [digitMatrix, map_add]
 
 /-- `digitMatrix` is multiplicative. -/
 theorem digitMatrix_mul (f g : PowerSeries ℤ_[p]) :
     digitMatrix (f * g) = digitMatrix f * digitMatrix g := by
-  unfold digitMatrix
-  rw [show (PhiAlg.toPS p).symm (f * g)
-      = (PhiAlg.toPS p).symm f * (PhiAlg.toPS p).symm g from map_mul _ _ _, map_mul]
+  simp only [digitMatrix, map_mul]
 
 /-- `digitMatrix 1 = 1`. -/
 @[simp]
@@ -572,14 +565,9 @@ theorem trace_digitMatrix (h : PowerSeries ℤ_[p]) :
   · rw [Fin.val_zero, if_pos rfl, smul_eq_mul, mul_comm]
     congr 1
     -- `repr_0 = ψ h`
-    have hdig : IsDigitDecomp p (PhiAlg.toPS p ((PhiAlg.toPS p).symm h))
-        (fun i => (digitBasis p).repr ((PhiAlg.toPS p).symm h) i) := by
-      rw [IsDigitDecomp, ← sum_smul_one_add_X_pow_eq
-        (fun i => (digitBasis p).repr ((PhiAlg.toPS p).symm h) i)]
-      conv_lhs => rw [← (digitBasis p).sum_repr ((PhiAlg.toPS p).symm h)]
-      exact congrArg (PhiAlg.toPS p) (Finset.sum_congr rfl (fun i _ => by rw [digitBasis_apply]))
-    rw [RingEquiv.apply_symm_apply] at hdig
-    exact (psiSeries_eq_of_isDigitDecomp_padicInt hdig).symm
+    obtain ⟨G, hG, -⟩ := existsUnique_digits_padicInt p h
+    rw [psiSeries_eq_of_isDigitDecomp_padicInt hG,
+      digitBasis_repr_eq ((PhiAlg.toPS p).symm h) G (by rwa [RingEquiv.apply_symm_apply])]
   · intro l _ hl0
     rw [if_neg (by simpa using fun h => hl0 (Fin.ext (by simpa using h))), smul_zero]
   · intro h; exact absurd (Finset.mem_univ _) h
