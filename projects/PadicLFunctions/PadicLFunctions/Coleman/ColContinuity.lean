@@ -629,7 +629,6 @@ theorem continuous_colemanPipe2 :
     Continuous (Function.uncurry (colemanPipe2 p)) := by
   rw [PadicMeasure.continuous_iff_eval]
   intro φ
-  -- the inner power series `(f, finv) ↦ (1+X)·f′·finv` is continuous
   have hseries : Continuous (fun q : PowerSeries ℤ_[p] × PowerSeries ℤ_[p] =>
       (1 + PowerSeries.X) * PowerSeries.derivativeFun q.1 * q.2) := by
     refine (continuous_const.mul ?_).mul continuous_snd
@@ -637,15 +636,6 @@ theorem continuous_colemanPipe2 :
     simp only [PowerSeries.coeff_derivativeFun]
     exact (PowerSeries.WithPiTopology.continuous_coeff ℤ_[p] (n + 1)).comp continuous_fst |>.mul
       continuous_const
-  -- the evaluation factors through `ofPowerSeries (·)(ψ)` at the fixed `ψ`
-  have hval : (fun q : PowerSeries ℤ_[p] × PowerSeries ℤ_[p] =>
-        Function.uncurry (colemanPipe2 p) q φ)
-      = fun q => PadicMeasure.ofPowerSeries p
-          ((1 + PowerSeries.X) * PowerSeries.derivativeFun q.1 * q.2)
-          ((PadicMeasure.extendByZero p (PadicMeasure.invCM p * φ))) := by
-    funext q
-    rfl
-  rw [hval]
   exact (continuous_ofPowerSeries_apply p _).comp hseries
 
 /-! ## Continuity of `colemanSeries` and of `Col` (ST2)
