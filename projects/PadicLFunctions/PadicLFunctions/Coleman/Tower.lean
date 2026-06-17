@@ -48,20 +48,16 @@ private theorem primitiveRoot_pow_succ :
       ∃ w : ℂ_[p], IsPrimitiveRoot w (p ^ (n + 1)) ∧ w ^ p = z := by
   haveI : NeZero (p : ℂ_[p]) := ⟨(Nat.cast_ne_zero (R := ℂ_[p])).mpr hp.out.ne_zero⟩
   rintro (_ | n) z hz
-  · -- `n = 0`: `z = 1`, take a genuine primitive `p`-th root
-    obtain ⟨w, hw⟩ := HasEnoughRootsOfUnity.exists_primitiveRoot ℂ_[p] p
+  · obtain ⟨w, hw⟩ := HasEnoughRootsOfUnity.exists_primitiveRoot ℂ_[p] p
     have hz1 : z = 1 := by simpa using hz.pow_eq_one
     exact ⟨w, by simpa using hw, by rw [hz1, hw.pow_eq_one]⟩
-  · -- `n + 1`: any `p`-th root `w` of `z` has order exactly `p^{n+2}`
-    obtain ⟨w, hwz⟩ := IsAlgClosed.exists_pow_nat_eq (k := ℂ_[p]) z (n := p) hp.out.pos
+  · obtain ⟨w, hwz⟩ := IsAlgClosed.exists_pow_nat_eq (k := ℂ_[p]) z (n := p) hp.out.pos
     refine ⟨w, ?_, hwz⟩
     rw [IsPrimitiveRoot.iff_orderOf]
-    -- `w^{p^{n+2}} = z^{p^{n+1}} = 1`, so `orderOf w ∣ p^{n+2}`
     have hpow : w ^ p ^ (n + 1 + 1) = 1 := by
       rw [pow_succ', pow_mul, hwz, hz.pow_eq_one]
     have hdvd : orderOf w ∣ p ^ (n + 1 + 1) := orderOf_dvd_of_pow_eq_one hpow
     obtain ⟨k, hkle, hk⟩ := (Nat.dvd_prime_pow hp.out).1 hdvd
-    -- if `k ≤ n+1` then `z^{p^n} = w^{p^{n+1}} = 1`, contradicting `hz`
     rcases eq_or_lt_of_le hkle with hkeq | hklt
     · rw [hk, hkeq]
     · exfalso
@@ -80,7 +76,6 @@ once and for all a compatible system of roots of unity `(ξ_{p^n})_n`". -/
 theorem exists_compatible_primitiveRoot :
     ∃ ξ : ℕ → ℂ_[p],
       (∀ n, IsPrimitiveRoot (ξ n) (p ^ n)) ∧ ∀ n, ξ (n + 1) ^ p = ξ n := by
-  -- build the system as a chain of subtypes `{z // IsPrimitiveRoot z (p^n)}`
   let chain : ∀ n, {z : ℂ_[p] // IsPrimitiveRoot z (p ^ n)} := fun n =>
     Nat.rec ⟨1, by simp⟩ (fun _ zn => ⟨(primitiveRoot_pow_succ p zn.2).choose,
       (primitiveRoot_pow_succ p zn.2).choose_spec.1⟩) n
@@ -230,8 +225,8 @@ private theorem norm_primitiveRoot_eq_one {n : ℕ} {ξ : ℂ_[p]}
   have h1 : ‖ξ‖ ^ (p ^ n) = 1 := by rw [← norm_pow, hξ.pow_eq_one, norm_one]
   have hne : p ^ n ≠ 0 := (pow_pos hp.out.pos n).ne'
   refine le_antisymm ?_ ?_
-  · by_contra h; rw [not_le] at h; exact absurd h1 (one_lt_pow₀ h hne).ne'
-  · by_contra h; rw [not_le] at h; exact absurd h1 (pow_lt_one₀ (norm_nonneg ξ) h hne).ne
+  · by_contra! h; exact absurd h1 (one_lt_pow₀ h hne).ne'
+  · by_contra! h; exact absurd h1 (pow_lt_one₀ (norm_nonneg ξ) h hne).ne
 
 /-- For a norm-one element `ξ` of `ℂ_p`, `‖ξ^c − 1‖ ≤ ‖ξ − 1‖`: factor
 `ξ^c − 1 = (∑_{i<c} ξ^i)(ξ − 1)` and bound the geometric factor by `1`
