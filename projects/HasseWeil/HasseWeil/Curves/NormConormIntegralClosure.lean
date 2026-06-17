@@ -153,7 +153,14 @@ of `C₁` cut out by `v` lies over an affine place of `C₂` (so it is *not* `�
 `y₁` have their poles).  This packages the place-identification `B`-prime ↔ affine point of `C₁`
 (over the affine part of `C₂`) that the localized `LocalizedDictionary.pointAt` provides only off a
 denominator locus; the global version requires `hreg` (to exclude `∞`) plus the place classification
-of `C₁`.  Stated as a named hypothesis so that the integrality reduction below is structural. -/
+of `C₁`.  Stated as a named hypothesis so that the integrality reduction below is structural.
+
+**Reduction (this file).**  This residual is now *derived* from the sharper, single-content
+hypothesis `BPrimePlaceClassification` (the curve-completeness statement: every `B`-prime valuation
+is a point valuation or the `∞`-place) together with the basepoint-regularity `OrdAtInftyReg`, via
+`bPrimeValuationCoordGenLeOne_of_classification_of_reg`.  The geometric `∞`-exclusion half is
+discharged here (`bPrime_valuation_ne_ordAtInfty`, from the ramification-at-`∞` pullback formula),
+leaving `BPrimePlaceClassification` as the *only* genuine remaining input. -/
 def BPrimeValuationCoordGenLeOne : Prop :=
   ∀ v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)),
     v.valuation C₁.FunctionField (coordXFun C₁) ≤ 1 ∧
