@@ -4,6 +4,8 @@ import Mathlib.RingTheory.Localization.Module
 import Mathlib.Algebra.Module.LocalizedModule.Exact
 import Mathlib.RingTheory.Ideal.Height
 import Mathlib.RingTheory.OrderOfVanishing.Basic
+import Mathlib.RingTheory.Localization.Finiteness
+import Mathlib.Algebra.Module.Torsion.Basic
 
 /-!
 # The characteristic ideal and its multiplicativity  (S13-S4)
@@ -79,14 +81,37 @@ theorem localMult_ne_top [IsDomain 𝒪] [IsPrincipalIdealRing 𝒪]
     refine Ring.krullDimLE_iff.mpr ?_
     rw [IsLocalization.AtPrime.ringKrullDim_eq_height P (Localization.AtPrime P), hP1]
     norm_cast
-  rw [localMult, Module.length_ne_top_iff]
-  -- `M_P` is finitely generated over `Λ_P` (instance) and killed by the image of the nonzero
-  -- annihilator `c` of `M` (`iwasawaAlgebra_exists_ne_zero_smul_eq_zero`); hence it is a
-  -- finitely generated module over the Artinian ring `Λ_P/(c)` (`isFiniteLength_quotient_span_singleton`
-  -- since `Λ_P` is Noetherian of Krull dimension ≤ 1, just shown), so it is Artinian
-  -- (`isArtinian_of_fg_of_artinian'`, transferred along `Λ_P ↠ Λ_P/(c)` by `isArtinian_of_tower`)
-  -- and Noetherian, i.e. finite length.  [Standard f.g.-torsion-over-1-dim-Noetherian fact.]
-  sorry
+  -- `M` is killed by a nonzero `c`; its image `c'` in `Λ_P` kills `M_P`.
+  obtain ⟨c, hc0, hcM⟩ := iwasawaAlgebra_exists_ne_zero_smul_eq_zero 𝒪 M hM
+  set c' : Localization.AtPrime P := algebraMap (IwasawaAlgebra 𝒪) (Localization.AtPrime P) c
+    with hc'
+  have hkill : Module.IsTorsionBy (Localization.AtPrime P) (LocalizedModule P.primeCompl M) c' := by
+    intro x
+    induction x using LocalizedModule.induction_on with
+    | _ m s =>
+      rw [hc', algebraMap_smul, LocalizedModule.smul'_mk, hcM m, LocalizedModule.zero_mk]
+  -- `c'` is a nonzerodivisor of the domain `Λ_P`, so `Λ_P/(c')` is Artinian (finite length).
+  have hc'nzd : c' ∈ nonZeroDivisors (Localization.AtPrime P) := by
+    rw [mem_nonZeroDivisors_iff_ne_zero, hc', Ne,
+      ← map_zero (algebraMap (IwasawaAlgebra 𝒪) (Localization.AtPrime P))]
+    exact fun h => hc0
+      (IsLocalization.injective (Localization.AtPrime P) (Ideal.primeCompl_le_nonZeroDivisors P) h)
+  haveI hflq : IsFiniteLength (Localization.AtPrime P)
+      (Localization.AtPrime P ⧸ Ideal.span {c'}) :=
+    isFiniteLength_quotient_span_singleton _ hc'nzd
+  haveI : IsArtinian (Localization.AtPrime P) (Localization.AtPrime P ⧸ Ideal.span {c'}) :=
+    (isFiniteLength_iff_isNoetherian_isArtinian.mp hflq).2
+  haveI : IsArtinianRing (Localization.AtPrime P ⧸ Ideal.span {c'}) :=
+    isArtinian_of_tower (Localization.AtPrime P) ‹_›
+  -- `M_P` is finitely generated over the Artinian ring `Λ_P/(c')`, hence finite length;
+  -- transfer the length back to `Λ_P` along the surjection `Λ_P ↠ Λ_P/(c')`.
+  letI := hkill.module
+  haveI : Module.Finite (Localization.AtPrime P ⧸ Ideal.span {c'}) (LocalizedModule P.primeCompl M) :=
+    Module.Finite.of_restrictScalars_finite (Localization.AtPrime P) _ _
+  rw [localMult, Module.length_eq_of_surjective
+    (S := Localization.AtPrime P) (R := Localization.AtPrime P ⧸ Ideal.span {c'})
+    Ideal.Quotient.mk_surjective]
+  exact Module.length_ne_top
 
 /-- The **characteristic ideal** `Ch_Λ(M) ⊆ Λ` of a finitely generated torsion `Λ`-module,
 defined the length-theoretic way: the product over height-one primes `P` of
