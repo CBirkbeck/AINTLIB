@@ -129,8 +129,35 @@ theorem localMult_pow_mulSupport_finite [IsDomain 𝒪] [IsPrincipalIdealRing �
   refine ((Module.annihilator (IwasawaAlgebra 𝒪) M).finite_minimalPrimes_of_isNoetherianRing).subset ?_
   rintro Q ⟨⟨P, hP, hP1⟩, hmem, rfl⟩
   haveI := hP
-  -- `P` is a height-one prime containing `Ann M`, hence minimal over `Ann M`.
-  sorry
+  obtain ⟨c, hc0, hcM⟩ := iwasawaAlgebra_exists_ne_zero_smul_eq_zero 𝒪 M hM
+  have hcann : c ∈ Module.annihilator (IwasawaAlgebra 𝒪) M := Module.mem_annihilator.mpr hcM
+  -- `localMult P M ≠ 0`, so `M_P` is nontrivial, so `P` lies in the support, so `Ann M ≤ P`.
+  rw [Function.mem_mulSupport] at hmem
+  have hlm : localMult 𝒪 P M ≠ 0 := fun h0 => hmem (by rw [h0, ENat.toNat_zero, pow_zero])
+  have hns : ¬ Subsingleton (LocalizedModule P.primeCompl M) :=
+    fun hs => hlm (Module.length_eq_zero_iff.mpr hs)
+  have hannP : Module.annihilator (IwasawaAlgebra 𝒪) M ≤ P := by
+    have hmemsupp : (⟨P, hP⟩ : PrimeSpectrum (IwasawaAlgebra 𝒪)) ∈
+        Module.support (IwasawaAlgebra 𝒪) M := by
+      by_contra hc
+      exact hns (Module.notMem_support_iff.mp hc)
+    exact Module.mem_support_iff_of_finite.mp hmemsupp
+  -- a minimal prime `Q ≤ P` of `Ann M` must equal `P`: `Q ⊇ (c)` forces `height Q ≥ 1`, but
+  -- `Q < P` would force `height Q + 1 ≤ height P = 1`.
+  obtain ⟨Q, hQ, hQP⟩ := Ideal.exists_minimalPrimes_le hannP
+  rcases eq_or_lt_of_le hQP with rfl | hlt
+  · exact hQ
+  · exfalso
+    haveI : Q.IsPrime := hQ.1.1
+    have hcQ : Ideal.span {c} ≤ Q :=
+      Ideal.span_le.mpr (Set.singleton_subset_iff.mpr (hQ.1.2 hcann))
+    have hQpos : 1 ≤ Q.height :=
+      le_trans (Ideal.one_le_height_span_singleton_of_mem_nonZeroDivisors
+        (mem_nonZeroDivisors_of_ne_zero hc0)) (Ideal.height_mono hcQ)
+    have hcontra : Q.height + 1 ≤ P.height := Ideal.height_add_one_le_of_lt_of_isPrime hlt
+    rw [hP1] at hcontra
+    have hbad : (1 : ℕ∞) + 1 ≤ 1 := le_trans (by gcongr) hcontra
+    norm_num at hbad
 
 /-- The **characteristic ideal** `Ch_Λ(M) ⊆ Λ` of a finitely generated torsion `Λ`-module,
 defined the length-theoretic way: the product over height-one primes `P` of
