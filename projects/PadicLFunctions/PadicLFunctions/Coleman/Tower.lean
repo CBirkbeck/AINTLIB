@@ -924,7 +924,6 @@ private theorem exists_pi_repr {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]} (hx : x �
     ∃ d : Fin p → ℂ_[p], (∀ k, d k ∈ K p n) ∧
       x = ∑ k : Fin p, d k * pi p (n + 1) ^ (k : ℕ) := by
   obtain ⟨W, hWval, hWint, hWtop⟩ := zetaSys_extendScalars_generator p hn
-  -- V = W − 1 generates `K_{n+1}/K_n` and is integral; its value is `π_{n+1}`
   set V : IntermediateField.extendScalars (K_le_succ p n) := W - 1 with hV
   have hVval : (V : ℂ_[p]) = pi p (n + 1) := by
     rw [hV]; push_cast; rw [hWval, pi]
@@ -986,12 +985,10 @@ theorem O_succ_exists_digits {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]} (hx : x ∈ 
     ∃ c : Fin p → ℂ_[p], (∀ i, c i ∈ O p n) ∧
       x = ∑ i : Fin p, c i * zetaSys p (n + 1) ^ (i : ℕ) := by
   obtain ⟨hxK, hxnorm⟩ := Subring.mem_inf.1 hx
-  -- uniformiser-power expansion, with all coefficients in `O_n` (orthogonality collapse)
   obtain ⟨d, hdK, hxd⟩ := exists_pi_repr p hn hxK
   have hdO : ∀ k, ‖d k‖ ≤ 1 := by
     refine forall_norm_le_one_of_norm_sum_pi_pow_le_one p hn d hdK ?_
     rw [← hxd]; exact hxnorm
-  -- `x ∈ O_n`-span of the `ξ`-powers
   have hxspan : x ∈ Submodule.span (O p n)
       (Set.range (fun i : Fin p => zetaSys p (n + 1) ^ (i : ℕ))) := by
     rw [hxd]
@@ -1001,7 +998,6 @@ theorem O_succ_exists_digits {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]} (hx : x ∈ 
     rw [show d k * pi p (n + 1) ^ (k : ℕ)
       = (⟨d k, hdkO⟩ : O p n) • pi p (n + 1) ^ (k : ℕ) from rfl]
     exact Submodule.smul_mem _ _ (pi_pow_mem_span p k.2)
-  -- extract the `ξ`-coordinates
   rw [Submodule.mem_span_range_iff_exists_fun] at hxspan
   obtain ⟨c, hc⟩ := hxspan
   refine ⟨fun i => ((c i : O p n) : ℂ_[p]), fun i => (c i).2, ?_⟩
@@ -1021,12 +1017,10 @@ private theorem zetaSys_pow_sum_eq_zero_imp {n : ℕ} (hn : 1 ≤ n) {e : Fin p 
     (heK : ∀ i, e i ∈ K p n) (he0 : ∑ i : Fin p, e i * zetaSys p (n + 1) ^ (i : ℕ) = 0) :
     ∀ i, e i = 0 := by
   obtain ⟨W, hWval, hWint, hWtop⟩ := zetaSys_extendScalars_generator p hn
-  -- `natDegree (minpoly K_n W) = p`
   have hdeg : (minpoly (K p n) W).natDegree = p := by
     have h1 := IntermediateField.adjoin.finrank hWint
     rw [hWtop, IntermediateField.finrank_top', finrank_K_succ p hn] at h1
     exact h1.symm
-  -- lift the `ℂ_p`-relation to `extendScalars`
   set ees : Fin p → K p n := fun i => ⟨e i, heK i⟩ with hees
   have hlift : ∑ i : Fin p, ees i • W ^ (i : ℕ) = 0 := by
     apply Subtype.ext
@@ -1035,10 +1029,8 @@ private theorem zetaSys_pow_sum_eq_zero_imp {n : ℕ} (hn : 1 ≤ n) {e : Fin p 
     rw [IntermediateField.coe_smul, hees]
     change (e i) * (W : ℂ_[p]) ^ (i : ℕ) = e i * zetaSys p (n + 1) ^ (i : ℕ)
     rw [hWval]
-  -- linear independence of `W`-powers, reindexed `Fin p ≃ Fin (natDegree)`
   have hli := linearIndependent_pow (K := K p n) W
   rw [Fintype.linearIndependent_iff] at hli
-  -- transport `ees` along `Fin p = Fin (natDegree)`
   have hsum' : ∑ i : Fin (minpoly (K p n) W).natDegree,
       (fun i => ees (Fin.cast hdeg i)) i • W ^ (i : ℕ) = 0 := by
     rw [← hlift]
