@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import HasseWeil.Curves.LocalizedDictionary
 import HasseWeil.Curves.PushforwardDivisor
 import HasseWeil.Curves.RamificationFinite
+import HasseWeil.Curves.OrdAtInftyRamification
 import Mathlib.RingTheory.Valuation.Discrete.IsDiscreteValuationRing
 
 /-!
@@ -290,6 +291,75 @@ theorem valuationSubring_isDVR
   haveI : Nontrivial (MonoidWithZeroHom.valueGroup (.ofClass w)) := by
     rw [hvg]; exact Subgroup.topEquiv.symm.toEquiv.nontrivial
   exact Valuation.valuationSubring_isDiscreteValuationRing w
+
+/-- The coercion `ℤ → WithTop ℤ` commutes with `nsmul`. -/
+private theorem coe_nsmul_int (k : ℕ) (a : ℤ) :
+    (k • ((a : ℤ) : WithTop ℤ)) = ((((k : ℤ) * a : ℤ)) : WithTop ℤ) := by
+  induction k with
+  | zero => simp
+  | succ n ih => rw [succ_nsmul, ih, ← WithTop.coe_add]; congr 1; push_cast; ring
+
+/-- **The `∞`-exclusion `hinf`, discharged from regularity** (axiom-clean): given `OrdAtInftyReg`
+(`hreg`, the basepoint-regularity carried by an isogeny), *no* height-one prime `v` of `B` has
+`v.valuation = C₁.ordAtInftyValuation`.  This is the geometric content excluding the place at
+infinity of `C₁`, and it is *provable* (not residual): the coordinate generator `coordX C₂` is a
+base-ring element of `B`, so `v` is `≤ 1` on its image (`valuation_algebraMap_coordinateRing_le_one`);
+were `v` the `∞`-place, this would force `ord_∞^{C₁}(φ^* coordX₂) ≥ 0`.  But the
+ramification-at-`∞` pullback formula (`exists_pos_ramificationIdx_ordAtInfty_ringHom_of_isAlgebraic`,
+with `e ≥ 1` and `K(C₁)/K(C₂)` algebraic from finiteness) gives
+`ord_∞^{C₁}(φ^* coordX₂) = e · ord_∞^{C₂}(coordX₂) = e · (−2) < 0` — a contradiction. -/
+theorem bPrime_valuation_ne_ordAtInfty (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂))
+    (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂))) :
+    v.valuation C₁.FunctionField ≠ C₁.ordAtInftyValuation := by
+  -- the ramification index `e ≥ 1` at `∞`, from `hreg` + algebraicity (finiteness)
+  obtain ⟨e, he, hform⟩ :
+      ∃ e : ℕ, 1 ≤ e ∧ ∀ g : C₂.FunctionField, g ≠ 0 →
+        C₁.ordAtInfty (algebraMap C₂.FunctionField C₁.FunctionField g) = e • C₂.ordAtInfty g := by
+    have halg : letI : Algebra C₂.FunctionField C₁.FunctionField := algKL
+        IsAlgebraic C₂.FunctionField C₁.coordX :=
+      Algebra.IsAlgebraic.isAlgebraic C₁.coordX
+    exact SmoothPlaneCurve.exists_pos_ramificationIdx_ordAtInfty_ringHom_of_isAlgebraic
+      (algebraMap C₂.FunctionField C₁.FunctionField) hreg halg
+  -- the pole of `φ^* coordX₂` at `∞` of `C₁`: `ord_∞ = e·(-2) < 0`
+  have hpole : C₁.ordAtInfty (algebraMap C₂.FunctionField C₁.FunctionField C₂.coordX) =
+      ((((e : ℤ) * (-2 : ℤ)) : ℤ) : WithTop ℤ) := by
+    rw [hform C₂.coordX C₂.coordX_ne_zero, C₂.ordAtInfty_coordX, coe_nsmul_int]
+  intro hv
+  -- `coordX₂` image is a base-ring element of `B`, so `v ≤ 1` on it
+  have hle : v.valuation C₁.FunctionField
+      (algebraMap C₂.FunctionField C₁.FunctionField C₂.coordX) ≤ 1 := by
+    have hcr : algebraMap C₂.CoordinateRing C₁.FunctionField
+          (WeierstrassCurve.Affine.CoordinateRing.mk C₂.toAffine (Polynomial.C Polynomial.X)) =
+        algebraMap C₂.FunctionField C₁.FunctionField C₂.coordX := by
+      rw [SmoothPlaneCurve.coordX,
+        IsScalarTower.algebraMap_apply C₂.CoordinateRing C₂.FunctionField C₁.FunctionField]
+      rfl
+    rw [← hcr]
+    exact valuation_algebraMap_coordinateRing_le_one v _
+  -- but `v = ordAtInftyValuation` and the pole forces `> 1`
+  rw [hv] at hle
+  have halg_ne : algebraMap C₂.FunctionField C₁.FunctionField C₂.coordX ≠ 0 := by
+    rw [Ne, map_eq_zero_iff _ (FaithfulSMul.algebraMap_injective C₂.FunctionField C₁.FunctionField)]
+    exact C₂.coordX_ne_zero
+  rw [C₁.ordAtInftyValuation_le_one_iff_ordAtInfty_nonneg halg_ne, hpole] at hle
+  have he2 : ((e : ℤ) * (-2 : ℤ)) < 0 := by
+    have : (1 : ℤ) ≤ e := by exact_mod_cast he
+    nlinarith
+  rw [show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl, WithTop.coe_le_coe] at hle
+  omega
+
+/-- **The place-dictionary residual from the curve-completeness classification + regularity**
+(axiom-clean): given the sharp place classification `BPrimePlaceClassification` and the
+basepoint-regularity `OrdAtInftyReg` (`hreg`), the residual `BPrimeValuationCoordGenLeOne` follows
+— the `∞` alternative of the classification is excluded by `bPrime_valuation_ne_ordAtInfty`.  This is
+the cleanest reduction: it removes the geometric `∞`-exclusion entirely, leaving the *single*
+genuine wall, the curve-completeness classification `BPrimePlaceClassification`. -/
+theorem bPrimeValuationCoordGenLeOne_of_classification_of_reg
+    (hclass : BPrimePlaceClassification (C₁ := C₁) (C₂ := C₂))
+    (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂)) :
+    BPrimeValuationCoordGenLeOne (C₁ := C₁) (C₂ := C₂) :=
+  bPrimeValuationCoordGenLeOne_of_classification hclass
+    (bPrime_valuation_ne_ordAtInfty hreg)
 
 /-- **The `x`-generator of `C₁` is integral over `C₂.CoordinateRing`** (regular at every place
 of `C₁` over an affine place of `C₂`).  Reduced — *non-circularly*, via the valuative criterion
