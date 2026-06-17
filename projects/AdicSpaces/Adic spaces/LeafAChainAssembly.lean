@@ -42,6 +42,45 @@ universe u
 variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
   [PlusSubring A] [IsHuberRing A]
 
+/-- **genPieceUnit `rationalOpen`-eq** — `R({↑u}/sB) = R({1}/(sB·↑u⁻¹))` for `↑u` a unit
+(`x(↑u) ≤ x(sB) ⟺ x(1) ≤ x(sB·↑u⁻¹)`, unit cancellation). Extracted so the engine's `h_ro` is
+a one-liner (matching `imagePieceDatum_domUnit_rationalOpen_eq`'s structure). -/
+theorem genPieceUnit_coUnit_rationalOpen_eq (P : PairOfDefinition A) (u : Aˣ) (sB : A)
+    (hspan : Ideal.span (({(↑u : A)} : Finset A) : Set A) = ⊤) :
+    rationalOpen (genPieceDatum P {(↑u : A)} sB hspan).T (genPieceDatum P {(↑u : A)} sB hspan).s =
+      rationalOpen (coUnitDatum P (sB * ↑u⁻¹)).T (coUnitDatum P (sB * ↑u⁻¹)).s := by
+  classical
+  have hui : (↑u : A) * (↑u⁻¹ : A) = 1 := by rw [← Units.val_mul, mul_inv_cancel, Units.val_one]
+  have hiu : (↑u⁻¹ : A) * (↑u : A) = 1 := by rw [← Units.val_mul, inv_mul_cancel, Units.val_one]
+  have hWT : (genPieceDatum P {(↑u : A)} sB hspan).T = {(↑u : A)} := rfl
+  have hWs : (genPieceDatum P {(↑u : A)} sB hspan).s = sB := rfl
+  have hUT : (coUnitDatum P (sB * ↑u⁻¹)).T = {(1 : A)} := rfl
+  have hUs : (coUnitDatum P (sB * ↑u⁻¹)).s = sB * ↑u⁻¹ := rfl
+  rw [hWT, hWs, hUT, hUs]
+  apply Set.ext
+  intro w
+  rw [rationalOpen, rationalOpen, Set.mem_sep_iff, Set.mem_sep_iff]
+  refine and_congr_right fun hspa => ?_
+  constructor
+  · rintro ⟨hgen, hnz⟩
+    have h1 : w.vle (↑u : A) sB := hgen _ (Finset.mem_singleton_self _)
+    refine ⟨fun t ht => ?_, ?_⟩
+    · rw [Finset.mem_singleton] at ht; subst ht
+      have h2 := w.mul_vle_mul_left h1 (↑u⁻¹ : A)
+      rwa [hui] at h2
+    · intro h0
+      exact hnz (by have h2 := w.mul_vle_mul_left h0 (↑u : A)
+                    rwa [mul_assoc, hiu, mul_one, zero_mul] at h2)
+  · rintro ⟨hgen, hnz⟩
+    have h1 : w.vle (1 : A) (sB * ↑u⁻¹) := hgen _ (Finset.mem_singleton_self _)
+    refine ⟨fun t ht => ?_, ?_⟩
+    · rw [Finset.mem_singleton] at ht; subst ht
+      have h2 := w.mul_vle_mul_left h1 (↑u : A)
+      rwa [one_mul, mul_assoc, hiu, mul_one] at h2
+    · intro h0
+      exact hnz (by have h2 := w.mul_vle_mul_left h0 (↑u⁻¹ : A)
+                    rwa [zero_mul] at h2)
+
 /-- **Whole-space Prop 8.30 (Remark 7.55 chain), assembled downstream.**
 `𝒪_B(im E)` is flat over `B = 𝒪_X(D)`, for `im E = imagePieceDatum D E.T E.s` the whole-space
 image of a `span = ⊤` rational piece. Proven by folding `flat_chainStep_domUnit` over `E.T`'s
