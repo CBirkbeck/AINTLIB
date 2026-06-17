@@ -3,6 +3,7 @@ import Mathlib.RingTheory.PowerSeries.Ideal
 import Mathlib.RingTheory.DiscreteValuationRing.Basic
 import Mathlib.RingTheory.DiscreteValuationRing.TFAE
 import Mathlib.RingTheory.Localization.AtPrime.Basic
+import Mathlib.RingTheory.Ideal.AssociatedPrime.Finiteness
 
 /-!
 # The structure theorem for finitely generated Λ-modules  (S13-S3)
@@ -106,6 +107,15 @@ theorem iwasawaAlgebra_localization_atPrime_isDVR
     rwa [hbot, Ideal.mem_bot] at hmem
   exact ((IsDiscreteValuationRing.TFAE
     (Localization.AtPrime (Ideal.span {π} : Ideal (IwasawaAlgebra 𝒪))) hnf).out 4 0).mp hprinc
+
+/-- **S13-S3d (support finiteness)**: a finitely generated `Λ`-module has only finitely
+many associated primes.  These cut out the finite set of height-one primes over which the
+structure theorem's local (DVR) pieces live — the index set of the eventual direct sum. -/
+theorem iwasawaAlgebra_associatedPrimes_finite [IsNoetherianRing 𝒪]
+    (M : Type*) [AddCommGroup M] [Module (IwasawaAlgebra 𝒪) M]
+    [Module.Finite (IwasawaAlgebra 𝒪) M] :
+    (associatedPrimes (IwasawaAlgebra 𝒪) M).Finite :=
+  associatedPrimes.finite (IwasawaAlgebra 𝒪) M
 
 /-- **The structure theorem (clean form), S13-S3 / Washington Thm 13.12.**
 Every finitely generated `Λ`-module `M` is pseudo-isomorphic to `Λ^r ⊕ ⨁ᵢ Λ/(gᵢ^eᵢ)`
