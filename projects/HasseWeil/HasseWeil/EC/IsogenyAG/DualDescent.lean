@@ -1,5 +1,6 @@
 import HasseWeil.EC.IsogenyAG.IsogenyClass
 import HasseWeil.EC.IsogenyAG.MulByIntBasepoint
+import HasseWeil.EC.IsogenyAG.TwistedFactorization
 import HasseWeil.Curves.CurveMapBaseChange
 import HasseWeil.Curves.NoFinitePolesBridge
 import HasseWeil.Curves.OrdAtInftyBaseChange
@@ -34,14 +35,23 @@ The arc is landed end-to-end with the deep input now isolated to **one** named `
 * **DUAL-Q2** (`descendPullback` / `descendIsogeny`): a `Gal(L/F)`-equivariant pullback descends to an
   `F`-algebra hom and to an `EC.Isogeny` over `F`; the algebra-hom packaging, the round-trip
   `functionFieldMap_comp_descendPullback`, and the basepoint condition `descend_basepoint` are all
-  proved (the CurveMap-from-restricted-pullback crux is **complete** modulo Q1's `sorry`).
+  proved — **axiom-clean** (Q1's `sorry` is gone).
 * **DUAL-Q3** (`galEquivariant_of_compose`): from the defining identity `φ* ∘ φ̂* = [m]*` and
-  injectivity of `φ*`, the dual pullback is equivariant — **axiom-clean** (the base-changed-pullback
-  equivariance feeding it is the residual inside `sorry` #2).
+  injectivity of `φ*`, the dual pullback is equivariant — **axiom-clean** (the full base-changed-pullback
+  equivariance feeding it is one of the sub-gaps inside the single residual below).
 * **DUAL-Q4** (`hasDualWitness_of_compose` + `universalDualWitness_of_charZero`): a reverse isogeny
-  `ρ` over `F` with `ρ ∘ φ = [deg φ]` yields `HasDualWitness φ` — **axiom-clean**; the headline
-  reduces to the assembled-chain residual `rationalDualCompose_of_charZero` (`sorry` #2). The label
-  gate is discharged ungated in `IsogenyClassLabel.lean` (`*_charZero`).
+  `ρ` over `F` with `ρ ∘ φ = [deg φ]` yields `HasDualWitness φ` — **axiom-clean**. The headline
+  `rationalDualCompose_of_charZero` is now a **thin assembly** over its proven pieces:
+  - `isSeparable_of_charZero` (char-0 ⟹ separable) — **proved, axiom-clean**;
+  - `rationalDualCompose_of_hasMulByIntDualWitness` (from an `F`-rational `[n]`-witness, the reverse
+    isogeny with `ρ ∘ φ = [n]` is purely formal) — **proved, axiom-clean**;
+  - `hasMulByIntDualWitness_of_rangeIncl` (the basepoint leaf, `mulByIntBasepoint_holds` +
+    `reflects_ordAtInfty`) — **proved**;
+  and the **single remaining `sorry`** `rationalRangeIncl_of_separable`: the range inclusion
+  `Im([deg φ]*) ⊆ Im(φ*)` over `F` for a separable isogeny. Its precise sub-gaps (general two-curve
+  base-change to `K̄`; field of definition over a finite Galois `L/F`; full base-changed-pullback
+  equivariance) are documented at that declaration (REVIEW-PENDING). The label gate is discharged
+  ungated in `IsogenyClassLabel.lean` (`*_charZero`).
 -/
 
 namespace HasseWeil.EC
@@ -692,22 +702,150 @@ noncomputable def hasDualWitness_of_compose {W₁ W₂ : WeierstrassCurve.Affine
     (EC.mulByIntBasepoint_holds W₁ hn)
     (EC.Isogeny.reflects_ordAtInfty φ)
 
+/-- **DUAL-Q4 deep residual** — the `K̄`-dual-plus-descent core (REVIEW-PENDING). For a **separable**
+isogeny `φ : E₁ → E₂` over `F`, there is `n ≠ 0` (mathematically `n = deg φ`) and an `F`-rational
+faithful `[n]`-witness `HasMulByIntDualWitness φ n hn`, i.e. `Im([n]*) ⊆ Im(φ*)` over `F`.
+
+This is the genuinely-deep content of Silverman III.6.1, isolating the three known mathlib gaps of
+the descent assembly:
+
+1. **General two-curve base-change of an isogeny to `K̄`.** The project's
+   `EC.Isogeny.baseChangeIsogeny` (`EC/IsogenyAG/BaseChange.lean`) is *endomorphism-only*
+   (`W.baseChange L → W.baseChange L`); a general `φ : E₁ → E₂` over `F` needs the two-curve
+   base-change `φ_K̄ : E₁_K̄ → E₂_K̄` with its `CoordHom` (`baseChangeXgen`/`baseChangeCoordHom`
+   generalized to distinct source/target curves). **Missing:** the two-curve `baseChangeIsogeny`.
+
+2. **Field of definition.** The `K̄`-dual produced by `exists_dual_of_pullbackEvaluation_general`
+   (`EC/KernelCountGeneral.lean`) lives over `K̄ = AlgebraicClosure F`, which is *infinite*; descent
+   (`descendIsogeny`) requires it defined over a *finite* Galois `L/F`. **Missing mathlib fact:** a
+   morphism of varieties over `AlgebraicClosure F` is defined over a finite (here finite Galois)
+   subextension `L/F` — there is no such descent lemma in mathlib, and the project has no
+   field-of-definition infrastructure.
+
+3. **Full base-changed-pullback equivariance.** `descendIsogeny` needs the `K̄`-dual's pullback
+   `Gal(L/F)`-equivariant on *all* of `F(C_L)` (DUAL-Q3). `galEquivariant_of_compose` reduces this to
+   the equivariance of `φ_L*` and `[n]_L*`; the latter is `galEquivariant_baseChange_on_image` *only
+   on the image of `F(E)`* (the easy half). The full statement on all of `F(C_L)` is the Q3 residual.
+
+Once available, the round-trip (`functionFieldMap_comp_descendPullback` + `functionFieldMap`
+injectivity, with `Isogeny.mulByInt`/`compose` base-change faithfulness) transports the `K̄` identity
+`(ρ_K̄ ∘ φ_K̄)* = [n]*` to this `F`-level range inclusion. See `tickets-dual-descent.md` DUAL-Q4.
+
+Stated at `n = deg φ` (Silverman's value): the *basepoint* leaf of the dual witness is **not** part
+of this residual — it is discharged unconditionally (`mulByIntBasepoint_holds` +
+`Isogeny.reflects_ordAtInfty`) in `hasMulByIntDualWitness_of_rangeIncl` below. So the entire deep
+content of Silverman III.6.1 over a char-0 base is exactly this one range inclusion. -/
+private theorem rationalRangeIncl_of_separable {F : Type*} [Field F] [DecidableEq F]
+    {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
+    (φ : EC.Isogeny W₁ W₂) (_hsep : φ.IsSeparable) :
+    (HasseWeil.mulByInt_pullbackAlgHom W₁ (φ.degree : ℤ)
+        (by exact_mod_cast φ.degree_pos'.ne')).range ≤ φ.toCurveMap.pullback.range :=
+  sorry
+
+/-- **The faithful `[deg φ]`-witness from the range inclusion** (the basepoint leaf, fully proved).
+Given the deep range inclusion `Im([deg φ]*) ⊆ Im(φ*)` (`rationalRangeIncl_of_separable`), the
+faithful dual witness `HasMulByIntDualWitness φ (deg φ)` is assembled: its basepoint field is the
+unconditional `Isogeny.hbase_of_reflects` fed by `mulByIntBasepoint_holds` (the `[n]`-basepoint
+theorem) and `Isogeny.reflects_ordAtInfty` (the `∞`-regularity reflection). No descent input. -/
+private theorem hasMulByIntDualWitness_of_rangeIncl {F : Type*} [Field F] [DecidableEq F]
+    {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
+    (φ : EC.Isogeny W₁ W₂)
+    (hincl : (HasseWeil.mulByInt_pullbackAlgHom W₁ (φ.degree : ℤ)
+        (by exact_mod_cast φ.degree_pos'.ne')).range ≤ φ.toCurveMap.pullback.range) :
+    φ.HasMulByIntDualWitness (φ.degree : ℤ) (by exact_mod_cast φ.degree_pos'.ne') where
+  hincl := hincl
+  hbase := EC.Isogeny.hbase_of_reflects φ
+    (HasseWeil.mulByInt_pullbackAlgHom W₁ (φ.degree : ℤ)
+      (by exact_mod_cast φ.degree_pos'.ne')) hincl
+    (EC.mulByIntBasepoint_holds W₁ (by exact_mod_cast φ.degree_pos'.ne'))
+    (EC.Isogeny.reflects_ordAtInfty φ)
+
+/-- **DUAL-Q4 deep residual, assembled** — the separable reverse-isogeny existence (Silverman
+III.6.1, char-0 case): from the deep range inclusion (`rationalRangeIncl_of_separable`, the sole
+remaining `sorry`) and the proved basepoint leaf (`hasMulByIntDualWitness_of_rangeIncl`), a
+separable isogeny over a char-0 base admits an `F`-rational faithful `[deg φ]`-witness. -/
+private theorem rationalReverseCompose_of_separable {F : Type*} [Field F] [DecidableEq F]
+    {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
+    (φ : EC.Isogeny W₁ W₂) (hsep : φ.IsSeparable) :
+    ∃ (n : ℤ) (hn : n ≠ 0), φ.HasMulByIntDualWitness n hn :=
+  ⟨(φ.degree : ℤ), by exact_mod_cast φ.degree_pos'.ne',
+    hasMulByIntDualWitness_of_rangeIncl φ (rationalRangeIncl_of_separable φ hsep)⟩
+
+/-! ### Char-0 separability and the `F`-level formal payoff
+
+Two leaves of the assembly that are **fully provable at the base field** (no descent input):
+
+* **Char-0 separability** (`isSeparable_of_charZero`): in characteristic zero every isogeny is
+  separable, since the function-field extension `K(E₁)/φ*K(E₂)` is algebraic (hence integral) and
+  `CharZero` (inherited from `F`), so mathlib's `Algebra.IsSeparable.of_integral` applies. This is
+  the input that makes the `K̄` dual machinery (`dualGaloisData_of_pullbackEvaluation_general`,
+  which requires `β.IsSeparable`) available over a char-0 base.
+
+* **The formal compose payoff** (`rationalDualCompose_of_hasMulByIntDualWitness`): once an
+  `F`-rational faithful `[n]`-witness `HasMulByIntDualWitness φ n hn` is in hand, the reverse isogeny
+  `φ̂ = mulByIntDual w` satisfies `φ̂ ∘ φ = [n]` *purely formally* — `(φ̂ ∘ φ)* = [n]*` is
+  `dualOfWitness_comp_pullback`, and `Isogeny.ext_toCurveMap`/`CurveMap.ext` turn pullback equality
+  into isogeny equality. (This is the inline form of `Isogeny.mulByIntDual_compose`, which lives in
+  the un-imported `MulByIntPullbackComp`.) Hence the whole headline reduces to producing such a
+  witness — the genuinely-deep `K̄`-dual-plus-descent content, isolated in
+  `rationalReverseCompose_of_separable` below. -/
+
+/-- **Char-0 ⟹ separable** (Silverman III.4.5, characteristic-zero case). An isogeny over a
+characteristic-zero field is separable: the function-field extension `K(E₁)/φ*K(E₂)` is
+finite-dimensional and algebraic (`Isogeny.finiteDimensional_toAlgebra`), hence integral, and has
+characteristic zero (inherited from `F`), so it is separable by `Algebra.IsSeparable.of_integral`.
+Bridged to the EC-sense `IsSeparable` via `Isogeny.isSeparable_iff_algebra_isSeparable`. -/
+theorem isSeparable_of_charZero [CharZero F]
+    {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
+    (φ : EC.Isogeny W₁ W₂) : φ.IsSeparable := by
+  -- bridge the EC-sense (`inseparableDegree = 1`) to `Algebra.IsSeparable`
+  rw [EC.Isogeny.isSeparable_iff_algebra_isSeparable]
+  letI : Algebra W₂.FunctionField W₁.FunctionField := φ.toCurveMap.toAlgebra
+  haveI : CharZero W₂.FunctionField :=
+    charZero_of_injective_algebraMap (FaithfulSMul.algebraMap_injective F W₂.FunctionField)
+  haveI : Algebra.IsAlgebraic W₂.FunctionField W₁.FunctionField :=
+    ⟨fun z => Curves.CurveMap.isAlgebraic_toAlgebra φ.toCurveMap z⟩
+  -- `Algebra.IsAlgebraic.isIntegral` (over a field) + `Algebra.IsSeparable.of_integral` (char 0)
+  -- are both instances, so `Algebra.IsSeparable` is found by instance resolution.
+  infer_instance
+
+/-- **The formal compose payoff** (Silverman III.6.1 defining identity, isogeny form). From an
+`F`-rational faithful `[n]`-witness for `φ`, the dual `mulByIntDual w` is a reverse isogeny
+`E₂ → E₁` with `(mulByIntDual w) ∘ φ = [n]`. This is `dualOfWitness_comp_pullback` (the pullback
+identity `(φ̂ ∘ φ)* = [n]*`) promoted to an isogeny equality via `Isogeny.ext_toCurveMap`/
+`CurveMap.ext` — no descent input, the inline `Isogeny.mulByIntDual_compose`. -/
+theorem rationalDualCompose_of_hasMulByIntDualWitness
+    {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
+    {φ : EC.Isogeny W₁ W₂} {n : ℤ} {hn : n ≠ 0}
+    (w : φ.HasMulByIntDualWitness n hn) :
+    (EC.Isogeny.mulByIntDual w).compose φ = EC.Isogeny.mulByInt W₁ hn := by
+  refine EC.Isogeny.ext_toCurveMap (Curves.CurveMap.ext (AlgHom.ext fun z => ?_))
+  show φ.toCurveMap.pullback ((EC.Isogeny.mulByIntDual w).toCurveMap.pullback z) =
+    (EC.Isogeny.mulByInt W₁ hn).toCurveMap.pullback z
+  rw [EC.Isogeny.mulByInt_pullback]
+  exact EC.Isogeny.mulByIntDual_comp_pullback w z
+
 /-- **DUAL-Q4 residual** (the assembled DUAL-Q1–Q3 chain, char-0): every isogeny `φ : E₁ → E₂` over a
 char-0 field has an `F`-rational reverse isogeny `ρ : E₂ → E₁` with `ρ ∘ φ = [deg φ]`.
 
 This is the dual `φ̂` over `F` from Silverman III.6.1: base-change `φ` to `K̄ = AlgebraicClosure F`
-(char 0 ⟹ separable), build the K̄ dual `φ̂_K̄` (`exists_dual_of_pullbackEvaluation_general`), descend
-to `φ̂` over the finite Galois field of definition `L/F` (DUAL-Q2 `descendIsogeny`, with the dual's
-pullback `Gal(L/F)`-equivariant by DUAL-Q3 `galEquivariant_of_compose`), and transport the K̄ identity
-`φ̂_K̄ ∘ φ_K̄ = [m]` back to `F` (round-trip + base-change faithfulness). The deep inputs are Q1's
-fixed-field descent and Q3's full base-changed-pullback equivariance; the whole chain is isolated
-here as a single `sorry`. -/
+(char 0 ⟹ separable, `isSeparable_of_charZero`), build the K̄ dual `φ̂_K̄`
+(`exists_dual_of_pullbackEvaluation_general`), descend to `φ̂` over the finite Galois field of
+definition `L/F` (DUAL-Q2 `descendIsogeny`, with the dual's pullback `Gal(L/F)`-equivariant by
+DUAL-Q3 `galEquivariant_of_compose`), and transport the K̄ identity `φ̂_K̄ ∘ φ_K̄ = [m]` back to `F`
+(round-trip + base-change faithfulness).
+
+Reduced (this file) to the single named residual `rationalReverseCompose_of_separable`: produce, for
+a **separable** isogeny over a char-0 field, an `F`-rational faithful `[n]`-witness. Everything
+downstream — the reverse isogeny and the `∘ = [n]` identity — is the proven formal payoff
+`rationalDualCompose_of_hasMulByIntDualWitness`. -/
 theorem rationalDualCompose_of_charZero {F : Type*} [Field F] [DecidableEq F] [CharZero F]
     {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
     (φ : EC.Isogeny W₁ W₂) :
     ∃ (n : ℤ) (hn : n ≠ 0) (ρ : EC.Isogeny W₂ W₁),
       ρ.compose φ = EC.Isogeny.mulByInt W₁ hn := by
-  sorry
+  obtain ⟨n, hn, w⟩ := rationalReverseCompose_of_separable φ (isSeparable_of_charZero φ)
+  exact ⟨n, hn, EC.Isogeny.mulByIntDual w, rationalDualCompose_of_hasMulByIntDualWitness w⟩
 
 /-- **DUAL-Q4 headline** (Silverman III.6.1, char-0 case): every isogeny over a char-0 field has an
 `F`-rational dual — i.e. `UniversalDualWitness F` holds. Proof route: base-change each isogeny to
