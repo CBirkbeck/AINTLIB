@@ -126,26 +126,76 @@ abbrev OrdAtInftyReg : Prop :=
   ∀ f : C₂.FunctionField, 0 ≤ C₂.ordAtInfty f →
     0 ≤ C₁.ordAtInfty (algebraMap C₂.FunctionField C₁.FunctionField f)
 
-/-- **The `x`-generator of `C₁` is integral over `C₂.CoordinateRing`** (regular at every place
-of `C₁` over an affine place of `C₂`).  Needs the basepoint-regularity `hreg` (its only pole, at
-`∞` of `C₁`, lies over `∞` of `C₂`). -/
-theorem coordXFun_mem_B (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂)) :
-    coordXFun C₁ ∈ (B (C₁ := C₁) (C₂ := C₂)) := by
-  sorry
+/-! #### The valuative-criterion reduction of integrality (structural, non-circular)
 
-/-- **The `y`-generator of `C₁` is integral over `C₂.CoordinateRing`.**  Needs the
-basepoint-regularity `hreg`. -/
-theorem coordYFun_mem_B (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂)) :
-    coordYFun C₁ ∈ (B (C₁ := C₁) (C₂ := C₂)) := by
-  sorry
+The integral closure `B` is a Dedekind domain with fraction field `K(C₁)`, so an element
+`z ∈ K(C₁)` lies in `B` iff it is `v`-integral at *every* height-one prime `v` of `B`
+(mathlib's `IsDedekindDomain.HeightOneSpectrum.mem_integers_of_valuation_le_one`).  This
+**non-circular** criterion (it does *not* presuppose `coordRingToClosure`, i.e. the very
+integralities we are proving — contrast `LocalizedDictionary.pointAt`) reduces both generator
+integralities to the single geometric statement that the `B`-prime valuations are `≤ 1` on the
+coordinate generators of `C₁`.
+
+The valuation `v.valuation K(C₁)` of a height-one prime `v` of `B` is a place of `C₁` lying over
+the affine place `v.asIdeal.under C₂.CoordinateRing` of `C₂` (a nonzero — hence height-one —
+prime of `C₂.CoordinateRing`, since `B` is module-finite over `C₂.CoordinateRing`).  The
+coordinate generators `x₁, y₁ ∈ F[C₁]` are regular at *every affine point* of `C₁` (their only
+pole is `∞` of `C₁`, `pointValuation_algebraMap_le_one`), and `∞` of `C₁` lies over `∞` of `C₂`
+by `hreg` (the basepoint), hence away from the affine `v`.  Identifying `v.valuation` with a point
+valuation of `C₁` is exactly the **global-`B` place dictionary** — the project's standing wall;
+it is the non-structural content isolated in `BPrimeValuationCoordGenLeOne` below. -/
+
+/-- **The genuine geometric residual (the global-`B` place dictionary)**: every height-one prime
+`v` of `B` has valuation `≤ 1` on the two coordinate generators of `C₁`.  Equivalently, the place
+of `C₁` cut out by `v` lies over an affine place of `C₂` (so it is *not* `∞` of `C₁`, where `x₁`,
+`y₁` have their poles).  This packages the place-identification `B`-prime ↔ affine point of `C₁`
+(over the affine part of `C₂`) that the localized `LocalizedDictionary.pointAt` provides only off a
+denominator locus; the global version requires `hreg` (to exclude `∞`) plus the place classification
+of `C₁`.  Stated as a named hypothesis so that the integrality reduction below is structural. -/
+def BPrimeValuationCoordGenLeOne : Prop :=
+  ∀ v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)),
+    v.valuation C₁.FunctionField (coordXFun C₁) ≤ 1 ∧
+    v.valuation C₁.FunctionField (coordYFun C₁) ≤ 1
+
+/-- **Structural valuative-criterion reduction**: an element `z ∈ K(C₁)` lies in `B` as soon as it
+is `v`-integral (valuation `≤ 1`) at every height-one prime `v` of `B`.  Direct from mathlib's
+`mem_integers_of_valuation_le_one` for the Dedekind domain `B` with fraction field `K(C₁)`, plus
+the subalgebra-membership ↔ `algebraMap`-range translation. -/
+theorem mem_B_of_forall_valuation_le_one (z : C₁.FunctionField)
+    (hz : ∀ v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)),
+      v.valuation C₁.FunctionField z ≤ 1) :
+    z ∈ (B (C₁ := C₁) (C₂ := C₂)) := by
+  have hmem : z ∈ (algebraMap (B (C₁ := C₁) (C₂ := C₂)) C₁.FunctionField).range :=
+    IsDedekindDomain.HeightOneSpectrum.mem_integers_of_valuation_le_one C₁.FunctionField z hz
+  obtain ⟨⟨y, hy⟩, rfl⟩ := hmem
+  exact hy
+
+/-- **The `x`-generator of `C₁` is integral over `C₂.CoordinateRing`** (regular at every place
+of `C₁` over an affine place of `C₂`).  Reduced — *non-circularly*, via the valuative criterion
+`mem_B_of_forall_valuation_le_one` — to the global-`B` place dictionary
+`BPrimeValuationCoordGenLeOne` (which consumes `hreg`).  Once the place dictionary is supplied this
+is a one-liner; the residual is the project's standing global-place wall. -/
+theorem coordXFun_mem_B (_hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂))
+    (hplace : BPrimeValuationCoordGenLeOne (C₁ := C₁) (C₂ := C₂)) :
+    coordXFun C₁ ∈ (B (C₁ := C₁) (C₂ := C₂)) :=
+  mem_B_of_forall_valuation_le_one _ fun v => (hplace v).1
+
+/-- **The `y`-generator of `C₁` is integral over `C₂.CoordinateRing`.**  Reduced — non-circularly,
+via the valuative criterion — to the same global-`B` place dictionary residual. -/
+theorem coordYFun_mem_B (_hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂))
+    (hplace : BPrimeValuationCoordGenLeOne (C₁ := C₁) (C₂ := C₂)) :
+    coordYFun C₁ ∈ (B (C₁ := C₁) (C₂ := C₂)) :=
+  mem_B_of_forall_valuation_le_one _ fun v => (hplace v).2
 
 /-- **The coordinate ring of `C₁` lands in `B`** (Silverman II.2.6, the integral-closure form):
 for every `r ∈ F[C₁]`, the image `algebraMap r ∈ K(C₁)` is integral over `C₂.CoordinateRing`.
 Built from the two generator integralities via `LocalizedDictionary.coordRing_mem_integralClosure`
 (at the trivial localization `Af := C₂.CoordinateRing`). -/
-theorem coordRing_mem_B (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂)) (r : C₁.CoordinateRing) :
+theorem coordRing_mem_B (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂))
+    (hplace : BPrimeValuationCoordGenLeOne (C₁ := C₁) (C₂ := C₂)) (r : C₁.CoordinateRing) :
     algebraMap C₁.CoordinateRing C₁.FunctionField r ∈ (B (C₁ := C₁) (C₂ := C₂)) :=
-  coordRing_mem_integralClosure C₂ C₂.CoordinateRing (coordXFun_mem_B hreg) (coordYFun_mem_B hreg) r
+  coordRing_mem_integralClosure C₂ C₂.CoordinateRing
+    (coordXFun_mem_B hreg hplace) (coordYFun_mem_B hreg hplace) r
 
 /-! ### Inertia degree `1` and the `s = 1` core over `B` (T-A2 core) -/
 
