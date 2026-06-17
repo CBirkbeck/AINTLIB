@@ -1,6 +1,7 @@
 import PadicLFunctions.Iwasawa.StructureTheory.CharIdeal
 import Mathlib.Algebra.MonoidAlgebra.Basic
 import Mathlib.Algebra.DirectSum.Module
+import Mathlib.RingTheory.Idempotents
 
 /-!
 # Equivariant isotypic decomposition and `Ch_{Λ(𝒢)}`  (S13-S5)
@@ -168,14 +169,63 @@ noncomputable def isotypicComponent [Invertible (Fintype.card H : 𝒪)] (ω : H
     Submodule (IwasawaAlgebraGroup 𝒪 H) M :=
   LinearMap.range (LinearMap.lsmul (IwasawaAlgebraGroup 𝒪 H) M (isotypicIdempotent 𝒪 H ω))
 
-/-- **The equivariant isotypic decomposition** `M = ⨁_ω M^{(ω)}` (RJW TeX 3662–3666):
-the isotypic components give an internal direct-sum decomposition of any
-`Λ(𝒢)`-module, the idempotents `e_ω` being orthogonal and summing to `1`. -/
-theorem isInternal_isotypicComponent [Invertible (Fintype.card H : 𝒪)]
-    [DecidableEq (H →* 𝒪ˣ)]
+/-- **Complete orthogonal idempotents decompose any module.**  A finite family `e : ι → R`
+of complete orthogonal idempotents in a commutative ring `R` (`∑ eᵢ = 1`, `eᵢ²=eᵢ`,
+`eᵢeⱼ=0` for `i≠j`) makes every `R`-module `M` the internal direct sum of the images
+`eᵢ·M = range (eᵢ • ·)`.  Mathlib has the ring-level `CompleteOrthogonalIdempotents`
+(and `R ≅ ∏ R/(1-eᵢ)`) but not this module-decomposition consequence. -/
+theorem isInternal_range_lsmul_of_completeOrthogonalIdempotents
+    {R M : Type*} [CommRing R] [AddCommGroup M] [Module R M]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] {e : ι → R}
+    (he : CompleteOrthogonalIdempotents e) :
+    DirectSum.IsInternal (fun i => LinearMap.range (LinearMap.lsmul R M (e i))) := by
+  have hself : ∀ i, ∀ x ∈ LinearMap.range (LinearMap.lsmul R M (e i)), e i • x = x := by
+    intro i x hx
+    obtain ⟨y, rfl⟩ := hx
+    rw [LinearMap.lsmul_apply, ← mul_smul, he.idem i]
+  have hkill : ∀ i j, i ≠ j →
+      ∀ x ∈ LinearMap.range (LinearMap.lsmul R M (e j)), e i • x = 0 := by
+    intro i j hij x hx
+    obtain ⟨y, rfl⟩ := hx
+    rw [LinearMap.lsmul_apply, ← mul_smul, he.ortho hij, zero_smul]
+  rw [DirectSum.isInternal_submodule_iff_iSupIndep_and_iSup_eq_top]
+  refine ⟨?_, ?_⟩
+  · rw [iSupIndep_def]
+    intro i
+    rw [Submodule.disjoint_def]
+    intro x hxi hxsup
+    have h1 : e i • x = x := hself i x hxi
+    have hker : (⨆ (j) (_ : j ≠ i), LinearMap.range (LinearMap.lsmul R M (e j)))
+        ≤ LinearMap.ker (LinearMap.lsmul R M (e i)) := by
+      refine iSup_le fun j => iSup_le fun hj => ?_
+      intro z hz
+      rw [LinearMap.mem_ker, LinearMap.lsmul_apply]
+      exact hkill i j (Ne.symm hj) z hz
+    have h2 : e i • x = 0 := by
+      have hx0 := hker hxsup
+      rwa [LinearMap.mem_ker, LinearMap.lsmul_apply] at hx0
+    exact h1.symm.trans h2
+  · rw [eq_top_iff]
+    intro m _
+    have hm : (∑ i, e i • m) = m := by rw [← Finset.sum_smul, he.complete, one_smul]
+    rw [← hm]
+    exact Submodule.sum_mem _ fun i _ =>
+      Submodule.mem_iSup_of_mem i (LinearMap.mem_range.mpr ⟨m, rfl⟩)
+
+/-- **The equivariant isotypic decomposition** `M = ⨁_ω M^{(ω)}` (RJW TeX 3662–3666; CS06 A.1):
+the isotypic components give an internal direct-sum decomposition of any `Λ(𝒢)`-module.
+The hypothesis `hcomplete : ∑_ω e_ω = 1` is RJW's *"after extending `L` by adjoining the
+values of `ω`"* (TeX 3665) — i.e. `μ_{|H|} ⊆ 𝒪`, so the character family `H →* 𝒪ˣ` is
+complete; without it the decomposition is false (e.g. `𝒪 = ℚ`, `H = ℤ/3`). -/
+theorem isInternal_isotypicComponent [IsDomain 𝒪] [Invertible (Fintype.card H : 𝒪)]
+    [Fintype (H →* 𝒪ˣ)] [DecidableEq (H →* 𝒪ˣ)]
+    (hcomplete : ∑ ω : H →* 𝒪ˣ, isotypicIdempotent 𝒪 H ω = 1)
     (M : Type*) [AddCommGroup M] [Module (IwasawaAlgebraGroup 𝒪 H) M] :
-    DirectSum.IsInternal (fun ω : H →* 𝒪ˣ => isotypicComponent 𝒪 H ω M) := by
-  sorry
+    DirectSum.IsInternal (fun ω : H →* 𝒪ˣ => isotypicComponent 𝒪 H ω M) :=
+  isInternal_range_lsmul_of_completeOrthogonalIdempotents
+    { idem := fun ω => isIdempotentElem_isotypicIdempotent 𝒪 H ω
+      ortho := fun _ _ hne => isotypicIdempotent_orthogonal 𝒪 H hne
+      complete := hcomplete }
 
 /-- The **equivariant characteristic ideal** `Ch_{Λ(𝒢)}(M) = ⨁_ω Ch_Λ(M^{(ω)})`
 (RJW TeX 3672–3676): assembled from the characteristic ideals (S13-S4) of the
