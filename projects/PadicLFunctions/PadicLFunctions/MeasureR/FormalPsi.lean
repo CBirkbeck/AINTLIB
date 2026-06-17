@@ -166,20 +166,16 @@ theorem one_add_mul_derivative_phiSeries (F : PowerSeries R) :
           ((1 + PowerSeries.X) * PowerSeries.derivativeFun F) := by
   have hS := hasSubst_one_add_X_pow_sub_one (R := R) p
   set S : PowerSeries R := (1 + PowerSeries.X) ^ p - 1 with hSdef
-  -- derivative of the substitution series `S = (1+X)^p − 1`
   have hone_sub : (1 : PowerSeries R).subst S = 1 := by
     rw [← PowerSeries.coe_substAlgHom hS, map_one]
   have hderS : d⁄dX R S = (p : R) • (1 + PowerSeries.X) ^ (p - 1) := by
     rw [hSdef, map_sub, Derivation.map_one_eq_zero, sub_zero, Derivation.leibniz_pow,
       map_add, Derivation.map_one_eq_zero, PowerSeries.derivative_X, zero_add, smul_eq_mul,
       mul_one, ← Nat.cast_smul_eq_nsmul R]
-  -- `1 + S = (1+X)^p`
   have hSplus : 1 + S = (1 + PowerSeries.X) ^ p := by rw [hSdef]; ring
-  -- `(1+X)·(1+X)^{p−1} = (1+X)^p`
   have hpow : (1 + PowerSeries.X : PowerSeries R) * (1 + PowerSeries.X) ^ (p - 1)
       = (1 + PowerSeries.X) ^ p := by
     rw [← pow_succ', Nat.sub_add_cancel hp.out.one_le]
-  -- chain rule on `phiSeries p F = F.subst S`
   rw [phiSeries, phiSeries, show PowerSeries.derivativeFun (F.subst S) = d⁄dX R (F.subst S)
       from rfl, PowerSeries.derivative_subst R hS, hderS,
     show PowerSeries.derivativeFun F = d⁄dX R F from rfl,
@@ -192,20 +188,6 @@ theorem one_add_mul_derivative_phiSeries (F : PowerSeries R) :
 end digits
 
 section integral
-
-/-!
-### The digit decomposition over `integerRing K` (W6b-b1, integral form)
-
-**Replan R6 W6b-b1'** (recorded `.mathlib-quality/b2_log.jsonl`, 2026-06-11):
-the digit decomposition is the `p`-adically-integral statement (false over a
-ring where `p` is invertible — see `psiSeries`). It is proved here over
-`R := integerRing K` by transporting the measure-level `p`-residue
-decomposition through the ring isomorphism `mahlerRingEquiv` (RJW Thm 3.20):
-`(1+T)^i ↔ δ_i`, `φ ↔ MeasureR.phi`, so
-`F = Σ_{i<p} (1+T)^i·φ(G_i)  ↔  μ = Σ_{i<p} δ_i * MeasureR.phi(ν_i)`, and the
-latter is the residue-class digit decomposition built from `MeasureR.phi_psi`
-(`φψ = Res_{pℤ_p}`) and the partition `ℤ_p = ⊔_{i<p} (i + pℤ_p)`.
--/
 
 variable (K : Type*) [NormedField K] [NormedAlgebra ℚ_[p] K]
   [IsUltrametricDist K] [CompleteSpace K]
@@ -233,7 +215,6 @@ theorem mahlerTransform_phi (μ : MeasureR K ℤ_[p]) :
   have hvanish : ∀ {m d : ℕ}, m < d → PowerSeries.coeff m (BZ ^ d) = 0 := fun {m d} hmd =>
     PowerSeries.X_pow_dvd_iff.1
       (pow_dvd_pow_of_dvd (PowerSeries.X_dvd_iff.2 (by simp [BZ])) d) m hmd
-  -- `B` is the `algebraMap`-image of `BZ`
   have hBmap : B = PowerSeries.map (algebraMap ℤ_[p] (integerRing K)) BZ := by
     change (1 + PowerSeries.X) ^ p - 1
       = PowerSeries.map (algebraMap ℤ_[p] (integerRing K)) ((1 + PowerSeries.X) ^ p - 1)
@@ -249,7 +230,6 @@ theorem mahlerTransform_phi (μ : MeasureR K ℤ_[p]) :
       by_contra hmem
       simp only [Finset.coe_range, Set.mem_Iio, not_lt] at hmem
       exact hd (by rw [hcoeffB, hvanish (by omega), map_zero, smul_zero]))]
-  -- the `ℤ_p`-level Chu–Vandermonde for `mahler n (p * k)`
   have key : ∀ k : ℕ, mahler n ((p : ℤ_[p]) * (k : ℤ_[p]))
       = ∑ d ∈ Finset.range (n + 1),
           PowerSeries.coeff n (BZ ^ d) * ((k.choose d : ℕ) : ℤ_[p]) := by
@@ -280,7 +260,6 @@ theorem mahlerTransform_phi (μ : MeasureR K ℤ_[p]) :
         (fun d hd hnd => ?_)).symm
       simp only [Finset.mem_range, not_lt] at hnd
       rw [hvanish (by omega), zero_mul]
-  -- transport the function identity through the algebra map
   have hfun : (mahlerCM p K n).comp (PadicMeasure.mulCM p (p : ℤ_[p]))
       = ∑ d ∈ Finset.range (n + 1),
           (PowerSeries.coeff n (B ^ d)) • (mahlerCM p K d) := by
@@ -315,8 +294,8 @@ lemma psi_dirac_mul_phi_eq_zero {a : ℤ_[p]} (ha : ‖a‖ = 1) (ν : MeasureR 
       = (dirac K ℤ_[p] a * MeasureR.phi p K ν)
           (charFnCM K ℤ_[p] (PadicMeasure.isClopen_pZp p)
             * f.comp (PadicMeasure.shiftDiv p)) from rfl,
-    mul_apply, dirac_apply, convInner_apply]
-  rw [LinearMap.zero_apply, MeasureR.phi, pushforward_apply]
+    mul_apply, dirac_apply, convInner_apply, LinearMap.zero_apply, MeasureR.phi,
+    pushforward_apply]
   rw [show ((charFnCM K ℤ_[p] (PadicMeasure.isClopen_pZp p)
         * f.comp (PadicMeasure.shiftDiv p)).comp
           ⟨fun y => a + y, by fun_prop⟩).comp (PadicMeasure.mulCM p (p : ℤ_[p]))
@@ -365,10 +344,8 @@ lemma sum_charFn_pZp_sub_natCast (y : ℤ_[p]) :
     ∑ i : Fin p, (charFnCM K ℤ_[p] (PadicMeasure.isClopen_pZp p)
         (y - ((i : ℕ) : ℤ_[p]))) = 1 := by
   haveI : NeZero p := ⟨hp.out.ne_zero⟩
-  -- the unique digit in `Fin p`
   set c : Fin p := ⟨(PadicInt.toZModPow 1 y).val,
     by simpa [pow_one] using ZMod.val_lt (PadicInt.toZModPow 1 y)⟩ with hc
-  -- the membership criterion `y - i ∈ pℤ_p` holds exactly for `i = c`
   have hcrit : ∀ i : Fin p,
       (y - ((i : ℕ) : ℤ_[p])) ∈ {z : ℤ_[p] | ‖z‖ < 1} ↔ i = c := by
     intro i
@@ -404,8 +381,7 @@ lemma psi_dirac_neg_mul_sum (ν : Fin p → MeasureR K ℤ_[p]) (j : Fin p) :
     MeasureR.psi p K (dirac K ℤ_[p] (-((j : ℕ) : ℤ_[p]))
         * ∑ i : Fin p, dirac K ℤ_[p] ((i : ℕ) : ℤ_[p]) * MeasureR.phi p K (ν i))
       = ν j := by
-  rw [Finset.mul_sum, MeasureR.psi_sum]
-  rw [Finset.sum_eq_single j]
+  rw [Finset.mul_sum, MeasureR.psi_sum, Finset.sum_eq_single j]
   · rw [← mul_assoc, dirac_mul_dirac, neg_add_cancel, ← MeasureR.one_def, one_mul,
       MeasureR.psi_phi]
   · intro i _ hij
@@ -423,13 +399,10 @@ theorem existsUnique_measure_digits (μ : MeasureR K ℤ_[p]) :
       μ = ∑ i : Fin p,
         dirac K ℤ_[p] ((i : ℕ) : ℤ_[p]) * MeasureR.phi p K (ν i) := by
   refine ⟨fun j => MeasureR.psi p K (dirac K ℤ_[p] (-((j : ℕ) : ℤ_[p])) * μ), ?_, ?_⟩
-  · -- existence
-    refine LinearMap.ext fun f => ?_
-    -- the digit-`i` reconstruction function `y ↦ 1_{pℤ_p}(y - i)·f(y)`
+  · refine LinearMap.ext fun f => ?_
     set hfun : Fin p → C(ℤ_[p], integerRing K) := fun i =>
       (charFnCM K ℤ_[p] (PadicMeasure.isClopen_pZp p)).comp
           ⟨fun y => y - ((i : ℕ) : ℤ_[p]), by fun_prop⟩ * f with hhfun
-    -- each term `(δ_i * φ(ψ(δ_{-i}μ))) f = μ(hfun i)` via `φψ = Res_{pℤ_p}`
     have hterm : ∀ i : Fin p,
         (dirac K ℤ_[p] ((i : ℕ) : ℤ_[p]) * MeasureR.phi p K (MeasureR.psi p K
             (dirac K ℤ_[p] (-((i : ℕ) : ℤ_[p])) * μ))) f
@@ -452,14 +425,12 @@ theorem existsUnique_measure_digits (μ : MeasureR K ℤ_[p]) :
     rw [← Finset.sum_mul,
       show ∑ i : Fin p, (charFnCM K ℤ_[p] (PadicMeasure.isClopen_pZp p)
           (y - ((i : ℕ) : ℤ_[p]))) = 1 from sum_charFn_pZp_sub_natCast p K y, one_mul]
-  · -- uniqueness
-    intro ν hν
+  · intro ν hν
     funext j
     rw [hν]
     exact (psi_dirac_neg_mul_sum p K ν j).symm
 
 omit [CompleteSpace K] in
-/-- `𝓐` is additive over finite sums (the linear-map form, repackaged). -/
 private lemma mahlerTransform_sum {ι : Type*} (s : Finset ι)
     (m : ι → MeasureR K ℤ_[p]) :
     mahlerTransform p K (∑ i ∈ s, m i) = ∑ i ∈ s, mahlerTransform p K (m i) :=
@@ -483,12 +454,10 @@ theorem existsUnique_digits (F : PowerSeries (integerRing K)) :
     ∃! G : Fin p → PowerSeries (integerRing K), IsDigitDecomp p F G := by
   obtain ⟨ν, hν, hνuniq⟩ := existsUnique_measure_digits p K (ofPowerSeries p K F)
   refine ⟨fun i => mahlerTransform p K (ν i), ?_, ?_⟩
-  · -- the transported family is a digit decomposition of `F`
-    change F = ∑ i : Fin p, (1 + PowerSeries.X) ^ (i : ℕ)
+  · change F = ∑ i : Fin p, (1 + PowerSeries.X) ^ (i : ℕ)
         * phiSeries p (mahlerTransform p K (ν i))
     rw [← mahlerTransform_sum_dirac_mul_phi, ← hν, mahlerTransform_ofPowerSeries]
-  · -- uniqueness, pulled back to the measure level
-    intro G hG
+  · intro G hG
     have hmeas : ofPowerSeries p K F
         = ∑ i : Fin p, dirac K ℤ_[p] ((i : ℕ) : ℤ_[p])
             * MeasureR.phi p K (ofPowerSeries p K (G i)) := by
@@ -588,16 +557,12 @@ through the Mahler transform. -/
 theorem mahlerTransform_psi (μ : MeasureR K ℤ_[p]) :
     MeasureR.mahlerTransform p K (MeasureR.psi p K μ)
       = psiSeries p (MeasureR.mahlerTransform p K μ) := by
-  -- the measure-level digit family `ν j = ψ(δ_{-j}·μ)` from the residue decomposition
   obtain ⟨ν, hν, -⟩ := existsUnique_measure_digits p K μ
-  -- the `0`-th digit is `ψ μ` (the `δ_0`-translate is trivial): use uniqueness against the
-  -- explicit witness `j ↦ ψ(δ_{-j}·μ)`
   have hν0 : ν 0 = MeasureR.psi p K μ := by
     have := psi_dirac_neg_mul_sum p K ν 0
     rw [← hν, show (-(((0 : Fin p) : ℕ) : ℤ_[p])) = 0 by simp, ← MeasureR.one_def,
       one_mul] at this
     exact this.symm
-  -- transport: `𝓐_μ = Σ_i (1+T)^i·φ(𝓐_{ν i})`, so `(𝓐_{ν i})` is its digit decomposition
   have hdig : IsDigitDecomp p (MeasureR.mahlerTransform p K μ)
       (fun i => MeasureR.mahlerTransform p K (ν i)) := by
     rw [IsDigitDecomp]
@@ -619,7 +584,6 @@ theorem seriesEval_zero_arg (F : PowerSeries K) :
   rw [seriesEval, tsum_eq_single 0 fun n hn => by rw [zero_pow hn, mul_zero], pow_zero,
     mul_one, PowerSeries.coeff_zero_eq_constantCoeff_apply]
 
-omit [NormedAlgebra ℚ_[p] K] in
 omit [hp : Fact p.Prime] [NormedAlgebra ℚ_[p] K] [IsUltrametricDist K] [CompleteSpace K] in
 /-- `seriesEval` is additive on series whose evaluations converge. -/
 theorem seriesEval_add {F H : PowerSeries K} {z : K}
@@ -679,7 +643,6 @@ polynomial, the sum is its evaluation at `z`. -/
 theorem tsum_coeff_substSeries_pow (z : K) (n : ℕ) :
     (∑' k : ℕ, PowerSeries.coeff k (((1 + PowerSeries.X) ^ p - 1 : PowerSeries K) ^ n) * z ^ k)
       = ((1 + z) ^ p - 1) ^ n := by
-  -- `S = (1+X)^p − 1` as a polynomial; `Sⁿ` has degree `≤ p·n`
   set Sp : Polynomial K := (1 + Polynomial.X) ^ p - 1 with hSp
   have hSpc : ((Sp ^ n : Polynomial K) : PowerSeries K)
       = ((1 + PowerSeries.X) ^ p - 1 : PowerSeries K) ^ n := by
@@ -746,12 +709,10 @@ theorem seriesEval_phi_of_summable_prod (G : PowerSeries K) (z : K)
     seriesEval (phiSeries p G) z
       = ∑' n : ℕ, PowerSeries.coeff n G * ((1 + z) ^ p - 1) ^ n := by
   have hS := hasSubst_one_add_X_pow_sub_one (R := K) p
-  -- the total family `T n k = coeff n G · coeff k (Sⁿ) · zᵏ`
   let T : ℕ → ℕ → K := fun n k =>
     PowerSeries.coeff n G
       * PowerSeries.coeff k (((1 + PowerSeries.X) ^ p - 1 : PowerSeries K) ^ n) * z ^ k
   have hprod' : Summable (Function.uncurry T) := hprod
-  -- the LHS coefficientwise: `coeff k (G.subst S) · zᵏ = ∑' n, T n k`
   have hLHScoeff : ∀ k : ℕ,
       PowerSeries.coeff k (phiSeries p G) * z ^ k = ∑' n : ℕ, T n k := by
     intro k
@@ -769,12 +730,10 @@ theorem seriesEval_phi_of_summable_prod (G : PowerSeries K) (z : K)
     refine Finset.sum_congr rfl fun n _ => ?_
     change PowerSeries.coeff n G • _ * z ^ k = _
     rw [smul_eq_mul]
-  -- assemble: `seriesEval (φ G) z = ∑'_k ∑'_n T n k = ∑'_n ∑'_k T n k`
   rw [seriesEval]
   simp_rw [hLHScoeff]
   rw [Summable.tsum_comm hprod']
   refine tsum_congr fun n => ?_
-  -- the inner sum: `∑'_k T n k = coeff n G · ((1+z)^p − 1)ⁿ`
   change (∑' k : ℕ, PowerSeries.coeff n G
       * PowerSeries.coeff k (((1 + PowerSeries.X) ^ p - 1 : PowerSeries K) ^ n) * z ^ k) = _
   rw [show (fun k : ℕ => PowerSeries.coeff n G
@@ -823,14 +782,11 @@ theorem norm_coeff_substSeries_pow_le_one (k n : ℕ) :
   exact IsUltrametricDist.norm_intCast_le_one _ _
 
 omit [hp : Fact p.Prime] [NormedAlgebra ℚ_[p] K] [IsUltrametricDist K] [CompleteSpace K] in
-/-- `n ↦ (n + 1)·rⁿ → 0` for `0 ≤ r < 1` (linear-times-geometric decay). -/
 private theorem tendsto_natCast_succ_mul_pow {r : ℝ} (hr0 : 0 ≤ r) (hr1 : r < 1) :
     Filter.Tendsto (fun n : ℕ => ((n : ℝ) + 1) * r ^ n) Filter.atTop (nhds 0) := by
-  have h1 : Filter.Tendsto (fun n : ℕ => (n : ℝ) * r ^ n) Filter.atTop (nhds 0) :=
-    tendsto_self_mul_const_pow_of_lt_one hr0 hr1
-  have h2 : Filter.Tendsto (fun n : ℕ => r ^ n) Filter.atTop (nhds 0) :=
-    tendsto_pow_atTop_nhds_zero_of_lt_one hr0 hr1
-  simpa only [add_mul, one_mul, add_zero] using h1.add h2
+  simpa only [add_mul, one_mul, add_zero] using
+    (tendsto_self_mul_const_pow_of_lt_one hr0 hr1).add
+      (tendsto_pow_atTop_nhds_zero_of_lt_one hr0 hr1)
 
 omit [hp : Fact p.Prime] [NormedAlgebra ℚ_[p] K] in
 /-- For an `‖·‖ ≤ 1`-coefficient series `G` and `‖z‖ < 1`, the total `ℕ × ℕ` family of
@@ -845,7 +801,6 @@ theorem summable_prod_of_norm_coeff_le_one {G : PowerSeries K} {z : K}
     NormedAddGroup.tendsto_nhds_zero]
   intro ε hε
   rw [Filter.eventually_cofinite]
-  -- the bound `‖T n k‖ ≤ ‖z‖ᵏ`, with support in `n ≤ k`
   obtain ⟨N, hN⟩ := ((tendsto_pow_atTop_nhds_zero_of_lt_one (norm_nonneg z) hz).eventually_lt_const
     hε).exists_forall_of_atTop
   refine Set.Finite.subset (Set.Finite.prod (Set.finite_Iio (N + 1)) (Set.finite_Iio (N + 1)))
@@ -863,12 +818,10 @@ theorem summable_prod_of_norm_coeff_le_one {G : PowerSeries K} {z : K}
             (norm_nonneg _) zero_le_one) le_rfl (by positivity) (by positivity)
       _ = ‖z‖ ^ nk.2 := by ring
   have hk : nk.2 < N + 1 := by
-    by_contra hge
-    rw [not_lt] at hge
+    by_contra! hge
     exact absurd (lt_of_le_of_lt (le_trans hnk hbd) (hN nk.2 (by omega))) (lt_irrefl ε)
   have hn : nk.1 < N + 1 := by
-    by_contra hge
-    rw [not_lt] at hge
+    by_contra! hge
     have hz0 : ‖PowerSeries.coeff nk.1 G
         * PowerSeries.coeff nk.2 (((1 + PowerSeries.X) ^ p - 1 : PowerSeries K) ^ nk.1)
         * z ^ nk.2‖ = 0 := by
@@ -1008,8 +961,7 @@ theorem summable_seriesEval_of_norm_coeff_le_one {F : PowerSeries K}
   refine Set.Finite.subset (Set.finite_Iio (N + 1)) fun n hn => ?_
   simp only [Set.mem_setOf_eq, not_lt] at hn
   simp only [Set.mem_Iio]
-  by_contra hge
-  rw [not_lt] at hge
+  by_contra! hge
   have hlt : ‖PowerSeries.coeff n F * z ^ n‖ < ε := by
     rw [norm_mul, norm_pow]
     exact lt_of_le_of_lt (mul_le_of_le_one_left (by positivity) (hF n)) (hN n (by omega))
@@ -1025,7 +977,6 @@ theorem summable_seriesEval_of_norm_coeff_le_linear {F : PowerSeries K} {C : ℝ
   rw [NonarchimedeanAddGroup.summable_iff_tendsto_cofinite_zero, NormedAddGroup.tendsto_nhds_zero]
   intro ε hε
   rw [Filter.eventually_cofinite]
-  -- `‖coeff n F · zⁿ‖ ≤ C·(n+1)·‖z‖ⁿ → 0`, so only finitely many terms exceed `ε`
   have hCnn : 0 ≤ C := le_trans (norm_nonneg _) (by simpa using hF 0)
   have htend : Filter.Tendsto (fun n : ℕ => C * (((n : ℝ) + 1) * ‖z‖ ^ n)) Filter.atTop (nhds 0) :=
     by simpa using (tendsto_natCast_succ_mul_pow (norm_nonneg z) hz).const_mul C
@@ -1033,8 +984,7 @@ theorem summable_seriesEval_of_norm_coeff_le_linear {F : PowerSeries K} {C : ℝ
   refine Set.Finite.subset (Set.finite_Iio (N + 1)) fun n hn => ?_
   simp only [Set.mem_setOf_eq, not_lt] at hn
   simp only [Set.mem_Iio]
-  by_contra hge
-  rw [not_lt] at hge
+  by_contra! hge
   have hlt : ‖PowerSeries.coeff n F * z ^ n‖ < ε := by
     rw [norm_mul, norm_pow]
     calc ‖PowerSeries.coeff n F‖ * ‖z‖ ^ n
@@ -1106,7 +1056,6 @@ theorem norm_coeff_one_add_X_pow_mul_le_one {H : PowerSeries K}
   refine hab.trans ?_
   rw [norm_mul]
   refine mul_le_one₀ ?_ (norm_nonneg _) (hH ab.2)
-  -- `coeff a ((1+X)^i) = C(i,a)` is integral
   have hXeq : (1 + PowerSeries.X : PowerSeries K)
       = ((1 + Polynomial.X : Polynomial K) : PowerSeries K) := by
     rw [Polynomial.coe_add, Polynomial.coe_one, Polynomial.coe_X]
@@ -1126,13 +1075,11 @@ theorem sum_seriesEval_mahlerK {ξ : K} (hξ : IsPrimitiveRoot ξ p)
       = (p : K) * PowerSeries.constantCoeff
           (mahlerK p K (MeasureR.psi p K μ)) := by
   haveI : Fact (1 < p) := ⟨hp.out.one_lt⟩
-  -- measure-level digits `ν i = ψ(δ_{-i}·μ)` with `ν 0 = ψ μ`
   obtain ⟨ν, hν, -⟩ := existsUnique_measure_digits p K μ
   have hν0 : ν 0 = MeasureR.psi p K μ := by
     have := psi_dirac_neg_mul_sum p K ν 0
     rw [← hν, show (-(((0 : Fin p) : ℕ) : ℤ_[p])) = 0 by simp, ← MeasureR.one_def, one_mul] at this
     exact this.symm
-  -- the `K`-coefficient digit decomposition of `mahlerK μ`
   set c : Fin p → K := fun i => PowerSeries.constantCoeff (mahlerK p K (ν i)) with hcdef
   have hbound : ∀ (i : Fin p) (n : ℕ), ‖PowerSeries.coeff n (mahlerK p K (ν i))‖ ≤ 1 := by
     intro i n
@@ -1142,8 +1089,7 @@ theorem sum_seriesEval_mahlerK {ξ : K} (hξ : IsPrimitiveRoot ξ p)
     intro j
     rcases Nat.eq_zero_or_pos (j : ℕ) with hj0 | hjpos
     · rw [hj0, pow_zero, sub_self, norm_zero]; exact one_pos
-    · -- `ξ^j` is itself a primitive `p`-th root (`j` coprime to `p`), so `‖ξ^j − 1‖ < 1`
-      have hcop : (j : ℕ).Coprime p :=
+    · have hcop : (j : ℕ).Coprime p :=
         (Nat.coprime_comm.mp (hp.out.coprime_iff_not_dvd.mpr fun hdvd =>
           absurd (Nat.le_of_dvd hjpos hdvd) (by omega : ¬ p ≤ (j : ℕ))))
       have hprim : IsPrimitiveRoot (ξ ^ (j : ℕ)) (p ^ 1) := by
@@ -1156,12 +1102,10 @@ theorem sum_seriesEval_mahlerK {ξ : K} (hξ : IsPrimitiveRoot ξ p)
     rw [mahlerTransform_sum_dirac_mul_phi, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_mul, map_pow, map_add, map_one, PowerSeries.map_X, map_phiSeries]
-  -- per-`j` evaluation: the `φ`-layer collapses at `ξ^j − 1` and `(1+(ξ^j−1))^i = ξ^{ij}`
   have heval : ∀ j : Fin p, seriesEval (mahlerK p K μ) (ξ ^ (j : ℕ) - 1)
       = ∑ i : Fin p, ξ ^ ((j : ℕ) * (i : ℕ)) * c i := by
     intro j
     rw [hdig, seriesEval]
-    -- `coeff` of the finite sum, then split the `tsum` over the finite index `Fin p`
     have hsummand : ∀ i : Fin p, Summable fun n : ℕ =>
         PowerSeries.coeff n ((1 + PowerSeries.X) ^ (i : ℕ) * phiSeries p (mahlerK p K (ν i)))
           * (ξ ^ (j : ℕ) - 1) ^ n :=
@@ -1178,7 +1122,6 @@ theorem sum_seriesEval_mahlerK {ξ : K} (hξ : IsPrimitiveRoot ξ p)
       rw [map_sum, Finset.sum_mul]]
     rw [Summable.tsum_finsetSum fun i _ => hsummand i]
     refine Finset.sum_congr rfl fun i _ => ?_
-    -- `coeff n ((1+X)^i)` is integral, so its evaluation is summable
     have hpolybd : ∀ n,
         ‖PowerSeries.coeff n ((1 + PowerSeries.X : PowerSeries K) ^ (i : ℕ))‖ ≤ 1 := by
       intro n
@@ -1187,7 +1130,6 @@ theorem sum_seriesEval_mahlerK {ξ : K} (hξ : IsPrimitiveRoot ξ p)
         rw [Polynomial.coe_add, Polynomial.coe_one, Polynomial.coe_X]
       rw [hXeq, ← Polynomial.coe_pow, Polynomial.coeff_coe, Polynomial.coeff_one_add_X_pow]
       exact IsUltrametricDist.norm_natCast_le_one _ _
-    -- `seriesEval ((1+X)^i · φ G) (ξ^j−1) = (ξ^j)^i · constantCoeff G`
     rw [← seriesEval, seriesEval_mul
       (summable_seriesEval_of_norm_coeff_le_one hpolybd (hzlt j))
       (summable_seriesEval_of_norm_coeff_le_one (norm_coeff_phiSeries_le_one p (hbound i))
@@ -1197,19 +1139,16 @@ theorem sum_seriesEval_mahlerK {ξ : K} (hξ : IsPrimitiveRoot ξ p)
         rw [show (1 : K) + (ξ ^ (j : ℕ) - 1) = ξ ^ (j : ℕ) by ring, ← pow_mul, mul_comm,
           pow_mul, hξ.pow_eq_one, one_pow]),
       show (1 : K) + (ξ ^ (j : ℕ) - 1) = ξ ^ (j : ℕ) by ring, ← pow_mul, hcdef]
-  -- sum over `j` and apply `μ_p`-orthogonality `Σ_j (ξ^i)^j = p·[i = 0]`
   simp_rw [heval]
-  rw [Finset.sum_comm]
-  rw [show (∑ i : Fin p, ∑ j : Fin p, ξ ^ ((j : ℕ) * (i : ℕ)) * c i)
+  rw [Finset.sum_comm,
+    show (∑ i : Fin p, ∑ j : Fin p, ξ ^ ((j : ℕ) * (i : ℕ)) * c i)
       = ∑ i : Fin p, (∑ j : Fin p, ξ ^ ((j : ℕ) * (i : ℕ))) * c i from by
     refine Finset.sum_congr rfl fun i _ => ?_
-    rw [Finset.sum_mul]]
-  rw [Finset.sum_eq_single (0 : Fin p)]
+    rw [Finset.sum_mul], Finset.sum_eq_single (0 : Fin p)]
   · simp_rw [Fin.val_zero, Nat.mul_zero, pow_zero]
     rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, mul_one]
     simp only [hcdef, hν0]
   · intro i _ hi0
-    -- for `i ≠ 0`, `Σ_j (ξ^i)^j = 0` by primitive-root orthogonality
     have horth : (∑ j : Fin p, ξ ^ ((j : ℕ) * (i : ℕ))) = 0 := by
       rw [show (∑ j : Fin p, ξ ^ ((j : ℕ) * (i : ℕ)))
           = ∑ j ∈ Finset.range p, (ξ ^ (i : ℕ)) ^ j from by
@@ -1233,13 +1172,11 @@ theorem exists_antideriv (B : PowerSeries K) :
         = B := by
   haveI := charZero_of_qpAlgebra (M := K) p
   have hp0 : (p : K) ≠ 0 := by exact_mod_cast hp.out.ne_zero
-  -- `1 + X` is a unit, with `(1+X)·(1+X)⁻¹ʳ = 1`
   have hunit : IsUnit (1 + PowerSeries.X : PowerSeries K) := by
     rw [PowerSeries.isUnit_iff_constantCoeff, map_add, PowerSeries.constantCoeff_one,
       PowerSeries.constantCoeff_X, add_zero]
     exact isUnit_one
   set E : PowerSeries K := (p : K)⁻¹ • (B * Ring.inverse (1 + PowerSeries.X)) with hE
-  -- the formal antiderivative: divide the `n`-th coefficient of `E` by `n+1`
   refine ⟨PowerSeries.mk fun n => if n = 0 then 0 else PowerSeries.coeff (n - 1) E / n, ?_, ?_⟩
   · rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply, PowerSeries.coeff_mk, if_pos rfl]
   · have hDC : PowerSeries.derivativeFun
@@ -1261,7 +1198,6 @@ theorem eq_C_constantCoeff_of_one_add_mul_derivative_eq_zero
     (h : (1 + PowerSeries.X) * PowerSeries.derivativeFun F = 0) :
     F = PowerSeries.C (PowerSeries.constantCoeff F) := by
   haveI := charZero_of_qpAlgebra (M := K) p
-  -- `1 + X` is a unit (constant coefficient `1`), so it cancels in `h`
   have hunit : IsUnit (1 + PowerSeries.X : PowerSeries K) := by
     rw [PowerSeries.isUnit_iff_constantCoeff, map_add, PowerSeries.constantCoeff_one,
       PowerSeries.constantCoeff_X, add_zero]
@@ -1275,15 +1211,6 @@ theorem eq_C_constantCoeff_of_one_add_mul_derivative_eq_zero
     rw [PowerSeries.coeff_derivativeFun] at hcoeff
     have hne : ((n : ℕ) + 1 : K) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
     rw [PowerSeries.coeff_succ_C, (mul_eq_zero.mp hcoeff).resolve_right hne]
-
-/-! ### The boundary `p`-adic logarithm via the formal log series (T618 / Washington §5.1)
-
-The formal power series `formalLog := Σ_{n≥1} (−1)^{n−1}·n⁻¹·Xⁿ` over `K` is the
-series-side avatar of `padicLog (1 + ·)`. Its key formal facts —
-`(1+X)·∂(formalLog) = 1` and `phiSeries p formalLog = p·formalLog` — transport (in
-`ValuesAtOne`) to the `‖z−1‖ < 1` multiplicativity `padicLog (z^p) = p·padicLog z`,
-extending `padicLog`'s `p`-power law from the exp ball to the whole open unit ball
-(decomposition R6.6; the single prerequisite recorded at `sum_seriesEval_Ftilde`). -/
 
 /-- T618: the formal logarithm `Σ_{n≥1} (−1)^{n−1}·n⁻¹·Xⁿ` over `K` (constant term
 `0`), the series-side of `padicLog (1 + ·)`. -/
@@ -1309,8 +1236,7 @@ theorem coeff_succ_formalLog (n : ℕ) :
 omit [IsUltrametricDist K] [CompleteSpace K] in
 include hp in
 /-- T618: `(1 + X)·∂(formalLog) = 1` over `K` (char 0) — the formal geometric
-identity `∂(log(1+X)) = 1/(1+X)`. Coefficient check: at `n = 0` the value is
-`L₁ = 1`; at `n ≥ 1` it is `(n+1)·L_{n+1} + n·L_n = (−1)ⁿ + (−1)^{n−1} = 0`. -/
+identity `∂(log(1+X)) = 1/(1+X)`. -/
 theorem one_add_mul_derivative_formalLog :
     (1 + PowerSeries.X) * PowerSeries.derivativeFun (formalLog K) = 1 := by
   haveI := charZero_of_qpAlgebra (M := K) p
@@ -1336,15 +1262,10 @@ theorem one_add_mul_derivative_formalLog :
 
 omit [IsUltrametricDist K] [CompleteSpace K] in
 include hp in
-/-- T618: `phiSeries p formalLog = p·formalLog` over `K` (char 0). Both sides have
-the same image under `∂ = (1+X)d/dX`: `∂(φ formalLog) = p·φ(∂ formalLog) = p·φ(1) =
-p·1` (using `one_add_mul_derivative_phiSeries` and `(1+X)·∂ formalLog = 1`), and
-`∂(p·formalLog) = p·1`. The difference is `∂`-killed, hence constant; its constant
-term is `constantCoeff(φ formalLog) − p·constantCoeff formalLog = 0`. -/
+/-- T618: `phiSeries p formalLog = p·formalLog` over `K` (char 0). -/
 theorem phiSeries_formalLog :
     phiSeries p (formalLog K) = (p : K) • formalLog K := by
   haveI := charZero_of_qpAlgebra (M := K) p
-  -- `(1+X)·∂` of both sides equals `p·1`
   have hphi1 : phiSeries p (1 : PowerSeries K) = 1 := by
     rw [phiSeries, ← PowerSeries.coe_substAlgHom (hasSubst_one_add_X_pow_sub_one p), map_one]
   have hLHS : (1 + PowerSeries.X) * PowerSeries.derivativeFun (phiSeries p (formalLog K))
@@ -1353,7 +1274,6 @@ theorem phiSeries_formalLog :
   have hRHS : (1 + PowerSeries.X) * PowerSeries.derivativeFun ((p : K) • formalLog K)
       = (p : K) • (1 : PowerSeries K) := by
     rw [PowerSeries.derivativeFun_smul, mul_smul_comm, one_add_mul_derivative_formalLog (p := p)]
-  -- the difference is `∂`-killed
   have hker : (1 + PowerSeries.X) * PowerSeries.derivativeFun
       (phiSeries p (formalLog K) - (p : K) • formalLog K) = 0 := by
     rw [show PowerSeries.derivativeFun (phiSeries p (formalLog K) - (p : K) • formalLog K)
@@ -1362,7 +1282,6 @@ theorem phiSeries_formalLog :
         map_sub (PowerSeries.derivative K) _ _,
       mul_sub, hLHS, hRHS, sub_self]
   have heqC := eq_C_constantCoeff_of_one_add_mul_derivative_eq_zero (p := p) hker
-  -- the constant term of the difference is `0`
   have hc0 : PowerSeries.constantCoeff (phiSeries p (formalLog K) - (p : K) • formalLog K)
       = 0 := by
     rw [map_sub, constantCoeff_phiSeries, PowerSeries.smul_eq_C_mul, map_mul,
