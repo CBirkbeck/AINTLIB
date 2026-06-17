@@ -389,4 +389,43 @@ theorem prop_8_30_imagePiece_assembled
   exact flat_of_rationalOpen_eq (gens.foldl (chainStep u sB) X₀)
     (imagePieceDatum D E.T E.s hspanE) h_ro hfoldB
 
+/-- **Prop 8.30 (assembled): restriction-map flatness for a rational pair.** For `D' ⊆ D` rational
+subsets, `𝒪_X(D) → 𝒪_X(D')` is flat. This is the *usable* form (what the structure-sheaf/OMT proof
+consumes): Wedhorn's first reduction "we may assume `X = V`" (`relativePiece_equiv`, the 8.16 keystone)
+identifies `𝒪_X(D') ≅ 𝒪_B(im D')` over `B = 𝒪_X(D)`, intertwining the restriction with the whole-space
+canonical map, so flatness transports (`Module.Flat.of_linearEquiv`) from the now-complete whole-space
+chain `prop_8_30_imagePiece_assembled`. The downstream, sorry-free-assembly counterpart of
+`prop_8_30_remark755_chain` (which routes through the RPK stub). -/
+theorem prop_8_30_remark755_chain_assembled
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    (D D' : RationalLocData A)
+    (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
+    (hD : D.IsRational) (hD' : D'.IsRational) :
+    @Module.Flat (presheafValue D) (presheafValue D') _ _
+      (restrictionMapHom D D' h).toModule := by
+  haveI hTateB : IsTateRing (presheafValue D) := presheafValue_isTateRing_concrete D
+  haveI : IsNoetherianRing (presheafValue D) := presheafValue_isNoetherianRing_faithful D
+  haveI : IsHuberRing (presheafValue D) := hTateB.toIsHuberRing
+  haveI : IsStronglyNoetherian (presheafValue D) := presheafValue_isStronglyNoetherian_faithful D
+  set W := imagePieceDatum D D'.T D'.s hD'.span_eq_top with hW
+  set e := relativePiece_equiv D D' h hD'.span_eq_top with he
+  have hflatW : @Module.Flat (presheafValue D) (presheafValue W) _ _
+      (W.canonicalMap).toModule :=
+    prop_8_30_imagePiece_assembled D D' hD'.span_eq_top
+  letI : Module (presheafValue D) (presheafValue D') := (restrictionMapHom D D' h).toModule
+  letI : Module (presheafValue D) (presheafValue W) := W.canonicalMap.toModule
+  have he_smul : ∀ (a : presheafValue D) (x : presheafValue D'), e (a • x) = a • e x := by
+    intro a x
+    change e (restrictionMapHom D D' h a * x) = W.canonicalMap a * e x
+    rw [e.map_mul]; congr 1
+    exact relativePiece_equiv_restrictionMap D D' h hD'.span_eq_top a
+  exact @Module.Flat.of_linearEquiv (presheafValue D) (presheafValue W) (presheafValue D')
+    _ _ _ _ _ hflatW
+    { toLinearMap := { toFun := e, map_add' := e.map_add, map_smul' := he_smul }
+      invFun := e.symm
+      left_inv := e.symm_apply_apply
+      right_inv := e.apply_symm_apply }
+
 end ValuationSpectrum
