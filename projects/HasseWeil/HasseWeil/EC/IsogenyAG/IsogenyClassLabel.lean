@@ -1,4 +1,5 @@
 import HasseWeil.EC.IsogenyAG.IsogenyClass
+import HasseWeil.EC.IsogenyAG.DualDescent
 
 /-!
 # LMFDB isogeny-class labels from a given representative table
@@ -104,6 +105,38 @@ noncomputable def lmfdbLabel (T : IsogenyClassTable F) (conductor : String)
     (E : EllipticCurveOver F) (hmem : ∃ i, IsogenousCurves E (T.reps i))
     (curveNumber : ℕ) : String :=
   conductor ++ "." ++ T.classLetter E hmem ++ "." ++ toString curveNumber
+
+/-! ### Ungated char-0 corollaries (DUAL-Q4)
+
+Over a characteristic-`0` field the universal dual witness is a theorem
+(`universalDualWitness_of_charZero`), so the symmetry gate disappears: the label well-definedness
+and the class-letter invariance hold unconditionally. These are the deliverables that make the LMFDB
+label layer over `ℚ` (or any char-`0` field) gate-free. -/
+
+/-- **Well-definedness of the label, char-0 (ungated)**: over a char-`0` field a curve is isogenous to
+at most one table representative — no `UniversalDualWitness` hypothesis needed
+(`universalDualWitness_of_charZero`). -/
+theorem index_unique_charZero [CharZero F] (T : IsogenyClassTable F)
+    (E : EllipticCurveOver F) {i j : Fin T.card}
+    (hi : IsogenousCurves E (T.reps i)) (hj : IsogenousCurves E (T.reps j)) :
+    i = j :=
+  T.index_unique (universalDualWitness_of_charZero F) E hi hj
+
+/-- **`index` picks out the unique class index, char-0 (ungated)**. -/
+theorem index_eq_charZero [CharZero F] (T : IsogenyClassTable F)
+    (E : EllipticCurveOver F) (hmem : ∃ i, IsogenousCurves E (T.reps i))
+    {i : Fin T.card} (hi : IsogenousCurves E (T.reps i)) :
+    T.index E hmem = i :=
+  T.index_eq (universalDualWitness_of_charZero F) E hmem hi
+
+/-- **The class letter is an isogeny invariant, char-0 (ungated)**: over a char-`0` field isogenous
+curves get the same LMFDB letter, unconditionally. -/
+theorem classLetter_eq_of_isogenous_charZero [CharZero F] (T : IsogenyClassTable F)
+    {E E' : EllipticCurveOver F} (hEE' : IsogenousCurves E E')
+    (hmem : ∃ i, IsogenousCurves E (T.reps i))
+    (hmem' : ∃ i, IsogenousCurves E' (T.reps i)) :
+    T.classLetter E hmem = T.classLetter E' hmem' :=
+  T.classLetter_eq_of_isogenous (universalDualWitness_of_charZero F) hEE' hmem hmem'
 
 end IsogenyClassTable
 
