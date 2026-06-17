@@ -1,9 +1,11 @@
 import HasseWeil.EC.IsogenyAG.IsogenyClass
 import HasseWeil.EC.IsogenyAG.MulByIntBasepoint
 import HasseWeil.EC.IsogenyAG.TwistedFactorization
+import HasseWeil.EC.IsogenyAG.BaseChange
 import HasseWeil.Curves.CurveMapBaseChange
 import HasseWeil.Curves.NoFinitePolesBridge
 import HasseWeil.Curves.OrdAtInftyBaseChange
+import HasseWeil.Curves.OrdAtInftyRamification
 
 /-!
 # DUAL-DESCENT — the dual isogeny over the base field (symmetry of isogeny)
@@ -60,12 +62,27 @@ The arc is landed end-to-end with the deep input now isolated to **one** named `
   `someDescentData_of_overKbar` threads the (equal) universe. So the residual is no longer "field of
   definition".
 
-  **The single remaining `sorry`** is now narrowed to exactly `descentData_over_kbar_intermediate`:
-  the **two-curve base-change `DescentData`** of `φ*`/`[deg φ]*` over a concrete finite Galois
-  `L ⊆ K̄`. Its only open content is the L-linear `psiL` (= two-curve `baseChangeAlgHom` of a `CoordHom`
-  for `φ`, which a general `EC.Isogeny` does not carry) plus the L-restricted `K̄`-dual range inclusion.
-  See the declaration (REVIEW-PENDING). The label gate is discharged ungated in `IsogenyClassLabel.lean`
-  (`*_charZero`).
+* **TWO-CURVE BASE-CHANGE via `ofEquation` (this pass, axiom-clean)**: the `DescentData`'s two-curve
+  base-change is now built CoordHom-free in the `TwoCurveBaseChange` namespace. The earlier framing —
+  "`psiL = baseChangeAlgHom cd L` needs a `CoordHom` for `φ`, which a general `EC.Isogeny` lacks" — is
+  superseded: `TwoCurveBaseChange.bcIsog` builds `φ_L : E₁_L → E₂_L` over a *general* finite `L`
+  directly from the pullback generator images `functionFieldMap (φ^* x_gen₂/y_gen₂)` via the two-curve
+  `EC.Isogeny.ofEquation` builder. The transcendence over a non-algebraically-closed `L` is supplied
+  by `ordAtInfty_eq_zero_of_isAlgebraic_constants` (order `0` for elements algebraic over the constant
+  field). This furnishes — all axiom-clean — `ψ_L` (`psiL`), `[m]_L*` (`mPbL`), the base-change
+  naturalities (`psiL_nat`, `mPbL_nat`), `ψ_L`'s injectivity (`psiL_injective`), and `ψ_L`'s **full
+  `Gal(L/F)`-equivariance** (`psiL_galEquivariant`, via the `σ`-semilinearity
+  `galActFunctionField_algebraMap_L` + the base-`L` extensionality `ringHom_ext_baseL`). So
+  `descentData_over_kbar_intermediate` is **sorry-free**, consuming a single isolated leaf.
+
+  **The single remaining `sorry`** is now narrowed to exactly `twoCurveKbarRangeIncl_descended`: the
+  **`L`-level two-curve `K̄`-dual range inclusion** `Im([deg φ]_L*) ⊆ Im(ψ_L)` over a concrete finite
+  Galois `L ⊆ K̄`. This is Silverman III.6.1's deep input (`DualGaloisData.hincl`, via III.4.10c
+  fixed-field) for a *two-curve* `φ_K̄ : E₁_K̄ → E₂_K̄`; the project's K̄-dual machinery
+  (`exists_dual_of_pullbackEvaluation_general`) is endomorphism-only, so this inclusion is the
+  irreducible remaining infrastructure. The factorization downstream of the inclusion
+  (`CurveMap.factorThroughPullback`) is already axiom-clean. See the declaration (REVIEW-PENDING). The
+  label gate is discharged ungated in `IsogenyClassLabel.lean` (`*_charZero`).
 -/
 
 namespace HasseWeil.EC
@@ -934,38 +951,534 @@ noncomputable def someDescentData_of_overKbar {F : Type u} [Field F]
   galL := d.galL
   data := d.data
 
-/-- **THE SINGLE IRREDUCIBLE LEAF — two-curve base-change of an isogeny (REVIEW-PENDING).** For a
-separable isogeny `φ : E₁ → E₂` over a char-0 field `F`, there is a *concrete* finite Galois
-intermediate field `L ⊆ K̄ = AlgebraicClosure F` (supplied by MOVE 1,
-`exists_finiteGalois_fieldOfDefinition`) and a `DescentData` for `φ*` and `[deg φ]*` over `L`.
+/-! ### TWO-CURVE BASE-CHANGE of an isogeny via `ofEquation` (the `DescentData` engine)
 
-This is now the **only** open content: the two-curve base-change DATA over `L` —
-* the L-linear pullback `ψ_L : F(E₂_L) → F(E₁_L)` of `φ*` and `[deg φ]_L*` of `[deg φ]*`;
-* their base-change naturalities and `ψ_L`'s injectivity;
-* `ψ_L`'s full `Gal(L/F)`-equivariance;
-* the `L`-level range inclusion `Im([deg φ]_L*) ⊆ Im(ψ_L)` (the two-curve `K̄`-dual `DualGaloisData.hincl`
-  restricted to `L` via MOVE 1's `galFixed_of_galFixed_top`).
+The single leaf `descentData_over_kbar_intermediate` needs the **two-curve** base-change of a
+separable isogeny `φ : E₁ → E₂` over a *finite* Galois `L/F` (`L ⊆ K̄`). The project's
+`EC.Isogeny.baseChangeIsogeny` (`BaseChange.lean`) is endomorphism-only *and* requires
+`[IsAlgClosed L]`. We rebuild it CoordHom-free via the **`EC.Isogeny.ofEquation`** builder, which is
+already two-curve: feed the generator images `functionFieldMap (φ^* x_gen₂)`, `functionFieldMap
+(φ^* y_gen₂)` (which satisfy the base-changed Weierstrass equation of `E₂_L` over `L(E₁_L)`), their
+even-negative order at infinity (the ramification formula transported through `functionFieldMap`),
+and the transcendence over `L`.
 
-**What is MISSING (the genuine mathlib gap):** the *two-curve* `baseChangeIsogeny`. The project's
-`EC.Isogeny.baseChangeIsogeny` (`EC/IsogenyAG/BaseChange.lean`) is endomorphism-only; its engine
-(`baseChangeXgen`/`baseChange_generic_equation`/`baseChangeXgen_transcendental`/`ofEquation`) is in
-fact already two-curve-capable, but the L-linear `psiL = baseChangeAlgHom cd L` requires a `CoordHom`
-`cd` for `φ`, which a general `EC.Isogeny` does not carry (`CurveMap` stores only the pullback;
-`CoordHom`/`toPointMap` are separate data). Constructing this `CoordHom` (equivalently the two-curve
-base-changed isogeny `φ_L : E₁_L → E₂_L`) is the irreducible infrastructure that remains.
+The transcendence over a *general* `L` (not just algebraically closed) is the only new analytic
+input: an element of `L(E₁_L)` *algebraic over the constant field `L`* has order `0` at infinity
+(`ordAtInfty_eq_zero_of_isAlgebraic_constants`, the minimal-polynomial/ultrametric argument), which
+contradicts the even-negative order of `functionFieldMap (φ^* x_gen₂)`. This sidesteps the
+`IsAlgClosed`-dependence of `baseChangeXgen_transcendental`. -/
+
+namespace TwoCurveBaseChange
+
+open WeierstrassCurve Polynomial Curves
+
+/-! #### `σ`-semilinearity of the Galois action over `L` (used for full equivariance)
+
+These two facts about a *single* curve's base-changed function field are kept independent of the
+two-curve data `W₁ W₂ φ`, so they apply at both `C₁` and `C₂`. -/
+
+section Semilinear
+
+variable {K : Type*} [Field K] (L : Type*) [Field L] [Algebra K L]
+
+/-- **`σ ⊗ id` (`ringAct`) on `L`-constants**: `(σ ⊗ id)(algebraMap L (L ⊗ CR) l) = algebraMap L
+(L ⊗ CR) (σ l)` — the `σ`-semilinearity of the tensor-side Galois action over `L`. -/
+theorem ringAct_algebraMap_L (C : SmoothPlaneCurve K) (σ : L ≃ₐ[K] L) (l : L) :
+    (Algebra.TensorProduct.congr σ (AlgEquiv.refl (R := K) (A₁ := C.toAffine.CoordinateRing)))
+      (algebraMap L (L ⊗[K] C.toAffine.CoordinateRing) l) =
+      algebraMap L (L ⊗[K] C.toAffine.CoordinateRing) (σ l) := by
+  rw [Algebra.TensorProduct.algebraMap_apply, Algebra.TensorProduct.algebraMap_apply,
+    Algebra.TensorProduct.congr_apply, Algebra.TensorProduct.map_tmul]
+  simp
+
+/-- **`σ`-semilinearity of the Galois action over `L`**: `galAct σ (algebraMap L F(C_L) l) =
+algebraMap L F(C_L) (σ l)`. The `L`-constant analogue of `galActFunctionField_fixes_baseChange`
+(which handles the `F(C)`-image). Proof: transport through the *`L`-linear*
+`functionField_baseChange_tensorEquiv` to the tensor-fraction side, where the action is
+`IsFractionRing.algEquivOfAlgEquiv (σ ⊗ id)` and `σ ⊗ id` is `σ`-semilinear on `L`-constants
+(`ringAct_algebraMap_L`). -/
+theorem galActFunctionField_algebraMap_L (C : SmoothPlaneCurve K) (σ : L ≃ₐ[K] L) (l : L) :
+    galActFunctionField C L σ (algebraMap L (C.baseChange L).FunctionField l) =
+      algebraMap L (C.baseChange L).FunctionField (σ l) := by
+  letI := C.isDomain_tensorCoordRing L
+  simp only [galActFunctionField, AlgEquiv.trans_apply, AlgEquiv.restrictScalars_apply]
+  rw [show (C.functionField_baseChange_tensorEquiv L)
+        (algebraMap L (C.baseChange L).FunctionField l) =
+      algebraMap L (FractionRing (L ⊗[K] C.toAffine.CoordinateRing)) l from
+    (C.functionField_baseChange_tensorEquiv L).commutes l]
+  rw [IsScalarTower.algebraMap_apply L (L ⊗[K] C.toAffine.CoordinateRing)
+    (FractionRing (L ⊗[K] C.toAffine.CoordinateRing)) l]
+  rw [galActFrac_algebraMap]
+  rw [show ringAct C L σ (algebraMap L (L ⊗[K] C.toAffine.CoordinateRing) l) =
+      algebraMap L (L ⊗[K] C.toAffine.CoordinateRing) (σ l) from
+    ringAct_algebraMap_L L C σ l]
+  rw [← IsScalarTower.algebraMap_apply L (L ⊗[K] C.toAffine.CoordinateRing)
+    (FractionRing (L ⊗[K] C.toAffine.CoordinateRing)) (σ l)]
+  exact (C.functionField_baseChange_tensorEquiv L).symm.commutes (σ l)
+
+end Semilinear
+
+/-- **Order at infinity vanishes for elements algebraic over the constant field.** If
+`u ∈ L(C)` is algebraic over the constant field `L`, then `ord_∞ u = 0`. (Minimal-polynomial /
+ultrametric argument: `u^n = -(lower terms)`, every lower term `c_i u^i` has order `i·ord_∞ u`,
+constants have order `0`, so a negative `ord_∞ u` makes the leading term dominate and the sum cannot
+vanish; a positive `ord_∞ u` is ruled out by the same argument on `u⁻¹`.) This is the
+constant-field analogue of `ordAtInfty_eq_zero_of_isAlgebraic`, needed so the two-curve base-change
+works over a general finite `L` rather than only over `K̄`. -/
+theorem ordAtInfty_eq_zero_of_isAlgebraic_constants {L : Type*} [Field L]
+    (C : SmoothPlaneCurve L) {u : C.FunctionField} (hu : u ≠ 0) (halg : IsAlgebraic L u) :
+    C.ordAtInfty u = ((0 : ℤ) : WithTop ℤ) := by
+  have hcoe : ∀ (k : ℕ) (a : ℤ),
+      k • ((a : ℤ) : WithTop ℤ) = (((k • a : ℤ)) : WithTop ℤ) := by
+    intro k a
+    induction k with
+    | zero => simp
+    | succ n ih => rw [succ_nsmul, succ_nsmul, ih, ← WithTop.coe_add]
+  have key : ∀ {z : C.FunctionField}, z ≠ 0 → IsAlgebraic L z → 0 < C.ordAtInfty z → False := by
+    intro z hz hzalg hpos
+    have hint : IsIntegral L z := hzalg.isIntegral
+    obtain ⟨a, ha⟩ : ∃ a : ℤ, C.ordAtInfty z = ((a : ℤ) : WithTop ℤ) := ⟨_, C.ordAtInfty_of_ne hz⟩
+    have ha_pos : 0 < a := by rw [ha] at hpos; exact_mod_cast hpos
+    set m : Polynomial L := minpoly L z with hm_def
+    have hc0 : m.coeff 0 ≠ 0 := minpoly.coeff_zero_ne_zero hint hz
+    have haev : (Polynomial.aeval z) m = 0 := minpoly.aeval _ _
+    rw [Polynomial.aeval_eq_sum_range, Finset.sum_range_succ'] at haev
+    have hconst : m.coeff 0 • (z ^ 0 : C.FunctionField) =
+        algebraMap L C.FunctionField (m.coeff 0) := by rw [pow_zero, Algebra.smul_def, mul_one]
+    have hkey : algebraMap L C.FunctionField (m.coeff 0) =
+        -∑ i ∈ Finset.range m.natDegree, m.coeff (i + 1) • z ^ (i + 1) := by
+      rw [← hconst]; exact eq_neg_of_add_eq_zero_right haev
+    have hterm : ∀ i ∈ Finset.range m.natDegree,
+        ((a : ℤ) : WithTop ℤ) ≤ C.ordAtInfty (m.coeff (i + 1) • z ^ (i + 1)) := by
+      intro i _
+      rcases eq_or_ne (m.coeff (i + 1)) 0 with hci | hci
+      · rw [hci, zero_smul]; simp
+      · have hci' : algebraMap L C.FunctionField (m.coeff (i + 1)) ≠ 0 :=
+          (_root_.map_ne_zero _).mpr hci
+        have hzpow : z ^ (i + 1) ≠ 0 := pow_ne_zero _ hz
+        rw [Algebra.smul_def, C.ordAtInfty_mul hci' hzpow,
+          C.ordAtInfty_algebraMap_F_nonzero hci, C.ordAtInfty_pow hz, ha,
+          hcoe, zero_add, WithTop.coe_le_coe, nsmul_eq_mul]
+        have hi : (0 : ℤ) ≤ (i : ℤ) := Int.natCast_nonneg i
+        push_cast; nlinarith
+    have hsum : ((a : ℤ) : WithTop ℤ) ≤
+        C.ordAtInfty (∑ i ∈ Finset.range m.natDegree, m.coeff (i + 1) • z ^ (i + 1)) :=
+      SmoothPlaneCurve.le_ordAtInfty_sum _ _ hterm
+    have h0 := C.ordAtInfty_algebraMap_F_nonzero hc0
+    rw [hkey, C.ordAtInfty_neg] at h0
+    rw [h0] at hsum
+    have : (a : ℤ) ≤ 0 := by exact_mod_cast hsum
+    omega
+  obtain ⟨a, ha⟩ : ∃ a : ℤ, C.ordAtInfty u = ((a : ℤ) : WithTop ℤ) := ⟨_, C.ordAtInfty_of_ne hu⟩
+  rcases lt_trichotomy a 0 with hlt | heq | hgt
+  · exfalso
+    refine key (inv_ne_zero hu) halg.inv ?_
+    rw [C.ordAtInfty_inv, ha, show -((a : ℤ) : WithTop ℤ) = (((-a : ℤ)) : WithTop ℤ) from rfl]
+    exact_mod_cast Int.neg_pos.mpr hlt
+  · rw [ha, heq]
+  · exact (key hu halg (by rw [ha]; exact_mod_cast hgt)).elim
+
+variable {K : Type*} [Field K] [DecidableEq K]
+variable (W₁ W₂ : WeierstrassCurve K) [W₁.toAffine.IsElliptic] [W₂.toAffine.IsElliptic]
+variable (φ : EC.Isogeny W₁.toAffine W₂.toAffine)
+variable (L : Type*) [Field L] [Algebra K L] [DecidableEq L]
+
+/-- The image in `L(E₁_L)` of `φ^* x_gen₂` under `functionFieldMap : K(E₁) → L(E₁_L)`
+(the two-curve `x_gen`-image of the base-changed isogeny). -/
+noncomputable def bcXgen : (W₁.baseChange L).toAffine.FunctionField :=
+  (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L (φ.toCurveMap.pullback (x_gen W₂))
+
+/-- The image in `L(E₁_L)` of `φ^* y_gen₂`. -/
+noncomputable def bcYgen : (W₁.baseChange L).toAffine.FunctionField :=
+  (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L (φ.toCurveMap.pullback (y_gen W₂))
+
+theorem bcXgen_ne_zero : bcXgen W₁ W₂ φ L ≠ 0 := fun h0 =>
+  φ.toCurveMap.pullback_ne_zero (x_gen_ne_zero W₂)
+    ((⟨W₁.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap_injective L
+      (h0.trans (map_zero _).symm))
+
+/-- The two-curve generator images satisfy the Weierstrass equation of `E₂_L` over `L(E₁_L)`:
+apply `φ^*` to the generic equation of `W₂` (over `K(E₂)`), then push along
+`functionFieldMap : K(E₁) → L(E₁_L)`. -/
+theorem bc_equation :
+    ((W₂.baseChange L).map
+        (algebraMap L (W₁.baseChange L).toAffine.FunctionField)).toAffine.Equation
+      (bcXgen W₁ W₂ φ L) (bcYgen W₁ W₂ φ L) := by
+  have hK : (W₂.map (algebraMap K W₁.toAffine.FunctionField)).toAffine.Equation
+      (φ.toCurveMap.pullback (x_gen W₂)) (φ.toCurveMap.pullback (y_gen W₂)) := by
+    have h := WeierstrassCurve.Affine.Equation.map
+      (f := (φ.toCurveMap.pullback : W₂.toAffine.FunctionField →+* W₁.toAffine.FunctionField))
+      (generic_equation W₂)
+    rwa [show (W_KE W₂).toAffine.map
+        (φ.toCurveMap.pullback : W₂.toAffine.FunctionField →+* W₁.toAffine.FunctionField) =
+        W₂.map (algebraMap K W₁.toAffine.FunctionField) from by
+      show (W₂.map _).map _ = W₂.map _
+      rw [WeierstrassCurve.map_map, AlgHom.comp_algebraMap]] at h
+  have hpush := WeierstrassCurve.Affine.Equation.map
+    (f := ((⟨W₁.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L :
+      W₁.toAffine.FunctionField →+*
+        ((⟨W₁.toAffine⟩ : SmoothPlaneCurve K).baseChange L).FunctionField)) hK
+  have hcurve : (W₂.map (algebraMap K W₁.toAffine.FunctionField)).toAffine.map
+      ((⟨W₁.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L) =
+      (W₂.baseChange L).map (algebraMap L (W₁.baseChange L).toAffine.FunctionField) := by
+    show (W₂.map _).map _ = (W₂.map _).map _
+    rw [WeierstrassCurve.map_map, WeierstrassCurve.map_map]
+    refine congrArg W₂.map ?_
+    refine RingHom.ext fun a => ?_
+    show (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L
+        (algebraMap K (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).FunctionField a) =
+      algebraMap L (W₁.baseChange L).toAffine.FunctionField (algebraMap K L a)
+    rw [SmoothPlaneCurve.functionFieldMap_algebraMap_F (⟨W₁.toAffine⟩ : SmoothPlaneCurve K) L a]
+    exact IsScalarTower.algebraMap_apply K L
+      ((⟨W₁.toAffine⟩ : SmoothPlaneCurve K).baseChange L).FunctionField a
+  exact (congrArg (fun V : WeierstrassCurve ((W₁.baseChange L).toAffine.FunctionField) =>
+    V.toAffine.Equation (bcXgen W₁ W₂ φ L) (bcYgen W₁ W₂ φ L)) hcurve).mp hpush
+
+/-- The even-negative order at infinity of `bcXgen`: `ord_∞ = 2m` with `m ≤ -1`, from the two-curve
+ramification formula `exists_pos_ramificationIdx_at_infinity` (`ord_∞(φ^* x_gen₂) = e • (-2)`)
+transported through `functionFieldMap`. -/
+theorem bc_ord :
+    ∃ m : ℤ, m ≤ -1 ∧
+      (W_smooth (W₁.baseChange L)).ordAtInfty (bcXgen W₁ W₂ φ L) = ((2 * m : ℤ) : WithTop ℤ) := by
+  obtain ⟨e, he1, hform⟩ := EC.Isogeny.exists_pos_ramificationIdx_at_infinity φ
+  refine ⟨-(e : ℤ), ?_, ?_⟩
+  · have h1 : (1 : ℤ) ≤ (e : ℤ) := by exact_mod_cast he1
+    omega
+  have hnsmul : ∀ k : ℕ, k • ((-2 : ℤ) : WithTop ℤ) = ((2 * (-(k : ℤ)) : ℤ) : WithTop ℤ) := by
+    intro k
+    induction k with
+    | zero => simp
+    | succ n ih =>
+      rw [succ_nsmul, ih, ← WithTop.coe_add]
+      exact WithTop.coe_inj.mpr (by push_cast; ring)
+  have hKord : (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).ordAtInfty
+      (φ.toCurveMap.pullback (x_gen W₂)) = ((2 * (-(e : ℤ)) : ℤ) : WithTop ℤ) := by
+    have h := hform (x_gen W₂) (x_gen_ne_zero W₂)
+    rw [show (⟨W₂.toAffine⟩ : SmoothPlaneCurve K).ordAtInfty (x_gen W₂) =
+        ((-2 : ℤ) : WithTop ℤ) from ordAtInfty_x_gen W₂] at h
+    rw [h]; exact hnsmul e
+  have hne : φ.toCurveMap.pullback (x_gen W₂) ≠ 0 :=
+    φ.toCurveMap.pullback_ne_zero (x_gen_ne_zero W₂)
+  have htrans := SmoothPlaneCurve.ordAtInfty_functionFieldMap
+    (⟨W₁.toAffine⟩ : SmoothPlaneCurve K) L (φ.toCurveMap.pullback (x_gen W₂)) hne
+  exact htrans.trans hKord
+
+/-- **Transcendence of `bcXgen` over the (general) constant field `L`.** No `IsAlgClosed`
+hypothesis: an element algebraic over `L` would have order `0` at infinity
+(`ordAtInfty_eq_zero_of_isAlgebraic_constants`), contradicting the even-negative `bc_ord`. -/
+theorem bcXgen_transcendental : Transcendental L (bcXgen W₁ W₂ φ L) := by
+  intro halg
+  obtain ⟨m, hm, hord⟩ := bc_ord W₁ W₂ φ L
+  have h0 := ordAtInfty_eq_zero_of_isAlgebraic_constants
+    (W_smooth (W₁.baseChange L)) (bcXgen_ne_zero W₁ W₂ φ L) halg
+  rw [h0] at hord
+  have : (0 : ℤ) = 2 * m := WithTop.coe_inj.mp hord
+  omega
+
+/-- **The two-curve base-changed isogeny** `φ_L : E₁_L → E₂_L` (over a general finite/`L`-algebra
+`L`, CoordHom-free), via `ofEquation`. Its pullback sends `x_gen (E₂_L) ↦ bcXgen`,
+`y_gen (E₂_L) ↦ bcYgen`. -/
+noncomputable def bcIsog :
+    EC.Isogeny (W₁.baseChange L).toAffine (W₂.baseChange L).toAffine :=
+  Isogeny.ofEquation (W₁.baseChange L) (W₂.baseChange L)
+    (bcXgen W₁ W₂ φ L) (bcYgen W₁ W₂ φ L)
+    (bc_equation W₁ W₂ φ L) (bcXgen_transcendental W₁ W₂ φ L)
+    (Classical.choose_spec (bc_ord W₁ W₂ φ L)).1
+    (Classical.choose_spec (bc_ord W₁ W₂ φ L)).2
+
+theorem bcIsog_pullback_x_gen :
+    (bcIsog W₁ W₂ φ L).toCurveMap.pullback (x_gen (W₂.baseChange L)) = bcXgen W₁ W₂ φ L :=
+  HasseWeil.ofEquationPullback_x_gen (W₁.baseChange L) (W₂.baseChange L) (bcXgen W₁ W₂ φ L)
+    (bcYgen W₁ W₂ φ L) (bc_equation W₁ W₂ φ L) (bcXgen_transcendental W₁ W₂ φ L)
+
+theorem bcIsog_pullback_y_gen :
+    (bcIsog W₁ W₂ φ L).toCurveMap.pullback (y_gen (W₂.baseChange L)) = bcYgen W₁ W₂ φ L :=
+  HasseWeil.ofEquationPullback_y_gen (W₁.baseChange L) (W₂.baseChange L) (bcXgen W₁ W₂ φ L)
+    (bcYgen W₁ W₂ φ L) (bc_equation W₁ W₂ φ L) (bcXgen_transcendental W₁ W₂ φ L)
+
+/-- **Two-curve `AlgHom` extensionality on the generic coordinates.** A `K`-algebra hom out of
+`K(E₂)` is determined by its values on `x_gen₂` and `y_gen₂`. -/
+theorem algHom_ext_x_y_gen2 {A : Type*} [CommRing A] [Algebra K A]
+    {ψ₁ ψ₂ : W₂.toAffine.FunctionField →ₐ[K] A}
+    (hx : ψ₁ (x_gen W₂) = ψ₂ (x_gen W₂)) (hy : ψ₁ (y_gen W₂) = ψ₂ (y_gen W₂)) : ψ₁ = ψ₂ := by
+  apply IsLocalization.algHom_ext (nonZeroDivisors W₂.toAffine.CoordinateRing)
+  apply AdjoinRoot.algHom_ext'
+  · apply Polynomial.algHom_ext
+    change ψ₁ (algebraMap _ _ (algebraMap _ _ Polynomial.X)) =
+      ψ₂ (algebraMap _ _ (algebraMap _ _ Polynomial.X))
+    exact hx
+  · change ψ₁ (algebraMap _ _ (AdjoinRoot.root W₂.toAffine.polynomial)) =
+      ψ₂ (algebraMap _ _ (AdjoinRoot.root W₂.toAffine.polynomial))
+    exact hy
+
+/-- `functionFieldMap` carries `x_gen₂` to `x_gen (E₂_L)`. -/
+theorem functionFieldMap_x_gen :
+    (⟨W₂.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L (x_gen W₂) =
+      x_gen (W₂.baseChange L) := by
+  rw [x_gen, SmoothPlaneCurve.functionFieldMap_algebraMap]
+  show algebraMap _ _ ((⟨W₂.toAffine⟩ : SmoothPlaneCurve K).coordRingMap L
+      (algebraMap (Polynomial K) W₂.toAffine.CoordinateRing Polynomial.X)) = _
+  rw [SmoothPlaneCurve.coordRingMap_X]
+  rfl
+
+/-- `functionFieldMap` carries `y_gen₂` to `y_gen (E₂_L)`. -/
+theorem functionFieldMap_y_gen :
+    (⟨W₂.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L (y_gen W₂) =
+      y_gen (W₂.baseChange L) := by
+  rw [y_gen, SmoothPlaneCurve.functionFieldMap_algebraMap]
+  show algebraMap _ _ ((⟨W₂.toAffine⟩ : SmoothPlaneCurve K).coordRingMap L
+      (AdjoinRoot.root W₂.toAffine.polynomial)) = _
+  rw [SmoothPlaneCurve.coordRingMap_root]
+  rfl
+
+/-- **`ψ_L`** — the `F = K`-algebra-hom pullback of the two-curve base-changed isogeny, i.e. the
+`L`-base-change of `φ^*` (`restrictScalars` to `K`). -/
+noncomputable def psiL :
+    ((⟨W₂.toAffine⟩ : SmoothPlaneCurve K).baseChange L).FunctionField →ₐ[K]
+      ((⟨W₁.toAffine⟩ : SmoothPlaneCurve K).baseChange L).FunctionField :=
+  ((bcIsog W₁ W₂ φ L).toCurveMap.pullback).restrictScalars K
+
+/-- **Base-change naturality of `φ^*`**: `functionFieldMap ∘ φ^* = ψ_L ∘ functionFieldMap`. The two
+sides are `K`-algebra homs `K(E₂) → L(E₁_L)` agreeing on `x_gen₂`, `y_gen₂`
+(`bcIsog_pullback_x_gen`/`_y_gen` + `functionFieldMap_x_gen`/`_y_gen`). -/
+theorem psiL_nat (g : (⟨W₂.toAffine⟩ : SmoothPlaneCurve K).FunctionField) :
+    (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L (φ.toCurveMap.pullback g) =
+      psiL W₁ W₂ φ L ((⟨W₂.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L g) := by
+  have heq : ((⟨W₁.toAffine⟩ : SmoothPlaneCurve K).functionField_baseChange L).comp
+        φ.toCurveMap.pullback =
+      (psiL W₁ W₂ φ L).comp
+        ((⟨W₂.toAffine⟩ : SmoothPlaneCurve K).functionField_baseChange L) := by
+    apply algHom_ext_x_y_gen2 W₂
+    · show (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L
+          (φ.toCurveMap.pullback (x_gen W₂)) =
+        psiL W₁ W₂ φ L ((⟨W₂.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L (x_gen W₂))
+      rw [functionFieldMap_x_gen]
+      show _ = (bcIsog W₁ W₂ φ L).toCurveMap.pullback (x_gen (W₂.baseChange L))
+      rw [bcIsog_pullback_x_gen]; rfl
+    · show (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L
+          (φ.toCurveMap.pullback (y_gen W₂)) =
+        psiL W₁ W₂ φ L ((⟨W₂.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L (y_gen W₂))
+      rw [functionFieldMap_y_gen]
+      show _ = (bcIsog W₁ W₂ φ L).toCurveMap.pullback (y_gen (W₂.baseChange L))
+      rw [bcIsog_pullback_y_gen]; rfl
+  exact AlgHom.congr_fun heq g
+
+/-- `ψ_L` is injective (it is an `F`-algebra hom between fields). -/
+theorem psiL_injective : Function.Injective (psiL W₁ W₂ φ L) :=
+  (psiL W₁ W₂ φ L).toRingHom.injective
+
+/-- `ψ_L` is `L`-linear on constants: `ψ_L (algebraMap L _ l) = algebraMap L _ l`. It is the
+`restrictScalars K` of the *`L`-algebra hom* `(bcIsog).pullback`, which fixes `L`-constants. -/
+theorem psiL_algebraMap_L (l : L) :
+    psiL W₁ W₂ φ L
+        (algebraMap L ((⟨W₂.toAffine⟩ : SmoothPlaneCurve K).baseChange L).FunctionField l) =
+      algebraMap L ((⟨W₁.toAffine⟩ : SmoothPlaneCurve K).baseChange L).FunctionField l :=
+  (bcIsog W₁ W₂ φ L).toCurveMap.pullback.commutes l
+
+/-! #### `mPbL` — the base change of `[deg φ]*` (an endomorphism), and its naturality -/
+
+variable {n : ℤ}
+
+/-- **`[m]_L*`** — the `L`-base-change of `[m]* = mulByInt_pullbackAlgHom` (the endomorphism case
+`W₁ → W₁`), as `ψ_L` of the `EC.Isogeny.mulByInt` endomorphism. -/
+noncomputable def mPbL (hn : n ≠ 0) :
+    ((⟨W₁.toAffine⟩ : SmoothPlaneCurve K).baseChange L).FunctionField →ₐ[K]
+      ((⟨W₁.toAffine⟩ : SmoothPlaneCurve K).baseChange L).FunctionField :=
+  psiL W₁ W₁ (EC.Isogeny.mulByInt W₁.toAffine hn) L
+
+/-- **Base-change naturality of `[m]*`**: `functionFieldMap ∘ [m]* = [m]_L* ∘ functionFieldMap`. The
+endomorphism shadow of `psiL_nat`, using `(mulByInt W hn).pullback = mulByInt_pullbackAlgHom`. -/
+theorem mPbL_nat (hn : n ≠ 0) (u : (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).FunctionField) :
+    (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L
+        (HasseWeil.mulByInt_pullbackAlgHom W₁ n hn u) =
+      mPbL W₁ L hn ((⟨W₁.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L u) := by
+  have hpb : (EC.Isogeny.mulByInt W₁.toAffine hn).toCurveMap.pullback u =
+      HasseWeil.mulByInt_pullbackAlgHom W₁ n hn u := rfl
+  rw [← hpb]
+  exact psiL_nat W₁ W₁ (EC.Isogeny.mulByInt W₁.toAffine hn) L u
+
+/-! #### `Gal(L/F)`-equivariance of `ψ_L` (full, on all of `F(E₂_L)`)
+
+`ψ_L` is `L`-linear (the `restrictScalars` of an `L`-algebra hom) and the Galois action is
+`σ`-semilinear over `L` (`galActFunctionField_algebraMap_L`). The function field `F(E₂_L)` is
+generated over `F` by the L-constants `algebraMap L _ l` together with the generic coordinates
+`x_gen (E₂_L)`, `y_gen (E₂_L)` — which are themselves `functionFieldMap`-images
+(`functionFieldMap_x_gen`/`_y_gen`), hence Galois-fixed. So equivariance reduces, via the base-`L`
+ring-hom extensionality `ringHom_ext_baseL`, to the three generators: on L-constants it is the
+semilinearity; on `x_gen`/`y_gen` both sides are the (Galois-fixed) `bcXgen`/`bcYgen`. -/
+
+/-- **Base-`L` ring-hom extensionality** (the equivariance engine): a ring hom out of `F(E₂_L)`
+(into any field) is determined by its values on the `L`-constants and the two generic coordinates of
+`E₂_L`. Reduction: `IsFractionRing.div_surjective` (peel `Frac`), `AdjoinRoot.ringHom_ext` (peel
+`AdjoinRoot`), `Polynomial.ringHom_ext` (peel `L[X]` into `C l` = L-constants and `X` = `x_gen`). -/
+theorem ringHom_ext_baseL {A : Type*} [Field A]
+    (ψ₁ ψ₂ : (W₂.baseChange L).toAffine.FunctionField →+* A)
+    (hbase : ∀ l : L, ψ₁ (algebraMap L _ l) = ψ₂ (algebraMap L _ l))
+    (hx : ψ₁ (x_gen (W₂.baseChange L)) = ψ₂ (x_gen (W₂.baseChange L)))
+    (hy : ψ₁ (y_gen (W₂.baseChange L)) = ψ₂ (y_gen (W₂.baseChange L))) :
+    ψ₁ = ψ₂ := by
+  have hcomp : (ψ₁.comp (algebraMap (W₂.baseChange L).toAffine.CoordinateRing
+        (W₂.baseChange L).toAffine.FunctionField)) =
+      (ψ₂.comp (algebraMap (W₂.baseChange L).toAffine.CoordinateRing
+        (W₂.baseChange L).toAffine.FunctionField)) := by
+    apply AdjoinRoot.ringHom_ext
+    · apply Polynomial.ringHom_ext
+      · intro l
+        change ψ₁ (algebraMap (W₂.baseChange L).toAffine.CoordinateRing _
+            ((AdjoinRoot.of (W₂.baseChange L).toAffine.polynomial) (C l))) =
+          ψ₂ (algebraMap (W₂.baseChange L).toAffine.CoordinateRing _
+            ((AdjoinRoot.of (W₂.baseChange L).toAffine.polynomial) (C l)))
+        have hca : (algebraMap (W₂.baseChange L).toAffine.CoordinateRing _)
+            ((AdjoinRoot.of (W₂.baseChange L).toAffine.polynomial) (C l)) =
+            algebraMap L (W₂.baseChange L).toAffine.FunctionField l := by
+          rw [show (AdjoinRoot.of (W₂.baseChange L).toAffine.polynomial) (C l) =
+              algebraMap L (W₂.baseChange L).toAffine.CoordinateRing l from rfl,
+            ← IsScalarTower.algebraMap_apply]
+        rw [hca]; exact hbase l
+      · change ψ₁ (algebraMap (W₂.baseChange L).toAffine.CoordinateRing _
+            ((AdjoinRoot.of (W₂.baseChange L).toAffine.polynomial) X)) =
+          ψ₂ (algebraMap (W₂.baseChange L).toAffine.CoordinateRing _
+            ((AdjoinRoot.of (W₂.baseChange L).toAffine.polynomial) X))
+        exact hx
+    · change ψ₁ (algebraMap (W₂.baseChange L).toAffine.CoordinateRing _
+          (AdjoinRoot.root (W₂.baseChange L).toAffine.polynomial)) =
+        ψ₂ (algebraMap (W₂.baseChange L).toAffine.CoordinateRing _
+          (AdjoinRoot.root (W₂.baseChange L).toAffine.polynomial))
+      exact hy
+  ext z
+  obtain ⟨a, b, hb, rfl⟩ := IsFractionRing.div_surjective
+    (A := (W₂.baseChange L).toAffine.CoordinateRing) z
+  have ha := RingHom.congr_fun hcomp a
+  have hbb := RingHom.congr_fun hcomp b
+  simp only [RingHom.comp_apply] at ha hbb
+  rw [map_div₀, map_div₀, ha, hbb]
+
+/-- **`ψ_L` is `Gal(L/F)`-equivariant** (the full statement on all of `F(E₂_L)`). Reduce, via
+`ringHom_ext_baseL`, to the three generators: on the `L`-constants `algebraMap L _ l` it is the
+`σ`-semilinearity of the Galois action (`galActFunctionField_algebraMap_L`) matched against the
+`L`-linearity of `ψ_L`; on `x_gen`/`y_gen` (which are `functionFieldMap`-images, so Galois-fixed via
+`galActFunctionField_fixes_baseChange`) both sides are the (also Galois-fixed) `bcXgen`/`bcYgen`. -/
+theorem psiL_galEquivariant : GalEquivariant L ((psiL W₁ W₂ φ L)) := by
+  intro σ
+  -- compare the two ring homs `x ↦ psiL (galAct σ x)` and `x ↦ galAct σ (psiL x)`
+  have hfun : (psiL W₁ W₂ φ L).toRingHom.comp (galActFunctionField (⟨W₂.toAffine⟩) L σ).toRingHom =
+      (galActFunctionField (⟨W₁.toAffine⟩) L σ).toRingHom.comp (psiL W₁ W₂ φ L).toRingHom := by
+    apply ringHom_ext_baseL W₂ L
+    · -- L-constants
+      intro l
+      show (psiL W₁ W₂ φ L) (galActFunctionField (⟨W₂.toAffine⟩) L σ
+          (algebraMap L _ l)) =
+        galActFunctionField (⟨W₁.toAffine⟩) L σ ((psiL W₁ W₂ φ L) (algebraMap L _ l))
+      rw [galActFunctionField_algebraMap_L]
+      rw [psiL_algebraMap_L, psiL_algebraMap_L, galActFunctionField_algebraMap_L]
+    · -- x_gen of E₂_L : a functionFieldMap-image, hence Galois-fixed
+      show (psiL W₁ W₂ φ L) (galActFunctionField (⟨W₂.toAffine⟩) L σ (x_gen (W₂.baseChange L))) =
+        galActFunctionField (⟨W₁.toAffine⟩) L σ ((psiL W₁ W₂ φ L) (x_gen (W₂.baseChange L)))
+      rw [← functionFieldMap_x_gen, galActFunctionField_fixes_baseChange,
+        functionFieldMap_x_gen]
+      show _ = galActFunctionField (⟨W₁.toAffine⟩) L σ
+        ((bcIsog W₁ W₂ φ L).toCurveMap.pullback (x_gen (W₂.baseChange L)))
+      rw [bcIsog_pullback_x_gen, bcXgen, galActFunctionField_fixes_baseChange]
+      show (bcIsog W₁ W₂ φ L).toCurveMap.pullback (x_gen (W₂.baseChange L)) = _
+      rw [bcIsog_pullback_x_gen]; rfl
+    · -- y_gen of E₂_L
+      show (psiL W₁ W₂ φ L) (galActFunctionField (⟨W₂.toAffine⟩) L σ (y_gen (W₂.baseChange L))) =
+        galActFunctionField (⟨W₁.toAffine⟩) L σ ((psiL W₁ W₂ φ L) (y_gen (W₂.baseChange L)))
+      rw [← functionFieldMap_y_gen, galActFunctionField_fixes_baseChange,
+        functionFieldMap_y_gen]
+      show _ = galActFunctionField (⟨W₁.toAffine⟩) L σ
+        ((bcIsog W₁ W₂ φ L).toCurveMap.pullback (y_gen (W₂.baseChange L)))
+      rw [bcIsog_pullback_y_gen, bcYgen, galActFunctionField_fixes_baseChange]
+      show (bcIsog W₁ W₂ φ L).toCurveMap.pullback (y_gen (W₂.baseChange L)) = _
+      rw [bcIsog_pullback_y_gen]; rfl
+  intro x
+  exact RingHom.congr_fun hfun x
+
+end TwoCurveBaseChange
+
+/-! ### The two-curve `DescentData` over a finite Galois `L ⊆ K̄`
+
+With `TwoCurveBaseChange` supplying the CoordHom-free `ψ_L`/`[m]_L*` (via `ofEquation`), their
+base-change naturalities, `ψ_L`'s injectivity, and `ψ_L`'s full `Gal(L/F)`-equivariance, the only
+remaining content of `descentData_over_kbar_intermediate` is the **`L`-level range inclusion**
+`Im([deg φ]_L*) ⊆ Im(ψ_L)` — the two-curve `K̄`-dual descended to a finite Galois `L`. That single
+inclusion is isolated as `twoCurveKbarRangeIncl_descended`.
+
+**OBSOLETE NOTE (pre-`TwoCurveBaseChange`):** the earlier framing required a `CoordHom` for `φ`
+(`psiL = baseChangeAlgHom cd L`), which a general `EC.Isogeny` does not carry. That obstruction is now
+gone — `ofEquation` builds `ψ_L` directly from the pullback generator images, no `CoordHom`.
 
 **What is PROVEN around it (this pass):** the field-of-definition descent (MOVE 1 —
 `instIsGalois_algebraicClosure`, `exists_finiteGalois_fieldOfDefinition`, `galFixed_of_galFixed_top`),
-the universe-correct packaging (`someDescentData_of_intermediate`), and the entire elementwise Galois
-descent downstream (`rangeIncl_of_descentData`, DUAL-Q1 `mem_range_functionField_baseChange_iff_fixed`).
--/
+the universe-correct packaging (`someDescentData_of_overKbar`), the entire elementwise Galois descent
+downstream (`rangeIncl_of_descentData`, DUAL-Q1 `mem_range_functionField_baseChange_iff_fixed`), and
+**all six structural `DescentData` fields except `hLincl`** (the two-curve base-change
+`TwoCurveBaseChange.{bcIsog, psiL, mPbL, psiL_nat, mPbL_nat, psiL_injective, psiL_galEquivariant}`). -/
+
+/-- **The data carrier of the single residual leaf** — a concrete finite Galois `L ⊆ K̄` together
+with the two-curve `K̄`-dual range inclusion `Im([deg φ]_L*) ⊆ Im(ψ_L)` over it. Bundles `L` and its
+instances as *data* so the leaf can be consumed by the (data-valued)
+`descentData_over_kbar_intermediate`. -/
+private structure TwoCurveKbarRangeInclData {F : Type u} [Field F] [DecidableEq F] [CharZero F]
+    {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
+    (φ : EC.Isogeny W₁ W₂) where
+  /-- The concrete finite Galois field of definition `L ⊆ K̄`. -/
+  L : IntermediateField F (AlgebraicClosure F)
+  /-- `L/F` is finite. -/
+  [finL : FiniteDimensional F L]
+  /-- `L/F` is Galois. -/
+  [galL : IsGalois F L]
+  /-- A decidability instance on `L` (for the `ofEquation` construction). -/
+  decL : DecidableEq L
+  /-- The two-curve `K̄`-dual range inclusion over `L`. -/
+  hLincl :
+    letI := decL
+    (TwoCurveBaseChange.mPbL W₁ L (n := (φ.degree : ℤ))
+        (by exact_mod_cast φ.degree_pos'.ne')).range ≤
+      (TwoCurveBaseChange.psiL W₁ W₂ φ L).range
+
+/-- **The single residual leaf — the `L`-level two-curve `K̄`-dual range inclusion (REVIEW-PENDING).**
+Produces a `TwoCurveKbarRangeInclData`: a concrete finite Galois `L ⊆ K̄` together with the range
+inclusion `Im([deg φ]_L*) ⊆ Im(ψ_L)` over it.
+
+This is the **two-curve `K̄`-dual** `Im([m]_K̄*) ⊆ Im(φ_K̄*)` (Silverman III.6.1 over an algebraically
+closed field) restricted to a finite Galois `L`. The project's K̄-dual machinery
+(`exists_dual_of_pullbackEvaluation_general`, `EC/KernelCountGeneral.lean`; the
+`HasMulByIntDualWitness.hincl`) is **endomorphism-only** (`W → W`); a *two-curve* `φ_K̄ : E₁_K̄ → E₂_K̄`
+has no codebase dual, so this range inclusion is the irreducible remaining infrastructure. Everything
+else of the two-curve `DescentData` is proven this pass: the L-linear `ψ_L`
+(`TwoCurveBaseChange.psiL`), `[m]_L*` (`TwoCurveBaseChange.mPbL`), their base-change naturalities
+(`psiL_nat`, `mPbL_nat`), `ψ_L`'s injectivity (`psiL_injective`), and `ψ_L`'s full
+`Gal(L/F)`-equivariance (`psiL_galEquivariant`). -/
+private noncomputable def twoCurveKbarRangeIncl_descended {F : Type u} [Field F] [DecidableEq F]
+    [CharZero F] {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
+    (φ : EC.Isogeny W₁ W₂) (hsep : φ.IsSeparable) :
+    TwoCurveKbarRangeInclData φ :=
+  sorry
+
 private noncomputable def descentData_over_kbar_intermediate {F : Type u} [Field F] [DecidableEq F]
     [CharZero F] {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
     (φ : EC.Isogeny W₁ W₂) (hsep : φ.IsSeparable) :
     DescentDataOverKbar (⟨W₁⟩ : SmoothPlaneCurve F) ⟨W₂⟩ φ.toCurveMap.pullback
       (HasseWeil.mulByInt_pullbackAlgHom W₁ (φ.degree : ℤ)
         (by exact_mod_cast φ.degree_pos'.ne')) :=
-  sorry
+  let d := twoCurveKbarRangeIncl_descended φ hsep
+  letI := d.finL
+  letI := d.galL
+  letI : DecidableEq d.L := d.decL
+  { L := d.L
+    finL := d.finL
+    galL := d.galL
+    data :=
+      { psiL := TwoCurveBaseChange.psiL W₁ W₂ φ d.L
+        mPbL := TwoCurveBaseChange.mPbL W₁ d.L (n := (φ.degree : ℤ))
+          (by exact_mod_cast φ.degree_pos'.ne')
+        hpsiL_equiv := TwoCurveBaseChange.psiL_galEquivariant W₁ W₂ φ d.L
+        hpsiL_inj := TwoCurveBaseChange.psiL_injective W₁ W₂ φ d.L
+        hpsiL_nat := fun g => TwoCurveBaseChange.psiL_nat W₁ W₂ φ d.L g
+        hmPbL_nat := fun u => TwoCurveBaseChange.mPbL_nat W₁ d.L
+          (by exact_mod_cast φ.degree_pos'.ne') u
+        hLincl := d.hLincl } }
 
 /-- **The single isolated deep residual of Silverman III.6.1 (descent half), REVIEW-PENDING — now
 narrowed to TWO-CURVE BASE-CHANGE only (the field-of-definition half is discharged by MOVE 1).** For
@@ -974,24 +1487,22 @@ a separable isogeny `φ : E₁ → E₂` over `F`, there is a *finite Galois* ex
 F(E₁_L)` of `φ*` and the base-change `[deg φ]_L*` of `[deg φ]*`, with `ψ_L` equivariant/injective,
 the base-change naturalities, and the `L`-level range inclusion `Im([deg φ]_L*) ⊆ Im(ψ_L)`.
 
-**The remaining content is the two-curve base-change DATA** — the structural `psiL`/`mPbL` over a
-finite Galois `L`, their naturalities, `psiL`'s injectivity and full `Gal(L/F)`-equivariance, and the
-`L`-level range inclusion. Concretely:
+**UPDATE (this pass): the two-curve base-change DATA is now PROVEN** — the structural `psiL`/`mPbL`
+over a finite Galois `L`, their naturalities, `psiL`'s injectivity and full `Gal(L/F)`-equivariance
+are all discharged in the `TwoCurveBaseChange` namespace (CoordHom-free, via `ofEquation`). Concretely:
 
-* **Two-curve base-change** (the irreducible leaf): construct `ψ_L : F(E₂_L) → F(E₁_L)`, `[deg φ]_L*`
-  and their naturality / equivariance / injectivity. The project's `baseChangeIsogeny`
-  (`EC/IsogenyAG/BaseChange.lean`) is *endomorphism-only* and requires `IsAlgClosed`; a general
-  `φ : E₁ → E₂` over a finite Galois `L` needs the **two-curve** `baseChangeAlgHom` (which already
-  exists at coordinate-ring level — `CurveMap.CoordHom.baseChangeAlgHom`, `C₁ C₂` distinct, in
-  `CurveMapBaseChange.lean`) lifted to a `CoordHom` for `φ`. A general isogeny carries no `CoordHom`
-  (it is separate data, `toPointMap`), so producing the `CoordHom`/the L-linear `psiL` is the genuine
-  missing infrastructure. `mulByInt`'s base-change naturality is available only on generators over
-  `AlgebraicClosure` (`PencilComapWitnesses.lean`), not over a general finite `L` on all elements.
-* **`K̄`-dual range inclusion** (the L-level inclusion `Im([deg φ]_L*) ⊆ Im(ψ_L)`): once `ψ_L` exists,
-  this is the two-curve `K̄`-dual `Im([m]_K̄*) ⊆ Im(φ_K̄*)` (the two-curve form of
-  `exists_dual_of_pullbackEvaluation_general` / `DualGaloisData.hincl`, which is *already two-curve*)
-  restricted to the finite Galois `L`. The Galois-descent of fixedness needed to restrict it from
-  `K̄` to `L` is **MOVE 1** below (`galFixed_of_galFixed_top`).
+* **Two-curve base-change** (DONE, axiom-clean): `TwoCurveBaseChange.bcIsog` builds `φ_L : E₁_L → E₂_L`
+  over a *general* finite `L` (no `IsAlgClosed`, no `CoordHom`) via `EC.Isogeny.ofEquation` applied to
+  the pullback generator images. `ψ_L` = `psiL`, `[m]_L*` = `mPbL`, with naturality (`psiL_nat`,
+  `mPbL_nat`), injectivity (`psiL_injective`), and full `Gal(L/F)`-equivariance
+  (`psiL_galEquivariant`).
+* **`K̄`-dual range inclusion** (the L-level inclusion `Im([deg φ]_L*) ⊆ Im(ψ_L)`): **THIS is now the
+  single irreducible leaf** (`twoCurveKbarRangeIncl_descended`). It is the two-curve `K̄`-dual
+  `Im([m]_K̄*) ⊆ Im(φ_K̄*)` (Silverman III.6.1, `DualGaloisData.hincl`/III.4.10c) restricted to a
+  finite Galois `L`. The `DualGaloisData` *structure* is two-curve, but its *constructors*
+  (`exists_dual_of_pullbackEvaluation_general` etc.) are endomorphism-only — a two-curve `φ_K̄` has no
+  codebase dual, so the `hfix` (III.4.10c fixed-field equality) for two curves is the genuine missing
+  infrastructure. Once available, MOVE 1's `galFixed_of_galFixed_top` descends it from `K̄` to `L`.
 
 **MOVE 1 discharges the field-of-definition gap.** The earlier "missing mathlib fact" — a datum over
 `AlgebraicClosure F` is defined over a finite Galois subextension — is now supplied by
