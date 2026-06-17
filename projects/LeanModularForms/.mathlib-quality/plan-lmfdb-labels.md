@@ -56,21 +56,28 @@ distinct orbits). Zero sorries in `Labels/{Encoding,CharacterOrbit}`.
 `Setoid` → `galoisOrbit` → orbit-invariant `traceSeqAt` (= `Tr_{K_f/ℚ}(aₙ)`) → `orbitIndex` → `newformOrbitLabel`,
 with `newformOrbitLabel_eq_of_isGaloisConj` proven (orbit-invariant) and `newformOrbitLabel_injOn_orbits`
 reduced to `traceSeq_injOn_orbits`. The SMO-separation `coeffSeq_injOn_charSpace` is **sorry-free from
-`strongMultiplicityOne_axiom_clean`**. **4 isolated deep-NT sorries:** `coeffSeq_isIntegral` (Hecke eigenvalues
-are algebraic integers — Shimura 3.52/Deligne), `instFiniteDimensionalCoeffField` (`[K_f:ℚ]<∞`),
-`instFiniteNewform` (finitely many newforms — reachable via `exists_simultaneous_eigenform_basis`), and
-`traceSeq_injOn_orbits` (distinct orbits ⇒ distinct trace sequences — newform analogue of
-`linearIndependent_monoidHom`, reachable via SMO + linear independence). **Phase 3 (`Labels/Label.lean`) — DONE, sorry-free.** `Newform.lmfdbLabel f = "N.k.{charOrbitLabel χ_f}.{newformOrbitLabel f}"`
+`strongMultiplicityOne_axiom_clean`**. **Now only 2 isolated deep-NT sorries** (2026-06-17, NewformOrbit 4→2):
+`coeffSeq_isIntegral` (Hecke eigenvalues are algebraic integers — Shimura 3.52/Deligne) and
+`instFiniteDimensionalCoeffField` (`[K_f:ℚ]<∞`) — both **isolated + unconsumed** (only their own docstrings
+reference them; NOT on the label map's critical path). The former finiteness/injectivity sorries
+`instFiniteNewform` + `traceSeq_injOn_orbits` are now **closed axiom-clean** (see resolved FINDING below).
+**Phase 3 (`Labels/Label.lean`) — DONE, sorry-free.** `Newform.lmfdbLabel f = "N.k.{charOrbitLabel χ_f}.{newformOrbitLabel f}"`
 (χ_f = `Eigenform.χ` via `Newform.dirichletLift`), with `lmfdbLabel_eq_of_isGaloisConj` (Galois-invariant, axiom-clean,
 composing Phase 1 + Phase 2) and `lmfdbLabel_injOn_orbits` (via label-parsing back to components). Full canonical label map in place.
 
-**⚠️ FINDING / blocker for finiteness+injectivity (owner decision needed).** `instFiniteNewform` and `traceSeq_injOn_orbits`
-are **false as currently stated**: `Eigenform` carries `ringEigenvalue : ℕ+ → ℂ` as a DATA field with `isRingEigen` only
-constraining indices coprime to N — so bad-prime values are FREE, giving infinitely many `Newform` terms over one underlying
-form, and `f ↦ f.toCuspForm`/`coeffSeq` is NOT injective on `Newform`. Fix = constrain the eigenvalues at ALL n (or derive
-`ringEigenvalue` from the form), which makes finiteness + coeffSeq-injectivity + `traceSeq_injOn_orbits` provable — but it's a
-change to the shared `Eigenform`/`Newform` definition (affects MainLemma/SMO), so flag to owner. The 2 genuinely-deep sorries
-remain regardless: `coeffSeq_isIntegral` (eigenvalues alg. integers) + `instFiniteDimensionalCoeffField` (`[K_f:ℚ]<∞`).
+**✅ RESOLVED (2026-06-17) — finiteness + injectivity closed.** The earlier blocker (`Eigenform.ringEigenvalue`
+free at bad primes ⇒ `Newform` not determined by its form ⇒ `instFiniteNewform`/`traceSeq_injOn_orbits` false) is
+**fixed**. Added field `Eigenform.ringEigen_bad : ∀ n, ¬Coprime n.val N → ringEigenvalue n = 0` (commit `f704590`;
+the one construction site `eigenformOfIsEigenform` in `StrongMultiplicityOneFull.lean` updated to guard `.choose`
+with `if Coprime … else 0`). A newform is now **determined by its underlying form**
+(`Newform.{toCuspForm,coeffSeq}_injective`: χ pinned via `cuspFormCharSpace` + diamond action on the nonzero form;
+`ringEigenvalue` pinned by the unique good-prime eigenvalue + `ringEigen_bad`). Then (commit `2936f0a`):
+`instFiniteNewform` via `linearIndependent_toCuspForm.finite` (distinct newforms are Petersson-orthogonal ⇒ LI,
+in the finite-dim cusp space `cuspForm_finiteDimensional`); `traceSeq_injOn_orbits` via `linearIndependent_coeffSeq`
+(the newform analogue of `linearIndependent_monoidHom`). **The full LMFDB label map + canonicity
+(`lmfdbLabel_eq_of_isGaloisConj`, `lmfdbLabel_injOn_orbits`, `newformOrbitLabel_injOn_orbits`, `instFiniteNewform`)
+is now axiom-clean `[propext, Classical.choice, Quot.sound]`**; SMO headline stays axiom-clean. The 2 deep sorries
+above remain (unconsumed, off the critical path).
 - Deliverable: `charOrbitLabel : DirichletCharacter ℂ N → String`; well-defined (constant on
   orbits) + injective on orbits.
 
