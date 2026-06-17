@@ -541,8 +541,7 @@ theorem exists_residue_pi {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]} (hx : x ∈ K p
   set i0 : Fin pb.dim := ⟨0, hdimpos⟩ with hi0
   have hq0le : ‖q i0‖ ≤ 1 := by
     have h := hterm_le_one i0
-    rw [hnormtm, show ((i0:ℕ)) = 0 from rfl, pow_zero, mul_one] at h
-    exact h
+    rwa [hnormtm, show ((i0:ℕ)) = 0 from rfl, pow_zero, mul_one] at h
   set a : ℤ_[p] := ⟨q i0, hq0le⟩ with ha
   have htm0 : tm i0 = toCp p a := by
     rw [htmval, show ((i0:ℕ)) = 0 from rfl, pow_zero, mul_one, toCp, RingHom.comp_apply,
@@ -554,10 +553,8 @@ theorem exists_residue_pi {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]} (hx : x ∈ K p
   rw [hsub]
   refine IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg (norm_nonneg _) (fun i hi => ?_)
   rw [Finset.mem_erase] at hi
-  have hi1 : 1 ≤ (i:ℕ) := by
-    rcases Nat.eq_zero_or_pos (i:ℕ) with h0 | h0
-    · exact absurd (Fin.ext (by rw [h0, hi0])) hi.1
-    · exact h0
+  have hi1 : 1 ≤ (i:ℕ) :=
+    Nat.pos_of_ne_zero fun h0 => hi.1 (Fin.ext (by rw [h0, hi0]))
   rw [hnormtm]
   exact term_norm_le_pi p hn (q i) hi1 (hdim ▸ i.2) (by rw [← hnormtm]; exact hterm_le_one i)
 
@@ -615,9 +612,8 @@ theorem exists_evalPi_eq {n : ℕ} (hn : 1 ≤ n) {u : ℂ_[p]} (hu : u ∈ O p 
     have hkey : ‖toCp p (a 0)‖ = 1 := by
       have h2 : ‖-(u - toCp p (a 0)) + u‖ = max ‖-(u - toCp p (a 0))‖ ‖u‖ :=
         IsUltrametricDist.norm_add_eq_max_of_norm_ne_norm (by rw [norm_neg]; exact hne)
-      rw [show -(u - toCp p (a 0)) + u = toCp p (a 0) from by ring, norm_neg, hnorm,
+      rwa [show -(u - toCp p (a 0)) + u = toCp p (a 0) from by ring, norm_neg, hnorm,
         max_eq_right hlt.le] at h2
-      exact h2
     rw [norm_toCp] at hkey
     rw [PowerSeries.isUnit_iff_constantCoeff, PowerSeries.constantCoeff_mk]
     exact PadicInt.isUnit_iff.2 hkey
@@ -646,8 +642,7 @@ theorem exists_evalPi_eq {n : ℕ} (hn : 1 ≤ n) {u : ℂ_[p]} (hu : u ∈ O p 
         _ < ε := hm
     have hSu : Filter.Tendsto (fun m => ∑ j ∈ Finset.range m,
         coeff j (PowerSeries.map (toCp p) f) * pi p n ^ j) Filter.atTop (nhds u) := by
-      have := hzero.const_sub u
-      simpa using this
+      simpa using hzero.const_sub u
     rw [evalPi, seriesEval]
     exact tendsto_nhds_unique hsum hSu
 
@@ -909,8 +904,7 @@ theorem tendsto_evalPi_of_tendsto {g : ℕ → PowerSeries ℤ_[p]} {h : PowerSe
         exact this.congr (fun j => by rw [map_sub])
       have := (continuous_norm.tendsto (0 : ℤ_[p])).comp hc
       rwa [norm_zero] at this
-    have := tendsto_finsetSum (Finset.range N) (fun k _ => hk k)
-    simpa using this
+    simpa using tendsto_finsetSum (Finset.range N) (fun k _ => hk k)
   -- eventually the head `< ε`
   rw [Metric.tendsto_atTop] at hhead
   obtain ⟨J, hJ⟩ := hhead ε hε
@@ -953,9 +947,8 @@ theorem tendsto_evalPi_of_tendsto {g : ℕ → PowerSeries ℤ_[p]} {h : PowerSe
   rw [hB, max_lt_iff]
   refine ⟨?_, hN N le_rfl⟩
   have := hJ j hj
-  rw [dist_eq_norm, sub_zero, Real.norm_eq_abs,
+  rwa [dist_eq_norm, sub_zero, Real.norm_eq_abs,
     abs_of_nonneg (Finset.sum_nonneg (fun k _ => norm_nonneg _))] at this
-  exact this
 
 /-- **Coleman's theorem** (RJW `thm:coleman power series`, TeX 2553–2560; `thm:coleman map 2`,
 TeX 2796–2807): for every norm-compatible system of units `u = (u_n)_n ∈ 𝒰_∞`, there is a
