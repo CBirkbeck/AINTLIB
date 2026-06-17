@@ -54,8 +54,7 @@ converted to the additive shape demanded by the statements with `MonoidHom.toAdd
 /-- `Col 1 = 0`: the trivial unit system is `(p−1)`-torsion (each level is `1`), so
 `Col_eq_zero_of_torsion` kills it. -/
 theorem Col_one : Col p (1 : NormCompatUnits p) = 0 :=
-  Col_eq_zero_of_torsion p 1 (fun n => by
-    rw [show ((1 : NormCompatUnits p).elems n) = 1 from rfl, one_pow])
+  Col_eq_zero_of_torsion p 1 (fun _ => one_pow _)
 
 /-- **The Coleman map as a homomorphism into the additive group `Λ(𝒢)/I(𝒢)ζ_p`**, packaged
 multiplicatively: `u ↦ [Col u] ∈ Multiplicative (Λ(𝒢)/I(𝒢)ζ_p)`. The hom property is
@@ -65,10 +64,9 @@ def ColMul (hp2 : p ≠ 2) :
     NormCompatUnits p →* Multiplicative (PadicMeasure p ℤ_[p]ˣ ⧸ PadicMeasure.zetaIdeal p hp2) where
   toFun u := Multiplicative.ofAdd (Ideal.Quotient.mk (PadicMeasure.zetaIdeal p hp2) (Col p u))
   map_one' := by
-    change Multiplicative.ofAdd (Ideal.Quotient.mk _ (Col p (1 : NormCompatUnits p))) = 1
-    rw [Col_one, map_zero]; rfl
+    rw [show Col p (1 : NormCompatUnits p) = 0 from Col_one p, map_zero]; rfl
   map_mul' u v := by
-    change Multiplicative.ofAdd (Ideal.Quotient.mk _ (Col p (u * v))) = _
+    show Multiplicative.ofAdd (Ideal.Quotient.mk _ (Col p (u * v))) = _
     rw [Col_add, map_add, ofAdd_add]
 
 @[simp] theorem ColMul_apply (hp2 : p ≠ 2) (u : NormCompatUnits p) :
@@ -134,13 +132,12 @@ theorem Col_galNCU_wGamma_inv (a : ℤ_[p]ˣ) (hp2 : p ≠ 2) :
       = (PadicMeasure.dirac p a) * PadicMeasure.zetaNum p
           (PadicMeasure.exists_nat_topological_generator p hp2).choose := by
   -- `Col(wγ⁻¹) = −Col(wγ) = zetaNum a₀`
+  have h := Col_add p (wGamma p hp2) (wGamma p hp2)⁻¹
+  rw [mul_inv_cancel, Col_one] at h
   have hinv : Col p (wGamma p hp2)⁻¹
       = PadicMeasure.zetaNum p
           (PadicMeasure.exists_nat_topological_generator p hp2).choose := by
-    have h := Col_add p (wGamma p hp2) (wGamma p hp2)⁻¹
-    rw [mul_inv_cancel, Col_one] at h
-    rw [show Col p (wGamma p hp2)⁻¹ = -Col p (wGamma p hp2) from by linear_combination -h,
-      Col_wGamma_choose, neg_neg]
+    rw [eq_neg_of_add_eq_zero_right h.symm, Col_wGamma_choose, neg_neg]
   rw [Col_galNCU_eq_dirac_mul, hinv]
 
 /-- **The group-element scalar multiples lie in `Col '' 𝒞_{∞,1}`** (the dense facet of the image
@@ -239,7 +236,7 @@ def colImageSubgroup : AddSubgroup (PadicMeasure p ℤ_[p]ˣ) where
     refine ⟨u⁻¹, inv_mem hu, ?_⟩
     have h := Col_add p u u⁻¹
     rw [mul_inv_cancel, Col_one] at h
-    linear_combination -h
+    exact eq_neg_of_add_eq_zero_right h.symm
 
 /-- **The ζ-ideal lands in the Coleman image** `I(𝒢)ζ_p ⊆ Col '' 𝒞_{∞,1}` — the genuine
 density-crossing (RJW §13/IMC, the formerly-blocked core). Now proved: `Col '' 𝒞_{∞,1}` is a
@@ -317,7 +314,7 @@ def colPreimageZeta (hp2 : p ≠ 2) : Subgroup (NormCompatUnits p) where
     simp only [Set.mem_setOf_eq] at *
     have h := Col_add p u u⁻¹
     rw [mul_inv_cancel, Col_one] at h
-    rw [show Col p u⁻¹ = -Col p u from by linear_combination -h]
+    rw [eq_neg_of_add_eq_zero_right h.symm]
     exact (PadicMeasure.zetaIdeal p hp2).neg_mem hu
 
 /-- `Col⁻¹(I(𝒢)ζ_p)` is closed in the inverse-limit topology (`continuous_Col` pulls back the
@@ -445,8 +442,7 @@ theorem mem_cycloTower1_of_col_mem_zetaIdeal (hp2 : p ≠ 2) {u : NormCompatUnit
     mul_mem hu ((unitsTower1 p).inv_mem (cycloTower1_le_unitsTower1 p hc))
   have hzp : u * c⁻¹ ∈ cycloTower1 p :=
     ZpOne_le_cycloTower1 p ((mem_ker_Col_iff_mem_ZpOne p hp2 hcunit).1 hker)
-  have : u = (u * c⁻¹) * c := by rw [mul_assoc, inv_mul_cancel, mul_one]
-  rw [this]
+  rw [show u = (u * c⁻¹) * c by rw [mul_assoc, inv_mul_cancel, mul_one]]
   exact mul_mem hzp hc
 
 /-- The level-`n` coordinate as a monoid hom `𝒰_∞ →* ℂ_[p]ˣ` (multiplicative + unital levelwise). -/
