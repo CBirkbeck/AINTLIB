@@ -12,6 +12,8 @@ namespace.
 
 **First, read `CLAUDE.md` at the repo root — it is binding; the "Worker system" section is your protocol.**
 
+**Guardrail:** prefix every `git checkout`, `git push`, and `gh pr merge` with `LEAN4_GUARDRAILS_BYPASS=1` (e.g. `LEAN4_GUARDRAILS_BYPASS=1 git checkout -b generalise/<n> origin/main`) — the Lean hook blocks those commands otherwise, and a cron-fired session won't have it exported.
+
 Loop until your lane is empty or a freeze is active:
 
 1. **Freeze check.** `gh issue list --repo CBirkbeck/AINTLIB --label freeze:active --state open`.
