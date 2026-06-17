@@ -77,6 +77,50 @@ theorem conorm_ne_zero (φ : HasseWeil.Isogeny W₁ W₂) {f : W₁.toAffine.Fun
     (hf : f ≠ 0) : conorm φ f ≠ 0 :=
   (IsUnit.map (conorm φ) (isUnit_iff_ne_zero.mpr hf)).ne_zero
 
+/-! ### Finite-dimensionality of `K(E₁)/φ*K(E₂)` (two-curve, unconditional)
+
+For *any* two-curve isogeny `φ : Isogeny W₁ W₂`, `K(E₁)` is finite-dimensional over `φ*K(E₂)` — the
+two-curve analogue of `HasseWeil.isogeny_finiteDimensional`.  Proof: `K(E₁)/φ*K(E₂)` is essentially
+of finite type (`K(E₁)` is so over `F`, and `φ*K(E₂) ⊇ F`) and algebraic (both function fields have
+transcendence degree `1` over `F`, so `trdeg_{φ*K(E₂)} K(E₁) = 0`), hence finite by
+`Algebra.finite_of_essFiniteType_of_isAlgebraic`.  This discharges the `hfin` hypothesis of the
+norm–conorm leaf automatically; only `hsep` (genuine separability) remains carried. -/
+
+set_option synthInstance.maxHeartbeats 400000 in
+set_option maxHeartbeats 800000 in
+/-- **Two-curve isogeny finite-dimensionality (unconditional)**: `K(E₁)` is finite-dimensional over
+`K(E₂)` via `φ.pullback`, for any two-curve isogeny `φ`. -/
+theorem isogeny_finiteDimensional_twoCurve (φ : HasseWeil.Isogeny W₁ W₂) :
+    @FiniteDimensional W₂.toAffine.FunctionField W₁.toAffine.FunctionField _ _
+      φ.toAlgebra.toModule := by
+  letI : Algebra W₂.toAffine.FunctionField W₁.toAffine.FunctionField := φ.toAlgebra
+  haveI tower : IsScalarTower F W₂.toAffine.FunctionField W₁.toAffine.FunctionField :=
+    IsScalarTower.of_algebraMap_eq fun c => (φ.pullback.commutes c).symm
+  haveI hfaith : FaithfulSMul W₂.toAffine.FunctionField W₁.toAffine.FunctionField :=
+    (faithfulSMul_iff_algebraMap_injective W₂.toAffine.FunctionField
+      W₁.toAffine.FunctionField).mpr φ.pullback_injective
+  haveI hfaithF2 : FaithfulSMul F W₂.toAffine.FunctionField :=
+    (faithfulSMul_iff_algebraMap_injective F W₂.toAffine.FunctionField).mpr
+      (algebraMap F W₂.toAffine.FunctionField).injective
+  -- essentially of finite type: `F → K(E₂) → K(E₁)` with `K(E₁)/F` ess. finite type.
+  haveI hessF1 : Algebra.EssFiniteType F W₁.toAffine.FunctionField :=
+    HasseWeil.functionField_essFiniteType_F W₁
+  haveI hess : Algebra.EssFiniteType W₂.toAffine.FunctionField W₁.toAffine.FunctionField :=
+    Algebra.EssFiniteType.of_comp F W₂.toAffine.FunctionField W₁.toAffine.FunctionField
+  -- algebraic: trdeg additivity `F → K(E₂) → K(E₁)`, both legs trdeg 1.
+  haveI halg : Algebra.IsAlgebraic W₂.toAffine.FunctionField W₁.toAffine.FunctionField := by
+    rw [← trdeg_eq_zero_iff]
+    have h_add : Algebra.trdeg F W₂.toAffine.FunctionField +
+        Algebra.trdeg W₂.toAffine.FunctionField W₁.toAffine.FunctionField =
+        Algebra.trdeg F W₁.toAffine.FunctionField :=
+      trdeg_add_eq F W₂.toAffine.FunctionField
+    rw [HasseWeil.weierstrass_functionField_trdeg_eq_one W₂,
+      HasseWeil.weierstrass_functionField_trdeg_eq_one W₁] at h_add
+    refine Cardinal.add_one_inj.mp ?_
+    rw [zero_add, add_comm]; exact h_add
+  exact @Algebra.finite_of_essFiniteType_of_isAlgebraic W₂.toAffine.FunctionField _
+    W₁.toAffine.FunctionField _ _ hess halg
+
 /-! ### The `f = u/v` reduction (structural)
 
 The norm–conorm identity `div(N_φ f) = φ_∗(div f)` is proven for all `f` from the `algebraMap`
@@ -193,7 +237,29 @@ valuation form of `count_relNorm_eq_sum_fiber`, but over the integral closure `B
 
 The fibre `{P : placeRestrictionPointMap φ P.toAffinePoint = Q.toAffinePoint}` is finite (it sits
 inside the support of `divisorOf (algebraMap w)` together with the pole locus), and the identity is
-matched, term by term, to the `mapDomain` fibre sum of `placeRestrictionPushforward`. -/
+matched, term by term, to the `mapDomain` fibre sum of `placeRestrictionPushforward`
+(`placeRestrictionPushforward_apply_affine`).
+
+**Route map for the remaining leaf** (the integral-closure re-derivation):
+* The localized-`D` *setup* is templated verbatim by `EC.KernelCountGeneral.card_kernel_eq_degree_of_separable`
+  (the `βAlg`/`algAfK`/`algAfL`/`twAfKL`/`twFKL` instance dance + `exists_denominator` +
+  `Localization.Away f₀`): take `f₀` clearing the minpoly denominators of `x_gen₁, y_gen₁` over
+  `φ*K(E₂)`, then `F[E₁] ⊆ D := integralClosure Af K(E₁)` by
+  `LocalizedDictionary.coordRing_mem_integralClosure`, so `algebraMap w ∈ D` (via `coordRingToClosure`).
+* The *weighted* count `count_{q_Q}(relNorm_Af(span{w})) = Σ_{P' | q_Q} count_{P'}(span{w})` and the
+  `s = 1` core `relNorm_Af(m_{P'}) = q_{φP'}` must be **re-derived over `D`** — these are
+  `CurveMap.count_relNorm_eq_sum_fiber` / `relNorm_maximalIdealAt_eq` (`PushforwardDivisor.lean`)
+  with `Af → D` in place of `F[E₂] → F[E₁]`, using `LocalizedDictionary.inertiaDeg_eq_one_of_under_eq`
+  (`f = 1`) + `Ideal.sum_ramification_inertia` (`Σ ef = deg`).  `LocalizedDictionary` supplies the
+  *cardinality* count but NOT this *per-element weighted* count — that is the genuine new work.
+* The `pointAt`/place-identification (`LocalizedDictionary.pointAt`,
+  `pointValuation_lt_one_of_mem_prime`) gives `D`-prime ↔ point-of-`E₁`, and the under-map to `Af`
+  ↔ `Q`; matching it to `placeRestrictionPointMap` is `residueValue_algebraMap` +
+  `twoCurve_evaluatesTo_x/y_gen_of_comap_eq` (`TwoCurvePointImage.lean`).
+* **Honest gap**: the localized `D` only has residue-triviality for `Q` off the (finite) zero
+  locus of `f₀` (`f₀ ∉ m_Q`).  Covering *all* `Q` (including `f₀`-zeros) needs either a global `B =
+  integralClosure F[E₂] K(E₁)` re-derivation of the place-identification, or a denominator chosen to
+  also avoid the fixed target `Q` (possible iff `Q` is not below a pole of `x_gen₁/y_gen₁`). -/
 
 /-- **The affine count identity — Silverman II.3.6, per-place, CoordHom-free (THE DEEP LEAF).**
 For `w ∈ F[E₁]` nonzero and an affine place `Q` of `E₂`, the order of the conorm `N_φ(algebraMap w)`
@@ -336,5 +402,18 @@ theorem placeRestrictionPreservesPrincipal_of_finite_separable
   refine ⟨conorm φ f, conorm_ne_zero φ hf_ne, ?_⟩
   rw [← hfD]
   exact (placeRestrictionPushforward_projectiveDivisorOf φ hfin hsep f).symm
+
+/-- **`PlaceRestrictionPreservesPrincipal` from separability alone (the wall's clean form).**  The
+finite-dimensionality hypothesis is automatic (`isogeny_finiteDimensional_twoCurve`), so the single
+remaining wall of char-0 isogeny symmetry rests on *separability* of `φ` alone (over
+`[IsAlgClosed F]`) — exactly Silverman III.4.10c's hypothesis.  This is the form to wire into
+`placeRestrictionRealizationOfPreservesPrincipal` at the `twoCurveGeometricDualData` call site. -/
+theorem placeRestrictionPreservesPrincipal_of_separable
+    (φ : HasseWeil.Isogeny W₁ W₂)
+    (hsep : @Algebra.IsSeparable W₂.toAffine.FunctionField W₁.toAffine.FunctionField _ _
+      φ.toAlgebra) :
+    PlaceRestrictionPreservesPrincipal φ :=
+  placeRestrictionPreservesPrincipal_of_finite_separable φ
+    (isogeny_finiteDimensional_twoCurve φ) hsep
 
 end HasseWeil.WeilPairing
