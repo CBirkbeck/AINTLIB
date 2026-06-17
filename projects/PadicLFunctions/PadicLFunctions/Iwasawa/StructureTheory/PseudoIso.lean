@@ -62,7 +62,53 @@ theorem IsPseudoIso.refl (M : Type*) [AddCommGroup M] [Module (IwasawaAlgebra �
 stay finite). -/
 theorem IsPseudoIso.trans (h : IsPseudoIso 𝒪 M M') (h' : IsPseudoIso 𝒪 M' M'') :
     IsPseudoIso 𝒪 M M'' := by
-  sorry
+  obtain ⟨f₁, hk₁, hc₁⟩ := h
+  obtain ⟨f₂, hk₂, hc₂⟩ := h'
+  refine ⟨f₂ ∘ₗ f₁, ?_, ?_⟩
+  · -- Finite kernel: `g : ker (f₂ ∘ₗ f₁) → ker f₂` via `f₁` has finite kernel
+    -- (it injects into `ker f₁`) and finite range (inside `ker f₂`).
+    have hmem : ∀ x : LinearMap.ker (f₂ ∘ₗ f₁), f₁ (x : M) ∈ LinearMap.ker f₂ := by
+      rintro ⟨x, hx⟩
+      rw [LinearMap.mem_ker] at hx ⊢
+      simpa using hx
+    set g : LinearMap.ker (f₂ ∘ₗ f₁) →ₗ[IwasawaAlgebra 𝒪] LinearMap.ker f₂ :=
+      (f₁.domRestrict (LinearMap.ker (f₂ ∘ₗ f₁))).codRestrict (LinearMap.ker f₂) hmem with hg
+    have hgapp : ∀ y : LinearMap.ker (f₂ ∘ₗ f₁), (g y : M') = f₁ (y : M) := fun _ => rfl
+    haveI hkg : Finite (LinearMap.ker g) := by
+      apply Finite.of_injective (β := LinearMap.ker f₁)
+        fun x : LinearMap.ker g => ⟨(x.1 : M), by
+          have hx : (g x.1 : M') = 0 := congrArg Subtype.val (LinearMap.mem_ker.mp x.2)
+          rw [LinearMap.mem_ker, ← hgapp x.1]; exact hx⟩
+      rintro a b hab
+      have hM := congrArg (Subtype.val : LinearMap.ker f₁ → M) hab
+      apply Subtype.ext
+      apply Subtype.ext
+      exact hM
+    haveI : Finite (LinearMap.range g) := inferInstance
+    haveI hqg : Finite (LinearMap.ker (f₂ ∘ₗ f₁) ⧸ LinearMap.ker g) :=
+      Finite.of_equiv _ g.quotKerEquivRange.symm.toEquiv
+    exact finite_of_finite_quotient (LinearMap.ker g)
+  · -- Finite cokernel: `M'' ⧸ range (f₂ ∘ₗ f₁)` is an extension of `M'' ⧸ range f₂`
+    -- (finite) by `(range f₂)/range (f₂ ∘ₗ f₁)`, itself a quotient of the finite
+    -- `M' ⧸ range f₁` (the image of `f₂`).
+    have hle : LinearMap.range (f₂ ∘ₗ f₁) ≤ LinearMap.range f₂ := by
+      rw [LinearMap.range_comp]; exact LinearMap.map_le_range
+    have hcond : LinearMap.range f₁ ≤ Submodule.comap f₂ (LinearMap.range (f₂ ∘ₗ f₁)) := by
+      rw [LinearMap.range_comp]
+      intro y hy
+      rw [Submodule.mem_comap]
+      exact Submodule.mem_map_of_mem hy
+    haveI : Finite ((M'' ⧸ LinearMap.range (f₂ ∘ₗ f₁)) ⧸
+        (LinearMap.range f₂).map (LinearMap.range (f₂ ∘ₗ f₁)).mkQ) :=
+      Finite.of_equiv _ (Submodule.quotientQuotientEquivQuotient _ _ hle).symm.toEquiv
+    haveI : Finite ((LinearMap.range f₂).map (LinearMap.range (f₂ ∘ₗ f₁)).mkQ) := by
+      have hSeq : (Submodule.mapQ (LinearMap.range f₁) (LinearMap.range (f₂ ∘ₗ f₁)) f₂ hcond).range
+          = (LinearMap.range f₂).map (LinearMap.range (f₂ ∘ₗ f₁)).mkQ :=
+        Submodule.range_mapQ (LinearMap.range f₁) (LinearMap.range (f₂ ∘ₗ f₁)) f₂ hcond
+      rw [← hSeq]
+      exact Finite.of_surjective _ (LinearMap.surjective_rangeRestrict _)
+    exact finite_of_finite_quotient
+      ((LinearMap.range f₂).map (LinearMap.range (f₂ ∘ₗ f₁)).mkQ)
 
 /-- **Symmetry on finitely generated torsion modules** (Washington §13.2): for
 finitely generated torsion `Λ`-modules, `M ~ M'` implies `M' ~ M`.  This fails for

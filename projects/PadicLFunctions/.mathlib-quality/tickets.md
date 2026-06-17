@@ -6548,9 +6548,18 @@ E+M. G/E/M are cluster milestones — decompose-when-reached via a follow-on /de
 
 **Skeleton status (2026-06-17, dev/padic, full LSP)**: Stage-S skeleton built and
 `lake build PadicLFunctions` green — all of `Iwasawa/StructureTheory/{IwasawaAlgebra,
-PseudoIso,StructureTheorem,CharIdeal,Isotypic}.lean` landed as `:= by sorry` (16 sorries,
-0 errors). S1–S5 statements are now the proving contract; ready for `/beastmode`.
-S3 (structure theorem) and S5 (isotypic) sub-leaves to be decomposed at execution.
+PseudoIso,StructureTheorem,CharIdeal,Isotypic}.lean` landed as `:= by sorry`.
+S1–S5 statements are now the proving contract.
+
+**Proving progress (2026-06-17)**: 4 of 16 leaves discharged (12 sorries remain), +1 new
+reusable lemma:
+- ✅ S1 `exists_unit_mul_distinguished` (Weierstrass, from mathlib `exists_isWeierstrassFactorization`).
+- ✅ S2 `IsPseudoIso.refl`, `IsPseudoIso.trans` (full kernel+cokernel diagram chase).
+- ✅ S3a `iwasawaAlgebra_isNoetherianRing` (mathlib `IsNoetherianRing R⟦X⟧`).
+- ✅ NEW `PseudoIso.finite_of_finite_quotient` (extension lemma; tool for the chases).
+- ⏳ Remaining 12 = the **structure-theorem cluster**: S2 `symm` (needs S3), S3
+  `fg_pseudoIso_canonical`/`_washington` (the deep build — S3b/S3c/S3d), S4 (3, on S3),
+  S5 (6, idempotent formula + on S3). This is the `/beastmode` target.
 
 ### Stage S — Λ-module structure theory + characteristic ideals (§13.1, Washington Ch.13)
 
