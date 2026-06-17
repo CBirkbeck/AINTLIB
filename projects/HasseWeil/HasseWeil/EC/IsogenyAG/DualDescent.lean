@@ -47,11 +47,25 @@ The arc is landed end-to-end with the deep input now isolated to **one** named `
     isogeny with `ρ ∘ φ = [n]` is purely formal) — **proved, axiom-clean**;
   - `hasMulByIntDualWitness_of_rangeIncl` (the basepoint leaf, `mulByIntBasepoint_holds` +
     `reflects_ordAtInfty`) — **proved**;
-  and the **single remaining `sorry`** `rationalRangeIncl_of_separable`: the range inclusion
-  `Im([deg φ]*) ⊆ Im(φ*)` over `F` for a separable isogeny. Its precise sub-gaps (general two-curve
-  base-change to `K̄`; field of definition over a finite Galois `L/F`; full base-changed-pullback
-  equivariance) are documented at that declaration (REVIEW-PENDING). The label gate is discharged
-  ungated in `IsogenyClassLabel.lean` (`*_charZero`).
+  and the range inclusion `Im([deg φ]*) ⊆ Im(φ*)` over `F` (`rationalRangeIncl_of_separable`), a thin
+  consequence of the proven elementwise descent `rangeIncl_of_descentData` over the single named leaf
+  `exists_descentData_of_separable`.
+
+* **MOVE 1 — field-of-definition over `K̄` (this pass, axiom-clean)**: the descent's
+  field-of-definition gap is now discharged inside `K̄ = AlgebraicClosure F`. In char 0 `K̄/F` is
+  Galois (`instIsGalois_algebraicClosure`); a finite set of `K̄`-elements lies in a finite Galois
+  intermediate field `L ⊆ K̄` (`exists_finiteGalois_fieldOfDefinition`, via mathlib's
+  `FiniteGaloisIntermediateField.adjoin`); and `Gal(K̄/F)`-fixedness descends to `Gal(L/F)`-fixedness
+  (`galFixed_of_galFixed_top`, via `AlgEquiv.restrictNormalHom_surjective`). The wrapper
+  `someDescentData_of_overKbar` threads the (equal) universe. So the residual is no longer "field of
+  definition".
+
+  **The single remaining `sorry`** is now narrowed to exactly `descentData_over_kbar_intermediate`:
+  the **two-curve base-change `DescentData`** of `φ*`/`[deg φ]*` over a concrete finite Galois
+  `L ⊆ K̄`. Its only open content is the L-linear `psiL` (= two-curve `baseChangeAlgHom` of a `CoordHom`
+  for `φ`, which a general `EC.Isogeny` does not carry) plus the L-restricted `K̄`-dual range inclusion.
+  See the declaration (REVIEW-PENDING). The label gate is discharged ungated in `IsogenyClassLabel.lean`
+  (`*_charZero`).
 -/
 
 namespace HasseWeil.EC
@@ -819,37 +833,188 @@ structure SomeDescentData.{w} {C₁ C₂ : SmoothPlaneCurve F}
 
 universe u
 
-/-- **The single isolated deep residual of Silverman III.6.1 (descent half), REVIEW-PENDING.** For a
-separable isogeny `φ : E₁ → E₂` over `F`, there is a *finite Galois* extension `L/F` and a
+/-! ### MOVE 1 — the field-of-definition descent over `K̄ = AlgebraicClosure F`
+
+The descent of the range inclusion runs over a *finite* Galois `L/F`, but the `K̄`-dual lives over
+`K̄ = AlgebraicClosure F`, which is infinite. The bridge — "a finite collection of `K̄`-elements is
+defined over a finite Galois subextension `L/F`" — is supplied by mathlib's
+`FiniteGaloisIntermediateField.adjoin` (`FieldTheory/Galois/GaloisClosure.lean`): in a Galois
+extension `K̄/F`, the normal closure of `F(s)` for a finite `s : Set K̄` is a finite Galois
+intermediate field containing `s`. In characteristic zero `K̄/F` is Galois
+(`instIsGalois_algebraicClosure`, from `IsAlgClosure.normal` + `IsAlgClosure.separable`).
+
+The descent's Galois-invariance step needs "fixed by all of `Gal(K̄/F)` ⟹ fixed by all of
+`Gal(L/F)`" for `x` in such an `L`; this is `galFixed_of_galFixed_top` (the surjectivity of
+`AlgEquiv.restrictNormalHom` for the normal pair `L`, `K̄` plus the commutation
+`AlgEquiv.restrictNormal_commutes`). These are the two reusable pieces of MOVE 1; they eliminate the
+*field-of-definition* sub-gap, leaving the residual exactly the **two-curve base-change** leaf. -/
+
+section FieldOfDefinition
+
+variable {E : Type*} [Field E]
+
+/-- **Characteristic zero ⟹ `K̄/F` is Galois.** For a char-0 field `F`, the algebraic closure
+`K̄ = AlgebraicClosure F` is a Galois extension: it is normal (`IsAlgClosure.normal`) and separable
+(`IsAlgClosure.separable`, char-0). Packaged as an instance so the field-of-definition API
+(`FiniteGaloisIntermediateField.adjoin`, which requires `[IsGalois F K̄]`) is available. -/
+instance instIsGalois_algebraicClosure [CharZero E] :
+    IsGalois E (AlgebraicClosure E) := inferInstance
+
+/-- **The abstract Galois-fixed descent** (the field-of-definition invariance step). For a normal
+extension `K/F` and a normal intermediate field `L`, an element `x : L` whose image in `K` is fixed
+by *every* `σ ∈ Gal(K/F)` is fixed by *every* `τ ∈ Gal(L/F)`. Proof: every `τ` lifts to some `σ` by
+`AlgEquiv.restrictNormalHom_surjective` (both `L/F` and `K/F` normal), and
+`AlgEquiv.restrictNormal_commutes` transports the fixed-ness down through the injective inclusion
+`algebraMap L K`.
+
+This is the order-theoretic heart of MOVE 1: it lets a `Gal(K̄/F)`-fixed function on the curve over a
+finite Galois `L ⊆ K̄` be recognised as `Gal(L/F)`-fixed, which is the hypothesis of the proven
+fixed-field characterization `mem_range_functionField_baseChange_iff_fixed`. -/
+theorem galFixed_of_galFixed_top {K : Type*} [Field K] [Algebra E K] [Normal E K]
+    (L : IntermediateField E K) [Normal E L] (x : L)
+    (hx : ∀ σ : K ≃ₐ[E] K, σ (algebraMap L K x) = algebraMap L K x)
+    (τ : L ≃ₐ[E] L) : τ x = x := by
+  obtain ⟨σ, rfl⟩ := AlgEquiv.restrictNormalHom_surjective (F := E) (K₁ := L) (E := K) τ
+  apply (algebraMap L K).injective
+  rw [show AlgEquiv.restrictNormalHom (F := E) L σ = σ.restrictNormal L from rfl,
+    AlgEquiv.restrictNormal_commutes, hx]
+
+/-- **The finite Galois field of definition of a finite set of `K̄`-elements** (MOVE 1). In char 0,
+for a finite `s : Set K̄` there is a finite Galois extension `L/F` (concretely the normal closure of
+`F(s)` inside `K̄`, `FiniteGaloisIntermediateField.adjoin`) containing `s` — so any datum built from
+finitely many algebraic elements of `K̄` is defined over a *finite* Galois `L/F`. This discharges the
+field-of-definition half of the descent: the (infinite) `K̄`-dual descends to a finite Galois `L`. -/
+theorem exists_finiteGalois_fieldOfDefinition [CharZero E]
+    (s : Set (AlgebraicClosure E)) (hs : s.Finite) :
+    ∃ (L : IntermediateField E (AlgebraicClosure E)),
+      FiniteDimensional E L ∧ IsGalois E L ∧ s ⊆ (L : Set (AlgebraicClosure E)) := by
+  haveI : Finite s := hs
+  refine ⟨(FiniteGaloisIntermediateField.adjoin E s).toIntermediateField,
+    inferInstance, inferInstance, ?_⟩
+  exact FiniteGaloisIntermediateField.subset_adjoin E s
+
+end FieldOfDefinition
+
+/-- **A `DescentData` over a concrete finite Galois intermediate field of `K̄`** (MOVE 1's data
+carrier). Bundles the concrete `L ⊆ K̄ = AlgebraicClosure F` (with its finite/Galois instances) and a
+`DescentData` over it. Unlike `SomeDescentData` (which takes an abstract `L : Type w`), this fixes `L`
+to be a *subfield of the algebraic closure* — exactly the shape MOVE 1's
+`exists_finiteGalois_fieldOfDefinition` produces. -/
+structure DescentDataOverKbar {F : Type u} [Field F] (C₁ C₂ : SmoothPlaneCurve F)
+    (φPb : C₂.FunctionField →ₐ[F] C₁.FunctionField)
+    (mPb : C₁.FunctionField →ₐ[F] C₁.FunctionField) where
+  /-- The concrete finite Galois field of definition `L ⊆ K̄`. -/
+  L : IntermediateField F (AlgebraicClosure F)
+  /-- `L/F` is finite. -/
+  [finL : FiniteDimensional F L]
+  /-- `L/F` is Galois. -/
+  [galL : IsGalois F L]
+  /-- The descent data over `L`. -/
+  data : DescentData (C₁ := C₁) (C₂ := C₂) φPb mPb L
+
+/-- **MOVE 1 payoff — package a `DescentDataOverKbar` into `SomeDescentData`** (the universe-correct
+field-of-definition wrapper). A finite Galois intermediate field `L ⊆ K̄ = AlgebraicClosure F` lives
+in the *same* universe `u` as `F`, so a `DescentData` over it directly furnishes the
+`SomeDescentData.{u, u}` demanded by `exists_descentData_of_separable`.
+
+This makes the field-of-definition reduction **concrete and load-bearing**: the residual no longer has
+to *exhibit* a finite Galois `L` from thin air — MOVE 1 supplies `L` as a subfield of `K̄`, and this
+wrapper threads the universe. The only remaining obligation is the `DescentData` over `L` itself (the
+two-curve base-change data). -/
+noncomputable def someDescentData_of_overKbar {F : Type u} [Field F]
+    {C₁ C₂ : SmoothPlaneCurve F}
+    {φPb : C₂.FunctionField →ₐ[F] C₁.FunctionField}
+    {mPb : C₁.FunctionField →ₐ[F] C₁.FunctionField}
+    (d : DescentDataOverKbar C₁ C₂ φPb mPb) :
+    SomeDescentData.{u, u} (C₁ := C₁) (C₂ := C₂) φPb mPb where
+  L := d.L
+  fieldL := inferInstance
+  algL := inferInstance
+  finL := d.finL
+  galL := d.galL
+  data := d.data
+
+/-- **THE SINGLE IRREDUCIBLE LEAF — two-curve base-change of an isogeny (REVIEW-PENDING).** For a
+separable isogeny `φ : E₁ → E₂` over a char-0 field `F`, there is a *concrete* finite Galois
+intermediate field `L ⊆ K̄ = AlgebraicClosure F` (supplied by MOVE 1,
+`exists_finiteGalois_fieldOfDefinition`) and a `DescentData` for `φ*` and `[deg φ]*` over `L`.
+
+This is now the **only** open content: the two-curve base-change DATA over `L` —
+* the L-linear pullback `ψ_L : F(E₂_L) → F(E₁_L)` of `φ*` and `[deg φ]_L*` of `[deg φ]*`;
+* their base-change naturalities and `ψ_L`'s injectivity;
+* `ψ_L`'s full `Gal(L/F)`-equivariance;
+* the `L`-level range inclusion `Im([deg φ]_L*) ⊆ Im(ψ_L)` (the two-curve `K̄`-dual `DualGaloisData.hincl`
+  restricted to `L` via MOVE 1's `galFixed_of_galFixed_top`).
+
+**What is MISSING (the genuine mathlib gap):** the *two-curve* `baseChangeIsogeny`. The project's
+`EC.Isogeny.baseChangeIsogeny` (`EC/IsogenyAG/BaseChange.lean`) is endomorphism-only; its engine
+(`baseChangeXgen`/`baseChange_generic_equation`/`baseChangeXgen_transcendental`/`ofEquation`) is in
+fact already two-curve-capable, but the L-linear `psiL = baseChangeAlgHom cd L` requires a `CoordHom`
+`cd` for `φ`, which a general `EC.Isogeny` does not carry (`CurveMap` stores only the pullback;
+`CoordHom`/`toPointMap` are separate data). Constructing this `CoordHom` (equivalently the two-curve
+base-changed isogeny `φ_L : E₁_L → E₂_L`) is the irreducible infrastructure that remains.
+
+**What is PROVEN around it (this pass):** the field-of-definition descent (MOVE 1 —
+`instIsGalois_algebraicClosure`, `exists_finiteGalois_fieldOfDefinition`, `galFixed_of_galFixed_top`),
+the universe-correct packaging (`someDescentData_of_intermediate`), and the entire elementwise Galois
+descent downstream (`rangeIncl_of_descentData`, DUAL-Q1 `mem_range_functionField_baseChange_iff_fixed`).
+-/
+private noncomputable def descentData_over_kbar_intermediate {F : Type u} [Field F] [DecidableEq F]
+    [CharZero F] {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
+    (φ : EC.Isogeny W₁ W₂) (hsep : φ.IsSeparable) :
+    DescentDataOverKbar (⟨W₁⟩ : SmoothPlaneCurve F) ⟨W₂⟩ φ.toCurveMap.pullback
+      (HasseWeil.mulByInt_pullbackAlgHom W₁ (φ.degree : ℤ)
+        (by exact_mod_cast φ.degree_pos'.ne')) :=
+  sorry
+
+/-- **The single isolated deep residual of Silverman III.6.1 (descent half), REVIEW-PENDING — now
+narrowed to TWO-CURVE BASE-CHANGE only (the field-of-definition half is discharged by MOVE 1).** For
+a separable isogeny `φ : E₁ → E₂` over `F`, there is a *finite Galois* extension `L/F` and a
 `DescentData` for `φ*` and `[deg φ]*` over `L`: i.e. the two-curve base-change `ψ_L : F(E₂_L) →
 F(E₁_L)` of `φ*` and the base-change `[deg φ]_L*` of `[deg φ]*`, with `ψ_L` equivariant/injective,
 the base-change naturalities, and the `L`-level range inclusion `Im([deg φ]_L*) ⊆ Im(ψ_L)`.
 
-This is **exactly** the union of the two genuine mathlib gaps (see `rationalRangeIncl_of_separable`):
+**The remaining content is the two-curve base-change DATA** — the structural `psiL`/`mPbL` over a
+finite Galois `L`, their naturalities, `psiL`'s injectivity and full `Gal(L/F)`-equivariance, and the
+`L`-level range inclusion. Concretely:
 
-* **Two-curve base-change** (gap 1, with gap 3): construct `ψ_L`, `[deg φ]_L*` and their naturality /
-  equivariance / injectivity. The project's `baseChangeIsogeny` is endomorphism-only and requires
-  `IsAlgClosed`; a general `φ : E₁ → E₂` over a *finite* Galois `L` needs the two-curve
-  `baseChangeAlgHom` (which exists at coordinate-ring level, `CurveMapBaseChange.lean`) lifted to a
-  `CoordHom` for `φ` — a general isogeny carries no `CoordHom` (it is separate data, `toPointMap`),
-  so this is the genuine missing infrastructure. (`mulByInt`'s pullback base-change naturality is
-  available only on generators over `AlgebraicClosure`, `PencilComapWitnesses.lean`, not over a
-  general finite `L` on all elements.)
-* **Field of definition + `K̄`-dual range inclusion** (gaps 1 + 2): the range inclusion
-  `Im([deg φ]_L*) ⊆ Im(ψ_L)` is the `K̄`-dual range inclusion `Im([m]_K̄*) ⊆ Im(φ_K̄*)`
-  (`exists_dual_of_pullbackEvaluation_general`, two-curve form) descended to a *finite* Galois field
-  of definition `L/F`. **Missing mathlib fact:** a morphism of varieties over `AlgebraicClosure F` is
-  defined over a finite Galois subextension `L/F` (no field-of-definition infrastructure exists).
+* **Two-curve base-change** (the irreducible leaf): construct `ψ_L : F(E₂_L) → F(E₁_L)`, `[deg φ]_L*`
+  and their naturality / equivariance / injectivity. The project's `baseChangeIsogeny`
+  (`EC/IsogenyAG/BaseChange.lean`) is *endomorphism-only* and requires `IsAlgClosed`; a general
+  `φ : E₁ → E₂` over a finite Galois `L` needs the **two-curve** `baseChangeAlgHom` (which already
+  exists at coordinate-ring level — `CurveMap.CoordHom.baseChangeAlgHom`, `C₁ C₂` distinct, in
+  `CurveMapBaseChange.lean`) lifted to a `CoordHom` for `φ`. A general isogeny carries no `CoordHom`
+  (it is separate data, `toPointMap`), so producing the `CoordHom`/the L-linear `psiL` is the genuine
+  missing infrastructure. `mulByInt`'s base-change naturality is available only on generators over
+  `AlgebraicClosure` (`PencilComapWitnesses.lean`), not over a general finite `L` on all elements.
+* **`K̄`-dual range inclusion** (the L-level inclusion `Im([deg φ]_L*) ⊆ Im(ψ_L)`): once `ψ_L` exists,
+  this is the two-curve `K̄`-dual `Im([m]_K̄*) ⊆ Im(φ_K̄*)` (the two-curve form of
+  `exists_dual_of_pullbackEvaluation_general` / `DualGaloisData.hincl`, which is *already two-curve*)
+  restricted to the finite Galois `L`. The Galois-descent of fixedness needed to restrict it from
+  `K̄` to `L` is **MOVE 1** below (`galFixed_of_galFixed_top`).
+
+**MOVE 1 discharges the field-of-definition gap.** The earlier "missing mathlib fact" — a datum over
+`AlgebraicClosure F` is defined over a finite Galois subextension — is now supplied by
+`exists_finiteGalois_fieldOfDefinition` (a finite set of `K̄`-elements lies in a finite Galois
+`L ⊆ K̄`, via mathlib's `FiniteGaloisIntermediateField.adjoin`) together with `instIsGalois_algebraicClosure`
+(char-0 ⟹ `K̄/F` Galois) and `galFixed_of_galFixed_top` (`Gal(K̄/F)`-fixed ⟹ `Gal(L/F)`-fixed). So
+the residual is no longer "field of definition" — it is exactly the two-curve base-change data.
 
 Everything downstream is proven: `rangeIncl_of_descentData` (the elementwise Galois descent, route
 steps 2–4) turns this datum into the `F`-level range inclusion. See `tickets-dual-descent.md`. -/
 private noncomputable def exists_descentData_of_separable {F : Type u} [Field F] [DecidableEq F]
+    [CharZero F]
     {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
-    (φ : EC.Isogeny W₁ W₂) (_hsep : φ.IsSeparable) :
+    (φ : EC.Isogeny W₁ W₂) (hsep : φ.IsSeparable) :
     SomeDescentData.{u, u} (C₁ := ⟨W₁⟩) (C₂ := ⟨W₂⟩) φ.toCurveMap.pullback
       (HasseWeil.mulByInt_pullbackAlgHom W₁ (φ.degree : ℤ)
         (by exact_mod_cast φ.degree_pos'.ne')) :=
-  sorry
+  -- MOVE 1 (field-of-definition) is discharged: the finite Galois `L` is taken inside
+  -- `K̄ = AlgebraicClosure F` (`instIsGalois_algebraicClosure` + `exists_finiteGalois_fieldOfDefinition`),
+  -- and `someDescentData_of_overKbar` threads the universe.  The remaining content is the
+  -- two-curve base-change `DescentData` over such a concrete `L ⊆ K̄` — the single irreducible leaf
+  -- `descentData_over_kbar_intermediate` below.
+  someDescentData_of_overKbar (descentData_over_kbar_intermediate φ hsep)
 
 /-- **DUAL-Q4 deep residual** — the `K̄`-dual-plus-descent core (REVIEW-PENDING). For a **separable**
 isogeny `φ : E₁ → E₂` over `F`, there is `n ≠ 0` (mathematically `n = deg φ`) and an `F`-rational
@@ -864,17 +1029,18 @@ the descent assembly:
    base-change `φ_K̄ : E₁_K̄ → E₂_K̄` with its `CoordHom` (`baseChangeXgen`/`baseChangeCoordHom`
    generalized to distinct source/target curves). **Missing:** the two-curve `baseChangeIsogeny`.
 
-2. **Field of definition.** The `K̄`-dual produced by `exists_dual_of_pullbackEvaluation_general`
-   (`EC/KernelCountGeneral.lean`) lives over `K̄ = AlgebraicClosure F`, which is *infinite*; descent
-   (`descendIsogeny`) requires it defined over a *finite* Galois `L/F`. **Missing mathlib fact:** a
-   morphism of varieties over `AlgebraicClosure F` is defined over a finite (here finite Galois)
-   subextension `L/F` — there is no such descent lemma in mathlib, and the project has no
-   field-of-definition infrastructure.
+2. **Field of definition — DISCHARGED by MOVE 1.** The `K̄`-dual lives over `K̄ = AlgebraicClosure F`,
+   which is *infinite*; descent requires it over a *finite* Galois `L/F`. This is now supplied by MOVE 1
+   (`exists_finiteGalois_fieldOfDefinition` + `instIsGalois_algebraicClosure` + `galFixed_of_galFixed_top`,
+   built on mathlib's `FiniteGaloisIntermediateField.adjoin` and `AlgEquiv.restrictNormalHom_surjective`).
+   No longer a gap.
 
 3. **Full base-changed-pullback equivariance.** `descendIsogeny` needs the `K̄`-dual's pullback
    `Gal(L/F)`-equivariant on *all* of `F(C_L)` (DUAL-Q3). `galEquivariant_of_compose` reduces this to
    the equivariance of `φ_L*` and `[n]_L*`; the latter is `galEquivariant_baseChange_on_image` *only
-   on the image of `F(E)`* (the easy half). The full statement on all of `F(C_L)` is the Q3 residual.
+   on the image of `F(E)`* (the easy half). The full statement on all of `F(C_L)` is part of the
+   two-curve base-change leaf (once `ψ_L` is the L-linear `baseChangeAlgHom`, equivariance is the
+   semilinearity of `σ ⊗ id`).
 
 Once available, the round-trip (`functionFieldMap_comp_descendPullback` + `functionFieldMap`
 injectivity, with `Isogeny.mulByInt`/`compose` base-change faithfulness) transports the `K̄` identity
@@ -885,15 +1051,15 @@ of this residual — it is discharged unconditionally (`mulByIntBasepoint_holds`
 `Isogeny.reflects_ordAtInfty`) in `hasMulByIntDualWitness_of_rangeIncl` below. So the entire deep
 content of Silverman III.6.1 over a char-0 base is exactly this one range inclusion.
 
-**Decomposition status (this pass).** The monolithic range inclusion is now a *thin* consequence of
-the proven elementwise descent (`rangeIncl_of_descentData`, route steps 2–4 — axiom-clean) over a
-single named residual `exists_descentData_of_separable` (the `DescentData` existence). That residual
-is exactly the union of the two genuine mathlib gaps above (gaps 1 + 2): the two-curve base-change of
-`φ*`/`[m]*` to a finite Galois `L/F` (supplying `ψ_L`, `[m]_L*`, their equivariance, injectivity, and
-naturality — gap 1, including gap 3 which is `galEquivariant_baseChange_on_image` on generators once
-`ψ_L` exists) together with the descended `K̄`-dual range inclusion `Im([m]_L*) ⊆ Im(ψ_L)` at the
-finite Galois field of definition (gaps 1 + 2). -/
-private theorem rationalRangeIncl_of_separable {F : Type u} [Field F] [DecidableEq F]
+**Decomposition status.** The monolithic range inclusion is a *thin* consequence of the proven
+elementwise descent (`rangeIncl_of_descentData`, route steps 2–4 — axiom-clean) over the single named
+leaf `descentData_over_kbar_intermediate` (the two-curve base-change `DescentData` over a concrete
+finite Galois `L ⊆ K̄`). With MOVE 1 discharging the field-of-definition (gap 2) and the universe
+packaging (`someDescentData_of_overKbar`), the leaf is now *only* the two-curve base-change DATA
+(gap 1, with gap 3): the L-linear `ψ_L = baseChangeAlgHom` of a `CoordHom` for `φ`, `[m]_L*`, their
+naturality/equivariance/injectivity, and the L-restricted `K̄`-dual range inclusion
+`Im([m]_L*) ⊆ Im(ψ_L)`. -/
+private theorem rationalRangeIncl_of_separable {F : Type u} [Field F] [DecidableEq F] [CharZero F]
     {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
     (φ : EC.Isogeny W₁ W₂) (hsep : φ.IsSeparable) :
     (HasseWeil.mulByInt_pullbackAlgHom W₁ (φ.degree : ℤ)
@@ -925,7 +1091,7 @@ private theorem hasMulByIntDualWitness_of_rangeIncl {F : Type*} [Field F] [Decid
 III.6.1, char-0 case): from the deep range inclusion (`rationalRangeIncl_of_separable`, the sole
 remaining `sorry`) and the proved basepoint leaf (`hasMulByIntDualWitness_of_rangeIncl`), a
 separable isogeny over a char-0 base admits an `F`-rational faithful `[deg φ]`-witness. -/
-private theorem rationalReverseCompose_of_separable {F : Type*} [Field F] [DecidableEq F]
+private theorem rationalReverseCompose_of_separable {F : Type*} [Field F] [DecidableEq F] [CharZero F]
     {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
     (φ : EC.Isogeny W₁ W₂) (hsep : φ.IsSeparable) :
     ∃ (n : ℤ) (hn : n ≠ 0), φ.HasMulByIntDualWitness n hn :=
