@@ -544,48 +544,37 @@ theorem padicLog_pow_pPow_of_norm_lt_one {z : K} (hz : ‖z - 1‖ < 1) (N : ℕ
 
 omit [CharZero K] in
 include hp in
-/-- T618: multiplicativity of `padicLog` on the WHOLE open unit ball
-`‖x − 1‖, ‖y − 1‖ < 1` (descend to the exp ball: choose `N` with `x^{p^N}`, `y^{p^N}`,
-`(xy)^{p^N}` all in the ball — `exists_pPow_pow_inExpBall` thrice with `N := max` — apply
-the exp-ball `padicLog_mul` at level `p^N` and cancel the `p^N`-scalar). -/
+/-- T618: multiplicativity of `padicLog` on the whole open unit ball:
+`padicLog p (x * y) = padicLog p x + padicLog p y` when `‖x − 1‖ < 1` and `‖y − 1‖ < 1`. -/
 theorem padicLog_mul_of_norm_lt_one {x y : K} (hx : ‖x - 1‖ < 1) (hy : ‖y - 1‖ < 1) :
     padicLog p (x * y) = padicLog p x + padicLog p y := by
   have hxy : ‖x * y - 1‖ < 1 := by
-    rw [show x * y - 1 = (x - 1) * y + (y - 1) from by ring]
+    rw [show x * y - 1 = (x - 1) * y + (y - 1) by ring]
     have hy1 : ‖y‖ ≤ 1 := by
-      calc ‖y‖ = ‖(y - 1) + 1‖ := by rw [sub_add_cancel]
-        _ ≤ max ‖y - 1‖ ‖(1 : K)‖ := IsUltrametricDist.norm_add_le_max _ _
-        _ ≤ 1 := by rw [norm_one]; exact max_le hy.le le_rfl
-    exact lt_of_le_of_lt (IsUltrametricDist.norm_add_le_max _ _) (max_lt
-      (by rw [norm_mul]; exact lt_of_le_of_lt (mul_le_of_le_one_right (norm_nonneg _) hy1) hx) hy)
-  -- a single `p^N` lands all three in the exp ball
+      rw [show y = (y - 1) + 1 by ring]
+      exact (IsUltrametricDist.norm_add_le_max _ _).trans (by simp [hy.le])
+    refine lt_of_le_of_lt (IsUltrametricDist.norm_add_le_max _ _) (max_lt ?_ hy)
+    rw [norm_mul]
+    exact (mul_le_of_le_one_right (norm_nonneg _) hy1).trans_lt hx
   obtain ⟨jx, hjx⟩ := exists_pPow_pow_inExpBall (p := p) hx
   obtain ⟨jy, hjy⟩ := exists_pPow_pow_inExpBall (p := p) hy
-  obtain ⟨jxy, hjxy⟩ := exists_pPow_pow_inExpBall (p := p) hxy
-  -- the exp ball is closed under further `p`-powering
   have hpow_ball : ∀ {w : K} {j : ℕ} (d : ℕ), InExpBall p (w ^ p ^ j - 1) →
-      InExpBall p (w ^ p ^ (j + d) - 1) := by
-    intro w j d hwj
+      InExpBall p (w ^ p ^ (j + d) - 1) := fun d hwj => by
     rw [pow_add, pow_mul]
     exact pow_mem_expBall (p := p) hwj (p ^ d)
-  set N : ℕ := max (max jx jy) jxy with hN
+  set N : ℕ := max jx jy with hN
   have hbx : InExpBall p (x ^ p ^ N - 1) := by
-    rw [hN, show max (max jx jy) jxy = jx + (max (max jx jy) jxy - jx) from by omega]
+    rw [hN, show max jx jy = jx + (max jx jy - jx) by omega]
     exact hpow_ball _ hjx
   have hby : InExpBall p (y ^ p ^ N - 1) := by
-    rw [hN, show max (max jx jy) jxy = jy + (max (max jx jy) jxy - jy) from by omega]
+    rw [hN, show max jx jy = jy + (max jx jy - jy) by omega]
     exact hpow_ball _ hjy
-  have hbxy : InExpBall p (x ^ p ^ N * y ^ p ^ N - 1) := by
-    rw [← mul_pow, hN, show max (max jx jy) jxy = jxy + (max (max jx jy) jxy - jxy) from by omega]
-    exact hpow_ball _ hjxy
-  -- the exp-ball identity at level `p^N`, transported back through the `p^N`-power law
   have hkey : padicLog p ((x * y) ^ p ^ N) = padicLog p (x ^ p ^ N) + padicLog p (y ^ p ^ N) := by
     rw [mul_pow, padicLog_mul (p := p) hbx hby]
   rw [padicLog_pow_pPow_of_norm_lt_one (p := p) hxy,
     padicLog_pow_pPow_of_norm_lt_one (p := p) hx,
     padicLog_pow_pPow_of_norm_lt_one (p := p) hy, ← smul_add] at hkey
-  have hpN : ((p : K) ^ N) ≠ 0 := pow_ne_zero _ (natCast_p_ne_zero (L := K) p)
-  exact smul_right_injective K hpN hkey
+  exact smul_right_injective K (pow_ne_zero _ (natCast_p_ne_zero (L := K) p)) hkey
 
 omit [CharZero K] in
 include hp in
