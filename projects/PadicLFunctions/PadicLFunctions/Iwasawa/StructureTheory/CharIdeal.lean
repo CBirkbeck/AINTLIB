@@ -181,7 +181,17 @@ variable {M M' M'' : Type*}
 /-- A **finite** `Λ`-module vanishes locally at a height-one prime: `localMult P F = 0`.  Its
 annihilator has finite index (the faithful action of `Λ/Ann F` embeds it into the finite
 `End F`), so `Ann F` is not contained in the height-one prime `P` (`Λ/P` is an infinite
-one-dimensional domain); hence `F_P = 0`. -/
+one-dimensional domain); hence `F_P = 0`.
+
+**Hypothesis note (TODO, fix before discharging the `sorry`)**: this needs `𝒪` to be a genuine
+DVR — i.e. `Λ` to be 2-dimensional so that a height-one prime is *not* maximal.  It is FALSE
+for `𝒪` a finite field: then `Λ = 𝒪⟦T⟧` is a DVR, `P = (T)` is height-one and maximal, and a
+finite `F = 𝒪` has `localMult P F = 1`.  Strengthen `[IsPrincipalIdealRing 𝒪]` to
+`[IsDiscreteValuationRing 𝒪]` here (and in `localMult_eq_of_pseudoIso`,
+`charIdeal_eq_of_pseudoIso`); then `ringKrullDim Λ ≥ ringKrullDim 𝒪 + 1 = 2`
+(`ringKrullDim_succ_le_ringKrullDim_powerseries`) and `P.height = 1 ≠ ringKrullDim Λ` forces
+`P ≠ maximalIdeal` (`IsLocalRing.maximalIdeal_height_eq_ringKrullDim`), so `Λ/P` is an infinite
+domain (`Finite.isField_of_domain`), giving `Ann F ⊄ P`.  Standing case `𝒪 = ℤ_p` ✓. -/
 theorem localMult_eq_zero_of_finite [IsDomain 𝒪] [IsPrincipalIdealRing 𝒪]
     (P : Ideal (IwasawaAlgebra 𝒪)) [P.IsPrime] (hP1 : P.height = 1)
     (F : Type*) [AddCommGroup F] [Module (IwasawaAlgebra 𝒪) F] [Finite F] :
