@@ -6633,7 +6633,17 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
     (b) axiomatize the structure theorem as a project hypothesis, or (c) reroute the IMC to avoid it.
 
 #### [S13-S4] characteristic ideal + multiplicativity
-- **Status**: open | **File**: Iwasawa/StructureTheory/CharIdeal.lean | **Depends on**: S13-S3 | **Type**: def+theorem
+- **Status**: open (REROUTED via Module.length — no longer depends on the S3 structure theorem) | **File**: Iwasawa/StructureTheory/CharIdeal.lean | **Depends on**: S13-S3b | **Type**: def+theorem
+- **REROUTE (2026-06-17)**: `charIdeal` redefined as `∏ᶠ_{ht P = 1} P^(localMult P M).toNat`,
+  where `localMult P M := Module.length Λ_P M_P` (the order of vanishing). PROVEN sorry-free:
+  `localMult` (def), `localMult_add_of_exact` (per-prime additivity = localization-exact +
+  `Module.length_eq_add_of_exact`), `charIdeal` (def). No structure theorem used.
+  Remaining for `charIdeal_mul_of_exact`: lift `localMult_add_of_exact` through `finprod`
+  (`finprod_mul_distrib` + `pow_add`), needing (i) `localMult P M ≠ ⊤` for f.g. torsion M
+  (M_P finite length over the DVR Λ_P — via UFD height-1 primes principal ⟹ S3b DVR ⟹
+  f.g. torsion over PID is finite length) so `.toNat` is additive, and (ii) finite mulSupport
+  (from `iwasawaAlgebra_associatedPrimes_finite`). Both bounded; the Krull/Bourbaki gluing is
+  NOT needed for the characteristic ideal.
 - `Ch_Λ(M) := (pⁿ)∏ⱼ(fⱼ^{mⱼ})` for f.g. torsion M (n=Σnᵢ); MULTIPLICATIVITY in exact sequences (CS06 A.1 Prop 1).
   **Source**: RJW 3652–3657, 3679–3681.
 
