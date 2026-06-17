@@ -434,8 +434,7 @@ lemma unitsToZModPow_surjective (n : ℕ) (hn : 0 < n) :
     have hu : IsUnit (ZMod.castHom (pow_dvd_pow p hn) (ZMod (p ^ 1)) (c : ZMod (p ^ n))) :=
       c.isUnit.map (ZMod.castHom (pow_dvd_pow p hn) (ZMod (p ^ 1)))
     rw [hker] at hu
-    haveI : Nontrivial (ZMod (p ^ 1)) := by
-      rw [pow_one]; infer_instance
+    haveI : Nontrivial (ZMod (p ^ 1)) := by rw [pow_one]; infer_instance
     exact not_isUnit_zero hu
   exact ⟨hunit.unit, Units.ext (by rw [unitsToZModPow_coe, IsUnit.unit_spec]; exact hzc)⟩
 
