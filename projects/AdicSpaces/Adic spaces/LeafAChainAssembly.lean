@@ -287,6 +287,59 @@ theorem flat_trans_via_canonicalMap
   haveI : Module.Flat (presheafValue X₀) (presheafValue D') := hfold
   exact Module.Flat.trans A (presheafValue X₀) (presheafValue D')
 
+/-- One `chainStep`'s `rationalOpen` is the intersection `R(D') ∩ R({g,↑u}/sB)`
+(`interSamePair_rationalOpen` + the `genPieceDatum` field projections). -/
+theorem chainStep_rationalOpen (u : Aˣ) (sB : A) (D' : RationalLocData A) (g : A) :
+    rationalOpen (chainStep u sB D' g).T (chainStep u sB D' g).s =
+      rationalOpen D'.T D'.s ∩ rationalOpen ({g, (↑u : A)} : Finset A) sB := by
+  simp only [chainStep]
+  rw [RationalLocData.interSamePair_rationalOpen, genPieceDatum_T, genPieceDatum_s]
+
+/-- **The fold's `rationalOpen` membership.** `v ∈ R(foldl gens X₀)` iff `v ∈ R(X₀)` and `v` lies
+in each step piece `R({g,↑u}/sB)`. By induction on `gens` (each step is the intersection
+`chainStep_rationalOpen`). -/
+theorem mem_foldl_chainStep (u : Aˣ) (sB : A) (gens : List A) (X₀ : RationalLocData A) (v : Spv A) :
+    v ∈ rationalOpen (gens.foldl (chainStep u sB) X₀).T (gens.foldl (chainStep u sB) X₀).s ↔
+      v ∈ rationalOpen X₀.T X₀.s ∧
+        ∀ g ∈ gens, v ∈ rationalOpen ({g, (↑u : A)} : Finset A) sB := by
+  induction gens generalizing X₀ with
+  | nil => simp
+  | cons g gs ih =>
+    rw [List.foldl_cons, ih (chainStep u sB X₀ g), chainStep_rationalOpen,
+      Set.mem_inter_iff, List.forall_mem_cons]
+    tauto
+
+/-- **Endpoint: `R(W/sB) = R(foldl W.toList X₀)`** (Wedhorn `Xₙ = im E`). The fold over `W`'s
+generators (on the dominating-unit base `X₀ = R({↑u}/sB)`) recovers `R(W/sB)`: the fold carries an
+extra `v(↑u) ≤ v(sB)` condition (from `X₀` and each step piece), which is **free** on `R(W/sB)` via
+the dominating-unit hypothesis `hu` (Cor 7.32). -/
+theorem foldl_rationalOpen_eq_base (P : PairOfDefinition A) (u : Aˣ) (sB : A) (W : Finset A)
+    (hspan_u : Ideal.span (({(↑u : A)} : Finset A) : Set A) = ⊤)
+    (hu : ∀ v ∈ rationalOpen W sB, v.vle (↑u) sB) :
+    rationalOpen W sB =
+      rationalOpen (W.toList.foldl (chainStep u sB) (genPieceDatum P {(↑u : A)} sB hspan_u)).T
+        (W.toList.foldl (chainStep u sB) (genPieceDatum P {(↑u : A)} sB hspan_u)).s := by
+  ext v
+  rw [mem_foldl_chainStep]
+  constructor
+  · intro hv
+    have huv := hu v hv
+    obtain ⟨hspa, hgen, hsupp⟩ := hv
+    refine ⟨⟨hspa, ?_, hsupp⟩, fun g hg => ⟨hspa, ?_, hsupp⟩⟩
+    · intro t ht
+      rw [genPieceDatum_T, Finset.mem_singleton] at ht; subst ht
+      rw [genPieceDatum_s]; exact huv
+    · intro t ht
+      rw [Finset.mem_insert, Finset.mem_singleton] at ht
+      rcases ht with rfl | rfl
+      · exact hgen t (Finset.mem_toList.mp hg)
+      · exact huv
+  · rintro ⟨hX₀, hg⟩
+    obtain ⟨hspa, -, hsupp⟩ := hX₀
+    refine ⟨hspa, ?_, hsupp⟩
+    intro t ht
+    exact (hg t (Finset.mem_toList.mpr ht)).2.1 t (Finset.mem_insert_self t _)
+
 /-- **Whole-space Prop 8.30 (Remark 7.55 chain), assembled downstream.**
 `𝒪_B(im E)` is flat over `B = 𝒪_X(D)`, for `im E = imagePieceDatum D E.T E.s` the whole-space
 image of a `span = ⊤` rational piece. Proven by folding `flat_chainStep_domUnit` over `E.T`'s
@@ -297,7 +350,6 @@ theorem prop_8_30_imagePiece_assembled
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
-    [CompatiblePlusSubring A]
     (D E : RationalLocData A) (hspanE : Ideal.span (E.T : Set A) = ⊤) :
     @Module.Flat (presheafValue D) (presheafValue (imagePieceDatum D E.T E.s hspanE)) _ _
       ((imagePieceDatum D E.T E.s hspanE).canonicalMap).toModule := by
@@ -330,8 +382,10 @@ theorem prop_8_30_imagePiece_assembled
   -- Endpoint: `foldl gens X₀ ≈ im E` (same `rationalOpen`), the `↑u`-condition free via `hu`.
   have h_ro : rationalOpen (imagePieceDatum D E.T E.s hspanE).T
         (imagePieceDatum D E.T E.s hspanE).s =
-      rationalOpen (gens.foldl (chainStep u sB) X₀).T (gens.foldl (chainStep u sB) X₀).s := by
-    sorry
+      rationalOpen (gens.foldl (chainStep u sB) X₀).T (gens.foldl (chainStep u sB) X₀).s :=
+    foldl_rationalOpen_eq_base (presheafValue_concretePair D) u sB
+      (imagePieceDatum D E.T E.s hspanE).T hspan_u
+      (fun v hv => (hu ⟨v, rationalOpen_subset_spa hv⟩ hv).1)
   exact flat_of_rationalOpen_eq (gens.foldl (chainStep u sB) X₀)
     (imagePieceDatum D E.T E.s hspanE) h_ro hfoldB
 
