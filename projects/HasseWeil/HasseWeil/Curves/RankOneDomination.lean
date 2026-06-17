@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import Mathlib.RingTheory.Valuation.LocalSubring
 import Mathlib.RingTheory.DiscreteValuationRing.Basic
 import Mathlib.RingTheory.DedekindDomain.Basic
+import Mathlib.RingTheory.Valuation.Discrete.IsDiscreteValuationRing
 import Mathlib.Algebra.GroupWithZero.WithZero
 
 /-!
@@ -33,6 +34,35 @@ and `DiscreteValuationRing` API) so that the place classification need not impor
 -/
 
 namespace HasseWeil.Curves
+
+/-- **General field-valuation helper (axiom-clean).** A surjective
+`ℤᵐ⁰ = WithZero (Multiplicative ℤ)`-valued valuation on a field has a *discrete valuation ring* as
+its valuation subring (rank one).  Surjectivity onto `ℤᵐ⁰` forces the value group to be all of `⊤`,
+hence cyclic and nontrivial, whence `Valuation.valuationSubring_isDiscreteValuationRing` applies.
+This is the rank-one input demanded by `rankOne_valuationSubring_le_eq_of_ne_top`. -/
+theorem valuationSubring_isDVR_of_surjective_withZeroInt
+    {F : Type*} [Field F] (v : Valuation F (WithZero (Multiplicative ℤ)))
+    (hv : Function.Surjective v) :
+    IsDiscreteValuationRing v.valuationSubring := by
+  have hvg : MonoidWithZeroHom.valueGroup (.ofClass v) = ⊤ := by
+    rw [eq_top_iff]
+    intro y _
+    rw [MonoidWithZeroHom.mem_valueGroup_iff_of_comm]
+    refine ⟨1, by simp, ?_⟩
+    obtain ⟨x, hx⟩ := hv (y : WithZero (Multiplicative ℤ))
+    exact ⟨x, by rw [map_one, one_mul]; exact hx.symm⟩
+  haveI : IsCyclic (WithZero (Multiplicative ℤ))ˣ :=
+    isCyclic_of_surjective WithZero.unitsWithZeroEquiv.symm.toMonoidHom
+      WithZero.unitsWithZeroEquiv.symm.surjective
+  haveI : Nontrivial (WithZero (Multiplicative ℤ))ˣ :=
+    WithZero.unitsWithZeroEquiv.symm.toEquiv.nontrivial
+  haveI : IsCyclic (MonoidWithZeroHom.valueGroup (.ofClass v)) := by
+    rw [hvg]
+    exact isCyclic_of_surjective Subgroup.topEquiv.symm.toMonoidHom
+      Subgroup.topEquiv.symm.surjective
+  haveI : Nontrivial (MonoidWithZeroHom.valueGroup (.ofClass v)) := by
+    rw [hvg]; exact Subgroup.topEquiv.symm.toEquiv.nontrivial
+  exact Valuation.valuationSubring_isDiscreteValuationRing v
 
 /-- **General field-valuation helper (axiom-clean).** Two surjective
 `ℤᵐ⁰ = WithZero (Multiplicative ℤ)`-valued valuations on a field that are
