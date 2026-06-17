@@ -497,7 +497,6 @@ theorem extendScalars_adjoin_eq_top {n : ℕ} (hn : 1 ≤ n)
     FiniteDimensional.right ℚ_[p] (K p n) _
   refine IntermediateField.eq_of_le_of_finrank_eq le_top ?_
   rw [IntermediateField.finrank_top', finrank_K_succ p hn]
-  -- `finrank K_n K_n⟮V⟯ ∣ p` and `≠ 1`, so `= p`
   have hdvd : Module.finrank (K p n) (K p n)⟮V⟯ ∣
       Module.finrank (K p n) (IntermediateField.extendScalars (K_le_succ p n)) :=
     (IntermediateField.finrank_dvd_of_le_right le_top).trans
@@ -525,27 +524,23 @@ private theorem norm_extendScalars_translated {n : ℕ} (hn : 1 ≤ n) (hp2 : p 
     (hmp : minpoly (K p n) V = (Polynomial.X + 1) ^ p - Polynomial.C c) :
     Algebra.norm (K p n) V = c - 1 := by
   have hp0 : p ≠ 0 := hp.out.ne_zero
+  have hm : ((Polynomial.X : (K p n)[X]) + 1).Monic := by
+    rw [show ((Polynomial.X : (K p n)[X]) + 1) = Polynomial.X + Polynomial.C 1 by simp]
+    exact Polynomial.monic_X_add_C 1
+  have hm1 : ((Polynomial.X : (K p n)[X]) + 1).natDegree = 1 := by
+    rw [show ((Polynomial.X : (K p n)[X]) + 1) = Polynomial.X + Polynomial.C 1 by simp,
+      Polynomial.natDegree_X_add_C]
   have hmonic : ((Polynomial.X + 1) ^ p - Polynomial.C c : (K p n)[X]).Monic := by
-    have hm : ((Polynomial.X : (K p n)[X]) + 1).Monic := by
-      rw [show ((Polynomial.X : (K p n)[X]) + 1) = Polynomial.X + Polynomial.C 1 by simp]
-      exact Polynomial.monic_X_add_C 1
     have hmp' : ((Polynomial.X + 1 : (K p n)[X]) ^ p).Monic := hm.pow p
     have hdn : ((Polynomial.X + 1 : (K p n)[X]) ^ p).natDegree = p := by
-      rw [hm.natDegree_pow, show ((Polynomial.X : (K p n)[X]) + 1).natDegree = 1 by
-        rw [show ((Polynomial.X : (K p n)[X]) + 1) = Polynomial.X + Polynomial.C 1 by simp,
-          Polynomial.natDegree_X_add_C], mul_one]
+      rw [hm.natDegree_pow, hm1, mul_one]
     rw [sub_eq_add_neg, ← Polynomial.C_neg]
     refine hmp'.add_of_left ?_
     rw [Polynomial.degree_eq_natDegree hmp'.ne_zero, hdn]
     exact lt_of_le_of_lt Polynomial.degree_C_le (by exact_mod_cast Nat.pos_of_ne_zero hp0)
   have hdeg : (minpoly (K p n) V).natDegree = p := by
-    rw [hmp, sub_eq_add_neg, ← Polynomial.C_neg, Polynomial.natDegree_add_C]
-    have hm : ((Polynomial.X : (K p n)[X]) + 1).Monic := by
-      rw [show ((Polynomial.X : (K p n)[X]) + 1) = Polynomial.X + Polynomial.C 1 by simp]
-      exact Polynomial.monic_X_add_C 1
-    rw [hm.natDegree_pow, show ((Polynomial.X : (K p n)[X]) + 1).natDegree = 1 by
-      rw [show ((Polynomial.X : (K p n)[X]) + 1) = Polynomial.X + Polynomial.C 1 by simp,
-        Polynomial.natDegree_X_add_C], mul_one]
+    rw [hmp, sub_eq_add_neg, ← Polynomial.C_neg, Polynomial.natDegree_add_C,
+      hm.natDegree_pow, hm1, mul_one]
   have hint : IsIntegral (K p n) V := by
     rw [← minpoly.ne_zero_iff, hmp]; exact hmonic.ne_zero
   have htop : (K p n)⟮V⟯ = ⊤ := extendScalars_adjoin_eq_top p hn hbot
