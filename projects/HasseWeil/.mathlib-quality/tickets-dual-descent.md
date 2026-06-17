@@ -211,3 +211,54 @@ mulByInt/compose base-change faithfulness) transports the K̄ range inclusion to
 - **Skeleton**: `DualDescent.lean` holds `universalDualWitness_of_charZero` (+ the gate corollaries)
   as `sorry` now (elaborates against existing types); Q1/Q2/Q3 internals are filled as the arc
   proceeds. DUAL-Q2's deep sub-leaves may remain `sorry`/REVIEW-PENDING.
+
+---
+
+## [DUAL-Q4-DECOMP] Elementwise Galois descent proven; deep input isolated to one residual (REVIEW-PENDING)
+
+**Status**: monolithic `sorry` of `rationalRangeIncl_of_separable` REPLACED by a thin proof over a
+single named residual. **Date**: this pass.
+
+### What is now PROVEN (axiom-clean, `[propext, Classical.choice, Quot.sound]`)
+
+- **`HasseWeil.EC.rangeIncl_of_descentData`** (`DualDescent.lean`): the *elementwise Galois descent*
+  of the range inclusion (Silverman III.6.1, descent half = route steps 2–4). From a `DescentData`
+  over a finite Galois `L/F`, derives the `F`-level inclusion `Im(mPb) ⊆ Im(φ*)`. Mechanism: for
+  `z = mPb u`, naturality lands `functionFieldMap z` in `Im(ψ_L) ⊇ Im([m]_L*)`, giving `ψ_L ĝ`; `ĝ`
+  is `Gal(L/F)`-fixed (equivariance + injectivity of `ψ_L`, plus
+  `galActFunctionField_fixes_baseChange`); DUAL-Q1
+  `mem_range_functionField_baseChange_iff_fixed` descends `ĝ = functionFieldMap g`; naturality +
+  `functionFieldMap_injective` give `φ* g = z`. **Verified `#print axioms` = no `sorryAx`.**
+- **`HasseWeil.EC.DescentData`** (structure): the descent input interface — `ψ_L`, `[m]_L*`,
+  `GalEquivariant ψ_L`, `Injective ψ_L`, base-change naturalities `hpsiL_nat`/`hmPbL_nat`, and the
+  `L`-level range inclusion `hLincl : Im([m]_L*) ⊆ Im(ψ_L)`.
+- **`HasseWeil.EC.SomeDescentData`** (structure): bundles `L` + its `Field`/`Algebra`/
+  `FiniteDimensional`/`IsGalois` instances + the `DescentData` (the existential output).
+- **`rationalRangeIncl_of_separable`**: now a thin 3-line proof =
+  `exists_descentData_of_separable φ hsep` fed to `rangeIncl_of_descentData`.
+
+### The ONE remaining residual (REVIEW-PENDING `sorry`)
+
+**`HasseWeil.EC.exists_descentData_of_separable`** (`DualDescent.lean`, private `noncomputable def`):
+for separable `φ : E₁ → E₂` over `F`, `SomeDescentData φ* [deg φ]*` — i.e. *there exists a finite
+Galois `L/F` with the full descent data*. This is **exactly** the union of the two genuine mathlib
+gaps already catalogued above:
+
+- **(gap 1 + gap 3) two-curve base-change to a finite Galois `L`.** Supplies `ψ_L`, `[deg φ]_L*`,
+  their equivariance/injectivity/naturality. The two-curve `CoordHom.baseChangeAlgHom` exists at
+  *coordinate-ring* level (`CurveMapBaseChange.lean`), but a general isogeny carries **no** `CoordHom`
+  (it is separate data — `Isogeny.toPointMap` takes it explicitly), and the function-field
+  base-change goes through `FractionRing (L ⊗ CR)` (NOT `L ⊗ FF`, which is not a field), so `ψ_L`
+  cannot be obtained by merely tensoring `φ*`. `baseChangeIsogeny` is endomorphism-only and needs
+  `IsAlgClosed`; `mulByInt`'s pullback naturality is available only on generators over
+  `AlgebraicClosure` (`PencilComapWitnesses.lean`), not over a finite `L` on all elements.
+- **(gap 1 + gap 2) descended K̄-dual range inclusion** `Im([deg φ]_L*) ⊆ Im(ψ_L)`: the two-curve
+  form of `exists_dual_of_pullbackEvaluation_general`'s range inclusion descended to a finite Galois
+  field of definition. Missing mathlib fact (field-of-definition): a morphism over
+  `AlgebraicClosure F` is defined over a finite Galois subextension.
+
+**Net.** The descent assembly (route steps 2–4) is no longer a black box: it is a proven, reusable,
+axiom-clean lemma exploiting the fully-proven DUAL-Q1. `universalDualWitness_of_charZero` now carries
+`sorryAx` from this single isolated residual ONLY. The sacred
+`HasseWeil.WeilPairing.hasse_bound_unconditional` remains `[propext, Classical.choice, Quot.sound]`
+(verified — no regression).

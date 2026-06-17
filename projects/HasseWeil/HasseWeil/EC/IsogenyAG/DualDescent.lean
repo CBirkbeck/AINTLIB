@@ -702,6 +702,155 @@ noncomputable def hasDualWitness_of_compose {W₁ W₂ : WeierstrassCurve.Affine
     (EC.mulByIntBasepoint_holds W₁ hn)
     (EC.Isogeny.reflects_ordAtInfty φ)
 
+/-! ### The elementwise Galois descent of the range inclusion (route steps 2–4, proven)
+
+The `F`-level range inclusion `Im([m]*) ⊆ Im(φ*)` is descended *elementwise* from a finite Galois
+level `L/F`, exploiting the now-fully-proven DUAL-Q1 fixed-field characterization
+(`mem_range_functionField_baseChange_iff_fixed`). The mechanism (Silverman III.6.1, descent half):
+
+1. **(K̄/L input, isolated)** Over a finite Galois `L/F`, the `L`-base-change `ψ_L` of `φ*` (an
+   `F`-algebra hom `F(C₂_L) → F(C₁_L)`, `Gal(L/F)`-equivariant, injective, natural with `φ*`) admits
+   the `L`-level range inclusion `Im([m]_L*) ⊆ Im(ψ_L)`. (This is the two-curve `K̄` dual descended to
+   `L`; it is the genuine deep residual — see `DescentData` below.)
+2. **(proven here)** For `z = [m]_F* u`, naturality of `[m]` gives
+   `functionFieldMap z = [m]_L* (functionFieldMap u) ∈ Im([m]_L*) ⊆ Im(ψ_L)`, so
+   `functionFieldMap z = ψ_L ĝ` for some `ĝ ∈ F(C₂_L)`.
+3. **(proven here)** `functionFieldMap z` is `Gal(L/F)`-fixed (it is a base-change image); `ψ_L` is
+   equivariant and injective, so `ĝ` is `Gal(L/F)`-fixed.
+4. **(proven here)** By DUAL-Q1 `ĝ = functionFieldMap g` for `g ∈ F(C₂)`; naturality
+   `functionFieldMap (φ* g) = ψ_L (functionFieldMap g) = ψ_L ĝ = functionFieldMap z`, and
+   injectivity of `functionFieldMap`, give `φ* g = z`. Hence `z ∈ Im(φ*)`.
+
+`DescentData` packages the step-1 input; `rangeIncl_of_descentData` is the proven descent (steps
+2–4). -/
+
+/-- **The `K̄`/finite-Galois descent input** for the range inclusion `Im([m]*) ⊆ Im(φ*)` over `F`
+(the isolated deep residual of Silverman III.6.1, descent half). For a curve map `φ* : F(C₂) → F(C₁)`
+(the pullback of `φ : C₁ → C₂`) and a nonconstant endomorphism pullback `mPb : F(C₁) → F(C₁)`
+(Silverman takes `mPb = [m]*`, `m = deg φ`), this bundles, over a *finite Galois* `L/F`:
+
+* `psiL` — the `L`-base-change `ψ_L : F(C₂_L) → F(C₁_L)` of `φ*`;
+* `mPbL` — the `L`-base-change `[m]_L* : F(C₁_L) → F(C₁_L)` of `mPb`;
+* `hpsiL_equiv` — `ψ_L` is `Gal(L/F)`-equivariant;
+* `hpsiL_inj` — `ψ_L` is injective (it is a base-changed field-pullback);
+* `hpsiL_nat` — base-change naturality of `φ*`: `functionFieldMap ∘ φ* = ψ_L ∘ functionFieldMap`;
+* `hmPbL_nat` — base-change naturality of `mPb`: `functionFieldMap ∘ mPb = mPb_L ∘ functionFieldMap`;
+* `hLincl` — the **`L`-level range inclusion** `Im([m]_L*) ⊆ Im(ψ_L)` (the two-curve `K̄` dual,
+  descended to `L`).
+
+The two genuine mathlib gaps of Silverman III.6.1 (the general two-curve base-change of the isogeny
+to `K̄`/`L`, and the field-of-definition reduction of the `K̄`-dual to a finite Galois `L/F`) are
+exactly what is needed to *construct* this datum; everything downstream is proven
+(`rangeIncl_of_descentData`). -/
+structure DescentData {C₁ C₂ : SmoothPlaneCurve F}
+    (φPb : C₂.FunctionField →ₐ[F] C₁.FunctionField)
+    (mPb : C₁.FunctionField →ₐ[F] C₁.FunctionField)
+    (L : Type*) [Field L] [Algebra F L] [FiniteDimensional F L] [IsGalois F L] where
+  /-- The `L`-base-change `ψ_L : F(C₂_L) → F(C₁_L)` of `φ*`. -/
+  psiL : (C₂.baseChange L).FunctionField →ₐ[F] (C₁.baseChange L).FunctionField
+  /-- The `L`-base-change `[m]_L* : F(C₁_L) → F(C₁_L)` of `mPb = [m]*`. -/
+  mPbL : (C₁.baseChange L).FunctionField →ₐ[F] (C₁.baseChange L).FunctionField
+  /-- `ψ_L` is `Gal(L/F)`-equivariant. -/
+  hpsiL_equiv : GalEquivariant L psiL
+  /-- `ψ_L` is injective. -/
+  hpsiL_inj : Function.Injective psiL
+  /-- Base-change naturality of `φ*`. -/
+  hpsiL_nat : ∀ g : C₂.FunctionField,
+    C₁.functionFieldMap L (φPb g) = psiL (C₂.functionFieldMap L g)
+  /-- Base-change naturality of `mPb = [m]*`. -/
+  hmPbL_nat : ∀ u : C₁.FunctionField,
+    C₁.functionFieldMap L (mPb u) = mPbL (C₁.functionFieldMap L u)
+  /-- The `L`-level range inclusion `Im([m]_L*) ⊆ Im(ψ_L)` (the descended `K̄` dual). -/
+  hLincl : mPbL.range ≤ psiL.range
+
+omit [DecidableEq F] in
+/-- **The elementwise Galois descent of the range inclusion** (Silverman III.6.1, descent half;
+route steps 2–4, fully proven). From a `DescentData` over a finite Galois `L/F`, the `F`-level range
+inclusion `Im(mPb) ⊆ Im(φ*)` follows. Axiom-clean: the only deep input is the `DescentData` (the
+`L`-level range inclusion + the two-curve base-change naturality); the descent itself is the DUAL-Q1
+fixed-field characterization plus injectivity. -/
+theorem rangeIncl_of_descentData {C₁ C₂ : SmoothPlaneCurve F}
+    {φPb : C₂.FunctionField →ₐ[F] C₁.FunctionField}
+    {mPb : C₁.FunctionField →ₐ[F] C₁.FunctionField}
+    {L : Type*} [Field L] [Algebra F L] [FiniteDimensional F L] [IsGalois F L]
+    (d : DescentData φPb mPb L) :
+    mPb.range ≤ φPb.range := by
+  rintro z ⟨u, rfl⟩
+  -- Step 2: `functionFieldMap (mPb u)` lies in `Im([m]_L*) ⊆ Im(ψ_L)`.
+  have hz_mem : C₁.functionFieldMap L (mPb u) ∈ d.psiL.range := by
+    apply d.hLincl
+    rw [d.hmPbL_nat u]
+    exact ⟨C₁.functionFieldMap L u, rfl⟩
+  obtain ⟨ĝ, hĝ⟩ := hz_mem
+  -- normalise the witness to `AlgHom`-application form
+  have hĝ' : d.psiL ĝ = C₁.functionFieldMap L (mPb u) := hĝ
+  -- Step 3: `ĝ` is `Gal(L/F)`-fixed (since `ψ_L ĝ = functionFieldMap (mPb u)` is fixed and `ψ_L`
+  -- is equivariant + injective).
+  have hĝ_fixed : ∀ σ : L ≃ₐ[F] L, galActFunctionField C₂ L σ ĝ = ĝ := by
+    intro σ
+    apply d.hpsiL_inj
+    rw [d.hpsiL_equiv σ ĝ, hĝ', galActFunctionField_fixes_baseChange]
+  -- Step 4: by DUAL-Q1, `ĝ = functionFieldMap g` for `g ∈ F(C₂)`.
+  obtain ⟨g, hg⟩ := (mem_range_functionField_baseChange_iff_fixed C₂ L ĝ).2 hĝ_fixed
+  -- and `φ* g = mPb u` by injectivity of `functionFieldMap` and naturality.
+  refine ⟨g, C₁.functionFieldMap_injective L ?_⟩
+  show C₁.functionFieldMap L (φPb g) = C₁.functionFieldMap L (mPb u)
+  rw [d.hpsiL_nat g, hg, hĝ']
+
+/-- **A `DescentData` together with its finite Galois field of definition** — the existential
+output of the isolated residual `exists_descentData_of_separable`, bundling `L` and its
+`Field`/`Algebra`/`FiniteDimensional`/`IsGalois` instances as fields (so that `DescentData`'s
+instance arguments are available when consuming it). -/
+structure SomeDescentData.{w} {C₁ C₂ : SmoothPlaneCurve F}
+    (φPb : C₂.FunctionField →ₐ[F] C₁.FunctionField)
+    (mPb : C₁.FunctionField →ₐ[F] C₁.FunctionField) where
+  /-- The finite Galois field of definition `L/F`. -/
+  L : Type w
+  /-- `L` is a field. -/
+  [fieldL : Field L]
+  /-- `L` is an `F`-algebra. -/
+  [algL : Algebra F L]
+  /-- `L/F` is finite. -/
+  [finL : FiniteDimensional F L]
+  /-- `L/F` is Galois. -/
+  [galL : IsGalois F L]
+  /-- The descent data over `L`. -/
+  data : DescentData (C₁ := C₁) (C₂ := C₂) φPb mPb L
+
+universe u
+
+/-- **The single isolated deep residual of Silverman III.6.1 (descent half), REVIEW-PENDING.** For a
+separable isogeny `φ : E₁ → E₂` over `F`, there is a *finite Galois* extension `L/F` and a
+`DescentData` for `φ*` and `[deg φ]*` over `L`: i.e. the two-curve base-change `ψ_L : F(E₂_L) →
+F(E₁_L)` of `φ*` and the base-change `[deg φ]_L*` of `[deg φ]*`, with `ψ_L` equivariant/injective,
+the base-change naturalities, and the `L`-level range inclusion `Im([deg φ]_L*) ⊆ Im(ψ_L)`.
+
+This is **exactly** the union of the two genuine mathlib gaps (see `rationalRangeIncl_of_separable`):
+
+* **Two-curve base-change** (gap 1, with gap 3): construct `ψ_L`, `[deg φ]_L*` and their naturality /
+  equivariance / injectivity. The project's `baseChangeIsogeny` is endomorphism-only and requires
+  `IsAlgClosed`; a general `φ : E₁ → E₂` over a *finite* Galois `L` needs the two-curve
+  `baseChangeAlgHom` (which exists at coordinate-ring level, `CurveMapBaseChange.lean`) lifted to a
+  `CoordHom` for `φ` — a general isogeny carries no `CoordHom` (it is separate data, `toPointMap`),
+  so this is the genuine missing infrastructure. (`mulByInt`'s pullback base-change naturality is
+  available only on generators over `AlgebraicClosure`, `PencilComapWitnesses.lean`, not over a
+  general finite `L` on all elements.)
+* **Field of definition + `K̄`-dual range inclusion** (gaps 1 + 2): the range inclusion
+  `Im([deg φ]_L*) ⊆ Im(ψ_L)` is the `K̄`-dual range inclusion `Im([m]_K̄*) ⊆ Im(φ_K̄*)`
+  (`exists_dual_of_pullbackEvaluation_general`, two-curve form) descended to a *finite* Galois field
+  of definition `L/F`. **Missing mathlib fact:** a morphism of varieties over `AlgebraicClosure F` is
+  defined over a finite Galois subextension `L/F` (no field-of-definition infrastructure exists).
+
+Everything downstream is proven: `rangeIncl_of_descentData` (the elementwise Galois descent, route
+steps 2–4) turns this datum into the `F`-level range inclusion. See `tickets-dual-descent.md`. -/
+private noncomputable def exists_descentData_of_separable {F : Type u} [Field F] [DecidableEq F]
+    {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
+    (φ : EC.Isogeny W₁ W₂) (_hsep : φ.IsSeparable) :
+    SomeDescentData.{u, u} (C₁ := ⟨W₁⟩) (C₂ := ⟨W₂⟩) φ.toCurveMap.pullback
+      (HasseWeil.mulByInt_pullbackAlgHom W₁ (φ.degree : ℤ)
+        (by exact_mod_cast φ.degree_pos'.ne')) :=
+  sorry
+
 /-- **DUAL-Q4 deep residual** — the `K̄`-dual-plus-descent core (REVIEW-PENDING). For a **separable**
 isogeny `φ : E₁ → E₂` over `F`, there is `n ≠ 0` (mathematically `n = deg φ`) and an `F`-rational
 faithful `[n]`-witness `HasMulByIntDualWitness φ n hn`, i.e. `Im([n]*) ⊆ Im(φ*)` over `F`.
@@ -734,13 +883,25 @@ injectivity, with `Isogeny.mulByInt`/`compose` base-change faithfulness) transpo
 Stated at `n = deg φ` (Silverman's value): the *basepoint* leaf of the dual witness is **not** part
 of this residual — it is discharged unconditionally (`mulByIntBasepoint_holds` +
 `Isogeny.reflects_ordAtInfty`) in `hasMulByIntDualWitness_of_rangeIncl` below. So the entire deep
-content of Silverman III.6.1 over a char-0 base is exactly this one range inclusion. -/
-private theorem rationalRangeIncl_of_separable {F : Type*} [Field F] [DecidableEq F]
+content of Silverman III.6.1 over a char-0 base is exactly this one range inclusion.
+
+**Decomposition status (this pass).** The monolithic range inclusion is now a *thin* consequence of
+the proven elementwise descent (`rangeIncl_of_descentData`, route steps 2–4 — axiom-clean) over a
+single named residual `exists_descentData_of_separable` (the `DescentData` existence). That residual
+is exactly the union of the two genuine mathlib gaps above (gaps 1 + 2): the two-curve base-change of
+`φ*`/`[m]*` to a finite Galois `L/F` (supplying `ψ_L`, `[m]_L*`, their equivariance, injectivity, and
+naturality — gap 1, including gap 3 which is `galEquivariant_baseChange_on_image` on generators once
+`ψ_L` exists) together with the descended `K̄`-dual range inclusion `Im([m]_L*) ⊆ Im(ψ_L)` at the
+finite Galois field of definition (gaps 1 + 2). -/
+private theorem rationalRangeIncl_of_separable {F : Type u} [Field F] [DecidableEq F]
     {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
-    (φ : EC.Isogeny W₁ W₂) (_hsep : φ.IsSeparable) :
+    (φ : EC.Isogeny W₁ W₂) (hsep : φ.IsSeparable) :
     (HasseWeil.mulByInt_pullbackAlgHom W₁ (φ.degree : ℤ)
-        (by exact_mod_cast φ.degree_pos'.ne')).range ≤ φ.toCurveMap.pullback.range :=
-  sorry
+        (by exact_mod_cast φ.degree_pos'.ne')).range ≤ φ.toCurveMap.pullback.range := by
+  have s : SomeDescentData.{u, u} (C₁ := ⟨W₁⟩) (C₂ := ⟨W₂⟩) φ.toCurveMap.pullback
+      (HasseWeil.mulByInt_pullbackAlgHom W₁ (φ.degree : ℤ)
+        (by exact_mod_cast φ.degree_pos'.ne')) := exists_descentData_of_separable φ hsep
+  exact @rangeIncl_of_descentData F _ ⟨W₁⟩ ⟨W₂⟩ _ _ s.L s.fieldL s.algL s.finL s.galL s.data
 
 /-- **The faithful `[deg φ]`-witness from the range inclusion** (the basepoint leaf, fully proved).
 Given the deep range inclusion `Im([deg φ]*) ⊆ Im(φ*)` (`rationalRangeIncl_of_separable`), the
