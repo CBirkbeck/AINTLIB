@@ -57,7 +57,7 @@ theorem zetaSys_pow_eq_pow_of_modEq {n i j : ℕ} (h : i ≡ j [MOD p ^ n]) :
   have hζuprim : IsPrimitiveRoot ζu (p ^ n) := by
     rw [← IsPrimitiveRoot.coe_units_iff, hζuval]; exact zetaSys_primitiveRoot p n
   have hu : ζu ^ i = ζu ^ j := by
-    rw [pow_eq_pow_iff_modEq, ← hζuprim.eq_orderOf]; exact h
+    rwa [pow_eq_pow_iff_modEq, ← hζuprim.eq_orderOf]
   have := congrArg (Units.val) hu
   rwa [Units.val_pow_eq_pow_val, Units.val_pow_eq_pow_val, hζuval] at this
 
@@ -83,23 +83,18 @@ theorem autToPow_zetaSys_eq {n : ℕ} (f : (K p n) ≃ₐ[ℚ_[p]] (K p n)) :
   set hζ := zeta_spec (p ^ n) ℚ_[p] (K p n) with hhζ
   set m := hξ.autToPow ℚ_[p] f with hm
   set m' := hζ.autToPow ℚ_[p] f with hm'
-  -- `ζ = ξ_n^c` with `c` coprime to `p^n`
   obtain ⟨c, _, hc⟩ := hξ.eq_pow_of_pow_eq_one hζ.pow_eq_one
   have hcop : Nat.Coprime c (p ^ n) := by
-    rw [← hξ.pow_iff_coprime (pow_pos hp.out.pos n) c, hc]; exact hζ
-  -- the two autToPow specs
+    rwa [← hξ.pow_iff_coprime (pow_pos hp.out.pos n) c, hc]
   have hspecξ : ζξ ^ (m : ZMod (p ^ n)).val = f ζξ := hξ.autToPow_spec ℚ_[p] f
   have hspecζ : (zeta (p ^ n) ℚ_[p] (K p n)) ^ (m' : ZMod (p ^ n)).val = f (zeta _ _ _) :=
     hζ.autToPow_spec ℚ_[p] f
-  -- `f ζ = (f ξ)^c = ξ^{c·m.val}` and `f ζ = ζ^{m'.val} = ξ^{c·m'.val}`
   have hfζ1 : f (zeta (p ^ n) ℚ_[p] (K p n)) = ζξ ^ (c * (m : ZMod (p ^ n)).val) := by
     rw [← hc, map_pow, ← hspecξ, ← pow_mul, mul_comm]
   have hfζ2 : f (zeta (p ^ n) ℚ_[p] (K p n)) = ζξ ^ (c * (m' : ZMod (p ^ n)).val) := by
     rw [← hspecζ, ← hc, ← pow_mul]
-  -- `ξ^{c·m.val} = ξ^{c·m'.val}`, so the exponents are congruent mod `p^n`
   have hpow : ζξ ^ (c * (m : ZMod (p ^ n)).val) = ζξ ^ (c * (m' : ZMod (p ^ n)).val) := by
     rw [← hfζ1, ← hfζ2]
-  -- lift to the unit group `ℂ_[p]ˣ` (a `CommGroup`), where `pow_eq_pow_iff_modEq` applies
   set ζu : ℂ_[p]ˣ := (zetaSys_primitiveRoot p n).isUnit (NeZero.ne _) |>.unit with hζu
   have hζuval : (ζu : ℂ_[p]) = zetaSys p n := IsUnit.unit_spec _
   have hζuprim : IsPrimitiveRoot ζu (p ^ n) := by
@@ -112,8 +107,7 @@ theorem autToPow_zetaSys_eq {n : ℕ} (f : (K p n) ≃ₐ[ℚ_[p]] (K p n)) :
   rw [pow_eq_pow_iff_modEq, ← hζuprim.eq_orderOf, ← ZMod.natCast_eq_natCast_iff] at hpowU
   push_cast at hpowU
   have hcunit : IsUnit (c : ZMod (p ^ n)) := by
-    rw [ZMod.isUnit_iff_coprime]; exact hcop
-  -- now `↑c * (m.val) = ↑c * (m'.val)`; cancel the unit `↑c`
+    rwa [ZMod.isUnit_iff_coprime]
   have hvaleq : ((m : ZMod (p ^ n)).val : ZMod (p ^ n))
       = ((m' : ZMod (p ^ n)).val : ZMod (p ^ n)) :=
     hcunit.mul_left_cancel hpowU
@@ -130,28 +124,18 @@ theorem galAut_zetaSys (a : ℤ_[p]ˣ) {n : ℕ} (hn : 1 ≤ n) :
         ZMod (p ^ n)).val := by
   set t : (ZMod (p ^ n))ˣ := PadicMeasure.unitsToZModPow p n a with ht
   set h := cyclotomic_irreducible_Qp p hn with hh
-  -- `galAut = autEquivPow.symm t`, so `autEquivPow (galAut) = t`
   have hgal : galAut p a n = (IsCyclotomicExtension.autEquivPow (K p n) h).symm t := by
     rw [galAut, dif_pos hn]
   have hae : IsCyclotomicExtension.autEquivPow (K p n) h (galAut p a n) = t := by
     rw [hgal, MulEquiv.apply_symm_apply]
-  -- the character value via `ξ_n` equals `t = a mod p^n` (`autEquivPow` is `zeta_spec`'s autToPow)
   have hval : (zetaSysK_primitiveRoot p n).autToPow ℚ_[p] (galAut p a n) = t := by
     rw [autToPow_zetaSys_eq, ← hae, IsCyclotomicExtension.autEquivPow_apply]
     rfl
-  -- apply the autToPow spec for `ξ_n` and coerce to `ℂ_[p]`
   have hspec := (zetaSysK_primitiveRoot p n).autToPow_spec ℚ_[p] (galAut p a n)
   rw [hval] at hspec
   have hcoe := congrArg (Subtype.val) hspec
   rw [SubmonoidClass.coe_pow] at hcoe
   exact hcoe.symm
-
-/-! ### Complex conjugation `σ_{-1}` and the Galois structure of `K_n` (RJW §12 material)
-
-The automorphism `σ_{-1} = galAut p (-1) n` is *complex conjugation* on the cyclotomic
-tower: it sends `ξ_n ↦ ξ_n⁻¹`. For `p` odd and `n ≥ 1` it has order exactly `2`
-(`ξ_n ≠ ξ_n⁻¹`), and `K_n/ℚ_p` is (abelian) Galois (`IsCyclotomicExtension.isGalois`).
-These feed the fixed-field characterisation `K_n⁺ = (K_n)^{⟨σ_{-1}⟩}` of `LocalUnits.lean`. -/
 
 /-- **Complex conjugation** `σ_{-1}` sends `ξ_{p^n} ↦ ξ_{p^n}⁻¹` (the cyclotomic-character
 value `-1`, read through `unitsToZModPow (-1) = -1` and `ξ^{(-1).val} = ξ⁻¹`). RJW TeX 3185. -/
@@ -183,12 +167,10 @@ order `p^n ≥ 3` (RJW: this is where `p ≠ 2` enters the order-2 of conjugatio
 theorem zetaSys_ne_inv (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n) :
     zetaSys p n ≠ (zetaSys p n)⁻¹ := by
   intro h
-  -- `ξ_n = ξ_n⁻¹` ⟹ `ξ_n^2 = 1`, so the order `p^n` divides `2`
   have hξ0 : zetaSys p n ≠ 0 := (zetaSys_primitiveRoot p n).ne_zero (pow_pos hp.out.pos n).ne'
   have hsq : zetaSys p n ^ 2 = 1 := by
     rw [pow_two]; nth_rewrite 2 [h]; exact mul_inv_cancel₀ hξ0
   have hdvd : p ^ n ∣ 2 := (zetaSys_primitiveRoot p n).dvd_of_pow_eq_one 2 hsq
-  -- but `p^n ≥ p ≥ 3` (p odd prime, n ≥ 1), contradicting `p^n ∣ 2`
   have hp3 : 3 ≤ p := by
     have := hp.out.two_le
     omega
@@ -209,10 +191,8 @@ private theorem adjoin_zetaSysK_eq_top (n : ℕ) :
   rw [show (IntermediateField.adjoin ℚ_[p] {(⟨zetaSys p n, zetaSys_mem_K p n⟩ : K p n)})
       = ⊤ from ?_]
   · rfl
-  -- the IntermediateField generated by `⟨ξ_n,_⟩` inside `K_n` is everything
   rw [eq_top_iff]
   rintro ⟨y, hy⟩ -
-  -- `y ∈ K p n = adjoin ℚ_[p] {ξ_n}`; lift the witness to the subtype's adjoin
   have hmap : y ∈ (IntermediateField.adjoin ℚ_[p]
       {(⟨zetaSys p n, zetaSys_mem_K p n⟩ : K p n)}).map (K p n).val := by
     rw [IntermediateField.adjoin_map]
@@ -221,22 +201,18 @@ private theorem adjoin_zetaSysK_eq_top (n : ℕ) :
     exact hy
   obtain ⟨z, hz, hzy⟩ := hmap
   have hzeq : (⟨y, hy⟩ : K p n) = z := Subtype.ext hzy.symm
-  rw [hzeq]; exact hz
+  rwa [hzeq]
 
 /-- **`σ_{-1}` has order `2`** (RJW §12, `p` odd, `n ≥ 1`): it is an involution
 (`σ_{-1}^2 = id` since `(-1)·(-1) = 1`) and is non-trivial (`σ_{-1}(ξ) = ξ⁻¹ ≠ ξ`). -/
 theorem orderOf_galAut_neg_one (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n) :
     orderOf (galAut p (-1) n) = 2 := by
   refine orderOf_eq_prime ?_ ?_
-  · -- `σ_{-1}^2 = id`: both `σ_{-1}^2` and `id` send the generator `ξ` to itself, and
-    -- agree on `ℚ_p`, so they are equal `ℚ_p`-algebra automorphisms
-    refine AlgEquiv.ext fun y => ?_
-    -- it suffices to check on `ξ`
+  · refine AlgEquiv.ext fun y => ?_
     have hξ : ((galAut p (-1) n ^ 2) ⟨zetaSys p n, zetaSys_mem_K p n⟩ : ℂ_[p])
         = (⟨zetaSys p n, zetaSys_mem_K p n⟩ : K p n) := by
       rw [pow_two]
       change (galAut p (-1) n (galAut p (-1) n ⟨zetaSys p n, zetaSys_mem_K p n⟩) : ℂ_[p]) = _
-      -- `σ_{-1}(ξ) = ξ⁻¹`, then `σ_{-1}(ξ⁻¹) = (σ_{-1} ξ)⁻¹ = ξ`
       have h1 : galAut p (-1) n ⟨zetaSys p n, zetaSys_mem_K p n⟩
           = ⟨(zetaSys p n)⁻¹, (K p n).inv_mem (zetaSys_mem_K p n)⟩ :=
         Subtype.ext (by rw [galAut_neg_one_zetaSys p hn])
@@ -245,7 +221,6 @@ theorem orderOf_galAut_neg_one (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n) :
           = (⟨zetaSys p n, zetaSys_mem_K p n⟩ : K p n)⁻¹ :=
         Subtype.ext (by rw [IntermediateField.coe_inv])
       rw [h2, map_inv₀, IntermediateField.coe_inv, galAut_neg_one_zetaSys p hn, inv_inv]
-    -- promote the generator-agreement to all of `K_n`
     have hcongr : (galAut p (-1) n ^ 2) ⟨zetaSys p n, zetaSys_mem_K p n⟩
         = (1 : (K p n) ≃ₐ[ℚ_[p]] (K p n)) ⟨zetaSys p n, zetaSys_mem_K p n⟩ :=
       Subtype.ext (by rw [hξ]; rfl)
@@ -255,24 +230,11 @@ theorem orderOf_galAut_neg_one (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n) :
       rintro z (rfl : z = ⟨zetaSys p n, zetaSys_mem_K p n⟩)
       exact hcongr
     exact AlgEquiv.ext_iff.1 heq y
-  · -- non-triviality: `σ_{-1}(ξ) = ξ⁻¹ ≠ ξ`
-    intro hone
+  · intro hone
     have : (galAut p (-1) n ⟨zetaSys p n, zetaSys_mem_K p n⟩ : ℂ_[p]) = zetaSys p n := by
       rw [hone]; rfl
     rw [galAut_neg_one_zetaSys p hn] at this
     exact zetaSys_ne_inv p hp2 hn this.symm
-
-/-! ### The fixed-field characterisation `K_n⁺ = (K_n)^{⟨σ_{-1}⟩}` (RJW §12 material)
-
-The maximal totally real subfield `K_n⁺ = ℚ_p(ξ + ξ⁻¹)` (`LocalUnits.KPlus`) is the fixed
-field of complex conjugation `σ_{-1}`. This is the §12 Galois characterisation flagged in
-`LocalUnits.lean`. It lives here (rather than in `LocalUnits`) because it couples `KPlus`
-(`LocalUnits`) with `galAut` (this file, which imports `LocalUnits`).
-
-`(⊆)` is the reality of `K_n⁺`: `σ_{-1}` fixes the generator `ξ + ξ⁻¹`. The equality is the
-Galois correspondence: `[K_n : (K_n)^{⟨σ_{-1}⟩}] = |⟨σ_{-1}⟩| = 2` (`σ_{-1}` order 2) and
-`[K_n : K_n⁺] ≤ 2` (`ξ` is a root of `X² − (ξ+ξ⁻¹)X + 1` over `K_n⁺`), so the two subfields,
-one inside the other, have the same `ℚ_p`-dimension. -/
 
 /-- `K_n⁺` viewed as an intermediate field of `K_n / ℚ_p` (it sits inside `K_n` by
 `KPlus_le_K`). Reducible so that the relative-algebra instances on `K_n` over it resolve. -/
@@ -286,7 +248,6 @@ field operations is the `adjoin` induction. -/
 theorem galAut_neg_one_fixes_KPlus {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]}
     (hx : x ∈ KPlus p n) (hxK : x ∈ K p n) :
     (galAut p (-1) n ⟨x, hxK⟩ : ℂ_[p]) = x := by
-  -- the generator `ξ + ξ⁻¹` is fixed
   have hgen : ∀ (hzK : zetaSys p n + (zetaSys p n)⁻¹ ∈ K p n),
       (galAut p (-1) n ⟨zetaSys p n + (zetaSys p n)⁻¹, hzK⟩ : ℂ_[p])
         = zetaSys p n + (zetaSys p n)⁻¹ := fun hzK => by
@@ -299,7 +260,6 @@ theorem galAut_neg_one_fixes_KPlus {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]}
             + ((galAut p (-1) n ⟨zetaSys p n, zetaSys_mem_K p n⟩ : ℂ_[p]))⁻¹ from by
         push_cast; ring,
       galAut_neg_one_zetaSys p hn, inv_inv, add_comm]
-  -- induct over `K_n⁺ = ℚ_p⟮ξ+ξ⁻¹⟯`
   have key : ∀ y ∈ KPlus p n, ∀ (hyK : y ∈ K p n),
       (galAut p (-1) n ⟨y, hyK⟩ : ℂ_[p]) = y := by
     intro y hy
@@ -346,7 +306,6 @@ theorem KPlusRestrict_le_fixedField {n : ℕ} (hn : 1 ≤ n) :
       (Subgroup.zpowers (galAut p (-1) n)) := by
   rw [IntermediateField.le_iff_le, Subgroup.zpowers_le, IntermediateField.mem_fixingSubgroup_iff]
   intro x hx
-  -- `x ∈ KPlusRestrict` means `(x : ℂ_[p]) ∈ KPlus`; conjugation fixes it
   rw [KPlusRestrict, IntermediateField.mem_restrict] at hx
   exact Subtype.ext (galAut_neg_one_fixes_KPlus p hn hx x.2)
 
@@ -377,20 +336,16 @@ relative degree is `(minpoly K_n⁺ ξ_n).natDegree ≤ 2`. -/
 theorem finrank_K_over_KPlusRestrict_le {n : ℕ} (_hn : 1 ≤ n) :
     Module.finrank (KPlusRestrict p n) (K p n) ≤ 2 := by
   set ξK : K p n := ⟨zetaSys p n, zetaSys_mem_K p n⟩ with hξK
-  -- `K_n⁺(ξ_n) = ⊤` over `K_n⁺` (since `ℚ_p(ξ_n) = ⊤`)
   have htop : IntermediateField.adjoin (KPlusRestrict p n) {ξK} = ⊤ :=
     IntermediateField.adjoin_eq_top_of_adjoin_eq_top (F := ℚ_[p])
       (adjoinSimple_zetaSysK_eq_top p n)
-  -- `ξ_n` is integral over `K_n⁺`
   have hξint : IsIntegral (KPlusRestrict p n) ξK := (isIntegral_zetaSysK p n).tower_top
-  -- the coefficient `β = ξ + ξ⁻¹` as an element of `K_n⁺`
   have hβmem : (zetaSys p n + (zetaSys p n)⁻¹) ∈ KPlus p n :=
     IntermediateField.subset_adjoin _ _ (Set.mem_singleton _)
   set βK : K p n := ⟨zetaSys p n + (zetaSys p n)⁻¹, KPlus_le_K p n hβmem⟩ with hβK
   have hβrestrict : βK ∈ KPlusRestrict p n :=
     (IntermediateField.mem_restrict (KPlus_le_K p n) βK).2 hβmem
   set β : KPlusRestrict p n := ⟨βK, hβrestrict⟩ with hβdef
-  -- the monic degree-2 annihilator `g = X² − βX + 1` over `K_n⁺`
   set g : Polynomial (KPlusRestrict p n) := Polynomial.X ^ 2 - Polynomial.C β * Polynomial.X + 1
     with hg
   have hgmonic : g.Monic := by rw [hg]; monicity!
@@ -400,7 +355,6 @@ theorem finrank_K_over_KPlusRestrict_le {n : ℕ} (_hn : 1 ≤ n) :
       (zetaSys_primitiveRoot p n).ne_zero (pow_pos hp.out.pos n).ne'
     rw [hg, map_add, map_sub, map_pow, map_mul, Polynomial.aeval_X, Polynomial.aeval_C,
       Polynomial.aeval_one]
-    -- `ξ² − algebraMap(β)·ξ + 1 = 0` in `K_n`; check via the `ℂ_[p]`-coercion
     apply Subtype.ext
     have hcoe : ((algebraMap (KPlusRestrict p n) (K p n) β : K p n) : ℂ_[p])
         = zetaSys p n + (zetaSys p n)⁻¹ := rfl
@@ -408,7 +362,6 @@ theorem finrank_K_over_KPlusRestrict_le {n : ℕ} (_hn : 1 ≤ n) :
     rw [hcoe]
     field_simp
     ring
-  -- the relative degree is the minpoly degree, `≤ g.natDegree = 2`
   rw [show Module.finrank (KPlusRestrict p n) (K p n)
       = Module.finrank (KPlusRestrict p n) (IntermediateField.adjoin (KPlusRestrict p n) {ξK}) from
     by rw [htop]; exact (LinearEquiv.finrank_eq IntermediateField.topEquiv.toLinearEquiv).symm,
@@ -428,7 +381,6 @@ Proof: `K_n⁺ ⊆ (K_n)^{⟨σ_{-1}⟩}` (reality), and the two have the same `
 theorem KPlus_eq_fixedField (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n) :
     KPlusRestrict p n
       = IntermediateField.fixedField (Subgroup.zpowers (galAut p (-1) n)) := by
-  -- `K_n⁺ ≤ (K_n)^{⟨σ_{-1}⟩}` and `[K_n : K_n⁺] ≤ 2 = [K_n : (K_n)^{⟨σ_{-1}⟩}]`, so equal
   refine IntermediateField.eq_of_le_of_finrank_le' (KPlusRestrict_le_fixedField p hn) ?_
   rw [finrank_fixedField_galAut_neg_one p hp2 hn]
   exact finrank_K_over_KPlusRestrict_le p hn
@@ -440,24 +392,20 @@ generator `σ_{-1}`.) -/
 theorem mem_KPlus_iff_galAut_neg_one_fixed (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]}
     (hxK : x ∈ K p n) :
     x ∈ KPlus p n ↔ (galAut p (-1) n ⟨x, hxK⟩ : ℂ_[p]) = x := by
-  -- `x ∈ K_n⁺ ↔ ⟨x,_⟩ ∈ KPlusRestrict ↔ ⟨x,_⟩ ∈ fixedField⟨σ_{-1}⟩ ↔ σ_{-1}⟨x,_⟩ = ⟨x,_⟩`
   rw [show (x ∈ KPlus p n) ↔ (⟨x, hxK⟩ : K p n) ∈ KPlusRestrict p n from
     (IntermediateField.mem_restrict (KPlus_le_K p n) ⟨x, hxK⟩).symm,
     KPlus_eq_fixedField p hp2 hn, IntermediateField.mem_fixedField_iff]
   constructor
-  · -- the generator `σ_{-1}` is in `zpowers σ_{-1}`, so it fixes `⟨x,_⟩`
-    intro h
+  · intro h
     have := h (galAut p (-1) n) (Subgroup.mem_zpowers _)
     exact congrArg (Subtype.val) this
-  · -- conversely, if `σ_{-1}` fixes `⟨x,_⟩` then every `σ_{-1}^k` does
-    intro h f hf
+  · intro h f hf
     rw [Subgroup.mem_zpowers_iff] at hf
     obtain ⟨k, rfl⟩ := hf
     have hfix : galAut p (-1) n ⟨x, hxK⟩ = ⟨x, hxK⟩ := Subtype.ext h
     have hfixinv : (galAut p (-1) n)⁻¹ ⟨x, hxK⟩ = ⟨x, hxK⟩ := by
       apply (galAut p (-1) n).injective
       rw [hfix, ← AlgEquiv.mul_apply, mul_inv_cancel, AlgEquiv.one_apply]
-    -- `σ_{-1}^k ⟨x,_⟩ = ⟨x,_⟩` by induction transported through the fixed point
     change (galAut p (-1) n ^ k) (⟨x, hxK⟩ : K p n) = ⟨x, hxK⟩
     induction k using Int.induction_on with
     | zero => simp
@@ -476,12 +424,10 @@ theorem mem_localUnitsOnePlus_iff_galAut_fixed (hp2 : p ≠ 2) {n : ℕ} (hn : 1
   have hxK : (u : ℂ_[p]) ∈ K p n := (Subring.mem_inf.1 hu.1.1).1
   rw [localUnitsOnePlus, Subgroup.mem_inf]
   constructor
-  · -- `u ∈ 𝒰⁺_{n,1}` ⟹ `(u : ℂ_[p]) ∈ K_n⁺` ⟹ `σ_{-1}` fixes `u`
-    rintro ⟨-, hplus⟩
+  · rintro ⟨-, hplus⟩
     have hmem : (u : ℂ_[p]) ∈ KPlus p n := hplus.2
     exact (mem_KPlus_iff_galAut_neg_one_fixed p hp2 hn hxK).1 hmem
-  · -- conversely `σ_{-1}` fixes `u` ⟹ `(u : ℂ_[p]) ∈ K_n⁺`, so `u ∈ 𝒰_n⁺`, hence `u ∈ 𝒰⁺_{n,1}`
-    intro hfix
+  · intro hfix
     refine ⟨hu, hu.1, (mem_KPlus_iff_galAut_neg_one_fixed p hp2 hn hxK).2 hfix⟩
 
 /-- Tower compatibility: `σ_a` at level `n+1` restricts to `σ_a` at level `n`
@@ -489,20 +435,16 @@ theorem mem_localUnitsOnePlus_iff_galAut_fixed (hp2 : p ≠ 2) {n : ℕ} (hn : 1
 theorem galAut_compat (a : ℤ_[p]ˣ) {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]} (hx : x ∈ K p n) :
     (galAut p a (n + 1) ⟨x, (K_le_succ p n) hx⟩ : ℂ_[p])
       = (galAut p a n ⟨x, hx⟩ : ℂ_[p]) := by
-  -- two `ℚ_p`-algebra homs `K_n → ℂ_[p]`: restrict `σ_a^{(n+1)}` to `K_n`, and `σ_a^{(n)}`
   set incl : (K p n) →ₐ[ℚ_[p]] (K p (n + 1)) := IntermediateField.inclusion (K_le_succ p n)
     with hincl
   set F1 : (K p n) →ₐ[ℚ_[p]] ℂ_[p] :=
     ((K p (n + 1)).val).comp ((galAut p a (n + 1)).toAlgHom.comp incl) with hF1
   set F2 : (K p n) →ₐ[ℚ_[p]] ℂ_[p] := ((K p n).val).comp (galAut p a n).toAlgHom with hF2
-  -- they agree on the generator `⟨ξ_n,_⟩`
   set ζξ : K p n := ⟨zetaSys p n, zetaSys_mem_K p n⟩ with hζξ
   have hagree : F1 ζξ = F2 ζξ := by
-    -- `F2 ζξ = σ_a^{(n)}(ξ_n) = ξ_n^{t_n.val}`
     have hF2val : F2 ζξ = zetaSys p n ^
         ((PadicMeasure.unitsToZModPow p n a : (ZMod (p ^ n))ˣ) : ZMod (p ^ n)).val := by
       rw [hF2]; change (galAut p a n ζξ : ℂ_[p]) = _; rw [galAut_zetaSys p a hn]
-    -- `F1 ζξ = σ_a^{(n+1)}(ξ_n) = σ_a^{(n+1)}(ξ_{n+1}^p) = (ξ_{n+1}^{t_{n+1}.val})^p`
     have hF1val : F1 ζξ = (zetaSys p (n + 1) ^
         ((PadicMeasure.unitsToZModPow p (n + 1) a : (ZMod (p ^ (n + 1)))ˣ) :
           ZMod (p ^ (n + 1))).val) ^ p := by
@@ -523,15 +465,12 @@ theorem galAut_compat (a : ℤ_[p]ˣ) {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]} (hx
       congr 1
       exact galAut_zetaSys p a (by omega)
     rw [hF1val, hF2val, ← pow_mul]
-    -- exponents: `t_{n+1}.val · p ≡ t_n.val (mod p^n)`, with `ξ_n = ξ_{n+1}^p`
     rw [show (zetaSys p (n + 1) ^
         (((PadicMeasure.unitsToZModPow p (n + 1) a : (ZMod (p ^ (n + 1)))ˣ) :
           ZMod (p ^ (n + 1))).val * p))
         = (zetaSys p (n + 1) ^ p) ^
           ((PadicMeasure.unitsToZModPow p (n + 1) a : (ZMod (p ^ (n + 1)))ˣ) :
             ZMod (p ^ (n + 1))).val from by rw [← pow_mul, mul_comm], zetaSys_pow_p]
-    -- now `ξ_n ^ t_{n+1}.val = ξ_n ^ t_n.val`, via the reduction compatibility mod `p^n`
-    -- `t_{n+1}.val ≡ t_n.val (mod p^n)` (reductions are compatible, `unitsToZModPow_le`)
     have hred : (PadicMeasure.unitsToZModPow p n a : (ZMod (p ^ n))ˣ)
         = ZMod.unitsMap (pow_dvd_pow p (Nat.le_succ n))
           (PadicMeasure.unitsToZModPow p (n + 1) a) :=
@@ -543,14 +482,11 @@ theorem galAut_compat (a : ℤ_[p]ˣ) {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]} (hx
       rw [← ZMod.natCast_eq_natCast_iff, ZMod.natCast_zmod_val, hred, ZMod.unitsMap_val,
         ZMod.natCast_val]
     exact zetaSys_pow_eq_pow_of_modEq p hmod
-  -- `F1 = F2` since they agree on the generator `⟨ξ_n,_⟩`, which generates `K_n`
   have hFeq : F1 = F2 :=
     AlgHom.ext_of_adjoin_eq_top (adjoin_zetaSysK_eq_top p n)
       (by rintro y (rfl : y = ζξ); exact hagree)
-  -- evaluate at `⟨x, hx⟩`
   have hev := congrFun (congrArg (fun (F : (K p n) →ₐ[ℚ_[p]] ℂ_[p]) => (F : K p n → ℂ_[p]))
     hFeq) ⟨x, hx⟩
-  -- unfold both sides; `incl ⟨x,hx⟩ = ⟨x, K_le_succ hx⟩` by `rfl`
   rw [hF1, hF2] at hev
   exact hev
 
@@ -577,26 +513,21 @@ theorem levelNorm_galAut (a : ℤ_[p]ˣ) {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]}
     (hx : x ∈ K p (n + 1)) :
     levelNorm p n (galAut p a (n + 1) ⟨x, hx⟩ : ℂ_[p])
       = (galAut p a n ⟨levelNorm p n x, levelNorm_mem p n hx⟩ : ℂ_[p]) := by
-  -- package the extendScalars element of `x`
   set xes : IntermediateField.extendScalars (K_le_succ p n) :=
     ⟨x, (IntermediateField.mem_extendScalars (K_le_succ p n)).2 hx⟩ with hxes
-  -- `galAut p a n` as a ring equiv `K_n ≃+* K_n`, semilinear-compatible with `galAutES`
   set e : (K p n) ≃+* (K p n) := (galAut p a n).toRingEquiv with he
-  -- the compatibility: `algebraMap K_n ES ∘ e = (galAutES) ∘ algebraMap K_n ES` on the base
   have hcompat : ∀ c : K p n,
       (galAutES p a hn) (algebraMap (K p n)
           (IntermediateField.extendScalars (K_le_succ p n)) c)
         = algebraMap (K p n) (IntermediateField.extendScalars (K_le_succ p n)) (e c) := by
     intro c
     apply Subtype.ext
-    -- both are in `K_{n+1}`; compare via `galAut_compat` (σ_a^{(n+1)}|_{K_n} = σ_a^{(n)})
     rw [galAutES_apply]
     change (galAut p a (n + 1) ⟨(c : ℂ_[p]), _⟩ : ℂ_[p]) = (e c : ℂ_[p])
     rw [he]
     change (galAut p a (n + 1) ⟨(c : ℂ_[p]), (K_le_succ p n) c.2⟩ : ℂ_[p])
       = (galAut p a n ⟨(c : ℂ_[p]), c.2⟩ : ℂ_[p])
     exact galAut_compat p a hn c.2
-  -- `he'` is the hypothesis shape of `Algebra.norm_eq_of_equiv_equiv`
   have he' : (algebraMap (K p n) (IntermediateField.extendScalars (K_le_succ p n))).comp
         (e : (K p n) →+* (K p n))
       = (galAutES p a hn : IntermediateField.extendScalars (K_le_succ p n) →+*
@@ -605,35 +536,23 @@ theorem levelNorm_galAut (a : ℤ_[p]ˣ) {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]}
     refine RingHom.ext fun c => ?_
     simp only [RingHom.coe_comp, RingHom.coe_coe, Function.comp_apply]
     exact (hcompat c).symm
-  -- `Algebra.norm_eq_of_equiv_equiv`: `norm x = e₁.symm (norm (e₂ x))`
   have hkey := Algebra.norm_eq_of_equiv_equiv e (galAutES p a hn) he' xes
-  -- rearrange to `e (norm x) = norm (galAutES xes)`
   have hkey2 : e (Algebra.norm (K p n) xes)
       = Algebra.norm (K p n) (galAutES p a hn xes) := by
     rw [hkey, RingEquiv.apply_symm_apply]
-  -- the LHS `levelNorm p n (σ_a x) = (norm (galAutES xes) : K_n)` coerced
   have hgalmem : (galAut p a (n + 1) ⟨x, hx⟩ : ℂ_[p]) ∈ K p (n + 1) :=
     (galAut p a (n + 1) ⟨x, hx⟩).2
   have hlhs : levelNorm p n (galAut p a (n + 1) ⟨x, hx⟩ : ℂ_[p])
       = (Algebra.norm (K p n) (galAutES p a hn xes) : K p n) := by
     rw [levelNorm_apply p n hgalmem]
     congr 1
-  -- the RHS inner `levelNorm p n x = (norm xes : K_n)` (as `K_n`-elements)
   have hrhsK : (⟨levelNorm p n x, levelNorm_mem p n hx⟩ : K p n)
-      = Algebra.norm (K p n) xes := by
-    apply Subtype.ext; exact levelNorm_apply p n hx
+      = Algebra.norm (K p n) xes :=
+    Subtype.ext (levelNorm_apply p n hx)
   rw [hlhs, ← hkey2, he]
-  -- both sides are `galAut p a n` applied to the same `K_n`-element `norm xes`
   change (galAut p a n (Algebra.norm (K p n) xes) : ℂ_[p])
     = (galAut p a n ⟨levelNorm p n x, levelNorm_mem p n hx⟩ : ℂ_[p])
   rw [hrhsK]
-
-/-! ### `σ_a` is an isometry (it preserves `O_n` and the unit norm)
-
-The `ℂ_p`-norm restricted to the finite extension `K_n` is the spectral norm
-(`spectralNorm_unique_field_norm_ext`), which depends only on the `ℚ_p`-minimal
-polynomial; a `ℚ_p`-algebra automorphism preserves minimal polynomials
-(`minpoly.algEquiv_eq`), hence the norm: `‖σ_a y‖ = ‖y‖`. -/
 
 /-- The restriction of the `ℂ_p`-norm to `K_n`, as an `AbsoluteValue (K p n) ℝ`
 (mirrors `Tower.restrictAbs`, which is private). -/
@@ -703,7 +622,6 @@ theorem galAutUnit_inv_val (a : ℤ_[p]ˣ) {n : ℕ} (v : ℂ_[p]ˣ)
     (((galAutUnit p a v hv)⁻¹ : ℂ_[p]ˣ) : ℂ_[p])
       = (galAut p a n ⟨((v : ℂ_[p]))⁻¹, (K p n).inv_mem hv⟩ : ℂ_[p]) := by
   rw [Units.val_inv_eq_inv_val, galAutUnit_val]
-  -- `(σ_a w)⁻¹ = σ_a (w⁻¹)` (field auto), and `w⁻¹ = ⟨(↑v)⁻¹, _⟩` in `K_n`
   have hinvK : (⟨(v : ℂ_[p]), hv⟩ : K p n)⁻¹ = ⟨((v : ℂ_[p]))⁻¹, (K p n).inv_mem hv⟩ :=
     Subtype.ext (by rw [IntermediateField.coe_inv])
   rw [show (galAut p a n ⟨((v : ℂ_[p]))⁻¹, (K p n).inv_mem hv⟩ : ℂ_[p])
@@ -728,16 +646,13 @@ def galNCU (a : ℤ_[p]ˣ) (u : NormCompatUnits p) : NormCompatUnits p where
     exact galAut_mem_O p a (u.mem n)
   inv_mem n := by
     rw [galAutUnit_inv_val']
-    -- `(u_n)⁻¹ ∈ O_n` (note `((u_n)⁻¹ : ℂ_[p]ˣ) = (u_n : ℂ_[p])⁻¹`), so `σ_a((u_n)⁻¹) ∈ O_n`
     have h := galAut_mem_O p a (u.inv_mem n)
     simpa only [Units.val_inv_eq_inv_val] using h
   compat n hn := by
-    -- `N_{n+1,n}(σ_a u_{n+1}) = σ_a(N_{n+1,n} u_{n+1}) = σ_a(u_n)` (`levelNorm_galAut` + `compat`)
     have hxK : (u.elems (n + 1) : ℂ_[p]) ∈ K p (n + 1) := (Subring.mem_inf.1 (u.mem _)).1
     change levelNorm p n ((galAutUnit p a (u.elems (n + 1)) hxK : ℂ_[p]ˣ) : ℂ_[p])
       = ((galAutUnit p a (u.elems n) (Subring.mem_inf.1 (u.mem n)).1 : ℂ_[p]ˣ) : ℂ_[p])
     rw [galAutUnit_val, galAutUnit_val, levelNorm_galAut p a hn hxK]
-    -- the `K_n`-arguments `⟨levelNorm u_{n+1}, _⟩` and `⟨u_n, _⟩` agree (`u.compat`)
     congr 2
     exact Subtype.ext (u.compat n hn)
 
@@ -759,8 +674,6 @@ theorem hasSubst_galSubstend (a : ℤ_[p]ˣ) : PowerSeries.HasSubst (galSubstend
 `PowerSeries.subst` of the binomial substituend `galSubstend a = (1+T)^a − 1`. -/
 noncomputable def galSeries (a : ℤ_[p]ˣ) (f : PowerSeries ℤ_[p]) : PowerSeries ℤ_[p] :=
   f.subst (galSubstend p a)
-
-/-! ### The evaluation bridge `evalPi (galSeries a f) n = σ_a(f(π_n))` -/
 
 /-- `‖coeff k (G^d)‖ ≤ 1` for an integral-coefficient series `G` (ultrametric Cauchy
 product; re-derivation of `ResidueZeta.norm_coeff_pow_le_one`). -/
@@ -824,7 +737,6 @@ private theorem seriesEval_subst {f G : PowerSeries ℂ_[p]}
     seriesEval (f.subst G) z = seriesEval f (seriesEval G z) := by
   have hS : PowerSeries.HasSubst G := PowerSeries.HasSubst.of_constantCoeff_zero' hG0
   have hw : ‖seriesEval G z‖ < 1 := norm_seriesEval_lt p hG hG0 hz
-  -- the total family `T n k = coeff n f · coeff k (Gⁿ) · zᵏ`, summable over `ℕ × ℕ`
   let T : ℕ → ℕ → ℂ_[p] := fun n k =>
     PowerSeries.coeff n f * PowerSeries.coeff k (G ^ n) * z ^ k
   have hTbd : ∀ n k, ‖T n k‖ ≤ ‖z‖ ^ k := by
@@ -860,7 +772,6 @@ private theorem seriesEval_subst {f G : PowerSeries ℂ_[p]}
       exact absurd (lt_of_le_of_lt (le_trans hnk (hTbd nk.1 nk.2)) (hN nk.2 (by omega)))
         (lt_irrefl ε)
     exact Set.mem_prod.2 ⟨lt_of_le_of_lt hnk1 hk, hk⟩
-  -- LHS coefficientwise: `coeff k (f.subst G) · zᵏ = ∑' n, T n k`
   have hLHScoeff : ∀ k : ℕ,
       PowerSeries.coeff k (f.subst G) * z ^ k = ∑' n : ℕ, T n k := by
     intro k
@@ -878,13 +789,10 @@ private theorem seriesEval_subst {f G : PowerSeries ℂ_[p]}
     refine Finset.sum_congr rfl fun n _ => ?_
     change PowerSeries.coeff n f • _ * z ^ k = _
     rw [smul_eq_mul]
-  -- assemble and swap the order of summation
   rw [seriesEval]
   simp_rw [hLHScoeff]
-  rw [Summable.tsum_comm hprod]
-  rw [seriesEval]
+  rw [Summable.tsum_comm hprod, seriesEval]
   refine tsum_congr fun n => ?_
-  -- inner: `∑'_k T n k = coeff n f · (seriesEval G z)^n`
   rw [show (fun k : ℕ => T n k)
       = fun k : ℕ => PowerSeries.coeff n f * (PowerSeries.coeff k (G ^ n) * z ^ k) from by
     funext k; rw [show T n k = _ from rfl]; ring,
@@ -924,7 +832,6 @@ theorem seriesEval_map_binomialSeries (c : ℤ_[p]) {z : ℂ_[p]} (hz : ‖z‖ 
     seriesEval (PowerSeries.map (toCp p) (PowerSeries.binomialSeries ℤ_[p] c)) z
       = zpPow p (1 + z) c := by
   have hz1 : ‖(1 + z) - 1‖ < 1 := by rwa [add_sub_cancel_left]
-  -- continuity of the LHS in the exponent `c`
   have hcontL : Continuous fun c : ℤ_[p] =>
       seriesEval (PowerSeries.map (toCp p) (PowerSeries.binomialSeries ℤ_[p] c)) z := by
     simp only [seriesEval, PowerSeries.coeff_map, PowerSeries.binomialSeries_coeff, smul_eq_mul,
@@ -934,14 +841,12 @@ theorem seriesEval_map_binomialSeries (c : ℤ_[p]) {z : ℂ_[p]} (hz : ‖z‖ 
     · exact ((continuous_toCp p).comp (PadicInt.continuous_choose k)).mul continuous_const
     · rw [norm_mul, norm_pow, norm_toCp]
       exact mul_le_of_le_one_left (by positivity) (PadicInt.norm_le_one _)
-  -- agreement on `c ∈ ℕ`, then density
   have hnat : ∀ k : ℕ,
       seriesEval (PowerSeries.map (toCp p) (PowerSeries.binomialSeries ℤ_[p] (k : ℤ_[p]))) z
         = zpPow p (1 + z) (k : ℤ_[p]) := by
     intro k
     rw [PowerSeries.binomialSeries_nat, zpPow_natCast p hz1,
-      show (1 + z) ^ k = (1 + z) ^ k from rfl]
-    rw [show PowerSeries.map (toCp p) ((1 + PowerSeries.X) ^ k : PowerSeries ℤ_[p])
+      show PowerSeries.map (toCp p) ((1 + PowerSeries.X) ^ k : PowerSeries ℤ_[p])
         = ((1 + PowerSeries.X) ^ k : PowerSeries ℂ_[p]) from by
       simp only [map_pow, map_add, map_one, PowerSeries.map_X],
       seriesEval_one_add_X_pow]
@@ -1007,7 +912,6 @@ private theorem galAut_evalPi (a : ℤ_[p]ˣ) (f : PowerSeries ℤ_[p]) {n : ℕ
   haveI : FiniteDimensional ℚ_[p] (K p n) := Module.finite_of_finrank_pos (R := ℚ_[p])
     (by rw [finrank_K]; exact Nat.totient_pos.2 (pow_pos hp.out.pos n))
   set t : ℕ := ((PadicMeasure.unitsToZModPow p n a : (ZMod (p ^ n))ˣ) : ZMod (p ^ n)).val with ht
-  -- `σ_a(π_n) = ξ_n^t − 1` (`galAut_zetaSys`, with `π_n = ξ_n − 1`)
   have hσπ : (galAut p a n ⟨pi p n, pi_mem_K p n⟩ : ℂ_[p]) = zetaSys p n ^ t - 1 := by
     have hζ := galAut_zetaSys p a hn
     have hsub : (⟨pi p n, pi_mem_K p n⟩ : K p n)
@@ -1016,13 +920,11 @@ private theorem galAut_evalPi (a : ℤ_[p]ˣ) (f : PowerSeries ℤ_[p]) {n : ℕ
     rw [hsub, map_sub, map_one]
     change (galAut p a n ⟨zetaSys p n, zetaSys_mem_K p n⟩ : ℂ_[p]) - 1 = _
     rw [hζ]
-  -- the coefficient `c_k` and its `K_n`-membership; the `K_n`-element `⟨c_k, _⟩`
   set c : ℕ → ℂ_[p] := fun k => PowerSeries.coeff k (PowerSeries.map (toCp p) f) with hc
   have hcK : ∀ k, c k ∈ K p n := fun k => by
     change PowerSeries.coeff k (PowerSeries.map (toCp p) f) ∈ K p n
     rw [PowerSeries.coeff_map, toCp, RingHom.comp_apply]
     exact IntermediateField.algebraMap_mem (K p n) _
-  -- `galAut` fixes the `ℚ_p`-coefficient `c_k` (it is in the `algebraMap ℚ_p`-image)
   have hgalc : ∀ k, (galAut p a n ⟨c k, hcK k⟩ : ℂ_[p]) = c k := by
     intro k
     obtain ⟨q, hq⟩ : ∃ q : ℚ_[p], algebraMap ℚ_[p] ℂ_[p] q = c k := by
@@ -1034,33 +936,27 @@ private theorem galAut_evalPi (a : ℤ_[p]ˣ) (f : PowerSeries ℤ_[p]) {n : ℕ
       change c k = ((algebraMap ℚ_[p] (K p n) q : K p n) : ℂ_[p])
       rw [IntermediateField.coe_algebraMap_apply, hq]
     rw [hmk, AlgEquiv.commutes, IntermediateField.coe_algebraMap_apply, hq]
-  -- partial sums `S_m = ∑_{k<m} c_k π_n^k` (in `K_n`), tending to `evalPi f n`
   set S : ℕ → K p n := fun m => ∑ k ∈ Finset.range m,
     ⟨c k, hcK k⟩ * ⟨pi p n, pi_mem_K p n⟩ ^ k with hS
   have hScoe : ∀ m, ((S m : K p n) : ℂ_[p]) = ∑ k ∈ Finset.range m, c k * pi p n ^ k := by
     intro m; rw [hS]; push_cast; rfl
-  -- the `ℂ_[p]` partial sums tend to `evalPi f n`
   have hevalC : evalPi p f n = ∑' k, c k * pi p n ^ k := rfl
   have htendC : Filter.Tendsto (fun m => ∑ k ∈ Finset.range m, c k * pi p n ^ k)
       Filter.atTop (nhds (evalPi p f n)) := by
     rw [hevalC]
     exact (summable_evalPi p f hn).hasSum.tendsto_sum_nat
-  -- transport to the subtype `K_n` (inducing topology): `⟨S_m, _⟩ → ⟨evalPi f n, _⟩`
   have htendK : Filter.Tendsto S Filter.atTop
       (nhds (⟨evalPi p f n, (Subring.mem_inf.1 (evalPi_mem_O p f hn)).1⟩ : K p n)) := by
     rw [tendsto_subtype_rng]
     refine htendC.congr (fun m => (hScoe m).symm)
-  -- `galAut` is continuous (finite-dim), so `galAut S_m → galAut ⟨evalPi f n, _⟩`
   have hcont : Continuous (galAut p a n) :=
     (galAut p a n).toLinearMap.continuous_of_finiteDimensional
   have htendGal : Filter.Tendsto (fun m => galAut p a n (S m)) Filter.atTop
       (nhds (galAut p a n ⟨evalPi p f n, (Subring.mem_inf.1 (evalPi_mem_O p f hn)).1⟩)) :=
     (hcont.tendsto _).comp htendK
-  -- coerce to `ℂ_[p]`: `galAut S_m → galAut ⟨evalPi,_⟩` in `ℂ_[p]`
   have htendGalC : Filter.Tendsto (fun m => (galAut p a n (S m) : ℂ_[p])) Filter.atTop
       (nhds (galAut p a n ⟨evalPi p f n, (Subring.mem_inf.1 (evalPi_mem_O p f hn)).1⟩ : ℂ_[p])) :=
     (continuous_subtype_val.tendsto _).comp htendGal
-  -- compute `galAut S_m = ∑_{k<m} c_k (σ_a π_n)^k` (ring hom, fixes ℚ_p-coeffs)
   have hgalS : ∀ m, (galAut p a n (S m) : ℂ_[p])
       = ∑ k ∈ Finset.range m, c k * (zetaSys p n ^ t - 1) ^ k := by
     intro m
@@ -1068,9 +964,7 @@ private theorem galAut_evalPi (a : ℤ_[p]ˣ) (f : PowerSeries ℤ_[p]) {n : ℕ
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [map_mul, map_pow, IntermediateField.coe_mul, IntermediateField.coe_pow, hgalc k,
       show (galAut p a n ⟨pi p n, pi_mem_K p n⟩ : ℂ_[p]) = zetaSys p n ^ t - 1 from hσπ]
-  -- the RHS partial sums tend to `seriesEval (map f) (ξ_n^t − 1)`
   have hzt : ‖zetaSys p n ^ t - 1‖ < 1 := by
-    -- `‖ξ_n^t − 1‖ ≤ ‖ξ_n − 1‖ = ‖π_n‖ < 1` (geometric factor, `‖ξ_n‖ = 1`)
     have hξ1 : ‖zetaSys p n‖ = 1 := by
       have h1 : ‖zetaSys p n‖ ^ (p ^ n) = 1 := by
         rw [← norm_pow, (zetaSys_primitiveRoot p n).pow_eq_one, norm_one]
@@ -1094,7 +988,6 @@ private theorem galAut_evalPi (a : ℤ_[p]ˣ) (f : PowerSeries ℤ_[p]) {n : ℕ
     rw [seriesEval]
     exact (summable_seriesEval_of_norm_coeff_le_one (norm_coeff_map_le_one p f) hzt).hasSum
       |>.tendsto_sum_nat
-  -- conclude by uniqueness of limits
   have hgalScongr : Filter.Tendsto (fun m => (galAut p a n (S m) : ℂ_[p])) Filter.atTop
       (nhds (seriesEval (PowerSeries.map (toCp p) f) (zetaSys p n ^ t - 1))) :=
     htendR.congr (fun m => (hgalS m).symm)
@@ -1128,10 +1021,8 @@ theorem colemanSeries_galNCU (a : ℤ_[p]ˣ) (u : NormCompatUnits p) :
     colemanSeries p (galNCU p a u) = galSeries p a (colemanSeries p u) := by
   refine evalPi_injective p (fun n hn => ?_)
   rw [evalPi_colemanSeries p (galNCU p a u) hn, evalPi_galSeries p a (colemanSeries p u) hn]
-  -- both equal `σ_a(u_n)`: LHS is `(galNCU a u).elems n`, RHS is `σ_a(colemanSeries u (π_n))`
   change ((galAutUnit p a (u.elems n) (Subring.mem_inf.1 (u.mem n)).1 : ℂ_[p]ˣ) : ℂ_[p]) = _
   rw [galAutUnit_val]
-  -- `σ_a ⟨u_n,_⟩ = σ_a ⟨colemanSeries u (π_n), _⟩` since `colemanSeries u (π_n) = u_n`
   congr 2
   apply Subtype.ext
   exact (evalPi_colemanSeries p u hn).symm
@@ -1141,22 +1032,11 @@ theorem colemanSeries_galNCU (a : ℤ_[p]ˣ) (u : NormCompatUnits p) :
 def unitsMulLeftCM (a : ℤ_[p]ˣ) : C(ℤ_[p]ˣ, ℤ_[p]ˣ) :=
   ⟨fun v => a * v, continuous_const.mul continuous_id⟩
 
-/-! ### The measure-side derivation of `Col_galNCU`
-
-The proof reduces to four algebraic facts (RJW TeX 3217–3234):
-* the binomial-series derivative identity `(1+T)·(binomialSeries r)' = r·binomialSeries r`
-  (`one_add_X_mul_derivative_binomialSeries`);
-* the `∂log` chain rule under `σ_a`, `∂log(σ_a f) = a·σ_a(∂log f)`
-  (`dlog_galSeries`, for `f` a unit);
-* the inverse Mahler bridge `𝒜⁻¹(σ_a g) = sigma a (𝒜⁻¹ g)` (`mahlerSymm_galSeries`);
-* the `a`/`a⁻¹` cancellation in the units-multiplication step (inside `Col_galNCU`). -/
-
 /-- The descending-Pochhammer recursion for `Ring.choose` over `ℤ_[p]`:
 `(n+1)·binom(r, n+1) = (r − n)·binom(r, n)`. Engine for the binomial-series derivative
 identity. -/
 private theorem succ_mul_ringChoose (r : ℤ_[p]) (n : ℕ) :
     ((n : ℤ_[p]) + 1) * Ring.choose r (n + 1) = (r - (n : ℤ_[p])) * Ring.choose r n := by
-  -- clear factorials: `(n+1)!·choose r (n+1) = (n!·choose r n)·(r − n)`
   have h1 : (descPochhammer ℤ (n + 1)).smeval r
       = ((n + 1).factorial : ℤ_[p]) * Ring.choose r (n + 1) := by
     rw [Ring.descPochhammer_eq_factorial_smul_choose r (n + 1), nsmul_eq_mul]
@@ -1169,7 +1049,6 @@ private theorem succ_mul_ringChoose (r : ℤ_[p]) (n : ℕ) :
   have hkey : ((n + 1).factorial : ℤ_[p]) * Ring.choose r (n + 1)
       = ((n.factorial : ℤ_[p]) * Ring.choose r n) * (r - (n : ℤ_[p])) := by
     rw [← h1, descPochhammer_succ_right, Polynomial.smeval_mul, h2, hX]
-  -- cancel `n!`: `(n+1)·n!·choose r (n+1) = n!·choose r n·(r−n)`, divide by the non-zero `n!`
   rw [Nat.factorial_succ, Nat.cast_mul, Nat.cast_add, Nat.cast_one] at hkey
   have hfac : (n.factorial : ℤ_[p]) ≠ 0 := Nat.cast_ne_zero.2 (Nat.factorial_ne_zero n)
   refine mul_left_cancel₀ hfac ?_
@@ -1194,15 +1073,12 @@ private theorem one_add_X_mul_derivative_binomialSeries (r : ℤ_[p]) :
   rw [PowerSeries.coeff_derivativeFun, hB, coeff_binomialSeries']
   cases n with
   | zero =>
-    -- `coeff 0 ((1+X)·B') = coeff 0 B' = choose r 1 = r·choose r 0 = coeff 0 (r·B)`
     rw [PowerSeries.coeff_zero_X_mul, add_zero, Ring.choose_one_right, Ring.choose_zero_right,
       mul_one]
     push_cast
     ring
   | succ m =>
-    -- `coeff (m+1) B' + coeff (m+1) (X·B') = (m+2)·choose r (m+2) + (m+1)·choose r (m+1)`
     rw [PowerSeries.coeff_succ_X_mul, PowerSeries.coeff_derivativeFun, coeff_binomialSeries']
-    -- target: `(m+2)·choose r (m+2) + (m+1)·choose r (m+1) = r·choose r (m+1)`
     have h : ((m : ℤ_[p]) + 1 + 1) * Ring.choose r (m + 1 + 1)
         = (r - ((m : ℤ_[p]) + 1)) * Ring.choose r (m + 1) := by
       have := succ_mul_ringChoose p r (m + 1)
@@ -1217,7 +1093,6 @@ private theorem subst_inverse_of_isUnit {f G : PowerSeries ℤ_[p]} (hf : IsUnit
     (hg : PowerSeries.HasSubst G) :
     (Ring.inverse f).subst G = Ring.inverse (f.subst G) := by
   obtain ⟨v, rfl⟩ := hf
-  -- `f.subst G = ↑(Units.map φ v)` is a unit, with inverse `↑(v⁻¹).subst G`
   set φ : PowerSeries ℤ_[p] →* PowerSeries ℤ_[p] :=
     ((PowerSeries.substAlgHom hg : PowerSeries ℤ_[p] →ₐ[ℤ_[p]] PowerSeries ℤ_[p]) :
       PowerSeries ℤ_[p] →+* PowerSeries ℤ_[p]).toMonoidHom with hφ
@@ -1238,7 +1113,6 @@ private theorem dlog_galSeries (a : ℤ_[p]ˣ) {f : PowerSeries ℤ_[p]} (hf : I
   classical
   set G : PowerSeries ℤ_[p] := galSubstend p a with hG
   have hg : PowerSeries.HasSubst G := hasSubst_galSubstend p a
-  -- `(1+T)·G′ = a·(1+T+G−... )` : the binomial identity, `1+G = binomialSeries a`
   have hBG : (1 : PowerSeries ℤ_[p]) + G = PowerSeries.binomialSeries ℤ_[p] (a : ℤ_[p]) := by
     rw [hG, galSubstend, add_sub_cancel]
   have hGderiv : (1 + PowerSeries.X) * PowerSeries.derivativeFun G
@@ -1252,23 +1126,19 @@ private theorem dlog_galSeries (a : ℤ_[p]ˣ) {f : PowerSeries ℤ_[p]} (hf : I
         show (-1 : PowerSeries ℤ_[p]) = PowerSeries.C (-1 : ℤ_[p]) by simp,
         PowerSeries.derivativeFun_C, add_zero]
     rw [hdG, one_add_X_mul_derivative_binomialSeries p (a : ℤ_[p])]
-  -- chain rule for the derivative of `f.subst G` (`d⁄dX` is defeq to `derivativeFun`)
   have hchain : PowerSeries.derivativeFun (f.subst G)
       = (PowerSeries.derivativeFun f).subst G * PowerSeries.derivativeFun G :=
     PowerSeries.derivative_subst ℤ_[p] hg
   have hsubstX : (1 + PowerSeries.X : PowerSeries ℤ_[p]).subst G = 1 + G := by
     rw [PowerSeries.subst_add hg, PowerSeries.subst_X hg,
       ← PowerSeries.coe_substAlgHom hg, map_one]
-  -- abbreviations: `D := f'.subst G`, `I := inv(f.subst G)`
   set D : PowerSeries ℤ_[p] := (PowerSeries.derivativeFun f).subst G with hD
   set I : PowerSeries ℤ_[p] := Ring.inverse (f.subst G) with hI
-  -- LHS `= (1+X)·(D·G')·I`; reduce `(1+X)·G' = a•binomialSeries a`
   have hLHS : dlog p (galSeries p a f)
       = ((a : ℤ_[p]) • PowerSeries.binomialSeries ℤ_[p] (a : ℤ_[p])) * D * I := by
     rw [dlog, galSeries, hchain]
     rw [show (1 + PowerSeries.X) * (D * PowerSeries.derivativeFun G) * I
         = ((1 + PowerSeries.X) * PowerSeries.derivativeFun G) * D * I by ring, hGderiv]
-  -- RHS `= a•((1+X)·f'·inv f).subst G = a•((1+G)·D·inv(f.subst G))`
   have hRHS : (a : ℤ_[p]) • galSeries p a (dlog p f)
       = ((a : ℤ_[p]) • PowerSeries.binomialSeries ℤ_[p] (a : ℤ_[p])) * D * I := by
     rw [dlog, galSeries, PowerSeries.subst_mul hg, PowerSeries.subst_mul hg, hsubstX,
@@ -1284,13 +1154,11 @@ private theorem mahlerSymm_galSeries (a : ℤ_[p]ˣ) (g : PowerSeries ℤ_[p]) :
     (PadicMeasure.mahlerLinearEquiv p).symm (galSeries p a g)
       = PadicMeasure.sigma p a ((PadicMeasure.mahlerLinearEquiv p).symm g) := by
   set μ : PadicMeasure p ℤ_[p] := (PadicMeasure.mahlerLinearEquiv p).symm g with hμ
-  -- `𝒜(σ_a μ) = galSeries a (𝒜 μ)`, and `𝒜 μ = g`
   have hmt : PadicMeasure.mahlerTransform p (PadicMeasure.sigma p a μ)
       = galSeries p a g := by
     rw [PadicMeasure.mahlerTransform_sigma, galSeries, galSubstend]
     congr 1
     rw [hμ, ← PadicMeasure.mahlerLinearEquiv_apply, LinearEquiv.apply_symm_apply]
-  -- apply `𝒜⁻¹` to both sides
   rw [← hmt, ← PadicMeasure.mahlerLinearEquiv_apply, LinearEquiv.symm_apply_apply]
 
 /-- **The `a`/`a⁻¹` cancellation** at the level of test functions (RJW TeX 3223): for
@@ -1305,16 +1173,13 @@ private theorem cancel_a_extendByZero (a : ℤ_[p]ˣ) (f : C(ℤ_[p]ˣ, ℤ_[p])
   classical
   ext x
   simp only [ContinuousMap.smul_apply, ContinuousMap.comp_apply, smul_eq_mul]
-  -- `mulCM a x = a·x`
   change (a : ℤ_[p]) * PadicMeasure.extendByZero p (PadicMeasure.invCM p * f) ((a : ℤ_[p]) * x)
       = PadicMeasure.extendByZero p (PadicMeasure.invCM p * f.comp (unitsMulLeftCM p a)) x
   by_cases hx : IsUnit x
-  · -- `x = ↑hx.unit`; `a·x = ↑(a * hx.unit)`, both units
-    obtain ⟨w, rfl⟩ := hx
+  · obtain ⟨w, rfl⟩ := hx
     have hax : ((a : ℤ_[p]) * (w : ℤ_[p])) = ((a * w : ℤ_[p]ˣ) : ℤ_[p]) := by
       rw [Units.val_mul]
     rw [hax, PadicMeasure.extendByZero_coe_unit, PadicMeasure.extendByZero_coe_unit]
-    -- `a · ((a*w)⁻¹ · f(a*w)) = w⁻¹ · f(a*w)`
     simp only [ContinuousMap.mul_apply, ContinuousMap.comp_apply]
     have hfa : f (unitsMulLeftCM p a w) = f (a * w) := rfl
     have hinvaw : PadicMeasure.invCM p (a * w) = (((a * w)⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) := rfl
@@ -1326,8 +1191,7 @@ private theorem cancel_a_extendByZero (a : ℤ_[p]ˣ) (f : C(ℤ_[p]ˣ, ℤ_[p])
           * f (a * w))
         = (((w⁻¹ : ℤ_[p]ˣ) : ℤ_[p])) * ((a : ℤ_[p]) * ((a⁻¹ : ℤ_[p]ˣ) : ℤ_[p]))
           * f (a * w) by ring, haa, mul_one]
-  · -- `a·x` not a unit (else `x = a⁻¹·(a·x)` would be); both `extendByZero`s vanish
-    have hax : ¬ IsUnit ((a : ℤ_[p]) * x) := by
+  · have hax : ¬ IsUnit ((a : ℤ_[p]) * x) := by
       intro h
       refine hx ?_
       have := (a⁻¹ : ℤ_[p]ˣ).isUnit.mul h
@@ -1353,7 +1217,6 @@ private theorem unitsCmul_smul_sigma_eq_pushforward (a : ℤ_[p]ˣ)
           (PadicMeasure.invCM p) (μ.comp (PadicMeasure.extendByZero p))) := by
   refine LinearMap.ext fun f => ?_
   rw [PadicMeasure.pushforward_apply, PadicMeasure.unitsCmul_apply, PadicMeasure.unitsCmul_apply]
-  -- LHS `= ((a•σ_a μ).comp E)(invCM·f) = a·μ((E(invCM·f)).comp(mulCM a))`
   change ((a : ℤ_[p]) • PadicMeasure.sigma p a μ)
       (PadicMeasure.extendByZero p (PadicMeasure.invCM p * f))
     = μ (PadicMeasure.extendByZero p
@@ -1372,10 +1235,8 @@ action is pushforward along `v ↦ a·v`). -/
 theorem Col_galNCU (a : ℤ_[p]ˣ) (u : NormCompatUnits p) :
     Col p (galNCU p a u)
       = PadicMeasure.pushforward p (unitsMulLeftCM p a) (Col p u) := by
-  -- unfold `Col`, intertwine the Coleman series, apply the `∂log` chain rule + Mahler bridge
   rw [Col, Col, colemanSeries_galNCU p a u,
     dlog_galSeries p a (colemanSeries_isUnit p u), map_smul, mahlerSymm_galSeries p a]
-  -- reduce to the μ-generic measure identity with `μ = 𝒜⁻¹(∂log f_u)`
   exact unitsCmul_smul_sigma_eq_pushforward p a
     ((PadicMeasure.mahlerLinearEquiv p).symm (dlog p (colemanSeries p u)))
 
