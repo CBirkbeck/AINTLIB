@@ -1,4 +1,5 @@
 import PadicLFunctions.Iwasawa.StructureTheory.PseudoIso
+import Mathlib.RingTheory.PowerSeries.Ideal
 
 /-!
 # The structure theorem for finitely generated Λ-modules  (S13-S3)
@@ -47,8 +48,8 @@ local notation "Λ" => IwasawaAlgebra 𝒪
 `𝒪` is).  Part of the ring-theory input to the structure theorem (`Λ` is in fact a
 2-dimensional regular local UFD when `𝒪` is a complete DVR). -/
 theorem iwasawaAlgebra_isNoetherianRing [IsNoetherianRing 𝒪] :
-    IsNoetherianRing (IwasawaAlgebra 𝒪) := by
-  sorry
+    IsNoetherianRing (IwasawaAlgebra 𝒪) :=
+  inferInstance
 
 /-- **The structure theorem (clean form), S13-S3 / Washington Thm 13.12.**
 Every finitely generated `Λ`-module `M` is pseudo-isomorphic to `Λ^r ⊕ ⨁ᵢ Λ/(gᵢ^eᵢ)`

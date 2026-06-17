@@ -65,6 +65,7 @@ theorem exists_unit_mul_distinguished
     [IsAdicComplete (IsLocalRing.maximalIdeal 𝒪) 𝒪]
     {g : Λ} (hg : g.map (IsLocalRing.residue 𝒪) ≠ 0) :
     ∃ (u : Λˣ) (f : Polynomial 𝒪), IsDistinguished 𝒪 f ∧ g = u * f := by
-  sorry
+  obtain ⟨f, h, H⟩ := PowerSeries.exists_isWeierstrassFactorization hg
+  exact ⟨H.isUnit.unit, f, H.isDistinguishedAt, by rw [H.isUnit.unit_spec, H.eq_mul, mul_comm]⟩
 
 end Iwasawa

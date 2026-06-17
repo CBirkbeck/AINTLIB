@@ -35,6 +35,17 @@ def IsPseudoIso (M M' : Type*) [AddCommGroup M] [Module Λ M]
     [AddCommGroup M'] [Module Λ M'] : Prop :=
   ∃ f : M →ₗ[Λ] M', Finite (LinearMap.ker f) ∧ Finite (M' ⧸ LinearMap.range f)
 
+/-- If a submodule `S` and the quotient `N ⧸ S` are both finite, then `N` is finite.
+Used to propagate finiteness of kernels and cokernels through composites of
+pseudo-isomorphisms. -/
+private theorem finite_of_finite_quotient {R N : Type*} [Ring R] [AddCommGroup N] [Module R N]
+    (S : Submodule R N) [Finite S] [Finite (N ⧸ S)] : Finite N := by
+  have h : Nat.card N = Nat.card S * Nat.card (N ⧸ S) :=
+    Submodule.card_eq_card_quotient_mul_card S
+  have hN : Nat.card N ≠ 0 := by
+    rw [h]; exact Nat.mul_ne_zero Nat.card_pos.ne' Nat.card_pos.ne'
+  exact Nat.finite_of_card_ne_zero hN
+
 variable {𝒪}
 variable {M M' M'' : Type*} [AddCommGroup M] [Module (IwasawaAlgebra 𝒪) M]
   [AddCommGroup M'] [Module (IwasawaAlgebra 𝒪) M']
@@ -43,8 +54,9 @@ variable {M M' M'' : Type*} [AddCommGroup M] [Module (IwasawaAlgebra 𝒪) M]
 /-- Pseudo-isomorphism is reflexive: the identity map has zero kernel and trivial
 cokernel. -/
 theorem IsPseudoIso.refl (M : Type*) [AddCommGroup M] [Module (IwasawaAlgebra 𝒪) M] :
-    IsPseudoIso 𝒪 M M := by
-  sorry
+    IsPseudoIso 𝒪 M M :=
+  ⟨LinearMap.id, by rw [LinearMap.ker_id]; infer_instance,
+    by rw [LinearMap.range_id]; infer_instance⟩
 
 /-- Pseudo-isomorphism is transitive (compose the two maps; kernels and cokernels
 stay finite). -/
