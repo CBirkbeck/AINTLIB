@@ -262,6 +262,31 @@ theorem flat_domUnit_listFold
         (domUnit_invDenom_mem_completedPlus_general D₀ (↑u) sB c hs hmem))
       (ih (chainStep u sB D₀ g) (c * sB) hs' hmem')
 
+/-- **Compose `A → 𝒪(X₀) → 𝒪(D')`** — flatness of the whole-space-canonical `A → 𝒪(D')` from the
+base step `A → 𝒪(X₀)` (`X₀.canonicalMap`) and the relative step `𝒪(X₀) → 𝒪(D')` (`restrictionMapHom`),
+via `Module.Flat.trans`. The scalar tower is `restrictionMapHom_canonicalMap` (restriction commutes with
+the canonical map). Generic in `X₀ D'` so the tower elaborates once. -/
+theorem flat_trans_via_canonicalMap
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    (X₀ D' : RationalLocData A) (h : rationalOpen D'.T D'.s ⊆ rationalOpen X₀.T X₀.s)
+    (hX0 : @Module.Flat A (presheafValue X₀) _ _ (RingHom.toModule X₀.canonicalMap))
+    (hfold : @Module.Flat (presheafValue X₀) (presheafValue D') _ _
+      (restrictionMapHom X₀ D' h).toModule) :
+    @Module.Flat A (presheafValue D') _ _ (RingHom.toModule D'.canonicalMap) := by
+  letI : Algebra A (presheafValue X₀) := X₀.canonicalMap.toAlgebra
+  letI : Algebra (presheafValue X₀) (presheafValue D') := (restrictionMapHom X₀ D' h).toAlgebra
+  letI : Algebra A (presheafValue D') := D'.canonicalMap.toAlgebra
+  letI : Module A (presheafValue X₀) := Algebra.toModule
+  letI : Module (presheafValue X₀) (presheafValue D') := Algebra.toModule
+  letI : Module A (presheafValue D') := Algebra.toModule
+  haveI : IsScalarTower A (presheafValue X₀) (presheafValue D') :=
+    IsScalarTower.of_algebraMap_eq fun x => (restrictionMapHom_canonicalMap X₀ D' h x).symm
+  haveI : Module.Flat A (presheafValue X₀) := hX0
+  haveI : Module.Flat (presheafValue X₀) (presheafValue D') := hfold
+  exact Module.Flat.trans A (presheafValue X₀) (presheafValue D')
+
 /-- **Whole-space Prop 8.30 (Remark 7.55 chain), assembled downstream.**
 `𝒪_B(im E)` is flat over `B = 𝒪_X(D)`, for `im E = imagePieceDatum D E.T E.s` the whole-space
 image of a `span = ⊤` rational piece. Proven by folding `flat_chainStep_domUnit` over `E.T`'s
@@ -292,6 +317,22 @@ theorem prop_8_30_imagePiece_assembled
   -- X₀ = R({↑u}/sB), flat over B (the dominating-unit base; genPieceUnit engine at A := B).
   have hX0 := presheafValue_flat_of_genPieceUnit_faithful (presheafValue_concretePair D) u
     (imagePieceDatum D E.T E.s hspanE).s hspan_u
-  sorry
+  set sB := (imagePieceDatum D E.T E.s hspanE).s with hsB
+  set X₀ := genPieceDatum (presheafValue_concretePair D) {(↑u : presheafValue D)} sB hspan_u with hX₀
+  set gens := (imagePieceDatum D E.T E.s hspanE).T.toList with hgens
+  -- The Remark-7.55 fold is flat over `𝒪(X₀)` (invariant `X₀.s = sB·1`, `↑u·1 ∈ X₀.T = {↑u}`).
+  have hfold := flat_domUnit_listFold u sB gens X₀ 1
+    (by rw [hX₀, genPieceDatum_s, mul_one])
+    (by rw [hX₀, genPieceDatum_T, mul_one]; exact Finset.mem_singleton_self _)
+  -- Compose `B → 𝒪(X₀) → 𝒪(foldl)`.
+  have hfoldB := flat_trans_via_canonicalMap X₀ (gens.foldl (chainStep u sB) X₀)
+    (foldl_chainStep_subset u sB gens X₀) hX0 hfold
+  -- Endpoint: `foldl gens X₀ ≈ im E` (same `rationalOpen`), the `↑u`-condition free via `hu`.
+  have h_ro : rationalOpen (imagePieceDatum D E.T E.s hspanE).T
+        (imagePieceDatum D E.T E.s hspanE).s =
+      rationalOpen (gens.foldl (chainStep u sB) X₀).T (gens.foldl (chainStep u sB) X₀).s := by
+    sorry
+  exact flat_of_rationalOpen_eq (gens.foldl (chainStep u sB) X₀)
+    (imagePieceDatum D E.T E.s hspanE) h_ro hfoldB
 
 end ValuationSpectrum
