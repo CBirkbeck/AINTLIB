@@ -368,13 +368,6 @@ theorem finrank_K_succ {n : ℕ} (hn : 1 ≤ n) :
   exact (Nat.eq_of_mul_eq_mul_left (Nat.totient_pos.2 (pow_pos hp.out.pos n))
     (by linarith [htower])).symm
 
-/-! ## The level norm `N_{n+1,n}` and the norm-compatible unit group `𝒰_∞`
-
-RJW §9 (TeX 2503, 2525, 2581–2585). The relative field norm
-`N_{K_{n+1}/K_n}` is the engine for the norm-inverse-limit `𝒰_∞` and (via its
-collapse `N_{n+1,n}(ξ^b_{p^{n+1}} − 1) = ξ^b_{p^n} − 1`, TeX 2581) for the
-cyclotomic units and the Coleman commuting square. -/
-
 /-- The relative field norm `N_{K_{n+1}/K_n} : K_{n+1} → K_n`, viewed as a map
 `ℂ_p → ℂ_p` (junk-extended by `0` off `K_{n+1}`). For `x ∈ K_{n+1}` it is the
 `Algebra.norm` of the corresponding element of
@@ -449,15 +442,6 @@ theorem levelNorm_const_eq_pow {n : ℕ} (hn : 1 ≤ n) {c : ℂ_[p]} (hc : c �
   rw [hval, Algebra.norm_algebraMap, finrank_K_succ p hn]
   push_cast
   rfl
-
-/-! ### The norm collapse `N_{n+1,n}(ξ^b_{p^{n+1}} − 1) = ξ^b_{p^n} − 1`
-
-RJW TeX 2581–2585. The proof identifies `w := ξ^b_{p^{n+1}}` as a primitive
-`p^{n+1}`-th root of unity (`b` coprime to `p`) generating `K_{n+1}` over
-`K_n`, whose minimal polynomial over `K_n` is `X^p − ξ^b_{p^n}` (degree
-`p = [K_{n+1}:K_n]`); translating to `w − 1` gives minpoly `(X+1)^p − ξ^b_{p^n}`,
-and the norm of a generator is `(−1)^p` times its constant term, i.e.
-`ξ^b_{p^n} − 1` (using `p` odd). -/
 
 /-- The degree of `ℚ_p(w)` for any primitive `p^{n+1}`-th root of unity `w` is
 `φ(p^{n+1})` — `ℚ_p(w)` is a cyclotomic extension (`w` generates the `p^{n+1}`-th
@@ -675,14 +659,6 @@ theorem levelNorm_pi {n : ℕ} (hn : 1 ≤ n) (hp2 : p ≠ 2) :
   have h := levelNorm_zetaSys_pow_sub_one p hn hp2 (b := 1) (by simp [hp.out.one_lt.ne'])
   simpa only [pi, pow_one] using h
 
-/-! ### The norm-compatible unit group `𝒰_∞`
-
-RJW TeX 2503/2525: `𝒰_∞ = lim_n 𝒰_n` along the level norms. A member is a
-system `(u_n)_n` of units `u_n ∈ 𝒪_n^×` with `N_{n+1,n}(u_{n+1}) = u_n`. The
-compatibility equation carries membership of the norm in `𝒪_n` (its value *is*
-`u_n ∈ 𝒪_n`), so no separate norm-preservation lemma is needed (T903 authoring
-note: the general `‖N(x)‖ ≤ 1` lemma is omitted as unused — see ticket item 6). -/
-
 /-- `𝒰_∞`, the norm-inverse-limit of the local unit groups (RJW TeX 2503): a
 compatible system of units, each in its integer ring together with its inverse,
 matched by the level norms `N_{n+1,n}`. The `compat` field is only imposed for
@@ -728,22 +704,6 @@ noncomputable def mul (u v : NormCompatUnits p) : NormCompatUnits p where
 noncomputable instance : Mul (NormCompatUnits p) := ⟨mul⟩
 
 end NormCompatUnits
-
-/-! ## Integral `O_n`-basis of the tower step `O_{n+1} = ⊕_{i<p} O_n·ξ_{n+1}^i`
-
-RJW TeX 2685 (the minimal polynomial of `ξ_{p^{n+1}}` over `K_n` is `X^p − ξ_{p^n}`)
-and TeX 2474 (`O_n` is the ring of integers). The `O_n`-module structure of `O_{n+1}`
-on the powers `ξ_{n+1}^i` (equivalently the uniformiser powers `π_{n+1}^i`) is the
-input T907's commuting-square determinant transport consumes (Washington, *Cyclotomic
-Fields*, §3, on the integral basis of a totally ramified tower step).
-
-The crux is that `K_{n+1}/K_n` is *totally ramified* of degree `p`: the uniformiser
-powers `{π_{n+1}^j : j < p}` are an *orthogonal* `K_n`-basis (their `ℂ_p`-norms lie in
-distinct cosets of the value group of `K_n`), so `‖∑_j d_j π_{n+1}^j‖ = max_j ‖d_j‖·q^j`
-where `q = ‖π_{n+1}‖`; an integral element then has every `d_j ∈ O_n`. The value-group
-fact `‖c‖^{φ(p^n)} ∈ p^ℤ` for `c ∈ K_n` comes from the spectral-norm formula
-`‖c‖ = ‖Φ_c(0)‖^{1/deg}` (Galois-invariance of the `ℂ_p`-norm on the algebraic
-elements). -/
 
 /-- The ambient `ℂ_p`-norm, restricted to a finite extension `F` of `ℚ_p` inside `ℂ_p`,
 as an `AbsoluteValue F ℝ`. Used to identify it with the spectral norm. -/
