@@ -22,13 +22,15 @@ in across tickets DUAL-Q1…Q4.
 
 ## Status (DUAL-Q1…Q4)
 
-The arc is landed end-to-end with the deep inputs isolated to **two** named `sorry`s:
+The arc is landed end-to-end with the deep input now isolated to **one** named `sorry`:
 
 * **DUAL-Q1** (`galActFunctionField` + API): the `Gal(L/F)`-action on `F(C_L)` via `σ ⊗ id` through
   `functionField_baseChange_tensorEquiv`, with `_id`/`_trans` and the *fixed-the-base-field* easy
   direction `galActFunctionField_fixes_baseChange` — **all axiom-clean**. The fixed-field
-  characterization `mem_range_functionField_baseChange_iff_fixed` has its easy direction proved; its
-  `→` (the Galois descent of the fraction field `F(C_L) = Frac(L ⊗_F F[C])`) is `sorry` #1.
+  characterization `mem_range_functionField_baseChange_iff_fixed` is **fully proved (both
+  directions)**: its `→` is the self-contained Galois descent of the fraction field
+  `F(C_L) = Frac(L ⊗_F F[C])` (ring descent `tensor_fixed_mem_range` + norm-denominator fraction lift
+  `the_lift`), needing no base-change-of-`IsGalois` lemma.
 * **DUAL-Q2** (`descendPullback` / `descendIsogeny`): a `Gal(L/F)`-equivariant pullback descends to an
   `F`-algebra hom and to an `EC.Isogeny` over `F`; the algebra-hom packaging, the round-trip
   `functionFieldMap_comp_descendPullback`, and the basepoint condition `descend_basepoint` are all
@@ -191,6 +193,212 @@ theorem galActFunctionField_fixes_baseChange (C : SmoothPlaneCurve F) (L : Type*
     simp
   rw [key, key]
 
+/-! ### Galois descent of the fraction field (the `→` direction)
+
+We discharge the descent `mem_range_functionField_baseChange_iff_fixed.mpr` self-contained at the
+tensor level. The structure is the standard Galois descent of a vector space, lifted to fractions:
+
+1. **Ring descent** (`tensor_fixed_mem_range`): for a free `F`-module `M` (here `F[C]`), a
+   `Gal(L/F)`-fixed element of `L ⊗_F M` (for the action `σ ⊗ id`) lies in `1 ⊗ M`. Proof: choose an
+   `F`-basis `b` of `M`; in the induced `L`-basis `1 ⊗ bᵢ` of `L ⊗_F M`, the action `σ ⊗ id` acts on
+   the `L`-coordinates by `σ`, so each coordinate is `Gal`-fixed, hence in `F`
+   (`IsGalois.mem_range_algebraMap_iff_fixed`); the element is then `1 ⊗ (∑ coord · bᵢ)`.
+2. **Fraction lift** (`the_lift`): a `galActFrac`-fixed `y ∈ Frac(L ⊗_F F[C])` is `n/den` with `n`,
+   `den` both `σ ⊗ id`-fixed in `L ⊗_F F[C]`. Proof: write `y = a/d`; take `den := ∏_σ (σ ⊗ id) d`
+   (the norm; `Gal`-fixed by group translation) and `n := a · ∏_{σ≠1}(σ ⊗ id) d`; `n` is fixed
+   because `algebraMap n = y · algebraMap den` is a product of fixed elements.
+3. **Wiring**: transport `x` through `functionField_baseChange_tensorEquiv` and back via
+   `tensorEquiv_symm_one_tmul`.
+
+This avoids any base-change-of-`IsGalois` lemma (absent from mathlib) and stays within the explicit
+`galActFrac`/`σ ⊗ id` action. -/
+
+/-- The ring-level Galois action `σ ⊗ id` on `L ⊗_F F[C]` (the tensor side of `galActFrac`). -/
+private noncomputable abbrev ringAct (C : SmoothPlaneCurve F) (L : Type*) [Field L] [Algebra F L]
+    (σ : L ≃ₐ[F] L) :
+    (L ⊗[F] C.toAffine.CoordinateRing) ≃ₐ[F] (L ⊗[F] C.toAffine.CoordinateRing) :=
+  Algebra.TensorProduct.congr σ (AlgEquiv.refl (R := F) (A₁ := C.toAffine.CoordinateRing))
+
+/-- Coordinate description of the `σ ⊗ id` action in the base-changed basis: the `i`-th `L`-coordinate
+of `(σ ⊗ id) z` is `σ` of the `i`-th coordinate of `z`. Proven by tensor induction (the action is
+`L`-semilinear with respect to `σ`). -/
+private theorem repr_congr_apply (L : Type*) [Field L] [Algebra F L]
+    (M : Type*) [AddCommGroup M] [Module F M] [Module.Free F M]
+    (σ : L ≃ₐ[F] L) (z : L ⊗[F] M) (i : Module.Free.ChooseBasisIndex F M) :
+    ((Module.Free.chooseBasis F M).baseChange L).repr
+        ((TensorProduct.congr σ.toLinearEquiv (LinearEquiv.refl F M)) z) i
+      = σ (((Module.Free.chooseBasis F M).baseChange L).repr z i) := by
+  classical
+  set b := Module.Free.chooseBasis F M
+  set B := b.baseChange L
+  induction z using TensorProduct.induction_on with
+  | zero => simp
+  | tmul l m =>
+      rw [TensorProduct.congr_tmul]
+      simp only [AlgEquiv.toLinearEquiv_apply, LinearEquiv.refl_apply]
+      rw [Module.Basis.baseChange_repr_tmul, Module.Basis.baseChange_repr_tmul,
+        Algebra.smul_def, Algebra.smul_def, map_mul, AlgEquiv.commutes]
+  | add x y hx hy =>
+      rw [map_add, map_add, Finsupp.add_apply, map_add, Finsupp.add_apply, map_add, hx, hy]
+
+/-- **Ring descent** (free-module Galois descent): a `Gal(L/F)`-fixed element of `L ⊗_F M` (for the
+`σ ⊗ id` action, `M` a free `F`-module) lies in the image of `1 ⊗ -`. -/
+private theorem tensor_fixed_mem_range (L : Type*) [Field L] [Algebra F L]
+    [FiniteDimensional F L] [IsGalois F L]
+    (M : Type*) [AddCommGroup M] [Module F M] [Module.Free F M]
+    (z : L ⊗[F] M)
+    (hz : ∀ σ : L ≃ₐ[F] L,
+      (TensorProduct.congr σ.toLinearEquiv (LinearEquiv.refl F M)) z = z) :
+    ∃ m : M, (1 : L) ⊗ₜ[F] m = z := by
+  classical
+  set b := Module.Free.chooseBasis F M with hb
+  set B := b.baseChange L with hBdef
+  set c : Module.Free.ChooseBasisIndex F M →₀ L := B.repr z with hc
+  have hfix : ∀ i, ∀ σ : L ≃ₐ[F] L, σ (c i) = c i := by
+    intro i σ
+    have := repr_congr_apply L M σ z i
+    rw [hz σ] at this
+    exact this.symm
+  have hrange : ∀ i, c i ∈ Set.range (algebraMap F L) := fun i =>
+    (IsGalois.mem_range_algebraMap_iff_fixed (c i)).2 (hfix i)
+  choose g hg using hrange
+  set c' : Module.Free.ChooseBasisIndex F M →₀ F :=
+    { support := c.support
+      toFun := fun i => g i
+      mem_support_toFun := by
+        intro i
+        rw [Finsupp.mem_support_iff]
+        constructor
+        · intro h hgi; apply h; rw [← hg i, hgi, map_zero]
+        · intro h hci; apply h
+          have : algebraMap F L (g i) = 0 := by rw [hg i, hci]
+          exact (FaithfulSMul.algebraMap_injective F L) (by rw [this, map_zero]) } with hc'
+  have hzc : B.repr z = c'.mapRange (algebraMap F L) (map_zero _) := by
+    ext i; simp only [Finsupp.mapRange_apply]; show c i = algebraMap F L (g i); rw [hg i]
+  refine ⟨Finsupp.linearCombination F b c', ?_⟩
+  have hz2 : z = Finsupp.linearCombination L B (B.repr z) := (B.linearCombination_repr z).symm
+  rw [hz2, hzc, Finsupp.linearCombination_apply, Finsupp.linearCombination_apply,
+    Finsupp.sum_mapRange_index (by intro i; simp)]
+  rw [show ((1 : L) ⊗ₜ[F] c'.sum fun i a => a • b i)
+      = (TensorProduct.mk F L M 1) (c'.sum fun i a => a • b i) from rfl]
+  rw [Finsupp.sum, Finsupp.sum, map_sum]
+  apply Finset.sum_congr rfl
+  intro i _
+  show (TensorProduct.mk F L M 1) (c' i • b i) = (algebraMap F L (c' i)) • B i
+  rw [TensorProduct.mk_apply, Module.Basis.baseChange_apply, TensorProduct.tmul_smul,
+    TensorProduct.smul_tmul', TensorProduct.smul_tmul', Algebra.smul_def, smul_eq_mul]
+
+/-- The algebra-side `σ ⊗ id` (`ringAct`) agrees with the linear-side `σ ⊗ id` as a function. -/
+private theorem congr_alg_eq_lin (L : Type*) [Field L] [Algebra F L]
+    (M : Type*) [CommRing M] [Algebra F M]
+    (σ : L ≃ₐ[F] L) (z : L ⊗[F] M) :
+    (Algebra.TensorProduct.congr σ (AlgEquiv.refl (R := F) (A₁ := M))) z
+      = (TensorProduct.congr σ.toLinearEquiv (LinearEquiv.refl F M)) z := by
+  induction z using TensorProduct.induction_on with
+  | zero => simp
+  | tmul l m => rw [Algebra.TensorProduct.congr_apply]; simp [Algebra.TensorProduct.map_tmul]
+  | add x y hx hy => rw [map_add, map_add, hx, hy]
+
+/-- Ring descent specialized to the coordinate ring and the `ringAct` (`σ ⊗ id`) action. -/
+private theorem tensor_ringAct_fixed_mem_range (C : SmoothPlaneCurve F)
+    (L : Type*) [Field L] [Algebra F L] [FiniteDimensional F L] [IsGalois F L]
+    (z : L ⊗[F] C.toAffine.CoordinateRing)
+    (hz : ∀ σ : L ≃ₐ[F] L, ringAct C L σ z = z) :
+    ∃ m : C.toAffine.CoordinateRing, (1 : L) ⊗ₜ[F] m = z := by
+  apply tensor_fixed_mem_range L C.toAffine.CoordinateRing z
+  intro σ
+  rw [← congr_alg_eq_lin L C.toAffine.CoordinateRing σ z]
+  exact hz σ
+
+/-- `galActFrac` carries the `algebraMap` of a tensor element `b` to the `algebraMap` of `ringAct b`
+(the defining compatibility of `IsFractionRing.algEquivOfAlgEquiv`). -/
+private theorem galActFrac_algebraMap (C : SmoothPlaneCurve F) (L : Type*) [Field L] [Algebra F L]
+    (σ : L ≃ₐ[F] L) (b : L ⊗[F] C.toAffine.CoordinateRing) :
+    letI := C.isDomain_tensorCoordRing L
+    galActFrac C L σ (algebraMap (L ⊗[F] C.toAffine.CoordinateRing) _ b)
+      = algebraMap _ _ (ringAct C L σ b) := by
+  letI := C.isDomain_tensorCoordRing L
+  unfold galActFrac ringAct
+  rw [IsFractionRing.algEquivOfAlgEquiv_algebraMap]
+
+/-- The norm `∏_σ (σ ⊗ id) d` is `Gal(L/F)`-fixed (group-translation invariance of the product). -/
+private theorem norm_fixed (C : SmoothPlaneCurve F) (L : Type*) [Field L] [Algebra F L]
+    [FiniteDimensional F L] [IsGalois F L]
+    (d : L ⊗[F] C.toAffine.CoordinateRing) (τ : L ≃ₐ[F] L) :
+    ringAct C L τ (∏ σ : L ≃ₐ[F] L, ringAct C L σ d) = ∏ σ : L ≃ₐ[F] L, ringAct C L σ d := by
+  classical
+  unfold ringAct
+  rw [map_prod]
+  have step : ∀ σ : L ≃ₐ[F] L,
+      (Algebra.TensorProduct.congr τ (AlgEquiv.refl (R := F)
+          (A₁ := C.toAffine.CoordinateRing)))
+        ((Algebra.TensorProduct.congr σ (AlgEquiv.refl (R := F)
+          (A₁ := C.toAffine.CoordinateRing))) d)
+      = (Algebra.TensorProduct.congr (σ.trans τ) (AlgEquiv.refl (R := F)
+          (A₁ := C.toAffine.CoordinateRing))) d := by
+    intro σ; rw [← AlgEquiv.trans_apply, ← congr_id_trans]
+  simp_rw [step]
+  rw [← Equiv.prod_comp (Equiv.mulLeft τ) (fun σ => (Algebra.TensorProduct.congr σ
+      (AlgEquiv.refl (R := F) (A₁ := C.toAffine.CoordinateRing))) d)]
+  rfl
+
+/-- **Fraction lift**: a `galActFrac`-fixed element of `Frac(L ⊗_F F[C])` is a ratio `n/den` of two
+`σ ⊗ id`-fixed elements of `L ⊗_F F[C]` (with `den ≠ 0`). The denominator is the norm of an arbitrary
+denominator; the numerator is forced fixed by the fixed quotient. -/
+private theorem the_lift (C : SmoothPlaneCurve F) (L : Type*) [Field L] [Algebra F L]
+    [FiniteDimensional F L] [IsGalois F L]
+    (y : letI := C.isDomain_tensorCoordRing L
+         FractionRing (L ⊗[F] C.toAffine.CoordinateRing))
+    (hy : letI := C.isDomain_tensorCoordRing L
+          ∀ σ : L ≃ₐ[F] L, galActFrac C L σ y = y) :
+    letI := C.isDomain_tensorCoordRing L
+    ∃ n den : L ⊗[F] C.toAffine.CoordinateRing,
+      (∀ σ, ringAct C L σ n = n) ∧ (∀ σ, ringAct C L σ den = den) ∧
+      (algebraMap (L ⊗[F] C.toAffine.CoordinateRing)
+          (FractionRing (L ⊗[F] C.toAffine.CoordinateRing)) den ≠ 0) ∧
+      y = algebraMap _ (FractionRing (L ⊗[F] C.toAffine.CoordinateRing)) n
+          / algebraMap _ (FractionRing (L ⊗[F] C.toAffine.CoordinateRing)) den := by
+  letI := C.isDomain_tensorCoordRing L
+  classical
+  obtain ⟨a, d, hd, rfl⟩ := IsFractionRing.div_surjective
+    (A := L ⊗[F] C.toAffine.CoordinateRing) y
+  set den := ∏ σ : L ≃ₐ[F] L, ringAct C L σ d with hden
+  have hd0 : d ≠ 0 := nonZeroDivisors.ne_zero hd
+  have hden0B : den ≠ 0 := by
+    rw [hden]; apply Finset.prod_ne_zero_iff.2; intro σ _ h
+    exact hd0 ((ringAct C L σ).injective (by rw [h, map_zero]))
+  have hdenmap0 : algebraMap (L ⊗[F] C.toAffine.CoordinateRing)
+      (FractionRing (L ⊗[F] C.toAffine.CoordinateRing)) den ≠ 0 :=
+    (map_ne_zero_iff _ (IsFractionRing.injective _
+      (FractionRing (L ⊗[F] C.toAffine.CoordinateRing)))).2 hden0B
+  have hdmap0 : algebraMap (L ⊗[F] C.toAffine.CoordinateRing)
+      (FractionRing (L ⊗[F] C.toAffine.CoordinateRing)) d ≠ 0 :=
+    (map_ne_zero_iff _ (IsFractionRing.injective _
+      (FractionRing (L ⊗[F] C.toAffine.CoordinateRing)))).2 hd0
+  set P := ∏ σ ∈ (Finset.univ.erase (1 : L ≃ₐ[F] L)), ringAct C L σ d with hP
+  have hdenP : den = d * P := by
+    rw [hden, hP, ← Finset.mul_prod_erase Finset.univ (fun σ => ringAct C L σ d)
+      (Finset.mem_univ (1 : L ≃ₐ[F] L))]
+    congr 1
+    show (Algebra.TensorProduct.congr (1 : L ≃ₐ[F] L) (AlgEquiv.refl (R := F)
+        (A₁ := C.toAffine.CoordinateRing))) d = d
+    rw [show (1 : L ≃ₐ[F] L) = AlgEquiv.refl from rfl, Algebra.TensorProduct.congr_refl]
+    rfl
+  have hnmap : ∀ a' : L ⊗[F] C.toAffine.CoordinateRing,
+      algebraMap (L ⊗[F] C.toAffine.CoordinateRing)
+        (FractionRing (L ⊗[F] C.toAffine.CoordinateRing)) (a' * P)
+      = (algebraMap _ _ a' / algebraMap _ _ d) * algebraMap _ _ den := by
+    intro a'
+    rw [hdenP, map_mul, map_mul]
+    field_simp
+  refine ⟨a * P, den, ?_, fun τ => norm_fixed C L d τ, hdenmap0,
+    by rw [hnmap a, mul_div_assoc, div_self hdenmap0, mul_one]⟩
+  intro τ
+  apply IsFractionRing.injective (L ⊗[F] C.toAffine.CoordinateRing)
+    (FractionRing (L ⊗[F] C.toAffine.CoordinateRing))
+  rw [← galActFrac_algebraMap, hnmap a, map_mul, hy τ, galActFrac_algebraMap,
+    norm_fixed C L d τ, ← hnmap]
+
 /-- **DUAL-Q1(c), the fixed-field characterization** (`L/F` finite Galois): an element of `F(C_L)`
 is fixed by *every* `galActFunctionField C L σ` iff it lies in the image of `F(C)` under the
 base-change embedding `functionFieldMap`.
@@ -198,10 +406,10 @@ base-change embedding `functionFieldMap`.
 The `←` direction is `galActFunctionField_fixes_baseChange` (proved). The `→` direction is the
 genuine **Galois descent of the fraction field** `F(C_L) = FractionRing(L ⊗_F F[C])`: a
 `Gal(L/F)`-invariant element of the fraction field descends to `F(C)`. Over the domain `L ⊗_F F[C]`
-this is the (free-module) Galois descent of `F[C]`; over its fraction field it is the statement that
-`F(C_L)/F(C)` is finite Galois with group realized by `galActFunctionField`, so
-`IntermediateField`'s `mem_range_algebraMap_iff_fixed` applies. This wiring is the deep DUAL-Q1/Q2
-sub-leaf; it is isolated here as a single `sorry`. -/
+this is the (free-module) Galois descent of `F[C]` (`tensor_fixed_mem_range`); the lift from the
+domain to its fraction field is the norm-denominator trick (`the_lift`). The two are wired through
+`functionField_baseChange_tensorEquiv`/`tensorEquiv_symm_one_tmul`; see the section above for the
+self-contained development (no base-change-of-`IsGalois` lemma needed). -/
 theorem mem_range_functionField_baseChange_iff_fixed (C : SmoothPlaneCurve F)
     (L : Type*) [Field L] [Algebra F L] [FiniteDimensional F L] [IsGalois F L]
     (x : (C.baseChange L).FunctionField) :
@@ -210,8 +418,36 @@ theorem mem_range_functionField_baseChange_iff_fixed (C : SmoothPlaneCurve F)
   constructor
   · rintro ⟨f, rfl⟩ σ
     exact galActFunctionField_fixes_baseChange C L σ f
-  · intro _hfixed
-    sorry
+  · intro hfixed
+    letI := C.isDomain_tensorCoordRing L
+    classical
+    -- transport `x` to the tensor fraction field
+    set y := (C.functionField_baseChange_tensorEquiv L) x with hy_def
+    -- `y` is `galActFrac`-fixed
+    have hyfix : ∀ σ : L ≃ₐ[F] L, galActFrac C L σ y = y := by
+      intro σ
+      have hx := hfixed σ
+      have hrel : galActFunctionField C L σ x
+          = (C.functionField_baseChange_tensorEquiv L).symm
+              (galActFrac C L σ ((C.functionField_baseChange_tensorEquiv L) x)) := rfl
+      rw [hrel] at hx
+      apply (C.functionField_baseChange_tensorEquiv L).symm.injective
+      rw [hx, hy_def, AlgEquiv.symm_apply_apply]
+    -- fraction lift: `y = n / den` with `n`, `den` both `σ ⊗ id`-fixed
+    obtain ⟨n, den, hnf, hdenf, _hdenne, hydiv⟩ := the_lift C L y hyfix
+    -- ring descent: `n = 1 ⊗ mn`, `den = 1 ⊗ md`
+    obtain ⟨mn, hmn⟩ := tensor_ringAct_fixed_mem_range C L n hnf
+    obtain ⟨md, hmd⟩ := tensor_ringAct_fixed_mem_range C L den hdenf
+    -- the descended function is `algebraMap mn / algebraMap md`
+    refine ⟨algebraMap C.toAffine.CoordinateRing C.FunctionField mn
+        / algebraMap C.toAffine.CoordinateRing C.FunctionField md, ?_⟩
+    rw [map_div₀]
+    have hx_eq : x = (C.functionField_baseChange_tensorEquiv L).symm y := by
+      rw [hy_def, AlgEquiv.symm_apply_apply]
+    rw [hx_eq, hydiv, map_div₀]
+    congr 1
+    · rw [← hmn, tensorEquiv_symm_one_tmul C L mn]
+    · rw [← hmd, tensorEquiv_symm_one_tmul C L md]
 
 /-! ## DUAL-Q2 — descent of a `Gal(L/F)`-equivariant function-field morphism
 
