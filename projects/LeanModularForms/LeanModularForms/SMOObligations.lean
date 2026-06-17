@@ -124,7 +124,7 @@ theorem coprimeSieve_admits_squarefree_decomposition_in_charSpace
     miyake_4_6_8_main_lemma_cuspForm χ f hfχ h_vanish
   extend_primeFactors_to_divisor_decomposition χ f f_p h_sum h_supp h_char
 
-private theorem heckeT_n_prime_sq_eq_heckeT_p_sq_sub_diamond
+theorem heckeT_n_prime_sq_eq_heckeT_p_sq_sub_diamond
     {N : ℕ} [NeZero N] {k : ℤ} {q : ℕ} (hq : Nat.Prime q) (hqN : Nat.Coprime q N) :
     haveI : NeZero (q ^ 2) := ⟨(pow_pos hq.pos 2).ne'⟩
     heckeT_n (N := N) k (q ^ 2) =

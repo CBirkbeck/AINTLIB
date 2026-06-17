@@ -89,39 +89,160 @@ private lemma aₘ_eq_eigenvalue_mul_aₒₙₑ
     ModularForm.qExpansion_smul one_pos (one_mem_strictPeriods_Gamma1_map N),
     PowerSeries.coeff_smul, smul_eq_mul]
 
-/-- **L2 (separation of eigensystems — the strong-multiplicity-one crux).**  *Isolated `sorry`.*
+/-- **L2 (separation of eigensystems — the strong-multiplicity-one crux).**
 
-Two nonzero common Hecke eigenfunctions lying in (possibly different) Nebentypus spaces whose
+Two nonzero **common Hecke eigenfunctions** lying in (possibly different) Nebentypus spaces whose
 eigenvalues agree at every index coprime to `N` must lie in the *same* character space.
 
 This is the cross-character half of Strong Multiplicity One: the Nebentypus character of a cusp
-form is recovered from its prime-to-level Hecke eigenvalues (the diamond operators `⟨d⟩` are
-polynomials in the `Tₚ` away from the level), so equal eigensystems force `χ = χ'`. -/
+form is recovered from its prime-to-level Hecke eigenvalues, because for a prime `q ∤ N` the
+operator identity `T_{q²} = T_q² − q^{k-1}⟨q⟩` (`heckeT_n_prime_sq_eq_heckeT_p_sq_sub_diamond`)
+gives, on the `χ`-eigenspace, `a_{q²} = a_q² − q^{k-1}·χ(q)`, hence
+`χ(q) = q^{1-k}(a_q² − a_{q²})`.  Equal eigensystems thus force `χ(q) = χ'(q)` at every prime
+`q ∤ N`, and every unit of `(ZMod N)ˣ` is a product of prime-residue units, so `χ = χ'`. -/
 private lemma eigensystem_determines_char
     {χ χ' : (ZMod N)ˣ →* ℂˣ}
     {h h' : CuspForm ((Gamma1 N).map (mapGL ℝ)) k}
     (hh_char : h ∈ cuspFormCharSpace k χ) (hh'_char : h' ∈ cuspFormCharSpace k χ')
     (hh_ne : h ≠ 0) (hh'_ne : h' ≠ 0)
+    (hh_eigen : IsCommonEigenfunctionCusp k h) (hh'_eigen : IsCommonEigenfunctionCusp k h')
     (h_eig : ∀ m : ℕ, ∀ _ : NeZero m, Nat.Coprime m N → ∀ a a' : ℂ,
       heckeT_n_cusp k m h = a • h → heckeT_n_cusp k m h' = a' • h' → a = a') :
-    χ = χ' :=
-  sorry
+    χ = χ' := by
+  classical
+  -- **Core relation.**  For a nonzero `χ₁`-eigenfunction `h₁` and a prime `q ∤ N`, the eigenvalues
+  -- `a_q, a_{q²}` (at `q` and `q²`) satisfy `a_{q²} = a_q² − χ₁(q)·q^{k-1}`.  This is the cusp-form
+  -- transcription of `newform_eigenvalue_at_prime_sq`, applied to `h₁.toModularForm'`.
+  have core : ∀ (χ₁ : (ZMod N)ˣ →* ℂˣ) (h₁ : CuspForm ((Gamma1 N).map (mapGL ℝ)) k),
+      h₁ ∈ cuspFormCharSpace k χ₁ → h₁ ≠ 0 → IsCommonEigenfunctionCusp k h₁ →
+      ∀ (q : ℕ) (hq : Nat.Prime q) (hqN : Nat.Coprime q N) (aq aqsq : ℂ),
+        haveI : NeZero q := ⟨hq.pos.ne'⟩
+        haveI : NeZero (q ^ 2) := ⟨(pow_pos hq.pos 2).ne'⟩
+        heckeT_n_cusp k q h₁ = aq • h₁ → heckeT_n_cusp k (q ^ 2) h₁ = aqsq • h₁ →
+        aqsq = aq ^ 2 - (χ₁ (ZMod.unitOfCoprime q hqN) : ℂ) * (q : ℂ) ^ (k - 1) := by
+    intro χ₁ h₁ hh₁_char hh₁_ne _hh₁_eigen q hq hqN aq aqsq h_aq h_aqsq
+    haveI : NeZero q := ⟨hq.pos.ne'⟩
+    haveI : NeZero (q ^ 2) := ⟨(pow_pos hq.pos 2).ne'⟩
+    set F : ModularForm ((Gamma1 N).map (mapGL ℝ)) k := h₁.toModularForm' with hF_def
+    have hF_char : F ∈ modFormCharSpace k χ₁ :=
+      HeckeRing.GL2.Unified.cuspFormCharSpace_toModularForm'_mem hh₁_char
+    have hF_ne : F ≠ 0 := fun hF0 ↦ hh₁_ne (by
+      ext z; exact congrFun (congrArg (⇑· : ModularForm _ k → _) hF0) z)
+    -- Transport the two eigen-equations to `ModularForm`s.
+    have h_eig_q : heckeT_n k q F = aq • F := by
+      rw [hF_def, ← heckeT_n_cusp_toModularForm']; exact congrArg _ h_aq
+    have h_eig_qsq : heckeT_n k (q ^ 2) F = aqsq • F := by
+      rw [hF_def, ← heckeT_n_cusp_toModularForm']; exact congrArg _ h_aqsq
+    have h_Tq_F : heckeT_p k q hq hqN F = aq • F :=
+      heckeT_n_prime_coprime k hq hqN ▸ h_eig_q
+    set chiq : ℂ := (χ₁ (ZMod.unitOfCoprime q hqN) : ℂ) with hchiq_def
+    have h_combined :
+        heckeT_n k (q ^ 2) F = (aq ^ 2 - chiq * (q : ℂ) ^ (k - 1)) • F := by
+      have h_apply : heckeT_n k (q ^ 2) F =
+          heckeT_p k q hq hqN (heckeT_p k q hq hqN F) -
+            (q : ℂ) ^ (k - 1) • diamondOp k (ZMod.unitOfCoprime q hqN) F := by
+        simpa [Module.End.mul_apply] using congr_arg (fun T : Module.End ℂ _ ↦ T F)
+          (heckeT_n_prime_sq_eq_heckeT_p_sq_sub_diamond hq hqN)
+      rw [h_apply, h_Tq_F, map_smul, h_Tq_F, smul_smul, sq,
+        show diamondOp k (ZMod.unitOfCoprime q hqN) F = chiq • F from
+        (mem_modFormCharSpace_iff k χ₁ F).mp hF_char (ZMod.unitOfCoprime q hqN), smul_smul, sub_smul,
+        mul_comm chiq]
+    -- Cancel the nonzero `F`.
+    refine sub_eq_zero.mp ((smul_eq_zero.mp ?_).resolve_right hF_ne)
+    rw [sub_smul, ← h_combined, ← h_eig_qsq, sub_self]
+  -- **Per-prime equality.**  At every prime `q ∤ N`, `χ(q) = χ'(q)` as elements of `ℂ`.
+  have hprime : ∀ (q : ℕ) (hq : Nat.Prime q) (hqN : Nat.Coprime q N),
+      (χ (ZMod.unitOfCoprime q hqN) : ℂ) = (χ' (ZMod.unitOfCoprime q hqN) : ℂ) := by
+    intro q hq hqN
+    haveI : NeZero q := ⟨hq.pos.ne'⟩
+    haveI : NeZero (q ^ 2) := ⟨(pow_pos hq.pos 2).ne'⟩
+    have hqsqN : Nat.Coprime (q ^ 2) N := hqN.pow_left 2
+    -- Eigenvalues of `h` and `h'` at `q` and `q²`.
+    obtain ⟨aq, h_aq⟩ := hh_eigen ⟨q, hq.pos⟩ hqN
+    obtain ⟨aqsq, h_aqsq⟩ := hh_eigen ⟨q ^ 2, pow_pos hq.pos 2⟩ hqsqN
+    obtain ⟨a'q, h_a'q⟩ := hh'_eigen ⟨q, hq.pos⟩ hqN
+    obtain ⟨a'qsq, h_a'qsq⟩ := hh'_eigen ⟨q ^ 2, pow_pos hq.pos 2⟩ hqsqN
+    -- The eigensystems agree (hypothesis `h_eig`).
+    have heq_q : aq = a'q := h_eig q ⟨hq.pos.ne'⟩ hqN aq a'q h_aq h_a'q
+    have heq_qsq : aqsq = a'qsq :=
+      h_eig (q ^ 2) ⟨(pow_pos hq.pos 2).ne'⟩ hqsqN aqsq a'qsq h_aqsq h_a'qsq
+    -- Apply the core relation to `h` and `h'`.
+    have hc := core χ h hh_char hh_ne hh_eigen q hq hqN aq aqsq h_aq h_aqsq
+    have hc' := core χ' h' hh'_char hh'_ne hh'_eigen q hq hqN a'q a'qsq h_a'q h_a'qsq
+    -- `χ(q)·q^{k-1} = χ'(q)·q^{k-1}`, then cancel `q^{k-1} ≠ 0`.
+    have hpow_ne : (q : ℂ) ^ (k - 1) ≠ 0 :=
+      zpow_ne_zero _ (by exact_mod_cast hq.pos.ne')
+    have hkey : (χ (ZMod.unitOfCoprime q hqN) : ℂ) * (q : ℂ) ^ (k - 1) =
+        (χ' (ZMod.unitOfCoprime q hqN) : ℂ) * (q : ℂ) ^ (k - 1) := by
+      have hsub : aq ^ 2 - (χ (ZMod.unitOfCoprime q hqN) : ℂ) * (q : ℂ) ^ (k - 1) =
+          a'q ^ 2 - (χ' (ZMod.unitOfCoprime q hqN) : ℂ) * (q : ℂ) ^ (k - 1) := by
+        rw [← hc, ← hc', heq_qsq]
+      rw [heq_q] at hsub
+      linear_combination -hsub
+    exact mul_right_cancel₀ hpow_ne hkey
+  -- **Lift to all units.**  `χ` and `χ'` agree on `unitOfCoprime n` for every `n` coprime to `N`,
+  -- by strong induction on the prime factorisation of `n` (`induction_on_primes`).
+  have hunit : ∀ n : ℕ, ∀ hn : Nat.Coprime n N,
+      (χ (ZMod.unitOfCoprime n hn) : ℂ) = (χ' (ZMod.unitOfCoprime n hn) : ℂ) := by
+    refine induction_on_primes ?_ ?_ ?_
+    · -- `n = 0`: coprimality forces `N = 1`, so `(ZMod N)ˣ` is trivial.
+      intro hn
+      have hN1 : N = 1 := by simpa [Nat.coprime_zero_left] using hn
+      subst hN1
+      simp [Subsingleton.elim (ZMod.unitOfCoprime 0 hn) 1]
+    · -- `n = 1`: `unitOfCoprime 1 = 1`.
+      intro hn
+      rw [show ZMod.unitOfCoprime 1 hn = 1 from Units.ext (by simp), map_one, map_one]
+    · -- `n = p * a`, `p` prime: split off the prime factor.
+      intro p a hp ih hpa
+      have hp_cop : Nat.Coprime p N := Nat.Coprime.coprime_dvd_left ⟨a, rfl⟩ hpa
+      have ha_cop : Nat.Coprime a N := Nat.Coprime.coprime_dvd_left ⟨p, mul_comm p a⟩ hpa
+      have hsplit : ZMod.unitOfCoprime (p * a) hpa =
+          ZMod.unitOfCoprime p hp_cop * ZMod.unitOfCoprime a ha_cop :=
+        Units.ext (by push_cast [ZMod.coe_unitOfCoprime]; ring)
+      rw [hsplit, map_mul, map_mul, Units.val_mul, Units.val_mul, hprime p hp hp_cop, ih ha_cop]
+  -- Conclude `χ = χ'` via `MonoidHom.ext`, writing each unit as `unitOfCoprime` of its value.
+  refine MonoidHom.ext fun u ↦ Units.ext ?_
+  have hu : u = ZMod.unitOfCoprime (u : ZMod N).val (ZMod.val_coe_unit_coprime u) :=
+    Units.ext (by rw [ZMod.coe_unitOfCoprime, ZMod.natCast_val, ZMod.cast_id])
+  have hcast : ((χ u : ℂˣ) : ℂ) = ((χ' u : ℂˣ) : ℂ) := by
+    rw [hu]; exact hunit _ (ZMod.val_coe_unit_coprime u)
+  exact_mod_cast hcast
 
-/-- **L3 (linear independence of distinct eigensystems).**  *Isolated `sorry`.*
+/-- **L3 (linear independence of distinct *multiplicative* eigensystems).**  *Isolated `sorry`.*
 
-A finite family of common Hecke eigenfunctions whose eigensystems (`ev i : ℕ⁺ → ℂ`, the prime-to-
-level eigenvalues) are pairwise distinct at *some* coprime index is `ℂ`-linearly independent
-*as eigensystems*: any scalars `c` for which the eigensystem combination
-`∑ᵢ cᵢ · evᵢ(m)` vanishes at every coprime `m` must all vanish.
+A finite family of *multiplicative* eigensystems (`ev i : ℕ⁺ → ℂ`, the prime-to-level Hecke
+eigenvalues — each a multiplicative arithmetic function: `ev i 1 = 1` and
+`ev i (m·m') = ev i m · ev i m'` whenever `m, m'` are **mutually coprime** and both coprime to `N`)
+that are pairwise distinct at *some* coprime index is `ℂ`-linearly independent *as eigensystems*:
+any scalars `c` for which the eigensystem combination `∑ᵢ cᵢ · evᵢ(m)` vanishes at every coprime
+`m` must all vanish.
 
-This is the classical fact that Hecke eigenforms with distinct eigensystems are linearly
-independent (Petersson orthogonality of distinct-eigenvalue eigenforms, the engine behind
-`linearIndependent_toCuspForm`), transported to the eigenvalue sequences. -/
+This is the classical fact that distinct multiplicative arithmetic functions (Hecke eigensystems)
+are `ℂ`-linearly independent — the eigenvalue-sequence form of the linear independence of distinct
+Hecke eigenforms.
+
+The multiplicativity hypotheses are essential: without them the statement is **false** (e.g.
+`ev₂ = ev₀ + ev₁` is distinct from both yet `1·ev₀ + 1·ev₁ - 1·ev₂ = 0`).  They are discharged in
+the assembly because the eigensystem of a common Hecke eigenfunction is multiplicative on mutually
+coprime indices (`T_{mm'} = T_m T_{m'}` for coprime `m, m'`, the cusp form analogue of
+`heckeT_n_mul_coprime`). -/
 private lemma eigensystems_linearIndependent
     {ι : Type} [Fintype ι] (ev : ι → ℕ+ → ℂ) (c : ι → ℂ)
+    (h_one : ∀ i : ι, ev i 1 = 1)
+    (h_mul : ∀ (i : ι) (m m' : ℕ+), Nat.Coprime m.val m'.val →
+      Nat.Coprime m.val N → Nat.Coprime m'.val N →
+      ev i (m * m') = ev i m * ev i m')
     (h_distinct : ∀ i j : ι, i ≠ j → ∃ m : ℕ+, Nat.Coprime m.val N ∧ ev i m ≠ ev j m)
     (h_rel : ∀ m : ℕ+, Nat.Coprime m.val N → ∑ i, c i * ev i m = 0) :
     ∀ i, c i = 0 :=
+  -- MISSING INGREDIENT: linear independence of distinct *multiplicative arithmetic functions*
+  -- (Artin/Dedekind for multiplicative — NOT completely-multiplicative — functions).  The Artin
+  -- shift `∑ᵢ cᵢ(evᵢ(m₀)−evⱼ(m₀))evᵢ(m) = 0` (from `h_mul` at the separating index `m₀`) only holds
+  -- for `m` coprime to `m₀`, where pairwise distinctness is *not* preserved; closing the induction
+  -- needs prime-power separation bookkeeping (distinct multiplicative functions differ at some
+  -- prime power `pᵉ`, p∤N).  This abstract lemma is absent from mathlib and is genuine new
+  -- infrastructure; left as an honest `sorry` per scope.
   sorry
 
 omit [NeZero N] in
@@ -168,6 +289,9 @@ private lemma charPiece_coeff_sum_eq_zero
       haveI : NeZero m.val := ⟨m.pos.ne'⟩
       heckeT_n_cusp k m.val (H k0) = EV k0 m • H k0)
     (hEV_zero : ∀ (k0 : K) (m : ℕ+), ¬ Nat.Coprime m.val N → EV k0 m = 0)
+    (hEV_one : ∀ k0 : K, EV k0 1 = 1)
+    (hEV_mul : ∀ (k0 : K) (m m' : ℕ+), Nat.Coprime m.val m'.val →
+      Nat.Coprime m.val N → Nat.Coprime m'.val N → EV k0 (m * m') = EV k0 m * EV k0 m')
     (hcoeff_piece : ∀ (m : ℕ+), Nat.Coprime m.val N → ∀ k0 : K,
       (UpperHalfPlane.qExpansion (1 : ℝ) (H k0)).coeff m.val =
         EV k0 m * (UpperHalfPlane.qExpansion (1 : ℝ) (H k0)).coeff 1)
@@ -202,6 +326,15 @@ private lemma charPiece_coeff_sum_eq_zero
     have key : ∀ s : ↥img, C s.val = 0 :=
       eigensystems_linearIndependent (N := N)
         (ι := ↥img) (fun s ↦ s.val) (fun s ↦ C s.val)
+        (by -- normalisation `s 1 = 1`: choose a representative `k0` with `EV k0 = s`
+          rintro ⟨s, hs⟩
+          obtain ⟨k0, _, hk0⟩ := Finset.mem_image.mp hs
+          exact hk0 ▸ hEV_one k0)
+        (by -- multiplicativity on mutually coprime indices, via a representative `k0`
+          rintro ⟨s, hs⟩ m m' hmm' hm hm'
+          obtain ⟨k0, _, hk0⟩ := Finset.mem_image.mp hs
+          simp only at hk0 ⊢
+          rw [← hk0]; exact hEV_mul k0 m m' hmm' hm hm')
         (by -- distinctness: distinct occurring values differ at a coprime index
           rintro ⟨s, hs⟩ ⟨s', hs'⟩ hne
           by_contra hcon
@@ -264,9 +397,12 @@ private lemma charPiece_coeff_sum_eq_zero
           intro j m hm hpos
           haveI : NeZero m := ⟨hpos.ne'⟩
           exact hEV_spec j ⟨m, hpos⟩ hm
+        -- `H k0` and `H k0₀` are common Hecke eigenfunctions (eigenvalues `EV · ⟨n, _⟩`).
+        have hEV_eigen : ∀ j : K, IsCommonEigenfunctionCusp k (H j) := fun j n hn ↦
+          ⟨EV j n, hEV_spec j n hn⟩
         have htag : tag k0 = χ₀ := by
           have hchar_eq := eigensystem_determines_char (N := N)
-            hk0_char hk0₀_char hk0_form_ne hk0₀_form_ne
+            hk0_char hk0₀_char hk0_form_ne hk0₀_form_ne (hEV_eigen k0) (hEV_eigen k0₀)
             (fun m hnz hm a a' he he' ↦ ?_)
           · rw [hchar_eq, hk0₀_tag]
           · -- equal eigensystems: both eigenvalues equal `EV · ⟨m,_⟩`, and `EV k0 = s = EV k0₀`
@@ -348,21 +484,75 @@ private lemma qExpansion_charComponent_coprime_eq_zero
   -- `H k0` is a common Hecke eigenfunction in the character space `tag k0`.
   have hH_char : ∀ k0 : K, H k0 ∈ cuspFormCharSpace k (tag k0) := fun k0 ↦ hHχ_char k0.1.val k0.2
   have hH_eig : ∀ k0 : K, IsCommonEigenfunctionCusp k (H k0) := fun k0 ↦ hHχ_eig k0.1.val k0.2
-  -- The eigensystem of `H k0` (eigenvalue at coprime indices, `0` off the coprime indices).
+  -- The eigensystem of `H k0`: the eigenvalue at coprime indices (`0` off them).  When `H k0 = 0`
+  -- every scalar is an "eigenvalue", so we pin the value to the *trivial multiplicative character*
+  -- `1` on coprime indices; this keeps `EV k0` multiplicative even for the degenerate zero pieces.
   let EV : K → ℕ+ → ℂ := fun k0 m ↦
-    if hm : Nat.Coprime m.val N then Classical.choose (hH_eig k0 m hm) else 0
+    if hm : Nat.Coprime m.val N then (if H k0 = 0 then 1 else Classical.choose (hH_eig k0 m hm))
+    else 0
   have hEV_spec : ∀ (k0 : K) (m : ℕ+) (hm : Nat.Coprime m.val N),
       haveI : NeZero m.val := ⟨m.pos.ne'⟩
       heckeT_n_cusp k m.val (H k0) = EV k0 m • H k0 := by
     intro k0 m hm
     haveI : NeZero m.val := ⟨m.pos.ne'⟩
-    show heckeT_n_cusp k m.val (H k0) = (if hm : Nat.Coprime m.val N then _ else 0) • H k0
+    show heckeT_n_cusp k m.val (H k0) =
+      (if hm : Nat.Coprime m.val N then (if H k0 = 0 then 1 else _) else 0) • H k0
     rw [dif_pos hm]
-    exact Classical.choose_spec (hH_eig k0 m hm)
+    by_cases h0 : H k0 = 0
+    · rw [if_pos h0, h0, smul_zero]
+      exact CuspForm.ext fun τ ↦ by
+        change ((heckeT_n k ↑m) (toModularForm' 0)) τ = 0
+        rw [show toModularForm' (0 : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) = 0 by rfl, map_zero]
+        rfl
+    · rw [if_neg h0]; exact Classical.choose_spec (hH_eig k0 m hm)
   have hEV_zero : ∀ (k0 : K) (m : ℕ+), ¬ Nat.Coprime m.val N → EV k0 m = 0 := by
     intro k0 m hm
     show (if hm : Nat.Coprime m.val N then _ else 0) = 0
     rw [dif_neg hm]
+  -- `EV k0 1 = 1`: at coprime index `1` the operator `T₁` is the identity, so `1 • h = EV k0 1 • h`.
+  have hEV_one : ∀ k0 : K, EV k0 1 = 1 := by
+    intro k0
+    show (if hm : Nat.Coprime (1 : ℕ+).val N then (if H k0 = 0 then 1 else _) else 0) = 1
+    rw [dif_pos (by simpa using Nat.coprime_one_left N)]
+    by_cases h0 : H k0 = 0
+    · rw [if_pos h0]
+    · rw [if_neg h0]
+      refine smul_eq_smul_cancel (N := N) (k := k) h0 ?_
+      have hsp := Classical.choose_spec (hH_eig k0 1 (by simpa using Nat.coprime_one_left N))
+      rw [← hsp, one_smul]
+      exact CuspForm.ext fun τ ↦ by
+        change (heckeT_n k (↑1) (H k0).toModularForm').toFun τ = (H k0) τ
+        rw [heckeT_n_one]; rfl
+  -- Multiplicativity of `EV k0` on **mutually coprime** indices, from `T_{mm'} = T_m T_{m'}`.
+  have hEV_mul : ∀ (k0 : K) (m m' : ℕ+), Nat.Coprime m.val m'.val →
+      Nat.Coprime m.val N → Nat.Coprime m'.val N → EV k0 (m * m') = EV k0 m * EV k0 m' := by
+    intro k0 m m' hmm' hm hm'
+    haveI : NeZero m.val := ⟨m.pos.ne'⟩
+    haveI : NeZero m'.val := ⟨m'.pos.ne'⟩
+    haveI : NeZero (m * m').val := ⟨(m * m').pos.ne'⟩
+    have hcopN : Nat.Coprime (m * m').val N := by
+      rw [PNat.mul_coe]; exact Nat.Coprime.mul_left hm hm'
+    by_cases h0 : H k0 = 0
+    · -- trivial-character branch: `1 = 1 · 1`
+      simp only [EV, dif_pos hm, dif_pos hm', dif_pos hcopN, if_pos h0, mul_one]
+    · -- eigenvalue branch: cancel the nonzero `H k0` from `T_{mm'} h = T_m (T_{m'} h)`.
+      refine smul_eq_smul_cancel (N := N) (k := k) h0 ?_
+      -- `T_{mm'} h = T_m (T_{m'} h)` from operator-level coprime multiplicativity.
+      have hcusp_mul : heckeT_n_cusp k (m * m').val (H k0) =
+          heckeT_n_cusp k m.val (heckeT_n_cusp k m'.val (H k0)) := by
+        refine CuspForm.ext fun τ ↦ ?_
+        have hop := DFunLike.congr_fun
+          (heckeT_n_mul_coprime (N := N) k m.val m'.val hmm' hm hm') (H k0).toModularForm'
+        change (heckeT_n k (m.val * m'.val) (H k0).toModularForm').toFun τ =
+          (heckeT_n k m.val (heckeT_n k m'.val (H k0).toModularForm')).toFun τ
+        rw [hop]; rfl
+      calc EV k0 (m * m') • H k0
+          = heckeT_n_cusp k (m * m').val (H k0) := (hEV_spec k0 (m * m') hcopN).symm
+        _ = heckeT_n_cusp k m.val (heckeT_n_cusp k m'.val (H k0)) := hcusp_mul
+        _ = heckeT_n_cusp k m.val (EV k0 m' • H k0) := by rw [hEV_spec k0 m' hm']
+        _ = EV k0 m' • heckeT_n_cusp k m.val (H k0) := heckeT_n_cusp_smul _ _ _
+        _ = EV k0 m' • (EV k0 m • H k0) := by rw [hEV_spec k0 m hm]
+        _ = (EV k0 m * EV k0 m') • H k0 := by rw [smul_smul, mul_comm]
   -- **L1 applied to each piece**: for coprime `m`, `aₘ(H k0) = EV k0 m · a₁(H k0)`.
   have hcoeff_piece : ∀ (m : ℕ+), Nat.Coprime m.val N → ∀ k0 : K,
       (UpperHalfPlane.qExpansion (1 : ℝ) (H k0)).coeff m.val =
@@ -435,7 +625,7 @@ private lemma qExpansion_charComponent_coprime_eq_zero
   -- Apply the combinatorial core.
   exact charPiece_coeff_sum_eq_zero (N := N) (k := k) H tag EV
     (fun k0 hk0 ↦ ⟨hH_char k0, fun h0 ↦ hk0 (by rw [h0, qExpansion_one_zero_coeff])⟩)
-    hEV_spec hEV_zero hcoeff_piece hrel χ₀ n hn
+    hEV_spec hEV_zero hEV_one hEV_mul hcoeff_piece hrel χ₀ n hn
 
 /-- **Per-character Main Lemma (route-B ingredient 2).**  A cusp form `g ∈ S_k(Γ₁(N), χ)` whose
 canonical (period-1) `q`-expansion vanishes at every index coprime to `N` is an oldform.
