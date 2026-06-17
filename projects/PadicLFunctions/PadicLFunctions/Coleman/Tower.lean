@@ -601,14 +601,12 @@ and `p = 2` would give `+(1 − ξ^b_n)` not `ξ^b_n − 1`. -/
 theorem levelNorm_zetaSys_pow_sub_one {n : ℕ} (hn : 1 ≤ n) (hp2 : p ≠ 2)
     {b : ℕ} (hb : ¬ p ∣ b) :
     levelNorm p n (zetaSys p (n + 1) ^ b - 1) = zetaSys p n ^ b - 1 := by
-  -- `w := ξ^b_{p^{n+1}}` is a primitive `p^{n+1}`-th root not in `K_n`
   have hw : IsPrimitiveRoot (zetaSys p (n + 1) ^ b) (p ^ (n + 1)) :=
     (zetaSys_primitiveRoot p (n + 1)).pow_of_coprime b
       (Nat.Coprime.pow_right _ (hp.out.coprime_iff_not_dvd.2 hb).symm)
   have hwK : zetaSys p (n + 1) ^ b ∈ K p (n + 1) := pow_mem (zetaSys_mem_K p (n + 1)) b
   have hcK : zetaSys p n ^ b ∈ K p n := pow_mem (zetaSys_mem_K p n) b
   have hvK : zetaSys p (n + 1) ^ b - 1 ∈ K p (n + 1) := sub_mem hwK (one_mem _)
-  -- package the extendScalars elements and the base element `c = ξ^b_n`
   set W : IntermediateField.extendScalars (K_le_succ p n) :=
     ⟨zetaSys p (n + 1) ^ b, (IntermediateField.mem_extendScalars (K_le_succ p n)).2 hwK⟩ with hW
   set c : K p n := ⟨zetaSys p n ^ b, hcK⟩ with hc
@@ -618,7 +616,6 @@ theorem levelNorm_zetaSys_pow_sub_one {n : ℕ} (hn : 1 ≤ n) (hp2 : p ≠ 2)
     rw [← pow_mul, mul_comm, pow_mul, zetaSys_pow_p]
   have hWbot : (W : ℂ_[p]) ∉ K p n := primitiveRoot_notMem_K p hn hw
   have hWtop : (K p n)⟮W⟯ = ⊤ := extendScalars_adjoin_eq_top p hn hWbot
-  -- `V := W − 1` has value `w − 1` and minpoly `(X+1)^p − C c`
   set V : IntermediateField.extendScalars (K_le_succ p n) := W - 1 with hV
   have hVval : (V : ℂ_[p]) = zetaSys p (n + 1) ^ b - 1 := rfl
   have hWval : (W : ℂ_[p]) = zetaSys p (n + 1) ^ b := rfl
@@ -633,7 +630,6 @@ theorem levelNorm_zetaSys_pow_sub_one {n : ℕ} (hn : 1 ≤ n) (hp2 : p ≠ 2)
   have hmpV : minpoly (K p n) V = (Polynomial.X + 1) ^ p - Polynomial.C c := by
     rw [hV, hone, minpoly.sub_algebraMap, minpoly_extendScalars_of_pow p hn hWc hWtop]
     rw [sub_comp, pow_comp, X_comp, C_comp, map_one]
-  -- the norm value, then unfold `levelNorm` and coerce
   have hnorm : Algebra.norm (K p n) V = c - 1 :=
     norm_extendScalars_translated p hn hp2 hVbot hmpV
   rw [levelNorm_apply p n hvK]
@@ -735,7 +731,6 @@ private theorem norm_pow_totient_mem_zpow {n : ℕ} {c : ℂ_[p]} (hc : c ∈ K 
   have halg : IsAlgebraic ℚ_[p] x := Algebra.IsAlgebraic.isAlgebraic x
   have hdeg : 0 < (minpoly ℚ_[p] x).natDegree := minpoly.natDegree_pos halg.isIntegral
   have hcpos : 0 < ‖c‖ := norm_pos_iff.mpr hc0
-  -- `‖c‖^deg = ‖Φ_c(0)‖`
   have hpow : ‖c‖ ^ (minpoly ℚ_[p] x).natDegree = ‖(minpoly ℚ_[p] x).coeff 0‖ := by
     have : (‖c‖ : ℝ)
         = ‖(minpoly ℚ_[p] x).coeff 0‖ ^ (1 / (minpoly ℚ_[p] x).natDegree : ℝ) := by
@@ -743,12 +738,10 @@ private theorem norm_pow_totient_mem_zpow {n : ℕ} {c : ℂ_[p]} (hc : c ∈ K 
     rw [this, ← Real.rpow_natCast (‖(minpoly ℚ_[p] x).coeff 0‖ ^ _),
       ← Real.rpow_mul (norm_nonneg _), one_div, inv_mul_cancel₀ (by exact_mod_cast hdeg.ne'),
       Real.rpow_one]
-  -- `deg ∣ φ(p^n)`
   have hdvd : (minpoly ℚ_[p] x).natDegree ∣ Nat.totient (p ^ n) := by
     rw [← finrank_K p n]
     exact minpoly.degree_dvd halg.isIntegral
   obtain ⟨e, he⟩ := hdvd
-  -- `Φ_c(0) ≠ 0` (else `‖c‖ = 0`), so `‖Φ_c(0)‖ = p^j`
   have hcoeff0 : (minpoly ℚ_[p] x).coeff 0 ≠ 0 := by
     intro h; rw [h, norm_zero] at hpow; exact (pow_ne_zero _ hcpos.ne') hpow
   obtain ⟨j, hj⟩ : ∃ j : ℤ, ‖(minpoly ℚ_[p] x).coeff 0‖ = (p : ℝ) ^ j :=
@@ -784,7 +777,6 @@ private theorem forall_norm_le_one_of_norm_sum_pi_pow_le_one {n : ℕ} (hn : 1 �
   set f : Fin p → ℂ_[p] := fun j => d j * pi p (n + 1) ^ (j : ℕ) with hf
   have hnormf : ∀ j : Fin p, ‖f j‖ = ‖d j‖ * ‖pi p (n + 1)‖ ^ (j : ℕ) := by
     intro j; rw [hf]; simp [norm_mul, norm_pow]
-  -- nonzero terms have pairwise distinct norms
   have hdist : ∀ a b : Fin p, a ≠ b → f a ≠ 0 → f b ≠ 0 →
       ‖f a‖ ≠ ‖f b‖ := by
     intro a b hab hfa hfb heqn
@@ -825,7 +817,6 @@ private theorem forall_norm_le_one_of_norm_sum_pi_pow_le_one {n : ℕ} (hn : 1 �
       omega
     rw [hkij, zero_mul] at hfactor
     exact hab (Fin.ext (by omega))
-  -- each term ≤ the sum norm (orthogonality on the nonzero support)
   intro j
   have hterm_le : ‖f j‖ ≤ ‖∑ jj : Fin p, f jj‖ := by
     set S : Finset (Fin p) := Finset.univ.filter (fun jj => f jj ≠ 0) with hS
@@ -843,7 +834,6 @@ private theorem forall_norm_le_one_of_norm_sum_pi_pow_le_one {n : ℕ} (hn : 1 �
       exact Finset.le_sup' (fun jj => ‖f jj‖) hjS
   have hle1 : ‖d j‖ * ‖pi p (n + 1)‖ ^ (j : ℕ) ≤ 1 := by
     rw [← hnormf]; exact le_trans hterm_le hsum
-  -- collapse: `d j = 0` trivial; else `‖d j‖ = q^{-pk}` with the exponent forcing `k ≥ 0`
   rcases eq_or_ne (d j) 0 with hdj0 | hdj0
   · rw [hdj0, norm_zero]; exact zero_le_one
   obtain ⟨k, hk⟩ := norm_pow_totient_mem_zpow p (hdK j) hdj0
@@ -861,7 +851,7 @@ private theorem forall_norm_le_one_of_norm_sum_pi_pow_le_one {n : ℕ} (hn : 1 �
       ← zpow_natCast ((p : ℝ)⁻¹) (j : ℕ), inv_zpow, ← zpow_neg]
   rw [hdM, hqj, ← zpow_add₀ hp0.ne'] at hraise
   have hexp : k * p + (-(j : ℕ) : ℤ) ≤ 0 := by
-    by_contra h; push Not at h
+    by_contra! h
     exact absurd hraise (not_le.mpr (one_lt_zpow₀ hpgt1 (by omega)))
   have hjlt := j.2
   have hkle : k ≤ 0 := by nlinarith [hexp, hjlt, hp.out.pos]
