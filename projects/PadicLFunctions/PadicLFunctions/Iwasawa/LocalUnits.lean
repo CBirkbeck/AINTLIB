@@ -34,8 +34,6 @@ namespace Coleman
 
 variable (p : ℕ) [hp : Fact p.Prime]
 
-/-! ## The unit groups 𝒰_n and 𝒰_{n,1} (RJW TeX 2474, 2494) -/
-
 /-- `𝒰_n = 𝒪_{K_n}^×`: the units of the integer ring of `K_n`, as a subgroup of
 `ℂ_[p]ˣ` (a unit together with its inverse lies in `O_n`). RJW TeX 2474. -/
 def localUnits (n : ℕ) : Subgroup ℂ_[p]ˣ where
@@ -74,7 +72,6 @@ def localUnitsOne (n : ℕ) : Subgroup ℂ_[p]ˣ where
   carrier := {u | u ∈ localUnits p n ∧ ‖(u : ℂ_[p]) - 1‖ < 1}
   mul_mem' {u v} hu hv := by
     refine ⟨mul_mem hu.1 hv.1, ?_⟩
-    -- `uv − 1 = u·(v − 1) + (u − 1)`, dominated by the max of the two norms `< 1`
     have hkey : (↑(u * v) : ℂ_[p]) - 1 = (u : ℂ_[p]) * ((v : ℂ_[p]) - 1) + ((u : ℂ_[p]) - 1) := by
       rw [Units.val_mul]; ring
     rw [hkey]
@@ -87,7 +84,6 @@ def localUnitsOne (n : ℕ) : Subgroup ℂ_[p]ˣ where
     exact one_pos
   inv_mem' {u} hu := by
     refine ⟨(localUnits p n).inv_mem hu.1, ?_⟩
-    -- `u⁻¹ − 1 = u⁻¹·(1 − u)`, and `‖u⁻¹‖ = 1`, so the norm equals `‖u − 1‖ < 1`
     have hu0 : (u : ℂ_[p]) ≠ 0 := u.ne_zero
     have hkey : ((u⁻¹ : ℂ_[p]ˣ) : ℂ_[p]) - 1
         = ((u⁻¹ : ℂ_[p]ˣ) : ℂ_[p]) * (1 - (u : ℂ_[p])) := by
@@ -100,8 +96,6 @@ def localUnitsOne (n : ℕ) : Subgroup ℂ_[p]ˣ where
 lemma mem_localUnitsOne_iff {n : ℕ} {u : ℂ_[p]ˣ} :
     u ∈ localUnitsOne p n ↔ u ∈ localUnits p n ∧ ‖(u : ℂ_[p]) - 1‖ < 1 :=
   Iff.rfl
-
-/-! ## The maximal totally real subfield K_n⁺ and the ⁺-variants (RJW TeX 2473–2475) -/
 
 /-- `K_n⁺ = ℚ_p(ξ_{p^n} + ξ_{p^n}⁻¹)`: the "+"-subfield, rendered by its standard
 concrete generator (the fixed points of `ξ ↦ ξ⁻¹`). The Galois characterisation
@@ -137,7 +131,8 @@ noncomputable def localUnitsPlus (n : ℕ) : Subgroup ℂ_[p]ˣ where
 noncomputable def localUnitsOnePlus (n : ℕ) : Subgroup ℂ_[p]ˣ :=
   localUnitsOne p n ⊓ localUnitsPlus p n
 
-/-! ## The ℤ_p-power structure on principal units (RJW TeX 2494–2496)
+/-!
+The ℤ_p-power structure on principal units (RJW TeX 2494–2496).
 
 "The subsets `𝒰_{n,1}` and `𝒰⁺_{n,1}` are important as they have the structure of
 `ℤ_p`-modules (indeed, if `u ∈ 𝒰_{n,1}` … and `a ∈ ℤ_p`, then
@@ -161,7 +156,8 @@ instance instUCCSMulZpAlgCl : UniformContinuousConstSMul ℤ_[p] (PadicAlgCl p) 
 
 /-- The induced `ℤ_[p]`-scalar action on `ℂ_[p]` is multiplication by `toCp p c`. -/
 theorem smul_cp_eq (c : ℤ_[p]) (x : ℂ_[p]) : c • x = toCp p c * x := by
-  rw [Algebra.smul_def]; congr 1
+  rw [Algebra.smul_def]
+  congr 1
 
 /-- File-local: the `ℤ_[p]`-action on `ℂ_[p]` is bounded (`‖c • x‖ = ‖c‖·‖x‖`,
 since `toCp` is isometric), the last instance `addChar_of_value_at_one` needs. -/
@@ -210,11 +206,7 @@ theorem zpPow_add {y : ℂ_[p]} (hy : ‖y - 1‖ < 1) (a b : ℤ_[p]) :
 character). -/
 private theorem continuous_zpPow {y : ℂ_[p]} (hy : ‖y - 1‖ < 1) :
     Continuous (zpPow p y) := by
-  have h : zpPow p y =
-      (PadicInt.addChar_of_value_at_one (y - 1) (tendsto_pow_of_norm_lt_one p hy) :
-        ℤ_[p] → ℂ_[p]) :=
-    funext (zpPow_def p hy)
-  rw [h]
+  rw [funext (zpPow_def p hy)]
   exact PadicInt.continuous_addChar_of_value_at_one _
 
 /-- Density transfer: a closed set containing every natural power `y^k` contains
@@ -230,8 +222,7 @@ private theorem zpPow_mem_of_closed {y : ℂ_[p]} (hy : ‖y - 1‖ < 1) {S : Se
   have huniv : zpPow p y ⁻¹' S = Set.univ := by
     rw [← Set.univ_subset_iff, ← PadicInt.denseRange_natCast.closure_range]
     exact (hS.preimage (continuous_zpPow p hy)).closure_subset_iff.mpr hsub
-  have : a ∈ zpPow p y ⁻¹' S := by rw [huniv]; trivial
-  exact this
+  exact Set.mem_preimage.mp (huniv.ge (Set.mem_univ a))
 
 /-- `zpPow` stays in the `1`-unit ball: `‖y^a − 1‖ ≤ ‖y − 1‖ < 1`. -/
 theorem norm_zpPow_sub_one_lt_one {y : ℂ_[p]} (hy : ‖y - 1‖ < 1) (a : ℤ_[p]) :
@@ -239,8 +230,6 @@ theorem norm_zpPow_sub_one_lt_one {y : ℂ_[p]} (hy : ‖y - 1‖ < 1) (a : ℤ_
   have hyle : ‖y‖ ≤ 1 := by
     rw [show y = (y - 1) + 1 by ring]
     exact le_trans (IsUltrametricDist.norm_add_le_max _ _) (by simp [hy.le])
-  -- `y^a` lies in the closed ball `{z : ‖z − 1‖ ≤ ‖y − 1‖}`, by the telescope
-  -- `‖y^k − 1‖ ≤ ‖y − 1‖` (ultrametric, `‖y‖ ≤ 1`).
   have hball : zpPow p y a ∈ {z : ℂ_[p] | ‖z - 1‖ ≤ ‖y - 1‖} := by
     refine zpPow_mem_of_closed p hy (isClosed_le (by fun_prop) continuous_const)
       (fun k => ?_) a
@@ -259,7 +248,6 @@ theorem norm_zpPow_sub_one_lt_one {y : ℂ_[p]} (hy : ‖y - 1‖ < 1) (a : ℤ_
 theorem zpPow_mul {y : ℂ_[p]} (hy : ‖y - 1‖ < 1) (a b : ℤ_[p]) :
     zpPow p y (a * b) = zpPow p (zpPow p y a) b := by
   have hya : ‖zpPow p y a - 1‖ < 1 := norm_zpPow_sub_one_lt_one p hy a
-  -- Both sides are continuous in `b` and agree on `b ∈ ℕ`; conclude by density.
   have hnat : ∀ k : ℕ, zpPow p y (a * (k : ℤ_[p])) = zpPow p (zpPow p y a) (k : ℤ_[p]) := by
     intro k
     rw [zpPow_natCast p hya]
@@ -270,9 +258,8 @@ theorem zpPow_mul {y : ℂ_[p]} (hy : ‖y - 1‖ < 1) (a b : ℤ_[p]) :
     | succ m ih => rw [Nat.cast_succ, mul_add, mul_one, zpPow_add p hy, ih, pow_succ]
   have hcont1 : Continuous (fun b => zpPow p y (a * b)) :=
     (continuous_zpPow p hy).comp (continuous_const.mul continuous_id)
-  have heq : (fun b => zpPow p y (a * b)) = (fun b => zpPow p (zpPow p y a) b) :=
-    PadicInt.denseRange_natCast.equalizer hcont1 (continuous_zpPow p hya) (funext hnat)
-  exact congrFun heq b
+  exact congrFun (PadicInt.denseRange_natCast.equalizer hcont1 (continuous_zpPow p hya)
+    (funext hnat)) b
 
 /-- `y^0 = 1` (the character maps `0 ↦ 1`). -/
 private theorem zpPow_zero {y : ℂ_[p]} (hy : ‖y - 1‖ < 1) : zpPow p y 0 = 1 := by
@@ -283,9 +270,8 @@ private theorem zpPow_one_base (a : ℤ_[p]) : zpPow p (1 : ℂ_[p]) a = 1 := by
   have h1 : ‖(1 : ℂ_[p]) - 1‖ < 1 := by simp
   have hnat : ∀ k : ℕ, zpPow p (1 : ℂ_[p]) (k : ℤ_[p]) = (1 : ℂ_[p]) :=
     fun k => by rw [zpPow_natCast p h1, one_pow]
-  have heq : (fun a => zpPow p (1 : ℂ_[p]) a) = (fun _ => (1 : ℂ_[p])) :=
-    PadicInt.denseRange_natCast.equalizer (continuous_zpPow p h1) continuous_const (funext hnat)
-  exact congrFun heq a
+  exact congrFun (PadicInt.denseRange_natCast.equalizer (continuous_zpPow p h1) continuous_const
+    (funext hnat)) a
 
 /-- The `ℤ_p`-power of a `1`-unit is nonzero (`y^a · y^{−a} = 1`). -/
 private theorem zpPow_ne_zero {y : ℂ_[p]} (hy : ‖y - 1‖ < 1) (a : ℤ_[p]) :
@@ -318,18 +304,15 @@ private theorem zpPow_mul_base {y z : ℂ_[p]} (hy : ‖y - 1‖ < 1) (hz : ‖z
   have hnat : ∀ k : ℕ,
       zpPow p (y * z) (k : ℤ_[p]) = zpPow p y (k : ℤ_[p]) * zpPow p z (k : ℤ_[p]) :=
     fun k => by rw [zpPow_natCast p hyz, zpPow_natCast p hy, zpPow_natCast p hz, mul_pow]
-  have heq : (fun a => zpPow p (y * z) a) = (fun a => zpPow p y a * zpPow p z a) :=
-    PadicInt.denseRange_natCast.equalizer (continuous_zpPow p hyz)
-      ((continuous_zpPow p hy).mul (continuous_zpPow p hz)) (funext hnat)
-  exact congrFun heq a
+  exact congrFun (PadicInt.denseRange_natCast.equalizer (continuous_zpPow p hyz)
+    ((continuous_zpPow p hy).mul (continuous_zpPow p hz)) (funext hnat)) a
 
 /-- `K_n` is finite-dimensional over `ℚ_p` (`[K_n:ℚ_p] = φ(p^n) > 0`), hence closed
 in `ℂ_p` (`ℚ_p` complete). Used to keep `zpPow` inside `K_n` by density. -/
 private theorem isClosed_K (n : ℕ) : IsClosed ((K p n : Set ℂ_[p])) := by
   haveI : FiniteDimensional ℚ_[p] (K p n) := Module.finite_of_finrank_pos (R := ℚ_[p])
     (by rw [finrank_K]; exact Nat.totient_pos.2 (pow_pos hp.out.pos n))
-  have h := Submodule.closed_of_finiteDimensional ((K p n).toSubalgebra.toSubmodule)
-  convert h using 1
+  convert Submodule.closed_of_finiteDimensional ((K p n).toSubalgebra.toSubmodule) using 1
   simp [Subalgebra.coe_toSubmodule, IntermediateField.coe_toSubalgebra]
 
 /-- The integral coefficient image `toCp p c` lies in `K_n` (it is in the
@@ -344,16 +327,13 @@ theorem zpPow_mem_localUnitsOne {n : ℕ} {u : ℂ_[p]ˣ} (hu : u ∈ localUnits
     (a : ℤ_[p]) :
     ∃ v : ℂ_[p]ˣ, (v : ℂ_[p]) = zpPow p (u : ℂ_[p]) a ∧ v ∈ localUnitsOne p n := by
   obtain ⟨huU, hy⟩ := hu
-  set y : ℂ_[p] := (u : ℂ_[p]) with hyeq
+  set y : ℂ_[p] := (u : ℂ_[p])
   have hyK : y ∈ K p n := (Subring.mem_inf.1 huU.1).1
-  -- The unit `y^a`, with explicit inverse `y^{−a}`.
   have hmul : zpPow p y a * zpPow p y (-a) = 1 := by
     rw [← zpPow_add p hy, add_neg_cancel, zpPow_zero p hy]
   refine ⟨Units.mkOfMulEqOne (zpPow p y a) (zpPow p y (-a)) hmul, rfl, ?_⟩
-  -- `y^{a'} ∈ K_n` for every exponent (density: `y^k ∈ K_n`).
   have hmemK : ∀ a' : ℤ_[p], zpPow p y a' ∈ K p n :=
     fun a' => zpPow_mem_of_closed p hy (isClosed_K p n) (fun k => pow_mem hyK k) a'
-  -- `‖y^{a'}‖ ≤ 1` for every exponent (ultrametric, `‖y^{a'} − 1‖ < 1`).
   have hnle : ∀ a' : ℤ_[p], ‖zpPow p y a'‖ ≤ 1 := fun a' => by
     rw [show zpPow p y a' = (zpPow p y a' - 1) + 1 by ring]
     exact le_trans (IsUltrametricDist.norm_add_le_max _ _)
@@ -363,7 +343,7 @@ theorem zpPow_mem_localUnitsOne {n : ℕ} {u : ℂ_[p]ˣ} (hu : u ∈ localUnits
   have hinvval : (((Units.mkOfMulEqOne (zpPow p y a) (zpPow p y (-a)) hmul)⁻¹ : ℂ_[p]ˣ) : ℂ_[p])
       = zpPow p y (-a) := by
     rw [Units.val_inv_eq_inv_val, Units.val_mkOfMulEqOne]
-    exact (eq_inv_of_mul_eq_one_left (by rw [mul_comm]; exact hmul)).symm
+    exact (eq_inv_of_mul_eq_one_left (by rwa [mul_comm])).symm
   refine ⟨⟨?_, ?_⟩, ?_⟩
   · rw [Units.val_mkOfMulEqOne]; exact hmemO a
   · rw [hinvval]; exact hmemO (-a)
@@ -454,8 +434,6 @@ noncomputable instance localUnitsOneModule (n : ℕ) :
     rw [coe_localUnitsOne_smul, coe_additive_zero,
       zpPow_zero p (norm_localUnitsOne_sub_one_lt_one p _)]
 
-/-! ## The group 𝒰_∞ and the towers 𝒰_{∞,1}, 𝒰⁺_{∞,1} (RJW TeX 2503–2505) -/
-
 /-- The level norm inverts: for nonzero `x ∈ K_{n+1}`,
 `N_{n+1,n}(x⁻¹) = N_{n+1,n}(x)⁻¹` (`levelNorm_mul` + `levelNorm_one` give
 `N(x)·N(x⁻¹) = 1`). -/
@@ -464,7 +442,7 @@ private theorem levelNorm_inv' (n : ℕ) {x : ℂ_[p]} (hx : x ∈ K p (n + 1)) 
   have hxinv : x⁻¹ ∈ K p (n + 1) := (K p (n + 1)).inv_mem hx
   have hprod : levelNorm p n x * levelNorm p n x⁻¹ = 1 := by
     rw [← levelNorm_mul p n hx hxinv, mul_inv_cancel₀ hx0, levelNorm_one]
-  exact eq_inv_of_mul_eq_one_left (by rw [mul_comm]; exact hprod)
+  exact eq_inv_of_mul_eq_one_left (by rwa [mul_comm])
 
 namespace NormCompatUnits
 
