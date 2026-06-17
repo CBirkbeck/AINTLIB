@@ -6618,6 +6618,19 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
 - **Mathlib**: `associatedPrimes.finite`, `IsLocalizedModule`, localization-is-exact. Most of the gluing is new project infrastructure.
 - **Generality**: minimal — Λ = 𝒪⟦T⟧, 𝒪 a DVR.
 - **Note**: this is the multi-step deep build; expect further sub-tickets at execution (support finiteness as height-one primes, the pseudo-null = finite-over-𝒪 lemma, the global-map exactness).
+- **Status update (2026-06-17, beastmode)**: building blocks PROVEN — `iwasawaAlgebra_associatedPrimes_finite`
+  (support finiteness) and `iwasawaAlgebra_exists_ne_zero_smul_eq_zero` (f.g. torsion killed by one
+  nonzero element, UFD-factoring to the support primes). **Completable-vs-novel boundary mapped**:
+  - COMPLETABLE (done): S3a foundations (Noetherian/domain/UFD/local), S3b (height-1 localization is a
+    DVR), support finiteness, single-element annihilator. The coprime/CRT primary decomposition
+    `M ≅ ⊕ᵢ torsionBy(gᵢ^eᵢ)` is also completable via mathlib `Submodule.torsionBySet_isInternal`.
+  - NOVEL CORE (B3-escalated): the per-component cyclic decomposition `Mᵢ ~ ⊕ Λ/(gᵢ^mⱼ)` via
+    height-1 localization + pseudo-iso gluing, and `pseudo-null ⇒ finite`. **Requires building an
+    absent mathlib area**: no `IsKrullDomain` class, no divisorial ideals, no reflexive hull, no
+    pseudo-isomorphism module theory (verified, 5 searches); DVR-localization is Dedekind-only.
+    This is Bourbaki *Comm. Alg.* VII §4.4 Thm 5 / Washington 13.12 — a multi-week+ mathlib-scale
+    development. **User decision needed**: (a) build the Krull-domain pseudo-iso apparatus (months),
+    (b) axiomatize the structure theorem as a project hypothesis, or (c) reroute the IMC to avoid it.
 
 #### [S13-S4] characteristic ideal + multiplicativity
 - **Status**: open | **File**: Iwasawa/StructureTheory/CharIdeal.lean | **Depends on**: S13-S3 | **Type**: def+theorem
