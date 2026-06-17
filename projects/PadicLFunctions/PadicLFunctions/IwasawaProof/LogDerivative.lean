@@ -1521,9 +1521,7 @@ theorem dlog_surjective_onto_psiId {F : PowerSeries ℤ_[p]} (hF : F ∈ psiIdSe
       refine squeeze_zero (fun j => norm_nonneg _) (fun j => ?_)
         (g := fun j => ((p : ℝ)⁻¹) ^ (φ j)) ?_
       · rw [norm_mul, norm_pow, norm_neg, PadicInt.norm_p]
-        calc (p : ℝ)⁻¹ ^ (φ j) * ‖PowerSeries.coeff m (fseq (φ j))‖
-            ≤ (p : ℝ)⁻¹ ^ (φ j) * 1 := by gcongr; exact PadicInt.norm_le_one _
-          _ = (p : ℝ)⁻¹ ^ (φ j) := mul_one _
+        exact mul_le_of_le_one_right (by positivity) (PadicInt.norm_le_one _)
       · exact (tendsto_pow_atTop_nhds_zero_of_lt_one (by positivity)
           (inv_lt_one_of_one_lt₀ (by exact_mod_cast hp.out.one_lt))).comp hφmono.tendsto_atTop
     -- RHS `(F − (−p)^{φj} f_{φj})·h_{φj} → F·h`
@@ -1556,10 +1554,7 @@ private theorem eq_C_constantCoeff_of_derivativeFun_zero (g : PowerSeries ℤ_[p
     rw [PowerSeries.coeff_C, if_neg (Nat.succ_ne_zero m)]
     have hcoeff := congrArg (PowerSeries.coeff m) h
     rw [PowerSeries.coeff_derivativeFun, map_zero] at hcoeff
-    have hne : ((m : ℤ_[p]) + 1) ≠ 0 := by
-      have : ((m + 1 : ℕ) : ℤ_[p]) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.succ_ne_zero m)
-      push_cast at this; exact this
-    exact (mul_eq_zero.mp hcoeff).resolve_right hne
+    exact (mul_eq_zero.mp hcoeff).resolve_right (Nat.cast_add_one_ne_zero m)
 
 /-- `𝒩(C c) = C (c^p)`: the digit matrix of a constant is the scalar `C c • 1`, so its
 determinant (`= 𝒩`) is `(C c)^p = C (c^p)`. -/
