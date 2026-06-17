@@ -881,9 +881,7 @@ theorem summable_prod_of_norm_coeff_le_one {G : PowerSeries K} {z : K}
 
 omit [hp : Fact p.Prime] [NormedAlgebra ℚ_[p] K] in
 /-- Linear-growth variant of `summable_prod_of_norm_coeff_le_one`: for `‖coeff n G‖ ≤
-C·(n+1)` and `‖z‖ < 1`, the `φ`-evaluation product family is summable (`‖T n k‖ ≤
-C·(k+1)·‖z‖ᵏ` on the support `n ≤ k`). Feeds `seriesEval_phi_at_root_of_summable` for the
-antiderivative series `C₁`. -/
+C·(n+1)` and `‖z‖ < 1`, the `φ`-evaluation product family is summable. -/
 theorem summable_prod_of_norm_coeff_le_linear {G : PowerSeries K} {C : ℝ}
     (hG : ∀ n, ‖PowerSeries.coeff n G‖ ≤ C * ((n : ℝ) + 1)) {z : K} (hz : ‖z‖ < 1) :
     Summable fun nk : ℕ × ℕ =>
@@ -895,17 +893,14 @@ theorem summable_prod_of_norm_coeff_le_linear {G : PowerSeries K} {C : ℝ}
     NormedAddGroup.tendsto_nhds_zero]
   intro ε hε
   rw [Filter.eventually_cofinite]
-  have htend : Filter.Tendsto (fun n : ℕ => C * (((n : ℝ) + 1) * ‖z‖ ^ n)) Filter.atTop (nhds 0) :=
-    by simpa using (tendsto_natCast_succ_mul_pow (norm_nonneg z) hz).const_mul C
+  have htend : Filter.Tendsto (fun n : ℕ => C * (((n : ℝ) + 1) * ‖z‖ ^ n)) Filter.atTop (nhds 0) := by
+    simpa using (tendsto_natCast_succ_mul_pow (norm_nonneg z) hz).const_mul C
   obtain ⟨N, hN⟩ := (htend.eventually_lt_const hε).exists_forall_of_atTop
   refine Set.Finite.subset (Set.Finite.prod (Set.finite_Iio (N + 1)) (Set.finite_Iio (N + 1)))
     fun nk hnk => ?_
   simp only [Set.mem_setOf_eq, not_lt] at hnk
-  -- on the support `n ≤ k`, `‖T n k‖ ≤ C·(k+1)·‖z‖ᵏ`
   by_cases hnk1 : nk.2 < nk.1
-  · -- off-support term vanishes; `ε ≤ 0`, contradiction
-    exfalso
-    rw [norm_mul, norm_mul, coeff_substSeries_pow_eq_zero p hnk1, norm_zero, mul_zero,
+  · rw [norm_mul, norm_mul, coeff_substSeries_pow_eq_zero p hnk1, norm_zero, mul_zero,
       zero_mul] at hnk
     exact absurd (lt_of_lt_of_le hε hnk) (lt_irrefl _)
   rw [not_lt] at hnk1
@@ -916,20 +911,17 @@ theorem summable_prod_of_norm_coeff_le_linear {G : PowerSeries K} {C : ℝ}
     calc ‖PowerSeries.coeff nk.1 G‖
           * ‖PowerSeries.coeff nk.2 (((1 + PowerSeries.X) ^ p - 1 : PowerSeries K) ^ nk.1)‖
           * ‖z‖ ^ nk.2
-        ≤ (C * ((nk.1 : ℝ) + 1)) * 1 * ‖z‖ ^ nk.2 :=
-          mul_le_mul (mul_le_mul (hG nk.1) (norm_coeff_substSeries_pow_le_one p nk.2 nk.1)
-            (norm_nonneg _) (by positivity)) le_rfl (by positivity) (by positivity)
+        ≤ C * ((nk.1 : ℝ) + 1) * 1 * ‖z‖ ^ nk.2 := by
+          gcongr
+          · exact hG nk.1
+          · exact norm_coeff_substSeries_pow_le_one p nk.2 nk.1
       _ = C * (((nk.1 : ℝ) + 1) * ‖z‖ ^ nk.2) := by ring
       _ ≤ C * (((nk.2 : ℝ) + 1) * ‖z‖ ^ nk.2) := by
-          refine mul_le_mul_of_nonneg_left ?_ hCnn
-          exact mul_le_mul_of_nonneg_right (by exact_mod_cast Nat.add_le_add_right hnk1 1)
-            (by positivity)
+          gcongr
   have hk : nk.2 < N + 1 := by
-    by_contra hge
-    rw [not_lt] at hge
+    by_contra! hge
     exact absurd (lt_of_le_of_lt (le_trans hnk hbd) (hN nk.2 (by omega))) (lt_irrefl ε)
-  have hn : nk.1 < N + 1 := lt_of_le_of_lt hnk1 hk
-  exact Set.mem_prod.2 ⟨hn, hk⟩
+  exact Set.mem_prod.2 ⟨lt_of_le_of_lt hnk1 hk, hk⟩
 
 omit [hp : Fact p.Prime] [NormedAlgebra ℚ_[p] K] in
 /-- φ-collapse at a primitive `p`-th root: for `‖·‖ ≤ 1`-coefficient `G` and
