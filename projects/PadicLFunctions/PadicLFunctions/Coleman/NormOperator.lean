@@ -259,9 +259,7 @@ noncomputable def digitBasis : Module.Basis (Fin p) (PowerSeries ℤ_[p]) (PhiAl
             (PhiAlg.toPS p (∑ j : Fin p, g j • ((1 + PowerSeries.X) ^ (j : ℕ) : PhiAlg p)))
             g := sum_smul_one_add_X_pow_eq g
         rw [hfg] at hf
-        have hex := existsUnique_digits_padicInt p
-          (PhiAlg.toPS p (∑ j : Fin p, g j • ((1 + PowerSeries.X) ^ (j : ℕ) : PhiAlg p)))
-        exact congrFun (hex.unique hf hg) i)
+        exact congrFun ((existsUnique_digits_padicInt p _).unique hf hg) i)
     (-- spanning ← existence of digits
       (Submodule.top_le_span_range_iff_forall_exists_fun (PowerSeries ℤ_[p])).2 fun x => by
         obtain ⟨G, hG, -⟩ := existsUnique_digits_padicInt p (PhiAlg.toPS p x)
@@ -584,8 +582,7 @@ theorem modEqPow_one_iff_map_toZMod {f g : PowerSeries ℤ_[p]} :
   refine forall_congr' (fun m => ?_)
   rw [PowerSeries.coeff_map, PowerSeries.coeff_map, ← sub_eq_zero, ← map_sub,
     ← RingHom.mem_ker, PadicInt.ker_toZMod, PadicInt.maximalIdeal_eq_span_p,
-    Ideal.mem_span_singleton, pow_one]
-  rw [map_sub]
+    Ideal.mem_span_singleton, pow_one, map_sub]
 
 /-- **The Frobenius identity over `𝔽_p⟦T⟧`** (the engine for part (ii)): `φ(ḡ) = ḡ^p`.
 Over char `p`, `(1+T)^p − 1 = T^p` (freshman's dream), so `φ = subst(T^p) = expand`,
@@ -680,9 +677,8 @@ theorem digitMatrix_col_isDigitDecomp (f : PowerSeries ℤ_[p]) (j : Fin p) :
     refine Finset.sum_congr rfl (fun i _ => ?_)
     rw [digitMatrix, Algebra.leftMulMatrix_eq_repr_mul, digitBasis_apply (i := i)]
   have hxPS := congrArg (PhiAlg.toPS p) hx
-  rw [map_mul, RingEquiv.apply_symm_apply, digitBasis_apply (i := j),
+  rwa [map_mul, RingEquiv.apply_symm_apply, digitBasis_apply (i := j),
     PhiAlg.toPS_apply, sum_smul_one_add_X_pow_eq] at hxPS
-  exact hxPS
 
 /-- `digitMatrix (1 + C a · h) = 1 + C a • digitMatrix h` (ring-hom additivity +
 multiplicativity + `digitMatrix (C a) = C a • 1`). -/
@@ -855,8 +851,7 @@ theorem normOp_iterate_modEq {k₁ k₂ : ℕ} (h : k₁ ≤ k₂) {f : PowerSer
     rw [hg]
     have hstep : ModEqPow p 1 (normOp^[k₂ - k₁] f * finv) (f * finv) :=
       (normOp_iterate_modEq_self f _).mul_right finv
-    rw [hfinv_mul] at hstep
-    exact hstep
+    rwa [hfinv_mul] at hstep
   -- iterate (iii): `𝒩^{k₁} g ≡ 1 mod p^{k₁+1}`
   have hiter := normOp_iterate_modEq_one hgunit hg1 k₁
   -- `𝒩^{k₁} g = 𝒩^{k₂} f · 𝒩^{k₁} finv`
@@ -867,8 +862,7 @@ theorem normOp_iterate_modEq {k₁ k₂ : ℕ} (h : k₁ ≤ k₂) {f : PowerSer
   have hffinv : normOp^[k₁] f * normOp^[k₁] finv = 1 := by
     rw [← normOp_iterate_mul, hfinv_mul]; simp [Function.iterate_fixed normOp_one]
   have hmul := hiter.mul_right (normOp^[k₁] f)
-  rw [one_mul, mul_assoc, mul_comm (normOp^[k₁] finv) (normOp^[k₁] f), hffinv, mul_one] at hmul
-  exact hmul
+  rwa [one_mul, mul_assoc, mul_comm (normOp^[k₁] finv) (normOp^[k₁] f), hffinv, mul_one] at hmul
 
 /-! ## Compactness of `ℤ_p⟦T⟧` and sequential extraction (T909)
 
