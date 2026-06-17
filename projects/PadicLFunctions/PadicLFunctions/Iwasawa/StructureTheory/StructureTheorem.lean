@@ -117,6 +117,34 @@ theorem iwasawaAlgebra_associatedPrimes_finite [IsNoetherianRing 𝒪]
     (associatedPrimes (IwasawaAlgebra 𝒪) M).Finite :=
   associatedPrimes.finite (IwasawaAlgebra 𝒪) M
 
+/-- **S13-S3d (building block)**: a finitely generated torsion `Λ`-module is annihilated by
+a single nonzero element of `Λ` (the product of the nonzero element-annihilators; nonzero
+because `Λ` is a domain).  Factoring this element in the UFD `Λ` produces the height-one
+primes `(gᵢ)` cutting out the support. -/
+theorem iwasawaAlgebra_exists_ne_zero_smul_eq_zero [IsDomain 𝒪]
+    (M : Type*) [AddCommGroup M] [Module (IwasawaAlgebra 𝒪) M]
+    [Module.Finite (IwasawaAlgebra 𝒪) M] (hM : Module.IsTorsion (IwasawaAlgebra 𝒪) M) :
+    ∃ c : IwasawaAlgebra 𝒪, c ≠ 0 ∧ ∀ m : M, c • m = 0 := by
+  classical
+  obtain ⟨s, hs⟩ := Module.finite_def.mp ‹Module.Finite (IwasawaAlgebra 𝒪) M›
+  choose a ha using fun x : M => hM (x := x)
+  refine ⟨∏ y ∈ s, (a y : IwasawaAlgebra 𝒪), ?_, ?_⟩
+  · rw [Finset.prod_ne_zero_iff]
+    exact fun y _ => nonZeroDivisors.ne_zero (a y).2
+  · -- the product kills every generator (it is divisible by each `a x`), hence — by
+    -- linearity over the spanning set `s` — every element of `M`
+    have hgen : ∀ x ∈ s, (∏ y ∈ s, (a y : IwasawaAlgebra 𝒪)) • x = 0 := by
+      intro x hx
+      obtain ⟨d, hd⟩ := Finset.dvd_prod_of_mem (fun y => (a y : IwasawaAlgebra 𝒪)) hx
+      rw [hd, mul_comm, mul_smul, show (↑(a x) : IwasawaAlgebra 𝒪) • x = 0 from ha x, smul_zero]
+    intro m
+    have hm : m ∈ Submodule.span (IwasawaAlgebra 𝒪) (s : Set M) := by rw [hs]; trivial
+    induction hm using Submodule.span_induction with
+    | mem x hx => exact hgen x hx
+    | zero => rw [smul_zero]
+    | add x y _ _ hx hy => rw [smul_add, hx, hy, add_zero]
+    | smul r x _ hx => rw [smul_comm, hx, smul_zero]
+
 /-- **The structure theorem (clean form), S13-S3 / Washington Thm 13.12.**
 Every finitely generated `Λ`-module `M` is pseudo-isomorphic to `Λ^r ⊕ ⨁ᵢ Λ/(gᵢ^eᵢ)`
 for a free rank `r` and finitely many cyclic prime-power quotients (`gᵢ` prime in
