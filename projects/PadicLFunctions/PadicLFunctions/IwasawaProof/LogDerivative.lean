@@ -207,18 +207,14 @@ private theorem del_one_add_X_pow (j : ℕ) :
       = (j : PowerSeries ℤ_[p]) * (1 + PowerSeries.X) ^ j := by
   have hDoneX : derivativeFun (1 + PowerSeries.X : PowerSeries ℤ_[p]) = 1 := by
     rw [derivativeFun_add, derivativeFun_one, zero_add]; exact derivative_X
-  rw [PadicMeasure.del]
-  induction j with
-  | zero => simp [derivativeFun_one]
-  | succ a ih =>
-    rw [pow_succ, derivativeFun_mul, hDoneX, smul_eq_mul, smul_eq_mul, mul_one]
-    have hpow : (1 + PowerSeries.X) * ((1 + PowerSeries.X) ^ a
-        + (1 + PowerSeries.X) * derivativeFun ((1 + PowerSeries.X : PowerSeries ℤ_[p]) ^ a))
-        = (1 + PowerSeries.X) ^ (a + 1) + (1 + PowerSeries.X)
-          * ((1 + PowerSeries.X) * derivativeFun ((1 + PowerSeries.X) ^ a)) := by
-      rw [pow_succ]; ring
-    rw [hpow, mul_left_comm (1 + PowerSeries.X) (1 + PowerSeries.X) (derivativeFun _), ih]
-    push_cast; ring
+  rw [PadicMeasure.del,
+    show derivativeFun ((1 + PowerSeries.X : PowerSeries ℤ_[p]) ^ j)
+      = d⁄dX ℤ_[p] ((1 + PowerSeries.X) ^ j) from rfl, derivative_pow,
+    show d⁄dX ℤ_[p] (1 + PowerSeries.X : PowerSeries ℤ_[p]) = derivativeFun (1 + PowerSeries.X)
+      from rfl, hDoneX, mul_one]
+  cases j with
+  | zero => simp
+  | succ a => rw [Nat.add_sub_cancel]; push_cast; ring
 
 /-- `Δ(φg) = p·φ(Δg)` in the additive `Δ = del` form (the `del`-shaped `del_phiHom`). -/
 private theorem del_phiSeries (g : PowerSeries ℤ_[p]) :
@@ -381,9 +377,7 @@ private theorem mul_p_cancel {a b : PowerSeries ℤ_[p]}
     (h : (p : PowerSeries ℤ_[p]) * a = (p : PowerSeries ℤ_[p]) * b) : a = b := by
   have hp0 : (p : PowerSeries ℤ_[p]) ≠ 0 := by
     rw [show (p : PowerSeries ℤ_[p]) = PowerSeries.C (p : ℤ_[p]) from by rw [map_natCast]]
-    intro hc
-    exact (by exact_mod_cast hp.out.ne_zero : (p : ℤ_[p]) ≠ 0)
-      (PowerSeries.C_injective (by rw [hc, map_zero]))
+    exact (map_ne_zero_iff _ PowerSeries.C_injective).mpr (Nat.cast_ne_zero.mpr hp.out.ne_zero)
   exact mul_left_cancel₀ hp0 h
 
 /-- **RJW lem:log der 1 (TeX 3292–3306)**: `Δ(𝒲) ⊆ ℤ_p⟦T⟧^{ψ=id}`, where
@@ -1225,9 +1219,8 @@ private theorem exists_approx_step {f : PowerSeries ℤ_[p]} (hf : psiSeries p f
   -- `C(p)·(ψ f' − f') = 0`, and `C(p)` is a non-zero-divisor, so `ψ f' = f'`
   have hpz : PowerSeries.C (p : ℤ_[p]) * (psiSeries p f' - f') = 0 := by
     rw [mul_sub, hdiff, sub_self]
-  have hpne : (PowerSeries.C (p : ℤ_[p]) : PowerSeries ℤ_[p]) ≠ 0 := by
-    rw [Ne, ← map_zero (PowerSeries.C (R := ℤ_[p]))]
-    exact fun h => (Nat.cast_ne_zero.mpr hp.out.ne_zero) (PowerSeries.C_injective h)
+  have hpne : (PowerSeries.C (p : ℤ_[p]) : PowerSeries ℤ_[p]) ≠ 0 :=
+    (map_ne_zero_iff _ PowerSeries.C_injective).mpr (Nat.cast_ne_zero.mpr hp.out.ne_zero)
   exact sub_eq_zero.1 ((mul_eq_zero.1 hpz).resolve_left hpne)
 
 /-- The successive-approximation sequences (`lem:log der red mod p`): `gₙ ∈ 𝒲`, `fₙ ∈ (ψ=id)`,
