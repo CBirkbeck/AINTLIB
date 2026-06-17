@@ -332,17 +332,14 @@ theorem extLog_witness_smul_eq {x : L} {m m' : ℕ} {k k' : ℤ} {y y' : L}
     (hxy' : x ^ m' = (p : L) ^ k' * y') (hy : InExpBall p (y - 1))
     (hy' : InExpBall p (y' - 1)) :
     ((m : ℚ_[p]))⁻¹ • padicLog p y = ((m' : ℚ_[p]))⁻¹ • padicLog p y' := by
-  have hpL : (p : L) ≠ 0 := natCast_p_ne_zero p
   have hny : ‖y‖ = 1 := norm_eq_one_of_inExpBall_sub_one p hy
   have hny' : ‖y'‖ = 1 := norm_eq_one_of_inExpBall_sub_one p hy'
-  -- raise to the other's power
   have e1 : x ^ (m * m') = (p : L) ^ (k * m') * y ^ m' := by
     rw [pow_mul, hxy, mul_pow, ← zpow_natCast ((p : L) ^ k) m', ← zpow_mul]
   have e2 : x ^ (m * m') = (p : L) ^ (k' * m) * y' ^ m := by
     rw [mul_comm m m', pow_mul, hxy', mul_pow, ← zpow_natCast ((p : L) ^ k') m, ← zpow_mul]
   have ekey : (p : L) ^ (k * m') * y ^ m' = (p : L) ^ (k' * m) * y' ^ m := by
     rw [← e1, ← e2]
-  -- match `p`-valuations
   have hnorm : ((p : ℝ)⁻¹) ^ (k * m') = ((p : ℝ)⁻¹) ^ (k' * m) := by
     have hc := congrArg norm ekey
     rwa [norm_mul, norm_mul, norm_zpow, norm_zpow, norm_natCast_p p, norm_pow,
@@ -353,28 +350,16 @@ theorem extLog_witness_smul_eq {x : L} {m m' : ℕ} {k k' : ℤ} {y y' : L}
     have : (p : ℝ)⁻¹ < 1 := inv_lt_one_of_one_lt₀ h1
     linarith
   have hexp : k * m' = k' * m := zpow_right_injective₀ hpinv0 hpinv1 hnorm
-  -- cancel equal `p`-powers, then take `padicLog`
   have hyeq : y ^ m' = y' ^ m := by
     rw [hexp] at ekey
-    exact mul_left_cancel₀ (zpow_ne_zero _ hpL) ekey
+    exact mul_left_cancel₀ (zpow_ne_zero _ (natCast_p_ne_zero p)) ekey
   have hlog := congrArg (padicLog p) hyeq
   rw [padicLog_pow p hy, padicLog_pow p hy'] at hlog
-  -- divide the `ℕ`-smul identity `m'·log y = m·log y'` by `m·m'`
   have hmne : (m : ℚ_[p]) ≠ 0 := by exact_mod_cast hm.ne'
   have hm'ne : (m' : ℚ_[p]) ≠ 0 := by exact_mod_cast hm'.ne'
   have hcast : (m' : ℚ_[p]) • padicLog p y = (m : ℚ_[p]) • padicLog p y' := by
-    rw [Nat.cast_smul_eq_nsmul, Nat.cast_smul_eq_nsmul]; exact hlog
-  have lhs : ((m : ℚ_[p]))⁻¹ • padicLog p y
-      = (((m' : ℚ_[p]) * (m : ℚ_[p]))⁻¹) • ((m' : ℚ_[p]) • padicLog p y) := by
-    rw [smul_smul, mul_inv]
-    congr 1
-    rw [mul_comm (m' : ℚ_[p])⁻¹, mul_assoc, inv_mul_cancel₀ hm'ne, mul_one]
-  have rhs : ((m' : ℚ_[p]))⁻¹ • padicLog p y'
-      = (((m' : ℚ_[p]) * (m : ℚ_[p]))⁻¹) • ((m : ℚ_[p]) • padicLog p y') := by
-    rw [smul_smul, mul_inv]
-    congr 1
-    rw [mul_assoc, inv_mul_cancel₀ hmne, mul_one]
-  rw [lhs, rhs, hcast]
+    simpa only [Nat.cast_smul_eq_nsmul] using hlog
+  rw [inv_smul_eq_iff₀ hmne, smul_comm, ← hcast, inv_smul_smul₀ hm'ne]
 
 /-- W6a-a7 (well-definedness): every witness computes `extLog`. -/
 theorem extLog_eq_of_witness {x : L} {m : ℕ} {k : ℤ} {y : L} (hm : 0 < m)
