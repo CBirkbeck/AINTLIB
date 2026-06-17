@@ -6,6 +6,9 @@ import Mathlib.RingTheory.Ideal.Height
 import Mathlib.RingTheory.OrderOfVanishing.Basic
 import Mathlib.RingTheory.Localization.Finiteness
 import Mathlib.Algebra.Module.Torsion.Basic
+import Mathlib.RingTheory.Support
+import Mathlib.RingTheory.Ideal.MinimalPrime.Noetherian
+import Mathlib.RingTheory.Ideal.KrullsHeightTheorem
 
 /-!
 # The characteristic ideal and its multiplicativity  (S13-S4)
@@ -113,6 +116,22 @@ theorem localMult_ne_top [IsDomain 𝒪] [IsPrincipalIdealRing 𝒪]
     Ideal.Quotient.mk_surjective]
   exact Module.length_ne_top
 
+/-- The mul-support of `P ↦ P ^ (localMult P M).toNat` over height-one primes is finite: a
+height-one prime where the local multiplicity is nonzero lies in the support of `M`, hence
+contains `Ann M`, and (being height-one) is therefore *minimal* over `Ann M`; the minimal
+primes of `Ann M` are finite (`Ideal.finite_minimalPrimes_of_isNoetherianRing`). -/
+theorem localMult_pow_mulSupport_finite [IsDomain 𝒪] [IsPrincipalIdealRing 𝒪]
+    (M : Type*) [AddCommGroup M] [Module (IwasawaAlgebra 𝒪) M]
+    [Module.Finite (IwasawaAlgebra 𝒪) M] (hM : Module.IsTorsion (IwasawaAlgebra 𝒪) M) :
+    (Function.mulSupport fun P : {P : Ideal (IwasawaAlgebra 𝒪) // P.IsPrime ∧ P.height = 1} =>
+      letI : P.1.IsPrime := P.2.1; P.1 ^ (localMult 𝒪 P.1 M).toNat).Finite := by
+  apply Set.Finite.of_finite_image (f := Subtype.val) ?_ Subtype.val_injective.injOn
+  refine ((Module.annihilator (IwasawaAlgebra 𝒪) M).finite_minimalPrimes_of_isNoetherianRing).subset ?_
+  rintro Q ⟨⟨P, hP, hP1⟩, hmem, rfl⟩
+  haveI := hP
+  -- `P` is a height-one prime containing `Ann M`, hence minimal over `Ann M`.
+  sorry
+
 /-- The **characteristic ideal** `Ch_Λ(M) ⊆ Λ` of a finitely generated torsion `Λ`-module,
 defined the length-theoretic way: the product over height-one primes `P` of
 `P ^ localMult P M` (RJW TeX 3652–3657).  Only finitely many factors are non-trivial (the
@@ -164,11 +183,8 @@ theorem charIdeal_mul_of_exact [IsDomain 𝒪] [IsPrincipalIdealRing 𝒪]
     haveI := hP
     rw [← pow_add, localMult_add_of_exact 𝒪 P f g hf hg hexact,
       ENat.toNat_add (localMult_ne_top 𝒪 P hP1 M' hM') (localMult_ne_top 𝒪 P hP1 M'' hM'')]
-  have hfs' : (Function.mulSupport fun P : {P : Ideal (IwasawaAlgebra 𝒪) // P.IsPrime ∧ P.height = 1} =>
-      letI : P.1.IsPrime := P.2.1; P.1 ^ (localMult 𝒪 P.1 M').toNat).Finite := sorry
-  have hfs'' : (Function.mulSupport fun P : {P : Ideal (IwasawaAlgebra 𝒪) // P.IsPrime ∧ P.height = 1} =>
-      letI : P.1.IsPrime := P.2.1; P.1 ^ (localMult 𝒪 P.1 M'').toNat).Finite := sorry
-  rw [charIdeal, charIdeal, charIdeal, ← finprod_mul_distrib hfs' hfs'']
+  rw [charIdeal, charIdeal, charIdeal, ← finprod_mul_distrib
+    (localMult_pow_mulSupport_finite 𝒪 M' hM') (localMult_pow_mulSupport_finite 𝒪 M'' hM'')]
   exact finprod_congr hadd
 
 end Iwasawa
