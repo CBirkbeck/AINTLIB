@@ -1287,10 +1287,8 @@ private theorem normOp_inverse {g : PowerSeries ℤ_[p]} (hg : IsUnit g) (h : no
     have h1 : normOp (Ring.inverse g) * normOp g = 1 := by
       rw [← normOp_mul, Ring.inverse_mul_cancel _ hg, normOp_one]
     rwa [h] at h1
-  calc normOp (Ring.inverse g) = normOp (Ring.inverse g) * (g * Ring.inverse g) := by
-          rw [Ring.mul_inverse_cancel _ hg, mul_one]
-    _ = (normOp (Ring.inverse g) * g) * Ring.inverse g := by ring
-    _ = Ring.inverse g := by rw [hu, one_mul]
+  nth_rewrite 2 [← one_mul (Ring.inverse g)]
+  rw [← hu, mul_assoc, Ring.mul_inverse_cancel _ hg, mul_one]
 
 /-- The `n`-th factor `g_{n+1}^{(−1)ⁿ pⁿ}` of `hₙ = ∏_{k=1}^n g_k^{(−1)^{k−1}p^{k−1}}`
 (the negative-sign factors realised by `Ring.inverse`). -/
@@ -1577,9 +1575,7 @@ private theorem eq_C_constantCoeff_of_derivativeFun_zero (g : PowerSeries ℤ_[p
     have hne : ((m : ℤ_[p]) + 1) ≠ 0 := by
       have : ((m + 1 : ℕ) : ℤ_[p]) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.succ_ne_zero m)
       push_cast at this; exact this
-    rcases mul_eq_zero.mp hcoeff with h1 | h2
-    · exact h1
-    · exact absurd h2 hne
+    exact (mul_eq_zero.mp hcoeff).resolve_right hne
 
 /-- `𝒩(C c) = C (c^p)`: the digit matrix of a constant is the scalar `C c • 1`, so its
 determinant (`= 𝒩`) is `(C c)^p = C (c^p)`. -/
@@ -1598,13 +1594,11 @@ theorem dlog_eq_zero_normOp_fixed {g : PowerSeries ℤ_[p]} (hg : IsUnit g)
   -- `dlog g = (1+X)·g'·g⁻¹ = 0`; cancel the two units `(1+X)` and `Ring.inverse g`
   have hgz : PowerSeries.derivativeFun g = 0 := by
     have hd' : (1 + PowerSeries.X) * PowerSeries.derivativeFun g * Ring.inverse g = 0 := hd
-    have hmulg : (1 + PowerSeries.X) * PowerSeries.derivativeFun g
-        * (Ring.inverse g * g) = 0 := by rw [← mul_assoc, hd', zero_mul]
-    rw [Ring.inverse_mul_cancel _ hg, mul_one] at hmulg
-    rcases hunit1.exists_left_inv with ⟨u, hu⟩
-    have := congrArg (fun x => u * x) hmulg
-    simp only [mul_zero, ← mul_assoc, hu, one_mul] at this
-    exact this
+    rw [mul_eq_zero, mul_eq_zero] at hd'
+    rcases hd' with (h1 | h2) | h3
+    · exact absurd h1 hunit1.ne_zero
+    · exact h2
+    · exact absurd h3 (isUnit_ringInverse.mpr hg).ne_zero
   set c := PowerSeries.constantCoeff (R := ℤ_[p]) g with hc
   have hgC : g = PowerSeries.C c := eq_C_constantCoeff_of_derivativeFun_zero p g hgz
   refine ⟨c, ?_, hgC⟩
