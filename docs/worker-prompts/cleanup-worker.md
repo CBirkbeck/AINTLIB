@@ -21,10 +21,11 @@ Loop until your lane is empty or a freeze is active:
    None → exit. Else take the lowest number and
    `gh issue edit <n> --repo CBirkbeck/AINTLIB --add-assignee @me --add-label state:in-progress --remove-label state:todo`,
    then comment "claimed". If the edit shows it's already assigned, re-query (someone beat you).
-3. **Work.** `git fetch origin main`; create branch `cleanup/<n>` off `origin/main`. Read the issue body
-   for the target declaration(s)/file. **If the target's proof contains a `sorry`, skip it** — comment,
-   relabel `state:in-progress`→`state:todo`, unassign — `sorry`s are the owning producer's WIP, never
-   fleet work. Otherwise run **`/cleanup`** on that target.
+3. **Work.** `git fetch origin main`; create branch `cleanup/<n>` off `origin/main`. The issue targets a
+   whole **file**. Run **`/cleanup` on that file** — it golfs *every* declaration in it, so you clean many
+   lemmas in one ticket. **Skip any individual declaration whose proof contains a `sorry`** (leave it
+   untouched — it's the producer's WIP); clean all the sorry-free ones. If the whole file is WIP/`sorry`
+   with nothing to clean, comment + relabel `state:in-progress`→`state:todo`, unassign, move on.
 4. **Verify (hard bar — do not merge otherwise):** `lake build <lib>` green; **zero new `sorry`**;
    `#print axioms` on the touched declarations shows only `propext` / `Classical.choice` / `Quot.sound`.
    If you can't meet the bar, comment why, relabel `state:in-progress`→`state:todo`, unassign, move on.
