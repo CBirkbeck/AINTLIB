@@ -178,6 +178,16 @@ variable {M M' M'' : Type*}
   [AddCommGroup M'] [Module (IwasawaAlgebra 𝒪) M'] [Module.Finite (IwasawaAlgebra 𝒪) M']
   [AddCommGroup M''] [Module (IwasawaAlgebra 𝒪) M''] [Module.Finite (IwasawaAlgebra 𝒪) M'']
 
+/-- A **finite** `Λ`-module vanishes locally at a height-one prime: `localMult P F = 0`.  Its
+annihilator has finite index (the faithful action of `Λ/Ann F` embeds it into the finite
+`End F`), so `Ann F` is not contained in the height-one prime `P` (`Λ/P` is an infinite
+one-dimensional domain); hence `F_P = 0`. -/
+theorem localMult_eq_zero_of_finite [IsDomain 𝒪] [IsPrincipalIdealRing 𝒪]
+    (P : Ideal (IwasawaAlgebra 𝒪)) [P.IsPrime] (hP1 : P.height = 1)
+    (F : Type*) [AddCommGroup F] [Module (IwasawaAlgebra 𝒪) F] [Finite F] :
+    localMult 𝒪 P F = 0 := by
+  sorry
+
 /-- **`localMult` is a pseudo-isomorphism invariant.**  At a height-one prime `P`, the finite
 kernel and cokernel of the comparison map `M → M'` vanish on localising (a finite Λ-module
 localises to `0` away from the maximal ideal — its annihilator has finite index, hence is not
@@ -187,7 +197,24 @@ im f → 0` and `0 → im f → M' → coker f → 0`. -/
 theorem localMult_eq_of_pseudoIso [IsDomain 𝒪] [IsPrincipalIdealRing 𝒪]
     (P : Ideal (IwasawaAlgebra 𝒪)) [P.IsPrime] (hP1 : P.height = 1)
     (h : IsPseudoIso 𝒪 M M') : localMult 𝒪 P M = localMult 𝒪 P M' := by
-  sorry
+  obtain ⟨f, hker, hcoker⟩ := h
+  -- the finite cokernel vanishes at the height-one prime `P`
+  have hcz : localMult 𝒪 P (M' ⧸ LinearMap.range f) = 0 := localMult_eq_zero_of_finite P hP1 _
+  -- the finite kernel of `f.rangeRestrict` (= ker f) vanishes
+  haveI : Finite (LinearMap.ker f.rangeRestrict) := by
+    rw [LinearMap.ker_rangeRestrict]; exact hker
+  have hkz : localMult 𝒪 P (LinearMap.ker f.rangeRestrict) = 0 := localMult_eq_zero_of_finite P hP1 _
+  -- `0 → ker f → M → im f → 0` gives `localMult M = localMult (im f)`
+  have e1 : localMult 𝒪 P M = localMult 𝒪 P (LinearMap.range f) := by
+    rw [localMult_add_of_exact 𝒪 P (LinearMap.ker f.rangeRestrict).subtype f.rangeRestrict
+      (Submodule.injective_subtype _) (LinearMap.surjective_rangeRestrict f)
+      (LinearMap.exact_subtype_ker_map f.rangeRestrict), hkz, zero_add]
+  -- `0 → im f → M' → coker f → 0` gives `localMult M' = localMult (im f)`
+  have e2 : localMult 𝒪 P M' = localMult 𝒪 P (LinearMap.range f) := by
+    rw [localMult_add_of_exact 𝒪 P (LinearMap.range f).subtype (LinearMap.range f).mkQ
+      (Submodule.injective_subtype _) (Submodule.mkQ_surjective _)
+      (LinearMap.exact_subtype_mkQ _), hcz, add_zero]
+  rw [e1, e2]
 
 /-- **Well-definedness of the characteristic ideal**: it depends only on the
 pseudo-isomorphism class of `M` (`localMult_eq_of_pseudoIso` at each height-one prime).  In
