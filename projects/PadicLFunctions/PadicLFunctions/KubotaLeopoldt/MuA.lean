@@ -57,8 +57,7 @@ lemma constantCoeff_geomSum (a : ℕ) : constantCoeff (geomSum p a) = (a : ℤ_[
 
 lemma geomSum_mul_X (a : ℕ) : geomSum p a * X = (1 + X) ^ a - 1 := by
   have h := geom_sum_mul (1 + X : PowerSeries ℤ_[p]) a
-  rw [add_sub_cancel_left] at h
-  exact h
+  rwa [add_sub_cancel_left] at h
 
 lemma isUnit_geomSum {a : ℕ} (hpa : ¬ p ∣ a) : IsUnit (geomSum p a) := by
   rw [PowerSeries.isUnit_iff_constantCoeff, constantCoeff_geomSum]
@@ -157,9 +156,8 @@ lemma dirac_natCast_sub_one_ne_zero {a : ℕ} (ha : a ≠ 0) :
     binomialSeries_nat, sub_eq_zero] at h2
   have h3 := congrArg (PowerSeries.coeff 1) h2
   rw [show ((1 : PowerSeries ℤ_[p]) + X) ^ a = ((1 + Polynomial.X : Polynomial ℤ_[p]) ^ a :
-      Polynomial ℤ_[p]).toPowerSeries by push_cast [Polynomial.coe_one, Polynomial.coe_X]; ring]
-    at h3
-  rw [Polynomial.coeff_coe, Polynomial.coeff_one_add_X_pow] at h3
+      Polynomial ℤ_[p]).toPowerSeries by push_cast [Polynomial.coe_one, Polynomial.coe_X]; ring,
+    Polynomial.coeff_coe, Polynomial.coeff_one_add_X_pow] at h3
   simp at h3
   omega
 
@@ -214,9 +212,8 @@ lemma constantCoeff_subst_exp (F : PowerSeries ℚ_[p]) :
       = MvPowerSeries.constantCoeff (F.subst (exp ℚ_[p] - 1)) from rfl,
     constantCoeff_subst (hasSubst_exp_sub_one p),
     finsum_eq_single _ 0 fun d hd => by
-      have h0 : MvPowerSeries.constantCoeff (exp ℚ_[p] - 1) = (0 : ℚ_[p]) := by
-        have h1 : PowerSeries.constantCoeff (exp ℚ_[p] - 1) = (0 : ℚ_[p]) := by simp
-        exact h1
+      have h0 : MvPowerSeries.constantCoeff (exp ℚ_[p] - 1) = (0 : ℚ_[p]) :=
+        show PowerSeries.constantCoeff (exp ℚ_[p] - 1) = 0 by simp
       rw [map_pow, h0, zero_pow hd, smul_zero]]
   simp
 
@@ -258,8 +255,7 @@ lemma X_mul_subst_exp_Fa {a : ℕ} (hpa : ¬ p ∣ a) :
     intro h
     have h1 := congrArg (PowerSeries.coeff 1) h
     rw [map_sub, coeff_rescale, PowerSeries.coeff_exp, PowerSeries.coeff_one] at h1
-    have h2 : ((a : ℕ) : ℚ_[p]) = 0 := by simpa [Nat.factorial] using h1
-    exact haN (Nat.cast_eq_zero.mp h2)
+    exact ha0 (by simpa [Nat.factorial] using h1)
   have hX : (substAlgHom hg) (X : PowerSeries ℚ_[p]) = exp ℚ_[p] - 1 := by
     rw [show ⇑(substAlgHom hg) = PowerSeries.subst (exp ℚ_[p] - 1) from coe_substAlgHom hg]
     exact subst_X hg
@@ -349,9 +345,7 @@ theorem muA_apply_powCM {a : ℕ} (hpa : ¬ p ∣ a) (k : ℕ) :
   simp only [map_div₀, map_mul, map_pow, map_neg, map_add, map_one, map_natCast]
   have hfact : (((k + 1).factorial : ℕ) : ℚ_[p])
       = ((k + 1 : ℕ) : ℚ_[p]) * (k.factorial : ℚ_[p]) := by
-    rw [Nat.factorial_succ]
-    push_cast
-    ring
+    push_cast [Nat.factorial_succ]; ring
   have hk1 : (((k + 1 : ℕ)) : ℚ_[p]) ≠ 0 := Nat.cast_ne_zero.2 (Nat.succ_ne_zero k)
   have hkf : ((k.factorial : ℕ) : ℚ_[p]) ≠ 0 := Nat.cast_ne_zero.2 k.factorial_ne_zero
   rw [hfact]
@@ -555,10 +549,9 @@ theorem psi_muA {a : ℕ} (hpa : ¬ p ∣ a) : psi p (muA p a) = muA p a := by
 lemma phi_apply_powCM (μ : PadicMeasure p ℤ_[p]) (k : ℕ) :
     phi p μ (powCM p k) = (p : ℤ_[p]) ^ k * μ (powCM p k) := by
   change μ ((powCM p k).comp (mulCM p (p : ℤ_[p]))) = (p : ℤ_[p]) ^ k * μ (powCM p k)
-  have hfun : (powCM p k).comp (mulCM p (p : ℤ_[p])) = (p : ℤ_[p]) ^ k • powCM p k := by
-    ext x
-    simp [powCM, mulCM, mul_pow]
-  rw [hfun, map_smul, smul_eq_mul]
+  rw [show (powCM p k).comp (mulCM p (p : ℤ_[p])) = (p : ℤ_[p]) ^ k • powCM p k by
+        ext x; simp [powCM, mulCM, mul_pow],
+    map_smul, smul_eq_mul]
 
 /-- **RJW Prop. 4.8 (`PropInterpolation1`)**: restricting to `ℤ_p^×` removes the
 Euler factor at `p`:
