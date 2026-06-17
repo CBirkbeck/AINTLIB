@@ -276,6 +276,9 @@ theorem twoCurve_ord_conorm_eq_sum_fiber
       φ.toAlgebra.toModule)
     (hsep : @Algebra.IsSeparable W₂.toAffine.FunctionField W₁.toAffine.FunctionField _ _
       φ.toAlgebra)
+    (hreg : ∀ f : (⟨W₂⟩ : SmoothPlaneCurve F).FunctionField,
+      0 ≤ (⟨W₂⟩ : SmoothPlaneCurve F).ordAtInfty f →
+      0 ≤ (⟨W₁⟩ : SmoothPlaneCurve F).ordAtInfty (φ.pullback f))
     {w : (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing} (hw : w ≠ 0)
     (Q : (⟨W₂⟩ : SmoothPlaneCurve F).SmoothPoint) :
     (⟨W₂⟩ : SmoothPlaneCurve F).ord_P Q (conorm φ
@@ -305,6 +308,9 @@ theorem placeRestrictionPushforward_projectiveDivisorOf_algebraMap
       φ.toAlgebra.toModule)
     (hsep : @Algebra.IsSeparable W₂.toAffine.FunctionField W₁.toAffine.FunctionField _ _
       φ.toAlgebra)
+    (hreg : ∀ f : (⟨W₂⟩ : SmoothPlaneCurve F).FunctionField,
+      0 ≤ (⟨W₂⟩ : SmoothPlaneCurve F).ordAtInfty f →
+      0 ≤ (⟨W₁⟩ : SmoothPlaneCurve F).ordAtInfty (φ.pullback f))
     {w : (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing} (hw : w ≠ 0) :
     placeRestrictionPushforward φ ((⟨W₁⟩ : SmoothPlaneCurve F).projectiveDivisorOf
         (algebraMap (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing
@@ -327,7 +333,7 @@ theorem placeRestrictionPushforward_projectiveDivisorOf_algebraMap
       RHS (ProjectiveSmoothPoint.affine Q) = LHS (ProjectiveSmoothPoint.affine Q) := by
     intro Q
     rw [hRHS_def, (⟨W₂⟩ : SmoothPlaneCurve F).projectiveDivisorOf_apply_affine,
-      twoCurve_ord_conorm_eq_sum_fiber φ hfin hsep hw Q, WithTop.untopD_coe, hLHS_def]
+      twoCurve_ord_conorm_eq_sum_fiber φ hfin hsep hreg hw Q, WithTop.untopD_coe, hLHS_def]
   -- Infinity coefficient forced by degree (both projective divisors have degree 0).
   apply Finsupp.ext
   intro v
@@ -379,11 +385,14 @@ theorem placeRestrictionPushforward_projectiveDivisorOf
       φ.toAlgebra.toModule)
     (hsep : @Algebra.IsSeparable W₂.toAffine.FunctionField W₁.toAffine.FunctionField _ _
       φ.toAlgebra)
+    (hreg : ∀ f : (⟨W₂⟩ : SmoothPlaneCurve F).FunctionField,
+      0 ≤ (⟨W₂⟩ : SmoothPlaneCurve F).ordAtInfty f →
+      0 ≤ (⟨W₁⟩ : SmoothPlaneCurve F).ordAtInfty (φ.pullback f))
     (f : W₁.toAffine.FunctionField) :
     placeRestrictionPushforward φ ((⟨W₁⟩ : SmoothPlaneCurve F).projectiveDivisorOf f) =
       (⟨W₂⟩ : SmoothPlaneCurve F).projectiveDivisorOf (conorm φ f) :=
   placeRestrictionPushforward_projectiveDivisorOf_of_algebraMap φ hfin
-    (fun w hw => placeRestrictionPushforward_projectiveDivisorOf_algebraMap φ hfin hsep hw) f
+    (fun w hw => placeRestrictionPushforward_projectiveDivisorOf_algebraMap φ hfin hsep hreg hw) f
 
 /-- **`PlaceRestrictionPreservesPrincipal` (Silverman II.3.6/II.3.7), separable case** — the single
 remaining wall of char-0 isogeny symmetry, CoordHom-free.  Given that `K(E₁)/φ*K(E₂)` is finite and
@@ -395,13 +404,16 @@ theorem placeRestrictionPreservesPrincipal_of_finite_separable
     (hfin : @FiniteDimensional W₂.toAffine.FunctionField W₁.toAffine.FunctionField _ _
       φ.toAlgebra.toModule)
     (hsep : @Algebra.IsSeparable W₂.toAffine.FunctionField W₁.toAffine.FunctionField _ _
-      φ.toAlgebra) :
+      φ.toAlgebra)
+    (hreg : ∀ f : (⟨W₂⟩ : SmoothPlaneCurve F).FunctionField,
+      0 ≤ (⟨W₂⟩ : SmoothPlaneCurve F).ordAtInfty f →
+      0 ≤ (⟨W₁⟩ : SmoothPlaneCurve F).ordAtInfty (φ.pullback f)) :
     PlaceRestrictionPreservesPrincipal φ := by
   intro D hD
   obtain ⟨f, hf_ne, hfD⟩ := hD
   refine ⟨conorm φ f, conorm_ne_zero φ hf_ne, ?_⟩
   rw [← hfD]
-  exact (placeRestrictionPushforward_projectiveDivisorOf φ hfin hsep f).symm
+  exact (placeRestrictionPushforward_projectiveDivisorOf φ hfin hsep hreg f).symm
 
 /-- **`PlaceRestrictionPreservesPrincipal` from separability alone (the wall's clean form).**  The
 finite-dimensionality hypothesis is automatic (`isogeny_finiteDimensional_twoCurve`), so the single
@@ -411,9 +423,12 @@ remaining wall of char-0 isogeny symmetry rests on *separability* of `φ` alone 
 theorem placeRestrictionPreservesPrincipal_of_separable
     (φ : HasseWeil.Isogeny W₁ W₂)
     (hsep : @Algebra.IsSeparable W₂.toAffine.FunctionField W₁.toAffine.FunctionField _ _
-      φ.toAlgebra) :
+      φ.toAlgebra)
+    (hreg : ∀ f : (⟨W₂⟩ : SmoothPlaneCurve F).FunctionField,
+      0 ≤ (⟨W₂⟩ : SmoothPlaneCurve F).ordAtInfty f →
+      0 ≤ (⟨W₁⟩ : SmoothPlaneCurve F).ordAtInfty (φ.pullback f)) :
     PlaceRestrictionPreservesPrincipal φ :=
   placeRestrictionPreservesPrincipal_of_finite_separable φ
-    (isogeny_finiteDimensional_twoCurve φ) hsep
+    (isogeny_finiteDimensional_twoCurve φ) hsep hreg
 
 end HasseWeil.WeilPairing

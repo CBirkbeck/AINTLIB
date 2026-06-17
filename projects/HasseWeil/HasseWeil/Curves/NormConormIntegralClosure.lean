@@ -116,14 +116,26 @@ This is the integral-closure analogue of the affine `coordRing_mem_integralClosu
 content is the genuine geometric input (regularity of the coordinate functions at all places
 over the affine part of `C₂`); everything downstream is structural. -/
 
+/-- The basepoint-regularity hypothesis: the function-field map `K(C₂) → K(C₁)` (the pullback of
+the underlying isogeny) carries functions regular at `∞` of `C₂` to functions regular at `∞` of
+`C₁` (i.e. the morphism is defined at the basepoint `O₁`, mapping it to `O₂`).  This is the spelled
+form of `EC.Isogeny.pullback_ordAtInfty_nonneg` / `EC.Isogeny.reflects_ordAtInfty` for the abstract
+algebra `algKL`.  It is the single geometric input that pins the *only* pole of the coordinate
+generators of `C₁` (at `∞` of `C₁`) to lie over `∞` of `C₂`, hence away from every affine place. -/
+abbrev OrdAtInftyReg : Prop :=
+  ∀ f : C₂.FunctionField, 0 ≤ C₂.ordAtInfty f →
+    0 ≤ C₁.ordAtInfty (algebraMap C₂.FunctionField C₁.FunctionField f)
+
 /-- **The `x`-generator of `C₁` is integral over `C₂.CoordinateRing`** (regular at every place
-of `C₁` over an affine place of `C₂`). -/
-theorem coordXFun_mem_B :
+of `C₁` over an affine place of `C₂`).  Needs the basepoint-regularity `hreg` (its only pole, at
+`∞` of `C₁`, lies over `∞` of `C₂`). -/
+theorem coordXFun_mem_B (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂)) :
     coordXFun C₁ ∈ (B (C₁ := C₁) (C₂ := C₂)) := by
   sorry
 
-/-- **The `y`-generator of `C₁` is integral over `C₂.CoordinateRing`.** -/
-theorem coordYFun_mem_B :
+/-- **The `y`-generator of `C₁` is integral over `C₂.CoordinateRing`.**  Needs the
+basepoint-regularity `hreg`. -/
+theorem coordYFun_mem_B (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂)) :
     coordYFun C₁ ∈ (B (C₁ := C₁) (C₂ := C₂)) := by
   sorry
 
@@ -131,9 +143,9 @@ theorem coordYFun_mem_B :
 for every `r ∈ F[C₁]`, the image `algebraMap r ∈ K(C₁)` is integral over `C₂.CoordinateRing`.
 Built from the two generator integralities via `LocalizedDictionary.coordRing_mem_integralClosure`
 (at the trivial localization `Af := C₂.CoordinateRing`). -/
-theorem coordRing_mem_B (r : C₁.CoordinateRing) :
+theorem coordRing_mem_B (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂)) (r : C₁.CoordinateRing) :
     algebraMap C₁.CoordinateRing C₁.FunctionField r ∈ (B (C₁ := C₁) (C₂ := C₂)) :=
-  coordRing_mem_integralClosure C₂ C₂.CoordinateRing coordXFun_mem_B coordYFun_mem_B r
+  coordRing_mem_integralClosure C₂ C₂.CoordinateRing (coordXFun_mem_B hreg) (coordYFun_mem_B hreg) r
 
 /-! ### Inertia degree `1` and the `s = 1` core over `B` (T-A2 core) -/
 
