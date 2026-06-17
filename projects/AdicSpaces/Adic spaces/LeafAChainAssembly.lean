@@ -163,6 +163,32 @@ theorem domUnit_invDenom_mem_completedPlus (D₀ : RationalLocData A) {t : A} (h
   rw [heq]
   exact D₀.coeRingHom_mem_completedPlusSubring (D₀.divByS_mem_locPlusSubring ht)
 
+/-- **`sB`-relative `h_pb` discharge** — `canMap u · (canMap sB)⁻¹ ∈ D⁺` whenever `sB` divides the
+denominator (`D.s = sB·c`) and the witness `u·c ∈ D.T`. Reduces to `domUnit_invDenom_mem_completedPlus`
+at `u·c` over `D.s` via the cofactor identity `u/sB = (u·c)/D.s` (`canMap c` is a unit since `c ∣ D.s`).
+This is what discharges each chain step's `h_pb`: `interSamePair` multiplies denoms so `Xⱼ.s = sB^{j+1}`,
+but the product structure keeps `↑u·sB^j ∈ Xⱼ.T`, so `↑u/sB` is structural at every piece. -/
+theorem domUnit_invDenom_mem_completedPlus_general (D : RationalLocData A) (u sB c : A)
+    (hs : D.s = sB * c) (hmem : u * c ∈ D.T) :
+    D.canonicalMap u * Ring.inverse (D.canonicalMap sB) ∈ D.completedPlusSubring := by
+  have hsc : D.canonicalMap D.s = D.canonicalMap sB * D.canonicalMap c := by rw [hs, map_mul]
+  have hc_unit : IsUnit (D.canonicalMap c) :=
+    isUnit_of_mul_isUnit_right (hsc ▸ D.canonicalMap_s_isUnit)
+  have heq : D.canonicalMap u * Ring.inverse (D.canonicalMap sB) =
+      D.canonicalMap (u * c) * Ring.inverse (D.canonicalMap D.s) := by
+    rw [map_mul, hsc, Ring.mul_inverse_rev, ← mul_assoc,
+      mul_assoc (D.canonicalMap u) (D.canonicalMap c) (Ring.inverse (D.canonicalMap c)),
+      Ring.mul_inverse_cancel _ hc_unit, mul_one]
+  rw [heq]
+  exact domUnit_invDenom_mem_completedPlus D hmem
+
+/-- `sB` is a unit in `𝒪(D)` when it divides the denominator `D.s` (`D.s = sB·c`). -/
+theorem canonicalMap_isUnit_of_dvd_s (D : RationalLocData A) (sB c : A) (hs : D.s = sB * c) :
+    IsUnit (D.canonicalMap sB) :=
+  isUnit_of_mul_isUnit_left
+    (show IsUnit (D.canonicalMap sB * D.canonicalMap c) by
+      rw [← map_mul, ← hs]; exact D.canonicalMap_s_isUnit)
+
 /-- **Whole-space Prop 8.30 (Remark 7.55 chain), assembled downstream.**
 `𝒪_B(im E)` is flat over `B = 𝒪_X(D)`, for `im E = imagePieceDatum D E.T E.s` the whole-space
 image of a `span = ⊤` rational piece. Proven by folding `flat_chainStep_domUnit` over `E.T`'s
