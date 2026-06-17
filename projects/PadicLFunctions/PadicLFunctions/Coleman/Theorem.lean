@@ -378,8 +378,7 @@ private theorem quot_mem_O {n : ℕ} (hn : 1 ≤ n) {r : ℂ_[p]} (hr : r ∈ O 
     exact IntermediateField.algebraMap_mem (K p n) _
   refine ⟨(K p n).div_mem (sub_mem hrK htoCpaK) (pi_mem_K p n), ?_⟩
   change ‖(r - toCp p a) / pi p n‖ ≤ 1
-  rw [norm_div, div_le_one (by rw [norm_pos_iff]; exact pi_ne_zero p hn)]
-  exact hres
+  rwa [norm_div, div_le_one (by rw [norm_pos_iff]; exact pi_ne_zero p hn)]
 
 /-- A single term `‖q‖·‖π_n‖^i` of the orthogonal expansion (`q : ℚ_p`, `1 ≤ i < φ(p^n)`)
 that is `≤ 1` is in fact `≤ ‖π_n‖`. Raising to the totient `M = φ(p^n)` and using
@@ -744,8 +743,7 @@ private theorem linearIndependent_zetaPow {n : ℕ} (hn : 1 ≤ n) :
   have hzero := O_succ_digits_unique p hn (c := fun k => ((e k : K p n) : ℂ_[p]))
     (c' := fun _ => 0) (fun k => (e k).2) (fun _ => zero_mem _)
     (by simpa using hproj)
-  have := congrFun hzero i
-  simpa using Subtype.ext this
+  simpa using Subtype.ext (congrFun hzero i)
 
 set_option synthInstance.maxHeartbeats 1000000 in
 -- the module/basis synthesis through the nested `IntermediateField (K p n) (extendScalars …)`
@@ -985,11 +983,11 @@ theorem coleman_existsUnique (u : NormCompatUnits p) :
     if hm : 1 ≤ m then (hlevel m hm).choose else 1 with hF
   have hF_unit : ∀ m, IsUnit (F m) := by
     intro m
-    rcases Nat.eq_zero_or_pos m with hm0 | hm0
-    · simp only [hF]; rw [dif_neg (show ¬ 1 ≤ m by omega)]; exact isUnit_one
-    · simp only [hF]; rw [dif_pos (show 1 ≤ m by omega)]; exact (hlevel m (by omega)).choose_spec.1
+    by_cases hm : 1 ≤ m
+    · simp only [hF, dif_pos hm]; exact (hlevel m hm).choose_spec.1
+    · simp only [hF, dif_neg hm]; exact isUnit_one
   have hF_eval : ∀ m, 1 ≤ m → evalPi p (F m) m = (u.elems m : ℂ_[p]) := by
-    intro m hm; simp only [hF]; rw [dif_pos hm]; exact (hlevel m hm).choose_spec.2
+    intro m hm; simp only [hF, dif_pos hm]; exact (hlevel m hm).choose_spec.2
   -- (b) the norm-iterate evaluation `𝒩^{[k]} F_{n+k}(π_n) = u_n` for `n ≥ 1`
   have hiter : ∀ k n, 1 ≤ n → evalPi p (normOp^[k] (F (n + k))) n = (u.elems n : ℂ_[p]) := by
     intro k
