@@ -251,12 +251,66 @@ theorem mul_isotypicIdempotent [Invertible (Fintype.card H : 𝒪)] (ω : H →*
     s * isotypicIdempotent 𝒪 H ω
       = algebraMap (IwasawaAlgebra 𝒪) (IwasawaAlgebraGroup 𝒪 H) (charAugmentation 𝒪 H ω s)
         * isotypicIdempotent 𝒪 H ω := by
-  sorry
+  have hcomm : ∀ r : IwasawaAlgebra 𝒪,
+      charAugmentation 𝒪 H ω (algebraMap (IwasawaAlgebra 𝒪) (IwasawaAlgebraGroup 𝒪 H) r) = r := by
+    intro r
+    rw [charAugmentation, AlgHom.toRingHom_eq_coe, RingHom.coe_coe,
+      show (algebraMap (IwasawaAlgebra 𝒪) (IwasawaAlgebraGroup 𝒪 H) r)
+          = MonoidAlgebra.single 1 r from by rw [MonoidAlgebra.coe_algebraMap]; simp,
+      MonoidAlgebra.lift_single]
+    simp
+  induction s using MonoidAlgebra.induction_on with
+  | hM a =>
+    rw [show (MonoidAlgebra.of (IwasawaAlgebra 𝒪) H) a = MonoidAlgebra.single a 1 from rfl,
+      charAugmentation_single, one_mul,
+      show (algebraMap (IwasawaAlgebra 𝒪) (IwasawaAlgebraGroup 𝒪 H))
+            (algebraMap 𝒪 (IwasawaAlgebra 𝒪) ((ω a : 𝒪)))
+          = MonoidAlgebra.single (1 : H) (algebraMap 𝒪 (IwasawaAlgebra 𝒪) ((ω a : 𝒪)))
+        from by rw [MonoidAlgebra.coe_algebraMap]; simp]
+    unfold isotypicIdempotent
+    rw [Finset.mul_sum, Finset.mul_sum]
+    simp_rw [MonoidAlgebra.single_mul_single, one_mul]
+    rw [← Equiv.sum_comp (Equiv.mulLeft a) (fun g : H => MonoidAlgebra.single g
+        (algebraMap 𝒪 (IwasawaAlgebra 𝒪) ((ω a : 𝒪))
+          * algebraMap 𝒪 (IwasawaAlgebra 𝒪) (⅟(Fintype.card H : 𝒪) * ((ω g)⁻¹ : 𝒪ˣ))))]
+    refine Finset.sum_congr rfl fun b _ => ?_
+    simp only [Equiv.coe_mulLeft]
+    congr 1
+    have hkey : ((ω (a * b))⁻¹ : 𝒪ˣ) = (ω a)⁻¹ * (ω b)⁻¹ := by
+      rw [map_mul, mul_inv]
+    rw [hkey, Units.val_mul, ← map_mul]
+    congr 1
+    have hωa : ((ω a : 𝒪ˣ) : 𝒪) * (((ω a)⁻¹ : 𝒪ˣ) : 𝒪) = 1 := by
+      rw [← Units.val_mul, mul_inv_cancel, Units.val_one]
+    rw [show ((ω a : 𝒪ˣ) : 𝒪) * (⅟(Fintype.card H : 𝒪)
+          * ((((ω a)⁻¹ : 𝒪ˣ) : 𝒪) * (((ω b)⁻¹ : 𝒪ˣ) : 𝒪)))
+        = (((ω a : 𝒪ˣ) : 𝒪) * (((ω a)⁻¹ : 𝒪ˣ) : 𝒪))
+          * (⅟(Fintype.card H : 𝒪) * (((ω b)⁻¹ : 𝒪ˣ) : 𝒪)) by ring,
+      hωa, one_mul]
+  | hadd x y hx hy =>
+    rw [map_add, map_add, add_mul, hx, hy, add_mul]
+  | hsmul r x hx =>
+    rw [Algebra.smul_def, map_mul, hcomm, mul_assoc, hx, map_mul, mul_assoc]
 
 /-- The idempotent `e_ω` is nonzero — its ω-augmentation is `1`. -/
 theorem isotypicIdempotent_ne_zero [Nontrivial 𝒪] [Invertible (Fintype.card H : 𝒪)]
     (ω : H →* 𝒪ˣ) : isotypicIdempotent 𝒪 H ω ≠ 0 := by
-  sorry
+  have key : charAugmentation 𝒪 H ω (isotypicIdempotent 𝒪 H ω) = 1 := by
+    unfold isotypicIdempotent
+    rw [map_sum]
+    have hterm : ∀ a : H, charAugmentation 𝒪 H ω (MonoidAlgebra.single a
+        (algebraMap 𝒪 (IwasawaAlgebra 𝒪) (⅟(Fintype.card H : 𝒪) * ((ω a)⁻¹ : 𝒪ˣ))))
+        = algebraMap 𝒪 (IwasawaAlgebra 𝒪) (⅟(Fintype.card H : 𝒪)) := by
+      intro a
+      rw [charAugmentation_single, ← map_mul]
+      congr 1
+      rw [mul_assoc, Units.inv_mul, mul_one]
+    rw [Finset.sum_congr rfl (fun a _ => hterm a), Finset.sum_const, Finset.card_univ,
+      nsmul_eq_mul, ← map_natCast (algebraMap 𝒪 (IwasawaAlgebra 𝒪)), ← map_mul,
+      mul_invOf_self, map_one]
+  intro h
+  have h1 : (1 : IwasawaAlgebra 𝒪) = 0 := by rw [← key, h, map_zero]
+  exact one_ne_zero h1
 
 /-- Each isotypic component `M^{(ω)}` is **torsion over `Λ`** (RJW TeX 3669): the `Λ(𝒢)`-action
 factors through `φ_ω`, and a non-zero-divisor `s` with `s•x = 0` has `φ_ω(s) ≠ 0` (else
@@ -268,7 +322,40 @@ theorem isotypicComponent_isTorsion_Λ [IsDomain 𝒪] [Invertible (Fintype.card
     Module.IsTorsion (IwasawaAlgebra 𝒪)
       (RestrictScalars (IwasawaAlgebra 𝒪) (IwasawaAlgebraGroup 𝒪 H)
         ↥(isotypicComponent 𝒪 H ω M)) := by
-  sorry
+  haveI : IsDomain (IwasawaAlgebra 𝒪) := inferInstance
+  intro x
+  set e := RestrictScalars.addEquiv (IwasawaAlgebra 𝒪) (IwasawaAlgebraGroup 𝒪 H)
+    ↥(isotypicComponent 𝒪 H ω M) with he
+  -- the underlying submodule element and its image in M
+  set xs : ↥(isotypicComponent 𝒪 H ω M) := e x with hxs
+  obtain ⟨m, hm⟩ : ∃ m, isotypicIdempotent 𝒪 H ω • m = (xs : M) := by
+    have hmem := xs.2
+    simp only [isotypicComponent, LinearMap.mem_range] at hmem
+    obtain ⟨m, hmeq⟩ := hmem
+    exact ⟨m, by rw [← LinearMap.lsmul_apply]; exact hmeq⟩
+  obtain ⟨s, hs⟩ := hM (x := (xs : M))
+  -- φ_ω s is a nonzerodivisor (it is nonzero, else e_ω = 0)
+  have ha_ne : charAugmentation 𝒪 H ω s ≠ 0 := by
+    intro hzero
+    have hse : (s : IwasawaAlgebraGroup 𝒪 H) * isotypicIdempotent 𝒪 H ω = 0 := by
+      rw [mul_isotypicIdempotent, hzero, map_zero, zero_mul]
+    have he0 : isotypicIdempotent 𝒪 H ω = 0 :=
+      (mem_nonZeroDivisors_iff.mp s.2).1 _ hse
+    exact isotypicIdempotent_ne_zero 𝒪 H ω he0
+  -- the Λ-annihilator
+  refine ⟨⟨charAugmentation 𝒪 H ω s, mem_nonZeroDivisors_of_ne_zero ha_ne⟩, ?_⟩
+  -- the annihilation: reduce to the underlying submodule, then to M
+  apply (RestrictScalars.addEquiv (IwasawaAlgebra 𝒪) (IwasawaAlgebraGroup 𝒪 H)
+    ↥(isotypicComponent 𝒪 H ω M)).injective
+  rw [Submonoid.smul_def, RestrictScalars.smul_def, AddEquiv.apply_symm_apply, map_zero]
+  apply Subtype.ext
+  rw [ZeroMemClass.coe_zero, Submodule.coe_smul, ← hm]
+  rw [show ((⟨charAugmentation 𝒪 H ω s, mem_nonZeroDivisors_of_ne_zero ha_ne⟩ :
+        nonZeroDivisors (IwasawaAlgebra 𝒪)) : IwasawaAlgebra 𝒪)
+      = charAugmentation 𝒪 H ω (s : IwasawaAlgebraGroup 𝒪 H) from rfl]
+  rw [← mul_smul, ← mul_isotypicIdempotent, mul_smul, hm]
+  rw [Submonoid.smul_def] at hs
+  exact hs
 
 /-- Each isotypic component `M^{(ω)}` is **finitely generated over `Λ`** (RJW TeX 3669):
 `M` is f.g. over `Λ(𝒢)`, which is module-finite over the Noetherian `Λ`, so `M` is f.g. over
@@ -279,7 +366,46 @@ theorem isotypicComponent_finite_Λ [Invertible (Fintype.card H : 𝒪)] [IsNoet
     Module.Finite (IwasawaAlgebra 𝒪)
       (RestrictScalars (IwasawaAlgebra 𝒪) (IwasawaAlgebraGroup 𝒪 H)
         ↥(isotypicComponent 𝒪 H ω M)) := by
-  sorry
+  -- `Λ⟦H⟧` is module-finite over `Λ` (free of rank `|H|`)
+  haveI hΛ𝒢 : Module.Finite (IwasawaAlgebra 𝒪) (IwasawaAlgebraGroup 𝒪 H) :=
+    MonoidAlgebra.moduleFinite
+  -- `RestrictScalars Λ Λ⟦H⟧ M` is module-finite (hence Noetherian) over the Noetherian `Λ`.
+  -- (Scoped `letI`s give the intermediate `Λ⟦H⟧`-module structure on the restriction.)
+  haveI hRSfin : Module.Finite (IwasawaAlgebra 𝒪)
+      (RestrictScalars (IwasawaAlgebra 𝒪) (IwasawaAlgebraGroup 𝒪 H) M) := by
+    letI : Module (IwasawaAlgebraGroup 𝒪 H)
+        (RestrictScalars (IwasawaAlgebra 𝒪) (IwasawaAlgebraGroup 𝒪 H) M) :=
+      RestrictScalars.moduleOrig _ _ _
+    haveI : IsScalarTower (IwasawaAlgebra 𝒪) (IwasawaAlgebraGroup 𝒪 H)
+        (RestrictScalars (IwasawaAlgebra 𝒪) (IwasawaAlgebraGroup 𝒪 H) M) :=
+      RestrictScalars.isScalarTower _ _ _
+    haveI : Module.Finite (IwasawaAlgebraGroup 𝒪 H)
+        (RestrictScalars (IwasawaAlgebra 𝒪) (IwasawaAlgebraGroup 𝒪 H) M) := ‹Module.Finite _ M›
+    exact Module.Finite.trans (IwasawaAlgebraGroup 𝒪 H) _
+  haveI hNoeth : IsNoetherian (IwasawaAlgebra 𝒪)
+      (RestrictScalars (IwasawaAlgebra 𝒪) (IwasawaAlgebraGroup 𝒪 H) M) :=
+    @isNoetherian_of_isNoetherianRing_of_finite (IwasawaAlgebra 𝒪)
+      (RestrictScalars (IwasawaAlgebra 𝒪) (IwasawaAlgebraGroup 𝒪 H) M) _ _
+      (RestrictScalars.module (IwasawaAlgebra 𝒪) (IwasawaAlgebraGroup 𝒪 H) M) _ hRSfin
+  -- the carrier of `RestrictScalars Λ Λ⟦H⟧ ↥(M^{(ω)})` injects `Λ`-linearly into the Noetherian
+  -- `Λ`-module `RestrictScalars Λ Λ⟦H⟧ M` (the subtype inclusion), so it is finitely generated
+  let f : RestrictScalars (IwasawaAlgebra 𝒪) (IwasawaAlgebraGroup 𝒪 H)
+        ↥(isotypicComponent 𝒪 H ω M)
+      →ₗ[IwasawaAlgebra 𝒪]
+        RestrictScalars (IwasawaAlgebra 𝒪) (IwasawaAlgebraGroup 𝒪 H) M :=
+    { toFun := fun x => (RestrictScalars.addEquiv (IwasawaAlgebra 𝒪) (IwasawaAlgebraGroup 𝒪 H) M).symm
+        ((RestrictScalars.addEquiv (IwasawaAlgebra 𝒪) (IwasawaAlgebraGroup 𝒪 H)
+          ↥(isotypicComponent 𝒪 H ω M) x : M))
+      map_add' := fun x y => by
+        rw [map_add, Submodule.coe_add, map_add]
+      map_smul' := fun r x => by
+        simp only [RingHom.id_apply]
+        rw [RestrictScalars.smul_def, AddEquiv.apply_symm_apply, Submodule.coe_smul,
+          RestrictScalars.smul_def, AddEquiv.apply_symm_apply] }
+  have hf : Function.Injective f := by
+    intro x y hxy
+    simpa [f] using hxy
+  exact Module.Finite.of_injective f hf
 
 /-- The **`Λ`-characteristic ideal of the ω-component** `Ch_Λ(M^{(ω)}) ⊆ Λ` (S13-S4 applied to
 the finitely generated torsion `Λ`-module `M^{(ω)}`). -/

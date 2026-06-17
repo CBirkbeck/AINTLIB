@@ -6653,8 +6653,15 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
   **Source**: RJW 3652–3657, 3679–3681.
 
 #### [S13-S5] equivariant isotypic decomposition + `Ch_{Λ(𝒢)}`
-- **Status**: PARTIAL — idempotent algebra DONE; isInternal hit **B2**; charIdealGroup blocked on the B2 fix
+- **Status**: DONE (2026-06-18, sorry-free, axioms clean — B2 resolved)
   | **File**: Iwasawa/StructureTheory/Isotypic.lean | **Depends on**: S13-S4 | **Type**: def+theorem
+- **COMPLETE**: whole equivariant layer proven. `isInternal_isotypicComponent` (B2 fixed per RJW TeX 3665:
+  added `[IsDomain 𝒪] [Fintype (H →* 𝒪ˣ)]` + completeness hyp `∑_ω e_ω = 1`, i.e. μ_{|H|} ⊆ 𝒪), via new
+  general lemma `isInternal_range_lsmul_of_completeOrthogonalIdempotents` (complete orthogonal idempotents
+  decompose any module — not in mathlib). `charAugmentation` φ_ω, `mul_isotypicIdempotent` (s·e_ω = φ_ω(s)·e_ω),
+  `isotypicIdempotent_ne_zero`, `isotypicComponent_isTorsion_Λ` + `_finite_Λ` (each M^(ω) f.g. torsion Λ, CS06 A.1),
+  `charIdealComponent`, `charIdealGroup` = ⨅_ω comap φ_ω (Ch_Λ M^(ω)). The whole §13 Stage-S is now done bar the
+  (optional, §13-unneeded) S2-symm + S3 structure theorem.
 - `Λ(𝒢) ≅ 𝒪_L[H]⊗Λ` (H=μ_{p-1} prime-to-p); projectors `e_ω=|H|⁻¹Σω⁻¹(a)[a]`; `M=⊕_ω M^(ω)` each f.g. torsion Λ;
   `Ch_{Λ(𝒢)}(M):=⊕_ω Ch_Λ(M^(ω))`. **Reuse**: mathlib `RepresentationTheory` group-algebra idempotents. **Source**: RJW 3659–3676 (CS06 A.1).
 - **DONE (2026-06-17, sorry-free, axioms clean)**: `isotypicIdempotent` (def), `isotypicComponent` (def, = range e_ω•·),
