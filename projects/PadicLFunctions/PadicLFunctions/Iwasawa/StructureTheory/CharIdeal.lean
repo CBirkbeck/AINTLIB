@@ -9,6 +9,9 @@ import Mathlib.Algebra.Module.Torsion.Basic
 import Mathlib.RingTheory.Support
 import Mathlib.RingTheory.Ideal.MinimalPrime.Noetherian
 import Mathlib.RingTheory.Ideal.KrullsHeightTheorem
+import Mathlib.RingTheory.IntegralDomain
+import Mathlib.RingTheory.KrullDimension.NonZeroDivisors
+import Mathlib.RingTheory.DiscreteValuationRing.TFAE
 
 /-!
 # The characteristic ideal and its multiplicativity  (S13-S4)
@@ -192,19 +195,37 @@ finite `F = 𝒪` has `localMult P F = 1`.  Strengthen `[IsPrincipalIdealRing �
 (`ringKrullDim_succ_le_ringKrullDim_powerseries`) and `P.height = 1 ≠ ringKrullDim Λ` forces
 `P ≠ maximalIdeal` (`IsLocalRing.maximalIdeal_height_eq_ringKrullDim`), so `Λ/P` is an infinite
 domain (`Finite.isField_of_domain`), giving `Ann F ⊄ P`.  Standing case `𝒪 = ℤ_p` ✓. -/
-theorem localMult_eq_zero_of_finite [IsDomain 𝒪] [IsPrincipalIdealRing 𝒪]
+theorem localMult_eq_zero_of_finite [IsDomain 𝒪] [IsDiscreteValuationRing 𝒪]
     (P : Ideal (IwasawaAlgebra 𝒪)) [P.IsPrime] (hP1 : P.height = 1)
     (F : Type*) [AddCommGroup F] [Module (IwasawaAlgebra 𝒪) F] [Finite F] :
     localMult 𝒪 P F = 0 := by
-  sorry
+  rw [localMult, Module.length_eq_zero_iff]
+  haveI : Module.Finite (IwasawaAlgebra 𝒪) F := Module.Finite.of_finite
+  -- `F_P = 0` ⇔ `P ∉ supp F` ⇔ `¬ (Ann F ≤ P)`.
+  rw [← Module.notMem_support_iff (p := ⟨P, ‹P.IsPrime›⟩), Module.mem_support_iff_of_finite]
+  intro hle
+  -- `Λ/Ann F` is finite (faithful action on the finite `F`); `Ann F ≤ P` makes `Λ/P` finite too,
+  -- hence (a finite domain is a field) `P` is maximal — contradicting `height P = 1 < 2 ≤ dim Λ`.
+  -- `Λ/Ann F` is finite: the faithful action embeds it into the finite `F →+ F`.  [standard]
+  haveI : Finite (IwasawaAlgebra 𝒪 ⧸ Module.annihilator (IwasawaAlgebra 𝒪) F) := sorry
+  haveI : Finite (IwasawaAlgebra 𝒪 ⧸ P) :=
+    Finite.of_surjective _ (Ideal.Quotient.factor_surjective hle)
+  haveI : IsField (IwasawaAlgebra 𝒪 ⧸ P) := Finite.isField_of_domain _
+  have hPmax : P.IsMaximal := Ideal.Quotient.maximal_of_isField _ ‹IsField _›
+  have hdim : P.height = ringKrullDim (IwasawaAlgebra 𝒪) := by
+    rw [IsLocalRing.eq_maximalIdeal hPmax, IsLocalRing.maximalIdeal_height_eq_ringKrullDim]
+  have h1 := ringKrullDim_succ_le_ringKrullDim_powerseries (R := 𝒪)
+  rw [IsDiscreteValuationRing.ringKrullDim_eq_one, ← hdim, hP1] at h1
+  norm_num at h1
 
+omit [Module.Finite (IwasawaAlgebra 𝒪) M] [Module.Finite (IwasawaAlgebra 𝒪) M'] in
 /-- **`localMult` is a pseudo-isomorphism invariant.**  At a height-one prime `P`, the finite
 kernel and cokernel of the comparison map `M → M'` vanish on localising (a finite Λ-module
 localises to `0` away from the maximal ideal — its annihilator has finite index, hence is not
 contained in the height-one `P`), so `M_P ≅ M'_P` and the local multiplicities agree.
 Assembled from `localMult_add_of_exact` on the two short exact sequences `0 → ker f → M →
 im f → 0` and `0 → im f → M' → coker f → 0`. -/
-theorem localMult_eq_of_pseudoIso [IsDomain 𝒪] [IsPrincipalIdealRing 𝒪]
+theorem localMult_eq_of_pseudoIso [IsDomain 𝒪] [IsDiscreteValuationRing 𝒪]
     (P : Ideal (IwasawaAlgebra 𝒪)) [P.IsPrime] (hP1 : P.height = 1)
     (h : IsPseudoIso 𝒪 M M') : localMult 𝒪 P M = localMult 𝒪 P M' := by
   obtain ⟨f, hker, hcoker⟩ := h
@@ -229,7 +250,7 @@ theorem localMult_eq_of_pseudoIso [IsDomain 𝒪] [IsPrincipalIdealRing 𝒪]
 /-- **Well-definedness of the characteristic ideal**: it depends only on the
 pseudo-isomorphism class of `M` (`localMult_eq_of_pseudoIso` at each height-one prime).  In
 particular a finite (pseudo-null) module has characteristic ideal `⊤ = (1)`. -/
-theorem charIdeal_eq_of_pseudoIso [IsDomain 𝒪] [IsPrincipalIdealRing 𝒪]
+theorem charIdeal_eq_of_pseudoIso [IsDomain 𝒪] [IsDiscreteValuationRing 𝒪]
     (hM : Module.IsTorsion (IwasawaAlgebra 𝒪) M)
     (hM' : Module.IsTorsion (IwasawaAlgebra 𝒪) M') (h : IsPseudoIso 𝒪 M M') :
     charIdeal 𝒪 M hM = charIdeal 𝒪 M' hM' := by
