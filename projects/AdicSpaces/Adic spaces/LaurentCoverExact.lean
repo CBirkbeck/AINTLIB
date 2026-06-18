@@ -596,9 +596,8 @@ theorem span_singleton_iInf_pow_eq_bot_of_le_jacobson (f : A)
     intro n
     have hxn : x ∈ Ideal.span ({f} : Set A) ^ n := (Ideal.mem_iInf.mp hx) n
     rwa [smul_eq_mul, ← Ideal.one_eq_top, mul_one]
-  have hx_bot : x ∈ (⊥ : Submodule A A) := by
-    rwa [hsub] at hx_sub
-  simpa using hx_bot
+  rw [hsub] at hx_sub
+  simpa using hx_sub
 
 omit [IsDomain A] in
 /-- **`ε` is injective when `(f)` lies in the Jacobson radical.**
@@ -1023,7 +1022,7 @@ theorem ker_lambdaMap_le_range_iotaHom [T1Space A]
   have hh_eq : algebraMap A ↥(TateAlgebra A) a = h := by
     apply TateAlgebra.ext; intro n
     cases n with
-    | zero => rw [coeff_zero_algebraMap]; rw [ha_def]; exact hg0_eq_h0'
+    | zero => rw [coeff_zero_algebraMap, ha_def]; exact hg0_eq_h0'
     | succ n =>
       rw [coeff_succ_algebraMap]
       exact (hh_higher' (n + 1) (Nat.succ_pos n)).symm
@@ -1202,8 +1201,8 @@ theorem negEmbHom_generator_mem :
       algebraMap A (LaurentTateAlgebra A) f * LaurentTateAlgebra.zetaInv =
       -(LaurentTateAlgebra.zetaInv *
         (algebraMap A (LaurentTateAlgebra A) f - LaurentTateAlgebra.zeta)) := by
-    rw [mul_sub, mul_comm LaurentTateAlgebra.zetaInv (algebraMap A _ f)]
-    rw [LaurentTateAlgebra.zetaInv_mul_zeta]; ring
+    rw [mul_sub, mul_comm LaurentTateAlgebra.zetaInv (algebraMap A _ f),
+      LaurentTateAlgebra.zetaInv_mul_zeta]; ring
   rw [hkey]
   exact neg_mem (Ideal.mul_mem_left _ _ (Ideal.subset_span rfl))
 
@@ -1779,8 +1778,8 @@ theorem ker_deltaMap_gen_le_range_epsilonHom_gen
         algebraMap A (LaurentTateAlgebra A) f * LaurentTateAlgebra.zetaInv =
         -(LaurentTateAlgebra.zetaInv *
           (algebraMap A (LaurentTateAlgebra A) f - LaurentTateAlgebra.zeta)) := by
-      rw [mul_sub, mul_comm LaurentTateAlgebra.zetaInv (algebraMap A _ f)]
-      rw [LaurentTateAlgebra.zetaInv_mul_zeta]; ring
+      rw [mul_sub, mul_comm LaurentTateAlgebra.zetaInv (algebraMap A _ f),
+        LaurentTateAlgebra.zetaInv_mul_zeta]; ring
     rw [hkey]
     -- Factor out (alg f - zeta) and use hneg_b, hab, hc
     have : (algebraMap A (LaurentTateAlgebra A) f - LaurentTateAlgebra.zeta) *
