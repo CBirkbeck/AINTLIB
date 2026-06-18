@@ -72,7 +72,7 @@ theorem fixedField_hfix_of_xy_family_of_card
     (h_card_eq_degree : Fintype.card (Multiplicative β.kernel) = β.degree) :
     ∀ z : W.toAffine.FunctionField,
       z ∈ β.pullback.range ↔
-        ∀ σ ∈ (Set.range (fun k : β.kernel =>
+        ∀ σ ∈ (Set.range (fun k : β.kernel ↦
             translateAlgEquivOfPoint W k.val)), σ z = z := by
   have h_eq := pullback_fieldRange_eq_fixedField_of_card_match_intrinsic W β
     h_xy_family h_card_eq_degree
@@ -128,7 +128,7 @@ implication `k ∈ ker β → (deg β) • k = 0`. -/
 theorem kernel_subset_degTorsion (β : HasseWeil.Isogeny W₁ W₂)
     [Finite β.kernel] (h_card : Nat.card β.kernel = β.degree) :
     ∀ k ∈ β.kernel, (β.degree) • k = 0 :=
-  fun _ hk => kernel_nsmul_degree_eq_zero β h_card hk
+  fun _ hk ↦ kernel_nsmul_degree_eq_zero β h_card hk
 
 end DualOne
 
@@ -185,7 +185,7 @@ theorem xy_family_of_genericPointCommutes
     ∀ k : β.kernel,
       (translateAlgEquivOfPoint W k.val (β.pullback (x_gen W)) = β.pullback (x_gen W)) ∧
       (translateAlgEquivOfPoint W k.val (β.pullback (y_gen W)) = β.pullback (y_gen W)) :=
-  fun k =>
+  fun k ↦
     ⟨WeilPairing.hcov_of_mapTranslateGenericPoint_canonical W β hgcomm k (x_gen W),
      WeilPairing.hcov_of_mapTranslateGenericPoint_canonical W β hgcomm k (y_gen W)⟩
 
@@ -223,7 +223,7 @@ noncomputable def dualGaloisData_of_basic_witnesses
       (translateAlgEquivOfPoint W k.val (β.pullback (y_gen W)) =
         β.pullback (y_gen W)))
     (h_card : Fintype.card (Multiplicative β.kernel) = β.degree)
-    (hnu : ∀ σ ∈ (Set.range (fun k : β.kernel =>
+    (hnu : ∀ σ ∈ (Set.range (fun k : β.kernel ↦
         translateAlgEquivOfPoint W k.val)), ∀ w, σ (νPb w) = νPb w)
     (hν : ∀ f : W.toAffine.FunctionField,
         0 ≤ (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve F).ordAtInfty f →
@@ -234,7 +234,7 @@ noncomputable def dualGaloisData_of_basic_witnesses
         0 ≤ (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve F).ordAtInfty g) :
     EC.Isogeny.DualGaloisData φ where
   νPb := νPb
-  transAut := Set.range (fun k : β.kernel => translateAlgEquivOfPoint W k.val)
+  transAut := Set.range (fun k : β.kernel ↦ translateAlgEquivOfPoint W k.val)
   hfix := by
     intro z
     rw [h_pb]
@@ -261,7 +261,7 @@ noncomputable def hasDualWitness_of_basic_witnesses
       (translateAlgEquivOfPoint W k.val (β.pullback (y_gen W)) =
         β.pullback (y_gen W)))
     (h_card : Fintype.card (Multiplicative β.kernel) = β.degree)
-    (hnu : ∀ σ ∈ (Set.range (fun k : β.kernel =>
+    (hnu : ∀ σ ∈ (Set.range (fun k : β.kernel ↦
         translateAlgEquivOfPoint W k.val)), ∀ w, σ (νPb w) = νPb w)
     (hν : ∀ f : W.toAffine.FunctionField,
         0 ≤ (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve F).ordAtInfty f →
@@ -326,7 +326,7 @@ Silverman choice `ν = [deg β]`. -/
 theorem hnu_mulByInt_of_kernel_nsmul_zero
     (β : HasseWeil.Isogeny W.toAffine W.toAffine) (n : ℤ) (hn : n ≠ 0)
     (hdvd : ∀ k ∈ β.kernel, n • k = 0) :
-    ∀ σ ∈ (Set.range (fun k : β.kernel => translateAlgEquivOfPoint W k.val)),
+    ∀ σ ∈ (Set.range (fun k : β.kernel ↦ translateAlgEquivOfPoint W k.val)),
       ∀ w, σ ((mulByInt W.toAffine n).pullback w) = (mulByInt W.toAffine n).pullback w := by
   rintro σ ⟨k, rfl⟩ w
   -- `[n]`-covariance: `τ_k([n]* w) = [n]*(τ_{[n]k} w)` (genuine, free leaf).
@@ -383,18 +383,18 @@ noncomputable def dualGaloisData_of_separable
   -- `hgcomm`-derived covariance `hcov`, plus `h_normal` and `hdesc`.
   have h_card_nat : Nat.card β.kernel = β.degree :=
     card_kernel_eq_degree_of_separable_concrete W β hsep
-      (fun k z => WeilPairing.hcov_of_mapTranslateGenericPoint_canonical W β hgcomm k z)
+      (fun k z ↦ WeilPairing.hcov_of_mapTranslateGenericPoint_canonical W β hgcomm k z)
       h_normal hdesc
   -- DUAL-1: `ker β ⊆ ker [deg β]`, so `[deg β]`'s `hnu` covariance holds.
   have hdvd : ∀ k ∈ β.kernel, (β.degree : ℤ) • k = 0 :=
-    fun k hk => kernel_nsmul_degree_eq_zero β h_card_nat hk
+    fun k hk ↦ kernel_nsmul_degree_eq_zero β h_card_nat hk
   dualGaloisData_of_basic_witnesses W φ β h_pb
     (mulByInt W.toAffine (β.degree : ℤ)).pullback
     (xy_family_of_genericPointCommutes W β hgcomm)
     (by rw [Fintype.card_eq_nat_card]; exact h_card_nat)
     (hnu_mulByInt_of_kernel_nsmul_zero W β (β.degree : ℤ) (by exact_mod_cast hdeg) hdvd)
     hν
-    (fun g hg => EC.reflects_ordAtInfty_of_ramificationIdx φ he hramO g hg)
+    (fun g hg ↦ EC.reflects_ordAtInfty_of_ramificationIdx φ he hramO g hg)
 
 set_option linter.unusedFintypeInType false in
 /-- **`HasDualWitness φ` for a separable isogeny** (Silverman III.6.1, DUAL-3).
