@@ -61,13 +61,10 @@ theorem locSubring_completion_flat [IsNoetherianRing (locSubring D.P D.T D.s)] :
       isUniformAddGroup_of_addCommGroup
     Module.Flat (locSubring D.P D.T D.s)
       (UniformSpace.Completion (locSubring D.P D.T D.s)) := by
-  letI : TopologicalSpace (locSubring D.P D.T D.s) :=
-    (locIdeal D.P D.T D.s).adicTopology
+  letI : TopologicalSpace (locSubring D.P D.T D.s) := (locIdeal D.P D.T D.s).adicTopology
   letI : IsTopologicalRing (locSubring D.P D.T D.s) := inferInstance
-  letI : UniformSpace (locSubring D.P D.T D.s) :=
-    IsTopologicalAddGroup.rightUniformSpace _
-  letI : IsUniformAddGroup (locSubring D.P D.T D.s) :=
-    isUniformAddGroup_of_addCommGroup
+  letI : UniformSpace (locSubring D.P D.T D.s) := IsTopologicalAddGroup.rightUniformSpace _
+  letI : IsUniformAddGroup (locSubring D.P D.T D.s) := isUniformAddGroup_of_addCommGroup
   exact AdicCompletionBridge.completion_flat (locIdeal D.P D.T D.s) rfl
 
 /-! ### Flatness of presheafValue over A (Wedhorn Proposition 8.30)
