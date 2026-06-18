@@ -704,6 +704,81 @@ theorem bPrimeValuationCoordGenLeOne_of_inftyInclusion_of_reg
   bPrimeValuationCoordGenLeOne_of_classification_of_reg
     (bPrimePlaceClassification_of_inftyInclusion hincl) hreg
 
+/-! ### The minimal-polynomial reduction (non-circular, place-dictionary-free)
+
+The whole content of `coordXFun_mem_B` / `coordYFun_mem_B` (and hence `coordRing_mem_B`) reduces —
+*without any place dictionary* — to a single sharp **algebraic** statement about the minimal
+polynomial of the coordinate generator over `K(C₂)`:
+
+> the coefficients of `minpoly K(C₂) z` lie in `C₂.CoordinateRing` (`MinpolyCoeffsRegular z`).
+
+Indeed, if the monic `minpoly K(C₂) z` has coefficients in (the image of) `C₂.CoordinateRing`,
+then it lifts to a monic polynomial over `C₂.CoordinateRing` annihilating `z`, so `z` is *integral*
+over `C₂.CoordinateRing`, i.e. `z ∈ B`.  This is exactly `LocalizedDictionary.isIntegral_of_denominator`
+at the trivial localization `Af := C₂.CoordinateRing`, `f := 1` (where the denominator condition
+collapses to "coefficients are coordinate-ring elements").
+
+This is the **sharpest, cleanest, non-circular** isolation of the remaining wall: it bypasses the
+entire place-classification chain (`BPrimePlaceClassification` / `BPrimeInftyInclusion` /
+`BPrimeValuationCoordGenLeOne`), it is *true* (curve-completeness: the only poles of `z = x₁, y₁`
+are at `∞` of `C₁`, which lies over `∞` of `C₂` by `hreg`, so the symmetric functions of the
+conjugates of `z` — i.e. the minpoly coefficients — have no affine poles, hence lie in
+`C₂.CoordinateRing`), and the residual content (the norm/trace pole estimate that pushes `z`'s
+`∞`-only poles down to `C₂`) is purely on the `C₂` side. -/
+
+/-- **The minpoly-coefficient regularity residual** for an element `z ∈ K(C₁)`: every coefficient
+of the minimal polynomial of `z` over `K(C₂)` lies in (the image of) `C₂.CoordinateRing`.  For the
+coordinate generators `z = coordXFun C₁`, `coordYFun C₁` this is the genuine curve-completeness
+content of `coordXFun_mem_B` / `coordYFun_mem_B`: the poles of `z` (only at `∞` of `C₁`) lie over
+`∞` of `C₂`, so the minpoly coefficients (symmetric functions of the conjugates of `z`) have no
+affine poles on `C₂`, hence lie in `C₂.CoordinateRing`. -/
+def MinpolyCoeffsRegular (z : C₁.FunctionField) : Prop :=
+  ∀ i : ℕ, ∃ a : C₂.CoordinateRing,
+    (minpoly C₂.FunctionField z).coeff i = algebraMap C₂.CoordinateRing C₂.FunctionField a
+
+/-- **Integrality of a generator from minpoly-coefficient regularity** (the non-circular reduction):
+if every coefficient of `minpoly K(C₂) z` lies in `C₂.CoordinateRing`, then `z` is integral over
+`C₂.CoordinateRing`, i.e. `z ∈ B`.  This is `LocalizedDictionary.isIntegral_of_denominator` at the
+trivial localization `Af := C₂.CoordinateRing`, `f := 1` (so the denominator condition reads "the
+coefficients are coordinate-ring elements"), followed by `mem_integralClosure_iff`. -/
+theorem mem_B_of_minpolyCoeffsRegular {z : C₁.FunctionField}
+    (hz : MinpolyCoeffsRegular (C₁ := C₁) (C₂ := C₂) z) :
+    z ∈ (B (C₁ := C₁) (C₂ := C₂)) := by
+  have hint : IsIntegral C₂.CoordinateRing z := by
+    refine LocalizedDictionary.isIntegral_of_denominator C₂ (1 : C₂.CoordinateRing)
+      C₂.CoordinateRing one_ne_zero z (fun i => ?_)
+    obtain ⟨a, ha⟩ := hz i
+    refine ⟨a, ?_⟩
+    rw [map_one, mul_one, ha]
+  exact hint
+
+/-- **The `x`-generator of `C₁` is integral over `C₂.CoordinateRing`, from minpoly-coefficient
+regularity** (non-circular, place-dictionary-free): `coordXFun C₁ ∈ B` follows directly from
+`MinpolyCoeffsRegular (coordXFun C₁)`. -/
+theorem coordXFun_mem_B_of_minpolyCoeffsRegular
+    (hx : MinpolyCoeffsRegular (C₁ := C₁) (C₂ := C₂) (coordXFun C₁)) :
+    coordXFun C₁ ∈ (B (C₁ := C₁) (C₂ := C₂)) :=
+  mem_B_of_minpolyCoeffsRegular hx
+
+/-- **The `y`-generator of `C₁` is integral over `C₂.CoordinateRing`, from minpoly-coefficient
+regularity** (non-circular, place-dictionary-free). -/
+theorem coordYFun_mem_B_of_minpolyCoeffsRegular
+    (hy : MinpolyCoeffsRegular (C₁ := C₁) (C₂ := C₂) (coordYFun C₁)) :
+    coordYFun C₁ ∈ (B (C₁ := C₁) (C₂ := C₂)) :=
+  mem_B_of_minpolyCoeffsRegular hy
+
+/-- **The coordinate ring of `C₁` lands in `B`, from minpoly-coefficient regularity of the two
+generators** (Silverman II.2.6, the non-circular place-dictionary-free form): for every
+`r ∈ F[C₁]`, the image `algebraMap r ∈ K(C₁)` is integral over `C₂.CoordinateRing`. -/
+theorem coordRing_mem_B_of_minpolyCoeffsRegular
+    (hx : MinpolyCoeffsRegular (C₁ := C₁) (C₂ := C₂) (coordXFun C₁))
+    (hy : MinpolyCoeffsRegular (C₁ := C₁) (C₂ := C₂) (coordYFun C₁))
+    (r : C₁.CoordinateRing) :
+    algebraMap C₁.CoordinateRing C₁.FunctionField r ∈ (B (C₁ := C₁) (C₂ := C₂)) :=
+  coordRing_mem_integralClosure C₂ C₂.CoordinateRing
+    (coordXFun_mem_B_of_minpolyCoeffsRegular hx)
+    (coordYFun_mem_B_of_minpolyCoeffsRegular hy) r
+
 /-- **The `x`-generator of `C₁` is integral over `C₂.CoordinateRing`** (regular at every place
 of `C₁` over an affine place of `C₂`).  Reduced — *non-circularly*, via the valuative criterion
 `mem_B_of_forall_valuation_le_one` — to the global-`B` place dictionary
