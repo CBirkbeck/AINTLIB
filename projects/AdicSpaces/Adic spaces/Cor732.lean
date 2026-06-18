@@ -215,17 +215,8 @@ theorem exists_dominating_unit
     have h_t : w (πA ^ N) ≤ w t :=
       (Valuation.Compatible.vle_iff_le (v := w) _ _).mp hvt
     have hπ_le_one : w πA ≤ 1 := valuation_pi_le_one_on_spa hvSpa hπ_tn
-    refine (Valuation.Compatible.vle_iff_le (v := w) _ _).mpr ?_
-    have hunit_val : ((hπN1_unit.unit : Aˣ) : A) = πA ^ (N + 1) :=
-      hπN1_unit.unit_spec
-    rw [hunit_val]
-    calc w (πA ^ (N + 1))
-        = w (πA ^ N) * w πA := by
-          rw [pow_succ, map_mul]
-      _ ≤ w (πA ^ N) * 1 :=
-          mul_le_mul_of_nonneg_left hπ_le_one (zero_le' (a := w (πA ^ N)))
-      _ = w (πA ^ N) := by rw [mul_one]
-      _ ≤ w t := h_t
+    rw [Valuation.Compatible.vle_iff_le (v := w), hπN1_unit.unit_spec, pow_succ, map_mul]
+    exact le_trans (mul_le_of_le_one_right zero_le' hπ_le_one) h_t
   · -- `¬ v.vle t (πA^(N+1))` via strict `w πA < 1`.
     letI : ValuativeRel A := v.toValuativeRel
     haveI : MulArchimedean (ValuativeRel.ValueGroupWithZero A) := hArch v
@@ -235,37 +226,21 @@ theorem exists_dominating_unit
       (Valuation.Compatible.vle_iff_le (v := w) _ _).mp hvt
     -- Strict `w πA < 1`.
     have hπ_lt_one : w πA < 1 := by
-      have hπ_not : ¬ v.vle 1 πA :=
-        not_vle_one_of_mem_spa_of_topologicallyNilpotent hvSpa hπ_tn
-      have hne : ¬ (w 1 ≤ w πA) := fun h ↦ hπ_not
+      rw [← map_one w]
+      exact lt_of_not_ge fun h ↦ not_vle_one_of_mem_spa_of_topologicallyNilpotent hvSpa hπ_tn
         ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr h)
-      rw [map_one] at hne
-      exact lt_of_not_ge hne
     -- `w (πA^N) ≠ 0` since πA is a unit.
-    have hπN_unit : IsUnit (πA ^ N) := hπ_unit.pow N
-    have hwπN_ne : w (πA ^ N) ≠ 0 := by
-      intro h
-      exact not_vle_zero_of_isUnit hπN_unit v
-        ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr (by rw [map_zero]; exact le_of_eq h))
-    -- `w t ≠ 0` since `v ∈ basicOpen (πA^N) t`.
-    have hwt_ne : w t ≠ 0 := by
-      intro h
-      refine hvt0 ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr ?_)
-      rw [map_zero]; exact le_of_eq h
-    -- Show `w t > w (πA^(N+1))`.
-    have h_sN1_lt_sN : w (πA ^ (N + 1)) < w (πA ^ N) := by
+    have hwπN_ne : w (πA ^ N) ≠ 0 := fun h ↦ not_vle_zero_of_isUnit (hπ_unit.pow N) v
+      ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr (by rw [map_zero]; exact h.le))
+    -- Show `w (πA^(N+1)) < w t`.
+    have h_lt_t : w (πA ^ (N + 1)) < w t := by
       rw [pow_succ, map_mul]
-      have h1 : w (πA ^ N) * w πA < w (πA ^ N) * 1 :=
-        mul_lt_mul_of_pos_left hπ_lt_one (zero_lt_iff.mpr hwπN_ne)
-      simpa using h1
-    have h_lt_t : w (πA ^ (N + 1)) < w t := lt_of_lt_of_le h_sN1_lt_sN h_t
+      exact lt_of_lt_of_le
+        (by simpa using mul_lt_mul_of_pos_left hπ_lt_one (zero_lt_iff.mpr hwπN_ne)) h_t
     -- Translate back to `vle` and `¬ vle`.
     intro hvle
-    have hunit_val : ((hπN1_unit.unit : Aˣ) : A) = πA ^ (N + 1) :=
-      hπN1_unit.unit_spec
-    rw [hunit_val] at hvle
-    have h_le := (Valuation.Compatible.vle_iff_le (v := w) t (πA ^ (N + 1))).mp hvle
-    exact absurd h_le (not_le.mpr h_lt_t)
+    rw [hπN1_unit.unit_spec] at hvle
+    exact absurd ((Valuation.Compatible.vle_iff_le (v := w) _ _).mp hvle) (not_le.mpr h_lt_t)
 
 /-! ## Wedhorn Cor 7.32 no-hArch variant
 
@@ -313,19 +288,12 @@ theorem exists_pow_dominated_finset
     have hcompat : (ValuativeRel.valuation A).Compatible := inferInstance
     set w := ValuativeRel.valuation A
     have hv_cont : w.IsContinuous := x.2.1
-    have hwf_ne : w f ≠ 0 := by
-      intro h
-      refine (hf x hx) ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr ?_)
-      rw [map_zero]; exact le_of_eq h
-    have h_open : IsOpen {a : A | w a < w f} := hv_cont (w f)
-    have h0_mem : (0 : A) ∈ {a : A | w a < w f} := by
-      change w 0 < w f
-      rw [map_zero]; exact zero_lt_iff.mpr hwf_ne
-    have h_nhds : {a : A | w a < w f} ∈ nhds (0 : A) := h_open.mem_nhds h0_mem
+    have hwf_ne : w f ≠ 0 := fun h => hf x hx
+      ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr (by rw [map_zero]; exact h.le))
+    have h_nhds : {a : A | w a < w f} ∈ nhds (0 : A) :=
+      (hv_cont (w f)).mem_nhds (by change w 0 < w f; rw [map_zero]; exact zero_lt_iff.mpr hwf_ne)
     obtain ⟨n, hn⟩ := ((hT_topnilp t htT).eventually h_nhds).exists
-    refine ⟨n, ?_, hf x hx⟩
-    refine (Valuation.Compatible.vle_iff_le (v := w) _ _).mpr ?_
-    exact le_of_lt hn
+    exact ⟨n, (Valuation.Compatible.vle_iff_le (v := w) _ _).mpr hn.le, hf x hx⟩
   -- Per-x bound via finite max over T.
   have h_per_x : ∀ x : ↥(Spa A A⁺), x ∈ X → ∃ m : ℕ, x ∈ U m := by
     intro x hx
@@ -343,19 +311,12 @@ theorem exists_pow_dominated_finset
     have hcompat : (ValuativeRel.valuation A).Compatible := inferInstance
     set w := ValuativeRel.valuation A
     have h_t_le_one : w t ≤ 1 := by
-      have h_t_not : ¬ x.1.vle 1 t :=
-        not_vle_one_of_mem_spa_of_topologicallyNilpotent x.2 (hT_topnilp t htT)
-      have h_not : ¬ (w 1 ≤ w t) := fun h => h_t_not
-        ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr h)
-      rw [map_one] at h_not
-      exact le_of_not_ge h_not
-    have h_pow : w t ^ m_x ≤ w t ^ (h_choose ⟨t, htT⟩).choose :=
-      pow_le_pow_of_le_one (zero_le') h_t_le_one h_n_le
-    refine (Valuation.Compatible.vle_iff_le (v := w) _ _).mpr ?_
-    calc w (t ^ m_x) = w t ^ m_x := by simp [map_pow]
-      _ ≤ w t ^ (h_choose ⟨t, htT⟩).choose := h_pow
-      _ = w (t ^ (h_choose ⟨t, htT⟩).choose) := by simp [map_pow]
-      _ ≤ w f := (Valuation.Compatible.vle_iff_le (v := w) _ _).mp h_n_t.1
+      rw [← map_one w]
+      exact le_of_not_ge fun h => not_vle_one_of_mem_spa_of_topologicallyNilpotent x.2
+        (hT_topnilp t htT) ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr h)
+    refine (Valuation.Compatible.vle_iff_le (v := w) _ _).mpr
+      (le_trans ?_ ((Valuation.Compatible.vle_iff_le (v := w) _ _).mp h_n_t.1))
+    simpa only [map_pow] using pow_le_pow_of_le_one zero_le' h_t_le_one h_n_le
   -- Monotonicity in m on X (via w t ≤ 1 from Spa membership).
   have hU_mono : ∀ m m', m ≤ m' → U m ⊆ U m' := by
     intro m m' hmm' x hx_m
@@ -367,19 +328,12 @@ theorem exists_pow_dominated_finset
     have hcompat : (ValuativeRel.valuation A).Compatible := inferInstance
     set w := ValuativeRel.valuation A
     have h_t_le_one : w t ≤ 1 := by
-      have h_t_not : ¬ x.1.vle 1 t :=
-        not_vle_one_of_mem_spa_of_topologicallyNilpotent x.2 (hT_topnilp t htT)
-      have h_not : ¬ (w 1 ≤ w t) := fun h => h_t_not
-        ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr h)
-      rw [map_one] at h_not
-      exact le_of_not_ge h_not
-    have h_pow : w t ^ m' ≤ w t ^ m :=
-      pow_le_pow_of_le_one (zero_le') h_t_le_one hmm'
-    refine (Valuation.Compatible.vle_iff_le (v := w) _ _).mpr ?_
-    calc w (t ^ m') = w t ^ m' := by simp [map_pow]
-      _ ≤ w t ^ m := h_pow
-      _ = w (t ^ m) := by simp [map_pow]
-      _ ≤ w f := (Valuation.Compatible.vle_iff_le (v := w) _ _).mp hvtm
+      rw [← map_one w]
+      exact le_of_not_ge fun h => not_vle_one_of_mem_spa_of_topologicallyNilpotent x.2
+        (hT_topnilp t htT) ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr h)
+    refine (Valuation.Compatible.vle_iff_le (v := w) _ _).mpr
+      (le_trans ?_ ((Valuation.Compatible.vle_iff_le (v := w) _ _).mp hvtm))
+    simpa only [map_pow] using pow_le_pow_of_le_one zero_le' h_t_le_one hmm'
   -- QC subcover.
   have hX_subset : X ⊆ ⋃ m, U m := fun x hx =>
     Set.mem_iUnion.mpr (h_per_x x hx)
