@@ -990,6 +990,18 @@ theorem towerTensorIncl_congr (R : Type*) [CommRing R] [Algebra F R]
       rw [hστ m]
   | add x y hx hy => rw [map_add, map_add, map_add, map_add, hx, hy]
 
+/-- A finite-sum `∑_{p∈S} p.1 ⊗ p.2` of `K̄ ⊗ R` whose scalars all lie in `M` is the
+`towerTensorIncl`-image of the corresponding sum over `M`. -/
+private theorem towerTensorIncl_finset_sum_mem_range (R : Type*) [CommRing R] [Algebra F R]
+    (M : IntermediateField F (AlgebraicClosure F))
+    (S : Finset (AlgebraicClosure F × R)) (hmem : ∀ p ∈ S, p.1 ∈ M) :
+    (S.sum fun p => p.1 ⊗ₜ[F] p.2) ∈ Set.range (towerTensorIncl R M) := by
+  classical
+  refine ⟨S.attach.sum fun p => (⟨p.1.1, hmem p.1 p.2⟩ : M) ⊗ₜ[F] p.1.2, ?_⟩
+  rw [map_sum, ← Finset.sum_attach S (fun p => p.1 ⊗ₜ[F] p.2)]
+  refine Finset.sum_congr rfl (fun p _ => ?_)
+  rw [towerTensorIncl_tmul]
+
 /-- **The tensor tower fact** (char 0): every element of `K̄ ⊗_F R` (`K̄ = AlgebraicClosure F`) is the
 image, under `towerTensorIncl`, of an element of `M ⊗_F R` for some *finite Galois* intermediate
 field `M ⊆ K̄`. The finitely many `K̄`-scalars in a finite-sum representation lie in a finite Galois
@@ -1004,15 +1016,32 @@ theorem exists_finiteGalois_towerTensorIncl_range [CharZero F]
     exists_finiteGalois_fieldOfDefinition (E := F) (↑(S.image Prod.fst) : Set (AlgebraicClosure F))
       (S.image Prod.fst).finite_toSet
   refine ⟨M, hMfin, hMgal, ?_⟩
-  have hmem : ∀ p ∈ S, p.1 ∈ M := by
-    intro p hp
-    exact hMsub (by exact Finset.mem_coe.mpr (Finset.mem_image_of_mem Prod.fst hp))
-  refine ⟨S.attach.sum fun p => (⟨p.1.1, hmem p.1 p.2⟩ : M) ⊗ₜ[F] p.1.2, ?_⟩
-  rw [map_sum, hS, ← Finset.sum_attach S (fun p => p.1 ⊗ₜ[F] p.2)]
-  refine Finset.sum_congr rfl (fun p _ => ?_)
-  rw [towerTensorIncl_tmul]
+  rw [hS]
+  exact towerTensorIncl_finset_sum_mem_range R M S (fun p hp =>
+    hMsub (Finset.mem_coe.mpr (Finset.mem_image_of_mem Prod.fst hp)))
 
-/-! #### The induced inclusion on fraction fields `Frac(M ⊗ F[C]) → Frac(K̄ ⊗ F[C])` -/
+/-- **The tensor tower fact for a pair** (char 0): two elements `z₁ z₂ ∈ K̄ ⊗_F R` both live over a
+*common* finite Galois intermediate field `M ⊆ K̄`. The scalars of finite-sum representations of
+*both* `z₁` and `z₂` lie in one finite Galois `M`. -/
+theorem exists_finiteGalois_towerTensorIncl_range₂ [CharZero F]
+    (R : Type*) [CommRing R] [Algebra F R] (z₁ z₂ : AlgebraicClosure F ⊗[F] R) :
+    ∃ (M : IntermediateField F (AlgebraicClosure F)),
+      FiniteDimensional F M ∧ IsGalois F M ∧
+        z₁ ∈ Set.range (towerTensorIncl R M) ∧ z₂ ∈ Set.range (towerTensorIncl R M) := by
+  classical
+  obtain ⟨S₁, hS₁⟩ := TensorProduct.exists_finset z₁
+  obtain ⟨S₂, hS₂⟩ := TensorProduct.exists_finset z₂
+  obtain ⟨M, hMfin, hMgal, hMsub⟩ :=
+    exists_finiteGalois_fieldOfDefinition (E := F)
+      (↑((S₁ ∪ S₂).image Prod.fst) : Set (AlgebraicClosure F))
+      ((S₁ ∪ S₂).image Prod.fst).finite_toSet
+  have hmem : ∀ (S : Finset (AlgebraicClosure F × R)), S ⊆ S₁ ∪ S₂ → ∀ p ∈ S, p.1 ∈ M := by
+    intro S hsub p hp
+    exact hMsub (Finset.mem_coe.mpr (Finset.mem_image_of_mem Prod.fst (hsub hp)))
+  refine ⟨M, hMfin, hMgal, ?_, ?_⟩
+  · rw [hS₁]; exact towerTensorIncl_finset_sum_mem_range R M S₁ (hmem S₁ Finset.subset_union_left)
+  · rw [hS₂]; exact towerTensorIncl_finset_sum_mem_range R M S₂ (hmem S₂ Finset.subset_union_right)
+
 
 /-- The fraction-field inclusion `Frac(M ⊗_F F[C]) → Frac(K̄ ⊗_F F[C])` induced by the injective
 ring hom `towerTensorIncl` (`M ⊆ K̄ = AlgebraicClosure F`). The codomain is the tensor-fraction
