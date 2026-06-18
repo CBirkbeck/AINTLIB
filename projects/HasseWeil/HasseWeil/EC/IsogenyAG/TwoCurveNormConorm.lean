@@ -308,6 +308,73 @@ theorem eq_pointValuation_of_center
     rw [Valuation.isEquiv_iff_valuationSubring]; rw [hA, hBv] at hEq; exact hEq.symm
   exact Valuation.isEquiv_iff_eq_of_surjective_withZeroInt _ _ hwsurj hpvsurj h_isEquiv
 
+/-! ### The reverse place dictionary: a regular point gives a `B`-prime (surjectivity)
+
+The fibre bijection also needs the *reverse* of `bPrime_valuation_eq_pointValuation`: a point `P`
+at which both pulled-back generators are regular (`P ∉ poleLocus`, equivalently its place-restriction
+image is an *affine* place of `E₂`) is cut out by *some* `B`-prime.  At such a `P` the whole image of
+`F[E₂]` lands in the local ring `O_P` (the generators are regular there), so the integral closure `B`
+lands in `O_P` (integrally closed); the contraction of `m_P` is then a height-one prime of `B` whose
+adic valuation is `pointValuation P`. -/
+
+set_option synthInstance.maxHeartbeats 400000 in
+set_option maxHeartbeats 1600000 in
+/-- **The pulled-back coordinate ring of `E₂` is `≤ 1` at a regular point `P`** (value bound, the
+generator induction).  If `φ^*(x_gen₂)`, `φ^*(y_gen₂)` are `≤ 1` at `P`, then `φ^*(algebraMap c)` is
+`≤ 1` at `P` for every `c ∈ F[E₂]` (it is a polynomial in the two generators with `F`-constant — i.e.
+unit — coefficients).  This is the `E₁`-point analogue of
+`valuation_algebraMap_coordinateRing_C₁_le_one`, transported through `φ^*`. -/
+theorem pointValuation_le_one_pullback_coordinateRing
+    (φ : HasseWeil.Isogeny W₁ W₂) (P : (W_smooth W₁).SmoothPoint)
+    (hx : (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P (φ.pullback (x_gen W₂)) ≤ 1)
+    (hy : (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P (φ.pullback (y_gen W₂)) ≤ 1)
+    (c : (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing) :
+    (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P
+      (φ.pullback (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+        W₂.toAffine.FunctionField c)) ≤ 1 := by
+  classical
+  set w := (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P with hw
+  obtain ⟨g, rfl⟩ := AdjoinRoot.mk_surjective c
+  induction g using Polynomial.induction_on' with
+  | add p q hp hq =>
+    rw [map_add, map_add, map_add]
+    exact le_trans (w.map_add _ _) (max_le hp hq)
+  | monomial n a =>
+    rw [← Polynomial.C_mul_X_pow_eq_monomial]
+    simp only [map_mul, map_pow, w.map_mul]
+    -- the `X`-power leg is `φ^*(y_gen₂)^n`
+    have hXeq : φ.pullback (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+        W₂.toAffine.FunctionField (AdjoinRoot.mk W₂.toAffine.polynomial Polynomial.X)) =
+        φ.pullback (y_gen W₂) := rfl
+    refine mul_le_one' ?_ (by rw [hXeq]; exact pow_le_one₀ zero_le' hy)
+    induction a using Polynomial.induction_on' with
+    | add p q hp hq =>
+      rw [Polynomial.C_add, map_add, map_add, map_add]
+      exact le_trans (w.map_add _ _) (max_le hp hq)
+    | monomial m d =>
+      rw [← Polynomial.C_mul_X_pow_eq_monomial, Polynomial.C_mul, Polynomial.C_pow]
+      simp only [map_mul, map_pow, w.map_mul]
+      -- the `C X`-power leg is `φ^*(x_gen₂)^m`
+      have hXgen : φ.pullback (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+          W₂.toAffine.FunctionField (AdjoinRoot.mk W₂.toAffine.polynomial
+            (Polynomial.C Polynomial.X))) = φ.pullback (x_gen W₂) := rfl
+      refine mul_le_one' ?_ (by rw [hXgen]; exact pow_le_one₀ zero_le' hx)
+      -- the `F`-constant leg `φ^*(algMap_F d) = algMap_F d` is regular at `P` (constant).
+      have hdconst : φ.pullback (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+          W₂.toAffine.FunctionField (AdjoinRoot.mk W₂.toAffine.polynomial
+            (Polynomial.C (Polynomial.C d)))) =
+          algebraMap (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing W₁.toAffine.FunctionField
+            (algebraMap F (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing d) := by
+        rw [show (AdjoinRoot.mk W₂.toAffine.polynomial (Polynomial.C (Polynomial.C d)) :
+              (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing) =
+            algebraMap F (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing d from rfl,
+          ← IsScalarTower.algebraMap_apply F (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+            W₂.toAffine.FunctionField d, φ.pullback.commutes d,
+          ← IsScalarTower.algebraMap_apply F (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing
+            W₁.toAffine.FunctionField d]
+      rw [hdconst]
+      exact (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation_algebraMap_le_one _ P
+
 /-! ### The point-map image of a `B`-prime over `m_Q` is `Q` (the fibre matching, value-level)
 
 For a `B`-prime `v` lying over the affine place `m_Q` of `E₂`, the point `P` of `E₁` cut out by
