@@ -952,11 +952,8 @@ theorem wedhorn_834_v_in_plus_of_f_bound_and_cover
     (v : Spv A) (hv : v ∈ rationalOpen D.T D.s)
     (f : A) (h_f_bound : v.vle f C.base.s) :
     v ∈ rationalOpen (insert f C.base.T) C.base.s := by
-  classical
-  -- Cover refinement: v lies in the base rational subset.
-  have hv_base : v ∈ rationalOpen C.base.T C.base.s := C.hsubset D hD hv
-  -- Unfold base membership.
-  obtain ⟨hv_spa, hv_T_bound, hv_C_base_s_ne⟩ := hv_base
+  -- Cover refinement: v lies in the base rational subset; unfold membership.
+  obtain ⟨hv_spa, hv_T_bound, hv_C_base_s_ne⟩ := C.hsubset D hD hv
   refine ⟨hv_spa, ?_, hv_C_base_s_ne⟩
   intro x hx
   rcases Finset.mem_insert.mp hx with rfl | hx_in_T
@@ -1358,7 +1355,6 @@ theorem rationalOpen_subset_via_single_t_h_s_factor_and_T_D_in_plus
     (h_T_D_in_plus : ∀ t' ∈ D.T, t' ∈ ((A⁺) : Subring A)) :
     rationalOpen (insert (σ * t * D.s ^ N) T_base) C_base_s ⊆
       rationalOpen D.T D.s := by
-  classical
   intro w hw
   obtain ⟨hw_spa, hw_bound, hw_C_base_s_ne⟩ := hw
   letI : ValuativeRel A := w.toValuativeRel
