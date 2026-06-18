@@ -162,12 +162,12 @@ theorem isIntegral_coordYInFunctionField_fracPoly :
 instance algebra_isSeparable_functionField [NeZero (2 : F)] :
     Algebra.IsSeparable (FractionRing (Polynomial F)) C.FunctionField := by
   have : NeZero (2 : FractionRing (Polynomial F)) := by
-    refine ⟨fun h => NeZero.ne (2 : F) ?_⟩
+    refine ⟨fun h ↦ NeZero.ne (2 : F) ?_⟩
     refine FaithfulSMul.algebraMap_injective F (FractionRing (Polynomial F))
       (.trans ?_ (map_zero _).symm)
     rw [IsScalarTower.algebraMap_apply F (Polynomial F) (FractionRing (Polynomial F)) 2]
     simpa only [map_ofNat] using h
-  refine ⟨fun α => ?_⟩
+  refine ⟨fun α ↦ ?_⟩
   have hint : IsIntegral (FractionRing (Polynomial F)) α :=
     Algebra.IsIntegral.isIntegral α
   refine Polynomial.separable_of_monic_irreducible_natDegree_le_two
@@ -190,7 +190,7 @@ instance isDedekindRing_coordinateRing
     [IsIntegrallyClosed C.CoordinateRing] :
     IsDedekindRing C.CoordinateRing := by
   rw [isDedekindRing_iff (A := C.CoordinateRing) C.FunctionField]
-  refine ⟨inferInstance, inferInstance, fun {x} hx => ?_⟩
+  refine ⟨inferInstance, inferInstance, fun {x} hx ↦ ?_⟩
   exact IsIntegrallyClosed.isIntegral_iff.mp hx
 
 /-- `IsDedekindDomain C.CoordinateRing` as a corollary (from `IsDedekindRing`
@@ -611,7 +611,7 @@ theorem Polynomial.Monic.eq_X_sq_add_C_mul_X_add_C_of_natDegree_two
     (hm : p.Monic) (hd : p.natDegree = 2) :
     p = Polynomial.X ^ 2 + Polynomial.C (p.coeff 1) * Polynomial.X +
       Polynomial.C (p.coeff 0) := by
-  refine Polynomial.ext fun n => ?_
+  refine Polynomial.ext fun n ↦ ?_
   rcases Nat.lt_or_ge n 3 with hn | hn
   · interval_cases n
     · simp [Polynomial.coeff_X_pow, Polynomial.coeff_C]
