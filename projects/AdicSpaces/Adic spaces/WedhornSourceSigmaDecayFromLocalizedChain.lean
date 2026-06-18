@@ -184,11 +184,9 @@ theorem source_direct_upper_bound_via_comap_at
     w.vle a b ∧ ¬ w.vle b 0 := by
   refine ⟨?_, ?_⟩
   · -- w.vle a b ↔ (comap _ v).vle a b ↔ v.vle (algebraMap a) (algebraMap b)
-    rw [← hv_eq, comap_vle]
-    exact h_v_le
+    rwa [← hv_eq, comap_vle]
   · -- ¬ w.vle b 0 ↔ ¬ v.vle (algebraMap b) (algebraMap 0) = ¬ v.vle (algebraMap b) 0
-    rw [← hv_eq, comap_vle, map_zero]
-    exact h_v_b_ne
+    rwa [← hv_eq, comap_vle, map_zero]
 
 omit [TopologicalSpace A] [PlusSubring A] [IsTopologicalRing A] in
 /-- **Source σ-decay chain from source direct upper bound at
@@ -221,8 +219,8 @@ theorem source_sigma_decay_chain_via_direct_upper_bound_at
       w.vle C_base_s ((σ : A) * b ^ (N + 1)) ∧
       ¬ w.vle b 0 := by
   refine ⟨(1 : Aˣ), 0, b, ?_, ?_, h_b_ne⟩
-  · simp only [Units.val_one, one_mul, pow_zero, mul_one]; exact h_w
-  · simp only [Units.val_one, one_mul, zero_add, pow_one]; exact w.vle_refl b
+  · simpa only [Units.val_one, one_mul, pow_zero, mul_one] using h_w
+  · simpa only [Units.val_one, one_mul, zero_add, pow_one] using w.vle_refl b
 
 /-! ## Named missing comparison precondition -/
 
@@ -363,18 +361,16 @@ theorem localized_cor732_sigma_decay_chain_supplier_from_denominator_chain
   -- Step 3: translate source restrictions at w to v via comap_vle.
   have hv_f : v.vle (algebraMap A (Localization.Away s) f)
       (algebraMap A (Localization.Away s) s_base) := by
-    rw [← comap_vle, hv_eq]; exact hw_f
+    rwa [← comap_vle, hv_eq]
   have hv_one_t : v.vle (1 : Localization.Away s)
       (algebraMap A (Localization.Away s) t') := by
-    rw [show (1 : Localization.Away s)
+    rwa [show (1 : Localization.Away s)
           = algebraMap A (Localization.Away s) 1 from (map_one _).symm,
       ← comap_vle, hv_eq]
-    exact hw_one_t
   have hv_t_ne : ¬ v.vle (algebraMap A (Localization.Away s) t') 0 := by
-    rw [show (0 : Localization.Away s)
+    rwa [show (0 : Localization.Away s)
           = algebraMap A (Localization.Away s) 0 from (map_zero _).symm,
       ← comap_vle, hv_eq]
-    exact hw_t_ne
   -- Step 4: apply the localized direct upper bound at v.
   have ht_image_mem :
       algebraMap A (Localization.Away s) t' ∈
