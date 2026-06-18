@@ -133,7 +133,7 @@ for a unique `a ∈ R`. -/
 theorem InvariantDifferential.eq_smul_normalized {F : FormalGroup R}
     (η : InvariantDifferential F) :
     ∃! a : R, η.toSeries = a • F.normalizedDifferential.toSeries := by
-  refine ⟨η.scalar, η.toSeries_eq_scalar_smul, fun b hb => ?_⟩
+  refine ⟨η.scalar, η.toSeries_eq_scalar_smul, fun b hb ↦ ?_⟩
   -- From `η.toSeries = b • invariantDiff`, take constant coefficient of both sides.
   -- Since `constantCoeff` is defeq-compatible with `•`, the goal reduces to
   -- `b • (1 : R) = b`, i.e., `b * 1 = b`.
