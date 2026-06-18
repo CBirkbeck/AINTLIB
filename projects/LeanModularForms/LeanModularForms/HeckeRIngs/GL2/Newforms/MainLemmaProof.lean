@@ -66,6 +66,186 @@ private lemma qExpansion_one_coeff_finset_sum {ι : Type*} (s : Finset ι)
   rw [show (∑ i ∈ s, ⇑(F i) : UpperHalfPlane → ℂ) = ⇑(∑ i ∈ s, F i) from
     (map_sum (CuspForm.coeHom (Γ := (Gamma1 N).map (mapGL ℝ)) (k := k)) F s).symm, h, map_sum]
 
+/-- **Oldforms vanish at coprime indices.**  If `g ∈ cuspFormsOld N k` and `(n, N) = 1`, then the
+`n`-th canonical (period-1) Fourier coefficient of `g` is `0`.
+
+This is the *forward* half of the Atkin–Lehner support analysis (DS §5.7): a single oldform
+generator `V_d h` (`d > 1`, `d ∣ N`) has `q`-expansion supported on multiples of `d`
+(`AtkinLehner.qExpansion_levelRaise_isSupportedOnDvd`), and for `(n,N) = 1` and `1 < d ∣ N` one has
+`d ∤ n` (else `1 < gcd(d,n) ∣ gcd(N,n) = 1`); the statement extends to the whole span by additivity
+of the `q`-coefficient (`qExpansionOneCuspAddHom`). -/
+lemma coeff_eq_zero_of_mem_cuspFormsOld
+    {g : CuspForm ((Gamma1 N).map (mapGL ℝ)) k} (hg : g ∈ cuspFormsOld N k)
+    {n : ℕ} (hn : Nat.Coprime n N) :
+    (UpperHalfPlane.qExpansion (1 : ℝ) g).coeff n = 0 := by
+  -- `span_induction` on `g`, on the motive `aₙ(x) = 0`; additivity/scalar of the `q`-coefficient
+  -- come from `qExpansionOneCuspAddHom`.
+  rw [show (UpperHalfPlane.qExpansion (1 : ℝ) g).coeff n =
+      (PowerSeries.coeff (R := ℂ) n) (qExpansionOneCuspAddHom (N := N) (k := k) g) from by
+    rw [qExpansionOneCuspAddHom_apply]]
+  induction hg using Submodule.span_induction with
+  | mem x hx =>
+    obtain ⟨M, d, hM, hd, hd1, heq, h, rfl⟩ := hx
+    haveI : NeZero M := hM
+    haveI : NeZero d := hd
+    -- `d ∤ n` from `1 < d`, `d ∣ N`, `(n, N) = 1`.
+    have hdN : d ∣ N := ⟨M, heq.symm⟩
+    have hdn : ¬ d ∣ n := fun hdvd ↦ by
+      have : d ∣ Nat.gcd n N := Nat.dvd_gcd hdvd hdN
+      rw [hn] at this
+      exact absurd (Nat.le_of_dvd Nat.one_pos this) (Nat.not_le.mpr hd1)
+    -- Support of the level-raise on multiples of `d`.
+    have hsupp : AtkinLehner.QExpansionSupportedOnDvd d
+        (heq ▸ levelRaise M d k h : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :=
+      AtkinLehner.levelRaise_mem_qSupportedOnDvdSubmodule (N := N) heq h
+    rw [qExpansionOneCuspAddHom_apply]; exact hsupp n hdn
+  | zero => rw [map_zero, map_zero]
+  | add x y _ _ ihx ihy => rw [map_add, map_add, ihx, ihy, add_zero]
+  | smul c x _ ihx =>
+    rw [qExpansionOneCuspAddHom_apply] at ihx ⊢
+    rw [show (⇑(c • x : CuspForm _ k) : UpperHalfPlane → ℂ) = c • ⇑x.toModularForm' from rfl,
+      ModularForm.qExpansion_smul one_pos (one_mem_strictPeriods_Gamma1_map N),
+      PowerSeries.coeff_smul, smul_eq_mul,
+      show (UpperHalfPlane.qExpansion (1 : ℝ) ⇑x.toModularForm') =
+        UpperHalfPlane.qExpansion (1 : ℝ) x from rfl, ihx, mul_zero]
+
+/-! ### Eigensystem arithmetic for normalised eigenforms
+
+The following block develops the Hecke-eigensystem identities (coprime multiplicativity, the
+prime-square character relation, and the "agree off a finite set ⟹ agree everywhere" propagation)
+for a **normalised period-1 eigenform** in a single Nebentypus space, working directly with the
+Fourier coefficients `aₙ = (qExpansion 1 g).coeff n` (so `a₁ = 1`).  These mirror the `Eigenform`
+versions in `StrongMultiplicityOneFull.lean`, but are stated for the bare normalised data
+`IsNormalisedEigenform_one` so they apply to any normalised common eigenfunction (not only bundled
+`Eigenform`/`Newform`s), and are the engine for the strong-multiplicity-one separation of new
+eigenforms used in L3.  None of them invokes `mainLemma` (only the public
+`eigenform_coeff_multiplicative_one`), so they are non-circular. -/
+
+variable {χ : (ZMod N)ˣ →* ℂˣ}
+
+/-- **Coprime multiplicativity of Fourier coefficients** of a normalised eigenform:
+`a_{mn} = a_m · a_n` when `gcd(m, n) = 1` (`m, n` coprime to `N`).  Direct specialisation of
+`eigenform_coeff_multiplicative_one` at `gcd = 1`. -/
+private lemma normEigen_coeff_coprime_mul
+    {g : CuspForm ((Gamma1 N).map (mapGL ℝ)) k}
+    (hgχ : g.toModularForm' ∈ modFormCharSpace k χ)
+    (hg_eig : IsNormalisedEigenform_one k g.toModularForm')
+    (m n : ℕ+) (hm : Nat.Coprime m.val N) (hn : Nat.Coprime n.val N)
+    (hmn : Nat.Coprime m.val n.val) :
+    (UpperHalfPlane.qExpansion (1 : ℝ) g).coeff (m.val * n.val) =
+      (UpperHalfPlane.qExpansion (1 : ℝ) g).coeff m.val *
+        (UpperHalfPlane.qExpansion (1 : ℝ) g).coeff n.val := by
+  have h := eigenform_coeff_multiplicative_one (N := N) k m n hm hn χ hgχ hg_eig
+  rw [(hmn : Nat.gcd m.val n.val = 1), Nat.divisors_one, Finset.sum_singleton,
+    dif_pos (Nat.coprime_one_left N),
+    show ZMod.unitOfCoprime 1 (Nat.coprime_one_left N) = 1 by ext; simp [ZMod.coe_unitOfCoprime]]
+    at h
+  simp only [Nat.cast_one, one_zpow, map_one, Units.val_one, one_mul, mul_one, Nat.div_one] at h
+  -- `(qExpansion 1 g).coeff = (qExpansion 1 g.toModularForm').coeff`
+  rw [show (⇑g : UpperHalfPlane → ℂ) = ⇑g.toModularForm' from rfl] at *
+  exact h.symm
+
+/-- **Prime-square character relation** for a normalised eigenform:
+`a_{q²} = a_q² − χ(q)·q^{k-1}` for a prime `q ∤ N`.  Mirrors
+`eigenvalue_at_prime_sq_of_coeff_one_ne_zero`, stated via coefficients. -/
+private lemma normEigen_coeff_prime_sq
+    {g : CuspForm ((Gamma1 N).map (mapGL ℝ)) k}
+    (hgχ : g.toModularForm' ∈ modFormCharSpace k χ)
+    (hg_eig : IsNormalisedEigenform_one k g.toModularForm')
+    {q : ℕ} (hq : Nat.Prime q) (hqN : Nat.Coprime q N) :
+    (UpperHalfPlane.qExpansion (1 : ℝ) g).coeff (q ^ 2) =
+      (UpperHalfPlane.qExpansion (1 : ℝ) g).coeff q ^ 2 -
+        (χ (ZMod.unitOfCoprime q hqN) : ℂ) * (q : ℂ) ^ (k - 1) := by
+  have hq_pos : 0 < q := hq.pos
+  let q_pnat : ℕ+ := ⟨q, hq_pos⟩
+  have h := eigenform_coeff_multiplicative_one (N := N) k q_pnat q_pnat hqN hqN χ hgχ hg_eig
+  simp only [q_pnat, PNat.mk_coe] at h
+  rw [Nat.gcd_self, hq.divisors,
+    Finset.sum_insert (by simp only [Finset.mem_singleton]; exact hq.ne_one.symm),
+    Finset.sum_singleton, dif_pos (Nat.coprime_one_left N), dif_pos hqN,
+    show q * q / (1 * 1) = q ^ 2 by rw [mul_one, Nat.div_one, sq],
+    show q * q / (q * q) = 1 from Nat.div_self (by positivity),
+    show ZMod.unitOfCoprime 1 (Nat.coprime_one_left N) = 1 by
+      ext; simp [ZMod.coe_unitOfCoprime]] at h
+  simp only [map_one, Units.val_one, one_mul, Nat.cast_one, one_zpow] at h
+  rw [hg_eig.2, mul_one] at h
+  rw [show (⇑g : UpperHalfPlane → ℂ) = ⇑g.toModularForm' from rfl]
+  linear_combination -h
+
+/-- **Cofactor agreement.**  If two normalised eigenforms (same `χ`) agree at a coprime index `m`
+where the common value `a_m` is nonzero, and agree at `nm` for some `n` coprime to both `N` and `m`,
+then they agree at `n`.  Mirrors `eigenvalue_agree_of_cofactor_ne_zero`. -/
+private lemma normEigen_coeff_agree_cofactor
+    {g g' : CuspForm ((Gamma1 N).map (mapGL ℝ)) k}
+    (hgχ : g.toModularForm' ∈ modFormCharSpace k χ)
+    (hg'χ : g'.toModularForm' ∈ modFormCharSpace k χ)
+    (hg_eig : IsNormalisedEigenform_one k g.toModularForm')
+    (hg'_eig : IsNormalisedEigenform_one k g'.toModularForm')
+    (n m : ℕ+) (hn : Nat.Coprime n.val N) (hmN : Nat.Coprime m.val N)
+    (hnm : Nat.Coprime n.val m.val)
+    (hm_ne : (UpperHalfPlane.qExpansion (1 : ℝ) g).coeff m.val ≠ 0)
+    (hm_eq : (UpperHalfPlane.qExpansion (1 : ℝ) g).coeff m.val =
+      (UpperHalfPlane.qExpansion (1 : ℝ) g').coeff m.val)
+    (hnm_eq : (UpperHalfPlane.qExpansion (1 : ℝ) g).coeff (n.val * m.val) =
+      (UpperHalfPlane.qExpansion (1 : ℝ) g').coeff (n.val * m.val)) :
+    (UpperHalfPlane.qExpansion (1 : ℝ) g).coeff n.val =
+      (UpperHalfPlane.qExpansion (1 : ℝ) g').coeff n.val := by
+  refine mul_right_cancel₀ hm_ne ?_
+  rw [← normEigen_coeff_coprime_mul hgχ hg_eig n m hn hmN hnm, hnm_eq,
+    normEigen_coeff_coprime_mul hg'χ hg'_eig n m hn hmN hnm, hm_eq]
+
+/-- **Strong-multiplicity-one eigenvalue propagation.**  Two normalised eigenforms (same `χ`) whose
+Fourier coefficients agree at every index coprime to `N` *outside a finite set* `S` in fact agree at
+*every* index coprime to `N`.  Mirrors `eigenvalues_eq_all_coprime_of_eq_off_finite_eigenform`: the
+cofactor trick (`normEigen_coeff_agree_cofactor`) plus the prime-square relation
+(`normEigen_coeff_prime_sq`) propagate the agreement into the finite exceptional set, using a prime
+`q` avoiding `S` from `exists_prime_coprime_avoiding_finset`. -/
+private lemma normEigen_coeff_agree_all_coprime
+    {g g' : CuspForm ((Gamma1 N).map (mapGL ℝ)) k}
+    (hgχ : g.toModularForm' ∈ modFormCharSpace k χ)
+    (hg'χ : g'.toModularForm' ∈ modFormCharSpace k χ)
+    (hg_eig : IsNormalisedEigenform_one k g.toModularForm')
+    (hg'_eig : IsNormalisedEigenform_one k g'.toModularForm')
+    (S : Finset ℕ)
+    (hyp : ∀ n : ℕ+, Nat.Coprime n.val N → n.val ∉ S →
+      (UpperHalfPlane.qExpansion (1 : ℝ) g).coeff n.val =
+        (UpperHalfPlane.qExpansion (1 : ℝ) g').coeff n.val) :
+    ∀ n : ℕ+, Nat.Coprime n.val N →
+      (UpperHalfPlane.qExpansion (1 : ℝ) g).coeff n.val =
+        (UpperHalfPlane.qExpansion (1 : ℝ) g').coeff n.val := by
+  intro n hn
+  by_cases hn_S : n.val ∈ S
+  · obtain ⟨q, hq_prime, hq_N, hn_coprime_q, hq_notin_S, hqsq_notin_S,
+      hnq_notin_S, hnqsq_notin_S⟩ := exists_prime_coprime_avoiding_finset (N := N) n S
+    have hqsq_N : Nat.Coprime (q ^ 2) N := Nat.Coprime.pow_left 2 hq_N
+    by_cases hLamq : (UpperHalfPlane.qExpansion (1 : ℝ) g).coeff q = 0
+    · -- `a_q(g) = 0 ⟹ a_{q²}(g) ≠ 0`; use the `q²` cofactor.
+      have hf_qsq0 : (UpperHalfPlane.qExpansion (1 : ℝ) g).coeff (q ^ 2) =
+          -((χ (ZMod.unitOfCoprime q hq_N) : ℂ)) * (q : ℂ) ^ (k - 1) := by
+        rw [normEigen_coeff_prime_sq hgχ hg_eig hq_prime hq_N, hLamq]; ring
+      have hqsq_ne : (UpperHalfPlane.qExpansion (1 : ℝ) g).coeff (q ^ 2) ≠ 0 := by
+        rw [hf_qsq0]
+        exact mul_ne_zero (neg_ne_zero.mpr (Units.ne_zero _))
+          (zpow_ne_zero _ (Nat.cast_ne_zero.mpr hq_prime.pos.ne'))
+      have hq_eq0 : (UpperHalfPlane.qExpansion (1 : ℝ) g').coeff q = 0 :=
+        (hyp ⟨q, hq_prime.pos⟩ hq_N hq_notin_S).symm.trans hLamq
+      have hqsq_eq : (UpperHalfPlane.qExpansion (1 : ℝ) g).coeff (q ^ 2) =
+          (UpperHalfPlane.qExpansion (1 : ℝ) g').coeff (q ^ 2) := by
+        rw [normEigen_coeff_prime_sq hgχ hg_eig hq_prime hq_N,
+          normEigen_coeff_prime_sq hg'χ hg'_eig hq_prime hq_N, hLamq, hq_eq0]
+      have hnqsq_eq := hyp ⟨n.val * q ^ 2, Nat.mul_pos n.pos (pow_pos hq_prime.pos 2)⟩
+        (Nat.Coprime.mul_left hn hqsq_N) hnqsq_notin_S
+      exact normEigen_coeff_agree_cofactor hgχ hg'χ hg_eig hg'_eig n ⟨q ^ 2, pow_pos hq_prime.pos 2⟩
+        hn hqsq_N (Nat.Coprime.pow_right 2 hn_coprime_q) hqsq_ne hqsq_eq hnqsq_eq
+    · -- `a_q(g) ≠ 0`; use the `q` cofactor directly.
+      have hq_eq : (UpperHalfPlane.qExpansion (1 : ℝ) g).coeff q =
+          (UpperHalfPlane.qExpansion (1 : ℝ) g').coeff q := hyp ⟨q, hq_prime.pos⟩ hq_N hq_notin_S
+      have hnq_eq := hyp ⟨n.val * q, Nat.mul_pos n.pos hq_prime.pos⟩
+        (Nat.Coprime.mul_left hn hq_N) hnq_notin_S
+      exact normEigen_coeff_agree_cofactor hgχ hg'χ hg_eig hg'_eig n ⟨q, hq_prime.pos⟩
+        hn hq_N hn_coprime_q hLamq hq_eq hnq_eq
+  · exact hyp n hn hn_S
+
 /-- **L1 (eigenvalue–coefficient identity, un-normalised).**  For a `χ`-cusp form `h` that is a
 `T_m`-eigenfunction with eigenvalue `a` at an index `m` coprime to `N`, the `m`-th canonical
 (period-`1`) Fourier coefficient is `a` times the first: `aₘ(h) = a · a₁(h)`.
