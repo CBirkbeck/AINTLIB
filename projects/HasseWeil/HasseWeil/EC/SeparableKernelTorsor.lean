@@ -103,10 +103,10 @@ noncomputable def kernelTranslateForwardAut
       translateAlgEquivOfPoint W k.val (φ.pullback z) = φ.pullback z) :
     φ.kernel → (@AlgEquiv W.toAffine.FunctionField W.toAffine.FunctionField
       W.toAffine.FunctionField _ _ _ φ.toAlgebra φ.toAlgebra) :=
-  fun k =>
+  fun k ↦
     letI := φ.toAlgebra
     AlgEquiv.ofRingEquiv (f := (translateAlgEquivOfPoint W k.val).toRingEquiv)
-      (fun r => hcov k r)
+      (fun r ↦ hcov k r)
 
 /-- **The forward kernel-translation map is injective.** Two kernel points giving the same
 `φ*K(E)`-algebra automorphism of `K(E)` give the same translation `AlgEquiv` (the forward map is
@@ -126,7 +126,7 @@ theorem kernelTranslateForwardAut_injective
       (kernelTranslateForwardAut W φ hcov k1 :
         W.toAffine.FunctionField → W.toAffine.FunctionField) =
       kernelTranslateForwardAut W φ hcov k2 := by rw [h]
-  exact AlgEquiv.ext (fun z => congrFun hfun z)
+  exact AlgEquiv.ext (fun z ↦ congrFun hfun z)
 
 /-- **Finiteness of `ker φ` for any endomorphism isogeny over `K̄` (or any field), from the
 kernel-translation covariance `hcov`.** The function-field extension `K(E) / φ*K(E)` is
@@ -300,7 +300,7 @@ theorem genericPointAct_kernelTranslateForwardAut (φ : Isogeny W.toAffine W.toA
   letI := φ.toAlgebra
   unfold genericPointAct kernelTranslateForwardAut
   have hAlgHom : ((AlgEquiv.ofRingEquiv (f := (translateAlgEquivOfPoint W k.val).toRingEquiv)
-        (fun r => hcov k r)).toAlgHom.restrictScalars F) =
+        (fun r ↦ hcov k r)).toAlgHom.restrictScalars F) =
       (translateAlgEquivOfPoint W k.val).toAlgHom := by
     apply AlgHom.ext; intro z; rfl
   rw [hAlgHom]
@@ -335,12 +335,12 @@ theorem card_kernel_eq_degree_of_separable_concrete
   -- The inverse witness: pick the descended kernel point from `hdesc`.
   set inverse : (@AlgEquiv W.toAffine.FunctionField W.toAffine.FunctionField
       W.toAffine.FunctionField _ _ _ φ.toAlgebra φ.toAlgebra) → φ.kernel :=
-    fun σ => ⟨(hdesc σ).choose, (hdesc σ).choose_spec.1⟩ with hinv_def
+    fun σ ↦ ⟨(hdesc σ).choose, (hdesc σ).choose_spec.1⟩ with hinv_def
   set forward := kernelTranslateForwardAut W φ hcov with hfwd_def
   -- Defining property of `inverse`: `lift (inverse σ).val = σ(P_gen) − P_gen`.
   have hinv_spec : ∀ σ, liftPointToKE W (inverse σ).val =
       genericPointAct W φ σ - genericPoint W :=
-    fun σ => (hdesc σ).choose_spec.2
+    fun σ ↦ (hdesc σ).choose_spec.2
   -- `liftPointToKE` is injective.
   have hlift_inj : Function.Injective (liftPointToKE W) := by
     unfold liftPointToKE
@@ -369,7 +369,7 @@ theorem card_kernel_eq_degree_of_separable_concrete
     have hcoeq : ((forward (inverse σ)).toAlgHom.restrictScalars F) =
         (σ.toAlgHom.restrictScalars F) :=
       algHom_ext_x_y_gen W hcoords.1 hcoords.2
-    refine AlgEquiv.ext fun z => ?_
+    refine AlgEquiv.ext fun z ↦ ?_
     exact DFunLike.congr_fun hcoeq z
   rw [card_kernel_eq_degree_of_separable_of_witnesses W φ hsep h_normal forward inverse
     h_left h_right]
