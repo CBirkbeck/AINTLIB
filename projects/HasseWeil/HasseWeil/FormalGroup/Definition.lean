@@ -414,9 +414,9 @@ theorem constantCoeff_subst_vanishing {σ τ : Type*}
       MvPowerSeries.constantCoeff f := by
   simp only [← MvPowerSeries.coeff_zero_eq_constantCoeff]
   rw [MvPowerSeries.coeff_subst ha, finsum_eq_single _ (0 : σ →₀ ℕ)]
-  · simp [Finsupp.prod_zero_index, MvPowerSeries.coeff_one, smul_eq_mul, mul_one]
+  · simp [Finsupp.prod_zero_index, smul_eq_mul, mul_one]
   · intro d hd
-    have : MvPowerSeries.constantCoeff (d.prod fun s e => a s ^ e) = 0 := by
+    have : MvPowerSeries.constantCoeff (d.prod fun s e ↦ a s ^ e) = 0 := by
       rw [Finsupp.prod, map_prod]
       obtain ⟨s, hs⟩ := Finsupp.support_nonempty_iff.mpr hd
       exact Finset.prod_eq_zero hs
@@ -431,7 +431,7 @@ theorem constantCoeff_FG_toSeries (F : FormalGroup.FormalGroup R) :
       (![MvPowerSeries.X 0, 0] : Fin 2 → MvPowerSeries (Fin 2) R) := by
     apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro s; fin_cases s <;> simp
   have := congr_arg MvPowerSeries.constantCoeff F.lunit
-  rw [constantCoeff_subst_vanishing ha (fun s => by fin_cases s <;> simp)] at this
+  rw [constantCoeff_subst_vanishing ha (fun s ↦ by fin_cases s <;> simp)] at this
   simpa using this
 
 /-- `constantCoeff (fAdd F f g) = 0` when `f(0) = g(0) = 0`. -/
@@ -440,7 +440,7 @@ theorem constantCoeff_fAdd (F : FormalGroup.FormalGroup R) (f g : PowerSeries R)
     PowerSeries.constantCoeff (fAdd F f g) = 0 := by
   show MvPowerSeries.constantCoeff (MvPowerSeries.subst _ F.toSeries) = 0
   rw [constantCoeff_subst_vanishing (hasSubst_pair f g hf hg)
-    (fun s => by fin_cases s <;> simpa)]
+    (fun s ↦ by fin_cases s <;> simpa)]
   exact constantCoeff_FG_toSeries F
 
 /-- The formal group law preserves the maximal ideal `𝔪 = {f : 0 < f.order}`:
@@ -468,12 +468,12 @@ theorem fAdd_zero_left (F : FormalGroup.FormalGroup R) (g : PowerSeries R)
     (MvPowerSeries.subst (show Fin 2 → MvPowerSeries Unit R from ![0, g])) F.runit
   rw [MvPowerSeries.subst_comp_subst_apply ha hb, subst_matrix_X1 _ hb] at step
   simp only [Matrix.cons_val_one, Matrix.cons_val_zero] at step
-  have heq : (fun s => MvPowerSeries.subst
+  have heq : (fun s ↦ MvPowerSeries.subst
       (show Fin 2 → MvPowerSeries Unit R from ![0, g])
       ((![0, MvPowerSeries.X 1] : Fin 2 → MvPowerSeries (Fin 2) R) s)) =
     (show Fin 2 → MvPowerSeries Unit R from ![0, g]) := by
     funext s; fin_cases s
-    · simp only [Matrix.cons_val_zero]; exact subst_zero_eq hb
+    · simp only []; exact subst_zero_eq hb
     · exact subst_matrix_X1 (show Fin 2 → MvPowerSeries Unit R from ![0, g]) hb
   rw [heq] at step; exact step
 
@@ -509,15 +509,15 @@ theorem FormalGroup.coeff_10 (F : FormalGroup.FormalGroup R) :
     rwa [MvPowerSeries.coeff_index_single_self_X, smul_eq_mul, mul_one] at key
   · intro d hd
     suffices MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1)
-        (d.prod fun s e =>
+        (d.prod fun s e ↦
           (![MvPowerSeries.X 0, (0 : MvPowerSeries (Fin 2) R)] s) ^ e) = 0 by
       rw [this, smul_zero]
-    rw [Finsupp.prod_fintype _ _ (fun i => by fin_cases i <;> simp),
+    rw [Finsupp.prod_fintype _ _ (fun i ↦ by fin_cases i <;> simp),
         Fin.prod_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_zero]
     by_cases hd1 : d 1 = 0
     · simp only [hd1, pow_zero, mul_one, MvPowerSeries.coeff_X_pow]
       have : d 0 ≠ 1 :=
-        fun h => hd (Finsupp.ext (fun i => by fin_cases i <;> simp [h, hd1]))
+        fun h ↦ hd (Finsupp.ext (fun i ↦ by fin_cases i <;> simp [h, hd1]))
       split_ifs with h
       · exact absurd (by simpa [Finsupp.single_eq_same] using
             (DFunLike.congr_fun h 0).symm) this
@@ -539,15 +539,15 @@ theorem FormalGroup.coeff_01 (F : FormalGroup.FormalGroup R) :
     rwa [MvPowerSeries.coeff_index_single_self_X, smul_eq_mul, mul_one] at key
   · intro d hd
     suffices MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) 1)
-        (d.prod fun s e =>
+        (d.prod fun s e ↦
           (![(0 : MvPowerSeries (Fin 2) R), MvPowerSeries.X 1] s) ^ e) = 0 by
       rw [this, smul_zero]
-    rw [Finsupp.prod_fintype _ _ (fun i => by fin_cases i <;> simp),
+    rw [Finsupp.prod_fintype _ _ (fun i ↦ by fin_cases i <;> simp),
         Fin.prod_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_zero]
     by_cases hd0 : d 0 = 0
     · simp only [hd0, pow_zero, one_mul, MvPowerSeries.coeff_X_pow]
       have : d 1 ≠ 1 :=
-        fun h => hd (Finsupp.ext (fun i => by fin_cases i <;> simp [h, hd0]))
+        fun h ↦ hd (Finsupp.ext (fun i ↦ by fin_cases i <;> simp [h, hd0]))
       split_ifs with h
       · exact absurd (by simpa [Finsupp.single_eq_same] using
             (DFunLike.congr_fun h 1).symm) this
@@ -567,8 +567,8 @@ theorem coeff_one_fAdd (F : FormalGroup.FormalGroup R) (f g : PowerSeries R)
   conv_lhs =>
     arg 1; ext d; rw [smul_eq_mul]; arg 2
     change MvPowerSeries.coeff (Finsupp.single () 1)
-      (d.prod fun s e => (![f, g]) s ^ e)
-    rw [Finsupp.prod_fintype _ _ (fun i => by fin_cases i <;> exact pow_zero _),
+      (d.prod fun s e ↦ (![f, g]) s ^ e)
+    rw [Finsupp.prod_fintype _ _ (fun i ↦ by fin_cases i <;> exact pow_zero _),
         Fin.prod_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_zero]
   change (∑ᶠ d, MvPowerSeries.coeff d F.toSeries *
     PowerSeries.coeff 1 (f ^ (d 0) * g ^ (d 1))) = _
@@ -578,13 +578,13 @@ theorem coeff_one_fAdd (F : FormalGroup.FormalGroup R) (f g : PowerSeries R)
     intro d hd0 hd1
     by_cases hsum : 2 ≤ d 0 + d 1
     · rw [coeff_one_high_deg f g hf hg (d 0) (d 1) hsum, mul_zero]
-    · push_neg at hsum
+    · push Not at hsum
       have hd : d = 0 := by
         ext i; fin_cases i <;> simp_all [Finsupp.ext_iff, Fin.forall_fin_two] <;> omega
       subst hd
       simp only [Finsupp.coe_zero, Pi.zero_apply, pow_zero]
       norm_num [PowerSeries.coeff_one, constantCoeff_FG_toSeries]
-  have hsub : Function.support (fun d : Fin 2 →₀ ℕ =>
+  have hsub : Function.support (fun d : Fin 2 →₀ ℕ ↦
       MvPowerSeries.coeff d F.toSeries *
         PowerSeries.coeff 1 (f ^ (d 0) * g ^ (d 1))) ⊆
       ({Finsupp.single 0 1, Finsupp.single 1 1} : Finset (Fin 2 →₀ ℕ)) := by
@@ -592,7 +592,7 @@ theorem coeff_one_fAdd (F : FormalGroup.FormalGroup R) (f g : PowerSeries R)
     rw [Function.mem_support] at hd
     by_contra h; simp at h
     exact hd (vanish d h.1 h.2)
-  rw [finsum_eq_finset_sum_of_support_subset _ hsub]
+  rw [finsum_eq_finsetSum_of_support_subset _ hsub]
   have hne : Finsupp.single (0 : Fin 2) 1 ≠ Finsupp.single (1 : Fin 2) 1 := by
     intro h
     exact absurd (DFunLike.congr_fun h 0) (by simp [Finsupp.single_eq_same,
@@ -636,14 +636,14 @@ theorem fAdd_zero_right (F : FormalGroup.FormalGroup R) (f : PowerSeries R)
   have step := congr_arg
     (MvPowerSeries.subst (show Fin 2 → MvPowerSeries Unit R from ![f, 0])) F.lunit
   rw [MvPowerSeries.subst_comp_subst_apply ha hb, subst_matrix_X0 _ hb] at step
-  simp only [Matrix.cons_val_one, Matrix.cons_val_zero] at step
-  have heq : (fun s => MvPowerSeries.subst
+  simp only [Matrix.cons_val_zero] at step
+  have heq : (fun s ↦ MvPowerSeries.subst
       (show Fin 2 → MvPowerSeries Unit R from ![f, 0])
       ((![MvPowerSeries.X 0, 0] : Fin 2 → MvPowerSeries (Fin 2) R) s)) =
     (show Fin 2 → MvPowerSeries Unit R from ![f, 0]) := by
     funext s; fin_cases s
     · exact subst_matrix_X0 (show Fin 2 → MvPowerSeries Unit R from ![f, 0]) hb
-    · simp only [Matrix.cons_val_one, Matrix.cons_val_zero]; exact subst_zero_eq hb
+    · simp only []; exact subst_zero_eq hb
   rw [heq] at step; exact step
 
 /-- `F(f, g) = F(g, f)`: commutativity of the formal addition. -/
@@ -658,14 +658,14 @@ theorem fAdd_comm (F : FormalGroup.FormalGroup R) (f g : PowerSeries R)
   have step := congr_arg
     (MvPowerSeries.subst (show Fin 2 → MvPowerSeries Unit R from ![f, g])) F.comm
   rw [MvPowerSeries.subst_comp_subst_apply ha hb] at step
-  have heq : (fun s => MvPowerSeries.subst
+  have heq : (fun s ↦ MvPowerSeries.subst
       (show Fin 2 → MvPowerSeries Unit R from ![f, g])
       ((![MvPowerSeries.X 1, MvPowerSeries.X 0] : Fin 2 → MvPowerSeries (Fin 2) R) s)) =
     (show Fin 2 → MvPowerSeries Unit R from ![g, f]) := by
     funext s; fin_cases s
-    · simp only [Matrix.cons_val_zero]
+    · simp only []
       exact subst_matrix_X1 (show Fin 2 → MvPowerSeries Unit R from ![f, g]) hb
-    · simp only [Matrix.cons_val_one, Matrix.cons_val_zero]
+    · simp only []
       exact subst_matrix_X0 (show Fin 2 → MvPowerSeries Unit R from ![f, g]) hb
   rw [heq] at step; exact step.symm
 
@@ -692,8 +692,8 @@ theorem fAdd_assoc (F : FormalGroup.FormalGroup R) (f g h : PowerSeries R)
               Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries,
           MvPowerSeries.X 2] : Fin 2 → MvPowerSeries (Fin 3) R) := by
     apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro s; fin_cases s
-    · simp only [Matrix.cons_val_zero]
-      exact (constantCoeff_subst_vanishing h_XY (fun s => by fin_cases s <;> simp)
+    · simp only []
+      exact (constantCoeff_subst_vanishing h_XY (fun s ↦ by fin_cases s <;> simp)
         F.toSeries).trans (constantCoeff_FG_toSeries F)
     · simp
   have h_X_FYZ : MvPowerSeries.HasSubst
@@ -704,8 +704,8 @@ theorem fAdd_assoc (F : FormalGroup.FormalGroup R) (f g h : PowerSeries R)
         Fin 2 → MvPowerSeries (Fin 3) R) := by
     apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro s; fin_cases s
     · simp
-    · simp only [Matrix.cons_val_one, Matrix.cons_val_zero]
-      exact (constantCoeff_subst_vanishing h_YZ (fun s => by fin_cases s <;> simp)
+    · simp only []
+      exact (constantCoeff_subst_vanishing h_YZ (fun s ↦ by fin_cases s <;> simp)
         F.toSeries).trans (constantCoeff_FG_toSeries F)
   -- HasSubst for the specialization map (Fin 3 → Unit)
   have h_fgh : MvPowerSeries.HasSubst
@@ -743,7 +743,7 @@ theorem fAdd_assoc (F : FormalGroup.FormalGroup R) (f g h : PowerSeries R)
     congr 1; funext s; fin_cases s
     · -- s = 0: subst ![f,g,h] (subst ![X0, X1] F) = fAdd F f g
       show MvPowerSeries.subst _ (MvPowerSeries.subst _ F.toSeries) = _
-      simp only [Matrix.cons_val_zero]; unfold fAdd
+      simp only []; unfold fAdd
       rw [MvPowerSeries.subst_comp_subst_apply h_XY h_fgh]
       congr 1; funext s; fin_cases s
       · exact subst_fin3_X _ h_fgh 0
@@ -769,7 +769,7 @@ theorem fAdd_assoc (F : FormalGroup.FormalGroup R) (f g h : PowerSeries R)
       exact subst_fin3_X _ h_fgh 0
     · -- s = 1: subst ![f,g,h] (subst ![X1, X2] F) = fAdd F g h
       show MvPowerSeries.subst _ (MvPowerSeries.subst _ F.toSeries) = _
-      simp only [Matrix.cons_val_one, Matrix.cons_val_zero]; unfold fAdd
+      simp only []; unfold fAdd
       rw [MvPowerSeries.subst_comp_subst_apply h_YZ h_fgh]
       congr 1; funext s; fin_cases s
       · exact subst_fin3_X _ h_fgh 1
