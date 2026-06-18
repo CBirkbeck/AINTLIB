@@ -893,6 +893,77 @@ theorem valuation_weierstrassCubic_le
         exact zero_le'
       · exact le_of_eq (valuation_algebraMap_F_eq_one v h0))
 
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 400000 in
+/-- **Generic linear-coefficient bound** (instance-light): `w (a₁ x₁ + a₃) ≤ w x₁` for an arbitrary
+valuation `w` with `1 ≤ w x₁` that is `≤ 1` on `F`-constants. -/
+theorem valuation_a₁X_add_a₃_le_generic {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀]
+    (w : Valuation C₁.FunctionField Γ₀) (h1 : 1 ≤ w (coordXFun C₁))
+    (hc : ∀ c : F, w (algebraMap F C₁.FunctionField c) ≤ 1) :
+    w (algebraMap F C₁.FunctionField C₁.toAffine.a₁ * coordXFun C₁ +
+        algebraMap F C₁.FunctionField C₁.toAffine.a₃) ≤ w (coordXFun C₁) := by
+  have ha₁x : w (algebraMap F C₁.FunctionField C₁.toAffine.a₁ * coordXFun C₁) ≤
+      w (coordXFun C₁) := by
+    rw [w.map_mul]
+    calc w (algebraMap F C₁.FunctionField C₁.toAffine.a₁) * w (coordXFun C₁)
+        ≤ 1 * w (coordXFun C₁) := mul_le_mul_right' (hc _) _
+      _ = w (coordXFun C₁) := one_mul _
+  have ha₃ : w (algebraMap F C₁.FunctionField C₁.toAffine.a₃) ≤ w (coordXFun C₁) :=
+    le_trans (hc _) h1
+  exact le_trans (w.map_add _ _) (max_le ha₁x ha₃)
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 400000 in
+/-- **Generic `y₁`-pole bound** (instance-light): for an arbitrary valuation `w` with `1 < w x₁`
+that is `≤ 1` on `F`-constants, `w y₁ ≤ (w x₁)²`.  This is the explicit "`y₁/x₁²` is integral over
+`F[1/x₁]`" fact, proved by ultrametric on the Weierstrass relation `y₁² = c − b·y₁`:
+`(w y₁)² ≤ max(w c, w b · w y₁) ≤ max((w x₁)³, w x₁ · w y₁)`, which forces `w y₁ ≤ (w x₁)²`. -/
+theorem valuation_coordYFun_le_sq_generic {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀]
+    (w : Valuation C₁.FunctionField Γ₀) (hx : 1 < w (coordXFun C₁))
+    (hc : ∀ c : F, w (algebraMap F C₁.FunctionField c) ≤ 1) :
+    w (coordYFun C₁) ≤ w (coordXFun C₁) ^ 2 := by
+  set X := w (coordXFun C₁) with hXdef
+  set Y := w (coordYFun C₁) with hYdef
+  have h1X : 1 ≤ X := le_of_lt hx
+  -- from the Weierstrass relation: `Y² = w(c - b·y₁)`
+  have hrel := weierstrass_relation_coordFun (C₁ := C₁)
+  -- `y₁² = cubic - (a₁x₁+a₃)·y₁`
+  have hyeq : coordYFun C₁ ^ 2 =
+      (coordXFun C₁ ^ 3 + algebraMap F C₁.FunctionField C₁.toAffine.a₂ * coordXFun C₁ ^ 2 +
+        algebraMap F C₁.FunctionField C₁.toAffine.a₄ * coordXFun C₁ +
+        algebraMap F C₁.FunctionField C₁.toAffine.a₆) -
+      (algebraMap F C₁.FunctionField C₁.toAffine.a₁ * coordXFun C₁ +
+        algebraMap F C₁.FunctionField C₁.toAffine.a₃) * coordYFun C₁ := by
+    linear_combination hrel
+  have hYsq : Y ^ 2 ≤ max (X ^ 3) (X * Y) := by
+    rw [hYdef, ← map_pow, hyeq]
+    refine le_trans (Valuation.map_sub w _ _) (max_le_max ?_ ?_)
+    · exact valuation_weierstrassCubic_le_generic w (coordXFun C₁) h1X hc
+    · rw [w.map_mul]
+      exact mul_le_mul_right' (valuation_a₁X_add_a₃_le_generic w h1X hc) _
+  -- trichotomy: `Y ≤ X²`
+  by_contra hcon
+  rw [not_le] at hcon
+  have hYne : Y ≠ 0 := by
+    rw [hYdef, Ne, Valuation.zero_iff]; exact coordYFun_ne_zero (C₁ := C₁)
+  have hX0 : (0 : Γ₀) < X := lt_of_lt_of_le one_pos h1X
+  have hY0 : (0 : Γ₀) < Y := zero_lt_iff.mpr hYne
+  have hXleX2 : X ≤ X ^ 2 := by
+    calc X = X * 1 := (mul_one X).symm
+      _ ≤ X * X := mul_le_mul_left' h1X X
+      _ = X ^ 2 := (sq X).symm
+  -- `X³ < X·Y` and `X·Y < Y²`, so `max(X³, X·Y) < Y²` — contradicting `hYsq`.
+  have hX3_lt : X ^ 3 < X * Y := by
+    have hstep : X ^ 2 * X < Y * X := (mul_lt_mul_iff_left₀ hX0).mpr hcon
+    rw [mul_comm (X ^ 2) X, mul_comm Y X, ← pow_succ' X 2] at hstep
+    exact hstep
+  have hXltY : X < Y := lt_of_le_of_lt hXleX2 hcon
+  have hXY_lt : X * Y < Y ^ 2 := by
+    have hstep : X * Y < Y * Y := (mul_lt_mul_iff_left₀ hY0).mpr hXltY
+    rwa [← sq Y] at hstep
+  have : max (X ^ 3) (X * Y) < Y ^ 2 := max_lt (lt_trans hX3_lt hXY_lt) hXY_lt
+  exact absurd hYsq (not_le.mpr this)
+
 /-! ### The minimal-polynomial reduction (non-circular, place-dictionary-free)
 
 The whole content of `coordXFun_mem_B` / `coordYFun_mem_B` (and hence `coordRing_mem_B`) reduces —
