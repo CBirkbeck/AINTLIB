@@ -89,14 +89,11 @@ theorem mem_frobenius_range_iff (f : W.toAffine.FunctionField) :
       ∃ g : W.toAffine.FunctionField, g ^ Fintype.card K = f := by
   refine ⟨?_, ?_⟩
   · rintro ⟨g, hg⟩
-    refine ⟨g, ?_⟩
-    have := frobeniusIsog_pullback_apply W g
-    change g ^ Fintype.card K = f
-    rw [← this]; exact hg
+    exact ⟨g, by rwa [← frobeniusIsog_pullback_apply]⟩
   · rintro ⟨g, hg⟩
     refine ⟨g, ?_⟩
-    change (frobeniusIsog W).pullback g = f
-    rw [frobeniusIsog_pullback_apply]; exact hg
+    show (frobeniusIsog W).pullback g = f
+    rwa [frobeniusIsog_pullback_apply]
 
 /-! ### `K(E)` is purely inseparable over `Im(π*)`
 
@@ -112,10 +109,8 @@ noncomputable abbrev frobeniusIsog_subalgebra : Subalgebra K W.toAffine.Function
 /-- Every element `x : K(E)` has `x^q ∈ Im(π*)` — this is
     `π* x = x^q ∈ Im(π*)`. Direct from `frobeniusIsog_pullback_apply`. -/
 theorem pow_card_mem_frobenius_subalgebra (x : W.toAffine.FunctionField) :
-    x ^ Fintype.card K ∈ frobeniusIsog_subalgebra W := by
-  refine ⟨x, ?_⟩
-  show (frobeniusIsog W).pullback x = x ^ Fintype.card K
-  rw [frobeniusIsog_pullback_apply]
+    x ^ Fintype.card K ∈ frobeniusIsog_subalgebra W :=
+  ⟨x, frobeniusIsog_pullback_apply W x⟩
 
 /-! ### IntermediateField promotion of the Frobenius range
 
@@ -129,8 +124,8 @@ theorem frobeniusIsog_subalgebra_inv_mem (f : W.toAffine.FunctionField)
     (hf : f ∈ frobeniusIsog_subalgebra W) :
     f⁻¹ ∈ frobeniusIsog_subalgebra W := by
   rw [mem_frobenius_range_iff] at hf ⊢
-  obtain ⟨g, hg⟩ := hf
-  exact ⟨g⁻¹, by rw [inv_pow, hg]⟩
+  obtain ⟨g, rfl⟩ := hf
+  exact ⟨g⁻¹, by rw [inv_pow]⟩
 
 /-- The Frobenius range `Im(π*)` as an `IntermediateField K (FunctionField W)`.
     Bridge for Route B: gives a field-typed carrier on which to attach
@@ -159,9 +154,8 @@ theorem pow_card_mem_frobeniusIsog_intermediateField (x : W.toAffine.FunctionFie
     the carrier. -/
 theorem pow_card_mem_algebraMap_range (x : W.toAffine.FunctionField) :
     x ^ Fintype.card K ∈
-      (algebraMap (frobeniusIsog_intermediateField W) W.toAffine.FunctionField).range := by
-  refine ⟨⟨x ^ Fintype.card K, ?_⟩, rfl⟩
-  exact pow_card_mem_frobeniusIsog_intermediateField W x
+      (algebraMap (frobeniusIsog_intermediateField W) W.toAffine.FunctionField).range :=
+  ⟨⟨x ^ Fintype.card K, pow_card_mem_frobeniusIsog_intermediateField W x⟩, rfl⟩
 
 set_option backward.isDefEq.respectTransparency false in
 /-- **Route B core (Silverman III.6.2 step)**: `K(E) / Im(π*)` is purely
@@ -187,9 +181,8 @@ instance frobeniusIsog_intermediateField_isPurelyInseparable :
     with `fieldRange` to the bridge form. -/
 theorem frobeniusIsog_intermediateField_eq_fieldRange :
     frobeniusIsog_intermediateField W =
-      (frobeniusIsog W).pullback.fieldRange := by
-  apply IntermediateField.toSubalgebra_injective
-  rfl
+      (frobeniusIsog W).pullback.fieldRange :=
+  IntermediateField.toSubalgebra_injective rfl
 
 /-! ### Toward `Im([q]*) ⊆ Im(π*)` — Silverman III.6.2 final step
 
