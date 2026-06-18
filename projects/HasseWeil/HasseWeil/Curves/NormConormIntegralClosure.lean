@@ -1053,6 +1053,23 @@ theorem valuation_algebraMap_fracPolyX_le_one_of_ordAtInfty_nonneg
   rw [div_le_one₀ (pow_ne_zero _ (by rw [hXdef]; exact valuation_coordXFun_ne_zero v) |>.bot_lt)]
   exact pow_le_pow_right₀ h1X hdeg
 
+set_option maxHeartbeats 1600000 in
+/-- `w_v(y₁ / x₁²) ≤ 1` for a `B`-prime `v` with `1 < w_v(x₁)` (from `w_v(y₁) ≤ w_v(x₁)²`). -/
+theorem valuation_coordYFun_div_coordXFun_sq_le_one
+    (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)))
+    (hx : 1 < v.valuation C₁.FunctionField (coordXFun C₁)) :
+    v.valuation C₁.FunctionField (coordYFun C₁ / coordXFun C₁ ^ 2) ≤ 1 := by
+  set w := v.valuation C₁.FunctionField with hw
+  have hxne : coordXFun C₁ ≠ 0 := by rw [coordXFun_eq_coordX]; exact C₁.coordX_ne_zero
+  have hx2ne : (coordXFun C₁ ^ 2 : C₁.FunctionField) ≠ 0 := pow_ne_zero _ hxne
+  have hwx2ne : w (coordXFun C₁ ^ 2) ≠ 0 := by rw [Ne, Valuation.zero_iff]; exact hx2ne
+  rw [map_div₀, div_le_one₀ (zero_lt_iff.mpr hwx2ne), map_pow]
+  have hc : ∀ c : F, w (algebraMap F C₁.FunctionField c) ≤ 1 := fun c => by
+    rcases eq_or_ne c 0 with h0 | h0
+    · rw [h0, map_zero (algebraMap F C₁.FunctionField), w.map_zero]; exact zero_le'
+    · exact le_of_eq (valuation_algebraMap_F_eq_one v h0)
+  exact valuation_coordYFun_le_sq_generic w hx hc
+
 /-! ### The minimal-polynomial reduction (non-circular, place-dictionary-free)
 
 The whole content of `coordXFun_mem_B` / `coordYFun_mem_B` (and hence `coordRing_mem_B`) reduces —
