@@ -276,10 +276,7 @@ theorem mvTateAlgNhd_coeff_mem (n : ℕ) (P : PairOfDefinition A) (k : ℕ)
     {y : ↥(restrictedMvPowerSeriesSubring n A)} (hy : y ∈ mvTateAlgNhd n P k) (l : Fin n →₀ ℕ) :
     ∃ b : P.A₀, b ∈ P.I ^ k ∧ (b : A) = MvPowerSeries.coeff l y.val := by
   obtain ⟨z, hz, rfl⟩ := hy
-  have := mvPairIdeal_pow_le_coeffInIdeal n P k hz l
-  change ∃ b, b ∈ P.I ^ k ∧ (b : A) =
-    MvPowerSeries.coeff l ((mvPairSubring n P).subtype.toAddMonoidHom z).val
-  exact this
+  exact mvPairIdeal_pow_le_coeffInIdeal n P k hz l
 
 omit [IsTopologicalRing A] in
 /-- The product `mvTateAlgNhd n P k · mvTateAlgNhd n P k ⊆ mvTateAlgNhd n P i`. Generalizes
@@ -319,8 +316,7 @@ theorem mvExists_mul_pow_subset_pow (P : PairOfDefinition A) (a : A) (k : ℕ) :
     ⟨b, hb, rfl⟩
   have := hm hbA
   simp only [Set.mem_preimage, Set.mem_image] at this
-  obtain ⟨c, hc, heq⟩ := this
-  exact ⟨c, hc, heq⟩
+  exact this
 
 /-- For `x ∈ A⟨X⟩` and `k`, eventually every coefficient of `x` lies in `image P.I^k`.
 Generalizes `TateAlgebra.tateAlgebra_coeff_eventually_in_pow` from `Fin 1` to `Fin n`;
@@ -717,13 +713,9 @@ omit [NonarchimedeanRing A] in
 Generalizes `TateAlgebra.pow_image_isClosed` (no index dependence); Wedhorn Prop 6.21(2). -/
 private theorem mvPow_image_isClosed (P : PairOfDefinition A) (k : ℕ) :
     IsClosed (Subtype.val '' ((P.I ^ k : Ideal ↥P.A₀) : Set ↥P.A₀) : Set A) := by
-  have hopen := P.pow_image_isOpen k
   rw [show Subtype.val '' ((P.I ^ k : Ideal ↥P.A₀) : Set ↥P.A₀) =
     (AddSubgroup.map P.A₀.subtype.toAddMonoidHom (P.I ^ k).toAddSubgroup : Set A) from rfl]
-  exact AddSubgroup.isClosed_of_isOpen _ (by
-    rw [show (AddSubgroup.map P.A₀.subtype.toAddMonoidHom (P.I ^ k).toAddSubgroup : Set A) =
-      Subtype.val '' ((P.I ^ k : Ideal ↥P.A₀) : Set ↥P.A₀) from rfl]
-    exact hopen)
+  exact AddSubgroup.isClosed_of_isOpen _ (P.pow_image_isOpen k)
 
 /-- **T-MVT-3:** `A⟨X₁,…,Xₙ⟩` is complete with the canonical natural Tate topology, provided
 the ground ring `A` is complete and Hausdorff. Generalizes
@@ -847,8 +839,8 @@ theorem mvTate_completeSpace [IsTateRing A] [T2Space A] (n : ℕ)
       simp only [MvPowerSeries.coeff_apply, f]
     have htend : Tendsto (fun i => MvPowerSeries.coeff l (u m).val -
         MvPowerSeries.coeff l (u i).val)
-        atTop (nhds (MvPowerSeries.coeff l (u m).val - c l)) := by
-      exact tendsto_const_nhds.sub (hc l)
+        atTop (nhds (MvPowerSeries.coeff l (u m).val - c l)) :=
+      tendsto_const_nhds.sub (hc l)
     have hev : ∀ᶠ i in atTop,
         MvPowerSeries.coeff l (u m).val - MvPowerSeries.coeff l (u i).val ∈
           (Subtype.val '' ((P.I ^ k : Ideal ↥P.A₀) : Set ↥P.A₀) : Set A) := by
@@ -858,8 +850,7 @@ theorem mvTate_completeSpace [IsTateRing A] [T2Space A] (n : ℕ)
       exact ⟨b, hb_mem, by rw [hb_eq]; simp [map_sub]⟩
     have hlim_mem := (mvPow_image_isClosed P k).mem_of_tendsto htend hev
     rw [← hcoeff_val] at hlim_mem
-    obtain ⟨b, hb_mem, hb_eq⟩ := hlim_mem
-    exact ⟨b, hb_mem, hb_eq⟩
+    exact hlim_mem
   have hpair : (u m - f) ∈ mvPairSubring n P := by
     intro s
     obtain ⟨b, _, hb_eq⟩ := hcoeff_diff s
@@ -882,10 +873,8 @@ theorem mvTateAlgNhd_preimage_eq (n : ℕ) (P : PairOfDefinition A) (k : ℕ) :
   simp only [Set.mem_preimage, SetLike.mem_coe]
   constructor
   · rintro ⟨y, hy, heq⟩
-    have : x = y := by
-      apply_fun (mvPairSubring n P).subtype using Subtype.val_injective
-      exact heq.symm
-    rw [this]; exact hy
+    obtain rfl : x = y := Subtype.val_injective heq.symm
+    exact hy
   · exact fun hx => ⟨x, hx, rfl⟩
 
 omit [IsTopologicalRing A] in
