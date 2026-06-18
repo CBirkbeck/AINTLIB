@@ -91,8 +91,8 @@ theorem presheafValue_ringOfDef_isOpen (D₀ : RationalLocData A) :
   open Filter Topology in
   have hbasis := (locBasis D₀.P D₀.T D₀.s D₀.hopen).hasBasis_nhds_zero
   set f := (D₀.coeRingHom : Localization.Away D₀.s → presheafValue D₀) with hf_def
-  have hbasis_compl : (nhds (0 : presheafValue D₀)).HasBasis (fun _ : ℕ => True)
-      (fun n => closure (f '' (locNhd D₀.P D₀.T D₀.s n :
+  have hbasis_compl : (nhds (0 : presheafValue D₀)).HasBasis (fun _ : ℕ ↦ True)
+      (fun n ↦ closure (f '' (locNhd D₀.P D₀.T D₀.s n :
         Set (Localization.Away D₀.s)))) :=
     (map_zero D₀.coeRingHom : f 0 = 0) ▸
       hbasis.hasBasis_of_isDenseInducing UniformSpace.Completion.isDenseInducing_coe
@@ -108,7 +108,7 @@ theorem presheafValue_ringOfDef_isOpen (D₀ : RationalLocData A) :
   have hclosure_sub : ∀ n, closure (f '' (locNhd D₀.P D₀.T D₀.s n :
       Set (Localization.Away D₀.s))) ⊆
       (presheafValue_ringOfDef D₀ : Set (presheafValue D₀)) :=
-    fun n => closure_mono (himage_sub n)
+    fun n ↦ closure_mono (himage_sub n)
   change IsOpen ((presheafValue_ringOfDef D₀).toAddSubgroup : Set (presheafValue D₀))
   exact AddSubgroup.isOpen_of_mem_nhds _
     (Filter.mem_of_superset (hbasis_compl.mem_of_mem (i := 0) trivial) (hclosure_sub 0))
@@ -154,18 +154,18 @@ theorem locSubring_subspace_eq_adic (D₀ : RationalLocData A) :
           (TopologicalSpace.induced
             (locSubring D₀.P D₀.T D₀.s).subtype D₀.topology)
           0).HasBasis
-        (fun _ : ℕ => True) (fun n => ((locIdeal D₀.P D₀.T D₀.s ^ n :
+        (fun _ : ℕ ↦ True) (fun n ↦ ((locIdeal D₀.P D₀.T D₀.s ^ n :
           Ideal (locSubring D₀.P D₀.T D₀.s)) : Set (locSubring D₀.P D₀.T D₀.s))) := by
       rw [nhds_induced, show ((locSubring D₀.P D₀.T D₀.s).subtype :
           (locSubring D₀.P D₀.T D₀.s) → Localization.Away D₀.s) 0 = 0 from map_zero _]
       exact (hbasis_loc.comap (locSubring D₀.P D₀.T D₀.s).subtype).congr
-        (fun _ => Iff.rfl) (fun n _ => hpreimage_eq n)
+        (fun _ ↦ Iff.rfl) (fun n _ ↦ hpreimage_eq n)
     ext U; rw [hbasis_ind.mem_iff, (locIdeal D₀.P D₀.T D₀.s).hasBasis_nhds_zero_adic.mem_iff]
   apply UniformSpace.ext; rw [uniformity_comap]
   change Filter.comap (Prod.map (locSubring D₀.P D₀.T D₀.s).subtype
       (locSubring D₀.P D₀.T D₀.s).subtype)
-    (Filter.comap (fun p : _ × _ => p.2 - p.1) (@nhds _ D₀.topology 0)) =
-    Filter.comap (fun p : _ × _ => p.2 - p.1)
+    (Filter.comap (fun p : _ × _ ↦ p.2 - p.1) (@nhds _ D₀.topology 0)) =
+    Filter.comap (fun p : _ × _ ↦ p.2 - p.1)
       (@nhds _ (locIdeal D₀.P D₀.T D₀.s).adicTopology 0)
   have hcomm :
       (fun p : (Localization.Away D₀.s) ×
@@ -173,7 +173,7 @@ theorem locSubring_subspace_eq_adic (D₀ : RationalLocData A) :
       (Prod.map (locSubring D₀.P D₀.T D₀.s).subtype
         (locSubring D₀.P D₀.T D₀.s).subtype) =
       (locSubring D₀.P D₀.T D₀.s).subtype ∘
-      (fun p : _ × _ => p.2 - p.1) := by
+      (fun p : _ × _ ↦ p.2 - p.1) := by
     ext ⟨a, b⟩; exact (map_sub (locSubring D₀.P D₀.T D₀.s).subtype b a).symm
   rw [Filter.comap_comap, hcomm, ← Filter.comap_comap]; congr 1
   conv_lhs => rw [show (0 : Localization.Away D₀.s) =
@@ -185,7 +185,7 @@ noncomputable def locSubringToRingOfDef (D₀ : RationalLocData A) :
     locSubring D₀.P D₀.T D₀.s →+* presheafValue_ringOfDef D₀ :=
   letI := D₀.uniformSpace
   (D₀.coeRingHom.comp (locSubring D₀.P D₀.T D₀.s).subtype).codRestrict
-    (presheafValue_ringOfDef D₀) fun d =>
+    (presheafValue_ringOfDef D₀) fun d ↦
     subset_closure (RingHom.mem_range.mpr ⟨d, rfl⟩)
 
 /-- The ideal of definition inside the ring of definition. -/
@@ -232,7 +232,7 @@ private theorem idealOfDef_pow_sub_val_preimage_closure (D₀ : RationalLocData 
       closure (comp_sub.range : Set (presheafValue D₀)) := rfl
   intro x hx
   change x.val ∈ closure T
-  refine Submodule.span_induction (p := fun x _ => x.val ∈ closure T) ?_ ?_ ?_ ?_ hx
+  refine Submodule.span_induction (p := fun x _ ↦ x.val ∈ closure T) ?_ ?_ ?_ ?_ hx
   · rintro x ⟨d, hd, rfl⟩
     exact subset_closure ⟨sub d, ⟨d, hd, rfl⟩, rfl⟩
   · exact subset_closure ⟨0, (locNhd D₀.P D₀.T D₀.s n).zero_mem, map_zero _⟩
@@ -248,8 +248,8 @@ private theorem idealOfDef_pow_sub_val_preimage_closure (D₀ : RationalLocData 
   · intro ⟨r, hr⟩ x _ hx_ih
     change ((⟨r, hr⟩ : presheafValue_ringOfDef D₀) • x).val ∈ closure T
     change r * x.val ∈ closure T
-    exact map_mem_closure₂' (fun _ => continuous_const_mul _) (fun _ => continuous_mul_const _)
-      (hringOfDef_eq ▸ hr) hx_ih (fun a ha b hb => hact a ha b hb)
+    exact map_mem_closure₂' (fun _ ↦ continuous_const_mul _) (fun _ ↦ continuous_mul_const _)
+      (hringOfDef_eq ▸ hr) hx_ih (fun a ha b hb ↦ hact a ha b hb)
 
 omit [PlusSubring A] in
 /-- Corollary: the val-image of `idealOfDef^n` is contained in `closure(coe '' locNhd n)`. -/
@@ -296,7 +296,7 @@ private theorem locSubring_induced_eq_adicTopology (D₀ : RationalLocData A) :
     @UniformSpace.toTopologicalSpace _
       (@IsTopologicalAddGroup.rightUniformSpace _ _
         (locIdeal D₀.P D₀.T D₀.s).adicTopology inferInstance) :=
-    congrArg (fun u => @UniformSpace.toTopologicalSpace _ u) hunif
+    congrArg (fun u ↦ @UniformSpace.toTopologicalSpace _ u) hunif
   rw [UniformSpace.toTopologicalSpace_comap] at h1
   exact h1
 
@@ -323,14 +323,14 @@ private theorem idealOfDef_pow_subset_closure (D₀ : RationalLocData A) (n : �
   rw [show presheafValue_idealOfDef D₀ = Ideal.map g J from rfl,
       (Ideal.map_pow g J n).symm]
   intro y hy
-  refine Submodule.span_induction (p := fun y _ => y ∈ closure gJn) ?_ ?_ ?_ ?_ hy
+  refine Submodule.span_induction (p := fun y _ ↦ y ∈ closure gJn) ?_ ?_ ?_ ?_ hy
   · rintro y ⟨d, hd, rfl⟩; exact subset_closure ⟨d, hd, rfl⟩
   · exact subset_closure ⟨0, (J ^ n).zero_mem, map_zero g⟩
   · intro a b _ _ ha hb
     exact ((J ^ n).toAddSubgroup.map g.toAddMonoidHom).topologicalClosure.add_mem ha hb
   · intro ⟨r, hr_mem⟩ y _ hy
-    exact map_mem_closure₂' (fun _ => continuous_const_mul _)
-      (fun _ => continuous_mul_const _)
+    exact map_mem_closure₂' (fun _ ↦ continuous_const_mul _)
+      (fun _ ↦ continuous_mul_const _)
       (hg_dense.closure_eq ▸ Set.mem_univ _) hy hact
 
 set_option maxHeartbeats 4000000 in
@@ -495,7 +495,7 @@ private theorem idealOfDef_pow_isClosed_aux (D₀ : RationalLocData A) (n : ℕ)
     haveI := (@UniformSpace.Completion.cPkg
       (locSubring D₀.P D₀.T D₀.s) _).separation
     have hπc_eq : ∀ y, πc y = (AdicCompletion.evalₐ J n) (eAC y) := by
-      refine fun y => UniformSpace.Completion.induction_on y ?_ ?_
+      refine fun y ↦ UniformSpace.Completion.induction_on y ?_ ?_
       · haveI := hdisc
         exact isClosed_eq
           UniformSpace.Completion.continuous_extension
@@ -524,7 +524,7 @@ private theorem idealOfDef_pow_isClosed_aux (D₀ : RationalLocData A) (n : ℕ)
                 simp only []
                 letI : ∀ i, TopologicalSpace
                     (locSubring D₀.P D₀.T D₀.s ⧸ J ^ i • ⊤) :=
-                  fun i => (AdicCompletionBridge.quotientDiscreteTopology J i)
+                  fun i ↦ (AdicCompletionBridge.quotientDiscreteTopology J i)
                 haveI : DiscreteTopology
                     (locSubring D₀.P D₀.T D₀.s ⧸ J ^ n • ⊤) :=
                   AdicCompletionBridge.quotientDiscrete J n
@@ -766,8 +766,8 @@ theorem presheafValue_isAdic (D₀ : RationalLocData A) :
   open Filter Topology in
   set f := (D₀.coeRingHom : Localization.Away D₀.s → presheafValue D₀) with hf_def
   have hbasis := (locBasis D₀.P D₀.T D₀.s D₀.hopen).hasBasis_nhds_zero
-  have hbasis_compl : (nhds (0 : presheafValue D₀)).HasBasis (fun _ : ℕ => True)
-      (fun n => closure (f '' (locNhd D₀.P D₀.T D₀.s n :
+  have hbasis_compl : (nhds (0 : presheafValue D₀)).HasBasis (fun _ : ℕ ↦ True)
+      (fun n ↦ closure (f '' (locNhd D₀.P D₀.T D₀.s n :
         Set (Localization.Away D₀.s)))) := by
     rw [← (map_zero D₀.coeRingHom : f 0 = 0)]
     exact hbasis.hasBasis_of_isDenseInducing UniformSpace.Completion.isDenseInducing_coe
@@ -785,9 +785,9 @@ theorem presheafValue_isAdic (D₀ : RationalLocData A) :
       closure (f '' (locNhd D₀.P D₀.T D₀.s n :
         Set (Localization.Away D₀.s))) ⊆
       (presheafValue_ringOfDef D₀ : Set (presheafValue D₀)) :=
-    fun n => closure_mono (himage_sub n)
+    fun n ↦ closure_mono (himage_sub n)
   have hsubspace_basis : (nhds (0 : presheafValue_ringOfDef D₀)).HasBasis
-      (fun _ : ℕ => True) (fun n => Subtype.val ⁻¹'
+      (fun _ : ℕ ↦ True) (fun n ↦ Subtype.val ⁻¹'
         (closure (f '' (locNhd D₀.P D₀.T D₀.s n :
           Set (Localization.Away D₀.s))))) := by
     rw [nhds_induced]
@@ -804,7 +804,7 @@ theorem presheafValue_isAdic (D₀ : RationalLocData A) :
     exact hy_mem
   · intro s hs
     obtain ⟨m, -, hm⟩ := hsubspace_basis.mem_iff.mp hs
-    exact ⟨m, fun x hx => hm (idealOfDef_pow_val_sub_closure D₀ m ⟨x, hx, rfl⟩)⟩
+    exact ⟨m, fun x hx ↦ hm (idealOfDef_pow_val_sub_closure D₀ m ⟨x, hx, rfl⟩)⟩
 
 omit [PlusSubring A] in
 /-- **Concrete pair of definition for `presheafValue D₀`**. The specific
@@ -1177,7 +1177,7 @@ private theorem locLift_maps_locNhd
   obtain ⟨n, -, hn⟩ :=
     (locBasis D₀.P D₀.T D₀.s D₀.hopen).hasBasis_nhds_zero.mem_iff.mp
       hpre
-  exact ⟨n, fun x hx => hn hx⟩
+  exact ⟨n, fun x hx ↦ hn hx⟩
 
 -- REMOVED 2026-04-14: FALSE infrastructure chain (locLift_preimage_locNhd,
 -- locLift_isUniformInducing, restrictionMapAlg_isUniformInducing).
@@ -2255,7 +2255,7 @@ private theorem locLift_preimage_jfull_witness_existence
   -- CLAUDE.md binding rule: sub-lemma with `sorry` body is the legal "named
   -- residual" pattern, matching `locLift_open_on_image_at_zero`'s delegation
   -- to `cross_localization_basis_form_residual_no_noeth` at the basis-form layer.
-  fun n => locLift_preimage_jfull_witness_existence_at D₀ D h n
+  fun n ↦ locLift_preimage_jfull_witness_existence_at D₀ D h n
 
 private theorem locLift_preimage_target_witness_existence
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
@@ -2611,14 +2611,14 @@ theorem ker_restrictionMapHom_subset_closure_algLift
   rw [mem_closure_iff_nhds]
   intro U hU
   -- Pick a sub-nbhd `U₀` of 0 and compatible `Uc` of `c` with `Uc - U₀ ⊆ U`.
-  have h_cont_sub : Continuous fun p : presheafValue D₀ × presheafValue D₀ => p.1 - p.2 :=
+  have h_cont_sub : Continuous fun p : presheafValue D₀ × presheafValue D₀ ↦ p.1 - p.2 :=
     continuous_sub
-  have h_sub_c0 : (fun p : presheafValue D₀ × presheafValue D₀ => p.1 - p.2)
+  have h_sub_c0 : (fun p : presheafValue D₀ × presheafValue D₀ ↦ p.1 - p.2)
       (c, (0 : presheafValue D₀)) = c := by
     simp
-  have h_preimage_nhd : (fun p : presheafValue D₀ × presheafValue D₀ => p.1 - p.2) ⁻¹' U ∈
+  have h_preimage_nhd : (fun p : presheafValue D₀ × presheafValue D₀ ↦ p.1 - p.2) ⁻¹' U ∈
       nhds ((c, (0 : presheafValue D₀)) : presheafValue D₀ × presheafValue D₀) := by
-    have : U ∈ nhds ((fun p : presheafValue D₀ × presheafValue D₀ => p.1 - p.2)
+    have : U ∈ nhds ((fun p : presheafValue D₀ × presheafValue D₀ ↦ p.1 - p.2)
         (c, (0 : presheafValue D₀))) := by
       rw [h_sub_c0]; exact hU
     exact h_cont_sub.continuousAt.preimage_mem_nhds this
@@ -2835,7 +2835,7 @@ theorem restrictionMap_isLocalization
   set s' := D₀.canonicalMap D.s with hs'_def
   have hsigma_coe : ∀ a : Localization.Away D₀.s,
       sigma (D₀.coeRingHom a) = restrictionMapAlg D₀ D h a :=
-    fun a => restrictionMapHom_coe' D₀ D h a
+    fun a ↦ restrictionMapHom_coe' D₀ D h a
   have hunit : IsUnit (sigma s') := by
     change IsUnit (sigma (D₀.coeRingHom (algebraMap A (Localization.Away D₀.s) D.s)))
     rw [hsigma_coe]
@@ -2843,7 +2843,7 @@ theorem restrictionMap_isLocalization
       RationalLocData.canonicalMap] using isUnit_s_in_presheafValue D
   exact IsLocalization.Away.mk (D₀.canonicalMap D.s) hunit
     (restrictionMapHom_surj D₀ D h)
-    (fun a b hab => by
+    (fun a b hab ↦ by
       -- Reduce to the kernel-torsion form: for `c` in the kernel of `sigma`,
       -- some power of `s' = D₀.canonicalMap D.s` annihilates `c`.
       obtain ⟨n, hn⟩ := restrictionMapHom_ker_isTorsion D₀ D h (a - b)
@@ -2908,7 +2908,7 @@ theorem isLocalization_away_of_openSubring_topNilpotentUnit
   · -- surj: every `s : S` has `s * (π : S)^n ∈ R` for some `n`.
     intro s
     have h_nhds : (R : Set S) ∈ nhds (0 : S) := hR_open.mem_nhds R.zero_mem
-    have h_tendsto : Filter.Tendsto (fun n : ℕ => s * (π : S) ^ n)
+    have h_tendsto : Filter.Tendsto (fun n : ℕ ↦ s * (π : S) ^ n)
         Filter.atTop (nhds 0) := by
       have h := Filter.Tendsto.const_mul (a := 0) s hπ_nil
       rw [mul_zero] at h
