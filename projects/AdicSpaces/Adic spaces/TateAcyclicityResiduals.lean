@@ -340,10 +340,7 @@ theorem principalPair_A₀_completeSpace_of_stronglyNoetherianTate
   letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A
   haveI : IsUniformAddGroup A := isUniformAddGroup_of_addCommGroup
   set P := (IsTateRing.principalPair A).toPairOfDefinition
-  have hclosed : IsClosed (P.A₀ : Set A) :=
-    AddSubgroup.isClosed_of_isOpen P.A₀.toAddSubgroup P.isOpen
-  haveI : IsClosed ((P.A₀ : Set A) : Set A) := hclosed
-  exact IsClosed.completeSpace_coe (s := (P.A₀ : Set A))
+  exact (AddSubgroup.isClosed_of_isOpen P.A₀.toAddSubgroup P.isOpen).completeSpace_coe
 
 /-- **(C3 atom C3a) Adic-completeness of the canonical principal pair.**
 The principal pair of a (strongly noetherian) Tate ring is
@@ -763,11 +760,8 @@ theorem isUnit_relativeUnitGenerator_from_W2_unit
   -- Goal: IsUnit (L.canonicalMap f)
   have hf : ((s : A)) * (((s⁻¹ : Aˣ) : A) * f) = f := by
     rw [← mul_assoc, ← Units.val_mul, mul_inv_cancel, Units.val_one, one_mul]
-  have hmap : L.canonicalMap ((s : A)) * L.canonicalMap (((s⁻¹ : Aˣ) : A) * f)
-      = L.canonicalMap f := by
-    rw [← map_mul, hf]
-  rw [← hmap]
-  exact IsUnit.mul (RingHom.isUnit_map _ s.isUnit) h_unit_W2
+  rw [← hf, map_mul]
+  exact (RingHom.isUnit_map _ s.isUnit).mul h_unit_W2
 
 /-- **(Derived hypothesis, round-12 revised)** From the
 restriction-map structure with rational containment, derive
@@ -930,8 +924,7 @@ private theorem comap_canonicalMap_not_vle_zero_of_isUnit_via_locLift
   obtain ⟨w_loc, hw_loc_spa, hw_loc_comap⟩ :=
     valuationLocalizationLift_of_spa_rationalOpen D.P D.T D.s D.hopen hA₀_le hv
   have hwg : w_loc.vle (algebraMap A (Localization.Away D.s) g) 0 := by
-    rw [← hw_loc_comap, comap_vle, map_zero] at hvg
-    exact hvg
+    rwa [← hw_loc_comap, comap_vle, map_zero] at hvg
   letI : ValuativeRel (Localization.Away D.s) := w_loc.toValuativeRel
   set ν : Valuation (Localization.Away D.s) _ :=
     ValuativeRel.valuation (Localization.Away D.s) with hν_def
@@ -947,11 +940,8 @@ private theorem comap_canonicalMap_not_vle_zero_of_isUnit_via_locLift
   have hν_g_ne_zero : ν (algebraMap A (Localization.Away D.s) g) ≠ 0 :=
     ν.ne_zero_of_unit_completion hν_at_one hg_unit_completion
   apply hν_g_ne_zero
-  have h_eq : ν (algebraMap A (Localization.Away D.s) g) ≤ ν 0 := by
-    rw [← Valuation.Compatible.vle_iff_le]
-    exact hwg
-  rw [ν.map_zero, le_zero_iff] at h_eq
-  exact h_eq
+  rw [← le_zero_iff, ← ν.map_zero, ← Valuation.Compatible.vle_iff_le]
+  exact hwg
 
 /-- **(Round-19 reviewer-mandated, sub-ticket
 `relativeUnitGenerator_vle_transport`.)** Comap-formula for the
