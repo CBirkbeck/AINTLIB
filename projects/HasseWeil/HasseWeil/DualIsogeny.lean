@@ -118,8 +118,8 @@ theorem exists_dual_iff_constructor :
       ∃ dualOf : Isogeny E E → Isogeny E E,
         (∀ α, IsDualOf E (dualOf α) α) ∧
         (∀ α β, IsDualOf E β α → β = dualOf α) := by
-  refine ⟨fun h => ⟨fun α => (h α).choose, fun α => (h α).choose_spec.1,
-           fun α β hβ => (h α).choose_spec.2 β hβ⟩, ?_⟩
+  refine ⟨fun h ↦ ⟨fun α ↦ (h α).choose, fun α ↦ (h α).choose_spec.1,
+           fun α β hβ ↦ (h α).choose_spec.2 β hβ⟩, ?_⟩
   rintro ⟨dualOf, h_dual, h_unique⟩ α
   exact exists_dual_of_constructor E dualOf h_dual h_unique α
 
@@ -170,9 +170,9 @@ theorem IsDualOf.pullback_unique {α β β' : Isogeny E E}
     (h : IsDualOf E β α) (h' : IsDualOf E β' α) :
     β.pullback = β'.pullback := by
   have hcomp : β.comp α = β'.comp α := h.1.trans h'.1.symm
-  refine AlgHom.ext fun z => ?_
+  refine AlgHom.ext fun z ↦ ?_
   exact α.pullback_injective
-    (congrArg (fun γ : Isogeny E E => γ.pullback z) hcomp)
+    (congrArg (fun γ : Isogeny E E ↦ γ.pullback z) hcomp)
 
 end DualIsogeny
 
