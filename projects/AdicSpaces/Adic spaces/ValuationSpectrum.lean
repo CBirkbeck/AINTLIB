@@ -202,8 +202,6 @@ lemma comap_quotient_isEmbedding :
     Topology.IsEmbedding (comap (Ideal.Quotient.mk 𝔞)) := by
   constructor
   · constructor
-    change ValuationSpectrum.instTopologicalSpace =
-      ValuationSpectrum.instTopologicalSpace.induced (comap (Ideal.Quotient.mk 𝔞))
     simp only [instTopologicalSpace, induced_generateFrom_eq]
     congr 1
     ext U
