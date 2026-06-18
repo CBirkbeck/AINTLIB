@@ -408,13 +408,13 @@ theorem function_field_x_separable :
   have h_polyY_ne : W.toAffine.polynomialY ≠ 0 := by
     intro h
     rw [Affine.polynomialY] at h
-    have h1 := congr_arg (fun p => p.coeff 1) h
-    have h0 := congr_arg (fun p => p.coeff 0) h
+    have h1 := congr_arg (fun p ↦ p.coeff 1) h
+    have h0 := congr_arg (fun p ↦ p.coeff 0) h
     simp [Polynomial.coeff_add, Polynomial.coeff_X, Polynomial.coeff_C] at h1 h0
     have ha1 : W.toAffine.a₁ = 0 := by
-      have := congr_arg (fun p => p.coeff 1) h0; simp at this; exact this
+      have := congr_arg (fun p ↦ p.coeff 1) h0; simp at this; exact this
     have ha3 : W.toAffine.a₃ = 0 := by
-      have := congr_arg (fun p => p.coeff 0) h0; simp at this; exact this
+      have := congr_arg (fun p ↦ p.coeff 0) h0; simp at this; exact this
     exact absurd ((show WeierstrassCurve.Δ W = 0 by
       simp only [WeierstrassCurve.Δ]
       rw [show WeierstrassCurve.b₂ W = 0 by
