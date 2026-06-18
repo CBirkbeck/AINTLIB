@@ -199,7 +199,7 @@ theorem tateAcyclicity_Part2_via_sigma_power_and_integrated_laneB
   tateAcyclicity_Part2_via_sigma_C1_and_integrated_laneB
     P hA₀_le hAplus_le_A₀ π hI hπ_tn hπ_unit hArch C hne
     h_base_eq_Spa h_covers_nonempty
-    (fun D hD v hv t ht hvt hvD => by
+    (fun D hD v hv t ht hvt hvD ↦ by
       obtain ⟨σ_choice, f, hv_base, hf_ne, h_pow_chain, h_laurent⟩ :=
         h_per_call_sigma_power D hD v hv t ht hvt hvD
       refine ⟨σ_choice, f, hv_base, hf_ne, ?_, h_laurent⟩
@@ -268,7 +268,7 @@ theorem tateAcyclicity_Part2_via_sigma_power_and_integrated_laneB_allow_empty
   tateAcyclicity_Part2_via_sigma_C1_and_integrated_laneB_allow_empty
     P hA₀_le hAplus_le_A₀ π hI hπ_tn hπ_unit hArch C hne
     h_base_eq_Spa h_covers_nonempty
-    (fun D hD v hv t ht hvt hvD => by
+    (fun D hD v hv t ht hvt hvD ↦ by
       obtain ⟨σ_choice, f, hv_base, hf_ne, h_pow_chain, h_laurent⟩ :=
         h_per_call_sigma_power D hD v hv t ht hvt hvD
       refine ⟨σ_choice, f, hv_base, hf_ne, ?_, h_laurent⟩
