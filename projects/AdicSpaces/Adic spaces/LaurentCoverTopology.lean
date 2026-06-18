@@ -65,8 +65,6 @@ section TopologicalQuotients
 variable [IsTateRing A] [IsNoetherianRing A] [IsDomain A]
 variable (f : A)
 
-/-! ### `B₁_gen`: `TateAlgebra A ⧸ ⟨algebraMap f − X⟩` -/
-
 /-- Canonical quotient topology on `B₁_gen f`, induced from the
 canonical Tate-algebra topology on `TateAlgebra A`. -/
 @[reducible]
@@ -87,8 +85,6 @@ noncomputable instance B₁_gen_isTopologicalAddGroup :
   @IsTopologicalRing.to_topologicalAddGroup _ _
     (B₁_gen_topology f) (B₁_gen_isTopologicalRing f)
 
-/-! ### `B₂_gen`: `TateAlgebra A ⧸ ⟨1 − algebraMap f · X⟩` -/
-
 /-- Canonical quotient topology on `B₂_gen f`, induced from the
 canonical Tate-algebra topology on `TateAlgebra A`. -/
 @[reducible]
@@ -108,8 +104,6 @@ noncomputable instance B₂_gen_isTopologicalAddGroup :
     @IsTopologicalAddGroup (B₂_gen f) (B₂_gen_topology f) _ :=
   @IsTopologicalRing.to_topologicalAddGroup _ _
     (B₂_gen_topology f) (B₂_gen_isTopologicalRing f)
-
-/-! ### `LaurentTateAlgebra`: `TateAlgebra₂ A ⧸ laurentIdeal A` -/
 
 /-- Canonical quotient topology on `LaurentTateAlgebra A`, induced
 from the canonical Tate-algebra-of-2-variables topology on
@@ -135,8 +129,6 @@ noncomputable instance laurentTateAlgebra_isTopologicalAddGroup :
   @IsTopologicalRing.to_topologicalAddGroup _ _
     laurentTateAlgebra_topology laurentTateAlgebra_isTopologicalRing
 
-/-! ### `B₁₂_gen`: `LaurentTateAlgebra A ⧸ ⟨algebraMap f − ζ⟩` -/
-
 /-- Canonical quotient topology on `B₁₂_gen f`, built as the further
 quotient of the canonical topology on `LaurentTateAlgebra A` by
 `laurentFSubZetaIdeal f`. -/
@@ -156,8 +148,6 @@ noncomputable instance B₁₂_gen_isTopologicalAddGroup :
     @IsTopologicalAddGroup (B₁₂_gen f) (B₁₂_gen_topology f) _ :=
   @IsTopologicalRing.to_topologicalAddGroup _ _
     (B₁₂_gen_topology f) (B₁₂_gen_isTopologicalRing f)
-
-/-! ### Quotient projection continuity -/
 
 omit [IsNoetherianRing A] [IsDomain A] in
 /-- The quotient map `LaurentTateAlgebra A → B₁₂_gen f` is continuous
@@ -191,11 +181,6 @@ section EmbeddingContinuity
 
 variable [IsTateRing A]
 
-/-- Local helper for `posIncl_continuous` and `negIncl_continuous`: any
-ring homomorphism `φ : TateAlgebra A →+* TateAlgebra₂ A` whose underlying
-function factors as the variable-`j` inclusion `varInclHom j` on the
-underlying multivariate power series is continuous under the canonical
-Tate topologies. -/
 private theorem varIncl_continuous_aux (j : Fin 2)
     (φ : ↥(TateAlgebra A) →+* ↥(TateAlgebra₂ A))
     (hφ : ∀ y : ↥(TateAlgebra A), (φ y).val = varInclHom j y.val) :
@@ -223,8 +208,7 @@ private theorem varIncl_continuous_aux (j : Fin 2)
   refine ⟨n, trivial, ?_⟩
   intro y hy
   apply tateAlgNhd₂_of_coeff_mem_principal P n pp.π hπ_gen hπ_unit
-  · -- φ y ∈ pairSubring₂ P
-    intro l
+  · intro l
     rw [hφ y]
     change varInclFun j y.val l ∈ P.A₀
     rw [varInclFun_apply]
@@ -233,8 +217,7 @@ private theorem varIncl_continuous_aux (j : Fin 2)
         tateAlgNhd_coeff_mem P n hy (Finsupp.single 0 (l j))
       rw [← hb_eq]; exact b.property
     · exact P.A₀.zero_mem
-  · -- coefficients of (φ y) all lie in image of P.I^n
-    intro l
+  · intro l
     rw [hφ y]
     change ∃ b : P.A₀, b ∈ P.I ^ n ∧ (b : A) = varInclFun j y.val l
     rw [varInclFun_apply]
@@ -248,7 +231,7 @@ theorem posIncl_continuous :
     @Continuous _ _ instTopologicalSpaceTateAlgebra
       instTopologicalSpaceTateAlgebra₂
       (LaurentTateAlgebra.posIncl : ↥(TateAlgebra A) →+* ↥(TateAlgebra₂ A)) :=
-  varIncl_continuous_aux 0 _ (fun _ => rfl)
+  varIncl_continuous_aux 0 _ fun _ ↦ rfl
 
 /-- The negative variable inclusion `negIncl : A⟨X⟩ →+* A⟨X, Y⟩` is continuous
 under the canonical Tate-algebra topologies. -/
@@ -256,7 +239,7 @@ theorem negIncl_continuous :
     @Continuous _ _ instTopologicalSpaceTateAlgebra
       instTopologicalSpaceTateAlgebra₂
       (LaurentTateAlgebra.negIncl : ↥(TateAlgebra A) →+* ↥(TateAlgebra₂ A)) :=
-  varIncl_continuous_aux 1 _ (fun _ => rfl)
+  varIncl_continuous_aux 1 _ fun _ ↦ rfl
 
 /-- The Laurent quotient projection `mkHom : A⟨X, Y⟩ →+* A⟨ζ, ζ⁻¹⟩` is
 continuous from the canonical bivariate Tate topology to the canonical
@@ -347,9 +330,9 @@ theorem deltaMap_gen_continuous :
   letI tB12 : TopologicalSpace (B₁₂_gen f) := B₁₂_gen_topology f
   haveI hringB12 : IsTopologicalRing (B₁₂_gen f) := B₁₂_gen_isTopologicalRing f
   haveI hagB12 : IsTopologicalAddGroup (B₁₂_gen f) := B₁₂_gen_isTopologicalAddGroup f
-  have h1 : Continuous (fun p : B₁_gen f × B₂_gen f => posLift f p.1) :=
+  have h1 : Continuous (fun p : B₁_gen f × B₂_gen f ↦ posLift f p.1) :=
     (posLift_continuous f).comp continuous_fst
-  have h2 : Continuous (fun p : B₁_gen f × B₂_gen f => negLift f p.2) :=
+  have h2 : Continuous (fun p : B₁_gen f × B₂_gen f ↦ negLift f p.2) :=
     (negLift_continuous f).comp continuous_snd
   exact h1.sub h2
 
@@ -385,11 +368,8 @@ variable [IsTateRing A] (f : A)
 continuous under the canonical T132 quotient topologies. -/
 theorem epsilonHom_gen_continuous :
     Continuous (epsilonHom_gen f : A → B₁_gen f × B₂_gen f) := by
-  have h_alg : Continuous (algebraMap A ↥(TateAlgebra A)) :=
-    tateAlgebra_algebraMap_continuous
-  refine Continuous.prodMk ?_ ?_
-  · exact continuous_quot_mk.comp h_alg
-  · exact continuous_quot_mk.comp h_alg
+  refine Continuous.prodMk ?_ ?_ <;>
+    exact continuous_quot_mk.comp tateAlgebra_algebraMap_continuous
 
 variable [IsNoetherianRing A] [IsDomain A]
 
@@ -401,15 +381,10 @@ theorem ker_deltaMap_gen_isClosed
     (hT2 : @T2Space (B₁₂_gen f) (B₁₂_gen_topology f)) :
     IsClosed ((deltaMap_gen f).ker : Set (B₁_gen f × B₂_gen f)) := by
   letI := hT2
-  have hcont : Continuous (deltaMap_gen f) := deltaMap_gen_continuous f
   have hpre : ((deltaMap_gen f).ker : Set (B₁_gen f × B₂_gen f)) =
-      (deltaMap_gen f) ⁻¹' {0} := by
-    ext p
-    constructor
-    · intro hp; exact hp
-    · intro hp; exact hp
+      (deltaMap_gen f) ⁻¹' {0} := rfl
   rw [hpre]
-  exact (isClosed_singleton).preimage hcont
+  exact isClosed_singleton.preimage (deltaMap_gen_continuous f)
 
 omit [IsTateRing A] [IsNoetherianRing A] [IsDomain A] in
 /-- The image of the Laurent diagonal `epsilonHom_gen f` equals the kernel
@@ -425,12 +400,9 @@ theorem range_epsilonHom_gen_eq_ker_deltaMap_gen
   ext p
   refine ⟨?_, ?_⟩
   · rintro ⟨a, rfl⟩
-    change deltaMap_gen f (epsilonHom_gen f a) = 0
     exact h_eps_ker a
   · intro hp
-    have hker : deltaMap_gen f p = 0 := hp
-    obtain ⟨a, ha⟩ := h_ker_eps p hker
-    exact ⟨a, ha⟩
+    exact h_ker_eps p hp
 
 /-- **Algebraic Laurent diagonal is a topological embedding** (T134, the
 algebraic missing fact for T133's `h_alg_inducing`).
@@ -452,16 +424,7 @@ The hypotheses package the Banach open mapping prerequisites:
 * `hf_nonunit` is the standard non-unit side-condition of
   `epsilonHom_gen_injective`;
 * `hT2_B12` and `hBaire_ker` provide the closed-kernel + Baire-T2
-  inputs at the kernel subspace level.
-
-**Proof structure.** The corestriction `e : A →+ ker(deltaMap_gen f)` is
-continuous (by `epsilonHom_gen_continuous`), bijective (injective by
-`epsilonHom_gen_injective` + surjective onto `ker` by `row3_exact`), and
-goes between Banach OMT-eligible groups. The Banach open mapping theorem
-then gives `IsOpenMap e`, hence `e` is a homeomorphism (`IsHomeomorph`),
-hence `IsInducing`. The inclusion `ker → B₁_gen f × B₂_gen f` is a closed
-embedding (the kernel is closed by `ker_deltaMap_gen_isClosed`), hence
-`IsInducing`. Composition gives `IsInducing (epsilonHom_gen f)`. -/
+  inputs at the kernel subspace level. -/
 theorem epsilonHom_gen_inducing
     [UniformSpace A] [IsUniformAddGroup A] [CompleteSpace A]
     [T2Space A] [SigmaCompactSpace A]
@@ -472,71 +435,44 @@ theorem epsilonHom_gen_inducing
     (hBaire_ker : BaireSpace
       ↥((deltaMap_gen f).ker : Set (B₁_gen f × B₂_gen f))) :
     Topology.IsInducing (epsilonHom_gen f : A → B₁_gen f × B₂_gen f) := by
-  -- Substitute `htop` so the topology on `A` becomes `UniformSpace.toTopologicalSpace`.
-  -- This is the same trick used in `row3_exact`. After substitution all
-  -- `[TopologicalSpace A]`-derived facts (e.g. continuity of `epsilonHom_gen`)
-  -- agree with the uniform-space-derived ones.
   subst htop
-  -- Step 0: continuity of the diagonal.
-  have hcont : Continuous (epsilonHom_gen f : A → B₁_gen f × B₂_gen f) :=
-    epsilonHom_gen_continuous f
-  -- Step 1: the kernel is closed (uses `T2Space (B₁₂_gen f)`).
   have hker_closed : IsClosed ((deltaMap_gen f).ker :
       Set (B₁_gen f × B₂_gen f)) :=
     ker_deltaMap_gen_isClosed f hT2_B12
-  -- Step 2: image of `epsilonHom_gen f` equals the kernel (algebraic
-  -- exactness from `row3_exact`).
   obtain ⟨h_eps_ker, h_ker_eps, _⟩ := row3_exact f rfl
-  -- Step 3: build the corestriction `e : A →+ ker` as an `AddMonoidHom`.
   let K : AddSubgroup (B₁_gen f × B₂_gen f) := (deltaMap_gen f).ker
-  have hmem : ∀ a : A, (epsilonHom_gen f a) ∈ K := fun a =>
-    show deltaMap_gen f (epsilonHom_gen f a) = 0 from h_eps_ker a
+  have hmem : ∀ a : A, (epsilonHom_gen f a) ∈ K := h_eps_ker
   let e : A →+ ↥K :=
-    { toFun := fun a => ⟨epsilonHom_gen f a, hmem a⟩
+    { toFun := fun a ↦ ⟨epsilonHom_gen f a, hmem a⟩
       map_zero' := by
         apply Subtype.ext
         change epsilonHom_gen f 0 = 0
         exact map_zero _
-      map_add' := fun x y => by
+      map_add' := fun x y ↦ by
         apply Subtype.ext
         change epsilonHom_gen f (x + y) = epsilonHom_gen f x + epsilonHom_gen f y
         exact map_add _ _ _ }
   have he_continuous : Continuous e :=
-    Continuous.subtype_mk hcont _
-  -- Step 4: `e` is bijective.
-  have he_inj : Function.Injective e := fun x y hxy => by
-    have := congrArg (Subtype.val) hxy
-    exact LaurentCover.epsilonHom_gen_injective f hf_nonunit this
-  have he_surj : Function.Surjective e := fun ⟨p, hp⟩ => by
-    have hδ : deltaMap_gen f p = 0 := hp
-    obtain ⟨a, ha⟩ := h_ker_eps p hδ
-    refine ⟨a, ?_⟩; apply Subtype.ext; exact ha
-  have he_bij : Function.Bijective e := ⟨he_inj, he_surj⟩
-  -- Step 5: Banach open mapping theorem applied to `e`.
+    Continuous.subtype_mk (epsilonHom_gen_continuous f) _
+  have he_inj : Function.Injective e := fun x y hxy ↦
+    epsilonHom_gen_injective f hf_nonunit (congrArg Subtype.val hxy)
+  have he_surj : Function.Surjective e := fun ⟨p, hp⟩ ↦ by
+    obtain ⟨a, ha⟩ := h_ker_eps p hp
+    exact ⟨a, Subtype.ext ha⟩
   haveI := hT2_prod
   haveI : BaireSpace ↥K := hBaire_ker
   have he_open : IsOpenMap e :=
     AddMonoidHom.isOpenMap_of_complete_countable e he_surj he_continuous
-  -- Step 6: `e` is a homeomorphism (continuous + open + bijective).
-  have he_homeo : IsHomeomorph e := ⟨he_continuous, he_open, he_bij⟩
-  have he_ind : Topology.IsInducing e := he_homeo.isInducing
-  -- Step 7: inclusion `ker → B₁_gen f × B₂_gen f` is a closed embedding.
-  have hincl_emb : Topology.IsClosedEmbedding
-      ((↑) : ↥(K : Set (B₁_gen f × B₂_gen f)) → B₁_gen f × B₂_gen f) :=
-    hker_closed.isClosedEmbedding_subtypeVal
+  have he_ind : Topology.IsInducing e :=
+    IsHomeomorph.isInducing ⟨he_continuous, he_open, he_inj, he_surj⟩
   have hincl_ind : Topology.IsInducing
       ((↑) : ↥(K : Set (B₁_gen f × B₂_gen f)) → B₁_gen f × B₂_gen f) :=
-    hincl_emb.isInducing
-  -- Step 8: compose. `epsilonHom_gen f = (↑) ∘ e` extensionally.
+    hker_closed.isClosedEmbedding_subtypeVal.isInducing
   have hcomp_eq :
       ((↑) : ↥(K : Set (B₁_gen f × B₂_gen f)) → B₁_gen f × B₂_gen f) ∘ e =
-        ⇑(epsilonHom_gen f) := by
-    funext a; rfl
-  have hcomp_ind : Topology.IsInducing
-      (((↑) : ↥(K : Set (B₁_gen f × B₂_gen f)) → B₁_gen f × B₂_gen f) ∘ e) :=
-    hincl_ind.comp he_ind
-  rw [hcomp_eq] at hcomp_ind
-  exact hcomp_ind
+        ⇑(epsilonHom_gen f) := rfl
+  rw [← hcomp_eq]
+  exact hincl_ind.comp he_ind
 
 end EpsilonHomInducing
 
@@ -625,24 +561,12 @@ theorem laurentTateAlgebra_t2Space
     @T2Space (LaurentTateAlgebra A) laurentTateAlgebra_topology := by
   haveI : IsClosed ((laurentIdeal A).toAddSubgroup : Set ↥(TateAlgebra₂ A)) :=
     laurentIdeal_local_isClosed hA_complete hnoeth
-  -- `LaurentTateAlgebra A` is `↥(TateAlgebra₂ A) ⧸ laurentIdeal A` definitionally,
-  -- and `laurentTateAlgebra_topology` is the canonical quotient topology on that
-  -- type. Unfold so Mathlib's standard `T1Space (G ⧸ N) ↔ IsClosed N` /
-  -- `T2Space ↔ T1Space` instance chain applies.
   change T2Space (↥(TateAlgebra₂ A) ⧸ laurentIdeal A)
   infer_instance
 
 omit [IsNoetherianRing A] [IsDomain A] in
 /-- The Laurent-fiber ideal `laurentFSubZetaIdeal f = ⟨algebraMap f − ζ⟩` is
-closed in `LaurentTateAlgebra A` under the canonical quotient topology.
-
-**Proof.** Let `mkHom : TateAlgebra₂ A → LaurentTateAlgebra A` be the
-canonical quotient map (an open quotient map by
-`QuotientRing.isOpenQuotientMap_mk`). The preimage of
-`laurentFSubZetaIdeal f` under `mkHom` (equivalently the comap) is an
-ideal of `TateAlgebra₂ A`, hence closed by `tateAlgebra₂_isClosed_ideal`.
-The `IsQuotientMap.isClosed_preimage` characterisation transports
-closedness back to `LaurentTateAlgebra A`. -/
+closed in `LaurentTateAlgebra A` under the canonical quotient topology. -/
 theorem laurentFSubZetaIdeal_isClosed
     (hA_complete : @CompleteSpace A (IsTopologicalAddGroup.rightUniformSpace A))
     (hnoeth : IsNoetherianRing
@@ -654,26 +578,15 @@ theorem laurentFSubZetaIdeal_isClosed
   haveI : IsTopologicalRing ↥(TateAlgebra₂ A) := instIsTopologicalRingTateAlgebra₂
   letI : TopologicalSpace (LaurentTateAlgebra A) := laurentTateAlgebra_topology
   haveI : IsTopologicalRing (LaurentTateAlgebra A) := laurentTateAlgebra_isTopologicalRing
-  -- The comap to `TateAlgebra₂ A` is an ideal, hence closed under the
-  -- canonical bivariate Tate topology.
   have hcomap_closed : IsClosed
       (((laurentFSubZetaIdeal f).comap LaurentTateAlgebra.mkHom : Ideal _) :
         Set ↥(TateAlgebra₂ A)) := by
     haveI : IsNoetherianRing ↥(tateAlgebra₂_pairOfDefinition (A := A)).A₀ := hnoeth
     exact tateAlgebra₂_isClosed_ideal hA_complete _
-  -- `mkHom` is an open quotient map; the preimage characterization transports
-  -- closedness back to `LaurentTateAlgebra A`.
   have hQM : Topology.IsQuotientMap
       (LaurentTateAlgebra.mkHom : ↥(TateAlgebra₂ A) → LaurentTateAlgebra A) :=
     (QuotientRing.isOpenQuotientMap_mk _).isQuotientMap
   rw [← hQM.isClosed_preimage]
-  -- Preimage as set = comap as set.
-  have hpre_eq :
-      (LaurentTateAlgebra.mkHom : ↥(TateAlgebra₂ A) → LaurentTateAlgebra A) ⁻¹'
-        ((laurentFSubZetaIdeal f : Ideal _) : Set _) =
-        (((laurentFSubZetaIdeal f).comap LaurentTateAlgebra.mkHom : Ideal _) :
-          Set ↥(TateAlgebra₂ A)) := rfl
-  rw [hpre_eq]
   exact hcomap_closed
 
 omit [IsNoetherianRing A] [IsDomain A] in
@@ -779,14 +692,7 @@ noncomputable instance B₂_gen_isUniformAddGroup :
     (B₂_gen_isTopologicalAddGroup f)
 
 omit [IsNoetherianRing A] [IsDomain A] [T2Space A] in
-/-- The neighborhood filter at `0 : B₁_gen f` is countably-generated.
-
-Derived directly from the open quotient projection
-`Ideal.Quotient.mk` (a `IsOpenQuotientMap` by
-`QuotientRing.isOpenQuotientMap_mk`) carrying the countably-generated
-nhds-of-zero from `TateAlgebra A` (which is first-countable). The
-image of a countably-generated filter under a function is
-countably-generated (`Filter.map.isCountablyGenerated`). -/
+/-- The neighborhood filter at `0 : B₁_gen f` is countably-generated. -/
 theorem B₁_gen_nhds_zero_isCountablyGenerated :
     Filter.IsCountablyGenerated (𝓝 (0 : B₁_gen f)) := by
   haveI : FirstCountableTopology ↥(TateAlgebra A) :=
@@ -820,11 +726,7 @@ theorem B₂_gen_nhds_zero_isCountablyGenerated :
   exact Filter.map.isCountablyGenerated _ _
 
 omit [IsNoetherianRing A] [IsDomain A] [T2Space A] in
-/-- The canonical uniformity on `B₁_gen f` is countably-generated.
-
-Inline form of `IsUniformAddGroup.uniformity_countably_generated`,
-applied at `α := B₁_gen f` with explicit instance arguments to bypass
-typeclass synthesis on the `(𝓝 0)`-countably-generated hypothesis. -/
+/-- The canonical uniformity on `B₁_gen f` is countably-generated. -/
 theorem B₁_gen_uniformity_isCountablyGenerated :
     Filter.IsCountablyGenerated (𝓤 (B₁_gen f)) := by
   haveI hcg : (𝓝 (0 : B₁_gen f)).IsCountablyGenerated :=
