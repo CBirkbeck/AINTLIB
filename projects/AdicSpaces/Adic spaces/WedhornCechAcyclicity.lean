@@ -155,7 +155,7 @@ noncomputable def RationalCovering.presheafValueCast
     (h : C'.base = C.base) :
     presheafValue C.base ≃+* presheafValue C'.base :=
   @Eq.rec (RationalLocData A) C.base
-    (fun b _ => presheafValue C.base ≃+* presheafValue b)
+    (fun b _ ↦ presheafValue C.base ≃+* presheafValue b)
     (RingEquiv.refl _) C'.base h.symm
 
 /-- Eq.rec double cancellation for presheafValue (forward direction): for h : a = b
@@ -164,8 +164,8 @@ theorem RationalCovering.presheafValue_eqRec_double_cancel_forward
     [HasLocLiftPowerBounded A] (a b : RationalLocData A) (h : a = b)
     (x : presheafValue b) :
     @Eq.rec (RationalLocData A) a
-      (fun b _ => presheafValue b)
-      (@Eq.rec (RationalLocData A) b (fun b _ => presheafValue b) x a h.symm)
+      (fun b _ ↦ presheafValue b)
+      (@Eq.rec (RationalLocData A) b (fun b _ ↦ presheafValue b) x a h.symm)
       b h = x := by
   subst h
   rfl
@@ -177,7 +177,7 @@ transfer (2026-06-10) to pull `x|Vⱼ = 0` back through the
 theorem RationalCovering.presheafValue_eqRec_eq_zero_iff
     [HasLocLiftPowerBounded A] (a b : RationalLocData A) (h : a = b)
     (x : presheafValue a) :
-    (@Eq.rec (RationalLocData A) a (fun b _ => presheafValue b) x b h) = 0 ↔
+    (@Eq.rec (RationalLocData A) a (fun b _ ↦ presheafValue b) x b h) = 0 ↔
       x = 0 := by
   subst h
   exact Iff.rfl
@@ -192,7 +192,7 @@ theorem RationalCovering.eqRec_restrictionMap_direct
     (hsubC' : rationalOpen D.T D.s ⊆ rationalOpen baseC'.T baseC'.s)
     (x : presheafValue baseC) :
     restrictionMap baseC' D hsubC'
-      (@Eq.rec (RationalLocData A) baseC (fun b _ => presheafValue b) x baseC' h) =
+      (@Eq.rec (RationalLocData A) baseC (fun b _ ↦ presheafValue b) x baseC' h) =
       restrictionMap baseC D hsubC x := by
   subst h
   rfl
@@ -206,7 +206,7 @@ theorem RationalCovering.presheafValueCast_restrictionMap
     (x : presheafValue baseC) :
     restrictionMap baseC' D hsubC'
       (@Eq.rec (RationalLocData A) baseC
-        (fun b _ => presheafValue baseC ≃+* presheafValue b)
+        (fun b _ ↦ presheafValue baseC ≃+* presheafValue b)
         (RingEquiv.refl _) baseC' h.symm x) =
       restrictionMap baseC D hsubC x := by
   -- Now h is between free variables; subst works.
@@ -233,7 +233,7 @@ noncomputable def RationalCovering.restrictToPiece
         rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s) :
     RationalCovering A where
   base := D
-  covers := C'.covers.filter fun D' =>
+  covers := C'.covers.filter fun D' ↦
     Classical.propDecidable (rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
       |>.decide
   hsubset := by
@@ -352,10 +352,10 @@ theorem propA3_part2_project_gluing
   -- Step 3: For each D' ∈ C'.covers, choose D ∈ C.covers refining D'
   -- (via _h_refines) and define g D' := f D restricted to D'.
   let chooseC : ∀ (D' : ↥C'.covers), { D : ↥C.covers //
-      rationalOpen D'.1.T D'.1.s ⊆ rationalOpen D.1.T D.1.s } := fun D' =>
+      rationalOpen D'.1.T D'.1.s ⊆ rationalOpen D.1.T D.1.s } := fun D' ↦
     ⟨⟨(_h_refines D'.1 D'.2).choose, (_h_refines D'.1 D'.2).choose_spec.1⟩,
      (_h_refines D'.1 D'.2).choose_spec.2⟩
-  let _g : ∀ (D' : ↥C'.covers), presheafValue D'.1 := fun D' =>
+  let _g : ∀ (D' : ↥C'.covers), presheafValue D'.1 := fun D' ↦
     restrictionMap (chooseC D').1.1 D'.1 (chooseC D').2 (f (chooseC D').1)
   -- Step 4: g is compatible on C'. For D'₁, D'₂ ∈ C', D'₃ ⊆ D'₁, D'₃ ⊆ D'₂:
   --   restrictionMap D'₁ D'₃ (g D'₁)
@@ -438,7 +438,7 @@ theorem propA3_part2_project_gluing
       simp only [x, RingEquiv.apply_symm_apply]
     rw [show
       (@Eq.rec (RationalLocData A) C.base
-        (fun b _ => presheafValue C.base ≃+* presheafValue b)
+        (fun b _ ↦ presheafValue C.base ≃+* presheafValue b)
         (RingEquiv.refl _) C'.base _h_same_base.symm x) =
         ((RationalCovering.presheafValueCast (C := C) (C' := C') _h_same_base) x)
       from rfl, h_cast_cancel] at key
@@ -599,7 +599,7 @@ noncomputable def RationalCovering.interProd (Uf V : RationalCovering A)
     (hVP : ∀ Q ∈ V.covers, Q.P = Uf.base.P) :
     RationalCovering A where
   base := Uf.base
-  covers := (Uf.covers ×ˢ V.covers).attach.image (fun pq =>
+  covers := (Uf.covers ×ˢ V.covers).attach.image (fun pq ↦
     pq.1.1.interSamePair pq.1.2
       ((hVP _ (Finset.mem_product.mp pq.2).2).trans
         (hUfP _ (Finset.mem_product.mp pq.2).1).symm))
@@ -631,7 +631,7 @@ theorem RationalCovering.interProd_covers (Uf V : RationalCovering A)
     (hUfP : ∀ P ∈ Uf.covers, P.P = Uf.base.P)
     (hVP : ∀ Q ∈ V.covers, Q.P = Uf.base.P) :
     (Uf.interProd V hbase hUfP hVP).covers =
-      (Uf.covers ×ˢ V.covers).attach.image (fun pq =>
+      (Uf.covers ×ˢ V.covers).attach.image (fun pq ↦
         pq.1.1.interSamePair pq.1.2
           ((hVP _ (Finset.mem_product.mp pq.2).2).trans
             (hUfP _ (Finset.mem_product.mp pq.2).1).symm)) := rfl
@@ -646,7 +646,7 @@ noncomputable def RationalCovering.restrictTo (V : RationalCovering A)
     (hDP : D.P = V.base.P) (hVP : ∀ Q ∈ V.covers, Q.P = V.base.P) :
     RationalCovering A where
   base := D
-  covers := V.covers.attach.image (fun Q =>
+  covers := V.covers.attach.image (fun Q ↦
     D.interSamePair Q.1 ((hVP _ Q.2).trans hDP.symm))
   hsubset := by
     intro E hE
@@ -674,7 +674,7 @@ theorem RationalCovering.restrictTo_covers (V : RationalCovering A)
     (hD : rationalOpen D.T D.s ⊆ rationalOpen V.base.T V.base.s)
     (hDP : D.P = V.base.P) (hVP : ∀ Q ∈ V.covers, Q.P = V.base.P) :
     (V.restrictTo D hD hDP hVP).covers =
-      V.covers.attach.image (fun Q =>
+      V.covers.attach.image (fun Q ↦
         D.interSamePair Q.1 ((hVP _ Q.2).trans hDP.symm)) := rfl
 
 omit [IsHuberRing A] in
@@ -736,7 +736,7 @@ noncomputable def RationalCovering.interProdOn (C₁ C₂ : RationalCovering A)
     (hP : ∀ D₁ ∈ C₁.covers, ∀ D₂ ∈ C₂.covers, D₂.P = D₁.P) :
     RationalCovering A where
   base := I
-  covers := (C₁.covers ×ˢ C₂.covers).attach.image (fun pq =>
+  covers := (C₁.covers ×ˢ C₂.covers).attach.image (fun pq ↦
     pq.1.1.interSamePair pq.1.2
       (hP _ (Finset.mem_product.mp pq.2).1 _ (Finset.mem_product.mp pq.2).2))
   hsubset := by
@@ -798,7 +798,7 @@ theorem RationalCovering.interProdOn_isGeneratedBy (C₁ C₂ : RationalCovering
     (hP₁ : ∀ D₁ ∈ C₁.covers, D₁.P = P₀) (hP₂ : ∀ D₂ ∈ C₂.covers, D₂.P = P₀)
     (units₁ units₂ : Finset A)
     (h₁ : C₁.IsGeneratedBy units₁) (h₂ : C₂.IsGeneratedBy units₂) :
-    (C₁.interProdOn C₂ I hI (fun D₁ hD₁ D₂ hD₂ =>
+    (C₁.interProdOn C₂ I hI (fun D₁ hD₁ D₂ hD₂ ↦
       (hP₂ D₂ hD₂).trans (hP₁ D₁ hD₁).symm)).IsGeneratedBy
       (units₁ * units₂) := by
   classical
@@ -815,12 +815,12 @@ theorem RationalCovering.interProdOn_isGeneratedBy (C₁ C₂ : RationalCovering
       exact ⟨x, hx, y, hy, hxy⟩
     choose a ha b hb hab using hfac
     have hP' : ∀ D₁ ∈ C₁.covers, ∀ D₂ ∈ C₂.covers, D₂.P = D₁.P :=
-      fun D₁ hD₁ D₂ hD₂ => (hP₂ D₂ hD₂).trans (hP₁ D₁ hD₁).symm
-    refine ⟨fun p => ⟨(φ₁ ⟨a p, ha p⟩).1.interSamePair (φ₂ ⟨b p, hb p⟩).1
+      fun D₁ hD₁ D₂ hD₂ ↦ (hP₂ D₂ hD₂).trans (hP₁ D₁ hD₁).symm
+    refine ⟨fun p ↦ ⟨(φ₁ ⟨a p, ha p⟩).1.interSamePair (φ₂ ⟨b p, hb p⟩).1
       (hP' _ (φ₁ ⟨a p, ha p⟩).2 _ (φ₂ ⟨b p, hb p⟩).2), ?_⟩, ⟨?_, ?_⟩, ?_⟩
     · -- membership of the value
       rw [show (C₁.interProdOn C₂ I hI hP').covers =
-          (C₁.covers ×ˢ C₂.covers).attach.image (fun pq =>
+          (C₁.covers ×ˢ C₂.covers).attach.image (fun pq ↦
             pq.1.1.interSamePair pq.1.2
               (hP' _ (Finset.mem_product.mp pq.2).1 _
                 (Finset.mem_product.mp pq.2).2)) from rfl, Finset.mem_image]
@@ -829,7 +829,7 @@ theorem RationalCovering.interProdOn_isGeneratedBy (C₁ C₂ : RationalCovering
         Finset.mem_attach _ _, rfl⟩
     · -- injectivity: the denominator recovers p
       intro p p' hpp'
-      have hs_eq := congrArg (fun E : ↥(C₁.interProdOn C₂ I hI hP').covers =>
+      have hs_eq := congrArg (fun E : ↥(C₁.interProdOn C₂ I hI hP').covers ↦
         E.1.s) hpp'
       simp only [RationalLocData.interSamePair_s] at hs_eq
       rw [(hφ₁ ⟨a p, ha p⟩).2, (hφ₂ ⟨b p, hb p⟩).2,
@@ -929,10 +929,10 @@ theorem isOXAcyclic_congr [HasLocLiftPowerBounded A] (C C' : RationalCovering A)
   -- forward/backward choice functions (no surjectivity needed)
   choose φ hφmem hφR using hCC'
   choose ψ hψmem hψR using hC'C
-  refine ⟨fun x hx => ?_, ?_⟩
+  refine ⟨fun x hx ↦ ?_, ?_⟩
   · -- SEPARATION: `x` zero on `cov` ⇒ zero on `cov'` (each `cov'`-piece `R`-matches a
     -- `cov`-piece `ψ D'` via `hψR`, on which `x = 0`) ⇒ `x = 0` by `hC'.separation`.
-    refine hC'.separation x (fun D' hD' => ?_)
+    refine hC'.separation x (fun D' hD' ↦ ?_)
     have h : rationalOpen (ψ D' hD').T (ψ D' hD').s = rationalOpen D'.T D'.s := hψR D' hD'
     have hcomp := congrFun
       (restrictionMap_comp b (ψ D' hD') D' (hsub _ (hψmem D' hD')) h.ge) x
@@ -942,10 +942,10 @@ theorem isOXAcyclic_congr [HasLocLiftPowerBounded A] (C C' : RationalCovering A)
   · -- GLUING: transfer the `cov`-cocycle `f` to a `cov'`-cocycle via `ψ` + the piece
     -- isos, glue via `hC'`, pull back via `φ` + `R`-equality.
     intro f hf
-    set g : ∀ D' : ↥cov', presheafValue D'.1 := fun D' =>
+    set g : ∀ D' : ↥cov', presheafValue D'.1 := fun D' ↦
       restrictionMap (ψ D'.1 D'.2) D'.1 (hψR D'.1 D'.2).ge
         (f ⟨ψ D'.1 D'.2, hψmem D'.1 D'.2⟩) with hg_def
-    obtain ⟨x, hx⟩ := hC'.gluing g (fun D'₁ D'₂ D₃ h₃₁ h₃₂ => by
+    obtain ⟨x, hx⟩ := hC'.gluing g (fun D'₁ D'₂ D₃ h₃₁ h₃₂ ↦ by
       simp only [hg_def]
       have c1 := congrFun (restrictionMap_comp (ψ D'₁.1 D'₁.2) D'₁.1 D₃
         (hψR D'₁.1 D'₁.2).ge h₃₁) (f ⟨ψ D'₁.1 D'₁.2, hψmem D'₁.1 D'₁.2⟩)
@@ -955,7 +955,7 @@ theorem isOXAcyclic_congr [HasLocLiftPowerBounded A] (C C' : RationalCovering A)
       rw [c1, c2]
       exact hf ⟨ψ D'₁.1 D'₁.2, hψmem D'₁.1 D'₁.2⟩
         ⟨ψ D'₂.1 D'₂.2, hψmem D'₂.1 D'₂.2⟩ D₃ _ _)
-    refine ⟨x, fun D => ?_⟩
+    refine ⟨x, fun D ↦ ?_⟩
     have hRD : rationalOpen D.1.T D.1.s = rationalOpen (φ D.1 D.2).T (φ D.1 D.2).s :=
       hφR D.1 D.2
     have cD := congrFun (restrictionMap_comp b (φ D.1 D.2) D.1
@@ -993,20 +993,20 @@ theorem isOXAcyclic_interProd [HasLocLiftPowerBounded A] (Uf V : RationalCoverin
     (hV0 : ∀ (P : RationalLocData A) (hP : P ∈ Uf.covers),
       (V.restrictTo P (by rw [hbase]; exact Uf.hsubset P hP)
         (by rw [hbase]; exact hUfP P hP)
-        (fun Q hQ => by rw [hbase]; exact hVP Q hQ)).IsOXAcyclic)
+        (fun Q hQ ↦ by rw [hbase]; exact hVP Q hQ)).IsOXAcyclic)
     (hV1 : ∀ (P P' : RationalLocData A) (hP : P ∈ Uf.covers) (hP' : P' ∈ Uf.covers),
       (V.restrictTo (P.interSamePair P' (by rw [hUfP P' hP', hUfP P hP]))
         (by rw [hbase]
             exact (RationalLocData.interSamePair_subset_left P P' _).trans
               (Uf.hsubset P hP))
         (by rw [hbase]; exact hUfP P hP)
-        (fun Q hQ => by rw [hbase]; exact hVP Q hQ)).IsOXAcyclic) :
+        (fun Q hQ ↦ by rw [hbase]; exact hVP Q hQ)).IsOXAcyclic) :
     (Uf.interProd V hbase hUfP hVP).IsOXAcyclic := by
-  refine ⟨fun x hx => ?_, ?_⟩
+  refine ⟨fun x hx ↦ ?_, ?_⟩
   · -- SEPARATION: `x` zero on every `P ∩ Q` ⇒ (via `hV0`) zero on every `P` ⇒
     -- (via `hU`) zero.
-    refine hU.separation x (fun P hP => ?_)
-    refine (hV0 P hP).separation _ (fun E hE => ?_)
+    refine hU.separation x (fun P hP ↦ ?_)
+    refine (hV0 P hP).separation _ (fun E hE ↦ ?_)
     rw [RationalCovering.restrictTo_covers, Finset.mem_image] at hE
     obtain ⟨Q, -, rfl⟩ := hE
     have hE' : (P.interSamePair Q.1 ((hVP _ Q.2).trans (hUfP P hP).symm))
@@ -1025,11 +1025,11 @@ theorem isOXAcyclic_interProd [HasLocLiftPowerBounded A] (Uf V : RationalCoverin
   · -- GLUING (the A.3(3) cocycle): per-`P` glue via `hV0`, `Uf`-cocycle via `hV1`,
     -- glue via `hU`.
     intro f hf
-    choose g hg using fun (P : ↥Uf.covers) =>
+    choose g hg using fun (P : ↥Uf.covers) ↦
       (hV0 P.1 P.2).gluing
-        (fun E => f ⟨E.1, RationalCovering.restrictTo_mem_interProd Uf V hbase hUfP hVP
+        (fun E ↦ f ⟨E.1, RationalCovering.restrictTo_mem_interProd Uf V hbase hUfP hVP
           P.1 P.2 _ _ _ E.1 E.2⟩)
-        (fun E₁ E₂ D₃ h₃₁ h₃₂ =>
+        (fun E₁ E₂ D₃ h₃₁ h₃₂ ↦
           hf ⟨E₁.1, RationalCovering.restrictTo_mem_interProd Uf V hbase hUfP hVP
               P.1 P.2 _ _ _ E₁.1 E₁.2⟩
             ⟨E₂.1, RationalCovering.restrictTo_mem_interProd Uf V hbase hUfP hVP
@@ -1049,7 +1049,7 @@ theorem isOXAcyclic_interProd [HasLocLiftPowerBounded A] (Uf V : RationalCoverin
       have hcanon : restrictionMap P₁.1 M hMP₁ (g P₁) =
           restrictionMap P₂.1 M hMP₂ (g P₂) := by
         rw [← sub_eq_zero]
-        refine (hV1 P₁.1 P₂.1 P₁.2 P₂.2).separation _ (fun E hE => ?_)
+        refine (hV1 P₁.1 P₂.1 P₁.2 P₂.2).separation _ (fun E hE ↦ ?_)
         rw [RationalCovering.restrictTo_covers, Finset.mem_image] at hE
         obtain ⟨Q, -, hQeq⟩ := hE
         have hQP₁ : Q.1.P = P₁.1.P := (hVP Q.1 Q.2).trans (hUfP P₁.1 P₁.2).symm
@@ -1081,13 +1081,13 @@ theorem isOXAcyclic_interProd [HasLocLiftPowerBounded A] (Uf V : RationalCoverin
         have hDmem₁ : (P₁.1.interSamePair Q.1 hQP₁) ∈
             (V.restrictTo P₁.1 (by rw [hbase]; exact Uf.hsubset P₁.1 P₁.2)
               (by rw [hbase]; exact hUfP P₁.1 P₁.2)
-              (fun Q hQ => by rw [hbase]; exact hVP Q hQ)).covers := by
+              (fun Q hQ ↦ by rw [hbase]; exact hVP Q hQ)).covers := by
           rw [RationalCovering.restrictTo_covers, Finset.mem_image]
           exact ⟨⟨Q.1, Q.2⟩, Finset.mem_attach _ _, rfl⟩
         have hDmem₂ : (P₂.1.interSamePair Q.1 hQP₂) ∈
             (V.restrictTo P₂.1 (by rw [hbase]; exact Uf.hsubset P₂.1 P₂.2)
               (by rw [hbase]; exact hUfP P₂.1 P₂.2)
-              (fun Q hQ => by rw [hbase]; exact hVP Q hQ)).covers := by
+              (fun Q hQ ↦ by rw [hbase]; exact hVP Q hQ)).covers := by
           rw [RationalCovering.restrictTo_covers, Finset.mem_image]
           exact ⟨⟨Q.1, Q.2⟩, Finset.mem_attach _ _, rfl⟩
         have hg₁ := hg P₁ ⟨_, hDmem₁⟩
@@ -1128,7 +1128,7 @@ theorem isOXAcyclic_interProd [HasLocLiftPowerBounded A] (Uf V : RationalCoverin
       rw [Function.comp_apply] at c1 c2
       rw [← c1, hcanon, c2]
     obtain ⟨x, hx⟩ := hU.gluing g hgcoc
-    refine ⟨x, fun D => ?_⟩
+    refine ⟨x, fun D ↦ ?_⟩
     obtain ⟨D₀, hD₀⟩ := D
     have hD₀' := hD₀
     rw [RationalCovering.interProd_covers, Finset.mem_image] at hD₀'
@@ -1136,7 +1136,7 @@ theorem isOXAcyclic_interProd [HasLocLiftPowerBounded A] (Uf V : RationalCoverin
     obtain ⟨hP, hQ⟩ := Finset.mem_product.mp hPQ
     have hDmem : D₀ ∈ (V.restrictTo P (by rw [hbase]; exact Uf.hsubset P hP)
         (by rw [hbase]; exact hUfP P hP)
-        (fun Q hQ => by rw [hbase]; exact hVP Q hQ)).covers := by
+        (fun Q hQ ↦ by rw [hbase]; exact hVP Q hQ)).covers := by
       rw [RationalCovering.restrictTo_covers, Finset.mem_image]
       exact ⟨⟨Q, hQ⟩, Finset.mem_attach _ _, hpq⟩
     have key := hg ⟨P, hP⟩ ⟨D₀, hDmem⟩
@@ -1218,7 +1218,7 @@ theorem isOXAcyclic_of_trivial_cover [HasLocLiftPowerBounded A]
     rwa [hid, id_eq] at hz
   · -- gluing: the unique piece's section IS the global section.
     intro f _hf
-    refine ⟨f ⟨V.base, hmem⟩, fun D => ?_⟩
+    refine ⟨f ⟨V.base, hmem⟩, fun D ↦ ?_⟩
     obtain ⟨D_val, D_mem⟩ := D
     have hD1 : D_val = V.base := by
       rw [h_triv, Finset.mem_singleton] at D_mem; exact D_mem
@@ -1348,7 +1348,7 @@ theorem laurentProdLeaves_restrict [DecidableEq A] (fs : List A) :
   induction fs with
   | nil =>
     intro D₀ P hsub
-    refine ⟨fun Q hQ => ?_, fun Q' hQ' => ?_⟩
+    refine ⟨fun Q hQ ↦ ?_, fun Q' hQ' ↦ ?_⟩
     · rw [laurentProdLeaves_nil, Finset.mem_singleton] at hQ; subst hQ
       exact ⟨P, by rw [laurentProdLeaves_nil]; exact Finset.mem_singleton_self _,
         Set.inter_eq_left.mpr hsub⟩
@@ -1403,7 +1403,7 @@ theorem laurentProdLeaves_restrict [DecidableEq A] (fs : List A) :
         rw [RationalLocData.interSamePair_rationalOpen]; exact Set.inter_subset_right
       rw [RationalLocData.interSamePair_rationalOpen, hR_counit, Set.inter_assoc,
         Set.inter_eq_right.mpr hQsub]
-    refine ⟨fun Q hQ => ?_, fun Q' hQ' => ?_⟩
+    refine ⟨fun Q hQ ↦ ?_, fun Q' hQ' ↦ ?_⟩
     · rw [laurentProdLeaves_cons, Finset.mem_union] at hQ
       rcases hQ with hQ | hQ
       · obtain ⟨Q', hQ', hQeq⟩ := ihp_fwd Q hQ
@@ -1631,7 +1631,7 @@ private theorem unitDatum_ker_le_span
           D.coeRingHom (algebraMap A (Localization.Away D.s) b)) ∧
         RingHom.ker (example638_evalHom D) = RingHom.ker Φ := by
     refine ⟨example638_evalHom D, example638_evalHom_continuous D,
-      fun x => example638_evalHom_algebraMap D x, ?_, rfl⟩
+      fun x ↦ example638_evalHom_algebraMap D x, ?_, rfl⟩
     erw [example638_evalHom_X D ((0 : Fin 1) : Fin D.T.card), unitDatum_genTuple_eq]
     rfl
   -- extend to the completion, then make the extension OPAQUE (an existential
@@ -1646,7 +1646,7 @@ private theorem unitDatum_ker_le_span
           @Continuous _ _ _ τQ ⇑β := by
     refine ⟨@UniformSpace.Completion.extensionHom (Localization.Away D.s) _ D.uniformSpace _ _
       (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) uQ _ (mvQuot_isUniformAddGroup 1 aI)
-      (mvQuot_isTopologicalRing 1 aI) ψ hψ_cont ‹_› ‹_›, fun y => ?_, ?_⟩
+      (mvQuot_isTopologicalRing 1 aI) ψ hψ_cont ‹_› ‹_›, fun y ↦ ?_, ?_⟩
     · exact @UniformSpace.Completion.extensionHom_coe (Localization.Away D.s) _ D.uniformSpace
         _ _ (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) uQ _ (mvQuot_isUniformAddGroup 1 aI)
         (mvQuot_isTopologicalRing 1 aI) ψ hψ_cont ‹_› ‹_› y
@@ -1662,7 +1662,7 @@ private theorem unitDatum_ker_le_span
     have hcomp : ((β.comp Φ).comp
         (MvTateAlgebra.mvPolynomialToTate (A := A) 1)) =
         (Ideal.Quotient.mk aI).comp (MvTateAlgebra.mvPolynomialToTate (A := A) 1) := by
-      refine MvPolynomial.ringHom_ext (fun c => ?_) (fun j => ?_)
+      refine MvPolynomial.ringHom_ext (fun c ↦ ?_) (fun j ↦ ?_)
       · simp only [RingHom.comp_apply, MvTateAlgebra.mvPolynomialToTate_C]
         rw [hΦ_alg]
         show β (D.coeRingHom (algebraMap A (Localization.Away D.s) c)) = _
@@ -1789,7 +1789,7 @@ private theorem coUnitDatum_ker_le_span
           D.coeRingHom (divByS (1 : A) D.s)) ∧
         RingHom.ker (example638_evalHom (coUnitDatum P b)) = RingHom.ker Φ := by
     refine ⟨example638_evalHom D, example638_evalHom_continuous D,
-      fun x => example638_evalHom_algebraMap D x, ?_, rfl⟩
+      fun x ↦ example638_evalHom_algebraMap D x, ?_, rfl⟩
     erw [example638_evalHom_X D ((0 : Fin 1) : Fin D.T.card), coUnitDatum_genTuple_eq]
     rfl
   -- extend to the completion, opaquely
@@ -1802,7 +1802,7 @@ private theorem coUnitDatum_ker_le_span
           @Continuous _ _ _ τQ ⇑β := by
     refine ⟨@UniformSpace.Completion.extensionHom (Localization.Away D.s) _ D.uniformSpace _ _
       (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) uQ _ (mvQuot_isUniformAddGroup 1 aI)
-      (mvQuot_isTopologicalRing 1 aI) ψ hψ_cont ‹_› ‹_›, fun y => ?_, ?_⟩
+      (mvQuot_isTopologicalRing 1 aI) ψ hψ_cont ‹_› ‹_›, fun y ↦ ?_, ?_⟩
     · exact @UniformSpace.Completion.extensionHom_coe (Localization.Away D.s) _ D.uniformSpace
         _ _ (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) uQ _ (mvQuot_isUniformAddGroup 1 aI)
         (mvQuot_isTopologicalRing 1 aI) ψ hψ_cont ‹_› ‹_› y
@@ -1818,7 +1818,7 @@ private theorem coUnitDatum_ker_le_span
     have hcomp : ((β.comp Φ).comp
         (MvTateAlgebra.mvPolynomialToTate (A := A) 1)) =
         (Ideal.Quotient.mk aI).comp (MvTateAlgebra.mvPolynomialToTate (A := A) 1) := by
-      refine MvPolynomial.ringHom_ext (fun c => ?_) (fun j => ?_)
+      refine MvPolynomial.ringHom_ext (fun c ↦ ?_) (fun j ↦ ?_)
       · simp only [RingHom.comp_apply, MvTateAlgebra.mvPolynomialToTate_C]
         rw [hΦ_alg]
         show β (D.coeRingHom (algebraMap A (Localization.Away D.s) c)) = _
@@ -2059,7 +2059,7 @@ private theorem datum_ker_le_span_of_unit_mod
           D.coeRingHom (divByS ((D.T.equivFin.symm i : D.T) : A) D.s)) ∧
         RingHom.ker (example638_evalHom D) = RingHom.ker Φ := by
     refine ⟨example638_evalHom D, example638_evalHom_continuous D,
-      fun x => example638_evalHom_algebraMap D x, fun i => ?_, rfl⟩
+      fun x ↦ example638_evalHom_algebraMap D x, fun i ↦ ?_, rfl⟩
     rw [example638_evalHom_X D i]
     rfl
   -- extend to the completion, opaquely
@@ -2072,7 +2072,7 @@ private theorem datum_ker_le_span_of_unit_mod
           @Continuous _ _ _ τQ ⇑β := by
     refine ⟨@UniformSpace.Completion.extensionHom (Localization.Away D.s) _ D.uniformSpace _ _
       (↥(restrictedMvPowerSeriesSubring D.T.card A) ⧸ aI) uQ _ (mvQuot_isUniformAddGroup D.T.card aI)
-      (mvQuot_isTopologicalRing D.T.card aI) ψ hψ_cont ‹_› ‹_›, fun y => ?_, ?_⟩
+      (mvQuot_isTopologicalRing D.T.card aI) ψ hψ_cont ‹_› ‹_›, fun y ↦ ?_, ?_⟩
     · exact @UniformSpace.Completion.extensionHom_coe (Localization.Away D.s) _ D.uniformSpace
         _ _ (↥(restrictedMvPowerSeriesSubring D.T.card A) ⧸ aI) uQ _ (mvQuot_isUniformAddGroup D.T.card aI)
         (mvQuot_isTopologicalRing D.T.card aI) ψ hψ_cont ‹_› ‹_› y
@@ -2088,7 +2088,7 @@ private theorem datum_ker_le_span_of_unit_mod
     have hcomp : ((β.comp Φ).comp
         (MvTateAlgebra.mvPolynomialToTate (A := A) D.T.card)) =
         (Ideal.Quotient.mk aI).comp (MvTateAlgebra.mvPolynomialToTate (A := A) D.T.card) := by
-      refine MvPolynomial.ringHom_ext (fun c => ?_) (fun j => ?_)
+      refine MvPolynomial.ringHom_ext (fun c ↦ ?_) (fun j ↦ ?_)
       · simp only [RingHom.comp_apply, MvTateAlgebra.mvPolynomialToTate_C]
         rw [hΦ_alg]
         show β (D.coeRingHom (algebraMap A (Localization.Away D.s) c)) = _
@@ -2116,7 +2116,7 @@ private theorem datum_span_le_ker
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     (D : RationalLocData A) :
-    Ideal.span (Set.range (fun i : Fin D.T.card =>
+    Ideal.span (Set.range (fun i : Fin D.T.card ↦
         algebraMap A ↥(restrictedMvPowerSeriesSubring D.T.card A)
           ((D.T.equivFin.symm i : D.T) : A) -
         algebraMap A ↥(restrictedMvPowerSeriesSubring D.T.card A) D.s *
@@ -2147,7 +2147,7 @@ private theorem datum_ker_eq_span_taut
       CompleteSpace A]
     (D : RationalLocData A) (h1 : (1 : A) ∈ D.T) :
     RingHom.ker (example638_evalHom D) =
-      Ideal.span (Set.range (fun i : Fin D.T.card =>
+      Ideal.span (Set.range (fun i : Fin D.T.card ↦
         algebraMap A ↥(restrictedMvPowerSeriesSubring D.T.card A)
           ((D.T.equivFin.symm i : D.T) : A) -
         algebraMap A ↥(restrictedMvPowerSeriesSubring D.T.card A) D.s *
@@ -2155,7 +2155,7 @@ private theorem datum_ker_eq_span_taut
             ↥(restrictedMvPowerSeriesSubring D.T.card A)))) := by
   classical
   set aI : Ideal ↥(restrictedMvPowerSeriesSubring D.T.card A) :=
-    Ideal.span (Set.range (fun i : Fin D.T.card =>
+    Ideal.span (Set.range (fun i : Fin D.T.card ↦
       algebraMap A ↥(restrictedMvPowerSeriesSubring D.T.card A)
         ((D.T.equivFin.symm i : D.T) : A) -
       algebraMap A ↥(restrictedMvPowerSeriesSubring D.T.card A) D.s *
@@ -2203,7 +2203,7 @@ private noncomputable def datum_quotEquiv_taut
     (D : RationalLocData A) (h1 : (1 : A) ∈ D.T) :
     presheafValue D ≃+*
       (↥(restrictedMvPowerSeriesSubring D.T.card A) ⧸
-        Ideal.span (Set.range (fun i : Fin D.T.card =>
+        Ideal.span (Set.range (fun i : Fin D.T.card ↦
           algebraMap A ↥(restrictedMvPowerSeriesSubring D.T.card A)
             ((D.T.equivFin.symm i : D.T) : A) -
           algebraMap A ↥(restrictedMvPowerSeriesSubring D.T.card A) D.s *
@@ -2427,7 +2427,7 @@ private theorem tate_ker_le_of_backward
           @Continuous _ _ _ τQ ⇑β := by
     refine ⟨@UniformSpace.Completion.extensionHom (Localization.Away D.s) _ D.uniformSpace _ _
       (↥(restrictedMvPowerSeriesSubring m A) ⧸ aI) uQ _ (mvQuot_isUniformAddGroup m aI)
-      (mvQuot_isTopologicalRing m aI) ψ hψ_cont ‹_› ‹_›, fun y => ?_, ?_⟩
+      (mvQuot_isTopologicalRing m aI) ψ hψ_cont ‹_› ‹_›, fun y ↦ ?_, ?_⟩
     · exact @UniformSpace.Completion.extensionHom_coe (Localization.Away D.s) _ D.uniformSpace
         _ _ (↥(restrictedMvPowerSeriesSubring m A) ⧸ aI) uQ _ (mvQuot_isUniformAddGroup m aI)
         (mvQuot_isTopologicalRing m aI) ψ hψ_cont ‹_› ‹_› y
@@ -2442,7 +2442,7 @@ private theorem tate_ker_le_of_backward
     have hcomp : ((β.comp Φ).comp
         (MvTateAlgebra.mvPolynomialToTate (A := A) m)) =
         (Ideal.Quotient.mk aI).comp (MvTateAlgebra.mvPolynomialToTate (A := A) m) := by
-      refine MvPolynomial.ringHom_ext (fun c => ?_) (fun j => ?_)
+      refine MvPolynomial.ringHom_ext (fun c ↦ ?_) (fun j ↦ ?_)
       · simp only [RingHom.comp_apply, MvTateAlgebra.mvPolynomialToTate_C]
         rw [hΦ_alg]
         show β (D.coeRingHom (algebraMap A (Localization.Away D.s) c)) = _
@@ -2573,7 +2573,7 @@ private theorem tate_backward_exists
           @Continuous _ _ _ τQ ⇑β := by
     refine ⟨@UniformSpace.Completion.extensionHom (Localization.Away D.s) _ D.uniformSpace _ _
       (↥(restrictedMvPowerSeriesSubring m A) ⧸ aI) uQ _ (mvQuot_isUniformAddGroup m aI)
-      (mvQuot_isTopologicalRing m aI) ψ hψ_cont ‹_› ‹_›, fun y => ?_, ?_⟩
+      (mvQuot_isTopologicalRing m aI) ψ hψ_cont ‹_› ‹_›, fun y ↦ ?_, ?_⟩
     · exact @UniformSpace.Completion.extensionHom_coe (Localization.Away D.s) _ D.uniformSpace
         _ _ (↥(restrictedMvPowerSeriesSubring m A) ⧸ aI) uQ _ (mvQuot_isUniformAddGroup m aI)
         (mvQuot_isTopologicalRing m aI) ψ hψ_cont ‹_› ‹_› y
@@ -2588,7 +2588,7 @@ private theorem tate_backward_exists
     have hcomp : ((β.comp Φ).comp
         (MvTateAlgebra.mvPolynomialToTate (A := A) m)) =
         (Ideal.Quotient.mk aI).comp (MvTateAlgebra.mvPolynomialToTate (A := A) m) := by
-      refine MvPolynomial.ringHom_ext (fun c => ?_) (fun j => ?_)
+      refine MvPolynomial.ringHom_ext (fun c ↦ ?_) (fun j ↦ ?_)
       · simp only [RingHom.comp_apply, MvTateAlgebra.mvPolynomialToTate_C]
         rw [hΦ_alg]
         show β (D.coeRingHom (algebraMap A (Localization.Away D.s) c)) = _
@@ -2726,7 +2726,7 @@ private noncomputable def tate_quotPresentation
   -- transport the `aI`-relations to `ker Φ`-relations along the factor map
   letI factor := Ideal.Quotient.factor haI_le
   have hfac : ∀ x : ↥(restrictedMvPowerSeriesSubring m A),
-      factor (Ideal.Quotient.mk aI x) = Ideal.Quotient.mk (RingHom.ker Φ) x := fun x =>
+      factor (Ideal.Quotient.mk aI x) = Ideal.Quotient.mk (RingHom.ker Φ) x := fun x ↦
     Ideal.Quotient.factor_mk haI_le x
   have hUnit' : IsUnit ((Ideal.Quotient.mk (RingHom.ker Φ)).comp
       (algebraMap A ↥(restrictedMvPowerSeriesSubring m A)) D.s) := by
@@ -2742,7 +2742,7 @@ private noncomputable def tate_quotPresentation
             (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) D.s) *
           Ideal.Quotient.mk (RingHom.ker Φ)
             (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
-              ↥(restrictedMvPowerSeriesSubring m A)) := fun j => by
+              ↥(restrictedMvPowerSeriesSubring m A)) := fun j ↦ by
     have := congrArg factor (hgen_mod j)
     rwa [map_mul, hfac, hfac, hfac] at this
   have hT_mod' : ∀ t ∈ D.T, ∃ w : ↥(restrictedMvPowerSeriesSubring m A),
@@ -2751,7 +2751,7 @@ private noncomputable def tate_quotPresentation
           (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) t) =
         Ideal.Quotient.mk (RingHom.ker Φ)
             (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) D.s) *
-          Ideal.Quotient.mk (RingHom.ker Φ) w := fun t ht => by
+          Ideal.Quotient.mk (RingHom.ker Φ) w := fun t ht ↦ by
     obtain ⟨w, hw_mem, hw_mod⟩ := hT_mod t ht
     refine ⟨w, hw_mem, ?_⟩
     have := congrArg factor hw_mod
@@ -2874,7 +2874,7 @@ private theorem unitCoUnit_inter_T_cases (P : PairOfDefinition A) (b : A) :
   classical
   intro t ht
   have : t ∈ ((insert (1 : A) ({b} : Finset A)).product (insert b ({1} : Finset A))).image
-      (fun p : A × A => p.1 * p.2) := ht
+      (fun p : A × A ↦ p.1 * p.2) := ht
   rw [Finset.mem_image] at this
   obtain ⟨⟨p, q⟩, hpq, rfl⟩ := this
   obtain ⟨hp, hq⟩ := Finset.mem_product.mp hpq
@@ -2893,7 +2893,7 @@ private theorem unitCoUnit_inter_one_mem (P : PairOfDefinition A) (b : A) :
     (1 : A) ∈ ((unitDatum P b).interSamePair (coUnitDatum P b) rfl).T := by
   classical
   show (1 : A) ∈ ((insert (1 : A) ({b} : Finset A)).product (insert b ({1} : Finset A))).image
-    (fun p : A × A => p.1 * p.2)
+    (fun p : A × A ↦ p.1 * p.2)
   rw [Finset.mem_image]
   exact ⟨(1, 1), Finset.mem_product.mpr
     ⟨Finset.mem_insert_self _ _,
@@ -2905,7 +2905,7 @@ private theorem unitCoUnit_inter_bb_mem (P : PairOfDefinition A) (b : A) :
     b * b ∈ ((unitDatum P b).interSamePair (coUnitDatum P b) rfl).T := by
   classical
   show b * b ∈ ((insert (1 : A) ({b} : Finset A)).product (insert b ({1} : Finset A))).image
-    (fun p : A × A => p.1 * p.2)
+    (fun p : A × A ↦ p.1 * p.2)
   rw [Finset.mem_image]
   exact ⟨(b, b), Finset.mem_product.mpr
     ⟨Finset.mem_insert_of_mem (Finset.mem_singleton_self _),
@@ -2965,7 +2965,7 @@ private theorem unitCover_overlapTuple_isBounded
     divByS_mem_locSubring _ _ _ hmem_one
   have hbdd := CompletionLocalization.coeRingHom_image_locSubring_isBounded
     (unitCover_overlapDatum_B D₀ f)
-  refine Fin.cases ?_ (fun j => ?_) i
+  refine Fin.cases ?_ (fun j ↦ ?_) i
   · refine hbdd.subset ?_
     rintro _ ⟨k, rfl⟩
     refine ⟨(divByS (D₀.canonicalMap f * D₀.canonicalMap f)
@@ -3246,12 +3246,12 @@ private noncomputable def unitCover_overlapQuotEquiv
   refine tate_quotPresentation (unitCover_overlapDatum_B D₀ f)
     (unitCover_overlapEval D₀ f)
     (mvEvalHomBounded_continuous _ _ _ _)
-    (fun x => mvEvalHomBounded_algebraMap _ _ _ _ x)
+    (fun x ↦ mvEvalHomBounded_algebraMap _ _ _ _ x)
     (![D₀.canonicalMap f * D₀.canonicalMap f, 1])
-    (fun j => ?_) (unitCover_overlapIdeal D₀ f) ?_ ?_ ?_ (fun j => ?_) ?_
+    (fun j ↦ ?_) (unitCover_overlapIdeal D₀ f) ?_ ?_ ?_ (fun j ↦ ?_) ?_
   · -- hΦ_X
     refine Eq.trans (mvEvalHomBounded_X _ _ _ _ j) ?_
-    refine Fin.cases ?_ (fun j' => ?_) j
+    refine Fin.cases ?_ (fun j' ↦ ?_) j
     · rfl
     · have hj : j' = 0 := Subsingleton.elim j' 0
       subst hj
@@ -3273,7 +3273,7 @@ private noncomputable def unitCover_overlapQuotEquiv
     rw [map_one] at h1
     exact h1.symm
   · -- hgen_mod
-    refine Fin.cases ?_ (fun j' => ?_) j
+    refine Fin.cases ?_ (fun j' ↦ ?_) j
     · simpa only [Matrix.cons_val_zero, hXzeta] using (unitCover_overlapIdeal_rel D₀ f).2.2
     · have hj : j' = 0 := Subsingleton.elim j' 0
       subst hj
@@ -3521,7 +3521,7 @@ private theorem unitCover_relPlus_forward_witness
         divByS_mem_locSubring D₀.P D₀.T D₀.s hp'⟩, rfl⟩
   -- decompose `t = p · q`
   have ht' : t ∈ ((insert D₀.s D₀.T).product
-      (insert (1 : A) ({f} : Finset A))).image (fun p : A × A => p.1 * p.2) := ht
+      (insert (1 : A) ({f} : Finset A))).image (fun p : A × A ↦ p.1 * p.2) := ht
   rw [Finset.mem_image] at ht'
   obtain ⟨⟨p, q⟩, hpq, rfl⟩ := ht'
   have hp : p ∈ insert D₀.s D₀.T := (Finset.mem_product.mp hpq).1
@@ -4208,7 +4208,7 @@ private theorem unitCover_relMinus_forward_witness
         divByS_mem_locSubring D₀.P D₀.T D₀.s hp'⟩, rfl⟩
   -- decompose `t = p · q`, `q ∈ insert f {1}` (`coUnitDatum` has `s = f`, `T = {1}`)
   have ht' : t ∈ ((insert D₀.s D₀.T).product
-      (insert f ({1} : Finset A))).image (fun p : A × A => p.1 * p.2) := ht
+      (insert f ({1} : Finset A))).image (fun p : A × A ↦ p.1 * p.2) := ht
   rw [Finset.mem_image] at ht'
   obtain ⟨⟨p, q⟩, hpq, rfl⟩ := ht'
   have hp : p ∈ insert D₀.s D₀.T := (Finset.mem_product.mp hpq).1
@@ -4993,7 +4993,7 @@ private theorem unitCover_relOverlap_forward_witness
       rw [show divByS (D₀.s * 1) D₀.s = divByS D₀.s D₀.s from by rw [mul_one]]
       exact hA₀ D₀.s (Finset.mem_insert_self _ _)
     · have hp'' : p ∈ ((insert D₀.s D₀.T).product
-          (insert (1 : A) ({f} : Finset A))).image (fun r : A × A => r.1 * r.2) := hp'
+          (insert (1 : A) ({f} : Finset A))).image (fun r : A × A ↦ r.1 * r.2) := hp'
       rw [Finset.mem_image] at hp''
       obtain ⟨⟨p', q'⟩, hpq', rfl⟩ := hp''
       have hp1 : p' ∈ insert D₀.s D₀.T := (Finset.mem_product.mp hpq').1
@@ -5019,7 +5019,7 @@ private theorem unitCover_relOverlap_forward_witness
       rw [hsplit D₀.s f, map_mul]
       rfl
     · have hq'' : q ∈ ((insert D₀.s D₀.T).product
-          (insert f ({1} : Finset A))).image (fun r : A × A => r.1 * r.2) := hq'
+          (insert f ({1} : Finset A))).image (fun r : A × A ↦ r.1 * r.2) := hq'
       rw [Finset.mem_image] at hq''
       obtain ⟨⟨p', q'⟩, hpq', rfl⟩ := hq''
       have hp1 : p' ∈ insert D₀.s D₀.T := (Finset.mem_product.mp hpq').1
@@ -5035,7 +5035,7 @@ private theorem unitCover_relOverlap_forward_witness
   -- decompose `t = p · q`
   have ht' : t ∈ ((insert (D₀.s * 1) (D₀.interSamePair (unitDatum D₀.P f) rfl).T).product
       (insert (D₀.s * f) (D₀.interSamePair (coUnitDatum D₀.P f) rfl).T)).image
-      (fun r : A × A => r.1 * r.2) := ht
+      (fun r : A × A ↦ r.1 * r.2) := ht
   rw [Finset.mem_image] at ht'
   obtain ⟨⟨p, q⟩, hpq, rfl⟩ := ht'
   have hp : p ∈ insert (D₀.s * 1) (D₀.interSamePair (unitDatum D₀.P f) rfl).T :=
@@ -6322,7 +6322,7 @@ private theorem unitCover_example638Plus_symm_continuous
         (D₀.canonicalMap f) - TateAlgebra.X})) =
       ⇑(example638_evalHom (unitDatum (presheafValue_concretePair D₀)
         (D₀.canonicalMap f))) :=
-    funext fun z => unitCover_example638Plus_symm_mk D₀ f z
+    funext fun z ↦ unitCover_example638Plus_symm_mk D₀ f z
   rw [hfun]
   exact example638_evalHom_continuous _
 
@@ -6426,11 +6426,11 @@ private theorem unitCover_overlapQuotEquiv_symm_mk
   exact tate_quotPresentation_symm_mk (unitCover_overlapDatum_B D₀ f)
     (unitCover_overlapEval D₀ f)
     (mvEvalHomBounded_continuous _ _ _ _)
-    (fun x => mvEvalHomBounded_algebraMap _ _ _ _ x)
+    (fun x ↦ mvEvalHomBounded_algebraMap _ _ _ _ x)
     (![D₀.canonicalMap f * D₀.canonicalMap f, 1])
-    (fun j => by
+    (fun j ↦ by
       refine Eq.trans (mvEvalHomBounded_X _ _ _ _ j) ?_
-      refine Fin.cases ?_ (fun j' => ?_) j
+      refine Fin.cases ?_ (fun j' ↦ ?_) j
       · rfl
       · have hj : j' = 0 := Subsingleton.elim j' 0
         subst hj
@@ -6451,8 +6451,8 @@ private theorem unitCover_overlapQuotEquiv_symm_mk
       have h1 := (unitCover_overlapIdeal_rel D₀ f).1
       rw [map_one] at h1
       exact h1.symm)
-    (fun j => by
-      refine Fin.cases ?_ (fun j' => ?_) j
+    (fun j ↦ by
+      refine Fin.cases ?_ (fun j' ↦ ?_) j
       · simpa only [Matrix.cons_val_zero, hXzeta] using
           (unitCover_overlapIdeal_rel D₀ f).2.2
       · have hj : j' = 0 := Subsingleton.elim j' 0
@@ -6462,7 +6462,7 @@ private theorem unitCover_overlapQuotEquiv_symm_mk
         have h1 := (unitCover_overlapIdeal_rel D₀ f).1
         rw [map_one] at h1
         exact h1)
-    (fun t ht => by
+    (fun t ht ↦ by
       rcases unitCoUnit_inter_T_cases (presheafValue_concretePair D₀)
         (D₀.canonicalMap f) t ht with rfl | rfl | rfl
       · refine ⟨⟨MvPowerSeries.X (1 : Fin 2), MvPowerSeries.X_isRestricted 1⟩,
@@ -6518,7 +6518,7 @@ private theorem unitCover_overlapQuotEquiv_symm_continuous
   have hfun : ⇑((unitCover_overlapQuotEquiv D₀ f).symm) ∘
       ⇑(Ideal.Quotient.mk (unitCover_overlapIdeal D₀ f)) =
       ⇑(unitCover_overlapEval D₀ f) :=
-    funext fun z => unitCover_overlapQuotEquiv_symm_mk D₀ f z
+    funext fun z ↦ unitCover_overlapQuotEquiv_symm_mk D₀ f z
   rw [hfun]
   exact mvEvalHomBounded_continuous _ _ _ _
 
@@ -6583,7 +6583,7 @@ private theorem unitCover_sq_plus_dense
   letI : IsUniformAddGroup (Localization.Away ((unitCover_overlapDatum_B D₀ f).s)) :=
     (unitCover_overlapDatum_B D₀ f).isUniformAddGroup
   -- the two sides as functions of `z`, continuous
-  have hfun : (fun z : ↥(TateAlgebra (presheafValue D₀)) =>
+  have hfun : (fun z : ↥(TateAlgebra (presheafValue D₀)) ↦
       restrictionMapHom (D₀.interSamePair (unitDatum D₀.P f) rfl)
         ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
           (D₀.interSamePair (coUnitDatum D₀.P f) rfl) rfl)
@@ -6593,7 +6593,7 @@ private theorem unitCover_sq_plus_dense
           (Ideal.Quotient.mk (Ideal.span {algebraMap (presheafValue D₀)
             ↥(TateAlgebra (presheafValue D₀)) (D₀.canonicalMap f) -
               TateAlgebra.X}) z)))) =
-    (fun z : ↥(TateAlgebra (presheafValue D₀)) =>
+    (fun z : ↥(TateAlgebra (presheafValue D₀)) ↦
       unitCover_relOverlap_backward D₀ f
         (unitCover_overlapEval D₀ f (LaurentTateAlgebra.posIncl z))) := by
     refine Continuous.ext_on
@@ -6621,7 +6621,7 @@ private theorem unitCover_sq_plus_dense
           (LaurentTateAlgebra.posIncl :
             ↥(TateAlgebra (presheafValue D₀)) →+* ↥(TateAlgebra₂ (presheafValue D₀))))).comp
           (MvTateAlgebra.mvPolynomialToTate (A := presheafValue D₀) 1) := by
-      refine MvPolynomial.ringHom_ext (fun c => ?_) (fun i => ?_)
+      refine MvPolynomial.ringHom_ext (fun c ↦ ?_) (fun i ↦ ?_)
       · simp only [RingHom.comp_apply, RingHom.coe_comp, Function.comp_apply,
           RingEquiv.toRingHom_eq_coe, RingEquiv.coe_toRingHom]
         rw [MvTateAlgebra.mvPolynomialToTate_C (A := presheafValue D₀) 1 c]
@@ -6650,7 +6650,7 @@ private theorem unitCover_sq_plus_dense
             by_cases h1 : e = Finsupp.single (0 : Fin 2) (e 0)
             · rw [if_pos h1]
               exact if_neg (Finsupp.single_ne_zero.mpr
-                (fun h => he (by rw [h1, h, Finsupp.single_zero])))
+                (fun h ↦ he (by rw [h1, h, Finsupp.single_zero])))
             · rw [if_neg h1]]
         erw [mvEvalHomBounded_algebraMap]
         rw [show (unitCover_overlapDatum_B D₀ f).canonicalMap c =
@@ -6865,7 +6865,7 @@ private theorem unitCover_sq_minus_dense
     (unitCover_overlapDatum_B D₀ f).isTopologicalRing
   letI : IsUniformAddGroup (Localization.Away ((unitCover_overlapDatum_B D₀ f).s)) :=
     (unitCover_overlapDatum_B D₀ f).isUniformAddGroup
-  have hfun : (fun z : ↥(TateAlgebra (presheafValue D₀)) =>
+  have hfun : (fun z : ↥(TateAlgebra (presheafValue D₀)) ↦
       restrictionMapHom (D₀.interSamePair (coUnitDatum D₀.P f) rfl)
         ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
           (D₀.interSamePair (coUnitDatum D₀.P f) rfl) rfl)
@@ -6874,7 +6874,7 @@ private theorem unitCover_sq_minus_dense
         ((unitCover_example639Minus D₀ f).symm
           (Ideal.Quotient.mk (Ideal.span {1 - algebraMap (presheafValue D₀)
             ↥(TateAlgebra (presheafValue D₀)) (D₀.canonicalMap f) * TateAlgebra.X}) z)))) =
-    (fun z : ↥(TateAlgebra (presheafValue D₀)) =>
+    (fun z : ↥(TateAlgebra (presheafValue D₀)) ↦
       unitCover_relOverlap_backward D₀ f
         (unitCover_overlapEval D₀ f (LaurentTateAlgebra.negIncl z))) := by
     refine Continuous.ext_on
@@ -6908,7 +6908,7 @@ private theorem unitCover_sq_minus_dense
               ↥(TateAlgebra (presheafValue D₀)) →+*
                 ↥(TateAlgebra₂ (presheafValue D₀))))).comp
           (MvTateAlgebra.mvPolynomialToTate (A := presheafValue D₀) 1) := by
-      refine MvPolynomial.ringHom_ext (fun c => ?_) (fun i => ?_)
+      refine MvPolynomial.ringHom_ext (fun c ↦ ?_) (fun i ↦ ?_)
       · simp only [RingHom.comp_apply]
         rw [MvTateAlgebra.mvPolynomialToTate_C (A := presheafValue D₀) 1 c]
         erw [tateQuotientToPresheafHom_algebraMap (unitCover_minusDatum_B D₀ f) hb]
@@ -6934,7 +6934,7 @@ private theorem unitCover_sq_minus_dense
             by_cases h1 : e = Finsupp.single (1 : Fin 2) (e 1)
             · rw [if_pos h1]
               exact if_neg (Finsupp.single_ne_zero.mpr
-                (fun h => he (by rw [h1, h, Finsupp.single_zero])))
+                (fun h ↦ he (by rw [h1, h, Finsupp.single_zero])))
             · rw [if_neg h1]]
         erw [mvEvalHomBounded_algebraMap]
         rw [show (unitCover_overlapDatum_B D₀ f).canonicalMap c =
@@ -7223,7 +7223,7 @@ theorem unitCover_isOXAcyclic
     have hdelta : LaurentCover.deltaMap_gen (D₀.canonicalMap f)
         (unitCover_bridgePlus D₀ f g₁, unitCover_bridgeMinus D₀ f g₂) = 0 :=
       unitCover_delta_eq_zero_of_compat D₀ f g₁ g₂
-        (fun D₃ h₃₁ h₃₂ => hcompat ⟨U₁, unit_mem_unitCover D₀ f⟩
+        (fun D₃ h₃₁ h₃₂ ↦ hcompat ⟨U₁, unit_mem_unitCover D₀ f⟩
           ⟨U₂, counit_mem_unitCover D₀ f⟩ D₃ h₃₁ h₃₂)
     -- `row3_exact` at `B = presheafValue D₀`, `b = D₀.canonicalMap f` (axiom-clean).
     have key := LaurentCover.row3_exact (A := presheafValue D₀) (D₀.canonicalMap f)
@@ -7275,19 +7275,19 @@ theorem laurentProdCoverOf_isOXAcyclic [DecidableEq A]
       rw [mem_unitCover_iff] at hP
       rcases hP with rfl | rfl <;> rfl
     have hVP : ∀ Q ∈ (laurentProdCoverOf D₀ gs).covers, Q.P = (unitCover D₀ f).base.P :=
-      fun Q hQ => laurentProdLeaves_pair gs D₀ hQ
+      fun Q hQ ↦ laurentProdLeaves_pair gs D₀ hQ
     have hinner : ((unitCover D₀ f).interProd (laurentProdCoverOf D₀ gs)
         hbase hUfP hVP).IsOXAcyclic := by
       refine isOXAcyclic_interProd (unitCover D₀ f) (laurentProdCoverOf D₀ gs)
-        hbase hUfP hVP (unitCover_isOXAcyclic D₀ f hD₀ hplus) (fun P hP => ?_)
-        (fun P P' hP hP' => ?_)
+        hbase hUfP hVP (unitCover_isOXAcyclic D₀ f hD₀ hplus) (fun P hP ↦ ?_)
+        (fun P P' hP hP' ↦ ?_)
       · -- hV0: V|_P acyclic, via congr from the IH at base P
         have hPsub : rationalOpen P.T P.s ⊆ rationalOpen D₀.T D₀.s :=
           (unitCover D₀ f).hsubset P hP
         have hplusP : (A⁺ : Set A) ⊆ ↑P.P.A₀ := by
           rw [hUfP P hP]; exact hplus
-        refine isOXAcyclic_congr _ (laurentProdCoverOf P gs) rfl (fun D hD => ?_)
-          (fun D' hD' => ?_) (ih P ((unitCover_isRational D₀ f hD₀).piece hP) hplusP)
+        refine isOXAcyclic_congr _ (laurentProdCoverOf P gs) rfl (fun D hD ↦ ?_)
+          (fun D' hD' ↦ ?_) (ih P ((unitCover_isRational D₀ f hD₀).piece hP) hplusP)
         · rw [RationalCovering.restrictTo_covers, Finset.mem_image] at hD
           obtain ⟨⟨Q, hQ⟩, -, rfl⟩ := hD
           obtain ⟨Q', hQ', hQeq⟩ := (laurentProdLeaves_restrict gs D₀ P hPsub).1 Q hQ
@@ -7309,8 +7309,8 @@ theorem laurentProdCoverOf_isOXAcyclic [DecidableEq A]
           RationalLocData.interSamePair_isRational P P' _
             ((unitCover_isRational D₀ f hD₀).piece hP)
             ((unitCover_isRational D₀ f hD₀).piece hP')
-        refine isOXAcyclic_congr _ (laurentProdCoverOf Pm gs) rfl (fun D hD => ?_)
-          (fun D' hD' => ?_) (ih Pm hPm_rat hplusP)
+        refine isOXAcyclic_congr _ (laurentProdCoverOf Pm gs) rfl (fun D hD ↦ ?_)
+          (fun D' hD' ↦ ?_) (ih Pm hPm_rat hplusP)
         · rw [RationalCovering.restrictTo_covers, Finset.mem_image] at hD
           obtain ⟨⟨Q, hQ⟩, -, rfl⟩ := hD
           obtain ⟨Q', hQ', hQeq⟩ := (laurentProdLeaves_restrict gs D₀ Pm hPsub).1 Q hQ
@@ -7325,7 +7325,7 @@ theorem laurentProdCoverOf_isOXAcyclic [DecidableEq A]
     -- `laurentProdLeaves_cons` recursion bases, so this is `laurentProdLeaves_restrict`).
     refine isOXAcyclic_congr (laurentProdCoverOf D₀ (f :: gs))
       ((unitCover D₀ f).interProd (laurentProdCoverOf D₀ gs) hbase hUfP hVP)
-      rfl (fun D hD => ?_) (fun D' hD' => ?_) hinner
+      rfl (fun D hD ↦ ?_) (fun D' hD' ↦ ?_) hinner
     · rw [laurentProdCoverOf_covers, laurentProdLeaves_cons, Finset.mem_union] at hD
       rcases hD with hD | hD
       · obtain ⟨Q, hQ, hQeq⟩ := (laurentProdLeaves_restrict gs D₀
@@ -7380,8 +7380,8 @@ theorem wedhorn_lemma_834_part_i_laurent_acyclic [DecidableEq A]
   -- The base-independent Laurent cover `V` IS (R-equal to) `laurentProdCoverOf V.base fs`
   -- (same base + same covers), which is acyclic by the faithful A.3(3) induction.
   rw [RationalCovering.IsLaurentProdCover] at hV_laurent
-  refine isOXAcyclic_congr V (laurentProdCoverOf V.base fs) rfl (fun D hD => ?_)
-    (fun D' hD' => ?_) (laurentProdCoverOf_isOXAcyclic V.base fs hV_base hplus)
+  refine isOXAcyclic_congr V (laurentProdCoverOf V.base fs) rfl (fun D hD ↦ ?_)
+    (fun D' hD' ↦ ?_) (laurentProdCoverOf_isOXAcyclic V.base fs hV_base hplus)
   · exact ⟨D, by rw [laurentProdCoverOf_covers, ← hV_laurent]; exact hD, rfl⟩
   · refine ⟨D', ?_, rfl⟩
     rw [laurentProdCoverOf_covers] at hD'; rw [hV_laurent]; exact hD'
@@ -7440,15 +7440,15 @@ theorem exists_vle_max_mem (v : Spv A) {S : Finset A} (hS : S.Nonempty) :
     ∃ m ∈ S, ∀ y ∈ S, v.vle y m := by
   induction hS using Finset.Nonempty.cons_induction with
   | singleton x =>
-    exact ⟨x, Finset.mem_singleton_self x, fun y hy => by
+    exact ⟨x, Finset.mem_singleton_self x, fun y hy ↦ by
       rw [Finset.mem_singleton] at hy; subst hy; exact (v.vle_total y y).elim id id⟩
   | cons a s _ha _hsne ih =>
     obtain ⟨m, hm, hmax⟩ := ih
     rcases v.vle_total m a with h | h
-    · exact ⟨a, Finset.mem_cons_self a s, fun y hy => (Finset.mem_cons.mp hy).elim
-        (fun e => e ▸ (v.vle_total y y).elim id id) (fun hy' => v.vle_trans (hmax y hy') h)⟩
-    · exact ⟨m, Finset.mem_cons.mpr (Or.inr hm), fun y hy => (Finset.mem_cons.mp hy).elim
-        (fun e => e ▸ h) (fun hy' => hmax y hy')⟩
+    · exact ⟨a, Finset.mem_cons_self a s, fun y hy ↦ (Finset.mem_cons.mp hy).elim
+        (fun e ↦ e ▸ (v.vle_total y y).elim id id) (fun hy' ↦ v.vle_trans (hmax y hy') h)⟩
+    · exact ⟨m, Finset.mem_cons.mpr (Or.inr hm), fun y hy ↦ (Finset.mem_cons.mp hy).elim
+        (fun e ↦ e ▸ h) (fun hy' ↦ hmax y hy')⟩
 
 /-- **Per-component cover (the covering half of Cor 7.53):** if `T` spans the unit
 ideal then for every `v ∈ Spa A A⁺` there is `t ∈ T` with `v ∈ R(T/t)` — take the
@@ -7459,15 +7459,15 @@ theorem exists_mem_rationalOpen_of_spanTop [DecidableEq A] (T : Finset A)
     ∃ t ∈ T, v ∈ rationalOpen T t := by
   have hnz : ∃ t ∈ T, ¬ v.vle t 0 := by
     by_contra h
-    push_neg at h
+    push Not at h
     have hle : Ideal.span (T : Set A) ≤ v.supp :=
-      Ideal.span_le.mpr fun t ht => (v.mem_supp_iff t).mpr (h t ht)
+      Ideal.span_le.mpr fun t ht ↦ (v.mem_supp_iff t).mpr (h t ht)
     rw [hspan] at hle
     exact (instIsPrimeSupp v).ne_top (top_le_iff.mp hle)
   obtain ⟨t₀, ht₀, ht₀0⟩ := hnz
   obtain ⟨tm, htm, hmax⟩ := exists_vle_max_mem v ⟨t₀, ht₀⟩
-  exact ⟨tm, htm, hv, fun t ht => hmax t ht,
-    fun h0 => ht₀0 (v.vle_trans (hmax t₀ ht₀) h0)⟩
+  exact ⟨tm, htm, hv, fun t ht ↦ hmax t ht,
+    fun h0 ↦ ht₀0 (v.vle_trans (hmax t₀ ht₀) h0)⟩
 
 
 /-- **The A-level restricted gen-cover (G3c-0)**: base `D₀`, pieces `D₀ ∩ R(T/t)`
@@ -7478,7 +7478,7 @@ noncomputable def genRestrictedCover
     (hspan : Ideal.span (T : Set A) = ⊤) :
     RationalCovering A :=
   { base := D₀
-    covers := T.image (fun t => D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl)
+    covers := T.image (fun t ↦ D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl)
     hsubset := by
       intro D hD
       rw [Finset.mem_image] at hD
@@ -7502,7 +7502,7 @@ theorem noCommonZero_of_idealGen
     ∀ v ∈ Spa A A⁺, ∃ t ∈ T, ¬ v.vle t 0 := by
   intro v _hv
   by_contra h
-  push_neg at h
+  push Not at h
   -- h : ∀ t ∈ T, v.vle t 0, i.e., every t ∈ T is in v.supp.
   have h_sub : (T : Set A) ⊆ (v.supp : Set A) := by
     intro t ht
@@ -7556,9 +7556,9 @@ theorem laurent_cover_from_dominating_unit [DecidableEq A]
       V.IsLaurentProdCover fs ∧
       V.base = D₀ ∧
       -- The Laurent generators are `s⁻¹·T`:
-      fs = (T.toList).map (fun t => ((s⁻¹ : Aˣ) : A) * t) :=
-  ⟨laurentProdCoverOf D₀ ((T.toList).map (fun t => ((s⁻¹ : Aˣ) : A) * t)),
-    (T.toList).map (fun t => ((s⁻¹ : Aˣ) : A) * t),
+      fs = (T.toList).map (fun t ↦ ((s⁻¹ : Aˣ) : A) * t) :=
+  ⟨laurentProdCoverOf D₀ ((T.toList).map (fun t ↦ ((s⁻¹ : Aˣ) : A) * t)),
+    (T.toList).map (fun t ↦ ((s⁻¹ : Aˣ) : A) * t),
     laurentProdCoverOf_isLaurentProd _ _, rfl, rfl⟩
 
 /-! ##### Sub-lemmas for `unit_gen_restriction_of_dominating_laurent` -/
@@ -7613,7 +7613,7 @@ theorem laurentProdLeaves_cover_sign_select [DecidableEq A] (fs : List A)
   | nil =>
     intro D₀ v hv _
     exact ⟨D₀, by rw [laurentProdLeaves_nil]; exact Finset.mem_singleton_self D₀,
-      hv, fun w _ f hf => absurd hf List.not_mem_nil⟩
+      hv, fun w _ f hf ↦ absurd hf List.not_mem_nil⟩
   | cons g gs ih =>
     intro D₀ v hv hP
     by_cases hg : v.vle g 1
@@ -7622,11 +7622,11 @@ theorem laurentProdLeaves_cover_sign_select [DecidableEq A] (fs : List A)
           (D₀.interSamePair (unitDatum D₀.P g) rfl).T
           (D₀.interSamePair (unitDatum D₀.P g) rfl).s := by
         rw [RationalLocData.interSamePair_rationalOpen]
-        exact ⟨hv, hv.1, fun x hx => by
+        exact ⟨hv, hv.1, fun x hx ↦ by
           rw [Finset.mem_singleton.mp hx]; exact hg, v.not_vle_one_zero⟩
       obtain ⟨Vj, hVj, hvVj, hbound⟩ :=
         ih (D₀.interSamePair (unitDatum D₀.P g) rfl) hv_plus
-          (fun f hf hPf => hP f (List.mem_cons_of_mem g hf) hPf)
+          (fun f hf hPf ↦ hP f (List.mem_cons_of_mem g hf) hPf)
       refine ⟨Vj, ?_, hvVj, ?_⟩
       · rw [laurentProdLeaves_cons, Finset.mem_union]; exact Or.inl hVj
       · intro w hw f hf hPf
@@ -7641,12 +7641,12 @@ theorem laurentProdLeaves_cover_sign_select [DecidableEq A] (fs : List A)
           (D₀.interSamePair (coUnitDatum D₀.P g) rfl).T
           (D₀.interSamePair (coUnitDatum D₀.P g) rfl).s := by
         rw [RationalLocData.interSamePair_rationalOpen]
-        refine ⟨hv, hv.1, fun x hx => by
-          rw [Finset.mem_singleton.mp hx]; exact hg', fun hf0 => ?_⟩
+        refine ⟨hv, hv.1, fun x hx ↦ by
+          rw [Finset.mem_singleton.mp hx]; exact hg', fun hf0 ↦ ?_⟩
         exact v.not_vle_one_zero (v.vle_trans hg' hf0)
       obtain ⟨Vj, hVj, hvVj, hbound⟩ :=
         ih (D₀.interSamePair (coUnitDatum D₀.P g) rfl) hv_minus
-          (fun f hf hPf => hP f (List.mem_cons_of_mem g hf) hPf)
+          (fun f hf hPf ↦ hP f (List.mem_cons_of_mem g hf) hPf)
       refine ⟨Vj, ?_, hvVj, ?_⟩
       · rw [laurentProdLeaves_cons, Finset.mem_union]; exact Or.inr hVj
       · intro w hw f hf hPf
@@ -7669,7 +7669,7 @@ theorem index_selection_on_laurent_piece [DecidableEq A]
     (T : Finset A) (hT : T.Nonempty) (s : Aˣ) (V : RationalCovering A)
     (h_dom : ∀ v ∈ Spa A A⁺, ∃ t ∈ T, v.vle (s : A) t ∧ ¬ v.vle t (s : A))
     (_fs : List A) (_hV_laurent : V.IsLaurentProdCover _fs)
-    (_hfs_eq : _fs = (T.toList).map (fun t => ((s⁻¹ : Aˣ) : A) * t))
+    (_hfs_eq : _fs = (T.toList).map (fun t ↦ ((s⁻¹ : Aˣ) : A) * t))
     (Vj : RationalLocData A) (_hVj : Vj ∈ V.covers) :
     ∃ t ∈ T, ∀ v ∈ rationalOpen Vj.T Vj.s,
       v.vle (s : A) t := by
@@ -7697,11 +7697,11 @@ theorem index_selection_on_laurent_piece [DecidableEq A]
   by_cases hplus : ∃ t ∈ T, ∀ v ∈ rationalOpen Vj.T Vj.s,
       v.vle 1 (((s⁻¹ : Aˣ) : A) * t)
   · obtain ⟨t, ht, hbranch⟩ := hplus
-    exact ⟨t, ht, fun v hv => harith₁ t v (hbranch v hv)⟩
+    exact ⟨t, ht, fun v hv ↦ harith₁ t v (hbranch v hv)⟩
   · -- all generators carry the `≤`-branch ⟹ the leaf is empty (dominance), vacuous
-    push_neg at hplus
+    push Not at hplus
     obtain ⟨t₀, ht₀⟩ := hT
-    refine ⟨t₀, ht₀, fun v hv => ?_⟩
+    refine ⟨t₀, ht₀, fun v hv ↦ ?_⟩
     exfalso
     -- every `t ∈ T` has the `≤`-branch at `v` (dichotomy + ¬∃-plus)
     have hall : ∀ t ∈ T, v.vle t (s : A) := by
@@ -7794,9 +7794,9 @@ theorem restricted_cover_construction
   -- companion lemmas (`unit_gen_restriction_of_dominating_laurent` etc).
   ⟨{ base := Vj,
      covers := {Vj},
-     hsubset := fun D hD => by
+     hsubset := fun D hD ↦ by
        rw [Finset.mem_singleton] at hD; subst hD; exact subset_rfl,
-     hcover := fun v hv => ⟨Vj, Finset.mem_singleton.mpr rfl, hv⟩ }, rfl⟩
+     hcover := fun v hv ↦ ⟨Vj, Finset.mem_singleton.mpr rfl, hv⟩ }, rfl⟩
 
 /-- **Part (ii) sub-lemma 4**: when the dominating-unit property holds,
 the restriction of an ideal-generating cover `C` to each Laurent piece
@@ -7816,7 +7816,7 @@ theorem unit_gen_restriction_of_dominating_laurent [DecidableEq A]
     -- Laurent cover, so Vj is a sign-vector piece — required by the
     -- index-selection σ-walk (step a). Threaded from `part_ii`.
     (_fs : List A) (_hV_laurent : V.IsLaurentProdCover _fs)
-    (_hfs_eq : _fs = (T.toList).map (fun t => ((s⁻¹ : Aˣ) : A) * t))
+    (_hfs_eq : _fs = (T.toList).map (fun t ↦ ((s⁻¹ : Aˣ) : A) * t))
     (hplus : (A⁺ : Set A) ⊆ V.base.P.A₀)
     (Vj : RationalLocData A) (_hVj : Vj ∈ V.covers) :
     -- σ₊-dichotomy package (2026-06-10, faithful to wedhorn.txt:4236-4242):
@@ -7851,7 +7851,7 @@ theorem unit_gen_restriction_of_dominating_laurent [DecidableEq A]
     have h2 := ValuativeRel.mul_vle_mul_left h (s : A)
     rwa [one_mul, mul_comm (((s⁻¹ : Aˣ) : A) * t) (s : A), ← mul_assoc,
       Units.mul_inv, one_mul] at h2
-  refine ⟨T.filter (fun t => ∀ v ∈ rationalOpen Vj.T Vj.s, v.vle (s : A) t),
+  refine ⟨T.filter (fun t ↦ ∀ v ∈ rationalOpen Vj.T Vj.s, v.vle (s : A) t),
     Finset.filter_subset _ _, ?_, ?_⟩
   · -- σ₊: piece-wide `v(s) ≤ v(t)` upgrades to a canonical-image unit
     -- (the landed Nullstellensatz keystone).
@@ -7872,8 +7872,8 @@ theorem unit_gen_restriction_of_dominating_laurent [DecidableEq A]
           exact List.mem_map.mpr ⟨t, Finset.mem_toList.mpr ht, rfl⟩)
     have hle : ∀ v ∈ rationalOpen Vj.T Vj.s, v.vle t (s : A) := by
       rcases hdich with h | h
-      · exact fun v hv => harith₂ t v (h v hv)
-      · exact absurd (fun v hv => harith₁ t v (h v hv)) hnot
+      · exact fun v hv ↦ harith₂ t v (h v hv)
+      · exact absurd (fun v hv ↦ harith₁ t v (h v hv)) hnot
     rw [Set.eq_empty_iff_forall_notMem]
     intro v hv
     rw [RationalLocData.interSamePair_rationalOpen] at hv
@@ -7898,7 +7898,7 @@ theorem wedhorn_lemma_834_part_ii_unit_gen_via_dominating [DecidableEq A]
       -- unit `s` and the `fs = s⁻¹·T` equation, needed by the σ-walk lemma
       -- `laurent_cover_covers_each_idealgen_piece`.
       (∀ v ∈ Spa A A⁺, ∃ t ∈ T, v.vle (s : A) t ∧ ¬ v.vle t (s : A)) ∧
-      fs = (T.toList).map (fun t => ((s⁻¹ : Aˣ) : A) * t) ∧
+      fs = (T.toList).map (fun t ↦ ((s⁻¹ : Aˣ) : A) * t) ∧
       ∀ Vj ∈ V.covers,
         ∃ Tpos : Finset A, Tpos ⊆ T ∧
           (∀ t ∈ Tpos, IsUnit (Vj.canonicalMap t)) ∧
@@ -8110,7 +8110,7 @@ private theorem wedhorn_propA3_gluing_yV_compat
         (f (chooseC Vj D').1))
     (hyV_def : ∀ (Vj : ↥V.covers), yV Vj =
       @Eq.rec (RationalLocData A) (C_restr_at Vj).base
-        (fun b _ => presheafValue b) (yVj Vj) Vj.1 (_hC_restr_base Vj))
+        (fun b _ ↦ presheafValue b) (yVj Vj) Vj.1 (_hC_restr_base Vj))
     (hyVj_spec : ∀ (Vj : ↥V.covers) (D'' : ↥(C_restr_at Vj).covers),
       restrictionMap (C_restr_at Vj).base D''.1
         ((C_restr_at Vj).hsubset D''.1 D''.2) (yVj Vj) = gVj Vj D'') :
@@ -8282,7 +8282,7 @@ private theorem wedhorn_propA3_gluing_mixed
         (f (chooseC Vj D').1))
     (hyV_def : ∀ (Vj : ↥V.covers), yV Vj =
       @Eq.rec (RationalLocData A) (C_restr_at Vj).base
-        (fun b _ => presheafValue b) (yVj Vj) Vj.1 (_hC_restr_base Vj))
+        (fun b _ ↦ presheafValue b) (yVj Vj) Vj.1 (_hC_restr_base Vj))
     (hyVj_spec : ∀ (Vj : ↥V.covers) (D'' : ↥(C_restr_at Vj).covers),
       restrictionMap (C_restr_at Vj).base D''.1
         ((C_restr_at Vj).hsubset D''.1 D''.2) (yVj Vj) = gVj Vj D'')
@@ -8408,7 +8408,7 @@ private theorem wedhorn_propA3_gluing_x_restricts
         (f (chooseC Vj D').1))
     (hyV_def : ∀ (Vj : ↥V.covers), yV Vj =
       @Eq.rec (RationalLocData A) (C_restr_at Vj).base
-        (fun b _ => presheafValue b) (yVj Vj) Vj.1 (_hC_restr_base Vj))
+        (fun b _ ↦ presheafValue b) (yVj Vj) Vj.1 (_hC_restr_base Vj))
     (hyVj_spec : ∀ (Vj : ↥V.covers) (D'' : ↥(C_restr_at Vj).covers),
       restrictionMap (C_restr_at Vj).base D''.1
         ((C_restr_at Vj).hsubset D''.1 D''.2) (yVj Vj) = gVj Vj D'')
@@ -8426,11 +8426,11 @@ private theorem wedhorn_propA3_gluing_x_restricts
     restrictionMap C.base D.1 (C.hsubset D.1 D.2) x - f D
   let diff_cast : presheafValue (V_restr_at D).base :=
     @Eq.rec (RationalLocData A) D.1
-      (fun b _ => presheafValue b) diff_D (V_restr_at D).base h_base_eq.symm
+      (fun b _ ↦ presheafValue b) diff_D (V_restr_at D).base h_base_eq.symm
   suffices h_diff_cast_zero : diff_cast = 0 by
     show diff_D = 0
     have key : ∀ (b : RationalLocData A) (h : D.1 = b)
-        (_ : @Eq.rec (RationalLocData A) D.1 (fun b _ => presheafValue b)
+        (_ : @Eq.rec (RationalLocData A) D.1 (fun b _ ↦ presheafValue b)
           diff_D b h = 0),
         diff_D = 0 := by
       intro b h z
@@ -8467,7 +8467,7 @@ private theorem wedhorn_propA3_gluing_x_restricts
       C.base V.base _hV_base V' (h_V'_sub_D.trans (C.hsubset D.1 D.2)) hsubV x
     rw [show
       (@Eq.rec (RationalLocData A) C.base
-        (fun b _ => presheafValue C.base ≃+* presheafValue b)
+        (fun b _ ↦ presheafValue C.base ≃+* presheafValue b)
         (RingEquiv.refl _) V.base _hV_base.symm x) =
         ((RationalCovering.presheafValueCast (C := C) (C' := V) _hV_base) x)
       from rfl, hx_def] at key
@@ -8589,13 +8589,13 @@ theorem wedhorn_lemma_834_propA3_part1_gluing
   -- f at the C-piece refining D' (via _hC_restr_pieces).
   let chooseC : ∀ (Vj : ↥V.covers) (D' : ↥(C_restr_at Vj).covers),
       { D : ↥C.covers //
-        rationalOpen D'.1.T D'.1.s ⊆ rationalOpen D.1.T D.1.s } := fun Vj D' =>
+        rationalOpen D'.1.T D'.1.s ⊆ rationalOpen D.1.T D.1.s } := fun Vj D' ↦
     ⟨⟨(_hC_restr_pieces Vj D'.1 D'.2).choose,
        (_hC_restr_pieces Vj D'.1 D'.2).choose_spec.1⟩,
      (_hC_restr_pieces Vj D'.1 D'.2).choose_spec.2⟩
   -- Restricted family at Vj.
   let gVj : ∀ (Vj : ↥V.covers) (D' : ↥(C_restr_at Vj).covers),
-      presheafValue D'.1 := fun Vj D' =>
+      presheafValue D'.1 := fun Vj D' ↦
     restrictionMap (chooseC Vj D').1.1 D'.1 (chooseC Vj D').2
       (f (chooseC Vj D').1)
   -- Step 2: gVj compatible on (C_restr_at Vj).covers (each Vj).
@@ -8608,14 +8608,14 @@ theorem wedhorn_lemma_834_propA3_part1_gluing
       restrictionMap D'₁.1 D'₃ h₃₁ (gVj Vj D'₁) =
         restrictionMap D'₂.1 D'₃ h₃₂ (gVj Vj D'₂) :=
     wedhorn_propA3_gluing_gVj_compat C C_restr_at f h_compat chooseC gVj
-      (fun _ _ => rfl)
+      (fun _ _ ↦ rfl)
   -- Step 3: apply C_restr_at(Vj).IsOXAcyclic.gluing to obtain yVj on Vj.
   -- _hC_restr_acyclic gives (C_restr_at Vj).IsOXAcyclic; .gluing extracts.
-  let yVj : ∀ (Vj : ↥V.covers), presheafValue (C_restr_at Vj).base := fun Vj =>
+  let yVj : ∀ (Vj : ↥V.covers), presheafValue (C_restr_at Vj).base := fun Vj ↦
     ((_hC_restr_acyclic Vj).gluing (gVj Vj) (h_gVj_compat Vj)).choose
   -- Step 4: cast yVj from presheafValue (C_restr_at Vj).base to presheafValue Vj.
   -- Use Eq.rec via _hC_restr_base Vj : (C_restr_at Vj).base = Vj.1.
-  let yV : ∀ (Vj : ↥V.covers), presheafValue Vj.1 := fun Vj =>
+  let yV : ∀ (Vj : ↥V.covers), presheafValue Vj.1 := fun Vj ↦
     _hC_restr_base Vj ▸ yVj Vj
   -- Step 5 (refinement-free, 2026-06-10): yV is compatible on V via the
   -- q=1 pair-package — reduce an arbitrary common rational subset Vj₃ to
@@ -8633,8 +8633,8 @@ theorem wedhorn_lemma_834_propA3_part1_gluing
         restrictionMap Vj₂.1 Vj₃ h₃₂ (yV Vj₂) :=
     wedhorn_propA3_gluing_yV_compat C C_restr_at _hC_restr_base f h_compat
       I_at hI_open W_at hW_base hW_pieces₁ hW_pieces₂ hW_acyclic
-      chooseC gVj yVj yV (fun _ _ => rfl) (fun _ => rfl)
-      (fun Vj => ((_hC_restr_acyclic Vj).gluing (gVj Vj)
+      chooseC gVj yVj yV (fun _ _ ↦ rfl) (fun _ ↦ rfl)
+      (fun Vj ↦ ((_hC_restr_acyclic Vj).gluing (gVj Vj)
         (h_gVj_compat Vj)).choose_spec)
   -- Step 6: apply V.IsOXAcyclic.gluing to (yV, h_yV_compat) to get x' on V.base.
   obtain ⟨x', hx'⟩ := _hV_acyclic.gluing yV h_yV_compat
@@ -8650,9 +8650,9 @@ theorem wedhorn_lemma_834_propA3_part1_gluing
   -- and h_compat — the q=1-chase pattern).
   exact wedhorn_propA3_gluing_x_restricts C _hV_base V_restr_at _hV_restr_base
     _hV_restr_pieces _hV_restr_acyclic C_restr_at _hC_restr_base f h_compat
-    M_at hM_base_open hM_pieces hM_acyclic chooseC gVj yVj yV (fun _ _ => rfl)
-    (fun _ => rfl)
-    (fun Vj => ((_hC_restr_acyclic Vj).gluing (gVj Vj)
+    M_at hM_base_open hM_pieces hM_acyclic chooseC gVj yVj yV (fun _ _ ↦ rfl)
+    (fun _ ↦ rfl)
+    (fun Vj ↦ ((_hC_restr_acyclic Vj).gluing (gVj Vj)
       (h_gVj_compat Vj)).choose_spec)
     x' x (by simp only [x, RingEquiv.apply_symm_apply]) hx'
 
@@ -8767,7 +8767,7 @@ theorem RationalCovering.interProdOn_isGeneratedByUnits
     (h₁ : C₁.IsGeneratedBy units₁) (h₂ : C₂.IsGeneratedBy units₂)
     (hu₁ : ∀ u ∈ units₁, IsUnit (I.canonicalMap u))
     (hu₂ : ∀ u ∈ units₂, IsUnit (I.canonicalMap u)) :
-    (C₁.interProdOn C₂ I hI (fun D₁ hD₁ D₂ hD₂ =>
+    (C₁.interProdOn C₂ I hI (fun D₁ hD₁ D₂ hD₂ ↦
       (hP₂ D₂ hD₂).trans (hP₁ D₁ hD₁).symm)).IsGeneratedByUnits := by
   refine ⟨units₁ * units₂,
     RationalCovering.interProdOn_isGeneratedBy C₁ C₂ I hI P₀ hP₁ hP₂
@@ -8821,7 +8821,7 @@ theorem prod_mem_transversalProducts [DecidableEq A] (LP : List (Finset A × A))
   | cons hd tl ih =>
     rw [List.map_cons, List.map_cons, transversalProducts_cons, List.prod_cons]
     exact Finset.mul_mem_mul (hts hd (List.mem_cons_self ..))
-      (ih (fun p hp => hts p (List.mem_cons_of_mem _ hp)))
+      (ih (fun p hp ↦ hts p (List.mem_cons_of_mem _ hp)))
 
 /-- **Product identity (Wedhorn 7.54 / Huber [Hu3] 2.6, Step 3):**
 `R(P / ∏ tᵢ) = Spa ∩ ⋂ᵢ R(Tᵢ / tᵢ)` for a transversal `(Tᵢ, tᵢ)` with `tᵢ ∈ Tᵢ`,
@@ -8838,7 +8838,7 @@ theorem rationalOpen_transversalProducts [DecidableEq A] (LP : List (Finset A ×
     exact rationalOpen_singleton_one
   | cons hd tl ih =>
     have hhd : hd.2 ∈ hd.1 := hts hd List.mem_cons_self
-    have htl : ∀ p ∈ tl, p.2 ∈ p.1 := fun p hp => hts p (List.mem_cons_of_mem _ hp)
+    have htl : ∀ p ∈ tl, p.2 ∈ p.1 := fun p hp ↦ hts p (List.mem_cons_of_mem _ hp)
     rw [List.map_cons, List.map_cons, transversalProducts_cons, List.prod_cons,
       ← rationalOpen_inter hd.1 (transversalProducts (tl.map Prod.fst)) hd.2
         ((tl.map Prod.snd).prod) hhd (prod_mem_transversalProducts tl htl),
@@ -8864,7 +8864,7 @@ theorem distinguishedProducts_subset [DecidableEq A] (LP : List (Finset A × A))
   induction LP with
   | nil => simp [distinguishedProducts]
   | cons hd tl ih =>
-    have htl : ∀ p ∈ tl, p.2 ∈ p.1 := fun p hp => hts p (List.mem_cons_of_mem _ hp)
+    have htl : ∀ p ∈ tl, p.2 ∈ p.1 := fun p hp ↦ hts p (List.mem_cons_of_mem _ hp)
     rw [distinguishedProducts, List.map_cons, transversalProducts_cons]
     refine Finset.union_subset ?_ ?_
     · exact Finset.mul_subset_mul
@@ -8894,14 +8894,14 @@ theorem prod_mem_distinguishedProducts [DecidableEq A]
     · refine Finset.mem_union_left _ ?_
       rw [hee]
       refine Finset.mul_mem_mul (Finset.mem_singleton_self _) ?_
-      have hP := prod_mem_transversalProducts (tl.map (fun e => (e.1.1, e.2)))
-        (fun p hp => by
+      have hP := prod_mem_transversalProducts (tl.map (fun e ↦ (e.1.1, e.2)))
+        (fun p hp ↦ by
           obtain ⟨a, ha, rfl⟩ := List.mem_map.mp hp
           exact hmem a (List.mem_cons_of_mem _ ha))
       simpa [List.map_map, Function.comp_def] using hP
     · refine Finset.mem_union_right _ ?_
       exact Finset.mul_mem_mul (hmem hd List.mem_cons_self)
-        (ih (fun p hp => hmem p (List.mem_cons_of_mem _ hp)) ⟨e, he', hee⟩)
+        (ih (fun p hp ↦ hmem p (List.mem_cons_of_mem _ hp)) ⟨e, he', hee⟩)
 
 
 /-- **The transversal-product cover covers `Spa`** (every normalised family covers):
@@ -8918,7 +8918,7 @@ theorem exists_mem_transversalProducts_cover [DecidableEq A]
     rw [List.map_nil, transversalProducts_nil, rationalOpen_singleton_one]
     exact hv
   | cons hd tl ih =>
-    have h1tl : ∀ p ∈ tl, (1 : A) ∈ p.1 := fun p hp => h1 p (List.mem_cons_of_mem _ hp)
+    have h1tl : ∀ p ∈ tl, (1 : A) ∈ p.1 := fun p hp ↦ h1 p (List.mem_cons_of_mem _ hp)
     have hspanH : Ideal.span (hd.1 : Set A) = ⊤ :=
       (Ideal.eq_top_iff_one _).mpr (Ideal.subset_span (h1 hd List.mem_cons_self))
     obtain ⟨tH, htH, hxH⟩ := exists_mem_rationalOpen_of_spanTop hd.1 hspanH hv
@@ -8941,8 +8941,8 @@ theorem distinguishedProducts_cover [DecidableEq A] (LP : List (Finset A × A))
   induction LP with
   | nil => obtain ⟨p, hp, _⟩ := hcov; simp at hp
   | cons hd tl ih =>
-    have htstl : ∀ p ∈ tl, p.2 ∈ p.1 := fun p hp => hts p (List.mem_cons_of_mem _ hp)
-    have h1tl : ∀ p ∈ tl, (1 : A) ∈ p.1 := fun p hp => h1 p (List.mem_cons_of_mem _ hp)
+    have htstl : ∀ p ∈ tl, p.2 ∈ p.1 := fun p hp ↦ hts p (List.mem_cons_of_mem _ hp)
+    have h1tl : ∀ p ∈ tl, (1 : A) ∈ p.1 := fun p hp ↦ h1 p (List.mem_cons_of_mem _ hp)
     rw [distinguishedProducts_cons, List.map_cons, transversalProducts_cons]
     obtain ⟨p, hp, hxp⟩ := hcov
     rcases List.mem_cons.mp hp with rfl | hp'
@@ -8973,11 +8973,11 @@ theorem rationalOpen_distinguished_eq [DecidableEq A] (LP : List (Finset A × A)
   apply Set.Subset.antisymm
   · intro v hv
     obtain ⟨hvspa, hvP, hvs0⟩ := hv
-    exact ⟨hvspa, fun t ht => hvP t (distinguishedProducts_subset LP hts ht), hvs0⟩
+    exact ⟨hvspa, fun t ht ↦ hvP t (distinguishedProducts_subset LP hts ht), hvs0⟩
   · intro v hv
     obtain ⟨hvspa, hvS, hvs0⟩ := hv
     obtain ⟨s', hs', _, hvP', _⟩ := distinguishedProducts_cover LP hts h1 hvspa (hcovSpa v hvspa)
-    exact ⟨hvspa, fun p hp => v.vle_trans (hvP' p hp) (hvS s' hs'), hvs0⟩
+    exact ⟨hvspa, fun p hp ↦ v.vle_trans (hvP' p hp) (hvS s' hs'), hvs0⟩
 
 /-- **Step 5 (Wedhorn 7.54 / Huber product trick):** the distinguished set `S` spans
 the unit ideal, `Ideal.span S = ⊤`. From Step 4 (`distinguishedProducts_cover`) the
@@ -9006,9 +9006,9 @@ private theorem rationalOpen_mul_subset_numerFactor [DecidableEq A]
     rationalOpen (X * Q) (c * e) ⊆ rationalOpen X c := by
   intro v hv
   obtain ⟨hvspa, hvP, hv0⟩ := hv
-  have hc0 : ¬ v.vle c 0 := fun hc => hv0 (by
+  have hc0 : ¬ v.vle c 0 := fun hc ↦ hv0 (by
     have := v.mul_vle_mul_left hc e; rwa [zero_mul] at this)
-  refine ⟨hvspa, fun t ht => ?_, hc0⟩
+  refine ⟨hvspa, fun t ht ↦ ?_, hc0⟩
   have h1 : v.vle (t * e) (c * e) := hvP _ (Finset.mul_mem_mul ht he)
   exact (basicOpen_mul_subset e t c ⟨by rw [mul_comm e t, mul_comm e c]; exact h1,
     by rw [mul_comm e c]; exact hv0⟩).1
@@ -9020,9 +9020,9 @@ private theorem rationalOpen_mul_subset_denomFactor [DecidableEq A]
     rationalOpen (X * Q) (t * s) ⊆ rationalOpen Q s := by
   intro v hv
   obtain ⟨hvspa, hvP, hv0⟩ := hv
-  have hs0 : ¬ v.vle s 0 := fun hs => hv0 (by
+  have hs0 : ¬ v.vle s 0 := fun hs ↦ hv0 (by
     have := v.mul_vle_mul_left hs t; rwa [zero_mul, mul_comm s t] at this)
-  refine ⟨hvspa, fun q hq => ?_, hs0⟩
+  refine ⟨hvspa, fun q hq ↦ ?_, hs0⟩
   have h1 : v.vle (t * q) (t * s) := hvP _ (Finset.mul_mem_mul ht hq)
   exact (basicOpen_mul_subset t q s ⟨h1, hv0⟩).1
 
@@ -9071,8 +9071,8 @@ theorem distinguishedProducts_cover_rel [DecidableEq A]
   | nil => intro p hp; simp at hp
   | cons hd tl ih =>
     intro p hp hxp
-    have htstl : ∀ q ∈ tl, q.2 ∈ q.1 := fun q hq => hts q (List.mem_cons_of_mem _ hq)
-    have h1tl : ∀ q ∈ tl, (1 : A) ∈ q.1 := fun q hq => h1 q (List.mem_cons_of_mem _ hq)
+    have htstl : ∀ q ∈ tl, q.2 ∈ q.1 := fun q hq ↦ hts q (List.mem_cons_of_mem _ hq)
+    have h1tl : ∀ q ∈ tl, (1 : A) ∈ q.1 := fun q hq ↦ h1 q (List.mem_cons_of_mem _ hq)
     rw [distinguishedProducts_cons, List.map_cons, transversalProducts_cons]
     rcases List.mem_cons.mp hp with rfl | hp'
     · obtain ⟨sR, hsR, hxR⟩ := exists_mem_transversalProducts_cover tl h1tl hv
@@ -9117,12 +9117,12 @@ noncomputable def imageGenCover
   letI : DecidableEq (presheafValue D₀) := Classical.decEq _
   letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
   { base := globalLocData (presheafValue_concretePair D₀)
-    covers := (T.image D₀.canonicalMap).image (fun u =>
+    covers := (T.image D₀.canonicalMap).image (fun u ↦
       genPieceDatum (presheafValue_concretePair D₀) (T.image D₀.canonicalMap) u
         (imageGenCover_span D₀ T hspan))
     hsubset := by
       intro D hD v hv
-      exact ⟨hv.1, fun x hx => by
+      exact ⟨hv.1, fun x hx ↦ by
         rw [Finset.mem_singleton.mp hx]
         exact (v.vle_total 1 1).elim id id, v.not_vle_one_zero⟩
     hcover := by
@@ -9131,7 +9131,7 @@ noncomputable def imageGenCover
         (T.image D₀.canonicalMap) (imageGenCover_span D₀ T hspan) hv.1
       exact ⟨genPieceDatum (presheafValue_concretePair D₀) (T.image D₀.canonicalMap) u
         (imageGenCover_span D₀ T hspan),
-        Finset.mem_image_of_mem (fun u => genPieceDatum (presheafValue_concretePair D₀)
+        Finset.mem_image_of_mem (fun u ↦ genPieceDatum (presheafValue_concretePair D₀)
           (T.image D₀.canonicalMap) u (imageGenCover_span D₀ T hspan)) hu, hv'⟩ }
 
 set_option linter.unusedSectionVars false in
@@ -9158,7 +9158,7 @@ theorem imageGenCover_isRational
   · exact globalLocData_isRational _
   · intro D hD
     rw [show (imageGenCover D₀ T hspan).covers =
-      (T.image D₀.canonicalMap).image (fun u =>
+      (T.image D₀.canonicalMap).image (fun u ↦
         genPieceDatum (presheafValue_concretePair D₀) (T.image D₀.canonicalMap) u
           (imageGenCover_span D₀ T hspan)) from rfl, Finset.mem_image] at hD
     obtain ⟨u, hu, rfl⟩ := hD
@@ -9187,17 +9187,17 @@ theorem imageGenCover_isGeneratedBy
   letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
   constructor
   · exact imageGenCover_span D₀ T hspan
-  · refine ⟨fun u => ⟨genPieceDatum (presheafValue_concretePair D₀)
+  · refine ⟨fun u ↦ ⟨genPieceDatum (presheafValue_concretePair D₀)
       (T.image D₀.canonicalMap) u.1 (imageGenCover_span D₀ T hspan),
-      Finset.mem_image_of_mem (fun u => genPieceDatum (presheafValue_concretePair D₀)
+      Finset.mem_image_of_mem (fun u ↦ genPieceDatum (presheafValue_concretePair D₀)
         (T.image D₀.canonicalMap) u (imageGenCover_span D₀ T hspan)) u.2⟩,
-      ⟨?_, ?_⟩, fun u => ⟨rfl, rfl⟩⟩
+      ⟨?_, ?_⟩, fun u ↦ ⟨rfl, rfl⟩⟩
     · intro u₁ u₂ h
-      have hs := congrArg (fun D => (D.1).s) h
+      have hs := congrArg (fun D ↦ (D.1).s) h
       exact Subtype.ext hs
     · rintro ⟨D, hD⟩
       rw [show (imageGenCover D₀ T hspan).covers =
-        (T.image D₀.canonicalMap).image (fun u =>
+        (T.image D₀.canonicalMap).image (fun u ↦
           genPieceDatum (presheafValue_concretePair D₀) (T.image D₀.canonicalMap) u
             (imageGenCover_span D₀ T hspan)) from rfl, Finset.mem_image] at hD
       obtain ⟨u, hu, rfl⟩ := hD
@@ -9439,7 +9439,7 @@ theorem genRestrictedCover_separation
   have hy0 : y = 0 := by
     refine hBsep y ?_
     intro E hE
-    have hE' : E ∈ (T.image D₀.canonicalMap).image (fun u =>
+    have hE' : E ∈ (T.image D₀.canonicalMap).image (fun u ↦
         genPieceDatum (presheafValue_concretePair D₀) (T.image D₀.canonicalMap) u
           (imageGenCover_span D₀ T hspan)) := hE
     rw [Finset.mem_image] at hE'
@@ -9672,7 +9672,7 @@ private theorem genPiece_relOverlap_forward_witness
   -- destructure `w = p·q`, then `p = p′·q′`
   have hw' : w ∈ ((insert (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).s
       (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).T).product
-      (insert t₂ T)).image (fun r : A × A => r.1 * r.2) := hw
+      (insert t₂ T)).image (fun r : A × A ↦ r.1 * r.2) := hw
   rw [Finset.mem_image] at hw'
   obtain ⟨⟨p, q⟩, hpq, rfl⟩ := hw'
   have hp : p ∈ insert (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).s
@@ -9685,7 +9685,7 @@ private theorem genPiece_relOverlap_forward_witness
     rcases Finset.mem_insert.mp hp with rfl | hp'
     · exact ⟨D₀.s, Finset.mem_insert_self _ _, t₁, Finset.mem_insert_self _ _, rfl⟩
     · have hp'' : p ∈ ((insert D₀.s D₀.T).product
-          (insert t₁ T)).image (fun r : A × A => r.1 * r.2) := hp'
+          (insert t₁ T)).image (fun r : A × A ↦ r.1 * r.2) := hp'
       rw [Finset.mem_image] at hp''
       obtain ⟨⟨p', q'⟩, hpq', rfl⟩ := hp''
       exact ⟨p', (Finset.mem_product.mp hpq').1, q', (Finset.mem_product.mp hpq').2, rfl⟩
@@ -9999,7 +9999,7 @@ private theorem genPiece_relOverlap_backwardLocHom_continuous
         (imagePieceDatum D₀ T t₁ hspan).T).product
         (insert (imagePieceDatum D₀ T t₂ hspan).s
           (imagePieceDatum D₀ T t₂ hspan).T)).image
-        (fun r : presheafValue D₀ × presheafValue D₀ => r.1 * r.2) := hu_mem
+        (fun r : presheafValue D₀ × presheafValue D₀ ↦ r.1 * r.2) := hu_mem
     rw [Finset.mem_image] at hu'
     obtain ⟨⟨u₁, u₂⟩, hu₁₂, rfl⟩ := hu'
     have hu₁ : u₁ ∈ insert (imagePieceDatum D₀ T t₁ hspan).s
@@ -10571,7 +10571,7 @@ private theorem genPiece_relative_overlap_square₁
     intro g; exact h g
   intro g
   revert g
-  refine fun g => ?_
+  refine fun g ↦ ?_
   refine congrFun (Continuous.ext_on
     (UniformSpace.Completion.denseRange_coe
       (α := Localization.Away (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).s))
@@ -10767,7 +10767,7 @@ private theorem genPiece_relative_overlap_square₂
     intro g; exact h g
   intro g
   revert g
-  refine fun g => congrFun (Continuous.ext_on
+  refine fun g ↦ congrFun (Continuous.ext_on
     (UniformSpace.Completion.denseRange_coe
       (α := Localization.Away (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).s))
     ?_ ?_ ?_) g
@@ -11002,7 +11002,7 @@ theorem genRestrictedCover_gluing
         (T.image D₀.canonicalMap) (D₀.canonicalMap t)
         (imageGenCover_span D₀ T hspan) := by
     rintro ⟨E, hE⟩
-    have hE' : E ∈ (T.image D₀.canonicalMap).image (fun u =>
+    have hE' : E ∈ (T.image D₀.canonicalMap).image (fun u ↦
         genPieceDatum (presheafValue_concretePair D₀) (T.image D₀.canonicalMap) u
           (imageGenCover_span D₀ T hspan)) := hE
     rw [Finset.mem_image] at hE'
@@ -11010,19 +11010,19 @@ theorem genRestrictedCover_gluing
     rw [Finset.mem_image] at hu
     obtain ⟨t, ht, rfl⟩ := hu
     exact ⟨t, ht, rfl⟩
-  set tof : ↥(imageGenCover D₀ T hspan).covers → A := fun E => (hchoose E).choose
+  set tof : ↥(imageGenCover D₀ T hspan).covers → A := fun E ↦ (hchoose E).choose
     with htof
-  have htof_mem : ∀ E, tof E ∈ T := fun E => (hchoose E).choose_spec.1
+  have htof_mem : ∀ E, tof E ∈ T := fun E ↦ (hchoose E).choose_spec.1
   have htof_eq : ∀ E : ↥(imageGenCover D₀ T hspan).covers,
       E.1 = genPieceDatum (presheafValue_concretePair D₀)
         (T.image D₀.canonicalMap) (D₀.canonicalMap (tof E))
-        (imageGenCover_span D₀ T hspan) := fun E => (hchoose E).choose_spec.2
+        (imageGenCover_span D₀ T hspan) := fun E ↦ (hchoose E).choose_spec.2
   -- the transported B-family (explicit `Eq.rec` form for `eqRec_restrictionMap_direct`)
   set g : ∀ (E : ↥(imageGenCover D₀ T hspan).covers), presheafValue E.1 :=
-    fun E => @Eq.rec (RationalLocData (presheafValue D₀))
+    fun E ↦ @Eq.rec (RationalLocData (presheafValue D₀))
       (genPieceDatum (presheafValue_concretePair D₀) (T.image D₀.canonicalMap)
         (D₀.canonicalMap (tof E)) (imageGenCover_span D₀ T hspan))
-      (fun b _ => presheafValue b)
+      (fun b _ ↦ presheafValue b)
       (genPiece_relative_equiv D₀ T (tof E) hspan (f (tof E) (htof_mem E)))
       E.1 (htof_eq E).symm with hg
   -- the cast vanishes under restriction
@@ -11069,7 +11069,7 @@ theorem genRestrictedCover_gluing
           ((imagePieceDatum D₀ T (tof E₁) hspan).interSamePair
             (imagePieceDatum D₀ T (tof E₂) hspan) rfl).s := by
       rw [RationalLocData.interSamePair_rationalOpen]
-      exact fun v hv => ⟨h₃₁' hv, h₃₂' hv⟩
+      exact fun v hv ↦ ⟨h₃₁' hv, h₃₂' hv⟩
     -- rewrite both sides through the E₁₂-factoring
     rw [show restrictionMap (genPieceDatum (presheafValue_concretePair D₀)
         (T.image D₀.canonicalMap) (D₀.canonicalMap (tof E₁))
@@ -11098,7 +11098,7 @@ theorem genRestrictedCover_gluing
     congr 1
     exact genPiece_family_pair_compat D₀ T hspan (tof E₁) (tof E₂)
       (f (tof E₁) (htof_mem E₁)) (f (tof E₂) (htof_mem E₂))
-      (fun D₃ h₃₁ h₃₂ => hcompat (tof E₁) (htof_mem E₁) (tof E₂) (htof_mem E₂)
+      (fun D₃ h₃₁ h₃₂ ↦ hcompat (tof E₁) (htof_mem E₁) (tof E₂) (htof_mem E₂)
         D₃ h₃₁ h₃₂)
   -- glue at B
   obtain ⟨y, hy⟩ := hBglue g hgcompat
@@ -11113,7 +11113,7 @@ theorem genRestrictedCover_gluing
       rationalOpen (globalLocData (presheafValue_concretePair D₀)).T
         (globalLocData (presheafValue_concretePair D₀)).s := by
     intro v hv
-    exact ⟨hv.1, fun w hw => by
+    exact ⟨hv.1, fun w hw ↦ by
       rw [Finset.mem_singleton.mp hw]
       exact (v.vle_total 1 1).elim id id, v.not_vle_one_zero⟩
   have hchain : (imagePieceDatum D₀ T t hspan).canonicalMap
@@ -11180,7 +11180,7 @@ theorem genRestrictedCover_gluing
       (genPiece_relative_equiv D₀ T (tof Et) hspan (f (tof Et) (htof_mem Et))) from
     genPiece_family_pair_compat D₀ T hspan t (tof Et)
       (f t ht) (f (tof Et) (htof_mem Et))
-      (fun D₃ h₃₁ h₃₂ => hcompat t ht (tof Et) (htof_mem Et) D₃ h₃₁ h₃₂)]
+      (fun D₃ h₃₁ h₃₂ ↦ hcompat t ht (tof Et) (htof_mem Et) D₃ h₃₁ h₃₂)]
   -- RHS: the cast vanishes (`hg_restr` at the same target; recast the source-spelling)
   exact (show restrictionMap (imagePieceDatum D₀ T t hspan)
       ((imagePieceDatum D₀ T t hspan).interSamePair
@@ -11227,14 +11227,14 @@ theorem genRestrictedCover_isOXAcyclic_of_B
     exact hx _ (Finset.mem_image_of_mem _ ht)
   · intro f hcompat
     obtain ⟨x, hx⟩ := genRestrictedCover_gluing D₀ T hspan hB.gluing
-      (fun t ht => f ⟨_, Finset.mem_image_of_mem
-        (fun t => D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl) ht⟩)
-      (fun t₁ ht₁ t₂ ht₂ D₃ h₃₁ h₃₂ => hcompat
+      (fun t ht ↦ f ⟨_, Finset.mem_image_of_mem
+        (fun t ↦ D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl) ht⟩)
+      (fun t₁ ht₁ t₂ ht₂ D₃ h₃₁ h₃₂ ↦ hcompat
         ⟨_, Finset.mem_image_of_mem _ ht₁⟩ ⟨_, Finset.mem_image_of_mem _ ht₂⟩
         D₃ h₃₁ h₃₂)
     refine ⟨x, ?_⟩
     rintro ⟨D, hD⟩
-    have hD' : D ∈ T.image (fun t =>
+    have hD' : D ∈ T.image (fun t ↦
         D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl) := hD
     rw [Finset.mem_image] at hD'
     obtain ⟨t, ht, rfl⟩ := hD'
@@ -11260,7 +11260,7 @@ theorem ratio_laurent_refines_unitGen_cover [DecidableEq A]
         rationalOpen V'.T V'.s ⊆ rationalOpen D.T D.s := by
   classical
   set ratios : List A := (units.attach.toList.product units.attach.toList).map
-    (fun p => (p.1 : A) * ↑((h_units p.2 p.2.2).unit⁻¹)) with hratios
+    (fun p ↦ (p.1 : A) * ↑((h_units p.2 p.2.2).unit⁻¹)) with hratios
   refine ⟨ratios, laurentProdCoverOf C.base ratios,
     laurentProdCoverOf_isLaurentProd _ _, rfl, ?_⟩
   intro V' hV'
@@ -11297,29 +11297,29 @@ theorem ratio_laurent_refines_unitGen_cover [DecidableEq A]
     induction hS using Finset.Nonempty.cons_induction with
     | singleton x =>
       intro _
-      exact ⟨x, Finset.mem_singleton_self x, fun g hg v hv => by
+      exact ⟨x, Finset.mem_singleton_self x, fun g hg v hv ↦ by
         rw [Finset.mem_singleton] at hg; subst hg
         exact (v.vle_total g g).elim id id⟩
     | cons a s ha hsne ih =>
       intro hsub
-      obtain ⟨m, hm, hmmax⟩ := ih (fun x hx => hsub (Finset.mem_cons_of_mem hx))
+      obtain ⟨m, hm, hmmax⟩ := ih (fun x hx ↦ hsub (Finset.mem_cons_of_mem hx))
       rcases hcmp m (hsub (Finset.mem_cons_of_mem hm)) a
           (hsub (Finset.mem_cons_self a s)) with h | h
-      · exact ⟨a, Finset.mem_cons_self a s, fun g hg v hv =>
+      · exact ⟨a, Finset.mem_cons_self a s, fun g hg v hv ↦
           (Finset.mem_cons.mp hg).elim
-            (fun e => e ▸ (v.vle_total g g).elim id id)
-            (fun hg' => v.vle_trans (hmmax g hg' v hv) (h v hv))⟩
-      · exact ⟨m, Finset.mem_cons.mpr (Or.inr hm), fun g hg v hv =>
+            (fun e ↦ e ▸ (v.vle_total g g).elim id id)
+            (fun hg' ↦ v.vle_trans (hmmax g hg' v hv) (h v hv))⟩
+      · exact ⟨m, Finset.mem_cons.mpr (Or.inr hm), fun g hg v hv ↦
           (Finset.mem_cons.mp hg).elim
-            (fun e => e ▸ h v hv)
-            (fun hg' => hmmax g hg' v hv)⟩
+            (fun e ↦ e ▸ h v hv)
+            (fun hg' ↦ hmmax g hg' v hv)⟩
   obtain ⟨m, hm, hmmax⟩ := hmax units hne (Finset.Subset.refl units)
   -- the `m`-piece of `C`
   obtain ⟨-, φ, hφ_bij, hφ_eq⟩ := hC_gen
   refine ⟨(φ ⟨m, hm⟩).1, (φ ⟨m, hm⟩).2, ?_⟩
   intro v hv
   rw [(hφ_eq ⟨m, hm⟩).1, (hφ_eq ⟨m, hm⟩).2]
-  exact ⟨hv.1, fun g hg => hmmax g hg v hv,
+  exact ⟨hv.1, fun g hg ↦ hmmax g hg v hv,
     not_vle_zero_of_isUnit (h_units m hm) v⟩
 
 /-- **Wedhorn 8.34(iii), bundled faithful form (wedhorn.txt:4246-4249)**: for a
@@ -11353,7 +11353,7 @@ theorem ratio_laurent_unitGen_bundle [DecidableEq A]
   -- rebuild: take the explicit ratio cover and prove both directions for it.
   clear h_refines hV_laurent hV_base V fs
   set ratios : List A := (units.attach.toList.product units.attach.toList).map
-    (fun p => (p.1 : A) * ↑((h_units p.2 p.2.2).unit⁻¹)) with hratios
+    (fun p ↦ (p.1 : A) * ↑((h_units p.2 p.2.2).unit⁻¹)) with hratios
   refine ⟨ratios, laurentProdCoverOf C.base ratios,
     laurentProdCoverOf_isLaurentProd _ _, rfl, ?_, ?_⟩
   · -- refines: delegate to the proven σ-walk lemma's argument by re-running it
@@ -11392,28 +11392,28 @@ theorem ratio_laurent_unitGen_bundle [DecidableEq A]
       induction hS using Finset.Nonempty.cons_induction with
       | singleton x =>
         intro _
-        exact ⟨x, Finset.mem_singleton_self x, fun g hg v hv => by
+        exact ⟨x, Finset.mem_singleton_self x, fun g hg v hv ↦ by
           rw [Finset.mem_singleton] at hg; subst hg
           exact (v.vle_total g g).elim id id⟩
       | cons a s ha hsne ih =>
         intro hsub
-        obtain ⟨m, hm, hmmax⟩ := ih (fun x hx => hsub (Finset.mem_cons_of_mem hx))
+        obtain ⟨m, hm, hmmax⟩ := ih (fun x hx ↦ hsub (Finset.mem_cons_of_mem hx))
         rcases hcmp m (hsub (Finset.mem_cons_of_mem hm)) a
             (hsub (Finset.mem_cons_self a s)) with h | h
-        · exact ⟨a, Finset.mem_cons_self a s, fun g hg v hv =>
+        · exact ⟨a, Finset.mem_cons_self a s, fun g hg v hv ↦
             (Finset.mem_cons.mp hg).elim
-              (fun e => e ▸ (v.vle_total g g).elim id id)
-              (fun hg' => v.vle_trans (hmmax g hg' v hv) (h v hv))⟩
-        · exact ⟨m, Finset.mem_cons.mpr (Or.inr hm), fun g hg v hv =>
+              (fun e ↦ e ▸ (v.vle_total g g).elim id id)
+              (fun hg' ↦ v.vle_trans (hmmax g hg' v hv) (h v hv))⟩
+        · exact ⟨m, Finset.mem_cons.mpr (Or.inr hm), fun g hg v hv ↦
             (Finset.mem_cons.mp hg).elim
-              (fun e => e ▸ h v hv)
-              (fun hg' => hmmax g hg' v hv)⟩
+              (fun e ↦ e ▸ h v hv)
+              (fun hg' ↦ hmmax g hg' v hv)⟩
     obtain ⟨m, hm, hmmax⟩ := hmax units hne (Finset.Subset.refl units)
     obtain ⟨-, φ, hφ_bij, hφ_eq⟩ := hC_gen
     refine ⟨(φ ⟨m, hm⟩).1, (φ ⟨m, hm⟩).2, ?_⟩
     intro v hv
     rw [(hφ_eq ⟨m, hm⟩).1, (hφ_eq ⟨m, hm⟩).2]
-    exact ⟨hv.1, fun g hg => hmmax g hg v hv,
+    exact ⟨hv.1, fun g hg ↦ hmmax g hg v hv,
       not_vle_zero_of_isUnit (h_units m hm) v⟩
   · -- cover-each: sign-selecting σ-walk keeping the piece's denominator
     -- dominant.
@@ -11449,7 +11449,7 @@ theorem ratio_laurent_unitGen_bundle [DecidableEq A]
       rwa [hinv_r] at h2
     obtain ⟨V', hV'_leaf, hvV', hbound⟩ :=
       laurentProdLeaves_cover_sign_select ratios
-        (fun r => ∃ g ∈ units, r = g * ↑((h_units ↑t hu).unit⁻¹))
+        (fun r ↦ ∃ g ∈ units, r = g * ↑((h_units ↑t hu).unit⁻¹))
         C.base hv_base hPv
     refine ⟨V', hV'_leaf, hvV', ?_⟩
     intro w hw
@@ -11488,8 +11488,8 @@ theorem laurentTrace_isOXAcyclic [DecidableEq A]
     (hplus : (A⁺ : Set A) ⊆ U.P.A₀) :
     (V.restrictTo U hU_subset hUP hVP).IsOXAcyclic := by
   classical
-  refine isOXAcyclic_congr _ (laurentProdCoverOf U fs) rfl (fun D hD => ?_)
-    (fun D' hD' => ?_) (laurentProdCoverOf_isOXAcyclic U fs hU_rat hplus)
+  refine isOXAcyclic_congr _ (laurentProdCoverOf U fs) rfl (fun D hD ↦ ?_)
+    (fun D' hD' ↦ ?_) (laurentProdCoverOf_isOXAcyclic U fs hU_rat hplus)
   · -- each trace piece's open IS a `U`-leaf open
     rw [RationalCovering.restrictTo_covers, Finset.mem_image] at hD
     obtain ⟨⟨Q, hQ⟩, -, rfl⟩ := hD
@@ -11536,18 +11536,18 @@ theorem isOXAcyclic_of_isGeneratedBy_ring_units [DecidableEq A]
     wedhorn_lemma_834_part_i_laurent_acyclic V fs hV_laurent
       (by rw [hV_base]; exact hC_rat.base)
       (by rw [hV_base]; exact hplus)
-  have hVP : ∀ Q ∈ V.covers, Q.P = V.base.P := fun Q hQ =>
+  have hVP : ∀ Q ∈ V.covers, Q.P = V.base.P := fun Q hQ ↦
     laurentProdLeaves_pair fs V.base
       ((Finset.ext_iff.mp hV_laurent Q).mp hQ)
   -- the TRACE-form per-piece refinement covers (Wedhorn 4233-4235; faithful,
   -- replacing the filter-form part_i_laurent_restriction route).
   refine IsOXAcyclic_of_refining_acyclic_cover C V hV_base h_refines
     hV_acyclic h_covers_each
-    (fun D => V.restrictTo D.1
+    (fun D ↦ V.restrictTo D.1
       (by rw [hV_base]; exact C.hsubset D.1 D.2)
       ((hP_pieces D.1 D.2).trans (congrArg RationalLocData.P hV_base).symm)
       hVP)
-    (fun D => rfl) ?_ ?_
+    (fun D ↦ rfl) ?_ ?_
   · intro D E' hE'
     rw [RationalCovering.restrictTo_covers, Finset.mem_image] at hE'
     obtain ⟨⟨Q, hQ⟩, -, rfl⟩ := hE'
@@ -11582,11 +11582,11 @@ noncomputable def imageCover [DecidableEq A]
   letI : DecidableEq (presheafValue C.base) := Classical.decEq _
   letI : DecidableEq (RationalLocData (presheafValue C.base)) := Classical.decEq _
   { base := globalLocData (presheafValue_concretePair C.base)
-    covers := C.covers.attach.image (fun D =>
+    covers := C.covers.attach.image (fun D ↦
       imagePieceDatum C.base D.1.T D.1.s ((hC.piece D.2).span_eq_top))
     hsubset := by
       intro E hE v hv
-      exact ⟨hv.1, fun x hx => by
+      exact ⟨hv.1, fun x hx ↦ by
         rw [Finset.mem_singleton.mp hx]
         exact (v.vle_total 1 1).elim id id, v.not_vle_one_zero⟩
     hcover := by
@@ -11654,7 +11654,7 @@ theorem presheafValue_subsingleton_of_rationalOpen_empty
     rw [PairOfDefinition.isUnit_iff_forall_not_vle_zero_of_complete
       (presheafValue_concretePair E)
       (completedPlusSubring_le_ringOfDef E hplus) 0]
-    exact fun w hw _ => hspa w hw
+    exact fun w hw _ ↦ hspa w hw
   exact subsingleton_of_zero_eq_one (isUnit_zero_iff.mp h0)
 
 set_option linter.unusedSectionVars false in
@@ -11777,8 +11777,8 @@ theorem hasLocLiftPowerBounded_faithful
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] :
     HasLocLiftPowerBounded A where
-  isUnit_canonicalMap_s := fun D D' h => isUnit_canonicalMap_s_faithful D D' h
-  locLift_divByS_isPowerBounded := fun D D' h t ht =>
+  isUnit_canonicalMap_s := fun D D' h ↦ isUnit_canonicalMap_s_faithful D D' h
+  locLift_divByS_isPowerBounded := fun D D' h t ht ↦
     locLift_divByS_isPowerBounded_faithful D D' h t ht
 
 set_option linter.unusedSectionVars false in
@@ -11819,8 +11819,8 @@ theorem isOXAcyclic_of_empty_complement
     exact hx D' (hsub hD')
   · -- gluing: glue on the C'-subfamily; empty pieces verify by subsingleton.
     intro f hcompat
-    obtain ⟨x', hx'⟩ := hC'.gluing (fun D' => f ⟨D'.1, hsub D'.2⟩)
-      (fun D'₁ D'₂ D₃ h₃₁ h₃₂ => hcompat ⟨D'₁.1, hsub D'₁.2⟩
+    obtain ⟨x', hx'⟩ := hC'.gluing (fun D' ↦ f ⟨D'.1, hsub D'.2⟩)
+      (fun D'₁ D'₂ D₃ h₃₁ h₃₂ ↦ hcompat ⟨D'₁.1, hsub D'₁.2⟩
         ⟨D'₂.1, hsub D'₂.2⟩ D₃ h₃₁ h₃₂)
     refine ⟨(RationalCovering.presheafValueCast hbase).symm x', ?_⟩
     intro D
@@ -11908,20 +11908,20 @@ theorem imageGenCover_isOXAcyclic_of_units
     wedhorn_lemma_834_part_i_laurent_acyclic V fs hV_laurent
       (by rw [hV_base]; exact (imageGenCover_isRational D₀ T hspan).base)
       (by rw [hV_base]; exact hplusB)
-  have hVP : ∀ Q ∈ V.covers, Q.P = V.base.P := fun Q hQ =>
+  have hVP : ∀ Q ∈ V.covers, Q.P = V.base.P := fun Q hQ ↦
     laurentProdLeaves_pair fs V.base
       ((Finset.ext_iff.mp hV_laurent Q).mp hQ)
   -- A.3(2) at B transports acyclicity back via the TRACE-form per-piece
   -- covers (Wedhorn 4233-4235, `laurentTrace_isOXAcyclic`).
   refine IsOXAcyclic_of_refining_acyclic_cover (imageGenCover D₀ T hspan) V
     hV_base h_refines hV_acyclic h_covers_each
-    (fun D => V.restrictTo D.1
+    (fun D ↦ V.restrictTo D.1
       (by rw [hV_base]; exact (imageGenCover D₀ T hspan).hsubset D.1 D.2)
       (by obtain ⟨u, hu, heq⟩ := Finset.mem_image.mp D.2
           rw [← heq]
           exact (congrArg RationalLocData.P hV_base).symm)
       hVP)
-    (fun D => rfl) ?_ ?_
+    (fun D ↦ rfl) ?_ ?_
   · intro D E' hE'
     rw [RationalCovering.restrictTo_covers, Finset.mem_image] at hE'
     obtain ⟨⟨Q, hQ⟩, -, rfl⟩ := hE'
@@ -11999,7 +11999,7 @@ theorem genRestrictedCover_isOXAcyclic_of_units_or_empty
     have h_all_empty : ∀ t ∈ T,
         rationalOpen (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).T
           (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).s = ∅ :=
-      fun t ht => _h_empty t ht (by rw [hTne]; exact Finset.notMem_empty t)
+      fun t ht ↦ _h_empty t ht (by rw [hTne]; exact Finset.notMem_empty t)
     have h_base_empty : rationalOpen D₀.T D₀.s = ∅ := by
       rw [Set.eq_empty_iff_forall_notMem]
       intro v hv
@@ -12014,7 +12014,7 @@ theorem genRestrictedCover_isOXAcyclic_of_units_or_empty
     · intro x _
       exact Subsingleton.elim x 0
     · intro f _
-      refine ⟨0, fun D => ?_⟩
+      refine ⟨0, fun D ↦ ?_⟩
       obtain ⟨t, ht, hDeq⟩ := Finset.mem_image.mp D.2
       haveI : Subsingleton (presheafValue D.1) := by
         rw [← hDeq]
@@ -12058,7 +12058,7 @@ theorem genRestrictedCover_isOXAcyclic_of_units_or_empty
           rw [ValuationSpectrum.comap_vle]
           exact hcond i hi
         have hle : Ideal.span (T : Set A) ≤ (comap D₀.canonicalMap w).supp :=
-          Ideal.span_le.mpr (fun i hi => hsupp i hi)
+          Ideal.span_le.mpr (fun i hi ↦ hsupp i hi)
         rw [hspan] at hle
         exact (comap D₀.canonicalMap w).not_vle_one_zero
           (((comap D₀.canonicalMap w).mem_supp_iff 1).mp (hle Submodule.mem_top))
@@ -12082,9 +12082,9 @@ theorem genRestrictedCover_isOXAcyclic_of_units_or_empty
       obtain ⟨m, hm, hmax⟩ := exists_vle_max_mem w (hTn.image D₀.canonicalMap)
       obtain ⟨t_m, ht_m, rfl⟩ := Finset.mem_image.mp hm
       by_cases htm : t_m ∈ Tpos
-      · exact ⟨t_m, htm, fun i hi =>
+      · exact ⟨t_m, htm, fun i hi ↦
           hmax (D₀.canonicalMap i) (Finset.mem_image_of_mem _ hi)⟩
-      · exact (hB_empty t_m ht_m htm w hw (fun i hi =>
+      · exact (hB_empty t_m ht_m htm w hw (fun i hi ↦
           hmax (D₀.canonicalMap i) (Finset.mem_image_of_mem _ hi))).elim
     -- the Tpos-image spans B (it contains a unit)
     have hspanB : Ideal.span ((Tpos.image D₀.canonicalMap :
@@ -12096,12 +12096,12 @@ theorem genRestrictedCover_isOXAcyclic_of_units_or_empty
     -- the B-native Tpos-generated cover of Spa B
     let C_gen : RationalCovering (presheafValue D₀) :=
       { base := globalLocData (presheafValue_concretePair D₀)
-        covers := (Tpos.image D₀.canonicalMap).image (fun u =>
+        covers := (Tpos.image D₀.canonicalMap).image (fun u ↦
           genPieceDatum (presheafValue_concretePair D₀)
             (Tpos.image D₀.canonicalMap) u hspanB)
         hsubset := by
           intro D hD v hv
-          exact ⟨hv.1, fun x hx => by
+          exact ⟨hv.1, fun x hx ↦ by
             rw [Finset.mem_singleton.mp hx]
             exact (v.vle_total 1 1).elim id id, v.not_vle_one_zero⟩
         hcover := by
@@ -12122,14 +12122,14 @@ theorem genRestrictedCover_isOXAcyclic_of_units_or_empty
     have hgenB : C_gen.IsGeneratedBy (Tpos.image D₀.canonicalMap) := by
       constructor
       · exact hspanB
-      · refine ⟨fun u => ⟨genPieceDatum (presheafValue_concretePair D₀)
+      · refine ⟨fun u ↦ ⟨genPieceDatum (presheafValue_concretePair D₀)
           (Tpos.image D₀.canonicalMap) u.1 hspanB,
-          Finset.mem_image_of_mem _ u.2⟩, ⟨?_, ?_⟩, fun u => ⟨rfl, rfl⟩⟩
+          Finset.mem_image_of_mem _ u.2⟩, ⟨?_, ?_⟩, fun u ↦ ⟨rfl, rfl⟩⟩
         · intro u₁ u₂ h
-          have hs := congrArg (fun D => (D.1).s) h
+          have hs := congrArg (fun D ↦ (D.1).s) h
           exact Subtype.ext hs
         · rintro ⟨D, hD⟩
-          rw [show C_gen.covers = (Tpos.image D₀.canonicalMap).image (fun u =>
+          rw [show C_gen.covers = (Tpos.image D₀.canonicalMap).image (fun u ↦
             genPieceDatum (presheafValue_concretePair D₀)
               (Tpos.image D₀.canonicalMap) u hspanB) from rfl,
             Finset.mem_image] at hD
@@ -12142,15 +12142,15 @@ theorem genRestrictedCover_isOXAcyclic_of_units_or_empty
     have hC_gen_acyclic : C_gen.IsOXAcyclic :=
       isOXAcyclic_of_isGeneratedBy_ring_units C_gen
         (Tpos.image D₀.canonicalMap) (hTne.image _) hgenB hunitsB
-        ⟨globalLocData_isRational _, fun D hD => by
+        ⟨globalLocData_isRational _, fun D hD ↦ by
           obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp hD
           exact RationalLocData.isRational_of_span_eq_top
             (by rw [genPieceDatum_T]; exact hspanB)⟩
         hplusB
-        (fun D hD => by
+        (fun D hD ↦ by
           obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp hD
           exact hplusB)
-        (fun D hD => by
+        (fun D hD ↦ by
           obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp hD
           rfl)
     -- the full-T image span (public form of the private imageGenCover_span)
@@ -12161,12 +12161,12 @@ theorem genRestrictedCover_isOXAcyclic_of_units_or_empty
     -- the Tpos-indexed subfamily of the FULL image cover
     let C_sub : RationalCovering (presheafValue D₀) :=
       { base := globalLocData (presheafValue_concretePair D₀)
-        covers := (Tpos.image D₀.canonicalMap).image (fun u =>
+        covers := (Tpos.image D₀.canonicalMap).image (fun u ↦
           genPieceDatum (presheafValue_concretePair D₀)
             (T.image D₀.canonicalMap) u hspanBT)
         hsubset := by
           intro D hD v hv
-          exact ⟨hv.1, fun x hx => by
+          exact ⟨hv.1, fun x hx ↦ by
             rw [Finset.mem_singleton.mp hx]
             exact (v.vle_total 1 1).elim id id, v.not_vle_one_zero⟩
         hcover := by
@@ -12190,7 +12190,7 @@ theorem genRestrictedCover_isOXAcyclic_of_units_or_empty
       intro u hu
       apply Set.Subset.antisymm
       · rintro w ⟨hw, hcond, hnz⟩
-        exact ⟨hw, fun k hk =>
+        exact ⟨hw, fun k hk ↦
           hcond k (Finset.image_subset_image _hsub hk), hnz⟩
       · rintro w ⟨hw, hcond, hnz⟩
         refine ⟨hw, ?_, hnz⟩
@@ -12200,8 +12200,8 @@ theorem genRestrictedCover_isOXAcyclic_of_units_or_empty
         exact w.vle_trans (hcondw i hi)
           (hcond (D₀.canonicalMap t') (Finset.mem_image_of_mem _ htpos'))
     have hC_sub_acyclic : C_sub.IsOXAcyclic := by
-      refine isOXAcyclic_congr C_sub C_gen rfl (fun D hD => ?_)
-        (fun D hD => ?_) hC_gen_acyclic
+      refine isOXAcyclic_congr C_sub C_gen rfl (fun D hD ↦ ?_)
+        (fun D hD ↦ ?_) hC_gen_acyclic
       · obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp hD
         refine ⟨genPieceDatum (presheafValue_concretePair D₀)
             (Tpos.image D₀.canonicalMap) u hspanB,
@@ -12217,7 +12217,7 @@ theorem genRestrictedCover_isOXAcyclic_of_units_or_empty
     -- pad the σ₋-pieces (empty at B) onto the subfamily.
     have hC_full_acyclic : (imageGenCover D₀ T hspan).IsOXAcyclic := by
       refine isOXAcyclic_of_empty_complement (imageGenCover D₀ T hspan) C_sub
-        rfl ?_ (fun D hD _ => ?_) (fun D hD hDn => ?_) hC_sub_acyclic
+        rfl ?_ (fun D hD _ ↦ ?_) (fun D hD hDn ↦ ?_) hC_sub_acyclic
       · intro D hD
         obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp hD
         exact Finset.mem_image_of_mem _ (Finset.image_subset_image _hsub hu)
@@ -12225,7 +12225,7 @@ theorem genRestrictedCover_isOXAcyclic_of_units_or_empty
         exact hplusB
       · obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp hD
         obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp hu
-        have htn : t ∉ Tpos := fun htpos => hDn (Finset.mem_image.mpr
+        have htn : t ∉ Tpos := fun htpos ↦ hDn (Finset.mem_image.mpr
           ⟨D₀.canonicalMap t, Finset.mem_image_of_mem _ htpos, rfl⟩)
         rw [Set.eq_empty_iff_forall_notMem]
         rintro w ⟨hw, hcond, hnz⟩
@@ -12319,7 +12319,7 @@ theorem wedhorn_lemma_834_pair_package_exists [DecidableEq A]
       RationalLocData.interSamePair_rationalOpen Vj₁.1 Vj₂.1 hP,
       genPieceDatum_T, genPieceDatum_s, genPieceDatum_T, genPieceDatum_s,
       ← rationalOpen_inter T T x y hx hy]
-    exact fun v hv => ⟨hv.1.1, hv.2.1⟩
+    exact fun v hv ↦ ⟨hv.1.1, hv.2.1⟩
   have hpiece₂ : ∀ x ∈ T, ∀ y ∈ T,
       rationalOpen ((Vj₁.1.interSamePair Vj₂.1 hP).interSamePair
           (genPieceDatum (Vj₁.1.interSamePair Vj₂.1 hP).P (T * T) (x * y)
@@ -12340,7 +12340,7 @@ theorem wedhorn_lemma_834_pair_package_exists [DecidableEq A]
       RationalLocData.interSamePair_rationalOpen Vj₁.1 Vj₂.1 hP,
       genPieceDatum_T, genPieceDatum_s, genPieceDatum_T, genPieceDatum_s,
       ← rationalOpen_inter T T x y hx hy]
-    exact fun v hv => ⟨hv.1.2, hv.2.2⟩
+    exact fun v hv ↦ ⟨hv.1.2, hv.2.2⟩
   refine ⟨Vj₁.1.interSamePair Vj₂.1 hP,
     genRestrictedCover (Vj₁.1.interSamePair Vj₂.1 hP) (T * T) hspanW,
     RationalLocData.interSamePair_rationalOpen Vj₁.1 Vj₂.1 hP, rfl, ?_, ?_, ?_⟩
@@ -12365,7 +12365,7 @@ theorem wedhorn_lemma_834_pair_package_exists [DecidableEq A]
       obtain ⟨x, hx, y, hy, rfl⟩ := Finset.mem_mul.mp ht
       have hxy : x ∉ Tpos_at Vj₁ ∨ y ∉ Tpos_at Vj₂ := by
         by_contra h
-        push_neg at h
+        push Not at h
         exact htpos (Finset.mul_mem_mul h.1 h.2)
       rcases hxy with hxn | hyn
       · exact Set.eq_empty_of_subset_empty
@@ -12438,16 +12438,16 @@ theorem wedhorn_lemma_834 [DecidableEq A]
   -- C_restr_at family: genRestrictedCover over the FULL spanning set T; the
   -- per-Vj σ₊-dichotomy (units / empty traces) comes from part (ii).
   choose Tpos_at hTpos_sub hTpos_units hTpos_empty using
-    fun Vj (hVj : Vj ∈ V.covers) => hV_unit_restrictions Vj hVj
+    fun Vj (hVj : Vj ∈ V.covers) ↦ hV_unit_restrictions Vj hVj
   -- V_restr_at family: the TRACE covers V|U (Wedhorn 4233-4235; the
   -- filter-form + its σ-walk cover-each are gone — traces always cover).
-  have hVP_leaves : ∀ Q ∈ V.covers, Q.P = V.base.P := fun Q hQ =>
+  have hVP_leaves : ∀ Q ∈ V.covers, Q.P = V.base.P := fun Q hQ ↦
     laurentProdLeaves_pair fs V.base ((Finset.ext_iff.mp hV_laurent Q).mp hQ)
-  let V_restr_at : ↥C.covers → RationalCovering A := fun U =>
+  let V_restr_at : ↥C.covers → RationalCovering A := fun U ↦
     V.restrictTo U.1 (by rw [hV_base]; exact C.hsubset U.1 U.2)
       ((hCP U.1 U.2).trans (congrArg RationalLocData.P hV_base).symm)
       hVP_leaves
-  have hV_restr_base : ∀ U : ↥C.covers, (V_restr_at U).base = U.1 := fun _ => rfl
+  have hV_restr_base : ∀ U : ↥C.covers, (V_restr_at U).base = U.1 := fun _ ↦ rfl
   have hV_restr_pieces : ∀ U : ↥C.covers, ∀ V' ∈ (V_restr_at U).covers,
       ∃ V'' ∈ V.covers, rationalOpen V'.T V'.s ⊆ rationalOpen V''.T V''.s := by
     intro U V' hV'
@@ -12456,7 +12456,7 @@ theorem wedhorn_lemma_834 [DecidableEq A]
     obtain ⟨⟨Q, hQ⟩, -, rfl⟩ := hV'
     exact ⟨Q, hQ, RationalLocData.interSamePair_subset_right _ _ _⟩
   have hV_restr_acyclic : ∀ U : ↥C.covers, (V_restr_at U).IsOXAcyclic :=
-    fun U => laurentTrace_isOXAcyclic V fs hV_laurent U.1 (hpiece_rat U.1 U.2)
+    fun U ↦ laurentTrace_isOXAcyclic V fs hV_laurent U.1 (hpiece_rat U.1 U.2)
       (by rw [hV_base]; exact C.hsubset U.1 U.2)
       ((hCP U.1 U.2).trans (congrArg RationalLocData.P hV_base).symm)
       hVP_leaves (by rw [hCP U.1 U.2]; exact hplus)
@@ -12475,10 +12475,10 @@ theorem wedhorn_lemma_834 [DecidableEq A]
     · rw [RationalLocData.interSamePair_rationalOpen]
       exact ⟨hv, hvQ⟩
   -- The restricted covers: genRestrictedCover over the full set T.
-  let C_restr_at : ↥V.covers → RationalCovering A := fun Vj =>
+  let C_restr_at : ↥V.covers → RationalCovering A := fun Vj ↦
     genRestrictedCover Vj.1 T _hC_gen.1
   have hC_restr_base' : ∀ Vj : ↥V.covers, (C_restr_at Vj).base = Vj.1 :=
-    fun _ => rfl
+    fun _ ↦ rfl
   -- pieces-in-C: each piece Vj ∩ R(T/t) sits inside the C-piece R(T/t)
   -- (C is generated by T, so R(T/t) IS a C-piece).
   obtain ⟨-, φC, hφC_bij, hφC_eq⟩ := id _hC_gen
@@ -12493,23 +12493,23 @@ theorem wedhorn_lemma_834 [DecidableEq A]
     rwa [genPieceDatum_T, genPieceDatum_s] at h
   -- Pair-level package: q=1 instances of the A.3(1) standing hypothesis,
   -- discharged by the part-(ii) construction on intersections.
-  have h_pair := fun (Vj₁ Vj₂ : ↥V.covers) =>
+  have h_pair := fun (Vj₁ Vj₂ : ↥V.covers) ↦
     wedhorn_lemma_834_pair_package_exists C T _hC_gen V fs hV_laurent hplusV
-      (fun Vj => Tpos_at Vj.1 Vj.2) (fun Vj => hTpos_sub Vj.1 Vj.2)
-      (fun Vj => hTpos_units Vj.1 Vj.2) (fun Vj => hTpos_empty Vj.1 Vj.2)
+      (fun Vj ↦ Tpos_at Vj.1 Vj.2) (fun Vj ↦ hTpos_sub Vj.1 Vj.2)
+      (fun Vj ↦ hTpos_units Vj.1 Vj.2) (fun Vj ↦ hTpos_empty Vj.1 Vj.2)
       Vj₁ Vj₂
   choose I_at W_at hI_open hW_base hW_acyclic hW_pieces₁ hW_pieces₂ using h_pair
   -- MIXED (U,Vj)-package: the trace U∩Vj carries the genRestrictedCover over
   -- T, acyclic by the σ₊-dichotomy engine with the per-Vj data restricted.
   have hP_UV : ∀ (U : ↥C.covers) (Vj : ↥V.covers), Vj.1.P = U.1.P :=
-    fun U Vj => (hVP_leaves Vj.1 Vj.2).trans
+    fun U Vj ↦ (hVP_leaves Vj.1 Vj.2).trans
       ((congrArg RationalLocData.P hV_base).trans (hCP U.1 U.2).symm)
-  let M_at : ↥C.covers → ↥V.covers → RationalCovering A := fun U Vj =>
+  let M_at : ↥C.covers → ↥V.covers → RationalCovering A := fun U Vj ↦
     genRestrictedCover (U.1.interSamePair Vj.1 (hP_UV U Vj)) T _hC_gen.1
   have hM_base_open : ∀ (U : ↥C.covers) (Vj : ↥V.covers),
       rationalOpen (M_at U Vj).base.T (M_at U Vj).base.s =
         rationalOpen U.1.T U.1.s ∩ rationalOpen Vj.1.T Vj.1.s :=
-    fun U Vj => RationalLocData.interSamePair_rationalOpen U.1 Vj.1 (hP_UV U Vj)
+    fun U Vj ↦ RationalLocData.interSamePair_rationalOpen U.1 Vj.1 (hP_UV U Vj)
   have hM_trace_sub : ∀ (U : ↥C.covers) (Vj : ↥V.covers), ∀ t ∈ T,
       rationalOpen ((U.1.interSamePair Vj.1 (hP_UV U Vj)).interSamePair
         (genPieceDatum (U.1.interSamePair Vj.1 (hP_UV U Vj)).P T t
@@ -12529,7 +12529,7 @@ theorem wedhorn_lemma_834 [DecidableEq A]
           _hC_gen.1) rfl,
       RationalLocData.interSamePair_rationalOpen U.1 Vj.1 (hP_UV U Vj),
       genPieceDatum_T, genPieceDatum_s, genPieceDatum_T, genPieceDatum_s]
-    exact fun v hv => ⟨hv.1.2, hv.2⟩
+    exact fun v hv ↦ ⟨hv.1.2, hv.2⟩
   have hM_pieces : ∀ (U : ↥C.covers) (Vj : ↥V.covers),
       ∀ E ∈ (M_at U Vj).covers, ∃ D'' ∈ (C_restr_at Vj).covers,
         rationalOpen E.T E.s ⊆ rationalOpen D''.T D''.s := by
@@ -12636,7 +12636,7 @@ theorem rationalCovering_from_idealGenSet [DecidableEq A]
     obtain ⟨f, hf, hv_mem, -⟩ := h_cover_rel D hD v hvD
     exact ⟨piece f, Finset.mem_image_of_mem piece hf, hv_mem⟩
   · -- IsGeneratedBy bijection φ : ↥S → ↥(S.image piece)
-    refine ⟨fun t => ⟨piece t.1, Finset.mem_image_of_mem piece t.2⟩, ⟨?_, ?_⟩, ?_⟩
+    refine ⟨fun t ↦ ⟨piece t.1, Finset.mem_image_of_mem piece t.2⟩, ⟨?_, ?_⟩, ?_⟩
     · -- injective: (piece f).s = f distinguishes f
       intro t1 t2 h
       have hpiece : piece t1.1 = piece t2.1 := congrArg Subtype.val h
@@ -12686,7 +12686,7 @@ private theorem exists_normalized_datum_of_mem [DecidableEq A] [IsTateRing A]
   have hu : (↑π : A) * ↑π⁻¹ = 1 := π.mul_inv
   have hui : (↑π⁻¹ : A) * ↑π = 1 := π.inv_mul
   have hui_unit : IsUnit (↑π⁻¹ : A) := (π⁻¹).isUnit
-  refine ⟨insert 1 (insert (D.s * ↑π⁻¹) (D.T.image (fun t => (↑π⁻¹ : A) * t))),
+  refine ⟨insert 1 (insert (D.s * ↑π⁻¹) (D.T.image (fun t ↦ (↑π⁻¹ : A) * t))),
     D.s * ↑π⁻¹, Finset.mem_insert_self _ _,
     Finset.mem_insert_of_mem (Finset.mem_insert_self _ _), ⟨hvspa, ?_, ?_⟩, ?_⟩
   · intro t' ht'
@@ -12741,7 +12741,7 @@ theorem spa_compactSpace_tate_noHArch
     rw [Set.eq_univ_iff_forall]
     intro v
     show v.1 ∈ rationalOpen (globalLocData P).T (globalLocData P).s
-    exact ⟨v.2, fun x hx => by
+    exact ⟨v.2, fun x hx ↦ by
       rw [Finset.mem_singleton.mp hx]
       exact (v.1.vle_total 1 1).elim id id, v.1.not_vle_one_zero⟩
   rwa [huniv] at h
@@ -12803,21 +12803,21 @@ theorem exists_finite_normalized_rational_refinement [DecidableEq A]
     have hcpt : IsCompact (Subtype.val ⁻¹' rationalOpen D.T D.s :
         Set ↥(Spa A A⁺)) := isCompact_preimage_rationalOpen_noHArch D
     obtain ⟨ι, hι⟩ := hcpt.elim_finite_subcover
-      (fun x : {w : ↥(Spa A A⁺) // (w : Spv A) ∈ rationalOpen D.T D.s} =>
+      (fun x : {w : ↥(Spa A A⁺) // (w : Spv A) ∈ rationalOpen D.T D.s} ↦
         Subtype.val ⁻¹' rationalOpen (q D hD x).1 (q D hD x).2)
-      (fun x => rationalOpen_isOpen _ _)
+      (fun x ↦ rationalOpen_isOpen _ _)
       (by
         rintro w hw
         simp only [Set.mem_iUnion, Set.mem_preimage]
         exact ⟨⟨w, hw⟩, hqv D hD ⟨w, hw⟩⟩)
-    refine ⟨ι, fun w hw => ?_⟩
+    refine ⟨ι, fun w hw ↦ ?_⟩
     have := hι hw
     simp only [Set.mem_iUnion, Set.mem_preimage] at this
     obtain ⟨x, hx, hmem⟩ := this
     exact ⟨x, hx, hmem⟩
   choose ι hι using hsubD
   -- assemble: the join of the per-D slot lists
-  refine ⟨(𝒱.toList.attach.map (fun D =>
+  refine ⟨(𝒱.toList.attach.map (fun D ↦
     (ι D.1 (Finset.mem_toList.mp D.2)).toList.map
       (q D.1 (Finset.mem_toList.mp D.2)))).flatten, ?_, ?_, ?_, ?_, ?_⟩
   · intro p hp
@@ -12975,16 +12975,16 @@ theorem exists_form_a_refinement [DecidableEq A]
   classical
   -- whole-space cover by the C-pieces (through hbase)
   have hcov𝒱 : ∀ v ∈ Spa A A⁺, ∃ D ∈ C.covers, v ∈ rationalOpen D.T D.s :=
-    fun v hv => C.hcover v (hbase v hv)
+    fun v hv ↦ C.hcover v (hbase v hv)
   obtain ⟨LP, hts, h1, hcovLP, hrelLP, hrefLP⟩ :=
     exists_finite_normalized_rational_refinement C.covers hcov𝒱
   have hspanS : Ideal.span ((distinguishedProducts LP : Finset A) : Set A) = ⊤ :=
     span_top_of_distinguished_products LP hts h1 hcovLP P₀ hAplus
   -- the form-(a) pieces: R(S/f) at the base pair (genPieceDatum)
   refine ⟨distinguishedProducts LP,
-    fun f => genPieceDatum C.base.P (distinguishedProducts LP) f hspanS,
-    hspanS, fun f _ => genPieceDatum_T _ _ _ _, fun f _ => genPieceDatum_s _ _ _ _,
-    fun f _ => genPieceDatum_P _ _ _ _, ?_, ?_, ?_⟩
+    fun f ↦ genPieceDatum C.base.P (distinguishedProducts LP) f hspanS,
+    hspanS, fun f _ ↦ genPieceDatum_T _ _ _ _, fun f _ ↦ genPieceDatum_s _ _ _ _,
+    fun f _ ↦ genPieceDatum_P _ _ _ _, ?_, ?_, ?_⟩
   · -- pieces sit inside the base
     intro f hf
     rw [genPieceDatum_T, genPieceDatum_s,
@@ -13233,7 +13233,7 @@ theorem genRestrictedCover_isOXAcyclic_of_spanTop [DecidableEq A]
     wedhorn_lemma_834 (imageGenCover D₀ T hspan)
       (T.image D₀.canonicalMap) (imageGenCover_isGeneratedBy D₀ T hspan)
       (globalLocData_isRational _)
-      (fun U hU => by
+      (fun U hU ↦ by
         obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp hU
         rfl)
       (completedPlusSubring_le_ringOfDef D₀ hplus)
@@ -13284,10 +13284,10 @@ theorem every_rational_cover_is_OXAcyclic_whole_space [DecidableEq A]
   obtain ⟨-, φC', hφC'_bij, hφC'_eq⟩ := id h_C'_gen
   refine IsOXAcyclic_of_refining_acyclic_cover C C' h_C'_base h_refines
     h_C'_acyclic h_C'_covers_each_D
-    (fun D => genRestrictedCover D.1 T h_C'_gen.1)
-    (fun D => rfl)
-    (fun D E' hE' => ?_)
-    (fun D => genRestrictedCover_isOXAcyclic_of_spanTop D.1 T h_C'_gen.1
+    (fun D ↦ genRestrictedCover D.1 T h_C'_gen.1)
+    (fun D ↦ rfl)
+    (fun D E' hE' ↦ ?_)
+    (fun D ↦ genRestrictedCover_isOXAcyclic_of_spanTop D.1 T h_C'_gen.1
       (hplus_pieces D.1 D.2))
   obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp hE'
   refine ⟨(φC' ⟨t, ht⟩).1, (φC' ⟨t, ht⟩).2, ?_⟩
@@ -13348,7 +13348,7 @@ theorem imageCover_isOXAcyclic [DecidableEq A]
     (presheafValue_concretePair C.base) hplusB (imageCover C hC)
     (globalLocData_isRational _) ?_ hplusB ?_
   · intro w hw
-    exact ⟨hw, fun x hx => by
+    exact ⟨hw, fun x hx ↦ by
       rw [Finset.mem_singleton.mp hx]
       exact (w.vle_total 1 1).elim id id, w.not_vle_one_zero⟩
   · intro E hE
@@ -13537,7 +13537,7 @@ theorem imageCover_gluing_transport [DecidableEq A]
     exact ⟨D, hDE⟩
   choose ψ hψ using hmem
   -- the B-side family (cast along the presentation equality)
-  set f' : ∀ E : ↥(imageCover C hC).covers, presheafValue E.1 := fun E =>
+  set f' : ∀ E : ↥(imageCover C hC).covers, presheafValue E.1 := fun E ↦
     (hψ E) ▸ (relativePiece_equiv C.base (ψ E).1 (C.hsubset (ψ E).1 (ψ E).2)
       ((hC.piece (ψ E).2).span_eq_top) (f (ψ E))) with hf'
   -- B-side compatibility, from the keystone-compat helper (the casts commute
