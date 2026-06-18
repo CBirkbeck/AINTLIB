@@ -50,10 +50,10 @@ def IsMorphism (φ : ProjectiveTuple C N) : Prop :=
 Reference: standard property of projective space. -/
 theorem mk_smul_eq_mk (s : C.FunctionField) (hs : s ≠ 0)
     (f : Fin (N + 1) → C.FunctionField) (hf : f ≠ 0) :
-    mk (fun i => s * f i) (fun h => hf <| funext fun i =>
+    mk (fun i ↦ s * f i) (fun h ↦ hf <| funext fun i ↦
       (mul_eq_zero.mp (congrFun h i)).resolve_left hs) = mk f hf := by
   apply (mk_eq_mk_iff _ hf).mpr
-  exact ⟨Units.mk0 s hs, funext fun i => rfl⟩
+  exact ⟨Units.mk0 s hs, funext fun i ↦ rfl⟩
 
 /-- **Silverman II.2.1**: every rational map from a smooth plane curve is
 regular at every smooth point (hence a morphism). Proof: pick `j`
@@ -66,11 +66,11 @@ theorem isRegularAt_of_smooth (φ : ProjectiveTuple C N) (P : C.SmoothPoint) :
   obtain ⟨t, ht⟩ := C.exists_uniformizer P
   -- Find j minimizing ord_P(repr ·).
   obtain ⟨j, _, hj_min⟩ := (Finset.univ : Finset (Fin (N + 1))).exists_min_image
-    (fun i => C.ord_P P (φ.repr i)) Finset.univ_nonempty
+    (fun i ↦ C.ord_P P (φ.repr i)) Finset.univ_nonempty
   -- `repr j ≠ 0`: else ord_P(repr j) = ⊤ ≤ ord_P(repr i) ⟹ all are ⊤ ⟹ repr = 0.
   have hj_ne : φ.repr j ≠ 0 := by
     intro h_j_zero
-    refine hf (funext fun i => ?_)
+    refine hf (funext fun i ↦ ?_)
     rw [Pi.zero_apply, ← ord_P_eq_top_iff]
     exact le_antisymm le_top
       ((ord_P_eq_top_iff _).mpr h_j_zero ▸ hj_min i (Finset.mem_univ _))
@@ -79,9 +79,9 @@ theorem isRegularAt_of_smooth (φ : ProjectiveTuple C N) (P : C.SmoothPoint) :
   set m : ℤ := (C.ord_P P (φ.repr j)).untop hj_lt with hm_def
   have hm_eq : C.ord_P P (φ.repr j) = (m : ℤ) := (WithTop.coe_untop _ _).symm
   obtain ⟨s, hs_ne, hs_ord⟩ := ht.exists_ord_P_eq (-m)
-  set f : Fin (N + 1) → C.FunctionField := fun i => s * φ.repr i with hf_def
+  set f : Fin (N + 1) → C.FunctionField := fun i ↦ s * φ.repr i with hf_def
   have hf_j_ne : f j ≠ 0 := mul_ne_zero hs_ne hj_ne
-  have hf_ne : f ≠ 0 := fun h => hf_j_ne (congrFun h j)
+  have hf_ne : f ≠ 0 := fun h ↦ hf_j_ne (congrFun h j)
   refine ⟨f, hf_ne, ?_, ?_, j, ?_⟩
   · exact (mk_smul_eq_mk s hs_ne φ.repr hf).trans φ.mk_repr
   · intro i
@@ -110,7 +110,7 @@ theorem isRegularAt_of_smooth (φ : ProjectiveTuple C N) (P : C.SmoothPoint) :
 /-- **Silverman II.2.1 (corollary)**: every rational map from a smooth
 plane curve to projective space is a morphism. -/
 theorem isMorphism_of_smooth (φ : ProjectiveTuple C N) : φ.IsMorphism :=
-  fun P => φ.isRegularAt_of_smooth P
+  fun P ↦ φ.isRegularAt_of_smooth P
 
 end ProjectiveTuple
 
