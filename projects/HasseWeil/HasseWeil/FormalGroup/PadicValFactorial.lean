@@ -1,5 +1,5 @@
-import Mathlib.NumberTheory.Padics.PadicVal.Basic
 import Mathlib.Data.Real.Basic
+import Mathlib.NumberTheory.Padics.PadicVal.Basic
 import Mathlib.Tactic.Positivity
 
 /-!
