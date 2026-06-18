@@ -100,7 +100,7 @@ theorem isGalois_of_xy_family_card (β : Isogeny W.toAffine W.toAffine)
   -- the kernel-translation covariance and kernel finiteness
   have hcov : ∀ k : β.kernel, ∀ z : W.toAffine.FunctionField,
       translateAlgEquivOfPoint W k.val (β.pullback z) = β.pullback z :=
-    fun k z => translate_pullback_invariance_of_xy_general W β k.val
+    fun k z ↦ translate_pullback_invariance_of_xy_general W β k.val
       (h_xy_family k).1 (h_xy_family k).2 z
   haveI : Finite β.kernel := finite_kernel_of_hcov W β hcov
   -- Im(β^*) = Fix(Multiplicative (ker β)) (Silverman III.4.10c)
@@ -128,14 +128,14 @@ theorem isGalois_of_xy_family_card (β : Isogeny W.toAffine W.toAffine)
     RingEquiv.ofBijective
       (β.pullback.toRingHom.codRestrict
         (FixedPoints.subfield (Multiplicative β.kernel) W.toAffine.FunctionField) hmem)
-      ⟨fun a b hab => β.pullback_injective (congrArg Subtype.val hab),
-       fun w => by
+      ⟨fun a b hab ↦ β.pullback_injective (congrArg Subtype.val hab),
+       fun w ↦ by
         obtain ⟨z, hz⟩ := hsurj w.val w.property
         exact ⟨z, Subtype.ext hz⟩⟩
   -- transport mathlib's Artin instance `IsGalois (Fix(ker β)) K(E)` along `e.symm`/`refl`
   refine IsGalois.of_equiv_equiv
     (f := e.symm) (g := RingEquiv.refl W.toAffine.FunctionField) ?_
-  refine RingHom.ext fun w => ?_
+  refine RingHom.ext fun w ↦ ?_
   exact congrArg Subtype.val (e.apply_symm_apply w)
 
 /-- **The `h_normal` witness is a theorem from `{xy_family, #ker = deg}`** (Silverman
@@ -179,7 +179,7 @@ theorem hdesc_of_xy_family_card (β : Isogeny W.toAffine W.toAffine)
   -- the kernel-translation covariance, kernel finiteness, and the Galois package
   have hcov : ∀ k : β.kernel, ∀ z : W.toAffine.FunctionField,
       translateAlgEquivOfPoint W k.val (β.pullback z) = β.pullback z :=
-    fun k z => translate_pullback_invariance_of_xy_general W β k.val
+    fun k z ↦ translate_pullback_invariance_of_xy_general W β k.val
       (h_xy_family k).1 (h_xy_family k).2 z
   haveI : Finite β.kernel := finite_kernel_of_hcov W β hcov
   haveI hfd : @FiniteDimensional W.toAffine.FunctionField W.toAffine.FunctionField
@@ -300,7 +300,7 @@ noncomputable def dualGaloisData_of_coordHom_unconditional
     (hsep : β.IsSeparable) :
     EC.Isogeny.DualGaloisData φ :=
   dualGaloisData_of_pullbackEvaluation_unconditional W φ β h_pb hsep
-    ⟨cd.toAlgHom, fun u => by
+    ⟨cd.toAlgHom, fun u ↦ by
       have h := cd.compat u
       rw [h_pb] at h
       exact h⟩
