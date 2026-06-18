@@ -511,10 +511,7 @@ theorem RationalCovering.plusLaurentCovering_hCov_of_refines_cover
   -- The membership `f₀ ∈ (laurentPlusDatum C.base f₀).T = insert f₀ C.base.T` is
   -- produced via simp through `laurentPlusDatum` and `Finset.mem_insert` to
   -- sidestep the `DecidableEq A` / `Classical.propDecidable` instance diamond.
-  have hv_f₀ : v.vle f₀ C.base.s := by
-    have : f₀ ∈ (laurentPlusDatum C.base f₀).T := by
-      simp [laurentPlusDatum]
-    exact hv.2.1 f₀ this
+  have hv_f₀ : v.vle f₀ C.base.s := hv.2.1 f₀ (by simp [laurentPlusDatum])
   -- Apply refines_cover to find f ∈ S with v ∈ plus-piece at f.
   obtain ⟨f, hf, hv_f⟩ := hS_cover v hv_base
   refine ⟨C.plusDatum f, (C.mem_standardCoverVCovers S).mpr ⟨f, hf, rfl⟩, ?_⟩
@@ -2206,10 +2203,7 @@ theorem rationalOpen_laurentMinusDatum_decomp [DecidableEq A]
   -- Final goal `X = X` differs only by `{D₀.s, f}` instance (Classical via
   -- letI vs ambient via theorem statement). Bridge via `Finset.ext` on the
   -- pair Finset.
-  congr 1
-  congr 1
-  apply Finset.ext
-  intro x
+  congr 2 with x
   simp [Finset.mem_insert, Finset.mem_singleton]
 
 /-- **Minus-half `hCov` discharge for standard-cover V-covers**. Under
@@ -2359,8 +2353,7 @@ theorem RationalCovering.refines_contain_plusHalf_of_refines_cover
   -- (which sidesteps a `DecidableEq` instance diamond between ambient
   -- `[DecidableEq A]` and `Classical.propDecidable` from `laurentPlusDatum`).
   simp only [laurentPlusDatum, RationalCovering.plusDatum]
-  congr 1
-  ext x
+  congr 1 with x
   simp [Finset.mem_insert, or_left_comm]
 
 /-! ### Minus-half `refines_contain` transfer
