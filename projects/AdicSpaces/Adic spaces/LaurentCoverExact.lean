@@ -126,9 +126,8 @@ theorem deltaMap_comp_epsilonHom (f : A) :
     RingHom.prod_apply, RingHom.comp_apply]
   have h1 : TateAlgebra.quotientFSubXToA f
       ((Ideal.Quotient.mk _) (algebraMap A ↥(TateAlgebra A) a)) = a := by
-    have := RingHom.congr_fun (TateAlgebra.quotientFSubXToA_comp_AToQuotientFSubX f) a
-    simp only [RingHom.comp_apply, RingHom.id_apply, TateAlgebra.AToQuotientFSubX] at this
-    exact this
+    simpa only [RingHom.comp_apply, RingHom.id_apply, TateAlgebra.AToQuotientFSubX]
+      using RingHom.congr_fun (TateAlgebra.quotientFSubXToA_comp_AToQuotientFSubX f) a
   have h2 : TateAlgebra.quotientOneSubfXToLoc f
       ((Ideal.Quotient.mk _) (algebraMap A ↥(TateAlgebra A) a)) =
       algebraMap A (Localization.Away f) a := by
@@ -168,9 +167,8 @@ theorem ker_deltaMap_le_range_epsilonHom (f : A) :
       TateAlgebra.quotientOneSubfXToLoc f b₂ := sub_eq_zero.mp h
   set a := TateAlgebra.quotientFSubXToA f b₁
   -- b₁ = AToQuotientFSubX(a) since the equiv round-trips
-  have hb₁ : TateAlgebra.AToQuotientFSubX f a = b₁ := by
-    change (TateAlgebra.quotientFSubXEquiv f).symm (TateAlgebra.quotientFSubXEquiv f b₁) = b₁
-    exact (TateAlgebra.quotientFSubXEquiv f).symm_apply_apply b₁
+  have hb₁ : TateAlgebra.AToQuotientFSubX f a = b₁ :=
+    (TateAlgebra.quotientFSubXEquiv f).symm_apply_apply b₁
   -- quotientOneSubfXToLoc(mk(algebraMap a)) = algebraMap(a)
   have himg : TateAlgebra.quotientOneSubfXToLoc f
       ((Ideal.Quotient.mk _) (algebraMap A ↥(TateAlgebra A) a)) =
@@ -275,13 +273,11 @@ theorem algebraMap_mem_span_fSubX_eq_zero_of_iInf_pow_eq_bot (f a : A)
       TateAlgebra.coeff n (algebraMap A ↥(TateAlgebra A) a) := by
     intro n
     have := congr_arg (TateAlgebra.coeff n) hc'
-    rw [sub_mul, TateAlgebra.coeff_sub, TateAlgebra.coeff_algebraMap_mul] at this
-    exact this
+    rwa [sub_mul, TateAlgebra.coeff_sub, TateAlgebra.coeff_algebraMap_mul] at this
   -- Constant coefficient: f * coeff 0 c = a.
   have h0 : f * TateAlgebra.coeff 0 c = a := by
     have := hcoeff_eq 0
-    rw [TateAlgebra.coeff_zero_X_mul, sub_zero, coeff_zero_algebraMap] at this
-    exact this
+    rwa [TateAlgebra.coeff_zero_X_mul, sub_zero, coeff_zero_algebraMap] at this
   -- Recurrence: coeff n c = f * coeff (n + 1) c.
   have hstep : ∀ n,
       TateAlgebra.coeff n c = f * TateAlgebra.coeff (n + 1) c := by
@@ -335,12 +331,10 @@ theorem exists_coeff_tendsto_and_pow_mul_of_algebraMap_mem_fSubX (f a : A)
       TateAlgebra.coeff n (algebraMap A ↥(TateAlgebra A) a) := by
     intro n
     have := congr_arg (TateAlgebra.coeff n) hc'
-    rw [sub_mul, TateAlgebra.coeff_sub, TateAlgebra.coeff_algebraMap_mul] at this
-    exact this
+    rwa [sub_mul, TateAlgebra.coeff_sub, TateAlgebra.coeff_algebraMap_mul] at this
   have h0 : f * TateAlgebra.coeff 0 c = a := by
     have := hcoeff_eq 0
-    rw [TateAlgebra.coeff_zero_X_mul, sub_zero, coeff_zero_algebraMap] at this
-    exact this
+    rwa [TateAlgebra.coeff_zero_X_mul, sub_zero, coeff_zero_algebraMap] at this
   have hstep : ∀ n,
       TateAlgebra.coeff n c = f * TateAlgebra.coeff (n + 1) c := by
     intro n
@@ -413,14 +407,12 @@ theorem tendsto_pow_mul_of_algebraMap_mem_oneSubfX (f a : A)
       TateAlgebra.coeff n (algebraMap A ↥(TateAlgebra A) a) := by
     intro n
     have := congr_arg (TateAlgebra.coeff n) hc'
-    rw [sub_mul, one_mul, mul_assoc, TateAlgebra.coeff_sub,
+    rwa [sub_mul, one_mul, mul_assoc, TateAlgebra.coeff_sub,
       TateAlgebra.coeff_algebraMap_mul] at this
-    exact this
   have h0 : TateAlgebra.coeff 0 c = a := by
     have := hcoeff_eq 0
-    rw [TateAlgebra.coeff_zero_X_mul, mul_zero, sub_zero,
+    rwa [TateAlgebra.coeff_zero_X_mul, mul_zero, sub_zero,
       coeff_zero_algebraMap] at this
-    exact this
   have hstep : ∀ n, TateAlgebra.coeff (n + 1) c =
       f * TateAlgebra.coeff n c := by
     intro n
@@ -430,8 +422,7 @@ theorem tendsto_pow_mul_of_algebraMap_mem_oneSubfX (f a : A)
   have hpow : ∀ n, TateAlgebra.coeff n c = f ^ n * a := by
     intro n
     induction n with
-    | zero =>
-        simpa using h0
+    | zero => simpa using h0
     | succ n ih =>
         rw [hstep n, ih, pow_succ, mul_assoc]
         ring
@@ -444,9 +435,8 @@ This packages the second projection of the simple Laurent row in a form that
 the separation proof can use directly. -/
 theorem tendsto_pow_mul_of_epsilonHom_gen_second_eq_zero (f a : A)
     (h2 : (epsilonHom_gen f a).2 = 0) :
-    Filter.Tendsto (fun n : ℕ => f ^ n * a) Filter.cofinite (nhds (0 : A)) := by
-  apply tendsto_pow_mul_of_algebraMap_mem_oneSubfX
-  exact Ideal.Quotient.eq_zero_iff_mem.mp h2
+    Filter.Tendsto (fun n : ℕ => f ^ n * a) Filter.cofinite (nhds (0 : A)) :=
+  tendsto_pow_mul_of_algebraMap_mem_oneSubfX f a (Ideal.Quotient.eq_zero_iff_mem.mp h2)
 
 omit [IsNoetherianRing A] [IsDomain A] in
 /-- Kernel data for `ε` in the simple Laurent row.
@@ -464,10 +454,9 @@ theorem epsilonHom_gen_eq_zero_coeff_data (f a : A)
     Filter.Tendsto (fun n : ℕ => f ^ n * a) Filter.cofinite (nhds (0 : A)) := by
   have h1 : (epsilonHom_gen f a).1 = 0 := congr_arg Prod.fst h
   have h2 : (epsilonHom_gen f a).2 = 0 := congr_arg Prod.snd h
-  constructor
-  · apply exists_coeff_tendsto_and_pow_mul_of_algebraMap_mem_fSubX
-    exact Ideal.Quotient.eq_zero_iff_mem.mp h1
-  · exact tendsto_pow_mul_of_epsilonHom_gen_second_eq_zero f a h2
+  refine ⟨exists_coeff_tendsto_and_pow_mul_of_algebraMap_mem_fSubX f a
+      (Ideal.Quotient.eq_zero_iff_mem.mp h1),
+    tendsto_pow_mul_of_epsilonHom_gen_second_eq_zero f a h2⟩
 
 omit [IsNoetherianRing A] [IsDomain A] in
 /-- Plus-side Krull-intersection membership for a constant in `(f - X)`.
@@ -484,8 +473,7 @@ theorem mem_iInf_pow_of_algebraMap_mem_fSubX (f a : A)
   rw [Ideal.mem_iInf]
   intro n
   cases n with
-  | zero =>
-      simp [Ideal.one_eq_top]
+  | zero => simp [Ideal.one_eq_top]
   | succ n =>
       rw [hc_pow n]
       exact Ideal.mul_mem_right _ _
@@ -538,14 +526,11 @@ theorem epsilonHom_gen_eq_zero_krull_multiplier_data (f a : A)
       Filter.Tendsto (fun n : ℕ => f ^ n * a) Filter.cofinite (nhds (0 : A)) := by
   obtain ⟨r, hr⟩ := exists_span_singleton_mul_eq_self_of_epsilonHom_gen_eq_zero f a h
   obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp r.property
-  have hcf : (c * f) * a = a := by
-    rw [hc]
-    exact hr
+  have hcf : (c * f) * a = a := by rw [hc]; exact hr
   have hcf_pow : ∀ n : ℕ, (c * f) ^ n * a = a := by
     intro n
     induction n with
-    | zero =>
-        simp
+    | zero => simp
     | succ n ih =>
         calc
           (c * f) ^ (n + 1) * a = (c * f) ^ n * ((c * f) * a) := by
@@ -611,9 +596,8 @@ theorem span_singleton_iInf_pow_eq_bot_of_le_jacobson (f : A)
     intro n
     have hxn : x ∈ Ideal.span ({f} : Set A) ^ n := (Ideal.mem_iInf.mp hx) n
     rwa [smul_eq_mul, ← Ideal.one_eq_top, mul_one]
-  have hx_bot : x ∈ (⊥ : Submodule A A) := by
-    rwa [hsub] at hx_sub
-  simpa using hx_bot
+  rw [hsub] at hx_sub
+  simpa using hx_sub
 
 omit [IsDomain A] in
 /-- **`ε` is injective when `(f)` lies in the Jacobson radical.**
@@ -689,9 +673,7 @@ private theorem idx_eq_single_zero_iff (i j : ℕ) :
   rw [idx_apply_zero]
   constructor
   · intro h
-    have := Finsupp.ext_iff.mp h 1
-    simp [idx] at this
-    exact this
+    simpa [idx] using Finsupp.ext_iff.mp h 1
   · intro hj
     subst hj; ext k; fin_cases k <;> simp [idx]
 
@@ -700,9 +682,7 @@ private theorem idx_eq_single_one_iff (i j : ℕ) :
   rw [idx_apply_one]
   constructor
   · intro h
-    have := Finsupp.ext_iff.mp h 0
-    simp [idx] at this
-    exact this
+    simpa [idx] using Finsupp.ext_iff.mp h 0
   · intro hi
     subst hi; ext k; fin_cases k <;> simp [idx]
 
@@ -724,9 +704,7 @@ private theorem coeff_posIncl (g : ↥(TateAlgebra A)) (i j : ℕ) :
   have h2 : (idx i j = Finsupp.single 0 i) ↔ j = 0 := by
     rw [show Finsupp.single (0 : Fin 2) i = Finsupp.single 0 (idx i j 0) from by rw [h1]]
     exact idx_eq_single_zero_iff i j
-  by_cases hj : j = 0
-  · rw [if_pos (h2.mpr hj), if_pos hj]
-  · rw [if_neg (mt h2.mp hj), if_neg hj]
+  simp only [h2]
 
 /-- The RHS coefficient: `negIncl h` at index `idx i j`. -/
 private theorem coeff_negIncl (h : ↥(TateAlgebra A)) (i j : ℕ) :
@@ -739,9 +717,7 @@ private theorem coeff_negIncl (h : ↥(TateAlgebra A)) (i j : ℕ) :
   have h2 : (idx i j = Finsupp.single 1 j) ↔ i = 0 := by
     rw [show Finsupp.single (1 : Fin 2) j = Finsupp.single 1 (idx i j 1) from by rw [h1]]
     exact idx_eq_single_one_iff i j
-  by_cases hi : i = 0
-  · rw [if_pos (h2.mpr hi), if_pos hi]
-  · rw [if_neg (mt h2.mp hi), if_neg hi]
+  simp only [h2]
 
 private theorem idx_11 :
     Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) 1 = idx 1 1 := by
@@ -944,10 +920,7 @@ theorem ker_lambdaMap_le_range_iotaHom [T1Space A]
     -- h1 : 0 - c(n,0) = coeff_n g - 0
     simp only [zero_sub, sub_zero] at h1
     -- h1 : -c(n,0) = coeff_n g, so c(n,0) = -coeff_n g
-    have : MvPowerSeries.coeff (idx n 0) c.val =
-        -(MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) n) g.val) := by
-      rw [← h1, neg_neg]
-    exact this
+    rw [← h1, neg_neg]
   -- Boundary equation at (0, m) for m ≥ 1: -c(0,m) = -coeff_m h, i.e. c(0,m) = coeff_m h
   have hboundary_y : ∀ m, 0 < m →
       MvPowerSeries.coeff (idx 0 m) c.val =
@@ -970,13 +943,8 @@ theorem ker_lambdaMap_le_range_iotaHom [T1Space A]
     rw [coeff_posIncl, if_pos rfl, coeff_negIncl, if_pos rfl] at h1
     -- h1 : 0 - c(0,0) = coeff_0 g - coeff_0 h
     simp only [zero_sub] at h1
-    -- h1 : -c(0,0) = coeff_0 g - coeff_0 h
-    -- Want: c(0,0) = coeff_0 h - coeff_0 g
-    have : MvPowerSeries.coeff (idx 0 0) c.val =
-      -(MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) 0) g.val -
-       MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) 0) h.val) := by
-      rw [← h1, neg_neg]
-    rw [this]; ring
+    -- h1 : -c(0,0) = coeff_0 g - coeff_0 h; want c(0,0) = coeff_0 h - coeff_0 g
+    linear_combination -h1
   -- Step 5: For n ≥ 1, the diagonal c(n+k, k) = c(n, 0) for all k.
   -- This is constant, and by restricted condition in T1 space, must be 0.
   -- Therefore coeff_n g = 0 for all n ≥ 1.
@@ -985,10 +953,8 @@ theorem ker_lambdaMap_le_range_iotaHom [T1Space A]
     intro n hn
     -- c(n, 0) = -coeff_n g, and c(n+k, k) = c(n, 0) for all k
     have hconst : ∀ k, MvPowerSeries.coeff (idx (n + k) k) c.val =
-        MvPowerSeries.coeff (idx n 0) c.val := by
-      intro k
-      have := hdiag_iter n 0 k
-      simp only [Nat.zero_add] at this; exact this
+        MvPowerSeries.coeff (idx n 0) c.val := fun k => by
+      simpa only [Nat.zero_add] using hdiag_iter n 0 k
     -- The injection ℕ → Fin 2 →₀ ℕ sending k ↦ idx (n + k) k
     have hinj : Function.Injective (fun k => idx (n + k) k) := by
       intro a b hab
@@ -1005,10 +971,8 @@ theorem ker_lambdaMap_le_range_iotaHom [T1Space A]
       MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) m) h.val = 0 := by
     intro m hm
     have hconst : ∀ k, MvPowerSeries.coeff (idx k (m + k)) c.val =
-        MvPowerSeries.coeff (idx 0 m) c.val := by
-      intro k
-      have := hdiag_iter 0 m k
-      simp only [Nat.zero_add] at this; exact this
+        MvPowerSeries.coeff (idx 0 m) c.val := fun k => by
+      simpa only [Nat.zero_add] using hdiag_iter 0 m k
     have hinj : Function.Injective (fun k => idx k (m + k)) := by
       intro a b hab
       have := Finsupp.ext_iff.mp hab 0
@@ -1020,10 +984,8 @@ theorem ker_lambdaMap_le_range_iotaHom [T1Space A]
   -- Step 7: c(0,0) = 0, which gives coeff_0 g = coeff_0 h.
   have hc00_zero : MvPowerSeries.coeff (idx 0 0) c.val = 0 := by
     have hconst : ∀ k, MvPowerSeries.coeff (idx k k) c.val =
-        MvPowerSeries.coeff (idx 0 0) c.val := by
-      intro k
-      have := hdiag_iter 0 0 k
-      simp only [Nat.zero_add] at this; exact this
+        MvPowerSeries.coeff (idx 0 0) c.val := fun k => by
+      simpa only [Nat.zero_add] using hdiag_iter 0 0 k
     have hinj : Function.Injective (fun k => idx k k) := by
       intro a b hab
       have := Finsupp.ext_iff.mp hab 0
@@ -1033,11 +995,8 @@ theorem ker_lambdaMap_le_range_iotaHom [T1Space A]
   have hg0_eq_h0 :
       MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) 0) g.val =
       MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) 0) h.val := by
-    have := hboundary_00
-    rw [hc00_zero] at this
-    -- this : 0 = coeff_0 h - coeff_0 g
-    -- So coeff_0 h - coeff_0 g = 0, hence coeff_0 h = coeff_0 g
-    exact (eq_of_sub_eq_zero this.symm).symm
+    -- hboundary_00 : c(0,0) = coeff_0 h - coeff_0 g; hc00_zero : c(0,0) = 0
+    linear_combination hboundary_00 - hc00_zero
   -- Step 8: Assemble. Set a = coeff_0 g (as TateAlgebra.coeff).
   -- coeff_zero_algebraMap and coeff_succ_algebraMap use TateAlgebra.coeff.
   set a := TateAlgebra.coeff 0 g with ha_def
@@ -1063,7 +1022,7 @@ theorem ker_lambdaMap_le_range_iotaHom [T1Space A]
   have hh_eq : algebraMap A ↥(TateAlgebra A) a = h := by
     apply TateAlgebra.ext; intro n
     cases n with
-    | zero => rw [coeff_zero_algebraMap]; rw [ha_def]; exact hg0_eq_h0'
+    | zero => rw [coeff_zero_algebraMap, ha_def]; exact hg0_eq_h0'
     | succ n =>
       rw [coeff_succ_algebraMap]
       exact (hh_higher' (n + 1) (Nat.succ_pos n)).symm
@@ -1207,13 +1166,9 @@ This is needed for `deltaMap_gen` to be well-defined. -/
 theorem posEmbHom_ideal_compat (x : ↥(TateAlgebra A))
     (hx : x ∈ Ideal.span {algebraMap A ↥(TateAlgebra A) f - TateAlgebra.X}) :
     posEmbHom x ∈ laurentFSubZetaIdeal f := by
-  have hsub : Ideal.span {algebraMap A ↥(TateAlgebra A) f - TateAlgebra.X} ≤
-      (laurentFSubZetaIdeal f).comap posEmbHom := by
-    rw [Ideal.span_le]
-    intro y hy
-    rw [Set.mem_singleton_iff] at hy; subst hy
-    exact posEmbHom_generator_mem f
-  exact Ideal.mem_comap.mp (hsub hx)
+  refine Ideal.mem_comap.mp (Ideal.span_le.mpr ?_ hx)
+  rintro y rfl
+  exact posEmbHom_generator_mem f
 
 /-- `negEmbHom` sends the generator `1 - fX` to an element of `(f - ζ)`.
 Key identity: `1 - f·ζ⁻¹ = -ζ⁻¹·(f - ζ)`. -/
@@ -1246,8 +1201,8 @@ theorem negEmbHom_generator_mem :
       algebraMap A (LaurentTateAlgebra A) f * LaurentTateAlgebra.zetaInv =
       -(LaurentTateAlgebra.zetaInv *
         (algebraMap A (LaurentTateAlgebra A) f - LaurentTateAlgebra.zeta)) := by
-    rw [mul_sub, mul_comm LaurentTateAlgebra.zetaInv (algebraMap A _ f)]
-    rw [LaurentTateAlgebra.zetaInv_mul_zeta]; ring
+    rw [mul_sub, mul_comm LaurentTateAlgebra.zetaInv (algebraMap A _ f),
+      LaurentTateAlgebra.zetaInv_mul_zeta]; ring
   rw [hkey]
   exact neg_mem (Ideal.mul_mem_left _ _ (Ideal.subset_span rfl))
 
@@ -1256,13 +1211,9 @@ theorem negEmbHom_ideal_compat (x : ↥(TateAlgebra A))
     (hx : x ∈ Ideal.span
       {1 - algebraMap A ↥(TateAlgebra A) f * TateAlgebra.X}) :
     negEmbHom x ∈ laurentFSubZetaIdeal f := by
-  have hsub : Ideal.span {1 - algebraMap A ↥(TateAlgebra A) f * TateAlgebra.X} ≤
-      (laurentFSubZetaIdeal f).comap negEmbHom := by
-    rw [Ideal.span_le]
-    intro y hy
-    rw [Set.mem_singleton_iff] at hy; subst hy
-    exact negEmbHom_generator_mem f
-  exact Ideal.mem_comap.mp (hsub hx)
+  refine Ideal.mem_comap.mp (Ideal.span_le.mpr ?_ hx)
+  rintro y rfl
+  exact negEmbHom_generator_mem f
 
 /-- The positive lift: `B₁ → B₁₂`, induced by `quotLaurent ∘ posEmbHom`. -/
 noncomputable def posLift : B₁_gen f →+* B₁₂_gen f :=
@@ -1827,8 +1778,8 @@ theorem ker_deltaMap_gen_le_range_epsilonHom_gen
         algebraMap A (LaurentTateAlgebra A) f * LaurentTateAlgebra.zetaInv =
         -(LaurentTateAlgebra.zetaInv *
           (algebraMap A (LaurentTateAlgebra A) f - LaurentTateAlgebra.zeta)) := by
-      rw [mul_sub, mul_comm LaurentTateAlgebra.zetaInv (algebraMap A _ f)]
-      rw [LaurentTateAlgebra.zetaInv_mul_zeta]; ring
+      rw [mul_sub, mul_comm LaurentTateAlgebra.zetaInv (algebraMap A _ f),
+        LaurentTateAlgebra.zetaInv_mul_zeta]; ring
     rw [hkey]
     -- Factor out (alg f - zeta) and use hneg_b, hab, hc
     have : (algebraMap A (LaurentTateAlgebra A) f - LaurentTateAlgebra.zeta) *
@@ -1844,16 +1795,7 @@ theorem ker_deltaMap_gen_le_range_epsilonHom_gen
     change posEmbHom (g - g') - negEmbHom (h - h') = 0
     have heq : posEmbHom g' - negEmbHom h' = posEmbHom g - negEmbHom h := hrow1
     rw [map_sub, map_sub]
-    -- a - b - (c - d) = 0 ↔ a - b = c - d ↔ a - c = b - d
-    rw [sub_eq_zero]
-    -- Need: posEmbHom g - posEmbHom g' = negEmbHom h - negEmbHom h'
-    have : posEmbHom g - negEmbHom h = posEmbHom g' - negEmbHom h' := heq.symm
-    -- a - c = b - d ↔ a - b = c - d (just rearranging)
-    calc posEmbHom g - posEmbHom g'
-        = (posEmbHom g - negEmbHom h) - (posEmbHom g' - negEmbHom h') +
-          (negEmbHom h - negEmbHom h') := by ring
-      _ = 0 + (negEmbHom h - negEmbHom h') := by rw [this, sub_self]
-      _ = negEmbHom h - negEmbHom h' := by rw [zero_add]
+    linear_combination -heq
   -- Step 6: By Row 2 exactness, (g - g', h - h') ∈ im(ι)
   obtain ⟨a, ha⟩ := ker_lambdaMap_le_range_iotaHom (g - g', h - h') hker
   -- Step 7: ha says ι(a) = (g - g', h - h'), i.e.,
