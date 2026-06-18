@@ -332,12 +332,11 @@ theorem _omt_open_at_zero
       | succ k ih =>
         intro n xs hxs
         rw [Fin.sum_univ_succ]
-        have h0 : xs 0 ∈ W (n + 1) := by have := hxs 0; simpa using this
+        have h0 : xs 0 ∈ W (n + 1) := by simpa using hxs 0
         have hrest : ∑ i, xs (Fin.succ i) ∈ W (n + 1) := by
           apply ih (n + 1)
           intro i
-          have := hxs (Fin.succ i)
-          convert this using 2
+          convert hxs (Fin.succ i) using 2
           simp [Fin.val_succ]; ring
         exact hW_shrink _ (Set.add_mem_add h0 hrest)
     -- Each partial sum `S k` lies in `W 0` (telescoping with offset `0`).
@@ -948,9 +947,7 @@ theorem _sub_lemma_L4_2_continuous_via_OMT
   -- ν continuous via ContinuousSMul A M.
   have hν_cont : Continuous ν := by
     change Continuous fun a : (Fin n → A) => ∑ i, a i • s i
-    refine continuous_finset_sum _ ?_
-    intro i _
-    exact (continuous_apply i).smul continuous_const
+    exact continuous_finset_sum _ fun i _ => (continuous_apply i).smul continuous_const
   -- ν surjective from hs.
   have hν_surj : Function.Surjective ν := by
     intro m
@@ -966,9 +963,7 @@ theorem _sub_lemma_L4_2_continuous_via_OMT
   have hfν_cont : Continuous (f ∘ ν) := by
     change Continuous fun a : (Fin n → A) => f (∑ i, a i • s i)
     simp only [map_sum, map_smul]
-    refine continuous_finset_sum _ ?_
-    intro i _
-    exact (continuous_apply i).smul continuous_const
+    exact continuous_finset_sum _ fun i _ => (continuous_apply i).smul continuous_const
   -- f continuous via quotient map.
   exact hν_quot.continuous_iff.mpr hfν_cont
 
