@@ -136,7 +136,7 @@ theorem maximalIdealAt_liesOver (P : C.SmoothPoint) :
     change (1 : Polynomial F) ∉ (C.maximalIdealAt P).comap (algebraMap _ _)
     rw [Ideal.mem_comap, map_one]
     exact (C.maximalIdealAt_isMaximal P).ne_top.imp
-      (fun h => (Ideal.eq_top_iff_one _).mpr h)
+      (fun h ↦ (Ideal.eq_top_iff_one _).mpr h)
   exact h_max.eq_of_le h_under_ne_top h_sub
 
 /-- Auxiliary: `F[X] ⧸ (X − a)` has F-rank 1 (it is F-algebra-isomorphic to F). -/
@@ -215,7 +215,7 @@ theorem inertiaDeg_maximalIdealAt (P : C.SmoothPoint) :
       ((Polynomial F) ⧸
         Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)})
       (C.CoordinateRing ⧸ C.maximalIdealAt P) ≤ 1 :=
-    finrank_le_one (1 : C.CoordinateRing ⧸ C.maximalIdealAt P) fun w => by
+    finrank_le_one (1 : C.CoordinateRing ⧸ C.maximalIdealAt P) fun w ↦ by
       obtain ⟨c, hc⟩ := C.algebraMap_quotient_maximalIdealAt_surjective P w
       refine ⟨c, ?_⟩
       rw [Algebra.smul_def, hc]
@@ -336,7 +336,7 @@ theorem equation_of_coordinates [IsAlgClosed F]
         algebraMap F (C.CoordinateRing ⧸ M) c =
         Ideal.Quotient.mk M
           (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
-            (Polynomial.C (Polynomial.C c))) := fun c => rfl
+            (Polynomial.C (Polynomial.C c))) := fun c ↦ rfl
     rw [h_const, h_const, h_const, h_const, h_const]
     simp only [← map_mul, ← map_add, ← map_sub, ← map_pow]
     congr 1
@@ -410,7 +410,7 @@ theorem equation_of_coordinates_of_field
         algebraMap F (C.CoordinateRing ⧸ M) c =
         Ideal.Quotient.mk M
           (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
-            (Polynomial.C (Polynomial.C c))) := fun c => rfl
+            (Polynomial.C (Polynomial.C c))) := fun c ↦ rfl
     rw [h_const, h_const, h_const, h_const, h_const]
     simp only [← map_mul, ← map_add, ← map_sub, ← map_pow]
     congr 1
@@ -954,10 +954,10 @@ theorem relNorm_maximalIdealAt [IsAlgClosed F]
     haveI hp_max : p.IsMaximal := Ideal.Quotient.maximal_of_isField _
       ((Polynomial.quotientSpanXSubCAlgEquiv P.x).toRingEquiv.isField
         (Field.toIsField F))
-    let s_fn : Ideal C.CoordinateRing → ℕ := fun Q =>
+    let s_fn : Ideal C.CoordinateRing → ℕ := fun Q ↦
       if hQ : Q ∈ p.primesOver C.CoordinateRing then C.primesOverExp P.x Q hQ else 0
     have h_s_fn_eq : ∀ Q (hQ : Q ∈ p.primesOver C.CoordinateRing),
-        s_fn Q = C.primesOverExp P.x Q hQ := fun Q hQ => dif_pos hQ
+        s_fn Q = C.primesOverExp P.x Q hQ := fun Q hQ ↦ dif_pos hQ
     have h_s_fn_ge : ∀ Q ∈ p.primesOver C.CoordinateRing, 1 ≤ s_fn Q := by
       intro Q hQ
       rw [h_s_fn_eq Q hQ]
@@ -1302,7 +1302,7 @@ theorem map_eq_localRing_max_pow_count
   conv_lhs => rw [← Ideal.finprod_heightOneSpectrum_factorization hI', h_finprod_to_prod]
   rw [Ideal.map_finset_prod]
   rw [← Finset.prod_erase_mul s _ hvM_in_s]
-  rw [Finset.prod_eq_one (fun v hv => ?_), one_mul]
+  rw [Finset.prod_eq_one (fun v hv ↦ ?_), one_mul]
   · change Ideal.map (algebraMap A (Localization.AtPrime M))
         (vM.asIdeal ^ (Associates.mk vM.asIdeal).count (Associates.mk I).factors) = _
     rw [Ideal.map_pow, Localization.AtPrime.map_eq_maximalIdeal]
@@ -1490,7 +1490,7 @@ theorem count_finset_prod_factors {α : Type*} [CommMonoidWithZero α] [Nontrivi
     simp [Associates.factors_one, Associates.count_zero hp]
   | @insert j s' hi ih =>
     have h_jne : f j ≠ 0 := hf _ (Finset.mem_insert_self _ _)
-    have h_sne : ∀ k ∈ s', f k ≠ 0 := fun k hk => hf _ (Finset.mem_insert_of_mem hk)
+    have h_sne : ∀ k ∈ s', f k ≠ 0 := fun k hk ↦ hf _ (Finset.mem_insert_of_mem hk)
     have h_prod_ne : ∏ k ∈ s', f k ≠ 0 := Finset.prod_ne_zero_iff.mpr h_sne
     rw [Finset.prod_insert hi, Associates.count_mul h_jne h_prod_ne hp,
       Finset.sum_insert hi, ih h_sne]
@@ -1585,15 +1585,15 @@ theorem count_relNorm_singleton_eq_sum_count_fiber
       (FaithfulSMul.algebraMap_injective (Polynomial F) C.CoordinateRing)] at h_over
     exact h_over
   let toHOS : ∀ Q ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing,
-      IsDedekindDomain.HeightOneSpectrum C.CoordinateRing := fun Q hQ =>
+      IsDedekindDomain.HeightOneSpectrum C.CoordinateRing := fun Q hQ ↦
     ⟨Q, ((IsDedekindDomain.mem_primesOverFinset_iff (B := C.CoordinateRing) hp_ne).mp hQ).1,
       h_prime_ne_bot Q hQ⟩
   let sH : Finset (IsDedekindDomain.HeightOneSpectrum C.CoordinateRing) :=
     (IsDedekindDomain.primesOverFinset p C.CoordinateRing).attach.image
-      (fun ⟨Q, hQ⟩ => toHOS Q hQ)
+      (fun ⟨Q, hQ⟩ ↦ toHOS Q hQ)
   set S : Finset (IsDedekindDomain.HeightOneSpectrum C.CoordinateRing) :=
     h_supp.toFinset ∪ sH with hS_def
-  have hS_supp : Function.mulSupport (fun Q : IsDedekindDomain.HeightOneSpectrum C.CoordinateRing =>
+  have hS_supp : Function.mulSupport (fun Q : IsDedekindDomain.HeightOneSpectrum C.CoordinateRing ↦
       Q.maxPowDividing (Ideal.span ({u} : Set _))) ⊆ ↑S := by
     intro Q hQ
     simp only [hS_def, Finset.coe_union, Set.mem_union]
@@ -1693,8 +1693,8 @@ theorem count_relNorm_singleton_eq_sum_count_fiber
   rw [Finset.sum_congr rfl h_S_split]
   rw [Finset.sum_ite, Finset.sum_const_zero, add_zero]
   refine Finset.sum_bij'
-    (i := fun (Q : IsDedekindDomain.HeightOneSpectrum C.CoordinateRing) _ => Q.asIdeal)
-    (j := fun (Q' : Ideal C.CoordinateRing) hQ' => toHOS Q' hQ')
+    (i := fun (Q : IsDedekindDomain.HeightOneSpectrum C.CoordinateRing) _ ↦ Q.asIdeal)
+    (j := fun (Q' : Ideal C.CoordinateRing) hQ' ↦ toHOS Q' hQ')
     ?_ ?_ ?_ ?_ ?_
   · intro Q hQ
     exact (Finset.mem_filter.mp hQ).2
@@ -1781,7 +1781,7 @@ theorem sum_count_X_sub_C_eq_natDegree [IsAlgClosed F] [DecidableEq F]
           (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))).count
         (Associates.mk (Ideal.span ({p} : Set (Polynomial F)))).factors =
       p.natDegree := by
-  rw [Finset.sum_congr rfl (fun a _ =>
+  rw [Finset.sum_congr rfl (fun a _ ↦
     SmoothPlaneCurve.count_X_sub_C_eq_rootMultiplicity (F := F) hp a)]
   exact Polynomial.sum_rootMultiplicity_eq_natDegree F p
 
@@ -1822,12 +1822,12 @@ theorem fiber_sum_divisorOf_algMap_eq_count_norm
       ∑ P ∈ (C.smoothPoint_x_preimage_finite a).toFinset,
         ((Associates.mk (C.maximalIdealAt P)).count
           (Associates.mk (Ideal.span ({u} : Set _))).factors : ℤ) from
-    Finset.sum_congr rfl (fun P _ => C.divisorOf_algebraMap_apply_eq_count P hu)]
+    Finset.sum_congr rfl (fun P _ ↦ C.divisorOf_algebraMap_apply_eq_count P hu)]
   rw [C.count_relNorm_singleton_eq_sum_count_fiber hu a]
   push_cast
   refine Finset.sum_bij'
-    (i := fun (P : C.SmoothPoint) _ => C.maximalIdealAt P)
-    (j := fun (Q : Ideal C.CoordinateRing) hQ =>
+    (i := fun (P : C.SmoothPoint) _ ↦ C.maximalIdealAt P)
+    (j := fun (Q : Ideal C.CoordinateRing) hQ ↦
       (C.exists_smoothPoint_of_isMaximal (h_isMax_of_primesOver Q hQ)).choose)
     ?_ ?_ ?_ ?_ ?_
   · intro P hP
@@ -1908,10 +1908,10 @@ theorem divisorOf_algMap_degree_eq_natDegree_norm
     (C.divisorOf (algebraMap C.CoordinateRing C.FunctionField u)).degree =
       ((Algebra.norm (Polynomial F) u).natDegree : ℤ) := by
   classical
-  have hNu : Algebra.norm (Polynomial F) u ≠ 0 := fun h =>
+  have hNu : Algebra.norm (Polynomial F) u ≠ 0 := fun h ↦
     hu ((Algebra.norm_eq_zero_iff (R := Polynomial F)).mp h)
   let Sa : F → Finset C.SmoothPoint :=
-    fun a => (C.smoothPoint_x_preimage_finite a).toFinset
+    fun a ↦ (C.smoothPoint_x_preimage_finite a).toFinset
   set S : Finset C.SmoothPoint :=
     (Algebra.norm (Polynomial F) u).roots.toFinset.biUnion Sa with hS_def
   have h_disjoint : ((Algebra.norm (Polynomial F) u).roots.toFinset :
@@ -1950,9 +1950,9 @@ theorem divisorOf_algMap_degree_eq_natDegree_norm
     exact (C.smoothPoint_x_preimage_finite P.x).mem_toFinset.mpr rfl
   rw [show (C.divisorOf (algebraMap C.CoordinateRing C.FunctionField u)).degree =
       ∑ P ∈ S, C.divisorOf (algebraMap C.CoordinateRing C.FunctionField u) P from
-    Finsupp.sum_of_support_subset _ h_supp_sub _ (fun _ _ => rfl)]
+    Finsupp.sum_of_support_subset _ h_supp_sub _ (fun _ _ ↦ rfl)]
   rw [hS_def, Finset.sum_biUnion h_disjoint]
-  rw [Finset.sum_congr rfl (fun a _ =>
+  rw [Finset.sum_congr rfl (fun a _ ↦
     C.fiber_sum_divisorOf_algMap_eq_count_norm hu a)]
   exact_mod_cast SmoothPlaneCurve.sum_count_X_sub_C_eq_natDegree (F := F) hNu
 
@@ -2041,7 +2041,7 @@ theorem toProjective_eq_projectiveDivisorOf_witness
     {D : Divisor C} (hD_aff_principal : C.IsPrincipal D) (hD_degZero : D.degree = 0) :
     ∃ g : C.FunctionField, g ≠ 0 ∧ C.projectiveDivisorOf g = D.toProjective :=
   C.toProjective_eq_projectiveDivisorOf_witness_of_helperB hD_aff_principal hD_degZero
-    (fun f _ => C.helperB f)
+    (fun f _ ↦ C.helperB f)
 
 /-- **Principal projective divisors lie in `degZero`** (witness drop): the
     `PrincipalImpliesDegZero W` predicate of `AFConditional.lean` follows
