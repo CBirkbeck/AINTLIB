@@ -984,7 +984,8 @@ theorem restrictionMap_canonicalMap_f_isUnit_laurentMinus
       rationalOpen D₀.T D₀.s) :
     IsUnit (restrictionMapHom D₀ (laurentMinusDatum D₀ f) hsub
       (D₀.canonicalMap f)) := by
-  rw [restrictionMapHom_canonicalMap]; exact canonicalMap_f_isUnit_in_laurentMinus D₀ f
+  rw [restrictionMapHom_canonicalMap]
+  exact canonicalMap_f_isUnit_in_laurentMinus D₀ f
 
 /-- Backward uncompleted hom `Loc_B(canonicalMap f) →+* presheafValue (laurentMinus)`. -/
 noncomputable def iteratedMinus_backwardLocHom
