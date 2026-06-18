@@ -95,23 +95,17 @@ theorem canonicalMap_b_isPowerBounded_in_trivialPlus
     TopologicalRing.IsPowerBounded
       ((trivialPlusDatum B P b).canonicalMap b) := by
   set D := trivialPlusDatum B P b
-  -- `D.canonicalMap b = D.coeRingHom (algebraMap B (Localization.Away 1) b)`.
   have hcm : D.canonicalMap b =
       D.coeRingHom (algebraMap B (Localization.Away D.s) b) := rfl
   rw [hcm]
-  -- Show `algebraMap b = divByS b 1` lies in `locSubring P {b} 1`.
   have halg_eq : algebraMap B (Localization.Away D.s) b = divByS b D.s := by
     change algebraMap B (Localization.Away (1 : B)) b = divByS b 1
     rw [divByS_eq_algebraMap]
   rw [halg_eq]
-  -- `divByS b D.s ∈ locSubring D.P D.T D.s` since `b ∈ D.T = {b}`.
   have hmem : divByS b D.s ∈ locSubring D.P D.T D.s :=
     divByS_mem_locSubring D.P D.T D.s (Finset.mem_singleton_self b)
-  -- Powers of `divByS b D.s` all lie in `locSubring`.
   have hpow : ∀ n : ℕ, (divByS b D.s) ^ n ∈ locSubring D.P D.T D.s :=
     fun n => (locSubring D.P D.T D.s).pow_mem hmem n
-  -- The range of `(D.coeRingHom (divByS b D.s))^·` lies in
-  -- `D.coeRingHom '' locSubring`, which is bounded.
   have hrange : Set.range
       ((D.coeRingHom (divByS b D.s)) ^ · : ℕ → presheafValue D) ⊆
       D.coeRingHom '' (locSubring D.P D.T D.s : Set (Localization.Away D.s)) := by
@@ -341,8 +335,7 @@ theorem plusLocToQuotient_algebraMap (b a : B) :
     plusLocToQuotient B b (algebraMap B _ a) =
       (Ideal.Quotient.mk (plusFSubXIdeal B b))
         (algebraMap B ↥(TateAlgebra B) a) := by
-  simp only [plusLocToQuotient, IsLocalization.Away.lift_eq]
-  rfl
+  simp [plusLocToQuotient, IsLocalization.Away.lift_eq]
 
 end Example638PlusBackwardAlgebraic
 
