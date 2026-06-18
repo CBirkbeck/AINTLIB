@@ -303,8 +303,8 @@ theorem AddHomProperty_of_miller_divZeroReduce
   AddHomProperty_of_AFInputs φ cd
     ⟨h_miller₁, h_dzr₁, noFinitePolesBridge_unconditional W₁⟩
     ⟨h_miller₂, h_dzr₂, noFinitePolesBridge_unconditional W₂⟩
-    (fun _ hD => SmoothPlaneCurve.principal_mem_degZero (C := ⟨W₁⟩) hD)
-    (fun _ hD => SmoothPlaneCurve.principal_mem_degZero (C := ⟨W₂⟩) hD)
+    (fun _ hD ↦ SmoothPlaneCurve.principal_mem_degZero (C := ⟨W₁⟩) hD)
+    (fun _ hD ↦ SmoothPlaneCurve.principal_mem_degZero (C := ⟨W₂⟩) hD)
     h_pres
 
 /-! ### T-III-3-004 (Pic⁰(E) ≅ E) witness-parametric on Miller + DivZeroReduce
@@ -342,14 +342,14 @@ noncomputable def picZeroIsoE_of_AFInputs
   let h_van : ∀ D : ProjectiveDivisor (⟨W⟩ : SmoothPlaneCurve F),
       D ∈ (⟨W⟩ : SmoothPlaneCurve F).projPrincipalSubgroup →
       Curves.projectiveDivisorSum W D = 0 :=
-    a.h_van (fun _ hD => SmoothPlaneCurve.principal_mem_degZero (C := ⟨W⟩) hD)
+    a.h_van (fun _ hD ↦ SmoothPlaneCurve.principal_mem_degZero (C := ⟨W⟩) hD)
   let sigmaBar : SmoothPlaneCurve.PicProj₀ (⟨W⟩ : SmoothPlaneCurve F) →+ W.Point :=
     HasseWeil.EC.Isogeny.picZeroSumOfWitness W h_van
   { toFun := sigmaBar
     invFun := picZeroOfPoint W
-    left_inv := fun D =>
+    left_inv := fun D ↦
       h_inj_of_divZeroReduce W a.divZeroReduce h_van D
-    right_inv := fun P =>
+    right_inv := fun P ↦
       HasseWeil.EC.Isogeny.picZeroSumOfWitness_picZeroOfPoint W h_van P
     map_add' := sigmaBar.map_add }
 
