@@ -722,11 +722,7 @@ theorem relativeLaurentNormalized_forwardInnerLocHom_continuous
       simp only [RingHom.comp_apply]
       exact IsLocalization.Away.lift_eq D.s
         (relativeLaurentNormalized_Ds_isUnit_in_Loc E D hsub) a
-    rw [show ⇑((relativeLaurentNormalized_forwardInnerLocHom E D hsub).comp
-        (algebraMap A (Localization.Away D.s))) =
-      ⇑((algebraMap (presheafValue E)
-          (Localization.Away (E.canonicalMap D.s))).comp E.canonicalMap) from
-      congr_arg _ heq]
+    rw [heq]
     exact (algebraMap_continuous_loc D_at_E_data).comp (canonicalMap_continuous E)
   -- hpow: forwardInner(divByS t D.s) is power-bounded for t ∈ D.T.
   have hpow : ∀ t ∈ D.T, @TopologicalRing.IsPowerBounded _ _ D_at_E_data.topology
@@ -736,8 +732,6 @@ theorem relativeLaurentNormalized_forwardInnerLocHom_continuous
     rw [relativeLaurentNormalized_forwardInnerLocHom_divByS]
     -- divByS (E.canonicalMap t) (E.canonicalMap D.s) ∈ locSubring of D_at_E_data.
     apply isPowerBounded_of_mem_locSubring D_at_E_data
-    change divByS (E.canonicalMap t) (E.canonicalMap D.s) ∈
-      locSubring D_at_E_data.P D_at_E_data.T D_at_E_data.s
     -- D_at_E_data.T = D.T.image E.canonicalMap, so E.canonicalMap t ∈ T.
     exact divByS_mem_locSubring D_at_E_data.P D_at_E_data.T D_at_E_data.s
       (Finset.mem_image.mpr ⟨t, ht, rfl⟩)
@@ -916,9 +910,7 @@ theorem relativeLaurentNormalized_backwardLocHom_continuous
       ext b
       simp only [RingHom.comp_apply]
       exact relativeLaurentNormalized_backwardLocHom_algebraMap E D hsub b
-    rw [show ⇑((relativeLaurentNormalized_backwardLocHom E D hsub).comp
-        (algebraMap (presheafValue E) (Localization.Away D_at_E_data.s))) =
-      ⇑(restrictionMapHom E D hsub) from congr_arg _ heq]
+    rw [heq]
     exact restrictionMapHom_continuous E D hsub
   -- hpow: backwardLocHom(divByS t' s_at_E) is power-bounded for t' ∈ D_at_E_data.T.
   have hpow : ∀ t' ∈ D_at_E_data.T,
