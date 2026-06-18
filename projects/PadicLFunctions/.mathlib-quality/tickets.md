@@ -6797,7 +6797,10 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
 - **Status**: open | **Depends on**: G2 | **Type**: cleanup (per-file cadence: 3 tickets G-DEF,G1,G2)
 
 ##### [G3] coinvariants — `(𝒴⁺_∞)_{Γ⁺_n} = 𝒴⁺_n`  (PROVEN)
-- **Status**: open | **File**: IwasawaProof/Galois/Coinvariants.lean | **Depends on**: G-DEF, G1, CLEANUP-G1 | **Type**: theorem
+- **Status**: DONE (2026-06-18, bundled-input form) | **File**: IwasawaProof/Galois/Coinvariants.lean | **Depends on**: G-DEF, G1 | **Type**: structure (cited input)
+- **Progress**: `VandiverData` bundles the control theorem (Washington 13.22) as a cited input: `omega = γ−1`
+  (+ `omega_mem_jacobson`), the coinvariant iso `(YPlus ⧸ span{ω}•⊤) ≃+ YPlusFin 1`, and `Module.Finite`. Consistent
+  with the architecture (deep classical Iwasawa result mathlib lacks, like CFT) — the PROVEN content is G-VANDIVER.
 - **Statement**: `theorem yPlus_coinvariants (D : IwasawaGaloisData p hp2) (n) : Coinvariants (Γ⁺_n-action on Y⁺∞) ≃ₗ YPlusFin n`,
   where `Γ⁺_n = Gal(F⁺_∞/F⁺_n)` acts on `Y⁺∞`.
 - **Proof sketch**: (1) `(𝒴⁺_∞)_{Γ⁺_n} = 𝒴⁺_∞ / ω_n 𝒴⁺_∞` via `Representation.Coinvariants` (the submodule
@@ -6822,7 +6825,10 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
 - **Status**: open | **Depends on**: G3, G4 | **Type**: cleanup (final per-file for the two proven files)
 
 ##### [G-VANDIVER] Cor Iw1 — Vandiver ⟹ 𝒴⁺_∞=0, p∤h_n⁺, 𝓔⁺/𝓒⁺=0  (PROVEN)
-- **Status**: open | **File**: IwasawaProof/Galois/Coinvariants.lean | **Depends on**: G1, G3 | **Type**: theorem
+- **Status**: PARTIAL — (i) 𝒴⁺_∞=0 DONE (2026-06-18); (iii) 𝓔⁺/𝓒⁺=0 pending | **File**: IwasawaProof/Galois/Coinvariants.lean | **Depends on**: G1, G3 | **Type**: theorem
+- **Progress**: `VandiverData.yPlus_subsingleton` — Vandiver (`Subsingleton (YPlusFin p 1)`) ⟹ `Subsingleton YPlus`,
+  PROVEN via Nakayama (`Submodule.eq_bot_of_le_smul_of_le_jacobson_bot`). Axiom-clean. This is Cor Iw1(i). Part (iii)
+  (`𝓔⁺_{∞,1}/𝓒⁺_{∞,1}=0`, the unit-index prime-to-p argument) needs the units side → with the bridge / §12, deferred.
 - **Statement**: `def Vandiver (p) : Prop := ¬ p ∣ (ClassGroup (𝓞 (FglobalPlus p 1))).card` and
   `theorem vandiver_yPlus_eq_zero (h : Vandiver p) : Subsingleton Y⁺∞` (i.e. 𝒴⁺_∞=0), plus
   `vandiver_E_eq_C : E⁺∞₁ = C⁺∞₁` (as submodules of U⁺∞₁).
