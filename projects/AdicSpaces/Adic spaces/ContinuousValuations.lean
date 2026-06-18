@@ -39,12 +39,10 @@ variable (v : Valuation A Γ₀) [TopologicalSpace A]
 /-- A valuation is continuous iff `{ a | v(a) < γ }` is open for all units `γ`. -/
 lemma isContinuous_iff_units :
     v.IsContinuous ↔ ∀ (γ : Γ₀ˣ), IsOpen { a : A | v a < γ } := by
-  constructor
-  · exact fun h γ ↦ h γ
-  · intro h γ
-    by_cases hγ : γ = 0
-    · subst hγ; simp [not_lt_zero']
-    · exact h (Units.mk0 γ hγ)
+  refine ⟨fun h γ ↦ h γ, fun h γ ↦ ?_⟩
+  by_cases hγ : γ = 0
+  · subst hγ; simp
+  · exact h (Units.mk0 γ hγ)
 
 /-- If `v` is continuous, then `v.ltAddSubgroup γ` is open for every unit `γ`. -/
 lemma IsContinuous.isOpen_ltAddSubgroup (hv : v.IsContinuous) (γ : Γ₀ˣ) :
@@ -59,25 +57,20 @@ lemma IsContinuous.continuousAt_of_ne_zero [IsTopologicalRing A]
     [TopologicalSpace Γ₀] (hv : v.IsContinuous) {a : A} (ha : v a ≠ 0) :
     ContinuousAt v a := by
   rw [ContinuousAt]
-  set B : Set A := {b | v b < v a} with hB_def
+  set B : Set A := {b | v b < v a}
   have hB_open : IsOpen B := hv (v a)
   have hB_zero : (0 : A) ∈ B := by
     change v 0 < v a
     rw [v.map_zero]; exact zero_lt_iff.mpr ha
-  set T : Set A := (· + a) '' B with hT_def
-  have hT_open : IsOpen T :=
-    (Homeomorph.addRight a).isOpenMap _ hB_open
+  set T : Set A := (· + a) '' B
+  have hT_open : IsOpen T := (Homeomorph.addRight a).isOpenMap _ hB_open
   have hT_a : a ∈ T := ⟨0, hB_zero, zero_add a⟩
-  have hT_nhds : T ∈ nhds a := hT_open.mem_nhds hT_a
-  have hT_v_const : ∀ x ∈ T, v x = v a := by
+  have heq : v =ᶠ[nhds a] fun _ ↦ v a := by
+    refine Filter.eventually_of_mem (hT_open.mem_nhds hT_a) ?_
     rintro x ⟨b, hb, rfl⟩
     change v (b + a) = v a
-    have hvb_lt : v b < v a := hb
-    have hne : v a ≠ v b := ne_of_gt hvb_lt
-    rw [add_comm b a, v.map_add_of_distinct_val hne]
-    exact max_eq_left (le_of_lt hvb_lt)
-  have heq : v =ᶠ[nhds a] fun _ => v a :=
-    Filter.eventually_of_mem hT_nhds (fun x hx => hT_v_const x hx)
+    rw [add_comm b a, v.map_add_of_distinct_val (ne_of_gt hb)]
+    exact max_eq_left hb.le
   exact heq.tendsto
 
 /-- A `Valuation.IsContinuous` valuation (Wedhorn 7.7) on a topological ring is
@@ -100,12 +93,11 @@ lemma IsContinuous.continuousAt_of_eq_zero [IsTopologicalRing A]
     ContinuousAt v a := by
   rw [ContinuousAt, ha, WithZeroTopology.hasBasis_nhds_zero.tendsto_right_iff]
   intro γ hγ
-  have hopen : IsOpen {b : A | v b < γ} := hv γ
   have hmem : a ∈ {b : A | v b < γ} := by
     change v a < γ
     rw [ha]
     exact zero_lt_iff.mpr hγ
-  exact Filter.eventually_of_mem (hopen.mem_nhds hmem) (fun x hx => hx)
+  exact Filter.eventually_of_mem ((hv γ).mem_nhds hmem) fun _ hx ↦ hx
 
 open scoped WithZeroTopology in
 /-- A `Valuation.IsContinuous` valuation (Wedhorn 7.7) on a topological ring is
@@ -143,7 +135,6 @@ variable [TopologicalSpace A]
 lemma mem_cont_iff (v : Spv A) : v ∈ Cont A ↔ v.IsContinuous := Iff.rfl
 
 omit [TopologicalSpace A] in
-/-- `embedding ∘ embed v ∘ (valuation A) = v` on elements of `A`. -/
 private lemma embed_comp_valuation_eq {Γ₀ : Type*}
     [LinearOrderedCommGroupWithZero Γ₀] (v : Valuation A Γ₀) (a : A) :
     letI := ValuativeRel.ofValuation v
@@ -157,9 +148,7 @@ private lemma embed_comp_valuation_eq {Γ₀ : Type*}
     (ValuativeRel.ValueGroupWithZero.embed v
       (ValuativeRel.ValueGroupWithZero.mk a
         ⟨1, (ValuativeRel.posSubmonoid A).one_mem⟩)) = v a
-  simp only [ValuativeRel.ValueGroupWithZero.embed_mk, map_one, div_one,
-    MonoidWithZeroHom.ValueGroup₀.embedding_restrict₀]
-  rfl
+  simp [ValuativeRel.ValueGroupWithZero.embed_mk, MonoidWithZeroHom.ValueGroup₀.embedding_restrict₀]
 
 /-- If `v : Valuation A Γ₀` is continuous, then `ofValuation v` is continuous. -/
 lemma isContinuous_ofValuation_of {Γ₀ : Type*}
@@ -209,8 +198,6 @@ end Functoriality
 
 end ValuationSpectrum
 
-/-! ## Wedhorn 7.8(3) — alternative continuity characterisation -/
-
 namespace Valuation
 
 variable {A : Type*} [CommRing A] [TopologicalSpace A]
@@ -219,24 +206,19 @@ variable {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀]
 /-- **Forward direction of Wedhorn 7.8(3)** (under topological additive
 group): if `v` is continuous (Definition 7.7), then the half-space
 `{a | γ ≤ v a}` (complement of the open ball `{v a < γ}`) is open for every
-`γ`. Proof: the open ball is an open additive subgroup
-(`ltAddSubgroup`), hence clopen (`AddSubgroup.isClosed_of_isOpen`), so its
-complement is open. -/
+`γ`. -/
 lemma IsContinuous.isOpen_setOf_ge [ContinuousAdd A] {v : Valuation A Γ₀}
     (hv : v.IsContinuous) (γ : Γ₀) :
     IsOpen { a : A | γ ≤ v a } := by
   by_cases hγ : γ = 0
   · subst hγ
-    have hEq : { a : A | (0 : Γ₀) ≤ v a } = Set.univ := by
-      ext a
-      simp only [Set.mem_setOf_eq, Set.mem_univ, iff_true]
-      exact zero_le' (a := v a)
+    have hEq : { a : A | (0 : Γ₀) ≤ v a } = Set.univ :=
+      Set.eq_univ_of_forall fun _ ↦ zero_le
     rw [hEq]
     exact isOpen_univ
-  · have hUnit_open : IsOpen ((v.ltAddSubgroup (Units.mk0 γ hγ)) : Set A) :=
-      Valuation.IsContinuous.isOpen_ltAddSubgroup (v := v) hv (Units.mk0 γ hγ)
-    have hClosed : IsClosed ((v.ltAddSubgroup (Units.mk0 γ hγ)) : Set A) :=
-      AddSubgroup.isClosed_of_isOpen _ hUnit_open
+  · have hClosed : IsClosed ((v.ltAddSubgroup (Units.mk0 γ hγ)) : Set A) :=
+      AddSubgroup.isClosed_of_isOpen _
+        (Valuation.IsContinuous.isOpen_ltAddSubgroup (v := v) hv (Units.mk0 γ hγ))
     have hcompl : { a : A | γ ≤ v a } =
         ((v.ltAddSubgroup (Units.mk0 γ hγ)) : Set A)ᶜ := by
       ext a
@@ -294,26 +276,20 @@ triangle inequality makes `{z | v z = v x}` a neighbourhood of `x` when `v x ≠
 lemma IsContinuous.setOf_value_eq_mem_nhds {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀]
     {v : Valuation S Γ₀} (hv : v.IsContinuous) {x : S} (hx : v x ≠ 0) :
     {z | v z = v x} ∈ nhds x := by
-  have hB_open : IsOpen {b : S | v b < v x} := hv (v x)
   have hB_zero : (0 : S) ∈ {b : S | v b < v x} := by
     change v 0 < v x
     rw [v.map_zero]; exact zero_lt_iff.mpr hx
   have hT_open : IsOpen ((· + x) '' {b | v b < v x}) :=
-    (Homeomorph.addRight x).isOpenMap _ hB_open
+    (Homeomorph.addRight x).isOpenMap _ (hv (v x))
   have hT_x : x ∈ (· + x) '' {b | v b < v x} := ⟨0, hB_zero, zero_add x⟩
   refine Filter.mem_of_superset (hT_open.mem_nhds hT_x) ?_
   rintro _ ⟨b, hb, rfl⟩
   change v (b + x) = v x
-  have hne : v x ≠ v b := ne_of_gt hb
-  rw [add_comm b x, v.map_add_of_distinct_val hne]
-  exact max_eq_left (le_of_lt hb)
+  rw [add_comm b x, v.map_add_of_distinct_val (ne_of_gt hb)]
+  exact max_eq_left hb.le
 
 variable {R : Type*} [CommRing R]
 
-/-- Directed core of `isEquiv_of_isContinuous_of_denseRange`: under a dense ring map and
-agreement of the induced preorders on the dense image, the `v`-order refines the `w`-order.
-A top-level (universe-polymorphic) lemma so it can be applied with the value groups in
-either order. -/
 private lemma le_of_isContinuous_of_denseRange_of_le {Γv Γw : Type*}
     [LinearOrderedCommGroupWithZero Γv] [LinearOrderedCommGroupWithZero Γw]
     {φ : R →+* S} (hdense : DenseRange φ)
@@ -328,10 +304,9 @@ private lemma le_of_isContinuous_of_denseRange_of_le {Γv Γw : Type*}
   by_contra hwxy
   rw [not_le] at hwxy
   have hwx : w x ≠ 0 := by
-    intro h0; rw [h0] at hwxy; exact absurd hwxy (not_lt.mpr zero_le')
+    intro h0; rw [h0] at hwxy; exact absurd hwxy (not_lt.mpr zero_le)
   by_cases hvx : v x = 0
-  · -- support trick at `x`: two approximants with equal `w`-value but different `v`-value
-    have hmem1 : x ∈ {z : S | v z < 1} := by change v x < 1; rw [hvx]; exact zero_lt_one
+  · have hmem1 : x ∈ {z : S | v z < 1} := by change v x < 1; rw [hvx]; exact zero_lt_one
     have hN1 : {z | w z = w x} ∩ {z : S | v z < 1} ∈ nhds x :=
       Filter.inter_mem (hw.setOf_value_eq_mem_nhds hwx) ((hv 1).mem_nhds hmem1)
     obtain ⟨a₁, ha₁⟩ := hex x _ hN1
@@ -351,15 +326,13 @@ private lemma le_of_isContinuous_of_denseRange_of_le {Γv Γw : Type*}
     simp only [Set.mem_inter_iff, Set.mem_setOf_eq] at ha₂
     obtain ⟨ha₂w, ha₂v⟩ := ha₂
     have hww : w (φ a₁) ≤ w (φ a₂) := by rw [ha₁w, ha₂w]
-    have hvv : v (φ a₁) ≤ v (φ a₂) := (h a₁ a₂).mpr hww
-    exact absurd ha₂v (not_lt.mpr hvv)
-  · -- `v x ≠ 0`: pick `a ≈ x` with both values exact, then compare with `b ≈ y`
-    have hN_a : {z | v z = v x} ∩ {z | w z = w x} ∈ nhds x :=
+    exact absurd ha₂v (not_lt.mpr ((h a₁ a₂).mpr hww))
+  · have hN_a : {z | v z = v x} ∩ {z | w z = w x} ∈ nhds x :=
       Filter.inter_mem (hv.setOf_value_eq_mem_nhds hvx) (hw.setOf_value_eq_mem_nhds hwx)
     obtain ⟨a, ha⟩ := hex x _ hN_a
     simp only [Set.mem_inter_iff, Set.mem_setOf_eq] at ha
     obtain ⟨ha_v, ha_w⟩ := ha
-    have hvy : v y ≠ 0 := fun h0 => hvx (le_antisymm (h0 ▸ hxy) zero_le')
+    have hvy : v y ≠ 0 := fun h0 ↦ hvx (le_antisymm (h0 ▸ hxy) zero_le)
     by_cases hwy : w y = 0
     · have hmemb : y ∈ {z : S | w z < w x} := hwxy
       have hN_b : {z | v z = v y} ∩ {z : S | w z < w x} ∈ nhds y :=
@@ -393,9 +366,9 @@ theorem isEquiv_of_isContinuous_of_denseRange {Γv Γw : Type*}
     (h : ∀ a b : R, v (φ a) ≤ v (φ b) ↔ w (φ a) ≤ w (φ b)) :
     v.IsEquiv w := by
   intro x y
-  exact ⟨fun hxy => le_of_isContinuous_of_denseRange_of_le hdense hv hw h hxy,
-         fun hxy => le_of_isContinuous_of_denseRange_of_le hdense hw hv
-           (fun a b => (h a b).symm) hxy⟩
+  exact ⟨fun hxy ↦ le_of_isContinuous_of_denseRange_of_le hdense hv hw h hxy,
+         fun hxy ↦ le_of_isContinuous_of_denseRange_of_le hdense hw hv
+           (fun a b ↦ (h a b).symm) hxy⟩
 
 end Valuation
 
@@ -425,13 +398,12 @@ theorem eq_of_isContinuous_of_comap_eq_of_denseRange {φ : R →+* S} (hdense : 
     exact (ValuativeRel.valuation S).vle_iff_le
   have hrel : ∀ a b : R, v.vle (φ a) (φ b) ↔ w.vle (φ a) (φ b) := by
     intro a b
-    have he : v.vle (φ a) (φ b) = w.vle (φ a) (φ b) := by
-      rw [← comap_vle, ← comap_vle]; exact congrArg (fun u : Spv R => u.vle a b) h
-    exact Iff.of_eq he
+    refine Iff.of_eq ?_
+    rw [← comap_vle, ← comap_vle]; exact congrArg (fun u : Spv R ↦ u.vle a b) h
   have key : (@ValuativeRel.valuation S _ v.toValuativeRel).IsEquiv
       (@ValuativeRel.valuation S _ w.toValuativeRel) :=
     Valuation.isEquiv_of_isContinuous_of_denseRange hdense hv hw
-      (fun a b => by rw [← bridgeV, ← bridgeW]; exact hrel a b)
+      (fun a b ↦ by rw [← bridgeV, ← bridgeW]; exact hrel a b)
   calc v = ofValuation (@ValuativeRel.valuation S _ v.toValuativeRel) :=
             (ofValuation_valuation v).symm
     _ = ofValuation (@ValuativeRel.valuation S _ w.toValuativeRel) :=
