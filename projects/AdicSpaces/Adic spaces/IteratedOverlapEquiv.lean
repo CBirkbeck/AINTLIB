@@ -94,10 +94,7 @@ private theorem iteratedOverlap_baseHom_DsTimes_f_isUnit
   haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
   haveI : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
   haveI := iteratedOverlap_isLocalization_target P D₀ f hLocLift_B
-  change IsUnit (algebraMap (presheafValue D₀)
-    (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s))
-    (D₀.canonicalMap (D₀.s * f)))
-  rw [map_mul, map_mul]
+  rw [RingHom.comp_apply, map_mul, map_mul]
   exact ((isUnit_s_in_presheafValue D₀).map _).mul
     (IsLocalization.Away.algebraMap_isUnit (D₀.canonicalMap f))
 
@@ -974,14 +971,8 @@ private theorem iteratedOverlap_backwardToCompletion_comp_forwardLocHom_to_B
     iteratedOverlap_isLocalization_target P D₀ f hLocLift_B
   apply IsLocalization.ringHom_ext (Submonoid.powers (D₀.s * f))
   ext a
-  change iteratedOverlap_backwardToCompletion P D₀ f hLocLift_B hsub
-    (iteratedOverlap_forwardLocHom_to_B P D₀ f hLocLift_B
-      (algebraMap A (Localization.Away ((laurentOverlapDatum D₀ f).s)) a)) =
-    (laurentOverlapDatum D₀ f).coeRingHom
-      (algebraMap A (Localization.Away ((laurentOverlapDatum D₀ f).s)) a)
-  rw [iteratedOverlap_forwardLocHom_to_B_algebraMap,
-      iteratedOverlap_backwardToCompletion_algebraMap,
-      restrictionMapHom_canonicalMap]
+  simp only [RingHom.comp_apply, iteratedOverlap_forwardLocHom_to_B_algebraMap,
+    iteratedOverlap_backwardToCompletion_algebraMap, restrictionMapHom_canonicalMap]
   rfl
 
 /-! ### Phase 6: forward and backward completion homs -/
