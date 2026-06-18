@@ -77,7 +77,7 @@ theorem coeff_one_formalIsogenySeries_frobenius_of_card_ne_one
     (h : Fintype.card K ≠ 1) :
     PowerSeries.coeff 1 (formalIsogenySeries W (frobeniusIsog W)) = 0 := by
   rw [formalIsogenySeries_frobenius, PowerSeries.coeff_X_pow]
-  exact if_neg fun heq => h heq.symm
+  exact if_neg fun heq ↦ h heq.symm
 
 /-! ### `omegaPullbackCoeff(π) = 0` (Frobenius is purely inseparable)
 
@@ -129,7 +129,7 @@ theorem not_isSeparable_frobenius_of_witness
       omegaPullbackCoeff W (frobeniusIsog W) ≠ 0) :
     ¬ (frobeniusIsog W).IsSeparable := by
   rw [h_sep_iff, omegaPullbackCoeff_frobenius]
-  exact fun h => h rfl
+  exact fun h ↦ h rfl
 
 /-! ### `m + n·π` chain witness closer (Silverman III.5.5)
 
