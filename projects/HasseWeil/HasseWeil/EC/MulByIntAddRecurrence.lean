@@ -74,7 +74,7 @@ theorem addNonInversePair_mulByInt_one (m : ℤ) (hm : m ≠ 0) (hm1 : m + 1 ≠
   · apply AddNonInversePair_of_x_ne
     rw [hpmx, hp1x]
     exact mulByInt_x_ne_mulByInt_x W m 1 hm one_ne_zero hm_ne_one
-      (fun h => hm1 (by omega))
+      (fun h ↦ hm1 (by omega))
 
 set_option maxHeartbeats 1000000 in
 /-- **Pair-order RB-ID** (`[m] ⊞ [1] = [m+1]`, Silverman III.5.3): the pair
@@ -101,7 +101,7 @@ theorem addPullback_xy_pair_mulByInt_one_eq_succ (m : ℤ) (hm : m ≠ 0) (hm1 :
   · -- Chord branch: `m ∉ {0, ±1}` (`m = -1` is excluded by `hm1`).
     have hx_ne : mulByInt_x W m ≠ mulByInt_x W 1 :=
       mulByInt_x_ne_mulByInt_x W m 1 hm one_ne_zero hm_ne_one
-        (fun h => hm1 (by omega))
+        (fun h ↦ hm1 (by omega))
     have hp1x : (mulByInt W.toAffine 1).pullback (x_gen W) = mulByInt_x W 1 :=
       mulByInt_pullback_x W 1 one_ne_zero
     have hp1y : (mulByInt W.toAffine 1).pullback (y_gen W) = mulByInt_y W 1 :=
