@@ -351,9 +351,8 @@ theorem relativeRationalLocData_hopen_proof_of_laurentNormalized
   -- Step 1: 1 ∈ D.T (from LaurentNormalized D)
   have h1_in_DT : (1 : A) ∈ D.T := LaurentNormalized.one_mem_T
   -- Step 2: E.canonicalMap 1 = 1 ∈ T_at_E.
-  have h1_in_TatE : (1 : presheafValue E) ∈ D.T.image E.canonicalMap := by
-    refine Finset.mem_image.mpr ⟨1, h1_in_DT, ?_⟩
-    exact map_one _
+  have h1_in_TatE : (1 : presheafValue E) ∈ D.T.image E.canonicalMap :=
+    Finset.mem_image.mpr ⟨1, h1_in_DT, map_one _⟩
   -- Step 3: divByS 1 s_at_E ∈ locSubring.
   have hdivByS_1 : divByS (1 : presheafValue E) (E.canonicalMap D.s) ∈
       locSubring P_at_E (D.T.image E.canonicalMap) (E.canonicalMap D.s) :=
@@ -1099,8 +1098,8 @@ theorem relativeLaurentNormalized_backwardHom_comp_forwardHom
     D.coeRingHom a
   rw [relativeLaurentNormalized_backwardHom_coeRingHom]
   -- Now: backwardLocHom (forwardInnerLocHom a) = D.coeRingHom a (locHom round-trip).
-  exact congr_fun (congrArg DFunLike.coe
-    (relativeLaurentNormalized_backward_forward_locHom E D hsub)) a
+  exact DFunLike.congr_fun
+    (relativeLaurentNormalized_backward_forward_locHom E D hsub) a
 
 /-- Intertwining at A: `forwardHom (D.canonicalMap a) = D_at_E.canonicalMap (E.canonicalMap a)`
 for `a : A`. -/
@@ -1190,7 +1189,7 @@ theorem relativeLaurentNormalized_forwardHom_restrictionMapHom
       D_at_E_data.canonicalMap (E.canonicalMap a)
     rw [restrictionMapHom_canonicalMap]
     exact relativeLaurentNormalized_forwardHom_canonicalMap E D hsub a
-  exact congr_fun (congrArg DFunLike.coe heq) y
+  exact DFunLike.congr_fun heq y
 
 /-- Forward round-trip identity: `forwardHom ∘ backwardHom = id` on
 `presheafValue D_at_E`. Proved by reducing via `Completion.ext'` to the
@@ -1264,7 +1263,7 @@ theorem relativeLaurentNormalized_forwardHom_comp_backwardHom
     rw [relativeLaurentNormalized_backwardLocHom_algebraMap,
       relativeLaurentNormalized_forwardHom_restrictionMapHom]
     rfl
-  exact congr_fun (congrArg DFunLike.coe heq) b
+  exact DFunLike.congr_fun heq b
 
 /-! ### Final relative equivalence (LaurentNormalized case)
 
@@ -1285,10 +1284,10 @@ noncomputable def relativeLaurentNormalized_equiv
   letI : DecidableEq (presheafValue E) := Classical.decEq _
   { toFun := relativeLaurentNormalized_forwardHom E D hsub
     invFun := relativeLaurentNormalized_backwardHom E D hsub
-    left_inv := fun x => congr_fun (congrArg DFunLike.coe
-      (relativeLaurentNormalized_backwardHom_comp_forwardHom E D hsub)) x
-    right_inv := fun y => congr_fun (congrArg DFunLike.coe
-      (relativeLaurentNormalized_forwardHom_comp_backwardHom E D hsub)) y
+    left_inv := fun x => DFunLike.congr_fun
+      (relativeLaurentNormalized_backwardHom_comp_forwardHom E D hsub) x
+    right_inv := fun y => DFunLike.congr_fun
+      (relativeLaurentNormalized_forwardHom_comp_backwardHom E D hsub) y
     map_mul' := map_mul _
     map_add' := map_add _ }
 
