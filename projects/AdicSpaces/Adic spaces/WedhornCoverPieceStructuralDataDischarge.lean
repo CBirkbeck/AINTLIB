@@ -186,7 +186,7 @@ theorem WedhornCoverPieceStructuralData_via_VK_nonempty_residual
     rw [mem_localizedTestFamily_iff] at hτ
     rcases hτ with rfl | hτ_in_T_D
     · -- α_s_D + V_∅: per-`t'` by transitivity through σ_loc.
-      refine ⟨fun t ht => w.vle_trans (h_V_empty t ht) hστ.1, ?_⟩
+      refine ⟨fun t ht ↦ w.vle_trans (h_V_empty t ht) hστ.1, ?_⟩
       exact not_vle_zero_of_strict_dominator hστ.2
     · -- α_T_D + V_∅: vacuous (σ-strict-dom by τ ∈ T_D.image vs V_∅ at τ).
       exact absurd (h_V_empty τ hτ_in_T_D) hστ.2
