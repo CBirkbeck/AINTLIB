@@ -1774,10 +1774,8 @@ def _root_.Homeomorph.piTwoToProd {ι : Type*} [DecidableEq ι]
       · rw [Finset.mem_singleton] at hxb
         subst hxb
         simp [h_ne.symm] }
-  refine (Homeomorph.piCongrLeft
-    (Y := fun i : ↥({a, b} : Finset ι) => α i.1) e).symm.trans ?_
-  refine (Homeomorph.piFinTwo _).trans ?_
-  exact Homeomorph.refl _
+  exact (Homeomorph.piCongrLeft
+    (Y := fun i : ↥({a, b} : Finset ι) => α i.1) e).symm.trans (Homeomorph.piFinTwo _)
 
 /-! ### T-INTERMEDIATE-2COVER-PAIR: 2-cover IsInducing in product form
 
