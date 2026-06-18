@@ -138,6 +138,37 @@ theorem classLetter_eq_of_isogenous_charZero [CharZero F] (T : IsogenyClassTable
     T.classLetter E hmem = T.classLetter E' hmem' :=
   T.classLetter_eq_of_isogenous (universalDualWitness_of_charZero F) hEE' hmem hmem'
 
+/-! ### Ungated perfect-field corollaries (char-p, via `universalDualWitness_of_perfectField`)
+
+Over any perfect field — every char-`0` field, and every finite field `𝔽_q` (the LMFDB setting in
+positive characteristic) — the universal dual witness is a theorem
+(`universalDualWitness_of_perfectField`), so the same label well-definedness and class-letter
+invariance hold unconditionally. -/
+
+/-- **Well-definedness of the label, perfect field (ungated)**: over a perfect field a curve is
+isogenous to at most one table representative (`universalDualWitness_of_perfectField`). -/
+theorem index_unique_perfectField [PerfectField F] (T : IsogenyClassTable F)
+    (E : EllipticCurveOver F) {i j : Fin T.card}
+    (hi : IsogenousCurves E (T.reps i)) (hj : IsogenousCurves E (T.reps j)) :
+    i = j :=
+  T.index_unique (universalDualWitness_of_perfectField F) E hi hj
+
+/-- **`index` picks out the unique class index, perfect field (ungated)**. -/
+theorem index_eq_perfectField [PerfectField F] (T : IsogenyClassTable F)
+    (E : EllipticCurveOver F) (hmem : ∃ i, IsogenousCurves E (T.reps i))
+    {i : Fin T.card} (hi : IsogenousCurves E (T.reps i)) :
+    T.index E hmem = i :=
+  T.index_eq (universalDualWitness_of_perfectField F) E hmem hi
+
+/-- **The class letter is an isogeny invariant, perfect field (ungated)**: over a perfect field
+isogenous curves get the same LMFDB letter, unconditionally — including finite fields. -/
+theorem classLetter_eq_of_isogenous_perfectField [PerfectField F] (T : IsogenyClassTable F)
+    {E E' : EllipticCurveOver F} (hEE' : IsogenousCurves E E')
+    (hmem : ∃ i, IsogenousCurves E (T.reps i))
+    (hmem' : ∃ i, IsogenousCurves E' (T.reps i)) :
+    T.classLetter E hmem = T.classLetter E' hmem' :=
+  T.classLetter_eq_of_isogenous (universalDualWitness_of_perfectField F) hEE' hmem hmem'
+
 end IsogenyClassTable
 
 end HasseWeil.EC
