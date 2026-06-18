@@ -101,7 +101,7 @@ See note [reducible non-instances]. -/
 noncomputable abbrev awayAlgebra (hf : f ≠ 0) :
     Algebra (Localization.Away f) C₂.FunctionField :=
   (IsLocalization.lift (M := Submonoid.powers f) (S := Localization.Away f)
-    fun y => IsLocalization.map_units (M := C₂.CoordinateRing⁰) C₂.FunctionField
+    fun y ↦ IsLocalization.map_units (M := C₂.CoordinateRing⁰) C₂.FunctionField
       ⟨y.1, Submonoid.powers_le.mpr (mem_nonZeroDivisors_of_ne_zero hf) y.2⟩).toAlgebra
 
 /-- `awayAlgebra` is compatible with the maps from the coordinate ring, so
@@ -110,7 +110,7 @@ theorem awayAlgebra_isScalarTower (hf : f ≠ 0) :
     letI := awayAlgebra C₂ f hf
     IsScalarTower C₂.CoordinateRing (Localization.Away f) C₂.FunctionField :=
   letI := awayAlgebra C₂ f hf
-  IsScalarTower.of_algebraMap_eq fun x => (IsLocalization.lift_eq _ x).symm
+  IsScalarTower.of_algebraMap_eq fun x ↦ (IsLocalization.lift_eq _ x).symm
 
 /-! ### The extension along a separable curve-map pullback
 
