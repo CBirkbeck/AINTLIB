@@ -607,8 +607,7 @@ theorem genericPoint_add_lift_eq_some (k : W.toAffine.Point) :
           (RingHom.injective (algebraMap K W.toAffine.FunctionField)) xk yk).mpr h_ns)
         (fun hxy ↦ x_gen_sub_const_ne_zero W xk
           (sub_eq_zero.mpr hxy.left)))
-    · change genericPoint W + liftPointToKE W (Affine.Point.some xk yk h_ns) = _
-      rw [liftPointToKE_some W xk yk h_ns, genericPoint_add_liftSomePoint W xk yk h_ns]
+    · rw [liftPointToKE_some W xk yk h_ns, genericPoint_add_liftSomePoint W xk yk h_ns]
       congr 1
       · exact (translateAlgEquivOfPoint_some_apply_x_gen W xk yk h_ns).symm
       · exact (translateAlgEquivOfPoint_some_apply_y_gen W xk yk h_ns).symm
