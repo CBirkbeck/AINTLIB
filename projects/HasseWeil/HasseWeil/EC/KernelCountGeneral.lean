@@ -82,7 +82,7 @@ theorem card_kernel_eq_degree_of_separable [IsAlgClosed F]
   have hgcomm := WeilPairing.mapTranslateGenericPoint_of_pullbackEvaluation W β hbad hw
   have hcov : ∀ k : β.kernel, ∀ z : KE,
       translateAlgEquivOfPoint W k.val (β.pullback z) = β.pullback z :=
-    fun k z => WeilPairing.hcov_of_mapTranslateGenericPoint_canonical W β hgcomm k z
+    fun k z ↦ WeilPairing.hcov_of_mapTranslateGenericPoint_canonical W β hgcomm k z
   have hker_fin : Finite β.kernel := finite_kernel_of_hcov W β hcov
   letI βAlg : Algebra KE KE := β.toAlgebra
   haveI hfd : @FiniteDimensional KE KE _ _ β.toAlgebra.toModule :=
@@ -101,7 +101,7 @@ theorem card_kernel_eq_degree_of_separable [IsAlgClosed F]
       _ _ β.toAlgebra := hsep
   haveI twFKL : @IsScalarTower F KE KE _ β.toAlgebra.toSMul _ :=
     @IsScalarTower.of_algebraMap_eq F KE KE _ _ _ _ β.toAlgebra _
-      fun c => (β.pullback.commutes c).symm
+      fun c ↦ (β.pullback.commutes c).symm
   -- the denominator of the minimal polynomials of `x, y` over `β^*K(E)`
   obtain ⟨f₀, hf₀, hdx, hdy⟩ := @Curves.LocalizedDictionary.exists_denominator F _
     (W_smooth W) (W_smooth W) β.toAlgebra
@@ -115,7 +115,7 @@ theorem card_kernel_eq_degree_of_separable [IsAlgClosed F]
   letI algAfL : Algebra Af KE :=
     ((β.pullback.toRingHom).comp (algebraMap Af (W_smooth W).FunctionField)).toAlgebra
   haveI twAfKL : @IsScalarTower Af KE KE algAfK.toSMul β.toAlgebra.toSMul algAfL.toSMul :=
-    @IsScalarTower.of_algebraMap_eq Af KE KE _ _ _ algAfK β.toAlgebra algAfL fun _ => rfl
+    @IsScalarTower.of_algebraMap_eq Af KE KE _ _ _ algAfK β.toAlgebra algAfL fun _ ↦ rfl
   -- the finite set of target points to avoid: possible images of the coherence bad set
   set badT : Set (W_smooth W).SmoothPoint := {Q' | ∃ p ∈ bad,
     WeilPairing.EvaluatesTo W p (β.pullback (x_gen W)) Q'.x ∧
@@ -126,7 +126,7 @@ theorem card_kernel_eq_degree_of_separable [IsAlgClosed F]
         WeilPairing.EvaluatesTo W p (β.pullback (y_gen W)) Q'.y} := by
       rintro Q' ⟨p, hp, h1, h2⟩
       exact Set.mem_biUnion hp ⟨h1, h2⟩
-    refine Set.Finite.subset (Set.Finite.biUnion hbad fun p _ => ?_) hsub
+    refine Set.Finite.subset (Set.Finite.biUnion hbad fun p _ ↦ ?_) hsub
     refine Set.Subsingleton.finite ?_
     rintro Q₁ ⟨hx₁, hy₁⟩ Q₂ ⟨hx₂, hy₂⟩
     exact Curves.SmoothPlaneCurve.SmoothPoint.ext (hx₁.unique hx₂) (hy₁.unique hy₂)
@@ -141,7 +141,7 @@ theorem card_kernel_eq_degree_of_separable [IsAlgClosed F]
     obtain ⟨hvx, hvy⟩ := hSpts pt hpt
     have hex : WeilPairing.EvaluatesTo W pt (β.pullback (x_gen W)) Q.x := hvx
     have hey : WeilPairing.EvaluatesTo W pt (β.pullback (y_gen W)) Q.y := hvy
-    have hptgood : pt ∉ bad := fun hmem => hQbadT ⟨pt, hmem, hex, hey⟩
+    have hptgood : pt ∉ bad := fun hmem ↦ hQbadT ⟨pt, hmem, hex, hey⟩
     obtain ⟨x', y', h', heq, hx, hy⟩ := hw pt hptgood
     have hxx : x' = Q.x := hx.unique hex
     have hyy : y' = Q.y := hy.unique hey
@@ -155,7 +155,7 @@ theorem card_kernel_eq_degree_of_separable [IsAlgClosed F]
   haveI hfib_fin : Finite {R : W.toAffine.Point //
       β.toAddMonoidHom R = Q.toAffinePoint} :=
     Isogeny.fiber_finite_of_kernel_finite β hker_fin
-  have hinj : Function.Injective (fun p : {x // x ∈ S} =>
+  have hinj : Function.Injective (fun p : {x // x ∈ S} ↦
       (⟨p.1.toAffinePoint, hfibmem p.1 p.2⟩ :
         {R : W.toAffine.Point // β.toAddMonoidHom R = Q.toAffinePoint})) := by
     intro p₁ p₂ h
@@ -179,7 +179,7 @@ theorem finite_kernel_of_separable [IsAlgClosed F]
     {bad : Set (W_smooth W).SmoothPoint} (hbad : bad.Finite)
     (hw : WeilPairing.PullbackEvaluation W β bad) :
     Finite β.kernel :=
-  finite_kernel_of_hcov W β fun k z =>
+  finite_kernel_of_hcov W β fun k z ↦
     WeilPairing.hcov_of_mapTranslateGenericPoint_canonical W β
       (WeilPairing.mapTranslateGenericPoint_of_pullbackEvaluation W β hbad hw) k z
 
@@ -204,7 +204,7 @@ theorem xy_family_of_pullbackEvaluation (β : Isogeny W.toAffine W.toAffine)
         β.pullback (x_gen W)) ∧
       (translateAlgEquivOfPoint W k.val (β.pullback (y_gen W)) =
         β.pullback (y_gen W)) :=
-  fun k =>
+  fun k ↦
     ⟨WeilPairing.hcov_of_mapTranslateGenericPoint_canonical W β
       (WeilPairing.mapTranslateGenericPoint_of_pullbackEvaluation W β hbad hw) k _,
      WeilPairing.hcov_of_mapTranslateGenericPoint_canonical W β
