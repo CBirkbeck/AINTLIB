@@ -153,7 +153,7 @@ theorem WedhornCoverPieceCovPlusPieceLiftPerTBound_via_base_refinement
   -- Unfold rationalOpen to extract per-t bound + non-vanishing on the base side.
   obtain ⟨_hw_spa_base, h_per_t_base, h_s_D_ne_base⟩ := h_comap_RHS
   -- Translate to localized side via comap_vle.
-  refine ⟨fun t ht => ?_, ?_⟩
+  refine ⟨fun t ht ↦ ?_, ?_⟩
   · have h_comap_t : (comap (algebraMap A (Localization.Away s)) w).vle t s_D :=
       h_per_t_base t ht
     rwa [comap_vle] at h_comap_t
