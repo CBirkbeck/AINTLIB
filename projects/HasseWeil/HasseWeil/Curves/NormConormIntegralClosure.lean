@@ -777,6 +777,29 @@ theorem valuation_algebraMap_F_eq_one
         mul_le_mul_left' hcinv_le _
     _ = v.valuation C₁.FunctionField (algebraMap F C₁.FunctionField c) := mul_one _
 
+/-- **The Weierstrass relation in `K(C₁)` with `F`-constant coefficients**:
+`y₁² + (a₁·x₁ + a₃)·y₁ = x₁³ + a₂·x₁² + a₄·x₁ + a₆` where `aᵢ = algebraMap F` constants and
+`x₁ = coordXFun C₁`, `y₁ = coordYFun C₁`. -/
+theorem weierstrass_relation_coordFun :
+    coordYFun C₁ ^ 2 +
+        (algebraMap F C₁.FunctionField C₁.toAffine.a₁ * coordXFun C₁ +
+          algebraMap F C₁.FunctionField C₁.toAffine.a₃) * coordYFun C₁ =
+      coordXFun C₁ ^ 3 +
+        algebraMap F C₁.FunctionField C₁.toAffine.a₂ * coordXFun C₁ ^ 2 +
+        algebraMap F C₁.FunctionField C₁.toAffine.a₄ * coordXFun C₁ +
+        algebraMap F C₁.FunctionField C₁.toAffine.a₆ := by
+  have hsq := C₁.coordYInFunctionField_sq
+  rw [← coordYFun_eq_coordYInFunctionField] at hsq
+  -- expand the `algebraMap (Polynomial F)` of `C aᵢ`, `X` into `F`-constants and `coordXFun`
+  have hX : algebraMap (Polynomial F) C₁.FunctionField Polynomial.X = coordXFun C₁ := by
+    rw [coordXFun_eq_coordX]; rfl
+  have hC : ∀ c : F, algebraMap (Polynomial F) C₁.FunctionField (Polynomial.C c) =
+      algebraMap F C₁.FunctionField c := fun c => by
+    rw [show (Polynomial.C c : Polynomial F) = algebraMap F (Polynomial F) c from rfl,
+      ← IsScalarTower.algebraMap_apply F (Polynomial F) C₁.FunctionField]
+  simp only [map_add, map_mul, map_pow, hX, hC] at hsq
+  linear_combination hsq
+
 /-! ### The minimal-polynomial reduction (non-circular, place-dictionary-free)
 
 The whole content of `coordXFun_mem_B` / `coordYFun_mem_B` (and hence `coordRing_mem_B`) reduces —
