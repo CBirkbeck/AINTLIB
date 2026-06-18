@@ -184,7 +184,7 @@ theorem algebraMap_polynomial_apply
 instance isScalarTower_k_polynomial
     {L : Type*} [Field L] [Algebra k L] (f : L) :
     IsScalarTower k (Polynomial k) (LinfAt (k := k) f) :=
-  IsScalarTower.of_algebraMap_eq fun c => by
+  IsScalarTower.of_algebraMap_eq fun c ↦ by
     change (algebraMap k L c : L) = polyToFieldOfInv (k := k) f
       (algebraMap k (Polynomial k) c)
     rw [polyToFieldOfInv_algebraMap_eq]
@@ -218,7 +218,7 @@ instance isScalarTower_polynomial_fractionRing
     [hf : Fact (Transcendental k f⁻¹)] :
     IsScalarTower (Polynomial k) (FractionRing (Polynomial k))
       (LinfAt (k := k) f) :=
-  IsScalarTower.of_algebraMap_eq fun p => by
+  IsScalarTower.of_algebraMap_eq fun p ↦ by
     change (polyToFieldOfInv (k := k) f p : L) =
       ratFunToFieldOfInv hf.out
         (algebraMap (Polynomial k) (FractionRing (Polynomial k)) p)
@@ -234,7 +234,7 @@ instance isScalarTower_k_fractionRing
     {L : Type*} [Field L] [Algebra k L] (f : L)
     [hf : Fact (Transcendental k f⁻¹)] :
     IsScalarTower k (FractionRing (Polynomial k)) (LinfAt (k := k) f) :=
-  IsScalarTower.of_algebraMap_eq fun c => by
+  IsScalarTower.of_algebraMap_eq fun c ↦ by
     change (algebraMap k L c : L) =
       ratFunToFieldOfInv hf.out (algebraMap k (FractionRing (Polynomial k)) c)
     exact ((ratFunToFieldOfInv hf.out).commutes c).symm
@@ -343,7 +343,7 @@ theorem finrank_eq_sum_ramificationIdx_mul_inertiaDeg
     letI := data.commRing
     letI := data.isDedekindDomain
     letI := data.algPoly
-    ∑ P ∈ primesOverFinset (xIdeal (k := k)) data.carrier,
+    ∑ P ∈ IsDedekindDomain.primesOverFinset (xIdeal (k := k)) data.carrier,
         Ideal.ramificationIdx (xIdeal (k := k)) P *
         Ideal.inertiaDeg (xIdeal (k := k)) P =
       Module.finrank (FractionRing (Polynomial k)) (LinfAt (k := k) f) := by
@@ -377,7 +377,7 @@ noncomputable def Sinf.ordAt {L : Type*} [Field L] [Algebra k L] {f : L}
     Ideal data.carrier → ℤ :=
   letI := data.commRing
   letI := data.algPoly
-  fun P => -(Ideal.ramificationIdx (xIdeal (k := k)) P : ℤ)
+  fun P ↦ -(Ideal.ramificationIdx (xIdeal (k := k)) P : ℤ)
 
 /-- The natural-number coercion: `(−ord_P f).toNat = e_P`. -/
 theorem Sinf.toNat_neg_ordAt_eq_ramificationIdx
@@ -401,7 +401,7 @@ abbrev Sinf.kappa {L : Type*} [Field L] [Algebra k L] {f : L}
     letI := data.commRing
     Ideal data.carrier → Type _ :=
   letI := data.commRing
-  fun P => data.carrier ⧸ P
+  fun P ↦ data.carrier ⧸ P
 
 /-- Convenience: the natural `Algebra k data.carrier` obtained by
 composing `algebraMap k (Polynomial k)` with `algebraMap (Polynomial k)
@@ -480,7 +480,7 @@ theorem Sinf.inertiaDeg_eq_one_of_algebraMap_surjective
       (Ideal.LiesOver.over (p := xIdeal (k := k)) (P := P)).le
   rw [Ideal.inertiaDeg_algebraMap]
   refine le_antisymm ?_ ?_
-  · refine finrank_le_one (1 : data.carrier ⧸ P) fun w => ?_
+  · refine finrank_le_one (1 : data.carrier ⧸ P) fun w ↦ ?_
     obtain ⟨c, hc⟩ := h_surj w
     exact ⟨c, by rw [Algebra.algebraMap_eq_smul_one] at hc; exact hc⟩
   · have hpos := Ideal.inertiaDeg_pos (xIdeal (k := k)) P
@@ -502,7 +502,7 @@ theorem finrank_eq_weighted_poleDegree_of_nonconstant
     letI := data.isDedekindDomain
     letI := data.algPoly
     Module.finrank (FractionRing (Polynomial k)) (LinfAt (k := k) f) =
-    ∑ P ∈ primesOverFinset (xIdeal (k := k)) data.carrier,
+    ∑ P ∈ IsDedekindDomain.primesOverFinset (xIdeal (k := k)) data.carrier,
       (-(data.ordAt P)).toNat *
         Ideal.inertiaDeg (xIdeal (k := k)) P := by
   letI := data.commRing
@@ -517,7 +517,7 @@ theorem finrank_eq_weighted_poleDegree_of_nonconstant
   have h := finrank_eq_sum_ramificationIdx_mul_inertiaDeg
     (k := k) (L := L) f data
   rw [← h]
-  refine Finset.sum_congr rfl fun P _ => ?_
+  refine Finset.sum_congr rfl fun P _ ↦ ?_
   rw [data.toNat_neg_ordAt_eq_ramificationIdx]
 
 end RamificationAtInfinity
