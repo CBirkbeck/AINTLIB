@@ -922,6 +922,98 @@ theorem exists_finiteGalois_fieldOfDefinition [CharZero E]
 
 end FieldOfDefinition
 
+/-! ### MOVE 2 — the infinite-Galois tower descent `K̄ → F`
+
+The descent of the range inclusion (`rangeIncl_of_descentData`) runs over a *finite* Galois `L/F`,
+which forces the genuine geometric realization of `φ_L` over that `L` (the `twoCurveGeometricDualData`
+leaf).  MOVE 2 supplies an alternative that descends the **`K̄`-direct** range inclusion
+(`ecIsog_mulByInt_deg_rangeIncl_of_charZero`, over `K̄ = AlgebraicClosure F`) all the way to `F` in
+one step, *bypassing* the finite-`L` geometric realization.
+
+The new content is the **tower fact**: every element of `K̄ ⊗_F R` lives over a finite Galois
+intermediate field `M ⊆ K̄` (`exists_finiteGalois_towerTensorIncl_range`), so a `Gal(K̄/F)`-fixed
+element descends to `F` by reduction to the proven finite descent (`tensor_ringAct_fixed_mem_range`
++ `the_lift`).  Concretely this furnishes the **infinite-Galois fixed-field characterization**
+`mem_range_functionField_baseChange_iff_fixed_kbar` (the `L = K̄` analogue of the finite
+`mem_range_functionField_baseChange_iff_fixed`). -/
+
+section TowerDescent
+
+variable {F : Type u} [Field F]
+
+/-- The `F`-algebra inclusion `M ⊗_F R → K̄ ⊗_F R` induced by `IntermediateField.val M : M →ₐ[F] K̄`
+(`M ⊆ K̄ = AlgebraicClosure F` an intermediate field) tensored with the identity on `R`. -/
+noncomputable def towerTensorIncl (R : Type*) [CommRing R] [Algebra F R]
+    (M : IntermediateField F (AlgebraicClosure F)) :
+    (M ⊗[F] R) →ₐ[F] (AlgebraicClosure F ⊗[F] R) :=
+  Algebra.TensorProduct.map (M.val) (AlgHom.id F R)
+
+@[simp] theorem towerTensorIncl_tmul (R : Type*) [CommRing R] [Algebra F R]
+    (M : IntermediateField F (AlgebraicClosure F)) (m : M) (r : R) :
+    towerTensorIncl R M (m ⊗ₜ[F] r) = (m : AlgebraicClosure F) ⊗ₜ[F] r :=
+  Algebra.TensorProduct.map_tmul _ _ _ _
+
+/-- `towerTensorIncl` is injective: it is `val M ⊗ id` with `val M` injective and everything flat
+over the field `F`. -/
+theorem towerTensorIncl_injective (R : Type*) [CommRing R] [Algebra F R]
+    (M : IntermediateField F (AlgebraicClosure F)) :
+    Function.Injective (towerTensorIncl R M) := by
+  have hfun : ⇑(towerTensorIncl R M) =
+      ⇑(TensorProduct.map (M.val.toLinearMap) (LinearMap.id (R := F) (M := R))) := by
+    funext x
+    induction x using TensorProduct.induction_on with
+    | zero => simp
+    | tmul m r => simp [towerTensorIncl_tmul]
+    | add x y hx hy => rw [map_add, map_add, hx, hy]
+  rw [hfun]
+  exact TensorProduct.map_injective_of_flat_flat _ _
+    (M.val.injective) Function.injective_id
+
+/-- **Equivariance of the tower inclusion.** If `σ : K̄ ≃ₐ[F] K̄` restricts to `τ : M ≃ₐ[F] M`
+(i.e. `σ (m : K̄) = (τ m : K̄)` for all `m ∈ M`), then `towerTensorIncl` intertwines the `σ ⊗ id`
+action upstairs with the `τ ⊗ id` action downstairs. -/
+theorem towerTensorIncl_congr (R : Type*) [CommRing R] [Algebra F R]
+    (M : IntermediateField F (AlgebraicClosure F)) (σ : AlgebraicClosure F ≃ₐ[F] AlgebraicClosure F)
+    (τ : M ≃ₐ[F] M) (hστ : ∀ m : M, σ (m : AlgebraicClosure F) = (τ m : AlgebraicClosure F))
+    (z : M ⊗[F] R) :
+    towerTensorIncl R M
+        ((Algebra.TensorProduct.congr τ (AlgEquiv.refl (R := F) (A₁ := R))) z) =
+      (Algebra.TensorProduct.congr σ (AlgEquiv.refl (R := F) (A₁ := R)))
+        (towerTensorIncl R M z) := by
+  induction z using TensorProduct.induction_on with
+  | zero => simp
+  | tmul m r =>
+      rw [Algebra.TensorProduct.congr_apply, Algebra.TensorProduct.map_tmul,
+        towerTensorIncl_tmul, towerTensorIncl_tmul, Algebra.TensorProduct.congr_apply,
+        Algebra.TensorProduct.map_tmul]
+      simp only [AlgEquiv.coe_refl, id_eq, AlgEquiv.coe_algHom]
+      rw [hστ m]
+  | add x y hx hy => rw [map_add, map_add, map_add, map_add, hx, hy]
+
+/-- **The tensor tower fact** (char 0): every element of `K̄ ⊗_F R` (`K̄ = AlgebraicClosure F`) is the
+image, under `towerTensorIncl`, of an element of `M ⊗_F R` for some *finite Galois* intermediate
+field `M ⊆ K̄`. The finitely many `K̄`-scalars in a finite-sum representation lie in a finite Galois
+`M` (`exists_finiteGalois_fieldOfDefinition`). -/
+theorem exists_finiteGalois_towerTensorIncl_range [CharZero F]
+    (R : Type*) [CommRing R] [Algebra F R] (z : AlgebraicClosure F ⊗[F] R) :
+    ∃ (M : IntermediateField F (AlgebraicClosure F)),
+      FiniteDimensional F M ∧ IsGalois F M ∧ z ∈ Set.range (towerTensorIncl R M) := by
+  classical
+  obtain ⟨S, hS⟩ := TensorProduct.exists_finset z
+  obtain ⟨M, hMfin, hMgal, hMsub⟩ :=
+    exists_finiteGalois_fieldOfDefinition (E := F) (↑(S.image Prod.fst) : Set (AlgebraicClosure F))
+      (S.image Prod.fst).finite_toSet
+  refine ⟨M, hMfin, hMgal, ?_⟩
+  have hmem : ∀ p ∈ S, p.1 ∈ M := by
+    intro p hp
+    exact hMsub (by exact Finset.mem_coe.mpr (Finset.mem_image_of_mem Prod.fst hp))
+  refine ⟨S.attach.sum fun p => (⟨p.1.1, hmem p.1 p.2⟩ : M) ⊗ₜ[F] p.1.2, ?_⟩
+  rw [map_sum, hS, ← Finset.sum_attach S (fun p => p.1 ⊗ₜ[F] p.2)]
+  refine Finset.sum_congr rfl (fun p _ => ?_)
+  rw [towerTensorIncl_tmul]
+
+end TowerDescent
+
 /-- **A `DescentData` over a concrete finite Galois intermediate field of `K̄`** (MOVE 1's data
 carrier). Bundles the concrete `L ⊆ K̄ = AlgebraicClosure F` (with its finite/Galois instances) and a
 `DescentData` over it. Unlike `SomeDescentData` (which takes an abstract `L : Type w`), this fixes `L`
