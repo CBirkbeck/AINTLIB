@@ -63,18 +63,18 @@ theorem pod_absorb_finset_mul_pow (P : PairOfDefinition A) (S : Finset A) :
   classical
   have hone : ∀ a : A, ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N → (↑b : A) * a ∈ P.A₀ := by
     intro a
-    have hcont : Continuous (fun x : P.A₀ => (↑x : A) * a) :=
+    have hcont : Continuous (fun x : P.A₀ ↦ (↑x : A) * a) :=
       continuous_subtype_val.mul continuous_const
-    have h0 : (fun x : P.A₀ => (↑x : A) * a) 0 ∈ (P.A₀ : Set A) := by
+    have h0 : (fun x : P.A₀ ↦ (↑x : A) * a) 0 ∈ (P.A₀ : Set A) := by
       simp only [ZeroMemClass.coe_zero, zero_mul]
       exact P.A₀.zero_mem
-    have hpre : (fun x : P.A₀ => (↑x : A) * a) ⁻¹' (P.A₀ : Set A) ∈
+    have hpre : (fun x : P.A₀ ↦ (↑x : A) * a) ⁻¹' (P.A₀ : Set A) ∈
         nhds (0 : P.A₀) :=
       hcont.continuousAt.preimage_mem_nhds (P.isOpen.mem_nhds h0)
     obtain ⟨n, -, hn⟩ := P.isAdic.hasBasis_nhds_zero.mem_iff.mp hpre
-    exact ⟨n, fun b hb => hn hb⟩
+    exact ⟨n, fun b hb ↦ hn hb⟩
   choose Nf hNf using hone
-  refine ⟨S.sup Nf, fun a ha b hb => hNf a b ?_⟩
+  refine ⟨S.sup Nf, fun a ha b hb ↦ hNf a b ?_⟩
   exact Ideal.pow_le_pow_right (Finset.le_sup ha) hb
 
 /-- **General gen-set piece openness**: for `T` spanning the unit ideal and `t ∈ T`,
@@ -89,7 +89,7 @@ theorem genPiece_hopen (P : PairOfDefinition A) (T : Finset A) (t : A)
   have h1 : (1 : A) ∈ Ideal.span (T : Set A) := hspan ▸ Submodule.mem_top
   obtain ⟨c, _hc_supp, hc⟩ := Submodule.mem_span_finset.mp h1
   obtain ⟨N, hN⟩ := pod_absorb_finset_mul_pow P (T.image c)
-  refine ⟨N, fun b hb => ?_⟩
+  refine ⟨N, fun b hb ↦ ?_⟩
   -- `divByS b t = Σ_{t' ∈ T} aM (b·c t') · divByS t' t` (cancel the away-unit `aM t`)
   have hkey : divByS (↑b : A) t = ∑ t' ∈ T,
       algebraMap A (Localization.Away t) ((↑b : A) * c t') * divByS t' t := by
@@ -123,7 +123,7 @@ theorem genPiece_hopen (P : PairOfDefinition A) (T : Finset A) (t : A)
             simpa only [smul_eq_mul] using hc]
       _ = ∑ t' ∈ T, (↑b : A) * c t' * t' := by rw [Finset.mul_sum]; ring_nf
   rw [hkey]
-  refine Subring.sum_mem _ (fun t' ht' => Subring.mul_mem _ ?_ ?_)
+  refine Subring.sum_mem _ (fun t' ht' ↦ Subring.mul_mem _ ?_ ?_)
   · exact algebraMap_mem_locSubring P T t
       (hN (c t') (Finset.mem_image_of_mem c ht') b hb)
   · exact divByS_mem_locSubring P T t ht'
@@ -337,7 +337,7 @@ theorem genPiece_rel_forward_witness
       exact Finset.mem_image_of_mem _ hq'
   -- decompose `w = p · q`
   have hw' : w ∈ ((insert D₀.s D₀.T).product
-      (insert t T)).image (fun r : A × A => r.1 * r.2) := hw
+      (insert t T)).image (fun r : A × A ↦ r.1 * r.2) := hw
   rw [Finset.mem_image] at hw'
   obtain ⟨⟨p, q⟩, hpq, rfl⟩ := hw'
   have hp : p ∈ insert D₀.s D₀.T := (Finset.mem_product.mp hpq).1
@@ -587,7 +587,7 @@ theorem genPiece_rel_backwardLocHom_continuous
     refine ⟨divByS (D₀.s * q) DI.s ^ k, pow_mem (divByS_mem_locSubring DI.P DI.T DI.s
       ?_) k, by rw [map_pow]⟩
     show D₀.s * q ∈ ((insert D₀.s D₀.T).product
-      (insert t T)).image (fun r : A × A => r.1 * r.2)
+      (insert t T)).image (fun r : A × A ↦ r.1 * r.2)
     exact Finset.mem_image.mpr ⟨(D₀.s, q), Finset.mem_product.mpr
       ⟨Finset.mem_insert_self _ _, Finset.mem_insert_of_mem hq⟩, rfl⟩
 
@@ -978,7 +978,7 @@ theorem imagePieceDatum_mem_rationalOpen_iff
   constructor
   · rintro ⟨hspa, hcond, hnz⟩
     refine ⟨hspa, comap_mem_spa (canonicalMap_continuous D₀)
-      D₀.canonicalMap_integral hspa, fun t ht => ?_, fun h0 => ?_⟩
+      D₀.canonicalMap_integral hspa, fun t ht ↦ ?_, fun h0 ↦ ?_⟩
     · rw [comap_vle]
       have := hcond (D₀.canonicalMap t) (by rw [hT]; exact Finset.mem_image_of_mem _ ht)
       rwa [hs] at this
@@ -986,7 +986,7 @@ theorem imagePieceDatum_mem_rationalOpen_iff
       rw [hs] at hnz
       exact hnz h0
   · rintro ⟨hspa, -, hcond, hnz⟩
-    refine ⟨hspa, fun x hx => ?_, fun h0 => ?_⟩
+    refine ⟨hspa, fun x hx ↦ ?_, fun h0 ↦ ?_⟩
     · rw [hT, Finset.mem_image] at hx
       obtain ⟨t, ht, rfl⟩ := hx
       rw [hs]
@@ -1285,7 +1285,7 @@ theorem prop_8_30_basic_laurent_step_flat
       algebraMap_mem_locSubring E.P E.T E.s ha
     have hpow : ∀ n : ℕ, (algebraMap A (Localization.Away E.s) t') ^ n ∈
         locSubring E.P E.T E.s :=
-      fun n => (locSubring E.P E.T E.s).pow_mem hmem n
+      fun n ↦ (locSubring E.P E.T E.s).pow_mem hmem n
     have hrange : Set.range
         ((E.coeRingHom (algebraMap A (Localization.Away E.s) t')) ^ · :
           ℕ → presheafValue E) ⊆
@@ -1354,8 +1354,8 @@ theorem remark755_dominating_unit_over_presheafValue
   set W := imagePieceDatum D E.T E.s hspanE with hW
   have hY := isCompact_preimage_rationalOpen_noHArch (A := presheafValue D) W
   obtain ⟨u, hu⟩ := exists_dominating_unit_noHArch (A := presheafValue D) hY W.s
-    (fun y hy => (Set.mem_preimage.mp hy).2.2)
-  exact ⟨u, fun y hy => hu y (Set.mem_preimage.mpr hy)⟩
+    (fun y hy ↦ (Set.mem_preimage.mp hy).2.2)
+  exact ⟨u, fun y hy ↦ hu y (Set.mem_preimage.mpr hy)⟩
 
 omit [CompatiblePlusSubring A] in
 /-- **GENUINE RESIDUAL — whole-space Prop 8.30 over `B = 𝒪_X(D)` (Remark-7.55 chain)**
@@ -1594,7 +1594,7 @@ omit [CompatiblePlusSubring A] in
 theorem cor_8_32_productRestriction_faithfullyFlat (C : RationalCovering A)
     (hC : C.IsRational) (hplus : (A⁺ : Set A) ⊆ C.base.P.A₀) :
     letI : ∀ D : { D // D ∈ C.covers }, Algebra (presheafValue C.base) (presheafValue D.1) :=
-      fun D => (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra
+      fun D ↦ (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra
     Module.FaithfullyFlat (presheafValue C.base)
       (∀ D : { D // D ∈ C.covers }, presheafValue D.1) := by
   -- Compose Prop 8.30 flatness with the Wedhorn-faithful MAXIMALS criterion
@@ -1606,10 +1606,10 @@ theorem cor_8_32_productRestriction_faithfullyFlat (C : RationalCovering A)
   -- prime-surjection / `supp = p` / Bourbaki domination.
   exact @faithfullyFlat_pi_of_maximal_ne_top (presheafValue C.base) _
     { D // D ∈ C.covers } (Finite.of_fintype _)
-    (fun D => presheafValue D.1)
-    (fun _ => inferInstance)
-    (fun D => (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra)
-    (fun D => prop_8_30_restriction_flat C.base D.1 (C.hsubset D.1 D.2)
+    (fun D ↦ presheafValue D.1)
+    (fun _ ↦ inferInstance)
+    (fun D ↦ (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra)
+    (fun D ↦ prop_8_30_restriction_flat C.base D.1 (C.hsubset D.1 D.2)
       hC.base (hC.piece D.2))
     (cor_8_32_maximal_liftedIdeal_ne_top C hplus)
 
@@ -1625,7 +1625,7 @@ theorem cor_8_32_productRestrictionSub_injective (C : RationalCovering A)
     (hC : C.IsRational) (hplus : (A⁺ : Set A) ⊆ C.base.P.A₀) :
     Function.Injective (productRestrictionSub A C) := by
   letI : ∀ D : { D // D ∈ C.covers }, Algebra (presheafValue C.base) (presheafValue D.1) :=
-    fun D => (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra
+    fun D ↦ (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra
   haveI := cor_8_32_productRestriction_faithfullyFlat C hC hplus
   -- The product's `algebraMap` is injective (faithfully flat ⇒ `FaithfulSMul`), and it
   -- agrees componentwise with `productRestrictionSub` (each factor's algebraMap is the
