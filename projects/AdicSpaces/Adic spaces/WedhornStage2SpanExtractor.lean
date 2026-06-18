@@ -75,7 +75,8 @@ The two hypotheses together close the no-common-zero check on all of
 `Spa A A⁺`, and `spanTop_iff_noCommonZero_spa` lifts that to the
 ideal-theoretic span-top conclusion. -/
 theorem span_top_via_strengthened_cover_and_outside_rescue
-    [DecidableEq A] (P : PairOfDefinition A)
+    [DecidableEq A] [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺ : Subring A)] (P : PairOfDefinition A)
     [IsAdicComplete P.I P.A₀]
     (hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀)
     (C : RationalCovering A)
@@ -88,7 +89,7 @@ theorem span_top_via_strengthened_cover_and_outside_rescue
         ∃ f ∈ C.covers.biUnion mk_S_D, ¬ v.vle f 0) :
     Ideal.span ((C.covers.biUnion mk_S_D : Finset A) : Set A) = ⊤ := by
   -- Reduce span-top to no-common-zero on Spa via Prop 7.14.
-  refine (spanTop_iff_noCommonZero_spa P hAplus_le_A₀ _).mpr ?_
+  refine (spanTop_iff_noCommonZero_spa _).mpr ?_
   intro v hv_spa
   -- Case-split on `v ∈ rationalOpen C.base.T C.base.s`.
   by_cases hv_base : v ∈ rationalOpen C.base.T C.base.s

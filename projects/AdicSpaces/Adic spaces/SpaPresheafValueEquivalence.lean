@@ -8,6 +8,7 @@ import «Adic spaces».PresheafIdentification
 import «Adic spaces».WedhornSpaRationalOpenLiftWrapper
 import «Adic spaces».CompletedResidueField
 import Mathlib.Topology.Algebra.UniformRing
+import Mathlib.RingTheory.Valuation.Integral
 
 /-!
 # C3 — `Spa_presheafValue_eq_rationalOpen` (Wedhorn 8.2)
@@ -467,6 +468,27 @@ theorem comap_coeRingHom_extensionHom_ofValuation_eq {R : Type*} [CommRing R] [U
       Valuation.ext (fun a => (Valuation.comap_apply _ _ _).trans (hval a))]
   exact ofValuation_valuation w
 
+/-- INFRASTRUCTURE (not in Wedhorn): the valuation integer is integrally closed, so if a
+ring hom `φ : R →+* K` carries a subring `S` into `{x | v (φ x) ≤ 1}`, then every element of
+`R` integral over `S` also satisfies `v (φ c) ≤ 1`. This is the integral-closure half of
+`completedPlusSubring = Ĉ` being a ring of integral elements (Wedhorn 7.14(1)/7.19): `Ĉ` is the
+closure of the image of the *integral closure* `(A⁺[T/s])^int`, so the Spa bound must extend
+from the generators `locPlusSubring` to their integral closure. -/
+private theorem vle_image_le_one_of_isIntegral_of_subring
+    {R K Γ : Type*} [CommRing R] [CommRing K] [LinearOrderedCommGroupWithZero Γ]
+    (v : Valuation K Γ) (φ : R →+* K) (S : Subring R)
+    (hS : ∀ x ∈ S, v (φ x) ≤ 1) {c : R} (hc : IsIntegral S c) :
+    v (φ c) ≤ 1 := by
+  have hφc_int : IsIntegral (↥v.integer) (φ c) := by
+    refine IsIntegral.map_of_comp_eq
+      ((φ.comp S.subtype).codRestrict v.integer ?_) φ ?_ hc
+    · intro x
+      rw [Valuation.mem_integer_iff]
+      exact hS x.1 x.2
+    · ext x; rfl
+  exact (Valuation.mem_integer_iff _ _).mp
+    ((Valuation.integer.integers v).mem_of_integral hφc_int)
+
 /-- **Completion step (Wedhorn Lemma 8.2, completion half).** A Spa-point `w`
 of the rational localization `Localization.Away D.s` extends to a Spa-point `w'`
 of its completion `presheafValue D`, pulling back along `D.coeRingHom`.
@@ -520,14 +542,21 @@ theorem spa_completion_of_spa_localization
       have hf_le : Valued.v (φhat f) ≤ 1 := by
         have hf_int : f ∈ ((Valued.v).integer).comap φhat := by
           refine Subring.topologicalClosure_minimal
-            ((D.locPlusSubring).map D.coeRingHom) ?_
+            ((integralClosure ↥(D.locPlusSubring) (Localization.Away D.s)).toSubring.map
+              D.coeRingHom) ?_
             ((isClosed_le hVcont continuous_const).preimage
               UniformSpace.Completion.continuous_extension) hf
-          rintro _ ⟨d, hd, rfl⟩
+          rintro _ ⟨c, hc, rfl⟩
           rw [Subring.mem_comap, Valuation.mem_integer_iff]
-          have hφd : φhat (D.coeRingHom d) = φ d := by
-            rw [hφhat_def]; exact UniformSpace.Completion.extensionHom_coe φ hφ d
-          erw [hφd]
+          have hφc : φhat (D.coeRingHom c) = φ c := by
+            rw [hφhat_def]; exact UniformSpace.Completion.extensionHom_coe φ hφ c
+          erw [hφc]
+          -- `c` is integral over `locPlusSubring`; the valuation integer is integrally
+          -- closed and `φ` carries `locPlusSubring` into it (the Spa bound `hw_loc`),
+          -- so `Valued.v (φ c) ≤ 1` (Wedhorn 7.14(1)/7.19: `Ĉ = closure(image of (A⁺[T/s])^int)`).
+          refine vle_image_le_one_of_isIntegral_of_subring Valued.v φ D.locPlusSubring ?_
+            ((mem_integralClosure_iff _ _).mp (Subalgebra.mem_toSubring.mp hc))
+          intro d hd
           show Valued.v ((scResHom D w d : WithVal val) : val.Completion) ≤ 1
           rw [Valued.valuedCompletion_apply, scResHom_val D w d]
           exact canonicalValuation_le_one_of_vle w (hw_loc d hd)

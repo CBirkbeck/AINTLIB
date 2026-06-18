@@ -2691,7 +2691,8 @@ block above). -/
 theorem RationalCovering.noCommonZero_plusHalf_of_refines_span_top
     (P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]
     (hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀)
-    [DecidableEq A] (C : RationalCovering A) (f₀ : A) (S : Finset A)
+    [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺ : Subring A)] [DecidableEq A] (C : RationalCovering A) (f₀ : A) (S : Finset A)
     (hspan : Ideal.span ((S : Set A)) = ⊤) :
     ∀ v ∈ rationalOpen (insert f₀ C.base.T) C.base.s,
       ∃ f ∈ S, ¬ v.vle f 0 := by
@@ -2701,14 +2702,15 @@ theorem RationalCovering.noCommonZero_plusHalf_of_refines_span_top
     (C.rationalOpen_plusDatum_eq_insert f₀).symm ▸ hv
   have hv_spa : v ∈ Spa A A⁺ :=
     rationalOpen_subset_spa (laurentPlus_subset C.base f₀ hv_plusDatum)
-  exact ((spanTop_iff_noCommonZero_spa P hAplus_le_A₀ S).mp hspan) v hv_spa
+  exact ((spanTop_iff_noCommonZero_spa S).mp hspan) v hv_spa
 
 /-- **Minus-half no-common-zero from `refines_span_top`**. Mirror of
 the plus-half version via `laurentMinus_subset`. -/
 theorem RationalCovering.noCommonZero_minusHalf_of_refines_span_top
     (P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]
     (hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀)
-    [DecidableEq A] (C : RationalCovering A) (f₀ : A) (S : Finset A)
+    [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺ : Subring A)] [DecidableEq A] (C : RationalCovering A) (f₀ : A) (S : Finset A)
     (hspan : Ideal.span ((S : Set A)) = ⊤) :
     ∀ v ∈ rationalOpen (laurentMinusDatum C.base f₀).T
                        (laurentMinusDatum C.base f₀).s,
@@ -2716,7 +2718,7 @@ theorem RationalCovering.noCommonZero_minusHalf_of_refines_span_top
   intro v hv
   have hv_spa : v ∈ Spa A A⁺ :=
     rationalOpen_subset_spa (laurentMinus_subset C.base f₀ hv)
-  exact ((spanTop_iff_noCommonZero_spa P hAplus_le_A₀ S).mp hspan) v hv_spa
+  exact ((spanTop_iff_noCommonZero_spa S).mp hspan) v hv_spa
 
 /-- **`f₀` has non-zero valuation on the minus half**. On the Laurent-
 minus half at `f₀`, the valuation of `f₀` dominates `C.base.s` (which
@@ -2752,13 +2754,14 @@ v(f) ≠ 0`; the witness cannot be `f₀` since `v(f₀) = 0`. -/
 theorem RationalCovering.noCommonZero_erase_of_f₀_zero
     (P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]
     (hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀)
-    [DecidableEq A] (f₀ : A) (S : Finset A)
+    [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺ : Subring A)] [DecidableEq A] (f₀ : A) (S : Finset A)
     (hspan : Ideal.span ((S : Set A)) = ⊤)
     (_h_f₀_mem : f₀ ∈ S) :
     ∀ v ∈ Spa A A⁺, v.vle f₀ 0 → ∃ g ∈ S.erase f₀, ¬ v.vle g 0 := by
   intro v hv_spa hv_f₀
   obtain ⟨f, hf_mem, hvf⟩ :=
-    (spanTop_iff_noCommonZero_spa P hAplus_le_A₀ S).mp hspan v hv_spa
+    (spanTop_iff_noCommonZero_spa S).mp hspan v hv_spa
   refine ⟨f, Finset.mem_erase.mpr ⟨?_, hf_mem⟩, hvf⟩
   intro h_eq
   exact hvf (h_eq ▸ hv_f₀)
@@ -2789,13 +2792,14 @@ outside the minus half with `v(f₀) ≠ 0` must be handled separately. -/
 theorem RationalCovering.refines_span_top_erase_of_noCommonZero_nonzero_f₀
     (P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]
     (hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀)
-    [DecidableEq A] (f₀ : A) (S : Finset A)
+    [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺ : Subring A)] [DecidableEq A] (f₀ : A) (S : Finset A)
     (hspan : Ideal.span ((S : Set A)) = ⊤)
     (h_f₀_mem : f₀ ∈ S)
     (h_cover_nonzero_f₀ :
       ∀ v ∈ Spa A A⁺, ¬ v.vle f₀ 0 → ∃ g ∈ S.erase f₀, ¬ v.vle g 0) :
     Ideal.span ((S.erase f₀ : Finset A) : Set A) = ⊤ := by
-  rw [spanTop_iff_noCommonZero_spa P hAplus_le_A₀]
+  rw [spanTop_iff_noCommonZero_spa]
   intro v hv_spa
   by_cases h_f₀_zero : v.vle f₀ 0
   · exact RationalCovering.noCommonZero_erase_of_f₀_zero P hAplus_le_A₀

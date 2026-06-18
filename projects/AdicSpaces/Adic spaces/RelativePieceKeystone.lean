@@ -2299,8 +2299,7 @@ so `m ≤ supp w = comap(restrictionMapHom) supp w'`, giving
 no OMT, and (crucially) **no** `restrictionMap_isLocalization` (the mathematically-false
 algebraic-localization predicate). The sole deep input is the isolated
 `cor_8_32_spaExtendsAlongRestriction` (Wedhorn 7.46/7.48/8.2). -/
-theorem cor_8_32_maximal_liftedIdeal_ne_top (C : RationalCovering A)
-    (hplus : (A⁺ : Set A) ⊆ C.base.P.A₀) :
+theorem cor_8_32_maximal_liftedIdeal_ne_top (C : RationalCovering A) :
     ∀ (m : Ideal (presheafValue C.base)), m.IsMaximal →
       ∃ (D : { D // D ∈ C.covers }),
         Ideal.map (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)) m ≠ ⊤ := by
@@ -2313,7 +2312,7 @@ theorem cor_8_32_maximal_liftedIdeal_ne_top (C : RationalCovering A)
     tate_proper_ideal_not_open hm.ne_top
   -- Lemma 7.45 on the completion (T-SUM-1, noeth-A₀-free): a Spa point `w` with `m ≤ w.supp`.
   obtain ⟨w, hw_spa, hw_supp⟩ :=
-    exists_spa_point_supp_ge_in_presheafValue C hplus hm_notOpen
+    exists_spa_point_supp_ge_in_presheafValue C hm_notOpen
   -- The `A`-shadow `v = comap C.base.canonicalMap w` lies in the base rational open.
   have hv_rat_base : comap C.base.canonicalMap w ∈ rationalOpen C.base.T C.base.s :=
     comap_canonicalMap_mem_rationalOpen C.base (canonicalMap_continuous C.base) hw_spa
@@ -2341,7 +2340,7 @@ theorem cor_8_32_maximal_liftedIdeal_ne_top (C : RationalCovering A)
 
 omit [CompatiblePlusSubring A] in
 theorem cor_8_32_productRestriction_faithfullyFlat (C : RationalCovering A)
-    (hC : C.IsRational) (hplus : (A⁺ : Set A) ⊆ C.base.P.A₀) :
+    (hC : C.IsRational) :
     letI : ∀ D : { D // D ∈ C.covers }, Algebra (presheafValue C.base) (presheafValue D.1) :=
       fun D => (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra
     Module.FaithfullyFlat (presheafValue C.base)
@@ -2360,7 +2359,7 @@ theorem cor_8_32_productRestriction_faithfullyFlat (C : RationalCovering A)
     (fun D => (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra)
     (fun D => prop_8_30_restriction_flat C.base D.1 (C.hsubset D.1 D.2)
       hC.base (hC.piece D.2))
-    (cor_8_32_maximal_liftedIdeal_ne_top C hplus)
+    (cor_8_32_maximal_liftedIdeal_ne_top C)
 
 omit [CompatiblePlusSubring A] in
 /-- **Corollary 8.32, injectivity consequence** (the separation half of `IsSheafy`): the
@@ -2371,11 +2370,11 @@ product restriction `O_X(X) → ∏ O_X(Uᵢ)` is injective. Faithfully flat ⇒
 criterion) gives `FaithfulSMul`, hence `algebraMap` injectivity, hence injectivity of the
 subtype-indexed product restriction. No noeth-`A₀`, no prime-surjection. -/
 theorem cor_8_32_productRestrictionSub_injective (C : RationalCovering A)
-    (hC : C.IsRational) (hplus : (A⁺ : Set A) ⊆ C.base.P.A₀) :
+    (hC : C.IsRational) :
     Function.Injective (productRestrictionSub A C) := by
   letI : ∀ D : { D // D ∈ C.covers }, Algebra (presheafValue C.base) (presheafValue D.1) :=
     fun D => (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra
-  haveI := cor_8_32_productRestriction_faithfullyFlat C hC hplus
+  haveI := cor_8_32_productRestriction_faithfullyFlat C hC
   -- The product's `algebraMap` is injective (faithfully flat ⇒ `FaithfulSMul`), and it
   -- agrees componentwise with `productRestrictionSub` (each factor's algebraMap is the
   -- restriction ring hom).
@@ -2407,8 +2406,7 @@ theorem cor_8_32_productRestrictionSub_isEmbedding (C : RationalCovering A)
     (hC : C.IsRational) :
     Topology.IsEmbedding (productRestrictionSub A C) :=
   ⟨cor_8_32_productRestrictionSub_isInducing C hC,
-    cor_8_32_productRestrictionSub_injective C hC
-      (CompatiblePlusSubring.aplus_le_A₀ C.base)⟩
+    cor_8_32_productRestrictionSub_injective C hC⟩
 
 end Wedhorn828Tail
 

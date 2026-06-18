@@ -6,6 +6,7 @@ import Mathlib.RingTheory.Localization.Away.Basic
 import Mathlib.RingTheory.Noetherian.Nilpotent
 import Mathlib.RingTheory.Valuation.LocalSubring
 import «Adic spaces».AdicCompletionBridge
+import «Adic spaces».AffinoidRings
 import «Adic spaces».CompleteTopCommRingCat
 import «Adic spaces».LocalizationTopology
 import «Adic spaces».OrderedGroupConvex
@@ -212,6 +213,25 @@ class CompatiblePlusSubring (A : Type*) [CommRing A] [TopologicalSpace A]
     [IsTopologicalRing A] [PlusSubring A] : Prop where
   /-- For every rational localization datum, `A⁺` is contained in the ring of definition. -/
   aplus_le_pod : ∀ (D : RationalLocData A), (A⁺ : Set A) ⊆ D.P.A₀
+  /-- `A⁺` is open (Wedhorn Def. 7.14(1), the affinoid-ring axiom the bare `PlusSubring` drops). -/
+  isOpen' : IsOpen (A⁺ : Set A)
+  /-- `A⁺` is integrally closed in `A` (Wedhorn Def. 7.14(1)). -/
+  isIntegrallyClosed' : ∀ a : A, IsIntegral (↥(A⁺ : Subring A)) a → a ∈ (A⁺ : Subring A)
+  /-- `A⁺ ⊆ A°` (Wedhorn Def. 7.14(1) / Remark 7.15(1)). -/
+  subset_powerBounded' : (A⁺ : Set A) ⊆ TopologicalRing.powerBoundedSubring A
+
+/-- **The base affinoid `(A, A⁺)` is a ring of integral elements** (Wedhorn Def. 7.14(1)).
+A `[CompatiblePlusSubring A]` affinoid carries the three Def-7.14 axioms, so
+`[IsRingOfIntegralElements (A⁺)]` resolves automatically — the faithful affinoid interface
+(expert-review 2026-06-18, Q1): it lets the pair-free Spa-point / span-top criteria fire at
+base level WITHOUT a pair of definition, exactly as `presheafValuePlus_isRingOfIntegralElements`
+does for the completions `B = 𝒪_X(D)`. -/
+instance (priority := 100) CompatiblePlusSubring.toIsRingOfIntegralElements
+    {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A] [PlusSubring A]
+    [CompatiblePlusSubring A] : IsRingOfIntegralElements (A⁺ : Subring A) where
+  isOpen := CompatiblePlusSubring.isOpen'
+  isIntegrallyClosed := CompatiblePlusSubring.isIntegrallyClosed'
+  subset_powerBounded := CompatiblePlusSubring.subset_powerBounded'
 
 /-- The plus subring is contained in the ring of definition of any rational locale
 (Wedhorn Remark 7.17, `CompatiblePlusSubring`-typeclass accessor). -/
@@ -404,19 +424,30 @@ theorem RationalLocData.divByS_mem_locPlusSubring (D : RationalLocData A)
     divByS t D.s ∈ D.locPlusSubring :=
   Subring.subset_closure (Set.mem_union_right _ ⟨⟨t, ht⟩, rfl⟩)
 
-/-- The completion plus subring `O_X(R(T/s))⁺ = Ĉ`: the topological closure of the
-image of `locPlusSubring` in `presheafValue D`. The A⁺-analogue of
-`completedLocSubring`. -/
+/-- The completion plus subring `O_X(R(T/s))⁺ = Ĉ` (Wedhorn 8.16): the topological closure of
+the image of the **integral closure** `C = (A⁺[T/s])^int` of `locPlusSubring` in
+`Localization.Away D.s`. Using the integral closure `C` (not merely the generated subring
+`locPlusSubring`) is essential for `Ĉ` to be a genuine ring of integral elements
+(Definition 7.14 / Wedhorn 7.19 + 7.47; expert-review 2026-06-18, Q2 / risk #1). -/
 noncomputable def RationalLocData.completedPlusSubring (D : RationalLocData A) [PlusSubring A] :
     Subring (presheafValue D) :=
-  (D.locPlusSubring.map D.coeRingHom).topologicalClosure
+  ((integralClosure ↥(D.locPlusSubring) (Localization.Away D.s)).toSubring.map
+    D.coeRingHom).topologicalClosure
+
+/-- `locPlusSubring ≤ C = (locPlusSubring)^int` (every element is integral over itself). -/
+theorem RationalLocData.locPlusSubring_le_integralClosure (D : RationalLocData A) [PlusSubring A] :
+    D.locPlusSubring ≤ (integralClosure ↥(D.locPlusSubring) (Localization.Away D.s)).toSubring := by
+  intro x hx
+  rw [Subalgebra.mem_toSubring]
+  exact (integralClosure ↥(D.locPlusSubring) (Localization.Away D.s)).algebraMap_mem ⟨x, hx⟩
 
 /-- The image of `locPlusSubring` under `coeRingHom` is contained in
 `completedPlusSubring` (the closure contains the image). -/
 theorem RationalLocData.coeRingHom_locPlusSubring_le_completedPlusSubring
     (D : RationalLocData A) [PlusSubring A] :
-    (D.locPlusSubring).map D.coeRingHom ≤ D.completedPlusSubring :=
-  Subring.le_topologicalClosure _
+    (D.locPlusSubring).map D.coeRingHom ≤ D.completedPlusSubring := by
+  rintro y ⟨x, hx, rfl⟩
+  exact Subring.le_topologicalClosure _ ⟨x, D.locPlusSubring_le_integralClosure hx, rfl⟩
 
 /-- An element of `locPlusSubring` maps into `completedPlusSubring`. -/
 theorem RationalLocData.coeRingHom_mem_completedPlusSubring
@@ -435,15 +466,12 @@ theorem RationalLocData.locPlusSubring_le_locSubring (D : RationalLocData A)
   · exact algebraMap_mem_locSubring D.P D.T D.s (hAplus_le_A₀ ha)
   · exact divByS_mem_locSubring D.P D.T D.s t.2
 
-/-- `completedPlusSubring ≤ completedLocSubring` when `A⁺ ⊆ A₀`: the A⁺-based plus
-subring sits inside the A₀-based ring of definition. (Used to convert A₀-based
-`Spa` membership into A⁺-based membership via `spa_antitone`.) -/
-theorem RationalLocData.completedPlusSubring_le_completedLocSubring (D : RationalLocData A)
-    [PlusSubring A] (hAplus_le_A₀ : (A⁺ : Set A) ⊆ D.P.A₀) :
-    D.completedPlusSubring ≤ D.completedLocSubring := by
-  apply Subring.topologicalClosure_mono
-  rintro y ⟨x, hx, rfl⟩
-  exact ⟨x, D.locPlusSubring_le_locSubring hAplus_le_A₀ hx, rfl⟩
+-- `completedPlusSubring_le_completedLocSubring` (the OLD `A⁺ ⊆ A₀` route, converting A₀-based
+-- `Spa` membership into A⁺-based) is DELETED: with the faithful `completedPlusSubring = Ĉ`
+-- (integral closure, Wedhorn 8.16) it is false (`Ĉ ⊄ completedLocSubring`, the integral closure
+-- escapes the ring-of-definition closure). Its consumers now route through the faithful
+-- `A⁺ ⊆ A°` interface (`IsRingOfIntegralElements`) + `exists_cont_supp_ge_powerBounded_of_nonOpen_prime`
+-- (expert-review 2026-06-18, Q4 / risk #1).
 
 /-- The image of `A⁺` under `canonicalMap` lands in `completedPlusSubring`
 (Wedhorn 8.2: `A⁺ ⊆ A(T/s)⁺`). No `A⁺ ⊆ A₀` hypothesis needed — `A⁺` generates
@@ -461,6 +489,22 @@ image of `A⁺` (via `canonicalMap_Aplus_le_completedPlusSubring`); the A₀-bas
 noncomputable instance RationalLocData.presheafValuePlusSubring
     (D : RationalLocData A) [PlusSubring A] : PlusSubring (presheafValue D) where
   toSubring := D.completedPlusSubring
+
+/-- **`(presheafValue D)⁺ = Ĉ` is a ring of integral elements** (Wedhorn 8.16; via 7.19 + 7.47).
+The completed integral-closure plus subring `Ĉ` of the rational localisation `O_X(R(T/s))` is open,
+integrally closed, and contained in `(presheafValue D)°`. This is the faithful affinoid-ring
+interface for completions (expert-review 2026-06-18, Q2): it makes `[IsRingOfIntegralElements
+((presheafValue D)⁺)]` resolve automatically, so the Spa-point/unit criteria apply to completions
+without the false-for-completions `CompatiblePlusSubring`. Three fields, all cited deep Wedhorn
+results: Wedhorn 7.19 (the precompletion `C = (A⁺[T/s])^int` is a ring of integral elements in
+`A_s`) lifted by 7.47 (completion correspondence). The IntCl construction (rather than the generated
+subring) is essential — risk #1. -/
+instance RationalLocData.presheafValuePlus_isRingOfIntegralElements
+    (D : RationalLocData A) [PlusSubring A] :
+    IsRingOfIntegralElements ((presheafValue D)⁺) where
+  isOpen := sorry
+  isIntegrallyClosed := sorry
+  subset_powerBounded := sorry
 
 /-- The canonical map `A →+* presheafValue D` sends `A⁺` into `B⁺`. -/
 theorem RationalLocData.canonicalMap_integral (D : RationalLocData A)

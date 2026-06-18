@@ -1589,37 +1589,10 @@ private theorem completedLocSubring_eq_presheafValue_ringOfDef (D : RationalLocD
   · exact closure_mono h_sub_eq.le
   · exact closure_mono h_sub_eq.ge
 
-/-- **[T-KS4] Keystone unit-ness via the complete-affinoid Nullstellensatz (no T001).**
-`D.s` maps to a unit in `presheafValue D'` when `R(D'.T/D'.s) ⊆ R(D.T/D.s)`, proved by applying
-Wedhorn 7.52(2) (`isUnit_iff_forall_not_vle_zero_of_complete`, axiom-clean) to the **noeth-free**
-complete-affinoid bundle on `presheafValue D'` (T-KS1–T-KS3), discharging non-vanishing via the
-`comap` into `rationalOpen D' ⊆ rationalOpen D`. Faithful replacement for the
-`isUnit_canonicalMap_s_of_huber` route through the T001 `spa_point_nonOpen` sorry. -/
-theorem isUnit_canonicalMap_s_via_nullstellensatz
-    [IsTateRing A] [IsNoetherianRing A] [T2Space A]
-    (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (D D' : RationalLocData A)
-    (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
-    (hAplus : (A⁺ : Set A) ⊆ D'.P.A₀)
-    (hcont : Continuous D'.canonicalMap) :
-    IsUnit (D'.canonicalMap D.s) := by
-  haveI hcomplete : IsAdicComplete (presheafValue_pairOfDefinition_concrete P D').I
-      (presheafValue_pairOfDefinition_concrete P D').A₀ := presheafValue_isAdicComplete D'
-  have hAplus_B : ((presheafValue D')⁺ : Set (presheafValue D')) ⊆
-      ((presheafValue_pairOfDefinition_concrete P D').A₀ : Set (presheafValue D')) := by
-    intro y hy
-    show y ∈ (presheafValue_ringOfDef D' : Set (presheafValue D'))
-    rw [← completedLocSubring_eq_presheafValue_ringOfDef D']
-    exact D'.completedPlusSubring_le_completedLocSubring hAplus hy
-  rw [PairOfDefinition.isUnit_iff_forall_not_vle_zero_of_complete
-      (presheafValue_pairOfDefinition_concrete P D') hAplus_B (D'.canonicalMap D.s)]
-  intro w hw
-  have hv_ro : comap D'.canonicalMap w ∈ rationalOpen D'.T D'.s := by
-    refine ⟨comap_mem_spa hcont D'.canonicalMap_integral hw, ?_, ?_⟩
-    · intro t ht; rw [comap_vle]; exact D'.comap_canonicalMap_vle hw.2 ht
-    · exact @RationalLocData.comap_canonicalMap_not_vle_s_zero A _ _ _ D' w.toValuativeRel
-  intro hvle
-  exact (h hv_ro).2.2 (by rw [comap_vle, map_zero]; exact hvle)
+-- `isUnit_canonicalMap_s_via_nullstellensatz` (the OLD `A⁺ ⊆ A₀` / noeth-`A₀` pair-based unit
+-- criterion) is DELETED: it was unused (superseded by the pair-free faithful
+-- `isUnit_canonicalMap_s_faithful`, `FaithfulLocLift`) and relied on the now-deleted
+-- `completedPlusSubring_le_completedLocSubring`.
 
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- **Lifting non-open primes from `presheafValue C.base` via Lemma 7.45.**
@@ -1634,35 +1607,23 @@ specific completion setting. The `IsAdicComplete` instance is supplied via
 theorem exists_spa_point_supp_ge_in_presheafValue
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [PlusSubring A]
     (C : RationalCovering A)
-    (hAplus_le_A₀ : (A⁺ : Set A) ⊆ C.base.P.A₀)
     {𝔭 : Ideal (presheafValue C.base)} [𝔭.IsPrime]
     (h𝔭_notOpen : ¬IsOpen (𝔭 : Set (presheafValue C.base))) :
     ∃ w ∈ Spa (presheafValue C.base) (presheafValue C.base)⁺,
       𝔭 ≤ w.supp := by
-  -- Set up: the INTRINSIC pair of definition of `presheafValue C.base` (ring of def =
-  -- `presheafValue_ringOfDef`, ideal of def = `presheafValue_idealOfDef`), the same faithful pair
-  -- `presheafValue_isTateRing_faithful` uses. NO `(P : PairOfDefinition A)`, NO noeth-A₀.
-  let PB : PairOfDefinition (presheafValue C.base) :=
-    { A₀ := presheafValue_ringOfDef C.base
-      I := presheafValue_idealOfDef C.base
-      isOpen := presheafValue_ringOfDef_isOpen C.base
-      fg := presheafValue_idealOfDef_fg C.base
-      isAdic := presheafValue_isAdic C.base }
-  haveI : IsAdicComplete PB.I PB.A₀ := presheafValue_isAdicComplete C.base
-  -- The PlusSubring is `presheafValuePlusSubring`, now `B⁺ = completedPlusSubring`
-  -- (A⁺-based, Wedhorn 8.2). The hypothesis `(B⁺ : Set _) ⊆ PB.A₀` follows from
-  -- `completedPlusSubring ⊆ completedLocSubring = ringOfDef` (since `A⁺ ⊆ A₀`).
-  have hBplus_le_B₀ : ((PlusSubring.toSubring (A := presheafValue C.base) :
-      Subring (presheafValue C.base)) : Set (presheafValue C.base)) ⊆
-      (PB.A₀ : Set (presheafValue C.base)) := by
-    intro x hx
-    have hx' : x ∈ (C.base.completedLocSubring : Set (presheafValue C.base)) :=
-      C.base.completedPlusSubring_le_completedLocSubring hAplus_le_A₀ hx
-    rwa [completedLocSubring_eq_presheafValue_ringOfDef] at hx'
-  obtain ⟨w, hw_spa, hw_supp, _⟩ :=
-    PB.exists_mem_spa_supp_ge_of_nonOpen_prime (𝔭 := 𝔭) h𝔭_notOpen hBplus_le_B₀
-  -- The output Spa is w.r.t. `(presheafValue C.base)⁺ = completedPlusSubring`.
-  exact ⟨w, hw_spa, hw_supp⟩
+  -- FAITHFUL route (expert-review 2026-06-18, Q4): the non-open prime `𝔭` of the complete
+  -- affinoid `B = O_X(C.base)` has a continuous analytic Spa-point bounded on **all of `B°`**
+  -- (Wedhorn 7.45 + 7.41, `exists_cont_supp_ge_powerBounded_of_nonOpen_prime`); since `B⁺ ⊆ B°`
+  -- (`B⁺` a ring of integral elements, `presheafValuePlus_isRingOfIntegralElements`) the point
+  -- lies in `Spa(B, B⁺)`. NO `A⁺ ⊆ A₀` / pair-of-definition detour, NO noeth-`A₀`.
+  haveI hTate : IsTateRing (presheafValue C.base) := presheafValue_isTateRing_concrete C.base
+  haveI : IsHuberRing (presheafValue C.base) := hTate.toIsHuberRing
+  haveI : T2Space (presheafValue C.base) := inferInstance
+  haveI : NonarchimedeanRing (presheafValue C.base) := inferInstance
+  obtain ⟨v, hcont, hsupp, hbd⟩ :=
+    exists_cont_supp_ge_powerBounded_of_nonOpen_prime (A := presheafValue C.base) h𝔭_notOpen
+  exact ⟨v, ⟨hcont, fun f hf => hbd f
+    (IsRingOfIntegralElements.subset_powerBounded (B := (presheafValue C.base)⁺) hf)⟩, hsupp⟩
 
 /-! ### Spa-point extension along a rational-subset restriction (Wedhorn Prop 8.2)
 
@@ -1799,7 +1760,7 @@ theorem hSpa_points_nonOpen_via_lifted_ideal_proper
   -- Step 3: Apply Lemma 7.45 (via the completion route) to get a Spa point of
   -- presheafValue C.base with 𝔭 in its support.
   obtain ⟨w, hw_spa, hw_supp⟩ :=
-    exists_spa_point_supp_ge_in_presheafValue C hAplus_le_A₀ h𝔭_notOpen
+    exists_spa_point_supp_ge_in_presheafValue C h𝔭_notOpen
   -- Step 4: liftedIdeal p ≤ 𝔭 ≤ w.supp.
   have hw_supp_lifted :
       (Ideal.map C.base.canonicalMap p : Ideal (presheafValue C.base)) ≤ w.supp :=
