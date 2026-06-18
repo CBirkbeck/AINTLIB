@@ -27,25 +27,19 @@ variable {R : Type*} [CommRing R] (I : Ideal R)
 Transfers `AdicCompletion.flat_of_isNoetherian` via the bridge. -/
 theorem completion_flat (hadic : IsAdic I) [IsNoetherianRing R] :
     Module.Flat R (UniformSpace.Completion R) := by
-  -- AdicCompletion I R is flat over R (Mathlib).
-  haveI : Module.Flat R (AdicCompletion I R) :=
+  have : Module.Flat R (AdicCompletion I R) :=
     AdicCompletion.flat_of_isNoetherian I
-  -- Build an R-linear equiv from the ring equiv.
-  -- The ring equiv sends coe(r) ↦ of(r) = algebraMap(r), so it's R-linear.
   let e := adicCompletionRingEquiv I hadic
   have he_smul : ∀ (r : R) (x : UniformSpace.Completion R),
       e (r • x) = r • e x := by
     intro r x
-    -- r • x in Completion = algebraMap(r) * x = coe(r) * x.
-    -- e(coe(r) * x) = e(coe r) * e(x) = of(r) * e(x) = algebraMap(r) * e(x) = r • e(x).
-    rw [Algebra.smul_def, Algebra.smul_def]
-    rw [e.map_mul]
+    rw [Algebra.smul_def, Algebra.smul_def, e.map_mul]
     congr 1
     exact AbstractCompletion.compare_coe
       UniformSpace.Completion.cPkg (adicAbstractCompletion I hadic) r
   exact Module.Flat.of_linearEquiv
     { e.toEquiv with
       map_add' := e.map_add
-      map_smul' := fun r x => he_smul r x }
+      map_smul' := he_smul }
 
 end AdicCompletionBridge
