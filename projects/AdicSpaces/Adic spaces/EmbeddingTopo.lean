@@ -2620,20 +2620,18 @@ theorem LaurentTree.exists_for_laurentCovering
   · -- allSplitsInducing
     refine ⟨h_split, ?_, ?_⟩ <;> trivial
   · -- allNodesDisjoint
-    refine ⟨h_ne, ?_, ?_, ?_⟩
-    · -- Disjoint (L.toCovering plus).covers (R.toCovering minus).covers
-      -- = Disjoint {plus} {minus} (since L = R = leaf).
-      show Disjoint
+    refine ⟨h_ne, ?_, trivial, trivial⟩
+    -- Disjoint (L.toCovering plus).covers (R.toCovering minus).covers
+    -- = Disjoint {plus} {minus} (since L = R = leaf).
+    show Disjoint
         ((LaurentTree.leaf : LaurentTree A).toCovering
           (laurentPlusDatum D₀ f)).covers
         ((LaurentTree.leaf : LaurentTree A).toCovering
           (laurentMinusDatum D₀ f)).covers
-      rw [LaurentTree.toCovering_leaf_covers,
-          LaurentTree.toCovering_leaf_covers,
-          Finset.disjoint_singleton]
-      exact h_ne
-    · trivial
-    · trivial
+    rw [LaurentTree.toCovering_leaf_covers,
+        LaurentTree.toCovering_leaf_covers,
+        Finset.disjoint_singleton]
+    exact h_ne
 
 /-! ### Graft preservation of inducing + disjointness predicates
 
@@ -2656,13 +2654,10 @@ theorem LaurentTree.allSplitsInducing_graftAt (t : LaurentTree A)
   | node f L R ihL ihR =>
     obtain ⟨h_split_f, h_split_L, h_split_R⟩ :=
       (LaurentTree.allSplitsInducing_node f L R D₀).mp h_outer
-    refine ⟨h_split_f, ?_, ?_⟩
-    · apply ihL (laurentPlusDatum D₀ f) h_split_L
-      intro L' hL'
-      exact h_inner L' (by simp [LaurentTree.leaves_node, hL'])
-    · apply ihR (laurentMinusDatum D₀ f) h_split_R
-      intro L' hL'
-      exact h_inner L' (by simp [LaurentTree.leaves_node, hL'])
+    refine ⟨h_split_f, ihL (laurentPlusDatum D₀ f) h_split_L fun L' hL' =>
+        h_inner L' (by simp [LaurentTree.leaves_node, hL']),
+      ihR (laurentMinusDatum D₀ f) h_split_R fun L' hL' =>
+        h_inner L' (by simp [LaurentTree.leaves_node, hL'])⟩
 
 /-! ### Note on `allNodesDisjoint` preservation under graft
 
