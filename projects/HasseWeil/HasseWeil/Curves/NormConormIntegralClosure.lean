@@ -748,6 +748,35 @@ theorem ordAtInfty_coordYFun : C₁.ordAtInfty (coordYFun C₁) = ((-3 : ℤ) : 
 theorem coordYFun_ne_zero : coordYFun C₁ ≠ 0 := by
   rw [coordYFun_eq_coordYInFunctionField]; exact C₁.coordYInFunctionField_ne_zero
 
+/-- An `F`-constant is a `v`-adic *unit* for every `B`-prime `v`: `w_v(algebraMap_F c) = 1` for
+`c ≠ 0` (both `c` and `c⁻¹` are base-ring elements of `B`, hence `≤ 1`).  The `F`-constants factor
+through `C₂.CoordinateRing`, so this is two applications of
+`valuation_algebraMap_coordinateRing_le_one`. -/
+theorem valuation_algebraMap_F_eq_one
+    (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)))
+    {c : F} (hc : c ≠ 0) :
+    v.valuation C₁.FunctionField (algebraMap F C₁.FunctionField c) = 1 := by
+  have hroute : ∀ d : F, algebraMap F C₁.FunctionField d =
+      algebraMap C₂.CoordinateRing C₁.FunctionField (algebraMap F C₂.CoordinateRing d) := by
+    intro d
+    rw [IsScalarTower.algebraMap_apply C₂.CoordinateRing C₂.FunctionField C₁.FunctionField,
+      ← IsScalarTower.algebraMap_apply F C₂.CoordinateRing C₂.FunctionField,
+      ← IsScalarTower.algebraMap_apply F C₂.FunctionField C₁.FunctionField]
+  refine le_antisymm (by rw [hroute]; exact valuation_algebraMap_coordinateRing_le_one v _) ?_
+  -- `1 = w_v(c · c⁻¹) = w_v(c) · w_v(c⁻¹) ≤ w_v(c) · 1`, so `1 ≤ w_v(c)`.
+  have hcinv_le : v.valuation C₁.FunctionField (algebraMap F C₁.FunctionField c⁻¹) ≤ 1 := by
+    rw [hroute]; exact valuation_algebraMap_coordinateRing_le_one v _
+  have hprod : v.valuation C₁.FunctionField (algebraMap F C₁.FunctionField c) *
+      v.valuation C₁.FunctionField (algebraMap F C₁.FunctionField c⁻¹) = 1 := by
+    rw [← map_mul, ← map_mul, mul_inv_cancel₀ hc, map_one, map_one]
+  -- `1 = w(c)·w(c⁻¹) ≤ w(c)·1 = w(c)`.
+  calc (1 : WithZero (Multiplicative ℤ))
+      = v.valuation C₁.FunctionField (algebraMap F C₁.FunctionField c) *
+        v.valuation C₁.FunctionField (algebraMap F C₁.FunctionField c⁻¹) := hprod.symm
+    _ ≤ v.valuation C₁.FunctionField (algebraMap F C₁.FunctionField c) * 1 :=
+        mul_le_mul_left' hcinv_le _
+    _ = v.valuation C₁.FunctionField (algebraMap F C₁.FunctionField c) := mul_one _
+
 /-! ### The minimal-polynomial reduction (non-circular, place-dictionary-free)
 
 The whole content of `coordXFun_mem_B` / `coordYFun_mem_B` (and hence `coordRing_mem_B`) reduces —
