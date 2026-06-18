@@ -79,4 +79,19 @@ class ClassFieldTheory (K : Type) [Field K] [NumberField K] [RayClassData K] whe
   /-- **Artin reciprocity**: `Cl_K(𝔪) ≃ Gal(H_𝔪/K)`. -/
   artin : ∀ 𝔪, RayClassData.rayClassGroup 𝔪 ≃* rayClassFieldGal 𝔪
 
+namespace ClassFieldTheory
+
+variable {K : Type} [Field K] [NumberField K] [RayClassData K] [ClassFieldTheory K]
+
+/-- **The ray-class exact sequence** (G2-RAYSEQ): `(𝓞_K/𝔪)ˣ → Cl_K(𝔪) → Cl_K` is exact at the
+middle — `ker(Cl_K(𝔪) ↠ Cl_K) = im((𝓞_K/𝔪)ˣ → Cl_K(𝔪))` — and `Cl_K(𝔪) ↠ Cl_K` is surjective
+(`toClassGroup_surjective`).  Derived from the bundled interface field `ray_exact`. -/
+theorem rayClassExact (𝔪 : Ideal (𝓞 K)) :
+    (toClassGroup 𝔪).ker = (fromUnitsMod 𝔪).range := by
+  ext x
+  rw [MonoidHom.mem_ker]
+  exact ray_exact 𝔪 x
+
+end ClassFieldTheory
+
 end Iwasawa.Galois
