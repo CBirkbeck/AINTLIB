@@ -142,8 +142,7 @@ theorem Localization.Away.mem_ideal_iff_clearing_denominator
   -- d = u⁻¹ * x ∈ q.
   have h_d_eq : (d : Localization.Away s) = (u⁻¹ : (Localization.Away s)ˣ) * x := by
     rw [hxud, ← mul_assoc, u.inv_mul, one_mul]
-  rw [h_d_eq]
-  exact q.mul_mem_left _ hx
+  exact h_d_eq ▸ q.mul_mem_left _ hx
 
 /-! ### Step 3 — topological transfer -/
 
