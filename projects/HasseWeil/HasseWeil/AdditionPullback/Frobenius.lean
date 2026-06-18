@@ -166,7 +166,7 @@ theorem ordAtInfty_a1L_minus_a2_minus_xgen_frobenius
   -- ord(a₁ * L)
   have h_a1_alg_ne : algebraMap K KE W.toAffine.a₁ ≠ 0 := by
     rw [Ne, ← map_zero (algebraMap K KE)]
-    exact fun h => ha1 (FaithfulSMul.algebraMap_injective _ _ h)
+    exact fun h ↦ ha1 (FaithfulSMul.algebraMap_injective _ _ h)
   have h_ord_a1 : (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₁) = 0 :=
     ordAtInfty_algebraMap_F_nonzero W ha1
   have h_ord_a1L :
@@ -413,7 +413,7 @@ theorem ordAtInfty_T2_frobenius (ha₁ : W.toAffine.a₁ ≠ 0) :
       ((-5 * (Fintype.card K : ℤ)) : WithTop ℤ) := by
   have h_a1_alg_ne : algebraMap K KE W.toAffine.a₁ ≠ 0 := by
     rw [Ne, ← map_zero (algebraMap K KE)]
-    exact fun h => ha₁ (FaithfulSMul.algebraMap_injective _ _ h)
+    exact fun h ↦ ha₁ (FaithfulSMul.algebraMap_injective _ _ h)
   have h_x_ne : x_gen W - (frobeniusIsog W).pullback (x_gen W) ≠ 0 :=
     x_gen_sub_frobeniusIsog_pullback_x_gen_ne_zero W
   have h_y_ne : y_gen W - (frobeniusIsog W).pullback (y_gen W) ≠ 0 :=
@@ -474,7 +474,7 @@ theorem ordAtInfty_a2_plus_x_gen_plus_pi_x_frobenius (hq : 2 ≤ Fintype.card K)
   · -- a₂ ≠ 0: ord(a₂ + x_gen) = -2 (strict non-arch, 0 ≠ -2).
     have h_a2_alg_ne : algebraMap K KE W.toAffine.a₂ ≠ 0 := by
       rw [Ne, ← map_zero (algebraMap K KE)]
-      exact fun h => ha₂ (FaithfulSMul.algebraMap_injective _ _ h)
+      exact fun h ↦ ha₂ (FaithfulSMul.algebraMap_injective _ _ h)
     have h_ord_a2 :
         (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₂) = 0 :=
       ordAtInfty_algebraMap_F_nonzero W ha₂
@@ -645,7 +645,7 @@ private lemma ord_algebraMap_mul_ge {f : KE} (c : K) {n : WithTop ℤ}
   by_cases hf_ne : f = 0
   · rw [hf_ne, mul_zero]
     exact (W_smooth W).ordAtInfty_zero.symm ▸ (le_top : n ≤ (⊤ : WithTop ℤ))
-  have h_alg_ne : algebraMap K KE c ≠ 0 := fun h =>
+  have h_alg_ne : algebraMap K KE c ≠ 0 := fun h ↦
     hc (FaithfulSMul.algebraMap_injective K KE (h.trans (map_zero _).symm))
   calc n ≤ (W_smooth W).ordAtInfty f := hf
     _ = (W_smooth W).ordAtInfty (algebraMap K KE c) + (W_smooth W).ordAtInfty f := by
@@ -1934,7 +1934,7 @@ theorem ord_addPullback_y_negFrobenius (hq : 2 ≤ Fintype.card K) :
   -- Step (a): show m ≤ -3 by contradiction.
   have h_m_le : m ≤ -3 := by
     by_contra h_not_le
-    push_neg at h_not_le
+    push Not at h_not_le
     have h_m_ge : -2 ≤ m := by omega
     have h_y_sq_ge : ((-4 : ℤ) : WithTop ℤ) ≤
         (W_smooth W).ordAtInfty
@@ -2412,7 +2412,7 @@ theorem mulByInt_neg_one_pullback_algebraMap_polyK (p : Polynomial K) :
     rw [Polynomial.aeval_X]
     exact h_x_alg
   have h_eval : algebraMap (Polynomial K) KE p = Polynomial.aeval (x_gen W) p := by
-    have := congrArg (fun (φ : Polynomial K →ₐ[K] KE) => φ p) h_alg_eq
+    have := congrArg (fun (φ : Polynomial K →ₐ[K] KE) ↦ φ p) h_alg_eq
     simpa using this
   rw [h_eval, ← Polynomial.aeval_algHom_apply, mulByInt_pullback_x_neg_one]
 
@@ -2429,7 +2429,7 @@ theorem mulByInt_neg_one_pullback_algebraMap_kx
     IsLocalization.surj (nonZeroDivisors (Polynomial K)) r
   have hden_ne : den ≠ 0 := nonZeroDivisors.ne_zero hden_mem
   have hden_alg_ne : algebraMap (Polynomial K) (FractionRing (Polynomial K)) den ≠ 0 :=
-    fun h => hden_ne (FaithfulSMul.algebraMap_injective _ _ (h.trans (map_zero _).symm))
+    fun h ↦ hden_ne (FaithfulSMul.algebraMap_injective _ _ (h.trans (map_zero _).symm))
   have h_r_eq : r = algebraMap (Polynomial K) (FractionRing (Polynomial K)) num *
       (algebraMap (Polynomial K) (FractionRing (Polynomial K)) den)⁻¹ := by
     rw [eq_mul_inv_iff_mul_eq₀ hden_alg_ne]; exact h_pd
@@ -2566,7 +2566,7 @@ theorem sigma_fixed_implies_in_KX_image
   by_cases h2 : (2 : K) = 0
   · -- Char 2: bXf ≠ 0 (from `a₁ X + a₃ ≠ 0`), so `b · bXf = 0` forces `b = 0`.
     haveI : CharP K 2 := CharTwo.of_one_ne_zero_of_two_eq_zero one_ne_zero h2
-    have h_bXf_ne : bXf ≠ 0 := fun h_eq =>
+    have h_bXf_ne : bXf ≠ 0 := fun h_eq ↦
       a₁X_plus_a₃_ne_zero_char_two W
         (FaithfulSMul.algebraMap_injective (Polynomial K)
           (FractionRing (Polynomial K)) (h_eq.trans (map_zero _).symm))
@@ -3243,7 +3243,7 @@ theorem ordAtInfty_mulByInt_y_eq_of_x
   -- Step (a): m ≤ 3M/2 by contradiction with m ≥ 3M/2 + 1.  Use uniform lower bound `3M+1`.
   have h_m_le : m ≤ 3 * M₂ := by
     by_contra h_not_le
-    push_neg at h_not_le
+    push Not at h_not_le
     have h_m_ge : 3 * M₂ + 1 ≤ m := by omega
     -- All three LHS terms have ord ≥ 3M + 1 (= 6M₂ + 1).
     have h_y_sq_ge : (((3 * M + 1 : ℤ)) : WithTop ℤ) ≤
@@ -3438,7 +3438,7 @@ theorem ordAtInfty_mulByInt_y_eq_neg_three
   -- Step (a): m ≤ -3 by contradiction with m ≥ -2.
   have h_m_le : m ≤ -3 := by
     by_contra h_not_le
-    push_neg at h_not_le
+    push Not at h_not_le
     have h_m_ge : -2 ≤ m := by omega
     have h_y_sq_ge : ((-4 : ℤ) : WithTop ℤ) ≤
         (W_smooth W).ordAtInfty (mulByInt_y W r ^ 2) := by
@@ -3932,7 +3932,7 @@ theorem ordAtInfty_addPullbackNumerator_reduced_pair_zsmul_frobenius_mulByInt_ne
       (((a + b) : ℤ) : WithTop ℤ) := by intros; push_cast; rfl
   -- Helper: equality of WithTop ℤ via integer arithmetic.
   have h_int_eq : ∀ (a b : ℤ), a = b →
-      ((a : ℤ) : WithTop ℤ) = ((b : ℤ) : WithTop ℤ) := fun _ _ h => by rw [h]
+      ((a : ℤ) : WithTop ℤ) = ((b : ℤ) : WithTop ℤ) := fun _ _ h ↦ by rw [h]
   -- ord(Y₁ · Y₂) = -3q + (-3) = -3q - 3.
   have h_Y_prod : (W_smooth W).ordAtInfty (Y₁ * Y₂) =
       ((-3 * (Fintype.card K : ℤ) - 3 : ℤ) : WithTop ℤ) := by
@@ -4140,7 +4140,7 @@ private theorem ord_addPullback_x_sq_pair_zsmul_frobenius_mulByInt_neg
       ((-4 : ℤ) : WithTop ℤ) := by
   haveI : (W_smooth W).toAffine.IsElliptic := inferInstanceAs W.toAffine.IsElliptic
   have hX_ne : addPullback_x_pair ((frobeniusIsog W).zsmul r) (mulByInt W.toAffine (-s)) ≠ 0 :=
-    fun h => WithTop.coe_ne_top
+    fun h ↦ WithTop.coe_ne_top
       (((W_smooth W).ordAtInfty_eq_top_iff _).mpr h ▸
         ord_addPullback_x_pair_zsmul_frobenius_mulByInt_neg W r s hr hs hrK hsK).symm
   refine ((W_smooth W).ord_pow_concrete hX_ne (-2) 2
@@ -4155,7 +4155,7 @@ private theorem ord_addPullback_x_cube_pair_zsmul_frobenius_mulByInt_neg
       ((-6 : ℤ) : WithTop ℤ) := by
   haveI : (W_smooth W).toAffine.IsElliptic := inferInstanceAs W.toAffine.IsElliptic
   have hX_ne : addPullback_x_pair ((frobeniusIsog W).zsmul r) (mulByInt W.toAffine (-s)) ≠ 0 :=
-    fun h => WithTop.coe_ne_top
+    fun h ↦ WithTop.coe_ne_top
       (((W_smooth W).ordAtInfty_eq_top_iff _).mpr h ▸
         ord_addPullback_x_pair_zsmul_frobenius_mulByInt_neg W r s hr hs hrK hsK).symm
   refine ((W_smooth W).ord_pow_concrete hX_ne (-2) 3
@@ -4262,7 +4262,7 @@ theorem ord_addPullback_y_pair_zsmul_frobenius_mulByInt_neg
   -- Step (a): m ≤ -3.
   have h_m_le : m ≤ -3 := by
     by_contra h_not_le
-    push_neg at h_not_le
+    push Not at h_not_le
     have h_y_sq_ge : ((-4 : ℤ) : WithTop ℤ) ≤ (W_smooth W).ordAtInfty (Y ^ 2) := by
       rw [hY_sq_ord]; exact_mod_cast (by linarith : (-4 : ℤ) ≤ 2 * m)
     have h_a1xy_ge : ((-4 : ℤ) : WithTop ℤ) ≤
