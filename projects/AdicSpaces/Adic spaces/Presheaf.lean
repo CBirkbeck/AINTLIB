@@ -2718,6 +2718,34 @@ theorem exists_spa_point_supp_eq_maxIdeal_of_complete
   · exact exists_mem_spa_supp_eq 𝔪 h
   · exact exists_spa_point_supp_eq_nonOpen_maxIdeal_of_complete 𝔪 h
 
+/-- **Support containment ⟹ equality for a maximal ideal** (expert-review 2026-06-18, Q3).
+`v.supp` is a prime ideal (hence `≠ ⊤`), so `𝔪 ≤ v.supp` with `𝔪` maximal forces `v.supp = 𝔪`.
+No rank-1 domination input: the exact support of Prop 7.51 for a MAXIMAL ideal is a formal
+consequence of the (axiom-clean) containment form plus maximality. -/
+theorem support_eq_maximal_of_le {A : Type*} [CommRing A] {v : Spv A} {𝔪 : Ideal A}
+    (h𝔪 : 𝔪.IsMaximal) (h : 𝔪 ≤ v.supp) : v.supp = 𝔪 :=
+  (h𝔪.eq_of_le (instIsPrimeSupp v).ne_top h).symm
+
+/-- **Wedhorn 7.45 + 7.41 (height-one bound form)** — the source-justified leaf underlying the
+faithful non-open-prime Spa-point existence. For a non-open prime `𝔭` of a complete affinoid
+ring there is a continuous valuation `v` with `𝔭 ≤ supp v` bounded by `1` on **all** power-bounded
+elements `A°` (not merely on a ring of definition `A₀`).
+
+The valuation is the analytic point of Lemma 7.45 (convex-subgroup retraction `Spv A → Spv(A, I)`
+of 7.1.2), vertically generalised to **height one** (Remark 4.12); Prop 7.41 then gives `v(a) ≤ 1`
+for every `a ∈ A°`. This is the faithful replacement for the artifact bound "`v ≤ 1` on `A⁺` via
+`A⁺ ⊆ A₀`": once `v` is bounded on `A°`, ANY ring of integral elements `A⁺ ⊆ A°` lands in
+`Spa(A, A⁺)` (expert-review 2026-06-18, Q4 — `A⁺ ⊆ A₀` is a proof artifact, not part of Wedhorn's
+theory). EXTERNAL: packages Wedhorn 7.45 + 7.41 + Remark 4.12; the repo's `restrictToConvex`
+construction supplies the analytic point but bounds only on `A₀`, omitting the height-one step. -/
+theorem exists_cont_supp_ge_powerBounded_of_nonOpen_prime
+    {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
+    [IsTopologicalRing A] [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
+    {𝔭 : Ideal A} [𝔭.IsPrime] (h𝔭 : ¬ IsOpen (𝔭 : Set A)) :
+    ∃ v : Spv A, v ∈ Cont A ∧ 𝔭 ≤ v.supp ∧
+      ∀ a ∈ (TopologicalRing.powerBoundedSubring A : Set A), v.vle a 1 :=
+  sorry
+
 -- Note: `maxIdeal_isClosed_of_complete_huber` and the bundled
 -- `prop_7_51_maxIdeal_closed_and_spa_point` are stated **below**
 -- `isOpen_units_of_complete_huber` (line ~2557) because the closedness

@@ -38,8 +38,13 @@ section IntegralElements
 
 variable {A : Type*} [CommRing A] [TopologicalSpace A]
 
-/-- A ring of integral elements (Definition 7.14(1)): open, integrally closed, and in `A°`. -/
-structure IsRingOfIntegralElements (B : Subring A) : Prop where
+/-- A ring of integral elements (Definition 7.14(1)): open, integrally closed, and in `A°`.
+
+A `class` (not a bare `structure`) so it can be required as `[IsRingOfIntegralElements (A⁺)]`
+on `Spa`-level theorems — the faithful affinoid-ring interface (expert-review 2026-06-18,
+reviewer Q1). The bare `PlusSubring` carrier stays low-level; this records the three
+Definition-7.14 axioms (open, integrally closed, `⊆ A°`) that make `(A, A⁺)` an affinoid ring. -/
+class IsRingOfIntegralElements (B : Subring A) : Prop where
   /-- `B` is open in `A`. -/
   isOpen : IsOpen (B : Set A)
   /-- `B` is integrally closed in `A`. -/
