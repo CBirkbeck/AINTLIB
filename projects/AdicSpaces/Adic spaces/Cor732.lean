@@ -373,15 +373,10 @@ theorem exists_zero_nbhd_lt_on_qc [IsTateRing A]
   refine ⟨(fun y : A => (π : A) ^ (m + 1) * y) ''
     (TopologicalRing.topologicallyNilpotentElements A), ?_, ?_, ?_⟩
   · -- I is open: π^(m+1) is a unit, so multiplication is a homeomorphism.
-    have hπ_unit : IsUnit ((π : A) ^ (m + 1)) := π.isUnit.pow (m + 1)
-    have h_op : IsOpen (TopologicalRing.topologicallyNilpotentElements A) :=
+    exact (π.isUnit.pow (m + 1)).isOpenMap_smul _
       IsTateRing.isOpen_topologicallyNilpotentElements_nonarch
-    have h_smul : IsOpenMap (fun y : A => (π : A) ^ (m + 1) • y) :=
-      hπ_unit.isOpenMap_smul
-    exact h_smul _ h_op
   · -- 0 ∈ I, via 0 ∈ A°° and π^(m+1) * 0 = 0.
-    refine ⟨0, ?_, mul_zero _⟩
-    exact (IsTopologicallyNilpotent.zero : IsTopologicallyNilpotent (0 : A))
+    exact ⟨0, (IsTopologicallyNilpotent.zero : IsTopologicallyNilpotent (0 : A)), mul_zero _⟩
   · -- The strict-domination property.
     rintro a ⟨y, hy_tn, rfl⟩ x hxX
     -- Unpack via the valuation w.
@@ -396,38 +391,20 @@ theorem exists_zero_nbhd_lt_on_qc [IsTateRing A]
       (Valuation.Compatible.vle_iff_le (v := w) _ _).mp h_dom
     -- y ∈ A°° topologically nilpotent ⟹ w(y) < 1 on Spa.
     have hy_lt : w y < 1 := by
-      have h_y_not : ¬ x.1.vle 1 y :=
-        not_vle_one_of_mem_spa_of_topologicallyNilpotent x.2 hy_tn
-      have h_not : ¬ (w 1 ≤ w y) := fun h => h_y_not
+      rw [← map_one w]
+      exact lt_of_not_ge fun h => not_vle_one_of_mem_spa_of_topologicallyNilpotent x.2 hy_tn
         ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr h)
-      rw [map_one] at h_not
-      exact lt_of_not_ge h_not
     -- w(π^(m+1)) ≠ 0 since π is a unit.
-    have hπ_pow_unit : IsUnit ((π : A) ^ (m + 1)) := π.isUnit.pow (m + 1)
-    have hwπ_ne : w ((π : A) ^ (m + 1)) ≠ 0 := by
-      intro h
-      exact not_vle_zero_of_isUnit hπ_pow_unit x.1
-        ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr
-          (by rw [map_zero]; exact le_of_eq h))
-    -- Compute w(π^(m+1) * y) = w(π^(m+1)) * w(y).
-    have h_a_eq : w ((π : A) ^ (m + 1) * y) = w ((π : A) ^ (m + 1)) * w y := by
+    have hwπ_ne : w ((π : A) ^ (m + 1)) ≠ 0 := fun h =>
+      not_vle_zero_of_isUnit (π.isUnit.pow (m + 1)) x.1
+        ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr (by rw [map_zero]; exact h.le))
+    -- Strict: w(a) = w(π^(m+1)) * w(y) < w(π^(m+1)) ≤ w(f).
+    have h_lt : w ((π : A) ^ (m + 1) * y) < w f := by
       rw [map_mul]
-    -- Strict: w(a) < w(π^(m+1)) since w(y) < 1 and w(π^(m+1)) > 0.
-    have h_strict : w ((π : A) ^ (m + 1) * y) < w ((π : A) ^ (m + 1)) := by
-      rw [h_a_eq]
-      have h1 : w ((π : A) ^ (m + 1)) * w y < w ((π : A) ^ (m + 1)) * 1 :=
-        mul_lt_mul_of_pos_left hy_lt (zero_lt_iff.mpr hwπ_ne)
-      simpa using h1
-    -- Combine: w(a) < w(π^(m+1)) ≤ w(f).
-    have h_lt : w ((π : A) ^ (m + 1) * y) < w f :=
-      lt_of_lt_of_le h_strict h_dom_le
-    refine ⟨?_, ?_⟩
-    · -- v.vle a f
-      exact (Valuation.Compatible.vle_iff_le (v := w) _ _).mpr (le_of_lt h_lt)
-    · -- ¬ v.vle f a
-      intro hvle
-      have h_le := (Valuation.Compatible.vle_iff_le (v := w) f _).mp hvle
-      exact absurd h_le (not_le.mpr h_lt)
+      exact lt_of_lt_of_le
+        (by simpa using mul_lt_mul_of_pos_left hy_lt (zero_lt_iff.mpr hwπ_ne)) h_dom_le
+    refine ⟨(Valuation.Compatible.vle_iff_le (v := w) _ _).mpr h_lt.le, fun hvle => ?_⟩
+    exact absurd ((Valuation.Compatible.vle_iff_le (v := w) _ _).mp hvle) (not_le.mpr h_lt)
 
 /-- **(T-B.2.a, audit-identified)** Tate-ring axiom: every open neighborhood of
 zero in a Tate ring contains a unit. Wedhorn 7.32 proof uses this directly:
