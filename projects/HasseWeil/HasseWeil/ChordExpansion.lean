@@ -88,14 +88,14 @@ omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- A Laurent series with nonnegative `orderTop` is the `ofPowerSeries` image
 of the power series of its `ℕ`-indexed coefficients. -/
 theorem ofPowerSeries_mk_coeff {S : LaurentSeries F} (h : 0 ≤ S.orderTop) :
-    HahnSeries.ofPowerSeries ℤ F (PowerSeries.mk fun n => S.coeff (n : ℤ)) = S := by
+    HahnSeries.ofPowerSeries ℤ F (PowerSeries.mk fun n ↦ S.coeff (n : ℤ)) = S := by
   ext j
   rcases le_or_gt 0 j with hj | hj
   · obtain ⟨n, rfl⟩ := Int.eq_ofNat_of_zero_le hj
     rw [HahnSeries.ofPowerSeries_apply_coeff, PowerSeries.coeff_mk]
   · have hnr : j ∉ Set.range ((↑) : ℕ → ℤ) := by rintro ⟨n, rfl⟩; omega
     have hL : (HahnSeries.ofPowerSeries ℤ F
-        (PowerSeries.mk fun n => S.coeff (n : ℤ))).coeff j = 0 := by
+        (PowerSeries.mk fun n ↦ S.coeff (n : ℤ))).coeff j = 0 := by
       rw [HahnSeries.ofPowerSeries_apply]
       exact HahnSeries.embDomain_notin_range hnr
     have hR : S.coeff j = 0 :=
@@ -215,7 +215,7 @@ theorem localExpand_wPair {ξ η : KE} {f : PowerSeries F}
   -- (`s` is introduced as an opaque variable so that the `localExpand`-to-
   -- `ofPowerSeries` rewrite below terminates).
   obtain ⟨s, hs_def⟩ : ∃ s : PowerSeries F,
-      s = PowerSeries.mk fun k => (localExpand W (-η⁻¹ : KE)).coeff (k : ℤ) := ⟨_, rfl⟩
+      s = PowerSeries.mk fun k ↦ (localExpand W (-η⁻¹ : KE)).coeff (k : ℤ) := ⟨_, rfl⟩
   have hwfact : localExpand W (-η⁻¹ : KE) = HahnSeries.ofPowerSeries ℤ F s := by
     rw [hs_def]
     exact (ofPowerSeries_mk_coeff hw_pos.le).symm
@@ -382,8 +382,8 @@ private lemma subst_subst_X (b : Fin 2 → PowerSeries F) (hb : MvPowerSeries.Ha
         (PowerSeries.subst (MvPowerSeries.X i : MvPowerSeries (Fin 2) F) φ) =
       PowerSeries.subst (b i) φ := by
   have hX : MvPowerSeries.HasSubst
-      (fun _ : Unit => (MvPowerSeries.X i : MvPowerSeries (Fin 2) F)) :=
-    MvPowerSeries.hasSubst_of_constantCoeff_zero fun _ =>
+      (fun _ : Unit ↦ (MvPowerSeries.X i : MvPowerSeries (Fin 2) F)) :=
+    MvPowerSeries.hasSubst_of_constantCoeff_zero fun _ ↦
       MvPowerSeries.constantCoeff_X (R := F) i
   rw [PowerSeries.subst_def, PowerSeries.subst_def,
     MvPowerSeries.subst_comp_subst_apply hX hb]
@@ -495,7 +495,7 @@ theorem localExpand_zwSlope_eq (α β : Isogeny W.toAffine W.toAffine)
     apply RingHom.injective (localExpand W)
     rw [hzα, hzβ, sub_eq_zero.mp h0]
   have hofg_ne : HahnSeries.ofPowerSeries ℤ F
-      (formalIsogenySeries W α - formalIsogenySeries W β) ≠ 0 := fun h =>
+      (formalIsogenySeries W α - formalIsogenySeries W β) ≠ 0 := fun h ↦
     hfg (HahnSeries.ofPowerSeries_injective (h.trans (map_zero _).symm))
   -- Assemble in the Laurent field.
   rw [zwSlope_def, map_div₀, map_sub, map_sub, hwα, hwβ, hzα, hzβ, ← map_sub, ← map_sub,
@@ -689,7 +689,7 @@ theorem zwNuLine_def (α β : Isogeny W.toAffine W.toAffine) :
 
 /-- The `y`-pullback of an isogeny is nonzero (pullbacks are injective). -/
 theorem pullback_y_gen_ne_zero (α : Isogeny W.toAffine W.toAffine) :
-    α.pullback (y_gen W) ≠ 0 := fun h =>
+    α.pullback (y_gen W) ≠ 0 := fun h ↦
   y_gen_ne_zero W (α.pullback_injective (h.trans (map_zero _).symm))
 
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
@@ -731,7 +731,7 @@ theorem x_gen_cubic_ne_zero :
     exact h
   -- Basis independence forces the monic cubic coordinate to vanish.
   have hp0 : p = 0 := (Affine.CoordinateRing.smul_basis_eq_zero hG).1
-  have h3 := congrArg (fun r => Polynomial.coeff r 3) hp0
+  have h3 := congrArg (fun r ↦ Polynomial.coeff r 3) hp0
   simp [hp_def, Polynomial.coeff_X_pow] at h3
 
 /-- **Chord-branch nonvanishing of the line intercept**: if `α*x ≠ β*x`, then
@@ -771,7 +771,7 @@ theorem pullback_y_eq_of_x_eq {α β : Isogeny W.toAffine W.toAffine}
     (h_ni : AddNonInversePair α β) :
     α.pullback (y_gen W) = β.pullback (y_gen W) :=
   Affine.Y_eq_of_Y_ne (pullback_equation_inl W α) (pullback_equation_inl W β) h_x
-    fun h => h_ni ⟨h_x, h⟩
+    fun h ↦ h_ni ⟨h_x, h⟩
 
 /-- At a tangent pair, the tangent denominator `u = 2y_α + a₁x_α + a₃` is
 nonzero (the `α`-image is not 2-torsion-like, by non-inverseness). -/
@@ -782,7 +782,7 @@ theorem pullback_u_ne_zero_of_x_eq {α β : Isogeny W.toAffine W.toAffine}
       + algebraMap F KE W.a₃ ≠ 0 := by
   have hy_ne : α.pullback (y_gen W)
       ≠ (W_KE W).toAffine.negY (β.pullback (x_gen W)) (β.pullback (y_gen W)) :=
-    fun h => h_ni ⟨h_x, h⟩
+    fun h ↦ h_ni ⟨h_x, h⟩
   have hy_ne' : α.pullback (y_gen W)
       ≠ (W_KE W).toAffine.negY (α.pullback (x_gen W)) (α.pullback (y_gen W)) := by
     rw [show (W_KE W).toAffine.negY (α.pullback (x_gen W)) (α.pullback (y_gen W))
@@ -811,7 +811,7 @@ theorem addSlopePair_mul_u_of_x_eq {α β : Isogeny W.toAffine W.toAffine}
         + algebraMap F KE W.a₄ - algebraMap F KE W.a₁ * α.pullback (y_gen W) := by
   have hy_ne : α.pullback (y_gen W)
       ≠ (W_KE W).toAffine.negY (β.pullback (x_gen W)) (β.pullback (y_gen W)) :=
-    fun h => h_ni ⟨h_x, h⟩
+    fun h ↦ h_ni ⟨h_x, h⟩
   have h1 : addSlopePair α β
       = (3 * α.pullback (x_gen W) ^ 2
           + 2 * algebraMap F KE W.a₂ * α.pullback (x_gen W) + algebraMap F KE W.a₄
@@ -1365,7 +1365,7 @@ omit [DecidableEq F] in
 bivariate one: `(φ ∘ g) ∘ b = φ ∘ (g ∘ b)`. -/
 private lemma mv_subst_powerSeries_subst (b : Fin 2 → PowerSeries F)
     (hb : MvPowerSeries.HasSubst b) {g : MvPowerSeries (Fin 2) F}
-    (hg : MvPowerSeries.HasSubst (fun _ : Unit => g)) (φ : PowerSeries F) :
+    (hg : MvPowerSeries.HasSubst (fun _ : Unit ↦ g)) (φ : PowerSeries F) :
     MvPowerSeries.subst b (PowerSeries.subst g φ) =
       PowerSeries.subst (MvPowerSeries.subst b g) φ := by
   rw [PowerSeries.subst_def, PowerSeries.subst_def,
@@ -1781,8 +1781,8 @@ theorem formalIsogenySeries_add (α β : Isogeny W.toAffine W.toAffine)
       ((W_KE W).toAffine.negY (addPullback_x_pair α β) (addPullback_y_pair α β))
       = addPullback_y_pair α β := Affine.negY_negY (W' := (W_KE W).toAffine) _ _
   rw [hYY] at hfinal
-  have hgz₃ : MvPowerSeries.HasSubst (fun _ : Unit => formalZ3 W) :=
-    MvPowerSeries.hasSubst_of_constantCoeff_zero fun _ => constantCoeff_formalZ3 W
+  have hgz₃ : MvPowerSeries.HasSubst (fun _ : Unit ↦ formalZ3 W) :=
+    MvPowerSeries.hasSubst_of_constantCoeff_zero fun _ ↦ constantCoeff_formalZ3 W
   rw [formalGroupLaw_eq_chord W,
     mv_subst_powerSeries_subst _ hb hgz₃ (formalInverse W)]
   exact hfinal
