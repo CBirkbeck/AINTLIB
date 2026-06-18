@@ -150,15 +150,11 @@ theorem laurentMinusNormalizedDatum_isLaurentNormalized
     · exact D₀.P.A₀.mul_mem
         (LaurentNormalized.insert_s_T_subset_A₀ D₀.s (Finset.mem_insert_self _ _))
         hf
-    show a ∈ D₀.P.A₀
     rcases Finset.mem_insert.mp ha_T with rfl | ha_old
     · exact D₀.P.A₀.one_mem
-    have hmem : a ∈ ((insert D₀.s D₀.T).product ({D₀.s, f} : Finset A)).image
-        (fun p => p.1 * p.2) := ha_old
-    obtain ⟨p, hp_prod, hp_eq⟩ := Finset.mem_image.mp hmem
+    -- a = p.1 * p.2 with p.1 ∈ insert D₀.s D₀.T and p.2 ∈ {D₀.s, f}.
+    obtain ⟨p, hp_prod, rfl⟩ := Finset.mem_image.mp ha_old
     obtain ⟨ht, hx⟩ := Finset.mem_product.mp hp_prod
-    -- a = p.1 * p.2.
-    rw [← hp_eq]
     refine D₀.P.A₀.mul_mem ?_ ?_
     · exact LaurentNormalized.insert_s_T_subset_A₀ p.1 ht
     · rcases Finset.mem_insert.mp hx with hx_s | hx_f
@@ -166,8 +162,7 @@ theorem laurentMinusNormalizedDatum_isLaurentNormalized
         exact LaurentNormalized.insert_s_T_subset_A₀ D₀.s
           (Finset.mem_insert_self _ _)
       · rw [Finset.mem_singleton.mp hx_f]; exact hf
-  · -- one_mem_T: 1 ∈ T by construction.
-    change (1 : A) ∈ insert (1 : A) (laurentMinusDatum D₀ f).T
+  · -- one_mem_T: 1 ∈ T = insert 1 (oldT) by construction.
     exact Finset.mem_insert_self _ _
 
 /-! ### Rational open equality
@@ -199,26 +194,14 @@ theorem rationalOpen_laurentMinusNormalized_eq
     -- v(D₀.s) ≤ v(D₀.s * f) comes from `D₀.s ∈ (laurentMinusDatum D₀ f).T` (as `1 * D₀.s`).
     intro t ht
     rcases Finset.mem_insert.mp ht with rfl | ht'
-    · -- t = 1: chain via transitivity.
-      -- Step 1: v ∈ rationalOpen D₀.T D₀.s (from `laurentMinus_subset`).
-      have hv_D₀ : v ∈ rationalOpen D₀.T D₀.s :=
-        laurentMinus_subset D₀ f ⟨hv, hvT, hvs⟩
-      obtain ⟨_, hv_D₀_T, _⟩ := hv_D₀
-      -- Step 2: v.vle 1 D₀.s from `1 ∈ D₀.T` (LaurentNormalized).
-      have hv_1_Ds : v.vle 1 D₀.s := hv_D₀_T 1 LaurentNormalized.one_mem_T
-      -- Step 3: D₀.s ∈ (laurentMinusDatum D₀ f).T (as `1 * D₀.s` with `1 ∈ insert D₀.s D₀.T`).
-      have hDs_in_oldT : D₀.s ∈ (laurentMinusDatum D₀ f).T := by
-        change D₀.s ∈ ((insert D₀.s D₀.T).product ({D₀.s, f} : Finset A)).image
-            (fun p => p.1 * p.2)
-        refine Finset.mem_image.mpr ⟨(1, D₀.s), ?_, ?_⟩
-        · exact Finset.mem_product.mpr
-            ⟨Finset.mem_insert_of_mem LaurentNormalized.one_mem_T,
-             Finset.mem_insert_self _ _⟩
-        · exact one_mul _
-      -- Step 4: v.vle D₀.s (D₀.s * f).
-      have hv_Ds_sf : v.vle D₀.s (D₀.s * f) := hvT D₀.s hDs_in_oldT
-      -- Step 5: chain.
-      exact v.vle_trans hv_1_Ds hv_Ds_sf
+    · -- t = 1: chain v(1) ≤ v(D₀.s) ≤ v(D₀.s * f) via transitivity.
+      -- v(1) ≤ v(D₀.s) from `1 ∈ D₀.T` (LaurentNormalized D₀, via `laurentMinus_subset`);
+      -- v(D₀.s) ≤ v(D₀.s * f) from `D₀.s ∈ (laurentMinusDatum D₀ f).T` (as `1 * D₀.s`).
+      refine v.vle_trans
+        ((laurentMinus_subset D₀ f ⟨hv, hvT, hvs⟩).2.1 1 LaurentNormalized.one_mem_T)
+        (hvT D₀.s (Finset.mem_image.mpr ⟨(1, D₀.s), Finset.mem_product.mpr
+          ⟨Finset.mem_insert_of_mem LaurentNormalized.one_mem_T,
+           Finset.mem_insert_self _ _⟩, one_mul _⟩))
     · exact hvT t ht'
 
 /-- The normalized minus half is contained in the base. -/
