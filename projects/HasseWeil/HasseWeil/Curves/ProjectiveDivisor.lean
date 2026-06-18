@@ -59,7 +59,7 @@ variable {C : SmoothPlaneCurve F}
 /-- Injectivity of the `affine` constructor. -/
 theorem affine_injective :
     Function.Injective (ProjectiveSmoothPoint.affine (C := C)) :=
-  fun _ _ h => by injection h
+  fun _ _ h ↦ by injection h
 
 /-- `DecidableEq (ProjectiveSmoothPoint C)` (via classical logic). -/
 noncomputable instance (C : SmoothPlaneCurve F) :
@@ -81,14 +81,14 @@ variable {C : SmoothPlaneCurve F}
 /-- The degree `Σ n_v` of a projective divisor `D = Σ n_v (v)`.
 Reference: Silverman II.3 (projective form). -/
 def degree (D : ProjectiveDivisor C) : ℤ :=
-  (D : ProjectiveSmoothPoint C →₀ ℤ).sum fun _ n => n
+  (D : ProjectiveSmoothPoint C →₀ ℤ).sum fun _ n ↦ n
 
 @[simp] theorem degree_zero : degree (0 : ProjectiveDivisor C) = 0 :=
   Finsupp.sum_zero_index
 
 @[simp] theorem degree_add (D₁ D₂ : ProjectiveDivisor C) :
     (D₁ + D₂).degree = D₁.degree + D₂.degree :=
-  Finsupp.sum_add_index' (fun _ => rfl) (fun _ _ _ => rfl)
+  Finsupp.sum_add_index' (fun _ ↦ rfl) (fun _ _ _ ↦ rfl)
 
 /-- The degree map as an additive-group hom `ProjectiveDivisor C →+ ℤ`.
 Reference: Silverman II.3 (projective form). -/
@@ -148,8 +148,8 @@ same coefficient, the sum of coefficients is unchanged. -/
 theorem degree_toProjective (D : Divisor C) :
     (toProjective D).degree = D.degree := by
   unfold toProjective ProjectiveDivisor.degree Divisor.degree
-  exact Finsupp.sum_mapDomain_index (h := fun _ n => n)
-    (fun _ => rfl) (fun _ _ _ => rfl)
+  exact Finsupp.sum_mapDomain_index (h := fun _ n ↦ n)
+    (fun _ ↦ rfl) (fun _ _ _ ↦ rfl)
 
 /-- **A5 foundational**: `Divisor.toProjective` packaged as an additive group hom
     `Divisor C →+ ProjectiveDivisor C`. -/
@@ -166,7 +166,7 @@ noncomputable def toProjectiveHom (C : SmoothPlaneCurve F) :
     projective embedding at the AddMonoidHom level. -/
 theorem degreeHom_comp_toProjectiveHom (C : SmoothPlaneCurve F) :
     (ProjectiveDivisor.degreeHom C).comp (toProjectiveHom C) = Divisor.degreeHom C :=
-  AddMonoidHom.ext fun D => Divisor.degree_toProjective D
+  AddMonoidHom.ext fun D ↦ Divisor.degree_toProjective D
 
 /-- **A5 degZero preservation**: `toProjective` sends degree-zero divisors to
     degree-zero projective divisors. Direct from `degree_toProjective`. -/
@@ -183,7 +183,7 @@ noncomputable def toProjectiveDegZeroHom (C : SmoothPlaneCurve F) :
   AddMonoidHom.codRestrict
     ((toProjectiveHom C).comp (Divisor.degZero C).subtype)
     (ProjectiveDivisor.degZero C)
-    (fun D => toProjective_mem_degZero D.property)
+    (fun D ↦ toProjective_mem_degZero D.property)
 
 @[simp] theorem toProjectiveDegZeroHom_coe (C : SmoothPlaneCurve F) (D : Divisor.degZero C) :
     ((toProjectiveDegZeroHom C D : ProjectiveDivisor.degZero C) :
@@ -504,7 +504,7 @@ theorem Polynomial.sum_rootMultiplicity_eq_natDegree [IsAlgClosed F]
     ∑ a ∈ p.roots.toFinset, p.rootMultiplicity a = p.natDegree := by
   rw [← IsAlgClosed.card_roots_eq_natDegree (k := F) (p := p),
     ← Multiset.toFinset_sum_count_eq]
-  exact Finset.sum_congr rfl fun a _ => (Polynomial.count_roots p).symm
+  exact Finset.sum_congr rfl fun a _ ↦ (Polynomial.count_roots p).symm
 
 /-- **F(x) product formula** (under `[IsAlgClosed F]`): for `g : RatFunc F`,
 the signed sum of root multiplicities (numerator minus denominator) equals
