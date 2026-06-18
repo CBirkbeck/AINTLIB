@@ -1113,6 +1113,104 @@ theorem fracTowerIncl_galActFrac (C : SmoothPlaneCurve F)
     (A := M ⊗[F] C.toAffine.CoordinateRing) y
   rw [map_div₀, map_div₀, map_div₀, map_div₀, key a, key d]
 
+/-- **The infinite-Galois fixed-field characterization** (`L = K̄ = AlgebraicClosure F`, char 0): an
+element of the `K̄`-function field `(C.baseChange K̄).FunctionField` lies in the image of `F(C)` under
+the base-change embedding `functionFieldMap` iff it is fixed by *every* `galActFunctionField C K̄ σ`.
+
+This is the `L = K̄` analogue of the finite `mem_range_functionField_baseChange_iff_fixed`. The `←`
+direction is the genuine **tower descent**: a `Gal(K̄/F)`-fixed `x` is transported to a `galActFrac`-
+fixed `y` in the tensor fraction field; the (finitely many) `K̄`-scalars of `y`'s numerator and
+denominator lie in a finite Galois `M ⊆ K̄` (`exists_finiteGalois_towerTensorIncl_range₂`), so
+`y = fracTowerIncl y_M`; `y_M` is `Gal(M/F)`-fixed (`fracTowerIncl` equivariance + injectivity +
+`restrictNormalHom_surjective`); the proven *finite* descent (`the_lift` +
+`tensor_ringAct_fixed_mem_range`) at `M` writes `y_M` as a ratio of `1 ⊗ -` images, which
+`towerTensorIncl` carries to `1 ⊗ -` upstairs — exhibiting `x` as a `functionFieldMap` image. -/
+theorem mem_range_functionField_baseChange_iff_fixed_kbar [CharZero F] (C : SmoothPlaneCurve F)
+    (x : (C.baseChange (AlgebraicClosure F)).FunctionField) :
+    (∃ f : C.FunctionField, C.functionFieldMap (AlgebraicClosure F) f = x) ↔
+      ∀ σ : AlgebraicClosure F ≃ₐ[F] AlgebraicClosure F,
+        galActFunctionField C (AlgebraicClosure F) σ x = x := by
+  constructor
+  · rintro ⟨f, rfl⟩ σ
+    exact galActFunctionField_fixes_baseChange C (AlgebraicClosure F) σ f
+  · intro hfixed
+    letI := C.isDomain_tensorCoordRing (AlgebraicClosure F)
+    classical
+    -- transport `x` to the tensor fraction field; it is `galActFrac`-fixed
+    set y := (C.functionField_baseChange_tensorEquiv (AlgebraicClosure F)) x with hy_def
+    have hyfix : ∀ σ : AlgebraicClosure F ≃ₐ[F] AlgebraicClosure F, galActFrac C (AlgebraicClosure F) σ y = y := by
+      intro σ
+      have hx := hfixed σ
+      have hrel : galActFunctionField C (AlgebraicClosure F) σ x
+          = (C.functionField_baseChange_tensorEquiv (AlgebraicClosure F)).symm
+              (galActFrac C (AlgebraicClosure F) σ ((C.functionField_baseChange_tensorEquiv (AlgebraicClosure F)) x)) := rfl
+      rw [hrel] at hx
+      apply (C.functionField_baseChange_tensorEquiv (AlgebraicClosure F)).symm.injective
+      rw [hx, hy_def, AlgEquiv.symm_apply_apply]
+    -- write `y = algebraMap a / algebraMap d`
+    obtain ⟨a, d, hd, hydiv⟩ := IsFractionRing.div_surjective
+      (A := AlgebraicClosure F ⊗[F] C.toAffine.CoordinateRing) y
+    -- the scalars of `a`, `d` live over a common finite Galois `M ⊆ K̄`
+    obtain ⟨M, hMfin, hMgal, ⟨aM, haM⟩, ⟨dM, hdM⟩⟩ :=
+      exists_finiteGalois_towerTensorIncl_range₂ C.toAffine.CoordinateRing a d
+    letI := hMfin
+    letI := hMgal
+    letI := C.isDomain_tensorCoordRing M
+    haveI : Normal F M := IsGalois.to_normal
+    -- the downstairs fraction `y_M = algebraMap aM / algebraMap dM`
+    let yM : FractionRing (M ⊗[F] C.toAffine.CoordinateRing) :=
+        algebraMap (M ⊗[F] C.toAffine.CoordinateRing)
+            (FractionRing (M ⊗[F] C.toAffine.CoordinateRing)) aM
+        / algebraMap (M ⊗[F] C.toAffine.CoordinateRing)
+            (FractionRing (M ⊗[F] C.toAffine.CoordinateRing)) dM
+    -- `fracTowerIncl y_M = y`
+    have hymap : fracTowerIncl C M yM = y := by
+      show fracTowerIncl C M (_ / _) = y
+      rw [map_div₀, fracTowerIncl_algebraMap, fracTowerIncl_algebraMap, haM, hdM]
+      rw [hydiv]
+    -- `y_M` is `Gal(M/F)`-fixed: lift each `τ` to `σ ⊇ τ` and use `fracTowerIncl` equivariance
+    have hyMfix : ∀ τ : M ≃ₐ[F] M, galActFrac C M τ yM = yM := by
+      intro τ
+      obtain ⟨σ, hσ⟩ := AlgEquiv.restrictNormalHom_surjective (F := F) (K₁ := M)
+        (E := AlgebraicClosure F) τ
+      have hστ : ∀ m : M, σ (m : AlgebraicClosure F) = (τ m : AlgebraicClosure F) := by
+        intro m
+        have hc := (σ.restrictNormal_commutes M m).symm
+        rw [show AlgEquiv.restrictNormalHom (F := F) M σ = σ.restrictNormal M from rfl] at hσ
+        rw [hσ] at hc
+        simpa using hc
+      apply fracTowerIncl_injective C M
+      rw [fracTowerIncl_galActFrac C M σ τ hστ, hymap, hyfix σ]
+    -- finite descent at `M`: `y_M = algebraMap (1 ⊗ mn) / algebraMap (1 ⊗ md)`
+    obtain ⟨n, den, hnf, hdenf, _hdenne, hyMdiv⟩ := the_lift C M yM hyMfix
+    obtain ⟨mn, hmn⟩ := tensor_ringAct_fixed_mem_range C M n hnf
+    obtain ⟨md, hmd⟩ := tensor_ringAct_fixed_mem_range C M den hdenf
+    -- the descended function over `F`
+    refine ⟨algebraMap C.toAffine.CoordinateRing C.FunctionField mn
+        / algebraMap C.toAffine.CoordinateRing C.FunctionField md, ?_⟩
+    rw [map_div₀]
+    -- transport `x` back through the K̄ tensor equiv
+    have hx_eq : x = (C.functionField_baseChange_tensorEquiv (AlgebraicClosure F)).symm y := by
+      rw [hy_def, AlgEquiv.symm_apply_apply]
+    -- `y = algebraMap (1⊗mn)/algebraMap (1⊗md)` upstairs (via fracTowerIncl `1⊗-` transport)
+    have hy_final : y =
+        algebraMap (AlgebraicClosure F ⊗[F] C.toAffine.CoordinateRing)
+            (FractionRing (AlgebraicClosure F ⊗[F] C.toAffine.CoordinateRing))
+            ((1 : AlgebraicClosure F) ⊗ₜ[F] mn)
+        / algebraMap (AlgebraicClosure F ⊗[F] C.toAffine.CoordinateRing)
+            (FractionRing (AlgebraicClosure F ⊗[F] C.toAffine.CoordinateRing))
+            ((1 : AlgebraicClosure F) ⊗ₜ[F] md) := by
+      rw [← hymap, hyMdiv, map_div₀, fracTowerIncl_algebraMap, fracTowerIncl_algebraMap,
+        ← hmn, ← hmd]
+      rw [show towerTensorIncl C.toAffine.CoordinateRing M ((1 : M) ⊗ₜ[F] mn)
+          = (1 : AlgebraicClosure F) ⊗ₜ[F] mn by rw [towerTensorIncl_tmul]; norm_num,
+        show towerTensorIncl C.toAffine.CoordinateRing M ((1 : M) ⊗ₜ[F] md)
+          = (1 : AlgebraicClosure F) ⊗ₜ[F] md by rw [towerTensorIncl_tmul]; norm_num]
+    rw [hx_eq, hy_final, map_div₀]
+    congr 1
+    · rw [tensorEquiv_symm_one_tmul C (AlgebraicClosure F) mn]
+    · rw [tensorEquiv_symm_one_tmul C (AlgebraicClosure F) md]
+
 end TowerDescent
 
 /-- **A `DescentData` over a concrete finite Galois intermediate field of `K̄`** (MOVE 1's data
