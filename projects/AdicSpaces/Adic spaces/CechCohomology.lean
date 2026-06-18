@@ -47,8 +47,6 @@ degree-zero acyclicity condition (separation + gluing).
 
 universe u v
 
-/-! ### Finite covers -/
-
 /-- A finite open cover of `X` indexed by `ι`. -/
 structure FiniteCover (X : Type u) [TopologicalSpace X]
     (ι : Type v) [Fintype ι] where
@@ -96,8 +94,6 @@ theorem inter_subset_univ (U : FiniteCover X ι) {q : ℕ}
   Set.subset_univ _
 
 end FiniteCover
-
-/-! ### Presheaves of abelian groups -/
 
 /-- A presheaf of additive abelian groups on subsets of `X`,
 with restriction maps. -/
@@ -164,19 +160,22 @@ theorem res_section_eq (F : AbPresheaf X) {α : Type*}
     {P : α → Set X} {W : Set X} (f : ∀ σ, F.obj (P σ))
     {σ₁ σ₂ : α} (h₁ : W ⊆ P σ₁) (h₂ : W ⊆ P σ₂)
     (heq : σ₁ = σ₂) : F.res h₁ (f σ₁) = F.res h₂ (f σ₂) := by
-  subst heq; rfl
+  subst heq
+  rfl
 
 /-- If `V = Set.univ`, restriction by `h : V ⊆ Set.univ` is a cast. -/
 theorem res_eq_of_eq_univ (F : AbPresheaf X) {V : Set X}
     (hV : V = Set.univ) (h : V ⊆ Set.univ)
     (x : F.obj Set.univ) : F.res h x = hV ▸ x := by
-  subst hV; exact F.res_id x
+  subst hV
+  exact F.res_id x
 
 /-- If `V = U`, then `F.res h x = cast (...) x`. -/
 theorem res_cast (F : AbPresheaf X) {U V : Set X}
     (hVU : V ⊆ U) (hUV : U = V) (x : F.obj U) :
     F.res hVU x = hUV ▸ x := by
-  subst hUV; exact F.res_id x
+  subst hUV
+  exact F.res_id x
 
 /-- Restrict an `AbPresheaf` on `X` to the subspace `↥W` (`W : Set X`):
 `obj S := F.obj (Subtype.val '' S)`, with restriction along the image. This is the
@@ -192,8 +191,6 @@ def restrict (F : AbPresheaf X) (W : Set X) : AbPresheaf ↥W where
   res_comp _ _ x := F.res_comp _ _ x
 
 end AbPresheaf
-
-/-! ### Čech complex -/
 
 section CechComplex
 
@@ -230,11 +227,7 @@ def cechAug (F : AbPresheaf X) (U : FiniteCover X ι) :
     F.obj Set.univ → CechCochain F U 0 :=
   fun x σ => F.res (U.inter_subset_univ σ) x
 
-/-! ### The key identity d ∘ d = 0 -/
-
 omit [Fintype ι] in
-/-- Simplicial identity for `k < j`: composing face maps gives
-`face k ∘ face j = face (j.pred) ∘ face (k.castSucc)`. -/
 private theorem face_face_lt {q : ℕ} (j : Fin (q + 3))
     (k : Fin (q + 2)) (hjk : (k : ℕ) < j)
     (σ : Fin (q + 3) → ι) (hj : j ≠ 0 := by omega) :
@@ -250,9 +243,6 @@ private theorem face_face_lt {q : ℕ} (j : Fin (q + 3))
   split_ifs <;> omega
 
 omit [Fintype ι] in
-/-- Simplicial identity for `j ≤ k`: composing face maps gives
-`face k ∘ face j = face j' ∘ face (k.succ)` where
-`j' = ⟨j.val, ...⟩ : Fin (q+2)`. -/
 private theorem face_face_ge {q : ℕ} (j : Fin (q + 3))
     (k : Fin (q + 2)) (hjk : (j : ℕ) ≤ k)
     (σ : Fin (q + 3) → ι)
@@ -268,17 +258,13 @@ private theorem face_face_ge {q : ℕ} (j : Fin (q + 3))
     Fin.val_succ, apply_ite Fin.val]
   split_ifs <;> omega
 
-/-- Alternating sign cancellation for integer scalar multiples
-in an additive group: `(-1)^n * (-1)^m + (-1)^(m+1) * (-1)^n = 0`. -/
 private theorem sign_zsmul_cancel {A : Type*} [AddCommGroup A]
     (n m : ℕ) (x : A) : (-1 : ℤ) ^ n • ((-1 : ℤ) ^ m • x) +
     (-1 : ℤ) ^ (m + 1) • ((-1 : ℤ) ^ n • x) = 0 := by
-  rw [← mul_zsmul, ← mul_zsmul, ← add_smul]
-  have : (-1 : ℤ) ^ (m + 1) = (-1 : ℤ) ^ m * (-1) := pow_succ _ _
-  rw [this]; ring_nf; exact zero_smul _ _
+  rw [← mul_zsmul, ← mul_zsmul, ← add_smul, pow_succ]
+  ring_nf
+  exact zero_smul _ _
 
-/-- Helper: if two face compositions are equal, the double-restricted
-sections agree after restriction to the multi-intersection. -/
 private theorem res_res_eq_of_face_eq {F : AbPresheaf X}
     {U : FiniteCover X ι} {q : ℕ} (f : CechCochain F U q)
     {σ : Fin (q + 1 + 1 + 1) → ι} (j j' : Fin (q + 3))
@@ -296,8 +282,6 @@ private theorem res_res_eq_of_face_eq {F : AbPresheaf X}
   rw [F.res_comp, F.res_comp]
   exact F.res_section_eq f _ _ heq
 
-/-- The `k < j` case of the involution cancellation in `d ∘ d = 0`:
-`T(j,k) + T(⟨k,...⟩, ⟨j-1,...⟩) = 0`. -/
 private theorem cechDiff_involution_add_lt {F : AbPresheaf X}
     {U : FiniteCover X ι} {q : ℕ} (f : CechCochain F U q)
     {σ : Fin (q + 1 + 1 + 1) → ι}
@@ -323,7 +307,9 @@ private theorem cechDiff_involution_add_lt {F : AbPresheaf X}
               ⟨(k : ℕ), by have := k.isLt; omega⟩
               σ))))) = 0 := by
   have hj_ne : j ≠ 0 := by
-    intro hj0; simp only [hj0, Fin.val_zero] at h; omega
+    intro hj0
+    simp only [hj0, Fin.val_zero] at h
+    omega
   have hface := face_face_lt j k h σ hj_ne
   have hj_eq : (⟨(k : ℕ), by have := k.isLt; omega⟩ :
       Fin (q + 3)) = k.castSucc :=
@@ -337,7 +323,8 @@ private theorem cechDiff_involution_add_lt {F : AbPresheaf X}
         (FiniteCover.face
           ⟨(k : ℕ), by have := k.isLt; omega⟩ σ) =
       FiniteCover.face k (FiniteCover.face j σ) := by
-    rw [hj_eq, hk_eq]; exact hface.symm
+    rw [hj_eq, hk_eq]
+    exact hface.symm
   rw [res_res_eq_of_face_eq f j
     ⟨k.val, by have := k.isLt; omega⟩ k
     ⟨(j : ℕ) - 1, by have := j.isLt; omega⟩ hface_eq]
@@ -345,12 +332,11 @@ private theorem cechDiff_involution_add_lt {F : AbPresheaf X}
   have : (-1 : ℤ) ^ (j : ℕ) =
       (-1 : ℤ) ^ ((j : ℕ) - 1) * (-1) := by
     conv_lhs =>
-      rw [show (j : ℕ) = (j : ℕ) - 1 + 1 from by omega]
-      rw [pow_succ]
-  rw [this]; ring_nf; exact zero_smul _ _
+      rw [show (j : ℕ) = (j : ℕ) - 1 + 1 from by omega, pow_succ]
+  rw [this]
+  ring_nf
+  exact zero_smul _ _
 
-/-- The `j ≤ k` case of the involution cancellation in `d ∘ d = 0`:
-`T(j,k) + T(⟨k+1,...⟩, ⟨j,...⟩) = 0`. -/
 private theorem cechDiff_involution_add_ge {F : AbPresheaf X}
     {U : FiniteCover X ι} {q : ℕ} (f : CechCochain F U q)
     {σ : Fin (q + 1 + 1 + 1) → ι}
@@ -385,23 +371,19 @@ private theorem cechDiff_involution_add_ge {F : AbPresheaf X}
         (FiniteCover.face
           ⟨(k : ℕ) + 1, by have := k.isLt; omega⟩ σ) =
       FiniteCover.face k (FiniteCover.face j σ) := by
-    rw [hj_eq]; exact hface.symm
+    rw [hj_eq]
+    exact hface.symm
   rw [res_res_eq_of_face_eq f j
     ⟨(k : ℕ) + 1, by have := k.isLt; omega⟩ k
     ⟨(j : ℕ), by have := k.isLt; omega⟩ hface_eq]
   exact sign_zsmul_cancel (j : ℕ) (k : ℕ) _
 
-/-- `d^{q+1} ∘ d^q = 0` (Appendix A of Wedhorn).
-
-The proof expands the double sum, uses linearity and functoriality of
-restriction, then applies `Finset.sum_involution` with the pairing
-`(j, k) ↦ (k↑, j-1)` (when `k < j`) and `(j, k) ↦ (k+1, j↓)`
-(when `j ≤ k`). The simplicial face identities ensure the underlying
-values match while the signs differ by `(-1)`. -/
+/-- `d^{q+1} ∘ d^q = 0` (Appendix A of Wedhorn). -/
 theorem cechDiff_comp_cechDiff (F : AbPresheaf X)
     (U : FiniteCover X ι) (q : ℕ) (f : CechCochain F U q) :
     cechDiff F U (q + 1) (cechDiff F U q f) = 0 := by
-  ext σ; simp only [cechDiff]
+  ext σ
+  simp only [cechDiff]
   change ∑ j : Fin (q + 3), (-1 : ℤ) ^ (j : ℕ) •
     F.res (U.inter_face_subset j σ)
       (∑ k : Fin (q + 2), (-1 : ℤ) ^ (k : ℕ) •
@@ -427,33 +409,43 @@ theorem cechDiff_comp_cechDiff (F : AbPresheaf X)
       (⟨k.val + 1, by omega⟩, ⟨j.val, by omega⟩)
   change ∑ p ∈ Finset.univ ×ˢ Finset.univ, T p = 0
   apply Finset.sum_involution (fun p _ => inv p)
-  · rintro ⟨j, k⟩ _; dsimp only [inv]; split_ifs with h
+  · rintro ⟨j, k⟩ _
+    dsimp only [inv]
+    split_ifs with h
     · simp only [hT]
       exact cechDiff_involution_add_lt f j k h
-    · push_neg at h; simp only [hT]
+    · push Not at h
+      simp only [hT]
       exact cechDiff_involution_add_ge f j k h
-  · rintro ⟨j, k⟩ _ _; dsimp only [inv]; split_ifs with h
-    · intro heq; have h1 := congr_arg Prod.fst heq
-      simp only [Fin.ext_iff] at h1; omega
-    · intro heq; have h1 := congr_arg Prod.fst heq
-      simp only [Fin.ext_iff] at h1; omega
-  · rintro ⟨j, k⟩ _; dsimp only [inv]; split_ifs <;>
+  · rintro ⟨j, k⟩ _ _
+    dsimp only [inv]
+    split_ifs with h
+    · intro heq
+      have h1 := congr_arg Prod.fst heq
+      simp only [Fin.ext_iff] at h1
+      omega
+    · intro heq
+      have h1 := congr_arg Prod.fst heq
+      simp only [Fin.ext_iff] at h1
+      omega
+  · rintro ⟨j, k⟩ _
+    dsimp only [inv]
+    split_ifs <;>
       exact Finset.mem_product.mpr
         ⟨Finset.mem_univ _, Finset.mem_univ _⟩
-  · rintro ⟨j, k⟩ _; dsimp only [inv]
+  · rintro ⟨j, k⟩ _
+    dsimp only [inv]
     by_cases h1 : (k : ℕ) < (j : ℕ)
     · simp only [h1, dif_pos, Fin.val_mk]
       rw [dif_neg (by omega)]
       exact Prod.ext (Fin.ext (by dsimp; omega))
         (Fin.ext rfl)
-    · push_neg at h1
+    · push Not at h1
       have h2 : ¬ (k : ℕ) < (j : ℕ) := by omega
       rw [dif_neg h2,
         dif_pos (show (j : ℕ) < (k : ℕ) + 1 by omega)]
       exact Prod.ext (Fin.ext rfl)
         (Fin.ext (by dsimp))
-
-/-! ### Acyclicity -/
 
 /-- The augmentation `ε` is injective (separation / uniqueness). -/
 def IsSeparating (F : AbPresheaf X)
@@ -476,8 +468,6 @@ def IsAcyclic (F : AbPresheaf X)
     ∃ g : CechCochain F U q, cechDiff F U q g = f
 
 end CechComplex
-
-/-! ### Cover refinement -/
 
 section Refinement
 
@@ -515,12 +505,12 @@ def cochainMapHom (F : AbPresheaf X) (q : ℕ) :
   map_zero' := by ext σ; exact F.res_zero _
   map_add' f g := by ext σ; exact F.res_add _ _ _
 
-/-- Face map commutes with composition by `r.map`. -/
 private theorem face_comp_map {q : ℕ} (j : Fin (q + 2))
     (σ : Fin (q + 2) → κ) :
     r.map ∘ FiniteCover.face j σ =
     FiniteCover.face j (r.map ∘ σ) := by
-  ext k; simp only [FiniteCover.face, Function.comp_apply]
+  ext k
+  simp only [FiniteCover.face, Function.comp_apply]
 
 /-- The cochain map commutes with the Čech differential. -/
 theorem cochainMap_comm_diff (F : AbPresheaf X) (q : ℕ)
@@ -530,7 +520,8 @@ theorem cochainMap_comm_diff (F : AbPresheaf X) (q : ℕ)
   ext σ
   simp only [cochainMap, cechDiff]
   rw [F.res_sum]
-  congr 1; ext j
+  congr 1
+  ext j
   rw [F.res_zsmul, F.res_comp]
   congr 1
   rw [F.res_comp]
@@ -539,8 +530,6 @@ theorem cochainMap_comm_diff (F : AbPresheaf X) (q : ℕ)
 end Refinement
 
 end Refinement
-
-/-! ### Cover restriction and products -/
 
 section CoverOps
 
@@ -596,8 +585,6 @@ def prodRefineSnd {κ : Type v} [Fintype κ]
 end FiniteCover
 
 end CoverOps
-
-/-! ### Acyclicity results -/
 
 section AcyclicResults
 
@@ -694,8 +681,6 @@ theorem isAcyclic_of_components {F : AbPresheaf X}
 
 end AcyclicResults
 
-/-! ### Čech cohomology for single-set covers -/
-
 section TrivialCover
 
 variable {X : Type u} [TopologicalSpace X]
@@ -718,8 +703,6 @@ private theorem unit_fun_eq {α : Type*} [Unique α] {n : ℕ}
   funext fun _ => Subsingleton.elim _ _
 
 omit [TopologicalSpace X] in
-/-- Restriction by a subset proof from/to `Set.univ` is injective
-when the source set equals `Set.univ`. -/
 private theorem res_univ_injective (F : AbPresheaf X)
     {V : Set X} (hV : V = Set.univ) (h : V ⊆ Set.univ) :
     Function.Injective (F.res h) := by
@@ -727,11 +710,11 @@ private theorem res_univ_injective (F : AbPresheaf X)
   exact fun _ _ heq => by rwa [F.res_id, F.res_id] at heq
 
 omit [TopologicalSpace X] in
-/-- Restriction by a subset proof where `V = U` is surjective. -/
 private theorem res_eq_surjective (F : AbPresheaf X)
     {U V : Set X} (h : V ⊆ U) (hVU : V = U) :
     Function.Surjective (F.res h) := by
-  subst hVU; exact fun y => ⟨y, F.res_id y⟩
+  subst hVU
+  exact fun y => ⟨y, F.res_id y⟩
 
 /-- The single-set cover satisfies separation and gluing. -/
 theorem single_isSeparating_and_hasGluing (F : AbPresheaf X) :
@@ -749,12 +732,12 @@ theorem single_isSeparating_and_hasGluing (F : AbPresheaf X) :
         (fun _ => ()))
       (FiniteCover.single_inter _) (f (fun _ => ()))
     refine ⟨x, ?_⟩
-    ext σ; simp only [cechAug]
-    rw [unit_fun_eq σ]; exact hx
+    ext σ
+    simp only [cechAug]
+    rw [unit_fun_eq σ]
+    exact hx
 
 end TrivialCover
-
-/-! ### Degree-zero acyclicity and the sheaf condition -/
 
 section BasisSheaf
 
@@ -786,15 +769,6 @@ theorem isDegreeZeroAcyclic_single (F : AbPresheaf X) :
 
 end BasisSheaf
 
-/-! ### Section-form characterisations of degree-zero acyclicity
-
-`IsSeparating`/`HasGluing` are phrased via the augmented Čech complex
-(`cechAug`/`cechDiff`). For the elementary proof of Wedhorn Prop A.3 *in
-degree ≤ 0* — which (crucially) needs only the `q ≤ 1` part of the
-intersection hypotheses, the cochain homotopy for `H⁰` stopping at `H¹` —
-it is convenient to restate them directly via restriction maps `F.res`
-over the cover sets and their pairwise intersections. -/
-
 section SectionForm
 
 variable {X : Type u} [TopologicalSpace X] {ι : Type v} [Fintype ι]
@@ -805,7 +779,8 @@ omit [TopologicalSpace X] in
 theorem AbPresheaf.res_congr (F : AbPresheaf X) {U V V' : Set X}
     (h : V = V') (hVU : V ⊆ U) (hV'U : V' ⊆ U) (x : F.obj U) :
     h ▸ F.res hVU x = F.res hV'U x := by
-  subst h; rfl
+  subst h
+  rfl
 
 /-- The `q = 0` multi-intersection is the single cover set. -/
 theorem FiniteCover.inter_fin_one (U : FiniteCover X ι) (σ : Fin 1 → ι) :
@@ -889,8 +864,7 @@ theorem hasGluing_iff_section (F : AbPresheaf X) (U : FiniteCover X ι) :
           U.sets i ∩ U.sets i' ⊆ U.sets i') (g i')) →
       ∃ x : F.obj Set.univ, ∀ i, F.res (Set.subset_univ (U.sets i)) x = g i := by
   constructor
-  · -- HasGluing → section gluing
-    intro hglue g hg
+  · intro hglue g hg
     have hdf : cechDiff F U 0
         (fun σ => F.res (U.inter_subset_sets σ 0) (g (σ 0))) = 0 := by
       funext τ
@@ -910,12 +884,10 @@ theorem hasGluing_iff_section (F : AbPresheaf X) (U : FiniteCover X ι) :
       (subset_refl (U.sets i)) (g i)
     rw [F.res_id] at tR
     rw [← tL, ← tR, hxi]
-  · -- section gluing → HasGluing
-    intro hsec f hf
+  · intro hsec f hf
     obtain ⟨x, hx⟩ := hsec
       (fun i => F.res ((U.inter_fin_one (fun _ => i)).symm.le) (f (fun _ => i)))
       (fun i i' => by
-        -- The cocycle for `g` comes from `cechDiff⁰ f = 0` at the 2-simplex `![i, i']`.
         have hfeq : F.res (U.inter_face_subset 0 ![i, i'])
               (f (FiniteCover.face 0 ![i, i'])) =
             F.res (U.inter_face_subset 1 ![i, i'])
@@ -924,9 +896,13 @@ theorem hasGluing_iff_section (F : AbPresheaf X) (U : FiniteCover X ι) :
           rw [cechDiff_zero_apply] at h
           exact sub_eq_zero.mp h
         have e0 : FiniteCover.face 0 (![i, i'] : Fin 2 → ι) = (fun _ => i') := by
-          funext k; rw [Fin.fin_one_eq_zero k]; rfl
+          funext k
+          rw [Fin.fin_one_eq_zero k]
+          rfl
         have e1 : FiniteCover.face 1 (![i, i'] : Fin 2 → ι) = (fun _ => i) := by
-          funext k; rw [Fin.fin_one_eq_zero k]; rfl
+          funext k
+          rw [Fin.fin_one_eq_zero k]
+          rfl
         have hsub : U.sets i ∩ U.sets i' ⊆ U.inter ![i, i'] :=
           (U.inter_fin_two ![i, i']).ge
         have key := congrArg (F.res hsub) hfeq
@@ -954,8 +930,6 @@ theorem hasGluing_iff_section (F : AbPresheaf X) (U : FiniteCover X ι) :
     exact (F.res_section_eq f _ (subset_refl (U.inter σ)) hσ).trans (F.res_id (f σ))
 
 end SectionForm
-
-/-! ### Product cover acyclicity (Proposition A.3(3) of Wedhorn) -/
 
 section ProductAcyclicity
 
@@ -1037,9 +1011,7 @@ theorem isDegreeZeroAcyclic_prod (F : AbPresheaf X)
         (U.sets i ∩ U.sets i') ∩ V.sets j ⊆ U.sets i ∩ U.sets i') z = 0) → z = 0) :
     IsDegreeZeroAcyclic F (U.prod V) := by
   refine ⟨?_, ?_⟩
-  · -- SEPARATION: y zero on every `U_i ∩ V_j` ⇒ (via `hV0sep`) zero on every
-    -- `U_i` ⇒ (via `hU`) zero.
-    rw [isSeparating_iff_section]
+  · rw [isSeparating_iff_section]
     intro y hy
     have hUsep := (isSeparating_iff_section F U).mp hU.1
     refine hUsep y (fun i => ?_)
@@ -1050,20 +1022,16 @@ theorem isDegreeZeroAcyclic_prod (F : AbPresheaf X)
         F.res (Set.subset_univ (U.sets i ∩ V.sets j)) y := F.res_comp _ _ y
     rw [step]
     exact hy (i, j)
-  · -- GLUING (the genuine A.3(3) cocycle).
-    rw [hasGluing_iff_section]
+  · rw [hasGluing_iff_section]
     intro fp hfp
-    -- Restate the cocycle with `(U.prod V).sets (i,j)` reduced to `U_i ∩ V_j`.
     have hfp' : ∀ (i₁ i₂ : ι) (j₁ j₂ : κ),
         F.res (Set.inter_subset_left : (U.sets i₁ ∩ V.sets j₁) ∩
             (U.sets i₂ ∩ V.sets j₂) ⊆ U.sets i₁ ∩ V.sets j₁) (fp (i₁, j₁)) =
         F.res (Set.inter_subset_right : (U.sets i₁ ∩ V.sets j₁) ∩
             (U.sets i₂ ∩ V.sets j₂) ⊆ U.sets i₂ ∩ V.sets j₂) (fp (i₂, j₂)) :=
       fun i₁ i₂ j₁ j₂ => hfp (i₁, j₁) (i₂, j₂)
-    -- Step 1: per-`i`, glue the family `j ↦ fp (i,j)` over `U_i` via `hV0glue`.
     choose g hg using fun i =>
       hV0glue i (fun j => fp (i, j)) (fun j j' => hfp' i i j j')
-    -- Step 2: the `g i` agree on `U_i ∩ U_i'` (`U`-cocycle), via `hV1sep`.
     have hgcoc : ∀ i i',
         F.res (Set.inter_subset_left : U.sets i ∩ U.sets i' ⊆ U.sets i) (g i) =
         F.res (Set.inter_subset_right : U.sets i ∩ U.sets i' ⊆ U.sets i') (g i') := by
@@ -1085,7 +1053,6 @@ theorem isDegreeZeroAcyclic_prod (F : AbPresheaf X)
           simp only [F.res_comp] at ka kb kc
           exact ka.trans (kc.trans kb.symm))
       exact sub_eq_zero.mp hz
-    -- Step 3: glue the `g i` over the whole space via `hU`'s gluing.
     obtain ⟨x, hx⟩ := (hasGluing_iff_section F U).mp hU.2 g hgcoc
     refine ⟨x, fun p => ?_⟩
     obtain ⟨i, j⟩ := p
