@@ -26,13 +26,13 @@ variable {F : Type*} [Field F] [DecidableEq F]
 respect to `Y` is nonzero for elliptic curves. In characteristic 2, this uses `Δ ≠ 0`. -/
 private lemma polynomialY_ne_zero (E : Affine F) [E.IsElliptic] : E.polynomialY ≠ 0 := by
   intro h; rw [Affine.polynomialY] at h
-  have h1 := congr_arg (fun p => p.coeff 1) h
-  have h0 := congr_arg (fun p => p.coeff 0) h
+  have h1 := congr_arg (fun p ↦ p.coeff 1) h
+  have h0 := congr_arg (fun p ↦ p.coeff 0) h
   simp [Polynomial.coeff_add, Polynomial.coeff_X, Polynomial.coeff_C] at h1 h0
   have ha1 : E.a₁ = 0 := by
-    have := congr_arg (fun p => p.coeff 1) h0; simp at this; exact this
+    have := congr_arg (fun p ↦ p.coeff 1) h0; simp at this; exact this
   have ha3 : E.a₃ = 0 := by
-    have := congr_arg (fun p => p.coeff 0) h0; simp at this; exact this
+    have := congr_arg (fun p ↦ p.coeff 0) h0; simp at this; exact this
   exact absurd ((show WeierstrassCurve.Δ E = 0 by
     simp only [WeierstrassCurve.Δ]; rw [show WeierstrassCurve.b₂ E = 0 by
       simp only [WeierstrassCurve.b₂, ha1]; linear_combination 2 * E.a₂ * h1,
@@ -134,7 +134,7 @@ lemma D_x_ne_zero (E : Affine F) [E.IsElliptic] :
         rw [AdjoinRoot.mk_X] at Y_sq
         simp only [map_sub, map_mul, AdjoinRoot.mk_X] at Y_sq
         have hcc : ∀ p : Polynomial F, AdjoinRoot.mk E.polynomial (Polynomial.C p) =
-          algebraMap (Polynomial F) E.CoordinateRing p := fun _ => rfl
+          algebraMap (Polynomial F) E.CoordinateRing p := fun _ ↦ rfl
         rw [hcc, hcc] at Y_sq; linear_combination Y_sq
       have hW_FF : y ^ 2 + c * y = algebraMap (Polynomial F) E.FunctionField
           (Polynomial.X ^ 3 + Polynomial.C E.a₂ * Polynomial.X ^ 2 +
@@ -214,7 +214,7 @@ lemma D_x_ne_zero (E : Affine F) [E.IsElliptic] :
           rw [smul_smul, inv_mul_cancel₀ hb_ne, one_smul], h1, smul_zero]
       rw [hDinv, smul_zero]
     suffices (⊤ : Submodule E.FunctionField (KaehlerDifferential F E.FunctionField)) ≤ ⊥ from
-      (subsingleton_iff_forall_eq 0).mpr fun ω => this trivial
+      (subsingleton_iff_forall_eq 0).mpr fun ω ↦ this trivial
     rw [← KaehlerDifferential.span_range_derivation, Submodule.span_le]
     rintro _ ⟨s, rfl⟩
     rw [SetLike.mem_coe, Submodule.mem_bot]
