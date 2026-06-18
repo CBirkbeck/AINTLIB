@@ -1175,13 +1175,9 @@ This is needed for `deltaMap_gen` to be well-defined. -/
 theorem posEmbHom_ideal_compat (x : ↥(TateAlgebra A))
     (hx : x ∈ Ideal.span {algebraMap A ↥(TateAlgebra A) f - TateAlgebra.X}) :
     posEmbHom x ∈ laurentFSubZetaIdeal f := by
-  have hsub : Ideal.span {algebraMap A ↥(TateAlgebra A) f - TateAlgebra.X} ≤
-      (laurentFSubZetaIdeal f).comap posEmbHom := by
-    rw [Ideal.span_le]
-    intro y hy
-    rw [Set.mem_singleton_iff] at hy; subst hy
-    exact posEmbHom_generator_mem f
-  exact Ideal.mem_comap.mp (hsub hx)
+  refine Ideal.mem_comap.mp (Ideal.span_le.mpr ?_ hx)
+  rintro y rfl
+  exact posEmbHom_generator_mem f
 
 /-- `negEmbHom` sends the generator `1 - fX` to an element of `(f - ζ)`.
 Key identity: `1 - f·ζ⁻¹ = -ζ⁻¹·(f - ζ)`. -/
@@ -1224,13 +1220,9 @@ theorem negEmbHom_ideal_compat (x : ↥(TateAlgebra A))
     (hx : x ∈ Ideal.span
       {1 - algebraMap A ↥(TateAlgebra A) f * TateAlgebra.X}) :
     negEmbHom x ∈ laurentFSubZetaIdeal f := by
-  have hsub : Ideal.span {1 - algebraMap A ↥(TateAlgebra A) f * TateAlgebra.X} ≤
-      (laurentFSubZetaIdeal f).comap negEmbHom := by
-    rw [Ideal.span_le]
-    intro y hy
-    rw [Set.mem_singleton_iff] at hy; subst hy
-    exact negEmbHom_generator_mem f
-  exact Ideal.mem_comap.mp (hsub hx)
+  refine Ideal.mem_comap.mp (Ideal.span_le.mpr ?_ hx)
+  rintro y rfl
+  exact negEmbHom_generator_mem f
 
 /-- The positive lift: `B₁ → B₁₂`, induced by `quotLaurent ∘ posEmbHom`. -/
 noncomputable def posLift : B₁_gen f →+* B₁₂_gen f :=
@@ -1812,16 +1804,7 @@ theorem ker_deltaMap_gen_le_range_epsilonHom_gen
     change posEmbHom (g - g') - negEmbHom (h - h') = 0
     have heq : posEmbHom g' - negEmbHom h' = posEmbHom g - negEmbHom h := hrow1
     rw [map_sub, map_sub]
-    -- a - b - (c - d) = 0 ↔ a - b = c - d ↔ a - c = b - d
-    rw [sub_eq_zero]
-    -- Need: posEmbHom g - posEmbHom g' = negEmbHom h - negEmbHom h'
-    have : posEmbHom g - negEmbHom h = posEmbHom g' - negEmbHom h' := heq.symm
-    -- a - c = b - d ↔ a - b = c - d (just rearranging)
-    calc posEmbHom g - posEmbHom g'
-        = (posEmbHom g - negEmbHom h) - (posEmbHom g' - negEmbHom h') +
-          (negEmbHom h - negEmbHom h') := by ring
-      _ = 0 + (negEmbHom h - negEmbHom h') := by rw [this, sub_self]
-      _ = negEmbHom h - negEmbHom h' := by rw [zero_add]
+    linear_combination -heq
   -- Step 6: By Row 2 exactness, (g - g', h - h') ∈ im(ι)
   obtain ⟨a, ha⟩ := ker_lambdaMap_le_range_iotaHom (g - g', h - h') hker
   -- Step 7: ha says ι(a) = (g - g', h - h'), i.e.,
