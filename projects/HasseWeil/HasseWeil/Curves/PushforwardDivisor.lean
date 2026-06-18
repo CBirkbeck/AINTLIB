@@ -95,7 +95,7 @@ theorem degree_pushforwardDivisorVal (φ : CurveMap C₁ C₂) (cd : φ.CoordHom
     (pushforwardDivisorVal φ cd D).degree = D.degree := by
   rw [pushforwardDivisorVal_apply]
   unfold ProjectiveDivisor.degree
-  rw [Finsupp.sum_mapDomain_index (h := fun _ n => n) (fun _ => rfl) (fun _ _ _ => rfl)]
+  rw [Finsupp.sum_mapDomain_index (h := fun _ n ↦ n) (fun _ ↦ rfl) (fun _ _ _ ↦ rfl)]
 
 /-! ### NEW-1(ii): the norm–conorm identity `div(N_φ f) = φ_∗(div f)`
 
@@ -162,7 +162,7 @@ theorem inertiaDeg_maximalIdealAt_toPointMap (P : C₁.SmoothPoint) :
   -- agree with the residue map because `cd` is an `F`-algebra hom).
   haveI htower : IsScalarTower F (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q)
       (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) := by
-    refine IsScalarTower.of_algebraMap_eq fun c => ?_
+    refine IsScalarTower.of_algebraMap_eq fun c ↦ ?_
     have hlhs : (algebraMap F (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P)) c =
         Ideal.Quotient.mk (C₁.maximalIdealAt P) (algebraMap F C₁.CoordinateRing c) :=
       IsScalarTower.algebraMap_apply F C₁.CoordinateRing
@@ -185,7 +185,7 @@ theorem inertiaDeg_maximalIdealAt_toPointMap (P : C₁.SmoothPoint) :
   have hbijSP := C₁.algebraMap_bijective_quotient_of_maximal hPmax
   have h_le : Module.finrank (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q)
       (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) ≤ 1 :=
-    finrank_le_one (1 : C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) fun w => by
+    finrank_le_one (1 : C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) fun w ↦ by
       obtain ⟨c, hc⟩ := hbijSP.2 w
       refine ⟨algebraMap F (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q) c, ?_⟩
       have key : (algebraMap F (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q) c) •
@@ -270,7 +270,7 @@ theorem finiteDimensional_functionField :
       (CurveMap.coordHom_injective φ cd)
   letI algFF : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
   haveI tower1 : IsScalarTower C₂.CoordinateRing C₂.FunctionField C₁.FunctionField := by
-    refine IsScalarTower.of_algebraMap_smul fun r x => ?_
+    refine IsScalarTower.of_algebraMap_smul fun r x ↦ ?_
     rw [Algebra.smul_def]
     show φ.pullback ((algebraMap C₂.CoordinateRing C₂.FunctionField) r) * x = r • x
     rw [cd.compat r, ← IsScalarTower.algebraMap_smul C₁.CoordinateRing r x, ← Algebra.smul_def]
@@ -331,7 +331,7 @@ theorem relNorm_maximalIdealAt_eq
       (CurveMap.coordHom_injective φ cd)
   letI algFF : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
   haveI tower1 : IsScalarTower C₂.CoordinateRing C₂.FunctionField C₁.FunctionField := by
-    refine IsScalarTower.of_algebraMap_smul fun r x => ?_
+    refine IsScalarTower.of_algebraMap_smul fun r x ↦ ?_
     rw [Algebra.smul_def]
     show φ.pullback ((algebraMap C₂.CoordinateRing C₂.FunctionField) r) * x = r • x
     rw [cd.compat r, ← IsScalarTower.algebraMap_smul C₁.CoordinateRing r x, ← Algebra.smul_def]
@@ -436,7 +436,7 @@ theorem relNorm_maximalIdealAt_eq
       rw [hcomap, ht, ht0, pow_zero, Ideal.one_eq_top, top_le_iff] at hbound
       exact hQmax.ne_top hbound
     · exact ht0
-  let sfn : Ideal C₁.CoordinateRing → ℕ := fun P' =>
+  let sfn : Ideal C₁.CoordinateRing → ℕ := fun P' ↦
     if hP' : P' ∈ p.primesOver C₁.CoordinateRing then (hexp P' hP').choose else 0
   have hsfn_ge : ∀ P' ∈ p.primesOver C₁.CoordinateRing, 1 ≤ sfn P' := by
     intro P' hP'
@@ -447,10 +447,10 @@ theorem relNorm_maximalIdealAt_eq
     intro P' hP'
     simp only [sfn, dif_pos hP']
     exact (hexp P' hP').choose_spec.2
-  have hfact := Ideal.map_algebraMap_eq_finset_prod_pow (R := C₁.CoordinateRing)
+  have hfact := Ideal.map_algebraMap_eq_finsetProd_pow (R := C₁.CoordinateRing)
     (S := C₂.CoordinateRing) (p := p) hp0
   set ee : Ideal C₁.CoordinateRing → ℕ :=
-    fun P' => p.ramificationIdx P' with hee_def
+    fun P' ↦ p.ramificationIdx P' with hee_def
   have hrel := congr_arg (Ideal.relNorm C₂.CoordinateRing) hfact
   rw [Ideal.relNorm_algebraMap C₁.CoordinateRing p, hcoh, map_prod] at hrel
   have hrhs : ∏ P' ∈ (p.primesOver C₁.CoordinateRing).toFinset,
@@ -565,15 +565,15 @@ theorem count_relNorm_eq_sum_fiber :
       (FaithfulSMul.algebraMap_injective C₂.CoordinateRing C₁.CoordinateRing)] at h_over
     exact h_over
   let toHOS : ∀ Q' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing,
-      IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing := fun Q' hQ' =>
+      IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing := fun Q' hQ' ↦
     ⟨Q', ((IsDedekindDomain.mem_primesOverFinset_iff (B := C₁.CoordinateRing) hp_ne).mp hQ').1,
       h_prime_ne_bot Q' hQ'⟩
   let sH : Finset (IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing) :=
-    (IsDedekindDomain.primesOverFinset p C₁.CoordinateRing).attach.image (fun ⟨Q', hQ'⟩ => toHOS Q' hQ')
+    (IsDedekindDomain.primesOverFinset p C₁.CoordinateRing).attach.image (fun ⟨Q', hQ'⟩ ↦ toHOS Q' hQ')
   set S : Finset (IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing) :=
     h_supp.toFinset ∪ sH with hS_def
   have hS_supp : Function.mulSupport
-      (fun Q' : IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing =>
+      (fun Q' : IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing ↦
         Q'.maxPowDividing (Ideal.span ({w} : Set _))) ⊆ ↑S := by
     intro Q' hQ'
     simp only [hS_def, Finset.coe_union, Set.mem_union]
@@ -680,8 +680,8 @@ theorem count_relNorm_eq_sum_fiber :
         Associates.count_eq_zero_of_ne h_vp_irr h_vP'_irr h_vp_ne_vP', Nat.mul_zero]
   rw [Finset.sum_congr rfl h_S_split, Finset.sum_ite, Finset.sum_const_zero, add_zero]
   refine Finset.sum_bij'
-    (i := fun (Q' : IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing) _ => Q'.asIdeal)
-    (j := fun (Q'' : Ideal C₁.CoordinateRing) hQ'' => toHOS Q'' hQ'') ?_ ?_ ?_ ?_ ?_
+    (i := fun (Q' : IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing) _ ↦ Q'.asIdeal)
+    (j := fun (Q'' : Ideal C₁.CoordinateRing) hQ'' ↦ toHOS Q'' hQ'') ?_ ?_ ?_ ?_ ?_
   · intro Q' hQ'
     exact (Finset.mem_filter.mp hQ').2
   · intro Q'' hQ''
@@ -733,7 +733,7 @@ theorem projectiveDivisorOf_pushforward_algebraMap_eq
       (CurveMap.coordHom_injective φ cd)
   letI algFF : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
   haveI tower1 : IsScalarTower C₂.CoordinateRing C₂.FunctionField C₁.FunctionField := by
-    refine IsScalarTower.of_algebraMap_smul fun r x => ?_
+    refine IsScalarTower.of_algebraMap_smul fun r x ↦ ?_
     rw [Algebra.smul_def]
     show φ.pullback ((algebraMap C₂.CoordinateRing C₂.FunctionField) r) * x = r • x
     rw [cd.compat r, ← IsScalarTower.algebraMap_smul C₁.CoordinateRing r x, ← Algebra.smul_def]
@@ -801,7 +801,7 @@ theorem projectiveDivisorOf_pushforward_algebraMap_eq
           ((Associates.mk Q').count (Associates.mk (Ideal.span ({w} : Set _))).factors : ℤ) := by
       have hRHS_supp : RHS (ProjectiveSmoothPoint.affine Q) =
           ∑ x ∈ D.support.filter
-            (fun x => placeImage φ cd x = ProjectiveSmoothPoint.affine Q), D x := by
+            (fun x ↦ placeImage φ cd x = ProjectiveSmoothPoint.affine Q), D x := by
         rw [hRHS_def, pushforwardDivisorVal_apply, Finsupp.mapDomain,
           Finsupp.sum_apply, Finsupp.sum, Finset.sum_filter]
         apply Finset.sum_congr rfl
@@ -830,17 +830,17 @@ theorem projectiveDivisorOf_pushforward_algebraMap_eq
         rw [hP'] at h1
         exact C₂.maximalIdealAt_injective (h1.trans h2.symm)
       let pt : (Q' : Ideal C₁.CoordinateRing) → Q' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing →
-          C₁.SmoothPoint := fun Q' hQ' => (hpoint Q' hQ').choose
+          C₁.SmoothPoint := fun Q' hQ' ↦ (hpoint Q' hQ').choose
       have hpt_ideal : ∀ Q' (hQ' : Q' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing),
-          C₁.maximalIdealAt (pt Q' hQ') = Q' := fun Q' hQ' => (hpoint Q' hQ').choose_spec.1
+          C₁.maximalIdealAt (pt Q' hQ') = Q' := fun Q' hQ' ↦ (hpoint Q' hQ').choose_spec.1
       have hpt_Q : ∀ Q' (hQ' : Q' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing),
-          toPointMap cd (pt Q' hQ') = Q := fun Q' hQ' => (hpoint Q' hQ').choose_spec.2
+          toPointMap cd (pt Q' hQ') = Q := fun Q' hQ' ↦ (hpoint Q' hQ').choose_spec.2
       let fibreFinset : Finset (ProjectiveSmoothPoint C₁) :=
         (IsDedekindDomain.primesOverFinset p C₁.CoordinateRing).attach.image
-          (fun Q' => ProjectiveSmoothPoint.affine (pt Q'.1 Q'.2))
+          (fun Q' ↦ ProjectiveSmoothPoint.affine (pt Q'.1 Q'.2))
       have hstep1 :
           (∑ x ∈ D.support.filter
-            (fun x => placeImage φ cd x = ProjectiveSmoothPoint.affine Q), D x) =
+            (fun x ↦ placeImage φ cd x = ProjectiveSmoothPoint.affine Q), D x) =
           ∑ x ∈ fibreFinset, D x := by
         apply Finset.sum_subset
         · intro x hx
@@ -876,7 +876,7 @@ theorem projectiveDivisorOf_pushforward_algebraMap_eq
           ∑ Q' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing,
             ((Associates.mk Q').count (Associates.mk (Ideal.span ({w} : Set _))).factors : ℤ) := by
         rw [show fibreFinset = (IsDedekindDomain.primesOverFinset p C₁.CoordinateRing).attach.image
-            (fun Q' => ProjectiveSmoothPoint.affine (pt Q'.1 Q'.2)) from rfl]
+            (fun Q' ↦ ProjectiveSmoothPoint.affine (pt Q'.1 Q'.2)) from rfl]
         rw [Finset.sum_image (by
           intro a _ b _ hab
           simp only [ProjectiveSmoothPoint.affine.injEq] at hab
@@ -886,7 +886,7 @@ theorem projectiveDivisorOf_pushforward_algebraMap_eq
           rw [hpt_ideal a.1 a.2, hpt_ideal b.1 b.2] at hh
           exact hh)]
         rw [← Finset.sum_attach (IsDedekindDomain.primesOverFinset p C₁.CoordinateRing)
-          (fun Q' => ((Associates.mk Q').count
+          (fun Q' ↦ ((Associates.mk Q').count
             (Associates.mk (Ideal.span ({w} : Set _))).factors : ℤ))]
         apply Finset.sum_congr rfl
         intro Q' _
@@ -922,7 +922,7 @@ theorem projectiveDivisorOf_pushforward_algebraMap_eq
       (Finsupp.support_subset_singleton.mp hE_supp)
     have hE_deg : E.degree = 0 := by
       rw [hE_def]; unfold ProjectiveDivisor.degree
-      rw [show (LHS - RHS).sum (fun _ n => n) = LHS.degree - RHS.degree from
+      rw [show (LHS - RHS).sum (fun _ n ↦ n) = LHS.degree - RHS.degree from
         (ProjectiveDivisor.degree_sub LHS RHS), hLHS_deg, hRHS_deg, sub_zero]
     have hEinf : E ProjectiveSmoothPoint.infinity = 0 := by
       have : E.degree = E ProjectiveSmoothPoint.infinity := by
