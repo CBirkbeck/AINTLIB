@@ -32,7 +32,7 @@ theorem isEmbedding_of_isStrictMap {X Y : Type*} [TopologicalSpace X] [Topologic
     (hinj : Function.Injective f) : Topology.IsEmbedding f := by
   have hoe : Topology.IsOpenEmbedding (Set.rangeFactorization f) :=
     .of_continuous_injective_isOpenMap (hcont.subtype_mk _)
-      (fun a b h => hinj (Subtype.ext_iff.mp h)) hstrict
+      (fun a b h ↦ hinj (Subtype.ext_iff.mp h)) hstrict
   change Topology.IsEmbedding (Subtype.val ∘ Set.rangeFactorization f)
   exact Topology.IsEmbedding.subtypeVal.comp hoe.isEmbedding
 
@@ -52,7 +52,7 @@ def IsFiltrationOpen {ι : Type*} (f : G →+ H) (U : ι → Set G)
 /-- A filtration-open group homomorphism is an open map. -/
 theorem isOpenMap_of_isFiltrationOpen {ι : Type*}
     (f : G →+ H) (U : ι → Set G) (hU_nhds : ∀ i, U i ∈ nhds (0 : G))
-    (hU_basis : Filter.HasBasis (nhds (0 : G)) (fun _ => True) U)
+    (hU_basis : Filter.HasBasis (nhds (0 : G)) (fun _ ↦ True) U)
     (hfilt : IsFiltrationOpen f U hU_nhds) : IsOpenMap f := by
   rw [IsTopologicalAddGroup.isOpenMap_iff_nhds_zero]
   intro S hS
@@ -64,7 +64,7 @@ theorem isOpenMap_of_isFiltrationOpen {ι : Type*}
 /-- Variant of `isOpenMap_of_isFiltrationOpen` with `ℕ`-indexed filtration. -/
 theorem isOpenMap_of_filtration_nhds (f : G →+ H)
     (U : ℕ → Set G) (hU_nhds : ∀ n, U n ∈ nhds (0 : G))
-    (hU_basis : Filter.HasBasis (nhds (0 : G)) (fun _ => True) U)
+    (hU_basis : Filter.HasBasis (nhds (0 : G)) (fun _ ↦ True) U)
     (himage : ∀ n, f '' (U n) ∈ nhds (0 : H)) :
     IsOpenMap f :=
   isOpenMap_of_isFiltrationOpen f U hU_nhds hU_basis himage
