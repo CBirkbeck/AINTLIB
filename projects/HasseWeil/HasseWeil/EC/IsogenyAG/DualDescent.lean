@@ -3,6 +3,11 @@ import HasseWeil.EC.IsogenyAG.MulByIntBasepoint
 import HasseWeil.EC.IsogenyAG.TwistedFactorization
 import HasseWeil.EC.IsogenyAG.BaseChange
 import HasseWeil.EC.IsogenyAG.TwoCurveDualRange
+import HasseWeil.EC.IsogenyAG.TwoCurveNormConorm
+import HasseWeil.EC.IsogenyAG.TwoCurveGroupHom
+import HasseWeil.EC.IsogenyKernelTwoCurve
+import HasseWeil.WeilPairing.TwoCurveGenericCovariance
+import HasseWeil.EC.IsogenyAG.TwoCurvePointImage
 import HasseWeil.Curves.CurveMapBaseChange
 import HasseWeil.Curves.NoFinitePolesBridge
 import HasseWeil.Curves.OrdAtInftyBaseChange
@@ -1255,6 +1260,66 @@ theorem rangeIncl_of_descentData_kbar [CharZero F] {C₁ C₂ : SmoothPlaneCurve
   refine ⟨g, C₁.functionFieldMap_injective (AlgebraicClosure F) ?_⟩
   show C₁.functionFieldMap (AlgebraicClosure F) (φPb g) = C₁.functionFieldMap (AlgebraicClosure F) (mPb u)
   rw [hpsiK_nat g, hg, hĝ']
+
+/-! ### The two-curve `K̄`-direct dual range inclusion over an alg-closed char-0 base
+
+(Relocated from the former `TwoCurveKbarRangeIncl.lean`, an unimported leaf.) For a two-curve
+`EC.Isogeny φ : E₁ → E₂` over `[IsAlgClosed F] [CharZero F]`, the Silverman III.6.1 range inclusion
+`Im([deg φ]*) ⊆ Im(φ*)` holds — fully proven via the geometric realization + the two-curve
+fixed-field range inclusion (`mulByInt_deg_rangeIncl_twoCurve`).  MOVE 2 feeds *this* `K̄`-direct
+inclusion (no finite `L`) into `rangeIncl_of_descentData_kbar`. -/
+
+/-- **Char-0 ⟹ separable, two-curve form** (for the Basic `HasseWeil.Isogeny`). -/
+theorem Isogeny.isSeparable_of_charZero_twoCurve [CharZero F] [DecidableEq F]
+    {W₁ W₂ : WeierstrassCurve F} [W₁.toAffine.IsElliptic] [W₂.toAffine.IsElliptic]
+    (β : HasseWeil.Isogeny W₁.toAffine W₂.toAffine) : β.IsSeparable := by
+  letI := β.toAlgebra
+  haveI : CharZero W₂.toAffine.FunctionField :=
+    charZero_of_injective_algebraMap (FaithfulSMul.algebraMap_injective F W₂.toAffine.FunctionField)
+  haveI : Algebra.IsAlgebraic W₂.toAffine.FunctionField W₁.toAffine.FunctionField :=
+    ⟨fun z => HasseWeil.Isogeny.isAlgebraic_toAlgebra_twoCurve β z⟩
+  exact (inferInstance :
+    @Algebra.IsSeparable W₂.toAffine.FunctionField W₁.toAffine.FunctionField _ _ β.toAlgebra)
+
+/-- **The Basic-`Isogeny` shell of an `EC.Isogeny`** over the alg-closed base. -/
+noncomputable def ecShell [DecidableEq F] {W₁ W₂ : WeierstrassCurve F} [W₁.toAffine.IsElliptic]
+    [W₂.toAffine.IsElliptic] (φ : EC.Isogeny W₁.toAffine W₂.toAffine) :
+    HasseWeil.Isogeny W₁.toAffine W₂.toAffine where
+  pullback := φ.toCurveMap.pullback
+  toAddMonoidHom := 0
+
+@[simp] theorem ecShell_pullback [DecidableEq F] {W₁ W₂ : WeierstrassCurve F}
+    [W₁.toAffine.IsElliptic] [W₂.toAffine.IsElliptic] (φ : EC.Isogeny W₁.toAffine W₂.toAffine) :
+    (ecShell φ).pullback = φ.toCurveMap.pullback := rfl
+
+/-- **Route A, step 1 — the two-curve `K̄`-dual range inclusion over an alg-closed char-0 base.** -/
+theorem ecIsog_mulByInt_deg_rangeIncl_of_charZero [IsAlgClosed F] [CharZero F]
+    [DecidableEq F] {W₁ W₂ : WeierstrassCurve F} [W₁.toAffine.IsElliptic] [W₂.toAffine.IsElliptic]
+    (φ : EC.Isogeny W₁.toAffine W₂.toAffine)
+    (hreg : ∀ f : (⟨W₂⟩ : Curves.SmoothPlaneCurve F).FunctionField,
+      0 ≤ (⟨W₂⟩ : Curves.SmoothPlaneCurve F).ordAtInfty f →
+      0 ≤ (⟨W₁⟩ : Curves.SmoothPlaneCurve F).ordAtInfty (φ.toCurveMap.pullback f)) :
+    (HasseWeil.mulByInt_pullbackAlgHom W₁.toAffine ((ecShell φ).degree : ℤ)
+        (by exact_mod_cast (HasseWeil.Isogeny.degree_pos_twoCurve (ecShell φ)).ne')).range ≤
+      φ.toCurveMap.pullback.range := by
+  classical
+  have h_pres : WeilPairing.PlaceRestrictionPreservesPrincipal (ecShell φ) :=
+    WeilPairing.placeRestrictionPreservesPrincipal_of_separable_charZero (ecShell φ)
+      (Isogeny.isSeparable_of_charZero_twoCurve (ecShell φ)) hreg
+  have hgh := WeilPairing.placeRestrictionPointMap_add_of_preservesPrincipal (ecShell φ) h_pres
+  set β := WeilPairing.placeRestrictionRealization (ecShell φ) hgh with hβ
+  have hβpb : β.pullback = φ.toCurveMap.pullback :=
+    WeilPairing.placeRestrictionRealization_pullback (ecShell φ) hgh
+  have hβsep : β.IsSeparable := Isogeny.isSeparable_of_charZero_twoCurve β
+  have hw := WeilPairing.pullbackEvaluation_twoCurve_placeRestrictionRealization (ecShell φ) hgh
+  have hxy := fun k => WeilPairing.xy_family_of_pullbackEvaluation_twoCurve W₁ W₂ β
+    (WeilPairing.twoCurvePoleLocus_finite (ecShell φ)) hw k
+  have hcard : Nat.card β.kernel = β.degree :=
+    card_kernel_eq_degree_twoCurve β hβsep
+      (WeilPairing.twoCurvePoleLocus_finite (ecShell φ)) hw
+  have hincl := HasseWeil.Isogeny.mulByInt_deg_rangeIncl_twoCurve β hxy hcard
+  rw [hβpb] at hincl
+  exact hincl
 
 end TowerDescent
 
