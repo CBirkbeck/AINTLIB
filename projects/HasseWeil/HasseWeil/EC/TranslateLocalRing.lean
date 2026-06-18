@@ -206,9 +206,9 @@ theorem pointValuation_mul_lt_one_of_le_and_lt
   by_cases hf_zero : (W_smooth W).pointValuation P f = 0
   · rw [hf_zero, zero_mul]; exact zero_lt_one
   · have hf_pos : 0 < (W_smooth W).pointValuation P f := lt_of_le_of_ne
-      (by exact zero_le') (Ne.symm hf_zero)
+      (by exact zero_le) (Ne.symm hf_zero)
     calc _ ≤ 1 * (W_smooth W).pointValuation P g :=
-            mul_le_mul_right' hf _
+            mul_le_mul_left hf _
       _ = (W_smooth W).pointValuation P g := one_mul _
       _ < 1 := hg
 
