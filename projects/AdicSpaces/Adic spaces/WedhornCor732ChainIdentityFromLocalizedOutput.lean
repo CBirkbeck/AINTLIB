@@ -175,10 +175,8 @@ theorem cor732_sigma_chain_lower_bound_from_image_witness
         Localization.Away s) * τ)
     (v : Spv (Localization.Away s)) :
     v.vle (t' * (σ_loc : Localization.Away s)) τ := by
-  have h_eq : t' * (σ_loc : Localization.Away s) = τ := by
-    rw [h_t_eq]
-    exact cor732_sigma_image_mul_unit_eq σ_loc τ
-  rw [h_eq]
+  subst h_t_eq
+  rw [cor732_sigma_image_mul_unit_eq σ_loc τ]
   exact (v.vle_total τ τ).elim id id
 
 omit [PlusSubring A] in
@@ -280,25 +278,17 @@ theorem cor732_sigma_denominator_clearing_chain_identity_from_localized_cor732_o
         P T s hopen T_D s_D s_base_loc D_s_loc f_loc) :
     Cor732SigmaDenominatorClearingChainIdentity
       P T s hopen T_D s_D D_T_loc s_base_loc D_s_loc f_loc := by
-  letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
-  letI : PlusSubring (Localization.Away s) :=
-    localizationLocSubringPlusSubring P T s
   intro σ_loc h_cover_t t' ht' v hv_spa hv_f hv_one_t hv_t_ne
   -- Step 1: recover τ from the σ-image decomposition.
   obtain ⟨τ, hτ_mem, h_t_eq⟩ :=
     h_D_T_loc_image_per_t σ_loc h_cover_t t' ht'
-  -- Step 2: transport source restrictions from t' to σ_loc⁻¹ * τ.
-  have h_one_τ : v.vle (1 : Localization.Away s)
-      (((σ_loc⁻¹ : (Localization.Away s)ˣ) : Localization.Away s) * τ) := by
-    rw [← h_t_eq]; exact hv_one_t
-  have h_τ_ne : ¬ v.vle (((σ_loc⁻¹ : (Localization.Away s)ˣ) :
-      Localization.Away s) * τ) 0 := by
-    rw [← h_t_eq]; exact hv_t_ne
-  -- Step 3: apply per-τ residual to obtain second chain side + non-vanishing.
+  -- Step 2: apply per-τ residual to obtain second chain side + non-vanishing,
+  -- transporting the source restrictions from t' to σ_loc⁻¹ * τ via h_t_eq.
   obtain ⟨h_τ_le_D, h_D_ne⟩ :=
-    h_per_tau σ_loc h_cover_t τ hτ_mem v hv_spa hv_f h_one_τ h_τ_ne
+    h_per_tau σ_loc h_cover_t τ hτ_mem v hv_spa hv_f (h_t_eq ▸ hv_one_t)
+      (h_t_eq ▸ hv_t_ne)
   refine ⟨τ, hτ_mem, ?_, h_τ_le_D, h_D_ne⟩
-  -- Step 4: discharge first chain side via σ-image algebra + reflexivity.
+  -- Step 3: discharge first chain side via σ-image algebra + reflexivity.
   exact cor732_sigma_chain_lower_bound_from_image_witness σ_loc t' τ h_t_eq v
 
 omit [PlusSubring A] in
@@ -353,10 +343,6 @@ theorem sigma_factored_supplier_via_cor732_image_decomposition_and_per_tau_resid
           P T s hopen T_D s_D s_base_loc D_s_loc f_loc),
     ∃ _ : (Localization.Away s)ˣ,
       SigmaFactoredSupplier D_T_loc s_base_loc D_s_loc f_loc := by
-  letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
-  letI : PlusSubring (Localization.Away s) :=
-    localizationLocSubringPlusSubring P T s
-  letI : DecidableEq (Localization.Away s) := Classical.decEq _
   intro π_loc hI_loc hπ_loc_tn hπ_loc_unit hArch_loc T_D s_D hT_loc
     D_T_loc s_base_loc D_s_loc f_loc h_D_T_loc_image_per_t h_per_tau
   -- Convert the σ-image decomposition + per-τ residual into the chain identity.
