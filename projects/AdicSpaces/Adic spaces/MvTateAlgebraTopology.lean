@@ -179,8 +179,7 @@ noncomputable def mvCoeffInIdealIdeal (n : ℕ) (P : PairOfDefinition A) (I : Id
       change (∑ p ∈ Finset.antidiagonal l,
           MvPowerSeries.coeff p.1 r.val.val * ((hz p.2).choose : A)) =
         MvPowerSeries.coeff l (r • z).val.val
-      rw [show (r • z).val.val = r.val.val * z.val.val from rfl]
-      rw [MvPowerSeries.coeff_mul]
+      rw [show (r • z).val.val = r.val.val * z.val.val from rfl, MvPowerSeries.coeff_mul]
       refine Finset.sum_congr rfl fun p _ => ?_
       rw [(hz p.2).choose_spec.2]
 
@@ -240,8 +239,7 @@ theorem mvCoeffInIdealIdeal_mul_mono (n : ℕ) (P : PairOfDefinition A) {I₁ I�
       change (∑ p ∈ Finset.antidiagonal l,
           ((ha' p.1).choose : A) * ((hb' p.2).choose : A)) =
         MvPowerSeries.coeff l (a * b).val.val
-      rw [show (a * b).val.val = a.val.val * b.val.val from rfl]
-      rw [MvPowerSeries.coeff_mul]
+      rw [show (a * b).val.val = a.val.val * b.val.val from rfl, MvPowerSeries.coeff_mul]
       refine Finset.sum_congr rfl fun p _ => ?_
       rw [(ha' p.1).choose_spec.2, (hb' p.2).choose_spec.2]
   · intro z₁ z₂ h₁' h₂' l
@@ -936,7 +934,7 @@ theorem mvTateAlgebra_algebraMap_continuous [IsTateRing A] (n : ℕ) :
     change algebraMap A ↥(restrictedMvPowerSeriesSubring n A) ((b : A) + a) -
       algebraMap A ↥(restrictedMvPowerSeriesSubring n A) a ∈ mvTateAlgNhd n P k
     rw [map_add, add_sub_cancel_right]
-    refine ⟨mvPairConstantHom n P ⟨b, b.property⟩, ?_, ?_⟩
+    refine ⟨mvPairConstantHom n P b, ?_, ?_⟩
     · rw [show (mvPairIdeal n P) ^ k = Ideal.map (mvPairConstantHom n P) (P.I ^ k) from by
         simp only [mvPairIdeal, ← Ideal.map_pow]]
       exact Ideal.mem_map_of_mem _ hb
