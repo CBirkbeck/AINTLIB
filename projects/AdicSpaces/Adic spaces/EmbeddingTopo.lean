@@ -375,9 +375,7 @@ def twoElementSubtypePiHomeomorph
       simp only [dif_neg h]
       exact continuous_snd
   · -- continuous_invFun
-    refine continuous_prodMk.mpr ⟨?_, ?_⟩
-    · exact continuous_apply _
-    · exact continuous_apply _
+    exact continuous_prodMk.mpr ⟨continuous_apply _, continuous_apply _⟩
 
 /-! ### T273: Lane C Laurent base case (parametric form)
 
