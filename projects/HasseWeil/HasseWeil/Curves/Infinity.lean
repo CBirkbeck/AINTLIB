@@ -71,7 +71,7 @@ theorem normAsRatFunc_eq_zero_iff (f : C.FunctionField) :
     C.normAsRatFunc f = 0 ↔ f = 0 := by
   rw [normAsRatFunc, show (0 : RatFunc F) = RatFunc.ofFractionRing 0 from
       RatFunc.ofFractionRing_zero.symm,
-      Function.Injective.eq_iff (fun _ _ h => by cases h; rfl),
+      Function.Injective.eq_iff (fun _ _ h ↦ by cases h; rfl),
       C.fieldNorm_eq_zero_iff]
 
 /-- The order of a function at the point at infinity on a Weierstrass
@@ -88,7 +88,7 @@ theorem ordAtInfty_eq_top_iff (f : C.FunctionField) :
     C.ordAtInfty f = ⊤ ↔ f = 0 := by
   unfold ordAtInfty
   split_ifs with h
-  · exact ⟨fun _ => h, fun _ => rfl⟩
+  · exact ⟨fun _ ↦ h, fun _ ↦ rfl⟩
   · simp [h]
 
 theorem ordAtInfty_of_ne {f : C.FunctionField} (hf : f ≠ 0) :
@@ -176,7 +176,7 @@ private theorem ofFractionRing_sq (r : FractionRing (Polynomial F)) :
 
 private theorem ofFractionRing_ne_zero {r : FractionRing (Polynomial F)} (hr : r ≠ 0) :
     (RatFunc.ofFractionRing r : RatFunc F) ≠ 0 :=
-  fun h => hr (RatFunc.ofFractionRing_injective (h.trans RatFunc.ofFractionRing_zero.symm))
+  fun h ↦ hr (RatFunc.ofFractionRing_injective (h.trans RatFunc.ofFractionRing_zero.symm))
 
 /-- For nonzero `r ∈ F(X)`, the order at infinity of its image in `F(C)` is
 twice the order at infinity of `r` itself (where the latter is `-intDegree`).
@@ -190,7 +190,7 @@ theorem ordAtInfty_algebraMap_fracPolyX_of_ne_zero
       ((- 2 * RatFunc.intDegree (RatFunc.ofFractionRing r) : ℤ) : WithTop ℤ) := by
   have h_alg_ne : algebraMap (FractionRing (Polynomial F)) C.FunctionField r ≠ 0 := by
     rw [Ne, ← map_zero (algebraMap (FractionRing (Polynomial F)) C.FunctionField)]
-    exact fun h => hr <|
+    exact fun h ↦ hr <|
       FaithfulSMul.algebraMap_injective (FractionRing (Polynomial F))
         C.FunctionField h
   have hRat_ne : (RatFunc.ofFractionRing r : RatFunc F) ≠ 0 := ofFractionRing_ne_zero hr
@@ -214,7 +214,7 @@ theorem ordAtInfty_algebraMap_polynomial_of_ne_zero
       C.FunctionField p
   have hp_alg : algebraMap (Polynomial F) (FractionRing (Polynomial F)) p ≠ 0 := by
     rw [Ne, ← map_zero (algebraMap (Polynomial F) (FractionRing (Polynomial F)))]
-    exact fun h => hp <| FaithfulSMul.algebraMap_injective
+    exact fun h ↦ hp <| FaithfulSMul.algebraMap_injective
       (Polynomial F) (FractionRing (Polynomial F)) h
   rw [h_alg_eq, C.ordAtInfty_algebraMap_fracPolyX_of_ne_zero hp_alg,
     RatFunc.ofFractionRing_algebraMap, RatFunc.intDegree_polynomial]
@@ -259,7 +259,7 @@ theorem ordAtInfty_coordX : C.ordAtInfty C.coordX = ((-2 : ℤ) : WithTop ℤ) :
   have hne : C.coordX ≠ 0 := C.coordX_ne_zero
   have hXRat_ne : algebraMap (Polynomial F) (RatFunc F) Polynomial.X ≠ 0 := by
     rw [Ne, ← map_zero (algebraMap (Polynomial F) (RatFunc F))]
-    exact fun h => Polynomial.X_ne_zero <|
+    exact fun h ↦ Polynomial.X_ne_zero <|
       FaithfulSMul.algebraMap_injective (Polynomial F) (RatFunc F) h
   have h_coordX :
       C.coordX = algebraMap (FractionRing (Polynomial F)) C.FunctionField
@@ -318,7 +318,7 @@ theorem ordAtInfty_algebraMap_coordinateRing (u : C.CoordinateRing)
     (hu : u ≠ 0) :
     C.ordAtInfty (algebraMap C.CoordinateRing C.FunctionField u) =
       ((-(Algebra.norm (Polynomial F) u).natDegree : ℤ) : WithTop ℤ) := by
-  have hne : algebraMap C.CoordinateRing C.FunctionField u ≠ 0 := fun h =>
+  have hne : algebraMap C.CoordinateRing C.FunctionField u ≠ 0 := fun h ↦
     hu ((IsFractionRing.injective C.CoordinateRing C.FunctionField)
       (h.trans (map_zero _).symm))
   rw [ordAtInfty_of_ne _ hne, normAsRatFunc, fieldNorm,
@@ -337,7 +337,7 @@ theorem ordAtInfty_algebraMap_F_nonzero {c : F} (hc : c ≠ 0) :
       algebraMap C.CoordinateRing C.FunctionField
         (algebraMap F C.CoordinateRing c) :=
     IsScalarTower.algebraMap_apply F C.CoordinateRing C.FunctionField c
-  have hu_ne : (algebraMap F C.CoordinateRing c) ≠ 0 := fun h => hc <|
+  have hu_ne : (algebraMap F C.CoordinateRing c) ≠ 0 := fun h ↦ hc <|
     FaithfulSMul.algebraMap_injective F C.CoordinateRing
       (h.trans (map_zero _).symm)
   rw [h_lift, C.ordAtInfty_algebraMap_coordinateRing _ hu_ne]
@@ -383,7 +383,7 @@ theorem ordAtInfty_smul_basis_coordinateRing_of_both_ne_zero
     omega
   have h_smul_ne_zero : p • (1 : C.CoordinateRing) +
       q • WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
-        (Polynomial.X : Polynomial (Polynomial F)) ≠ 0 := fun h =>
+        (Polynomial.X : Polynomial (Polynomial F)) ≠ 0 := fun h ↦
     h_norm_ne (by rw [h, Algebra.norm_zero])
   rw [C.ordAtInfty_algebraMap_coordinateRing _ h_smul_ne_zero, h_norm]
 
@@ -436,7 +436,7 @@ private theorem intDegree_ofFractionRing_eq_of_surj
       (p.natDegree : ℤ) - (d.natDegree : ℤ) := by
   have hd_alg_ne : algebraMap (Polynomial F) (FractionRing (Polynomial F)) d ≠ 0 := by
     rw [Ne, ← map_zero (algebraMap (Polynomial F) (FractionRing (Polynomial F)))]
-    exact fun heq => hd (FaithfulSMul.algebraMap_injective _ _ heq)
+    exact fun heq ↦ hd (FaithfulSMul.algebraMap_injective _ _ heq)
   have hr_eq : r = algebraMap (Polynomial F) (FractionRing (Polynomial F)) p *
       (algebraMap (Polynomial F) (FractionRing (Polynomial F)) d)⁻¹ := by
     rw [eq_mul_inv_iff_mul_eq₀ hd_alg_ne]; exact h
@@ -489,9 +489,9 @@ theorem ordAtInfty_basis_fracPolyX_of_both_ne_zero
   have hd₁_ne : d₁ ≠ 0 := nonZeroDivisors.ne_zero hd₁_mem
   have hd₂_ne : d₂ ≠ 0 := nonZeroDivisors.ne_zero hd₂_mem
   have hd₁_alg_ne : algebraMap (Polynomial F) (FractionRing (Polynomial F)) d₁ ≠ 0 :=
-    fun h => hd₁_ne (FaithfulSMul.algebraMap_injective _ _ (h.trans (map_zero _).symm))
+    fun h ↦ hd₁_ne (FaithfulSMul.algebraMap_injective _ _ (h.trans (map_zero _).symm))
   have hd₂_alg_ne : algebraMap (Polynomial F) (FractionRing (Polynomial F)) d₂ ≠ 0 :=
-    fun h => hd₂_ne (FaithfulSMul.algebraMap_injective _ _ (h.trans (map_zero _).symm))
+    fun h ↦ hd₂_ne (FaithfulSMul.algebraMap_injective _ _ (h.trans (map_zero _).symm))
   have hp₁_ne : p₁ ≠ 0 := by
     intro hp; apply hr₁
     have h_zero : r₁ * algebraMap (Polynomial F) (FractionRing (Polynomial F)) d₁ = 0 := by
@@ -513,7 +513,7 @@ theorem ordAtInfty_basis_fracPolyX_of_both_ne_zero
   have hp₁'_ne : p₁' ≠ 0 := mul_ne_zero hp₁_ne hd₂_ne
   have hp₂'_ne : p₂' ≠ 0 := mul_ne_zero hp₂_ne hd₁_ne
   have hd_alg_ne : algebraMap (Polynomial F) (FractionRing (Polynomial F)) d ≠ 0 :=
-    fun h => hd_ne (FaithfulSMul.algebraMap_injective _ _ (h.trans (map_zero _).symm))
+    fun h ↦ hd_ne (FaithfulSMul.algebraMap_injective _ _ (h.trans (map_zero _).symm))
   have h₁' : r₁ * algebraMap (Polynomial F) (FractionRing (Polynomial F)) d =
       algebraMap (Polynomial F) (FractionRing (Polynomial F)) p₁' := by
     rw [hd_def, hp₁'_def, map_mul, ← mul_assoc, h₁, ← map_mul]
@@ -659,7 +659,7 @@ theorem ordAtInfty_basis_eq_min (r₁ r₂ : FractionRing (Polynomial F)) :
     · subst hr₁
       have ha₂_ne : algebraMap (FractionRing (Polynomial F)) C.FunctionField r₂ ≠ 0 := by
         rw [Ne, ← map_zero (algebraMap (FractionRing (Polynomial F)) C.FunctionField)]
-        exact fun h => hr₂ (FaithfulSMul.algebraMap_injective _ _ h)
+        exact fun h ↦ hr₂ (FaithfulSMul.algebraMap_injective _ _ h)
       rw [map_zero, zero_add, C.ordAtInfty_mul ha₂_ne C.coordYInFunctionField_ne_zero,
         show C.ordAtInfty 0 = (⊤ : WithTop ℤ) from C.ordAtInfty_zero]
       exact (min_eq_right le_top).symm
@@ -920,7 +920,7 @@ theorem ordAtInfty_exists_const_sub_pos_of_fracPolyX_nonneg
   have h_const : ∀ lam : F, algebraMap F C.FunctionField lam =
       algebraMap (FractionRing (Polynomial F)) C.FunctionField
         (algebraMap F (FractionRing (Polynomial F)) lam) :=
-    fun lam => IsScalarTower.algebraMap_apply F (FractionRing (Polynomial F))
+    fun lam ↦ IsScalarTower.algebraMap_apply F (FractionRing (Polynomial F))
       C.FunctionField lam
   have h_ofC : ∀ lam : F, (RatFunc.ofFractionRing
         (algebraMap F (FractionRing (Polynomial F)) lam) : RatFunc F) = RatFunc.C lam := by
@@ -1006,7 +1006,7 @@ theorem ordAtInftyVal_mul (f g : C.FunctionField) :
 theorem ordAtInftyVal_add_le_max (f g : C.FunctionField) :
     C.ordAtInftyVal (f + g) ≤ max (C.ordAtInftyVal f) (C.ordAtInftyVal g) := by
   rcases eq_or_ne (f + g) 0 with hfg | hfg
-  · rw [hfg, ordAtInftyVal_zero]; exact zero_le'
+  · rw [hfg, ordAtInftyVal_zero]; exact zero_le
   rcases eq_or_ne f 0 with rfl | hf
   · simp
   rcases eq_or_ne g 0 with rfl | hg
@@ -1184,7 +1184,7 @@ theorem coordinateRing_const_of_ordAtInfty_nonneg (u : C.CoordinateRing)
   by_cases huz : u = 0
   · exact ⟨0, by rw [huz, map_zero]⟩
   have hN_natDeg := C.natDegree_zero_of_ordAtInfty_nonneg hu huz
-  have hNu_ne : Algebra.norm (Polynomial F) u ≠ 0 := fun h =>
+  have hNu_ne : Algebra.norm (Polynomial F) u ≠ 0 := fun h ↦
     huz ((Algebra.norm_eq_zero_iff (R := Polynomial F)).mp h)
   obtain ⟨p, q, hpq⟩ :=
     WeierstrassCurve.Affine.CoordinateRing.exists_smul_basis_eq u
@@ -1192,7 +1192,7 @@ theorem coordinateRing_const_of_ordAtInfty_nonneg (u : C.CoordinateRing)
   have hq : q = 0 := C.q_eq_zero_of_norm_natDeg_zero hNu_ne hN_natDeg
   subst hq
   have hpq' : p • (1 : C.CoordinateRing) = u := by rw [← hpq, zero_smul, add_zero]
-  have hp_ne : p ≠ 0 := fun hp => huz (by rw [← hpq', hp, zero_smul])
+  have hp_ne : p ≠ 0 := fun hp ↦ huz (by rw [← hpq', hp, zero_smul])
   have h_Nu_eq : Algebra.norm (Polynomial F) (p • (1 : C.CoordinateRing) +
       (0 : Polynomial F) •
         WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine Y) = p ^ 2 := by
@@ -1241,8 +1241,8 @@ theorem smoothPoint_x_preimage_finite (a : F) :
   Set.Finite.of_injOn
     (s := {P : C.SmoothPoint | P.x = a})
     (t := {y : F | (C.fiberQuadratic a).IsRoot y})
-    (fun _ hP => C.fiberQuadratic_isRoot_of_smoothPoint hP)
-    (fun _ hP₁ _ hP₂ hy => SmoothPoint.ext (hP₁.trans hP₂.symm) hy)
+    (fun _ hP ↦ C.fiberQuadratic_isRoot_of_smoothPoint hP)
+    (fun _ hP₁ _ hP₂ hy ↦ SmoothPoint.ext (hP₁.trans hP₂.symm) hy)
     (Polynomial.finite_setOf_isRoot (C.fiberQuadratic_ne_zero a))
 
 /-- The x-projection preimage of a finite set of `x`-values is finite. In
@@ -1254,7 +1254,7 @@ theorem smoothPoint_x_preimage_finite_of_set (s : Set F) (hs : s.Finite) :
   have h : {P : C.SmoothPoint | P.x ∈ s} = ⋃ a ∈ s, {P : C.SmoothPoint | P.x = a} := by
     ext P; simp
   rw [h]
-  exact hs.biUnion (fun a _ => C.smoothPoint_x_preimage_finite a)
+  exact hs.biUnion (fun a _ ↦ C.smoothPoint_x_preimage_finite a)
 
 private noncomputable def coordEval (P : C.SmoothPoint) :
     C.CoordinateRing →+* F :=
@@ -1459,7 +1459,7 @@ theorem ord_P_algebraMap_ne_zero_iff_mem_maximalIdealAt
     {u : C.CoordinateRing} (hu : u ≠ 0) (P : C.SmoothPoint) :
     C.ord_P P (algebraMap C.CoordinateRing C.FunctionField u) ≠ 0 ↔
     u ∈ C.maximalIdealAt P := by
-  have hne : algebraMap C.CoordinateRing C.FunctionField u ≠ 0 := fun h =>
+  have hne : algebraMap C.CoordinateRing C.FunctionField u ≠ 0 := fun h ↦
     hu ((IsFractionRing.injective C.CoordinateRing C.FunctionField)
       (h.trans (map_zero _).symm))
   have hle : C.pointValuation P
@@ -1483,7 +1483,7 @@ theorem finite_setOf_mem_maximalIdealAt {u : C.CoordinateRing} (hu : u ≠ 0) :
     {P : C.SmoothPoint | u ∈ C.maximalIdealAt P}.Finite := by
   obtain ⟨p, q, hpq⟩ :=
     WeierstrassCurve.Affine.CoordinateRing.exists_smul_basis_eq u
-  have hNu_ne : Algebra.norm (Polynomial F) u ≠ 0 := fun h =>
+  have hNu_ne : Algebra.norm (Polynomial F) u ≠ 0 := fun h ↦
     hu ((Algebra.norm_eq_zero_iff (R := Polynomial F)).mp h)
   refine (C.smoothPoint_x_preimage_finite_of_set
     {a : F | (Algebra.norm (Polynomial F) u).IsRoot a}
