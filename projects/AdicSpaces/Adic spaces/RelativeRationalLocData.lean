@@ -351,9 +351,8 @@ theorem relativeRationalLocData_hopen_proof_of_laurentNormalized
   -- Step 1: 1 ∈ D.T (from LaurentNormalized D)
   have h1_in_DT : (1 : A) ∈ D.T := LaurentNormalized.one_mem_T
   -- Step 2: E.canonicalMap 1 = 1 ∈ T_at_E.
-  have h1_in_TatE : (1 : presheafValue E) ∈ D.T.image E.canonicalMap := by
-    refine Finset.mem_image.mpr ⟨1, h1_in_DT, ?_⟩
-    exact map_one _
+  have h1_in_TatE : (1 : presheafValue E) ∈ D.T.image E.canonicalMap :=
+    Finset.mem_image.mpr ⟨1, h1_in_DT, map_one _⟩
   -- Step 3: divByS 1 s_at_E ∈ locSubring.
   have hdivByS_1 : divByS (1 : presheafValue E) (E.canonicalMap D.s) ∈
       locSubring P_at_E (D.T.image E.canonicalMap) (E.canonicalMap D.s) :=
@@ -603,11 +602,6 @@ theorem relativeLaurentNormalized_forwardLocHom_factor
   --    = D_at_E.coeRingHom (algebraMap _ (E.canonicalMap a))
   --    = D_at_E.canonicalMap (E.canonicalMap a)  (by definition of canonicalMap).
   simp only [RingHom.comp_apply]
-  change relativeLaurentNormalized_forwardLocHom E D hsub
-      (algebraMap A (Localization.Away D.s) a) =
-    (relativeRationalLocData_laurentNormalized E D hsub).coeRingHom
-      (relativeLaurentNormalized_forwardInnerLocHom E D hsub
-        (algebraMap A (Localization.Away D.s) a))
   rw [relativeLaurentNormalized_forwardLocHom_algebraMap]
   -- Inner: forwardInnerLocHom (algebraMap A _ a)
   -- = algebraMap (presheafValue E) _ (E.canonicalMap a).
@@ -624,8 +618,8 @@ theorem relativeLaurentNormalized_forwardLocHom_factor
   have hinner : relativeLaurentNormalized_forwardInnerLocHom E D hsub
       (algebraMap A (Localization.Away D.s) a) =
       algebraMap (presheafValue E) (Localization.Away (E.canonicalMap D.s))
-        (E.canonicalMap a) := by
-    exact IsLocalization.Away.lift_eq D.s
+        (E.canonicalMap a) :=
+    IsLocalization.Away.lift_eq D.s
       (relativeLaurentNormalized_Ds_isUnit_in_Loc E D hsub) a
   rw [hinner]
   -- Goal: baseHom a = coeRingHom (algebraMap presheafValue E _ (E.canonicalMap a))
@@ -723,11 +717,7 @@ theorem relativeLaurentNormalized_forwardInnerLocHom_continuous
       simp only [RingHom.comp_apply]
       exact IsLocalization.Away.lift_eq D.s
         (relativeLaurentNormalized_Ds_isUnit_in_Loc E D hsub) a
-    rw [show ⇑((relativeLaurentNormalized_forwardInnerLocHom E D hsub).comp
-        (algebraMap A (Localization.Away D.s))) =
-      ⇑((algebraMap (presheafValue E)
-          (Localization.Away (E.canonicalMap D.s))).comp E.canonicalMap) from
-      congr_arg _ heq]
+    rw [heq]
     exact (algebraMap_continuous_loc D_at_E_data).comp (canonicalMap_continuous E)
   -- hpow: forwardInner(divByS t D.s) is power-bounded for t ∈ D.T.
   have hpow : ∀ t ∈ D.T, @TopologicalRing.IsPowerBounded _ _ D_at_E_data.topology
@@ -737,8 +727,6 @@ theorem relativeLaurentNormalized_forwardInnerLocHom_continuous
     rw [relativeLaurentNormalized_forwardInnerLocHom_divByS]
     -- divByS (E.canonicalMap t) (E.canonicalMap D.s) ∈ locSubring of D_at_E_data.
     apply isPowerBounded_of_mem_locSubring D_at_E_data
-    change divByS (E.canonicalMap t) (E.canonicalMap D.s) ∈
-      locSubring D_at_E_data.P D_at_E_data.T D_at_E_data.s
     -- D_at_E_data.T = D.T.image E.canonicalMap, so E.canonicalMap t ∈ T.
     exact divByS_mem_locSubring D_at_E_data.P D_at_E_data.T D_at_E_data.s
       (Finset.mem_image.mpr ⟨t, ht, rfl⟩)
@@ -917,9 +905,7 @@ theorem relativeLaurentNormalized_backwardLocHom_continuous
       ext b
       simp only [RingHom.comp_apply]
       exact relativeLaurentNormalized_backwardLocHom_algebraMap E D hsub b
-    rw [show ⇑((relativeLaurentNormalized_backwardLocHom E D hsub).comp
-        (algebraMap (presheafValue E) (Localization.Away D_at_E_data.s))) =
-      ⇑(restrictionMapHom E D hsub) from congr_arg _ heq]
+    rw [heq]
     exact restrictionMapHom_continuous E D hsub
   -- hpow: backwardLocHom(divByS t' s_at_E) is power-bounded for t' ∈ D_at_E_data.T.
   have hpow : ∀ t' ∈ D_at_E_data.T,
@@ -1037,10 +1023,6 @@ theorem relativeLaurentNormalized_backward_forward_locHom
   --     = backwardLocHom (algebraMap (presheafValue E) _ (E.canonicalMap a))
   --     = restrictionMapHom E D hsub (E.canonicalMap a)
   --     = D.canonicalMap a = D.coeRingHom (algebraMap A _ a).
-  change relativeLaurentNormalized_backwardLocHom E D hsub
-      (relativeLaurentNormalized_forwardInnerLocHom E D hsub
-        (algebraMap A (Localization.Away D.s) a)) =
-    D.coeRingHom (algebraMap A (Localization.Away D.s) a)
   rw [relativeLaurentNormalized_forwardInnerLocHom_algebraMap,
     relativeLaurentNormalized_backwardLocHom_algebraMap,
     restrictionMapHom_canonicalMap]
@@ -1099,8 +1081,8 @@ theorem relativeLaurentNormalized_backwardHom_comp_forwardHom
     D.coeRingHom a
   rw [relativeLaurentNormalized_backwardHom_coeRingHom]
   -- Now: backwardLocHom (forwardInnerLocHom a) = D.coeRingHom a (locHom round-trip).
-  exact congr_fun (congrArg DFunLike.coe
-    (relativeLaurentNormalized_backward_forward_locHom E D hsub)) a
+  exact DFunLike.congr_fun
+    (relativeLaurentNormalized_backward_forward_locHom E D hsub) a
 
 /-- Intertwining at A: `forwardHom (D.canonicalMap a) = D_at_E.canonicalMap (E.canonicalMap a)`
 for `a : A`. -/
@@ -1190,7 +1172,7 @@ theorem relativeLaurentNormalized_forwardHom_restrictionMapHom
       D_at_E_data.canonicalMap (E.canonicalMap a)
     rw [restrictionMapHom_canonicalMap]
     exact relativeLaurentNormalized_forwardHom_canonicalMap E D hsub a
-  exact congr_fun (congrArg DFunLike.coe heq) y
+  exact DFunLike.congr_fun heq y
 
 /-- Forward round-trip identity: `forwardHom ∘ backwardHom = id` on
 `presheafValue D_at_E`. Proved by reducing via `Completion.ext'` to the
@@ -1264,7 +1246,7 @@ theorem relativeLaurentNormalized_forwardHom_comp_backwardHom
     rw [relativeLaurentNormalized_backwardLocHom_algebraMap,
       relativeLaurentNormalized_forwardHom_restrictionMapHom]
     rfl
-  exact congr_fun (congrArg DFunLike.coe heq) b
+  exact DFunLike.congr_fun heq b
 
 /-! ### Final relative equivalence (LaurentNormalized case)
 
@@ -1285,10 +1267,10 @@ noncomputable def relativeLaurentNormalized_equiv
   letI : DecidableEq (presheafValue E) := Classical.decEq _
   { toFun := relativeLaurentNormalized_forwardHom E D hsub
     invFun := relativeLaurentNormalized_backwardHom E D hsub
-    left_inv := fun x => congr_fun (congrArg DFunLike.coe
-      (relativeLaurentNormalized_backwardHom_comp_forwardHom E D hsub)) x
-    right_inv := fun y => congr_fun (congrArg DFunLike.coe
-      (relativeLaurentNormalized_forwardHom_comp_backwardHom E D hsub)) y
+    left_inv := fun x => DFunLike.congr_fun
+      (relativeLaurentNormalized_backwardHom_comp_forwardHom E D hsub) x
+    right_inv := fun y => DFunLike.congr_fun
+      (relativeLaurentNormalized_forwardHom_comp_backwardHom E D hsub) y
     map_mul' := map_mul _
     map_add' := map_add _ }
 
