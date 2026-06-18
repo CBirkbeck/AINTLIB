@@ -226,6 +226,88 @@ theorem placeRestrictionPushforward_apply_affine
   intro x hx
   rw [Finsupp.single_apply]
 
+/-! ### The comap-center → point-valuation lemma (the place dictionary on `E₂`)
+
+The crux of the fibre matching is to identify, from a `B`-prime `v` over `m_Q`, the *target*
+place `Q` of `E₂`.  The valuation `v` restricts (via `φ.pullback`) to a valuation on `K(E₂)` whose
+center on `F[E₂]` is exactly `m_Q`; such a valuation *is* `pointValuation Q` — the place dictionary
+for the smooth curve `E₂`, in its general (non-`B`) form.  The proof is the same DVR-domination as
+`NormConormIntegralClosure.bPrime_valuation_eq_pointValuation_of_coordGen_le_one`, transcribed to a
+generic surjective `ℤᵐ⁰`-valued valuation with prescribed affine center. -/
+
+set_option synthInstance.maxHeartbeats 400000 in
+set_option maxHeartbeats 800000 in
+/-- **A surjective valuation on `K(C)` with affine center `m_Q` is `pointValuation Q`** (the place
+dictionary for a smooth curve, general form).  If `w : K(C) → ℤᵐ⁰` is surjective, is `≤ 1` on the
+coordinate ring `F[C]`, and has center exactly `m_Q` (i.e. `w(algebraMap b) < 1 ↔ b ∈ m_Q`), then
+`w = pointValuation Q`.  This is the DVR-domination argument of
+`bPrime_valuation_eq_pointValuation_of_coordGen_le_one` for a generic valuation: the local ring
+`O_Q = F[C]_{m_Q}` dominates downward into `O_w`, so the two rank-one DVR valuation subrings agree,
+hence the two surjective `ℤᵐ⁰`-valuations are equal. -/
+theorem eq_pointValuation_of_center
+    (C : SmoothPlaneCurve F) [C.toAffine.IsElliptic] [IsIntegrallyClosed C.CoordinateRing]
+    (Q : C.SmoothPoint)
+    (w : Valuation C.FunctionField (WithZero (Multiplicative ℤ)))
+    (hwsurj : Function.Surjective w)
+    (hle : ∀ b : C.CoordinateRing, w (algebraMap C.CoordinateRing C.FunctionField b) ≤ 1)
+    (hcenter : ∀ b : C.CoordinateRing,
+      w (algebraMap C.CoordinateRing C.FunctionField b) < 1 ↔ b ∈ C.maximalIdealAt Q) :
+    w = C.pointValuation Q := by
+  classical
+  -- `O_w` is a rank-one DVR (`w` surjective onto `ℤᵐ⁰`).
+  haveI : IsDiscreteValuationRing w.valuationSubring :=
+    valuationSubring_isDVR_of_surjective_withZeroInt _ hwsurj
+  -- `O_Q := O_{pointValuation Q}` is a rank-one DVR.
+  have hpvsurj : Function.Surjective (C.pointValuation Q) :=
+    (IsDiscreteValuationRing.maximalIdeal (C.localRingAt Q)).valuation_surjective C.FunctionField
+  set A : ValuationSubring C.FunctionField := w.valuationSubring with hA
+  set Bv : ValuationSubring C.FunctionField := (C.pointValuation Q).valuationSubring with hBv
+  haveI : IsDiscreteValuationRing Bv :=
+    valuationSubring_isDVR_of_surjective_withZeroInt _ hpvsurj
+  -- `Bv ⊆ A`: every `pointValuation Q`-integer is a `w`-integer (write `f = a / s`, `s ∉ m_Q`).
+  have hBA : Bv ≤ A := by
+    intro f hf
+    obtain ⟨x, hx_eq⟩ := (SmoothPlaneCurve.mem_localRingAt_image_iff_pointValuation_le_one f).mpr
+      ((Valuation.mem_valuationSubring_iff _ f).mp hf)
+    obtain ⟨a, s, hxas⟩ := IsLocalization.exists_mk'_eq (C.maximalIdealAt Q).primeCompl x
+    set sv : C.CoordinateRing := (s : C.CoordinateRing) with hsv
+    have hs_notin : sv ∉ C.maximalIdealAt Q := Ideal.mem_primeCompl_iff.mp s.2
+    have hs_ne : sv ≠ 0 := fun h => hs_notin (h ▸ Submodule.zero_mem _)
+    have hs_map_ne : algebraMap C.CoordinateRing C.FunctionField sv ≠ 0 :=
+      (map_ne_zero_iff _ (IsFractionRing.injective C.CoordinateRing C.FunctionField)).mpr hs_ne
+    have hf_eq : f = algebraMap C.CoordinateRing C.FunctionField a /
+        algebraMap C.CoordinateRing C.FunctionField sv := by
+      rw [eq_div_iff hs_map_ne, ← hx_eq, ← hxas,
+        IsScalarTower.algebraMap_apply C.CoordinateRing (C.localRingAt Q) C.FunctionField sv,
+        IsScalarTower.algebraMap_apply C.CoordinateRing (C.localRingAt Q) C.FunctionField a,
+        ← map_mul]
+      congr 1
+      exact IsLocalization.mk'_spec (C.localRingAt Q) a s
+    have hws : w (algebraMap C.CoordinateRing C.FunctionField sv) = 1 := by
+      refine le_antisymm (hle sv) ?_
+      by_contra hlt
+      rw [not_le] at hlt
+      exact hs_notin ((hcenter sv).mp hlt)
+    refine (Valuation.mem_valuationSubring_iff _ f).mpr ?_
+    rw [hf_eq, map_div₀ w, hws, div_one]
+    exact hle a
+  -- `A ≠ ⊤`: `w` is nontrivial (surjective onto `ℤᵐ⁰`).
+  have hAtop : A ≠ ⊤ := by
+    have hNontriv : w.IsNontrivial := by
+      refine ⟨?_⟩
+      obtain ⟨z, hz⟩ := hwsurj (WithZero.exp (1 : ℤ))
+      refine ⟨z, ?_, ?_⟩
+      · rw [hz]; exact WithZero.exp_ne_zero
+      · rw [hz, show (1 : WithZero (Multiplicative ℤ)) = WithZero.exp (0 : ℤ) from
+          (WithZero.exp_zero).symm, Ne, WithZero.exp_inj]; norm_num
+    intro htop
+    rw [hA] at htop
+    exact (Valuation.valuationSubring_eq_top_iff _).mp htop hNontriv
+  have hEq : Bv = A := rankOne_valuationSubring_le_eq_of_ne_top Bv A hBA hAtop
+  have h_isEquiv : w.IsEquiv (C.pointValuation Q) := by
+    rw [Valuation.isEquiv_iff_valuationSubring]; rw [hA, hBv] at hEq; exact hEq.symm
+  exact Valuation.isEquiv_iff_eq_of_surjective_withZeroInt _ _ hwsurj hpvsurj h_isEquiv
+
 /-! ### The affine count identity (the per-place norm–conorm, the deep leaf)
 
 The mathematical content of Silverman II.3.6, CoordHom-free, is the per-affine-place identity: for
