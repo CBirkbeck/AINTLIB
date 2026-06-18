@@ -42,7 +42,7 @@ theorem qf_nonneg_of_frob_det_residual {p : ℕ} (hp : p.Prime) {q t : ℤ} (hq 
   apply qf_nonneg_of_nonneg_on_coprime hq hp
   intro r s hps
   have hd : deg r s = q * r ^ 2 - t * r * s + s ^ 2 :=
-    deg_eq_of_frob_det_data (fun ℓ hℓ hℓne => hres r s hps ℓ hℓ hℓne)
+    deg_eq_of_frob_det_data (hres r s hps)
   rw [← hd]; exact hdeg_nonneg r s
 
 /-- **Route-2A capstone (coprime-BOTH): `qf_nonneg` from the Weil-pairing det-residual on `p ∤ r ∧ p ∤ s`.**
@@ -63,10 +63,9 @@ theorem qf_nonneg_of_frob_det_residual_both {p : ℕ} (hp : p.Prime) {q t : ℤ}
   apply qf_nonneg_of_nonneg_on_coprime_both hq hp
   intro r s hpr hps
   have hd : deg r s = q * r ^ 2 - t * r * s + s ^ 2 :=
-    deg_eq_of_frob_det_data (fun ℓ hℓ hℓne => hres r s hpr hps ℓ hℓ hℓne)
+    deg_eq_of_frob_det_data (hres r s hpr hps)
   rw [← hd]; exact hdeg_nonneg r s
 
-open Matrix in
 /-- **Route-2A top-level reduction: `qf_nonneg` from the per-isogeny Weil-pairing scaling data.**
 
 The cleanest, additivity-free form of the capstone. Given `0 < q`, a prime `p`, a non-negative
