@@ -1,8 +1,8 @@
 import HasseWeil.FormalGroup
-import Mathlib.RingTheory.MvPowerSeries.Substitution
-import Mathlib.RingTheory.PowerSeries.Substitution
-import Mathlib.RingTheory.PowerSeries.Derivative
 import Mathlib.RingTheory.MvPowerSeries.Inverse
+import Mathlib.RingTheory.MvPowerSeries.Substitution
+import Mathlib.RingTheory.PowerSeries.Derivative
+import Mathlib.RingTheory.PowerSeries.Substitution
 
 /-!
 # The specification layer for the legacy formal group law (Silverman IV §1)
@@ -98,12 +98,12 @@ theorem coeff_subst_X {σ : Type*} [DecidableEq σ] (s : σ) (f : PowerSeries R)
     MvPowerSeries.coeff d (PowerSeries.subst (MvPowerSeries.X s) f) =
       if d = Finsupp.single s (d s) then PowerSeries.coeff (d s) f else 0 := by
   rw [PowerSeries.coeff_subst (PowerSeries.HasSubst.X s)]
-  rw [finsum_eq_single _ (d s) fun n hn => ?_]
+  rw [finsum_eq_single _ (d s) fun n hn ↦ ?_]
   · rw [MvPowerSeries.X_pow_eq, MvPowerSeries.coeff_monomial]
     split_ifs with h
     · rw [smul_eq_mul, mul_one]
     · rw [smul_zero]
-  · rw [MvPowerSeries.X_pow_eq, MvPowerSeries.coeff_monomial, if_neg fun h => hn ?_, smul_zero]
+  · rw [MvPowerSeries.X_pow_eq, MvPowerSeries.coeff_monomial, if_neg fun h ↦ hn ?_, smul_zero]
     rw [h, Finsupp.single_eq_same]
 
 /-- The constant coefficient of `f∘(X s)` is the constant coefficient of `f`. -/
@@ -169,7 +169,7 @@ polynomial divided differences: `coeff (a,b) λ = formalW_coeff W (a + b + 1)`
 (this is `(z₂ⁿ − z₁ⁿ)/(z₂ − z₁) = Σ_{i+j=n−1} z₁ⁱz₂ʲ` applied to each monomial
 of `w`). Source: [Sil] IV §1, p. 119. -/
 noncomputable def formalSlopeBiv (W : WeierstrassCurve R) : MvPowerSeries (Fin 2) R :=
-  fun d => formalW_coeff W (d 0 + d 1 + 1)
+  fun d ↦ formalW_coeff W (d 0 + d 1 + 1)
 
 @[simp]
 theorem coeff_formalSlopeBiv (d : Fin 2 →₀ ℕ) :
@@ -182,7 +182,7 @@ theorem formalSlopeBiv_spec :
     (MvPowerSeries.X 1 - MvPowerSeries.X 0) * formalSlopeBiv W
       = PowerSeries.subst (MvPowerSeries.X (1 : Fin 2)) (formalW W)
         - PowerSeries.subst (MvPowerSeries.X (0 : Fin 2)) (formalW W) := by
-  apply MvPowerSeries.ext fun d => ?_
+  apply MvPowerSeries.ext fun d ↦ ?_
   rw [sub_mul, map_sub, map_sub, coeff_X_mul, coeff_X_mul, coeff_subst_X, coeff_subst_X]
   simp only [fin2_eq_single_zero_iff, fin2_eq_single_one_iff, Finsupp.single_le_iff,
     coeff_formalSlopeBiv, coeff_formalW, Finsupp.tsub_apply, Finsupp.single_eq_same,
@@ -217,12 +217,12 @@ contribute, each with the same value `formalW_coeff W (n+1)`. -/
 private lemma formalSlopeBiv_diag_term (n : ℕ) (d : Fin 2 →₀ ℕ) :
     MvPowerSeries.coeff d (formalSlopeBiv W) •
         MvPowerSeries.coeff (Finsupp.single () n)
-          (d.prod fun _ e => (PowerSeries.X : PowerSeries R) ^ e)
+          (d.prod fun _ e ↦ (PowerSeries.X : PowerSeries R) ^ e)
       = if n = d 0 + d 1 then formalW_coeff W (n + 1) else 0 := by
-  have hprod : (d.prod fun _ e => (PowerSeries.X : PowerSeries R) ^ e)
+  have hprod : (d.prod fun _ e ↦ (PowerSeries.X : PowerSeries R) ^ e)
       = (PowerSeries.X : PowerSeries R) ^ (d 0 + d 1) := by
-    rw [Finsupp.prod_fintype d (fun _ e => (PowerSeries.X : PowerSeries R) ^ e)
-        (fun _ => pow_zero _), Fin.prod_univ_two]
+    rw [Finsupp.prod_fintype d (fun _ e ↦ (PowerSeries.X : PowerSeries R) ^ e)
+        (fun _ ↦ pow_zero _), Fin.prod_univ_two]
     exact (pow_add (PowerSeries.X : PowerSeries R) (d 0) (d 1)).symm
   rw [hprod,
     show MvPowerSeries.coeff (Finsupp.single () n)
@@ -236,22 +236,22 @@ private lemma formalSlopeBiv_diag_term (n : ℕ) (d : Fin 2 →₀ ℕ) :
 /-- The diagonal of the slope series at the variable (constant-family form):
 `λ(z,z) = w′(z)`. -/
 private theorem formalSlopeBiv_diag_const :
-    MvPowerSeries.subst (fun _ : Fin 2 => (PowerSeries.X : PowerSeries R)) (formalSlopeBiv W)
+    MvPowerSeries.subst (fun _ : Fin 2 ↦ (PowerSeries.X : PowerSeries R)) (formalSlopeBiv W)
       = d⁄dX R (formalW W) := by
-  have hX : MvPowerSeries.HasSubst (fun _ : Fin 2 => (PowerSeries.X : PowerSeries R)) :=
-    MvPowerSeries.hasSubst_of_constantCoeff_zero fun _ => MvPowerSeries.constantCoeff_X ()
-  apply PowerSeries.ext fun n => ?_
+  have hX : MvPowerSeries.HasSubst (fun _ : Fin 2 ↦ (PowerSeries.X : PowerSeries R)) :=
+    MvPowerSeries.hasSubst_of_constantCoeff_zero fun _ ↦ MvPowerSeries.constantCoeff_X ()
+  apply PowerSeries.ext fun n ↦ ?_
   rw [show PowerSeries.coeff n
-        (MvPowerSeries.subst (fun _ : Fin 2 => (PowerSeries.X : PowerSeries R))
+        (MvPowerSeries.subst (fun _ : Fin 2 ↦ (PowerSeries.X : PowerSeries R))
           (formalSlopeBiv W))
       = MvPowerSeries.coeff (Finsupp.single () n)
-          (MvPowerSeries.subst (fun _ : Fin 2 => (PowerSeries.X : PowerSeries R))
+          (MvPowerSeries.subst (fun _ : Fin 2 ↦ (PowerSeries.X : PowerSeries R))
             (formalSlopeBiv W)) from rfl,
     MvPowerSeries.coeff_subst hX]
-  refine (finsum_congr fun d => formalSlopeBiv_diag_term W n d).trans ?_
-  have hsupp : (Function.support fun d : Fin 2 →₀ ℕ =>
+  refine (finsum_congr fun d ↦ formalSlopeBiv_diag_term W n d).trans ?_
+  have hsupp : (Function.support fun d : Fin 2 →₀ ℕ ↦
         if n = d 0 + d 1 then formalW_coeff W (n + 1) else 0)
-      ⊆ ↑((Finset.antidiagonal n).image fun p : ℕ × ℕ =>
+      ⊆ ↑((Finset.antidiagonal n).image fun p : ℕ × ℕ ↦
         Finsupp.single (0 : Fin 2) p.1 + Finsupp.single (1 : Fin 2) p.2) := by
     intro d hd
     have h : n = d 0 + d 1 := by
@@ -260,11 +260,11 @@ private theorem formalSlopeBiv_diag_const :
     exact Finset.mem_coe.mpr (Finset.mem_image.mpr
       ⟨(d 0, d 1), Finset.mem_antidiagonal.mpr h.symm, (fin2_finsupp_decomp d).symm⟩)
   have hinj : Set.InjOn
-      (fun p : ℕ × ℕ => Finsupp.single (0 : Fin 2) p.1 + Finsupp.single (1 : Fin 2) p.2)
+      (fun p : ℕ × ℕ ↦ Finsupp.single (0 : Fin 2) p.1 + Finsupp.single (1 : Fin 2) p.2)
       ↑(Finset.antidiagonal n) := by
     intro p _ q _ hpq
-    have h0 := congrArg (fun f : Fin 2 →₀ ℕ => f 0) hpq
-    have h1 := congrArg (fun f : Fin 2 →₀ ℕ => f 1) hpq
+    have h0 := congrArg (fun f : Fin 2 →₀ ℕ ↦ f 0) hpq
+    have h1 := congrArg (fun f : Fin 2 →₀ ℕ ↦ f 1) hpq
     simp only [Finsupp.add_apply, Finsupp.single_eq_same,
       Finsupp.single_eq_of_ne (show (1 : Fin 2) ≠ 0 by decide),
       Finsupp.single_eq_of_ne (show (0 : Fin 2) ≠ 1 by decide), add_zero, zero_add] at h0 h1
@@ -289,7 +289,7 @@ theorem formalSlopeBiv_diag_X :
         (formalSlopeBiv W)
       = d⁄dX R (formalW W) := by
   rw [show (![PowerSeries.X, PowerSeries.X] : Fin 2 → PowerSeries R)
-      = fun _ : Fin 2 => PowerSeries.X from funext fun s => by fin_cases s <;> rfl]
+      = fun _ : Fin 2 ↦ PowerSeries.X from funext fun s ↦ by fin_cases s <;> rfl]
   exact formalSlopeBiv_diag_const W
 
 /-- **The diagonal of the slope series** (Silverman's `λ(z,z) = w′(z)`): substituting
@@ -299,12 +299,12 @@ theorem formalSlopeBiv_diag (f : PowerSeries R) (hf : 1 ≤ f.order) :
       = PowerSeries.subst f (d⁄dX R (formalW W)) := by
   have hf0 : PowerSeries.constantCoeff f = 0 :=
     PowerSeries.one_le_order_iff_constCoeff_eq_zero.mp hf
-  have hX : MvPowerSeries.HasSubst (fun _ : Fin 2 => (PowerSeries.X : PowerSeries R)) :=
-    MvPowerSeries.hasSubst_of_constantCoeff_zero fun _ => MvPowerSeries.constantCoeff_X ()
-  have hb : MvPowerSeries.HasSubst (fun _ : Unit => f) :=
-    MvPowerSeries.hasSubst_of_constantCoeff_zero fun _ => hf0
-  rw [show (![f, f] : Fin 2 → PowerSeries R) = fun _ : Fin 2 => f from
-      funext fun s => by fin_cases s <;> rfl,
+  have hX : MvPowerSeries.HasSubst (fun _ : Fin 2 ↦ (PowerSeries.X : PowerSeries R)) :=
+    MvPowerSeries.hasSubst_of_constantCoeff_zero fun _ ↦ MvPowerSeries.constantCoeff_X ()
+  have hb : MvPowerSeries.HasSubst (fun _ : Unit ↦ f) :=
+    MvPowerSeries.hasSubst_of_constantCoeff_zero fun _ ↦ hf0
+  rw [show (![f, f] : Fin 2 → PowerSeries R) = fun _ : Fin 2 ↦ f from
+      funext fun s ↦ by fin_cases s <;> rfl,
     ← formalSlopeBiv_diag_const (R := R) W, PowerSeries.subst_def,
     MvPowerSeries.subst_comp_subst_apply hX hb]
   congr 1
@@ -495,7 +495,7 @@ operation with the corresponding series operation.
 
 /-- Repackage a coefficient stream `ℕ → ℕ → R` as a bivariate power series. -/
 def F_of (f : ℕ → ℕ → R) : MvPowerSeries (Fin 2) R :=
-  fun d => f (d 0) (d 1)
+  fun d ↦ f (d 0) (d 1)
 
 @[simp]
 theorem coeff_F_of (f : ℕ → ℕ → R) (d : Fin 2 →₀ ℕ) :
@@ -519,17 +519,17 @@ theorem constantCoeff_F_of (f : ℕ → ℕ → R) :
 /-- **The product dictionary**: the legacy Cauchy product `bmul` repackages to
 the product of the repackaged series. -/
 theorem F_of_bmul (f g : ℕ → ℕ → R) : F_of (bmul f g) = F_of f * F_of g := by
-  apply MvPowerSeries.ext fun d => ?_
+  apply MvPowerSeries.ext fun d ↦ ?_
   rw [MvPowerSeries.coeff_mul, coeff_F_of]
-  change (Finset.range (d 0 + 1)).sum (fun a => (Finset.range (d 1 + 1)).sum fun b =>
+  change (Finset.range (d 0 + 1)).sum (fun a ↦ (Finset.range (d 1 + 1)).sum fun b ↦
     f a b * g (d 0 - a) (d 1 - b)) = _
   rw [← Finset.sum_product']
   refine Finset.sum_bij'
-    (i := fun (x : ℕ × ℕ) _ =>
+    (i := fun (x : ℕ × ℕ) _ ↦
       ((Finsupp.single (0 : Fin 2) x.1 + Finsupp.single (1 : Fin 2) x.2,
         Finsupp.single (0 : Fin 2) (d 0 - x.1) + Finsupp.single (1 : Fin 2) (d 1 - x.2)) :
         (Fin 2 →₀ ℕ) × (Fin 2 →₀ ℕ)))
-    (j := fun p _ => ((p.1 0, p.1 1) : ℕ × ℕ)) ?_ ?_ ?_ ?_ ?_
+    (j := fun p _ ↦ ((p.1 0, p.1 1) : ℕ × ℕ)) ?_ ?_ ?_ ?_ ?_
   · intro x hx
     simp only [Finset.mem_product, Finset.mem_range, Nat.lt_succ_iff] at hx
     rw [Finset.mem_antidiagonal]
@@ -565,10 +565,10 @@ theorem coeff_F_of_mul (f g : ℕ → ℕ → R) (d : Fin 2 →₀ ℕ) :
 
 /-- Unfolding of the well-founded recursion underlying `binv_by_degree`. -/
 theorem binv_by_degree_eq (f : ℕ → ℕ → R) (N : ℕ) :
-    binv_by_degree f N = fun i j =>
+    binv_by_degree f N = fun i j ↦
       if i + j ≠ N then 0
       else if i = 0 ∧ j = 0 then 1
-      else -(Finset.range (i + 1)).sum fun a => (Finset.range (j + 1)).sum fun b =>
+      else -(Finset.range (i + 1)).sum fun a ↦ (Finset.range (j + 1)).sum fun b ↦
         if a = i ∧ b = j then 0
         else (if a + b < N then binv f a b else 0) * f (i - a) (j - b) := by
   change WellFoundedRelation.wf.fix _ N = _
@@ -584,13 +584,13 @@ theorem binv_zero_zero (f : ℕ → ℕ → R) : binv f 0 0 = 1 := by
 /-- The defining recursion of the legacy bivariate inverse, with the
 degree-truncation guard discharged. -/
 theorem binv_eq_of_ne (f : ℕ → ℕ → R) (i j : ℕ) (hij : ¬(i = 0 ∧ j = 0)) :
-    binv f i j = -(Finset.range (i + 1)).sum fun a => (Finset.range (j + 1)).sum fun b =>
+    binv f i j = -(Finset.range (i + 1)).sum fun a ↦ (Finset.range (j + 1)).sum fun b ↦
       if a = i ∧ b = j then 0 else binv f a b * f (i - a) (j - b) := by
   change binv_by_degree f (i + j) i j = _
   rw [binv_by_degree_eq]
   simp only [ne_eq, not_true_eq_false, if_false, if_neg hij]
   congr 1
-  refine Finset.sum_congr rfl fun a ha => Finset.sum_congr rfl fun b hb => ?_
+  refine Finset.sum_congr rfl fun a ha ↦ Finset.sum_congr rfl fun b hb ↦ ?_
   by_cases h : a = i ∧ b = j
   · rw [if_pos h, if_pos h]
   · rw [if_neg h, if_neg h, if_pos]
@@ -599,9 +599,9 @@ theorem binv_eq_of_ne (f : ℕ → ℕ → R) (i j : ℕ) (hij : ¬(i = 0 ∧ j 
 
 /-- Extract the top-corner term from a rectangular double sum of `ite`s. -/
 private lemma sum_rect_corner (h : ℕ → ℕ → R) (i j : ℕ) :
-    ((Finset.range (i + 1)).sum fun a => (Finset.range (j + 1)).sum fun b =>
+    ((Finset.range (i + 1)).sum fun a ↦ (Finset.range (j + 1)).sum fun b ↦
       if a = i ∧ b = j then h a b else 0) = h i j := by
-  have hrow : ∀ a, ((Finset.range (j + 1)).sum fun b => if a = i ∧ b = j then h a b else 0)
+  have hrow : ∀ a, ((Finset.range (j + 1)).sum fun b ↦ if a = i ∧ b = j then h a b else 0)
       = if a = i then h a j else 0 := by
     intro a
     by_cases ha : a = i
@@ -611,31 +611,31 @@ private lemma sum_rect_corner (h : ℕ → ℕ → R) (i j : ℕ) :
       rw [Finset.sum_ite_eq' (Finset.range (j + 1)) j (h a),
         if_pos (Finset.self_mem_range_succ j)]
     · rw [if_neg ha]
-      exact Finset.sum_eq_zero fun b _ => if_neg fun hc => ha hc.1
-  rw [Finset.sum_congr rfl fun a _ => hrow a,
-    Finset.sum_ite_eq' (Finset.range (i + 1)) i (fun a => h a j),
+      exact Finset.sum_eq_zero fun b _ ↦ if_neg fun hc ↦ ha hc.1
+  rw [Finset.sum_congr rfl fun a _ ↦ hrow a,
+    Finset.sum_ite_eq' (Finset.range (i + 1)) i (fun a ↦ h a j),
     if_pos (Finset.self_mem_range_succ i)]
 
 /-- Split the top-corner term off a rectangular double sum. -/
 private lemma sum_rect_split_corner (h : ℕ → ℕ → R) (i j : ℕ) :
-    ((Finset.range (i + 1)).sum fun a => (Finset.range (j + 1)).sum fun b => h a b)
+    ((Finset.range (i + 1)).sum fun a ↦ (Finset.range (j + 1)).sum fun b ↦ h a b)
       = h i j + (Finset.range (i + 1)).sum
-          (fun a => (Finset.range (j + 1)).sum fun b => if a = i ∧ b = j then 0 else h a b) := by
+          (fun a ↦ (Finset.range (j + 1)).sum fun b ↦ if a = i ∧ b = j then 0 else h a b) := by
   have hsplit : ∀ a b, h a b
       = (if a = i ∧ b = j then h a b else 0) + (if a = i ∧ b = j then 0 else h a b) := by
     intro a b
     split_ifs <;> simp
-  calc ((Finset.range (i + 1)).sum fun a => (Finset.range (j + 1)).sum fun b => h a b)
-      = ((Finset.range (i + 1)).sum fun a => (Finset.range (j + 1)).sum fun b =>
+  calc ((Finset.range (i + 1)).sum fun a ↦ (Finset.range (j + 1)).sum fun b ↦ h a b)
+      = ((Finset.range (i + 1)).sum fun a ↦ (Finset.range (j + 1)).sum fun b ↦
           (if a = i ∧ b = j then h a b else 0) + (if a = i ∧ b = j then 0 else h a b)) :=
-        Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => hsplit a b
-    _ = ((Finset.range (i + 1)).sum fun a => (Finset.range (j + 1)).sum fun b =>
+        Finset.sum_congr rfl fun a _ ↦ Finset.sum_congr rfl fun b _ ↦ hsplit a b
+    _ = ((Finset.range (i + 1)).sum fun a ↦ (Finset.range (j + 1)).sum fun b ↦
           if a = i ∧ b = j then h a b else 0)
-        + (Finset.range (i + 1)).sum (fun a => (Finset.range (j + 1)).sum fun b =>
+        + (Finset.range (i + 1)).sum (fun a ↦ (Finset.range (j + 1)).sum fun b ↦
           if a = i ∧ b = j then 0 else h a b) := by
         rw [← Finset.sum_add_distrib]
-        exact Finset.sum_congr rfl fun a _ => Finset.sum_add_distrib
-    _ = h i j + (Finset.range (i + 1)).sum (fun a => (Finset.range (j + 1)).sum fun b =>
+        exact Finset.sum_congr rfl fun a _ ↦ Finset.sum_add_distrib
+    _ = h i j + (Finset.range (i + 1)).sum (fun a ↦ (Finset.range (j + 1)).sum fun b ↦
           if a = i ∧ b = j then 0 else h a b) := by rw [sum_rect_corner]
 
 /-- **The inverse dictionary**: for a stream with `f 0 0 = 1`, the legacy `binv`
@@ -643,16 +643,16 @@ repackages to a (left and hence two-sided) inverse of `F_of f`. -/
 theorem F_of_binv_mul (f : ℕ → ℕ → R) (hf : f 0 0 = 1) :
     F_of (binv f) * F_of f = 1 := by
   rw [← F_of_bmul]
-  apply MvPowerSeries.ext fun d => ?_
+  apply MvPowerSeries.ext fun d ↦ ?_
   rw [coeff_F_of, MvPowerSeries.coeff_one]
-  change (Finset.range (d 0 + 1)).sum (fun a => (Finset.range (d 1 + 1)).sum fun b =>
+  change (Finset.range (d 0 + 1)).sum (fun a ↦ (Finset.range (d 1 + 1)).sum fun b ↦
     binv f a b * f (d 0 - a) (d 1 - b)) = _
   rw [sum_rect_split_corner, Nat.sub_self, Nat.sub_self, hf, mul_one]
   by_cases h : d = 0
   · rw [if_pos h]
     rw [fin2_eq_zero_iff] at h
     rw [h.1, h.2, binv_zero_zero]
-    rw [show ((Finset.range (0 + 1)).sum fun a => (Finset.range (0 + 1)).sum fun b =>
+    rw [show ((Finset.range (0 + 1)).sum fun a ↦ (Finset.range (0 + 1)).sum fun b ↦
         if a = 0 ∧ b = 0 then (0 : R) else binv f a b * f (0 - a) (0 - b)) = 0 by simp]
     exact add_zero 1
   · rw [if_neg h]
@@ -666,16 +666,16 @@ theorem bpow_zero (f : ℕ → ℕ → R) (i j : ℕ) :
   rfl
 
 theorem bpow_succ (f : ℕ → ℕ → R) (i j n : ℕ) :
-    bpow f i j (n + 1) = bmul f (fun a b => bpow f a b n) i j :=
+    bpow f i j (n + 1) = bmul f (fun a b ↦ bpow f a b n) i j :=
   rfl
 
 theorem bpow_one (f : ℕ → ℕ → R) (i j : ℕ) : bpow f i j 1 = f i j := by
-  have h : bpow f i j 1 = bmul f (fun a b => bpow f a b 0) i j := bpow_succ f i j 0
+  have h : bpow f i j 1 = bmul f (fun a b ↦ bpow f a b 0) i j := bpow_succ f i j 0
   rw [h]
-  change ((Finset.range (i + 1)).sum fun a => (Finset.range (j + 1)).sum fun b =>
+  change ((Finset.range (i + 1)).sum fun a ↦ (Finset.range (j + 1)).sum fun b ↦
     f a b * bpow f (i - a) (j - b) 0) = f i j
   rw [← sum_rect_corner f i j]
-  refine Finset.sum_congr rfl fun a ha => Finset.sum_congr rfl fun b hb => ?_
+  refine Finset.sum_congr rfl fun a ha ↦ Finset.sum_congr rfl fun b hb ↦ ?_
   simp only [Finset.mem_range, Nat.lt_succ_iff] at ha hb
   rw [bpow_zero]
   by_cases hab : a = i ∧ b = j
@@ -684,28 +684,28 @@ theorem bpow_one (f : ℕ → ℕ → R) (i j : ℕ) : bpow f i j 1 = f i j := b
 
 /-- The legacy `bpow` repackages to powers of the repackaged series. -/
 theorem F_of_bpow (s : ℕ → ℕ → R) (n : ℕ) :
-    F_of s ^ n = F_of fun i j => bpow s i j n := by
+    F_of s ^ n = F_of fun i j ↦ bpow s i j n := by
   induction n with
   | zero =>
-      apply MvPowerSeries.ext fun d => ?_
+      apply MvPowerSeries.ext fun d ↦ ?_
       rw [pow_zero, coeff_F_of, bpow_zero, MvPowerSeries.coeff_one]
       simp only [fin2_eq_zero_iff]
   | succ n ih =>
       rw [pow_succ', ih, ← F_of_bmul]
-      exact congrArg F_of (funext fun i => funext fun j => (bpow_succ s i j n).symm)
+      exact congrArg F_of (funext fun i ↦ funext fun j ↦ (bpow_succ s i j n).symm)
 
 /-- `bpow` vanishes above the total degree (for streams with zero constant term). -/
 theorem bpow_eq_zero_of_lt (s : ℕ → ℕ → R) (hs : s 0 0 = 0) :
     ∀ n i j, i + j < n → bpow s i j n = 0 := by
   intro n
   induction n with
-  | zero => exact fun i j h => absurd h (Nat.not_lt_zero _)
+  | zero => exact fun i j h ↦ absurd h (Nat.not_lt_zero _)
   | succ n ih =>
       intro i j h
       rw [bpow_succ]
-      change ((Finset.range (i + 1)).sum fun a => (Finset.range (j + 1)).sum fun b =>
+      change ((Finset.range (i + 1)).sum fun a ↦ (Finset.range (j + 1)).sum fun b ↦
         s a b * bpow s (i - a) (j - b) n) = 0
-      refine Finset.sum_eq_zero fun a ha => Finset.sum_eq_zero fun b hb => ?_
+      refine Finset.sum_eq_zero fun a ha ↦ Finset.sum_eq_zero fun b hb ↦ ?_
       simp only [Finset.mem_range, Nat.lt_succ_iff] at ha hb
       by_cases hab : a = 0 ∧ b = 0
       · rw [hab.1, hab.2, hs, zero_mul]
@@ -719,13 +719,13 @@ theorem coeff_subst_F_of (c : ℕ → R) (s : ℕ → ℕ → R) (hs : s 0 0 = 0
   have hsub : PowerSeries.HasSubst (F_of s) :=
     PowerSeries.HasSubst.of_constantCoeff_zero (by rw [constantCoeff_F_of]; exact hs)
   rw [PowerSeries.coeff_subst hsub]
-  rw [finsum_congr fun n => by
+  rw [finsum_congr fun n ↦ by
     rw [PowerSeries.coeff_mk, F_of_bpow, coeff_F_of]]
   rw [finsum_eq_sum_of_support_subset _
     (s := Finset.range (d 0 + d 1 + 1)) ?_]
-  · change (Finset.range (d 0 + d 1 + 1)).sum (fun n => c n • bpow s (d 0) (d 1) n)
-      = (Finset.range (d 0 + d 1 + 1)).sum fun n => c n * bpow s (d 0) (d 1) n
-    exact Finset.sum_congr rfl fun n _ => smul_eq_mul ..
+  · change (Finset.range (d 0 + d 1 + 1)).sum (fun n ↦ c n • bpow s (d 0) (d 1) n)
+      = (Finset.range (d 0 + d 1 + 1)).sum fun n ↦ c n * bpow s (d 0) (d 1) n
+    exact Finset.sum_congr rfl fun n _ ↦ smul_eq_mul ..
   · intro n hn
     by_contra hmem
     simp only [Finset.coe_range, Set.mem_Iio, not_lt] at hmem
@@ -747,7 +747,7 @@ recursion; no restatement (B2) was needed.
 theorem invDenom_coeff_eq (n : ℕ) :
     invDenom_coeff W n = if n = 0 then 1 else
       W.a₁ * (if n - 1 < n then invDenom_coeff W (n - 1) else 0)
-        + (if n ≥ 3 then W.a₃ * (Finset.range (n - 2)).sum fun k =>
+        + (if n ≥ 3 then W.a₃ * (Finset.range (n - 2)).sum fun k ↦
             formalU_coeff W k * (if n - 3 - k < n then invDenom_coeff W (n - 3 - k) else 0)
           else 0) := by
   change WellFoundedRelation.wf.fix _ n = _
@@ -775,7 +775,7 @@ theorem invDenom_coeff_three : invDenom_coeff W 3 = W.a₁ * (W.a₁ * W.a₁) +
 truncation guards discharged. -/
 theorem invDenom_coeff_succ (n : ℕ) :
     invDenom_coeff W (n + 1) = W.a₁ * invDenom_coeff W n
-      + (if 3 ≤ n + 1 then W.a₃ * (Finset.range (n - 1)).sum fun k =>
+      + (if 3 ≤ n + 1 then W.a₃ * (Finset.range (n - 1)).sum fun k ↦
           formalU_coeff W k * invDenom_coeff W (n - 2 - k)
         else 0) := by
   rw [invDenom_coeff_eq W (n + 1), if_neg (Nat.succ_ne_zero n)]
@@ -785,7 +785,7 @@ theorem invDenom_coeff_succ (n : ℕ) :
     by_cases h3 : 3 ≤ n + 1
     · rw [if_pos h3, if_pos h3]
       congr 1
-      refine Finset.sum_congr rfl fun k hk => ?_
+      refine Finset.sum_congr rfl fun k hk ↦ ?_
       rw [show n + 1 - 3 - k = n - 2 - k from rfl, if_pos (by omega)]
     · rw [if_neg h3, if_neg h3]
 
@@ -798,18 +798,18 @@ private lemma mul_one_sub_sub {A : Type*} [CommRing A] (a u w a₁ a₃ : A) :
 /-- The convolution of `formalW` against a coefficient stream, reindexed onto
 the `formalU_coeff` tail (the first three `w`-coefficients vanish). -/
 private lemma sum_formalW_mul_eq (g : ℕ → R) (n : ℕ) :
-    ((Finset.range (n + 1 + 1)).sum fun i => formalW_coeff W i * g (n + 1 - i))
+    ((Finset.range (n + 1 + 1)).sum fun i ↦ formalW_coeff W i * g (n + 1 - i))
       = if 3 ≤ n + 1 then
-          (Finset.range (n - 1)).sum fun k => formalU_coeff W k * g (n - 2 - k)
+          (Finset.range (n - 1)).sum fun k ↦ formalU_coeff W k * g (n - 2 - k)
         else 0 := by
   by_cases h3 : 3 ≤ n + 1
   · rw [if_pos h3]
     conv_lhs => rw [Finset.range_eq_Ico]
     rw [← Finset.sum_Ico_consecutive _ (Nat.zero_le 3) (by omega : 3 ≤ n + 1 + 1)]
-    rw [show ((Finset.Ico 0 3).sum fun i => formalW_coeff W i * g (n + 1 - i)) = 0 from ?_,
+    rw [show ((Finset.Ico 0 3).sum fun i ↦ formalW_coeff W i * g (n + 1 - i)) = 0 from ?_,
       zero_add, Finset.sum_Ico_eq_sum_range]
     · refine Finset.sum_congr
-        (congrArg Finset.range (show n + 1 + 1 - 3 = n - 1 by omega)) fun k _ => ?_
+        (congrArg Finset.range (show n + 1 + 1 - 3 = n - 1 by omega)) fun k _ ↦ ?_
       rw [show 3 + k = k + 3 from Nat.add_comm 3 k, show n + 1 - (k + 3) = n - 2 - k by omega]
       simp only [formalU_coeff]
     · rw [show Finset.Ico 0 3 = Finset.range 3 from by rw [Finset.range_eq_Ico],
@@ -817,7 +817,7 @@ private lemma sum_formalW_mul_eq (g : ℕ → R) (n : ℕ) :
         formalW_coeff_zero, formalW_coeff_one, formalW_coeff_two]
       simp
   · rw [if_neg h3]
-    refine Finset.sum_eq_zero fun i hi => ?_
+    refine Finset.sum_eq_zero fun i hi ↦ ?_
     simp only [Finset.mem_range] at hi
     have hi3 : i < 3 := by omega
     interval_cases i <;>
@@ -830,7 +830,7 @@ theorem invDenom_mul_eq_one :
   have h2 : PowerSeries.mk (invDenom_coeff W)
       - PowerSeries.C W.a₁ * (PowerSeries.X * PowerSeries.mk (invDenom_coeff W))
       - PowerSeries.C W.a₃ * (formalW W * PowerSeries.mk (invDenom_coeff W)) = 1 := by
-    apply PowerSeries.ext fun n => ?_
+    apply PowerSeries.ext fun n ↦ ?_
     rw [map_sub, map_sub, PowerSeries.coeff_C_mul, PowerSeries.coeff_C_mul]
     cases n with
     | zero =>
@@ -839,7 +839,7 @@ theorem invDenom_mul_eq_one :
         rw [PowerSeries.coeff_succ_X_mul, PowerSeries.coeff_mk, PowerSeries.coeff_mk,
           PowerSeries.coeff_mul,
           Finset.Nat.sum_antidiagonal_eq_sum_range_succ
-            (M := R) (fun i j => PowerSeries.coeff i (formalW W)
+            (M := R) (fun i j ↦ PowerSeries.coeff i (formalW W)
               * PowerSeries.coeff j (PowerSeries.mk (invDenom_coeff W))) (n + 1)]
         simp only [coeff_formalW, PowerSeries.coeff_mk]
         rw [sum_formalW_mul_eq W (invDenom_coeff W) n, invDenom_coeff_succ W n,
@@ -849,8 +849,8 @@ theorem invDenom_mul_eq_one :
           ring
         · rw [if_neg h3, if_neg h3]
           ring
-  exact Eq.trans (mul_one_sub_sub (PowerSeries.mk (invDenom_coeff W)) PowerSeries.X
-    (formalW W) (PowerSeries.C W.a₁) (PowerSeries.C W.a₃)) h2
+  exact (mul_one_sub_sub (PowerSeries.mk (invDenom_coeff W)) PowerSeries.X
+    (formalW W) (PowerSeries.C W.a₁) (PowerSeries.C W.a₃)).trans h2
 
 @[simp]
 theorem coeff_formalInverse (n : ℕ) :
@@ -860,7 +860,7 @@ theorem coeff_formalInverse (n : ℕ) :
 /-- `formalInverse` is `−z·D(z)` for the inverse-denominator stream `D`. -/
 theorem formalInverse_eq_neg_X_mul :
     formalInverse W = -(PowerSeries.X * PowerSeries.mk (invDenom_coeff W)) := by
-  refine eq_neg_of_add_eq_zero_right (PowerSeries.ext fun n => ?_)
+  refine eq_neg_of_add_eq_zero_right (PowerSeries.ext fun n ↦ ?_)
   rw [map_add, coeff_formalInverse, map_zero]
   cases n with
   | zero =>
@@ -912,27 +912,27 @@ the FG-A1/A3 series `formalSlopeBiv`/`formalNuBiv`/`chordA`/`chordB`/
 -/
 
 private noncomputable def lamS (W : WeierstrassCurve R) : ℕ → ℕ → R :=
-  fun a b => formalW_coeff W (a + b + 1)
+  fun a b ↦ formalW_coeff W (a + b + 1)
 
 private noncomputable def w1S (W : WeierstrassCurve R) : ℕ → ℕ → R :=
-  fun a b => if b = 0 then formalW_coeff W a else 0
+  fun a b ↦ if b = 0 then formalW_coeff W a else 0
 
 private noncomputable def nuS (W : WeierstrassCurve R) : ℕ → ℕ → R :=
-  fun a b => w1S W a b - (if a ≥ 1 then lamS W (a - 1) b else 0)
+  fun a b ↦ w1S W a b - (if a ≥ 1 then lamS W (a - 1) b else 0)
 
 private noncomputable def AS (W : WeierstrassCurve R) : ℕ → ℕ → R :=
-  fun a b => (if a = 0 ∧ b = 0 then 1 else 0) + W.a₂ * lamS W a b
+  fun a b ↦ (if a = 0 ∧ b = 0 then 1 else 0) + W.a₂ * lamS W a b
     + W.a₄ * bmul (lamS W) (lamS W) a b
     + W.a₆ * bmul (lamS W) (bmul (lamS W) (lamS W)) a b
 
 private noncomputable def BS (W : WeierstrassCurve R) : ℕ → ℕ → R :=
-  fun a b => W.a₁ * lamS W a b + W.a₂ * nuS W a b
+  fun a b ↦ W.a₁ * lamS W a b + W.a₂ * nuS W a b
     + W.a₃ * bmul (lamS W) (lamS W) a b
     + 2 * W.a₄ * bmul (lamS W) (nuS W) a b
     + 3 * W.a₆ * bmul (bmul (lamS W) (lamS W)) (nuS W) a b
 
 private noncomputable def z3S (W : WeierstrassCurve R) : ℕ → ℕ → R :=
-  fun a b => -(bmul (BS W) (binv (AS W)) a b)
+  fun a b ↦ -(bmul (BS W) (binv (AS W)) a b)
     - (if a = 1 ∧ b = 0 then 1 else 0) - (if a = 0 ∧ b = 1 then 1 else 0)
 
 private lemma F_of_lamS : F_of (lamS W) = formalSlopeBiv W :=
@@ -940,19 +940,19 @@ private lemma F_of_lamS : F_of (lamS W) = formalSlopeBiv W :=
 
 private lemma F_of_w1S :
     F_of (w1S W) = PowerSeries.subst (MvPowerSeries.X (0 : Fin 2)) (formalW W) := by
-  apply MvPowerSeries.ext fun d => ?_
+  apply MvPowerSeries.ext fun d ↦ ?_
   rw [coeff_F_of, coeff_subst_X]
   simp only [w1S, coeff_formalW, fin2_eq_single_zero_iff]
 
 private lemma F_of_nuS : F_of (nuS W) = formalNuBiv W := by
-  apply MvPowerSeries.ext fun d => ?_
+  apply MvPowerSeries.ext fun d ↦ ?_
   rw [coeff_F_of, formalNuBiv, map_sub, ← F_of_w1S, coeff_F_of, coeff_X_mul,
     coeff_formalSlopeBiv]
   simp [nuS, lamS, Finsupp.single_le_iff, Finsupp.tsub_apply]
 
 private lemma F_of_delta :
-    F_of (fun a b => if a = 0 ∧ b = 0 then (1 : R) else 0) = 1 := by
-  apply MvPowerSeries.ext fun d => ?_
+    F_of (fun a b ↦ if a = 0 ∧ b = 0 then (1 : R) else 0) = 1 := by
+  apply MvPowerSeries.ext fun d ↦ ?_
   rw [coeff_F_of, MvPowerSeries.coeff_one]
   simp only [fin2_eq_zero_iff]
 
@@ -975,24 +975,24 @@ private lemma fin2_eq_single11_iff (d : Fin 2 →₀ ℕ) :
     fin_cases t <;> simp [h0, h1]
 
 private lemma F_of_delta10 :
-    F_of (fun a b => if a = 1 ∧ b = 0 then (1 : R) else 0) = MvPowerSeries.X 0 := by
-  apply MvPowerSeries.ext fun d => ?_
+    F_of (fun a b ↦ if a = 1 ∧ b = 0 then (1 : R) else 0) = MvPowerSeries.X 0 := by
+  apply MvPowerSeries.ext fun d ↦ ?_
   rw [coeff_F_of, MvPowerSeries.coeff_X]
   simp only [fin2_eq_single01_iff]
 
 private lemma F_of_delta01 :
-    F_of (fun a b => if a = 0 ∧ b = 1 then (1 : R) else 0) = MvPowerSeries.X 1 := by
-  apply MvPowerSeries.ext fun d => ?_
+    F_of (fun a b ↦ if a = 0 ∧ b = 1 then (1 : R) else 0) = MvPowerSeries.X 1 := by
+  apply MvPowerSeries.ext fun d ↦ ?_
   rw [coeff_F_of, MvPowerSeries.coeff_X]
   simp only [fin2_eq_single11_iff]
 
 private lemma F_of_AS : F_of (AS W) = chordA W := by
   have hsum : F_of (AS W)
-      = F_of (fun a b => if a = 0 ∧ b = 0 then (1 : R) else 0)
+      = F_of (fun a b ↦ if a = 0 ∧ b = 0 then (1 : R) else 0)
         + MvPowerSeries.C W.a₂ * F_of (lamS W)
         + MvPowerSeries.C W.a₄ * F_of (bmul (lamS W) (lamS W))
         + MvPowerSeries.C W.a₆ * F_of (bmul (lamS W) (bmul (lamS W) (lamS W))) := by
-    apply MvPowerSeries.ext fun d => ?_
+    apply MvPowerSeries.ext fun d ↦ ?_
     rw [map_add, map_add, map_add, MvPowerSeries.coeff_C_mul, MvPowerSeries.coeff_C_mul,
       MvPowerSeries.coeff_C_mul, coeff_F_of, coeff_F_of, coeff_F_of, coeff_F_of]
     rfl
@@ -1007,7 +1007,7 @@ private lemma F_of_BS : F_of (BS W) = chordB W := by
         + MvPowerSeries.C W.a₃ * F_of (bmul (lamS W) (lamS W))
         + MvPowerSeries.C (2 * W.a₄) * F_of (bmul (lamS W) (nuS W))
         + MvPowerSeries.C (3 * W.a₆) * F_of (bmul (bmul (lamS W) (lamS W)) (nuS W)) := by
-    apply MvPowerSeries.ext fun d => ?_
+    apply MvPowerSeries.ext fun d ↦ ?_
     rw [map_add, map_add, map_add, map_add, MvPowerSeries.coeff_C_mul,
       MvPowerSeries.coeff_C_mul, MvPowerSeries.coeff_C_mul, MvPowerSeries.coeff_C_mul,
       MvPowerSeries.coeff_C_mul, coeff_F_of, coeff_F_of, coeff_F_of, coeff_F_of,
@@ -1029,18 +1029,17 @@ private lemma F_of_binv_AS :
 private lemma F_of_z3S : F_of (z3S W) = formalZ3 W := by
   have hsum : F_of (z3S W)
       = -F_of (bmul (BS W) (binv (AS W)))
-        - F_of (fun a b => if a = 1 ∧ b = 0 then (1 : R) else 0)
-        - F_of (fun a b => if a = 0 ∧ b = 1 then (1 : R) else 0) := by
-    apply MvPowerSeries.ext fun d => ?_
+        - F_of (fun a b ↦ if a = 1 ∧ b = 0 then (1 : R) else 0)
+        - F_of (fun a b ↦ if a = 0 ∧ b = 1 then (1 : R) else 0) := by
+    apply MvPowerSeries.ext fun d ↦ ?_
     rw [map_sub, map_sub, map_neg, coeff_F_of, coeff_F_of, coeff_F_of, coeff_F_of]
     rfl
   rw [hsum, F_of_bmul, F_of_BS, F_of_binv_AS, F_of_delta10, F_of_delta01, formalZ3]
   ring
 
 private lemma z3S_zero_zero : z3S W 0 0 = 0 := by
-  have h := congrArg MvPowerSeries.constantCoeff (F_of_z3S W)
-  rw [constantCoeff_F_of, constantCoeff_formalZ3] at h
-  exact h
+  simpa only [constantCoeff_F_of, constantCoeff_formalZ3]
+    using congrArg MvPowerSeries.constantCoeff (F_of_z3S W)
 
 /-- The coefficients of the legacy formal group law. -/
 theorem coeff_formalGroupLaw (d : Fin 2 →₀ ℕ) :
@@ -1072,11 +1071,11 @@ over a commutative ring and instantiated (the `ring`-on-`PowerSeries` gap).
 
 /-- The substitution family killing all variables except `s` (sent to `X`). -/
 private noncomputable def rowFamily (s : Fin 2) : Fin 2 → PowerSeries R :=
-  fun i => if i = s then PowerSeries.X else 0
+  fun i ↦ if i = s then PowerSeries.X else 0
 
 private lemma hasSubst_rowFamily (s : Fin 2) :
     MvPowerSeries.HasSubst (rowFamily (R := R) s) :=
-  MvPowerSeries.hasSubst_of_constantCoeff_zero fun i => by
+  MvPowerSeries.hasSubst_of_constantCoeff_zero fun i ↦ by
     by_cases h : i = s
     · rw [show rowFamily (R := R) s i = PowerSeries.X from if_pos h]
       exact PowerSeries.constantCoeff_X
@@ -1084,9 +1083,9 @@ private lemma hasSubst_rowFamily (s : Fin 2) :
       exact map_zero _
 
 private lemma prod_rowFamily (s : Fin 2) (d : Fin 2 →₀ ℕ) :
-    (d.prod fun i e => (rowFamily (R := R) s i) ^ e)
+    (d.prod fun i e ↦ (rowFamily (R := R) s i) ^ e)
       = if d = Finsupp.single s (d s) then (PowerSeries.X : PowerSeries R) ^ (d s) else 0 := by
-  rw [Finsupp.prod_fintype d (fun i e => (rowFamily (R := R) s i) ^ e) fun _ => pow_zero _,
+  rw [Finsupp.prod_fintype d (fun i e ↦ (rowFamily (R := R) s i) ^ e) fun _ ↦ pow_zero _,
     Fin.prod_univ_two]
   fin_cases s
   · simp only [Fin.zero_eta, Fin.isValue]
@@ -1096,8 +1095,8 @@ private lemma prod_rowFamily (s : Fin 2) (d : Fin 2 →₀ ℕ) :
     by_cases h1 : d 1 = 0
     · rw [h1, pow_zero, if_pos ((fin2_eq_single_zero_iff d).mpr h1)]
       exact mul_one _
-    · rw [if_neg fun hc => h1 ((fin2_eq_single_zero_iff d).mp hc)]
-      exact (congrArg (fun t => (PowerSeries.X : PowerSeries R) ^ (d 0) * t)
+    · rw [if_neg fun hc ↦ h1 ((fin2_eq_single_zero_iff d).mp hc)]
+      exact (congrArg (fun t ↦ (PowerSeries.X : PowerSeries R) ^ (d 0) * t)
         (zero_pow h1)).trans (mul_zero _)
   · simp only [Fin.mk_one, Fin.isValue]
     change (rowFamily (R := R) 1 0) ^ (d 0) * (rowFamily (R := R) 1 1) ^ (d 1) = _
@@ -1106,15 +1105,15 @@ private lemma prod_rowFamily (s : Fin 2) (d : Fin 2 →₀ ℕ) :
     by_cases h0 : d 0 = 0
     · rw [h0, pow_zero, if_pos ((fin2_eq_single_one_iff d).mpr h0)]
       exact one_mul _
-    · rw [if_neg fun hc => h0 ((fin2_eq_single_one_iff d).mp hc)]
-      exact (congrArg (fun t => t * (PowerSeries.X : PowerSeries R) ^ (d 1))
+    · rw [if_neg fun hc ↦ h0 ((fin2_eq_single_one_iff d).mp hc)]
+      exact (congrArg (fun t ↦ t * (PowerSeries.X : PowerSeries R) ^ (d 1))
         (zero_pow h0)).trans (zero_mul _)
 
 /-- One term of the row-extraction finsum. -/
 private lemma coeff_subst_rowFamily_term (s : Fin 2) (n : ℕ) (φ : MvPowerSeries (Fin 2) R)
     (d : Fin 2 →₀ ℕ) :
     MvPowerSeries.coeff d φ • MvPowerSeries.coeff (Finsupp.single () n)
-        (d.prod fun i e => (rowFamily (R := R) s i) ^ e)
+        (d.prod fun i e ↦ (rowFamily (R := R) s i) ^ e)
       = if d = Finsupp.single s n then MvPowerSeries.coeff d φ else 0 := by
   rw [prod_rowFamily]
   by_cases hds : d = Finsupp.single s (d s)
@@ -1124,10 +1123,10 @@ private lemma coeff_subst_rowFamily_term (s : Fin 2) (n : ℕ) (φ : MvPowerSeri
       PowerSeries.coeff_X_pow]
     by_cases hsn : d s = n
     · rw [if_pos hsn.symm, smul_eq_mul, mul_one, if_pos (by rw [hds, hsn])]
-    · rw [if_neg fun h => hsn h.symm, smul_zero,
-        if_neg fun hc => hsn (by rw [hc, Finsupp.single_eq_same])]
-  · rw [if_neg hds, if_neg fun hc => hds (by rw [hc, Finsupp.single_eq_same])]
-    exact (congrArg (fun t => MvPowerSeries.coeff d φ • t)
+    · rw [if_neg fun h ↦ hsn h.symm, smul_zero,
+        if_neg fun hc ↦ hsn (by rw [hc, Finsupp.single_eq_same])]
+  · rw [if_neg hds, if_neg fun hc ↦ hds (by rw [hc, Finsupp.single_eq_same])]
+    exact (congrArg (fun t ↦ MvPowerSeries.coeff d φ • t)
       ((MvPowerSeries.coeff (Finsupp.single () n)).map_zero)).trans (smul_zero _)
 
 /-- Row extraction: the coefficients of a `rowFamily` substitution are the
@@ -1139,8 +1138,8 @@ private lemma coeff_subst_rowFamily (s : Fin 2) (φ : MvPowerSeries (Fin 2) R) (
       = MvPowerSeries.coeff (Finsupp.single () n)
           (MvPowerSeries.subst (rowFamily (R := R) s) φ) from rfl,
     MvPowerSeries.coeff_subst (hasSubst_rowFamily s)]
-  refine (finsum_congr fun d => coeff_subst_rowFamily_term s n φ d).trans ?_
-  rw [finsum_eq_single _ (Finsupp.single s n) fun d hd => if_neg hd, if_pos rfl]
+  refine (finsum_congr fun d ↦ coeff_subst_rowFamily_term s n φ d).trans ?_
+  rw [finsum_eq_single _ (Finsupp.single s n) fun d hd ↦ if_neg hd, if_pos rfl]
 
 /-- Substitution fixes constants (multivariate source, univariate target). -/
 private lemma mv_subst_C (a : Fin 2 → PowerSeries R) (r : R) :
@@ -1154,10 +1153,10 @@ private lemma mv_subst_C (a : Fin 2 → PowerSeries R) (r : R) :
 /-- The one-variable slope `λ₀(z) = w(z)/z = z² + ⋯` (the row specialization of
 `formalSlopeBiv`). -/
 private noncomputable def lam0 (W : WeierstrassCurve R) : PowerSeries R :=
-  PowerSeries.mk fun n => formalW_coeff W (n + 1)
+  PowerSeries.mk fun n ↦ formalW_coeff W (n + 1)
 
 private lemma X_mul_lam0 : PowerSeries.X * lam0 W = formalW W := by
-  apply PowerSeries.ext fun n => ?_
+  apply PowerSeries.ext fun n ↦ ?_
   cases n with
   | zero =>
       simp [PowerSeries.coeff_zero_eq_constantCoeff_apply, map_mul, formalW_coeff_zero]
@@ -1195,7 +1194,7 @@ private lemma cubic_factor_abstract {A : Type*} [CommRing A] (a₁ a₂ a₃ a�
   linear_combination -h
 
 private lemma X_mul_cancel {f : PowerSeries R} (h : PowerSeries.X * f = 0) : f = 0 := by
-  apply PowerSeries.ext fun n => ?_
+  apply PowerSeries.ext fun n ↦ ?_
   have h2 := congrArg (PowerSeries.coeff (n + 1)) h
   rw [PowerSeries.coeff_succ_X_mul, map_zero] at h2
   rw [h2, map_zero]
@@ -1218,7 +1217,7 @@ private lemma lam0_eq : lam0 W = A0 W * PowerSeries.X ^ 2 + B0 W * PowerSeries.X
 
 private lemma rowEval_formalSlopeBiv (s : Fin 2) :
     MvPowerSeries.subst (rowFamily (R := R) s) (formalSlopeBiv W) = lam0 W := by
-  apply PowerSeries.ext fun n => ?_
+  apply PowerSeries.ext fun n ↦ ?_
   rw [coeff_subst_rowFamily, coeff_formalSlopeBiv, lam0, PowerSeries.coeff_mk]
   congr 1
   fin_cases s <;> simp
@@ -1236,7 +1235,7 @@ private lemma nuS_row1 (b : ℕ) : nuS W 0 b = 0 := by
 
 private lemma rowEval_formalNuBiv (s : Fin 2) :
     MvPowerSeries.subst (rowFamily (R := R) s) (formalNuBiv W) = 0 := by
-  apply PowerSeries.ext fun n => ?_
+  apply PowerSeries.ext fun n ↦ ?_
   rw [coeff_subst_rowFamily, ← F_of_nuS, coeff_F_of]
   refine Eq.trans ?_ ((PowerSeries.coeff n).map_zero).symm
   fin_cases s
@@ -1383,7 +1382,7 @@ private lemma subst_rowZ3_formalInverse (s : Fin 2) :
     rw [show (1 : PowerSeries R) = PowerSeries.C 1 from (map_one _).symm,
       subst_C' ζ hζsub, map_one]
   have hsubsub : ∀ f g : PowerSeries R, PowerSeries.subst ζ (f - g)
-      = PowerSeries.subst ζ f - PowerSeries.subst ζ g := fun f g => by
+      = PowerSeries.subst ζ f - PowerSeries.subst ζ g := fun f g ↦ by
     have h := map_sub (PowerSeries.substAlgHom (R := R) hζsub) f g
     rwa [PowerSeries.coe_substAlgHom hζsub] at h
   have hT : PowerSeries.subst ζ (1 - PowerSeries.C W.a₁ * PowerSeries.X
@@ -1420,11 +1419,11 @@ private lemma subst_rowZ3_formalInverse (s : Fin 2) :
 private lemma coeff_single_subst_z3 (s : Fin 2) (n : ℕ) :
     MvPowerSeries.coeff (Finsupp.single s n)
       (PowerSeries.subst (formalZ3 W) (formalInverse W)) = if n = 1 then 1 else 0 := by
-  have hz3 : MvPowerSeries.HasSubst (fun _ : Unit => formalZ3 W) :=
-    MvPowerSeries.hasSubst_of_constantCoeff_zero fun _ => constantCoeff_formalZ3 W
+  have hz3 : MvPowerSeries.HasSubst (fun _ : Unit ↦ formalZ3 W) :=
+    MvPowerSeries.hasSubst_of_constantCoeff_zero fun _ ↦ constantCoeff_formalZ3 W
   have hcomp : MvPowerSeries.subst
-      (fun u : Unit => MvPowerSeries.subst (rowFamily (R := R) s)
-        ((fun _ : Unit => formalZ3 W) u)) (formalInverse W)
+      (fun u : Unit ↦ MvPowerSeries.subst (rowFamily (R := R) s)
+        ((fun _ : Unit ↦ formalZ3 W) u)) (formalInverse W)
       = PowerSeries.subst
         (MvPowerSeries.subst (rowFamily (R := R) s) (formalZ3 W)) (formalInverse W) := rfl
   rw [← coeff_subst_rowFamily s _ n]
@@ -1605,24 +1604,24 @@ private lemma z3S_13 : z3S W 1 3 = 2 * W.a₁ * W.a₂ - W.a₁ ^ 3 - 2 * W.a₃
   ring
 
 private lemma bpow_two (f : ℕ → ℕ → R) (i j : ℕ) : bpow f i j 2 = bmul f f i j := by
-  have h : bpow f i j 2 = bmul f (fun a b => bpow f a b 1) i j := bpow_succ f i j 1
-  rw [h, show (fun a b => bpow f a b 1) = f from funext fun a => funext fun b =>
+  have h : bpow f i j 2 = bmul f (fun a b ↦ bpow f a b 1) i j := bpow_succ f i j 1
+  rw [h, show (fun a b ↦ bpow f a b 1) = f from funext fun a ↦ funext fun b ↦
     bpow_one f a b]
 
 private lemma bpow_three (f : ℕ → ℕ → R) (i j : ℕ) :
     bpow f i j 3 = bmul f (bmul f f) i j := by
-  have h : bpow f i j 3 = bmul f (fun a b => bpow f a b 2) i j := bpow_succ f i j 2
-  rw [h, show (fun a b => bpow f a b 2) = bmul f f from funext fun a => funext fun b =>
+  have h : bpow f i j 3 = bmul f (fun a b ↦ bpow f a b 2) i j := bpow_succ f i j 2
+  rw [h, show (fun a b ↦ bpow f a b 2) = bmul f f from funext fun a ↦ funext fun b ↦
     bpow_two f a b]
 
 private lemma bpow_four (f : ℕ → ℕ → R) (i j : ℕ) :
     bpow f i j 4 = bmul f (bmul f (bmul f f)) i j := by
-  have h : bpow f i j 4 = bmul f (fun a b => bpow f a b 3) i j := bpow_succ f i j 3
-  rw [h, show (fun a b => bpow f a b 3) = bmul f (bmul f f) from funext fun a =>
-    funext fun b => bpow_three f a b]
+  have h : bpow f i j 4 = bmul f (fun a b ↦ bpow f a b 3) i j := bpow_succ f i j 3
+  rw [h, show (fun a b ↦ bpow f a b 3) = bmul f (bmul f f) from funext fun a ↦
+    funext fun b ↦ bpow_three f a b]
 
 private lemma band_11 : bcomp (formalInverse_coeff W) (z3S W) 1 1 = -W.a₁ := by
-  change ((Finset.range (1 + 1 + 1)).sum fun n =>
+  change ((Finset.range (1 + 1 + 1)).sum fun n ↦
     formalInverse_coeff W n * bpow (z3S W) 1 1 n) = -W.a₁
   rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one,
     bpow_zero, bpow_one, bpow_two]
@@ -1631,7 +1630,7 @@ private lemma band_11 : bcomp (formalInverse_coeff W) (z3S W) 1 1 = -W.a₁ := b
   ring
 
 private lemma band_21 : bcomp (formalInverse_coeff W) (z3S W) 2 1 = -W.a₂ := by
-  change ((Finset.range (2 + 1 + 1)).sum fun n =>
+  change ((Finset.range (2 + 1 + 1)).sum fun n ↦
     formalInverse_coeff W n * bpow (z3S W) 2 1 n) = -W.a₂
   rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
     Finset.sum_range_one, bpow_zero, bpow_one, bpow_two, bpow_three]
@@ -1640,7 +1639,7 @@ private lemma band_21 : bcomp (formalInverse_coeff W) (z3S W) 2 1 = -W.a₂ := b
   ring
 
 private lemma band_12 : bcomp (formalInverse_coeff W) (z3S W) 1 2 = -W.a₂ := by
-  change ((Finset.range (1 + 2 + 1)).sum fun n =>
+  change ((Finset.range (1 + 2 + 1)).sum fun n ↦
     formalInverse_coeff W n * bpow (z3S W) 1 2 n) = -W.a₂
   rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
     Finset.sum_range_one, bpow_zero, bpow_one, bpow_two, bpow_three]
@@ -1649,7 +1648,7 @@ private lemma band_12 : bcomp (formalInverse_coeff W) (z3S W) 1 2 = -W.a₂ := b
   ring
 
 private lemma band_31 : bcomp (formalInverse_coeff W) (z3S W) 3 1 = -(2 * W.a₃) := by
-  change ((Finset.range (3 + 1 + 1)).sum fun n =>
+  change ((Finset.range (3 + 1 + 1)).sum fun n ↦
     formalInverse_coeff W n * bpow (z3S W) 3 1 n) = -(2 * W.a₃)
   rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
     Finset.sum_range_succ, Finset.sum_range_one, bpow_zero, bpow_one, bpow_two,
@@ -1661,7 +1660,7 @@ private lemma band_31 : bcomp (formalInverse_coeff W) (z3S W) 3 1 = -(2 * W.a₃
 
 private lemma band_22 : bcomp (formalInverse_coeff W) (z3S W) 2 2
     = W.a₁ * W.a₂ - 3 * W.a₃ := by
-  change ((Finset.range (2 + 2 + 1)).sum fun n =>
+  change ((Finset.range (2 + 2 + 1)).sum fun n ↦
     formalInverse_coeff W n * bpow (z3S W) 2 2 n) = W.a₁ * W.a₂ - 3 * W.a₃
   rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
     Finset.sum_range_succ, Finset.sum_range_one, bpow_zero, bpow_one, bpow_two,
@@ -1672,7 +1671,7 @@ private lemma band_22 : bcomp (formalInverse_coeff W) (z3S W) 2 2
   ring
 
 private lemma band_13 : bcomp (formalInverse_coeff W) (z3S W) 1 3 = -(2 * W.a₃) := by
-  change ((Finset.range (1 + 3 + 1)).sum fun n =>
+  change ((Finset.range (1 + 3 + 1)).sum fun n ↦
     formalInverse_coeff W n * bpow (z3S W) 1 3 n) = -(2 * W.a₃)
   rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
     Finset.sum_range_succ, Finset.sum_range_one, bpow_zero, bpow_one, bpow_two,
@@ -1696,10 +1695,10 @@ theorem formalGroupLaw_eq_chord :
       = PowerSeries.subst (formalZ3 W) (formalInverse W) := by
   have hbc : ∀ d : Fin 2 →₀ ℕ,
       MvPowerSeries.coeff d (PowerSeries.subst (formalZ3 W) (formalInverse W))
-        = bcomp (formalInverse_coeff W) (z3S W) (d 0) (d 1) := fun d => by
+        = bcomp (formalInverse_coeff W) (z3S W) (d 0) (d 1) := fun d ↦ by
     rw [← F_of_z3S, show formalInverse W = PowerSeries.mk (formalInverse_coeff W) from rfl,
       coeff_subst_F_of _ _ (z3S_zero_zero W)]
-  apply MvPowerSeries.ext fun d => ?_
+  apply MvPowerSeries.ext fun d ↦ ?_
   rw [coeff_formalGroupLaw]
   by_cases h0 : d 0 = 0
   · have hd : d = Finsupp.single 1 (d 1) := (fin2_eq_single_one_iff d).mpr h0
