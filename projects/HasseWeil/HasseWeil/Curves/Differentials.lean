@@ -235,7 +235,7 @@ that any map into a Subsingleton is zero. -/
 theorem mapBaseChange_surjective_of_subsingleton_relativeKaehler
     (R A B : Type*) [CommRing R] [CommRing A] [CommRing B]
     [Algebra R A] [Algebra R B] [Algebra A B] [IsScalarTower R A B] [Subsingleton (Ω[B⁄A])] :
-    Function.Surjective (KaehlerDifferential.mapBaseChange R A B) := fun y =>
+    Function.Surjective (KaehlerDifferential.mapBaseChange R A B) := fun y ↦
   (KaehlerDifferential.exact_mapBaseChange_map R A B y).mp (Subsingleton.elim _ _)
 
 /-- **Cotangent Subsingleton (axiom-clean abstract form, reverse)**: for a tower
@@ -247,9 +247,9 @@ theorem subsingleton_relativeKaehler_of_mapBaseChange_surjective
     [Algebra R A] [Algebra R B] [Algebra A B] [IsScalarTower R A B]
     (h_surj : Function.Surjective (KaehlerDifferential.mapBaseChange R A B)) :
     Subsingleton (Ω[B⁄A]) := by
-  refine ⟨fun x y => ?_⟩
+  refine ⟨fun x y ↦ ?_⟩
   have h_map_zero : KaehlerDifferential.map R A B B = 0 := by
-    refine LinearMap.ext fun ω => ?_
+    refine LinearMap.ext fun ω ↦ ?_
     obtain ⟨z, hz⟩ := h_surj ω
     rw [← hz, (KaehlerDifferential.exact_mapBaseChange_map (R := R) (A := A)
       (B := B)).apply_apply_eq_zero]
@@ -294,7 +294,7 @@ theorem isogeny_isScalarTower
     @IsScalarTower F W.toAffine.FunctionField W.toAffine.FunctionField
       _ α.toAlgebra.toSMul _ := by
   letI : Algebra W.toAffine.FunctionField W.toAffine.FunctionField := α.toAlgebra
-  exact IsScalarTower.of_algebraMap_eq fun x => (α.pullback.commutes x).symm
+  exact IsScalarTower.of_algebraMap_eq fun x ↦ (α.pullback.commutes x).symm
 
 /-- **EssFiniteType from FiniteDimensional (axiom-clean)**: if `K(E)` is a
 finite-dimensional `K(E)_α`-module (via `α.toAlgebra`), then it is essentially
@@ -422,7 +422,7 @@ theorem isSeparable_iff_subsingleton_kaehler_of_finiteDimensional
       @Subsingleton (@KaehlerDifferential W.toAffine.FunctionField
         W.toAffine.FunctionField _ _ α.toAlgebra) :=
   ⟨isogeny_subsingleton_kaehler_of_isSeparable W α,
-   fun h_sub =>
+   fun h_sub ↦
      isogeny_isSeparable_of_subsingleton_kaehler_finiteDimensional W α h_sub h_fin⟩
 
 /-- **T-II-4-004 (witness-parametric, axiom-clean)**: the full iff
@@ -498,7 +498,7 @@ noncomputable instance algebra : Algebra (IsogenyAlgebraSource W α)
 break-through `isogeny_isScalarTower` lifted to the synonym wrapper. -/
 noncomputable instance isScalarTower :
     IsScalarTower F (IsogenyAlgebraSource W α) W.toAffine.FunctionField :=
-  IsScalarTower.of_algebraMap_eq fun x => (α.pullback.commutes x).symm
+  IsScalarTower.of_algebraMap_eq fun x ↦ (α.pullback.commutes x).symm
 
 end IsogenyAlgebraSource
 
@@ -736,7 +736,7 @@ theorem isogeny_omegaCoeff_ne_zero_of_isSeparable
   -- on `D`-generators (both are `0`), and is determined on the 1-dim `Ω` by `ω`.
   have h_map_zero : KaehlerDifferential.map F F (IsogenyAlgebraSource W α)
       W.toAffine.FunctionField = 0 := by
-    refine LinearMap.ext fun ω' => ?_
+    refine LinearMap.ext fun ω' ↦ ?_
     obtain ⟨a, ha⟩ := exists_smul_eq_of_finrank_eq_one
       (kaehler_rank_one W.toAffine)
       (invariantDifferential_ne_zero W.toAffine) ω'
@@ -760,7 +760,7 @@ theorem isogeny_omegaCoeff_ne_zero_of_isSeparable
       (by rw [h_map_ω, smul_zero])
   have h_mbc_zero : KaehlerDifferential.mapBaseChange F (IsogenyAlgebraSource W α)
       W.toAffine.FunctionField = 0 := by
-    refine LinearMap.ext fun η => ?_
+    refine LinearMap.ext fun η ↦ ?_
     induction η with
     | zero => simp
     | tmul x y => simp [KaehlerDifferential.mapBaseChange_tmul, h_map_zero]
@@ -799,7 +799,7 @@ theorem isSeparable_iff_omegaPullbackCoeff_ne_zero_of_finiteDim
       _ _ α.toAlgebra.toModule) :
     α.IsSeparable ↔ omegaPullbackCoeff W α ≠ 0 :=
   ⟨isogeny_omegaCoeff_ne_zero_of_isSeparable W α,
-   fun h => isogeny_isSeparable_of_omegaCoeff_ne_zero_finiteDim W α h h_fin⟩
+   fun h ↦ isogeny_isSeparable_of_omegaCoeff_ne_zero_finiteDim W α h h_fin⟩
 
 /-- **T-II-4-004 reverse direction (witness-parametric, axiom-clean)**: if
 `α.pullbackKaehler` is injective on `Ω[K(E)/F]`, then given Witness #2
@@ -849,7 +849,7 @@ The reverse: the converse chain via `FormallyUnramified.iff_isSeparable`. -/
 theorem isSeparable_iff_pullbackKaehler_injective
     (α : Isogeny W.toAffine W.toAffine) :
     α.IsSeparable ↔ Function.Injective α.pullbackKaehler :=
-  ⟨fun h => (pullbackKaehler_injective_iff_omegaPullbackCoeff_ne_zero W α).mpr
+  ⟨fun h ↦ (pullbackKaehler_injective_iff_omegaPullbackCoeff_ne_zero W α).mpr
       (isogeny_omegaCoeff_ne_zero_of_isSeparable W α h),
    isogeny_isSeparable_of_pullbackKaehler_injective W α⟩
 
