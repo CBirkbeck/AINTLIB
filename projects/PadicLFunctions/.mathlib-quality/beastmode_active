@@ -1,1 +1,1 @@
-FOCUS: G2-CFT — RayClassData layer done; adding ClassFieldTheory class (toClassGroup surjection + Artin iso) in ClassFieldTheory.lean
+FOCUS: G2-CFT — ClassFieldTheory class (toClassGroup+Artin) compiles; adding existence field, then G2-RAYSEQ

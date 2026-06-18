@@ -1,5 +1,6 @@
 import Mathlib.RingTheory.ClassGroup.Basic
 import Mathlib.NumberTheory.NumberField.ClassNumber
+import Mathlib.Algebra.Category.Grp.Basic
 
 /-!
 # An interface to global class field theory (ray-class form)  (S13-G, G2-CFT)
@@ -48,5 +49,26 @@ instance instCommGroupRayClassGroup {K : Type} [Field K] [NumberField K] [RayCla
 instance instFiniteRayClassGroup {K : Type} [Field K] [NumberField K] [RayClassData K]
     (𝔪 : Ideal (𝓞 K)) : Finite (RayClassData.rayClassGroup 𝔪) :=
   RayClassData.finite 𝔪
+
+/-- **The class field theory interface** over a number field `K`, layered on `RayClassData`.
+Bundles the classical theorems of global CFT (ray-class form) as data:
+
+* the forget-modulus surjection `Cl_K(𝔪) ↠ Cl_K` (the ideal-theoretic ray → class sequence);
+* **Artin reciprocity** `Cl_K(𝔪) ≃ Gal(H_𝔪/K)` (the ray class field Galois group, bundled via the
+  `CommGrp` category to avoid carrying its group structure as a bare field);
+* **existence**: every finite abelian `L/K` is dominated by a ray class field (its Galois group is
+  a quotient of some `Gal(H_𝔪/K)`).
+
+This is the single axiomatised input of Stage G; a future mathlib global-CFT library provides the
+instance (`G2-DISCHARGE`), and CFTunits1 is *derived* from it. -/
+class ClassFieldTheory (K : Type) [Field K] [NumberField K] [RayClassData K] where
+  /-- `Cl_K(𝔪) ↠ Cl_K`, forgetting the modulus. -/
+  toClassGroup : ∀ 𝔪 : Ideal (𝓞 K), RayClassData.rayClassGroup 𝔪 →* ClassGroup (𝓞 K)
+  /-- the forget-modulus map is surjective. -/
+  toClassGroup_surjective : ∀ 𝔪, Function.Surjective (toClassGroup 𝔪)
+  /-- the **ray class field** Galois group `Gal(H_𝔪/K)`, as a bundled commutative group. -/
+  rayClassFieldGal : Ideal (𝓞 K) → CommGrpCat.{0}
+  /-- **Artin reciprocity**: `Cl_K(𝔪) ≃ Gal(H_𝔪/K)`. -/
+  artin : ∀ 𝔪, RayClassData.rayClassGroup 𝔪 ≃* rayClassFieldGal 𝔪
 
 end Iwasawa.Galois
