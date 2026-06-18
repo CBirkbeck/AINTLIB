@@ -974,14 +974,9 @@ variable [IsTateRing B] [IsNoetherianRing B] [T2Space B] [NonarchimedeanRing B]
 
 open TateAlgebra
 
-/-- **T145: `example638Plus_forwardHom` is a topological homeomorphism.**
-
-Plus-branch analogue of `tateQuotientToPresheafHom_isHomeomorph`. The forward
-hom from the canonical quotient `B⟨X⟩ ⧸ (algebraMap b − X)` to the
-presheafValue of the trivial plus datum is continuous (`hcont_forward`) and
-bijective (via `example638Plus_equiv`). Under the additional Banach-OMT
-discharges (`hBaire` on the target presheafValue, `hSigma` on the source
-quotient), Banach OMT promotes it to a topological homeomorphism. -/
+/-- **T145: `example638Plus_forwardHom` is a topological homeomorphism**
+from the canonical quotient `B⟨X⟩ ⧸ (algebraMap b − X)` to the presheafValue of
+the trivial plus datum. -/
 theorem example638Plus_isHomeomorph
     (P : PairOfDefinition B) [IsNoetherianRing P.A₀] (b : B)
     (hA_complete : @CompleteSpace B (IsTopologicalAddGroup.rightUniformSpace B))
@@ -1012,12 +1007,9 @@ theorem example638Plus_isHomeomorph
     quotient_plusFSubXIdeal_completeSpace B hA_complete hnoeth b
   haveI : T2Space (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
     quotient_plusFSubXIdeal_t2Space B hA_complete hnoeth b
-  -- Bijectivity from the equiv.
   let e := example638Plus_equiv B P b hA_complete hnoeth hcont_forward
   have hbij : Function.Bijective (example638Plus_forwardHom B P b) :=
     ⟨e.injective, e.surjective⟩
-  -- Banach OMT for openness: surjective continuous hom from sigma-compact
-  -- complete uniform group to Baire T2 group is open.
   have hopen : @IsOpenMap _ _ τC _ (example638Plus_forwardHom B P b) :=
     @AddMonoidHom.isOpenMap_of_complete_countable
       (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b)
@@ -1081,21 +1073,16 @@ theorem example638Plus_equiv_symm_isInducing
           ↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) := by
   letI τC : TopologicalSpace (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
     quotientPlusFSubXIdealTopology B b
-  -- Bundle the forward homeomorphism.
   have h := example638Plus_isHomeomorph B P b hA_complete hnoeth hcont_forward
     hBaire hSigma
   let H : (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) ≃ₜ
       presheafValue (trivialPlusDatum B P b) :=
     h.homeomorph (example638Plus_forwardHom B P b)
-  -- The equiv's inverse pointwise equals `H.symm`. Both invert `H`.
   have h_eq : (((example638Plus_equiv B P b hA_complete hnoeth hcont_forward).symm) :
         presheafValue _ → _) = (H.symm : presheafValue _ → _) := by
     funext y
     apply H.injective
     rw [Homeomorph.apply_symm_apply]
-    -- Goal: `H ((forward equiv).symm y) = y`. `H` underlying is
-    -- `example638Plus_forwardHom`, and `(forward equiv).symm y` coerces to
-    -- `example638Plus_backwardHom y`. The equality is `right_inv`.
     change example638Plus_forwardHom B P b _ = y
     exact (example638Plus_equiv B P b hA_complete hnoeth hcont_forward).right_inv y
   rw [h_eq]
