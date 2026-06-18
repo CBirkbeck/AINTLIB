@@ -78,7 +78,7 @@ theorem le_ordAtInfty_aeval {g : C.FunctionField} {M : ℤ}
   have hg_ne : g ≠ 0 :=
     (C.ordAtInfty_eq_top_iff g).not.mp (ne_of_eq_of_ne hg WithTop.coe_ne_top)
   rw [Polynomial.aeval_eq_sum_range]
-  refine le_ordAtInfty_sum _ _ (fun i hi => ?_)
+  refine le_ordAtInfty_sum _ _ (fun i hi ↦ ?_)
   rcases eq_or_ne (p.coeff i) 0 with hc | hc
   · rw [hc, zero_smul, C.ordAtInfty_zero]
     exact le_top
@@ -536,7 +536,7 @@ residual of `IsogenyAG.lean`. No separability hypothesis: the inseparable case
 and all bounds are one-sided). -/
 theorem mulByIntBasepoint_holds (W : Affine F) [W.IsElliptic] {n : ℤ}
     (hn : n ≠ 0) : MulByIntBasepoint W hn :=
-  fun f hf => mulByInt_pullbackAlgHom_ordAtInfty_nonneg (W := W) n hn f hf
+  fun f hf ↦ mulByInt_pullbackAlgHom_ordAtInfty_nonneg (W := W) n hn f hf
 
 /-- **`[n]` as an `EC.Isogeny`, witness-free** (Silverman III.4): the
 basepoint condition is now a theorem (`mulByIntBasepoint_holds`), so the
