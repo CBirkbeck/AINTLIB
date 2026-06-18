@@ -62,8 +62,6 @@ namespace ValuationSpectrum
 variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
   [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A]
 
-/-! ### Closedness at the completion level -/
-
 omit [PlusSubring A] [HasLocLiftPowerBounded A] in
 /-- **Closedness of ideals in `presheafValue_ringOfDef D₀` (subspace topology).**
 
@@ -126,14 +124,11 @@ theorem Ideal.isClosed_in_presheafValue_of_ringOfDef_ideal
       (J : Set (presheafValue_ringOfDef D₀)) := by
     ext ⟨x, hx⟩
     simp only [Set.mem_preimage, Set.mem_image, Subring.coe_subtype, SetLike.mem_coe]
-    refine ⟨fun ⟨y, hy, hyx⟩ => ?_, fun h => ⟨⟨x, hx⟩, h, rfl⟩⟩
-    have : y = ⟨x, hx⟩ := Subtype.ext hyx
-    exact this ▸ hy
+    exact ⟨fun ⟨y, hy, hyx⟩ ↦ (Subtype.ext hyx : y = ⟨x, hx⟩) ▸ hy,
+      fun h ↦ ⟨⟨x, hx⟩, h, rfl⟩⟩
   refine Ideal.isClosed_in_presheafValue_of_isClosed_in_ringOfDef D₀ ?_ ?_
   · rintro _ ⟨x, _, rfl⟩; exact x.property
-  · rw [heq]; exact hJ_closed
-
-/-! ### Preimage descent to `Localization.Away` -/
+  · rwa [heq]
 
 omit [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A] in
 /-- **Preimage descent**: a closed subset of `presheafValue D₀` pulls back to
@@ -148,10 +143,7 @@ theorem IsClosed.preimage_coeRingHom
   letI : UniformSpace (Localization.Away D₀.s) := D₀.uniformSpace
   haveI : IsTopologicalRing (Localization.Away D₀.s) := D₀.isTopologicalRing
   haveI : IsUniformAddGroup (Localization.Away D₀.s) := D₀.isUniformAddGroup
-  have hcont : Continuous
-      (D₀.coeRingHom : Localization.Away D₀.s → presheafValue D₀) :=
-    UniformSpace.Completion.continuous_coeRingHom
-  exact hC.preimage hcont
+  exact hC.preimage UniformSpace.Completion.continuous_coeRingHom
 
 /-! ### T-COMP-FF scaffold: identify `presheafValue_ringOfDef D` with
 `AdicCompletion (locIdeal) (locSubring)`
@@ -182,22 +174,15 @@ of `locSubring` in the completion. -/
 theorem completedLocSubring_eq_ringOfDef_subring (D : RationalLocData A) :
     D.completedLocSubring = presheafValue_ringOfDef D := by
   refine SetLike.ext' ?_
-  -- Both are `topologicalClosure` of the same underlying set:
-  -- `D.coeRingHom '' (locSubring : Set _)` (as a Subring of presheafValue D).
   unfold RationalLocData.completedLocSubring presheafValue_ringOfDef
   have h_sub_eq : (Subring.map D.coeRingHom (locSubring D.P D.T D.s) :
       Set (presheafValue D)) =
     ((D.coeRingHom.comp (locSubring D.P D.T D.s).subtype).range :
       Set (presheafValue D)) := by
     ext y
-    simp only [Subring.coe_map, RingHom.coe_range, Set.mem_image,
-      RingHom.comp_apply, Set.mem_range]
-    refine ⟨?_, ?_⟩
-    · rintro ⟨x, hx, rfl⟩; exact ⟨⟨x, hx⟩, rfl⟩
-    · rintro ⟨⟨x, hx⟩, rfl⟩; exact ⟨x, hx, rfl⟩
-  apply Set.eq_of_subset_of_subset
-  · exact closure_mono h_sub_eq.le
-  · exact closure_mono h_sub_eq.ge
+    simp only [Subring.coe_map, RingHom.coe_range, Set.mem_image, Set.mem_range]
+    exact ⟨fun ⟨x, hx, h⟩ ↦ ⟨⟨x, hx⟩, h⟩, fun ⟨⟨x, hx⟩, h⟩ ↦ ⟨x, hx, h⟩⟩
+  exact Set.Subset.antisymm (closure_mono h_sub_eq.le) (closure_mono h_sub_eq.ge)
 
 omit [HasLocLiftPowerBounded A] in
 /-- **Ring iso `D.completedLocSubring ≃+* presheafValue_ringOfDef D`** via
@@ -315,16 +300,6 @@ theorem locSubringToRingOfDef_val_eq_symm_comp_of (D : RationalLocData A)
       ((presheafValue_ringOfDef_ringEquiv_adicCompletion D).symm
         (AdicCompletion.of (locIdeal D.P D.T D.s) (locSubring D.P D.T D.s) r) :
           presheafValue D) := by
-  -- The proof chains through the three bridges forming the iso:
-  --   e3 = locSubringCompletionEquivAdicCompletion  :  Completion ≃+* AdicCompletion
-  --   e2 = (completionLocSubringEquiv).symm         :  completedLocSubring ≃+* Completion
-  --   e1 = (completedLocSubring_ringEquiv_ringOfDef).symm : ringOfDef ≃+* completedLocSubring
-  -- Then `iso.symm y = e1.symm (e2.symm (e3.symm y))`, so applied to
-  -- `y = AdicCompletion.of _ _ r`, the RHS becomes
-  --   completedLocSubring_ringEquiv_ringOfDef (completionLocSubringEquiv (e3.symm y)).
-  -- We use the defining coe properties of each bridge at the dense point ↑r.
-  -- Set up uniform/topological structure on `Localization.Away D.s` and
-  -- `locSubring` (matching the setup in `CompletionLocalization.BridgeMap`).
   letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
   haveI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
   haveI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
@@ -332,23 +307,15 @@ theorem locSubringToRingOfDef_val_eq_symm_comp_of (D : RationalLocData A)
     CompletionLocalization.locSubringUniformSpace D
   have hadic : IsAdic (locIdeal D.P D.T D.s) :=
     locSubring_topology_eq_adic D.P D.T D.s D.hopen
-  -- Step 1. `e3.symm (AdicCompletion.of _ _ r) = ↑r` via `adicCompletionRingEquiv_coe`.
   have h1 : (CompletionLocalization.locSubringCompletionEquivAdicCompletion D).symm
       (AdicCompletion.of (locIdeal D.P D.T D.s) (locSubring D.P D.T D.s) r) =
       (r : UniformSpace.Completion (locSubring D.P D.T D.s)) := by
     rw [RingEquiv.symm_apply_eq]
     exact (AdicCompletionBridge.adicCompletionRingEquiv_coe
       (locIdeal D.P D.T D.s) hadic r).symm
-  -- Step 2. `(completionLocSubringEquiv D) (↑r) = D.locSubringToCompleted r`
-  -- via `completionRingEquiv_coe`. Unfold `completionLocSubringEquiv` to
-  -- `completionRingEquiv`, then apply the coe lemma.
   have h2 : (CompletionLocalization.completionLocSubringEquiv D)
       (r : UniformSpace.Completion (locSubring D.P D.T D.s)) =
       D.locSubringToCompleted r := by
-    -- `completionLocSubringEquiv D` is *defined* as
-    -- `AdicCompletionBridge.completionRingEquiv D.locSubringToCompleted hcont hui hdense`
-    -- (inside a `by` block); expose the structure via an explicit
-    -- `DFunLike.coe` rewrite through `completionRingEquiv_coe`.
     have hcont : Continuous D.locSubringToCompleted :=
       Continuous.subtype_mk
         (CompletionLocalization.locSubringToPresheafValue_continuous D) _
@@ -374,14 +341,10 @@ theorem locSubringToRingOfDef_val_eq_symm_comp_of (D : RationalLocData A)
         hVU hyV, ⟨⟨z, hz⟩, rfl⟩⟩
     change AdicCompletionBridge.completionRingEquiv _ hcont hui hdense (↑r) = _
     exact AdicCompletionBridge.completionRingEquiv_coe _ hcont hui hdense r
-  -- Unfold the iso.symm composition step by step.
   change ((locSubringToRingOfDef D r) : presheafValue D) = _
   unfold presheafValue_ringOfDef_ringEquiv_adicCompletion
   rw [RingEquiv.symm_trans_apply, RingEquiv.symm_trans_apply,
       RingEquiv.symm_symm, RingEquiv.symm_symm, h1, h2]
-  -- Remaining: `(locSubringToRingOfDef D r).val =
-  --   ((completedLocSubring_ringEquiv_ringOfDef D) (D.locSubringToCompleted r)).val`.
-  -- Both unfold to `D.coeRingHom r.val`.
   rfl
 
 omit [PlusSubring A] [HasLocLiftPowerBounded A] in
@@ -410,35 +373,21 @@ theorem locSubringToRingOfDef_faithfullyFlat_of_residual
     (h_stacks00MA_instance : Module.FaithfullyFlat (locSubring D.P D.T D.s)
       (AdicCompletion (locIdeal D.P D.T D.s) (locSubring D.P D.T D.s))) :
     RingHom.FaithfullyFlat (locSubringToRingOfDef D) := by
-  -- Step 1. Convert to `RingHom.FaithfullyFlat` of `algebraMap = AdicCompletion.of`.
   have h_adic_of_ff : RingHom.FaithfullyFlat
       (algebraMap (locSubring D.P D.T D.s)
         (AdicCompletion (locIdeal D.P D.T D.s) (locSubring D.P D.T D.s))) :=
-    (RingHom.faithfullyFlat_algebraMap_iff).mpr h_stacks00MA_instance
-  -- Step 2. RingEquiv bijective ⟹ its underlying ring-hom is FaithfullyFlat.
+    RingHom.faithfullyFlat_algebraMap_iff.mpr h_stacks00MA_instance
   have h_iso_ff : RingHom.FaithfullyFlat
       ((presheafValue_ringOfDef_ringEquiv_adicCompletion D).symm.toRingHom) :=
     RingHom.FaithfullyFlat.of_bijective
       (presheafValue_ringOfDef_ringEquiv_adicCompletion D).symm.bijective
-  -- Step 3. Composition of FaithfullyFlat ring-homs is FaithfullyFlat.
-  have h_comp_ff : RingHom.FaithfullyFlat
-      (((presheafValue_ringOfDef_ringEquiv_adicCompletion D).symm.toRingHom).comp
-        (algebraMap (locSubring D.P D.T D.s)
-          (AdicCompletion (locIdeal D.P D.T D.s) (locSubring D.P D.T D.s)))) :=
-    RingHom.FaithfullyFlat.stableUnderComposition _ _ h_adic_of_ff h_iso_ff
-  -- Step 4. The composite equals `locSubringToRingOfDef D` by the
-  -- commutativity residual `locSubringToRingOfDef_val_eq_symm_comp_of`.
   have h_eq : locSubringToRingOfDef D =
       ((presheafValue_ringOfDef_ringEquiv_adicCompletion D).symm.toRingHom).comp
         (algebraMap (locSubring D.P D.T D.s)
-          (AdicCompletion (locIdeal D.P D.T D.s) (locSubring D.P D.T D.s))) := by
-    refine RingHom.ext fun r => ?_
-    apply Subtype.ext
-    -- `algebraMap` to `AdicCompletion` is `AdicCompletion.of` (Mathlib's
-    -- canonical `Algebra` instance on `AdicCompletion`), so this matches
-    -- the commutativity residual's statement exactly.
-    exact locSubringToRingOfDef_val_eq_symm_comp_of D r
-  rw [h_eq]; exact h_comp_ff
+          (AdicCompletion (locIdeal D.P D.T D.s) (locSubring D.P D.T D.s))) :=
+    RingHom.ext fun r ↦ Subtype.ext (locSubringToRingOfDef_val_eq_symm_comp_of D r)
+  rw [h_eq]
+  exact RingHom.FaithfullyFlat.stableUnderComposition _ _ h_adic_of_ff h_iso_ff
 
 omit [PlusSubring A] [HasLocLiftPowerBounded A] in
 /-- **T-COMP-FF via Jacobson hypothesis** (cleaner entry-point composition).
