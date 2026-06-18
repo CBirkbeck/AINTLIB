@@ -800,6 +800,99 @@ theorem weierstrass_relation_coordFun :
   simp only [map_add, map_mul, map_pow, hX, hC] at hsq
   linear_combination hsq
 
+set_option maxHeartbeats 800000 in
+/-- The `v`-valuation of `coordXFun C₁` is nonzero (it is a nonzero field element). -/
+theorem valuation_coordXFun_ne_zero
+    (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂))) :
+    v.valuation C₁.FunctionField (coordXFun C₁) ≠ 0 := by
+  have hne : coordXFun C₁ ≠ 0 := by rw [coordXFun_eq_coordX]; exact C₁.coordX_ne_zero
+  rw [Ne, Valuation.zero_iff]; exact hne
+
+set_option maxHeartbeats 800000 in
+/-- `w_v(a₁·x₁ + a₃) ≤ w_v(x₁)` when `1 < w_v(x₁)` (the linear Weierstrass coefficient is dominated
+by `x₁`, since the constants are `v`-units `≤ 1 < w_v(x₁)`). -/
+theorem valuation_a₁X_add_a₃_le
+    (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)))
+    (hx : 1 < v.valuation C₁.FunctionField (coordXFun C₁)) :
+    v.valuation C₁.FunctionField
+        (algebraMap F C₁.FunctionField C₁.toAffine.a₁ * coordXFun C₁ +
+          algebraMap F C₁.FunctionField C₁.toAffine.a₃) ≤
+      v.valuation C₁.FunctionField (coordXFun C₁) := by
+  set w := v.valuation C₁.FunctionField with hw
+  have ha₁x : w (algebraMap F C₁.FunctionField C₁.toAffine.a₁ * coordXFun C₁) ≤
+      w (coordXFun C₁) := by
+    rw [w.map_mul]
+    rcases eq_or_ne C₁.toAffine.a₁ 0 with h0 | h0
+    · rw [h0, map_zero (algebraMap F C₁.FunctionField), w.map_zero, zero_mul]; exact zero_le'
+    · rw [valuation_algebraMap_F_eq_one v h0, one_mul]
+  have ha₃ : w (algebraMap F C₁.FunctionField C₁.toAffine.a₃) ≤ w (coordXFun C₁) := by
+    rcases eq_or_ne C₁.toAffine.a₃ 0 with h0 | h0
+    · rw [h0, map_zero (algebraMap F C₁.FunctionField), w.map_zero]; exact zero_le'
+    · rw [valuation_algebraMap_F_eq_one v h0]; exact le_of_lt hx
+  exact le_trans (w.map_add _ _) (max_le ha₁x ha₃)
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 400000 in
+/-- **Generic ultrametric monomial bound** (instance-light): if a valuation `w` on `K(C₁)` is `≤ 1`
+on the `F`-constant `algebraMap_F c` (`hc`) and `m ≤ X := w t`, then `w (algebraMap_F c * t^k) ≤ X^k`
+... specialised below.  Stated as a free lemma over an *arbitrary* valuation `w` and element `t` to
+keep the heavy `B`-instance `v.valuation` out of the unifier during the power arithmetic. -/
+theorem valuation_const_mul_pow_le {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀]
+    (w : Valuation C₁.FunctionField Γ₀) (t : C₁.FunctionField) (h1 : 1 ≤ w t)
+    (hc : ∀ c : F, w (algebraMap F C₁.FunctionField c) ≤ 1) (c : F) {k : ℕ} (hk : k ≤ 3) :
+    w (algebraMap F C₁.FunctionField c * t ^ k) ≤ w t ^ 3 := by
+  rw [w.map_mul, map_pow]
+  calc w (algebraMap F C₁.FunctionField c) * w t ^ k
+      ≤ 1 * w t ^ k := mul_le_mul_right' (hc c) _
+    _ = w t ^ k := one_mul _
+    _ ≤ w t ^ 3 := pow_le_pow_right₀ h1 hk
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 400000 in
+/-- **Generic ultrametric Weierstrass-cubic bound** (instance-light): for an arbitrary valuation `w`
+that is `≤ 1` on `F`-constants and has `1 ≤ w t`, the value of the Weierstrass cubic in `t` is
+`≤ (w t)^3`. -/
+theorem valuation_weierstrassCubic_le_generic {Γ₀ : Type*}
+    [LinearOrderedCommGroupWithZero Γ₀]
+    (w : Valuation C₁.FunctionField Γ₀) (t : C₁.FunctionField) (h1 : 1 ≤ w t)
+    (hc : ∀ c : F, w (algebraMap F C₁.FunctionField c) ≤ 1) :
+    w (t ^ 3 + algebraMap F C₁.FunctionField C₁.toAffine.a₂ * t ^ 2 +
+        algebraMap F C₁.FunctionField C₁.toAffine.a₄ * t +
+        algebraMap F C₁.FunctionField C₁.toAffine.a₆) ≤ w t ^ 3 := by
+  have hx3 : w (t ^ 3) ≤ w t ^ 3 := le_of_eq (map_pow _ _ _)
+  have ha₂ : w (algebraMap F C₁.FunctionField C₁.toAffine.a₂ * t ^ 2) ≤ w t ^ 3 :=
+    valuation_const_mul_pow_le w t h1 hc _ (by norm_num)
+  have ha₄ : w (algebraMap F C₁.FunctionField C₁.toAffine.a₄ * t) ≤ w t ^ 3 := by
+    have := valuation_const_mul_pow_le w t h1 hc C₁.toAffine.a₄ (k := 1) (by norm_num)
+    rwa [pow_one] at this
+  have ha₆ : w (algebraMap F C₁.FunctionField C₁.toAffine.a₆) ≤ w t ^ 3 :=
+    le_trans (hc _) (one_le_pow₀ h1)
+  have hstep1 : w (t ^ 3 + algebraMap F C₁.FunctionField C₁.toAffine.a₂ * t ^ 2) ≤ w t ^ 3 :=
+    le_trans (w.map_add _ _) (max_le hx3 ha₂)
+  have hstep2 : w (t ^ 3 + algebraMap F C₁.FunctionField C₁.toAffine.a₂ * t ^ 2 +
+        algebraMap F C₁.FunctionField C₁.toAffine.a₄ * t) ≤ w t ^ 3 :=
+    le_trans (w.map_add _ _) (max_le hstep1 ha₄)
+  exact le_trans (w.map_add _ _) (max_le hstep2 ha₆)
+
+set_option maxHeartbeats 1600000 in
+/-- `w_v(x₁³ + a₂x₁² + a₄x₁ + a₆) ≤ w_v(x₁)³` when `1 < w_v(x₁)`: the `B`-prime specialisation of
+`valuation_weierstrassCubic_le_generic`. -/
+theorem valuation_weierstrassCubic_le
+    (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)))
+    (hx : 1 < v.valuation C₁.FunctionField (coordXFun C₁)) :
+    v.valuation C₁.FunctionField
+        (coordXFun C₁ ^ 3 +
+          algebraMap F C₁.FunctionField C₁.toAffine.a₂ * coordXFun C₁ ^ 2 +
+          algebraMap F C₁.FunctionField C₁.toAffine.a₄ * coordXFun C₁ +
+          algebraMap F C₁.FunctionField C₁.toAffine.a₆) ≤
+      v.valuation C₁.FunctionField (coordXFun C₁) ^ 3 :=
+  valuation_weierstrassCubic_le_generic (v.valuation C₁.FunctionField) (coordXFun C₁)
+    (le_of_lt hx) (fun c => by
+      rcases eq_or_ne c 0 with h0 | h0
+      · rw [h0, map_zero (algebraMap F C₁.FunctionField), (v.valuation C₁.FunctionField).map_zero]
+        exact zero_le'
+      · exact le_of_eq (valuation_algebraMap_F_eq_one v h0))
+
 /-! ### The minimal-polynomial reduction (non-circular, place-dictionary-free)
 
 The whole content of `coordXFun_mem_B` / `coordYFun_mem_B` (and hence `coordRing_mem_B`) reduces —
