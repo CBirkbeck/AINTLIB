@@ -49,7 +49,7 @@ variable {A : Type u} [CommRing A] [TopologicalSpace A] [NonarchimedeanRing A]
 module-valued analogue of `MvPowerSeries.IsRestricted`. -/
 def MvPowerSeries.IsRestrictedModule {M : Type*} [Zero M] [TopologicalSpace M]
     (f : MvPowerSeries (Fin 1) M) : Prop :=
-  Tendsto (fun s : Fin 1 →₀ ℕ => f s) cofinite (nhds 0)
+  Tendsto (fun s : Fin 1 →₀ ℕ ↦ f s) cofinite (nhds 0)
 
 /-- The submodule `M⟨X⟩` of restricted `M`-valued power series over a nonarchimedean ring `A`.
 An element of `MvPowerSeries (Fin 1) M` is restricted if its coefficients tend to `0`
@@ -62,14 +62,14 @@ def restrictedModule (A : Type u) [CommRing A] [TopologicalSpace A] [Nonarchimed
   zero_mem' := tendsto_const_nhds
   add_mem' {f g} hf hg := by
     change Tendsto _ cofinite (nhds 0)
-    have : Tendsto (fun s => f s + g s) cofinite (nhds 0) := by
+    have : Tendsto (fun s ↦ f s + g s) cofinite (nhds 0) := by
       rw [show (0 : M) = 0 + 0 from (add_zero 0).symm]; exact hf.add hg
-    exact this.congr (fun s => (Pi.add_apply f g s).symm)
+    exact this.congr (fun s ↦ (Pi.add_apply f g s).symm)
   smul_mem' a f hf := by
     change Tendsto _ cofinite (nhds 0)
-    have : Tendsto (fun s => a • f s) cofinite (nhds 0) := by
+    have : Tendsto (fun s ↦ a • f s) cofinite (nhds 0) := by
       rw [show (0 : M) = a • (0 : M) from (smul_zero a).symm]; exact hf.const_smul a
-    exact this.congr (fun s => (Pi.smul_apply a f s).symm)
+    exact this.congr (fun s ↦ (Pi.smul_apply a f s).symm)
 
 /-! ### Induced map on restricted modules -/
 
@@ -82,8 +82,8 @@ def restrictedModule.map
     [IsTopologicalAddGroup N] [ContinuousConstSMul A N]
     (f : M →ₗ[A] N) (hf_cont : Continuous f) :
     restrictedModule A M →ₗ[A] restrictedModule A N where
-  toFun g := ⟨fun s => f (g.1 s), by
-    change Tendsto (fun s => f (g.1 s)) cofinite (nhds 0)
+  toFun g := ⟨fun s ↦ f (g.1 s), by
+    change Tendsto (fun s ↦ f (g.1 s)) cofinite (nhds 0)
     rw [show (0 : N) = f 0 from (map_zero f).symm]
     exact (hf_cont.tendsto 0).comp g.2⟩
   map_add' g₁ g₂ := by
@@ -119,16 +119,16 @@ private theorem eq_zero_of_mem_image_all
     {N : Type*} [AddCommGroup N] [TopologicalSpace N] [T2Space N]
     (f : M →+ N) (hf_cont : Continuous f)
     (W : ℕ → OpenAddSubgroup M)
-    (hW : (nhds (0 : M)).HasAntitoneBasis (fun n => (W n : Set M)))
+    (hW : (nhds (0 : M)).HasAntitoneBasis (fun n ↦ (W n : Set M)))
     (b : N) (hb : ∀ n, b ∈ f '' (W n : Set M)) : b = 0 := by
   choose m hm_mem hm_eq using hb
   have hm_tend : Tendsto m atTop (nhds (0 : M)) :=
-    hW.1.tendsto_right_iff.mpr fun n _ =>
-      eventually_atTop.mpr ⟨n, fun k hk => hW.2 hk (hm_mem k)⟩
-  have : Tendsto (fun _ : ℕ => b) atTop (nhds (0 : N)) := by
+    hW.1.tendsto_right_iff.mpr fun n _ ↦
+      eventually_atTop.mpr ⟨n, fun k hk ↦ hW.2 hk (hm_mem k)⟩
+  have : Tendsto (fun _ : ℕ ↦ b) atTop (nhds (0 : N)) := by
     have hfc : Tendsto (f ∘ m) atTop (nhds (f 0)) := (hf_cont.tendsto 0).comp hm_tend
     rw [map_zero] at hfc
-    exact hfc.congr (fun n => by simp only [Function.comp_apply]; exact hm_eq n)
+    exact hfc.congr (fun n ↦ by simp only [Function.comp_apply]; exact hm_eq n)
   exact tendsto_const_nhds_iff.mp this
 
 /-- **Surjection lifting for restricted modules.** If `f : M →ₗ[A] N` is surjective,
@@ -159,12 +159,12 @@ theorem restrictedModule_map_surjective
     obtain ⟨h, hfh, hh⟩ := this
     exact ⟨⟨h, hh⟩, by apply Subtype.ext; funext s; exact hfh s⟩
   -- Step 1: Obtain an antitone basis of open additive subgroups of M.
-  obtain ⟨W, _, hW⟩ := (Filter.HasBasis.mk (fun U => ⟨fun hU =>
+  obtain ⟨W, _, hW⟩ := (Filter.HasBasis.mk (fun U ↦ ⟨fun hU ↦
     let ⟨V, hV⟩ := NonarchimedeanAddGroup.is_nonarchimedean U hU
-    ⟨V, trivial, hV⟩, fun ⟨V, _, hV⟩ =>
+    ⟨V, trivial, hV⟩, fun ⟨V, _, hV⟩ ↦
     mem_nhds_iff.mpr ⟨(V : Set M), hV, V.isOpen, V.zero_mem⟩⟩) :
-    (nhds (0 : M)).HasBasis (fun _ : OpenAddSubgroup M => True)
-      (fun V => (V : Set M))).exists_antitone_subbasis
+    (nhds (0 : M)).HasBasis (fun _ : OpenAddSubgroup M ↦ True)
+      (fun V ↦ (V : Set M))).exists_antitone_subbasis
   -- Step 2: Sₙ = {s | g s ∉ f(Wₙ)} is finite for each n.
   have hS_fin : ∀ n, {s : Fin 1 →₀ ℕ | g s ∉ f '' (W n : Set M)}.Finite := by
     intro n
@@ -172,15 +172,15 @@ theorem restrictedModule_map_surjective
       ⟨0, (W n).zero_mem, map_zero f⟩))
   -- Step 3: g s ∈ f(Wₙ) for all n implies g s = 0 (Hausdorff argument).
   have hzero : ∀ s, (∀ n, g s ∈ f '' (W n : Set M)) → g s = 0 :=
-    fun s hs => eq_zero_of_mem_image_all f.toAddMonoidHom hf_cont W hW (g s) hs
+    fun s hs ↦ eq_zero_of_mem_image_all f.toAddMonoidHom hf_cont W hW (g s) hs
   -- Step 4: Define h by diagonal construction.
   -- For each s: if g s ∈ f(Wₙ) for all n, then g s = 0 and h s := 0.
   -- Otherwise let k(s) = min{n | g s ∉ f(Wₙ)}.
   -- If k(s) = 0, take any lift. If k(s) ≥ 1, lift in W_{k(s)-1}.
-  set h : (Fin 1 →₀ ℕ) → M := fun s =>
+  set h : (Fin 1 →₀ ℕ) → M := fun s ↦
     if hall : ∀ n, g s ∈ f '' (W n : Set M) then 0
     else by
-      push_neg at hall
+      push Not at hall
       exact if hk0 : Nat.find hall = 0 then (hf_surj (g s)).choose
         else (not_not.mp (Nat.find_min hall (Nat.sub_one_lt hk0))).choose
   -- Step 5: f(h s) = g s for all s.
@@ -189,7 +189,7 @@ theorem restrictedModule_map_surjective
     split_ifs with hall hk0
     · exact (map_zero f).trans (hzero s hall).symm
     · exact (hf_surj (g s)).choose_spec
-    · have hall' : ∃ n, g s ∉ f '' (W n : Set M) := by push_neg at hall; exact hall
+    · have hall' : ∃ n, g s ∉ f '' (W n : Set M) := by push Not at hall; exact hall
       exact (not_not.mp (Nat.find_min hall' (by omega))).choose_spec.2
   -- Step 6: h → 0 cofinitely.
   -- For each Wₙ, {s | h s ∉ Wₙ} ⊆ Sₙ = {s | g s ∉ f(Wₙ)} (finite).
@@ -209,14 +209,14 @@ theorem restrictedModule_map_surjective
     · -- g s ∈ f(Wₙ) for all n, h s = 0 ∈ Wₙ.
       exact (W n).zero_mem
     · -- k(s) = 0: g s ∉ f(W₀). Since W antitone, f(Wₙ) ⊆ f(W₀), contradiction.
-      have hall' : ∃ m, g s ∉ f '' (W m : Set M) := by push_neg at hall; exact hall
+      have hall' : ∃ m, g s ∉ f '' (W m : Set M) := by push Not at hall; exact hall
       have hspec := Nat.find_spec hall'
       rw [hk0] at hspec
       exact absurd (Set.image_mono (hW.2 (Nat.zero_le n)) hgs) hspec
     · -- k(s) ≥ 1: g s ∈ f(Wₙ) forces k(s) > n, so h s ∈ W_{k(s)-1} ⊆ Wₙ.
-      have hall' : ∃ m, g s ∉ f '' (W m : Set M) := by push_neg at hall; exact hall
+      have hall' : ∃ m, g s ∉ f '' (W m : Set M) := by push Not at hall; exact hall
       have hk_gt : n < Nat.find hall' := by
-        by_contra h_le; push_neg at h_le
+        by_contra h_le; push Not at h_le
         exact Nat.find_spec hall' (Set.image_mono (hW.2 h_le) hgs)
       exact hW.2 (by omega : n ≤ Nat.find hall' - 1)
         (not_not.mp (Nat.find_min hall' (by omega))).choose_spec.1
