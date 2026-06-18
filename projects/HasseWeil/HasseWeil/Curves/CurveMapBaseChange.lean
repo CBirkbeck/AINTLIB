@@ -351,7 +351,7 @@ diamond-affected and `inferInstance` fails. -/
 noncomputable instance (priority := 100000) tensorCoordRingFLeftScalarTower'
     (L : Type*) [Field L] [Algebra F L] :
     IsScalarTower F C.toAffine.CoordinateRing (C.toAffine.CoordinateRing ⊗[F] L) :=
-  IsScalarTower.of_algebraMap_eq fun _ => rfl
+  IsScalarTower.of_algebraMap_eq fun _ ↦ rfl
 
 /-- `CommRing` on the reversed function-field tensor `C.FF ⊗[F] L`, pinned. -/
 noncomputable instance (priority := 100000) tensorFunctionFieldCommRing'
@@ -486,7 +486,7 @@ theorem coordRingScalarExtFwd_injective (L : Type*) [Field L] [Algebra F L] :
       rfl
   have heq : (C.coordRingScalarExtFwd L).toLinearMap =
       (bLA.equiv bD (Equiv.refl _)).toLinearMap := by
-    refine bLA.ext fun ij => (hbasis ij).trans ?_
+    refine bLA.ext fun ij ↦ (hbasis ij).trans ?_
     exact (Module.Basis.equiv_apply bLA ij bD (Equiv.refl _)).symm
   rw [show ⇑(C.coordRingScalarExtFwd L) =
       ⇑(C.coordRingScalarExtFwd L).toLinearMap from rfl, heq]
@@ -518,7 +518,7 @@ noncomputable def fwdPinned (L : Type*) [Field L] [Algebra F L] :
   Algebra.TensorProduct.lift
     (Algebra.ofId L (C.baseChange L).toAffine.CoordinateRing)
     ((C.coordRingAlgHom L).restrictScalars F)
-    (fun _ _ => mul_comm _ _)
+    (fun _ _ ↦ mul_comm _ _)
 
 @[simp] theorem fwdPinned_tmul (L : Type*) [Field L] [Algebra F L]
     (l : L) (u : C.toAffine.CoordinateRing) :
@@ -601,7 +601,7 @@ theorem fwdPinned_injective (L : Type*) [Field L] [Algebra F L] :
       rfl
   have heq : (C.fwdPinned L).toLinearMap =
       (bLA.equiv bD (Equiv.refl _)).toLinearMap := by
-    refine bLA.ext fun ij => (hbasis ij).trans ?_
+    refine bLA.ext fun ij ↦ (hbasis ij).trans ?_
     exact (Module.Basis.equiv_apply bLA ij bD (Equiv.refl _)).symm
   rw [show ⇑(C.fwdPinned L) =
       ⇑(C.fwdPinned L).toLinearMap from rfl, heq]
@@ -723,7 +723,7 @@ theorem tensor_functionField_isField (L : Type*) [Field L] [Algebra F L]
         (AlgHom.id F L)).toRingHom := rfl
   haveI tower : IsScalarTower C.toAffine.CoordinateRing (C.toAffine.CoordinateRing ⊗[F] L)
       (C.toAffine.FunctionField ⊗[F] L) :=
-    IsScalarTower.of_algebraMap_eq fun _ => by
+    IsScalarTower.of_algebraMap_eq fun _ ↦ by
       rw [halgmap]
       rfl
   haveI hloc : IsLocalization
@@ -779,7 +779,7 @@ theorem tensor_functionField_surj (L : Type*) [Field L] [Algebra F L] :
   have halg : ∀ (l : L) (u : C.toAffine.CoordinateRing),
       algebraMap (L ⊗[F] C.toAffine.CoordinateRing) (L ⊗[F] C.toAffine.FunctionField) (l ⊗ₜ u)
         = l ⊗ₜ algebraMap C.toAffine.CoordinateRing C.toAffine.FunctionField u :=
-    fun l u => rfl
+    fun l u ↦ rfl
   have hden : ∀ (b : C.toAffine.CoordinateRing), b ∈ nonZeroDivisors C.toAffine.CoordinateRing →
       (1 ⊗ₜ b : L ⊗[F] C.toAffine.CoordinateRing)
         ∈ nonZeroDivisors (L ⊗[F] C.toAffine.CoordinateRing) := by
@@ -791,9 +791,9 @@ theorem tensor_functionField_surj (L : Type*) [Field L] [Algebra F L] :
       Module.Flat.rTensor_preserves_injective_linearMap (M := C.toAffine.CoordinateRing)
         (Algebra.linearMap F L) (RingHom.injective (algebraMap F L))
     have hinj : Function.Injective
-        (fun c : C.toAffine.CoordinateRing => (1 ⊗ₜ c : L ⊗[F] C.toAffine.CoordinateRing)) := by
+        (fun c : C.toAffine.CoordinateRing ↦ (1 ⊗ₜ c : L ⊗[F] C.toAffine.CoordinateRing)) := by
       have hcomp := hrt.comp (TensorProduct.lid F C.toAffine.CoordinateRing).symm.injective
-      have heq : (fun c : C.toAffine.CoordinateRing => (1 ⊗ₜ c : L ⊗[F] C.toAffine.CoordinateRing))
+      have heq : (fun c : C.toAffine.CoordinateRing ↦ (1 ⊗ₜ c : L ⊗[F] C.toAffine.CoordinateRing))
           = (LinearMap.rTensor C.toAffine.CoordinateRing (Algebra.linearMap F L))
               ∘ (TensorProduct.lid F C.toAffine.CoordinateRing).symm := by
         funext c
@@ -803,7 +803,7 @@ theorem tensor_functionField_surj (L : Type*) [Field L] [Algebra F L] :
       exact hcomp
     intro hc
     exact hb0 (hinj (hc.trans (TensorProduct.tmul_zero _ _).symm))
-  refine fun z => ?_
+  refine fun z ↦ ?_
   induction z using TensorProduct.induction_on with
   | zero =>
       exact ⟨(0, 1), by rw [zero_mul, map_zero]⟩
@@ -837,7 +837,7 @@ theorem tensor_functionField_isFractionRing (L : Type*) [Field L] [Algebra F L]
     C.tensorFunctionFieldStructureHom_injective L
   have hfield : IsField (L ⊗[F] C.toAffine.FunctionField) := C.tensor_functionField_isField L
   rw [IsFractionRing, isLocalization_iff]
-  refine ⟨fun y => ?_, C.tensor_functionField_surj L, fun {x y} h => ⟨1, by rw [hinj h]⟩⟩
+  refine ⟨fun y ↦ ?_, C.tensor_functionField_surj L, fun {x y} h ↦ ⟨1, by rw [hinj h]⟩⟩
   have hy : algebraMap (L ⊗[F] C.toAffine.CoordinateRing)
       (L ⊗[F] C.toAffine.FunctionField) y.1 ≠ 0 := by
     intro hc
@@ -859,7 +859,7 @@ noncomputable def functionField_tensor_locBaseChange (L : Type*) [Field L] [Alge
   letI := C.tensor_functionField_isFractionRing L
   haveI : IsScalarTower L (L ⊗[F] C.toAffine.CoordinateRing)
       (L ⊗[F] C.toAffine.FunctionField) :=
-    IsScalarTower.of_algebraMap_eq fun l =>
+    IsScalarTower.of_algebraMap_eq fun l ↦
       ((C.tensorFunctionFieldStructureHom L).commutes l).symm
   (IsLocalization.algEquiv (nonZeroDivisors (L ⊗[F] C.toAffine.CoordinateRing))
     (L ⊗[F] C.toAffine.FunctionField)
