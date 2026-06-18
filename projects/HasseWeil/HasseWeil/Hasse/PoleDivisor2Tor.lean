@@ -70,7 +70,7 @@ private lemma pi_x_gen_ne_zero_aux :
   exact pow_ne_zero _ (x_gen_ne_zero W)
 
 private lemma pi_y_gen_ne_zero_aux (hq : 2 ≤ Fintype.card K) :
-    (negFrobeniusIsog W).pullback (y_gen W) ≠ 0 := fun h_zero => by
+    (negFrobeniusIsog W).pullback (y_gen W) ≠ 0 := fun h_zero ↦ by
   have h_top : (W_smooth W).ordAtInfty ((negFrobeniusIsog W).pullback (y_gen W)) = ⊤ := by
     rw [h_zero]; exact (W_smooth W).ordAtInfty_zero
   rw [ordAtInfty_negFrobeniusIsog_pullback_y_gen W hq] at h_top
@@ -214,12 +214,12 @@ theorem ord_P_translateSlope_xy_eq_neg_one_at_2tor (xk yk : K)
     rw [hBma_def]; exact ord_P_B_minus_a1_yk_eq_zero_at_2tor W xk yk h_ns h_2_tor
   have h_x_ne : x_gen W - algebraMap K KE xk ≠ 0 :=
     x_gen_sub_const_ne_zero W xk
-  have h_Bma_ne : Bma ≠ 0 := fun h_zero => by
+  have h_Bma_ne : Bma ≠ 0 := fun h_zero ↦ by
     have h_top : (W_smooth W).ord_P P Bma = ⊤ :=
       (SmoothPlaneCurve.ord_P_eq_top_iff _).mpr h_zero
     rw [h_Bma_ord] at h_top
     simp at h_top
-  have h_A_ne : A ≠ 0 := fun h_zero => by
+  have h_A_ne : A ≠ 0 := fun h_zero ↦ by
     have h_top : (W_smooth W).ord_P P A = ⊤ :=
       (SmoothPlaneCurve.ord_P_eq_top_iff _).mpr h_zero
     rw [h_A_ord] at h_top
@@ -253,7 +253,7 @@ theorem ord_P_translateX_xy_eq_neg_two_at_2tor (xk yk : K)
   set sq2 : KE := s * s with hsq_def
   have h_s_ord : (W_smooth W).ord_P P s = ((-1 : ℤ) : WithTop ℤ) :=
     ord_P_translateSlope_xy_eq_neg_one_at_2tor W xk yk h_ns h_2_tor
-  have h_s_ne : s ≠ 0 := fun h_zero => by
+  have h_s_ne : s ≠ 0 := fun h_zero ↦ by
     have h_top : (W_smooth W).ord_P P s = ⊤ := by
       rw [h_zero]; exact SmoothPlaneCurve.ord_P_zero
     rw [h_s_ord] at h_top
@@ -1281,7 +1281,7 @@ theorem bridge_at_negFrobeniusIsog_pullback_y_gen_of_2_tor (xT yT : K)
       rw [h_a1_zero, zero_mul, neg_zero, zero_add]
       exact h_neg_a3_bridge
     · have h_a1_ne : algebraMap K W.toAffine.FunctionField W.toAffine.a₁ ≠ 0 :=
-        fun h => ha1 (FaithfulSMul.algebraMap_injective K
+        fun h ↦ ha1 (FaithfulSMul.algebraMap_injective K
           W.toAffine.FunctionField (h.trans (map_zero _).symm))
       have h_mul_eq : (W_smooth W).ordAtInfty
           (algebraMap K W.toAffine.FunctionField W.toAffine.a₁ *
@@ -1791,7 +1791,7 @@ theorem bridge_at_addPullback_x_negFrobenius_of_2_tor (xT yT : K)
       (((-2 - 4 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) := by
     rw [addPullbackNumerator_negFrobenius_eq_reduced]
     exact ordAtInfty_addPullbackNumerator_reduced_negFrobenius_eq W hq
-  have h_Num_ne : addPullbackNumerator_negFrobenius W ≠ 0 := fun h => by
+  have h_Num_ne : addPullbackNumerator_negFrobenius W ≠ 0 := fun h ↦ by
     have h_top : (W_smooth W).ordAtInfty
         (addPullbackNumerator_negFrobenius W) = ⊤ := by
       rw [h]; exact (W_smooth W).ordAtInfty_zero
