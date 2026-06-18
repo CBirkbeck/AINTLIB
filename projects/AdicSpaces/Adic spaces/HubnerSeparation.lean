@@ -133,18 +133,10 @@ theorem laurentCover_separation_presheaf_viaRow3_of_iInf_pow_eq_bot
     x = 0 := by
   apply LaurentCover.epsilonHom_gen_injective_of_iInf_pow_eq_bot
     (D₀.canonicalMap f) hInf
-  have h1 : (LaurentCover.epsilonHom_gen (D₀.canonicalMap f) x).1 = 0 := by
-    have h := htau_plus x
-    rw [hplus0, map_zero] at h
-    exact h.symm
-  have h2 : (LaurentCover.epsilonHom_gen (D₀.canonicalMap f) x).2 = 0 := by
-    have h := htau_minus x
-    rw [hminus0, map_zero] at h
-    exact h.symm
-  change LaurentCover.epsilonHom_gen (D₀.canonicalMap f) x =
-    LaurentCover.epsilonHom_gen (D₀.canonicalMap f) 0
   rw [map_zero]
-  exact Prod.ext h1 h2
+  refine Prod.ext ?_ ?_
+  · rw [← htau_plus x, hplus0, map_zero, Prod.fst_zero]
+  · rw [← htau_minus x, hminus0, map_zero, Prod.snd_zero]
 
 /-- **H1-Jacobson: Laurent-pair separation when `(D₀.canonicalMap f)` is
 contained in the Jacobson radical.**
@@ -234,13 +226,10 @@ theorem laurentCover_separation_presheaf_viaRow3_domain
     (x : presheafValue D₀)
     (hplus0 : restrictionMap D₀ (laurentPlusDatum D₀ f) hplus x = 0)
     (hminus0 : restrictionMap D₀ (laurentMinusDatum D₀ f) hminus x = 0) :
-    x = 0 := by
-  have hf_ne_top :
-      Ideal.span ({D₀.canonicalMap f} : Set (presheafValue D₀)) ≠ ⊤ := by
-    rwa [Ne, Ideal.span_singleton_eq_top]
-  exact laurentCover_separation_presheaf_viaRow3_of_iInf_pow_eq_bot D₀ f
-    (Ideal.iInf_pow_eq_bot_of_isDomain _ hf_ne_top) hplus hminus τ_plus τ_minus
-    htau_plus htau_minus x hplus0 hminus0
+    x = 0 :=
+  laurentCover_separation_presheaf_viaRow3_of_iInf_pow_eq_bot D₀ f
+    (Ideal.iInf_pow_eq_bot_of_isDomain _ (by rwa [Ne, Ideal.span_singleton_eq_top]))
+    hplus hminus τ_plus τ_minus htau_plus htau_minus x hplus0 hminus0
 
 /-- **Hübner simple-Laurent separation via the named Route-B bridges.**
 
