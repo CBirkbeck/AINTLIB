@@ -72,10 +72,9 @@ theorem IsTrivialValuation.vle_iff {v : Spv A} (hv : IsTrivialValuation v)
     by_contra h
     push_neg at h
     obtain ⟨ha, hb⟩ := h
-    rw [v.mem_supp_iff] at ha hb
+    rw [v.mem_supp_iff] at ha
     exact ha (ValuativeRel.vle_trans hab ((v.mem_supp_iff b).mp hb))
-  · intro h
-    rcases h with ha | hb
+  · rintro (ha | hb)
     · exact ValuativeRel.vle_trans ((v.mem_supp_iff a).mp ha) (ValuativeRel.zero_vle b)
     · by_cases ha : a ∈ v.supp
       · exact ValuativeRel.vle_trans ((v.mem_supp_iff a).mp ha) (ValuativeRel.zero_vle b)
@@ -115,10 +114,8 @@ theorem ValuationSpectrum.IsTateRing.spaIsAnalytic [IsTopologicalRing A] [PlusSu
   exact (ValuationSpectrum.IsTateRing.isAnalytic v) (by
     -- Show supp(v) is open using continuity of v and triviality
     letI : ValuativeRel A := v.toValuativeRel
-    -- v is continuous since v ∈ Spa
-    have hcont : v.IsContinuous := hv.1
-    -- Take γ = val(1); then {a | val(a) < val(1)} is open by continuity
-    have h_open := hcont ((ValuativeRel.valuation A) 1)
+    -- Take γ = val(1); then {a | val(a) < val(1)} is open by continuity (v ∈ Spa ⇒ v continuous)
+    have h_open := hv.1 ((ValuativeRel.valuation A) 1)
     -- Show {a | val(a) < val(1)} = supp(v) for a trivial valuation
     convert h_open using 1
     ext a
@@ -126,9 +123,7 @@ theorem ValuationSpectrum.IsTateRing.spaIsAnalytic [IsTopologicalRing A] [PlusSu
     constructor
     · -- a ∈ supp → val(a) < val(1)
       intro ha
-      have ha' : v.vle a 0 := (v.mem_supp_iff a).mp ha
-      have h0 : ValuativeRel.valuation A a = 0 := ValuativeRel.valuation_eq_zero_iff.mpr ha'
-      rw [h0]
+      rw [ValuativeRel.valuation_eq_zero_iff.mpr ((v.mem_supp_iff a).mp ha)]
       exact zero_lt_iff.mpr
         (ValuativeRel.valuation_posSubmonoid_ne_zero ⟨1, ValuativeRel.zero_vlt_one⟩)
     · -- val(a) < val(1) → a ∈ supp
