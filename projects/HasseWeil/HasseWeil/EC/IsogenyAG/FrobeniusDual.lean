@@ -165,7 +165,7 @@ with Frobenius *is* the multiplication-by-`q` isogeny. -/
 theorem dualFrobenius_compose_frobenius :
     (dualFrobenius W).compose (Isogeny.frobenius W) =
       Isogeny.mulByInt W (intCardK_ne_zero (K := K)) :=
-  Isogeny.ext_toCurveMap (CurveMap.ext (AlgHom.ext fun z =>
+  Isogeny.ext_toCurveMap (CurveMap.ext (AlgHom.ext fun z ↦
     frobenius_pullback_dualFrobenius_pullback W z))
 
 -- `[Fintype K]`/`[DecidableEq K]` are genuinely required: the inhabitant is the
