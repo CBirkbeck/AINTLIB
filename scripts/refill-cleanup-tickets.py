@@ -157,7 +157,10 @@ def main():
     filed = 0
     for rel, title, c in cands[:a.max]:
         body = (f"`{lib}` · {c} substantial sorry-free proof(s) in `projects/{project}/{rel}`.\n\n"
-                f"Run `/cleanup` on the whole file; skip any declaration whose proof contains a `sorry`.")
+                f"Run the **FULL `/cleanup`** skill on the whole file — the complete methodical pass "
+                f"(mathlib-style audit, best-mathlib-API check, naming conventions, dedup, simp/instance "
+                f"hygiene, **then** golf), **not just the proof-golfer agent**. Golfing is only the last step. "
+                f"Skip any declaration whose proof contains a `sorry`.")
         if a.dry_run:
             print(f"  [dry] {title}  ({c})"); filed += 1; continue
         r = subprocess.run(

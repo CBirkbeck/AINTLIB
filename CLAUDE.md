@@ -52,7 +52,7 @@ You are on a `dev/<project>` branch, editing `projects/<YourProject>/`.
 
 ## If you are a CLEANER (the fleet, on `main`)
 You are working an AINTLIB cleanup ticket.
-- Deduplicate across projects, golf, apply mathlib style, generalise, decompose long proofs, cross-link
+- Run the **complete `/cleanup`** skill, **not just golfing** — deduplicate across projects, apply mathlib style, fix naming, audit for the best mathlib API, golf, generalise, decompose long proofs, cross-link
   consumers, and repair daily-bump fallout. **Leave `sorry`s alone** — they are the owning producer's WIP,
   never fleet work (only operate on sorry-free results).
 - **Keep `main` green.** **Never** change a theorem/def statement to make something pass, and
@@ -74,7 +74,7 @@ tickets are **GitHub issues** on `CBirkbeck/AINTLIB`, labelled by lane + state. 
 - **Coordinator** — files issues (from `/overview`), runs the daily **bump**, does cross-cutting
   **renames**, **reviews + merges the `/generalise` PRs**, and reverts bad auto-merges.
 - **Lane workers** (one account each):
-  - `lane:cleanup` → `/cleanup` (golf/style) — **auto-merges on green**
+  - `lane:cleanup` → the **full `/cleanup`** skill (style audit + best-mathlib-API + naming + dedup + golf — **not just golfing**) — **auto-merges on green**
   - `lane:decompose` → `/decompose-proof` (extracts helpers; statement unchanged) — **auto-merges on green**
   - `lane:generalise` → `/generalise` (changes the statement) — **stops at `state:review`; coordinator merges**
 

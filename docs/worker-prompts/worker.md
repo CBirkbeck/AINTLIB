@@ -27,7 +27,11 @@ Loop until the queue is empty or a freeze is active:
    `gh issue edit <n> --repo CBirkbeck/AINTLIB --add-assignee @me --add-label state:in-progress --remove-label state:todo`,
    comment "claimed". If it's already assigned, re-query (another worker beat you).
 3. **Do the work**, on a branch `<lane>/<n>` off the latest `origin/main`, per the ticket's lane label:
-   - **`lane:cleanup`** → run **`/cleanup`** on the target file — golf *every* declaration in it.
+   - **`lane:cleanup`** → run the **complete `/cleanup` skill** on the target file — the full methodical pass
+     over *every* declaration: mathlib-**style audit**, best-**mathlib-API** check, **naming** conventions,
+     **dedup**, `simp`/instance hygiene, **and then** golfing. **Do NOT shortcut to the proof-golfer agent** —
+     golfing is only the *last* step of `/cleanup`, not the whole job. Skipping the audit/API/naming work is the
+     failure mode we're correcting.
    - **`lane:decompose`** → run **`/decompose-proof`** on the target proof — extract helpers; statement unchanged.
    - **`lane:generalise`** → run **`/generalise`** on the target file — generalise the over-specific lemmas.
 
