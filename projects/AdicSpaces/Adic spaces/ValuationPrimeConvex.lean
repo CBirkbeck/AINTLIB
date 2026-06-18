@@ -129,8 +129,8 @@ Since primes are totally ordered, `J.minimalPrimes` is a singleton
 theorem minimalPrime_unique {J : Ideal A} {P Q : Ideal A}
     (hP : P ∈ J.minimalPrimes) (hQ : Q ∈ J.minimalPrimes) : P = Q := by
   rcases ideal_le_total A P Q with h | h
-  · exact le_antisymm h (hQ.2 ⟨hP.1.1, hP.1.2⟩ h)
-  · exact le_antisymm (hP.2 ⟨hQ.1.1, hQ.1.2⟩ h) h
+  · exact le_antisymm h (hQ.2 hP.1 h)
+  · exact le_antisymm (hP.2 hQ.1 h) h
 
 /-- In a valuation ring, a prime `P` contains an ideal `J` if and only if `P`
 is above the minimal prime of `J` (when it exists).
@@ -138,10 +138,8 @@ is above the minimal prime of `J` (when it exists).
 Since primes are totally ordered, any prime containing `J` is comparable
 with the minimal prime, and minimality forces the minimal prime to be below. -/
 theorem minimalPrime_le_of_le {J : Ideal A} {P Q : Ideal A} [P.IsPrime]
-    (hQ : Q ∈ J.minimalPrimes) (hJP : J ≤ P) : Q ≤ P := by
-  rcases ideal_le_total A Q P with h | h
-  · exact h
-  · exact hQ.2 ⟨‹P.IsPrime›, hJP⟩ h
+    (hQ : Q ∈ J.minimalPrimes) (hJP : J ≤ P) : Q ≤ P :=
+  (ideal_le_total A Q P).elim id (hQ.2 ⟨‹P.IsPrime›, hJP⟩)
 
 /-! ### Height-1 primes: what is and is not true
 
@@ -183,8 +181,7 @@ would be a smaller prime containing `J`, contradicting `Q`'s minimality. -/
 theorem not_le_of_lt_minimalPrime {J : Ideal A} {P Q : Ideal A}
     [P.IsPrime] (hQ : Q ∈ J.minimalPrimes) (hPQ : P < Q) : ¬(J ≤ P) := by
   intro hJP
-  have h1 : Q ≤ P := hQ.2 ⟨‹P.IsPrime›, hJP⟩ hPQ.le
-  exact absurd h1 (not_le_of_gt hPQ)
+  exact absurd (hQ.2 ⟨‹P.IsPrime›, hJP⟩ hPQ.le) (not_le_of_gt hPQ)
 
 /-- In a valuation ring, for any two elements `a b`, either `a` divides `b`
 or `b` divides `a`. This is the divisibility form of the valuation ring property. -/
@@ -452,9 +449,8 @@ theorem primeOfConvexSubgroup_lt_of_lt (A : ValuationSubring K)
     rw [show (a : K) = x from rfl, hx]; exact Units.ne_zero g'
   have hunit_eq : Units.mk0 (A.valuation (a : K)) hva = g' := by
     ext; simp [show (a : K) = x from rfl, hx]
-  have ha_not_prime : a ∉ primeOfConvexSubgroup A C := by
-    rw [mem_primeOfConvexSubgroup_iff]
-    push_neg; exact ⟨hva, hunit_eq ▸ hg'⟩
+  have ha_not_prime : a ∉ primeOfConvexSubgroup A C :=
+    (not_mem_primeOfConvexSubgroup_iff A C a).mpr ⟨hva, hunit_eq ▸ hg'⟩
   have hmap2 : mapOfLE A (A.ofPrime Q) (le_ofPrime A Q) (g' : A.ValueGroup) =
       (A.ofPrime Q).valuation x := by rw [← hx, mapOfLE_valuation_apply]
   have hne1 : (A.ofPrime Q).valuation x ≠ 1 := by rw [← hmap2]; exact hg'H
@@ -610,9 +606,8 @@ theorem le_convexSubgroupOfPrime_primeOfConvexSubgroup (A : ValuationSubring K)
       rw [show (a : K) = x from rfl]; rwa [Valuation.ne_zero_iff]
     have hunit_eq : Units.mk0 (A.valuation (a : K)) hva = g := by
       ext; simp [show (a : K) = x from rfl, hx]
-    have ha_not_mem : a ∉ primeOfConvexSubgroup A H := by
-      rw [mem_primeOfConvexSubgroup_iff]; push_neg
-      exact ⟨hva, hunit_eq ▸ hg⟩
+    have ha_not_mem : a ∉ primeOfConvexSubgroup A H :=
+      (not_mem_primeOfConvexSubgroup_iff A H a).mpr ⟨hva, hunit_eq ▸ hg⟩
     exact (ofPrime_valuation_eq_one_iff_mem_primeCompl A
       (primeOfConvexSubgroup A H) a).mpr ha_not_mem
   · set a : A := ⟨x⁻¹, hxA⟩
@@ -620,9 +615,8 @@ theorem le_convexSubgroupOfPrime_primeOfConvexSubgroup (A : ValuationSubring K)
       rw [show (a : K) = x⁻¹ from rfl, Valuation.ne_zero_iff]; exact inv_ne_zero hx_ne
     have hunit_eq : Units.mk0 (A.valuation (a : K)) hva = g⁻¹ := by
       ext; simp [show (a : K) = x⁻¹ from rfl, map_inv₀, hx, Units.val_inv_eq_inv_val]
-    have ha_not_mem : a ∉ primeOfConvexSubgroup A H := by
-      rw [mem_primeOfConvexSubgroup_iff]; push_neg
-      exact ⟨hva, hunit_eq ▸ inv_mem hg⟩
+    have ha_not_mem : a ∉ primeOfConvexSubgroup A H :=
+      (not_mem_primeOfConvexSubgroup_iff A H a).mpr ⟨hva, hunit_eq ▸ inv_mem hg⟩
     have h1 := (ofPrime_valuation_eq_one_iff_mem_primeCompl A
       (primeOfConvexSubgroup A H) a).mpr ha_not_mem
     rw [show (a : K) = x⁻¹ from rfl, map_inv₀] at h1
