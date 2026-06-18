@@ -779,6 +779,46 @@ theorem coordRing_mem_B_of_minpolyCoeffsRegular
     (coordXFun_mem_B_of_minpolyCoeffsRegular hx)
     (coordYFun_mem_B_of_minpolyCoeffsRegular hy) r
 
+/-! #### Bridge to the place-classification chain
+
+The minpoly-coefficient reduction subsumes the place-classification chain: if both coordinate
+generators have minpoly coefficients in `C₂.CoordinateRing` (so `x₁, y₁ ∈ B`), then *every* `B`-prime
+is `≤ 1` on both generators (`BPrimeValuationCoordGenLeOne`), since `B`-elements are `v`-adic integers.
+Consequently no `B`-prime has an `x₁`-pole, so the residual `BPrimeInftyInclusion` holds *vacuously*.
+This shows the cleaner Prop `MinpolyCoeffsRegular` is strictly stronger than (and replaces) the
+awkward `∞`-inclusion residual `BPrimeInftyInclusion`. -/
+
+/-- **A `v`-adic integer of `B`**: if `z ∈ B`, then `v.valuation z ≤ 1` for every `B`-prime `v`. -/
+theorem valuation_le_one_of_mem_B
+    (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)))
+    {z : C₁.FunctionField} (hz : z ∈ (B (C₁ := C₁) (C₂ := C₂))) :
+    v.valuation C₁.FunctionField z ≤ 1 :=
+  v.valuation_le_one (K := C₁.FunctionField) (⟨z, hz⟩ : B (C₁ := C₁) (C₂ := C₂))
+
+/-- **The place dictionary from minpoly-coefficient regularity** (place-classification-free): if both
+coordinate generators have minpoly coefficients in `C₂.CoordinateRing`, then every `B`-prime is `≤ 1`
+on both — the residual `BPrimeValuationCoordGenLeOne`, with *no* place classification and *no* `hreg`
+(those are absorbed into `MinpolyCoeffsRegular`). -/
+theorem bPrimeValuationCoordGenLeOne_of_minpolyCoeffsRegular
+    (hx : MinpolyCoeffsRegular (C₁ := C₁) (C₂ := C₂) (coordXFun C₁))
+    (hy : MinpolyCoeffsRegular (C₁ := C₁) (C₂ := C₂) (coordYFun C₁)) :
+    BPrimeValuationCoordGenLeOne (C₁ := C₁) (C₂ := C₂) := fun v =>
+  ⟨valuation_le_one_of_mem_B v (coordXFun_mem_B_of_minpolyCoeffsRegular hx),
+   valuation_le_one_of_mem_B v (coordYFun_mem_B_of_minpolyCoeffsRegular hy)⟩
+
+/-- **The `∞`-inclusion residual `BPrimeInftyInclusion` is discharged (vacuously) by
+minpoly-coefficient regularity**: once both coordinate generators have minpoly coefficients in
+`C₂.CoordinateRing`, every `B`-prime is `≤ 1` on both generators, so the hypothesis of
+`BPrimeInftyInclusion` (a `B`-prime *failing* `v(x₁) ≤ 1 ∧ v(y₁) ≤ 1`) is never met — the inclusion
+holds vacuously.  This closes the task's literal target (`BPrimeInftyInclusion`) modulo the strictly
+cleaner, place-dictionary-free residual `MinpolyCoeffsRegular`. -/
+theorem bPrimeInftyInclusion_of_minpolyCoeffsRegular
+    (hx : MinpolyCoeffsRegular (C₁ := C₁) (C₂ := C₂) (coordXFun C₁))
+    (hy : MinpolyCoeffsRegular (C₁ := C₁) (C₂ := C₂) (coordYFun C₁)) :
+    BPrimeInftyInclusion (C₁ := C₁) (C₂ := C₂) := by
+  intro v hv
+  exact absurd (bPrimeValuationCoordGenLeOne_of_minpolyCoeffsRegular hx hy v) hv
+
 /-- **The `x`-generator of `C₁` is integral over `C₂.CoordinateRing`** (regular at every place
 of `C₁` over an affine place of `C₂`).  Reduced — *non-circularly*, via the valuative criterion
 `mem_B_of_forall_valuation_le_one` — to the global-`B` place dictionary
