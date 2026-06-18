@@ -110,11 +110,11 @@ theorem Isogeny.finiteDimensional_toAlgebra (φ : Isogeny W₁ W₂) :
       φ.toCurveMap.toAlgebra.toModule := by
   letI : Algebra W₂.FunctionField W₁.FunctionField := φ.toCurveMap.toAlgebra
   haveI : IsScalarTower F W₂.FunctionField W₁.FunctionField :=
-    IsScalarTower.of_algebraMap_eq fun x => (φ.toCurveMap.pullback.commutes x).symm
+    IsScalarTower.of_algebraMap_eq fun x ↦ (φ.toCurveMap.pullback.commutes x).symm
   haveI : Algebra.EssFiniteType W₂.FunctionField W₁.FunctionField :=
     Algebra.EssFiniteType.of_comp F W₂.FunctionField W₁.FunctionField
   haveI : Algebra.IsAlgebraic W₂.FunctionField W₁.FunctionField :=
-    ⟨fun z => CurveMap.isAlgebraic_toAlgebra φ.toCurveMap z⟩
+    ⟨fun z ↦ CurveMap.isAlgebraic_toAlgebra φ.toCurveMap z⟩
   exact Algebra.finite_of_essFiniteType_of_isAlgebraic
 
 /-- **Two-curve degree positivity**: `0 < deg φ` for any isogeny `φ : E₁ → E₂`,
@@ -174,7 +174,7 @@ theorem Isogeny.isSeparable_of_pullback_kaehlerD_ne_zero (φ : Isogeny W₁ W₂
   rw [φ.isSeparable_iff_algebra_isSeparable]
   letI : Algebra W₂.FunctionField W₁.FunctionField := φ.toCurveMap.toAlgebra
   haveI : IsScalarTower F W₂.FunctionField W₁.FunctionField :=
-    IsScalarTower.of_algebraMap_eq fun x => (φ.toCurveMap.pullback.commutes x).symm
+    IsScalarTower.of_algebraMap_eq fun x ↦ (φ.toCurveMap.pullback.commutes x).symm
   haveI : Algebra.EssFiniteType W₂.FunctionField W₁.FunctionField :=
     Algebra.EssFiniteType.of_comp F W₂.FunctionField W₁.FunctionField
   have hsurj : Function.Surjective
@@ -477,7 +477,7 @@ theorem twistedFrobeniusFactorization_pow_root (φ : Isogeny E.toAffine V) :
     ∃ k : ℕ, ∀ z : V.FunctionField,
       ∃ g : E.toAffine.FunctionField, g ^ p ^ k = φ.toCurveMap.pullback z := by
   obtain ⟨k, φs, _, hfact⟩ := twistedFrobeniusFactorization p E φ
-  refine ⟨k, fun z => ?_⟩
+  refine ⟨k, fun z ↦ ?_⟩
   have hz : φ.toCurveMap.pullback z =
       (Isogeny.relativeFrobenius p E k).toCurveMap.pullback
         (φs.toCurveMap.pullback z) := by
@@ -543,7 +543,7 @@ theorem separablePart_eq_of_twistedFactorization
     φ.separablePart m
         (rangeIncl_frobeniusPower_of_twistedFactorization p s E φ m φs hfact) =
       Isogeny.congrSource (iterateFrobeniusTwist_card_mul_eq_self p s E m) φs := by
-  refine Isogeny.ext_toCurveMap (CurveMap.ext (AlgHom.ext fun z => ?_))
+  refine Isogeny.ext_toCurveMap (CurveMap.ext (AlgHom.ext fun z ↦ ?_))
   apply (Isogeny.frobeniusPower E.toAffine m).pullback_injective
   rw [φ.frobeniusPower_pullback_separablePart_pullback m
     (rangeIncl_frobeniusPower_of_twistedFactorization p s E φ m φs hfact) z]
@@ -585,7 +585,7 @@ theorem frobeniusFactorization_of_card_eq_prime_via_twist
     (hcard : Fintype.card K = p) (E : WeierstrassCurve K) [E.toAffine.IsElliptic] :
     FrobeniusFactorization E.toAffine := by
   haveI : Fact (Fintype.card K = p ^ 1) := ⟨by rw [pow_one]; exact hcard⟩
-  refine frobeniusFactorization_of_twisted_sdvd p 1 E fun φ => ?_
+  refine frobeniusFactorization_of_twisted_sdvd p 1 E fun φ ↦ ?_
   obtain ⟨k, φs, hsep, hfact⟩ := twistedFrobeniusFactorization p E φ
   exact ⟨k, φs, one_dvd k, hsep, hfact⟩
 
@@ -733,7 +733,7 @@ noncomputable def hasDualWitnessRelativeFrobeniusOf
     (HasseWeil.mulByInt_pullbackAlgHom E.toAffine ((p ^ e : ℕ) : ℤ) (intPPow_ne_zero p e))
     (mulByInt_p_pow_range_le_relativeFrobenius p E hinsep e)
     (mulByIntBasepoint_holds E.toAffine (intPPow_ne_zero p e))
-    (fun g hg => (Isogeny.relativeFrobenius p E e).reflects_ordAtInfty g hg)
+    (fun g hg ↦ (Isogeny.relativeFrobenius p E e).reflects_ordAtInfty g hg)
 
 /-- **The relative Verschiebung** `V̂_{p^e} : E^{(p^e)} → E` (deliverable d): the dual of
 the relative `p^e`-Frobenius, as an `EC.Isogeny`, from the single `[p]`-inseparability
@@ -762,7 +762,7 @@ theorem relativeVerschiebungOf_compose_relativeFrobenius
     (hinsep : ¬(Isogeny.mulByInt E.toAffine (intP_ne_zero p)).IsSeparable) (e : ℕ) :
     (relativeVerschiebungOf p E hinsep e).compose (Isogeny.relativeFrobenius p E e) =
       Isogeny.mulByInt E.toAffine (intPPow_ne_zero p e) := by
-  refine Isogeny.ext_toCurveMap (CurveMap.ext (AlgHom.ext fun z => ?_))
+  refine Isogeny.ext_toCurveMap (CurveMap.ext (AlgHom.ext fun z ↦ ?_))
   exact relativeFrobenius_pullback_relativeVerschiebungOf_pullback p E hinsep e z
 
 /-! #### Headline instantiations of the Verschiebung
