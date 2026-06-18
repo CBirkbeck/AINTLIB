@@ -157,7 +157,7 @@ theorem FormalGroup.evalAdd_mem
   apply (IsLocalRing.maximalIdeal R).sum_mem
   intro d _hd
   change (RingHom.id R) (MvPowerSeries.coeff d F.toSeries) *
-        (d.prod fun s e => (![x.1, y.1]) s ^ e) ∈ _
+        (d.prod fun s e ↦ (![x.1, y.1]) s ^ e) ∈ _
   simp only [RingHom.id_apply]
   by_cases hd : d = 0
   · -- d = 0: coeff 0 F.toSeries = constantCoeff F.toSeries = 0.
@@ -171,8 +171,8 @@ theorem FormalGroup.evalAdd_mem
     apply (IsLocalRing.maximalIdeal R).mul_mem_left
     have hne : ∃ s, d s ≠ 0 := by
       by_contra h
-      push_neg at h
-      exact hd (Finsupp.ext (fun s => by simpa using h s))
+      push Not at h
+      exact hd (Finsupp.ext (fun s ↦ by simpa using h s))
     obtain ⟨s, hs⟩ := hne
     have hs_mem : s ∈ d.support := Finsupp.mem_support_iff.mpr hs
     rw [Finsupp.prod]
@@ -205,7 +205,7 @@ theorem FormalGroup.evalAdd_zero_zero
   -- For each d, the term is 0: if d = 0, coeff 0 F = 0; else some factor vanishes.
   have hterm_zero : ∀ d : Fin 2 →₀ ℕ,
       (RingHom.id R) (MvPowerSeries.coeff d F.toSeries) *
-        (d.prod fun s e => (![(0 : R), (0 : R)]) s ^ e) = 0 := by
+        (d.prod fun s e ↦ (![(0 : R), (0 : R)]) s ^ e) = 0 := by
     intro d
     simp only [RingHom.id_apply]
     by_cases hd : d = 0
@@ -217,20 +217,20 @@ theorem FormalGroup.evalAdd_zero_zero
     · -- The prod has a zero factor since d s > 0 for some s, and a s = 0.
       have hne : ∃ s, d s ≠ 0 := by
         by_contra h
-        push_neg at h
-        exact hd (Finsupp.ext (fun s => by simpa using h s))
+        push Not at h
+        exact hd (Finsupp.ext (fun s ↦ by simpa using h s))
       obtain ⟨s, hs⟩ := hne
       have hs_mem : s ∈ d.support := Finsupp.mem_support_iff.mpr hs
-      have : (d.prod fun s' e' => (![(0 : R), (0 : R)]) s' ^ e') = 0 := by
+      have : (d.prod fun s' e' ↦ (![(0 : R), (0 : R)]) s' ^ e') = 0 := by
         rw [Finsupp.prod]
         refine Finset.prod_eq_zero hs_mem ?_
         have : (![(0 : R), (0 : R)] : Fin 2 → R) s = 0 := by fin_cases s <;> simp
         rw [this, zero_pow hs]
       rw [this, mul_zero]
   -- So the hasSum is hasSum of the zero function, which sums to 0.
-  have hzero : HasSum (fun d : Fin 2 →₀ ℕ =>
+  have hzero : HasSum (fun d : Fin 2 →₀ ℕ ↦
       (RingHom.id R) (MvPowerSeries.coeff d F.toSeries) *
-        (d.prod fun s e => (![(0 : R), (0 : R)]) s ^ e)) 0 := by
+        (d.prod fun s e ↦ (![(0 : R), (0 : R)]) s ^ e)) 0 := by
     convert hasSum_zero using 1
     exact funext hterm_zero
   exact (hzero.unique hsum).symm
@@ -246,18 +246,18 @@ private noncomputable def finsupp_swap : (Fin 2 →₀ ℕ) ≃ (Fin 2 →₀ �
   invFun d := Finsupp.single 0 (d 1) + Finsupp.single 1 (d 0)
   left_inv d := by
     ext i; fin_cases i <;>
-      simp [Finsupp.single_apply, Finsupp.coe_add, Pi.add_apply]
+      simp [Finsupp.coe_add, Pi.add_apply]
   right_inv d := by
     ext i; fin_cases i <;>
-      simp [Finsupp.single_apply, Finsupp.coe_add, Pi.add_apply]
+      simp [Finsupp.coe_add, Pi.add_apply]
 
 private lemma finsupp_swap_apply_zero (d : Fin 2 →₀ ℕ) :
     (finsupp_swap d) 0 = d 1 := by
-  simp [finsupp_swap, Finsupp.single_apply]
+  simp [finsupp_swap]
 
 private lemma finsupp_swap_apply_one (d : Fin 2 →₀ ℕ) :
     (finsupp_swap d) 1 = d 0 := by
-  simp [finsupp_swap, Finsupp.single_apply]
+  simp [finsupp_swap]
 
 /-- The coefficient swap induced by `F.comm`: `coeff d F.toSeries =
 coeff (finsupp_swap d) F.toSeries`. This is a consequence of
@@ -270,14 +270,14 @@ theorem FormalGroup.coeff_swap (F : FormalGroup R) (d : Fin 2 →₀ ℕ) :
     apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro s; fin_cases s <;> simp
   have key := congr_arg (MvPowerSeries.coeff d) F.comm
   rw [MvPowerSeries.coeff_subst h_swap] at key
-  -- key : finsum (fun d' => coeff d' F • coeff d (prod (![X 1, X 0] s)^e)) = coeff d F
+  -- key : finsum (fun d' ↦ coeff d' F • coeff d (prod (![X 1, X 0] s)^e)) = coeff d F
   -- The only nonzero term in this sum is at d' = finsupp_swap d, where the product
   -- `X 1^(d' 0) * X 0^(d' 1)` has coefficient 1 at `(d' 1, d' 0)`.
   -- When `d' = finsupp_swap d`, i.e., `d' 0 = d 1, d' 1 = d 0`, the product
   -- `X 1^(d 1) * X 0^(d 0)` has coefficient 1 at `(d 0, d 1) = d`.
   rw [finsum_eq_single _ (finsupp_swap d)] at key
   · -- Evaluate the single nonzero term.
-    simp only [Finsupp.prod_fintype _ _ (fun i => pow_zero _), Fin.prod_univ_two,
+    simp only [Finsupp.prod_fintype _ _ (fun i ↦ pow_zero _), Fin.prod_univ_two,
       Matrix.cons_val_zero, Matrix.cons_val_one] at key
     have hcoeff_prod :
         MvPowerSeries.coeff d
@@ -288,12 +288,12 @@ theorem FormalGroup.coeff_swap (F : FormalGroup R) (d : Fin 2 →₀ ℕ) :
       rw [MvPowerSeries.coeff_monomial]
       rw [finsupp_swap_apply_zero, finsupp_swap_apply_one]
       rw [if_pos]
-      ext i; fin_cases i <;> simp [Finsupp.single_apply]
+      ext i; fin_cases i <;> simp
     rw [hcoeff_prod, smul_eq_mul, mul_one] at key
     exact key.symm
   · -- Other terms vanish.
     intro d' hd'
-    simp only [Finsupp.prod_fintype _ _ (fun i => pow_zero _), Fin.prod_univ_two,
+    simp only [Finsupp.prod_fintype _ _ (fun i ↦ pow_zero _), Fin.prod_univ_two,
       Matrix.cons_val_zero, Matrix.cons_val_one]
     suffices MvPowerSeries.coeff d
         ((MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) R) ^ (d' 0) *
@@ -341,25 +341,25 @@ theorem FormalGroup.evalAdd_comm
     MvPowerSeries.eval₂ (RingHom.id R) (![y.1, x.1] : Fin 2 → R) F.toSeries
   -- Reindex hsum_yx via σ to match hsum_xy.
   have hsum_yx_reindex :
-      HasSum (fun d => (fun d' : Fin 2 →₀ ℕ =>
+      HasSum (fun d ↦ (fun d' : Fin 2 →₀ ℕ ↦
         (RingHom.id R) (MvPowerSeries.coeff d' F.toSeries) *
-          (d'.prod fun s e => (![y.1, x.1] : Fin 2 → R) s ^ e)) (finsupp_swap d))
+          (d'.prod fun s e ↦ (![y.1, x.1] : Fin 2 → R) s ^ e)) (finsupp_swap d))
         (MvPowerSeries.eval₂ (RingHom.id R) (![y.1, x.1] : Fin 2 → R) F.toSeries) :=
     (finsupp_swap.hasSum_iff).mpr hsum_yx
   -- Show the reindexed sum function equals the xy sum function.
   have hterm_eq : ∀ d : Fin 2 →₀ ℕ,
       (RingHom.id R) (MvPowerSeries.coeff (finsupp_swap d) F.toSeries) *
-        ((finsupp_swap d).prod fun s e => (![y.1, x.1] : Fin 2 → R) s ^ e) =
+        ((finsupp_swap d).prod fun s e ↦ (![y.1, x.1] : Fin 2 → R) s ^ e) =
       (RingHom.id R) (MvPowerSeries.coeff d F.toSeries) *
-        (d.prod fun s e => (![x.1, y.1] : Fin 2 → R) s ^ e) := by
+        (d.prod fun s e ↦ (![x.1, y.1] : Fin 2 → R) s ^ e) := by
     intro d
     simp only [RingHom.id_apply]
     -- Key: coeff (finsupp_swap d) F = coeff d F by F.coeff_swap.
     rw [← F.coeff_swap d]
     congr 1
     -- Show product equality.
-    rw [Finsupp.prod_fintype _ _ (fun i => pow_zero _),
-        Finsupp.prod_fintype _ _ (fun i => pow_zero _),
+    rw [Finsupp.prod_fintype _ _ (fun i ↦ pow_zero _),
+        Finsupp.prod_fintype _ _ (fun i ↦ pow_zero _),
         Fin.prod_univ_two, Fin.prod_univ_two,
         Matrix.cons_val_zero, Matrix.cons_val_one,
         Matrix.cons_val_zero, Matrix.cons_val_one]
@@ -367,9 +367,9 @@ theorem FormalGroup.evalAdd_comm
     simp only [Matrix.cons_val_zero]
     ring
   have hsum_xy_match : HasSum
-      (fun d : Fin 2 →₀ ℕ =>
+      (fun d : Fin 2 →₀ ℕ ↦
         (RingHom.id R) (MvPowerSeries.coeff d F.toSeries) *
-          (d.prod fun s e => (![x.1, y.1] : Fin 2 → R) s ^ e))
+          (d.prod fun s e ↦ (![x.1, y.1] : Fin 2 → R) s ^ e))
       (MvPowerSeries.eval₂ (RingHom.id R) (![y.1, x.1] : Fin 2 → R) F.toSeries) := by
     convert hsum_yx_reindex using 1
     ext d
@@ -412,11 +412,11 @@ theorem FormalGroup.coeff_j0_of_ne_one (F : FormalGroup R) (j : ℕ) (hj : j ≠
   rw [MvPowerSeries.coeff_subst ha,
       finsum_eq_single _ (Finsupp.single (0 : Fin 2) j)] at key
   · -- Main term: coeff (single 0 j) F * coeff (single 0 j) (X 0^j * 0^0) = coeff (0,j) F * 1
-    simp only [Finsupp.prod_fintype _ _ (fun i => pow_zero _), Fin.prod_univ_two,
+    simp only [Finsupp.prod_fintype _ _ (fun i ↦ pow_zero _), Fin.prod_univ_two,
       Matrix.cons_val_zero, Matrix.cons_val_one] at key
-    have hj0 : (Finsupp.single (0 : Fin 2) j) 0 = j := by simp [Finsupp.single_apply]
+    have hj0 : (Finsupp.single (0 : Fin 2) j) 0 = j := by simp
     have hj1 : (Finsupp.single (0 : Fin 2) j) 1 = 0 := by
-      simp [Finsupp.single_apply]
+      simp
     rw [hj0, hj1] at key
     simp only [pow_zero, mul_one] at key
     rw [show ((MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) R) ^ j) =
@@ -427,15 +427,15 @@ theorem FormalGroup.coeff_j0_of_ne_one (F : FormalGroup R) (j : ℕ) (hj : j ≠
   · -- Other terms vanish: for d ≠ single 0 j, need to show
     -- coeff (single 0 j) (X 0^(d 0) * 0^(d 1)) = 0.
     intro d hd
-    simp only [Finsupp.prod_fintype _ _ (fun i => pow_zero _), Fin.prod_univ_two,
+    simp only [Finsupp.prod_fintype _ _ (fun i ↦ pow_zero _), Fin.prod_univ_two,
       Matrix.cons_val_zero, Matrix.cons_val_one]
     by_cases hd1 : d 1 = 0
     · -- d 1 = 0, so d = single 0 (d 0). Since d ≠ single 0 j, d 0 ≠ j.
       have hdeq : d = Finsupp.single (0 : Fin 2) (d 0) := by
         ext i; fin_cases i
-        · simp [Finsupp.single_apply]
-        · simp [Finsupp.single_apply, hd1]
-      have hdj : d 0 ≠ j := fun heq => hd (by rw [hdeq, heq])
+        · simp
+        · simp [hd1]
+      have hdj : d 0 ≠ j := fun heq ↦ hd (by rw [hdeq, heq])
       simp only [hd1, pow_zero, mul_one]
       rw [show ((MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) R) ^ (d 0)) =
             MvPowerSeries.monomial (R := R) (Finsupp.single 0 (d 0)) 1 from by
@@ -468,7 +468,7 @@ theorem FormalGroup.evalAdd_zero_right
   -- So the sum has only one nonzero term: x.
   have hterm_eq : ∀ d : Fin 2 →₀ ℕ,
       (RingHom.id R) (MvPowerSeries.coeff d F.toSeries) *
-        (d.prod fun s e => (![x.1, (0 : R)] : Fin 2 → R) s ^ e) =
+        (d.prod fun s e ↦ (![x.1, (0 : R)] : Fin 2 → R) s ^ e) =
       (if d = Finsupp.single 0 1 then x.1 else 0) := by
     intro d
     simp only [RingHom.id_apply]
@@ -476,9 +476,9 @@ theorem FormalGroup.evalAdd_zero_right
     · -- d 1 = 0. Then d = single 0 (d 0).
       have hdeq : d = Finsupp.single (0 : Fin 2) (d 0) := by
         ext i; fin_cases i
-        · simp [Finsupp.single_apply]
-        · simp [Finsupp.single_apply, hd1]
-      rw [Finsupp.prod_fintype _ _ (fun i => pow_zero _), Fin.prod_univ_two,
+        · simp
+        · simp [hd1]
+      rw [Finsupp.prod_fintype _ _ (fun i ↦ pow_zero _), Fin.prod_univ_two,
           Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_zero,
           hd1, pow_zero, mul_one]
       by_cases hd0 : d 0 = 1
@@ -488,7 +488,7 @@ theorem FormalGroup.evalAdd_zero_right
           rw [hdeq, hd0]
         rw [hd_single, HasseWeil.FG.FormalGroup.coeff_10]
         rw [show (Finsupp.single (0 : Fin 2) 1) 0 = 1 from by
-              simp [Finsupp.single_apply]]
+              simp]
         rw [pow_one, one_mul, if_pos rfl]
       · -- coeff F = 0.
         rw [hdeq, F.coeff_j0_of_ne_one (d 0) hd0, zero_mul, if_neg]
@@ -497,7 +497,7 @@ theorem FormalGroup.evalAdd_zero_right
         have := DFunLike.congr_fun hcontra 0
         simpa [Finsupp.single_apply] using this
     · -- d 1 ≠ 0. 0^(d 1) = 0, so product has a zero factor.
-      rw [Finsupp.prod_fintype _ _ (fun i => pow_zero _), Fin.prod_univ_two,
+      rw [Finsupp.prod_fintype _ _ (fun i ↦ pow_zero _), Fin.prod_univ_two,
           Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_zero,
           zero_pow hd1, mul_zero, mul_zero, if_neg]
       intro hcontra
@@ -506,12 +506,12 @@ theorem FormalGroup.evalAdd_zero_right
       have := DFunLike.congr_fun hcontra 1
       simpa [Finsupp.single_apply] using this
   -- So hsum is the sum of x at d = single 0 1 and 0 elsewhere.
-  have hsum_x : HasSum (fun d : Fin 2 →₀ ℕ =>
+  have hsum_x : HasSum (fun d : Fin 2 →₀ ℕ ↦
       (if d = Finsupp.single 0 1 then x.1 else 0)) x.1 :=
     hasSum_ite_eq (Finsupp.single (0 : Fin 2) 1) x.1
-  have hsum_rewrite : HasSum (fun d : Fin 2 →₀ ℕ =>
+  have hsum_rewrite : HasSum (fun d : Fin 2 →₀ ℕ ↦
       (RingHom.id R) (MvPowerSeries.coeff d F.toSeries) *
-        (d.prod fun s e => (![x.1, (0 : R)] : Fin 2 → R) s ^ e)) x.1 := by
+        (d.prod fun s e ↦ (![x.1, (0 : R)] : Fin 2 → R) s ^ e)) x.1 := by
     convert hsum_x using 1
     ext d; exact hterm_eq d
   exact hsum.unique hsum_rewrite
@@ -538,11 +538,11 @@ theorem FormalGroup.coeff_0j_of_ne_one (F : FormalGroup R) (j : ℕ) (hj : j ≠
   rw [hrhs] at key
   rw [MvPowerSeries.coeff_subst ha,
       finsum_eq_single _ (Finsupp.single (1 : Fin 2) j)] at key
-  · simp only [Finsupp.prod_fintype _ _ (fun i => pow_zero _), Fin.prod_univ_two,
+  · simp only [Finsupp.prod_fintype _ _ (fun i ↦ pow_zero _), Fin.prod_univ_two,
       Matrix.cons_val_zero, Matrix.cons_val_one] at key
     have hj0 : (Finsupp.single (1 : Fin 2) j) 0 = 0 := by
-      simp [Finsupp.single_apply]
-    have hj1 : (Finsupp.single (1 : Fin 2) j) 1 = j := by simp [Finsupp.single_apply]
+      simp
+    have hj1 : (Finsupp.single (1 : Fin 2) j) 1 = j := by simp
     rw [hj0, hj1] at key
     simp only [pow_zero, one_mul] at key
     rw [show ((MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) R) ^ j) =
@@ -551,14 +551,14 @@ theorem FormalGroup.coeff_0j_of_ne_one (F : FormalGroup R) (j : ℕ) (hj : j ≠
         MvPowerSeries.coeff_monomial_same, smul_eq_mul, mul_one] at key
     exact key
   · intro d hd
-    simp only [Finsupp.prod_fintype _ _ (fun i => pow_zero _), Fin.prod_univ_two,
+    simp only [Finsupp.prod_fintype _ _ (fun i ↦ pow_zero _), Fin.prod_univ_two,
       Matrix.cons_val_zero, Matrix.cons_val_one]
     by_cases hd0 : d 0 = 0
     · have hdeq : d = Finsupp.single (1 : Fin 2) (d 1) := by
         ext i; fin_cases i
-        · simp [Finsupp.single_apply, hd0]
-        · simp [Finsupp.single_apply]
-      have hdj : d 1 ≠ j := fun heq => hd (by rw [hdeq, heq])
+        · simp [hd0]
+        · simp
+      have hdj : d 1 ≠ j := fun heq ↦ hd (by rw [hdeq, heq])
       simp only [hd0, pow_zero, one_mul]
       rw [show ((MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) R) ^ (d 1)) =
             MvPowerSeries.monomial (R := R) (Finsupp.single 1 (d 1)) 1 from by
@@ -624,7 +624,6 @@ theorem FormalGroup.evalNeg_mem
   filter_upwards with N
   apply (IsLocalRing.maximalIdeal R).sum_mem
   intro n _hn
-  change (RingHom.id R) (PowerSeries.coeff n F.inverse) * x.1 ^ n ∈ _
   simp only [RingHom.id_apply]
   by_cases hn : n = 0
   · subst hn
@@ -661,7 +660,6 @@ private theorem powerSeries_eval_mem
   filter_upwards with N
   apply (IsLocalRing.maximalIdeal R).sum_mem
   intro n _hn
-  change (RingHom.id R) (PowerSeries.coeff n u) * x.1 ^ n ∈ _
   simp only [RingHom.id_apply]
   by_cases hn : n = 0
   · subst hn
@@ -704,13 +702,13 @@ private theorem coeff_prod_pow_support_finite
     (ha0 : ∀ s, MvPowerSeries.constantCoeff (a s) = 0)
     (e : τ →₀ ℕ) :
     Set.Finite {d : σ →₀ ℕ | MvPowerSeries.coeff e
-      (d.prod fun s e' => (a s) ^ e') ≠ 0} := by
+      (d.prod fun s e' ↦ (a s) ^ e') ≠ 0} := by
   classical
   apply (Finsupp.finite_of_degree_le e.degree).subset
   intro d hd
   simp only [Set.mem_setOf_eq] at hd ⊢
   by_contra hdeg
-  push_neg at hdeg
+  push Not at hdeg
   apply hd
   apply MvPowerSeries.coeff_of_lt_order
   rw [Finsupp.prod]
@@ -743,11 +741,11 @@ private theorem continuous_subst_of_constantCoeff_zero
   have hS_fin := coeff_prod_pow_support_finite (R := R) ha0 e
   obtain ⟨T, hTS⟩ : ∃ T : Finset (σ →₀ ℕ),
       {d : σ →₀ ℕ | MvPowerSeries.coeff e
-        (d.prod fun s e' => (a s) ^ e') ≠ 0} ⊆ ↑T :=
+        (d.prod fun s e' ↦ (a s) ^ e') ≠ 0} ⊆ ↑T :=
     ⟨hS_fin.toFinset, by simp [Set.Finite.coe_toFinset]⟩
-  have heq : (fun f : MvPowerSeries σ R => (MvPowerSeries.subst a f) e) =
-      (fun f => ∑ d ∈ T, MvPowerSeries.coeff d f *
-        MvPowerSeries.coeff e (d.prod fun s e' => (a s) ^ e')) := by
+  have heq : (fun f : MvPowerSeries σ R ↦ (MvPowerSeries.subst a f) e) =
+      (fun f ↦ ∑ d ∈ T, MvPowerSeries.coeff d f *
+        MvPowerSeries.coeff e (d.prod fun s e' ↦ (a s) ^ e')) := by
     funext f
     change MvPowerSeries.coeff e (MvPowerSeries.subst a f) = _
     rw [MvPowerSeries.coeff_subst ha]
@@ -763,7 +761,7 @@ private theorem continuous_subst_of_constantCoeff_zero
     intros d _
     rw [smul_eq_mul]
   rw [heq]
-  exact continuous_finset_sum T fun d _ =>
+  exact continuous_finsetSum T fun d _ ↦
     (continuous_mul_const _).comp (MvPowerSeries.WithPiTopology.continuous_coeff R d)
 
 /-! ### Membership and HasEval lemmas for general finite-type MvPowerSeries -/
@@ -777,7 +775,7 @@ private theorem mvPowerSeries_eval_mem_maximalIdeal {σ : Type*} [Finite σ]
     MvPowerSeries.eval₂ (RingHom.id R) b u ∈ IsLocalRing.maximalIdeal R := by
   have hb : MvPowerSeries.HasEval b := by
     cases nonempty_fintype σ
-    refine ⟨fun s => ?_, ?_⟩
+    refine ⟨fun s ↦ ?_, ?_⟩
     · exact isTopologicallyNilpotent_of_mem_maximalIdeal hAdic (hb_mem s)
     · rw [Filter.cofinite_eq_bot]
       exact Filter.tendsto_bot
@@ -797,7 +795,7 @@ private theorem mvPowerSeries_eval_mem_maximalIdeal {σ : Type*} [Finite σ]
   · apply (IsLocalRing.maximalIdeal R).mul_mem_left
     have hne : ∃ s, d s ≠ 0 := by
       by_contra h
-      push_neg at h
+      push Not at h
       exact hd (Finsupp.ext h)
     obtain ⟨s, hs⟩ := hne
     have hs_mem : s ∈ d.support := Finsupp.mem_support_iff.mpr hs
@@ -812,7 +810,7 @@ private lemma hasEval_of_mem_maximalIdeal_general {σ : Type*} [Finite σ]
     {b : σ → R} (hb_mem : ∀ s, b s ∈ IsLocalRing.maximalIdeal R) :
     MvPowerSeries.HasEval b := by
   cases nonempty_fintype σ
-  refine ⟨fun s => ?_, ?_⟩
+  refine ⟨fun s ↦ ?_, ?_⟩
   · exact isTopologicallyNilpotent_of_mem_maximalIdeal hAdic (hb_mem s)
   · rw [Filter.cofinite_eq_bot]
     exact Filter.tendsto_bot
@@ -832,12 +830,12 @@ theorem eval₂_subst_bridge {σ τ : Type*} [Finite σ] [Finite τ]
     (F : MvPowerSeries σ R) :
     MvPowerSeries.eval₂ (RingHom.id R) b (MvPowerSeries.subst a F) =
       MvPowerSeries.eval₂ (RingHom.id R)
-        (fun s => MvPowerSeries.eval₂ (RingHom.id R) b (a s)) F := by
+        (fun s ↦ MvPowerSeries.eval₂ (RingHom.id R) b (a s)) F := by
   have hb := hasEval_of_mem_maximalIdeal_general hAdic hb_mem
   have hbcomp : MvPowerSeries.HasEval
-      (fun s => MvPowerSeries.eval₂ (RingHom.id R) b (a s)) := by
+      (fun s ↦ MvPowerSeries.eval₂ (RingHom.id R) b (a s)) := by
     cases nonempty_fintype σ
-    refine ⟨fun s => ?_, ?_⟩
+    refine ⟨fun s ↦ ?_, ?_⟩
     · apply isTopologicallyNilpotent_of_mem_maximalIdeal hAdic
       exact mvPowerSeries_eval_mem_maximalIdeal hAdic hb_mem (a s) (ha0 s)
     · rw [Filter.cofinite_eq_bot]
@@ -845,8 +843,8 @@ theorem eval₂_subst_bridge {σ τ : Type*} [Finite σ] [Finite τ]
   have hcid : Continuous (RingHom.id R) := continuous_id
   -- Use eval₂_unique to identify (f ↦ eval₂ id b (subst a f)) with eval₂ id (eval₂ id b ∘ a).
   have key := MvPowerSeries.eval₂_unique (σ := σ) (R := R) (S := R)
-    (φ := RingHom.id R) (a := fun s => MvPowerSeries.eval₂ (RingHom.id R) b (a s))
-    hcid hbcomp (ε := fun f =>
+    (φ := RingHom.id R) (a := fun s ↦ MvPowerSeries.eval₂ (RingHom.id R) b (a s))
+    hcid hbcomp (ε := fun f ↦
       MvPowerSeries.eval₂ (RingHom.id R) b (MvPowerSeries.subst a f))
     (hε := (MvPowerSeries.continuous_eval₂ hcid hb).comp
       (continuous_subst_of_constantCoeff_zero ha0 ha))
@@ -877,7 +875,7 @@ theorem eval₂_subst_bridge {σ τ : Type*} [Finite σ] [Finite τ]
       simp [MvPolynomial.eval₂_C]
     rw [hcomp]
     -- Goal: MvPolynomial.eval₂ (RingHom.id R) ((eval₂Hom hcid hb) ∘ a) p =
-    --       MvPolynomial.eval₂ (RingHom.id R) (fun s => eval₂ id b (a s)) p
+    --       MvPolynomial.eval₂ (RingHom.id R) (fun s ↦ eval₂ id b (a s)) p
     -- The functions are equal (∘ = fun s =>).
     rfl
 
@@ -891,7 +889,7 @@ viewed as `MvPowerSeries Unit R`) with `MvPowerSeries.eval₂`. -/
 private theorem powerSeries_eval₂_eq_mvEval₂
     (u : PowerSeries R) (x : R) :
     PowerSeries.eval₂ (RingHom.id R) x u =
-      MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit => x) u := rfl
+      MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ x) u := rfl
 
 /-! ### The inverse axiom: `F(x, -_F x) = 0` -/
 
@@ -911,7 +909,7 @@ theorem FormalGroup.evalAdd_evalNeg
     F.fAdd_X_inverse_eq_zero
   -- `fAdd F X inverse = subst ![X, inverse] F.toSeries` (unfolding).
   change MvPowerSeries.eval₂ (RingHom.id R) (![x.1, F.evalNeg x] : Fin 2 → R) F.toSeries = 0
-  -- Apply the bridge with a := ![PowerSeries.X, F.inverse], b := fun _ => x,
+  -- Apply the bridge with a := ![PowerSeries.X, F.inverse], b := fun _ ↦ x,
   -- or equivalently treat everything in MvPowerSeries.
   -- Set up: a : Fin 2 → PowerSeries R = MvPowerSeries Unit R
   let a : Fin 2 → MvPowerSeries Unit R := ![PowerSeries.X, F.inverse]
@@ -926,41 +924,41 @@ theorem FormalGroup.evalAdd_evalNeg
       show MvPowerSeries.constantCoeff (F.inverse : PowerSeries R) = 0
       exact F.inverse_constantCoeff
   have ha : MvPowerSeries.HasSubst a :=
-    MvPowerSeries.hasSubst_of_constantCoeff_zero (fun s => ha0 s)
+    MvPowerSeries.hasSubst_of_constantCoeff_zero (fun s ↦ ha0 s)
   -- The substitution gives us `subst a F.toSeries` ∈ MvPowerSeries Unit R = PowerSeries R.
   -- By hfg_zero, `subst a F.toSeries = fAdd F X inverse = 0`.
   have hsubst_zero : MvPowerSeries.subst a F.toSeries = 0 := by
     have : MvPowerSeries.subst a F.toSeries = HasseWeil.FG.fAdd F PowerSeries.X F.inverse := rfl
     rw [this, hfg_zero]
-  -- Apply eval₂ id (fun _ => x.1) to both sides. RHS = 0.
-  have hb_mem : ∀ _ : Unit, x.1 ∈ IsLocalRing.maximalIdeal R := fun _ => x.2
-  have bridge := eval₂_subst_bridge hAdic ha0 ha (b := fun _ : Unit => x.1) hb_mem F.toSeries
-  -- bridge: eval₂ id (fun _ => x.1) (subst a F.toSeries) =
-  --         eval₂ id (fun s => eval₂ id (fun _ => x.1) (a s)) F.toSeries
+  -- Apply eval₂ id (fun _ ↦ x.1) to both sides. RHS = 0.
+  have hb_mem : ∀ _ : Unit, x.1 ∈ IsLocalRing.maximalIdeal R := fun _ ↦ x.2
+  have bridge := eval₂_subst_bridge hAdic ha0 ha (b := fun _ : Unit ↦ x.1) hb_mem F.toSeries
+  -- bridge: eval₂ id (fun _ ↦ x.1) (subst a F.toSeries) =
+  --         eval₂ id (fun s ↦ eval₂ id (fun _ ↦ x.1) (a s)) F.toSeries
   rw [hsubst_zero] at bridge
-  have heval_zero : MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit => x.1)
+  have heval_zero : MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ x.1)
       (0 : MvPowerSeries Unit R) = 0 := by
     change PowerSeries.eval₂ (RingHom.id R) x.1 (0 : PowerSeries R) = 0
     rw [show (0 : PowerSeries R) = ((0 : Polynomial R) : PowerSeries R) from by simp,
         PowerSeries.eval₂_coe]
     simp
   rw [heval_zero] at bridge
-  -- Now LHS of bridge is 0. RHS: eval₂ id (fun s => eval_x (a s)) F.toSeries.
-  -- The function `fun s => eval_x (a s)` is `fun s => eval_x (![X, inverse] s)`:
+  -- Now LHS of bridge is 0. RHS: eval₂ id (fun s ↦ eval_x (a s)) F.toSeries.
+  -- The function `fun s ↦ eval_x (a s)` is `fun s ↦ eval_x (![X, inverse] s)`:
   --   s = 0: eval_x X = x.1.
   --   s = 1: eval_x inverse = F.evalNeg x.
-  have hfun : (fun s : Fin 2 =>
-        MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit => x.1) (a s)) =
+  have hfun : (fun s : Fin 2 ↦
+        MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ x.1) (a s)) =
       ![x.1, F.evalNeg x] := by
     funext s
     fin_cases s
     · -- s = 0: a 0 = PowerSeries.X, eval_x X = x.1.
-      show MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit => x.1) (PowerSeries.X : PowerSeries R)
+      show MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ x.1) (PowerSeries.X : PowerSeries R)
           = x.1
       change PowerSeries.eval₂ (RingHom.id R) x.1 PowerSeries.X = x.1
       rw [PowerSeries.eval₂_X]
     · -- s = 1: a 1 = F.inverse, eval_x inverse = F.evalNeg x (definitionally).
-      show MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit => x.1) F.inverse = F.evalNeg x
+      show MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ x.1) F.inverse = F.evalNeg x
       change PowerSeries.eval₂ (RingHom.id R) x.1 F.inverse = F.evalNeg x
       rfl
   rw [hfun] at bridge
@@ -1046,7 +1044,7 @@ theorem FormalGroup.evalAdd_assoc
   have hbridge_XY := eval₂_subst_bridge hAdic hXY0 hXY (b := xyz) hxyz_mem F.toSeries
   have hbridge_YZ := eval₂_subst_bridge hAdic hYZ0 hYZ (b := xyz) hxyz_mem F.toSeries
   -- eval_xyz F_XY = eval₂ id (eval_xyz ∘ XY) F.toSeries = eval₂ id ![x,y] F.toSeries = evalAdd F x y.
-  have hxy_fn : (fun s : Fin 2 => MvPowerSeries.eval₂ (RingHom.id R) xyz (XY s)) =
+  have hxy_fn : (fun s : Fin 2 ↦ MvPowerSeries.eval₂ (RingHom.id R) xyz (XY s)) =
       ![x.1, y.1] := by
     funext s
     fin_cases s
@@ -1054,7 +1052,7 @@ theorem FormalGroup.evalAdd_assoc
       rw [MvPowerSeries.eval₂_X]; simp [xyz]
     · show MvPowerSeries.eval₂ (RingHom.id R) xyz (MvPowerSeries.X (1 : Fin 3)) = y.1
       rw [MvPowerSeries.eval₂_X]; simp [xyz]
-  have hyz_fn : (fun s : Fin 2 => MvPowerSeries.eval₂ (RingHom.id R) xyz (YZ s)) =
+  have hyz_fn : (fun s : Fin 2 ↦ MvPowerSeries.eval₂ (RingHom.id R) xyz (YZ s)) =
       ![y.1, z.1] := by
     funext s
     fin_cases s
@@ -1067,7 +1065,7 @@ theorem FormalGroup.evalAdd_assoc
   -- hbridge_XY: eval_xyz F_XY = eval₂ id ![x,y] F.toSeries = evalAdd F x y
   -- hbridge_YZ: eval_xyz F_YZ = eval₂ id ![y,z] F.toSeries = evalAdd F y z
   -- Now compute eval_xyz ∘ aL and eval_xyz ∘ aR:
-  have hL_fn : (fun s : Fin 2 => MvPowerSeries.eval₂ (RingHom.id R) xyz (aL s)) =
+  have hL_fn : (fun s : Fin 2 ↦ MvPowerSeries.eval₂ (RingHom.id R) xyz (aL s)) =
       ![F.evalAdd x y, z.1] := by
     funext s
     fin_cases s
@@ -1075,7 +1073,7 @@ theorem FormalGroup.evalAdd_assoc
       rw [hbridge_XY]; rfl
     · show MvPowerSeries.eval₂ (RingHom.id R) xyz (MvPowerSeries.X (2 : Fin 3)) = z.1
       rw [MvPowerSeries.eval₂_X]; simp [xyz]
-  have hR_fn : (fun s : Fin 2 => MvPowerSeries.eval₂ (RingHom.id R) xyz (aR s)) =
+  have hR_fn : (fun s : Fin 2 ↦ MvPowerSeries.eval₂ (RingHom.id R) xyz (aR s)) =
       ![x.1, F.evalAdd y z] := by
     funext s
     fin_cases s
@@ -1114,11 +1112,11 @@ instance : Zero (F.EvalGroup hAdic) :=
 
 /-- The formal-group addition on `F.EvalGroup hAdic`. -/
 noncomputable instance : Add (F.EvalGroup hAdic) :=
-  ⟨fun x y => ⟨⟨F.evalAdd x.val y.val, F.evalAdd_mem hAdic x.val y.val⟩⟩⟩
+  ⟨fun x y ↦ ⟨⟨F.evalAdd x.val y.val, F.evalAdd_mem hAdic x.val y.val⟩⟩⟩
 
 /-- The formal-group negation on `F.EvalGroup hAdic`. -/
 noncomputable instance : Neg (F.EvalGroup hAdic) :=
-  ⟨fun x => ⟨⟨F.evalNeg x.val, F.evalNeg_mem hAdic x.val⟩⟩⟩
+  ⟨fun x ↦ ⟨⟨F.evalNeg x.val, F.evalNeg_mem hAdic x.val⟩⟩⟩
 
 omit [IsUniformAddGroup R] [IsTopologicalRing R] [IsLinearTopology R R]
   [T2Space R] [CompleteSpace R] in
@@ -1151,20 +1149,20 @@ noncomputable instance FormalGroup.EvalGroup.instAddCommGroup
     AddCommGroup (F.EvalGroup hAdic) :=
   letI addGroup : AddGroup (F.EvalGroup hAdic) :=
     AddGroup.ofLeftAxioms
-      (fun x y z =>
+      (fun x y z ↦
         FormalGroup.EvalGroup.ext
           (Subtype.ext (F.evalAdd_assoc hAdic x.val y.val z.val)))
-      (fun x =>
+      (fun x ↦
         FormalGroup.EvalGroup.ext
           (Subtype.ext (F.evalAdd_zero_left hAdic x.val)))
-      (fun x =>
+      (fun x ↦
         FormalGroup.EvalGroup.ext
           (Subtype.ext (by
             change F.evalAdd ⟨F.evalNeg x.val, F.evalNeg_mem hAdic x.val⟩ x.val = 0
             rw [F.evalAdd_comm hAdic]
             exact F.evalAdd_evalNeg hAdic x.val)))
   { addGroup with
-    add_comm := fun x y =>
+    add_comm := fun x y ↦
       FormalGroup.EvalGroup.ext
         (Subtype.ext (F.evalAdd_comm hAdic x.val y.val)) }
 
