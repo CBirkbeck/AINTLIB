@@ -163,10 +163,8 @@ theorem source_laurent_membership_in_localization_base_of_per_t_and_s_nonvan
       ¬ w.vle s 0) :
     SourceLaurentMembershipInLocalizationBase T s T_D s_base f := by
   intro t' ht' w hw_spa hw_f hw_one_t hw_t_ne
-  refine ⟨hw_spa, ?_, ?_⟩
-  · intro t ht
-    exact h_per_t t ht t' ht' w hw_spa hw_f hw_one_t hw_t_ne
-  · exact h_s_nonvan t' ht' w hw_spa hw_f hw_one_t hw_t_ne
+  exact ⟨hw_spa, fun t ht => h_per_t t ht t' ht' w hw_spa hw_f hw_one_t hw_t_ne,
+    h_s_nonvan t' ht' w hw_spa hw_f hw_one_t hw_t_ne⟩
 
 /-! ## Trivial localization auto-discharger -/
 
@@ -194,10 +192,7 @@ theorem source_laurent_membership_in_localization_base_empty_T_one_s
     SourceLaurentMembershipInLocalizationBase (∅ : Finset A) (1 : A)
       T_D s_base f := by
   intro t' _ht' w hw_spa _hw_f _hw_one_t _hw_t_ne
-  refine ⟨hw_spa, ?_, ?_⟩
-  · intro t ht
-    exact absurd ht (Finset.notMem_empty _)
-  · exact w.not_vle_one_zero
+  exact ⟨hw_spa, fun t ht => absurd ht (Finset.notMem_empty _), w.not_vle_one_zero⟩
 
 /-! ## End-to-end consumers -/
 
