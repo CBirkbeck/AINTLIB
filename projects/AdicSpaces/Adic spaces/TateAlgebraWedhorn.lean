@@ -72,8 +72,8 @@ is the substitution `X ↦ fX` (Wedhorn, §5.48). -/
 noncomputable def scaleHom (f : A) :
     MvPowerSeries (Fin 1) A →+* MvPowerSeries (Fin 1) A where
   toFun g s := f ^ (s 0) * g s
-  map_zero' := funext fun _ => mul_zero _
-  map_one' := funext fun s => by
+  map_zero' := funext fun _ ↦ mul_zero _
+  map_one' := funext fun s ↦ by
     change f ^ (s 0) * (1 : MvPowerSeries (Fin 1) A) s =
       (1 : MvPowerSeries (Fin 1) A) s
     rw [show (1 : MvPowerSeries (Fin 1) A) s =
@@ -81,11 +81,11 @@ noncomputable def scaleHom (f : A) :
     split
     · rename_i h; subst h; simp
     · ring
-  map_add' _ _ := funext fun _ => mul_add _ _ _
-  map_mul' g h := funext fun s => by
+  map_add' _ _ := funext fun _ ↦ mul_add _ _ _
+  map_mul' g h := funext fun s ↦ by
     classical
-    let φ : MvPowerSeries (Fin 1) A := fun s => f ^ (s 0) * g s
-    let ψ : MvPowerSeries (Fin 1) A := fun s => f ^ (s 0) * h s
+    let φ : MvPowerSeries (Fin 1) A := fun s ↦ f ^ (s 0) * g s
+    let ψ : MvPowerSeries (Fin 1) A := fun s ↦ f ^ (s 0) * h s
     change f ^ (s 0) * MvPowerSeries.coeff s (g * h) =
       MvPowerSeries.coeff s (φ * ψ)
     rw [MvPowerSeries.coeff_mul (φ := g) (ψ := h),
@@ -195,24 +195,24 @@ theorem tateTopologyT_nonarchimedean (f : A) :
   rw [map_zero] at hW
   -- W is a nhd of 0 in the Pi topology. Decompose via mem_pi.
   change W ∈ @nhds _
-    (@Pi.topologicalSpace (Fin 1 →₀ ℕ) (fun _ => A) (fun _ => ‹_›)) 0
+    (@Pi.topologicalSpace (Fin 1 →₀ ℕ) (fun _ ↦ A) (fun _ ↦ ‹_›)) 0
     at hW
   rw [nhds_pi] at hW
   simp only [show ∀ i : Fin 1 →₀ ℕ,
-    (0 : (Fin 1 →₀ ℕ) → A) i = (0 : A) from fun _ => rfl] at hW
+    (0 : (Fin 1 →₀ ℕ) → A) i = (0 : A) from fun _ ↦ rfl] at hW
   obtain ⟨I, hI_fin, t, ht, hIt⟩ := mem_pi.mp hW
   -- For each i ∈ I, find an open additive subgroup of A inside t i.
   -- Use a single V that works for all i ∈ I by taking a finite infimum.
   -- First, for each i, pick a subgroup inside t i.
   have hVi : ∀ i : Fin 1 →₀ ℕ,
-      ∃ Vi : OpenAddSubgroup A, (Vi : Set A) ⊆ t i := fun i =>
+      ∃ Vi : OpenAddSubgroup A, (Vi : Set A) ⊆ t i := fun i ↦
     NonarchimedeanRing.is_nonarchimedean (t i) (ht i)
   choose Vi hVi using hVi
   -- The preimage scaleIncl⁻¹(I.pi Vi) is an open additive subgroup.
   refine ⟨{
     toAddSubgroup :=
-      { carrier := (scaleIncl f) ⁻¹' (I.pi (fun i => (Vi i : Set A)))
-        add_mem' := fun {a b} ha hb => by
+      { carrier := (scaleIncl f) ⁻¹' (I.pi (fun i ↦ (Vi i : Set A)))
+        add_mem' := fun {a b} ha hb ↦ by
           simp only [Set.mem_preimage] at ha hb ⊢
           intro i hi
           change (scaleIncl f (a + b)) i ∈ _
@@ -222,14 +222,14 @@ theorem tateTopologyT_nonarchimedean (f : A) :
         zero_mem' := by
           simp only [Set.mem_preimage, map_zero]
           intro i _; exact (Vi i).toAddSubgroup.zero_mem
-        neg_mem' := fun {a} ha => by
+        neg_mem' := fun {a} ha ↦ by
           simp only [Set.mem_preimage] at ha ⊢
           intro i hi
           change scaleIncl f (-a) i ∈ _
           rw [map_neg]
           exact (Vi i).toAddSubgroup.neg_mem (ha i hi) }
     isOpen' :=
-      (isOpen_set_pi hI_fin fun i _ => (Vi i).isOpen).preimage
+      (isOpen_set_pi hI_fin fun i _ ↦ (Vi i).isOpen).preimage
         continuous_induced_dom
   }, ?_⟩
   -- Show this open additive subgroup is contained in U.
@@ -247,15 +247,15 @@ continuous by definition of the induced topology) with the continuous
 projection `π_{toIndex n}` from the product topology. -/
 theorem tateTopologyT_continuous_scaledCoeff (f : A) (n : ℕ) :
     @Continuous _ _ (tateTopologyT f) _
-      (fun g : ↥(TateAlgebra A) =>
+      (fun g : ↥(TateAlgebra A) ↦
         f ^ n * TateAlgebra.coeff n g) := by
   letI : TopologicalSpace ↥(TateAlgebra A) := tateTopologyT f
   letI : TopologicalSpace (MvPowerSeries (Fin 1) A) :=
     WithPiTopology.instTopologicalSpace A
   -- The map equals π_{toIndex n} ∘ scaleIncl f.
-  have h : (fun g : ↥(TateAlgebra A) =>
+  have h : (fun g : ↥(TateAlgebra A) ↦
       f ^ n * TateAlgebra.coeff n g) =
-    (fun φ : MvPowerSeries (Fin 1) A =>
+    (fun φ : MvPowerSeries (Fin 1) A ↦
       φ (TateAlgebra.toIndex n)) ∘ (scaleIncl f) := by
     ext g
     simp only [Function.comp, scaleIncl_apply]
@@ -283,21 +283,21 @@ theorem tateTopologyT_continuous_algebraMap (f : A) :
   -- Since (C a)(s) = if s = 0 then a else 0 (by MvPowerSeries.coeff_C),
   -- this is either a ↦ f^0 * a = a or a ↦ f^k * 0 = 0.
   -- Both are continuous.
-  change Continuous fun a =>
+  change Continuous fun a ↦
     f ^ (s 0) * (algebraMap A ↥(TateAlgebra A) a).val s
   by_cases hs : s = 0
   · subst hs
     simp only [Finsupp.zero_apply, pow_zero, one_mul]
     -- Need: a ↦ (algebraMap a).val 0 is continuous.
     -- (algebraMap a).val 0 = (C a) 0 = a (constant coefficient).
-    change Continuous fun a =>
+    change Continuous fun a ↦
       (algebraMap A (MvPowerSeries (Fin 1) A) a) 0
     exact (WithPiTopology.continuous_coeff A 0).comp
       WithPiTopology.continuous_C
   · -- s ≠ 0: (C a)(s) = 0, so the map is a ↦ f^(s 0) * 0 = 0.
-    have : (fun a : A =>
+    have : (fun a : A ↦
         f ^ (s 0) * (algebraMap A ↥(TateAlgebra A) a).val s) =
-      fun _ => 0 := by
+      fun _ ↦ 0 := by
       ext a
       change f ^ (s 0) * (algebraMap A (MvPowerSeries (Fin 1) A) a) s = 0
       classical
@@ -332,7 +332,7 @@ noncomputable def evalTerm (g : A →+* B) (b : B)
 the cofinite filter on `ℕ`. This transfers the restricted condition
 from multi-indices to natural numbers via `toIndex`. -/
 private theorem coeff_tendsto_zero (h : ↥(TateAlgebra A)) :
-    Tendsto (fun n => TateAlgebra.coeff n h)
+    Tendsto (fun n ↦ TateAlgebra.coeff n h)
       cofinite (nhds (0 : A)) :=
   h.prop.comp
     (Finsupp.single_injective (0 : Fin 1)).tendsto_cofinite
@@ -347,12 +347,12 @@ private theorem tendsto_zero_mul_of_bounded_range
     {c : ℕ → B} {d : ℕ → B}
     (hc : Tendsto c cofinite (nhds 0))
     (hd : TopologicalRing.IsBounded (Set.range d)) :
-    Tendsto (fun n => c n * d n) cofinite (nhds 0) := by
+    Tendsto (fun n ↦ c n * d n) cofinite (nhds 0) := by
   intro U hU
   obtain ⟨V, hV, hSV⟩ := hd U hU
   have hcV := hc hV
   rw [mem_map] at hcV ⊢
-  exact mem_of_superset hcV fun n (hn : c n ∈ V) =>
+  exact mem_of_superset hcV fun n (hn : c n ∈ V) ↦
     show c n * d n ∈ U from
       mul_comm (c n) (d n) ▸
         hSV (Set.mul_mem_mul ⟨n, rfl⟩ hn)
@@ -442,7 +442,7 @@ noncomputable def evalHomBounded (g : A →+* B) (hg : Continuous g)
         map_zero, zero_mul]
   map_add' f h := by
     have hterm : ∀ n, evalTerm g b (f + h) n =
-        evalTerm g b f n + evalTerm g b h n := fun n => by
+        evalTerm g b f n + evalTerm g b h n := fun n ↦ by
       simp only [evalTerm, TateAlgebra.coeff,
         Subring.coe_add, map_add, add_mul]
     conv_lhs =>
@@ -458,7 +458,7 @@ noncomputable def evalHomBounded (g : A →+* B) (hg : Continuous g)
     congr 1; ext n
     simp only [evalTerm, coeff_mul_antidiag, map_sum, map_mul,
       Finset.sum_mul]
-    exact Finset.sum_congr rfl fun ⟨i, j⟩ hij => by
+    exact Finset.sum_congr rfl fun ⟨i, j⟩ hij ↦ by
       rw [← Finset.mem_antidiagonal.mp hij, pow_add]; ring
 
 /-! ### Bivariate evaluation ring homomorphism (Wedhorn Example 6.39)
@@ -484,7 +484,7 @@ omit [UniformSpace B] [IsUniformAddGroup B]
 cofinite filter on `Fin 2 →₀ ℕ`. Direct projection of the `IsRestricted`
 hypothesis carried by the subring element. -/
 private theorem coeff₂_tendsto_zero (h : ↥(TateAlgebra₂ A)) :
-    Tendsto (fun n : Fin 2 →₀ ℕ => MvPowerSeries.coeff n h.val)
+    Tendsto (fun n : Fin 2 →₀ ℕ ↦ MvPowerSeries.coeff n h.val)
       cofinite (nhds (0 : A)) := h.prop
 
 omit [IsUniformAddGroup B] [NonarchimedeanRing B]
@@ -495,7 +495,7 @@ private theorem range_pow₂_isBounded (b₁ b₂ : B)
     (hb₁ : TopologicalRing.IsBounded (Set.range (b₁ ^ · : ℕ → B)))
     (hb₂ : TopologicalRing.IsBounded (Set.range (b₂ ^ · : ℕ → B))) :
     TopologicalRing.IsBounded
-      (Set.range (fun n : Fin 2 →₀ ℕ => b₁ ^ (n 0) * b₂ ^ (n 1))) :=
+      (Set.range (fun n : Fin 2 →₀ ℕ ↦ b₁ ^ (n 0) * b₂ ^ (n 1))) :=
   (hb₁.mul hb₂).subset (by
     rintro _ ⟨n, rfl⟩
     exact Set.mul_mem_mul ⟨n 0, rfl⟩ ⟨n 1, rfl⟩)
@@ -511,7 +511,7 @@ theorem evalTerm₂_tendsto_zero (g : A →+* B) (hg : Continuous g)
     (hb₂ : TopologicalRing.IsBounded (Set.range (b₂ ^ · : ℕ → B)))
     (h : ↥(TateAlgebra₂ A)) :
     Tendsto (evalTerm₂ g b₁ b₂ h) cofinite (nhds 0) := by
-  have hc : Tendsto (fun n : Fin 2 →₀ ℕ =>
+  have hc : Tendsto (fun n : Fin 2 →₀ ℕ ↦
       g (MvPowerSeries.coeff n h.val)) cofinite (nhds 0) :=
     map_zero g ▸ hg.continuousAt.tendsto.comp (coeff₂_tendsto_zero h)
   have hd := range_pow₂_isBounded b₁ b₂ hb₁ hb₂
@@ -519,7 +519,7 @@ theorem evalTerm₂_tendsto_zero (g : A →+* B) (hg : Continuous g)
   obtain ⟨V, hV, hSV⟩ := hd U hU
   have hcV := hc hV
   rw [mem_map] at hcV ⊢
-  refine mem_of_superset hcV (fun n (hn : _ ∈ V) => ?_)
+  refine mem_of_superset hcV (fun n (hn : _ ∈ V) ↦ ?_)
   change g (MvPowerSeries.coeff n h.val) *
     (b₁ ^ (n 0) * b₂ ^ (n 1)) ∈ U
   rw [mul_comm]
@@ -584,7 +584,7 @@ noncomputable def evalHomBounded₂ (g : A →+* B) (hg : Continuous g)
       rw [MvPowerSeries.coeff_one, if_neg hn, map_zero, zero_mul]
   map_add' f h := by
     have hterm : ∀ n, evalTerm₂ g b₁ b₂ (f + h) n =
-        evalTerm₂ g b₁ b₂ f n + evalTerm₂ g b₁ b₂ h n := fun n => by
+        evalTerm₂ g b₁ b₂ f n + evalTerm₂ g b₁ b₂ h n := fun n ↦ by
       simp only [evalTerm₂, Subring.coe_add, map_add, add_mul]
     conv_lhs => arg 1; ext n; rw [hterm n]
     exact (evalTerm₂_summable g hg b₁ b₂ hb₁ hb₂ f).tsum_add
@@ -599,7 +599,7 @@ noncomputable def evalHomBounded₂ (g : A →+* B) (hg : Continuous g)
     ext n
     simp only [evalTerm₂, coeff₂_mul_antidiag, map_sum, map_mul,
       Finset.sum_mul]
-    refine Finset.sum_congr rfl (fun ⟨p, q⟩ hpq => ?_)
+    refine Finset.sum_congr rfl (fun ⟨p, q⟩ hpq ↦ ?_)
     have hpq_add : p + q = n := Finset.mem_antidiagonal.mp hpq
     have h0 : p 0 + q 0 = n 0 := by rw [← Finsupp.add_apply, hpq_add]
     have h1 : p 1 + q 1 = n 1 := by rw [← Finsupp.add_apply, hpq_add]
