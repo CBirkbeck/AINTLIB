@@ -202,9 +202,6 @@ theorem sigma_factored_inequality_at_localized_cor732_sigma
               (D_s_loc ^ (N + 1) *
                 (σ_loc : Localization.Away s)) ∧
             ¬ v.vle D_s_loc 0 := by
-  letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
-  letI : PlusSubring (Localization.Away s) :=
-    localizationLocSubringPlusSubring P T s
   intro σ_loc h_cover_t t' ht' v hv_spa hv_f hv_one_t hv_t_ne
   -- Apply the named direct upper bound residual at this (σ_loc, h_cover_t).
   obtain ⟨h_clear, h_D_s_ne⟩ :=
@@ -216,8 +213,8 @@ theorem sigma_factored_inequality_at_localized_cor732_sigma
   --     = v.vle (t' * 1 * σ_loc) (D_s_loc^1 * σ_loc)
   --     = v.vle (t' * σ_loc) (D_s_loc * σ_loc)
   --     ↔ v.vle t' D_s_loc (by per_t_inequality_via_sigma_factor)
-  simp only [pow_zero, mul_one, zero_add, pow_one]
-  exact (per_t_inequality_via_sigma_factor v σ_loc t' D_s_loc).mpr h_clear
+  simpa only [pow_zero, mul_one, zero_add, pow_one] using
+    (per_t_inequality_via_sigma_factor v σ_loc t' D_s_loc).mpr h_clear
 
 omit [PlusSubring A] in
 /-- **End-to-end: σ-factored supplier output via the named direct
@@ -264,10 +261,6 @@ theorem sigma_factored_supplier_via_cor732_direct_upper_bound_residual
           D_T_loc s_base_loc D_s_loc f_loc),
     ∃ _ : (Localization.Away s)ˣ,
       SigmaFactoredSupplier D_T_loc s_base_loc D_s_loc f_loc := by
-  letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
-  letI : PlusSubring (Localization.Away s) :=
-    localizationLocSubringPlusSubring P T s
-  letI : DecidableEq (Localization.Away s) := Classical.decEq _
   intro π_loc hI_loc hπ_loc_tn hπ_loc_unit hArch_loc T_D s_D hT_loc
     D_T_loc s_base_loc D_s_loc f_loc h_direct_residual
   -- Convert the named direct upper bound residual into T076's
