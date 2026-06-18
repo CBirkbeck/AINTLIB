@@ -3161,12 +3161,9 @@ theorem tateAlgebra₂_polynomial_decomp (g : ↥(TateAlgebra₂ A)) (N : ℕ)
             Finsupp.single (1 : Fin 2) j) g.val) := by
     change (Subring.subtype _) _ = _
     rw [map_sum]
-    apply Finset.sum_congr rfl
-    intros i _
+    refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_sum]
-    apply Finset.sum_congr rfl
-    intros j _
-    exact TateAlgebra₂_monomial_val _ i j
+    exact Finset.sum_congr rfl fun j _ => TateAlgebra₂_monomial_val _ i j
   rw [hRHS_val_eq]
   -- Compute the value at l via Finset.sum_apply' + coeff_monomial.
   -- (∑_i ∑_j monomial_ij c_ij) l = ∑_i ∑_j (monomial_ij c_ij) l
@@ -3187,12 +3184,9 @@ theorem tateAlgebra₂_polynomial_decomp (g : ↥(TateAlgebra₂ A)) (N : ℕ)
           Finsupp.single (1 : Fin 2) j)
           (MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) i +
             Finsupp.single (1 : Fin 2) j) g.val)) l).symm, map_sum]
-    apply Finset.sum_congr rfl
-    intros i _
+    refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_sum]
-    apply Finset.sum_congr rfl
-    intros j _
-    exact MvPowerSeries.coeff_monomial _ _ _
+    exact Finset.sum_congr rfl fun j _ => MvPowerSeries.coeff_monomial _ _ _
   rw [hsum_val]
   -- Split cases on whether l is in the box.
   by_cases hl : l 0 < N ∧ l 1 < N
