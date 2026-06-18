@@ -14,17 +14,17 @@ namespace HasseWeil
 variable {R : Type*} [CommRing R]
 
 def conv₂ (f : ℕ → R) (n : ℕ) : R :=
-  (range (n + 1)).sum fun i => f i * f (n - i)
+  (range (n + 1)).sum fun i ↦ f i * f (n - i)
 
 def conv₃ (f : ℕ → R) (n : ℕ) : R :=
-  (range (n + 1)).sum fun i =>
-    (range (n - i + 1)).sum fun j => f i * f j * f (n - i - j)
+  (range (n + 1)).sum fun i ↦
+    (range (n - i + 1)).sum fun j ↦ f i * f j * f (n - i - j)
 
 /-! ### 1. w(z) and u(z) -/
 
 def formalW_step (W : WeierstrassCurve R) (n : ℕ) (ih : ∀ m, m < n → R) : R :=
   if n < 3 then 0 else if n = 3 then 1 else
-  let w : ℕ → R := fun m => if h : m < n then ih m h else 0
+  let w : ℕ → R := fun m ↦ if h : m < n then ih m h else 0
   W.a₁ * w (n-1) + W.a₂ * w (n-2) + W.a₃ * conv₂ w n +
   W.a₄ * conv₂ w (n-1) + W.a₆ * conv₃ w n
 
@@ -35,7 +35,7 @@ noncomputable def formalW (W : WeierstrassCurve R) : PowerSeries R :=
   PowerSeries.mk (formalW_coeff W)
 
 noncomputable def formalU_coeff (W : WeierstrassCurve R) : ℕ → R :=
-  fun n => formalW_coeff W (n + 3)
+  fun n ↦ formalW_coeff W (n + 3)
 
 noncomputable def formalPoly (W : WeierstrassCurve R) : MvPowerSeries (Fin 2) R :=
   let z : MvPowerSeries (Fin 2) R := MvPowerSeries.X 0
@@ -47,15 +47,15 @@ noncomputable def formalPoly (W : WeierstrassCurve R) : MvPowerSeries (Fin 2) R 
 /-! ### 2. The formal inverse i(z) = -z/(1 - a₁z - a₃z³u(z)) -/
 
 noncomputable def invDenom_coeff (W : WeierstrassCurve R) : ℕ → R :=
-  WellFoundedRelation.wf.fix fun n ih =>
+  WellFoundedRelation.wf.fix fun n ih ↦
     if n = 0 then 1 else
-    let d : ℕ → R := fun m => if h : m < n then ih m h else 0
+    let d : ℕ → R := fun m ↦ if h : m < n then ih m h else 0
     W.a₁ * d (n - 1) +
-      (if n ≥ 3 then W.a₃ * (range (n - 2)).sum fun k =>
+      (if n ≥ 3 then W.a₃ * (range (n - 2)).sum fun k ↦
         formalU_coeff W k * d (n - 3 - k) else 0)
 
 noncomputable def formalInverse_coeff (W : WeierstrassCurve R) : ℕ → R :=
-  fun n => if n = 0 then 0 else -(invDenom_coeff W (n - 1))
+  fun n ↦ if n = 0 then 0 else -(invDenom_coeff W (n - 1))
 
 noncomputable def formalInverse (W : WeierstrassCurve R) : PowerSeries R :=
   PowerSeries.mk (formalInverse_coeff W)
@@ -63,7 +63,7 @@ noncomputable def formalInverse (W : WeierstrassCurve R) : PowerSeries R :=
 /-! ### 3. Bivariate helpers -/
 
 def bmul (f g : ℕ → ℕ → R) (i j : ℕ) : R :=
-  (range (i + 1)).sum fun a => (range (j + 1)).sum fun b =>
+  (range (i + 1)).sum fun a ↦ (range (j + 1)).sum fun b ↦
     f a b * g (i - a) (j - b)
 
 -- Inverse of bivariate unit power series (f₀₀ = 1).
@@ -75,15 +75,15 @@ def bmul (f g : ℕ → ℕ → R) (i j : ℕ) : R :=
 -- At total degree N, g_{ij} depends on g_{ab} with a+b < N (already computed).
 -- This avoids 2D recursion issues.
 noncomputable def binv_by_degree (f : ℕ → ℕ → R) : ℕ → (ℕ → ℕ → R) :=
-  WellFoundedRelation.wf.fix fun N ih =>
+  WellFoundedRelation.wf.fix fun N ih ↦
     -- ih N' hN' gives all g_{ab} with a + b = N' for N' < N
-    let g_prev : ℕ → ℕ → R := fun a b =>
+    let g_prev : ℕ → ℕ → R := fun a b ↦
       if h : a + b < N then (ih (a + b) h) a b else 0
     -- Now compute g_{ij} for i + j = N
-    fun i j =>
+    fun i j ↦
       if i + j ≠ N then 0  -- not this degree level
       else if i = 0 ∧ j = 0 then 1
-      else -(range (i + 1)).sum fun a => (range (j + 1)).sum fun b =>
+      else -(range (i + 1)).sum fun a ↦ (range (j + 1)).sum fun b ↦
         if a = i ∧ b = j then 0
         else g_prev a b * f (i - a) (j - b)
 
@@ -98,7 +98,7 @@ def bpow (f : ℕ → ℕ → R) : ℕ → ℕ → ℕ → R
   | i, j, (n + 1) => bmul f (bpow f · · n) i j
 
 noncomputable def bcomp (h : ℕ → R) (s : ℕ → ℕ → R) (i j : ℕ) : R :=
-  (range (i + j + 1)).sum fun n => h n * bpow s i j n
+  (range (i + j + 1)).sum fun n ↦ h n * bpow s i j n
 
 /-! ### 4. The formal group law F(z₁,z₂) -/
 
@@ -107,7 +107,7 @@ structure FormalGroupLaw (R : Type*) [CommRing R] where
 
 noncomputable def formalGroupLaw_coeff (W : WeierstrassCurve R) :
     (Fin 2 →₀ ℕ) → R :=
-  fun d => let i := d 0; let j := d 1
+  fun d ↦ let i := d 0; let j := d 1
   if i = 0 then (if j = 1 then 1 else 0)
   else if j = 0 then (if i = 1 then 1 else 0)
   else if i + j = 2 then -W.a₁
@@ -116,33 +116,33 @@ noncomputable def formalGroupLaw_coeff (W : WeierstrassCurve R) :
     (if i = 2 ∧ j = 2 then W.a₁ * W.a₂ - 3 * W.a₃ else -(2 * W.a₃))
   else
     -- Degree ≥ 5: F = i(z₃) where z₃ = -B·A⁻¹ - z₁ - z₂
-    let lam : ℕ → ℕ → R := fun a b => formalW_coeff W (a + b + 1)
-    let w1 : ℕ → ℕ → R := fun a b => if b = 0 then formalW_coeff W a else 0
-    let nu : ℕ → ℕ → R := fun a b =>
+    let lam : ℕ → ℕ → R := fun a b ↦ formalW_coeff W (a + b + 1)
+    let w1 : ℕ → ℕ → R := fun a b ↦ if b = 0 then formalW_coeff W a else 0
+    let nu : ℕ → ℕ → R := fun a b ↦
       w1 a b - (if a ≥ 1 then lam (a - 1) b else 0)
-    let A : ℕ → ℕ → R := fun a b =>
+    let A : ℕ → ℕ → R := fun a b ↦
       (if a = 0 ∧ b = 0 then 1 else 0) + W.a₂ * lam a b +
       W.a₄ * bmul lam lam a b + W.a₆ * bmul lam (bmul lam lam) a b
-    let B : ℕ → ℕ → R := fun a b =>
+    let B : ℕ → ℕ → R := fun a b ↦
       W.a₁ * lam a b + W.a₂ * nu a b + W.a₃ * bmul lam lam a b +
       2 * W.a₄ * bmul lam nu a b + 3 * W.a₆ * bmul (bmul lam lam) nu a b
-    let z3 : ℕ → ℕ → R := fun a b =>
+    let z3 : ℕ → ℕ → R := fun a b ↦
       -(bmul B (binv A) a b) -
       (if a = 1 ∧ b = 0 then 1 else 0) - (if a = 0 ∧ b = 1 then 1 else 0)
     bcomp (formalInverse_coeff W) z3 i j
 
 noncomputable def formalGroupLaw (W : WeierstrassCurve R) : FormalGroupLaw R :=
-  ⟨fun d => formalGroupLaw_coeff W d⟩
+  ⟨fun d ↦ formalGroupLaw_coeff W d⟩
 
 /-! ### 5. The invariant differential ω(z)/dz = 1/F_X(0,z) -/
 
 noncomputable def formalGroupLaw_dX_at_zero (W : WeierstrassCurve R) : ℕ → R :=
-  fun n => formalGroupLaw_coeff W (Finsupp.single 0 1 + Finsupp.single 1 n)
+  fun n ↦ formalGroupLaw_coeff W (Finsupp.single 0 1 + Finsupp.single 1 n)
 
 noncomputable def formalDiffCoeff (W : WeierstrassCurve R) : ℕ → R :=
-  WellFoundedRelation.wf.fix fun n ih =>
+  WellFoundedRelation.wf.fix fun n ih ↦
     if n = 0 then 1
-    else -(range n).sum fun k =>
+    else -(range n).sum fun k ↦
       (if h : k < n then ih k h else 0) * formalGroupLaw_dX_at_zero W (n - k)
 
 noncomputable def formalDiff (W : WeierstrassCurve R) : PowerSeries R :=
@@ -178,16 +178,16 @@ characteristic equation derived from the Weierstrass equation by substituting
 
 /-- Unfolding `formalW_coeff` via `WellFounded.fix_eq`. -/
 theorem formalW_coeff_eq_step (n : ℕ) :
-    formalW_coeff W n = formalW_step W n (fun m _ => formalW_coeff W m) := by
+    formalW_coeff W n = formalW_step W n (fun m _ ↦ formalW_coeff W m) := by
   show WellFoundedRelation.wf.fix (formalW_step W) n =
-    formalW_step W n (fun m _ => formalW_coeff W m)
+    formalW_step W n (fun m _ ↦ formalW_coeff W m)
   rw [WellFoundedRelation.wf.fix_eq]
   rfl
 
 /-- The convolution `conv₂` of `formalW_coeff` with the truncation `m < n` agrees
     with the full convolution, since `formalW_coeff W k = 0` for `k < 3`. -/
 theorem conv₂_truncate (n : ℕ) :
-    conv₂ (fun m => if m < n then formalW_coeff W m else 0) n =
+    conv₂ (fun m ↦ if m < n then formalW_coeff W m else 0) n =
       conv₂ (formalW_coeff W) n := by
   unfold conv₂
   apply Finset.sum_congr rfl
@@ -213,7 +213,7 @@ theorem conv₂_truncate (n : ℕ) :
 
 /-- The conv₂ of formalW_coeff at index `n-1` equals the truncated version. -/
 theorem conv₂_truncate' (n : ℕ) (hn : 1 ≤ n) :
-    conv₂ (fun m => if m < n then formalW_coeff W m else 0) (n - 1) =
+    conv₂ (fun m ↦ if m < n then formalW_coeff W m else 0) (n - 1) =
       conv₂ (formalW_coeff W) (n - 1) := by
   unfold conv₂
   apply Finset.sum_congr rfl
@@ -232,7 +232,7 @@ theorem coeff_formalW_sq (n : ℕ) :
     PowerSeries.coeff n (formalW W * formalW W) = conv₂ (formalW_coeff W) n := by
   rw [PowerSeries.coeff_mul]
   rw [Finset.Nat.sum_antidiagonal_eq_sum_range_succ
-    (M := R) (fun i j => @PowerSeries.coeff R _ i (formalW W) *
+    (M := R) (fun i j ↦ @PowerSeries.coeff R _ i (formalW W) *
                 @PowerSeries.coeff R _ j (formalW W)) n]
   unfold conv₂
   apply Finset.sum_congr rfl
@@ -253,7 +253,7 @@ theorem coeff_formalW_cube (n : ℕ) :
       conv₃ (formalW_coeff W) n := by
   rw [PowerSeries.coeff_mul]
   rw [Finset.Nat.sum_antidiagonal_eq_sum_range_succ
-    (M := R) (fun i j => @PowerSeries.coeff R _ i (formalW W) *
+    (M := R) (fun i j ↦ @PowerSeries.coeff R _ i (formalW W) *
                 @PowerSeries.coeff R _ j (formalW W * formalW W)) n]
   unfold conv₃
   apply Finset.sum_congr rfl
@@ -280,7 +280,7 @@ theorem coeff_formalW_pow_three (n : ℕ) :
 /-- The convolution `conv₃` of `formalW_coeff` with truncation agrees with the full version,
     since `formalW_coeff W k = 0` for `k < 3`. -/
 theorem conv₃_truncate (n : ℕ) :
-    conv₃ (fun m => if m < n then formalW_coeff W m else 0) n =
+    conv₃ (fun m ↦ if m < n then formalW_coeff W m else 0) n =
       conv₃ (formalW_coeff W) n := by
   unfold conv₃
   apply Finset.sum_congr rfl
@@ -407,14 +407,14 @@ theorem formalW_recurrence :
     interval_cases n
     all_goals
       simp [conv₂, conv₃, formalW_coeff_zero, formalW_coeff_one, formalW_coeff_two,
-            Finset.sum_range_succ, Finset.sum_range_zero]
-  · push_neg at hn3
+            Finset.sum_range_succ]
+  · push Not at hn3
     rw [if_neg (not_lt.mpr hn3)]
     by_cases hn_eq3 : n = 3
     · -- n = 3 case: LHS = 1
       rw [if_pos hn_eq3]
       subst hn_eq3
-      simp only [if_pos rfl]
+      simp only []
       have h1 : (1 : ℕ) ≤ 3 := by norm_num
       have h2 : (2 : ℕ) ≤ 3 := by norm_num
       rw [if_pos h1, if_pos h2, if_pos h1]
