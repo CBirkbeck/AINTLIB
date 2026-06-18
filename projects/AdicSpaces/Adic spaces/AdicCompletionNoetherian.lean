@@ -751,10 +751,7 @@ theorem pow_eq_span_pow_of_span_eq [IsNoetherianRing R] (I : Ideal R)
   classical
   apply le_antisymm
   · -- I^k ≤ Ideal.span RHS via Submodule.span_pow + counting argument.
-    rw [← hspan]
-    have hspow : Ideal.span (Set.range f) ^ k = Ideal.span (Set.range f ^ k) :=
-      Submodule.span_pow (Set.range f) k
-    rw [hspow]
+    rw [← hspan, Submodule.span_pow]
     refine Ideal.span_le.mpr ?_
     intro x hx
     rw [Set.mem_pow_iff_prod] at hx
@@ -766,11 +763,8 @@ theorem pow_eq_span_pow_of_span_eq [IsNoetherianRing R] (I : Ideal R)
     let α : Fin n → ℕ := fun i =>
       (Finset.univ.filter (fun j : Fin k => h j = i)).card
     have hα_sum : ∑ i, α i = k := by
-      have hcard : (Finset.univ : Finset (Fin k)).card =
-          ∑ i ∈ (Finset.univ : Finset (Fin n)), α i :=
-        Finset.card_eq_sum_card_fiberwise (fun j _ => Finset.mem_univ _)
-      simp only [Finset.card_univ, Fintype.card_fin] at hcard
-      exact hcard.symm
+      rw [← Finset.card_eq_sum_card_fiberwise (fun j _ => Finset.mem_univ (h j))]
+      simp
     have hx_alpha : x = ∏ i, (f i) ^ (α i) := by
       rw [hx_eq, Finset.prod_comp f h]
       apply Finset.prod_subset (Finset.subset_univ _)
@@ -873,8 +867,7 @@ private lemma _adicCompletion_mk_of_first_zero_in_I_smul_top
     AdicCompletion.mk I R b ∈ (I • ⊤ : Submodule R (AdicCompletion I R)) := by
   -- Step 1: `evalₐ` at level 1 sends `mk b` to 0 (because `b 1 = 0`).
   have hker : (AdicCompletion.evalₐ I 1) (AdicCompletion.mk I R b) = 0 := by
-    rw [AdicCompletion.evalₐ_mk, hb]
-    exact (Ideal.Quotient.mk (I ^ 1)).map_zero
+    simp [AdicCompletion.evalₐ_mk, hb]
   -- Step 2: by `ker_evalₐ_eq` (kernel description), `mk b ∈ Ideal.map (algebraMap R _) I`.
   have hker' : AdicCompletion.mk I R b ∈
       Ideal.map (algebraMap R (AdicCompletion I R)) (I ^ 1) := by
