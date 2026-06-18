@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import HasseWeil.EC.IsogenyAG.TwoCurveGroupHom
 import HasseWeil.Curves.LocalizedDictionary
 import HasseWeil.Curves.PushforwardDivisor
+import HasseWeil.Curves.NormConormIntegralClosure
 
 /-!
 # The CoordHom-free norm–conorm: `PlaceRestrictionPreservesPrincipal` (Silverman II.3.6)
@@ -261,6 +262,8 @@ matched, term by term, to the `mapDomain` fibre sum of `placeRestrictionPushforw
   integralClosure F[E₂] K(E₁)` re-derivation of the place-identification, or a denominator chosen to
   also avoid the fixed target `Q` (possible iff `Q` is not below a pole of `x_gen₁/y_gen₁`). -/
 
+set_option synthInstance.maxHeartbeats 800000 in
+set_option maxHeartbeats 1600000 in
 /-- **The affine count identity — Silverman II.3.6, per-place, CoordHom-free (THE DEEP LEAF).**
 For `w ∈ F[E₁]` nonzero and an affine place `Q` of `E₂`, the order of the conorm `N_φ(algebraMap w)`
 at `Q` equals the sum, over the points `P` of `E₁` with `placeRestrictionPointMap φ P = Q`, of the
@@ -271,6 +274,7 @@ This is the place-valuation form of `CurveMap.count_relNorm_eq_sum_fiber` over t
 fibre-ramification, all `e = 1` by III.4.10c over `[IsAlgClosed F]`).  It is the single genuine
 deep input; everything else in this file is structural. -/
 theorem twoCurve_ord_conorm_eq_sum_fiber
+    [PerfectField (FractionRing (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing)]
     (φ : HasseWeil.Isogeny W₁ W₂)
     (hfin : @FiniteDimensional W₂.toAffine.FunctionField W₁.toAffine.FunctionField _ _
       φ.toAlgebra.toModule)
@@ -289,6 +293,100 @@ theorem twoCurve_ord_conorm_eq_sum_fiber
             (algebraMap (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing
               (⟨W₁⟩ : SmoothPlaneCurve F).FunctionField w)))
         (ProjectiveSmoothPoint.affine Q) : ℤ) : WithTop ℤ) := by
+  classical
+  -- ## Phase 1: set up the `NormConormIntegralClosure` section instances from `φ`.
+  letI algKL : Algebra W₂.toAffine.FunctionField W₁.toAffine.FunctionField := φ.toAlgebra
+  haveI twF : IsScalarTower F W₂.toAffine.FunctionField W₁.toAffine.FunctionField :=
+    IsScalarTower.of_algebraMap_eq fun c => (φ.pullback.commutes c).symm
+  haveI finKL : FiniteDimensional W₂.toAffine.FunctionField W₁.toAffine.FunctionField := hfin
+  haveI sepKL : Algebra.IsSeparable W₂.toAffine.FunctionField W₁.toAffine.FunctionField := hsep
+  -- the composite algebra `F[E₂] → K(E₂) → K(E₁)`
+  letI algCR1 : Algebra (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing W₁.toAffine.FunctionField :=
+    ((algebraMap W₂.toAffine.FunctionField W₁.toAffine.FunctionField).comp
+      (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+        W₂.toAffine.FunctionField)).toAlgebra
+  haveI tw1 : IsScalarTower (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+      W₂.toAffine.FunctionField W₁.toAffine.FunctionField :=
+    IsScalarTower.of_algebraMap_eq fun _ => rfl
+  -- Bring the toolkit's `B`-instances explicitly into scope (they are `set_option`-gated
+  -- instances in `NormConormIntegralClosure`, so re-establish them here to avoid synth timeouts).
+  haveI instDed : IsDedekindDomain (NormConormIntegralClosure.B
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) :=
+    NormConormIntegralClosure.instDedekindB
+  haveI instFin : Module.Finite (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+      (NormConormIntegralClosure.B
+        (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) :=
+    NormConormIntegralClosure.instModuleFiniteB
+  haveI instFracB : IsFractionRing (NormConormIntegralClosure.B
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))
+      W₁.toAffine.FunctionField :=
+    NormConormIntegralClosure.instFractionRingB
+  haveI instTF : Module.IsTorsionFree (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+      (NormConormIntegralClosure.B
+        (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) :=
+    NormConormIntegralClosure.instTorsionFreeB
+  haveI instIntClosedB : IsIntegrallyClosed (NormConormIntegralClosure.B
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) :=
+    inferInstance
+  haveI instIntegralAB : Algebra.IsIntegral (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+      (NormConormIntegralClosure.B
+        (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) :=
+    inferInstance
+  -- `hreg` in the `OrdAtInftyReg` form (the abstract algebra `algKL = φ.toAlgebra` has
+  -- `algebraMap = φ.pullback`).
+  have hregB : NormConormIntegralClosure.OrdAtInftyReg
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)) := hreg
+  -- ## Phase 2: the LHS bridge — `ord_P Q (conorm φ (aw)) = count_{m_Q}(relNorm (span {w_B}))`.
+  set aw := algebraMap (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing
+    (⟨W₁⟩ : SmoothPlaneCurve F).FunctionField w with haw
+  -- `aw ∈ B` by curve-completeness (`coordRing_mem_B_of_reg`); package as `w_B : B`.
+  have haw_mem : aw ∈ NormConormIntegralClosure.B
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)) :=
+    NormConormIntegralClosure.coordRing_mem_B_of_reg hregB w
+  set wB : NormConormIntegralClosure.B
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)) :=
+    ⟨aw, haw_mem⟩ with hwB
+  have hwB_ne : wB ≠ 0 := by
+    rw [hwB, Ne, Subtype.ext_iff]
+    simp only [ZeroMemClass.coe_zero]
+    rw [haw]
+    intro h
+    exact hw ((IsFractionRing.injective (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing
+      (⟨W₁⟩ : SmoothPlaneCurve F).FunctionField) (h.trans (map_zero _).symm))
+  -- `conorm φ aw = algebraMap_{F[E₂]→K(E₂)} (intNorm F[E₂] B wB)`.
+  have hconorm_eq : conorm φ aw =
+      algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+        (⟨W₂⟩ : SmoothPlaneCurve F).FunctionField
+        (Algebra.intNorm (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+          (NormConormIntegralClosure.B
+            (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) wB) := by
+    rw [Algebra.algebraMap_intNorm (K := (⟨W₂⟩ : SmoothPlaneCurve F).FunctionField)
+      (L := (⟨W₁⟩ : SmoothPlaneCurve F).FunctionField)]
+    show conorm φ aw = Algebra.norm (⟨W₂⟩ : SmoothPlaneCurve F).FunctionField
+      (algebraMap (NormConormIntegralClosure.B
+        (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))
+        (⟨W₁⟩ : SmoothPlaneCurve F).FunctionField wB)
+    rfl
+  have hintNorm_ne : Algebra.intNorm (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+      (NormConormIntegralClosure.B
+        (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) wB ≠ 0 := by
+    have hconorm_ne : conorm φ aw ≠ 0 := by
+      apply conorm_ne_zero φ
+      rw [haw]
+      intro h
+      exact hw ((IsFractionRing.injective (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing
+        (⟨W₁⟩ : SmoothPlaneCurve F).FunctionField) (h.trans (map_zero _).symm))
+    intro hzero
+    rw [hconorm_eq, hzero, map_zero] at hconorm_ne
+    exact hconorm_ne rfl
+  -- LHS = count of `m_Q` in `span {intNorm wB}`.
+  have hLHS : (⟨W₂⟩ : SmoothPlaneCurve F).ord_P Q (conorm φ aw) =
+      (((Associates.mk ((⟨W₂⟩ : SmoothPlaneCurve F).maximalIdealAt Q)).count
+        (Associates.mk (Ideal.span {Algebra.intNorm (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+          (NormConormIntegralClosure.B
+            (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) wB})).factors
+          : ℤ) : WithTop ℤ) := by
+    rw [hconorm_eq, (⟨W₂⟩ : SmoothPlaneCurve F).ord_P_algebraMap_eq_count Q hintNorm_ne]
   sorry
 
 /-! ### The `algebraMap` case of the norm–conorm identity (assembly)
@@ -303,6 +401,7 @@ degree, `degree_placeRestrictionPushforward`).  Mirrors
 `div(N_φ(algebraMap w)) = placeRestrictionPushforward φ (div(algebraMap w))`.  Affine coefficients
 via `twoCurve_ord_conorm_eq_sum_fiber`; infinity coefficient forced by degree `0`. -/
 theorem placeRestrictionPushforward_projectiveDivisorOf_algebraMap
+    [PerfectField (FractionRing (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing)]
     (φ : HasseWeil.Isogeny W₁ W₂)
     (hfin : @FiniteDimensional W₂.toAffine.FunctionField W₁.toAffine.FunctionField _ _
       φ.toAlgebra.toModule)
@@ -380,6 +479,7 @@ isogeny `φ` over `[IsAlgClosed F]`, `div(N_φ f) = placeRestrictionPushforward 
 `f ∈ K(E₁)`.  The `algebraMap` case is `placeRestrictionPushforward_projectiveDivisorOf_algebraMap`;
 the general case is the `f = u/v` reduction. -/
 theorem placeRestrictionPushforward_projectiveDivisorOf
+    [PerfectField (FractionRing (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing)]
     (φ : HasseWeil.Isogeny W₁ W₂)
     (hfin : @FiniteDimensional W₂.toAffine.FunctionField W₁.toAffine.FunctionField _ _
       φ.toAlgebra.toModule)
@@ -400,6 +500,7 @@ separable, the place-restriction pushforward carries principal projective diviso
 projective divisors: if `D = div f` (`f ≠ 0`), then `placeRestrictionPushforward φ D = div(N_φ f)`
 with `N_φ f ∈ K(E₂)` nonzero. -/
 theorem placeRestrictionPreservesPrincipal_of_finite_separable
+    [PerfectField (FractionRing (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing)]
     (φ : HasseWeil.Isogeny W₁ W₂)
     (hfin : @FiniteDimensional W₂.toAffine.FunctionField W₁.toAffine.FunctionField _ _
       φ.toAlgebra.toModule)
@@ -421,6 +522,7 @@ remaining wall of char-0 isogeny symmetry rests on *separability* of `φ` alone 
 `[IsAlgClosed F]`) — exactly Silverman III.4.10c's hypothesis.  This is the form to wire into
 `placeRestrictionRealizationOfPreservesPrincipal` at the `twoCurveGeometricDualData` call site. -/
 theorem placeRestrictionPreservesPrincipal_of_separable
+    [PerfectField (FractionRing (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing)]
     (φ : HasseWeil.Isogeny W₁ W₂)
     (hsep : @Algebra.IsSeparable W₂.toAffine.FunctionField W₁.toAffine.FunctionField _ _
       φ.toAlgebra)
@@ -430,5 +532,26 @@ theorem placeRestrictionPreservesPrincipal_of_separable
     PlaceRestrictionPreservesPrincipal φ :=
   placeRestrictionPreservesPrincipal_of_finite_separable φ
     (isogeny_finiteDimensional_twoCurve φ) hsep hreg
+
+/-- **`PlaceRestrictionPreservesPrincipal` from separability alone, char-zero form.**  In
+characteristic zero the `PerfectField (FractionRing F[E₂])` instance is automatic (`K(E₂)` has
+characteristic zero, hence is perfect), so the norm–conorm wall holds with no instance side-condition
+beyond the standing `[IsAlgClosed F]` (the III.4.10c setting).  This is the convenient form to wire
+into `placeRestrictionRealizationOfPreservesPrincipal` at the `twoCurveGeometricDualData` call site
+(where the ambient field is `CharZero`). -/
+theorem placeRestrictionPreservesPrincipal_of_separable_charZero [CharZero F]
+    (φ : HasseWeil.Isogeny W₁ W₂)
+    (hsep : @Algebra.IsSeparable W₂.toAffine.FunctionField W₁.toAffine.FunctionField _ _
+      φ.toAlgebra)
+    (hreg : ∀ f : (⟨W₂⟩ : SmoothPlaneCurve F).FunctionField,
+      0 ≤ (⟨W₂⟩ : SmoothPlaneCurve F).ordAtInfty f →
+      0 ≤ (⟨W₁⟩ : SmoothPlaneCurve F).ordAtInfty (φ.pullback f)) :
+    PlaceRestrictionPreservesPrincipal φ := by
+  haveI : CharZero (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing :=
+    charZero_of_injective_algebraMap (R := F) (algebraMap F _).injective
+  haveI : CharZero (FractionRing (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing) :=
+    charZero_of_injective_algebraMap (R := (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing)
+      (IsFractionRing.injective (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing _)
+  exact placeRestrictionPreservesPrincipal_of_separable φ hsep hreg
 
 end HasseWeil.WeilPairing
