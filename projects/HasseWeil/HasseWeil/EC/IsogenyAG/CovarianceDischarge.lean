@@ -174,7 +174,6 @@ theorem zsmul_affine_point_eq_general (m : ℤ) {x₀ y₀ : F₀}
         (m • WeierstrassCurve.Jacobian.Point.fromAffine
           (Affine.Point.some x₀ y₀ h_ns)) =
       WeierstrassCurve.Jacobian.Point.toAffine V (smulEval V x₀ y₀ m) := by
-    change _ = WeierstrassCurve.Jacobian.Point.toAffine V _
     unfold WeierstrassCurve.Jacobian.Point.toAffineLift
     rw [h_smulEval]
     rfl
@@ -351,11 +350,11 @@ theorem PullbackEvaluation.pullback_evaluatesTo {β : Isogeny W.toAffine W.toAff
       (h := g - algebraMap F KE c) (le_of_lt hg)
   have hsm : b ∉ (W_smooth W).maximalIdealAt Q := hbm'
   have hfrac : (g - algebraMap F KE c) * algebraMap R KE b = algebraMap R KE a := hfrac'
-  have hsne0 : b ≠ 0 := fun hc =>
+  have hsne0 : b ≠ 0 := fun hc ↦
     hsm (hc ▸ Ideal.zero_mem ((W_smooth W).maximalIdealAt Q))
-  have hsKE : algebraMap R KE b ≠ 0 := fun hc =>
+  have hsKE : algebraMap R KE b ≠ 0 := fun hc ↦
     hsne0 (IsFractionRing.injective R KE (hc.trans (map_zero _).symm))
-  have hsval : (W_smooth W).evalAt Q b ≠ 0 := fun hc =>
+  have hsval : (W_smooth W).evalAt Q b ≠ 0 := fun hc ↦
     hsm ((W_smooth W).ker_evalAt Q ▸ RingHom.mem_ker.mpr hc)
   -- the numerator vanishes at `Q`
   have hav : (W_smooth W).pointValuation Q (algebraMap R KE a) < 1 := by
@@ -372,31 +371,19 @@ theorem PullbackEvaluation.pullback_evaluatesTo {β : Isogeny W.toAffine W.toAff
   have ham : a ∈ (W_smooth W).maximalIdealAt Q :=
     (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
       (C := W_smooth W) a Q).mp hav
-  have haval : (W_smooth W).evalAt Q a = 0 := by
-    have hker : a ∈ RingHom.ker ((W_smooth W).evalAt Q) := by
-      rw [(W_smooth W).ker_evalAt Q]
-      exact ham
-    exact RingHom.mem_ker.mp hker
+  have haval : (W_smooth W).evalAt Q a = 0 :=
+    RingHom.mem_ker.mp ((W_smooth W).ker_evalAt Q ▸ ham)
   -- assemble: `β^*(g − c)` evaluates to `0`
   have hdivKE : g - algebraMap F KE c = algebraMap R KE a / algebraMap R KE b :=
     (eq_div_iff hsKE).mpr hfrac
   have hsub : EvaluatesTo W P (β.pullback (g - algebraMap F KE c)) 0 := by
-    have hpbdiv : β.pullback (algebraMap R KE a / algebraMap R KE b) =
-        β.pullback (algebraMap R KE a) / β.pullback (algebraMap R KE b) :=
-      map_div₀ β.pullback _ _
-    rw [hdivKE, hpbdiv]
+    rw [hdivKE, map_div₀]
     have h := (key a).div (key b) hsval
     rwa [haval, zero_div] at h
   -- and `β^* g = β^*(g − c) + c`
   have hgsplit : β.pullback g =
       β.pullback (g - algebraMap F KE c) + algebraMap F KE c := by
-    have h0 : g = (g - algebraMap F KE c) + algebraMap F KE c := by abel
-    calc β.pullback g
-        = β.pullback ((g - algebraMap F KE c) + algebraMap F KE c) := by rw [← h0]
-      _ = β.pullback (g - algebraMap F KE c) + β.pullback (algebraMap F KE c) :=
-          map_add _ _ _
-      _ = β.pullback (g - algebraMap F KE c) + algebraMap F KE c := by
-          rw [β.pullback.commutes c]
+    rw [map_sub, β.pullback.commutes c, sub_add_cancel]
   have h := hsub.add (evaluatesTo_algebraMap P c)
   rw [zero_add] at h
   rwa [← hgsplit] at h
@@ -415,11 +402,11 @@ theorem PullbackEvaluation.comp {β₁ β₂ : Isogeny W.toAffine W.toAffine}
       (bad₂ ∪ {P : (W_smooth W).SmoothPoint |
         ∃ Q ∈ bad₁, β₂.toAddMonoidHom P.toAffinePoint = Q.toAffinePoint}) := by
   intro P hP
-  have hP₂ : P ∉ bad₂ := fun hc => hP (Set.mem_union_left _ hc)
+  have hP₂ : P ∉ bad₂ := fun hc ↦ hP (Set.mem_union_left _ hc)
   obtain ⟨x₂, y₂, h₂, heq₂, hx₂, hy₂⟩ := hw₂ P hP₂
   have heqQ : β₂.toAddMonoidHom P.toAffinePoint =
       (⟨x₂, y₂, h₂⟩ : (W_smooth W).SmoothPoint).toAffinePoint := heq₂
-  have hQ₁ : (⟨x₂, y₂, h₂⟩ : (W_smooth W).SmoothPoint) ∉ bad₁ := fun hc =>
+  have hQ₁ : (⟨x₂, y₂, h₂⟩ : (W_smooth W).SmoothPoint) ∉ bad₁ := fun hc ↦
     hP (Set.mem_union_right _ ⟨⟨x₂, y₂, h₂⟩, hc, heqQ⟩)
   obtain ⟨x₁, y₁, h₁, heq₁, hx₁, hy₁⟩ := hw₁ ⟨x₂, y₂, h₂⟩ hQ₁
   refine ⟨x₁, y₁, h₁, ?_, ?_, ?_⟩
@@ -447,7 +434,7 @@ theorem PullbackEvaluation.comp_bad_finite {β₂ : Isogeny W.toAffine W.toAffin
     ext P
     simp only [Set.mem_setOf_eq, Set.mem_iUnion, exists_prop]
   rw [h]
-  exact hb₁.biUnion fun Q _ => hw₂.finite_fiber hb₂ Q.toAffinePoint
+  exact hb₁.biUnion fun Q _ ↦ hw₂.finite_fiber hb₂ Q.toAffinePoint
 
 /-! ### The `[n]`-witness: division polynomials evaluate the multiplication map -/
 
@@ -587,11 +574,9 @@ theorem mulByInt_pullbackAlgHom_comm_of_pullbackEvaluation [IsAlgClosed F]
       (PullbackEvaluation.comp_bad_finite hbad hbadn hwn)
       (PullbackEvaluation.comp_bad_finite hbadn hbad hw)
       (hw.comp hwn) (hwn.comp hw) Set.infinite_univ
-      (fun P _ => map_zsmul β.toAddMonoidHom n P.toAffinePoint)
-  have h : (mulByInt W.toAffine n).pullback (β.pullback u) =
-      β.pullback ((mulByInt W.toAffine n).pullback u) := DFunLike.congr_fun heq u
-  rw [hpb] at h
-  exact h
+      (fun P _ ↦ map_zsmul β.toAddMonoidHom n P.toAffinePoint)
+  rw [← hpb]
+  exact DFunLike.congr_fun heq u
 
 end HasseWeil.WeilPairing
 
