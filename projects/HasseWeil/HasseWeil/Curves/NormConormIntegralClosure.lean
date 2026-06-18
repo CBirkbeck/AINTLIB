@@ -1150,6 +1150,120 @@ theorem valuation_le_one_of_ordAtInfty_nonneg
   rw [hg_eq]
   exact le_trans (w.map_add _ _) (max_le hwa hwby)
 
+/-- **The `v`-adic valuation subring of a `B`-prime is `≠ ⊤`** (it is nontrivial, surjecting onto
+`ℤᵐ⁰`).  Needed for the `∞`-domination. -/
+theorem valuationSubring_ne_top
+    (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂))) :
+    (v.valuation C₁.FunctionField).valuationSubring ≠ ⊤ := by
+  have hNontriv : (v.valuation C₁.FunctionField).IsNontrivial := by
+    refine ⟨?_⟩
+    obtain ⟨z, hz⟩ := v.valuation_surjective C₁.FunctionField (WithZero.exp (1 : ℤ))
+    refine ⟨z, ?_, ?_⟩
+    · rw [hz]; exact WithZero.exp_ne_zero
+    · rw [hz, show (1 : WithZero (Multiplicative ℤ)) = WithZero.exp (0 : ℤ) from
+        (WithZero.exp_zero).symm, Ne, WithZero.exp_inj]; norm_num
+  intro htop
+  exact (Valuation.valuationSubring_eq_top_iff _).mp htop hNontriv
+
+set_option maxHeartbeats 1600000 in
+/-- **No `B`-prime has an `x₁`-pole** (the `coordXFun` half of `BPrimeValuationCoordGenLeOne`,
+discharged via the `∞`-exclusion `hreg`): for a `B`-prime `v`, `w_v(x₁) ≤ 1`.  By contradiction: if
+`1 < w_v(x₁)`, then `O_∞ ⊆ O_v` (`valuation_le_one_of_ordAtInfty_nonneg`), so the rank-one domination
+`bPrime_valuation_eq_ordAtInfty_of_subring_ge` forces `v = ordAtInftyValuation` — which
+`bPrime_valuation_ne_ordAtInfty` (fed by `hreg`) forbids. -/
+theorem valuation_coordXFun_le_one (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂))
+    (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂))) :
+    v.valuation C₁.FunctionField (coordXFun C₁) ≤ 1 := by
+  by_contra hcon
+  rw [not_le] at hcon
+  -- `O_∞ ⊆ O_v`
+  have hsup : C₁.ordAtInftyValuation.valuationSubring ≤
+      (v.valuation C₁.FunctionField).valuationSubring := by
+    intro f hf
+    rw [Valuation.mem_valuationSubring_iff] at hf ⊢
+    rcases eq_or_ne f 0 with hf0 | hf0
+    · rw [hf0, (v.valuation C₁.FunctionField).map_zero]; exact zero_le_one
+    · exact valuation_le_one_of_ordAtInfty_nonneg v hcon
+        ((C₁.ordAtInftyValuation_le_one_iff_ordAtInfty_nonneg hf0).mp hf)
+  -- domination ⟹ `v = ordAtInftyValuation`, contradicting the `∞`-exclusion
+  exact bPrime_valuation_ne_ordAtInfty hreg v
+    (bPrime_valuation_eq_ordAtInfty_of_subring_ge v hsup (valuationSubring_ne_top v))
+
+set_option maxHeartbeats 1600000 in
+/-- **No `B`-prime has a `y₁`-pole** (the `coordYFun` half): for a `B`-prime `v`, `w_v(y₁) ≤ 1`.
+Once `w_v(x₁) ≤ 1` (`valuation_coordXFun_le_one`), `y₁` is `v`-integral because it is integral over
+`F[x₁]` (the Weierstrass relation `y₁² + b·y₁ = c` with `w_v(b), w_v(c) ≤ 1`): a pole of `y₁` would
+make `w_v(y₁)² = w_v(c − b·y₁) ≤ max(w_v c, w_v b · w_v y₁) ≤ w_v(y₁)`, impossible. -/
+theorem valuation_coordYFun_le_one (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂))
+    (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂))) :
+    v.valuation C₁.FunctionField (coordYFun C₁) ≤ 1 := by
+  set w := v.valuation C₁.FunctionField with hw
+  have hxle : w (coordXFun C₁) ≤ 1 := valuation_coordXFun_le_one hreg v
+  have hc : ∀ c : F, w (algebraMap F C₁.FunctionField c) ≤ 1 := fun c => by
+    rcases eq_or_ne c 0 with h0 | h0
+    · rw [h0, map_zero (algebraMap F C₁.FunctionField), w.map_zero]; exact zero_le'
+    · exact le_of_eq (valuation_algebraMap_F_eq_one v h0)
+  -- the Weierstrass relation, rearranged: `y₁² = c − b·y₁`
+  have hyeq : coordYFun C₁ ^ 2 =
+      (coordXFun C₁ ^ 3 + algebraMap F C₁.FunctionField C₁.toAffine.a₂ * coordXFun C₁ ^ 2 +
+        algebraMap F C₁.FunctionField C₁.toAffine.a₄ * coordXFun C₁ +
+        algebraMap F C₁.FunctionField C₁.toAffine.a₆) -
+      (algebraMap F C₁.FunctionField C₁.toAffine.a₁ * coordXFun C₁ +
+        algebraMap F C₁.FunctionField C₁.toAffine.a₃) * coordYFun C₁ := by
+    linear_combination weierstrass_relation_coordFun (C₁ := C₁)
+  -- bounds on the cubic and linear coefficients (using `w x₁ ≤ 1`)
+  have hcubic : w (coordXFun C₁ ^ 3 +
+      algebraMap F C₁.FunctionField C₁.toAffine.a₂ * coordXFun C₁ ^ 2 +
+      algebraMap F C₁.FunctionField C₁.toAffine.a₄ * coordXFun C₁ +
+      algebraMap F C₁.FunctionField C₁.toAffine.a₆) ≤ 1 := by
+    have hx3 : w (coordXFun C₁ ^ 3) ≤ 1 := by
+      rw [map_pow]; exact pow_le_one₀ zero_le' hxle
+    have hmono : ∀ (cf : F) (k : ℕ),
+        w (algebraMap F C₁.FunctionField cf * coordXFun C₁ ^ k) ≤ 1 := by
+      intro cf k
+      rw [w.map_mul, map_pow]
+      calc w (algebraMap F C₁.FunctionField cf) * w (coordXFun C₁) ^ k
+          ≤ 1 * 1 := mul_le_mul' (hc cf) (pow_le_one₀ zero_le' hxle)
+        _ = 1 := mul_one 1
+    have ha₂ := hmono C₁.toAffine.a₂ 2
+    have ha₄' : w (algebraMap F C₁.FunctionField C₁.toAffine.a₄ * coordXFun C₁) ≤ 1 := by
+      have := hmono C₁.toAffine.a₄ 1; rwa [pow_one] at this
+    have hstep1 : w (coordXFun C₁ ^ 3 +
+        algebraMap F C₁.FunctionField C₁.toAffine.a₂ * coordXFun C₁ ^ 2) ≤ 1 :=
+      le_trans (w.map_add _ _) (max_le hx3 ha₂)
+    have hstep2 : w (coordXFun C₁ ^ 3 +
+        algebraMap F C₁.FunctionField C₁.toAffine.a₂ * coordXFun C₁ ^ 2 +
+        algebraMap F C₁.FunctionField C₁.toAffine.a₄ * coordXFun C₁) ≤ 1 :=
+      le_trans (w.map_add _ _) (max_le hstep1 ha₄')
+    exact le_trans (w.map_add _ _) (max_le hstep2 (hc _))
+  have hlin : w (algebraMap F C₁.FunctionField C₁.toAffine.a₁ * coordXFun C₁ +
+      algebraMap F C₁.FunctionField C₁.toAffine.a₃) ≤ 1 := by
+    have ha₁ : w (algebraMap F C₁.FunctionField C₁.toAffine.a₁ * coordXFun C₁) ≤ 1 := by
+      rw [w.map_mul]
+      calc w (algebraMap F C₁.FunctionField C₁.toAffine.a₁) * w (coordXFun C₁)
+          ≤ 1 * 1 := mul_le_mul' (hc _) hxle
+        _ = 1 := mul_one 1
+    exact le_trans (w.map_add _ _) (max_le ha₁ (hc _))
+  -- ultrametric: `w(y₁)² ≤ max(1, w(y₁))`, force `w(y₁) ≤ 1`
+  by_contra hcon
+  rw [not_le] at hcon
+  have hYsq : w (coordYFun C₁) ^ 2 ≤ w (coordYFun C₁) := by
+    rw [← map_pow, hyeq]
+    refine le_trans (Valuation.map_sub w _ _) (max_le (le_trans hcubic (le_of_lt hcon)) ?_)
+    rw [w.map_mul]
+    calc w (algebraMap F C₁.FunctionField C₁.toAffine.a₁ * coordXFun C₁ +
+            algebraMap F C₁.FunctionField C₁.toAffine.a₃) * w (coordYFun C₁)
+        ≤ 1 * w (coordYFun C₁) := mul_le_mul_right' hlin _
+      _ = w (coordYFun C₁) := one_mul _
+  have hYne : w (coordYFun C₁) ≠ 0 := by
+    rw [Ne, Valuation.zero_iff]; exact coordYFun_ne_zero (C₁ := C₁)
+  have hY0 : (0 : WithZero (Multiplicative ℤ)) < w (coordYFun C₁) := zero_lt_iff.mpr hYne
+  -- `w(y₁)² > w(y₁)` since `w(y₁) > 1`, contradicting `hYsq`
+  have hlt : w (coordYFun C₁) < w (coordYFun C₁) ^ 2 := by
+    have hstep := (mul_lt_mul_iff_left₀ hY0).mpr hcon
+    rwa [one_mul, ← sq] at hstep
+  exact absurd hYsq (not_le.mpr hlt)
+
 /-! ### The minimal-polynomial reduction (non-circular, place-dictionary-free)
 
 The whole content of `coordXFun_mem_B` / `coordYFun_mem_B` (and hence `coordRing_mem_B`) reduces —
