@@ -151,7 +151,7 @@ Used to invoke `invS_isPowerBounded_of_one_mem_T` on the overlap. -/
 theorem one_mem_overlapDatum_T (P : PairOfDefinition B) (b : B) :
     (1 : B) ∈ (overlapDatum B P b).T := by
   classical
-  change (1 : B) ∈ Finset.image (fun p : B × B => p.1 * p.2)
+  change (1 : B) ∈ Finset.image (fun p : B × B ↦ p.1 * p.2)
       (Finset.product (insert (1 : B) {b}) ({1, b} : Finset B))
   refine Finset.mem_image.mpr ⟨(1, 1), ?_, one_mul 1⟩
   exact Finset.mem_product.mpr
@@ -166,7 +166,7 @@ Used to show `algebraMap b = divByS (b·b) b` lies in `locSubring` of the overla
 theorem b_sq_mem_overlapDatum_T (P : PairOfDefinition B) (b : B) :
     b * b ∈ (overlapDatum B P b).T := by
   classical
-  change b * b ∈ Finset.image (fun p : B × B => p.1 * p.2)
+  change b * b ∈ Finset.image (fun p : B × B ↦ p.1 * p.2)
       (Finset.product (insert (1 : B) {b}) ({1, b} : Finset B))
   refine Finset.mem_image.mpr ⟨(b, b), ?_, rfl⟩
   exact Finset.mem_product.mpr
@@ -191,11 +191,9 @@ theorem canonicalMap_b_isPowerBounded_in_overlap
     TopologicalRing.IsPowerBounded ((overlapDatum B P b).canonicalMap b) := by
   set D := overlapDatum B P b
   have hs_eq : D.s = b := overlapDatum_s B P b
-  -- `D.canonicalMap b = D.coeRingHom (algebraMap B (Localization.Away D.s) b)`.
   have hcm : D.canonicalMap b =
       D.coeRingHom (algebraMap B (Localization.Away D.s) b) := rfl
   rw [hcm]
-  -- `algebraMap b = divByS (b·b) b` in `Localization.Away b = Localization.Away D.s`.
   have halg_eq : algebraMap B (Localization.Away D.s) b = divByS (b * b) D.s := by
     unfold divByS
     rw [← IsLocalization.mk'_one (M := Submonoid.powers D.s)
@@ -204,14 +202,12 @@ theorem canonicalMap_b_isPowerBounded_in_overlap
     simp only [Submonoid.coe_one, one_mul]
     rw [hs_eq]
   rw [halg_eq]
-  -- `divByS (b·b) b ∈ locSubring D.P D.T D.s` since `b·b ∈ D.T`.
   have hmem : divByS (b * b) D.s ∈ locSubring D.P D.T D.s := by
     apply divByS_mem_locSubring D.P D.T D.s
     rw [hs_eq] at *
     exact b_sq_mem_overlapDatum_T B P b
-  -- Powers stay in locSubring; image under coeRingHom is bounded.
   have hpow : ∀ n : ℕ, (divByS (b * b) D.s) ^ n ∈ locSubring D.P D.T D.s :=
-    fun n => (locSubring D.P D.T D.s).pow_mem hmem n
+    fun n ↦ (locSubring D.P D.T D.s).pow_mem hmem n
   have hrange : Set.range
       ((D.coeRingHom (divByS (b * b) D.s)) ^ · : ℕ → presheafValue D) ⊆
       D.coeRingHom '' (locSubring D.P D.T D.s : Set (Localization.Away D.s)) := by
@@ -420,7 +416,7 @@ factoring `overlap_plus_evalHom` through the ideal `(algebraMap b - X)`. -/
 noncomputable def overlap_plus_forwardHom
     (P : PairOfDefinition B) [IsNoetherianRing P.A₀] (b : B) :
     LaurentCover.B₁_gen b →+* presheafValue (overlapDatum B P b) :=
-  Ideal.Quotient.lift _ (overlap_plus_evalHom B P b) (fun y hy => by
+  Ideal.Quotient.lift _ (overlap_plus_evalHom B P b) (fun y hy ↦ by
     rw [Ideal.mem_span_singleton'] at hy
     obtain ⟨c, hc⟩ := hy
     rw [← hc, map_mul, overlap_plus_evalHom_fSubX_eq_zero, mul_zero])
@@ -430,7 +426,7 @@ factoring `overlap_minus_evalHom` through the ideal `(1 - algebraMap b · X)`. -
 noncomputable def overlap_minus_forwardHom
     (P : PairOfDefinition B) [IsNoetherianRing P.A₀] (b : B) :
     LaurentCover.B₂_gen b →+* presheafValue (overlapDatum B P b) :=
-  Ideal.Quotient.lift _ (overlap_minus_evalHom B P b) (fun y hy => by
+  Ideal.Quotient.lift _ (overlap_minus_evalHom B P b) (fun y hy ↦ by
     rw [Ideal.mem_span_singleton'] at hy
     obtain ⟨c, hc⟩ := hy
     rw [← hc, map_mul, overlap_minus_evalHom_oneSubfX_eq_zero, mul_zero])
@@ -515,7 +511,7 @@ noncomputable def example638Bivariate_forwardHom
         Ideal.span {algebraMap B ↥(TateAlgebra₂ B) b - TateAlgebra₂.X,
                     1 - algebraMap B ↥(TateAlgebra₂ B) b * TateAlgebra₂.Y}
       →+* presheafValue (overlapDatum B P b) := by
-  refine Ideal.Quotient.lift _ (example638Bivariate_evalHom B P b) (fun y hy => ?_)
+  refine Ideal.Quotient.lift _ (example638Bivariate_evalHom B P b) (fun y hy ↦ ?_)
   have h_le : Ideal.span
         {algebraMap B ↥(TateAlgebra₂ B) b - TateAlgebra₂.X,
          1 - algebraMap B ↥(TateAlgebra₂ B) b * TateAlgebra₂.Y} ≤
@@ -645,11 +641,8 @@ noncomputable def bivariateOverlap_equiv_B₁₂gen (b : B) :
     ↥(TateAlgebra₂ B) ⧸ Ideal.span {algebraMap B ↥(TateAlgebra₂ B) b - TateAlgebra₂.X,
                                     1 - algebraMap B ↥(TateAlgebra₂ B) b * TateAlgebra₂.Y}
       ≃+* LaurentCover.B₁₂_gen b :=
-  -- Step 1: rewrite ideal via `bivariateOverlap_ideal_eq`.
   (Ideal.quotEquivOfEq (bivariateOverlap_ideal_eq B b)).trans <|
-  -- Step 2: rewrite to `laurentIdeal B ⊔ Ideal.span{b - X}`.
   (Ideal.quotEquivOfEq (laurentIdeal_sup_bSubX B b).symm).trans <|
-  -- Step 3: third iso theorem (reversed): quot of sup = quot of quot.
   (DoubleQuot.quotQuotEquivQuotSup (laurentIdeal B)
       (Ideal.span {algebraMap B ↥(TateAlgebra₂ B) b - TateAlgebra₂.X})).symm.trans <|
   -- Step 4: identify the inner quotient as `B₁₂_gen b`, which has the same
@@ -1030,22 +1023,20 @@ theorem bivariateLocToQuotient_continuous
       exact bivariateLocToQuotient_atOverlap_algebraMap B P b a
     rw [show ⇑((bivariateLocToQuotient_atOverlap B P b).comp
         (algebraMap B (Localization.Away (overlapDatum B P b).s))) =
-        (fun a : B => Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b)
+        (fun a : B ↦ Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b)
             (algebraMap B ↥(TateAlgebra₂ B) a)) from funext heq]
     exact TateAlgebra.mk_algebraMap_continuous_bivariateOverlap b
   · -- (2) Power-boundedness at each `t ∈ (overlapDatum).T`.
     intro t ht
     classical
-    change t ∈ Finset.image (fun p : B × B => p.1 * p.2)
+    change t ∈ Finset.image (fun p : B × B ↦ p.1 * p.2)
       (Finset.product (insert (1 : B) {b}) ({1, b} : Finset B)) at ht
     obtain ⟨p, hp_mem, hp_eq⟩ := Finset.mem_image.mp ht
     obtain ⟨h1, h2⟩ := Finset.mem_product.mp hp_mem
-    -- Destructure p : B × B into (p1, p2).
     obtain ⟨p1, p2⟩ := p
     -- `hp_eq : (fun p => p.1 * p.2) (p1, p2) = t` beta-reduces to `p1 * p2 = t`.
     change p1 * p2 = t at hp_eq
     subst hp_eq
-    -- Reduce `(p1, p2).1` / `(p1, p2).2` to `p1` / `p2` in h1, h2.
     change p1 ∈ insert (1 : B) {b} at h1
     change p2 ∈ ({1, b} : Finset B) at h2
     rw [Finset.mem_insert, Finset.mem_singleton] at h1
@@ -1293,7 +1284,6 @@ theorem example638Bivariate_backwardHom_invS
     example638Bivariate_backwardHom B P b hA_complete hnoeth
         (invS (overlapDatum B P b)) =
       (Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b)) TateAlgebra₂.Y := by
-  -- Use unique-inverse argument in the commutative ring.
   have h_bwd_cb : example638Bivariate_backwardHom B P b hA_complete hnoeth
       ((overlapDatum B P b).canonicalMap b) =
       (Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b))
@@ -1308,8 +1298,6 @@ theorem example638Bivariate_backwardHom_invS
     rw [← map_mul, h_mul, map_one]
   rw [h_bwd_cb] at h_applied
   rw [TateAlgebra.quotient_algebraMap_b_eq_X_bivariate] at h_applied
-  -- h_applied : mk X * backward(invS) = 1.
-  -- Also: mk X * mk Y = 1 via the ideal relation 1 - algMap b · Y.
   have h_XY_inv : Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b)
         TateAlgebra₂.X *
       Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b)
@@ -1368,7 +1356,6 @@ theorem example638Bivariate_backward_forward_eq_id
     TateAlgebra.quotientBivariateOverlapIdealTopology b
   haveI hT2Q : @T2Space _ (TateAlgebra.quotientBivariateOverlapIdealTopology b) :=
     TateAlgebra.quotient_bivariateOverlapIdeal_t2Space hA_complete hnoeth b
-  -- Reduce via Ideal.Quotient.ringHom_ext.
   apply Ideal.Quotient.ringHom_ext
   apply RingHom.ext
   intro x
@@ -1379,7 +1366,6 @@ theorem example638Bivariate_backward_forward_eq_id
     (Ideal.Quotient.lift _ (example638Bivariate_evalHom B P b) _
       (Ideal.Quotient.mk _ x)) = _
   rw [Ideal.Quotient.lift_mk]
-  -- Setup uniform spaces for continuity.
   letI : UniformSpace (Localization.Away (overlapDatum B P b).s) :=
     (overlapDatum B P b).uniformSpace
   letI : IsUniformAddGroup (Localization.Away (overlapDatum B P b).s) :=
@@ -1395,7 +1381,6 @@ theorem example638Bivariate_backward_forward_eq_id
     TateAlgebra.quotientBivariateOverlapIdealTopology_isTopologicalRing b
   haveI : CompleteSpace (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     TateAlgebra.quotient_bivariateOverlapIdeal_completeSpace hA_complete hnoeth b
-  -- Continuity of backward and evalHom.
   have hbwd_cont : @Continuous _ _
       (inferInstance : TopologicalSpace (presheafValue (overlapDatum B P b)))
       (TateAlgebra.quotientBivariateOverlapIdealTopology b)
@@ -1428,21 +1413,17 @@ theorem example638Bivariate_backward_forward_eq_id
       (TateAlgebra.quotientBivariateOverlapIdealTopology b)
       (Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b)) :=
     continuous_quotient_mk'
-  -- Density of bivariate polynomials in TateAlgebra₂ B.
   have hS_dense : @Dense (↥(TateAlgebra₂ B)) TateAlgebra.instTopologicalSpaceTateAlgebra₂
       {g : ↥(TateAlgebra₂ B) |
         ∃ N : ℕ, ∀ n : Fin 2 →₀ ℕ, N ≤ n 0 ∨ N ≤ n 1 → g.val n = 0} :=
     TateAlgebra.tateAlgebra₂_polynomials_dense_canonical (A := B)
-  -- Agreement on polynomials via polynomial decomposition + generator agreement.
   have hagree : @Set.EqOn _ _
       ((example638Bivariate_backwardHom B P b hA_complete hnoeth) ∘
         (example638Bivariate_evalHom B P b))
       (Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b))
       {g | ∃ N : ℕ, ∀ n : Fin 2 →₀ ℕ, N ≤ n 0 ∨ N ≤ n 1 → g.val n = 0} := by
     intro g ⟨N, hN⟩
-    -- Decompose g as Finset.sum over [0, N) × [0, N).
     have hg_eq := TateAlgebra.tateAlgebra₂_polynomial_decomp g N hN
-    -- Build a direct claim: LHS = RHS on a single monomial.
     have h_mono_agree : ∀ (i j : ℕ) (c : B),
         (example638Bivariate_backwardHom B P b hA_complete hnoeth)
           (example638Bivariate_evalHom B P b
@@ -1452,20 +1433,16 @@ theorem example638Bivariate_backward_forward_eq_id
           (algebraMap B ↥(TateAlgebra₂ B) c * TateAlgebra₂.X ^ i *
             TateAlgebra₂.Y ^ j) := by
       intros i j c
-      -- Distribute mul/pow via ring hom structure on BOTH sides.
       rw [map_mul, map_mul, map_pow, map_pow, map_mul, map_mul, map_pow, map_pow,
           map_mul, map_mul, map_pow, map_pow]
-      -- Apply generator agreement.
       rw [example638Bivariate_evalHom_algebraMap, example638Bivariate_evalHom_X,
         example638Bivariate_evalHom_Y,
         example638Bivariate_backwardHom_canonicalMap,
         example638Bivariate_backwardHom_canonicalMap,
         example638Bivariate_backwardHom_invS,
         TateAlgebra.quotient_algebraMap_b_eq_X_bivariate]
-    -- Apply agreement through the decomposed finite sum.
     simp only [Function.comp]
     rw [hg_eq]
-    -- Distribute ring homs through the nested Finset.sum.
     rw [map_sum, map_sum, map_sum]
     apply Finset.sum_congr rfl
     intros i _
@@ -1831,7 +1808,7 @@ noncomputable def TateAlgebra_mapRingHom
     ↥(TateAlgebra R) →+* ↥(TateAlgebra S) :=
   (MvPowerSeries.map f).restrict
     (TateAlgebra R) (TateAlgebra S)
-    (fun _ hg => MvPowerSeries_IsRestricted_map_pub hf hg)
+    (fun _ hg ↦ MvPowerSeries_IsRestricted_map_pub hf hg)
 
 /-- `TateAlgebra_mapRingHom` action on the underlying MvPowerSeries. -/
 theorem TateAlgebra_mapRingHom_val
@@ -1858,7 +1835,6 @@ noncomputable def TateAlgebra_mapRingEquiv
     show (TateAlgebra_mapRingHom e.symm.toRingHom he_symm
       (TateAlgebra_mapRingHom e.toRingHom he g)).val = g.val
     rw [TateAlgebra_mapRingHom_val, TateAlgebra_mapRingHom_val]
-    -- MvPowerSeries.map e.symm ∘ MvPowerSeries.map e = id at underlying level.
     change MvPowerSeries.map e.symm.toRingHom (MvPowerSeries.map e.toRingHom g.val) = g.val
     rw [← RingHom.comp_apply, ← MvPowerSeries.map_comp]
     change MvPowerSeries.map ((e.symm.toRingHom).comp e.toRingHom) g.val = g.val
@@ -2437,7 +2413,7 @@ theorem TA_B_to_bivariateOverlap_evalHom_X
     rw [MvPowerSeries.coeff_X]
     have hne : (Finsupp.single (0 : Fin 1) n : Fin 1 →₀ ℕ) ≠ Finsupp.single 0 1 := by
       intro h
-      have := congrArg (fun f : Fin 1 →₀ ℕ => f 0) h
+      have := congrArg (fun f : Fin 1 →₀ ℕ ↦ f 0) h
       simp at this
       exact hn this
     simp only [if_neg hne, map_zero]
@@ -2472,7 +2448,7 @@ noncomputable def baseHom_B₁_gen_to_bivariateOverlap
     LaurentCover.B₁_gen b →+*
       ↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b := by
   refine Ideal.Quotient.lift _ (TA_B_to_bivariateOverlap_evalHom P b hA_complete hnoeth)
-    (fun y hy => ?_)
+    (fun y hy ↦ ?_)
   have h_le : Ideal.span
         {algebraMap B ↥(TateAlgebra B) b - TateAlgebra.X} ≤
       RingHom.ker (TA_B_to_bivariateOverlap_evalHom P b hA_complete hnoeth) := by
@@ -2550,7 +2526,7 @@ theorem B₁_gen_nonarchimedeanRing (b : B) :
       (Ideal.Quotient.mk (plusFSubXIdeal B b)).toAddMonoidHom
     isOpen' := @QuotientRing.isOpenMap_coe _ TateAlgebra.instTopologicalSpaceTateAlgebra _
       (plusFSubXIdeal B b) TateAlgebra.instIsTopologicalRingTateAlgebra _ V.isOpen
-  }, fun x hx => by obtain ⟨y, hy, rfl⟩ := hx; exact hVU hy⟩
+  }, fun x hx ↦ by obtain ⟨y, hy, rfl⟩ := hx; exact hVU hy⟩
 
 /-- Local `TopologicalSpace` instance for `LaurentCover.B₁_gen b`, needed for
 the specialized quotient bridge signatures that mention `TateAlgebra (B₁_gen b)`. -/
@@ -2701,7 +2677,7 @@ theorem TA_B₁_gen_to_bivariateOverlap_outer_evalHom_X
     rw [MvPowerSeries.coeff_X]
     have hne : (Finsupp.single (0 : Fin 1) n : Fin 1 →₀ ℕ) ≠ Finsupp.single 0 1 := by
       intro h
-      have := congrArg (fun f : Fin 1 →₀ ℕ => f 0) h
+      have := congrArg (fun f : Fin 1 →₀ ℕ ↦ f 0) h
       simp at this
       exact hn this
     simp only [if_neg hne, map_zero]
@@ -2786,7 +2762,7 @@ noncomputable def TA_B₁_gen_quotient_to_bivariateOverlap_forwardHom
       ↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b := by
   refine Ideal.Quotient.lift _
     (TA_B₁_gen_to_bivariateOverlap_outer_evalHom P b hA_complete hnoeth hcont_base)
-    (fun y hy => ?_)
+    (fun y hy ↦ ?_)
   have h_le : outerLaurentOverlapIdeal b ≤
       RingHom.ker (TA_B₁_gen_to_bivariateOverlap_outer_evalHom P b hA_complete hnoeth
         hcont_base) := by
@@ -3126,7 +3102,7 @@ noncomputable def TA_B_bivariate_quotient_to_outerQuotient_backwardHom
     ↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b →+*
       ↥(TateAlgebra (LaurentCover.B₁_gen b)) ⧸ outerLaurentOverlapIdeal b := by
   refine Ideal.Quotient.lift _ (TA_B_bivariate_to_outerQuotient_evalHom₂ b h)
-    (fun y hy => ?_)
+    (fun y hy ↦ ?_)
   have h_le : TateAlgebra.bivariateOverlapIdeal b ≤
       RingHom.ker (TA_B_bivariate_to_outerQuotient_evalHom₂ b h) := by
     unfold TateAlgebra.bivariateOverlapIdeal
@@ -3268,7 +3244,7 @@ theorem tateAlgebra_polynomial_decomp
       rw [if_neg]
       intro heq
       apply hi
-      have := congrArg (fun f : Fin 1 →₀ ℕ => f 0) heq
+      have := congrArg (fun f : Fin 1 →₀ ℕ ↦ f 0) heq
       simp at this
       exact this.symm
     · intro h
@@ -3282,7 +3258,7 @@ theorem tateAlgebra_polynomial_decomp
     rw [if_neg]
     intro heq
     have h_l_i : l 0 = i := by
-      have := congrArg (fun f : Fin 1 →₀ ℕ => f 0) heq
+      have := congrArg (fun f : Fin 1 →₀ ℕ ↦ f 0) heq
       simp at this
       exact this
     have h_i_lt : i < N := Finset.mem_range.mp hi
