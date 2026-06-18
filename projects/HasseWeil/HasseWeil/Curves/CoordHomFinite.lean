@@ -151,7 +151,7 @@ private theorem eval₂_map_algebraMap (ψ : C₂.CoordinateRing →ₐ[F] C₁.
     algebraMap (Polynomial F) C₁.CoordinateRing g := by
   rw [Polynomial.eval₂_map,
     show ψ.toRingHom.comp (algebraMap F C₂.CoordinateRing) = algebraMap F C₁.CoordinateRing from
-      RingHom.ext fun c => ψ.commutes c,
+      RingHom.ext fun c ↦ ψ.commutes c,
     ← Polynomial.aeval_def, aeval_algebraMap_X]
 
 /-- Auxiliary: a `RingHom.IsIntegralElem` witness from an `F[X]`-polynomial
@@ -218,7 +218,7 @@ theorem algHom_coordinateRing_isIntegralElem_X
   -- the degenerate case `u ∈ F·1` contradicts injectivity of `ψ`
   have hnondeg : q ≠ 0 ∨ 0 < p.degree := by
     by_contra hcon
-    push_neg at hcon
+    push Not at hcon
     obtain ⟨hq0, hp0⟩ := hcon
     have hpC : p = Polynomial.C (p.coeff 0) := Polynomial.eq_C_of_degree_le_zero hp0
     have hu' : ψ (algebraMap (Polynomial F) C₂.CoordinateRing Polynomial.X) =
@@ -238,7 +238,7 @@ theorem algHom_coordinateRing_isIntegralElem_X
   · -- linear case: `u = p(x₁)` with `p` nonconstant; witness `p(T) − x₂`
     subst hq
     rw [zero_smul, add_zero] at hu
-    have hp0 : 0 < p.degree := hnondeg.resolve_left fun h => h rfl
+    have hp0 : 0 < p.degree := hnondeg.resolve_left fun h ↦ h rfl
     refine isIntegralElem_aux ψ (n := p)
       (r := -Polynomial.C (algebraMap (Polynomial F) C₂.CoordinateRing Polynomial.X))
       hp0 (lt_of_le_of_lt ((Polynomial.degree_neg _).trans_le Polynomial.degree_C_le) hp0) ?_
@@ -373,7 +373,7 @@ theorem algHom_coordinateRing_module_finite
   letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := ψ.toRingHom.toAlgebra
   letI : Module C₂.CoordinateRing C₁.CoordinateRing := Algebra.toModule
   haveI : IsScalarTower F C₂.CoordinateRing C₁.CoordinateRing :=
-    IsScalarTower.of_algebraMap_eq fun c => (ψ.commutes c).symm
+    IsScalarTower.of_algebraMap_eq fun c ↦ (ψ.commutes c).symm
   have hx : IsIntegral C₂.CoordinateRing
       (algebraMap (Polynomial F) C₁.CoordinateRing Polynomial.X) :=
     algHom_coordinateRing_isIntegralElem_X ψ hψ
@@ -391,7 +391,7 @@ theorem algHom_coordinateRing_module_finite
         {algebraMap (Polynomial F) C₁.CoordinateRing Polynomial.X} ≤
         (Algebra.adjoin C₂.CoordinateRing
           {algebraMap (Polynomial F) C₁.CoordinateRing Polynomial.X}).restrictScalars F :=
-      Algebra.adjoin_le_iff.mpr fun w hw => Algebra.subset_adjoin hw
+      Algebra.adjoin_le_iff.mpr fun w hw ↦ Algebra.subset_adjoin hw
     exact h2 h1
   -- assemble via the abstract lemma; the `{1, Y}` basis spans `F[C₁]` over the adjoin
   refine module_finite_of_adjoin_singleton_mul_span hx
@@ -465,7 +465,7 @@ theorem sum_ramificationIdx_mul_inertiaDeg_eq_degree'
     (φ : CurveMap C₁ C₂) (coordHom : φ.CoordHom)
     {p : Ideal C₂.CoordinateRing} (hpMax : p.IsMaximal) (hp0 : p ≠ ⊥) :
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
-    ∑ P ∈ primesOverFinset p C₁.CoordinateRing,
+    ∑ P ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing,
         Ideal.ramificationIdx p P *
         Ideal.inertiaDeg p P = φ.degree :=
   φ.sum_ramificationIdx_mul_inertiaDeg_eq_degree coordHom
