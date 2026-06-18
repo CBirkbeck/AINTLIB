@@ -6683,11 +6683,13 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
 
 ### Cluster milestones (decompose-when-reached — own /develop sub-pass each)
 #### [S13-G] Stage G — Galois Λ-modules + the Vandiver IMC (§13.2–§13.3) | Depends on: S13-S5, §12 (done)
-- **DECOMPOSED 2026-06-18** (`/develop`). Plan: `.mathlib-quality/plan-G.md`. Target = **IMC for Vandiver
-  primes** (RJW `thm:vandiver`), reusing §12 `iwasawa_theorem` (done). Global CFT is absent from mathlib
-  (verified) + FltRegular not vendored ⇒ **CFT inputs axiomatised** in a `structure IwasawaGaloisData`
-  (mirroring RJW TeX 3767 "we omit the proofs of some more classical auxiliary results"); the Iwasawa-theoretic
-  content (G3/G4/Vandiver/IMC) is proven. Sub-tickets below.
+- **DECOMPOSED 2026-06-18** (`/develop`; revised after full-monorepo search). Plan: `.mathlib-quality/plan-G.md`.
+  Target = **IMC for Vandiver primes** (RJW `thm:vandiver`), reusing §12 `iwasawa_theorem` (done). The monorepo
+  has real sorry-free CFT/class-group infrastructure (`FltRegular/Hilbert94`, `FltRegularBernoulli`
+  HilbertClassField/Hilbert90/Vandiver-p37/class-group±/cyclotomic-units, `Chebotarev`) + the PadicLFunctions
+  tower ⇒ **G1 and G-VANDIVER REUSE real proofs; G3/G4/G-IMC proven**. The **only** axiomatised input is **G2**
+  (ramified CFT, Washington Cor 13.6 — absent everywhere), one field of `structure IwasawaGaloisData`, cited as
+  RJW themselves cite it (TeX 3767/3790). Sub-tickets below.
 
 ##### [G-DEF] `IwasawaGaloisData` — Galois modules + axiomatised CFT inputs
 - **Status**: open | **File**: IwasawaProof/Galois/Modules.lean | **Depends on**: S13-S5 | **Type**: structure/def
@@ -6706,18 +6708,22 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
   `charIdealGroup`. **Generality**: concrete to the project's `p`,`GPlus p` (these are the specific cyclotomic modules).
 - **Note**: axiomatised — `galoisSES` and the module structures encode classical Galois/CFT facts mathlib lacks.
 
-##### [G1] `𝒴⁺_n ≅ Cl(F⁺_n) ⊗ ℤ_p`  (Hilbert-94 / unramified CFT)
-- **Status**: open | **File**: IwasawaProof/Galois/Modules.lean | **Depends on**: G-DEF | **Type**: def + axiom-field
-- **Statement**: `def YPlusFin (n) : Type* := (ClassGroup (𝓞 (FglobalPlus p n))) ⊗[ℤ] ℤ_[p]` (the class-group side,
-  **real**), with `Y⁺∞` related to `⟨YPlusFin n⟩` via inverse limit; the iso `YPlusFin n ≃ Gal(𝓛⁺_n/F⁺_n)`
-  (Hilbert 94) is an **axiomatised field** of `IwasawaGaloisData` (`yfin_iso : ∀ n, YPlusFin n ≃ₗ ...`).
-- **Proof sketch**: define `YPlusFin` via mathlib `ClassGroup (𝓞 (FglobalPlus p n))` ⊗ ℤ_p (finiteness from
-  `instFintypeClassGroup`); the unramified-CFT identification (𝒴⁺_n = Gal of max unramified abelian p-ext ≅
-  p-part of class group) is Hilbert 94 — ABSENT from mathlib/FltRegular, so taken as the `yfin_iso` axiom-field
-  with citation. No proof obligation on the iso; the class-group def is real.
-- **Sources**: RJW TeX 3819–3821 (eq Y_n^+, `𝒴⁺_n ≅ Cl(F⁺_n)⊗ℤ_p`); Washington *Cyclotomic Fields* (Hilbert
-  class field / unramified CFT). **Reuse**: mathlib `ClassGroup`, `NumberField.RingOfIntegers.instFintypeClassGroup`,
-  project `FglobalPlus`. **Generality**: per-`n` over the project's tower.
+##### [G1] `𝒴⁺_n ≅ Cl(F⁺_n) ⊗ ℤ_p`  (Hilbert-94 / unramified CFT — **REUSE monorepo**)
+- **Status**: open | **File**: IwasawaProof/Galois/Modules.lean | **Depends on**: G-DEF | **Type**: def + theorem (reuse)
+- **Statement**: `def YPlusFin (n) : Type* := (ClassGroup (𝓞 (FglobalPlus p n))) ⊗[ℤ] ℤ_[p]`; `Y⁺∞` is the inverse
+  limit of `YPlusFin n` along class-group norm maps. The identification `YPlusFin n ≃ Gal(𝓛⁺_n/F⁺_n)` is
+  **unramified CFT = Hilbert 94**, which the monorepo PROVES.
+- **Proof sketch**: define `YPlusFin` via mathlib `ClassGroup (𝓞 (FglobalPlus p n))` ⊗ ℤ_p. For the
+  class-group ↔ unramified-Galois-group link, **reuse** `FltRegular/.../Hilbert94.lean`
+  (`dvd_card_classGroup_of_unramified_isCyclic`, `exists_not_isPrincipal_and_isPrincipal_map`, sorry-free) and the
+  Hilbert p-class field iso `HilbertPClassField` (`Gal(H_p(L)/L) ≃* ClassGroupModP L p`) from
+  `FltRegularBernoulli/.../HilbertClassField.lean`. The norm maps defining the limit reuse
+  `FltRegularBernoulli/.../ClassGroupExtension.lean` `ClassGroup.extensionMap`. Bridge `F⁺_n` (project `FglobalPlus`)
+  to the `K⁺`/`ℚ(ζ_{p^n})` setup of those projects (small compatibility lemma — sub-ticket if the field setups differ).
+- **Sources**: RJW TeX 3819–3821 (eq Y_n^+); Washington Hilbert class field. **Reuse**: `FltRegular` Hilbert94,
+  `FltRegularBernoulli` HilbertClassField / ClassGroupExtension, mathlib `ClassGroup`/`instFintypeClassGroup`,
+  project `FglobalPlus`. **Generality**: per-`n`. **Note**: the bridge between the two projects' field setups is the
+  only real work; the CFT content is reused, not axiomatised.
 
 ##### [G2] CFTunits1 — `0 → 𝓔⁺_{∞,1} → 𝒰⁺_{∞,1} → Gal(𝓜⁺_∞/𝓛⁺_∞) → 0`  (ramified CFT — HARDEST)
 - **Status**: open | **File**: IwasawaProof/Galois/Modules.lean | **Depends on**: G-DEF, G1 | **Type**: axiom-field
@@ -6725,11 +6731,14 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
   an **axiomatised field** of `IwasawaGaloisData`. (`EPlusInftyOne` = 𝓔⁺_{∞,1}, the inverse limit of the p-adic
   closures of global units; `localUnitsOnePlus∞` = 𝒰⁺_{∞,1} = inverse limit of the project's `localUnitsOnePlus`.)
 - **Proof sketch**: global CFT (Washington Cor 13.6) at finite level gives `0→𝓔⁺_{n,1}→𝒰⁺_{n,1}→Gal(𝓜⁺_n/𝓛⁺_n)→0`;
-  inverse limit over `n` (Mittag-Leffler: all terms f.g. ℤ_p-modules) preserves exactness. Global CFT + exactness-
-  of-lim are both ABSENT from mathlib ⇒ **axiomatised field** with citation (this is the board's "hardest;
-  axiomatise"). Define `EPlusInftyOne`, `localUnitsOnePlus∞` as inverse limits of the existing project subgroups.
+  inverse limit over `n` (Mittag-Leffler: all terms f.g. ℤ_p-modules) preserves exactness. **This is the SINGLE
+  axiomatised input of Stage G**: ramified CFT (ray class groups, Artin reciprocity, conductor, max abelian p-ext
+  unramified-*outside-p*) is ABSENT from the **whole monorepo** and mathlib — distinct from the Hilbert class field
+  (unramified everywhere) reused in G1. Axiomatised field with citation. `projects/Chebotarev` (`chebotarev_density`,
+  `dirichlet_primes_in_AP`) supplies the prime-existence ingredient should one later *build* this rather than assume
+  it. Define `EPlusInftyOne`, `localUnitsOnePlus∞` as inverse limits of the existing project subgroups.
 - **Sources**: RJW TeX 3782–3795 (Prop CFTunits1); Washington Cor 13.6. **Reuse**: project `localUnitsOnePlus`,
-  `globalUnitsPlus`; mathlib `IsMittagLeffler`. **Generality**: concrete.
+  `globalUnitsPlus`; mathlib `IsMittagLeffler`; `projects/Chebotarev` (if built). **Generality**: concrete.
 
 ##### [CLEANUP-G1] /cleanup IwasawaProof/Galois/Modules.lean
 - **Status**: open | **Depends on**: G2 | **Type**: cleanup (per-file cadence: 3 tickets G-DEF,G1,G2)
@@ -6769,8 +6778,13 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
   the Jacobson radical) `𝒴⁺_∞=0`. (ii) p∤h_n⁺ for all n: combine (i) with G3 `𝒴⁺_n=0`. (iii) `𝓔⁺/𝓒⁺=0`: from
   `[𝒱⁺_{n,1}:𝒟⁺_{n,1}] | h_n⁺` prime-to-p (TeX 3849–3856), the index is a unit after ⊗ℤ_p ⇒ `𝒞⁺_{n,1}≅𝓔⁺_{n,1}`,
   inverse limit. Uses Theorem `iwasawa` ([𝒱⁺_n:𝒟⁺_n]=h_n⁺, §11/12) — locate/reuse.
-- **Sources**: RJW TeX 3833–3865 (Cor Iw1), Nakayama. **Reuse**: mathlib Nakayama, project `ClassGroup`,
-  `CyclotomicUnits`. **Generality**: concrete.
+- **Sources**: RJW TeX 3833–3865 (Cor Iw1), Nakayama. **Reuse**: mathlib Nakayama; G1+G3 (above); **monorepo**
+  `FltRegularBernoulli` — the class-group `h = h⁺·h⁻` split + `classGroupMap` injective
+  (`TotallyRealSubfield/ClassGroup.lean`), the cyclotomic-unit index `[𝒱:𝒟]` (`UnitQuotient/`,
+  `Thaine/CircularUnits.lean`), and `Vandiver`-style defs (`FLT37/VandiverProven.lean` as the p=37 instance/
+  template); project `CyclotomicUnits` for `𝒞⁺_{n,1}`. **Generality**: general Vandiver `p` (the p=37 file is the
+  concrete instance). **Note**: the prime-to-p index step (iii) reuses the monorepo's index/class-number results;
+  not axiomatised.
 
 ##### [CLEANUP-ALL-G] /cleanup-all on Stage-G files before the milestone
 - **Status**: open | **Depends on**: G4, G-VANDIVER | **Type**: cleanup-all (pre-milestone)

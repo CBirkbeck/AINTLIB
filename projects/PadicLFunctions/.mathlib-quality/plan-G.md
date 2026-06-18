@@ -24,28 +24,40 @@ RJW prove the IMC in two regimes:
 required** for an RJW-faithful IMC — it would be a separate, far larger project formalising
 Mazur–Wiles or Rubin. The board's S13-E/S13-M should be re-scoped accordingly (proposal below).
 
-## CFT-input decision (binding — surfaced for user approval)
+## CFT-input decision (REVISED after full-monorepo search — surfaced for user approval)
 
-Global class field theory is **absent from mathlib**: no Artin reciprocity, idele/ray class
-groups, conductors, Hilbert 94, ramified abelian extensions, Galois cohomology of global fields,
-ℤ_p-extension Galois theory, or principal-unit filtrations of the cyclotomic local tower
-(verified by exhaustive search). FltRegular is **not vendored**.
+**We do NOT need to build or axiomatise full class field theory.** My first pass searched only
+mathlib + `.lake`; searching the whole **monorepo** found substantial real, sorry-free CFT /
+class-group infrastructure in sibling projects that Stage G can `import` (the point of the monorepo):
 
-RJW themselves "omit the proofs of some more classical auxiliary results" and follow CS06 §4.5
-(TeX 3767). Mirroring this, the **CFT inputs are introduced as axiomatised hypotheses**, bundled
-in a `structure IwasawaGaloisData` whose fields are exactly the classical CFT facts RJW cite to
-Washington. The **Iwasawa-theoretic content is proven** on top of that data. This is the
-"axiomatise" option the board already flagged for G2. Every axiomatised field carries its precise
-Washington/CS06 citation.
+- **Hilbert 94** — `FltRegular/FltRegular/NumberTheory/Hilbert94.lean`: `dvd_card_classGroup_of_unramified_isCyclic`
+  (unramified cyclic ext of odd prime degree ⟹ `[L:K] ∣ |Cl(𝓞 K)|`), `exists_not_isPrincipal_and_isPrincipal_map`. Sorry-free.
+- **Hilbert p-class field iso** — `FltRegularBernoulli/.../HilbertClassField.lean`: `ClassGroupModP L p`,
+  `HilbertPClassField L p` (`Gal(H_p(L)/L) ≃* Cl(𝓞 L)/Cl^p`), bundled data structure.
+- **Class-group ±-structure** — `TotallyRealSubfield/ClassGroup.lean`: `classGroupMap : Cl(𝓞 K⁺) →* Cl(𝓞 K)`
+  injective, `hMinus`, `h = h⁺·h⁻`; `p ∣ h⁻ ⟺ p ∣ Bernoulli`. Sorry-free.
+- **Galois action on Cl + units, eigenspace projectors** (`Reflection/ClassGroupModP/GalAction.lean`,
+  `UnitQuotient/DeltaAction.lean`); **Hilbert 90** for K/K⁺ (`FLT37/Hilbert90.lean`); cyclotomic/circular
+  units + index `[𝒱:𝒟]`; **Vandiver proven p=37** (`FLT37/VandiverProven.lean`). All sorry-free.
+- **Chebotarev density** — `projects/Chebotarev/` (`chebotarev_density`, `dirichlet_primes_in_AP`). Sorry-free.
+- **Cyclotomic tower foundation** — already in PadicLFunctions: `Fglobal(Plus)`, `globalUnits(Plus)`,
+  `localUnits(One)(Plus)`, `𝒢≅ℤ_p^×`, `Λ(𝒢)=PadicMeasure`, ±-decomposition, `𝒞_∞`. Sorry-free. Plus
+  mathlib `Representation.Coinvariants` + Nakayama.
 
-Split:
-- **Axiomatised inputs** (fields of `IwasawaGaloisData`): G1 (Hilbert-94 iso `𝒴⁺_n ≅ Cl(F⁺_n)⊗ℤ_p`
-  — the *iso to the unramified Galois group*; the class group side is real mathlib), G2 (CFTunits1
-  ramified-CFT SES, Washington Cor 13.6), the Λ(𝒢⁺)-module structures, and the Galois SES
-  `0→Gal(𝓜⁺_∞/𝓛⁺_∞)→𝒳⁺_∞→𝒴⁺_∞→0`.
-- **Proven** from the data: G3 (coinvariants `(𝒴⁺_∞)_{Γ⁺_n}=𝒴⁺_n`), G4 (CFTunits2 4-term SES),
-  G-VANDIVER (Cor Iw1), G-IMC (the Vandiver theorem) — using §12's `iwasawa_theorem` and Stage-S
-  `charIdealGroup`.
+So **G1 (unramified CFT) and G-VANDIVER REUSE real monorepo proofs**, not axioms. **G3** builds on the
+existing tower + mathlib `Coinvariants` (the Iwasawa-specific coinvariant/norm assembly is the new proof).
+The Euler-system machinery (`FltRegularBernoulli/Thaine/`) is *also* present (finite-level), so a future
+full-IMC (Stage E) is less out-of-reach than first stated.
+
+**The ONE genuinely-missing classical input is G2 — ramified CFT** (Washington Cor 13.6): the exact
+sequence for `Gal(𝓜⁺_∞/𝓛⁺_∞)`, the maximal abelian p-extension unramified *outside p*. Ray class groups,
+the Artin reciprocity map, conductors, and ramified-abelian-extension Galois theory are **absent from the
+entire monorepo and mathlib** (the Hilbert class field is unramified *everywhere* — a different object).
+This single input is axiomatised as one field of `IwasawaGaloisData` (citing Washington Cor 13.6), exactly
+as RJW cite it (TeX 3767, 3790); Chebotarev supplies prime-existence but not the full reciprocity sequence.
+
+Net: instead of "axiomatise CFT", the plan is **reuse the monorepo for G1 / G-VANDIVER / the tower, prove
+G3 / G4 / G-IMC, and axiomatise only the single ramified-CFT sequence (G2).**
 
 ## Mathlib / project inventory
 
