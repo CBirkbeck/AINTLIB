@@ -205,7 +205,7 @@ private theorem isHausdorff_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
   obtain ⟨ϖ, hϖ_pb, ⟨c, hc_pb, hpc⟩⟩ :=
     IsPerfectoidRing.exists_pseudoUniformizer (p := p) (A := A)
   -- x ∈ (Ideal.span {p})^n • ⊤ for all n, i.e., p^n | x in A°
-  have hx_mem : ∀ n : ℕ, (x : A) ∈ (Set.range (fun y : PBSubring A => (p : A) ^ n * (y : A))) := by
+  have hx_mem : ∀ n : ℕ, (x : A) ∈ (Set.range (fun y : PBSubring A ↦ (p : A) ^ n * (y : A))) := by
     intro n
     have := (SModEq.sub_mem.mp (hx n))
     simp only [sub_zero] at this
@@ -222,7 +222,7 @@ private theorem isHausdorff_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
     haveI := IsPerfectoidRing.uniform (p := p) (A := A)
     suffices h_mem_nhds : ∀ U ∈ nhds (0 : A), (x : A) ∈ U by
       have h0 : (0 : A) ∈ closure ({(x : A)} : Set A) :=
-        mem_closure_iff_nhds.mpr fun U hU => ⟨(x : A), h_mem_nhds U hU, Set.mem_singleton _⟩
+        mem_closure_iff_nhds.mpr fun U hU ↦ ⟨(x : A), h_mem_nhds U hU, Set.mem_singleton _⟩
       rwa [IsClosed.closure_eq isClosed_singleton, Set.mem_singleton_iff, eq_comm] at h0
     intro U hU
     -- A° is bounded: ∃ V ∈ nhds 0, A° * V ⊆ U
@@ -233,8 +233,8 @@ private theorem isHausdorff_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
     have hϖp_tn : IsTopologicallyNilpotent ((ϖ.val : A) ^ p) := by
       rw [IsTopologicallyNilpotent]; simp_rw [← pow_mul]
       exact (ϖ.property).comp
-        (Filter.tendsto_atTop_atTop_of_monotone (fun _ _ h => Nat.mul_le_mul_left p h)
-          fun b => ⟨b, Nat.le_mul_of_pos_left _ hp_pos⟩)
+        (Filter.tendsto_atTop_atTop_of_monotone (fun _ _ h ↦ Nat.mul_le_mul_left p h)
+          fun b ↦ ⟨b, Nat.le_mul_of_pos_left _ hp_pos⟩)
     -- c^n is power-bounded for all n (A° is a subring, c ∈ A°)
     have hcn_pb : ∀ m : ℕ, IsPowerBounded (c ^ m) := by
       intro m; induction m with
@@ -272,8 +272,8 @@ private theorem isPowerBounded_of_tendsto_of_powerBounded
   obtain ⟨J', hJ'open, hJ'VJ⟩ :=
     (IsLinearTopology.hasBasis_open_ideal (R := A)).mem_iff.mp
       (Filter.inter_mem hV (hJopen.mem_nhds J.zero_mem))
-  have hJ'V : (J' : Set A) ⊆ V := fun x hx => (hJ'VJ hx).1
-  have hJ'J : (J' : Set A) ⊆ (J : Set A) := fun x hx => (hJ'VJ hx).2
+  have hJ'V : (J' : Set A) ⊆ V := fun x hx ↦ (hJ'VJ hx).1
+  have hJ'J : (J' : Set A) ⊆ (J : Set A) := fun x hx ↦ (hJ'VJ hx).2
   -- Pick N such that f N - L ∈ J'
   have hJ'nhds : {x | x - L ∈ (J' : Set A)} ∈ nhds L :=
     (continuous_sub_right L).continuousAt.preimage_mem_nhds
@@ -336,7 +336,7 @@ private theorem isPrecomplete_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
     exact this
   -- Step 1b: Divisibility in A
   have hf_divA : ∀ m n, m ≤ n →
-      (f m : A) - (f n : A) ∈ Set.range (fun y : PBSubring A => (p : A) ^ m * (y : A)) := by
+      (f m : A) - (f n : A) ∈ Set.range (fun y : PBSubring A ↦ (p : A) ^ m * (y : A)) := by
     intro m n hmn
     obtain ⟨y, hy⟩ := hf_div m n hmn
     exact ⟨y, by have := congr_arg (Subtype.val) hy; push_cast at this ⊢; exact this.symm⟩
@@ -353,8 +353,8 @@ private theorem isPrecomplete_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
     have hϖp_tn : IsTopologicallyNilpotent ((ϖ.val : A) ^ p) := by
       rw [IsTopologicallyNilpotent]; simp_rw [← pow_mul]
       exact ϖ.property.comp
-        (Filter.tendsto_atTop_atTop_of_monotone (fun _ _ h => Nat.mul_le_mul_left p h)
-          fun b => ⟨b, Nat.le_mul_of_pos_left _ hp_pos⟩)
+        (Filter.tendsto_atTop_atTop_of_monotone (fun _ _ h ↦ Nat.mul_le_mul_left p h)
+          fun b ↦ ⟨b, Nat.le_mul_of_pos_left _ hp_pos⟩)
     have hcn_pb : ∀ m : ℕ, IsPowerBounded (c ^ m) := by
       intro m; induction m with
       | zero => simpa using isPowerBounded_one
@@ -363,7 +363,7 @@ private theorem isPrecomplete_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
     obtain ⟨J, hJopen, hJV⟩ :=
       (IsLinearTopology.hasBasis_open_ideal (R := A)).mem_iff.mp hV
     obtain ⟨N, hN⟩ := hϖp_tn.exists_pow_mem_of_mem_nhds (hJopen.mem_nhds J.zero_mem)
-    refine ⟨N, fun m n hNm hmn => ?_⟩
+    refine ⟨N, fun m n hNm hmn ↦ ?_⟩
     obtain ⟨y, hy⟩ := hf_divA m n hmn
     have hcy_pb : IsPowerBounded (c ^ m * (y : A)) :=
       isPowerBounded_mul (hcn_pb m) y.property
@@ -390,13 +390,13 @@ private theorem isPrecomplete_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
     obtain ⟨J, hJopen, hJW⟩ :=
       (IsLinearTopology.hasBasis_open_ideal (R := A)).mem_iff.mp hW
     obtain ⟨N, hN⟩ := hf_small (J : Set A) (hJopen.mem_nhds J.zero_mem)
-    exact ⟨N, fun m n hm hn => by
+    exact ⟨N, fun m n hm hn ↦ by
       rcases le_total m n with hmn | hmn
       · exact hJW (hN m n hm hmn)
       · rw [show (f m : A) - (f n : A) = -((f n : A) - (f m : A)) from by ring]
         exact hJW (J.neg_mem (hN n m hn hmn))⟩
   -- CauchySeq
-  have hCauchy : CauchySeq (fun n => (f n : A)) := by
+  have hCauchy : CauchySeq (fun n ↦ (f n : A)) := by
     rw [CauchySeq, IsUniformAddGroup.cauchy_map_iff_tendsto_swapped]
     refine ⟨Filter.atTop_neBot, ?_⟩
     rw [Filter.Tendsto, Filter.map_le_iff_le_comap]
@@ -404,22 +404,22 @@ private theorem isPrecomplete_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
     obtain ⟨W, hW, hWU⟩ := Filter.mem_comap.mp hU
     obtain ⟨N, hN⟩ := hf_sym W hW
     rw [Filter.prod_atTop_atTop_eq, Filter.mem_atTop_sets]
-    exact ⟨(N, N), fun ⟨m, n⟩ ⟨hm, hn⟩ => hWU (hN n m hn hm)⟩
+    exact ⟨(N, N), fun ⟨m, n⟩ ⟨hm, hn⟩ ↦ hWU (hN n m hn hm)⟩
   -- Get limit from CompleteSpace
   obtain ⟨L, hL⟩ := cauchySeq_tendsto_of_complete hCauchy
   -- Convert hL to use the given topology
-  have hL' : Filter.Tendsto (fun n => (f n : A)) Filter.atTop
+  have hL' : Filter.Tendsto (fun n ↦ (f n : A)) Filter.atTop
       (@nhds A ‹TopologicalSpace A› L) := by rwa [htop] at hL
   -- Step 4: L is power-bounded
   have hL_pb : IsPowerBounded L :=
-    isPowerBounded_of_tendsto_of_powerBounded (fun n => (f n).property) hL'
+    isPowerBounded_of_tendsto_of_powerBounded (fun n ↦ (f n).property) hL'
   -- Step 5: Verify SModEq condition via telescoping series.
   -- Extract differences d_k ∈ A° with f(k) - f(k+1) = p^k * d_k.
   have hd_ex : ∀ k, ∃ d : PBSubring A, f k - f (k + 1) = (p : PBSubring A) ^ k * d :=
-    fun k => hf_div k (k + 1) (Nat.le_succ k)
+    fun k ↦ hf_div k (k + 1) (Nat.le_succ k)
   choose d hd using hd_ex
   -- Define partial sums in A: S(n, N) = Σ_{j<N} p^j * d(n+j)
-  let S : ℕ → ℕ → A := fun n N =>
+  let S : ℕ → ℕ → A := fun n N ↦
     ∑ j ∈ Finset.range N, (p : A) ^ j * (d (n + j) : A)
   -- Telescoping identity: p^n * S(n, N) = (f n : A) - (f(n+N) : A)
   -- Coercion of hd to A
@@ -458,8 +458,8 @@ private theorem isPrecomplete_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
   have hϖp_tn : IsTopologicallyNilpotent ((ϖ.val : A) ^ p) := by
     rw [IsTopologicallyNilpotent]; simp_rw [← pow_mul]
     exact ϖ.property.comp
-      (Filter.tendsto_atTop_atTop_of_monotone (fun _ _ h => Nat.mul_le_mul_left p h)
-        fun b => ⟨b, Nat.le_mul_of_pos_left _ hp_pos⟩)
+      (Filter.tendsto_atTop_atTop_of_monotone (fun _ _ h ↦ Nat.mul_le_mul_left p h)
+        fun b ↦ ⟨b, Nat.le_mul_of_pos_left _ hp_pos⟩)
   -- Key lemma: each term p^j * d(n+j) is in any open ideal for large j.
   -- p^j * d(n+j) = (c^j * d(n+j)) * (ϖ^p)^j ∈ A° * {small} ⊆ any nhd of 0.
   have hterm_small : ∀ W ∈ nhds (0 : A), ∃ M, ∀ n j, M ≤ j →
@@ -469,7 +469,7 @@ private theorem isPrecomplete_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
     obtain ⟨J, hJopen, hJV⟩ :=
       (IsLinearTopology.hasBasis_open_ideal (R := A)).mem_iff.mp hV
     obtain ⟨M, hM⟩ := hϖp_tn.exists_pow_mem_of_mem_nhds (hJopen.mem_nhds J.zero_mem)
-    exact ⟨M, fun n j hj => by
+    exact ⟨M, fun n j hj ↦ by
       have hϖpj : ((ϖ.val : A) ^ p) ^ j ∈ V := by
         apply hJV
         rw [show ((ϖ.val : A) ^ p) ^ j =
@@ -496,7 +496,7 @@ private theorem isPrecomplete_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
       (IsLinearTopology.hasBasis_open_ideal (R := A)).mem_iff.mp hW
     obtain ⟨M, hM⟩ := hterm_small (K : Set A) (hKopen.mem_nhds K.zero_mem)
     rw [Filter.prod_atTop_atTop_eq, Filter.mem_atTop_sets]
-    refine ⟨(M, M), fun ⟨N₂, N₁⟩ ⟨hN₂, hN₁⟩ => ?_⟩
+    refine ⟨(M, M), fun ⟨N₂, N₁⟩ ⟨hN₂, hN₁⟩ ↦ ?_⟩
     -- Need: (N₂, N₁) ∈ (fun p => S n p.2 - S n p.1) ⁻¹' W
     apply hWU; change S n N₁ - S n N₂ ∈ W
     -- Use the Ico sum and show it lands in K ⊆ W.
@@ -506,7 +506,7 @@ private theorem isPrecomplete_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
       rcases le_total N₁ N₂ with h | h
       · -- S n N₁ - S n N₂ = -(Σ Ico N₁ N₂)
         have heq := Finset.sum_range_add_sum_Ico
-          (fun j => (p : A) ^ j * (d (n + j) : A)) h
+          (fun j ↦ (p : A) ^ j * (d (n + j) : A)) h
         have hS_diff : S n N₂ - S n N₁ =
             ∑ j ∈ Finset.Ico N₁ N₂, (p : A) ^ j * (d (n + j) : A) := by
           simp only [S]; rw [← heq]; ring
@@ -514,14 +514,14 @@ private theorem isPrecomplete_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
         exact hKW (K.neg_mem (hsub N₁ N₂ hN₁ h))
       · -- S n N₁ - S n N₂ = Σ Ico N₂ N₁
         have heq := Finset.sum_range_add_sum_Ico
-          (fun j => (p : A) ^ j * (d (n + j) : A)) h
+          (fun j ↦ (p : A) ^ j * (d (n + j) : A)) h
         have hS_diff : S n N₁ - S n N₂ =
             ∑ j ∈ Finset.Ico N₂ N₁, (p : A) ^ j * (d (n + j) : A) := by
           simp only [S]; rw [← heq]; ring
         rw [hS_diff]; exact hKW (hsub N₂ N₁ hN₂ h)
     -- Prove the sub-result: Σ Ico a b ∈ K
     intro a b ha hab
-    exact Submodule.sum_mem _ fun j hj =>
+    exact Submodule.sum_mem _ fun j hj ↦
       hM n j (le_trans ha (Finset.mem_Ico.mp hj).1)
   -- Get limits of S(n, ·) from CompleteSpace
   have hS_lim : ∀ n, ∃ sn : A, Filter.Tendsto (S n) Filter.atTop
@@ -533,25 +533,25 @@ private theorem isPrecomplete_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
     intro n; rw [htop] at hsn; exact hsn n
   -- Each sn is power-bounded (limit of PB sequence)
   have hsn_pb : ∀ n, IsPowerBounded (sn n) := by
-    intro n; exact isPowerBounded_of_tendsto_of_powerBounded (fun N => hS_pb n N) (hsn' n)
+    intro n; exact isPowerBounded_of_tendsto_of_powerBounded (fun N ↦ hS_pb n N) (hsn' n)
   -- p^n * sn(n) = (f n : A) - L, by continuity of multiplication by p^n
   have hpn_sn : ∀ n, (p : A) ^ n * sn n = (f n : A) - L := by
     intro n
     -- p^n * S(n, N) = (f n : A) - (f(n+N) : A) and S(n,N) → sn(n), f(n+N) → L
-    have hlhs : Filter.Tendsto (fun N => (p : A) ^ n * S n N) Filter.atTop
+    have hlhs : Filter.Tendsto (fun N ↦ (p : A) ^ n * S n N) Filter.atTop
         (@nhds A ‹TopologicalSpace A› ((p : A) ^ n * sn n)) :=
       (continuous_const.mul continuous_id).continuousAt.tendsto.comp (hsn' n)
-    have hrhs : Filter.Tendsto (fun N => (f n : A) - (f (n + N) : A)) Filter.atTop
+    have hrhs : Filter.Tendsto (fun N ↦ (f n : A) - (f (n + N) : A)) Filter.atTop
         (@nhds A ‹TopologicalSpace A› ((f n : A) - L)) := by
       apply Filter.Tendsto.const_sub
       exact hL'.comp (Filter.tendsto_atTop_atTop_of_monotone
-        (fun _ _ h => Nat.add_le_add_left h n) fun b => ⟨b, Nat.le_add_left b n⟩)
-    have heq : (fun N => (p : A) ^ n * S n N) = fun N => (f n : A) - (f (n + N) : A) := by
+        (fun _ _ h ↦ Nat.add_le_add_left h n) fun b ↦ ⟨b, Nat.le_add_left b n⟩)
+    have heq : (fun N ↦ (p : A) ^ n * S n N) = fun N ↦ (f n : A) - (f (n + N) : A) := by
       ext N; exact htelescope n N
     rw [heq] at hlhs
     exact tendsto_nhds_unique hlhs hrhs
   -- Construct the limit in A° and verify SModEq
-  refine ⟨⟨L, hL_pb⟩, fun n => ?_⟩
+  refine ⟨⟨L, hL_pb⟩, fun n ↦ ?_⟩
   rw [SModEq.sub_mem]
   rw [Ideal.smul_eq_mul, Ideal.mul_top, Ideal.span_singleton_pow, Ideal.mem_span_singleton]
   refine ⟨⟨sn n, hsn_pb n⟩, Subtype.val_injective ?_⟩
