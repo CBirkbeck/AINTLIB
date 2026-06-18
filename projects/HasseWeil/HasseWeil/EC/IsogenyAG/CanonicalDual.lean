@@ -101,9 +101,9 @@ pullback-level): if `ψ₁ ∘ φ = ψ₂ ∘ φ` then `ψ₁ = ψ₂`. The pull
 argument — no group structure on isogenies is needed. -/
 theorem Isogeny.compose_right_cancel {φ : Isogeny W₁ W₂} {ψ₁ ψ₂ : Isogeny W₂ W₃}
     (h : ψ₁.compose φ = ψ₂.compose φ) : ψ₁ = ψ₂ := by
-  refine Isogeny.ext_toCurveMap (CurveMap.ext (AlgHom.ext fun z => ?_))
+  refine Isogeny.ext_toCurveMap (CurveMap.ext (AlgHom.ext fun z ↦ ?_))
   exact φ.pullback_injective
-    (congrArg (fun χ : Isogeny W₁ W₃ => χ.toCurveMap.pullback z) h)
+    (congrArg (fun χ : Isogeny W₁ W₃ ↦ χ.toCurveMap.pullback z) h)
 
 /-- **The defining identity of the generic dual, pullback form**: for any
 `w : HasDualWitness φ`, `φ* ((φ.dual w)* z) = ν* z`. Instance of
@@ -131,7 +131,7 @@ theorem Isogeny.mulByInt_degree (W : Affine F) [W.IsElliptic] {n : ℤ} (hn : n 
   have hpb : (HasseWeil.mulByInt W n).pullback =
       HasseWeil.mulByInt_pullbackAlgHom W n hn := dif_neg hn
   have key : (Isogeny.mulByInt W hn).degree = (HasseWeil.mulByInt W n).degree :=
-    (congrArg (fun α : W.FunctionField →ₐ[F] W.FunctionField =>
+    (congrArg (fun α : W.FunctionField →ₐ[F] W.FunctionField ↦
       @Module.finrank W.FunctionField W.FunctionField _ _
         (RingHom.toAlgebra α.toRingHom).toModule) hpb).symm
   rw [key]
@@ -183,7 +183,7 @@ of the pullback covariance. Note the two `[n]`'s live on the two different curve
 theorem Isogeny.compose_mulByInt_of_covariant {φ : Isogeny W₁ W₂} {n : ℤ} {hn : n ≠ 0}
     (hcov : φ.MulByIntPullbackCovariant n hn) :
     φ.compose (Isogeny.mulByInt W₁ hn) = (Isogeny.mulByInt W₂ hn).compose φ :=
-  Isogeny.ext_toCurveMap (CurveMap.ext (AlgHom.ext fun z => hcov z))
+  Isogeny.ext_toCurveMap (CurveMap.ext (AlgHom.ext fun z ↦ hcov z))
 
 /-- **The second composition** `φ ∘ φ̂ = [n]` (Silverman III.6.2(a)): cancel `φ` on the
 right in `(φ ∘ φ̂) ∘ φ = φ ∘ (φ̂ ∘ φ) = φ ∘ [n] = [n] ∘ φ`. The covariance `hcov` is the one
@@ -211,7 +211,7 @@ theorem Isogeny.HasMulByIntDualWitness.dual {φ : Isogeny W₁ W₂} {n : ℤ} {
       (Isogeny.mulByIntDual w).toCurveMap.pullback.range := by
     rintro z ⟨u, rfl⟩
     exact ⟨φ.toCurveMap.pullback u,
-      congrArg (fun χ : Isogeny W₂ W₂ => χ.toCurveMap.pullback u)
+      congrArg (fun χ : Isogeny W₂ W₂ ↦ χ.toCurveMap.pullback u)
         (Isogeny.compose_mulByIntDual w hcov)⟩
   exact ⟨hincl, Isogeny.hbase_of_reflects (Isogeny.mulByIntDual w)
     (HasseWeil.mulByInt_pullbackAlgHom W₂ n hn) hincl
@@ -351,7 +351,7 @@ canonical witness, there is exactly one reverse isogeny composing with `φ` to `
 theorem Isogeny.existsUnique_dual (φ : Isogeny W₁ W₂) (w : φ.HasCanonicalDualWitness) :
     ∃! ψ : Isogeny W₂ W₁,
       ψ.compose φ = Isogeny.mulByInt W₁ φ.intDegree_ne_zero :=
-  ⟨φ.canonicalDual w, φ.canonicalDual_compose w, fun _ hψ => φ.eq_canonicalDual w hψ⟩
+  ⟨φ.canonicalDual w, φ.canonicalDual_compose w, fun _ hψ ↦ φ.eq_canonicalDual w hψ⟩
 
 /-- **`deg φ̂ = deg φ`** for the canonical dual (Silverman III.6.2(d) at `m = deg φ`). -/
 theorem Isogeny.canonicalDual_degree (φ : Isogeny W₁ W₂)
@@ -555,7 +555,7 @@ theorem dualMulByInt_compose_mulByInt (ℓ : ℤ) (hℓ : ℓ ≠ 0) (hℓF : (�
     (HasseWeil.dualMulByInt W ℓ hℓ hℓF).compose (Isogeny.mulByInt W.toAffine hℓ) =
       Isogeny.mulByInt W.toAffine
         (Int.natCast_ne_zero.mpr (HasseWeil.mulByInt_degree_ne_zero W.toAffine hℓ)) := by
-  refine Isogeny.ext_toCurveMap (CurveMap.ext (AlgHom.ext fun z => ?_))
+  refine Isogeny.ext_toCurveMap (CurveMap.ext (AlgHom.ext fun z ↦ ?_))
   have h1 := Isogeny.dual_comp_pullback (φ := Isogeny.mulByInt W.toAffine hℓ)
     (Isogeny.hasDualWitness_of_galoisData
       (HasseWeil.dualGaloisData_mulByInt W ℓ hℓ hℓF)) z
@@ -616,7 +616,7 @@ theorem relativeFrobeniusMulByIntDualWitness
         (intPPow_ne_zero p e))
       (mulByInt_p_pow_range_le_relativeFrobenius p E hinsep e)
       (mulByIntBasepoint_holds E.toAffine (intPPow_ne_zero p e))
-      (fun g hg => (Isogeny.relativeFrobenius p E e).reflects_ordAtInfty g hg)⟩
+      (Isogeny.relativeFrobenius p E e).reflects_ordAtInfty⟩
 
 /-- The relative Verschiebung **is** the faithful dual at the `[p^e]`-witness (the two
 packagings of the same witness fields produce definitionally the same isogeny). -/
