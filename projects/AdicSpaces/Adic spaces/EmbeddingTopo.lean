@@ -105,9 +105,7 @@ theorem productRestrictionSub_injective_of_product_injective
         restrictionMap C.base D (C.hsubset D hD) y) → x = y) :
     Function.Injective (productRestrictionSub A C) := by
   intro x y hxy
-  apply h
-  intro D hD
-  exact congr_fun hxy ⟨D, hD⟩
+  exact h _ _ fun D hD => congr_fun hxy ⟨D, hD⟩
 
 /-! ### T-EMBED-TOPO-REFINEMENT-TRANSFER (conditional form)
 
