@@ -1211,6 +1211,51 @@ theorem mem_range_functionField_baseChange_iff_fixed_kbar [CharZero F] (C : Smoo
     · rw [tensorEquiv_symm_one_tmul C (AlgebraicClosure F) mn]
     · rw [tensorEquiv_symm_one_tmul C (AlgebraicClosure F) md]
 
+/-- **The `K̄`-direct elementwise descent of the range inclusion** (MOVE 2, the one-step analogue of
+`rangeIncl_of_descentData`). From the `K̄`-base-changes `psiK = φ*_K̄` and `mPbK = [m]*_K̄` (their
+naturalities, `psiK` `Gal(K̄/F)`-equivariant + injective) and the **`K̄`-level** range inclusion
+`Im(mPbK) ⊆ Im(psiK)`, the `F`-level inclusion `Im(mPb) ⊆ Im(φ*)` follows.
+
+Unlike `rangeIncl_of_descentData` (which descends from a *finite* Galois `L`), this descends straight
+from `K̄ = AlgebraicClosure F`, using the tower fixed-field characterization
+`mem_range_functionField_baseChange_iff_fixed_kbar`.  This removes the need for a finite-`L` geometric
+realization: the `K̄`-level inclusion is the *fully proven* `ecIsog_mulByInt_deg_rangeIncl_of_charZero`. -/
+theorem rangeIncl_of_descentData_kbar [CharZero F] {C₁ C₂ : SmoothPlaneCurve F}
+    {φPb : C₂.FunctionField →ₐ[F] C₁.FunctionField}
+    {mPb : C₁.FunctionField →ₐ[F] C₁.FunctionField}
+    (psiK : (C₂.baseChange (AlgebraicClosure F)).FunctionField →ₐ[F]
+      (C₁.baseChange (AlgebraicClosure F)).FunctionField)
+    (mPbK : (C₁.baseChange (AlgebraicClosure F)).FunctionField →ₐ[F]
+      (C₁.baseChange (AlgebraicClosure F)).FunctionField)
+    (hpsiK_equiv : GalEquivariant (AlgebraicClosure F) psiK)
+    (hpsiK_inj : Function.Injective psiK)
+    (hpsiK_nat : ∀ g : C₂.FunctionField,
+      C₁.functionFieldMap (AlgebraicClosure F) (φPb g) = psiK (C₂.functionFieldMap (AlgebraicClosure F) g))
+    (hmPbK_nat : ∀ u : C₁.FunctionField,
+      C₁.functionFieldMap (AlgebraicClosure F) (mPb u) = mPbK (C₁.functionFieldMap (AlgebraicClosure F) u))
+    (hKincl : mPbK.range ≤ psiK.range) :
+    mPb.range ≤ φPb.range := by
+  rintro z ⟨u, rfl⟩
+  -- `functionFieldMap (mPb u) ∈ Im(mPbK) ⊆ Im(psiK)`
+  have hz_mem : C₁.functionFieldMap (AlgebraicClosure F) (mPb u) ∈ psiK.range := by
+    apply hKincl
+    rw [hmPbK_nat u]
+    exact ⟨C₁.functionFieldMap (AlgebraicClosure F) u, rfl⟩
+  obtain ⟨ĝ, hĝ⟩ := hz_mem
+  have hĝ' : psiK ĝ = C₁.functionFieldMap (AlgebraicClosure F) (mPb u) := hĝ
+  -- `ĝ` is `Gal(K̄/F)`-fixed (since `psiK ĝ` is a base-change image, `psiK` equivariant + injective)
+  have hĝ_fixed : ∀ σ : AlgebraicClosure F ≃ₐ[F] AlgebraicClosure F,
+      galActFunctionField C₂ (AlgebraicClosure F) σ ĝ = ĝ := by
+    intro σ
+    apply hpsiK_inj
+    rw [hpsiK_equiv σ ĝ, hĝ', galActFunctionField_fixes_baseChange]
+  -- by the tower fact, `ĝ = functionFieldMap g` for `g ∈ F(C₂)`
+  obtain ⟨g, hg⟩ := (mem_range_functionField_baseChange_iff_fixed_kbar C₂ ĝ).2 hĝ_fixed
+  -- and `φPb g = mPb u` by injectivity of `functionFieldMap` and naturality
+  refine ⟨g, C₁.functionFieldMap_injective (AlgebraicClosure F) ?_⟩
+  show C₁.functionFieldMap (AlgebraicClosure F) (φPb g) = C₁.functionFieldMap (AlgebraicClosure F) (mPb u)
+  rw [hpsiK_nat g, hg, hĝ']
+
 end TowerDescent
 
 /-- **A `DescentData` over a concrete finite Galois intermediate field of `K̄`** (MOVE 1's data
