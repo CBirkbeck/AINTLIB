@@ -570,7 +570,6 @@ private theorem isBounded_addSubgroup_closure [NonarchimedeanRing A]
   intro U hU
   obtain ⟨G, hGU⟩ := NonarchimedeanRing.is_nonarchimedean U hU
   obtain ⟨V, hV, hSV⟩ := hS (G : Set A) (G.isOpen.mem_nhds G.zero_mem)
-  -- Key lemma: ∀ s ∈ AddSubgroup.closure S, ∀ w ∈ V, s * w ∈ G
   have hcl : ∀ s ∈ AddSubgroup.closure S, ∀ w ∈ V, s * w ∈ (G : Set A) := by
     intro s hs
     induction hs using AddSubgroup.closure_induction with
@@ -578,7 +577,7 @@ private theorem isBounded_addSubgroup_closure [NonarchimedeanRing A]
     | zero => intro w _; simp [show (0 : A) ∈ (G : Set A) from G.zero_mem]
     | add _ _ _ _ h₁ h₂ => intro w hw; rw [add_mul]; exact G.add_mem (h₁ w hw) (h₂ w hw)
     | neg _ _ h₁ => intro w hw; rw [neg_mul]; exact G.neg_mem (h₁ w hw)
-  exact ⟨V, hV, fun z hz => by
+  exact ⟨V, hV, fun z hz ↦ by
     obtain ⟨s, hs, v, hv, rfl⟩ := Set.mem_mul.mp hz
     exact hGU (hcl s hs v hv)⟩
 
@@ -587,9 +586,6 @@ theorem PairOfDefinition.isBounded_adjoin (P : PairOfDefinition A) (T : Finset A
     [NonarchimedeanRing A] :
     TopologicalRing.IsBounded ((Subring.closure ((P.A₀ : Set A) ∪ ↑T)) : Set A) := by
   classical
-  -- Strategy: induction on T. At each step, adding a power-bounded element t
-  -- enlarges the ring to a subset of AddSubgroup.closure(B_old * range(a^·)),
-  -- which is bounded by isBounded_addSubgroup_closure.
   induction T using Finset.induction with
   | empty =>
     have : Subring.closure ((P.A₀ : Set A) ∪ ↑(∅ : Finset A)) = P.A₀ := by
@@ -597,21 +593,13 @@ theorem PairOfDefinition.isBounded_adjoin (P : PairOfDefinition A) (T : Finset A
     rw [this]; exact P.isBounded_A₀
   | @insert a S ha ih =>
     have hT_S : ∀ t ∈ S, TopologicalRing.IsPowerBounded t :=
-      fun t ht => hT t (Finset.mem_insert_of_mem ht)
+      fun t ht ↦ hT t (Finset.mem_insert_of_mem ht)
     specialize ih hT_S
     set B_old := Subring.closure ((P.A₀ : Set A) ∪ ↑S)
     have ha_pb : TopologicalRing.IsPowerBounded a := hT a (Finset.mem_insert_self a S)
-    -- B_old * range(a^·) is bounded (product of bounded sets)
     have hAM_bounded : TopologicalRing.IsBounded ((B_old : Set A) * Set.range (a ^ · : ℕ → A)) :=
       ih.mul ha_pb
-    -- Subring.closure(A₀ ∪ insert a S) ⊆ AddSubgroup.closure(B_old * range(a^·))
-    -- This is a subring: AddSubgroup.closure is closed under +, -, 0, and
-    -- mul is handled by distributing products of sums into sums of products.
-    -- We construct an intermediate subring to use Subring.closure_le.
-    -- Define the subring structure on C = AddSubgroup.closure(B_old * range(a^·)).
     set BM := (B_old : Set A) * Set.range (a ^ · : ℕ → A)
-    -- C is closed under multiplication: products of generators collapse.
-    -- Use closure_induction₂ to handle both arguments simultaneously.
     have hC_mul : ∀ x ∈ AddSubgroup.closure BM, ∀ y ∈ AddSubgroup.closure BM,
         x * y ∈ AddSubgroup.closure BM := by
       intro x hx y hy
@@ -632,38 +620,31 @@ theorem PairOfDefinition.isBounded_adjoin (P : PairOfDefinition A) (T : Finset A
         rw [neg_mul]; exact (AddSubgroup.closure BM).neg_mem ih₁
       | neg_right _ _ _ _ ih₁ =>
         rw [mul_neg]; exact (AddSubgroup.closure BM).neg_mem ih₁
-    -- Build a Subring from C
-    -- Helper: membership in BM via x = b * a^k
     have mem_BM (b : A) (hb : b ∈ B_old) (k : ℕ) : b * a ^ k ∈ BM :=
       Set.mul_mem_mul hb ⟨k, rfl⟩
     set C_subring : Subring A :=
       { carrier := AddSubgroup.closure BM
-        mul_mem' := fun {_ _} ha hb => hC_mul _ ha _ hb
+        mul_mem' := fun {_ _} ha hb ↦ hC_mul _ ha _ hb
         one_mem' := by
           rw [show (1 : A) = 1 * a ^ 0 by simp]
           exact AddSubgroup.subset_closure (mem_BM 1 B_old.one_mem 0)
         zero_mem' := (AddSubgroup.closure BM).zero_mem
-        add_mem' := fun {_ _} ha hb => (AddSubgroup.closure BM).add_mem ha hb
-        neg_mem' := fun {_} ha => (AddSubgroup.closure BM).neg_mem ha }
-    -- Show generators are in C_subring
+        add_mem' := fun {_ _} ha hb ↦ (AddSubgroup.closure BM).add_mem ha hb
+        neg_mem' := fun {_} ha ↦ (AddSubgroup.closure BM).neg_mem ha }
     have h_sub : (P.A₀ : Set A) ∪ ↑(insert a S) ⊆ (C_subring : Set A) := by
       rw [Finset.coe_insert]
       intro x hx
       change x ∈ (AddSubgroup.closure BM : Set A)
       rcases hx with hx_A₀ | hx_a
-      · -- x ∈ A₀: x ∈ B_old (via A₀ ⊆ A₀ ∪ S), so x = x * a^0
-        rw [show x = x * a ^ 0 by simp]
+      · rw [show x = x * a ^ 0 by simp]
         exact AddSubgroup.subset_closure
           (mem_BM x (Subring.subset_closure (Set.mem_union_left _ hx_A₀)) 0)
       · rcases Set.mem_insert_iff.mp hx_a with hxa | hx_S
-        · -- x = a = 1 * a^1
-          rw [hxa, show a = 1 * a ^ 1 by simp]
+        · rw [hxa, show a = 1 * a ^ 1 by simp]
           exact AddSubgroup.subset_closure (mem_BM 1 B_old.one_mem 1)
-        · -- x ∈ S: x ∈ B_old (via S ⊆ A₀ ∪ S), so x = x * a^0
-          rw [show x = x * a ^ 0 by simp]
+        · rw [show x = x * a ^ 0 by simp]
           exact AddSubgroup.subset_closure
             (mem_BM x (Subring.subset_closure (Set.mem_union_right _ hx_S)) 0)
-    -- Subring.closure ⊆ C_subring ⊆ AddSubgroup.closure BM
     exact (isBounded_addSubgroup_closure hAM_bounded).subset (Subring.closure_le.mpr h_sub)
 
 /-- Adjoin a finite set of power-bounded elements to the ring of definition.
@@ -692,47 +673,35 @@ def PairOfDefinition.adjoin (P : PairOfDefinition A) (T : Finset A)
     set I' := Ideal.map incl P.I
     rw [isAdic_iff]
     constructor
-    · -- Part 1: Each I'^n is open in B₀ (subspace topology)
-      intro n
+    · intro n
       apply AddSubgroup.isOpen_of_mem_nhds (I' ^ n).toAddSubgroup
       rw [Submodule.coe_toAddSubgroup]
-      -- I'^n ⊇ incl(I^n), and incl(I^n) maps to an open set in A
       have h_nhds : Subtype.val ⁻¹' (Subtype.val '' ((P.I ^ n : Ideal P.A₀) : Set P.A₀)) ∈
           𝓝 (0 : B₀) :=
         continuous_subtype_val.continuousAt.preimage_mem_nhds
           (show Subtype.val '' ((P.I ^ n : Ideal P.A₀) : Set P.A₀) ∈ 𝓝 (0 : A) from
             (P.pow_image_isOpen n).mem_nhds ⟨0, (P.I ^ n).zero_mem, rfl⟩)
       apply Filter.mem_of_superset h_nhds
-      -- Show val⁻¹'(val '' I^n) ⊆ I'^n
       intro ⟨x, hx_mem⟩ hx
       simp only [Set.mem_preimage] at hx
       obtain ⟨⟨y, hy_A₀⟩, hy_In, hval⟩ := hx
-      -- x = y as elements of A, so incl(⟨y, hy_A₀⟩) corresponds to ⟨x, hx_mem⟩
       have heq : (⟨x, hx_mem⟩ : B₀) = incl ⟨y, hy_A₀⟩ := by
         ext; exact hval.symm
       rw [heq, ← Ideal.map_pow]
       exact Ideal.mem_map_of_mem _ hy_In
-    · -- Part 2: The powers I'^n shrink to any nhd of 0 in B₀.
-      -- I'^n = Ideal.map incl (P.I^n). Elements are B₀-linear combinations
-      -- of incl(a) with a ∈ P.I^n. Their A-values lie in B₀ · val''(P.I^n) ⊆ G.
-      intro s hs
+    · intro s hs
       rw [nhds_induced] at hs
       obtain ⟨U_A, hU_A, hU_sub⟩ := Filter.mem_comap.mp hs
       obtain ⟨G, hGU⟩ := NonarchimedeanRing.is_nonarchimedean U_A hU_A
       obtain ⟨V, hV, hBV⟩ := P.isBounded_adjoin T hT (G : Set A)
         (G.isOpen.mem_nhds G.zero_mem)
       obtain ⟨n, _, hn⟩ := P.hasBasis_nhds_zero.mem_iff.mp hV
-      refine ⟨n, fun x hx_In => hU_sub (Set.mem_preimage.mpr (hGU ?_))⟩
-      -- x ∈ I'^n = (Ideal.map incl P.I)^n = Ideal.map incl (P.I^n)
+      refine ⟨n, fun x hx_In ↦ hU_sub (Set.mem_preimage.mpr (hGU ?_))⟩
       have hx_map : x ∈ Ideal.map incl (P.I ^ n) := Ideal.map_pow incl P.I n ▸ hx_In
-      -- Ideal.map f J = Submodule.span _ (f '' J). Use mem_span_set for Finsupp.
       set img_set := incl '' ((P.I ^ n : Ideal P.A₀) : Set P.A₀)
       obtain ⟨f, hf_supp, hf_sum⟩ := Submodule.mem_span_set.mp hx_map
-      -- val(x) = val(∑ f(i) • i) = ∑ val(f(i)) * val(i)
-      -- Each term: val(f(i)) ∈ B₀, val(i) ∈ val''(P.I^n) ⊆ V.
-      -- So val(f(i)) * val(i) ∈ B₀ * V ⊆ G. Sum ∈ G (additive subgroup).
       rw [← hf_sum]
-      change (Finsupp.sum f fun i a => a • i : B₀).val ∈ (G : Set A)
+      change (Finsupp.sum f fun i a ↦ a • i : B₀).val ∈ (G : Set A)
       simp only [Finsupp.sum, smul_eq_mul]
       rw [show ((∑ x ∈ f.support, f x * x : B₀) : A) =
           ∑ x ∈ f.support, ((f x * x : B₀) : A) from map_sum B₀.subtype _ _]
@@ -740,7 +709,6 @@ def PairOfDefinition.adjoin (P : PairOfDefinition A) (T : Finset A)
       intro i hi
       have hi_img : i ∈ img_set := hf_supp (Finset.mem_coe.mpr hi)
       obtain ⟨a, ha, rfl⟩ := hi_img
-      -- Goal: ((f (incl a) * incl a : B₀) : A) ∈ G
       have : ((f (incl a) * incl a : B₀) : A) = (f (incl a) : A) * (a : A) := by
         rw [MulMemClass.coe_mul, Subring.coe_inclusion]
       rw [this]
