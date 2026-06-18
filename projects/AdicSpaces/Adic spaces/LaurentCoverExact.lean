@@ -713,9 +713,7 @@ private theorem coeff_posIncl (g : ↥(TateAlgebra A)) (i j : ℕ) :
   have h2 : (idx i j = Finsupp.single 0 i) ↔ j = 0 := by
     rw [show Finsupp.single (0 : Fin 2) i = Finsupp.single 0 (idx i j 0) from by rw [h1]]
     exact idx_eq_single_zero_iff i j
-  by_cases hj : j = 0
-  · rw [if_pos (h2.mpr hj), if_pos hj]
-  · rw [if_neg (mt h2.mp hj), if_neg hj]
+  simp only [h2]
 
 /-- The RHS coefficient: `negIncl h` at index `idx i j`. -/
 private theorem coeff_negIncl (h : ↥(TateAlgebra A)) (i j : ℕ) :
@@ -728,9 +726,7 @@ private theorem coeff_negIncl (h : ↥(TateAlgebra A)) (i j : ℕ) :
   have h2 : (idx i j = Finsupp.single 1 j) ↔ i = 0 := by
     rw [show Finsupp.single (1 : Fin 2) j = Finsupp.single 1 (idx i j 1) from by rw [h1]]
     exact idx_eq_single_one_iff i j
-  by_cases hi : i = 0
-  · rw [if_pos (h2.mpr hi), if_pos hi]
-  · rw [if_neg (mt h2.mp hi), if_neg hi]
+  simp only [h2]
 
 private theorem idx_11 :
     Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) 1 = idx 1 1 := by
@@ -956,13 +952,8 @@ theorem ker_lambdaMap_le_range_iotaHom [T1Space A]
     rw [coeff_posIncl, if_pos rfl, coeff_negIncl, if_pos rfl] at h1
     -- h1 : 0 - c(0,0) = coeff_0 g - coeff_0 h
     simp only [zero_sub] at h1
-    -- h1 : -c(0,0) = coeff_0 g - coeff_0 h
-    -- Want: c(0,0) = coeff_0 h - coeff_0 g
-    have : MvPowerSeries.coeff (idx 0 0) c.val =
-      -(MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) 0) g.val -
-       MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) 0) h.val) := by
-      rw [← h1, neg_neg]
-    rw [this]; ring
+    -- h1 : -c(0,0) = coeff_0 g - coeff_0 h; want c(0,0) = coeff_0 h - coeff_0 g
+    linear_combination -h1
   -- Step 5: For n ≥ 1, the diagonal c(n+k, k) = c(n, 0) for all k.
   -- This is constant, and by restricted condition in T1 space, must be 0.
   -- Therefore coeff_n g = 0 for all n ≥ 1.
@@ -1013,11 +1004,8 @@ theorem ker_lambdaMap_le_range_iotaHom [T1Space A]
   have hg0_eq_h0 :
       MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) 0) g.val =
       MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) 0) h.val := by
-    have := hboundary_00
-    rw [hc00_zero] at this
-    -- this : 0 = coeff_0 h - coeff_0 g
-    -- So coeff_0 h - coeff_0 g = 0, hence coeff_0 h = coeff_0 g
-    exact (eq_of_sub_eq_zero this.symm).symm
+    -- hboundary_00 : c(0,0) = coeff_0 h - coeff_0 g; hc00_zero : c(0,0) = 0
+    linear_combination hboundary_00 - hc00_zero
   -- Step 8: Assemble. Set a = coeff_0 g (as TateAlgebra.coeff).
   -- coeff_zero_algebraMap and coeff_succ_algebraMap use TateAlgebra.coeff.
   set a := TateAlgebra.coeff 0 g with ha_def
