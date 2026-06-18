@@ -121,7 +121,7 @@ theorem eq_of_evaluatesTo_infinite {f g : KE}
     exact absurd (WithTop.coe_le_coe.mp h1') (by norm_num)
   -- so the infinite agreement set sits inside the finite zero set
   exact ((W_smooth W).finite_setOf_ord_P_nonzero hD).not_infinite
-    (hS.mono fun P hP => hzero P hP)
+    (hS.mono fun P hP ↦ hzero P hP)
 
 end HasseWeil.WeilPairing
 
@@ -179,18 +179,18 @@ theorem Isogeny.pullback_eq_of_pointMap_eqOn_infinite
         EvaluatesTo W P (β.pullback (y_gen W)) c) := by
     rintro P ⟨hPS, hPbad⟩
     obtain ⟨xa, ya, hnsa, heqa, hxa, hya⟩ :=
-      hwα P (fun hc => hPbad (Set.mem_union_left _ hc))
+      hwα P (fun hc ↦ hPbad (Set.mem_union_left _ hc))
     obtain ⟨xb, yb, hnsb, heqb, hxb, hyb⟩ :=
-      hwβ P (fun hc => hPbad (Set.mem_union_right _ hc))
+      hwβ P (fun hc ↦ hPbad (Set.mem_union_right _ hc))
     have heq : (WeierstrassCurve.Affine.Point.some xa ya hnsa : W.toAffine.Point) =
         WeierstrassCurve.Affine.Point.some xb yb hnsb :=
       heqa.symm.trans ((h P hPS).trans heqb)
     obtain ⟨hxx, hyy⟩ := (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mp heq
     exact ⟨⟨xa, hxa, by rw [hxx]; exact hxb⟩, ⟨ya, hya, by rw [hyy]; exact hyb⟩⟩
   have hx : α.pullback (x_gen W) = β.pullback (x_gen W) :=
-    eq_of_evaluatesTo_infinite W hS' fun P hP => (key P hP).1
+    eq_of_evaluatesTo_infinite W hS' fun P hP ↦ (key P hP).1
   have hy : α.pullback (y_gen W) = β.pullback (y_gen W) :=
-    eq_of_evaluatesTo_infinite W hS' fun P hP => (key P hP).2
+    eq_of_evaluatesTo_infinite W hS' fun P hP ↦ (key P hP).2
   exact algHom_ext_x_y_gen W hx hy
 
 variable {W} in
@@ -207,17 +207,17 @@ theorem Isogeny.pullback_eq_of_pointMap_eqOn_infinite_points
     α.pullback = β.pullback := by
   -- every nonzero point is affine, so `T \ {0}` lifts to smooth points
   have hsub : T \ {0} ⊆
-      Set.range (fun P : (W_smooth W).SmoothPoint => P.toAffinePoint) := by
+      Set.range (fun P : (W_smooth W).SmoothPoint ↦ P.toAffinePoint) := by
     rintro P ⟨hPT, hP0⟩
     cases P with
     | zero =>
       exact absurd (Set.mem_singleton_iff.mpr WeierstrassCurve.Affine.Point.zero_def) hP0
     | some x y hns => exact ⟨⟨x, y, hns⟩, rfl⟩
-  have hpre : ((fun P : (W_smooth W).SmoothPoint => P.toAffinePoint) ⁻¹'
+  have hpre : ((fun P : (W_smooth W).SmoothPoint ↦ P.toAffinePoint) ⁻¹'
       (T \ {0})).Infinite :=
     (hT.diff (Set.finite_singleton 0)).preimage hsub
   exact Isogeny.pullback_eq_of_pointMap_eqOn_infinite hbadα hbadβ hwα hwβ hpre
-    fun P hP => h P.toAffinePoint hP.1
+    fun P hP ↦ h P.toAffinePoint hP.1
 
 variable {W} in
 /-- **Full extensionality from point-map agreement** (over `K̄`): two coherent
@@ -235,7 +235,7 @@ theorem Isogeny.ext_of_pointMap_eq [IsAlgClosed F]
   haveI : Infinite (W_smooth W).SmoothPoint := (W_smooth W).smoothPoint_infinite
   refine Isogeny.ext ?_ (AddMonoidHom.ext h)
   exact Isogeny.pullback_eq_of_pointMap_eqOn_infinite hbadα hbadβ hwα hwβ
-    Set.infinite_univ fun P _ => h P.toAffinePoint
+    Set.infinite_univ fun P _ ↦ h P.toAffinePoint
 
 /-! ### The infinitude source: nonzero torsion across infinitely many primes -/
 
@@ -250,11 +250,11 @@ theorem exists_torsion_ne_zero [IsAlgClosed F] (ℓ : ℤ) (hℓ : (ℓ : F) ≠
       rw [hZ]; push_cast; rw [sq_abs]
     exact_mod_cast h'
   by_contra hno
-  push_neg at hno
+  push Not at hno
   have hbot : W.toAffine[ℓ] = ⊥ := by
     ext P
     simp only [mem_torsionSubgroup, AddSubgroup.mem_bot]
-    exact ⟨fun hP => hno P hP, fun hP => by rw [hP, smul_zero]⟩
+    exact ⟨fun hP ↦ hno P hP, fun hP ↦ by rw [hP, smul_zero]⟩
   rw [hbot, AddSubgroup.card_bot] at hcard
   exact absurd hcard.symm (Nat.one_lt_pow two_ne_zero hℓ1).ne'
 
@@ -282,14 +282,14 @@ theorem torsionUnionSet_infinite [IsAlgClosed F] {L : Set ℕ}
     refine exists_torsion_ne_zero W ((ℓ : ℕ) : ℤ) (hLchar ℓ hℓ) ?_
     rw [Int.natAbs_natCast]
     exact (hLp ℓ hℓ).one_lt
-  set f : ↥L → W.toAffine.Point := fun ℓ => (hchoice ℓ).choose with hf
+  set f : ↥L → W.toAffine.Point := fun ℓ ↦ (hchoice ℓ).choose with hf
   have hf_spec : ∀ ℓ : ↥L, ((ℓ : ℕ) : ℤ) • f ℓ = 0 ∧ f ℓ ≠ 0 :=
-    fun ℓ => (hchoice ℓ).choose_spec
+    fun ℓ ↦ (hchoice ℓ).choose_spec
   -- distinct primes give distinct points: nonzero torsion at coprime orders is disjoint
   have hinj : Function.Injective f := by
     rintro ⟨ℓ₁, h₁⟩ ⟨ℓ₂, h₂⟩ heq
     by_contra hne
-    have hℓne : ℓ₁ ≠ ℓ₂ := fun hc => hne (Subtype.ext hc)
+    have hℓne : ℓ₁ ≠ ℓ₂ := fun hc ↦ hne (Subtype.ext hc)
     have h1 : ((ℓ₁ : ℕ) : ℤ) • f ⟨ℓ₁, h₁⟩ = 0 := (hf_spec ⟨ℓ₁, h₁⟩).1
     have h2 : ((ℓ₂ : ℕ) : ℤ) • f ⟨ℓ₁, h₁⟩ = 0 := by
       rw [heq]; exact (hf_spec ⟨ℓ₂, h₂⟩).1
@@ -384,7 +384,7 @@ theorem dual_add_pullback
     Dχ.pullback = σ.pullback := by
   have htor := dual_add_pointMap_eqOn_torsionUnion hLchar hχ hadjφ hadjψ hadjχ
   refine Isogeny.pullback_eq_of_pointMap_eqOn_infinite_points hbχ hbσ hwχ hwσ
-    (torsionUnionSet_infinite W hL hLp hLchar) fun P hP => ?_
+    (torsionUnionSet_infinite W hL hLp hLchar) fun P hP ↦ ?_
   rw [hσ]
   exact htor P hP
 
