@@ -1816,9 +1816,7 @@ theorem isInducing_2cover_pair
   have h_eq : (fun x : presheafValue D₀ =>
         (restrictionMap D₀ (laurentPlusDatum D₀ f) (laurentPlus_subset D₀ f) x,
          restrictionMap D₀ (laurentMinusDatum D₀ f) (laurentMinus_subset D₀ f) x))
-      = h_homeo ∘ productRestrictionSub A (laurentCovering D₀ f) := by
-    funext x
-    apply Prod.ext <;> rfl
+      = h_homeo ∘ productRestrictionSub A (laurentCovering D₀ f) := rfl
   rw [h_eq]
   exact h_homeo.isInducing.comp h_split
 
@@ -2099,9 +2097,6 @@ theorem productRestrictionSub_isInducing_via_tree_refinement
   intro x
   rw [naturalRefinementMap_comp]
   funext d
-  -- Both sides: `restrictionMap C.base d.1 _ x` with possibly different
-  -- subset proofs. Use proof-irrelevance.
-  change restrictionMap C.base d.1 _ x = restrictionMap C.base d.1 _ x
   rfl
 
 /-! ### Wedhorn-faithful (no-disjointness) inducing transfer
@@ -2326,7 +2321,6 @@ theorem productRestrictionSub_isInducing_via_tree_refinement_no_disj
   intro x
   rw [naturalRefinementMap_comp]
   funext d
-  change restrictionMap C.base d.1 _ x = restrictionMap C.base d.1 _ x
   rfl
 
 /-! ## Wedhorn 8.34 factorization
