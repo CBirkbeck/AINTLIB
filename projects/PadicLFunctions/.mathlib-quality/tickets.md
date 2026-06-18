@@ -6694,7 +6694,11 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
   it by instantiation. Sub-tickets below.
 
 ##### [G-DEF] `IwasawaGaloisData` — Galois modules + axiomatised CFT inputs
-- **Status**: open | **File**: IwasawaProof/Galois/Modules.lean | **Depends on**: S13-S5 | **Type**: structure/def
+- **Status**: DONE (2026-06-18) | **File**: IwasawaProof/Galois/Modules.lean | **Depends on**: S13-S5 | **Type**: structure/def
+- **Progress**: `LambdaGPlus p := PadicMeasure p (GPlus p)` + `structure IwasawaGaloisData` (over variable module
+  types XPlus/YPlus/MmodL, avoiding module-in-structure friction) bundling galι/galπ + injective/surjective/Exact
+  + `Module.Finite XPlus`. Compiles; wired into umbrella. Post-proof cleanup: pure structure/def (no proof bodies)
+  — clean by construction (docstring, names, gates pass).
 - **Statement**: a `structure IwasawaGaloisData (p) [hp : Fact p.Prime] (hp2 : p ≠ 2)` bundling: the Λ(𝒢⁺)-modules
   `X⁺∞ Y⁺∞ MmodL` (= 𝒳⁺_∞, 𝒴⁺_∞, Gal(𝓜⁺_∞/𝓛⁺_∞)) with `[AddCommGroup ·] [Module Λ(𝒢⁺) ·]`; the **axiomatised
   Galois SES** `galoisSES : 0 → MmodL → X⁺∞ → Y⁺∞ → 0` (exact, fundamental thm of Galois theory, TeX 3806); and a
@@ -6714,7 +6718,14 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
   structure. So `IwasawaGaloisData` carries Galois-theoretic/structural data; the single CFT axiom is `[G2-CFT]`.
 
 ##### [G1] `𝒴⁺_n ≅ Cl(F⁺_n) ⊗ ℤ_p`  (Hilbert-94 / unramified CFT — **REUSE monorepo**)
-- **Status**: open | **File**: IwasawaProof/Galois/Modules.lean | **Depends on**: G-DEF | **Type**: def + theorem (reuse)
+- **Status**: DONE (2026-06-18, def) | **File**: IwasawaProof/Galois/Modules.lean | **Depends on**: G-DEF | **Type**: def + theorem (reuse)
+- **Progress**: `RealCyclotomic p n := maximalRealSubfield (CyclotomicField (p^n) ℚ)` (mathlib's tower, NumberField
+  instance present for all n — cleaner than the project's ℂ_[p] `FglobalPlus`, whose NumberField instance is absent;
+  the two are bridged later at G4). `YPlusFin p n := ℤ_p ⊗[ℤ] Additive (ClassGroup (𝓞 (RealCyclotomic p n)))` with
+  AddCommGroup / Module ℤ_p / Module.Finite ℤ_p instances (class group finite ⇒ base change f.g.). Real reuse of
+  mathlib's cyclotomic class group — not axiomatized. The Hilbert-94 iso `YPlusFin n ≅ Gal(𝓛⁺_n/F⁺_n)` and the
+  inverse limit `𝒴⁺_∞` belong with the bundled data + G3 (Gal(𝓛⁺_n/F⁺_n) is abstract there). Compiles. Cleanup:
+  defs + 3-line Finite proof — clean by construction.
 - **Statement**: `def YPlusFin (n) : Type* := (ClassGroup (𝓞 (FglobalPlus p n))) ⊗[ℤ] ℤ_[p]`; `Y⁺∞` is the inverse
   limit of `YPlusFin n` along class-group norm maps. The identification `YPlusFin n ≃ Gal(𝓛⁺_n/F⁺_n)` is
   **unramified CFT = Hilbert 94**, which the monorepo PROVES.
