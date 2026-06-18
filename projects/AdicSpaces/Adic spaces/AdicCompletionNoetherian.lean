@@ -513,15 +513,8 @@ theorem _mvPowerSeriesEval_partial_compat [IsNoetherianRing R] (I : Ideal R)
       le_trans hj (Finset.single_le_sum (f := α)
         (fun i _ => Nat.zero_le _) (Finset.mem_univ j))
     exact Ideal.pow_le_pow_right (by omega : m ≤ ∑ i, α i) h1
-  have h_term : MvPolynomial.coeff α (((MvPowerSeries.trunc R
-      (Finsupp.equivFunOnFinite.symm fun _ : Fin n => k + 1)) P) -
-        ((MvPowerSeries.trunc R
-          (Finsupp.equivFunOnFinite.symm fun _ : Fin n => m + 1)) P)) *
-      ∏ i, (f i) ^ (α i) ∈ I ^ m :=
-    Ideal.mul_mem_left _ _ h_prod_in
-  exact (show I ^ m ≤ I ^ m • (⊤ : Submodule R R) from fun y hy => by
-    rw [show y = y * 1 from (mul_one _).symm]
-    exact Submodule.smul_mem_smul hy Submodule.mem_top) h_term
+  rw [Ideal.smul_top_eq_map (S := R)]
+  simpa using Ideal.mul_mem_left _ _ h_prod_in
 
 /-- **(L3.B.map_one)**: the lifted LinearMap sends `1` to `1`, assuming
 `0 < n`.
@@ -675,17 +668,8 @@ private theorem _mvPowerSeriesEval_partial_map_mul_residual_mem
       le_trans hj (Finset.single_le_sum (f := α)
         (fun i _ => Nat.zero_le _) (Finset.mem_univ j))
     exact Ideal.pow_le_pow_right (by omega : k ≤ ∑ i, α i) h1
-  have h_term : MvPolynomial.coeff α (((MvPowerSeries.trunc R
-      (Finsupp.equivFunOnFinite.symm fun _ : Fin n => k + 1)) (P * Q)) -
-        ((MvPowerSeries.trunc R
-          (Finsupp.equivFunOnFinite.symm fun _ : Fin n => k + 1)) P *
-         (MvPowerSeries.trunc R
-          (Finsupp.equivFunOnFinite.symm fun _ : Fin n => k + 1)) Q)) *
-      ∏ i, (f i) ^ (α i) ∈ I ^ k :=
-    Ideal.mul_mem_left _ _ h_prod_in
-  exact (show I ^ k ≤ I ^ k • (⊤ : Submodule R R) from fun y hy => by
-    rw [show y = y * 1 from (mul_one _).symm]
-    exact Submodule.smul_mem_smul hy Submodule.mem_top) h_term
+  rw [Ideal.smul_top_eq_map (S := R)]
+  simpa using Ideal.mul_mem_left _ _ h_prod_in
 
 /-- **(L3.B.map_mul.partial)**: per-level multiplicativity of the partial
 evaluation map mod `I^k`.
