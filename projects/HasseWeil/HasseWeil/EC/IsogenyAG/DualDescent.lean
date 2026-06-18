@@ -2272,4 +2272,62 @@ theorem isIsogenous_symm_charZero {F : Type*} [Field F] [DecidableEq F] [CharZer
     (h : IsIsogenous W₁ W₂) : IsIsogenous W₂ W₁ :=
   h.symm_of (universalDualWitness_of_charZero F)
 
+/-! ### The perfect-field headline (char-p via the twisted Frobenius factorization)
+
+Over a perfect field of any characteristic, every isogeny has an `F`-rational dual. The separable
+side is the `K̄`-direct engine `rationalReverseCompose_of_separable` (now `PerfectField`-scoped); the
+inseparable side over char `p` is absorbed by `nonempty_hasDualWitness_of_twisted_separable_witnesses`
+(the twisted Frobenius factorization + relative Verschiebung, `TwistedFactorization`), whose only
+remaining input — dual witnesses for the *separable* isogenies out of the Frobenius twists of `E` — is
+exactly what the separable engine supplies. -/
+
+/-- **The separable reverse-isogeny existence over a perfect field** (Silverman III.6.1). For a
+**separable** isogeny over a perfect base, an `F`-rational reverse isogeny `ρ` with `ρ ∘ φ = [n]`
+(`n ≠ 0`). The perfect-field analogue of `rationalDualCompose_of_charZero` — it takes `hsep`
+explicitly instead of deriving it from char 0. -/
+theorem rationalDualCompose_of_separable {F : Type*} [Field F] [DecidableEq F] [PerfectField F]
+    {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
+    (φ : EC.Isogeny W₁ W₂) (hsep : φ.IsSeparable) :
+    ∃ (n : ℤ) (hn : n ≠ 0) (ρ : EC.Isogeny W₂ W₁),
+      ρ.compose φ = EC.Isogeny.mulByInt W₁ hn := by
+  obtain ⟨n, hn, w⟩ := rationalReverseCompose_of_separable φ hsep
+  exact ⟨n, hn, EC.Isogeny.mulByIntDual w, rationalDualCompose_of_hasMulByIntDualWitness w⟩
+
+/-- **DUAL headline, perfect-field case** (Silverman III.6.1): every isogeny over a *perfect* field
+`F` has an `F`-rational dual — i.e. `UniversalDualWitness F` holds. Case on the characteristic of `F`:
+
+* char 0 (`CharZero F` from `CharP F 0`): every isogeny is separable, so the char-0 headline
+  `universalDualWitness_of_charZero` applies directly.
+* char `p > 0` (`Fact p.Prime`, `CharP F p`): the twisted Frobenius factorization finale
+  `nonempty_hasDualWitness_of_twisted_separable_witnesses` reduces `φ`'s dual to dual witnesses for
+  the *separable* isogenies out of the Frobenius twists of `W₁`; each such separable `ψ` gets an
+  `F`-rational reverse isogeny from `rationalDualCompose_of_separable`, hence a `HasDualWitness` via
+  `hasDualWitness_of_compose`.
+
+Axiom-clean (the char-p inseparable/Verschiebung side is discharged inside the finale). -/
+theorem universalDualWitness_of_perfectField (F : Type*) [Field F] [DecidableEq F] [PerfectField F] :
+    UniversalDualWitness F := by
+  intro W₁ W₂ _ _ φ
+  obtain ⟨p, hp⟩ := CharP.exists F
+  rcases (CharP.char_is_prime_or_zero F p).symm with hp0 | hpp
+  · -- char 0
+    subst hp0
+    haveI : CharZero F := CharP.charP_to_charZero F
+    exact universalDualWitness_of_charZero F φ
+  · -- char p prime
+    haveI : Fact p.Prime := ⟨hpp⟩
+    haveI : CharP F p := hp
+    -- view `W₁` as the underlying `WeierstrassCurve F` (`W₁.toAffine = W₁`)
+    refine nonempty_hasDualWitness_of_twisted_separable_witnesses p (W₁ : WeierstrassCurve F)
+      (V := W₂) (fun k ψ hψsep => ?_) φ
+    obtain ⟨n, hn, ρ, hρ⟩ := rationalDualCompose_of_separable ψ hψsep
+    exact ⟨hasDualWitness_of_compose hρ⟩
+
+/-- Symmetry of `IsIsogenous` over a perfect field — the LMFDB-label gate, discharged from the
+perfect-field headline. The char-p analogue of `isIsogenous_symm_charZero`. -/
+theorem isIsogenous_symm_perfectField {F : Type*} [Field F] [DecidableEq F] [PerfectField F]
+    {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
+    (h : IsIsogenous W₁ W₂) : IsIsogenous W₂ W₁ :=
+  h.symm_of (universalDualWitness_of_perfectField F)
+
 end HasseWeil.EC
