@@ -91,4 +91,31 @@ theorem towerTensorIncl_congr (R : Type*) [CommRing R] [Algebra F R]
       rw [hστ m]
   | add x y hx hy => rw [map_add, map_add, map_add, map_add, hx, hy]
 
+/-! ### Every element of `K̄ ⊗_F R` lives at a finite Galois intermediate level -/
+
+/-- **The tensor tower fact** (char 0): every element of `K̄ ⊗_F R` (`K̄ = AlgebraicClosure F`) is the
+image, under `towerTensorIncl`, of an element of `M ⊗_F R` for some *finite Galois* intermediate
+field `M ⊆ K̄`.  The finitely many `K̄`-scalars appearing in a finite-sum representation of `z` lie
+in a finite Galois `M` (`exists_finiteGalois_fieldOfDefinition`). -/
+theorem exists_finiteGalois_towerTensorIncl_range [CharZero F]
+    (R : Type*) [CommRing R] [Algebra F R] (z : AlgebraicClosure F ⊗[F] R) :
+    ∃ (M : IntermediateField F (AlgebraicClosure F)),
+      FiniteDimensional F M ∧ IsGalois F M ∧ z ∈ Set.range (towerTensorIncl R M) := by
+  classical
+  obtain ⟨S, hS⟩ := TensorProduct.exists_finset z
+  -- the finitely many scalars
+  obtain ⟨M, hMfin, hMgal, hMsub⟩ :=
+    exists_finiteGalois_fieldOfDefinition (E := F) (↑(S.image Prod.fst) : Set (AlgebraicClosure F))
+      (S.image Prod.fst).finite_toSet
+  refine ⟨M, hMfin, hMgal, ?_⟩
+  -- build the downstairs tensor `z_M = ∑ ⟨p.1,_⟩ ⊗ p.2`
+  have hmem : ∀ p ∈ S, p.1 ∈ M := by
+    intro p hp
+    exact hMsub (by exact Finset.mem_coe.mpr (Finset.mem_image_of_mem Prod.fst hp))
+  refine ⟨S.attach.sum fun p => (⟨p.1.1, hmem p.1 p.2⟩ : M) ⊗ₜ[F] p.1.2, ?_⟩
+  rw [map_sum, hS]
+  rw [← Finset.sum_attach S (fun p => p.1 ⊗ₜ[F] p.2)]
+  refine Finset.sum_congr rfl (fun p _ => ?_)
+  rw [towerTensorIncl_tmul]
+
 end HasseWeil.EC
