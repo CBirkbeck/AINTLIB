@@ -411,7 +411,6 @@ theorem levelNorm_one (n : ℕ) : levelNorm p n 1 = 1 := by
 set_option synthInstance.maxHeartbeats 1000000 in
 -- the `Algebra.norm_algebraMap`/`finrank` computation runs through the nested
 -- `IntermediateField (K p n) (extendScalars …)` layer; instance synthesis exceeds defaults
-set_option maxHeartbeats 1000000 in
 /-- **The level norm of a base constant is its `p`-th power** (RJW §12.1 norm-compatibility
 helper, the `N(ζ) = ζ^p` step): for `c ∈ K_n` with `n ≥ 1`, viewing `c ∈ K_{n+1}` through
 the inclusion, `N_{n+1,n}(c) = c^p`. The step `K_{n+1}/K_n` has degree `p`
@@ -511,11 +510,8 @@ theorem extendScalars_adjoin_eq_top {n : ℕ} (hn : 1 ≤ n)
   · exact hp'
 
 set_option synthInstance.maxHeartbeats 1000000 in
--- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis (see below)
-set_option maxHeartbeats 1000000 in
--- the `adjoin.powerBasis`/`norm_eq_norm_adjoin` computation runs through the nested
--- `IntermediateField (K p n) (extendScalars …)` layer; both instance synthesis and the
--- elaboration of the power-basis term exceed the defaults
+-- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis through the
+-- second `IntermediateField` over `K p n` exceeds the default budget
 /-- The norm of a generator `V` of `K_{n+1}/K_n` with minimal polynomial
 `(X+1)^p − C c` is `c − 1` (using `p` odd: `(−1)^p · (1 − c) = c − 1`). -/
 private theorem norm_extendScalars_translated {n : ℕ} (hn : 1 ≤ n) (hp2 : p ≠ 2)
@@ -562,10 +558,7 @@ private theorem norm_extendScalars_translated {n : ℕ} (hn : 1 ≤ n) (hp2 : p 
   ring
 
 set_option synthInstance.maxHeartbeats 1000000 in
--- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis (see below)
-set_option maxHeartbeats 1000000 in
--- `adjoin.finrank` and the divisibility argument run through the nested
--- `IntermediateField (K p n) (extendScalars …)` layer, exceeding the default budgets
+-- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis exceeds the default
 /-- The minimal polynomial over `K_n` of the extendScalars element `W` whose
 value is a primitive `p^{n+1}`-th root `w` (with `w^p = (c : ℂ_p)`, `c ∈ K_n`)
 is `X^p − C c` (RJW TeX 2685). Degree `p = [K_{n+1}:K_n]` from `W` generating. -/
@@ -862,11 +855,9 @@ private theorem forall_norm_le_one_of_norm_sum_pi_pow_le_one {n : ℕ} (hn : 1 �
   exact le_of_pow_le_pow_left₀ hMpos.ne' (by norm_num) (by rwa [one_pow])
 
 set_option synthInstance.maxHeartbeats 1000000 in
--- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis (see below)
 set_option maxHeartbeats 1000000 in
--- the `adjoin.powerBasis`/`Basis.sum_repr` computation runs through the nested
--- `IntermediateField (K p n) (extendScalars …)` layer; both instance synthesis and the
--- power-basis term elaboration exceed the defaults
+-- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis and the
+-- `adjoin.powerBasis`/`Basis.sum_repr` term elaboration both exceed the default budgets
 /-- `K_n`-coordinate expansion in the tower step: for an integral generator `W` of
 `K_{n+1}/K_n` (`(K_n)⟮W⟯ = ⊤`, the step has degree `p`), every element is uniquely
 `∑_{i<p} c_i W^i` with `c_i ∈ K_n` — `W` carries a power basis of dimension `p`
@@ -1006,10 +997,7 @@ theorem O_succ_exists_digits {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]} (hx : x ∈ 
   rfl
 
 set_option synthInstance.maxHeartbeats 1000000 in
--- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis (see below)
-set_option maxHeartbeats 1000000 in
--- the `linearIndependent_pow`/`adjoin.finrank` computation runs through the nested
--- `IntermediateField (K p n) (extendScalars …)` layer, exceeding the defaults
+-- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis exceeds the default
 /-- The `ξ_{n+1}`-powers `{ξ_{n+1}^i : i < p}` are `K_n`-linearly independent in `ℂ_p`:
 a `K_n`-combination `∑_{i<p} e_i ξ_{n+1}^i = 0` with `e_i ∈ K_n` has all `e_i = 0`. (They
 form a power basis of `K_{n+1}/K_n`, `linearIndependent_pow`.) -/
