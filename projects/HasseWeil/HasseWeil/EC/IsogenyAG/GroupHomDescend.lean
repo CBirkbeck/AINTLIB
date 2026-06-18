@@ -122,7 +122,7 @@ theorem addHomProperty_descend_of_baseChange
   have halg : φ_F.AddHomProperty cd_F := φ_F.addHomProperty cd_F
   -- `δ` is additive on points over a field (`AffinePointMap.lean`).
   have hδ_add : ∀ A B : W.toAffine.Point, δ (A + B) = δ A + δ B :=
-    fun A B => HasseWeil.Affine.Point.map_add (W := W) f A B
+    fun A B ↦ HasseWeil.Affine.Point.map_add (W := W) f A B
   -- It suffices to prove the identity after applying the injective `δ`.
   refine hδ_inj ?_
   calc δ (φ.toPointMap cd (P + Q))
