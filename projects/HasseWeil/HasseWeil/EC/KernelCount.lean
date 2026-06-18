@@ -71,7 +71,7 @@ omit [DecidableEq F] [W.toAffine.IsElliptic] in
 `GenericCovarianceGeneral`). -/
 theorem smoothPoint_toAffinePoint_injective :
     Function.Injective
-      (fun P : (W_smooth W).SmoothPoint => P.toAffinePoint) := by
+      (fun P : (W_smooth W).SmoothPoint ↦ P.toAffinePoint) := by
   intro P Q h
   simp only [Curves.SmoothPlaneCurve.SmoothPoint.toAffinePoint_def] at h
   obtain ⟨hx, hy⟩ := (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mp h
@@ -185,9 +185,9 @@ theorem card_kernel_eq_degree_of_separable_coordHom [IsAlgClosed F]
   -- under the coordinate point map and under the stored point map
   set avoid : Set (W_smooth W).SmoothPoint :=
     (Curves.CurveMap.toPointMap cd '' bad) ∪
-      ((fun Q : (W_smooth W).SmoothPoint => Q.toAffinePoint) ⁻¹'
+      ((fun Q : (W_smooth W).SmoothPoint ↦ Q.toAffinePoint) ⁻¹'
         (β.toAddMonoidHom ''
-          ((fun P : (W_smooth W).SmoothPoint => P.toAffinePoint) '' bad)))
+          ((fun P : (W_smooth W).SmoothPoint ↦ P.toAffinePoint) '' bad)))
     with havoid_def
   have havoid : avoid.Finite :=
     (hbad.image _).union
@@ -203,7 +203,7 @@ theorem card_kernel_eq_degree_of_separable_coordHom [IsAlgClosed F]
       Curves.CurveMap.toPointMap cd P = Q},
       β.toAddMonoidHom P.1.toAffinePoint = Q.toAffinePoint := by
     rintro ⟨P, hP⟩
-    have hPgood : P ∉ bad := fun hmem => hQ1 ⟨P, hmem, hP⟩
+    have hPgood : P ∉ bad := fun hmem ↦ hQ1 ⟨P, hmem, hP⟩
     have hco : β.toAddMonoidHom P.toAffinePoint =
         (Curves.CurveMap.toPointMap cd P).toAffinePoint :=
       PullbackEvaluation.stored_eq_toPointMap W hw cd hPgood
@@ -242,7 +242,7 @@ theorem card_kernel_eq_degree_of_separable_coordHom [IsAlgClosed F]
       Curves.CurveMap.toPointMap cd P = Q} =
       Nat.card {R : W.toAffine.Point // β.toAddMonoidHom R = Q.toAffinePoint} := by
     refine Nat.card_congr (Equiv.ofBijective
-      (fun P => ⟨P.1.toAffinePoint, hforward P⟩) ⟨?_, ?_⟩)
+      (fun P ↦ ⟨P.1.toAffinePoint, hforward P⟩) ⟨?_, ?_⟩)
     · intro P P' h
       exact Subtype.ext (smoothPoint_toAffinePoint_injective W
         (congrArg Subtype.val h))
@@ -291,7 +291,7 @@ theorem card_kernel_eq_degree_of_separable_coordHom_hom [IsAlgClosed F]
       (β.endCurveMap W).pullback
         (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField u) =
       algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField (cd.toAlgHom u) :=
-    fun u => by
+    fun u ↦ by
       have h := cd.compat u
       rw [h_pb] at h
       exact h
