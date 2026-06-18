@@ -3,8 +3,8 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
 import Mathlib.Algebra.Polynomial.Expand
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
 
 /-!
 # Generic-CommRing division polynomial expand-range membership
@@ -38,8 +38,6 @@ namespace HasseWeil
 
 variable {R : Type*} [CommRing R]
 
-/-! ### Base case `q = 2` -/
-
 /-- **Φ_2 ∈ expand 2 range, generic in `R`** with `[CharP R 2]`. The base
     case of Silverman III.6.2 for `q = 2`.
 
@@ -48,12 +46,8 @@ variable {R : Type*} [CommRing R]
 theorem Φ_two_mem_expand_two_charP [CharP R 2] (W : WeierstrassCurve R) :
     W.Φ 2 ∈ Set.range (⇑(Polynomial.expand R 2)) := by
   refine ⟨Polynomial.X ^ 2 - Polynomial.C W.b₄ * Polynomial.X - Polynomial.C W.b₈, ?_⟩
-  rw [W.Φ_two]
-  rw [map_sub, map_sub, map_mul, Polynomial.expand_C, Polynomial.expand_X,
-    map_pow, Polynomial.expand_X, Polynomial.expand_C]
-  have h_2b6 : (2 : R) * W.b₆ = 0 := by
-    rw [show (2 : R) = 0 from CharP.cast_eq_zero R 2, zero_mul]
-  rw [h_2b6, map_zero, zero_mul, sub_zero]
+  simp only [W.Φ_two, map_sub, map_mul, map_pow, Polynomial.expand_C, Polynomial.expand_X,
+    CharP.ofNat_eq_zero, zero_mul, map_zero]
   ring
 
 /-- **ΨSq_2 ∈ expand 2 range, generic in `R`** with `[CharP R 2]`. Companion
@@ -64,28 +58,17 @@ theorem Φ_two_mem_expand_two_charP [CharP R 2] (W : WeierstrassCurve R) :
 theorem ΨSq_two_mem_expand_two_charP [CharP R 2] (W : WeierstrassCurve R) :
     W.ΨSq 2 ∈ Set.range (⇑(Polynomial.expand R 2)) := by
   refine ⟨Polynomial.C W.b₂ * Polynomial.X + Polynomial.C W.b₆, ?_⟩
-  rw [W.ΨSq_two, WeierstrassCurve.Ψ₂Sq]
-  rw [map_add, map_mul, Polynomial.expand_C, Polynomial.expand_X, Polynomial.expand_C]
-  have h_2 : (2 : R) = 0 := CharP.cast_eq_zero R 2
-  have h_4 : (4 : R) = 0 := by
-    rw [show (4 : R) = 2 * 2 from by ring, h_2, mul_zero]
-  have h_2b4 : (2 : R) * W.b₄ = 0 := by rw [h_2, zero_mul]
-  rw [h_4, h_2b4, map_zero, zero_mul, zero_mul]
+  have h4 : (4 : R) = 0 := by simpa using (CharP.cast_eq_zero_iff R 2 4).2 ⟨2, rfl⟩
+  simp only [W.ΨSq_two, WeierstrassCurve.Ψ₂Sq, map_add, map_mul, Polynomial.expand_C,
+    Polynomial.expand_X, CharP.ofNat_eq_zero, h4, zero_mul, map_zero]
   ring
-
-/-! ### Base case `q = 3` -/
 
 /-- **Char-3 b-relation, generic in `R`**: `b₈ = b₂ · b₆ - b₄²`.
     Specialisation of mathlib's `WeierstrassCurve.b_relation` (`4·b₈ = b₂·b₆ - b₄²`)
     via `4 = 1` in char 3. -/
 theorem b_relation_of_charP_three [CharP R 3] (W : WeierstrassCurve R) :
     W.b₈ = W.b₂ * W.b₆ - W.b₄ ^ 2 := by
-  have h := W.b_relation
-  have h_4 : (4 : R) = 1 := by
-    have h_3 : (3 : R) = 0 := CharP.cast_eq_zero R 3
-    rw [show (4 : R) = 3 + 1 from by ring, h_3, zero_add]
-  rw [h_4, one_mul] at h
-  exact h
+  linear_combination W.b_relation - W.b₈ * CharP.cast_eq_zero R 3
 
 /-- **Ψ₃ ∈ expand 3 range, generic in `R`** with `[CharP R 3]`.
 
@@ -94,16 +77,7 @@ theorem b_relation_of_charP_three [CharP R 3] (W : WeierstrassCurve R) :
 theorem Ψ₃_mem_expand_three_charP [CharP R 3] (W : WeierstrassCurve R) :
     W.Ψ₃ ∈ Set.range (⇑(Polynomial.expand R 3)) := by
   refine ⟨Polynomial.C W.b₂ * Polynomial.X + Polynomial.C W.b₈, ?_⟩
-  rw [WeierstrassCurve.Ψ₃]
-  rw [map_add, map_mul, Polynomial.expand_C, Polynomial.expand_X, Polynomial.expand_C]
-  have h_3 : (3 : R) = 0 := CharP.cast_eq_zero R 3
-  have h_3P : (3 : Polynomial R) = 0 := by
-    show ((3 : ℕ) : Polynomial R) = 0
-    rw [Nat.cast_ofNat]
-    show Polynomial.C ((3 : ℕ) : R) = 0
-    rw [show ((3 : ℕ) : R) = 0 by exact_mod_cast h_3, Polynomial.C_0]
-  linear_combination -(Polynomial.X ^ 4 + Polynomial.C W.b₄ * Polynomial.X ^ 2 +
-    Polynomial.C W.b₆ * Polynomial.X) * h_3P
+  simp [WeierstrassCurve.Ψ₃, Polynomial.expand_C, Polynomial.expand_X, CharP.ofNat_eq_zero]
 
 /-- **ΨSq_3 ∈ expand 3 range, generic in `R`** with `[CharP R 3]`. Direct
     from `W.ΨSq_three : W.ΨSq 3 = W.Ψ₃ ^ 2` and the multiplicativity of
@@ -111,10 +85,8 @@ theorem Ψ₃_mem_expand_three_charP [CharP R 3] (W : WeierstrassCurve R) :
 theorem ΨSq_three_mem_expand_three_charP [CharP R 3] (W : WeierstrassCurve R) :
     W.ΨSq 3 ∈ Set.range (⇑(Polynomial.expand R 3)) := by
   obtain ⟨g, hg⟩ := Ψ₃_mem_expand_three_charP W
-  refine ⟨g ^ 2, ?_⟩
-  rw [W.ΨSq_three, ← hg, map_pow]
+  exact ⟨g ^ 2, by rw [W.ΨSq_three, ← hg, map_pow]⟩
 
-set_option maxHeartbeats 1000000 in
 /-- **Φ_3 ∈ expand 3 range, generic in `R`** with `[CharP R 3]`.
 
     Witness `g(X) = X³ + 2·b₂·b₄·X² + (2·b₂³·b₆ + b₂²·b₄² + b₂·b₄·b₆)·X +
@@ -130,18 +102,11 @@ theorem Φ_three_mem_expand_three_charP [CharP R 3] (W : WeierstrassCurve R) :
         Polynomial.X +
       Polynomial.C (2 * W.b₂ * W.b₄ * W.b₆ ^ 2 + W.b₄ ^ 3 * W.b₆ + W.b₆ ^ 3),
       ?_⟩
-  have h_3 : (3 : R) = 0 := CharP.cast_eq_zero R 3
-  have h_3P : (3 : Polynomial R) = 0 := by
-    show ((3 : ℕ) : Polynomial R) = 0
-    rw [Nat.cast_ofNat]
-    show Polynomial.C ((3 : ℕ) : R) = 0
-    rw [show ((3 : ℕ) : R) = 0 by exact_mod_cast h_3, Polynomial.C_0]
+  have h_3P : (3 : Polynomial R) = 0 := CharP.ofNat_eq_zero (Polynomial R) 3
   rw [W.Φ_three, WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, WeierstrassCurve.Ψ₂Sq,
     b_relation_of_charP_three W]
-  push_cast
   simp only [map_add, map_mul, map_sub, map_pow, map_ofNat, Polynomial.expand_C,
-    Polynomial.expand_X, Polynomial.C_mul, Polynomial.C_sub, Polynomial.C_pow,
-    Polynomial.C_add, Polynomial.C_ofNat]
+    Polynomial.expand_X]
   linear_combination
     (2 * Polynomial.C W.b₄ * Polynomial.X ^ 7 +
       Polynomial.C W.b₂ * Polynomial.C W.b₄ * Polynomial.X ^ 6 +
