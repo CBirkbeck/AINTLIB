@@ -176,7 +176,7 @@ Named `compose` rather than `comp` to avoid clashing with `Function.comp`
 during dot-notation resolution. -/
 noncomputable def compose (ψ : Isogeny W₂ W₃) (φ : Isogeny W₁ W₂) : Isogeny W₁ W₃ where
   toCurveMap := ψ.toCurveMap.comp φ.toCurveMap
-  pullback_ordAtInfty_nonneg := fun f h =>
+  pullback_ordAtInfty_nonneg := fun f h ↦
     φ.pullback_ordAtInfty_nonneg (ψ.toCurveMap.pullback f)
       (ψ.pullback_ordAtInfty_nonneg f h)
 
@@ -284,7 +284,7 @@ basepoint at infinity is preserved because `ord_∞` multiplies by `q` under
 Reference: Silverman III.4.6. -/
 noncomputable def Isogeny.frobenius : Isogeny W W where
   toCurveMap := { pullback := FiniteField.frobeniusAlgHom K W.FunctionField }
-  pullback_ordAtInfty_nonneg := fun f h => by
+  pullback_ordAtInfty_nonneg := fun f h ↦ by
     change 0 ≤ (⟨W⟩ : Curves.SmoothPlaneCurve K).ordAtInfty
       (FiniteField.frobeniusAlgHom K W.FunctionField f)
     rw [show (FiniteField.frobeniusAlgHom K W.FunctionField) f =
@@ -306,7 +306,7 @@ with powers). -/
 noncomputable def Isogeny.frobeniusCoordHom :
     (Isogeny.frobenius W).toCurveMap.CoordHom where
   toAlgHom := FiniteField.frobeniusAlgHom K W.CoordinateRing
-  compat := fun u => by
+  compat := fun u ↦ by
     change FiniteField.frobeniusAlgHom K W.FunctionField
         (algebraMap W.CoordinateRing W.FunctionField u) =
       algebraMap W.CoordinateRing W.FunctionField
