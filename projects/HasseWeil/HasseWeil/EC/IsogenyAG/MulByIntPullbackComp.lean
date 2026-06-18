@@ -241,7 +241,7 @@ unconditional): both sides equal `[m·n]*` by multiplicativity (`mulByInt_pullba
 and `_mul'`). -/
 theorem Isogeny.mulByInt_mulByIntPullbackCovariant {m : ℤ} (hm : m ≠ 0) (n : ℤ)
     (hn : n ≠ 0) :
-    (Isogeny.mulByInt W hm).MulByIntPullbackCovariant n hn := fun u =>
+    (Isogeny.mulByInt W hm).MulByIntPullbackCovariant n hn := fun u ↦
   (DFunLike.congr_fun (HasseWeil.mulByInt_pullbackAlgHom_mul W m n hm hn) u).symm.trans
     (DFunLike.congr_fun (HasseWeil.mulByInt_pullbackAlgHom_mul' W m n hm hn) u)
 
@@ -320,7 +320,7 @@ theorem mulByIntDual_compose {φ : Isogeny W₁ W₂} {n : ℤ} {hn : n ≠ 0}
     (w : φ.HasMulByIntDualWitness n hn) :
     (Isogeny.mulByIntDual w).compose φ = Isogeny.mulByInt W₁ hn := by
   classical
-  exact Isogeny.ext_toCurveMap (Curves.CurveMap.ext (AlgHom.ext fun z =>
+  exact Isogeny.ext_toCurveMap (Curves.CurveMap.ext (AlgHom.ext fun z ↦
     Isogeny.mulByIntDual_comp_pullback w z))
 
 end Isogeny
