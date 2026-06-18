@@ -6682,10 +6682,118 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
   Wire blueprint node in `MainConjecture.lean` chapter once sorry-free-on-the-statement. **Source**: RJW Thm IMC 3740.
 
 ### Cluster milestones (decompose-when-reached — own /develop sub-pass each)
-#### [S13-G] Stage G — Galois Λ-modules + class field theory (§13.2) | Depends on: S13-S5
-- Define 𝓜⁺/𝓛⁺, 𝒳⁺_∞/𝒴⁺_∞ + Λ(𝒢)-action; G1 `𝒴⁺_n≅Cl(F⁺_n)_p` (REUSE FltRegular Unramified/Hilbert94, mathlib ClassGroup);
-  G2 CFT seq (Washington Cor 13.6 — ramified CFT, hardest; via Chebotarev infra or axiomatise); G3 coinvariants
-  (Washington 13.22, mathlib Coinvariants); G4 Cor CFTunits2.
+#### [S13-G] Stage G — Galois Λ-modules + the Vandiver IMC (§13.2–§13.3) | Depends on: S13-S5, §12 (done)
+- **DECOMPOSED 2026-06-18** (`/develop`). Plan: `.mathlib-quality/plan-G.md`. Target = **IMC for Vandiver
+  primes** (RJW `thm:vandiver`), reusing §12 `iwasawa_theorem` (done). Global CFT is absent from mathlib
+  (verified) + FltRegular not vendored ⇒ **CFT inputs axiomatised** in a `structure IwasawaGaloisData`
+  (mirroring RJW TeX 3767 "we omit the proofs of some more classical auxiliary results"); the Iwasawa-theoretic
+  content (G3/G4/Vandiver/IMC) is proven. Sub-tickets below.
+
+##### [G-DEF] `IwasawaGaloisData` — Galois modules + axiomatised CFT inputs
+- **Status**: open | **File**: IwasawaProof/Galois/Modules.lean | **Depends on**: S13-S5 | **Type**: structure/def
+- **Statement**: a `structure IwasawaGaloisData (p) [hp : Fact p.Prime] (hp2 : p ≠ 2)` bundling: the Λ(𝒢⁺)-modules
+  `X⁺∞ Y⁺∞ MmodL` (= 𝒳⁺_∞, 𝒴⁺_∞, Gal(𝓜⁺_∞/𝓛⁺_∞)) with `[AddCommGroup ·] [Module Λ(𝒢⁺) ·]`; the **axiomatised
+  Galois SES** `galoisSES : 0 → MmodL → X⁺∞ → Y⁺∞ → 0` (exact, fundamental thm of Galois theory, TeX 3806); and a
+  `[Module.Finite Λ(𝒢⁺) X⁺∞]` field. `Λ(𝒢⁺)` is realised as the project's `PadicMeasure p (GPlus p)` (= the
+  completed group algebra) or `IwasawaAlgebraGroup` per the bridge chosen in G-DEF.
+- **Proof sketch**: pure bundling — no proof obligation beyond stating the structure and projection defs
+  (`X_infty := IwasawaGaloisData.X⁺∞` etc.). Decide the Λ(𝒢⁺) carrier: reuse `PadicMeasure p (GPlus p)` (matches
+  §12's `zetaIdealPlus`/`iwasawa_theorem`) and bridge to Stage-S `IwasawaAlgebraGroup`/`charIdealGroup` via the
+  iso `Λ(𝒢⁺) ≅ 𝒪⟦H⟧` — record the bridge as a field/def if the iso isn't yet available (sub-ticket if needed).
+- **Sources**: RJW arXiv:2309.15692 §13.2, TeX 3687–3704 (defns of 𝓜/𝓛/𝒳/𝒴), 3723–3728 (Λ(𝒢)-action via inner
+  automorphisms), 3806–3808 (Galois SES).
+- **Reuse**: project `GPlus`, `projPlus`, `zetaIdealPlus` (PlusPart/ZetaGalois); Stage-S `IwasawaAlgebraGroup`,
+  `charIdealGroup`. **Generality**: concrete to the project's `p`,`GPlus p` (these are the specific cyclotomic modules).
+- **Note**: axiomatised — `galoisSES` and the module structures encode classical Galois/CFT facts mathlib lacks.
+
+##### [G1] `𝒴⁺_n ≅ Cl(F⁺_n) ⊗ ℤ_p`  (Hilbert-94 / unramified CFT)
+- **Status**: open | **File**: IwasawaProof/Galois/Modules.lean | **Depends on**: G-DEF | **Type**: def + axiom-field
+- **Statement**: `def YPlusFin (n) : Type* := (ClassGroup (𝓞 (FglobalPlus p n))) ⊗[ℤ] ℤ_[p]` (the class-group side,
+  **real**), with `Y⁺∞` related to `⟨YPlusFin n⟩` via inverse limit; the iso `YPlusFin n ≃ Gal(𝓛⁺_n/F⁺_n)`
+  (Hilbert 94) is an **axiomatised field** of `IwasawaGaloisData` (`yfin_iso : ∀ n, YPlusFin n ≃ₗ ...`).
+- **Proof sketch**: define `YPlusFin` via mathlib `ClassGroup (𝓞 (FglobalPlus p n))` ⊗ ℤ_p (finiteness from
+  `instFintypeClassGroup`); the unramified-CFT identification (𝒴⁺_n = Gal of max unramified abelian p-ext ≅
+  p-part of class group) is Hilbert 94 — ABSENT from mathlib/FltRegular, so taken as the `yfin_iso` axiom-field
+  with citation. No proof obligation on the iso; the class-group def is real.
+- **Sources**: RJW TeX 3819–3821 (eq Y_n^+, `𝒴⁺_n ≅ Cl(F⁺_n)⊗ℤ_p`); Washington *Cyclotomic Fields* (Hilbert
+  class field / unramified CFT). **Reuse**: mathlib `ClassGroup`, `NumberField.RingOfIntegers.instFintypeClassGroup`,
+  project `FglobalPlus`. **Generality**: per-`n` over the project's tower.
+
+##### [G2] CFTunits1 — `0 → 𝓔⁺_{∞,1} → 𝒰⁺_{∞,1} → Gal(𝓜⁺_∞/𝓛⁺_∞) → 0`  (ramified CFT — HARDEST)
+- **Status**: open | **File**: IwasawaProof/Galois/Modules.lean | **Depends on**: G-DEF, G1 | **Type**: axiom-field
+- **Statement**: the exact sequence of Λ(𝒢⁺)-modules `cftSES : 0 → EPlusInftyOne → localUnitsOnePlus∞ → MmodL → 0`,
+  an **axiomatised field** of `IwasawaGaloisData`. (`EPlusInftyOne` = 𝓔⁺_{∞,1}, the inverse limit of the p-adic
+  closures of global units; `localUnitsOnePlus∞` = 𝒰⁺_{∞,1} = inverse limit of the project's `localUnitsOnePlus`.)
+- **Proof sketch**: global CFT (Washington Cor 13.6) at finite level gives `0→𝓔⁺_{n,1}→𝒰⁺_{n,1}→Gal(𝓜⁺_n/𝓛⁺_n)→0`;
+  inverse limit over `n` (Mittag-Leffler: all terms f.g. ℤ_p-modules) preserves exactness. Global CFT + exactness-
+  of-lim are both ABSENT from mathlib ⇒ **axiomatised field** with citation (this is the board's "hardest;
+  axiomatise"). Define `EPlusInftyOne`, `localUnitsOnePlus∞` as inverse limits of the existing project subgroups.
+- **Sources**: RJW TeX 3782–3795 (Prop CFTunits1); Washington Cor 13.6. **Reuse**: project `localUnitsOnePlus`,
+  `globalUnitsPlus`; mathlib `IsMittagLeffler`. **Generality**: concrete.
+
+##### [CLEANUP-G1] /cleanup IwasawaProof/Galois/Modules.lean
+- **Status**: open | **Depends on**: G2 | **Type**: cleanup (per-file cadence: 3 tickets G-DEF,G1,G2)
+
+##### [G3] coinvariants — `(𝒴⁺_∞)_{Γ⁺_n} = 𝒴⁺_n`  (PROVEN)
+- **Status**: open | **File**: IwasawaProof/Galois/Coinvariants.lean | **Depends on**: G-DEF, G1, CLEANUP-G1 | **Type**: theorem
+- **Statement**: `theorem yPlus_coinvariants (D : IwasawaGaloisData p hp2) (n) : Coinvariants (Γ⁺_n-action on Y⁺∞) ≃ₗ YPlusFin n`,
+  where `Γ⁺_n = Gal(F⁺_∞/F⁺_n)` acts on `Y⁺∞`.
+- **Proof sketch**: (1) `(𝒴⁺_∞)_{Γ⁺_n} = 𝒴⁺_∞ / ω_n 𝒴⁺_∞` via `Representation.Coinvariants` (the submodule
+  generated by `γ•y − y`); (2) the inverse-limit/coinvariants identification with the finite-level `YPlusFin n`
+  (Washington 13.22 / RJW Prop Iwmu2) — the Iwasawa-module content. Use mathlib `Representation.Coinvariants`,
+  `Representation.Coinvariants.mk`. The hard ML-step (lim ↔ coinvariant) may need an axiom-field if exactness-of-lim
+  is required; isolate it. **This is the genuinely-provable Iwasawa-theoretic core.**
+- **Sources**: RJW TeX 3823–3827 (Prop coinvariants); Washington *Cyclotomic Fields* Prop 13.22. **Reuse**: mathlib
+  `Representation.Coinvariants`. **Generality**: per-`n`.
+
+##### [G4] CFTunits2 — `0 → 𝓔⁺/𝓒⁺ → 𝒰⁺/𝓒⁺ → 𝒳⁺_∞ → 𝒴⁺_∞ → 0`  (PROVEN)
+- **Status**: open | **File**: IwasawaProof/Galois/Sequence.lean | **Depends on**: G-DEF, G2 | **Type**: theorem
+- **Statement**: `theorem cftUnits2 (D : IwasawaGaloisData p hp2) : Exact4 (E⁺∞₁/C⁺∞₁) (U⁺∞₁/C⁺∞₁) X⁺∞ Y⁺∞`
+  (the 4-term exact sequence of Λ(𝒢⁺)-modules).
+- **Proof sketch**: from `galoisSES` (G-DEF: `0→MmodL→X⁺∞→Y⁺∞→0`) and `cftSES` (G2: `0→E⁺∞₁→U⁺∞₁→MmodL→0`),
+  splice via `MmodL ≅ U⁺∞₁/E⁺∞₁ ≅ (U⁺∞₁/C⁺∞₁)/(E⁺∞₁/C⁺∞₁)` (third iso theorem, `Submodule.quotientQuotientEquivQuotient`,
+  already used in PseudoIso.lean) ⇒ the 4-term sequence. Pure homological algebra on the two axiomatised SESs.
+- **Sources**: RJW TeX 3800–3815 (Cor CFTunits2), third iso theorem. **Reuse**: mathlib `Submodule.quotientQuotientEquivQuotient`,
+  `LinearMap.exact` API; project `CyclotomicUnits` closures `𝒞⁺_{∞,1}`. **Generality**: concrete.
+
+##### [CLEANUP-G2] /cleanup IwasawaProof/Galois/{Coinvariants,Sequence}.lean
+- **Status**: open | **Depends on**: G3, G4 | **Type**: cleanup (final per-file for the two proven files)
+
+##### [G-VANDIVER] Cor Iw1 — Vandiver ⟹ 𝒴⁺_∞=0, p∤h_n⁺, 𝓔⁺/𝓒⁺=0  (PROVEN)
+- **Status**: open | **File**: IwasawaProof/Galois/Coinvariants.lean | **Depends on**: G1, G3 | **Type**: theorem
+- **Statement**: `def Vandiver (p) : Prop := ¬ p ∣ (ClassGroup (𝓞 (FglobalPlus p 1))).card` and
+  `theorem vandiver_yPlus_eq_zero (h : Vandiver p) : Subsingleton Y⁺∞` (i.e. 𝒴⁺_∞=0), plus
+  `vandiver_E_eq_C : E⁺∞₁ = C⁺∞₁` (as submodules of U⁺∞₁).
+- **Proof sketch**: (i) Vandiver ⟹ `YPlusFin 1 = 0` (def: p∤h₁⁺ ⟺ Cl⊗ℤ_p=0); by G3, `(𝒴⁺_∞)_{Γ⁺_0}=𝒴⁺_1=0`,
+  so by **Nakayama** (`Submodule.eq_bot_of_le_smul_of_le_jacobson_bot`; Λ(𝒢⁺) local with the augmentation ideal in
+  the Jacobson radical) `𝒴⁺_∞=0`. (ii) p∤h_n⁺ for all n: combine (i) with G3 `𝒴⁺_n=0`. (iii) `𝓔⁺/𝓒⁺=0`: from
+  `[𝒱⁺_{n,1}:𝒟⁺_{n,1}] | h_n⁺` prime-to-p (TeX 3849–3856), the index is a unit after ⊗ℤ_p ⇒ `𝒞⁺_{n,1}≅𝓔⁺_{n,1}`,
+  inverse limit. Uses Theorem `iwasawa` ([𝒱⁺_n:𝒟⁺_n]=h_n⁺, §11/12) — locate/reuse.
+- **Sources**: RJW TeX 3833–3865 (Cor Iw1), Nakayama. **Reuse**: mathlib Nakayama, project `ClassGroup`,
+  `CyclotomicUnits`. **Generality**: concrete.
+
+##### [CLEANUP-ALL-G] /cleanup-all on Stage-G files before the milestone
+- **Status**: open | **Depends on**: G4, G-VANDIVER | **Type**: cleanup-all (pre-milestone)
+
+##### [G-IMC] **MILESTONE** — IMC for Vandiver primes (`thm:vandiver` + char-ideal)
+- **Status**: open | **File**: IwasawaProof/MainConjecture.lean | **Depends on**: G4, G-VANDIVER, CLEANUP-ALL-G, §12 `iwasawa_theorem` | **Type**: milestone theorem
+- **Statement**:
+  ```
+  theorem iwasawa_main_conjecture_vandiver (hp2 : p ≠ 2) (h : Vandiver p) (D : IwasawaGaloisData p hp2) :
+      Nonempty (D.X⁺∞ ≃ₗ[Λ(𝒢⁺)] Λ(𝒢⁺) ⧸ zetaIdealPlus p hp2) ∧
+      charIdealGroup D.X⁺∞ = zetaIdealPlus p hp2
+  ```
+- **Proof sketch**: by G4 (CFTunits2) and G-VANDIVER (i)+(iii): `𝒴⁺_∞=0` collapses the 4-term sequence to
+  `𝒳⁺_∞ ≅ 𝒰⁺_{∞,1}/𝒞⁺_{∞,1}` (since `𝓔⁺/𝒞⁺=0`); then §12 `iwasawa_theorem` gives `𝒰⁺_{∞,1}/𝒞⁺_{∞,1} ≅
+  Λ(𝒢⁺)/I(𝒢⁺)ζ_p`. Compose ⇒ first conjunct. For the char-ideal: `charIdealGroup (Λ(𝒢⁺)/I) = I` for the
+  ideal `I = zetaIdealPlus` (Stage-S `charIdealGroup` of a cyclic module; may need a small lemma
+  `charIdealGroup_quotient`), and char-ideal is iso-invariant ⇒ `charIdealGroup 𝒳⁺_∞ = zetaIdealPlus`. RJW TeX
+  3872–3877. **Sub-ticket** likely: `charIdealGroup_quotient_eq` (char ideal of `Λ(𝒢⁺)/I`).
+- **Sources**: RJW TeX 3740–3744 (IMC), 3762–3765 (thm:vandiver), 3872–3877 (proof). **Reuse**: §12
+  `iwasawa_theorem`, Stage-S `charIdealGroup`. **Generality**: concrete (Vandiver `p`).
+
+##### [CLEANUP-FINAL-G] /cleanup-all on the whole Stage-G layer
+- **Status**: open | **Depends on**: G-IMC | **Type**: cleanup-final
 
 #### [S13-E] Stage E — Euler system / Thaine (Washington Ch.15 / Rubin) | Depends on: S13-G
 - E1 Thaine annihilation (REUSE FRB Thaine/{AnnihilatorDescent,SingleCharacter}); E2 Euler-system→char-ideal
