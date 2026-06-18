@@ -60,8 +60,8 @@ theorem sigma_verschiebung_pullback_x_eq
     (mulByInt W.toAffine (-1)).pullback
         ((verschiebungPullback_of_witness W h_subset) (x_gen W)) =
       (verschiebungPullback_of_witness W h_subset) (x_gen W) := by
-  have h := verschiebung_pullback_commute_mulByInt_neg_one W h_subset
-  have h_app := DFunLike.congr_fun h.symm (x_gen W)
+  have h_app := DFunLike.congr_fun
+    (verschiebung_pullback_commute_mulByInt_neg_one W h_subset).symm (x_gen W)
   -- h_app: σ.pb (V.pb x) = V.pb (σ.pb x)
   rw [AlgHom.comp_apply, AlgHom.comp_apply] at h_app
   rw [h_app, mulByInt_pullback_x_neg_one]
@@ -78,8 +78,8 @@ theorem sigma_verschiebung_pullback_y_eq
       algebraMap K W.toAffine.FunctionField W.toAffine.a₁ *
         (verschiebungPullback_of_witness W h_subset) (x_gen W) -
       algebraMap K W.toAffine.FunctionField W.toAffine.a₃ := by
-  have h := verschiebung_pullback_commute_mulByInt_neg_one W h_subset
-  have h_app := DFunLike.congr_fun h.symm (y_gen W)
+  have h_app := DFunLike.congr_fun
+    (verschiebung_pullback_commute_mulByInt_neg_one W h_subset).symm (y_gen W)
   rw [AlgHom.comp_apply, AlgHom.comp_apply] at h_app
   -- h_app: σ.pb (V.pb y_gen) = V.pb (σ.pb y_gen)
   rw [h_app, mulByInt_pullback_y_neg_one]
@@ -103,8 +103,8 @@ theorem sigma_zsmul_verschiebung_pullback_x_eq
   show (mulByInt W.toAffine (-1)).pullback
       ((verschiebungPullback_of_witness W h_subset)
         ((mulByInt W.toAffine r).pullback (x_gen W))) = _
-  have h_comm := verschiebung_pullback_commute_mulByInt_neg_one W h_subset
-  have h_app := DFunLike.congr_fun h_comm.symm
+  have h_app := DFunLike.congr_fun
+    (verschiebung_pullback_commute_mulByInt_neg_one W h_subset).symm
     ((mulByInt W.toAffine r).pullback (x_gen W))
   rw [AlgHom.comp_apply, AlgHom.comp_apply] at h_app
   rw [h_app, sigma_mulByInt_pullback_x_eq W r hr]
@@ -133,8 +133,8 @@ theorem sigma_zsmul_verschiebung_pullback_y_eq
       (verschiebungPullback_of_witness W h_subset)
         ((mulByInt W.toAffine r).pullback (x_gen W)) -
     algebraMap K W.toAffine.FunctionField W.toAffine.a₃
-  have h_comm := verschiebung_pullback_commute_mulByInt_neg_one W h_subset
-  have h_app := DFunLike.congr_fun h_comm.symm
+  have h_app := DFunLike.congr_fun
+    (verschiebung_pullback_commute_mulByInt_neg_one W h_subset).symm
     ((mulByInt W.toAffine r).pullback (y_gen W))
   rw [AlgHom.comp_apply, AlgHom.comp_apply] at h_app
   rw [h_app, sigma_mulByInt_pullback_y_eq W r hr]
@@ -231,8 +231,6 @@ theorem addBaseHomPair_injective_zsmul_verschiebung_mulByInt_neg_of_pole
   obtain ⟨a, ha⟩ :=
     addPullback_x_pair_zsmul_verschiebung_mulByInt_neg_in_KX_image
       W h_subset r s hr hs h_x_ne
-  have h_inj : Function.Injective (algebraMap (FractionRing (Polynomial K)) KE) :=
-    (algebraMap (FractionRing (Polynomial K)) KE).injective
   have ha_alg : IsAlgebraic K a := by
     by_contra h_trans
     have h_px_trans : Transcendental K
@@ -240,7 +238,8 @@ theorem addBaseHomPair_injective_zsmul_verschiebung_mulByInt_neg_of_pole
           ((verschiebungIsog_of_witness W h_subset).zsmul r)
           (mulByInt W.toAffine (-s))) := by
       rw [ha]
-      exact (transcendental_algebraMap_iff h_inj).mpr h_trans
+      exact (transcendental_algebraMap_iff
+        (algebraMap (FractionRing (Polynomial K)) KE).injective).mpr h_trans
     exact h_px_trans h_alg
   obtain ⟨c, hc⟩ := algebraic_in_fracRing_eq_const a ha_alg
   have hc' : addPullback_x_pair
@@ -384,6 +383,17 @@ III.6.2(b) is implicitly using when stating the polarization is
 non-degenerate; the cleanest formalisation goes via the polynomial
 divisibility ⟹ degree match ⟹ `p`-adic valuation contradiction. -/
 
+/-- `algebraMap (Polynomial K) → K(E)` is injective: it factors as the two-step scalar
+tower `Polynomial K → CoordinateRing → FunctionField`, each step injective. -/
+private theorem algebraMap_poly_KE_injective :
+    Function.Injective (algebraMap (Polynomial K) W.toAffine.FunctionField) := by
+  show Function.Injective
+    ((algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField).comp
+      (algebraMap (Polynomial K) W.toAffine.CoordinateRing))
+  exact (IsFractionRing.injective W.toAffine.CoordinateRing
+      W.toAffine.FunctionField).comp
+    Affine.CoordinateRing.algebraMap_poly_injective
+
 /-- **T26-B core** (R29 §2): from the assumed K(E) equation
 `mulByInt_x W (r * q) = (mulByInt_x W s) ^ q`, derive the polynomial
 equation in `K[X]` via algebra-map injectivity. -/
@@ -418,16 +428,36 @@ private theorem polyEq_of_mulByInt_x_eq_pow
       ← Φ_ff_eq_algebraMap_polynomial, ← Φ_ff_eq_algebraMap_polynomial,
       ← ΨSq_ff_eq_algebraMap_polynomial, ← ΨSq_ff_eq_algebraMap_polynomial]
     exact h_cross
-  -- algebraMap (Polynomial K) → FunctionField is injective.
-  have h_inj : Function.Injective
-      (algebraMap (Polynomial K) W.toAffine.FunctionField) := by
-    show Function.Injective
-      ((algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField).comp
-        (algebraMap (Polynomial K) W.toAffine.CoordinateRing))
-    exact (IsFractionRing.injective W.toAffine.CoordinateRing
-        W.toAffine.FunctionField).comp
-      Affine.CoordinateRing.algebraMap_poly_injective
-  exact h_inj h_alg
+  exact algebraMap_poly_KE_injective W h_alg
+
+/-- `(mulByInt n).pb x_gen = mulByInt_x W n` for `n ≠ 0`: `x_gen` form of
+`mulByInt_pullback_x` (`x_gen` unfolds to the `algebraMap`-of-`X` form). -/
+private theorem mulByInt_pullback_x_gen (n : ℤ) (hn : n ≠ 0) :
+    (mulByInt W.toAffine n).pullback (x_gen W) = mulByInt_x W n :=
+  mulByInt_pullback_x W n hn
+
+/-- `(V.zsmul r).pb x_gen = V.pb (mulByInt_x W r)`: the `(V.zsmul r)`-pullback of the
+x-coordinate generator factors through `mulByInt_x`. Shared between the T26-B mismatch
+and the V-side pole-bound proofs. -/
+private theorem zsmul_verschiebung_pullback_x_eq
+    (h_subset :
+      (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback.range ≤
+        (frobeniusIsog W).pullback.range)
+    (r : ℤ) (hr : r ≠ 0) :
+    ((verschiebungIsog_of_witness W h_subset).zsmul r).pullback (x_gen W) =
+      (verschiebungIsog_of_witness W h_subset).pullback (mulByInt_x W r) := by
+  show ((mulByInt W.toAffine r).comp
+      (verschiebungIsog_of_witness W h_subset)).pullback (x_gen W) = _
+  rw [Isogeny.comp_algebraMap_eq]
+  congr 1
+  exact mulByInt_pullback_x_gen W r hr
+
+/-- `(mulByInt (-s)).pb x_gen = mulByInt_x W s`: the `(-s)`-pullback of the x-coordinate
+generator, simplified via `mulByInt_x_neg`. Shared between the T26-B mismatch and the
+V-side pole-bound proofs. -/
+private theorem mulByInt_neg_pullback_x_eq (s : ℤ) (hs : s ≠ 0) :
+    (mulByInt W.toAffine (-s)).pullback (x_gen W) = mulByInt_x W s := by
+  rw [mulByInt_pullback_x_gen W (-s) (neg_ne_zero.mpr hs), mulByInt_x_neg]
 
 /-- **T26-B (R29 §2 T26-B substantive ship)** — V-side x-coordinate
 mismatch at infinity for the genuine `(V.zsmul r, mulByInt (-s))` pair.
@@ -446,24 +476,8 @@ theorem h_x_ne_zsmul_verschiebung_mulByInt_neg
       (mulByInt W.toAffine (-s)).pullback (x_gen W) := by
   intro h_eq
   -- Step 1: simplify LHS and RHS to mulByInt_x form.
-  have h_lhs_x :
-      ((verschiebungIsog_of_witness W h_subset).zsmul r).pullback (x_gen W) =
-        (verschiebungIsog_of_witness W h_subset).pullback (mulByInt_x W r) := by
-    show ((mulByInt W.toAffine r).comp
-        (verschiebungIsog_of_witness W h_subset)).pullback (x_gen W) = _
-    rw [Isogeny.comp_algebraMap_eq]
-    congr 1
-    show (mulByInt W.toAffine r).pullback
-      (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
-        (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X)) = _
-    exact mulByInt_pullback_x W r hr
-  have h_rhs_x : (mulByInt W.toAffine (-s)).pullback (x_gen W) = mulByInt_x W s := by
-    have h : (mulByInt W.toAffine (-s)).pullback (x_gen W) = mulByInt_x W (-s) := by
-      show (mulByInt W.toAffine (-s)).pullback
-        (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
-          (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X)) = _
-      exact mulByInt_pullback_x W (-s) (neg_ne_zero.mpr hs)
-    rw [h, mulByInt_x_neg]
+  have h_lhs_x := zsmul_verschiebung_pullback_x_eq W h_subset r hr
+  have h_rhs_x := mulByInt_neg_pullback_x_eq W s hs
   rw [h_lhs_x, h_rhs_x] at h_eq
   -- h_eq : V.pullback (mulByInt_x W r) = mulByInt_x W s
   -- Step 2: apply π.pullback to both sides.
@@ -638,13 +652,9 @@ theorem mulByInt_pow_pullback_x_gen_mem_frobenius_fieldRange
   have h_pow : Fintype.card K ^ (k' + 1) = Fintype.card K * Fintype.card K ^ k' := by
     ring
   rw [h_pow, pow_mul]
-  rw [show ((isogenyIterate W (verschiebungIsog_of_witness W h_subset) (k' + 1)).pullback
-        (x_gen W) ^ Fintype.card K) ^ (Fintype.card K ^ k') =
-      (((isogenyIterate W (verschiebungIsog_of_witness W h_subset) (k' + 1)).pullback
-        (x_gen W)) ^ Fintype.card K) ^ (Fintype.card K ^ k') from rfl]
   -- Use the q-th-power → Im(π*) characterisation.
   refine pow_mem ?_ _
-  rw [(frobeniusIsog_pullback_mem_iff W _)]
+  rw [frobeniusIsog_pullback_mem_iff W _]
   exact ⟨_, rfl⟩
 
 /-- **Pow-of-q range membership** for `(mulByInt q^k).pb y_gen`: y-side analog. -/
@@ -660,12 +670,8 @@ theorem mulByInt_pow_pullback_y_gen_mem_frobenius_fieldRange
   have h_pow : Fintype.card K ^ (k' + 1) = Fintype.card K * Fintype.card K ^ k' := by
     ring
   rw [h_pow, pow_mul]
-  rw [show ((isogenyIterate W (verschiebungIsog_of_witness W h_subset) (k' + 1)).pullback
-        (y_gen W) ^ Fintype.card K) ^ (Fintype.card K ^ k') =
-      (((isogenyIterate W (verschiebungIsog_of_witness W h_subset) (k' + 1)).pullback
-        (y_gen W)) ^ Fintype.card K) ^ (Fintype.card K ^ k') from rfl]
   refine pow_mem ?_ _
-  rw [(frobeniusIsog_pullback_mem_iff W _)]
+  rw [frobeniusIsog_pullback_mem_iff W _]
   exact ⟨_, rfl⟩
 
 /-- **Universal-in-k inclusion theorem**: for every `k ≥ 1`, every
@@ -786,8 +792,7 @@ theorem h_subset_of_isDualOf
       V.comp (frobeniusIsog W) =
         mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ) := by
     have h := hV.1
-    rw [frobeniusIsog_degree] at h
-    exact h
+    rwa [frobeniusIsog_degree] at h
   -- Pullback identity: (mulByInt q).pullback = π.pullback ∘ V.pullback.
   -- For any z with [q].pullback z = w, we have w = π.pullback (V.pullback z).
   rintro w ⟨z, rfl⟩
@@ -795,8 +800,7 @@ theorem h_subset_of_isDualOf
   -- Goal: π.pullback (V.pullback z) = (mulByInt q).pullback z.
   -- π.pullback (V.pullback z) = (V.comp π).pullback z (by `Isogeny.comp` defn)
   --                          = (mulByInt q).pullback z (by h_comp).
-  have h := DFunLike.congr_fun (congrArg Isogeny.pullback h_comp) z
-  exact h
+  exact DFunLike.congr_fun (congrArg Isogeny.pullback h_comp) z
 
 /-! ### T11-DISCHARGE-X-NE (Worker C reusable) — `V.pullback x_gen ≠ x_gen`
 
@@ -848,8 +852,7 @@ theorem V_pullback_x_gen_ne_x_gen
       V.comp (frobeniusIsog W) =
         mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ) := by
     have h := hV.1
-    rw [frobeniusIsog_degree] at h
-    exact h
+    rwa [frobeniusIsog_degree] at h
   have h_q_ne_int : ((Fintype.card K : ℕ) : ℤ) ≠ 0 := by
     exact_mod_cast Fintype.card_pos.ne'
   -- π.pb (V.pb x_gen) = (V.comp π).pb x_gen by Isogeny.comp_algebraMap_eq.
@@ -860,11 +863,8 @@ theorem V_pullback_x_gen_ne_x_gen
     -- LHS = π.pb (V.pb x_gen) (by comp_algebraMap_eq, definitionally).
     -- RHS = mulByInt_x W q (by mulByInt_pullback_x).
     have h_rhs : (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback
-        (x_gen W) = mulByInt_x W ((Fintype.card K : ℕ) : ℤ) := by
-      show (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback
-        (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
-          (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X)) = _
-      exact mulByInt_pullback_x W ((Fintype.card K : ℕ) : ℤ) h_q_ne_int
+        (x_gen W) = mulByInt_x W ((Fintype.card K : ℕ) : ℤ) :=
+      mulByInt_pullback_x_gen W ((Fintype.card K : ℕ) : ℤ) h_q_ne_int
     rw [← h_rhs]
     exact h_app
   -- π.pb is z ↦ z^q.
@@ -897,19 +897,11 @@ theorem V_pullback_x_gen_ne_x_gen
       ← ΨSq_ff_eq_algebraMap_polynomial,
       ← Φ_ff_eq_algebraMap_polynomial]
     exact h_cross
-  have h_inj : Function.Injective
-      (algebraMap (Polynomial K) W.toAffine.FunctionField) := by
-    show Function.Injective
-      ((algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField).comp
-        (algebraMap (Polynomial K) W.toAffine.CoordinateRing))
-    exact (IsFractionRing.injective W.toAffine.CoordinateRing
-        W.toAffine.FunctionField).comp
-      Affine.CoordinateRing.algebraMap_poly_injective
   have h_poly :
       Polynomial.X ^ Fintype.card K *
           W.toAffine.ΨSq ((Fintype.card K : ℕ) : ℤ) =
         W.toAffine.Φ ((Fintype.card K : ℕ) : ℤ) :=
-    h_inj h_alg
+    algebraMap_poly_KE_injective W h_alg
   -- isCoprime_Φ_ΨSq + divides ⟹ W.ΨSq q is a unit in K[X].
   have hΔ : W.toAffine.Δ ≠ 0 := by
     rw [← W.toAffine.coe_Δ']
@@ -928,9 +920,8 @@ theorem V_pullback_x_gen_ne_x_gen
       (W.toAffine.ΨSq ((Fintype.card K : ℕ) : ℤ)).natDegree = 0 :=
     Polynomial.natDegree_eq_zero_of_isUnit hΨq_unit
   -- natDegree(W.Φ q) = q from natDegree_Φ. natDegree(X^q * W.ΨSq q) = q + 0 = q.
-  have hΨq_ne_K : W.toAffine.ΨSq ((Fintype.card K : ℕ) : ℤ) ≠ 0 := by
-    have h := IsUnit.ne_zero hΨq_unit
-    exact h
+  have hΨq_ne_K : W.toAffine.ΨSq ((Fintype.card K : ℕ) : ℤ) ≠ 0 :=
+    IsUnit.ne_zero hΨq_unit
   have h_X_pow_ne : (Polynomial.X : Polynomial K) ^ Fintype.card K ≠ 0 :=
     pow_ne_zero _ Polynomial.X_ne_zero
   have h_LHS_natDeg :
@@ -947,8 +938,7 @@ theorem V_pullback_x_gen_ne_x_gen
   have h_natDeg_eq :
       Fintype.card K = ((Fintype.card K : ℕ) : ℤ).natAbs ^ 2 := by
     have h := congrArg Polynomial.natDegree h_poly
-    rw [h_LHS_natDeg, h_RHS_natDeg] at h
-    exact h
+    rwa [h_LHS_natDeg, h_RHS_natDeg] at h
   have h_natAbs : ((Fintype.card K : ℕ) : ℤ).natAbs = Fintype.card K :=
     Int.natAbs_natCast _
   rw [h_natAbs] at h_natDeg_eq
@@ -982,12 +972,7 @@ theorem h_x_ne_id_V_zsmul_neg_one
     show ((mulByInt W.toAffine (-1)).comp V).pullback (x_gen W) = _
     rw [Isogeny.comp_algebraMap_eq]
     congr 1
-    have h : (mulByInt W.toAffine (-1)).pullback (x_gen W) = mulByInt_x W (-1) := by
-      show (mulByInt W.toAffine (-1)).pullback
-        (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
-          (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X)) = _
-      exact mulByInt_pullback_x W (-1) (by norm_num)
-    rw [h, mulByInt_x_neg, mulByInt_x_one]
+    rw [mulByInt_pullback_x_gen W (-1) (by norm_num), mulByInt_x_neg, mulByInt_x_one]
   rw [h_lhs, h_rhs] at h_eq
   exact h_eq.symm
 
@@ -1117,14 +1102,7 @@ Direct: `(mulByInt −s).pb x_gen = mulByInt_x W s`, with `ord < 0` by
 theorem ordAtInfty_zsmul_mulByInt_neg_pullback_x_neg
     (s : ℤ) (hs : s ≠ 0) :
     (W_smooth W).ordAtInfty ((mulByInt W.toAffine (-s)).pullback (x_gen W)) < 0 := by
-  have h_rhs_x : (mulByInt W.toAffine (-s)).pullback (x_gen W) = mulByInt_x W s := by
-    have h : (mulByInt W.toAffine (-s)).pullback (x_gen W) = mulByInt_x W (-s) := by
-      show (mulByInt W.toAffine (-s)).pullback
-        (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
-          (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X)) = _
-      exact mulByInt_pullback_x W (-s) (neg_ne_zero.mpr hs)
-    rw [h, mulByInt_x_neg]
-  rw [h_rhs_x]
+  rw [mulByInt_neg_pullback_x_eq W s hs]
   exact ordAtInfty_mulByInt_x_neg W s hs
 
 /-- **The `rV` summand reduces to `O`**: `ord_∞((V.zsmul r).pb x_gen) < 0`.
@@ -1144,17 +1122,7 @@ theorem ordAtInfty_zsmul_verschiebung_pullback_x_neg
     (W_smooth W).ordAtInfty
         (((verschiebungIsog_of_witness W h_subset).zsmul r).pullback (x_gen W)) < 0 := by
   -- Step 1: `(V.zsmul r).pb x_gen = V.pb (mulByInt_x W r)`.
-  have h_lhs_x :
-      ((verschiebungIsog_of_witness W h_subset).zsmul r).pullback (x_gen W) =
-        (verschiebungIsog_of_witness W h_subset).pullback (mulByInt_x W r) := by
-    show ((mulByInt W.toAffine r).comp
-        (verschiebungIsog_of_witness W h_subset)).pullback (x_gen W) = _
-    rw [Isogeny.comp_algebraMap_eq]
-    congr 1
-    show (mulByInt W.toAffine r).pullback
-      (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
-        (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X)) = _
-    exact mulByInt_pullback_x W r hr
+  have h_lhs_x := zsmul_verschiebung_pullback_x_eq W h_subset r hr
   set X₁ := (verschiebungIsog_of_witness W h_subset).pullback (mulByInt_x W r) with hX₁_def
   -- Step 2: `X₁^q = mulByInt_x W (r·q)` via `π.pb (V.pb z) = (mulByInt q).pb z = mulByInt_x (r·q)`
   --   and `π.pb f = f^q`.
@@ -1187,7 +1155,7 @@ theorem ordAtInfty_zsmul_verschiebung_pullback_x_neg
   -- Step 3: `q · ord(X₁) = ord(mulByInt_x (r·q)) < 0`, and `q > 0`, so `ord(X₁) < 0`.
   have hX₁_ne : X₁ ≠ 0 := by
     rw [hX₁_def]
-    exact fun h => mulByInt_x_ne_zero W r hr
+    exact fun h ↦ mulByInt_x_ne_zero W r hr
       ((verschiebungIsog_of_witness W h_subset).pullback_injective
         (h.trans (map_zero _).symm))
   have h_ord_pow : (W_smooth W).ordAtInfty (X₁ ^ Fintype.card K) =
@@ -1202,7 +1170,7 @@ theorem ordAtInfty_zsmul_verschiebung_pullback_x_neg
   have h_smul_neg : Fintype.card K • (W_smooth W).ordAtInfty X₁ < 0 := h_ord_pow ▸ h_rhs_neg
   -- If `ord X₁ ≥ 0` then `q • ord X₁ ≥ 0` (nsmul of nonneg in `WithTop ℤ`), contradiction.
   by_contra h_not
-  push_neg at h_not
+  rw [not_lt] at h_not
   -- h_not : 0 ≤ ord X₁.  Then 0 = q • 0 ≤ q • ord X₁, contradicting h_smul_neg.
   have h_nonneg : (0 : WithTop ℤ) ≤ Fintype.card K • (W_smooth W).ordAtInfty X₁ := by
     calc (0 : WithTop ℤ) = Fintype.card K • (0 : WithTop ℤ) := by rw [smul_zero]
@@ -1375,7 +1343,7 @@ theorem addPullback_x_pair_x_ord_neg
     (h_α₂ : (W_smooth W).ordAtInfty (α₂.pullback (x_gen W)) < 0) :
     (W_smooth W).ordAtInfty ((addPullback_x_pair α₁ α₂) : KE) < 0 := by
   by_contra h_not
-  push_neg at h_not
+  rw [not_lt] at h_not
   -- `h_not : 0 ≤ ord_∞ X₃`; derive a contradiction from the chart-line data.
   have h_ni : AddNonInversePair α₁ α₂ := AddNonInversePair_of_x_ne h_x_ne
   have hc : addLineC W α₁ α₂ ≠ 0 := addLineC_ne_zero_of_x_ne W h_α₁ h_α₂ h_x_ne
@@ -1470,14 +1438,13 @@ theorem addPullback_x_pair_x_ord_neg
           * ((W_KE W).toAffine.negY (addPullback_x_pair α₁ α₂) (addPullback_y_pair α₁ α₂))
       = addPullback_x_pair α₁ α₂ ^ 3
         + algebraMap K KE W.a₂ * addPullback_x_pair α₁ α₂ ^ 2
-        + algebraMap K KE W.a₄ * addPullback_x_pair α₁ α₂ + algebraMap K KE W.a₆ := by
-    have h := (Affine.equation_iff _ _).mp h_weier₃
-    exact h
+        + algebraMap K KE W.a₄ * addPullback_x_pair α₁ α₂ + algebraMap K KE W.a₆ :=
+    (Affine.equation_iff _ _).mp h_weier₃
   -- (3) With `0 ≤ ord X₃`, the monic quadratic forces `0 ≤ ord Y₃′`.
   have h_Y'_nonneg : 0 ≤ (W_smooth W).ordAtInfty
       ((W_KE W).toAffine.negY (addPullback_x_pair α₁ α₂) (addPullback_y_pair α₁ α₂)) := by
     by_contra h_neg
-    push_neg at h_neg
+    rw [not_le] at h_neg
     have hY'_ne : (W_KE W).toAffine.negY (addPullback_x_pair α₁ α₂)
         (addPullback_y_pair α₁ α₂) ≠ 0 := ne_zero_of_ordAtInfty_neg W h_neg
     obtain ⟨m', hm'⟩ := h_int hY'_ne
@@ -1746,7 +1713,7 @@ theorem intDegree_addPullback_x_pair_zsmul_verschiebung_mulByInt_neg_pos
   -- The K(x)-image witness `a` (the `.choose`) and its defining equation.
   have h_x_ne := h_x_ne_zsmul_verschiebung_mulByInt_neg W h_subset r s hr hs hrK hsK
   set a := (addPullback_x_pair_zsmul_verschiebung_mulByInt_neg_in_KX_image
-    W h_subset r s hr hs h_x_ne).choose with ha_def
+    W h_subset r s hr hs h_x_ne).choose
   have ha : addPullback_x_pair ((verschiebungIsog_of_witness W h_subset).zsmul r)
       (mulByInt W.toAffine (-s)) =
       algebraMap (FractionRing (Polynomial K)) KE a :=
@@ -1812,25 +1779,8 @@ theorem ord_addPullback_x_pair_zsmul_verschiebung_mulByInt_neg_lt_zero
   have h_intDeg_pos :=
     intDegree_addPullback_x_pair_zsmul_verschiebung_mulByInt_neg_pos
       W h_subset r s hr hs hrK hsK
-  have h_a_ne : a ≠ 0 := by
-    intro h_a_zero
-    -- a = 0 ⟹ intDegree = 0 (intDegree_zero), contradicting positivity.
-    have h_a_choose_eq : a = (addPullback_x_pair_zsmul_verschiebung_mulByInt_neg_in_KX_image
-        W h_subset r s hr hs h_x_ne).choose := by
-      -- ha says addPullback = algebraMap a; choose_spec also says
-      -- addPullback = algebraMap (choose). So algebraMap a = algebraMap choose,
-      -- and algebraMap is injective.
-      have h_spec := (addPullback_x_pair_zsmul_verschiebung_mulByInt_neg_in_KX_image
-        W h_subset r s hr hs h_x_ne).choose_spec
-      have h_eq : algebraMap (FractionRing (Polynomial K)) KE a =
-          algebraMap (FractionRing (Polynomial K)) KE _ := ha.symm.trans h_spec
-      exact (FaithfulSMul.algebraMap_injective (FractionRing (Polynomial K)) KE) h_eq
-    rw [h_a_choose_eq] at h_a_zero
-    rw [h_a_zero] at h_intDeg_pos
-    simp [RatFunc.ofFractionRing_zero, RatFunc.intDegree_zero] at h_intDeg_pos
-  -- Step 4: apply ordAtInfty_algebraMap_fracPolyX_of_ne_zero, going via W_smooth.
-  have h_ord_eq := (W_smooth W).ordAtInfty_algebraMap_fracPolyX_of_ne_zero h_a_ne
-  -- Step 5: connect intDegree of a to intDegree of choose.
+  -- `a` agrees with the `.choose` witness `ha` was extracted from (both satisfy the same
+  -- `algebraMap`-image equation, and the map is injective).
   have h_eq_choose : a = (addPullback_x_pair_zsmul_verschiebung_mulByInt_neg_in_KX_image
       W h_subset r s hr hs h_x_ne).choose := by
     have h_spec := (addPullback_x_pair_zsmul_verschiebung_mulByInt_neg_in_KX_image
@@ -1838,6 +1788,14 @@ theorem ord_addPullback_x_pair_zsmul_verschiebung_mulByInt_neg_lt_zero
     have h_eq : algebraMap (FractionRing (Polynomial K)) KE a =
         algebraMap (FractionRing (Polynomial K)) KE _ := ha.symm.trans h_spec
     exact (FaithfulSMul.algebraMap_injective (FractionRing (Polynomial K)) KE) h_eq
+  have h_a_ne : a ≠ 0 := by
+    intro h_a_zero
+    -- a = 0 ⟹ intDegree = 0 (intDegree_zero), contradicting positivity.
+    rw [h_eq_choose] at h_a_zero
+    rw [h_a_zero] at h_intDeg_pos
+    simp [RatFunc.ofFractionRing_zero, RatFunc.intDegree_zero] at h_intDeg_pos
+  -- Step 4: apply ordAtInfty_algebraMap_fracPolyX_of_ne_zero, going via W_smooth.
+  have h_ord_eq := (W_smooth W).ordAtInfty_algebraMap_fracPolyX_of_ne_zero h_a_ne
   -- Step 6: h_intDeg_pos talks about choose's intDegree; transfer via h_eq_choose.
   have h_intDeg_a : 0 < RatFunc.intDegree (RatFunc.ofFractionRing a) := by
     rw [h_eq_choose]; exact h_intDeg_pos
