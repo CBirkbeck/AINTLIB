@@ -60,7 +60,7 @@ variable [CommSemiring R]
 respect to the variable `s`. Concretely, the coefficient of `X^d` in
 `pderiv s f` is `(d s + 1) * coeff_{d + e_s} f`, where `e_s = single s 1`. -/
 def pderiv (s : σ) (f : MvPowerSeries σ R) : MvPowerSeries σ R :=
-  fun d => (d s + 1 : ℕ) • coeff (R := R) (d + Finsupp.single s 1) f
+  fun d ↦ (d s + 1 : ℕ) • coeff (R := R) (d + Finsupp.single s 1) f
 
 @[simp]
 theorem coeff_pderiv (s : σ) (f : MvPowerSeries σ R) (d : σ →₀ ℕ) :
@@ -94,7 +94,7 @@ private lemma single_self_apply (s : σ) :
 private lemma add_single_ne_zero (d : σ →₀ ℕ) (s : σ) :
     d + Finsupp.single s 1 ≠ 0 := by
   intro h
-  have hs := congrArg (fun f : σ →₀ ℕ => f s) h
+  have hs := congrArg (fun f : σ →₀ ℕ ↦ f s) h
   simp at hs
 
 @[simp]
@@ -174,7 +174,7 @@ private theorem coeff_pderiv_mul_left [DecidableEq σ] (s : σ) (f g : MvPowerSe
       ∑ p ∈ Finset.antidiagonal d,
         (p.1 s + 1 : ℕ) • (coeff (R := R) (p.1 + e) f * coeff (R := R) p.2 g) := by
     rw [coeff_mul]
-    refine Finset.sum_congr rfl fun p _ => ?_
+    refine Finset.sum_congr rfl fun p _ ↦ ?_
     rw [coeff_pderiv, smul_mul_assoc]
   rw [hmul]
   -- Step 2: reindex via `(p, q) ↦ (p + e, q) : antidiag d → antidiag (d + e)`.
@@ -183,11 +183,11 @@ private theorem coeff_pderiv_mul_left [DecidableEq σ] (s : σ) (f g : MvPowerSe
   -- when `¬ e ≤ t.1`).
   rw [show (∑ p ∈ Finset.antidiagonal (d + e),
         (p.1 s : ℕ) • (coeff (R := R) p.1 f * coeff (R := R) p.2 g)) =
-      ∑ p ∈ (Finset.antidiagonal (d + e)).filter (fun p => e ≤ p.1),
+      ∑ p ∈ (Finset.antidiagonal (d + e)).filter (fun p ↦ e ≤ p.1),
         (p.1 s : ℕ) • (coeff (R := R) p.1 f * coeff (R := R) p.2 g) from ?_]
   · -- Now reindex using the explicit bijection. Use `sum_nbij'` with
     -- source = antidiag d, target = filter.
-    refine Finset.sum_nbij' (fun p => (p.1 + e, p.2)) (fun p => (p.1 - e, p.2))
+    refine Finset.sum_nbij' (fun p ↦ (p.1 + e, p.2)) (fun p ↦ (p.1 - e, p.2))
       ?_ ?_ ?_ ?_ ?_
     · -- forward `(p.1 + e, p.2) ∈ filter` given `p ∈ antidiag d`
       intro p hp
@@ -236,14 +236,14 @@ private theorem coeff_pderiv_mul_right [DecidableEq σ] (s : σ) (f g : MvPowerS
       ∑ p ∈ Finset.antidiagonal d,
         (p.2 s + 1 : ℕ) • (coeff (R := R) p.1 f * coeff (R := R) (p.2 + e) g) := by
     rw [coeff_mul]
-    refine Finset.sum_congr rfl fun p _ => ?_
+    refine Finset.sum_congr rfl fun p _ ↦ ?_
     rw [coeff_pderiv, mul_smul_comm]
   rw [hmul]
   rw [show (∑ p ∈ Finset.antidiagonal (d + e),
         (p.2 s : ℕ) • (coeff (R := R) p.1 f * coeff (R := R) p.2 g)) =
-      ∑ p ∈ (Finset.antidiagonal (d + e)).filter (fun p => e ≤ p.2),
+      ∑ p ∈ (Finset.antidiagonal (d + e)).filter (fun p ↦ e ≤ p.2),
         (p.2 s : ℕ) • (coeff (R := R) p.1 f * coeff (R := R) p.2 g) from ?_]
-  · refine Finset.sum_nbij' (fun p => (p.1, p.2 + e)) (fun p => (p.1, p.2 - e))
+  · refine Finset.sum_nbij' (fun p ↦ (p.1, p.2 + e)) (fun p ↦ (p.1, p.2 - e))
       ?_ ?_ ?_ ?_ ?_
     · intro p hp
       simp only [Finset.mem_antidiagonal] at hp
@@ -288,7 +288,7 @@ theorem pderiv_mul (s : σ) (f g : MvPowerSeries σ R) :
       ∑ p ∈ Finset.antidiagonal (d + (Finsupp.single s 1 : σ →₀ ℕ)),
         (p.1 s + p.2 s : ℕ) • (coeff (R := R) p.1 f * coeff (R := R) p.2 g) := by
     rw [coeff_pderiv, coeff_mul, Finset.smul_sum]
-    refine Finset.sum_congr rfl fun p hp => ?_
+    refine Finset.sum_congr rfl fun p hp ↦ ?_
     rw [Finset.mem_antidiagonal] at hp
     congr 1
     have hds : (p.1 + p.2) s = (d + (Finsupp.single s 1 : σ →₀ ℕ)) s := by rw [hp]
@@ -296,7 +296,7 @@ theorem pderiv_mul (s : σ) (f g : MvPowerSeries σ R) :
     omega
   rw [hLHS, map_add, coeff_pderiv_mul_left s f g d, coeff_pderiv_mul_right s f g d,
       ← Finset.sum_add_distrib]
-  refine Finset.sum_congr rfl fun p _ => ?_
+  refine Finset.sum_congr rfl fun p _ ↦ ?_
   rw [add_smul]
 
 /-! ### Monomial formula -/
@@ -399,11 +399,11 @@ on `MvPowerSeries σ R`. -/
 theorem continuous_pderiv (s : σ) :
     Continuous (MvPowerSeries.pderiv (R := R) (σ := σ) s) := by
   classical
-  refine continuous_pi_iff.mpr fun d => ?_
+  refine continuous_pi_iff.mpr fun d ↦ ?_
   -- `coeff d (pderiv s f) = (d s + 1) • coeff (d + single s 1) f`
-  have heq : (fun f : MvPowerSeries σ R =>
+  have heq : (fun f : MvPowerSeries σ R ↦
       (MvPowerSeries.pderiv s f) d) =
-      fun f : MvPowerSeries σ R =>
+      fun f : MvPowerSeries σ R ↦
         (d s + 1 : ℕ) • coeff (R := R) (d + Finsupp.single s 1) f := by
     funext f
     change coeff (R := R) d (MvPowerSeries.pderiv s f) = _
@@ -465,7 +465,7 @@ private theorem pderiv_subst_polynomial {σ : Type*} [Fintype σ]
   | add p q hp hq =>
     rw [MvPolynomial.coe_add, MvPowerSeries.subst_add ha, pderiv_add]
     rw [hp, hq, ← Finset.sum_add_distrib]
-    refine Finset.sum_congr rfl fun s _ => ?_
+    refine Finset.sum_congr rfl fun s _ ↦ ?_
     rw [pderiv_add, MvPowerSeries.subst_add ha, mul_add]
   | mul_X p i h =>
     rw [MvPolynomial.coe_mul, MvPolynomial.coe_X,
@@ -508,15 +508,15 @@ private theorem pderiv_subst_polynomial {σ : Type*} [Fintype σ]
           MvPowerSeries.pderiv t (a s) *
             MvPowerSeries.subst a (p : MvPowerSeries σ R) *
             (if s = i then 1 else 0)) from
-          Finset.sum_congr rfl fun s _ => hsummand s]
+          Finset.sum_congr rfl fun s _ ↦ hsummand s]
     rw [Finset.sum_add_distrib]
     congr 1
     · -- `(∑ s, f s) * a i = ∑ s, f s * a i`
       exact Finset.sum_mul ..
     · -- Second sum picks out `s = i`, giving `subst a p * pderiv t (a i)`.
       rw [Finset.sum_eq_single i
-        (fun b _ hb => by simp [hb])
-        (fun hi => (hi (Finset.mem_univ i)).elim)]
+        (fun b _ hb ↦ by simp [hb])
+        (fun hi ↦ (hi (Finset.mem_univ i)).elim)]
       simp [mul_comm]
 
 /-- **Substitution chain rule for `MvPowerSeries.pderiv`** for a finite index
@@ -535,22 +535,22 @@ theorem pderiv_subst {σ : Type*} [Fintype σ]
   haveI : DiscreteUniformity R := ⟨rfl⟩
   -- Both sides as continuous functions of `f`.
   let LHS : MvPowerSeries σ R → MvPowerSeries τ R :=
-    fun f => MvPowerSeries.pderiv t (MvPowerSeries.subst a f)
+    fun f ↦ MvPowerSeries.pderiv t (MvPowerSeries.subst a f)
   let RHS : MvPowerSeries σ R → MvPowerSeries τ R :=
-    fun f => ∑ s : σ, MvPowerSeries.pderiv t (a s) *
+    fun f ↦ ∑ s : σ, MvPowerSeries.pderiv t (a s) *
       MvPowerSeries.subst a (MvPowerSeries.pderiv s f)
   -- Continuity of LHS.
   have hLHS_cont : Continuous LHS :=
     (continuous_pderiv t).comp (continuous_subst ha)
   -- Continuity of RHS.
   have hRHS_cont : Continuous RHS := by
-    apply continuous_finset_sum
+    apply continuous_finsetSum
     intro s _
     exact continuous_const.mul ((continuous_subst ha).comp (continuous_pderiv s))
   -- The two functions agree on polynomial inputs.
   have hpoly : ∀ p : MvPolynomial σ R,
       LHS (p : MvPowerSeries σ R) = RHS (p : MvPowerSeries σ R) :=
-    fun p => pderiv_subst_polynomial t ha p
+    fun p ↦ pderiv_subst_polynomial t ha p
   -- Polynomials are dense in power series (pi topology).
   have hdense : DenseRange
       (MvPolynomial.toMvPowerSeries (R := R) (σ := σ)) :=
