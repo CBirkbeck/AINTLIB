@@ -44,7 +44,7 @@ zero, then it is the `expand p hp` of another series. -/
 private theorem exists_expand_of_coeff_vanishing (p : ℕ) (hp : p ≠ 0)
     (f : PowerSeries R) (h : ∀ n, ¬ p ∣ n → PowerSeries.coeff n f = 0) :
     ∃ g : PowerSeries R, f = g.expand p hp := by
-  refine ⟨PowerSeries.mk (fun m => PowerSeries.coeff (p * m) f), ?_⟩
+  refine ⟨PowerSeries.mk (fun m ↦ PowerSeries.coeff (p * m) f), ?_⟩
   ext n
   rw [PowerSeries.coeff_expand]
   split_ifs with hd
@@ -60,7 +60,7 @@ private theorem coeff_eq_zero_of_derivative_eq_zero_charP {p : ℕ}
     (n : ℕ) (hpn : ¬ p ∣ n) :
     PowerSeries.coeff n f = 0 := by
   -- `n ≠ 0` since `p ∣ 0`.
-  have hn : n ≠ 0 := fun h => hpn (h ▸ dvd_zero p)
+  have hn : n ≠ 0 := fun h ↦ hpn (h ▸ dvd_zero p)
   -- Express `n` as `m + 1`.
   obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn
   -- From `hf`: `coeff m (derivative f) = 0`, i.e. `coeff (m+1) f * (m+1) = 0`.
@@ -81,9 +81,9 @@ private lemma constantCoeff_subst_zero_const
     (f : PowerSeries R) :
     PowerSeries.constantCoeff (PowerSeries.subst g f) = PowerSeries.constantCoeff f := by
   rw [PowerSeries.subst_def]
-  have h : MvPowerSeries.HasSubst (fun _ : Unit => g) := by
+  have h : MvPowerSeries.HasSubst (fun _ : Unit ↦ g) := by
     apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro; exact hg
-  exact HasseWeil.FG.constantCoeff_subst_vanishing h (fun _ => hg) f
+  exact HasseWeil.FG.constantCoeff_subst_vanishing h (fun _ ↦ hg) f
 
 /-- **Silverman IV.4.4**: In characteristic `p`, the multiplication-by-`p`
 series of a formal group is a power series in `T^p`.
