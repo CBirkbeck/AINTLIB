@@ -45,7 +45,7 @@ Since `F(X, 0) = X` (left unit), the constant coefficient is `1`.
 
 Reference: Silverman IV.4, proof of Prop. 4.2. -/
 noncomputable def FormalGroup.dX_at_zero (F : FormalGroup R) : PowerSeries R :=
-  PowerSeries.mk fun n =>
+  PowerSeries.mk fun n ↦
     MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) n)
       F.toSeries
 
@@ -77,16 +77,16 @@ theorem FormalGroup.dX_at_zero_constantCoeff (F : FormalGroup R) :
   · -- Every other multi-index d ≠ single 0 1 contributes 0.
     intro d hd
     suffices h : MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1)
-        (d.prod fun s e => (![MvPowerSeries.X 0, (0 : MvPowerSeries (Fin 2) R)] s) ^ e) = 0 by
+        (d.prod fun s e ↦ (![MvPowerSeries.X 0, (0 : MvPowerSeries (Fin 2) R)] s) ^ e) = 0 by
       rw [h, smul_zero]
-    rw [Finsupp.prod_fintype _ _ (fun i => by fin_cases i <;> simp),
+    rw [Finsupp.prod_fintype _ _ (fun i ↦ by fin_cases i <;> simp),
         Fin.prod_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_zero]
     by_cases hd1 : d 1 = 0
     · -- Variable 1 has exponent 0: product is (X 0)^(d 0), but d 0 ≠ 1.
       simp only [hd1, pow_zero, mul_one]
       rw [MvPowerSeries.coeff_X_pow]
       have hd0 : d 0 ≠ 1 :=
-        fun h01 => hd (Finsupp.ext (fun i => by fin_cases i <;> simp [h01, hd1]))
+        fun h01 ↦ hd (Finsupp.ext (fun i ↦ by fin_cases i <;> simp [h01, hd1]))
       split_ifs with h
       · exact absurd (by simpa [Finsupp.single_eq_same] using
             (DFunLike.congr_fun h 0).symm) hd0
@@ -183,16 +183,16 @@ private theorem coeff_subst_runit_eq (n : ℕ)
   · -- For d ≠ single 1 n: the product has coeff 0 at (single 1 n).
     intro d hd
     suffices MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) n)
-        (d.prod fun s e =>
+        (d.prod fun s e ↦
           (![(0 : MvPowerSeries (Fin 2) R), MvPowerSeries.X 1] s) ^ e) = 0 by
       rw [this, smul_zero]
-    rw [Finsupp.prod_fintype _ _ (fun i => by fin_cases i <;> simp),
+    rw [Finsupp.prod_fintype _ _ (fun i ↦ by fin_cases i <;> simp),
         Fin.prod_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_zero]
     by_cases hd0 : d 0 = 0
     · simp only [hd0, pow_zero, one_mul, MvPowerSeries.coeff_X_pow]
       have hne : d 1 ≠ n :=
-        fun h => hd (Finsupp.ext (fun i => by fin_cases i <;> simp [*, Finsupp.single_eq_same]))
-      rw [if_neg (fun h => hne ((Finsupp.single_injective (1 : Fin 2)).eq_iff.mp h).symm)]
+        fun h ↦ hd (Finsupp.ext (fun i ↦ by fin_cases i <;> simp [*, Finsupp.single_eq_same]))
+      rw [if_neg (fun h ↦ hne ((Finsupp.single_injective (1 : Fin 2)).eq_iff.mp h).symm)]
     · rw [zero_pow hd0, zero_mul, map_zero]
 
 -- Helper: coeff at (single 1 m) of F.toSeries equals [m = 1] (from runit: F(0,Y)=Y)
@@ -258,7 +258,7 @@ private theorem coeff_subst_X0 (g : PowerSeries R) (a b : ℕ) :
     · simp [MvPowerSeries.coeff_X_pow, smul_eq_mul]
     · intro d hd
       simp only [MvPowerSeries.coeff_X_pow, smul_eq_mul]
-      rw [if_neg (fun h => hd ((Finsupp.single_injective (0 : Fin 2)).eq_iff.mp h).symm),
+      rw [if_neg (fun h ↦ hd ((Finsupp.single_injective (0 : Fin 2)).eq_iff.mp h).symm),
         mul_zero]
   · rw [if_neg hb]
     apply finsum_eq_zero_of_forall_eq_zero
@@ -285,7 +285,7 @@ private theorem coeff_subst_X1 (g : PowerSeries R) (a b : ℕ) :
     · simp [MvPowerSeries.coeff_X_pow, smul_eq_mul]
     · intro d hd
       simp only [MvPowerSeries.coeff_X_pow, smul_eq_mul]
-      rw [if_neg (fun h => hd ((Finsupp.single_injective (1 : Fin 2)).eq_iff.mp h).symm),
+      rw [if_neg (fun h ↦ hd ((Finsupp.single_injective (1 : Fin 2)).eq_iff.mp h).symm),
         mul_zero]
   · rw [if_neg hab]
     apply finsum_eq_zero_of_forall_eq_zero
@@ -366,12 +366,12 @@ private theorem coeff_10_prod_orthogonal (g : PowerSeries R) (d0 d1 n : ℕ) :
 
 -- Helper: Finsupp.prod of the substitution vector at d = explicit product over Fin 2.
 private lemma prod_subst_vec (f : FormalGroupHom F G) (d : Fin 2 →₀ ℕ) :
-    (d.prod fun s e =>
+    (d.prod fun s e ↦
       (![PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) f.toSeries,
          PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) f.toSeries] s) ^ e) =
     (PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) f.toSeries) ^ (d 0) *
     (PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) f.toSeries) ^ (d 1) := by
-  rw [Finsupp.prod_fintype _ _ (fun i => by fin_cases i <;> simp), Fin.prod_univ_two]
+  rw [Finsupp.prod_fintype _ _ (fun i ↦ by fin_cases i <;> simp), Fin.prod_univ_two]
   simp [Matrix.cons_val_zero, Matrix.cons_val_one]
 
 -- Helper: HasSubst for the substitution vector ![subst X₀ f, subst X₁ f].
@@ -396,7 +396,7 @@ private lemma finsum_fin2_reduce_full (p : (Fin 2 →₀ ℕ) → R) :
     (∑ᶠ d : Fin 2 →₀ ℕ, if d 0 = 1 then p d else 0) =
     ∑ᶠ k : ℕ, p (Finsupp.single 0 1 + Finsupp.single 1 k) := by
   -- Section s : ℕ → Fin 2 →₀ ℕ embeds ℕ as {d | d 0 = 1}.
-  let ι : ℕ → Fin 2 →₀ ℕ := fun k => Finsupp.single (0 : Fin 2) 1 + Finsupp.single 1 k
+  let ι : ℕ → Fin 2 →₀ ℕ := fun k ↦ Finsupp.single (0 : Fin 2) 1 + Finsupp.single 1 k
   have hι0 : ∀ k, (ι k : Fin 2 →₀ ℕ) 0 = 1 := by intro k; simp [ι, Finsupp.add_apply]
   have hinj : Function.Injective ι := by
     intro a b hab
@@ -405,9 +405,9 @@ private lemma finsum_fin2_reduce_full (p : (Fin 2 →₀ ℕ) → R) :
   have hmem : ∀ e : Fin 2 →₀ ℕ, e ∈ Set.range ι ↔ e 0 = 1 := by
     intro e; constructor
     · rintro ⟨k, rfl⟩; exact hι0 k
-    · intro he0; exact ⟨e 1, Finsupp.ext fun i => by fin_cases i <;> simp [ι, Finsupp.add_apply, he0]⟩
+    · intro he0; exact ⟨e 1, Finsupp.ext fun i ↦ by fin_cases i <;> simp [ι, Finsupp.add_apply, he0]⟩
   have key : ∀ d : Fin 2 →₀ ℕ, (if d 0 = 1 then p d else (0 : R)) =
-      Set.indicator (Set.range ι) (fun d => if d 0 = 1 then p d else 0) d := by
+      Set.indicator (Set.range ι) (fun d ↦ if d 0 = 1 then p d else 0) d := by
     intro d; classical rw [Set.indicator_apply]
     by_cases hd : d ∈ Set.range ι
     · rw [if_pos hd]
@@ -424,9 +424,9 @@ private lemma finsum_fin2_reduce_full (p : (Fin 2 →₀ ℕ) → R) :
 private lemma mul_finsum_of_support_subset {α : Type*} (c : R) (f : α → R)
     {s : Finset α} (hs : Function.support f ⊆ ↑s) :
     c * (∑ᶠ a, f a) = ∑ᶠ a, c * f a := by
-  rw [finsum_eq_finset_sum_of_support_subset f hs,
-      finsum_eq_finset_sum_of_support_subset (fun a => c * f a)
-        (Function.support_subset_iff'.mpr fun a ha =>
+  rw [finsum_eq_finsetSum_of_support_subset f hs,
+      finsum_eq_finsetSum_of_support_subset (fun a ↦ c * f a)
+        (Function.support_subset_iff'.mpr fun a ha ↦
           by simp [Function.support_subset_iff'.mp hs a ha]),
       Finset.mul_sum]
 
@@ -462,7 +462,7 @@ private theorem coeff_10_rhs (F G : FormalGroup R) (f : FormalGroupHom F G) (n :
   rw [finsum_fin2_reduce_full]
   -- Simplify Finsupp evaluations: (single 0 1 + single 1 k) 1 = k
   simp only [Finsupp.add_apply, Finsupp.single_apply, show (0 : Fin 2) ≠ 1 from by decide,
-    show (1 : Fin 2) = 1 from rfl, ite_true, ite_false, zero_add]
+    ite_true, ite_false, zero_add]
   -- Goal: finsum k, c₁ * (coeff_{(1,k)} G * coeff_n(f^k)) = c₁ * coeff_n(subst f dXG)
   -- Step 5: Expand the RHS using PowerSeries.coeff_subst'
   rw [PowerSeries.coeff_subst' f.hasSubst]
@@ -471,7 +471,7 @@ private theorem coeff_10_rhs (F G : FormalGroup R) (f : FormalGroupHom F G) (n :
   --     = c₁ * finsum k, coeff_{(1,k)} G * coeff_n(f^k)
   -- Step 6: Factor c₁ out using mul_finsum with finite support
   symm
-  -- Use finsum_eq_finset_sum_of_support_subset on both sides, then Finset.mul_sum
+  -- Use finsum_eq_finsetSum_of_support_subset on both sides, then Finset.mul_sum
   have heq : ∀ d : ℕ,
       MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1 + Finsupp.single 1 d) G.toSeries *
         PowerSeries.coeff n (f.toSeries ^ d) =
@@ -480,7 +480,7 @@ private theorem coeff_10_rhs (F G : FormalGroup R) (f : FormalGroupHom F G) (n :
   simp_rw [heq]
   -- Factor c₁ out of the finsum using finite support
   have hfs := PowerSeries.coeff_subst_finite f.hasSubst G.dX_at_zero (Finsupp.single () n)
-  exact mul_finsum_of_support_subset _ _ (s := hfs.toFinset) fun d hd => by
+  exact mul_finsum_of_support_subset _ _ (s := hfs.toFinset) fun d hd ↦ by
     rw [Finset.mem_coe, hfs.mem_toFinset, Function.mem_support, smul_eq_mul]
     rwa [Function.mem_support] at hd
 
@@ -496,19 +496,16 @@ private theorem antidiag_term_vanish (F : FormalGroup R) (d n : ℕ)
       MvPowerSeries.coeff e2 (F.toSeries ^ d) = 0 := by
   have h0 : e1 0 + e2 0 = 1 := by
     have := DFunLike.congr_fun hsum 0
-    simp [Finsupp.add_apply, Finsupp.single_eq_same,
-      Finsupp.single_eq_of_ne (show (1 : Fin 2) ≠ 0 by decide)] at this
+    simp [Finsupp.add_apply, Finsupp.single_eq_same] at this
     exact this
   rcases Nat.eq_zero_or_pos (e1 0) with he10 | he10
-  · have he1eq : e1 = Finsupp.single 1 (e1 1) := Finsupp.ext fun i => by
-      fin_cases i <;> simp_all [Finsupp.single_eq_same,
-        Finsupp.single_eq_of_ne (show (1 : Fin 2) ≠ 0 by decide)]
-    rw [he1eq, coeff_single1_F, if_neg (fun h => hA ⟨he10, h⟩), zero_mul]
+  · have he1eq : e1 = Finsupp.single 1 (e1 1) := Finsupp.ext fun i ↦ by
+      fin_cases i <;> simp_all [Finsupp.single_eq_same]
+    rw [he1eq, coeff_single1_F, if_neg (fun h ↦ hA ⟨he10, h⟩), zero_mul]
   · have he20 : e2 0 = 0 := by omega
-    have he2eq : e2 = Finsupp.single 1 (e2 1) := Finsupp.ext fun i => by
-      fin_cases i <;> simp_all [Finsupp.single_eq_same,
-        Finsupp.single_eq_of_ne (show (1 : Fin 2) ≠ 0 by decide)]
-    rw [he2eq, coeff_runit_pow, if_neg (fun h => hB ⟨by omega, h⟩), mul_zero]
+    have he2eq : e2 = Finsupp.single 1 (e2 1) := Finsupp.ext fun i ↦ by
+      fin_cases i <;> simp_all [Finsupp.single_eq_same]
+    rw [he2eq, coeff_runit_pow, if_neg (fun h ↦ hB ⟨by omega, h⟩), mul_zero]
 
 -- Sub-lemma: coeff_{(1,n)} (F^d) = d * coeff_{n+1-d} (dX_at_zero F) when d ≤ n+1
 set_option maxHeartbeats 6400000 in
@@ -527,8 +524,7 @@ private theorem coeff_10_FG_pow (F : FormalGroup R) :
       Nat.cast_zero, zero_mul, MvPowerSeries.coeff_one]
     rw [if_neg]; intro h
     exact absurd (DFunLike.congr_fun h 0) (by
-      simp [Finsupp.add_apply, Finsupp.single_eq_same,
-        Finsupp.single_eq_of_ne (show (1 : Fin 2) ≠ 0 by decide)])
+      simp [Finsupp.add_apply, Finsupp.single_eq_same])
   | succ d ih =>
     intro n
     -- For d+1 > n+1, use direct vanishing from nilpotent coefficient
@@ -557,8 +553,7 @@ private theorem coeff_10_FG_pow (F : FormalGroup R) :
         -- The only nonzero term has x.2 = 0, so x.1 = single 0 1 + single 1 0.
         -- Use sum_eq_single to isolate it.
         rw [Finset.sum_eq_single (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) 0, 0)]
-        · simp only [MvPowerSeries.coeff_one, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq,
-            Finset.mem_antidiagonal, Finsupp.single_zero, add_zero, ite_true]
+        · simp only [MvPowerSeries.coeff_one, mul_one, Finsupp.single_zero, add_zero, ite_true]
           rw [FormalGroup.dX_at_zero, PowerSeries.coeff_mk]
           simp only [Finsupp.single_zero, add_zero]
         · intro ⟨e1, e2⟩ hmem hne
@@ -585,27 +580,22 @@ private theorem coeff_10_FG_pow (F : FormalGroup R) :
             Finset.antidiagonal
               (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) n) := by
           rw [Finset.mem_antidiagonal]; ext i; fin_cases i
-          · simp [Finsupp.add_apply, Finsupp.single_eq_same,
-              Finsupp.single_eq_of_ne (show (1 : Fin 2) ≠ 0 by decide)]
-          · simp [Finsupp.add_apply, Finsupp.single_eq_same,
-              Finsupp.single_eq_of_ne (show (0 : Fin 2) ≠ 1 by decide)]; omega
+          · simp [Finsupp.add_apply, Finsupp.single_eq_same]
+          · simp [Finsupp.add_apply, Finsupp.single_eq_same]; omega
         have hB_mem : (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) (n - d),
             Finsupp.single (1 : Fin 2) d) ∈
             Finset.antidiagonal
               (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) n) := by
           rw [Finset.mem_antidiagonal]; ext i; fin_cases i
-          · simp [Finsupp.add_apply, Finsupp.single_eq_same,
-              Finsupp.single_eq_of_ne (show (1 : Fin 2) ≠ 0 by decide)]
-          · simp [Finsupp.add_apply, Finsupp.single_eq_same,
-              Finsupp.single_eq_of_ne (show (0 : Fin 2) ≠ 1 by decide)]; omega
+          · simp [Finsupp.add_apply, Finsupp.single_eq_same]
+          · simp [Finsupp.add_apply, Finsupp.single_eq_same]; omega
         have hAB_ne : (Finsupp.single (1 : Fin 2) 1,
             Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) (n - 1)) ≠
             (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) (n - d),
              Finsupp.single (1 : Fin 2) d) := by
           intro h; have := congr_arg Prod.fst h; simp only at this
           exact absurd (DFunLike.congr_fun this 0) (by
-            simp [Finsupp.add_apply, Finsupp.single_eq_same,
-              Finsupp.single_eq_of_ne (show (1 : Fin 2) ≠ 0 by decide)])
+            simp [Finsupp.add_apply, Finsupp.single_eq_same])
         -- Compute pair A value
         have hA_val :
             MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) 1) F.toSeries *
@@ -642,14 +632,14 @@ private theorem coeff_10_FG_pow (F : FormalGroup R) :
               MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) d) (F.toSeries ^ d) := by
           -- Step 1: extract pair A
           rw [← Finset.add_sum_erase _
-            (fun p : (Fin 2 →₀ ℕ) × (Fin 2 →₀ ℕ) =>
+            (fun p : (Fin 2 →₀ ℕ) × (Fin 2 →₀ ℕ) ↦
               MvPowerSeries.coeff p.1 F.toSeries *
                 MvPowerSeries.coeff p.2 (F.toSeries ^ d))
             hA_mem]
           congr 1
           -- Step 2: extract pair B from the erased sum
           rw [← Finset.add_sum_erase _
-            (fun p : (Fin 2 →₀ ℕ) × (Fin 2 →₀ ℕ) =>
+            (fun p : (Fin 2 →₀ ℕ) × (Fin 2 →₀ ℕ) ↦
               MvPowerSeries.coeff p.1 F.toSeries *
                 MvPowerSeries.coeff p.2 (F.toSeries ^ d))
             (Finset.mem_erase.mpr ⟨hAB_ne.symm, hB_mem⟩)]
@@ -673,35 +663,30 @@ private theorem coeff_10_FG_pow (F : FormalGroup R) :
           · -- Not pair A
             intro ⟨h10, h11⟩; apply hneA
             have h0sum := DFunLike.congr_fun hmem 0
-            simp [Finsupp.add_apply, Finsupp.single_eq_same,
-              Finsupp.single_eq_of_ne (show (1 : Fin 2) ≠ 0 by decide)] at h0sum
+            simp [Finsupp.add_apply, Finsupp.single_eq_same] at h0sum
             have h1sum := DFunLike.congr_fun hmem 1
-            simp [Finsupp.add_apply, Finsupp.single_eq_same,
-              Finsupp.single_eq_of_ne (show (0 : Fin 2) ≠ 1 by decide)] at h1sum
+            simp [Finsupp.add_apply, Finsupp.single_eq_same] at h1sum
             exact Prod.ext
-              (Finsupp.ext fun i => by fin_cases i <;>
-                simp_all [Finsupp.single_eq_same,
-                  Finsupp.single_eq_of_ne (show (1 : Fin 2) ≠ 0 by decide)])
-              (Finsupp.ext fun i => by fin_cases i <;>
+              (Finsupp.ext fun i ↦ by fin_cases i <;>
+                simp_all [Finsupp.single_eq_same])
+              (Finsupp.ext fun i ↦ by fin_cases i <;>
                 simp_all [Finsupp.add_apply, Finsupp.single_eq_same,
                   Finsupp.single_eq_of_ne (show (1 : Fin 2) ≠ 0 by decide),
-                  Finsupp.single_eq_of_ne (show (0 : Fin 2) ≠ 1 by decide)] <;> omega)
+                  Finsupp.single_eq_of_ne (show (0 : Fin 2) ≠ 1 by decide)]; omega)
           · -- Not pair B
             intro ⟨h10, h21⟩; apply hneB
             have h1sum := DFunLike.congr_fun hmem 1
-            simp [Finsupp.add_apply, Finsupp.single_eq_same,
-              Finsupp.single_eq_of_ne (show (0 : Fin 2) ≠ 1 by decide)] at h1sum
+            simp [Finsupp.add_apply, Finsupp.single_eq_same] at h1sum
             exact Prod.ext
-              (Finsupp.ext fun i => by fin_cases i <;>
+              (Finsupp.ext fun i ↦ by fin_cases i <;>
                 simp_all [Finsupp.add_apply, Finsupp.single_eq_same,
                   Finsupp.single_eq_of_ne (show (1 : Fin 2) ≠ 0 by decide),
-                  Finsupp.single_eq_of_ne (show (0 : Fin 2) ≠ 1 by decide)] <;> omega)
-              (Finsupp.ext fun i => by
+                  Finsupp.single_eq_of_ne (show (0 : Fin 2) ≠ 1 by decide)]; omega)
+              (Finsupp.ext fun i ↦ by
                 fin_cases i
-                · simp [Finsupp.single_eq_of_ne (show (1 : Fin 2) ≠ 0 by decide)]
+                · simp
                   have h0sum := DFunLike.congr_fun hmem 0
-                  simp [Finsupp.add_apply, Finsupp.single_eq_same,
-                    Finsupp.single_eq_of_ne (show (1 : Fin 2) ≠ 0 by decide)] at h0sum
+                  simp [Finsupp.add_apply, Finsupp.single_eq_same] at h0sum
                   omega
                 · simp [Finsupp.single_eq_same, h21])
         -- The sum equals A_val + B_val = (d+1) * coeff_{n-d} dxF
@@ -716,11 +701,11 @@ private theorem coeff_10_FG_pow (F : FormalGroup R) :
       apply MvPowerSeries.coeff_eq_zero_of_constantCoeff_nilpotent (m := 1)
       · rw [pow_one, FG.constantCoeff_FG_toSeries]
       · rw [map_add]; simp only [Finsupp.degree_apply]
-        rw [Finsupp.support_single_ne_zero _ (by norm_num : (1 : ℕ) ≠ 0)]
+        rw [Finsupp.support_single _ (by norm_num : (1 : ℕ) ≠ 0)]
         simp only [Finset.sum_singleton, Finsupp.single_eq_same]
         by_cases hn0 : n = 0
         · subst hn0; simp; omega
-        · rw [Finsupp.support_single_ne_zero _ hn0, Finset.sum_singleton,
+        · rw [Finsupp.support_single _ hn0, Finset.sum_singleton,
             Finsupp.single_eq_same]; omega
 
 -- LHS computation: coeff_{(1,n)} of f(F(X,Y))
@@ -762,10 +747,10 @@ private theorem coeff_10_lhs (F G : FormalGroup R) (f : FormalGroupHom F G) (n :
       from by split_ifs <;> ring]
   -- Convert the finsum to a Finset.sum over range (n + 2)
   rw [finsum_eq_sum_of_support_subset _ (s := Finset.range (n + 2))
-    (fun d hd => by
+    (fun d hd ↦ by
       rw [Function.mem_support, ne_eq] at hd
       rw [Finset.mem_coe, Finset.mem_range]
-      by_contra h; push_neg at h
+      by_contra h; push Not at h
       exact hd (if_neg (by omega : ¬(d ≤ n + 1))))]
   -- Kill the d = 0 term (it contributes 0 since d = 0 gives 0 * ... = 0)
   rw [Finset.sum_range_succ' (n := n + 1)]
@@ -787,7 +772,7 @@ private theorem coeff_10_lhs (F G : FormalGroup R) (f : FormalGroupHom F G) (n :
   -- Now LHS: Σ_{k=0}^{n} (↑(k+1) * coeff_{k+1}(f) * coeff_{n-k}(dxF))
   -- RHS: Σ_{(a,b) ∈ antidiag n} coeff_{a+1}(f) * (↑a+1) * coeff_b(dxF)
   -- Match via k <-> (k, n - k)
-  apply Finset.sum_nbij' (fun k => (k, n - k)) (fun p => p.1)
+  apply Finset.sum_nbij' (fun k ↦ (k, n - k)) (fun p ↦ p.1)
   · intro k hk; rw [Finset.mem_range] at hk
     rw [Finset.mem_antidiagonal]; omega
   · intro ⟨a, b⟩ hab
@@ -936,7 +921,7 @@ private lemma hasSubst_assocL (F : FormalGroup R) :
       (MvPowerSeries.subst (pairXY R : Fin 2 → MvPowerSeries (Fin 3) R)
         F.toSeries) = 0
     exact MvPowerSeries.constantCoeff_subst_eq_zero hasSubst_pairXY
-      (fun i => by fin_cases i <;> simp [pairXY])
+      (fun i ↦ by fin_cases i <;> simp [pairXY])
       (FG.constantCoeff_FG_toSeries F)
   · show MvPowerSeries.constantCoeff
       (MvPowerSeries.X (2 : Fin 3) : MvPowerSeries (Fin 3) R) = 0
@@ -953,7 +938,7 @@ private lemma hasSubst_assocR (F : FormalGroup R) :
       (MvPowerSeries.subst (pairYZ R : Fin 2 → MvPowerSeries (Fin 3) R)
         F.toSeries) = 0
     exact MvPowerSeries.constantCoeff_subst_eq_zero hasSubst_pairYZ
-      (fun i => by fin_cases i <;> simp [pairYZ])
+      (fun i ↦ by fin_cases i <;> simp [pairYZ])
       (FG.constantCoeff_FG_toSeries F)
 
 private lemma hasSubst_shift3to2 :
@@ -1056,7 +1041,7 @@ private lemma pderiv_assoc_identity (F : FormalGroup R) :
 
 /-- `shift3to2 ∘ pairXY = ![0, X 0]`. -/
 private lemma shift3to2_comp_pairXY :
-    (fun s => MvPowerSeries.subst (shift3to2 R : Fin 3 → MvPowerSeries (Fin 2) R)
+    (fun s ↦ MvPowerSeries.subst (shift3to2 R : Fin 3 → MvPowerSeries (Fin 2) R)
       ((pairXY R : Fin 2 → MvPowerSeries (Fin 3) R) s)) =
       (![0, MvPowerSeries.X 0] : Fin 2 → MvPowerSeries (Fin 2) R) := by
   funext s; fin_cases s
@@ -1071,7 +1056,7 @@ private lemma shift3to2_comp_pairXY :
 
 /-- `shift3to2 ∘ pairYZ = ![X 0, X 1]`. -/
 private lemma shift3to2_comp_pairYZ :
-    (fun s => MvPowerSeries.subst (shift3to2 R : Fin 3 → MvPowerSeries (Fin 2) R)
+    (fun s ↦ MvPowerSeries.subst (shift3to2 R : Fin 3 → MvPowerSeries (Fin 2) R)
       ((pairYZ R : Fin 2 → MvPowerSeries (Fin 3) R) s)) =
       (![MvPowerSeries.X 0, MvPowerSeries.X 1] :
         Fin 2 → MvPowerSeries (Fin 2) R) := by
@@ -1110,7 +1095,7 @@ private lemma runit_at_X0 (F : FormalGroup R) :
       MvPowerSeries.subst_X hb 1] at happ
   -- happ : subst (subst b ∘ ![0, X 1]) F = X 0.
   -- subst b ∘ ![0, X 1] evaluates to ![0, X 0].
-  have hcomp : (fun s => MvPowerSeries.subst
+  have hcomp : (fun s ↦ MvPowerSeries.subst
       (![MvPowerSeries.X 0, MvPowerSeries.X 0] :
         Fin 2 → MvPowerSeries (Fin 2) R)
       ((![(0 : MvPowerSeries (Fin 2) R), MvPowerSeries.X 1] :
@@ -1132,7 +1117,7 @@ private lemma runit_at_X0 (F : FormalGroup R) :
 
 /-- `shift3to2 ∘ assocL = ![X 0, X 1]`: after `X = 0`, `F(0, X 0) = X 0`. -/
 private lemma shift3to2_comp_assocL (F : FormalGroup R) :
-    (fun s => MvPowerSeries.subst (shift3to2 R : Fin 3 → MvPowerSeries (Fin 2) R)
+    (fun s ↦ MvPowerSeries.subst (shift3to2 R : Fin 3 → MvPowerSeries (Fin 2) R)
       ((assocL F) s)) =
       (![MvPowerSeries.X 0, MvPowerSeries.X 1] :
         Fin 2 → MvPowerSeries (Fin 2) R) := by
@@ -1149,7 +1134,7 @@ private lemma shift3to2_comp_assocL (F : FormalGroup R) :
 
 /-- `shift3to2 ∘ assocR = ![0, F.toSeries]`. -/
 private lemma shift3to2_comp_assocR (F : FormalGroup R) :
-    (fun s => MvPowerSeries.subst (shift3to2 R : Fin 3 → MvPowerSeries (Fin 2) R)
+    (fun s ↦ MvPowerSeries.subst (shift3to2 R : Fin 3 → MvPowerSeries (Fin 2) R)
       ((assocR F) s)) =
       (![0, F.toSeries] : Fin 2 → MvPowerSeries (Fin 2) R) := by
   funext s; fin_cases s
@@ -1172,12 +1157,12 @@ private lemma shift3to2_comp_assocR (F : FormalGroup R) :
 equals `coeff_e ((X 0)^(d 1))` if `d 0 = 0`, else 0. -/
 private lemma coeff_prod_subst_vec_zero_X0 (d e : Fin 2 →₀ ℕ) :
     MvPowerSeries.coeff (R := R) e
-      (d.prod fun s n =>
+      (d.prod fun s n ↦
         (![(0 : MvPowerSeries (Fin 2) R), MvPowerSeries.X 0] s) ^ n) =
       if d 0 = 0 then MvPowerSeries.coeff e
         ((MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) ^ (d 1)) else 0 := by
   classical
-  rw [Finsupp.prod_fintype _ _ (fun i => by fin_cases i <;> simp), Fin.prod_univ_two]
+  rw [Finsupp.prod_fintype _ _ (fun i ↦ by fin_cases i <;> simp), Fin.prod_univ_two]
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_zero]
   by_cases hd0 : d 0 = 0
   · simp [hd0]
@@ -1231,19 +1216,19 @@ private lemma subst_zero_X0_pderiv0 (F : FormalGroup R) :
   · -- Reindex the finsum: use `finsum_mem_coe_finset` or Equiv.ofInjective.
     -- The support of the LHS function is contained in {single 1 n : n : ℕ}, indexed by ℕ.
     symm
-    let ι : ℕ → Fin 2 →₀ ℕ := fun n => Finsupp.single (1 : Fin 2) n
-    have hinj : Function.Injective ι := fun a b hab => by
+    let ι : ℕ → Fin 2 →₀ ℕ := fun n ↦ Finsupp.single (1 : Fin 2) n
+    have hinj : Function.Injective ι := fun a b hab ↦ by
       have := DFunLike.congr_fun hab (1 : Fin 2)
-      simp [ι, Finsupp.single_apply] at this; exact this
+      simp [ι] at this; exact this
     have himg : ∀ d : Fin 2 →₀ ℕ, d ∈ Set.range ι ↔ d 0 = 0 := by
       intro d; constructor
       · rintro ⟨n, rfl⟩
-        simp [ι, Finsupp.single_apply]
+        simp [ι]
       · intro h0
         refine ⟨d 1, ?_⟩
         ext i; fin_cases i
-        · simp [ι, Finsupp.single_apply, h0]
-        · simp [ι, Finsupp.single_apply]
+        · simp [ι, h0]
+        · simp [ι]
     -- Expand LHS finsum as indicator finsum, then pull back through ι.
     have key : ∀ d : Fin 2 →₀ ℕ,
         (if d 0 = 0 then
@@ -1251,7 +1236,7 @@ private lemma subst_zero_X0_pderiv0 (F : FormalGroup R) :
             MvPowerSeries.coeff e
               ((MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) ^ d 1) else (0 : R)) =
         Set.indicator (Set.range ι)
-          (fun d => MvPowerSeries.coeff d (MvPowerSeries.pderiv 0 F.toSeries) •
+          (fun d ↦ MvPowerSeries.coeff d (MvPowerSeries.pderiv 0 F.toSeries) •
             MvPowerSeries.coeff e
               ((MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) ^ d 1)) d := by
       intro d; rw [Set.indicator_apply]
@@ -1296,7 +1281,7 @@ private lemma subst_zero_F_pderiv0_eq (F : FormalGroup R) :
       (![F.toSeries, F.toSeries] : Fin 2 → MvPowerSeries (Fin 2) R))
     (subst_zero_X0_pderiv0 F)
   rw [MvPowerSeries.subst_comp_subst_apply hshift0X0 hb] at happ
-  have hcomp_lhs : (fun s => MvPowerSeries.subst
+  have hcomp_lhs : (fun s ↦ MvPowerSeries.subst
       (![F.toSeries, F.toSeries] : Fin 2 → MvPowerSeries (Fin 2) R)
       ((![(0 : MvPowerSeries (Fin 2) R), MvPowerSeries.X 0] :
         Fin 2 → MvPowerSeries (Fin 2) R) s)) =
@@ -1311,14 +1296,14 @@ private lemma subst_zero_F_pderiv0_eq (F : FormalGroup R) :
       rw [MvPowerSeries.subst_X hb 0]; rfl
   rw [hcomp_lhs] at happ
   have hX0_unit : MvPowerSeries.HasSubst
-      ((fun _ : Unit => (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R))) := by
+      ((fun _ : Unit ↦ (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R))) := by
     apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro _; simp
   have hrhs : MvPowerSeries.subst
       (![F.toSeries, F.toSeries] : Fin 2 → MvPowerSeries (Fin 2) R)
       (PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) F.dX_at_zero) =
       PowerSeries.subst (F.toSeries : MvPowerSeries (Fin 2) R) F.dX_at_zero := by
     show MvPowerSeries.subst _
-      (MvPowerSeries.subst (fun _ : Unit => (MvPowerSeries.X 0 :
+      (MvPowerSeries.subst (fun _ : Unit ↦ (MvPowerSeries.X 0 :
           MvPowerSeries (Fin 2) R)) F.dX_at_zero) = _
     rw [MvPowerSeries.subst_comp_subst_apply hX0_unit hb]
     congr 1
