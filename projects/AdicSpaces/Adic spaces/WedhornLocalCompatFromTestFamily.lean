@@ -706,8 +706,8 @@ theorem h_T_test_compat_loc_branch_α_T_D_via_localized_laurent_piece
   -- Feed the two halves into h_T_test_compat_loc_branch_α_T_D_via_multi_corrected.
   exact h_T_test_compat_loc_branch_α_T_D_via_multi_corrected P T s hopen
     T_D s_D σ_loc
-    (fun w hw_spa hw_f => (h_pair w hw_spa hw_f).1)
-    (fun w hw_spa hw_f => (h_pair w hw_spa hw_f).2)
+    (fun w hw_spa hw_f ↦ (h_pair w hw_spa hw_f).1)
+    (fun w hw_spa hw_f ↦ (h_pair w hw_spa hw_f).2)
 
 omit [PlusSubring A] in
 /-- **T169: localized Laurent-piece rationalOpen producer**
