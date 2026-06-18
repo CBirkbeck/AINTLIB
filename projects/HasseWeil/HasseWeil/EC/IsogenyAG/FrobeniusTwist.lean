@@ -178,7 +178,7 @@ noncomputable def ofEquationCoordAlgHom
     (h_eqn : (V.map (algebraMap F KE)).toAffine.Equation u v) :
     V.toAffine.CoordinateRing →ₐ[F] KE :=
   { toRingHom := ofEquationCoordRingHom E V u v h_eqn
-    commutes' := fun r => by
+    commutes' := fun r ↦ by
       change ofEquationCoordRingHom E V u v h_eqn
         (algebraMap (Polynomial F) _ (algebraMap F (Polynomial F) r)) = _
       change AdjoinRoot.lift (ofEquationBaseHom E u) v _
@@ -266,7 +266,7 @@ private theorem ofEquationCoordRingHom_smul_basis_b_eq_zero (a b : Polynomial F)
       b • Affine.CoordinateRing.mk V.toAffine Polynomial.X with hr'_def
   have h_alg : ∀ f : Polynomial F,
       ofEquationCoordRingHom E V u v h_eqn
-        (algebraMap (Polynomial F) _ f) = ofEquationBaseHom E u f := fun f => by
+        (algebraMap (Polynomial F) _ f) = ofEquationBaseHom E u f := fun f ↦ by
     change AdjoinRoot.lift _ _ _ (AdjoinRoot.of _ f) = _
     exact AdjoinRoot.lift_of _
   set conj_r := Affine.CoordinateRing.mk V.toAffine
@@ -455,7 +455,7 @@ private theorem ofEquation_v_ne_zero : v ≠ 0 := by
     Polynomial.C V.toAffine.a₄ * Polynomial.X + Polynomial.C V.toAffine.a₆ with hq_def
   have hq_ne : q ≠ 0 := by
     intro h
-    have h3 := congrArg (fun r => Polynomial.coeff r 3) h
+    have h3 := congrArg (fun r ↦ Polynomial.coeff r 3) h
     simp [hq_def, Polynomial.coeff_X_pow] at h3
   have hq_eval : Polynomial.aeval u q = 0 := by
     rw [hq_def]
@@ -581,7 +581,7 @@ noncomputable def _root_.HasseWeil.EC.Isogeny.ofEquation
     (hu : (W_smooth E).ordAtInfty u = ((2 * m : ℤ) : WithTop ℤ)) :
     EC.Isogeny E.toAffine V.toAffine where
   toCurveMap := { pullback := ofEquationPullback E V u v h_eqn h_trans }
-  pullback_ordAtInfty_nonneg := fun f hf =>
+  pullback_ordAtInfty_nonneg := fun f hf ↦
     ofEquationPullback_ordAtInfty_nonneg E V u v h_eqn h_trans hm hu f hf
 
 @[simp] theorem _root_.HasseWeil.EC.Isogeny.ofEquation_pullback
@@ -868,16 +868,16 @@ local notation "KE" => E.toAffine.FunctionField
 private noncomputable def iterFrobRangeEquiv (e : ℕ) :
     E.toAffine.FunctionField ≃+*
       ↥((iterateFrobenius (E.toAffine.FunctionField) p e).fieldRange) :=
-  { toFun := fun x => ⟨iterateFrobenius (E.toAffine.FunctionField) p e x,
+  { toFun := fun x ↦ ⟨iterateFrobenius (E.toAffine.FunctionField) p e x,
       RingHom.mem_fieldRange.mpr ⟨x, rfl⟩⟩
-    invFun := fun y => Classical.choose (RingHom.mem_fieldRange.mp y.2)
-    left_inv := fun x => (iterateFrobenius (E.toAffine.FunctionField) p e).injective
+    invFun := fun y ↦ Classical.choose (RingHom.mem_fieldRange.mp y.2)
+    left_inv := fun x ↦ (iterateFrobenius (E.toAffine.FunctionField) p e).injective
       (Classical.choose_spec (RingHom.mem_fieldRange.mp
         (RingHom.mem_fieldRange.mpr ⟨x, rfl⟩)))
-    right_inv := fun y => Subtype.ext
+    right_inv := fun y ↦ Subtype.ext
       (Classical.choose_spec (RingHom.mem_fieldRange.mp y.2))
-    map_mul' := fun a b => Subtype.ext (map_mul _ a b)
-    map_add' := fun a b => Subtype.ext (map_add _ a b) }
+    map_mul' := fun a b ↦ Subtype.ext (map_mul _ a b)
+    map_add' := fun a b ↦ Subtype.ext (map_add _ a b) }
 
 /-- Finrank transport along an equality of subfields. -/
 private theorem finrank_subfield_congr {L : Type*} [Field L] {S T : Subfield L}
@@ -912,7 +912,7 @@ private theorem finrank_iterFrobRange_succ (e : ℕ) :
       ↥((iterateFrobenius (E.toAffine.FunctionField) p (e + 1)).fieldRange)
       ↥((iterateFrobenius (E.toAffine.FunctionField) p e).fieldRange)
       (E.toAffine.FunctionField) :=
-    IsScalarTower.of_algebraMap_eq fun _ => rfl
+    IsScalarTower.of_algebraMap_eq fun _ ↦ rfl
   have h_tower := Module.finrank_mul_finrank
     ↥((iterateFrobenius (E.toAffine.FunctionField) p (e + 1)).fieldRange)
     ↥((iterateFrobenius (E.toAffine.FunctionField) p e).fieldRange)
@@ -946,7 +946,7 @@ theorem finrank_KE_over_iterateFrobeniusRange [PerfectField F] (e : ℕ) :
   | zero =>
     have h0 : (iterateFrobenius (E.toAffine.FunctionField) p 0).fieldRange = ⊤ := by
       rw [iterateFrobenius_zero]
-      exact eq_top_iff.mpr fun x _ => RingHom.mem_fieldRange.mpr ⟨x, rfl⟩
+      exact eq_top_iff.mpr fun x _ ↦ RingHom.mem_fieldRange.mpr ⟨x, rfl⟩
     rw [finrank_subfield_congr h0, pow_zero]
     have htop := Algebra.finrank_eq_of_equiv_equiv
       (R₀ := ↥(⊤ : Subfield (E.toAffine.FunctionField)))
@@ -969,12 +969,12 @@ private theorem finrank_congr_toSubfield {K L : Type*} [Field K] [Field L] [Alge
     Module.finrank ↥IF L = Module.finrank ↥S L := by
   subst h
   let i : (↥IF) ≃+* ↥(IF.toSubfield) :=
-    { toFun := fun x => ⟨x.1, (IntermediateField.mem_toSubfield IF x.1).mpr x.2⟩
-      invFun := fun x => ⟨x.1, (IntermediateField.mem_toSubfield IF x.1).mp x.2⟩
-      left_inv := fun _ => rfl
-      right_inv := fun _ => rfl
-      map_mul' := fun _ _ => rfl
-      map_add' := fun _ _ => rfl }
+    { toFun := fun x ↦ ⟨x.1, (IntermediateField.mem_toSubfield IF x.1).mpr x.2⟩
+      invFun := fun x ↦ ⟨x.1, (IntermediateField.mem_toSubfield IF x.1).mp x.2⟩
+      left_inv := fun _ ↦ rfl
+      right_inv := fun _ ↦ rfl
+      map_mul' := fun _ _ ↦ rfl
+      map_add' := fun _ _ ↦ rfl }
   exact Algebra.finrank_eq_of_equiv_equiv i (RingEquiv.refl L) (by ext x; rfl)
 
 /-- **Item 4 (`e = 1`)**: the relative `p`-Frobenius has degree `p`, over a perfect
