@@ -47,8 +47,6 @@ degree-zero acyclicity condition (separation + gluing).
 
 universe u v
 
-/-! ### Finite covers -/
-
 /-- A finite open cover of `X` indexed by `ι`. -/
 structure FiniteCover (X : Type u) [TopologicalSpace X]
     (ι : Type v) [Fintype ι] where
@@ -96,8 +94,6 @@ theorem inter_subset_univ (U : FiniteCover X ι) {q : ℕ}
   Set.subset_univ _
 
 end FiniteCover
-
-/-! ### Presheaves of abelian groups -/
 
 /-- A presheaf of additive abelian groups on subsets of `X`,
 with restriction maps. -/
@@ -164,19 +160,22 @@ theorem res_section_eq (F : AbPresheaf X) {α : Type*}
     {P : α → Set X} {W : Set X} (f : ∀ σ, F.obj (P σ))
     {σ₁ σ₂ : α} (h₁ : W ⊆ P σ₁) (h₂ : W ⊆ P σ₂)
     (heq : σ₁ = σ₂) : F.res h₁ (f σ₁) = F.res h₂ (f σ₂) := by
-  subst heq; rfl
+  subst heq
+  rfl
 
 /-- If `V = Set.univ`, restriction by `h : V ⊆ Set.univ` is a cast. -/
 theorem res_eq_of_eq_univ (F : AbPresheaf X) {V : Set X}
     (hV : V = Set.univ) (h : V ⊆ Set.univ)
     (x : F.obj Set.univ) : F.res h x = hV ▸ x := by
-  subst hV; exact F.res_id x
+  subst hV
+  exact F.res_id x
 
 /-- If `V = U`, then `F.res h x = cast (...) x`. -/
 theorem res_cast (F : AbPresheaf X) {U V : Set X}
     (hVU : V ⊆ U) (hUV : U = V) (x : F.obj U) :
     F.res hVU x = hUV ▸ x := by
-  subst hUV; exact F.res_id x
+  subst hUV
+  exact F.res_id x
 
 /-- Restrict an `AbPresheaf` on `X` to the subspace `↥W` (`W : Set X`):
 `obj S := F.obj (Subtype.val '' S)`, with restriction along the image. This is the
@@ -192,8 +191,6 @@ def restrict (F : AbPresheaf X) (W : Set X) : AbPresheaf ↥W where
   res_comp _ _ x := F.res_comp _ _ x
 
 end AbPresheaf
-
-/-! ### Čech complex -/
 
 section CechComplex
 
@@ -230,11 +227,7 @@ def cechAug (F : AbPresheaf X) (U : FiniteCover X ι) :
     F.obj Set.univ → CechCochain F U 0 :=
   fun x σ => F.res (U.inter_subset_univ σ) x
 
-/-! ### The key identity d ∘ d = 0 -/
-
 omit [Fintype ι] in
-/-- Simplicial identity for `k < j`: composing face maps gives
-`face k ∘ face j = face (j.pred) ∘ face (k.castSucc)`. -/
 private theorem face_face_lt {q : ℕ} (j : Fin (q + 3))
     (k : Fin (q + 2)) (hjk : (k : ℕ) < j)
     (σ : Fin (q + 3) → ι) (hj : j ≠ 0 := by omega) :
@@ -250,9 +243,6 @@ private theorem face_face_lt {q : ℕ} (j : Fin (q + 3))
   split_ifs <;> omega
 
 omit [Fintype ι] in
-/-- Simplicial identity for `j ≤ k`: composing face maps gives
-`face k ∘ face j = face j' ∘ face (k.succ)` where
-`j' = ⟨j.val, ...⟩ : Fin (q+2)`. -/
 private theorem face_face_ge {q : ℕ} (j : Fin (q + 3))
     (k : Fin (q + 2)) (hjk : (j : ℕ) ≤ k)
     (σ : Fin (q + 3) → ι)
@@ -268,17 +258,13 @@ private theorem face_face_ge {q : ℕ} (j : Fin (q + 3))
     Fin.val_succ, apply_ite Fin.val]
   split_ifs <;> omega
 
-/-- Alternating sign cancellation for integer scalar multiples
-in an additive group: `(-1)^n * (-1)^m + (-1)^(m+1) * (-1)^n = 0`. -/
 private theorem sign_zsmul_cancel {A : Type*} [AddCommGroup A]
     (n m : ℕ) (x : A) : (-1 : ℤ) ^ n • ((-1 : ℤ) ^ m • x) +
     (-1 : ℤ) ^ (m + 1) • ((-1 : ℤ) ^ n • x) = 0 := by
-  rw [← mul_zsmul, ← mul_zsmul, ← add_smul]
-  have : (-1 : ℤ) ^ (m + 1) = (-1 : ℤ) ^ m * (-1) := pow_succ _ _
-  rw [this]; ring_nf; exact zero_smul _ _
+  rw [← mul_zsmul, ← mul_zsmul, ← add_smul, pow_succ]
+  ring_nf
+  exact zero_smul _ _
 
-/-- Helper: if two face compositions are equal, the double-restricted
-sections agree after restriction to the multi-intersection. -/
 private theorem res_res_eq_of_face_eq {F : AbPresheaf X}
     {U : FiniteCover X ι} {q : ℕ} (f : CechCochain F U q)
     {σ : Fin (q + 1 + 1 + 1) → ι} (j j' : Fin (q + 3))
@@ -296,8 +282,6 @@ private theorem res_res_eq_of_face_eq {F : AbPresheaf X}
   rw [F.res_comp, F.res_comp]
   exact F.res_section_eq f _ _ heq
 
-/-- The `k < j` case of the involution cancellation in `d ∘ d = 0`:
-`T(j,k) + T(⟨k,...⟩, ⟨j-1,...⟩) = 0`. -/
 private theorem cechDiff_involution_add_lt {F : AbPresheaf X}
     {U : FiniteCover X ι} {q : ℕ} (f : CechCochain F U q)
     {σ : Fin (q + 1 + 1 + 1) → ι}
@@ -323,7 +307,9 @@ private theorem cechDiff_involution_add_lt {F : AbPresheaf X}
               ⟨(k : ℕ), by have := k.isLt; omega⟩
               σ))))) = 0 := by
   have hj_ne : j ≠ 0 := by
-    intro hj0; simp only [hj0, Fin.val_zero] at h; omega
+    intro hj0
+    simp only [hj0, Fin.val_zero] at h
+    omega
   have hface := face_face_lt j k h σ hj_ne
   have hj_eq : (⟨(k : ℕ), by have := k.isLt; omega⟩ :
       Fin (q + 3)) = k.castSucc :=
@@ -337,7 +323,8 @@ private theorem cechDiff_involution_add_lt {F : AbPresheaf X}
         (FiniteCover.face
           ⟨(k : ℕ), by have := k.isLt; omega⟩ σ) =
       FiniteCover.face k (FiniteCover.face j σ) := by
-    rw [hj_eq, hk_eq]; exact hface.symm
+    rw [hj_eq, hk_eq]
+    exact hface.symm
   rw [res_res_eq_of_face_eq f j
     ⟨k.val, by have := k.isLt; omega⟩ k
     ⟨(j : ℕ) - 1, by have := j.isLt; omega⟩ hface_eq]
@@ -345,9 +332,10 @@ private theorem cechDiff_involution_add_lt {F : AbPresheaf X}
   have : (-1 : ℤ) ^ (j : ℕ) =
       (-1 : ℤ) ^ ((j : ℕ) - 1) * (-1) := by
     conv_lhs =>
-      rw [show (j : ℕ) = (j : ℕ) - 1 + 1 from by omega]
-      rw [pow_succ]
-  rw [this]; ring_nf; exact zero_smul _ _
+      rw [show (j : ℕ) = (j : ℕ) - 1 + 1 from by omega, pow_succ]
+  rw [this]
+  ring_nf
+  exact zero_smul _ _
 
 /-- The `j ≤ k` case of the involution cancellation in `d ∘ d = 0`:
 `T(j,k) + T(⟨k+1,...⟩, ⟨j,...⟩) = 0`. -/
