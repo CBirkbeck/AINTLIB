@@ -126,9 +126,8 @@ theorem deltaMap_comp_epsilonHom (f : A) :
     RingHom.prod_apply, RingHom.comp_apply]
   have h1 : TateAlgebra.quotientFSubXToA f
       ((Ideal.Quotient.mk _) (algebraMap A ↥(TateAlgebra A) a)) = a := by
-    have := RingHom.congr_fun (TateAlgebra.quotientFSubXToA_comp_AToQuotientFSubX f) a
-    simp only [RingHom.comp_apply, RingHom.id_apply, TateAlgebra.AToQuotientFSubX] at this
-    exact this
+    simpa only [RingHom.comp_apply, RingHom.id_apply, TateAlgebra.AToQuotientFSubX]
+      using RingHom.congr_fun (TateAlgebra.quotientFSubXToA_comp_AToQuotientFSubX f) a
   have h2 : TateAlgebra.quotientOneSubfXToLoc f
       ((Ideal.Quotient.mk _) (algebraMap A ↥(TateAlgebra A) a)) =
       algebraMap A (Localization.Away f) a := by
@@ -275,13 +274,11 @@ theorem algebraMap_mem_span_fSubX_eq_zero_of_iInf_pow_eq_bot (f a : A)
       TateAlgebra.coeff n (algebraMap A ↥(TateAlgebra A) a) := by
     intro n
     have := congr_arg (TateAlgebra.coeff n) hc'
-    rw [sub_mul, TateAlgebra.coeff_sub, TateAlgebra.coeff_algebraMap_mul] at this
-    exact this
+    rwa [sub_mul, TateAlgebra.coeff_sub, TateAlgebra.coeff_algebraMap_mul] at this
   -- Constant coefficient: f * coeff 0 c = a.
   have h0 : f * TateAlgebra.coeff 0 c = a := by
     have := hcoeff_eq 0
-    rw [TateAlgebra.coeff_zero_X_mul, sub_zero, coeff_zero_algebraMap] at this
-    exact this
+    rwa [TateAlgebra.coeff_zero_X_mul, sub_zero, coeff_zero_algebraMap] at this
   -- Recurrence: coeff n c = f * coeff (n + 1) c.
   have hstep : ∀ n,
       TateAlgebra.coeff n c = f * TateAlgebra.coeff (n + 1) c := by
@@ -335,12 +332,10 @@ theorem exists_coeff_tendsto_and_pow_mul_of_algebraMap_mem_fSubX (f a : A)
       TateAlgebra.coeff n (algebraMap A ↥(TateAlgebra A) a) := by
     intro n
     have := congr_arg (TateAlgebra.coeff n) hc'
-    rw [sub_mul, TateAlgebra.coeff_sub, TateAlgebra.coeff_algebraMap_mul] at this
-    exact this
+    rwa [sub_mul, TateAlgebra.coeff_sub, TateAlgebra.coeff_algebraMap_mul] at this
   have h0 : f * TateAlgebra.coeff 0 c = a := by
     have := hcoeff_eq 0
-    rw [TateAlgebra.coeff_zero_X_mul, sub_zero, coeff_zero_algebraMap] at this
-    exact this
+    rwa [TateAlgebra.coeff_zero_X_mul, sub_zero, coeff_zero_algebraMap] at this
   have hstep : ∀ n,
       TateAlgebra.coeff n c = f * TateAlgebra.coeff (n + 1) c := by
     intro n
@@ -413,14 +408,12 @@ theorem tendsto_pow_mul_of_algebraMap_mem_oneSubfX (f a : A)
       TateAlgebra.coeff n (algebraMap A ↥(TateAlgebra A) a) := by
     intro n
     have := congr_arg (TateAlgebra.coeff n) hc'
-    rw [sub_mul, one_mul, mul_assoc, TateAlgebra.coeff_sub,
+    rwa [sub_mul, one_mul, mul_assoc, TateAlgebra.coeff_sub,
       TateAlgebra.coeff_algebraMap_mul] at this
-    exact this
   have h0 : TateAlgebra.coeff 0 c = a := by
     have := hcoeff_eq 0
-    rw [TateAlgebra.coeff_zero_X_mul, mul_zero, sub_zero,
+    rwa [TateAlgebra.coeff_zero_X_mul, mul_zero, sub_zero,
       coeff_zero_algebraMap] at this
-    exact this
   have hstep : ∀ n, TateAlgebra.coeff (n + 1) c =
       f * TateAlgebra.coeff n c := by
     intro n
@@ -689,9 +682,7 @@ private theorem idx_eq_single_zero_iff (i j : ℕ) :
   rw [idx_apply_zero]
   constructor
   · intro h
-    have := Finsupp.ext_iff.mp h 1
-    simp [idx] at this
-    exact this
+    simpa [idx] using Finsupp.ext_iff.mp h 1
   · intro hj
     subst hj; ext k; fin_cases k <;> simp [idx]
 
@@ -700,9 +691,7 @@ private theorem idx_eq_single_one_iff (i j : ℕ) :
   rw [idx_apply_one]
   constructor
   · intro h
-    have := Finsupp.ext_iff.mp h 0
-    simp [idx] at this
-    exact this
+    simpa [idx] using Finsupp.ext_iff.mp h 0
   · intro hi
     subst hi; ext k; fin_cases k <;> simp [idx]
 
@@ -944,10 +933,7 @@ theorem ker_lambdaMap_le_range_iotaHom [T1Space A]
     -- h1 : 0 - c(n,0) = coeff_n g - 0
     simp only [zero_sub, sub_zero] at h1
     -- h1 : -c(n,0) = coeff_n g, so c(n,0) = -coeff_n g
-    have : MvPowerSeries.coeff (idx n 0) c.val =
-        -(MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) n) g.val) := by
-      rw [← h1, neg_neg]
-    exact this
+    rw [← h1, neg_neg]
   -- Boundary equation at (0, m) for m ≥ 1: -c(0,m) = -coeff_m h, i.e. c(0,m) = coeff_m h
   have hboundary_y : ∀ m, 0 < m →
       MvPowerSeries.coeff (idx 0 m) c.val =
@@ -985,10 +971,8 @@ theorem ker_lambdaMap_le_range_iotaHom [T1Space A]
     intro n hn
     -- c(n, 0) = -coeff_n g, and c(n+k, k) = c(n, 0) for all k
     have hconst : ∀ k, MvPowerSeries.coeff (idx (n + k) k) c.val =
-        MvPowerSeries.coeff (idx n 0) c.val := by
-      intro k
-      have := hdiag_iter n 0 k
-      simp only [Nat.zero_add] at this; exact this
+        MvPowerSeries.coeff (idx n 0) c.val := fun k => by
+      simpa only [Nat.zero_add] using hdiag_iter n 0 k
     -- The injection ℕ → Fin 2 →₀ ℕ sending k ↦ idx (n + k) k
     have hinj : Function.Injective (fun k => idx (n + k) k) := by
       intro a b hab
@@ -1005,10 +989,8 @@ theorem ker_lambdaMap_le_range_iotaHom [T1Space A]
       MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) m) h.val = 0 := by
     intro m hm
     have hconst : ∀ k, MvPowerSeries.coeff (idx k (m + k)) c.val =
-        MvPowerSeries.coeff (idx 0 m) c.val := by
-      intro k
-      have := hdiag_iter 0 m k
-      simp only [Nat.zero_add] at this; exact this
+        MvPowerSeries.coeff (idx 0 m) c.val := fun k => by
+      simpa only [Nat.zero_add] using hdiag_iter 0 m k
     have hinj : Function.Injective (fun k => idx k (m + k)) := by
       intro a b hab
       have := Finsupp.ext_iff.mp hab 0
@@ -1020,10 +1002,8 @@ theorem ker_lambdaMap_le_range_iotaHom [T1Space A]
   -- Step 7: c(0,0) = 0, which gives coeff_0 g = coeff_0 h.
   have hc00_zero : MvPowerSeries.coeff (idx 0 0) c.val = 0 := by
     have hconst : ∀ k, MvPowerSeries.coeff (idx k k) c.val =
-        MvPowerSeries.coeff (idx 0 0) c.val := by
-      intro k
-      have := hdiag_iter 0 0 k
-      simp only [Nat.zero_add] at this; exact this
+        MvPowerSeries.coeff (idx 0 0) c.val := fun k => by
+      simpa only [Nat.zero_add] using hdiag_iter 0 0 k
     have hinj : Function.Injective (fun k => idx k k) := by
       intro a b hab
       have := Finsupp.ext_iff.mp hab 0
