@@ -566,15 +566,7 @@ theorem laurentTateAlgebra_t2Space
 
 omit [IsNoetherianRing A] [IsDomain A] in
 /-- The Laurent-fiber ideal `laurentFSubZetaIdeal f = ⟨algebraMap f − ζ⟩` is
-closed in `LaurentTateAlgebra A` under the canonical quotient topology.
-
-**Proof.** Let `mkHom : TateAlgebra₂ A → LaurentTateAlgebra A` be the
-canonical quotient map (an open quotient map by
-`QuotientRing.isOpenQuotientMap_mk`). The preimage of
-`laurentFSubZetaIdeal f` under `mkHom` (equivalently the comap) is an
-ideal of `TateAlgebra₂ A`, hence closed by `tateAlgebra₂_isClosed_ideal`.
-The `IsQuotientMap.isClosed_preimage` characterisation transports
-closedness back to `LaurentTateAlgebra A`. -/
+closed in `LaurentTateAlgebra A` under the canonical quotient topology. -/
 theorem laurentFSubZetaIdeal_isClosed
     (hA_complete : @CompleteSpace A (IsTopologicalAddGroup.rightUniformSpace A))
     (hnoeth : IsNoetherianRing
@@ -586,26 +578,15 @@ theorem laurentFSubZetaIdeal_isClosed
   haveI : IsTopologicalRing ↥(TateAlgebra₂ A) := instIsTopologicalRingTateAlgebra₂
   letI : TopologicalSpace (LaurentTateAlgebra A) := laurentTateAlgebra_topology
   haveI : IsTopologicalRing (LaurentTateAlgebra A) := laurentTateAlgebra_isTopologicalRing
-  -- The comap to `TateAlgebra₂ A` is an ideal, hence closed under the
-  -- canonical bivariate Tate topology.
   have hcomap_closed : IsClosed
       (((laurentFSubZetaIdeal f).comap LaurentTateAlgebra.mkHom : Ideal _) :
         Set ↥(TateAlgebra₂ A)) := by
     haveI : IsNoetherianRing ↥(tateAlgebra₂_pairOfDefinition (A := A)).A₀ := hnoeth
     exact tateAlgebra₂_isClosed_ideal hA_complete _
-  -- `mkHom` is an open quotient map; the preimage characterization transports
-  -- closedness back to `LaurentTateAlgebra A`.
   have hQM : Topology.IsQuotientMap
       (LaurentTateAlgebra.mkHom : ↥(TateAlgebra₂ A) → LaurentTateAlgebra A) :=
     (QuotientRing.isOpenQuotientMap_mk _).isQuotientMap
   rw [← hQM.isClosed_preimage]
-  -- Preimage as set = comap as set.
-  have hpre_eq :
-      (LaurentTateAlgebra.mkHom : ↥(TateAlgebra₂ A) → LaurentTateAlgebra A) ⁻¹'
-        ((laurentFSubZetaIdeal f : Ideal _) : Set _) =
-        (((laurentFSubZetaIdeal f).comap LaurentTateAlgebra.mkHom : Ideal _) :
-          Set ↥(TateAlgebra₂ A)) := rfl
-  rw [hpre_eq]
   exact hcomap_closed
 
 omit [IsNoetherianRing A] [IsDomain A] in
@@ -711,14 +692,7 @@ noncomputable instance B₂_gen_isUniformAddGroup :
     (B₂_gen_isTopologicalAddGroup f)
 
 omit [IsNoetherianRing A] [IsDomain A] [T2Space A] in
-/-- The neighborhood filter at `0 : B₁_gen f` is countably-generated.
-
-Derived directly from the open quotient projection
-`Ideal.Quotient.mk` (a `IsOpenQuotientMap` by
-`QuotientRing.isOpenQuotientMap_mk`) carrying the countably-generated
-nhds-of-zero from `TateAlgebra A` (which is first-countable). The
-image of a countably-generated filter under a function is
-countably-generated (`Filter.map.isCountablyGenerated`). -/
+/-- The neighborhood filter at `0 : B₁_gen f` is countably-generated. -/
 theorem B₁_gen_nhds_zero_isCountablyGenerated :
     Filter.IsCountablyGenerated (𝓝 (0 : B₁_gen f)) := by
   haveI : FirstCountableTopology ↥(TateAlgebra A) :=
@@ -752,11 +726,7 @@ theorem B₂_gen_nhds_zero_isCountablyGenerated :
   exact Filter.map.isCountablyGenerated _ _
 
 omit [IsNoetherianRing A] [IsDomain A] [T2Space A] in
-/-- The canonical uniformity on `B₁_gen f` is countably-generated.
-
-Inline form of `IsUniformAddGroup.uniformity_countably_generated`,
-applied at `α := B₁_gen f` with explicit instance arguments to bypass
-typeclass synthesis on the `(𝓝 0)`-countably-generated hypothesis. -/
+/-- The canonical uniformity on `B₁_gen f` is countably-generated. -/
 theorem B₁_gen_uniformity_isCountablyGenerated :
     Filter.IsCountablyGenerated (𝓤 (B₁_gen f)) := by
   haveI hcg : (𝓝 (0 : B₁_gen f)).IsCountablyGenerated :=
