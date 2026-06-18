@@ -347,7 +347,7 @@ theorem maximalIdeal_localRingAt_eq_span_XClass_of_non_2_tor
   have h_map_eq : Ideal.map f P_ideal = Ideal.span ({f XC} : Set _) := by
     rw [h_pideal_eq, Ideal.map_span, Set.image_pair]
     exact le_antisymm
-      (Ideal.span_le.mpr (fun z hz => by
+      (Ideal.span_le.mpr (fun z hz ↦ by
         rcases (Set.mem_insert_iff.mp hz) with rfl | hz'
         · exact Ideal.subset_span rfl
         · simp only [Set.mem_singleton_iff] at hz'
@@ -651,7 +651,7 @@ theorem maximalIdeal_localRingAt_eq_span_YClass_of_2_tor
   have h_map_eq : Ideal.map f P_ideal = Ideal.span ({f YC} : Set _) := by
     rw [h_pideal_eq, Ideal.map_span, Set.image_pair]
     exact le_antisymm
-      (Ideal.span_le.mpr (fun z hz => by
+      (Ideal.span_le.mpr (fun z hz ↦ by
         rcases (Set.mem_insert_iff.mp hz) with rfl | hz'
         · exact h_f_xc_mem
         · simp only [Set.mem_singleton_iff] at hz'
@@ -1690,7 +1690,7 @@ noncomputable def translateAlgHom_of_nonTorsion
     (h_not_2_tor : yk ≠ W.toAffine.negY xk yk) :
     KE →ₐ[F] KE :=
   translateAlgHom W xk yk h_ns.1
-    (fun h => x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h.1))
+    (fun h ↦ x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h.1))
     (translateBaseHom_injective_of_transcendental W xk yk
       (translateX_xy_transcendental W xk yk h_ns h_not_2_tor))
 
@@ -1732,7 +1732,7 @@ theorem translateAlgHom_apply_x_gen
     translateAlgHom_of_nonTorsion W xk yk h_ns h_not_2_tor (x_gen W) =
       translateX_xy W xk yk := by
   let hxy : TranslateNonInverse W xk yk :=
-    fun h => x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h.1)
+    fun h ↦ x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h.1)
   unfold translateAlgHom_of_nonTorsion translateAlgHom
   unfold x_gen
   rw [IsFractionRing.liftAlgHom_apply, IsFractionRing.lift_algebraMap]
@@ -1816,10 +1816,10 @@ theorem genericPoint_add_liftSomePoint
         (Affine.nonsingular_add (generic_nonsingular W)
           ((WeierstrassCurve.Affine.map_nonsingular (W := W.toAffine)
             (RingHom.injective (algebraMap F KE)) xk yk).mpr h_ns)
-          (fun hxy => x_gen_sub_const_ne_zero W xk
+          (fun hxy ↦ x_gen_sub_const_ne_zero W xk
             (sub_eq_zero.mpr hxy.left))) := by
   unfold genericPoint liftSomePoint
-  exact Affine.Point.add_of_X_ne (fun h_eq =>
+  exact Affine.Point.add_of_X_ne (fun h_eq ↦
     x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h_eq))
 
 /-- `genericPoint + liftSomePoint_neg T` = `some translateX_xy_neg translateY_xy_neg h`,
@@ -1835,7 +1835,7 @@ theorem genericPoint_add_liftSomePoint_neg
             (RingHom.injective (algebraMap F KE))
             xk (W.toAffine.negY xk yk)).mpr
               ((Affine.nonsingular_neg xk yk).mpr h_ns))
-          (fun hxy => x_gen_sub_const_ne_zero W xk
+          (fun hxy ↦ x_gen_sub_const_ne_zero W xk
             (sub_eq_zero.mpr hxy.left))) :=
   genericPoint_add_liftSomePoint W xk (W.toAffine.negY xk yk)
     ((Affine.nonsingular_neg xk yk).mpr h_ns)
@@ -1889,7 +1889,7 @@ theorem translateAlgHom_apply_y_gen
     translateAlgHom_of_nonTorsion W xk yk h_ns h_not_2_tor (y_gen W) =
       translateY_xy W xk yk := by
   let hxy : TranslateNonInverse W xk yk :=
-    fun h => x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h.1)
+    fun h ↦ x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h.1)
   unfold translateAlgHom_of_nonTorsion translateAlgHom
   unfold y_gen
   rw [IsFractionRing.liftAlgHom_apply, IsFractionRing.lift_algebraMap]
@@ -2013,7 +2013,7 @@ theorem translateAlgHom_round_trip_x_gen
   rw [σ_commutes_addX W (x_gen W) (algebraMap F KE xk)
         (translateSlope_xy W xk yk)]
   rw [σ.commutes xk, hσx]
-  have hx_ne : x_gen W ≠ algebraMap F KE xk := fun h =>
+  have hx_ne : x_gen W ≠ algebraMap F KE xk := fun h ↦
     x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h)
   have hx_σ_ne : σ (x_gen W) ≠ algebraMap F KE xk := by
     rw [hσx]
@@ -2064,7 +2064,7 @@ theorem translateAlgHom_round_trip_y_gen
   rw [σ_commutes_addY W (x_gen W) (algebraMap F KE xk) (y_gen W)
         (translateSlope_xy W xk yk)]
   rw [σ.commutes xk, hσx, hσy]
-  have hx_ne : x_gen W ≠ algebraMap F KE xk := fun h =>
+  have hx_ne : x_gen W ≠ algebraMap F KE xk := fun h ↦
     x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h)
   have hx_σ_ne : σ (x_gen W) ≠ algebraMap F KE xk := by
     rw [hσx]
@@ -2126,7 +2126,7 @@ theorem algEquiv_ext_x_y_gen {ψ₁ ψ₂ : KE ≃ₐ[F] KE}
     (hx : ψ₁ (x_gen W) = ψ₂ (x_gen W))
     (hy : ψ₁ (y_gen W) = ψ₂ (y_gen W)) :
     ψ₁ = ψ₂ := by
-  refine AlgEquiv.ext fun z => ?_
+  refine AlgEquiv.ext fun z ↦ ?_
   have h := algHom_ext_x_y_gen (W := W) (ψ₁ := ψ₁.toAlgHom) (ψ₂ := ψ₂.toAlgHom)
     (by simpa using hx) (by simpa using hy)
   have hz := DFunLike.congr_fun h z
@@ -2154,7 +2154,7 @@ theorem translateAlgHom_inv_round_trip_x_gen
   rw [σ_commutes_addX W (x_gen W) (algebraMap F KE xk)
         (translateSlope_xy W xk (W.toAffine.negY xk yk))]
   rw [τ.commutes xk, hτx]
-  have hx_ne : x_gen W ≠ algebraMap F KE xk := fun h =>
+  have hx_ne : x_gen W ≠ algebraMap F KE xk := fun h ↦
     x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h)
   have hx_τ_ne : τ (x_gen W) ≠ algebraMap F KE xk := by
     rw [hτx]
@@ -2206,7 +2206,7 @@ theorem translateAlgHom_inv_round_trip_y_gen
   rw [σ_commutes_addY W (x_gen W) (algebraMap F KE xk)
         (y_gen W) (translateSlope_xy W xk (W.toAffine.negY xk yk))]
   rw [τ.commutes xk, hτx, hτy]
-  have hx_ne : x_gen W ≠ algebraMap F KE xk := fun h =>
+  have hx_ne : x_gen W ≠ algebraMap F KE xk := fun h ↦
     x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h)
   have hx_τ_ne : τ (x_gen W) ≠ algebraMap F KE xk := by
     rw [hτx]
@@ -2573,12 +2573,12 @@ theorem ord_P_translateSlope_xy_le_neg_one_at_2tor
     exact ord_P_B_minus_a1_yk_eq_zero_at_2tor W xk yk h_ns h_2_tor
   have h_x_ne : x_gen W - algebraMap F KE xk ≠ 0 :=
     x_gen_sub_const_ne_zero W xk
-  have h_Bma_ne : Bma ≠ 0 := fun h_zero => by
+  have h_Bma_ne : Bma ≠ 0 := fun h_zero ↦ by
     have h_top : (W_smooth W).ord_P P Bma = ⊤ :=
       (SmoothPlaneCurve.ord_P_eq_top_iff _).mpr h_zero
     have h_eq : (⊤ : WithTop ℤ) = (0 : WithTop ℤ) := h_top.symm.trans h_Bma_ord
     exact absurd h_eq (by simp)
-  have h_A_ne : A ≠ 0 := fun h_zero => by
+  have h_A_ne : A ≠ 0 := fun h_zero ↦ by
     have h_LHS_zero : (y_gen W - algebraMap F KE yk) * A = 0 := by
       rw [h_zero, mul_zero]
     rw [h_id] at h_LHS_zero
@@ -2632,7 +2632,7 @@ theorem ord_P_translateX_xy_lt_zero_at_2tor
   set sq2 : KE := s * s
   have h_slope_ord : (W_smooth W).ord_P P s ≤ ((-1 : ℤ) : WithTop ℤ) :=
     ord_P_translateSlope_xy_le_neg_one_at_2tor W xk yk h_ns h_2_tor
-  have h_s_ne : s ≠ 0 := fun h_zero => by
+  have h_s_ne : s ≠ 0 := fun h_zero ↦ by
     have h_top : (W_smooth W).ord_P P s = ⊤ := by
       rw [h_zero]; exact (W_smooth W).ord_P_zero
     rw [h_top] at h_slope_ord
@@ -2663,7 +2663,7 @@ theorem ord_P_translateX_xy_lt_zero_at_2tor
           have h_top : (W_smooth W).ord_P P ((W_KE W).a₁ * s) = ⊤ := by
             rw [h_zero]; exact (W_smooth W).ord_P_zero
           rw [h_top]; exact le_top
-        · have h_a1_F : W.a₁ ≠ 0 := fun h => ha1 (by
+        · have h_a1_F : W.a₁ ≠ 0 := fun h ↦ ha1 (by
             change algebraMap F KE W.a₁ = 0
             rw [h, map_zero])
           have h_a1_ord : (W_smooth W).ord_P P ((W_KE W).a₁) = 0 := by
@@ -2756,7 +2756,7 @@ noncomputable def translateAlgHom_of_2tor
     (h_2_tor : yk = W.toAffine.negY xk yk) :
     KE →ₐ[F] KE :=
   translateAlgHom W xk yk h_ns.1
-    (fun h => x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h.1))
+    (fun h ↦ x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h.1))
     (translateBaseHom_injective_of_transcendental W xk yk
       (translateX_xy_transcendental_2tor W xk yk h_ns h_2_tor))
 
@@ -2774,7 +2774,7 @@ theorem translateAlgHom_of_2tor_apply_x_gen
     translateAlgHom_of_2tor W xk yk h_ns h_2_tor (x_gen W) =
       translateX_xy W xk yk := by
   let hxy : TranslateNonInverse W xk yk :=
-    fun h => x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h.1)
+    fun h ↦ x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h.1)
   unfold translateAlgHom_of_2tor translateAlgHom
   unfold x_gen
   rw [IsFractionRing.liftAlgHom_apply, IsFractionRing.lift_algebraMap]
@@ -2864,7 +2864,7 @@ theorem translateAlgHom_of_2tor_apply_y_gen
     translateAlgHom_of_2tor W xk yk h_ns h_2_tor (y_gen W) =
       translateY_xy W xk yk := by
   let hxy : TranslateNonInverse W xk yk :=
-    fun h => x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h.1)
+    fun h ↦ x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h.1)
   unfold translateAlgHom_of_2tor translateAlgHom
   unfold y_gen
   rw [IsFractionRing.liftAlgHom_apply, IsFractionRing.lift_algebraMap]
@@ -2903,7 +2903,7 @@ theorem translateAlgHom_of_2tor_round_trip_x_gen
   rw [σ_commutes_addX W (x_gen W) (algebraMap F KE xk)
         (translateSlope_xy W xk yk)]
   rw [σ.commutes xk, hσx]
-  have hx_ne : x_gen W ≠ algebraMap F KE xk := fun h =>
+  have hx_ne : x_gen W ≠ algebraMap F KE xk := fun h ↦
     x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h)
   have hx_σ_ne : σ (x_gen W) ≠ algebraMap F KE xk := by
     rw [hσx]
@@ -2949,7 +2949,7 @@ theorem translateAlgHom_of_2tor_round_trip_y_gen
   rw [σ_commutes_addY W (x_gen W) (algebraMap F KE xk) (y_gen W)
         (translateSlope_xy W xk yk)]
   rw [σ.commutes xk, hσx, hσy]
-  have hx_ne : x_gen W ≠ algebraMap F KE xk := fun h =>
+  have hx_ne : x_gen W ≠ algebraMap F KE xk := fun h ↦
     x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h)
   have hx_σ_ne : σ (x_gen W) ≠ algebraMap F KE xk := by
     rw [hσx]
@@ -3396,7 +3396,7 @@ theorem translateAlgEquivOfPoint_add_nonTor_x_gen
   rw [σ_commutes_addX W (x_gen W) (algebraMap F KE xk₁)
         (translateSlope_xy W xk₁ yk₁)]
   rw [σ.commutes xk₁, hσx]
-  have hx_ne : x_gen W ≠ algebraMap F KE xk₁ := fun h =>
+  have hx_ne : x_gen W ≠ algebraMap F KE xk₁ := fun h ↦
     x_gen_sub_const_ne_zero W xk₁ (sub_eq_zero.mpr h)
   have hx_σ_ne_full : σ (x_gen W) ≠ σ (algebraMap F KE xk₁) := by
     rwa [σ.commutes, hσx]
@@ -3454,7 +3454,7 @@ theorem translateAlgEquivOfPoint_add_nonTor_y_gen
   rw [σ_commutes_addY W (x_gen W) (algebraMap F KE xk₁) (y_gen W)
         (translateSlope_xy W xk₁ yk₁)]
   rw [σ.commutes xk₁, hσx, hσy]
-  have hx_ne : x_gen W ≠ algebraMap F KE xk₁ := fun h =>
+  have hx_ne : x_gen W ≠ algebraMap F KE xk₁ := fun h ↦
     x_gen_sub_const_ne_zero W xk₁ (sub_eq_zero.mpr h)
   have hx_σ_ne_full : σ (x_gen W) ≠ σ (algebraMap F KE xk₁) := by
     rwa [σ.commutes, hσx]
@@ -3518,7 +3518,7 @@ theorem translateAlgEquivOfPoint_add_2tor_x_gen
   rw [σ_commutes_addX W (x_gen W) (algebraMap F KE xk₁)
         (translateSlope_xy W xk₁ yk₁)]
   rw [σ.commutes xk₁, hσx]
-  have hx_ne : x_gen W ≠ algebraMap F KE xk₁ := fun h =>
+  have hx_ne : x_gen W ≠ algebraMap F KE xk₁ := fun h ↦
     x_gen_sub_const_ne_zero W xk₁ (sub_eq_zero.mpr h)
   have hx_σ_ne_full : σ (x_gen W) ≠ σ (algebraMap F KE xk₁) := by
     rwa [σ.commutes, hσx]
@@ -3574,7 +3574,7 @@ theorem translateAlgEquivOfPoint_add_2tor_y_gen
   rw [σ_commutes_addY W (x_gen W) (algebraMap F KE xk₁) (y_gen W)
         (translateSlope_xy W xk₁ yk₁)]
   rw [σ.commutes xk₁, hσx, hσy]
-  have hx_ne : x_gen W ≠ algebraMap F KE xk₁ := fun h =>
+  have hx_ne : x_gen W ≠ algebraMap F KE xk₁ := fun h ↦
     x_gen_sub_const_ne_zero W xk₁ (sub_eq_zero.mpr h)
   have hx_σ_ne_full : σ (x_gen W) ≠ σ (algebraMap F KE xk₁) := by
     rwa [σ.commutes, hσx]
@@ -3638,7 +3638,7 @@ theorem translateAlgEquivOfPoint_add_2tor_nonTor_x_gen
   rw [σ_commutes_addX W (x_gen W) (algebraMap F KE xk₁)
         (translateSlope_xy W xk₁ yk₁)]
   rw [σ.commutes xk₁, hσx]
-  have hx_ne : x_gen W ≠ algebraMap F KE xk₁ := fun h =>
+  have hx_ne : x_gen W ≠ algebraMap F KE xk₁ := fun h ↦
     x_gen_sub_const_ne_zero W xk₁ (sub_eq_zero.mpr h)
   have hx_σ_ne_full : σ (x_gen W) ≠ σ (algebraMap F KE xk₁) := by
     rwa [σ.commutes, hσx]
@@ -3694,7 +3694,7 @@ theorem translateAlgEquivOfPoint_add_2tor_nonTor_y_gen
   rw [σ_commutes_addY W (x_gen W) (algebraMap F KE xk₁) (y_gen W)
         (translateSlope_xy W xk₁ yk₁)]
   rw [σ.commutes xk₁, hσx, hσy]
-  have hx_ne : x_gen W ≠ algebraMap F KE xk₁ := fun h =>
+  have hx_ne : x_gen W ≠ algebraMap F KE xk₁ := fun h ↦
     x_gen_sub_const_ne_zero W xk₁ (sub_eq_zero.mpr h)
   have hx_σ_ne_full : σ (x_gen W) ≠ σ (algebraMap F KE xk₁) := by
     rwa [σ.commutes, hσx]
@@ -3750,7 +3750,7 @@ theorem translateAlgEquivOfPoint_add_nonTor_2tor_x_gen
   rw [σ_commutes_addX W (x_gen W) (algebraMap F KE xk₁)
         (translateSlope_xy W xk₁ yk₁)]
   rw [σ.commutes xk₁, hσx]
-  have hx_ne : x_gen W ≠ algebraMap F KE xk₁ := fun h =>
+  have hx_ne : x_gen W ≠ algebraMap F KE xk₁ := fun h ↦
     x_gen_sub_const_ne_zero W xk₁ (sub_eq_zero.mpr h)
   have hx_σ_ne_full : σ (x_gen W) ≠ σ (algebraMap F KE xk₁) := by
     rwa [σ.commutes, hσx]
@@ -3806,7 +3806,7 @@ theorem translateAlgEquivOfPoint_add_nonTor_2tor_y_gen
   rw [σ_commutes_addY W (x_gen W) (algebraMap F KE xk₁) (y_gen W)
         (translateSlope_xy W xk₁ yk₁)]
   rw [σ.commutes xk₁, hσx, hσy]
-  have hx_ne : x_gen W ≠ algebraMap F KE xk₁ := fun h =>
+  have hx_ne : x_gen W ≠ algebraMap F KE xk₁ := fun h ↦
     x_gen_sub_const_ne_zero W xk₁ (sub_eq_zero.mpr h)
   have hx_σ_ne_full : σ (x_gen W) ≠ σ (algebraMap F KE xk₁) := by
     rwa [σ.commutes, hσx]
@@ -4282,7 +4282,7 @@ theorem translateAlgEquivOfPoint_smul_pointValuation_of_comap
     (f : W.toAffine.FunctionField) :
     (W_smooth W).pointValuation P (translateAlgEquivOfPoint W k f) =
       (W_smooth W).pointValuation (P.translate_of_finite k h) f := by
-  have := congr_arg (fun v => v f) h_comap
+  have := congr_arg (fun v ↦ v f) h_comap
   exact this
 
 /-- **Pointwise → comap-equality bridge**: for `translateAlgEquivOfPoint W k`,
@@ -4392,7 +4392,7 @@ theorem isTranslateValuationCompatible_iff_pointwise
       ∀ f : W.toAffine.FunctionField,
         (W_smooth W).pointValuation P (translateAlgEquivOfPoint W k f) =
           (W_smooth W).pointValuation (P.translate_of_finite k h) f := by
-  refine ⟨fun h_compat f => ?_, fun h_pointwise => ?_⟩
+  refine ⟨fun h_compat f ↦ ?_, fun h_pointwise ↦ ?_⟩
   · exact translateAlgEquivOfPoint_smul_pointValuation_of_compatible W P k h h_compat f
   · exact comap_pointValuation_eq_of_pointwise_smul W P k h h_pointwise
 
@@ -4540,7 +4540,7 @@ theorem isTranslateLocalRingCompatible_iff_localRingAt_image
           algebraMap ((W_smooth W).localRingAt (P.translate_of_finite k h))
               (W_smooth W).FunctionField y = f)) := by
   unfold IsTranslateLocalRingCompatible
-  refine ⟨fun h_le f => ?_, fun h_image f => ?_⟩
+  refine ⟨fun h_le f ↦ ?_, fun h_image f ↦ ?_⟩
   · rw [Curves.SmoothPlaneCurve.mem_localRingAt_image_iff_pointValuation_le_one,
         Curves.SmoothPlaneCurve.mem_localRingAt_image_iff_pointValuation_le_one]
     exact h_le f
@@ -5279,7 +5279,7 @@ theorem ord_P_translateAlgEquivOfPoint_sum_dominant
       exact h_dom_lt g (List.mem_cons_of_mem f hg)
     have h_rest_bridges' : ∀ g ∈ rest',
         (W_smooth W).ord_P P (translateAlgEquivOfPoint W k g) =
-          (W_smooth W).ordAtInfty g := fun g hg =>
+          (W_smooth W).ordAtInfty g := fun g hg ↦
       h_rest_bridges g (List.mem_cons_of_mem f hg)
     exact ih (dom + f) h_dom_f_bridge h_rest_bridges' h_dom_f_lt
 
@@ -5304,7 +5304,7 @@ theorem ord_P_translateAlgEquivOfPoint_const_mul_eq_ordAtInfty_of_base
         Curves.SmoothPlaneCurve.ord_P_zero]
     rw [show ((W_smooth W).ordAtInfty (0 : W.toAffine.FunctionField)) = ⊤ from
         (W_smooth W).ordAtInfty_zero]
-  · have hc_alg : algebraMap F W.toAffine.FunctionField c ≠ 0 := fun h => hc <|
+  · have hc_alg : algebraMap F W.toAffine.FunctionField c ≠ 0 := fun h ↦ hc <|
       FaithfulSMul.algebraMap_injective F W.toAffine.FunctionField
         (h.trans (map_zero _).symm)
     have h_const : (W_smooth W).ord_P P
