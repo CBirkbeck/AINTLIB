@@ -174,20 +174,14 @@ theorem tateAcyclicity_Part2_via_C1SupplierStrong_local
             ((C.per_E_local_covering S'.elts f₀ E hS'_per_E).hsubset D hD) b) →
         a = b) :
     ∃ x : presheafValue C.base, ∀ E : { E // E ∈ C.covers },
-      restrictionMap C.base E.1 (C.hsubset E.1 E.2) x = fC E := by
-  -- Step 1: lift `C1SupplierStrong_local C` to the normalized cover.
-  have h_C1_strong_insertDenom : C1SupplierStrong_local C.insertDenom :=
-    C1SupplierStrong_local_insertDenom_lift C h_covers_nonempty h_C1_strong
-  -- Step 2: produce `hZavyalov_per_E` via the strong base-Spa bridge.
-  have hZavyalov_per_E :
-      rationalOpen C.base.T C.base.s ≠ ∅ →
-      ∃ S : Finset A,
-        refines_cover_per_E C S ∧ refines_contain C S ∧ refines_span_top S :=
-    hZavyalov_per_E_via_normalized_C1Strong_supplier_of_base_eq_Spa
+      restrictionMap C.base E.1 (C.hsubset E.1 E.2) x = fC E :=
+  -- Compose the three accepted bridges: lift `C1SupplierStrong_local C` to the
+  -- normalized cover, produce `hZavyalov_per_E` via the strong base-Spa bridge,
+  -- then feed the final Part-2 assembly with abstract Lane A / Lane B.
+  RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary C hne
+    (hZavyalov_per_E_via_normalized_C1Strong_supplier_of_base_eq_Spa
       P hA₀_le hAplus_le_A₀ π hI hπ_tn hπ_unit hArch C h_base_eq_Spa
-      h_C1_strong_insertDenom
-  -- Step 3: invoke the final Part-2 assembly with abstract Lane A / Lane B.
-  exact RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary C hne
-    hZavyalov_per_E f₀ fC hC_compat lane_A_supplier lane_B_supplier
+      (C1SupplierStrong_local_insertDenom_lift C h_covers_nonempty h_C1_strong))
+    f₀ fC hC_compat lane_A_supplier lane_B_supplier
 
 end ValuationSpectrum
