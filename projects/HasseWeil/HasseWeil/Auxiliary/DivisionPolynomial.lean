@@ -100,7 +100,7 @@ open WeierstrassCurve (ω)
 
 lemma ω_spec (n : ℤ) :
     2 * W.ω n + CC W.a₁ * W.φ n * W.ψ n + CC W.a₃ * W.ψ n ^ 3 = W.ψc n := by
-  have hψ : W.ψ = normEDS W.ψ₂ (C W.Ψ₃) (C W.preΨ₄) := funext fun _ => rfl
+  have hψ : W.ψ = normEDS W.ψ₂ (C W.Ψ₃) (C W.preΨ₄) := funext fun _ ↦ rfl
   rw [ψc, complEDS₂_eq_redInvarNum_sub, redInvar_normEDS, preΨ₄_add_ψ₂_pow_four, mul_assoc (C _),
     φ_mul_ψ, hψ, invarDenom_normEDS_eq_redInvarDenom_mul, ω, ← hψ, invar, b₂, b₄, ψ₂,
     polynomialY, polynomialX, negPolynomial]
@@ -266,7 +266,7 @@ lemma smulX_ne_zero (h0 : n ≠ 0) : smulX n ≠ 0 :=
 lemma smulX_sub_smulX (hm : m ≠ 0) (hn : n ≠ 0) :
     smulX m - smulX n = (ψᵤ (n + m) * ψᵤ (n - m)) / (ψᵤ n * ψᵤ m) ^ 2 := by
   rw [smulX_eq hm, smulX_eq hn,
-    show ∀ (c a b : Universal.Field), c - a - (c - b) = b - a from fun c a b => by ring,
+    show ∀ (c a b : Universal.Field), c - a - (c - b) = b - a from fun c a b ↦ by ring,
     div_sub_div]
   · rw [mul_pow]; congr; convert (isEllSequence_ψᵤ n m 1).symm using 1
     · ring
@@ -449,7 +449,7 @@ theorem zsmul_point_eq_smulX_smulY : n ≠ 0 →
       · rw [Affine.negY, ← X_eq]; ring
       · rw [← X_eq]; rfl
     rw [X_eq, Y_eq, n2.cast_add, add_zsmul, eq, eq2]
-    exact ⟨Affine.nonsingular_add ns2 ns (fun h => ne h.1), add_of_X_ne ne⟩
+    exact ⟨Affine.nonsingular_add ns2 ns (fun h ↦ ne h.1), add_of_X_ne ne⟩
   | neg ih n =>
     rw [neg_ne_zero]; intro h0
     obtain ⟨ns, eq⟩ := ih n h0
@@ -460,7 +460,7 @@ lemma zsmul_point_ne_zero (h0 : n ≠ 0) :
     n • Affine.point ≠ (0 : ((curve.baseChange Universal.Field).Point)) := by
   obtain ⟨ns, eq⟩ := zsmul_point_eq_smulX_smulY h0
   rw [eq]
-  exact fun h => nomatch h
+  exact fun h ↦ nomatch h
 
 end Affine
 
@@ -505,7 +505,7 @@ theorem zsmul_point_eq_smulField : (n • Jacobian.point).point = ⟦smulField n
 private lemma ω_neg_eq_neg_negY : curve.ω (-n) = -negY curvePoly (smulPoly n) := by
   unfold smulPoly WeierstrassCurve.Jacobian.negY curvePoly
   simp_rw [ω_neg, fin3_def_ext, WeierstrassCurve.baseChange, WeierstrassCurve.map,
-    show ∀ x, CC x = (algebraMap _ Poly) x from fun _ => rfl]
+    show ∀ x, CC x = (algebraMap _ Poly) x from fun _ ↦ rfl]
   norm_num; ring
 
 lemma smulPoly_neg : smulPoly (-n) = (-1 : Poly) • neg curvePoly (smulPoly n) := by
@@ -519,7 +519,7 @@ private lemma dblZ_smulPoly : dblZ curvePoly (smulPoly n) = curve.ψ (2 * n) := 
   unfold dblZ smulPoly WeierstrassCurve.Jacobian.negY curvePoly
   simp_rw [fin3_def_ext, WeierstrassCurve.baseChange, WeierstrassCurve.map]
   rw [← ψc_spec _ n]; congr; convert curve.ω_spec n using 1
-  simp_rw [show ∀ x, CC x = (algebraMap _ Poly) x from fun _ => rfl]
+  simp_rw [show ∀ x, CC x = (algebraMap _ Poly) x from fun _ ↦ rfl]
   norm_num; ring
 
 private lemma nonsingular_smulField :
@@ -581,7 +581,7 @@ lemma addXYZ_smulField :
     simp_rw [zero_mul]
   obtain rfl | ne_neg := eq_or_ne n (-m)
   · have jac_one_smul : ∀ (P : Fin 3 → Universal.Field), (1 : Universal.Field) • P = P :=
-      fun _ => by simp only [smul_fin3, one_pow, one_mul, fin3_def]
+      fun _ ↦ by simp only [smul_fin3, one_pow, one_mul, fin3_def]
     rw [← jac_one_smul (smulField m), smulField_neg, neg_add_cancel,
       addXYZ_smul, one_mul, neg_one_sq (R := Universal.Field), addXYZ_neg nonsingular_smulField.1,
       jac_one_smul, show (-m - m : ℤ) = -(2 * m) from by ring,
@@ -750,7 +750,7 @@ lemma exists_point_on_curve [IsAlgClosed F] (a : F) :
   set p : F[X] := X ^ 2 + C c₁ * X - C c₀ with hp_def
   have hcoeff : p.coeff 2 = 1 := by
     simp [hp_def, coeff_sub, coeff_add, coeff_X_pow]
-  have hp0 : p ≠ 0 := fun h => by simp [h] at hcoeff
+  have hp0 : p ≠ 0 := fun h ↦ by simp [h] at hcoeff
   have hnd : p.natDegree = 2 := by
     refine le_antisymm ?_ (le_natDegree_of_ne_zero (hcoeff ▸ one_ne_zero))
     apply (natDegree_sub_le _ _).trans
