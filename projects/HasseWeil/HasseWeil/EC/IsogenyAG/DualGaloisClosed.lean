@@ -96,7 +96,7 @@ theorem translate_pullback_invariance_of_xy_general
     (h_x : translateAlgEquivOfPoint W k (β.pullback (x_gen W)) = β.pullback (x_gen W))
     (h_y : translateAlgEquivOfPoint W k (β.pullback (y_gen W)) = β.pullback (y_gen W)) :
     ∀ z : W.toAffine.FunctionField,
-      translateAlgEquivOfPoint W k (β.pullback z) = β.pullback z := fun z =>
+      translateAlgEquivOfPoint W k (β.pullback z) = β.pullback z := fun z ↦
   DFunLike.congr_fun
     (algHom_ext_x_y_gen W
       (ψ₁ := (translateAlgEquivOfPoint W k).toAlgHom.comp β.pullback)
@@ -154,7 +154,7 @@ theorem pullback_fieldRange_eq_fixedField_general
         IntermediateField F W.toAffine.FunctionField) := by
   have hcov : ∀ k : β.kernel, ∀ z : W.toAffine.FunctionField,
       translateAlgEquivOfPoint W k.val (β.pullback z) = β.pullback z :=
-    fun k z => translate_pullback_invariance_of_xy_general W β k.val
+    fun k z ↦ translate_pullback_invariance_of_xy_general W β k.val
       (h_xy_family k).1 (h_xy_family k).2 z
   haveI : Finite β.kernel := finite_kernel_of_hcov W β hcov
   haveI : Fintype (Multiplicative β.kernel) := Fintype.ofFinite _
@@ -180,11 +180,11 @@ theorem fixedField_hfix_general
     (h_card : Nat.card β.kernel = β.degree) :
     ∀ z : W.toAffine.FunctionField,
       z ∈ β.pullback.range ↔
-        ∀ σ ∈ (Set.range (fun k : β.kernel =>
+        ∀ σ ∈ (Set.range (fun k : β.kernel ↦
             translateAlgEquivOfPoint W k.val)), σ z = z := by
   have hcov : ∀ k : β.kernel, ∀ z : W.toAffine.FunctionField,
       translateAlgEquivOfPoint W k.val (β.pullback z) = β.pullback z :=
-    fun k z => translate_pullback_invariance_of_xy_general W β k.val
+    fun k z ↦ translate_pullback_invariance_of_xy_general W β k.val
       (h_xy_family k).1 (h_xy_family k).2 z
   haveI : Finite β.kernel := finite_kernel_of_hcov W β hcov
   haveI : Fintype (Multiplicative β.kernel) := Fintype.ofFinite _
@@ -230,7 +230,7 @@ theorem mulByInt_isGenuineWith_general (N : ℤ) (hN : N ≠ 0) :
 theorem hnu_mulByInt_general
     (β : Isogeny W.toAffine W.toAffine) (n : ℤ) (hn : n ≠ 0)
     (hdvd : ∀ k ∈ β.kernel, n • k = 0) :
-    ∀ σ ∈ (Set.range (fun k : β.kernel => translateAlgEquivOfPoint W k.val)),
+    ∀ σ ∈ (Set.range (fun k : β.kernel ↦ translateAlgEquivOfPoint W k.val)),
       ∀ w, σ ((mulByInt W.toAffine n).pullback w) = (mulByInt W.toAffine n).pullback w := by
   rintro σ ⟨k, rfl⟩ w
   -- `[n]`-covariance: `τ_k([n]* w) = [n]*(τ_{[n]k} w)` (field-general genuine leaf).
@@ -273,21 +273,21 @@ noncomputable def dualGaloisData_of_basic_witnesses_general
       (translateAlgEquivOfPoint W k.val (β.pullback (y_gen W)) =
         β.pullback (y_gen W)))
     (h_card : Nat.card β.kernel = β.degree)
-    (hnu : ∀ σ ∈ (Set.range (fun k : β.kernel =>
+    (hnu : ∀ σ ∈ (Set.range (fun k : β.kernel ↦
         translateAlgEquivOfPoint W k.val)), ∀ w, σ (νPb w) = νPb w)
     (hν : ∀ f : W.toAffine.FunctionField,
         0 ≤ (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve F).ordAtInfty f →
         0 ≤ (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve F).ordAtInfty (νPb f)) :
     EC.Isogeny.DualGaloisData φ where
   νPb := νPb
-  transAut := Set.range (fun k : β.kernel => translateAlgEquivOfPoint W k.val)
+  transAut := Set.range (fun k : β.kernel ↦ translateAlgEquivOfPoint W k.val)
   hfix := by
     intro z
     rw [h_pb]
     exact fixedField_hfix_general W β h_xy_family h_card z
   hnu := hnu
   hν := hν
-  hrefl := fun g hg => EC.Isogeny.reflects_ordAtInfty φ g hg
+  hrefl := fun g hg ↦ EC.Isogeny.reflects_ordAtInfty φ g hg
 
 /-- **`DualGaloisData φ` for a separable isogeny from the generic-point leaf `hgcomm`**
 (Silverman III.4.11 / III.6.1) — the field-general analogue of `dualGaloisData_of_separable`,
@@ -316,14 +316,14 @@ noncomputable def dualGaloisData_of_separable_general
   -- the full kernel-translation covariance, from the single generic-point leaf
   have hcov : ∀ k : β.kernel, ∀ z : W.toAffine.FunctionField,
       translateAlgEquivOfPoint W k.val (β.pullback z) = β.pullback z :=
-    fun k z => WeilPairing.hcov_of_mapTranslateGenericPoint_canonical W β hgcomm k z
+    fun k z ↦ WeilPairing.hcov_of_mapTranslateGenericPoint_canonical W β hgcomm k z
   -- the cardinality match `#ker β = deg β` (Silverman III.4.10c)
   have h_card : Nat.card β.kernel = β.degree :=
     card_kernel_eq_degree_of_separable_concrete W β hsep hcov h_normal hdesc
   -- Lagrange: `ker β ⊆ ker [deg β]`
   have hdvd : ∀ k ∈ β.kernel, (β.degree : ℤ) • k = 0 := by
     haveI : Finite β.kernel := finite_kernel_of_hcov W β hcov
-    exact fun k hk => kernel_nsmul_degree_eq_zero β h_card hk
+    exact fun k hk ↦ kernel_nsmul_degree_eq_zero β h_card hk
   dualGaloisData_of_basic_witnesses_general W φ β h_pb
     (mulByInt W.toAffine (β.degree : ℤ)).pullback
     (xy_family_of_genericPointCommutes W β hgcomm)
