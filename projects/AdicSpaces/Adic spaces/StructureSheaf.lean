@@ -687,7 +687,7 @@ theorem exists_spa_point_in_rationalOpen_of_isOpen_prime
         · convert isOpen_univ; ext a
           simp only [Set.mem_setOf_eq, Set.mem_univ, iff_true, w, Valuation.comap_apply]
           exact lt_of_le_of_lt (Valuation.one_apply_le_one _) h1
-        · push_neg at h1
+        · push Not at h1
           suffices {a : A | w a < γ} = (p : Set A) by rw [this]; exact hp_open
           ext a
           simp only [Set.mem_setOf_eq]
@@ -809,7 +809,7 @@ private theorem algebraMap_zero_of_radical_ann
         smul_mem' := fun r {x} (hx : x * a = 0) => by
           change r * x * a = 0; rw [mul_assoc, hx, mul_zero] }
     have hspan : Ideal.span ({b : A | b * a = 0} : Set A) = ann_a :=
-      le_antisymm (Ideal.span_le.mpr (fun _ h => h)) (fun _ h => Ideal.subset_span h)
+      le_antisymm (Ideal.span_le.mpr (fun _ h ↦ h)) (fun _ h ↦ Ideal.subset_span h)
     rw [hspan] at hN
     exact hN
   have hs_unit := isUnit_algebraMap_f_in_quotient_gen s
@@ -846,7 +846,7 @@ theorem tateQuotientProductRestriction_injective_on_algebraMap
       productRestriction A C (C.base.canonicalMap a) D hD = 0) :
     e_base (C.base.canonicalMap a) = 0 := by
   have hzero : C.base.canonicalMap a = 0 :=
-    rationalCovering_hasSeparation P C hSpa (C.base.canonicalMap a) 0 (fun D hD => by
+    rationalCovering_hasSeparation P C hSpa (C.base.canonicalMap a) 0 (fun D hD ↦ by
       change restrictionMap C.base D (C.hsubset D hD) (C.base.canonicalMap a) =
         restrictionMap C.base D (C.hsubset D hD) 0
       rw [show restrictionMap C.base D (C.hsubset D hD) 0 =
@@ -881,7 +881,7 @@ theorem tateQuotientProductRestriction_injective
       productRestriction A C z D hD = 0) :
     _e_base z = 0 := by
   have hzero : z = 0 :=
-    rationalCovering_hasSeparation P C hSpa z 0 (fun D hD => by
+    rationalCovering_hasSeparation P C hSpa z 0 (fun D hD ↦ by
       change restrictionMap C.base D (C.hsubset D hD) z =
         restrictionMap C.base D (C.hsubset D hD) 0
       rw [show restrictionMap C.base D (C.hsubset D hD) 0 =
@@ -935,11 +935,11 @@ theorem separation_ofStronglyNoetherianTate
     have : e_base z = 0 := hq
     exact e_base.injective (this.trans (map_zero e_base.toRingHom).symm)
   exact tateQuotientProductRestriction_injective (A := A) P C e_base
-    (fun D hD => presheafValueTateQuotientEquiv D (hb_all D)
+    (fun D hD ↦ presheafValueTateQuotientEquiv D (hb_all D)
       (hcs_cover D hD) (ht0_cover D hD) (hcont_cover D hD) (hdense_cover D hD))
-    (fun a => presheafValueTateQuotientEquiv_canonicalMap C.base
+    (fun a ↦ presheafValueTateQuotientEquiv_canonicalMap C.base
       hb_base hcs_base ht0_base hcont_base hdense_base a)
-    (fun D hD a => presheafValueTateQuotientEquiv_canonicalMap D
+    (fun D hD a ↦ presheafValueTateQuotientEquiv_canonicalMap D
       (hb_all D) (hcs_cover D hD) (ht0_cover D hD) (hcont_cover D hD)
       (hdense_cover D hD) a)
     hSpa z hker
@@ -1134,7 +1134,7 @@ theorem productRestriction_injective_of_laurentRefinement
     Function.Injective (productRestriction A C) := by
   intro x y hxy
   exact rationalCovering_hasSeparation P C hSpa x y
-    (fun D hD => congr_fun (congr_fun hxy D) hD)
+    (fun D hD ↦ congr_fun (congr_fun hxy D) hD)
 
 -- REMOVED: productRestrictionSub_isInducing (R1, 2026-04-03)
 -- This used the FALSE restrictionMapHom_isInducing. No longer needed since
@@ -1236,7 +1236,7 @@ theorem _aux_nonOpen_hSpa_Aplus_le_principalPair_A₀
     { P := P
       T := {1}
       s := 1
-      hopen := ⟨0, fun b _ => by
+      hopen := ⟨0, fun b _ ↦ by
         rw [divByS_eq_algebraMap]
         exact algebraMap_mem_locSubring P {1} (1 : A) b.property⟩ }
   exact CompatiblePlusSubring.aplus_le_A₀ D
@@ -1374,7 +1374,7 @@ theorem exists_spa_point_in_rationalOpen_of_prime
     (C : RationalCovering A) :
     ∀ (p : Ideal A), p.IsPrime → C.base.s ∉ p →
       ∃ v ∈ rationalOpen C.base.T C.base.s, p ≤ v.supp :=
-  fun p hp hs =>
+  fun p hp hs ↦
     exists_hSpa_points_global_of_stronglyNoetherianTate (A := A) C.base.T C.base.s p hp hs
 
 /-- **(Gap B) Topological inducing of `productRestrictionSub` for arbitrary `C`.**
@@ -1935,7 +1935,7 @@ theorem cor_8_32_clean
     [NonarchimedeanRing A]
     (C : RationalCovering A) :
     letI : ∀ D : { D // D ∈ C.covers }, Algebra (presheafValue C.base)
-        (presheafValue D.1) := fun D =>
+        (presheafValue D.1) := fun D ↦
       (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra
     Module.FaithfullyFlat (presheafValue C.base)
       (∀ D : { D // D ∈ C.covers }, presheafValue D.1) :=
@@ -1956,7 +1956,7 @@ theorem tateAcyclicity_separation_via_cor832
       (∀ (D : RationalLocData A) (hD : D ∈ C.covers),
         restrictionMap C.base D (C.hsubset D hD) x = 0) → x = 0 := by
   letI algInst : ∀ D : { D // D ∈ C.covers }, Algebra (presheafValue C.base)
-      (presheafValue D.1) := fun D =>
+      (presheafValue D.1) := fun D ↦
     (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra
   haveI hFF : Module.FaithfullyFlat (presheafValue C.base)
       (∀ D : { D // D ∈ C.covers }, presheafValue D.1) :=
@@ -2034,7 +2034,7 @@ theorem isSheafy_separation_empty_cover_of_stronglyNoetherianTate
     exfalso
     have hcon : ∃ p : Ideal A, p.IsPrime ∧ C.base.s ∉ p := by
       by_contra h
-      push_neg at h
+      push Not at h
       exact hnil (nilpotent_iff_mem_prime.mpr h)
     obtain ⟨p, hp, hsp⟩ := hcon
     obtain ⟨v, hv_rat, _⟩ :=
@@ -2068,7 +2068,7 @@ theorem isSheafy_ofStronglyNoetherianTate
     [NonarchimedeanRing A] [CompatiblePlusSubring A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] :
     IsSheafy A :=
-  { embedding := fun C _hC => by
+  { embedding := fun C _hC ↦ by
       by_cases hs : C.base.s = 0
       · haveI := presheafValue_subsingleton_of_s_eq_zero C.base hs
         exact Topology.IsEmbedding.of_subsingleton _
@@ -2086,7 +2086,7 @@ theorem isSheafy_ofStronglyNoetherianTate
             tateAcyclicity_separation_via_cor832 (A := A) C hne (x - y) hxy'
           exact sub_eq_zero.mp h_diff
         · exact isSheafy_separation_empty_cover_of_stronglyNoetherianTate C hs hne x y,
-    gluing := fun C _hC f hcompat => by
+    gluing := fun C _hC f hcompat ↦ by
       by_cases hne : C.covers.Nonempty
       · exact tateAcyclicity_gluing_via_descent (A := A) C hne f hcompat
       · refine ⟨0, ?_⟩
@@ -2163,8 +2163,8 @@ theorem isStronglyNoetherian_of_isNoetherianRing_isTateRing
     -- singleton, so MvPowerSeries (Fin 0) A ≃+* A; restrictedness is trivial as cofinite
     -- on a finite-domain function is automatic).
     let e : ↥(restrictedMvPowerSeriesSubring 0 A) ≃+* A :=
-      { toFun := fun f => MvPowerSeries.constantCoeff (f : MvPowerSeries (Fin 0) A)
-        invFun := fun a => ⟨algebraMap A (MvPowerSeries (Fin 0) A) a,
+      { toFun := fun f ↦ MvPowerSeries.constantCoeff (f : MvPowerSeries (Fin 0) A)
+        invFun := fun a ↦ ⟨algebraMap A (MvPowerSeries (Fin 0) A) a,
           MvPowerSeries.IsRestricted_algebraMap a⟩
         left_inv := by
           intro ⟨f, hf⟩
@@ -2234,10 +2234,10 @@ noncomputable def Spa.comap_of_continuousRingHom
     [IsTopologicalRing B] [IsHuberRing B]
     (φ : A →+* B) (hφ : Continuous φ)
     (hφ_plus : ∀ a ∈ (A⁺ : Set A), φ a ∈ (B⁺ : Set B)) :
-    Spa B B⁺ → Spa A A⁺ := fun v =>
+    Spa B B⁺ → Spa A A⁺ := fun v ↦
   ⟨ValuationSpectrum.comap φ v.val,
     ⟨ValuationSpectrum.comap_isContinuous hφ v.property.1,
-     fun a ha => by
+     fun a ha ↦ by
        rw [ValuationSpectrum.comap_vle, map_one]
        exact v.property.2 (φ a) (hφ_plus a ha)⟩⟩
 
