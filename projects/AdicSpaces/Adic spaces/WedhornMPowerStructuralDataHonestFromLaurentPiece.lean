@@ -161,10 +161,6 @@ theorem WedhornMPowerStructuralDataHonest_via_laurent_piece_consumer
     (h_per_piece :
       PerLaurentPieceFactoredChain P T s hopen T_D s_D σ_loc) :
     WedhornMPowerStructuralDataHonest P T s hopen T_D s_D σ_loc := by
-  letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
-  letI : PlusSubring (Localization.Away s) :=
-    localizationLocSubringPlusSubring P T s
-  letI : DecidableEq (Localization.Away s) := Classical.decEq _
   intro w hw_spa hw_f _τ_supp _hτ_supp _hστ_supp t' ht'
   obtain ⟨τ_w, hτ_w_mem, hw_in_piece⟩ := h_laurent w hw_spa
   exact h_per_piece τ_w hτ_w_mem w hw_spa hw_in_piece hw_f t' ht'
