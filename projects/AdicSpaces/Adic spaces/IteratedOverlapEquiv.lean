@@ -1200,12 +1200,6 @@ theorem iteratedOverlap_forwardHom_comp_restrictionMapHom
     exact hcong
   apply IsLocalization.ringHom_ext (Submonoid.powers D₀.s)
   ext c
-  change lhsHom (algebraMap A _ c) = rhsHom (algebraMap A _ c)
-  change iteratedOverlap_forwardHom P D₀ f hLocLift_B
-      (restrictionMapHom D₀ (laurentOverlapDatum D₀ f) hsub
-        (D₀.coeRingHom (algebraMap A _ c))) =
-    (iteratedOverlapDatum_B P D₀ f hLocLift_B).canonicalMap
-      (D₀.coeRingHom (algebraMap A _ c))
   change iteratedOverlap_forwardHom P D₀ f hLocLift_B
       (restrictionMapHom D₀ (laurentOverlapDatum D₀ f) hsub
         (D₀.canonicalMap c)) =
@@ -1287,8 +1281,6 @@ theorem iteratedOverlap_forwardHom_comp_backwardHom
     exact hcong
   apply IsLocalization.ringHom_ext (Submonoid.powers (D₀.canonicalMap f))
   ext b
-  change lhsHom (algebraMap (presheafValue D₀) _ b) =
-    rhsHom (algebraMap (presheafValue D₀) _ b)
   change iteratedOverlap_forwardHom P D₀ f hLocLift_B
       (iteratedOverlap_backwardToCompletion P D₀ f hLocLift_B hsub
         (algebraMap (presheafValue D₀) _ b)) =
