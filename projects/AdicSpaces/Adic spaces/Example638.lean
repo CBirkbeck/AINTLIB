@@ -573,7 +573,6 @@ noncomputable def example638Plus_backwardHom
     quotient_plusFSubXIdeal_t2Space B hA_complete hnoeth b
   haveI hT0Q : @T0Space _ (quotientPlusFSubXIdealTopology B b) :=
     @T1Space.t0Space _ (quotientPlusFSubXIdealTopology B b) (T2Space.t1Space)
-  -- (trivialPlusDatum B P b).s = 1, so these types match.
   exact @UniformSpace.Completion.extensionHom _ _ _ _ _ _
     (quotientPlusFSubXIdealUniformSpace B b) _
     (quotientPlusFSubXIdeal_isUniformAddGroup B b)
@@ -594,8 +593,6 @@ theorem example638Plus_backwardHom_coe
     example638Plus_backwardHom B P b hA_complete hnoeth
         ((trivialPlusDatum B P b).coeRingHom a) =
       plusLocToQuotient B b a := by
-  -- `(trivialPlusDatum B P b).s = 1`, so the localization types match.
-  -- Use letI on `Localization.Away 1` directly (matching plusLocToQuotient's type).
   letI : UniformSpace (Localization.Away (1 : B)) :=
     (trivialPlusDatum B P b).uniformSpace
   letI : IsTopologicalRing (Localization.Away (1 : B)) :=
@@ -651,30 +648,7 @@ variable [IsTateRing B] [IsNoetherianRing B] [T2Space B] [NonarchimedeanRing B]
 
 open TateAlgebra
 
-/-- `backward ∘ forward = id` on `TateAlgebra B ⧸ plusFSubXIdeal B b`.
-
-**Strategy:** Apply `Ideal.Quotient.ringHom_ext` to reduce to the ring hom
-equality `(backward ∘ forward ∘ mk) = mk : TateAlgebra B →+* quotient`.
-
-Since `forward ∘ mk = evalHom` (by the definition of `example638Plus_forwardHom`
-via `Ideal.Quotient.lift`), this becomes `backward ∘ evalHom = mk`.
-
-Both sides are continuous ring homs `TateAlgebra B →+* quotient`:
-- `backward ∘ evalHom` is continuous since `evalHom = forward ∘ mk` (where `mk`
-  is continuous and `forward` is continuous by `hcont_forward`), and `backward`
-  is continuous (it's an `extensionHom` image).
-- `mk` is continuous by `continuous_quotient_mk'`.
-
-They agree on polynomials in `X` (dense in `TateAlgebra B` via
-`tateAlgebra_polynomials_dense_canonical`):
-- `backward(evalHom(algebraMap a)) = backward(canonicalMap a) =
-   mk(algebraMap a)` (by `example638Plus_backwardHom_canonicalMap`).
-- `backward(evalHom(X)) = backward(canonicalMap b) = mk(algebraMap b) = mk(X)`
-  (by `quotient_algebraMap_b_eq_X`).
-- Extends to polynomials in X by ring hom properties.
-
-Since the quotient is T2 (via `quotient_plusFSubXIdeal_t2Space`), T2 closure +
-density gives the equality. -/
+/-- `backward ∘ forward = id` on `TateAlgebra B ⧸ plusFSubXIdeal B b`. -/
 theorem example638Plus_backward_forward_eq_id
     (P : PairOfDefinition B) [IsNoetherianRing P.A₀] (b : B)
     (hA_complete : @CompleteSpace B (IsTopologicalAddGroup.rightUniformSpace B))
@@ -692,24 +666,16 @@ theorem example638Plus_backward_forward_eq_id
     quotientPlusFSubXIdealTopology B b
   haveI hT2Q : @T2Space _ (quotientPlusFSubXIdealTopology B b) :=
     quotient_plusFSubXIdeal_t2Space B hA_complete hnoeth b
-  -- Step 1: reduce via Ideal.Quotient.ringHom_ext.
   apply Ideal.Quotient.ringHom_ext
-  -- Step 2: show the two ring homs backward ∘ forward ∘ mk and mk are equal
-  -- as continuous functions TateAlgebra B → quotient.
   apply RingHom.ext
   intro x
-  -- LHS: backward (forward (mk x)) = backward (evalHom x)
-  -- RHS: mk x
   change (example638Plus_backwardHom B P b hA_complete hnoeth)
     (example638Plus_forwardHom B P b (Ideal.Quotient.mk _ x)) =
     Ideal.Quotient.mk _ x
-  -- Simplify forward ∘ mk = evalHom.
   change (example638Plus_backwardHom B P b hA_complete hnoeth)
     (Ideal.Quotient.lift _ (example638Plus_evalHom B P b) _
       (Ideal.Quotient.mk _ x)) = _
   rw [Ideal.Quotient.lift_mk]
-  -- Now need: backward (evalHom x) = mk x.
-  -- Use density of polynomials + continuity + T2.
   letI : UniformSpace (Localization.Away (1 : B)) :=
     (trivialPlusDatum B P b).uniformSpace
   letI : IsUniformAddGroup (Localization.Away (1 : B)) :=
@@ -735,11 +701,9 @@ theorem example638Plus_backward_forward_eq_id
       (quotientPlusFSubXIdealTopology B b)
       (example638Plus_backwardHom B P b hA_complete hnoeth) :=
     UniformSpace.Completion.continuous_extension
-  -- evalHom is continuous since evalHom = forward ∘ mk (on the quotient).
   have hevalHom_cont : @Continuous _ _ instTopologicalSpaceTateAlgebra
       (inferInstance : TopologicalSpace (presheafValue (trivialPlusDatum B P b)))
       (example638Plus_evalHom B P b) := by
-    -- evalHom = forward ∘ mk (by definition of forward as Ideal.Quotient.lift)
     have heq : (example638Plus_evalHom B P b : ↥(TateAlgebra B) → _) =
         (example638Plus_forwardHom B P b ∘ Ideal.Quotient.mk (plusFSubXIdeal B b)) := by
       ext y
@@ -753,40 +717,29 @@ theorem example638Plus_backward_forward_eq_id
           (Ideal.Quotient.mk (plusFSubXIdeal B b) : ↥(TateAlgebra B) → _)
         from heq]
     exact hcont_forward.comp continuous_quotient_mk'
-  -- LHS as a function of x: backward ∘ evalHom.
-  -- RHS as a function of x: mk.
-  -- LHS is continuous: backward is continuous, evalHom is continuous.
   have hLHS_cont : @Continuous _ _ instTopologicalSpaceTateAlgebra
       (quotientPlusFSubXIdealTopology B b)
       ((example638Plus_backwardHom B P b hA_complete hnoeth) ∘
         (example638Plus_evalHom B P b)) :=
     hbwd_cont.comp hevalHom_cont
-  -- RHS is continuous (continuous_quotient_mk').
   have hRHS_cont : @Continuous _ _ instTopologicalSpaceTateAlgebra
       (quotientPlusFSubXIdealTopology B b)
       (Ideal.Quotient.mk (plusFSubXIdeal B b)) :=
     continuous_quotient_mk'
-  -- Apply Continuous.ext_on with dense polynomial set.
   have hS_dense : @Dense (↥(TateAlgebra B)) instTopologicalSpaceTateAlgebra
       {g : ↥(TateAlgebra B) |
         ∃ N : ℕ, ∀ n : Fin 1 →₀ ℕ, N ≤ n 0 → g.val n = 0} :=
     tateAlgebra_polynomials_dense_canonical (A := B)
-  -- LHS and RHS agree on the polynomial set (polynomial agreement).
   have hagree : @Set.EqOn _ _
       ((example638Plus_backwardHom B P b hA_complete hnoeth) ∘
         (example638Plus_evalHom B P b))
       (Ideal.Quotient.mk (plusFSubXIdeal B b))
       {g | ∃ N : ℕ, ∀ n : Fin 1 →₀ ℕ, N ≤ n 0 → g.val n = 0} := by
-    -- Agreement on generators algebraMap a and X (ring hom structure).
-    -- Use polynomial induction via finite X-degree.
     intro g ⟨N, hN⟩
-    -- For fixed g, we have a polynomial of X-degree ≤ N.
-    -- Both maps are ring homs, so they're determined by values on algebraMap a and X.
     revert g
     induction N with
     | zero =>
       intro g hN
-      -- All coefficients zero, so g = 0.
       have hg0 : g = 0 := by
         ext n
         exact hN (TateAlgebra.toIndex n)
@@ -794,10 +747,8 @@ theorem example638Plus_backward_forward_eq_id
       simp [hg0, Function.comp]
     | succ k ih =>
       intro g hN
-      -- Let a = coeff k g, gk = algebraMap(a) * X^k.
       set a := TateAlgebra.coeff k g with ha_def
       set gk : ↥(TateAlgebra B) := algebraMap B _ a * TateAlgebra.X ^ k with hgk_def
-      -- Helper: coeff m (X ^ j) = δ_{m,j} for TateAlgebra.
       have hcoeff_X_pow : ∀ m j : ℕ,
           TateAlgebra.coeff m (TateAlgebra.X ^ j : ↥(TateAlgebra B)) =
           if m = j then 1 else 0 := by
@@ -809,7 +760,6 @@ theorem example638Plus_backward_forward_eq_id
           cases m with
           | zero => rw [TateAlgebra.coeff_zero_X_mul, if_neg (by omega)]
           | succ m => rw [TateAlgebra.coeff_succ_X_mul, ihj m]; simp
-      -- g - gk has coefficients zero above degree k.
       have hg'_vanish : ∀ n : Fin 1 →₀ ℕ, k ≤ n 0 → (g - gk).val n = 0 := by
         intro n hn
         rw [TateAlgebra.eq_toIndex n]
@@ -827,50 +777,21 @@ theorem example638Plus_backward_forward_eq_id
       have hg'_agree : ((example638Plus_backwardHom B P b hA_complete hnoeth) ∘
           example638Plus_evalHom B P b) (g - gk) =
           (Ideal.Quotient.mk (plusFSubXIdeal B b)) (g - gk) := ih hg'_vanish
-      -- Agreement on gk: both send algebraMap(a) * X^k to mk(algebraMap a) * mk(X)^k.
-      -- LHS: backward(evalHom(gk)) = backward(evalHom(algebraMap(a) * X^k))
-      --    = backward(canonicalMap a * (canonicalMap b)^k)
-      --    = mk(algebraMap a) * mk(algebraMap b)^k (by backward being ring hom)
-      --    = mk(algebraMap a) * mk(X)^k (via quotient_algebraMap_b_eq_X).
-      -- RHS: mk(gk) = mk(algebraMap a * X^k) = mk(algebraMap a) * mk(X)^k.
       have hgk_agree :
           (example638Plus_backwardHom B P b hA_complete hnoeth)
             (example638Plus_evalHom B P b gk) =
           (Ideal.Quotient.mk (plusFSubXIdeal B b)) gk := by
-        rw [hgk_def]
-        -- evalHom(algebraMap a * X^k) = canonicalMap a * canonicalMap b ^ k
-        rw [map_mul, map_pow, example638Plus_evalHom_algebraMap, example638Plus_evalHom_X]
-        -- backward(canonicalMap a * canonicalMap b ^ k)
-        --   = backward(canonicalMap a) * backward(canonicalMap b) ^ k
-        rw [map_mul, map_pow]
-        -- backward(canonicalMap a) = mk(algebraMap a)
-        rw [example638Plus_backwardHom_canonicalMap,
-            example638Plus_backwardHom_canonicalMap]
-        -- RHS: mk(algebraMap a * X^k) = mk(algebraMap a) * mk(X)^k.
-        -- We use mk as a ring hom.
-        rw [map_mul, map_pow]
-        -- Now show mk(algebraMap b) = mk(X). (Both sides end in this difference.)
-        rw [quotient_algebraMap_b_eq_X]
-      -- Combine: (g - gk) + gk = g.
+        rw [hgk_def, map_mul, map_pow, example638Plus_evalHom_algebraMap,
+          example638Plus_evalHom_X, map_mul, map_pow,
+          example638Plus_backwardHom_canonicalMap,
+          example638Plus_backwardHom_canonicalMap, map_mul, map_pow,
+          quotient_algebraMap_b_eq_X]
       have hg_eq : g = (g - gk) + gk := by ring
-      -- Both LHS and RHS are ring homs, so applied to `(g - gk) + gk`:
-      -- LHS(g) = LHS(g-gk) + LHS(gk) = RHS(g-gk) + RHS(gk) = RHS(g).
       simp only [Function.comp] at hg'_agree ⊢
       rw [hg_eq, map_add, map_add, hg'_agree, hgk_agree, ← map_add]
   exact congr_fun (Continuous.ext_on hS_dense hLHS_cont hRHS_cont hagree) x
 
-/-- `forward ∘ backward = id` on `presheafValue (trivialPlusDatum B P b)`.
-
-**Strategy:** Use `Completion.ext'` on `presheafValue` to reduce to dense image
-agreement on `coeRingHom a` for `a : Localization.Away 1`. On such a point:
-- `backward (coeRingHom a) = plusLocToQuotient a` (by `example638Plus_backwardHom_coe`).
-- Need: `forward (plusLocToQuotient a) = coeRingHom a`.
-
-Both sides are ring homs `Localization.Away 1 →+* presheafValue`. By
-`IsLocalization.ringHom_ext` at `Submonoid.powers 1`, suffices to check on
-`algebraMap a`:
-- `forward(plusLocToQuotient(algebraMap a)) = forward(mk(algebraMap a)) =
-  evalHom(algebraMap a) = canonicalMap a = coeRingHom(algebraMap a)` ✓ -/
+/-- `forward ∘ backward = id` on `presheafValue (trivialPlusDatum B P b)`. -/
 theorem example638Plus_forward_backward_eq_id
     (P : PairOfDefinition B) [IsNoetherianRing P.A₀] (b : B)
     (hA_complete : @CompleteSpace B (IsTopologicalAddGroup.rightUniformSpace B))
@@ -920,33 +841,24 @@ theorem example638Plus_forward_backward_eq_id
   change example638Plus_forwardHom B P b
     (example638Plus_backwardHom B P b hA_complete hnoeth
       (UniformSpace.Completion.coeRingHom a)) = UniformSpace.Completion.coeRingHom a
-  -- backward (coeRingHom a) = plusLocToQuotient a
   have hbwd : example638Plus_backwardHom B P b hA_complete hnoeth
       (UniformSpace.Completion.coeRingHom a) =
       plusLocToQuotient B b a :=
     example638Plus_backwardHom_coe B P b hA_complete hnoeth a
   rw [hbwd]
-  -- Now need: forward (plusLocToQuotient a) = coeRingHom a.
-  -- Check as a ring hom equality via IsLocalization.ringHom_ext.
   suffices h : (example638Plus_forwardHom B P b).comp (plusLocToQuotient B b) =
-      (trivialPlusDatum B P b).coeRingHom by
-    have := congr_fun (congrArg DFunLike.coe h) a
-    exact this
+      (trivialPlusDatum B P b).coeRingHom from congr_fun (congrArg DFunLike.coe h) a
   apply IsLocalization.ringHom_ext (Submonoid.powers (1 : B))
   ext c
   change example638Plus_forwardHom B P b
       (plusLocToQuotient B b (algebraMap B (Localization.Away (1 : B)) c)) =
     (trivialPlusDatum B P b).coeRingHom (algebraMap B _ c)
   rw [plusLocToQuotient_algebraMap]
-  -- forward(mk(algebraMap c)) = evalHom(algebraMap c) = canonicalMap c.
   change Ideal.Quotient.lift _ (example638Plus_evalHom B P b) _
       ((Ideal.Quotient.mk (plusFSubXIdeal B b))
         (algebraMap B ↥(TateAlgebra B) c)) =
     (trivialPlusDatum B P b).coeRingHom (algebraMap B _ c)
-  rw [Ideal.Quotient.lift_mk]
-  -- evalHom (algebraMap c) = canonicalMap c
-  rw [example638Plus_evalHom_algebraMap]
-  -- canonicalMap c = coeRingHom (algebraMap c) by definition.
+  rw [Ideal.Quotient.lift_mk, example638Plus_evalHom_algebraMap]
   rfl
 
 end Example638PlusRoundTrip
