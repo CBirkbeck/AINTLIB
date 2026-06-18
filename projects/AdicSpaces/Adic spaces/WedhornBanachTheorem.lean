@@ -332,12 +332,11 @@ theorem _omt_open_at_zero
       | succ k ih =>
         intro n xs hxs
         rw [Fin.sum_univ_succ]
-        have h0 : xs 0 ∈ W (n + 1) := by have := hxs 0; simpa using this
+        have h0 : xs 0 ∈ W (n + 1) := by simpa using hxs 0
         have hrest : ∑ i, xs (Fin.succ i) ∈ W (n + 1) := by
           apply ih (n + 1)
           intro i
-          have := hxs (Fin.succ i)
-          convert this using 2
+          convert hxs (Fin.succ i) using 2
           simp [Fin.val_succ]; ring
         exact hW_shrink _ (Set.add_mem_add h0 hrest)
     -- Each partial sum `S k` lies in `W 0` (telescoping with offset `0`).
@@ -574,9 +573,8 @@ theorem fg_topologicalClosure_isClosed
     exact set_pi_mem_nhds Set.finite_univ (fun i _ => by simpa using hW_nhds)
   set Ω : Set ↥Nbar := π '' Wpi with hΩ_def
   have hΩ_nhds : Ω ∈ nhds (0 : ↥Nbar) := by
-    have h0 : π (0 : Fin n → A) = 0 := map_zero π
     have := hπ_open.image_mem_nhds (x := (0 : Fin n → A)) hWpi_nhds
-    rwa [h0] at this
+    rwa [map_zero] at this
   -- **Step 3 + 4 + 5**: density extraction + Nakayama in `M ⧸ N` + conclusion.
   -- The quotient map `q : M →ₗ[A] M ⧸ N`.
   -- For each generator `gᵥ`, density gives `m'ᵥ ∈ N'` with `gᵥ - m'ᵥ ∈ Ω`, i.e.
@@ -948,9 +946,7 @@ theorem _sub_lemma_L4_2_continuous_via_OMT
   -- ν continuous via ContinuousSMul A M.
   have hν_cont : Continuous ν := by
     change Continuous fun a : (Fin n → A) => ∑ i, a i • s i
-    refine continuous_finset_sum _ ?_
-    intro i _
-    exact (continuous_apply i).smul continuous_const
+    exact continuous_finset_sum _ fun i _ => (continuous_apply i).smul continuous_const
   -- ν surjective from hs.
   have hν_surj : Function.Surjective ν := by
     intro m
@@ -966,9 +962,7 @@ theorem _sub_lemma_L4_2_continuous_via_OMT
   have hfν_cont : Continuous (f ∘ ν) := by
     change Continuous fun a : (Fin n → A) => f (∑ i, a i • s i)
     simp only [map_sum, map_smul]
-    refine continuous_finset_sum _ ?_
-    intro i _
-    exact (continuous_apply i).smul continuous_const
+    exact continuous_finset_sum _ fun i _ => (continuous_apply i).smul continuous_const
   -- f continuous via quotient map.
   exact hν_quot.continuous_iff.mpr hfν_cont
 
@@ -1103,8 +1097,7 @@ theorem _sub_lemma_L4_3_strict_via_closed_image
       continuous_invFun := continuous_subtype_val.subtype_mk _ }
   have hcomp : Set.rangeFactorization ⇑f = ⇑e ∘ ⇑f.rangeRestrict := by
     funext a
-    apply Subtype.coe_injective
-    rfl
+    exact Subtype.coe_injective rfl
   rw [hcomp]
   exact e.isOpenMap.comp hf_rangeRestrict_open
 
