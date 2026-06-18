@@ -704,6 +704,50 @@ theorem bPrimeValuationCoordGenLeOne_of_inftyInclusion_of_reg
   bPrimeValuationCoordGenLeOne_of_classification_of_reg
     (bPrimePlaceClassification_of_inftyInclusion hincl) hreg
 
+/-! ### The ∞-inclusion residual, DISCHARGED via explicit local coordinates at `∞`
+
+This section discharges `BPrimeInftyInclusion` *unconditionally* (the genuine curve-completeness
+content), by proving the valuation-subring inclusion `O_∞ ⊆ O_v` for every `B`-prime `v` that has a
+pole of `x₁` (`1 < v(x₁)`).  The route is the explicit local-coordinate description of the place at
+infinity of `C₁` (over the place at `∞` of `F(x₁)`), avoiding the abstract `Sinf` `Σ e·f`
+machinery entirely:
+
+* `1 < v(x₁)` gives `v(1/x₁) < 1`, so `1/x₁ ∈ m_v` and `F[1/x₁] ⊆ O_v`.
+* `w := y₁/x₁²` is *integral over* `F[1/x₁]` (explicit monic quadratic from the Weierstrass
+  relation: `w² + (a₁/x₁ + a₃/x₁²) w − (1/x₁ + a₂/x₁² + a₄/x₁³ + a₆/x₁⁴) = 0`), so `w ∈ O_v`
+  (`O_v` is a valuation ring, hence integrally closed).
+* every `g` regular at `∞` (`0 ≤ ord_∞ g`) is `v`-integral: decompose `g = a + b·y₁` with
+  `a, b ∈ F(x₁)`; the regularity at `∞` forces `a` and `b·x₁²` to be `F(x₁)`-elements regular at
+  `∞`, hence in the local ring `F[1/x₁]_{(1/x₁)} ⊆ O_v`, and `b·y₁ = (b·x₁²)·w`.
+
+Then the natural-direction rank-one domination `bPrime_valuation_eq_ordAtInfty_of_subring_ge`
+turns `O_∞ ⊆ O_v` into `v = ordAtInftyValuation` — which `bPrime_valuation_ne_ordAtInfty` (the
+`hreg`-fed `∞`-exclusion) forbids.  Hence no `B`-prime has an `x₁`-pole, i.e.
+`BPrimeValuationCoordGenLeOne` holds. -/
+
+/-- `coordXFun C₁` is the image of `Polynomial.X` under `F[X] → K(C₁)` (`= C₁.coordX`).  The two
+descriptions agree through the scalar tower `F[X] → F[C₁] → K(C₁)`. -/
+theorem coordXFun_eq_coordX : coordXFun C₁ = C₁.coordX := by
+  rw [coordXFun, SmoothPlaneCurve.coordX,
+    IsScalarTower.algebraMap_apply (Polynomial F) C₁.CoordinateRing C₁.FunctionField]
+  rfl
+
+/-- `coordYFun C₁` is `C₁.coordYInFunctionField` (both are `algebraMap (AdjoinRoot.root W)`). -/
+theorem coordYFun_eq_coordYInFunctionField :
+    coordYFun C₁ = C₁.coordYInFunctionField := rfl
+
+/-- `ord_∞(x₁) = -2`. -/
+theorem ordAtInfty_coordXFun : C₁.ordAtInfty (coordXFun C₁) = ((-2 : ℤ) : WithTop ℤ) := by
+  rw [coordXFun_eq_coordX]; exact C₁.ordAtInfty_coordX
+
+/-- `ord_∞(y₁) = -3`. -/
+theorem ordAtInfty_coordYFun : C₁.ordAtInfty (coordYFun C₁) = ((-3 : ℤ) : WithTop ℤ) := by
+  rw [coordYFun_eq_coordYInFunctionField]; exact C₁.ordAtInfty_coordYInFunctionField
+
+/-- `coordYFun C₁ ≠ 0`. -/
+theorem coordYFun_ne_zero : coordYFun C₁ ≠ 0 := by
+  rw [coordYFun_eq_coordYInFunctionField]; exact C₁.coordYInFunctionField_ne_zero
+
 /-! ### The minimal-polynomial reduction (non-circular, place-dictionary-free)
 
 The whole content of `coordXFun_mem_B` / `coordYFun_mem_B` (and hence `coordRing_mem_B`) reduces —
