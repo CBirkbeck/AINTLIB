@@ -214,18 +214,11 @@ private lemma _antidiag_cons {n : ℕ} (k : ℕ) (m : Fin n →₀ ℕ) :
   constructor
   · -- (⊆): given δ + ε = Finsupp.cons k m, produce ((δ 0, ε 0), (δ.tail, ε.tail)).
     intro h
-    refine ⟨((δ 0, ε 0), (δ.tail, ε.tail)), ⟨?_, ?_⟩, ?_, ?_⟩
+    refine ⟨((δ 0, ε 0), (δ.tail, ε.tail)), ⟨?_, ?_⟩, Finsupp.cons_tail δ, Finsupp.cons_tail ε⟩
     · -- δ 0 + ε 0 = k
-      have := congrArg (fun f : Fin (n+1) →₀ ℕ => f 0) h
-      simpa [Finsupp.cons_zero] using this
+      simpa [Finsupp.cons_zero] using congrArg (· 0) h
     · -- δ.tail + ε.tail = m
-      have := congrArg Finsupp.tail h
-      rw [_finsupp_tail_add, Finsupp.tail_cons] at this
-      exact this
-    · -- Finsupp.cons (δ 0) δ.tail = δ
-      exact Finsupp.cons_tail δ
-    · -- Finsupp.cons (ε 0) ε.tail = ε
-      exact Finsupp.cons_tail ε
+      simpa [_finsupp_tail_add, Finsupp.tail_cons] using congrArg Finsupp.tail h
   · -- (⊇): given ((a, b), (β, γ)) with a+b=k, β+γ=m, show cons sums.
     rintro ⟨⟨⟨a, b⟩, ⟨β, γ⟩⟩, ⟨hab, hβγ⟩, hδ, hε⟩
     subst hδ
@@ -278,18 +271,10 @@ theorem _root_.MvPowerSeries.finSucc_forward_map_mul (R : Type u) [CommRing R] (
     intro ⟨⟨a, b⟩, ⟨β, γ⟩⟩ _ ⟨⟨a', b'⟩, ⟨β', γ'⟩⟩ _ heq
     simp only [Prod.mk.injEq] at heq
     obtain ⟨h1, h2⟩ := heq
-    have ha : a = a' := by
-      have := congrArg (fun f : Fin (n+1) →₀ ℕ => f 0) h1
-      simpa [Finsupp.cons_zero] using this
-    have hβ : β = β' := by
-      have := congrArg Finsupp.tail h1
-      simpa [Finsupp.tail_cons] using this
-    have hb : b = b' := by
-      have := congrArg (fun f : Fin (n+1) →₀ ℕ => f 0) h2
-      simpa [Finsupp.cons_zero] using this
-    have hγ : γ = γ' := by
-      have := congrArg Finsupp.tail h2
-      simpa [Finsupp.tail_cons] using this
+    have ha : a = a' := by simpa [Finsupp.cons_zero] using congrArg (· 0) h1
+    have hβ : β = β' := by simpa [Finsupp.tail_cons] using congrArg Finsupp.tail h1
+    have hb : b = b' := by simpa [Finsupp.cons_zero] using congrArg (· 0) h2
+    have hγ : γ = γ' := by simpa [Finsupp.tail_cons] using congrArg Finsupp.tail h2
     simp [ha, hb, hβ, hγ]
 
 /-- The ring iso `MvPowerSeries (Fin (n+1)) R ≃+* MvPowerSeries (Fin n) R⟦X⟧`
@@ -935,9 +920,7 @@ private lemma _adicCompletion_val_one_zero_in_I_smul_top
   have ha1 : (a : ℕ → R) 1 ∈ (I ^ 1 • ⊤ : Submodule R R) := by
     rwa [Submodule.Quotient.mk_eq_zero] at hy'
   have ha1_in_I : (a : ℕ → R) 1 ∈ I := by
-    have heq : (I ^ 1 • ⊤ : Submodule R R) = (I : Submodule R R) := by
-      rw [pow_one, Ideal.smul_top_eq_map]; simp
-    rwa [heq] at ha1
+    simpa [pow_one, Ideal.smul_top_eq_map] using ha1
   -- Step 2: construct the shifted Cauchy sequence b n = a n - a 1.
   let b : AdicCompletion.AdicCauchySequence I R :=
     ⟨fun n => (a : ℕ → R) n - (a : ℕ → R) 1, by
