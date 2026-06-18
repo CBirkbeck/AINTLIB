@@ -160,11 +160,8 @@ private theorem away_lift_ker_torsion {s₁ t : A}
   have hs₁_unit : IsUnit ((algebraMap A (Localization.Away s₁) s₁) ^ n₀) :=
     IsUnit.pow n₀ (IsLocalization.Away.algebraMap_isUnit (S := Localization.Away s₁) s₁)
   have key : algebraMap A (Localization.Away s₁) (t ^ m) * x *
-      (algebraMap A (Localization.Away s₁) s₁) ^ n₀ = 0 :=
-    calc _ = algebraMap A _ (t ^ m) * (x * (algebraMap A _ s₁) ^ n₀) := by ring
-      _ = algebraMap A _ (t ^ m) * algebraMap A _ a := by rw [hsurj]
-      _ = algebraMap A _ (t ^ m * a) := (map_mul _ _ _).symm
-      _ = 0 := by rw [hm, map_zero]
+      (algebraMap A (Localization.Away s₁) s₁) ^ n₀ = 0 := by
+    rw [mul_assoc, hsurj, ← map_mul, hm, map_zero]
   rwa [hs₁_unit.mul_left_eq_zero] at key
 
 omit [TopologicalSpace A] [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] in
@@ -306,7 +303,7 @@ private theorem restrictionMapHom_coe_eq
       ext x
       simp only [RingHom.comp_apply, restrictionMapAlg, algLift, IsLocalization.Away.lift_eq,
         RationalLocData.coeRingHom, RationalLocData.canonicalMap]
-    exact congr_fun (congr_arg DFunLike.coe this) a
+    exact DFunLike.congr_fun this a
   exact (UniformSpace.Completion.extensionHom_coe _ _ a).trans h2
 
 /-- The embedding of `locSubring` into `presheafValue` via `coeRingHom ∘ subtype`. -/
@@ -474,12 +471,11 @@ noncomputable def completionLocSubringEquiv :
   haveI : IsTopologicalRing D₀.completedLocSubring := Subring.instIsTopologicalRing _
   haveI : IsUniformAddGroup D₀.completedLocSubring :=
     IsUniformAddGroup.comap D₀.completedLocSubring.subtype.toAddMonoidHom
-  have hcont : Continuous D₀.locSubringToCompleted := by
-    apply Continuous.subtype_mk (locSubringToPresheafValue_continuous D₀)
-  have hui : IsUniformInducing D₀.locSubringToCompleted := by
-    refine isUniformEmbedding_subtype_val.isUniformInducing.isUniformInducing_comp_iff.mp ?_
-    change IsUniformInducing (Subtype.val ∘ ⇑D₀.locSubringToCompleted)
-    exact locSubringToPresheafValue_isUniformInducing D₀
+  have hcont : Continuous D₀.locSubringToCompleted :=
+    (locSubringToPresheafValue_continuous D₀).subtype_mk _
+  have hui : IsUniformInducing D₀.locSubringToCompleted :=
+    isUniformEmbedding_subtype_val.isUniformInducing.of_comp_iff.mp
+      (locSubringToPresheafValue_isUniformInducing D₀)
   have hdense : DenseRange D₀.locSubringToCompleted := by
     intro ⟨x, hx⟩
     rw [mem_closure_iff_nhds]
