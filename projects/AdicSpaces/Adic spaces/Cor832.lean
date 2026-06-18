@@ -1050,15 +1050,11 @@ theorem productRestriction_faithfullyFlat_laurentCovering_at_E
     Module.FaithfullyFlat (presheafValue (laurentCovering E f).base)
       (∀ D : { D // D ∈ (laurentCovering E f).covers }, presheafValue D.1) := by
   classical
-  -- `(laurentCovering E f).base = E` definitionally; install instances at the
-  -- `(laurentCovering E f).base` side.
   letI : IsNoetherianRing (locSubring (laurentCovering E f).base.P
       (laurentCovering E f).base.T (laurentCovering E f).base.s) := hE_loc
   letI : LaurentNormalized (laurentCovering E f).base := hE_LN
   haveI : Finite { D : RationalLocData A // D ∈ (laurentCovering E f).covers } :=
     Finite.of_fintype _
-  -- The cover pieces of `laurentCovering E f` are exactly
-  -- `laurentPlusDatum E f` and `laurentMinusDatum E f`.
   have laurent_witness : ∀ D : { D // D ∈ (laurentCovering E f).covers },
       ∃ g : A,
         D.1 = laurentPlusDatum (laurentCovering E f).base g ∨
@@ -1067,10 +1063,7 @@ theorem productRestriction_faithfullyFlat_laurentCovering_at_E
     refine ⟨f, ?_⟩
     rcases D with ⟨D_val, hD_mem⟩
     simp only [laurentCovering] at hD_mem
-    rw [Finset.mem_insert, Finset.mem_singleton] at hD_mem
-    rcases hD_mem with hD | hD
-    · exact Or.inl hD
-    · exact Or.inr hD
+    rwa [Finset.mem_insert, Finset.mem_singleton] at hD_mem
   exact productRestriction_faithfullyFlat_tate_laurent_combined_of_hSpa_points
     P (laurentCovering E f) laurent_witness flat_plus flat_minus hSpa_points
 
@@ -1132,14 +1125,9 @@ theorem tate_proper_ideal_not_open
     {𝔞 : Ideal R} (h𝔞 : 𝔞 ≠ ⊤) : ¬ IsOpen (𝔞 : Set R) := by
   intro h_open
   obtain ⟨u, hu_nil⟩ := ‹IsTateRing R›.exists_topologicallyNilpotent_unit
-  -- Topologically nilpotent units lie in the radical of every open ideal.
   have hu_rad : (u : R) ∈ 𝔞.radical := hu_nil.mem_ideal_radical h_open
-  -- u is a unit, hence u ∈ 𝔞.radical implies 𝔞.radical = ⊤.
   obtain ⟨n, hn⟩ := Ideal.mem_radical_iff.mp hu_rad
-  -- u^n is also a unit.
-  have hu_n_unit : IsUnit ((u : R) ^ n) := u.isUnit.pow n
-  -- A unit lying in 𝔞 forces 𝔞 = ⊤.
-  exact h𝔞 (Ideal.eq_top_of_isUnit_mem 𝔞 hn hu_n_unit)
+  exact h𝔞 (Ideal.eq_top_of_isUnit_mem 𝔞 hn (u.isUnit.pow n))
 
 omit [HasLocLiftPowerBounded A] [PlusSubring A] in
 /-- **`IsAdicComplete` for the concrete pair of definition on `presheafValue C.base`.**
@@ -1159,37 +1147,21 @@ theorem presheafValue_isAdicComplete
     (D₀ : RationalLocData A) :
     IsAdicComplete (presheafValue_idealOfDef D₀) (presheafValue_ringOfDef D₀) := by
   have hadic : IsAdic (presheafValue_idealOfDef D₀) := presheafValue_isAdic D₀
-  -- Equip `presheafValue_ringOfDef D₀` with the subspace UniformSpace structure
-  -- inherited from `presheafValue D₀` (whose UniformSpace is the completion uniformity).
   letI : UniformSpace (presheafValue_ringOfDef D₀) :=
     UniformSpace.comap Subtype.val inferInstance
-  -- Inherit `IsUniformAddGroup` from the ambient `presheafValue D₀`.
   haveI : IsUniformAddGroup (presheafValue_ringOfDef D₀) :=
     AddSubgroup.isUniformAddGroup (presheafValue_ringOfDef D₀).toAddSubgroup
-  -- The ring of definition is closed, hence complete (subspace of complete space).
   haveI : CompleteSpace (presheafValue_ringOfDef D₀) :=
     (Subring.isClosed_topologicalClosure
       (D₀.coeRingHom.comp (locSubring D₀.P D₀.T D₀.s).subtype).range).completeSpace_coe
-  -- T2 inherited from ambient T2.
   haveI : T2Space (presheafValue_ringOfDef D₀) := inferInstance
-  -- Apply the iff: IsAdic ⇒ (IsAdicComplete ↔ CompleteSpace ∧ T2Space).
   exact hadic.isAdicComplete_iff.mpr ⟨inferInstance, inferInstance⟩
 
 omit [HasLocLiftPowerBounded A] [PlusSubring A] in
-/-- **Subset relation between `D.completedLocSubring` and `presheafValue_ringOfDef D`.**
-Both are topological closures of the same image of `locSubring` (one via
-`Subring.map`, one via `RingHom.range`); as sets they coincide. -/
 private theorem completedLocSubring_eq_presheafValue_ringOfDef (D : RationalLocData A) :
     (D.completedLocSubring : Set (presheafValue D)) =
     (presheafValue_ringOfDef D : Set (presheafValue D)) := by
-  -- Both are `topologicalClosure` of the same underlying set:
-  -- `D.coeRingHom '' (locSubring D.P D.T D.s)`.
-  -- The closure operation is set-determined, so once we show the inputs match as sets,
-  -- the closures match as sets.
   unfold RationalLocData.completedLocSubring presheafValue_ringOfDef
-  -- The underlying sets:
-  --   Subring.map D.coeRingHom (locSubring) = D.coeRingHom '' (locSubring : Set _)
-  --   (D.coeRingHom.comp (locSubring).subtype).range = D.coeRingHom '' (locSubring : Set _)
   have h_sub_eq : (Subring.map D.coeRingHom (locSubring D.P D.T D.s) :
       Set (presheafValue D)) =
     ((D.coeRingHom.comp (locSubring D.P D.T D.s).subtype).range :
@@ -1200,7 +1172,6 @@ private theorem completedLocSubring_eq_presheafValue_ringOfDef (D : RationalLocD
     refine ⟨?_, ?_⟩
     · rintro ⟨x, hx, rfl⟩; exact ⟨⟨x, hx⟩, rfl⟩
     · rintro ⟨⟨x, hx⟩, rfl⟩; exact ⟨x, hx, rfl⟩
-  -- topologicalClosure of two subrings with the same underlying set is the same.
   apply Set.eq_of_subset_of_subset
   · exact closure_mono h_sub_eq.le
   · exact closure_mono h_sub_eq.ge
