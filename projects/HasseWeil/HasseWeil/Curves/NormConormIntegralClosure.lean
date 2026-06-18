@@ -995,6 +995,64 @@ theorem valuation_algebraMap_polynomial_eq
   exact Polynomial.valuation_aeval_eq_valuation_X_pow_natDegree_of_one_lt_valuation_X
     (coordXFun C₁) hx hp
 
+set_option maxHeartbeats 1600000 in
+/-- **The `F(x₁)`-regular-at-∞ bound (sublemma I)**: for `r ∈ FractionRing F[X]` whose image in
+`K(C₁)` is *regular at `∞`* (`0 ≤ ord_∞`), and a `B`-prime `v` with `1 < w_v(x₁)`, the value
+`w_v(algebraMap r) ≤ 1`.  Writing `r = p/d` with `p, d ∈ F[X]`, regularity at `∞` reads
+`natDeg p ≤ natDeg d`, and `w_v(p(x₁))/w_v(d(x₁)) = w_v(x₁)^{natDeg p − natDeg d} ≤ 1` since
+`1 < w_v(x₁)`. -/
+theorem valuation_algebraMap_fracPolyX_le_one_of_ordAtInfty_nonneg
+    (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)))
+    (hx : 1 < v.valuation C₁.FunctionField (coordXFun C₁))
+    {r : FractionRing (Polynomial F)}
+    (hr : (0 : WithTop ℤ) ≤
+      C₁.ordAtInfty (algebraMap (FractionRing (Polynomial F)) C₁.FunctionField r)) :
+    v.valuation C₁.FunctionField
+        (algebraMap (FractionRing (Polynomial F)) C₁.FunctionField r) ≤ 1 := by
+  set w := v.valuation C₁.FunctionField with hw
+  set X := w (coordXFun C₁) with hXdef
+  have h1X : 1 ≤ X := le_of_lt hx
+  rcases eq_or_ne r 0 with hr0 | hr0
+  · rw [hr0, map_zero, w.map_zero]; exact zero_le_one
+  -- decompose `r = algMap p / algMap d`
+  obtain ⟨⟨p, ⟨d, hd_mem⟩⟩, hpd⟩ := IsLocalization.surj (nonZeroDivisors (Polynomial F)) r
+  have hd_ne : d ≠ 0 := nonZeroDivisors.ne_zero hd_mem
+  have hp_ne : p ≠ 0 := by
+    intro hp0
+    apply hr0
+    have hz : r * algebraMap (Polynomial F) (FractionRing (Polynomial F)) d = 0 := by
+      rw [hpd, hp0, map_zero]
+    rcases mul_eq_zero.mp hz with h | h
+    · exact h
+    · exact absurd h ((map_ne_zero_iff _ (IsFractionRing.injective _ _)).mpr hd_ne)
+  -- images in `K(C₁)`: `r ↦ P/D`
+  set P : C₁.FunctionField := algebraMap (Polynomial F) C₁.FunctionField p with hPdef
+  set D : C₁.FunctionField := algebraMap (Polynomial F) C₁.FunctionField d with hDdef
+  have hD_ne : D ≠ 0 :=
+    (map_ne_zero_iff _ (C₁.algebraMap_polynomialX_functionField_injective)).mpr hd_ne
+  have hP_ne : P ≠ 0 :=
+    (map_ne_zero_iff _ (C₁.algebraMap_polynomialX_functionField_injective)).mpr hp_ne
+  have hrPD : algebraMap (FractionRing (Polynomial F)) C₁.FunctionField r = P / D := by
+    rw [eq_div_iff hD_ne, hPdef, hDdef,
+      IsScalarTower.algebraMap_apply (Polynomial F) (FractionRing (Polynomial F)) C₁.FunctionField p,
+      IsScalarTower.algebraMap_apply (Polynomial F) (FractionRing (Polynomial F)) C₁.FunctionField d,
+      ← map_mul, ← hpd, map_mul]
+  -- degree comparison from regularity at `∞`
+  have hordP : C₁.ordAtInfty P = ((-2 * (p.natDegree : ℤ) : ℤ) : WithTop ℤ) := by
+    rw [hPdef]; exact C₁.ordAtInfty_algebraMap_polynomial_of_ne_zero hp_ne
+  have hordD : C₁.ordAtInfty D = ((-2 * (d.natDegree : ℤ) : ℤ) : WithTop ℤ) := by
+    rw [hDdef]; exact C₁.ordAtInfty_algebraMap_polynomial_of_ne_zero hd_ne
+  have hdeg : p.natDegree ≤ d.natDegree := by
+    rw [hrPD, C₁.ordAtInfty_div_of_ord_eq hD_ne (-2 * (p.natDegree : ℤ)) (-2 * (d.natDegree : ℤ))
+      hordP hordD] at hr
+    rw [show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl, WithTop.coe_le_coe] at hr
+    omega
+  -- valuation comparison
+  rw [hrPD, map_div₀, valuation_algebraMap_polynomial_eq v hx hp_ne,
+    valuation_algebraMap_polynomial_eq v hx hd_ne, ← hXdef]
+  rw [div_le_one₀ (pow_ne_zero _ (by rw [hXdef]; exact valuation_coordXFun_ne_zero v) |>.bot_lt)]
+  exact pow_le_pow_right₀ h1X hdeg
+
 /-! ### The minimal-polynomial reduction (non-circular, place-dictionary-free)
 
 The whole content of `coordXFun_mem_B` / `coordYFun_mem_B` (and hence `coordRing_mem_B`) reduces —
