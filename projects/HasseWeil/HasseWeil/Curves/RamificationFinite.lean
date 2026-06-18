@@ -143,7 +143,7 @@ theorem isSeparable_fractionRing :
         RingHom.comp ↑(FractionRing.algEquiv B L).symm.toRingEquiv (algebraMap K L) := by
     apply IsLocalization.ringHom_ext A⁰
     ext
-    simp only [AlgEquiv.toRingEquiv_eq_coe, RingHom.coe_comp, RingHom.coe_coe,
+    simp only [RingHom.coe_comp, RingHom.coe_coe,
       AlgEquiv.coe_ringEquiv, Function.comp_apply, AlgEquiv.commutes,
       ← IsScalarTower.algebraMap_apply]
     rw [IsScalarTower.algebraMap_apply A B L, AlgEquiv.commutes,
@@ -207,7 +207,7 @@ over their contraction different from `1`) is finite. -/
 theorem finite_setOf_ramificationIdx_ne_one :
     {P : Ideal B | P.IsPrime ∧ P ≠ ⊥ ∧
       Ideal.ramificationIdx (P.under A) P ≠ 1}.Finite :=
-  (finite_setOf_dvd_differentIdeal A K L B).subset fun _ ⟨hP, hPbot, he⟩ =>
+  (finite_setOf_dvd_differentIdeal A K L B).subset fun _ ⟨hP, hPbot, he⟩ ↦
     dvd_differentIdeal_of_ramificationIdx_ne_one A K L B hP hPbot he
 
 /-- **(d)** The set of primes of `A` over which some prime of `B` ramifies is finite
@@ -230,12 +230,12 @@ theorem ramificationIdx_eq_one_of_notMem {q : Ideal A}
   haveI := hP
   haveI := module_finite A K L B
   haveI := isSeparable_fractionRing A K L B
-  have hqbot : q ≠ ⊥ := fun h => hq (h ▸ Set.mem_insert _ _)
+  have hqbot : q ≠ ⊥ := fun h ↦ hq (h ▸ Set.mem_insert _ _)
   have hPbot : P ≠ ⊥ := by
     rintro rfl
     exact hqbot (hPq.symm.trans
       (Ideal.comap_bot_of_injective _ (FaithfulSMul.algebraMap_injective A B)))
-  have hdvd : ¬P ∣ differentIdeal A B := fun hdvd =>
+  have hdvd : ¬P ∣ differentIdeal A B := fun hdvd ↦
     hq (Set.mem_insert_iff.mpr (Or.inr ⟨P, hdvd, hPq⟩))
   haveI : Algebra.IsUnramifiedAt A P := not_dvd_differentIdeal_iff.mp hdvd
   have h1 := Ideal.ramificationIdx_eq_one_of_isUnramifiedAt (R := A) hPbot
@@ -255,6 +255,6 @@ theorem exists_finite_ramification_locus :
   haveI := isDedekindDomain A K L B
   haveI := isTorsionFree A K L B
   exact ⟨ramifiedUnderLocus A B, finite_ramifiedUnderLocus A K L B,
-    fun _ hq _ hP hPq => ramificationIdx_eq_one_of_notMem A K L B hq hP hPq⟩
+    fun _ hq _ hP hPq ↦ ramificationIdx_eq_one_of_notMem A K L B hq hP hPq⟩
 
 end HasseWeil.Curves.RamificationFinite
