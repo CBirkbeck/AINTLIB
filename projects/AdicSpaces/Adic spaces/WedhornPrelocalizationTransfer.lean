@@ -117,21 +117,10 @@ lemma comap_mem_rationalOpen_iff
     (T : Finset A) (s : A) {w : Spv B} (hw : w ∈ Spa B B⁺) :
     comap φ w ∈ rationalOpen T s ↔
       (∀ t ∈ T, w.vle (φ t) (φ s)) ∧ ¬ w.vle (φ s) 0 := by
-  constructor
-  · rintro ⟨_, hvT, hvs⟩
-    refine ⟨fun t ht => ?_, ?_⟩
-    · have := hvT t ht
-      rwa [comap_vle] at this
-    · intro hws
-      apply hvs
-      rwa [comap_vle, map_zero]
-  · rintro ⟨hwT, hws⟩
-    refine ⟨comap_mem_spa hφ hAB hw, fun t ht => ?_, ?_⟩
-    · rw [comap_vle]; exact hwT t ht
-    · intro hvs
-      apply hws
-      rw [comap_vle, map_zero] at hvs
-      exact hvs
+  refine ⟨fun ⟨_, hvT, hvs⟩ => ⟨fun t ht => by simpa only [comap_vle] using hvT t ht,
+      fun hws => hvs (by rwa [comap_vle, map_zero])⟩, fun ⟨hwT, hws⟩ =>
+    ⟨comap_mem_spa hφ hAB hw, fun t ht => by simpa only [comap_vle] using hwT t ht,
+      fun hvs => hws (by rwa [comap_vle, map_zero] at hvs)⟩⟩
 
 /-! ## Target signature: full pre-localisation transfer
 
