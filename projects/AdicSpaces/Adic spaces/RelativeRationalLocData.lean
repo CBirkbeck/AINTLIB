@@ -602,11 +602,6 @@ theorem relativeLaurentNormalized_forwardLocHom_factor
   --    = D_at_E.coeRingHom (algebraMap _ (E.canonicalMap a))
   --    = D_at_E.canonicalMap (E.canonicalMap a)  (by definition of canonicalMap).
   simp only [RingHom.comp_apply]
-  change relativeLaurentNormalized_forwardLocHom E D hsub
-      (algebraMap A (Localization.Away D.s) a) =
-    (relativeRationalLocData_laurentNormalized E D hsub).coeRingHom
-      (relativeLaurentNormalized_forwardInnerLocHom E D hsub
-        (algebraMap A (Localization.Away D.s) a))
   rw [relativeLaurentNormalized_forwardLocHom_algebraMap]
   -- Inner: forwardInnerLocHom (algebraMap A _ a)
   -- = algebraMap (presheafValue E) _ (E.canonicalMap a).
@@ -623,8 +618,8 @@ theorem relativeLaurentNormalized_forwardLocHom_factor
   have hinner : relativeLaurentNormalized_forwardInnerLocHom E D hsub
       (algebraMap A (Localization.Away D.s) a) =
       algebraMap (presheafValue E) (Localization.Away (E.canonicalMap D.s))
-        (E.canonicalMap a) := by
-    exact IsLocalization.Away.lift_eq D.s
+        (E.canonicalMap a) :=
+    IsLocalization.Away.lift_eq D.s
       (relativeLaurentNormalized_Ds_isUnit_in_Loc E D hsub) a
   rw [hinner]
   -- Goal: baseHom a = coeRingHom (algebraMap presheafValue E _ (E.canonicalMap a))
@@ -1028,10 +1023,6 @@ theorem relativeLaurentNormalized_backward_forward_locHom
   --     = backwardLocHom (algebraMap (presheafValue E) _ (E.canonicalMap a))
   --     = restrictionMapHom E D hsub (E.canonicalMap a)
   --     = D.canonicalMap a = D.coeRingHom (algebraMap A _ a).
-  change relativeLaurentNormalized_backwardLocHom E D hsub
-      (relativeLaurentNormalized_forwardInnerLocHom E D hsub
-        (algebraMap A (Localization.Away D.s) a)) =
-    D.coeRingHom (algebraMap A (Localization.Away D.s) a)
   rw [relativeLaurentNormalized_forwardInnerLocHom_algebraMap,
     relativeLaurentNormalized_backwardLocHom_algebraMap,
     restrictionMapHom_canonicalMap]
