@@ -489,7 +489,7 @@ private theorem pointValuation_mulByInt_pullback_algebraMap_eq_one_of_notMem [Is
     (⟨W⟩ : SmoothPlaneCurve F).pointValuation P
         ((mulByInt W ℓ).pullback
           (algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE r)) = 1 := by
-  have hrQ : (⟨W⟩ : SmoothPlaneCurve F).evalAt ⟨x, y, h_ns⟩ r ≠ 0 := fun h0 =>
+  have hrQ : (⟨W⟩ : SmoothPlaneCurve F).evalAt ⟨x, y, h_ns⟩ r ≠ 0 := fun h0 ↦
     hr (by rw [← (⟨W⟩ : SmoothPlaneCurve F).ker_evalAt ⟨x, y, h_ns⟩]; exact h0)
   have hconst : (⟨W⟩ : SmoothPlaneCurve F).pointValuation P
       (algebraMap F KE ((⟨W⟩ : SmoothPlaneCurve F).evalAt ⟨x, y, h_ns⟩ r)) = 1 :=
@@ -544,9 +544,9 @@ private theorem pointValuation_mulByInt_pullback_le_one_of_le_one [IsAlgClosed F
   have hv_notMem : (v : (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing) ∉
       (⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt ⟨x, y, h_ns⟩ := v.2
   have hv_ne : (v : (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing) ≠ 0 :=
-    fun h => hv_notMem (h ▸ Submodule.zero_mem _)
+    fun h ↦ hv_notMem (h ▸ Submodule.zero_mem _)
   have h_alg_v_ne : algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE
-      (v : _) ≠ 0 := fun h => hv_ne ((IsFractionRing.injective _ _) (h.trans (map_zero _).symm))
+      (v : _) ≠ 0 := fun h ↦ hv_ne ((IsFractionRing.injective _ _) (h.trans (map_zero _).symm))
   have hg_eq : g = algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE u /
       algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE (v : _) := by
     rw [eq_div_iff h_alg_v_ne]; exact h_lift
@@ -578,14 +578,14 @@ private theorem pointValuation_mulByInt_pullback_lt_one_of_lt_one [IsAlgClosed F
   have hv_notMem : (v : (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing) ∉
       (⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt ⟨x, y, h_ns⟩ := v.2
   have hv_ne : (v : (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing) ≠ 0 :=
-    fun h => hv_notMem (h ▸ Submodule.zero_mem _)
+    fun h ↦ hv_notMem (h ▸ Submodule.zero_mem _)
   have h_alg_v_ne : algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE
-      (v : _) ≠ 0 := fun h => hv_ne ((IsFractionRing.injective _ _) (h.trans (map_zero _).symm))
+      (v : _) ≠ 0 := fun h ↦ hv_ne ((IsFractionRing.injective _ _) (h.trans (map_zero _).symm))
   -- `pV Q (algMap v) = 1`, so `pV Q (algMap u) = pV Q g < 1`, giving `u ∈ m_Q`.
   have hv_unitQ : (⟨W⟩ : SmoothPlaneCurve F).pointValuation ⟨x, y, h_ns⟩
       (algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE (v : _)) = 1 :=
     le_antisymm ((⟨W⟩ : SmoothPlaneCurve F).pointValuation_algebraMap_le_one _ _)
-      (not_lt.mp (fun hlt => hv_notMem
+      (not_lt.mp (fun hlt ↦ hv_notMem
         ((Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
           (C := (⟨W⟩ : SmoothPlaneCurve F)) _ ⟨x, y, h_ns⟩).mp hlt)))
   have hu_mem : u ∈ (⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt ⟨x, y, h_ns⟩ := by
@@ -612,12 +612,12 @@ theorem mulByInt_samePlace_le_one_iff_affine [IsAlgClosed F] (ℓ : ℤ) (hℓ :
     (g : (⟨W⟩ : SmoothPlaneCurve F).FunctionField) :
     (⟨W⟩ : SmoothPlaneCurve F).pointValuation P ((mulByInt W ℓ).pullback g) ≤ 1 ↔
       (⟨W⟩ : SmoothPlaneCurve F).pointValuation ⟨x, y, h_ns⟩ g ≤ 1 := by
-  refine ⟨fun hP => ?_, pointValuation_mulByInt_pullback_le_one_of_le_one ℓ hℓ P h_ns hQ⟩
+  refine ⟨fun hP ↦ ?_, pointValuation_mulByInt_pullback_le_one_of_le_one ℓ hℓ P h_ns hQ⟩
   -- (⟹): contrapositive via `g⁻¹`.
   by_contra hQng
   rw [not_le] at hQng
   have hg_ne : g ≠ 0 := by
-    rintro rfl; rw [map_zero] at hQng; exact absurd hQng (not_lt.mpr zero_le')
+    rintro rfl; rw [map_zero] at hQng; exact absurd hQng (not_lt.mpr zero_le)
   -- `1 < pV Q g` ⟹ `pV Q g⁻¹ < 1`, so `[ℓ]^*(g⁻¹) ∈ m_P` (strict forward transfer).
   have hinvQ : (⟨W⟩ : SmoothPlaneCurve F).pointValuation ⟨x, y, h_ns⟩ g⁻¹ < 1 := by
     rw [map_inv₀]
@@ -649,7 +649,7 @@ private theorem ord_algebraMap_mul_ge_aux' (c : F)
   · by_cases hf0 : f = 0
     · rw [hf0, mul_zero, (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty_zero]; exact le_top
     · have hc_ne : algebraMap F KE c ≠ 0 :=
-        fun h => hc (FaithfulSMul.algebraMap_injective F _ (h.trans (map_zero _).symm))
+        fun h ↦ hc (FaithfulSMul.algebraMap_injective F _ (h.trans (map_zero _).symm))
       rw [(⟨W⟩ : SmoothPlaneCurve F).ordAtInfty_mul hc_ne hf0,
         (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty_algebraMap_F_nonzero hc, zero_add]
       exact hf
@@ -846,7 +846,7 @@ theorem comap_pointValuation_mulByInt_eq_infty [IsAlgClosed F] (ℓ : ℤ) (hℓ
   have hℓ0 : ℓ ≠ 0 := by rintro rfl; simp at hℓ
   set τ := (mulByInt W ℓ).pullback with hτ
   set w := ((⟨W⟩ : SmoothPlaneCurve F).pointValuation P).comap τ.toRingHom with hw
-  have hw_apply : ∀ g, w g = (⟨W⟩ : SmoothPlaneCurve F).pointValuation P (τ g) := fun g =>
+  have hw_apply : ∀ g, w g = (⟨W⟩ : SmoothPlaneCurve F).pointValuation P (τ g) := fun g ↦
     Valuation.comap_apply _ _ _
   have hx : w (x_gen W) = WithZero.exp 2 := by
     rw [hw_apply, show τ (x_gen W) = mulByInt_x W ℓ from mulByInt_pullback_x W ℓ hℓ0,
@@ -863,7 +863,7 @@ theorem comap_pointValuation_mulByInt_eq_infty [IsAlgClosed F] (ℓ : ℤ) (hℓ
       pointValuation_eq_exp_neg_of_ord_P_eq (C := (⟨W⟩ : SmoothPlaneCurve F)) (P := P)
         hy_ne (ord_P_mulByInt_y_eq_neg_three_of_torsion ℓ hℓ0 hℓ P hQ)]
     norm_num
-  have hc : ∀ c : F, c ≠ 0 → w (algebraMap F KE c) = 1 := fun c hc => by
+  have hc : ∀ c : F, c ≠ 0 → w (algebraMap F KE c) = 1 := fun c hc ↦ by
     rw [hw_apply, show τ (algebraMap F KE c) = algebraMap F KE c from τ.commutes c]
     exact pointValuation_algebraMap_F_eq_one_of_ne_zero W P hc
   exact eq_ordAtInftyValuation_of_x_y W w hx hy hc
