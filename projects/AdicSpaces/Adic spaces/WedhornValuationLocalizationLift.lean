@@ -104,13 +104,9 @@ lemma valuationLocalizationLift_powers_subset_primeCompl
     Submonoid.powers s ≤ v.supp.primeCompl := by
   intro x hx
   obtain ⟨n, rfl⟩ := hx
-  -- s ∉ v.supp from hvs.
-  have hs_notin : s ∉ v.supp := by
-    rw [mem_supp_iff]; exact hvs
-  -- s^n ∉ v.supp by primality (closed under non-supp).
+  -- s ∉ v.supp from hvs; s^n ∉ v.supp by primality (closed under non-supp).
   intro hxs
-  exact hs_notin
-    ((inferInstance : v.supp.IsPrime).mem_of_pow_mem n hxs)
+  exact (mem_supp_iff v s).not.mpr hvs ((inferInstance : v.supp.IsPrime).mem_of_pow_mem n hxs)
 
 omit [IsTopologicalRing A] in
 /-- **Algebraic lift conclusion**: comap-of-lift identity plus the
@@ -136,24 +132,17 @@ theorem valuationLocalizationLift_algebraic
     let w := localizationLift (Submonoid.powers s) (Localization.Away s) v hS
     comap (algebraMap A (Localization.Away s)) w = v ∧
     ∀ a : A, a ∈ A⁺ → w.vle (algebraMap A (Localization.Away s) a) 1 := by
-  refine ⟨?_, ?_⟩
-  · -- comap-of-lift identity, directly from `comap_localizationLift`.
-    exact comap_localizationLift _ _ v _
-  · -- Plus-subring bound: w.vle (algebraMap a) 1 ↔ v.vle a 1 (via comap).
-    intro a ha
-    have hv_a : v.vle a 1 := hv.2 a ha
-    have h_comap := comap_localizationLift (Submonoid.powers s)
-      (Localization.Away s) v
-      (valuationLocalizationLift_powers_subset_primeCompl hvs)
-    -- Rewrite the goal `w.vle (algebraMap a) 1` to `v.vle a 1` via map_one, comap_vle,
-    -- and the comap-of-lift identity.
-    rw [show (1 : Localization.Away s) = algebraMap A (Localization.Away s) 1 from
-          (map_one _).symm,
-        ← comap_vle (algebraMap A (Localization.Away s))
-          (localizationLift (Submonoid.powers s) (Localization.Away s) v
-            (valuationLocalizationLift_powers_subset_primeCompl hvs)) a 1,
-        h_comap]
-    exact hv_a
+  refine ⟨comap_localizationLift _ _ v _, fun a ha => ?_⟩
+  -- Plus-subring bound: w.vle (algebraMap a) 1 ↔ v.vle a 1 (via comap).
+  -- Rewrite the goal `w.vle (algebraMap a) 1` to `v.vle a 1` via map_one, comap_vle,
+  -- and the comap-of-lift identity.
+  rw [show (1 : Localization.Away s) = algebraMap A (Localization.Away s) 1 from
+        (map_one _).symm,
+      ← comap_vle (algebraMap A (Localization.Away s))
+        (localizationLift (Submonoid.powers s) (Localization.Away s) v
+          (valuationLocalizationLift_powers_subset_primeCompl hvs)) a 1,
+      comap_localizationLift _ _ v _]
+  exact hv.2 a ha
 
 /-- **Conditional full Spa-membership lift**: under the continuity
 hypothesis on the lifted valuation, the lift `w` lies in
