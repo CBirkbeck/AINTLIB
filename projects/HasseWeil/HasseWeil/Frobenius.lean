@@ -74,23 +74,12 @@ ord values for the addition-formula inputs:
 These are the building blocks for the unconditional pole bound on
 `addPullback_x W (frobeniusIsog W)` (Sorry 1's Frobenius case). -/
 
-/-- Helper: in `WithTop ℤ`, `n • ↑(z : ℤ) = ↑(n * z)` for `n : ℕ`. -/
-private theorem nsmul_coe_eq_coe_mul (n : ℕ) (z : ℤ) :
-    (n : ℕ) • ((z : ℤ) : WithTop ℤ) = (((n : ℤ) * z : ℤ) : WithTop ℤ) := by
-  induction n with
-  | zero => simp
-  | succ k ih =>
-    rw [succ_nsmul, ih, show (((k + 1 : ℕ) : ℤ) * z : ℤ) = (k : ℤ) * z + z from by push_cast; ring]
-    push_cast
-    rfl
-
 /-- `ord_∞(π·x_gen) = -2q` where `q = #K`. Direct from `frobeniusIsog_pullback_apply`
 + `ordAtInfty_x_gen_pow`. -/
 theorem ordAtInfty_frobeniusIsog_pullback_x_gen :
     (W_smooth W).ordAtInfty ((frobeniusIsog W).pullback (x_gen W)) =
       ((-2 * (Fintype.card K : ℤ)) : WithTop ℤ) := by
-  rw [frobeniusIsog_pullback_apply, ordAtInfty_x_gen_pow,
-    nsmul_coe_eq_coe_mul (Fintype.card K) (-2)]
+  rw [frobeniusIsog_pullback_apply, ordAtInfty_x_gen_pow, ← WithTop.coe_nsmul, nsmul_eq_mul]
   congr 1
   ring
 
@@ -98,8 +87,7 @@ theorem ordAtInfty_frobeniusIsog_pullback_x_gen :
 theorem ordAtInfty_frobeniusIsog_pullback_y_gen :
     (W_smooth W).ordAtInfty ((frobeniusIsog W).pullback (y_gen W)) =
       ((-3 * (Fintype.card K : ℤ)) : WithTop ℤ) := by
-  rw [frobeniusIsog_pullback_apply, ordAtInfty_y_gen_pow,
-    nsmul_coe_eq_coe_mul (Fintype.card K) (-3)]
+  rw [frobeniusIsog_pullback_apply, ordAtInfty_y_gen_pow, ← WithTop.coe_nsmul, nsmul_eq_mul]
   congr 1
   ring
 
@@ -114,31 +102,29 @@ inequality `ord_∞(a − b) = ord_∞(a)` when `ord_∞(a) < ord_∞(b)`: here
 theorem ordAtInfty_frobeniusIsog_pullback_x_gen_sub_x_gen :
     (W_smooth W).ordAtInfty ((frobeniusIsog W).pullback (x_gen W) - x_gen W) =
       ((-2 * (Fintype.card K : ℤ)) : WithTop ℤ) := by
-  have hq := two_le_fintype_card_K (K := K)
   have h_int : (-2 * (Fintype.card K : ℤ) : ℤ) < (-2 : ℤ) := by
-    have : (1 : ℤ) < (Fintype.card K : ℤ) := by exact_mod_cast hq
+    have : (1 : ℤ) < (Fintype.card K : ℤ) := by exact_mod_cast two_le_fintype_card_K (K := K)
     linarith
   have h_lt : (W_smooth W).ordAtInfty ((frobeniusIsog W).pullback (x_gen W)) <
       (W_smooth W).ordAtInfty (x_gen W) := by
     rw [ordAtInfty_frobeniusIsog_pullback_x_gen, ordAtInfty_x_gen]
     exact WithTop.coe_lt_coe.mpr h_int
-  have h_eq := (W_smooth W).ordAtInfty_sub_eq_of_lt h_lt
-  exact h_eq.trans (ordAtInfty_frobeniusIsog_pullback_x_gen W)
+  exact ((W_smooth W).ordAtInfty_sub_eq_of_lt h_lt).trans
+    (ordAtInfty_frobeniusIsog_pullback_x_gen W)
 
 /-- `ord_∞(π·y_gen − y_gen) = -3q` for `q ≥ 2`. -/
 theorem ordAtInfty_frobeniusIsog_pullback_y_gen_sub_y_gen :
     (W_smooth W).ordAtInfty ((frobeniusIsog W).pullback (y_gen W) - y_gen W) =
       ((-3 * (Fintype.card K : ℤ)) : WithTop ℤ) := by
-  have hq := two_le_fintype_card_K (K := K)
   have h_int : (-3 * (Fintype.card K : ℤ) : ℤ) < (-3 : ℤ) := by
-    have : (1 : ℤ) < (Fintype.card K : ℤ) := by exact_mod_cast hq
+    have : (1 : ℤ) < (Fintype.card K : ℤ) := by exact_mod_cast two_le_fintype_card_K (K := K)
     linarith
   have h_lt : (W_smooth W).ordAtInfty ((frobeniusIsog W).pullback (y_gen W)) <
       (W_smooth W).ordAtInfty (y_gen W) := by
     rw [ordAtInfty_frobeniusIsog_pullback_y_gen, ordAtInfty_y_gen]
     exact WithTop.coe_lt_coe.mpr h_int
-  have h_eq := (W_smooth W).ordAtInfty_sub_eq_of_lt h_lt
-  exact h_eq.trans (ordAtInfty_frobeniusIsog_pullback_y_gen W)
+  exact ((W_smooth W).ordAtInfty_sub_eq_of_lt h_lt).trans
+    (ordAtInfty_frobeniusIsog_pullback_y_gen W)
 
 /-- The degree of the Frobenius isogeny is `#K`.
     Uses the sorry-free proof from `FrobeniusIsogeny.frobenius_finrank_functionField`.
@@ -232,7 +218,7 @@ theorem frobeniusIsog_pullback_range :
   · rintro ⟨g, hg⟩
     exact ⟨g, by rw [← hg, frobeniusIsog_pullback_apply]⟩
   · rintro ⟨g, hg⟩
-    exact ⟨g, by rw [frobeniusIsog_pullback_apply]; exact hg⟩
+    exact ⟨g, by rwa [frobeniusIsog_pullback_apply]⟩
 
 /-- The `AlgHom.fieldRange` (subfield image) of `π*` is the subfield of
     `q`-th powers. Equivalent to `frobeniusIsog_pullback_range` but in the
@@ -242,14 +228,11 @@ theorem frobeniusIsog_pullback_mem_iff (f : W.toAffine.FunctionField) :
     f ∈ (frobeniusIsog W).pullback.fieldRange ↔ ∃ g, g ^ Fintype.card K = f := by
   refine ⟨?_, ?_⟩
   · rintro ⟨g, hg⟩
-    refine ⟨g, ?_⟩
-    have := frobeniusIsog_pullback_apply W g
-    change g ^ Fintype.card K = f
-    rw [← this]; exact hg
+    exact ⟨g, by rwa [← frobeniusIsog_pullback_apply W g]⟩
   · rintro ⟨g, hg⟩
     refine ⟨g, ?_⟩
     change (frobeniusIsog W).pullback g = f
-    rw [frobeniusIsog_pullback_apply]; exact hg
+    rwa [frobeniusIsog_pullback_apply]
 
 /-- A `q`-th power lies in the image of `π*` (one direction of the membership
     lemma, packaged for `AlgHom.factor` use). -/
