@@ -337,8 +337,6 @@ private theorem cechDiff_involution_add_lt {F : AbPresheaf X}
   ring_nf
   exact zero_smul _ _
 
-/-- The `j ≤ k` case of the involution cancellation in `d ∘ d = 0`:
-`T(j,k) + T(⟨k+1,...⟩, ⟨j,...⟩) = 0`. -/
 private theorem cechDiff_involution_add_ge {F : AbPresheaf X}
     {U : FiniteCover X ι} {q : ℕ} (f : CechCochain F U q)
     {σ : Fin (q + 1 + 1 + 1) → ι}
@@ -373,23 +371,19 @@ private theorem cechDiff_involution_add_ge {F : AbPresheaf X}
         (FiniteCover.face
           ⟨(k : ℕ) + 1, by have := k.isLt; omega⟩ σ) =
       FiniteCover.face k (FiniteCover.face j σ) := by
-    rw [hj_eq]; exact hface.symm
+    rw [hj_eq]
+    exact hface.symm
   rw [res_res_eq_of_face_eq f j
     ⟨(k : ℕ) + 1, by have := k.isLt; omega⟩ k
     ⟨(j : ℕ), by have := k.isLt; omega⟩ hface_eq]
   exact sign_zsmul_cancel (j : ℕ) (k : ℕ) _
 
-/-- `d^{q+1} ∘ d^q = 0` (Appendix A of Wedhorn).
-
-The proof expands the double sum, uses linearity and functoriality of
-restriction, then applies `Finset.sum_involution` with the pairing
-`(j, k) ↦ (k↑, j-1)` (when `k < j`) and `(j, k) ↦ (k+1, j↓)`
-(when `j ≤ k`). The simplicial face identities ensure the underlying
-values match while the signs differ by `(-1)`. -/
+/-- `d^{q+1} ∘ d^q = 0` (Appendix A of Wedhorn). -/
 theorem cechDiff_comp_cechDiff (F : AbPresheaf X)
     (U : FiniteCover X ι) (q : ℕ) (f : CechCochain F U q) :
     cechDiff F U (q + 1) (cechDiff F U q f) = 0 := by
-  ext σ; simp only [cechDiff]
+  ext σ
+  simp only [cechDiff]
   change ∑ j : Fin (q + 3), (-1 : ℤ) ^ (j : ℕ) •
     F.res (U.inter_face_subset j σ)
       (∑ k : Fin (q + 2), (-1 : ℤ) ^ (k : ℕ) •
@@ -415,33 +409,43 @@ theorem cechDiff_comp_cechDiff (F : AbPresheaf X)
       (⟨k.val + 1, by omega⟩, ⟨j.val, by omega⟩)
   change ∑ p ∈ Finset.univ ×ˢ Finset.univ, T p = 0
   apply Finset.sum_involution (fun p _ => inv p)
-  · rintro ⟨j, k⟩ _; dsimp only [inv]; split_ifs with h
+  · rintro ⟨j, k⟩ _
+    dsimp only [inv]
+    split_ifs with h
     · simp only [hT]
       exact cechDiff_involution_add_lt f j k h
-    · push_neg at h; simp only [hT]
+    · push Not at h
+      simp only [hT]
       exact cechDiff_involution_add_ge f j k h
-  · rintro ⟨j, k⟩ _ _; dsimp only [inv]; split_ifs with h
-    · intro heq; have h1 := congr_arg Prod.fst heq
-      simp only [Fin.ext_iff] at h1; omega
-    · intro heq; have h1 := congr_arg Prod.fst heq
-      simp only [Fin.ext_iff] at h1; omega
-  · rintro ⟨j, k⟩ _; dsimp only [inv]; split_ifs <;>
+  · rintro ⟨j, k⟩ _ _
+    dsimp only [inv]
+    split_ifs with h
+    · intro heq
+      have h1 := congr_arg Prod.fst heq
+      simp only [Fin.ext_iff] at h1
+      omega
+    · intro heq
+      have h1 := congr_arg Prod.fst heq
+      simp only [Fin.ext_iff] at h1
+      omega
+  · rintro ⟨j, k⟩ _
+    dsimp only [inv]
+    split_ifs <;>
       exact Finset.mem_product.mpr
         ⟨Finset.mem_univ _, Finset.mem_univ _⟩
-  · rintro ⟨j, k⟩ _; dsimp only [inv]
+  · rintro ⟨j, k⟩ _
+    dsimp only [inv]
     by_cases h1 : (k : ℕ) < (j : ℕ)
     · simp only [h1, dif_pos, Fin.val_mk]
       rw [dif_neg (by omega)]
       exact Prod.ext (Fin.ext (by dsimp; omega))
         (Fin.ext rfl)
-    · push_neg at h1
+    · push Not at h1
       have h2 : ¬ (k : ℕ) < (j : ℕ) := by omega
       rw [dif_neg h2,
         dif_pos (show (j : ℕ) < (k : ℕ) + 1 by omega)]
       exact Prod.ext (Fin.ext rfl)
         (Fin.ext (by dsimp))
-
-/-! ### Acyclicity -/
 
 /-- The augmentation `ε` is injective (separation / uniqueness). -/
 def IsSeparating (F : AbPresheaf X)
@@ -464,8 +468,6 @@ def IsAcyclic (F : AbPresheaf X)
     ∃ g : CechCochain F U q, cechDiff F U q g = f
 
 end CechComplex
-
-/-! ### Cover refinement -/
 
 section Refinement
 
@@ -503,12 +505,12 @@ def cochainMapHom (F : AbPresheaf X) (q : ℕ) :
   map_zero' := by ext σ; exact F.res_zero _
   map_add' f g := by ext σ; exact F.res_add _ _ _
 
-/-- Face map commutes with composition by `r.map`. -/
 private theorem face_comp_map {q : ℕ} (j : Fin (q + 2))
     (σ : Fin (q + 2) → κ) :
     r.map ∘ FiniteCover.face j σ =
     FiniteCover.face j (r.map ∘ σ) := by
-  ext k; simp only [FiniteCover.face, Function.comp_apply]
+  ext k
+  simp only [FiniteCover.face, Function.comp_apply]
 
 /-- The cochain map commutes with the Čech differential. -/
 theorem cochainMap_comm_diff (F : AbPresheaf X) (q : ℕ)
@@ -518,7 +520,8 @@ theorem cochainMap_comm_diff (F : AbPresheaf X) (q : ℕ)
   ext σ
   simp only [cochainMap, cechDiff]
   rw [F.res_sum]
-  congr 1; ext j
+  congr 1
+  ext j
   rw [F.res_zsmul, F.res_comp]
   congr 1
   rw [F.res_comp]
