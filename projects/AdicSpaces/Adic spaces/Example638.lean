@@ -353,12 +353,9 @@ theorem mk_algebraMap_continuous_plusFSubX (b : B) :
       (fun a : B => (Ideal.Quotient.mk (plusFSubXIdeal B b))
         (algebraMap B ↥(TateAlgebra B) a)) := by
   letI : TopologicalSpace ↥(TateAlgebra B) := instTopologicalSpaceTateAlgebra
-  have h1 : Continuous (algebraMap B ↥(TateAlgebra B)) :=
-    tateAlgebra_algebraMap_continuous
   have h2 : @Continuous _ _ _ (quotientPlusFSubXIdealTopology B b)
-      (Ideal.Quotient.mk (plusFSubXIdeal B b)) := by
-    exact continuous_quotient_mk'
-  exact h2.comp h1
+      (Ideal.Quotient.mk (plusFSubXIdeal B b)) := continuous_quotient_mk'
+  exact h2.comp tateAlgebra_algebraMap_continuous
 
 /-- In the quotient `TateAlgebra B ⧸ plusFSubXIdeal B b`, the classes of
 `algebraMap B _ b` and `X` are equal. (Since `algebraMap b - X ∈ plusFSubXIdeal`.) -/
@@ -395,11 +392,9 @@ theorem TateAlgebra_X_isPowerBounded :
   have hX_in : TateAlgebra.X (A := B) ∈
       TateAlgebra.pairSubring (IsTateRing.principalPair B).toPairOfDefinition :=
     TateAlgebra_X_mem_pairSubring B
-  -- All powers stay in pairSubring.
   have hpow : ∀ n : ℕ, TateAlgebra.X (A := B) ^ n ∈
       TateAlgebra.pairSubring (IsTateRing.principalPair B).toPairOfDefinition :=
     fun n => (TateAlgebra.pairSubring _).pow_mem hX_in n
-  -- pairSubring is bounded (it's the ring of definition of tateAlgebra_pairOfDefinition).
   have hbd : TopologicalRing.IsBounded
       (TateAlgebra.pairSubring (IsTateRing.principalPair B).toPairOfDefinition :
         Set ↥(TateAlgebra B)) :=
@@ -420,7 +415,6 @@ theorem IsBounded_mk_image_of_IsBounded (b : B) {S : Set ↥(TateAlgebra B)}
   letI : IsTopologicalRing (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
     quotientPlusFSubXIdealTopology_isTopologicalRing B b
   intro U hU
-  -- Pull back U to TateAlgebra B (mk is continuous).
   have hcont : @Continuous _ _ instTopologicalSpaceTateAlgebra
       (quotientPlusFSubXIdealTopology B b)
       (Ideal.Quotient.mk (plusFSubXIdeal B b)) :=
@@ -428,16 +422,13 @@ theorem IsBounded_mk_image_of_IsBounded (b : B) {S : Set ↥(TateAlgebra B)}
   have hU_pre : (Ideal.Quotient.mk (plusFSubXIdeal B b)) ⁻¹' U ∈
       @nhds _ instTopologicalSpaceTateAlgebra (0 : ↥(TateAlgebra B)) :=
     hcont.continuousAt.preimage_mem_nhds (by rw [map_zero]; exact hU)
-  -- Use boundedness of S to find V with S * V ⊆ preimage(U).
   obtain ⟨V, hV, hSV⟩ := hS _ hU_pre
-  -- mk(V) is an open nhd of 0 (mk is open). Actually we take a smaller open W ⊆ V with 0 ∈ W.
   obtain ⟨W, hWV, hW_open, hW_zero⟩ := _root_.mem_nhds_iff.mp hV
   have hmkW_open : IsOpen ((Ideal.Quotient.mk (plusFSubXIdeal B b)) '' W) :=
     @QuotientRing.isOpenMap_coe _ instTopologicalSpaceTateAlgebra _
       (plusFSubXIdeal B b) instIsTopologicalRingTateAlgebra _ hW_open
   refine ⟨(Ideal.Quotient.mk (plusFSubXIdeal B b)) '' W,
     _root_.mem_nhds_iff.mpr ⟨_, le_refl _, hmkW_open, ⟨0, hW_zero, map_zero _⟩⟩, ?_⟩
-  -- (mk '' S) * (mk '' W) ⊆ U
   rintro _ ⟨_, ⟨s, hs, rfl⟩, _, ⟨w, hw, rfl⟩, rfl⟩
   change (Ideal.Quotient.mk (plusFSubXIdeal B b)) s *
     (Ideal.Quotient.mk (plusFSubXIdeal B b)) w ∈ U
@@ -452,13 +443,7 @@ theorem mk_algebraMap_b_isPowerBounded_in_quotientPlusFSubX
     @TopologicalRing.IsPowerBounded _ _ (quotientPlusFSubXIdealTopology B b)
       ((Ideal.Quotient.mk (plusFSubXIdeal B b))
         (algebraMap B ↥(TateAlgebra B) b)) := by
-  -- Rewrite mk(algebraMap b) = mk(X) via quotient_algebraMap_b_eq_X.
-  have heq := quotient_algebraMap_b_eq_X B b
-  rw [heq]
-  -- X is power-bounded in TateAlgebra B, and mk preserves boundedness.
-  have hX_pb : @TopologicalRing.IsPowerBounded _ _ instTopologicalSpaceTateAlgebra
-      (TateAlgebra.X (A := B)) := TateAlgebra_X_isPowerBounded B
-  -- mk(X^n) = mk(X)^n, so Set.range ((mk X)^·) = mk '' Set.range (X^·).
+  rw [quotient_algebraMap_b_eq_X B b]
   have hrange_eq : (Set.range
         ((Ideal.Quotient.mk (plusFSubXIdeal B b)) TateAlgebra.X ^ · :
           ℕ → ↥(TateAlgebra B) ⧸ plusFSubXIdeal B b)) =
@@ -472,7 +457,7 @@ theorem mk_algebraMap_b_isPowerBounded_in_quotientPlusFSubX
       exact ⟨n, by rw [map_pow]⟩
   change @TopologicalRing.IsBounded _ _ (quotientPlusFSubXIdealTopology B b) _
   rw [hrange_eq]
-  exact IsBounded_mk_image_of_IsBounded B b hX_pb
+  exact IsBounded_mk_image_of_IsBounded B b (TateAlgebra_X_isPowerBounded B)
 
 /-- `plusLocToQuotient B b` is continuous from the `trivialPlusDatum` localization
 topology on `Localization.Away 1` to the quotient topology on
@@ -500,9 +485,6 @@ theorem plusLocToQuotient_continuous (P : PairOfDefinition B) (b : B) :
     quotientPlusFSubXIdealTopology_isTopologicalRing B b
   letI hadd : IsTopologicalAddGroup (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
     quotientPlusFSubXIdealTopology_isTopologicalAddGroup B b
-  -- The canonical quotient topology is nonarchimedean (as it is a topological quotient
-  -- of TateAlgebra B which is nonarchimedean). Use NonarchimedeanRing from the quotient
-  -- topology's ring filter basis.
   haveI hNA_tate : @NonarchimedeanRing ↥(TateAlgebra B) _ instTopologicalSpaceTateAlgebra :=
     tateAlgBasis'.nonarchimedean
   haveI : @NonarchimedeanRing (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b)
@@ -522,14 +504,11 @@ theorem plusLocToQuotient_continuous (P : PairOfDefinition B) (b : B) :
       isOpen' := @QuotientRing.isOpenMap_coe _ instTopologicalSpaceTateAlgebra _
         (plusFSubXIdeal B b) instIsTopologicalRingTateAlgebra _ V.isOpen
     }, fun x hx => by obtain ⟨y, hy, rfl⟩ := hx; exact hVU hy⟩
-  -- Continuity via locTopology_continuous_lift: needs nonarchimedean target.
   apply locTopology_continuous_lift (trivialPlusDatum B P b).P (trivialPlusDatum B P b).T
     (trivialPlusDatum B P b).s (trivialPlusDatum B P b).hopen
     (plusLocToQuotient B b)
-  · -- Continuity of plusLocToQuotient ∘ algebraMap = mk ∘ algebraMap.
-    change @Continuous _ _ _ (quotientPlusFSubXIdealTopology B b)
+  · change @Continuous _ _ _ (quotientPlusFSubXIdealTopology B b)
         ((plusLocToQuotient B b).comp (algebraMap B (Localization.Away (1 : B))))
-    -- Rewrite the composite as mk ∘ algebraMap using plusLocToQuotient_algebraMap.
     have heq : (plusLocToQuotient B b).comp
         (algebraMap B (Localization.Away (1 : B))) =
         (Ideal.Quotient.mk (plusFSubXIdeal B b)).comp
@@ -541,18 +520,14 @@ theorem plusLocToQuotient_continuous (P : PairOfDefinition B) (b : B) :
           ⇑((Ideal.Quotient.mk (plusFSubXIdeal B b)).comp (algebraMap B ↥(TateAlgebra B)))
           from congr_arg _ heq]
     exact mk_algebraMap_continuous_plusFSubX B b
-  · -- Power-boundedness: for each t ∈ {b}, plusLocToQuotient(divByS t 1) is power-bounded.
-    intro t ht
-    -- t = b since T = {b}.
+  · intro t ht
     have htb : t = b := Finset.mem_singleton.mp ht
-    -- divByS t 1 = algebraMap t.
     rw [htb]
     change @TopologicalRing.IsPowerBounded _ _ (quotientPlusFSubXIdealTopology B b)
       (plusLocToQuotient B b (divByS b (trivialPlusDatum B P b).s))
     change @TopologicalRing.IsPowerBounded _ _ (quotientPlusFSubXIdealTopology B b)
       (plusLocToQuotient B b (divByS b (1 : B)))
-    rw [divByS_eq_algebraMap]
-    rw [plusLocToQuotient_algebraMap]
+    rw [divByS_eq_algebraMap, plusLocToQuotient_algebraMap]
     exact mk_algebraMap_b_isPowerBounded_in_quotientPlusFSubX B b
 
 end Example638PlusBackwardContinuity
