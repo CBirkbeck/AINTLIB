@@ -57,6 +57,7 @@ import PadicLFunctions.IwasawaProof.Generators
 import PadicLFunctions.IwasawaProof.Main
 import PadicLFunctions.IwasawaProof.Galois.ClassFieldTheory
 import PadicLFunctions.IwasawaProof.Galois.Modules
+import PadicLFunctions.IwasawaProof.Galois.Coinvariants
 
 /-!
 # p-adic L-functions
