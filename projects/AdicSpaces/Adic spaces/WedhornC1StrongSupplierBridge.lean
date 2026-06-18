@@ -325,11 +325,6 @@ theorem produce_WedhornC1PerCallSupplyLocalizedMultiPiece_via_factorization_and_
         v ∈ rationalOpen (insert f C.base.T) C.base.s ∧
         ¬ v.vle f 0) :
     WedhornC1PerCallSupplyLocalizedMultiPiece P C hopen_base D v := by
-  letI : TopologicalSpace (Localization.Away C.base.s) :=
-    locTopology P C.base.T C.base.s hopen_base
-  letI : PlusSubring (Localization.Away C.base.s) :=
-    localizationLocSubringPlusSubring P C.base.T C.base.s
-  letI : DecidableEq (Localization.Away C.base.s) := Classical.decEq _
   obtain ⟨σ_loc, f, hσ_dom, h_alg, h_s_factor, hv_in, hvf_nz⟩ :=
     h_dom_factorization
   exact ⟨σ_loc, f, hσ_dom, h_alg, h_s_factor, hT_D_le_A₀, hv_in, hvf_nz⟩
@@ -496,10 +491,6 @@ theorem wedhorn_834_per_call_dom_supplier
           ∃ τ ∈ localizedTestFamily C.base.s D.T D.s,
             w.vle (σ_loc : Localization.Away C.base.s) τ ∧
               ¬ w.vle τ (σ_loc : Localization.Away C.base.s) := by
-  letI : TopologicalSpace (Localization.Away C.base.s) :=
-    locTopology P C.base.T C.base.s hopen_base
-  letI : PlusSubring (Localization.Away C.base.s) :=
-    localizationLocSubringPlusSubring P C.base.T C.base.s
   intro π_loc hI_loc hπ_loc_tn hπ_loc_unit hArch_loc hT_loc_ne
   exact exists_dominating_unit_in_localization P C.base.T C.base.s hopen_base
     π_loc hI_loc hπ_loc_tn hπ_loc_unit hArch_loc
@@ -568,10 +559,6 @@ theorem wedhorn_834_localizedTestFamily_nonvanishing_supplier
       ∀ w ∈ Spa (Localization.Away C.base.s)
             (Localization.Away C.base.s)⁺,
         ∃ τ ∈ localizedTestFamily C.base.s D.T D.s, ¬ w.vle τ 0 := by
-  letI : TopologicalSpace (Localization.Away C.base.s) :=
-    locTopology P C.base.T C.base.s hopen_base
-  letI : PlusSubring (Localization.Away C.base.s) :=
-    localizationLocSubringPlusSubring P C.base.T C.base.s
   letI : DecidableEq (Localization.Away C.base.s) := Classical.decEq _
   intro h_α_D_s_ne w hw_spa
   refine ⟨algebraMap A (Localization.Away C.base.s) D.s, ?_,
@@ -629,10 +616,6 @@ theorem wedhorn_834_per_call_dom_supplier_via_α_D_s_ne
           ∃ τ ∈ localizedTestFamily C.base.s D.T D.s,
             w.vle (σ_loc : Localization.Away C.base.s) τ ∧
               ¬ w.vle τ (σ_loc : Localization.Away C.base.s) := by
-  letI : TopologicalSpace (Localization.Away C.base.s) :=
-    locTopology P C.base.T C.base.s hopen_base
-  letI : PlusSubring (Localization.Away C.base.s) :=
-    localizationLocSubringPlusSubring P C.base.T C.base.s
   intro π_loc hI_loc hπ_loc_tn hπ_loc_unit hArch_loc h_α_D_s_ne
   exact wedhorn_834_per_call_dom_supplier P C hopen_base D
     π_loc hI_loc hπ_loc_tn hπ_loc_unit hArch_loc
@@ -699,10 +682,6 @@ theorem wedhorn_834_alpha_D_s_nonvanishing_of_base_factorization
     ∀ w ∈ Spa (Localization.Away C.base.s)
           (Localization.Away C.base.s)⁺,
       ¬ w.vle (algebraMap A (Localization.Away C.base.s) D.s) 0 := by
-  letI : TopologicalSpace (Localization.Away C.base.s) :=
-    locTopology P C.base.T C.base.s hopen_base
-  letI : PlusSubring (Localization.Away C.base.s) :=
-    localizationLocSubringPlusSubring P C.base.T C.base.s
   -- α C.base.s is a unit in Loc C.base.s (since C.base.s is inverted).
   have h_α_C_base_s_unit :
       IsUnit (algebraMap A (Localization.Away C.base.s) C.base.s) :=
@@ -770,10 +749,6 @@ theorem wedhorn_834_per_call_dom_supplier_via_base_factorization
           ∃ τ ∈ localizedTestFamily C.base.s D.T D.s,
             w.vle (σ_loc : Localization.Away C.base.s) τ ∧
               ¬ w.vle τ (σ_loc : Localization.Away C.base.s) := by
-  letI : TopologicalSpace (Localization.Away C.base.s) :=
-    locTopology P C.base.T C.base.s hopen_base
-  letI : PlusSubring (Localization.Away C.base.s) :=
-    localizationLocSubringPlusSubring P C.base.T C.base.s
   intro π_loc hI_loc hπ_loc_tn hπ_loc_unit hArch_loc
   exact wedhorn_834_per_call_dom_supplier_via_α_D_s_ne P C hopen_base D
     π_loc hI_loc hπ_loc_tn hπ_loc_unit hArch_loc
@@ -922,11 +897,6 @@ theorem wedhorn_834_per_call_construction_via_factorization
       C.base.s = D.s * f' ∧
       v ∈ rationalOpen (insert f' C.base.T) C.base.s ∧
       ¬ v.vle f' 0 := by
-  letI : TopologicalSpace (Localization.Away C.base.s) :=
-    locTopology P C.base.T C.base.s hopen_base
-  letI : PlusSubring (Localization.Away C.base.s) :=
-    localizationLocSubringPlusSubring P C.base.T C.base.s
-  letI : DecidableEq (Localization.Away C.base.s) := Classical.decEq _
   refine ⟨σ_loc, f, hσ_loc_dom, h_alg, h_s_factor, hv_in_plus, ?_⟩
   -- Derive ¬ v.vle f 0 from hv_in_plus + h_s_factor.
   -- hv_in_plus : v ∈ Spa A A⁺ ∧ (∀ x, v.vle x C.base.s) ∧ ¬ v.vle (C.base.s) 0.
