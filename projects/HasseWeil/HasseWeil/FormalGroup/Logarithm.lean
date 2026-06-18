@@ -47,7 +47,7 @@ The coefficient at `T^n` for `n ≥ 1` is the ℚ-scalar multiple
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, IV.5. -/
 noncomputable def FormalGroup.log (F : FormalGroup R) [Module ℚ R] :
     PowerSeries R :=
-  PowerSeries.mk fun n =>
+  PowerSeries.mk fun n ↦
     if n = 0 then 0
     else ((n : ℚ)⁻¹) •
       PowerSeries.coeff (n - 1) F.normalizedDifferential.toSeries
@@ -332,7 +332,7 @@ theorem coeff_subst_eq_of_coeff_eq (f g₁ g₂ : PowerSeries R)
   -- `coeff_pow_eq_of_coeff_eq`; or `d > k`, in which case both sides are zero.
   by_cases hdk : d ≤ k
   · exact coeff_pow_eq_of_coeff_eq g₁ g₂ n hg d k hk
-  · push_neg at hdk
+  · push Not at hdk
     have hzero : ∀ (g : PowerSeries R), @PowerSeries.constantCoeff R _ g = 0 →
         PowerSeries.coeff k (g ^ d) = 0 := by
       intro g hg0
@@ -543,7 +543,7 @@ theorem coeff_subst_add_monomial (f g : PowerSeries R) (n : ℕ) (c : R)
   have key : ∀ d : ℕ,
       PowerSeries.coeff (n + 1) ((g + h) ^ d) =
         PowerSeries.coeff (n + 1) (g ^ d) + (if d = 1 then c else 0) :=
-    fun d => coeff_add_monomial_pow_eq g hg n c d
+    fun d ↦ coeff_add_monomial_pow_eq g hg n c d
   -- Linearity of finsum over smul.
   have hadd : ∀ d : ℕ,
       PowerSeries.coeff d f • PowerSeries.coeff (n + 1) ((g + h) ^ d) =
@@ -551,8 +551,8 @@ theorem coeff_subst_add_monomial (f g : PowerSeries R) (n : ℕ) (c : R)
           PowerSeries.coeff d f • (if d = 1 then c else 0) := by
     intro d
     rw [key d, smul_add]
-  rw [show (fun d => PowerSeries.coeff d f • PowerSeries.coeff (n + 1) ((g + h) ^ d)) =
-          (fun d => PowerSeries.coeff d f • PowerSeries.coeff (n + 1) (g ^ d) +
+  rw [show (fun d ↦ PowerSeries.coeff d f • PowerSeries.coeff (n + 1) ((g + h) ^ d)) =
+          (fun d ↦ PowerSeries.coeff d f • PowerSeries.coeff (n + 1) (g ^ d) +
             PowerSeries.coeff d f • (if d = 1 then c else 0)) from funext hadd]
   rw [finsum_add_distrib
     (PowerSeries.coeff_subst_finite' hsubG f (n + 1))
@@ -1306,10 +1306,10 @@ private theorem subst_zero_LogPreservesAdd_LHS (F : FormalGroup R) [Module ℚ R
   -- By F.runit, subst ![0, X 1] F.toSeries = X 1.
   rw [PowerSeries.subst_def]
   rw [MvPowerSeries.subst_comp_subst_apply hF_subst.const h0X1]
-  have hX1_eq : (fun _ : Unit => MvPowerSeries.subst
+  have hX1_eq : (fun _ : Unit ↦ MvPowerSeries.subst
       (![(0 : MvPowerSeries (Fin 2) R), MvPowerSeries.X 1] :
         Fin 2 → MvPowerSeries (Fin 2) R) F.toSeries) =
-      (fun _ : Unit => (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R)) := by
+      (fun _ : Unit ↦ (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R)) := by
     funext _; exact F.runit
   rw [hX1_eq]
   rw [PowerSeries.subst_def]
@@ -1326,7 +1326,7 @@ private theorem PowerSeries_subst_zero_of_constantCoeff_zero {τ : Type*}
   rw [PowerSeries.coeff_subst h0 f e, MvPowerSeries.coeff_zero]
   -- Only d = 0 contributes, and `coeff 0 f = 0`.
   rw [finsum_eq_single _ 0
-    (fun n hn => by
+    (fun n hn ↦ by
       rw [zero_pow hn]
       rw [map_zero (MvPowerSeries.coeff e)]
       rw [smul_zero])]
@@ -1360,11 +1360,11 @@ private theorem subst_zero_LogPreservesAdd_RHS (F : FormalGroup R) [Module ℚ R
       (PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) F.log) = 0 := by
     rw [PowerSeries.subst_def]
     rw [MvPowerSeries.subst_comp_subst_apply hX0.const h0X1]
-    have hconst : (fun _ : Unit => MvPowerSeries.subst
+    have hconst : (fun _ : Unit ↦ MvPowerSeries.subst
         (![(0 : MvPowerSeries (Fin 2) R), MvPowerSeries.X 1] :
           Fin 2 → MvPowerSeries (Fin 2) R)
         (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R)) =
-        fun _ : Unit => (0 : MvPowerSeries (Fin 2) R) := by
+        fun _ : Unit ↦ (0 : MvPowerSeries (Fin 2) R) := by
       funext _
       rw [MvPowerSeries.subst_X h0X1 0]
       rfl
@@ -1375,11 +1375,11 @@ private theorem subst_zero_LogPreservesAdd_RHS (F : FormalGroup R) [Module ℚ R
   -- Handle subst (X 1) F.log: becomes subst (X 1) F.log after substituting.
   rw [PowerSeries.subst_def]
   rw [MvPowerSeries.subst_comp_subst_apply hX1.const h0X1]
-  have hX1_eq : (fun _ : Unit => MvPowerSeries.subst
+  have hX1_eq : (fun _ : Unit ↦ MvPowerSeries.subst
       (![(0 : MvPowerSeries (Fin 2) R), MvPowerSeries.X 1] :
         Fin 2 → MvPowerSeries (Fin 2) R)
       (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R)) =
-      (fun _ : Unit => (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R)) := by
+      (fun _ : Unit ↦ (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R)) := by
     funext _
     rw [MvPowerSeries.subst_X h0X1 1]
     rfl
@@ -1412,7 +1412,7 @@ private theorem coeff_subst_zero_X1_at_single_1 (h : MvPowerSeries (Fin 2) R) (b
   rw [finsum_eq_single _ (Finsupp.single (1 : Fin 2) b)]
   · -- Case d = single 1 b: d.prod _ = (a 1)^b = (X 1)^b, coeff (single 1 b) ((X 1)^b) = 1.
     have hprod : (Finsupp.single (1 : Fin 2) b).prod
-        (fun s e => (a s) ^ e) =
+        (fun s e ↦ (a s) ^ e) =
         (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) ^ b := by
       -- support of single 1 b is {1} if b ≠ 0, else ∅.
       by_cases hb : b = 0
@@ -1445,7 +1445,7 @@ private theorem coeff_subst_zero_X1_at_single_1 (h : MvPowerSeries (Fin 2) R) (b
           rw [h1]; simp
       -- d.prod: support is subset of {0, 1}. Since d 0 = 0, support ⊆ {1}.
       -- d.prod = (a 1)^(d 1) = (X 1)^(d 1). Coefficient at (single 1 b) is 0 since d 1 ≠ b.
-      have hprod : d.prod (fun s e => (a s) ^ e) =
+      have hprod : d.prod (fun s e ↦ (a s) ^ e) =
           (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) ^ (d 1) := by
         -- d.prod over support. Support of d does not include 0 (since d 0 = 0).
         rw [Finsupp.prod]
@@ -1485,7 +1485,7 @@ private theorem coeff_subst_zero_X1_at_single_1 (h : MvPowerSeries (Fin 2) R) (b
         exact hd1 this.symm
       rw [hc, smul_zero]
     · -- d 0 ≠ 0: d.prod = 0.
-      have hprod : d.prod (fun s e => (a s) ^ e) = 0 := by
+      have hprod : d.prod (fun s e ↦ (a s) ^ e) = 0 := by
         rw [Finsupp.prod]
         -- 0 is in support since d 0 ≠ 0.
         have h0mem : (0 : Fin 2) ∈ d.support :=
