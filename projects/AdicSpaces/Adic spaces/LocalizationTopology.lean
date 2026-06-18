@@ -564,17 +564,12 @@ of the codomain. -/
 theorem locSubring_isNoetherianRing (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (T : Finset A) (s : A) :
     IsNoetherianRing (locSubring P T s) := by
-  -- Algebra structure on locSubring P T s over P.A₀ via algebraMapD.
   letI : Algebra P.A₀ (locSubring P T s) := (algebraMapD P T s).toAlgebra
-  -- Generators: for each t ∈ T, the element t/s in locSubring.
-  let g : T → locSubring P T s := fun t =>
+  let g : T → locSubring P T s := fun t ↦
     ⟨divByS t.1 s, divByS_mem_locSubring P T s t.2⟩
-  -- The aeval map from polynomials to locSubring.
   let aeval_g : MvPolynomial T P.A₀ →ₐ[P.A₀] locSubring P T s := MvPolynomial.aeval g
-  -- Surjectivity: every element of locSubring is in the image.
   have h_surj : Function.Surjective aeval_g := by
     intro x
-    -- x.1 ∈ locSubring P T s = Subring.closure (algebraMap '' P.A₀ ∪ range (divByS · s)).
     have hx_mem : x.1 ∈ Subring.closure
         ((algebraMap A (Localization.Away s)) '' (P.A₀ : Set A) ∪
          Set.range (fun t : T ↦ divByS (t : A) s)) := x.2
@@ -585,7 +580,7 @@ theorem locSubring_isNoetherianRing (P : PairOfDefinition A) [IsNoetherianRing P
       obtain ⟨p, hp⟩ := h
       exact ⟨p, Subtype.ext hp⟩
     refine Subring.closure_induction
-      (p := fun y _ => ∃ p : MvPolynomial T P.A₀, (aeval_g p).1 = y)
+      (p := fun y _ ↦ ∃ p : MvPolynomial T P.A₀, (aeval_g p).1 = y)
       ?_ ?_ ?_ ?_ ?_ ?_ hx_mem
     · -- mem case: y ∈ algebraMap '' P.A₀ ∪ Set.range (divByS · s)
       intro y hy
@@ -618,11 +613,9 @@ theorem locSubring_isNoetherianRing (P : PairOfDefinition A) [IsNoetherianRing P
       refine ⟨p₁ * p₂, ?_⟩
       change (aeval_g (p₁ * p₂)).1 = y₁ * y₂
       rw [map_mul]; exact congr_arg₂ (· * ·) hp₁ hp₂
-  -- MvPolynomial T P.A₀ is Noetherian (Hilbert basis, iterated).
   haveI : Fintype T := inferInstance
   haveI : IsNoetherianRing (MvPolynomial T P.A₀) :=
     MvPolynomial.isNoetherianRing
-  -- Surjective ring hom from Noetherian gives Noetherian.
   exact isNoetherianRing_of_surjective _ _ aeval_g.toRingHom h_surj
 
 /-- Instance version of `locSubring_isNoetherianRing`, so `IsNoetherianRing
