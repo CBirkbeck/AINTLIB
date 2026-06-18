@@ -375,6 +375,84 @@ theorem pointValuation_le_one_pullback_coordinateRing
       rw [hdconst]
       exact (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation_algebraMap_le_one _ P
 
+set_option synthInstance.maxHeartbeats 400000 in
+set_option maxHeartbeats 1600000 in
+/-- **A regular point with a vanishing `B`-function is cut out by a `B`-prime** (reverse place
+dictionary / surjectivity).  If both pulled-back generators are regular at `P` (`P ∉ poleLocus`) and
+some nonzero `z ∈ B` vanishes at `P` (`pointValuation P (algebraMap_B z) < 1`), then there is a
+height-one prime `v` of `B` with `v.valuation = pointValuation P`.
+
+Proof: the integral closure `B` lands in the (integrally closed) local ring `O_P` because `F[E₂]`
+does (`pointValuation_le_one_pullback_coordinateRing`), so `pointValuation P ≤ 1` on `B`.  The
+center `q = {b ∈ B : pointValuation P (algebraMap_B b) < 1}` is then an ideal (regularity ⟹ absorbs
+`B`), prime (`pointValuation P` multiplicative), nonzero (`z ∈ q`) and proper, hence a height-one
+prime `v`.  Its adic-valuation subring satisfies `O_v ⊆ O_P` (an `O_v`-integer `x = n/d` with
+`d ∉ q` has `pointValuation P (algebraMap_B d) = 1`, `exists_primeCompl_mul_eq_of_integer`), so by
+rank-one DVR domination `O_v = O_P`, i.e. `v.valuation = pointValuation P`. -/
+theorem exists_bPrime_eq_pointValuation_of_notMem_poleLocus
+    (φ : HasseWeil.Isogeny W₁ W₂)
+    [algKL : Algebra W₂.toAffine.FunctionField W₁.toAffine.FunctionField]
+    [IsScalarTower F W₂.toAffine.FunctionField W₁.toAffine.FunctionField]
+    [FiniteDimensional W₂.toAffine.FunctionField W₁.toAffine.FunctionField]
+    [Algebra.IsSeparable W₂.toAffine.FunctionField W₁.toAffine.FunctionField]
+    [algCR1 : Algebra (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing W₁.toAffine.FunctionField]
+    [IsScalarTower (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+      W₂.toAffine.FunctionField W₁.toAffine.FunctionField]
+    [IsDedekindDomain (NormConormIntegralClosure.B
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))]
+    [IsFractionRing (NormConormIntegralClosure.B
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))
+      W₁.toAffine.FunctionField]
+    (halg : ∀ g : W₂.toAffine.FunctionField,
+      algebraMap W₂.toAffine.FunctionField W₁.toAffine.FunctionField g = φ.pullback g)
+    (P : (W_smooth W₁).SmoothPoint) (hP : P ∉ twoCurvePoleLocus φ)
+    {z : NormConormIntegralClosure.B
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))}
+    (hzvanish : (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P
+      (algebraMap (NormConormIntegralClosure.B
+        (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))
+        W₁.toAffine.FunctionField z) < 1) :
+    ∃ v : IsDedekindDomain.HeightOneSpectrum (NormConormIntegralClosure.B
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))),
+      v.valuation W₁.toAffine.FunctionField =
+        (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P := by
+  classical
+  set Bb := NormConormIntegralClosure.B
+    (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)) with hBb
+  set pv := (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P with hpv
+  have hxle : pv (φ.pullback (x_gen W₂)) ≤ 1 := by by_contra h; exact hP (Or.inl h)
+  have hyle : pv (φ.pullback (y_gen W₂)) ≤ 1 := by by_contra h; exact hP (Or.inr h)
+  -- the image of `F[E₂]` lands in the valuation integers `O_P = pv.integer`.
+  have hImOP : ∀ c : (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing,
+      algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing W₁.toAffine.FunctionField c ∈
+        pv.integer := by
+    intro c
+    rw [Valuation.mem_integer_iff]
+    have hceq : algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing W₁.toAffine.FunctionField c =
+        φ.pullback (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+          W₂.toAffine.FunctionField c) := by
+      rw [← halg, IsScalarTower.algebraMap_apply (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+        W₂.toAffine.FunctionField W₁.toAffine.FunctionField c]
+    rw [hceq]
+    exact pointValuation_le_one_pullback_coordinateRing φ P hxle hyle c
+  -- the algebra `F[E₂] → O_P = pv.integer` (image lands in the integers).
+  letI algCR_int : Algebra (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing pv.integer :=
+    (((algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing W₁.toAffine.FunctionField)).codRestrict
+      pv.integer.toSubsemiring hImOP).toAlgebra
+  haveI twCR_int : IsScalarTower (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing pv.integer
+      W₁.toAffine.FunctionField :=
+    IsScalarTower.of_algebraMap_eq fun _ => rfl
+  -- (1) regularity: every `b ∈ B` has `pv (algebraMap_B b) ≤ 1`.
+  have hregB : ∀ b : Bb, pv (algebraMap Bb W₁.toAffine.FunctionField b) ≤ 1 := by
+    intro b
+    -- `b` integral over `F[E₂]` (image ⊆ `O_P`) ⟹ `b` integral over `O_P` ⟹ `pv b ≤ 1`.
+    have hbint : IsIntegral (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+        (algebraMap Bb W₁.toAffine.FunctionField b) := b.2
+    have hbint_int : IsIntegral pv.integer (algebraMap Bb W₁.toAffine.FunctionField b) :=
+      hbint.tower_top
+    exact (Valuation.integer.integers pv).isIntegral_iff_v_le_one.mp hbint_int
+  sorry
+
 /-! ### The point-map image of a `B`-prime over `m_Q` is `Q` (the fibre matching, value-level)
 
 For a `B`-prime `v` lying over the affine place `m_Q` of `E₂`, the point `P` of `E₁` cut out by
