@@ -174,7 +174,7 @@ theorem FormalGroup.evalAdd_pow_mem
   apply ((maximalIdeal R) ^ n).sum_mem
   intro d _hd
   change (RingHom.id R) (MvPowerSeries.coeff d F.toSeries) *
-      (d.prod fun s e => (![x.1, y.1]) s ^ e) ∈ _
+      (d.prod fun s e ↦ (![x.1, y.1]) s ^ e) ∈ _
   simp only [RingHom.id_apply]
   by_cases hd : d = 0
   · subst hd
@@ -186,8 +186,8 @@ theorem FormalGroup.evalAdd_pow_mem
   · apply ((maximalIdeal R) ^ n).mul_mem_left
     have hne : ∃ s, d s ≠ 0 := by
       by_contra h
-      push_neg at h
-      exact hd (Finsupp.ext (fun s => by simpa using h s))
+      push Not at h
+      exact hd (Finsupp.ext (fun s ↦ by simpa using h s))
     obtain ⟨s, hs⟩ := hne
     have hs_mem : s ∈ d.support := Finsupp.mem_support_iff.mpr hs
     rw [Finsupp.prod]
@@ -217,7 +217,6 @@ theorem FormalGroup.evalNeg_pow_mem
   filter_upwards with N
   apply ((maximalIdeal R) ^ n).sum_mem
   intro k _hk
-  change (RingHom.id R) (PowerSeries.coeff k F.inverse) * x.1 ^ k ∈ _
   simp only [RingHom.id_apply]
   by_cases hk : k = 0
   · subst hk
@@ -238,8 +237,8 @@ noncomputable def FormalGroup.evalGroup_powerIdeal
   zero_mem' := by
     change (0 : R) ∈ (maximalIdeal R) ^ n
     exact ((maximalIdeal R) ^ n).zero_mem
-  add_mem' := fun {x y} hx hy => F.evalAdd_pow_mem hAdic n hx hy
-  neg_mem' := fun {x} hx => F.evalNeg_pow_mem hAdic n hx
+  add_mem' := fun {x y} hx hy ↦ F.evalAdd_pow_mem hAdic n hx hy
+  neg_mem' := fun {x} hx ↦ F.evalNeg_pow_mem hAdic n hx
 
 /-- The `F(M^n)` filtration is monotone: `m ≤ n ⇒ F(M^n) ⊆ F(M^m)`. -/
 theorem FormalGroup.evalGroup_powerIdeal_mono
@@ -300,22 +299,22 @@ theorem FormalGroup.EvalGroup.nsmul_val
         change PowerSeries.constantCoeff (R := R) PowerSeries.X = 0
         simp
     have ha : MvPowerSeries.HasSubst a :=
-      MvPowerSeries.hasSubst_of_constantCoeff_zero (fun s => ha0 s)
-    have hb_mem : ∀ _ : Unit, x.val.1 ∈ maximalIdeal R := fun _ => x.val.2
-    -- Bridge: eval₂ id (fun _ => x) (subst a F.toSeries) =
-    --         eval₂ id (fun s => eval₂ id (fun _ => x) (a s)) F.toSeries.
+      MvPowerSeries.hasSubst_of_constantCoeff_zero (fun s ↦ ha0 s)
+    have hb_mem : ∀ _ : Unit, x.val.1 ∈ maximalIdeal R := fun _ ↦ x.val.2
+    -- Bridge: eval₂ id (fun _ ↦ x) (subst a F.toSeries) =
+    --         eval₂ id (fun s ↦ eval₂ id (fun _ ↦ x) (a s)) F.toSeries.
     have bridge :=
-      eval₂_subst_bridge hAdic ha0 ha (b := fun _ : Unit => x.val.1) hb_mem F.toSeries
+      eval₂_subst_bridge hAdic ha0 ha (b := fun _ : Unit ↦ x.val.1) hb_mem F.toSeries
     -- The RHS of bridge is evaluated at the pair (eval_x (mulByNatSeries F n), x).
     -- Using the induction hypothesis, this becomes (![(n • x).val.1, x.val.1]).
     -- Compute the two functions and match.
-    have hfun : (fun s : Fin 2 =>
-          MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit => x.val.1) (a s)) =
+    have hfun : (fun s : Fin 2 ↦
+          MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ x.val.1) (a s)) =
         ![(n • x).val.1, x.val.1] := by
       funext s
       fin_cases s
       · -- s = 0: eval₂ id x (mulByNatSeries F n) = (n • x).val.1 by ih.
-        change MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit => x.val.1)
+        change MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ x.val.1)
             (HasseWeil.FG.mulByNatSeries F n : PowerSeries R) = ((n • x).val.1 : R)
         change PowerSeries.eval₂ (RingHom.id R) x.val.1
             (HasseWeil.FG.mulByNatSeries F n) = _
@@ -325,7 +324,7 @@ theorem FormalGroup.EvalGroup.nsmul_val
         rw [F.mulByNatHom_toSeries] at ih'
         exact ih'.symm
       · -- s = 1: eval₂ id x PowerSeries.X = x.val.1.
-        change MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit => x.val.1)
+        change MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ x.val.1)
             (PowerSeries.X : PowerSeries R) = x.val.1
         change PowerSeries.eval₂ (RingHom.id R) x.val.1 PowerSeries.X = _
         rw [PowerSeries.eval₂_X]
@@ -335,7 +334,7 @@ theorem FormalGroup.EvalGroup.nsmul_val
     -- bridge's RHS is eval₂ id ![(n•x), x] F.toSeries = F.evalAdd (n • x).val x.val.
     change _ = PowerSeries.eval₂ (RingHom.id R) x.val.1
       (MvPowerSeries.subst a F.toSeries)
-    change _ = MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit => x.val.1)
+    change _ = MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ x.val.1)
       (MvPowerSeries.subst a F.toSeries)
     rw [bridge]
     rfl
@@ -386,7 +385,7 @@ private lemma single_zero_ne_single_one :
 private lemma two_le_sum_of_not_mem_lowDeg {d : Fin 2 →₀ ℕ}
     (hd : d ∉ lowDegFinset) : 2 ≤ d 0 + d 1 := by
   by_contra h
-  push_neg at h
+  push Not at h
   -- h : d 0 + d 1 < 2, so d 0 + d 1 ∈ {0, 1}.
   apply hd
   rw [lowDegFinset_mem_iff]
@@ -431,9 +430,9 @@ theorem FormalGroup.evalAdd_sub_add_mem_pow_succ
   have hcid : Continuous (RingHom.id R) := continuous_id
   have hsum := MvPowerSeries.hasSum_eval₂ hcid ha F.toSeries
   -- Abbreviate the general term.
-  set term : (Fin 2 →₀ ℕ) → R := fun d =>
+  set term : (Fin 2 →₀ ℕ) → R := fun d ↦
     (RingHom.id R) (MvPowerSeries.coeff d F.toSeries) *
-      (d.prod fun s e => (![x.1, y.1] : Fin 2 → R) s ^ e) with hterm
+      (d.prod fun s e ↦ (![x.1, y.1] : Fin 2 → R) s ^ e) with hterm
   change F.evalAdd x y - (x.1 + y.1) ∈ _
   -- Compute ∑ d ∈ lowDegFinset, term d = x + y.
   have hsum_S : ∑ d ∈ lowDegFinset, term d = x.1 + y.1 := by
@@ -463,7 +462,7 @@ theorem FormalGroup.evalAdd_sub_add_mem_pow_succ
   -- Shift the tendsto by -(x + y).
   have hsum_term : HasSum term (F.evalAdd x y) := hsum
   have htendsto :
-      Filter.Tendsto (fun N : Finset (Fin 2 →₀ ℕ) => (∑ d ∈ N, term d) - (x.1 + y.1))
+      Filter.Tendsto (fun N : Finset (Fin 2 →₀ ℕ) ↦ (∑ d ∈ N, term d) - (x.1 + y.1))
         Filter.atTop (nhds (F.evalAdd x y - (x.1 + y.1))) :=
     (hsum_term : Filter.Tendsto _ _ _).sub_const _
   -- Apply IsClosed.mem_of_tendsto on M^(n+1), which is closed.
@@ -483,7 +482,7 @@ theorem FormalGroup.evalAdd_sub_add_mem_pow_succ
   simp only [hterm, RingHom.id_apply]
   apply ((maximalIdeal R) ^ (n + 1)).mul_mem_left
   -- Show x^(d 0) * y^(d 1) ∈ M^(n+1).
-  rw [Finsupp.prod_fintype _ _ (fun i => pow_zero _), Fin.prod_univ_two,
+  rw [Finsupp.prod_fintype _ _ (fun i ↦ pow_zero _), Fin.prod_univ_two,
       Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_zero]
   -- x^(d 0) ∈ M^(n * d 0) and y^(d 1) ∈ M^(n * d 1).
   have hxpow : x.1 ^ (d 0) ∈ (maximalIdeal R) ^ (n * d 0) := by
@@ -549,11 +548,11 @@ a group homomorphism by the congruence `evalAdd x y ≡ x + y (mod M^(n+1))`. -/
 noncomputable def FormalGroup.evalGroup_powerIdeal_toQuot
     (F : FormalGroup R) (hAdic : IsAdic (maximalIdeal R)) {n : ℕ} (hn : 1 ≤ n) :
     F.evalGroup_powerIdeal hAdic n →+ R ⧸ ((maximalIdeal R) ^ (n + 1)) where
-  toFun := fun x => (Ideal.Quotient.mk ((maximalIdeal R) ^ (n + 1))) x.1.val.1
+  toFun := fun x ↦ (Ideal.Quotient.mk ((maximalIdeal R) ^ (n + 1))) x.1.val.1
   map_zero' := by
     change (Ideal.Quotient.mk ((maximalIdeal R) ^ (n + 1))) (0 : R) = 0
     exact map_zero _
-  map_add' := fun x y => by
+  map_add' := fun x y ↦ by
     change (Ideal.Quotient.mk ((maximalIdeal R) ^ (n + 1))) (F.evalAdd x.1.val y.1.val) =
       (Ideal.Quotient.mk ((maximalIdeal R) ^ (n + 1))) x.1.val.1 +
       (Ideal.Quotient.mk ((maximalIdeal R) ^ (n + 1))) y.1.val.1
@@ -649,9 +648,9 @@ private theorem FormalGroup.eval₂_zero_of_constantCoeff_zero
       rw [PowerSeries.coeff_zero_eq_constantCoeff_apply, hf, zero_mul]
     · rw [zero_pow hd, mul_zero]
   have hsum_zero : HasSum
-      (fun d : ℕ => (RingHom.id R) (PowerSeries.coeff d f) * (0 : R) ^ d) 0 := by
-    rw [show (fun d : ℕ => (RingHom.id R) (PowerSeries.coeff d f) * (0 : R) ^ d) =
-        (fun _ : ℕ => (0 : R)) from funext hterms]
+      (fun d : ℕ ↦ (RingHom.id R) (PowerSeries.coeff d f) * (0 : R) ^ d) 0 := by
+    rw [show (fun d : ℕ ↦ (RingHom.id R) (PowerSeries.coeff d f) * (0 : R) ^ d) =
+        (fun _ : ℕ ↦ (0 : R)) from funext hterms]
     exact hasSum_zero
   exact hsum.unique hsum_zero
 
@@ -673,27 +672,27 @@ theorem FormalGroup.eval_mulByNatHom_injective_of_unit
       (F.mulByNatInvSeries n hn) = PowerSeries.X :=
     F.subst_mulByNatHom_mulByNatInvSeries hn
   -- Unit-indexed substitution family `b` so we can apply the MvPowerSeries bridge.
-  let b : Unit → MvPowerSeries Unit R := fun _ => (F.mulByNatHom n).toSeries
-  have hb0 : ∀ s : Unit, MvPowerSeries.constantCoeff (b s) = 0 := fun _ =>
+  let b : Unit → MvPowerSeries Unit R := fun _ ↦ (F.mulByNatHom n).toSeries
+  have hb0 : ∀ s : Unit, MvPowerSeries.constantCoeff (b s) = 0 := fun _ ↦
     (F.mulByNatHom n).zero_const
   have hb : MvPowerSeries.HasSubst b :=
-    MvPowerSeries.hasSubst_of_constantCoeff_zero (fun s => hb0 s)
+    MvPowerSeries.hasSubst_of_constantCoeff_zero (fun s ↦ hb0 s)
   have hleft' : MvPowerSeries.subst b (F.mulByNatInvSeries n hn) = PowerSeries.X :=
     hleft
-  -- Apply `eval₂ id (fun _ : Unit => a.1)` to both sides and invoke the bridge.
-  have hc_mem : ∀ _ : Unit, a.1 ∈ maximalIdeal R := fun _ => a.2
-  have bridge := eval₂_subst_bridge hAdic hb0 hb (b := fun _ : Unit => a.1) hc_mem
+  -- Apply `eval₂ id (fun _ : Unit ↦ a.1)` to both sides and invoke the bridge.
+  have hc_mem : ∀ _ : Unit, a.1 ∈ maximalIdeal R := fun _ ↦ a.2
+  have bridge := eval₂_subst_bridge hAdic hb0 hb (b := fun _ : Unit ↦ a.1) hc_mem
     (F.mulByNatInvSeries n hn)
   rw [hleft'] at bridge
-  have hlhs : MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit => a.1)
+  have hlhs : MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ a.1)
       (PowerSeries.X : PowerSeries R) = a.1 := by
     change PowerSeries.eval₂ (RingHom.id R) a.1 PowerSeries.X = a.1
     rw [PowerSeries.eval₂_X]
   rw [hlhs] at bridge
   -- Inner function collapses to the constant-zero function by `ha`.
-  have hfun : (fun s : Unit =>
-        MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit => a.1) (b s)) =
-      fun _ : Unit => (0 : R) := by
+  have hfun : (fun s : Unit ↦
+        MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ a.1) (b s)) =
+      fun _ : Unit ↦ (0 : R) := by
     funext s; cases s
     change PowerSeries.eval₂ (RingHom.id R) a.1 (F.mulByNatHom n).toSeries = 0
     exact ha
@@ -786,7 +785,7 @@ def oneUnitsSubgroup (R : Type*) [CommRing R] [IsLocalRing R] : Subgroup Rˣ whe
   one_mem' := by
     change ((1 : Rˣ) : R) - 1 ∈ maximalIdeal R
     simp
-  mul_mem' := fun {u v} hu hv => by
+  mul_mem' := fun {u v} hu hv ↦ by
     -- `u*v - 1 = (u-1)*(v-1) + (u-1) + (v-1)` — all three summands are in `M`.
     change ((u * v : Rˣ) : R) - 1 ∈ maximalIdeal R
     have h : ((u * v : Rˣ) : R) - 1 =
@@ -795,7 +794,7 @@ def oneUnitsSubgroup (R : Type*) [CommRing R] [IsLocalRing R] : Subgroup Rˣ whe
     rw [h]
     exact (maximalIdeal R).add_mem
       ((maximalIdeal R).add_mem ((maximalIdeal R).mul_mem_right _ hu) hu) hv
-  inv_mem' := fun {u} hu => by
+  inv_mem' := fun {u} hu ↦ by
     -- `(u⁻¹ : R) - 1 = -(u - 1) * (u⁻¹ : R) ∈ M`.
     change ((u⁻¹ : Rˣ) : R) - 1 ∈ maximalIdeal R
     have hinv : (u : R) * ((u⁻¹ : Rˣ) : R) = 1 := by
@@ -853,10 +852,10 @@ noncomputable def multiplicativeFormalGroup_EvalGroup_mulEquiv
     (hAdic : IsAdic (maximalIdeal R)) :
     Multiplicative ((multiplicativeFormalGroup R).EvalGroup hAdic) ≃*
       oneUnitsSubgroup R where
-  toFun := fun x => ⟨oneAddUnit x.toAdd.val, oneAddUnit_mem x.toAdd.val⟩
-  invFun := fun u =>
+  toFun := fun x ↦ ⟨oneAddUnit x.toAdd.val, oneAddUnit_mem x.toAdd.val⟩
+  invFun := fun u ↦
     Multiplicative.ofAdd ⟨⟨((u : Rˣ) : R) - 1, u.2⟩⟩
-  left_inv := fun x => by
+  left_inv := fun x ↦ by
     -- `toFun` then `invFun`: reduces to `(1 + x.val.1) - 1 = x.val.1`.
     apply (Multiplicative.toAdd).injective
     apply FormalGroup.EvalGroup.ext
@@ -864,7 +863,7 @@ noncomputable def multiplicativeFormalGroup_EvalGroup_mulEquiv
     change ((oneAddUnit x.toAdd.val : Rˣ) : R) - 1 = x.toAdd.val.1
     rw [oneAddUnit_val]
     ring
-  right_inv := fun u => by
+  right_inv := fun u ↦ by
     -- `invFun` then `toFun`: reduces to `1 + (u - 1) = u` in `Rˣ` via `Units.ext`.
     apply Subtype.ext
     apply Units.ext
@@ -872,7 +871,7 @@ noncomputable def multiplicativeFormalGroup_EvalGroup_mulEquiv
     rw [oneAddUnit_val]
     change (1 : R) + (((u : Rˣ) : R) - 1) = ((u : Rˣ) : R)
     ring
-  map_mul' := fun x y => by
+  map_mul' := fun x y ↦ by
     -- Multiplicativity: reduce to equality in `R` via `Subtype.ext`/`Units.ext`.
     apply Subtype.ext
     apply Units.ext
@@ -917,6 +916,6 @@ theorem FormalGroup.EvalGroup.addOrderOf_isPowOf_residueChar
     (x : F.EvalGroup hAdic) (hx : IsOfFinAddOrder x) :
     ∃ k : ℕ, addOrderOf x = p ^ k :=
   FormalGroup.EvalGroup.addOrderOf_isPowOf F hAdic p hp
-    (fun _ hm => isUnit_natCast_of_not_dvd_residueChar p hm) x hx
+    (fun _ hm ↦ isUnit_natCast_of_not_dvd_residueChar p hm) x hx
 
 end HasseWeil.FormalGroup
