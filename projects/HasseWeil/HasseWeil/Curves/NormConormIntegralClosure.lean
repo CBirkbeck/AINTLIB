@@ -1264,6 +1264,14 @@ theorem valuation_coordYFun_le_one (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ :=
     rwa [one_mul, ← sq] at hstep
   exact absurd hYsq (not_le.mpr hlt)
 
+/-- **`BPrimeValuationCoordGenLeOne`, DISCHARGED** (the genuine curve-completeness content, now
+unconditional modulo the basepoint-regularity `hreg`): every `B`-prime `v` is `≤ 1` on both
+coordinate generators of `C₁`.  This combines the two pole-free lemmas
+`valuation_coordXFun_le_one` / `valuation_coordYFun_le_one`. -/
+theorem bPrimeValuationCoordGenLeOne_of_reg (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂)) :
+    BPrimeValuationCoordGenLeOne (C₁ := C₁) (C₂ := C₂) := fun v =>
+  ⟨valuation_coordXFun_le_one hreg v, valuation_coordYFun_le_one hreg v⟩
+
 /-! ### The minimal-polynomial reduction (non-circular, place-dictionary-free)
 
 The whole content of `coordXFun_mem_B` / `coordYFun_mem_B` (and hence `coordRing_mem_B`) reduces —
@@ -1405,6 +1413,57 @@ theorem coordRing_mem_B (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂))
     algebraMap C₁.CoordinateRing C₁.FunctionField r ∈ (B (C₁ := C₁) (C₂ := C₂)) :=
   coordRing_mem_integralClosure C₂ C₂.CoordinateRing
     (coordXFun_mem_B hreg hplace) (coordYFun_mem_B hreg hplace) r
+
+/-! ### The coordinate ring lands in `B` — UNCONDITIONAL (modulo basepoint regularity `hreg`)
+
+With `BPrimeValuationCoordGenLeOne` now *proved* (`bPrimeValuationCoordGenLeOne_of_reg`, the
+curve-completeness content discharged via explicit local coordinates at `∞`), the entire
+`coordRing_mem_B` chain — and the sharp `MinpolyCoeffsRegular` residual — are unconditional: they
+require only the basepoint-regularity `hreg` (`OrdAtInftyReg`), which is carried by every honest
+isogeny pullback (`EC.Isogeny.pullback_ordAtInfty_nonneg`). -/
+
+/-- **`coordXFun C₁ ∈ B`, UNCONDITIONAL** (modulo `hreg`). -/
+theorem coordXFun_mem_B_of_reg (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂)) :
+    coordXFun C₁ ∈ (B (C₁ := C₁) (C₂ := C₂)) :=
+  coordXFun_mem_B hreg (bPrimeValuationCoordGenLeOne_of_reg hreg)
+
+/-- **`coordYFun C₁ ∈ B`, UNCONDITIONAL** (modulo `hreg`). -/
+theorem coordYFun_mem_B_of_reg (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂)) :
+    coordYFun C₁ ∈ (B (C₁ := C₁) (C₂ := C₂)) :=
+  coordYFun_mem_B hreg (bPrimeValuationCoordGenLeOne_of_reg hreg)
+
+/-- **The coordinate ring of `C₁` lands in `B`, UNCONDITIONAL** (Silverman II.2.6, modulo `hreg`):
+for every `r ∈ F[C₁]`, the image `algebraMap r ∈ K(C₁)` is integral over `C₂.CoordinateRing`. -/
+theorem coordRing_mem_B_of_reg (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂)) (r : C₁.CoordinateRing) :
+    algebraMap C₁.CoordinateRing C₁.FunctionField r ∈ (B (C₁ := C₁) (C₂ := C₂)) :=
+  coordRing_mem_B hreg (bPrimeValuationCoordGenLeOne_of_reg hreg) r
+
+/-- **`MinpolyCoeffsRegular` for any `z ∈ B`** (the integrally-closed minpoly fact): if `z` is
+integral over `C₂.CoordinateRing`, then every coefficient of `minpoly K(C₂) z` lies in (the image of)
+`C₂.CoordinateRing`.  Direct from `minpoly.isIntegrallyClosed_eq_field_fractions'`
+(`minpoly K(C₂) z = (minpoly C₂.CoordinateRing z).map (algebraMap …)`), so each coefficient is the
+`algebraMap`-image of the corresponding coefficient over `C₂.CoordinateRing`. -/
+theorem minpolyCoeffsRegular_of_mem_B {z : C₁.FunctionField}
+    (hz : z ∈ (B (C₁ := C₁) (C₂ := C₂))) :
+    MinpolyCoeffsRegular (C₁ := C₁) (C₂ := C₂) z := by
+  have hint : IsIntegral C₂.CoordinateRing z := hz
+  have hmap : minpoly C₂.FunctionField z =
+      (minpoly C₂.CoordinateRing z).map (algebraMap C₂.CoordinateRing C₂.FunctionField) :=
+    minpoly.isIntegrallyClosed_eq_field_fractions' C₂.FunctionField hint
+  intro i
+  exact ⟨(minpoly C₂.CoordinateRing z).coeff i, by rw [hmap, Polynomial.coeff_map]⟩
+
+/-- **`MinpolyCoeffsRegular (coordXFun C₁)`, DISCHARGED** (modulo `hreg`): the task's literal target
+for the `x`-generator.  Combines `coordXFun_mem_B_of_reg` with `minpolyCoeffsRegular_of_mem_B`. -/
+theorem minpolyCoeffsRegular_coordXFun (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂)) :
+    MinpolyCoeffsRegular (C₁ := C₁) (C₂ := C₂) (coordXFun C₁) :=
+  minpolyCoeffsRegular_of_mem_B (coordXFun_mem_B_of_reg hreg)
+
+/-- **`MinpolyCoeffsRegular (coordYFun C₁)`, DISCHARGED** (modulo `hreg`): the task's literal target
+for the `y`-generator. -/
+theorem minpolyCoeffsRegular_coordYFun (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂)) :
+    MinpolyCoeffsRegular (C₁ := C₁) (C₂ := C₂) (coordYFun C₁) :=
+  minpolyCoeffsRegular_of_mem_B (coordYFun_mem_B_of_reg hreg)
 
 /-! ### Inertia degree `1` and the `s = 1` core over `B` (T-A2 core) -/
 
