@@ -330,9 +330,9 @@ theorem deltaMap_gen_continuous :
   letI tB12 : TopologicalSpace (B₁₂_gen f) := B₁₂_gen_topology f
   haveI hringB12 : IsTopologicalRing (B₁₂_gen f) := B₁₂_gen_isTopologicalRing f
   haveI hagB12 : IsTopologicalAddGroup (B₁₂_gen f) := B₁₂_gen_isTopologicalAddGroup f
-  have h1 : Continuous (fun p : B₁_gen f × B₂_gen f => posLift f p.1) :=
+  have h1 : Continuous (fun p : B₁_gen f × B₂_gen f ↦ posLift f p.1) :=
     (posLift_continuous f).comp continuous_fst
-  have h2 : Continuous (fun p : B₁_gen f × B₂_gen f => negLift f p.2) :=
+  have h2 : Continuous (fun p : B₁_gen f × B₂_gen f ↦ negLift f p.2) :=
     (negLift_continuous f).comp continuous_snd
   exact h1.sub h2
 
@@ -368,11 +368,8 @@ variable [IsTateRing A] (f : A)
 continuous under the canonical T132 quotient topologies. -/
 theorem epsilonHom_gen_continuous :
     Continuous (epsilonHom_gen f : A → B₁_gen f × B₂_gen f) := by
-  have h_alg : Continuous (algebraMap A ↥(TateAlgebra A)) :=
-    tateAlgebra_algebraMap_continuous
-  refine Continuous.prodMk ?_ ?_
-  · exact continuous_quot_mk.comp h_alg
-  · exact continuous_quot_mk.comp h_alg
+  refine Continuous.prodMk ?_ ?_ <;>
+    exact continuous_quot_mk.comp tateAlgebra_algebraMap_continuous
 
 variable [IsNoetherianRing A] [IsDomain A]
 
@@ -384,15 +381,10 @@ theorem ker_deltaMap_gen_isClosed
     (hT2 : @T2Space (B₁₂_gen f) (B₁₂_gen_topology f)) :
     IsClosed ((deltaMap_gen f).ker : Set (B₁_gen f × B₂_gen f)) := by
   letI := hT2
-  have hcont : Continuous (deltaMap_gen f) := deltaMap_gen_continuous f
   have hpre : ((deltaMap_gen f).ker : Set (B₁_gen f × B₂_gen f)) =
-      (deltaMap_gen f) ⁻¹' {0} := by
-    ext p
-    constructor
-    · intro hp; exact hp
-    · intro hp; exact hp
+      (deltaMap_gen f) ⁻¹' {0} := rfl
   rw [hpre]
-  exact (isClosed_singleton).preimage hcont
+  exact isClosed_singleton.preimage (deltaMap_gen_continuous f)
 
 omit [IsTateRing A] [IsNoetherianRing A] [IsDomain A] in
 /-- The image of the Laurent diagonal `epsilonHom_gen f` equals the kernel
@@ -408,12 +400,9 @@ theorem range_epsilonHom_gen_eq_ker_deltaMap_gen
   ext p
   refine ⟨?_, ?_⟩
   · rintro ⟨a, rfl⟩
-    change deltaMap_gen f (epsilonHom_gen f a) = 0
     exact h_eps_ker a
   · intro hp
-    have hker : deltaMap_gen f p = 0 := hp
-    obtain ⟨a, ha⟩ := h_ker_eps p hker
-    exact ⟨a, ha⟩
+    exact h_ker_eps p hp
 
 /-- **Algebraic Laurent diagonal is a topological embedding** (T134, the
 algebraic missing fact for T133's `h_alg_inducing`).
