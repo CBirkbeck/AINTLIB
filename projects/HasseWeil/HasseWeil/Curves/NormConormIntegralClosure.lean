@@ -565,6 +565,91 @@ theorem bPrime_valuation_eq_pointValuation_of_coordGen_le_one
     rw [Valuation.isEquiv_iff_valuationSubring]; rw [hA, hBv] at hEq; exact hEq.symm
   exact Valuation.isEquiv_iff_eq_of_surjective_withZeroInt _ _ hwsurj hpvsurj h_isEquiv
 
+/-! ### The ∞ case of the place classification (curve-completeness, infinity half)
+
+If a height-one prime `v` of `B` has a *pole* of `coordXFun C₁` (`1 < v(x₁)`), then `v` is the place
+at infinity `ordAtInftyValuation`.  The structural reduction below
+(`bPrime_valuation_eq_ordAtInfty_of_subring_le`) packages `ordAtInftyValuation` as the rank-one
+valuation it is and runs the same DVR-domination as the point case, *given* the valuation-subring
+inclusion `O_v ⊆ O_∞` — i.e. `v(g) ≤ 1 → 0 ≤ ord_∞ g` for all `g`.
+
+**That inclusion is the genuine remaining content** (the project's standing curve-completeness wall in
+its sharpest, fully-isolated form).  It is the statement that a `v`-integral function is regular at
+`∞`, for a `B`-prime `v` whose center on `C₁` is at infinity (`1 < v(x₁)`).  Equivalently it is the
+*uniqueness of the place of `K(C₁)` over the `∞`-place of `F(x₁)`* — the fundamental identity
+`Σ e·f = [K(C₁) : F(x₁)] = 2` with the `∞`-place totally accounting for it (`e = 2`, `f = 1`, one
+point at infinity).  The `RamificationAtInfinity.Sinf` machinery (`finrank_eq_sum_ramificationIdx_…`)
+is the intended vehicle, but `ordAtInftyValuation` is *not* packaged as the adic valuation of a local
+ring at `∞` in the project (it is the degree-based `−intDegree ∘ N`), so the center-domination route
+that closes the point case has no `∞` analogue without first building that packaging.  This is
+isolated as the named hypothesis `hsub` below. -/
+
+/-- **The ∞ case of the place classification, structural reduction**: given the valuation-subring
+inclusion `O_v ⊆ O_∞` (`hsub`), a height-one prime `v` of `B` *is* the place at infinity.  Mirrors
+the point case: `O_v` is a rank-one DVR, `O_∞ ≠ ⊤` (`ordAtInftyValuation` nontrivial), so
+`rankOne_valuationSubring_le_eq_of_ne_top` forces `O_v = O_∞`, and the two surjective `ℤᵐ⁰`-valued
+valuations are equal. -/
+theorem bPrime_valuation_eq_ordAtInfty_of_subring_le
+    (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)))
+    (hsub : (v.valuation C₁.FunctionField).valuationSubring ≤
+      C₁.ordAtInftyValuation.valuationSubring) :
+    v.valuation C₁.FunctionField = C₁.ordAtInftyValuation := by
+  set w := v.valuation C₁.FunctionField with hw
+  have hwsurj : Function.Surjective w := v.valuation_surjective C₁.FunctionField
+  haveI : IsDiscreteValuationRing w.valuationSubring := valuationSubring_isDVR v
+  -- `O_∞ ≠ ⊤`: `ordAtInftyValuation` is nontrivial (surjective onto `ℤᵐ⁰`).
+  have hBtop : C₁.ordAtInftyValuation.valuationSubring ≠ ⊤ := by
+    have hNontriv : C₁.ordAtInftyValuation.IsNontrivial := by
+      refine ⟨?_⟩
+      obtain ⟨z, hz⟩ := C₁.ordAtInftyValuation_surjective (WithZero.exp (1 : ℤ))
+      refine ⟨z, ?_, ?_⟩
+      · rw [hz]; exact WithZero.exp_ne_zero
+      · rw [hz, show (1 : WithZero (Multiplicative ℤ)) = WithZero.exp (0 : ℤ) from
+          (WithZero.exp_zero).symm, Ne, WithZero.exp_inj]; norm_num
+    intro htop; exact (Valuation.valuationSubring_eq_top_iff _).mp htop hNontriv
+  -- DVR-domination: `O_v = O_∞`, then upgrade equal subrings to the value identity.
+  have hEq : w.valuationSubring = C₁.ordAtInftyValuation.valuationSubring :=
+    rankOne_valuationSubring_le_eq_of_ne_top _ _ hsub hBtop
+  refine Valuation.isEquiv_iff_eq_of_surjective_withZeroInt _ _ hwsurj
+    C₁.ordAtInftyValuation_surjective ?_
+  rw [Valuation.isEquiv_iff_valuationSubring]; exact hEq
+
+/-- **The ∞-inclusion residual (the sharply-isolated curve-completeness wall)**: for every
+height-one prime `v` of `B` that is *not* `≤ 1` on both coordinate generators of `C₁` (so its center
+is at infinity), the `v`-adic valuation subring is contained in the `∞`-place subring.  Equivalently:
+a `v`-integral function is regular at `∞`, for a `B`-prime `v` with a pole of `x₁` — i.e. there is a
+*unique* place of `K(C₁)` over the `∞`-place of `F(x₁)`.  This is the only remaining input of the
+place classification (the `∞` half); the point half is discharged unconditionally
+(`bPrime_valuation_eq_pointValuation_of_coordGen_le_one`). -/
+def BPrimeInftyInclusion : Prop :=
+  ∀ v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)),
+    ¬ (v.valuation C₁.FunctionField (coordXFun C₁) ≤ 1 ∧
+        v.valuation C₁.FunctionField (coordYFun C₁) ≤ 1) →
+      (v.valuation C₁.FunctionField).valuationSubring ≤ C₁.ordAtInftyValuation.valuationSubring
+
+/-- **The place classification, reduced to the ∞-inclusion residual** (the affine half discharged):
+given `BPrimeInftyInclusion`, the full curve-completeness classification `BPrimePlaceClassification`
+holds.  Case split on whether `v` is `≤ 1` on both coordinate generators: if so, the *point* case
+`bPrime_valuation_eq_pointValuation_of_coordGen_le_one` (axiom-clean) gives the point alternative; if
+not, the *infinity* case `bPrime_valuation_eq_ordAtInfty_of_subring_le` together with the residual
+inclusion gives the `∞` alternative.
+
+This isolates the entire remaining content of the classification into the single geometric hypothesis
+`BPrimeInftyInclusion` (uniqueness of the place over `∞` of `F(x₁)`). -/
+theorem bPrimePlaceClassification_of_inftyInclusion
+    [IsIntegrallyClosed C₁.CoordinateRing]
+    (hincl : BPrimeInftyInclusion (C₁ := C₁) (C₂ := C₂)) :
+    BPrimePlaceClassification (C₁ := C₁) (C₂ := C₂) := by
+  intro v
+  by_cases hgen : v.valuation C₁.FunctionField (coordXFun C₁) ≤ 1 ∧
+      v.valuation C₁.FunctionField (coordYFun C₁) ≤ 1
+  · -- point case (affine half, axiom-clean)
+    obtain ⟨P, hP⟩ :=
+      bPrime_valuation_eq_pointValuation_of_coordGen_le_one v hgen.1 hgen.2
+    exact Or.inl ⟨P, hP⟩
+  · -- infinity case (modulo the inclusion residual)
+    exact Or.inr (bPrime_valuation_eq_ordAtInfty_of_subring_le v (hincl v hgen))
+
 /-- **The place-dictionary residual from the curve-completeness classification + regularity**
 (axiom-clean): given the sharp place classification `BPrimePlaceClassification` and the
 basepoint-regularity `OrdAtInftyReg` (`hreg`), the residual `BPrimeValuationCoordGenLeOne` follows
