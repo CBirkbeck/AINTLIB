@@ -404,12 +404,9 @@ theorem hSpa_surj_from_spanTop
     IsLocalization.isPrime_of_isPrime_disjoint
       (Submonoid.powers (C.base.canonicalMap D.1.s))
       (presheafValue D.1) p hp hdisj, ?_⟩
-  have hcomap := IsLocalization.comap_map_of_isPrime_disjoint
+  exact IsLocalization.comap_map_of_isPrime_disjoint
     (Submonoid.powers (C.base.canonicalMap D.1.s))
     (presheafValue D.1) hp hdisj
-  -- `Ideal.under (presheafValue C.base)` unfolds to `Ideal.comap (algebraMap …)`, and the
-  -- algebra map is definitionally `restrictionMapHom` under the algebra structure we set up.
-  exact hcomap
 
 theorem flat_over_base_tate
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
@@ -425,9 +422,6 @@ theorem flat_over_base_tate
       (C.base.canonicalMap D.1.s) (presheafValue D.1) _
       (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra :=
     restrictionMap_isLocalization P C.base D.1 (C.hsubset D.1 D.2)
-  -- `IsLocalization.flat` delivers `Module.Flat` from the `IsLocalization` structure.
-  -- The ambient `Module` structure is `Algebra.toModule`, which matches
-  -- `(restrictionMapHom ...).toModule` by definition.
   exact IsLocalization.flat (presheafValue D.1) (Submonoid.powers (C.base.canonicalMap D.1.s))
 
 theorem flat_over_base_tate_laurent
@@ -482,20 +476,10 @@ theorem flat_over_base_tate_laurent
       @Module.Flat (presheafValue C.base) (presheafValue D.1) _ _
         ((restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toModule) := by
   intro D
-  -- Extract the Laurent witness: D.1 = laurentMinusDatum C.base f_D.
   obtain ⟨f, hf_eq⟩ := laurent_witness D
-  -- Rewrite D.1 as laurentMinusDatum C.base f and the membership / restriction
-  -- accordingly. We do this by `subst`-ing the equality, which requires
-  -- discharging the subtype side.
-  -- The subtype carries `hD : D.1 ∈ C.covers`; rewriting `D.1` to `laurentMinusDatum`
-  -- means we transport the membership proof correspondingly.
   rcases D with ⟨D_val, hD_mem⟩
   simp only at hf_eq
   subst hf_eq
-  -- Now `D = ⟨laurentMinusDatum C.base f, hD_mem⟩` and the goal is
-  -- `Module.Flat (presheafValue C.base) (presheafValue (laurentMinusDatum C.base f))`
-  -- along `restrictionMapHom C.base (laurentMinusDatum C.base f) ...`.
-  -- Apply the Laurent-shape flatness theorem.
   exact restrictionMap_flat_via_iteratedMinus P C.base f
     (C.hsubset (laurentMinusDatum C.base f) hD_mem)
     hNoeth_B hA_complete_B hnoeth_B hP_A₀Noeth_B
