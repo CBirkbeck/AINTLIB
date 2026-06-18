@@ -129,8 +129,8 @@ Since primes are totally ordered, `J.minimalPrimes` is a singleton
 theorem minimalPrime_unique {J : Ideal A} {P Q : Ideal A}
     (hP : P ∈ J.minimalPrimes) (hQ : Q ∈ J.minimalPrimes) : P = Q := by
   rcases ideal_le_total A P Q with h | h
-  · exact le_antisymm h (hQ.2 ⟨hP.1.1, hP.1.2⟩ h)
-  · exact le_antisymm (hP.2 ⟨hQ.1.1, hQ.1.2⟩ h) h
+  · exact le_antisymm h (hQ.2 hP.1 h)
+  · exact le_antisymm (hP.2 hQ.1 h) h
 
 /-- In a valuation ring, a prime `P` contains an ideal `J` if and only if `P`
 is above the minimal prime of `J` (when it exists).
@@ -138,10 +138,8 @@ is above the minimal prime of `J` (when it exists).
 Since primes are totally ordered, any prime containing `J` is comparable
 with the minimal prime, and minimality forces the minimal prime to be below. -/
 theorem minimalPrime_le_of_le {J : Ideal A} {P Q : Ideal A} [P.IsPrime]
-    (hQ : Q ∈ J.minimalPrimes) (hJP : J ≤ P) : Q ≤ P := by
-  rcases ideal_le_total A Q P with h | h
-  · exact h
-  · exact hQ.2 ⟨‹P.IsPrime›, hJP⟩ h
+    (hQ : Q ∈ J.minimalPrimes) (hJP : J ≤ P) : Q ≤ P :=
+  (ideal_le_total A Q P).elim id (hQ.2 ⟨‹P.IsPrime›, hJP⟩)
 
 /-! ### Height-1 primes: what is and is not true
 
@@ -183,8 +181,7 @@ would be a smaller prime containing `J`, contradicting `Q`'s minimality. -/
 theorem not_le_of_lt_minimalPrime {J : Ideal A} {P Q : Ideal A}
     [P.IsPrime] (hQ : Q ∈ J.minimalPrimes) (hPQ : P < Q) : ¬(J ≤ P) := by
   intro hJP
-  have h1 : Q ≤ P := hQ.2 ⟨‹P.IsPrime›, hJP⟩ hPQ.le
-  exact absurd h1 (not_le_of_gt hPQ)
+  exact absurd (hQ.2 ⟨‹P.IsPrime›, hJP⟩ hPQ.le) (not_le_of_gt hPQ)
 
 /-- In a valuation ring, for any two elements `a b`, either `a` divides `b`
 or `b` divides `a`. This is the divisibility form of the valuation ring property. -/
@@ -270,15 +267,11 @@ theorem convexSubgroupOfPrime_bot (A : ValuationSubring K) :
   have hx_ne : x ≠ 0 := by
     intro he; exact Units.ne_zero g (hx ▸ (show A.valuation x = 0 by simp [he]))
   rcases A.mem_or_inv_mem x with hxA | hxA
-  · have : (⟨x, hxA⟩ : A) ∈ (⊥ : Ideal A).primeCompl := by
-      simp only [Ideal.primeCompl, Submodule.bot_coe, Submonoid.mem_mk, Subsemigroup.mem_mk,
-        Set.mem_compl_iff, Set.mem_singleton_iff]
-      exact fun h => hx_ne (Subtype.mk.inj h ▸ rfl)
+  · have : (⟨x, hxA⟩ : A) ∈ (⊥ : Ideal A).primeCompl :=
+      Ideal.mem_primeCompl_iff.mpr fun h => hx_ne (Subtype.ext_iff.mp (Ideal.mem_bot.mp h))
     exact (ofPrime_valuation_eq_one_iff_mem_primeCompl A ⊥ ⟨x, hxA⟩).mpr this
-  · have : (⟨x⁻¹, hxA⟩ : A) ∈ (⊥ : Ideal A).primeCompl := by
-      simp only [Ideal.primeCompl, Submodule.bot_coe, Submonoid.mem_mk, Subsemigroup.mem_mk,
-        Set.mem_compl_iff, Set.mem_singleton_iff]
-      exact fun h => inv_ne_zero hx_ne (Subtype.mk.inj h ▸ rfl)
+  · have : (⟨x⁻¹, hxA⟩ : A) ∈ (⊥ : Ideal A).primeCompl :=
+      Ideal.mem_primeCompl_iff.mpr fun h => inv_ne_zero hx_ne (Subtype.ext_iff.mp (Ideal.mem_bot.mp h))
     have h1 := (ofPrime_valuation_eq_one_iff_mem_primeCompl A ⊥ ⟨x⁻¹, hxA⟩).mpr this
     rw [map_inv₀] at h1; exact inv_eq_one.mp h1
 
@@ -305,16 +298,14 @@ noncomputable def primeOfConvexSubgroup (A : ValuationSubring K)
         rw [ha_zero, zero_add]
       have hvb : A.valuation (b : K) ≠ 0 := hval_eq ▸ hne
       have hueq : Units.mk0 (A.valuation ((a + b : A) : K)) hne =
-          Units.mk0 (A.valuation (b : K)) hvb :=
-        Units.ext (by change A.valuation ((a + b : A) : K) = A.valuation (b : K); exact hval_eq)
+          Units.mk0 (A.valuation (b : K)) hvb := Units.ext hval_eq
       rw [hueq]; exact hb hvb
     · by_cases hvb : A.valuation (b : K) = 0
       · have hb_zero : (b : K) = 0 := by rwa [Valuation.zero_iff] at hvb
         have hval_eq : A.valuation ((a : K) + (b : K)) = A.valuation (a : K) := by
           rw [hb_zero, add_zero]
         have hueq : Units.mk0 (A.valuation ((a + b : A) : K)) hne =
-            Units.mk0 (A.valuation (a : K)) hva :=
-          Units.ext (by change A.valuation ((a + b : A) : K) = A.valuation (a : K); exact hval_eq)
+            Units.mk0 (A.valuation (a : K)) hva := Units.ext hval_eq
         rw [hueq]; exact ha hva
       · have hua := ha hva
         have hub := hb hvb
@@ -407,14 +398,11 @@ theorem primeOfConvexSubgroup_le_of_le (A : ValuationSubring K)
     primeOfConvexSubgroup A C ≤ Q := by
   intro a ha
   by_cases hva : A.valuation (a : K) = 0
-  · have : (a : K) = 0 := by rwa [Valuation.zero_iff] at hva
-    have : a = 0 := Subtype.ext this
-    rw [this]; exact Q.zero_mem
+  · rw [show a = 0 from Subtype.ext (by rwa [Valuation.zero_iff] at hva)]
+    exact Q.zero_mem
   · have hua_H : Units.mk0 (A.valuation (a : K)) hva ∉ convexSubgroupOfPrime A Q :=
       fun hmem => ((mem_primeOfConvexSubgroup_iff A C a).mp ha hva) (hle _ hmem)
-    rw [mem_convexSubgroupOfPrime] at hua_H
-    push_neg at hua_H
-    rw [Units.val_mk0, mapOfLE_valuation_apply] at hua_H
+    rw [mem_convexSubgroupOfPrime, Units.val_mk0, mapOfLE_valuation_apply] at hua_H
     have : a ∈ idealOfLE A (A.ofPrime Q) (le_ofPrime A Q) :=
       (valuation_lt_one_iff _ _).mpr (lt_of_le_of_ne
         ((A.ofPrime Q).valuation_le_one ⟨(a : K), le_ofPrime A Q a.2⟩) hua_H)
@@ -431,10 +419,7 @@ theorem primeOfConvexSubgroup_lt_of_lt (A : ValuationSubring K)
     primeOfConvexSubgroup A C < Q := by
   refine lt_of_le_of_ne (primeOfConvexSubgroup_le_of_le A Q C hlt.le) ?_
   intro heq
-  have : ∃ g, g ∈ C ∧ g ∉ convexSubgroupOfPrime A Q := by
-    by_contra hall; push_neg at hall
-    exact ne_of_lt hlt (le_antisymm hlt.le (fun x hx => hall x hx))
-  obtain ⟨g, hgC, hgH⟩ := this
+  obtain ⟨g, hgC, hgH⟩ := SetLike.exists_of_lt hlt
   have hg' : (if g ≤ 1 then g else g⁻¹) ∈ C := by
     split_ifs with h
     · exact hgC
@@ -449,7 +434,6 @@ theorem primeOfConvexSubgroup_lt_of_lt (A : ValuationSubring K)
     · push_neg at h; exact (inv_le_one_of_one_le h.le)
   set g' := if g ≤ 1 then g else g⁻¹ with hg'_def
   rw [mem_convexSubgroupOfPrime] at hg'H
-  push_neg at hg'H
   obtain ⟨x, hx⟩ := A.valuation_surjective (g' : A.ValueGroup)
   have hx_ne : x ≠ 0 := by
     intro he; exact Units.ne_zero g' (by rw [← hx]; simp [he])
@@ -459,9 +443,8 @@ theorem primeOfConvexSubgroup_lt_of_lt (A : ValuationSubring K)
     rw [show (a : K) = x from rfl, hx]; exact Units.ne_zero g'
   have hunit_eq : Units.mk0 (A.valuation (a : K)) hva = g' := by
     ext; simp [show (a : K) = x from rfl, hx]
-  have ha_not_prime : a ∉ primeOfConvexSubgroup A C := by
-    rw [mem_primeOfConvexSubgroup_iff]
-    push_neg; exact ⟨hva, hunit_eq ▸ hg'⟩
+  have ha_not_prime : a ∉ primeOfConvexSubgroup A C :=
+    (not_mem_primeOfConvexSubgroup_iff A C a).mpr ⟨hva, hunit_eq ▸ hg'⟩
   have hmap2 : mapOfLE A (A.ofPrime Q) (le_ofPrime A Q) (g' : A.ValueGroup) =
       (A.ofPrime Q).valuation x := by rw [← hx, mapOfLE_valuation_apply]
   have hne1 : (A.ofPrime Q).valuation x ≠ 1 := by rw [← hmap2]; exact hg'H
@@ -491,8 +474,7 @@ theorem primeOfConvexSubgroup_eq_bot_imp_eq_top (A : ValuationSubring K)
     have ha_not_mem : a ∉ primeOfConvexSubgroup A C := by
       intro hmem
       rw [h] at hmem
-      have := Ideal.mem_bot.mp hmem
-      exact hx_ne (Subtype.ext_iff.mp this)
+      exact hx_ne (Subtype.ext_iff.mp (Ideal.mem_bot.mp hmem))
     rw [not_mem_primeOfConvexSubgroup_iff] at ha_not_mem
     obtain ⟨_, hmem⟩ := ha_not_mem
     have : Units.mk0 (A.valuation (a : K)) hva = u := by
@@ -504,8 +486,7 @@ theorem primeOfConvexSubgroup_eq_bot_imp_eq_top (A : ValuationSubring K)
     have ha_not_mem : a ∉ primeOfConvexSubgroup A C := by
       intro hmem
       rw [h] at hmem
-      have := Ideal.mem_bot.mp hmem
-      exact inv_ne_zero hx_ne (Subtype.ext_iff.mp this)
+      exact inv_ne_zero hx_ne (Subtype.ext_iff.mp (Ideal.mem_bot.mp hmem))
     rw [not_mem_primeOfConvexSubgroup_iff] at ha_not_mem
     obtain ⟨_, hmem⟩ := ha_not_mem
     have hval_inv : A.valuation (a : K) = (↑u)⁻¹ := by
@@ -619,9 +600,8 @@ theorem le_convexSubgroupOfPrime_primeOfConvexSubgroup (A : ValuationSubring K)
       rw [show (a : K) = x from rfl]; rwa [Valuation.ne_zero_iff]
     have hunit_eq : Units.mk0 (A.valuation (a : K)) hva = g := by
       ext; simp [show (a : K) = x from rfl, hx]
-    have ha_not_mem : a ∉ primeOfConvexSubgroup A H := by
-      rw [mem_primeOfConvexSubgroup_iff]; push_neg
-      exact ⟨hva, hunit_eq ▸ hg⟩
+    have ha_not_mem : a ∉ primeOfConvexSubgroup A H :=
+      (not_mem_primeOfConvexSubgroup_iff A H a).mpr ⟨hva, hunit_eq ▸ hg⟩
     exact (ofPrime_valuation_eq_one_iff_mem_primeCompl A
       (primeOfConvexSubgroup A H) a).mpr ha_not_mem
   · set a : A := ⟨x⁻¹, hxA⟩
@@ -629,9 +609,8 @@ theorem le_convexSubgroupOfPrime_primeOfConvexSubgroup (A : ValuationSubring K)
       rw [show (a : K) = x⁻¹ from rfl, Valuation.ne_zero_iff]; exact inv_ne_zero hx_ne
     have hunit_eq : Units.mk0 (A.valuation (a : K)) hva = g⁻¹ := by
       ext; simp [show (a : K) = x⁻¹ from rfl, map_inv₀, hx, Units.val_inv_eq_inv_val]
-    have ha_not_mem : a ∉ primeOfConvexSubgroup A H := by
-      rw [mem_primeOfConvexSubgroup_iff]; push_neg
-      exact ⟨hva, hunit_eq ▸ inv_mem hg⟩
+    have ha_not_mem : a ∉ primeOfConvexSubgroup A H :=
+      (not_mem_primeOfConvexSubgroup_iff A H a).mpr ⟨hva, hunit_eq ▸ inv_mem hg⟩
     have h1 := (ofPrime_valuation_eq_one_iff_mem_primeCompl A
       (primeOfConvexSubgroup A H) a).mpr ha_not_mem
     rw [show (a : K) = x⁻¹ from rfl, map_inv₀] at h1
