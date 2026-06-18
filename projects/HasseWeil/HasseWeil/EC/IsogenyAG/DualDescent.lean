@@ -1053,6 +1053,37 @@ theorem fracTowerIncl_injective (C : SmoothPlaneCurve F)
   letI := C.isDomain_tensorCoordRing (AlgebraicClosure F)
   exact (fracTowerIncl C M).injective
 
+/-- **Equivariance of `fracTowerIncl`.** If `σ : K̄ ≃ₐ[F] K̄` restricts to `τ : M ≃ₐ[F] M`, then
+`fracTowerIncl` intertwines `galActFrac C M τ` (downstairs) with `galActFrac C K̄ σ` (upstairs). The
+ring-hom equality is checked on the `algebraMap` images via `IsFractionRing.ringHom_ext`, where it
+reduces to the ring-level `towerTensorIncl_congr`. -/
+theorem fracTowerIncl_galActFrac (C : SmoothPlaneCurve F)
+    (M : IntermediateField F (AlgebraicClosure F))
+    (σ : AlgebraicClosure F ≃ₐ[F] AlgebraicClosure F) (τ : M ≃ₐ[F] M)
+    (hστ : ∀ m : M, σ (m : AlgebraicClosure F) = (τ m : AlgebraicClosure F))
+    (y : letI := C.isDomain_tensorCoordRing M
+         FractionRing (M ⊗[F] C.toAffine.CoordinateRing)) :
+    letI := C.isDomain_tensorCoordRing M
+    letI := C.isDomain_tensorCoordRing (AlgebraicClosure F)
+    fracTowerIncl C M (galActFrac C M τ y) = galActFrac C (AlgebraicClosure F) σ (fracTowerIncl C M y) := by
+  letI := C.isDomain_tensorCoordRing M
+  letI := C.isDomain_tensorCoordRing (AlgebraicClosure F)
+  -- the key compatibility on a single `algebraMap` image
+  have key : ∀ b : M ⊗[F] C.toAffine.CoordinateRing,
+      fracTowerIncl C M (galActFrac C M τ
+          (algebraMap (M ⊗[F] C.toAffine.CoordinateRing) _ b)) =
+        galActFrac C (AlgebraicClosure F) σ (fracTowerIncl C M
+          (algebraMap (M ⊗[F] C.toAffine.CoordinateRing) _ b)) := by
+    intro b
+    rw [galActFrac_algebraMap, fracTowerIncl_algebraMap, fracTowerIncl_algebraMap,
+      galActFrac_algebraMap]
+    congr 1
+    exact towerTensorIncl_congr C.toAffine.CoordinateRing M σ τ hστ b
+  -- reduce `y` to a ratio of `algebraMap` images
+  obtain ⟨a, d, -, rfl⟩ := IsFractionRing.div_surjective
+    (A := M ⊗[F] C.toAffine.CoordinateRing) y
+  rw [map_div₀, map_div₀, map_div₀, map_div₀, key a, key d]
+
 end TowerDescent
 
 /-- **A `DescentData` over a concrete finite Galois intermediate field of `K̄`** (MOVE 1's data
