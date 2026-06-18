@@ -241,11 +241,11 @@ private theorem coeff_X_pow_mul_pow_eq_of_coeff_eq
     by_cases hjb : j ≥ b
     · congr 1
       exact coeff_pow_eq_of_coeff_eq g₁ g₂ n hg b j hj_le
-    · push_neg at hjb
+    · push Not at hjb
       have e1 : PowerSeries.coeff j (g₁ ^ b) = 0 := coeff_pow_eq_zero_of_gt g₁ h1 j b hjb
       have e2 : PowerSeries.coeff j (g₂ ^ b) = 0 := coeff_pow_eq_zero_of_gt g₂ h2 j b hjb
       rw [e1, e2]
-  · rw [PowerSeries.coeff_X_pow, if_neg (fun h => hia h)]
+  · rw [PowerSeries.coeff_X_pow, if_neg (fun h ↦ hia h)]
     rw [zero_mul, zero_mul]
 
 /-- **MvPowerSeries stabilisation for the `![X, g]` substitution**: if `g₁` and
@@ -276,7 +276,7 @@ theorem FormalGroup.coeff_fAdd_X_eq_of_coeff_eq
     intro d
     congr 1
     -- Expand `d.prod (s e => ![X, g] s ^ e)` to `X^(d 0) * g^(d 1)`.
-    rw [Finsupp.prod_fintype _ _ (fun i => by fin_cases i <;> exact pow_zero _),
+    rw [Finsupp.prod_fintype _ _ (fun i ↦ by fin_cases i <;> exact pow_zero _),
         Fin.prod_univ_two]
     rfl
   rw [main g₁ h1, main g₂ h2]
@@ -406,7 +406,7 @@ private theorem coeff_X_pow_mul_add_monomial_pow
     exact coeff_add_monomial_pow_eq g hg n c j
   · -- a ≥ 1: the "if" vanishes, and we need to show
     -- coeff (n+1) (X^a * (g+h)^j) = coeff (n+1) (X^a * g^j).
-    have hand_fail : ¬ (a = 0 ∧ j = 1) := fun hand => ha0 hand.1
+    have hand_fail : ¬ (a = 0 ∧ j = 1) := fun hand ↦ ha0 hand.1
     rw [if_neg hand_fail]
     rw [add_zero]
     -- By coeff_mul, coeff (n+1) (X^a * f) = coeff (n+1 - a) f (when a ≤ n+1).
@@ -466,7 +466,7 @@ theorem FormalGroup.coeff_fAdd_X_add_monomial (F : FormalGroup R)
     apply finsum_congr
     intro d
     congr 1
-    rw [Finsupp.prod_fintype _ _ (fun i => by fin_cases i <;> exact pow_zero _),
+    rw [Finsupp.prod_fintype _ _ (fun i ↦ by fin_cases i <;> exact pow_zero _),
         Fin.prod_univ_two]
     rfl
   have rhs_eq :
@@ -481,7 +481,7 @@ theorem FormalGroup.coeff_fAdd_X_add_monomial (F : FormalGroup R)
     apply finsum_congr
     intro d
     congr 1
-    rw [Finsupp.prod_fintype _ _ (fun i => by fin_cases i <;> exact pow_zero _),
+    rw [Finsupp.prod_fintype _ _ (fun i ↦ by fin_cases i <;> exact pow_zero _),
         Fin.prod_univ_two]
     rfl
   rw [lhs_eq, rhs_eq]
@@ -498,27 +498,27 @@ theorem FormalGroup.coeff_fAdd_X_add_monomial (F : FormalGroup R)
         (if d 0 = 0 ∧ d 1 = 1 then c else 0) := by
     intro d
     rw [coeff_X_pow_mul_add_monomial_pow g hg n c (d 0) (d 1), smul_add]
-  rw [show (fun d : Fin 2 →₀ ℕ => MvPowerSeries.coeff d F.toSeries •
+  rw [show (fun d : Fin 2 →₀ ℕ ↦ MvPowerSeries.coeff d F.toSeries •
           PowerSeries.coeff (n + 1)
             ((PowerSeries.X : PowerSeries R) ^ (d 0) *
               (g + PowerSeries.C c * PowerSeries.X ^ (n + 1)) ^ (d 1))) =
-        (fun d : Fin 2 →₀ ℕ => MvPowerSeries.coeff d F.toSeries •
+        (fun d : Fin 2 →₀ ℕ ↦ MvPowerSeries.coeff d F.toSeries •
           PowerSeries.coeff (n + 1)
             ((PowerSeries.X : PowerSeries R) ^ (d 0) * g ^ (d 1)) +
             MvPowerSeries.coeff d F.toSeries •
               (if d 0 = 0 ∧ d 1 = 1 then c else 0)) from funext key]
   -- Split the finsum into two.
-  have hfin1 : (fun d : Fin 2 →₀ ℕ => MvPowerSeries.coeff d F.toSeries •
+  have hfin1 : (fun d : Fin 2 →₀ ℕ ↦ MvPowerSeries.coeff d F.toSeries •
         PowerSeries.coeff (n + 1)
           ((PowerSeries.X : PowerSeries R) ^ (d 0) * g ^ (d 1))).support.Finite := by
     -- The support is finite because of MvPowerSeries.coeff_subst_finite.
     have hfinite := MvPowerSeries.coeff_subst_finite ha_g F.toSeries (Finsupp.single () (n + 1))
     -- `hfinite` is `HasFiniteSupport` which unfolds to `.support.Finite`.
     -- We show our support equals the original support.
-    have hfinite' : (fun d : Fin 2 →₀ ℕ =>
+    have hfinite' : (fun d : Fin 2 →₀ ℕ ↦
         MvPowerSeries.coeff d F.toSeries •
         MvPowerSeries.coeff (Finsupp.single () (n + 1))
-          (d.prod fun s e =>
+          (d.prod fun s e ↦
             (show Fin 2 → MvPowerSeries Unit R from ![PowerSeries.X, g]) s ^ e)).support.Finite :=
       hfinite
     refine hfinite'.subset ?_
@@ -530,17 +530,17 @@ theorem FormalGroup.coeff_fAdd_X_add_monomial (F : FormalGroup R)
     -- then the coeffs are equal.
     have prod_eq :
         (MvPowerSeries.coeff (Finsupp.single () (n + 1))
-            (d.prod fun s e =>
+            (d.prod fun s e ↦
               (show Fin 2 → MvPowerSeries Unit R from ![PowerSeries.X, g]) s ^ e)) =
           PowerSeries.coeff (n + 1)
             ((PowerSeries.X : PowerSeries R) ^ (d 0) * g ^ (d 1)) := by
       congr 1
-      rw [Finsupp.prod_fintype _ _ (fun i => by fin_cases i <;> exact pow_zero _),
+      rw [Finsupp.prod_fintype _ _ (fun i ↦ by fin_cases i <;> exact pow_zero _),
           Fin.prod_univ_two]
       rfl
     rw [prod_eq]
     exact hd
-  have hfin2 : (fun d : Fin 2 →₀ ℕ => MvPowerSeries.coeff d F.toSeries •
+  have hfin2 : (fun d : Fin 2 →₀ ℕ ↦ MvPowerSeries.coeff d F.toSeries •
         (if d 0 = 0 ∧ d 1 = 1 then c else 0)).support.Finite := by
     -- Support ⊆ {Finsupp.single 1 1}.
     apply Set.Finite.subset (Set.finite_singleton (Finsupp.single (1 : Fin 2) 1))
@@ -553,7 +553,7 @@ theorem FormalGroup.coeff_fAdd_X_add_monomial (F : FormalGroup R)
       intro ⟨h0, h1⟩
       apply hne
       ext i
-      fin_cases i <;> simp [Finsupp.single_apply, h0, h1]
+      fin_cases i <;> simp [h0, h1]
     rw [if_neg this, smul_zero]
   rw [finsum_add_distrib hfin1 hfin2]
   -- The second finsum equals `coeff_01 F * c = 1 * c = c`.
@@ -565,13 +565,13 @@ theorem FormalGroup.coeff_fAdd_X_add_monomial (F : FormalGroup R)
       intro ⟨h0, h1⟩
       apply hd
       ext i
-      fin_cases i <;> simp [Finsupp.single_apply, h0, h1]
+      fin_cases i <;> simp [h0, h1]
     rw [if_neg this, smul_zero])]
   -- Eval at d = Finsupp.single 1 1: d 0 = 0, d 1 = 1.
   have hd01 : (Finsupp.single (1 : Fin 2) 1) 0 = 0 := by
-    simp [Finsupp.single_apply]
+    simp
   have hd11 : (Finsupp.single (1 : Fin 2) 1) 1 = 1 := by
-    simp [Finsupp.single_apply]
+    simp
   rw [hd01, hd11]
   rw [if_pos ⟨rfl, rfl⟩]
   -- coeff (Finsupp.single 1 1) F.toSeries = 1 by the right-unit axiom.
