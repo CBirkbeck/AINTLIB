@@ -206,8 +206,8 @@ theorem mulByInt_x_sub_mulByInt_x (m n : ℤ) (hm : m ≠ 0) (hn : n ≠ 0) :
 theorem mulByInt_x_ne_mulByInt_x (m n : ℤ) (hm : m ≠ 0) (hn : n ≠ 0) (hne : m ≠ n)
     (hneg : m ≠ -n) : mulByInt_x W m ≠ mulByInt_x W n := by
   rw [← sub_ne_zero, mulByInt_x_sub_mulByInt_x W m n hm hn]
-  have hnm : n + m ≠ 0 := fun h => hneg (by lia)
-  have hn_sub_m : n - m ≠ 0 := fun h => hne (by lia)
+  have hnm : n + m ≠ 0 := fun h ↦ hneg (by lia)
+  have hn_sub_m : n - m ≠ 0 := fun h ↦ hne (by lia)
   refine div_ne_zero (mul_ne_zero ?_ ?_) (pow_ne_zero _ <| mul_ne_zero ?_ ?_)
   · exact ψ_ff_ne_zero W hnm
   · exact ψ_ff_ne_zero W hn_sub_m
@@ -471,7 +471,6 @@ theorem zsmul_genericPoint_eq (n : ℤ) (hn : n ≠ 0) :
           (Affine.Point.some (x_gen W) (y_gen W) hns)) =
       WeierstrassCurve.Jacobian.Point.toAffine (W_KE W)
         (smulEval (W_KE W) (x_gen W) (y_gen W) n) := by
-    change _ = WeierstrassCurve.Jacobian.Point.toAffine (W_KE W) _
     unfold WeierstrassCurve.Jacobian.Point.toAffineLift
     rw [h_smulEval]
     rfl
@@ -546,7 +545,6 @@ theorem zsmul_affine_point_eq (m : ℤ) {x₀ y₀ : KE}
           (Affine.Point.some x₀ y₀ h_ns)) =
       WeierstrassCurve.Jacobian.Point.toAffine (W_KE W)
         (smulEval (W_KE W) x₀ y₀ m) := by
-    change _ = WeierstrassCurve.Jacobian.Point.toAffine (W_KE W) _
     unfold WeierstrassCurve.Jacobian.Point.toAffineLift
     rw [h_smulEval]
     rfl
@@ -557,7 +555,7 @@ private lemma zsmul_genericPoint_ne_zero (n : ℤ) (hn : n ≠ 0) :
     (n : ℤ) • genericPoint W ≠ (0 : (W_KE W).toAffine.Point) := by
   obtain ⟨_, h_eq⟩ := zsmul_genericPoint_eq W n hn
   rw [h_eq]
-  exact fun h => by cases h
+  exact fun h ↦ by cases h
 
 /-- **Injectivity of `n ↦ [n]` (Silverman III.4.2b)**: if two nonzero integers `a, b`
     give the same `mulByInt_x` AND `mulByInt_y` coordinates, then `a = b`. Matching the
