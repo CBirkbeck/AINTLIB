@@ -167,9 +167,8 @@ theorem ker_deltaMap_le_range_epsilonHom (f : A) :
       TateAlgebra.quotientOneSubfXToLoc f b₂ := sub_eq_zero.mp h
   set a := TateAlgebra.quotientFSubXToA f b₁
   -- b₁ = AToQuotientFSubX(a) since the equiv round-trips
-  have hb₁ : TateAlgebra.AToQuotientFSubX f a = b₁ := by
-    change (TateAlgebra.quotientFSubXEquiv f).symm (TateAlgebra.quotientFSubXEquiv f b₁) = b₁
-    exact (TateAlgebra.quotientFSubXEquiv f).symm_apply_apply b₁
+  have hb₁ : TateAlgebra.AToQuotientFSubX f a = b₁ :=
+    (TateAlgebra.quotientFSubXEquiv f).symm_apply_apply b₁
   -- quotientOneSubfXToLoc(mk(algebraMap a)) = algebraMap(a)
   have himg : TateAlgebra.quotientOneSubfXToLoc f
       ((Ideal.Quotient.mk _) (algebraMap A ↥(TateAlgebra A) a)) =
@@ -423,8 +422,7 @@ theorem tendsto_pow_mul_of_algebraMap_mem_oneSubfX (f a : A)
   have hpow : ∀ n, TateAlgebra.coeff n c = f ^ n * a := by
     intro n
     induction n with
-    | zero =>
-        simpa using h0
+    | zero => simpa using h0
     | succ n ih =>
         rw [hstep n, ih, pow_succ, mul_assoc]
         ring
@@ -437,9 +435,8 @@ This packages the second projection of the simple Laurent row in a form that
 the separation proof can use directly. -/
 theorem tendsto_pow_mul_of_epsilonHom_gen_second_eq_zero (f a : A)
     (h2 : (epsilonHom_gen f a).2 = 0) :
-    Filter.Tendsto (fun n : ℕ => f ^ n * a) Filter.cofinite (nhds (0 : A)) := by
-  apply tendsto_pow_mul_of_algebraMap_mem_oneSubfX
-  exact Ideal.Quotient.eq_zero_iff_mem.mp h2
+    Filter.Tendsto (fun n : ℕ => f ^ n * a) Filter.cofinite (nhds (0 : A)) :=
+  tendsto_pow_mul_of_algebraMap_mem_oneSubfX f a (Ideal.Quotient.eq_zero_iff_mem.mp h2)
 
 omit [IsNoetherianRing A] [IsDomain A] in
 /-- Kernel data for `ε` in the simple Laurent row.
@@ -457,10 +454,9 @@ theorem epsilonHom_gen_eq_zero_coeff_data (f a : A)
     Filter.Tendsto (fun n : ℕ => f ^ n * a) Filter.cofinite (nhds (0 : A)) := by
   have h1 : (epsilonHom_gen f a).1 = 0 := congr_arg Prod.fst h
   have h2 : (epsilonHom_gen f a).2 = 0 := congr_arg Prod.snd h
-  constructor
-  · apply exists_coeff_tendsto_and_pow_mul_of_algebraMap_mem_fSubX
-    exact Ideal.Quotient.eq_zero_iff_mem.mp h1
-  · exact tendsto_pow_mul_of_epsilonHom_gen_second_eq_zero f a h2
+  refine ⟨exists_coeff_tendsto_and_pow_mul_of_algebraMap_mem_fSubX f a
+      (Ideal.Quotient.eq_zero_iff_mem.mp h1),
+    tendsto_pow_mul_of_epsilonHom_gen_second_eq_zero f a h2⟩
 
 omit [IsNoetherianRing A] [IsDomain A] in
 /-- Plus-side Krull-intersection membership for a constant in `(f - X)`.
@@ -477,8 +473,7 @@ theorem mem_iInf_pow_of_algebraMap_mem_fSubX (f a : A)
   rw [Ideal.mem_iInf]
   intro n
   cases n with
-  | zero =>
-      simp [Ideal.one_eq_top]
+  | zero => simp [Ideal.one_eq_top]
   | succ n =>
       rw [hc_pow n]
       exact Ideal.mul_mem_right _ _
@@ -531,14 +526,11 @@ theorem epsilonHom_gen_eq_zero_krull_multiplier_data (f a : A)
       Filter.Tendsto (fun n : ℕ => f ^ n * a) Filter.cofinite (nhds (0 : A)) := by
   obtain ⟨r, hr⟩ := exists_span_singleton_mul_eq_self_of_epsilonHom_gen_eq_zero f a h
   obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp r.property
-  have hcf : (c * f) * a = a := by
-    rw [hc]
-    exact hr
+  have hcf : (c * f) * a = a := by rw [hc]; exact hr
   have hcf_pow : ∀ n : ℕ, (c * f) ^ n * a = a := by
     intro n
     induction n with
-    | zero =>
-        simp
+    | zero => simp
     | succ n ih =>
         calc
           (c * f) ^ (n + 1) * a = (c * f) ^ n * ((c * f) * a) := by
