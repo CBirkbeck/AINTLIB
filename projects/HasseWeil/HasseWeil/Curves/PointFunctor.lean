@@ -155,12 +155,12 @@ theorem evalAtPullback_mk {φ : CurveMap C₁ C₂} (coordHom : φ.CoordHom)
     (Polynomial.evalRingHom x').comp (Polynomial.evalRingHom (Polynomial.C y'))
   change ρ g = σ g
   congr 1
-  refine Polynomial.ringHom_ext (fun p => ?_) ?_
+  refine Polynomial.ringHom_ext (fun p ↦ ?_) ?_
   · -- agree on `C p` for `p : F[X]`; reduce to `(ρ ∘ C) = (σ ∘ C)` and apply
     -- `Polynomial.ringHom_ext` again.
     change ρ.comp Polynomial.C p = σ.comp Polynomial.C p
     congr 1
-    refine Polynomial.ringHom_ext (fun c => ?_) ?_
+    refine Polynomial.ringHom_ext (fun c ↦ ?_) ?_
     · change ρ (Polynomial.C (Polynomial.C c)) = σ (Polynomial.C (Polynomial.C c))
       have hρ_c : ρ (Polynomial.C (Polynomial.C c)) = c := by
         change evalAtPullback coordHom P
@@ -180,8 +180,7 @@ theorem evalAtPullback_mk {φ : CurveMap C₁ C₂} (coordHom : φ.CoordHom)
           (Polynomial.C y')) (Polynomial.C Polynomial.X)) = x'
         simp
       rw [hρ_X, hσ_X]
-  · change ρ Polynomial.X = σ Polynomial.X
-    have hρ_Y : ρ Polynomial.X = y' := rfl
+  · have hρ_Y : ρ Polynomial.X = y' := rfl
     have hσ_Y : σ Polynomial.X = y' := by
       change (Polynomial.evalRingHom x') ((Polynomial.evalRingHom
         (Polynomial.C y')) Polynomial.X) = y'
