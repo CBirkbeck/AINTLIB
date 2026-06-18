@@ -126,16 +126,8 @@ theorem isUnit_root_mul_pow_one_add_X_sub_one {ζ : integerRing K} {D : ℕ}
       = ((ζ : K) ^ c - 1) + (ζ : K) ^ c * ((w : K) - 1) := by
     push_cast
     ring
-  rw [hsplit]
-  refine le_antisymm ((IsUltrametricDist.norm_add_le_max _ _).trans
-    (by rw [h1]; exact max_le le_rfl h2.le)) ?_
-  by_contra hcon
-  push Not at hcon
-  have hb := IsUltrametricDist.norm_add_le_max
-    ((ζ : K) ^ c - 1 + (ζ : K) ^ c * ((w : K) - 1))
-    (-((ζ : K) ^ c * ((w : K) - 1)))
-  rw [add_neg_cancel_right, norm_neg, h1] at hb
-  exact absurd (hb.trans_lt (max_lt hcon h2)) (lt_irrefl _)
+  rw [hsplit, IsUltrametricDist.norm_add_eq_max_of_norm_ne_norm
+    (by rw [h1]; exact ne_of_gt h2), h1, max_eq_left h2.le]
 
 /-- Ring homomorphisms commute with `Ring.inverse` at units. -/
 lemma map_ring_inverse_of_isUnit {R S : Type*} [Semiring R] [Semiring S]
@@ -343,6 +335,20 @@ lemma subst_map_neg (F : PowerSeries (integerRing K)) :
   rw [map_neg, ← PowerSeries.coe_substAlgHom hg, map_neg,
     PowerSeries.coe_substAlgHom hg]
 
+omit [IsUltrametricDist K] [CompleteSpace K] in
+/-- For `M ≠ 0`, the rescaled exponential `e^{Mt} − 1` is a nonzero power series
+over `K` (its degree-`1` coefficient is `M ≠ 0`). -/
+lemma rescale_exp_sub_one_ne_zero {M : ℕ} [NeZero M] :
+    (PowerSeries.rescale ((M : ℕ) : K) (PowerSeries.exp K) - 1 : PowerSeries K)
+      ≠ 0 := by
+  intro h0
+  have h1 := congrArg (PowerSeries.coeff 1) h0
+  rw [map_sub, PowerSeries.coeff_rescale, PowerSeries.coeff_exp,
+    PowerSeries.coeff_one] at h1
+  simp only [Nat.factorial_one, Nat.cast_one, map_one, div_one, pow_one,
+    if_neg one_ne_zero, sub_zero, map_zero] at h1
+  exact NeZero.ne M (by simpa using h1)
+
 /-- L5.2.3 step 3, the master identity: `X·H_η = −G(η⁻¹)·genBPS_{η_K}` in
 `K⟦t⟧`, with `H_η` the exp-substituted `K`-valued Mahler transform of
 `muEtaCleared` — the η⁻¹-weighted geometric numerators collapse through the
@@ -421,16 +427,7 @@ lemma X_mul_muEtaCleared_subst {D : ℕ} [NeZero D] (hD1 : 1 < D)
     ring
   -- (3) multiply by `X`, insert T504, cancel the regular factor
   have h504 := X_mul_sum_char_rescale_exp (K := K) hD1 (toFieldChar η)
-  have hreg : (PowerSeries.rescale ((D : ℕ) : K) (PowerSeries.exp K) - 1)
-      ≠ 0 := by
-    intro h0
-    have h1 := congrArg (PowerSeries.coeff 1) h0
-    rw [map_sub, PowerSeries.coeff_rescale, PowerSeries.coeff_exp,
-      PowerSeries.coeff_one] at h1
-    simp only [Nat.factorial_one, Nat.cast_one, map_one, div_one, pow_one,
-      if_neg one_ne_zero, sub_zero, map_zero] at h1
-    exact NeZero.ne D (by simpa using h1)
-  refine mul_right_cancel₀ hreg ?_
+  refine mul_right_cancel₀ (rescale_exp_sub_one_ne_zero (M := D)) ?_
   calc PowerSeries.X * (PowerSeries.map (integerRing K).subtype
           (mahlerTransform p K (muEtaCleared p K η hζ hD))).subst
           (PowerSeries.exp K - 1)
@@ -472,32 +469,25 @@ theorem muEtaCleared_moments {D : ℕ} [NeZero D] (hD1 : 1 < D)
           ((PowerSeries.map (integerRing K).subtype
             (mahlerTransform p K (muEtaCleared p K η hζ hD))).subst
             (PowerSeries.exp K - 1)) := by
-    rw [apply_powCM]
-    rw [show ((PowerSeries.constantCoeff ((del K)^[k] (mahlerTransform p K
+    rw [apply_powCM,
+      show ((PowerSeries.constantCoeff ((del K)^[k] (mahlerTransform p K
           (muEtaCleared p K η hζ hD))) : integerRing K) : K)
         = PowerSeries.constantCoeff (PowerSeries.map (integerRing K).subtype
             ((del K)^[k] (mahlerTransform p K (muEtaCleared p K η hζ hD)))) from by
       rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply,
         ← PowerSeries.coeff_zero_eq_constantCoeff_apply, PowerSeries.coeff_map]
-      rfl]
-    rw [map_subtype_del_iterate, constantCoeff_iterate_delField]
+      rfl,
+      map_subtype_del_iterate, constantCoeff_iterate_delField]
   -- the `(k+1)`-st coefficient of the master identity
   have hmaster := congrArg (PowerSeries.coeff (k + 1))
     (X_mul_muEtaCleared_subst hD1 hη hζ hζK hD)
   rw [PowerSeries.coeff_succ_X_mul, map_neg, PowerSeries.coeff_C_mul,
     PowerSeries.coeff_mk] at hmaster
   rw [hmom, hmaster, coe_gaussSum_zmodChar η hζ hζK, LvalNeg]
-  have hk1 : ((k + 1 : ℕ) : K) ≠ 0 := Nat.cast_ne_zero.2 (Nat.succ_ne_zero k)
   have hkf : ((k.factorial : ℕ) : K) ≠ 0 := Nat.cast_ne_zero.2 k.factorial_ne_zero
-  have hfact : (((k + 1).factorial : ℕ) : K)
-      = ((k + 1 : ℕ) : K) * (k.factorial : K) := by
-    rw [Nat.factorial_succ]
-    push_cast
-    ring
-  field_simp [hfact]
-  rw [hfact]
+  rw [Nat.factorial_succ]
   push_cast
-  ring
+  field_simp
 
 omit [CharZero K] in
 /-- The denominator series `w·(1+T) − 1` read back through the Mahler
@@ -604,8 +594,7 @@ lemma psi_symm_inverse_denom {ζ : integerRing K} {D : ℕ}
   -- (ii) ψ of the telescope is `δ_0 = 1`
   have hψtel : psi p K (∑ j ∈ Finset.range p,
       (ζ ^ (m * j)) • dirac K ℤ_[p] ((j : ℕ) : ℤ_[p])) = 1 := by
-    rw [psi_sum]
-    rw [Finset.sum_eq_single 0]
+    rw [psi_sum, Finset.sum_eq_single 0]
     · rw [Nat.cast_zero, psi_smul, psi_dirac_zero, mul_zero, pow_zero, one_smul]
       rfl
     · intro j hj hj0
@@ -804,28 +793,11 @@ lemma toFieldChar_prod_natCast {D : ℕ}
     rfl
   · rw [θ.map_nonunit hj]
     rcases not_and_or.mp (fun hc => hj (hsplitU.mpr hc)) with h | h
-    · rw [show (toFieldChar η) ((j : ℕ) : ZMod D)
-          = ((η ((j : ℕ) : ZMod D) : integerRing K) : K) from rfl,
-        η.map_nonunit h]
-      simp
-    · rw [show (toFieldChar χ) ((j : ℕ) : ZMod (p ^ n))
+    · simp [show (toFieldChar η) ((j : ℕ) : ZMod D)
+          = ((η ((j : ℕ) : ZMod D) : integerRing K) : K) from rfl, η.map_nonunit h]
+    · simp [show (toFieldChar χ) ((j : ℕ) : ZMod (p ^ n))
           = ((χ ((j : ℕ) : ZMod (p ^ n)) : integerRing K) : K) from rfl,
         χ.map_nonunit h]
-      simp
-
-omit [IsUltrametricDist K] [CompleteSpace K] in
-/-- For `M ≠ 0`, the rescaled exponential `e^{Mt} − 1` is a nonzero power series
-over `K` (its degree-`1` coefficient is `M ≠ 0`). -/
-lemma rescale_exp_sub_one_ne_zero {M : ℕ} [NeZero M] :
-    (PowerSeries.rescale ((M : ℕ) : K) (PowerSeries.exp K) - 1 : PowerSeries K)
-      ≠ 0 := by
-  intro h0
-  have h1 := congrArg (PowerSeries.coeff 1) h0
-  rw [map_sub, PowerSeries.coeff_rescale, PowerSeries.coeff_exp,
-    PowerSeries.coeff_one] at h1
-  simp only [Nat.factorial_one, Nat.cast_one, map_one, div_one, pow_one,
-    if_neg one_ne_zero, sub_zero, map_zero] at h1
-  exact NeZero.ne M (by simpa using h1)
 
 /-- The exp-substituted `ε^b`-line of the twist of `μ̃_η`: it is the
 `η̄⁻¹`-weighted sum of the substituted product-root inverses (the `K`-valued
@@ -1311,8 +1283,8 @@ theorem twist_muEtaCleared_moments {D : ℕ} [NeZero D] (hD1 : 1 < D)
             (mahlerTransform p K (twist p K χ.toContinuousMapZp
               (muEtaCleared p K η hζ hD)))).subst
             (PowerSeries.exp K - 1)) := by
-    rw [apply_powCM]
-    rw [show ((PowerSeries.constantCoeff ((del K)^[m] (mahlerTransform p K
+    rw [apply_powCM,
+      show ((PowerSeries.constantCoeff ((del K)^[m] (mahlerTransform p K
           (twist p K χ.toContinuousMapZp (muEtaCleared p K η hζ hD))))
             : integerRing K) : K)
         = PowerSeries.constantCoeff (PowerSeries.map (integerRing K).subtype
@@ -1320,24 +1292,17 @@ theorem twist_muEtaCleared_moments {D : ℕ} [NeZero D] (hD1 : 1 < D)
               (muEtaCleared p K η hζ hD))))) from by
       rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply,
         ← PowerSeries.coeff_zero_eq_constantCoeff_apply, PowerSeries.coeff_map]
-      rfl]
-    rw [map_subtype_del_iterate, constantCoeff_iterate_delField]
+      rfl,
+      map_subtype_del_iterate, constantCoeff_iterate_delField]
   have hmaster := congrArg (PowerSeries.coeff (m + 1))
     (X_mul_twist_muEtaCleared_subst hD1 hη hζ hζK hD hχ hε hεK hθ)
   rw [PowerSeries.coeff_succ_X_mul, map_neg, PowerSeries.coeff_C_mul,
     PowerSeries.coeff_mk] at hmaster
   rw [hmom, hmaster, coe_gaussSum_zmodChar η hζ hζK, LvalNeg]
-  have hk1 : ((m + 1 : ℕ) : K) ≠ 0 := Nat.cast_ne_zero.2 (Nat.succ_ne_zero m)
   have hkf : ((m.factorial : ℕ) : K) ≠ 0 := Nat.cast_ne_zero.2 m.factorial_ne_zero
-  have hfact : (((m + 1).factorial : ℕ) : K)
-      = ((m + 1 : ℕ) : K) * (m.factorial : K) := by
-    rw [Nat.factorial_succ]
-    push_cast
-    ring
-  field_simp [hfact]
-  rw [hfact]
+  rw [Nat.factorial_succ]
   push_cast
-  ring
+  field_simp
 
 /-- L5.2.6/L5.2.7 (RJW Def TeX 1866–1868 + final display 1870–1873): the
 χ-twisted moments of `ζ_η := x⁻¹·Res_{ℤ_p^×}(μ_η)`, in the moment form the
@@ -1529,9 +1494,8 @@ theorem eq_zero_of_twisted_moments_eq_zero
       obtain ⟨m, hm1, hm2⟩ := (Nat.dvd_prime_pow hp.out).mp χ.conductor_dvd_level
       exact ⟨m, (Nat.pow_dvd_pow_iff_le_right hp.out.one_lt).mp
         (hm2 ▸ χ.conductor_dvd_level), hm2⟩
-    have hft : DirichletCharacter.FactorsThrough χ (p ^ m) := by
-      rw [← hcond]
-      exact χ.factorsThrough_conductor
+    have hft : DirichletCharacter.FactorsThrough χ (p ^ m) :=
+      hcond ▸ χ.factorsThrough_conductor
     obtain ⟨hdvd, χ₀, hχeq⟩ := hft
     have hχ₀prim : χ₀.IsPrimitive := by
       refine le_antisymm
