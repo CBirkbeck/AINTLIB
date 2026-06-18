@@ -9,6 +9,7 @@ import HasseWeil.Curves.RamificationFinite
 import HasseWeil.Curves.OrdAtInftyRamification
 import HasseWeil.Curves.RankOneDomination
 import Mathlib.RingTheory.Valuation.Discrete.IsDiscreteValuationRing
+import Mathlib.RingTheory.Valuation.IsTrivialOn
 
 /-!
 # The norm–conorm count over the integral closure `B` (CoordHom-free, Silverman II.3.6)
@@ -963,6 +964,36 @@ theorem valuation_coordYFun_le_sq_generic {Γ₀ : Type*} [LinearOrderedCommGrou
     rwa [← sq Y] at hstep
   have : max (X ^ 3) (X * Y) < Y ^ 2 := max_lt (lt_trans hX3_lt hXY_lt) hXY_lt
   exact absurd hYsq (not_le.mpr this)
+
+/-- `Polynomial.aeval (coordXFun C₁) p = algebraMap (Polynomial F) K(C₁) p` (evaluating the formal
+polynomial at `x₁` is the structure map, since `x₁ = algebraMap X`).  Both are `F`-algebra maps
+`F[X] → K(C₁)` sending `X ↦ x₁`. -/
+theorem aeval_coordXFun_eq (p : Polynomial F) :
+    Polynomial.aeval (coordXFun C₁) p = algebraMap (Polynomial F) C₁.FunctionField p := by
+  rw [coordXFun_eq_coordX]
+  induction p using Polynomial.induction_on' with
+  | add p q hp hq => rw [map_add, map_add, hp, hq]
+  | monomial n a =>
+      rw [Polynomial.aeval_monomial, SmoothPlaneCurve.coordX, ← map_pow,
+        ← Polynomial.C_mul_X_pow_eq_monomial, map_mul, map_pow,
+        IsScalarTower.algebraMap_apply F (Polynomial F) C₁.FunctionField,
+        Polynomial.algebraMap_eq]
+
+/-- **The `v`-valuation of a polynomial in `x₁` is `w_v(x₁)` to its degree**, when `1 < w_v(x₁)`:
+the top-degree term dominates the non-archimedean sum.  Mathlib's
+`Polynomial.valuation_aeval_eq_valuation_X_pow_natDegree_of_one_lt_valuation_X` for the valuation
+`v.valuation`, which is `IsTrivialOn F` (constants are `v`-units). -/
+theorem valuation_algebraMap_polynomial_eq
+    (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)))
+    (hx : 1 < v.valuation C₁.FunctionField (coordXFun C₁))
+    {p : Polynomial F} (hp : p ≠ 0) :
+    v.valuation C₁.FunctionField (algebraMap (Polynomial F) C₁.FunctionField p) =
+      v.valuation C₁.FunctionField (coordXFun C₁) ^ p.natDegree := by
+  haveI hTriv : (v.valuation C₁.FunctionField).IsTrivialOn F :=
+    ⟨fun a ha => valuation_algebraMap_F_eq_one v ha⟩
+  rw [← aeval_coordXFun_eq]
+  exact Polynomial.valuation_aeval_eq_valuation_X_pow_natDegree_of_one_lt_valuation_X
+    (coordXFun C₁) hx hp
 
 /-! ### The minimal-polynomial reduction (non-circular, place-dictionary-free)
 
