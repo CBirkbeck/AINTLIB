@@ -119,7 +119,7 @@ theorem degree_comp (ψ : CurveMap C₂ C₃) (φ : CurveMap C₁ C₂) :
   letI inst₂ : Algebra C₃.FunctionField C₂.FunctionField := ψ.toAlgebra
   letI inst₃ : Algebra C₃.FunctionField C₁.FunctionField := (ψ.comp φ).toAlgebra
   haveI : IsScalarTower C₃.FunctionField C₂.FunctionField C₁.FunctionField :=
-    IsScalarTower.of_algebraMap_eq fun x => by
+    IsScalarTower.of_algebraMap_eq fun x ↦ by
       change (ψ.comp φ).pullback x = φ.pullback (ψ.pullback x)
       rfl
   haveI : Module.Free C₂.FunctionField C₁.FunctionField :=
@@ -189,13 +189,13 @@ preserves nonzeroness (pullbacks are injective), so `ord_P (φ* t) ≠ ⊤`. -/
 theorem ramificationIndex_ne_top (φ : CurveMap C₁ C₂) (P : C₁.SmoothPoint)
     {t : C₂.FunctionField} (ht : t ≠ 0) :
     φ.ramificationIndex P t ≠ ⊤ :=
-  (C₁.ord_P_eq_top_iff (φ.pullback t)).not.mpr fun h =>
+  (C₁.ord_P_eq_top_iff (φ.pullback t)).not.mpr fun h ↦
     ht (φ.pullback_injective (h.trans (map_zero _).symm))
 
 /-- The pullback of a nonzero function is nonzero: `φ*` is injective. -/
 theorem pullback_ne_zero (φ : CurveMap C₁ C₂) {t : C₂.FunctionField}
     (ht : t ≠ 0) : φ.pullback t ≠ 0 :=
-  fun h => ht (φ.pullback_injective (h.trans (map_zero _).symm))
+  fun h ↦ ht (φ.pullback_injective (h.trans (map_zero _).symm))
 
 /-- An `ℤ`-valued form of the ramification index, using `WithTop.untopD 0` to
 coerce. For nonzero `t`, this coincides with the pullback-ord as an integer. -/
@@ -298,11 +298,11 @@ theorem _root_.Finset.sum_eq_card_iff_forall_eq_one_of_one_le
     ∑ P ∈ S, e P = (S.card : ℤ) ↔ ∀ P ∈ S, e P = 1 := by
   have hconst : ∑ _ ∈ S, (1 : ℤ) = (S.card : ℤ) := by
     rw [Finset.sum_const]; simp
-  refine ⟨fun hsum P hP => ?_, fun h => ?_⟩
+  refine ⟨fun hsum P hP ↦ ?_, fun h ↦ ?_⟩
   · have hsub : ∑ P ∈ S, (e P - 1) = 0 := by
       rw [Finset.sum_sub_distrib, hconst, hsum, sub_self]
     rw [Finset.sum_eq_zero_iff_of_nonneg
-      (fun P hP => by linarith [hle P hP])] at hsub
+      (fun P hP ↦ by linarith [hle P hP])] at hsub
     have := hsub P hP
     linarith
   · calc ∑ P ∈ S, e P
@@ -349,9 +349,9 @@ theorem pullback_surjective_of_degree_one (φ : CurveMap C₁ C₂)
   obtain ⟨c₀, hc₀v⟩ := hv (1 : C₁.FunctionField)
   have hc₀_am : algebraMap C₂.FunctionField C₁.FunctionField c₀ * v = 1 := by
     rw [← Algebra.smul_def]; exact hc₀v
-  have hc₀_ne : algebraMap C₂.FunctionField C₁.FunctionField c₀ ≠ 0 := fun h' => by
+  have hc₀_ne : algebraMap C₂.FunctionField C₁.FunctionField c₀ ≠ 0 := fun h' ↦ by
     rw [h', zero_mul] at hc₀_am; exact one_ne_zero hc₀_am.symm
-  have hc₀F : c₀ ≠ 0 := fun h' => hc₀_ne (by rw [h', map_zero])
+  have hc₀F : c₀ ≠ 0 := fun h' ↦ hc₀_ne (by rw [h', map_zero])
   refine ⟨c / c₀, ?_⟩
   have hv_eq : v = (algebraMap C₂.FunctionField C₁.FunctionField c₀)⁻¹ :=
     eq_inv_of_mul_eq_one_right hc₀_am
@@ -416,7 +416,7 @@ theorem sum_ramificationIdx_mul_inertiaDeg_eq_degree
       coordHom.toAlgebra.toModule)
     {p : Ideal C₂.CoordinateRing} (hpMax : p.IsMaximal) (hp0 : p ≠ ⊥) :
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
-    ∑ P ∈ primesOverFinset p C₁.CoordinateRing,
+    ∑ P ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing,
         Ideal.ramificationIdx p P *
         Ideal.inertiaDeg p P = φ.degree := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing :=
@@ -426,7 +426,7 @@ theorem sum_ramificationIdx_mul_inertiaDeg_eq_degree
       C₁.FunctionField := inferInstance
   haveI tower1 : IsScalarTower C₂.CoordinateRing C₂.FunctionField
       C₁.FunctionField := by
-    refine IsScalarTower.of_algebraMap_smul fun r x => ?_
+    refine IsScalarTower.of_algebraMap_smul fun r x ↦ ?_
     rw [Algebra.smul_def]
     show φ.pullback ((algebraMap C₂.CoordinateRing C₂.FunctionField) r) * x =
       r • x
