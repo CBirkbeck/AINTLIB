@@ -625,11 +625,10 @@ private theorem ker_algLift_denom_clear
         algebraMap A (Localization.Away D₀.s) (D₀.s ^ k) * x ∧
       algLift D₀ D h (algebraMap A (Localization.Away D₀.s) a) = 0 := by
   obtain ⟨k, a, hsurj⟩ := IsLocalization.Away.surj (S := Localization.Away D₀.s) D₀.s x
-  refine ⟨k, a, ?_, ?_⟩
-  · rw [map_pow]; exact hsurj.symm.trans (mul_comm _ _)
-  · rw [show algebraMap A (Localization.Away D₀.s) a =
-        algebraMap A _ (D₀.s ^ k) * x from by rw [map_pow]; exact hsurj.symm.trans (mul_comm _ _)]
-    rw [map_mul, hx, mul_zero]
+  have heq : algebraMap A (Localization.Away D₀.s) a =
+      algebraMap A (Localization.Away D₀.s) (D₀.s ^ k) * x := by
+    rw [map_pow]; exact hsurj.symm.trans (mul_comm _ _)
+  exact ⟨k, a, heq, by rw [heq, map_mul, hx, mul_zero]⟩
 
 -- REMOVED 2026-04-16: `presheafValue_ker_from_locSubring_ker` (sorry'd) and
 -- `restrictionMapHom_eq_condition` (its only caller). Neither had external
