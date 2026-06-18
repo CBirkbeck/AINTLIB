@@ -641,8 +641,6 @@ theorem spanTop_presheafValue_of_localization
         algebraMap A (Localization.Away C.base.s) D.s) '' (C.covers : Set _)) = ⊤) :
     Ideal.span ((fun D : RationalLocData A =>
       C.base.canonicalMap D.s) '' (C.covers : Set _)) = ⊤ := by
-  -- The image of {algebraMap D.s} under C.base.coeRingHom is {canonicalMap D.s},
-  -- since canonicalMap = coeRingHom.comp (algebraMap A _) by definition.
   have himg :
       (C.base.coeRingHom '' ((fun D : RationalLocData A =>
           algebraMap A (Localization.Away C.base.s) D.s) '' (C.covers : Set _))) =
@@ -650,7 +648,6 @@ theorem spanTop_presheafValue_of_localization
           C.base.canonicalMap D.s) '' (C.covers : Set _)) := by
     rw [Set.image_image]
     rfl
-  -- Apply `Ideal.map_span` + `Ideal.map_top`: image of span-top under ring hom is span-top.
   rw [← himg, ← Ideal.map_span, hspan_loc, Ideal.map_top]
 
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
@@ -668,9 +665,7 @@ theorem hspan_top_of_spanTop_presheafValue
     ∀ (p : Ideal (presheafValue C.base)), p.IsPrime →
       ∃ D : { D // D ∈ C.covers }, C.base.canonicalMap D.1.s ∉ p := by
   intro p hp
-  by_contra hall
-  push_neg at hall
-  -- Every `canonicalMap D.s` lies in p (for D ∈ C.covers).
+  by_contra! hall
   have hsub : ((fun D : RationalLocData A =>
       C.base.canonicalMap D.s) '' (C.covers : Set _)) ⊆ (p : Set _) := by
     rintro y ⟨D, hD, rfl⟩
@@ -697,7 +692,6 @@ theorem spanTop_localization_of_hSpa_points
   by_contra hne
   obtain ⟨q, hq_max, hq_le⟩ := Ideal.exists_le_maximal _ hne
   haveI : q.IsPrime := Ideal.IsMaximal.isPrime hq_max
-  -- Pull back to a prime p of A with C.base.s ∉ p and D.s ∈ p for all D ∈ C.covers.
   set p := q.comap (algebraMap A (Localization.Away C.base.s)) with hp_def
   have hp_prime : p.IsPrime := Ideal.IsPrime.comap _
   have hDs_in : ∀ D ∈ C.covers, D.s ∈ p := by
@@ -709,13 +703,10 @@ theorem spanTop_localization_of_hSpa_points
     exact Ideal.IsMaximal.ne_top hq_max (Ideal.eq_top_of_isUnit_mem q this
       (IsLocalization.map_units (Localization.Away C.base.s)
         (⟨C.base.s, 1, pow_one _⟩ : Submonoid.powers C.base.s)))
-  -- Produce a Spa point witnessing the contradiction.
   obtain ⟨v, hv_rat, hv_supp_ge⟩ := hSpa_points p hp_prime hbs_notin
   obtain ⟨D, hD, hv_D⟩ := C.hcover v hv_rat
-  -- v(D.s) ≠ 0 since v ∈ rationalOpen D.T D.s.
   have hDs_notin_supp : D.s ∉ v.supp := fun hDs ↦
     hv_D.2.2 ((v.mem_supp_iff D.s).mp hDs)
-  -- But D.s ∈ p ⊆ v.supp, contradicting the previous line.
   exact hDs_notin_supp (hv_supp_ge (hDs_in D hD))
 
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
@@ -729,10 +720,10 @@ theorem hspan_top_of_hSpa_points
     (hSpa_points : ∀ (p : Ideal A), p.IsPrime → C.base.s ∉ p →
       ∃ v ∈ rationalOpen C.base.T C.base.s, p ≤ v.supp) :
     ∀ (p : Ideal (presheafValue C.base)), p.IsPrime →
-      ∃ D : { D // D ∈ C.covers }, C.base.canonicalMap D.1.s ∉ p := by
-  have hloc := spanTop_localization_of_hSpa_points C hSpa_points
-  have hpv := spanTop_presheafValue_of_localization C hloc
-  exact hspan_top_of_spanTop_presheafValue C hpv
+      ∃ D : { D // D ∈ C.covers }, C.base.canonicalMap D.1.s ∉ p :=
+  hspan_top_of_spanTop_presheafValue C
+    (spanTop_presheafValue_of_localization C
+      (spanTop_localization_of_hSpa_points C hSpa_points))
 
 /-- **`productRestriction_injective_tate` via Cor 8.32 + A-level Spa-points.**
 Given the A-level Spa-point-in-rational-open hypothesis (for primes of `A`
