@@ -72,7 +72,7 @@ theorem ord_P_nonneg_of_isAlgebraic
   -- Construct the ring hom φ : F → (pointValuation P).integer.
   let φ : F →+* (C.pointValuation P).integer :=
     (algebraMap F C.FunctionField).codRestrict (C.pointValuation P).integer
-      (fun c => C.pointValuation_algebraMap_F_le_one P c)
+      (fun c ↦ C.pointValuation_algebraMap_F_le_one P c)
   -- f algebraic over F ⟹ f integral over F (since F is a field).
   have h_int_F : IsIntegral F f := h_alg.isIntegral
   obtain ⟨p, hp_monic, hp_eval⟩ := h_int_F
