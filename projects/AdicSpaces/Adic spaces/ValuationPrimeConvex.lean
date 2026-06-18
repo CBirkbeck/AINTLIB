@@ -298,16 +298,14 @@ noncomputable def primeOfConvexSubgroup (A : ValuationSubring K)
         rw [ha_zero, zero_add]
       have hvb : A.valuation (b : K) ≠ 0 := hval_eq ▸ hne
       have hueq : Units.mk0 (A.valuation ((a + b : A) : K)) hne =
-          Units.mk0 (A.valuation (b : K)) hvb :=
-        Units.ext (by change A.valuation ((a + b : A) : K) = A.valuation (b : K); exact hval_eq)
+          Units.mk0 (A.valuation (b : K)) hvb := Units.ext hval_eq
       rw [hueq]; exact hb hvb
     · by_cases hvb : A.valuation (b : K) = 0
       · have hb_zero : (b : K) = 0 := by rwa [Valuation.zero_iff] at hvb
         have hval_eq : A.valuation ((a : K) + (b : K)) = A.valuation (a : K) := by
           rw [hb_zero, add_zero]
         have hueq : Units.mk0 (A.valuation ((a + b : A) : K)) hne =
-            Units.mk0 (A.valuation (a : K)) hva :=
-          Units.ext (by change A.valuation ((a + b : A) : K) = A.valuation (a : K); exact hval_eq)
+            Units.mk0 (A.valuation (a : K)) hva := Units.ext hval_eq
         rw [hueq]; exact ha hva
       · have hua := ha hva
         have hub := hb hvb
