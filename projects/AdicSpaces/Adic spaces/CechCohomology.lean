@@ -531,8 +531,6 @@ end Refinement
 
 end Refinement
 
-/-! ### Cover restriction and products -/
-
 section CoverOps
 
 variable {X : Type u} [TopologicalSpace X]
@@ -587,8 +585,6 @@ def prodRefineSnd {κ : Type v} [Fintype κ]
 end FiniteCover
 
 end CoverOps
-
-/-! ### Acyclicity results -/
 
 section AcyclicResults
 
@@ -685,8 +681,6 @@ theorem isAcyclic_of_components {F : AbPresheaf X}
 
 end AcyclicResults
 
-/-! ### Čech cohomology for single-set covers -/
-
 section TrivialCover
 
 variable {X : Type u} [TopologicalSpace X]
@@ -709,8 +703,6 @@ private theorem unit_fun_eq {α : Type*} [Unique α] {n : ℕ}
   funext fun _ => Subsingleton.elim _ _
 
 omit [TopologicalSpace X] in
-/-- Restriction by a subset proof from/to `Set.univ` is injective
-when the source set equals `Set.univ`. -/
 private theorem res_univ_injective (F : AbPresheaf X)
     {V : Set X} (hV : V = Set.univ) (h : V ⊆ Set.univ) :
     Function.Injective (F.res h) := by
@@ -718,11 +710,11 @@ private theorem res_univ_injective (F : AbPresheaf X)
   exact fun _ _ heq => by rwa [F.res_id, F.res_id] at heq
 
 omit [TopologicalSpace X] in
-/-- Restriction by a subset proof where `V = U` is surjective. -/
 private theorem res_eq_surjective (F : AbPresheaf X)
     {U V : Set X} (h : V ⊆ U) (hVU : V = U) :
     Function.Surjective (F.res h) := by
-  subst hVU; exact fun y => ⟨y, F.res_id y⟩
+  subst hVU
+  exact fun y => ⟨y, F.res_id y⟩
 
 /-- The single-set cover satisfies separation and gluing. -/
 theorem single_isSeparating_and_hasGluing (F : AbPresheaf X) :
@@ -740,12 +732,12 @@ theorem single_isSeparating_and_hasGluing (F : AbPresheaf X) :
         (fun _ => ()))
       (FiniteCover.single_inter _) (f (fun _ => ()))
     refine ⟨x, ?_⟩
-    ext σ; simp only [cechAug]
-    rw [unit_fun_eq σ]; exact hx
+    ext σ
+    simp only [cechAug]
+    rw [unit_fun_eq σ]
+    exact hx
 
 end TrivialCover
-
-/-! ### Degree-zero acyclicity and the sheaf condition -/
 
 section BasisSheaf
 
