@@ -284,10 +284,10 @@ private theorem locToQuotient_mul_small_constant_mem (D : RationalLocData A)
   have hC_exists : ∀ t : T, ∃ C : ℕ, ∀ (k : ℕ) (b : P.A₀),
       (b : P.A₀) ∈ P.I ^ (k + C) →
         s * t * (b : A) ∈ Subtype.val '' ((P.I ^ k : Ideal P.A₀) : Set P.A₀) :=
-    fun t => mul_st_ideal_shift P s t
+    fun t ↦ mul_st_ideal_shift P s t
   choose C_fn hC_fn using hC_exists
   let C := (T.attach.image C_fn).sup id
-  have hC_bound : ∀ (t : T), C_fn t ≤ C := fun t =>
+  have hC_bound : ∀ (t : T), C_fn t ≤ C := fun t ↦
     Finset.le_sup (f := id) (Finset.mem_image_of_mem _ (Finset.mem_attach _ _))
   have hC_shift : ∀ (t : T) (k : ℕ) (b : P.A₀), (b : P.A₀) ∈ P.I ^ (k + C) →
       s * t * (b : A) ∈ Subtype.val '' ((P.I ^ k : Ideal P.A₀) : Set P.A₀) := by
@@ -304,22 +304,22 @@ private theorem locToQuotient_mul_small_constant_mem (D : RationalLocData A)
   obtain ⟨W_prod, hW_prod, hW_incl⟩ := hmk_pre_W
   rw [map_zero] at hW_prod
   change W_prod ∈ @nhds _ (@Pi.topologicalSpace (Fin 1 →₀ ℕ)
-    (fun _ => A) (fun _ => ‹_›)) 0 at hW_prod
+    (fun _ ↦ A) (fun _ ↦ ‹_›)) 0 at hW_prod
   rw [nhds_pi] at hW_prod
   simp only [show ∀ i : Fin 1 →₀ ℕ,
-    (0 : (Fin 1 →₀ ℕ) → A) i = (0 : A) from fun _ => rfl] at hW_prod
+    (0 : (Fin 1 →₀ ℕ) → A) i = (0 : A) from fun _ ↦ rfl] at hW_prod
   obtain ⟨Idx, t_set, ht_set, hIt⟩ := Filter.mem_pi'.mp hW_prod
   -- Step 4: For each index in Idx, find m_i with Im(I^{m_i}) ⊆ t_set(i).
   have hm_exists : ∀ i : Fin 1 →₀ ℕ,
       ∃ m : ℕ, Subtype.val '' ((P.I ^ m : Ideal P.A₀) : Set P.A₀) ⊆ t_set i :=
-    fun i => by
+    fun i ↦ by
       obtain ⟨m, _, hm⟩ := P.hasBasis_nhds_zero.mem_iff.mp (ht_set i)
       exact ⟨m, hm⟩
   choose m_fn hm_fn using hm_exists
-  let N := (Idx.image (fun i : Fin 1 →₀ ℕ => i 0)).sup id
+  let N := (Idx.image (fun i : Fin 1 →₀ ℕ ↦ i 0)).sup id
   let M := (Idx.image m_fn).sup id
   -- Step 5: Construct G — the self-preserving neighborhood.
-  let G : Set ↥(TateAlgebra A) := fun g =>
+  let G : Set ↥(TateAlgebra A) := fun g ↦
     ∀ n : ℕ, n ≤ N →
       s ^ n * TateAlgebra.coeff n g ∈
         Subtype.val '' ((P.I ^ (M + (N - n) * C) : Ideal P.A₀) : Set P.A₀)
@@ -330,7 +330,7 @@ private theorem locToQuotient_mul_small_constant_mem (D : RationalLocData A)
     apply hIt
     intro i hi
     have : i 0 ≤ N :=
-      Finset.le_sup (f := id) (Finset.mem_image_of_mem (fun i : Fin 1 →₀ ℕ => i 0) hi)
+      Finset.le_sup (f := id) (Finset.mem_image_of_mem (fun i : Fin 1 →₀ ℕ ↦ i 0) hi)
     have hg_i := hg (i 0) this
     have hM_bound : m_fn i ≤ M :=
       Finset.le_sup (f := id) (Finset.mem_image_of_mem m_fn hi)
@@ -390,7 +390,7 @@ private theorem locToQuotient_mul_small_constant_mem (D : RationalLocData A)
     rw [mem_nhds_iff]
     refine ⟨G, le_refl _, ?_, hG_zero⟩
     rw [hG_eq]
-    exact isOpen_iInter_of_finite fun ⟨n, _⟩ =>
+    exact isOpen_iInter_of_finite fun ⟨n, _⟩ ↦
       (P.pow_image_isOpen _).preimage
         (TateAlgebraWedhorn.tateTopologyT_continuous_scaledCoeff s n)
   -- Step 6: G is stable under algebraMap(a₀) * · for a₀ ∈ A₀.
@@ -947,7 +947,7 @@ private theorem isRestricted_of_eventually_zero
     MvPowerSeries.IsRestricted h := by
   -- IsRestricted = coefficients tend to 0 along cofinite filter.
   -- Suffices to show: the set of nonzero coefficients is finite.
-  change Filter.Tendsto (fun s => h s) Filter.cofinite (nhds 0)
+  change Filter.Tendsto (fun s ↦ h s) Filter.cofinite (nhds 0)
   rw [tendsto_nhds]
   intro U hU h0U
   rw [Filter.mem_cofinite]
@@ -959,15 +959,15 @@ private theorem isRestricted_of_eventually_zero
   simp only [Finset.coe_image, Finset.coe_range, Set.mem_image, Set.mem_Iio]
   refine ⟨s 0, ?_, (TateAlgebra.eq_toIndex s).symm⟩
   by_contra hge
-  push_neg at hge
+  push Not at hge
   exact hs (by rw [hh s hge]; exact h0U)
 
 /-- The truncation of `g ∈ A⟨X⟩` at degree `N`: keep coefficients at multi-indices
 with `s 0 < N` and set the rest to zero. The result is restricted (polynomial). -/
 private noncomputable def truncTate (g : ↥(TateAlgebra A)) (N : ℕ) :
     ↥(TateAlgebra A) :=
-  ⟨fun s => if s 0 < N then g.val s else 0,
-   isRestricted_of_eventually_zero _ N (fun s hs => by simp [show ¬(s 0 < N) from by omega])⟩
+  ⟨fun s ↦ if s 0 < N then g.val s else 0,
+   isRestricted_of_eventually_zero _ N (fun s hs ↦ by simp [show ¬(s 0 < N) from by omega])⟩
 
 set_option linter.unusedSectionVars false in
 private theorem truncTate_val (g : ↥(TateAlgebra A)) (N : ℕ) (s : Fin 1 →₀ ℕ) :
@@ -1053,7 +1053,7 @@ theorem tateAlgebra_polynomials_dense (s : A) :
     rw [scaleIncl_truncTate_eq g N s idx hlt]
     exact mem_of_mem_nhds (ht_nhds idx)
   · -- truncTate g N has finitely many nonzero coefficients
-    exact ⟨N, fun n hn => truncTate_coeff_high g N n hn⟩
+    exact ⟨N, fun n hn ↦ truncTate_coeff_high g N n hn⟩
 
 set_option linter.unusedSectionVars false in
 /-- Every polynomial element in `A⟨X⟩` (coefficients zero above degree N) has its
@@ -1450,11 +1450,11 @@ theorem tateQuotientToPresheafHom_continuous (D : RationalLocData A)
   intro V hV
   -- Use hadic to get the J-adic nhds basis, then apply hJ_eval.
   have hbasis : ((@nhds _ τT (0 : ↥(TateAlgebra A))).HasBasis
-      (fun _ : ℕ => True) fun n => ((J ^ n : Ideal _) : Set _)) :=
+      (fun _ : ℕ ↦ True) fun n ↦ ((J ^ n : Ideal _) : Set _)) :=
     hadic.hasBasis_nhds_zero
   rw [hbasis.mem_iff]
   obtain ⟨k, hk⟩ := hJ_eval V hV
-  exact ⟨k, trivial, fun h hh => hk h hh⟩
+  exact ⟨k, trivial, fun h hh ↦ hk h hh⟩
 
 end HypothesesDischarge
 
@@ -1481,9 +1481,9 @@ keep coefficients at multi-indices with `s 0 < N`, set the rest to zero.
 The result is restricted (polynomial). -/
 private noncomputable def truncTateC (g : ↥(TateAlgebra A)) (N : ℕ) :
     ↥(TateAlgebra A) :=
-  ⟨fun s => if s 0 < N then g.val s else 0,
+  ⟨fun s ↦ if s 0 < N then g.val s else 0,
    isRestricted_of_eventually_zero _ N
-    (fun s hs => by simp [show ¬(s 0 < N) from by omega])⟩
+    (fun s hs ↦ by simp [show ¬(s 0 < N) from by omega])⟩
 
 private theorem truncTateC_val (g : ↥(TateAlgebra A)) (N : ℕ)
     (s : Fin 1 →₀ ℕ) :
@@ -1521,7 +1521,7 @@ theorem tateAlgebra_polynomials_dense_canonical [IsTateRing A] :
       (Subtype.val '' ((P.I ^ n : Ideal P.A₀) : Set P.A₀) : Set A)} with hS_def
   have hS_fin : S.Finite := hfin
   let N := (hS_fin.toFinset.image (· 0)).sup id + 1
-  refine ⟨truncTateC g N, hn ?_, ⟨N, fun m hm => truncTateC_coeff_high g N m hm⟩⟩
+  refine ⟨truncTateC g N, hn ?_, ⟨N, fun m hm ↦ truncTateC_coeff_high g N m hm⟩⟩
   -- Need: truncTateC g N - g ∈ tateAlgNhd P n (basis uses b - a ∈ ...).
   -- This equals -(g - truncTateC g N), so use neg_mem.
   have hdiff_pair : g - truncTateC g N ∈ pairSubring P := by
@@ -1666,7 +1666,7 @@ theorem locToQuotientOneSubfX_gen_continuous_canonical [IsTateRing A] [T2Space A
         (Ideal.Quotient.mk (oneSubfXIdeal D.s)).toAddMonoidHom
       isOpen' := @QuotientRing.isOpenMap_coe _ instTopologicalSpaceTateAlgebra _
         (oneSubfXIdeal D.s) instIsTopologicalRingTateAlgebra _ V.isOpen
-    }, fun x hx => by obtain ⟨y, hy, rfl⟩ := hx; exact hVU hy⟩
+    }, fun x hx ↦ by obtain ⟨y, hy, rfl⟩ := hx; exact hVU hy⟩
   obtain ⟨W, hWS⟩ := NonarchimedeanRing.is_nonarchimedean S hS
   suffices ∃ n, ∀ x ∈ locNhd D.P D.T D.s n,
       locToQuotientOneSubfX_gen D.s x ∈ (W : Set _) by
@@ -1704,12 +1704,12 @@ theorem locToQuotientOneSubfX_gen_continuous_canonical [IsTateRing A] [T2Space A
       rw [(IsTateRing.principalPair A).I_eq_span]; exact Ideal.mem_span_singleton_self _)
   -- mk(algebraMap(π^n)) → 0 in canonical quotient.
   have hmk_pi_tendsto : Filter.Tendsto
-      (fun n => mk (algebraMap A ↥(TateAlgebra A) ((IsTateRing.principalPair A).π ^ n : A)))
+      (fun n ↦ mk (algebraMap A ↥(TateAlgebra A) ((IsTateRing.principalPair A).π ^ n : A)))
       Filter.atTop (@nhds _ τC 0) := by
     have h0 : mk (algebraMap A ↥(TateAlgebra A) 0) = 0 := by simp
     rw [← h0]
     exact (hmk_alg_cont.tendsto 0).comp (by
-      change Filter.Tendsto (fun n => ((IsTateRing.principalPair A).π : A) ^ n) _ _
+      change Filter.Tendsto (fun n ↦ ((IsTateRing.principalPair A).π : A) ^ n) _ _
       exact hπ)
   -- Step 2: Construct P_common = D.P.adjoin D.T (Wedhorn 6.3).
   -- P_common.A₀ = Subring.closure(D.P.A₀ ∪ D.T), which contains both D.P.A₀ and D.T.
@@ -1734,7 +1734,7 @@ theorem locToQuotientOneSubfX_gen_continuous_canonical [IsTateRing A] [T2Space A
   obtain ⟨M, -, hM⟩ := P_common.hasBasis_nhds_zero.mem_iff.mp hPcI_nhds
   -- hM : image(P_common.I^M) ⊆ image(P'.I^k₀)
   -- Step 5: Define G = {g | all coefficients in image(P_common.I^M)}.
-  let G : Set ↥(TateAlgebra A) := fun g =>
+  let G : Set ↥(TateAlgebra A) := fun g ↦
     ∀ l : Fin 1 →₀ ℕ, MvPowerSeries.coeff l g.val ∈
       Subtype.val '' ((P_common.I ^ M : Ideal P_common.A₀) : Set P_common.A₀)
   -- Step 5a: G ⊆ mk⁻¹(W).
@@ -1789,7 +1789,7 @@ theorem locToQuotientOneSubfX_gen_continuous_canonical [IsTateRing A] [T2Space A
   -- Step 6a: G stable under algebraMap(a₀) for a₀ ∈ D.P.A₀.
   have hG_stable_alg : ∀ (a₀ : P.A₀), ∀ (g : ↥(TateAlgebra A)), g ∈ G →
       algebraMap A ↥(TateAlgebra A) (a₀ : A) * g ∈ G :=
-    fun a₀ => hG_stable_Pc a₀ (P.adjoin_A₀_le D.T hT_pb a₀.property)
+    fun a₀ ↦ hG_stable_Pc a₀ (P.adjoin_A₀_le D.T hT_pb a₀.property)
   -- Step 6b: G stable under X * · (shifting coefficients preserves G).
   have hG_stable_X : ∀ (g : ↥(TateAlgebra A)), g ∈ G →
       TateAlgebra.X * g ∈ G := by
@@ -2021,7 +2021,7 @@ theorem presheafValueToCanonicalQuotient_continuous (D : RationalLocData A)
   -- presheafValueToCanonicalQuotient is defined as
   -- `UniformSpace.Completion.extensionHom (locToQuotientOneSubfX_gen D.s) ...`.
   -- Its function coercion is `Completion.extension (...)` which is continuous.
-  change Continuous (fun x : presheafValue D =>
+  change Continuous (fun x : presheafValue D ↦
     presheafValueToCanonicalQuotient D hA_complete hnoeth hT_pb x)
   unfold presheafValueToCanonicalQuotient
   -- The underlying function is `Completion.extension (locToQuotientOneSubfX_gen D.s)`.
@@ -2540,11 +2540,11 @@ theorem tateEvalPresheafHom_continuous_canonical
   -- Since W ⊆ V, it suffices to show tateAlgNhd P N ⊆ (eval) ⁻¹' W.
   -- Use the canonical basis to describe nhds of 0 in A⟨X⟩.
   have hbasis : ((@nhds _ τ (0 : ↥(TateAlgebra A))).HasBasis
-      (fun _ : ℕ => True) fun n =>
+      (fun _ : ℕ ↦ True) fun n ↦
         (TateAlgebra.tateAlgNhd P n : Set ↥(TateAlgebra A))) :=
     TateAlgebra.tateAlgBasis'.hasBasis_nhds_zero
   apply hbasis.mem_iff.mpr
-  refine ⟨N, trivial, fun h hh => ?_⟩
+  refine ⟨N, trivial, fun h hh ↦ ?_⟩
   -- Goal: (tateEvalPresheafHom D hb).toAddMonoidHom h ∈ V.
   change tateEvalPresheafHom D hb h ∈ V
   refine hWV ?_
@@ -2587,8 +2587,8 @@ theorem tateEvalPresheafHom_continuous_canonical
   -- Apply IsClosed.mem_of_tendsto with the HasSum and eventually-in-W.
   refine hW_closed.mem_of_tendsto hhs.tendsto_sum_nat ?_
   -- Eventually: partial sums are in W (they are, in fact, always in W by subgroup).
-  refine Filter.Eventually.of_forall fun n => ?_
-  exact W.toAddSubgroup.sum_mem (fun k _ => hterm_mem k)
+  refine Filter.Eventually.of_forall fun n ↦ ?_
+  exact W.toAddSubgroup.sum_mem (fun k _ ↦ hterm_mem k)
 
 omit [PlusSubring A] [IsHuberRing A] [T2Space A] in
 /-- **Canonical-topology continuity of `tateQuotientToPresheafHom`
