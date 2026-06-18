@@ -69,8 +69,6 @@ per `Cor832.lean:1542-1546`).
 
 namespace ValuationSpectrum
 
-open ValuationSpectrum
-
 variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
   [PlusSubring A] [IsHuberRing A]
 
@@ -118,7 +116,6 @@ theorem prime_extension_closed_from_Huber_Tate_of_jacobson_pointwise
       u.isUnit.pow (K + 1),
       hK (K + 1) (Nat.le_succ K)⟩
   obtain ⟨π, hπ_nil, hπ_unit, hπ_A₀⟩ := hπ_exists
-  -- Apply the locTopology transfer lemma.
   refine Ideal.isClosed_in_locTopology_of_contraction_isClosed_in_locSubring
     D'.P D'.T D'.s D'.hopen hπ_nil hπ_A₀ hπ_unit _ ?_
   -- Contraction closedness via pointwise Jacobson in the adic topology on locSubring.
