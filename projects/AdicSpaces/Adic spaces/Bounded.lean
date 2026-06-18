@@ -390,9 +390,9 @@ theorem IsBounded.isPowerBounded_of_isIntegral [IsTopologicalRing A] {B : Subrin
     fun i _ ↦ hB.mul (isBounded_singleton _)).subset ?_
   rintro _ ⟨n, rfl⟩
   have hp_rel : a ^ N = -(∑ i ∈ Finset.range N, (p.coeff i : A) * a ^ i) := by
-    have h := hp_eval; rw [eval₂_eq_sum_range, Finset.sum_range_succ] at h
-    rw [hp_monic.coeff_natDegree, map_one, one_mul, add_comm] at h
-    exact eq_neg_of_add_eq_zero_left h
+    rw [eval₂_eq_sum_range, Finset.sum_range_succ, hp_monic.coeff_natDegree, map_one, one_mul,
+      add_comm] at hp_eval
+    exact eq_neg_of_add_eq_zero_left hp_eval
   suffices key : ∀ n, ∃ c : ℕ → ↥B, a ^ n = ∑ j ∈ Finset.range N, (c j : A) * a ^ j by
     change a ^ n ∈ S; obtain ⟨c, hc⟩ := key n; rw [hc, hS_def]
     exact Set.finsetSum_mem_finsetSum _ _ _ fun j _ ↦ Set.mul_mem_mul (Subtype.coe_prop _) rfl
@@ -432,9 +432,8 @@ theorem IsTopologicallyNilpotent.isUnit_one_sub_mul_of_isPowerBounded
     {a y : A} (ha : IsTopologicallyNilpotent a)
     (hy : TopologicalRing.IsPowerBounded y) :
     IsUnit (1 - a * y) := by
-  have h_mul : IsTopologicallyNilpotent (y * a) := hy.isTopologicallyNilpotent_mul ha
-  rw [show a * y = y * a from mul_comm _ _]
-  exact h_mul.isUnit_one_sub
+  rw [mul_comm a y]
+  exact (hy.isTopologicallyNilpotent_mul ha).isUnit_one_sub
 
 /-- Symmetric version: `1 - y*a` is a unit when `a` is topologically nilpotent
 and `y` is power-bounded. -/
