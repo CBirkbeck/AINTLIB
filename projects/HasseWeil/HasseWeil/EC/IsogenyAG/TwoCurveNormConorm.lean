@@ -627,6 +627,43 @@ theorem twoCurve_ord_conorm_eq_sum_fiber
             (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) wB})).factors
           : ℤ) : WithTop ℤ) := by
     rw [hconorm_eq, (⟨W₂⟩ : SmoothPlaneCurve F).ord_P_algebraMap_eq_count Q hintNorm_ne]
+  -- `span {intNorm wB} = relNorm (span {wB})`, so the LHS count is over `relNorm`.
+  have hrelN : Ideal.span ({Algebra.intNorm (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+        (NormConormIntegralClosure.B
+          (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) wB} :
+        Set (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing) =
+      Ideal.relNorm (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+        (Ideal.span ({wB} : Set (NormConormIntegralClosure.B
+          (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))))) :=
+    (Ideal.relNorm_singleton (R := (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing) wB).symm
+  -- ## Phase 3-4: the fibre bijection (`B`-primes over `m_Q` ↔ points `P` with image `Q`) + count.
+  haveI : IsIntegrallyClosed (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing := inferInstance
+  set D := (⟨W₁⟩ : SmoothPlaneCurve F).projectiveDivisorOf aw with hD_def
+  set p : Ideal (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing :=
+    (⟨W₂⟩ : SmoothPlaneCurve F).maximalIdealAt Q with hp_def
+  have hp_ne : p ≠ ⊥ := (⟨W₂⟩ : SmoothPlaneCurve F).maximalIdealAt_ne_bot Q
+  haveI hpMax : p.IsMaximal := (⟨W₂⟩ : SmoothPlaneCurve F).maximalIdealAt_isMaximal Q
+  -- place dictionary on `E₁`: every `B`-prime `≤ 1` on the coordinate generators.
+  have hcoordLE := NormConormIntegralClosure.bPrimeValuationCoordGenLeOne_of_reg hregB
+  -- For each `B`-prime over `m_Q`, the point `P` it cuts out, with image `Q` and the count match.
+  -- (a) the point assignment.
+  have hpoint : ∀ vP : IsDedekindDomain.HeightOneSpectrum (NormConormIntegralClosure.B
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))),
+      vP.asIdeal ∈ IsDedekindDomain.primesOverFinset p (NormConormIntegralClosure.B
+        (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) →
+      ∃ P : (W_smooth W₁).SmoothPoint,
+        vP.valuation W₁.toAffine.FunctionField = (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P ∧
+        placeRestrictionPlaceImage φ (ProjectiveSmoothPoint.affine P) =
+          ProjectiveSmoothPoint.affine Q := by
+    intro vP hvP
+    obtain ⟨P, hP⟩ := NormConormIntegralClosure.bPrime_valuation_eq_pointValuation_of_coordGen_le_one
+      vP (hcoordLE vP).1 (hcoordLE vP).2
+    rw [IsDedekindDomain.mem_primesOverFinset_iff (B := NormConormIntegralClosure.B
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) hp_ne] at hvP
+    have hunder : vP.asIdeal.under (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing = p := hvP.2.over.symm
+    refine ⟨P, hP, ?_⟩
+    exact placeRestrictionPlaceImage_affine_eq_of_bPrime φ
+      (fun g => rfl) vP P Q hP hunder
   sorry
 
 /-! ### The `algebraMap` case of the norm–conorm identity (assembly)
