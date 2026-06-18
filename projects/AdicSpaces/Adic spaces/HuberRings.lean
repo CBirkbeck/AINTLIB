@@ -809,7 +809,7 @@ private theorem nilpotentUnit_principalData {C : Type*} [CommRing C] [Topologica
     (isTopologicallyNilpotent_pow hu_nil hK_pos)
   set N := N₀ + 1
   have hN_mem : (⟨(u : C) ^ K, hu_K⟩ : P.A₀) ^ N ∈ P.I := by
-    rw [show N = 1 + N₀ from by omega, pow_add, pow_one]
+    rw [show N = 1 + N₀ from by lia, pow_add, pow_one]
     exact Ideal.mul_mem_left _ _ hN₀
   have hu_K_unit : ((u ^ K : Cˣ) : C) ∈ P.A₀ := by
     rwa [Units.val_pow_eq_pow_val]
@@ -833,7 +833,7 @@ theorem IsTateRing.isAdicHom_of_continuous_with_pairs [IsTateRing A] [IsHuberRin
     nilpotentUnit_principalData PB (Units.map (φ : A →* B) u)
       (show IsTopologicallyNilpotent ((Units.map (φ : A →* B) u : B))
         from Units.coe_map (φ : A →* B) u ▸ hv_nil)
-  set vL : PB.A₀ := ⟨↑((Units.map (φ : A →* B)) u) ^ L, hv_L⟩ with hvL_def
+  set vL : PB.A₀ := ⟨↑((Units.map (φ : A →* B)) u) ^ L, hv_L⟩
   have hmB' : PB.I ^ mB ≤ Ideal.span {vL ^ M} := hmB
   refine ⟨PA.withPrincipal hN_mem hmA,
     PB.withPrincipal hM_mem hmB', h_map, ?_⟩
