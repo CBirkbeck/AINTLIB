@@ -126,16 +126,8 @@ theorem isUnit_root_mul_pow_one_add_X_sub_one {ζ : integerRing K} {D : ℕ}
       = ((ζ : K) ^ c - 1) + (ζ : K) ^ c * ((w : K) - 1) := by
     push_cast
     ring
-  rw [hsplit]
-  refine le_antisymm ((IsUltrametricDist.norm_add_le_max _ _).trans
-    (by rw [h1]; exact max_le le_rfl h2.le)) ?_
-  by_contra hcon
-  push Not at hcon
-  have hb := IsUltrametricDist.norm_add_le_max
-    ((ζ : K) ^ c - 1 + (ζ : K) ^ c * ((w : K) - 1))
-    (-((ζ : K) ^ c * ((w : K) - 1)))
-  rw [add_neg_cancel_right, norm_neg, h1] at hb
-  exact absurd (hb.trans_lt (max_lt hcon h2)) (lt_irrefl _)
+  rw [hsplit, IsUltrametricDist.norm_add_eq_max_of_norm_ne_norm
+    (by rw [h1]; exact ne_of_gt h2), h1, max_eq_left h2.le]
 
 /-- Ring homomorphisms commute with `Ring.inverse` at units. -/
 lemma map_ring_inverse_of_isUnit {R S : Type*} [Semiring R] [Semiring S]
@@ -487,17 +479,10 @@ theorem muEtaCleared_moments {D : ℕ} [NeZero D] (hD1 : 1 < D)
   rw [PowerSeries.coeff_succ_X_mul, map_neg, PowerSeries.coeff_C_mul,
     PowerSeries.coeff_mk] at hmaster
   rw [hmom, hmaster, coe_gaussSum_zmodChar η hζ hζK, LvalNeg]
-  have hk1 : ((k + 1 : ℕ) : K) ≠ 0 := Nat.cast_ne_zero.2 (Nat.succ_ne_zero k)
   have hkf : ((k.factorial : ℕ) : K) ≠ 0 := Nat.cast_ne_zero.2 k.factorial_ne_zero
-  have hfact : (((k + 1).factorial : ℕ) : K)
-      = ((k + 1 : ℕ) : K) * (k.factorial : K) := by
-    rw [Nat.factorial_succ]
-    push_cast
-    ring
-  field_simp [hfact]
-  rw [hfact]
+  rw [Nat.factorial_succ]
   push_cast
-  ring
+  field_simp
 
 omit [CharZero K] in
 /-- The denominator series `w·(1+T) − 1` read back through the Mahler
@@ -1327,17 +1312,10 @@ theorem twist_muEtaCleared_moments {D : ℕ} [NeZero D] (hD1 : 1 < D)
   rw [PowerSeries.coeff_succ_X_mul, map_neg, PowerSeries.coeff_C_mul,
     PowerSeries.coeff_mk] at hmaster
   rw [hmom, hmaster, coe_gaussSum_zmodChar η hζ hζK, LvalNeg]
-  have hk1 : ((m + 1 : ℕ) : K) ≠ 0 := Nat.cast_ne_zero.2 (Nat.succ_ne_zero m)
   have hkf : ((m.factorial : ℕ) : K) ≠ 0 := Nat.cast_ne_zero.2 m.factorial_ne_zero
-  have hfact : (((m + 1).factorial : ℕ) : K)
-      = ((m + 1 : ℕ) : K) * (m.factorial : K) := by
-    rw [Nat.factorial_succ]
-    push_cast
-    ring
-  field_simp [hfact]
-  rw [hfact]
+  rw [Nat.factorial_succ]
   push_cast
-  ring
+  field_simp
 
 /-- L5.2.6/L5.2.7 (RJW Def TeX 1866–1868 + final display 1870–1873): the
 χ-twisted moments of `ζ_η := x⁻¹·Res_{ℤ_p^×}(μ_η)`, in the moment form the
