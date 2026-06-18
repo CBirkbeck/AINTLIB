@@ -407,7 +407,7 @@ theorem exists_bPrime_eq_pointValuation_of_notMem_poleLocus
       algebraMap W₂.toAffine.FunctionField W₁.toAffine.FunctionField g = φ.pullback g)
     (P : (W_smooth W₁).SmoothPoint) (hP : P ∉ twoCurvePoleLocus φ)
     {z : NormConormIntegralClosure.B
-      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))}
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))} (hz_ne : z ≠ 0)
     (hzvanish : (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P
       (algebraMap (NormConormIntegralClosure.B
         (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))
@@ -417,9 +417,14 @@ theorem exists_bPrime_eq_pointValuation_of_notMem_poleLocus
       v.valuation W₁.toAffine.FunctionField =
         (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P := by
   classical
-  set Bb := NormConormIntegralClosure.B
-    (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)) with hBb
-  set pv := (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P with hpv
+  let Bb := NormConormIntegralClosure.B
+    (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))
+  let pv := (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P
+  haveI : IsIntegrallyClosed (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing := inferInstance
+  haveI hmPprime : ((⟨W₁⟩ : SmoothPlaneCurve F).maximalIdealAt P).IsPrime :=
+    ((⟨W₁⟩ : SmoothPlaneCurve F).maximalIdealAt_isMaximal P).isPrime
+  haveI hDVR : IsDiscreteValuationRing ((⟨W₁⟩ : SmoothPlaneCurve F).localRingAt P) :=
+    (⟨W₁⟩ : SmoothPlaneCurve F).localRing_isDVR_of_smooth P
   have hxle : pv (φ.pullback (x_gen W₂)) ≤ 1 := by by_contra h; exact hP (Or.inl h)
   have hyle : pv (φ.pullback (y_gen W₂)) ≤ 1 := by by_contra h; exact hP (Or.inr h)
   -- the image of `F[E₂]` lands in the valuation integers `O_P = pv.integer`.
@@ -451,7 +456,88 @@ theorem exists_bPrime_eq_pointValuation_of_notMem_poleLocus
     have hbint_int : IsIntegral pv.integer (algebraMap Bb W₁.toAffine.FunctionField b) :=
       hbint.tower_top
     exact (Valuation.integer.integers pv).isIntegral_iff_v_le_one.mp hbint_int
-  sorry
+  -- (2) the center `q = {b ∈ B : pv (algebraMap_B b) < 1}` as an ideal.
+  set q : Ideal Bb :=
+    { carrier := {b : Bb | pv (algebraMap Bb W₁.toAffine.FunctionField b) < 1}
+      add_mem' := by
+        intro a b ha hb
+        simp only [Set.mem_setOf_eq, map_add] at *
+        exact lt_of_le_of_lt (pv.map_add _ _) (max_lt ha hb)
+      zero_mem' := by simp [Set.mem_setOf_eq, map_zero]
+      smul_mem' := by
+        intro c b hb
+        simp only [Set.mem_setOf_eq, smul_eq_mul, map_mul, pv.map_mul] at *
+        calc pv (algebraMap Bb W₁.toAffine.FunctionField c) *
+              pv (algebraMap Bb W₁.toAffine.FunctionField b)
+            ≤ 1 * pv (algebraMap Bb W₁.toAffine.FunctionField b) :=
+              mul_le_mul_right' (hregB c) _
+          _ = pv (algebraMap Bb W₁.toAffine.FunctionField b) := one_mul _
+          _ < 1 := hb } with hq_def
+  have hq_mem_iff : ∀ b : Bb, b ∈ q ↔
+      pv (algebraMap Bb W₁.toAffine.FunctionField b) < 1 := fun b => Iff.rfl
+  -- `q` is prime.
+  have hq_prime : q.IsPrime := by
+    refine ⟨?_, ?_⟩
+    · rw [Ideal.ne_top_iff_one, hq_mem_iff, map_one, pv.map_one]; exact lt_irrefl 1
+    · intro a b hab
+      rw [hq_mem_iff, map_mul, pv.map_mul] at hab
+      by_contra h
+      push_neg at h
+      obtain ⟨ha, hb⟩ := h
+      rw [hq_mem_iff, not_lt] at ha hb
+      have ha1 : pv (algebraMap Bb W₁.toAffine.FunctionField a) = 1 := le_antisymm (hregB a) ha
+      have hb1 : pv (algebraMap Bb W₁.toAffine.FunctionField b) = 1 := le_antisymm (hregB b) hb
+      rw [ha1, hb1, one_mul] at hab
+      exact lt_irrefl 1 hab
+  -- `q ≠ ⊥`: `z ∈ q` (the vanishing hypothesis) and `z ≠ 0`.
+  have hz_mem : z ∈ q := (hq_mem_iff z).mpr hzvanish
+  have hq_ne : q ≠ ⊥ := fun h => hz_ne ((Submodule.mem_bot _).mp (h ▸ hz_mem))
+  -- the height-one prime `v`.
+  set v : IsDedekindDomain.HeightOneSpectrum Bb := ⟨q, hq_prime, hq_ne⟩ with hv_def
+  refine ⟨v, ?_⟩
+  -- (3) domination: `O_v ⊆ O_P`, then equality (both rank-one DVR, `O_P ≠ ⊤`).
+  have hwsurj : Function.Surjective (v.valuation W₁.toAffine.FunctionField) :=
+    v.valuation_surjective W₁.toAffine.FunctionField
+  have hpvsurj : Function.Surjective pv :=
+    (IsDiscreteValuationRing.maximalIdeal ((⟨W₁⟩ : SmoothPlaneCurve F).localRingAt P)).valuation_surjective
+      W₁.toAffine.FunctionField
+  haveI : IsDiscreteValuationRing (v.valuation W₁.toAffine.FunctionField).valuationSubring :=
+    valuationSubring_isDVR_of_surjective_withZeroInt _ hwsurj
+  -- `O_v ⊆ O_P`: an `O_v`-integer `f = n/d` with `d ∉ q` has `pv (algebraMap_B d) = 1`.
+  have hsub : (v.valuation W₁.toAffine.FunctionField).valuationSubring ≤ pv.valuationSubring := by
+    intro f hf
+    rw [Valuation.mem_valuationSubring_iff] at hf ⊢
+    obtain ⟨n, d, hnd⟩ := IsDedekindDomain.HeightOneSpectrum.exists_primeCompl_mul_eq_of_integer
+      v f hf
+    -- `d ∉ q = v.asIdeal`, so `pv (algebraMap_B d) = 1`.
+    have hd_notin : (d : Bb) ∉ q := Ideal.mem_primeCompl_iff.mp d.2
+    have hd_ge : ¬ pv (algebraMap Bb W₁.toAffine.FunctionField (d : Bb)) < 1 := by
+      rw [← hq_mem_iff]; exact hd_notin
+    have hd1 : pv (algebraMap Bb W₁.toAffine.FunctionField (d : Bb)) = 1 :=
+      le_antisymm (hregB _) (not_lt.mp hd_ge)
+    -- from `f · algMap_B d = algMap_B n`: `pv f = pv (algMap_B n) / pv (algMap_B d) ≤ 1`.
+    have hfn : f = algebraMap Bb W₁.toAffine.FunctionField n /
+        algebraMap Bb W₁.toAffine.FunctionField (d : Bb) := by
+      have hd_ne : algebraMap Bb W₁.toAffine.FunctionField (d : Bb) ≠ 0 := by
+        rw [Ne, ← pv.zero_iff, hd1]; exact one_ne_zero
+      rw [eq_div_iff hd_ne, hnd]
+    rw [hfn, map_div₀ pv, hd1, div_one]
+    exact hregB n
+  have hAtop : pv.valuationSubring ≠ ⊤ := by
+    have hNontriv : pv.IsNontrivial := by
+      refine ⟨?_⟩
+      obtain ⟨t, ht⟩ := hpvsurj (WithZero.exp (1 : ℤ))
+      refine ⟨t, ?_, ?_⟩
+      · rw [ht]; exact WithZero.exp_ne_zero
+      · rw [ht, show (1 : WithZero (Multiplicative ℤ)) = WithZero.exp (0 : ℤ) from
+          (WithZero.exp_zero).symm, Ne, WithZero.exp_inj]; norm_num
+    intro htop
+    exact (Valuation.valuationSubring_eq_top_iff _).mp htop hNontriv
+  have hEq : (v.valuation W₁.toAffine.FunctionField).valuationSubring = pv.valuationSubring :=
+    rankOne_valuationSubring_le_eq_of_ne_top _ _ hsub hAtop
+  have h_isEquiv : (v.valuation W₁.toAffine.FunctionField).IsEquiv pv := by
+    rw [Valuation.isEquiv_iff_valuationSubring]; rw [hEq]
+  exact Valuation.isEquiv_iff_eq_of_surjective_withZeroInt _ _ hwsurj hpvsurj h_isEquiv
 
 /-! ### The point-map image of a `B`-prime over `m_Q` is `Q` (the fibre matching, value-level)
 
