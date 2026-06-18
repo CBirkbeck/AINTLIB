@@ -85,19 +85,18 @@ private theorem frobenius_finrank_eq_fieldRange_finrank :
       (frobeniusAlgHom K W.toAffine.FunctionField).toRingHom.toAlgebra.toModule =
     Module.finrank (frobeniusAlgHom K W.toAffine.FunctionField).fieldRange
       W.toAffine.FunctionField := by
-  have := @Algebra.finrank_eq_of_equiv_equiv
+  refine @Algebra.finrank_eq_of_equiv_equiv
     W.toAffine.FunctionField W.toAffine.FunctionField _ _
     (frobeniusAlgHom K W.toAffine.FunctionField).toRingHom.toAlgebra
     (frobeniusAlgHom K W.toAffine.FunctionField).fieldRange W.toAffine.FunctionField _ _ _
     (frobeniusRangeEquiv K W) (RingEquiv.refl _) ?_
-  · exact this
-  · ext x
-    simp only [RingHom.comp_apply, RingEquiv.toRingHom_eq_coe,
-      RingEquiv.coe_toRingHom, RingEquiv.coe_refl, id]
-    change ↑(AlgEquiv.ofInjective (frobeniusAlgHom K W.toAffine.FunctionField)
-      (frobeniusAlgHom K W.toAffine.FunctionField).toRingHom.injective x) =
-      (frobeniusAlgHom K W.toAffine.FunctionField).toRingHom x
-    simp [AlgEquiv.ofInjective_apply]
+  ext x
+  simp only [RingHom.comp_apply, RingEquiv.toRingHom_eq_coe,
+    RingEquiv.coe_toRingHom, RingEquiv.coe_refl, id]
+  change ↑(AlgEquiv.ofInjective (frobeniusAlgHom K W.toAffine.FunctionField)
+    (frobeniusAlgHom K W.toAffine.FunctionField).toRingHom.injective x) =
+    (frobeniusAlgHom K W.toAffine.FunctionField).toRingHom x
+  simp [AlgEquiv.ofInjective_apply]
 
 /-- Explicit module instance: `K[X]` acts on `CoordinateRing` via the algebra structure. -/
 noncomputable instance coordinateRing_module :
@@ -177,7 +176,7 @@ private theorem frobeniusAlgHom_comp_comm :
       (frobeniusAlgHom K (FractionRing K[X])) =
     (frobeniusAlgHom K W.toAffine.FunctionField).comp
       (IsScalarTower.toAlgHom K (FractionRing K[X]) W.toAffine.FunctionField) := by
-  refine AlgHom.ext fun a => ?_
+  refine AlgHom.ext fun a ↦ ?_
   change algebraMap (FractionRing K[X]) W.toAffine.FunctionField (a ^ Fintype.card K) =
     (algebraMap (FractionRing K[X]) W.toAffine.FunctionField a) ^ Fintype.card K
   exact map_pow _ a _
@@ -204,7 +203,7 @@ private theorem frobenius_fieldRange_ratFunc :
     intro g _
     change frobeniusAlgHom K (RatFunc K) g ∈ A
     simp only [coe_frobeniusAlgHom]
-    obtain ⟨p, r, hr, rfl⟩ : ∃ p r : K[X], algebraMap K[X] (RatFunc K) r ≠ 0 ∧
+    obtain ⟨p, r, _hr, rfl⟩ : ∃ p r : K[X], algebraMap K[X] (RatFunc K) r ≠ 0 ∧
       g = algebraMap K[X] (RatFunc K) p / algebraMap K[X] (RatFunc K) r :=
       ⟨g.num, g.denom, RatFunc.algebraMap_ne_zero g.denom_ne_zero, g.num_div_denom.symm⟩
     simp only [div_pow, ← map_pow, ← FiniteField.expand_card (K := K)]
