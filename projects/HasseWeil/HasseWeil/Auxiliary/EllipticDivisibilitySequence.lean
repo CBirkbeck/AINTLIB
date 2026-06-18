@@ -295,11 +295,11 @@ lemma rel₄_iff_evenRec (m : ℤ) : rel₄ W (2 * m + 1) (2 * m - 1) 3 1 = 0 �
   rw [iff_comm, EvenRec, ← sub_eq_zero, show 2 * m - 1 = 2 * (m - 1) + 1 by ring]
   have e₃₁ : addMulSub W 3 1 = W 2 * W 1 := by
     have h := addMulSub_odd (W := W) 1 0; norm_num at h; exact h
-  have e₃ : ∀ k : ℤ, addMulSub W (2 * k + 1) 3 = W (k + 2) * W (k - 1) := fun k => by
+  have e₃ : ∀ k : ℤ, addMulSub W (2 * k + 1) 3 = W (k + 2) * W (k - 1) := fun k ↦ by
     have h := addMulSub_odd (W := W) k 1
     rw [show (2 * (1 : ℤ) + 1) = 3 by norm_num, show k + 1 + 1 = k + 2 by ring] at h
     exact h
-  have e₁ : ∀ k : ℤ, addMulSub W (2 * k + 1) 1 = W (k + 1) * W k := fun k => by
+  have e₁ : ∀ k : ℤ, addMulSub W (2 * k + 1) 1 = W (k + 1) * W k := fun k ↦ by
     have h := addMulSub_odd (W := W) k 0; norm_num at h; exact h
   simp only [rel₄, addMulSub_odd, e₃₁, e₃, e₁]
   ring_nf
@@ -482,7 +482,7 @@ include one two oddRec evenRec
 
 theorem rel₄_of_oddRec_evenRec {a b c d : ℤ} (same : HaveSameParity₄ a b c d) :
     rel₄ W a b c d = 0 := by
-  let t : Fin 4 → ℤ := fun i => match i with
+  let t : Fin 4 → ℤ := fun i ↦ match i with
     | 0 => |a|
     | 1 => |b|
     | 2 => |c|
@@ -974,7 +974,7 @@ lemma invar₂_normEDS {m : ℤ} :
     EllSequence.invarNum (normEDS b c d) 1 m * c =
       EllSequence.invarDenom (normEDS b c d) 1 m * (d + b ^ 4) := by
   have heval : ∀ n, aeval (Param.rec b c d) (normEDS (X B) (X Param.C) (X D) n) =
-      normEDS b c d n := fun n => by
+      normEDS b c d n := fun n ↦ by
     change (aeval (Param.rec b c d)) (universalNormEDS n) = normEDS b c d n
     exact (congr_fun (normEDS_eq_aeval b c d) n).symm
   have h := invar₂_normEDS_of_mem_nonZeroDivisors
