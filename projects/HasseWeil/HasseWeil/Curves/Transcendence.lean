@@ -88,7 +88,7 @@ theorem notMem_pthPowers_of_uniformizer {p : ℕ} (hp : 1 < p)
     t ≠ f ^ p := by
   intro hfp
   have ht_ne : t ≠ 0 := ht.ne_zero
-  have hf_ne : f ≠ 0 := fun hf => ht_ne (by rw [hfp, hf, zero_pow (by omega)])
+  have hf_ne : f ≠ 0 := fun hf ↦ ht_ne (by rw [hfp, hf, zero_pow (by omega)])
   have h_ord_t : C.ord_P P t = 1 := ht
   have h_ord_fp : C.ord_P P (f ^ p) = (p : ℕ) • C.ord_P P f :=
     C.ord_P_pow f p
