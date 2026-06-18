@@ -78,12 +78,9 @@ private lemma valuation_pi_le_one_on_spa
   letI : ValuativeRel A := v.toValuativeRel
   have hcompat : (ValuativeRel.valuation A).Compatible := inferInstance
   set w := ValuativeRel.valuation A
-  have hπ_lt : ¬ v.vle 1 π :=
-    not_vle_one_of_mem_spa_of_topologicallyNilpotent hv hπ_tn
-  have h_not : ¬ (w 1 ≤ w π) := fun h ↦ hπ_lt
+  rw [← map_one w]
+  exact le_of_not_ge fun h ↦ not_vle_one_of_mem_spa_of_topologicallyNilpotent hv hπ_tn
     ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr h)
-  rw [map_one] at h_not
-  exact le_of_not_ge h_not
 
 omit [IsTopologicalRing A] in
 /-- Monotonicity in `n`: on `Spa A A⁺`, `dominatedBy T π n ⊆ dominatedBy T π m`
@@ -102,13 +99,8 @@ lemma dominatedBy_mono_on_spa
   have h_t : w (π ^ n) ≤ w t :=
     (Valuation.Compatible.vle_iff_le (v := w) _ _).mp hvt
   have hπ_le_one : w π ≤ 1 := valuation_pi_le_one_on_spa hvSpa hπ_tn
-  have h_pow : w π ^ m ≤ w π ^ n :=
-    pow_le_pow_of_le_one (zero_le') hπ_le_one hnm
-  refine (Valuation.Compatible.vle_iff_le (v := w) _ _).mpr ?_
-  calc w (π ^ m) = w π ^ m := by simp [map_pow]
-    _ ≤ w π ^ n := h_pow
-    _ = w (π ^ n) := by simp [map_pow]
-    _ ≤ w t := h_t
+  refine (Valuation.Compatible.vle_iff_le (v := w) _ _).mpr (le_trans ?_ h_t)
+  simpa only [map_pow] using pow_le_pow_of_le_one zero_le' hπ_le_one hnm
 
 /-! ### Coverage: every Spa-point lies in some `dominatedBy` -/
 
@@ -130,21 +122,13 @@ lemma exists_mem_basicOpen_pow_of_tn
   have hcompat : (ValuativeRel.valuation A).Compatible := inferInstance
   set w := ValuativeRel.valuation A
   have hπ_lt : w π < 1 := by
-    have hπ_not : ¬ v.vle 1 π :=
-      not_vle_one_of_mem_spa_of_topologicallyNilpotent hv hπ_tn
-    have hne : ¬ (w 1 ≤ w π) := fun h ↦ hπ_not
+    rw [← map_one w]
+    exact lt_of_not_ge fun h ↦ not_vle_one_of_mem_spa_of_topologicallyNilpotent hv hπ_tn
       ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr h)
-    rw [map_one] at hne
-    exact lt_of_not_ge hne
-  have hwt_ne : w t ≠ 0 := by
-    intro h
-    refine htne ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr ?_)
-    rw [map_zero]; exact le_of_eq h
+  have hwt_ne : w t ≠ 0 := fun h ↦ htne
+    ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr (by rw [map_zero]; exact h.le))
   obtain ⟨n, hn⟩ := exists_pow_lt₀ hπ_lt (Units.mk0 (w t) hwt_ne)
-  refine ⟨n, ?_, htne⟩
-  refine (Valuation.Compatible.vle_iff_le (v := w) _ _).mpr ?_
-  simp only [map_pow]
-  exact le_of_lt (by simpa using hn)
+  exact ⟨n, (Valuation.Compatible.vle_iff_le (v := w) _ _).mpr (by simpa using hn.le), htne⟩
 
 /-! ### Compactness-based stabilisation -/
 
@@ -178,16 +162,10 @@ lemma exists_dominatedBy_cover
   set N : ℕ := F.sup id with hN_def
   refine ⟨N, fun v hvSpa ↦ ?_⟩
   -- `(⟨v, hvSpa⟩ : ↥(Spa A A⁺)) ∈ S n` for some `n ∈ F`.
-  have hmem : (⟨v, hvSpa⟩ : ↥(Spa A A⁺)) ∈ (Set.univ : Set ↥(Spa A A⁺)) := Set.mem_univ _
-  have hUnion := hF hmem
-  simp only [Set.mem_iUnion] at hUnion
-  obtain ⟨n, hnF, hvn⟩ := hUnion
+  obtain ⟨n, hnF, hvn⟩ := Set.mem_iUnion₂.mp (hF (Set.mem_univ (⟨v, hvSpa⟩ : ↥(Spa A A⁺))))
   -- `v ∈ dominatedBy T π n`, and `n ≤ N`, so `v ∈ dominatedBy T π N` by monotonicity.
-  have hle : n ≤ N := by
-    have := Finset.le_sup (f := id) hnF
-    simpa [hN_def] using this
-  have hv_dom : v ∈ dominatedBy T π n := by
-    simpa [hS_def, Set.mem_preimage] using hvn
+  have hle : n ≤ N := by simpa [hN_def] using Finset.le_sup (f := id) hnF
+  have hv_dom : v ∈ dominatedBy T π n := by simpa [hS_def, Set.mem_preimage] using hvn
   exact dominatedBy_mono_on_spa T hπ_tn hle ⟨hv_dom, hvSpa⟩
 
 /-! ### Assembly: strict-domination unit -/
