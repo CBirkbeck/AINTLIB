@@ -63,7 +63,7 @@ noncomputable def picZeroSumOfWitness
     ((⟨W⟩ : Curves.SmoothPlaneCurve F).projPrincipalSubgroup.addSubgroupOf
       (Curves.ProjectiveDivisor.degZero (⟨W⟩ : Curves.SmoothPlaneCurve F)))
     restricted
-    fun D hD => by
+    fun D hD ↦ by
       -- D ∈ addSubgroupOf means D.val ∈ projPrincipalSubgroup
       -- Apply h_van.
       show Curves.projectiveDivisorSum W D.val = 0
@@ -115,7 +115,7 @@ noncomputable def pushforwardPicZeroOfWitness
           (Curves.ProjectiveDivisor.degZero
             (⟨W₂⟩ : Curves.SmoothPlaneCurve F)))).comp
       (pushforwardDegZero φ cd))
-    fun D hD => by
+    fun D hD ↦ by
       -- Goal: comp ((mk' N₂).comp (pushforwardDegZero φ cd)) D = 0
       -- Strategy: the comp at D produces Quotient.mk of (pushforwardDegZero φ cd D),
       -- and we show this is zero via mk_eq_zero_iff and h_pres.
