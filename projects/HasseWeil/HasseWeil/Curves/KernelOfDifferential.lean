@@ -169,7 +169,7 @@ theorem Isogeny.pullback_mem_pth_powers_of_not_isSeparable (p : ℕ) [Fact p.Pri
     (f : V.FunctionField) :
     ∃ g : V.FunctionField, g ^ p = φ.toCurveMap.pullback f := by
   letI : DecidableEq K := Classical.decEq K
-  have hα : ¬(⟨φ.toCurveMap.pullback, 0⟩ : HasseWeil.Isogeny V V).IsSeparable := fun hs =>
+  have hα : ¬(⟨φ.toCurveMap.pullback, 0⟩ : HasseWeil.Isogeny V V).IsSeparable := fun hs ↦
     h (φ.isSeparable_of_algebra_isSeparable hs)
   exact HasseWeil.pullback_mem_pth_powers_of_not_isSeparable V p
     ⟨φ.toCurveMap.pullback, 0⟩ hα f
@@ -190,7 +190,7 @@ theorem Isogeny.pullback_range_le_frobeniusPower_one_of_not_isSeparable (p : ℕ
     (h : ¬φ.IsSeparable) :
     φ.toCurveMap.pullback.range ≤
       (Isogeny.frobeniusPower V 1).toCurveMap.pullback.range := by
-  refine φ.rangeIncl_frobeniusPower_of_pow_roots 1 fun z => ?_
+  refine φ.rangeIncl_frobeniusPower_of_pow_roots 1 fun z ↦ ?_
   rw [hcard, pow_one]
   exact φ.pullback_mem_pth_powers_of_not_isSeparable p h z
 
@@ -199,7 +199,7 @@ theorem Isogeny.separablePart_zero_eq (φ : Isogeny V V)
     (hincl : φ.toCurveMap.pullback.range ≤
       (Isogeny.frobeniusPower V 0).toCurveMap.pullback.range) :
     φ.separablePart 0 hincl = φ := by
-  refine Isogeny.ext_toCurveMap (Curves.CurveMap.ext (AlgHom.ext fun z => ?_))
+  refine Isogeny.ext_toCurveMap (Curves.CurveMap.ext (AlgHom.ext fun z ↦ ?_))
   have h := φ.separablePart_pullback_pow 0 hincl z
   rwa [pow_zero, pow_one] at h
 
@@ -242,7 +242,7 @@ theorem Isogeny.separablePart_succ_eq (φ : Isogeny V V)
     (hincl'' : φ.toCurveMap.pullback.range ≤
       (Isogeny.frobeniusPower V (r + 1)).toCurveMap.pullback.range) :
     φ.separablePart (r + 1) hincl'' = (φ.separablePart 1 hincl1).separablePart r hincl' := by
-  refine Isogeny.ext_toCurveMap (Curves.CurveMap.ext (AlgHom.ext fun z => ?_))
+  refine Isogeny.ext_toCurveMap (Curves.CurveMap.ext (AlgHom.ext fun z ↦ ?_))
   apply (Isogeny.frobeniusPower V (r + 1)).pullback_injective
   rw [Isogeny.frobeniusPower_pullback, Isogeny.frobeniusPower_pullback,
     φ.separablePart_pullback_pow (r + 1) hincl'' z,
@@ -314,7 +314,7 @@ theorem frobeniusFactorization_of_qStep (V : WeierstrassCurve.Affine K) [V.IsEll
 theorem frobeniusFactorization_of_card_eq_prime (p : ℕ) [Fact p.Prime] [CharP K p]
     (hcard : Fintype.card K = p) (V : WeierstrassCurve.Affine K) [V.IsElliptic] :
     FrobeniusFactorization V :=
-  frobeniusFactorization_of_qStep V fun φ h =>
+  frobeniusFactorization_of_qStep V fun φ h ↦
     φ.pullback_range_le_frobeniusPower_one_of_not_isSeparable p hcard h
 
 end IterationSkeleton
