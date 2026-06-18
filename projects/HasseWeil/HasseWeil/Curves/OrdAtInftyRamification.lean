@@ -150,7 +150,7 @@ theorem ordAtInfty_ringHom_eq_nsmul
     {g : C₂.FunctionField} (hg : g ≠ 0) :
     C₁.ordAtInfty (ψ g) = e • C₂.ordAtInfty g := by
   -- `t ≠ 0` (its order is `1`, not `⊤`); `ψ` injective so `ψ t ≠ 0`, `ψ g ≠ 0`.
-  have ht_ne : t ≠ 0 := fun h => by simp [h] at ht
+  have ht_ne : t ≠ 0 := fun h ↦ by simp [h] at ht
   have hψt_ne : ψ t ≠ 0 := (map_ne_zero ψ).mpr ht_ne
   -- Extract the integer order `n` of `g` at `O₂`.
   obtain ⟨n, hn⟩ : ∃ n : ℤ, C₂.ordAtInfty g = ((n : ℤ) : WithTop ℤ) :=
@@ -220,7 +220,7 @@ theorem exists_ramificationIdx_ordAtInfty_ringHom
   obtain ⟨m, hm⟩ : ∃ m : ℤ, C₁.ordAtInfty (ψ t) = ((m : ℤ) : WithTop ℤ) :=
     ⟨_, C₁.ordAtInfty_of_ne hψt_ne⟩
   have hm_nonneg : 0 ≤ m := by rw [hm] at hψt_nonneg; exact_mod_cast hψt_nonneg
-  refine ⟨m.toNat, fun g hg => ?_⟩
+  refine ⟨m.toNat, fun g hg ↦ ?_⟩
   have he : C₁.ordAtInfty (ψ t) = ((m.toNat : ℤ) : WithTop ℤ) := by
     rw [hm, Int.toNat_of_nonneg hm_nonneg]
   exact ordAtInfty_ringHom_eq_nsmul ψ hreg ht he hg
@@ -254,7 +254,7 @@ theorem exists_pos_ramificationIdx_ordAtInfty_ringHom
     ⟨_, C₁.ordAtInfty_of_ne hψt_ne⟩
   -- `0 < ord_∞(ψ t) = m`, so `1 ≤ m`, hence `1 ≤ m.toNat`.
   have hm_pos : 0 < m := by rw [hm] at hnt; exact_mod_cast hnt
-  refine ⟨m.toNat, by omega, fun g hg => ?_⟩
+  refine ⟨m.toNat, by omega, fun g hg ↦ ?_⟩
   have he : C₁.ordAtInfty (ψ t) = ((m.toNat : ℤ) : WithTop ℤ) := by
     rw [hm, Int.toNat_of_nonneg (le_of_lt hm_pos)]
   exact ordAtInfty_ringHom_eq_nsmul ψ hreg ht he hg
@@ -277,8 +277,8 @@ theorem le_ordAtInfty_sum {ι : Type*} {C : SmoothPlaneCurve F} {c : WithTop ℤ
     (s : Finset ι) (f : ι → C.FunctionField)
     (h : ∀ i ∈ s, c ≤ C.ordAtInfty (f i)) :
     c ≤ C.ordAtInfty (∑ i ∈ s, f i) :=
-  Finset.sum_induction f (fun x => c ≤ C.ordAtInfty x)
-    (fun a b ha hb => le_trans (le_min ha hb) (C.ordAtInfty_add_ge_min a b))
+  Finset.sum_induction f (fun x ↦ c ≤ C.ordAtInfty x)
+    (fun a b ha hb ↦ le_trans (le_min ha hb) (C.ordAtInfty_add_ge_min a b))
     (by simp) h
 
 /-- If `ord_∞ ∘ ψ` vanishes on all of `F(C₂)×`, then no element of `F(C₁)` that
@@ -450,7 +450,7 @@ theorem isAlgebraic_toAlgebra (φ : CurveMap C₁ C₂) (z : C₁.FunctionField)
     IsAlgebraic C₂.FunctionField z := by
   letI : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
   -- `φ* x₂` is transcendental over `F` (pullbacks are injective `F`-algebra homs)
-  have hu : Transcendental F (φ.pullback C₂.coordX) := fun hAlg =>
+  have hu : Transcendental F (φ.pullback C₂.coordX) := fun hAlg ↦
     C₂.transcendental_coordX
       ((isAlgebraic_algHom_iff φ.pullback φ.pullback_injective).mp hAlg)
   -- the singleton `{φ* x₂}` is a transcendence basis of `F(C₁)/F`
