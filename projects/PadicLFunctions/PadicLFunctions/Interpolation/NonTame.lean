@@ -335,6 +335,20 @@ lemma subst_map_neg (F : PowerSeries (integerRing K)) :
   rw [map_neg, ← PowerSeries.coe_substAlgHom hg, map_neg,
     PowerSeries.coe_substAlgHom hg]
 
+omit [IsUltrametricDist K] [CompleteSpace K] in
+/-- For `M ≠ 0`, the rescaled exponential `e^{Mt} − 1` is a nonzero power series
+over `K` (its degree-`1` coefficient is `M ≠ 0`). -/
+lemma rescale_exp_sub_one_ne_zero {M : ℕ} [NeZero M] :
+    (PowerSeries.rescale ((M : ℕ) : K) (PowerSeries.exp K) - 1 : PowerSeries K)
+      ≠ 0 := by
+  intro h0
+  have h1 := congrArg (PowerSeries.coeff 1) h0
+  rw [map_sub, PowerSeries.coeff_rescale, PowerSeries.coeff_exp,
+    PowerSeries.coeff_one] at h1
+  simp only [Nat.factorial_one, Nat.cast_one, map_one, div_one, pow_one,
+    if_neg one_ne_zero, sub_zero, map_zero] at h1
+  exact NeZero.ne M (by simpa using h1)
+
 /-- L5.2.3 step 3, the master identity: `X·H_η = −G(η⁻¹)·genBPS_{η_K}` in
 `K⟦t⟧`, with `H_η` the exp-substituted `K`-valued Mahler transform of
 `muEtaCleared` — the η⁻¹-weighted geometric numerators collapse through the
@@ -413,16 +427,7 @@ lemma X_mul_muEtaCleared_subst {D : ℕ} [NeZero D] (hD1 : 1 < D)
     ring
   -- (3) multiply by `X`, insert T504, cancel the regular factor
   have h504 := X_mul_sum_char_rescale_exp (K := K) hD1 (toFieldChar η)
-  have hreg : (PowerSeries.rescale ((D : ℕ) : K) (PowerSeries.exp K) - 1)
-      ≠ 0 := by
-    intro h0
-    have h1 := congrArg (PowerSeries.coeff 1) h0
-    rw [map_sub, PowerSeries.coeff_rescale, PowerSeries.coeff_exp,
-      PowerSeries.coeff_one] at h1
-    simp only [Nat.factorial_one, Nat.cast_one, map_one, div_one, pow_one,
-      if_neg one_ne_zero, sub_zero, map_zero] at h1
-    exact NeZero.ne D (by simpa using h1)
-  refine mul_right_cancel₀ hreg ?_
+  refine mul_right_cancel₀ (rescale_exp_sub_one_ne_zero (M := D)) ?_
   calc PowerSeries.X * (PowerSeries.map (integerRing K).subtype
           (mahlerTransform p K (muEtaCleared p K η hζ hD))).subst
           (PowerSeries.exp K - 1)
@@ -793,20 +798,6 @@ lemma toFieldChar_prod_natCast {D : ℕ}
     · simp [show (toFieldChar χ) ((j : ℕ) : ZMod (p ^ n))
           = ((χ ((j : ℕ) : ZMod (p ^ n)) : integerRing K) : K) from rfl,
         χ.map_nonunit h]
-
-omit [IsUltrametricDist K] [CompleteSpace K] in
-/-- For `M ≠ 0`, the rescaled exponential `e^{Mt} − 1` is a nonzero power series
-over `K` (its degree-`1` coefficient is `M ≠ 0`). -/
-lemma rescale_exp_sub_one_ne_zero {M : ℕ} [NeZero M] :
-    (PowerSeries.rescale ((M : ℕ) : K) (PowerSeries.exp K) - 1 : PowerSeries K)
-      ≠ 0 := by
-  intro h0
-  have h1 := congrArg (PowerSeries.coeff 1) h0
-  rw [map_sub, PowerSeries.coeff_rescale, PowerSeries.coeff_exp,
-    PowerSeries.coeff_one] at h1
-  simp only [Nat.factorial_one, Nat.cast_one, map_one, div_one, pow_one,
-    if_neg one_ne_zero, sub_zero, map_zero] at h1
-  exact NeZero.ne M (by simpa using h1)
 
 /-- The exp-substituted `ε^b`-line of the twist of `μ̃_η`: it is the
 `η̄⁻¹`-weighted sum of the substituted product-root inverses (the `K`-valued
