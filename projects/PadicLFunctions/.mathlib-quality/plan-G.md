@@ -59,6 +59,47 @@ as RJW cite it (TeX 3767, 3790); Chebotarev supplies prime-existence but not the
 Net: instead of "axiomatise CFT", the plan is **reuse the monorepo for G1 / G-VANDIVER / the tower, prove
 G3 / G4 / G-IMC, and axiomatise only the single ramified-CFT sequence (G2).**
 
+### Post-expert-review refinement (2026-06-18): assume *general* CFT, derive the special case
+
+An Iwasawa-theory specialist reviewed the above (`expert-review/2026-06-18/`). Conclusions: there is **no
+Coleman-only/Chebotarev-only shortcut** (the kernel = closure of global units *is* p-ramified global
+reciprocity); the bespoke sequence is **not intrinsic**, but *some* global bridge is; for the Vandiver
+milestone, assuming the CFT input is "overwhelmingly the right engineering decision". Acting on the
+reviewer's "more reusable black box" and on the design goal *depend on the stable interface a future
+global-CFT library will expose, not a bespoke specialisation*:
+
+- **The assumed boundary is the general, classical theorem of global CFT** (ray-class / ideal-theoretic
+  form), for arbitrary number fields: **Artin reciprocity** `Cl_K(𝔪) ≅ Gal(H_𝔪/K)` + **existence**
+  (every finite abelian `L/K` lies in some `H_𝔪`, `𝔪` divisible by the conductor) + **conductor–
+  ramification** ("unramified outside `S`" ↔ modulus supported in `S`). Bundled as a `structure
+  ClassFieldTheory` (or marked axioms). This is exactly what mathlib's eventual global CFT will provide,
+  so discharge later = *instantiate the structure*, with nothing downstream changing.
+- **Derived (PROVEN) from the interface**: the bespoke CFTunits1 sequence (apply the interface to
+  `K = F_n^+`, `S = {𝔭,∞}`). Most of the unwinding is **elementary** (the ray-class/units/class-group
+  exact sequence is the *definition* of the ray class group — no CFT); the only irreducible CFT content
+  is the Artin iso itself. The inverse-limit passage is a Mittag–Leffler proof.
+
+So the irreducible assumed surface is **one general classical theorem (Artin reciprocity + existence)**,
+not a cyclotomic-tower specialisation. The deduction + ray-class API is reusable by every monorepo project.
+
+### Eventual axiom-elimination (deferred, separate project)
+
+Per the reviewer, the genuine non-ray-class route to the *full* IMC is **tower-level class-group Euler
+system (reuse `FltRegularBernoulli/Thaine`) + Kummer pairing/reflection (NSW Thm 11.4.3 / Washington
+Prop 13.32) + the Iwasawa adjoint** — replacing ray-class reciprocity by global Kummer duality (itself a
+global theorem ≈ degree-one Poitou–Tate). This is ≈ the full Main Conjecture and is **not** a shortcut for
+Vandiver (it concerns reflected *odd* components, where the irregularity lives). Recorded as `G2-DISCHARGE`.
+The Greenberg/Selmer reformulation (Q5) is cleanest in the abstract but **larger** than the CFT black box
+now (needs local Tate duality + Poitou–Tate) — not pursued at this stage.
+
+### Added references (from the review)
+- Neukirch–Schmidt–Wingberg, *Cohomology of Number Fields*, Thm 11.4.3 (Kummer pairing).
+- Washington, *Cyclotomic Fields* 2nd ed., Prop 13.32 (Kummer pairing), Cor 13.6 (the finite-level
+  ramified sequence), Ch. 15 (Thaine–Kolyvagin–Rubin + an MC proof).
+- Aoki, "The Iwasawa Main Conjecture and Gauss Sums" (minus-side Euler system of Gauss sums).
+- [Selecta Math.] "Fitting ideals of p-ramified Iwasawa modules over totally real fields" (Selmer-complex
+  treatment).
+
 ## Mathlib / project inventory
 
 | Concept | Status | Action |

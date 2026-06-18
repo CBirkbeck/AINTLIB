@@ -6687,9 +6687,11 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
   Target = **IMC for Vandiver primes** (RJW `thm:vandiver`), reusing §12 `iwasawa_theorem` (done). The monorepo
   has real sorry-free CFT/class-group infrastructure (`FltRegular/Hilbert94`, `FltRegularBernoulli`
   HilbertClassField/Hilbert90/Vandiver-p37/class-group±/cyclotomic-units, `Chebotarev`) + the PadicLFunctions
-  tower ⇒ **G1 and G-VANDIVER REUSE real proofs; G3/G4/G-IMC proven**. The **only** axiomatised input is **G2**
-  (ramified CFT, Washington Cor 13.6 — absent everywhere), one field of `structure IwasawaGaloisData`, cited as
-  RJW themselves cite it (TeX 3767/3790). Sub-tickets below.
+  tower ⇒ **G1 and G-VANDIVER REUSE real proofs; G3/G4/G-IMC proven**. **Expert-reviewed 2026-06-18**
+  (`.mathlib-quality/expert-review/2026-06-18/`): the **only** axiom is now the **general classical CFT theorem**
+  `[G2-CFT]` (ray-class Artin reciprocity + existence + conductor, arbitrary number fields), from which the bespoke
+  CFTunits1 sequence is **derived** (G2-DEDUCE/G2-LIMIT, proven) — chosen so a future global-CFT library discharges
+  it by instantiation. Sub-tickets below.
 
 ##### [G-DEF] `IwasawaGaloisData` — Galois modules + axiomatised CFT inputs
 - **Status**: open | **File**: IwasawaProof/Galois/Modules.lean | **Depends on**: S13-S5 | **Type**: structure/def
@@ -6706,7 +6708,10 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
   automorphisms), 3806–3808 (Galois SES).
 - **Reuse**: project `GPlus`, `projPlus`, `zetaIdealPlus` (PlusPart/ZetaGalois); Stage-S `IwasawaAlgebraGroup`,
   `charIdealGroup`. **Generality**: concrete to the project's `p`,`GPlus p` (these are the specific cyclotomic modules).
-- **Note**: axiomatised — `galoisSES` and the module structures encode classical Galois/CFT facts mathlib lacks.
+- **Note**: `galoisSES` is the fundamental theorem of Galois theory for the infinite extensions (`𝓛⁺_∞ ⊆ 𝓜⁺_∞`),
+  bundled with the module structures as structural data for the tower's Galois modules. The **CFT** content is NOT
+  here — CFTunits1 is *derived* from the general `[G2-CFT]` interface (see G2-DEDUCE/G2-LIMIT), not a field of this
+  structure. So `IwasawaGaloisData` carries Galois-theoretic/structural data; the single CFT axiom is `[G2-CFT]`.
 
 ##### [G1] `𝒴⁺_n ≅ Cl(F⁺_n) ⊗ ℤ_p`  (Hilbert-94 / unramified CFT — **REUSE monorepo**)
 - **Status**: open | **File**: IwasawaProof/Galois/Modules.lean | **Depends on**: G-DEF | **Type**: def + theorem (reuse)
@@ -6725,20 +6730,49 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
   project `FglobalPlus`. **Generality**: per-`n`. **Note**: the bridge between the two projects' field setups is the
   only real work; the CFT content is reused, not axiomatised.
 
-##### [G2] CFTunits1 — `0 → 𝓔⁺_{∞,1} → 𝒰⁺_{∞,1} → Gal(𝓜⁺_∞/𝓛⁺_∞) → 0`  (ramified CFT — HARDEST)
-- **Status**: open | **File**: IwasawaProof/Galois/Modules.lean | **Depends on**: G-DEF, G1 | **Type**: axiom-field
-- **Statement**: the exact sequence of Λ(𝒢⁺)-modules `cftSES : 0 → EPlusInftyOne → localUnitsOnePlus∞ → MmodL → 0`,
-  an **axiomatised field** of `IwasawaGaloisData`. (`EPlusInftyOne` = 𝓔⁺_{∞,1}, the inverse limit of the p-adic
-  closures of global units; `localUnitsOnePlus∞` = 𝒰⁺_{∞,1} = inverse limit of the project's `localUnitsOnePlus`.)
-- **Proof sketch**: global CFT (Washington Cor 13.6) at finite level gives `0→𝓔⁺_{n,1}→𝒰⁺_{n,1}→Gal(𝓜⁺_n/𝓛⁺_n)→0`;
-  inverse limit over `n` (Mittag-Leffler: all terms f.g. ℤ_p-modules) preserves exactness. **This is the SINGLE
-  axiomatised input of Stage G**: ramified CFT (ray class groups, Artin reciprocity, conductor, max abelian p-ext
-  unramified-*outside-p*) is ABSENT from the **whole monorepo** and mathlib — distinct from the Hilbert class field
-  (unramified everywhere) reused in G1. Axiomatised field with citation. `projects/Chebotarev` (`chebotarev_density`,
-  `dirichlet_primes_in_AP`) supplies the prime-existence ingredient should one later *build* this rather than assume
-  it. Define `EPlusInftyOne`, `localUnitsOnePlus∞` as inverse limits of the existing project subgroups.
-- **Sources**: RJW TeX 3782–3795 (Prop CFTunits1); Washington Cor 13.6. **Reuse**: project `localUnitsOnePlus`,
-  `globalUnitsPlus`; mathlib `IsMittagLeffler`; `projects/Chebotarev` (if built). **Generality**: concrete.
+##### [G2] CFTunits1 — restructured per expert review (2026-06-18): assume *general* CFT, derive the special case
+- **Reviewer guidance (2026-06-18)**: no Coleman/Chebotarev shortcut (kernel = closure of global units *is*
+  p-ramified reciprocity); assume the general classical CFT theorem (ray-class form) and DERIVE CFTunits1;
+  black-box at the level a future global-CFT library exposes, so discharge = instantiate the interface.
+  See `.mathlib-quality/expert-review/2026-06-18/`. The single axiom is now **G2-CFT** below; G2-RAYSEQ /
+  G2-DEDUCE / G2-LIMIT are PROVEN.
+
+###### [G2-CFT] the assumed interface — general global class field theory (ray-class form)
+- **Status**: open | **File**: Common/ClassFieldTheory.lean (shared) | **Depends on**: — | **Type**: structure (axiomatised interface)
+- **Statement**: `structure ClassFieldTheory` over arbitrary number fields `K` bundling the classical theorems:
+  **Artin reciprocity** `Cl_K(𝔪) ≃* Gal(H_𝔪/K)` (ray class group ≅ ray class field Galois group); **existence**
+  (every finite abelian `L/K` lies in some `H_𝔪`, `𝔪` divisible by the conductor); **conductor–ramification**
+  (`v` ramifies in `L` ⟺ `v ∣ cond L`; "unramified outside `S`" ↔ modulus supported in `S`). Plus the modest
+  ray-class/conductor API to state it.
+- **Proof sketch**: NO proof — this is the marked-axiom interface (the one CFT black box, fully general). It is
+  exactly what mathlib's eventual global CFT will expose, so `[G2-DISCHARGE]` later = provide the instance.
+- **Sources**: standard global CFT (Takagi–Artin); Neukirch *ANT* Ch. VI; Washington Ch. 13. **Reuse**: mathlib
+  `ClassGroup`, ray-class API to be defined here (shared in `Common/` for all monorepo projects). **Generality**:
+  arbitrary number field `K`, arbitrary modulus `𝔪` — maximal.
+
+###### [G2-RAYSEQ] ray-class / units / class-group exact sequence — **PROVEN (elementary)**
+- **Status**: open | **File**: Common/ClassFieldTheory.lean | **Depends on**: G2-CFT (for ray-class defs) | **Type**: theorem
+- **Statement**: `𝒪_K^× → ∏_{v∣𝔪} (𝒪_{K_v}^×/U_v^{(𝔪)}) → Cl_K(𝔪) → Cl_K → 0` exact (the ray-class group vs
+  class group sequence). For `𝔪 = 𝔭^m` in the cyclotomic setting this is the algebraic backbone of CFTunits1.
+- **Proof sketch**: this is the *definition* of the ray class group (ideals prime to `𝔪` mod `𝔪`-principal) — pure
+  algebra, **no CFT**. Exactness by the standard diagram chase. **Generality**: arbitrary `K`, `𝔪`.
+
+###### [G2-DEDUCE] CFTunits1 `0 → 𝓔⁺_{n,1} → 𝒰⁺_{n,1} → Gal(𝓜⁺_n/𝓛⁺_n) → 0` — **PROVEN from G2-CFT**
+- **Status**: open | **File**: IwasawaProof/Galois/Modules.lean | **Depends on**: G2-CFT, G2-RAYSEQ, G1 | **Type**: theorem
+- **Proof sketch**: apply the `ClassFieldTheory` interface to `K = F_n^+`, `S = {𝔭, ∞}` (max abelian p-extension
+  unramified outside p); combine Artin reciprocity + existence with G2-RAYSEQ and the local principal units
+  `localUnitsOnePlus` to identify `Gal(𝓜⁺_n/𝓛⁺_n)` with `𝒰⁺_{n,1}/closure(𝓔⁺_{n,1})`. This is the Washington
+  Cor 13.6 derivation, now a lemma over the interface (not an axiom). **Sources**: RJW TeX 3782–3795; Washington
+  Cor 13.6. **Reuse**: G2-CFT, project `localUnitsOnePlus`, `globalUnitsPlus`.
+
+###### [G2-LIMIT] inverse-limit sequence `0 → 𝓔⁺_{∞,1} → 𝒰⁺_{∞,1} → Gal(𝓜⁺_∞/𝓛⁺_∞) → 0` — **PROVEN (Mittag–Leffler)**
+- **Status**: open | **File**: IwasawaProof/Galois/Modules.lean | **Depends on**: G2-DEDUCE | **Type**: theorem
+- **Proof sketch**: inverse limit of the G2-DEDUCE sequences over `n`; exactness preserved since all terms are
+  f.g. ℤ_p-modules (Mittag–Leffler). This `cftSES` is what feeds G4. **Reuse**: mathlib `IsMittagLeffler`; project
+  inverse-limit setup for `localUnitsOnePlus∞`, `EPlusInftyOne`.
+- **Note**: `[G2-DISCHARGE]` (deferred, separate project) = provide the `ClassFieldTheory` instance, either from
+  mathlib's future global CFT, or via the reviewer's route (tower-level Euler system + Kummer pairing/reflection
+  NSW 11.4.3 / Wa 13.32 + Iwasawa adjoint). The Greenberg/Selmer route (Q5) is larger now — not pursued.
 
 ##### [CLEANUP-G1] /cleanup IwasawaProof/Galois/Modules.lean
 - **Status**: open | **Depends on**: G2 | **Type**: cleanup (per-file cadence: 3 tickets G-DEF,G1,G2)
@@ -6756,7 +6790,7 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
   `Representation.Coinvariants`. **Generality**: per-`n`.
 
 ##### [G4] CFTunits2 — `0 → 𝓔⁺/𝓒⁺ → 𝒰⁺/𝓒⁺ → 𝒳⁺_∞ → 𝒴⁺_∞ → 0`  (PROVEN)
-- **Status**: open | **File**: IwasawaProof/Galois/Sequence.lean | **Depends on**: G-DEF, G2 | **Type**: theorem
+- **Status**: open | **File**: IwasawaProof/Galois/Sequence.lean | **Depends on**: G-DEF, G2-LIMIT | **Type**: theorem
 - **Statement**: `theorem cftUnits2 (D : IwasawaGaloisData p hp2) : Exact4 (E⁺∞₁/C⁺∞₁) (U⁺∞₁/C⁺∞₁) X⁺∞ Y⁺∞`
   (the 4-term exact sequence of Λ(𝒢⁺)-modules).
 - **Proof sketch**: from `galoisSES` (G-DEF: `0→MmodL→X⁺∞→Y⁺∞→0`) and `cftSES` (G2: `0→E⁺∞₁→U⁺∞₁→MmodL→0`),
@@ -6809,10 +6843,25 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
 ##### [CLEANUP-FINAL-G] /cleanup-all on the whole Stage-G layer
 - **Status**: open | **Depends on**: G-IMC | **Type**: cleanup-final
 
-#### [S13-E] Stage E — Euler system / Thaine (Washington Ch.15 / Rubin) | Depends on: S13-G
-- E1 Thaine annihilation (REUSE FRB Thaine/{AnnihilatorDescent,SingleCharacter}); E2 Euler-system→char-ideal
-  divisibility `Ch(𝒳⁺_∞) | I(𝒢⁺)ζ_p` (deepest new build); E3 pin to 𝒳⁺_∞.
+##### [G2-DISCHARGE] eliminate the `[G2-CFT]` axiom (DEFERRED — separate project)
+- **Status**: deferred | **File**: Common/ClassFieldTheory.lean (instance) | **Depends on**: G-IMC | **Type**: discharge
+- **Goal**: provide a real `ClassFieldTheory` instance so the only Stage-G axiom becomes a theorem. Two routes:
+  (a) **instantiate from mathlib's future global CFT** — the intended path (the interface was chosen to match what
+  such a library exposes); one-shot, nothing downstream changes. (b) **monorepo-native** (per reviewer 2026-06-18):
+  tower-level class-group Euler system (reuse `FltRegularBernoulli/Thaine`) + Kummer pairing/reflection (NSW Thm
+  11.4.3 / Washington Prop 13.32) + the Iwasawa adjoint — replacing ray-class reciprocity by global Kummer duality
+  (≈ the full IMC; concerns reflected *odd* components, so **not** a Vandiver shortcut). The Greenberg/Selmer route
+  (Q5) is larger now (local Tate duality + Poitou–Tate) — not pursued.
 
-#### [S13-M] Stage M — assembly | Depends on: S13-E, §12 (done)
-- M1 analytic class-number-formula / cyclotomic-unit index = class number (reverse divisibility; REUSE FRB + our §11);
-  M2 combine E+M1+S4-multiplicativity → `Ch(𝒳⁺_∞)=I(𝒢⁺)ζ_p`, wire §12; M3 f.g.-torsion-ness. Closes S13-STMT + the milestone.
+#### [S13-E] Stage E — Euler system / Thaine (Washington Ch.15 / Rubin) | Depends on: S13-G
+- **Re-scope (reviewer 2026-06-18)**: the Euler-system route proves the **class-group** Main Conjecture without
+  forming `𝓜⁺_∞`, but does **not** by itself reach the `𝒳⁺_∞` statement — that still needs a bridge (the `[G2-CFT]`
+  interface, or Kummer duality). So Stage E is an **ingredient of `[G2-DISCHARGE]`** (route (b)), not an independent
+  path to the IMC. It is NOT needed for the Vandiver milestone (which uses `[G2-CFT]` + §12 directly).
+- E1 Thaine annihilation (REUSE FRB Thaine/{AnnihilatorDescent,SingleCharacter}); E2 Euler-system→char-ideal
+  divisibility for class groups `Ch(𝒴⁺/𝒞⁺-type) | …` (deepest new build); E3 transfer to 𝒳⁺_∞ via Kummer duality.
+
+#### [S13-M] Stage M — assembly | Depends on: §12 (done), S13-G (for the Vandiver milestone)
+- For the **Vandiver IMC**: M is absorbed into `[G-IMC]` (reuses §12 `iwasawa_theorem`). For the **full IMC** (route
+  (b)): M1 analytic class-number-formula / cyclotomic-unit index = class number (reverse divisibility; REUSE FRB +
+  our §11); M2 combine E + M1 + S4-multiplicativity + Kummer duality → `Ch(𝒳⁺_∞)=I(𝒢⁺)ζ_p`; M3 f.g.-torsion-ness.
