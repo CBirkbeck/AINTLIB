@@ -296,13 +296,7 @@ theorem vExtFun_map_mul (P : PairOfDefinition A) {Γ₀ : Type*}
     Subtype.ext (show s ^ (nx + ny) * (x * y) =
       (s ^ nx * x) * (s ^ ny * y) from by ring)
   rw [hfact, map_mul, pow_add]
-  set a := v_r ⟨s ^ nx * x, hnx⟩
-  set b := v_r ⟨s ^ ny * y, hny⟩
-  set c := v_s⁻¹ ^ nx
-  set d := v_s⁻¹ ^ ny
-  change a * b * (c * d) = a * c * (b * d)
-  rw [mul_assoc a b, ← mul_assoc b c d, mul_comm b c,
-    mul_assoc c b d, ← mul_assoc a c]
+  exact mul_mul_mul_comm _ _ _ _
 
 omit [IsTopologicalRing A] in
 theorem vExtFun_map_add_le_max (P : PairOfDefinition A) {Γ₀ : Type*}
@@ -322,7 +316,7 @@ theorem vExtFun_map_add_le_max (P : PairOfDefinition A) {Γ₀ : Type*}
   have hult := v_r.map_add
     ⟨s ^ N * x, hNx⟩ ⟨s ^ N * y, hNy⟩
   have hmr : ∀ {a b : Γ₀}, a ≤ b → a * d ≤ b * d :=
-    fun {a b} hab => by
+    fun {a b} hab ↦ by
       rw [mul_comm a d, mul_comm b d]
       exact mul_le_mul_right hab d
   rcases le_max_iff.mp hult with h | h
@@ -346,7 +340,7 @@ theorem exists_valuation_extension (P : PairOfDefinition A) {Γ₀ : Type*}
   have h_pow_mul : ∀ a : A, ∃ n : ℕ, s ^ n * a ∈ P.A₀ :=
     P.exists_pow_mul_mem_A₀ hs_nil
   set v_s := v_r ⟨s, hs_A₀⟩ with v_s_def
-  let v_ext_fun : A → Γ₀ := fun a =>
+  let v_ext_fun : A → Γ₀ := fun a ↦
     let n := Nat.find (h_pow_mul a)
     v_r ⟨s ^ n * a, Nat.find_spec (h_pow_mul a)⟩ * v_s⁻¹ ^ n
   have v_ext_at : ∀ (a : A) (m : ℕ) (hm : s ^ m * a ∈ P.A₀),
@@ -591,7 +585,7 @@ theorem exists_spa_point_via_restrictToConvex (P : PairOfDefinition A)
   have h0_A₀ : (0 : A) ∈ P.A₀ := P.A₀.zero_mem
   have h0_mem : s ^ 0 * 0 ∈ P.A₀ := by simp only [pow_zero, mul_zero, P.A₀.zero_mem]
   have h1_mem : s ^ 0 * 1 ∈ P.A₀ := by simp only [pow_zero, mul_one, P.A₀.one_mem]
-  let v_ext_fun : A → WithZero H_gen.toSubgroup := fun a =>
+  let v_ext_fun : A → WithZero H_gen.toSubgroup := fun a ↦
     let n := Nat.find (h_pow_mul a)
     v_r ⟨s ^ n * a, Nat.find_spec (h_pow_mul a)⟩ * v_s⁻¹ ^ n
   have v_ext_at : ∀ (a : A) (m : ℕ) (hm : s ^ m * a ∈ P.A₀),
@@ -733,7 +727,7 @@ theorem isUnit_iff_forall_not_vle_zero_of_complete
     [IsTopologicalRing A] (P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]
     [PlusSubring A] (hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀) (f : A) :
     IsUnit f ↔ ∀ v ∈ Spa A A⁺, ¬ v.vle f 0 := by
-  refine ⟨fun hu v _ => not_vle_zero_of_isUnit hu v, fun h => ?_⟩
+  refine ⟨fun hu v _ ↦ not_vle_zero_of_isUnit hu v, fun h ↦ ?_⟩
   by_contra hf
   obtain ⟨𝔪, h𝔪, hf𝔪⟩ :=
     Ideal.exists_le_maximal (Ideal.span {f}) (Ideal.span_singleton_ne_top hf)
