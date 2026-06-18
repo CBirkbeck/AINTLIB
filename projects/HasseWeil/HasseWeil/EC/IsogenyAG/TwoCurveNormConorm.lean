@@ -930,7 +930,190 @@ theorem twoCurve_ord_conorm_eq_sum_fiber
       exact this
     rw [hcounts, hD_def, (⟨W₁⟩ : SmoothPlaneCurve F).projectiveDivisorOf_apply_affine,
       (⟨W₁⟩ : SmoothPlaneCurve F).ord_P_algebraMap_eq_count P hw, WithTop.untopD_coe]
-  sorry
+  -- ## Phase 4: assemble.  LHS = count over `relNorm` = Σ over `B`-primes; RHS = fibre sum.
+  rw [hLHS, hrelN, NormConormIntegralClosure.count_relNorm_eq_sum_fiber_B hwB_ne Q]
+  -- the point of a `B`-prime over `m_Q`.
+  set primesB := IsDedekindDomain.primesOverFinset p (NormConormIntegralClosure.B
+    (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) with hprimesB
+  -- the `HeightOneSpectrum` of a member ideal + its chosen point.
+  have hPrimeData : ∀ P' ∈ primesB, ∃ vP : IsDedekindDomain.HeightOneSpectrum
+      (NormConormIntegralClosure.B
+        (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))),
+      vP.asIdeal = P' ∧ ∃ pt : (W_smooth W₁).SmoothPoint,
+        vP.valuation W₁.toAffine.FunctionField = (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation pt ∧
+        placeRestrictionPlaceImage φ (ProjectiveSmoothPoint.affine pt) =
+          ProjectiveSmoothPoint.affine Q := by
+    intro P' hP'
+    rw [hprimesB, IsDedekindDomain.mem_primesOverFinset_iff (B := NormConormIntegralClosure.B
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) hp_ne] at hP'
+    have hP'_ne : P' ≠ ⊥ := by
+      intro h; apply hp_ne
+      have := hP'.2.over; rw [h, Ideal.under_bot] at this; exact this
+    set vP : IsDedekindDomain.HeightOneSpectrum (NormConormIntegralClosure.B
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) :=
+      ⟨P', hP'.1, hP'_ne⟩ with hvP_def
+    have hmem : vP.asIdeal ∈ primesB := by
+      rw [hprimesB, IsDedekindDomain.mem_primesOverFinset_iff (B := NormConormIntegralClosure.B
+        (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) hp_ne]
+      exact hP'
+    obtain ⟨pt, hpt1, hpt2⟩ := hpoint vP hmem
+    exact ⟨vP, rfl, pt, hpt1, hpt2⟩
+  -- the point assignment `ptF : primesB → SmoothPoint`.
+  let ptF : (P' : Ideal (NormConormIntegralClosure.B
+    (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))) → P' ∈ primesB →
+      (W_smooth W₁).SmoothPoint := fun P' hP' => (hPrimeData P' hP').choose_spec.2.choose
+  have hptF_val : ∀ P' (hP' : P' ∈ primesB),
+      (hPrimeData P' hP').choose.valuation W₁.toAffine.FunctionField =
+        (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation (ptF P' hP') := fun P' hP' =>
+    (hPrimeData P' hP').choose_spec.2.choose_spec.1
+  have hptF_id : ∀ P' (hP' : P' ∈ primesB), (hPrimeData P' hP').choose.asIdeal = P' :=
+    fun P' hP' => (hPrimeData P' hP').choose_spec.1
+  have hptF_img : ∀ P' (hP' : P' ∈ primesB),
+      placeRestrictionPlaceImage φ (ProjectiveSmoothPoint.affine (ptF P' hP')) =
+        ProjectiveSmoothPoint.affine Q := fun P' hP' =>
+    (hPrimeData P' hP').choose_spec.2.choose_spec.2
+  -- the count of `P'` matches `D (affine (ptF P'))`.
+  have hcount_ptF : ∀ P' (hP' : P' ∈ primesB),
+      ((Associates.mk P').count (Associates.mk (Ideal.span ({wB} : Set _))).factors : ℤ) =
+        D (ProjectiveSmoothPoint.affine (ptF P' hP')) := by
+    intro P' hP'
+    have hcm := hcountMatch (hPrimeData P' hP').choose (ptF P' hP') (hptF_val P' hP')
+    rw [hptF_id P' hP'] at hcm
+    exact hcm
+  -- `ptF` is injective (distinct primes ⟹ distinct valuations ⟹ distinct points).
+  have hptF_inj : ∀ P₁ (h₁ : P₁ ∈ primesB) P₂ (h₂ : P₂ ∈ primesB),
+      ptF P₁ h₁ = ptF P₂ h₂ → P₁ = P₂ := by
+    intro P₁ h₁ P₂ h₂ heq
+    have hv1 := hptF_val P₁ h₁
+    have hv2 := hptF_val P₂ h₂
+    rw [heq] at hv1
+    -- `(hPrimeData P₁ _).choose` and `(hPrimeData P₂ _).choose` have equal valuations ⟹ equal ideals
+    have hvaleq : (hPrimeData P₁ h₁).choose.valuation W₁.toAffine.FunctionField =
+        (hPrimeData P₂ h₂).choose.valuation W₁.toAffine.FunctionField := by rw [hv1, hv2]
+    -- equal valuations ⟹ equal `asIdeal` (both are the `< 1`-locus of the valuation).
+    have hideq : (hPrimeData P₁ h₁).choose.asIdeal = (hPrimeData P₂ h₂).choose.asIdeal := by
+      ext a
+      rw [← IsDedekindDomain.HeightOneSpectrum.valuation_lt_one_iff_mem
+          (K := W₁.toAffine.FunctionField),
+        ← IsDedekindDomain.HeightOneSpectrum.valuation_lt_one_iff_mem
+          (K := W₁.toAffine.FunctionField), hvaleq]
+    rw [← hptF_id P₁ h₁, ← hptF_id P₂ h₂, hideq]
+  -- the fibre image finset.
+  let fibreImg : Finset (ProjectiveSmoothPoint (⟨W₁⟩ : SmoothPlaneCurve F)) :=
+    primesB.attach.image (fun P' => ProjectiveSmoothPoint.affine (ptF P'.1 P'.2))
+  -- Step 1: `Σ_{primesB} count = Σ_{fibreImg} D`.
+  have hstep1 : (∑ P' ∈ primesB,
+      ((Associates.mk P').count (Associates.mk (Ideal.span ({wB} : Set _))).factors : ℤ)) =
+      ∑ x ∈ fibreImg, D x := by
+    rw [← Finset.sum_attach primesB (fun P' =>
+      ((Associates.mk P').count (Associates.mk (Ideal.span ({wB} : Set _))).factors : ℤ))]
+    rw [Finset.sum_image (by
+      rintro ⟨a, ha⟩ _ ⟨b, hb⟩ _ hab
+      simp only [ProjectiveSmoothPoint.affine.injEq] at hab
+      exact Subtype.ext (hptF_inj a ha b hb hab))]
+    apply Finset.sum_congr rfl
+    rintro ⟨P', hP'⟩ _
+    exact hcount_ptF P' hP'
+  -- Step 2: `Σ_{fibreImg} D = Σ_{D.support.filter} D` (`sum_subset`, surjectivity).
+  -- reduce `WithTop ℤ` goal to the `ℤ`-level fibre-sum equality, pushing the `ℕ → ℤ` cast.
+  rw [placeRestrictionPushforward_apply_affine]
+  refine congrArg (fun n : ℤ => (n : WithTop ℤ)) ?_
+  rw [Nat.cast_sum, hstep1]
+  symm
+  apply Finset.sum_subset
+  · -- `D.support.filter(placeImage = affine Q) ⊆ fibreImg`: surjectivity via `exists_bPrime`.
+    intro x hx
+    rw [Finset.mem_filter] at hx
+    obtain ⟨hx_supp, hx_img⟩ := hx
+    cases x with
+    | infinity =>
+      refine absurd hx_img ?_
+      show (placeRestrictionPointMap φ
+        (ProjectiveSmoothPoint.infinity : ProjectiveSmoothPoint
+          (⟨W₁⟩ : SmoothPlaneCurve F)).toAffinePoint).toProjectiveSmoothPoint ≠ _
+      simp only [Curves.ProjectiveSmoothPoint.toAffinePoint_infinity,
+        Affine.Point.toProjectiveSmoothPoint_zero]
+      exact fun h => by cases h
+    | affine P' =>
+      -- `P' ∉ poleLocus` (its image is affine `Q`), and `aw` vanishes at `P'` (it's in support).
+      have hP'_notpole : P' ∉ twoCurvePoleLocus φ := by
+        intro hpole
+        have himg : placeRestrictionPlaceImage φ (ProjectiveSmoothPoint.affine P') =
+            ProjectiveSmoothPoint.infinity := by
+          show (placeRestrictionPointMap φ
+            (ProjectiveSmoothPoint.affine P').toAffinePoint).toProjectiveSmoothPoint = _
+          rw [Curves.ProjectiveSmoothPoint.toAffinePoint_affine]
+          rcases P' with ⟨px, py, ph⟩
+          rw [SmoothPlaneCurve.SmoothPoint.toAffinePoint_def,
+            placeRestrictionPointMap_some_of_mem φ hpole]
+          rfl
+        rw [himg] at hx_img
+        exact absurd hx_img (by simp)
+      -- `aw` vanishes at `P'` (`P' ∈ support`): `ord ≠ 0` + `ord ≥ 0` (regular) ⟹ `pv < 1`.
+      have hP'_vanish : (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P'
+          (algebraMap (NormConormIntegralClosure.B
+            (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))
+            W₁.toAffine.FunctionField wB) < 1 := by
+        rw [Finsupp.mem_support_iff, hD_def,
+          (⟨W₁⟩ : SmoothPlaneCurve F).projectiveDivisorOf_apply_affine] at hx_supp
+        have haw_ne : aw ≠ 0 := by
+          rw [haw]; intro h
+          exact hw ((IsFractionRing.injective (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing
+            (⟨W₁⟩ : SmoothPlaneCurve F).FunctionField) (h.trans (map_zero _).symm))
+        show (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P' aw < 1
+        rw [← (⟨W₁⟩ : SmoothPlaneCurve F).one_le_ord_P_iff_pointValuation_lt_one haw_ne]
+        -- `ord_P P' aw = count ≥ 0`, and `≠ 0`, so `≥ 1`.
+        rw [(⟨W₁⟩ : SmoothPlaneCurve F).ord_P_algebraMap_eq_count P' hw] at hx_supp ⊢
+        have hcount_ne : (Associates.mk ((⟨W₁⟩ : SmoothPlaneCurve F).maximalIdealAt P')).count
+            (Associates.mk (Ideal.span {w})).factors ≠ 0 := by
+          intro h0; exact hx_supp (by rw [h0]; rfl)
+        rw [show (1 : WithTop ℤ) = ((1 : ℤ) : WithTop ℤ) from rfl, WithTop.coe_le_coe]
+        exact_mod_cast Nat.one_le_iff_ne_zero.mpr hcount_ne
+      obtain ⟨vP, hvP⟩ := exists_bPrime_eq_pointValuation_of_notMem_poleLocus φ
+        (fun g => rfl) P' hP'_notpole hwB_ne hP'_vanish
+      -- `vP` lies over the affine place `m_{Q'}` of its point's image `Q'`; `Q' = Q` (from `hx_img`).
+      obtain ⟨Q', hQ'⟩ := NormConormIntegralClosure.exists_smoothPoint_under vP
+      have himg' : placeRestrictionPlaceImage φ (ProjectiveSmoothPoint.affine P') =
+          ProjectiveSmoothPoint.affine Q' :=
+        placeRestrictionPlaceImage_affine_eq_of_bPrime φ (fun g => rfl) vP P' Q' hvP hQ'
+      have hQeq : Q' = Q := by
+        have h := himg'.symm.trans hx_img
+        exact ProjectiveSmoothPoint.affine.inj h
+      -- so `vP.asIdeal ∈ primesB`; the chosen point of `vP` (which has the same valuation) is `P'`.
+      have hvP_mem : vP.asIdeal ∈ primesB := by
+        rw [hprimesB, IsDedekindDomain.mem_primesOverFinset_iff (B := NormConormIntegralClosure.B
+          (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) hp_ne]
+        exact ⟨vP.isPrime, ⟨by rw [hp_def, ← hQeq]; exact hQ'.symm⟩⟩
+      -- `ptF vP.asIdeal = P'` (same valuation ⟹ same point), so `affine P' ∈ fibreImg`.
+      simp only [fibreImg, Finset.mem_image, Finset.mem_attach, true_and, Subtype.exists]
+      refine ⟨vP.asIdeal, hvP_mem, ?_⟩
+      congr 1
+      -- `(hPrimeData vP.asIdeal).choose` has `asIdeal = vP.asIdeal`, hence equals `vP`.
+      have hchoose_eq : (hPrimeData vP.asIdeal hvP_mem).choose = vP :=
+        IsDedekindDomain.HeightOneSpectrum.ext (hptF_id vP.asIdeal hvP_mem)
+      -- so `pointValuation (ptF vP.asIdeal) = vP.valuation = pointValuation P'`.
+      have hval_eq : (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation (ptF vP.asIdeal hvP_mem) =
+          (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P' := by
+        rw [← hptF_val vP.asIdeal hvP_mem, hchoose_eq, hvP]
+      -- `pointValuation` is injective on points (`maximalIdealAt` recovers the prime).
+      have hmIeq : (⟨W₁⟩ : SmoothPlaneCurve F).maximalIdealAt (ptF vP.asIdeal hvP_mem) =
+          (⟨W₁⟩ : SmoothPlaneCurve F).maximalIdealAt P' := by
+        ext a
+        rw [← (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt a,
+          ← (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt a,
+          hval_eq]
+      exact SmoothPlaneCurve.SmoothPoint.ext
+        (congrArg (fun (P : (⟨W₁⟩ : SmoothPlaneCurve F).SmoothPoint) => P.x)
+          ((⟨W₁⟩ : SmoothPlaneCurve F).maximalIdealAt_injective hmIeq))
+        (congrArg (fun (P : (⟨W₁⟩ : SmoothPlaneCurve F).SmoothPoint) => P.y)
+          ((⟨W₁⟩ : SmoothPlaneCurve F).maximalIdealAt_injective hmIeq))
+  · -- the extra `fibreImg` points (not in `support.filter`) have `D = 0`.
+    intro x hx_img hx_notin
+    simp only [fibreImg, Finset.mem_image, Finset.mem_attach, true_and, Subtype.exists] at hx_img
+    obtain ⟨P', hP', hxeq⟩ := hx_img
+    rw [Finset.mem_filter, not_and] at hx_notin
+    by_contra hDx
+    exact hx_notin (Finsupp.mem_support_iff.mpr hDx) (by rw [← hxeq]; exact hptF_img P' hP')
 
 /-! ### The `algebraMap` case of the norm–conorm identity (assembly)
 
