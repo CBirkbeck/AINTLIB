@@ -232,7 +232,7 @@ theorem coeff_one_subst_bivariate (S : MvPowerSeries (Fin 2) F)
     simp only [Fin.isValue, Finset.coe_insert, Finset.coe_singleton, Set.mem_insert_iff,
       Set.mem_singleton_iff, not_or] at h
     exact hd (vanish d h.1 h.2)
-  rw [finsum_eq_finset_sum_of_support_subset _ hsub]
+  rw [finsum_eq_finsetSum_of_support_subset _ hsub]
   have hne : Finsupp.single (0 : Fin 2) 1 ≠ Finsupp.single (1 : Fin 2) 1 := by
     intro h
     exact absurd (DFunLike.congr_fun h 0) (by simp [Finsupp.single_eq_same,
@@ -241,8 +241,7 @@ theorem coeff_one_subst_bivariate (S : MvPowerSeries (Fin 2) F)
   simp only [Finsupp.single_eq_same, pow_one, pow_zero,
     Finsupp.single_eq_of_ne (show (0 : Fin 2) ≠ 1 from by decide),
     Finsupp.single_eq_of_ne (show (1 : Fin 2) ≠ 0 from by decide),
-    hS10, hS01, one_mul]
-  rw [mul_one]
+    hS10, hS01, one_mul, mul_one]
 
 /-! ### (a) The formal group law preserves positive order (the subgroup property)
 
@@ -919,10 +918,9 @@ so fixes the Weierstrass coefficients. -/
 theorem pullback_equation_inl (α : Isogeny W.toAffine W.toAffine) :
     (W_KE W).toAffine.Equation (α.pullback (x_gen W)) (α.pullback (y_gen W)) := by
   have hmapped := Affine.Equation.map α.pullback.toRingHom (generic_equation W)
-  rw [show (W_KE W).toAffine.map α.pullback.toRingHom = (W_KE W).toAffine from by
+  rwa [show (W_KE W).toAffine.map α.pullback.toRingHom = (W_KE W).toAffine from by
     unfold W_KE; rw [Affine.map, WeierstrassCurve.map_map]
     congr 1; ext x; exact α.pullback.commutes x] at hmapped
-  exact hmapped
 
 /-- `0 ≤ ordAtInfty (algebraMap F KE c)`: a constant from the base field is
 regular at `O` (`ord = 0` when `c ≠ 0`, `⊤` when `c = 0`). -/
@@ -1199,8 +1197,7 @@ theorem ordAtInfty_y_lt_ordAtInfty_x_of_equation_of_ord_x_neg
   have hm_neg : m < 0 := by rw [hm] at hX_neg; exact_mod_cast hX_neg
   -- Suppose, for contradiction, `m ≤ n`. We will derive `ord(LHS) > 3m = ord(RHS)`.
   rw [hm, hn, WithTop.coe_lt_coe]
-  by_contra h_not
-  push Not at h_not
+  by_contra! h_not
   -- Weierstrass equation rearranged.
   rw [Affine.equation_iff'] at h_weier
   have h_eq2 : Y ^ 2 + ((W_KE W).toAffine.a₁ * X * Y + (W_KE W).toAffine.a₃ * Y) =
