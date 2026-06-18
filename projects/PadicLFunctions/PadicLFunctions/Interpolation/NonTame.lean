@@ -464,15 +464,15 @@ theorem muEtaCleared_moments {D : ℕ} [NeZero D] (hD1 : 1 < D)
           ((PowerSeries.map (integerRing K).subtype
             (mahlerTransform p K (muEtaCleared p K η hζ hD))).subst
             (PowerSeries.exp K - 1)) := by
-    rw [apply_powCM]
-    rw [show ((PowerSeries.constantCoeff ((del K)^[k] (mahlerTransform p K
+    rw [apply_powCM,
+      show ((PowerSeries.constantCoeff ((del K)^[k] (mahlerTransform p K
           (muEtaCleared p K η hζ hD))) : integerRing K) : K)
         = PowerSeries.constantCoeff (PowerSeries.map (integerRing K).subtype
             ((del K)^[k] (mahlerTransform p K (muEtaCleared p K η hζ hD)))) from by
       rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply,
         ← PowerSeries.coeff_zero_eq_constantCoeff_apply, PowerSeries.coeff_map]
-      rfl]
-    rw [map_subtype_del_iterate, constantCoeff_iterate_delField]
+      rfl,
+      map_subtype_del_iterate, constantCoeff_iterate_delField]
   -- the `(k+1)`-st coefficient of the master identity
   have hmaster := congrArg (PowerSeries.coeff (k + 1))
     (X_mul_muEtaCleared_subst hD1 hη hζ hζK hD)
@@ -589,8 +589,7 @@ lemma psi_symm_inverse_denom {ζ : integerRing K} {D : ℕ}
   -- (ii) ψ of the telescope is `δ_0 = 1`
   have hψtel : psi p K (∑ j ∈ Finset.range p,
       (ζ ^ (m * j)) • dirac K ℤ_[p] ((j : ℕ) : ℤ_[p])) = 1 := by
-    rw [psi_sum]
-    rw [Finset.sum_eq_single 0]
+    rw [psi_sum, Finset.sum_eq_single 0]
     · rw [Nat.cast_zero, psi_smul, psi_dirac_zero, mul_zero, pow_zero, one_smul]
       rfl
     · intro j hj hj0
@@ -789,14 +788,11 @@ lemma toFieldChar_prod_natCast {D : ℕ}
     rfl
   · rw [θ.map_nonunit hj]
     rcases not_and_or.mp (fun hc => hj (hsplitU.mpr hc)) with h | h
-    · rw [show (toFieldChar η) ((j : ℕ) : ZMod D)
-          = ((η ((j : ℕ) : ZMod D) : integerRing K) : K) from rfl,
-        η.map_nonunit h]
-      simp
-    · rw [show (toFieldChar χ) ((j : ℕ) : ZMod (p ^ n))
+    · simp [show (toFieldChar η) ((j : ℕ) : ZMod D)
+          = ((η ((j : ℕ) : ZMod D) : integerRing K) : K) from rfl, η.map_nonunit h]
+    · simp [show (toFieldChar χ) ((j : ℕ) : ZMod (p ^ n))
           = ((χ ((j : ℕ) : ZMod (p ^ n)) : integerRing K) : K) from rfl,
         χ.map_nonunit h]
-      simp
 
 omit [IsUltrametricDist K] [CompleteSpace K] in
 /-- For `M ≠ 0`, the rescaled exponential `e^{Mt} − 1` is a nonzero power series
@@ -1296,8 +1292,8 @@ theorem twist_muEtaCleared_moments {D : ℕ} [NeZero D] (hD1 : 1 < D)
             (mahlerTransform p K (twist p K χ.toContinuousMapZp
               (muEtaCleared p K η hζ hD)))).subst
             (PowerSeries.exp K - 1)) := by
-    rw [apply_powCM]
-    rw [show ((PowerSeries.constantCoeff ((del K)^[m] (mahlerTransform p K
+    rw [apply_powCM,
+      show ((PowerSeries.constantCoeff ((del K)^[m] (mahlerTransform p K
           (twist p K χ.toContinuousMapZp (muEtaCleared p K η hζ hD))))
             : integerRing K) : K)
         = PowerSeries.constantCoeff (PowerSeries.map (integerRing K).subtype
@@ -1305,8 +1301,8 @@ theorem twist_muEtaCleared_moments {D : ℕ} [NeZero D] (hD1 : 1 < D)
               (muEtaCleared p K η hζ hD))))) from by
       rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply,
         ← PowerSeries.coeff_zero_eq_constantCoeff_apply, PowerSeries.coeff_map]
-      rfl]
-    rw [map_subtype_del_iterate, constantCoeff_iterate_delField]
+      rfl,
+      map_subtype_del_iterate, constantCoeff_iterate_delField]
   have hmaster := congrArg (PowerSeries.coeff (m + 1))
     (X_mul_twist_muEtaCleared_subst hD1 hη hζ hζK hD hχ hε hεK hθ)
   rw [PowerSeries.coeff_succ_X_mul, map_neg, PowerSeries.coeff_C_mul,
@@ -1507,9 +1503,8 @@ theorem eq_zero_of_twisted_moments_eq_zero
       obtain ⟨m, hm1, hm2⟩ := (Nat.dvd_prime_pow hp.out).mp χ.conductor_dvd_level
       exact ⟨m, (Nat.pow_dvd_pow_iff_le_right hp.out.one_lt).mp
         (hm2 ▸ χ.conductor_dvd_level), hm2⟩
-    have hft : DirichletCharacter.FactorsThrough χ (p ^ m) := by
-      rw [← hcond]
-      exact χ.factorsThrough_conductor
+    have hft : DirichletCharacter.FactorsThrough χ (p ^ m) :=
+      hcond ▸ χ.factorsThrough_conductor
     obtain ⟨hdvd, χ₀, hχeq⟩ := hft
     have hχ₀prim : χ₀.IsPrimitive := by
       refine le_antisymm
