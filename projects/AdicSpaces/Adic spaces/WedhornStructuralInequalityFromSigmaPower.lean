@@ -193,21 +193,17 @@ theorem h_M_power_decay_from_sigma_power_structural_data
         (∏ t ∈ (T_D.image
           (algebraMap A (Localization.Away s))).erase τ, t)
       rwa [zero_mul] at this
-    -- Step 2: chain through h_struct_τ.
-    have h_α_s_zero : w.vle (algebraMap A (Localization.Away s) s) 0 :=
-      w.vle_trans h_struct_τ h1
-    -- Step 3: chain through hw_f.
+    -- Steps 2-3: chain through h_struct_τ and then hw_f.
     have h_σ_prod_zero : w.vle ((σ_loc : Localization.Away s) *
         (∏ t ∈ T_D.image (algebraMap A (Localization.Away s)), t)) 0 :=
-      w.vle_trans hw_f h_α_s_zero
+      w.vle_trans hw_f (w.vle_trans h_struct_τ h1)
     -- Step 4: cancel σ_loc on the left.
     letI : ValuativeRel (Localization.Away s) := w.toValuativeRel
     have hσ_ne : ¬ ((σ_loc : Localization.Away s) ≤ᵥ 0) :=
       not_vle_zero_of_isUnit (σ_loc.isUnit) w
     rw [show (0 : Localization.Away s) =
-          (σ_loc : Localization.Away s) * 0 from (mul_zero _).symm]
-      at h_σ_prod_zero
-    rw [ValuativeRel.mul_vle_mul_iff_right hσ_ne] at h_σ_prod_zero
+          (σ_loc : Localization.Away s) * 0 from (mul_zero _).symm,
+        ValuativeRel.mul_vle_mul_iff_right hσ_ne] at h_σ_prod_zero
     -- h_σ_prod_zero : w.vle (∏ T_D.image α) 0
     -- Step 5: contradict T_D non-vanishing.
     exact not_vle_zero_prod_of_pointwise w
