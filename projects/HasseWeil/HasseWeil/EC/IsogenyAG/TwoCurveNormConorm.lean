@@ -664,6 +664,41 @@ theorem twoCurve_ord_conorm_eq_sum_fiber
     refine ⟨P, hP, ?_⟩
     exact placeRestrictionPlaceImage_affine_eq_of_bPrime φ
       (fun g => rfl) vP P Q hP hunder
+  -- (b) the count match: for a `B`-prime `vP` with point `P`, `count_{vP}(wB) = D (affine P)`.
+  have hcountMatch : ∀ (vP : IsDedekindDomain.HeightOneSpectrum (NormConormIntegralClosure.B
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))))
+      (P : (W_smooth W₁).SmoothPoint),
+      vP.valuation W₁.toAffine.FunctionField = (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P →
+      ((Associates.mk vP.asIdeal).count (Associates.mk (Ideal.span ({wB} : Set _))).factors : ℤ) =
+        D (ProjectiveSmoothPoint.affine P) := by
+    intro vP P hPval
+    -- `vP.intValuation wB = exp(-count_vP)` and `pointValuation P aw = exp(-count_{m_P})`,
+    -- equal via `vP.valuation = pointValuation P` (both applied to `aw = algebraMap_B wB`).
+    have h1 : vP.valuation W₁.toAffine.FunctionField aw =
+        WithZero.exp (-((Associates.mk vP.asIdeal).count
+          (Associates.mk (Ideal.span ({wB} : Set _))).factors : ℤ)) := by
+      have hawB : aw = algebraMap (NormConormIntegralClosure.B
+          (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))
+          W₁.toAffine.FunctionField wB := rfl
+      rw [hawB, IsDedekindDomain.HeightOneSpectrum.valuation_of_algebraMap,
+        vP.intValuation_if_neg hwB_ne]
+    have h2 : (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P aw =
+        WithZero.exp (-((Associates.mk ((⟨W₁⟩ : SmoothPlaneCurve F).maximalIdealAt P)).count
+          (Associates.mk (Ideal.span {w})).factors : ℤ)) :=
+      (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation_algebraMap_eq_exp_count P hw
+    have hcounts : ((Associates.mk vP.asIdeal).count
+          (Associates.mk (Ideal.span ({wB} : Set _))).factors : ℤ) =
+        ((Associates.mk ((⟨W₁⟩ : SmoothPlaneCurve F).maximalIdealAt P)).count
+          (Associates.mk (Ideal.span {w})).factors : ℤ) := by
+      have : WithZero.exp (-((Associates.mk vP.asIdeal).count
+            (Associates.mk (Ideal.span ({wB} : Set _))).factors : ℤ)) =
+          WithZero.exp (-((Associates.mk ((⟨W₁⟩ : SmoothPlaneCurve F).maximalIdealAt P)).count
+            (Associates.mk (Ideal.span {w})).factors : ℤ)) := by
+        rw [← h1, ← h2, hPval]
+      rw [WithZero.exp_inj, neg_inj] at this
+      exact this
+    rw [hcounts, hD_def, (⟨W₁⟩ : SmoothPlaneCurve F).projectiveDivisorOf_apply_affine,
+      (⟨W₁⟩ : SmoothPlaneCurve F).ord_P_algebraMap_eq_count P hw, WithTop.untopD_coe]
   sorry
 
 /-! ### The `algebraMap` case of the norm–conorm identity (assembly)
