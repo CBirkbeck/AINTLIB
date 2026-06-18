@@ -178,8 +178,7 @@ theorem Refinement.cochainMap_comp_aug (F : AbPresheaf X)
     (r : Refinement V U) (x : F.obj Set.univ) :
     r.cochainMap F 0 (cechAug F U x) = cechAug F V x := by
   ext σ
-  simp only [Refinement.cochainMap, cechAug]
-  rw [F.res_comp]
+  simp only [Refinement.cochainMap, cechAug, F.res_comp]
 
 /-- **Refinement preserves separation (Proposition A.3 of Wedhorn).**
 
@@ -620,12 +619,10 @@ private theorem discrete_gluing_numerator_compat {A : Type*} [CommRing A]
       algebraMap A (Localization.Away D₃.s) (r' D₂ * D₁.1.s ^ N₀) := by
     have hr₁ : ψ₁ (g D₁) * (algebraMap A (Localization.Away D₃.s) D₁.1.s) ^ N₀ =
         algebraMap A _ (r' D₁) := by
-      have := congr_arg ψ₁ (hr' D₁)
-      simp only [map_mul, map_pow, hψ₁_alg] at this; exact this
+      simpa only [map_mul, map_pow, hψ₁_alg] using congr_arg ψ₁ (hr' D₁)
     have hr₂ : ψ₂ (g D₂) * (algebraMap A (Localization.Away D₃.s) D₂.1.s) ^ N₀ =
         algebraMap A _ (r' D₂) := by
-      have := congr_arg ψ₂ (hr' D₂)
-      simp only [map_mul, map_pow, hψ₂_alg] at this; exact this
+      simpa only [map_mul, map_pow, hψ₂_alg] using congr_arg ψ₂ (hr' D₂)
     -- Cross-multiply: both sides equal ψ₁(g D₁) * D₁.s^N₀ * D₂.s^N₀.
     simp only [map_mul, map_pow]
     calc algebraMap A _ (r' D₁) * algebraMap A _ D₂.1.s ^ N₀
@@ -716,10 +713,9 @@ private theorem discrete_gluing_partition_of_unity {A : Type*} [CommRing A]
     -- Need: (algebraMap D'.s)^N * algebraMap(r'' D) = algebraMap(r'' D') * (algebraMap D.s)^N
     -- From hcompat_r'': algebraMap A R (r'' D * D'.s^N) = algebraMap A R (r'' D' * D.s^N)
     -- Apply φ D' to both sides, using hφ_alg.
-    have h := congr_arg (φ D') (hcompat_r'' D D')
-    simp only [map_mul, map_pow, hφ_alg] at h
-    -- h : algebraMap(r'' D) * algebraMap(D'.s)^N = algebraMap(r'' D') * algebraMap(D.s)^N
-    rw [mul_comm]; exact h
+    rw [mul_comm]
+    -- Apply φ D' to hcompat_r'': algebraMap(r'' D) * algebraMap(D'.s)^N = algebraMap(r'' D') * algebraMap(D.s)^N
+    simpa only [map_mul, map_pow, hφ_alg] using congr_arg (φ D') (hcompat_r'' D D')
   simp_rw [key]
   -- Goal: ∑ D, φ D' (c D) * (algebraMap(r'' D') * (algebraMap D.s)^N) = algebraMap(r'' D')
   simp_rw [mul_comm (algebraMap A _ (r'' D')) _, ← mul_assoc, ← Finset.sum_mul,
