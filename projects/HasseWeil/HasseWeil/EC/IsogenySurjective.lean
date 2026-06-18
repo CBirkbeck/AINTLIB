@@ -136,10 +136,10 @@ theorem projValuation_comap_pullback_eq_of_projOrdTransport {φ : HasseWeil.Isog
     (hproj : WeilPairing.DivisorPullback.ProjOrdTransport φ) (P : W.Point) :
     (projValuation (W := W) P).comap φ.pullback.toRingHom =
       projValuation (W := W) (φ.toAddMonoidHom P) := by
-  refine Valuation.ext fun g => ?_
+  refine Valuation.ext fun g ↦ ?_
   rcases eq_or_ne g 0 with rfl | hg
   · simp only [map_zero]
-  · have hpg : φ.pullback g ≠ 0 := fun h => hg (φ.pullback_injective (by rw [h, map_zero]))
+  · have hpg : φ.pullback g ≠ 0 := fun h ↦ hg (φ.pullback_injective (by rw [h, map_zero]))
     rw [Valuation.comap_apply]
     change (projValuation (W := W) P) (φ.pullback g) = projValuation (W := W) (φ.toAddMonoidHom P) g
     rw [projValuation_eq_exp_neg_projOrdAt hpg, projValuation_eq_exp_neg_projOrdAt hg,
@@ -282,11 +282,11 @@ theorem comap_isNontrivial_of_finiteDimensional
       algebraMap M L (p.coeff i) * y ^ i := by
     have haev : (Polynomial.aeval y) p = 0 := minpoly.aeval M y
     rw [← haev, Polynomial.aeval_eq_sum_range]
-    exact Finset.sum_congr rfl fun i _ => by rw [Algebra.smul_def]
+    exact Finset.sum_congr rfl fun i _ ↦ by rw [Algebra.smul_def]
   -- The constant term (`i = 0`) has value `1` and strictly dominates every other term.
   have hdom : v (∑ i ∈ Finset.range (p.natDegree + 1), algebraMap M L (p.coeff i) * y ^ i) =
       v (algebraMap M L (p.coeff 0) * y ^ 0) := by
-    refine v.map_sum_eq_of_lt (Finset.mem_range.mpr (Nat.succ_pos _)) fun i hi => ?_
+    refine v.map_sum_eq_of_lt (Finset.mem_range.mpr (Nat.succ_pos _)) fun i hi ↦ ?_
     rw [Finset.mem_sdiff, Finset.mem_singleton] at hi
     have hi0 : i ≠ 0 := hi.2
     have hi1 : 1 ≤ i := Nat.one_le_iff_ne_zero.mpr hi0
@@ -312,7 +312,7 @@ theorem exists_valuationSubring_comap_le
     {M L : Type*} [Field M] [Field L] [Algebra M L] (O : ValuationSubring M) :
     ∃ B : ValuationSubring L, O ≤ B.comap (algebraMap M L) := by
   obtain ⟨B, hB⟩ := (LocalSubring.map (algebraMap M L) O.toLocalSubring).exists_le_valuationSubring
-  refine ⟨B, fun x hx => ?_⟩
+  refine ⟨B, fun x hx ↦ ?_⟩
   -- `O.toLocalSubring` maps into `B` (domination ⟹ subring inclusion), so `f x ∈ B`.
   have hsub : (LocalSubring.map (algebraMap M L) O.toLocalSubring).toSubring ≤ B.toSubring := hB.1
   rw [ValuationSubring.mem_comap]
