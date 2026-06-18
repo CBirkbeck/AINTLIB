@@ -273,7 +273,7 @@ private theorem resid_div {P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoi
   have hd_ne : d ≠ 0 := by
     intro h0; rw [h0, map_zero] at hd_unit; exact zero_ne_one hd_unit
   have hcast_ne : algebraMap F KE c ≠ 0 :=
-    fun h => hc (FaithfulSMul.algebraMap_injective F KE (h.trans (map_zero _).symm))
+    fun h ↦ hc (FaithfulSMul.algebraMap_injective F KE (h.trans (map_zero _).symm))
   -- numerator `u·c − a·d` residues to `a·c − a·c = 0`.
   have hnum : resid P (u * algebraMap F KE c - algebraMap F KE a * d) (0 : F) := by
     have := resid_sub (resid_mul hu (resid_const P c)) (resid_mul (resid_const P a) hd)
@@ -546,7 +546,7 @@ theorem oneSub_coords_at_affine
     show (α₁.toAddMonoidHom + α₂.toAddMonoidHom) P.toAffinePoint = _
     rw [AddMonoidHom.add_apply, hα₁, hα₂]
   -- non-inverse at the closed points: `x₁ ≠ x₂` rules out `x₁ = x₂ ∧ …`.
-  have hxy_pts : ¬(x₁ = x₂ ∧ y₁ = W.toAffine.negY x₂ y₂) := fun h => hx_ne h.1
+  have hxy_pts : ¬(x₁ = x₂ ∧ y₁ = W.toAffine.negY x₂ y₂) := fun h ↦ hx_ne h.1
   rw [Affine.Point.add_some hxy_pts, Affine.Point.some.injEq] at hsum
   -- `hsum.1 : x = addX x₁ x₂ (slope ..)`, `hsum.2 : y = addY x₁ x₂ y₁ (slope ..)`.
   obtain ⟨hxeq, hyeq⟩ := hsum
@@ -638,7 +638,7 @@ private theorem pV_addIsog_pullback_algebraMap_eq_one_of_notMem
     (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P
         ((addIsog hxy hinj).pullback
           (algebraMap (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing KE r)) = 1 := by
-  have hrQ : (⟨W.toAffine⟩ : SmoothPlaneCurve F).evalAt ⟨x, y, h_ns⟩ r ≠ 0 := fun h0 =>
+  have hrQ : (⟨W.toAffine⟩ : SmoothPlaneCurve F).evalAt ⟨x, y, h_ns⟩ r ≠ 0 := fun h0 ↦
     hr (by rw [← (⟨W.toAffine⟩ : SmoothPlaneCurve F).ker_evalAt ⟨x, y, h_ns⟩]; exact h0)
   have hconst : (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P
       (algebraMap F KE ((⟨W.toAffine⟩ : SmoothPlaneCurve F).evalAt ⟨x, y, h_ns⟩ r)) = 1 :=
@@ -696,9 +696,9 @@ private theorem pV_addIsog_pullback_le_one_of_le_one
   have hv_notMem : (v : (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing) ∉
       (⟨W.toAffine⟩ : SmoothPlaneCurve F).maximalIdealAt ⟨x, y, h_ns⟩ := v.2
   have hv_ne : (v : (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing) ≠ 0 :=
-    fun h => hv_notMem (h ▸ Submodule.zero_mem _)
+    fun h ↦ hv_notMem (h ▸ Submodule.zero_mem _)
   have h_alg_v_ne : algebraMap (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing KE
-      (v : _) ≠ 0 := fun h => hv_ne ((IsFractionRing.injective _ _) (h.trans (map_zero _).symm))
+      (v : _) ≠ 0 := fun h ↦ hv_ne ((IsFractionRing.injective _ _) (h.trans (map_zero _).symm))
   have hg_eq : g = algebraMap (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing KE u /
       algebraMap (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing KE (v : _) := by
     rw [eq_div_iff h_alg_v_ne]; exact h_lift
@@ -730,13 +730,13 @@ private theorem pV_addIsog_pullback_lt_one_of_lt_one
   have hv_notMem : (v : (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing) ∉
       (⟨W.toAffine⟩ : SmoothPlaneCurve F).maximalIdealAt ⟨x, y, h_ns⟩ := v.2
   have hv_ne : (v : (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing) ≠ 0 :=
-    fun h => hv_notMem (h ▸ Submodule.zero_mem _)
+    fun h ↦ hv_notMem (h ▸ Submodule.zero_mem _)
   have h_alg_v_ne : algebraMap (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing KE
-      (v : _) ≠ 0 := fun h => hv_ne ((IsFractionRing.injective _ _) (h.trans (map_zero _).symm))
+      (v : _) ≠ 0 := fun h ↦ hv_ne ((IsFractionRing.injective _ _) (h.trans (map_zero _).symm))
   have hv_unitQ : (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation ⟨x, y, h_ns⟩
       (algebraMap (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing KE (v : _)) = 1 :=
     le_antisymm ((⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation_algebraMap_le_one _ _)
-      (not_lt.mp (fun hlt => hv_notMem
+      (not_lt.mp (fun hlt ↦ hv_notMem
         ((Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
           (C := (⟨W.toAffine⟩ : SmoothPlaneCurve F)) _ ⟨x, y, h_ns⟩).mp hlt)))
   have hu_mem : u ∈ (⟨W.toAffine⟩ : SmoothPlaneCurve F).maximalIdealAt ⟨x, y, h_ns⟩ := by
@@ -769,13 +769,13 @@ theorem addIsog_samePlace_le_one_iff_affine
     (g : (⟨W.toAffine⟩ : SmoothPlaneCurve F).FunctionField) :
     (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P ((addIsog hxy hinj).pullback g) ≤ 1 ↔
       (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation ⟨x, y, h_ns⟩ g ≤ 1 := by
-  refine ⟨fun hP => ?_,
+  refine ⟨fun hP ↦ ?_,
     pV_addIsog_pullback_le_one_of_le_one (hxy := hxy) (hinj := hinj) P h_ns hx hy⟩
   -- (⟹): contrapositive via `g⁻¹`.
   by_contra hQng
   rw [not_le] at hQng
   have hg_ne : g ≠ 0 := by
-    rintro rfl; rw [map_zero] at hQng; exact absurd hQng (not_lt.mpr zero_le')
+    rintro rfl; rw [map_zero] at hQng; exact absurd hQng (not_lt.mpr zero_le)
   have hinvQ : (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation ⟨x, y, h_ns⟩ g⁻¹ < 1 := by
     rw [map_inv₀]
     exact (inv_lt_one₀ (lt_trans one_pos hQng)).mpr hQng
@@ -886,7 +886,7 @@ theorem isog_coords_at_affine_of_decomp {α₁ α₂ : Isogeny W.toAffine W.toAf
   -- `some x y = α(P) = some x₁ y₁ + some x₂ y₂`, so its coords are `addX`/`addY`.
   have hsum : Affine.Point.some x y h_ns =
       Affine.Point.some x₁ y₁ h₁ + Affine.Point.some x₂ y₂ h₂ := by rw [← hQ, hsum_pt]
-  have hxy_pts : ¬(x₁ = x₂ ∧ y₁ = W.toAffine.negY x₂ y₂) := fun h => hx_ne h.1
+  have hxy_pts : ¬(x₁ = x₂ ∧ y₁ = W.toAffine.negY x₂ y₂) := fun h ↦ hx_ne h.1
   rw [Affine.Point.add_some hxy_pts, Affine.Point.some.injEq] at hsum
   obtain ⟨hxeq, hyeq⟩ := hsum
   rw [hpb_x, hpb_y]
@@ -992,7 +992,7 @@ private theorem pV_isog_pullback_algebraMap_eq_one_of_notMem
     (hr : r ∉ (⟨W.toAffine⟩ : SmoothPlaneCurve F).maximalIdealAt ⟨x, y, h_ns⟩) :
     (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P
         (α.pullback (algebraMap (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing KE r)) = 1 := by
-  have hrQ : (⟨W.toAffine⟩ : SmoothPlaneCurve F).evalAt ⟨x, y, h_ns⟩ r ≠ 0 := fun h0 =>
+  have hrQ : (⟨W.toAffine⟩ : SmoothPlaneCurve F).evalAt ⟨x, y, h_ns⟩ r ≠ 0 := fun h0 ↦
     hr (by rw [← (⟨W.toAffine⟩ : SmoothPlaneCurve F).ker_evalAt ⟨x, y, h_ns⟩]; exact h0)
   have hconst : (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P
       (algebraMap F KE ((⟨W.toAffine⟩ : SmoothPlaneCurve F).evalAt ⟨x, y, h_ns⟩ r)) = 1 :=
@@ -1044,9 +1044,9 @@ private theorem pV_isog_pullback_le_one_of_le_one
   have hv_notMem : (v : (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing) ∉
       (⟨W.toAffine⟩ : SmoothPlaneCurve F).maximalIdealAt ⟨x, y, h_ns⟩ := v.2
   have hv_ne : (v : (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing) ≠ 0 :=
-    fun h => hv_notMem (h ▸ Submodule.zero_mem _)
+    fun h ↦ hv_notMem (h ▸ Submodule.zero_mem _)
   have h_alg_v_ne : algebraMap (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing KE
-      (v : _) ≠ 0 := fun h => hv_ne ((IsFractionRing.injective _ _) (h.trans (map_zero _).symm))
+      (v : _) ≠ 0 := fun h ↦ hv_ne ((IsFractionRing.injective _ _) (h.trans (map_zero _).symm))
   have hg_eq : g = algebraMap (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing KE u /
       algebraMap (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing KE (v : _) := by
     rw [eq_div_iff h_alg_v_ne]; exact h_lift
@@ -1077,13 +1077,13 @@ private theorem pV_isog_pullback_lt_one_of_lt_one
   have hv_notMem : (v : (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing) ∉
       (⟨W.toAffine⟩ : SmoothPlaneCurve F).maximalIdealAt ⟨x, y, h_ns⟩ := v.2
   have hv_ne : (v : (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing) ≠ 0 :=
-    fun h => hv_notMem (h ▸ Submodule.zero_mem _)
+    fun h ↦ hv_notMem (h ▸ Submodule.zero_mem _)
   have h_alg_v_ne : algebraMap (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing KE
-      (v : _) ≠ 0 := fun h => hv_ne ((IsFractionRing.injective _ _) (h.trans (map_zero _).symm))
+      (v : _) ≠ 0 := fun h ↦ hv_ne ((IsFractionRing.injective _ _) (h.trans (map_zero _).symm))
   have hv_unitQ : (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation ⟨x, y, h_ns⟩
       (algebraMap (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing KE (v : _)) = 1 :=
     le_antisymm ((⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation_algebraMap_le_one _ _)
-      (not_lt.mp (fun hlt => hv_notMem
+      (not_lt.mp (fun hlt ↦ hv_notMem
         ((Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
           (C := (⟨W.toAffine⟩ : SmoothPlaneCurve F)) _ ⟨x, y, h_ns⟩).mp hlt)))
   have hu_mem : u ∈ (⟨W.toAffine⟩ : SmoothPlaneCurve F).maximalIdealAt ⟨x, y, h_ns⟩ := by
@@ -1110,11 +1110,11 @@ theorem isog_samePlace_le_one_iff_affine
     (g : (⟨W.toAffine⟩ : SmoothPlaneCurve F).FunctionField) :
     (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P (α.pullback g) ≤ 1 ↔
       (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation ⟨x, y, h_ns⟩ g ≤ 1 := by
-  refine ⟨fun hP => ?_, pV_isog_pullback_le_one_of_le_one P h_ns hx hy⟩
+  refine ⟨fun hP ↦ ?_, pV_isog_pullback_le_one_of_le_one P h_ns hx hy⟩
   by_contra hQng
   rw [not_le] at hQng
   have hg_ne : g ≠ 0 := by
-    rintro rfl; rw [map_zero] at hQng; exact absurd hQng (not_lt.mpr zero_le')
+    rintro rfl; rw [map_zero] at hQng; exact absurd hQng (not_lt.mpr zero_le)
   have hinvQ : (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation ⟨x, y, h_ns⟩ g⁻¹ < 1 := by
     rw [map_inv₀]
     exact (inv_lt_one₀ (lt_trans one_pos hQng)).mpr hQng
@@ -1176,7 +1176,7 @@ theorem ord_P_isog_pullback_x_sub_const_eq_one
     rw [sub_eq_zero] at h0
     rw [h0, Dω_algebraMap] at hDω
     obtain ⟨c, hc⟩ := hcoeff
-    have hc_ne : c ≠ 0 := fun h => hcoeff_ne (by rw [h, map_zero] at hc; exact hc.symm)
+    have hc_ne : c ≠ 0 := fun h ↦ hcoeff_ne (by rw [h, map_zero] at hc; exact hc.symm)
     have hau_ne : alpha_star_u W α ≠ 0 := by
       intro h
       rw [h, (⟨W.toAffine⟩ : SmoothPlaneCurve F).ord_P_zero] at h_u
