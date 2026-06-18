@@ -319,7 +319,7 @@ theorem coeff_one_formalIsogenySeries_mulByInt_neg_eq (n : ℤ) (hn : n ≠ 0) :
     _ = (1 : WithTop ℤ) + (1 : WithTop ℤ) := by rfl
     _ ≤ _ := add_le_add hs'_one hbr_ord
   -- conclude: coeff 1 of `s' + s` is 0
-  have h_coeffs := congrArg (fun z : LaurentSeries F => z.coeff 1) hL
+  have h_coeffs := congrArg (fun z : LaurentSeries F ↦ z.coeff 1) hL
   simp only [HahnSeries.coeff_add, h_rhs_coeff] at h_coeffs
   rw [formalIsogenySeries_coeff, formalIsogenySeries_coeff, Nat.cast_one, ← hs_def, ← hs'_def]
   exact eq_neg_of_add_eq_zero_left h_coeffs
@@ -378,14 +378,14 @@ theorem laurentSeries_derivative_mul {R : Type*} [CommRing R] (f g : LaurentSeri
           (p.2 + 1) • (f.coeff p.1 * g.coeff (p.2 + 1)) := by
       intro p
       rw [LaurentSeries.hasseDeriv_coeff, Ring.choose_one_right, Nat.cast_one, mul_smul_comm]
-    have h_inj : Set.InjOn (fun p : ℤ × ℤ => (p.1, p.2 + 1))
+    have h_inj : Set.InjOn (fun p : ℤ × ℤ ↦ (p.1, p.2 + 1))
         ↑(Finset.addAntidiagonal f.isPWO_support
           (LaurentSeries.hasseDeriv R 1 g).isPWO_support m) := by
       intro x _ y _ h
       simp only [Prod.mk.injEq, add_left_inj] at h
       exact Prod.ext h.1 h.2
-    rw [Finset.sum_congr rfl (fun p _ => hcoeff p),
-      ← Finset.sum_image (f := fun q : ℤ × ℤ => q.2 • (f.coeff q.1 * g.coeff q.2)) h_inj]
+    rw [Finset.sum_congr rfl (fun p _ ↦ hcoeff p),
+      ← Finset.sum_image (f := fun q : ℤ × ℤ ↦ q.2 • (f.coeff q.1 * g.coeff q.2)) h_inj]
     refine Finset.sum_subset ?_ ?_
     · intro q hq
       rw [Finset.mem_image] at hq
@@ -426,14 +426,14 @@ theorem laurentSeries_derivative_mul {R : Type*} [CommRing R] (f g : LaurentSeri
           (p.1 + 1) • (f.coeff (p.1 + 1) * g.coeff p.2) := by
       intro p
       rw [LaurentSeries.hasseDeriv_coeff, Ring.choose_one_right, Nat.cast_one, smul_mul_assoc]
-    have h_inj : Set.InjOn (fun p : ℤ × ℤ => (p.1 + 1, p.2))
+    have h_inj : Set.InjOn (fun p : ℤ × ℤ ↦ (p.1 + 1, p.2))
         ↑(Finset.addAntidiagonal (LaurentSeries.hasseDeriv R 1 f).isPWO_support
           g.isPWO_support m) := by
       intro x _ y _ h
       simp only [Prod.mk.injEq, add_left_inj] at h
       exact Prod.ext h.1 h.2
-    rw [Finset.sum_congr rfl (fun p _ => hcoeff p),
-      ← Finset.sum_image (f := fun q : ℤ × ℤ => q.1 • (f.coeff q.1 * g.coeff q.2)) h_inj]
+    rw [Finset.sum_congr rfl (fun p _ ↦ hcoeff p),
+      ← Finset.sum_image (f := fun q : ℤ × ℤ ↦ q.1 • (f.coeff q.1 * g.coeff q.2)) h_inj]
     refine Finset.sum_subset ?_ ?_
     · intro q hq
       rw [Finset.mem_image] at hq
@@ -464,7 +464,7 @@ theorem laurentSeries_derivative_mul {R : Type*} [CommRing R] (f g : LaurentSeri
         exact hz
       rw [this, zero_mul]
   rw [h1, h2, ← Finset.sum_add_distrib, Finset.smul_sum]
-  refine Finset.sum_congr rfl (fun ij hij => ?_)
+  refine Finset.sum_congr rfl (fun ij hij ↦ ?_)
   rw [Finset.mem_addAntidiagonal] at hij
   rw [← add_smul, add_comm ij.2 ij.1, hij.2.2, Nat.cast_one]
 
@@ -519,9 +519,9 @@ variable {W}
 @[ext] theorem ext {x y : LExp W} (h : x.out = y.out) : x = y := by cases x; cases y; congr
 
 noncomputable instance : Zero (LExp W) := ⟨⟨0⟩⟩
-noncomputable instance : Add (LExp W) := ⟨fun x y => ⟨x.out + y.out⟩⟩
-noncomputable instance : Neg (LExp W) := ⟨fun x => ⟨-x.out⟩⟩
-noncomputable instance : Sub (LExp W) := ⟨fun x y => ⟨x.out - y.out⟩⟩
+noncomputable instance : Add (LExp W) := ⟨fun x y ↦ ⟨x.out + y.out⟩⟩
+noncomputable instance : Neg (LExp W) := ⟨fun x ↦ ⟨-x.out⟩⟩
+noncomputable instance : Sub (LExp W) := ⟨fun x y ↦ ⟨x.out - y.out⟩⟩
 @[simp] theorem out_zero : (0 : LExp W).out = 0 := rfl
 @[simp] theorem out_add (x y : LExp W) : (x + y).out = x.out + y.out := rfl
 @[simp] theorem out_neg (x : LExp W) : (-x).out = -x.out := rfl
@@ -566,7 +566,7 @@ noncomputable instance instModuleF : Module F (LExp W) where
   zero_smul x := by ext; simp
 
 instance : IsScalarTower F KE (LExp W) := by
-  refine ⟨fun r c x => ?_⟩
+  refine ⟨fun r c x ↦ ?_⟩
   ext
   simp only [out_smul_KE, out_smul_F]
   rw [show (r • c : KE) = algebraMap F KE r * c from Algebra.smul_def r c, map_mul, mul_assoc]
@@ -713,8 +713,7 @@ theorem omegaPullbackCoeff_ordAtInfty_nonneg_frobenius
     (0 : WithTop ℤ) ≤
       (⟨W.toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve F).ordAtInfty
         (omegaPullbackCoeff W (frobeniusIsog W)) := by
-  rw [omegaPullbackCoeff_frobenius]
-  rw [HasseWeil.Curves.SmoothPlaneCurve.ordAtInfty_zero]
+  rw [omegaPullbackCoeff_frobenius, HasseWeil.Curves.SmoothPlaneCurve.ordAtInfty_zero]
   exact le_top
 
 /-- **Wave 2.0 PASS leaf (Leaf 3.π) — `mem_F` for α = π specifically**
@@ -743,8 +742,7 @@ theorem omegaPullbackCoeff_mem_F_comp_of_witnesses
     (hβ : omegaPullbackCoeff W β = algebraMap F KE c_β) :
     ∃ c : F, omegaPullbackCoeff W (α.comp β) = algebraMap F KE c := by
   refine ⟨c_α * c_β, ?_⟩
-  rw [omegaPullbackCoeff_comp_of_base W α β c_α hα, hβ]
-  rw [← map_mul]
+  rw [omegaPullbackCoeff_comp_of_base W α β c_α hα, hβ, ← map_mul]
 
 /-- **Wave 2.0 PASS closure — `mem_F` from existential witnesses**. The
 purely-existential form (no explicit `c_α, c_β`). Useful as a composition
@@ -795,8 +793,7 @@ theorem omegaPullbackCoeff_mem_F_addIsog_id_of_witness
     (hα : omegaPullbackCoeff W α = algebraMap F KE c_α) :
     ∃ c : F, omegaPullbackCoeff W (addIsog hxy hinj) = algebraMap F KE c := by
   refine ⟨1 + c_α, ?_⟩
-  rw [omegaPullbackCoeff_addIsog_id W α hxy hinj h_ne, hα]
-  rw [map_add, map_one]
+  rw [omegaPullbackCoeff_addIsog_id W α hxy hinj h_ne, hα, map_add, map_one]
 
 /-! ### Universal mem_F closures via inseparable-leading isogeny composition
 
@@ -816,9 +813,7 @@ theorem omegaPullbackCoeff_mem_F_comp_of_omega_zero_leading
     (hα : omegaPullbackCoeff W α = 0) :
     ∃ c : F, omegaPullbackCoeff W (α.comp β) = algebraMap F KE c := by
   refine ⟨0, ?_⟩
-  have hα_eq : omegaPullbackCoeff W α = algebraMap F KE 0 := by
-    rw [hα, map_zero]
-  rw [omegaPullbackCoeff_comp_of_base W α β 0 hα_eq, map_zero, zero_mul]
+  rw [omegaPullbackCoeff_comp_of_base W α β 0 (by rw [hα, map_zero]), map_zero, zero_mul]
 
 /-- **Wave 2.0 PASS leaf — UNIVERSAL `mem_F` for `frobeniusIsog.comp β`**.
 Direct application of `omegaPullbackCoeff_mem_F_comp_of_omega_zero_leading`
@@ -864,8 +859,7 @@ theorem omegaPullbackCoeff_ordAtInfty_nonneg_id :
   rw [omegaPullbackCoeff_id]
   show (0 : WithTop ℤ) ≤ (W_smooth W).ordAtInfty (1 : KE)
   have h_one : (1 : KE) = algebraMap F KE 1 := (map_one _).symm
-  rw [h_one]
-  rw [ordAtInfty_algebraMap_F_nonzero (W := W) (one_ne_zero)]
+  rw [h_one, ordAtInfty_algebraMap_F_nonzero (W := W) (one_ne_zero)]
 
 /-- **Wave 2.0 PASS leaf (Leaf 3.id) — `mem_F` for α = identity**
 (Silverman III.1.5 corollary, identity baseline). Axiom-clean. -/
@@ -938,8 +932,7 @@ theorem omegaPullbackCoeff_ordAtInfty_nonneg_negFrobenius
     (0 : WithTop ℤ) ≤
       (⟨W.toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve F).ordAtInfty
         (omegaPullbackCoeff W (negFrobeniusIsog W)) := by
-  rw [omegaPullbackCoeff_negFrobeniusIsog]
-  rw [HasseWeil.Curves.SmoothPlaneCurve.ordAtInfty_zero]
+  rw [omegaPullbackCoeff_negFrobeniusIsog, HasseWeil.Curves.SmoothPlaneCurve.ordAtInfty_zero]
   exact le_top
 
 /-- **Wave 2.0 PASS leaf (Leaf 3.−π) — `mem_F` for α = `negFrobeniusIsog`
@@ -982,8 +975,7 @@ theorem omegaPullbackCoeff_ordAtInfty_nonneg_isogOneSub_negFrobenius
   rw [omegaPullbackCoeff_isogOneSub_negFrobenius_eq_one W p hq]
   show (0 : WithTop ℤ) ≤ (W_smooth W).ordAtInfty (1 : KE)
   have h_one : (1 : KE) = algebraMap F KE 1 := (map_one _).symm
-  rw [h_one]
-  rw [ordAtInfty_algebraMap_F_nonzero (W := W) (one_ne_zero)]
+  rw [h_one, ordAtInfty_algebraMap_F_nonzero (W := W) (one_ne_zero)]
 
 /-- **Wave 2.0 PASS leaf (Leaf 3.1+π) — `mem_F` for the KEY isogeny `(1+π)`**
 (Silverman III.1.5 corollary for the Hasse-bound isogeny). Axiom-clean: direct
@@ -1291,7 +1283,7 @@ theorem invariantDiff_localExpand_coeff_zero :
     have hDY_ne0 : DY.coeff (-4) ≠ 0 := by rw [hDY_at, h3]; exact one_ne_zero
     have hDY_ord : DY.orderTop = ((-4 : ℤ) : WithTop ℤ) :=
       laurent_orderTop_eq_of_coeff hDY_lt hDY_ne0
-    have hv_ne : v ≠ 0 := fun h => hv_ne0 (by rw [h, HahnSeries.coeff_zero])
+    have hv_ne : v ≠ 0 := fun h ↦ hv_ne0 (by rw [h, HahnSeries.coeff_zero])
     -- u ≠ 0 via injectivity of localExpand (coefficientwise u is invisible in char 2)
     have hu_ne : u ≠ 0 := by
       rw [hu_def, ← localExpand_u_gen]
@@ -1319,7 +1311,7 @@ theorem invariantDiff_localExpand_coeff_zero :
       rw [hDX_at]; exact neg_ne_zero.mpr h2
     have hDX_ord : DX.orderTop = ((-3 : ℤ) : WithTop ℤ) :=
       laurent_orderTop_eq_of_coeff hDX_lt hDX_ne0
-    have hu_ne : u ≠ 0 := fun h => hu_ne0 (by rw [h, HahnSeries.coeff_zero])
+    have hu_ne : u ≠ 0 := fun h ↦ hu_ne0 (by rw [h, HahnSeries.coeff_zero])
     have hord : (u⁻¹ * DX).orderTop = ((0 : ℤ) : WithTop ℤ) := by
       rw [HahnSeries.orderTop_mul, HahnSeries.orderTop_inv_eq_neg hu_ne, hu_ord, hDX_ord]
       rfl
@@ -1461,7 +1453,7 @@ theorem pullback_invariantDiff_core (f : PowerSeries F)
       HahnSeries.coeff_one, if_neg (by omega), sub_zero]
   have h1P_ord : ((1 : LaurentSeries F) - PL).orderTop = ((0 : ℤ) : WithTop ℤ) :=
     laurent_orderTop_eq_of_coeff h1P_lt (by rw [h1P_coeff0]; exact one_ne_zero)
-  have h1P_ne : (1 : LaurentSeries F) - PL ≠ 0 := fun h =>
+  have h1P_ne : (1 : LaurentSeries F) - PL ≠ 0 := fun h ↦
     one_ne_zero (by rw [← h1P_coeff0, h, HahnSeries.coeff_zero])
   -- ## The main multiplicative identity `(d/dt) xL · (1 − PL) = S′ · U`, T²-cleared
   have hDxU2 : LaurentSeries.derivative F xL * ((1 : LaurentSeries F) - PL)
@@ -1531,7 +1523,7 @@ theorem pullback_invariantDiff_core (f : PowerSeries F)
       HahnSeries.ofPowerSeries ℤ F (d⁄dX F f)
         + (U⁻¹ * LaurentSeries.derivative F xL) * PL := by
     linear_combination hMP
-  have hc := congrArg (fun z : LaurentSeries F => z.coeff 0) hsplit
+  have hc := congrArg (fun z : LaurentSeries F ↦ z.coeff 0) hsplit
   simp only [HahnSeries.coeff_add, hMPL0, add_zero] at hc
   rw [hc, show (0 : ℤ) = ((0 : ℕ) : ℤ) from rfl, HahnSeries.ofPowerSeries_apply_coeff,
     show (1 : ℤ) = ((1 : ℕ) : ℤ) from rfl, HahnSeries.ofPowerSeries_apply_coeff,
@@ -1630,14 +1622,14 @@ theorem omegaPullbackCoeff_F_value_eq_coeff_one
   have hspec := omegaPullbackCoeff_spec W α
   rw [show (algebraMap W.toAffine.CoordinateRing KE
         (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X)) = x_gen W from rfl] at hspec
-  have hKI := congrArg (fun ω => (localExpandKaehlerLift W ω).out) hspec
+  have hKI := congrArg (fun ω ↦ (localExpandKaehlerLift W ω).out) hspec
   simp only [localExpandKaehlerLift_smul] at hKI
   have hω : (localExpandKaehlerLift W (invariantDifferential W.toAffine)).out =
       (localExpand W (u_gen W))⁻¹ * LaurentSeries.derivative F (localExpand W (x_gen W)) := by
     show (localExpandKaehlerLift W ((u_gen W)⁻¹ • KaehlerDifferential.D F KE (x_gen W))).out = _
     rw [localExpandKaehlerLift_smul, localExpandKaehlerLift_D, map_inv₀]
   rw [hc, hω, localExpandKaehlerLift_D, map_inv₀] at hKI
-  have hc0 := congrArg (fun s => HahnSeries.coeff s 0) hKI
+  have hc0 := congrArg (fun s ↦ HahnSeries.coeff s 0) hKI
   simp only [pullback_invariantDiff_coeff_zero W α h_α] at hc0
   rw [← hc0, localExpand_algebraMap, HahnSeries.ofPowerSeries_C,
     show (HahnSeries.C c : LaurentSeries F) = HahnSeries.single 0 c from rfl,
@@ -1742,7 +1734,7 @@ theorem kaehlerD_ne_zero : ∃ w : KE, KaehlerDifferential.D F KE w ≠ 0 := by
     rintro x ⟨w, rfl⟩
     simp only [SetLike.mem_coe, Submodule.mem_bot]
     exact h w
-  haveI : Subsingleton (KaehlerDifferential F KE) := ⟨fun a b => by
+  haveI : Subsingleton (KaehlerDifferential F KE) := ⟨fun a b ↦ by
     have ha : a ∈ (⊥ : Submodule KE (KaehlerDifferential F KE)) := hbot ▸ Submodule.mem_top
     have hb : b ∈ (⊥ : Submodule KE (KaehlerDifferential F KE)) := hbot ▸ Submodule.mem_top
     rw [Submodule.mem_bot] at ha hb; rw [ha, hb]⟩
@@ -1810,7 +1802,7 @@ theorem minpoly_x_gen_frobeniusRange_natDegree (p : ℕ) [Fact p.Prime] [CharP F
     have hax : (minpoly ↥((frobenius KE p).fieldRange) (x_gen W)).aeval (x_gen W) = 0 :=
       minpoly.aeval _ _
     rw [hmin] at hax
-    simp only [pow_zero, pow_one, map_sub, map_pow, Polynomial.aeval_X, Polynomial.aeval_C,
+    simp only [pow_zero, pow_one, map_sub, Polynomial.aeval_X, Polynomial.aeval_C,
       sub_eq_zero] at hax
     obtain ⟨w, hw⟩ := y.2
     rw [frobenius_def] at hw
@@ -1880,7 +1872,7 @@ theorem isSeparable_KE_over_frobeniusRange_adjoin_x_gen (p : ℕ) [Fact p.Prime]
     ((algebraMap (FractionRing (Polynomial F)) KE).codRestrict
       L.toSubalgebra.toSubsemiring himg).toAlgebra
   haveI : IsScalarTower (FractionRing (Polynomial F)) ↥L KE :=
-    IsScalarTower.of_algebraMap_eq (fun _ => rfl)
+    IsScalarTower.of_algebraMap_eq (fun _ ↦ rfl)
   exact Algebra.isSeparable_tower_top_of_isSeparable (FractionRing (Polynomial F)) ↥L KE
 
 set_option backward.isDefEq.respectTransparency false in
@@ -1912,7 +1904,7 @@ theorem finrank_KE_over_frobeniusRange_p (p : ℕ) [Fact p.Prime] [CharP F p] [P
       (functionField_algebra_fractionRing W.toAffine) (functionField_isSeparable W.toAffine)
       (functionField_isScalarTower W.toAffine)
   have hLtop : L = ⊤ := by
-    refine eq_top_iff.mpr (fun x _ => ?_)
+    refine eq_top_iff.mpr (fun x _ ↦ ?_)
     obtain ⟨l, hl⟩ := IsPurelyInseparable.surjective_algebraMap_of_isSeparable ↥L KE x
     rw [← hl]; exact l.2
   have hfin : Module.finrank ↥((frobenius KE p).fieldRange) ↥L = p := by
@@ -1938,17 +1930,17 @@ theorem kaehlerD_eq_zero_iff_mem_pth_powers (p : ℕ) [Fact p.Prime] [CharP F p]
       finrank_KE_over_frobeniusRange_p W p
     let M : IntermediateField ↥((frobenius KE p).fieldRange) KE :=
       { carrier := {v | KaehlerDifferential.D F KE v = 0}
-        mul_mem' := fun {a b} ha hb => by
+        mul_mem' := fun {a b} ha hb ↦ by
           simp only [Set.mem_setOf_eq] at *
           rw [Derivation.leibniz, ha, hb, smul_zero, smul_zero, add_zero]
         one_mem' := by
           simp only [Set.mem_setOf_eq]; exact Derivation.map_one_eq_zero _
-        add_mem' := fun {a b} ha hb => by
+        add_mem' := fun {a b} ha hb ↦ by
           simp only [Set.mem_setOf_eq] at *; rw [map_add, ha, hb, add_zero]
         zero_mem' := by simp only [Set.mem_setOf_eq, map_zero]
-        inv_mem' := fun a ha => by
+        inv_mem' := fun a ha ↦ by
           simp only [Set.mem_setOf_eq] at *; rw [Derivation.leibniz_inv, ha, smul_zero]
-        algebraMap_mem' := fun c => by
+        algebraMap_mem' := fun c ↦ by
           obtain ⟨g, hg⟩ := c.2
           have hval : (c : KE) = g ^ p := hg.symm
           show KaehlerDifferential.D F KE (algebraMap _ KE c) = 0
@@ -1975,7 +1967,7 @@ theorem kaehlerD_eq_zero_iff_mem_pth_powers (p : ℕ) [Fact p.Prime] [CharP F p]
             = Module.finrank ↥((frobenius KE p).fieldRange) KE := by
           rw [hfin_p]; exact hp
         have htop_sub : M.toSubmodule = ⊤ := Submodule.eq_top_of_finrank_eq heq
-        refine eq_top_iff.mpr (fun x _ => ?_)
+        refine eq_top_iff.mpr (fun x _ ↦ ?_)
         show x ∈ M.toSubmodule
         rw [htop_sub]; exact Submodule.mem_top
     rw [hMbot] at hwM
