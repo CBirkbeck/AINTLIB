@@ -332,11 +332,9 @@ theorem IsTateRing.isOpen_topologicallyNilpotentElements_nonarch :
     show IsTopologicallyNilpotent ((u : A) • a)
     rw [smul_eq_mul, mul_comm]
     exact (P.mem_powerBoundedSubring ha).isTopologicallyNilpotent_mul hu
-  have hopen : IsOpen ((TopologicalRing.topNilpAddSubgroup A : AddSubgroup A) : Set A) :=
-    AddSubgroup.isOpen_of_mem_nhds _ (Filter.mem_of_superset
-      ((u.isUnit.isOpenMap_smul _ P.isOpen).mem_nhds
-        ⟨0, P.A₀.zero_mem, smul_zero _⟩) hsub)
-  exact hopen
+  exact AddSubgroup.isOpen_of_mem_nhds _ (Filter.mem_of_superset
+    ((u.isUnit.isOpenMap_smul _ P.isOpen).mem_nhds
+      ⟨0, P.A₀.zero_mem, smul_zero _⟩) hsub)
 
 omit [IsLinearTopology A A] in
 /-- A continuous ring homomorphism from a Tate ring preserves topologically nilpotent units. -/
@@ -506,48 +504,29 @@ theorem IsTateRing.exists_principal_pairOfDefinition
       P.I = Ideal.span {π} ∧ IsUnit ((π : A)) := by
   obtain ⟨u, hu_nilp⟩ := ‹IsTateRing A›.exists_topologicallyNilpotent_unit
   obtain ⟨P⟩ := (‹IsTateRing A›.toIsHuberRing).exists_pairOfDefinition
-  -- Step 1: Some power `u^k` of `u` lies in `P.A₀`, since `P.A₀` is open and
-  -- `u` is topologically nilpotent.
-  have h_nhds : (P.A₀ : Set A) ∈ nhds (0 : A) := P.isOpen.mem_nhds P.A₀.zero_mem
-  have h_eventually : ∀ᶠ n in Filter.atTop, (u : A) ^ n ∈ P.A₀ := hu_nilp h_nhds
-  obtain ⟨K, hK⟩ := Filter.eventually_atTop.mp h_eventually
-  -- Use k := K + 1 so that u^k is a positive power (hence a unit, topologically nilpotent).
-  set k : ℕ := K + 1 with hk_def
+  obtain ⟨K, hK⟩ := Filter.eventually_atTop.mp
+    (hu_nilp (P.isOpen.mem_nhds P.A₀.zero_mem))
+  set k : ℕ := K + 1
   have hk_pos : 0 < k := Nat.succ_pos K
-  -- `u^k : Aˣ` is a unit, its value in A is `(u : A)^k`.
   have hu_k_mem : ((u : A) ^ k) ∈ P.A₀ := hK k (Nat.le_succ K)
   have hu_k_nilp : IsTopologicallyNilpotent ((u : A) ^ k) :=
     isTopologicallyNilpotent_pow hu_nilp hk_pos
-  -- View `u^k` as an element of `P.A₀`.
   set u_k : P.A₀ := ⟨((u : A) ^ k), hu_k_mem⟩ with hu_k_def
-  -- Step 2: Some power `u_k^N` lies in `P.I`, by `exists_pow_mem_I`.
   have hu_k_val : (u_k : A) = (u : A) ^ k := rfl
-  obtain ⟨N, hN_mem⟩ :
-      ∃ N : ℕ, u_k ^ N ∈ P.I := by
-    have := P.exists_pow_mem_I (u := (u : A) ^ k) hu_k_mem hu_k_nilp
-    obtain ⟨N, hN⟩ := this
-    exact ⟨N, hN⟩
-  -- Define π := u_k^N.
+  obtain ⟨N, hN_mem⟩ : ∃ N : ℕ, u_k ^ N ∈ P.I :=
+    P.exists_pow_mem_I (u := (u : A) ^ k) hu_k_mem hu_k_nilp
   set π : P.A₀ := u_k ^ N with hπ_def
   have hπ_mem_I : π ∈ P.I := hN_mem
-  -- Step 3: `P.I^m ≤ span {π}` for some `m`, via `exists_pow_I_le_span_unit`
-  -- applied with the unit `u^k : Aˣ` and exponent `N`.
   have hu_k_unit_val : ((u ^ k : Aˣ) : A) ∈ P.A₀ := by
     rw [Units.val_pow_eq_pow_val]; exact hu_k_mem
   obtain ⟨m, hm_le⟩ := P.exists_pow_I_le_span_unit (u := u ^ k) hu_k_unit_val N
-  -- Step 4: Build the principal pair via `P.withPrincipal`.
-  -- The generator element in the lemma is `(⟨((u ^ k : Aˣ) : A), hu_k_unit_val⟩ : P.A₀) ^ N`,
-  -- which equals `π` since `((u ^ k : Aˣ) : A) = (u : A) ^ k`.
   have hgen_eq :
       (⟨((u ^ k : Aˣ) : A), hu_k_unit_val⟩ : P.A₀) ^ N = π := by
     rw [hπ_def, hu_k_def]
     apply congr_arg (· ^ N)
     exact Subtype.ext (Units.val_pow_eq_pow_val u k)
   rw [hgen_eq] at hm_le
-  -- Now construct `withPrincipal`.
   refine ⟨P.withPrincipal hπ_mem_I hm_le, π, rfl, ?_⟩
-  -- Step 5: `(π : A)` is a unit. Since `π = u_k^N` and `(u_k : A) = (u : A)^k`,
-  -- we have `(π : A) = (u : A) ^ (k * N)`, which is the value of a unit.
   have : (π : A) = ((u ^ (k * N) : Aˣ) : A) := by
     rw [hπ_def]
     show ((u_k ^ N : P.A₀) : A) = _
