@@ -75,14 +75,12 @@ example : IsTopologicalRing ↥(TateAlgebra A) := inferInstance
 the continuous coefficient projection). -/
 theorem continuous_coeff (n : ℕ) :
     Continuous (fun f : ↥(TateAlgebra A) => coeff n f) := by
-  apply Continuous.comp
-  · exact MvPowerSeries.WithPiTopology.continuous_coeff A (toIndex n)
-  · exact continuous_subtype_val
+  exact (MvPowerSeries.WithPiTopology.continuous_coeff A (toIndex n)).comp continuous_subtype_val
 
 /-- `evalZeroHom` is continuous (it extracts the 0-th coefficient). -/
 theorem continuous_evalZeroHom :
-    Continuous (evalZeroHom : ↥(TateAlgebra A) → A) := by
-  exact continuous_coeff 0
+    Continuous (evalZeroHom : ↥(TateAlgebra A) → A) :=
+  continuous_coeff 0
 
 end TateAlgebra
 
@@ -1228,8 +1226,8 @@ theorem tateAlgebraTopology'_completeSpace [IsTateRing A] [T2Space A]
     -- The sequence (coeff l (u m))_m converges to c l.
     have htend : Tendsto (fun m => MvPowerSeries.coeff l (u n).val -
         MvPowerSeries.coeff l (u m).val)
-        atTop (nhds (MvPowerSeries.coeff l (u n).val - c l)) := by
-      exact tendsto_const_nhds.sub (hc l)
+        atTop (nhds (MvPowerSeries.coeff l (u n).val - c l)) :=
+      tendsto_const_nhds.sub (hc l)
     -- For m ≥ N, the value is in image P.I^k (closed set).
     have hev : ∀ᶠ m in atTop,
         MvPowerSeries.coeff l (u n).val - MvPowerSeries.coeff l (u m).val ∈
@@ -2467,8 +2465,8 @@ theorem tateAlgebra₂Topology'_completeSpace [IsTateRing A] [T2Space A]
       simp only [MvPowerSeries.coeff_apply, f]
     have htend : Tendsto (fun m => MvPowerSeries.coeff l (u n).val -
         MvPowerSeries.coeff l (u m).val)
-        atTop (nhds (MvPowerSeries.coeff l (u n).val - c l)) := by
-      exact tendsto_const_nhds.sub (hc l)
+        atTop (nhds (MvPowerSeries.coeff l (u n).val - c l)) :=
+      tendsto_const_nhds.sub (hc l)
     have hev : ∀ᶠ m in atTop,
         MvPowerSeries.coeff l (u n).val - MvPowerSeries.coeff l (u m).val ∈
           (Subtype.val '' ((P.I ^ k : Ideal ↥P.A₀) : Set ↥P.A₀) : Set A) := by
@@ -3252,13 +3250,9 @@ theorem tateAlgebra₂_polynomial_decomp (g : ↥(TateAlgebra₂ A)) (N : ℕ)
     rw [if_neg]
     intro heq
     have h_l_i : l 0 = i := by
-      have := congrArg (fun f : Fin 2 →₀ ℕ => f 0) heq
-      simp at this
-      exact this
+      simpa using congrArg (fun f : Fin 2 →₀ ℕ => f 0) heq
     have h_l_j : l 1 = j := by
-      have := congrArg (fun f : Fin 2 →₀ ℕ => f 1) heq
-      simp at this
-      exact this
+      simpa using congrArg (fun f : Fin 2 →₀ ℕ => f 1) heq
     have h_i_lt : i < N := Finset.mem_range.mp hi
     have h_j_lt : j < N := Finset.mem_range.mp hj
     rw [h_l_i] at hl
