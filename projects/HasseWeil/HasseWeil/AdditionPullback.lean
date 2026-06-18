@@ -43,7 +43,7 @@ local notation "R" => W.toAffine.CoordinateRing
 local notation "KE" => W.toAffine.FunctionField
 
 noncomputable instance instDecidableEqFunctionField : DecidableEq KE :=
-  fun a b => Classical.dec (a = b)
+  fun a b ↦ Classical.dec (a = b)
 
 /-- The image of the generic point under a pullback satisfies the Weierstrass equation.
 Reference: Silverman III.4. -/
@@ -427,7 +427,7 @@ private lemma minpoly_not_const_degree_two [NeZero (2 : F)] (c₁ c₀ : F)
     rw [h1, hq_v_eq_u]
   have hav_ne : algebraMap (Polynomial F) (FractionRing (Polynomial F))
       ((v : Polynomial F)) ≠ 0 :=
-    fun h => hv_ne (FaithfulSMul.algebraMap_injective _ _
+    fun h ↦ hv_ne (FaithfulSMul.algebraMap_injective _ _
       (h.trans (map_zero _).symm))
   have hu_ne : u ≠ 0 := by
     intro hu0
@@ -681,7 +681,7 @@ conjunct already fails. -/
 theorem AddNonInversePair_of_x_ne {α₁ α₂ : Isogeny W.toAffine W.toAffine}
     (h_x : α₁.pullback (x_gen W) ≠ α₂.pullback (x_gen W)) :
     AddNonInversePair α₁ α₂ :=
-  fun ⟨h, _⟩ => h_x h
+  fun ⟨h, _⟩ ↦ h_x h
 
 /-- Build `AddNonInversePair α₁ α₂` from a y-coordinate mismatch (negY-form):
 if `α₁.pullback y_gen ≠ negY (α₂.pullback x_gen) (α₂.pullback y_gen)`, the
@@ -690,7 +690,7 @@ theorem AddNonInversePair_of_y_ne {α₁ α₂ : Isogeny W.toAffine W.toAffine}
     (h_y : α₁.pullback (y_gen W) ≠
       (W_KE W).toAffine.negY (α₂.pullback (x_gen W)) (α₂.pullback (y_gen W))) :
     AddNonInversePair α₁ α₂ :=
-  fun ⟨_, h⟩ => h_y h
+  fun ⟨_, h⟩ ↦ h_y h
 
 set_option linter.unusedSectionVars false in
 /-- `addBaseHomPair` coincides with `Polynomial.aeval (addPullback_x_pair α₁ α₂)`
