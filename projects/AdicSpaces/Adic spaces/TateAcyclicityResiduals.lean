@@ -340,10 +340,7 @@ theorem principalPair_A₀_completeSpace_of_stronglyNoetherianTate
   letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A
   haveI : IsUniformAddGroup A := isUniformAddGroup_of_addCommGroup
   set P := (IsTateRing.principalPair A).toPairOfDefinition
-  have hclosed : IsClosed (P.A₀ : Set A) :=
-    AddSubgroup.isClosed_of_isOpen P.A₀.toAddSubgroup P.isOpen
-  haveI : IsClosed ((P.A₀ : Set A) : Set A) := hclosed
-  exact IsClosed.completeSpace_coe (s := (P.A₀ : Set A))
+  exact (AddSubgroup.isClosed_of_isOpen P.A₀.toAddSubgroup P.isOpen).completeSpace_coe
 
 /-- **(C3 atom C3a) Adic-completeness of the canonical principal pair.**
 The principal pair of a (strongly noetherian) Tate ring is
