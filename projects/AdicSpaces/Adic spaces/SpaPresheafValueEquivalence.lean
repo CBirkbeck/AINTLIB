@@ -231,15 +231,12 @@ theorem _sub_lemma_C3_3_subset_direction
         φ w ∈ rationalOpen D.T D.s ∧ φ w ∈ Spa A A⁺ := by
   -- The forward map is the pullback of valuations along `D.canonicalMap`.
   refine ⟨fun w => ValuationSpectrum.comap D.canonicalMap w.val, fun w => ?_⟩
-  -- (Spa A A⁺) membership comes from the deferred pullback-mem-spa sub-leaf.
+  -- (Spa A A⁺) membership comes from the deferred pullback-mem-spa sub-leaf;
+  -- `v(t) ≤ v(s)` from `comap_canonicalMap_vle` and `¬ v(s) ≤ 0` from
+  -- `comap_canonicalMap_not_vle_s_zero`.
   have hSpa := _sub_lemma_C3_3_subset_direction_pullback_mem_spa D w
-  refine ⟨⟨hSpa, ?_, ?_⟩, hSpa⟩
-  · -- v(t) ≤ v(s) for t ∈ D.T: discharged by `comap_canonicalMap_vle`.
-    intro t ht
-    exact D.comap_canonicalMap_vle w.property.2 ht
-  · -- ¬ v(s) ≤ 0: `D.s` is a unit in `presheafValue D`, hence the pullback
-    -- valuation cannot send it to zero.
-    exact D.comap_canonicalMap_not_vle_s_zero
+  exact ⟨⟨hSpa, fun t ht => D.comap_canonicalMap_vle w.property.2 ht,
+    D.comap_canonicalMap_not_vle_s_zero⟩, hSpa⟩
 
 /-- **(C3.3.superset, ⊇ direction)**: the forward map from C3.3.subset is
 *surjective onto* `rationalOpen D.T D.s ∩ Spa A` (every rational-open
@@ -278,16 +275,10 @@ theorem _sub_lemma_C3_3_superset_direction
   refine ⟨fun w => ((e w : ↥(rationalOpen D.T D.s ∩ Spa A A⁺)) : Spv A), ?_, ?_⟩
   · -- Both `rationalOpen` and `Spa A A⁺` membership follow from the codomain
     -- subtype property of `e w`.
-    intro w
-    refine ⟨?_, ?_⟩
-    · exact (e w).property.1
-    · exact (e w).property.2
+    exact fun w => ⟨(e w).property.1, (e w).property.2⟩
   · -- Surjectivity: for `v ∈ rationalOpen ∩ Spa A A⁺`, take `w := e.symm ⟨v, _⟩`.
-    intro v hRat hSpa
-    refine ⟨e.symm ⟨v, hRat, hSpa⟩, ?_⟩
-    -- `e (e.symm x) = x` by `Equiv.apply_symm_apply`, then cast.
-    change ((e (e.symm ⟨v, hRat, hSpa⟩) : ↥(rationalOpen D.T D.s ∩ Spa A A⁺)) : Spv A) = v
-    rw [e.apply_symm_apply]
+    exact fun v hRat hSpa =>
+      ⟨e.symm ⟨v, hRat, hSpa⟩, congrArg _ (e.apply_symm_apply _)⟩
 
 /-! ## GENUINE ⊇ direction (non-circular) — Wedhorn Lemma 8.2 completion half
 
@@ -310,9 +301,8 @@ theorem residueFieldValuation_surjective {R : Type*} [CommRing R] [TopologicalSp
   refine ⟨algebraMap (R ⧸ w.supp) (FractionRing (R ⧸ w.supp)) (Ideal.Quotient.mk w.supp a) /
           algebraMap (R ⧸ w.supp) (FractionRing (R ⧸ w.supp))
             (Ideal.Quotient.mk w.supp (b : R)), ?_⟩
-  rw [ValuationSpectrum.residueFieldValuation, Valuation.map_div,
+  rwa [ValuationSpectrum.residueFieldValuation, Valuation.map_div,
       Valuation.extendToLocalization_apply_map_apply, Valuation.extendToLocalization_apply_map_apply]
-  exact hab
 
 /-- Pulling back the `ofValuation` point of a valued ring along a ring hom: if `V (φ f) ≤ 1`,
 then `(comap φ (ofValuation V)).vle f 1`. (Extracted as a general lemma — `B` a variable — so the
@@ -360,8 +350,7 @@ theorem extension_vle_one_on_locPlusSubring (D : RationalLocData A) [PlusSubring
     rintro x (⟨a, ha, rfl⟩ | ⟨t, rfl⟩)
     · show w.vle (algebraMap A (Localization.Away D.s) a) 1
       have hva : v.vle a 1 := vle_one_of_mem_spa hv_spa ha
-      rw [← hw_comap, comap_vle, map_one] at hva
-      exact hva
+      rwa [← hw_comap, comap_vle, map_one] at hva
     · show w.vle (divByS (t : A) D.s) 1
       have hts : w.vle (algebraMap A (Localization.Away D.s) (t : A))
           (algebraMap A (Localization.Away D.s) D.s) := by
@@ -656,7 +645,7 @@ theorem _sub_lemma_C3_main_inverse_map
     obtain ⟨w⟩ := _sub_lemma_C3_main_inverse_map_nonempty (A := A) D hdom
     exact ⟨fun _ => w, fun _ => w.property⟩
   · -- Domain is empty: any function works (vacuously).
-    refine ⟨fun v => (hdom ⟨v⟩).elim, fun v => (hdom ⟨v⟩).elim⟩
+    exact ⟨fun v => (hdom ⟨v⟩).elim, fun v => (hdom ⟨v⟩).elim⟩
 
 /-- **(C3.main.3 — bijection)**: the forward and inverse maps are mutually
 inverse. Uses `_sub_lemma_C3_3_subset_direction` and
@@ -745,9 +734,8 @@ theorem comap_coeRingHom_injOn_spa (D : RationalLocData A) [PlusSubring A]
     (hw₂ : w₂ ∈ Spa (presheafValue D) (presheafValue D)⁺)
     (h : comap D.coeRingHom w₁ = comap D.coeRingHom w₂) :
     w₁ = w₂ := by
-  have hdense : DenseRange (D.coeRingHom : Localization.Away D.s → presheafValue D) := by
-    intro y
-    exact @UniformSpace.Completion.denseRange_coe (Localization.Away D.s) D.uniformSpace y
+  have hdense : DenseRange (D.coeRingHom : Localization.Away D.s → presheafValue D) :=
+    @UniformSpace.Completion.denseRange_coe (Localization.Away D.s) D.uniformSpace
   exact ValuationSpectrum.eq_of_isContinuous_of_comap_eq_of_denseRange hdense
     ((mem_spa_iff w₁).mp hw₁).1 ((mem_spa_iff w₂).mp hw₂).1 h
 
@@ -761,10 +749,8 @@ theorem comap_canonicalMap_injOn_spa (D : RationalLocData A) [PlusSubring A]
     (hw₂ : w₂ ∈ Spa (presheafValue D) (presheafValue D)⁺)
     (h : comap D.canonicalMap w₁ = comap D.canonicalMap w₂) :
     w₁ = w₂ := by
-  have hcomp : D.canonicalMap
-      = D.coeRingHom.comp (algebraMap A (Localization.Away D.s)) := rfl
-  rw [hcomp, comap_comp] at h
-  simp only [Function.comp_apply] at h
+  simp only [show D.canonicalMap = D.coeRingHom.comp (algebraMap A (Localization.Away D.s)) from rfl,
+    comap_comp, Function.comp_apply] at h
   exact comap_coeRingHom_injOn_spa D hw₁ hw₂ (comap_algebraMap_injective D h)
 
 /-- **Continuity-only form of `comap_coeRingHom_injOn_spa`.** The completion Spa-injectivity
@@ -774,9 +760,8 @@ where the restricted point is not (yet) known to be plus-bounded. -/
 theorem comap_coeRingHom_inj_of_isContinuous (D : RationalLocData A)
     {w₁ w₂ : Spv (presheafValue D)} (h₁ : w₁.IsContinuous) (h₂ : w₂.IsContinuous)
     (h : comap D.coeRingHom w₁ = comap D.coeRingHom w₂) : w₁ = w₂ := by
-  have hdense : DenseRange (D.coeRingHom : Localization.Away D.s → presheafValue D) := by
-    intro y
-    exact @UniformSpace.Completion.denseRange_coe (Localization.Away D.s) D.uniformSpace y
+  have hdense : DenseRange (D.coeRingHom : Localization.Away D.s → presheafValue D) :=
+    @UniformSpace.Completion.denseRange_coe (Localization.Away D.s) D.uniformSpace
   exact ValuationSpectrum.eq_of_isContinuous_of_comap_eq_of_denseRange hdense h₁ h₂ h
 
 /-- **Continuity-only form of `comap_canonicalMap_injOn_spa`** (`comap D.canonicalMap` is
@@ -784,10 +769,8 @@ injective on *continuous* points of `Spv (presheafValue D)`). -/
 theorem comap_canonicalMap_inj_of_isContinuous (D : RationalLocData A)
     {w₁ w₂ : Spv (presheafValue D)} (h₁ : w₁.IsContinuous) (h₂ : w₂.IsContinuous)
     (h : comap D.canonicalMap w₁ = comap D.canonicalMap w₂) : w₁ = w₂ := by
-  have hcomp : D.canonicalMap
-      = D.coeRingHom.comp (algebraMap A (Localization.Away D.s)) := rfl
-  rw [hcomp, comap_comp] at h
-  simp only [Function.comp_apply] at h
+  simp only [show D.canonicalMap = D.coeRingHom.comp (algebraMap A (Localization.Away D.s)) from rfl,
+    comap_comp, Function.comp_apply] at h
   exact comap_coeRingHom_inj_of_isContinuous D h₁ h₂ (comap_algebraMap_injective D h)
 
 /-- **(C3 main, reviewer Q3)**: assembly to discharge the headline
