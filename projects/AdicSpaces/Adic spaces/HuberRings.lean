@@ -250,16 +250,11 @@ ring), so it needs no `[IsLinearTopology A A]` — which is in any case unsatisf
 rings. -/
 theorem isOpen_powerBoundedSubring (P : PairOfDefinition A) :
     IsOpen (TopologicalRing.powerBoundedSubring A) := by
-  -- `A°` is realised as an `AddSubgroup` via `powerBoundedSubring.toSubring`, which is a
-  -- subring precisely because `A` is non-archimedean — a structure supplied directly by `P`.
-  haveI : NonarchimedeanAddGroup A := P.nonarchimedeanAddGroup
+  have : NonarchimedeanAddGroup A := P.nonarchimedeanAddGroup
   have h_le : P.A₀.toAddSubgroup ≤
       (TopologicalRing.powerBoundedSubring.toSubring A).toAddSubgroup :=
     fun _ ha ↦ P.mem_powerBoundedSubring ha
-  have := AddSubgroup.isOpen_mono h_le (show IsOpen (P.A₀.toAddSubgroup : Set A)
-    from P.isOpen)
-  rwa [show ((TopologicalRing.powerBoundedSubring.toSubring A).toAddSubgroup : Set A) =
-    TopologicalRing.powerBoundedSubring A from rfl] at this
+  exact AddSubgroup.isOpen_mono h_le P.isOpen
 
 end PairOfDefinition
 
@@ -276,11 +271,11 @@ to state it as a separate hypothesis. -/
 instance IsHuberRing.firstCountableTopology {A : Type*} [CommRing A]
     [TopologicalSpace A] [IsHuberRing A] : FirstCountableTopology A := by
   obtain ⟨P⟩ := ‹IsHuberRing A›.exists_pairOfDefinition
-  haveI : IsTopologicalRing A := IsHuberRing.toIsTopologicalRing
-  haveI : IsTopologicalAddGroup A := IsTopologicalRing.to_topologicalAddGroup
-  haveI h0 : (nhds (0 : A)).IsCountablyGenerated :=
+  have : IsTopologicalRing A := IsHuberRing.toIsTopologicalRing
+  have : IsTopologicalAddGroup A := IsTopologicalRing.to_topologicalAddGroup
+  have h0 : (nhds (0 : A)).IsCountablyGenerated :=
     P.hasBasis_nhds_zero.isCountablyGenerated
-  refine ⟨fun a => ?_⟩
+  refine ⟨fun a ↦ ?_⟩
   rw [← map_add_left_nhds_zero a]
   exact Filter.map.isCountablyGenerated _ _
 
