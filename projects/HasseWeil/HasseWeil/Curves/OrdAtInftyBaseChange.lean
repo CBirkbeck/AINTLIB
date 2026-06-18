@@ -86,7 +86,7 @@ theorem ordAtInfty_algebraMap_coordRingMap (u : C.CoordinateRing) :
       C.ordAtInfty (algebraMap C.CoordinateRing C.FunctionField u) := by
   by_cases hu : u = 0
   · subst hu; simp
-  · have hcu : C.coordRingMap L u ≠ 0 := fun h =>
+  · have hcu : C.coordRingMap L u ≠ 0 := fun h ↦
       hu ((C.coordRingMap_injective L) (by rw [h, map_zero]))
     rw [(C.baseChange L).ordAtInfty_algebraMap_coordinateRing _ hcu,
       C.ordAtInfty_algebraMap_coordinateRing _ hu, norm_coordRingMap,
@@ -114,11 +114,11 @@ theorem ordAtInfty_functionFieldMap (z : C.FunctionField) (hz : z ≠ 0) :
   have hcu_map_ne : algebraMap (C.baseChange L).CoordinateRing (C.baseChange L).FunctionField
       (C.coordRingMap L u) ≠ 0 :=
     (map_ne_zero_iff _ (IsFractionRing.injective _ _)).mpr
-      (fun h => hu_ne ((C.coordRingMap_injective L) (by rw [h, map_zero])))
+      (fun h ↦ hu_ne ((C.coordRingMap_injective L) (by rw [h, map_zero])))
   have hcv_map_ne : algebraMap (C.baseChange L).CoordinateRing (C.baseChange L).FunctionField
       (C.coordRingMap L v) ≠ 0 :=
     (map_ne_zero_iff _ (IsFractionRing.injective _ _)).mpr
-      (fun h => hv_ne ((C.coordRingMap_injective L) (by rw [h, map_zero])))
+      (fun h ↦ hv_ne ((C.coordRingMap_injective L) (by rw [h, map_zero])))
   rw [(C.baseChange L).ordAtInfty_div_eq_mul_inv _ hcu_map_ne hcv_map_ne,
     (C.baseChange L).ordAtInfty_inv,
     ordAtInfty_algebraMap_coordRingMap, ordAtInfty_algebraMap_coordRingMap]
