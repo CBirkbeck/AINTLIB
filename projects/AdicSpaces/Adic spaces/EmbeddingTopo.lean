@@ -286,9 +286,7 @@ continuous ring homomorphism). The full Π-valued map is continuous by
 `continuous_pi`. -/
 theorem productRestrictionSub_continuous (C : RationalCovering A) :
     Continuous (productRestrictionSub A C) := by
-  refine continuous_pi ?_
-  rintro ⟨D, hD⟩
-  change Continuous (restrictionMap C.base D (C.hsubset D hD))
+  refine continuous_pi fun ⟨D, hD⟩ => ?_
   exact restrictionMapHom_continuous C.base D (C.hsubset D hD)
 
 /-- **T282**: **strengthened** topological refinement transfer.
@@ -768,10 +766,8 @@ theorem naturalRefinementMap_continuous
     (hτ : ∀ d : { D // D ∈ V_covers },
       rationalOpen d.1.T d.1.s ⊆ rationalOpen (τ d).1.T (τ d).1.s) :
     Continuous (naturalRefinementMap τ hτ) := by
-  refine continuous_pi ?_
-  intro d
-  unfold naturalRefinementMap
-  exact (restrictionMapHom_continuous (τ d).1 d.1 (hτ d)).comp (continuous_apply (τ d))
+  exact continuous_pi fun d =>
+    (restrictionMapHom_continuous (τ d).1 d.1 (hτ d)).comp (continuous_apply (τ d))
 
 /-- **T285 (commutativity)**: the natural refinement map composes with
 `productRestrictionSub_C` to give `productRestrictionSub_V` (where V is
@@ -787,9 +783,6 @@ theorem naturalRefinementMap_comp
       fun d => restrictionMap C.base d.1
         ((hτ d).trans (C.hsubset (τ d).1 (τ d).2)) x := by
   funext d
-  unfold naturalRefinementMap
-  change restrictionMap (τ d).1 d.1 (hτ d)
-      (restrictionMap C.base (τ d).1 (C.hsubset (τ d).1 (τ d).2) x) = _
   exact congr_fun (restrictionMap_comp C.base (τ d).1 d.1
     (C.hsubset (τ d).1 (τ d).2) (hτ d)) x
 
@@ -1089,10 +1082,9 @@ theorem productRestrictionSub_isInducing_of_sub_inducing
   let proj : (∀ D : { D // D ∈ V_large }, presheafValue D.1) →
               (∀ D : { D // D ∈ V_small }, presheafValue D.1) :=
     fun x ⟨D, hD⟩ => x ⟨D, h_subset hD⟩
-  have h_proj_continuous : Continuous proj := by
-    refine continuous_pi ?_
-    rintro ⟨D, hD⟩
-    exact continuous_apply (⟨D, h_subset hD⟩ : { D // D ∈ V_large })
+  have h_proj_continuous : Continuous proj :=
+    continuous_pi fun ⟨D, hD⟩ =>
+      continuous_apply (⟨D, h_subset hD⟩ : { D // D ∈ V_large })
   -- The composition `proj ∘ pr_large = pr_small` (by proof-irrelevance).
   have hcomp : pr_small = proj ∘ pr_large := by
     rw [hpr_small, hpr_large]
@@ -1206,9 +1198,7 @@ theorem productRestrictionSub_isInducing_of_V_contains_laurent_pair
     funext x ⟨D, hD⟩
     rfl
   · -- hpr_large continuity
-    refine continuous_pi ?_
-    rintro ⟨D, hD⟩
-    exact restrictionMapHom_continuous Base D (hV_subset D hD)
+    exact continuous_pi fun ⟨D, hD⟩ => restrictionMapHom_continuous Base D (hV_subset D hD)
 
 /-- **T291**: `IsInducing` for any `C` whose `C.covers` contains both
 halves of a laurent split at `C.base`. Direct specialisation of T290
