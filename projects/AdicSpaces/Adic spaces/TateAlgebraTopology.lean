@@ -74,8 +74,8 @@ example : IsTopologicalRing ↥(TateAlgebra A) := inferInstance
 (it's the composition of the continuous embedding into `MvPowerSeries` and
 the continuous coefficient projection). -/
 theorem continuous_coeff (n : ℕ) :
-    Continuous (fun f : ↥(TateAlgebra A) => coeff n f) := by
-  exact (MvPowerSeries.WithPiTopology.continuous_coeff A (toIndex n)).comp continuous_subtype_val
+    Continuous (fun f : ↥(TateAlgebra A) => coeff n f) :=
+  (MvPowerSeries.WithPiTopology.continuous_coeff A (toIndex n)).comp continuous_subtype_val
 
 /-- `evalZeroHom` is continuous (it extracts the 0-th coefficient). -/
 theorem continuous_evalZeroHom :
@@ -1098,7 +1098,7 @@ theorem tateAlgebraTopology'_completeSpace [IsTateRing A] [T2Space A]
       rw [@uniformity_eq_comap_nhds_zero' _ _ _ haddgrp]
       exact Filter.mem_comap.mpr ⟨(tateAlgNhd P n : Set _),
         tateAlgBasis'.hasBasis_nhds_zero.mem_of_mem (i := n) trivial,
-        fun p hp => by simp only [Set.mem_preimage, sub_eq_add_neg] at hp ⊢; exact hp⟩
+        fun p hp => by simpa only [Set.mem_preimage, sub_eq_add_neg] using hp⟩
     obtain ⟨N, hN⟩ := cauchySeq_iff.mp hu _ hmem
     exact ⟨N, fun m hm k hk => by
       have h1 := hN m hm k hk
@@ -2381,7 +2381,7 @@ theorem tateAlgebra₂Topology'_completeSpace [IsTateRing A] [T2Space A]
       rw [@uniformity_eq_comap_nhds_zero' _ _ _ haddgrp]
       exact Filter.mem_comap.mpr ⟨(tateAlgNhd₂ P n : Set _),
         tateAlgBasis'₂.hasBasis_nhds_zero.mem_of_mem (i := n) trivial,
-        fun p hp => by simp only [Set.mem_preimage, sub_eq_add_neg] at hp ⊢; exact hp⟩
+        fun p hp => by simpa only [Set.mem_preimage, sub_eq_add_neg] using hp⟩
     obtain ⟨N, hN⟩ := cauchySeq_iff.mp hu _ hmem
     exact ⟨N, fun m hm k hk => by
       have h1 := hN m hm k hk
@@ -2967,10 +2967,7 @@ private theorem isRestricted₂_of_eventually_zero
   · -- Otherwise `N ≤ s 0 ∨ N ≤ s 1`, so `h s = 0 ∈ U` contradicts `hs`.
     exfalso
     push_neg at h_in_box
-    have h_ge : N ≤ s 0 ∨ N ≤ s 1 := by
-      rcases lt_or_ge (s 0) N with h0 | h0
-      · exact Or.inr (h_in_box h0)
-      · exact Or.inl h0
+    have h_ge : N ≤ s 0 ∨ N ≤ s 1 := by omega
     exact hs (by rw [hh s h_ge]; exact h0U)
 
 /-- The box-truncation of `g ∈ A⟨X, Y⟩` at size `N × N`: keep coefficients at
@@ -2983,10 +2980,7 @@ private noncomputable def truncTateC₂ (g : ↥(TateAlgebra₂ A)) (N : ℕ) :
     (fun l hl => by
       simp only [ite_eq_right_iff, and_imp]
       intro h0 h1
-      exfalso
-      rcases hl with hl | hl
-      · omega
-      · omega)⟩
+      omega)⟩
 
 private theorem truncTateC₂_val (g : ↥(TateAlgebra₂ A)) (N : ℕ)
     (l : Fin 2 →₀ ℕ) :
@@ -2997,10 +2991,7 @@ private theorem truncTateC₂_coeff_outside (g : ↥(TateAlgebra₂ A)) (N : ℕ
     (truncTateC₂ g N).val l = 0 := by
   simp only [truncTateC₂_val, ite_eq_right_iff, and_imp]
   intro h0 h1
-  exfalso
-  rcases hl with hl | hl
-  · omega
-  · omega
+  omega
 
 set_option linter.unusedSectionVars false in
 /-- Polynomials (elements with box-finite support) are dense in `TateAlgebra₂ A`
@@ -3232,11 +3223,7 @@ theorem tateAlgebra₂_polynomial_decomp (g : ↥(TateAlgebra₂ A)) (N : ℕ)
     · intro h
       exfalso; exact h (Finset.mem_range.mpr h0)
   · push_neg at hl
-    have hN_apply : g.val l = 0 := by
-      apply hN
-      rcases Nat.lt_or_ge (l 0) N with h0 | h0
-      · exact Or.inr (hl h0)
-      · exact Or.inl h0
+    have hN_apply : g.val l = 0 := hN l (by omega)
     rw [hN_apply]
     symm
     apply Finset.sum_eq_zero
