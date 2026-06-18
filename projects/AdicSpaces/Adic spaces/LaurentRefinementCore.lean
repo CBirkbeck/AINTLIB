@@ -296,13 +296,8 @@ theorem prodImage_mul_comm (T₁ T₂ : Finset A) :
     (T₂.product T₁).image (fun p => p.1 * p.2) := by
   ext x
   simp only [Finset.mem_image, Prod.exists]
-  constructor
-  · rintro ⟨a, b, hp, rfl⟩
-    obtain ⟨ha, hb⟩ := Finset.mem_product.mp hp
-    exact ⟨b, a, Finset.mem_product.mpr ⟨hb, ha⟩, mul_comm b a⟩
-  · rintro ⟨a, b, hp, rfl⟩
-    obtain ⟨ha, hb⟩ := Finset.mem_product.mp hp
-    exact ⟨b, a, Finset.mem_product.mpr ⟨hb, ha⟩, mul_comm b a⟩
+  constructor <;> rintro ⟨a, b, hp, rfl⟩ <;>
+    exact ⟨b, a, Finset.mem_product.mpr (Finset.mem_product.mp hp).symm, mul_comm b a⟩
 
 set_option maxHeartbeats 400000 in
 -- heavy `Subring.closure_induction` over `locSubring` (6 cases × ring ops)
@@ -671,8 +666,7 @@ theorem ratioPlus_subset (D₀ : RationalLocData A) (f g g_inv : A)
     rationalOpen (ratioPlusDatum D₀ f g g_inv hg hg_inv).T
                  (ratioPlusDatum D₀ f g g_inv hg hg_inv).s ⊆
       rationalOpen D₀.T D₀.s := by
-  rw [ratioPlus_rationalOpen]
-  exact Set.inter_subset_left
+  rw [ratioPlus_rationalOpen]; exact Set.inter_subset_left
 
 /-- The ratio minus piece is contained in the base. -/
 theorem ratioMinus_subset (D₀ : RationalLocData A) (f g f_inv : A)
@@ -680,8 +674,7 @@ theorem ratioMinus_subset (D₀ : RationalLocData A) (f g f_inv : A)
     rationalOpen (ratioMinusDatum D₀ f g f_inv hf hf_inv).T
                  (ratioMinusDatum D₀ f g f_inv hf hf_inv).s ⊆
       rationalOpen D₀.T D₀.s := by
-  unfold ratioMinusDatum
-  exact ratioPlus_subset D₀ g f f_inv hf hf_inv
+  unfold ratioMinusDatum; exact ratioPlus_subset D₀ g f f_inv hf hf_inv
 
 /-- The ratio plus and minus pieces cover the base. -/
 theorem ratioCover_covers (D₀ : RationalLocData A) (f g f_inv g_inv : A)
@@ -972,11 +965,9 @@ theorem algebraMap_f_isUnit_in_laurentMinus
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     (D₀ : RationalLocData A) (f : A) :
     IsUnit (algebraMap A (Localization.Away (D₀.s * f)) f) := by
-  have hmul : algebraMap A (Localization.Away (D₀.s * f)) (D₀.s * f) =
-      algebraMap A _ D₀.s * algebraMap A _ f := map_mul _ _ _
   have hu : IsUnit (algebraMap A (Localization.Away (D₀.s * f)) (D₀.s * f)) :=
     IsLocalization.Away.algebraMap_isUnit _
-  rw [hmul] at hu
+  rw [map_mul] at hu
   exact isUnit_of_mul_isUnit_right hu
 
 /-- In `presheafValue (laurentMinusDatum D₀ f)`, the canonical image of `f` is a unit. -/
