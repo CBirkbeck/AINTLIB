@@ -275,10 +275,16 @@ theorem _sub_lemma_C3_3_superset_direction
   refine ⟨fun w => ((e w : ↥(rationalOpen D.T D.s ∩ Spa A A⁺)) : Spv A), ?_, ?_⟩
   · -- Both `rationalOpen` and `Spa A A⁺` membership follow from the codomain
     -- subtype property of `e w`.
-    exact fun w => ⟨(e w).property.1, (e w).property.2⟩
+    intro w
+    refine ⟨?_, ?_⟩
+    · exact (e w).property.1
+    · exact (e w).property.2
   · -- Surjectivity: for `v ∈ rationalOpen ∩ Spa A A⁺`, take `w := e.symm ⟨v, _⟩`.
-    exact fun v hRat hSpa =>
-      ⟨e.symm ⟨v, hRat, hSpa⟩, congrArg _ (e.apply_symm_apply _)⟩
+    intro v hRat hSpa
+    refine ⟨e.symm ⟨v, hRat, hSpa⟩, ?_⟩
+    -- `e (e.symm x) = x` by `Equiv.apply_symm_apply`, then cast.
+    change ((e (e.symm ⟨v, hRat, hSpa⟩) : ↥(rationalOpen D.T D.s ∩ Spa A A⁺)) : Spv A) = v
+    rw [e.apply_symm_apply]
 
 /-! ## GENUINE ⊇ direction (non-circular) — Wedhorn Lemma 8.2 completion half
 
@@ -644,7 +650,7 @@ theorem _sub_lemma_C3_main_inverse_map
     obtain ⟨w⟩ := _sub_lemma_C3_main_inverse_map_nonempty (A := A) D hdom
     exact ⟨fun _ => w, fun _ => w.property⟩
   · -- Domain is empty: any function works (vacuously).
-    exact ⟨fun v => (hdom ⟨v⟩).elim, fun v => (hdom ⟨v⟩).elim⟩
+    refine ⟨fun v => (hdom ⟨v⟩).elim, fun v => (hdom ⟨v⟩).elim⟩
 
 /-- **(C3.main.3 — bijection)**: the forward and inverse maps are mutually
 inverse. Uses `_sub_lemma_C3_3_subset_direction` and
