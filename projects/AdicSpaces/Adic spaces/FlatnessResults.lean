@@ -78,15 +78,7 @@ theorem canonicalMap_flat_discrete [DiscreteTopology A] (D : RationalLocData A) 
   have halg : ∀ a : A, e (algebraMap A _ a) = algebraMap A (presheafValue D) a := fun a => by
     change D.coeRingHom (algebraMap A _ a) = algebraMap A (presheafValue D) a
     rfl
-  exact Module.Flat.of_linearEquiv
-    { e.symm.toEquiv with
-      map_add' := e.symm.map_add
-      map_smul' := fun a x => by
-        simp only [Algebra.smul_def, RingHom.id_apply]
-        change e.symm (e (algebraMap A _ a) * x) = algebraMap A _ a * e.symm x
-        rw [show e.symm (e (algebraMap A _ a) * x) =
-          e.symm (e (algebraMap A _ a)) * e.symm x from e.symm.map_mul _ _,
-          e.symm_apply_apply] }
+  exact Module.Flat.of_linearEquiv (AlgEquiv.ofRingEquiv halg).symm.toLinearEquiv
 
 /-! ### Cor 8.32: each cover piece is flat over A (discrete case) -/
 
@@ -121,15 +113,8 @@ theorem flat_of_ringEquiv_respecting_algebra {R : Type*} [CommRing R]
     {S : Type*} [CommRing S] [Algebra R S] [Module.Flat R S]
     {T : Type*} [CommRing T] [Algebra R T]
     (e : S ≃+* T) (halg : ∀ r : R, e (algebraMap R S r) = algebraMap R T r) :
-    Module.Flat R T := by
-  exact Module.Flat.of_linearEquiv
-    { e.symm.toEquiv with
-      map_add' := e.symm.map_add
-      map_smul' := fun r x => by
-        simp only [Algebra.smul_def, RingHom.id_apply]
-        change e.symm (algebraMap R T r * x) = algebraMap R S r * e.symm x
-        rw [show algebraMap R T r = e (algebraMap R S r) from (halg r).symm]
-        rw [e.symm.map_mul, e.symm_apply_apply] }
+    Module.Flat R T :=
+  Module.Flat.of_linearEquiv (AlgEquiv.ofRingEquiv halg).symm.toLinearEquiv
 
 /-! ### Tate algebra quotient flatness (discrete, Lemma 8.31(2))
 
