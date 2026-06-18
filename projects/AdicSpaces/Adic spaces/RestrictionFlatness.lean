@@ -857,7 +857,7 @@ theorem restrictionMap_flat_trans
   letI mod_D₁_D : Module (presheafValue D₁) (presheafValue D) := Algebra.toModule
   letI mod_E_D : Module (presheafValue E) (presheafValue D) := Algebra.toModule
   haveI : IsScalarTower (presheafValue E) (presheafValue D₁) (presheafValue D) := by
-    refine IsScalarTower.of_algebraMap_eq fun x => ?_
+    refine IsScalarTower.of_algebraMap_eq fun x ↦ ?_
     change restrictionMapHom E D (h_D₁_D.trans h_E_D₁) x =
       restrictionMapHom D₁ D h_D₁_D (restrictionMapHom E D₁ h_E_D₁ x)
     have hcomp := congrFun (restrictionMap_comp E D₁ D h_E_D₁ h_D₁_D) x
