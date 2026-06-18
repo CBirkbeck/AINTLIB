@@ -71,7 +71,7 @@ Restricted to `Div⁰` (and descended to `Pic⁰`), this is Silverman
 III.3.4's σ map. Reference: Silverman III.3.4. -/
 noncomputable def projectiveDivisorSum
     (D : ProjectiveDivisor (⟨W⟩ : SmoothPlaneCurve F)) : W.Point :=
-  D.sum fun P n => n • P.toAffinePoint
+  D.sum fun P n ↦ n • P.toAffinePoint
 
 @[simp] theorem projectiveDivisorSum_zero :
     projectiveDivisorSum W 0 = 0 := by
