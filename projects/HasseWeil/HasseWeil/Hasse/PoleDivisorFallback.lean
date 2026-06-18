@@ -159,7 +159,7 @@ def ComputationA_bridge_pullback_x_gen
     W.toAffine.FunctionField =
   ((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
       ((isogOneSub_negFrobenius W hq).pullback (x_gen W)))).support.sum
-    (fun P => (-((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
+    (fun P ↦ (-((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
       ((isogOneSub_negFrobenius W hq).pullback (x_gen W))) P)).toNat)
 
 namespace Conditional
@@ -748,7 +748,7 @@ theorem ordAtInfty_neg_y_gen_pow_card_lt_rest
           from (W_smooth W).ordAtInfty_zero]
       exact le_top
     · have h_a1_ne : a1KE ≠ 0 :=
-        fun h => ha1 (FaithfulSMul.algebraMap_injective K
+        fun h ↦ ha1 (FaithfulSMul.algebraMap_injective K
           W.toAffine.FunctionField (h.trans (map_zero _).symm))
       have h_xq_ne : xq ≠ 0 := pow_ne_zero _ (x_gen_ne_zero W)
       have h_mul_ord : (W_smooth W).ordAtInfty (a1KE * xq) =
@@ -897,7 +897,7 @@ theorem bridge_at_negFrobeniusIsog_pullback_y_gen_of_non_2_tor
       rw [h_a1_zero, zero_mul, neg_zero, zero_add]
       exact h_neg_a3_bridge
     · have h_a1_ne : algebraMap K W.toAffine.FunctionField W.toAffine.a₁ ≠ 0 :=
-        fun h => ha1 (FaithfulSMul.algebraMap_injective K
+        fun h ↦ ha1 (FaithfulSMul.algebraMap_injective K
           W.toAffine.FunctionField (h.trans (map_zero _).symm))
       have h_mul_eq : (W_smooth W).ordAtInfty
           (algebraMap K W.toAffine.FunctionField W.toAffine.a₁ *
@@ -1558,7 +1558,7 @@ theorem ordAtInfty_T1_ge
         from (W_smooth W).ordAtInfty_zero]
     exact le_top
   · have h_a4_ne : algebraMap K W.toAffine.FunctionField W.toAffine.a₄ ≠ 0 :=
-      fun h => ha4 (FaithfulSMul.algebraMap_injective K
+      fun h ↦ ha4 (FaithfulSMul.algebraMap_injective K
         W.toAffine.FunctionField (h.trans (map_zero _).symm))
     have h_sum_ne :
         x_gen W + (negFrobeniusIsog W).pullback (x_gen W) ≠ 0 :=
@@ -1650,7 +1650,7 @@ theorem ordAtInfty_neg_T3_ge
         from (W_smooth W).ordAtInfty_zero]
     exact le_top
   · have h_a3_ne : algebraMap K W.toAffine.FunctionField W.toAffine.a₃ ≠ 0 :=
-      fun h => ha3 (FaithfulSMul.algebraMap_injective K
+      fun h ↦ ha3 (FaithfulSMul.algebraMap_injective K
         W.toAffine.FunctionField (h.trans (map_zero _).symm))
     have h_ypy_ne : y_gen W + (negFrobeniusIsog W).pullback (y_gen W) ≠ 0 :=
       y_gen_add_negFrobeniusIsog_pullback_y_gen_ne_zero W hq
@@ -1725,7 +1725,7 @@ theorem ordAtInfty_neg_T4_ge
         from (W_smooth W).ordAtInfty_zero]
     exact le_top
   · have h_alg2_ne : algebraMap K W.toAffine.FunctionField (2 : K) ≠ 0 :=
-      fun h => h2z (FaithfulSMul.algebraMap_injective K
+      fun h ↦ h2z (FaithfulSMul.algebraMap_injective K
         W.toAffine.FunctionField (h.trans (map_zero _).symm))
     have h_mul : (W_smooth W).ordAtInfty
         (algebraMap K W.toAffine.FunctionField (2 : K) *
@@ -1776,7 +1776,7 @@ theorem ordAtInfty_neg_T5_ge
         from (W_smooth W).ordAtInfty_zero]
     exact le_top
   · have h_a1_ne : algebraMap K W.toAffine.FunctionField W.toAffine.a₁ ≠ 0 :=
-      fun h => ha1 (FaithfulSMul.algebraMap_injective K
+      fun h ↦ ha1 (FaithfulSMul.algebraMap_injective K
         W.toAffine.FunctionField (h.trans (map_zero _).symm))
     have h_piy_ne := negFrobeniusIsog_pullback_y_gen_ne_zero W hq
     have h_pix_ne := negFrobeniusIsog_pullback_x_gen_ne_zero W
@@ -1900,7 +1900,7 @@ theorem ordAtInfty_T8_ge
         from (W_smooth W).ordAtInfty_zero]
     exact le_top
   · have h_alg_ne : algebraMap K W.toAffine.FunctionField (2 * W.toAffine.a₂)
-        ≠ 0 := fun h => h2a2 (FaithfulSMul.algebraMap_injective K
+        ≠ 0 := fun h ↦ h2a2 (FaithfulSMul.algebraMap_injective K
           W.toAffine.FunctionField (h.trans (map_zero _).symm))
     have h_pix_ne := negFrobeniusIsog_pullback_x_gen_ne_zero W
     have h_xpix_ne : x_gen W * (negFrobeniusIsog W).pullback (x_gen W) ≠ 0 :=
@@ -2154,7 +2154,7 @@ theorem bridge_at_addPullback_x_negFrobenius_of_bridge_at_Num
       (((-2 - 4 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) := by
     rw [addPullbackNumerator_negFrobenius_eq_reduced]
     exact ordAtInfty_addPullbackNumerator_reduced_negFrobenius_eq W hq
-  have h_Num_ne : addPullbackNumerator_negFrobenius W ≠ 0 := fun h => by
+  have h_Num_ne : addPullbackNumerator_negFrobenius W ≠ 0 := fun h ↦ by
     have h_top : (W_smooth W).ordAtInfty
         (addPullbackNumerator_negFrobenius W) = ⊤ := by
       rw [h]; exact (W_smooth W).ordAtInfty_zero
@@ -2254,7 +2254,7 @@ theorem pc_sepDeg_eq_pointCount_of_computationA_and_lemma5
     (h_lemma5 :
       ((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
           ((isogOneSub_negFrobenius W hq).pullback (x_gen W)))).support.sum
-        (fun P => (-((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
+        (fun P ↦ (-((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
           ((isogOneSub_negFrobenius W hq).pullback (x_gen W))) P)).toNat) =
       2 * pointCount W.toAffine) :
     (isogOneSub_negFrobenius W hq).sepDegree = pointCount W.toAffine := by
@@ -2295,15 +2295,15 @@ theorem lemma5_of_pole_orders_and_support_card
       pointCount W.toAffine) :
     ((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
         ((isogOneSub_negFrobenius W hq).pullback (x_gen W)))).support.sum
-      (fun P => (-((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
+      (fun P ↦ (-((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
         ((isogOneSub_negFrobenius W hq).pullback (x_gen W))) P)).toNat) =
     2 * pointCount W.toAffine := by
   set S := ((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
     ((isogOneSub_negFrobenius W hq).pullback (x_gen W)))).support with hS
   set D := Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
     ((isogOneSub_negFrobenius W hq).pullback (x_gen W)) with hD
-  have h_sum_const : S.sum (fun P => (-(D P)).toNat) =
-      S.sum (fun _ => (2 : ℕ)) := by
+  have h_sum_const : S.sum (fun P ↦ (-(D P)).toNat) =
+      S.sum (fun _ ↦ (2 : ℕ)) := by
     apply Finset.sum_congr rfl
     intro P hP
     exact (h_pole_orders P hP).2
@@ -2495,7 +2495,7 @@ theorem bridgeA_intermediateField_adjoin_eq_fractionRing_finrank
         f⁻¹
       have h_e1_symm_val : ∀ x : IntermediateField.adjoin K ({f⁻¹} :
             Set W.toAffine.FunctionField),
-          (e1.symm x).val = x.val := fun x => rfl
+          (e1.symm x).val = x.val := fun x ↦ rfl
       rw [h_e1_symm_val]
       exact RatFunc.algEquivOfTranscendental_X f⁻¹ h_inv
     rw [h_LHS, h_RHS]
@@ -2540,7 +2540,7 @@ theorem finrank_gamma_pullback_x_eq_weightedPoleDegree
           ((isogOneSub_negFrobenius W hq).pullback (x_gen W))) _ _
         (Curves.RamificationAtInfinity.LinfAt.algebraFractionRing
           (k := K) ((isogOneSub_negFrobenius W hq).pullback (x_gen W))).toModule =
-      ∑ P ∈ primesOverFinset
+      ∑ P ∈ IsDedekindDomain.primesOverFinset
         (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
         (-(data.ordAt P)).toNat *
           Ideal.inertiaDeg
@@ -2552,7 +2552,7 @@ theorem finrank_gamma_pullback_x_eq_weightedPoleDegree
 (`K(y) = K(y⁻¹)`). Turns `Transcendental K (γ*x)` into the `Transcendental K (γ*x)⁻¹` that
 `LinfAt`/`finrank_gamma...` require. -/
 theorem transcendental_inv {L : Type*} [Field L] [Algebra K L] {y : L}
-    (h : Transcendental K y) : Transcendental K y⁻¹ := fun halg => h (by simpa using halg.inv)
+    (h : Transcendental K y) : Transcendental K y⁻¹ := fun halg ↦ h (by simpa using halg.inv)
 
 /-- **SK-L6CA-HYPS helper**: `γ*x = (1-π)*x_gen` is transcendental over `K`. The isogeny pullback
 is an injective `K`-algebra hom and `x_gen` is transcendental (`x_gen_transcendental`), so its
@@ -2599,7 +2599,7 @@ theorem finrank_adjoin_eq_finrank_LinfAt
     (RatFunc.toFractionRingAlgEquiv K K).symm.trans
       (RatFunc.algEquivOfTranscendental (K := K) f⁻¹ h_f_inv)
   have hgen : ∀ a : W.toAffine.FunctionField,
-      a ∈ IntermediateField.adjoin K ({a⁻¹} : Set W.toAffine.FunctionField) := fun a => by
+      a ∈ IntermediateField.adjoin K ({a⁻¹} : Set W.toAffine.FunctionField) := fun a ↦ by
     have h1 : a⁻¹ ∈ IntermediateField.adjoin K ({a⁻¹} : Set W.toAffine.FunctionField) :=
       IntermediateField.subset_adjoin K {a⁻¹} (Set.mem_singleton _)
     simpa using inv_mem h1
@@ -2652,7 +2652,6 @@ theorem finrank_adjoin_eq_finrank_LinfAt
           = (RatFunc.X : RatFunc K) := by
         have h_e3_X : RatFunc.toFractionRingAlgEquiv K K (RatFunc.X : RatFunc K) =
             algebraMap (Polynomial K) (FractionRing (Polynomial K)) Polynomial.X := by
-          change (RatFunc.toFractionRingAlgEquiv K K) RatFunc.X = _
           simp only [RatFunc.toFractionRingAlgEquiv_apply]
           change ((algebraMap (Polynomial K) (RatFunc K)) Polynomial.X).toFractionRing = _
           rw [← RatFunc.ofFractionRing_algebraMap (K := K)]
@@ -2789,7 +2788,7 @@ theorem K_E_separable_of_KofF_separable
         f⁻¹
       have h_e1_symm_val : ∀ x : IntermediateField.adjoin K ({f⁻¹} :
             Set W.toAffine.FunctionField),
-          (e1.symm x).val = x.val := fun x => rfl
+          (e1.symm x).val = x.val := fun x ↦ rfl
       rw [h_e1_symm_val]
       exact RatFunc.algEquivOfTranscendental_X f⁻¹ h_inv
     rw [h_LHS, h_RHS]
@@ -2822,7 +2821,7 @@ theorem K_E_separable_over_LinfAt_gamma_pullback_x_gen
   set γ := isogOneSub_negFrobenius W hq with hγ_def
   set f : W.toAffine.FunctionField := γ.pullback (x_gen W) with hf_def
   have h_inv : Transcendental K f⁻¹ := hf.out
-  have h_f : Transcendental K f := fun h_alg =>
+  have h_f : Transcendental K f := fun h_alg ↦
     h_inv ((IsAlgebraic.inv_iff (R := K) (x := f)).mpr h_alg)
   have h_pc_sep : γ.IsSeparable := isogOneSub_negFrobenius_isSeparable W p hq
   have h_le :
@@ -2917,7 +2916,6 @@ theorem K_E_separable_over_LinfAt_gamma_pullback_x_gen
                 RatFunc.toFractionRingAlgEquiv K K (RatFunc.X : RatFunc K) =
                 algebraMap (Polynomial K) (FractionRing (Polynomial K))
                   Polynomial.X := by
-              change (RatFunc.toFractionRingAlgEquiv K K) RatFunc.X = _
               simp only [RatFunc.toFractionRingAlgEquiv_apply]
               change ((algebraMap (Polynomial K) (RatFunc K)) Polynomial.X).toFractionRing = _
               rw [← RatFunc.ofFractionRing_algebraMap (K := K)]
@@ -2978,14 +2976,14 @@ theorem weightedPoleDegree_gamma_pullback_x_eq_two_mul_pointCount
       letI := data.commRing
       letI := data.isDedekindDomain
       letI := data.algPoly
-      ∀ P ∈ primesOverFinset
+      ∀ P ∈ IsDedekindDomain.primesOverFinset
         (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
         data.ordAt P = -2)
     (h_inertia_one :
       letI := data.commRing
       letI := data.isDedekindDomain
       letI := data.algPoly
-      ∀ P ∈ primesOverFinset
+      ∀ P ∈ IsDedekindDomain.primesOverFinset
         (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
         Ideal.inertiaDeg
           (Curves.RamificationAtInfinity.xIdeal (k := K)) P = 1)
@@ -2993,13 +2991,13 @@ theorem weightedPoleDegree_gamma_pullback_x_eq_two_mul_pointCount
       letI := data.commRing
       letI := data.isDedekindDomain
       letI := data.algPoly
-      (primesOverFinset
+      (IsDedekindDomain.primesOverFinset
         (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier).card =
       pointCount W.toAffine) :
     letI := data.commRing
     letI := data.isDedekindDomain
     letI := data.algPoly
-    ∑ P ∈ primesOverFinset
+    ∑ P ∈ IsDedekindDomain.primesOverFinset
       (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
       (-(data.ordAt P)).toNat *
         Ideal.inertiaDeg
@@ -3009,12 +3007,12 @@ theorem weightedPoleDegree_gamma_pullback_x_eq_two_mul_pointCount
   letI := data.isDedekindDomain
   letI := data.algPoly
   have h_sum_eq :
-      ∑ P ∈ primesOverFinset
+      ∑ P ∈ IsDedekindDomain.primesOverFinset
         (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
         (-(data.ordAt P)).toNat *
           Ideal.inertiaDeg
             (Curves.RamificationAtInfinity.xIdeal (k := K)) P =
-      ∑ _P ∈ primesOverFinset
+      ∑ _P ∈ IsDedekindDomain.primesOverFinset
         (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
         (2 : ℕ) := by
     apply Finset.sum_congr rfl
@@ -3036,14 +3034,14 @@ theorem bridgeB_weightedPoleDegree_eq_projectiveDivisorOf_sum
       letI := data.commRing
       letI := data.isDedekindDomain
       letI := data.algPoly
-      ∀ P ∈ primesOverFinset
+      ∀ P ∈ IsDedekindDomain.primesOverFinset
         (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
         data.ordAt P = -2)
     (h_inertia_one :
       letI := data.commRing
       letI := data.isDedekindDomain
       letI := data.algPoly
-      ∀ P ∈ primesOverFinset
+      ∀ P ∈ IsDedekindDomain.primesOverFinset
         (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
         Ideal.inertiaDeg
           (Curves.RamificationAtInfinity.xIdeal (k := K)) P = 1)
@@ -3051,7 +3049,7 @@ theorem bridgeB_weightedPoleDegree_eq_projectiveDivisorOf_sum
       letI := data.commRing
       letI := data.isDedekindDomain
       letI := data.algPoly
-      (primesOverFinset
+      (IsDedekindDomain.primesOverFinset
         (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier).card =
       pointCount W.toAffine)
     (h_pole_orders :
@@ -3068,14 +3066,14 @@ theorem bridgeB_weightedPoleDegree_eq_projectiveDivisorOf_sum
     letI := data.commRing
     letI := data.isDedekindDomain
     letI := data.algPoly
-    (∑ P ∈ primesOverFinset
+    (∑ P ∈ IsDedekindDomain.primesOverFinset
       (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
       (-(data.ordAt P)).toNat *
         Ideal.inertiaDeg
           (Curves.RamificationAtInfinity.xIdeal (k := K)) P) =
     ((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
         ((isogOneSub_negFrobenius W hq).pullback (x_gen W)))).support.sum
-      (fun P => (-((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
+      (fun P ↦ (-((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
         ((isogOneSub_negFrobenius W hq).pullback (x_gen W))) P)).toNat) := by
   rw [weightedPoleDegree_gamma_pullback_x_eq_two_mul_pointCount
         W hq data h_uniform_pole_order h_inertia_one h_card,
@@ -3101,14 +3099,14 @@ theorem finrank_gamma_pullback_x_eq_projectiveDivisorOf_sum
       letI := data.commRing
       letI := data.isDedekindDomain
       letI := data.algPoly
-      ∀ P ∈ primesOverFinset
+      ∀ P ∈ IsDedekindDomain.primesOverFinset
         (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
         data.ordAt P = -2)
     (h_inertia_one :
       letI := data.commRing
       letI := data.isDedekindDomain
       letI := data.algPoly
-      ∀ P ∈ primesOverFinset
+      ∀ P ∈ IsDedekindDomain.primesOverFinset
         (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
         Ideal.inertiaDeg
           (Curves.RamificationAtInfinity.xIdeal (k := K)) P = 1)
@@ -3116,7 +3114,7 @@ theorem finrank_gamma_pullback_x_eq_projectiveDivisorOf_sum
       letI := data.commRing
       letI := data.isDedekindDomain
       letI := data.algPoly
-      (primesOverFinset
+      (IsDedekindDomain.primesOverFinset
         (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier).card =
       pointCount W.toAffine)
     (h_pole_orders :
@@ -3137,7 +3135,7 @@ theorem finrank_gamma_pullback_x_eq_projectiveDivisorOf_sum
         W.toAffine.FunctionField =
       ((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
           ((isogOneSub_negFrobenius W hq).pullback (x_gen W)))).support.sum
-        (fun P => (-((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
+        (fun P ↦ (-((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
           ((isogOneSub_negFrobenius W hq).pullback (x_gen W))) P)).toNat) := by
   rw [bridgeA_intermediateField_adjoin_eq_fractionRing_finrank W hq]
   rw [finrank_gamma_pullback_x_eq_weightedPoleDegree W hq hMF data]
