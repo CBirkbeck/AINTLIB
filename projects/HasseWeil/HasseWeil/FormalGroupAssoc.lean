@@ -41,12 +41,12 @@ variable {R : Type*} [CommRing R] (W : WeierstrassCurve R)
     In a complete local ring with `a, b ∈ 𝔪`, this converges. For a general
     ring, we define the truncated evaluation to degree `N`. -/
 noncomputable def formalGroupEval (a b : R) (N : ℕ) : R :=
-  (range (N + 1)).sum fun i => (range (N + 1 - i)).sum fun j =>
+  (range (N + 1)).sum fun i ↦ (range (N + 1 - i)).sum fun j ↦
     formalGroupLaw_coeff W (Finsupp.single 0 i + Finsupp.single 1 j) * a ^ i * b ^ j
 
 /-- The formal inverse evaluated at a concrete element. -/
 noncomputable def formalInverseEval (a : R) (N : ℕ) : R :=
-  (range (N + 1)).sum fun n => formalInverse_coeff W n * a ^ n
+  (range (N + 1)).sum fun n ↦ formalInverse_coeff W n * a ^ n
 
 /-- The multiplication-by-m map on the formal group.
 
@@ -59,29 +59,29 @@ noncomputable def formalInverseEval (a : R) (N : ℕ) : R :=
     `[0] = 0`, `[1] = T`, `[m+1] = F([m], T)`, `[-m] = i([m])`. -/
 -- Convolution of two coefficient sequences
 private def uconv (f g : ℕ → R) (n : ℕ) : R :=
-  (range (n + 1)).sum fun i => f i * g (n - i)
+  (range (n + 1)).sum fun i ↦ f i * g (n - i)
 
 -- Power of a univariate power series: (s^i)_n
 private def univPow (s : ℕ → R) : ℕ → ℕ → R
-  | 0 => fun n => if n = 0 then 1 else 0
+  | 0 => fun n ↦ if n = 0 then 1 else 0
   | 1 => s
-  | (i + 2) => fun n => uconv s (univPow s (i + 1)) n
+  | (i + 2) => fun n ↦ uconv s (univPow s (i + 1)) n
 
 -- n-th coefficient of F(s(T), T) where s(0) = 0
 private noncomputable def compFGL (s : ℕ → R) (n : ℕ) : R :=
-  (range (n + 1)).sum fun j =>
+  (range (n + 1)).sum fun j ↦
     if j ≤ n then
-      (range (n - j + 1)).sum fun i =>
+      (range (n - j + 1)).sum fun i ↦
         formalGroupLaw_coeff W (Finsupp.single 0 i + Finsupp.single 1 j) *
           univPow s i (n - j)
     else 0
 
 -- [m](T) for m ∈ ℕ, by recursion on m
 private noncomputable def formalMulByNat_coeff : ℕ → ℕ → R :=
-  WellFoundedRelation.wf.fix fun m ih =>
-    if hm0 : m = 0 then fun _ => 0
-    else if hm1 : m = 1 then fun n => if n = 1 then 1 else 0
-    else fun n => compFGL W (fun k => ih (m - 1)
+  WellFoundedRelation.wf.fix fun m ih ↦
+    if hm0 : m = 0 then fun _ ↦ 0
+    else if hm1 : m = 1 then fun n ↦ if n = 1 then 1 else 0
+    else fun n ↦ compFGL W (fun k ↦ ih (m - 1)
       (Nat.sub_lt (Nat.pos_of_ne_zero hm0) one_pos) k) n
 
 noncomputable def formalMulByInt_coeff (m : ℤ) (n : ℕ) : R :=
@@ -160,9 +160,9 @@ theorem univPow_one_eq_zero (s : ℕ → R) (hs0 : s 0 = 0) (i : ℕ) (hi : 2 �
     the sum is over all ways to get total degree n. -/
 private noncomputable def bivarComp
     (F : ℕ → ℕ → R) (f g : ℕ → R) (n : ℕ) : R :=
-  (Finset.range (n + 1)).sum fun k =>
-    (Finset.range (n + 1)).sum fun i =>
-      (Finset.range (n + 1)).sum fun j =>
+  (Finset.range (n + 1)).sum fun k ↦
+    (Finset.range (n + 1)).sum fun i ↦
+      (Finset.range (n + 1)).sum fun j ↦
         if i + j ≤ n then
           F i j * univPow f i k * univPow g j (n - k)
         else 0
@@ -182,12 +182,8 @@ theorem pullbackCoeff_add (f g : ℕ → R) (hf0 : f 0 = 0) (hg0 : g 0 = 0) :
     -- the linear coefficient of F(f(T), g(T)) is f₁ + g₁.
     -- We state this for the specific formal group law:
     fgl_coeff W 1 0 * f 1 + fgl_coeff W 0 1 * g 1 = f 1 + g 1 := by
-  rw [show fgl_coeff W 1 0 = 1 from by
-    simp [fgl_coeff, formalGroupLaw_coeff_right_unit, Finsupp.single_apply,
-      show (1 : Fin 2) ≠ 0 from by decide]]
-  rw [show fgl_coeff W 0 1 = 1 from by
-    simp [fgl_coeff, formalGroupLaw_coeff_left_unit, Finsupp.single_apply,
-      show (0 : Fin 2) ≠ 1 from by decide]]
+  rw [show fgl_coeff W 1 0 = 1 from by simp [fgl_coeff, formalGroupLaw_coeff_right_unit],
+    show fgl_coeff W 0 1 = 1 from by simp [fgl_coeff, formalGroupLaw_coeff_left_unit]]
   ring
 
 /-- The pullback coefficient is multiplicative (chain rule): `a_{φ∘ψ} = a_φ · a_ψ`.
@@ -211,7 +207,7 @@ theorem pullbackCoeff_comp (f g : ℕ → R) (hf0 : f 0 = 0) (hg0 : g 0 = 0) :
 /-- Packaged version: the composition linear coefficient. -/
 theorem comp_coeff_one (f g : ℕ → R) (hf0 : f 0 = 0) (hg0 : g 0 = 0) :
     -- For the formal composition Σ_n f_n · (univPow g n) at index 1:
-    (Finset.range 2).sum (fun n => f n * univPow g n 1) = f 1 * g 1 := by
+    (Finset.range 2).sum (fun n ↦ f n * univPow g n 1) = f 1 * g 1 := by
   simp [Finset.sum_range_succ, hf0, univPow]
 
 /-! ### The key theorem: φ ↦ a_φ is a ring homomorphism End(E) → R
