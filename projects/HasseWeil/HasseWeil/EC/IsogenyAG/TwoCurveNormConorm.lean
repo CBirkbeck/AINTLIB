@@ -745,7 +745,6 @@ This is the place-valuation form of `CurveMap.count_relNorm_eq_sum_fiber` over t
 fibre-ramification, all `e = 1` by III.4.10c over `[IsAlgClosed F]`).  It is the single genuine
 deep input; everything else in this file is structural. -/
 theorem twoCurve_ord_conorm_eq_sum_fiber
-    [PerfectField (FractionRing (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing)]
     (φ : HasseWeil.Isogeny W₁ W₂)
     (hfin : @FiniteDimensional W₂.toAffine.FunctionField W₁.toAffine.FunctionField _ _
       φ.toAlgebra.toModule)
@@ -1127,7 +1126,6 @@ degree, `degree_placeRestrictionPushforward`).  Mirrors
 `div(N_φ(algebraMap w)) = placeRestrictionPushforward φ (div(algebraMap w))`.  Affine coefficients
 via `twoCurve_ord_conorm_eq_sum_fiber`; infinity coefficient forced by degree `0`. -/
 theorem placeRestrictionPushforward_projectiveDivisorOf_algebraMap
-    [PerfectField (FractionRing (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing)]
     (φ : HasseWeil.Isogeny W₁ W₂)
     (hfin : @FiniteDimensional W₂.toAffine.FunctionField W₁.toAffine.FunctionField _ _
       φ.toAlgebra.toModule)
@@ -1205,7 +1203,6 @@ isogeny `φ` over `[IsAlgClosed F]`, `div(N_φ f) = placeRestrictionPushforward 
 `f ∈ K(E₁)`.  The `algebraMap` case is `placeRestrictionPushforward_projectiveDivisorOf_algebraMap`;
 the general case is the `f = u/v` reduction. -/
 theorem placeRestrictionPushforward_projectiveDivisorOf
-    [PerfectField (FractionRing (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing)]
     (φ : HasseWeil.Isogeny W₁ W₂)
     (hfin : @FiniteDimensional W₂.toAffine.FunctionField W₁.toAffine.FunctionField _ _
       φ.toAlgebra.toModule)
@@ -1226,7 +1223,6 @@ separable, the place-restriction pushforward carries principal projective diviso
 projective divisors: if `D = div f` (`f ≠ 0`), then `placeRestrictionPushforward φ D = div(N_φ f)`
 with `N_φ f ∈ K(E₂)` nonzero. -/
 theorem placeRestrictionPreservesPrincipal_of_finite_separable
-    [PerfectField (FractionRing (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing)]
     (φ : HasseWeil.Isogeny W₁ W₂)
     (hfin : @FiniteDimensional W₂.toAffine.FunctionField W₁.toAffine.FunctionField _ _
       φ.toAlgebra.toModule)
@@ -1248,7 +1244,6 @@ remaining wall of char-0 isogeny symmetry rests on *separability* of `φ` alone 
 `[IsAlgClosed F]`) — exactly Silverman III.4.10c's hypothesis.  This is the form to wire into
 `placeRestrictionRealizationOfPreservesPrincipal` at the `twoCurveGeometricDualData` call site. -/
 theorem placeRestrictionPreservesPrincipal_of_separable
-    [PerfectField (FractionRing (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing)]
     (φ : HasseWeil.Isogeny W₁ W₂)
     (hsep : @Algebra.IsSeparable W₂.toAffine.FunctionField W₁.toAffine.FunctionField _ _
       φ.toAlgebra)

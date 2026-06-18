@@ -885,11 +885,12 @@ section FieldOfDefinition
 
 variable {E : Type*} [Field E]
 
-/-- **Characteristic zero ⟹ `K̄/F` is Galois.** For a char-0 field `F`, the algebraic closure
-`K̄ = AlgebraicClosure F` is a Galois extension: it is normal (`IsAlgClosure.normal`) and separable
-(`IsAlgClosure.separable`, char-0). Packaged as an instance so the field-of-definition API
-(`FiniteGaloisIntermediateField.adjoin`, which requires `[IsGalois F K̄]`) is available. -/
-instance instIsGalois_algebraicClosure [CharZero E] :
+/-- **Perfect field ⟹ `K̄/F` is Galois.** For a perfect field `F`, the algebraic closure
+`K̄ = AlgebraicClosure F` is a Galois extension: it is normal (`IsAlgClosure.normal`, always) and
+separable (`Algebra.IsSeparable F (AlgebraicClosure F)`, automatic for perfect `F`). Packaged as an
+instance so the field-of-definition API (`FiniteGaloisIntermediateField.adjoin`, which requires
+`[IsGalois F K̄]`) is available. (Char-0 ⟹ perfect, so the char-0 callers still resolve.) -/
+instance instIsGalois_algebraicClosure [PerfectField E] :
     IsGalois E (AlgebraicClosure E) := inferInstance
 
 /-- **The abstract Galois-fixed descent** (the field-of-definition invariance step). For a normal
@@ -911,12 +912,13 @@ theorem galFixed_of_galFixed_top {K : Type*} [Field K] [Algebra E K] [Normal E K
   rw [show AlgEquiv.restrictNormalHom (F := E) L σ = σ.restrictNormal L from rfl,
     AlgEquiv.restrictNormal_commutes, hx]
 
-/-- **The finite Galois field of definition of a finite set of `K̄`-elements** (MOVE 1). In char 0,
-for a finite `s : Set K̄` there is a finite Galois extension `L/F` (concretely the normal closure of
-`F(s)` inside `K̄`, `FiniteGaloisIntermediateField.adjoin`) containing `s` — so any datum built from
-finitely many algebraic elements of `K̄` is defined over a *finite* Galois `L/F`. This discharges the
-field-of-definition half of the descent: the (infinite) `K̄`-dual descends to a finite Galois `L`. -/
-theorem exists_finiteGalois_fieldOfDefinition [CharZero E]
+/-- **The finite Galois field of definition of a finite set of `K̄`-elements** (MOVE 1). Over a
+perfect field, for a finite `s : Set K̄` there is a finite Galois extension `L/F` (concretely the
+normal closure of `F(s)` inside `K̄`, `FiniteGaloisIntermediateField.adjoin`) containing `s` — so any
+datum built from finitely many algebraic elements of `K̄` is defined over a *finite* Galois `L/F`.
+This discharges the field-of-definition half of the descent: the (infinite) `K̄`-dual descends to a
+finite Galois `L`. -/
+theorem exists_finiteGalois_fieldOfDefinition [PerfectField E]
     (s : Set (AlgebraicClosure E)) (hs : s.Finite) :
     ∃ (L : IntermediateField E (AlgebraicClosure E)),
       FiniteDimensional E L ∧ IsGalois E L ∧ s ⊆ (L : Set (AlgebraicClosure E)) := by
@@ -1007,11 +1009,11 @@ private theorem towerTensorIncl_finset_sum_mem_range (R : Type*) [CommRing R] [A
   refine Finset.sum_congr rfl (fun p _ => ?_)
   rw [towerTensorIncl_tmul]
 
-/-- **The tensor tower fact** (char 0): every element of `K̄ ⊗_F R` (`K̄ = AlgebraicClosure F`) is the
-image, under `towerTensorIncl`, of an element of `M ⊗_F R` for some *finite Galois* intermediate
-field `M ⊆ K̄`. The finitely many `K̄`-scalars in a finite-sum representation lie in a finite Galois
-`M` (`exists_finiteGalois_fieldOfDefinition`). -/
-theorem exists_finiteGalois_towerTensorIncl_range [CharZero F]
+/-- **The tensor tower fact** (perfect base field): every element of `K̄ ⊗_F R`
+(`K̄ = AlgebraicClosure F`) is the image, under `towerTensorIncl`, of an element of `M ⊗_F R` for some
+*finite Galois* intermediate field `M ⊆ K̄`. The finitely many `K̄`-scalars in a finite-sum
+representation lie in a finite Galois `M` (`exists_finiteGalois_fieldOfDefinition`). -/
+theorem exists_finiteGalois_towerTensorIncl_range [PerfectField F]
     (R : Type*) [CommRing R] [Algebra F R] (z : AlgebraicClosure F ⊗[F] R) :
     ∃ (M : IntermediateField F (AlgebraicClosure F)),
       FiniteDimensional F M ∧ IsGalois F M ∧ z ∈ Set.range (towerTensorIncl R M) := by
@@ -1025,10 +1027,10 @@ theorem exists_finiteGalois_towerTensorIncl_range [CharZero F]
   exact towerTensorIncl_finset_sum_mem_range R M S (fun p hp =>
     hMsub (Finset.mem_coe.mpr (Finset.mem_image_of_mem Prod.fst hp)))
 
-/-- **The tensor tower fact for a pair** (char 0): two elements `z₁ z₂ ∈ K̄ ⊗_F R` both live over a
-*common* finite Galois intermediate field `M ⊆ K̄`. The scalars of finite-sum representations of
-*both* `z₁` and `z₂` lie in one finite Galois `M`. -/
-theorem exists_finiteGalois_towerTensorIncl_range₂ [CharZero F]
+/-- **The tensor tower fact for a pair** (perfect base field): two elements `z₁ z₂ ∈ K̄ ⊗_F R` both
+live over a *common* finite Galois intermediate field `M ⊆ K̄`. The scalars of finite-sum
+representations of *both* `z₁` and `z₂` lie in one finite Galois `M`. -/
+theorem exists_finiteGalois_towerTensorIncl_range₂ [PerfectField F]
     (R : Type*) [CommRing R] [Algebra F R] (z₁ z₂ : AlgebraicClosure F ⊗[F] R) :
     ∃ (M : IntermediateField F (AlgebraicClosure F)),
       FiniteDimensional F M ∧ IsGalois F M ∧
@@ -1118,9 +1120,10 @@ theorem fracTowerIncl_galActFrac (C : SmoothPlaneCurve F)
     (A := M ⊗[F] C.toAffine.CoordinateRing) y
   rw [map_div₀, map_div₀, map_div₀, map_div₀, key a, key d]
 
-/-- **The infinite-Galois fixed-field characterization** (`L = K̄ = AlgebraicClosure F`, char 0): an
-element of the `K̄`-function field `(C.baseChange K̄).FunctionField` lies in the image of `F(C)` under
-the base-change embedding `functionFieldMap` iff it is fixed by *every* `galActFunctionField C K̄ σ`.
+/-- **The infinite-Galois fixed-field characterization** (`L = K̄ = AlgebraicClosure F`, perfect base
+field): an element of the `K̄`-function field `(C.baseChange K̄).FunctionField` lies in the image of
+`F(C)` under the base-change embedding `functionFieldMap` iff it is fixed by *every*
+`galActFunctionField C K̄ σ`.
 
 This is the `L = K̄` analogue of the finite `mem_range_functionField_baseChange_iff_fixed`. The `←`
 direction is the genuine **tower descent**: a `Gal(K̄/F)`-fixed `x` is transported to a `galActFrac`-
@@ -1130,7 +1133,7 @@ denominator lie in a finite Galois `M ⊆ K̄` (`exists_finiteGalois_towerTensor
 `restrictNormalHom_surjective`); the proven *finite* descent (`the_lift` +
 `tensor_ringAct_fixed_mem_range`) at `M` writes `y_M` as a ratio of `1 ⊗ -` images, which
 `towerTensorIncl` carries to `1 ⊗ -` upstairs — exhibiting `x` as a `functionFieldMap` image. -/
-theorem mem_range_functionField_baseChange_iff_fixed_kbar [CharZero F] (C : SmoothPlaneCurve F)
+theorem mem_range_functionField_baseChange_iff_fixed_kbar [PerfectField F] (C : SmoothPlaneCurve F)
     (x : (C.baseChange (AlgebraicClosure F)).FunctionField) :
     (∃ f : C.FunctionField, C.functionFieldMap (AlgebraicClosure F) f = x) ↔
       ∀ σ : AlgebraicClosure F ≃ₐ[F] AlgebraicClosure F,
@@ -1225,7 +1228,7 @@ Unlike `rangeIncl_of_descentData` (which descends from a *finite* Galois `L`), t
 from `K̄ = AlgebraicClosure F`, using the tower fixed-field characterization
 `mem_range_functionField_baseChange_iff_fixed_kbar`.  This removes the need for a finite-`L` geometric
 realization: the `K̄`-level inclusion is the *fully proven* `ecIsog_mulByInt_deg_rangeIncl_of_charZero`. -/
-theorem rangeIncl_of_descentData_kbar [CharZero F] {C₁ C₂ : SmoothPlaneCurve F}
+theorem rangeIncl_of_descentData_kbar [PerfectField F] {C₁ C₂ : SmoothPlaneCurve F}
     {φPb : C₂.FunctionField →ₐ[F] C₁.FunctionField}
     {mPb : C₁.FunctionField →ₐ[F] C₁.FunctionField}
     (psiK : (C₂.baseChange (AlgebraicClosure F)).FunctionField →ₐ[F]
