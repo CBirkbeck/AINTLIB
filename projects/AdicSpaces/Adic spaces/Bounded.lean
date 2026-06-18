@@ -362,7 +362,7 @@ private theorem pow_eq_lincomb_of_monic_rel {B : Subring A} {a : A} {N : ℕ}
   by_cases hn : n < N
   · classical exact ⟨fun j ↦ if j = n then 1 else 0, by
       simp [apply_ite (Subtype.val), Finset.sum_ite_eq', Finset.mem_range.mpr hn]⟩
-  · push_neg at hn
+  · rw [not_lt] at hn
     choose d hd using fun i (hi : i ∈ Finset.range N) ↦
       ih (i + (n - N)) (by rw [Finset.mem_range] at hi; omega)
     refine ⟨fun j ↦ -(∑ i ∈ (Finset.range N).attach, p.coeff ↑i * d ↑i i.2 j), ?_⟩
@@ -458,9 +458,7 @@ open TopologicalRing in
 /-- The topologically nilpotent elements form an ideal of the power-bounded subring `A°`. -/
 def topNilpIdeal : Ideal (powerBoundedSubring.toSubring A) where
   carrier := {x | IsTopologicallyNilpotent (x : A)}
-  zero_mem' := by
-    show IsTopologicallyNilpotent ((0 : powerBoundedSubring.toSubring A) : A)
-    exact IsTopologicallyNilpotent.zero
+  zero_mem' := IsTopologicallyNilpotent.zero
   add_mem' := by
     intro x y hx hy
     show IsTopologicallyNilpotent ((x + y : powerBoundedSubring.toSubring A) : A)
