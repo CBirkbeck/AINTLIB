@@ -67,7 +67,7 @@ theorem h_inj_of_divZeroReduce
     (D : SmoothPlaneCurve.PicProj₀ (⟨W⟩ : SmoothPlaneCurve F)) :
     picZeroOfPoint W
         (HasseWeil.EC.Isogeny.picZeroSumOfWitness W h_van D) = D := by
-  refine QuotientAddGroup.induction_on D fun D' => ?_
+  refine QuotientAddGroup.induction_on D fun D' ↦ ?_
   rw [HasseWeil.EC.Isogeny.picZeroSumOfWitness_apply_mk]
   -- Goal: picZeroOfPoint W (σ D'.val) = QuotientAddGroup.mk D'
   unfold picZeroOfPoint
