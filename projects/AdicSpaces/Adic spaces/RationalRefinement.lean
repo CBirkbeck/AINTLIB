@@ -60,12 +60,10 @@ theorem separation_of_finer_rational (C : RationalCovering A)
   let E := (τ ⟨D, hD⟩).1
   have hE : E ∈ C.covers := (τ ⟨D, hD⟩).2
   have hDE : rationalOpen D.T D.s ⊆ rationalOpen E.T E.s := hτ ⟨D, hD⟩
-  have hE_eq := hC E hE
   have hcomp := restrictionMap_comp C.base E D (C.hsubset E hE) hDE
-  have hsub : hV_subset D hD = hDE.trans (C.hsubset E hE) :=
-    Subsingleton.elim _ _
-  rw [hsub, ← congr_fun hcomp x, ← congr_fun hcomp y]
-  exact congrArg (restrictionMap E D hDE) hE_eq
+  rw [show hV_subset D hD = hDE.trans (C.hsubset E hE) from Subsingleton.elim _ _,
+    ← congr_fun hcomp x, ← congr_fun hcomp y]
+  exact congrArg (restrictionMap E D hDE) (hC E hE)
 
 /-- **Refinement reduces gluing (concrete form)**.
 
@@ -126,17 +124,9 @@ theorem gluing_of_finer_rational (C : RationalCovering A)
       (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₂.1.T D₂.1.s),
       restrictionMap D₁.1 D₃ h₃₁ (fV D₁) = restrictionMap D₂.1 D₃ h₃₂ (fV D₂) := by
     intro D₁ D₂ D₃ h₃₁ h₃₂
-    -- LHS = restrictionMap D₁ D₃ (restrictionMap τ(D₁) D₁ (fC τ(D₁)))
-    --     = restrictionMap τ(D₁) D₃ (fC τ(D₁))   via restrictionMap_comp
-    -- Similarly for RHS, then use hC_compat.
-    change restrictionMap D₁.1 D₃ h₃₁ (restrictionMap (τ D₁).1 D₁.1 (hτ D₁) (fC (τ D₁))) =
-      restrictionMap D₂.1 D₃ h₃₂ (restrictionMap (τ D₂).1 D₂.1 (hτ D₂) (fC (τ D₂)))
-    have hc1 := restrictionMap_comp (τ D₁).1 D₁.1 D₃ (hτ D₁) h₃₁
-    have hc2 := restrictionMap_comp (τ D₂).1 D₂.1 D₃ (hτ D₂) h₃₂
-    rw [show restrictionMap D₁.1 D₃ h₃₁ (restrictionMap (τ D₁).1 D₁.1 (hτ D₁) (fC (τ D₁))) =
-          restrictionMap (τ D₁).1 D₃ (h₃₁.trans (hτ D₁)) (fC (τ D₁)) from congr_fun hc1 _,
-        show restrictionMap D₂.1 D₃ h₃₂ (restrictionMap (τ D₂).1 D₂.1 (hτ D₂) (fC (τ D₂))) =
-          restrictionMap (τ D₂).1 D₃ (h₃₂.trans (hτ D₂)) (fC (τ D₂)) from congr_fun hc2 _]
+    -- Peel each fV via restrictionMap_comp, then close with hC_compat.
+    simp only [fV, ← Function.comp_apply (f := restrictionMap D₁.1 D₃ h₃₁),
+      ← Function.comp_apply (f := restrictionMap D₂.1 D₃ h₃₂), restrictionMap_comp]
     exact hC_compat (τ D₁) (τ D₂) D₃ (h₃₁.trans (hτ D₁)) (h₃₂.trans (hτ D₂))
   -- Step 3: Apply hV_glue to get x.
   obtain ⟨x, hx⟩ := hV_glue fV hfV_compat
@@ -145,28 +135,10 @@ theorem gluing_of_finer_rational (C : RationalCovering A)
   -- via hE_sep (separation on E through the V-pieces with τ d = E).
   apply hE_sep E
   intro d hd
-  -- d ∈ V_covers, hd : τ d = E. Substitute E := τ d to align types.
-  -- (hτ d : rationalOpen d.1 ⊆ rationalOpen (τ d).1, so after substitution it
-  -- has the type expected by restrictionMap E.1 d.1.)
+  -- Substitute E := τ d to align types, then collapse the LHS double-restriction
+  -- via restrictionMap_comp; it then equals fV d = restrictionMap (τ d) d (fC (τ d)).
   subst hd
-  -- Now E.1 = (τ d).1 definitionally, and E.2 is τ d's proof.
-  -- We need:
-  -- restrictionMap (τ d).1 d.1 (hτ d) (restrictionMap C.base (τ d).1 _ x) =
-  -- restrictionMap (τ d).1 d.1 (hτ d) (fC (τ d))
-  have hxd := hx d
-  -- hxd : restrictionMap C.base d.1 (hV_subset d.1 d.2) x = fV d
-  --     : ... = restrictionMap (τ d).1 d.1 (hτ d) (fC (τ d))  by defn of fV
-  -- LHS via restrictionMap_comp = restrictionMap C.base d.1 _ x.
-  have hcomp_Cbase_E_d := restrictionMap_comp C.base (τ d).1 d.1
-    (C.hsubset (τ d).1 (τ d).2) (hτ d)
-  have hLHS : restrictionMap (τ d).1 d.1 (hτ d) (restrictionMap C.base (τ d).1
-      (C.hsubset (τ d).1 (τ d).2) x) =
-      restrictionMap C.base d.1 ((hτ d).trans (C.hsubset (τ d).1 (τ d).2)) x :=
-    congr_fun hcomp_Cbase_E_d x
-  rw [hLHS]
-  -- Now need: restrictionMap C.base d.1 _ x = fV d
-  have hsub : (hτ d).trans (C.hsubset (τ d).1 (τ d).2) = hV_subset d.1 d.2 :=
-    Subsingleton.elim _ _
-  rw [hsub, hxd]
+  rw [← Function.comp_apply (f := restrictionMap (τ d).1 d.1 (hτ d)), restrictionMap_comp]
+  exact hx d
 
 end ValuationSpectrum
