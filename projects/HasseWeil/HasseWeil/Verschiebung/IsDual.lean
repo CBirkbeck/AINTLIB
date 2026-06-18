@@ -3,9 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Verschiebung.Construction
 import HasseWeil.DualIsogeny
 import HasseWeil.EC.GenericPointZsmul
+import HasseWeil.Verschiebung.Construction
 
 /-!
 # Verschiebung as `IsDualOf` Frobenius (Session 5)
@@ -214,7 +214,7 @@ theorem verschiebung_pullback_commute_mulByInt_neg_one
       (frobeniusIsog W).pullback
         ((verschiebungPullback_of_witness W h_subset) z') =
       (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback z' :=
-    fun z' => DFunLike.congr_fun h_factor z'
+    DFunLike.congr_fun h_factor
   rw [h_factor_apply ((mulByInt W.toAffine (-1)).pullback z)]
   -- Goal: [q].pb (σ.pb z) = π.pb (σ.pb (V.pb z))
   -- RHS: use σ commutes with π (universal commute).
@@ -226,7 +226,7 @@ theorem verschiebung_pullback_commute_mulByInt_neg_one
         ((mulByInt W.toAffine (-1)).pullback z') =
       (mulByInt W.toAffine (-1)).pullback
         ((frobeniusIsog W).pullback z') :=
-    fun z' => DFunLike.congr_fun h_pi_sigma z'
+    DFunLike.congr_fun h_pi_sigma
   rw [h_pi_sigma_apply ((verschiebungPullback_of_witness W h_subset) z),
       h_factor_apply z]
   -- Goal: [q].pb (σ.pb z) = σ.pb ([q].pb z)
@@ -280,13 +280,7 @@ theorem verschiebung_pullback_commute_mulByInt_neg_one
         ((mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).comp
           (mulByInt W.toAffine (-1))).pullback := rfl
     rw [h_lhs_eq, h_rhs_eq, h_eq]
-  have h_mul_comm_apply : ∀ z',
-      (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback
-        ((mulByInt W.toAffine (-1)).pullback z') =
-      (mulByInt W.toAffine (-1)).pullback
-        ((mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback z') :=
-    fun z' => DFunLike.congr_fun h_mul_comm z'
-  exact h_mul_comm_apply z
+  exact DFunLike.congr_fun h_mul_comm z
 
 /-! ### σ-V commute from `IsDualOf V π` (R25h Worker-A Round 3)
 
@@ -325,15 +319,12 @@ theorem sigma_V_commute_of_hV
     have h := hV.1
     -- h : V.comp π = mulByInt π.degree = mulByInt #K via frobeniusIsog_degree
     rw [frobeniusIsog_degree] at h
-    have : (V.comp (frobeniusIsog W)).pullback =
-        (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback :=
-      congrArg Isogeny.pullback h
     -- (V.comp π).pullback = π.pullback.comp V.pullback by Isogeny.comp def
-    exact this
+    exact congrArg Isogeny.pullback h
   have h_factor_apply : ∀ z',
       (frobeniusIsog W).pullback (V.pullback z') =
       (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback z' :=
-    fun z' => DFunLike.congr_fun h_factor z'
+    DFunLike.congr_fun h_factor
   -- LHS goal: π.pb (σ.pb (V.pb f)).
   -- Step 1: σ commutes with π via universal commute.
   have h_pi_sigma := frobeniusIsog_pullback_universal_commute W
@@ -341,7 +332,7 @@ theorem sigma_V_commute_of_hV
   have h_pi_sigma_apply : ∀ z',
       (frobeniusIsog W).pullback ((mulByInt W.toAffine (-1)).pullback z') =
       (mulByInt W.toAffine (-1)).pullback ((frobeniusIsog W).pullback z') :=
-    fun z' => DFunLike.congr_fun h_pi_sigma z'
+    DFunLike.congr_fun h_pi_sigma
   show (frobeniusIsog W).pullback
       ((mulByInt W.toAffine (-1)).pullback (V.pullback f)) =
     (frobeniusIsog W).pullback
@@ -376,13 +367,7 @@ theorem sigma_V_commute_of_hV
         (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ))).pullback :=
     congrArg Isogeny.pullback h_eq
   -- ((α.comp β).pullback = β.pullback.comp α.pullback) by Isogeny.comp def.
-  have h_pb_apply : ∀ z',
-      (mulByInt W.toAffine (-1)).pullback
-        ((mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback z') =
-      (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback
-        ((mulByInt W.toAffine (-1)).pullback z') :=
-    fun z' => DFunLike.congr_fun h_pb z'
-  exact h_pb_apply f
+  exact DFunLike.congr_fun h_pb f
 
 /-! ### Iterated `V^k · π^k = [q^k]` — Silverman III.6.1 inductive composition
 
@@ -403,7 +388,7 @@ so that the pullback unfolds as `φ.pb` outside `(isogenyIterate k).pb` —
 the convention needed for the `[q^k].pb x_gen = (V^k.pb x_gen)^{q^k}` proof. -/
 noncomputable def isogenyIterate (φ : Isogeny W.toAffine W.toAffine)
     (k : ℕ) : Isogeny W.toAffine W.toAffine :=
-  Nat.rec (Isogeny.id W.toAffine) (fun _ ih => ih.comp φ) k
+  Nat.rec (Isogeny.id W.toAffine) (fun _ ih ↦ ih.comp φ) k
 
 @[simp] theorem isogenyIterate_zero (φ : Isogeny W.toAffine W.toAffine) :
     isogenyIterate W φ 0 = Isogeny.id W.toAffine := rfl
@@ -423,6 +408,144 @@ theorem verschiebungIsog_frobeniusIsog_comm
       (frobeniusIsog W).comp (verschiebungIsog_of_witness W h_subset) := by
   rw [verschiebung_comp_frobenius_eq_mulByInt_q W h_subset,
       frobenius_comp_verschiebung_eq_mulByInt_q W h_subset]
+
+/-- **`[q^k].pb g = (V^k.pb g)^{q^k}` for every `g ∈ K(E)`** — the
+generator-independent core of Silverman III.6.1's inductive composition,
+shared by the `x_gen`/`y_gen` specialisations below. Universal in `k` and
+`g`; witness-parametric on the Session 3 inclusion.
+
+Proof by induction on `k`:
+* `k=0`: `[1].pb g = g = g^1`, via `mulByInt_one_pullback_eq_id`.
+* `k+1`: `[q^{k+1}].pb = [q].pb ∘ [q^k].pb`; by IH `[q^k].pb g
+  = (V^k.pb g)^{q^k}`, so `[q^{k+1}].pb g = [q].pb((V^k.pb g)^{q^k})
+  = (V^{k+1}.pb g)^{q^{k+1}}`, using `[q].pb z = π.pb (V.pb z) = (V.pb z)^q`,
+  `[q^k].pb`'s commutation with `V.pb`, and K-algebra distribution. -/
+private theorem mulByInt_pow_pullback_gen_eq_pow_qpow
+    (h_subset :
+      (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback.range ≤
+        (frobeniusIsog W).pullback.range)
+    (k : ℕ) (g : W.toAffine.FunctionField) :
+    (mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback g =
+      ((isogenyIterate W (verschiebungIsog_of_witness W h_subset) k).pullback
+        g) ^ (Fintype.card K ^ k) := by
+  induction k with
+  | zero =>
+    show (mulByInt W.toAffine ((1 : ℕ) : ℤ)).pullback g =
+      ((Isogeny.id W.toAffine).pullback g) ^ 1
+    have h1 : ((1 : ℕ) : ℤ) = 1 := by norm_num
+    rw [h1, mulByInt_one_pullback_eq_id]
+    simp only [Isogeny.id_pullback, AlgHom.id_apply, pow_one]
+  | succ k ih =>
+    have h_q_succ : (Fintype.card K ^ (k + 1) : ℕ) =
+        Fintype.card K * Fintype.card K ^ k := by ring
+    have h_card_pos : 0 < Fintype.card K := Fintype.card_pos
+    have h_q_ne : ((Fintype.card K : ℕ) : ℤ) ≠ 0 := by
+      exact_mod_cast Nat.pos_iff_ne_zero.mp h_card_pos
+    have h_qk_ne : ((Fintype.card K ^ k : ℕ) : ℤ) ≠ 0 := by
+      exact_mod_cast Nat.pos_iff_ne_zero.mp (pow_pos h_card_pos k)
+    have h_q_qk_ne : ((Fintype.card K : ℕ) : ℤ) * ((Fintype.card K ^ k : ℕ) : ℤ) ≠ 0 :=
+      mul_ne_zero h_q_ne h_qk_ne
+    -- Decompose the LHS: [q^(k+1)] = [q].comp [q^k] at the isogeny level.
+    have h_decomp : mulByInt W.toAffine ((Fintype.card K ^ (k + 1) : ℕ) : ℤ) =
+        (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).comp
+          (mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)) := by
+      have h := mulByInt_comp_eq_mul W ((Fintype.card K : ℕ) : ℤ)
+        ((Fintype.card K ^ k : ℕ) : ℤ) h_q_ne h_qk_ne h_q_qk_ne
+      rw [h]
+      congr 1
+      push_cast [h_q_succ]; ring
+    -- Apply pullback to both sides of h_decomp. `comp` is contravariant on
+    -- pullback, so `([q].comp [q^k]).pb g = [q^k].pb ([q].pb g)`.
+    have h_decomp_pb := congrArg Isogeny.pullback h_decomp
+    have h_apply := DFunLike.congr_fun h_decomp_pb g
+    rw [h_apply]
+    show ((mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback
+        ((mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback g)) = _
+    -- Rewrite [q].pb g = (V.pb g)^q via the V·π = [q] identity.
+    have h_q_pb : (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback g =
+        ((verschiebungPullback_of_witness W h_subset) g) ^ Fintype.card K := by
+      have h_factor :
+          (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback =
+          (frobeniusIsog W).pullback.comp
+            (verschiebungPullback_of_witness W h_subset) :=
+        mulByInt_q_factor_via_witness W h_subset
+      have h_at := DFunLike.congr_fun h_factor g
+      rw [AlgHom.comp_apply] at h_at
+      rw [h_at, frobeniusIsog_pullback_apply]
+    rw [h_q_pb, map_pow]
+    -- Goal: ([q^k].pb (V.pb g))^q = (V^(k+1).pb g)^(q^(k+1)).
+    -- V.pb commutes with [q^k].pb: [q^k].pb (V.pb g) = V.pb ([q^k].pb g).
+    have h_comm : (mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback
+        ((verschiebungPullback_of_witness W h_subset) g) =
+        (verschiebungPullback_of_witness W h_subset)
+          ((mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback g) := by
+      -- Prove via π.pb injectivity: π.pb commutes with [q^k].pb (Frobenius
+      -- universal commute) and with V.pb (factor identity).
+      apply (frobeniusIsog W).pullback_injective
+      have h_pi_qk := frobeniusIsog_pullback_universal_commute W
+        (mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback
+      have h_pi_V : (frobeniusIsog W).pullback
+          ((verschiebungPullback_of_witness W h_subset) g) =
+          (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback g := by
+        have h_factor :
+            (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback =
+            (frobeniusIsog W).pullback.comp
+              (verschiebungPullback_of_witness W h_subset) :=
+          mulByInt_q_factor_via_witness W h_subset
+        have h_at := DFunLike.congr_fun h_factor g
+        rw [AlgHom.comp_apply] at h_at
+        exact h_at.symm
+      have h_lhs_pi : (frobeniusIsog W).pullback
+          ((mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback
+            ((verschiebungPullback_of_witness W h_subset) g)) =
+          (mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback
+            ((mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback g) := by
+        have h_app := DFunLike.congr_fun h_pi_qk
+          ((verschiebungPullback_of_witness W h_subset) g)
+        rw [AlgHom.comp_apply, AlgHom.comp_apply] at h_app
+        rw [h_app, h_pi_V]
+      have h_rhs_pi : (frobeniusIsog W).pullback
+          ((verschiebungPullback_of_witness W h_subset)
+            ((mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback g)) =
+          (mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback
+            ((mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback g) := by
+        have h_factor :
+            (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback =
+            (frobeniusIsog W).pullback.comp
+              (verschiebungPullback_of_witness W h_subset) :=
+          mulByInt_q_factor_via_witness W h_subset
+        have h_at := DFunLike.congr_fun h_factor
+          ((mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback g)
+        rw [AlgHom.comp_apply] at h_at
+        rw [← h_at]
+        -- [q] commutes with [q^k] (both mulByInt central).
+        have h_qk_q := mulByInt_comp_eq_mul W ((Fintype.card K ^ k : ℕ) : ℤ)
+          ((Fintype.card K : ℕ) : ℤ) h_qk_ne h_q_ne (by
+            rw [mul_comm]; exact h_q_qk_ne)
+        have h_q_qk := mulByInt_comp_eq_mul W ((Fintype.card K : ℕ) : ℤ)
+          ((Fintype.card K ^ k : ℕ) : ℤ) h_q_ne h_qk_ne h_q_qk_ne
+        have h_eq : (mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).comp
+            (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)) =
+            (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).comp
+              (mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)) := by
+          rw [h_qk_q, h_q_qk]; congr 1; ring
+        exact DFunLike.congr_fun (congrArg Isogeny.pullback h_eq) g
+      rw [h_lhs_pi, h_rhs_pi]
+    rw [h_comm, ih]
+    -- After h_comm + ih the LHS is `V.pb ((V^k.pb g)^(q^k))`;
+    -- `map_pow` pushes the power out: `(V.pb (V^k.pb g))^(q^k)`.
+    rw [map_pow]
+    show (((verschiebungIsog_of_witness W h_subset).pullback
+        ((isogenyIterate W (verschiebungIsog_of_witness W h_subset) k).pullback
+          g)) ^ Fintype.card K ^ k) ^ Fintype.card K = _
+    -- V.pb (V^k.pb g) = V^(k+1).pb g by isogenyIterate_succ.
+    have h_iter_succ : (isogenyIterate W (verschiebungIsog_of_witness W h_subset)
+        (k + 1)).pullback g =
+        (verschiebungIsog_of_witness W h_subset).pullback
+          ((isogenyIterate W (verschiebungIsog_of_witness W h_subset) k).pullback
+            g) := rfl
+    rw [← h_iter_succ, ← pow_mul]
+    push_cast [h_q_succ]; ring_nf
 
 /-- **`[q^k].pb x_gen = (V^k.pb x_gen)^{q^k}`** — Silverman III.6.1
 inductive composition at the function-field level. The `[q^k]`-pullback
@@ -446,167 +569,8 @@ theorem mulByInt_pow_pullback_x_gen_eq_pow_qpow
     (k : ℕ) :
     (mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback (x_gen W) =
       ((isogenyIterate W (verschiebungIsog_of_witness W h_subset) k).pullback
-        (x_gen W)) ^ (Fintype.card K ^ k) := by
-  induction k with
-  | zero =>
-    show (mulByInt W.toAffine ((1 : ℕ) : ℤ)).pullback (x_gen W) =
-      ((Isogeny.id W.toAffine).pullback (x_gen W)) ^ 1
-    have h1 : ((1 : ℕ) : ℤ) = 1 := by norm_num
-    rw [h1, mulByInt_one_pullback_eq_id]
-    simp
-  | succ k ih =>
-    -- [q^(k+1)] = [q] ∘ [q^k]; [q^(k+1)].pb x_gen = [q].pb ([q^k].pb x_gen)
-    -- [q].pb z = (V.pb z)^q (from π·V = [q] composition).
-    -- IH: [q^k].pb x_gen = (V^k.pb x_gen)^(q^k).
-    -- Substitute and simplify.
-    have h_q_succ : (Fintype.card K ^ (k + 1) : ℕ) =
-        Fintype.card K * Fintype.card K ^ k := by ring
-    have h_card_pos : 0 < Fintype.card K := Fintype.card_pos
-    have h_q_ne : ((Fintype.card K : ℕ) : ℤ) ≠ 0 := by exact_mod_cast Nat.pos_iff_ne_zero.mp h_card_pos
-    have h_qk_ne : ((Fintype.card K ^ k : ℕ) : ℤ) ≠ 0 := by
-      exact_mod_cast Nat.pos_iff_ne_zero.mp (pow_pos h_card_pos k)
-    have h_q_qk_ne : ((Fintype.card K : ℕ) : ℤ) * ((Fintype.card K ^ k : ℕ) : ℤ) ≠ 0 :=
-      mul_ne_zero h_q_ne h_qk_ne
-    -- Decompose the LHS: [q^(k+1)] = [q].comp [q^k] at the isogeny level.
-    have h_decomp : mulByInt W.toAffine ((Fintype.card K ^ (k + 1) : ℕ) : ℤ) =
-        (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).comp
-          (mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)) := by
-      have h := mulByInt_comp_eq_mul W ((Fintype.card K : ℕ) : ℤ)
-        ((Fintype.card K ^ k : ℕ) : ℤ) h_q_ne h_qk_ne h_q_qk_ne
-      rw [h]
-      congr 1
-      push_cast [h_q_succ]; ring
-    -- Apply pullback to both sides of h_decomp.
-    have h_decomp_pb := congrArg Isogeny.pullback h_decomp
-    have h_apply := DFunLike.congr_fun h_decomp_pb (x_gen W)
-    -- h_apply : [q^(k+1)].pb x_gen = ([q].comp [q^k]).pb x_gen
-    --        = [q^k].pb ([q].pb x_gen) — wait, comp is contravariant on pb.
-    -- Actually (ψ.comp φ).pb x = φ.pb (ψ.pb x) by Isogeny.comp_apply (actually
-    -- comp_algebraMap_eq); for pullback level the order is composed-as-functions.
-    rw [h_apply]
-    -- Goal: ([q].comp [q^k]).pb x_gen = (V^(k+1).pb x_gen)^(q^(k+1))
-    show ((mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback
-        ((mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback (x_gen W))) = _
-    -- Now rewrite [q].pb x_gen = (V.pb x_gen)^q via the V·π = [q] identity.
-    have h_q_pb_x : (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback
-        (x_gen W) =
-        ((verschiebungPullback_of_witness W h_subset) (x_gen W)) ^ Fintype.card K := by
-      have h_factor :
-          (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback =
-          (frobeniusIsog W).pullback.comp
-            (verschiebungPullback_of_witness W h_subset) :=
-        mulByInt_q_factor_via_witness W h_subset
-      have h_at_x := DFunLike.congr_fun h_factor (x_gen W)
-      rw [AlgHom.comp_apply] at h_at_x
-      rw [h_at_x, frobeniusIsog_pullback_apply]
-    rw [h_q_pb_x]
-    -- Goal: [q^k].pb ((V.pb x_gen)^q) = (V^(k+1).pb x_gen)^(q^(k+1))
-    -- [q^k].pb is K-alg hom, distributes over powers.
-    rw [map_pow]
-    -- Goal: ([q^k].pb (V.pb x_gen))^q = (V^(k+1).pb x_gen)^(q^(k+1))
-    -- Apply IH (with z = V.pb x_gen instead of x_gen — but IH is for x_gen.
-    -- Need a generalised IH? Actually we can apply [q^k].pb to V.pb x_gen
-    -- and use V commute with [q^k] (mulByInt central).
-    -- (V.pb commutes with [q^k].pb): [q^k].pb (V.pb x_gen) = V.pb ([q^k].pb x_gen).
-    have h_comm_at_x : (mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback
-        ((verschiebungPullback_of_witness W h_subset) (x_gen W)) =
-        (verschiebungPullback_of_witness W h_subset)
-          ((mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback (x_gen W)) := by
-      -- Uses that V.pb commutes with [q^k].pb. Both maps act on K(E).
-      -- V is the dual of π; mulByInt is central; their composition is symmetric.
-      -- The commutation chain goes: [q^k] central → comp with V trivially.
-      -- Or via π.comp [q^k] = [q^k].comp π (mulByInt central, π.pb commutes via universal).
-      -- Concretely: V.pb is K-AlgHom, [q^k].pb sends K(x_gen) → K(x_gen) (via (mulByInt q^k).pb x_gen = mulByInt_x q^k),
-      -- and these commute by the central nature of [q^k].
-      -- Use the V.pb commute with mulByInt argument similar to π·V = V·π:
-      -- We need V.comp [q^k] = [q^k].comp V to derive pullback commute.
-      -- For this, V centrality with mulByInt: NOT obvious. Let me prove via
-      -- π injectivity.
-      apply (frobeniusIsog W).pullback_injective
-      -- π.pb (LHS) vs π.pb (RHS).
-      -- π.pb commutes with [q^k].pb (frobeniusIsog universal commute on K-AlgHom).
-      have h_pi_qk := frobeniusIsog_pullback_universal_commute W
-        (mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback
-      have h_pi_V_x : (frobeniusIsog W).pullback
-          ((verschiebungPullback_of_witness W h_subset) (x_gen W)) =
-          (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback (x_gen W) := by
-        have h_factor :
-            (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback =
-            (frobeniusIsog W).pullback.comp
-              (verschiebungPullback_of_witness W h_subset) :=
-          mulByInt_q_factor_via_witness W h_subset
-        have h_at := DFunLike.congr_fun h_factor (x_gen W)
-        rw [AlgHom.comp_apply] at h_at
-        exact h_at.symm
-      -- LHS: π.pb ([q^k].pb (V.pb x_gen)) = [q^k].pb (π.pb (V.pb x_gen))
-      --    = [q^k].pb ([q].pb x_gen) = ([q].comp [q^k]).pb x_gen
-      -- RHS: π.pb (V.pb ([q^k].pb x_gen)) = [q].pb ([q^k].pb x_gen)
-      --    = ([q].comp [q^k]).pb x_gen.  Same.
-      have h_lhs_pi : (frobeniusIsog W).pullback
-          ((mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback
-            ((verschiebungPullback_of_witness W h_subset) (x_gen W))) =
-          (mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback
-            ((mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback (x_gen W)) := by
-        have h_app := DFunLike.congr_fun h_pi_qk
-          ((verschiebungPullback_of_witness W h_subset) (x_gen W))
-        rw [AlgHom.comp_apply, AlgHom.comp_apply] at h_app
-        rw [h_app, h_pi_V_x]
-      have h_rhs_pi : (frobeniusIsog W).pullback
-          ((verschiebungPullback_of_witness W h_subset)
-            ((mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback (x_gen W))) =
-          (mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback
-            ((mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback (x_gen W)) := by
-        have h_factor :
-            (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback =
-            (frobeniusIsog W).pullback.comp
-              (verschiebungPullback_of_witness W h_subset) :=
-          mulByInt_q_factor_via_witness W h_subset
-        have h_at := DFunLike.congr_fun h_factor
-          ((mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback (x_gen W))
-        rw [AlgHom.comp_apply] at h_at
-        rw [← h_at]
-        -- h_at: (mulByInt q).pb ([q^k].pb x_gen) = π.pb (V.pb ([q^k].pb x_gen))
-        -- Rearrange:
-        -- And use [q] commutes with [q^k] (both mulByInt central).
-        have h_qk_q := mulByInt_comp_eq_mul W ((Fintype.card K ^ k : ℕ) : ℤ)
-          ((Fintype.card K : ℕ) : ℤ) h_qk_ne h_q_ne (by
-            rw [mul_comm]; exact h_q_qk_ne)
-        have h_q_qk := mulByInt_comp_eq_mul W ((Fintype.card K : ℕ) : ℤ)
-          ((Fintype.card K ^ k : ℕ) : ℤ) h_q_ne h_qk_ne h_q_qk_ne
-        have h_eq : (mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).comp
-            (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)) =
-            (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).comp
-              (mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)) := by
-          rw [h_qk_q, h_q_qk]; congr 1; ring
-        have h_eq_pb := congrArg Isogeny.pullback h_eq
-        have h_eq_at := DFunLike.congr_fun h_eq_pb (x_gen W)
-        exact h_eq_at
-      -- Combine.
-      rw [h_lhs_pi, h_rhs_pi]
-    rw [h_comm_at_x, ih]
-    -- Goal: ([q^k].pb (V.pb x_gen))^q = (V^(k+1).pb x_gen)^(q^(k+1))
-    -- Wait actually we now have: V.pb ((V^k.pb x_gen)^(q^k)) on LHS via rw.
-    -- Let me re-examine.
-    -- After h_comm_at_x: [q^k].pb (V.pb x_gen) = V.pb ([q^k].pb x_gen).
-    -- Then ih: [q^k].pb x_gen = (V^k.pb x_gen)^(q^k).
-    -- So V.pb ((V^k.pb x_gen)^(q^k)) = (V.pb (V^k.pb x_gen))^(q^k) (V.pb K-alg).
-    rw [map_pow]
-    -- Goal: (V.pb (V^k.pb x_gen))^(q^k))^q = (V^(k+1).pb x_gen)^(q^(k+1))
-    -- V.pb (V^k.pb x_gen) = V^(k+1).pb x_gen (by isogenyIterate_succ).
-    show (((verschiebungIsog_of_witness W h_subset).pullback
-        ((isogenyIterate W (verschiebungIsog_of_witness W h_subset) k).pullback
-          (x_gen W))) ^ Fintype.card K ^ k) ^ Fintype.card K = _
-    -- (V^(k+1).pb x_gen) = V.pb (V^k.pb x_gen) by isogenyIterate_succ
-    -- and Isogeny.comp_apply (or comp_algebraMap_eq).
-    have h_iter_succ : (isogenyIterate W (verschiebungIsog_of_witness W h_subset)
-        (k + 1)).pullback (x_gen W) =
-        (verschiebungIsog_of_witness W h_subset).pullback
-          ((isogenyIterate W (verschiebungIsog_of_witness W h_subset) k).pullback
-            (x_gen W)) := by
-      rw [isogenyIterate_succ]
-      rfl
-    rw [← h_iter_succ, ← pow_mul]
-    push_cast [h_q_succ]; ring_nf
+        (x_gen W)) ^ (Fintype.card K ^ k) :=
+  mulByInt_pow_pullback_gen_eq_pow_qpow W h_subset k (x_gen W)
 
 /-- **`[q^k].pb y_gen = (V^k.pb y_gen)^{q^k}`** — y-side analog of
 `mulByInt_pow_pullback_x_gen_eq_pow_qpow`. Same induction structure with
@@ -619,114 +583,7 @@ theorem mulByInt_pow_pullback_y_gen_eq_pow_qpow
     (k : ℕ) :
     (mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback (y_gen W) =
       ((isogenyIterate W (verschiebungIsog_of_witness W h_subset) k).pullback
-        (y_gen W)) ^ (Fintype.card K ^ k) := by
-  induction k with
-  | zero =>
-    show (mulByInt W.toAffine ((1 : ℕ) : ℤ)).pullback (y_gen W) =
-      ((Isogeny.id W.toAffine).pullback (y_gen W)) ^ 1
-    have h1 : ((1 : ℕ) : ℤ) = 1 := by norm_num
-    rw [h1, mulByInt_one_pullback_eq_id]
-    simp
-  | succ k ih =>
-    have h_q_succ : (Fintype.card K ^ (k + 1) : ℕ) =
-        Fintype.card K * Fintype.card K ^ k := by ring
-    have h_card_pos : 0 < Fintype.card K := Fintype.card_pos
-    have h_q_ne : ((Fintype.card K : ℕ) : ℤ) ≠ 0 := by
-      exact_mod_cast Nat.pos_iff_ne_zero.mp h_card_pos
-    have h_qk_ne : ((Fintype.card K ^ k : ℕ) : ℤ) ≠ 0 := by
-      exact_mod_cast Nat.pos_iff_ne_zero.mp (pow_pos h_card_pos k)
-    have h_q_qk_ne : ((Fintype.card K : ℕ) : ℤ) * ((Fintype.card K ^ k : ℕ) : ℤ) ≠ 0 :=
-      mul_ne_zero h_q_ne h_qk_ne
-    have h_decomp : mulByInt W.toAffine ((Fintype.card K ^ (k + 1) : ℕ) : ℤ) =
-        (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).comp
-          (mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)) := by
-      have h := mulByInt_comp_eq_mul W ((Fintype.card K : ℕ) : ℤ)
-        ((Fintype.card K ^ k : ℕ) : ℤ) h_q_ne h_qk_ne h_q_qk_ne
-      rw [h]
-      congr 1
-      push_cast [h_q_succ]; ring
-    have h_decomp_pb := congrArg Isogeny.pullback h_decomp
-    have h_apply := DFunLike.congr_fun h_decomp_pb (y_gen W)
-    rw [h_apply]
-    show ((mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback
-        ((mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback (y_gen W))) = _
-    have h_q_pb_y : (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback
-        (y_gen W) =
-        ((verschiebungPullback_of_witness W h_subset) (y_gen W)) ^ Fintype.card K := by
-      have h_factor :
-          (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback =
-          (frobeniusIsog W).pullback.comp
-            (verschiebungPullback_of_witness W h_subset) :=
-        mulByInt_q_factor_via_witness W h_subset
-      have h_at_y := DFunLike.congr_fun h_factor (y_gen W)
-      rw [AlgHom.comp_apply] at h_at_y
-      rw [h_at_y, frobeniusIsog_pullback_apply]
-    rw [h_q_pb_y, map_pow]
-    -- Goal: ([q^k].pb (V.pb y_gen))^q = (V^(k+1).pb y_gen)^(q^(k+1))
-    have h_comm_at_y : (mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback
-        ((verschiebungPullback_of_witness W h_subset) (y_gen W)) =
-        (verschiebungPullback_of_witness W h_subset)
-          ((mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback (y_gen W)) := by
-      apply (frobeniusIsog W).pullback_injective
-      have h_pi_qk := frobeniusIsog_pullback_universal_commute W
-        (mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback
-      have h_pi_V_y : (frobeniusIsog W).pullback
-          ((verschiebungPullback_of_witness W h_subset) (y_gen W)) =
-          (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback (y_gen W) := by
-        have h_factor :
-            (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback =
-            (frobeniusIsog W).pullback.comp
-              (verschiebungPullback_of_witness W h_subset) :=
-          mulByInt_q_factor_via_witness W h_subset
-        have h_at := DFunLike.congr_fun h_factor (y_gen W)
-        rw [AlgHom.comp_apply] at h_at
-        exact h_at.symm
-      have h_lhs_pi : (frobeniusIsog W).pullback
-          ((mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback
-            ((verschiebungPullback_of_witness W h_subset) (y_gen W))) =
-          (mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback
-            ((mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback (y_gen W)) := by
-        have h_app := DFunLike.congr_fun h_pi_qk
-          ((verschiebungPullback_of_witness W h_subset) (y_gen W))
-        rw [AlgHom.comp_apply, AlgHom.comp_apply] at h_app
-        rw [h_app, h_pi_V_y]
-      have h_rhs_pi : (frobeniusIsog W).pullback
-          ((verschiebungPullback_of_witness W h_subset)
-            ((mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback (y_gen W))) =
-          (mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback
-            ((mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback (y_gen W)) := by
-        have h_factor :
-            (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback =
-            (frobeniusIsog W).pullback.comp
-              (verschiebungPullback_of_witness W h_subset) :=
-          mulByInt_q_factor_via_witness W h_subset
-        have h_at := DFunLike.congr_fun h_factor
-          ((mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).pullback (y_gen W))
-        rw [AlgHom.comp_apply] at h_at
-        rw [← h_at]
-        have h_qk_q := mulByInt_comp_eq_mul W ((Fintype.card K ^ k : ℕ) : ℤ)
-          ((Fintype.card K : ℕ) : ℤ) h_qk_ne h_q_ne (by
-            rw [mul_comm]; exact h_q_qk_ne)
-        have h_q_qk := mulByInt_comp_eq_mul W ((Fintype.card K : ℕ) : ℤ)
-          ((Fintype.card K ^ k : ℕ) : ℤ) h_q_ne h_qk_ne h_q_qk_ne
-        have h_eq : (mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)).comp
-            (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)) =
-            (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).comp
-              (mulByInt W.toAffine ((Fintype.card K ^ k : ℕ) : ℤ)) := by
-          rw [h_qk_q, h_q_qk]; congr 1; ring
-        have h_eq_pb := congrArg Isogeny.pullback h_eq
-        have h_eq_at := DFunLike.congr_fun h_eq_pb (y_gen W)
-        exact h_eq_at
-      rw [h_lhs_pi, h_rhs_pi]
-    rw [h_comm_at_y, ih, map_pow]
-    have h_iter_succ : (isogenyIterate W (verschiebungIsog_of_witness W h_subset)
-        (k + 1)).pullback (y_gen W) =
-        (verschiebungPullback_of_witness W h_subset)
-          ((isogenyIterate W (verschiebungIsog_of_witness W h_subset) k).pullback
-            (y_gen W)) := by
-      rw [isogenyIterate_succ]
-      rfl
-    rw [← h_iter_succ, ← pow_mul]
-    push_cast [h_q_succ]; ring_nf
+        (y_gen W)) ^ (Fintype.card K ^ k) :=
+  mulByInt_pow_pullback_gen_eq_pow_qpow W h_subset k (y_gen W)
 
 end HasseWeil
