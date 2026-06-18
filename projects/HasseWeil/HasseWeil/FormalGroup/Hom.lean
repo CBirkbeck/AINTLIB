@@ -66,27 +66,27 @@ noncomputable def FormalGroupHom.id (F : FormalGroup R) : FormalGroupHom F F whe
     -- Both equal F.toSeries.
     have hlhs : PowerSeries.subst F.toSeries (PowerSeries.X : PowerSeries R) =
         F.toSeries := by
-      change MvPowerSeries.subst (fun _ : Unit => F.toSeries)
+      change MvPowerSeries.subst (fun _ : Unit ↦ F.toSeries)
         (MvPowerSeries.X () : MvPowerSeries Unit R) = F.toSeries
       have h : MvPowerSeries.HasSubst
-          (fun _ : Unit => F.toSeries : Unit → MvPowerSeries (Fin 2) R) := by
+          (fun _ : Unit ↦ F.toSeries : Unit → MvPowerSeries (Fin 2) R) := by
         apply MvPowerSeries.hasSubst_of_constantCoeff_zero
         intro; exact HasseWeil.FG.constantCoeff_FG_toSeries F
       exact MvPowerSeries.subst_X h ()
     have hX0 : PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R)
         (PowerSeries.X : PowerSeries R) = MvPowerSeries.X 0 := by
-      change MvPowerSeries.subst (fun _ : Unit => (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R))
+      change MvPowerSeries.subst (fun _ : Unit ↦ (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R))
         (MvPowerSeries.X () : MvPowerSeries Unit R) = _
       have h : MvPowerSeries.HasSubst
-          (fun _ : Unit => (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R)) := by
+          (fun _ : Unit ↦ (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R)) := by
         apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro; simp
       exact MvPowerSeries.subst_X h ()
     have hX1 : PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R)
         (PowerSeries.X : PowerSeries R) = MvPowerSeries.X 1 := by
-      change MvPowerSeries.subst (fun _ : Unit => (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R))
+      change MvPowerSeries.subst (fun _ : Unit ↦ (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R))
         (MvPowerSeries.X () : MvPowerSeries Unit R) = _
       have h : MvPowerSeries.HasSubst
-          (fun _ : Unit => (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R)) := by
+          (fun _ : Unit ↦ (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R)) := by
         apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro; simp
       exact MvPowerSeries.subst_X h ()
     rw [hlhs, hX0, hX1]
@@ -98,7 +98,7 @@ noncomputable def FormalGroupHom.id (F : FormalGroup R) : FormalGroupHom F F whe
       intro s; fin_cases s <;> simp
     have heq : (![MvPowerSeries.X (0 : Fin 2), MvPowerSeries.X 1] :
         Fin 2 → MvPowerSeries (Fin 2) R) =
-        (fun s : Fin 2 => MvPowerSeries.X s) := by
+        (fun s : Fin 2 ↦ MvPowerSeries.X s) := by
       funext s; fin_cases s <;> rfl
     rw [heq]
     exact (congr_fun MvPowerSeries.subst_self F.toSeries).symm
@@ -135,7 +135,7 @@ theorem PowerSeries_subst_MvSubst_eq {σ τ : Type*}
     PowerSeries.subst (MvPowerSeries.subst A B) g =
       MvPowerSeries.subst A (PowerSeries.subst B g) := by
   rw [PowerSeries.subst_def, PowerSeries.subst_def]
-  have hB' : MvPowerSeries.HasSubst (fun _ : Unit => B) := by
+  have hB' : MvPowerSeries.HasSubst (fun _ : Unit ↦ B) := by
     apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro; exact hB
   rw [MvPowerSeries.subst_comp_subst_apply hB' hA]
 
@@ -281,10 +281,10 @@ theorem FormalGroupHom.id_comp (f : FormalGroupHom F G) :
   refine FormalGroupHom.ext ?_
   rw [FormalGroupHom.comp_toSeries, FormalGroupHom.id_toSeries]
   -- Goal: PowerSeries.subst f.toSeries PowerSeries.X = f.toSeries.
-  change MvPowerSeries.subst (fun _ : Unit => f.toSeries)
+  change MvPowerSeries.subst (fun _ : Unit ↦ f.toSeries)
     (MvPowerSeries.X () : MvPowerSeries Unit R) = f.toSeries
   have h : MvPowerSeries.HasSubst
-      (fun _ : Unit => f.toSeries : Unit → MvPowerSeries Unit R) := by
+      (fun _ : Unit ↦ f.toSeries : Unit → MvPowerSeries Unit R) := by
     apply MvPowerSeries.hasSubst_of_constantCoeff_zero
     intro; exact f.zero_const
   exact MvPowerSeries.subst_X h ()
@@ -298,7 +298,7 @@ theorem FormalGroupHom.comp_id (f : FormalGroupHom F G) :
   -- Goal: PowerSeries.subst PowerSeries.X f.toSeries = f.toSeries.
   rw [PowerSeries.subst_def]
   -- Goal: MvPowerSeries.subst (fun _ : Unit => PowerSeries.X) f.toSeries = f.toSeries.
-  have heq : (fun _ : Unit => (PowerSeries.X : PowerSeries R)) =
+  have heq : (fun _ : Unit ↦ (PowerSeries.X : PowerSeries R)) =
       (MvPowerSeries.X : Unit → MvPowerSeries Unit R) := by
     funext _; rfl
   rw [heq]
@@ -470,7 +470,7 @@ proves the left-inverse identity for `mulByNatHom`. -/
 private theorem subst_X_eq_self (f : PowerSeries R) :
     PowerSeries.subst (PowerSeries.X : PowerSeries R) f = f := by
   rw [PowerSeries.subst_def]
-  have heq : (fun _ : Unit => (PowerSeries.X : PowerSeries R)) =
+  have heq : (fun _ : Unit ↦ (PowerSeries.X : PowerSeries R)) =
       (MvPowerSeries.X : Unit → MvPowerSeries Unit R) := by
     funext _; rfl
   rw [heq]
