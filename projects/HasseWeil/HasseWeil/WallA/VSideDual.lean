@@ -4,8 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.GapSpines
-import HasseWeil.Verschiebung.Genuine
 import HasseWeil.Hasse.SumTrace
+import HasseWeil.Verschiebung.Genuine
 
 /-!
 # Wall A — the V-side dual route to the signed III.6.3 degree identity
@@ -63,8 +63,6 @@ namespace WallA
 
 variable {K : Type*} [Field K] [Fintype K] [DecidableEq K]
 variable (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
-
-local notation "KE" => W.toAffine.FunctionField
 
 /-! ### A general genuineness witness: any isogeny is genuine with `map pullback`
 
@@ -145,10 +143,8 @@ theorem betaDualV_toAddMonoidHom_sub (hq : 2 ≤ Fintype.card K)
   -- whose `toAddMonoidHom` is `(V.zsmul r).toAddMonoidHom + (mulByInt -s).toAddMonoidHom`.  The
   -- internally-produced `verschiebungIsog_of_witness W _` is, by proof irrelevance on its `h_subset`
   -- argument, the same as `verschiebungV W hq`.
-  have hrfl : (betaDualV W hq r s hr hs hrK hsK).toAddMonoidHom =
-      ((verschiebungV W hq).zsmul r).toAddMonoidHom +
-        (mulByInt W.toAffine (-s)).toAddMonoidHom := rfl
-  rw [hrfl]
+  show ((verschiebungV W hq).zsmul r).toAddMonoidHom +
+      (mulByInt W.toAffine (-s)).toAddMonoidHom = _
   ext P
   simp only [AddMonoidHom.add_apply, AddMonoidHom.sub_apply, AddMonoidHom.smul_apply,
     AddMonoidHom.id_apply, Isogeny.zsmul_apply, mulByInt_apply]
