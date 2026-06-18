@@ -179,7 +179,7 @@ variable {F : Type*} [Field F]
 /-- The identity isogeny satisfies the `[n]`-pullback covariance: both sides are `[n]*`. -/
 theorem Isogeny.id_mulByIntPullbackCovariant (W : Affine F) [W.IsElliptic] (n : ℤ)
     (hn : n ≠ 0) : (Isogeny.id W).MulByIntPullbackCovariant n hn :=
-  fun _ => rfl
+  fun _ ↦ rfl
 
 /-- **The `[n]`-pullback covariance composes**: if `ψ` and `φ` are covariant against `[n]`,
 so is `ψ ∘ φ` — `[n]*((ψ∘φ)* u) = [n]*(φ*(ψ* u)) = φ*([n]*(ψ* u)) = φ*(ψ*([n]* u))`. -/
@@ -247,9 +247,9 @@ field-general) — the base case of the `πʳ` induction. The range inclusion is
 `∞`-regularity reflection. -/
 theorem idMulByIntDualWitness (W : Affine F) [W.IsElliptic] (n : ℤ) (hn : n ≠ 0) :
     (Isogeny.id W).HasMulByIntDualWitness n hn :=
-  ⟨fun z _ => ⟨z, rfl⟩,
+  ⟨fun z _ ↦ ⟨z, rfl⟩,
     Isogeny.hbase_of_reflects (Isogeny.id W) (HasseWeil.mulByInt_pullbackAlgHom W n hn)
-      (fun z _ => ⟨z, rfl⟩) (mulByIntBasepoint_holds W hn)
+      (fun z _ ↦ ⟨z, rfl⟩) (mulByIntBasepoint_holds W hn)
       (Isogeny.reflects_ordAtInfty (Isogeny.id W))⟩
 
 end IdWitness
@@ -419,7 +419,7 @@ theorem Isogeny.rangeIncl_compose_frobeniusPower (ψ : Isogeny W W) (r : ℕ) :
 recovers `id` (injectivity of the pullback). A sanity check that `separablePart` computes. -/
 theorem Isogeny.separablePart_frobeniusPower_self (W : Affine K) [W.IsElliptic] (r : ℕ) :
     (Isogeny.frobeniusPower W r).separablePart r le_rfl = Isogeny.id W := by
-  refine Isogeny.ext_toCurveMap (CurveMap.ext (AlgHom.ext fun z => ?_))
+  refine Isogeny.ext_toCurveMap (CurveMap.ext (AlgHom.ext fun z ↦ ?_))
   apply (Isogeny.frobeniusPower W r).pullback_injective
   rw [(Isogeny.frobeniusPower W r).frobeniusPower_pullback_separablePart_pullback r le_rfl z]
   rfl
