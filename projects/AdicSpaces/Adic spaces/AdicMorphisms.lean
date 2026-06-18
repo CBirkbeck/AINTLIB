@@ -41,14 +41,11 @@ namespace ValuationSpectrum
 variable {A B : Type*} [CommRing A] [CommRing B]
   [TopologicalSpace A] [TopologicalSpace B]
 
-/-! ### Support and comap -/
-
 omit [TopologicalSpace A] [TopologicalSpace B] in
 /-- The support of `comap φ v` equals the preimage ideal `φ⁻¹(supp v)`. -/
 theorem supp_comap (φ : A →+* B) (v : Spv B) :
     (comap φ v).supp = Ideal.comap φ v.supp := by
-  have h := congr_arg PrimeSpectrum.asIdeal (suppFun_comap φ v)
-  simpa using h
+  simpa using congr_arg PrimeSpectrum.asIdeal (suppFun_comap φ v)
 
 omit [TopologicalSpace A] [TopologicalSpace B] in
 /-- The support of `comap φ v` as a set equals `φ ⁻¹' (supp v : Set B)`. -/
@@ -56,16 +53,12 @@ theorem supp_comap_coe (φ : A →+* B) (v : Spv B) :
     ((comap φ v).supp : Set A) = φ ⁻¹' (v.supp : Set B) := by
   ext x; simp only [Set.mem_preimage, SetLike.mem_coe, Ideal.mem_comap, supp_comap]
 
-/-! ### Lemma 7.46(1): Non-analytic preservation -/
-
 /-- **Lemma 7.46(1), first part.** Continuous ring homomorphisms preserve non-analytic points. -/
 theorem nonAnalytic_comap_of_continuous {φ : A →+* B} (hφ : Continuous φ)
     {v : Spv B} (hv : ¬IsAnalytic v) : ¬IsAnalytic (comap φ v) := by
   simp only [IsAnalytic, not_not] at hv ⊢
   rw [supp_comap_coe]
   exact hφ.isOpen_preimage _ hv
-
-/-! ### Lemma 7.46(1): Adic homomorphisms preserve analytic points -/
 
 section AdicPreservesAnalytic
 
@@ -127,8 +120,6 @@ theorem analytic_comap_of_isAdicHom {φ : A →+* B} (hφ : IsAdicHom φ) {v : S
 
 end AdicPreservesAnalytic
 
-/-! ### Tate ring specializations of Lemma 7.46 -/
-
 section TateSpecialization
 
 variable [IsTopologicalRing A] [IsTopologicalRing B]
@@ -141,8 +132,6 @@ theorem analytic_comap_of_isAdicHom_tate [IsTateRing B] {φ : A →+* B} (hφ : 
   analytic_comap_of_isAdicHom hφ (IsTateRing.isAnalytic v)
 
 end TateSpecialization
-
-/-! ### Lemma 7.46(2): Converse — analytic preservation implies adic -/
 
 section Lemma746Converse
 
@@ -161,7 +150,7 @@ private theorem pow_2m_image_sub_closure (PA : PairOfDefinition A) {m : ℕ} {S 
   set A₀' := Subring.closure S
   rintro _ ⟨x, hx, rfl⟩
   have hx' : x ∈ PA.I ^ m * PA.I ^ m := by
-    rwa [← pow_add, show m + m = 2 * m from by ring]
+    rwa [← pow_add, ← two_mul]
   refine Submodule.mul_induction_on hx'
     (fun a ha b hb ↦ ?_) (fun _ _ h1 h2 ↦ A₀'.add_mem h1 h2)
   change PA.A₀.subtype (a * b) ∈ A₀'
@@ -169,7 +158,6 @@ private theorem pow_2m_image_sub_closure (PA : PairOfDefinition A) {m : ℕ} {S 
   exact A₀'.mul_mem
     (Subring.subset_closure (hS ▸ ⟨a, ha, rfl⟩))
     (Subring.subset_closure (hS ▸ ⟨b, hb, rfl⟩))
-
 
 omit [IsHuberRing A] in
 /-- Each I' power is open in A₀', using `comap_le_pow`. -/
@@ -269,7 +257,7 @@ private theorem exists_pairOfDefinition_le_subring (PA : PairOfDefinition A) {U 
     rw [this]
     exact hF ▸ Ideal.subset_span (Finset.mem_coe.mpr hg_mem)
   have hI'_le_comap : I' ≤ Ideal.comap ι (PA.I ^ m) :=
-    Ideal.span_le.mpr fun g' hg' ↦ hι_gen g' hg'
+    Ideal.span_le.mpr hι_gen
   have comap_le_pow :
       ∀ n, Ideal.comap ι (PA.I ^ ((n + 2) * m)) ≤ I' ^ n := by
     intro n
@@ -282,8 +270,7 @@ private theorem exists_pairOfDefinition_le_subring (PA : PairOfDefinition A) {U 
       intro x hx
       change x ∈ I' ^ (n + 1)
       have hιx : ι x ∈ PA.I ^ m * PA.I ^ ((n + 2) * m) := by
-        rw [← pow_add,
-          show m + (n + 2) * m = (n + 3) * m from by ring]
+        rw [← pow_add, show m + (n + 2) * m = (n + 3) * m by ring]
         exact hx
       suffices h_suff :
           ∀ z ∈ PA.I ^ m * PA.I ^ ((n + 2) * m),
@@ -428,18 +415,16 @@ private theorem exists_separating_prime_of_B₀ {φ : A →+* B} (PA : PairOfDef
     (h_le : (Ideal.map (PA.restrictRingHom PB φ h_map) PA.I).radical ≤ PB.I.radical) :
     ∃ (𝔭₀ : Ideal PB.A₀), 𝔭₀.IsPrime ∧
       Ideal.map (PA.restrictRingHom PB φ h_map) PA.I ≤ 𝔭₀ ∧ ¬PB.I ≤ 𝔭₀ := by
-  have h_strict := lt_of_le_of_ne h_le h_not_eq
   obtain ⟨j, hj_radJ, hj_not_radI⟩ :=
     Set.exists_of_ssubset
       (show (Ideal.map (PA.restrictRingHom PB φ h_map) PA.I).radical <
-        PB.I.radical from h_strict)
+        PB.I.radical from lt_of_le_of_ne h_le h_not_eq)
   set img := Ideal.map (PA.restrictRingHom PB φ h_map) PA.I
   have hj_not_all :
       ¬(∀ (𝔭 : Ideal PB.A₀), (img ≤ 𝔭 ∧ 𝔭.IsPrime) → j ∈ 𝔭) := by
     intro hall
-    exact hj_not_radI (Ideal.radical_eq_sInf img ▸ Ideal.mem_sInf.mpr
-      fun J hJ ↦ hall J hJ)
-  push_neg at hj_not_all
+    exact hj_not_radI (Ideal.radical_eq_sInf img ▸ Ideal.mem_sInf.mpr hall)
+  push Not at hj_not_all
   obtain ⟨𝔭₀, ⟨h_image_le, h𝔭₀_prime⟩, hj_not_p⟩ := hj_not_all
   refine ⟨𝔭₀, h𝔭₀_prime, h_image_le, fun hJ_le ↦ hj_not_p ?_⟩
   exact h𝔭₀_prime.radical.symm ▸ Ideal.radical_mono hJ_le hj_radJ
@@ -543,8 +528,8 @@ private theorem exists_nonOpen_prime_of_B_from_B₀_prime (PB : PairOfDefinition
       𝔭₀ ≤ Ideal.comap PB.A₀.subtype 𝔭 := by
   obtain ⟨j, hj_mem, hj_not⟩ := SetLike.not_le_iff_exists.mp hJ_not_le
   have h_disj : Disjoint (Ideal.map PB.A₀.subtype 𝔭₀ : Set B)
-      (Submonoid.powers (PB.A₀.subtype j)) := by
-    exact (Ideal.disjoint_map_primeCompl_iff_comap_le.mpr
+      (Submonoid.powers (PB.A₀.subtype j)) :=
+    (Ideal.disjoint_map_primeCompl_iff_comap_le.mpr
       (comap_map_subtype_le_of_prime PB hj_mem hj_not)).mono_right
       (powers_sub_primeCompl_map hj_not)
   obtain ⟨𝔭, h𝔭_prime, h𝔭_le, h𝔭_disj⟩ :=
@@ -569,9 +554,8 @@ private theorem spa_point_from_nonOpen_prime [PlusSubring B] (PB : PairOfDefinit
     [IsAdicComplete PB.I PB.A₀] {𝔭 : Ideal B} [𝔭.IsPrime]
     (h𝔭 : ¬IsOpen (𝔭 : Set B)) (hBplus_le_B₀ : (B⁺ : Set B) ⊆ PB.A₀) :
     ∃ v ∈ Spa B B⁺, IsAnalytic v ∧ 𝔭 ≤ v.supp := by
-  have hx : ∃ v ∈ Spa B B⁺, 𝔭 ≤ v.supp ∧ ¬PB.idealOfDefinition ≤ v.supp :=
+  obtain ⟨v, hv_spa, hv_supp, hv_idealOfDef⟩ :=
     PB.exists_mem_spa_supp_ge_of_nonOpen_prime h𝔭 hBplus_le_B₀
-  obtain ⟨v, hv_spa, hv_supp, hv_idealOfDef⟩ := hx
   refine ⟨v, hv_spa, ?_, hv_supp⟩
   intro h_open
   exact hv_idealOfDef (by
@@ -588,7 +572,7 @@ private theorem exists_analytic_spa_point_from_B₀_prime [PlusSubring B] {φ : 
     ∃ v ∈ Spa B B⁺, IsAnalytic v ∧ IsOpen ((comap φ v).supp : Set A) := by
   obtain ⟨𝔭, h𝔭_prime, h𝔭_notopen, h𝔭₀_le⟩ :=
     exists_nonOpen_prime_of_B_from_B₀_prime PB hJ_not_le
-  haveI := h𝔭_prime
+  have := h𝔭_prime
   obtain ⟨v, hv_spa, hv_an, hv_supp⟩ :=
     spa_point_from_nonOpen_prime PB h𝔭_notopen hBplus_le_B₀
   refine ⟨v, hv_spa, hv_an, ?_⟩
@@ -614,7 +598,7 @@ private theorem exists_analytic_spa_point_with_open_comap_supp [PlusSubring B]
     ∃ v ∈ Spa B B⁺, IsAnalytic v ∧ IsOpen ((comap φ v).supp : Set A) := by
   obtain ⟨𝔭₀, h𝔭₀_prime, h_image_le, hJ_not_le⟩ :=
     exists_separating_prime_of_B₀ PA PB h_map h_not_eq h_le
-  haveI := h𝔭₀_prime
+  have := h𝔭₀_prime
   exact exists_analytic_spa_point_from_B₀_prime
     PA PB h_map h_image_le hJ_not_le hBplus_le_B₀
 
@@ -648,8 +632,6 @@ theorem isAdicHom_of_complete_and_analytic_preserved [PlusSubring A] [PlusSubrin
   exact (h_analytic v hv_spa hv_an) hv_open
 
 end Lemma746Converse
-
-/-! ### Definition 8.38: Adic morphisms of adic spaces -/
 
 section AdicMorphismDef
 
@@ -695,8 +677,6 @@ def IsAdicMorphism (X Y : AdicSpace.{u}) (f : C(X.carrier, Y.carrier)) : Prop :=
       IsAdicHom φ
 
 end AdicMorphismDef
-
-/-! ### Proposition 8.39: Characterization via analytic points -/
 
 section Prop839
 
@@ -776,8 +756,6 @@ theorem isAdicHom_iff_preserves_analytic {A B : Type*} [CommRing A] [CommRing B]
       isAdicHom_of_complete_and_analytic_preserved hφ hAB h PB hBplus_le_B₀
 
 end Prop839
-
-/-! ### Corollary 8.40: All ring maps of an adic morphism are adic -/
 
 section Cor840
 
