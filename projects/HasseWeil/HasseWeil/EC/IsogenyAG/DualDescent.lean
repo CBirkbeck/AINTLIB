@@ -1764,6 +1764,142 @@ theorem ringHom_ext_baseL {A : Type*} [Field A]
   simp only [RingHom.comp_apply] at ha hbb
   rw [map_div₀, map_div₀, ha, hbb]
 
+/-- `coordRingMap` over `K̄` sends `algebraMap K[X] (W.Φ m)` to the base-changed `Φ m`
+(char-independent; via `WeierstrassCurve.map_Φ`). -/
+private theorem coordRingMap_algebraMap_Φ_kbar (m : ℤ) :
+    (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).coordRingMap (AlgebraicClosure K)
+        (algebraMap (Polynomial K) W₁.toAffine.CoordinateRing (W₁.Φ m)) =
+      algebraMap (Polynomial (AlgebraicClosure K)) (W₁.baseChange (AlgebraicClosure K)).toAffine.CoordinateRing
+        ((W₁.baseChange (AlgebraicClosure K)).Φ m) := by
+  change WeierstrassCurve.Affine.CoordinateRing.map W₁.toAffine (algebraMap K (AlgebraicClosure K))
+    (WeierstrassCurve.Affine.CoordinateRing.mk W₁.toAffine (Polynomial.C (W₁.Φ m))) = _
+  rw [WeierstrassCurve.Affine.CoordinateRing.map_mk]
+  rw [show ((Polynomial.C (W₁.Φ m) : Polynomial (Polynomial K)).map
+        (Polynomial.mapRingHom (algebraMap K (AlgebraicClosure K)))) =
+        Polynomial.C ((W₁.baseChange (AlgebraicClosure K)).Φ m) by
+      rw [Polynomial.map_C, Polynomial.coe_mapRingHom,
+        show (W₁.baseChange (AlgebraicClosure K)).Φ m
+            = (W₁.map (algebraMap K (AlgebraicClosure K))).Φ m from rfl,
+        WeierstrassCurve.map_Φ (W := W₁) (algebraMap K (AlgebraicClosure K)) m]]
+  rfl
+
+/-- `coordRingMap` over `K̄` sends `algebraMap K[X] (W.ΨSq m)` to the base-changed `ΨSq m`. -/
+private theorem coordRingMap_algebraMap_ΨSq_kbar (m : ℤ) :
+    (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).coordRingMap (AlgebraicClosure K)
+        (algebraMap (Polynomial K) W₁.toAffine.CoordinateRing (W₁.ΨSq m)) =
+      algebraMap (Polynomial (AlgebraicClosure K)) (W₁.baseChange (AlgebraicClosure K)).toAffine.CoordinateRing
+        ((W₁.baseChange (AlgebraicClosure K)).ΨSq m) := by
+  change WeierstrassCurve.Affine.CoordinateRing.map W₁.toAffine (algebraMap K (AlgebraicClosure K))
+    (WeierstrassCurve.Affine.CoordinateRing.mk W₁.toAffine (Polynomial.C (W₁.ΨSq m))) = _
+  rw [WeierstrassCurve.Affine.CoordinateRing.map_mk]
+  rw [show ((Polynomial.C (W₁.ΨSq m) : Polynomial (Polynomial K)).map
+        (Polynomial.mapRingHom (algebraMap K (AlgebraicClosure K)))) =
+        Polynomial.C ((W₁.baseChange (AlgebraicClosure K)).ΨSq m) by
+      rw [Polynomial.map_C, Polynomial.coe_mapRingHom,
+        show (W₁.baseChange (AlgebraicClosure K)).ΨSq m
+            = (W₁.map (algebraMap K (AlgebraicClosure K))).ΨSq m from rfl,
+        WeierstrassCurve.map_ΨSq (W := W₁) (algebraMap K (AlgebraicClosure K)) m]]
+  rfl
+
+/-- `coordRingMap` over `K̄` sends `mk (W.ω m)` to the base-changed `mk (ω m)`. -/
+private theorem coordRingMap_mk_ω_kbar (m : ℤ) :
+    (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).coordRingMap (AlgebraicClosure K)
+        (WeierstrassCurve.Affine.CoordinateRing.mk W₁.toAffine (W₁.ω m)) =
+      WeierstrassCurve.Affine.CoordinateRing.mk (W₁.baseChange (AlgebraicClosure K)).toAffine
+        ((W₁.baseChange (AlgebraicClosure K)).ω m) := by
+  change WeierstrassCurve.Affine.CoordinateRing.map W₁.toAffine (algebraMap K (AlgebraicClosure K))
+    (WeierstrassCurve.Affine.CoordinateRing.mk W₁.toAffine (W₁.ω m)) = _
+  rw [WeierstrassCurve.Affine.CoordinateRing.map_mk,
+    show (W₁.baseChange (AlgebraicClosure K)).ω m = (W₁.map (algebraMap K (AlgebraicClosure K))).ω m from rfl,
+    WeierstrassCurve.map_ω (W := W₁) (algebraMap K (AlgebraicClosure K)) m]
+  rfl
+
+/-- `coordRingMap` over `K̄` sends `mk (W.ψ m)` to the base-changed `mk (ψ m)`. -/
+private theorem coordRingMap_mk_ψ_kbar (m : ℤ) :
+    (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).coordRingMap (AlgebraicClosure K)
+        (WeierstrassCurve.Affine.CoordinateRing.mk W₁.toAffine (W₁.ψ m)) =
+      WeierstrassCurve.Affine.CoordinateRing.mk (W₁.baseChange (AlgebraicClosure K)).toAffine
+        ((W₁.baseChange (AlgebraicClosure K)).ψ m) := by
+  change WeierstrassCurve.Affine.CoordinateRing.map W₁.toAffine (algebraMap K (AlgebraicClosure K))
+    (WeierstrassCurve.Affine.CoordinateRing.mk W₁.toAffine (W₁.ψ m)) = _
+  rw [WeierstrassCurve.Affine.CoordinateRing.map_mk,
+    show (W₁.baseChange (AlgebraicClosure K)).ψ m = (W₁.map (algebraMap K (AlgebraicClosure K))).ψ m from rfl,
+    WeierstrassCurve.map_ψ (W := W₁) (algebraMap K (AlgebraicClosure K)) m]
+  rfl
+
+/-- **Base-change of `mulByInt_x` to `K̄`** (char-independent). -/
+private theorem functionFieldMap_mulByInt_x_kbar (m : ℤ) :
+    (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap (AlgebraicClosure K)
+        (HasseWeil.mulByInt_x W₁ m) =
+      HasseWeil.mulByInt_x (W₁.baseChange (AlgebraicClosure K)) m := by
+  rw [HasseWeil.mulByInt_x, HasseWeil.mulByInt_x, map_div₀]
+  congr 1
+  · show (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap (AlgebraicClosure K)
+        (algebraMap _ _ (algebraMap (Polynomial K) W₁.toAffine.CoordinateRing (W₁.Φ m))) = _
+    rw [SmoothPlaneCurve.functionFieldMap_algebraMap, coordRingMap_algebraMap_Φ_kbar]
+    rfl
+  · show (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap (AlgebraicClosure K)
+        (algebraMap _ _ (algebraMap (Polynomial K) W₁.toAffine.CoordinateRing (W₁.ΨSq m))) = _
+    rw [SmoothPlaneCurve.functionFieldMap_algebraMap, coordRingMap_algebraMap_ΨSq_kbar]
+    rfl
+
+/-- **Base-change of `mulByInt_y` to `K̄`** (char-independent). -/
+private theorem functionFieldMap_mulByInt_y_kbar (m : ℤ) :
+    (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap (AlgebraicClosure K)
+        (HasseWeil.mulByInt_y W₁ m) =
+      HasseWeil.mulByInt_y (W₁.baseChange (AlgebraicClosure K)) m := by
+  rw [HasseWeil.mulByInt_y, HasseWeil.mulByInt_y, map_div₀, map_pow]
+  congr 1
+  · show (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap (AlgebraicClosure K)
+        (algebraMap _ _ (WeierstrassCurve.Affine.CoordinateRing.mk W₁.toAffine (W₁.ω m))) = _
+    rw [SmoothPlaneCurve.functionFieldMap_algebraMap, coordRingMap_mk_ω_kbar]
+    rfl
+  · congr 1
+    show (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap (AlgebraicClosure K)
+        (algebraMap _ _ (WeierstrassCurve.Affine.CoordinateRing.mk W₁.toAffine (W₁.ψ m))) = _
+    rw [SmoothPlaneCurve.functionFieldMap_algebraMap, coordRingMap_mk_ψ_kbar]
+    rfl
+
+/-- **`mPbL` over `K̄` equals the source-`W₁_K̄` endomorphism `[m]*`** (the structural
+`mulByInt`-base-change identification, `h_mPbL`).  Both `K`-algebra homs out of `K̄(E₁_K̄)` send
+`x_gen ↦ mulByInt_x (W₁_K̄) m` (resp. `y_gen ↦ mulByInt_y (W₁_K̄) m`) and fix `K̄`-constants, so by
+`ringHom_ext_baseL` they coincide. -/
+theorem mPbL_eq_mulByInt_baseChange_kbar [DecidableEq (AlgebraicClosure K)] (hn : n ≠ 0) :
+    mPbL W₁ (AlgebraicClosure K) hn =
+      (HasseWeil.mulByInt_pullbackAlgHom (W₁.baseChange (AlgebraicClosure K)) n hn).restrictScalars K := by
+  apply AlgHom.coe_ringHom_injective
+  apply ringHom_ext_baseL W₁ (AlgebraicClosure K)
+  · -- K̄-constants: both fix them
+    intro l
+    show mPbL W₁ (AlgebraicClosure K) hn
+        (algebraMap (AlgebraicClosure K) _ l) = _
+    rw [mPbL, psiL_algebraMap_L]
+    exact ((HasseWeil.mulByInt_pullbackAlgHom (W₁.baseChange (AlgebraicClosure K)) n hn).commutes l).symm
+  · -- x_gen: both sides equal `mulByInt_x (W₁_K̄) n`
+    show mPbL W₁ (AlgebraicClosure K) hn (HasseWeil.x_gen (W₁.baseChange (AlgebraicClosure K))) =
+      (HasseWeil.mulByInt_pullbackAlgHom (W₁.baseChange (AlgebraicClosure K)) n hn)
+        (HasseWeil.x_gen (W₁.baseChange (AlgebraicClosure K)))
+    rw [HasseWeil.mulByInt_pullbackAlgHom_x_gen]
+    rw [mPbL, psiL]
+    show (bcIsog W₁ W₁ (EC.Isogeny.mulByInt W₁.toAffine hn) (AlgebraicClosure K)).toCurveMap.pullback
+        (HasseWeil.x_gen (W₁.baseChange (AlgebraicClosure K))) = _
+    rw [bcIsog_pullback_x_gen, bcXgen,
+      show (EC.Isogeny.mulByInt W₁.toAffine hn).toCurveMap.pullback (HasseWeil.x_gen W₁)
+        = HasseWeil.mulByInt_x W₁ n from HasseWeil.mulByInt_pullbackAlgHom_x_gen W₁ n hn,
+      functionFieldMap_mulByInt_x_kbar]
+  · -- y_gen: both sides equal `mulByInt_y (W₁_K̄) n`
+    show mPbL W₁ (AlgebraicClosure K) hn (HasseWeil.y_gen (W₁.baseChange (AlgebraicClosure K))) =
+      (HasseWeil.mulByInt_pullbackAlgHom (W₁.baseChange (AlgebraicClosure K)) n hn)
+        (HasseWeil.y_gen (W₁.baseChange (AlgebraicClosure K)))
+    rw [HasseWeil.mulByInt_pullbackAlgHom_y_gen]
+    rw [mPbL, psiL]
+    show (bcIsog W₁ W₁ (EC.Isogeny.mulByInt W₁.toAffine hn) (AlgebraicClosure K)).toCurveMap.pullback
+        (HasseWeil.y_gen (W₁.baseChange (AlgebraicClosure K))) = _
+    rw [bcIsog_pullback_y_gen, bcYgen,
+      show (EC.Isogeny.mulByInt W₁.toAffine hn).toCurveMap.pullback (HasseWeil.y_gen W₁)
+        = HasseWeil.mulByInt_y W₁ n from HasseWeil.mulByInt_pullbackAlgHom_y_gen W₁ n hn,
+      functionFieldMap_mulByInt_y_kbar]
+
 /-- **`ψ_L` is `Gal(L/F)`-equivariant** (the full statement on all of `F(E₂_L)`). Reduce, via
 `ringHom_ext_baseL`, to the three generators: on the `L`-constants `algebraMap L _ l` it is the
 `σ`-semilinearity of the Galois action (`galActFunctionField_algebraMap_L`) matched against the
