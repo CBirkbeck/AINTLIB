@@ -43,7 +43,7 @@ theorem LFunction_neg_nat {N : ℕ} [NeZero N] (χ : DirichletCharacter ℂ N) (
     -- sum to the interior of `(0,1)` where the Bernoulli values apply
     haveI : Fact (1 < N) := ⟨by have := NeZero.pos N; omega⟩
     have hχ0 : χ (0 : ZMod N) = 0 := χ.map_nonunit not_isUnit_zero
-    have hNR : (0 : ℝ) < (N : ℝ) := by exact_mod_cast NeZero.pos N
+    have hNR : (0 : ℝ) < (N : ℝ) := mod_cast NeZero.pos N
     have hterm : ∀ j : ZMod N,
         χ j * HurwitzZeta.hurwitzZeta (ZMod.toAddCircle j) (-(k : ℂ))
           = χ j * (-1 / (k + 1) *
@@ -53,8 +53,7 @@ theorem LFunction_neg_nat {N : ℕ} [NeZero N] (χ : DirichletCharacter ℂ N) (
       rcases eq_or_ne j 0 with rfl | hj
       · rw [hχ0, zero_mul, zero_mul]
       · have hx₀ : (0 : ℝ) < (j.val : ℝ) / (N : ℝ) := by
-          have : 0 < j.val := ZMod.val_pos.mpr hj
-          positivity
+          have := ZMod.val_pos.mpr hj; positivity
         have hx₁ : ((j.val : ℝ) / (N : ℝ)) < 1 := by
           rw [div_lt_one hNR]
           exact_mod_cast ZMod.val_lt j
