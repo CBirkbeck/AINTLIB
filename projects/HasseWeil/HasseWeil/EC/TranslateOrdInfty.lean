@@ -101,7 +101,7 @@ theorem valuation_aeval_eq_exp (w : Valuation KE (WithZero (Multiplicative ℤ))
     rw [h_term i, h_term n, if_neg h_lead_ne]
     by_cases hci : p.coeff i = 0
     · rw [if_pos hci]
-      exact lt_of_le_of_ne zero_le' (Ne.symm WithZero.exp_ne_zero)
+      exact lt_of_le_of_ne zero_le (Ne.symm WithZero.exp_ne_zero)
     · rw [if_neg hci, WithZero.exp_lt_exp]
       omega
   · rw [h_term n, if_neg h_lead_ne]
