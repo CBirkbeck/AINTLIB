@@ -116,7 +116,7 @@ theorem isEmpty_dualGaloisData_frobenius (W : Affine K) [W.IsElliptic] :
     exact (iterateFrobenius (⟨W⟩ : SmoothPlaneCurve K).FunctionField p (n : ℕ)).injective hfixed
   -- So the right-hand side of `hfix` is trivially true and `π*` is surjective:
   -- in particular `x_gen` is a `q`-th power.
-  obtain ⟨g, hg⟩ := (d.hfix (x_gen W)).mpr fun σ hσ => hid σ hσ (x_gen W)
+  obtain ⟨g, hg⟩ := (d.hfix (x_gen W)).mpr fun σ hσ ↦ hid σ hσ (x_gen W)
   have hg' : g ^ p ^ (n : ℕ) = x_gen W := by
     rw [← hcard, ← Isogeny.frobenius_pullback W g]
     exact hg
@@ -147,7 +147,7 @@ Frobenius of `y² + y = x³` over `𝔽₂` is a counterexample
 universe-polymorphic statement specialises to. -/
 theorem not_universal_dualGaloisData :
     ¬ ∀ (F : Type) [Field F] (W₁ W₂ : Affine F) [W₁.IsElliptic] [W₂.IsElliptic]
-        (φ : Isogeny W₁ W₂), Nonempty (Isogeny.DualGaloisData φ) := fun h =>
+        (φ : Isogeny W₁ W₂), Nonempty (Isogeny.DualGaloisData φ) := fun h ↦
   (h (ZMod 2) frobeniusCounterexampleCurve frobeniusCounterexampleCurve
     (Isogeny.frobenius frobeniusCounterexampleCurve)).elim
     (isEmpty_dualGaloisData_frobenius frobeniusCounterexampleCurve).false
