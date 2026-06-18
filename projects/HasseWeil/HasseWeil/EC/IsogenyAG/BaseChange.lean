@@ -124,7 +124,7 @@ theorem baseChangeAlgHom_coordRingMap (u : C₂.CoordinateRing) :
       (C₁.coordRingMap L).comp cd.toAlgHom.toRingHom := by
     refine AdjoinRoot.ringHom_ext ?_ ?_
     · -- agree on `of q` for `q : K[X]`
-      refine Polynomial.ringHom_ext (fun a => ?_) ?_
+      refine Polynomial.ringHom_ext (fun a ↦ ?_) ?_
       · -- constants from `K`
         show cd.baseChangeAlgHom L (C₂.coordRingMap L
             (algebraMap (Polynomial K) C₂.CoordinateRing (Polynomial.C a))) =
@@ -295,7 +295,7 @@ theorem functionFieldMap_comp_algebraMap :
     ((⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L).comp
         (algebraMap K W.toAffine.FunctionField) =
       (algebraMap L (W.baseChange L).toAffine.FunctionField).comp (algebraMap K L) := by
-  refine RingHom.ext fun a => ?_
+  refine RingHom.ext fun a ↦ ?_
   show (⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L
       (algebraMap K (⟨W.toAffine⟩ : SmoothPlaneCurve K).FunctionField a) =
     algebraMap L (W.baseChange L).toAffine.FunctionField (algebraMap K L a)
@@ -326,13 +326,13 @@ theorem baseChange_generic_equation :
       W.toAffine.FunctionField →+*
         ((⟨W.toAffine⟩ : SmoothPlaneCurve K).baseChange L).FunctionField))
     (pullback_generic_equation W φ)
-  exact (congrArg (fun V : WeierstrassCurve ((W.baseChange L).toAffine.FunctionField) =>
+  exact (congrArg (fun V : WeierstrassCurve ((W.baseChange L).toAffine.FunctionField) ↦
     V.toAffine.Equation (baseChangeXgen W φ L) (baseChangeYgen W φ L))
     (baseChange_map_functionFieldMap W L)).mp h
 
 omit [DecidableEq L] in
 /-- The base-changed `x_gen`-image is nonzero. -/
-theorem baseChangeXgen_ne_zero : baseChangeXgen W φ L ≠ 0 := fun h0 =>
+theorem baseChangeXgen_ne_zero : baseChangeXgen W φ L ≠ 0 := fun h0 ↦
   φ.toCurveMap.pullback_ne_zero (x_gen_ne_zero W)
     ((⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap_injective L
       (h0.trans (map_zero _).symm))
@@ -432,7 +432,7 @@ theorem ofEquationCoordRingHom_eq_algebraMap_comp_baseChangeAlgHom :
         (cd.baseChangeAlgHom L).toRingHom := by
   refine AdjoinRoot.ringHom_ext ?_ ?_
   · -- agreement on `L[X]`
-    refine Polynomial.ringHom_ext (fun a => ?_) ?_
+    refine Polynomial.ringHom_ext (fun a ↦ ?_) ?_
     · -- constants from `L`
       show ofEquationCoordRingHom (W.baseChange L) (W.baseChange L)
           (baseChangeXgen W φ L) (baseChangeYgen W φ L)
@@ -535,7 +535,7 @@ base-changed isogeny. -/
 noncomputable def baseChangeCoordHom [IsAlgClosed L] :
     (baseChangeIsogeny W φ L).toCurveMap.CoordHom where
   toAlgHom := cd.baseChangeAlgHom L
-  compat := fun u' => by
+  compat := fun u' ↦ by
     have h1 : (baseChangeIsogeny W φ L).toCurveMap.pullback
         (algebraMap (W.baseChange L).toAffine.CoordinateRing
           (W.baseChange L).toAffine.FunctionField u') =
