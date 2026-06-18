@@ -111,7 +111,7 @@ theorem cor732_laurent_piece_membership_t_indexed
     (hσ_dom :
       ∀ v ∈ Spa A A⁺, ∃ τ ∈ T, v.vle (σ : A) τ ∧ ¬ v.vle τ (σ : A)) :
     ∀ w ∈ Spa A A⁺,
-      ∃ t ∈ T.image (fun τ => ((σ⁻¹ : Aˣ) : A) * τ),
+      ∃ t ∈ T.image (fun τ ↦ ((σ⁻¹ : Aˣ) : A) * τ),
         w ∈ rationalOpen ({(1 : A)} : Finset A) t := by
   intro w hw
   obtain ⟨τ, hτ_mem, hw_in_piece⟩ :=
@@ -173,7 +173,7 @@ theorem localizedCor732_sigma_supplier_for_actual_C1
     ∃ σ_loc : (Localization.Away s)ˣ,
       ∀ w ∈ Spa (Localization.Away s) (Localization.Away s)⁺,
         ∃ t ∈ (localizedTestFamily s T_D s_D).image
-          (fun τ => ((σ_loc⁻¹ : (Localization.Away s)ˣ) :
+          (fun τ ↦ ((σ_loc⁻¹ : (Localization.Away s)ˣ) :
             Localization.Away s) * τ),
           w ∈ rationalOpen
             ({(1 : Localization.Away s)} :
@@ -227,7 +227,7 @@ theorem localizedCor732_sigma_supplier_t_indexed_cover_at
     letI : DecidableEq (Localization.Away s) := Classical.decEq _
     ∀ w ∈ Spa (Localization.Away s) (Localization.Away s)⁺,
       ∃ t ∈ (localizedTestFamily s T_D s_D).image
-        (fun τ => ((σ_loc⁻¹ : (Localization.Away s)ˣ) :
+        (fun τ ↦ ((σ_loc⁻¹ : (Localization.Away s)ˣ) :
           Localization.Away s) * τ),
         w ∈ rationalOpen
           ({(1 : Localization.Away s)} :
@@ -298,7 +298,7 @@ theorem rationalOpen_global_subset_via_localizedCor732_sigma_supplier
       (_h_per_piece_subset_at_supplied_sigma :
         ∀ (σ_loc : (Localization.Away s)ˣ),
           ∀ t ∈ (localizedTestFamily s T_D s_D).image
-              (fun τ => ((σ_loc⁻¹ : (Localization.Away s)ˣ) :
+              (fun τ ↦ ((σ_loc⁻¹ : (Localization.Away s)ˣ) :
                 Localization.Away s) * τ),
             rationalOpen (insert f_loc T_base_loc) s_base_loc ∩
                 rationalOpen
@@ -310,7 +310,7 @@ theorem rationalOpen_global_subset_via_localizedCor732_sigma_supplier
       rationalOpen (insert f_loc T_base_loc) s_base_loc ⊆
         rationalOpen
           ((localizedTestFamily s T_D s_D).image
-            (fun τ => ((σ_loc⁻¹ : (Localization.Away s)ˣ) :
+            (fun τ ↦ ((σ_loc⁻¹ : (Localization.Away s)ˣ) :
               Localization.Away s) * τ))
           D_s := by
   letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
@@ -328,7 +328,7 @@ theorem rationalOpen_global_subset_via_localizedCor732_sigma_supplier
   have h_cover_source :
       ∀ w ∈ rationalOpen (insert f_loc T_base_loc) s_base_loc,
         ∃ t ∈ (localizedTestFamily s T_D s_D).image
-          (fun τ => ((σ_loc⁻¹ : (Localization.Away s)ˣ) :
+          (fun τ ↦ ((σ_loc⁻¹ : (Localization.Away s)ˣ) :
             Localization.Away s) * τ),
           w ∈ rationalOpen
             ({(1 : Localization.Away s)} :
@@ -340,7 +340,7 @@ theorem rationalOpen_global_subset_via_localizedCor732_sigma_supplier
   -- Apply T062's σ-shift t-indexed consumer.
   exact rationalOpen_global_subset_via_sigma_shift_t_indexed σ_loc
     ((localizedTestFamily s T_D s_D).image
-      (fun τ => ((σ_loc⁻¹ : (Localization.Away s)ˣ) :
+      (fun τ ↦ ((σ_loc⁻¹ : (Localization.Away s)ˣ) :
         Localization.Away s) * τ))
     T_base_loc s_base_loc D_s f_loc
     (h_per_piece_subset_at_supplied_sigma σ_loc)
