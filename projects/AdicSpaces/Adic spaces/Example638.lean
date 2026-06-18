@@ -80,8 +80,6 @@ noncomputable def trivialMinusDatum (P : PairOfDefinition B) (b : B) :
       (algebraMap_mem_locSubring _ _ _ c.2)
       (divByS_mem_locSubring _ _ _ (Finset.mem_singleton_self 1))⟩
 
-/-! ### Plus branch forward: evaluation at `canonicalMap b` -/
-
 section Example638PlusForward
 
 variable [IsTateRing B] [IsNoetherianRing B] [T2Space B] [NonarchimedeanRing B]
@@ -214,14 +212,6 @@ noncomputable def example638Plus_forwardHom
 
 end Example638PlusForward
 
-/-! ### Plus branch backward: topology on `TateAlgebra B ⧸ (algebraMap b − X)`
-
-Unlike the minus branch (where the quotient is `oneSubfXIdeal b` and we can reuse
-`presheafValueCanonicalQuotientEquiv`), the plus branch quotient is
-`TateAlgebra B ⧸ Ideal.span {algebraMap b − X}`, which is different.
-We mirror the `oneSubfXIdeal`/`quotientOneSubfXIdealTopology` infrastructure
-for this new ideal. -/
-
 section Example638PlusBackwardTopology
 
 variable [IsTateRing B] [IsNoetherianRing B] [T2Space B] [NonarchimedeanRing B]
@@ -322,8 +312,6 @@ theorem quotient_plusFSubXIdeal_completeSpace
 
 end Example638PlusBackwardTopology
 
-/-! ### Plus branch backward: algebraic hom from `Localization.Away 1` -/
-
 section Example638PlusBackwardAlgebraic
 
 variable [IsTateRing B] [IsNoetherianRing B] [T2Space B] [NonarchimedeanRing B]
@@ -357,8 +345,6 @@ theorem plusLocToQuotient_algebraMap (b a : B) :
   rfl
 
 end Example638PlusBackwardAlgebraic
-
-/-! ### Plus branch backward: continuity of `plusLocToQuotient` -/
 
 section Example638PlusBackwardContinuity
 
@@ -578,8 +564,6 @@ theorem plusLocToQuotient_continuous (P : PairOfDefinition B) (b : B) :
 
 end Example638PlusBackwardContinuity
 
-/-! ### Plus branch backward: extension to completion -/
-
 section Example638PlusBackwardCompletion
 
 variable [IsTateRing B] [IsNoetherianRing B] [T2Space B] [NonarchimedeanRing B]
@@ -692,21 +676,6 @@ theorem example638Plus_backwardHom_canonicalMap
   rw [example638Plus_backwardHom_coe, plusLocToQuotient_algebraMap]
 
 end Example638PlusBackwardCompletion
-
-/-! ### Plus branch forward/backward round trips
-
-The forward hom is `example638Plus_forwardHom : TateAlgebra B ⧸ plusFSubXIdeal B b →
-presheafValue (trivialPlusDatum B P b)`. The backward hom is
-`example638Plus_backwardHom` (above).
-
-Round trips:
-- `backward ∘ forward = id` on `TateAlgebra B ⧸ plusFSubXIdeal B b`: Ideal.Quotient.ringHom_ext
-  reduces to checking on `algebraMap a` (where both sides become `mk(algebraMap a)`)
-  and on `X` (where `forward X = canonicalMap b`, then
-  `backward (canonicalMap b) = mk(algebraMap b) = mk(X)` using the quotient relation
-  `algebraMap b - X ∈ plusFSubXIdeal B b`).
-- `forward ∘ backward = id` on `presheafValue (trivialPlusDatum B P b)`: Completion.ext'
-  reduces to dense image agreement. -/
 
 section Example638PlusRoundTrip
 
@@ -1014,8 +983,6 @@ theorem example638Plus_forward_backward_eq_id
 
 end Example638PlusRoundTrip
 
-/-! ### Plus branch RingEquiv -/
-
 section Example638PlusEquiv
 
 variable [IsTateRing B] [IsNoetherianRing B] [T2Space B] [NonarchimedeanRing B]
@@ -1120,19 +1087,6 @@ theorem example638Plus_equiv_symm_canonicalMap
   exact example638Plus_backwardHom_canonicalMap B P b hA_complete hnoeth a
 
 end Example638PlusEquiv
-
-/-! ### Plus branch RingEquiv: topology (T145)
-
-Topological companion of `example638Plus_equiv`: the forward map
-`example638Plus_forwardHom B P b` is a homeomorphism (Banach OMT), and
-both directions of `example638Plus_equiv` are `Topology.IsInducing`.
-
-These mirror the minus-branch
-`tateQuotientToPresheafHom_isHomeomorph` /
-`presheafValueCanonicalQuotientEquiv_isInducing` pair in
-`TopologyComparison.lean` and are consumed by the Laurent plus-bridge
-identification `presheafValue_trivialPlus_fSubX_equiv` in
-`LaurentRefinement.lean` (which is defined as `(example638Plus_equiv).symm`). -/
 
 section Example638PlusEquivTopology
 
@@ -1269,8 +1223,6 @@ theorem example638Plus_equiv_symm_isInducing
 
 end Example638PlusEquivTopology
 
-/-! ### Minus branch forward: evaluation at `invS = 1 / canonicalMap b` -/
-
 section Example638MinusForward
 
 variable [IsTateRing B] [IsNoetherianRing B] [T2Space B] [NonarchimedeanRing B]
@@ -1352,20 +1304,6 @@ noncomputable def example638Minus_forwardHom
     rw [← hc, map_mul, example638Minus_evalHom_oneSubfX_eq_zero, mul_zero])
 
 end Example638MinusForward
-
-/-! ### Minus branch backward: `locToQuotientOneSubfX_gen b` extended to completion
-
-The backward direction starts from
-`locToQuotientOneSubfX_gen b : Localization.Away b →+* TateAlgebra B ⧸ oneSubfXIdeal b`
-(defined in `PresheafIdentification.lean`, continuous by
-`locToQuotientOneSubfX_gen_continuous_canonical` in `TopologyComparison.lean`)
-and extends it to the completion `presheafValue (trivialMinusDatum B P b)` via
-`UniformSpace.Completion.extensionHom`, targeting the canonical quotient
-topology on `TateAlgebra B ⧸ oneSubfXIdeal b`.
-
-Recall `(trivialMinusDatum B P b).s = b`, so the target of this backward hom
-coincides with `TateAlgebra B ⧸ oneSubfXIdeal b`, and we can reuse the
-existing `presheafValueToCanonicalQuotient` infrastructure. -/
 
 section Example638MinusBackward
 
@@ -1462,13 +1400,6 @@ theorem example638Minus_backwardHom_eq_presheafValueToCanonicalQuotient
 
 end Example638MinusBackward
 
-/-! ### Minus branch round-trip identities
-
-Both round-trips reduce to `presheafValueCanonicalQuotientEquiv` applied at
-`D = trivialMinusDatum B P b`, which requires the continuity hypothesis
-`hcont_eval` on `tateQuotientToPresheafHom`. We carry this as an explicit
-hypothesis — it matches the shape of the existing infrastructure. -/
-
 section Example638MinusRoundTrip
 
 variable [IsTateRing B] [IsNoetherianRing B] [T2Space B] [NonarchimedeanRing B]
@@ -1536,8 +1467,6 @@ theorem example638Minus_forward_backward_eq_id
     hcont_eval x
 
 end Example638MinusRoundTrip
-
-/-! ### Minus branch RingEquiv -/
 
 section Example638MinusEquiv
 
