@@ -3,9 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Verschiebung.PurelyInsep
-import HasseWeil.Verschiebung.DivPolyExpand
 import HasseWeil.OmegaPullbackCoeff
+import HasseWeil.Verschiebung.DivPolyExpand
+import HasseWeil.Verschiebung.PurelyInsep
 import Mathlib.Algebra.Polynomial.Expand
 import Mathlib.Tactic.ReduceModChar
 
@@ -120,13 +120,9 @@ theorem polyPowCardEq_of_finite : PolyPowCardEq K := by
   | add p_poly q_poly hp_poly hq_poly =>
     rw [add_pow_expChar_pow, hp_poly, hq_poly, map_add]
   | monomial m a =>
-    rw [show (Polynomial.monomial m a : Polynomial K) =
-      Polynomial.C a * Polynomial.X ^ m from
-      (Polynomial.C_mul_X_pow_eq_monomial).symm]
-    rw [mul_pow, ← Polynomial.C_pow, ← hcard,
-      show (a : K) ^ Fintype.card K = a from FiniteField.pow_card a]
-    rw [map_mul, map_pow, Polynomial.expand_C, Polynomial.expand_X]
-    rw [← pow_mul]
+    rw [← Polynomial.C_mul_X_pow_eq_monomial, mul_pow, ← Polynomial.C_pow, ← hcard,
+      show (a : K) ^ Fintype.card K = a from FiniteField.pow_card a,
+      map_mul, map_pow, Polynomial.expand_C, Polynomial.expand_X, ← pow_mul]
     ring
 
 /-! ### The q-th root for `Φ_q(x_gen)`, witness form -/
@@ -144,9 +140,16 @@ theorem polyExpandRoot_aeval_pow_eq
     (Polynomial.aeval z (polyExpandRoot f hf)) ^ Fintype.card K =
       Polynomial.aeval z f := by
   -- (aeval z f')^q = aeval z (f'^q) = aeval z (expand q f') = aeval z f
-  rw [← map_pow]
-  rw [h_pow (polyExpandRoot f hf)]
-  rw [polyExpandRoot_spec]
+  rw [← map_pow, h_pow (polyExpandRoot f hf), polyExpandRoot_spec]
+
+/-- The natural-number `p` casts to `0` in `K(E)` whenever `CharP K p`, transported
+    through the injective `algebraMap K → K(E)`. Shared helper for the char-`p`
+    Freshman's-dream and Weierstrass-substitution lemmas below. -/
+private theorem natCast_functionField_eq_zero (W : WeierstrassCurve K) (p : ℕ) [CharP K p] :
+    (p : W.toAffine.FunctionField) = 0 := by
+  have : CharP W.toAffine.FunctionField p :=
+    charP_of_injective_algebraMap (algebraMap K W.toAffine.FunctionField).injective p
+  exact CharP.cast_eq_zero W.toAffine.FunctionField p
 
 /-! ### b-relation reduction: `Φ_q ∈ Set.range (expand K q)` for q ∈ K
 
@@ -223,8 +226,8 @@ theorem mulByInt_q_pullback_x_gen_qth_root_of_expand_witness
   --         = aeval x_gen Φ / aeval x_gen ΨSq = mulByInt_x q
   --         = (mulByInt W q).pullback x_gen.
   have h_pow := polyPowCardEq_of_finite (K := K)
-  set Φ' := polyExpandRoot (W.Φ ((Fintype.card K : ℕ) : ℤ)) h_Φ with hΦ'_def
-  set ΨSq' := polyExpandRoot (W.ΨSq ((Fintype.card K : ℕ) : ℤ)) h_ΨSq with hΨSq'_def
+  set Φ' := polyExpandRoot (W.Φ ((Fintype.card K : ℕ) : ℤ)) h_Φ
+  set ΨSq' := polyExpandRoot (W.ΨSq ((Fintype.card K : ℕ) : ℤ)) h_ΨSq
   have hΦ_root_pow : (Polynomial.aeval (x_gen W) Φ') ^ Fintype.card K =
       Polynomial.aeval (x_gen W) (W.Φ ((Fintype.card K : ℕ) : ℤ)) :=
     polyExpandRoot_aeval_pow_eq W _ h_Φ h_pow (x_gen W)
@@ -331,22 +334,12 @@ theorem omega2_Y_coeff_mem_expand_two_char_two
     Polynomial.C (W.a₁ * W.b₄ + W.a₁ ^ 2 * W.a₃) * Polynomial.X +
     Polynomial.C (W.a₁ * W.b₈ + W.a₃ ^ 3), ?_⟩
   have h_2 : (2 : K) = 0 := CharP.cast_eq_zero K 2
-  have h_3 : (3 : K) = 1 := by
-    rw [show (3 : K) = 2 + 1 from by ring, h_2, zero_add]
-  have h_b2 : W.b₂ = W.a₁ ^ 2 := by
-    rw [WeierstrassCurve.b₂, show (4 : K) = 2 * 2 from by ring, h_2, mul_zero,
-        zero_mul, add_zero]
-  have h_b6 : W.b₆ = W.a₃ ^ 2 := by
-    rw [WeierstrassCurve.b₆, show (4 : K) = 2 * 2 from by ring, h_2, mul_zero,
-        zero_mul, add_zero]
+  have h_b2 : W.b₂ = W.a₁ ^ 2 := WeierstrassCurve.b₂_of_char_two W
+  have h_b6 : W.b₆ = W.a₃ ^ 2 := WeierstrassCurve.b₆_of_char_two W
   rw [omega2_Y_coeff_char_two, WeierstrassCurve.Ψ₃, h_b2, h_b6]
   simp only [map_add, map_mul, map_pow, Polynomial.expand_C, Polynomial.expand_X]
   have h_2P : (2 : Polynomial K) = 0 := by
     rw [show (2 : Polynomial K) = Polynomial.C 2 from rfl, h_2, Polynomial.C_0]
-  have h_3P : (3 : Polynomial K) = 1 := by
-    rw [show (3 : Polynomial K) = Polynomial.C 3 from rfl, h_3, Polynomial.C_1]
-  have h_4P : (4 : Polynomial K) = 0 := by
-    rw [show (4 : Polynomial K) = 2 * 2 from by ring, h_2P, mul_zero]
   have h_6P : (6 : Polynomial K) = 0 := by
     rw [show (6 : Polynomial K) = 2 * 3 from by ring, h_2P, zero_mul]
   linear_combination
@@ -502,17 +495,12 @@ theorem omega2_coupled_residual_derivative_eq_zero
       WeierstrassCurve.b₈, h_b2, h_b4, h_b6]
   simp only [Polynomial.derivative_add, Polynomial.derivative_mul,
         Polynomial.derivative_pow, Polynomial.derivative_C,
-        Polynomial.derivative_X, Polynomial.derivative_C_mul,
-        Polynomial.derivative_X_pow, Polynomial.derivative_sub,
-        Polynomial.derivative_neg, Polynomial.derivative_one,
-        Polynomial.derivative_ofNat, Polynomial.C_0, Polynomial.C_1,
-        zero_mul, mul_zero, one_mul, mul_one, zero_add, add_zero,
-        sub_zero, zero_sub, neg_zero, Nat.cast_ofNat]
+        Polynomial.derivative_X, Polynomial.derivative_ofNat,
+        zero_mul, mul_zero, mul_one, zero_add, add_zero, Nat.cast_ofNat]
   reduce_mod_char!
   -- Fully expand C(compound) into products of atomic C(a_i), so ring_nf
   -- can combine all power-products into atomic C(a_i)^k * X^j form.
   simp only [Polynomial.C_mul, Polynomial.C_pow, Polynomial.C_add,
-    Polynomial.C_neg, Polynomial.C_sub,
     Polynomial.C_0, Polynomial.C_1]
   ring_nf
   reduce_mod_char!
@@ -522,9 +510,8 @@ theorem omega2_coupled_residual_derivative_eq_zero
 theorem omega2_coupled_residual_mem_expand_two_char_two
     (W : WeierstrassCurve K) [CharP K 2] :
     omega2_coupled_residual_char_two W ∈ Set.range (⇑(Polynomial.expand K 2)) := by
-  refine ⟨Polynomial.contract 2 (omega2_coupled_residual_char_two W), ?_⟩
-  exact Polynomial.expand_contract 2 (omega2_coupled_residual_derivative_eq_zero W)
-    (by norm_num)
+  exact ⟨Polynomial.contract 2 (omega2_coupled_residual_char_two W),
+    Polynomial.expand_contract 2 (omega2_coupled_residual_derivative_eq_zero W) (by norm_num)⟩
 
 /-! ### y-coordinate q-th-root (witness-parametric, q=2 char-2)
 
@@ -750,7 +737,7 @@ theorem functionField_eq_intermediateField_adjoin_xy_of_witness
   have h_R_in_adjoin : ∀ r : W.toAffine.CoordinateRing,
       algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField r ∈
         IntermediateField.adjoin K ({x_gen W, y_gen W} : Set _) :=
-    fun r => IntermediateField.algebra_adjoin_le_adjoin K _ (h_alg_top r)
+    fun r ↦ IntermediateField.algebra_adjoin_le_adjoin K _ (h_alg_top r)
   have h_num := h_R_in_adjoin num
   have h_den := h_R_in_adjoin den
   show IsLocalization.mk' W.toAffine.FunctionField num ⟨den, hden_mem⟩ ∈ _
@@ -863,10 +850,7 @@ to identify the result with `mulByInt_y W 2`. -/
 theorem char_two_sq_basis_form (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     [CharP K 2] (a b : W.toAffine.FunctionField) :
     (a + b * y_gen W) ^ 2 = a ^ 2 + b ^ 2 * y_gen W ^ 2 := by
-  have h_2 : (2 : W.toAffine.FunctionField) = 0 := by
-    have : CharP W.toAffine.FunctionField 2 :=
-      charP_of_injective_algebraMap (algebraMap K W.toAffine.FunctionField).injective 2
-    exact CharP.cast_eq_zero W.toAffine.FunctionField 2
+  have h_2 : (2 : W.toAffine.FunctionField) = 0 := natCast_functionField_eq_zero W 2
   ring_nf
   linear_combination (a * b * y_gen W) * h_2
 
@@ -889,10 +873,7 @@ theorem y_gen_sq_weierstrass_char_two (W : WeierstrassCurve K)
   -- h_eq : y_gen² + a₁ * x_gen * y_gen + a₃ * y_gen - (x_gen³ + a₂*x_gen² + a₄*x_gen + a₆) = 0
   -- (with algebraMap K K(E) for the a_i values, since we're in W_KE = W.map (algebraMap K K(E)))
   -- In char 2, - = +, so y² = a₁xy + a₃y + (x³ + a₂x² + a₄x + a₆).
-  have h_2 : (2 : W.toAffine.FunctionField) = 0 := by
-    have : CharP W.toAffine.FunctionField 2 :=
-      charP_of_injective_algebraMap (algebraMap K W.toAffine.FunctionField).injective 2
-    exact CharP.cast_eq_zero W.toAffine.FunctionField 2
+  have h_2 : (2 : W.toAffine.FunctionField) = 0 := natCast_functionField_eq_zero W 2
   -- W_KE's coefficients are algebraMap K K(E) of W's coefficients.
   show _ = _
   have h_a1 : (W_KE W).a₁ = algebraMap K W.toAffine.FunctionField W.a₁ := rfl
@@ -988,7 +969,7 @@ theorem omegaTwoBasisHolds_char_two
     WeierstrassCurve.Affine.polynomialY
   reduce_mod_char!
   simp only [Polynomial.C_mul, Polynomial.C_pow, Polynomial.C_add,
-    Polynomial.C_sub, Polynomial.C_0, Polynomial.C_1]
+    Polynomial.C_0, Polynomial.C_1]
   ring_nf
 
 /-! ### ω_ff at the generic point: K(E)-level basis decomposition
@@ -1020,7 +1001,7 @@ theorem omega_ff_two_basis_decomp_char_two
   -- pattern from MulByIntPullback.lean:401 (aeval_algebraMap_apply twice).
   have h_alg_eq_aeval : ∀ p : Polynomial K,
       algebraMap (Polynomial K) W.toAffine.FunctionField p =
-      Polynomial.aeval (x_gen W) p := fun p => by
+      Polynomial.aeval (x_gen W) p := fun p ↦ by
     show algebraMap (Polynomial K) W.toAffine.FunctionField p =
       Polynomial.aeval (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
         (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X)) p
@@ -1028,8 +1009,7 @@ theorem omega_ff_two_basis_decomp_char_two
           (B := W.toAffine.FunctionField),
         Polynomial.aeval_algebraMap_apply (A := Polynomial K)
           (B := W.toAffine.CoordinateRing),
-        Polynomial.aeval_X_left_apply]
-    rw [← IsScalarTower.algebraMap_apply]
+        Polynomial.aeval_X_left_apply, ← IsScalarTower.algebraMap_apply]
   have h_C_A : algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
       (Affine.CoordinateRing.mk W.toAffine
         (Polynomial.C (omega2_X_coeff_char_two W))) =
@@ -1083,8 +1063,7 @@ theorem psi_ff_two_eq_aeval_char_two
         (B := W.toAffine.FunctionField),
       Polynomial.aeval_algebraMap_apply (A := Polynomial K)
         (B := W.toAffine.CoordinateRing),
-      Polynomial.aeval_X_left_apply]
-  rw [← IsScalarTower.algebraMap_apply]
+      Polynomial.aeval_X_left_apply, ← IsScalarTower.algebraMap_apply]
 
 /-! ### Final composition: squaring identity
 
@@ -1161,10 +1140,7 @@ theorem alpha_0_sq_polynomial_match_char_two
     unfold omega2_coupled_residual_char_two
     rw [map_add, map_mul, map_mul]
   rw [h_residual]
-  have h_2 : (2 : W.toAffine.FunctionField) = 0 := by
-    have : CharP W.toAffine.FunctionField 2 :=
-      charP_of_injective_algebraMap (algebraMap K W.toAffine.FunctionField).injective 2
-    exact CharP.cast_eq_zero W.toAffine.FunctionField 2
+  have h_2 : (2 : W.toAffine.FunctionField) = 0 := natCast_functionField_eq_zero W 2
   field_simp
   linear_combination
     (Polynomial.aeval (x_gen W) (omega2_Y_coeff_char_two W) *
@@ -1217,18 +1193,14 @@ theorem y_qth_root_squared_eq_mulByInt_y_two_of_witnesses
     simp [Polynomial.aeval_C, Polynomial.aeval_X]
   -- Convert h_const to a clean polynomial form: (α₀² + α₁²·C')·ψ³ = A'.
   have h_const' : (α₀ ^ 2 + α₁ ^ 2 * C') * ψ ^ 3 = A' := by
-    have h := h_const
-    have hψ_ne : ψ ≠ 0 := h_psi_ne
     have h2 : (α₀ ^ 2 + α₁ ^ 2 * C') * ψ ^ 3 * ψ = A' * ψ := by
-      linear_combination h
-    exact mul_right_cancel₀ hψ_ne h2
+      linear_combination h_const
+    exact mul_right_cancel₀ h_psi_ne h2
   -- Convert h_Y to the clean polynomial form: α₁²·ψ⁴ = B'.
   have h_Y' : α₁ ^ 2 * ψ ^ 4 = B' := by
-    have h := h_Y
-    have : α₁ ^ 2 * ψ * ψ ^ 3 = B' / ψ ^ 3 * ψ ^ 3 := by
-      rw [h]
-    rw [div_mul_cancel₀ _ (pow_ne_zero 3 h_psi_ne)] at this
-    linear_combination this
+    have h : α₁ ^ 2 * ψ * ψ ^ 3 = B' / ψ ^ 3 * ψ ^ 3 := by rw [h_Y]
+    rw [div_mul_cancel₀ _ (pow_ne_zero 3 h_psi_ne)] at h
+    linear_combination h
   -- Now refactor LHS of goal: a₁·x·y + a₃·y + cubic = ψ·y + cubic (using h_psi_form).
   rw [show algebraMap K W.toAffine.FunctionField W.a₁ * x_gen W * y_gen W +
         algebraMap K W.toAffine.FunctionField W.a₃ * y_gen W +
@@ -1277,10 +1249,7 @@ with cube root instead of square root. -/
 theorem char_three_cube_basis_form (W : WeierstrassCurve K)
     [W.toAffine.IsElliptic] [CharP K 3] (a b : W.toAffine.FunctionField) :
     (a + b * y_gen W) ^ 3 = a ^ 3 + b ^ 3 * y_gen W ^ 3 := by
-  have h_3 : (3 : W.toAffine.FunctionField) = 0 := by
-    have : CharP W.toAffine.FunctionField 3 :=
-      charP_of_injective_algebraMap (algebraMap K W.toAffine.FunctionField).injective 3
-    exact CharP.cast_eq_zero W.toAffine.FunctionField 3
+  have h_3 : (3 : W.toAffine.FunctionField) = 0 := natCast_functionField_eq_zero W 3
   ring_nf
   linear_combination (a ^ 2 * b * y_gen W + a * b ^ 2 * y_gen W ^ 2) * h_3
 
@@ -1290,10 +1259,7 @@ theorem char_three_cube_basis_form (W : WeierstrassCurve K)
 theorem char_five_quintic_basis_form (W : WeierstrassCurve K)
     [W.toAffine.IsElliptic] [CharP K 5] (a b : W.toAffine.FunctionField) :
     (a + b * y_gen W) ^ 5 = a ^ 5 + b ^ 5 * y_gen W ^ 5 := by
-  have h_5 : (5 : W.toAffine.FunctionField) = 0 := by
-    have : CharP W.toAffine.FunctionField 5 :=
-      charP_of_injective_algebraMap (algebraMap K W.toAffine.FunctionField).injective 5
-    exact CharP.cast_eq_zero W.toAffine.FunctionField 5
+  have h_5 : (5 : W.toAffine.FunctionField) = 0 := natCast_functionField_eq_zero W 5
   ring_nf
   linear_combination
     (a ^ 4 * b * y_gen W + 2 * a ^ 3 * b ^ 2 * y_gen W ^ 2 +
@@ -1908,7 +1874,6 @@ theorem psi_2_sq_plus_cubic_x_form_char_three
     rw [Nat.cast_ofNat]
     show Polynomial.C ((3 : ℕ) : K) = 0
     rw [show ((3 : ℕ) : K) = 0 by exact_mod_cast h_3, Polynomial.C_0]
-  push_cast
   simp only [Polynomial.C_add, Polynomial.C_mul, Polynomial.C_pow, Polynomial.C_ofNat]
   linear_combination
     -(Polynomial.C W.a₂ * Polynomial.X ^ 2 +
@@ -2246,7 +2211,7 @@ theorem omega_ff_three_decomp_via_nat_degree_bound
   -- Bridge: algebraMap CR KE ∘ mk W ∘ Polynomial.C = aeval x_gen
   have h_alg_eq_aeval : ∀ p : Polynomial K,
       algebraMap (Polynomial K) W.toAffine.FunctionField p =
-      Polynomial.aeval (x_gen W) p := fun p => by
+      Polynomial.aeval (x_gen W) p := fun p ↦ by
     show algebraMap (Polynomial K) W.toAffine.FunctionField p =
       Polynomial.aeval (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
         (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X)) p
@@ -2254,8 +2219,7 @@ theorem omega_ff_three_decomp_via_nat_degree_bound
           (B := W.toAffine.FunctionField),
         Polynomial.aeval_algebraMap_apply (A := Polynomial K)
           (B := W.toAffine.CoordinateRing),
-        Polynomial.aeval_X_left_apply]
-    rw [← IsScalarTower.algebraMap_apply]
+        Polynomial.aeval_X_left_apply, ← IsScalarTower.algebraMap_apply]
   -- Bridge: algebraMap (mk W X) = y_gen W
   have h_X_y : algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
       (Affine.CoordinateRing.mk W.toAffine Polynomial.X) = y_gen W := by
@@ -2266,7 +2230,7 @@ theorem omega_ff_three_decomp_via_nat_degree_bound
   have h_C_aeval : ∀ p : Polynomial K,
       algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
         (Affine.CoordinateRing.mk W.toAffine (Polynomial.C p)) =
-      Polynomial.aeval (x_gen W) p := fun p => by
+      Polynomial.aeval (x_gen W) p := fun p ↦ by
     show algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
       (algebraMap (Polynomial K) W.toAffine.CoordinateRing p) = _
     rw [← IsScalarTower.algebraMap_apply]
@@ -2274,7 +2238,7 @@ theorem omega_ff_three_decomp_via_nat_degree_bound
   unfold ω_ff
   conv_lhs => rw [h_decomp_poly]
   simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
-    map_add, map_sum, map_mul, map_pow, h_C_aeval, h_X_y]
+    map_add, map_mul, map_pow, h_C_aeval, h_X_y]
   ring
 
 set_option maxHeartbeats 1000000 in
@@ -2313,7 +2277,7 @@ theorem omega_ff_three_basis_decomp_via_witness_char_three
   rw [h_sq_mul, h_cube_mul, h_quartic_mul, h_quintic_mul]
   -- Now goal: sums of {1, y_gen} basis terms = X_reduced + Y_reduced · y_gen
   -- after aeval distributes.
-  simp only [map_add, map_mul, map_pow, map_sub, map_neg, map_ofNat,
+  simp only [map_add, map_mul, map_pow, map_sub, map_ofNat,
     Polynomial.aeval_C, Polynomial.aeval_X]
   unfold cubic_x
   simp only [map_add, map_mul, map_pow, Polynomial.aeval_C, Polynomial.aeval_X]
@@ -2572,7 +2536,7 @@ theorem ψ_2_ne_zero_of_char_three {K' : Type*} [CommRing K'] [Nontrivial K'] [C
   unfold WeierstrassCurve.Affine.polynomialY
   intro h
   -- Take coeff at degree 1: C(C 2) = 0, so C 2 = 0, so 2 = 0 — contradicting char 3.
-  have h_coeff_1 := congrArg (fun p => Polynomial.coeff p 1) h
+  have h_coeff_1 := congrArg (Polynomial.coeff · 1) h
   simp only [Polynomial.coeff_zero, Polynomial.coeff_add, Polynomial.coeff_C_mul,
     Polynomial.coeff_X_one, Polynomial.coeff_C, mul_one] at h_coeff_1
   -- After simp: C(2 : K') = 0 (or close to it)
@@ -2793,21 +2757,18 @@ theorem mulByInt_two_pullback_y_gen_sq_root_unconditional
           (polyExpandRoot (omega2_coupled_residual_char_two W)
             (h_card ▸ omega2_coupled_residual_mem_expand_two_char_two W : _))) ^ 2 =
         Polynomial.aeval (x_gen W) (omega2_coupled_residual_char_two W) := by
-      have h := polyExpandRoot_aeval_pow_eq W (omega2_coupled_residual_char_two W)
+      simpa [h_card] using polyExpandRoot_aeval_pow_eq W (omega2_coupled_residual_char_two W)
         (h_card ▸ omega2_coupled_residual_mem_expand_two_char_two W : _) h_pow (x_gen W)
-      simpa [h_card] using h
     have h_alpha_1 :
         (Polynomial.aeval (x_gen W)
           (polyExpandRoot (omega2_Y_coeff_char_two W)
             (h_card ▸ omega2_Y_coeff_mem_expand_two_char_two W : _))) ^ 2 =
         Polynomial.aeval (x_gen W) (omega2_Y_coeff_char_two W) := by
-      have h := polyExpandRoot_aeval_pow_eq W (omega2_Y_coeff_char_two W)
+      simpa [h_card] using polyExpandRoot_aeval_pow_eq W (omega2_Y_coeff_char_two W)
         (h_card ▸ omega2_Y_coeff_mem_expand_two_char_two W : _) h_pow (x_gen W)
-      simpa [h_card] using h
-    have h_sq := y_qth_root_squared_eq_mulByInt_y_two_of_witnesses W h_card h_psi_ne
-      h_alpha_0 h_alpha_1
     rw [h_card]
-    exact h_sq
+    exact y_qth_root_squared_eq_mulByInt_y_two_of_witnesses W h_card h_psi_ne
+      h_alpha_0 h_alpha_1
   · rw [h_card]; decide
 
 /-! ### q=2 char=2 final inclusion: `Im([q]*) ⊆ Im(π*)`
