@@ -119,13 +119,8 @@ theorem vle_mul_pow_cancel_left
   | zero => simpa using h
   | succ N ih =>
     apply ih
-    rw [pow_succ] at h
-    have h' : w.vle ((a ^ N * x) * a) ((a ^ N * y) * a) := by
-      have e1 : a ^ N * a * x = (a ^ N * x) * a := by ring
-      have e2 : a ^ N * a * y = (a ^ N * y) * a := by ring
-      rw [e1, e2] at h
-      exact h
-    exact w.vle_mul_cancel ha h'
+    rw [pow_succ, mul_right_comm (a ^ N) a x, mul_right_comm (a ^ N) a y] at h
+    exact w.vle_mul_cancel ha h
 
 omit [TopologicalSpace A] [IsTopologicalRing A] [PlusSubring A] in
 /-- **σ-power non-vanishing primitive** (T050 valuation arithmetic
@@ -146,8 +141,7 @@ theorem not_vle_zero_pow_of_not_vle_zero
     intro h
     apply ih
     rw [pow_succ] at h
-    have h' : w.vle (a ^ N * a) (0 * a) := by rwa [zero_mul]
-    exact w.vle_mul_cancel ha h'
+    exact w.vle_mul_cancel ha (by rwa [zero_mul])
 
 omit [IsTopologicalRing A] in
 /-- **Base rationalOpen inclusion via corrected multi-clearing**
@@ -182,8 +176,8 @@ theorem rationalOpen_subset_via_corrected_multi_clearing
     rationalOpen (insert f T_base) s ⊆ rationalOpen T_D D_s := by
   intro v hv
   obtain ⟨hv_spa, hv_per_c, _hv_s_ne⟩ := hv
-  have hv_f : v.vle f s := hv_per_c f (Finset.mem_insert_self f T_base)
-  obtain ⟨h_prod, h_lower⟩ := h_per_w v hv_spa hv_f
+  obtain ⟨h_prod, h_lower⟩ :=
+    h_per_w v hv_spa (hv_per_c f (Finset.mem_insert_self f T_base))
   obtain ⟨h_per_t, h_D_s_ne⟩ :=
     vle_of_dominating_unit_multi_corrected_at v h_prod h_lower
   exact ⟨hv_spa, h_per_t, h_D_s_ne⟩
