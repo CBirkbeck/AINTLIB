@@ -179,7 +179,7 @@ theorem l6_v_1_1_sepDegree_eq_pointCount_of_witnesses
     (h_lemma5 :
       ((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
           ((isogOneSub_negFrobenius W hq).pullback (x_gen W)))).support.sum
-        (fun P => (-((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
+        (fun P ↦ (-((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
           ((isogOneSub_negFrobenius W hq).pullback (x_gen W))) P)).toNat) =
         2 * pointCount W.toAffine) :
     (isogOneSub_negFrobenius W hq).sepDegree = pointCount W.toAffine := by
@@ -225,7 +225,7 @@ theorem witness_pc_sepDeg_of_witnesses
     (h_lemma5 :
       ((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
           ((isogOneSub_negFrobenius W hq).pullback (x_gen W)))).support.sum
-        (fun P => (-((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
+        (fun P ↦ (-((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
           ((isogOneSub_negFrobenius W hq).pullback (x_gen W))) P)).toNat) =
         2 * pointCount W.toAffine) :
     (isogOneSub_negFrobenius W hq).sepDegree = pointCount W.toAffine :=
@@ -275,14 +275,14 @@ theorem l6_v_1_1_sepDegree_eq_pointCount_of_primitive_witnesses
       letI := data.commRing
       letI := data.isDedekindDomain
       letI := data.algPoly
-      ∀ P ∈ primesOverFinset
+      ∀ P ∈ IsDedekindDomain.primesOverFinset
         (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
         data.ordAt P = -2)
     (h_inertia_one :
       letI := data.commRing
       letI := data.isDedekindDomain
       letI := data.algPoly
-      ∀ P ∈ primesOverFinset
+      ∀ P ∈ IsDedekindDomain.primesOverFinset
         (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
         Ideal.inertiaDeg
           (Curves.RamificationAtInfinity.xIdeal (k := K)) P = 1)
@@ -290,7 +290,7 @@ theorem l6_v_1_1_sepDegree_eq_pointCount_of_primitive_witnesses
       letI := data.commRing
       letI := data.isDedekindDomain
       letI := data.algPoly
-      (primesOverFinset
+      (IsDedekindDomain.primesOverFinset
         (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier).card =
       pointCount W.toAffine)
     -- projectiveDivisorOf-side witnesses (per-point pole orders, support card):
@@ -322,7 +322,7 @@ theorem l6_v_1_1_sepDegree_eq_pointCount_of_primitive_witnesses
   have h_lemma5 :
       ((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
           ((isogOneSub_negFrobenius W hq).pullback (x_gen W)))).support.sum
-        (fun P => (-((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
+        (fun P ↦ (-((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
           ((isogOneSub_negFrobenius W hq).pullback (x_gen W))) P)).toNat) =
         2 * pointCount W.toAffine :=
     lemma5_of_pole_orders_and_support_card W hq h_pole_orders h_support_card
@@ -363,7 +363,7 @@ theorem hasse_bound_from_L6_witnesses
     (h_lemma5 :
       ((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
           ((isogOneSub_negFrobenius W hq).pullback (x_gen W)))).support.sum
-        (fun P => (-((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
+        (fun P ↦ (-((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
           ((isogOneSub_negFrobenius W hq).pullback (x_gen W))) P)).toNat) =
         2 * pointCount W.toAffine)
     -- qf_nonneg witness (the remaining substantive Hasse witness):
