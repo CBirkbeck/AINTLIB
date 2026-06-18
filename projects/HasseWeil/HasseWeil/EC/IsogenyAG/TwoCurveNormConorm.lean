@@ -308,6 +308,164 @@ theorem eq_pointValuation_of_center
     rw [Valuation.isEquiv_iff_valuationSubring]; rw [hA, hBv] at hEq; exact hEq.symm
   exact Valuation.isEquiv_iff_eq_of_surjective_withZeroInt _ _ hwsurj hpvsurj h_isEquiv
 
+/-! ### The point-map image of a `B`-prime over `m_Q` is `Q` (the fibre matching, value-level)
+
+For a `B`-prime `v` lying over the affine place `m_Q` of `E₂`, the point `P` of `E₁` cut out by
+`v` (place dictionary) satisfies `placeRestrictionPointMap φ P = Q`.  Crucially this is proved at the
+*value* level — `φ^*(x_gen₂)`, `φ^*(y_gen₂)` evaluate at `P` to `Q.x`, `Q.y` — which needs **only**
+`v` over `m_Q` (a generator `x_gen₂ − Q.x = algebraMap(b)` with `b ∈ m_Q` pulls back to a `B`-element
+in `v.asIdeal`), *not* the exact comap-valuation equality (and hence not the ramification index
+`e = 1`).  The image is then read off by `placeRestrictionPointMap_residue_agreement`. -/
+
+set_option synthInstance.maxHeartbeats 400000 in
+set_option maxHeartbeats 800000 in
+/-- **The place-restriction image of a `B`-prime over `m_Q` is `Q`** (the fibre matching).  Given a
+`B`-prime `v` whose point `P` (place dictionary: `v.valuation = pointValuation P`) lies over the
+affine place `m_Q` of `E₂` (`v.asIdeal.under = m_Q`), the place-restriction point map sends `P` to
+`Q`: `placeRestrictionPlaceImage φ (affine P) = affine Q`.  Value-level (no `e = 1`). -/
+theorem placeRestrictionPlaceImage_affine_eq_of_bPrime
+    (φ : HasseWeil.Isogeny W₁ W₂)
+    [algKL : Algebra W₂.toAffine.FunctionField W₁.toAffine.FunctionField]
+    [IsScalarTower F W₂.toAffine.FunctionField W₁.toAffine.FunctionField]
+    [FiniteDimensional W₂.toAffine.FunctionField W₁.toAffine.FunctionField]
+    [Algebra.IsSeparable W₂.toAffine.FunctionField W₁.toAffine.FunctionField]
+    [algCR1 : Algebra (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing W₁.toAffine.FunctionField]
+    [IsScalarTower (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+      W₂.toAffine.FunctionField W₁.toAffine.FunctionField]
+    [IsDedekindDomain (NormConormIntegralClosure.B
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))]
+    [IsFractionRing (NormConormIntegralClosure.B
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))
+      W₁.toAffine.FunctionField]
+    (halg : ∀ g : W₂.toAffine.FunctionField,
+      algebraMap W₂.toAffine.FunctionField W₁.toAffine.FunctionField g = φ.pullback g)
+    (v : IsDedekindDomain.HeightOneSpectrum (NormConormIntegralClosure.B
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))))
+    (P : (W_smooth W₁).SmoothPoint) (Q : (W_smooth W₂).SmoothPoint)
+    (hP : v.valuation W₁.toAffine.FunctionField = (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P)
+    (hQ : v.asIdeal.under (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing =
+      (⟨W₂⟩ : SmoothPlaneCurve F).maximalIdealAt Q) :
+    placeRestrictionPlaceImage φ (ProjectiveSmoothPoint.affine P) =
+      ProjectiveSmoothPoint.affine Q := by
+  classical
+  -- the scalar tower `F[E₂] → B → K(E₁)` (mathlib's integral-closure tower) — for `hviaB` below.
+  haveI tw1B : IsScalarTower (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+      (NormConormIntegralClosure.B
+        (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))
+      W₁.toAffine.FunctionField := inferInstance
+  -- the `algCR1`-via-B vs `φ.pullback`-via-`K(E₂)` agreement on `F[E₂]` (both equal `algCR1`).
+  have halgB : ∀ b : (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing,
+      φ.pullback (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+        W₂.toAffine.FunctionField b) =
+      algebraMap (NormConormIntegralClosure.B
+        (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))
+        W₁.toAffine.FunctionField
+        (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+          (NormConormIntegralClosure.B
+            (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) b) := by
+    intro b
+    rw [← IsScalarTower.algebraMap_apply (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+      (NormConormIntegralClosure.B
+        (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))
+      W₁.toAffine.FunctionField b, ← halg,
+      IsScalarTower.algebraMap_apply (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+        W₂.toAffine.FunctionField W₁.toAffine.FunctionField b]
+  -- A coordinate-ring element `b ∈ m_Q` pulls back to a `B`-element of `v.asIdeal`, so it has
+  -- `pointValuation P`-value `< 1`.
+  have hkey : ∀ b : (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing,
+      b ∈ (⟨W₂⟩ : SmoothPlaneCurve F).maximalIdealAt Q →
+      (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P
+        (φ.pullback (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+          W₂.toAffine.FunctionField b)) < 1 := by
+    intro b hb
+    -- `algebraMap_{F[E₂]→B} b ∈ v.asIdeal` (since `b ∈ m_Q = v.asIdeal.under`)
+    have hmem : algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+        (NormConormIntegralClosure.B
+          (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) b ∈ v.asIdeal := by
+      have : b ∈ v.asIdeal.under (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing := by rw [hQ]; exact hb
+      rwa [Ideal.mem_under] at this
+    -- `φ^*(algebraMap b) = algebraMap_B (algebraMap_{F[E₂]→B} b)`, value `< 1 ↔ ∈ v.asIdeal`.
+    rw [halgB b, ← hP, IsDedekindDomain.HeightOneSpectrum.valuation_lt_one_iff_mem]
+    exact hmem
+  -- `x_gen₂ − Q.x = algebraMap (X − Q.x)`, `X − Q.x ∈ m_Q`; pull back ⟹ `EvaluatesTo P (φ^*x_gen₂) Q.x`.
+  have hbx_mem : (algebraMap (Polynomial F) (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing Polynomial.X -
+      algebraMap F (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing Q.x) ∈
+      (⟨W₂⟩ : SmoothPlaneCurve F).maximalIdealAt Q := by
+    have hx : (⟨W₂⟩ : SmoothPlaneCurve F).evalAt Q
+        (algebraMap (Polynomial F) W₂.toAffine.CoordinateRing Polynomial.X) = Q.x := by
+      rw [show algebraMap (Polynomial F) W₂.toAffine.CoordinateRing Polynomial.X =
+        WeierstrassCurve.Affine.CoordinateRing.mk W₂.toAffine (Polynomial.C Polynomial.X) from rfl]
+      exact (⟨W₂⟩ : SmoothPlaneCurve F).evalAt_x Q
+    have h0 : (⟨W₂⟩ : SmoothPlaneCurve F).evalAt Q
+        (algebraMap (Polynomial F) W₂.toAffine.CoordinateRing Polynomial.X -
+          algebraMap F W₂.toAffine.CoordinateRing Q.x) = 0 :=
+      (map_sub ((⟨W₂⟩ : SmoothPlaneCurve F).evalAt Q) _ _).trans
+        (by rw [hx]; exact sub_eq_zero_of_eq ((⟨W₂⟩ : SmoothPlaneCurve F).evalAt_algebraMap Q Q.x).symm)
+    exact (⟨W₂⟩ : SmoothPlaneCurve F).ker_evalAt Q ▸ RingHom.mem_ker.mpr h0
+  have hby_mem : (AdjoinRoot.root W₂.toAffine.polynomial -
+      algebraMap F (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing Q.y) ∈
+      (⟨W₂⟩ : SmoothPlaneCurve F).maximalIdealAt Q := by
+    have hy : (⟨W₂⟩ : SmoothPlaneCurve F).evalAt Q (AdjoinRoot.root W₂.toAffine.polynomial) = Q.y :=
+      (⟨W₂⟩ : SmoothPlaneCurve F).evalAt_y Q
+    have h0 : (⟨W₂⟩ : SmoothPlaneCurve F).evalAt Q
+        (AdjoinRoot.root W₂.toAffine.polynomial -
+          algebraMap F W₂.toAffine.CoordinateRing Q.y) = 0 :=
+      (map_sub ((⟨W₂⟩ : SmoothPlaneCurve F).evalAt Q) _ _).trans
+        (by rw [hy]; exact sub_eq_zero_of_eq ((⟨W₂⟩ : SmoothPlaneCurve F).evalAt_algebraMap Q Q.y).symm)
+    exact (⟨W₂⟩ : SmoothPlaneCurve F).ker_evalAt Q ▸ RingHom.mem_ker.mpr h0
+  -- the two `EvaluatesTo` facts at `P`
+  -- `x_gen₂ = algebraMap_{F[E₂]→K(E₂)} (algebraMap_{F[X]→F[E₂]} X)`; `y_gen₂ = algebraMap (root)`.
+  have hxgen : x_gen W₂ = algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+      W₂.toAffine.FunctionField
+      (algebraMap (Polynomial F) (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing Polynomial.X) := rfl
+  have hygen : y_gen W₂ = algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+      W₂.toAffine.FunctionField (AdjoinRoot.root W₂.toAffine.polynomial) := rfl
+  have hEvX : EvaluatesTo W₁ P (φ.pullback (x_gen W₂)) Q.x := by
+    unfold EvaluatesTo
+    have hrw : φ.pullback (x_gen W₂) - algebraMap F W₁.toAffine.FunctionField Q.x =
+        φ.pullback (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+          W₂.toAffine.FunctionField
+          (algebraMap (Polynomial F) (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing Polynomial.X -
+            algebraMap F (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing Q.x)) := by
+      rw [map_sub, map_sub, hxgen, ← φ.pullback.commutes Q.x,
+        ← IsScalarTower.algebraMap_apply F (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+          W₂.toAffine.FunctionField Q.x]
+    rw [hrw]
+    exact hkey _ hbx_mem
+  have hEvY : EvaluatesTo W₁ P (φ.pullback (y_gen W₂)) Q.y := by
+    unfold EvaluatesTo
+    have hrw : φ.pullback (y_gen W₂) - algebraMap F W₁.toAffine.FunctionField Q.y =
+        φ.pullback (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+          W₂.toAffine.FunctionField
+          (AdjoinRoot.root W₂.toAffine.polynomial -
+            algebraMap F (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing Q.y)) := by
+      rw [map_sub, map_sub, hygen, ← φ.pullback.commutes Q.y,
+        ← IsScalarTower.algebraMap_apply F (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+          W₂.toAffine.FunctionField Q.y]
+    rw [hrw]
+    exact hkey _ hby_mem
+  -- regularity of the pulled-back generators at `P` (both `≤ 1`): `x_gen₂`, `y_gen₂` are
+  -- `algebraMap`-images, so their pullbacks are `B`-elements, hence `v`-integral.
+  have hregGen : ∀ b : (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing,
+      (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P
+        (φ.pullback (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+          W₂.toAffine.FunctionField b)) ≤ 1 := by
+    intro b
+    rw [halgB b, ← hP]
+    exact v.valuation_le_one (K := W₁.toAffine.FunctionField) _
+  -- `P ∉ poleLocus` (both generators are regular at `P`), and the residue agreement gives the image.
+  have hPnotMem : P ∉ twoCurvePoleLocus φ := by
+    intro hmem
+    rcases hmem with hx | hy
+    · exact hx (by rw [hxgen]; exact hregGen _)
+    · exact hy (by rw [hygen]; exact hregGen _)
+  obtain ⟨h', himg⟩ := placeRestrictionPointMap_residue_agreement φ P hPnotMem hEvX hEvY
+  -- `placeRestrictionPlaceImage φ (affine P) = (placeRestrictionPointMap φ P.toAffinePoint).toProj`
+  have hgoal : placeRestrictionPlaceImage φ (ProjectiveSmoothPoint.affine P) =
+      (placeRestrictionPointMap φ P.toAffinePoint).toProjectiveSmoothPoint := rfl
+  rw [hgoal, himg]
+  rfl
+
 /-! ### The affine count identity (the per-place norm–conorm, the deep leaf)
 
 The mathematical content of Silverman II.3.6, CoordHom-free, is the per-affine-place identity: for
