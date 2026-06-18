@@ -74,15 +74,13 @@ example : IsTopologicalRing ↥(TateAlgebra A) := inferInstance
 (it's the composition of the continuous embedding into `MvPowerSeries` and
 the continuous coefficient projection). -/
 theorem continuous_coeff (n : ℕ) :
-    Continuous (fun f : ↥(TateAlgebra A) => coeff n f) := by
-  apply Continuous.comp
-  · exact MvPowerSeries.WithPiTopology.continuous_coeff A (toIndex n)
-  · exact continuous_subtype_val
+    Continuous (fun f : ↥(TateAlgebra A) => coeff n f) :=
+  (MvPowerSeries.WithPiTopology.continuous_coeff A (toIndex n)).comp continuous_subtype_val
 
 /-- `evalZeroHom` is continuous (it extracts the 0-th coefficient). -/
 theorem continuous_evalZeroHom :
-    Continuous (evalZeroHom : ↥(TateAlgebra A) → A) := by
-  exact continuous_coeff 0
+    Continuous (evalZeroHom : ↥(TateAlgebra A) → A) :=
+  continuous_coeff 0
 
 end TateAlgebra
 
@@ -765,9 +763,8 @@ theorem tateAlgNhd_leftMul_of_principal [IsTateRing A] (P : PairOfDefinition A)
     obtain ⟨b_p, hb_p_mem, hb_p_eq⟩ := hy_coeff p.2
     by_cases hp : p.1 ∈ S
     · -- Bad case: use Sub-task B via `hm_spec`.
-      have hb_lower : b_p ∈ P.I ^ (m_fn p.1) := by
-        have hle : m_fn p.1 ≤ j := hj_ge_m p.1 (hS_finite.mem_toFinset.mpr hp)
-        exact Ideal.pow_le_pow_right hle hb_p_mem
+      have hb_lower : b_p ∈ P.I ^ (m_fn p.1) :=
+        Ideal.pow_le_pow_right (hj_ge_m p.1 (hS_finite.mem_toFinset.mpr hp)) hb_p_mem
       obtain ⟨c, hc_mem, hc_eq⟩ := hm_spec p.1 b_p hb_lower
       refine ⟨c, hc_mem, ?_⟩
       rw [hc_eq, hb_p_eq]
@@ -1101,7 +1098,7 @@ theorem tateAlgebraTopology'_completeSpace [IsTateRing A] [T2Space A]
       rw [@uniformity_eq_comap_nhds_zero' _ _ _ haddgrp]
       exact Filter.mem_comap.mpr ⟨(tateAlgNhd P n : Set _),
         tateAlgBasis'.hasBasis_nhds_zero.mem_of_mem (i := n) trivial,
-        fun p hp => by simp only [Set.mem_preimage, sub_eq_add_neg] at hp ⊢; exact hp⟩
+        fun p hp => by simpa only [Set.mem_preimage, sub_eq_add_neg] using hp⟩
     obtain ⟨N, hN⟩ := cauchySeq_iff.mp hu _ hmem
     exact ⟨N, fun m hm k hk => by
       have h1 := hN m hm k hk
@@ -1228,8 +1225,8 @@ theorem tateAlgebraTopology'_completeSpace [IsTateRing A] [T2Space A]
     -- The sequence (coeff l (u m))_m converges to c l.
     have htend : Tendsto (fun m => MvPowerSeries.coeff l (u n).val -
         MvPowerSeries.coeff l (u m).val)
-        atTop (nhds (MvPowerSeries.coeff l (u n).val - c l)) := by
-      exact tendsto_const_nhds.sub (hc l)
+        atTop (nhds (MvPowerSeries.coeff l (u n).val - c l)) :=
+      tendsto_const_nhds.sub (hc l)
     -- For m ≥ N, the value is in image P.I^k (closed set).
     have hev : ∀ᶠ m in atTop,
         MvPowerSeries.coeff l (u n).val - MvPowerSeries.coeff l (u m).val ∈
@@ -1271,10 +1268,7 @@ theorem tateAlgNhd_preimage_eq (P : PairOfDefinition A) (n : ℕ) :
   simp only [Set.mem_preimage, SetLike.mem_coe]
   constructor
   · rintro ⟨y, hy, heq⟩
-    have : x = y := by
-      apply_fun (pairSubring P).subtype using Subtype.val_injective
-      exact heq.symm
-    rw [this]; exact hy
+    exact (Subtype.val_injective heq) ▸ hy
   · exact fun hx => ⟨x, hx, rfl⟩
 
 omit [IsTopologicalRing A] in
@@ -2387,7 +2381,7 @@ theorem tateAlgebra₂Topology'_completeSpace [IsTateRing A] [T2Space A]
       rw [@uniformity_eq_comap_nhds_zero' _ _ _ haddgrp]
       exact Filter.mem_comap.mpr ⟨(tateAlgNhd₂ P n : Set _),
         tateAlgBasis'₂.hasBasis_nhds_zero.mem_of_mem (i := n) trivial,
-        fun p hp => by simp only [Set.mem_preimage, sub_eq_add_neg] at hp ⊢; exact hp⟩
+        fun p hp => by simpa only [Set.mem_preimage, sub_eq_add_neg] using hp⟩
     obtain ⟨N, hN⟩ := cauchySeq_iff.mp hu _ hmem
     exact ⟨N, fun m hm k hk => by
       have h1 := hN m hm k hk
@@ -2467,8 +2461,8 @@ theorem tateAlgebra₂Topology'_completeSpace [IsTateRing A] [T2Space A]
       simp only [MvPowerSeries.coeff_apply, f]
     have htend : Tendsto (fun m => MvPowerSeries.coeff l (u n).val -
         MvPowerSeries.coeff l (u m).val)
-        atTop (nhds (MvPowerSeries.coeff l (u n).val - c l)) := by
-      exact tendsto_const_nhds.sub (hc l)
+        atTop (nhds (MvPowerSeries.coeff l (u n).val - c l)) :=
+      tendsto_const_nhds.sub (hc l)
     have hev : ∀ᶠ m in atTop,
         MvPowerSeries.coeff l (u n).val - MvPowerSeries.coeff l (u m).val ∈
           (Subtype.val '' ((P.I ^ k : Ideal ↥P.A₀) : Set ↥P.A₀) : Set A) := by
@@ -2973,10 +2967,7 @@ private theorem isRestricted₂_of_eventually_zero
   · -- Otherwise `N ≤ s 0 ∨ N ≤ s 1`, so `h s = 0 ∈ U` contradicts `hs`.
     exfalso
     push_neg at h_in_box
-    have h_ge : N ≤ s 0 ∨ N ≤ s 1 := by
-      rcases lt_or_ge (s 0) N with h0 | h0
-      · exact Or.inr (h_in_box h0)
-      · exact Or.inl h0
+    have h_ge : N ≤ s 0 ∨ N ≤ s 1 := by omega
     exact hs (by rw [hh s h_ge]; exact h0U)
 
 /-- The box-truncation of `g ∈ A⟨X, Y⟩` at size `N × N`: keep coefficients at
@@ -2989,10 +2980,7 @@ private noncomputable def truncTateC₂ (g : ↥(TateAlgebra₂ A)) (N : ℕ) :
     (fun l hl => by
       simp only [ite_eq_right_iff, and_imp]
       intro h0 h1
-      exfalso
-      rcases hl with hl | hl
-      · omega
-      · omega)⟩
+      omega)⟩
 
 private theorem truncTateC₂_val (g : ↥(TateAlgebra₂ A)) (N : ℕ)
     (l : Fin 2 →₀ ℕ) :
@@ -3003,10 +2991,7 @@ private theorem truncTateC₂_coeff_outside (g : ↥(TateAlgebra₂ A)) (N : ℕ
     (truncTateC₂ g N).val l = 0 := by
   simp only [truncTateC₂_val, ite_eq_right_iff, and_imp]
   intro h0 h1
-  exfalso
-  rcases hl with hl | hl
-  · omega
-  · omega
+  omega
 
 set_option linter.unusedSectionVars false in
 /-- Polynomials (elements with box-finite support) are dense in `TateAlgebra₂ A`
@@ -3176,12 +3161,9 @@ theorem tateAlgebra₂_polynomial_decomp (g : ↥(TateAlgebra₂ A)) (N : ℕ)
             Finsupp.single (1 : Fin 2) j) g.val) := by
     change (Subring.subtype _) _ = _
     rw [map_sum]
-    apply Finset.sum_congr rfl
-    intros i _
+    refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_sum]
-    apply Finset.sum_congr rfl
-    intros j _
-    exact TateAlgebra₂_monomial_val _ i j
+    exact Finset.sum_congr rfl fun j _ => TateAlgebra₂_monomial_val _ i j
   rw [hRHS_val_eq]
   -- Compute the value at l via Finset.sum_apply' + coeff_monomial.
   -- (∑_i ∑_j monomial_ij c_ij) l = ∑_i ∑_j (monomial_ij c_ij) l
@@ -3202,12 +3184,9 @@ theorem tateAlgebra₂_polynomial_decomp (g : ↥(TateAlgebra₂ A)) (N : ℕ)
           Finsupp.single (1 : Fin 2) j)
           (MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) i +
             Finsupp.single (1 : Fin 2) j) g.val)) l).symm, map_sum]
-    apply Finset.sum_congr rfl
-    intros i _
+    refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_sum]
-    apply Finset.sum_congr rfl
-    intros j _
-    exact MvPowerSeries.coeff_monomial _ _ _
+    exact Finset.sum_congr rfl fun j _ => MvPowerSeries.coeff_monomial _ _ _
   rw [hsum_val]
   -- Split cases on whether l is in the box.
   by_cases hl : l 0 < N ∧ l 1 < N
@@ -3238,11 +3217,7 @@ theorem tateAlgebra₂_polynomial_decomp (g : ↥(TateAlgebra₂ A)) (N : ℕ)
     · intro h
       exfalso; exact h (Finset.mem_range.mpr h0)
   · push_neg at hl
-    have hN_apply : g.val l = 0 := by
-      apply hN
-      rcases Nat.lt_or_ge (l 0) N with h0 | h0
-      · exact Or.inr (hl h0)
-      · exact Or.inl h0
+    have hN_apply : g.val l = 0 := hN l (by omega)
     rw [hN_apply]
     symm
     apply Finset.sum_eq_zero
@@ -3252,13 +3227,9 @@ theorem tateAlgebra₂_polynomial_decomp (g : ↥(TateAlgebra₂ A)) (N : ℕ)
     rw [if_neg]
     intro heq
     have h_l_i : l 0 = i := by
-      have := congrArg (fun f : Fin 2 →₀ ℕ => f 0) heq
-      simp at this
-      exact this
+      simpa using congrArg (fun f : Fin 2 →₀ ℕ => f 0) heq
     have h_l_j : l 1 = j := by
-      have := congrArg (fun f : Fin 2 →₀ ℕ => f 1) heq
-      simp at this
-      exact this
+      simpa using congrArg (fun f : Fin 2 →₀ ℕ => f 1) heq
     have h_i_lt : i < N := Finset.mem_range.mp hi
     have h_j_lt : j < N := Finset.mem_range.mp hj
     rw [h_l_i] at hl
