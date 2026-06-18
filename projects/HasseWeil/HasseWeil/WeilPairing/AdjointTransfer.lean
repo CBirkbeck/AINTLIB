@@ -123,7 +123,7 @@ theorem eq_of_weilPairing_eq_right (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0)
   have hkey : ∀ (S : W.toAffine.Point) (hS : ℓ • S = 0),
       weilPairing W ℓ hℓ S (T₁ - T₂) hS hD = 1 := by
     intro S hS
-    have hadd : ℓ • (T₁ - T₂ + T₂) = 0 := by rw [sub_add_cancel]; exact hT₁
+    have hadd : ℓ • (T₁ - T₂ + T₂) = 0 := by rwa [sub_add_cancel]
     have h1 := weilPairing_mul_right W ℓ hℓ S (T₁ - T₂) T₂ hS hD hT₂ hadd
     have h2 : weilPairing W ℓ hℓ S (T₁ - T₂ + T₂) hS hadd =
         weilPairing W ℓ hℓ S T₁ hS hT₁ :=
@@ -155,7 +155,7 @@ theorem weilPairing_zsmul_comm (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0) (n : ℤ)
     (S T : W.toAffine.Point) (hS : ℓ • S = 0) (hT : ℓ • T = 0)
     (hnS : ℓ • (n • S) = 0) (hnT : ℓ • (n • T) = 0) :
     weilPairing W ℓ hℓ (n • S) T hnS hT = weilPairing W ℓ hℓ S (n • T) hS hnT := by
-  set k := n.natAbs with hk
+  set k := n.natAbs
   have hkS : ℓ • ((k : ℕ) • S) = 0 := smul_nsmul_eq_zero W ℓ S hS k
   have hkT : ℓ • ((k : ℕ) • T) = 0 := smul_nsmul_eq_zero_right W ℓ T hT k
   rcases Int.natAbs_eq n with hn | hn
@@ -180,16 +180,14 @@ theorem weilPairing_zsmul_comm (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0) (n : ℤ)
         weilPairing W ℓ hℓ S T hS hT ^ k = 1 := by
       rw [← weilPairing_nsmul_left W ℓ hℓ S T hS hT k hkS,
         ← weilPairing_mul_left W ℓ hℓ (n • S) ((k : ℕ) • S) T hnS hkS hT hsumS,
-        weilPairing_congr_left W ℓ hℓ hsumS
-          (by simp : ℓ • (0 : W.toAffine.Point) = 0) hT hcancelS]
+        weilPairing_congr_left W ℓ hℓ hsumS (smul_zero ℓ) hT hcancelS]
       exact weilPairing_refl_left W ℓ hℓ T hT _
     -- right slot: `e(S, n•T) · e(S,T)^k = 1`
     have h2 : weilPairing W ℓ hℓ S (n • T) hS hnT *
         weilPairing W ℓ hℓ S T hS hT ^ k = 1 := by
       rw [← weilPairing_nsmul_right W ℓ hℓ S T hS hT k hkT,
         ← weilPairing_mul_right W ℓ hℓ S (n • T) ((k : ℕ) • T) hS hnT hkT hsumT,
-        weilPairing_congr_right W ℓ hℓ hS hsumT
-          (by simp : ℓ • (0 : W.toAffine.Point) = 0) hcancelT]
+        weilPairing_congr_right W ℓ hℓ hS hsumT (smul_zero ℓ) hcancelT]
       exact weilPairing_refl_right W ℓ hℓ S hS _
     exact mul_right_cancel₀
       (pow_ne_zero k (weilPairing_ne_zero W ℓ hℓ S T hS hT)) (h1.trans h2.symm)
@@ -218,7 +216,7 @@ of `[n]^ = [n]` (`mulByIntDual_mulByIntSelf`), unconditional.  Direct from
 `weilPairing_zsmul_comm` (the stored point map of `mulByInt` is definitionally `n • ·`). -/
 theorem isWeilAdjointOn_mulByInt (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0) (n : ℤ) :
     IsWeilAdjointOn W ℓ hℓ (mulByInt W.toAffine n).toAddMonoidHom
-      (mulByInt W.toAffine n).toAddMonoidHom := fun S T hS hT hfS hδT =>
+      (mulByInt W.toAffine n).toAddMonoidHom := fun S T hS hT hfS hδT ↦
   weilPairing_zsmul_comm W ℓ hℓ n S T hS hT hfS hδT
 
 variable {W}
@@ -231,7 +229,7 @@ theorem IsWeilAdjointOn.unique {ℓ : ℤ} {hℓ : (ℓ : F) ≠ 0}
     {T : W.toAffine.Point} (hT : ℓ • T = 0) :
     δ₁ T = δ₂ T := by
   refine eq_of_weilPairing_eq_right W ℓ hℓ (smul_map_eq_zero δ₁ hT)
-    (smul_map_eq_zero δ₂ hT) (fun S hS => ?_)
+    (smul_map_eq_zero δ₂ hT) (fun S hS ↦ ?_)
   exact (h₁ S T hS hT (smul_map_eq_zero f hS) (smul_map_eq_zero δ₁ hT)).symm.trans
     (h₂ S T hS hT (smul_map_eq_zero f hS) (smul_map_eq_zero δ₂ hT))
 
@@ -277,7 +275,7 @@ theorem IsWeilAdjointOn.add {ℓ : ℤ} {hℓ : (ℓ : F) ≠ 0}
   have hδgT := smul_map_eq_zero δg hT
   have hδfgT := smul_map_eq_zero δfg hT
   have hsumT : ℓ • (δf T + δg T) = 0 := by rw [smul_add, hδfT, hδgT, add_zero]
-  refine eq_of_weilPairing_eq_right W ℓ hℓ hδfgT hsumT (fun S hS => ?_)
+  refine eq_of_weilPairing_eq_right W ℓ hℓ hδfgT hsumT (fun S hS ↦ ?_)
   have hfS := smul_map_eq_zero f hS
   have hgS := smul_map_eq_zero g hS
   have hfgS := smul_map_eq_zero fg hS
