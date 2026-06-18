@@ -195,12 +195,10 @@ private theorem mvPairConstantHom_mem_coeffInIdeal (n : ℕ) (P : PairOfDefiniti
   classical
   by_cases hl : l = 0
   · refine ⟨c, hc, ?_⟩
-    show (c : A) = MvPowerSeries.coeff l (mvPairConstantHom n P c).val.val
     subst hl
     change (c : A) = MvPowerSeries.coeff 0 (MvPowerSeries.C (c : A))
     rw [MvPowerSeries.coeff_zero_C]
   · refine ⟨0, (P.I ^ k).zero_mem, ?_⟩
-    show ((0 : P.A₀) : A) = MvPowerSeries.coeff l (mvPairConstantHom n P c).val.val
     change (0 : A) = MvPowerSeries.coeff l (MvPowerSeries.C (c : A))
     rw [MvPowerSeries.coeff_C, if_neg hl]
 
@@ -964,10 +962,6 @@ theorem mvTate_isTateRing [IsTateRing A] (n : ℕ) :
       refine ⟨Units.map
         (algebraMap A ↥(restrictedMvPowerSeriesSubring n A) :
           A →* ↥(restrictedMvPowerSeriesSubring n A)) u, ?_⟩
-      change @IsTopologicallyNilpotent _ _ τ
-        ((Units.map (algebraMap A ↥(restrictedMvPowerSeriesSubring n A) :
-          A →* ↥(restrictedMvPowerSeriesSubring n A)) u :
-            ↥(restrictedMvPowerSeriesSubring n A)))
       change Tendsto (fun m => ((Units.map
         (algebraMap A ↥(restrictedMvPowerSeriesSubring n A) :
           A →* ↥(restrictedMvPowerSeriesSubring n A)) u :
@@ -978,9 +972,6 @@ theorem mvTate_isTateRing [IsTateRing A] (n : ℕ) :
               ↥(restrictedMvPowerSeriesSubring n A)) ^ m =
           algebraMap A ↥(restrictedMvPowerSeriesSubring n A) ((u : A) ^ m) := by
         intro m
-        show ((Units.map (algebraMap A ↥(restrictedMvPowerSeriesSubring n A) :
-          A →* ↥(restrictedMvPowerSeriesSubring n A)) u :
-            ↥(restrictedMvPowerSeriesSubring n A)) ^ m) = _
         rw [show (Units.map (algebraMap A ↥(restrictedMvPowerSeriesSubring n A) :
           A →* ↥(restrictedMvPowerSeriesSubring n A)) u :
             ↥(restrictedMvPowerSeriesSubring n A)) =
