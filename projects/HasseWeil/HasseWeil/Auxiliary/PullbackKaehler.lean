@@ -60,9 +60,9 @@ theorem ext {x y : TwistedKaehler f} (h : x.out = y.out) : x = y := by
   cases x; cases y; congr
 
 noncomputable instance : Zero (TwistedKaehler f) := ⟨⟨0⟩⟩
-noncomputable instance : Add (TwistedKaehler f) := ⟨fun x y => ⟨x.out + y.out⟩⟩
-noncomputable instance : Neg (TwistedKaehler f) := ⟨fun x => ⟨-x.out⟩⟩
-noncomputable instance : Sub (TwistedKaehler f) := ⟨fun x y => ⟨x.out - y.out⟩⟩
+noncomputable instance : Add (TwistedKaehler f) := ⟨fun x y ↦ ⟨x.out + y.out⟩⟩
+noncomputable instance : Neg (TwistedKaehler f) := ⟨fun x ↦ ⟨-x.out⟩⟩
+noncomputable instance : Sub (TwistedKaehler f) := ⟨fun x y ↦ ⟨x.out - y.out⟩⟩
 
 @[simp] theorem out_zero : (0 : TwistedKaehler f).out = 0 := rfl
 @[simp] theorem out_add (x y : TwistedKaehler f) : (x + y).out = x.out + y.out := rfl
@@ -112,7 +112,7 @@ noncomputable instance : Module R (TwistedKaehler f) where
 
 /-- The twisted `S`-action factors through `R` correctly. -/
 instance : IsScalarTower R S (TwistedKaehler f) := by
-  refine ⟨fun r s ω => ?_⟩
+  refine ⟨fun r s ω ↦ ?_⟩
   ext
   change f (r • s) • ω.out = r • (f s • ω.out)
   rw [map_smul, smul_assoc]
@@ -146,7 +146,7 @@ noncomputable def derivationCompHom (f : S →ₐ[R] S) :
 noncomputable def pullbackKaehler (f : S →ₐ[R] S) :
     Ω[S⁄R] →+ Ω[S⁄R] :=
   let lift : Ω[S⁄R] →ₗ[S] TwistedKaehler f := f.derivationCompHom.liftKaehlerDifferential
-  { toFun := fun ω => (lift ω).out
+  { toFun := fun ω ↦ (lift ω).out
     map_zero' := by change (lift 0).out = 0; rw [map_zero]; rfl
     map_add' := fun x y => by change (lift (x + y)).out = (lift x).out + (lift y).out
                               rw [map_add]; rfl }
@@ -191,7 +191,7 @@ private theorem ext_of_D {f₁ f₂ : Ω[S⁄R] →+ Ω[S⁄R]}
   intro ω
   have hω : ω ∈ Submodule.span S (Set.range (KaehlerDifferential.D R S)) := by
     rw [KaehlerDifferential.span_range_derivation]; exact Submodule.mem_top
-  refine Submodule.span_induction (p := fun x _ => f₁ x = f₂ x) ?_ ?_ ?_ ?_ hω
+  refine Submodule.span_induction (p := fun x _ ↦ f₁ x = f₂ x) ?_ ?_ ?_ ?_ hω
   · rintro _ ⟨x, rfl⟩
     exact h_D x
   · simp
@@ -203,7 +203,7 @@ private theorem ext_of_D {f₁ f₂ : Ω[S⁄R] →+ Ω[S⁄R]}
 /-- The pullback for the identity algebra hom is the identity. -/
 @[simp]
 theorem pullbackKaehler_id : (AlgHom.id R S).pullbackKaehler = AddMonoidHom.id _ := by
-  refine ext_of_D (fun s ω hω => ?_) (fun x => ?_)
+  refine ext_of_D (fun s ω hω ↦ ?_) (fun x ↦ ?_)
   · change (AlgHom.id R S).pullbackKaehler (s • ω) = s • ω
     rw [pullbackKaehler_smul_S]
     change s • ((AlgHom.id R S).pullbackKaehler ω) = s • ω
@@ -221,7 +221,7 @@ first, then `f`), so the induced pullback on Ω composes in the SAME order:
 theorem pullbackKaehler_comp (f g : S →ₐ[R] S) :
     (f.comp g).pullbackKaehler =
       f.pullbackKaehler.comp g.pullbackKaehler := by
-  refine ext_of_D (fun s ω hω => ?_) (fun x => ?_)
+  refine ext_of_D (fun s ω hω ↦ ?_) (fun x ↦ ?_)
   · rw [pullbackKaehler_smul_S, hω]
     -- Goal: (f.comp g) s • (f.pullbackKaehler.comp g.pullbackKaehler) ω
     --     = (f.pullbackKaehler.comp g.pullbackKaehler) (s • ω)
