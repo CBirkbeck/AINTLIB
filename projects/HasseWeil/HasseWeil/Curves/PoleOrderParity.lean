@@ -57,7 +57,7 @@ theorem coordRingImage_ordAtInfty_ne_neg_one
       have hq_alg_ne :
           (algebraMap (Polynomial F) C.FunctionField q) ≠ 0 := by
         rw [Ne, ← map_zero (algebraMap (Polynomial F) C.FunctionField)]
-        exact fun h => hq
+        exact fun h ↦ hq
           (FaithfulSMul.algebraMap_injective (Polynomial F) C.FunctionField h)
       rw [C.ordAtInfty_mul hq_alg_ne C.coordYInFunctionField_ne_zero,
         ordAtInfty_coordYInFunctionField,
@@ -100,7 +100,7 @@ theorem funcField_image_ordAtInfty_ne_neg_one
       algebraMap C.CoordinateRing C.FunctionField u = f) :
     C.ordAtInfty f ≠ ((-1 : ℤ) : WithTop ℤ) := by
   obtain ⟨u, hu_eq⟩ := h_coord
-  have hu_ne : u ≠ 0 := fun h => hf (by rw [← hu_eq, h, map_zero])
+  have hu_ne : u ≠ 0 := fun h ↦ hf (by rw [← hu_eq, h, map_zero])
   rw [← hu_eq]
   exact C.coordRingImage_ordAtInfty_ne_neg_one u hu_ne
 
