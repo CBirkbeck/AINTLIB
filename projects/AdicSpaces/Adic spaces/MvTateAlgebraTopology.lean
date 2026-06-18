@@ -302,12 +302,8 @@ theorem mvExists_mul_pow_subset_pow (P : PairOfDefinition A) (a : A) (k : ℕ) :
     P.hasBasis_nhds_zero.mem_of_mem trivial
   have hcont : Continuous fun b : A => a * b := continuous_const.mul continuous_id
   have hV : (fun b : A => a * b) ⁻¹' (Subtype.val '' ((P.I ^ k : Ideal P.A₀) : Set P.A₀)) ∈
-      nhds (0 : A) := by
-    have h0 : (0 : A) ∈
-        (fun b : A => a * b) ⁻¹' (Subtype.val '' ((P.I ^ k : Ideal P.A₀) : Set P.A₀)) := by
-      simp only [Set.mem_preimage, mul_zero]
-      exact ⟨0, (P.I ^ k).zero_mem, rfl⟩
-    exact hcont.continuousAt.preimage_mem_nhds (by
+      nhds (0 : A) :=
+    hcont.continuousAt.preimage_mem_nhds (by
       rw [show (a * (0 : A)) = (0 : A) from mul_zero a]
       exact hU)
   obtain ⟨m, -, hm⟩ := P.hasBasis_nhds_zero.mem_iff.mp hV
@@ -359,8 +355,6 @@ theorem mvTateAlgNhd_of_coeff_mem_principal (n : ℕ) (P : PairOfDefinition A) (
     have hcoeff_g : MvPowerSeries.coeff l g_val.val =
         πinv ^ k * MvPowerSeries.coeff l y.val := by
       change MvPowerSeries.coeff l
-        (((algebraMap A ↥(restrictedMvPowerSeriesSubring n A)) (πinv ^ k) * y).val) = _
-      change MvPowerSeries.coeff l
         ((MvPowerSeries.C (πinv ^ k) : MvPowerSeries (Fin n) A) * y.val) = _
       rw [MvPowerSeries.coeff_C_mul]
     change MvPowerSeries.coeff l g_val.val ∈ P.A₀
@@ -383,13 +377,6 @@ theorem mvTateAlgNhd_of_coeff_mem_principal (n : ℕ) (P : PairOfDefinition A) (
     apply Subtype.ext
     apply Subtype.ext
     ext l
-    change MvPowerSeries.coeff l y.val =
-      MvPowerSeries.coeff l
-        ((mvPairConstantHom n P (π ^ k) * g_in_subring :
-          ↥(mvPairSubring n P)) : ↥(restrictedMvPowerSeriesSubring n A)).val
-    change MvPowerSeries.coeff l y.val =
-      MvPowerSeries.coeff l
-        ((MvPowerSeries.C ((π : A) ^ k)) * g_val.val)
     change MvPowerSeries.coeff l y.val =
       MvPowerSeries.coeff l ((MvPowerSeries.C ((π : A) ^ k)) *
         ((MvPowerSeries.C (πinv ^ k)) * y.val))
@@ -1033,10 +1020,8 @@ theorem mvTate_isClosed_ideal [IsTateRing A] [T2Space A] [IsStronglyNoetherian A
       ↥(restrictedMvPowerSeriesSubring n A) := ⟨continuous_mul⟩
   haveI hnoeth : IsNoetherianRing ↥(restrictedMvPowerSeriesSubring n A) :=
     IsStronglyNoetherian.isNoetherianRing_restricted n
-  have hfin : Module.Finite ↥(restrictedMvPowerSeriesSubring n A)
-      (Submodule.topologicalClosure J) :=
-    Module.Finite.iff_fg.mpr (isNoetherian_def.mp hnoeth _)
-  exact ValuationSpectrum.fg_topologicalClosure_isClosed J hfin
+  exact ValuationSpectrum.fg_topologicalClosure_isClosed J
+    (Module.Finite.iff_fg.mpr (isNoetherian_def.mp hnoeth _))
 
 omit [IsTopologicalRing A] in
 /-- A multivariate power series whose support is contained in the box `[0, N)^m` (all coefficients
