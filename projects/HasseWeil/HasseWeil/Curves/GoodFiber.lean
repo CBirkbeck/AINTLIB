@@ -72,7 +72,7 @@ theorem exists_finite_ramified_locus_coordHom [IsAlgClosed F]
     inferInstance
   -- the `A → K → L` tower, from `cd.compat` (the `tower1` dance of `PushforwardDivisor`)
   haveI tower1 : IsScalarTower C₂.CoordinateRing C₂.FunctionField C₁.FunctionField := by
-    refine IsScalarTower.of_algebraMap_smul fun r x => ?_
+    refine IsScalarTower.of_algebraMap_smul fun r x ↦ ?_
     rw [Algebra.smul_def]
     change φ.pullback ((algebraMap C₂.CoordinateRing C₂.FunctionField) r) * x = r • x
     rw [cd.compat r, ← IsScalarTower.algebraMap_smul C₁.CoordinateRing r x,
@@ -143,7 +143,7 @@ theorem nat_card_toPointMap_fiber_eq_card_primesOverFinset [IsAlgClosed F]
     (φ : CurveMap C₁ C₂) (cd : φ.CoordHom) (Q : C₂.SmoothPoint) :
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
     Nat.card {P : C₁.SmoothPoint // toPointMap cd P = Q} =
-      (primesOverFinset (C₂.maximalIdealAt Q) C₁.CoordinateRing).card := by
+      (IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q) C₁.CoordinateRing).card := by
   classical
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
   letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
@@ -163,7 +163,7 @@ theorem nat_card_toPointMap_fiber_eq_card_primesOverFinset [IsAlgClosed F]
   have key : Nat.card {P : C₁.SmoothPoint // toPointMap cd P = Q} =
       Nat.card ((C₂.maximalIdealAt Q).primesOver C₁.CoordinateRing) := by
     refine Nat.card_congr (Equiv.ofBijective
-      (fun P => (⟨C₁.maximalIdealAt P.1, hmem P⟩ :
+      (fun P ↦ (⟨C₁.maximalIdealAt P.1, hmem P⟩ :
         (C₂.maximalIdealAt Q).primesOver C₁.CoordinateRing)) ⟨?_, ?_⟩)
     · -- injectivity: `maximalIdealAt` is injective
       intro P P' h
@@ -185,10 +185,10 @@ theorem nat_card_toPointMap_fiber_eq_card_primesOverFinset [IsAlgClosed F]
       exact ⟨⟨P'', C₂.maximalIdealAt_injective (h1.trans hMlies.over.symm)⟩,
         Subtype.ext hP''⟩
   -- convert the set count to the Finset count
-  have hcoe : ((primesOverFinset (C₂.maximalIdealAt Q) C₁.CoordinateRing : Finset _) :
+  have hcoe : ((IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q) C₁.CoordinateRing : Finset _) :
       Set (Ideal C₁.CoordinateRing)) =
       (C₂.maximalIdealAt Q).primesOver C₁.CoordinateRing :=
-    coe_primesOverFinset hQ0 C₁.CoordinateRing
+    IsDedekindDomain.coe_primesOverFinset hQ0 C₁.CoordinateRing
   rw [key, ← hcoe, Nat.card_coe_set_eq, Set.ncard_coe_finset]
 
 /-- **The good fibre (Silverman II.2.6(b) over `K̄`)**: for a curve map with a
@@ -222,7 +222,7 @@ theorem exists_good_fiber_card_eq_degree [IsAlgClosed F]
   refine primesOverFinset_card_eq_degree_of_unramified φ cd hQmax hQ0 ?_
   intro P hP
   have hPmem : P ∈ (C₂.maximalIdealAt Q).primesOver C₁.CoordinateRing := by
-    rw [← coe_primesOverFinset hQ0 C₁.CoordinateRing]
+    rw [← IsDedekindDomain.coe_primesOverFinset hQ0 C₁.CoordinateRing]
     exact hP
   obtain ⟨hPprime, hPlies⟩ := hPmem
   rw [hS _ hQS P hPprime hPlies.over.symm,
