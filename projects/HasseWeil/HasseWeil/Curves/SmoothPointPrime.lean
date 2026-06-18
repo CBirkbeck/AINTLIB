@@ -92,7 +92,7 @@ noncomputable def Ideal.toHeightOneFinsuppNonzero
     IsDedekindDomain.HeightOneSpectrum R →₀ ℕ := by
   classical
   exact Finsupp.onFinset (Ideal.finite_factors hI).toFinset
-    (fun v => (Associates.mk v.asIdeal).count (Associates.mk I).factors)
+    (fun v ↦ (Associates.mk v.asIdeal).count (Associates.mk I).factors)
     (by
       intro v hv_ne_zero
       rw [Set.Finite.mem_toFinset]
@@ -148,7 +148,7 @@ finite product `∏ v.asIdeal ^ f v` over the support of `f`. -/
 noncomputable def Ideal.fromHeightOneFinsupp
     {R : Type*} [CommRing R] [IsDomain R] [IsDedekindDomain R]
     (f : IsDedekindDomain.HeightOneSpectrum R →₀ ℕ) : Ideal R :=
-  f.prod fun v n => v.asIdeal ^ n
+  f.prod fun v n ↦ v.asIdeal ^ n
 
 /-- **A2.4 zero**: the zero Finsupp maps to the unit ideal (empty product = 1). -/
 @[simp] theorem Ideal.fromHeightOneFinsupp_zero
@@ -164,10 +164,10 @@ theorem Ideal.fromHeightOneFinsupp_add
       Ideal.fromHeightOneFinsupp f * Ideal.fromHeightOneFinsupp g := by
   classical
   let h : IsDedekindDomain.HeightOneSpectrum R → ℕ → Ideal R :=
-    fun v n => v.asIdeal ^ n
+    fun v n ↦ v.asIdeal ^ n
   exact Finsupp.prod_add_index' (h := h)
-    (fun v => pow_zero v.asIdeal)
-    (fun v m n => pow_add v.asIdeal m n)
+    (fun v ↦ pow_zero v.asIdeal)
+    (fun v m n ↦ pow_add v.asIdeal m n)
 
 /-! ### Helper: Finsupp.prod ↔ finprod bridge
 
@@ -203,9 +203,9 @@ theorem Ideal.fromHeightOneFinsupp_toHeightOneFinsuppNonzero
     Ideal.fromHeightOneFinsupp (Ideal.toHeightOneFinsuppNonzero hI) = I := by
   unfold Ideal.fromHeightOneFinsupp
   rw [Finsupp.prod_eq_finprod_of_zero_eq_one (Ideal.toHeightOneFinsuppNonzero hI)
-      (fun v n => v.asIdeal ^ n) (fun v => pow_zero v.asIdeal)]
+      (fun v n ↦ v.asIdeal ^ n) (fun v ↦ pow_zero v.asIdeal)]
   conv_rhs => rw [← Ideal.finprod_heightOneSpectrum_factorization hI]
-  refine finprod_congr (fun v => ?_)
+  refine finprod_congr (fun v ↦ ?_)
   rw [Ideal.toHeightOneFinsuppNonzero_apply]
   rfl
 
@@ -218,7 +218,7 @@ noncomputable def FractionalIdeal.fromHeightOneFinsupp
     {R : Type*} [CommRing R] [IsDomain R] [IsDedekindDomain R]
     {K : Type*} [Field K] [Algebra R K] [IsFractionRing R K]
     (f : IsDedekindDomain.HeightOneSpectrum R →₀ ℤ) : FractionalIdeal R⁰ K :=
-  f.prod (fun v n => (v.asIdeal : FractionalIdeal R⁰ K) ^ n)
+  f.prod (fun v n ↦ (v.asIdeal : FractionalIdeal R⁰ K) ^ n)
 
 /-- **A3 reverse zero**: empty Finsupp maps to unit ideal. -/
 @[simp] theorem FractionalIdeal.fromHeightOneFinsupp_zero
@@ -239,13 +239,13 @@ theorem FractionalIdeal.fromHeightOneFinsupp_add
         FractionalIdeal.fromHeightOneFinsupp (K := K) g := by
   classical
   let h : IsDedekindDomain.HeightOneSpectrum R → ℤ → FractionalIdeal R⁰ K :=
-    fun v n => (v.asIdeal : FractionalIdeal R⁰ K) ^ n
+    fun v n ↦ (v.asIdeal : FractionalIdeal R⁰ K) ^ n
   have hzpow : ∀ v : IsDedekindDomain.HeightOneSpectrum R,
-      ((v.asIdeal : FractionalIdeal R⁰ K)) ≠ 0 := fun v =>
+      ((v.asIdeal : FractionalIdeal R⁰ K)) ≠ 0 := fun v ↦
     FractionalIdeal.coeIdeal_ne_zero.mpr v.ne_bot
   exact Finsupp.prod_add_index' (h := h)
-    (fun v => zpow_zero _)
-    (fun v m n => zpow_add₀ (hzpow v) m n)
+    (fun v ↦ zpow_zero _)
+    (fun v m n ↦ zpow_add₀ (hzpow v) m n)
 
 /-- **A3 forward iso (count formula)**: for any Finsupp `f`, the count of
     `fromHeightOneFinsupp f` at `v` recovers `f v`. Direct from mathlib's
@@ -274,7 +274,7 @@ theorem Ideal.fromHeightOneFinsupp_ne_zero
     Ideal.fromHeightOneFinsupp f ≠ 0 := by
   unfold Ideal.fromHeightOneFinsupp
   rw [Finsupp.prod]
-  exact Finset.prod_ne_zero_iff.mpr fun v _ =>
+  exact Finset.prod_ne_zero_iff.mpr fun v _ ↦
     pow_ne_zero _ v.ne_bot
 
 /-! ### A4 foundational: (FractionalIdeal R⁰ K)ˣ → Finsupp bridge
@@ -296,8 +296,8 @@ noncomputable def FractionalIdeal.unitsToHeightOneFinsupp
     Filter.eventually_cofinite.mp
       (FractionalIdeal.finite_factors (I : FractionalIdeal R⁰ K))
   exact Finsupp.onFinset h_finite.toFinset
-    (fun v => FractionalIdeal.count K v (I : FractionalIdeal R⁰ K))
-    (fun v hv => (Set.Finite.mem_toFinset _).mpr hv)
+    (fun v ↦ FractionalIdeal.count K v (I : FractionalIdeal R⁰ K))
+    (fun v hv ↦ (Set.Finite.mem_toFinset _).mpr hv)
 
 @[simp] theorem FractionalIdeal.unitsToHeightOneFinsupp_apply
     {R : Type*} [CommRing R] [IsDomain R] [IsDedekindDomain R]
@@ -435,7 +435,7 @@ instance FractionalIdeal.principalImageSubgroup_normal
     {R : Type*} [CommRing R] [IsDomain R] [IsDedekindDomain R]
     {K : Type*} [Field K] [Algebra R K] [IsFractionRing R K] :
     (FractionalIdeal.principalImageSubgroup (R := R) (K := K)).Normal :=
-  Subgroup.normal_of_comm _
+  Subgroup.normal_of_isMulCommutative _
 
 /-- **A4 ClassGroup descent**: `unitsToHeightOneFinsuppMonoidHom` descends to a
     well-defined homomorphism on the quotient group
@@ -480,7 +480,7 @@ theorem FractionalIdeal.eq_of_count_eq
     I = J := by
   rw [← FractionalIdeal.finprod_heightOneSpectrum_factorization' K hI,
       ← FractionalIdeal.finprod_heightOneSpectrum_factorization' K hJ]
-  exact finprod_congr fun v => by rw [h v]
+  exact finprod_congr fun v ↦ by rw [h v]
 
 /-- **A4 kernel-trivial**: `unitsToHeightOneFinsuppMonoidHom` is injective on
     `(FractionalIdeal R⁰ K)ˣ`. Two units with the same count Finsupp factor as
@@ -539,10 +539,10 @@ theorem FractionalIdeal.fromFinsupp_ne_zero
     {R : Type*} [CommRing R] [IsDomain R] [IsDedekindDomain R]
     {K : Type*} [Field K] [Algebra R K] [IsFractionRing R K]
     (f : IsDedekindDomain.HeightOneSpectrum R →₀ ℤ) :
-    f.prod (fun w n => (w.asIdeal : FractionalIdeal R⁰ K) ^ n) ≠ 0 := by
+    f.prod (fun w n ↦ (w.asIdeal : FractionalIdeal R⁰ K) ^ n) ≠ 0 := by
   rw [Finsupp.prod]
   exact Finset.prod_ne_zero_iff.mpr
-    (fun v _ => zpow_ne_zero _ (FractionalIdeal.coeIdeal_ne_zero.mpr v.ne_bot))
+    (fun v _ ↦ zpow_ne_zero _ (FractionalIdeal.coeIdeal_ne_zero.mpr v.ne_bot))
 
 /-- **A4 surjectivity of `unitsToHeightOneFinsuppMonoidHom`**: every Finsupp on
     height-one primes is the count Finsupp of some unit fractional ideal.
@@ -557,7 +557,7 @@ theorem FractionalIdeal.unitsToHeightOneFinsuppMonoidHom_surjective
   classical
   set f : IsDedekindDomain.HeightOneSpectrum R →₀ ℤ := Multiplicative.toAdd mf
   set I_f : FractionalIdeal R⁰ K :=
-    f.prod (fun w n => (w.asIdeal : FractionalIdeal R⁰ K) ^ n)
+    f.prod (fun w n ↦ (w.asIdeal : FractionalIdeal R⁰ K) ^ n)
   have hI_ne : I_f ≠ 0 := FractionalIdeal.fromFinsupp_ne_zero f
   refine ⟨Units.mk0 I_f hI_ne, ?_⟩
   -- Goal: uthsf (mk0 I_f hI_ne) = mf, i.e., ofAdd (uthsf-as-Finsupp ...) = mf
@@ -660,7 +660,7 @@ theorem FractionalIdeal.unitsToHeightOneFinsuppMulEquiv_symm_apply
     (FractionalIdeal.unitsToHeightOneFinsuppMulEquiv (R := R) (K := K)).symm mf =
       Units.mk0
         ((Multiplicative.toAdd mf).prod
-          (fun w n => (w.asIdeal : FractionalIdeal R⁰ K) ^ n))
+          (fun w n ↦ (w.asIdeal : FractionalIdeal R⁰ K) ^ n))
         (FractionalIdeal.fromFinsupp_ne_zero (Multiplicative.toAdd mf)) := by
   classical
   apply (FractionalIdeal.unitsToHeightOneFinsuppMulEquiv (R := R) (K := K)).injective
@@ -669,7 +669,7 @@ theorem FractionalIdeal.unitsToHeightOneFinsuppMulEquiv_symm_apply
   have hf : FractionalIdeal.unitsToHeightOneFinsupp
       (Units.mk0
         ((Multiplicative.toAdd mf).prod
-          (fun w n => (w.asIdeal : FractionalIdeal R⁰ K) ^ n))
+          (fun w n ↦ (w.asIdeal : FractionalIdeal R⁰ K) ^ n))
         (FractionalIdeal.fromFinsupp_ne_zero (Multiplicative.toAdd mf))) =
       Multiplicative.toAdd mf := by
     ext v
