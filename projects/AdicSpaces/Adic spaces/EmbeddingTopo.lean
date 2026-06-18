@@ -2114,10 +2114,10 @@ theorem isInducing_to_subtype_pi_iff_iInf_induced
     (s : Finset ι) (f : ∀ i : ↥s, X → Y i.1) :
     Topology.IsInducing (fun (x : X) (i : ↥s) => f i x) ↔
       tX = ⨅ i : ↥s, TopologicalSpace.induced (f i) inferInstance := by
-  rw [Topology.isInducing_iff]
-  rw [show (Pi.topologicalSpace : TopologicalSpace ((i : ↥s) → Y i.1)) =
-    ⨅ i : ↥s, TopologicalSpace.induced (fun g => g i) inferInstance from rfl]
-  rw [induced_iInf]
+  rw [Topology.isInducing_iff,
+    show (Pi.topologicalSpace : TopologicalSpace ((i : ↥s) → Y i.1)) =
+      ⨅ i : ↥s, TopologicalSpace.induced (fun g => g i) inferInstance from rfl,
+    induced_iInf]
   simp_rw [induced_compose]
   rfl
 
@@ -2148,10 +2148,7 @@ theorem induced_restrictionMap_eq_iInf_of_inner_topology_iInf
   funext D
   rw [induced_compose]
   congr 1
-  funext x
-  change (restrictionMap D' D.1 (hSub_inner D.1 D.2) ∘
-      restrictionMap D₀ D' h_inter) x = restrictionMap D₀ D.1 _ x
-  exact congr_fun (restrictionMap_comp D₀ D' D.1 h_inter (hSub_inner D.1 D.2)) x
+  exact restrictionMap_comp D₀ D' D.1 h_inter (hSub_inner D.1 D.2)
 
 /-- **Subtype-iInf union with dependent bodies**: if two subtype-indexed
 iInfs `⨅ D : ↥s, fs D` and `⨅ D : ↥u, fu D` agree (on overlapping/each
@@ -2577,8 +2574,7 @@ theorem LaurentTree.allNodesDisjoint_ofRightBranchList
         (laurentPlusDatum D₀ f)).covers
       ((LaurentTree.ofRightBranchList rest).toCovering
         (laurentMinusDatum D₀ f)).covers
-    rw [LaurentTree.toCovering_leaf_covers]
-    rw [Finset.disjoint_singleton_left]
+    rw [LaurentTree.toCovering_leaf_covers, Finset.disjoint_singleton_left]
     exact h_notin
 
 /-- `ofRightBranchList [f] = node f leaf leaf` — the depth-1 right-
