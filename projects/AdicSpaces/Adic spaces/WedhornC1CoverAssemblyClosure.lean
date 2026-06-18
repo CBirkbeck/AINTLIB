@@ -104,14 +104,14 @@ theorem coverLevelAssemblyResidual_via_lemma833_assembly
     {σ : Aˣ} (T_test T_base D_T : Finset A) (s D_s f : A)
     (h_lemma833 :
       LaurentCoverPresheafLemma833Assembly (σ := σ) T_test
-        (fun τ => rationalOpen ({((σ⁻¹ : Aˣ) : A) * τ} : Finset A) D_s)
+        (fun τ ↦ rationalOpen ({((σ⁻¹ : Aˣ) : A) * τ} : Finset A) D_s)
         (rationalOpen D_T D_s)) :
     CoverLevelAssemblyResidual (σ := σ) T_test T_base D_T s D_s f := by
   intro h_per_piece_subset h_cover
   have h_cover_source :
       ∀ w ∈ rationalOpen (insert f T_base) s, ∃ τ ∈ T_test,
         w ∈ rationalOpen ({(1 : A)} : Finset A) (((σ⁻¹ : Aˣ) : A) * τ) :=
-    fun w hw_source => h_cover w (rationalOpen_subset_spa hw_source)
+    fun w hw_source ↦ h_cover w (rationalOpen_subset_spa hw_source)
   exact rationalOpen_global_subset_via_lemma833_assembly T_test T_base D_T
     s D_s f h_lemma833 h_per_piece_subset h_cover_source
 
@@ -153,7 +153,7 @@ theorem C1SupplierStrong_local_clause2_via_lemma833_assembly
     {σ : Aˣ} (T_test : Finset A) (T_base D_T : Finset A) (s D_s f : A)
     (h_lemma833 :
       LaurentCoverPresheafLemma833Assembly (σ := σ) T_test
-        (fun τ => rationalOpen ({((σ⁻¹ : Aˣ) : A) * τ} : Finset A) D_s)
+        (fun τ ↦ rationalOpen ({((σ⁻¹ : Aˣ) : A) * τ} : Finset A) D_s)
         (rationalOpen D_T D_s))
     (h_per_piece_subset :
       ∀ τ ∈ T_test,
@@ -209,7 +209,7 @@ theorem C1SupplierStrong_local_clause2_via_per_piece_lemma833_full_chain
           rationalOpen ({((σ⁻¹ : Aˣ) : A) * τ} : Finset A) D_s)
     (h_lemma833 :
       LaurentCoverPresheafLemma833Assembly (σ := σ) T_test
-        (fun τ => rationalOpen ({((σ⁻¹ : Aˣ) : A) * τ} : Finset A) D_s)
+        (fun τ ↦ rationalOpen ({((σ⁻¹ : Aˣ) : A) * τ} : Finset A) D_s)
         (rationalOpen D_T D_s)) :
     rationalOpen (insert f T_base) s ⊆ rationalOpen D_T D_s := by
   -- Extract the σ-rescaled Laurent cover hypothesis on the source from
