@@ -65,8 +65,6 @@ section TopologicalQuotients
 variable [IsTateRing A] [IsNoetherianRing A] [IsDomain A]
 variable (f : A)
 
-/-! ### `B₁_gen`: `TateAlgebra A ⧸ ⟨algebraMap f − X⟩` -/
-
 /-- Canonical quotient topology on `B₁_gen f`, induced from the
 canonical Tate-algebra topology on `TateAlgebra A`. -/
 @[reducible]
@@ -87,8 +85,6 @@ noncomputable instance B₁_gen_isTopologicalAddGroup :
   @IsTopologicalRing.to_topologicalAddGroup _ _
     (B₁_gen_topology f) (B₁_gen_isTopologicalRing f)
 
-/-! ### `B₂_gen`: `TateAlgebra A ⧸ ⟨1 − algebraMap f · X⟩` -/
-
 /-- Canonical quotient topology on `B₂_gen f`, induced from the
 canonical Tate-algebra topology on `TateAlgebra A`. -/
 @[reducible]
@@ -108,8 +104,6 @@ noncomputable instance B₂_gen_isTopologicalAddGroup :
     @IsTopologicalAddGroup (B₂_gen f) (B₂_gen_topology f) _ :=
   @IsTopologicalRing.to_topologicalAddGroup _ _
     (B₂_gen_topology f) (B₂_gen_isTopologicalRing f)
-
-/-! ### `LaurentTateAlgebra`: `TateAlgebra₂ A ⧸ laurentIdeal A` -/
 
 /-- Canonical quotient topology on `LaurentTateAlgebra A`, induced
 from the canonical Tate-algebra-of-2-variables topology on
@@ -135,8 +129,6 @@ noncomputable instance laurentTateAlgebra_isTopologicalAddGroup :
   @IsTopologicalRing.to_topologicalAddGroup _ _
     laurentTateAlgebra_topology laurentTateAlgebra_isTopologicalRing
 
-/-! ### `B₁₂_gen`: `LaurentTateAlgebra A ⧸ ⟨algebraMap f − ζ⟩` -/
-
 /-- Canonical quotient topology on `B₁₂_gen f`, built as the further
 quotient of the canonical topology on `LaurentTateAlgebra A` by
 `laurentFSubZetaIdeal f`. -/
@@ -156,8 +148,6 @@ noncomputable instance B₁₂_gen_isTopologicalAddGroup :
     @IsTopologicalAddGroup (B₁₂_gen f) (B₁₂_gen_topology f) _ :=
   @IsTopologicalRing.to_topologicalAddGroup _ _
     (B₁₂_gen_topology f) (B₁₂_gen_isTopologicalRing f)
-
-/-! ### Quotient projection continuity -/
 
 omit [IsNoetherianRing A] [IsDomain A] in
 /-- The quotient map `LaurentTateAlgebra A → B₁₂_gen f` is continuous
@@ -191,11 +181,6 @@ section EmbeddingContinuity
 
 variable [IsTateRing A]
 
-/-- Local helper for `posIncl_continuous` and `negIncl_continuous`: any
-ring homomorphism `φ : TateAlgebra A →+* TateAlgebra₂ A` whose underlying
-function factors as the variable-`j` inclusion `varInclHom j` on the
-underlying multivariate power series is continuous under the canonical
-Tate topologies. -/
 private theorem varIncl_continuous_aux (j : Fin 2)
     (φ : ↥(TateAlgebra A) →+* ↥(TateAlgebra₂ A))
     (hφ : ∀ y : ↥(TateAlgebra A), (φ y).val = varInclHom j y.val) :
@@ -223,8 +208,7 @@ private theorem varIncl_continuous_aux (j : Fin 2)
   refine ⟨n, trivial, ?_⟩
   intro y hy
   apply tateAlgNhd₂_of_coeff_mem_principal P n pp.π hπ_gen hπ_unit
-  · -- φ y ∈ pairSubring₂ P
-    intro l
+  · intro l
     rw [hφ y]
     change varInclFun j y.val l ∈ P.A₀
     rw [varInclFun_apply]
@@ -233,8 +217,7 @@ private theorem varIncl_continuous_aux (j : Fin 2)
         tateAlgNhd_coeff_mem P n hy (Finsupp.single 0 (l j))
       rw [← hb_eq]; exact b.property
     · exact P.A₀.zero_mem
-  · -- coefficients of (φ y) all lie in image of P.I^n
-    intro l
+  · intro l
     rw [hφ y]
     change ∃ b : P.A₀, b ∈ P.I ^ n ∧ (b : A) = varInclFun j y.val l
     rw [varInclFun_apply]
@@ -248,7 +231,7 @@ theorem posIncl_continuous :
     @Continuous _ _ instTopologicalSpaceTateAlgebra
       instTopologicalSpaceTateAlgebra₂
       (LaurentTateAlgebra.posIncl : ↥(TateAlgebra A) →+* ↥(TateAlgebra₂ A)) :=
-  varIncl_continuous_aux 0 _ (fun _ => rfl)
+  varIncl_continuous_aux 0 _ fun _ ↦ rfl
 
 /-- The negative variable inclusion `negIncl : A⟨X⟩ →+* A⟨X, Y⟩` is continuous
 under the canonical Tate-algebra topologies. -/
@@ -256,7 +239,7 @@ theorem negIncl_continuous :
     @Continuous _ _ instTopologicalSpaceTateAlgebra
       instTopologicalSpaceTateAlgebra₂
       (LaurentTateAlgebra.negIncl : ↥(TateAlgebra A) →+* ↥(TateAlgebra₂ A)) :=
-  varIncl_continuous_aux 1 _ (fun _ => rfl)
+  varIncl_continuous_aux 1 _ fun _ ↦ rfl
 
 /-- The Laurent quotient projection `mkHom : A⟨X, Y⟩ →+* A⟨ζ, ζ⁻¹⟩` is
 continuous from the canonical bivariate Tate topology to the canonical
