@@ -58,20 +58,17 @@ non-units mod `p^n`). Source: TeX 1752 "Since `χ` is 0 on `pℤ_p`". -/
 lemma DirichletCharacter.toContinuousMapZp_eq_zero
     (χ : DirichletCharacter R (p ^ n)) (hn : 1 ≤ n) {x : ℤ_[p]}
     (hx : ¬IsUnit x) : χ.toContinuousMapZp x = 0 := by
-  rw [DirichletCharacter.toContinuousMapZp_apply]
   refine χ.map_nonunit fun hu => hx ?_
   rw [PadicInt.isUnit_iff]
   by_contra hnorm
   have hdvd : (p : ℤ_[p]) ∣ x := by
     rw [← PadicInt.norm_lt_one_iff_dvd]
-    exact lt_of_le_of_ne (PadicInt.norm_le_one x) hnorm
+    exact (PadicInt.norm_le_one x).lt_of_ne hnorm
   obtain ⟨y, rfl⟩ := hdvd
   have hpu : IsUnit ((p : ZMod (p ^ n))) :=
     isUnit_of_mul_isUnit_left (y := PadicInt.toZModPow n y) (by simpa [map_mul] using hu)
-  rw [ZMod.isUnit_iff_coprime] at hpu
-  rw [Nat.coprime_pow_right_iff (by omega)] at hpu
-  simp only [Nat.Coprime, Nat.gcd_self] at hpu
-  exact absurd hpu hp.out.ne_one
+  rw [ZMod.isUnit_iff_coprime, Nat.coprime_pow_right_iff (by omega)] at hpu
+  exact hp.out.ne_one (by simpa [Nat.Coprime, Nat.gcd_self] using hpu)
 
 /-- At a unit, the tilde-function only depends on the primitive core: the
 level-raise `changeLevel` is invisible through `toZModPow`-compatibility. -/
@@ -178,13 +175,8 @@ mathlib's `Complex.norm_eq_one_of_pow_eq_one`). -/
 lemma norm_eq_one_of_pow_eq_one {x : L} {m : ℕ} (h : x ^ m = 1) (hm : m ≠ 0) :
     ‖x‖ = 1 := by
   have h1 : ‖x‖ ^ m = 1 := by rw [← norm_pow, h, norm_one]
-  refine le_antisymm ?_ ?_
-  · by_contra hc
-    push Not at hc
-    exact absurd h1 (one_lt_pow₀ hc hm).ne'
-  · by_contra hc
-    push Not at hc
-    exact absurd h1 (pow_lt_one₀ (norm_nonneg x) hc hm).ne
+  refine le_antisymm ((pow_le_one_iff_of_nonneg (norm_nonneg x) hm).mp h1.le)
+    ((one_le_pow_iff_of_nonneg (norm_nonneg x) hm).mp h1.ge)
 
 omit [CompleteSpace L] in
 /-- For `η` primitive of conductor `D` coprime to `p` (and a primitive `D`-th
@@ -213,30 +205,22 @@ theorem norm_gaussSum_eq_one {D : ℕ} [NeZero D] {η : DirichletCharacter L D}
     rw [norm_mul]
     have he' : ‖e' a‖ = 1 := norm_eq_one_of_pow_eq_one (L := L) (hroots a) (NeZero.ne D)
     rcases eq_or_ne (ψ a) 0 with h0 | h0
-    · rw [h0, norm_zero, zero_mul]
-      norm_num
+    · simp [h0]
     · have hu : IsUnit (a : ZMod D) := by
         by_contra hu
         exact h0 (ψ.map_nonunit hu)
       have hpow : ψ a ^ Nat.totient D = 1 := by
-        rw [← map_pow]
         obtain ⟨u, rfl⟩ := hu
-        rw [show ((u : ZMod D)) ^ Nat.totient D = ((u ^ Nat.totient D : (ZMod D)ˣ) : ZMod D)
-            from (Units.val_pow_eq_pow_val u (Nat.totient D)).symm,
-          ZMod.pow_totient, Units.val_one, map_one]
+        rw [← map_pow, ← Units.val_pow_eq_pow_val, ZMod.pow_totient, Units.val_one, map_one]
       have hψa : ‖ψ a‖ = 1 := norm_eq_one_of_pow_eq_one (L := L) hpow htot
       rw [hψa, he', mul_one]
   -- the value-torsion hypotheses for `e` and `e⁻¹`
   have hroote : ∀ b, e b ^ D = 1 := fun b => by
-    rw [← AddChar.map_nsmul_eq_pow]
-    have hb : (D : ℕ) • b = 0 := by
-      simp [nsmul_eq_mul]
-    rw [hb, AddChar.map_zero_eq_one]
+    rw [← AddChar.map_nsmul_eq_pow, show (D : ℕ) • b = 0 by simp [nsmul_eq_mul],
+      AddChar.map_zero_eq_one]
   have hrootei : ∀ b, e⁻¹ b ^ D = 1 := fun b => by
-    rw [AddChar.inv_apply, ← AddChar.map_nsmul_eq_pow]
-    have hb : (D : ℕ) • (-b) = 0 := by
-      simp [nsmul_eq_mul]
-    rw [hb, AddChar.map_zero_eq_one]
+    rw [AddChar.inv_apply, ← AddChar.map_nsmul_eq_pow,
+      show (D : ℕ) • (-b) = 0 by simp [nsmul_eq_mul], AddChar.map_zero_eq_one]
   -- product formula + norm-1 of `D` force equality
   have hprod : ‖gaussSum η e‖ * ‖gaussSum η⁻¹ e⁻¹‖ = 1 := by
     rw [← norm_mul, gaussSum_mul_gaussSum_inv hη]
@@ -269,11 +253,8 @@ lemma _root_.DirichletCharacter.factorsThrough_ringHomComp_iff
       rw [← Units.val_eq_one, ← Units.val_eq_one, MulChar.coe_toUnitHom,
         MulChar.coe_toUnitHom, MulChar.ringHomComp_apply, ← map_one f]
       exact ⟨fun h => hf h, fun h => congrArg f h⟩
-    constructor
-    · intro h x hx
-      exact MonoidHom.mem_ker.mpr ((hker x).mp (MonoidHom.mem_ker.mp (h hx)))
-    · intro h x hx
-      exact MonoidHom.mem_ker.mpr ((hker x).mpr (MonoidHom.mem_ker.mp (h hx)))
+    exact ⟨fun h x hx => MonoidHom.mem_ker.mpr ((hker x).mp (MonoidHom.mem_ker.mp (h hx))),
+      fun h x hx => MonoidHom.mem_ker.mpr ((hker x).mpr (MonoidHom.mem_ker.mp (h hx)))⟩
   · exact ⟨fun h => absurd h.dvd hd, fun h => absurd h.dvd hd⟩
 
 /-- Primitivity of a Dirichlet character transports along injective
