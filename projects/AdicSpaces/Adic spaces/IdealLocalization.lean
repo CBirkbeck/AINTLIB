@@ -65,13 +65,11 @@ import of the downstream `Lemma745` file. -/
 private theorem exists_pow_mul_mem_A₀_aux
     (P : PairOfDefinition A) {π : A} (hπ : IsTopologicallyNilpotent π)
     (a : A) : ∃ n : ℕ, π ^ n * a ∈ P.A₀ := by
-  have h_cont : Continuous (· * a : A → A) := continuous_mul_const a
-  have h_open : IsOpen {x : A | x * a ∈ P.A₀} := P.isOpen.preimage h_cont
+  have h_open : IsOpen {x : A | x * a ∈ P.A₀} :=
+    P.isOpen.preimage (continuous_mul_const a)
   have h_zero : (0 : A) ∈ {x : A | x * a ∈ P.A₀} := by
     simp only [Set.mem_setOf_eq, zero_mul, P.A₀.zero_mem]
-  have h_nhds : {x : A | x * a ∈ P.A₀} ∈ nhds (0 : A) :=
-    h_open.mem_nhds h_zero
-  exact (hπ.eventually h_nhds).exists
+  exact (hπ.eventually (h_open.mem_nhds h_zero)).exists
 
 /-- **Clearing denominators into `locSubring`** (S-IDEAL-LOC Step 1).
 
@@ -94,21 +92,15 @@ theorem Localization.Away.exists_unit_locSubring_decomp
   obtain ⟨n, hna⟩ := exists_pow_mul_mem_A₀_aux P hπ_nil a
   have h_mem : algebraMap A (Localization.Away s) (π ^ n * a) ∈ locSubring P T s :=
     algebraMap_mem_locSubring P T s hna
-  have h_s_unit : IsUnit ((algebraMap A (Localization.Away s)) s) :=
-    IsLocalization.map_units _ (⟨s, ⟨1, pow_one s⟩⟩ : Submonoid.powers s)
-  have h_π_unit : IsUnit ((algebraMap A (Localization.Away s)) π) :=
-    hπ_unit.map (algebraMap A (Localization.Away s))
-  have h_sk_unit : IsUnit (((algebraMap A (Localization.Away s)) s) ^ k) :=
-    h_s_unit.pow k
-  have h_πn_unit : IsUnit (((algebraMap A (Localization.Away s)) π) ^ n) :=
-    h_π_unit.pow n
   have h_prod_unit : IsUnit (((algebraMap A (Localization.Away s)) π) ^ n *
-      ((algebraMap A (Localization.Away s)) s) ^ k) := h_πn_unit.mul h_sk_unit
-  set U : (Localization.Away s)ˣ := h_prod_unit.unit with hU_def
+      ((algebraMap A (Localization.Away s)) s) ^ k) :=
+    ((hπ_unit.map (algebraMap A (Localization.Away s))).pow n).mul
+      ((IsLocalization.map_units (Localization.Away s)
+        (⟨s, ⟨1, pow_one s⟩⟩ : Submonoid.powers s)).pow k)
+  set U : (Localization.Away s)ˣ := h_prod_unit.unit
   have hU_val : (U : Localization.Away s) =
       ((algebraMap A (Localization.Away s)) π) ^ n *
-      ((algebraMap A (Localization.Away s)) s) ^ k := by
-    rw [hU_def]; rfl
+      ((algebraMap A (Localization.Away s)) s) ^ k := h_prod_unit.unit_spec
   -- Key: U.val * x = algebraMap (π^n * a).
   have key : (U : Localization.Away s) * x =
       algebraMap A (Localization.Away s) (π ^ n * a) := by
@@ -278,13 +270,8 @@ private theorem isUnit_of_algebraMap_isUnit_of_faithfullyFlat
     [Module.FaithfullyFlat R S] {r : R}
     (hr : IsUnit (algebraMap R S r)) : IsUnit r := by
   rw [← Ideal.span_singleton_eq_top] at hr ⊢
-  have h_map : Ideal.map (algebraMap R S) (Ideal.span {r}) =
-      Ideal.span {algebraMap R S r} := by
-    rw [Ideal.map_span, Set.image_singleton]
-  have h_comap := Ideal.comap_map_eq_self_of_faithfullyFlat
-    (A := R) (B := S) (Ideal.span {r})
-  rw [h_map, hr, Ideal.comap_top] at h_comap
-  exact h_comap.symm
+  rw [← Ideal.comap_map_eq_self_of_faithfullyFlat (A := R) (B := S) (Ideal.span {r}),
+    Ideal.map_span, Set.image_singleton, hr, Ideal.comap_top]
 
 omit [IsTopologicalRing A] in
 /-- **S-IDEAL-JAC via faithful-flatness descent**.
@@ -320,16 +307,9 @@ theorem locIdeal_le_jacobson_bot_of_faithfullyFlat
   have hx_jac : algebraMap (locSubring P T s) S x ∈
       Ideal.jacobson (⊥ : Ideal S) := h_jac hx_map
   rw [Ideal.mem_jacobson_bot] at hx_jac
-  have h_unit_S : IsUnit
-      (algebraMap (locSubring P T s) S x *
-        algebraMap (locSubring P T s) S y + 1) :=
-    hx_jac (algebraMap _ S y)
-  have h_eq : algebraMap (locSubring P T s) S x *
-      algebraMap (locSubring P T s) S y + 1 =
-      algebraMap (locSubring P T s) S (x * y + 1) := by
-    rw [map_add, map_mul, map_one]
-  rw [h_eq] at h_unit_S
-  exact isUnit_of_algebraMap_isUnit_of_faithfullyFlat h_unit_S
+  refine isUnit_of_algebraMap_isUnit_of_faithfullyFlat (S := S) ?_
+  rw [map_add, map_mul, map_one]
+  exact hx_jac (algebraMap _ S y)
 
 /-- **Topological-nilpotence transfer for `locIdeal`.**
 
