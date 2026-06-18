@@ -303,14 +303,9 @@ Purely algebraic (Wedhorn Proposition 8.30). -/
 theorem fX_eq_one_in_quotient (f : A) :
     (Ideal.Quotient.mk (oneSubfXIdeal f))
       (algebraMap A ↥(TateAlgebra A) f * TateAlgebra.X) = 1 := by
-  rw [← sub_eq_zero]
-  change (Ideal.Quotient.mk _) (algebraMap A _ f * TateAlgebra.X) -
-    (Ideal.Quotient.mk _) 1 = 0
-  rw [← map_sub]
-  apply Ideal.Quotient.eq_zero_iff_mem.mpr
-  rw [show algebraMap A ↥(TateAlgebra A) f * TateAlgebra.X - 1 =
-    -(1 - algebraMap A ↥(TateAlgebra A) f * TateAlgebra.X) from by ring]
-  exact neg_mem (Ideal.subset_span rfl)
+  rw [eq_comm, ← sub_eq_zero, ← map_one (Ideal.Quotient.mk (oneSubfXIdeal f)), ← map_sub,
+    Ideal.Quotient.eq_zero_iff_mem]
+  exact Ideal.subset_span rfl
 
 omit [IsTopologicalRing A] in
 /-- `X` is the two-sided inverse of `algebraMap f` in `A⟨X⟩/(1-fX)`. -/
@@ -1465,8 +1460,7 @@ and both components are surjective: the first is an equivalence
 rings (`coeRingHom_bijective_of_discrete`). -/
 theorem quotientEvalPresheafHom_surjective (D : RationalLocData A) :
     Function.Surjective (quotientEvalPresheafHom D) := by
-  rw [show quotientEvalPresheafHom D = quotientToPresheaf D from
-    (quotientToPresheaf_eq_quotientEvalPresheafHom D).symm]
+  rw [← quotientToPresheaf_eq_quotientEvalPresheafHom D]
   intro y
   obtain ⟨w, rfl⟩ := (coeRingHom_bijective_of_discrete D).2 y
   obtain ⟨q, rfl⟩ :=
