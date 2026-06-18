@@ -221,7 +221,7 @@ theorem addPullback_x_negFrobenius_isAlgebraic_range_of_witness
     addPullback_x_negFrobenius_isAlgebraic_subalgebra W hq hxy
   refine @Algebra.IsAlgebraic.mk
     (↥(isogOneSub_negFrobenius W hq).pullback.range)
-    W.toAffine.FunctionField _ _ (Subalgebra.toAlgebra _) (fun y => ?_)
+    W.toAffine.FunctionField _ _ (Subalgebra.toAlgebra _) (fun y ↦ ?_)
   exact (h_alg_adjoin.isAlgebraic y).tower_top_of_subalgebra_le h_le
 
 /-- **Algebraicity over α.pullback.range (UNCONDITIONAL, axiom-clean)**:
@@ -252,7 +252,7 @@ theorem isogOneSub_negFrobenius_isAlgebraic_synonym
   let α := isogOneSub_negFrobenius W hq
   let e : W.toAffine.FunctionField ≃ₐ[K] α.pullback.range :=
     AlgEquiv.ofInjective α.pullback α.pullback_injective
-  refine ⟨fun y => ?_⟩
+  refine ⟨fun y ↦ ?_⟩
   have h_y_alg := h_range.isAlgebraic y
   obtain ⟨p, hp_ne, hp_eval⟩ := h_y_alg
   let f : α.pullback.range →+* W.toAffine.FunctionField := e.symm
@@ -263,7 +263,6 @@ theorem isogOneSub_negFrobenius_isAlgebraic_synonym
     have h_e_inv : ∀ (z : α.pullback.range),
         α.pullback (e.symm z) = (z : W.toAffine.FunctionField) := by
       intro z
-      change α.pullback (e.symm z) = z.1
       exact congrArg Subtype.val (e.apply_symm_apply z)
     simp only [Polynomial.aeval_def, Polynomial.eval₂_map] at hp_eval ⊢
     refine Eq.trans (Polynomial.eval₂_congr ?_ rfl rfl) hp_eval
