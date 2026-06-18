@@ -688,6 +688,22 @@ theorem bPrimeValuationCoordGenLeOne_of_classification_of_reg
   bPrimeValuationCoordGenLeOne_of_classification hclass
     (bPrime_valuation_ne_ordAtInfty hreg)
 
+/-- **The place dictionary, reduced to the single ∞-inclusion residual** (the affine half discharged,
+axiom-clean): composing the classification reduction `bPrimePlaceClassification_of_inftyInclusion`
+(point half done) with `bPrimeValuationCoordGenLeOne_of_classification_of_reg`, the place-dictionary
+residual `BPrimeValuationCoordGenLeOne` — and hence all of `coordXFun_mem_B`, `coordYFun_mem_B`,
+`coordRing_mem_B` — follows from the single geometric residual `BPrimeInftyInclusion` together with
+the basepoint-regularity `hreg`.  This is the sharpest statement of the remaining wall: the entire
+norm–conorm integral-closure chain is one curve-completeness fact (uniqueness of the place over `∞` of
+`F(x₁)`) away from unconditional. -/
+theorem bPrimeValuationCoordGenLeOne_of_inftyInclusion_of_reg
+    [IsIntegrallyClosed C₁.CoordinateRing]
+    (hincl : BPrimeInftyInclusion (C₁ := C₁) (C₂ := C₂))
+    (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂)) :
+    BPrimeValuationCoordGenLeOne (C₁ := C₁) (C₂ := C₂) :=
+  bPrimeValuationCoordGenLeOne_of_classification_of_reg
+    (bPrimePlaceClassification_of_inftyInclusion hincl) hreg
+
 /-- **The `x`-generator of `C₁` is integral over `C₂.CoordinateRing`** (regular at every place
 of `C₁` over an affine place of `C₂`).  Reduced — *non-circularly*, via the valuative criterion
 `mem_B_of_forall_valuation_le_one` — to the global-`B` place dictionary
