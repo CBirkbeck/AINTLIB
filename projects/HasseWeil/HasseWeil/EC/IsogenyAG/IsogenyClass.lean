@@ -183,7 +183,7 @@ and it is *not* derivable from a universal Galois package
 (`EC.not_universal_dualGaloisData`). -/
 theorem exists_dual (φ : EC.Isogeny W₁ W₂) (w : Nonempty φ.HasDualWitness) :
     Nonempty (EC.Isogeny W₂ W₁) :=
-  w.elim fun w' => φ.exists_dual_of_witness w'
+  w.elim fun w' ↦ φ.exists_dual_of_witness w'
 
 end IsogenyDual
 
@@ -216,7 +216,7 @@ theorem IsIsogenous.symm_of_witness {W₁ W₂ : Affine F} [W₁.IsElliptic] [W�
 III.6.1, gated form of the former `IsIsogenous.symm`). -/
 theorem IsIsogenous.symm_of (hw : UniversalDualWitness F) {W₁ W₂ : Affine F}
     [W₁.IsElliptic] [W₂.IsElliptic] (h : IsIsogenous W₁ W₂) : IsIsogenous W₂ W₁ :=
-  h.symm_of_witness fun φ => hw φ
+  h.symm_of_witness fun φ ↦ hw φ
 
 /-- Symmetry, named for the `Equivalence` packaging (witness-gated). -/
 theorem isIsogenous_symm_of (hw : UniversalDualWitness F) {W₁ W₂ : Affine F}
