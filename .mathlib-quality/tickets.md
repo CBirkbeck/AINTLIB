@@ -148,7 +148,12 @@ signature must keep them for callers).
 ---
 
 ### [T-ROIE-3] Discharge `IsRingOfIntegralElements ((presheafValue D)⁺)` (3 fields)
-- **Status**: open
+- **Status**: open — PARKED at external leaf (2026-06-18). The instance EXISTS + RESOLVES (build green);
+  its 3 fields are cited sorries. `isOpen`/`isIntegrallyClosed` bottom at **Wedhorn 7.47(4) = [Hu1]
+  2.4.3** (completion preserves rings of integral elements — EXTERNAL, Wedhorn cites without reproof;
+  building it = the CLAUDE.md "substantial missing infrastructure" STOP tell). `subset_powerBounded`
+  (Ĉ ⊆ B°) is provable via 7.19/7.20 + completion power-bounded transfer (a real sub-development).
+  Faithful as a cited named-leaf per CLAUDE.md.
 - **File**: Presheaf.lean (or a new `PresheafAffinoid.lean` if imports demand)
 - **Depends on**: T-ROIE-1
 - **Parallel**: yes (with T-ROIE-2, T-ROIE-4 — discharges sorries; doesn't affect build greenness)
@@ -189,7 +194,11 @@ Wedhorn Prop. 7.19 (p.61), Lemma 7.20 (p.61), Lemma 7.47(4) = [Hu1] 2.4.3 (p.68)
 ---
 
 ### [T-ROIE-4] Discharge `exists_cont_supp_ge_powerBounded_of_nonOpen_prime` (Wedhorn 7.45+7.42+7.41)
-- **Status**: open
+- **Status**: open — PARKED at deep leaf (2026-06-18). Faithful named leaf in place (cited sorry,
+  Presheaf:2785). Bottoms at the **height-one vertical generalization** (Remark 4.12) connecting the
+  repo's `restrictToConvex` analytic point (bounded on A₀) to a height-1 point bounded on **A°** (Prop
+  7.41). The A₀→A° height-one step is deep repo infrastructure (not the optimistic "~6 lines" — that was
+  7.41 ALONE assuming the height-1 point). Faithful as a cited named-leaf per CLAUDE.md.
 - **File**: Presheaf.lean (+ Lemma745.lean for the 7.41 sub-leaf if cleaner)
 - **Depends on**: T-ROIE-1
 - **Parallel**: yes
