@@ -823,19 +823,15 @@ noncomputable instance presheafValueNonarchimedeanAddGroup
 /-- `presheafValue D` is T2 (Hausdorff): it is T0 (from the
 completion) and regular (from the uniform space), hence T3 hence T2. -/
 instance presheafValueT2Space (D : RationalLocData A) :
-    T2Space (presheafValue D) := by
-  haveI : T0Space (presheafValue D) := inferInstance
-  haveI : RegularSpace (presheafValue D) :=
-    UniformSpace.to_regularSpace
-  exact inferInstance
+    T2Space (presheafValue D) :=
+  haveI : RegularSpace (presheafValue D) := UniformSpace.to_regularSpace
+  inferInstance
 
 /-- `presheafValue D` is T3: it is T0 and regular. -/
 instance presheafValueT3Space (D : RationalLocData A) :
-    T3Space (presheafValue D) := by
-  haveI : T0Space (presheafValue D) := inferInstance
-  haveI : RegularSpace (presheafValue D) :=
-    UniformSpace.to_regularSpace
-  exact inferInstance
+    T3Space (presheafValue D) :=
+  haveI : RegularSpace (presheafValue D) := UniformSpace.to_regularSpace
+  inferInstance
 
 /-! #### Continuity of algebraMap and canonicalMap -/
 
@@ -955,9 +951,8 @@ restricted condition from multi-indices to natural numbers via the
 injective map `toIndex`. -/
 theorem coeff_tendsto_zero (g : ↥(TateAlgebra A)) :
     Filter.Tendsto (fun n => TateAlgebra.coeff n g)
-      Filter.cofinite (nhds (0 : A)) := by
-  exact g.prop.comp
-    (Finsupp.single_injective (0 : Fin 1)).tendsto_cofinite
+      Filter.cofinite (nhds (0 : A)) :=
+  g.prop.comp (Finsupp.single_injective (0 : Fin 1)).tendsto_cofinite
 
 /-- The image of coefficients under `canonicalMap` tends to `0` in
 `presheafValue D`, because `canonicalMap` is continuous and the
@@ -1000,9 +995,8 @@ theorem locLiftPresheaf_comp_algebraMap_eq_canonicalMap
     (D : RationalLocData A) :
     (locLiftToPresheaf D).comp
       (algebraMap A (Localization.Away D.s)) =
-      D.canonicalMap := by
-  ext a
-  simp only [RingHom.comp_apply, locLiftToPresheaf_algebraMap]
+      D.canonicalMap :=
+  RingHom.ext (locLiftToPresheaf_algebraMap D)
 
 /-- The ideal `(1 - sX)` is contained in the kernel of ANY ring
 hom `A⟨X⟩ → presheafValue D` that satisfies
