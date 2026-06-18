@@ -1167,8 +1167,7 @@ private theorem completedLocSubring_eq_presheafValue_ringOfDef (D : RationalLocD
     ((D.coeRingHom.comp (locSubring D.P D.T D.s).subtype).range :
       Set (presheafValue D)) := by
     ext y
-    simp only [Subring.coe_map, RingHom.coe_range, Set.mem_image,
-      RingHom.comp_apply, Set.mem_range]
+    simp only [Subring.coe_map, RingHom.coe_range, Set.mem_image, Set.mem_range]
     refine ⟨?_, ?_⟩
     · rintro ⟨x, hx, rfl⟩; exact ⟨⟨x, hx⟩, rfl⟩
     · rintro ⟨⟨x, hx⟩, rfl⟩; exact ⟨x, hx, rfl⟩
@@ -1827,9 +1826,6 @@ theorem productRestriction_injective_tate_via_prime_extension_closed
       hcanonicalMap_cont h_closed_nonOpen) x hx
 
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] [PlusSubring A] [IsTopologicalRing A] in
-/-- **Helper**: every `PairOfDefinition` of a Tate ring contains a topologically
-nilpotent unit. For any fixed `P`, pick a power `u^k` of the global
-topologically-nilpotent unit `u : Aˣ` large enough that `u^k ∈ P.A₀`. -/
 private theorem IsTateRing.exists_topologicallyNilpotent_unit_mem_A₀
     [IsTateRing A] (P : PairOfDefinition A) :
     ∃ π : A, IsTopologicallyNilpotent π ∧ IsUnit π ∧ π ∈ P.A₀ := by
