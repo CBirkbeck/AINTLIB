@@ -12,6 +12,7 @@ import HasseWeil.Curves.CurveMapBaseChange
 import HasseWeil.Curves.NoFinitePolesBridge
 import HasseWeil.Curves.OrdAtInftyBaseChange
 import HasseWeil.Curves.OrdAtInftyRamification
+import HasseWeil.WeilPairing.OmegaBaseChange
 
 /-!
 # DUAL-DESCENT — the dual isogeny over the base field (symmetry of isogeny)
@@ -1295,10 +1296,34 @@ noncomputable def ecShell [DecidableEq F] {W₁ W₂ : WeierstrassCurve F} [W₁
     [W₁.toAffine.IsElliptic] [W₂.toAffine.IsElliptic] (φ : EC.Isogeny W₁.toAffine W₂.toAffine) :
     (ecShell φ).pullback = φ.toCurveMap.pullback := rfl
 
-/-- **Route A, step 1 — the two-curve `K̄`-dual range inclusion over an alg-closed char-0 base.** -/
-theorem ecIsog_mulByInt_deg_rangeIncl_of_charZero [IsAlgClosed F] [CharZero F]
+/-- **`(ecShell φ).IsSeparable` from `φ.IsSeparable`** (EC-sense to Basic-`Isogeny`-sense). The shell
+has `(ecShell φ).pullback = φ.toCurveMap.pullback` definitionally, so `(ecShell φ).toAlgebra` and
+`φ.toCurveMap.toAlgebra` are the *same* algebra; separability is a property of that algebra
+(`Isogeny.isSeparable_iff_algebra_isSeparable`). -/
+theorem ecShell_isSeparable_of_isSeparable [DecidableEq F]
+    {W₁ W₂ : WeierstrassCurve F} [W₁.toAffine.IsElliptic] [W₂.toAffine.IsElliptic]
+    (φ : EC.Isogeny W₁.toAffine W₂.toAffine) (hsep : φ.IsSeparable) :
+    (ecShell φ).IsSeparable :=
+  (EC.Isogeny.isSeparable_iff_algebra_isSeparable φ).mp hsep
+
+/-- **Separability transport along a pullback equality** (Basic two-curve `Isogeny`). Since
+`Isogeny.toAlgebra = pullback.toRingHom.toAlgebra`, two isogenies with the same pullback induce the
+same `K(E₂)`-algebra structure on `K(E₁)`, hence the same separability. -/
+theorem Isogeny.isSeparable_of_pullback_eq [DecidableEq F] {W₁ W₂ : WeierstrassCurve.Affine F}
+    [W₁.IsElliptic] [W₂.IsElliptic] {β γ : HasseWeil.Isogeny W₁ W₂} (hpb : β.pullback = γ.pullback)
+    (hsep : γ.IsSeparable) : β.IsSeparable := by
+  unfold HasseWeil.Isogeny.IsSeparable HasseWeil.Isogeny.toAlgebra
+  rw [hpb]
+  exact hsep
+
+/-- **Route A, step 1 — the two-curve `K̄`-dual range inclusion over an alg-closed base, separable
+form.** For a **separable** `EC.Isogeny φ : E₁ → E₂` over `[IsAlgClosed F]` (any characteristic; the
+norm–conorm wall is `PerfectField`-free since CP-1), the Silverman III.6.1 range inclusion
+`Im([deg φ]*) ⊆ Im(φ*)` holds. Separability is threaded through to the two places that need it:
+`placeRestrictionPreservesPrincipal` (norm–conorm) and `card_kernel = degree`. -/
+theorem ecIsog_mulByInt_deg_rangeIncl_of_separable [IsAlgClosed F]
     [DecidableEq F] {W₁ W₂ : WeierstrassCurve F} [W₁.toAffine.IsElliptic] [W₂.toAffine.IsElliptic]
-    (φ : EC.Isogeny W₁.toAffine W₂.toAffine)
+    (φ : EC.Isogeny W₁.toAffine W₂.toAffine) (hsep : φ.IsSeparable)
     (hreg : ∀ f : (⟨W₂⟩ : Curves.SmoothPlaneCurve F).FunctionField,
       0 ≤ (⟨W₂⟩ : Curves.SmoothPlaneCurve F).ordAtInfty f →
       0 ≤ (⟨W₁⟩ : Curves.SmoothPlaneCurve F).ordAtInfty (φ.toCurveMap.pullback f)) :
@@ -1307,13 +1332,16 @@ theorem ecIsog_mulByInt_deg_rangeIncl_of_charZero [IsAlgClosed F] [CharZero F]
       φ.toCurveMap.pullback.range := by
   classical
   have h_pres : WeilPairing.PlaceRestrictionPreservesPrincipal (ecShell φ) :=
-    WeilPairing.placeRestrictionPreservesPrincipal_of_separable_charZero (ecShell φ)
-      (Isogeny.isSeparable_of_charZero_twoCurve (ecShell φ)) hreg
+    WeilPairing.placeRestrictionPreservesPrincipal_of_separable (ecShell φ)
+      (ecShell_isSeparable_of_isSeparable φ hsep) hreg
   have hgh := WeilPairing.placeRestrictionPointMap_add_of_preservesPrincipal (ecShell φ) h_pres
   set β := WeilPairing.placeRestrictionRealization (ecShell φ) hgh with hβ
   have hβpb : β.pullback = φ.toCurveMap.pullback :=
     WeilPairing.placeRestrictionRealization_pullback (ecShell φ) hgh
-  have hβsep : β.IsSeparable := Isogeny.isSeparable_of_charZero_twoCurve β
+  -- `β` has the same pullback as `ecShell φ`, hence the same separability.
+  have hβsep : β.IsSeparable :=
+    Isogeny.isSeparable_of_pullback_eq (hβpb.trans (ecShell_pullback φ).symm)
+      (ecShell_isSeparable_of_isSeparable φ hsep)
   have hw := WeilPairing.pullbackEvaluation_twoCurve_placeRestrictionRealization (ecShell φ) hgh
   have hxy := fun k => WeilPairing.xy_family_of_pullbackEvaluation_twoCurve W₁ W₂ β
     (WeilPairing.twoCurvePoleLocus_finite (ecShell φ)) hw k
@@ -1323,6 +1351,22 @@ theorem ecIsog_mulByInt_deg_rangeIncl_of_charZero [IsAlgClosed F] [CharZero F]
   have hincl := HasseWeil.Isogeny.mulByInt_deg_rangeIncl_twoCurve β hxy hcard
   rw [hβpb] at hincl
   exact hincl
+
+/-- **Route A, step 1, char-0 wrapper.** The separable-form inclusion specialised to a char-0 base,
+where separability is automatic (`Isogeny.isSeparable_of_charZero_twoCurve`). Kept so the char-0
+headline chain is unchanged. -/
+theorem ecIsog_mulByInt_deg_rangeIncl_of_charZero [IsAlgClosed F] [CharZero F]
+    [DecidableEq F] {W₁ W₂ : WeierstrassCurve F} [W₁.toAffine.IsElliptic] [W₂.toAffine.IsElliptic]
+    (φ : EC.Isogeny W₁.toAffine W₂.toAffine)
+    (hreg : ∀ f : (⟨W₂⟩ : Curves.SmoothPlaneCurve F).FunctionField,
+      0 ≤ (⟨W₂⟩ : Curves.SmoothPlaneCurve F).ordAtInfty f →
+      0 ≤ (⟨W₁⟩ : Curves.SmoothPlaneCurve F).ordAtInfty (φ.toCurveMap.pullback f)) :
+    (HasseWeil.mulByInt_pullbackAlgHom W₁.toAffine ((ecShell φ).degree : ℤ)
+        (by exact_mod_cast (HasseWeil.Isogeny.degree_pos_twoCurve (ecShell φ)).ne')).range ≤
+      φ.toCurveMap.pullback.range :=
+  ecIsog_mulByInt_deg_rangeIncl_of_separable φ
+    ((EC.Isogeny.isSeparable_iff_algebra_isSeparable φ).mpr
+      (Isogeny.isSeparable_of_charZero_twoCurve (ecShell φ))) hreg
 
 end TowerDescent
 
@@ -1689,6 +1733,101 @@ theorem psiL_algebraMap_L (l : L) :
       algebraMap L ((⟨W₁.toAffine⟩ : SmoothPlaneCurve K).baseChange L).FunctionField l :=
   (bcIsog W₁ W₂ φ L).toCurveMap.pullback.commutes l
 
+/-! #### Base-change separability of a two-curve isogeny (Silverman III.5, base-change form)
+
+Separability of an isogeny is stable under base change of the constant field (for *any* field
+extension `L/K` with `L/K` algebraic): the two-curve `bcIsog φ` over `L` is separable whenever `φ`
+is. The proof is the **differential** transport: a separable `φ` has a separating element `g`
+(`D_K(φ*g) ≠ 0`), and the base-change map on Kähler differentials `omegaDiffMap` (single-curve, from
+`OmegaBaseChange`) carries it to `D_L(bcIsog^*(functionFieldMap g)) ≠ 0` — nonzero because
+`Ω[K(E₁)/K]` is one-dimensional and `omegaDiffMap` sends the (nonzero) invariant differential to the
+(nonzero) base-changed invariant differential. This is the EC-analogue of the omega-coefficient value
+transport `omegaPullbackCoeff_baseChangePullback`, but two-curve. -/
+
+open HasseWeil.WeilPairing in
+/-- **A separating element for a separable two-curve isogeny** (Silverman II.4.2 forward direction,
+two-curve): if `φ` is separable then some `g ∈ K(E₂)` has `D_K(φ*g) ≠ 0`. Mirror of
+`Isogeny.isSeparable_of_pullback_kaehlerD_ne_zero` (the reverse): separability makes
+`Ω[K(E₁)/K(E₂)]` vanish, so `mapBaseChange` is surjective; since `Ω[K(E₁)/K]` is rank-1 (hence ≠ 0)
+its preimage cannot lie in the kernel, forcing a separating generator. -/
+theorem exists_separating_element (hsep : φ.IsSeparable) :
+    ∃ g : W₂.toAffine.FunctionField,
+      KaehlerDifferential.D K W₁.toAffine.FunctionField (φ.toCurveMap.pullback g) ≠ 0 := by
+  letI : Algebra W₂.toAffine.FunctionField W₁.toAffine.FunctionField := φ.toCurveMap.toAlgebra
+  haveI : IsScalarTower K W₂.toAffine.FunctionField W₁.toAffine.FunctionField :=
+    IsScalarTower.of_algebraMap_eq fun x => (φ.toCurveMap.pullback.commutes x).symm
+  haveI hsa : Algebra.IsSeparable W₂.toAffine.FunctionField W₁.toAffine.FunctionField :=
+    (EC.Isogeny.isSeparable_iff_algebra_isSeparable φ).mp hsep
+  haveI : Algebra.FormallyUnramified W₂.toAffine.FunctionField W₁.toAffine.FunctionField :=
+    Algebra.FormallyUnramified.of_isSeparable _ _
+  haveI hsub : Subsingleton (KaehlerDifferential W₂.toAffine.FunctionField W₁.toAffine.FunctionField) :=
+    Algebra.FormallyUnramified.subsingleton_kaehlerDifferential
+  have hsurj : Function.Surjective
+      (KaehlerDifferential.mapBaseChange K W₂.toAffine.FunctionField W₁.toAffine.FunctionField) :=
+    mapBaseChange_surjective_of_subsingleton_relativeKaehler K W₂.toAffine.FunctionField
+      W₁.toAffine.FunctionField
+  have hne : (invariantDifferential W₁.toAffine) ≠ 0 := invariantDifferential_ne_zero W₁.toAffine
+  obtain ⟨t, ht⟩ := hsurj (invariantDifferential W₁.toAffine)
+  by_contra hcon
+  push Not at hcon
+  have hmapzero : KaehlerDifferential.map K K W₂.toAffine.FunctionField W₁.toAffine.FunctionField = 0 := by
+    apply LinearMap.ext_on (KaehlerDifferential.span_range_derivation K W₂.toAffine.FunctionField)
+    rintro _ ⟨g, rfl⟩
+    rw [KaehlerDifferential.map_D, LinearMap.zero_apply]
+    exact hcon g
+  have hbc0 : ∀ s : W₁.toAffine.FunctionField ⊗[W₂.toAffine.FunctionField]
+      KaehlerDifferential K W₂.toAffine.FunctionField,
+      KaehlerDifferential.mapBaseChange K W₂.toAffine.FunctionField W₁.toAffine.FunctionField s = 0 := by
+    intro s
+    induction s using TensorProduct.induction_on with
+    | zero => simp
+    | tmul a ω =>
+        rw [KaehlerDifferential.mapBaseChange_tmul, hmapzero, LinearMap.zero_apply, smul_zero]
+    | add x y hx hy => rw [map_add, hx, hy, add_zero]
+  exact hne (ht.symm.trans (hbc0 t))
+
+open HasseWeil.WeilPairing in
+/-- **`omegaDiffMap` is nonzero on a nonzero differential** (rank-1 nonvanishing). For any algebraic
+field extension `L/K`, the base-change map `omegaDiffMap W₁ L : Ω[K(E₁)/K] → Ω[L(E₁_L)/L]` does not
+kill a nonzero `η`: write `η = c • ω_K` (`c ≠ 0`, by `kaehler_rank_one`); then `omegaDiffMap η =
+functionFieldMap(c) • ω_L` with both factors nonzero in the 1-dimensional `Ω[L(E₁_L)/L]`. -/
+theorem omegaDiffMap_ne_zero [Algebra.IsAlgebraic K L]
+    {η : KaehlerDifferential K W₁.toAffine.FunctionField} (hη : η ≠ 0) :
+    omegaDiffMap W₁ L η ≠ 0 := by
+  obtain ⟨c, hc⟩ := exists_smul_eq_of_finrank_eq_one (kaehler_rank_one W₁.toAffine)
+    (invariantDifferential_ne_zero W₁.toAffine) η
+  have hcne : c ≠ 0 := by
+    rintro rfl; rw [zero_smul] at hc; exact hη hc.symm
+  rw [← hc, omegaDiffMap_smul, omegaDiffMap_invariantDifferential]
+  rw [show c • invariantDifferential (W₁.baseChange L).toAffine =
+      algebraMap W₁.toAffine.FunctionField (W₁.baseChange L).toAffine.FunctionField c •
+        invariantDifferential (W₁.baseChange L).toAffine from (algebraMap_smul _ _ _).symm]
+  apply smul_ne_zero
+  · rw [algebraMap_functionField_baseChange_eq]
+    exact fun h => hcne ((map_eq_zero_iff _
+      ((⟨W₁.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap_injective L)).mp h)
+  · exact invariantDifferential_ne_zero (W₁.baseChange L).toAffine
+
+open HasseWeil.WeilPairing in
+/-- **Base-change separability of a two-curve isogeny** (Silverman III.5, base-change form). For any
+algebraic field extension `L/K`, if `φ : E₁ → E₂` is separable then its base change `bcIsog φ` over
+`L` is separable. Differential proof: the separating element `g` of `φ`
+(`exists_separating_element`) base-changes — `bcIsog^*(functionFieldMap g) = functionFieldMap(φ*g)`
+(`psiL_nat`) — and `D_L(functionFieldMap(φ*g)) = omegaDiffMap(D_K(φ*g)) ≠ 0` (`omegaDiffMap_D` +
+`omegaDiffMap_ne_zero`), so `bcIsog φ` is separable by
+`Isogeny.isSeparable_of_pullback_kaehlerD_ne_zero`. -/
+theorem bcIsog_isSeparable [Algebra.IsAlgebraic K L] (hsep : φ.IsSeparable) :
+    (bcIsog W₁ W₂ φ L).IsSeparable := by
+  obtain ⟨g, hg⟩ := exists_separating_element W₁ W₂ φ hsep
+  refine EC.Isogeny.isSeparable_of_pullback_kaehlerD_ne_zero (bcIsog W₁ W₂ φ L)
+    ((⟨W₂.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L g) ?_
+  have hpb : (bcIsog W₁ W₂ φ L).toCurveMap.pullback
+        ((⟨W₂.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L g) =
+      (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L (φ.toCurveMap.pullback g) :=
+    (psiL_nat W₁ W₂ φ L g).symm
+  rw [hpb, ← algebraMap_functionField_baseChange_eq W₁ L, ← omegaDiffMap_D W₁ L]
+  exact omegaDiffMap_ne_zero W₁ L hg
+
 /-! #### `mPbL` — the base change of `[deg φ]*` (an endomorphism), and its naturality -/
 
 variable {n : ℤ}
@@ -1970,14 +2109,15 @@ private theorem hasMulByIntDualWitness_of_rangeIncl_general {F : Type*} [Field F
     (EC.Isogeny.reflects_ordAtInfty φ)
 
 /-- **MOVE 2 — the `F`-level range inclusion via the `K̄`-direct route** (no finite-`L` geometric
-realization). For `m = deg` of the `K̄`-base-changed isogeny `bcIsog`, the inclusion
-`Im([m]*_F) ⊆ Im(φ*_F)` holds: the `K̄`-direct inclusion `ecIsog_mulByInt_deg_rangeIncl_of_charZero`
-(applied to `bcIsog`, with `hreg` = its `pullback_ordAtInfty_nonneg`) gives the inclusion over `K̄`
-for `mPbK = [m]*_K̄` (`mPbL_eq_mulByInt_baseChange_kbar`) and `psiK = φ*_K̄`; this is descended to `F`
-by `rangeIncl_of_descentData_kbar` (the tower fixed-field characterization). -/
-private theorem rationalRangeIncl_kbar {F : Type u} [Field F] [DecidableEq F] [CharZero F]
+realization), separable form. For a **separable** `φ` and `m = deg` of the `K̄`-base-changed isogeny
+`bcIsog`, the inclusion `Im([m]*_F) ⊆ Im(φ*_F)` holds: the `K̄`-direct inclusion
+`ecIsog_mulByInt_deg_rangeIncl_of_separable` (applied to `bcIsog`, separable by `bcIsog_isSeparable`,
+with `hreg` = its `pullback_ordAtInfty_nonneg`) gives the inclusion over `K̄` for `mPbK = [m]*_K̄`
+(`mPbL_eq_mulByInt_baseChange_kbar`) and `psiK = φ*_K̄`; this is descended to `F` by
+`rangeIncl_of_descentData_kbar` (the tower fixed-field characterization, `PerfectField`-relaxed). -/
+private theorem rationalRangeIncl_kbar {F : Type u} [Field F] [DecidableEq F] [PerfectField F]
     {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
-    (φ : EC.Isogeny W₁ W₂) :
+    (φ : EC.Isogeny W₁ W₂) (hsep : φ.IsSeparable) :
     ∃ (m : ℤ) (hm : m ≠ 0),
       (HasseWeil.mulByInt_pullbackAlgHom W₁ m hm).range ≤ φ.toCurveMap.pullback.range := by
   classical
@@ -1989,9 +2129,10 @@ private theorem rationalRangeIncl_kbar {F : Type u} [Field F] [DecidableEq F] [C
       (TwoCurveBaseChange.mPbL W₁ (AlgebraicClosure F) (n := (bc.degree : ℤ))
           (by exact_mod_cast bc.degree_pos'.ne')).range ≤
         (TwoCurveBaseChange.psiL W₁ W₂ φ (AlgebraicClosure F)).range := by
-    -- the K̄-direct inclusion for `bc` (its degree)
-    have hincl := ecIsog_mulByInt_deg_rangeIncl_of_charZero
+    -- the K̄-direct inclusion for `bc` (its degree); `bc` is separable since `φ` is.
+    have hincl := ecIsog_mulByInt_deg_rangeIncl_of_separable
       (W₁ := W₁.baseChange (AlgebraicClosure F)) (W₂ := W₂.baseChange (AlgebraicClosure F)) bc
+      (TwoCurveBaseChange.bcIsog_isSeparable W₁ W₂ φ (AlgebraicClosure F) hsep)
       bc.pullback_ordAtInfty_nonneg
     -- rewrite `mPbL = [m]*_K̄` (h_mPbL) and `psiL` range = `bc.pullback` range
     rw [TwoCurveBaseChange.mPbL_eq_mulByInt_baseChange_kbar W₁ (n := (bc.degree : ℤ))]
@@ -2018,14 +2159,15 @@ private theorem rationalRangeIncl_kbar {F : Type u} [Field F] [DecidableEq F] [C
     hKincl
 
 /-- **DUAL-Q4 deep residual, assembled** — the separable reverse-isogeny existence (Silverman
-III.6.1, char-0 case): from the `K̄`-direct range inclusion (`rationalRangeIncl_kbar`, MOVE 2) and the
-basepoint leaf (`hasMulByIntDualWitness_of_rangeIncl_general`), a separable isogeny over a char-0 base
-admits an `F`-rational faithful `[n]`-witness (`n = deg` of the `K̄`-base-change). -/
-private theorem rationalReverseCompose_of_separable {F : Type u} [Field F] [DecidableEq F] [CharZero F]
-    {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
+III.6.1): from the `K̄`-direct range inclusion (`rationalRangeIncl_kbar`, MOVE 2) and the basepoint
+leaf (`hasMulByIntDualWitness_of_rangeIncl_general`), a **separable** isogeny over a perfect base
+admits an `F`-rational faithful `[n]`-witness (`n = deg` of the `K̄`-base-change). Char-0 is the
+special case where every isogeny is separable. -/
+private theorem rationalReverseCompose_of_separable {F : Type u} [Field F] [DecidableEq F]
+    [PerfectField F] {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
     (φ : EC.Isogeny W₁ W₂) (hsep : φ.IsSeparable) :
     ∃ (n : ℤ) (hn : n ≠ 0), φ.HasMulByIntDualWitness n hn := by
-  obtain ⟨m, hm, hincl⟩ := rationalRangeIncl_kbar φ
+  obtain ⟨m, hm, hincl⟩ := rationalRangeIncl_kbar φ hsep
   exact ⟨m, hm, hasMulByIntDualWitness_of_rangeIncl_general φ hm hincl⟩
 
 /-! ### Char-0 separability and the `F`-level formal payoff
