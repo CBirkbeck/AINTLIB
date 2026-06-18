@@ -163,7 +163,6 @@ instance quotientLE (H : ConvexSubgroup Γ) : LE (Γ ⧸ H.toSubgroup) where
     (fun a b ↦ b⁻¹ * a ≤ 1 ∨ b⁻¹ * a ∈ H.toSubgroup)
     (fun a₁ b₁ a₂ b₂ ha hb ↦ by
       rw [QuotientGroup.leftRel_apply] at ha hb
-      change (b₁⁻¹ * a₁ ≤ 1 ∨ _) = (b₂⁻¹ * a₂ ≤ 1 ∨ _)
       have hk : (b₁⁻¹ * b₂)⁻¹ * (a₁⁻¹ * a₂) ∈ H.toSubgroup :=
         H.toSubgroup.mul_mem (H.toSubgroup.inv_mem hb) ha
       have : b₂⁻¹ * a₂ =
@@ -196,7 +195,7 @@ noncomputable instance quotientLinearOrder (H : ConvexSubgroup Γ) :
     LinearOrder (Γ ⧸ H.toSubgroup) where
   le_refl x := by
     induction x using Quotient.inductionOn with
-    | _ a => change a⁻¹ * a ≤ 1 ∨ _; left; simp only [inv_mul_cancel, le_refl]
+    | _ a => exact .inl (inv_mul_cancel a).le
   le_trans x y z hxy hyz := by
     induction x using Quotient.inductionOn with | _ a =>
     induction y using Quotient.inductionOn with | _ b =>
@@ -522,9 +521,7 @@ def comap {Δ : Type*} [CommGroup Δ] [LinearOrder Δ] [IsOrderedMonoid Δ]
     (K : ConvexSubgroup Δ) (f : Γ →* Δ) (hf : Monotone f) :
     ConvexSubgroup Γ where
   toSubgroup := K.toSubgroup.comap f
-  convex' := by
-    intro a b x ha hb hax hxb
-    exact K.convex ha hb (hf hax) (hf hxb)
+  convex' := fun ha hb hax hxb ↦ K.convex ha hb (hf hax) (hf hxb)
 
 omit [IsOrderedMonoid Γ] in
 @[simp]
