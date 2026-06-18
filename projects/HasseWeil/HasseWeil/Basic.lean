@@ -688,8 +688,7 @@ theorem mulByInt_degree (W : Affine F) [W.IsElliptic] (n : ℤ) (hn : n ≠ 0) :
   · rw [this]; exact mulByInt_finrank W hn
   · ext x
     simp only [RingHom.comp_apply, RingEquiv.toRingHom_eq_coe,
-      RingEquiv.coe_toRingHom, RingEquiv.coe_refl, id,
-      AlgEquiv.toRingEquiv_eq_coe]
+      RingEquiv.coe_toRingHom, RingEquiv.coe_refl, id]
     rfl
 
 /-- For nonzero `n`, the multiplication-by-`n` isogeny has positive degree.
