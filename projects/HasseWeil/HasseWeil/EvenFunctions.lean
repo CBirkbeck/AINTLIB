@@ -164,7 +164,7 @@ lemma negInvolution_eq_iff [NeZero (2 : F)] (f : W.CoordinateRing) :
       have h2q : q + q = 0 := by linear_combination -hcomp
       ext n
       have h2coeff : q.coeff n + q.coeff n = 0 := by
-        have := congr_arg (fun p => p.coeff n) h2q
+        have := congr_arg (fun p ↦ p.coeff n) h2q
         simpa [Polynomial.coeff_add] using this
       have : 2 * q.coeff n = 0 := by linear_combination h2coeff
       exact (mul_eq_zero.mp this).resolve_left (NeZero.ne 2)
