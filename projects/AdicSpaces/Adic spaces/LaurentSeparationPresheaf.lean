@@ -102,19 +102,11 @@ theorem laurentCover_separation_presheaf_viaRow3
     (h_minus : restrictionMap D₀ (laurentMinusDatum D₀ f) hminus a =
       restrictionMap D₀ (laurentMinusDatum D₀ f) hminus b) :
     a = b := by
-  -- Apply ε-injectivity at the bridged base.
   apply LaurentCover.epsilonHom_gen_injective_of_iInf_pow_eq_bot
     (A := presheafValue D₀) (D₀.canonicalMap f) hInf
-  -- Reduce to component-wise equality.
   apply Prod.ext
-  · -- First component: via τ_plus and h_plus.
-    have ha := htau_plus a
-    have hb := htau_plus b
-    rw [← ha, ← hb, h_plus]
-  · -- Second component: via τ_minus and h_minus.
-    have ha := htau_minus a
-    have hb := htau_minus b
-    rw [← ha, ← hb, h_minus]
+  · rw [← htau_plus a, ← htau_plus b, h_plus]
+  · rw [← htau_minus a, ← htau_minus b, h_minus]
 
 /-- **Caller-friendly companion** to `laurentCover_separation_presheaf_viaRow3`
 that constructs the `(τ_plus, τ_minus, htau_plus, htau_minus)` bridge
