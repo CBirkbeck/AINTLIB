@@ -1,1 +1,1 @@
-FOCUS: G2-CFT — ClassFieldTheory class (toClassGroup+Artin) compiles; adding existence field, then G2-RAYSEQ
+FOCUS: G2-DEDUCE needs semi-local units → spawn G2-SEMILOCAL; checking mathlib adicCompletion units API

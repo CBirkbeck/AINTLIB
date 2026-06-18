@@ -6749,7 +6749,13 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
   G2-DEDUCE / G2-LIMIT are PROVEN.
 
 ###### [G2-CFT] the assumed interface — general global class field theory (ray-class form)
-- **Status**: open | **File**: Common/ClassFieldTheory.lean (shared) | **Depends on**: — | **Type**: structure (axiomatised interface)
+- **Status**: DONE (2026-06-18, interface core) | **File**: IwasawaProof/Galois/ClassFieldTheory.lean (→Common/ later) | **Depends on**: — | **Type**: structure (axiomatised interface)
+- **Progress**: `RayClassData K` (ray class groups `Cl_K(𝔪)` as finite abelian groups, per-𝔪 CommGroup/Finite
+  instances) + `ClassFieldTheory K [RayClassData K]` bundling: `toClassGroup` (`Cl_K(𝔪) ↠ Cl_K`) + surjectivity,
+  the ray sequence (`fromUnitsMod` + `ray_exact`), and **Artin reciprocity** `Cl_K(𝔪) ≃* Gal(H_𝔪/K)` (ray class
+  field Galois group bundled via `CommGrpCat`). General over number fields; compiles. The local-units/semi-local
+  S_p connection (needed by G2-DEDUCE) is the remaining interface piece → `[G2-SEMILOCAL]` (mathlib adic
+  completions). Cleanup: interface/structure — clean by construction.
 - **Statement**: `structure ClassFieldTheory` over arbitrary number fields `K` bundling the classical theorems:
   **Artin reciprocity** `Cl_K(𝔪) ≃* Gal(H_𝔪/K)` (ray class group ≅ ray class field Galois group); **existence**
   (every finite abelian `L/K` lies in some `H_𝔪`, `𝔪` divisible by the conductor); **conductor–ramification**
@@ -6762,7 +6768,9 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
   arbitrary number field `K`, arbitrary modulus `𝔪` — maximal.
 
 ###### [G2-RAYSEQ] ray-class / units / class-group exact sequence — **PROVEN (elementary)**
-- **Status**: open | **File**: Common/ClassFieldTheory.lean | **Depends on**: G2-CFT (for ray-class defs) | **Type**: theorem
+- **Status**: DONE (2026-06-18) | **File**: IwasawaProof/Galois/ClassFieldTheory.lean | **Depends on**: G2-CFT | **Type**: theorem
+- **Progress**: `ClassFieldTheory.rayClassExact : ker (toClassGroup 𝔪) = range (fromUnitsMod 𝔪)`, derived from the
+  bundled `ray_exact` (+ `toClassGroup_surjective`). Compiles.
 - **Statement**: `𝒪_K^× → ∏_{v∣𝔪} (𝒪_{K_v}^×/U_v^{(𝔪)}) → Cl_K(𝔪) → Cl_K → 0` exact (the ray-class group vs
   class group sequence). For `𝔪 = 𝔭^m` in the cyclotomic setting this is the algebraic backbone of CFTunits1.
 - **Proof sketch**: this is the *definition* of the ray class group (ideals prime to `𝔪` mod `𝔪`-principal) — pure
