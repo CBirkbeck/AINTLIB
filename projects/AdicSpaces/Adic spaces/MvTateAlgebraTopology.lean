@@ -370,8 +370,7 @@ theorem mvTateAlgNhd_of_coeff_mem_principal (n : ℕ) (P : PairOfDefinition A) (
   let g_in_subring : ↥(mvPairSubring n P) := ⟨g_val, hg_in⟩
   have hy_eq : (⟨y, hy_pair⟩ : ↥(mvPairSubring n P)) =
       mvPairConstantHom n P (π ^ k) * g_in_subring := by
-    apply Subtype.ext
-    apply Subtype.ext
+    refine Subtype.ext (Subtype.ext ?_)
     ext l
     change MvPowerSeries.coeff l y.val =
       MvPowerSeries.coeff l ((MvPowerSeries.C ((π : A) ^ k)) *
@@ -638,9 +637,7 @@ theorem mvTate_t2Space [IsTateRing A] [T2Space A] (n : ℕ) :
   intro y hy_ne
   obtain ⟨l, hl⟩ : ∃ l, MvPowerSeries.coeff l y.val ≠ 0 := by
     contrapose! hy_ne
-    apply Subtype.ext
-    apply MvPowerSeries.ext
-    intro l
+    refine Subtype.ext (MvPowerSeries.ext fun l => ?_)
     simpa using hy_ne l
   suffices h : ∃ k, MvPowerSeries.coeff l y.val ∉
       (Subtype.val '' ((P.I ^ k : Ideal ↥P.A₀) : Set ↥P.A₀) : Set A) by
