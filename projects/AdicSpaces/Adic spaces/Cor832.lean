@@ -1482,14 +1482,10 @@ ne-top criterion). -/
 theorem map_algebraMap_ne_top_of_notMem
     (D : RationalLocData A) {p : Ideal A} (hp : p.IsPrime) (hs : D.s ∉ p) :
     (Ideal.map (algebraMap A (Localization.Away D.s)) p : Ideal (Localization.Away D.s))
-      ≠ ⊤ := by
-  -- `D.s ∉ p` converts to `Disjoint (powers D.s) p` (prime ideals are radical).
-  have hradical : p.IsRadical := hp.isRadical
-  have hdisj : Disjoint (Submonoid.powers D.s : Set A) (p : Set A) :=
-    (Ideal.disjoint_powers_iff_notMem D.s hradical).mpr hs
-  -- Localization ne-top iff disjoint.
-  exact (IsLocalization.map_algebraMap_ne_top_iff_disjoint
-    (Submonoid.powers D.s) (Localization.Away D.s) p).mpr hdisj
+      ≠ ⊤ :=
+  (IsLocalization.map_algebraMap_ne_top_iff_disjoint
+    (Submonoid.powers D.s) (Localization.Away D.s) p).mpr
+    ((Ideal.disjoint_powers_iff_notMem D.s hp.isRadical).mpr hs)
 
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] [PlusSubring A] in
 /-- **Reduction of `lifted_ideal_proper` to the completion-level question.**
@@ -1579,37 +1575,27 @@ theorem one_mem_closure_coeRingHom_image
     (1 : presheafValue D) ∈
       closure ((D.coeRingHom '' (q : Set (Localization.Away D.s))) :
         Set (presheafValue D)) := by
-  -- Abbreviate the image set.
   set S : Set (presheafValue D) := D.coeRingHom '' (q : Set _) with hS_def
-  -- Basic closure properties of `S` as an image of the subgroup `q`.
   have hS_zero : (0 : presheafValue D) ∈ S :=
     ⟨0, q.zero_mem, map_zero _⟩
   have hS_add : ∀ {x y}, x ∈ S → y ∈ S → x + y ∈ S := by
     rintro _ _ ⟨a, ha, rfl⟩ ⟨b, hb, rfl⟩
     exact ⟨a + b, q.add_mem ha hb, map_add _ _ _⟩
-  -- For `a ∈ Loc.Away D.s` and `s ∈ S`, `coeRingHom a * s ∈ S` (ideal absorption).
   have hS_mul_coe : ∀ (a : Localization.Away D.s), ∀ {s}, s ∈ S →
       D.coeRingHom a * s ∈ S := by
     rintro a _ ⟨b, hb, rfl⟩
     exact ⟨a * b, q.mul_mem_left a hb, map_mul _ _ _⟩
-  -- Dense range of the completion map `D.coeRingHom`.
-  have hdense : DenseRange (D.coeRingHom : Localization.Away D.s → presheafValue D) := by
-    intro y
-    -- `D.coeRingHom` is definitionally `UniformSpace.Completion.coeRingHom` which has dense range.
-    have := @UniformSpace.Completion.denseRange_coe (Localization.Away D.s) D.uniformSpace y
-    exact this
-  -- Key step: for all `b ∈ presheafValue D` and all `s ∈ S`, `b * s ∈ closure S`.
+  have hdense : DenseRange (D.coeRingHom : Localization.Away D.s → presheafValue D) :=
+    fun y => @UniformSpace.Completion.denseRange_coe (Localization.Away D.s) D.uniformSpace y
   have hmul_closure : ∀ (b : presheafValue D), ∀ s ∈ S, b * s ∈ closure S := by
     intro b
     refine hdense.induction_on (p := fun b => ∀ s ∈ S, b * s ∈ closure S) b ?_ ?_
-    · -- closedness of `{b | ∀ s ∈ S, b * s ∈ closure S}`.
-      rw [show {b | ∀ s ∈ S, b * s ∈ closure S} =
+    · rw [show {b | ∀ s ∈ S, b * s ∈ closure S} =
         ⋂ s ∈ S, (fun b => b * s) ⁻¹' closure S from by ext b; simp]
       refine isClosed_biInter fun s _ => ?_
       exact isClosed_closure.preimage (continuous_id.mul continuous_const)
     · intro a s hs
       exact subset_closure (hS_mul_coe a hs)
-  -- `closure S` is closed under addition (since `S + S ⊆ S`).
   have hcl_add : ∀ {x y}, x ∈ closure S → y ∈ closure S → x + y ∈ closure S := by
     intro x y hx hy
     have h_add_maps : Set.MapsTo (fun p : presheafValue D × presheafValue D => p.1 + p.2)
@@ -1618,7 +1604,6 @@ theorem one_mem_closure_coeRingHom_image
       rw [closure_prod_eq]; exact ⟨hx, hy⟩
     exact map_mem_closure (f := fun p : presheafValue D × presheafValue D => p.1 + p.2)
       continuous_add hxy_prod h_add_maps
-  -- `closure S` is closed under left-multiplication by `presheafValue D`.
   have hcl_smul : ∀ (b : presheafValue D), ∀ {x}, x ∈ closure S → b * x ∈ closure S := by
     intro b x hx
     have hbS_sub : (fun s => b * s) '' S ⊆ closure S := fun _ ⟨s, hs, hsb⟩ =>
@@ -1626,19 +1611,16 @@ theorem one_mem_closure_coeRingHom_image
     have : b * x ∈ closure ((fun s => b * s) '' S) :=
       map_mem_closure (continuous_const.mul continuous_id) hx (fun _ hs => ⟨_, hs, rfl⟩)
     exact closure_minimal hbS_sub isClosed_closure this
-  -- Assemble `closure S` as an `Ideal (presheafValue D)`.
   let J : Ideal (presheafValue D) :=
     { carrier := closure S
       zero_mem' := subset_closure hS_zero
       add_mem' := hcl_add
       smul_mem' := fun b _ hx => hcl_smul b hx }
   have hS_sub_J : S ⊆ (J : Set (presheafValue D)) := subset_closure
-  -- `Ideal.map D.coeRingHom q ≤ J` since `q = Ideal.span q` and `J` contains `S`.
   have hmap_le_J : Ideal.map D.coeRingHom q ≤ J := by
     rw [show (q : Ideal (Localization.Away D.s)) = Ideal.span (q : Set _) from
       (Ideal.span_eq q).symm, Ideal.map_span]
     exact Ideal.span_le.mpr hS_sub_J
-  -- Conclude `1 ∈ closure S` by applying `hmap_le_J` to `h`.
   exact hmap_le_J h
 
 omit [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A] in
@@ -1659,15 +1641,12 @@ theorem coeRingHom_preserves_proper_of_closed
     (h_closed : @IsClosed _ D.topology (q : Set (Localization.Away D.s))) :
     Ideal.map D.coeRingHom q ≠ ⊤ := by
   intro hmap_top
-  -- `1 ∈ Ideal.map D.coeRingHom q`.
   have h1_map : (1 : presheafValue D) ∈ Ideal.map D.coeRingHom q := by
     rw [hmap_top]; exact Submodule.mem_top
-  -- T-IDEAL-1: `1 ∈ closure (D.coeRingHom '' q)`.
   have h1_closure : (1 : presheafValue D) ∈
       closure ((D.coeRingHom '' (q : Set (Localization.Away D.s))) :
         Set (presheafValue D)) :=
     one_mem_closure_coeRingHom_image D q h1_map
-  -- `D.coeRingHom` is `IsUniformInducing` (completion map) → `IsInducing`.
   letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
   letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
   letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
@@ -1677,20 +1656,15 @@ theorem coeRingHom_preserves_proper_of_closed
   have h_inducing :
       Topology.IsInducing (D.coeRingHom : Localization.Away D.s → presheafValue D) :=
     h_uniformInducing.isInducing
-  -- `closure q = coeRingHom⁻¹ (closure (coeRingHom '' q))`.
   have h_closure_eq := h_inducing.closure_eq_preimage_closure_image
     (q : Set (Localization.Away D.s))
-  -- Since `q` is closed, `closure q = q`.
   rw [h_closed.closure_eq] at h_closure_eq
-  -- `1 : presheafValue D = D.coeRingHom 1`, and `D.coeRingHom 1 ∈ closure (coeRingHom '' q)`,
-  -- so `1 ∈ coeRingHom⁻¹ (closure ...) = q`.
   have h1_loc_in_q : (1 : Localization.Away D.s) ∈ (q : Set _) := by
     rw [h_closure_eq]
     change (D.coeRingHom : Localization.Away D.s → presheafValue D) 1 ∈
       closure ((D.coeRingHom '' (q : Set _)) : Set (presheafValue D))
     rw [map_one]
     exact h1_closure
-  -- But `q ≠ ⊤` forces `1 ∉ q`, contradiction.
   exact h_proper (Ideal.eq_top_iff_one q |>.mpr h1_loc_in_q)
 
 omit [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A] in
