@@ -773,7 +773,6 @@ theorem example638Plus_backward_forward_eq_id
           change (MvPowerSeries.coeff (TateAlgebra.toIndex (n 0))) g.val = 0
           rw [MvPowerSeries.coeff_apply]
           exact hN _ (by simp [TateAlgebra.toIndex, Finsupp.single_eq_same]; omega)
-      -- By IH, the maps agree on g - gk.
       have hg'_agree : ((example638Plus_backwardHom B P b hA_complete hnoeth) ∘
           example638Plus_evalHom B P b) (g - gk) =
           (Ideal.Quotient.mk (plusFSubXIdeal B b)) (g - gk) := ih hg'_vanish
@@ -1182,8 +1181,8 @@ theorem trivialMinusDatum_hT_pb
     (P : PairOfDefinition B) [IsNoetherianRing P.A₀] (b : B) :
     ∀ t ∈ (trivialMinusDatum B P b).T, TopologicalRing.IsPowerBounded t := by
   intro t ht
-  have ht1 : t = 1 := Finset.mem_singleton.mp ht
-  rw [ht1]; exact TopologicalRing.isPowerBounded_one
+  rw [Finset.mem_singleton.mp ht]
+  exact TopologicalRing.isPowerBounded_one
 
 /-- Backward ring hom `presheafValue (trivialMinusDatum B P b) →+* TateAlgebra B ⧸ oneSubfXIdeal b`,
 obtained by reusing `presheafValueToCanonicalQuotient` at `D = trivialMinusDatum B P b`
@@ -1239,7 +1238,6 @@ theorem example638Minus_backwardHom_invS
         (invS (trivialMinusDatum B P b)) =
       (Ideal.Quotient.mk (oneSubfXIdeal b)) TateAlgebra.X := by
   rw [invS_eq_coeRingHom_divByS_one]
-  -- `divByS 1 b = invSelf` in `Localization.Away b`.
   have hdiv : divByS (1 : B) (trivialMinusDatum B P b).s =
       IsLocalization.Away.invSelf (S := Localization.Away b) b := by
     change divByS (1 : B) b = IsLocalization.Away.invSelf b
@@ -1286,8 +1284,6 @@ theorem example638Minus_backward_forward_eq_id
     (example638Minus_backwardHom B P b hA_complete hnoeth).comp
       (example638Minus_forwardHom B P b) =
       RingHom.id _ := by
-  -- `backward_forward = presheafValueToCanonicalQuotient ∘ tateQuotientToPresheafHom`.
-  -- This equals `id` by `presheafToCanonicalQuotient_comp_tateQuotientToPresheaf`.
   rw [example638Minus_forwardHom_eq_tateQuotientToPresheafHom,
     example638Minus_backwardHom_eq_presheafValueToCanonicalQuotient]
   apply RingHom.ext
@@ -1296,8 +1292,6 @@ theorem example638Minus_backward_forward_eq_id
       hA_complete hnoeth (trivialMinusDatum_hT_pb B P b)
       (tateQuotientToPresheafHom (trivialMinusDatum B P b)
         (invS_isPowerBounded_in_trivialMinus B P b) q) = q
-  -- `(trivialMinusDatum B P b).s = b`, so the `oneSubfXIdeal D.s` matches
-  -- `oneSubfXIdeal b` definitionally.
   exact presheafToCanonicalQuotient_comp_tateQuotientToPresheaf
     (trivialMinusDatum B P b)
     (invS_isPowerBounded_in_trivialMinus B P b)
