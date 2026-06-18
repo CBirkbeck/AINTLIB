@@ -78,7 +78,7 @@ theorem mem_fractionRing_range_of_pow_mem (p : ℕ) [Fact p.Prime] [CharP K p]
   have hsep : IsSeparable Mff g := Algebra.IsSeparable.isSeparable Mff g
   have hsd1 : (minpoly Mff g).natSepDegree = 1 := by
     rw [minpoly.natSepDegree_eq_one_iff_pow_mem p]
-    exact ⟨1, by rw [pow_one]; exact hg⟩
+    exact ⟨1, by rwa [pow_one]⟩
   have hsd_nd : (minpoly Mff g).natSepDegree = (minpoly Mff g).natDegree :=
     Polynomial.Separable.natSepDegree_eq_natDegree hsep
   have hnd1 : (minpoly Mff g).natDegree = 1 := by rw [← hsd_nd, hsd1]
@@ -174,6 +174,21 @@ theorem mulByInt_p_pullback_x_gen_mem_adjoin_pow_routeB
   rw [← hg]
   exact adjoin_simple_pow_le_adjoin_simple_pow p (x_gen W) g hg_mem
 
+omit [Fintype K] in
+/-- `[p ^ (k+1)]` factors as `[p ^ k] ∘ [p]` (shared scaffolding for the x- and
+y-side `p^k`-power inductions). -/
+private theorem mulByInt_pow_succ_comp (p : ℕ) [Fact p.Prime] (k : ℕ) :
+    mulByInt W.toAffine ((p ^ (k + 1) : ℕ) : ℤ) =
+      (mulByInt W.toAffine ((p ^ k : ℕ) : ℤ)).comp
+        (mulByInt W.toAffine ((p : ℕ) : ℤ)) := by
+  have hp_pos : 0 < p := (Fact.out : p.Prime).pos
+  have hp_ne : ((p : ℕ) : ℤ) ≠ 0 := by exact_mod_cast hp_pos.ne'
+  have hpk_ne : ((p ^ k : ℕ) : ℤ) ≠ 0 := by exact_mod_cast pow_ne_zero k hp_pos.ne'
+  rw [show ((p ^ (k + 1) : ℕ) : ℤ) = ((p ^ k : ℕ) : ℤ) * ((p : ℕ) : ℤ) by
+    push_cast; rw [pow_succ]]
+  exact (mulByInt_comp_eq_mul W ((p ^ k : ℕ) : ℤ) ((p : ℕ) : ℤ) hpk_ne hp_ne
+    (mul_ne_zero hpk_ne hp_ne)).symm
+
 /-- **x-side, all powers (general characteristic)**: for all `k`,
 `[p^k]* x_gen ∈ adjoin K {x_gen ^ (p^k)}`. -/
 theorem mulByInt_pow_pullback_x_gen_mem_adjoin_pow_routeB
@@ -185,19 +200,7 @@ theorem mulByInt_pow_pullback_x_gen_mem_adjoin_pow_routeB
   induction k with
   | zero => exact mulByInt_pow_zero_pullback_x_gen_mem_adjoin_pow W p
   | succ k ih =>
-    have hp_pos : 0 < p := (Fact.out : p.Prime).pos
-    have hp_ne : ((p : ℕ) : ℤ) ≠ 0 := by exact_mod_cast hp_pos.ne'
-    have hpk_ne : ((p ^ k : ℕ) : ℤ) ≠ 0 := by exact_mod_cast pow_ne_zero k hp_pos.ne'
-    have h_mul : ((p ^ k : ℕ) : ℤ) * ((p : ℕ) : ℤ) = ((p ^ (k + 1) : ℕ) : ℤ) := by
-      push_cast; rw [pow_succ]
-    have h_decomp : mulByInt W.toAffine ((p ^ (k + 1) : ℕ) : ℤ) =
-        (mulByInt W.toAffine ((p ^ k : ℕ) : ℤ)).comp
-          (mulByInt W.toAffine ((p : ℕ) : ℤ)) := by
-      rw [show ((p ^ (k + 1) : ℕ) : ℤ) = ((p ^ k : ℕ) : ℤ) * ((p : ℕ) : ℤ) from
-        h_mul.symm]
-      exact (mulByInt_comp_eq_mul W ((p ^ k : ℕ) : ℤ) ((p : ℕ) : ℤ) hpk_ne hp_ne
-        (mul_ne_zero hpk_ne hp_ne)).symm
-    rw [h_decomp]
+    rw [mulByInt_pow_succ_comp W p k]
     change (mulByInt W.toAffine ((p : ℕ) : ℤ)).pullback
         ((mulByInt W.toAffine ((p ^ k : ℕ) : ℤ)).pullback (x_gen W)) ∈ _
     have h_in_image :
@@ -375,19 +378,7 @@ theorem mulByInt_pow_pullback_y_gen_mem_adjoin_pair_pow
     rw [pow_one, pow_one, show ((1 : ℕ) : ℤ) = 1 from rfl, mulByInt_one_pullback_eq_id]
     exact IntermediateField.subset_adjoin K _ (by right; rfl)
   | succ k ih =>
-    have hp_pos : 0 < p := (Fact.out : p.Prime).pos
-    have hp_ne : ((p : ℕ) : ℤ) ≠ 0 := by exact_mod_cast hp_pos.ne'
-    have hpk_ne : ((p ^ k : ℕ) : ℤ) ≠ 0 := by exact_mod_cast pow_ne_zero k hp_pos.ne'
-    have h_mul : ((p ^ k : ℕ) : ℤ) * ((p : ℕ) : ℤ) = ((p ^ (k + 1) : ℕ) : ℤ) := by
-      push_cast; rw [pow_succ]
-    have h_decomp : mulByInt W.toAffine ((p ^ (k + 1) : ℕ) : ℤ) =
-        (mulByInt W.toAffine ((p ^ k : ℕ) : ℤ)).comp
-          (mulByInt W.toAffine ((p : ℕ) : ℤ)) := by
-      rw [show ((p ^ (k + 1) : ℕ) : ℤ) = ((p ^ k : ℕ) : ℤ) * ((p : ℕ) : ℤ) from
-        h_mul.symm]
-      exact (mulByInt_comp_eq_mul W ((p ^ k : ℕ) : ℤ) ((p : ℕ) : ℤ) hpk_ne hp_ne
-        (mul_ne_zero hpk_ne hp_ne)).symm
-    rw [h_decomp]
+    rw [mulByInt_pow_succ_comp W p k]
     change (mulByInt W.toAffine ((p : ℕ) : ℤ)).pullback
         ((mulByInt W.toAffine ((p ^ k : ℕ) : ℤ)).pullback (y_gen W)) ∈ _
     have h_in_image :
