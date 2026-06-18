@@ -182,21 +182,9 @@ theorem _root_.MvPowerSeries.finSucc_forward_map_add (R : Type u) [CommRing R] (
     MvPowerSeries.finSucc_forwardFun R n (p + q) =
       MvPowerSeries.finSucc_forwardFun R n p + MvPowerSeries.finSucc_forwardFun R n q := by
   ext k m
-  change (PowerSeries.coeff k)
-      (PowerSeries.mk fun j => fun m' : Fin n →₀ ℕ => (p + q) (Finsupp.cons j m')) m =
-    (MvPowerSeries.coeff m)
-      ((PowerSeries.coeff k) (MvPowerSeries.finSucc_forwardFun R n p +
-        MvPowerSeries.finSucc_forwardFun R n q))
-  rw [PowerSeries.coeff_mk, map_add, map_add]
-  change (p + q) (Finsupp.cons k m) =
-    MvPowerSeries.coeff m ((PowerSeries.coeff k) (MvPowerSeries.finSucc_forwardFun R n p)) +
-      MvPowerSeries.coeff m ((PowerSeries.coeff k) (MvPowerSeries.finSucc_forwardFun R n q))
-  rw [MvPowerSeries.coeff_apply, MvPowerSeries.coeff_apply]
-  change p (Finsupp.cons k m) + q (Finsupp.cons k m) =
-    (PowerSeries.coeff k) (MvPowerSeries.finSucc_forwardFun R n p) m +
-      (PowerSeries.coeff k) (MvPowerSeries.finSucc_forwardFun R n q) m
-  unfold MvPowerSeries.finSucc_forwardFun
-  rw [PowerSeries.coeff_mk, PowerSeries.coeff_mk]
+  simp only [MvPowerSeries.finSucc_forwardFun, PowerSeries.coeff_mk, map_add,
+    MvPowerSeries.coeff_apply]
+  rfl
 
 /-- Helper for L2.1.g: `Finsupp.cons` is additive in both arguments. -/
 private lemma _finsupp_cons_add (n : ℕ) (a b : ℕ) (β γ : Fin n →₀ ℕ) :
@@ -226,18 +214,11 @@ private lemma _antidiag_cons {n : ℕ} (k : ℕ) (m : Fin n →₀ ℕ) :
   constructor
   · -- (⊆): given δ + ε = Finsupp.cons k m, produce ((δ 0, ε 0), (δ.tail, ε.tail)).
     intro h
-    refine ⟨((δ 0, ε 0), (δ.tail, ε.tail)), ⟨?_, ?_⟩, ?_, ?_⟩
+    refine ⟨((δ 0, ε 0), (δ.tail, ε.tail)), ⟨?_, ?_⟩, Finsupp.cons_tail δ, Finsupp.cons_tail ε⟩
     · -- δ 0 + ε 0 = k
-      have := congrArg (fun f : Fin (n+1) →₀ ℕ => f 0) h
-      simpa [Finsupp.cons_zero] using this
+      simpa [Finsupp.cons_zero] using congrArg (· 0) h
     · -- δ.tail + ε.tail = m
-      have := congrArg Finsupp.tail h
-      rw [_finsupp_tail_add, Finsupp.tail_cons] at this
-      exact this
-    · -- Finsupp.cons (δ 0) δ.tail = δ
-      exact Finsupp.cons_tail δ
-    · -- Finsupp.cons (ε 0) ε.tail = ε
-      exact Finsupp.cons_tail ε
+      simpa [_finsupp_tail_add, Finsupp.tail_cons] using congrArg Finsupp.tail h
   · -- (⊇): given ((a, b), (β, γ)) with a+b=k, β+γ=m, show cons sums.
     rintro ⟨⟨⟨a, b⟩, ⟨β, γ⟩⟩, ⟨hab, hβγ⟩, hδ, hε⟩
     subst hδ
@@ -290,18 +271,10 @@ theorem _root_.MvPowerSeries.finSucc_forward_map_mul (R : Type u) [CommRing R] (
     intro ⟨⟨a, b⟩, ⟨β, γ⟩⟩ _ ⟨⟨a', b'⟩, ⟨β', γ'⟩⟩ _ heq
     simp only [Prod.mk.injEq] at heq
     obtain ⟨h1, h2⟩ := heq
-    have ha : a = a' := by
-      have := congrArg (fun f : Fin (n+1) →₀ ℕ => f 0) h1
-      simpa [Finsupp.cons_zero] using this
-    have hβ : β = β' := by
-      have := congrArg Finsupp.tail h1
-      simpa [Finsupp.tail_cons] using this
-    have hb : b = b' := by
-      have := congrArg (fun f : Fin (n+1) →₀ ℕ => f 0) h2
-      simpa [Finsupp.cons_zero] using this
-    have hγ : γ = γ' := by
-      have := congrArg Finsupp.tail h2
-      simpa [Finsupp.tail_cons] using this
+    have ha : a = a' := by simpa [Finsupp.cons_zero] using congrArg (· 0) h1
+    have hβ : β = β' := by simpa [Finsupp.tail_cons] using congrArg Finsupp.tail h1
+    have hb : b = b' := by simpa [Finsupp.cons_zero] using congrArg (· 0) h2
+    have hγ : γ = γ' := by simpa [Finsupp.tail_cons] using congrArg Finsupp.tail h2
     simp [ha, hb, hβ, hγ]
 
 /-- The ring iso `MvPowerSeries (Fin (n+1)) R ≃+* MvPowerSeries (Fin n) R⟦X⟧`
@@ -333,20 +306,16 @@ theorem _root_.MvPowerSeries.instIsNoetherianRing_fin (R : Type u) [CommRing R]
   | zero =>
     -- For σ = Fin 0 (empty), `C : R →+* MvPowerSeries (Fin 0) R` is surjective,
     -- so noetherianness transfers from R.
-    haveI hunique : Unique (Fin 0 →₀ ℕ) := Finsupp.uniqueOfLeft
     apply isNoetherianRing_of_surjective R (MvPowerSeries (Fin 0) R)
       (MvPowerSeries.C (σ := Fin 0) (R := R))
     intro p
     refine ⟨p 0, ?_⟩
     ext α
-    have hα : α = 0 := Subsingleton.elim _ _
-    subst hα
-    rw [MvPowerSeries.coeff_C]
+    rw [Subsingleton.elim α 0, MvPowerSeries.coeff_C]
     rfl
   | succ n IH =>
     obtain ⟨e⟩ := MvPowerSeries.finSuccEquivPowerSeries R n
     haveI : IsNoetherianRing (MvPowerSeries (Fin n) R) := IH
-    haveI : IsNoetherianRing (PowerSeries (MvPowerSeries (Fin n) R)) := inferInstance
     exact isNoetherianRing_of_ringEquiv _ e.symm
 
 /-! ## L3 — Evaluation map `MvPowerSeries (Fin n) R → AdicCompletion I R`
@@ -453,15 +422,7 @@ private lemma _mvPowerSeriesEval_partial_compat_support_high {n : ℕ}
     ∃ j : Fin n, α j ≥ m + 1 := by
   classical
   rw [MvPolynomial.mem_support_iff] at hα
-  have hsub : MvPolynomial.coeff α (((MvPowerSeries.trunc R
-      (Finsupp.equivFunOnFinite.symm fun _ : Fin n => k + 1)) P) -
-        ((MvPowerSeries.trunc R
-          (Finsupp.equivFunOnFinite.symm fun _ : Fin n => m + 1)) P)) =
-      MvPolynomial.coeff α (MvPowerSeries.trunc R
-        (Finsupp.equivFunOnFinite.symm fun _ : Fin n => k + 1) P) -
-      MvPolynomial.coeff α (MvPowerSeries.trunc R
-        (Finsupp.equivFunOnFinite.symm fun _ : Fin n => m + 1) P) := rfl
-  rw [hsub, MvPowerSeries.coeff_trunc, MvPowerSeries.coeff_trunc] at hα
+  rw [MvPolynomial.coeff_sub, MvPowerSeries.coeff_trunc, MvPowerSeries.coeff_trunc] at hα
   by_cases h_lt_m : α < (Finsupp.equivFunOnFinite.symm fun _ : Fin n => m + 1 :
       Fin n →₀ ℕ)
   · -- α < n_m ≤ n_k: both branches give P α, difference is 0.
@@ -537,15 +498,8 @@ theorem _mvPowerSeriesEval_partial_compat [IsNoetherianRing R] (I : Ideal R)
       le_trans hj (Finset.single_le_sum (f := α)
         (fun i _ => Nat.zero_le _) (Finset.mem_univ j))
     exact Ideal.pow_le_pow_right (by omega : m ≤ ∑ i, α i) h1
-  have h_term : MvPolynomial.coeff α (((MvPowerSeries.trunc R
-      (Finsupp.equivFunOnFinite.symm fun _ : Fin n => k + 1)) P) -
-        ((MvPowerSeries.trunc R
-          (Finsupp.equivFunOnFinite.symm fun _ : Fin n => m + 1)) P)) *
-      ∏ i, (f i) ^ (α i) ∈ I ^ m :=
-    Ideal.mul_mem_left _ _ h_prod_in
-  exact (show I ^ m ≤ I ^ m • (⊤ : Submodule R R) from fun y hy => by
-    rw [show y = y * 1 from (mul_one _).symm]
-    exact Submodule.smul_mem_smul hy Submodule.mem_top) h_term
+  rw [Ideal.smul_top_eq_map (S := R)]
+  simpa using Ideal.mul_mem_left _ _ h_prod_in
 
 /-- **(L3.B.map_one)**: the lifted LinearMap sends `1` to `1`, assuming
 `0 < n`.
@@ -646,13 +600,7 @@ private lemma _mvPowerSeriesEval_partial_map_mul_support_high {n : ℕ}
       · refine ⟨⟨0, hn⟩, ?_⟩
         have := hcontra ⟨0, hn⟩
         simp [hn_k_def, Finsupp.equivFunOnFinite]; omega
-    have hsub_coeff : MvPolynomial.coeff α
-        ((MvPowerSeries.trunc R n_k) (P * Q) -
-          (MvPowerSeries.trunc R n_k) P * (MvPowerSeries.trunc R n_k) Q) =
-        MvPolynomial.coeff α ((MvPowerSeries.trunc R n_k) (P * Q)) -
-          MvPolynomial.coeff α
-            ((MvPowerSeries.trunc R n_k) P * (MvPowerSeries.trunc R n_k) Q) := rfl
-    rw [hsub_coeff, MvPowerSeries.coeff_trunc, if_pos h_lt,
+    rw [MvPolynomial.coeff_sub, MvPowerSeries.coeff_trunc, if_pos h_lt,
         MvPolynomial.coeff_mul, MvPowerSeries.coeff_mul]
     refine sub_eq_zero.mpr ?_
     refine Finset.sum_congr rfl ?_
@@ -705,17 +653,8 @@ private theorem _mvPowerSeriesEval_partial_map_mul_residual_mem
       le_trans hj (Finset.single_le_sum (f := α)
         (fun i _ => Nat.zero_le _) (Finset.mem_univ j))
     exact Ideal.pow_le_pow_right (by omega : k ≤ ∑ i, α i) h1
-  have h_term : MvPolynomial.coeff α (((MvPowerSeries.trunc R
-      (Finsupp.equivFunOnFinite.symm fun _ : Fin n => k + 1)) (P * Q)) -
-        ((MvPowerSeries.trunc R
-          (Finsupp.equivFunOnFinite.symm fun _ : Fin n => k + 1)) P *
-         (MvPowerSeries.trunc R
-          (Finsupp.equivFunOnFinite.symm fun _ : Fin n => k + 1)) Q)) *
-      ∏ i, (f i) ^ (α i) ∈ I ^ k :=
-    Ideal.mul_mem_left _ _ h_prod_in
-  exact (show I ^ k ≤ I ^ k • (⊤ : Submodule R R) from fun y hy => by
-    rw [show y = y * 1 from (mul_one _).symm]
-    exact Submodule.smul_mem_smul hy Submodule.mem_top) h_term
+  rw [Ideal.smul_top_eq_map (S := R)]
+  simpa using Ideal.mul_mem_left _ _ h_prod_in
 
 /-- **(L3.B.map_mul.partial)**: per-level multiplicativity of the partial
 evaluation map mod `I^k`.
@@ -812,10 +751,7 @@ theorem pow_eq_span_pow_of_span_eq [IsNoetherianRing R] (I : Ideal R)
   classical
   apply le_antisymm
   · -- I^k ≤ Ideal.span RHS via Submodule.span_pow + counting argument.
-    rw [← hspan]
-    have hspow : Ideal.span (Set.range f) ^ k = Ideal.span (Set.range f ^ k) :=
-      Submodule.span_pow (Set.range f) k
-    rw [hspow]
+    rw [← hspan, Submodule.span_pow]
     refine Ideal.span_le.mpr ?_
     intro x hx
     rw [Set.mem_pow_iff_prod] at hx
@@ -827,11 +763,8 @@ theorem pow_eq_span_pow_of_span_eq [IsNoetherianRing R] (I : Ideal R)
     let α : Fin n → ℕ := fun i =>
       (Finset.univ.filter (fun j : Fin k => h j = i)).card
     have hα_sum : ∑ i, α i = k := by
-      have hcard : (Finset.univ : Finset (Fin k)).card =
-          ∑ i ∈ (Finset.univ : Finset (Fin n)), α i :=
-        Finset.card_eq_sum_card_fiberwise (fun j _ => Finset.mem_univ _)
-      simp only [Finset.card_univ, Fintype.card_fin] at hcard
-      exact hcard.symm
+      rw [← Finset.card_eq_sum_card_fiberwise (fun j _ => Finset.mem_univ (h j))]
+      simp
     have hx_alpha : x = ∏ i, (f i) ^ (α i) := by
       rw [hx_eq, Finset.prod_comp f h]
       apply Finset.prod_subset (Finset.subset_univ _)
@@ -934,8 +867,7 @@ private lemma _adicCompletion_mk_of_first_zero_in_I_smul_top
     AdicCompletion.mk I R b ∈ (I • ⊤ : Submodule R (AdicCompletion I R)) := by
   -- Step 1: `evalₐ` at level 1 sends `mk b` to 0 (because `b 1 = 0`).
   have hker : (AdicCompletion.evalₐ I 1) (AdicCompletion.mk I R b) = 0 := by
-    rw [AdicCompletion.evalₐ_mk, hb]
-    exact (Ideal.Quotient.mk (I ^ 1)).map_zero
+    simp [AdicCompletion.evalₐ_mk, hb]
   -- Step 2: by `ker_evalₐ_eq` (kernel description), `mk b ∈ Ideal.map (algebraMap R _) I`.
   have hker' : AdicCompletion.mk I R b ∈
       Ideal.map (algebraMap R (AdicCompletion I R)) (I ^ 1) := by
@@ -981,9 +913,7 @@ private lemma _adicCompletion_val_one_zero_in_I_smul_top
   have ha1 : (a : ℕ → R) 1 ∈ (I ^ 1 • ⊤ : Submodule R R) := by
     rwa [Submodule.Quotient.mk_eq_zero] at hy'
   have ha1_in_I : (a : ℕ → R) 1 ∈ I := by
-    have heq : (I ^ 1 • ⊤ : Submodule R R) = (I : Submodule R R) := by
-      rw [pow_one, Ideal.smul_top_eq_map]; simp
-    rwa [heq] at ha1
+    simpa [pow_one, Ideal.smul_top_eq_map] using ha1
   -- Step 2: construct the shifted Cauchy sequence b n = a n - a 1.
   let b : AdicCompletion.AdicCauchySequence I R :=
     ⟨fun n => (a : ℕ → R) n - (a : ℕ → R) 1, by
