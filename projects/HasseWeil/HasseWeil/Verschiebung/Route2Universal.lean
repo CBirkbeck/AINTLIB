@@ -228,14 +228,9 @@ def universalSquaringIdentity (p : ℕ) [Fact p.Prime] : Prop :=
 /-- **Universal squaring identity holds for p = 2**. Direct from
     `(2 : ZMod 2) = 0`, hence `(2 : URing 2) = 0`. -/
 theorem universalSquaringIdentity_holds_two : universalSquaringIdentity 2 := by
-  unfold universalSquaringIdentity
   have h : (2 : URing 2) = 0 := by
-    have : (2 : ZMod 2) = 0 := rfl
-    show ((2 : ℕ) : URing 2) = 0
-    rw [Nat.cast_ofNat]
-    show (MvPolynomial.C ((2 : ℕ) : ZMod 2) : URing 2) = 0
-    rw [show ((2 : ℕ) : ZMod 2) = 0 from rfl, MvPolynomial.C_0]
-  rw [h, zero_mul, zero_mul]
+    rw [show (2 : URing 2) = ((2 : ℕ) : URing 2) by push_cast; ring, CharP.cast_eq_zero]
+  rw [universalSquaringIdentity, h, zero_mul, zero_mul]
 
 /-! ### Universal cubing identity (p=3 char-3)
 
@@ -263,13 +258,9 @@ def universalCubingIdentity (p : ℕ) [Fact p.Prime] : Prop :=
     in `scripts/verify_universal_cubing.py`. -/
 theorem universalCubingIdentity_holds_three :
     universalCubingIdentity 3 := by
-  unfold universalCubingIdentity
   have h : (3 : URing 3) = 0 := by
-    show ((3 : ℕ) : URing 3) = 0
-    rw [Nat.cast_ofNat]
-    show (MvPolynomial.C ((3 : ℕ) : ZMod 3) : URing 3) = 0
-    rw [show ((3 : ℕ) : ZMod 3) = 0 from rfl, MvPolynomial.C_0]
-  rw [h, zero_mul, zero_mul]
+    rw [show (3 : URing 3) = ((3 : ℕ) : URing 3) by push_cast; ring, CharP.cast_eq_zero]
+  rw [universalCubingIdentity, h, zero_mul, zero_mul]
 
 /-! ### Universal quintic identity (p=5 char-5)
 
@@ -298,13 +289,9 @@ theorem universalQuinticIdentity_holds_five :
     haveI : Fact (Nat.Prime 5) := ⟨by decide⟩
     universalQuinticIdentity 5 := by
   haveI : Fact (Nat.Prime 5) := ⟨by decide⟩
-  unfold universalQuinticIdentity
   have h : (5 : URing 5) = 0 := by
-    show ((5 : ℕ) : URing 5) = 0
-    rw [Nat.cast_ofNat]
-    show (MvPolynomial.C ((5 : ℕ) : ZMod 5) : URing 5) = 0
-    rw [show ((5 : ℕ) : ZMod 5) = 0 from rfl, MvPolynomial.C_0]
-  rw [h, zero_mul, zero_mul]
+    rw [show (5 : URing 5) = ((5 : ℕ) : URing 5) by push_cast; ring, CharP.cast_eq_zero]
+  rw [universalQuinticIdentity, h, zero_mul, zero_mul]
 
 /-! ### Universal septimic identity (p=7 char-7)
 
@@ -321,13 +308,9 @@ theorem universalSepticIdentity_holds_seven :
     haveI : Fact (Nat.Prime 7) := ⟨by decide⟩
     universalSepticIdentity 7 := by
   haveI : Fact (Nat.Prime 7) := ⟨by decide⟩
-  unfold universalSepticIdentity
   have h : (7 : URing 7) = 0 := by
-    show ((7 : ℕ) : URing 7) = 0
-    rw [Nat.cast_ofNat]
-    show (MvPolynomial.C ((7 : ℕ) : ZMod 7) : URing 7) = 0
-    rw [show ((7 : ℕ) : ZMod 7) = 0 from rfl, MvPolynomial.C_0]
-  rw [h, zero_mul, zero_mul]
+    rw [show (7 : URing 7) = ((7 : ℕ) : URing 7) by push_cast; ring, CharP.cast_eq_zero]
+  rw [universalSepticIdentity, h, zero_mul, zero_mul]
 
 /-! ### Uniform-in-p universal identity
 
@@ -376,11 +359,8 @@ theorem squaringIdentity_specialized_char_two
       (Polynomial.X ^ 3 + Polynomial.C W.a₂ * Polynomial.X ^ 2 +
         Polynomial.C W.a₄ * Polynomial.X + Polynomial.C W.a₆) = 0 := by
   have h_2 : (2 : Polynomial K) = 0 := by
-    have hk : (2 : K) = 0 := CharP.cast_eq_zero K 2
-    show ((2 : ℕ) : Polynomial K) = 0
-    rw [Nat.cast_ofNat]
-    show (Polynomial.C ((2 : ℕ) : K) : Polynomial K) = 0
-    rw [show ((2 : ℕ) : K) = 0 by exact_mod_cast hk, Polynomial.C_0]
+    rw [show (2 : Polynomial K) = ((2 : ℕ) : Polynomial K) by push_cast; ring,
+      CharP.cast_eq_zero]
   rw [h_2, zero_mul, zero_mul]
 
 /-! ### K-level specialisation (q=3 char-3)
@@ -402,11 +382,8 @@ theorem cubingIdentity_specialized_char_three
       (Polynomial.X ^ 3 + Polynomial.C W.a₂ * Polynomial.X ^ 2 +
         Polynomial.C W.a₄ * Polynomial.X + Polynomial.C W.a₆) = 0 := by
   have h_3 : (3 : Polynomial K) = 0 := by
-    have hk : (3 : K) = 0 := CharP.cast_eq_zero K 3
-    show ((3 : ℕ) : Polynomial K) = 0
-    rw [Nat.cast_ofNat]
-    show (Polynomial.C ((3 : ℕ) : K) : Polynomial K) = 0
-    rw [show ((3 : ℕ) : K) = 0 by exact_mod_cast hk, Polynomial.C_0]
+    rw [show (3 : Polynomial K) = ((3 : ℕ) : Polynomial K) by push_cast; ring,
+      CharP.cast_eq_zero]
   rw [h_3, zero_mul, zero_mul]
 
 /-! ### K-level specialisation (q=5 char-5)
@@ -428,11 +405,8 @@ theorem quinticIdentity_specialized_char_five
       (Polynomial.X ^ 3 + Polynomial.C W.a₂ * Polynomial.X ^ 2 +
         Polynomial.C W.a₄ * Polynomial.X + Polynomial.C W.a₆) = 0 := by
   have h_5 : (5 : Polynomial K) = 0 := by
-    have hk : (5 : K) = 0 := CharP.cast_eq_zero K 5
-    show ((5 : ℕ) : Polynomial K) = 0
-    rw [Nat.cast_ofNat]
-    show (Polynomial.C ((5 : ℕ) : K) : Polynomial K) = 0
-    rw [show ((5 : ℕ) : K) = 0 by exact_mod_cast hk, Polynomial.C_0]
+    rw [show (5 : Polynomial K) = ((5 : ℕ) : Polynomial K) by push_cast; ring,
+      CharP.cast_eq_zero]
   rw [h_5, zero_mul, zero_mul]
 
 /-- **K-level specialisation of `universalSepticIdentity_holds_seven`**:
@@ -448,11 +422,8 @@ theorem septicIdentity_specialized_char_seven
       (Polynomial.X ^ 3 + Polynomial.C W.a₂ * Polynomial.X ^ 2 +
         Polynomial.C W.a₄ * Polynomial.X + Polynomial.C W.a₆) = 0 := by
   have h_7 : (7 : Polynomial K) = 0 := by
-    have hk : (7 : K) = 0 := CharP.cast_eq_zero K 7
-    show ((7 : ℕ) : Polynomial K) = 0
-    rw [Nat.cast_ofNat]
-    show (Polynomial.C ((7 : ℕ) : K) : Polynomial K) = 0
-    rw [show ((7 : ℕ) : K) = 0 by exact_mod_cast hk, Polynomial.C_0]
+    rw [show (7 : Polynomial K) = ((7 : ℕ) : Polynomial K) by push_cast; ring,
+      CharP.cast_eq_zero]
   rw [h_7, zero_mul, zero_mul]
 
 /-! ### Uniform-in-`p` K-level char-`p` identity
@@ -504,8 +475,7 @@ theorem h_polyRoot_sq_alpha_0_holds_char_two
     (h_card ▸ omega2_coupled_residual_mem_expand_two_char_two W : _)
     (polyPowCardEq_of_finite (K := K)) (x_gen W)
   rw [← hp] at h
-  rw [show (2 : ℕ) = Fintype.card K from h_card.symm]
-  exact h
+  rwa [show (2 : ℕ) = Fintype.card K from h_card.symm]
 
 /-- **Witness discharge for α₁**: the polyExpandRoot squaring identity for
     `omega2_Y_coeff_char_two`, in `^ 2` form. -/
@@ -524,8 +494,7 @@ theorem h_polyRoot_sq_alpha_1_holds_char_two
     (h_card ▸ omega2_Y_coeff_mem_expand_two_char_two W : _)
     (polyPowCardEq_of_finite (K := K)) (x_gen W)
   rw [← hp] at h
-  rw [show (2 : ℕ) = Fintype.card K from h_card.symm]
-  exact h
+  rwa [show (2 : ℕ) = Fintype.card K from h_card.symm]
 
 /-! ### polyExpandRoot witness discharges (q=3 char-3)
 
@@ -553,8 +522,7 @@ theorem h_polyRoot_cube_Ψ₃_holds_char_three
     (h_card ▸ Ψ₃_mem_expand_three_char_three W : _)
     (polyPowCardEq_of_finite (K := K)) (x_gen W)
   rw [← hp] at h
-  rw [show (3 : ℕ) = Fintype.card K from h_card.symm]
-  exact h
+  rwa [show (3 : ℕ) = Fintype.card K from h_card.symm]
 
 /-- **Witness discharge for ΨSq 3 in char 3**: the polyExpandRoot cubing
     identity for `W.ΨSq 3`, in `^ 3` form. q=3 analog of
@@ -574,8 +542,7 @@ theorem h_polyRoot_cube_ΨSq_three_holds_char_three
     (h_card ▸ ΨSq_three_mem_expand_three_char_three W : _)
     (polyPowCardEq_of_finite (K := K)) (x_gen W)
   rw [← hp] at h
-  rw [show (3 : ℕ) = Fintype.card K from h_card.symm]
-  exact h
+  rwa [show (3 : ℕ) = Fintype.card K from h_card.symm]
 
 /-- **Witness-parametric polyExpandRoot cubing for the corrected ω_3 coupled
     residual** (q=3 char-3). Takes the expand-3 membership hypothesis as
@@ -604,8 +571,7 @@ theorem h_polyRoot_cube_omega3_coupled_residual_full_char_three
     (h_card ▸ h_mem : _)
     (polyPowCardEq_of_finite (K := K)) (x_gen W)
   rw [← hp] at h
-  rw [show (3 : ℕ) = Fintype.card K from h_card.symm]
-  exact h
+  rwa [show (3 : ℕ) = Fintype.card K from h_card.symm]
 
 /-! ### What's queued for next session
 
@@ -655,7 +621,7 @@ step `Φ_{p^k} ∈ R[X^{p^k}] → Φ_{p^{k+1}} ∈ R[X^{p^{k+1}}]`. Mathlib's
 theorem pow_mem_expand_charP (p : ℕ) [Fact p.Prime] [CharP R p] (f : Polynomial R) :
     f ^ p ∈ Set.range (⇑(Polynomial.expand R p)) := by
   refine ⟨f.map (frobenius R p), ?_⟩
-  refine f.induction_on' (fun a b ha hb => ?_) fun n a => ?_
+  refine f.induction_on' (fun a b ha hb ↦ ?_) fun n a ↦ ?_
   · rw [Polynomial.map_add, map_add, ha, hb, add_pow_expChar]
   · rw [Polynomial.map_monomial, Polynomial.expand_monomial,
       ← Polynomial.C_mul_X_pow_eq_monomial,
@@ -668,7 +634,7 @@ theorem pow_mem_expand_charP (p : ℕ) [Fact p.Prime] [CharP R p] (f : Polynomia
 theorem expand_pow_map_iterateFrobenius
     (p : ℕ) [Fact p.Prime] [CharP R p] (n : ℕ) (f : Polynomial R) :
     Polynomial.expand R (p ^ n) (f.map (iterateFrobenius R p n)) = f ^ (p ^ n) := by
-  refine f.induction_on' (fun a b ha hb => ?_) fun m a => ?_
+  refine f.induction_on' (fun a b ha hb ↦ ?_) fun m a ↦ ?_
   · rw [Polynomial.map_add, map_add, ha, hb, add_pow_expChar_pow]
   · rw [Polynomial.map_monomial, Polynomial.expand_monomial,
       ← Polynomial.C_mul_X_pow_eq_monomial,
@@ -751,7 +717,7 @@ theorem pow_pow_mem_expand_pow_succ_of_expand_charP
   -- Goal: expand R (p^(k+1)) (A.map iterateFrobenius) = f^(p^k)
   rw [← hA]
   -- Goal: expand R (p^(k+1)) (A.map iterateFrobenius) = (expand R p A)^(p^k)
-  rw [show (p : ℕ) ^ (k + 1) = p ^ k * p from by rw [pow_succ],
+  rw [show (p : ℕ) ^ (k + 1) = p ^ k * p by rw [pow_succ],
     ← Polynomial.expand_expand,
     ← Polynomial.map_expand,
     expand_pow_map_iterateFrobenius]
@@ -957,9 +923,7 @@ theorem mulByInt_pow_pullback_x_gen_mem_adjoin_pow_of_base
         _ h_base
       have h_eq : ((x_gen W ^ p) ^ (p ^ k) : W.toAffine.FunctionField) =
           x_gen W ^ (p ^ (k + 1) : ℕ) := by
-        rw [← pow_mul]
-        congr 1
-        rw [← pow_succ']
+        rw [← pow_mul, ← pow_succ']
       rwa [h_eq] at h_iter
     exact IntermediateField.adjoin_le_iff.mpr
       (Set.singleton_subset_iff.mpr h_pow) h_in_image
@@ -984,9 +948,7 @@ theorem isCoprime_eq_mul_factor_of_eq_mul
     exact h_coprime.symm.dvd_of_dvd_mul_left this
   obtain ⟨h, hh⟩ := hb_dvd
   refine ⟨h, ?_, hh⟩
-  have hcancel : b * (a * h) = b * f := by
-    rw [show b * (a * h) = a * (b * h) from by ring, ← hh]
-    exact h_eq
+  have hcancel : b * (a * h) = b * f := by linear_combination (-a) * hh + h_eq
   exact (mul_left_cancel₀ hb_ne hcancel).symm
 
 /-- **Characterisation of `Polynomial.expand n`-range**: a polynomial `f` is in
@@ -1051,7 +1013,7 @@ theorem mem_expand_range_of_mul_mem_of_const_ne_zero
       · rw [hb_mem j1 h_div, zero_mul]
     have h0i_mem : (0, i) ∈ Finset.antidiagonal i :=
       Finset.mem_antidiagonal.mpr (zero_add i)
-    rw [Finset.sum_eq_single (0, i) h_others (fun h => absurd h0i_mem h)] at hbc_i
+    rw [Finset.sum_eq_single (0, i) h_others (fun h ↦ absurd h0i_mem h)] at hbc_i
     exact (mul_eq_zero.mp hbc_i).resolve_left hb_zero_ne
 
 /-- **Piece 4 / Lemma B (general)**: in an integral domain, if `b ∈ R[X^n]`,
@@ -1098,7 +1060,7 @@ theorem mem_expand_range_of_mul_mem_expand_range
       by_cases h_div : n ∣ j1
       · by_cases h_lt : j1 < m₀
         · rw [Polynomial.coeff_eq_zero_of_lt_natTrailingDegree h_lt, zero_mul]
-        · push_neg at h_lt
+        · rw [not_lt] at h_lt
           by_cases h_eq_m₀ : j1 = m₀
           · exfalso; apply hj_ne
             refine Prod.ext h_eq_m₀ ?_
@@ -1120,7 +1082,7 @@ theorem mem_expand_range_of_mul_mem_expand_range
       · rw [hb_mem j1 h_div, zero_mul]
     have h_m₀i_mem : (m₀, i) ∈ Finset.antidiagonal (i + m₀) := by
       rw [Finset.mem_antidiagonal]; omega
-    rw [Finset.sum_eq_single (m₀, i) h_others (fun h => absurd h_m₀i_mem h)] at h_eq
+    rw [Finset.sum_eq_single (m₀, i) h_others (fun h ↦ absurd h_m₀i_mem h)] at h_eq
     exact (mul_eq_zero.mp h_eq).resolve_left hb_m₀
 
 /-- **Injectivity of `aeval (x_gen W)`** on `K[X]`. Direct from
@@ -1185,27 +1147,21 @@ theorem function_field_rational_to_K_X_eq
   have hΨ_ne : Polynomial.aeval (x_gen W) (W.ΨSq ((p ^ k : ℕ) : ℤ)) ≠ 0 := by
     rw [← ΨSq_ff_eq_aeval_x_gen]
     exact ΨSq_ff_ne_zero W hpk_ne
-  -- Show expand p^k s ≠ 0 via the LHS-nonzero contradiction
+  -- LHS = Φ_ff / ΨSq_ff = mulByInt_x p^k ≠ 0, used in both branches below.
+  have h_lhs_ne : Polynomial.aeval (x_gen W) (W.Φ ((p ^ k : ℕ) : ℤ)) /
+      Polynomial.aeval (x_gen W) (W.ΨSq ((p ^ k : ℕ) : ℤ)) ≠ 0 := by
+    rw [← Φ_ff_eq_aeval_x_gen, ← ΨSq_ff_eq_aeval_x_gen]
+    exact mulByInt_x_ne_zero W ((p ^ k : ℕ) : ℤ) hpk_ne
   refine ⟨r, s, ?_, ?_⟩
   · intro h_zero
     have h_zero_aeval : Polynomial.aeval (x_gen W) (Polynomial.expand K (p ^ k) s) = 0 := by
       rw [h_zero, Polynomial.aeval_zero]
     rw [h_zero_aeval, div_zero] at h_eq
-    -- h_eq : aeval x_gen Φ / aeval x_gen ΨSq = 0
-    -- LHS = Φ_ff / ΨSq_ff = mulByInt_x p^k ≠ 0.
-    have h_lhs_ne : Polynomial.aeval (x_gen W) (W.Φ ((p ^ k : ℕ) : ℤ)) /
-        Polynomial.aeval (x_gen W) (W.ΨSq ((p ^ k : ℕ) : ℤ)) ≠ 0 := by
-      rw [← Φ_ff_eq_aeval_x_gen, ← ΨSq_ff_eq_aeval_x_gen]
-      exact mulByInt_x_ne_zero W ((p ^ k : ℕ) : ℤ) hpk_ne
     exact h_lhs_ne h_eq
   · -- Cross-multiply h_eq, lift via aeval_x_gen_injective
     have hs_aeval_ne : Polynomial.aeval (x_gen W) (Polynomial.expand K (p ^ k) s) ≠ 0 := by
       intro h_zero
       rw [h_zero, div_zero] at h_eq
-      have h_lhs_ne : Polynomial.aeval (x_gen W) (W.Φ ((p ^ k : ℕ) : ℤ)) /
-          Polynomial.aeval (x_gen W) (W.ΨSq ((p ^ k : ℕ) : ℤ)) ≠ 0 := by
-        rw [← Φ_ff_eq_aeval_x_gen, ← ΨSq_ff_eq_aeval_x_gen]
-        exact mulByInt_x_ne_zero W ((p ^ k : ℕ) : ℤ) hpk_ne
       exact h_lhs_ne h_eq
     rw [div_eq_div_iff hΨ_ne hs_aeval_ne] at h_eq
     -- h_eq : aeval x_gen Φ * aeval x_gen (expand p^k s) =
@@ -1266,12 +1222,12 @@ theorem mem_expand_range_of_isCoprime_witness
   refine ⟨?_, ?_⟩
   · -- Φ ∈ R[X^n]: apply Lemma B with b = h, c = Φ.
     have h_hΦ_mem : h * Φ ∈ Set.range (⇑(Polynomial.expand R n)) := by
-      rw [show h * Φ = Φ * h from by ring, ← hf_eq]
+      rw [mul_comm h Φ, ← hf_eq]
       exact ⟨f, rfl⟩
     exact mem_expand_range_of_mul_mem_expand_range n hn h_mem h_ne h_hΦ_mem
   · -- Ψ ∈ R[X^n]: apply Lemma B with b = h, c = Ψ.
     have h_hΨ_mem : h * Ψ ∈ Set.range (⇑(Polynomial.expand R n)) := by
-      rw [show h * Ψ = Ψ * h from by ring, ← hg_eq]
+      rw [mul_comm h Ψ, ← hg_eq]
       exact ⟨g, rfl⟩
     exact mem_expand_range_of_mul_mem_expand_range n hn h_mem h_ne h_hΨ_mem
 
@@ -1351,29 +1307,20 @@ theorem h_witness_in_expand_range
   have h_gcd_assoc_h : Associated (EuclideanDomain.gcd (Φ * h) (Ψ * h)) h := by
     apply associated_of_dvd_dvd
     · -- gcd ∣ h: derive `h = u(Φh) + v(Ψh)`, then gcd ∣ each summand
-      have h_eq_h : u * (Φ * h) + v * (Ψ * h) = h := by
-        have : (u * Φ + v * Ψ) * h = 1 * h := by rw [h_bezout]
-        rw [one_mul] at this
-        linear_combination this
+      have h_eq_h : u * (Φ * h) + v * (Ψ * h) = h := by linear_combination h * h_bezout
       have h_combo : EuclideanDomain.gcd (Φ * h) (Ψ * h) ∣
           u * (Φ * h) + v * (Ψ * h) :=
         dvd_add
           ((EuclideanDomain.gcd_dvd_left (Φ * h) (Ψ * h)).mul_left u)
           ((EuclideanDomain.gcd_dvd_right (Φ * h) (Ψ * h)).mul_left v)
-      rw [h_eq_h] at h_combo
-      exact h_combo
+      rwa [h_eq_h] at h_combo
     · -- h ∣ gcd: h ∣ Φ*h and h ∣ Ψ*h
       exact EuclideanDomain.dvd_gcd (dvd_mul_left h Φ) (dvd_mul_left h Ψ)
   -- gcd(Φ*h, Ψ*h) = gcd(expand n f, expand n s) (via hf_eq, hs_eq)
   rw [hf_eq.symm, hs_eq.symm] at h_gcd_assoc_h
   -- expand n (gcd f s) ∼ gcd(expand n f, expand n s) ∼ h
-  have h_assoc_lift :
-      Associated h (Polynomial.expand K n (EuclideanDomain.gcd f s)) := by
-    have h1 := expand_gcd_associated n f s
-    -- h1 : expand n (gcd f s) ∼ gcd (expand n f) (expand n s)
-    -- h_gcd_assoc_h : gcd (expand n f) (expand n s) ∼ h
-    exact (h_gcd_assoc_h.symm.trans h1.symm)
-  -- expand n (gcd f s) ∈ image(expand n)
+  have h_assoc_lift : Associated h (Polynomial.expand K n (EuclideanDomain.gcd f s)) :=
+    h_gcd_assoc_h.symm.trans (expand_gcd_associated n f s).symm
   exact mem_expand_range_of_associated n h_assoc_lift
     ⟨EuclideanDomain.gcd f s, rfl⟩
 
