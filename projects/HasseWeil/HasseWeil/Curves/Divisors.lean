@@ -36,14 +36,14 @@ variable {C : SmoothPlaneCurve F}
 /-- The degree `Σ n_P` of a divisor `D = Σ n_P (P)`.
 Reference: Silverman II.3 (definition). -/
 def degree (D : Divisor C) : ℤ :=
-  (D : C.SmoothPoint →₀ ℤ).sum fun _ n => n
+  (D : C.SmoothPoint →₀ ℤ).sum fun _ n ↦ n
 
 @[simp] theorem degree_zero : degree (0 : Divisor C) = 0 :=
   Finsupp.sum_zero_index
 
 @[simp] theorem degree_add (D₁ D₂ : Divisor C) :
     (D₁ + D₂).degree = D₁.degree + D₂.degree :=
-  Finsupp.sum_add_index' (fun _ => rfl) (fun _ _ _ => rfl)
+  Finsupp.sum_add_index' (fun _ ↦ rfl) (fun _ _ _ ↦ rfl)
 
 /-- The degree map as an additive group homomorphism `Div(C) →+ ℤ`.
 Reference: Silverman II.3 (definition). -/
@@ -74,15 +74,15 @@ if all its coefficients are non-negative: `D = Σ n_P (P)` with `n_P ≥ 0`.
 Reference: Silverman II.3 (definition). -/
 def IsEffective (D : Divisor C) : Prop := ∀ P, 0 ≤ D P
 
-@[simp] theorem isEffective_zero : IsEffective (0 : Divisor C) := fun _ => le_refl 0
+@[simp] theorem isEffective_zero : IsEffective (0 : Divisor C) := fun _ ↦ le_refl 0
 
 theorem IsEffective.add {D₁ D₂ : Divisor C} (h₁ : D₁.IsEffective)
-    (h₂ : D₂.IsEffective) : (D₁ + D₂).IsEffective := fun P => by
+    (h₂ : D₂.IsEffective) : (D₁ + D₂).IsEffective := fun P ↦ by
   rw [Finsupp.add_apply]; exact add_nonneg (h₁ P) (h₂ P)
 
 theorem degree_nonneg_of_isEffective {D : Divisor C} (hD : D.IsEffective) :
     0 ≤ D.degree :=
-  Finsupp.sum_nonneg fun P _ => hD P
+  Finsupp.sum_nonneg fun P _ ↦ hD P
 
 end Divisor
 
@@ -103,10 +103,10 @@ when `f = 0`. Reference: Silverman II.3 (definition). -/
 noncomputable def divisorOf (C : SmoothPlaneCurve F) (f : C.FunctionField) :
     Divisor C := by
   classical
-  refine Finsupp.ofSupportFinite (fun P => (C.ord_P P f).untopD 0) ?_
+  refine Finsupp.ofSupportFinite (fun P ↦ (C.ord_P P f).untopD 0) ?_
   by_cases hf : f = 0
   · subst hf
-    have : Function.support (fun P : C.SmoothPoint =>
+    have : Function.support (fun P : C.SmoothPoint ↦
         (C.ord_P P (0 : C.FunctionField)).untopD 0) = ∅ := by
       ext P; simp [C.ord_P_zero]
     rw [this]; exact Set.finite_empty
@@ -123,14 +123,14 @@ theorem divisorOf_apply (C : SmoothPlaneCurve F) (f : C.FunctionField)
 
 @[simp] theorem divisorOf_zero (C : SmoothPlaneCurve F) :
     C.divisorOf (0 : C.FunctionField) = 0 := by
-  refine Finsupp.ext fun P => ?_
+  refine Finsupp.ext fun P ↦ ?_
   rw [divisorOf_apply, C.ord_P_zero]; rfl
 
 /-- The divisor of a product is the sum of divisors (for nonzero inputs). -/
 theorem divisorOf_mul (C : SmoothPlaneCurve F) {f g : C.FunctionField}
     (hf : f ≠ 0) (hg : g ≠ 0) :
     C.divisorOf (f * g) = C.divisorOf f + C.divisorOf g := by
-  refine Finsupp.ext fun P => ?_
+  refine Finsupp.ext fun P ↦ ?_
   rw [Finsupp.add_apply, divisorOf_apply, divisorOf_apply, divisorOf_apply,
     C.ord_P_mul]
   have hvf : C.ord_P P f ≠ ⊤ := (C.ord_P_eq_top_iff f).not.mpr hf
@@ -142,7 +142,7 @@ theorem divisorOf_mul (C : SmoothPlaneCurve F) {f g : C.FunctionField}
 
 @[simp] theorem divisorOf_one (C : SmoothPlaneCurve F) :
     C.divisorOf (1 : C.FunctionField) = 0 := by
-  refine Finsupp.ext fun P => ?_
+  refine Finsupp.ext fun P ↦ ?_
   rw [divisorOf_apply, ord_P_one]; rfl
 
 /-- The divisor of the inverse of a nonzero function is the negation of its
@@ -150,7 +150,7 @@ divisor: `div(f⁻¹) = -div(f)`. -/
 theorem divisorOf_inv (C : SmoothPlaneCurve F) {f : C.FunctionField}
     (hf : f ≠ 0) :
     C.divisorOf f⁻¹ = -(C.divisorOf f) := by
-  refine Finsupp.ext fun P => ?_
+  refine Finsupp.ext fun P ↦ ?_
   rw [Finsupp.neg_apply, divisorOf_apply, divisorOf_apply,
     C.ord_P_inv f hf]
   have hvf : C.ord_P P f ≠ ⊤ := (C.ord_P_eq_top_iff f).not.mpr hf
@@ -162,7 +162,7 @@ theorem divisorOf_inv (C : SmoothPlaneCurve F) {f : C.FunctionField}
 theorem divisorOf_pow (C : SmoothPlaneCurve F) {f : C.FunctionField}
     (hf : f ≠ 0) (n : ℕ) :
     C.divisorOf (f ^ n) = n • C.divisorOf f := by
-  refine Finsupp.ext fun P => ?_
+  refine Finsupp.ext fun P ↦ ?_
   rw [Finsupp.coe_smul, Pi.smul_apply, divisorOf_apply, divisorOf_apply,
     C.ord_P_pow f n]
   have hvf : C.ord_P P f ≠ ⊤ := (C.ord_P_eq_top_iff f).not.mpr hf
@@ -286,7 +286,7 @@ zeros or poles. -/
     C.divisorOf (algebraMap F C.FunctionField c) = 0 := by
   by_cases hc : c = 0
   · rw [hc, map_zero, C.divisorOf_zero]
-  refine Finsupp.ext fun P => ?_
+  refine Finsupp.ext fun P ↦ ?_
   rw [divisorOf_apply, C.ord_P_algebraMap_F_of_ne_zero hc P]; rfl
 
 /-! ### T-II-3-008 (⇒): `divisorOf = 0 ⇒ const` (prime-indexed via IC-006) -/
