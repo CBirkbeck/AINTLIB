@@ -1,0 +1,14 @@
+{
+  "path": "./HasseWeil/FormalGroup/PadicValFactorial.lean",
+  "totalDecls": 2,
+  "defs": 0,
+  "lemmas": 2,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": ["padicValNat_factorial_le", "padicValNat_factorial_div_le"],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "Tiny utility file (88 lines, 2 theorems) packaging Mathlib's Legendre formula into a real-valued bound v_p(n!) ≤ (n-1)/(p-1) for Silverman IV.6.2 formal-logarithm convergence. Neither declaration is referenced by any other file in the project, making the entire file dead code at the project level. No sorries, no maxHeartbeats overrides."
+}

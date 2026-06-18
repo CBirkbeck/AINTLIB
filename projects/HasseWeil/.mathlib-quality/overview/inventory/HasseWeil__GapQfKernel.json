@@ -1,0 +1,60 @@
+{
+  "path": "./HasseWeil/GapQfKernel.lean",
+  "totalDecls": 77,
+  "defs": 2,
+  "lemmas": 64,
+  "instances": 10,
+  "sorries": [
+    "formalIsogenySeries_FGL_additivity",
+    "coeff_one_formalIsogenySeries_mulByInt_nonpos",
+    "omegaPullbackCoeff_isIntegral_polynomialX",
+    "omegaPullbackCoeff_ordAtInfty_nonneg",
+    "invariantDiff_localExpand_coeff_zero",
+    "pullback_invariantDiff_coeff_zero"
+  ],
+  "maxHeartbeats": [
+    "finrank_KE_over_frobeniusRange_p: 1600000 [NO-COMMENT]",
+    "kaehlerD_eq_zero_iff_mem_pth_powers: 1600000 [NO-COMMENT]"
+  ],
+  "longProofs": [
+    { "name": "laurentSeries_derivative_mul", "lines": 109 },
+    { "name": "kaehlerD_eq_zero_iff_mem_pth_powers", "lines": 57 },
+    { "name": "isSeparable_KE_over_frobeniusRange_adjoin_x_gen", "lines": 53 },
+    { "name": "minpoly_x_gen_frobeniusRange_natDegree", "lines": 49 },
+    { "name": "finrank_KE_over_frobeniusRange_p", "lines": 32 }
+  ],
+  "unused": [
+    "omegaPullbackCoeff_mem_F_frobenius",
+    "omegaPullbackCoeff_mem_F_comp_of_mem_F",
+    "omegaPullbackCoeff_mem_F_of_add_witness",
+    "omegaPullbackCoeff_mem_F_addIsog_id_of_witness",
+    "omegaPullbackCoeff_mem_F_frobeniusIsog_comp",
+    "omegaPullbackCoeff_mem_F_negFrobeniusIsog_comp",
+    "omegaPullbackCoeff_isIntegral_polynomialX_id",
+    "omegaPullbackCoeff_ordAtInfty_nonneg_id",
+    "omegaPullbackCoeff_mem_F_id",
+    "omegaPullbackCoeff_isIntegral_polynomialX_mulByInt",
+    "omegaPullbackCoeff_ordAtInfty_nonneg_mulByInt",
+    "omegaPullbackCoeff_mem_F_mulByInt",
+    "omegaPullbackCoeff_isIntegral_polynomialX_negFrobenius",
+    "omegaPullbackCoeff_ordAtInfty_nonneg_negFrobenius",
+    "omegaPullbackCoeff_mem_F_negFrobenius",
+    "omegaPullbackCoeff_isIntegral_polynomialX_isogOneSub_negFrobenius",
+    "omegaPullbackCoeff_ordAtInfty_nonneg_isogOneSub_negFrobenius",
+    "omegaPullbackCoeff_mem_F_isogOneSub_negFrobenius",
+    "omegaPullbackCoeff_mulByInt_p_eq_zero_via_formalGroup",
+    "kaehlerD_pth_power_mul",
+    "mulByInt_p_pullback_x_gen_mem_pth_powers",
+    "omegaPullbackCoeff_id_isConstant",
+    "omegaPullbackCoeff_frobenius_isConstant",
+    "omegaPullbackCoeff_negFrobeniusIsog_isConstant",
+    "omegaPullbackCoeff_isogOneSub_negFrobenius_isConstant"
+  ],
+  "keyApi": [
+    "kaehlerD_pth_power_eq_zero",
+    "localExpandKaehlerLift",
+    "isPurelyInseparable_frobeniusRange_p"
+  ],
+  "scratchWritten": true,
+  "notes": "File is a sorry-skeleton with 6 sorry leaves (2 FGL additivity/nonpos for L-F1, 2 III.1.5-substrate, 2 formal-group chain-rule sub-leaves) but contains substantial axiom-clean machinery: the LExp wrapper type + Kähler-lift construction (Silverman IV.4.3 setup), a 109-line product-rule proof for LaurentSeries derivative (likely a mathlib gap), and a complete char-p Kähler-kernel argument (ker D = K(E)^p, [K(E):K(E)^p] = p). Over half the theorems are unused within this file — they form a library of per-isogeny mem_F dispatch lemmas intended for external consumers (FormalGroupBridge)."
+}

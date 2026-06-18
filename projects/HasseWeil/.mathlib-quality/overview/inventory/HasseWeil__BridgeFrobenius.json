@@ -1,0 +1,21 @@
+{
+  "path": "./HasseWeil/BridgeFrobenius.lean",
+  "totalDecls": 8,
+  "defs": 0,
+  "lemmas": 8,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "frobenius_pullbackKaehler_invariantDifferential",
+    "not_isSeparable_frobenius_of_witness",
+    "omegaPullbackCoeff_m_plus_n_frob_of_witness",
+    "omegaPullbackCoeff_eq_formalIsogenyLeading_frobenius"
+  ],
+  "keyApi": [
+    "omegaPullbackCoeff_frobenius"
+  ],
+  "scratchWritten": true,
+  "notes": "Short bridge file (176 lines, 8 theorems) connecting the formal-group series side (formalIsogenySeries_frobenius = X^q) to the invariant-differential side (omegaPullbackCoeff_frobenius = 0) for the Frobenius isogeny over a finite field. All proofs are axiom-clean and short (≤9 lines); no sorry, no set_option. The central result `omegaPullbackCoeff_frobenius` is heavily consumed by GapSpines.lean, GapQfKernel.lean, and AdditionPullback/Differential.lean; four of the eight declarations are leaves unused within the file itself."
+}

@@ -1,0 +1,38 @@
+{
+  "path": "./HasseWeil/LocalExpansion.lean",
+  "totalDecls": 53,
+  "defs": 7,
+  "lemmas": 46,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "formalXY_weierstrass", "lines": 31 },
+    { "name": "localExpand_inner_orderTop_eq", "lines": 44 },
+    { "name": "localExpand_inner_leadingCoeff", "lines": 48 },
+    { "name": "localExpand_coordHom_injective", "lines": 62 }
+  ],
+  "unused": [
+    "hC_single'",
+    "single_one_pow'",
+    "formalW_ps_order",
+    "formalY_leadingCoeff",
+    "localExpand_inner_leadingCoeff",
+    "localParam_ne_zero",
+    "localExpand_algebraMap",
+    "orderTop_localExpand_algebraMap_polynomial",
+    "localExpand_localParam"
+  ],
+  "keyApi": [
+    "ofPowerSeries_formalU_inv_ne_zero",
+    "formalU_inv_constantCoeff",
+    "ofPowerSeries_formalU_inv_orderTop",
+    "lifted_formalW_ne_zero",
+    "formalW_eq_X3_mul_U",
+    "localExpand_inner",
+    "localExpand_inner_orderTop_eq",
+    "localExpand_coordHom"
+  ],
+  "scratchWritten": true,
+  "notes": "All 53 declarations are sorry-free despite the file header claiming sorry-marks on the hard parts (stale comment). Two private helpers hC_single' and single_one_pow' are provably dead code never referenced within the file. The core mathematical content is a parity argument (even vs odd orderTop) proving injectivity of the coordinate ring hom, enabling IsFractionRing.lift to construct localExpand."
+}

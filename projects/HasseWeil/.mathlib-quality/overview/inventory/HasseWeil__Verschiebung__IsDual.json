@@ -1,0 +1,34 @@
+{
+  "path": "./HasseWeil/Verschiebung/IsDual.lean",
+  "totalDecls": 12,
+  "defs": 2,
+  "lemmas": 10,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "verschiebung_comp_frobenius_eq_mulByInt_q", "lines": 42},
+    {"name": "frobenius_comp_verschiebung_eq_mulByInt_q", "lines": 41},
+    {"name": "verschiebung_pullback_commute_mulByInt_neg_one", "lines": 105},
+    {"name": "sigma_V_commute_of_hV", "lines": 73},
+    {"name": "mulByInt_pow_pullback_x_gen_eq_pow_qpow", "lines": 168},
+    {"name": "mulByInt_pow_pullback_y_gen_eq_pow_qpow", "lines": 116}
+  ],
+  "unused": [
+    "verschiebungIsog_of_witness_isDualOf_frobenius",
+    "verschiebung_pullback_commute_mulByInt_neg_one",
+    "sigma_V_commute_of_hV",
+    "verschiebungIsog_frobeniusIsog_comm",
+    "mulByInt_pow_pullback_x_gen_eq_pow_qpow",
+    "mulByInt_pow_pullback_y_gen_eq_pow_qpow"
+  ],
+  "keyApi": [
+    "verschiebungIsog_of_witness",
+    "verschiebungPullback_of_witness",
+    "mulByInt_q_factor_via_witness",
+    "frobeniusIsog_pullback_universal_commute",
+    "isogenyIterate"
+  ],
+  "scratchWritten": true,
+  "notes": "Session 5 file bundling the Verschiebung as a full Isogeny and proving IsDualOf V π; all 12 declarations are sorry-free and no maxHeartbeats overrides are needed. The two iterated-pullback theorems (mulByInt_pow_pullback_x/y_gen_eq_pow_qpow, 168 and 116 lines) are near-verbatim duplicates that could be refactored into a single generator-parametric lemma."
+}

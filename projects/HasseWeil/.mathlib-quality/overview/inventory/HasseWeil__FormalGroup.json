@@ -1,0 +1,28 @@
+{
+  "path": "./HasseWeil/FormalGroup.lean",
+  "totalDecls": 37,
+  "defs": 22,
+  "lemmas": 15,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "conv₃_truncate", "lines": 51 },
+    { "name": "formalW_recurrence", "lines": 104 }
+  ],
+  "unused": [
+    "formalPoly",
+    "formalInverse",
+    "formalGroupLaw",
+    "formalDiff",
+    "formalU_coeff_zero",
+    "formalDiffCoeff_zero"
+  ],
+  "keyApi": [
+    "formalW_coeff",
+    "conv₂",
+    "conv₃"
+  ],
+  "scratchWritten": true,
+  "notes": "File implements the formal group of an elliptic curve (Silverman Ch. IV §1): the series w(z), its inverse i(z), the formal group law F(z₁,z₂), and the invariant differential ω, all by well-founded recursion over coefficient index. The main result formalW_recurrence (Silverman IV.1.1) is proved coefficient-by-coefficient in ~104 lines using the truncation lemmas and is consumed by LocalExpansion.lean. Several top-level defs (formalPoly, formalInverse, formalGroupLaw, formalDiff) are leaf wrappers with no properties proved in this file and appear to be dead code here, intended for downstream files."
+}

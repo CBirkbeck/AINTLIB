@@ -1,0 +1,24 @@
+{
+  "path": "./HasseWeil/Curves/NormBezout.lean",
+  "totalDecls": 9,
+  "defs": 1,
+  "lemmas": 8,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "fieldNorm_one",
+    "fieldNorm_mul",
+    "fieldNorm_pow",
+    "fieldNorm_zero",
+    "fieldNorm_algebraMap",
+    "fieldNorm_ne_zero"
+  ],
+  "keyApi": [
+    "fieldNorm",
+    "fieldNorm_eq_zero_iff"
+  ],
+  "scratchWritten": true,
+  "notes": "Thin wrapper around Mathlib's Algebra.norm; all proofs are 1–4 lines delegating to map_one/map_mul/map_pow/norm_eq_zero_iff/norm_algebraMap. The only project-specific fact consumed is finrank_functionField_over_fracPolynomialX (degree 2 of the function-field extension). No sorries, no maxHeartbeats overrides, no long proofs."
+}

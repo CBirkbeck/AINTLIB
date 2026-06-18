@@ -1,0 +1,53 @@
+{
+  "path": "./HasseWeil/EC/TranslateValuation.lean",
+  "totalDecls": 28,
+  "defs": 0,
+  "lemmas": 27,
+  "instances": 1,
+  "sorries": [],
+  "maxHeartbeats": [
+    "pointValuation_translateY_xy_sub_alg_addY_lt_one_of_X_ne: 1600000 [NO-COMMENT]",
+    "pointValuation_translateSlope_xy_sub_alg_slope_lt_one_of_doubling: 1600000 [NO-COMMENT]",
+    "pointValuation_translateY_xy_sub_alg_addY_lt_one_of_doubling: 1600000 [NO-COMMENT]",
+    "pointValuation_translateAlgEquivOfPoint_algebraMap_le_one_of_isSome: 800000 [NO-COMMENT]",
+    "ord_P_translateAlgEquivOfPoint_algebraMap_ge_of_pow_mem: 1600000 [NO-COMMENT]"
+  ],
+  "longProofs": [
+    {"name": "pointValuation_chord_numerator_lt_one_of_X_ne", "lines": 60},
+    {"name": "pointValuation_translateSlope_xy_sub_alg_slope_lt_one_of_X_ne", "lines": 82},
+    {"name": "pointValuation_translateX_xy_sub_alg_addX_lt_one_of_X_ne", "lines": 91},
+    {"name": "pointValuation_translateY_xy_sub_alg_addY_lt_one_of_X_ne", "lines": 128},
+    {"name": "weierstrass_factorization", "lines": 63},
+    {"name": "pointValuation_A_eq_one_of_doubling", "lines": 105},
+    {"name": "pointValuation_translateSlope_xy_sub_alg_slope_lt_one_of_doubling", "lines": 154},
+    {"name": "pointValuation_translateX_xy_sub_alg_addX_lt_one_of_doubling", "lines": 70},
+    {"name": "pointValuation_translateY_xy_sub_alg_addY_lt_one_of_doubling", "lines": 124},
+    {"name": "pointValuation_translateAlgEquivOfPoint_algebraMap_le_one_of_isSome", "lines": 194},
+    {"name": "isTranslateMaxIdealCompatible_on_CoordinateRing_some", "lines": 167},
+    {"name": "pointValuation_translateAlgEquivOfPoint_algebraMap_eq_one_of_notMem", "lines": 95},
+    {"name": "zero_le_ord_P_of_pointValuation_le_one", "lines": 59},
+    {"name": "ord_P_translateAlgEquivOfPoint_algebraMap_ge_of_pow_mem", "lines": 67},
+    {"name": "ord_P_translateAlgEquivOfPoint_neg_algebraMap_ge_of_pow_mem", "lines": 71},
+    {"name": "mem_pow_maxIdealAt_of_le_ord_P_algebraMap", "lines": 38},
+    {"name": "ord_P_translateAlgEquivOfPoint_algebraMap_le_of_ne_zero", "lines": 44},
+    {"name": "ord_P_translateAlgEquivOfPoint_algebraMap_ge_of_ne_zero", "lines": 271},
+    {"name": "translate_ord_eq_all_nonzero", "lines": 76},
+    {"name": "isTranslateXY_evaluatesAt_some", "lines": 73},
+    {"name": "pointValuation_translateY_xy_le_one_of_isSome", "lines": 35}
+  ],
+  "unused": [
+    "isTranslateValuationCompatible_all",
+    "W_smooth_toAffine_isElliptic"
+  ],
+  "keyApi": [
+    "addY_eq_unfolded_neg_negAddY",
+    "pointValuation_translateAlgEquivOfPoint_algebraMap_le_one_of_isSome",
+    "pointValuation_algebraMap_F_eq_one_of_ne_zero",
+    "pointValuation_translateSlope_xy_le_one_of_X_ne",
+    "pointValuation_translateSlope_xy_le_one_of_doubling",
+    "pointValuation_translateSlope_xy_sub_alg_slope_lt_one_of_doubling",
+    "translate_ord_eq_all_nonzero"
+  ],
+  "scratchWritten": true,
+  "notes": "Large file (2698 lines, 28 decls) implementing a 4-item proof that τ_k transports the pointValuation, split into chord (P.x≠xk) and tangent/doubling (P.x=xk) sub-cases. The longest proof is `ord_P_translateAlgEquivOfPoint_algebraMap_ge_of_ne_zero` at ~271 lines, which uses IsLocalization.surj + composition identity τ_{-k}∘τ_k = id. All 5 maxHeartbeats bumps lack justifying comments. `isTranslateValuationCompatible_all` appears to be the intended export but was not found referenced in any importing file by name (external usage is via `translate_ord_eq_all_nonzero` directly)."
+}

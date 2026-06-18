@@ -1,0 +1,19 @@
+{
+  "path": "./HasseWeil/WeilPairing/FrobeniusGenericCovariance.lean",
+  "totalDecls": 6,
+  "defs": 1,
+  "lemmas": 4,
+  "instances": 1,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "mapTranslateGenericPoint_frobenius_Kbar"
+  ],
+  "keyApi": [
+    "frobFunctionFieldPointKbar",
+    "frobeniusGenericCovariance_Kbar"
+  ],
+  "scratchWritten": true,
+  "notes": "Short focused file (237 lines, 6 decls) that resolves reviewer round-21 'Wall B' for the Frobenius component of the generic-point covariance leaf, axiom-clean and CoordHom-free. The scalar-tower diamond (frobeniusAlgHom is only 𝔽_q-linear, not K̄-linear) is handled by typing frobFunctionFieldPointKbar via W' := W rather than W.baseChange K̄, with a bridging lemma (tau_mapW) resolving the cross-W' mismatch. Wall A (opaque baseChangePullback at the generic point) is explicitly left open and documented."
+}

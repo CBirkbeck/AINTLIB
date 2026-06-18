@@ -1,0 +1,16 @@
+{
+  "path": "./HasseWeil/Curves/RationalMap.lean",
+  "totalDecls": 5,
+  "defs": 2,
+  "lemmas": 3,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "isRegularAt_of_smooth", "lines": 45 }
+  ],
+  "unused": ["isMorphism_of_smooth"],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "Small file (120 lines, 5 declarations) formalizing Silverman II.2.1: every rational map from a smooth plane curve is a morphism. The main proof (isRegularAt_of_smooth, 45 lines) uses Finset.exists_min_image to find the minimizing component index and Uniformizer.exists_ord_P_eq to produce a normalizing scalar; no sorry, no set_option maxHeartbeats. No mathlib duplication suspected — the result is specific to the project's SmoothPlaneCurve/FunctionField setup."
+}

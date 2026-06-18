@@ -1,0 +1,28 @@
+{
+  "path": "./HasseWeil/FormalGroup/Inverse.lean",
+  "totalDecls": 20,
+  "defs": 3,
+  "lemmas": 17,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "FormalGroup.coeff_fAdd_X_eq_of_coeff_eq", "lines": 32 },
+    { "name": "coeff_add_monomial_pow_stable", "lines": 78 },
+    { "name": "coeff_X_pow_mul_add_monomial_pow", "lines": 48 },
+    { "name": "FormalGroup.coeff_fAdd_X_add_monomial", "lines": 140 },
+    { "name": "FormalGroup.inverseTrunc_fAdd_coeff_eq_zero", "lines": 46 }
+  ],
+  "unused": [
+    "FormalGroup.inverseTrunc_hasSubst",
+    "FormalGroup.inverse_hasSubst",
+    "FormalGroup.inverse_coeff_one"
+  ],
+  "keyApi": [
+    "FormalGroup.inverseTrunc_constantCoeff",
+    "FormalGroup.coeff_fAdd_X_eq_of_coeff_eq",
+    "FormalGroup.coeff_inverseTrunc_succ_of_le"
+  ],
+  "scratchWritten": true,
+  "notes": "Implements the formal inverse i(T) for a formal group law via a coefficient-by-coefficient recursion (inverseTrunc), closely mirroring the compInvTrunc pattern in Logarithm.lean; the capstone fAdd_X_inverse_eq_zero (F(T,i(T))=0) is used by EvalGroup.lean to build the formal group structure on nilpotent elements. No sorries, no maxHeartbeats overrides; the longest proof (coeff_fAdd_X_add_monomial, ~140 lines) has most of its bulk in the finsum finiteness argument and Nat.cast-to-C boilerplate, with the genuine mathematical content being the single use of coeff_01 (the right-unit axiom)."
+}

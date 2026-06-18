@@ -1,0 +1,22 @@
+{
+  "path": "./HasseWeil/Verschiebung/QthRootRouteB.lean",
+  "totalDecls": 22,
+  "defs": 0,
+  "lemmas": 22,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "mulByInt_pow_pullback_x_gen_mem_adjoin_pow_routeB", "lines": 40 },
+    { "name": "mulByInt_pow_pullback_y_gen_mem_adjoin_pair_pow", "lines": 58 }
+  ],
+  "unused": [
+    "x_gen_mem_fractionRing_range",
+    "verschiebung_isDualOf_frobenius_general"
+  ],
+  "keyApi": [
+    "algebraMap_polynomial_eq_fractionRing"
+  ],
+  "scratchWritten": true,
+  "notes": "Characteristic-uniform Route B for the GAP-QF keystone: proves the universal q-th-root witness using Kaehler differentials and separability of K(E)/K(x_gen), with no per-prime polynomial witnesses. Two generic adjoin-pair-pow lemmas (adjoin_pair_pow_le_adjoin_pair_pow, adjoin_pair_pow_pow_le_adjoin_pair_pow_pow) are potential mathlib candidates. No sorries, no set_option maxHeartbeats."
+}

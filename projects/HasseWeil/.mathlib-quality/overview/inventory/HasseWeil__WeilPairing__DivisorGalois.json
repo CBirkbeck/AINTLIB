@@ -1,0 +1,27 @@
+{
+  "path": "./HasseWeil/WeilPairing/DivisorGalois.lean",
+  "totalDecls": 16,
+  "defs": 0,
+  "lemmas": 16,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [
+    "count_map_ringEquiv (line 107): 1000000 [NO-COMMENT]"
+  ],
+  "longProofs": [],
+  "unused": [
+    "valuation_map_ringEquiv",
+    "map_XYIdeal",
+    "pointValuation_ringEquivCast",
+    "ord_P_ringEquivCast",
+    "heq_smoothPoint",
+    "ordAtInfty_ringEquivCast"
+  ],
+  "keyApi": [
+    "map_le_map_iff_ringEquiv",
+    "count_map_ringEquiv",
+    "valuation_map_ringEquiv_algebraMap"
+  ],
+  "scratchWritten": true,
+  "notes": "Self-contained algebraic engine for divisor-Galois-descent: transports adic valuations through a Dedekind-domain ring isomorphism, plus geometric bookkeeping lemmas for `pointValuation`/`ord_P`/`ordAtInfty` through `RingEquiv.cast`. All 16 declarations are axiom-clean (no sorry); the `count_map_ringEquiv` theorem needs elevated heartbeats (1000000, no comment) due to the `Associates` multiplicity characterization. The six cast/geometric lemmas at the bottom are unused within this file but serve as the interface consumed by `FrobeniusFunctionFieldEquiv.lean`."
+}

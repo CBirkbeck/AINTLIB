@@ -1,0 +1,22 @@
+{
+  "path": "./HasseWeil/Curves/ResidueFieldAtSmoothPoint.lean",
+  "totalDecls": 10,
+  "defs": 5,
+  "lemmas": 5,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [
+    "CurveMap.exists_heightOneSpectrum_fiber_card_eq_sepDegree_unconditional (line 288): 2000000 [NO-COMMENT]"
+  ],
+  "longProofs": [
+    {"name": "CurveMap.CoordHom.residueLinearEquiv", "lines": 33},
+    {"name": "CurveMap.exists_heightOneSpectrum_fiber_card_eq_sepDegree_unconditional", "lines": 103}
+  ],
+  "unused": [
+    "SmoothPlaneCurve.residueFieldsAlgEquiv",
+    "CurveMap.exists_heightOneSpectrum_fiber_card_eq_sepDegree_unconditional"
+  ],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "The file assembles Piece 9 (inertiaDeg = 1 over alg-closed fields) and the unconditional T-II-2-009 fiber-count theorem; it is not imported by any other Lean file in the project (only referenced in doc comments). The IsDedekindDomain.HeightOneSpectrum.under definition placed in _root_ is a likely near-duplicate of Mathlib's HeightOneSpectrum.comap. The large unconditional theorem carries set_option maxHeartbeats 2000000 without a justifying comment."
+}

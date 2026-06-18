@@ -1,0 +1,39 @@
+{
+  "path": "./HasseWeil/AdditionPullback/SamePlace.lean",
+  "totalDecls": 47,
+  "defs": 1,
+  "lemmas": 46,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "pV_aeval_sub_eval_lt_one", "lines": 38 },
+    { "name": "pV_bivariate_bridge", "lines": 54 },
+    { "name": "resid_addPullback_y_pair", "lines": 43 },
+    { "name": "resid_addPullback_y_pair_of_slope", "lines": 34 },
+    { "name": "pV_addIsog_pullback_le_one_of_le_one", "lines": 32 },
+    { "name": "pV_addIsog_pullback_lt_one_of_lt_one", "lines": 44 },
+    { "name": "addIsog_samePlace_le_one_iff_affine", "lines": 32 },
+    { "name": "pV_isog_pullback_le_one_of_le_one", "lines": 31 },
+    { "name": "pV_isog_pullback_lt_one_of_lt_one", "lines": 44 },
+    { "name": "ord_P_isog_pullback_x_sub_const_eq_one", "lines": 33 },
+    { "name": "ord_P_isog_pullback_y_sub_const_eq_one", "lines": 38 }
+  ],
+  "unused": [
+    "resid_pow",
+    "resid_y_gen",
+    "comap_pointValuation_addIsog_eq_affine_of_e_eq_one"
+  ],
+  "keyApi": [
+    "resid",
+    "resid_le_one",
+    "resid_sub",
+    "resid_mul",
+    "resid_const",
+    "pV_bivariate_bridge",
+    "pV_isog_pullback_algebraMap_sub_evalAt_lt_one",
+    "isog_comap_pointValuation_isEquiv_affine"
+  ],
+  "scratchWritten": true,
+  "notes": "The file is a self-contained addition-formula analogue of MulByIntSamePlace.lean: it duplicates the three private value-bridge lemmas verbatim (pV_aeval_sub_eval_lt_one, pV_algebraMap_sub_evalAt_lt_one, pV_bivariate_bridge) from that file since they are private there. The general-isogeny section (IsogGeneral, roughly lines 863–1315) mirrors the addIsog-keyed section structurally, producing a fully duplicated pair of transfer chains; the public API (comap_pointValuation_isog_eq_affine, comap_pointValuation_isog_eq_affine_y, isog_coords_at_affine_of_decomp, isog_coords_at_affine_of_decomp_slope) is the one consumed by downstream files. No sorry, no set_option maxHeartbeats."
+}

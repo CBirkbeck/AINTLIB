@@ -1,0 +1,22 @@
+{
+  "path": "./HasseWeil/WeilPairing/OneSubProjOrdTransport.lean",
+  "totalDecls": 9,
+  "defs": 0,
+  "lemmas": 8,
+  "instances": 1,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "oneSub_hproj_of_comapWitness",
+    "oneSubFrobeniusScaling_of_comapWitness",
+    "oneSubFrobeniusScaling_of_comapWitness_surj"
+  ],
+  "keyApi": [
+    "oneSubFrobeniusIsogBaseChange_degree_eq_pointCount",
+    "oneSubFrobeniusScaling_of_comapWitness_noδ_clean",
+    "comapPointValuationWitness_oneSub"
+  ],
+  "scratchWritten": true,
+  "notes": "Short assembly file (298 lines, 9 decls including 1 local instance) that wires together the local comap witnesses from OneSubAffineResidues and OneSubInftyResidues with the WallA covariance, culminating in `oneSubFrobeniusScaling_holds` — leaf 2 of the Hasse bound, axiom-clean with zero carried hypotheses. Several intermediate theorems (`oneSubFrobeniusScaling_of_comapWitness`, `oneSub_hproj_of_comapWitness`, `oneSubFrobeniusScaling_of_comapWitness_surj`) are superseded stepping stones and are dead code within this file."
+}

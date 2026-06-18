@@ -1,0 +1,19 @@
+{
+  "path": "./HasseWeil/Curves/FintypeProjectiveSmoothPoint.lean",
+  "totalDecls": 4,
+  "defs": 2,
+  "lemmas": 2,
+  "instances": 1,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "instFintypeProjectiveSmoothPoint",
+    "Fintype.card_projectiveSmoothPoint_eq_pointCount"
+  ],
+  "keyApi": [
+    "Affine.Point.equivProjectiveSmoothPoint"
+  ],
+  "scratchWritten": true,
+  "notes": "Short glue file (89 lines, 4 decls) establishing `W.toAffine.Point ≃ ProjectiveSmoothPoint` and deriving a `Fintype` instance and cardinality identity. All four declarations are near-duplicates of material already in `PicZero.lean` (under different namespaces); the rest of the codebase (`DivisorTranslate.lean`, `PairingNondeg.lean`) references the `PicZero.lean` versions, not these. The `Frobenius` import appears unused."
+}

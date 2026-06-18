@@ -1,0 +1,14 @@
+{
+  "path": "./HasseWeil/WeilPairing/OneSubComapConcrete.lean",
+  "totalDecls": 5,
+  "defs": 1,
+  "lemmas": 3,
+  "instances": 1,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": ["comap_pointValuation_oneSub_eq_affine_of_residues"],
+  "keyApi": ["omegaPullbackCoeff_oneSubFrobeniusIsogBaseChange_eq_one"],
+  "scratchWritten": true,
+  "notes": "A focused 185-line glue file that instantiates the general `comap_pointValuation_isog_eq_affine` engine at the concrete base-changed `1−π`. The hub lemma `omegaPullbackCoeff_oneSubFrobeniusIsogBaseChange_eq_one` (omega-coefficient value transport = 1) eliminates all previously sorry-tainted inputs and is reused in `OneSubAffineResidues.lean`. `OneSubAffineResidues` is an explicitly parked residual `Prop`-def whose discharge lives in a separate file; the assembly theorem `comap_pointValuation_oneSub_eq_affine_of_residues` is dead code within this file but is superseded (not duplicated) by the unconditional version in `OneSubAffineResidues.lean`."
+}

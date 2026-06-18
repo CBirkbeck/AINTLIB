@@ -1,0 +1,20 @@
+{
+  "path": "./HasseWeil/WeilPairing/HcommLemma.lean",
+  "totalDecls": 4,
+  "defs": 0,
+  "lemmas": 4,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "hcomm_point_of_isGenuineWith", "lines": 35 }
+  ],
+  "unused": [
+    "hcomm_of_isGenuineWith"
+  ],
+  "keyApi": [
+    "map_pullback_genericPoint_of_isGenuineWith"
+  ],
+  "scratchWritten": true,
+  "notes": "Small focused file (172 lines, 4 theorems) proving the translation-isogeny commutation τ_S∘φ*=φ*∘τ_{φS} in point, alg-hom, and pointwise forms, with all proofs axiom-clean and no sorry. The key machinery is IsGenuineWith (GapSpines), translateAlgEquivOfPoint_map_genericPoint (SeparableKernelTorsor), and algHom_ext_x_y_gen (TranslationOrd); the main consumer externally is SeparableWitnesses.lean."
+}

@@ -1,0 +1,23 @@
+{
+  "path": "./HasseWeil/Curves/BaseChange.lean",
+  "totalDecls": 10,
+  "defs": 2,
+  "lemmas": 7,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "baseChange_toAffine",
+    "baseChange_a₁",
+    "baseChange_a₂",
+    "baseChange_a₃",
+    "baseChange_a₄",
+    "baseChange_a₆",
+    "includePoint_x",
+    "includePoint_y"
+  ],
+  "keyApi": ["baseChange", "pointsOver"],
+  "scratchWritten": true,
+  "notes": "Thin infrastructure file (84 lines, 10 declarations) providing base change of SmoothPlaneCurve and L-rational points; all proofs are rfl or single-step structure constructions. The sole non-trivial proof is includePoint, which invokes WeierstrassCurve.Affine.map_nonsingular and FaithfulSMul.algebraMap_injective. baseChange is the primary export consumed heavily across IsogenyBaseChange.lean, GaloisAction.lean, OrdAtInftyBaseChange.lean, and many WeilPairing files."
+}

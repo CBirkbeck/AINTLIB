@@ -1,0 +1,19 @@
+{
+  "path": "./HasseWeil/WeilPairing/PairingDet.lean",
+  "totalDecls": 11,
+  "defs": 1,
+  "lemmas": 10,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "frob_det_data_of_scaling",
+    "frob_det_data_of_adjoint_norm_trace",
+    "linearMap_det_eq_of_symplectic_scaling",
+    "frob_det_data_of_pairing_form"
+  ],
+  "keyApi": ["symJ"],
+  "scratchWritten": true,
+  "notes": "Pure linear-algebra file with no elliptic-curve imports; contains the abstract matrix and module-level core of Silverman III.8.6 (det φ = deg φ via symplectic scaling). Two parallel routes are offered: the adjoint+norm+trace route (det_eq_of_symplectic_adjoint, frob_det_data_of_adjoint_norm_trace) and the additivity-free per-isogeny scaling route (det_eq_of_symplectic_scaling, frob_det_data_of_scaling, det_eq_of_alternating_scaling, frob_det_data_of_pairing_form); the latter is the load-bearing interface consumed by DetDeg and Assembly. No sorries, no heartbeat overrides; all proofs are short."
+}

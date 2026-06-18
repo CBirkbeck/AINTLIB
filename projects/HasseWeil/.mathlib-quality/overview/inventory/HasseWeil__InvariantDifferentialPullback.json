@@ -1,0 +1,18 @@
+{
+  "path": "./HasseWeil/InvariantDifferentialPullback.lean",
+  "totalDecls": 7,
+  "defs": 1,
+  "lemmas": 6,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "omegaPullbackCoeff_comp_of_base"
+  ],
+  "keyApi": [
+    "Isogeny.pullbackKaehler"
+  ],
+  "scratchWritten": true,
+  "notes": "Small focused bridge file (119 lines, 7 decls, no sorries, no maxHeartbeats overrides) specializing abstract AlgHom.pullbackKaehler to elliptic curve isogenies and proving the chain rule a_{alpha circ beta} = c_alpha * a_beta (Silverman III.5.6a). All proofs are 1-15 lines; the main export omegaPullbackCoeff_comp_of_base is used in GapSpines.lean, GapQfKernel.lean, and AdditionPullback/Differential.lean but is unused within this file itself."
+}

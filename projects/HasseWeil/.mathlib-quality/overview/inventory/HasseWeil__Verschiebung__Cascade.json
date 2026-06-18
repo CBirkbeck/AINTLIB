@@ -1,0 +1,32 @@
+{
+  "path": "./HasseWeil/Verschiebung/Cascade.lean",
+  "totalDecls": 19,
+  "defs": 0,
+  "lemmas": 19,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "Conditional.iterated_silverman_II_2_12_of_subset_witness",
+    "mulByInt_three_pullback_cube_root_q_three_char_three",
+    "verschiebungIsog_isDualOf_frobenius_q_three_char_three",
+    "hasse_bound_witness_parametric_assembled_q_three",
+    "hasse_bound_sq_witness_parametric_assembled_q_three",
+    "hasse_bound_witness_parametric_assembled_q_five",
+    "hasse_bound_sq_witness_parametric_assembled_q_five",
+    "verschiebungIsog_isDualOf_frobenius_q_five_char_five",
+    "hasse_bound_witness_parametric_assembled_q_seven",
+    "hasse_bound_sq_witness_parametric_assembled_q_seven",
+    "verschiebungIsog_isDualOf_frobenius_q_seven_char_seven",
+    "hasse_bound_F_four",
+    "hasse_bound_F_nine"
+  ],
+  "keyApi": [
+    "verschiebungIsog_isDualOf_frobenius_of_qth_root_witness",
+    "hasse_bound_witness_parametric_assembled",
+    "hasse_bound_sq_witness_parametric_assembled"
+  ],
+  "scratchWritten": true,
+  "notes": "Pure cascade/wire-up file: all 19 declarations are theorems (no defs, no instances), and all proofs are short delegations (≤12 lines) to upstream project lemmas in IsDual.lean, PurelyInsep.lean, and HoleE.lean. The file contains no sorry and no set_option maxHeartbeats. Thirteen of 19 declarations have no internal callers within this file and serve as exposed API or per-prime specialization milestones (q=2,3,5,7, F_4, F_9); mulByInt_three_pullback_cube_root_q_three_char_three is vacuously trivial (its proof body just returns the h_xy_subfield hypothesis)."
+}

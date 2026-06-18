@@ -1,0 +1,18 @@
+{
+  "path": "./HasseWeil/Pic0/IsogenyClassGroup.lean",
+  "totalDecls": 8,
+  "defs": 3,
+  "lemmas": 4,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [],
+  "keyApi": [
+    "Isogeny.CoordHom",
+    "Isogeny.CoordHom.toAlgebra",
+    "Isogeny.CoordHom.isTorsionFree"
+  ],
+  "scratchWritten": true,
+  "notes": "Pure infrastructure file packaging the coordinate-ring restriction data (`CoordHom`) and lifting `ClassGroup.relNorm`/`ClassGroup.map` to the `Isogeny` namespace. The key design challenge is the same-type `R → R` instance diamond, which is worked around by carrying `toAlgebra` as explicit data and requiring nominal type copies `S`, `S'` for the degree bridge. All declarations are short, sorry-free, and axiom-clean; the file is heavily used by `PicDual.lean`, `RouteCTheoremOfSquare.lean`, and `RouteCGeometric.lean`."
+}

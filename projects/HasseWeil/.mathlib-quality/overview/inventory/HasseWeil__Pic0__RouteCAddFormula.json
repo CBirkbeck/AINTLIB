@@ -1,0 +1,22 @@
+{
+  "path": "./HasseWeil/Pic0/RouteCAddFormula.lean",
+  "totalDecls": 9,
+  "defs": 2,
+  "lemmas": 7,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "sigma_kappaDivisor_picDual",
+    "tos_pullback_principal_of_sigma_eq_zero",
+    "dualAddResidual_iff_sigma_vanishes",
+    "htrace_dual_of_dualAddMulByInt_residual"
+  ],
+  "keyApi": [
+    "tosPullDivisor",
+    "DualAddMulByIntResidual"
+  ],
+  "scratchWritten": true,
+  "notes": "All 9 declarations are axiom-clean and characteristic-free; the file packages the irreducible Silverman III.6.2(c) residual as `DualAddMulByIntResidual` and wires it into the Route-C `htrace_dual` consumer via `RouteCTheoremOfSquareDiv.kappaDivisor_add_linEquiv` (Miller/Abel, char-free). Four of the seven theorems are unused within the file itself (exposed as external API or equivalence certifiers). No sorries, no heartbeat overrides."
+}

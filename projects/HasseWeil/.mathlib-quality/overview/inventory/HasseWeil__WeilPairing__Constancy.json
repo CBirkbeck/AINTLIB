@@ -1,0 +1,23 @@
+{
+  "path": "./HasseWeil/WeilPairing/Constancy.lean",
+  "totalDecls": 7,
+  "defs": 0,
+  "lemmas": 7,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [
+    "const_of_projectiveDivisorOf_eq_zero: 1600000 [The SmoothPlaneCurve coercion makes instance/whnf elaboration heavy]"
+  ],
+  "longProofs": [],
+  "unused": [
+    "pairing_const_pow_eq_one"
+  ],
+  "keyApi": [
+    "const_unit_of_projectiveDivisorOf_eq_zero",
+    "pairing_const_of_transport",
+    "pairing_const_refl",
+    "pairing_const_mul"
+  ],
+  "scratchWritten": true,
+  "notes": "Compact 7-theorem leaf file implementing the algebraic-Liouville / constant-function step of the Weil pairing (Silverman II.1.2): trivial projective divisor implies constant, plus scalar-extraction, mu_ell membership, and bilinearity engines. No sorries, no defs. `pairing_const_pow_eq_one` is likely dead within the current Pairing.lean proof (bilinearity route replaced it) but may still be referenced elsewhere. `const_unit_of_projectiveDivisorOf_eq_zero` is the most-called export with 6+ call sites across HfactLemma, SeparableScaling, FrobeniusDivisorGalois, and PairingProps."
+}

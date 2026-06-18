@@ -1,0 +1,24 @@
+{
+  "path": "./HasseWeil/EC/SeparableKernelTorsor.lean",
+  "totalDecls": 14,
+  "defs": 2,
+  "lemmas": 12,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "card_kernel_eq_degree_of_separable_concrete", "lines": 51 }
+  ],
+  "unused": [
+    "finite_kernel_of_hcov",
+    "genericPointAct_mem_ker_g",
+    "card_kernel_eq_degree_of_separable_concrete"
+  ],
+  "keyApi": [
+    "kernelTranslateForwardAut",
+    "genericPointAct",
+    "translateAlgEquivOfPoint_map_genericPoint"
+  ],
+  "scratchWritten": true,
+  "notes": "Formalises the kernel-torsor / Galois-correspondence proof of Silverman III.4.10c (#ker φ = deg φ for separable φ), parametrised on three genuine-isogeny hypotheses (hcov, h_normal, hdesc) that are discharged downstream for φ = [ℓ]. The file is axiom-clean with no sorry and no maxHeartbeats overrides. The master result `card_kernel_eq_degree_of_separable_concrete` and its helper `genericPointAct_mem_ker_g` are not referenced within this file, so they are dead-code candidates here but are clearly intended as exported API."
+}

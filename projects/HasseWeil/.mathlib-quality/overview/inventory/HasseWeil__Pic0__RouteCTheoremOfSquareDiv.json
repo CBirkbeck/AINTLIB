@@ -1,0 +1,19 @@
+{
+  "path": "./HasseWeil/Pic0/RouteCTheoremOfSquareDiv.lean",
+  "totalDecls": 8,
+  "defs": 0,
+  "lemmas": 8,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "tos_toClass",
+    "toClassEquiv'_add_iff",
+    "picDual_add_iff_sigma_vanishes",
+    "htrace_dual_of_picDual_add"
+  ],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "Entirely clean (0 sorries, 0 maxHeartbeats overrides), 8 theorems that provide the divisor-level theorem of the square for the Route C pipeline. tos_toClass and toClassEquiv'_add_iff (Part C) are not referenced by any other file found in the project and are dead-code candidates. The file is a leaf-like bridge: exported declarations are consumed by RouteCAddFormula.lean."
+}

@@ -1,0 +1,17 @@
+{
+  "path": "./HasseWeil/WeilPairing/PairingAdjoint.lean",
+  "totalDecls": 7,
+  "defs": 0,
+  "lemmas": 7,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "weilPairing_adjoint_core", "lines": 37},
+    {"name": "weilPairing_scaling", "lines": 32}
+  ],
+  "unused": ["weilPairing_scaling"],
+  "keyApi": ["weilPairing_congr_right", "weilPairing_adjoint_core", "smul_nsmul_eq_zero_right"],
+  "scratchWritten": true,
+  "notes": "All 7 declarations are sorry-free (axiom-clean); the file is a leaf with no importers of its own — all results are consumed by SeparableScaling.lean, FrobeniusGalois.lean, HfactLemma.lean, DetDeg.lean, HasseAssembly.lean etc. The `weilPairing_adjoint_core` theorem (37-line proof) is the central reusable engine for the adjoint and scaling, consumed 6+ times across the project. The `weilPairing_scaling` result inherits a transitive `sorryAx` from `weilPairing_mul_right` (slot-2 bilinearity, upstream in DivisorPullback), but no sorry originates in this file."
+}

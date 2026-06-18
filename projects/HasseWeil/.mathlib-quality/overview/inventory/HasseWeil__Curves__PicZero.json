@@ -1,0 +1,32 @@
+{
+  "path": "./HasseWeil/Curves/PicZero.lean",
+  "totalDecls": 29,
+  "defs": 7,
+  "lemmas": 21,
+  "instances": 1,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "toAffinePoint_affine",
+    "projectiveDivisorSumHom_apply",
+    "toProjectiveSmoothPoint_zero",
+    "toProjectiveSmoothPoint_some",
+    "fintype",
+    "card_eq_card_affine_point",
+    "picZeroOfPoint_zero",
+    "projectiveDivisorSum_projectiveDivisorOf_one",
+    "projectiveDivisorSum_projectiveDivisorOf_mul",
+    "projectiveDivisorSum_projectiveDivisorOf_inv",
+    "projectiveDivisorSum_vertical_line"
+  ],
+  "keyApi": [
+    "toAffinePoint",
+    "projectiveDivisorSum",
+    "projectiveDivisorSumHom",
+    "toProjectiveSmoothPoint",
+    "kappaDivisor"
+  ],
+  "scratchWritten": true,
+  "notes": "Builds the σ (sum-of-points) and κ (P↦class of (P)−(O)) maps for Silverman III.3.4, plus the easy σ∘κ=id direction. The `equivProjectiveSmoothPoint`, `fintype` instance, and `card_eq_card_affine_point` in this file (for `W : WeierstrassCurve.Affine F`) are largely superseded by the corresponding declarations in `FintypeProjectiveSmoothPoint.lean`. `projectiveDivisorSum_kappaDivisor` is the single most widely consumed exported lemma, used across the Weil-pairing pipeline in at least 6 other files."
+}

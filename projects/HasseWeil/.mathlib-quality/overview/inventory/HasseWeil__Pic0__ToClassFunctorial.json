@@ -1,0 +1,14 @@
+{
+  "path": "./HasseWeil/Pic0/ToClassFunctorial.lean",
+  "totalDecls": 3,
+  "defs": 0,
+  "lemmas": 3,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": ["toClass_toPointMap_id"],
+  "keyApi": ["toClass_toAffinePoint"],
+  "scratchWritten": true,
+  "notes": "Three short theorems implementing the III.3.4 ideal-level functoriality: the comap (contraction) form of the Pic0-isomorphism for CurveMaps, an identity base case, and the identification of toClass with maximalIdealAt. toClass_toPointMap is the principal external API, consumed by RouteCGeometric, PicDual, and ClassGroupNorm. The file contains an unusually detailed module docstring explaining why the classMap (extension) direction is false and why naive toClass_isogeny_compat is unprovable."
+}

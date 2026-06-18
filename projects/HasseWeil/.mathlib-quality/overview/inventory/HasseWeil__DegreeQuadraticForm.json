@@ -1,0 +1,29 @@
+{
+  "path": "./HasseWeil/DegreeQuadraticForm.lean",
+  "totalDecls": 15,
+  "defs": 0,
+  "lemmas": 15,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "comp_toAddMonoidHom_eq_mulByInt_of_quadratic", "lines": 33 },
+    { "name": "degree_quadratic_closed", "lines": 32 },
+    { "name": "trace_identity_of_dual_chain", "lines": 34 },
+    { "name": "degree_quadratic_genuine_addIsog", "lines": 39 }
+  ],
+  "unused": [
+    "quadratic_expansion",
+    "degree_quadratic_nonneg_of_witness",
+    "signed_degree_of_genuine_dual_pair",
+    "degree_quadratic_of_dualChain_witnesses",
+    "sq_degree_eq_sq_of_comp_deg_witness",
+    "trace_identity_of_dual_chain",
+    "degree_quadratic_genuine_addIsog"
+  ],
+  "keyApi": [
+    "sq_degree_eq_sq_of_dual_deg_prod_witness"
+  ],
+  "scratchWritten": true,
+  "notes": "All 15 declarations are sorry-free; the file is a witness-parametric scaffold for Silverman III.6.3 (degree as positive-definite quadratic form). Many public theorems (7 of 15) are unused within the file itself — they are prospective call-sites for external dual-chain workers. The private `quadratic_expansion` is dead code superseded by `comp_toAddMonoidHom_eq_mulByInt_of_quadratic`."
+}

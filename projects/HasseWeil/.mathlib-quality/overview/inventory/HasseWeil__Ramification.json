@@ -1,0 +1,40 @@
+{
+  "path": "./HasseWeil/Ramification.lean",
+  "totalDecls": 28,
+  "defs": 0,
+  "lemmas": 14,
+  "instances": 14,
+  "sorries": [],
+  "maxHeartbeats": [
+    "functionField_finiteDimensional: 800000 [Typeclass synthesis for FiniteDimensional over the tower FractionRing F[X] → K(E) needs extra heartbeats]",
+    "polynomialY_sq_eq_disc: 3200000 [Large `ring` over F[X][Y] needs extra heartbeats]",
+    "mk_polynomialY_sq: 800000 [AdjoinRoot rewriting over the bivariate polynomial ring needs extra heartbeats]",
+    "four_polynomialX_eq_jacobi: 3200000 [Large `ring` over F[X][Y] needs extra heartbeats]",
+    "exists_coeffs_via_polynomialY: 1600000 [Large polynomial manipulations plus AdjoinRoot pushes need extra heartbeats]",
+    "maximalIdeal_isPrincipal_of_nonsingular: 6400000 [Very large case analysis over char = 2 vs char ≠ 2 branches, plus nested AdjoinRoot arguments]",
+    "coordinateRing_isIntegralClosure: 800000 [Typeclass synthesis over the tower F[X] → CoordinateRing → FunctionField needs more budget]",
+    "root_aeval_polynomial_map: 1600000 [The image of AdjoinRoot.root in the function field is a root of W.map(algebraMap). Polynomial.aeval_map_algebraMap rewriting needs extra heartbeats]",
+    "functionField_isSeparable: 800000 [The separability proof reasons over two cases via finSepDegree; typeclass synthesis for the tower through FractionRing F[X] needs more budget]",
+    "coordinateRing_isDedekindDomain: 4000000 [Assembling the Dedekind domain conclusion from integral closure + separability + Noetherian via mathlib's `IsIntegralClosure.isDedekindDomain` requires a heavy typeclass search]"
+  ],
+  "longProofs": [
+    {"name": "dprime_not_in_p", "lines": 38},
+    {"name": "exists_coeffs_via_polynomialY", "lines": 64},
+    {"name": "maximalIdeal_isPrincipal_of_nonsingular", "lines": 995},
+    {"name": "coordinateRing_isIntegrallyClosed", "lines": 31},
+    {"name": "functionField_isSeparable", "lines": 60}
+  ],
+  "unused": [
+    "isIntegrallyClosed_coordinateRing"
+  ],
+  "keyApi": [
+    "coordinateRing_algebraMap_injective",
+    "mk_polynomialY_sq",
+    "polynomialY_sq_eq_disc",
+    "nonsingular_at_maximal",
+    "functionField_faithfulSMul",
+    "derivative_polynomial_eq_polynomialY"
+  ],
+  "scratchWritten": true,
+  "notes": "Orphaned file not imported by HasseWeil.lean; its main result (T-II-1-001, local ring at smooth point is DVR) is proved sorry-free elsewhere. No sorry tactic in any proof body. The file is dominated by the ~995-line proof of maximalIdeal_isPrincipal_of_nonsingular, a complete char-2/char-≠-2 case analysis; isIntegrallyClosed_coordinateRing at the end is redundant with coordinateRing_isIntegrallyClosed."
+}

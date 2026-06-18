@@ -1,0 +1,16 @@
+{
+  "path": "./HasseWeil/EC/AffinePointMap.lean",
+  "totalDecls": 7,
+  "defs": 2,
+  "lemmas": 5,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "map_add", "lines": 33 }
+  ],
+  "unused": ["map_neg", "map_zsmul"],
+  "keyApi": ["map", "map_some"],
+  "scratchWritten": true,
+  "notes": "Small focused file (132 lines, 7 decls) that lifts the elliptic-curve point functor to `AddMonoidHom` level using mathlib's `map_nonsingular`, `map_negY`, `map_addX/Y`, and `map_slope`. No sorries or maxHeartbeats overrides; `map_add` is the only non-trivial proof (~33 lines of case analysis). `map_neg` and `map_zsmul` are exported API unused within the file itself, likely consumed by other project files."
+}

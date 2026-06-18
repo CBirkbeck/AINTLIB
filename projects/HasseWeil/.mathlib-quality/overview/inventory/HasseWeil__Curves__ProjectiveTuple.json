@@ -1,0 +1,14 @@
+{
+  "path": "./HasseWeil/Curves/ProjectiveTuple.lean",
+  "totalDecls": 7,
+  "defs": 3,
+  "lemmas": 4,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": ["mk_repr", "mk_smul"],
+  "keyApi": ["ProjectiveTuple"],
+  "scratchWritten": true,
+  "notes": "Thin wrapper around Mathlib's Projectivization for smooth plane curves; every proof is a one-line delegation. The file is consumed by HasseWeil/Curves/RationalMap.lean and has no sorries, no heartbeat overrides, and no experimental content."
+}

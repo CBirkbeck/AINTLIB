@@ -1,0 +1,27 @@
+{
+  "path": "./HasseWeil/Curves/PointFunctor.lean",
+  "totalDecls": 24,
+  "defs": 6,
+  "lemmas": 18,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "evalAtPullback_mk", "lines": 48 }
+  ],
+  "unused": [
+    "toPointMap_id",
+    "toPointMap_comp",
+    "maximalIdealAt_toPointMap",
+    "SmoothPoint.toAffinePoint_def"
+  ],
+  "keyApi": [
+    "SmoothPlaneCurve.evalAt",
+    "CurveMap.evalAtPullback",
+    "SmoothPlaneCurve.evalAt_mk",
+    "CurveMap.evalAtPullback_apply",
+    "CurveMap.toPointMap"
+  ],
+  "scratchWritten": true,
+  "notes": "Clean foundational file with no sorries or heartbeat overrides. The single long proof (evalAtPullback_mk, ~48 lines) is a double Polynomial.ringHom_ext argument showing two ring homs agree on generators, which is mechanically correct but verbose. The file is the entry point for IsogenyAG.lean and is also imported for evalAt/ker_evalAt in SamePlace.lean."
+}

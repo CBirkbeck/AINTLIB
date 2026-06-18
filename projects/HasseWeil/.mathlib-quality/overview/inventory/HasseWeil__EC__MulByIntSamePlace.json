@@ -1,0 +1,35 @@
+{
+  "path": "./HasseWeil/EC/MulByIntSamePlace.lean",
+  "totalDecls": 28,
+  "defs": 0,
+  "lemmas": 28,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "mulByInt_coords_at_affine", "lines": 51},
+    {"name": "pointValuation_aeval_sub_eval_lt_one", "lines": 40},
+    {"name": "pointValuation_mulByInt_x_sub_lt_one", "lines": 54},
+    {"name": "pointValuation_mulByInt_y_sub_lt_one", "lines": 68},
+    {"name": "pointValuation_bivariate_bridge", "lines": 56},
+    {"name": "pointValuation_mulByInt_pullback_le_one_of_le_one", "lines": 32},
+    {"name": "pointValuation_mulByInt_pullback_lt_one_of_lt_one", "lines": 46},
+    {"name": "mulByInt_samePlace_le_one_iff_affine", "lines": 33},
+    {"name": "ordAtInfty_mulByInt_y_eq_neg_three_general", "lines": 130}
+  ],
+  "unused": [
+    "mulByInt_comap_pointValuation_isEquiv_affine",
+    "mulByInt_comap_pointValuation_isEquiv_infty",
+    "pointValuation_mulByInt_x_sub_lt_one_of_ne_zero",
+    "pointValuation_mulByInt_y_sub_lt_one_of_ne_zero"
+  ],
+  "keyApi": [
+    "pointValuation_aeval_sub_eval_lt_one",
+    "pointValuation_mulByInt_x_sub_lt_one",
+    "pointValuation_mulByInt_y_sub_lt_one",
+    "pointValuation_mulByInt_pullback_algebraMap_sub_evalAt_lt_one",
+    "ord_algebraMap_mul_ge_aux'"
+  ],
+  "scratchWritten": true,
+  "notes": "All 28 declarations are sorry-free and the file is axiom-clean. The core machinery is a layered residue-matching argument (generator value bridges → bivariate bridge → coordinate-ring bridge → IsLocalization fraction decomposition) for the affine case, and a translation-invariance + ordAtInfty transport route for the torsion case. The 130-line `ordAtInfty_mulByInt_y_eq_neg_three_general` proof is the most complex, deriving `ord_∞(Y) = −3` entirely from the Weierstrass equation and `ord_∞(X) = −2` by iterated `ordAtInfty_add_eq_of_lt` steps."
+}

@@ -1,0 +1,21 @@
+{
+  "path": "./HasseWeil/FormalGroupBridge.lean",
+  "totalDecls": 5,
+  "defs": 0,
+  "lemmas": 5,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "isogPullbackCoeff_add_of_formal",
+    "omegaPullbackCoeff_mulByInt_add",
+    "omegaPullbackCoeff_mulByInt_isConstant"
+  ],
+  "keyApi": [
+    "bridge_mulByInt",
+    "omegaPullbackCoeff_isConstant_of_witness"
+  ],
+  "scratchWritten": true,
+  "notes": "Thin scaffold file (124 lines, all proofs 1-2 lines, no sorry) bridging formal-group linear coefficients to omega-pullback coefficients; the only non-trivial content lives in the imported OmegaPullbackCoeff.lean. The main theorem isogPullbackCoeff_add_of_formal is a pure-transitivity wrapper by design, with callers (BridgeMulByInt.lean, BridgeFrobenius.lean) responsible for verifying the bridge hypotheses. Three of five declarations are dead-code candidates within this file (only used externally)."
+}

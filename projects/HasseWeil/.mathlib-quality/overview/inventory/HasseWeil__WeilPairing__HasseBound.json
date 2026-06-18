@@ -1,0 +1,18 @@
+{
+  "path": "./HasseWeil/WeilPairing/HasseBound.lean",
+  "totalDecls": 2,
+  "defs": 0,
+  "lemmas": 1,
+  "instances": 1,
+  "sorries": [],
+  "maxHeartbeats": [
+    "line 51: 2000000 [NO-COMMENT]"
+  ],
+  "longProofs": [],
+  "unused": [
+    "hasse_bound_unconditional"
+  ],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "Capstone file with a single public theorem (the unconditional Hasse bound) and one anonymous local Classical.decEq instance; no sorries, axiom-clean. The file-global set_option maxHeartbeats 2000000 has no justifying comment, though the docstring mentions the whnf-freeze technique for pencilKerCard via set."
+}

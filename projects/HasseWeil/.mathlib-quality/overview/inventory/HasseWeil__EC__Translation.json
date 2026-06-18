@@ -1,0 +1,24 @@
+{
+  "path": "./HasseWeil/EC/Translation.lean",
+  "totalDecls": 20,
+  "defs": 8,
+  "lemmas": 12,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "translateCoordAlgHom_injective_of_baseHom_inj", "lines": 76 }
+  ],
+  "unused": [
+    "translateX_xy_ne_const_of_pole",
+    "translateBaseHom_injective_of_transcendental",
+    "ord_translateSlope_xy"
+  ],
+  "keyApi": [
+    "translateSlope_xy",
+    "x_gen_sub_const_ne_zero",
+    "translateBaseHom"
+  ],
+  "scratchWritten": true,
+  "notes": "The file constructs the translation-by-base-field-point algebra endomorphism τ_k : K(E) →ₐ[F] K(E) via the addX/addY group-law formula, directly paralleling addPullbackAlgHom in AdditionPullback.lean. The long injectivity proof (76 lines) is an explicit transposition of addCoordAlgHom_injective_of_baseHom_inj and relies on the CoordinateRing basis decomposition and degree_norm_smul_basis. Three declarations (translateX_xy_ne_const_of_pole, translateBaseHom_injective_of_transcendental, ord_translateSlope_xy) are unused within the file but are consumed by TranslationOrd.lean and TranslateValuation.lean; x_gen_sub_const_ne_zero is the most widely referenced export across the project."
+}

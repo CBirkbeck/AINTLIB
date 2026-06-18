@@ -1,0 +1,14 @@
+{
+  "path": "./HasseWeil/WeilPairing/FrobMatrixData.lean",
+  "totalDecls": 14,
+  "defs": 8,
+  "lemmas": 6,
+  "instances": 1,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [],
+  "keyApi": ["frobeniusHomBaseChange"],
+  "scratchWritten": true,
+  "notes": "Thin wiring layer with no sorry and no long proofs; all declarations are either Prop-valued bundle definitions or short assembly theorems (≤21 lines). The file contains two parallel proof paths (full PencilScaling vs coprime-BOTH PencilScalingCoprime, reviewer round-23 Route B) that share 90% of structure. frobeniusHomBaseChange is the sole key API, referenced by five other declarations."
+}

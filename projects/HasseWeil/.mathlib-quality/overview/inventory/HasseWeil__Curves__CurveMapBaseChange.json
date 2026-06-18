@@ -1,0 +1,35 @@
+{
+  "path": "./HasseWeil/Curves/CurveMapBaseChange.lean",
+  "totalDecls": 56,
+  "defs": 18,
+  "lemmas": 22,
+  "instances": 16,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "baseChange_inner_comp_mapRingHom_eq", "lines": 35},
+    {"name": "baseChange_eval₂_zero", "lines": 32},
+    {"name": "coordRingScalarExtFwd_surjective", "lines": 60},
+    {"name": "coordRingScalarExtFwd_injective", "lines": 59},
+    {"name": "fwdPinned_surjective", "lines": 43},
+    {"name": "fwdPinned_injective", "lines": 53},
+    {"name": "tensorFunctionFieldStructureHom_injective", "lines": 32},
+    {"name": "tensor_functionField_isField", "lines": 68},
+    {"name": "tensor_functionField_surj", "lines": 70}
+  ],
+  "unused": [
+    "functionFieldMap_injective",
+    "functionField_baseChange_apply",
+    "coordRingScalarExt_tmul",
+    "functionField_baseChange_tensorEquiv",
+    "baseChangeAlgHom"
+  ],
+  "keyApi": [
+    "coordRingMap",
+    "isDomain_tensorCoordRing",
+    "fwdPinned",
+    "tensorFunctionFieldAlgebra"
+  ],
+  "scratchWritten": true,
+  "notes": "The file builds the base-change infrastructure for function fields of smooth plane curves, culminating in the localization-commutes-with-base-change iso `L ⊗_F K(C) ≃ₐ[L] FractionRing(L ⊗_F C.CR)`. It contains 16 priority-100000 instance pins specifically to defeat an `Algebra F / Algebra F[X]` diamond on `AdjoinRoot W.polynomial`; there is substantial proof duplication between the `coordRingScalarExtFwd` and `fwdPinned` variants (near-verbatim copies of both the surjectivity adjoin argument and the basis-transport injectivity argument). No sorries; no maxHeartbeats overrides."
+}

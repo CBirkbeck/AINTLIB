@@ -1,0 +1,48 @@
+{
+  "path": "./HasseWeil/Auxiliary/DivisionPolynomial.lean",
+  "totalDecls": 99,
+  "defs": 6,
+  "lemmas": 83,
+  "instances": 1,
+  "sorries": [],
+  "maxHeartbeats": [
+    "dblXYZ_smulField (line 553): maxRecDepth 2048 [NO-COMMENT]"
+  ],
+  "longProofs": [
+    { "name": "zsmul_point_eq_smulX_smulY", "lines": 41 },
+    { "name": "isCoprime_Φ_ΨSq", "lines": 44 },
+    { "name": "zsmul_eq_smulEval", "lines": 37 },
+    { "name": "exists_point_on_curve", "lines": 23 }
+  ],
+  "unused": [
+    "evalEval_ψ",
+    "evalEval_φ",
+    "evalEval_ω",
+    "polyEval_cusp_ω",
+    "smulY_zero",
+    "addX_smul_one_smul_one_aux",
+    "point_point",
+    "algebraMap_comp_smulRing",
+    "addXYZ_smulField₁",
+    "addXYZ_smulEval",
+    "ω_one"
+  ],
+  "keyApi": [
+    "ψᵤ_ne_zero",
+    "smulX",
+    "smulY",
+    "ψᵤ",
+    "smulEval",
+    "smulField",
+    "zsmul_eq_smulEval",
+    "isCoprime_Φ_ΨSq",
+    "ψc_spec",
+    "ω_spec",
+    "ringEval_comp_smulRing",
+    "smulX_sub_smulX",
+    "smulY_sub_negY",
+    "zsmul_point_eq_smulField"
+  ],
+  "scratchWritten": true,
+  "notes": "This file is the project's central division polynomial engine: it introduces the ω-family and ψc, proves the Jacobian scalar-multiplication formula zsmul_eq_smulEval (used by MulByIntPullback, MulByIntUnramified, GenericPointZsmul), and proves isCoprime_Φ_ΨSq (used by Basic.lean and MulByIntPullback). The maxRecDepth bump on dblXYZ_smulField carries no comment. Eleven declarations appear unused within this file but several (ω_one, evalEval_ψ/φ/ω) are used externally; addX_smul_one_smul_one_aux and point_point appear to be genuine dead code."
+}

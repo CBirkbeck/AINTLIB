@@ -1,0 +1,29 @@
+{
+  "path": "./HasseWeil/Curves/EffectiveSumReduce.lean",
+  "totalDecls": 20,
+  "defs": 5,
+  "lemmas": 15,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "effective_sum_reduce", "lines": 78},
+    {"name": "sub_principal_of_miller", "lines": 45},
+    {"name": "kappaDivisor_nsmul_linEquiv_of_miller", "lines": 36},
+    {"name": "kappaDivisor_zsmul_linEquiv_of_miller", "lines": 34}
+  ],
+  "unused": [
+    "projectiveDivisorSum_listToDivisor",
+    "single_diff_kappa_reduce_of_miller",
+    "single_minus_inf_eq_kappaDivisor",
+    "kappaDivisor_zsmul_linEquiv_of_miller",
+    "effective_sum_reduce"
+  ],
+  "keyApi": [
+    "MillerHypothesis",
+    "listSum",
+    "listToDivisor"
+  ],
+  "scratchWritten": true,
+  "notes": "The file is an intentionally incomplete scaffold: all ingredients for a general Finsupp-induction kappa reduction are present, but the capstone theorem `general_kappa_reduce_of_miller` is explicitly parked in a comment block (lines 472-494). Several public declarations (`single_minus_inf_eq_kappaDivisor`, `kappaDivisor_zsmul_linEquiv_of_miller`, `single_diff_kappa_reduce_of_miller`) are dead code within this file, prepared for the deferred capstone. No sorries, no maxHeartbeats overrides; proofs are clean."
+}

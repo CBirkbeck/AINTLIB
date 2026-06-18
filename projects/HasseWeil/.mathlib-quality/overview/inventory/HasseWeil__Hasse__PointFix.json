@@ -1,0 +1,36 @@
+{
+  "path": "./HasseWeil/Hasse/PointFix.lean",
+  "totalDecls": 47,
+  "defs": 12,
+  "lemmas": 31,
+  "instances": 4,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "omegaPullbackCoeff_of_pullback_eq_id",
+    "pointCount_eq_of_hom_kernel_witness",
+    "aut_of_kernel_zero_apply",
+    "aut_of_kernel_construction_witness",
+    "kernelTranslateForwardAsAut",
+    "kernelTranslateForward_zero",
+    "kernelTranslateAsAut_zero",
+    "kernelTranslateAsAut_apply",
+    "mem_algHomFieldEqualizer",
+    "kernelTranslateForwardAsAut_of_xy_family",
+    "kernel_pullback_invariance_id",
+    "fiber_witness_via_inverse_witnesses",
+    "kernelMulSemiringAction_smulCommClass",
+    "xy_family_zero",
+    "pullback_fieldRange_eq_fixedField_of_card_match_intrinsic",
+    "isogeny_pullback_algebraMap_K"
+  ],
+  "keyApi": [
+    "kernel_eq_top_of_hom_eq_id_sub_frobenius",
+    "kernelTranslateAsAut",
+    "translateAlgEquivOfPoint_pullback_invariance_of_xy",
+    "pullback_fieldRange_le_fixedField_of_xy_family"
+  ],
+  "scratchWritten": true,
+  "notes": "File is a large witness-parametric cascade scaffold (T-V-1-001 through Artin fixed-field closure) with no sorries. About a third of the 47 declarations are unused within this file, suggesting they are infrastructure intended for external consumers or exploratory scaffolding. The file builds two parallel tracks: a Galois-cascade chain (S1–S11) reducing the fibre-witness requirement to IsGalois + Aut≃ker, and an Artin-machinery track (Layer 2) using FixedPoints.finrank_eq_card; both tracks rely heavily on translateAlgEquivOfPoint from EC/TranslationOrd."
+}

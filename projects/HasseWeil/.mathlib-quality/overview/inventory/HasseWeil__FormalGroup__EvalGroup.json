@@ -1,0 +1,47 @@
+{
+  "path": "./HasseWeil/FormalGroup/EvalGroup.lean",
+  "totalDecls": 35,
+  "defs": 4,
+  "lemmas": 27,
+  "instances": 4,
+  "sorries": [],
+  "maxHeartbeats": [
+    "evalAdd_comm: 800000 [NO-COMMENT]",
+    "evalAdd_assoc: 800000 [NO-COMMENT]"
+  ],
+  "longProofs": [
+    {"name": "FormalGroup.evalAdd_mem", "lines": 43},
+    {"name": "FormalGroup.evalAdd_zero_zero", "lines": 45},
+    {"name": "FormalGroup.coeff_swap", "lines": 58},
+    {"name": "FormalGroup.evalAdd_comm", "lines": 49},
+    {"name": "FormalGroup.coeff_j0_of_ne_one", "lines": 62},
+    {"name": "FormalGroup.evalAdd_zero_right", "lines": 64},
+    {"name": "FormalGroup.coeff_0j_of_ne_one", "lines": 53},
+    {"name": "continuous_subst_of_constantCoeff_zero", "lines": 34},
+    {"name": "mvPowerSeries_eval_mem_maximalIdeal", "lines": 35},
+    {"name": "eval₂_subst_bridge", "lines": 57},
+    {"name": "FormalGroup.evalAdd_evalNeg", "lines": 68},
+    {"name": "FormalGroup.evalAdd_assoc", "lines": 114}
+  ],
+  "unused": [
+    "FormalGroup.evalAdd_zero_zero",
+    "FormalGroup.coeff_0j_of_ne_one",
+    "powerSeries_eval_mem",
+    "powerSeries_eval₂_eq_mvEval₂",
+    "val_zero",
+    "val_add",
+    "val_neg",
+    "FormalGroup.EvalGroup.instAddCommGroup"
+  ],
+  "keyApi": [
+    "eval₂_subst_bridge",
+    "evalAdd_mem",
+    "maximalIdeal_isClosed",
+    "isTopologicallyNilpotent_of_mem_maximalIdeal",
+    "hasEval_of_mem_maximalIdeal",
+    "evalAdd_comm",
+    "finsupp_swap"
+  ],
+  "scratchWritten": true,
+  "notes": "The file formalises Silverman IV.3 (T-IV-3-001): it constructs the abelian group F(M) on the maximal ideal of a complete local ring via formal group evaluation, with the key technical challenge being the substitution bridge (eval₂_subst_bridge) that circumvents mathlib's eval₂_subst requiring discrete uniformity. Four private declarations (powerSeries_eval_mem, powerSeries_eval₂_eq_mvEval₂, coeff_0j_of_ne_one, evalAdd_zero_zero) are unused within this file, suggesting they were written speculatively or for external API."
+}

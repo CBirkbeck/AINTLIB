@@ -1,0 +1,21 @@
+{
+  "path": "./HasseWeil/Curves/WithTopArith.lean",
+  "totalDecls": 6,
+  "defs": 0,
+  "lemmas": 6,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "coe_add_coe",
+    "coe_neg_coe",
+    "ord_div_concrete",
+    "ord_pow_concrete",
+    "ord_sub_lt_concrete",
+    "ord_add_le_concrete_of_lt"
+  ],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "All six declarations are thin wrappers or corollaries of lemmas in Infinity.lean, providing closed-form ordAtInfty computations for quotients, powers, sums, and differences with integer-valued ords. coe_neg_coe and ord_add_le_concrete_of_lt have no external callers in the project. The file is heavily consumed by AdditionPullback/Frobenius.lean and FormalIsogenySeries.lean for Frobenius pullback ord arithmetic."
+}

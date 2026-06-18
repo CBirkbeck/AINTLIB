@@ -1,0 +1,49 @@
+{
+  "path": "./HasseWeil/Verschiebung/Genuine.lean",
+  "totalDecls": 35,
+  "defs": 3,
+  "lemmas": 32,
+  "instances": 0,
+  "sorries": ["addPullback_x_pair_x_ord_neg"],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "addBaseHomPair_injective_zsmul_verschiebung_mulByInt_neg_of_pole", "lines": 56},
+    {"name": "polyEq_of_mulByInt_x_eq_pow", "lines": 41},
+    {"name": "h_x_ne_zsmul_verschiebung_mulByInt_neg", "lines": 165},
+    {"name": "mulByInt_pullback_fieldRange_subset_frobenius_universal_in_k", "lines": 32},
+    {"name": "V_pullback_x_gen_ne_x_gen", "lines": 120},
+    {"name": "ordAtInfty_zsmul_verschiebung_pullback_x_neg", "lines": 73},
+    {"name": "intDegree_addPullback_x_pair_zsmul_verschiebung_mulByInt_neg_pos", "lines": 45},
+    {"name": "ord_addPullback_x_pair_zsmul_verschiebung_mulByInt_neg_lt_zero", "lines": 59}
+  ],
+  "unused": [
+    "sigma_verschiebung_pullback_x_eq",
+    "sigma_verschiebung_pullback_y_eq",
+    "genuineIsogSmulSubV_of_pole_witness_toAddMonoidHom",
+    "genuineIsogSmulSubV_universal_toAddMonoidHom",
+    "h_x_ne_id_V_zsmul_neg_one",
+    "addPullback_x_pair_ord_neg_of_sum_reduces_witness",
+    "addPullback_x_pair_sum_reduces_of_iv14_witness",
+    "mulByInt_pow_pullback_range_subset_frobenius_universal_in_k",
+    "mulByInt_pow_pullback_x_gen_mem_frobenius_subalgebra",
+    "mulByInt_pow_pullback_y_gen_mem_frobenius_subalgebra",
+    "genuineIsogSmulSubV_universal_unconditional_toAddMonoidHom"
+  ],
+  "keyApi": [
+    "addPullback_x_pair_zsmul_verschiebung_mulByInt_neg_in_KX_image",
+    "h_subset_of_isDualOf",
+    "h_x_ne_zsmul_verschiebung_mulByInt_neg",
+    "addPullback_x_pair_x_ord_neg",
+    "genuineIsogSmulSubV_of_pole_witness",
+    "addPullback_x_pair_sum_reduces_to_O",
+    "addPullback_x_pair_ord_neg_of_summands_reduce",
+    "mulByInt_pow_pullback_x_gen_mem_frobenius_fieldRange",
+    "genuineIsogSmulSubV_universal",
+    "V_pullback_x_gen_ne_x_gen",
+    "ordAtInfty_zsmul_verschiebung_pullback_x_neg",
+    "ordAtInfty_zsmul_mulByInt_neg_pullback_x_neg",
+    "mulByInt_pow_pullback_y_gen_mem_frobenius_fieldRange"
+  ],
+  "scratchWritten": true,
+  "notes": "File implements the V-side (Verschiebung) genuine r·V−s·id isogeny family, mirroring the π-side Frobenius D-track. One sorry remains in addPullback_x_pair_x_ord_neg (Silverman IV.1.4 / BRIDGE-003 formal-group subgroup closure); everything downstream is axiom-clean pending this gap. The file also ships a standalone universal-in-k inclusion theorem (Im([q^k]*) ⊆ Im(π*)) and the T26-A/B tickets (h_subset and h_x_ne discharge from IsDualOf), with two polynomial-degree arguments (T26-B at ≈165 lines, T11-DISCHARGE at ≈120 lines) that avoid any ord-at-infinity infrastructure."
+}

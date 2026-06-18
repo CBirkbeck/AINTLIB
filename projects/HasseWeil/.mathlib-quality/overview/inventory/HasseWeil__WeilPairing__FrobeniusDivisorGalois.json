@@ -1,0 +1,29 @@
+{
+  "path": "./HasseWeil/WeilPairing/FrobeniusDivisorGalois.lean",
+  "totalDecls": 19,
+  "defs": 3,
+  "lemmas": 16,
+  "instances": 1,
+  "sorries": [],
+  "maxHeartbeats": [
+    "pointValuation_frobeniusFunctionFieldEquiv (line 101): 1000000 [NO-COMMENT]"
+  ],
+  "longProofs": [
+    { "name": "pointValuation_frobeniusFunctionFieldEquiv", "lines": 33 },
+    { "name": "ordAtInfty_ffFrobEquivRaw", "lines": 32 },
+    { "name": "pullbackDiv_geomFrobInv_eq", "lines": 34 },
+    { "name": "projectiveDivisorOf_frobeniusFunctionFieldEquiv_weilFunction", "lines": 41 }
+  ],
+  "unused": [
+    "frobeniusFunctionFieldEquiv_weilFunction_eq_smul"
+  ],
+  "keyApi": [
+    "crFrobEquiv",
+    "geomFrobSmoothPointInv",
+    "map_coeffFrobEquiv_eq",
+    "pointOnMapped",
+    "pointValuation_frobeniusFunctionFieldEquiv"
+  ],
+  "scratchWritten": true,
+  "notes": "The file instantiates the abstract divisor-Galois-descent engine to the concrete arithmetic Frobenius σ, proving both the affine order transport (pointValuation_frobeniusFunctionFieldEquiv) and the ∞-order invariance, then assembles divisor equality and σ-naturality (frobeniusFunctionFieldEquiv_weilFunction_eq_smul). The single maxHeartbeats bump (1M, no comment) covers the affine valuation transport proof which needs several instance registrations for the mapped curve. The top-level σ-naturality theorem is a leaf exported for FrobeniusGaloisGeometric and is not consumed within this file."
+}

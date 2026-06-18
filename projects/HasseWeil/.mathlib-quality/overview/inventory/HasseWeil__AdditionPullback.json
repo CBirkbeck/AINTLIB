@@ -1,0 +1,48 @@
+{
+  "path": "./HasseWeil/AdditionPullback.lean",
+  "totalDecls": 54,
+  "defs": 17,
+  "lemmas": 36,
+  "instances": 1,
+  "sorries": ["addPullback_x_ne_const"],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "minpoly_F_monic_irreducible_in_F_x_gen", "lines": 69},
+    {"name": "addPullback_x_quadratic_over_F_case_two", "lines": 49},
+    {"name": "addPullback_x_quadratic_over_F", "lines": 33},
+    {"name": "minpoly_not_const_degree_two", "lines": 158},
+    {"name": "addPullback_x_transcendental", "lines": 91},
+    {"name": "addCoordAlgHom_injective_of_baseHom_inj", "lines": 85},
+    {"name": "addCoordAlgHomPair_injective_of_baseHom_inj", "lines": 75}
+  ],
+  "unused": [
+    "addPullback_x_ne_const_of_pole",
+    "addCoordAlgHom_injective",
+    "AddNonInversePair_id",
+    "addSlopePair_id",
+    "addPullback_x_pair_id",
+    "addPullback_y_pair_id",
+    "addBaseHomPair_id",
+    "addCoordRingHomPair_id",
+    "addCoordAlgHomPair_id",
+    "addPullbackAlgHomPair_id",
+    "AddNonInversePair_of_x_ne",
+    "AddNonInversePair_of_y_ne",
+    "addBaseHomPair_eq_aeval",
+    "addCoordAlgHomPair_injective_of_baseHom_inj",
+    "addSlopePair_eq_of_x_ne",
+    "addSlopePair_sigma_sum_eq_neg_a1",
+    "addPullback_x_pair_sigma_invariant"
+  ],
+  "keyApi": [
+    "addPullback_x_pair",
+    "addSlopePair",
+    "AddNonInversePair",
+    "addBaseHomPair",
+    "addIsog",
+    "addCoordRingHom",
+    "addPullback_x"
+  ],
+  "scratchWritten": true,
+  "notes": "The file has two near-duplicate injectivity proof blocks (~80 lines each): `addCoordAlgHom_injective_of_baseHom_inj` (lines 857-942) and `addCoordAlgHomPair_injective_of_baseHom_inj` (lines 1156-1231), differing only in single- vs. pair-isogeny naming — a refactor opportunity. The single sorry is in `addPullback_x_ne_const` (a private lemma): the pole-witness `ord_∞(addPullback_x) < 0` is deferred; the axiom-clean sibling `addPullback_x_ne_const_of_pole` packages the conditional form. `minpoly_not_const_degree_two` (158 lines) contains an extensive degree-parity argument over the curve discriminant using `SmoothPlaneCurve` infrastructure, requiring `[NeZero (2 : F)]` (char ≠ 2)."
+}

@@ -1,0 +1,42 @@
+{
+  "path": "./HasseWeil/Auxiliary/EllipticDivisibilitySequence.lean",
+  "totalDecls": 131,
+  "defs": 22,
+  "lemmas": 109,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "normEDS_mul_complEDS_of_mem", "lines": 50 },
+    { "name": "invarDenom_normEDS_eq_redInvarDenom_mul", "lines": 41 }
+  ],
+  "unused": [
+    "net_add_sub_iff",
+    "isEllSequence_iff_rel₃",
+    "map_invarNum",
+    "map_invarDenom",
+    "complEDS₂_eq_aeval",
+    "complEDSAux₂_neg",
+    "complEDS₂_eq_redInvarNum_sub",
+    "complEDS₂_two_three_two",
+    "redInvarDenom_zero",
+    "redInvarDenom_one",
+    "redInvarDenom_two",
+    "IsEllSequence.invar"
+  ],
+  "keyApi": [
+    "addMulSub",
+    "rel₄",
+    "HaveSameParity₄",
+    "invarNum",
+    "Rel₄OfValid",
+    "normEDS_eq_aeval",
+    "normEDS_mul_complEDS",
+    "IsEllSequence.normEDS",
+    "redInvarNum",
+    "redInvarDenom",
+    "complEDSAux₂"
+  ],
+  "scratchWritten": true,
+  "notes": "Ported from LutzNagell; provides normalised EDS theory (IsEllSequence.normEDS, IsEllSequence.ext, normEDS_mul_complEDS, redInvar_normEDS) needed for division polynomial ZSMul development. The central proof strategy universalises to MvPolynomial Param ℤ (eliminating nonzerodivisor hypotheses) via normEDS_eq_aeval + aeval. Several lemmas (map_invarNum, map_invarDenom, complEDS₂_eq_aeval, isEllSequence_iff_rel₃, etc.) appear unused within the file and are dead-code candidates, likely exported for other consumers or left from porting."
+}

@@ -1,0 +1,25 @@
+{
+  "path": "./HasseWeil/Isogeny.lean",
+  "totalDecls": 7,
+  "defs": 4,
+  "lemmas": 3,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [
+    "PullbackIsogeny.comp (line 64): 400000 [AlgHom.comp on FunctionField needs extra heartbeats for typeclass synthesis]",
+    "PullbackIsogeny.comp_degree (line 76): 800000 [Degree multiplicativity needs extra heartbeats for the tower law with FunctionField]"
+  ],
+  "longProofs": [],
+  "unused": [
+    "PullbackIsogeny.pullback_injective",
+    "PullbackIsogeny.comp_algebraMap_eq",
+    "PullbackIsogeny.comp_degree"
+  ],
+  "keyApi": [
+    "PullbackIsogeny",
+    "PullbackIsogeny.toAlgebra",
+    "PullbackIsogeny.comp"
+  ],
+  "scratchWritten": true,
+  "notes": "This file defines a pullback-only `PullbackIsogeny` structure (no point map) that is largely superseded by the fuller `Isogeny` in Basic.lean, which duplicates all five derived declarations nearly verbatim. The three lemmas `pullback_injective`, `comp_algebraMap_eq`, and `comp_degree` are unreferenced within the file and serve only as an API surface for `SeparableDegree.lean` consumers."
+}

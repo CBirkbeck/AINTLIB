@@ -1,0 +1,33 @@
+{
+  "path": "./HasseWeil/IsogenyBaseChange.lean",
+  "totalDecls": 24,
+  "defs": 9,
+  "lemmas": 15,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "cross_compose_zPi_witness", "lines": 38},
+    {"name": "frobeniusIsog_relative_iterate", "lines": 31}
+  ],
+  "unused": [
+    "mkBaseChange_pullback",
+    "mkBaseChange_toAddMonoidHom",
+    "degree_eq_of_finrank_eq",
+    "cross_compose_zPi_witness",
+    "qf_nonneg_from_polarisation_witness",
+    "h_dual_comp_from_picZeroPullback_witness",
+    "isogPicPullback_comp_pushforward",
+    "isogPicPushforward_compat_frobenius_baseChange_charP_prime",
+    "frobeniusIsog_baseChange_charP_pow",
+    "frobeniusTwist_eq_self_of_card_eq_p",
+    "iteratedFrobenius_isog"
+  ],
+  "keyApi": [
+    "isogPicPushforward",
+    "iterateFrobenius_eq_id_of_charP_pow",
+    "frobeniusIsog_relative_iterate"
+  ],
+  "scratchWritten": true,
+  "notes": "This file is a witness-parametric scaffold for the isogeny base-change API, with no sorries and no maxHeartbeats overrides; many leaf declarations (mkBaseChange_pullback, cross_compose_zPi_witness, qf_nonneg_from_polarisation_witness, etc.) are unused within the file and serve as API entry points for external consumers in the Hasse-bound cascade. The frobeniusIsog_relative_iterate def and cross_compose_zPi_witness are the only proofs exceeding 30 lines, and the heavy use of cast on type equalities for Frobenius constructions is a fragility note."
+}

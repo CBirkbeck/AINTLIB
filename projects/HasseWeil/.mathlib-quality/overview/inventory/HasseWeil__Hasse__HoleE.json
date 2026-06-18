@@ -1,0 +1,23 @@
+{
+  "path": "./HasseWeil/Hasse/HoleE.lean",
+  "totalDecls": 4,
+  "defs": 0,
+  "lemmas": 4,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "hasse_bound_via_signed_QF_negFrobenius_beta_param",
+    "hasse_bound_via_signed_QF_negFrobenius_streamlined_qf_nonneg"
+  ],
+  "keyApi": [
+    "isogOneSub_negFrobenius",
+    "isogTrace",
+    "frobeniusIsog",
+    "pointCount",
+    "hole_d_of_hom_and_sepDegree"
+  ],
+  "scratchWritten": true,
+  "notes": "This file is a thin adapter layer with 4 short theorems (all proofs ≤ 9 lines) forwarding to BoundOfWitnesses/QuadraticForm; no sorries, no set_option. Two theorems (beta_param and streamlined_qf_nonneg) appear to be dead code with no callers inside or outside the file, while the qf_nonneg variants are the live entry points consumed by Verschiebung/Cascade.lean and Hasse/Final.lean. Several placeholder theorems were deleted on 2026-05-28 per the module-doc comments."
+}

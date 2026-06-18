@@ -1,0 +1,17 @@
+{
+  "path": "./HasseWeil/Curves/PoleOrderParity.lean",
+  "totalDecls": 3,
+  "defs": 0,
+  "lemmas": 3,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "coordRingImage_ordAtInfty_ne_neg_one", "lines": 52},
+    {"name": "point_minus_O_principal_eq_zero_of_coord", "lines": 42}
+  ],
+  "unused": [],
+  "keyApi": ["funcField_image_ordAtInfty_ne_neg_one"],
+  "scratchWritten": true,
+  "notes": "Small file (183 lines, 3 theorems) implementing the parity obstruction at infinity for coordinate-ring elements: ord_∞ is always even or odd≤−3, never −1. The third theorem is a specialized Silverman III.3.3 carrying an explicit coordinate-ring hypothesis (the unconditional version is flagged in comments as a separate ticket requiring IntegralClosure and NormValuation bridges). No sorry, no maxHeartbeats overrides."
+}

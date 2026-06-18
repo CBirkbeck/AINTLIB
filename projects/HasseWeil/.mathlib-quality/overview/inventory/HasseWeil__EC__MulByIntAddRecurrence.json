@@ -1,0 +1,19 @@
+{
+  "path": "./HasseWeil/EC/MulByIntAddRecurrence.lean",
+  "totalDecls": 2,
+  "defs": 0,
+  "lemmas": 2,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [
+    "addPullback_xy_mulByInt_eq_succ: 1000000 [NO-COMMENT — docstring explains DecidableEq/whnf explosion risk over FunctionField tower]"
+  ],
+  "longProofs": [],
+  "unused": [
+    "addPullback_xy_mulByInt_eq_succ",
+    "mulByInt_left_injective"
+  ],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "Deliberately isolated module to avoid an AddCommGroup instance diamond on (W_KE W).toAffine.Point from heavier imports (SilvermanIV14/OpenLemmaPrimitives). Both theorems are public leaf API: addPullback_xy_mulByInt_eq_succ (Silverman III.5.3 addition recurrence) is consumed by RouteBInduction and TorsionGeometric; mulByInt_left_injective (Wall C / III.4.2b injectivity) is consumed by DegreeQuadraticForm. No sorries, no instances, 2 theorems total."
+}

@@ -1,0 +1,14 @@
+{
+  "path": "./HasseWeil/PowerSeriesHelpers.lean",
+  "totalDecls": 2,
+  "defs": 0,
+  "lemmas": 2,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": ["eq_zero_of_self_eq_self_mul"],
+  "keyApi": ["eq_zero_of_self_eq_mul_self"],
+  "scratchWritten": true,
+  "notes": "Tiny two-theorem helper file providing power-series self-multiplication cancellation lemmas for semirings (resp. commutative semirings). Both are likely mathlib-gap fills; eq_zero_of_self_eq_mul_self is cited in FormalGroup.lean for formalW_unique. No sorries, no heartbeat overrides."
+}

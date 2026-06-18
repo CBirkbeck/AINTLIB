@@ -1,0 +1,31 @@
+{
+  "path": "./HasseWeil/FormalGroup/PDeriv.lean",
+  "totalDecls": 22,
+  "defs": 1,
+  "lemmas": 21,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "coeff_pderiv_mul_left", "lines": 57},
+    {"name": "coeff_pderiv_mul_right", "lines": 45},
+    {"name": "pderiv_monomial", "lines": 43},
+    {"name": "pderiv_subst_polynomial", "lines": 88},
+    {"name": "pderiv_subst", "lines": 35}
+  ],
+  "unused": [
+    "pderiv_smul",
+    "pderiv_one",
+    "pderiv_neg",
+    "pderiv_sub",
+    "pderiv_coe",
+    "pderiv_subst_fin2"
+  ],
+  "keyApi": [
+    "coeff_pderiv",
+    "single_self_apply",
+    "continuous_pderiv"
+  ],
+  "scratchWritten": true,
+  "notes": "Self-contained infrastructure file adding MvPowerSeries.pderiv (multivariate formal derivative) which is absent from Mathlib; strong candidate for upstream contribution. The Leibniz rule proof uses a Finset.sum_nbij' reindexing of antidiagonal sums, and pderiv_subst proves the chain rule by a density+continuity extension (polynomials dense in power series under Pi topology). Downstream use is Silverman IV.4.2 (formal group invariant differential), consumed by HasseWeil/FormalGroup/Differential.lean."
+}

@@ -1,0 +1,19 @@
+{
+  "path": "./HasseWeil/EvenFunctions.lean",
+  "totalDecls": 13,
+  "defs": 1,
+  "lemmas": 12,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "negInvolution_involutive",
+    "negInvolution_eq_iff"
+  ],
+  "keyApi": [
+    "negInvolution"
+  ],
+  "scratchWritten": true,
+  "notes": "Self-contained file formalising Silverman III.2.3.1: the negation involution on the coordinate ring and its fixed-point characterisation (fixed iff in F[X]). No sorries, no maxHeartbeats overrides. None of the 13 declarations are referenced by any other file in the project (negInvolution_involutive and negInvolution_eq_iff are the main intended exports but have no callers yet), making the entire file a dead-code candidate unless imported. The supporting lemmas from mathlib (smul_basis_eq_zero, exists_smul_basis_eq) live in Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point."
+}

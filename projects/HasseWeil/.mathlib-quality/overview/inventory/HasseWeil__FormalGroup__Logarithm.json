@@ -1,0 +1,47 @@
+{
+  "path": "./HasseWeil/FormalGroup/Logarithm.lean",
+  "totalDecls": 65,
+  "defs": 10,
+  "lemmas": 55,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "coeff_add_monomial_pow_eq", "lines": 137},
+    {"name": "coeff_subst_zero_X1_at_single_1", "lines": 101},
+    {"name": "subst_compInverseOfUnit_eq_X", "lines": 64},
+    {"name": "compInvTrunc_subst_coeff_eq", "lines": 63},
+    {"name": "FormalGroup.log_additiveFormalGroup", "lines": 67},
+    {"name": "subst_zero_LogPreservesAdd_RHS", "lines": 47},
+    {"name": "FormalGroup.logPreservesAdd", "lines": 43},
+    {"name": "coeff_subst_add_monomial", "lines": 41},
+    {"name": "FormalGroup.logHomOfLogPreservesAdd", "lines": 34},
+    {"name": "coeff_zero_of_pderiv_zero_fin2", "lines": 35},
+    {"name": "subst_compInverse_eq_X", "lines": 31}
+  ],
+  "unused": [
+    "compInverseOfUnit_hasSubst",
+    "subst_compInverseOfUnit_eq_X",
+    "compInverseOfUnit_coeff_one",
+    "FormalGroup.exp_constantCoeff",
+    "FormalGroup.commutative_of_torsion_free",
+    "FormalGroup.log_coeff_succ_nsmul",
+    "FormalGroup.logPreservesAdd_constantCoeff",
+    "FormalGroup.logHomOfLogPreservesAdd_toSeries",
+    "FormalGroup.additiveFormalGroup_logHom",
+    "FormalGroup.logHom_toSeries"
+  ],
+  "keyApi": [
+    "FormalGroup.log",
+    "FormalGroup.log_coeff_succ",
+    "FormalGroup.log_constantCoeff",
+    "FormalGroup.LogPreservesAdd",
+    "compInvTrunc",
+    "compInvTrunc_constantCoeff",
+    "coeff_subst_eq_of_coeff_eq",
+    "monomial_pow_eq",
+    "FormalGroup.logPreservesAdd"
+  ],
+  "scratchWritten": true,
+  "notes": "Self-contained development of the formal logarithm (Silverman IV.5): defines log_F as the integral of ω_F, builds a coefficient-by-coefficient compositional inverse (compInverse/compInverseOfUnit), proves the identity subst (compInverse f) f = X, and then proves Silverman IV.5.2 (log preserves addition) by a derivative + uniqueness argument using F.invariantDiff_translation and torsion-freeness. No sorries, no maxHeartbeats bumps; the longest proofs (coeff_add_monomial_pow_eq at 137 lines, coeff_subst_zero_X1_at_single_1 at 101 lines) are verbose binomial/finsupp calculations that could be golfed."
+}

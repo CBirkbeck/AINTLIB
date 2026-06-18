@@ -1,0 +1,14 @@
+{
+  "path": "./HasseWeil/Curves/FrobeniusFixedLocus.lean",
+  "totalDecls": 15,
+  "defs": 4,
+  "lemmas": 11,
+  "instances": 1,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": ["frobPoly_separable"],
+  "keyApi": ["frobRootsFinset", "baseImageFinset", "mem_frobRootsFinset_iff", "mem_baseImageFinset_iff"],
+  "scratchWritten": true,
+  "notes": "A self-contained 136-line file; all private helpers feed the two public theorems `range_algebraMap_eq_roots_X_pow_card_sub_X` and `frobenius_fixed_iff_mem_baseField`. The lemma `frobPoly_separable` is proved but never invoked within the file (the cardinality bound uses `Polynomial.card_roots'` directly, not separability), making it a dead-code candidate. There is likely mathlib overlap with `FiniteField.roots_X_pow_card_sub_X` mentioned in the file header."
+}

@@ -1,0 +1,39 @@
+{
+  "path": "./HasseWeil/Pic0/ToClassSurjective.lean",
+  "totalDecls": 41,
+  "defs": 7,
+  "lemmas": 33,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [
+    "finrank_quotient_eq_sum_smithCoeffs (line 463): synthInstance 80000 [instance search for Smith summands]",
+    "quotIdealMulEquiv (line 544): 1200000 [large fractional ideal terms need raised budget]",
+    "finrank_quotient_mul (line 649): 800000 [quotient/restrictScalars defeq checking needs raised budget]",
+    "exists_mem_norm_natDegree_le (line 878): 800000 [rank-nullity dimension count needs raised budget]",
+    "exists_codimLEOne_inv (line 935): synthInstance 80000 [(Ideal R)⁰ / class-group coercions need raised instance budget]"
+  ],
+  "longProofs": [
+    {"name": "quotIdealMulEquiv", "lines": 90},
+    {"name": "finrank_quotient_mul", "lines": 43},
+    {"name": "exists_mem_norm_natDegree_le", "lines": 39}
+  ],
+  "unused": [
+    "toClass_surjective_iff_classRepresentableByPoints",
+    "toClassEquiv_of_surjective_apply",
+    "idealNatDegree_relNorm_mul",
+    "idealNatDegree_relNorm_span_singleton",
+    "finrank_quotient_eq_sum_smithCoeffs",
+    "finrank_quotient_smul",
+    "toClassEquiv_apply",
+    "toClassEquiv'_apply"
+  ],
+  "keyApi": [
+    "finiteDimensional_quotient_of_ne_bot",
+    "ClassRepresentableByPoints",
+    "basisCombMap",
+    "toClassEquiv_of_surjective",
+    "idealNatDegree"
+  ],
+  "scratchWritten": true,
+  "notes": "This file provides an unconditional proof of E ≅ Pic⁰(E) for elliptic Weierstrass curves, requiring no prior mathlib surjectivity result. The core machinery is a genus-1 Riemann–Roch argument: a dimension count (basisCombMap + rank-nullity) yields a small-norm ideal element, Dedekind factorisation gives a codimension-≤1 representative, and FractionalIdeal.quotientEquiv supplies the invertible-ideal SES kernel isomorphism (quotIdealMulEquiv). Several declarations (finrank_quotient_smul, idealNatDegree_relNorm_mul/span_singleton, finrank_quotient_eq_sum_smithCoeffs) are unused within the file and may be intermediate scaffolding or future API."
+}

@@ -1,0 +1,19 @@
+{
+  "path": "./HasseWeil/Verschiebung/FieldTower.lean",
+  "totalDecls": 4,
+  "defs": 0,
+  "lemmas": 4,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "frobeniusIsog_pullback_finrank",
+    "mulByInt_q_pullback_finrank",
+    "mulByInt_q_pullback_image_subset_frobenius_witness",
+    "mulByInt_q_factor_witness"
+  ],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "Thin 4-theorem scaffolding file for the Verschiebung field-tower; all substantive content is carried as explicit hypotheses (witness form, no sorries). `mulByInt_q_factor_witness` appears unused in any project file; the other three are referenced in `PurelyInsep.lean`. No heartbeat overrides, no long proofs."
+}

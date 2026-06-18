@@ -1,0 +1,18 @@
+{
+  "path": "./HasseWeil/WeilPairing/OneSubDualDivisor.lean",
+  "totalDecls": 13,
+  "defs": 4,
+  "lemmas": 8,
+  "instances": 1,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "mkOneSubScalingDataConcrete_of_divisorDual", "lines": 51}
+  ],
+  "unused": [
+    "oneSubFrobeniusScaling_of_divisorDual"
+  ],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "Builds the divisor-pushforward dual δ = κ ∘ φ^* ∘ κ^{-1} (Silverman III.6.1b) CoordHom-free, using the σ-bridge `sigma_pullbackDivisor_kappaDivisor` to make the dual relation δ ∘ φ = [#ker φ] automatic. No `sorry` in the file; the two main public exports `divisorPushforwardDual` and `divisorPushforwardDual_comp` are used by `PencilDualDivisor.lean` and `OneSubProjOrdTransport.lean`, while `oneSubFrobeniusScaling_of_divisorDual` is consumed by `SeparableTransportBridge.lean`."
+}

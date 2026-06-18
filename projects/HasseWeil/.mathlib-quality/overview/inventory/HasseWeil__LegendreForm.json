@@ -1,0 +1,21 @@
+{
+  "path": "./HasseWeil/LegendreForm.lean",
+  "totalDecls": 11,
+  "defs": 1,
+  "lemmas": 9,
+  "instances": 1,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "exists_legendreCurve_of_charNeTwoNF_a₆_eq_zero", "lines": 63 },
+    { "name": "exists_legendreCurve_iso", "lines": 40 }
+  ],
+  "unused": [
+    "legendreCurve_isCharNeTwoNF",
+    "legendreCurve_Δ_ne_zero_iff",
+    "exists_legendreCurve_iso"
+  ],
+  "keyApi": ["legendreCurve"],
+  "scratchWritten": true,
+  "notes": "Self-contained Legendre normal form module implementing Silverman III.1.7; no sorries, no sorry-inheriting axioms, and no set_option maxHeartbeats. The two long proofs are structural variable-change manipulations. Strong candidate for eventual Mathlib contribution as it only imports NormalForms and IsAlgClosed."
+}

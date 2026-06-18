@@ -1,0 +1,45 @@
+{
+  "path": "./HasseWeil/Pic0/ClassGroupNorm.lean",
+  "totalDecls": 30,
+  "defs": 8,
+  "lemmas": 22,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [
+    "Ideal.relNorm_maximalIdeal_eq_pow_inertiaDeg_of_isLocalRing (L169): 800000 [fraction-field tower + residue-degree finrank bookkeeping need elaboration room]",
+    "relNorm_map_localization (L359): synthInstance 400000 [semilocal Sₚ Dedekind/finite/torsion-free instance bundle pushes synthesis past default budget]",
+    "relNorm_eq_under_of_localized (L378): synthInstance 400000 [semilocal Sₚ instance bundle in hlocal's type needs synthesis room at statement elaboration]",
+    "isSimpleModule_quot_of_inertiaDeg_one (L488): 800000 [residue-field algebra structure built on Ideal.Quotient.field-derived semiring keeps surjectivity/finrank bookkeeping in budget]",
+    "relNorm_eq_maximalIdeal_of_inertiaDeg_one (L536): 800000 [module-length chain over DVR base (Smith + Ring.ord additivity + simplicity) needs room]",
+    "relNorm_map_eq_maximalIdeal_general (L574): synthInstance 400000 [abstract Rₚ/Sₚ localisation instance bundle in the binders needs synthesis room]",
+    "Ideal.relNorm_eq_under_of_inertiaDeg_one (L614): synthInstance 1000000 [concrete semilocal Sₚ / DVR Rₚ localisation instance bundle is expensive to synthesise]",
+    "Ideal.relNorm_eq_under_of_inertiaDeg_one (L616): 1600000 [NO-COMMENT — paired with synthInstance above]",
+    "Ideal.inertiaDeg_under_eq_one_of_algHom_of_residueField_finrank_one (L719): synthInstance 400000 [twisted self-algebra R →[g] R pushes instance synthesis past the default budget]",
+    "Ideal.inertiaDeg_under_eq_one_of_algHom_of_residueField_finrank_one (L721): 1600000 [residue-field finrank bookkeeping (surjectivity bound + tower) needs more elaboration room]"
+  ],
+  "longProofs": [
+    { "name": "Ideal.relNorm_maximalIdeal_eq_pow_inertiaDeg_of_isLocalRing", "lines": 32 },
+    { "name": "isSimpleModule_quot_of_inertiaDeg_one", "lines": 33 },
+    { "name": "Ideal.inertiaDeg_under_eq_one_of_algHom_of_residueField_finrank_one", "lines": 36 }
+  ],
+  "unused": [
+    "ClassGroup.relNorm_mk0'",
+    "Ideal.relNorm_maximalIdeal_eq_under_of_inertiaDeg_one_of_isLocalRing",
+    "relNorm_eq_relNorm_localization",
+    "ClassGroup.mk0_relNorm0_eq_mk0_comap_of_inertiaDeg_one",
+    "Ideal.inertiaDeg_under_eq_one_of_algHom_of_residueField_finrank_one",
+    "ClassGroup.relNorm_one",
+    "ClassGroup.relNorm_mul",
+    "ClassGroup.map_one",
+    "ClassGroup.map_mul",
+    "ClassGroup.relNorm_comp_map_eq"
+  ],
+  "keyApi": [
+    "mk0CompRelNorm0_eq_of_mk0_eq",
+    "mk0CompMap0_eq_of_mk0_eq",
+    "ClassGroup.relNorm",
+    "ClassGroup.map"
+  ],
+  "scratchWritten": true,
+  "notes": "The file's main technical content is a PerfectField-free proof of relNorm P = comap P at inertiaDeg 1 (Silverman III.4.10(a)), going through a module-length route via Smith normal form rather than the Galois-closure route that mathlib's Ideal.relNorm_eq_pow_of_isMaximal uses. The file also builds symmetric ClassGroup.relNorm and ClassGroup.map monoid homs and proves their dual composition relation ClassGroup.relNorm_comp_map (the class-group shadow of alpha-hat ∘ alpha = [deg alpha]). Several declarations near the end (relNorm_one, relNorm_mul, map_one, map_mul, relNorm_comp_map_eq) are sanity checks with trivial proofs and no in-file consumers."
+}

@@ -1,0 +1,22 @@
+{
+  "path": "./HasseWeil/Curves/PicZeroPushforward.lean",
+  "totalDecls": 7,
+  "defs": 2,
+  "lemmas": 5,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "pushforwardProjectiveDivisor_zero",
+    "pushforwardProjectiveDivisor_add",
+    "pushforwardProjectiveDivisor_single",
+    "pushforwardDegZero",
+    "pushforwardProjectiveDivisor_kappaDivisor"
+  ],
+  "keyApi": [
+    "pushforwardProjectiveDivisor"
+  ],
+  "scratchWritten": true,
+  "notes": "Compact, axiom-clean file (no sorries, no maxHeartbeats) implementing divisor-pushforward via Finsupp.mapDomain. All five simp/theorem declarations in the file are consumed by callers in HasseWeil/EC/IsogenyAG/HomProperty.lean, making the 'unused in file' list a red herring — these are key exported API. The file is a pure leaf in the import graph with no duplication suspicion."
+}

@@ -1,0 +1,14 @@
+{
+  "path": "./HasseWeil/Curves/FrobeniusFixedPoint.lean",
+  "totalDecls": 18,
+  "defs": 5,
+  "lemmas": 13,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": ["geomFrobeniusPoint_fixed_iff_mem_range_includePointBC: 400000 [NO-COMMENT]"],
+  "longProofs": [],
+  "unused": ["geomFrobRingHom_apply", "map_geomFrob_baseChange_eq_self"],
+  "keyApi": ["geomFrobeniusPointFun", "includePointBC", "geomFrobeniusPoint"],
+  "scratchWritten": true,
+  "notes": "Clean Step 2 of the Route B fixed-locus argument with no sorries; `geomFrobeniusPointFun` is the central hub used by 9 other declarations in the file. The single `set_option maxHeartbeats 400000` on the main S2 theorem has no justifying comment. `geomFrobRingHom` and `map_geomFrob_baseChange_eq_self` appear unused within the file body (the S2 proof works around the transport issue by a different route)."
+}

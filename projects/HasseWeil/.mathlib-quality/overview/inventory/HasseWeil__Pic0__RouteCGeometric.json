@@ -1,0 +1,25 @@
+{
+  "path": "./HasseWeil/Pic0/RouteCGeometric.lean",
+  "totalDecls": 14,
+  "defs": 0,
+  "lemmas": 14,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "picDual_eq_of_degree_eq",
+    "picDual_frobenius_eq_verschiebung",
+    "picDual_mulByInt_eq_self",
+    "degree_eq_N_via_picDual_geometric_v3",
+    "qf_nonneg_generic_via_picDual_geometric",
+    "qf_nonneg_generic_via_picDual_geometric_v2",
+    "hgeom_of_infinite_point",
+    "degree_eq_N_via_picDual_geometric_hpicval_discharged"
+  ],
+  "keyApi": [
+    "degree_eq_N_via_picDual_geometric_v2"
+  ],
+  "scratchWritten": true,
+  "notes": "Ships the geometric Route C assembly for the Hasse bound: TARGET 1 (abstract zsmul-injectivity over an infinite group with finite torsion, plus EC specialisation) and a layered family of degree_eq_N theorems (v1/v2/v3/hpicval_discharged) reducing the residual list from {hnat, hdual_hom, CoordHom, Vieta, hgeom} down to {hpoint, htrace_dual, CoordHom, Vieta, hgeom}. No sorry, no maxHeartbeats. Eight of fourteen declarations are unused within this file and serve as entry points for external callers; the key internal hub is degree_eq_N_via_picDual_geometric_v2, called by three other theorems in the file."
+}

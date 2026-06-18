@@ -1,0 +1,50 @@
+{
+  "path": "./HasseWeil/Curves/Infinity.lean",
+  "totalDecls": 97,
+  "defs": 7,
+  "lemmas": 89,
+  "instances": 1,
+  "sorries": [],
+  "maxHeartbeats": [
+    "mem_localRingAt_image_of_pointValuation_le_one (L1529): 80000 [FaithfulSMul instance synthesis hits 20000 ceiling on cold caches; bumped to keep proof robust]"
+  ],
+  "longProofs": [
+    {"name": "ordAtInfty_basis_fracPolyX_of_both_ne_zero", "lines": 152},
+    {"name": "ordAtInfty_add_ge_min", "lines": 73},
+    {"name": "ordAtInfty_algebraMap_fracPolyX_add_ge_min", "lines": 62},
+    {"name": "ordAtInfty_exists_const_sub_pos_of_fracPolyX_nonneg", "lines": 60},
+    {"name": "ratFunc_exists_C_sub_intDegree_neg", "lines": 51},
+    {"name": "ordAtInfty_basis_eq_min", "lines": 43},
+    {"name": "intDegree_ofFractionRing_eq_of_surj", "lines": 38},
+    {"name": "coordinateRing_const_of_ordAtInfty_nonneg", "lines": 32},
+    {"name": "ordAtInftyVal_add_le_max", "lines": 31}
+  ],
+  "unused": [
+    "ordAtInfty_sub_eq_of_lt",
+    "ordAtInfty_exists_const_sub_pos_of_fracPolyX_nonneg",
+    "ordAtInftyValuation_surjective",
+    "ordAtInftyValuation_ne_zero",
+    "ordAtInftyValuation_le_one_of_ordAtInfty_nonneg",
+    "ordAtInfty_div_of_ord_eq",
+    "ordAtInfty_pow_of_ord_eq",
+    "mem_localRingAt_image_iff_pointValuation_le_one",
+    "finite_zeros_poles",
+    "const_of_no_poles_of_valuation_of_ordAtInfty",
+    "const_of_isIntegral_polynomialX_of_ordAtInfty",
+    "ordAtInfty_algebraMap_F_nonzero",
+    "ordAtInfty_basis_polynomial_of_both_ne_zero"
+  ],
+  "keyApi": [
+    "ordAtInfty_of_ne",
+    "ordAtInfty_algebraMap_fracPolyX_of_ne_zero",
+    "ordAtInftyVal_eq_exp_neg_ordAtInfty",
+    "ordAtInfty_mul",
+    "ordAtInfty_add_ge_min",
+    "ordAtInfty_basis_eq_min",
+    "ordAtInfty_algebraMap_coordinateRing",
+    "const_of_no_poles_of_coordinateRing",
+    "algebraMap_smul_basis_eq"
+  ],
+  "scratchWritten": true,
+  "notes": "This file is the central Infinity.lean infrastructure module: it algebraically defines ordAtInfty via the algebra norm intDegree, proves the classical values ord(x)=-2, ord(y)=-3, the non-archimedean inequality, algebraic Liouville, Bezout-finiteness (Silverman II.1.2 D-004), and packages ordAtInfty as a multiplicative Valuation. It is heavily imported (23+ downstream files). The longest proof (ordAtInfty_basis_fracPolyX_of_both_ne_zero, 152 lines) is the FractionRing-coefficient non-archimedean min formula, which reduces to the polynomial case via IsLocalization.surj witnesses."
+}

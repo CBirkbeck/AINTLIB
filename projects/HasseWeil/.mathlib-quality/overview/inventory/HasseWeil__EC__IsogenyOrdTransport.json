@@ -1,0 +1,22 @@
+{
+  "path": "./HasseWeil/EC/IsogenyOrdTransport.lean",
+  "totalDecls": 4,
+  "defs": 0,
+  "lemmas": 4,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "Valuation.isEquiv_eq_of_surjective_withZeroInt", "lines": 44}
+  ],
+  "unused": [
+    "pointValuation_surjective'",
+    "Valuation.isEquiv_eq_of_surjective_withZeroInt"
+  ],
+  "keyApi": [
+    "comap_pointValuation_eq_of_isEquiv_of_ord_eq_one",
+    "pointValuation_surjective'"
+  ],
+  "scratchWritten": true,
+  "notes": "Small clean leaf file (168 lines, 4 theorems, 0 sorries). `Valuation.isEquiv_eq_of_surjective_withZeroInt` and `pointValuation_surjective'` are deliberate Fintype-free re-derivations of results in `Hasse/L6Witnesses.lean` to avoid `[Fintype K]` dependencies. `comap_pointValuation_eq_of_isEquiv_of_ord_eq_one` is the main export, heavily used across `SamePlace.lean`, `DivisorPullback.lean`, `MulByIntSamePlace.lean`, and others."
+}

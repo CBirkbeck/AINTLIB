@@ -1,0 +1,18 @@
+{
+  "path": "./HasseWeil/Verschiebung/Construction.lean",
+  "totalDecls": 5,
+  "defs": 3,
+  "lemmas": 2,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [],
+  "keyApi": [
+    "frobeniusIsog_rangeEquiv",
+    "mulByInt_q_pullback_restricted",
+    "verschiebungPullback_of_witness"
+  ],
+  "scratchWritten": true,
+  "notes": "Minimal 5-declaration file constructing the Verschiebung pullback V* as pi*^{-1} composed with [q]* restricted to Im(pi*), parametric on a Session 3 inclusion witness. No sorries, no maxHeartbeats overrides, no proofs over 30 lines. All declarations are consumed by downstream files (IsDual.lean and OpenLemmaPrimitives.lean)."
+}

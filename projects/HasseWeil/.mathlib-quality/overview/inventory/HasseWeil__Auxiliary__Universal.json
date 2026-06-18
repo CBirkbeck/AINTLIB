@@ -1,0 +1,33 @@
+{
+  "path": "./HasseWeil/Auxiliary/Universal.lean",
+  "totalDecls": 44,
+  "defs": 8,
+  "lemmas": 26,
+  "instances": 2,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "some_eq_some_iff",
+    "Poly.two_ne_zero",
+    "polyToField_apply",
+    "Jacobian.point",
+    "pointedCurve_a₁",
+    "pointedCurve_a₂",
+    "pointedCurve_a₃",
+    "pointedCurve_a₄",
+    "pointedCurve_a₆",
+    "curvePoly",
+    "curveField_eq"
+  ],
+  "keyApi": [
+    "curve",
+    "polyToField",
+    "pointedCurve",
+    "polyEval",
+    "ringEval",
+    "specialize"
+  ],
+  "scratchWritten": true,
+  "notes": "The file builds the universal Weierstrass curve specialization machinery (ported from LutzNagell) used heavily by DivisionPolynomial.lean and algebraMap_poly_injective which is the most-used declaration across the wider project. There is one non-heartbeats set_option (backward.isDefEq.respectTransparency false, no comment) before algebraMap_poly_injective. No sorries, no long proofs, all declarations are axiom-clean."
+}

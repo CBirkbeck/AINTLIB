@@ -1,0 +1,34 @@
+{
+  "path": "./HasseWeil/DualIsogeny.lean",
+  "totalDecls": 21,
+  "defs": 2,
+  "lemmas": 19,
+  "instances": 0,
+  "sorries": ["exists_dual"],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "dual_add_of_trace_witnesses", "lines": 32}
+  ],
+  "unused": [
+    "exists_dual_iff_constructor",
+    "isogDual_comp_self_of_witness",
+    "self_comp_isogDual_of_witness",
+    "degree_dual_of_witness",
+    "isogDual_isogDual",
+    "isogDual_add_of_sum_dual",
+    "dual_add_of_trace_witnesses",
+    "dual_add_of_sum_witnesses",
+    "isogDual_mulByInt_of_comp",
+    "isogTrace_eq_dual",
+    "isogDual_comp_self_apply"
+  ],
+  "keyApi": [
+    "IsDualOf",
+    "exists_dual",
+    "isogDual",
+    "isogDual_comp_self",
+    "isogDual_unique"
+  ],
+  "scratchWritten": true,
+  "notes": "One keystone sorry (`exists_dual`, Silverman III.6.1) gates all `isogDual`-based theorems transitively; the file carefully provides witness-parametric (`exists_dual`-free) alternatives for `degree_dual_of_witness`, `isogDual_comp_self_of_witness`, `dual_add_of_trace_witnesses`, and `dual_add_of_sum_witnesses`. The majority of top-level declarations are unused within this file, serving as API for external consumers (DegreeQuadraticForm, GapSpines, MulByIntDual, Verschiebung/IsDual, etc.)."
+}

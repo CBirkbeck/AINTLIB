@@ -1,0 +1,41 @@
+{
+  "path": "./HasseWeil/BridgeMulByInt.lean",
+  "totalDecls": 43,
+  "defs": 0,
+  "lemmas": 43,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "localExpand_algebraMap_polynomial", "lines": 52},
+    {"name": "localExpand_basis_decomp", "lines": 34},
+    {"name": "preΨ_u_eq_ΨSq_sq_mul_alpha_star_u", "lines": 50},
+    {"name": "two_mulByInt_y_ΨSq_sq_eq", "lines": 37},
+    {"name": "localExpand_u_gen_orderTop", "lines": 55},
+    {"name": "localExpand_u_gen_leadingCoeff", "lines": 46},
+    {"name": "localExpand_mulByInt_y_orderTop_of_rhs", "lines": 56},
+    {"name": "localExpand_mulByInt_y_leadingCoeff_of_rhs", "lines": 45},
+    {"name": "localExpand_rhs_two_mulByInt_y_ΨSq_sq_orderTop", "lines": 41},
+    {"name": "localExpand_rhs_two_mulByInt_y_ΨSq_sq_leadingCoeff", "lines": 40},
+    {"name": "coeff_one_formalIsogenySeries_mulByInt_of_witnesses", "lines": 72},
+    {"name": "coeff_one_formalIsogenySeries_mulByInt", "lines": 32}
+  ],
+  "unused": [
+    "localExpand_basis_decomp",
+    "localExpand_inner_add_mul_formalY_orderTop",
+    "localExpand_Φ_ff_ne_zero",
+    "two_ls_ne_zero",
+    "omegaPullbackCoeff_eq_formalIsogenyLeading_of_mulByInt"
+  ],
+  "keyApi": [
+    "localExpand_algebraMap_polynomial",
+    "localExpand_const",
+    "localExpand_ΨSq_ff_orderTop",
+    "orderTop_single_zero_mul",
+    "localExpand_preΨ_u_gen_orderTop",
+    "localExpand_a1_Φ_ΨSq_orderTop_ge",
+    "localExpand_a3_ΨSq_sq_orderTop_ge"
+  ],
+  "scratchWritten": true,
+  "notes": "Self-contained Laurent-series computation file proving T-IV-BRIDGE-001 for [n] (Silverman IV.2.3), with no sorry and no maxHeartbeats overrides. The dominant design pattern is witness-parametric decomposition: `_of_rhs` private lemmas isolate the orderTop/leadingCoeff computation, then public lemmas assemble them. `two_ls_ne_zero` is a dead-code candidate within the file (defined but never called)."
+}

@@ -1,0 +1,22 @@
+{
+  "path": "./HasseWeil/Curves/NoFinitePolesBridge.lean",
+  "totalDecls": 12,
+  "defs": 3,
+  "lemmas": 9,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "pointMinusOPrincipalEqZero_unconditional",
+    "AddHomProperty_of_miller_divZeroReduce",
+    "picZeroIsoE_baseChange_of_AFInputs"
+  ],
+  "keyApi": [
+    "smoothPointToHeightOne",
+    "noFinitePolesBridge_unconditional",
+    "pointValuation_eq_heightOneValuation"
+  ],
+  "scratchWritten": true,
+  "notes": "Bridges the project's ord_P/pointValuation framework with mathlib's HeightOneSpectrum.valuation framework via IsFractionRing.div_surjective + pointValuation_algebraMap_eq_exp_count, discharging NoFinitePolesBridge W fully unconditionally. Three declarations (pointMinusOPrincipalEqZero_unconditional, AddHomProperty_of_miller_divZeroReduce, picZeroIsoE_baseChange_of_AFInputs) are exported to other files but have no in-file callers, and picZeroIsoE_of_AFInputs is the T-III-3-004 (Pic0(E) ≅ E) construction consumed by Miller.lean and OpenLemmaPrimitives.lean."
+}

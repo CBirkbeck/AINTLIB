@@ -1,0 +1,14 @@
+{
+  "path": "./HasseWeil/EC/TranslationEvaluation.lean",
+  "totalDecls": 0,
+  "defs": 0,
+  "lemmas": 0,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "This file contains zero named declarations — it is a pure crystallisation/scratchpad file with five anonymous `example` blocks that type-check existing lemma signatures from Translation.lean and TranslationOrd.lean. It is a candidate for deletion once Helper 2 is formalised in a proper lemma file."
+}

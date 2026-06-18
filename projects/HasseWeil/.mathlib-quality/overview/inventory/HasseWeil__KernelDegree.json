@@ -1,0 +1,18 @@
+{
+  "path": "./HasseWeil/KernelDegree.lean",
+  "totalDecls": 3,
+  "defs": 1,
+  "lemmas": 2,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "frobeniusAlgHom_eq_id",
+    "fiberEquivKer",
+    "card_fiber_eq_card_ker"
+  ],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "The file is never imported by any other Lean file in the project, making all three declarations dead code. Both fiberEquivKer and card_fiber_eq_card_ker are duplicated (with slight variation) in HasseWeil/WeilPairing/Fiber.lean and HasseWeil/EC/IsogenyKernel.lean. Migration ticket T-MIGRATE-014 proposes moving this content to EC/IsogenyFactor.lean."
+}

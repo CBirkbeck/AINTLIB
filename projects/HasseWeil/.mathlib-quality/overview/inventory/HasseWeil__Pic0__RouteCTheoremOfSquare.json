@@ -1,0 +1,25 @@
+{
+  "path": "./HasseWeil/Pic0/RouteCTheoremOfSquare.lean",
+  "totalDecls": 15,
+  "defs": 0,
+  "lemmas": 0,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "picDual_add_of_classMap_mulHom",
+    "classMap_toClass_some_eq_map",
+    "classMap_mul_of_ideal_class_mul",
+    "classMap_mul_of_point",
+    "picDual_eq_rV_sub_s_of_classMap_mul",
+    "map_xyIdeal_eq_prod_primesOver",
+    "htrace_dual_genuineIsogSmulSub_of_classMap_mul"
+  ],
+  "keyApi": [
+    "picDual_add_of_classMap_mul",
+    "map_comorphism_mem_nonZeroDivisors"
+  ],
+  "scratchWritten": true,
+  "notes": "All 15 declarations are theorems; no defs, instances, or sorries. The file is a purely structural reduction layer that transports the dual-additivity problem (picDual(α₁⊞α₂) = picDual α₁ + picDual α₂) through κ-conjugation to a class-group product identity, then unfolds to mk0/Ideal.map level (Phase 1.5) and ships the Dedekind fibre factorisation (Phase 5); no sorry, no maxHeartbeats, no proofs exceed 16 lines. Seven declarations have no proof-level callers within the file, serving as forward-looking infrastructure for a future Abel/theorem-of-the-square discharge."
+}

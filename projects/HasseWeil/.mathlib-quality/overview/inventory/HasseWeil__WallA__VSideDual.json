@@ -1,0 +1,20 @@
+{
+  "path": "./HasseWeil/WallA/VSideDual.lean",
+  "totalDecls": 8,
+  "defs": 3,
+  "lemmas": 5,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "isogeny_isGenuine",
+    "verschiebungV_toAddMonoidHom",
+    "genuineIsogSmulSub_degree_eq_signed_closed"
+  ],
+  "keyApi": [
+    "verschiebungV"
+  ],
+  "scratchWritten": true,
+  "notes": "Short scaffold file (206 lines, 8 decls) that constructs the V-side genuine isogeny betaDualV = r·V − s and reduces the Wall-A degree keystone to three named standing residuals (trace relation, double-Vieta pullback identity, IsDualOf β_dual β). The main theorem genuineIsogSmulSub_degree_eq_signed_closed has a 20-line signature but only an 8-line proof body delegating entirely to GapSpines.genuineIsogSmulSub_degree_eq_signed_of_full_pivot_chain. No sorries, no set_option, no long proofs; isogeny_isGenuineWith_pointMap is the one declaration consumed by other files (SeparableWitnesses, SeparableTransportBridge)."
+}

@@ -1,0 +1,38 @@
+{
+  "path": "./HasseWeil/Curves/SmoothPointPrime.lean",
+  "totalDecls": 44,
+  "defs": 13,
+  "lemmas": 30,
+  "instances": 1,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "smoothPointEquivHeightOneSpectrum_apply_asIdeal",
+    "Ideal.toHeightOneFinsuppNonzero_mul",
+    "Ideal.toHeightOneFinsuppNonzero_one",
+    "Ideal.fromHeightOneFinsupp_zero",
+    "Ideal.fromHeightOneFinsupp_add",
+    "Ideal.fromHeightOneFinsupp_toHeightOneFinsuppNonzero",
+    "FractionalIdeal.fromHeightOneFinsupp_zero",
+    "FractionalIdeal.fromHeightOneFinsupp_add",
+    "FractionalIdeal.count_fromHeightOneFinsupp",
+    "Ideal.fromHeightOneFinsupp_ne_zero",
+    "FractionalIdeal.count_spanSingleton_mk'",
+    "FractionalIdeal.principalToHeightOneFinsuppMonoidHom_apply",
+    "FractionalIdeal.principalImageSubgroup_normal",
+    "ClassGroup.toFinsuppQuotient",
+    "ClassGroup.toFinsuppMulEquiv",
+    "FractionalIdeal.classToFinsuppMulEquiv_mk",
+    "FractionalIdeal.unitsToHeightOneFinsuppMulEquiv_symm_apply"
+  ],
+  "keyApi": [
+    "FractionalIdeal.unitsToHeightOneFinsupp",
+    "FractionalIdeal.unitsToHeightOneFinsuppMonoidHom",
+    "FractionalIdeal.principalImageSubgroup",
+    "FractionalIdeal.classToFinsuppQuotient",
+    "FractionalIdeal.unitsToHeightOneFinsupp_apply"
+  ],
+  "scratchWritten": true,
+  "notes": "Two distinct sections: a 4-declaration SmoothPoint ↔ HeightOneSpectrum bijection bridge (delegating to NormValuation.lean), and a large A2–A4 Dedekind ideal factorisation / ClassGroup ≃ Finsupp-quotient development (40 declarations, no sorry, no maxHeartbeats). Many declarations (17 of 44) are unused within the file and appear to be pre-built infrastructure for downstream Pic⁰ chain consumers. The helper Finsupp.prod_eq_finprod_of_zero_eq_one is flagged in file comments as a potential mathlib upstream contribution."
+}

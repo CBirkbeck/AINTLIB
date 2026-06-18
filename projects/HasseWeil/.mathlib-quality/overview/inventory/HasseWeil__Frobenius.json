@@ -1,0 +1,28 @@
+{
+  "path": "./HasseWeil/Frobenius.lean",
+  "totalDecls": 17,
+  "defs": 2,
+  "lemmas": 15,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "ordAtInfty_frobeniusIsog_pullback_x_gen_sub_x_gen",
+    "ordAtInfty_frobeniusIsog_pullback_y_gen_sub_y_gen",
+    "frobeniusIsog_mulByInt_pullback_comm",
+    "frobeniusIsog_universal_commute_isog",
+    "frobeniusIsog_pullback_eq_pow_pow",
+    "frobeniusIsog_pullback_range",
+    "frobeniusIsog_pullback_pow_mem",
+    "mulByInt_pullback_pow_witness_iff_mem_frobenius_range"
+  ],
+  "keyApi": [
+    "frobeniusIsog",
+    "frobeniusIsog_pullback_apply",
+    "frobeniusIsog_pullback_universal_commute",
+    "frobeniusIsog_pullback_mem_iff"
+  ],
+  "scratchWritten": true,
+  "notes": "A clean, sorry-free file with zero heartbeat overrides; the ordAtInfty group (4 theorems) and the Verschiebung infrastructure group (pullback_range, pullback_pow_mem, mulByInt_pullback_pow_witness_iff, frobeniusIsog_pullback_eq_pow_pow, frobeniusIsog_mulByInt_pullback_comm, frobeniusIsog_universal_commute_isog) are parked/forward-looking with no external callers found in the project, while frobeniusIsog, frobeniusIsog_pullback_apply, frobeniusIsog_degree, and frobeniusIsog_pullback_universal_commute are load-bearing API used extensively across GapSpines, Hasse/*, Verschiebung/*, and WeilPairing/*."
+}

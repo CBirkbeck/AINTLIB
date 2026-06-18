@@ -1,0 +1,50 @@
+{
+  "path": "./HasseWeil/Curves/CurveMap.lean",
+  "totalDecls": 36,
+  "defs": 13,
+  "lemmas": 23,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [
+    "degree_comp: 800000 [comment: 'The tower law for FunctionField needs extra heartbeats']",
+    "sum_ramificationIdx_mul_inertiaDeg_eq_degree: 1600000 [NO-COMMENT]",
+    "sum_ramificationIdx_mul_inertiaDeg_eq_degree (synthInstance): 200000 [NO-COMMENT]"
+  ],
+  "longProofs": [
+    {"name": "sum_ramificationIdx_mul_inertiaDeg_eq_degree", "lines": 31}
+  ],
+  "unused": [
+    "id_pullback",
+    "comp_pullback",
+    "comp_assoc",
+    "id_comp",
+    "comp_id",
+    "degree_id",
+    "degree_comp",
+    "IsSeparable",
+    "IsPurelyInseparable",
+    "ramificationIndex_id",
+    "ramificationIndex_comp",
+    "ramificationIndex_ne_top",
+    "ramificationIndexℤ_id",
+    "ramificationIndexℤ_comp",
+    "isUnramifiedAt_iff_uniformizer_pullback",
+    "id_isUnramifiedAt",
+    "one_le_ramificationIndex_of_pullback_pointValuation_lt_one",
+    "pushforward_pullback",
+    "pushforward_mul",
+    "pushforward_one",
+    "fiber_card_eq_degree_iff_all_ramificationIndexℤ_one",
+    "pullback_surjective_of_degree_one",
+    "sum_ramificationIdx_mul_inertiaDeg_eq_degree"
+  ],
+  "keyApi": [
+    "CurveMap.toAlgebra",
+    "CurveMap.degree",
+    "CurveMap.ramificationIndex",
+    "CurveMap.comp",
+    "CurveMap.id"
+  ],
+  "scratchWritten": true,
+  "notes": "Infrastructure file defining the curve-map API (Silverman II.2) via function-field pullback: degree (finrank), separable/inseparable degree, ramification index (WithTop ℤ and ℤ variants), unramifiedness, pushforward (norm map), CoordHom witness, and Silverman II.2.6(a)/II.2.7. No sorries anywhere; two heartbeat bumps are needed for tower-law and scalar-tower synthesis in degree_comp and sum_ramificationIdx_mul_inertiaDeg_eq_degree. Almost all declarations are locally unused (leaf API for external consumers)."
+}

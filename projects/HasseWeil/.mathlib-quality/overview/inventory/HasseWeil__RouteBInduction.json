@@ -1,0 +1,29 @@
+{
+  "path": "./HasseWeil/RouteBInduction.lean",
+  "totalDecls": 8,
+  "defs": 0,
+  "lemmas": 8,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "omegaPullbackCoeff_addIsog_id", "lines": 35 },
+    { "name": "omegaPullbackCoeff_addIsog_pair", "lines": 35 },
+    { "name": "omegaPullbackCoeff_mulByInt_succ", "lines": 38 }
+  ],
+  "unused": [
+    "omegaPullbackCoeff_addIsog_id",
+    "omegaPullbackCoeff_addIsog_pair",
+    "omegaPullbackCoeff_mulByInt_succ",
+    "omegaPullbackCoeff_mulByInt_ge_two",
+    "omegaPullbackCoeff_mulByInt_p_eq_zero_routeB",
+    "omegaPullbackCoeff_mulByInt_card_eq_zero"
+  ],
+  "keyApi": [
+    "omegaPullbackCoeff_mulByInt_routeB",
+    "omegaPullbackCoeff_mulByInt_pos",
+    "omegaPullbackCoeff_mulByInt_neg"
+  ],
+  "scratchWritten": true,
+  "notes": "Pure theorem file (8 theorems, 0 defs/instances), no sorry, no maxHeartbeats overrides. Implements the complete Route B induction for Silverman III.5.3 (a_{[n]} = n) EDS-Wronskian-free and formal-group-free, building on SilvermanIV14 (RB-ω4) and MulByIntAddRecurrence (RB-ID recurrence). The three proofs longer than 30 lines all follow the same pattern: identify pullbacks via addIsog_pullback, unfold alpha_star_u, apply kaehler_D_addPullback lemma, and conclude by omegaPullbackCoeff_unique."
+}

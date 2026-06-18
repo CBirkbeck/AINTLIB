@@ -1,0 +1,23 @@
+{
+  "path": "./HasseWeil/FormalGroupCorrespondence.lean",
+  "totalDecls": 4,
+  "defs": 0,
+  "lemmas": 4,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [
+    "kaehler_rank_one: 1600000 [NO-COMMENT]"
+  ],
+  "longProofs": [
+    {"name": "kaehler_rank_one", "lines": 157}
+  ],
+  "unused": [
+    "formalMulByInt_const_zero",
+    "pullback_coeff_eq_formal_coeff_mulByInt"
+  ],
+  "keyApi": [
+    "kaehler_rank_one"
+  ],
+  "scratchWritten": true,
+  "notes": "kaehler_rank_one is a heavily used key API lemma (5+ external callers) proving Ω[K(E)/F] has rank 1 via a 157-line Leibniz/Weierstrass induction; it carries an unexplained maxHeartbeats 1600000. The two formal-group theorems (formalMulByInt_const_zero, pullback_coeff_eq_formal_coeff_mulByInt) appear to be unused documentation aliases — the latter is literally a one-line wrapper around formalMulByInt_linear_coeff with identical statement, and both lack any external callers."
+}

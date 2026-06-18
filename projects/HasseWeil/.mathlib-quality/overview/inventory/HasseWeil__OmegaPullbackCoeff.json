@@ -1,0 +1,39 @@
+{
+  "path": "./HasseWeil/OmegaPullbackCoeff.lean",
+  "totalDecls": 37,
+  "defs": 3,
+  "lemmas": 34,
+  "instances": 0,
+  "sorries": ["wronskian_Φ_ΨSq_nat"],
+  "maxHeartbeats": [
+    "omegaPullbackCoeff: 400000 [NO-COMMENT]",
+    "wronskian_Φ_ΨSq_three: 6400000 [NO-COMMENT]",
+    "wronskian_Φ_ΨSq_four: 6400000 [NO-COMMENT]",
+    "divPoly_wronskian_identity_of_poly: 3200000 [NO-COMMENT]",
+    "divPoly_wronskian_identity_of_omega: 3200000 [comment: Leibniz/chain-rule unfolding and field_simp denominator clearings push the default budget]"
+  ],
+  "longProofs": [
+    {"name": "wronskian_Φ_ΨSq_three", "lines": 33},
+    {"name": "wronskian_Φ_ΨSq_four", "lines": 40},
+    {"name": "preΨ_two_mul_u_eq_ΨSq_sq_mul_alpha_star_u", "lines": 38},
+    {"name": "divPoly_wronskian_identity_of_poly", "lines": 111},
+    {"name": "omegaPullbackCoeff_mulByInt_of_poly", "lines": 90},
+    {"name": "divPoly_wronskian_identity_of_omega", "lines": 80}
+  ],
+  "unused": [
+    "wronskian_Φ_ΨSq_neg_one",
+    "divPoly_wronskian_identity",
+    "omegaPullbackCoeff_mulByInt",
+    "divPoly_wronskian_identity_of_omega"
+  ],
+  "keyApi": [
+    "alpha_star_u",
+    "ψ_ff_sq_eq",
+    "ΨSq_ff_ne_zero'",
+    "omegaPullbackCoeff_spec",
+    "divPoly_wronskian_identity_of_poly",
+    "D_poly_eval"
+  ],
+  "scratchWritten": true,
+  "notes": "The central sorry is in wronskian_Φ_ΨSq_nat (m ≥ 5 branch), requiring the EDS addition formula (Ward's relation) which is absent from mathlib; an axiom-clean alternative via Route-B chord recurrence in RouteBInduction.lean is explicitly documented. The parametrized design (hpoly / homega) cleanly separates the sorry-tainted polynomial Wronskian from the axiom-clean base cases and the reverse direction, with divPoly_wronskian_identity_of_omega and preΨ_two_mul_u_eq_ΨSq_sq_mul_alpha_star_u being axiom-clean bridges. Several public theorems (divPoly_wronskian_identity, omegaPullbackCoeff_mulByInt, divPoly_wronskian_identity_of_omega) are unused within this file, serving only as exports for downstream files."
+}

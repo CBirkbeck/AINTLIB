@@ -1,0 +1,20 @@
+{
+  "path": "./HasseWeil/Pic0/RouteCAdditivity.lean",
+  "totalDecls": 6,
+  "defs": 0,
+  "lemmas": 6,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "htrace_dual_iff_picDual_eq_rV_sub_s",
+    "htrace_dual_of_picDual_additive",
+    "picDual_eq_rV_sub_s_of_additive"
+  ],
+  "keyApi": [
+    "htrace_dual_of_picDual_eq"
+  ],
+  "scratchWritten": true,
+  "notes": "Thin reduction-chain file: all 6 declarations are theorems, 3 are one-line re-exports/delegations to PicDual.lean, and no sorry, no set_option maxHeartbeats, no instances. The module docstring mentions a third engine 'htrace_dual_of_picDual_frobeniusFamily_additive' but this is NOT defined in the file — it exists only in the docstring description of planned content."
+}

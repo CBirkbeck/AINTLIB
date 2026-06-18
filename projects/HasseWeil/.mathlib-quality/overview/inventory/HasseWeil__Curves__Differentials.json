@@ -1,0 +1,43 @@
+{
+  "path": "./HasseWeil/Curves/Differentials.lean",
+  "totalDecls": 59,
+  "defs": 3,
+  "lemmas": 44,
+  "instances": 12,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    { "name": "pullbackKaehler_injective_of_omegaPullbackCoeff_ne_zero", "lines": 32 },
+    { "name": "isogeny_mapBaseChange_surjective_of_omegaCoeff_ne_zero", "lines": 46 },
+    { "name": "isogeny_omegaCoeff_ne_zero_of_isSeparable", "lines": 99 }
+  ],
+  "unused": [
+    "d_add",
+    "d_mul",
+    "d_algebraMap",
+    "d_zero",
+    "d_one",
+    "d_neg",
+    "d_sub",
+    "d_pow",
+    "d_inv",
+    "d_zpow",
+    "d_smul",
+    "isogeny_smul_assoc_identity",
+    "isogeny_finiteDimensional_of_isAlgebraic_essFiniteType",
+    "isogeny_isAlgebraic_of_finite_intermediate",
+    "isSeparable_iff_omegaPullbackCoeff_ne_zero_of_witnesses",
+    "isSeparable_iff_pullbackKaehler_injective_of_witnesses",
+    "isogeny_mapBaseChange_one_tmul_D",
+    "isSeparable_iff_omegaPullbackCoeff_ne_zero_of_finiteDim",
+    "isogeny_isSeparable_of_pullbackKaehler_injective_witnesses",
+    "isogeny_degree_pos",
+    "isSeparable_iff_omegaPullbackCoeff_ne_zero"
+  ],
+  "keyApi": [
+    "pullbackKaehler_injective_iff_omegaPullbackCoeff_ne_zero",
+    "isogeny_isSeparable_of_subsingleton_kaehler_finiteDimensional"
+  ],
+  "scratchWritten": true,
+  "notes": "Discharges T-II-4-001 (Differentials abbrev + d_* API) and T-II-4-004 (IsSeparable iff omegaPullbackCoeff ≠ 0, Silverman II.4.2(c)) fully unconditionally — no sorry, no maxHeartbeats. The IsogenyAlgebraSource type-synonym pattern is the key engineering device, breaking OreLocalization vs alpha.toAlgebra defeq ambiguity so that IsAlgebraic fires via trdeg additivity. Several intermediate scaffold theorems (isogeny_finiteDimensional_of_isAlgebraic_essFiniteType, isogeny_isAlgebraic_of_finite_intermediate, isSeparable_iff_*_of_witnesses, isogeny_degree_pos) appear unused within the file — they are likely staged stepping-stones or intended for external consumers."
+}

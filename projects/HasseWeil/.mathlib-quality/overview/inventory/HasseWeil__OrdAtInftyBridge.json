@@ -1,0 +1,32 @@
+{
+  "path": "./HasseWeil/OrdAtInftyBridge.lean",
+  "totalDecls": 19,
+  "defs": 1,
+  "lemmas": 18,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [
+    {"name": "ordAtInfty_mulByInt_x_neg", "lines": 35},
+    {"name": "exists_ordAtInfty_mulByInt_x_eq_even_le_neg_two", "lines": 34}
+  ],
+  "unused": [
+    "W_smooth_toAffine",
+    "W_smooth_functionField",
+    "ordAtInfty_algebraMap_F_nonzero",
+    "ordAtInfty_x_gen_pow",
+    "ordAtInfty_y_gen_pow",
+    "mulByInt_x_ne_zero",
+    "ordAtInfty_mulByInt_x",
+    "exists_ordAtInfty_mulByInt_x_eq_even_le_neg_two"
+  ],
+  "keyApi": [
+    "W_smooth",
+    "Φ_ff_eq_algebraMap_polynomial",
+    "Φ_ff_ne_zero",
+    "ordAtInfty_Φ_ff",
+    "ΨSq_ff_eq_algebraMap_polynomial"
+  ],
+  "scratchWritten": true,
+  "notes": "Thin bridge file (334 lines, 19 decls) wrapping W.toAffine as a SmoothPlaneCurve to re-export ordAtInfty facts for x_gen, y_gen, Phi_ff, PsiSq_ff, and mulByInt_x. The two longest proofs are the unconditional inseparable pole bounds for mulByInt_x (ordAtInfty_mulByInt_x_neg and exists_ordAtInfty_mulByInt_x_eq_even_le_neg_two), added to handle the p|r pencil regime. No sorries, no set_option maxHeartbeats; heavy use of WithTop Z cast arithmetic via push_cast/rfl."
+}

@@ -1,0 +1,19 @@
+{
+  "path": "./HasseWeil/WeilPairing/Assembly.lean",
+  "totalDecls": 3,
+  "defs": 0,
+  "lemmas": 3,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": [
+    "qf_nonneg_of_frob_det_residual_both",
+    "qf_nonneg_of_pairing_scaling"
+  ],
+  "keyApi": [
+    "qf_nonneg_of_frob_det_residual"
+  ],
+  "scratchWritten": true,
+  "notes": "Pure 99-line assembly file with three sorry-free short-proof theorems composing Discriminant.lean (qf_nonneg_of_nonneg_on_coprime/_both) with Reduction.lean (deg_eq_of_frob_det_data) and PairingDet.lean (frob_det_data_of_scaling/symJ). No maxHeartbeats, no instances, no defs; qf_nonneg_of_pairing_scaling is the intended top-level external API export for Weil-pairing scaling witnesses."
+}

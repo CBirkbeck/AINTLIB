@@ -1,0 +1,14 @@
+{
+  "path": "./HasseWeil/EC/MulByIntDual.lean",
+  "totalDecls": 1,
+  "defs": 0,
+  "lemmas": 1,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": ["isogDual_mulByInt"],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "Single-theorem file proving Silverman III.6.2(d): the dual isogeny of [n] equals [n], using isogDual_mulByInt_of_comp + mulByInt_comp_eq_mul + mulByInt_degree. No file in the repo imports this module, so isogDual_mulByInt is a dead-code candidate at the module level (though it may be intended as a standalone result). No sorries, no maxHeartbeats overrides, proof is 6 lines."
+}

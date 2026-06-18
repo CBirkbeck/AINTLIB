@@ -1,0 +1,23 @@
+{
+  "path": "./HasseWeil/Verschiebung/DivPolyExpand.lean",
+  "totalDecls": 6,
+  "defs": 0,
+  "lemmas": 6,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [
+    "Φ_three_mem_expand_three_charP (line 117): 1000000 [NO-COMMENT]"
+  ],
+  "longProofs": [
+    { "name": "Φ_three_mem_expand_three_charP", "lines": 40 }
+  ],
+  "unused": [
+    "Φ_two_mem_expand_two_charP",
+    "ΨSq_two_mem_expand_two_charP",
+    "ΨSq_three_mem_expand_three_charP",
+    "Φ_three_mem_expand_three_charP"
+  ],
+  "keyApi": [],
+  "scratchWritten": true,
+  "notes": "Leaf file providing generic-CommRing base cases (q=2, q=3) of Silverman III.6.2; all six theorems are one-line specialisations consumed by QthRoots.lean and Route2Universal.lean. The largest proof (Φ_three_mem_expand_three_charP, 40 lines) uses a sympy-verified linear_combination witness and requires maxHeartbeats 1000000. No sorries, no mathlib overlap beyond WeierstrassCurve.b_relation."
+}

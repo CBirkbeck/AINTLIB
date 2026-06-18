@@ -1,0 +1,43 @@
+{
+  "path": "./HasseWeil/FormalGroup/Differential.lean",
+  "totalDecls": 50,
+  "defs": 7,
+  "lemmas": 43,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [
+    "coeff_10_prod_orthogonal: 800000 [NO-COMMENT]",
+    "coeff_10_rhs: 3200000 [NO-COMMENT]",
+    "antidiag_term_vanish: 1600000 [NO-COMMENT]",
+    "coeff_10_FG_pow: 6400000 [NO-COMMENT]",
+    "coeff_10_lhs: 6400000 [NO-COMMENT]"
+  ],
+  "longProofs": [
+    { "name": "FormalGroup.dX_at_zero_constantCoeff", "lines": 38 },
+    { "name": "FormalGroup.invariantDiff_chain", "lines": 41 },
+    { "name": "FormalGroup.invariantDiff_translation", "lines": 41 },
+    { "name": "coeff_subst_runit_eq", "lines": 26 },
+    { "name": "coeff_subst_X0", "lines": 24 },
+    { "name": "coeff_subst_X1", "lines": 24 },
+    { "name": "finsum_fin2_reduce_full", "lines": 26 },
+    { "name": "coeff_10_prod_orthogonal", "lines": 57 },
+    { "name": "coeff_10_rhs", "lines": 49 },
+    { "name": "coeff_10_FG_pow", "lines": 209 },
+    { "name": "coeff_10_lhs", "lines": 77 },
+    { "name": "runit_at_X0", "lines": 41 },
+    { "name": "subst_zero_X0_pderiv0", "lines": 86 },
+    { "name": "subst_zero_F_pderiv0_eq", "lines": 49 }
+  ],
+  "unused": [
+    "FormalGroup.invariantDiff_constantCoeff",
+    "FormalGroup.dX_at_zero_chain"
+  ],
+  "keyApi": [
+    "FormalGroup.dX_at_zero",
+    "FormalGroup.dX_at_zero_constantCoeff",
+    "FormalGroup.dX_at_zero_mul_invariantDiff",
+    "FormalGroupHom.hasSubst"
+  ],
+  "scratchWritten": true,
+  "notes": "The file formalizes Silverman IV.4 in two independent blocks: (1) Corollary 4.3 (pullback of invariant differential under a formal group hom), proved by a coefficient-level computation via several private helper lemmas about multivariate finsupp coefficients; (2) Proposition 4.2 (translation invariance), proved by differentiating the associativity law in three variables and specializing to X=0 via a `shift3to2` substitution. The five `set_option maxHeartbeats` increases (up to 6.4M) on the central inductive coefficient lemma `coeff_10_FG_pow` (~209 lines) are the dominant computational cost; no sorries are present. The two public outputs `invariantDiff_chain` and `invariantDiff_translation` are consumed downstream by `FormalGroup/InvariantDiff.lean` and `FormalGroup/Logarithm.lean` respectively."
+}

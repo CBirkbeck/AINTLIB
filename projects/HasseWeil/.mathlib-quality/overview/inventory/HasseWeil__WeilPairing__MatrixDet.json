@@ -1,0 +1,14 @@
+{
+  "path": "./HasseWeil/WeilPairing/MatrixDet.lean",
+  "totalDecls": 3,
+  "defs": 0,
+  "lemmas": 3,
+  "instances": 0,
+  "sorries": [],
+  "maxHeartbeats": [],
+  "longProofs": [],
+  "unused": ["det_one_sub_fin_two"],
+  "keyApi": ["det_smul_sub_smul_one_fin_two"],
+  "scratchWritten": true,
+  "notes": "Pure commutative-ring linear algebra with no elliptic-curve content; all three theorems are consumed by Reduction.lean. The file is a self-contained 60-line leaf. det_one_sub_fin_two is marked as unused within this file but is used by Reduction.lean."
+}
