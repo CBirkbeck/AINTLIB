@@ -573,9 +573,8 @@ theorem fg_topologicalClosure_isClosed
     exact set_pi_mem_nhds Set.finite_univ (fun i _ => by simpa using hW_nhds)
   set Ω : Set ↥Nbar := π '' Wpi with hΩ_def
   have hΩ_nhds : Ω ∈ nhds (0 : ↥Nbar) := by
-    have h0 : π (0 : Fin n → A) = 0 := map_zero π
     have := hπ_open.image_mem_nhds (x := (0 : Fin n → A)) hWpi_nhds
-    rwa [h0] at this
+    rwa [map_zero] at this
   -- **Step 3 + 4 + 5**: density extraction + Nakayama in `M ⧸ N` + conclusion.
   -- The quotient map `q : M →ₗ[A] M ⧸ N`.
   -- For each generator `gᵥ`, density gives `m'ᵥ ∈ N'` with `gᵥ - m'ᵥ ∈ Ω`, i.e.
@@ -1098,8 +1097,7 @@ theorem _sub_lemma_L4_3_strict_via_closed_image
       continuous_invFun := continuous_subtype_val.subtype_mk _ }
   have hcomp : Set.rangeFactorization ⇑f = ⇑e ∘ ⇑f.rangeRestrict := by
     funext a
-    apply Subtype.coe_injective
-    rfl
+    exact Subtype.coe_injective rfl
   rw [hcomp]
   exact e.isOpenMap.comp hf_rangeRestrict_open
 
