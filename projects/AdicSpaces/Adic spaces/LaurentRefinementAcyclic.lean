@@ -383,14 +383,12 @@ omit [PlusSubring A] in
 hence its completion `presheafValue D` is also subsingleton. -/
 theorem presheafValue_subsingleton_of_s_eq_zero (D : RationalLocData A)
     (hs : D.s = 0) : Subsingleton (presheafValue D) := by
-  haveI : Subsingleton (Localization.Away D.s) := by
-    apply IsLocalization.subsingleton (M := Submonoid.powers D.s)
-    exact ⟨1, by simp [hs]⟩
+  haveI : Subsingleton (Localization.Away D.s) :=
+    IsLocalization.subsingleton (M := Submonoid.powers D.s) ⟨1, by simp [hs]⟩
   -- 0 = 1 in `Localization.Away D.s` (subsingleton), so 0 = 1 in `presheafValue D`.
-  have h01 : (0 : presheafValue D) = 1 := by
-    rw [← map_zero D.coeRingHom, ← map_one D.coeRingHom,
-      Subsingleton.elim (0 : Localization.Away D.s) 1]
-  exact subsingleton_of_zero_eq_one h01
+  refine subsingleton_of_zero_eq_one (M₀ := presheafValue D) ?_
+  rw [← map_zero D.coeRingHom, ← map_one D.coeRingHom,
+    Subsingleton.elim (0 : Localization.Away D.s) 1]
 
 /-- Separation extracted from `tateAcyclicity`. Handles empty coverings
 directly: when `C.covers = ∅` and `C.base.s = 0`, `presheafValue C.base` is
