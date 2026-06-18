@@ -763,9 +763,8 @@ theorem tateAlgNhd_leftMul_of_principal [IsTateRing A] (P : PairOfDefinition A)
     obtain ⟨b_p, hb_p_mem, hb_p_eq⟩ := hy_coeff p.2
     by_cases hp : p.1 ∈ S
     · -- Bad case: use Sub-task B via `hm_spec`.
-      have hb_lower : b_p ∈ P.I ^ (m_fn p.1) := by
-        have hle : m_fn p.1 ≤ j := hj_ge_m p.1 (hS_finite.mem_toFinset.mpr hp)
-        exact Ideal.pow_le_pow_right hle hb_p_mem
+      have hb_lower : b_p ∈ P.I ^ (m_fn p.1) :=
+        Ideal.pow_le_pow_right (hj_ge_m p.1 (hS_finite.mem_toFinset.mpr hp)) hb_p_mem
       obtain ⟨c, hc_mem, hc_eq⟩ := hm_spec p.1 b_p hb_lower
       refine ⟨c, hc_mem, ?_⟩
       rw [hc_eq, hb_p_eq]
@@ -1269,10 +1268,7 @@ theorem tateAlgNhd_preimage_eq (P : PairOfDefinition A) (n : ℕ) :
   simp only [Set.mem_preimage, SetLike.mem_coe]
   constructor
   · rintro ⟨y, hy, heq⟩
-    have : x = y := by
-      apply_fun (pairSubring P).subtype using Subtype.val_injective
-      exact heq.symm
-    rw [this]; exact hy
+    exact (Subtype.val_injective heq) ▸ hy
   · exact fun hx => ⟨x, hx, rfl⟩
 
 omit [IsTopologicalRing A] in
