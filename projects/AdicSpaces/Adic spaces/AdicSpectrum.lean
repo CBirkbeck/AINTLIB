@@ -45,8 +45,6 @@ following Definition 7.23 of [Wedhorn, *Adic Spaces*].
 
 open Topology Pointwise WithZero
 
-/-! ### Maximal ideals and units in topological rings -/
-
 section MaximalIdealClosed
 
 variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
@@ -55,7 +53,8 @@ variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
 theorem isClosed_of_isMaximal_of_isOpen_units
     (hU : IsOpen {a : A | IsUnit a}) (𝔪 : Ideal A) [𝔪.IsMaximal] :
     IsClosed (𝔪 : Set A) := by
-  rw [← closure_eq_iff_isClosed, ← Ideal.coe_closure]; congr 1
+  rw [← closure_eq_iff_isClosed, ← Ideal.coe_closure]
+  congr 1
   have hne : 𝔪.closure ≠ ⊤ := by
     rw [Ideal.ne_top_iff_one]
     exact fun h1 ↦ (closure_minimal (fun x hx ↦ mt (Ideal.eq_top_of_isUnit_mem 𝔪 hx)
@@ -81,7 +80,7 @@ theorem isOpen_units_of_isOpen_topologicallyNilpotent
   · rintro x ⟨a, ha, rfl⟩
     change IsUnit (_ + a)
     obtain ⟨u', rfl⟩ := (hu : IsUnit u)
-    rw [show (↑u' : A) + a = ↑u' * (1 + ↑u'⁻¹ * a) from by
+    rw [show (↑u' : A) + a = ↑u' * (1 + ↑u'⁻¹ * a) by
       rw [mul_add, mul_one, ← mul_assoc, mul_comm (↑u' : A) (↑u'⁻¹ : A),
         Units.inv_mul, one_mul]]
     exact u'.isUnit.mul (ha.mul_left ↑u'⁻¹).isUnit_one_add
@@ -136,7 +135,8 @@ lemma vle_one_of_mem_spa {v : Spv A} (hv : v ∈ Spa A A⁺)
 lemma spa_eq_cont_inter :
     Spa A A⁺ = Cont A ∩ ⋂ f ∈ (A⁺ : Set A), { v : Spv A | v.vle f 1 } := by
   ext v
-  simp only [Spa, Set.mem_inter_iff, mem_cont_iff, Set.mem_iInter, Set.mem_setOf_eq]; rfl
+  simp only [Spa, Set.mem_inter_iff, mem_cont_iff, Set.mem_iInter, Set.mem_setOf_eq]
+  rfl
 
 /-- For discrete `A`, every valuation is continuous (Example 7.26). -/
 theorem spa_eq_of_discreteTopology [DiscreteTopology A] :
@@ -146,11 +146,6 @@ theorem spa_eq_of_discreteTopology [DiscreteTopology A] :
   exact ⟨fun ⟨_, h⟩ ↦ h, fun h ↦ ⟨fun γ ↦ isOpen_discrete _, h⟩⟩
 
 section Prop752
-
-/-! ### Proposition 7.52 of Wedhorn
-
-We characterize elements of `A⁺` and units via the adic spectrum.
--/
 
 /-- The trivial valuation on `A/𝔪` gives a point of `Spa(A, A⁺)`
 with support `𝔪` (Prop 7.51). -/
@@ -164,14 +159,17 @@ lemma exists_mem_spa_supp_eq (𝔪 : Ideal A) [𝔪.IsMaximal]
   · apply isContinuous_ofValuation_of
     intro γ
     by_cases hγ : γ = 0
-    · subst hγ; convert isOpen_empty
-      ext a; simp [not_lt_zero']
+    · subst hγ
+      convert isOpen_empty
+      ext a
+      simp
     · by_cases h1 : (1 : ℤᵐ⁰) < γ
-      · convert isOpen_univ; ext a
+      · convert isOpen_univ
+        ext a
         simp only [Set.mem_setOf_eq, Set.mem_univ, iff_true, w, Valuation.comap_apply]
         exact lt_of_le_of_lt (Valuation.one_apply_le_one _) h1
-      · push_neg at h1
-        suffices {a : A | w a < γ} = (𝔪 : Set A) by rw [this]; exact h𝔪
+      · push Not at h1
+        suffices {a : A | w a < γ} = (𝔪 : Set A) by rwa [this]
         ext a
         simp only [Set.mem_setOf_eq, w, Valuation.comap_apply]
         constructor
@@ -183,9 +181,9 @@ lemma exists_mem_spa_supp_eq (𝔪 : Ideal A) [𝔪.IsMaximal]
           exact zero_lt_iff.mpr hγ
   · intro f _
     change w f ≤ w 1
-    simp only [w, Valuation.comap_apply, map_one]
-    exact Valuation.one_apply_le_one _
-  · rw [supp_ofValuation]; ext a
+    simpa only [w, Valuation.comap_apply, map_one] using Valuation.one_apply_le_one _
+  · rw [supp_ofValuation]
+    ext a
     simp only [Valuation.mem_supp_iff, w, Valuation.comap_apply,
       Valuation.one_apply_eq_zero_iff]
     exact Ideal.Quotient.eq_zero_iff_mem
@@ -214,9 +212,9 @@ lemma exists_mem_spa_supp_eq_of_prime [DiscreteTopology A]
   · exact isContinuous_ofValuation_of _ (fun _ ↦ isOpen_discrete _)
   · intro f _
     change w f ≤ w 1
-    simp only [w, Valuation.comap_apply, map_one]
-    exact Valuation.one_apply_le_one _
-  · rw [supp_ofValuation]; ext a
+    simpa only [w, Valuation.comap_apply, map_one] using Valuation.one_apply_le_one _
+  · rw [supp_ofValuation]
+    ext a
     simp only [Valuation.mem_supp_iff, w, Valuation.comap_apply, φ, RingHom.comp_apply,
       Valuation.one_apply_eq_zero_iff]
     exact ⟨fun h ↦ Ideal.Quotient.eq_zero_iff_mem.mp
@@ -258,8 +256,7 @@ theorem comap_mem_spa {φ : A →+* B} (hφ : Continuous φ)
     {v : Spv B} (hv : v ∈ Spa B B⁺) :
     comap φ v ∈ Spa A A⁺ := by
   refine ⟨comap_isContinuous hφ hv.1, fun f hf ↦ ?_⟩
-  simp only [comap_vle, map_one]
-  exact hv.2 (φ f) (hAB hf)
+  simpa only [comap_vle, map_one] using hv.2 (φ f) (hAB hf)
 
 /-- `comap φ` maps `Spa(B, B⁺)` into `Spa(A, A⁺)` (Remark 7.28). -/
 theorem spa_comap_mapsTo {φ : A →+* B} (hφ : Continuous φ) (hAB : A⁺ ≤ (B⁺).comap φ) :
@@ -274,8 +271,6 @@ def spaComap {φ : A →+* B} (hφ : Continuous φ) (hAB : A⁺ ≤ (B⁺).comap
     (comap_continuous φ).restrict (spa_comap_mapsTo hφ hAB)
 
 end Functoriality
-
-/-! ### Topology on `Cont(A)` and `Spa(A, A⁺)` -/
 
 section SubspaceTopology
 
@@ -311,8 +306,6 @@ end ValuationSpectrum
 
 section TopNilMaximal
 
-/-! ### Topologically nilpotent elements and maximal ideals -/
-
 variable {A : Type*} [CommRing A]
   [UniformSpace A] [T2Space A] [CompleteSpace A]
   [IsTopologicalRing A] [IsUniformAddGroup A] [NonarchimedeanAddGroup A]
@@ -347,8 +340,6 @@ theorem isOpen_of_isMaximal_of_isOpen_topologicallyNilpotent
 end TopNilMaximal
 
 section Prop752Full
-
-/-! ### Proposition 7.52 with f-adic hypotheses -/
 
 variable {A : Type*} [CommRing A]
   [UniformSpace A] [T2Space A] [CompleteSpace A]
