@@ -90,9 +90,8 @@ theorem divByS_factor' (a b s f : A) :
 
 /-- `divByS (b * s) (s * f) = divByS (b * f) (s * f) * divByS (s * s) (s * f)`. -/
 theorem divByS_factor2' (b s f : A) :
-    divByS (b * s) (s * f) = divByS (b * f) (s * f) * divByS (s * s) (s * f) := by
-  unfold divByS; rw [← IsLocalization.mk'_mul]
-  exact IsLocalization.mk'_eq_of_eq (by simp only [Submonoid.coe_mul]; ring)
+    divByS (b * s) (s * f) = divByS (b * f) (s * f) * divByS (s * s) (s * f) :=
+  divByS_factor' b s s f
 
 /-- `divByS` is additive in the numerator. -/
 theorem divByS_add' (a b s : A) :
@@ -526,9 +525,8 @@ noncomputable def unitCover (D₀ : RationalLocData A) (f : A) : RationalCoverin
   hsubset := by
     intro D hD
     simp only [Finset.mem_insert, Finset.mem_singleton] at hD
-    rcases hD with rfl | rfl
-    · exact RationalLocData.interSamePair_subset_left _ _ _
-    · exact RationalLocData.interSamePair_subset_left _ _ _
+    rcases hD with rfl | rfl <;>
+      exact RationalLocData.interSamePair_subset_left _ _ _
   hcover := by
     intro v hv
     rcases v.vle_total f 1 with h | h
@@ -657,8 +655,7 @@ theorem ratioMinus_rationalOpen (D₀ : RationalLocData A) (f g f_inv : A)
                  (ratioMinusDatum D₀ f g f_inv hf hf_inv).s =
       rationalOpen D₀.T D₀.s ∩
         rationalOpen ({g, f} : Finset A) f := by
-  unfold ratioMinusDatum
-  exact ratioPlus_rationalOpen D₀ g f f_inv hf hf_inv
+  unfold ratioMinusDatum; exact ratioPlus_rationalOpen D₀ g f f_inv hf hf_inv
 
 /-- The ratio plus piece is contained in the base. -/
 theorem ratioPlus_subset (D₀ : RationalLocData A) (f g g_inv : A)
@@ -987,8 +984,7 @@ theorem restrictionMap_canonicalMap_f_isUnit_laurentMinus
       rationalOpen D₀.T D₀.s) :
     IsUnit (restrictionMapHom D₀ (laurentMinusDatum D₀ f) hsub
       (D₀.canonicalMap f)) := by
-  rw [restrictionMapHom_canonicalMap]
-  exact canonicalMap_f_isUnit_in_laurentMinus D₀ f
+  rw [restrictionMapHom_canonicalMap]; exact canonicalMap_f_isUnit_in_laurentMinus D₀ f
 
 /-- Backward uncompleted hom `Loc_B(canonicalMap f) →+* presheafValue (laurentMinus)`. -/
 noncomputable def iteratedMinus_backwardLocHom
