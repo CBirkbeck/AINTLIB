@@ -81,9 +81,8 @@ theorem mulByInt_q_pullback_finrank :
       Fintype.card K ^ 2 := by
   have hq : ((Fintype.card K : ℕ) : ℤ) ≠ 0 := by
     exact_mod_cast (Fintype.card_pos).ne'
-  have h := mulByInt_degree W.toAffine ((Fintype.card K : ℕ) : ℤ) hq
   change (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).degree = Fintype.card K ^ 2
-  rw [h]
+  rw [mulByInt_degree W.toAffine ((Fintype.card K : ℕ) : ℤ) hq]
   -- Show ((((Fintype.card K : ℕ) : ℤ)) ^ 2).toNat = Fintype.card K ^ 2
   rw [show (((Fintype.card K : ℕ) : ℤ) ^ 2).toNat = Fintype.card K ^ 2 from by
     have : ((Fintype.card K : ℕ) : ℤ) ^ 2 = ((Fintype.card K ^ 2 : ℕ) : ℤ) := by push_cast; ring
@@ -157,9 +156,7 @@ theorem mulByInt_q_factor_witness
       (frobeniusIsog W).pullback.fieldRange := by
   rintro f ⟨z, hz⟩
   refine ⟨V z, ?_⟩
-  change (frobeniusIsog W).pullback (V z) = f
-  rw [show (frobeniusIsog W).pullback (V z) =
-    ((frobeniusIsog W).pullback.comp V) z from rfl]
+  change ((frobeniusIsog W).pullback.comp V) z = f
   rw [← h_factor]; exact hz
 
 end HasseWeil
