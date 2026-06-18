@@ -194,7 +194,7 @@ theorem coordX_sub_const_eq_algebraMap_XClass (a : F) :
 theorem coordX_sub_const_ne_zero (a : F) :
     C.coordX - algebraMap F C.FunctionField a ≠ 0 := by
   rw [C.coordX_sub_const_eq_algebraMap_XClass a]
-  exact fun h => WeierstrassCurve.Affine.CoordinateRing.XClass_ne_zero
+  exact fun h ↦ WeierstrassCurve.Affine.CoordinateRing.XClass_ne_zero
     (W' := C.toAffine) a
     ((map_eq_zero_iff _ (IsFractionRing.injective _ _)).mp h)
 
@@ -419,7 +419,7 @@ theorem divisorOf_coordX_sub_const_apply_eq_finsupp
         (if P.neg = Q then 1 else 0) := by
     by_cases h : Q = P.neg
     · rw [if_pos h.symm, h, C.count_maximalIdealAt_self P.neg]
-    · rw [if_neg fun he => h he.symm,
+    · rw [if_neg fun he ↦ h he.symm,
         C.count_maximalIdealAt_eq_zero_of_ne Q P.neg h]
   have h_count_P :
       (Associates.mk (C.maximalIdealAt Q)).count
@@ -427,7 +427,7 @@ theorem divisorOf_coordX_sub_const_apply_eq_finsupp
         (if P = Q then 1 else 0) := by
     by_cases h : Q = P
     · rw [if_pos h.symm, h, C.count_maximalIdealAt_self P]
-    · rw [if_neg fun he => h he.symm,
+    · rw [if_neg fun he ↦ h he.symm,
         C.count_maximalIdealAt_eq_zero_of_ne Q P h]
   rw [h_count_Pneg, h_count_P]
   push_cast
@@ -442,7 +442,7 @@ theorem divisorOf_coordX_sub_const
     (P : C.SmoothPoint) :
     C.divisorOf (C.coordX - algebraMap F C.FunctionField P.x) =
       Finsupp.single P (1 : ℤ) + Finsupp.single P.neg 1 :=
-  Finsupp.ext fun Q => C.divisorOf_coordX_sub_const_apply_eq_finsupp P Q
+  Finsupp.ext fun Q ↦ C.divisorOf_coordX_sub_const_apply_eq_finsupp P Q
 
 /-- **Vertical-line projective divisor**: the full projective divisor of
 `coordX − P.x` is `(P) + (P.neg) − 2·(∞)` on the projective closure.
@@ -550,7 +550,7 @@ theorem coordY_sub_algMap_linePolynomial_ne_zero (x y slope : F) :
         algebraMap (Polynomial F) C.FunctionField
           (WeierstrassCurve.Affine.linePolynomial x y slope) ≠ 0 := by
   rw [C.coordY_sub_algMap_linePolynomial_eq_algMap_YClass x y slope]
-  exact fun h => WeierstrassCurve.Affine.CoordinateRing.YClass_ne_zero
+  exact fun h ↦ WeierstrassCurve.Affine.CoordinateRing.YClass_ne_zero
     (W' := C.toAffine) _
     ((map_eq_zero_iff _ (IsFractionRing.injective _ _)).mp h)
 
@@ -760,9 +760,9 @@ theorem count_YClass_linePolynomial_eq
       ((Associates.mk (C.maximalIdealAt Q')).count
         (Associates.mk (C.maximalIdealAt SQ)).factors : ℤ) := by
   rw [show ∀ (a b : ℕ), (a : ℤ) + (b : ℤ) = ((a + b : ℕ) : ℤ) from
-    fun a b => by push_cast; ring,
+    fun a b ↦ by push_cast; ring,
     show ∀ (a b c : ℕ), (a : ℤ) + (b : ℤ) + (c : ℤ) = ((a + b + c : ℕ) : ℤ) from
-    fun a b c => by push_cast; ring]
+    fun a b c ↦ by push_cast; ring]
   congr 1
   have hMSP_ne : (Associates.mk (C.maximalIdealAt SP) :
       Associates (Ideal C.CoordinateRing)) ≠ 0 :=
@@ -879,7 +879,7 @@ theorem count_maximalIdealAt_eq_single
   by_cases h : X = Q'
   · rw [h, if_pos rfl, C.count_maximalIdealAt_self Q']
     rfl
-  · rw [if_neg h, C.count_maximalIdealAt_eq_zero_of_ne Q' X fun he => h he.symm]
+  · rw [if_neg h, C.count_maximalIdealAt_eq_zero_of_ne Q' X fun he ↦ h he.symm]
     rfl
 
 /-- **Chord-line affine divisor (pointwise Finsupp identity)**: for
@@ -935,7 +935,7 @@ theorem divisorOf_coordY_sub_algMap_linePolynomial
             (C.toAffine.slope SP.x SQ.x SP.y SQ.y))) =
       Finsupp.single SP (1 : ℤ) + Finsupp.single SQ 1 +
         Finsupp.single (C.addSmoothPoint SP SQ hxy).neg 1 :=
-  Finsupp.ext fun Q' =>
+  Finsupp.ext fun Q' ↦
     C.divisorOf_coordY_sub_algMap_linePolynomial_apply_eq_finsupp SP SQ hxy Q'
 
 /-- **Chord-line projective divisor**: the full projective divisor of
@@ -1429,7 +1429,7 @@ theorem projectiveDivisorSum_eq_zero_of_principal
     (hD : D ∈ (⟨W⟩ : SmoothPlaneCurve F).projPrincipalSubgroup) :
     projectiveDivisorSum W D = 0 :=
   (afInputs_unconditional W).h_van
-    (fun _ hD' =>
+    (fun _ hD' ↦
       SmoothPlaneCurve.principal_mem_degZero (C := (⟨W⟩ : SmoothPlaneCurve F)) hD')
     D hD
 
@@ -1637,7 +1637,7 @@ theorem dualViaPicZero_comp_property
       (α.degree : ℤ) • P :=
   h_dual_comp_from_picZeroPullback_witness _ (HasseWeil.Curves.picZeroIsoE W) α
     (picZeroPushforward α) (picZeroPullback α_dual) α_dual.pullback
-    (fun P => by
+    (fun P ↦ by
       have h := picZeroPushforward_picZeroOfPoint α P
       rw [HasseWeil.Curves.picZeroIsoE_symm_apply,
         HasseWeil.Curves.picZeroIsoE_symm_apply]
