@@ -85,11 +85,12 @@ Five sub-lemmas (mirror Sharifi's structure):
 
 /-- Sharifi 7.2.2 Step 2 sub-lemma (i) — cyclic subgroup trivial meet
 (p. 144). Source quote: "if `|G|` divides the order of `τ`, then
-`⟨(σ,τ)⟩ ∩ (G × {1}) = 1`". This is the only place where the
-`|G| | ord(τ)` hypothesis is used in Step 2. -/
+`⟨(σ,τ)⟩ ∩ (G × {1}) = 1`". Stated in generalised form: no finiteness on
+`G`/`H`, and the hypothesis is the weaker `orderOf σ ∣ orderOf τ` (the project's
+`|G| ∣ ord τ` Step-2 usage recovers it via `orderOf σ ∣ Nat.card G`). -/
 theorem cyclic_subgroup_meets_G_times_one_trivially
-    (G H : Type*) [Group G] [Group H] [Finite G] [Finite H] (σ : G) (τ : H)
-    (_hn : Nat.card G ∣ orderOf τ) :
+    (G H : Type*) [Group G] [Group H] (σ : G) (τ : H)
+    (hn : orderOf σ ∣ orderOf τ) :
     (Subgroup.zpowers (σ, τ)) ⊓
         ((⊤ : Subgroup G).prod (⊥ : Subgroup H)) = ⊥ := by
   rw [eq_bot_iff]
@@ -98,7 +99,7 @@ theorem cyclic_subgroup_meets_G_times_one_trivially
   obtain ⟨⟨k, hk⟩, _, (hh : h = 1)⟩ := hmem
   have h2 : τ ^ k = 1 := by simpa [hh] using congrArg Prod.snd hk
   have hg2 : σ ^ k = 1 := orderOf_dvd_iff_zpow_eq_one.mp
-    (((orderOf_dvd_natCard σ).trans _hn).natCast.trans (orderOf_dvd_iff_zpow_eq_one.mpr h2))
+    (hn.natCast.trans (orderOf_dvd_iff_zpow_eq_one.mpr h2))
   rw [Subgroup.mem_bot, Prod.mk_eq_one]
   exact ⟨by simpa [hg2] using (congrArg Prod.fst hk).symm, hh⟩
 
