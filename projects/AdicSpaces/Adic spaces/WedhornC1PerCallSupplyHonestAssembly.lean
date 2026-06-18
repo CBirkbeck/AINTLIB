@@ -101,11 +101,6 @@ theorem WedhornC1PerCallSupplyHonest_of_components
       (_hv_in_plus : v ∈ rationalOpen (insert f C.base.T) C.base.s)
       (_hvf_nz : ¬ v.vle f 0),
       WedhornC1PerCallSupplyHonest P C hopen_base D v := by
-  letI : TopologicalSpace (Localization.Away C.base.s) :=
-    locTopology P C.base.T C.base.s hopen_base
-  letI : PlusSubring (Localization.Away C.base.s) :=
-    localizationLocSubringPlusSubring P C.base.T C.base.s
-  letI : DecidableEq (Localization.Away C.base.s) := Classical.decEq _
   intro σ_loc f h_alg h_dom h_honest hv_in_plus hvf_nz
   exact ⟨σ_loc, f, h_alg, h_dom, h_honest, hv_in_plus, hvf_nz⟩
 
@@ -150,11 +145,6 @@ theorem C1SupplierStrong_local_via_honest_per_call_assembly
         v ∈ rationalOpen (insert f C.base.T) C.base.s ∧
         ¬ v.vle f 0) :
     C1SupplierStrong_local C := by
-  letI : TopologicalSpace (Localization.Away C.base.s) :=
-    locTopology P C.base.T C.base.s hopen_base
-  letI : PlusSubring (Localization.Away C.base.s) :=
-    localizationLocSubringPlusSubring P C.base.T C.base.s
-  letI : DecidableEq (Localization.Away C.base.s) := Classical.decEq _
   refine C1SupplierStrong_local_via_honest_residuals P hA₀_le C hopen_base ?_
   intro D hD v hv t ht hvt hvD_s
   obtain ⟨σ_loc, f, h_alg, h_dom, h_honest, hv_in_plus, hvf_nz⟩ :=
