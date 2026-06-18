@@ -182,21 +182,9 @@ theorem _root_.MvPowerSeries.finSucc_forward_map_add (R : Type u) [CommRing R] (
     MvPowerSeries.finSucc_forwardFun R n (p + q) =
       MvPowerSeries.finSucc_forwardFun R n p + MvPowerSeries.finSucc_forwardFun R n q := by
   ext k m
-  change (PowerSeries.coeff k)
-      (PowerSeries.mk fun j => fun m' : Fin n →₀ ℕ => (p + q) (Finsupp.cons j m')) m =
-    (MvPowerSeries.coeff m)
-      ((PowerSeries.coeff k) (MvPowerSeries.finSucc_forwardFun R n p +
-        MvPowerSeries.finSucc_forwardFun R n q))
-  rw [PowerSeries.coeff_mk, map_add, map_add]
-  change (p + q) (Finsupp.cons k m) =
-    MvPowerSeries.coeff m ((PowerSeries.coeff k) (MvPowerSeries.finSucc_forwardFun R n p)) +
-      MvPowerSeries.coeff m ((PowerSeries.coeff k) (MvPowerSeries.finSucc_forwardFun R n q))
-  rw [MvPowerSeries.coeff_apply, MvPowerSeries.coeff_apply]
-  change p (Finsupp.cons k m) + q (Finsupp.cons k m) =
-    (PowerSeries.coeff k) (MvPowerSeries.finSucc_forwardFun R n p) m +
-      (PowerSeries.coeff k) (MvPowerSeries.finSucc_forwardFun R n q) m
-  unfold MvPowerSeries.finSucc_forwardFun
-  rw [PowerSeries.coeff_mk, PowerSeries.coeff_mk]
+  simp only [MvPowerSeries.finSucc_forwardFun, PowerSeries.coeff_mk, map_add,
+    MvPowerSeries.coeff_apply]
+  rfl
 
 /-- Helper for L2.1.g: `Finsupp.cons` is additive in both arguments. -/
 private lemma _finsupp_cons_add (n : ℕ) (a b : ℕ) (β γ : Fin n →₀ ℕ) :
@@ -333,20 +321,16 @@ theorem _root_.MvPowerSeries.instIsNoetherianRing_fin (R : Type u) [CommRing R]
   | zero =>
     -- For σ = Fin 0 (empty), `C : R →+* MvPowerSeries (Fin 0) R` is surjective,
     -- so noetherianness transfers from R.
-    haveI hunique : Unique (Fin 0 →₀ ℕ) := Finsupp.uniqueOfLeft
     apply isNoetherianRing_of_surjective R (MvPowerSeries (Fin 0) R)
       (MvPowerSeries.C (σ := Fin 0) (R := R))
     intro p
     refine ⟨p 0, ?_⟩
     ext α
-    have hα : α = 0 := Subsingleton.elim _ _
-    subst hα
-    rw [MvPowerSeries.coeff_C]
+    rw [Subsingleton.elim α 0, MvPowerSeries.coeff_C]
     rfl
   | succ n IH =>
     obtain ⟨e⟩ := MvPowerSeries.finSuccEquivPowerSeries R n
     haveI : IsNoetherianRing (MvPowerSeries (Fin n) R) := IH
-    haveI : IsNoetherianRing (PowerSeries (MvPowerSeries (Fin n) R)) := inferInstance
     exact isNoetherianRing_of_ringEquiv _ e.symm
 
 /-! ## L3 — Evaluation map `MvPowerSeries (Fin n) R → AdicCompletion I R`
@@ -453,15 +437,7 @@ private lemma _mvPowerSeriesEval_partial_compat_support_high {n : ℕ}
     ∃ j : Fin n, α j ≥ m + 1 := by
   classical
   rw [MvPolynomial.mem_support_iff] at hα
-  have hsub : MvPolynomial.coeff α (((MvPowerSeries.trunc R
-      (Finsupp.equivFunOnFinite.symm fun _ : Fin n => k + 1)) P) -
-        ((MvPowerSeries.trunc R
-          (Finsupp.equivFunOnFinite.symm fun _ : Fin n => m + 1)) P)) =
-      MvPolynomial.coeff α (MvPowerSeries.trunc R
-        (Finsupp.equivFunOnFinite.symm fun _ : Fin n => k + 1) P) -
-      MvPolynomial.coeff α (MvPowerSeries.trunc R
-        (Finsupp.equivFunOnFinite.symm fun _ : Fin n => m + 1) P) := rfl
-  rw [hsub, MvPowerSeries.coeff_trunc, MvPowerSeries.coeff_trunc] at hα
+  rw [MvPolynomial.coeff_sub, MvPowerSeries.coeff_trunc, MvPowerSeries.coeff_trunc] at hα
   by_cases h_lt_m : α < (Finsupp.equivFunOnFinite.symm fun _ : Fin n => m + 1 :
       Fin n →₀ ℕ)
   · -- α < n_m ≤ n_k: both branches give P α, difference is 0.
@@ -646,13 +622,7 @@ private lemma _mvPowerSeriesEval_partial_map_mul_support_high {n : ℕ}
       · refine ⟨⟨0, hn⟩, ?_⟩
         have := hcontra ⟨0, hn⟩
         simp [hn_k_def, Finsupp.equivFunOnFinite]; omega
-    have hsub_coeff : MvPolynomial.coeff α
-        ((MvPowerSeries.trunc R n_k) (P * Q) -
-          (MvPowerSeries.trunc R n_k) P * (MvPowerSeries.trunc R n_k) Q) =
-        MvPolynomial.coeff α ((MvPowerSeries.trunc R n_k) (P * Q)) -
-          MvPolynomial.coeff α
-            ((MvPowerSeries.trunc R n_k) P * (MvPowerSeries.trunc R n_k) Q) := rfl
-    rw [hsub_coeff, MvPowerSeries.coeff_trunc, if_pos h_lt,
+    rw [MvPolynomial.coeff_sub, MvPowerSeries.coeff_trunc, if_pos h_lt,
         MvPolynomial.coeff_mul, MvPowerSeries.coeff_mul]
     refine sub_eq_zero.mpr ?_
     refine Finset.sum_congr rfl ?_
