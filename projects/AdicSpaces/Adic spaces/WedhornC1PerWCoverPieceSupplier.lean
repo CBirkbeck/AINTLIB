@@ -160,7 +160,7 @@ theorem C1SupplierStrong_local_via_per_w_cover_piece_supplier
     C1SupplierStrong_local C :=
   C1SupplierStrong_local_via_cover_piece_structural_data_residuals
     P hA₀_le C hopen_base
-    (fun D hD v hv t ht hvt hvD_s =>
+    (fun D hD v hv t ht hvt hvD_s ↦
       WedhornC1PerCallSupplyCoverPiece_of_per_w_supplier P C hopen_base D v
         (h_per_call_supply D hD v hv t ht hvt hvD_s))
 
