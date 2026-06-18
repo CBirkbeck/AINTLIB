@@ -1654,14 +1654,12 @@ theorem ord_P_translateAlgEquivOfPoint_algebraMap_ge_of_pow_mem
         W P xk yk h_ns h s
     exact zero_le_ord_P_of_pointValuation_le_one W P h_le
   · intro x y i _ _ hx_ge hy_ge
-    change (i : WithTop ℤ) ≤ (W_smooth W).ord_P P (τ (algC (x + y)))
     have h_rw : τ (algC (x + y)) = τ (algC x) + τ (algC y) := by
       rw [map_add, map_add]
     rw [h_rw]
     refine le_trans (le_min hx_ge hy_ge) ?_
     exact Curves.SmoothPlaneCurve.ord_P_add_le _ _
   · intro m h_m i x _ hx_ge
-    change (i.succ : WithTop ℤ) ≤ (W_smooth W).ord_P P (τ (algC (m * x)))
     have h_rw : τ (algC (m * x)) = τ (algC m) * τ (algC x) := by
       rw [map_mul, map_mul]
     rw [h_rw, Curves.SmoothPlaneCurve.ord_P_mul]
