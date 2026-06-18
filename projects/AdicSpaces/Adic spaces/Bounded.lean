@@ -234,10 +234,8 @@ theorem IsTopologicallyNilpotent.add_of_nonarch [IsTopologicalRing A] [Nonarchim
     {a b : A} (ha : IsTopologicallyNilpotent a) (hb : IsTopologicallyNilpotent b) :
     IsTopologicallyNilpotent (a + b) := by
   -- `IsTopologicallyNilpotent x = Tendsto (x ^ ·) atTop (𝓝 0)`.
-  have toPB : ∀ {x : A}, IsTopologicallyNilpotent x → IsPowerBounded x :=
-    IsTopologicallyNilpotent.isPowerBounded
-  have ha_pb : IsPowerBounded a := toPB ha
-  have hb_pb : IsPowerBounded b := toPB hb
+  have ha_pb : IsPowerBounded a := IsTopologicallyNilpotent.isPowerBounded ha
+  have hb_pb : IsPowerBounded b := IsTopologicallyNilpotent.isPowerBounded hb
   rw [IsTopologicallyNilpotent, Filter.tendsto_def]
   intro U hU
   -- Shrink `U` to an open additive subgroup `G ⊆ U`.
@@ -397,7 +395,7 @@ theorem IsBounded.isPowerBounded_of_isIntegral [IsTopologicalRing A] {B : Subrin
     exact eq_neg_of_add_eq_zero_left h
   suffices key : ∀ n, ∃ c : ℕ → ↥B, a ^ n = ∑ j ∈ Finset.range N, (c j : A) * a ^ j by
     change a ^ n ∈ S; obtain ⟨c, hc⟩ := key n; rw [hc, hS_def]
-    exact Set.finset_sum_mem_finset_sum _ _ _ fun j _ ↦ Set.mul_mem_mul (Subtype.coe_prop _) rfl
+    exact Set.finsetSum_mem_finsetSum _ _ _ fun j _ ↦ Set.mul_mem_mul (Subtype.coe_prop _) rfl
   by_cases hN : N = 0
   · intro n; refine ⟨0, ?_⟩; simp only [hN, Finset.range_zero, Finset.sum_empty]
     have h1 : (1 : A) = 0 := by simpa [hN] using hp_rel
