@@ -153,10 +153,8 @@ lemma norm_pow_sub_one_lt_one {ζ : integerRing K} {n : ℕ}
   · have horder : orderOf (ζ ^ c) ∣ p ^ n :=
       orderOf_dvd_of_pow_eq_one (by rw [← pow_mul, mul_comm, pow_mul, hζ.pow_eq_one, one_pow])
     obtain ⟨j, hjle, hj⟩ := (Nat.dvd_prime_pow hp.out).mp horder
-    have hj1 : 1 ≤ j := by
-      rcases Nat.eq_zero_or_pos j with rfl | h
-      · exact absurd (orderOf_eq_one_iff.mp (by simpa using hj)) hc1
-      · exact h
+    have hj1 : 1 ≤ j :=
+      Nat.pos_of_ne_zero fun h => hc1 (orderOf_eq_one_iff.mp (by simpa [h] using hj))
     have hprim : IsPrimitiveRoot ((ζ ^ c : integerRing K) : K) (p ^ j) := by
       have h0 : IsPrimitiveRoot (ζ ^ c) (orderOf (ζ ^ c)) := IsPrimitiveRoot.orderOf _
       rw [hj] at h0
@@ -343,23 +341,13 @@ lemma substAffine_X (r : integerRing K)
     (hr : Filter.Tendsto (r ^ ·) Filter.atTop (nhds 0)) :
     substAffine r hr PowerSeries.X
       = (1 + PowerSeries.X) * PowerSeries.C (1 + r) - 1 := by
-  rw [show substAffine r hr PowerSeries.X
-      = PowerSeries.eval₂ PowerSeries.C
-          ((1 + PowerSeries.X) * PowerSeries.C (1 + r) - 1) PowerSeries.X from
-    congrFun (PowerSeries.coe_eval₂Hom PowerSeries.WithPiTopology.continuous_C
-      (hasEval_affine r hr)) PowerSeries.X]
-  exact PowerSeries.eval₂_X _ _
+  rw [substAffine, PowerSeries.coe_eval₂Hom, PowerSeries.eval₂_X]
 
 @[simp]
 lemma substAffine_C (r : integerRing K)
     (hr : Filter.Tendsto (r ^ ·) Filter.atTop (nhds 0)) (b : integerRing K) :
     substAffine r hr (PowerSeries.C b) = PowerSeries.C b := by
-  rw [show substAffine r hr (PowerSeries.C b)
-      = PowerSeries.eval₂ PowerSeries.C
-          ((1 + PowerSeries.X) * PowerSeries.C (1 + r) - 1) (PowerSeries.C b) from
-    congrFun (PowerSeries.coe_eval₂Hom PowerSeries.WithPiTopology.continuous_C
-      (hasEval_affine r hr)) (PowerSeries.C b)]
-  exact PowerSeries.eval₂_C _ _ _
+  rw [substAffine, PowerSeries.coe_eval₂Hom, PowerSeries.eval₂_C]
 
 /-- `substAffine r` sends `1 + X` to `C(1+r)·(1+X)`. -/
 lemma substAffine_one_add_X (r : integerRing K)
@@ -382,12 +370,7 @@ lemma coeff_substAffine (r : integerRing K)
   have h2 := h.map (PowerSeries.coeff (R := integerRing K) n).toAddMonoidHom
     (PowerSeries.WithPiTopology.continuous_coeff (R := integerRing K) n)
   simp only [LinearMap.toAddMonoidHom_coe, Function.comp_def] at h2
-  have h3 : substAffine r hr F
-      = PowerSeries.eval₂ PowerSeries.C
-          ((1 + PowerSeries.X) * PowerSeries.C (1 + r) - 1) F :=
-    congrFun (PowerSeries.coe_eval₂Hom PowerSeries.WithPiTopology.continuous_C
-      (hasEval_affine r hr)) F
-  rw [h3, ← h2.tsum_eq]
+  rw [substAffine, PowerSeries.coe_eval₂Hom, ← h2.tsum_eq]
   exact tsum_congr fun m => by
     rw [PowerSeries.coeff_C_mul]
     ring
