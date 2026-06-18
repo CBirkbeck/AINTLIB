@@ -72,9 +72,9 @@ theorem le_one_of_forall_le_one_mem_of_ne_top {L : Type*} [Field L]
     (hO : ∀ x : L, v x ≤ 1 → x ∈ R) (hR : R ≠ ⊤) :
     ∀ z ∈ R, v z ≤ 1 := by
   by_contra hcon
-  push_neg at hcon
+  push Not at hcon
   obtain ⟨z, hzR, hz⟩ := hcon
-  refine hR (eq_top_iff.mpr fun w _ => ?_)
+  refine hR (eq_top_iff.mpr fun w _ ↦ ?_)
   rcases le_or_gt (v w) 1 with hw | hw
   · exact hO w hw
   · -- both `v z` and `v w` exceed `1`; pick `k` with `v w ≤ (v z)ᵏ`
@@ -99,13 +99,13 @@ theorem le_one_of_forall_le_one_mem_of_ne_top {L : Type*} [Field L]
       rw [mul_one] at h2
       linarith
     -- write `w = (w / zᵏ) · zᵏ` with the first factor in the valuation ring
-    have hzne : z ≠ 0 := fun h => hz0 (h ▸ map_zero v)
+    have hzne : z ≠ 0 := fun h ↦ hz0 (h ▸ map_zero v)
     have hzkne : z ^ k ≠ 0 := pow_ne_zero _ hzne
     have hwdec : w = w / z ^ k * z ^ k := (div_mul_cancel₀ w hzkne).symm
     rw [hwdec]
     refine R.mul_mem (hO _ ?_) (R.pow_mem hzR k)
     rw [map_div₀, map_pow]
-    exact div_le_one_of_le₀ hk (zero_le')
+    exact div_le_one_of_le₀ hk (zero_le)
 
 variable {F : Type*} [Field F]
 
@@ -156,7 +156,7 @@ theorem disjoint_powers_maximalIdealAt (hfQ : f ∉ C₂.maximalIdealAt Q) :
 /-- `awayIdealAt Q` lies over `m_Q`. -/
 theorem awayIdealAt_under (hfQ : f ∉ C₂.maximalIdealAt Q) :
     (awayIdealAt Af Q).under C₂.CoordinateRing = C₂.maximalIdealAt Q :=
-  IsLocalization.comap_map_of_isPrime_disjoint (Submonoid.powers f) Af
+  IsLocalization.under_map_of_isPrime_disjoint (Submonoid.powers f) Af
     (C₂.maximalIdealAt_isPrime Q) (disjoint_powers_maximalIdealAt f Q hfQ)
 
 theorem awayIdealAt_isPrime (hfQ : f ∉ C₂.maximalIdealAt Q) :
@@ -290,7 +290,7 @@ theorem isIntegral_of_denominator (hf : f ≠ 0) (z : C₁.FunctionField)
   have hzint : IsIntegral C₂.FunctionField z := IsIntegral.of_finite _ z
   have hmonic : (minpoly C₂.FunctionField z).Monic := minpoly.monic hzint
   have hfK : algebraMap C₂.CoordinateRing C₂.FunctionField f ≠ 0 :=
-    fun h => hf ((map_eq_zero_iff _
+    fun h ↦ hf ((map_eq_zero_iff _
       (IsFractionRing.injective C₂.CoordinateRing C₂.FunctionField)).mp h)
   -- every coefficient of the minimal polynomial is in the image of `Af`
   have hrange : ∀ i, (minpoly C₂.FunctionField z).coeff i ∈
@@ -307,7 +307,7 @@ theorem isIntegral_of_denominator (hf : f ≠ 0) (z : C₁.FunctionField)
   -- lift the monic minimal polynomial along `Af → K(C₂)`
   have hlift : minpoly C₂.FunctionField z ∈
       Polynomial.lifts (algebraMap Af C₂.FunctionField) :=
-    (Polynomial.lifts_iff_coeff_lifts _).mpr fun i => hrange i
+    (Polynomial.lifts_iff_coeff_lifts _).mpr fun i ↦ hrange i
   obtain ⟨q, hq_map, _, hq_monic⟩ := Polynomial.lifts_and_degree_eq_and_monic hlift hmonic
   have h0 : Polynomial.aeval z (minpoly C₂.FunctionField z) = 0 := minpoly.aeval _ _
   rw [← hq_map, Polynomial.aeval_map_algebraMap] at h0
@@ -463,7 +463,7 @@ theorem residue_closure_bijective [IsAlgClosed F] [IsIntegrallyClosed C₂.Coord
       (residue_away_bijective f Af Q hfQ).2
   haveI tower : IsScalarTower F (Af ⧸ awayIdealAt Af Q)
       ((integralClosure Af C₁.FunctionField) ⧸ P) :=
-    IsScalarTower.of_algebraMap_eq fun c =>
+    IsScalarTower.of_algebraMap_eq fun c ↦
       (algebraMap_quotient_residueAway C₂ Af hPq c).symm
   haveI h4 : Module.Finite F ((integralClosure Af C₁.FunctionField) ⧸ P) :=
     Module.Finite.trans (Af ⧸ awayIdealAt Af Q) _
@@ -513,7 +513,7 @@ noncomputable def residueChar (hbij : Function.Bijective (residueClosure C₂ Af
 /-- The residue value `D → F` of a maximal ideal `P` of `D` with trivial residue field. -/
 noncomputable def residueValue (hbij : Function.Bijective (residueClosure C₂ Af P)) :
     integralClosure Af C₁.FunctionField → F :=
-  fun d => (RingEquiv.ofBijective (residueClosure C₂ Af P) hbij).symm (Ideal.Quotient.mk P d)
+  fun d ↦ (RingEquiv.ofBijective (residueClosure C₂ Af P) hbij).symm (Ideal.Quotient.mk P d)
 
 theorem residueClosure_residueValue (hbij : Function.Bijective (residueClosure C₂ Af P))
     (d : integralClosure Af C₁.FunctionField) :
@@ -559,7 +559,7 @@ omit [C₁.toAffine.IsElliptic] in
 field `F`). -/
 theorem ker_residueChar_isMaximal (hbij : Function.Bijective (residueClosure C₂ Af P)) :
     (RingHom.ker (residueChar C₂ Af hX hY hbij)).IsMaximal :=
-  RingHom.ker_isMaximal_of_surjective _ fun c =>
+  RingHom.ker_isMaximal_of_surjective _ fun c ↦
     ⟨algebraMap F C₁.CoordinateRing c, residueChar_algebraMap C₂ Af hX hY hbij c⟩
 
 /-- **The smooth point of a maximal ideal of `D`** (over `K̄`): the point of `C₁` whose
@@ -600,7 +600,7 @@ noncomputable def fractionsAway (hPp : P.IsPrime) : Subring C₁.FunctionField w
   one_mem' := ⟨1, 1, (Ideal.ne_top_iff_one P).mp hPp.ne_top, by simp⟩
   mul_mem' := by
     rintro z₁ z₂ ⟨d₁, s₁, hs₁, h₁⟩ ⟨d₂, s₂, hs₂, h₂⟩
-    refine ⟨d₁ * d₂, s₁ * s₂, fun hmem => ?_, ?_⟩
+    refine ⟨d₁ * d₂, s₁ * s₂, fun hmem ↦ ?_, ?_⟩
     · rcases hPp.mem_or_mem hmem with h | h
       exacts [hs₁ h, hs₂ h]
     · simp only [MulMemClass.coe_mul]
@@ -610,7 +610,7 @@ noncomputable def fractionsAway (hPp : P.IsPrime) : Subring C₁.FunctionField w
   zero_mem' := ⟨0, 1, (Ideal.ne_top_iff_one P).mp hPp.ne_top, by simp⟩
   add_mem' := by
     rintro z₁ z₂ ⟨d₁, s₁, hs₁, h₁⟩ ⟨d₂, s₂, hs₂, h₂⟩
-    refine ⟨d₁ * s₂ + d₂ * s₁, s₁ * s₂, fun hmem => ?_, ?_⟩
+    refine ⟨d₁ * s₂ + d₂ * s₁, s₁ * s₂, fun hmem ↦ ?_, ?_⟩
     · rcases hPp.mem_or_mem hmem with h | h
       exacts [hs₁ h, hs₂ h]
     · push_cast
@@ -676,7 +676,7 @@ theorem pointValuation_lt_one_of_mem_prime [IsAlgClosed F]
           (C₁.localRingAt (pointAt C₂ Af hX hY hbij)) C₁.FunctionField] at hmap
       exact hmap
     refine ⟨coordRingToClosure C₂ Af hX hY r, coordRingToClosure C₂ Af hX hY
-      (s : C₁.CoordinateRing), fun hsP => s.2 (hcontr _ hsP), hxs⟩
+      (s : C₁.CoordinateRing), fun hsP ↦ s.2 (hcontr _ hsP), hxs⟩
   -- (iii) `R` is a proper subring: `1/u ∉ R` for `0 ≠ u ∈ P`
   have hRne : fractionsAway Af P hPp ≠ ⊤ := by
     intro htop
@@ -699,7 +699,7 @@ theorem pointValuation_lt_one_of_mem_prime [IsAlgClosed F]
     have hinv : C₁.pointValuation (pointAt C₂ Af hX hY hbij)
         ((d : C₁.FunctionField))⁻¹ ≤ 1 := by
       rw [map_inv₀, h, inv_one]
-    have hd0' : d ≠ 0 := fun h0 => hd0 (by rw [h0]; rfl)
+    have hd0' : d ≠ 0 := fun h0 ↦ hd0 (by rw [h0]; rfl)
     exact inv_notMem_fractionsAway Af hPp hd hd0' (hO _ hinv)
 
 /-- **Evaluation form of the place identification**: every `d ∈ D` evaluates at
@@ -780,7 +780,7 @@ theorem pointAt_injective [IsAlgClosed F]
       ((u₁ : C₁.FunctionField) + (u₂ : C₁.FunctionField)) < 1 :=
     lt_of_le_of_lt (Valuation.map_add _ _ _) (max_lt hv₁ hv₂)
   have hone : (u₁ : C₁.FunctionField) + (u₂ : C₁.FunctionField) = 1 := by
-    have := congrArg (fun t : integralClosure Af C₁.FunctionField =>
+    have := congrArg (fun t : integralClosure Af C₁.FunctionField ↦
       (t : C₁.FunctionField)) hsum
     push_cast at this
     simpa using this
@@ -846,14 +846,14 @@ theorem exists_good_fiber_points [IsAlgClosed F] [IsIntegrallyClosed C₂.Coordi
       UniqueFactorizationMonoid.fintypeSubtypeDvd _
         (by simpa using hf)
     rw [← Set.finite_coe_iff]
-    refine Finite.of_injective (fun Q' =>
+    refine Finite.of_injective (fun Q' ↦
       (⟨C₂.maximalIdealAt Q'.1, Ideal.dvd_span_singleton.mpr Q'.2⟩ :
         {I : Ideal C₂.CoordinateRing // I ∣ Ideal.span {f}})) ?_
     intro Q₁ Q₂ h
     exact Subtype.ext (C₂.maximalIdealAt_injective (congrArg Subtype.val h))
   have hfin2 : {Q' : C₂.SmoothPoint |
       f ∉ C₂.maximalIdealAt Q' ∧ awayIdealAt Af Q' ∈ Sram}.Finite := by
-    refine Set.Finite.of_finite_image (f := fun Q' => awayIdealAt Af Q')
+    refine Set.Finite.of_finite_image (f := fun Q' ↦ awayIdealAt Af Q')
       (hSfin.subset ?_) ?_
     · rintro _ ⟨Q', ⟨_, hmem⟩, rfl⟩
       exact hmem
@@ -869,7 +869,7 @@ theorem exists_good_fiber_points [IsAlgClosed F] [IsIntegrallyClosed C₂.Coordi
   rw [Set.mem_compl_iff, Set.mem_union, Set.mem_union, not_or, not_or] at hQ
   obtain ⟨⟨hQavoid, hQf⟩, hQram⟩ := hQ
   have hfQ : f ∉ C₂.maximalIdealAt Q := hQf
-  have hQS : awayIdealAt Af Q ∉ Sram := fun hmem => hQram ⟨hfQ, hmem⟩
+  have hQS : awayIdealAt Af Q ∉ Sram := fun hmem ↦ hQram ⟨hfQ, hmem⟩
   -- instances for the Σ e·f count at `(Af, D)`
   haveI := GoodAffineLocus.isDedekindDomain_away C₂ f Af hf
   haveI := GoodAffineLocus.isFractionRing_away C₂ f Af
@@ -884,33 +884,33 @@ theorem exists_good_fiber_points [IsAlgClosed F] [IsIntegrallyClosed C₂.Coordi
   haveI htf : Module.IsTorsionFree Af (integralClosure Af C₁.FunctionField) :=
     Curves.RamificationFinite.isTorsionFree Af C₂.FunctionField C₁.FunctionField _
   -- the prime data over `q`
-  have hPdata : ∀ P ∈ primesOverFinset (awayIdealAt Af Q)
+  have hPdata : ∀ P ∈ IsDedekindDomain.primesOverFinset (awayIdealAt Af Q)
       (integralClosure Af C₁.FunctionField), P.IsPrime ∧ P.under Af = awayIdealAt Af Q := by
     intro P hP
     have hmem : P ∈ (awayIdealAt Af Q).primesOver (integralClosure Af C₁.FunctionField) :=
-      (mem_primesOverFinset_iff hq0 _).mp hP
+      (IsDedekindDomain.mem_primesOverFinset_iff hq0 _).mp hP
     exact ⟨hmem.1, hmem.2.over.symm⟩
-  have hPbot : ∀ P ∈ primesOverFinset (awayIdealAt Af Q)
+  have hPbot : ∀ P ∈ IsDedekindDomain.primesOverFinset (awayIdealAt Af Q)
       (integralClosure Af C₁.FunctionField), P ≠ ⊥ := by
     intro P hP hbot
     exact hq0 (by rw [← (hPdata P hP).2, hbot, Ideal.under_bot])
   -- Σ e·f = finrank, with e = 1 (off the ramified locus) and f = 1 (residue triviality)
   have hsum := Ideal.sum_ramification_inertia
     (S := integralClosure Af C₁.FunctionField) C₂.FunctionField C₁.FunctionField hq0
-  have hcard : (primesOverFinset (awayIdealAt Af Q)
+  have hcard : (IsDedekindDomain.primesOverFinset (awayIdealAt Af Q)
       (integralClosure Af C₁.FunctionField)).card =
       Module.finrank C₂.FunctionField C₁.FunctionField := by
-    have hsum' : ∑ _P ∈ primesOverFinset (awayIdealAt Af Q)
+    have hsum' : ∑ _P ∈ IsDedekindDomain.primesOverFinset (awayIdealAt Af Q)
         (integralClosure Af C₁.FunctionField), (1 : ℕ) =
         Module.finrank C₂.FunctionField C₁.FunctionField := by
       rw [← hsum]
-      refine Finset.sum_congr rfl fun P hP => ?_
+      refine Finset.sum_congr rfl fun P hP ↦ ?_
       rw [hSram _ hQS P (hPdata P hP).1 (hPdata P hP).2,
         inertiaDeg_eq_one_of_under_eq C₂ f Af hf hfQ (hPdata P hP).1 (hPdata P hP).2]
     rwa [Finset.sum_const, Nat.smul_one_eq_cast, Nat.cast_id] at hsum'
   -- the point set: images of the primes over `q`
-  refine ⟨Q, hQavoid, (primesOverFinset (awayIdealAt Af Q)
-      (integralClosure Af C₁.FunctionField)).attach.image fun P =>
+  refine ⟨Q, hQavoid, (IsDedekindDomain.primesOverFinset (awayIdealAt Af Q)
+      (integralClosure Af C₁.FunctionField)).attach.image fun P ↦
         pointAt C₂ Af hX hY
           (residue_closure_bijective C₂ f Af hf hfQ (hPdata P.1 P.2).1 (hPdata P.1 P.2).2),
     ?_, ?_⟩
@@ -919,7 +919,7 @@ theorem exists_good_fiber_points [IsAlgClosed F] [IsIntegrallyClosed C₂.Coordi
     · exact hcard
     intro P₁ h₁ P₂ h₂ heq
     by_contra hne
-    have hne' : P₁.1 ≠ P₂.1 := fun h => hne (Subtype.ext h)
+    have hne' : P₁.1 ≠ P₂.1 := fun h ↦ hne (Subtype.ext h)
     have hd₁ := hPdata P₁.1 P₁.2
     have hd₂ := hPdata P₂.1 P₂.2
     have h₁0 : P₁.1 ≠ ⊥ := hPbot P₁.1 P₁.2
@@ -1030,9 +1030,9 @@ theorem exists_denominator :
     · exact ⟨0, by
         rw [p.coeff_eq_zero_of_natDegree_lt (lt_of_not_ge hi), zero_mul, map_zero]⟩
   refine ⟨b, nonZeroDivisors.ne_zero b.2, ?_, ?_⟩
-  · exact key px fun j hj => hb _ (Finset.mem_union_left _
+  · exact key px fun j hj ↦ hb _ (Finset.mem_union_left _
       (Finset.mem_image_of_mem _ (Finset.mem_range.mpr (by omega))))
-  · exact key py fun j hj => hb _ (Finset.mem_union_right _
+  · exact key py fun j hj ↦ hb _ (Finset.mem_union_right _
       (Finset.mem_image_of_mem _ (Finset.mem_range.mpr (by omega))))
 
 end Denominator
