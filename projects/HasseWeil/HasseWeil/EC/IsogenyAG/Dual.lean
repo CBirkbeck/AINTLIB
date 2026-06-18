@@ -82,7 +82,7 @@ noncomputable def factorThroughPullback (φ : CurveMap C₁ C₂) (ψ : CurveMap
     (h : ψ.pullback.range ≤ φ.pullback.range) :
     C₃.FunctionField →ₐ[F] C₂.FunctionField :=
   (AlgEquiv.ofInjective φ.pullback φ.pullback.toRingHom.injective).symm.toAlgHom.comp
-    (ψ.pullback.codRestrict φ.pullback.range (fun z => h ⟨z, rfl⟩))
+    (ψ.pullback.codRestrict φ.pullback.range (fun z ↦ h ⟨z, rfl⟩))
 
 /-- The factoring curve map `χ : C₂ → C₃`. -/
 noncomputable def factorThrough (φ : CurveMap C₁ C₂) (ψ : CurveMap C₁ C₃)
@@ -100,7 +100,7 @@ theorem factorThroughPullback_spec (φ : CurveMap C₁ C₂) (ψ : CurveMap C₁
     φ.pullback (factorThroughPullback φ ψ h z) = ψ.pullback z := by
   change φ.pullback
       ((AlgEquiv.ofInjective φ.pullback φ.pullback.toRingHom.injective).symm
-        (ψ.pullback.codRestrict φ.pullback.range (fun z => h ⟨z, rfl⟩) z)) = _
+        (ψ.pullback.codRestrict φ.pullback.range (fun z ↦ h ⟨z, rfl⟩) z)) = _
   -- `φ.pullback` of `(ofInjective φ).symm x` is the coercion of `x` back to K(C₁),
   -- and the codomain-restriction's coercion is just `ψ.pullback z`.
   have key : ∀ x : φ.pullback.range,
@@ -319,7 +319,7 @@ theorem rangeIncl_of_fixedField {L : Type*} [Field L] [Algebra F L]
   rintro z ⟨w, rfl⟩
   change νPb w ∈ φPb.range
   rw [hfix (νPb w)]
-  exact fun σ hσ => hnu σ hσ w
+  exact fun σ hσ ↦ hnu σ hσ w
 
 /-- **Silverman III.6.1 Galois data** for an isogeny `φ : E₁ → E₂`. Bundles the
 per-`φ` inputs of the III.4.11 fixed-field argument for the range inclusion
@@ -365,7 +365,7 @@ theorem DualGaloisData.hincl {φ : Isogeny W₁ W₂} (d : DualGaloisData φ) :
   rintro z ⟨w, rfl⟩
   change d.νPb w ∈ φ.toCurveMap.pullback.range
   rw [d.hfix (d.νPb w)]
-  exact fun σ hσ => d.hnu σ hσ w
+  exact fun σ hσ ↦ d.hnu σ hσ w
 
 /-- **The dual witness from the Galois data** (Silverman III.6.1). Assembles the
 range inclusion (`DualGaloisData.hincl`, via the III.4.11 fixed-field core) with
