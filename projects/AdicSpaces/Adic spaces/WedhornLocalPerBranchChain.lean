@@ -210,7 +210,7 @@ theorem rationalOpen_subset_base_via_local_Cor732_chain
         exact hw_T1 t' (Finset.mem_insert_of_mem ht')
     -- Apply local inclusion to deduce w in local target rational-open.
     obtain ⟨_, hw_T_D_loc, hw_s_D_ne⟩ := h_local_inclusion hw_loc_source
-    refine ⟨fun t ht => ?_, hw_s_D_ne⟩
+    refine ⟨fun t ht ↦ ?_, hw_s_D_ne⟩
     exact hw_T_D_loc (algebraMap A (Localization.Away s) t)
       (Finset.mem_image.mpr ⟨t, ht, rfl⟩)
   -- Step 4: pull back via rationalOpen_subset_via_localization_locSubring.
