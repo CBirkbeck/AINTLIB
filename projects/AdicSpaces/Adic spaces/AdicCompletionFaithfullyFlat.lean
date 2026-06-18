@@ -64,33 +64,23 @@ theorem faithfullyFlat_of_le_jacobson_bot (I : Ideal R)
     Module.FaithfullyFlat R (AdicCompletion I R) := by
   refine ⟨?_⟩
   intro m hm
-  -- Translate `m • ⊤ ≠ ⊤` to `Ideal.map (algebraMap R (AdicCompletion I R)) m ≠ ⊤`.
   rw [Ideal.smul_top_eq_map, Ne, Submodule.restrictScalars_eq_top_iff]
   intro hm_top
-  -- Use `I ⊆ Jacobson ⊥ ⊆ m` (every maximal contains `Jacobson ⊥`).
   have hIm : I ≤ m :=
     hI.trans (Ideal.jacobson_bot (R := R) ▸ Ring.jacobson_le_of_isMaximal m)
-  -- Apply `evalₐ I 1` to reduce `m.map algebraMap R R^ = ⊤` to
-  -- `m.map (Quotient.mk I) = ⊤` in `R/I`.
   have h_comp : ((AdicCompletion.evalₐ I 1).toRingHom.comp
       (algebraMap R (AdicCompletion I R))) = Ideal.Quotient.mk (I ^ 1) := by
     ext x
-    change AdicCompletion.evalₐ I 1 (AdicCompletion.of I R x) = Ideal.Quotient.mk _ x
     exact AdicCompletion.evalₐ_of I 1 x
   have h_eval_map : Ideal.map ((AdicCompletion.evalₐ I 1).toRingHom.comp
       (algebraMap R (AdicCompletion I R))) m = ⊤ := by
     rw [← Ideal.map_map, hm_top, Ideal.map_top]
   rw [h_comp, show (I ^ 1 : Ideal R) = I from pow_one I] at h_eval_map
-  -- `m.map (Quotient.mk I) = ⊤`.
-  -- By `comap_map_quotientMk`: `(m.map (Quotient.mk I)).comap (Quotient.mk I) = I ⊔ m`.
   have h_sup : I ⊔ m = ⊤ := by
     have := Ideal.comap_map_quotientMk I m
     rw [h_eval_map, Ideal.comap_top] at this
     exact this.symm
-  -- `I ≤ m` ⟹ `I ⊔ m = m`. So `m = ⊤`. Contradiction with `m.IsMaximal`.
-  have h_m_top : m = ⊤ := by
-    rw [← h_sup, sup_eq_right.mpr hIm]
-  exact hm.ne_top h_m_top
+  exact hm.ne_top <| by rw [← h_sup, sup_eq_right.mpr hIm]
 
 end AdicCompletion
 
