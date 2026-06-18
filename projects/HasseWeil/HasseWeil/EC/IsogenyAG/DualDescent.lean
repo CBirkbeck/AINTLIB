@@ -1012,6 +1012,47 @@ theorem exists_finiteGalois_towerTensorIncl_range [CharZero F]
   refine Finset.sum_congr rfl (fun p _ => ?_)
   rw [towerTensorIncl_tmul]
 
+/-! #### The induced inclusion on fraction fields `Frac(M ⊗ F[C]) → Frac(K̄ ⊗ F[C])` -/
+
+/-- The fraction-field inclusion `Frac(M ⊗_F F[C]) → Frac(K̄ ⊗_F F[C])` induced by the injective
+ring hom `towerTensorIncl` (`M ⊆ K̄ = AlgebraicClosure F`). The codomain is the tensor-fraction
+presentation of `(C.baseChange K̄).FunctionField` (via `functionField_baseChange_tensorEquiv`). -/
+noncomputable def fracTowerIncl (C : SmoothPlaneCurve F)
+    (M : IntermediateField F (AlgebraicClosure F)) :
+    letI := C.isDomain_tensorCoordRing M
+    letI := C.isDomain_tensorCoordRing (AlgebraicClosure F)
+    FractionRing (M ⊗[F] C.toAffine.CoordinateRing) →+*
+      FractionRing (AlgebraicClosure F ⊗[F] C.toAffine.CoordinateRing) :=
+  letI := C.isDomain_tensorCoordRing M
+  letI := C.isDomain_tensorCoordRing (AlgebraicClosure F)
+  IsFractionRing.map (B := AlgebraicClosure F ⊗[F] C.toAffine.CoordinateRing)
+    (j := (towerTensorIncl C.toAffine.CoordinateRing M).toRingHom)
+    (towerTensorIncl_injective C.toAffine.CoordinateRing M)
+
+/-- `fracTowerIncl` carries `algebraMap b` to `algebraMap (towerTensorIncl b)`. -/
+theorem fracTowerIncl_algebraMap (C : SmoothPlaneCurve F)
+    (M : IntermediateField F (AlgebraicClosure F)) (b : M ⊗[F] C.toAffine.CoordinateRing) :
+    letI := C.isDomain_tensorCoordRing M
+    letI := C.isDomain_tensorCoordRing (AlgebraicClosure F)
+    fracTowerIncl C M (algebraMap (M ⊗[F] C.toAffine.CoordinateRing) _ b) =
+      algebraMap (AlgebraicClosure F ⊗[F] C.toAffine.CoordinateRing) _
+        (towerTensorIncl C.toAffine.CoordinateRing M b) := by
+  letI := C.isDomain_tensorCoordRing M
+  letI := C.isDomain_tensorCoordRing (AlgebraicClosure F)
+  unfold fracTowerIncl
+  exact IsLocalization.map_eq _ b
+
+/-- `fracTowerIncl` is injective: its domain `FractionRing (M ⊗ F[C])` is a field, and every ring
+hom out of a field is injective. -/
+theorem fracTowerIncl_injective (C : SmoothPlaneCurve F)
+    (M : IntermediateField F (AlgebraicClosure F)) :
+    letI := C.isDomain_tensorCoordRing M
+    letI := C.isDomain_tensorCoordRing (AlgebraicClosure F)
+    Function.Injective (fracTowerIncl C M) := by
+  letI := C.isDomain_tensorCoordRing M
+  letI := C.isDomain_tensorCoordRing (AlgebraicClosure F)
+  exact (fracTowerIncl C M).injective
+
 end TowerDescent
 
 /-- **A `DescentData` over a concrete finite Galois intermediate field of `K̄`** (MOVE 1's data
