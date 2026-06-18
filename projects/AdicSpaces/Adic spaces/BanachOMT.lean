@@ -263,9 +263,6 @@ theorem _sub_sub_lemma_D_1_cauchy_builder
     (step : (n : ℕ) → G) (hstep : ∀ n, step (n + 1) - step n ∈ basis n) :
     CauchySeq step := by
   have h0_basis : ∀ n, (0 : G) ∈ basis n := fun n => mem_of_mem_nhds (hbasis n)
-  have hbasis_dec : ∀ n, basis (n + 1) ⊆ basis n := fun n x hx => by
-    have hsum : x + 0 ∈ basis (n + 1) + basis (n + 1) := Set.add_mem_add hx (h0_basis _)
-    rw [add_zero] at hsum; exact hshrink _ hsum
   -- Sum lemma: for any indexed family with xs i ∈ basis (n + 1 + i), Σ xs ∈ basis n.
   -- Proved by induction on k via iterated doubling.
   have hsum_lemma : ∀ k : ℕ, ∀ n : ℕ, ∀ xs : Fin k → G,
@@ -278,7 +275,7 @@ theorem _sub_sub_lemma_D_1_cauchy_builder
     | succ k ih =>
       intro n xs hxs
       rw [Fin.sum_univ_succ]
-      have h0 : xs 0 ∈ basis (n + 1) := by have := hxs 0; simpa using this
+      have h0 : xs 0 ∈ basis (n + 1) := by simpa using hxs 0
       have hrest : ∑ i, xs (Fin.succ i) ∈ basis (n + 1) := by
         apply ih (n + 1)
         intro i
