@@ -66,7 +66,7 @@ noncomputable def frobeniusIsog_rangeEquiv :
 @[simp] theorem frobeniusIsog_rangeEquiv_apply (z : W.toAffine.FunctionField) :
     ((frobeniusIsog_rangeEquiv W) z : W.toAffine.FunctionField) =
       (frobeniusIsog W).pullback z := by
-  simp [frobeniusIsog_rangeEquiv]
+  simp only [frobeniusIsog_rangeEquiv, AlgEquiv.ofInjective_apply]
 
 /-! ### `[q]*` restricted to land in the Frobenius image
 
@@ -84,7 +84,7 @@ noncomputable def mulByInt_q_pullback_restricted
     W.toAffine.FunctionField →ₐ[K] (frobeniusIsog W).pullback.range :=
   (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback.codRestrict
     (frobeniusIsog W).pullback.range
-    (fun z => h_subset ⟨z, rfl⟩)
+    (fun z ↦ h_subset ⟨z, rfl⟩)
 
 /-- Coercion of `mulByInt_q_pullback_restricted` back to `K(E)` via the
     range subalgebra inclusion gives `(mulByInt W q).pullback`. -/
@@ -131,26 +131,11 @@ theorem mulByInt_q_factor_via_witness
         (verschiebungPullback_of_witness W h_subset) := by
   apply AlgHom.ext
   intro z
-  -- LHS: (mulByInt W q).pullback z
-  -- RHS: π* (V* z) = π* ((frobenius_rangeEquiv).symm (mulByInt_q_restricted z))
-  --    = ((frobenius_rangeEquiv) ((frobenius_rangeEquiv).symm (mulByInt_q_restricted z)) : K(E))
-  --    = ((mulByInt_q_restricted z) : K(E))
-  --    = (mulByInt W q).pullback z
   show (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback z =
     (frobeniusIsog W).pullback
       ((frobeniusIsog_rangeEquiv W).symm
         (mulByInt_q_pullback_restricted W h_subset z))
-  -- Apply π* to (frobenius_rangeEquiv).symm result
-  have h_apply_pi :
-      (frobeniusIsog W).pullback
-        ((frobeniusIsog_rangeEquiv W).symm
-          (mulByInt_q_pullback_restricted W h_subset z)) =
-      ((frobeniusIsog_rangeEquiv W) ((frobeniusIsog_rangeEquiv W).symm
-        (mulByInt_q_pullback_restricted W h_subset z)) :
-          W.toAffine.FunctionField) := by
-    rw [← frobeniusIsog_rangeEquiv_apply W ((frobeniusIsog_rangeEquiv W).symm
-      (mulByInt_q_pullback_restricted W h_subset z))]
-  rw [h_apply_pi, AlgEquiv.apply_symm_apply]
-  rw [mulByInt_q_pullback_restricted_coe]
+  rw [← frobeniusIsog_rangeEquiv_apply, AlgEquiv.apply_symm_apply,
+    mulByInt_q_pullback_restricted_coe]
 
 end HasseWeil
