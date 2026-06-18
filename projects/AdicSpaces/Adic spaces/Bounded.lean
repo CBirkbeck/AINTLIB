@@ -536,10 +536,7 @@ theorem eq_zero_of_isUnit_matrix_of_forall_sum_smul_eq_zero
       C * (↑u : Matrix n n A) = 1 ∧ (↑u : Matrix n n A) * C = 1 :=
     ⟨((u⁻¹ : (Matrix n n A)ˣ) : Matrix n n A), u.inv_mul, u.mul_inv⟩
   calc y k
-      = ∑ j, (1 : Matrix n n A) k j • y j := by
-        rw [Finset.sum_eq_single k
-          (fun j _ hjk => by rw [Matrix.one_apply_ne hjk.symm, zero_smul])
-          (fun h => absurd (Finset.mem_univ k) h), Matrix.one_apply_eq, one_smul]
+      = ∑ j, (1 : Matrix n n A) k j • y j := by simp [Matrix.one_apply]
     _ = ∑ j, (C * (↑u : Matrix n n A)) k j • y j := by rw [hC1]
     _ = ∑ j, (∑ i, C k i * (↑u : Matrix n n A) i j) • y j := by simp_rw [Matrix.mul_apply]
     _ = ∑ j, ∑ i, (C k i * (↑u : Matrix n n A) i j) • y j := by simp_rw [Finset.sum_smul]
@@ -561,8 +558,5 @@ theorem eq_zero_of_forall_eq_sum_topNilp_smul    {n : Type*} [Fintype n] [Decida
   have h1 : ∑ j, (1 - B : Matrix n n A) i j • y j
       = (∑ j, (1 : Matrix n n A) i j • y j) - ∑ j, B i j • y j := by
     simp_rw [Matrix.sub_apply, sub_smul, Finset.sum_sub_distrib]
-  rw [h1, show (∑ j, (1 : Matrix n n A) i j • y j) = y i from by
-    rw [Finset.sum_eq_single i
-      (fun j _ hji => by rw [Matrix.one_apply_ne hji.symm, zero_smul])
-      (fun h => absurd (Finset.mem_univ i) h), Matrix.one_apply_eq, one_smul],
+  rw [h1, show (∑ j, (1 : Matrix n n A) i j • y j) = y i by simp [Matrix.one_apply],
     ← hy i, sub_self]
