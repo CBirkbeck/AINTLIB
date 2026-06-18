@@ -2281,16 +2281,78 @@ private theorem hasMulByIntDualWitness_of_rangeIncl {F : Type*} [Field F] [Decid
     (EC.mulByIntBasepoint_holds W₁ (by exact_mod_cast φ.degree_pos'.ne'))
     (EC.Isogeny.reflects_ordAtInfty φ)
 
+/-- **The faithful `[n]`-witness from a range inclusion, for a general `n`** (the basepoint leaf for
+arbitrary `n ≠ 0`). The basepoint field is `hbase_of_reflects` fed by `mulByIntBasepoint_holds` and
+`reflects_ordAtInfty`. -/
+private theorem hasMulByIntDualWitness_of_rangeIncl_general {F : Type*} [Field F] [DecidableEq F]
+    {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
+    (φ : EC.Isogeny W₁ W₂) {n : ℤ} (hn : n ≠ 0)
+    (hincl : (HasseWeil.mulByInt_pullbackAlgHom W₁ n hn).range ≤ φ.toCurveMap.pullback.range) :
+    φ.HasMulByIntDualWitness n hn where
+  hincl := hincl
+  hbase := EC.Isogeny.hbase_of_reflects φ
+    (HasseWeil.mulByInt_pullbackAlgHom W₁ n hn) hincl
+    (EC.mulByIntBasepoint_holds W₁ hn)
+    (EC.Isogeny.reflects_ordAtInfty φ)
+
+/-- **MOVE 2 — the `F`-level range inclusion via the `K̄`-direct route** (no finite-`L` geometric
+realization). For `m = deg` of the `K̄`-base-changed isogeny `bcIsog`, the inclusion
+`Im([m]*_F) ⊆ Im(φ*_F)` holds: the `K̄`-direct inclusion `ecIsog_mulByInt_deg_rangeIncl_of_charZero`
+(applied to `bcIsog`, with `hreg` = its `pullback_ordAtInfty_nonneg`) gives the inclusion over `K̄`
+for `mPbK = [m]*_K̄` (`mPbL_eq_mulByInt_baseChange_kbar`) and `psiK = φ*_K̄`; this is descended to `F`
+by `rangeIncl_of_descentData_kbar` (the tower fixed-field characterization). -/
+private theorem rationalRangeIncl_kbar {F : Type u} [Field F] [DecidableEq F] [CharZero F]
+    {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
+    (φ : EC.Isogeny W₁ W₂) :
+    ∃ (m : ℤ) (hm : m ≠ 0),
+      (HasseWeil.mulByInt_pullbackAlgHom W₁ m hm).range ≤ φ.toCurveMap.pullback.range := by
+  classical
+  -- `m = deg` of the K̄-base-changed isogeny
+  set bc := TwoCurveBaseChange.bcIsog W₁ W₂ φ (AlgebraicClosure F) with hbc
+  refine ⟨(bc.degree : ℤ), by exact_mod_cast bc.degree_pos'.ne', ?_⟩
+  -- the K̄-level inclusion `Im([m]*_K̄) ⊆ Im(φ*_K̄)`, from the K̄-direct theorem
+  have hKincl :
+      (TwoCurveBaseChange.mPbL W₁ (AlgebraicClosure F) (n := (bc.degree : ℤ))
+          (by exact_mod_cast bc.degree_pos'.ne')).range ≤
+        (TwoCurveBaseChange.psiL W₁ W₂ φ (AlgebraicClosure F)).range := by
+    -- the K̄-direct inclusion for `bc` (its degree)
+    have hincl := ecIsog_mulByInt_deg_rangeIncl_of_charZero
+      (W₁ := W₁.baseChange (AlgebraicClosure F)) (W₂ := W₂.baseChange (AlgebraicClosure F)) bc
+      bc.pullback_ordAtInfty_nonneg
+    -- rewrite `mPbL = [m]*_K̄` (h_mPbL) and `psiL` range = `bc.pullback` range
+    rw [TwoCurveBaseChange.mPbL_eq_mulByInt_baseChange_kbar W₁ (n := (bc.degree : ℤ))]
+    rintro z ⟨u, hu⟩
+    rw [AlgHom.mem_range]
+    -- `z ∈ Im([m]*_K̄)` (the bare AlgHom, `(ecShell bc).degree = bc.degree`)
+    have hzmem : z ∈ (HasseWeil.mulByInt_pullbackAlgHom (W₁.baseChange (AlgebraicClosure F))
+        ((ecShell bc).degree : ℤ)
+        (by exact_mod_cast (HasseWeil.Isogeny.degree_pos_twoCurve (ecShell bc)).ne')).range := by
+      refine ⟨u, ?_⟩
+      rw [← hu]; rfl
+    obtain ⟨w, hw⟩ := hincl hzmem
+    exact ⟨w, hw⟩
+  -- descend to `F`
+  exact rangeIncl_of_descentData_kbar
+    (TwoCurveBaseChange.psiL W₁ W₂ φ (AlgebraicClosure F))
+    (TwoCurveBaseChange.mPbL W₁ (AlgebraicClosure F) (n := (bc.degree : ℤ))
+      (by exact_mod_cast bc.degree_pos'.ne'))
+    (TwoCurveBaseChange.psiL_galEquivariant W₁ W₂ φ (AlgebraicClosure F))
+    (TwoCurveBaseChange.psiL_injective W₁ W₂ φ (AlgebraicClosure F))
+    (fun g => TwoCurveBaseChange.psiL_nat W₁ W₂ φ (AlgebraicClosure F) g)
+    (fun u => TwoCurveBaseChange.mPbL_nat W₁ (AlgebraicClosure F)
+      (by exact_mod_cast bc.degree_pos'.ne') u)
+    hKincl
+
 /-- **DUAL-Q4 deep residual, assembled** — the separable reverse-isogeny existence (Silverman
-III.6.1, char-0 case): from the deep range inclusion (`rationalRangeIncl_of_separable`, the sole
-remaining `sorry`) and the proved basepoint leaf (`hasMulByIntDualWitness_of_rangeIncl`), a
-separable isogeny over a char-0 base admits an `F`-rational faithful `[deg φ]`-witness. -/
-private theorem rationalReverseCompose_of_separable {F : Type*} [Field F] [DecidableEq F] [CharZero F]
+III.6.1, char-0 case): from the `K̄`-direct range inclusion (`rationalRangeIncl_kbar`, MOVE 2) and the
+basepoint leaf (`hasMulByIntDualWitness_of_rangeIncl_general`), a separable isogeny over a char-0 base
+admits an `F`-rational faithful `[n]`-witness (`n = deg` of the `K̄`-base-change). -/
+private theorem rationalReverseCompose_of_separable {F : Type u} [Field F] [DecidableEq F] [CharZero F]
     {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
     (φ : EC.Isogeny W₁ W₂) (hsep : φ.IsSeparable) :
-    ∃ (n : ℤ) (hn : n ≠ 0), φ.HasMulByIntDualWitness n hn :=
-  ⟨(φ.degree : ℤ), by exact_mod_cast φ.degree_pos'.ne',
-    hasMulByIntDualWitness_of_rangeIncl φ (rationalRangeIncl_of_separable φ hsep)⟩
+    ∃ (n : ℤ) (hn : n ≠ 0), φ.HasMulByIntDualWitness n hn := by
+  obtain ⟨m, hm, hincl⟩ := rationalRangeIncl_kbar φ
+  exact ⟨m, hm, hasMulByIntDualWitness_of_rangeIncl_general φ hm hincl⟩
 
 /-! ### Char-0 separability and the `F`-level formal payoff
 
