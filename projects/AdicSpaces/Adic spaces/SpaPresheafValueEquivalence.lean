@@ -547,9 +547,8 @@ theorem exists_spa_presheafValue_of_rationalOpen
     extension_vle_one_on_locPlusSubring D hv_rat hw_comap
   obtain ⟨w', hw'_spa, hw'_comap⟩ := spa_completion_of_spa_localization D hw_spa hw_loc
   refine ⟨w', hw'_spa, ?_⟩
-  have hcomp : D.canonicalMap =
-      (D.coeRingHom).comp (algebraMap A (Localization.Away D.s)) := rfl
-  rw [hcomp, comap_comp, Function.comp_apply, hw'_comap, hw_comap]
+  rw [show D.canonicalMap = (D.coeRingHom).comp (algebraMap A (Localization.Away D.s)) from rfl,
+    comap_comp, Function.comp_apply, hw'_comap, hw_comap]
 
 /-! ## Main result — assembly
 
@@ -811,8 +810,7 @@ theorem Spa_presheafValue_eq_rationalOpen_via_subcomponents
         ↥(rationalOpen D.T D.s ∩ Spa A A⁺ : Set (Spv A))))
     ⟨?_, ?_⟩⟩
   · -- Injectivity: Wedhorn 8.2 — the extension is unique.
-    intro w₁ w₂ hw
-    exact Subtype.ext (comap_canonicalMap_injOn_spa D w₁.property w₂.property
+    exact fun w₁ w₂ hw => Subtype.ext (comap_canonicalMap_injOn_spa D w₁.property w₂.property
       (congrArg Subtype.val hw))
   · -- Surjectivity: every `v ∈ R(T/s) ∩ Spa A` is the pullback of a Spa-point of the
     -- completion (Wedhorn 8.2: image of `j` is `R(T/s)`).
