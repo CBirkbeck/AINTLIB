@@ -225,12 +225,9 @@ theorem sigma_power_cleared_inequality_via_sigma_decay_chain_at
     {w : Spv A} {σ : Aˣ} {t' s_D C_base_s : A} {N : ℕ}
     (h_w_f : w.vle ((σ : A) * t' * s_D ^ N) C_base_s)
     (h_C_decay : w.vle C_base_s ((σ : A) * s_D ^ (N + 1))) :
-    w.vle (t' * s_D ^ N) (s_D ^ (N + 1)) := by
-  have h_combined :
-      w.vle ((σ : A) * t' * s_D ^ N) ((σ : A) * s_D ^ (N + 1)) :=
-    w.vle_trans h_w_f h_C_decay
-  rw [mul_assoc] at h_combined
-  exact (vle_iff_mul_unit_left w σ (t' * s_D ^ N) (s_D ^ (N + 1))).mp h_combined
+    w.vle (t' * s_D ^ N) (s_D ^ (N + 1)) :=
+  (vle_iff_mul_unit_left w σ (t' * s_D ^ N) (s_D ^ (N + 1))).mp
+    (mul_assoc (σ : A) t' (s_D ^ N) ▸ w.vle_trans h_w_f h_C_decay)
 
 omit [IsTopologicalRing A] in
 /-- **σ-power-cleared inequality supplier from generic σ-decay chain
@@ -422,14 +419,12 @@ theorem sigma_power_cleared_inequality_from_localized_cor732_output
   obtain ⟨σ_loc, h_cover_t⟩ :=
     localizedCor732_sigma_supplier_for_actual_C1 P T s hopen
       π_loc hI_loc hπ_loc_tn hπ_loc_unit hArch_loc T_D s_D hT_loc
-  -- Apply the T065-tied predicate at this specific (σ_loc, h_cover_t)
-  -- to obtain the generic σ-decay chain supplier.
-  have h_generic : Cor732SigmaDecayChainSupplier T_D s_base s_D f :=
-    Cor732SigmaDecayChainSupplier_of_localized_at_T065_sigma_loc
-      P T s hopen T_D s_D s_base f h_loc σ_loc h_cover_t
-  -- Compose with the generic-layer bridge to deliver the T079/T080 input.
-  exact sigma_power_cleared_inequality_via_generic_chain_supplier
-    T_D s_base s_D f h_generic
+  -- Apply the T065-tied predicate at this specific (σ_loc, h_cover_t) to
+  -- obtain the generic σ-decay chain supplier, then compose with the
+  -- generic-layer bridge to deliver the T079/T080 input.
+  exact sigma_power_cleared_inequality_via_generic_chain_supplier T_D s_base s_D f
+    (Cor732SigmaDecayChainSupplier_of_localized_at_T065_sigma_loc
+      P T s hopen T_D s_D s_base f h_loc σ_loc h_cover_t)
 
 /-- **`SigmaProductClearedInequalitySupplier` from localized Cor 7.32
 output** (T083 + T079 end-to-end consumer-facing T083 deliverable).
