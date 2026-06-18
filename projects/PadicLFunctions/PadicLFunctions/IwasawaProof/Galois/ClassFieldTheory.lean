@@ -66,6 +66,14 @@ class ClassFieldTheory (K : Type) [Field K] [NumberField K] [RayClassData K] whe
   toClassGroup : ∀ 𝔪 : Ideal (𝓞 K), RayClassData.rayClassGroup 𝔪 →* ClassGroup (𝓞 K)
   /-- the forget-modulus map is surjective. -/
   toClassGroup_surjective : ∀ 𝔪, Function.Surjective (toClassGroup 𝔪)
+  /-- the map `(𝓞_K/𝔪)ˣ → Cl_K(𝔪)` sending a residue to the class of the principal ideal it
+  generates (the start of the ray–class–group sequence). -/
+  fromUnitsMod : ∀ 𝔪 : Ideal (𝓞 K), (𝓞 K ⧸ 𝔪)ˣ →* RayClassData.rayClassGroup 𝔪
+  /-- exactness `(𝓞_K/𝔪)ˣ → Cl_K(𝔪) → Cl_K → 0`: an element of `Cl_K(𝔪)` dies in `Cl_K` iff it
+  comes from `(𝓞_K/𝔪)ˣ`.  (The ideal-theoretic ray sequence — elementary, bundled here since the
+  ray class group is abstract interface data.) -/
+  ray_exact : ∀ 𝔪 (x : RayClassData.rayClassGroup 𝔪),
+    toClassGroup 𝔪 x = 1 ↔ x ∈ (fromUnitsMod 𝔪).range
   /-- the **ray class field** Galois group `Gal(H_𝔪/K)`, as a bundled commutative group. -/
   rayClassFieldGal : Ideal (𝓞 K) → CommGrpCat.{0}
   /-- **Artin reciprocity**: `Cl_K(𝔪) ≃ Gal(H_𝔪/K)`. -/
