@@ -1314,7 +1314,7 @@ theorem restrictionMapAlg_continuous [HasLocLiftPowerBounded A] (D D' : Rational
       (restrictionMapAlg D D' h) :=
   restrictionMapAlg_continuous_of_huber_completion D D' h
     (HasLocLiftPowerBounded.isUnit_canonicalMap_s D D' h)
-    (fun t ht => HasLocLiftPowerBounded.locLift_divByS_isPowerBounded D D' h t ht)
+    (fun t ht ↦ HasLocLiftPowerBounded.locLift_divByS_isPowerBounded D D' h t ht)
 
 /-- The restriction map `σ : A⟨T/s⟩ →+* A⟨T'/s'⟩` (Proposition 8.2(1) of Wedhorn). -/
 noncomputable def restrictionMapHom [HasLocLiftPowerBounded A] (D D' : RationalLocData A)
@@ -2864,7 +2864,7 @@ theorem units_subseteq_union_translates_of_oneAdd_topNilp
     [IsHuberRing A] :
     {x : A | IsUnit x} ⊆
       ⋃ (u : Aˣ),
-        (fun y => (u : A) * y) ''
+        (fun y ↦ (u : A) * y) ''
           {y : A | ∃ n ∈ TopologicalRing.topologicallyNilpotentElements A,
                      y = 1 + n} := by
   intro x hx
@@ -2882,7 +2882,7 @@ theorem union_translates_of_oneAdd_topNilp_subseteq_units_of_complete
     {A : Type*} [CommRing A] [UniformSpace A] [IsUniformAddGroup A]
     [IsTopologicalRing A] [IsHuberRing A] [T2Space A] [CompleteSpace A] :
     (⋃ (u : Aˣ),
-        (fun y => (u : A) * y) ''
+        (fun y ↦ (u : A) * y) ''
           {y : A | ∃ n ∈ TopologicalRing.topologicallyNilpotentElements A,
                      y = 1 + n}) ⊆
       {x : A | IsUnit x} := by
@@ -2957,7 +2957,7 @@ theorem units_eq_union_translates_of_oneAdd_topNilp
     [IsHuberRing A] :
     {x : A | IsUnit x} =
       ⋃ (u : Aˣ),
-        (fun y => (u : A) * y) ''
+        (fun y ↦ (u : A) * y) ''
           {y : A | ∃ n ∈ TopologicalRing.topologicallyNilpotentElements A,
                      y = 1 + n} :=
   Set.Subset.antisymm
@@ -2987,20 +2987,20 @@ theorem isOpen_units_of_complete_huber
   refine isOpen_iUnion ?_
   intro u
   have h1 : {y : A | ∃ n ∈ TopologicalRing.topologicallyNilpotentElements A, y = 1 + n}
-      = (fun n => 1 + n) '' (TopologicalRing.topologicallyNilpotentElements A) := by
+      = (fun n ↦ 1 + n) '' (TopologicalRing.topologicallyNilpotentElements A) := by
     ext y
     constructor
     · rintro ⟨n, hn, rfl⟩; exact ⟨n, hn, rfl⟩
     · rintro ⟨n, hn, rfl⟩; exact ⟨n, hn, rfl⟩
   rw [h1, Set.image_image]
-  have h3 : (fun n : A => (u : A) * (1 + n)) =
-      (fun y : A => (u : A) + y) ∘ (fun n : A => (u : A) * n) := by
+  have h3 : (fun n : A ↦ (u : A) * (1 + n)) =
+      (fun y : A ↦ (u : A) + y) ∘ (fun n : A ↦ (u : A) * n) := by
     ext n; simp [mul_add]
   rw [h3, Set.image_comp]
   have hu_unit : IsUnit (u : A) := u.isUnit
   have htop_open : IsOpen (TopologicalRing.topologicallyNilpotentElements A) :=
     isOpen_topologicallyNilpotent_of_huber
-  have h_mul_open : IsOpen ((fun n : A => (u : A) * n) ''
+  have h_mul_open : IsOpen ((fun n : A ↦ (u : A) * n) ''
       (TopologicalRing.topologicallyNilpotentElements A)) :=
     hu_unit.isOpenMap_smul _ htop_open
   exact (Homeomorph.addLeft (u : A)).isOpenMap _ h_mul_open
@@ -3049,7 +3049,7 @@ theorem isUnit_iff_forall_not_vle_zero_of_complete_pairFree
     [IsTopologicalRing A] [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
     (f : A) :
     IsUnit f ↔ ∀ v ∈ Spa A A⁺, ¬ v.vle f 0 := by
-  refine ⟨fun hu v _ => not_vle_zero_of_isUnit hu v, fun h => ?_⟩
+  refine ⟨fun hu v _ ↦ not_vle_zero_of_isUnit hu v, fun h ↦ ?_⟩
   by_contra hf
   obtain ⟨𝔪, h𝔪, hf𝔪⟩ :=
     Ideal.exists_le_maximal (Ideal.span {f}) (Ideal.span_singleton_ne_top hf)
@@ -3094,7 +3094,7 @@ theorem isUnit_implies_ne_zero_on_spa
     [IsTopologicalRing A] [IsHuberRing A]
     {f : A} (hf : IsUnit f) :
     ∀ x ∈ Spa A A⁺, ¬ x.vle f 0 :=
-  fun x _ => ValuationSpectrum.not_vle_zero_of_isUnit hf x
+  fun x _ ↦ ValuationSpectrum.not_vle_zero_of_isUnit hf x
 
 /-- **(T-H.2.a.2, Wedhorn 7.52(2))** For complete Tate `A` and `f ∈ A`, `f` is a unit iff
 `|f(x)| ≠ 0` for all `x ∈ Spa A`. Wedhorn's proof reformulates Prop 7.51
@@ -3204,11 +3204,11 @@ private theorem topNilp_vle_one_of_continuous
   open WithZeroTopology in
   have hv_cont_fn : Continuous (ValuativeRel.valuation A) := hv_cont.continuous
   -- `b^n → 0` in `A` (the definition of topological nilpotence).
-  have hb_pow : Filter.Tendsto (fun n : ℕ => b ^ n) Filter.atTop (nhds 0) := _hb_topNilp
+  have hb_pow : Filter.Tendsto (fun n : ℕ ↦ b ^ n) Filter.atTop (nhds 0) := _hb_topNilp
   -- Continuity transports this to `v(b)^n = v(b^n) → v(0) = 0` in the
   -- value group (with the `WithZeroTopology`).
   open WithZeroTopology in
-  have hvb_pow : Filter.Tendsto (fun n : ℕ => (ValuativeRel.valuation A) b ^ n)
+  have hvb_pow : Filter.Tendsto (fun n : ℕ ↦ (ValuativeRel.valuation A) b ^ n)
       Filter.atTop (nhds 0) := by
     have h := (hv_cont_fn.tendsto 0).comp hb_pow
     rw [map_zero] at h
@@ -3395,7 +3395,7 @@ private theorem rankOne_embedding_of_topNilp_witness
   have h_bracket : ∀ γ : ValuativeRel.ValueGroupWithZero A, 0 < γ →
       ∃ n : ℤ, ValuativeRel.valuation A b ^ (n + 1) ≤ γ ∧
         γ < ValuativeRel.valuation A b ^ n :=
-    fun γ hγ =>
+    fun γ hγ ↦
       valueGroup_archimedean_pair_of_topNilp_lt_one hvb_pos hvb_lt_one hγ
   -- Step 3b: bracket property gives the rank-1 embedding into the reals.
   exact embed_archimedean_valueGroup_into_real hvb_pos hvb_lt_one h_bracket
@@ -3469,7 +3469,7 @@ mathematical content — just a unit/zero case split. -/
 private theorem mulArchimedean_withZero_of_mulArchimedean_units
     {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀] [MulArchimedean Γ₀ˣ] :
     MulArchimedean Γ₀ := by
-  refine ⟨fun x y hy => ?_⟩
+  refine ⟨fun x y hy ↦ ?_⟩
   have hy_ne : y ≠ 0 := by
     intro h
     rw [h] at hy
