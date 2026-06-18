@@ -769,15 +769,6 @@ theorem isDegreeZeroAcyclic_single (F : AbPresheaf X) :
 
 end BasisSheaf
 
-/-! ### Section-form characterisations of degree-zero acyclicity
-
-`IsSeparating`/`HasGluing` are phrased via the augmented Čech complex
-(`cechAug`/`cechDiff`). For the elementary proof of Wedhorn Prop A.3 *in
-degree ≤ 0* — which (crucially) needs only the `q ≤ 1` part of the
-intersection hypotheses, the cochain homotopy for `H⁰` stopping at `H¹` —
-it is convenient to restate them directly via restriction maps `F.res`
-over the cover sets and their pairwise intersections. -/
-
 section SectionForm
 
 variable {X : Type u} [TopologicalSpace X] {ι : Type v} [Fintype ι]
@@ -788,7 +779,8 @@ omit [TopologicalSpace X] in
 theorem AbPresheaf.res_congr (F : AbPresheaf X) {U V V' : Set X}
     (h : V = V') (hVU : V ⊆ U) (hV'U : V' ⊆ U) (x : F.obj U) :
     h ▸ F.res hVU x = F.res hV'U x := by
-  subst h; rfl
+  subst h
+  rfl
 
 /-- The `q = 0` multi-intersection is the single cover set. -/
 theorem FiniteCover.inter_fin_one (U : FiniteCover X ι) (σ : Fin 1 → ι) :
@@ -872,8 +864,7 @@ theorem hasGluing_iff_section (F : AbPresheaf X) (U : FiniteCover X ι) :
           U.sets i ∩ U.sets i' ⊆ U.sets i') (g i')) →
       ∃ x : F.obj Set.univ, ∀ i, F.res (Set.subset_univ (U.sets i)) x = g i := by
   constructor
-  · -- HasGluing → section gluing
-    intro hglue g hg
+  · intro hglue g hg
     have hdf : cechDiff F U 0
         (fun σ => F.res (U.inter_subset_sets σ 0) (g (σ 0))) = 0 := by
       funext τ
@@ -893,12 +884,10 @@ theorem hasGluing_iff_section (F : AbPresheaf X) (U : FiniteCover X ι) :
       (subset_refl (U.sets i)) (g i)
     rw [F.res_id] at tR
     rw [← tL, ← tR, hxi]
-  · -- section gluing → HasGluing
-    intro hsec f hf
+  · intro hsec f hf
     obtain ⟨x, hx⟩ := hsec
       (fun i => F.res ((U.inter_fin_one (fun _ => i)).symm.le) (f (fun _ => i)))
       (fun i i' => by
-        -- The cocycle for `g` comes from `cechDiff⁰ f = 0` at the 2-simplex `![i, i']`.
         have hfeq : F.res (U.inter_face_subset 0 ![i, i'])
               (f (FiniteCover.face 0 ![i, i'])) =
             F.res (U.inter_face_subset 1 ![i, i'])
@@ -907,9 +896,13 @@ theorem hasGluing_iff_section (F : AbPresheaf X) (U : FiniteCover X ι) :
           rw [cechDiff_zero_apply] at h
           exact sub_eq_zero.mp h
         have e0 : FiniteCover.face 0 (![i, i'] : Fin 2 → ι) = (fun _ => i') := by
-          funext k; rw [Fin.fin_one_eq_zero k]; rfl
+          funext k
+          rw [Fin.fin_one_eq_zero k]
+          rfl
         have e1 : FiniteCover.face 1 (![i, i'] : Fin 2 → ι) = (fun _ => i) := by
-          funext k; rw [Fin.fin_one_eq_zero k]; rfl
+          funext k
+          rw [Fin.fin_one_eq_zero k]
+          rfl
         have hsub : U.sets i ∩ U.sets i' ⊆ U.inter ![i, i'] :=
           (U.inter_fin_two ![i, i']).ge
         have key := congrArg (F.res hsub) hfeq
@@ -937,8 +930,6 @@ theorem hasGluing_iff_section (F : AbPresheaf X) (U : FiniteCover X ι) :
     exact (F.res_section_eq f _ (subset_refl (U.inter σ)) hσ).trans (F.res_id (f σ))
 
 end SectionForm
-
-/-! ### Product cover acyclicity (Proposition A.3(3) of Wedhorn) -/
 
 section ProductAcyclicity
 
@@ -1020,9 +1011,7 @@ theorem isDegreeZeroAcyclic_prod (F : AbPresheaf X)
         (U.sets i ∩ U.sets i') ∩ V.sets j ⊆ U.sets i ∩ U.sets i') z = 0) → z = 0) :
     IsDegreeZeroAcyclic F (U.prod V) := by
   refine ⟨?_, ?_⟩
-  · -- SEPARATION: y zero on every `U_i ∩ V_j` ⇒ (via `hV0sep`) zero on every
-    -- `U_i` ⇒ (via `hU`) zero.
-    rw [isSeparating_iff_section]
+  · rw [isSeparating_iff_section]
     intro y hy
     have hUsep := (isSeparating_iff_section F U).mp hU.1
     refine hUsep y (fun i => ?_)
@@ -1033,20 +1022,16 @@ theorem isDegreeZeroAcyclic_prod (F : AbPresheaf X)
         F.res (Set.subset_univ (U.sets i ∩ V.sets j)) y := F.res_comp _ _ y
     rw [step]
     exact hy (i, j)
-  · -- GLUING (the genuine A.3(3) cocycle).
-    rw [hasGluing_iff_section]
+  · rw [hasGluing_iff_section]
     intro fp hfp
-    -- Restate the cocycle with `(U.prod V).sets (i,j)` reduced to `U_i ∩ V_j`.
     have hfp' : ∀ (i₁ i₂ : ι) (j₁ j₂ : κ),
         F.res (Set.inter_subset_left : (U.sets i₁ ∩ V.sets j₁) ∩
             (U.sets i₂ ∩ V.sets j₂) ⊆ U.sets i₁ ∩ V.sets j₁) (fp (i₁, j₁)) =
         F.res (Set.inter_subset_right : (U.sets i₁ ∩ V.sets j₁) ∩
             (U.sets i₂ ∩ V.sets j₂) ⊆ U.sets i₂ ∩ V.sets j₂) (fp (i₂, j₂)) :=
       fun i₁ i₂ j₁ j₂ => hfp (i₁, j₁) (i₂, j₂)
-    -- Step 1: per-`i`, glue the family `j ↦ fp (i,j)` over `U_i` via `hV0glue`.
     choose g hg using fun i =>
       hV0glue i (fun j => fp (i, j)) (fun j j' => hfp' i i j j')
-    -- Step 2: the `g i` agree on `U_i ∩ U_i'` (`U`-cocycle), via `hV1sep`.
     have hgcoc : ∀ i i',
         F.res (Set.inter_subset_left : U.sets i ∩ U.sets i' ⊆ U.sets i) (g i) =
         F.res (Set.inter_subset_right : U.sets i ∩ U.sets i' ⊆ U.sets i') (g i') := by
@@ -1068,7 +1053,6 @@ theorem isDegreeZeroAcyclic_prod (F : AbPresheaf X)
           simp only [F.res_comp] at ka kb kc
           exact ka.trans (kc.trans kb.symm))
       exact sub_eq_zero.mp hz
-    -- Step 3: glue the `g i` over the whole space via `hU`'s gluing.
     obtain ⟨x, hx⟩ := (hasGluing_iff_section F U).mp hU.2 g hgcoc
     refine ⟨x, fun p => ?_⟩
     obtain ⟨i, j⟩ := p
