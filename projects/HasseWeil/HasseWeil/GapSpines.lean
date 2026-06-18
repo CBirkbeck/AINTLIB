@@ -1222,8 +1222,6 @@ leaf closes via the sharp residual alone. -/
 theorem ker_deg_skeleton (hq : 2 ≤ Fintype.card K) :
     Nat.card (isogOneSub_negFrobenius W hq).kernel =
       (isogOneSub_negFrobenius W hq).degree := by
-  haveI : Finite W.toAffine.Point := Finite.of_fintype _
-  haveI : Finite (isogOneSub_negFrobenius W hq).kernel := inferInstance
   -- `kernel = ⊤` (rational-point shape) ⇒ `Nat.card kernel = pointCount`.
   have h_ker_card : Nat.card (isogOneSub_negFrobenius W hq).kernel = pointCount W.toAffine := by
     rw [kernel_eq_top_of_hom_eq_id_sub_frobenius W
