@@ -34,7 +34,7 @@ theorem trace_sq_le_four_mul_deg (q : ℕ) (t : ℤ) (hq : 0 < q)
     (h : ∀ r s : ℤ, 0 ≤ (q : ℤ) * r ^ 2 - t * r * s + s ^ 2) :
     t ^ 2 ≤ 4 * (q : ℤ) := by
   by_contra habs
-  push_neg at habs
+  push Not at habs
   have h₁ := h t (2 * (q : ℤ))
   have hq' : (0 : ℤ) < q := Int.natCast_pos.mpr hq
   nlinarith [sq_nonneg t, sq_nonneg (q : ℤ), mul_self_nonneg (q : ℤ)]
