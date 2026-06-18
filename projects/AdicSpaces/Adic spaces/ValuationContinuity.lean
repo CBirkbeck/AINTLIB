@@ -605,7 +605,7 @@ noncomputable def restrictToConvexBounded
         Units.mk0 (v r) hr ∉ H → v r < 1 := by
       intro r hr hnot
       by_contra h_ge_one
-      push_neg at h_ge_one
+      push Not at h_ge_one
       exact hnot (hH_ge r hr h_ge_one)
     have not_mem_of_le' {u w : Γ₀ˣ} (hu : u ∉ H) (hu1 : u ≤ 1) (hw1 : w ≤ u) : w ∉ H :=
       fun hw_mem ↦ hu (H.convex hw_mem (one_mem H) hw1 hu1)
@@ -657,7 +657,7 @@ noncomputable def restrictToConvexBounded
         Units.mk0 (v r) hr ∉ H → v r < 1 := by
       intro r hr hnot
       by_contra h_ge_one
-      push_neg at h_ge_one
+      push Not at h_ge_one
       exact hnot (hH_ge r hr h_ge_one)
     set f : R → WithZero H.toSubgroup := fun r ↦
       if h : v r = 0 then 0
@@ -1030,7 +1030,7 @@ theorem exists_mem_spa_supp_eq_of_nonOpen_prime_via_heightOne_ofPrime
   -- Transfer of `hAplus` through `V₀ ≤ V₀.ofPrime Q`.
   have hAplus' : ∀ f ∈ (A⁺ : Set A),
       P.pulledBackValuation (V₀.ofPrime Q) f ≤ 1 :=
-    fun f hf => P.pulledBackValuation_le_one_of_le hle (hAplus f hf)
+    fun f hf ↦ P.pulledBackValuation_le_one_of_le hle (hAplus f hf)
   -- Apply the MulArchimedean Lemma 7.45.
   exact P.exists_mem_spa_supp_eq_of_nonOpen_prime_mulArchimedean
     h𝔭 hrange' hnonunits' hAplus'
@@ -1175,7 +1175,7 @@ noncomputable def rationalEnlargedSubring (P : PairOfDefinition A)
   letI : IsDomain (A ⧸ 𝔭) := Ideal.Quotient.isDomain 𝔭
   Subring.closure
     (((P.toFractionQuotient 𝔭).range : Set _) ∪
-      (fun t : A =>
+      (fun t : A ↦
         ((algebraMap (A ⧸ 𝔭) (FractionRing (A ⧸ 𝔭))).comp
           (Ideal.Quotient.mk 𝔭)) t *
         (((algebraMap (A ⧸ 𝔭) (FractionRing (A ⧸ 𝔭))).comp
@@ -1224,10 +1224,10 @@ theorem rangeRestrict_image_mem_codRestrict_image
     (hy : y ∈ Ideal.map (P.toFractionQuotient 𝔭).rangeRestrict P.I) :
     (⟨y.1, hR' y.2⟩ : R') ∈
       Ideal.map ((P.toFractionQuotient 𝔭).codRestrict R'
-        (fun a => hR' ⟨a, rfl⟩)) P.I := by
+        (fun a ↦ hR' ⟨a, rfl⟩)) P.I := by
   set i : (P.toFractionQuotient 𝔭).range →+* R' := Subring.inclusion hR'
   have hcomp :
-      (P.toFractionQuotient 𝔭).codRestrict R' (fun a => hR' ⟨a, rfl⟩) =
+      (P.toFractionQuotient 𝔭).codRestrict R' (fun a ↦ hR' ⟨a, rfl⟩) =
       i.comp (P.toFractionQuotient 𝔭).rangeRestrict := by
     ext a; rfl
   rw [hcomp, ← Ideal.map_map]
@@ -1264,13 +1264,13 @@ theorem exists_packaged_enlarged_domination_of_subResiduals
     (hR'_proper :
       Ideal.map
         ((P.toFractionQuotient 𝔭).codRestrict (P.rationalEnlargedSubring 𝔭 T s)
-          (fun a => (P.range_le_rationalEnlargedSubring 𝔭 T s) ⟨a, rfl⟩))
+          (fun a ↦ (P.range_le_rationalEnlargedSubring 𝔭 T s) ⟨a, rfl⟩))
         P.I ≠ ⊤)
     (hQ_heightOne_I : ∀ V₀ : ValuationSubring (FractionRing (A ⧸ 𝔭)),
         P.rationalEnlargedSubring 𝔭 T s ≤ V₀.toSubring →
         ((P.rationalEnlargedSubring 𝔭 T s).subtype '' (Ideal.map
           ((P.toFractionQuotient 𝔭).codRestrict (P.rationalEnlargedSubring 𝔭 T s)
-            (fun a => (P.range_le_rationalEnlargedSubring 𝔭 T s) ⟨a, rfl⟩))
+            (fun a ↦ (P.range_le_rationalEnlargedSubring 𝔭 T s) ⟨a, rfl⟩))
           P.I : Set _) ⊆ V₀.nonunits) →
         ∃ Q : Ideal V₀, ∃ _ : Q.IsPrime, Q ≠ ⊥ ∧
           (∀ (P' : Ideal V₀), P'.IsPrime → P' < Q → P' = ⊥) ∧
@@ -1316,7 +1316,7 @@ theorem exists_packaged_enlarged_domination_of_subResiduals
             P.rationalEnlargedSubring 𝔭 T s) ∈
         Ideal.map ((P.toFractionQuotient 𝔭).codRestrict
           (P.rationalEnlargedSubring 𝔭 T s)
-          (fun a => (P.range_le_rationalEnlargedSubring 𝔭 T s) ⟨a, rfl⟩)) P.I :=
+          (fun a ↦ (P.range_le_rationalEnlargedSubring 𝔭 T s) ⟨a, rfl⟩)) P.I :=
       P.rangeRestrict_image_mem_codRestrict_image
         (P.range_le_rationalEnlargedSubring 𝔭 T s) hy_I
     -- Embed y.1 into V₀.nonunits via hnonunits_V₀.
