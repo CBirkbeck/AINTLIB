@@ -63,7 +63,7 @@ theorem kaehler_rank_one :
   haveI : Module.Free E.FunctionField (KaehlerDifferential F E.FunctionField) :=
     Module.Free.of_divisionRing _ _
   rw [finrank_eq_one_iff']
-  refine ⟨invariantDifferential E, invariantDifferential_ne_zero E, fun w => ?_⟩
+  refine ⟨invariantDifferential E, invariantDifferential_ne_zero E, fun w ↦ ?_⟩
   -- Every w ∈ Ω is a K(E)-multiple of ω = u⁻¹ • D(x).
   -- We show span{ω} = ⊤ by proving range(D) ⊆ span{D(x)} = span{ω}.
   suffices h : Submodule.span E.FunctionField {invariantDifferential E} = ⊤ by
@@ -133,7 +133,7 @@ theorem kaehler_rank_one :
       rw [AdjoinRoot.mk_X] at Y_sq
       simp only [map_sub, map_mul, AdjoinRoot.mk_X] at Y_sq
       have hcc : ∀ p : Polynomial F, AdjoinRoot.mk E.polynomial (Polynomial.C p) =
-        algebraMap (Polynomial F) E.CoordinateRing p := fun _ => rfl
+        algebraMap (Polynomial F) E.CoordinateRing p := fun _ ↦ rfl
       rw [hcc, hcc] at Y_sq; linear_combination Y_sq
     -- Lift to the function field
     set c_ff : E.FunctionField := algebraMap (Polynomial F) E.FunctionField
@@ -175,8 +175,7 @@ theorem kaehler_rank_one :
             (IsScalarTower.algebraMap_apply (Polynomial F) E.CoordinateRing
               E.FunctionField Polynomial.X).symm]
       rw [hc_eq, ← add_assoc]; exact denom_ne_zero E
-    rw [show D y_ff = (2 * y_ff + c_ff)⁻¹ • ((2 * y_ff + c_ff) • D y_ff) from by
-      rw [smul_smul, inv_mul_cancel₀ hu_c, one_smul]]
+    rw [← inv_smul_smul₀ hu_c (D y_ff)]
     exact S.smul_mem _ h_uDy_mem
   /- Step 4: D(r) ∈ S for all r ∈ CoordinateRing -/
   have hDcoord : ∀ r : E.CoordinateRing,
@@ -234,12 +233,12 @@ variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
     [m]*ω = m·ω (Silverman Cor. III.5.3). -/
 theorem formalMulByInt_linear_coeff (m : ℤ) :
     formalMulByInt_coeff W.toAffine m 1 = (m : F) := by
-  simp [formalMulByInt_coeff]
+  simp only [formalMulByInt_coeff, one_ne_zero, ↓reduceIte]
 
 /-- The multiplication-by-m on the formal group starts with 0 (no constant term). -/
 theorem formalMulByInt_const_zero (m : ℤ) :
     formalMulByInt_coeff W.toAffine m 0 = 0 := by
-  simp [formalMulByInt_coeff]
+  simp only [formalMulByInt_coeff, ↓reduceIte]
 
 end MulByMFormal
 
