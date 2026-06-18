@@ -177,36 +177,19 @@ theorem Ideal.isClosed_in_locTopology_of_contraction_isClosed_in_locSubring
       Ideal (locSubring P T s)) := by
     intro hcon
     exact hd_notin_q (Ideal.mem_comap.mp hcon)
-  have hd_in_compl : d ∈ (((Ideal.comap (locSubring P T s).subtype q :
-      Ideal (locSubring P T s)) : Set (locSubring P T s)))ᶜ := hd_notin_contr
-  have h_compl_open : @IsOpen (locSubring P T s)
-      ((locTopology P T s hopen).induced (locSubring P T s).subtype)
-      (((Ideal.comap (locSubring P T s).subtype q :
-          Ideal (locSubring P T s)) : Set (locSubring P T s)))ᶜ :=
-    h_contr_closed.isOpen_compl
-  have h_nhd_subspace : (((Ideal.comap (locSubring P T s).subtype q :
-      Ideal (locSubring P T s)) : Set (locSubring P T s)))ᶜ ∈
-      @nhds (locSubring P T s)
-        ((locTopology P T s hopen).induced (locSubring P T s).subtype) d :=
-    @IsOpen.mem_nhds _ _ _ _ h_compl_open hd_in_compl
+  have h_nhd_subspace := h_contr_closed.isOpen_compl.mem_nhds hd_notin_contr
   rw [@nhds_induced] at h_nhd_subspace
   obtain ⟨V₀, hV₀_nhds, hV₀_sub⟩ := Filter.mem_comap.mp h_nhd_subspace
   set V : Set (Localization.Away s) :=
-    V₀ ∩ (locSubring P T s : Set (Localization.Away s)) with hV_def
-  have h_locSubring_open : IsOpen ((locSubring P T s) : Set (Localization.Away s)) :=
-    locSubring_isOpen P T s hopen
-  have h_d_in_locSubring : (d : Localization.Away s) ∈ locSubring P T s := d.property
+    V₀ ∩ (locSubring P T s : Set (Localization.Away s))
   have hV_nhds : V ∈ nhds (d : Localization.Away s) :=
-    Filter.inter_mem hV₀_nhds (h_locSubring_open.mem_nhds h_d_in_locSubring)
+    Filter.inter_mem hV₀_nhds ((locSubring_isOpen P T s hopen).mem_nhds d.property)
   have h_d_eq : (d : Localization.Away s) = (u⁻¹ : (Localization.Away s)ˣ) * x := by
     rw [hxud, ← mul_assoc, u.inv_mul, one_mul]
-  have h_mul_uinv_cont : Continuous (fun y : Localization.Away s =>
-      ((u⁻¹ : (Localization.Away s)ˣ) : Localization.Away s) * y) :=
-    continuous_const.mul continuous_id
   have hV_preimage_nhd_x :
       (fun y : Localization.Away s =>
         ((u⁻¹ : (Localization.Away s)ˣ) : Localization.Away s) * y) ⁻¹' V ∈ nhds x := by
-    apply h_mul_uinv_cont.continuousAt
+    apply (continuous_const.mul continuous_id).continuousAt
     change V ∈ nhds (((u⁻¹ : (Localization.Away s)ˣ) : Localization.Away s) * x)
     rw [← h_d_eq]; exact hV_nhds
   refine Filter.mem_of_superset hV_preimage_nhd_x ?_
@@ -216,13 +199,9 @@ theorem Ideal.isClosed_in_locTopology_of_contraction_isClosed_in_locSubring
   have h_uinv_y_in_q : (u⁻¹ : (Localization.Away s)ˣ) * y ∈ q :=
     q.mul_mem_left _ hy_in_q
   set z : locSubring P T s := ⟨(u⁻¹ : (Localization.Away s)ˣ) * y, hy_locSub⟩
-  have hz_preim : z ∈ (Subtype.val : locSubring P T s → Localization.Away s) ⁻¹' V₀ :=
-    hy_V₀
   have hz_notin_contr : z ∉ (Ideal.comap (locSubring P T s).subtype q :
-      Ideal (locSubring P T s)) := hV₀_sub hz_preim
-  apply hz_notin_contr
-  change (z : Localization.Away s) ∈ q
-  exact h_uinv_y_in_q
+      Ideal (locSubring P T s)) := hV₀_sub hy_V₀
+  exact hz_notin_contr h_uinv_y_in_q
 
 /-! ### S-IDEAL-JAC — `locIdeal ≤ Ideal.jacobson ⊥` in `locSubring`
 
