@@ -253,25 +253,17 @@ integrality of `D.T ∪ {D.s}` in `D.P.A₀`. -/
 theorem RationalLocData.IntegralInPair.insertDenom
     {D : RationalLocData A} (hD : D.IntegralInPair) :
     D.insertDenom.IntegralInPair where
-  s_in_A₀ := by
-    show D.insertDenom.s ∈ D.insertDenom.P.A₀
-    rw [RationalLocData.insertDenom_s, RationalLocData.insertDenom_P]
-    exact hD.s_in_A₀
+  s_in_A₀ := by simpa using hD.s_in_A₀
   T_in_A₀ := by
-    intro t ht
-    rw [RationalLocData.insertDenom_P]
-    rw [RationalLocData.insertDenom_T, Finset.mem_insert] at ht
-    rcases ht with rfl | h
-    · exact hD.s_in_A₀
-    · exact hD.T_in_A₀ t h
+    simp only [RationalLocData.insertDenom_T, RationalLocData.insertDenom_P,
+      Finset.forall_mem_insert]
+    exact ⟨hD.s_in_A₀, hD.T_in_A₀⟩
 
 /-- The `insertDenom` transform preserves `SamePair` (in either argument). -/
 theorem RationalLocData.SamePair.insertDenom
     {D₀ D : RationalLocData A} (h : D₀.SamePair D) :
     D₀.insertDenom.SamePair D.insertDenom := by
-  unfold RationalLocData.SamePair at *
-  rw [RationalLocData.insertDenom_P, RationalLocData.insertDenom_P]
-  exact h
+  simpa [RationalLocData.SamePair] using h
 
 section RationalCoveringSection2
 
@@ -305,17 +297,11 @@ piece-level `insertDenom` keeps `P` unchanged. -/
 theorem RationalCovering.PinnedTo.insertDenom
     {P : PairOfDefinition A} {C : RationalCovering A} (hC : C.PinnedTo P) :
     C.insertDenom.PinnedTo P where
-  base_pair := by
-    show C.insertDenom.base.P = P
-    change C.base.insertDenom.P = P
-    rw [RationalLocData.insertDenom_P]
-    exact hC.base_pair
+  base_pair := hC.base_pair
   covers_pair := by
     classical
     intro D hD
-    show D.P = P
     obtain ⟨D', hD', rfl⟩ := Finset.mem_image.mp hD
-    rw [RationalLocData.insertDenom_P]
     exact hC.covers_pair D' hD'
 
 /-- The cover-level `insertDenom` transform preserves per-piece (and
