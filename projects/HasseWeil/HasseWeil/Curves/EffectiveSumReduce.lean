@@ -70,7 +70,7 @@ def MillerHypothesis : Prop :=
 /-- The divisor associated to a list of points. -/
 noncomputable def listToDivisor (Ps : List W.Point) :
     ProjectiveDivisor (⟨W⟩ : SmoothPlaneCurve F) :=
-  Ps.foldr (fun P acc => Finsupp.single P.toProjectiveSmoothPoint 1 + acc) 0
+  Ps.foldr (fun P acc ↦ Finsupp.single P.toProjectiveSmoothPoint 1 + acc) 0
 
 omit [DecidableEq F] [W.IsElliptic] in
 @[simp] theorem listToDivisor_nil :
