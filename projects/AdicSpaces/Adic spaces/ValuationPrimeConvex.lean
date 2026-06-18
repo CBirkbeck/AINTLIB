@@ -400,14 +400,11 @@ theorem primeOfConvexSubgroup_le_of_le (A : ValuationSubring K)
     primeOfConvexSubgroup A C ≤ Q := by
   intro a ha
   by_cases hva : A.valuation (a : K) = 0
-  · have : (a : K) = 0 := by rwa [Valuation.zero_iff] at hva
-    have : a = 0 := Subtype.ext this
-    rw [this]; exact Q.zero_mem
+  · rw [show a = 0 from Subtype.ext (by rwa [Valuation.zero_iff] at hva)]
+    exact Q.zero_mem
   · have hua_H : Units.mk0 (A.valuation (a : K)) hva ∉ convexSubgroupOfPrime A Q :=
       fun hmem => ((mem_primeOfConvexSubgroup_iff A C a).mp ha hva) (hle _ hmem)
-    rw [mem_convexSubgroupOfPrime] at hua_H
-    push_neg at hua_H
-    rw [Units.val_mk0, mapOfLE_valuation_apply] at hua_H
+    rw [mem_convexSubgroupOfPrime, Units.val_mk0, mapOfLE_valuation_apply] at hua_H
     have : a ∈ idealOfLE A (A.ofPrime Q) (le_ofPrime A Q) :=
       (valuation_lt_one_iff _ _).mpr (lt_of_le_of_ne
         ((A.ofPrime Q).valuation_le_one ⟨(a : K), le_ofPrime A Q a.2⟩) hua_H)
@@ -439,7 +436,6 @@ theorem primeOfConvexSubgroup_lt_of_lt (A : ValuationSubring K)
     · push_neg at h; exact (inv_le_one_of_one_le h.le)
   set g' := if g ≤ 1 then g else g⁻¹ with hg'_def
   rw [mem_convexSubgroupOfPrime] at hg'H
-  push_neg at hg'H
   obtain ⟨x, hx⟩ := A.valuation_surjective (g' : A.ValueGroup)
   have hx_ne : x ≠ 0 := by
     intro he; exact Units.ne_zero g' (by rw [← hx]; simp [he])
