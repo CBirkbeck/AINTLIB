@@ -614,6 +614,31 @@ theorem bPrime_valuation_eq_ordAtInfty_of_subring_le
     C₁.ordAtInftyValuation_surjective ?_
   rw [Valuation.isEquiv_iff_valuationSubring]; exact hEq
 
+/-- **The ∞ case of the place classification, structural reduction (natural direction)**: given the
+valuation-subring inclusion `O_∞ ⊆ O_v` (`hsup`), a height-one prime `v` of `B` *is* the place at
+infinity.  This is the direction an eventual proof produces naturally: the `∞`-chart integral closure
+`B_∞ = integralClosure F[1/x₁] K(C₁)` is `v`-integral (`O_v` is integrally closed and contains
+`1/x₁`), so `O_∞ = (B_∞)_{m_∞} ⊆ O_v`.  Here `O_∞` is the rank-one DVR, so
+`rankOne_valuationSubring_le_eq_of_ne_top` forces `O_∞ = O_v` and the two surjective `ℤᵐ⁰`-valued
+valuations are equal. -/
+theorem bPrime_valuation_eq_ordAtInfty_of_subring_ge
+    (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)))
+    (hsup : C₁.ordAtInftyValuation.valuationSubring ≤
+      (v.valuation C₁.FunctionField).valuationSubring)
+    (hvtop : (v.valuation C₁.FunctionField).valuationSubring ≠ ⊤) :
+    v.valuation C₁.FunctionField = C₁.ordAtInftyValuation := by
+  set w := v.valuation C₁.FunctionField with hw
+  have hwsurj : Function.Surjective w := v.valuation_surjective C₁.FunctionField
+  -- `O_∞` is a rank-one DVR (`ordAtInftyValuation` surjective onto `ℤᵐ⁰`).
+  haveI : IsDiscreteValuationRing C₁.ordAtInftyValuation.valuationSubring :=
+    valuationSubring_isDVR_of_surjective_withZeroInt _ C₁.ordAtInftyValuation_surjective
+  -- DVR-domination: `O_∞ = O_v`, then upgrade equal subrings to the value identity.
+  have hEq : C₁.ordAtInftyValuation.valuationSubring = w.valuationSubring :=
+    rankOne_valuationSubring_le_eq_of_ne_top _ _ hsup hvtop
+  refine Valuation.isEquiv_iff_eq_of_surjective_withZeroInt _ _ hwsurj
+    C₁.ordAtInftyValuation_surjective ?_
+  rw [Valuation.isEquiv_iff_valuationSubring]; exact hEq.symm
+
 /-- **The ∞-inclusion residual (the sharply-isolated curve-completeness wall)**: for every
 height-one prime `v` of `B` that is *not* `≤ 1` on both coordinate generators of `C₁` (so its center
 is at infinity), the `v`-adic valuation subring is contained in the `∞`-place subring.  Equivalently:
