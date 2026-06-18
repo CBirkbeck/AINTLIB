@@ -62,18 +62,18 @@ theorem primesOverFinset_card_eq_degree_of_unramified
     {p : Ideal C₂.CoordinateRing} (hpMax : p.IsMaximal) (hp0 : p ≠ ⊥)
     (h_ef_one :
       letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
-      ∀ P ∈ primesOverFinset p C₁.CoordinateRing,
+      ∀ P ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing,
         Ideal.ramificationIdx p P *
         Ideal.inertiaDeg p P = 1) :
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
-    (primesOverFinset p C₁.CoordinateRing).card = φ.degree := by
+    (IsDedekindDomain.primesOverFinset p C₁.CoordinateRing).card = φ.degree := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
   have hsum := φ.sum_ramificationIdx_mul_inertiaDeg_eq_degree
     coordHom coordHom.module_finite hpMax hp0
   -- Σ_{P ∈ S} (e · f) = deg. With each e·f = 1, LHS = S.card.
-  have hsum' : ∑ P ∈ primesOverFinset p C₁.CoordinateRing, (1 : ℕ) = φ.degree := by
+  have hsum' : ∑ P ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing, (1 : ℕ) = φ.degree := by
     rw [← hsum]
-    exact Finset.sum_congr rfl fun P hP => (h_ef_one P hP).symm
+    exact Finset.sum_congr rfl fun P hP ↦ (h_ef_one P hP).symm
   rw [Finset.sum_const, Nat.smul_one_eq_cast] at hsum'
   exact_mod_cast hsum'
 
@@ -89,11 +89,11 @@ theorem primesOverFinset_card_eq_sepDegree_of_separable_and_unramified
     {p : Ideal C₂.CoordinateRing} (hpMax : p.IsMaximal) (hp0 : p ≠ ⊥)
     (h_ef_one :
       letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
-      ∀ P ∈ primesOverFinset p C₁.CoordinateRing,
+      ∀ P ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing,
         Ideal.ramificationIdx p P *
         Ideal.inertiaDeg p P = 1) :
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
-    (primesOverFinset p C₁.CoordinateRing).card = φ.separableDegree := by
+    (IsDedekindDomain.primesOverFinset p C₁.CoordinateRing).card = φ.separableDegree := by
   -- separable + finite-dim ⇒ sepDegree = degree.
   letI : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
   have hsep_eq : φ.degree = φ.separableDegree := by
@@ -292,7 +292,7 @@ theorem exists_smoothPoint_of_x
         C.toAffine.a₆) with hyPoly_def
   have hdeg : yPoly.natDegree = 2 := by
     rw [hyPoly_def]; compute_degree!
-  have hne : yPoly ≠ 0 := fun h => by
+  have hne : yPoly ≠ 0 := fun h ↦ by
     rw [h, Polynomial.natDegree_zero] at hdeg; exact absurd hdeg (by decide)
   have hdeg_ne : yPoly.degree ≠ 0 := by
     rw [Polynomial.degree_eq_natDegree hne, hdeg]; decide
@@ -319,7 +319,7 @@ theorem smoothPoint_infinite
     Infinite C.SmoothPoint := by
   -- Injection F → SmoothPoint via `x ↦ Classical.choose (exists_smoothPoint_of_x x)`.
   refine Infinite.of_injective
-    (fun x : F => (C.exists_smoothPoint_of_x x).choose) ?_
+    (fun x : F ↦ (C.exists_smoothPoint_of_x x).choose) ?_
   intro x₁ x₂ hP
   have h₁ : (C.exists_smoothPoint_of_x x₁).choose.x = x₁ :=
     (C.exists_smoothPoint_of_x x₁).choose_spec
@@ -403,11 +403,11 @@ theorem exists_heightOneSpectrum_fiber_card_eq_sepDegree
     (Q : IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing)
     (h_ef_one_Q :
       letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
-      ∀ P ∈ primesOverFinset Q.asIdeal C₁.CoordinateRing,
+      ∀ P ∈ IsDedekindDomain.primesOverFinset Q.asIdeal C₁.CoordinateRing,
         Ideal.ramificationIdx Q.asIdeal P *
         Ideal.inertiaDeg Q.asIdeal P = 1) :
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
-    (primesOverFinset Q.asIdeal C₁.CoordinateRing).card = φ.separableDegree := by
+    (IsDedekindDomain.primesOverFinset Q.asIdeal C₁.CoordinateRing).card = φ.separableDegree := by
   haveI : Q.asIdeal.IsPrime := Q.isPrime
   haveI hQmax : Q.asIdeal.IsMaximal :=
     Q.isPrime.isMaximal Q.ne_bot
