@@ -255,7 +255,7 @@ private theorem frobeniusRelativeCoordRingHom_smul_basis_b_eq_zero (a b : Polyno
       b • Affine.CoordinateRing.mk (E.frobeniusTwist p).toAffine Polynomial.X with hr'_def
   have h_alg : ∀ f : Polynomial k,
       frobeniusRelativeCoordRingHom p E
-        (algebraMap (Polynomial k) _ f) = frobeniusRelativeBaseHom p E f := fun f => by
+        (algebraMap (Polynomial k) _ f) = frobeniusRelativeBaseHom p E f := fun f ↦ by
     change AdjoinRoot.lift _ _ _ (AdjoinRoot.of _ f) = _
     exact AdjoinRoot.lift_of _
   set conj_r := Affine.CoordinateRing.mk (E.frobeniusTwist p).toAffine
@@ -383,7 +383,7 @@ theorem frobeniusRelativePointFun_add (P₁ P₂ : E.toAffine.Point) :
             (RingHom.injective (frobenius k p)) x₁ y₁).mpr h₁)
         (h₂ := (WeierstrassCurve.Affine.map_nonsingular (W := E.toAffine)
           (RingHom.injective (frobenius k p)) x₂ y₂).mpr h₂)
-        (fun h => hxy ⟨RingHom.injective (frobenius k p) h.1,
+        (fun h ↦ hxy ⟨RingHom.injective (frobenius k p) h.1,
           RingHom.injective (frobenius k p)
             (WeierstrassCurve.Affine.map_negY (W' := E.toAffine)
               (f := frobenius k p) x₂ y₂ ▸ h.2)⟩)).symm
