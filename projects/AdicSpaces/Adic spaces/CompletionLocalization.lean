@@ -84,17 +84,8 @@ variable {R : Type*} [CommRing R] [IsNoetherianRing R] (s : R)
 /-- Monotone sequences of submodules over Noetherian rings stabilize. -/
 private theorem monotone_stabilizes_of_wfGT {α : Type*} [PartialOrder α]
     [WellFoundedGT α] (f : ℕ → α) (hf : Monotone f) :
-    ∃ n, ∀ m, n ≤ m → f n = f m := by
-  by_contra hns; push_neg at hns
-  have : ∀ n, ∃ m, n < m ∧ f n < f m := fun n => by
-    obtain ⟨m, hnm, hne⟩ := hns n
-    exact ⟨m, lt_of_le_of_ne hnm (fun h => hne (h ▸ rfl)),
-           lt_of_le_of_ne (hf hnm) hne⟩
-  exact not_strictMono_of_wellFoundedGT
-    (fun n => (f ∘ fun n => Nat.rec 0 (fun k gk => (this gk).choose) n) n)
-    (by intro a b hab; induction hab with
-        | refl => exact (this _).choose_spec.2
-        | step _ ih => exact lt_trans ih (this _).choose_spec.2)
+    ∃ n, ∀ m, n ≤ m → f n = f m :=
+  WellFoundedGT.monotone_chain_condition ⟨f, hf⟩
 
 /-- The annihilator ideal `{x | s^n * x = 0}`. -/
 private def sAnn (n : ℕ) : Ideal R where
@@ -121,10 +112,8 @@ theorem torsion_bounded :
   refine ⟨N₀, fun x ⟨m, hm⟩ => ?_⟩
   rcases Nat.lt_or_ge m N₀ with hlt | hge
   · exact sAnn_mono s (Nat.le_of_lt hlt) hm
-  · have hmem : x ∈ sAnn s m := hm
-    have heq : sAnn s N₀ = sAnn s m := by
-      ext y; exact ⟨fun hy => (hN₀ m hge).symm ▸ hy, fun hy => (hN₀ m hge) ▸ hy⟩
-    rw [← heq] at hmem; exact hmem
+  · show x ∈ sAnn s N₀
+    exact (hN₀ m hge).symm ▸ hm
 
 end TorsionStabilization
 
@@ -579,8 +568,8 @@ theorem coeRingHom_image_locSubring_isBounded (D : RationalLocData A) :
   obtain ⟨a, ha, b, hb, rfl⟩ := Set.mem_mul.mp hx
   obtain ⟨a', ha', rfl⟩ := ha
   -- a' ∈ locSubring, b ∈ closure(coe '' locNhd k). Show coe(a') * b ∈ W.
-  set f := (D.coeRingHom a' * · : presheafValue D → presheafValue D) with hf_def
-  set S := D.coeRingHom '' (locNhd D.P D.T D.s k : Set (Localization.Away D.s)) with hS_def
+  set f := (D.coeRingHom a' * · : presheafValue D → presheafValue D)
+  set S := D.coeRingHom '' (locNhd D.P D.T D.s k : Set (Localization.Away D.s))
   -- f(b) ∈ f '' closure(S) ⊆ closure(f '' S)
   have hcont : Continuous f := continuous_const.mul continuous_id
   have hfb_in_cl : f b ∈ closure (f '' S) :=
