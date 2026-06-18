@@ -1226,9 +1226,6 @@ theorem exists_spa_point_supp_ge_in_presheafValue
     (h𝔭_notOpen : ¬IsOpen (𝔭 : Set (presheafValue C.base))) :
     ∃ w ∈ Spa (presheafValue C.base) (presheafValue C.base)⁺,
       𝔭 ≤ w.supp := by
-  -- Set up: the INTRINSIC pair of definition of `presheafValue C.base` (ring of def =
-  -- `presheafValue_ringOfDef`, ideal of def = `presheafValue_idealOfDef`), the same faithful pair
-  -- `presheafValue_isTateRing_faithful` uses. NO `(P : PairOfDefinition A)`, NO noeth-A₀.
   let PB : PairOfDefinition (presheafValue C.base) :=
     { A₀ := presheafValue_ringOfDef C.base
       I := presheafValue_idealOfDef C.base
@@ -1236,9 +1233,6 @@ theorem exists_spa_point_supp_ge_in_presheafValue
       fg := presheafValue_idealOfDef_fg C.base
       isAdic := presheafValue_isAdic C.base }
   haveI : IsAdicComplete PB.I PB.A₀ := presheafValue_isAdicComplete C.base
-  -- The PlusSubring is `presheafValuePlusSubring`, now `B⁺ = completedPlusSubring`
-  -- (A⁺-based, Wedhorn 8.2). The hypothesis `(B⁺ : Set _) ⊆ PB.A₀` follows from
-  -- `completedPlusSubring ⊆ completedLocSubring = ringOfDef` (since `A⁺ ⊆ A₀`).
   have hBplus_le_B₀ : ((PlusSubring.toSubring (A := presheafValue C.base) :
       Subring (presheafValue C.base)) : Set (presheafValue C.base)) ⊆
       (PB.A₀ : Set (presheafValue C.base)) := by
@@ -1248,7 +1242,6 @@ theorem exists_spa_point_supp_ge_in_presheafValue
     rwa [completedLocSubring_eq_presheafValue_ringOfDef] at hx'
   obtain ⟨w, hw_spa, hw_supp, _⟩ :=
     PB.exists_mem_spa_supp_ge_of_nonOpen_prime (𝔭 := 𝔭) h𝔭_notOpen hBplus_le_B₀
-  -- The output Spa is w.r.t. `(presheafValue C.base)⁺ = completedPlusSubring`.
   exact ⟨w, hw_spa, hw_supp⟩
 
 omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
@@ -1299,17 +1292,11 @@ theorem cor_8_32_spaExtendsAlongRestriction
     (_hv_rat : comap C.base.canonicalMap w ∈ rationalOpen D.T D.s) :
     ∃ w' : Spv (presheafValue D),
       comap (restrictionMapHom C.base D (C.hsubset D hD)) w' = w := by
-  -- Lift the `A`-shadow `v = comap C.base.canonicalMap w` to a Spa point `w''` of `O_X(D)`
-  -- (the genuine ⊇ extension, axiom-clean).
   obtain ⟨w'', hw''_spa, hw''_v⟩ := exists_spa_presheafValue_of_rationalOpen D _hv_rat
   refine ⟨w'', ?_⟩
-  -- `restrictionMapHom ∘ C.base.canonicalMap = D.canonicalMap` (restriction commutes with ρ).
   have hcomp : (restrictionMapHom C.base D (C.hsubset D hD)).comp C.base.canonicalMap
       = D.canonicalMap := by
     ext a; exact restrictionMapHom_canonicalMap C.base D (C.hsubset D hD) a
-  -- The restricted point `comap (restrictionMapHom) w''` and `w` both pull back along
-  -- `C.base.canonicalMap` to `v`; injectivity on continuous points (Prop 7.48, now proven)
-  -- pins them equal. Only continuity is needed, so no plus-preservation of `restrictionMapHom`.
   refine comap_canonicalMap_inj_of_isContinuous C.base
     (comap_isContinuous (restrictionMapHom_continuous C.base D (C.hsubset D hD)) hw''_spa.1)
     _hw.1 ?_
@@ -1355,24 +1342,17 @@ theorem hSpa_points_nonOpen_via_lifted_ideal_proper
     (h_lifted_ne_top :
       (Ideal.map C.base.canonicalMap p : Ideal (presheafValue C.base)) ≠ ⊤) :
     ∃ v ∈ rationalOpen C.base.T C.base.s, p ≤ v.supp := by
-  -- Step 1: Lift `liftedIdeal p` to a maximal ideal `𝔭` of `presheafValue C.base`.
   obtain ⟨𝔭, h𝔭_max, h𝔭_le⟩ :=
     Ideal.exists_le_maximal (Ideal.map C.base.canonicalMap p) h_lifted_ne_top
   haveI : 𝔭.IsPrime := h𝔭_max.isPrime
-  -- Step 2: 𝔭 is non-open since `presheafValue C.base` is a Tate ring and 𝔭 is proper.
-  -- The Tate structure on presheafValue C.base via `presheafValue_isTateRing`.
   haveI : IsTateRing (presheafValue C.base) := presheafValue_isTateRing P C.base
   have h𝔭_notOpen : ¬IsOpen (𝔭 : Set (presheafValue C.base)) :=
     tate_proper_ideal_not_open h𝔭_max.ne_top
-  -- Step 3: Apply Lemma 7.45 (via the completion route) to get a Spa point of
-  -- presheafValue C.base with 𝔭 in its support.
   obtain ⟨w, hw_spa, hw_supp⟩ :=
     exists_spa_point_supp_ge_in_presheafValue C hAplus_le_A₀ h𝔭_notOpen
-  -- Step 4: liftedIdeal p ≤ 𝔭 ≤ w.supp.
   have hw_supp_lifted :
       (Ideal.map C.base.canonicalMap p : Ideal (presheafValue C.base)) ≤ w.supp :=
     h𝔭_le.trans hw_supp
-  -- Step 5: Pull back via exists_rationalOpen_of_completion_spa.
   exact RationalLocData.exists_rationalOpen_of_completion_spa C.base
     hAplus_le_A₀ hcanonicalMap_cont hs_notin hw_spa hw_supp_lifted
 
