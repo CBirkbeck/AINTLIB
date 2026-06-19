@@ -128,7 +128,7 @@ private theorem peterssonInner_T_p_reps_sum_slashes_eq_aggregate_HeckeFD
         (⇑g ∣[k] (glMap (T_p_lower p hp.pos) : GL (Fin 2) ℝ)) τ)
       (⋃ i ∈ (Finset.univ : Finset (Option (Fin p))),
         α i • (Gamma1_fundDomain_PSL N : Set ℍ)) μ_hyp := by
-    rw [hset_eq]; exact hfi
+    rwa [hset_eq]
   have hmain : peterssonInner k (Gamma1_fundDomain_PSL N)
       (∑ i ∈ (Finset.univ : Finset (Option (Fin p))), ⇑f ∣[k] α i) ⇑g =
     peterssonInner k
@@ -151,8 +151,7 @@ private theorem peterssonInner_T_p_reps_sum_slashes_eq_aggregate_HeckeFD
     · exact aedisjoint_pairwise_T_p_family p hp hpN
     · exact h_int_per
     · exact hfi_compact
-  rw [← hset_eq]
-  exact hmain
+  rwa [← hset_eq]
 
 include hp hpN in
 open UpperHalfPlane ModularGroup MeasureTheory in
@@ -516,9 +515,8 @@ private theorem slGamma_p_αToGamma1_surjective_onto_Gamma1_fiber
     refine (pslQuot_eq_one_iff_exists_center_mem _ z⁻¹).mpr ⟨z, hz, ?_⟩
     rw [inv_mul_cancel]
     exact (Gamma_p_α (N := N) (T_p_lower p hp.pos)).one_mem
-  · rw [slGamma_p_αToGamma1_mk, QuotientGroup.eq, inv_inv,
+  · rwa [slGamma_p_αToGamma1_mk, QuotientGroup.eq, inv_inv,
       (Subgroup.mem_center_iff.mp hz g).symm]
-    exact hgz
 
 include hp hpN in
 open CongruenceSubgroup Pointwise UpperHalfPlane ModularGroup MeasureTheory in
@@ -648,7 +646,7 @@ private theorem h_int_tr_FD (p : ℕ) (hp : Nat.Prime p) (_hpN : Nat.Coprime p N
     funext τ
     rw [traceSlash_Gamma_p_α, petersson_sum_right]
   rw [h_fun]
-  refine MeasureTheory.integrable_finset_sum _ fun q _ ↦ ?_
+  refine MeasureTheory.integrable_finsetSum _ fun q _ ↦ ?_
   exact integrableOn_petersson_slash_T_p_lower_slash_SL p hp f g
     ((q.out : SL(2, ℤ))⁻¹ * q₀.out)
     (hyperbolicMeasure_Gamma1_fundDomain_PSL_lt_top (N := N))
