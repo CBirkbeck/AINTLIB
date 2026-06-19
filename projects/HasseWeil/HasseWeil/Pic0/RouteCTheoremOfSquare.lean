@@ -249,7 +249,7 @@ theorem picDual_add_of_classMap_mulHom
     (hmul : α.classMap ch hinj hfin =
       α₁.classMap ch₁ hinj₁ hfin₁ * α₂.classMap ch₂ hinj₂ hfin₂) :
     α.picDual ch hinj hfin = α₁.picDual ch₁ hinj₁ hfin₁ + α₂.picDual ch₂ hinj₂ hfin₂ := by
-  refine picDual_add_of_classMap_mul ch hinj hfin ch₁ hinj₁ hfin₁ ch₂ hinj₂ hfin₂ (fun c => ?_)
+  refine picDual_add_of_classMap_mul ch hinj hfin ch₁ hinj₁ hfin₁ ch₂ hinj₂ hfin₂ (fun c ↦ ?_)
   rw [hmul]; rfl
 
 /-! ### Phase 1.5 — unfolding `classMap` to the `mk0`/`Ideal.map` divisor form (diamond-free)
@@ -317,7 +317,7 @@ For a finite point `Q = (x, y)`, `classMap_α (κ Q) = mk0 (map α* 𝔪_Q)`, wh
 extension along the comorphism.  This is the concrete left-hand side of the theorem-of-the-square
 identity, fully unfolded and diamond-free: it identifies `classMap_α(κ Q)` with the class of the
 extended maximal ideal whose prime factorisation (Silverman III.6.2(b) /
-`Ideal.map_algebraMap_eq_finset_prod_pow`) is the divisor `∑_{αP=Q} e_φ(P)(P)` over the fibre.
+`Ideal.map_algebraMap_eq_finsetProd_pow`) is the divisor `∑_{αP=Q} e_φ(P)(P)` over the fibre.
 
 Proof: `κ Q = toClass Q = mk (XYIdeal' h) = mk0 ⟨𝔪_Q, _⟩` (the shipped `mk0_eq_mk_XYIdeal'`), then
 `classMap_mk0_eq`. -/
@@ -502,7 +502,7 @@ extension of the maximal ideal at a point factors over the fibre primes,
 where `e_P = ramificationIdx (α*) 𝔪_Q P` is the multiplicity Silverman writes `e_φ(P)`.  This is the
 ideal incarnation of the pullback divisor `φ*((Q)) = ∑_{αP=Q} e_φ(P)(P)`: the primes `P` of `R` over
 `𝔪_Q` (via `α*`) are the fibre `α^{-1}(Q)`, and the exponents are the ramification/inseparability
-multiplicities.  It is `mathlib`'s `Ideal.map_algebraMap_eq_finset_prod_pow` applied to the
+multiplicities.  It is `mathlib`'s `Ideal.map_algebraMap_eq_finsetProd_pow` applied to the
 module-finite comorphism extension. -/
 
 omit [DecidableEq F] [E.IsElliptic] in
@@ -526,7 +526,7 @@ inseparability multiplicity `e_φ(P)` (constant `= deg_i φ` by III.4.10, read o
 
 Proof: `α*` is module-finite (hence integral, `Algebra.IsIntegral.of_finite`), `𝔪_Q` is maximal
 (`xyIdeal_isMaximal`) and nonzero (`hmem`), so `mathlib`'s
-`Ideal.map_algebraMap_eq_finset_prod_pow` gives the factorisation directly.  **No `PerfectField`, no
+`Ideal.map_algebraMap_eq_finsetProd_pow` gives the factorisation directly.  **No `PerfectField`, no
 separability, no degree of `α` — purely the Dedekind factorisation of the extended ideal.** -/
 theorem map_xyIdeal_eq_prod_primesOver
     {α : Isogeny E E}
@@ -552,7 +552,7 @@ theorem map_xyIdeal_eq_prod_primesOver
   haveI : (WeierstrassCurve.Affine.CoordinateRing.XYIdeal E x (Polynomial.C y)).IsMaximal :=
     xyIdeal_isMaximal h
   haveI : Algebra.IsIntegral E.CoordinateRing E.CoordinateRing := Algebra.IsIntegral.of_finite _ _
-  exact Ideal.map_algebraMap_eq_finset_prod_pow
+  exact Ideal.map_algebraMap_eq_finsetProd_pow
     (S := E.CoordinateRing) (R := E.CoordinateRing)
     (mem_nonZeroDivisors_iff_ne_zero.mp hmem)
 
