@@ -95,7 +95,7 @@ private theorem exists_legendreCurve_of_charNeTwoNF_a₆_eq_zero
       ∃ C : VariableChange F, (C • W).IsElliptic ∧ C • W = legendreCurve l := by
   have hq_ne : (X ^ 2 + C W.a₂ * X + C W.a₄ : F[X]).degree ≠ 0 := by
     have hnd : (X ^ 2 + C W.a₂ * X + C W.a₄ : F[X]).natDegree = 2 := by compute_degree!
-    have hne : (X ^ 2 + C W.a₂ * X + C W.a₄ : F[X]) ≠ 0 := fun heq => by
+    have hne : (X ^ 2 + C W.a₂ * X + C W.a₄ : F[X]) ≠ 0 := fun heq ↦ by
       simp [heq] at hnd
     rw [degree_eq_natDegree hne, hnd]; decide
   obtain ⟨e₂, he₂⟩ := IsAlgClosed.exists_root _ hq_ne
@@ -174,7 +174,7 @@ theorem exists_legendreCurve_iso
   have hp_ne : (X ^ 3 + C W.a₂ * X ^ 2 + C W.a₄ * X + C W.a₆ : F[X]).degree ≠ 0 := by
     have hnd : (X ^ 3 + C W.a₂ * X ^ 2 + C W.a₄ * X + C W.a₆ : F[X]).natDegree = 3 := by
       compute_degree!
-    have hne : (X ^ 3 + C W.a₂ * X ^ 2 + C W.a₄ * X + C W.a₆ : F[X]) ≠ 0 := fun heq => by
+    have hne : (X ^ 3 + C W.a₂ * X ^ 2 + C W.a₄ * X + C W.a₆ : F[X]) ≠ 0 := fun heq ↦ by
       simp [heq] at hnd
     rw [degree_eq_natDegree hne, hnd]; decide
   obtain ⟨e₁, he₁⟩ := IsAlgClosed.exists_root _ hp_ne
