@@ -79,7 +79,7 @@ theorem algebraMap_functionField_baseChange_eq (z : W.toAffine.FunctionField) :
 factors `K → K(E_L)` through `K → K(E)`). -/
 noncomputable scoped instance towerFunctionFieldBaseChange :
     IsScalarTower K W.toAffine.FunctionField (W.baseChange L).toAffine.FunctionField :=
-  IsScalarTower.of_algebraMap_eq fun k => by
+  IsScalarTower.of_algebraMap_eq fun k ↦ by
     change algebraMap K (W.baseChange L).toAffine.FunctionField k =
       (⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L (algebraMap K W.toAffine.FunctionField k)
     rw [SmoothPlaneCurve.functionFieldMap_algebraMap_F]
