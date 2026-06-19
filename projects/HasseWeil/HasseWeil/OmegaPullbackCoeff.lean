@@ -235,7 +235,7 @@ private lemma mk_polynomialY_eq_u_gen :
   simp only [map_add, map_mul, AdjoinRoot.mk_X]
   -- `mk (C (C c)) = algebraMap F R c`, then transport along the scalar tower `F → R → KE`.
   have h_C : ∀ c : F, (AdjoinRoot.mk W.toAffine.polynomial)
-      (Polynomial.C (Polynomial.C c)) = algebraMap F R c := fun c => rfl
+      (Polynomial.C (Polynomial.C c)) = algebraMap F R c := fun c ↦ rfl
   rw [h_C, h_C, h_C,
     show (AdjoinRoot.mk W.toAffine.polynomial) (Polynomial.C Polynomial.X) =
       algebraMap (Polynomial F) R Polynomial.X from rfl,
@@ -716,7 +716,7 @@ theorem omegaPullbackCoeff_mulByInt_of_poly (n : ℤ) (hn : n ≠ 0)
       rw [RingHom.comp_apply, RingHom.comp_apply, map_zero, map_zero]; exact h))
   have hαu_ne : αu ≠ 0 := by
     rw [hαu_def, alpha_star_u_eq]
-    exact fun h => hu (α.pullback_injective (h.trans (map_zero _).symm))
+    exact fun h ↦ hu (α.pullback_injective (h.trans (map_zero _).symm))
   have hαx : α.pullback x_ff = Φ * Ψ⁻¹ := by
     rw [mulByInt_pullback_x W n hn, mulByInt_x, div_eq_mul_inv]
   -- Rewrite `Φ`, `Ψ`, `x_ff` as images of polynomials so the chain rule `D_poly_eval` applies.
@@ -795,7 +795,7 @@ theorem divPoly_wronskian_identity_of_omega (n : ℤ) (hn : n ≠ 0)
       rw [RingHom.comp_apply, RingHom.comp_apply, map_zero, map_zero]; exact h))
   have hαu_ne : αu ≠ 0 := by
     rw [hαu_def, alpha_star_u_eq]
-    exact fun h => hu (α.pullback_injective (h.trans (map_zero _).symm))
+    exact fun h ↦ hu (α.pullback_injective (h.trans (map_zero _).symm))
   have hαx : α.pullback x_ff = Φ * Ψ⁻¹ := by
     rw [mulByInt_pullback_x W n hn, mulByInt_x, div_eq_mul_inv]
   have hΦ_poly : Φ = algebraMap (Polynomial F) KE (W.Φ n) := by
