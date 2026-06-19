@@ -112,7 +112,7 @@ theorem smooth_boundary_classification (z : ℂ)
   rcases hnorm_ge.eq_or_lt with h_eq | h_gt
   · have h_nsq_1 : Complex.normSq z = 1 := by
       rw [Complex.normSq_eq_norm_sq, ← h_eq]; ring
-    refine Or.inr ⟨h_eq.symm, fun hre_zero => ?_, fun hre_half => ?_⟩
+    refine Or.inr ⟨h_eq.symm, fun hre_zero ↦ ?_, fun hre_half ↦ ?_⟩
     · rw [Complex.normSq_apply, hre_zero, mul_zero, zero_add] at h_nsq_1
       exact hz_ne_I <| Complex.ext (hre_zero.trans I_re.symm) <| by
         nlinarith [mul_self_nonneg (z.im - 1), mul_self_nonneg (z.im + 1), hz_im, I_im]
