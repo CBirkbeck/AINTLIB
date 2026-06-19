@@ -3,8 +3,8 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.TateModule.TorsionPowStructure
 import HasseWeil.TateModule.PadicLimZMod
+import HasseWeil.TateModule.TorsionPowStructure
 
 /-!
 # The Tate module `T_ℓ(E) = lim_n E[ℓⁿ] ≅ ℤ_ℓ²` (Silverman III.7, Prop 7.1a)
@@ -76,13 +76,11 @@ on coordinate `n` we have, by `tateConn_castHom_compat`,
 `castHom (toZModPow (n+1) z) = toZModPow n z` (`PadicInt.cast_toZModPow`) and
 `tateConn (f (n+1)) = f n` (compatibility of `f`). -/
 noncomputable instance : SMul ℤ_[ℓ] (tateCompat W ℓ) where
-  smul z f := ⟨fun n => PadicInt.toZModPow n z • f.val n, by
+  smul z f := ⟨fun n ↦ PadicInt.toZModPow n z • f.val n, by
     intro n
     rw [tateConn_castHom_compat, tateCompat_compat]
     congr 1
-    have h := PadicInt.cast_toZModPow (p := ℓ) n (n + 1) n.le_succ z
-    rw [ZMod.castHom_apply]
-    exact h⟩
+    rw [ZMod.castHom_apply, PadicInt.cast_toZModPow (p := ℓ) n (n + 1) n.le_succ z]⟩
 
 omit [IsAlgClosed F] in
 @[simp] theorem smul_tateCompat_val (z : ℤ_[ℓ]) (f : tateCompat W ℓ) (n : ℕ) :
@@ -145,19 +143,19 @@ theorem torsion_ellPow_linearEquiv_tateConn (n : ℕ)
       ∑ j, ZMod.castHom (pow_dvd_pow ℓ n.le_succ) (ZMod (ℓ ^ n)) (v j) •
         tateBasis W ℓ hℓF n j := by
     have hP : P = ∑ j, v j • tateBasis W ℓ hℓF (n + 1) j := by
-      rw [hv, ← Module.Basis.equivFun_symm_apply]
-      exact ((tateBasis W ℓ hℓF (n + 1)).equivFun.symm_apply_apply P).symm
+      rw [hv]
+      exact ((tateBasis W ℓ hℓF (n + 1)).sum_equivFun P).symm
     rw [hP, map_sum]
-    refine Finset.sum_congr rfl fun j _ => ?_
+    refine Finset.sum_congr rfl fun j _ ↦ ?_
     rw [tateConn_castHom_compat, tateConn_tateBasis]
   -- Reading off coordinate `i` via `equivFun`.
-  rw [torsion_ellPow_linearEquiv, hPexp]
-  rw [show (∑ j, ZMod.castHom (pow_dvd_pow ℓ n.le_succ) (ZMod (ℓ ^ n)) (v j) •
+  rw [torsion_ellPow_linearEquiv, hPexp,
+    show (∑ j, ZMod.castHom (pow_dvd_pow ℓ n.le_succ) (ZMod (ℓ ^ n)) (v j) •
         tateBasis W ℓ hℓF n j) =
       (tateBasis W ℓ hℓF n).equivFun.symm
-        (fun j => ZMod.castHom (pow_dvd_pow ℓ n.le_succ) (ZMod (ℓ ^ n)) (v j)) from
-    (Module.Basis.equivFun_symm_apply _ _).symm]
-  rw [LinearEquiv.apply_symm_apply]
+        (fun j ↦ ZMod.castHom (pow_dvd_pow ℓ n.le_succ) (ZMod (ℓ ^ n)) (v j)) from
+      (Module.Basis.equivFun_symm_apply _ _).symm,
+    LinearEquiv.apply_symm_apply]
   rfl
 
 /-- For `g : Fin 2 → ℤ_[ℓ]`, the `E`-sequence
@@ -167,8 +165,8 @@ element of `tateCompat`. The compatibility is the inverse form of
 theorem tateConn_invFun_compat (g : Fin 2 → ℤ_[ℓ]) (n : ℕ) :
     tateConn W ℓ n
         ((torsion_ellPow_linearEquiv W ℓ hℓF (n + 1)).symm
-          (fun i => PadicInt.toZModPow (n + 1) (g i))) =
-      (torsion_ellPow_linearEquiv W ℓ hℓF n).symm (fun i => PadicInt.toZModPow n (g i)) := by
+          (fun i ↦ PadicInt.toZModPow (n + 1) (g i))) =
+      (torsion_ellPow_linearEquiv W ℓ hℓF n).symm (fun i ↦ PadicInt.toZModPow n (g i)) := by
   -- Apply the (injective) level-`n` isomorphism and compare coordinatewise.
   apply (torsion_ellPow_linearEquiv W ℓ hℓF n).injective
   rw [LinearEquiv.apply_symm_apply]
@@ -181,7 +179,7 @@ theorem tateConn_invFun_compat (g : Fin 2 → ℤ_[ℓ]) (n : ℕ) :
 is a `castHom`-compatible `ZMod`-sequence, hence an element of `compatSubring ℓ`
 (`= lim ZMod (ℓⁿ)`). -/
 noncomputable def tateForwardCompat (f : tateModule W ℓ) (i : Fin 2) : compatSubring ℓ :=
-  ⟨fun n => torsion_ellPow_linearEquiv W ℓ hℓF n (f.val n) i, by
+  ⟨fun n ↦ torsion_ellPow_linearEquiv W ℓ hℓF n (f.val n) i, by
     intro n
     rw [← torsion_ellPow_linearEquiv_tateConn W ℓ hℓF n (f.val (n + 1)) i, tateCompat_compat]⟩
 
@@ -223,14 +221,14 @@ noncomputable def tateModuleEquiv : tateModule W ℓ ≃ₗ[ℤ_[ℓ]] (Fin 2 �
     rw [show padicToLimZMod ℓ z = padicIntEquivLimZMod ℓ z from rfl,
       RingEquiv.symm_apply_apply, smul_eq_mul]
   invFun g :=
-    ⟨fun n => (torsion_ellPow_linearEquiv W ℓ hℓF n).symm (fun i => PadicInt.toZModPow n (g i)),
-      fun n => tateConn_invFun_compat W ℓ hℓF g n⟩
+    ⟨fun n ↦ (torsion_ellPow_linearEquiv W ℓ hℓF n).symm (fun i ↦ PadicInt.toZModPow n (g i)),
+      tateConn_invFun_compat W ℓ hℓF g⟩
   left_inv f := by
     apply Subtype.ext; funext n
     change (torsion_ellPow_linearEquiv W ℓ hℓF n).symm
-        (fun i => PadicInt.toZModPow n ((padicIntEquivLimZMod ℓ).symm
+        (fun i ↦ PadicInt.toZModPow n ((padicIntEquivLimZMod ℓ).symm
           (tateForwardCompat W ℓ hℓF f i))) = f.val n
-    have hcoord : (fun i => PadicInt.toZModPow n ((padicIntEquivLimZMod ℓ).symm
+    have hcoord : (fun i ↦ PadicInt.toZModPow n ((padicIntEquivLimZMod ℓ).symm
         (tateForwardCompat W ℓ hℓF f i))) =
         torsion_ellPow_linearEquiv W ℓ hℓF n (f.val n) := by
       funext i
@@ -244,11 +242,11 @@ noncomputable def tateModuleEquiv : tateModule W ℓ ≃ₗ[ℤ_[ℓ]] (Fin 2 �
     rw [RingEquiv.apply_symm_apply]
     apply Subtype.ext; funext n
     change (tateForwardCompat W ℓ hℓF
-        ⟨fun n => (torsion_ellPow_linearEquiv W ℓ hℓF n).symm
-          (fun i => PadicInt.toZModPow n (g i)), _⟩ i).val n = (padicIntEquivLimZMod ℓ (g i)).val n
+        ⟨fun n ↦ (torsion_ellPow_linearEquiv W ℓ hℓF n).symm
+          (fun i ↦ PadicInt.toZModPow n (g i)), _⟩ i).val n = (padicIntEquivLimZMod ℓ (g i)).val n
     rw [tateForwardCompat_val]
     change torsion_ellPow_linearEquiv W ℓ hℓF n
-        ((torsion_ellPow_linearEquiv W ℓ hℓF n).symm (fun i => PadicInt.toZModPow n (g i))) i =
+        ((torsion_ellPow_linearEquiv W ℓ hℓF n).symm (fun i ↦ PadicInt.toZModPow n (g i))) i =
       (padicIntEquivLimZMod ℓ (g i)).val n
     rw [LinearEquiv.apply_symm_apply]
     rfl
