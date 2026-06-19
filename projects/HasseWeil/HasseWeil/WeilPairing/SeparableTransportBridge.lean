@@ -199,7 +199,7 @@ covariance `τ_S(φ^* z) = φ^*(τ_{φS} z)` follows from the single generic-poi
 (carried in the bundle), via `hcomm_of_mapTranslateGenericPoint_canonical`. -/
 theorem translationCovariant (hφ : GeometricRealization W φ) :
     TranslationCovariant W φ :=
-  fun S z => hcomm_of_mapTranslateGenericPoint_canonical W φ hφ.hgcomm S z
+  fun S z ↦ hcomm_of_mapTranslateGenericPoint_canonical W φ hφ.hgcomm S z
 
 /-! #### Derived witness — the separable degree match `#ker = deg`
 
@@ -215,7 +215,7 @@ kernel-translation invariance `hcov` is supplied from the bundled leaf `hgcomm`
 theorem card_kernel_eq_degree (hφ : GeometricRealization W φ) :
     Nat.card φ.kernel = φ.degree :=
   HasseWeil.card_kernel_eq_degree_of_separable_concrete W φ hφ.hsep
-    (fun k z => hcov_of_mapTranslateGenericPoint_canonical W φ hφ.hgcomm k z)
+    (fun k z ↦ hcov_of_mapTranslateGenericPoint_canonical W φ hφ.hgcomm k z)
     hφ.h_normal hφ.hdesc
 
 /-- **`#ker φ = deg φ`, `AddMonoidHom.ker` form** (the shape the scaling's `hdeg`/`hkerdeg`
@@ -297,7 +297,7 @@ theorem weilScales_of_geometricRealization (ℓ : ℕ) [Fact ℓ.Prime] (hℓF :
       (mulByInt W.toAffine (Nat.card φ.toAddMonoidHom.ker : ℤ)).toAddMonoidHom) :
     WeilScales W ℓ hℓF ψ d :=
   weilScales_of_dualComp W ℓ hℓF φ ψ hψ d hd hφ.hproj hcommφ δ hdc hφ.card_ker_eq_degree
-    (fun S _T _hS _hφT => hφ.translationCovariant S _)
+    (fun S _T _hS _hφT ↦ hφ.translationCovariant S _)
 
 end ScalesBridge
 
