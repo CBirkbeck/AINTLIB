@@ -108,7 +108,7 @@ theorem ordTransport_of_comap_pointValuation {φ : Isogeny W.toAffine W.toAffine
     rw [projOrdAt, (⟨W.toAffine⟩ : SmoothPlaneCurve F).projectiveDivisorOf_zero]
     rfl
   set τ := φ.pullback with hτ
-  have hτh_ne : τ h ≠ 0 := fun h0 => hh (φ.pullback_injective (h0.trans (map_zero _).symm))
+  have hτh_ne : τ h ≠ 0 := fun h0 ↦ hh (φ.pullback_injective (h0.trans (map_zero _).symm))
   obtain ⟨m, hm⟩ : ∃ m : ℤ, (⟨W.toAffine⟩ : SmoothPlaneCurve F).ord_P P (τ h) = (m : WithTop ℤ) := by
     obtain ⟨m, hm⟩ := WithTop.ne_top_iff_exists.mp
       (((⟨W.toAffine⟩ : SmoothPlaneCurve F).ord_P_eq_top_iff (τ h)).not.mpr hτh_ne)
@@ -163,7 +163,7 @@ theorem projOrdTransport_of_comap_pointValuation {φ : Isogeny W.toAffine W.toAf
     (hcomap : ComapPointValuationWitness W φ) :
     ProjOrdTransport φ :=
   projOrdTransport_of_affine_of_infinity
-    (fun P => ordTransport_of_comap_pointValuation hcomap P)
+    (fun P ↦ ordTransport_of_comap_pointValuation hcomap P)
     hcomap.infinity
 
 /-! ### Sanity instantiation: `[ℓ]` recovers `projOrdTransport_mulByInt`
@@ -176,9 +176,9 @@ content) for the one isogeny whose local witnesses are fully proved. -/
 /-- The `[ℓ]` comap-valuation witnesses, packaged from the proved affine/infinity comap identities. -/
 theorem comapPointValuationWitness_mulByInt [IsAlgClosed F] (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0) :
     ComapPointValuationWitness W (mulByInt W.toAffine ℓ) where
-  affine := fun P {x y} h_ns hQ =>
+  affine := fun P {x y} h_ns hQ ↦
     comap_pointValuation_mulByInt_eq_affine (W := W.toAffine) ℓ hℓ P (x := x) (y := y) h_ns hQ
-  affineToInfty := fun P hQ => comap_pointValuation_mulByInt_eq_infty (W := W.toAffine) ℓ hℓ P hQ
+  affineToInfty := fun P hQ ↦ comap_pointValuation_mulByInt_eq_infty (W := W.toAffine) ℓ hℓ P hQ
   infinity := by
     have hℓ0 : ℓ ≠ 0 := by rintro rfl; simp at hℓ
     exact inftyOrdTransport_mulByInt (W := W.toAffine) ℓ hℓ0 hℓ
