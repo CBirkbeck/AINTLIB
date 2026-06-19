@@ -46,7 +46,7 @@ theorem qf_nonneg_of_nonneg_on_coprime {q t : ℤ} (hq : 0 < q) {p : ℕ} (hp : 
   -- Step 1: t² ≤ 4q.
   have hdisc : t ^ 2 ≤ 4 * q := by
     by_contra hcon
-    push_neg at hcon                       -- 4 * q < t ^ 2
+    push Not at hcon                       -- 4 * q < t ^ 2
     obtain ⟨ℓ, hℓ_ge, hℓ_prime⟩ := Nat.exists_infinite_primes (p + 1)
     have hℓp : ℓ ≠ p := by omega
     have h1ℓ : (1 : ℤ) < (ℓ : ℤ) := by exact_mod_cast hℓ_prime.one_lt
@@ -99,7 +99,7 @@ theorem qf_nonneg_of_nonneg_on_coprime_both {q t : ℤ} (hq : 0 < q) {p : ℕ} (
   -- Step 1: t² ≤ 4q, by the reviewer's explicit prime-to-`p` negative witness.
   have hdisc : t ^ 2 ≤ 4 * q := by
     by_contra hcon
-    push_neg at hcon                       -- 4 * q < t ^ 2
+    push Not at hcon                       -- 4 * q < t ^ 2
     have hΔ : (1 : ℤ) ≤ t ^ 2 - 4 * q := by linarith
     set C : ℤ := q - t + 1 with hCdef
     set m : ℤ := (p : ℤ) * (|C| + 1) with hmdef
