@@ -373,7 +373,7 @@ theorem hyperbolicMeasure_fd_boundary : μ_hyp (fd \ fdo) = 0 := by
 /-- `fd` and `fdo` are a.e. equal w.r.t. the hyperbolic measure. -/
 theorem fd_ae_eq_fdo : (fd : Set ℍ) =ᶠ[ae μ_hyp] fdo :=
   ae_eq_set.mpr ⟨hyperbolicMeasure_fd_boundary, by
-    rw [show (fdo : Set ℍ) \ fd = ∅ from diff_eq_empty.mpr fdo_subset_fd]
+    rw [show (fdo : Set ℍ) \ fd = ∅ from sdiff_eq_empty.mpr fdo_subset_fd]
     exact measure_empty⟩
 
 /-- Integrals over `fd` and `fdo` agree against `μ_hyp`. -/
