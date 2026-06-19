@@ -203,8 +203,7 @@ theorem frobeniusAlgHom_translate_commute_ringHom
       (translateAlgEquivOfPoint (W.baseChange L) S).toAlgHom.toRingHom.comp
         (FiniteField.frobeniusAlgHom K (W.baseChange L).toAffine.FunctionField).toRingHom := by
   ext g
-  simp only [RingHom.comp_apply, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, AlgHom.coe_coe,
-    AlgEquiv.toAlgHom_eq_coe]
+  simp only [RingHom.comp_apply, AlgHom.toRingHom_eq_coe, RingHom.coe_coe]
   exact frobeniusAlgHom_translate_commute W L S g
 
 end Frobenius
