@@ -129,7 +129,7 @@ commuting with `K[X] → L[X]`) plus `natDegree`-preservation under the injectiv
 this is the named leaf at the general curve transport. -/
 theorem ordAtInftyBaseChange_holds (L : Type*) [Field L] [Algebra K L]
     [(W.baseChange L).toAffine.IsElliptic] : OrdAtInftyBaseChange W L :=
-  fun z hz => HasseWeil.Curves.SmoothPlaneCurve.ordAtInfty_functionFieldMap
+  fun z hz ↦ HasseWeil.Curves.SmoothPlaneCurve.ordAtInfty_functionFieldMap
     (⟨W.toAffine⟩ : SmoothPlaneCurve K) L z hz
 
 /-- **`ord_∞^{K̄}((1 − π)_{K̄}^* x_gen) = -2`** — the pole of order `2` at `O` over `K̄`.  Chains the
@@ -147,7 +147,7 @@ theorem ordAtInfty_oneSub_pullback_x_gen (hq : 2 ≤ Fintype.card K) :
   rw [oneSubFrobeniusIsogBaseChange_pullback,
     IsogenyBaseChangeConcrete.oneSubFrobeniusPullback_L_x_gen W (AlgebraicClosure K) hq,
     hbc _
-      (fun h0 => by
+      (fun h0 ↦ by
         have hcoe := ordAtInfty_isogOneSub_negFrobenius_pullback_x_gen_K W hq
         rw [(((W_smooth W).ordAtInfty_eq_top_iff _).mpr h0)] at hcoe
         exact WithTop.top_ne_coe hcoe),
@@ -166,7 +166,7 @@ theorem ordAtInfty_oneSub_pullback_y_gen
   rw [oneSubFrobeniusIsogBaseChange_pullback,
     IsogenyBaseChangeConcrete.oneSubFrobeniusPullback_L_y_gen W (AlgebraicClosure K) hq,
     hbc _
-      (fun h0 => by
+      (fun h0 ↦ by
         have hcoe := ordAtInfty_isogOneSub_negFrobenius_pullback_y_gen_K W hq
         rw [(((W_smooth W).ordAtInfty_eq_top_iff _).mpr h0)] at hcoe
         exact WithTop.top_ne_coe hcoe),
@@ -189,25 +189,25 @@ theorem inftyOrdTransport_of_ordAtInfty_x_y (W' : WeierstrassCurve F) [W'.toAffi
     DivisorPullback.InftyOrdTransport φ := by
   set τ := φ.pullback
   set w := ((W_smooth W').ordAtInftyValuation).comap τ.toRingHom
-  have hw_apply : ∀ g, w g = (W_smooth W').ordAtInftyValuation (τ g) := fun g =>
+  have hw_apply : ∀ g, w g = (W_smooth W').ordAtInftyValuation (τ g) := fun g ↦
     Valuation.comap_apply _ _ _
   have hwx : w (HasseWeil.x_gen W') = WithZero.exp 2 := by
-    have hx_ne : φ.pullback (HasseWeil.x_gen W') ≠ 0 := fun h0 => by
+    have hx_ne : φ.pullback (HasseWeil.x_gen W') ≠ 0 := fun h0 ↦ by
       rw [(((W_smooth W').ordAtInfty_eq_top_iff _).mpr h0)] at hx; exact WithTop.top_ne_coe hx
     rw [hw_apply,
       (W_smooth W').ordAtInftyValuation_eq_exp_neg_of_ordAtInfty_eq hx_ne hx]
     norm_num
   have hwy : w (HasseWeil.y_gen W') = WithZero.exp 3 := by
-    have hy_ne : φ.pullback (HasseWeil.y_gen W') ≠ 0 := fun h0 => by
+    have hy_ne : φ.pullback (HasseWeil.y_gen W') ≠ 0 := fun h0 ↦ by
       rw [(((W_smooth W').ordAtInfty_eq_top_iff _).mpr h0)] at hy; exact WithTop.top_ne_coe hy
     rw [hw_apply,
       (W_smooth W').ordAtInftyValuation_eq_exp_neg_of_ordAtInfty_eq hy_ne hy]
     norm_num
-  have hwc : ∀ c : F, c ≠ 0 → w (algebraMap F W'.toAffine.FunctionField c) = 1 := fun c hc => by
+  have hwc : ∀ c : F, c ≠ 0 → w (algebraMap F W'.toAffine.FunctionField c) = 1 := fun c hc ↦ by
     rw [hw_apply, show τ (algebraMap F W'.toAffine.FunctionField c) =
         algebraMap F W'.toAffine.FunctionField c from τ.commutes c]
     have h_ne : algebraMap F W'.toAffine.FunctionField c ≠ 0 :=
-      fun h => hc (FaithfulSMul.algebraMap_injective F _ (h.trans (map_zero _).symm))
+      fun h ↦ hc (FaithfulSMul.algebraMap_injective F _ (h.trans (map_zero _).symm))
     have h_ord : (W_smooth W').ordAtInfty (algebraMap F W'.toAffine.FunctionField c) =
         ((0 : ℤ) : WithTop ℤ) := by
       rw [HasseWeil.ordAtInfty_algebraMap_F_nonzero W' hc]; rfl
@@ -218,7 +218,7 @@ theorem inftyOrdTransport_of_ordAtInfty_x_y (W' : WeierstrassCurve F) [W'.toAffi
   intro h
   rcases eq_or_ne h 0 with rfl | hh
   · rw [map_zero]
-  · have hτh_ne : τ h ≠ 0 := fun h0 => hh (τ.injective (h0.trans (map_zero τ).symm))
+  · have hτh_ne : τ h ≠ 0 := fun h0 ↦ hh (τ.injective (h0.trans (map_zero τ).symm))
     obtain ⟨m, hm⟩ : ∃ m : ℤ, (W_smooth W').ordAtInfty (τ h) = (m : WithTop ℤ) :=
       ⟨_, (W_smooth W').ordAtInfty_of_ne hτh_ne⟩
     obtain ⟨n, hn⟩ : ∃ n : ℤ, (W_smooth W').ordAtInfty h = (n : WithTop ℤ) :=
@@ -278,21 +278,21 @@ theorem comap_pointValuation_eq_infty_of_ordAtInfty_x_y_of_kernelInvariant
     (HasseWeil.ord_P_eq_ordAtInfty_of_invariant_and_compatible W' P k h_zero h_compat
       (φ.pullback (HasseWeil.y_gen W')) (hcov ⟨k, hk_mem⟩ (HasseWeil.y_gen W'))).trans hy
   set w := ((W_smooth W').pointValuation P).comap φ.pullback.toRingHom
-  have hw_apply : ∀ g, w g = (W_smooth W').pointValuation P (φ.pullback g) := fun g =>
+  have hw_apply : ∀ g, w g = (W_smooth W').pointValuation P (φ.pullback g) := fun g ↦
     Valuation.comap_apply _ _ _
   have hwx : w (HasseWeil.x_gen W') = WithZero.exp 2 := by
-    have hx_ne : φ.pullback (HasseWeil.x_gen W') ≠ 0 := fun h0 => by
+    have hx_ne : φ.pullback (HasseWeil.x_gen W') ≠ 0 := fun h0 ↦ by
       rw [(((W_smooth W').ordAtInfty_eq_top_iff _).mpr h0)] at hx; exact WithTop.top_ne_coe hx
     rw [hw_apply,
       HasseWeil.pointValuation_eq_exp_neg_of_ord_P_eq (C := W_smooth W') (P := P) hx_ne h_ordx]
     norm_num
   have hwy : w (HasseWeil.y_gen W') = WithZero.exp 3 := by
-    have hy_ne : φ.pullback (HasseWeil.y_gen W') ≠ 0 := fun h0 => by
+    have hy_ne : φ.pullback (HasseWeil.y_gen W') ≠ 0 := fun h0 ↦ by
       rw [(((W_smooth W').ordAtInfty_eq_top_iff _).mpr h0)] at hy; exact WithTop.top_ne_coe hy
     rw [hw_apply,
       HasseWeil.pointValuation_eq_exp_neg_of_ord_P_eq (C := W_smooth W') (P := P) hy_ne h_ordy]
     norm_num
-  have hwc : ∀ c : F, c ≠ 0 → w (algebraMap F W'.toAffine.FunctionField c) = 1 := fun c hc => by
+  have hwc : ∀ c : F, c ≠ 0 → w (algebraMap F W'.toAffine.FunctionField c) = 1 := fun c hc ↦ by
     rw [hw_apply, show φ.pullback (algebraMap F W'.toAffine.FunctionField c) =
         algebraMap F W'.toAffine.FunctionField c from φ.pullback.commutes c]
     exact HasseWeil.pointValuation_algebraMap_F_eq_one_of_ne_zero W' P hc
