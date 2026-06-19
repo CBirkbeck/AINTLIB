@@ -20,7 +20,7 @@ integral of `f'/f` around `fdBoundary_H H` tends to `2πi · Σ gWN · ord`.
 -/
 
 open Complex MeasureTheory Set Filter Topology CongruenceSubgroup
-open scoped Real Interval UpperHalfPlane ModularForm Modular MatrixGroups
+open scoped Real Interval UpperHalfPlane ModularForm Modular
 
 attribute [local instance] Classical.propDecidable
 
@@ -54,14 +54,14 @@ private lemma exists_height_above_sqrt3_and_S (S : Finset UpperHalfPlane) :
     ∃ H₀ : ℝ, Real.sqrt 3 / 2 < H₀ ∧ 1 ≤ H₀ ∧ ∀ s ∈ S, (s : ℂ).im < H₀ := by
   rcases S.eq_empty_or_nonempty with rfl | hne
   · exact ⟨1, by nlinarith [Real.sq_sqrt (show (0:ℝ) ≤ 3 by norm_num)],
-      le_rfl, fun s hs => absurd hs (Finset.notMem_empty s)⟩
-  · refine ⟨max 1 (S.sup' hne (fun s => (s : ℂ).im) + 1), ?_, ?_, ?_⟩
+      le_rfl, fun s hs ↦ absurd hs (Finset.notMem_empty s)⟩
+  · refine ⟨max 1 (S.sup' hne (fun s ↦ (s : ℂ).im) + 1), ?_, ?_, ?_⟩
     · calc Real.sqrt 3 / 2 < 1 := by
             nlinarith [Real.sq_sqrt (show (0:ℝ) ≤ 3 by norm_num)]
           _ ≤ _ := le_max_left _ _
     · exact le_max_left _ _
     · intro s hs
-      exact lt_of_le_of_lt (Finset.le_sup' (fun p : ℍ => (p : ℂ).im) hs)
+      exact lt_of_le_of_lt (Finset.le_sup' (fun p : ℍ ↦ (p : ℂ).im) hs)
         (lt_of_lt_of_le (lt_add_one _) (le_max_right _ _))
 
 include hf in
@@ -88,11 +88,11 @@ private lemma cpv_residue_side_Fp_diffOn (_S : Finset UpperHalfPlane)
     let Fp := logDerivPatched F S0 hSimplePoles
     DifferentiableOn ℂ Fp (fdBox M \ ↑S0) := by
   intro F Fp z hz
-  have hz_not_S0 : z ∉ (S0 : Finset ℂ) := fun h => hz.2 (Finset.mem_coe.mpr h)
+  have hz_not_S0 : z ∉ (S0 : Finset ℂ) := fun h ↦ hz.2 (Finset.mem_coe.mpr h)
   have h_ev : Fp =ᶠ[𝓝 z] F := by
     filter_upwards [S0.finite_toSet.isClosed.isOpen_compl.mem_nhds hz_not_S0] with w hw
     exact logDerivPatched_eq_raw_off F S0 hSimplePoles hw
-  have hz_not_zero : modularFormCompOfComplex f z ≠ 0 := fun h_zero =>
+  have hz_not_zero : modularFormCompOfComplex f z ≠ 0 := fun h_zero ↦
     hz_not_S0 (hS0 ▸ Finset.mem_union_left S_on
       (hSbox ▸ (mem_allZerosInFdBox_iff f hf hM_half).mpr ⟨hz.1, h_zero⟩))
   exact (h_ev.differentiableAt_iff.mpr (analyticAt_logDeriv_off_zeros' f z
@@ -106,7 +106,7 @@ private lemma cpv_residue_side_cpvExists (_S : Finset UpperHalfPlane)
     let Fp := logDerivPatched F S0 hSimplePoles
     let γ_imm := fdBoundary_HImmersion H hH_sqrt3
     ∀ s ∈ S0, CauchyPrincipalValueExists'
-      (fun z => residueSimplePole Fp s / (z - s))
+      (fun z ↦ residueSimplePole Fp s / (z - s))
       γ_imm.toFun γ_imm.a γ_imm.b s := by
   intro F γ Fp γ_imm s hs
   rw [residue_logDerivPatched_eq_raw F S0 hSimplePoles s hs]
@@ -143,9 +143,9 @@ private lemma cpv_residue_side_off_curve_min_dist (S : Finset UpperHalfPlane)
       exact ((mem_allZerosInFdBox_iff f hf hM_half).mp h_box).2)))
   obtain ⟨t₀, ht₀, ht₀_min⟩ := isCompact_Icc.exists_isMinOn
     ⟨0, left_mem_Icc.mpr (by norm_num)⟩
-    (by fun_prop : ContinuousOn (fun t => ‖γ t - s‖) (Icc 0 5))
+    (by fun_prop : ContinuousOn (fun t ↦ ‖γ t - s‖) (Icc 0 5))
   exact ⟨‖γ t₀ - s‖, norm_pos_iff.mpr (sub_ne_zero.mpr (h_off t₀ ht₀)),
-    fun t ht => ht₀_min ht⟩
+    fun t ht ↦ ht₀_min ht⟩
 
 include hf in
 private lemma cpv_residue_side_eventually_eq (S : Finset UpperHalfPlane)
@@ -180,7 +180,7 @@ private lemma cpv_residue_side_eventually_eq (S : Finset UpperHalfPlane)
       rw [Filter.eventually_all]
       intro ⟨s, hs⟩
       exact this s hs
-    exact h_all.mono (fun ε hε s hs => hε ⟨s, hs⟩)
+    exact h_all.mono (fun ε hε s hs ↦ hε ⟨s, hs⟩)
   filter_upwards [h_finite_family] with ε hε t ht
   rw [Set.uIcc_of_le (by norm_num : (0:ℝ) ≤ 5)] at ht
   simp only [cpvIntegrandOn]
@@ -221,9 +221,9 @@ private lemma cpv_residue_side_sum_convert (S : Finset UpperHalfPlane)
       (orderOfVanishingAt' (⇑f) s : ℂ) := by
   intro hM_half Sbox F γ
   have hHM : H < H + 1 := lt_add_one H
-  set S_zeros := S.filter (fun p => f p = 0) with hS_zeros_def
+  set S_zeros := S.filter (fun p ↦ f p = 0) with hS_zeros_def
   have h_image_sub : S_zeros.image (↑· : ℍ → ℂ) ⊆ Sbox :=
-    Finset.image_subset_iff.mpr (fun p hp => by
+    Finset.image_subset_iff.mpr (fun p hp ↦ by
       rw [Finset.mem_filter] at hp
       exact fd_point_mem_fdBox f hf S hS hM_half hHM hH_bound p hp.1 hp.2)
   have h_complement_zero : ∀ s ∈ Sbox,
@@ -249,7 +249,7 @@ private lemma cpv_residue_side_sum_convert (S : Finset UpperHalfPlane)
     _ = ∑ p ∈ S_zeros,
           generalizedWindingNumber' γ 0 5 (↑p : ℂ) *
             residueSimplePole F (↑p : ℂ) :=
-        Finset.sum_image (fun _ _ _ _ h => UpperHalfPlane.ext h)
+        Finset.sum_image (fun _ _ _ _ ↦ UpperHalfPlane.ext)
     _ = ∑ p ∈ S_zeros,
           generalizedWindingNumber' γ 0 5 (↑p : ℂ) *
             (orderOfVanishingAt' (⇑f) p : ℂ) := by
@@ -269,7 +269,7 @@ theorem cpv_residue_side_tendsto (S : Finset UpperHalfPlane) (hS : ∀ p ∈ S, 
     (hS_complete : ∀ p, p ∈ 𝒟 → orderOfVanishingAt' (⇑f) p ≠ 0 → p ∈ S) :
     ∃ H₀ : ℝ, Real.sqrt 3 / 2 < H₀ ∧
       ∀ {H : ℝ}, H₀ ≤ H →
-        Tendsto (fun ε =>
+        Tendsto (fun ε ↦
           ∫ t in (0:ℝ)..5,
             pvIntegrand f (fdBoundary_H H)
               (sArcOfS S ∪ sVertOfS S) ε t)
@@ -280,11 +280,11 @@ theorem cpv_residue_side_tendsto (S : Finset UpperHalfPlane) (hS : ∀ p ∈ S, 
                 (fdBoundary_H H) 0 5 (↑s : ℂ) *
                 (orderOfVanishingAt' (⇑f) s : ℂ))) := by
   obtain ⟨H₀, hH₀_sqrt3, hH₀_ge1, hH₀_bound⟩ := exists_height_above_sqrt3_and_S S
-  refine ⟨H₀, hH₀_sqrt3, fun {H} hH_ge => ?_⟩
+  refine ⟨H₀, hH₀_sqrt3, fun {H} hH_ge ↦ ?_⟩
   have hH_sqrt3 : Real.sqrt 3 / 2 < H := lt_of_lt_of_le hH₀_sqrt3 hH_ge
   have hH_ge1 : 1 ≤ H := le_trans hH₀_ge1 hH_ge
   have hH_bound : ∀ s ∈ S, (s : ℂ).im < H :=
-    fun s hs => lt_of_lt_of_le (hH₀_bound s hs) hH_ge
+    fun s hs ↦ lt_of_lt_of_le (hH₀_bound s hs) hH_ge
   set F := logDeriv (modularFormCompOfComplex f)
   set γ := fdBoundary_H H
   set S_on := sArcOfS S ∪ sVertOfS S with hS_on_def
@@ -317,18 +317,18 @@ theorem cpv_residue_side_tendsto (S : Finset UpperHalfPlane) (hS : ∀ p ∈ S, 
         (hS_on_def ▸ h)
   have h_grt := generalizedResidueTheorem' (fdBox M) (fdBox_isOpen M)
     (fdBox_convex M) (↑S0) hS0_in_U (finset_discrete S0)
-    S0.finite_toSet.isClosed S0 (fun s hs => Finset.mem_coe.mpr hs)
+    S0.finite_toSet.isClosed S0 (fun s hs ↦ Finset.mem_coe.mpr hs)
     Fp hFp_diff γ_imm (fdBoundary_HCurve_closed H)
-    (fun t ht => fdBoundary_H_mem_fdBox' hH_ge1 hHM t ht)
-    (fun _ _ h => Finset.mem_coe.mp h)
-    (fun s hs => hasSimplePoleAt_logDerivPatched F S0 hSimplePoles s hs)
+    (fun t ht ↦ fdBoundary_H_mem_fdBox' hH_ge1 hHM t ht)
+    (fun _ _ h ↦ Finset.mem_coe.mp h)
+    (fun s hs ↦ hasSimplePoleAt_logDerivPatched F S0 hSimplePoles s hs)
     (logDerivPatched_hf_ext F S0 hSimplePoles)
     (cpv_residue_side_cpvExists f S hH_sqrt3 S0 hSimplePoles)
   obtain ⟨⟨L, hL_tendsto⟩, h_val⟩ := h_grt
   rw [show γ_imm.toFun = γ from rfl,
       show γ_imm.a = (0:ℝ) from rfl,
       show γ_imm.b = (5:ℝ) from rfl] at hL_tendsto h_val
-  have hL_tendsto_F : Tendsto (fun ε =>
+  have hL_tendsto_F : Tendsto (fun ε ↦
       ∫ t in (0:ℝ)..5, cpvIntegrandOn S0 F γ ε t)
       (𝓝[>] 0) (𝓝 L) := by
     apply hL_tendsto.congr'
@@ -340,20 +340,20 @@ theorem cpv_residue_side_tendsto (S : Finset UpperHalfPlane) (hS : ∀ p ∈ S, 
     split_ifs with h
     · rfl
     · push Not at h
-      have h_not : γ t ∉ S0 := fun habs => by
+      have h_not : γ t ∉ S0 := fun habs ↦ by
         have := h (γ t) habs
         simp only [sub_self, norm_zero] at this
         linarith [mem_Ioi.mp hε]
       change Fp (γ t) * _ = F (γ t) * _
       congr 1
       exact logDerivPatched_eq_raw_off F S0 hSimplePoles h_not
-  have hL_tendsto_S_on : Tendsto (fun ε =>
+  have hL_tendsto_S_on : Tendsto (fun ε ↦
       ∫ t in (0:ℝ)..5, cpvIntegrandOn S_on F γ ε t)
       (𝓝[>] 0) (𝓝 L) :=
     hL_tendsto_F.congr' ((cpv_residue_side_eventually_eq f hf S
       hS_complete hH_sqrt3 hH_ge1 hH_bound hM_half hHM
-      Sbox hSbox_def S_on hS_on_def S0 hS0_def).mono fun ε hε =>
-      intervalIntegral.integral_congr (fun t ht => hε t ht))
+      Sbox hSbox_def S_on hS_on_def S0 hS0_def).mono fun ε hε ↦
+      intervalIntegral.integral_congr hε)
   have h_sum_convert : L = 2 * ↑Real.pi * I *
       ∑ s ∈ S, generalizedWindingNumber' γ 0 5 (↑s : ℂ) *
         (orderOfVanishingAt' (⇑f) s : ℂ) := by
@@ -394,6 +394,6 @@ theorem cpv_residue_side_tendsto (S : Finset UpperHalfPlane) (hS : ∀ p ∈ S, 
     exact cpv_residue_side_sum_convert f hf S hS hS_complete
       hH_sqrt3 hH_ge1 hH_bound S_on hS_on_def
   rw [h_sum_convert] at hL_tendsto_S_on
-  exact hL_tendsto_S_on.congr fun _ => intervalIntegral.integral_congr fun _ _ => rfl
+  exact hL_tendsto_S_on.congr fun _ ↦ intervalIntegral.integral_congr fun _ _ ↦ rfl
 
 end
