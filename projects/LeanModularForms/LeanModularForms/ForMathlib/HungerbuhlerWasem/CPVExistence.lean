@@ -48,10 +48,10 @@ variable {x : ℂ}
 theorem chord_div_t_tendsto_right
     {γ : ℝ → ℂ} {t₀ : ℝ} {s L : ℂ}
     (h_deriv : HasDerivWithinAt γ L (Ioi t₀) t₀) (h_at : γ t₀ = s) :
-    Tendsto (fun t : ℝ => (γ t - s) / ((t - t₀ : ℝ) : ℂ)) (𝓝[>] t₀) (𝓝 L) := by
+    Tendsto (fun t : ℝ ↦ (γ t - s) / ((t - t₀ : ℝ) : ℂ)) (𝓝[>] t₀) (𝓝 L) := by
   have hr := hasDerivWithinAt_iff_isLittleO.mp h_deriv
   have h_rem_tendsto :
-      Tendsto (fun t : ℝ => (γ t - γ t₀ - (t - t₀) • L) / ((t - t₀ : ℝ) : ℂ))
+      Tendsto (fun t : ℝ ↦ (γ t - γ t₀ - (t - t₀) • L) / ((t - t₀ : ℝ) : ℂ))
         (𝓝[>] t₀) (𝓝 0) := by
     rw [Metric.tendsto_nhds]
     intro δ hδ_pos
@@ -71,7 +71,7 @@ theorem chord_div_t_tendsto_right
     have h_ne_complex : ((t - t₀ : ℝ) : ℂ) ≠ 0 :=
       Complex.ofReal_ne_zero.mpr (sub_ne_zero.mpr (ne_of_gt ht))
     rw [h_at, Complex.real_smul]; field_simp; ring
-  refine (?_ : Tendsto _ _ _).congr' (h_rewrite.mono (fun _ h => h.symm))
+  refine (?_ : Tendsto _ _ _).congr' (h_rewrite.mono (fun _ h ↦ h.symm))
   simpa using tendsto_const_nhds.add h_rem_tendsto
 
 /-- **Left-side chord-to-tangent quotient limit.** Given `γ : ℝ → ℂ` with
@@ -80,10 +80,10 @@ theorem chord_div_t_tendsto_right
 theorem chord_div_t_tendsto_left
     {γ : ℝ → ℂ} {t₀ : ℝ} {s L : ℂ}
     (h_deriv : HasDerivWithinAt γ L (Iio t₀) t₀) (h_at : γ t₀ = s) :
-    Tendsto (fun t : ℝ => (γ t - s) / ((t - t₀ : ℝ) : ℂ)) (𝓝[<] t₀) (𝓝 L) := by
+    Tendsto (fun t : ℝ ↦ (γ t - s) / ((t - t₀ : ℝ) : ℂ)) (𝓝[<] t₀) (𝓝 L) := by
   have hr := hasDerivWithinAt_iff_isLittleO.mp h_deriv
   have h_rem_tendsto :
-      Tendsto (fun t : ℝ => (γ t - γ t₀ - (t - t₀) • L) / ((t - t₀ : ℝ) : ℂ))
+      Tendsto (fun t : ℝ ↦ (γ t - γ t₀ - (t - t₀) • L) / ((t - t₀ : ℝ) : ℂ))
         (𝓝[<] t₀) (𝓝 0) := by
     rw [Metric.tendsto_nhds]
     intro δ hδ_pos
@@ -103,7 +103,7 @@ theorem chord_div_t_tendsto_left
     have h_ne_complex : ((t - t₀ : ℝ) : ℂ) ≠ 0 :=
       Complex.ofReal_ne_zero.mpr (sub_ne_zero.mpr (ne_of_lt ht))
     rw [h_at, Complex.real_smul]; field_simp; ring
-  refine (?_ : Tendsto _ _ _).congr' (h_rewrite.mono (fun _ h => h.symm))
+  refine (?_ : Tendsto _ _ _).congr' (h_rewrite.mono (fun _ h ↦ h.symm))
   simpa using tendsto_const_nhds.add h_rem_tendsto
 
 /-- **Right-side exit-point chord ratio convergence.** Given a positive cutoff
@@ -120,9 +120,9 @@ theorem exit_chord_tendsto_right
     {δ_right : ℝ → ℝ}
     (hδ_pos : ∀ᶠ ε in 𝓝[>] (0 : ℝ), 0 < δ_right ε)
     (hδ_to_zero : Tendsto δ_right (𝓝[>] (0 : ℝ)) (𝓝[>] (0 : ℝ))) :
-    Tendsto (fun ε : ℝ => (γ (t₀ + δ_right ε) - s) / ((δ_right ε : ℝ) : ℂ))
+    Tendsto (fun ε : ℝ ↦ (γ (t₀ + δ_right ε) - s) / ((δ_right ε : ℝ) : ℂ))
       (𝓝[>] (0 : ℝ)) (𝓝 L) := by
-  have h_compose : Tendsto (fun ε : ℝ => t₀ + δ_right ε)
+  have h_compose : Tendsto (fun ε : ℝ ↦ t₀ + δ_right ε)
       (𝓝[>] (0 : ℝ)) (𝓝[>] t₀) := by
     rw [tendsto_nhdsWithin_iff]
     refine ⟨?_, ?_⟩
@@ -145,9 +145,9 @@ theorem exit_chord_tendsto_left
     {δ_left : ℝ → ℝ}
     (hδ_pos : ∀ᶠ ε in 𝓝[>] (0 : ℝ), 0 < δ_left ε)
     (hδ_to_zero : Tendsto δ_left (𝓝[>] (0 : ℝ)) (𝓝[>] (0 : ℝ))) :
-    Tendsto (fun ε : ℝ => (γ (t₀ - δ_left ε) - s) / ((-(δ_left ε) : ℝ) : ℂ))
+    Tendsto (fun ε : ℝ ↦ (γ (t₀ - δ_left ε) - s) / ((-(δ_left ε) : ℝ) : ℂ))
       (𝓝[>] (0 : ℝ)) (𝓝 L) := by
-  have h_compose : Tendsto (fun ε : ℝ => t₀ - δ_left ε)
+  have h_compose : Tendsto (fun ε : ℝ ↦ t₀ - δ_left ε)
       (𝓝[>] (0 : ℝ)) (𝓝[<] t₀) := by
     rw [tendsto_nhdsWithin_iff]
     refine ⟨?_, ?_⟩
@@ -171,7 +171,7 @@ theorem normalized_chord_close_right
   have h_div := ((chord_div_t_tendsto_right h_deriv h_at).div_const L)
   rw [div_self hL] at h_div
   have h_tendsto_one : Tendsto
-      (fun t : ℝ => (γ t - s) / (L * ((t - t₀ : ℝ) : ℂ))) (𝓝[>] t₀) (𝓝 1) := by
+      (fun t : ℝ ↦ (γ t - s) / (L * ((t - t₀ : ℝ) : ℂ))) (𝓝[>] t₀) (𝓝 1) := by
     refine h_div.congr' ?_
     filter_upwards [self_mem_nhdsWithin] with t ht
     have h_ne : ((t - t₀ : ℝ) : ℂ) ≠ 0 :=
@@ -192,7 +192,7 @@ theorem normalized_chord_close_left
   have h_div := ((chord_div_t_tendsto_left h_deriv h_at).div_const L)
   rw [div_self hL] at h_div
   have h_tendsto_one : Tendsto
-      (fun t : ℝ => (γ t - s) / (L * ((t - t₀ : ℝ) : ℂ))) (𝓝[<] t₀) (𝓝 1) := by
+      (fun t : ℝ ↦ (γ t - s) / (L * ((t - t₀ : ℝ) : ℂ))) (𝓝[<] t₀) (𝓝 1) := by
     refine h_div.congr' ?_
     filter_upwards [self_mem_nhdsWithin] with t ht
     have h_ne : ((t - t₀ : ℝ) : ℂ) ≠ 0 :=
@@ -218,7 +218,7 @@ theorem exists_normalized_chord_right
   obtain ⟨V, hV_open, ht₀_in_V, hV_sub⟩ := hU_mem
   rw [Metric.isOpen_iff] at hV_open
   obtain ⟨r, hr_pos, hr_ball⟩ := hV_open t₀ ht₀_in_V
-  refine ⟨r / 2, by linarith, fun t ht_in => hU_prop t (hV_sub ⟨?_, ht_in.1⟩)⟩
+  refine ⟨r / 2, by linarith, fun t ht_in ↦ hU_prop t (hV_sub ⟨?_, ht_in.1⟩)⟩
   apply hr_ball
   rw [Metric.mem_ball, Real.dist_eq, abs_of_pos (by linarith [ht_in.1] : 0 < t - t₀)]
   linarith [ht_in.2]
@@ -237,7 +237,7 @@ theorem exists_normalized_chord_left
   obtain ⟨V, hV_open, ht₀_in_V, hV_sub⟩ := hU_mem
   rw [Metric.isOpen_iff] at hV_open
   obtain ⟨r, hr_pos, hr_ball⟩ := hV_open t₀ ht₀_in_V
-  refine ⟨r / 2, by linarith, fun t ht_in => hU_prop t (hV_sub ⟨?_, ht_in.2⟩)⟩
+  refine ⟨r / 2, by linarith, fun t ht_in ↦ hU_prop t (hV_sub ⟨?_, ht_in.2⟩)⟩
   apply hr_ball
   rw [Metric.mem_ball, Real.dist_eq, abs_of_neg (by linarith [ht_in.2] : t - t₀ < 0)]
   linarith [ht_in.1]
@@ -250,7 +250,7 @@ The proof uses `‖z/w - 1‖ = ‖z-w‖/‖w‖ ≤ (1/2)/(3/4) = 2/3 < 1`, gi
 theorem div_mem_slitPlane_of_close_to_one {z w : ℂ}
     (hz : ‖z - 1‖ ≤ 1 / 4) (hw : ‖w - 1‖ ≤ 1 / 4) :
     z / w ∈ Complex.slitPlane := by
-  have hw_ne : w ≠ 0 := fun hw_eq => by
+  have hw_ne : w ≠ 0 := fun hw_eq ↦ by
     rw [hw_eq, zero_sub, norm_neg, norm_one] at hw; linarith
   have h_zw : ‖z - w‖ ≤ 1 / 2 := by
     calc ‖z - w‖ = ‖(z - 1) - (w - 1)‖ := by congr 1; ring
@@ -298,7 +298,7 @@ theorem exists_slitPlane_chord_quotient_right
       (γ b - s) / (γ a - s) ∈ Complex.slitPlane := by
   obtain ⟨r, hr_pos, hr_close⟩ :=
     exists_normalized_chord_right h_deriv h_at hL (ρ := 1 / 4) (by norm_num)
-  refine ⟨r, hr_pos, fun a b ha_gt hab hb_le => ?_⟩
+  refine ⟨r, hr_pos, fun a b ha_gt hab hb_le ↦ ?_⟩
   have ha_le : a ≤ t₀ + r := le_trans hab hb_le
   have hb_gt : t₀ < b := lt_of_lt_of_le ha_gt hab
   have ha_in : a ∈ Ioc t₀ (t₀ + r) := ⟨ha_gt, ha_le⟩
@@ -340,7 +340,7 @@ theorem exists_slitPlane_chord_quotient_left_forward
       (γ b - s) / (γ a - s) ∈ Complex.slitPlane := by
   obtain ⟨r, hr_pos, hr_close⟩ :=
     exists_normalized_chord_left h_deriv h_at hL (ρ := 1 / 4) (by norm_num)
-  refine ⟨r, hr_pos, fun a b ha_ge hab hb_lt => ?_⟩
+  refine ⟨r, hr_pos, fun a b ha_ge hab hb_lt ↦ ?_⟩
   have ha_lt : a < t₀ := lt_of_le_of_lt hab hb_lt
   have hb_ge : t₀ - r ≤ b := le_trans ha_ge hab
   have ha_in : a ∈ Ico (t₀ - r) t₀ := ⟨ha_ge, ha_lt⟩
@@ -376,15 +376,15 @@ theorem arg_right_annular_tendsto
     (h_γr_div_L : (γ (t₀ + r) - s) / L ∈ Complex.slitPlane)
     (hδ_pos : ∀ᶠ ε in 𝓝[>] (0 : ℝ), 0 < δ_right ε)
     (hδ_to_zero : Tendsto δ_right (𝓝[>] (0 : ℝ)) (𝓝[>] (0 : ℝ))) :
-    Tendsto (fun ε : ℝ =>
+    Tendsto (fun ε : ℝ ↦
       Complex.arg ((γ (t₀ + r) - s) / (γ (t₀ + δ_right ε) - s)))
       (𝓝[>] (0 : ℝ)) (𝓝 ((γ (t₀ + r) - s) / L).arg) := by
-  have h_recip : Tendsto (fun ε : ℝ => ((δ_right ε : ℝ) : ℂ) / (γ (t₀ + δ_right ε) - s))
+  have h_recip : Tendsto (fun ε : ℝ ↦ ((δ_right ε : ℝ) : ℂ) / (γ (t₀ + δ_right ε) - s))
       (𝓝[>] (0 : ℝ)) (𝓝 (1 / L)) := by
     rw [one_div]
     refine ((exit_chord_tendsto_right h_deriv h_at hδ_pos hδ_to_zero).inv₀ hL).congr' ?_
     filter_upwards with ε using by rw [inv_div]
-  have h_quot_delta : Tendsto (fun ε : ℝ =>
+  have h_quot_delta : Tendsto (fun ε : ℝ ↦
       (γ (t₀ + r) - s) * (((δ_right ε : ℝ) : ℂ) / (γ (t₀ + δ_right ε) - s)))
       (𝓝[>] (0 : ℝ)) (𝓝 ((γ (t₀ + r) - s) / L)) := by
     have h1 := tendsto_const_nhds (x := γ (t₀ + r) - s) |>.mul h_recip
@@ -404,10 +404,10 @@ theorem arg_left_annular_tendsto
     (h_γnegr_div_L : (-L) / (γ (t₀ - r) - s) ∈ Complex.slitPlane)
     (hδ_pos : ∀ᶠ ε in 𝓝[>] (0 : ℝ), 0 < δ_left ε)
     (hδ_to_zero : Tendsto δ_left (𝓝[>] (0 : ℝ)) (𝓝[>] (0 : ℝ))) :
-    Tendsto (fun ε : ℝ =>
+    Tendsto (fun ε : ℝ ↦
       Complex.arg ((γ (t₀ - δ_left ε) - s) / (γ (t₀ - r) - s)))
       (𝓝[>] (0 : ℝ)) (𝓝 ((-L) / (γ (t₀ - r) - s)).arg) := by
-  have h_quot' : Tendsto (fun ε : ℝ =>
+  have h_quot' : Tendsto (fun ε : ℝ ↦
       (γ (t₀ - δ_left ε) - s) / ((δ_left ε : ℝ) : ℂ))
       (𝓝[>] (0 : ℝ)) (𝓝 (-L)) := by
     refine (exit_chord_tendsto_left h_deriv h_at hδ_pos hδ_to_zero).neg.congr' ?_
