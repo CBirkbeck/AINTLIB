@@ -187,7 +187,7 @@ theorem frobeniusFunctionFieldEquiv_x_gen :
   have key : ∀ (V : WeierstrassCurve (AlgebraicClosure K))
       (h : V = W.baseChange (AlgebraicClosure K)),
       (RingEquiv.cast
-          (R := fun (U : WeierstrassCurve (AlgebraicClosure K)) => U.toAffine.FunctionField) h)
+          (R := fun (U : WeierstrassCurve (AlgebraicClosure K)) ↦ U.toAffine.FunctionField) h)
         (algebraMap V.toAffine.CoordinateRing V.toAffine.FunctionField
           (algebraMap (Polynomial (AlgebraicClosure K)) V.toAffine.CoordinateRing Polynomial.X)) =
       x_gen (W.baseChange (AlgebraicClosure K)) := by
@@ -211,7 +211,7 @@ theorem frobeniusFunctionFieldEquiv_y_gen :
   have key : ∀ (V : WeierstrassCurve (AlgebraicClosure K))
       (h : V = W.baseChange (AlgebraicClosure K)),
       (RingEquiv.cast
-          (R := fun (U : WeierstrassCurve (AlgebraicClosure K)) => U.toAffine.FunctionField) h)
+          (R := fun (U : WeierstrassCurve (AlgebraicClosure K)) ↦ U.toAffine.FunctionField) h)
         (algebraMap V.toAffine.CoordinateRing V.toAffine.FunctionField
           (AdjoinRoot.root V.toAffine.polynomial)) =
       y_gen (W.baseChange (AlgebraicClosure K)) := by
@@ -400,7 +400,7 @@ theorem sigmaConjugation_x_y_gen (S : (W.baseChange (AlgebraicClosure K)).toAffi
     WeierstrassCurve.Affine.Point.some.injEq] at hpt
   obtain ⟨hx, hy⟩ := hpt
   -- Reduce the `restrictScalars`/`σ_K` wrappers to plain function applications.
-  simp only [AlgHom.coe_restrictScalars', AlgEquiv.toAlgHom_eq_coe,
+  simp only [AlgHom.coe_restrictScalars',
     frobeniusFunctionFieldEquivK_apply] at hx hy
   exact ⟨hx, hy⟩
 
@@ -445,7 +445,7 @@ theorem frobeniusFunctionFieldEquiv_comp_translate_eq
           (geomFrobeniusPointFun W S)).toRingEquiv.toRingHom.comp
         (frobeniusFunctionFieldEquiv W).toRingHom := by
   obtain ⟨hx, hy⟩ := sigmaConjugation_x_y_gen W S
-  refine ringHom_ext_base_x_y_gen (W.baseChange (AlgebraicClosure K)) _ _ (fun a => ?_)
+  refine ringHom_ext_base_x_y_gen (W.baseChange (AlgebraicClosure K)) _ _ (fun a ↦ ?_)
     (by rw [frob_comp_tau_apply, tau_comp_frob_apply]; exact hx)
     (by rw [frob_comp_tau_apply, tau_comp_frob_apply]; exact hy)
   -- Base agreement: both sides `q`-power the coefficients (`τ`s fix `algebraMap`, `σ` `q`-powers it).
