@@ -29,8 +29,7 @@ on each segment, and sum via `intervalIntegral.sum_integral_adjacent_intervals`.
   `(z - w)⁻¹` along `γ` equals a sum of complex logs of segment ratios.
 -/
 
-open Set Filter Topology MeasureTheory Complex
-open scoped Interval
+open Set MeasureTheory
 
 noncomputable section
 
@@ -51,22 +50,22 @@ theorem contourIntegral_inv_eq_sum_log_segRatio
     (h_slit : ∀ j, j < N → ∀ t ∈ Icc (s j) (s (j + 1)),
       (γ.toPath.extend t - w) / (γ.toPath.extend (s j) - w) ∈ Complex.slitPlane)
     (h_int : IntervalIntegrable
-      (fun t => deriv γ.toPath.extend t / (γ.toPath.extend t - w))
+      (fun t ↦ deriv γ.toPath.extend t / (γ.toPath.extend t - w))
       MeasureTheory.volume 0 1) :
-    γ.contourIntegral (fun z => (z - w)⁻¹) =
+    γ.contourIntegral (fun z ↦ (z - w)⁻¹) =
       ∑ j ∈ Finset.range N,
         Complex.log ((γ.toPath.extend (s (j + 1)) - w) /
           (γ.toPath.extend (s j) - w)) := by
-  have h_eq_int : γ.contourIntegral (fun z => (z - w)⁻¹) =
+  have h_eq_int : γ.contourIntegral (fun z ↦ (z - w)⁻¹) =
       ∫ t in (0 : ℝ)..1, deriv γ.toPath.extend t / (γ.toPath.extend t - w) := by
     rw [PiecewiseC1Path.contourIntegral]
-    refine intervalIntegral.integral_congr (fun t _ => ?_)
+    refine intervalIntegral.integral_congr (fun t _ ↦ ?_)
     change (γ.toPath.extend t - w)⁻¹ * deriv γ.toPath.extend t =
          deriv γ.toPath.extend t / (γ.toPath.extend t - w)
     rw [div_eq_mul_inv, mul_comm]
   rw [h_eq_int]
   have h_int_seg : ∀ k < N, IntervalIntegrable
-      (fun t => deriv γ.toPath.extend t / (γ.toPath.extend t - w))
+      (fun t ↦ deriv γ.toPath.extend t / (γ.toPath.extend t - w))
       MeasureTheory.volume (s k) (s (k + 1)) := by
     intro k hk
     refine h_int.mono_set ?_
@@ -78,7 +77,7 @@ theorem contourIntegral_inv_eq_sum_log_segRatio
   intro j hj
   rw [Finset.mem_range] at hj
   have hγ_diff : ∀ t ∈ Ioo (s j) (s (j + 1)) \ (γ.partition : Set ℝ),
-      HasDerivAt γ.toPath.extend (deriv γ.toPath.extend t) t := fun t ht =>
+      HasDerivAt γ.toPath.extend (deriv γ.toPath.extend t) t := fun t ht ↦
     (γ.differentiable_off_extend t
       ⟨(hs_in j hj.le).1.trans_lt ht.1.1,
        ht.1.2.trans_le (hs_in (j + 1) hj).2⟩ ht.2).hasDerivAt
@@ -98,9 +97,9 @@ theorem contourIntegral_inv_decomp
     (h_slit : ∀ j, j < N → ∀ t ∈ Icc (s j) (s (j + 1)),
       (γ.toPath.extend t - w) / (γ.toPath.extend (s j) - w) ∈ Complex.slitPlane)
     (h_int : IntervalIntegrable
-      (fun t => deriv γ.toPath.extend t / (γ.toPath.extend t - w))
+      (fun t ↦ deriv γ.toPath.extend t / (γ.toPath.extend t - w))
       MeasureTheory.volume 0 1) :
-    γ.contourIntegral (fun z => (z - w)⁻¹) =
+    γ.contourIntegral (fun z ↦ (z - w)⁻¹) =
       ((Real.log ‖γ.toPath.extend 1 - w‖ - Real.log ‖γ.toPath.extend 0 - w‖ : ℝ) : ℂ) +
       Complex.I *
         ((∑ j ∈ Finset.range N,
@@ -125,7 +124,7 @@ theorem contourIntegral_inv_decomp
                 (norm_ne_zero_iff.mpr (h_avoid j hj.le))]
       _ = Real.log ‖γ.toPath.extend (s N) - w‖ -
             Real.log ‖γ.toPath.extend (s 0) - w‖ :=
-          Finset.sum_range_sub (fun j => Real.log ‖γ.toPath.extend (s j) - w‖) N
+          Finset.sum_range_sub (fun j ↦ Real.log ‖γ.toPath.extend (s j) - w‖) N
       _ = _ := by rw [hs_N, hs_zero]
   · simp only [Complex.add_im, Complex.ofReal_im, Complex.mul_im, Complex.I_re, Complex.I_im,
       Complex.ofReal_re, zero_mul, zero_add, one_mul]
@@ -138,21 +137,21 @@ theorem hasGeneralizedWindingNumber_eq_arg_diff_W1_closed
     (γ : PiecewiseC1Path x x) {w : ℂ}
     (hδ : ∃ δ > 0, ∀ t ∈ Icc (0 : ℝ) 1, δ ≤ ‖γ.toPath.extend t - w‖)
     (h_int : IntervalIntegrable
-      (fun t => deriv γ.toPath.extend t / (γ.toPath.extend t - w))
+      (fun t ↦ deriv γ.toPath.extend t / (γ.toPath.extend t - w))
       MeasureTheory.volume 0 1) :
     ∃ θ : ℝ → ℝ, ContinuousOn θ (Icc (0 : ℝ) 1) ∧
       (∀ t ∈ Icc (0 : ℝ) 1, γ.toPath.extend t - w =
         (‖γ.toPath.extend t - w‖ : ℂ) * Complex.exp (Complex.I * (θ t : ℂ))) ∧
       HasGeneralizedWindingNumber γ w (((θ 1 - θ 0 : ℝ) : ℂ) / (2 * Real.pi)) := by
   obtain ⟨d, hd_pos, hd_bd⟩ := hδ
-  have h_avoid : ∀ t ∈ Icc (0 : ℝ) 1, γ.toPath.extend t ≠ w := fun t ht heq => by
+  have h_avoid : ∀ t ∈ Icc (0 : ℝ) 1, γ.toPath.extend t ≠ w := fun t ht heq ↦ by
     have := hd_bd t ht
     rw [heq, sub_self, norm_zero] at this
     linarith
   obtain ⟨N, s, _, hs_zero, hs_N, hs_mono, hs_in, hs_avoid, h_slit, hθ_cont, h_lift⟩ :=
     Complex.exists_continuous_arg_lift_with_partition
       γ.toPath.continuous_extend.continuousOn h_avoid
-  set θ : ℝ → ℝ := fun t =>
+  set θ : ℝ → ℝ := fun t ↦
     Complex.arg (γ.toPath.extend 0 - w) +
       ∑ j ∈ Finset.range N,
         (Complex.log (Complex.segRatio γ.toPath.extend w (s j) (s (j + 1)) t)).im
@@ -164,7 +163,7 @@ theorem hasGeneralizedWindingNumber_eq_arg_diff_W1_closed
       ∑ j ∈ Finset.range N,
         (Complex.log (Complex.segRatio γ.toPath.extend w (s j) (s (j + 1)) 0)).im =
       Complex.arg (γ.toPath.extend 0 - w)
-    rw [Finset.sum_eq_zero fun j hj => by
+    rw [Finset.sum_eq_zero fun j hj ↦ by
       rw [Finset.mem_range] at hj
       rw [Complex.segRatio_eq_one_of_le (hs_mono (Nat.le_succ _)) (hs_in j hj.le).1
             (hs_avoid j hj.le), Complex.log_one]; rfl, add_zero]
@@ -176,7 +175,7 @@ theorem hasGeneralizedWindingNumber_eq_arg_diff_W1_closed
       ∑ j ∈ Finset.range N,
         (Complex.log (Complex.segRatio γ.toPath.extend w (s j) (s (j + 1)) 1)).im = _
     exact congrArg (Complex.arg (γ.toPath.extend 0 - w) + ·)
-      (Finset.sum_congr rfl fun j hj => by
+      (Finset.sum_congr rfl fun j hj ↦ by
         rw [Finset.mem_range] at hj
         rw [Complex.segRatio_eq_full (hs_mono (Nat.le_succ _)) (hs_N ▸ hs_mono hj)])
   have h_θ_diff : (θ 1 - θ 0 : ℝ) =
@@ -186,14 +185,13 @@ theorem hasGeneralizedWindingNumber_eq_arg_diff_W1_closed
     rw [h_θ_one, h_θ_zero]; ring
   have h_re_zero : Real.log ‖γ.toPath.extend 1 - w‖ -
       Real.log ‖γ.toPath.extend 0 - w‖ = 0 := by
-    simp
+    rw [γ.toPath.extend_one, γ.toPath.extend_zero, sub_self]
   have h_w := hasGeneralizedWindingNumber_of_avoids (γ := γ) (z₀ := w) ⟨d, hd_pos, hd_bd⟩
   rw [h_contour, h_re_zero, Complex.ofReal_zero, zero_add, ← h_θ_diff] at h_w
-  rw [show ((θ 1 - θ 0 : ℝ) : ℂ) / (2 * Real.pi) =
+  rwa [show ((θ 1 - θ 0 : ℝ) : ℂ) / (2 * Real.pi) =
       (2 * ↑Real.pi * Complex.I)⁻¹ * (Complex.I * ((θ 1 - θ 0 : ℝ) : ℂ)) by
     have : (Real.pi : ℂ) ≠ 0 := mod_cast Real.pi_ne_zero
     field_simp]
-  exact h_w
 
 /-- **W-3 (Winding integer-valued).** For a closed piecewise C¹ path `γ` avoiding `w`
 with positive distance, the generalized winding number is an integer. -/
@@ -201,7 +199,7 @@ theorem hasGeneralizedWindingNumber_integer_of_closed
     (γ : PiecewiseC1Path x x) {w : ℂ}
     (hδ : ∃ δ > 0, ∀ t ∈ Icc (0 : ℝ) 1, δ ≤ ‖γ.toPath.extend t - w‖)
     (h_int : IntervalIntegrable
-      (fun t => deriv γ.toPath.extend t / (γ.toPath.extend t - w))
+      (fun t ↦ deriv γ.toPath.extend t / (γ.toPath.extend t - w))
       MeasureTheory.volume 0 1) :
     ∃ n : ℤ, HasGeneralizedWindingNumber γ w (n : ℂ) := by
   obtain ⟨θ, _, h_lift, h_winding⟩ :=
@@ -248,19 +246,19 @@ theorem intervalIntegrable_div_lipschitz
     (h_dist_lb : ∀ t ∈ Icc (0 : ℝ) 1, δ ≤ ‖γ.toPath.extend t - w‖)
     {K : NNReal} (hLip : LipschitzWith K γ.toPath.extend) :
     IntervalIntegrable
-      (fun t => deriv γ.toPath.extend t / (γ.toPath.extend t - w))
+      (fun t ↦ deriv γ.toPath.extend t / (γ.toPath.extend t - w))
       MeasureTheory.volume 0 1 := by
   have h_deriv_int : IntervalIntegrable (deriv γ.toPath.extend)
       MeasureTheory.volume 0 1 := by
     rw [intervalIntegrable_iff_integrableOn_Ioc_of_le (zero_le_one' ℝ)]
     exact MeasureTheory.Measure.integrableOn_of_bounded measure_Ioc_lt_top.ne
       (stronglyMeasurable_deriv _).aestronglyMeasurable
-      (ae_restrict_of_ae (Filter.Eventually.of_forall fun _ => norm_deriv_le_of_lipschitz hLip))
-  have h_avoid : ∀ t ∈ Icc (0 : ℝ) 1, γ.toPath.extend t - w ≠ 0 := fun t ht heq => by
+      (ae_restrict_of_ae (Filter.Eventually.of_forall fun _ ↦ norm_deriv_le_of_lipschitz hLip))
+  have h_avoid : ∀ t ∈ Icc (0 : ℝ) 1, γ.toPath.extend t - w ≠ 0 := fun t ht heq ↦ by
     have := h_dist_lb t ht
     rw [heq, norm_zero] at this
     linarith
-  have h_cont : ContinuousOn (fun t => (γ.toPath.extend t - w)⁻¹) (uIcc (0 : ℝ) 1) := by
+  have h_cont : ContinuousOn (fun t ↦ (γ.toPath.extend t - w)⁻¹) (uIcc (0 : ℝ) 1) := by
     rw [uIcc_of_le (zero_le_one' ℝ)]
     exact (γ.toPath.continuous_extend.continuousOn.sub continuousOn_const).inv₀ h_avoid
   simp_rw [div_eq_mul_inv]
@@ -285,7 +283,7 @@ theorem generalizedWindingNumber_locally_const_of_closed
     Metric.mem_ball.mpr (hw'.trans_le (min_le_right _ _))
   have hw_in : w ∈ Metric.ball w ε₀ := Metric.mem_ball_self hε₀_pos
   have winding_int : ∀ w'' ∈ Metric.ball w ε₀,
-      ∃ n : ℤ, HasGeneralizedWindingNumber γ w'' (n : ℂ) := fun w'' hw'' =>
+      ∃ n : ℤ, HasGeneralizedWindingNumber γ w'' (n : ℂ) := fun w'' hw'' ↦
     hasGeneralizedWindingNumber_integer_of_closed γ
       ⟨ε₀, hε₀_pos, h_dist_lb w'' hw''⟩
       (intervalIntegrable_div_lipschitz γ hε₀_pos (h_dist_lb w'' hw'') hLip)
