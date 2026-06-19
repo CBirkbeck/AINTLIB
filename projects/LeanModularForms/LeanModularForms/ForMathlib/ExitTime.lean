@@ -52,7 +52,7 @@ theorem firstExitTimeRight_set_nonempty
 theorem firstExitTimeRight_set_lb
     (γ : ℝ → ℂ) (t₀ δ ε : ℝ) (s : ℂ) :
     ∀ t ∈ {t ∈ Icc t₀ (t₀ + δ) | ε ≤ ‖γ t - s‖}, t₀ ≤ t :=
-  fun _ ⟨hmem, _⟩ => hmem.1
+  fun _ ⟨hmem, _⟩ ↦ hmem.1
 
 /-- **First exit time lies in `[t₀, t₀+δ]`.** -/
 theorem firstExitTimeRight_mem_Icc
@@ -89,14 +89,14 @@ theorem t₀_lt_firstExitTimeRight
     (hγ_cont : ContinuousOn γ (Icc t₀ (t₀ + δ)))
     (h_s : γ t₀ = s) (hε_pos : 0 < ε) (hε_le : ε ≤ ‖γ (t₀ + δ) - s‖) :
     t₀ < firstExitTimeRight γ t₀ δ s ε := by
-  have h_cont_at_t₀ : ContinuousWithinAt (fun t => ‖γ t - s‖) (Icc t₀ (t₀ + δ)) t₀ :=
+  have h_cont_at_t₀ : ContinuousWithinAt (fun t ↦ ‖γ t - s‖) (Icc t₀ (t₀ + δ)) t₀ :=
     ((hγ_cont t₀ ⟨le_rfl, by linarith⟩).sub continuousWithinAt_const).norm
   have h_eventually : ∀ᶠ t in 𝓝[Icc t₀ (t₀ + δ)] t₀, ‖γ t - s‖ < ε :=
     h_cont_at_t₀.tendsto.eventually_lt_const (by simp [h_s, hε_pos])
   obtain ⟨η, hη_pos, hη⟩ := Metric.nhdsWithin_basis_ball.eventually_iff.mp h_eventually
   refine lt_of_lt_of_le (a := t₀) (b := t₀ + min η δ / 2)
     (by linarith [lt_min hη_pos hδ]) ?_
-  refine le_csInf ⟨t₀ + δ, firstExitTimeRight_set_nonempty hδ.le hε_le⟩ fun t ht => ?_
+  refine le_csInf ⟨t₀ + δ, firstExitTimeRight_set_nonempty hδ.le hε_le⟩ fun t ht ↦ ?_
   by_contra! h_lt
   have h_in_Icc : t ∈ Icc t₀ (t₀ + δ) := ht.1
   exact absurd ht.2 <| not_le.mpr <| hη ⟨Metric.mem_ball.mpr <| by
@@ -154,7 +154,7 @@ theorem firstExitTimeLeft_set_nonempty
 theorem firstExitTimeLeft_set_ub
     (γ : ℝ → ℂ) (t₀ δ ε : ℝ) (s : ℂ) :
     ∀ t ∈ {t ∈ Icc (t₀ - δ) t₀ | ε ≤ ‖γ t - s‖}, t ≤ t₀ :=
-  fun _ ⟨hmem, _⟩ => hmem.2
+  fun _ ⟨hmem, _⟩ ↦ hmem.2
 
 /-- **First exit time (left) lies in `[t₀-δ, t₀]`.** -/
 theorem firstExitTimeLeft_mem_Icc
@@ -191,14 +191,14 @@ theorem firstExitTimeLeft_lt_t₀
     (hγ_cont : ContinuousOn γ (Icc (t₀ - δ) t₀))
     (h_s : γ t₀ = s) (hε_pos : 0 < ε) (hε_le : ε ≤ ‖γ (t₀ - δ) - s‖) :
     firstExitTimeLeft γ t₀ δ s ε < t₀ := by
-  have h_cont_at_t₀ : ContinuousWithinAt (fun t => ‖γ t - s‖) (Icc (t₀ - δ) t₀) t₀ :=
+  have h_cont_at_t₀ : ContinuousWithinAt (fun t ↦ ‖γ t - s‖) (Icc (t₀ - δ) t₀) t₀ :=
     ((hγ_cont t₀ ⟨by linarith, le_rfl⟩).sub continuousWithinAt_const).norm
   have h_eventually : ∀ᶠ t in 𝓝[Icc (t₀ - δ) t₀] t₀, ‖γ t - s‖ < ε :=
     h_cont_at_t₀.tendsto.eventually_lt_const (by simp [h_s, hε_pos])
   obtain ⟨η, hη_pos, hη⟩ := Metric.nhdsWithin_basis_ball.eventually_iff.mp h_eventually
   refine lt_of_le_of_lt (a := firstExitTimeLeft γ t₀ δ s ε)
     (b := t₀ - min η δ / 2) ?_ (by linarith [lt_min hη_pos hδ])
-  refine csSup_le ⟨t₀ - δ, firstExitTimeLeft_set_nonempty hδ.le hε_le⟩ fun t ht => ?_
+  refine csSup_le ⟨t₀ - δ, firstExitTimeLeft_set_nonempty hδ.le hε_le⟩ fun t ht ↦ ?_
   by_contra! h_lt
   have h_in_Icc : t ∈ Icc (t₀ - δ) t₀ := ht.1
   exact absurd ht.2 <| not_le.mpr <| hη ⟨Metric.mem_ball.mpr <| by
@@ -260,7 +260,7 @@ theorem firstExitTimeRight_tendsto_t₀
     {γ : ℝ → ℂ} {t₀ δ : ℝ} {s : ℂ} (hδ : 0 < δ)
     (hγ_cont : ContinuousOn γ (Icc t₀ (t₀ + δ)))
     (h_s : γ t₀ = s) (h_leave : ∀ t ∈ Ioc t₀ (t₀ + δ), γ t ≠ s) :
-    Tendsto (fun ε => firstExitTimeRight γ t₀ δ s ε) (𝓝[>] 0) (𝓝[>] t₀) := by
+    Tendsto (fun ε ↦ firstExitTimeRight γ t₀ δ s ε) (𝓝[>] 0) (𝓝[>] t₀) := by
   rw [tendsto_nhdsWithin_iff]
   refine ⟨?_, ?_⟩
   · rw [Metric.tendsto_nhdsWithin_nhds]
@@ -280,7 +280,7 @@ theorem firstExitTimeRight_tendsto_t₀
   · have h_far_pos : (0 : ℝ) < ‖γ (t₀ + δ) - s‖ :=
       norm_pos_iff.mpr (sub_ne_zero.mpr (h_leave _ ⟨by linarith, le_rfl⟩))
     rw [eventually_iff_exists_mem]
-    refine ⟨Ioo 0 ‖γ (t₀ + δ) - s‖, Ioo_mem_nhdsGT h_far_pos, fun ε hε => ?_⟩
+    refine ⟨Ioo 0 ‖γ (t₀ + δ) - s‖, Ioo_mem_nhdsGT h_far_pos, fun ε hε ↦ ?_⟩
     exact t₀_lt_firstExitTimeRight hδ hγ_cont h_s hε.1 hε.2.le
 
 /-- **Left-side asymptotic.** Symmetric to `firstExitTimeRight_tendsto_t₀`:
@@ -290,7 +290,7 @@ theorem firstExitTimeLeft_tendsto_t₀
     {γ : ℝ → ℂ} {t₀ δ : ℝ} {s : ℂ} (hδ : 0 < δ)
     (hγ_cont : ContinuousOn γ (Icc (t₀ - δ) t₀))
     (h_s : γ t₀ = s) (h_leave : ∀ t ∈ Ico (t₀ - δ) t₀, γ t ≠ s) :
-    Tendsto (fun ε => firstExitTimeLeft γ t₀ δ s ε) (𝓝[>] 0) (𝓝[<] t₀) := by
+    Tendsto (fun ε ↦ firstExitTimeLeft γ t₀ δ s ε) (𝓝[>] 0) (𝓝[<] t₀) := by
   rw [tendsto_nhdsWithin_iff]
   refine ⟨?_, ?_⟩
   · rw [Metric.tendsto_nhdsWithin_nhds]
@@ -311,7 +311,7 @@ theorem firstExitTimeLeft_tendsto_t₀
   · have h_far_pos : (0 : ℝ) < ‖γ (t₀ - δ) - s‖ :=
       norm_pos_iff.mpr (sub_ne_zero.mpr (h_leave _ ⟨le_rfl, by linarith⟩))
     rw [eventually_iff_exists_mem]
-    refine ⟨Ioo 0 ‖γ (t₀ - δ) - s‖, Ioo_mem_nhdsGT h_far_pos, fun ε hε => ?_⟩
+    refine ⟨Ioo 0 ‖γ (t₀ - δ) - s‖, Ioo_mem_nhdsGT h_far_pos, fun ε hε ↦ ?_⟩
     exact firstExitTimeLeft_lt_t₀ hδ hγ_cont h_s hε.1 hε.2.le
 
 /-- **Right-side eventual exact radius.** For `γ` continuous with `γ(t₀) = s`
