@@ -47,7 +47,7 @@ variable (n : ℕ)
 
 /-- The diagonal `GL_n(ℚ)` matrix with natural number entries.
     Positivity is needed to ensure the determinant is nonzero. -/
-private def natDiagDetNeZero (a : Fin n → ℕ) (ha : ∀ i, 0 < a i) :
+private lemma natDiagDetNeZero (a : Fin n → ℕ) (ha : ∀ i, 0 < a i) :
     (Matrix.diagonal (fun i ↦ (a i : ℚ))).det ≠ 0 := by
   rw [Matrix.det_diagonal]
   exact ne_of_gt (Finset.prod_pos fun i _ ↦ Nat.cast_pos.mpr (ha i))
@@ -254,7 +254,7 @@ private lemma sign_correct_unit_transform (A : Matrix (Fin n) (Fin n) ℤ) (d : 
     have hflip_sq : flip * flip = 1 := by
       rw [Matrix.diagonal_mul_diagonal]; ext i j; simp only [Matrix.diagonal_apply, Matrix.one_apply]
       by_cases h : i = j
-      · subst h; by_cases hi : i = 0 <;> simp [Function.update_apply, hi]
+      · subst h; by_cases hi : i = 0 <;> simp [hi]
       · simp [h]
     have hflip_diag : flip * Matrix.diagonal d * flip = Matrix.diagonal d := by
       have hcomm : flip * Matrix.diagonal d = Matrix.diagonal d * flip := by
