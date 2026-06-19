@@ -89,7 +89,7 @@ noncomputable def classTransport (m : ClassGroup E.CoordinateRing →* ClassGrou
     E.Point →+ E.Point :=
   (WeierstrassCurve.Affine.Point.toClassEquiv' (W := E)).symm.toAddMonoidHom.comp
     ((AddMonoidHom.mk'
-        (fun a : Additive (ClassGroup E.CoordinateRing) => Additive.ofMul (m a.toMul))
+        (fun a : Additive (ClassGroup E.CoordinateRing) ↦ Additive.ofMul (m a.toMul))
         (by intro a b; simp [map_mul])).comp
       (WeierstrassCurve.Affine.Point.toClassEquiv' (W := E)).toAddMonoidHom)
 
@@ -652,7 +652,7 @@ theorem comp_eq_mulByInt_of_comp_eq_of_surjective
   -- `(g ∘ f)(g Q) = g (f (g Q))`; and `f (g Q) = (f ∘ g) Q = m • Q` by `hfg`.
   rw [AddMonoidHom.comp_apply]
   have hf : f (g Q) = m • Q := by
-    have := congrArg (fun h : E.Point →+ E.Point => h Q) hfg
+    have := congrArg (fun h : E.Point →+ E.Point ↦ h Q) hfg
     simpa [AddMonoidHom.comp_apply, mulByInt_apply] using this
   -- `g (f (g Q)) = g (m • Q) = m • g Q`, and the RHS `[m] (g Q) = m • g Q`.
   rw [hf, g.map_zsmul, mulByInt_apply]
@@ -668,7 +668,7 @@ theorem eq_of_comp_eq_of_surjective {f₁ f₂ g : E.Point →+ E.Point} (hg : F
     (h : f₁.comp g = f₂.comp g) : f₁ = f₂ := by
   ext a
   obtain ⟨b, rfl⟩ := hg a
-  have := congrArg (fun k : E.Point →+ E.Point => k b) h
+  have := congrArg (fun k : E.Point →+ E.Point ↦ k b) h
   simpa [AddMonoidHom.comp_apply] using this
 
 /-- **Silverman III.6.2(a) via right-cancellation: `α̂ ∘ α = [deg α]` (`finrank` exponent).**
