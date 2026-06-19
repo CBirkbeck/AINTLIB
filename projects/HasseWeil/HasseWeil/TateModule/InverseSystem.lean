@@ -43,7 +43,7 @@ from `E[ℓⁿ⁺¹]` to `E[ℓⁿ]`: if `P ∈ E[ℓⁿ⁺¹]` then `ℓⁿ · 
 noncomputable def tateConn (n : ℕ) :
     W.toAffine[((ℓ ^ (n + 1) : ℕ) : ℤ)] →+ W.toAffine[((ℓ ^ n : ℕ) : ℤ)] :=
   ((zsmulAddGroupHom (ℓ : ℤ)).comp (W.toAffine[((ℓ ^ (n + 1) : ℕ) : ℤ)]).subtype).codRestrict _
-    (fun P => by
+    (fun P ↦ by
       rw [mem_torsionSubgroup]
       have hP : ((ℓ ^ (n + 1) : ℕ) : ℤ) • (P : W.toAffine.Point) = 0 := by
         have := P.property; rwa [mem_torsionSubgroup] at this
