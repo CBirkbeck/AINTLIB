@@ -463,3 +463,47 @@ $`\Qp^\vee = \Qp(1)` forces $`r_{\Qp^\vee} = 1`; but the two statements are
 equivalent. More general — even non-commutative — formulations exist in the work
 of Kato and of Fukaya–Kato.
 :::
+
+# Formalisation status
+
+The formalisation of this chapter lives in `PadicLFunctions.Iwasawa.StructureTheory`
+(the $`\Lam`-module structure theory) and `PadicLFunctions.IwasawaProof.Galois`
+(the Galois side). We record here what is currently proved in Lean and what is taken as
+input, so the roadmap above doubles as a status map.
+
+**Structure theory** ({bpref "lambda-module-structure"}[]–{bpref "imc-char-ideal-multiplicative"}[]).
+The Iwasawa algebra $`\Lam = \cO_L[[T]]`, distinguished polynomials and Weierstrass preparation
+{bpref "imc-distinguished-polynomial"}[], pseudo-isomorphism {bpref "imc-pseudo-isomorphism"}[],
+and the Noetherian/domain/UFD/DVR-localisation facts are formalised in `IwasawaAlgebra.lean`,
+`PseudoIso.lean` and `StructureTheorem.lean`. The *characteristic ideal*
+{bpref "characteristic-ideal"}[] is built in `CharIdeal.lean` not through the full structure
+theorem (which is not in Mathlib) but equivalently as $`\prod_P P^{\ell_P(M)}` over the
+height-one primes $`P`, with $`\ell_P(M)` the length of the localisation $`M_P` over $`\Lam_P`.
+This makes both pseudo-isomorphism invariance and multiplicativity in exact sequences
+{bpref "imc-char-ideal-multiplicative"}[] provable directly from additivity of length, with no
+appeal to the structure theorem. The isotypic decomposition {bpref "imc-isotypic-decomposition"}[]
+and the equivariant characteristic ideal {bpref "imc-characteristic-ideal-general"}[] are proved
+in `Isotypic.lean` (`isInternal_isotypicComponent`, `charIdealGroup`), the decomposition via a
+general lemma that a complete family of orthogonal idempotents splits any module.
+
+**Galois side** ({bpref "imc-galois-modules"}[]–{bpref "imc-vandiver"}[]).
+The modules $`\sX_\infty^+, \sY_\infty^+` and the short exact sequence
+{bpref "imc-galois-modules"}[] are bundled in `Galois/Modules.lean` (`IwasawaGaloisData`), and the
+finite-level class-group modules $`\sY_n^+ = \Cl(F_n^+)\otimes_\Z\Zp` as `YPlusFin`, reusing
+Mathlib's class group of the cyclotomic tower. The Vandiver vanishing
+{bpref "imc-vandiver-consequences"}[] (i), $`p\nmid h_1^+ \Rightarrow \sY_\infty^+ = 0`, is
+**proved** in `Galois/Coinvariants.lean` (`yPlus_subsingleton`) from the control theorem
+{bpref "imc-coinvariants"}[] and Nakayama's lemma. The collapse of the four-term sequence to
+{bpref "imc-vandiver"}[] is then pure algebra over {bpref "imc-cft-units-2"}[].
+
+**Class field theory as a bundled input.** Global class field theory is not yet in Mathlib.
+Mirroring the source's own practice of citing {Informal.citet "washington"}[] for these classical
+facts, the ramified-reciprocity sequence {bpref "imc-cft-units-1"}[] and the control theorem
+{bpref "imc-coinvariants"}[] are recorded as a *general* interface in `Galois/ClassFieldTheory.lean`
+(`RayClassData`, `ClassFieldTheory`): Artin reciprocity $`\Cl_K(\mathfrak m) \cong \Gal(H_\mathfrak{m}/K)`
+for an arbitrary number field, from which the cyclotomic special cases are to be derived — chosen so
+that a future Mathlib global class field theory discharges the assumption by instantiation rather than
+re-derivation. The connector between the abstract cyclotomic field used on the algebraic side and the
+analytic $`\Cp`-tower carrying the Coleman map {bpref "coleman-map"}[] is the embedding
+$`\Q(\mu_{p^n}) \hookrightarrow \Cp`, $`\zeta \mapsto \xi_{p^n}`, of `Galois/Bridge.lean`
+(`cyclotomicEmbedding`).
