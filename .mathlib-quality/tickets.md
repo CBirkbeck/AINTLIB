@@ -259,7 +259,15 @@ Any affinoid `(A, A⁺)`; the `A°` bound is `A⁺`-independent (Prop 7.41 gives
 ---
 
 ### [T-L4] `isPowerBounded_of_forall_vle_one_spa_of_complete` via 7.52(1) = 7.18(1) (former leaf #4)
-- **Status**: open — discharges the bare `sorry` at FaithfulLocLift.lean:85
+- **Status**: PARKED — cited external leaf **[Hu2] Lemma 3.3 (i/ii)**, NOT a trivial wrapper.
+  ⚠ Adversarial round-2 finding (`decomposition.md`): the reviewer's "trivial via 7.52(1)" does
+  NOT survive contact with the code. In-repo 7.18 (`isIntegral_of_forall_continuous_valuation_le_one`,
+  Presheaf:1639) requires `[IsDomain R]` (FALSE for case-(b) `presheafValue D'`) AND has a live 7.22
+  continuity sub-`sorry`; the all-valuations form (Presheaf:1569) is `[IsDomain]`-gated + wrong
+  quantifier; [Hu2] (Huber 1993) is not in hand. **The ℂ_p red flag IS withdrawn** (it is 7.18(1),
+  NOT the noetherian density converse 7.18(3)), but the leaf is a genuine cited external, consistent
+  with the LL chain already resting on [Hu2] 3.3. DECISION (user): (a) keep parked [recommended];
+  (b) build non-domain 7.18(1) + 7.22 (substantial); (c) source [Hu2].
 - **File**: FaithfulLocLift.lean (+ a `mem_plus_iff_forall_spa_vle_one` named leaf = 7.52(1))
 - **Depends on**: none
 - **Parallel**: yes

@@ -7,6 +7,124 @@ Source mapping verified against Wedhorn's bibliography (`wedhorn.txt:5725-5745`)
 **[Hu3]** = A generalization (1994). Build is green (3190 jobs); these are the only
 critical-path sorries.
 
+## ★★ ADVERSARIAL DECOMPOSE round 2 (2026-06-19) — attack logs per leaf (read FIRST)
+
+Disposition: opposing the plan. Each leaf attacked across the 5 categories + prior-B2 log
+(`b2_log.jsonl`, 2 entries consulted). Net: **T-L1/T-L2 survive; T-L3 survives + improved
+(its feared-deep input is already proven); T-L4 FAILED — it is NOT the trivial wrapper the
+reviewer implied.** One decision point for the user (T-L4).
+
+### T-L1 (equalizer + OMT inducing) — VERDICT: SURVIVED, real work itemised
+- **[1] Counterexample / discharge attack on the OMT input.** The reviewer said "apply the
+  already-formalized Theorem 6.16." FLAW in the naive reading: the landed
+  `isOpenMap_of_completeSpace_of_countablyGenerated` carries `[SigmaCompactSpace G]`, with an
+  explicit in-file counterexample (ℝ-discrete→ℝ-Euclidean) and a `b2_log` note — **false for the
+  Tate `R` of interest.** RESOLVED, not fatal: the correct input is `wedhorn_6_16_of_topNilpUnit`
+  (WedhornBanachTheorem:408), σ-compact-free, already used on `f.rangeRestrict` in
+  `_sub_lemma_L4_3_strict_via_closed_image`. Ticket pins it.
+- **[2] Precondition attack (does the OMT even apply to `ρ̃`?).** `wedhorn_6_16_of_topNilpUnit`
+  needs `f : M →ₗ[A] N` (bundled A-linear). **`productRestrictionSub` is an unbundled function
+  `presheafValue base → ∀ D, presheafValue D` (StructureSheaf:275), NOT a `→ₗ[A]`.** Real work:
+  T-L1b must build `productRestrictionToEqualizer : R →ₗ[A] E` (bundle the existing additive/
+  algebra structure). Not fatal, but not free.
+- **[3] Precondition attack (cg uniformity on the equalizer).** OMT needs
+  `[(uniformity N).IsCountablyGenerated]` on the target. CHECKED: `IsCountablyGenerated
+  (uniformity (presheafValue D))` IS established in-repo (LaurentRefinementCore:2689); the
+  equalizer `E ⊆ ∏` (finite product) inherits it via `Filter.comap.isCountablyGenerated`
+  (the `_sub_lemma_L4_3` pattern). Also need `ContinuousSMul A R`, `ContinuousSMul A E` — to
+  verify at build time (plausible; presheafValue is a topological A-algebra).
+- **[4] Composition attack (is inducing independent of gluing?).** NO. `IsOpenMap ρ̃` needs `ρ̃`
+  **surjective** = the gluing axiom (Leaf C). Alternative (OMT on `ρ.rangeRestrict`) needs
+  `range(ρ)` closed = complete; without module-finiteness (the 6.18 route the reviewer rejects),
+  `range(ρ)` closed ⟺ `range(ρ) = E` ⟺ gluing. **So T-L1c is genuinely gated on Leaf C.** The
+  "4 independent leaves" framing is wrong: the embedding side sits on top of gluing. Board encodes
+  this (T-L1b depends on Leaf C); recommended order corrected: Leaf C before T-L1b/c.
+- **[5] Source-drift.** `sectionEqualizer_isClosed` (kernel of continuous overlap-diff) is standard
+  topology, no Wedhorn proposition mis-cited. ✓
+- **Prior-B2:** no name/shape match.
+
+### T-L2 (completion ring of integral elements) — VERDICT: SURVIVED (external leaf in hand)
+- **[1] Source-drift on 7.47(4).** CHECKED `wedhorn.txt:3556`: "(4) Rings of integral elements of
+  A and rings of integral elements of Â [correspond]. Proof. [Hu1] 2.4.3." Leaf claim matches
+  exactly. The external cite is **[Hu1] 2.4.3, which IS in hand** (`huber1.txt`), so this is a real
+  sub-development, not unfulfillable infrastructure (CLAUDE.md STOP tell does NOT fire).
+- **[2] Discharge attack on the precompletion (7.19/7.20).** The `subset_powerBounded`/openness at
+  the *precompletion* level (C = IntCl(A⁺[T/s]) ⊆ (A_s)°, open) needs the 7.20 inclusion
+  `(A°)⟨T/s⟩ ⊆ (A_s)°` and `C ⊆ (A°)⟨T/s⟩`. TO VERIFY at build time: the `⟨T/s⟩` (restricted) vs
+  `[T/s]` (plain localization) distinction in the in-repo `locPlusSubring`/`Localization.Away`
+  encoding — a place a gap could hide. Flagged, not fatal.
+- **[3] Definitional-match attack.** Leaf assumes `(presheafValue D)⁺ = closure(coeRingHom C)`. The
+  T-ROIE-1 def `completedPlusSubring D := closure((IntCl(locPlusSubring)).map coeRingHom)` matches;
+  confirm `(presheafValue D)⁺` resolves to `completedPlusSubring D` (ringPlus instance key).
+- **Prior-B2:** the deleted `completedPlusSubring_le_ringOfDef` B2 is about the *false* `Ĉ ⊆ B₀`
+  (ring of definition), NOT about `Ĉ` being a ring of integral elements (this leaf). No conflict —
+  this leaf is the correct replacement direction.
+
+### T-L3 (analytic Spa point) — VERDICT: SURVIVED + IMPROVED (feared input already proven)
+- **[1] Deep-leaf attack (is 7.45 a live sorry?).** Feared T-L3 bottoms at an unproven 7.45.
+  CHECKED: **`Lemma745.lean` has 0 sorries** — `exists_spa_point_via_restrictToConvex` (L418) and
+  `exists_mem_spa_supp_ge_of_nonOpen_prime` (L691) are PROVEN. The analytic-point existence is DONE.
+  Moreover `restrictToConvex` yields a valuation "automatically MulArchimedean (rank ≤ 1)"
+  (Lemma745:38) — i.e. the **height-1 property is built in**, so Remark 4.12 generization is not a
+  separate deep step.
+- **[2] Hypothesis/conclusion-strength attack (b2 shape-match).** `b2_log` entry
+  `exists_spa_point_supp_eq_nonOpen_maxIdeal_of_complete` was FALSE for bare `PlusSubring` (A⁺=⊤ ⟹
+  Spa(A,⊤)=∅, counterexample A=ℚ_p). **T-L3 dodges it**: T-L3 concludes the bound on
+  `powerBoundedSubring A` (A°), which is `A⁺`-INDEPENDENT — NOT on A⁺. The existing Lemma745 lemmas
+  conclude the A⁺/A₀-bound (need `A⁺⊆A₀`); T-L3 needs the **A°**-bound, which is STRICTLY STRONGER
+  (A₀ ⊆ A°), supplied by **Prop 7.41** (height-1 ⟹ bounded on A°). So T-L3's residual = wire the
+  proven height-1 analytic point (Lemma745) + Prop 7.41 (≈ the docstring's 6-line argument, now
+  legitimately ≈6 lines because the height-1 point is already in hand) + pair-free plumbing. **More
+  tractable than the board's "deep" flag implied.**
+- **[3] Source-drift on 7.41.** `wedhorn.txt:3487` (Prop 7.41) is the height-1-analytic ⟹
+  bounded-on-A° step; matches. Archimedean value-group API exists in-repo (Presheaf:3331–3438,
+  the 7.40(6) chain).
+- **Verdict:** ticket sharpened — drop the "7.45 is a deep in-repo sorry" framing; the residual is
+  Prop 7.41 + the A₀→A° upgrade + pair-free wiring.
+
+### T-L4 (former leaf #4 = 7.52(1)/7.18(1)) — VERDICT: ⚠ FLAW — NOT a trivial wrapper
+- **[1] Discharge attack (is 7.52(1)/7.18(1) actually dischargeable in-repo?).** The reviewer:
+  "leaf #4 is essentially trivial via 7.52(1)." FALSE as a formalization claim. The in-repo 7.18
+  content is:
+  - `isIntegral_of_forall_valuation_le_one` (Presheaf:1569): PROVEN, but quantifies over **ALL**
+    valuations (a STRONGER hypothesis than T-L4's "continuous only") AND requires **`[IsDomain R]`**.
+  - `isIntegral_of_forall_continuous_valuation_le_one` (Presheaf:1639): the correct
+    continuous-valuations form (Wedhorn 7.18 proper) — but it **(a) requires `[IsDomain R]`** and
+    **(b) has a live sub-`sorry`** (the continuity construction = Wedhorn Lemma 7.22, "substantial
+    additional infrastructure", per its own docstring).
+- **[2] Setting attack (`[IsDomain]` vs case-(b)).** `presheafValue D' = Â⟨T/s⟩` in case-(b)
+  (general strongly noetherian) is **NOT a domain**. So BOTH in-repo 7.18 lemmas are inapplicable to
+  the actual target. The general non-domain 7.18(1) bottoms at **[Hu2] Lemma 3.3** — and **[Hu2]
+  (Huber, *Continuous valuations*, 1993) is NOT in hand** (we have [Hu1] Habilitation + [Hu3] 1994;
+  huber1.txt grep found §1.3 Spv theory, not the σ/τ membership bijection).
+- **[3] Cross-check with the existing LL chain.** Consistent: `project_faithful_ll_assembly` records
+  the faithful (LL) assembly already rests on "2 honest leaves (7.51(2)/7.49 + **[Hu2] 3.3**)". So
+  T-L4 = that pre-existing **parked [Hu2] 3.3 external leaf**.
+- **What the reviewer got right:** the **ℂ_p red flag is genuinely withdrawn** — leaf #4 is NOT the
+  noetherian *density* converse 7.18(3); it is the hypothesis-free-*in-principle* bijection 7.18(1).
+  The citation correction is real and valuable.
+- **What the reviewer got wrong (formalization reality):** 7.18(1) is **not** a trivial in-repo
+  wrapper. It is a genuine **cited external leaf at [Hu2] 3.3 (i)/(ii)** — faithful and acceptable
+  per CLAUDE.md, but NOT newly dischargeable. The "delete leaf #4 / short wrapper" instruction does
+  not survive contact with the code (non-domain + [IsDomain]-gated in-repo proof + 7.22 sorry +
+  [Hu2] not in hand).
+- **DECISION POINT for the user (recorded, not auto-resolved):**
+  - **(a)** Keep T-L4 PARKED as the cited [Hu2] 3.3 external leaf (faithful; consistent with the LL
+    chain already resting on it). Lowest cost; the red flag is gone. **Recommended.**
+  - **(b)** Attempt the general non-domain 7.18(1) in-repo: drop `[IsDomain]` from
+    `isIntegral_of_forall_continuous_valuation_le_one` (re-do via Spv/supports not FractionRing) AND
+    discharge its 7.22 continuity sorry. Substantial (Wedhorn 7.22 = "substantial infrastructure");
+    a multi-leaf sub-project, not a wrapper.
+  - **(c)** Source [Hu2] (Huber 1993) and cite 3.3 directly (still external; doesn't reduce Lean work).
+
+### Net for the board
+- T-L1, T-L2, T-L3 stand (with the itemised real work above; T-L3 is more tractable).
+- **T-L4's status changes from "trivial wrapper" → "cited external leaf [Hu2] 3.3, parked"** — the
+  red flag is withdrawn but it is NOT a discharge. Update the T-L4 ticket framing accordingly and
+  surface the decision to the user.
+
+---
+
 ## ★ REVISED per /expert-review (2026-06-19) — read this first
 
 The reviewer (adic-spaces expert) checked the 4-leaf plan against the source. Net effect:
