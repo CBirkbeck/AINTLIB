@@ -85,7 +85,7 @@ lemma ftc_log_pieceFM {g h : ℝ → ℂ} {a b : ℝ} (hab : a ≤ b)
     (hh_slit : ∀ t ∈ Icc a b, h t ∈ Complex.slitPlane)
     (heq : ∀ t ∈ Ioo a b, g t = h t ∧ deriv g t = deriv h t)
     (heq_a : g a = h a) (heq_b : g b = h b) :
-    IntervalIntegrable (fun t => deriv g t / g t) volume a b ∧
+    IntervalIntegrable (fun t ↦ deriv g t / g t) volume a b ∧
     ∫ t in a..b, deriv g t / g t = Complex.log (g b) - Complex.log (g a) :=
   LogDerivFTC.ftc_log_pieceFM hab hh_cont hh_diff hh_deriv_cont hh_slit heq heq_a heq_b
 
@@ -95,13 +95,13 @@ lemma continuousOn_arg_im_nonneg :
   exact ContinuousWithinAt.congr
     ((continuous_re.continuousWithinAt.div continuous_norm.continuousWithinAt
       (norm_ne_zero_iff.mpr hz_ne)).arccos)
-    (fun w ⟨hw_im, hw_ne⟩ => Complex.arg_of_im_nonneg_of_ne_zero hw_im hw_ne)
+    (fun w ⟨hw_im, hw_ne⟩ ↦ Complex.arg_of_im_nonneg_of_ne_zero hw_im hw_ne)
     (Complex.arg_of_im_nonneg_of_ne_zero hz_im hz_ne)
 
 lemma continuousOn_clog_im_nonneg :
     ContinuousOn Complex.log {z : ℂ | 0 ≤ z.im ∧ z ≠ 0} := by
   intro z ⟨hz_im, hz_ne⟩
-  rw [show Complex.log = fun w => ↑(Real.log ‖w‖) + ↑(Complex.arg w) * I from funext fun _ => rfl]
+  rw [show Complex.log = fun w ↦ ↑(Real.log ‖w‖) + ↑(Complex.arg w) * I from funext fun _ ↦ rfl]
   refine ContinuousWithinAt.add ?_ ?_
   · exact (continuous_ofReal.continuousAt.comp
       ((Real.continuousAt_log (norm_ne_zero_iff.mpr hz_ne)).comp
@@ -113,13 +113,13 @@ lemma continuousOn_clog_im_nonneg :
 when `g = h` on `Ioo a b`, returning both the AE-equality and `IntervalIntegrable g'/g`. -/
 private lemma ftc_log_piece_congr_aux {g h : ℝ → ℂ} {a b : ℝ} (hab : a ≤ b)
     (heq : ∀ t ∈ Ioo a b, g t = h t ∧ deriv g t = deriv h t)
-    (hint_h : IntervalIntegrable (fun t => deriv h t / h t) volume a b) :
+    (hint_h : IntervalIntegrable (fun t ↦ deriv h t / h t) volume a b) :
     (∀ᵐ t ∂volume, t ∈ Ι a b → deriv g t / g t = deriv h t / h t) ∧
-    IntervalIntegrable (fun t => deriv g t / g t) volume a b := by
+    IntervalIntegrable (fun t ↦ deriv g t / g t) volume a b := by
   have hb_ae : ({b} : Set ℝ)ᶜ ∈ ae volume := by simp [mem_ae_iff]
   have h_congr : ∀ᵐ t ∂volume, t ∈ Ι a b → deriv g t / g t = deriv h t / h t := by
     filter_upwards [hb_ae] with t ht_ne_b ht_mem
-    have ht_ne : t ≠ b := fun h => ht_ne_b (mem_singleton_iff.mpr h)
+    have ht_ne : t ≠ b := fun h ↦ ht_ne_b (mem_singleton_iff.mpr h)
     rw [uIoc_of_le hab] at ht_mem
     obtain ⟨hval, hderiv⟩ := heq t ⟨ht_mem.1, lt_of_le_of_ne ht_mem.2 ht_ne⟩
     rw [hval, hderiv]
@@ -127,7 +127,7 @@ private lemma ftc_log_piece_congr_aux {g h : ℝ → ℂ} {a b : ℝ} (hab : a �
   · exact MeasureTheory.Integrable.congr
       (show Integrable _ (volume.restrict (Ioc a b)) from hint_h.1)
       ((MeasureTheory.ae_restrict_iff' measurableSet_Ioc).mpr
-        (h_congr.mono (fun t ht hm => (ht (uIoc_of_le hab ▸ hm)).symm)))
+        (h_congr.mono (fun t ht hm ↦ (ht (uIoc_of_le hab ▸ hm)).symm)))
   · rw [show Ioc b a = ∅ from Set.Ioc_eq_empty (not_lt.mpr hab)]
     exact MeasureTheory.integrableOn_empty
 
@@ -138,16 +138,16 @@ lemma ftc_log_piece_upper {g h : ℝ → ℂ} {a b : ℝ} (hab : a ≤ b)
     (hh_slit_interior : ∀ t ∈ Ioo a b, h t ∈ slitPlane)
     (heq : ∀ t ∈ Ioo a b, g t = h t ∧ deriv g t = deriv h t)
     (heq_a : g a = h a) (heq_b : g b = h b) :
-    IntervalIntegrable (fun t => deriv g t / g t) volume a b ∧
+    IntervalIntegrable (fun t ↦ deriv g t / g t) volume a b ∧
     ∫ t in a..b, deriv g t / g t = Complex.log (g b) - Complex.log (g a) := by
-  have hh_log_cont : ContinuousOn (fun t => Complex.log (h t)) (Icc a b) :=
+  have hh_log_cont : ContinuousOn (fun t ↦ Complex.log (h t)) (Icc a b) :=
     ContinuousOn.comp continuousOn_clog_im_nonneg hh_cont
-      (fun t ht => ⟨hh_im_nn t ht, hh_ne t ht⟩)
-  have hint_h : IntervalIntegrable (fun t => deriv h t / h t) volume a b :=
+      (fun t ht ↦ ⟨hh_im_nn t ht, hh_ne t ht⟩)
+  have hint_h : IntervalIntegrable (fun t ↦ deriv h t / h t) volume a b :=
     ((hh_deriv_cont.div hh_cont hh_ne).mono (uIcc_of_le hab ▸ Subset.rfl)).intervalIntegrable
   obtain ⟨h_congr, hint_g⟩ := ftc_log_piece_congr_aux hab heq hint_h
   have h_ftc := intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le hab
-    hh_log_cont (fun t ht => (hh_diff t ht).hasDerivAt.clog_real
+    hh_log_cont (fun t ht ↦ (hh_diff t ht).hasDerivAt.clog_real
       (hh_slit_interior t ht)) hint_h
   exact ⟨hint_g, by
     calc ∫ t in a..b, deriv g t / g t
@@ -162,20 +162,20 @@ lemma ftc_log_piece_lower {g h : ℝ → ℂ} {a b : ℝ} (hab : a ≤ b)
     (hh_im_neg_interior : ∀ t ∈ Ioo a b, (h t).im < 0)
     (heq : ∀ t ∈ Ioo a b, g t = h t ∧ deriv g t = deriv h t)
     (heq_a : g a = h a) (heq_b : g b = h b) :
-    IntervalIntegrable (fun t => deriv g t / g t) volume a b ∧
+    IntervalIntegrable (fun t ↦ deriv g t / g t) volume a b ∧
     ∫ t in a..b, deriv g t / g t =
       Complex.log (-(g b)) - Complex.log (-(g a)) := by
-  have hnh_log_cont : ContinuousOn (fun t => Complex.log (-(h t))) (Icc a b) :=
-    ContinuousOn.comp continuousOn_clog_im_nonneg hh_cont.neg fun t ht =>
+  have hnh_log_cont : ContinuousOn (fun t ↦ Complex.log (-(h t))) (Icc a b) :=
+    ContinuousOn.comp continuousOn_clog_im_nonneg hh_cont.neg fun t ht ↦
       ⟨by simpa using hh_im_np t ht, neg_ne_zero.mpr (hh_ne t ht)⟩
-  have hint_h : IntervalIntegrable (fun t => deriv h t / h t) volume a b :=
+  have hint_h : IntervalIntegrable (fun t ↦ deriv h t / h t) volume a b :=
     ((hh_deriv_cont.div hh_cont hh_ne).mono (uIcc_of_le hab ▸ Subset.rfl)).intervalIntegrable
   obtain ⟨h_congr, hint_g⟩ := ftc_log_piece_congr_aux hab heq hint_h
-  have hnh_slit : ∀ t ∈ Ioo a b, (-(h t)) ∈ slitPlane := fun t ht => by
+  have hnh_slit : ∀ t ∈ Ioo a b, (-(h t)) ∈ slitPlane := fun t ht ↦ by
     rw [Complex.mem_slitPlane_iff]
     exact Or.inr (by simpa using ne_of_lt (hh_im_neg_interior t ht))
   have h_ftc := intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le hab
-    hnh_log_cont (fun t ht => by
+    hnh_log_cont (fun t ht ↦ by
       have := (hh_diff t ht).hasDerivAt.neg.clog_real (hnh_slit t ht)
       exact (show -deriv h t / -h t = deriv h t / h t by simp only [neg_div_neg_eq]) ▸ this) hint_h
   exact ⟨hint_g, by
@@ -188,12 +188,12 @@ lemma ftc_log_piece_lower {g h : ℝ → ℂ} {a b : ℝ} (hab : a ≤ b)
 
 /-- Derivative of the parametric arc `exp(i·π(1+t)/6) - s`. -/
 lemma hasDerivAt_arc_sub_const (s : ℂ) (t : ℝ) :
-    HasDerivAt (fun t : ℝ => Complex.exp (↑(Real.pi * (1 + t) / 6) * I) - s)
+    HasDerivAt (fun t : ℝ ↦ Complex.exp (↑(Real.pi * (1 + t) / 6) * I) - s)
       (↑(Real.pi / 6) * I * Complex.exp (↑(Real.pi * (1 + t) / 6) * I)) t := by
-  have hf : HasDerivAt (fun s : ℝ => Real.pi * (1 + s) / 6) (Real.pi / 6) t :=
+  have hf : HasDerivAt (fun s : ℝ ↦ Real.pi * (1 + s) / 6) (Real.pi / 6) t :=
     ((hasDerivAt_id t).add_const (1:ℝ) |>.const_mul (Real.pi / 6)).congr_of_eventuallyEq
-      (Eventually.of_forall fun s => by simp [id]; ring) |>.congr_deriv (by ring)
-  have hci : HasDerivAt (fun s : ℝ => (↑(Real.pi * (1 + s) / 6) : ℂ) * I)
+      (Eventually.of_forall fun s ↦ by simp [id]; ring) |>.congr_deriv (by ring)
+  have hci : HasDerivAt (fun s : ℝ ↦ (↑(Real.pi * (1 + s) / 6) : ℂ) * I)
       ((↑(Real.pi / 6) : ℂ) * I) t :=
     (hf.ofReal_comp.mul_const I).congr_deriv (by norm_num [smul_eq_mul])
   exact (hci.cexp.sub (hasDerivAt_const t s)).congr_deriv (by simp only [sub_zero]; ring)
@@ -205,7 +205,7 @@ lemma fdBoundary_H_sub_closed (H : ℝ) (c : ℂ) :
 /-- Continuity of the arc-derivative expression `(π/6)·i·exp(i·π(1+t)/6)`. -/
 @[fun_prop]
 lemma continuous_arc_deriv :
-    Continuous fun t : ℝ => (↑(Real.pi / 6) : ℂ) * I *
+    Continuous fun t : ℝ ↦ (↑(Real.pi / 6) : ℂ) * I *
       Complex.exp (↑(Real.pi * (1 + t) / 6) * I) := by
   fun_prop
 
@@ -215,56 +215,56 @@ lemma continuousOn_deriv_of_arc_form {h : ℝ → ℂ}
       (↑(Real.pi / 6) * I * Complex.exp (↑(Real.pi * (1 + t) / 6) * I)) t)
     (a b : ℝ) : ContinuousOn (deriv h) (Icc a b) := by
   rw [show deriv h =
-      fun t => ↑(Real.pi / 6) * I * Complex.exp (↑(Real.pi * (1 + t) / 6) * I) from
-    funext fun t => (hd t).deriv]
+      fun t ↦ ↑(Real.pi / 6) * I * Complex.exp (↑(Real.pi * (1 + t) / 6) * I) from
+    funext fun t ↦ (hd t).deriv]
   exact continuous_arc_deriv.continuousOn
 
 /-- Derivative of the final segment `t ↦ ↑(t - c) + d`, which equals `1`. -/
 lemma hasDerivAt_seg5_line (c : ℝ) (d : ℂ) (t : ℝ) :
-    HasDerivAt (fun s : ℝ => (↑(s - c) : ℂ) + d) 1 t :=
+    HasDerivAt (fun s : ℝ ↦ (↑(s - c) : ℂ) + d) 1 t :=
   (((hasDerivAt_id t).sub_const c).ofReal_comp.add (hasDerivAt_const t d)).congr_deriv
     (by simp only [Complex.ofReal_one, add_zero])
 
 /-- Derivative of `t ↦ ↑((c - t) · k) · I`: slope `−k · I`. -/
 lemma hasDerivAt_aff_imI_neg (k : ℝ) (c : ℝ) (t : ℝ) :
-    HasDerivAt (fun s : ℝ => (↑((c - s) * k) : ℂ) * I) (-(↑k : ℂ) * I) t := by
-  have h1 : HasDerivAt (fun s : ℝ => (c - s) * k) (-k) t :=
+    HasDerivAt (fun s : ℝ ↦ (↑((c - s) * k) : ℂ) * I) (-(↑k : ℂ) * I) t := by
+  have h1 : HasDerivAt (fun s : ℝ ↦ (c - s) * k) (-k) t :=
     (((hasDerivAt_const t c).sub (hasDerivAt_id t)).mul_const k).congr_deriv (by ring)
   exact (h1.ofReal_comp.mul_const I).congr_deriv (by push_cast; ring)
 
 /-- Derivative of `t ↦ ↑((t - c) · k) · I`: slope `k · I`. -/
 lemma hasDerivAt_aff_imI_pos (k : ℝ) (c : ℝ) (t : ℝ) :
-    HasDerivAt (fun s : ℝ => (↑((s - c) * k) : ℂ) * I) ((↑k : ℂ) * I) t :=
+    HasDerivAt (fun s : ℝ ↦ (↑((s - c) * k) : ℂ) * I) ((↑k : ℂ) * I) t :=
   ((((hasDerivAt_id t).sub (hasDerivAt_const t c)).mul_const k).ofReal_comp.mul_const
     I).congr_deriv (by norm_num [smul_eq_mul])
 
 /-- Derivative of `t ↦ d + ↑(c0 + (t - c) · k) · I`: slope `k · I`. -/
 lemma hasDerivAt_aff_imI_pos_shift (d : ℂ) (k c0 : ℝ) (c : ℝ) (t : ℝ) :
-    HasDerivAt (fun s : ℝ => d + (↑(c0 + (s - c) * k) : ℂ) * I) ((↑k : ℂ) * I) t := by
-  have hf : HasDerivAt (fun s : ℝ => c0 + (s - c) * k) k t :=
+    HasDerivAt (fun s : ℝ ↦ d + (↑(c0 + (s - c) * k) : ℂ) * I) ((↑k : ℂ) * I) t := by
+  have hf : HasDerivAt (fun s : ℝ ↦ c0 + (s - c) * k) k t :=
     ((((hasDerivAt_id t).sub_const c).mul_const k).const_add c0).congr_deriv (by ring)
   exact ((hasDerivAt_const t d).add (hf.ofReal_comp.mul_const I)).congr_deriv (by ring)
 
 /-- The derivative of a function with constant derivative `c` is continuous. -/
 lemma continuousOn_deriv_of_const {h : ℝ → ℂ} (c : ℂ) (hd : ∀ t : ℝ, HasDerivAt h c t)
     (a b : ℝ) : ContinuousOn (deriv h) (Icc a b) := by
-  rw [show deriv h = fun _ => c from funext fun t => (hd t).deriv]; exact continuousOn_const
+  rw [show deriv h = fun _ ↦ c from funext fun t ↦ (hd t).deriv]; exact continuousOn_const
 
 /-- Build the bundled `(g t = h t ∧ deriv g t = deriv h t)` property over an open
 interval from a pointwise equality on a containing neighborhood. -/
 lemma heq_deriv_of_eq_on_nhds {g h : ℝ → ℂ} {a b : ℝ}
     {U : Set ℝ} (hU : ∀ t ∈ Ioo a b, U ∈ 𝓝 t)
     (hgh : ∀ s ∈ U, g s = h s) :
-    ∀ t ∈ Ioo a b, g t = h t ∧ deriv g t = deriv h t := fun t ht =>
+    ∀ t ∈ Ioo a b, g t = h t ∧ deriv g t = deriv h t := fun t ht ↦
   ⟨hgh t (mem_of_mem_nhds (hU t ht)), Filter.EventuallyEq.deriv_eq
-    (Filter.eventually_of_mem (hU t ht) (fun s hs => hgh s hs))⟩
+    (Filter.eventually_of_mem (hU t ht) (fun s hs ↦ hgh s hs))⟩
 
 /-- Swap the form `(γ t - c)⁻¹ * deriv γ t` to `deriv (· - c) γ t / (γ t - c)`. -/
 lemma inv_mul_deriv_eq_logDeriv_sub (H : ℝ) (c : ℂ) :
-    (fun t => (fdBoundary_H H t - c)⁻¹ * deriv (fdBoundary_H H) t) =
-    (fun t => deriv (fun s => fdBoundary_H H s - c) t / (fdBoundary_H H t - c)) := by
+    (fun t ↦ (fdBoundary_H H t - c)⁻¹ * deriv (fdBoundary_H H) t) =
+    (fun t ↦ deriv (fun s ↦ fdBoundary_H H s - c) t / (fdBoundary_H H t - c)) := by
   funext t
-  have : deriv (fun s => fdBoundary_H H s - c) t = deriv (fdBoundary_H H) t :=
+  have : deriv (fun s ↦ fdBoundary_H H s - c) t = deriv (fdBoundary_H H) t :=
     deriv_sub_const (f := fdBoundary_H H) c
   rw [this, div_eq_mul_inv, mul_comm]
 
