@@ -109,6 +109,15 @@ private lemma mul_mem_delta (a : H) (g : Δ) (h₀ : H.toSubmonoid ≤ Δ) :
     (a : G) * (g : G) ∈ Δ :=
   Submonoid.mul_mem _ (h₀ a.2) g.2
 
+/-- Membership in `(ConjAct.toConjAct a • H).subgroupOf H` unfolds to conjugation by `a`
+landing back in `H`. -/
+private lemma inv_mul_mul_mem_of_mem_subgroupOf {a : G}
+    (x : (ConjAct.toConjAct a • H).subgroupOf H) : a⁻¹ * (x.val : G) * a ∈ H := by
+  have := x.2
+  rw [Subgroup.mem_subgroupOf, Subgroup.mem_pointwise_smul_iff_inv_smul_mem,
+    ConjAct.smul_def] at this
+  simpa [ConjAct.ofConjAct_toConjAct] using this
+
 /-- The map sending a pair of coset representatives `(σ_i, τ_j)` to the double coset
 of their product `H(σ_i τ_j)H`. -/
 noncomputable def mulMap (g₁ g₂ : P.Δ) (i : decompQuot P g₁ × decompQuot P g₂) :
@@ -123,7 +132,6 @@ noncomputable def heckeMultiplicity (g₁ g₂ d : P.Δ) : ℤ :=
   Nat.card {⟨i, j⟩ : decompQuot P g₁ × decompQuot P g₂ |
     ({(i.out : G) * (g₁ : G)} : Set G) * {(j.out : G) * (g₂ : G)} * P.H =
       {(d : G)} * (P.H : Set G)}
-
 
 /-- The finite set of double cosets appearing in the product `D1 * D2`. -/
 noncomputable def mulSupport (g₁ g₂ : P.Δ) : Finset (HeckeCoset P) :=
@@ -164,13 +172,8 @@ private lemma mulMap_T_one_eq (g₁ : P.Δ) (i : decompQuot P g₁)
 /-- Left multiplication by a singleton set is cancellative. -/
 lemma set_singleton_mul_left_cancel (a : G) {S T : Set G}
     (h : ({a} : Set G) * S = ({a} : Set G) * T) : S = T := by
-  have aux : ∀ {U V : Set G}, ({a} : Set G) * U = ({a} : Set G) * V → U ⊆ V := by
-    intro U V huv x hx
-    obtain ⟨b, hb, y, hy, heq⟩ : a * x ∈ ({a} : Set G) * V :=
-      huv ▸ Set.mul_mem_mul (Set.mem_singleton a) hx
-    rw [Set.mem_singleton_iff.mp hb] at heq
-    exact mul_left_cancel heq ▸ hy
-  exact Set.Subset.antisymm (aux h) (aux h.symm)
+  rw [Set.singleton_mul, Set.singleton_mul] at h
+  exact Set.image_injective.mpr (mul_right_injective a) h
 
 /-- When the first-component representatives agree, the second-component
 representatives must also agree (by left-cancellation on the common prefix). -/
@@ -255,9 +258,8 @@ lemma heckeMultiplicity_mul_one (g₁ d : P.Δ) :
       simp only [heckeMultiplicity, Nat.cast_eq_zero, Nat.card_eq_zero, isEmpty_subtype]
       left
       intro ⟨i, j⟩ heq
-      refine hne ?_
-      have h1 := doubleCoset_eq_of_rightCoset_eq P g₁ (HeckeCoset.one P).rep d (i, j) heq
-      exact (mulMap_T_one_eq P g₁ i j).symm.trans h1
+      exact hne ((mulMap_T_one_eq P g₁ i j).symm.trans
+        (doubleCoset_eq_of_rightCoset_eq P g₁ (HeckeCoset.one P).rep d (i, j) heq))
     omega
 
 private lemma mulMap_one_T_eq (g₁ : P.Δ) (i : decompQuot P (HeckeCoset.one P).rep)
@@ -289,27 +291,19 @@ private lemma nonempty_witness_of_doubleCoset_eq (g₁ g₂ : P.Δ) (c : G)
   set i' : decompQuot P g₁ := ⟦⟨h₁ * ↑i₀.out, P.H.mul_mem hh₁ i₀.out.2⟩⟧
   obtain ⟨κ₁, hκ₁_eq⟩ := QuotientGroup.mk_out_eq_mul K₁
     ⟨h₁ * ↑i₀.out, P.H.mul_mem hh₁ i₀.out.2⟩
-  have hκ₁_conj : α⁻¹ * (κ₁.val : G) * α ∈ P.H := by
-    have := κ₁.2
-    rw [Subgroup.mem_subgroupOf, Subgroup.mem_pointwise_smul_iff_inv_smul_mem,
-      ConjAct.smul_def] at this
-    simpa [ConjAct.ofConjAct_toConjAct] using this
+  have hκ₁_conj : α⁻¹ * (κ₁.val : G) * α ∈ P.H :=
+    inv_mul_mul_mem_of_mem_subgroupOf (H := P.H) κ₁
   set K₂ := (ConjAct.toConjAct β • P.H).subgroupOf P.H
   set j' : decompQuot P g₂ := ⟦⟨(α⁻¹ * (κ₁.val : G) * α)⁻¹ * ↑j₀.out,
     P.H.mul_mem (P.H.inv_mem hκ₁_conj) j₀.out.2⟩⟧
   obtain ⟨κ₂, hκ₂_eq⟩ := QuotientGroup.mk_out_eq_mul K₂
     ⟨(α⁻¹ * (κ₁.val : G) * α)⁻¹ * ↑j₀.out,
       P.H.mul_mem (P.H.inv_mem hκ₁_conj) j₀.out.2⟩
-  have hκ₂_conj : β⁻¹ * (κ₂.val : G) * β ∈ P.H := by
-    have := κ₂.2
-    rw [Subgroup.mem_subgroupOf, Subgroup.mem_pointwise_smul_iff_inv_smul_mem,
-      ConjAct.smul_def] at this
-    simpa [ConjAct.ofConjAct_toConjAct] using this
+  have hκ₂_conj : β⁻¹ * (κ₂.val : G) * β ∈ P.H :=
+    inv_mul_mul_mem_of_mem_subgroupOf (H := P.H) κ₂
   have hi'_coe : (↑i'.out : G) = h₁ * ↑i₀.out * (κ₁.val : G) := by
-    have h := hκ₁_eq
-    apply_fun (↑· : ↥P.H → G) at h
-    simp only [Subgroup.coe_mul] at h
-    exact h
+    have := congr_arg (Subtype.val : P.H → G) hκ₁_eq
+    simpa [Subgroup.coe_mul] using this
   have hj'_coe : (↑j'.out : G) =
       (α⁻¹ * (κ₁.val : G) * α)⁻¹ * ↑j₀.out * (κ₂.val : G) := by
     have h := hκ₂_eq
@@ -395,11 +389,8 @@ lemma mem_mulSupport_of_product_mem (g₁ g₂ d : P.Δ) (h₁ h₂ : P.H)
     have hj : ((⟦⟨(h₂ : G), h₂.2⟩⟧ : decompQuot P g₂).out : G) = h₂ * n₂ := by
       have := congr_arg (Subtype.val : P.H → G) hn₂
       simpa [Subgroup.coe_mul]
-    have hn₂c : (g₂ : G)⁻¹ * ↑n₂ * g₂ ∈ P.H := by
-      have := n₂.2
-      rw [Subgroup.mem_subgroupOf, Subgroup.mem_pointwise_smul_iff_inv_smul_mem,
-        ConjAct.smul_def] at this
-      simpa [ConjAct.ofConjAct_toConjAct]
+    have hn₂c : (g₂ : G)⁻¹ * ↑n₂ * g₂ ∈ P.H :=
+      inv_mul_mul_mem_of_mem_subgroupOf (H := P.H) n₂
     rw [hi, hj]
     apply HeckeCoset.doubleCoset_eq_of_mem
     rw [DoubleCoset.mem_doubleCoset] at hmem
@@ -417,7 +408,6 @@ lemma mem_mulSupport_of_product_mem (g₁ g₂ d : P.Δ) (h₁ h₂ : P.H)
         _ = (↑h₁ * ↑↑n₁) * ↑g₁ * ((↑h₂ * ↑↑n₂) * ↑g₂) := by group
     exact key.symm
   unfold mulSupport
-  rw [show ((⊤ : Finset _) : Finset _) = (Finset.univ : Finset _) from rfl]
   exact key ▸ Finset.mem_image_of_mem (mulMap P g₁ g₂) (Finset.mem_univ _)
 
 private lemma nonempty_one_mul_witness_of_dcRel (g₁ d : P.Δ) (hg₁d : dcRel P g₁ d) :
@@ -443,11 +433,8 @@ private lemma nonempty_one_mul_witness_of_dcRel (g₁ d : P.Δ) (hg₁d : dcRel 
   have hn_coe : (j₀.out : G) = h₀⁻¹ * ↑j'.out * (n : G) := by
     have := congr_arg (Subtype.val : ↥P.H → G) hn_eq
     simpa [Subgroup.coe_mul] using this
-  have hn_conj : (↑g₁ : G)⁻¹ * (n : G) * ↑g₁ ∈ P.H := by
-    have := n.2
-    rw [Subgroup.mem_subgroupOf, Subgroup.mem_pointwise_smul_iff_inv_smul_mem,
-      ConjAct.smul_def] at this
-    simpa [ConjAct.ofConjAct_toConjAct] using this
+  have hn_conj : (↑g₁ : G)⁻¹ * (n : G) * ↑g₁ ∈ P.H :=
+    inv_mul_mul_mem_of_mem_subgroupOf (H := P.H) n
   refine ⟨⟨(i₀, j₀), ?_⟩⟩
   simp only [Set.mem_setOf_eq, Set.singleton_mul_singleton]
   apply (leftCoset_eq_of_not_disjoint (H := P.H) _ _ _).symm
@@ -493,17 +480,14 @@ lemma heckeMultiplicity_one_mul (g₁ d : P.Δ) :
       simp only [heckeMultiplicity, Nat.cast_eq_zero, Nat.card_eq_zero, isEmpty_subtype]
       left
       intro ⟨i, j⟩ heq
-      refine hne ?_
-      exact (mulMap_one_T_eq P g₁ i j).symm.trans
-        (doubleCoset_eq_of_rightCoset_eq P (HeckeCoset.one P).rep g₁ d (i, j) heq)
+      exact hne ((mulMap_one_T_eq P g₁ i j).symm.trans
+        (doubleCoset_eq_of_rightCoset_eq P (HeckeCoset.one P).rep g₁ d (i, j) heq))
     omega
 
 /-- Scalar multiplication on finitely supported functions by ring elements. -/
 noncomputable instance instSMulZeroClass : SMulZeroClass Z (α →₀ Z) where
   smul a v := v.mapRange (a • ·) (smul_zero _)
-  smul_zero a := by
-    ext
-    exact smul_zero _
+  smul_zero a := by ext; exact smul_zero _
 
 /-- The multiplication finsupp: `m(g₁, g₂)` is the formal sum
 `Σ_d heckeMultiplicity(g₁, g₂, d) · d`
