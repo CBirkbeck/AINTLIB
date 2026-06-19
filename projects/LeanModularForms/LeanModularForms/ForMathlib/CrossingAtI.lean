@@ -145,11 +145,11 @@ def singleCrossingData_atI_of_ftcHyp {H : ℝ} (hH : 1 < H)
     arcsinDelta (min (1/3) (H - 1))
     (lt_min (by norm_num) (by linarith))
     (min_le_min (by norm_num : (1 : ℝ)/3 ≤ 1/2) le_rfl)
-    (fun ε hε hεt => arcsinDelta_pos hε)
-    (fun ε hε hεt => arcsinDelta_lt_one_fifth hε (lt_of_lt_of_le hεt (min_le_left _ _)))
-    (fun ε hε hεt t ht hδt =>
+    (fun ε hε hεt ↦ arcsinDelta_pos hε)
+    (fun ε hε hεt ↦ arcsinDelta_lt_one_fifth hε (lt_of_lt_of_le hεt (min_le_left _ _)))
+    (fun ε hε hεt t ht hδt ↦
       arc_far_at_I_arcsin H hε (lt_of_lt_of_le hεt (min_le_left _ _)) ht hδt)
-    (fun ε hε hεt t ht =>
+    (fun ε hε hεt t ht ↦
       arc_near_at_I_arcsin H hε (lt_of_lt_of_le hεt (min_le_left _ _)) ht)
     ftcHyp
 
