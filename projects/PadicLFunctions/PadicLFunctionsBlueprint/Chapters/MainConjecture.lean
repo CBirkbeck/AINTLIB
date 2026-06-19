@@ -506,13 +506,22 @@ closes the quotient. Composing with the §12 analytic identification $`\sU^+/\sC
 \Lam(\GG^+)/I` ({bpref "coleman-map"}[]) gives the **isomorphism half** of
 {bpref "imc-vandiver"}[], formalised as `iwasawa_main_conjecture_vandiver` and — from the bare
 class-number hypothesis $`p \nmid h_1^+` — `iwasawa_main_conjecture_of_vandiver` in
-`IwasawaProof/MainConjecture.lean` (both axiom-clean). The characteristic-ideal half
-$`\Ch_{\Lam(\GG^+)}(\sX_\infty^+) = I(\GG^+)\zeta_p` reduces, via the proved
-*isomorphism invariance* of $`\Ch` (`charIdeal_eq_of_linearEquiv` in `CharIdeal.lean`), to
-$`\Ch(\Lam/I) = I`; that identity (length-at-each-height-one-prime equals the valuation,
-through Mathlib's `\ord`/`ord_eq_addVal`, and the unique-factorisation divisor identity in
-$`\Lam`) together with the $`\Lam(\GG^+) \cong` Iwasawa-group-algebra carrier bridge is the
-remaining structure-theoretic work (de-risked, ticketed).
+`IwasawaProof/MainConjecture.lean` (both axiom-clean).
+
+The **characteristic-ideal half** $`\Ch_{\Lam(\GG^+)}(\sX_\infty^+) = I(\GG^+)\zeta_p` is now
+**proved in abstract form** (`charIdealGroup_of_quotientEquiv` in `CharIdealGroupQuotient.lean`,
+axiom-clean): any finitely generated torsion `Λ(𝒢)`-module isomorphic to `Λ(𝒢)/(g)` has
+characteristic ideal `(g)`.  Its two structural inputs are both formalised: the *base* cyclic
+computation $`\Ch_\Lam(\Lam/(f)) = (f)` (`charIdeal_quotient` in `CharIdealQuotient.lean`, via
+length-at-each-height-one-prime $`=` valuation through Mathlib's `Ring.ord`/`ord_eq_addVal` and the
+unique-factorisation divisor identity in $`\Lam`), and the *equivariant* reassembly
+$`\Ch_{\Lam(\GG)}(\Lam(\GG)/(g)) = (g)` (`charIdealGroup_quotient`), with both `Ch` and `Ch_{Λ(𝒢)}`
+shown to be linear-isomorphism invariants (`charIdeal_eq_of_linearEquiv`,
+`charIdealGroup_eq_of_linearEquiv`).  The single remaining concrete input is the
+$`\Lam(\GG^+) \cong` Iwasawa-group-algebra **carrier bridge**
+(`PadicMeasure(\GG^+) \cong` `IwasawaAlgebraGroup`, from $`\Zpx/\{\pm1\} \cong \Delta\times\Gamma`),
+which produces the `Λ(𝒢)`-linear isomorphism `e` feeding `charIdealGroup_of_quotientEquiv` (ticket
+`CARRIER-BRIDGE`).
 
 **Class field theory as a bundled input.** Global class field theory is not yet in Mathlib.
 Mirroring the source's own practice of citing {Informal.citet "washington"}[] for these classical
