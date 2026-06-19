@@ -171,7 +171,7 @@ private lemma kappa_sq_dvd_four_Psi3
   set P := Affine.Point.some _ _ hpt
   have hm_pos := htor.addOrderOf_pos
   have hord_ne1 : addOrderOf P ≠ 1 :=
-    fun h => Affine.Point.some_ne_zero hpt (AddMonoid.addOrderOf_eq_one_iff.mp h)
+    fun h ↦ Affine.Point.some_ne_zero hpt (AddMonoid.addOrderOf_eq_one_iff.mp h)
   have hord_ne2 : addOrderOf P ≠ 2 :=
     addOrderOf_ne_two_of_kappa_ne_zero W hpt hx hy (by rwa [← hκ₀])
   have hord_gt2 : 2 < addOrderOf P := by omega
