@@ -116,7 +116,7 @@ theorem lutz_nagell_integrality_general
   set P := Affine.Point.some _ _ hpt
   have hP_ne : P ≠ 0 := Affine.Point.some_ne_zero hpt
   have hm_ne_one : addOrderOf P ≠ 1 :=
-    fun h => hP_ne (AddMonoid.addOrderOf_eq_one_iff.mp h)
+    fun h ↦ hP_ne (AddMonoid.addOrderOf_eq_one_iff.mp h)
   by_cases hord2 : addOrderOf P = 2
   · right
     have h2P : (2 : ℕ) • P = 0 := by rw [← hord2, addOrderOf_nsmul_eq_zero]
@@ -126,7 +126,7 @@ theorem lutz_nagell_integrality_general
     by_cases h_odd : ∃ p, p.Prime ∧ p ≠ 2 ∧ p ∣ addOrderOf P
     · obtain ⟨p, hp, hodd, hpm⟩ := h_odd
       exact integrality_of_odd_prime_factor W hpt hp hodd hpm htor
-    · push_neg at h_odd
+    · push Not at h_odd
       have h_all_two : ∀ q, q.Prime → q ∣ addOrderOf P → q = 2 := by
         intro q hq hqm; by_contra hne; exact h_odd q hq hne hqm
       have h2_dvd : 2 ∣ addOrderOf P := by
