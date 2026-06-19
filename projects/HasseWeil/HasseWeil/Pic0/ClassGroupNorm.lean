@@ -70,7 +70,7 @@ theorem mk0CompRelNorm0_eq_of_mk0_eq {I J : (Ideal S)⁰}
     FractionRing.isScalarTower_liftAlgebra R (FractionRing S)
   haveI : IsLocalization (Algebra.algebraMapSubmonoid S R⁰) (FractionRing S) :=
     IsIntegralClosure.isLocalization R (FractionRing R) (FractionRing S) S
-  haveI : IsScalarTower R S (FractionRing S) := IsScalarTower.of_algebraMap_eq fun _ => rfl
+  haveI : IsScalarTower R S (FractionRing S) := IsScalarTower.of_algebraMap_eq fun _ ↦ rfl
   haveI : FiniteDimensional (FractionRing R) (FractionRing S) :=
     Module.Finite.of_isLocalization R S R⁰
   rw [ClassGroup.mk0_eq_mk0_iff] at h
@@ -196,7 +196,7 @@ theorem Ideal.relNorm_maximalIdeal_eq_pow_inertiaDeg_of_isLocalRing
   -- `p · S = 𝔪^e` (the *unique* prime over `p`, so the factorisation is a single term).
   have hmap : Ideal.map (algebraMap R S) p = m ^ e := by
     have hp0' : p ≠ 0 := hp0
-    rw [Ideal.map_algebraMap_eq_finset_prod_pow hp0']
+    rw [Ideal.map_algebraMap_eq_finsetProd_pow hp0']
     rw [Finset.prod_eq_single m]
     · intro b hb hne
       exact absurd ((Set.mem_singleton_iff).mp
@@ -207,7 +207,7 @@ theorem Ideal.relNorm_maximalIdeal_eq_pow_inertiaDeg_of_isLocalRing
   letI : Algebra (FractionRing R) (FractionRing S) := FractionRing.liftAlgebra R _
   haveI : IsScalarTower R (FractionRing R) (FractionRing S) :=
     FractionRing.isScalarTower_liftAlgebra R _
-  haveI : IsScalarTower R S (FractionRing S) := IsScalarTower.of_algebraMap_eq fun _ => rfl
+  haveI : IsScalarTower R S (FractionRing S) := IsScalarTower.of_algebraMap_eq fun _ ↦ rfl
   have hef : e * f = Module.finrank (FractionRing R) (FractionRing S) :=
     Ideal.ramificationIdx_mul_inertiaDeg_of_isLocalRing S (FractionRing R) (FractionRing S) hp0
   -- `(relNorm 𝔪)^e = relNorm(𝔪^e) = relNorm(p · S) = p^{[Frac S:Frac R]} = p^{e·f}`.
@@ -344,7 +344,7 @@ theorem map_eq_top_of_under_ne (P : Ideal S) (q : Ideal R) [hq : q.IsMaximal] [P
     P.map (algebraMap S (Localization (Algebra.algebraMapSubmonoid S q.primeCompl))) = ⊤ := by
   haveI : (P.under R).IsMaximal := Ideal.IsMaximal.under R P
   obtain ⟨a, hap, haq⟩ : ∃ a, a ∈ P.under R ∧ a ∉ q := by
-    by_contra h; push_neg at h
+    by_contra h; push Not at h
     exact hne (((Ideal.IsMaximal.under R P).eq_of_le hq.ne_top h))
   have haP : algebraMap R S a ∈ P := by rwa [← Ideal.mem_comap, ← Ideal.under_def]
   have hunit : IsUnit (algebraMap S (Localization (Algebra.algebraMapSubmonoid S q.primeCompl))
@@ -403,14 +403,14 @@ theorem relNorm_eq_under_of_localized (P : Ideal S) [P.IsMaximal] (hP : P ≠ �
   haveI hpne : NeZero (P.under R) := ⟨Ideal.under_ne_bot R hP⟩
   have hnotfield : ¬ IsField R :=
     Ring.not_isField_of_ne_of_ne (Ideal.under_ne_bot R hP) (Ideal.IsMaximal.ne_top inferInstance)
-  refine Ideal.eq_of_localization_maximal (fun q hq => ?_)
+  refine Ideal.eq_of_localization_maximal (fun q hq ↦ ?_)
   by_cases hqp : P.under R = q
   · subst hqp
     rw [relNorm_map_localization P (P.under R), hlocal,
       Localization.AtPrime.map_eq_maximalIdeal]
   · haveI : NeZero q := ⟨Ring.ne_bot_of_isMaximal_of_not_isField hq hnotfield⟩
     rw [relNorm_map_localization P q, map_eq_top_of_under_ne P q hqp, Ideal.relNorm_top,
-      IsLocalization.AtPrime.map_eq_top_of_not_le _ (fun hle => hqp
+      IsLocalization.AtPrime.map_eq_top_of_not_le _ (fun hle ↦ hqp
         ((Ideal.IsMaximal.under R P).eq_of_le hq.ne_top hle))]
 
 /-! #### The per-prime relative norm over a DVR base — the `PerfectField`-free residual, **CLOSED**
@@ -440,12 +440,12 @@ theorem Ring.ord_finset_prod {A : Type*} [CommRing A] [IsDomain A]
     Ring.ord A (∏ i ∈ s, c i) = ∑ i ∈ s, Ring.ord A (c i) := by
   classical
   induction s using Finset.induction with
-  | empty => simp [Ring.ord_one]
+  | empty => simp
   | insert a t ha ih =>
     rw [Finset.prod_insert ha, Finset.sum_insert ha, Ring.ord_mul,
-      ih (fun i hi => hc i (Finset.mem_insert_of_mem hi))]
+      ih (fun i hi ↦ hc i (Finset.mem_insert_of_mem hi))]
     rw [mem_nonZeroDivisors_iff_ne_zero]
-    exact Finset.prod_ne_zero_iff.mpr (fun i hi => hc i (Finset.mem_insert_of_mem hi))
+    exact Finset.prod_ne_zero_iff.mpr (fun i hi ↦ hc i (Finset.mem_insert_of_mem hi))
 
 /-- **Norm–length identity over a PID base.** For a free-finite algebra `Sₚ` over a PID `Rₚ`
 (integrally closed domains), and a nonzero element `π`, the `Rₚ`-module length of `Sₚ ⧸ (π)` equals
@@ -467,8 +467,8 @@ theorem relNorm_length_eq_span
   have hQ : (Ideal.span {π} : Ideal Sp) ≠ ⊥ := by
     rw [Ne, Ideal.span_singleton_eq_bot]; exact hπ0
   set b := Module.Free.chooseBasis Rp Sp with hb
-  set c := fun i => (Ideal.span {π} : Ideal Sp).smithCoeffs b hQ i with hc
-  have hc0 : ∀ i, c i ≠ 0 := fun i => (Ideal.span {π}).smithCoeffs_ne_zero b hQ i
+  set c := fun i ↦ (Ideal.span {π} : Ideal Sp).smithCoeffs b hQ i with hc
+  have hc0 : ∀ i, c i ≠ 0 := fun i ↦ (Ideal.span {π}).smithCoeffs_ne_zero b hQ i
   have hrelNorm : Ideal.relNorm Rp (Ideal.span {π}) = Ideal.span {Algebra.norm Rp π} := by
     rw [Ideal.relNorm_singleton, Algebra.intNorm_eq_norm]
   have hassoc : Associated (Algebra.norm Rp π) (∏ i, c i) := by
@@ -479,7 +479,7 @@ theorem relNorm_length_eq_span
   have hord_eq : Ring.ord Rp (Algebra.norm Rp π) = Ring.ord Rp (∏ i, c i) := by
     rw [Ring.ord, Ring.ord, Ideal.span_singleton_eq_span_singleton.mpr hassoc]
   have hord_prod : Ring.ord Rp (∏ i, c i) = ∑ i, Module.length Rp (Rp ⧸ Ideal.span {c i}) := by
-    rw [Ring.ord_finset_prod Finset.univ c (fun i _ => hc0 i)]; rfl
+    rw [Ring.ord_finset_prod Finset.univ c (fun i _ ↦ hc0 i)]; rfl
   have hlen_smith : Module.length Rp (Sp ⧸ (Ideal.span {π} : Ideal Sp)) =
       ∑ i, Module.length Rp (Rp ⧸ Ideal.span {c i}) := by
     rw [(Ideal.quotientEquivPiSpan (Ideal.span {π}) b hQ).length_eq, Module.length_pi_of_fintype]
@@ -741,7 +741,7 @@ theorem Ideal.inertiaDeg_under_eq_one_of_algHom_of_residueField_finrank_one
     @Algebra.IsIntegral.of_finite R R _ _ inst instFin
   -- The twisted self-algebra is a scalar tower over `F`: `g` fixes the image of `F`.
   haveI hst : @IsScalarTower F R R _ inst.toSMul _ :=
-    @IsScalarTower.of_algebraMap_eq F R R _ _ _ _ inst _ fun c => by
+    @IsScalarTower.of_algebraMap_eq F R R _ _ _ _ inst _ fun c ↦ by
     change algebraMap F R c = g.toRingHom (algebraMap F R c)
     rw [show g.toRingHom (algebraMap F R c) = g (algebraMap F R c) from rfl, AlgHom.commutes]
   haveI : M.LiesOver (M.under R) := Ideal.over_under M
@@ -768,7 +768,7 @@ theorem Ideal.inertiaDeg_under_eq_one_of_algHom_of_residueField_finrank_one
     Module.Finite.of_surjective (Algebra.linearMap (R ⧸ M.under R) (R ⧸ M))
       (by intro w; obtain ⟨c, hc⟩ := hsurj w; exact ⟨c, hc⟩)
   have h_le : Module.finrank (R ⧸ M.under R) (R ⧸ M) ≤ 1 :=
-    finrank_le_one 1 fun w => by
+    finrank_le_one 1 fun w ↦ by
       obtain ⟨c, hc⟩ := hsurj w
       exact ⟨c, by rw [Algebra.smul_def, hc]; exact mul_one w⟩
   have h_ge : 1 ≤ Module.finrank (R ⧸ M.under R) (R ⧸ M) := Module.finrank_pos
@@ -849,7 +849,7 @@ theorem mk0CompMap0_eq_of_mk0_eq {I J : (Ideal R)⁰}
   change Ideal.span {algebraMap R S x} * Ideal.map (algebraMap R S) (I : Ideal R) =
     Ideal.span {algebraMap R S y} * Ideal.map (algebraMap R S) (J : Ideal R)
   have key : ∀ a : R,
-      Ideal.span {algebraMap R S a} = Ideal.map (algebraMap R S) (Ideal.span {a}) := fun a => by
+      Ideal.span {algebraMap R S a} = Ideal.map (algebraMap R S) (Ideal.span {a}) := fun a ↦ by
     rw [Ideal.map_span, Set.image_singleton]
   rw [key x, key y, ← Ideal.map_mul, ← Ideal.map_mul, hxy]
 
@@ -907,7 +907,7 @@ theorem Ideal.relNorm_map_algebraMap (I : Ideal R) :
     FractionRing.liftAlgebra R (FractionRing S)
   haveI : IsScalarTower R (FractionRing R) (FractionRing S) :=
     FractionRing.isScalarTower_liftAlgebra R (FractionRing S)
-  haveI : IsScalarTower R S (FractionRing S) := IsScalarTower.of_algebraMap_eq fun _ => rfl
+  haveI : IsScalarTower R S (FractionRing S) := IsScalarTower.of_algebraMap_eq fun _ ↦ rfl
   have hrank : Module.finrank (FractionRing R) (FractionRing S) = Module.finrank R S :=
     Algebra.IsAlgebraic.finrank_of_isFractionRing R (FractionRing R) S (FractionRing S)
   rw [Ideal.relNorm_algebraMap S I, hrank]
@@ -936,7 +936,7 @@ theorem ClassGroup.relNorm_comp_map (c : ClassGroup R) :
 theorem ClassGroup.relNorm_comp_map_eq :
     (ClassGroup.relNorm (R := R)).comp (ClassGroup.map (S := S)) =
       powMonoidHom (Module.finrank R S) := by
-  refine MonoidHom.ext fun c => ?_
+  refine MonoidHom.ext fun c ↦ ?_
   rw [MonoidHom.comp_apply, powMonoidHom_apply, ClassGroup.relNorm_comp_map]
 
 end HasseWeil
