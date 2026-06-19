@@ -76,12 +76,24 @@ Spa point is power-bounded.
 
 Wedhorn 7.52(1) (p. 74) states `f ∈ B⁺ ⟺ |f(x)| ≤ 1 ∀ x ∈ Spa B` (a reformulation of
 Prop 7.18(1)); combined with `B⁺ ⊆ B°` (Def 7.14(1), integral elements are power-bounded) this
-gives the stated criterion. Wedhorn proves 7.18(1) by citing [Hu2] Lemma 3.3, which is NOT
-reproved in Wedhorn — so this is the single, source-justified external leaf of the faithful
-(LL-bdd) (reviewer (LL-bdd) reply, Q-bdd-1: "all Spa valuations ≤ 1 ⇒ x ∈ B⁺ (Prop 7.18) ⇒
-x ∈ B° (B⁺ ⊆ power-bounded, Def 7.14) ⇒ power-bounded").
+gives the stated criterion. Wedhorn proves 7.18(1) by citing [Hu2] Lemma 3.3 (reviewer (LL-bdd)
+reply, Q-bdd-1: "all Spa valuations ≤ 1 ⇒ x ∈ B⁺ (Prop 7.18) ⇒ x ∈ B° (B⁺ ⊆ power-bounded,
+Def 7.14) ⇒ power-bounded").
 
--- EXTERNAL (Wedhorn cites [Hu2] Lemma 3.3; not reproved in Wedhorn). -/
+SOURCE NOW IN HAND (`references/huber2-continuous-valuations.pdf`, OCR `references/huber2.txt`):
+**[Hu2] = R. Huber, *Continuous valuations*, Math. Z. 212 (1993), 455–477. Lemma 3.3(i), p. 466
+(`huber2.txt:624-627`)**: for an f-adic ring `A`, `σ : G ↦ {v ∈ Cont A | v(g) ≤ 1 ∀ g ∈ G}` and
+`τ : F ↦ {a | v(a) ≤ 1 ∀ v ∈ F}` are mutually inverse bijections between the open-integrally-closed
+subrings and `𝔊_A`. The substantive direction `τ(σ(G)) = G` is **hypothesis-free** — Huber's proof
+(`huber2.txt:633-658`) uses a minimal prime of `G[a⁻¹]` + a valuation ring dominating the local
+ring; **NO `[IsDomain]`, NO noetherian, NO Tate**. (The noetherian hypothesis appears ONLY in
+3.3(iii) = Wedhorn 7.18(3), the *density* converse, which is NOT used here.)
+
+This is a genuine **cited external leaf** ([Hu2] 3.3(i) — not reproved in Wedhorn). The in-repo
+`isIntegral_of_forall_continuous_valuation_le_one` (Presheaf.lean) is `[IsDomain]`-gated (an
+artifact of its FractionRing route, false for case-(b) non-domain `presheafValue D'`) + carries a
+7.22 continuity sorry, so it does NOT discharge this. Should a faithful in-repo discharge be wanted
+later, formalise Huber's hypothesis-free 3.3(i) proof directly (≈25 lines + his (3.1) continuity). -/
 theorem isPowerBounded_of_forall_vle_one_spa_of_complete
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]

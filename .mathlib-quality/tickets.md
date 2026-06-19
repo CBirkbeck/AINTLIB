@@ -259,15 +259,16 @@ Any affinoid `(A, A⁺)`; the `A°` bound is `A⁺`-independent (Prop 7.41 gives
 ---
 
 ### [T-L4] `isPowerBounded_of_forall_vle_one_spa_of_complete` via 7.52(1) = 7.18(1) (former leaf #4)
-- **Status**: PARKED — cited external leaf **[Hu2] Lemma 3.3 (i/ii)**, NOT a trivial wrapper.
+- **Status**: PARKED — cited external leaf **[Hu2] Lemma 3.3(i)**, now SOURCED (user chose (c)).
   ⚠ Adversarial round-2 finding (`decomposition.md`): the reviewer's "trivial via 7.52(1)" does
-  NOT survive contact with the code. In-repo 7.18 (`isIntegral_of_forall_continuous_valuation_le_one`,
-  Presheaf:1639) requires `[IsDomain R]` (FALSE for case-(b) `presheafValue D'`) AND has a live 7.22
-  continuity sub-`sorry`; the all-valuations form (Presheaf:1569) is `[IsDomain]`-gated + wrong
-  quantifier; [Hu2] (Huber 1993) is not in hand. **The ℂ_p red flag IS withdrawn** (it is 7.18(1),
-  NOT the noetherian density converse 7.18(3)), but the leaf is a genuine cited external, consistent
-  with the LL chain already resting on [Hu2] 3.3. DECISION (user): (a) keep parked [recommended];
-  (b) build non-domain 7.18(1) + 7.22 (substantial); (c) source [Hu2].
+  NOT survive contact with the code — in-repo 7.18 (`isIntegral_of_forall_continuous_valuation_le_one`,
+  Presheaf:1639) is `[IsDomain]`-gated (artifact of FractionRing route, FALSE for case-(b) non-domain
+  `presheafValue D'`) + has a 7.22 continuity sub-`sorry`; the all-valuations form (Presheaf:1569) is
+  `[IsDomain]`-gated + wrong quantifier. **ℂ_p red flag WITHDRAWN** (it is 7.18(1), not the noetherian
+  density converse 7.18(3)). **[Hu2] now in hand** (`references/huber2-continuous-valuations.pdf`,
+  OCR `huber2.txt`): Lemma 3.3(i), p.466 (`huber2.txt:624-627`) = the σ/τ bijection, proof
+  `:633-658` **hypothesis-free (no [IsDomain]/noeth/Tate)**. Leaf stays a parked cited sorry; if an
+  in-repo discharge is wanted later, follow Huber's hypothesis-free proof (≈25 lines + his (3.1)).
 - **File**: FaithfulLocLift.lean (+ a `mem_plus_iff_forall_spa_vle_one` named leaf = 7.52(1))
 - **Depends on**: none
 - **Parallel**: yes
@@ -304,6 +305,9 @@ theorem isPowerBounded_of_forall_vle_one_spa_of_complete
 #### Sources
 Wedhorn Prop 7.52(1) (p.74, `wedhorn.txt:3619`: "|f(x)|≤1 ∀x∈Spa A iff f∈A⁺"), Prop 7.18(1) (p.60,
 `:3161`, "Proof. [Hu2] Lemma 3.3"); Def 7.14(1) (`A⁺ ⊆ A°`). Reviewer reply Q1 + risk #1.
+**[Hu2] = R. Huber, *Continuous valuations*, Math. Z. 212 (1993), 455–477 — IN HAND**
+(`references/huber2-continuous-valuations.pdf`, OCR `references/huber2.txt`): **Lemma 3.3(i), p.466
+(`huber2.txt:624-627`)** = the σ/τ inverse bijection; proof `:633-658` is hypothesis-free.
 
 #### Generality decision
 State the 7.52(1) leaf for a general affinoid ring `(B, B⁺)` (no Tate/complete/noetherian) for reuse;
