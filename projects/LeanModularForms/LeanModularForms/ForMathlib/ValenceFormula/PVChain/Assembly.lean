@@ -96,7 +96,7 @@ private lemma norm_shift_neg_inv_eq {z s : ℂ} (hz_re : z.re = 1/2) (hs_unit : 
 omit f hf in
 private lemma neg_inv_involution {s : ℂ} (hs_unit : ‖s‖ = 1) :
     -(1 : ℂ) / (-(1 : ℂ) / s) = s := by
-  have : s ≠ 0 := fun h => by rw [h, norm_zero] at hs_unit; norm_num at hs_unit
+  have : s ≠ 0 := fun h ↦ by rw [h, norm_zero] at hs_unit; norm_num at hs_unit
   field_simp
 
 omit f hf in
@@ -136,7 +136,7 @@ private lemma logDeriv_modFormComp_periodic :
   intro z
   simp only [logDeriv, Pi.div_apply, h_per z,
     ← deriv_comp_add_const (modularFormCompOfComplex f) 1 z,
-    show deriv (fun x => modularFormCompOfComplex f (x + 1)) =
+    show deriv (fun x ↦ modularFormCompOfComplex f (x + 1)) =
       deriv (modularFormCompOfComplex f) from congr_arg deriv (funext h_per)]
 
 omit f hf in
@@ -233,7 +233,7 @@ private theorem pvIntegral_vertical_cancel_union (S : Finset UpperHalfPlane)
     refine (truncation_iff_shift_union S (fdBoundary_H H u) ?_ ε).symm
     rw [h_seg1]
     simp [fdBoundary_seg1_H, add_re, ofReal_re, mul_re, I_re, I_im, ofReal_im]
-  rw [integral_neg_of_pw_neg _ (fun u hu =>
+  rw [integral_neg_of_pw_neg _ (fun u hu ↦
     pvIntegrand_seg4_eq_neg_seg1 f S (sArcOfS S ∪ sVertOfS S) h_trunc_iff u hu),
     intervalIntegral.integral_neg]
   ring
@@ -244,7 +244,7 @@ private theorem tendsto_pvIntegral_arc (S : Finset UpperHalfPlane)
     (_h_oncurve_arc : ∀ t ∈ Set.Ioo (1 : ℝ) 3,
       modularFormCompOfComplex f (fdBoundary_H H t) = 0 →
       fdBoundary_H H t ∈ (↑(sArcOfS S) : Set ℂ)) :
-    Tendsto (fun ε => ∫ t in (1:ℝ)..3,
+    Tendsto (fun ε ↦ ∫ t in (1:ℝ)..3,
         pvIntegrand f (fdBoundary_H H) (sArcOfS S ∪ sVertOfS S) ε t)
       (𝓝[>] 0) (𝓝 (-(2 * ↑Real.pi * I * ((k : ℂ) / 12)))) :=
   tendsto_pvIntegral_arc_bridge f S _hH _h_oncurve_arc
@@ -269,15 +269,15 @@ private theorem tendsto_pvIntegral_seg5
       q ≠ 0 → UpperHalfPlane.cuspFunction (1 : ℝ) f q ≠ 0)
     (h_vert_below_H : ∀ s ∈ sVertOfS S, s.im < H)
     (h_arc_below_H : ∀ s ∈ sArcOfS S, s.im < H) :
-    Tendsto (fun ε =>
+    Tendsto (fun ε ↦
       ∫ t in (4:ℝ)..5,
         pvIntegrand f (fdBoundary_H H) (sArcOfS S ∪ sVertOfS S) ε t)
       (𝓝[>] 0)
       (𝓝 (2 * ↑Real.pi * I * (orderAtCusp' f : ℂ))) := by
   set L := 2 * ↑Real.pi * I * (orderAtCusp' f : ℂ)
-  have h_below : ∀ s ∈ (sArcOfS S ∪ sVertOfS S : Finset ℂ), s.im < H := fun s hs =>
+  have h_below : ∀ s ∈ (sArcOfS S ∪ sVertOfS S : Finset ℂ), s.im < H := fun s hs ↦
     (Finset.mem_union.mp hs).elim (h_arc_below_H s) (h_vert_below_H s)
-  have h_seg5_im : ∀ t, 4 < t → (fdBoundary_H H t).im = H := fun t ht => by
+  have h_seg5_im : ∀ t, 4 < t → (fdBoundary_H H t).im = H := fun t ht ↦ by
     rw [fdBoundary_H_eq_seg5_H ht]
     simp [fdBoundary_seg5_H, add_im, ofReal_im, mul_im, I_re, I_im]
   have h_no_trunc : ∀ᶠ ε in 𝓝[>] (0 : ℝ),
@@ -287,9 +287,9 @@ private theorem tendsto_pvIntegral_seg5
     · filter_upwards [self_mem_nhdsWithin] with ε _
       intro t _ _
       simp [h_empty]
-    · set δ := (sArcOfS S ∪ sVertOfS S).inf' h_ne (fun s => H - s.im)
+    · set δ := (sArcOfS S ∪ sVertOfS S).inf' h_ne (fun s ↦ H - s.im)
       have hδ_pos : 0 < δ :=
-        (Finset.lt_inf'_iff h_ne).mpr (fun s hs => by linarith [h_below s hs])
+        (Finset.lt_inf'_iff h_ne).mpr (fun s hs ↦ by linarith [h_below s hs])
       filter_upwards [Ioo_mem_nhdsGT hδ_pos] with ε hε
       intro t ht4 _
       push Not
@@ -310,15 +310,15 @@ private theorem tendsto_pvIntegral_seg5
           logDeriv (modularFormCompOfComplex f) (fdBoundary_H H t) *
             deriv (fdBoundary_H H) t := by
           apply intervalIntegral.integral_congr_ae'
-          · exact Filter.Eventually.of_forall fun t ht => by
+          · exact Filter.Eventually.of_forall fun t ht ↦ by
               rw [Set.mem_Ioc] at ht
               simp only [pvIntegrand, cpvIntegrandOn,
                 if_neg (hε t ht.1 ht.2)]
-          · exact Filter.Eventually.of_forall fun t ht => by
+          · exact Filter.Eventually.of_forall fun t ht ↦ by
               rw [Set.mem_Ioc] at ht
               exact absurd ht.1 (by linarith [ht.2])
       _ = L := seg5_logDeriv_integral_value f hf hH hcusp_nonvan
-  exact tendsto_const_nhds.congr' (h_ev.mono fun ε h => h.symm)
+  exact tendsto_const_nhds.congr' (h_ev.mono fun ε h ↦ h.symm)
 
 omit f hf in
 private lemma norm_deriv_fdBoundary_H_le
@@ -371,31 +371,31 @@ private lemma integrableOn_logDeriv_mul_deriv_farSet
     let S₀ := (sArcOfS S ∪ sVertOfS S : Finset ℂ)
     let g := modularFormCompOfComplex f
     let K' := {t ∈ Icc (0:ℝ) 5 | ∀ s ∈ S₀, ε ≤ ‖γ t - (s : ℂ)‖}
-    IntegrableOn (fun t => logDeriv g (γ t) * deriv γ t) K' := by
+    IntegrableOn (fun t ↦ logDeriv g (γ t) * deriv γ t) K' := by
   intro γ S₀ g K'
   have hK'_compact : IsCompact K' := by
-    refine IsCompact.of_isClosed_subset isCompact_Icc ?_ (fun _ ⟨ht, _⟩ => ht)
+    refine IsCompact.of_isClosed_subset isCompact_Icc ?_ (fun _ ⟨ht, _⟩ ↦ ht)
     apply IsClosed.inter isClosed_Icc
     have : IsClosed (⋂ (s : ℂ) (_ : s ∈ S₀), {t : ℝ | ε ≤ ‖γ t - s‖}) :=
-      isClosed_iInter fun s => isClosed_iInter fun _ =>
+      isClosed_iInter fun s ↦ isClosed_iInter fun _ ↦
         isClosed_le continuous_const (by fun_prop)
     convert this using 1
     ext t
     simp only [mem_iInter, mem_setOf_eq]
     exact Iff.rfl
   have hK'_meas : MeasurableSet K' := hK'_compact.isClosed.measurableSet
-  have h_ne : ∀ t ∈ K', g (γ t) ≠ 0 := fun t ⟨ht_Icc, h_far⟩ h_zero => by
+  have h_ne : ∀ t ∈ K', g (γ t) ≠ 0 := fun t ⟨ht_Icc, h_far⟩ h_zero ↦ by
     have := h_far _ (Finset.mem_coe.mp (h_capture t ht_Icc h_zero))
     rw [sub_self, norm_zero] at this
     linarith
-  have h_cont : ContinuousOn (fun t => logDeriv g (γ t)) K' := fun t ht =>
+  have h_cont : ContinuousOn (fun t ↦ logDeriv g (γ t)) K' := fun t ht ↦
     ContinuousAt.continuousWithinAt <| ContinuousAt.comp
       (have h_analytic : AnalyticAt ℂ g (γ t) :=
         (UpperHalfPlane.mdifferentiable_iff.mp f.holo').analyticAt
           (UpperHalfPlane.isOpen_upperHalfPlaneSet.mem_nhds (fdBoundary_H_im_pos H hH t ht.1))
        (h_analytic.deriv.fun_div h_analytic (h_ne t ht)).continuousAt)
       (fdBoundary_H_continuous H).continuousAt
-  have h_asm : AEStronglyMeasurable (fun t => logDeriv g (γ t) * deriv γ t)
+  have h_asm : AEStronglyMeasurable (fun t ↦ logDeriv g (γ t) * deriv γ t)
       (volume.restrict K') :=
     (h_cont.aestronglyMeasurable hK'_meas).mul
       ((aestronglyMeasurable_deriv γ volume).mono_measure
@@ -439,12 +439,12 @@ private lemma pvIntegrand_intervalIntegrable
   set F := pvIntegrand f γ S₀ ε
   set K' := {t ∈ Icc (0:ℝ) 5 | ∀ s ∈ S₀, ε ≤ ‖γ t - (s : ℂ)‖}
   set K := {t ∈ uIoc a b | ¬∃ s ∈ (S₀ : Set ℂ), ‖γ t - s‖ ≤ ε}
-  have hK_subset_K' : K ⊆ K' := fun t ⟨ht_uioc, h_not_near⟩ => by
-    refine ⟨uIcc_subset_Icc ha hb (uIoc_subset_uIcc ht_uioc), fun s hs => ?_⟩
+  have hK_subset_K' : K ⊆ K' := fun t ⟨ht_uioc, h_not_near⟩ ↦ by
+    refine ⟨uIcc_subset_Icc ha hb (uIoc_subset_uIcc ht_uioc), fun s hs ↦ ?_⟩
     by_contra h_contra
     push Not at h_contra
     exact h_not_near ⟨s, Finset.mem_coe.mpr hs, h_contra.le⟩
-  have hF_K : EqOn F (fun t => logDeriv g (γ t) * deriv γ t) K := fun t ⟨_, h_not_near⟩ => by
+  have hF_K : EqOn F (fun t ↦ logDeriv g (γ t) * deriv γ t) K := fun t ⟨_, h_not_near⟩ ↦ by
     change cpvIntegrandOn S₀ (logDeriv g) γ ε t = _
     simp only [cpvIntegrandOn, Finset.mem_coe] at h_not_near ⊢
     exact if_neg h_not_near
@@ -464,12 +464,12 @@ private lemma pvIntegrand_intervalIntegrable
       ext t
       simp only [mem_iUnion, mem_setOf_eq, Finset.mem_coe, exists_prop]
       exact Iff.rfl
-    exact S₀.finite_toSet.isClosed_biUnion fun s _ =>
+    exact S₀.finite_toSet.isClosed_biUnion fun s _ ↦
       isClosed_le (by fun_prop) continuous_const
   rw [intervalIntegrable_iff]
   have := ((h_int_K'.mono_set hK_subset_K').congr_fun hF_K.symm hK_meas).union
     (integrableOn_zero.congr_fun h_compl_zero.symm (measurableSet_uIoc.diff hK_meas))
-  rwa [union_diff_cancel (fun t ht => ht.1)] at this
+  rwa [union_sdiff_cancel (fun t ht ↦ ht.1)] at this
 
 omit hf in
 private theorem tendsto_pvIntegral_split
@@ -494,7 +494,7 @@ private theorem tendsto_pvIntegral_split
       IntervalIntegrable
         (pvIntegrand f (fdBoundary_H H) (sArcOfS S ∪ sVertOfS S) ε)
         MeasureTheory.volume a b :=
-    fun ha hb => pvIntegrand_intervalIntegrable f S hH (Set.mem_Ioi.mp hε) h_capture ha hb
+    fun ha hb ↦ pvIntegrand_intervalIntegrable f S hH (Set.mem_Ioi.mp hε) h_capture ha hb
   have mem0 : (0:ℝ) ∈ Icc (0:ℝ) 5 := ⟨le_rfl, by norm_num⟩
   have mem1 : (1:ℝ) ∈ Icc (0:ℝ) 5 := ⟨by norm_num, by norm_num⟩
   have mem3 : (3:ℝ) ∈ Icc (0:ℝ) 5 := ⟨by norm_num, by norm_num⟩
@@ -545,14 +545,14 @@ private lemma modular_side_h_capture
   have hH_pos : 0 < H := by linarith [hH_sqrt3, Real.sqrt_nonneg 3]
   have h_oncurve_arc : ∀ t ∈ Set.Ioo (1 : ℝ) 3,
       modularFormCompOfComplex f (fdBoundary_H H t) = 0 →
-      fdBoundary_H H t ∈ (↑(sArcOfS S) : Set ℂ) := fun t ht h_zero =>
+      fdBoundary_H H t ∈ (↑(sArcOfS S) : Set ℂ) := fun t ht h_zero ↦
     oncurve_arc_capture f hf S hS_complete hH_sqrt3
       ⟨by linarith [ht.1], by linarith [ht.2]⟩
       (by rw [fdBoundary_H_eq_arc ht.1 ht.2]; exact Complex.norm_exp_ofReal_mul_I _) h_zero
   have h_oncurve_vert : ∀ t ∈ Set.Ioo (0 : ℝ) 1,
       modularFormCompOfComplex f (fdBoundary_H H t) = 0 →
       (fdBoundary_H H t : ℂ) ∈ (↑(sVertOfS S) : Set ℂ) :=
-    fun t ht h_zero => oncurve_vert_capture f hf S hS_complete hH_sqrt3 ht h_zero
+    fun t ht h_zero ↦ oncurve_vert_capture f hf S hS_complete hH_sqrt3 ht h_zero
   intro t ht h_zero
   by_cases h1 : t < 1
   · by_cases h0 : 0 < t
@@ -624,7 +624,7 @@ theorem cpv_modular_side_tendsto
         orderOfVanishingAt' (⇑f) p ≠ 0 → p ∈ S) :
     ∃ H₀ : ℝ, Real.sqrt 3 / 2 < H₀ ∧
       ∀ {H : ℝ}, H₀ ≤ H →
-        Tendsto (fun ε =>
+        Tendsto (fun ε ↦
           ∫ t in (0:ℝ)..5,
             pvIntegrand f (fdBoundary_H H)
               (sArcOfS S ∪ sVertOfS S) ε t)
@@ -635,36 +635,36 @@ theorem cpv_modular_side_tendsto
   obtain ⟨H₀, hH₀_gt, hH₀_nonvan⟩ := exists_height_cusp_nonvanishing f hf
   obtain ⟨H₁, hH₁_gt, hH₁_gt_one, hH₁_bound⟩ := exists_height_bound_S S
   set H₂ := max H₀ H₁
-  refine ⟨H₂, hH₀_gt.trans_le (le_max_left _ _), fun {H} hH => ?_⟩
+  refine ⟨H₂, hH₀_gt.trans_le (le_max_left _ _), fun {H} hH ↦ ?_⟩
   have hH_sqrt3 : Real.sqrt 3 / 2 < H :=
     hH₀_gt.trans_le ((le_max_left _ _).trans hH)
   have hH_gt_one : 1 < H := hH₁_gt_one.trans_le ((le_max_right _ _).trans hH)
   have hcusp := cusp_nonvanishing_height_mono f
     ((le_max_left _ _).trans hH) hH₀_nonvan
-  have h_vert_below : ∀ s ∈ sVertOfS S, s.im < H := fun s hs =>
+  have h_vert_below : ∀ s ∈ sVertOfS S, s.im < H := fun s hs ↦
     (sVertOfS_im_lt_height_bound S s hs hH₁_bound).trans_le ((le_max_right _ _).trans hH)
-  have h_arc_below : ∀ s ∈ sArcOfS S, s.im < H := fun s hs => by
+  have h_arc_below : ∀ s ∈ sArcOfS S, s.im < H := fun s hs ↦ by
     have : s.im ≤ 1 := by
       nlinarith [Complex.sq_norm s, Complex.normSq_apply s, sq_nonneg s.re, sArcOfS_unit S s hs]
     linarith
   have h_oncurve_arc : ∀ t ∈ Set.Ioo (1 : ℝ) 3,
       modularFormCompOfComplex f (fdBoundary_H H t) = 0 →
-      fdBoundary_H H t ∈ (↑(sArcOfS S) : Set ℂ) := fun t ht h_zero =>
+      fdBoundary_H H t ∈ (↑(sArcOfS S) : Set ℂ) := fun t ht h_zero ↦
     oncurve_arc_capture f hf S hS_complete hH_sqrt3
       ⟨by linarith [ht.1], by linarith [ht.2]⟩
       (by rw [fdBoundary_H_eq_arc ht.1 ht.2]; exact Complex.norm_exp_ofReal_mul_I _) h_zero
   have h_oncurve_vert : ∀ t ∈ Set.Ioo (0 : ℝ) 1,
       modularFormCompOfComplex f (fdBoundary_H H t) = 0 →
       (fdBoundary_H H t : ℂ) ∈ (↑(sVertOfS S) : Set ℂ) :=
-    fun t ht h_zero => oncurve_vert_capture f hf S hS_complete hH_sqrt3 ht h_zero
-  have hH_bound : ∀ s ∈ S, (s : ℂ).im < H := fun s hs =>
+    fun t ht h_zero ↦ oncurve_vert_capture f hf S hS_complete hH_sqrt3 ht h_zero
+  have hH_bound : ∀ s ∈ S, (s : ℂ).im < H := fun s hs ↦
     (hH₁_bound s hs).trans_le ((le_max_right _ _).trans hH)
   have h_split := tendsto_pvIntegral_split f S hH_sqrt3
     (modular_side_h_capture f hf S _hS hS_complete hH_sqrt3 hH_gt_one hH_bound hcusp)
   have h_arc := tendsto_pvIntegral_arc f S hH_sqrt3 h_oncurve_arc
   have h_seg5 := tendsto_pvIntegral_seg5 f hf S hH_sqrt3 hcusp
     h_vert_below h_arc_below
-  have h_vert_tendsto : Tendsto (fun ε =>
+  have h_vert_tendsto : Tendsto (fun ε ↦
       (∫ t in (0:ℝ)..1,
         pvIntegrand f (fdBoundary_H H) (sArcOfS S ∪ sVertOfS S) ε t) +
       (∫ t in (3:ℝ)..4,
@@ -674,11 +674,11 @@ theorem cpv_modular_side_tendsto
       filter_upwards [self_mem_nhdsWithin] with ε hε
       exact (pvIntegral_vertical_cancel_union f S hH_sqrt3 h_oncurve_vert ε
         (Set.mem_Ioi.mp hε)).symm
-  refine (?_ : Tendsto _ _ _).congr' (h_split.mono fun ε h => h.symm)
+  refine (?_ : Tendsto _ _ _).congr' (h_split.mono fun ε h ↦ h.symm)
   rw [show -(2 * ↑Real.pi * I * ((k : ℂ) / 12 - ↑(orderAtCusp' f))) =
     0 + (-(2 * ↑Real.pi * I * (↑k / 12)) +
       2 * ↑Real.pi * I * ↑(orderAtCusp' f)) from by ring]
-  exact Filter.Tendsto.congr (fun ε => by ring)
+  exact Filter.Tendsto.congr (fun ε ↦ by ring)
     (h_vert_tendsto.add (h_arc.add h_seg5))
 
 end
