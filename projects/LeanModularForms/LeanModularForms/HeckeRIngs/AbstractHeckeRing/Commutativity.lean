@@ -381,7 +381,6 @@ private lemma heckeMultiplicity_le_comm (h_fix : ∀ D : HeckeCoset P, ι.onHeck
   obtain ⟨h1₁, h2₁, hbar₁⟩ := bar_rep_mem_doubleCoset ι h_fix D₁
   set q₀ : decompQuot P (HeckeCoset.rep D) := ⟦⟨(h1D : G), h1D.2⟩⟧ with hq₀
   unfold heckeMultiplicity
-  push_cast
   rw [← heckeMultiplicity_uniform P (HeckeCoset.rep D₂) (HeckeCoset.rep D₁) D q₀]
   exact_mod_cast Nat.card_le_card_of_injective
     (heckeMultiplicity_le_comm_fwdMap ι h_fix D₁ D₂ D h1D h2D hbarD h1₁ h2₁ hbar₁ q₀ hq₀)
@@ -428,6 +427,7 @@ end AntiInvolution
 
 /-- Shimura Proposition 3.8: `CommRing (𝕋 P ℤ)` from an anti-involution
 fixing every double coset. -/
+@[reducible]
 noncomputable def instCommRing_of_antiInvolution (ι : AntiInvolution P)
     (h_fix : ∀ D : HeckeCoset P, ι.onHeckeCoset D = D) : CommRing (𝕋 P ℤ) :=
   { HeckeRing.instRing P with mul_comm := ι.mul_comm_of_antiInvolution h_fix }
