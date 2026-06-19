@@ -43,7 +43,7 @@ geometric reason the Weil pairing value `e_ℓ(S,T) = (τ_S^* g)/g` is constant:
 unchanged. -/
 def fiberTranslateEquiv {ℓ : ℤ} {S : W.Point} (hS : ℓ • S = 0) (T : W.Point) :
     {Q : W.Point // ℓ • Q = T} ≃ {Q : W.Point // ℓ • Q = T} :=
-  Equiv.subtypeEquiv (Equiv.addRight S) (fun Q => (smul_add_torsion_eq_iff hS T Q).symm)
+  Equiv.subtypeEquiv (Equiv.addRight S) (fun Q ↦ (smul_add_torsion_eq_iff hS T Q).symm)
 
 /-- **The Weil divisor** `D_T := ℓ·(T) − ℓ·(O)` (projective) for `T ∈ E` and `ℓ : ℤ`. For
 `T ∈ E[ℓ]` this is the divisor of the Weil function `f_T`. -/
