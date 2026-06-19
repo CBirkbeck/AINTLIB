@@ -113,7 +113,7 @@ private lemma Gamma0_of_conj_diagMat_mem (a : Fin 2 → ℕ) (ha : ∀ i, 0 < a 
     simp only [← mul_assoc, mul_inv_cancel, one_mul] at this; exact this
   have h_entry : (a 1 : ℚ) * (τ.1 1 0 : ℚ) = (σ.1 1 0 : ℚ) * (a 0 : ℚ) := by
     have h10 := Units.ext_iff.mp h_mul
-    have := congr_arg (fun M => M 1 0) h10
+    have := congr_arg (fun M ↦ M 1 0) h10
     simpa only [Units.val_mul, mapGL_coe_matrix, map_apply_coe, RingHom.mapMatrix_apply,
       diagMat_val 2 a ha, Matrix.diagonal_mul, Matrix.mul_diagonal,
       Matrix.map_apply, algebraMap_int_eq, eq_intCast] using this
