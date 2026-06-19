@@ -42,20 +42,20 @@ noncomputable def pvIntegrand {k : ℤ} (f : ModularForm (Gamma 1) k) (γ : ℝ 
 
 /-- Arc singular set: unit-circle zeros (and S-transforms) plus ρ, ρ+1. -/
 noncomputable def sArcOfS (S : Finset UpperHalfPlane) : Finset ℂ :=
-  (S.filter (fun (p : ℍ) => ‖(↑p : ℂ)‖ = 1)).image (↑· : ℍ → ℂ) ∪
-  (S.filter (fun (p : ℍ) => ‖(↑p : ℂ)‖ = 1)).image (fun (p : ℍ) => -(1 : ℂ) / (↑p : ℂ)) ∪
+  (S.filter (fun p : ℍ ↦ ‖(↑p : ℂ)‖ = 1)).image (↑· : ℍ → ℂ) ∪
+  (S.filter (fun p : ℍ ↦ ‖(↑p : ℂ)‖ = 1)).image (fun p : ℍ ↦ -(1 : ℂ) / (↑p : ℂ)) ∪
   {ellipticPointRho, ellipticPointRhoPlusOne}
 
 /-- Vertical singular set: re = ±1/2, ‖z‖ > 1 zeros, plus T-shifts. -/
 noncomputable def sVertOfS (S : Finset UpperHalfPlane) : Finset ℂ :=
-  (S.filter (fun p : ℍ => (↑p : ℂ).re = 1/2 ∧ ‖(↑p : ℂ)‖ > 1)).image
+  (S.filter (fun p : ℍ ↦ (↑p : ℂ).re = 1/2 ∧ ‖(↑p : ℂ)‖ > 1)).image
     (↑· : ℍ → ℂ) ∪
-  (S.filter (fun p : ℍ => (↑p : ℂ).re = 1/2 ∧ ‖(↑p : ℂ)‖ > 1)).image
-    (fun p : ℍ => (↑p : ℂ) - 1) ∪
-  (S.filter (fun p : ℍ => (↑p : ℂ).re = -1/2 ∧ ‖(↑p : ℂ)‖ > 1)).image
+  (S.filter (fun p : ℍ ↦ (↑p : ℂ).re = 1/2 ∧ ‖(↑p : ℂ)‖ > 1)).image
+    (fun p : ℍ ↦ (↑p : ℂ) - 1) ∪
+  (S.filter (fun p : ℍ ↦ (↑p : ℂ).re = -1/2 ∧ ‖(↑p : ℂ)‖ > 1)).image
     (↑· : ℍ → ℂ) ∪
-  (S.filter (fun p : ℍ => (↑p : ℂ).re = -1/2 ∧ ‖(↑p : ℂ)‖ > 1)).image
-    (fun p : ℍ => (↑p : ℂ) + 1)
+  (S.filter (fun p : ℍ ↦ (↑p : ℂ).re = -1/2 ∧ ‖(↑p : ℂ)‖ > 1)).image
+    (fun p : ℍ ↦ (↑p : ℂ) + 1)
 
 lemma sArcOfS_rho_in (S : Finset UpperHalfPlane) :
     ellipticPointRho ∈ sArcOfS S := by
@@ -195,10 +195,10 @@ theorem exists_height_bound_S (S : Finset UpperHalfPlane) :
     nlinarith [Real.sq_sqrt (show (0 : ℝ) ≤ 3 by norm_num), Real.sqrt_nonneg 3]
   rcases S.eq_empty_or_nonempty with h_empty | h_ne
   · exact ⟨2, hsqrt3, by norm_num, by simp [h_empty]⟩
-  set M := S.sup' h_ne (fun s : ℍ => (s : ℂ).im)
+  set M := S.sup' h_ne (fun s : ℍ ↦ (s : ℂ).im)
   refine ⟨max 2 (M + 1), lt_of_lt_of_le hsqrt3 (le_max_left _ _),
-      lt_of_lt_of_le (by norm_num : (1 : ℝ) < 2) (le_max_left _ _), fun s hs => ?_⟩
-  calc (s : ℂ).im ≤ M := Finset.le_sup' (fun s : ℍ => (↑s : ℂ).im) hs
+      lt_of_lt_of_le (by norm_num : (1 : ℝ) < 2) (le_max_left _ _), fun s hs ↦ ?_⟩
+  calc (s : ℂ).im ≤ M := Finset.le_sup' (fun s : ℍ ↦ (↑s : ℂ).im) hs
     _ < M + 1 := by linarith
     _ ≤ max 2 (M + 1) := le_max_right _ _
 
@@ -216,10 +216,10 @@ omit hf in
 /-- Summing `gWN · ord` over all of `S` equals summing over just zeros. -/
 theorem sum_gWN_ord_eq_filter_zeros (S : Finset UpperHalfPlane) (g : ℂ → ℂ) :
     ∑ s ∈ S, g (↑s : ℂ) * (orderOfVanishingAt' (⇑f) s : ℂ) =
-    ∑ s ∈ S.filter (fun p => f p = 0),
+    ∑ s ∈ S.filter (fun p ↦ f p = 0),
       g (↑s : ℂ) * (orderOfVanishingAt' (⇑f) s : ℂ) := by
   rw [Finset.sum_filter]
-  refine Finset.sum_congr rfl fun p _ => ?_
+  refine Finset.sum_congr rfl fun p _ ↦ ?_
   split_ifs with h
   · rfl
   · simp [orderOfVanishingAt'_eq_zero_of_ne_zero' f p h]
@@ -232,7 +232,7 @@ lemma sArcOfS_im_pos (S : Finset UpperHalfPlane) (s : ℂ) (hs : s ∈ sArcOfS S
     Finset.mem_filter, Finset.mem_insert, Finset.mem_singleton] at hs
   rcases hs with ⟨⟨p, ⟨_, _⟩, rfl⟩ | ⟨p, ⟨_, hp_norm⟩, rfl⟩⟩ | hs
   · exact p.2
-  · have hz_ne : (↑p : ℂ) ≠ 0 := fun h => by simp [h] at hp_norm
+  · have hz_ne : (↑p : ℂ) ≠ 0 := fun h ↦ by simp [h] at hp_norm
     rw [show -(1 : ℂ) / (↑p : ℂ) = (-(↑p : ℂ))⁻¹ from by field_simp, Complex.inv_im]
     simp only [neg_im, neg_neg]
     exact div_pos p.2 (Complex.normSq_pos.mpr (neg_ne_zero.mpr hz_ne))
@@ -303,7 +303,7 @@ private lemma sArcOfS_im_ge_sqrt3_half (S : Finset UpperHalfPlane) (hS : ∀ p �
     Finset.mem_filter, Finset.mem_insert, Finset.mem_singleton] at h_arc
   rcases h_arc with ⟨⟨p, ⟨hp_mem, hp_norm⟩, rfl⟩ | ⟨p, ⟨hp_mem, hp_norm⟩, rfl⟩⟩ | h_ell
   · exact im_ge_sqrt3_half_of_re_half_and_norm_eq_one p (hS p hp_mem).2 hp_norm
-  · have hz_ne : (↑p : ℂ) ≠ 0 := fun h => by simp [h] at hp_norm
+  · have hz_ne : (↑p : ℂ) ≠ 0 := fun h ↦ by simp [h] at hp_norm
     have h_eq : (-(1 : ℂ) / (↑p : ℂ)).im = (↑p : ℂ).im := by
       rw [show -(1 : ℂ) / (↑p : ℂ) = (-(↑p : ℂ))⁻¹ from by field_simp,
         Complex.inv_im, Complex.normSq_neg]
