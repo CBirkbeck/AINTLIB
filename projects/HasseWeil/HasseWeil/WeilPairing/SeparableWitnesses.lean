@@ -349,7 +349,7 @@ theorem pencil_hkerdeg_of_hgcomm_separable (r' s' : ℤ)
       (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s' pullback_L).degree :=
   HasseWeil.card_kernel_eq_degree_of_separable_concrete (W.baseChange (AlgebraicClosure K))
     (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s' pullback_L) hsep
-    (fun k z => hcov_of_mapTranslateGenericPoint_canonical (W.baseChange (AlgebraicClosure K))
+    (fun k z ↦ hcov_of_mapTranslateGenericPoint_canonical (W.baseChange (AlgebraicClosure K))
       (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s' pullback_L) hgcomm k z)
     h_normal hdesc
 
