@@ -6828,14 +6828,20 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
   + `charIdealGroup_quotient`; and discharging h12 is §12's own deferred milestone.
 
 ##### [G-CHARIDEAL] Char-ideal conjunct of thm:vandiver (part ii): `charIdealGroup 𝒳⁺ = I(𝒢⁺)ζ_p`
-- **Status**: IN PROGRESS — 3 of 5 sub-lemmas DONE (axiom-clean) | **File**: CharIdeal.lean, CharIdealQuotient.lean, CharIdealGroupQuotient.lean | **Depends on**: G-IMC (iso, DONE), CHARIDEALGROUP-QUOT, CARRIER-BRIDGE | **Type**: theorem
-- **Progress (2026-06-19)** — **DONE (axiom-clean)**:
+- **Status**: ABSTRACT FORM DONE (axiom-clean) — only CARRIER-BRIDGE remains | **File**: CharIdeal.lean, CharIdealQuotient.lean, CharIdealGroupQuotient.lean | **Depends on**: G-IMC (iso, DONE), CARRIER-BRIDGE | **Type**: theorem
+- **Progress (2026-06-19)** — **5 structure-theory lemmas DONE (all axiom-clean)**:
   (1) `charIdeal_eq_of_linearEquiv` (CharIdeal.lean) — base char-ideal is a linear-iso invariant.
   (2) `charIdeal_quotient` (CharIdealQuotient.lean) — `charIdeal(Λ ⧸ (f)) = (f)` (see [CHARIDEAL-QUOT]).
   (3) `charIdealGroup_eq_of_linearEquiv` (CharIdealGroupQuotient.lean) — equivariant char-ideal is a
-      `Λ(𝒢)`-linear-iso invariant (per-ω reduction to (1) via `isotypicComponent_map_of_linearEquiv`).
-  With the G-IMC iso `𝒳⁺ ≅ Λ(𝒢⁺)/I`, (3) reduces part (ii) to `charIdealGroup(Λ(𝒢⁺)/I) = I`
-  ([CHARIDEALGROUP-QUOT]) modulo the carrier bridge ([CARRIER-BRIDGE]). REMAINING (2 sub-lemmas):
+      `Λ(𝒢)`-linear-iso invariant.
+  (4) `charIdealGroup_quotient` (CharIdealGroupQuotient.lean) — `charIdealGroup(Λ(𝒢) ⧸ (g)) = (g)`
+      ([CHARIDEALGROUP-QUOT], DONE).
+  (5) `charIdealGroup_of_quotientEquiv` (CharIdealGroupQuotient.lean) — **the abstract part-ii
+      conjunct**: `X ≅ Λ(𝒢) ⧸ (g)` ⟹ `charIdealGroup X = (g)` (composes (3)+(4)).
+  So part (ii) is COMPLETE in abstract form: applied with `X = 𝒳⁺_∞`, `g` the `I(𝒢⁺)ζ_p` generator,
+  and the iso `e` = the carrier-bridged `iwasawa_main_conjecture_vandiver`. The SINGLE remaining
+  concrete input is [CARRIER-BRIDGE] (the PadicMeasure↔IwasawaAlgebraGroup ring iso producing `e`).
+  Former REMAINING (now (4),(5) DONE):
 - **Sub-ticket [CHARIDEAL-QUOT]** — **DONE (2026-06-19, axiom-clean)**, `Iwasawa/StructureTheory/CharIdealQuotient.lean`:
   `charIdeal_quotient : charIdeal 𝒪 (Λ ⧸ span{f}) htor = span{f}` (`f≠0`, `[IsDiscreteValuationRing 𝒪]`).
   Route as sketched: `localMult_quotient_span` (= `Ring.ord` of the DVR localization via
