@@ -137,13 +137,13 @@ private abbrev seg4_h₅ := vertSeg_h₅
 
 private lemma seg4_seg1_ftc (H : ℝ) {z₀ : ℂ} (hz_re : z₀.re = -1/2) :
     IntervalIntegrable
-      (fun t => deriv (seg4_h₀ H z₀) t / seg4_h₀ H z₀ t) volume 0 (1/5) ∧
+      (fun t ↦ deriv (seg4_h₀ H z₀) t / seg4_h₀ H z₀ t) volume 0 (1/5) ∧
     ∫ t in (0:ℝ)..(1/5),
         deriv (seg4_h₀ H z₀) t / seg4_h₀ H z₀ t =
       Complex.log (seg4_h₀ H z₀ (1/5)) - Complex.log (seg4_h₀ H z₀ 0) := by
   apply LogDerivFTC.ftc_log_on_segment (by norm_num : (0 : ℝ) ≤ 1/5)
     (vertSeg_h₀_continuous H z₀).continuousOn
-    (fun t _ => (hasDerivAt_vertSeg_h₀ H z₀ t).differentiableAt)
+    (fun t _ ↦ (hasDerivAt_vertSeg_h₀ H z₀ t).differentiableAt)
     (funext (deriv_vertSeg_h₀ H z₀) ▸ continuousOn_const)
   intro t _
   exact seg4_h₀_slitPlane hz_re t
@@ -151,13 +151,13 @@ private lemma seg4_seg1_ftc (H : ℝ) {z₀ : ℂ} (hz_re : z₀.re = -1/2) :
 private lemma seg4_arc_ftc {z₀ : ℂ} (hz_re : z₀.re = -1/2)
     (hc_lo : Real.sqrt 3 / 2 < z₀.im) :
     IntervalIntegrable
-      (fun t => deriv (seg4_h_arc z₀) t / seg4_h_arc z₀ t) volume (1/5) (3/5) ∧
+      (fun t ↦ deriv (seg4_h_arc z₀) t / seg4_h_arc z₀ t) volume (1/5) (3/5) ∧
     ∫ t in (1/5 : ℝ)..(3/5),
         deriv (seg4_h_arc z₀) t / seg4_h_arc z₀ t =
       Complex.log (seg4_h_arc z₀ (3/5)) - Complex.log (seg4_h_arc z₀ (1/5)) := by
   apply LogDerivFTC.ftc_log_on_segment (by norm_num : (1/5 : ℝ) ≤ 3/5)
     (vertSeg_h_arc_continuous z₀).continuousOn
-    (fun t _ => (hasDerivAt_vertSeg_h_arc z₀ t).differentiableAt)
+    (fun t _ ↦ (hasDerivAt_vertSeg_h_arc z₀ t).differentiableAt)
     (vertSeg_h_arc_deriv_continuousOn z₀ _)
   intro t ⟨ht1, ht3⟩
   exact seg4_h_arc_slitPlane hz_re hc_lo ht1 ht3
@@ -166,14 +166,14 @@ private lemma seg4_left_ftc {H : ℝ} (hH : Real.sqrt 3 / 2 < H)
     {z₀ : ℂ} (hz_re : z₀.re = -1/2)
     {δ : ℝ} (hδ_pos : 0 < δ) (hδ_lt : δ < seg4T₀ H z₀.im - 3/5) :
     IntervalIntegrable
-      (fun t => deriv (seg4_h₃ H z₀) t / seg4_h₃ H z₀ t) volume (3/5) (seg4T₀ H z₀.im - δ) ∧
+      (fun t ↦ deriv (seg4_h₃ H z₀) t / seg4_h₃ H z₀ t) volume (3/5) (seg4T₀ H z₀.im - δ) ∧
     ∫ t in (3/5 : ℝ)..(seg4T₀ H z₀.im - δ),
         deriv (seg4_h₃ H z₀) t / seg4_h₃ H z₀ t =
       Complex.log (seg4_h₃ H z₀ (seg4T₀ H z₀.im - δ)) -
       Complex.log (seg4_h₃ H z₀ (3/5)) := by
   apply LogDerivFTC.ftc_log_on_segment (by linarith : (3/5 : ℝ) ≤ seg4T₀ H z₀.im - δ)
     (vertSeg_h₃_continuous H z₀).continuousOn
-    (fun t _ => (hasDerivAt_vertSeg_h₃ H z₀ t).differentiableAt)
+    (fun t _ ↦ (hasDerivAt_vertSeg_h₃ H z₀ t).differentiableAt)
     (funext (deriv_vertSeg_h₃ H z₀) ▸ continuousOn_const)
   intro t ⟨_, htd⟩
   exact seg4_h₃_left_slitPlane hH hz_re hδ_pos htd
@@ -182,14 +182,14 @@ private lemma seg4_right_ftc {H : ℝ} (hH : Real.sqrt 3 / 2 < H)
     {z₀ : ℂ} (hz_re : z₀.re = -1/2)
     {δ : ℝ} (hδ_pos : 0 < δ) (hδ_lt : δ < 4/5 - seg4T₀ H z₀.im) :
     IntervalIntegrable
-      (fun t => deriv (seg4_h₃ H z₀) t / seg4_h₃ H z₀ t) volume (seg4T₀ H z₀.im + δ) (4/5) ∧
+      (fun t ↦ deriv (seg4_h₃ H z₀) t / seg4_h₃ H z₀ t) volume (seg4T₀ H z₀.im + δ) (4/5) ∧
     ∫ t in (seg4T₀ H z₀.im + δ)..(4/5 : ℝ),
         deriv (seg4_h₃ H z₀) t / seg4_h₃ H z₀ t =
       Complex.log (seg4_h₃ H z₀ (4/5)) -
       Complex.log (seg4_h₃ H z₀ (seg4T₀ H z₀.im + δ)) := by
   apply LogDerivFTC.ftc_log_on_segment (by linarith : seg4T₀ H z₀.im + δ ≤ 4/5)
     (vertSeg_h₃_continuous H z₀).continuousOn
-    (fun t _ => (hasDerivAt_vertSeg_h₃ H z₀ t).differentiableAt)
+    (fun t _ ↦ (hasDerivAt_vertSeg_h₃ H z₀ t).differentiableAt)
     (funext (deriv_vertSeg_h₃ H z₀) ▸ continuousOn_const)
   intro t ⟨htd, _⟩
   exact seg4_h₃_right_slitPlane hH hz_re hδ_pos htd
@@ -347,7 +347,7 @@ def arcFTCHyp_seg4 {H : ℝ} (hH : Real.sqrt 3 / 2 < H)
     (hc_lo : Real.sqrt 3 / 2 < z₀.im) (hc_hi : z₀.im < H) :
     ArcFTCHyp γ z₀ (seg4T₀ H z₀.im) (linDelta (seg1Speed H))
       (seg4Threshold H z₀) (-(↑Real.pi * I)) where
-  E := fun _ => -(↑Real.pi * I)
+  E := fun _ ↦ -(↑Real.pi * I)
   h_ftc := by
     intro ε hε hε_thr
     obtain ⟨h_lin_pos, h_lin_lt_lo, h_lin_lt_hi, h_t₀_lo, h_t₀_hi⟩ :=
