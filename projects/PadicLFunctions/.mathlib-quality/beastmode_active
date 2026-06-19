@@ -1,1 +1,1 @@
-FOCUS: CHARIDEAL-QUOT DONE (verified axiom-clean); commit, then CHARIDEALGROUP-QUOT (equivariant reassembly) + CARRIER-BRIDGE
+FOCUS: charIdealGroup_eq_of_linearEquiv (GOAL A) DONE; commit. Part-ii remaining: CHARIDEALGROUP-QUOT reassembly + CARRIER-BRIDGE
