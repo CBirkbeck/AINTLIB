@@ -305,7 +305,7 @@ theorem frobeniusGaloisData_of_geometric
   intro ℓ hℓ S T hS hT hπS hπT
   obtain ⟨hconj, c, hc, hnat⟩ := hgeom ℓ hℓ S T hS hT hπS hπT
   exact ⟨frobeniusFunctionFieldEquiv W, c, hc, hconj, hnat,
-    fun a => frobeniusFunctionFieldEquiv_algebraMap W a⟩
+    fun a ↦ frobeniusFunctionFieldEquiv_algebraMap W a⟩
 
 /-- **The geometric residual `FrobeniusGaloisGeometric` holds** (now **axiom-clean, no `sorry`**) —
 leaf 1.  It is the divisor-Galois-descent content for the concrete arithmetic Frobenius
