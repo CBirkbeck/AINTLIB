@@ -171,19 +171,19 @@ lemma orb_S_smul_eq (p : ℍ) :
 
 /-- The left-vertical filter of S: points with `re = -1/2` and `‖p‖ > 1`. -/
 def sLeftVertFM (S : Finset ℍ) : Finset ℍ :=
-  S.filter (fun p => (p : ℂ).re = -1/2 ∧ ‖(p : ℂ)‖ > 1)
+  S.filter (fun p ↦ (p : ℂ).re = -1/2 ∧ ‖(p : ℂ)‖ > 1)
 
 /-- The right-vertical filter of S: points with `re = 1/2` and `‖p‖ > 1`. -/
 def sRightVertFM (S : Finset ℍ) : Finset ℍ :=
-  S.filter (fun p => (p : ℂ).re = 1/2 ∧ ‖(p : ℂ)‖ > 1)
+  S.filter (fun p ↦ (p : ℂ).re = 1/2 ∧ ‖(p : ℂ)‖ > 1)
 
 /-- The left-arc filter: points on the unit circle with negative real part. -/
 def sLeftArcFM (S : Finset ℍ) : Finset ℍ :=
-  S.filter (fun p => ‖(p : ℂ)‖ = 1 ∧ (p : ℂ).re < 0)
+  S.filter (fun p ↦ ‖(p : ℂ)‖ = 1 ∧ (p : ℂ).re < 0)
 
 /-- The right-arc filter: points on the unit circle with positive real part. -/
 def sRightArcFM (S : Finset ℍ) : Finset ℍ :=
-  S.filter (fun p => ‖(p : ℂ)‖ = 1 ∧ (p : ℂ).re > 0)
+  S.filter (fun p ↦ ‖(p : ℂ)‖ = 1 ∧ (p : ℂ).re > 0)
 
 /-- T⁻¹-invariance of vanishing order: `ord(f, (-1)+ᵥp) = ord(f, p)`. -/
 lemma ord_vAdd_neg_one_eqFM (p : ℍ) :
@@ -215,7 +215,7 @@ theorem sum_ord_rightVert_eq_sum_ord_leftVertFM (S : Finset ℍ)
     · rw [vAdd_neg_one_norm_eq_of_re_halfFM p hre]
       exact hnorm
     · exact ord_vAdd_neg_one_eqFM f p ▸ hord
-  · exact fun _ _ _ _ => IsLeftCancelVAdd.left_cancel _ _ _
+  · exact fun _ _ _ _ ↦ IsLeftCancelVAdd.left_cancel _ _ _
   · intro q hq
     obtain ⟨⟨hq_S, hre, hnorm⟩, hord⟩ := Finset.mem_filter.mp hq
       |>.imp_left Finset.mem_filter.mp
@@ -231,7 +231,7 @@ theorem sum_ord_rightVert_eq_sum_ord_leftVertFM (S : Finset ℍ)
     · exact ord_add_one_eq f q ▸ hord
     · change (-1 : ℝ) +ᵥ ((1 : ℝ) +ᵥ q) = q
       simp [← add_vadd]
-  · exact fun p _ => by rw [ord_vAdd_neg_one_eqFM f p]
+  · exact fun p _ ↦ by rw [ord_vAdd_neg_one_eqFM f p]
 
 /-- Orders on right arc equal orders on left arc (via S-action). -/
 theorem sum_ord_rightArc_eq_sum_ord_leftArcFM (S : Finset ℍ) (hS : ∀ p ∈ S, p ∈ 𝒟)
@@ -263,6 +263,6 @@ theorem sum_ord_rightArc_eq_sum_ord_leftArcFM (S : Finset ℍ) (hS : ∀ p ∈ S
       rw [S_smul_re_neg_of_unitFM q hnorm, show q.re = (q : ℂ).re from rfl]
       linarith
     · exact ord_S_eq f q ▸ hord
-  · exact fun p _ => by rw [ord_S_eq f p]
+  · exact fun p _ ↦ by rw [ord_S_eq f p]
 
 end
