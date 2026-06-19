@@ -52,9 +52,9 @@ def mkFDWindingDataFull_seg1seg4_unconditional {H : ℝ} (hH : 1 < H)
     FDWindingDataFull H :=
   let hH_sqrt3 := sqrt_three_div_two_lt_of_one_lt hH
   mkFDWindingDataFull_of_ftcProviders hH D
-    (fun _ hz_re hi_lo hi_hi =>
+    (fun _ hz_re hi_lo hi_hi ↦
       arcFTCHyp_seg1 hH_sqrt3 D.boundary D.boundary_eq hz_re hi_lo hi_hi)
-    (fun _ hz_re hi_lo hi_hi =>
+    (fun _ hz_re hi_lo hi_hi ↦
       arcFTCHyp_seg4 hH_sqrt3 D.boundary D.boundary_eq hz_re hi_lo hi_hi)
     ftc_arc
 
@@ -63,7 +63,7 @@ All three FTC providers (seg1, seg4, arc) are supplied unconditionally. -/
 def mkFDWindingDataFull_unconditional {H : ℝ} (hH : 1 < H) (D : FDWindingData H) :
     FDWindingDataFull H :=
   mkFDWindingDataFull_seg1seg4_unconditional hH D
-    (fun _ h_lo h_hi => arcFTCHyp_arc_generic hH D.boundary D.boundary_eq h_lo h_hi)
+    (fun _ h_lo h_hi ↦ arcFTCHyp_arc_generic hH D.boundary D.boundary_eq h_lo h_hi)
 
 /-! ### Fully unconditional FDWindingData from the FD boundary path -/
 
@@ -76,7 +76,7 @@ def fdWindingData_unconditional {H : ℝ} (hH : 1 < H) : FDWindingData H :=
     fdBoundaryPC1Path_eq H hH_sqrt3
   { boundary := γ
     boundary_eq := hγ
-    interior_winding := fun _ hz_norm hz_re hz_im_pos hz_im_lt =>
+    interior_winding := fun _ hz_norm hz_re hz_im_pos hz_im_lt ↦
       fdBoundary_interior_winding_complete hH_sqrt3
         ⟨hz_norm, hz_re, hz_im_pos, hz_im_lt⟩ hγ
     winding_at_i := hasWindingNumber_atI_of_scd
@@ -118,17 +118,17 @@ theorem valence_formula_unconditional_mkD {k : ℤ} (f : ModularForm (Gamma 1) k
     (orderAtCusp' f : ℂ) +
     (1/2 : ℂ) * ↑(orderOfVanishingAt' (⇑f) ellipticPointI') +
     (1/3 : ℂ) * ↑(orderOfVanishingAt' (⇑f) ellipticPointRho') +
-    ∑ s ∈ S.filter (fun p =>
+    ∑ s ∈ S.filter (fun p ↦
         p ≠ ellipticPointI' ∧ p ≠ ellipticPointRho' ∧ p ≠ ellipticPointRhoPlusOne' ∧
         ‖(p : ℂ)‖ > 1 ∧ |(p : ℂ).re| < 1/2),
       ↑(orderOfVanishingAt' (⇑f) s) +
     ∑ s ∈ sLeftVertFM S, ↑(orderOfVanishingAt' (⇑f) s) +
-    ∑ s ∈ S.filter (fun p =>
+    ∑ s ∈ S.filter (fun p ↦
         p ≠ ellipticPointRho' ∧ ‖(p : ℂ)‖ = 1 ∧ (p : ℂ).re < 0),
       ↑(orderOfVanishingAt' (⇑f) s) =
     (k : ℂ) / 12 :=
   valence_formula_of_two_sides_Hgt1 f S hS hS_complete
-    (fun _ => fdWindingDataFull_unconditional)
+    (fun _ ↦ fdWindingDataFull_unconditional)
     H_S hH_S F H_res hH_res_gt h_res H_mod hH_mod_gt h_mod
 
 end
