@@ -7,6 +7,51 @@ Source mapping verified against Wedhorn's bibliography (`wedhorn.txt:5725-5745`)
 **[Hu3]** = A generalization (1994). Build is green (3190 jobs); these are the only
 critical-path sorries.
 
+## ★ REVISED per /expert-review (2026-06-19) — read this first
+
+The reviewer (adic-spaces expert) checked the 4-leaf plan against the source. Net effect:
+**one leaf's red flag is eliminated, one leaf is greatly simplified, two are confirmed.**
+Reply: `.mathlib-quality/expert-review/2026-06-19/reply.md`. Source-verified by us.
+
+- **Leaf #4 — RED FLAG WITHDRAWN.** The correct source is **Wedhorn 7.52(1) = 7.18(1)**
+  ("`f ∈ A⁺ ⟺ v(f) ≤ 1 ∀v ∈ Spa(A,A⁺)`", `wedhorn.txt:3619` / `:3161`), which is **stated
+  for any affinoid ring — no completeness, Tate, or noetherian ring of definition.** Our
+  earlier ℂ_p concern came from conflating it with the *density* converse 7.18(3) (the only
+  part needing a noetherian ring of definition). New target: prove 7.52(1) (the τ∘σ=id
+  direction, hypothesis-free, content in [Hu1] §3 / [Hu2] 3.3 parts i–ii — NOT iii) and
+  wrap the leaf as `v(x)≤1 ∀v∈Spa ⟹ x∈A⁺ ⟹ x∈A°` (the second ⟹ is our already-built
+  `IsRingOfIntegralElements.subset_powerBounded`). NUANCE vs reviewer: 7.52(1) is *not* yet
+  an in-project lemma (only 7.52(2) `wedhorn_7_52_2_isUnit_iff_forall_not_vle_zero` is), so
+  it is a small **hypothesis-free** sub-leaf, not a pure deletion.
+- **Leaf #1 — SIMPLIFIED (no Prop 6.18).** Corestrict `ρ : R=𝒪_X(U) → P=∏𝒪_X(Uᵢ)` to the
+  closed equalizer `E` of the overlap maps; separation+gluing give a continuous bijection
+  `ρ̃ : R → E`; `E` is closed (kernel of the overlap difference map) hence complete +
+  countably-based; apply the **already-landed Theorem 6.16** (`BanachOMT.lean`: complete
+  target + surjective ⟹ open) to `ρ̃`; continuous+injective+open ⟹ homeomorphism; compose
+  with `E ↪ P`. Prop 6.18 (the "Proof. Missing" functional analysis) is **not needed**.
+  RISK: do not apply 6.16 to `ρ` into the full `P` (not surjective) — corestrict to `E` first.
+- **Leaf #2 — CONFIRMED; openness is automatic.** `A⁺` open ⟹ `Iⁿ ⊆ A⁺` ⟹ `IⁿA₀[T/s]` is an
+  open nbhd of 0 in the loc topology, `⊆ A⁺[T/s]`, so `A⁺[T/s]` open ⟹ its integral closure
+  `G` open ⟹ `G` is a ring of integral elements of `A[1/s]` (+ 7.19/7.20 for `G ⊆ (A[1/s])°`)
+  ⟹ `closure(G)` a ring of integral elements of the completion by **7.47(4)**. RISK: the
+  localized plus-ring must contain the generators `T/s` and be integrally closed (it does:
+  our def is `closure(image of IntCl(locPlusSubring))`).
+- **Leaf #3 — CONFIRMED; only the general (non-noetherian) branch of 7.45 is needed.** Add a
+  one-line maximality lemma (for maximal `p`, `p ⊆ supp x` + supp prime ⟹ `supp x = p`).
+  Prop 7.41 is the height-1-bound-on-A° step. ℂ_p-safe.
+- **Gluing dependency correction (Q4b).** Gluing needs neither leaf #1 nor the former leaf
+  #4, but it DOES depend on leaf #2 (relative use over `𝒪_X(U)`) and **leaf #3** (Lemma 7.54
+  uses Cor 7.53, whose proof uses maximal-ideal Spa points from Prop 7.51). Record leaf #3
+  as upstream of gluing — not "gluing is wholly independent."
+
+**Revised residual: 3 leaves** — #1 (equalizer+6.16 assembly, tractable), #2 (7.47(4)
+completion + openness chain), #3 (general 7.45 + maximality). Former #4 → small
+hypothesis-free 7.52(1) sub-leaf (possibly mergeable with the leaf #3 / Cont(A) work, since
+both are [Hu1] §3 valuation theory). The original per-leaf analysis below is retained for
+record; the **revised** statements above supersede it where they differ.
+
+---
+
 ## Skeleton location (existing — these are the live sorries, not new decls)
 - Leaf #1: `StructureSheaf.lean:1384` `productRestrictionSub_isInducing_tate := sorry`
 - Leaf #2: `Presheaf.lean:505-507` `presheafValuePlus_isRingOfIntegralElements` 3 sorry fields
