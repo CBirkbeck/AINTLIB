@@ -1,206 +1,223 @@
-# Ticket Board — ROIE (`A⁺ ⊆ A°` ring-of-integral-elements interface, full option (a))
+# Ticket Board — Thm 8.28(b) sheafiness, revised 4-leaf plan (post /expert-review 2026-06-19)
 
 ## Summary
-- Total: 4 proof tickets + 2 cleanup = 6
-- Open: 6 | In Progress: 0 | Done: 0 (foundation 489fe72 already committed: `IsRingOfIntegralElements`
-  class, `support_eq_maximal_of_le`, `exists_cont_supp_ge_powerBounded_of_nonOpen_prime` named leaf)
-- WIP for T-ROIE-1 is in `git stash@{0}` (Presheaf + Cor832 IntCl migration, builds through Cor832).
-- Plan: `.mathlib-quality/plan-roie.md`. Refines TaskList #68; supersedes its B2.
+- **Foundation DONE** (commits 489fe72 / b5c20a9 / a42bdc9): the `A⁺ ⊆ A°` ring-of-integral-elements
+  interface migration (T-ROIE-1/2). Full `lake build` GREEN (3190 jobs). The false `B⁺ ⊆ B₀` route is
+  gone; consumers use `[IsRingOfIntegralElements (A⁺)]` + the pair-free Spa criteria.
+- **Revised residual = 4 embedding-side leaves** (the expert-review reply
+  `.mathlib-quality/expert-review/2026-06-19/`, all key claims source-verified):
+  - **T-L1** leaf #1 — topological inducing of `productRestrictionSub` via the equalizer + the
+    σ-compact-FREE OMT. (Was "Prop 6.18"; reviewer simplified it to 6.16-on-the-equalizer.)
+  - **T-L2** leaf #2 — `(presheafValue D)⁺` is a ring of integral elements (= former T-ROIE-3).
+  - **T-L3** leaf #3 — analytic Spa point above a non-open prime (= former T-ROIE-4).
+  - **T-L4** former leaf #4 — `isPowerBounded_of_forall_vle_one_spa_of_complete` via **7.52(1)=7.18(1)**
+    (NOT the noetherian density converse 7.18(3); the ℂ_p red flag was a mis-citation — WITHDRAWN).
+- **Leaf C (gluing)** is the *separate* Čech track (WedhornCechAcyclicity; whole-space chain sorry-free
+  per `lemma_8_34_gluing`, R2-transport residual). Not re-ticketed here, but it is a **dependency of
+  T-L1** (the algebraic bijection `ρ̃ : R → E` is injectivity ∧ gluing) and, per reviewer Q4b, gluing
+  itself depends on **T-L2 + T-L3** (Lemma 7.54 → Cor 7.53 → Prop 7.51 maximal-ideal Spa points).
+- Total this board: 4 proof leaves (T-L1 has 3 sub-tickets) + 3 cleanup = 7 entries.
+
+## Dependency graph (bottom-up)
+```
+T-L4 (7.52(1) criterion) ─────────────► [feeds the LL-bdd / Leaf-A chain, already wired]
+
+T-L3 (leaf #3: Spa points) ──┬─► productRestrictionSub_injective  (embedding.injective)
+                             └─► Leaf C (gluing, via 7.54/7.53/7.51) ──┐
+T-L2 (leaf #2: completion ROIE) ─► Leaf C (relative use over 𝒪_X(U)) ──┤
+                                                                       ▼
+   T-L1a EQ-CLOSED ─┐                                          ρ̃ : R → E surjective
+   T-L1b EQ-COMPLETE─┼─► T-L1c OMT-inducing (productRestrictionSub_isInducing_tate)
+                     │        ▲
+   wedhorn_6_16_of_topNilpUnit (landed) ─────────────────────────────┘
+                                                                       ▼
+   isSheafy_of_stronglyNoetherian_828b = ⟨embedding (T-L1c ∧ T-L3-inj), gluing (Leaf C)⟩
+```
 
 ---
 
-### [T-ROIE-1] Restore + verify the IntCl plus-ring migration core
-- **Status**: DONE (2026-06-18) — WIP restored; IntCl `completedPlusSubring` migration builds.
-- **File**: Presheaf.lean, Cor832.lean
-- **Depends on**: none
-- **Parallel**: no (foundation of the cascade)
-- **Type**: refactor (restore stashed WIP)
-
-#### Statement
-Restore `git stash@{0}` (the verified WIP) and confirm Presheaf + Cor832 build:
-- `Presheaf.lean`: `RationalLocData.completedPlusSubring D := ((integralClosure ↥(D.locPlusSubring)
-  (Localization.Away D.s)).toSubring.map D.coeRingHom).topologicalClosure`; the helper
-  `locPlusSubring_le_integralClosure`; the membership lemma re-proof; `import AffinoidRings`; the
-  instance `presheafValuePlus_isRingOfIntegralElements : IsRingOfIntegralElements ((presheafValue D)⁺)`
-  (3 fields `sorry`, discharged in T-ROIE-3); dropped `completedPlusSubring_le_completedLocSubring`.
-- `Cor832.lean`: `exists_spa_point_supp_ge_in_presheafValue` faithful re-proof (via the named leaf +
-  the instance); dropped unused `isUnit_canonicalMap_s_via_nullstellensatz`.
-
-#### Proof sketch
-1. `git stash pop` (or re-apply the diff). 2. `lake build «Adic spaces».Cor832` — verified to pass
-   in the planning run (the full build reached SpaPresheafValueEquivalence, i.e. *past* Cor832, with
-   0 errors there). 3. If `git stash` was discarded, re-do the edits per `plan-roie.md`.
-
-#### Mathlib lemmas needed
-`integralClosure`, `Subalgebra.toSubring`, `Subalgebra.algebraMap_mem`, `Subring.topologicalClosure`,
-`Subring.le_topologicalClosure` (all verified at planning time).
-
-#### Sources
-Wedhorn 8.16 (`Ĉ = 𝒪_X⁺(U)`), Def. 7.14(1); REVIEW_BRIEF.md Q1/Q2.
-
-#### Generality decision
-`(D : RationalLocData A) [PlusSubring A]` + the project's standard `A`-bundle; index the instance by
-`(presheafValue D)⁺` (`ringPlus` key) to match consumer queries.
-
----
-
-### [T-ROIE-2] Cascade re-route: OLD `A⁺⊆A₀` machinery → faithful `A⁺⊆A°`
-- **Status**: DONE (2026-06-18) — foundation + pair→pair-free migration + 8-file cascade landed; full `lake build` GREEN (3190 jobs, 0 errors). Residual = T-ROIE-3/4 honest leaves (warnings).
-
-#### Progress
-- 2026-06-18: SpaPresheafValueEquivalence:525 casualty FIXED (helper `vle_image_le_one_of_isIntegral_of_subring`
-  via `IsIntegral.map_of_comp_eq` + `Valuation.Integers.mem_of_integral`; `erw` for the field-instance
-  diamond). Builds green.
-- 2026-06-18: REFINED the WCA half. The `completedPlusSubring_le_ringOfDef` (false) is NOT a 5-leaf
-  re-route — it produces `hplusB = B⁺⊆B₀` feeding the acyclicity engine's `hplus` param, which threads
-  `wedhorn_lemma_834_part_i_laurent_acyclic → laurentProdCoverOf_isOXAcyclic → unitCover_isOXAcyclic →
-  cor_8_32_productRestrictionSub_injective → cor_8_32_productRestriction_faithfullyFlat →
-  cor_8_32_maximal_liftedIdeal_ne_top → exists_spa_point_supp_ge_in_presheafValue`. The WIP already made
-  the BOTTOM faithful (uses the `IsRingOfIntegralElements` instance + 7.45 leaf). So `hplus` is VESTIGIAL
-  engine-wide. De-threaded it from the whole WCA acyclicity engine + Cor832 bottom + RPK Cor-8.32 chain
-  + SpaPresheafValueEquivalence:525 (IntCl casualty fixed via `vle_image_le_one_of_isIntegral_of_subring`).
-- 2026-06-18 **SCOPE DISCOVERY — the de-thread does NOT terminate inside WCA.** The B-level recursion of
-  Lemma 8.34 (`genRestrictedCover_isOXAcyclic_of_spanTop`/`imageCover_isOXAcyclic` instantiate
-  `wedhorn_lemma_834`/`every_rational_cover_is_OXAcyclic_whole_space` at `B = presheafValue`) bottoms at
-  **`spanTop_iff_noCommonZero_spa` (StandardCover.lean) → `exists_spa_point_with_supp_ge_of_prime`**, which
-  is pair-based (`(P : PairOfDefinition A) (hAplus : A⁺⊆P.A₀)`, via Lemma 7.45). At B-level `hAplus = B⁺⊆B₀`
-  is FALSE. To de-thread it requires the pair-free form `[IsRingOfIntegralElements (A⁺)]` (the Def-7.14
-  affinoid axiom) — but there is **NO base-level instance** of `IsRingOfIntegralElements (A⁺)` (the bare
-  `PlusSubring`/`CompatiblePlusSubring` classes lack the `A⁺⊆A°`+integrally-closed+open fields). So the
-  faithful fix is the **reviewer's foundational interface change** (give the affinoid axiom so the instance
-  resolves) + a **pair→pair-free migration of `spanTop_iff_noCommonZero_spa` across its 8 caller files**
-  (WedhornStandardCoverRefinement, TateAcyclicityResiduals, WedhornStage2SpanExtractor, GeometricReduction,
-  LocalBasis, WedhornCechAcyclicity, WedhornOutsideRescue, StandardCover). This is the documented
-  multi-session **P1 marathon** (#58-#61), NOT a bounded ticket. The WCA-engine de-thread (~90% done,
-  faithful) is preserved in `git stash` (with the IntCl WIP). Build restored to green 489fe72. NEEDS
-  re-plan foundation-first + a user decision on the foundational interface vehicle.
-- 2026-06-18 **RESUMED + LANDED (user: "do full"/"why arent you working").** Foundation chosen:
-  extended `CompatiblePlusSubring` (Presheaf.lean) with the 3 Def-7.14 fields (`isOpen'`,
-  `isIntegrallyClosed'`, `subset_powerBounded'`) + derived `instance
-  CompatiblePlusSubring.toIsRingOfIntegralElements : IsRingOfIntegralElements (A⁺)` (sorry-free; it has
-  NO instances, only hypothesis-sites, so strengthening it is the faithful affinoid axiom). Made
-  `exists_spa_point_with_supp_ge_of_prime` + `spanTop_iff_noCommonZero_spa` (StandardCover) pair-free
-  (drop `(P, hAplus)`, add `[IsHuberRing][T2Space][NonarchimedeanRing][IsRingOfIntegralElements (A⁺)]`,
-  use `exists_cont_supp_ge_powerBounded_of_nonOpen_prime` + instance). Cascaded the (P,hAplus)→instance
-  swap through ALL 8 caller files (StandardCover, TateAcyclicityResiduals, WedhornStage2SpanExtractor,
-  GeometricReduction, WedhornCechAcyclicity) + the WCA P₀-chain + whole_space + imageCover (B-level
-  instances resolve from `presheafValuePlus_isRingOfIntegralElements` + the faithful `presheafValue_*`).
-  Deleted false `completedPlusSubring_le_ringOfDef`. **GREEN: Presheaf, Cor832, RPK,
-  SpaPresheafValueEquivalence, StandardCover, TateAcyclicityResiduals, WedhornStage2SpanExtractor,
-  GeometricReduction, WedhornCechAcyclicity all build with 0 errors.** Residual = T-ROIE-3 (presheafValue
-  instance 3 sorry fields) + T-ROIE-4 (prime leaf sorry) — both honest named leaves (warnings, not
-  errors). Running full `lake build` to confirm downstream (headline). Vestigial (P,hAplus)/hplusA params
-  left as unused-warnings (cleanup later).
-- **File**: SpaPresheafValueEquivalence.lean, WedhornCechAcyclicity.lean, + any downstream
-- **Depends on**: T-ROIE-1
-- **Parallel**: no
-- **Type**: refactor (re-route, iterate to green)
-
-#### Statement
-Re-route every consumer that relied on `(presheafValue D)⁺ = closure(locPlusSubring image)` or on the
-two deleted `B⁺⊆B₀` lemmas, to the faithful route (the `IsRingOfIntegralElements` instance +
-`exists_cont_supp_ge_powerBounded_of_nonOpen_prime` + the pair-free criteria). Known casualties:
-- `SpaPresheafValueEquivalence.lean:525` (`spa_completion_of_spa_localization`): show
-  `(presheafValue D)⁺ = closure(IntCl image) ⊆ (Valued.v.integer).comap φhat` by `topologicalClosure_minimal`
-  on the **IntCl** image; for `c ∈ IntCl(locPlusSubring)`, `φhat (coeRingHom c)` is integral over
-  `φhat (coeRingHom (locPlusSubring))) ⊆ integer`, and the valuation integer is integrally closed
-  (`Valuation.Integers.mem_of_integral`), so it lands in the integer.
-- `WedhornCechAcyclicity.lean`: `completedPlusSubring_le_ringOfDef` is now FALSE (IntCl ⊄ ringOfDef) →
-  DROP it; re-route its 5 users (10958, 11078, 11220, 12417, 12524) to the faithful route (the
-  pair-free `isUnit_iff_forall_not_vle_zero_of_complete_pairFree` / `exists_spa_point_supp_ge_in_presheafValue`
-  + the instance's `subset_powerBounded`), exactly as `canonical_unit_of_pointwise_lower_bound` was
-  re-routed in the WIP.
-- **Downstream discovery**: the planning build halted at the first error (SpaPresheafValueEquivalence),
-  so WCA + the chain + headline were not fully re-checked. Run `lean_diagnostic_messages` on each
-  affected file after its deps build; iterate until `lake build` is fully GREEN (the deep sorries from
-  T-ROIE-3/T-ROIE-4 remain as warnings).
-
-#### Proof sketch
-Each casualty has the same shape: it used `B⁺ ⊆ B₀` (a ring of definition) to feed pair-based
-machinery; with IntCl that inclusion is false, but `B⁺ ⊆ B°` holds (the instance) and the faithful
-pair-free criteria consume exactly `B⁺ ⊆ B°`. So: replace `B⁺ ⊆ B₀` + pair-based-criterion with
-the pair-free criterion (+ `IsRingOfIntegralElements.subset_powerBounded` where a `B° `bound is
-needed). For the integral-closure step (SpaPresheafValueEquivalence), use that valuation integers
-are integrally closed.
-
-#### Mathlib lemmas needed
-`Subring.topologicalClosure_minimal`, `Valuation.Integers.mem_of_integral` (valuation integer
-integrally closed), `IsIntegral.map`/`RingHom.IsIntegralElem.map` (integral transfer through
-`coeRingHom`, `φhat`), `IsRingOfIntegralElements.subset_powerBounded`.
-
-#### Sources
-Wedhorn 8.16, Def. 7.14(1); the valuation-integer-integrally-closed fact ([BGR] 6.1.2 / standard).
-
-#### Generality decision
-No new hypotheses — the re-routes DROP `A⁺⊆A₀`/noeth-`A₀` arguments (rename to `_h…` where a
-signature must keep them for callers).
-
----
-
-### [CLEANUP-1] Run /cleanup on Presheaf.lean + Cor832.lean
+### [T-L1a] `sectionEqualizer` is closed in the product
 - **Status**: open
-- **Depends on**: T-ROIE-2
-- **Parallel**: no
-- **Type**: cleanup
-- **Description**: cadence (3 proof tickets across these files since the foundation). Run /cleanup on
-  the migrated declarations.
+- **File**: StructureSheaf.lean (new decls near `productRestrictionSub`, ~L280)
+- **Depends on**: none (pure topology)
+- **Parallel**: yes
+- **Type**: def + lemma
+
+#### Statement
+Define the overlap equalizer `E ⊆ ∏ᵢ 𝒪_X(Uᵢ)` as the kernel of the continuous difference of the two
+overlap-restriction maps `∏ᵢ 𝒪_X(Uᵢ) ⇉ ∏_{i,j} 𝒪_X(Uᵢ ∩ Uⱼ)`, and show it is closed:
+```lean
+noncomputable def sectionEqualizer (C : RationalCovering A) :
+    Subgroup (∀ D : C.index, presheafValue (C.piece D))   -- or AddSubgroup of the product
+  := AddMonoidHom.ker (overlapDiff C)                       -- (overlapDiff = ρ_{ij}^left - ρ_{ij}^right)
+
+theorem sectionEqualizer_isClosed (C : RationalCovering A) :
+    IsClosed (sectionEqualizer C : Set _) := by sorry
+```
+
+#### Proof sketch
+1. The two overlap maps are continuous (each is a `restrictionMapHom` between completions, continuous
+   by `restrictionMapAlg_continuous_of_huber_completion`). Their difference `overlapDiff` is continuous.
+2. The target `∏_{i,j} 𝒪_X(Uᵢ∩Uⱼ)` is T2 (finite product of T2 completions).
+3. `E = ker(overlapDiff) = overlapDiff ⁻¹ {0}`; preimage of the closed `{0}` under a continuous map →
+   closed. (`IsClosed.preimage continuous_overlapDiff isClosed_singleton`.)
+
+#### Mathlib lemmas needed
+`continuous_sub`, `IsClosed.preimage`, `isClosed_singleton` (target T2), `AddMonoidHom.ker`,
+`continuous_apply`/`Pi.continuous` for the product projections. (All verified to exist.)
+
+#### Sources
+Reviewer reply Q2 (`expert-review/2026-06-19/reply.md`): "The equalizer is the kernel of the continuous
+difference map from P to the finite overlap product, hence is closed." Standard topology; no Wedhorn
+proposition needed (the sheaf-axiom equalizer shape, Wedhorn §8.2 / Def of sheaf).
+
+#### Generality decision
+`(C : RationalCovering A)` over the standard Tate `A`-bundle. State `E` as an `AddSubgroup` of the
+product (the OMT needs an additive/`A`-module structure on the target, not a ring structure).
 
 ---
 
-### [T-ROIE-3] Discharge `IsRingOfIntegralElements ((presheafValue D)⁺)` (3 fields)
-- **Status**: open — PARKED at external leaf (2026-06-18). The instance EXISTS + RESOLVES (build green);
-  its 3 fields are cited sorries. `isOpen`/`isIntegrallyClosed` bottom at **Wedhorn 7.47(4) = [Hu1]
-  2.4.3** (completion preserves rings of integral elements — EXTERNAL, Wedhorn cites without reproof;
-  building it = the CLAUDE.md "substantial missing infrastructure" STOP tell). `subset_powerBounded`
-  (Ĉ ⊆ B°) is provable via 7.19/7.20 + completion power-bounded transfer (a real sub-development).
-  Faithful as a cited named-leaf per CLAUDE.md.
-- **File**: Presheaf.lean (or a new `PresheafAffinoid.lean` if imports demand)
-- **Depends on**: T-ROIE-1
-- **Parallel**: yes (with T-ROIE-2, T-ROIE-4 — discharges sorries; doesn't affect build greenness)
+### [T-L1b] `sectionEqualizer` is a complete, countably-based A-module; `ρ̃ : R → E` continuous bijection
+- **Status**: open
+- **File**: StructureSheaf.lean
+- **Depends on**: T-L1a; **Leaf C** (gluing surjectivity); T-L3 (injectivity, transitively)
+- **Parallel**: no (needs gluing)
+- **Type**: lemmas (instances + the corestricted map)
+
+#### Statement
+```lean
+-- Closed subspace of the complete product ⇒ complete; finite product of cg ⇒ cg; A-module structure.
+instance : CompleteSpace (sectionEqualizer C) := (sectionEqualizer_isClosed C).completeSpace_coe
+-- The corestriction of productRestrictionSub to E (lands in E by overlap-compatibility):
+noncomputable def productRestrictionToEqualizer (C : RationalCovering A) :
+    presheafValue C.base →ₗ[A] sectionEqualizer C := …
+theorem productRestrictionToEqualizer_bijective (C : RationalCovering A) :
+    Function.Bijective (productRestrictionToEqualizer C) := by sorry
+```
+
+#### Proof sketch
+1. `CompleteSpace E` from `sectionEqualizer_isClosed C |>.completeSpace_coe` (closed in complete `∏`).
+2. `(uniformity E).IsCountablyGenerated` via `Filter.comap.isCountablyGenerated` (subspace of a finite
+   product of cg completions) — pattern copied verbatim from `_sub_lemma_L4_3_strict_via_closed_image`
+   (WedhornBanachTheorem:1031-1040).
+3. `ρ` lands in `E`: `productRestriction` of a global section satisfies the overlap relations
+   (`restrictionMap` functoriality / `productRestriction_apply` cocycle) → corestrict to `E`.
+4. **Injective**: `productRestrictionSub_injective` / `productRestriction_injective_of_laurentRefinement`
+   (exists, StructureSheaf:922/1134; rests transitively on T-L3 Spa points).
+5. **Surjective onto E** = the algebraic **gluing** axiom: every overlap-compatible family `(eᵢ) ∈ E`
+   glues to a global section. This is **Leaf C** (`lemma_8_34_gluing` / the Čech H⁰-exactness).
+
+#### Mathlib lemmas needed
+`IsClosed.completeSpace_coe`, `Filter.comap.isCountablyGenerated`, `Submodule`/`AddSubgroup` subtype
+instances, `LinearMap.codRestrict`. (Verified.)
+
+#### Sources
+Reviewer Q2: "E is Hausdorff, complete, countably based as a closed subspace of a finite product of
+such spaces … separation+gluing give a continuous bijection ρ̃ : R → E." Gluing = Wedhorn Lemma 8.34
+(Leaf C); injectivity = Wedhorn 7.45 route (T-L3).
+
+#### Generality decision
+`ρ̃` as `M →ₗ[A] N` (A-linear) so `wedhorn_6_16_of_topNilpUnit` applies directly in T-L1c.
+
+---
+
+### [T-L1c] `productRestrictionSub_isInducing_tate` via the σ-compact-free OMT
+- **Status**: open — replaces the bare `sorry` at StructureSheaf.lean:1384
+- **File**: StructureSheaf.lean:1384
+- **Depends on**: T-L1a, T-L1b
+- **Parallel**: no
+- **Type**: theorem (discharge existing sorry)
+
+#### Statement
+```lean
+theorem productRestrictionSub_isInducing_tate
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A] [NonarchimedeanRing A]
+    (C : RationalCovering A) :
+    Topology.IsInducing (productRestrictionSub A C)
+```
+
+#### Proof sketch (reviewer Q2, faithful σ-compact-free)
+1. `R := presheafValue C.base` is complete, cg, T2, and an `A`-module; `E := sectionEqualizer C` is
+   complete (T-L1a/b), cg, T2.
+2. `ρ̃ := productRestrictionToEqualizer C : R →ₗ[A] E` is continuous (T-L1b step 3 + `continuous_productRestriction`)
+   and **surjective** (T-L1b: bijective).
+3. Obtain a topologically-nilpotent **unit** `ϖ` from `[IsTateRing A]`
+   (`IsTateRing.exists_topologicallyNilpotent_unit`).
+4. `wedhorn_6_16_of_topNilpUnit hϖ_nil ϖ.isUnit ρ̃ hρ̃_cont hρ̃_surj : IsOpenMap ρ̃`  — **the
+   σ-compact-free OMT (WedhornBanachTheorem:408); do NOT use `isOpenMap_of_completeSpace_of_countablyGenerated`,
+   which carries `[SigmaCompactSpace]`, false for Tate `R`.**
+5. `ρ̃` continuous + bijective + open ⟹ homeomorphism (`IsOpenMap` + `Continuous` + `Bijective` →
+   `Homeomorph`, or `Topology.IsInducing` of a bijective open continuous map).
+6. `productRestrictionSub A C = (E ↪ ∏) ∘ ρ̃` where `E ↪ ∏` is `IsInducing.subtypeVal`; composition of
+   inducings is inducing → `IsInducing (productRestrictionSub A C)`. (`Topology.IsInducing.comp`.)
+
+This is exactly the `_sub_lemma_L4_3_strict_via_closed_image` (WedhornBanachTheorem:994) pattern, but on
+the closed **equalizer** `E` (closedness from T-L1a, NOT from module-finiteness/noetherian-6.18).
+
+#### Mathlib lemmas needed
+`wedhorn_6_16_of_topNilpUnit` (WedhornBanachTheorem:408 — verified signature `(f : M →ₗ[A] N) (Continuous f)
+(Surjective f) : IsOpenMap f`), `IsTateRing.exists_topologicallyNilpotent_unit`, `Topology.IsInducing.comp`,
+`Topology.IsInducing.subtypeVal`, `IsOpenMap.isQuotientMap` / `Homeomorph.ofContinuousOpen`.
+
+#### Sources
+Reviewer Q2 + Wedhorn 6.16 (= BGR §3.7.2/1, "Proof Missing", landed faithfully as `wedhorn_6_16_of_topNilpUnit`).
+NOT Prop 6.18 (reviewer: "Proposition 6.18 is unnecessary for this application").
+
+#### Generality decision
+Keep the existing signature at StructureSheaf:1384 (`[IsTateRing][IsNoetherianRing][IsStronglyNoetherian]
+[T2Space][NonarchimedeanRing]`, no `[IsDomain]`, no `P`/noeth-`A₀`). `[IsNoetherianRing A]`/`[IsStronglyNoetherian A]`
+are inherited from the headline; not used by the equalizer route itself (the route is σ-compact-free,
+module-finiteness-free) — leave them (the headline supplies them) but the proof must not invoke the
+noetherian-module-closedness route.
+
+---
+
+### [T-L2] `(presheafValue D)⁺` is a ring of integral elements (leaf #2 = former T-ROIE-3)
+- **Status**: open — discharges the 3 `sorry` fields of `presheafValuePlus_isRingOfIntegralElements` (Presheaf.lean:505)
+- **File**: Presheaf.lean (+ a `ringOfIntegralElements_completion` named leaf for 7.47(4))
+- **Depends on**: none (T-ROIE-1 foundation done)
+- **Parallel**: yes
 - **Type**: theorem (3 instance fields)
 
 #### Statement
-Replace the three `sorry` fields of `presheafValuePlus_isRingOfIntegralElements`
-(`(presheafValue D)⁺ = Ĉ = closure((A⁺⟨T/s⟩)^int)`):
 ```lean
   isOpen : IsOpen ((presheafValue D)⁺ : Set (presheafValue D))
   isIntegrallyClosed : ∀ a, IsIntegral ↥((presheafValue D)⁺) a → a ∈ (presheafValue D)⁺
   subset_powerBounded : ((presheafValue D)⁺ : Set _) ⊆ TopologicalRing.powerBoundedSubring (presheafValue D)
 ```
 
-#### Proof sketch (Wedhorn 7.19 + 7.20 + 7.47(4))
-1. **Precompletion (Wedhorn 7.19/7.20):** `C := (A⁺[T/s])^int = IntCl(locPlusSubring)` is a ring of
-   integral elements of `A_s = Localization.Away D.s`: open (A⁺ open ⟹ A⁺[T/s] open ⟹ ^int open);
-   integrally closed (integral closure is idempotent — `integralClosure_idem`); `⊆ (A_s)°` (Lemma 7.20:
-   `(A°)⟨T/s⟩ ⊆ (A_s)°`, and `C ⊆ (A°)⟨T/s⟩`).
-2. **Completion (Wedhorn 7.47(4) = [Hu1] 2.4.3):** `Ĉ = closure(coeRingHom C)` is a ring of integral
-   elements of the completion `presheafValue D`. This is the EXTERNAL cite — state it as a named leaf
-   `ringOfIntegralElements_completion` (Wedhorn 7.47(4)/[Hu1] 2.4.3) with a `sorry`, source-justified;
-   it discharges all three fields at once (the lift preserves open + integrally-closed + ⊆°).
-3. Each field then = the corresponding projection of the 7.47(4) leaf applied to the 7.19/7.20 input.
+#### Proof sketch (Wedhorn 7.19 + 7.20 + 7.47(4); reviewer Q3)
+1. **Precompletion (Wedhorn 7.19, openness is automatic — reviewer Q3):** `C := IntCl(A⁺[T/s]) =
+   IntCl(D.locPlusSubring)` is a ring of integral elements of `A_s = Localization.Away D.s`:
+   - **open**: `A⁺` open in `A` ⟹ for the ideal of definition `I`, some `Iⁿ ⊆ A⁺` ⟹ `IⁿA₀[T/s]` is an
+     open nbhd of 0 in the loc topology and `⊆ A⁺[T/s]`, so `A⁺[T/s]` is open; its integral closure `C ⊇
+     A⁺[T/s]` is then open (superset of an open subgroup). (Wedhorn 7.19 openness pattern.)
+   - **integrally closed**: `integralClosure_idem` (integral closure is integrally closed).
+   - **⊆ (A_s)°**: Wedhorn 7.20 `(A°)⟨T/s⟩ ⊆ (A_s)°` and `C ⊆ (A°)⟨T/s⟩`.
+2. **Completion (Wedhorn 7.47(4) = [Hu1] 2.4.3):** state the named leaf
+   `ringOfIntegralElements_completion` : "`B` a ring of integral elements of f-adic `A` ⟹ its closure
+   `B̂ = ι(B)` is a ring of integral elements of `Â`", citing 7.47(4). `(presheafValue D)⁺ = closure(coeRingHom C)`,
+   so the three fields are the three projections of this leaf applied to the 7.19/7.20 input from step 1.
 
 #### Mathlib lemmas needed
-`integralClosure_idem` (integral closure integrally closed), `IsOpen` of subring-images,
-`TopologicalRing.powerBoundedSubring`; the 7.20 inclusion is provable (power-bounded localisation).
+`integralClosure_idem`, `Subring.le_topologicalClosure`, openness of subgroup images, `TopologicalRing.powerBoundedSubring`.
+The 7.47(4) leaf is the external cite — **but [Hu1] 2.4.3 is IN HAND** (`references/huber1.txt:7467`); it is a
+real (substantial) sub-development from [Hu1], not unfulfillable infrastructure.
 
 #### Sources
-Wedhorn Prop. 7.19 (p.61), Lemma 7.20 (p.61), Lemma 7.47(4) = [Hu1] 2.4.3 (p.68). `isIntegrallyClosed`
-+ `isOpen` bottom at the [Hu1] 2.4.3 completion-lift (EXTERNAL, acceptable parking — like [Hu2] 3.3).
+Wedhorn Prop 7.19 (p.61, `wedhorn.txt:3176`), Lemma 7.20 (p.61, `:3195`), Lemma 7.47(4) (p.68,
+`wedhorn.txt:3556`: "Rings of integral elements of A and of Â correspond. Proof. [Hu1] 2.4.3").
+[Hu1] = Huber, *Bewertungsspektrum und rigide Geometrie* (Habilitation), 2.4.3 = `huber1.txt:7467`.
 
 #### Generality decision
-`(D : RationalLocData A) [PlusSubring A]` + standard bundle. The 7.47(4) leaf stated generally
-("`B` ring of integral elements of `A` ⟹ `B̂` ring of integral elements of `Â`") for reuse.
+`(D : RationalLocData A) [PlusSubring A]` + standard bundle. The 7.47(4) leaf stated generally for reuse.
 
 ---
 
-### [T-ROIE-4] Discharge `exists_cont_supp_ge_powerBounded_of_nonOpen_prime` (Wedhorn 7.45+7.42+7.41)
-- **Status**: open — PARKED at deep leaf (2026-06-18). Faithful named leaf in place (cited sorry,
-  Presheaf:2785). Bottoms at the **height-one vertical generalization** (Remark 4.12) connecting the
-  repo's `restrictToConvex` analytic point (bounded on A₀) to a height-1 point bounded on **A°** (Prop
-  7.41). The A₀→A° height-one step is deep repo infrastructure (not the optimistic "~6 lines" — that was
-  7.41 ALONE assuming the height-1 point). Faithful as a cited named-leaf per CLAUDE.md.
-- **File**: Presheaf.lean (+ Lemma745.lean for the 7.41 sub-leaf if cleaner)
-- **Depends on**: T-ROIE-1
+### [T-L3] Analytic Spa point above a non-open prime (leaf #3 = former T-ROIE-4)
+- **Status**: open — discharges `exists_cont_supp_ge_powerBounded_of_nonOpen_prime` (Presheaf.lean:2785)
+- **File**: Presheaf.lean (+ Lemma745.lean for the 7.41 sub-leaf)
+- **Depends on**: none
 - **Parallel**: yes
 - **Type**: theorem
 
@@ -213,40 +230,107 @@ theorem exists_cont_supp_ge_powerBounded_of_nonOpen_prime
       ∀ a ∈ (TopologicalRing.powerBoundedSubring A : Set A), v.vle a 1
 ```
 
-#### Proof sketch (Wedhorn Remark 7.25 → Lemma 7.45 → Remark 7.42(2)/4.12 → Prop 7.41)
-1. **Analytic point (Lemma 7.45):** the non-open prime `𝔭` is dominated by an analytic continuous
-   valuation `v₀` with `𝔭 ≤ supp v₀`. In-repo: `PairOfDefinition.exists_mem_spa_supp_ge_of_nonOpen_prime`
-   / `exists_spa_point_via_restrictToConvex` (a deep in-repo sorry; obtain a pair via
-   `IsHuberRing.exists_pairOfDefinition`). NOTE: that lemma currently returns a Spa point bounded on
-   `A₀`; here we only need the *analytic continuous* valuation with `𝔭 ≤ supp` — drop the `A⁺`/`A₀`
-   bound and take its analytic content.
-2. **Height-1 generization (Remark 7.42(2) / 4.12):** `v₀` analytic ⟹ microbial ⟹ ∃ height-1
-   vertical generization `v` of `v₀` (Remark 4.12; unique). `supp v ⊇ supp v₀ ⊇ 𝔭` and `v` continuous
-   (Remark 7.11(2)).
-3. **Bounded on A° (Prop 7.41):** `v` height-1 analytic ⟹ `v(a) ≤ 1 ∀ a ∈ A°`. Wedhorn proof (≈6
-   lines): if `v(a) > 1` for `a ∈ A°`, pick `b ∈ A°°` with `v(b) ≠ 0`; `Γ_v` height-1 ⟹ archimedean
-   (Prop 1.14) ⟹ `∃n, v(aⁿb) > 1`; but `aⁿb ∈ A°°` so continuity ⟹ `v(aⁿb) < 1`, contradiction.
-   → state Prop 7.41 as its own sub-leaf `heightOne_le_one_on_powerBounded` and PROVE it (provable).
+#### Proof sketch (Wedhorn Lemma 7.45 general branch + Prop 7.41; reviewer Q4a)
+1. **Analytic point (general Lemma 7.45, NO noetherian):** the non-open prime `𝔭` is dominated by an
+   analytic continuous valuation `v₀` with `𝔭 ≤ supp v₀` (in-repo `exists_spa_point_via_restrictToConvex` /
+   `PairOfDefinition.exists_mem_spa_supp_ge_of_nonOpen_prime`). Keep only the **general** branch — drop
+   the noetherian-discrete refinement (only needed for exact support / discrete value group).
+2. **Height-1 generization (Remark 7.42(2)/4.12):** `v₀` analytic ⟹ ∃ height-1 vertical generization `v`,
+   continuous (Rem 7.11(2)), `supp v ⊇ supp v₀ ⊇ 𝔭`.
+3. **Bounded on A° (Prop 7.41):** sub-leaf `heightOne_le_one_on_powerBounded` (PROVE it, ≈6 lines): if
+   `v(a)>1` for `a∈A°`, pick `b∈A°°` with `v(b)≠0`; `Γ_v` height-1 ⟹ archimedean ⟹ `∃n, v(aⁿb)>1`; but
+   `aⁿb∈A°°` ⟹ continuity ⟹ `v(aⁿb)<1`, contradiction.
+- **Maximality corollary (reviewer Q4a, already in-repo):** `support_eq_maximal_of_le` (board foundation)
+  turns `𝔭 ≤ supp v` into equality when `𝔭` is maximal — used downstream, no new work.
 
 #### Mathlib lemmas needed
-height-1/microbial/archimedean valuation API (`LinearOrderedCommGroupWithZero`, Prop 1.14 analogue),
-vertical-generization (Remark 4.12 — repo `restrictToConvex`/`ValuativeRel` vertical generization),
+height-1/microbial/archimedean valuation API, vertical-generization (`ValuativeRel` / `restrictToConvex`),
 `A°°`-continuity (`IsTopologicallyNilpotent`).
 
 #### Sources
-Wedhorn Remark 7.25 (p.62), Lemma 7.45 (p.67), Remark 7.40(5)/7.42(2) (p.65/66), Prop 7.41 (p.66),
-Remark 4.12. Residual deep leaf: Lemma 7.45 analytic-point existence (in-repo `restrictToConvex`).
+Wedhorn Lemma 7.45 (p.67), Remark 7.42(2)/4.12 (p.66), Prop 7.41 (p.66, `wedhorn.txt:3487`). Residual
+deep leaf: Lemma 7.45 analytic-point existence (in-repo `restrictToConvex`). **No noetherian ring of
+definition** (reviewer Q4a — ℂ_p-safe).
 
 #### Generality decision
-Stated for any affinoid `(A, A⁺)` with `A⁺` a ring of integral elements implicit (the `A°` bound is
-`A⁺`-independent — Prop 7.41 gives `Spa(A,A⁺)` membership for *every* such `A⁺`).
+Any affinoid `(A, A⁺)`; the `A°` bound is `A⁺`-independent (Prop 7.41 gives `Spa(A,A⁺)` membership for
+*every* ring of integral elements `A⁺`).
 
 ---
 
-### [CLEANUP-FINAL] Run /cleanup-all on the ROIE diff
+### [T-L4] `isPowerBounded_of_forall_vle_one_spa_of_complete` via 7.52(1) = 7.18(1) (former leaf #4)
+- **Status**: open — discharges the bare `sorry` at FaithfulLocLift.lean:85
+- **File**: FaithfulLocLift.lean (+ a `mem_plus_iff_forall_spa_vle_one` named leaf = 7.52(1))
+- **Depends on**: none
+- **Parallel**: yes
+- **Type**: theorem
+
+#### Statement
+```lean
+theorem isPowerBounded_of_forall_vle_one_spa_of_complete
+    [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    (D' : RationalLocData A) (x : presheafValue D')
+    (hx : ∀ w : Spv (presheafValue D'), w ∈ Spa (presheafValue D') (presheafValue D')⁺ → w.vle x 1) :
+    @TopologicalRing.IsPowerBounded (presheafValue D') _ inferInstance x
+```
+
+#### Proof sketch (reviewer Q1 — RED FLAG WITHDRAWN)
+1. State the named leaf `mem_plus_iff_forall_spa_vle_one` = **Wedhorn 7.52(1) = 7.18(1)**: for the
+   affinoid ring `B = (presheafValue D', (presheafValue D')⁺)`,
+   `x ∈ (presheafValue D')⁺  ⟺  ∀ w ∈ Spa B, w.vle x 1`. **Hypothesis-free** in the affinoid setting
+   (any affinoid ring; NO completeness/Tate/**noetherian**). The `←` (Spa-bound ⟹ membership) is the
+   substantive direction (= τ∘σ = id of the 7.18(1) bijection).
+2. From `hx`, conclude `x ∈ (presheafValue D')⁺` by the leaf.
+3. `x ∈ (presheafValue D')⁺ ⊆ B°` by `IsRingOfIntegralElements.subset_powerBounded` (the affinoid axiom,
+   resolved via `presheafValuePlus_isRingOfIntegralElements` = T-L2). `x ∈ B° ⟹ IsPowerBounded x`.
+- **DO NOT** route via Huber 3.3(iii)/density/noetherian (reviewer risk #1: that is the *different*
+  converse 7.18(3)). The current docstring's "[Hu2] 3.3 external / noetherian" framing is the
+  mis-citation to fix.
+
+#### Mathlib lemmas needed
+`IsRingOfIntegralElements.subset_powerBounded`, `TopologicalRing.powerBoundedSubring` membership ⟹
+`IsPowerBounded` (`mem_powerBoundedSubring_iff` / `isPowerBounded_of_mem`). The 7.52(1) leaf bottoms at
+[Hu2] Lemma 3.3 parts (i)/(ii) — the bijection, content in [Hu1] §3 (IN HAND); NOT part (iii).
+
+#### Sources
+Wedhorn Prop 7.52(1) (p.74, `wedhorn.txt:3619`: "|f(x)|≤1 ∀x∈Spa A iff f∈A⁺"), Prop 7.18(1) (p.60,
+`:3161`, "Proof. [Hu2] Lemma 3.3"); Def 7.14(1) (`A⁺ ⊆ A°`). Reviewer reply Q1 + risk #1.
+
+#### Generality decision
+State the 7.52(1) leaf for a general affinoid ring `(B, B⁺)` (no Tate/complete/noetherian) for reuse;
+apply at `B = presheafValue D'`.
+
+---
+
+### [CLEANUP-L1] Run /cleanup on StructureSheaf.lean (leaf #1 equalizer decls)
 - **Status**: open
-- **Depends on**: T-ROIE-2, T-ROIE-3, T-ROIE-4
+- **Depends on**: T-L1c
 - **Parallel**: no
 - **Type**: cleanup
-- **Description**: final pass; `#print axioms isSheafy_of_stronglyNoetherian_828b` to confirm the
-  residual is exactly {[Hu1] 2.4.3, Lemma 7.45, + the pre-existing [Hu2] 3.3 / 7.49}.
+- **Description**: cadence (3 proof tickets T-L1a/b/c on StructureSheaf.lean). Golf the equalizer/OMT
+  assembly; confirm no `[SigmaCompactSpace]`/module-finiteness crept in.
+
+### [CLEANUP-L2L3L4] Run /cleanup on Presheaf.lean + FaithfulLocLift.lean
+- **Status**: open
+- **Depends on**: T-L2, T-L3, T-L4
+- **Parallel**: no
+- **Type**: cleanup
+- **Description**: cadence (T-L2/T-L3 on Presheaf.lean, T-L4 on FaithfulLocLift.lean). Fix the T-L4
+  docstring mis-citation; remove vestigial noeth-`A₀`/[Hu2]-3.3-external notes.
+
+### [CLEANUP-FINAL] /cleanup-all + axiom audit
+- **Status**: open
+- **Depends on**: T-L1c, T-L2, T-L3, T-L4, CLEANUP-L1, CLEANUP-L2L3L4
+- **Parallel**: no
+- **Type**: cleanup
+- **Description**: `#print axioms isSheafy_of_stronglyNoetherian_828b` — confirm the residual is exactly
+  the source-justified external leaves {7.47(4)=[Hu1] 2.4.3, 7.45 analytic-point, 7.52(1)=[Hu2] 3.3,
+  + Leaf C R2-transport}; no `[SigmaCompactSpace]`, no noeth-`A₀`, no `[IsDomain]`, no `sorryAx` beyond
+  the named leaves.
+```
+
+#### Folded tickets
+- **T-ROIE-3** → **T-L2** (sharpened: openness automatic via 7.19; completion via 7.47(4)).
+- **T-ROIE-4** → **T-L3** (sharpened: general 7.45 branch only + existing maximality lemma).
+- The former **leaf #4 "[Hu2] 3.3 noetherian external"** framing → **T-L4** (7.52(1), red flag withdrawn).
