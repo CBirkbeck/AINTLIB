@@ -57,8 +57,6 @@ lemma Gamma_p_α_le_Gamma1 (α : GL (Fin 2) ℚ) :
   inf_le_right
 
 open CongruenceSubgroup Pointwise ConjAct in
-
-open CongruenceSubgroup Pointwise ConjAct in
 /-- `Γ_p(α)` conjugation embedding. -/
 lemma Gamma_p_α_conj_mem_Gamma1 (α : GL (Fin 2) ℚ)
     {γ : SL(2, ℤ)} (hγ : γ ∈ Gamma_p_α (N := N) α) :
@@ -86,8 +84,6 @@ lemma Gamma_p_α_conjBy_spec (α : GL (Fin 2) ℚ)
         (mapGL ℝ ((γ : SL(2, ℤ))) : GL (Fin 2) ℝ) *
         ((α.map (Rat.castHom ℝ) : GL (Fin 2) ℝ))⁻¹ :=
   (Classical.choose_spec (Gamma_p_α_conj_mem_Gamma1 α γ.property)).2
-
-open CongruenceSubgroup Pointwise ConjAct in
 
 open CongruenceSubgroup Pointwise ConjAct UpperHalfPlane MeasureTheory in
 /-- Slash by α is `Γ_p(α)`-invariant on Γ₁(N)-cusp forms. -/
@@ -121,12 +117,6 @@ lemma slash_α_Gamma_p_α_invariant_cuspForm
         (((δ : SL(2, ℤ)) : GL (Fin 2) ℝ)) from rfl, ← ModularForm.SL_slash]
   exact slash_Gamma1_eq f δ hδ
 
-open CongruenceSubgroup Pointwise ConjAct UpperHalfPlane MeasureTheory in
-
-open CongruenceSubgroup Pointwise ConjAct UpperHalfPlane MeasureTheory in
-
-open CongruenceSubgroup Pointwise ConjAct UpperHalfPlane MeasureTheory in
-
 open CongruenceSubgroup Pointwise UpperHalfPlane MeasureTheory in
 /-- Finite-index FD decomposition for `Γ_p(α) ≤ Γ₁(N)` (generic ambient). -/
 theorem Gamma_p_α_FD_finite_index_decomp
@@ -144,8 +134,6 @@ theorem Gamma_p_α_FD_finite_index_decomp
         ((q.out : ((Gamma1 N).map φ)) : G_outer)⁻¹ • D)
       μ_hyp :=
   hD.subgroup_iUnion_out_smul _
-
-open CongruenceSubgroup Pointwise ConjAct UpperHalfPlane MeasureTheory in
 
 open CongruenceSubgroup in
 /-- Finite-index instance for the projective image of `Γ_p(α)` inside the
@@ -805,16 +793,6 @@ theorem slGamma_p_αToGamma1_fiberCard_eq (α : GL (Fin 2) ℚ)
       slGamma_p_αToGamma1 (N := N) α q = q')).card =
     slGamma_p_αToGamma1_fiberCard (N := N) α :=
   slGamma_p_αToGamma1_fiber_card_uniform (N := N) α q' _
-
-open CongruenceSubgroup UpperHalfPlane MeasureTheory in
-
-open CongruenceSubgroup UpperHalfPlane MeasureTheory Classical in
-
-open CongruenceSubgroup UpperHalfPlane ModularGroup MeasureTheory in
-
-open UpperHalfPlane ModularGroup MeasureTheory in
-
-open CongruenceSubgroup UpperHalfPlane ModularGroup MeasureTheory in
 
 open CongruenceSubgroup Pointwise UpperHalfPlane ModularGroup MeasureTheory in
 /-- **Per-tile slash-reindex (DS 5.4.4 leaf).** A single `SL/Γ_p(α)`-coset tile
