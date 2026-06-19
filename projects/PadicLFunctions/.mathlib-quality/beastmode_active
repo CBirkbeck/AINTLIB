@@ -1,1 +1,1 @@
-FOCUS: charIdeal_eq_of_linearEquiv (transport) done; build+axiom-check+commit, then record part-ii sub-tickets
+FOCUS: CHARIDEAL-QUOT DONE (verified axiom-clean); commit, then CHARIDEALGROUP-QUOT (equivariant reassembly) + CARRIER-BRIDGE
