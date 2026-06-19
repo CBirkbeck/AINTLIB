@@ -127,19 +127,11 @@ theorem tos_divisor
     SmoothPlaneCurve.ProjIsPrincipal (⟨W⟩ : SmoothPlaneCurve F)
       (Curves.kappaDivisor W (f Q) - Curves.kappaDivisor W (g Q) -
         Curves.kappaDivisor W (h Q)) := by
-  have key : SmoothPlaneCurve.ProjLinearlyEquiv (⟨W⟩ : SmoothPlaneCurve F)
-      (Curves.kappaDivisor W (f Q))
-      (Curves.kappaDivisor W (g Q) + Curves.kappaDivisor W (h Q)) := by
-    rw [hsum Q]
-    exact kappaDivisor_add_linEquiv W (g Q) (h Q)
-  -- The goal `ProjIsPrincipal (κ(fQ) − κ(gQ) − κ(hQ))` is `key` (`ProjLinearlyEquiv`, i.e.
-  -- `ProjIsPrincipal (κ(fQ) − (κ(gQ) + κ(hQ)))`) after regrouping the difference (`abel`).
-  have hrw : Curves.kappaDivisor W (f Q) - Curves.kappaDivisor W (g Q) -
-      Curves.kappaDivisor W (h Q) =
-      Curves.kappaDivisor W (f Q) -
-        (Curves.kappaDivisor W (g Q) + Curves.kappaDivisor W (h Q)) := by abel
-  rw [hrw]
-  exact key
+  -- `ProjIsPrincipal (κ(fQ) − κ(gQ) − κ(hQ))` unfolds to `ProjLinearlyEquiv (κ(fQ)) (κ(gQ) + κ(hQ))`
+  -- after regrouping the difference (`sub_sub`); then rewrite `f Q = g Q + h Q` and apply
+  -- `κ`-additivity.
+  rw [sub_sub, hsum Q]
+  exact kappaDivisor_add_linEquiv W (g Q) (h Q)
 
 /-! ### Part B — the `σ(Δ_Q) = O` form (the reviewer's Q2 equivalence, made exact)
 
@@ -173,14 +165,7 @@ theorem sigma_delta_eq_zero_iff
         (Curves.kappaDivisor W (f Q) - Curves.kappaDivisor W (g Q) -
           Curves.kappaDivisor W (h Q)) = 0 ↔
       f Q = g Q + h Q := by
-  rw [sigma_delta]
-  constructor
-  · intro hz
-    -- f Q - g Q - h Q = 0 ⟹ f Q = g Q + h Q
-    have : f Q - g Q - h Q + (g Q + h Q) = 0 + (g Q + h Q) := by rw [hz]
-    simpa [sub_add_cancel, zero_add] using this
-  · intro hadd
-    rw [hadd]; abel
+  rw [sigma_delta, sub_sub, sub_eq_zero]
 
 /-! ### Part C — the theorem of the square at the `ClassGroup` / `toClass` level (Abel `map_add`)
 
@@ -273,9 +258,8 @@ theorem picDual_add_iff_pointwise
     (α.picDual ch hinj hfin = α₁.picDual ch₁ hinj₁ hfin₁ + α₂.picDual ch₂ hinj₂ hfin₂) ↔
       (∀ Q : E.Point, α.picDual ch hinj hfin Q =
         α₁.picDual ch₁ hinj₁ hfin₁ Q + α₂.picDual ch₂ hinj₂ hfin₂ Q) := by
-  constructor
-  · intro hadd Q; rw [hadd]; rfl
-  · intro hpt; ext Q; rw [hpt]; rfl
+  rw [DFunLike.ext_iff]
+  simp only [AddMonoidHom.add_apply]
 
 /-- **`hadd` from the dual additivity recast as the Q2 `σ`-vanishing** (Part D).
 
@@ -299,7 +283,7 @@ theorem picDual_add_iff_sigma_vanishes
               Curves.kappaDivisor E (α₁.picDual ch₁ hinj₁ hfin₁ Q) -
               Curves.kappaDivisor E (α₂.picDual ch₂ hinj₂ hfin₂ Q)) = 0) := by
   rw [picDual_add_iff_pointwise]
-  refine forall_congr' (fun Q => ?_)
+  refine forall_congr' (fun Q ↦ ?_)
   exact (sigma_delta_eq_zero_iff E
     (f := α.picDual ch hinj hfin) (g := α₁.picDual ch₁ hinj₁ hfin₁)
     (h := α₂.picDual ch₂ hinj₂ hfin₂) Q).symm
