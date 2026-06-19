@@ -193,7 +193,7 @@ noncomputable def ffFrobCast :
     ((W.baseChange (AlgebraicClosure K)).map
         (coeffFrobEquiv (K := K) : AlgebraicClosure K →+* AlgebraicClosure K)).toAffine.FunctionField
       ≃+* (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField :=
-  RingEquiv.cast (R := fun (V : WeierstrassCurve (AlgebraicClosure K)) => V.toAffine.FunctionField)
+  RingEquiv.cast (R := fun (V : WeierstrassCurve (AlgebraicClosure K)) ↦ V.toAffine.FunctionField)
     (map_coeffFrobEquiv_eq W)
 
 /-- **The arithmetic Frobenius automorphism `σ` of `K̄(E)`** (Silverman III.8.1, Galois route):
@@ -244,7 +244,7 @@ theorem ffFrobCast_algebraMap (b : AlgebraicClosure K) :
   have key : ∀ (V : WeierstrassCurve (AlgebraicClosure K))
       (h : V = W.baseChange (AlgebraicClosure K)),
       (RingEquiv.cast
-          (R := fun (U : WeierstrassCurve (AlgebraicClosure K)) => U.toAffine.FunctionField) h)
+          (R := fun (U : WeierstrassCurve (AlgebraicClosure K)) ↦ U.toAffine.FunctionField) h)
         (algebraMap (AlgebraicClosure K) V.toAffine.FunctionField b) =
       algebraMap (AlgebraicClosure K) (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField b := by
     intro V h; subst h; rfl
