@@ -246,10 +246,7 @@ theorem Gamma0MapUnits_surjective [NeZero N] :
   obtain ⟨g, hg⟩ := SL2Reduction.SL2_reduction_surjective N
     ⟨!![↑d⁻¹, 0; 0, ↑d], by simp [Matrix.det_fin_two]⟩
   have hg11 := congr_fun (congr_fun (congr_arg Subtype.val hg) 1)
-  have hg0 : g ∈ Gamma0 N := by
-    rw [Gamma0_mem]
-    simpa using hg11 0
-  exact ⟨⟨g, hg0⟩, Units.ext <| by simpa [Gamma0Map] using hg11 1⟩
+  exact ⟨⟨g, Gamma0_mem.mpr (by simpa using hg11 0)⟩, Units.ext <| by simpa [Gamma0Map] using hg11 1⟩
 
 /-- The diamond operator `⟨d⟩` on modular forms for `Gamma1(N)`, indexed by
 `d : (ZMod N)ˣ`. -/
@@ -269,7 +266,7 @@ theorem diamondOp_one [NeZero N] (k : ℤ) : diamondOp (N := N) k 1 = LinearMap.
   rw [diamondOp_eq_diamondOpAux k 1 1 (map_one _)]
   ext f z
   change (⇑f ∣[k] mapGL ℝ (1 : SL(2, ℤ))) z = f z
-  simp [map_one, SlashAction.slash_one]
+  simp only [map_one, SlashAction.slash_one]
 
 /-- Diamond operators compose: `⟨d₁ * d₂⟩ = ⟨d₁⟩ ∘ ⟨d₂⟩`. -/
 theorem diamondOp_mul [NeZero N] (k : ℤ) (d₁ d₂ : (ZMod N)ˣ) :
@@ -339,7 +336,7 @@ theorem diamondOpCusp_one [NeZero N] (k : ℤ) : diamondOpCusp (N := N) k 1 = Li
   rw [diamondOpCusp_eq k 1 1 (map_one _)]
   ext f z
   change (⇑f ∣[k] mapGL ℝ (1 : SL(2, ℤ))) z = f z
-  simp [map_one, SlashAction.slash_one]
+  simp only [map_one, SlashAction.slash_one]
 
 theorem diamondOpCusp_mul [NeZero N] (k : ℤ) (d₁ d₂ : (ZMod N)ˣ) :
     diamondOpCusp k (d₁ * d₂) = (diamondOpCusp k d₁).comp (diamondOpCusp k d₂) := by
@@ -373,7 +370,7 @@ noncomputable def cuspFormCharSpace [NeZero N] (k : ℤ) (χ : (ZMod N)ˣ →* �
 theorem mem_cuspFormCharSpace_iff [NeZero N] (k : ℤ) (χ : (ZMod N)ˣ →* ℂˣ)
     (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) : f ∈ cuspFormCharSpace k χ ↔
     ∀ d : (ZMod N)ˣ, diamondOpCuspHom k d f = (↑(χ d) : ℂ) • f := by
-  simp [cuspFormCharSpace, Submodule.mem_iInf]
+  simp only [cuspFormCharSpace, Submodule.mem_iInf, Module.End.mem_eigenspace_iff]
 
 /-- Diamond operators act by `χ(d)` on elements of `S_k(Γ₁(N), χ)`. -/
 theorem diamondOpCusp_apply_charSpace [NeZero N] (k : ℤ) (χ : (ZMod N)ˣ →* ℂˣ)
@@ -391,7 +388,7 @@ for every `d ∈ (ZMod N)ˣ`. -/
 theorem mem_modFormCharSpace_iff [NeZero N] (k : ℤ) (χ : (ZMod N)ˣ →* ℂˣ)
     (f : ModularForm ((Gamma1 N).map (mapGL ℝ)) k) : f ∈ modFormCharSpace k χ ↔
     ∀ d : (ZMod N)ˣ, diamondOpHom k d f = (↑(χ d) : ℂ) • f := by
-  simp [modFormCharSpace, Submodule.mem_iInf]
+  simp only [modFormCharSpace, Submodule.mem_iInf, Module.End.mem_eigenspace_iff]
 
 /-- **Bridge**: for a `Gamma1`-invariant modular form `f`, membership in the
 diamond-eigenspace `modFormCharSpace k χ₀` is equivalent to the classical Nebentypus
