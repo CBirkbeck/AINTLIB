@@ -43,7 +43,7 @@ lemma deriv_deviation_bound_of_C2 {γ : ℝ → ℂ} {t₀ : ℝ} {L : ℂ}
   obtain ⟨K, s, hs_nhds, h_lip⟩ :=
     (contDiffAt_one_deriv_of_contDiffAt_two hγ_C2).exists_lipschitzOnWith
   obtain ⟨δ, hδ_pos, hball_sub⟩ := Metric.mem_nhds_iff.mp hs_nhds
-  refine ⟨K, δ, hδ_pos, fun t ht => ?_⟩
+  refine ⟨K, δ, hδ_pos, fun t ht ↦ ?_⟩
   have h := h_lip.dist_le_mul t
     (hball_sub (Metric.mem_ball.mpr (by rwa [Real.dist_eq])))
     t₀ (hball_sub (Metric.mem_ball_self hδ_pos))
@@ -57,7 +57,7 @@ lemma quadratic_approx_of_contDiffAt_two {γ : ℝ → ℂ} {t₀ : ℝ} {L : �
   obtain ⟨M, δ₁, hδ₁_pos, h_deriv_dev⟩ := deriv_deviation_bound_of_C2 hγ_C2 hγ_deriv
   have h_evt_diff : ∀ᶠ s in 𝓝 t₀, DifferentiableAt ℝ γ s :=
     ((hγ_C2.of_le one_le_two).eventually (by simp : (1 : WithTop ℕ∞) ≠ ↑(⊤ : ℕ∞))).mono
-      (fun _ hs => hs.differentiableAt one_ne_zero)
+      (fun _ hs ↦ hs.differentiableAt one_ne_zero)
   obtain ⟨δ₂, hδ₂_pos, h_diff_ball⟩ := Metric.eventually_nhds_iff.mp h_evt_diff
   let δ := min δ₁ δ₂
   have hδ_pos : 0 < δ := lt_min hδ₁_pos hδ₂_pos
@@ -73,9 +73,9 @@ lemma quadratic_approx_of_contDiffAt_two {γ : ℝ → ℂ} {t₀ : ℝ} {L : �
   intro t ht
   by_cases ht_eq : t = t₀
   · simp [ht_eq]
-  let f₂ : ℝ → ℂ := fun _ => γ t₀
-  let f₃ : ℝ → ℂ := fun s => (s - t₀) • L
-  let h := fun s => γ s - f₂ s - f₃ s
+  let f₂ : ℝ → ℂ := fun _ ↦ γ t₀
+  let f₃ : ℝ → ℂ := fun s ↦ (s - t₀) • L
+  let h := fun s ↦ γ s - f₂ s - f₃ s
   have ht_lt_δ₁ : |t - t₀| < δ₁ := lt_of_lt_of_le ht (min_le_left _ _)
   have ht_lt_δ₂ : |t - t₀| < δ₂ := lt_of_lt_of_le ht (min_le_right _ _)
   have h_uIcc_sub_ball : Set.uIcc t₀ t ⊆ Metric.ball t₀ δ₂ := by
@@ -83,26 +83,26 @@ lemma quadratic_approx_of_contDiffAt_two {γ : ℝ → ℂ} {t₀ : ℝ} {L : �
     rw [Metric.mem_ball, Real.dist_eq]
     exact lt_of_le_of_lt (Set.abs_sub_left_of_mem_uIcc hs) ht_lt_δ₂
   have h_γ_diff_on : ∀ s ∈ Set.uIcc t₀ t, DifferentiableAt ℝ γ s :=
-    fun s hs => h_diff_ball (h_uIcc_sub_ball hs)
-  have h_f₂_diff : ∀ s, DifferentiableAt ℝ f₂ s := fun _ => differentiableAt_const _
+    fun s hs ↦ h_diff_ball (h_uIcc_sub_ball hs)
+  have h_f₂_diff : ∀ s, DifferentiableAt ℝ f₂ s := fun _ ↦ differentiableAt_const _
   have h_f₃_diff : ∀ s, DifferentiableAt ℝ f₃ s :=
-    fun _ => (differentiableAt_id.sub (differentiableAt_const _)).smul_const _
+    fun _ ↦ (differentiableAt_id.sub (differentiableAt_const _)).smul_const _
   have h_diff : ∀ s ∈ Set.uIcc t₀ t, DifferentiableAt ℝ h s :=
-    fun s hs => ((h_γ_diff_on s hs).sub (h_f₂_diff s)).sub (h_f₃_diff s)
-  have h_deriv_f₂ : ∀ s, deriv f₂ s = 0 := fun s => deriv_const s (γ t₀)
-  have h_deriv_f₃ : ∀ s, deriv f₃ s = L := fun s => by
+    fun s hs ↦ ((h_γ_diff_on s hs).sub (h_f₂_diff s)).sub (h_f₃_diff s)
+  have h_deriv_f₂ : ∀ s, deriv f₂ s = 0 := fun s ↦ deriv_const s (γ t₀)
+  have h_deriv_f₃ : ∀ s, deriv f₃ s = L := fun s ↦ by
     have h₀ : HasDerivAt f₃ ((1 : ℝ) • L) s :=
       ((hasDerivAt_id s).sub_const t₀).smul_const L
     simpa using h₀.deriv
   have h_deriv : ∀ s ∈ Set.uIcc t₀ t, deriv h s = deriv γ s - L := by
     intro s hs
     have hs_diff : DifferentiableAt ℝ γ s := h_γ_diff_on s hs
-    have step2 : deriv (fun s => (γ s - f₂ s) - f₃ s) s =
-        deriv (fun s => γ s - f₂ s) s - deriv f₃ s :=
+    have step2 : deriv (fun s ↦ (γ s - f₂ s) - f₃ s) s =
+        deriv (fun s ↦ γ s - f₂ s) s - deriv f₃ s :=
       deriv_sub (hs_diff.sub (h_f₂_diff s)) (h_f₃_diff s)
-    have step3 : deriv (fun s => γ s - f₂ s) s = deriv γ s - deriv f₂ s :=
+    have step3 : deriv (fun s ↦ γ s - f₂ s) s = deriv γ s - deriv f₂ s :=
       deriv_sub hs_diff (h_f₂_diff s)
-    simp only [show h = fun s => (γ s - f₂ s) - f₃ s from rfl, step2, step3,
+    simp only [show h = fun s ↦ (γ s - f₂ s) - f₃ s from rfl, step2, step3,
       h_deriv_f₂, h_deriv_f₃, sub_zero]
   have h_at_t₀ : h t₀ = 0 := by simp [h, f₂, f₃]
   have h_deriv_bound : ∀ s ∈ Set.uIcc t₀ t, ‖deriv h s‖ ≤ M * |t - t₀| := by
@@ -129,7 +129,7 @@ lemma numerator_quadratic_bound {γ : ℝ → ℂ} {t₀ : ℝ} {L : ℂ}
   obtain ⟨K₂, δ₂, hδ₂_pos, h_deriv⟩ := deriv_deviation_bound_of_C2 hγ_C2 hγ_deriv
   let δ := min δ₁ δ₂
   have hδ_pos : 0 < δ := lt_min hδ₁_pos hδ₂_pos
-  refine ⟨K₁ + K₂ + 1, δ, hδ_pos, fun t ht => ?_⟩
+  refine ⟨K₁ + K₂ + 1, δ, hδ_pos, fun t ht ↦ ?_⟩
   have ht₁ : |t - t₀| < δ₁ := lt_of_lt_of_le ht (min_le_left _ _)
   have ht₂ : |t - t₀| < δ₂ := lt_of_lt_of_le ht (min_le_right _ _)
   have h_identity : (↑(t - t₀) : ℂ) * deriv γ t - (γ t - γ t₀) =
@@ -158,7 +158,7 @@ lemma remainder_bounded_of_C2 {γ : ℝ → ℂ} {t₀ : ℝ} {L : ℂ} (hL : L 
   obtain ⟨K, δ₂, hδ₂_pos, h_numer⟩ := numerator_quadratic_bound hγ_C2 hγ_deriv
   let δ := min δ₁ δ₂
   have hδ_pos : 0 < δ := lt_min hδ₁_pos hδ₂_pos
-  refine ⟨2 * K / ‖L‖, δ, hδ_pos, fun t ht_pos ht_lt => ?_⟩
+  refine ⟨2 * K / ‖L‖, δ, hδ_pos, fun t ht_pos ht_lt ↦ ?_⟩
   have ht₁ : |t - t₀| < δ₁ := lt_of_lt_of_le ht_lt (min_le_left _ _)
   have ht₂ : |t - t₀| < δ₂ := lt_of_lt_of_le ht_lt (min_le_right _ _)
   have h_Δγ_ne : γ t - γ t₀ ≠ 0 := by
