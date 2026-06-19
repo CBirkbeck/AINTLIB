@@ -68,7 +68,7 @@ local notation "KE" => W.toAffine.FunctionField
     Constructed by shifting `formalW_coeff` down by 3 (since `formalW` has leading
     term `z³`). Has constant coefficient 1, hence is a unit in `F⟦X⟧`. -/
 noncomputable def formalU : PowerSeries F :=
-  PowerSeries.mk (fun n => formalW_coeff W (n + 3))
+  PowerSeries.mk (fun n ↦ formalW_coeff W (n + 3))
 
 /-- The constant coefficient of `formalU` is 1. -/
 @[simp] theorem formalU_constantCoeff :
@@ -278,11 +278,11 @@ theorem formalW_eq_X3_mul_U :
     -- RHS: (X^3 * formalU).coeff n = 0 for n < 3
     rw [PowerSeries.coeff_X_pow_mul']
     rw [if_neg (by omega : ¬ 3 ≤ n)]
-  · push_neg at hn
+  · push Not at hn
     obtain ⟨m, rfl⟩ := Nat.exists_eq_add_of_le hn
     rw [add_comm 3 m, PowerSeries.coeff_X_pow_mul]
     change formalW_coeff W (m + 3) = @PowerSeries.coeff F _ m (formalU W)
-    rw [show formalU W = PowerSeries.mk (fun n => formalW_coeff W (n + 3)) from rfl,
+    rw [show formalU W = PowerSeries.mk (fun n ↦ formalW_coeff W (n + 3)) from rfl,
         PowerSeries.coeff_mk]
 
 /-- `formalW W` has `PowerSeries.order` equal to 3 (since `formalW = X^3 * formalU`
@@ -323,7 +323,7 @@ private theorem formalW_recurrence_lift :
         HahnSeries.C W.a₆ *
           (HahnSeries.ofPowerSeries ℤ F (formalW W)) ^ 3 := by
   have h := congrArg (HahnSeries.ofPowerSeries ℤ F) (formalW_recurrence W)
-  simp only [map_add, map_mul, map_pow, map_one, HahnSeries.ofPowerSeries_C,
+  simp only [map_add, map_mul, map_pow, HahnSeries.ofPowerSeries_C,
     HahnSeries.ofPowerSeries_X] at h
   exact h
 
@@ -629,7 +629,6 @@ theorem localExpand_inner_orderTop_eq {p : Polynomial F} (hp : p ≠ 0) :
             ih _ h_eraseLead_lt hEL rfl
           rw [hA_ord, WithTop.coe_lt_coe]
           have : p.eraseLead.natDegree < n := h_eraseLead_lt
-          push_cast
           nlinarith
       exact (HahnSeries.orderTop_add_eq_right h_lt).trans hB_ord
 
@@ -695,7 +694,6 @@ theorem localExpand_inner_leadingCoeff {p : Polynomial F} (hp : p ≠ 0) :
             localExpand_inner_orderTop_eq W hEL
           rw [hA_ord, WithTop.coe_lt_coe]
           have : p.eraseLead.natDegree < n := h_eraseLead_lt
-          push_cast
           nlinarith
       rw [HahnSeries.leadingCoeff_add_eq_right h_lt, hB_lead, ← hDecomp]
 
@@ -723,7 +721,7 @@ theorem localExpand_inner_mul_formalY_orderTop
     summands are zero, iff `p = q = 0`, iff `r = 0`. -/
 private theorem localExpand_coordHom_injective :
     Function.Injective (localExpand_coordHom W) :=
-  (injective_iff_map_eq_zero _).mpr fun r hr => by
+  (injective_iff_map_eq_zero _).mpr fun r hr ↦ by
     obtain ⟨p, q, rfl⟩ := Affine.CoordinateRing.exists_smul_basis_eq r
     -- Compute the image: `p • 1 + q • mk Y ↦ localExpand_inner p + localExpand_inner q * formalY`.
     have h_img : ∀ (f : Polynomial F) (x : W.toAffine.CoordinateRing),
