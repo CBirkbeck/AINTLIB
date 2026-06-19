@@ -19,8 +19,6 @@ For an abstract `HeckePair P`:
   `CongruenceHecke` degree-combinatorics computations.
 -/
 
-open Subgroup.Commensurable Pointwise HeckeRing DoubleCoset
-
 open scoped Pointwise
 
 namespace HeckeRing
@@ -78,6 +76,12 @@ section ConjugationEquiv
 
 variable {G : Type*} [Group G] (P : HeckePair G)
 
+/-- Conjugation by `h⁻¹` is the inverse automorphism of conjugation by `h`; the two `MulAut.conj`
+maps used to build `decompQuot_mul_left_equiv` are mutually inverse. -/
+private lemma conj_inv_eq_symm {H : Type*} [Group H] (h : H) :
+    MulAut.conj h⁻¹ = (MulAut.conj h).symm := by
+  rw [map_inv, MulAut.inv_def]
+
 /-- Conjugation by `h ∈ H` gives an Equiv on decomposition quotients:
 `H/Stab(h·g) ≃ H/Stab(g)` via `σ ↦ h⁻¹·σ·h`.
 
@@ -95,13 +99,12 @@ noncomputable def decompQuot_mul_left_equiv (g : P.Δ) (h : P.H)
     rw [QuotientGroup.leftRel_apply] at hab ⊢
     simp only [← map_inv, ← map_mul]
     obtain ⟨k, hk, hkeq⟩ := Subgroup.mem_map.mp hab
-    show (MulAut.conj h⁻¹) (a⁻¹ * b) ∈ K
-    rw [show a⁻¹ * b = (MulAut.conj h) k from hkeq.symm]
-    convert hk using 1
-    ext; simp [MulAut.conj_apply, mul_assoc]
+    rw [show a⁻¹ * b = (MulAut.conj h) k from hkeq.symm, conj_inv_eq_symm,
+      MulEquiv.symm_apply_apply]
+    exact hk
   exact Equiv.ofBijective
     (Quotient.map' (MulAut.conj h⁻¹) h_wd)
-    ⟨fun x y hxy ↦ by
+    ⟨fun x y ↦ by
       revert x y
       refine Quotient.ind₂ fun a b hxy ↦ ?_
       simp only [Quotient.map'_mk''] at hxy
@@ -109,14 +112,13 @@ noncomputable def decompQuot_mul_left_equiv (g : P.Δ) (h : P.H)
       rw [QuotientGroup.leftRel_apply] at hxy ⊢
       simp only [← map_inv, ← map_mul] at hxy
       exact Subgroup.mem_map.mpr ⟨(MulAut.conj h⁻¹) (a⁻¹ * b), hxy, by
-        ext; simp [MulAut.conj_apply, mul_assoc]⟩,
+        rw [conj_inv_eq_symm, MulEquiv.coe_toMonoidHom, MulEquiv.apply_symm_apply]⟩,
     fun x ↦ by
       revert x
       refine Quotient.ind fun b ↦ ⟨Quotient.mk'' ((MulAut.conj h) b), ?_⟩
       simp only [Quotient.map'_mk'']
-      rw [Quotient.eq'', QuotientGroup.leftRel_apply]
-      rw [show ((MulAut.conj h⁻¹) ((MulAut.conj h) b))⁻¹ * b = 1 by
-        ext; simp [MulAut.conj_apply, mul_assoc]]
+      rw [Quotient.eq'', QuotientGroup.leftRel_apply, conj_inv_eq_symm,
+        MulEquiv.symm_apply_apply, inv_mul_cancel]
       exact K.one_mem⟩
 
 /-- Combined left-right invariance: `decompQuot(h·g·k) ≃ decompQuot(g)` for `h, k ∈ H`.
