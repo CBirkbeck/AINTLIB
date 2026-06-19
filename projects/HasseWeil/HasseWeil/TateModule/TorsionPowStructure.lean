@@ -88,15 +88,13 @@ theorem tateConn_surjective (n : ℕ) : Function.Surjective (tateConn W ℓ n) :
     rw [mem_torsionSubgroup]
     have hQ : ((ℓ ^ n : ℕ) : ℤ) • (Q : W.toAffine.Point) = 0 := by
       have := Q.property; rwa [mem_torsionSubgroup] at this
-    have hcast : ((ℓ ^ n : ℕ) : ℤ) * (ℓ : ℤ) = ((ℓ ^ (n + 1) : ℕ) : ℤ) := by
-      push_cast; ring
+    have hcast : ((ℓ ^ n : ℕ) : ℤ) * (ℓ : ℤ) = ((ℓ ^ (n + 1) : ℕ) : ℤ) := by push_cast; ring
     have hsplit : ((ℓ ^ (n + 1) : ℕ) : ℤ) • P₀ = ((ℓ ^ n : ℕ) : ℤ) • ((ℓ : ℤ) • P₀) := by
       rw [smul_smul, hcast]
     rw [hsplit, hP₀, hQ]
   refine ⟨⟨P₀, hmem⟩, ?_⟩
   apply Subtype.ext
-  rw [tateConn_coe]
-  exact hP₀
+  rwa [tateConn_coe]
 
 end Surjective
 
@@ -109,7 +107,7 @@ noncomputable def smulPow (n : ℕ) :
     W.toAffine[((ℓ ^ (n + 1) : ℕ) : ℤ)] →+ W.toAffine[((ℓ ^ (n + 1) : ℕ) : ℤ)] :=
   ((zsmulAddGroupHom ((ℓ ^ n : ℕ) : ℤ)).comp
     (W.toAffine[((ℓ ^ (n + 1) : ℕ) : ℤ)]).subtype).codRestrict _
-    (fun P => by
+    (fun P ↦ by
       rw [mem_torsionSubgroup]
       have hP : ((ℓ ^ (n + 1) : ℕ) : ℤ) • (P : W.toAffine.Point) = 0 := by
         have := P.property; rwa [mem_torsionSubgroup] at this
@@ -131,10 +129,10 @@ theorem card_ker_smulPow (n : ℕ) :
   -- `ker (smulPow n) ≃ E[ℓⁿ]` via `⟨⟨P, _⟩, ℓⁿ•P = 0⟩ ↦ ⟨P, ℓⁿ•P = 0⟩`.
   apply Nat.card_congr
   refine
-    { toFun := fun P => ⟨(P.val : W.toAffine.Point), ?_⟩
-      invFun := fun P => ⟨⟨(P.val : W.toAffine.Point), ?_⟩, ?_⟩
-      left_inv := fun P => by ext; rfl
-      right_inv := fun P => by ext; rfl }
+    { toFun := fun P ↦ ⟨(P.val : W.toAffine.Point), ?_⟩
+      invFun := fun P ↦ ⟨⟨(P.val : W.toAffine.Point), ?_⟩, ?_⟩
+      left_inv := fun P ↦ by ext; rfl
+      right_inv := fun P ↦ by ext; rfl }
   · -- `P.val.val ∈ E[ℓⁿ]`: from `smulPow n P.val = 0`.
     have hk : smulPow W ℓ n P.val = 0 := P.property
     rw [mem_torsionSubgroup]
@@ -165,10 +163,10 @@ theorem card_ker_tateConn (n : ℕ) :
   -- `ker (tateConn n) ≃ E[ℓ]` via `⟨⟨P, _⟩, ℓ•P = 0⟩ ↦ ⟨P, ℓ•P = 0⟩`.
   apply Nat.card_congr
   refine
-    { toFun := fun P => ⟨(P.val : W.toAffine.Point), ?_⟩
-      invFun := fun P => ⟨⟨(P.val : W.toAffine.Point), ?_⟩, ?_⟩
-      left_inv := fun P => by ext; rfl
-      right_inv := fun P => by ext; rfl }
+    { toFun := fun P ↦ ⟨(P.val : W.toAffine.Point), ?_⟩
+      invFun := fun P ↦ ⟨⟨(P.val : W.toAffine.Point), ?_⟩, ?_⟩
+      left_inv := fun P ↦ by ext; rfl
+      right_inv := fun P ↦ by ext; rfl }
   · -- `P.val.val ∈ E[ℓ]`: from `tateConn n P.val = 0`.
     have hk : tateConn W ℓ n P.val = 0 := P.property
     rw [mem_torsionSubgroup]
@@ -237,9 +235,9 @@ theorem tateConn_linearCombination_lift (n : ℕ)
     (hc : ∀ i, tateConn W ℓ n (c i) = b i) (v : Fin 2 → ZMod (ℓ ^ (n + 1))) :
     tateConn W ℓ n (Fintype.linearCombination (ZMod (ℓ ^ (n + 1))) c v) =
       Fintype.linearCombination (ZMod (ℓ ^ n)) b
-        (fun i => ZMod.castHom (pow_dvd_pow ℓ n.le_succ) (ZMod (ℓ ^ n)) (v i)) := by
+        (fun i ↦ ZMod.castHom (pow_dvd_pow ℓ n.le_succ) (ZMod (ℓ ^ n)) (v i)) := by
   rw [Fintype.linearCombination_apply, Fintype.linearCombination_apply, map_sum]
-  refine Finset.sum_congr rfl fun i _ => ?_
+  refine Finset.sum_congr rfl fun i _ ↦ ?_
   rw [tateConn_castHom_compat, hc]
 
 /-- Given a basis `b` of `E[ℓⁿ]` (with `n ≥ 1`) and a lifted family `c i ∈ E[ℓⁿ⁺¹]` with
@@ -259,10 +257,10 @@ theorem linearCombination_lift_surjective (n : ℕ) (hn : 1 ≤ n)
     Function.Surjective (Fintype.linearCombination (ZMod (ℓ ^ (n + 1))) c) := by
   set g := Fintype.linearCombination (ZMod (ℓ ^ (n + 1))) c with hg
   -- Step 1: `tateConn ∘ g` is surjective.
-  have htc_surj : Function.Surjective (fun v => tateConn W ℓ n (g v)) := by
+  have htc_surj : Function.Surjective (fun v ↦ tateConn W ℓ n (g v)) := by
     intro Q
     -- lift the coordinates of `Q` in the basis `b` to `ZMod ℓⁿ⁺¹`.
-    refine ⟨fun i => Classical.choose
+    refine ⟨fun i ↦ Classical.choose
       (ZMod.castHom_surjective (m := ℓ ^ n) (n := ℓ ^ (n + 1)) (pow_dvd_pow ℓ n.le_succ)
         (b.equivFun Q i)), ?_⟩
     show tateConn W ℓ n (g _) = Q
@@ -270,7 +268,7 @@ theorem linearCombination_lift_surjective (n : ℕ) (hn : 1 ≤ n)
     have hlift : ∀ i, ZMod.castHom (pow_dvd_pow ℓ n.le_succ) (ZMod (ℓ ^ n))
         (Classical.choose (ZMod.castHom_surjective (m := ℓ ^ n) (n := ℓ ^ (n + 1))
           (pow_dvd_pow ℓ n.le_succ) (b.equivFun Q i))) = b.equivFun Q i :=
-      fun i => Classical.choose_spec (ZMod.castHom_surjective (m := ℓ ^ n) (n := ℓ ^ (n + 1))
+      fun i ↦ Classical.choose_spec (ZMod.castHom_surjective (m := ℓ ^ n) (n := ℓ ^ (n + 1))
         (pow_dvd_pow ℓ n.le_succ) (b.equivFun Q i))
     simp_rw [hlift]
     rw [Fintype.linearCombination_apply]
@@ -337,11 +335,11 @@ theorem subsingleton_torsion_ellPow_zero :
 noncomputable def tateBasisZero :
     Module.Basis (Fin 2) (ZMod (ℓ ^ 0)) W.toAffine[((ℓ ^ 0 : ℕ) : ℤ)] := by
   haveI : Subsingleton (ZMod (ℓ ^ 0)) := by rw [pow_zero]; infer_instance
-  haveI hs : Subsingleton W.toAffine[((ℓ ^ 0 : ℕ) : ℤ)] := subsingleton_torsion_ellPow_zero W ℓ
+  haveI : Subsingleton W.toAffine[((ℓ ^ 0 : ℕ) : ℤ)] := subsingleton_torsion_ellPow_zero W ℓ
   -- both `E[1]` and `Fin 2 → ZMod 1` are subsingletons; the zero map is bijective.
   exact Module.Basis.ofEquivFun (LinearEquiv.ofBijective
     (0 : W.toAffine[((ℓ ^ 0 : ℕ) : ℤ)] →ₗ[ZMod (ℓ ^ 0)] (Fin 2 → ZMod (ℓ ^ 0)))
-    ⟨fun x y _ => Subsingleton.elim x y, fun y => ⟨0, Subsingleton.elim _ _⟩⟩)
+    ⟨fun x y _ ↦ Subsingleton.elim x y, fun y ↦ ⟨0, Subsingleton.elim _ _⟩⟩)
 
 /-- **L4 base case `n = 1`.** The field-theoretic basis of `E[ℓ¹]` over `ZMod (ℓ¹)`. Since
 `ℓ¹ = ℓ` is prime, `ZMod (ℓ¹)` is a field and `#E[ℓ¹] = (ℓ¹)²` forces `finrank = 2`
@@ -366,8 +364,7 @@ omit [DecidableEq F] [IsAlgClosed F] hℓF in
 /-- The cardinality of `Fin 2 → ZMod (ℓⁿ)` is `(ℓⁿ)²`, matching `#E[ℓⁿ]`. -/
 theorem card_fin_two_zmod (n : ℕ) : Nat.card (Fin 2 → ZMod (ℓ ^ n)) = (ℓ ^ n) ^ 2 := by
   haveI : NeZero (ℓ ^ n) := ⟨by have : ℓ ≠ 0 := hℓ.out.pos.ne'; positivity⟩
-  rw [Nat.card_eq_fintype_card]
-  simp [ZMod.card]
+  rw [Nat.card_eq_fintype_card, Fintype.card_fun, ZMod.card, Fintype.card_fin]
 
 /-- **The lift step of L4's induction** (`n ≥ 1` packaged as `n+1`). Given a basis `b` of
 `E[ℓⁿ⁺¹]`, produce a basis of `E[ℓⁿ⁺²]` whose vectors are `[ℓ]`-lifts of the `b i`. Surjectivity of
@@ -380,7 +377,7 @@ noncomputable def liftBasisData (n : ℕ)
         ∀ i, tateConn W ℓ (n + 1) (b' i) = b i } := by
   haveI : Finite W.toAffine[((ℓ ^ (n + 2) : ℕ) : ℤ)] := torsion_ellPow_finite W ℓ hℓF (n + 2)
   -- lifts `c i` of `b i` along the surjective `tateConn`.
-  choose c hc using fun i => tateConn_surjective W ℓ hℓF (n + 1) (b i)
+  choose c hc using fun i ↦ tateConn_surjective W ℓ hℓF (n + 1) (b i)
   -- the linear-combination map is surjective, hence bijective (equal finite cardinality).
   have hsurj : Function.Surjective (Fintype.linearCombination (ZMod (ℓ ^ (n + 2))) c) :=
     linearCombination_lift_surjective W ℓ hℓF (n + 1) (Nat.le_add_left 1 n) b c hc
@@ -388,7 +385,7 @@ noncomputable def liftBasisData (n : ℕ)
     apply hsurj.bijective_of_nat_card_le
     rw [card_fin_two_zmod ℓ (n + 2), card_torsion_ellPow_nat W ℓ hℓF (n + 2)]
   -- package as a basis via `ofEquivFun` of the inverse equivalence.
-  refine ⟨Module.Basis.ofEquivFun (LinearEquiv.ofBijective _ hbij).symm, fun i => ?_⟩
+  refine ⟨Module.Basis.ofEquivFun (LinearEquiv.ofBijective _ hbij).symm, fun i ↦ ?_⟩
   -- `b' i = c i`, and `tateConn (c i) = b i`.
   have hbi : (Module.Basis.ofEquivFun (LinearEquiv.ofBijective
       (Fintype.linearCombination (ZMod (ℓ ^ (n + 2))) c) hbij).symm) i = c i := by
@@ -440,10 +437,7 @@ and `finrank` is degenerate, so the rank-`2` statement is only meaningful for `n
 theorem finrank_torsion_ellPow {n : ℕ} (hn : 1 ≤ n) :
     Module.finrank (ZMod (ℓ ^ n)) W.toAffine[((ℓ ^ n : ℕ) : ℤ)] = 2 := by
   haveI : Nontrivial (ZMod (ℓ ^ n)) := by
-    haveI : Fact (1 < ℓ ^ n) := ⟨by
-      calc 1 < ℓ := hℓ.out.one_lt
-        _ = ℓ ^ 1 := (pow_one ℓ).symm
-        _ ≤ ℓ ^ n := Nat.pow_le_pow_right hℓ.out.pos hn⟩
+    haveI : Fact (1 < ℓ ^ n) := ⟨(one_lt_pow_iff (by omega)).mpr hℓ.out.one_lt⟩
     infer_instance
   rw [Module.finrank_eq_card_basis (tateBasis W ℓ hℓF n), Fintype.card_fin]
 
