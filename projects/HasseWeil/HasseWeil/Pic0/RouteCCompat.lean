@@ -75,7 +75,7 @@ algebra map `R → K(E)` commutes with `q`-th powers. -/
 noncomputable def frobeniusCurveMapCoordHom :
     (frobeniusCurveMap W).CoordHom where
   toAlgHom := FiniteField.frobeniusAlgHom K W.toAffine.CoordinateRing
-  compat := fun u => by
+  compat := fun u ↦ by
     change FiniteField.frobeniusAlgHom K W.toAffine.FunctionField
         (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField u) =
       algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
