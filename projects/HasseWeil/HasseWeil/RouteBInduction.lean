@@ -59,7 +59,7 @@ theorem omegaPullbackCoeff_addIsog_id
         from rfl, hpx]
   have hu_ne : alpha_star_u W (addIsog hxy hinj) ≠ 0 := by
     rw [alpha_star_u_eq]
-    exact fun h => u_gen_ne_zero W
+    exact fun h ↦ u_gen_ne_zero W
       ((addIsog hxy hinj).pullback_injective (h.trans (map_zero _).symm))
   have hu3_ne : 2 * addPullback_y W α + algebraMap K KE W.a₁ * addPullback_x W α
       + algebraMap K KE W.a₃ ≠ 0 := hu ▸ hu_ne
@@ -106,7 +106,7 @@ theorem omegaPullbackCoeff_addIsog_pair
         from rfl, hpx]
   have hu_ne : alpha_star_u W (addIsog hxy hinj) ≠ 0 := by
     rw [alpha_star_u_eq]
-    exact fun h => u_gen_ne_zero W
+    exact fun h ↦ u_gen_ne_zero W
       ((addIsog hxy hinj).pullback_injective (h.trans (map_zero _).symm))
   have hu3_ne : 2 * addPullback_y_pair α₁ α₂ + algebraMap K KE W.a₁ * addPullback_x_pair α₁ α₂
       + algebraMap K KE W.a₃ ≠ 0 := hu ▸ hu_ne
@@ -156,7 +156,7 @@ theorem omegaPullbackCoeff_mulByInt_succ (k : ℤ) (hk2 : 2 ≤ k) :
     rw [alpha_star_u_mulByInt W (k + 1) hk1, ← hAx, ← hAy]
   have hu_ne : alpha_star_u W (mulByInt W.toAffine (k + 1)) ≠ 0 := by
     rw [alpha_star_u_eq]
-    exact fun h => u_gen_ne_zero W
+    exact fun h ↦ u_gen_ne_zero W
       ((mulByInt W.toAffine (k + 1)).pullback_injective (h.trans (map_zero _).symm))
   have hu3_ne : 2 * addPullback_y W (mulByInt W.toAffine k)
       + algebraMap K KE W.a₁ * addPullback_x W (mulByInt W.toAffine k) + algebraMap K KE W.a₃ ≠ 0 :=
@@ -171,12 +171,12 @@ theorem omegaPullbackCoeff_mulByInt_succ (k : ℤ) (hk2 : 2 ≤ k) :
     kaehler_D_addPullback_x_eq_one_add_smul_omega W (mulByInt W.toAffine k) hx_ne_pb, smul_smul,
     inv_mul_cancel₀ hu3_ne, one_smul]
 
-/-- `a_{[n]} = n` for all `n ≥ 2`, by `Int.le_induction` from the axiom-clean base case `n = 2`
+/-- `a_{[n]} = n` for all `n ≥ 2`, by `Int.leInduction` from the axiom-clean base case `n = 2`
 (`omegaPullbackCoeff_mulByInt_two`), with step `k ≥ 2 ⟹ k+1` via the chord step
 `omegaPullbackCoeff_mulByInt_succ`. -/
 theorem omegaPullbackCoeff_mulByInt_ge_two (n : ℤ) (hn : 2 ≤ n) :
     omegaPullbackCoeff W (mulByInt W.toAffine n) = algebraMap K KE n := by
-  induction n, hn using Int.le_induction with
+  induction n, hn using Int.leInduction with
   | base => exact omegaPullbackCoeff_mulByInt_two W
   | succ k hk2 ih =>
     rw [omegaPullbackCoeff_mulByInt_succ W k hk2, ih, Int.cast_add, Int.cast_one, map_add,
