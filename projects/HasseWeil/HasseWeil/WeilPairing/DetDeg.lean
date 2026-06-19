@@ -218,7 +218,7 @@ theorem omegaForm_nondegenerate {T : W.toAffine[((ℓ : ℕ) : ℤ)]}
     T = 0 := by
   have : NeZero ℓ := ⟨hℓ.out.pos.ne'⟩
   refine Subtype.ext (weilPairing_nondegenerate W ((ℓ : ℕ) : ℤ) (by exact_mod_cast hℓF) T.val
-    (zsmul_eq_zero_of_mem_torsion W ℓ T) (fun S hS => ?_))
+    (zsmul_eq_zero_of_mem_torsion W ℓ T) (fun S hS ↦ ?_))
   set S' : W.toAffine[((ℓ : ℕ) : ℤ)] := ⟨S, (mem_torsionSubgroup _ _ _).mpr hS⟩
   have hω : (rootsOfUnity_addEquiv_zmod (primRou_isPrimitiveRoot ℓ hℓF))
       (Additive.ofMul (pairingRou W ℓ hℓF S' T)) = 0 := by
@@ -287,7 +287,7 @@ theorem omegaForm_gram_ne_zero :
     have : NeZero ℓ := ⟨hℓ.out.pos.ne'⟩
     exact zero_ne_one⟩
   intro h01
-  refine (torsion_ell_basis W ℓ hℓF).ne_zero 1 (omegaForm_nondegenerate W ℓ hℓF fun S => ?_)
+  refine (torsion_ell_basis W ℓ hℓF).ne_zero 1 (omegaForm_nondegenerate W ℓ hℓF fun S ↦ ?_)
   have hrepr := (torsion_ell_basis W ℓ hℓF).sum_repr S
   rw [Fin.sum_univ_two] at hrepr
   rw [← hrepr, map_add, map_smul, map_smul, LinearMap.add_apply, LinearMap.smul_apply,
@@ -315,7 +315,7 @@ theorem linearMap_det_torsionRestrict_eq (ψ : W.toAffine.Point →+ W.toAffine.
     LinearMap.det (torsionRestrict W ℓ ψ) = (d : ZMod ℓ) := by
   refine HasseWeil.WeilPairing.det_eq_of_alternating_scaling (torsion_ell_basis W ℓ hℓF)
     (omegaForm W ℓ hℓF) (omegaForm_self W ℓ hℓF) (omegaForm_gram_ne_zero W ℓ hℓF)
-    (torsionRestrict W ℓ ψ) (fun x y => ?_)
+    (torsionRestrict W ℓ ψ) (fun x y ↦ ?_)
   exact omegaForm_scaling W ℓ hℓF ψ d x y (hsc x y)
 
 /-- **DET-DEG (matrix form)** (Silverman III.8.6): `det(ρ_ℓ ψ) = (d : ZMod ℓ)` from the pairing
