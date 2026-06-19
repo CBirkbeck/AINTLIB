@@ -123,35 +123,35 @@ private lemma ref4n_slit (z : ℂ) (H : ℝ) (hz : -1/2 < z.re) (t : ℝ) :
   linarith
 
 private theorem seg1F (z : ℂ) (H : ℝ) (hz : z.re < 1/2) :
-    IntervalIntegrable (fun t => deriv (fun s => fdBoundaryFun H s - z) t /
+    IntervalIntegrable (fun t ↦ deriv (fun s ↦ fdBoundaryFun H s - z) t /
       (fdBoundaryFun H t - z)) volume 0 (1/5) ∧
-    ∫ t in (0 : ℝ)..(1/5), deriv (fun s => fdBoundaryFun H s - z) t /
+    ∫ t in (0 : ℝ)..(1/5), deriv (fun s ↦ fdBoundaryFun H s - z) t /
       (fdBoundaryFun H t - z) =
       Complex.log (fdBoundaryFun H (1/5) - z) - Complex.log (fdBoundaryFun H 0 - z) :=
   LogDerivFTC.ftc_log_pieceFM (by norm_num) (ref1_cd z H).continuous.continuousOn
-    (fun t _ => (ref1_cd z H).differentiable (by norm_num) |>.differentiableAt)
+    (fun t _ ↦ (ref1_cd z H).differentiable (by norm_num) |>.differentiableAt)
     ((ref1_cd z H).continuous_deriv le_top).continuousOn
-    (fun t _ => ref1_slit z H hz t)
-    (fun t ht => ⟨ref1_eq z H (by linarith [ht.2]),
+    (fun t _ ↦ ref1_slit z H hz t)
+    (fun t ht ↦ ⟨ref1_eq z H (by linarith [ht.2]),
       Filter.EventuallyEq.deriv_eq (Filter.eventually_of_mem
         (Iio_mem_nhds (by linarith [ht.2] : t < 1/5))
-        fun s hs => ref1_eq z H hs.le)⟩)
+        fun s hs ↦ ref1_eq z H hs.le)⟩)
     (ref1_eq z H (by norm_num)) (ref1_eq z H le_rfl)
 
 private theorem seg5F (z : ℂ) (H : ℝ) (hz : z.im < H) :
-    IntervalIntegrable (fun t => deriv (fun s => fdBoundaryFun H s - z) t /
+    IntervalIntegrable (fun t ↦ deriv (fun s ↦ fdBoundaryFun H s - z) t /
       (fdBoundaryFun H t - z)) volume (4/5) 1 ∧
-    ∫ t in (4/5 : ℝ)..1, deriv (fun s => fdBoundaryFun H s - z) t /
+    ∫ t in (4/5 : ℝ)..1, deriv (fun s ↦ fdBoundaryFun H s - z) t /
       (fdBoundaryFun H t - z) =
       Complex.log (fdBoundaryFun H 1 - z) - Complex.log (fdBoundaryFun H (4/5) - z) :=
   LogDerivFTC.ftc_log_pieceFM (by norm_num) (ref5_cd z H).continuous.continuousOn
-    (fun t _ => (ref5_cd z H).differentiable (by norm_num) |>.differentiableAt)
+    (fun t _ ↦ (ref5_cd z H).differentiable (by norm_num) |>.differentiableAt)
     ((ref5_cd z H).continuous_deriv le_top).continuousOn
-    (fun t _ => ref5_slit z H hz t)
-    (fun t ht => ⟨ref5_eq z H (by linarith [ht.1]),
+    (fun t _ ↦ ref5_slit z H hz t)
+    (fun t ht ↦ ⟨ref5_eq z H (by linarith [ht.1]),
       Filter.EventuallyEq.deriv_eq (Filter.eventually_of_mem
         (Ioi_mem_nhds (by linarith [ht.1] : 4/5 < t))
-        fun s hs => ref5_eq z H hs)⟩)
+        fun s hs ↦ ref5_eq z H hs)⟩)
     (by
       unfold ref5
       rw [fdBoundaryFun_at_four_fifths]
@@ -164,39 +164,39 @@ private theorem seg5F (z : ℂ) (H : ℝ) (hz : z.im < H) :
     (ref5_eq z H (by norm_num))
 
 private theorem seg4F (z : ℂ) (H : ℝ) (hz : -1/2 < z.re) :
-    IntervalIntegrable (fun t => deriv (fun s => fdBoundaryFun H s - z) t /
+    IntervalIntegrable (fun t ↦ deriv (fun s ↦ fdBoundaryFun H s - z) t /
       (fdBoundaryFun H t - z)) volume (3/5) (4/5) ∧
-    ∫ t in (3/5 : ℝ)..(4/5), deriv (fun s => fdBoundaryFun H s - z) t /
+    ∫ t in (3/5 : ℝ)..(4/5), deriv (fun s ↦ fdBoundaryFun H s - z) t /
       (fdBoundaryFun H t - z) =
       Complex.log (-(fdBoundaryFun H (4/5) - z)) -
       Complex.log (-(fdBoundaryFun H (3/5) - z)) := by
   have hae : ∀ᵐ t ∂volume, t ∈ Ι (3/5 : ℝ) (4/5) →
-      deriv (fun s => fdBoundaryFun H s - z) t / (fdBoundaryFun H t - z) =
+      deriv (fun s ↦ fdBoundaryFun H s - z) t / (fdBoundaryFun H t - z) =
       deriv (ref4n z H) t / ref4n z H t := by
     filter_upwards [compl_mem_ae_iff.mpr (measure_singleton (4/5 : ℝ))] with t hne hm
     rw [uIoc_of_le (by norm_num : (3:ℝ)/5 ≤ 4/5)] at hm
-    have hlt : t < 4/5 := lt_of_le_of_ne hm.2 (fun h => hne (mem_singleton_iff.mpr h))
+    have hlt : t < 4/5 := lt_of_le_of_ne hm.2 (fun h ↦ hne (mem_singleton_iff.mpr h))
     rw [show ref4n z H t = -(fdBoundaryFun H t - z) from (ref4n_eq z H hm.1 hlt.le).symm,
-      show deriv (ref4n z H) t = deriv (fun s => -(fdBoundaryFun H s - z)) t from
+      show deriv (ref4n z H) t = deriv (fun s ↦ -(fdBoundaryFun H s - z)) t from
         (Filter.EventuallyEq.deriv_eq (Filter.eventually_of_mem
           (Filter.inter_mem (Ioi_mem_nhds hm.1) (Iio_mem_nhds hlt))
-          fun s ⟨hs3, hs4⟩ => ref4n_eq z H (mem_Ioi.mp hs3)
+          fun s ⟨hs3, hs4⟩ ↦ ref4n_eq z H (mem_Ioi.mp hs3)
             (mem_Iio.mp hs4).le)).symm]
-    have hd : deriv (fun s => -(fdBoundaryFun H s - z)) t =
-        -(deriv (fun s => fdBoundaryFun H s - z) t) := by
-      rw [show (fun s => -(fdBoundaryFun H s - z)) = (-(fun s => fdBoundaryFun H s - z)) by
+    have hd : deriv (fun s ↦ -(fdBoundaryFun H s - z)) t =
+        -(deriv (fun s ↦ fdBoundaryFun H s - z) t) := by
+      rw [show (fun s ↦ -(fdBoundaryFun H s - z)) = (-(fun s ↦ fdBoundaryFun H s - z)) by
         ext
         simp]
       exact deriv.neg
     rw [hd, neg_div_neg_eq]
   have hp := LogDerivFTC.ftc_log_pieceFM (by norm_num : (3:ℝ)/5 ≤ 4/5)
     (ref4n_cd z H).continuous.continuousOn
-    (fun t _ => (ref4n_cd z H).differentiable (by norm_num) |>.differentiableAt)
+    (fun t _ ↦ (ref4n_cd z H).differentiable (by norm_num) |>.differentiableAt)
     ((ref4n_cd z H).continuous_deriv le_top).continuousOn
-    (fun t _ => ref4n_slit z H hz t)
-    (fun t _ => ⟨rfl, rfl⟩) rfl rfl
+    (fun t _ ↦ ref4n_slit z H hz t)
+    (fun t _ ↦ ⟨rfl, rfl⟩) rfl rfl
   refine ⟨hp.1.congr_ae ((ae_restrict_iff' measurableSet_uIoc).mpr
-      (hae.mono fun t ht hm => (ht hm).symm)), ?_⟩
+      (hae.mono fun t ht hm ↦ (ht hm).symm)), ?_⟩
   rw [intervalIntegral.integral_congr_ae hae, hp.2]
   congr 1
   · rw [← ref4n_eq z H (by norm_num : (3:ℝ)/5 < 4/5) le_rfl]
@@ -245,9 +245,9 @@ private lemma arcRef_eq35 (z : ℂ) (H : ℝ) :
   ring
 
 private lemma arcRef_ee (z : ℂ) (H : ℝ) {t : ℝ} (ht1 : 1/5 < t) (ht2 : t < 3/5) :
-    (fun s => fdBoundaryFun H s - z) =ᶠ[𝓝 t] arcRef z :=
+    (fun s ↦ fdBoundaryFun H s - z) =ᶠ[𝓝 t] arcRef z :=
   Filter.eventually_of_mem (Filter.inter_mem (Ioi_mem_nhds ht1) (Iio_mem_nhds ht2))
-    fun _ ⟨hs1, hs2⟩ => arcRef_eq z H (mem_Ioi.mp hs1) (mem_Iio.mp hs2).le
+    fun _ ⟨hs1, hs2⟩ ↦ arcRef_eq z H (mem_Ioi.mp hs1) (mem_Iio.mp hs2).le
 
 private lemma arcRef_slit_nonpos {z : ℂ}
     (hz_norm : 1 < ‖z‖) (hz_re : z.re ≤ 0) (_hz_im : 0 < z.im)
@@ -297,17 +297,17 @@ private lemma arcRef_neg_slit_pos {z : ℂ}
 
 private theorem arcF_standard {z : ℂ} (hz_norm : 1 < ‖z‖)
     (_hz_re : |z.re| < 1/2) (hz_re_le : z.re ≤ 0) (hz_im : 0 < z.im) (H : ℝ) :
-    IntervalIntegrable (fun t => deriv (fun s => fdBoundaryFun H s - z) t /
+    IntervalIntegrable (fun t ↦ deriv (fun s ↦ fdBoundaryFun H s - z) t /
       (fdBoundaryFun H t - z)) volume (1/5) (3/5) ∧
-    ∫ t in (1/5 : ℝ)..(3/5), deriv (fun s => fdBoundaryFun H s - z) t /
+    ∫ t in (1/5 : ℝ)..(3/5), deriv (fun s ↦ fdBoundaryFun H s - z) t /
       (fdBoundaryFun H t - z) =
       Complex.log (fdBoundaryFun H (3/5) - z) -
       Complex.log (fdBoundaryFun H (1/5) - z) :=
   LogDerivFTC.ftc_log_pieceFM (by norm_num) (arcRef_cd z).continuous.continuousOn
-    (fun t _ => (arcRef_cd z).differentiable (by norm_num) |>.differentiableAt)
+    (fun t _ ↦ (arcRef_cd z).differentiable (by norm_num) |>.differentiableAt)
     ((arcRef_cd z).continuous_deriv le_top).continuousOn
-    (fun t ht => arcRef_slit_nonpos hz_norm hz_re_le hz_im ht.1 ht.2)
-    (fun t ht => ⟨arcRef_eq z H (by linarith [ht.1]) (by linarith [ht.2]),
+    (fun t ht ↦ arcRef_slit_nonpos hz_norm hz_re_le hz_im ht.1 ht.2)
+    (fun t ht ↦ ⟨arcRef_eq z H (by linarith [ht.1]) (by linarith [ht.2]),
       (arcRef_ee z H (by linarith [ht.1]) (by linarith [ht.2])).deriv_eq⟩)
     (arcRef_eq15 z H) (arcRef_eq35 z H)
 
@@ -353,27 +353,27 @@ private lemma arcEndpoint_im_neg {z : ℂ}
 
 private theorem arcF_negated {z : ℂ} (hz_norm : 1 < ‖z‖)
     (hz_re : |z.re| < 1/2) (hz_re_pos : 0 < z.re) (hz_im : 0 < z.im) (H : ℝ) :
-    IntervalIntegrable (fun t => deriv (fun s => fdBoundaryFun H s - z) t /
+    IntervalIntegrable (fun t ↦ deriv (fun s ↦ fdBoundaryFun H s - z) t /
       (fdBoundaryFun H t - z)) volume (1/5) (3/5) ∧
-    ∫ t in (1/5 : ℝ)..(3/5), deriv (fun s => fdBoundaryFun H s - z) t /
+    ∫ t in (1/5 : ℝ)..(3/5), deriv (fun s ↦ fdBoundaryFun H s - z) t /
       (fdBoundaryFun H t - z) =
       Complex.log (fdBoundaryFun H (3/5) - z) -
       Complex.log (fdBoundaryFun H (1/5) - z) := by
   have hp := LogDerivFTC.ftc_log_neg_on_segment (by norm_num : (1:ℝ)/5 ≤ 3/5)
     (arcRef_cd z).continuous.continuousOn
-    (fun t _ => (arcRef_cd z).differentiable (by norm_num) |>.differentiableAt)
+    (fun t _ ↦ (arcRef_cd z).differentiable (by norm_num) |>.differentiableAt)
     ((arcRef_cd z).continuous_deriv le_top).continuousOn
-    (fun t ht => arcRef_neg_slit_pos hz_norm hz_re_pos hz_im ht.1 ht.2)
+    (fun t ht ↦ arcRef_neg_slit_pos hz_norm hz_re_pos hz_im ht.1 ht.2)
   have hae : ∀ᵐ t ∂volume, t ∈ Ι (1/5 : ℝ) (3/5) →
-      deriv (fun s => fdBoundaryFun H s - z) t / (fdBoundaryFun H t - z) =
+      deriv (fun s ↦ fdBoundaryFun H s - z) t / (fdBoundaryFun H t - z) =
       deriv (arcRef z) t / arcRef z t := by
     filter_upwards [compl_mem_ae_iff.mpr (measure_singleton (3/5 : ℝ))] with t hne hm
     rw [uIoc_of_le (by norm_num : (1:ℝ)/5 ≤ 3/5)] at hm
-    have hlt : t < 3/5 := lt_of_le_of_ne hm.2 (fun h => hne (mem_singleton_iff.mpr h))
+    have hlt : t < 3/5 := lt_of_le_of_ne hm.2 (fun h ↦ hne (mem_singleton_iff.mpr h))
     rw [arcRef_eq z H (by linarith [hm.1]) hlt.le,
       (arcRef_ee z H (by linarith [hm.1]) hlt).deriv_eq]
   have hint := hp.1.congr_ae ((ae_restrict_iff' measurableSet_uIoc).mpr
-      (hae.mono fun t ht hm => (ht hm).symm))
+      (hae.mono fun t ht hm ↦ (ht hm).symm))
   refine ⟨hint, ?_⟩
   rw [intervalIntegral.integral_congr_ae hae, hp.2, arcRef_eq15 z H, arcRef_eq35 z H]
   have him1 := arcRef_eq15 z H ▸ arcEndpoint_im_neg hz_norm hz_re hz_im H _ (Or.inl rfl)
@@ -383,9 +383,9 @@ private theorem arcF_negated {z : ℂ} (hz_norm : 1 < ‖z‖)
 
 private theorem arcF {z : ℂ} (hz_norm : 1 < ‖z‖)
     (hz_re : |z.re| < 1/2) (hz_im : 0 < z.im) (H : ℝ) :
-    IntervalIntegrable (fun t => deriv (fun s => fdBoundaryFun H s - z) t /
+    IntervalIntegrable (fun t ↦ deriv (fun s ↦ fdBoundaryFun H s - z) t /
       (fdBoundaryFun H t - z)) volume (1/5) (3/5) ∧
-    ∫ t in (1/5 : ℝ)..(3/5), deriv (fun s => fdBoundaryFun H s - z) t /
+    ∫ t in (1/5 : ℝ)..(3/5), deriv (fun s ↦ fdBoundaryFun H s - z) t /
       (fdBoundaryFun H t - z) =
       Complex.log (fdBoundaryFun H (3/5) - z) -
       Complex.log (fdBoundaryFun H (1/5) - z) := by
@@ -414,9 +414,9 @@ private theorem ftc_full {z : ℂ} {H : ℝ}
     ∫ t in (0 : ℝ)..1,
         (fdBoundaryFun H t - z)⁻¹ * deriv (fdBoundaryFun H) t = -(2 * ↑Real.pi * I) := by
   have hconv : ∀ t, (fdBoundaryFun H t - z)⁻¹ * deriv (fdBoundaryFun H) t =
-      deriv (fun s => fdBoundaryFun H s - z) t / (fdBoundaryFun H t - z) := by
+      deriv (fun s ↦ fdBoundaryFun H s - z) t / (fdBoundaryFun H t - z) := by
     intro t
-    rw [show (fun s => fdBoundaryFun H s - z) = (fun s => fdBoundaryFun H s + (-z)) by
+    rw [show (fun s ↦ fdBoundaryFun H s - z) = (fun s ↦ fdBoundaryFun H s + (-z)) by
       ext
       ring, deriv_add_const, div_eq_mul_inv, mul_comm]
   simp_rw [hconv]
@@ -424,7 +424,7 @@ private theorem ftc_full {z : ℂ} {H : ℝ}
   have p23 := arcF hz_norm hz_re hz_im H
   have p4 := seg4F z H (by linarith [abs_lt.mp hz_re])
   have p5 := seg5F z H hzH
-  set F : ℝ → ℂ := fun t => deriv (fun s => fdBoundaryFun H s - z) t / (fdBoundaryFun H t - z)
+  set F : ℝ → ℂ := fun t ↦ deriv (fun s ↦ fdBoundaryFun H s - z) t / (fdBoundaryFun H t - z)
   have h13 : ∫ t in (0 : ℝ)..(3/5), F t = Complex.log (fdBoundaryFun H (3/5) - z) -
       Complex.log (fdBoundaryFun H 0 - z) := by
     rw [← intervalIntegral.integral_add_adjacent_intervals p1.1 p23.1, p1.2, p23.2]
@@ -449,16 +449,16 @@ private theorem ftc_full {z : ℂ} {H : ℝ}
 private theorem xfer {z : ℂ} {H : ℝ}
     {γ : PiecewiseC1Path (fdStart H) (fdStart H)}
     (hγ : ∀ t ∈ Icc (0 : ℝ) 1, γ.toPath.extend t = fdBoundaryFun H t) :
-    γ.contourIntegral (fun w => (w - z)⁻¹) =
+    γ.contourIntegral (fun w ↦ (w - z)⁻¹) =
     ∫ t in (0 : ℝ)..1, (fdBoundaryFun H t - z)⁻¹ * deriv (fdBoundaryFun H) t := by
   unfold PiecewiseC1Path.contourIntegral
   apply intervalIntegral.integral_congr_ae
   filter_upwards [compl_mem_ae_iff.mpr (measure_singleton (1 : ℝ))] with t hne hm
   rw [uIoc_of_le (by norm_num : (0:ℝ) ≤ 1)] at hm
   have ht01 : t ∈ Ioo (0 : ℝ) 1 :=
-    ⟨by linarith [hm.1], lt_of_le_of_ne hm.2 (fun h => hne (mem_singleton_iff.mpr h))⟩
+    ⟨by linarith [hm.1], lt_of_le_of_ne hm.2 (fun h ↦ hne (mem_singleton_iff.mpr h))⟩
   have hee : γ.toPath.extend =ᶠ[𝓝 t] fdBoundaryFun H :=
-    Filter.eventually_of_mem (Ioo_mem_nhds ht01.1 ht01.2) fun s hs =>
+    Filter.eventually_of_mem (Ioo_mem_nhds ht01.1 ht01.2) fun s hs ↦
       hγ s (Ioo_subset_Icc_self hs)
   change (γ.extendedPath t - z)⁻¹ * deriv γ.toPath.extend t =
     (fdBoundaryFun H t - z)⁻¹ * deriv (fdBoundaryFun H) t
@@ -470,7 +470,7 @@ theorem fdBoundary_contourIntegral_interior_eq {H : ℝ}
     (_hH : H > Real.sqrt 3 / 2) {z : ℂ} (hz : FDStrictInterior z H)
     {γ : PiecewiseC1Path (fdStart H) (fdStart H)}
     (hγ : ∀ t ∈ Icc (0 : ℝ) 1, γ.toPath.extend t = fdBoundaryFun H t) :
-    γ.contourIntegral (fun w => (w - z)⁻¹) = -(2 * ↑Real.pi * I) := by
+    γ.contourIntegral (fun w ↦ (w - z)⁻¹) = -(2 * ↑Real.pi * I) := by
   rw [xfer hγ]
   exact ftc_full hz.norm_gt hz.re_abs_lt hz.im_pos hz.im_lt
 
