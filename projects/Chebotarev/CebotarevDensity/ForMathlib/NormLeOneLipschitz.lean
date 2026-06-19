@@ -180,10 +180,10 @@ theorem frontier_image_paramSet_subset :
   have hint : expMapBasis '' interior (paramSet K) ⊆ interior (expMapBasis '' paramSet K) :=
     (expMapBasis.isOpen_image_of_subset_source isOpen_interior
       (by simp [expMapBasis_source])).subset_interior_iff.mpr (Set.image_mono interior_subset)
-  refine (Set.diff_subset_diff hcl hint).trans ?_
-  rw [compactSet_eq_union, Set.union_diff_distrib,
-    ← Set.image_diff (injective_expMapBasis K)]
-  exact Set.union_subset_union_right _ Set.diff_subset
+  refine (Set.sdiff_subset_sdiff hcl hint).trans ?_
+  rw [compactSet_eq_union, Set.union_sdiff_distrib,
+    ← Set.image_sdiff (injective_expMapBasis K)]
+  exact Set.union_subset_union_right _ Set.sdiff_subset
 
 open scoped Classical in
 private theorem expMapBasis_mem_iUnion_faceMapSide
@@ -574,21 +574,21 @@ theorem mem_iUnion_image_liftToMixed_of_eq
     · exact ⟨hc'.1 i, hc'.2 i⟩
     · exact hθmem w
   refine Set.mem_iUnion.mpr ⟨ε, c, ⟨fun k ↦ (hck k).1, fun k ↦ (hck k).2⟩, ?_⟩
-  · rw [liftToMixed, hproj]
-    have hcph : ∀ w : {w : InfinitePlace K // IsComplex w},
-        c ((mixedCubeEquiv K).symm (Sum.inr w)) = θ w := fun w ↦ by rw [hc]; simp
-    have hmodreal : ∀ w : {w : InfinitePlace K // IsReal w}, ψ c' w.1 = |x.1 w| := fun w ↦ by
-      rw [← hx, normAtAllPlaces_apply, normAtPlace_apply_of_isReal w.2, ← Real.norm_eq_abs]
-    have hmodcplx : ∀ w : {w : InfinitePlace K // IsComplex w}, ψ c' w.1 = ‖x.2 w‖ :=
-      fun w ↦ by rw [← hx, normAtAllPlaces_apply, normAtPlace_apply_of_isComplex w.2]
-    refine Prod.ext (funext fun w ↦ ?_) (funext fun w ↦ ?_)
-    · simp only [hε, hmodreal w]
-      by_cases hpos : 0 ≤ x.1 w
-      · rw [decide_eq_true hpos, if_pos rfl, one_mul, abs_of_nonneg hpos]
-      · rw [decide_eq_false hpos, if_neg (by simp), abs_of_neg (not_le.mp hpos)]
-        ring
-    · simp only [hcph w, hmodcplx w]
-      exact hθeq w
+  rw [liftToMixed, hproj]
+  have hcph : ∀ w : {w : InfinitePlace K // IsComplex w},
+      c ((mixedCubeEquiv K).symm (Sum.inr w)) = θ w := fun w ↦ by rw [hc]; simp
+  have hmodreal : ∀ w : {w : InfinitePlace K // IsReal w}, ψ c' w.1 = |x.1 w| := fun w ↦ by
+    rw [← hx, normAtAllPlaces_apply, normAtPlace_apply_of_isReal w.2, ← Real.norm_eq_abs]
+  have hmodcplx : ∀ w : {w : InfinitePlace K // IsComplex w}, ψ c' w.1 = ‖x.2 w‖ :=
+    fun w ↦ by rw [← hx, normAtAllPlaces_apply, normAtPlace_apply_of_isComplex w.2]
+  refine Prod.ext (funext fun w ↦ ?_) (funext fun w ↦ ?_)
+  · simp only [hε, hmodreal w]
+    by_cases hpos : 0 ≤ x.1 w
+    · rw [decide_eq_true hpos, if_pos rfl, one_mul, abs_of_nonneg hpos]
+    · rw [decide_eq_false hpos, if_neg (by simp), abs_of_neg (not_le.mp hpos)]
+      ring
+  · simp only [hcph w, hmodcplx w]
+    exact hθeq w
 
 /-- The frontier of `normLeOne K` in `mixedSpace K` is contained in the `normAtAllPlaces`-preimage
 of the frontier of its `realSpace` image: `normLeOne K` is the preimage of its image
