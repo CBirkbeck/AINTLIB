@@ -1065,7 +1065,7 @@ theorem diamondOp_n_preserves_modFormCharSpace [NeZero N] (k : ℤ) (n : ℕ) (�
     rw [heig]
     exact Submodule.smul_mem _ _ hf
   · rw [diamondOp_n_not_coprime k h]
-    simpa using (modFormCharSpace (N := N) k χ).zero_mem
+    simp
 
 /-- `T_{p^r}` preserves each character space, for **every** prime `p` (including
 `p ∣ N`).  Direct induction over the defining recurrence. -/
