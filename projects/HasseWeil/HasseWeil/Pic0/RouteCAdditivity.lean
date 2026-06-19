@@ -176,8 +176,8 @@ theorem htrace_dual_iff_picDual_eq_rV_sub_s
     (α.toAddMonoidHom + α.picDual ch hinj hfin =
         (mulByInt E (r * t - 2 * s)).toAddMonoidHom) ↔
       α.picDual ch hinj hfin = r • V - s • (AddMonoidHom.id _) :=
-  ⟨fun htrace_dual => picDual_eq_of_htrace_dual ch hinj hfin r s t hbeta hsum htrace_dual,
-   fun hpicval => htrace_dual_of_picDual_eq ch hinj hfin r s t hbeta hsum hpicval⟩
+  ⟨fun htrace_dual ↦ picDual_eq_of_htrace_dual ch hinj hfin r s t hbeta hsum htrace_dual,
+   fun hpicval ↦ htrace_dual_of_picDual_eq ch hinj hfin r s t hbeta hsum hpicval⟩
 
 /-! ### Phase 2 — the abstract dual-additivity engine (reduce III.8 to the additivity residual)
 
