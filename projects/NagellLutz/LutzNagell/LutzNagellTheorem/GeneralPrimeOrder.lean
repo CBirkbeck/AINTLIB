@@ -107,7 +107,7 @@ theorem x_integral_of_odd_prime_torsion_general
   have hden_one : x.den = 1 := by
     rcases hp.eq_one_or_self_of_dvd x.den hdvd_nat with h | h
     · exact h
-    · exact absurd h (fun h => den_ne_prime_of_on_general_curve W
+    · exact absurd h (fun h ↦ den_ne_prime_of_on_general_curve W
         ((curveQ_equation_iff W x y).mp hns.left) hp h)
   exact ⟨x.num, by rwa [← Rat.den_eq_one_iff]⟩
 
@@ -138,7 +138,7 @@ theorem integrality_of_order_four_general
     have hden_one : x.den = 1 := by
       rcases (by decide : Nat.Prime 2).eq_one_or_self_of_dvd x.den hdvd_nat with h | h
       · exact h
-      · exact absurd h (fun h => den_ne_prime_of_on_general_curve W
+      · exact absurd h (fun h ↦ den_ne_prime_of_on_general_curve W
           ((curveQ_equation_iff W x y).mp hns.left) (by decide) h)
     have hx₀ : (x.num : ℚ) = x := by rwa [← Rat.den_eq_one_iff]
     exact ⟨⟨x.num, hx₀⟩, y_integral_of_x_integral_on_general_curve W
