@@ -6826,6 +6826,39 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
   Cor Iw1(iii) (hEC), CFTunits1 (cd), §12 iso (h12). RJW thm:vandiver. **Remaining**: the char-ideal conjunct
   `charIdealGroup 𝒳⁺ = zetaIdealPlus` needs the carrier bridge `PadicMeasure (GPlus) ≅ IwasawaAlgebraGroup 𝒪 H`
   + `charIdealGroup_quotient`; and discharging h12 is §12's own deferred milestone.
+
+##### [G-CHARIDEAL] Char-ideal conjunct of thm:vandiver (part ii): `charIdealGroup 𝒳⁺ = I(𝒢⁺)ζ_p`
+- **Status**: BLOCKED (on structure-theorem-scale infra) | **File**: Iwasawa/StructureTheory/CharIdeal.lean + new | **Depends on**: G-IMC (iso, DONE), CHARIDEAL-QUOT, CARRIER-BRIDGE | **Type**: theorem
+- **Progress (2026-06-19)**: transport tool **DONE** — `charIdeal_eq_of_linearEquiv` (CharIdeal.lean, axiom-clean):
+  `M ≃ₗ M' ⟹ charIdeal M = charIdeal M'` (an iso is a pseudo-iso). With the G-IMC iso `𝒳⁺ ≅ Λ/I`,
+  reduces part (ii) to `charIdealGroup (Λ/I) = I`. Two genuinely-deep prerequisites remain (each
+  structure-theorem-scale), so the conjunct is BLOCKED, not dispatchable:
+- **Sub-ticket [CHARIDEAL-QUOT]** `charIdeal (Λ ⧸ span{f}) = span{f}` (`f ≠ 0`, base IwasawaAlgebra 𝒪).
+  Sketch: (1) `localMult P (Λ/(f)) = v_P(f)` — via `localizedQuotientEquiv` (mathlib:
+  `LocalizedModule p (M⧸M') ≃ₗ (LocalizedModule p M)⧸(localized p M')`) reduce to `Module.length Λ_P
+  (Λ_P/(f))`, where `Λ_P = Localization.AtPrime P` is a **DVR** (project
+  `iwasawaAlgebra_localization_atPrime_isDVR`); then `Module.length Λ_P (Λ_P/(f)) = Ring.ord Λ_P f`
+  (**def** `Ring.ord x = Module.length R (R⧸span{x})`, `Mathlib.RingTheory.OrderOfVanishing.Basic`)
+  `= IsDiscreteValuationRing.addVal Λ_P f` (**`Ring.ord_eq_addVal`**, `OrderOfVanishing.Noetherian`).
+  (2) `∏ᶠ_{P ht-1} P^{v_P(f)} = span{f}` — in the **UFD** Λ (project
+  `iwasawaAlgebra_uniqueFactorizationMonoid`) height-1 primes are principal `(gᵢ)`, `f = u·∏gᵢ^{aᵢ}`,
+  so finprod = `(∏gᵢ^{aᵢ}) = (f)`; mathlib `Ring.ord_mul`/`Ring.ord_pow`/`Ring.ord_of_irreducible`
+  (=1)/`Ring.ord_of_isUnit` (=0) compute `v_P(f)` per factor. ~5–8 lemmas (localization reduction +
+  UFD divisor identity). **NOTE**: the project's structure theorem
+  `fg_pseudoIso_canonical` (StructureTheorem.lean:167) is itself `sorry`; CHARIDEAL-QUOT is the
+  UFD-detour that avoids it, but is comparable in scale.
+- **Sub-ticket [CARRIER-BRIDGE]** `PadicMeasure p (GPlus p) ≃+* IwasawaAlgebraGroup ℤ_[p] Δ`
+  (carrier identification so `charIdealGroup` — defined over `IwasawaAlgebraGroup 𝒪 H` — applies to
+  `𝒳⁺`, a module over `LambdaGPlus p = PadicMeasure p (GPlus p)`). Sketch: `GPlus = ℤ_[p]ˣ/±1 ≅ Δ × Γ`
+  (Teichmüller split `Δ` = prime-to-p torsion, `Γ ≅ ℤ_[p]`; project `ResidueField.normCompat_eq_teichmuller_mul_principal`),
+  then `PadicMeasure(Δ×Γ) ≅ (PadicMeasure Γ)[Δ]` (measure algebra of a product = group algebra of the
+  finite factor over the other) and `PadicMeasure Γ ≅ IwasawaAlgebra ℤ_[p]` (cf. existing
+  `Measure.mahlerRingEquiv : PadicMeasure ℤ_[p] ≃+* ℤ_p[[T]]`). ~8–12 lemmas.
+- **Sub-ticket [CHARIDEALGROUP-QUOT]** equivariant reassembly `charIdealGroup (Λ(𝒢⁺)/I) = I`: from
+  CHARIDEAL-QUOT per ω-component (`charIdealComponent`) through the `⨅_ω comap φ_ω` definition.
+- **Sources**: RJW TeX 3652–3690 (charIdeal), thm:vandiver part (ii); Washington Ch. 13.
+- **Generality**: 𝒪 = ℤ_[p] standing case (`[IsDiscreteValuationRing 𝒪]`).
+
 - **Statement**: `theorem cftUnits2 (D : IwasawaGaloisData p hp2) : Exact4 (E⁺∞₁/C⁺∞₁) (U⁺∞₁/C⁺∞₁) X⁺∞ Y⁺∞`
   (the 4-term exact sequence of Λ(𝒢⁺)-modules).
 - **Proof sketch**: from `galoisSES` (G-DEF: `0→MmodL→X⁺∞→Y⁺∞→0`) and `cftSES` (G2: `0→E⁺∞₁→U⁺∞₁→MmodL→0`),
