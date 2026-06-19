@@ -194,7 +194,7 @@ theorem pullbackDivisor_injective (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0)
     Function.Injective
       (pullbackDivisor (W := W.toAffine) (mulByInt W.toAffine ℓ).toAddMonoidHom hker) := by
   intro D₁ D₂ hD
-  refine Finsupp.ext fun v => ?_
+  refine Finsupp.ext fun v ↦ ?_
   -- Pick `w` with `[ℓ]·w.toAffine = v.toAffinePoint` (point-surjectivity).
   obtain ⟨P, hP⟩ := mulByInt_point_surjective W ℓ hℓ v.toAffinePoint
   -- A place mapping onto `v` under `[ℓ]`: `w := P.toProjectiveSmoothPoint`.
@@ -224,7 +224,7 @@ theorem eq_zero_of_kappaDivisor_principal {T : W.toAffine.Point}
     T = 0 := by
   have hvan : Curves.projectiveDivisorSum W.toAffine (Curves.kappaDivisor W.toAffine T) = 0 :=
     (afInputs_allChar W.toAffine).h_van
-      (fun _ hD => SmoothPlaneCurve.principal_mem_degZero (C := ⟨W.toAffine⟩) hD)
+      (fun _ hD ↦ SmoothPlaneCurve.principal_mem_degZero (C := ⟨W.toAffine⟩) hD)
       (Curves.kappaDivisor W.toAffine T) hT
   rwa [Curves.projectiveDivisorSum_kappaDivisor] at hvan
 
