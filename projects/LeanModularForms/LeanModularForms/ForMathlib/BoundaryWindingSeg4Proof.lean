@@ -204,14 +204,14 @@ def smoothBoundaryData_seg4_of_ftcHyp {H : ℝ} (hH : Real.sqrt 3 / 2 < H)
   δ := linDelta (seg1Speed H)
   threshold := seg4Threshold H z₀
   hthresh := seg4Threshold_pos hz_re hc_lo hc_hi
-  hδ_pos := fun _ hε _ => linDelta_pos (seg1Speed_pos hH) hε
-  hδ_small := fun ε _ hε_thr => by
+  hδ_pos := fun _ hε _ ↦ linDelta_pos (seg1Speed_pos hH) hε
+  hδ_small := fun ε _ hε_thr ↦ by
     obtain ⟨_, _, h_lin_lt_lo, h_lin_lt_hi⟩ := linDelta_lt_gap_seg4 hH hz_re hc_lo hε_thr
     exact lt_min (by linarith)
       (by linarith [show (1 : ℝ) - seg4T₀ H z₀.im = (4/5 - seg4T₀ H z₀.im) + 1/5 from by ring])
-  h_far := fun _ _ hε_thr t ht hδt => by
+  h_far := fun _ _ hε_thr t ht hδt ↦ by
     rw [hγ t ht]; exact seg4_far_bound hH hz_re hc_lo hc_hi hε_thr ht hδt
-  h_near := fun ε _ hε_thr t ht => by
+  h_near := fun ε _ hε_thr t ht ↦ by
     obtain ⟨h_eps_top, h_eps_width, h_lin_lt_lo, _⟩ :=
       linDelta_lt_gap_seg4 hH hz_re hc_lo hε_thr
     have h_t_lo : 0 ≤ t := by linarith [(abs_le.mp ht).1]
