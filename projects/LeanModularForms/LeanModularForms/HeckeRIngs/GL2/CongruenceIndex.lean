@@ -32,14 +32,14 @@ namespace HeckeRing.GL2
 
 private lemma dvd_sub_val_mul (p : ℕ) (hp : Nat.Prime p) (a b : ℤ) (hb : (b : ZMod p) ≠ 0) :
     (p : ℤ) ∣ a - (((a : ZMod p) * (b : ZMod p)⁻¹).val : ℤ) * b := by
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact (Nat.Prime p) := ⟨hp⟩
   rw [← ZMod.intCast_zmod_eq_zero_iff_dvd]
   push_cast
   rw [ZMod.natCast_zmod_val, mul_assoc, inv_mul_cancel₀ hb, mul_one, sub_self]
 
 private lemma SL2_entry_mul (A B : SL(2, ℤ)) (i j : Fin 2) :
     (A * B).1 i j = A.1 i 0 * B.1 0 j + A.1 i 1 * B.1 1 j := by
-  simp [Matrix.mul_apply, Fin.sum_univ_two]
+  simp only [Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two]
 
 private lemma TjS_inv_10 (j : ℤ) : ((T ^ j * S)⁻¹).1 1 0 = -1 := by
   simp [coe_T_zpow, coe_S, Matrix.SpecialLinearGroup.coe_inv, adjugate_fin_two_of]
