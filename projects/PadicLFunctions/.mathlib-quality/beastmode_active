@@ -1,1 +1,1 @@
-FOCUS: G4 collapse (xPlus_equiv_uModCPlus) done; build+commit, then G-IMC (compose with §12 iso) in IwasawaProof/MainConjecture.lean
+FOCUS: G-IMC capstone done (iwasawa_main_conjecture_vandiver); axiom-check + commit

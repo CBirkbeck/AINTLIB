@@ -60,6 +60,7 @@ import PadicLFunctions.IwasawaProof.Galois.Modules
 import PadicLFunctions.IwasawaProof.Galois.Coinvariants
 import PadicLFunctions.IwasawaProof.Galois.Bridge
 import PadicLFunctions.IwasawaProof.Galois.Sequence
+import PadicLFunctions.IwasawaProof.MainConjecture
 
 /-!
 # p-adic L-functions
