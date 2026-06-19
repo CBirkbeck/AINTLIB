@@ -59,32 +59,32 @@ limits `L₁` and `L₂`) and their cutoff integrands are interval integrable fo
 theorem HasCauchyPV.add {f g : ℂ → ℂ} {γ : PiecewiseC1Path x y} {z₀ L₁ L₂ : ℂ}
     (hf : HasCauchyPV f γ z₀ L₁) (hg : HasCauchyPV g γ z₀ L₂)
     (hfi : ∀ ε > 0, IntervalIntegrable
-      (fun t => cpvIntegrand f γ.toPath.extend z₀ ε t) volume 0 1)
+      (fun t ↦ cpvIntegrand f γ.toPath.extend z₀ ε t) volume 0 1)
     (hgi : ∀ ε > 0, IntervalIntegrable
-      (fun t => cpvIntegrand g γ.toPath.extend z₀ ε t) volume 0 1) :
-    HasCauchyPV (fun z => f z + g z) γ z₀ (L₁ + L₂) := by
+      (fun t ↦ cpvIntegrand g γ.toPath.extend z₀ ε t) volume 0 1) :
+    HasCauchyPV (fun z ↦ f z + g z) γ z₀ (L₁ + L₂) := by
   simp only [HasCauchyPV] at hf hg ⊢
-  have heq : (fun ε => ∫ t in (0 : ℝ)..1,
-      cpvIntegrand (fun z => f z + g z) γ.toPath.extend z₀ ε t) =ᶠ[𝓝[>] 0]
-      (fun ε => (∫ t in (0 : ℝ)..1, cpvIntegrand f γ.toPath.extend z₀ ε t) +
+  have heq : (fun ε ↦ ∫ t in (0 : ℝ)..1,
+      cpvIntegrand (fun z ↦ f z + g z) γ.toPath.extend z₀ ε t) =ᶠ[𝓝[>] 0]
+      (fun ε ↦ (∫ t in (0 : ℝ)..1, cpvIntegrand f γ.toPath.extend z₀ ε t) +
         (∫ t in (0 : ℝ)..1, cpvIntegrand g γ.toPath.extend z₀ ε t)) := by
     filter_upwards [self_mem_nhdsWithin] with ε (hε : 0 < ε)
-    rw [show (fun t => cpvIntegrand (fun z => f z + g z) γ.toPath.extend z₀ ε t) =
-        (fun t => cpvIntegrand f γ.toPath.extend z₀ ε t +
+    rw [show (fun t ↦ cpvIntegrand (fun z ↦ f z + g z) γ.toPath.extend z₀ ε t) =
+        (fun t ↦ cpvIntegrand f γ.toPath.extend z₀ ε t +
           cpvIntegrand g γ.toPath.extend z₀ ε t) from
-      funext fun _ => by simp only [cpvIntegrand]; split_ifs <;> ring]
+      funext fun _ ↦ by simp only [cpvIntegrand]; split_ifs <;> ring]
     exact intervalIntegral.integral_add (hfi ε hε) (hgi ε hε)
   exact (hf.add hg).congr' heq.symm
 
 /-- The Cauchy principal value of the zero function is zero. -/
 theorem HasCauchyPV.zero_fun {γ : PiecewiseC1Path x y} {z₀ : ℂ} :
-    HasCauchyPV (fun _ => (0 : ℂ)) γ z₀ 0 := by
+    HasCauchyPV (fun _ ↦ (0 : ℂ)) γ z₀ 0 := by
   simp only [HasCauchyPV]
-  refine Tendsto.congr (f₁ := fun _ => (0 : ℂ)) ?_ tendsto_const_nhds
+  refine Tendsto.congr (f₁ := fun _ ↦ (0 : ℂ)) ?_ tendsto_const_nhds
   intro ε
-  rw [show (fun t => cpvIntegrand (fun _ : ℂ => (0 : ℂ)) γ.toPath.extend z₀ ε t) =
-      fun _ => (0 : ℂ) from
-    funext fun _ => by simp only [cpvIntegrand]; split_ifs <;> simp]
+  rw [show (fun t ↦ cpvIntegrand (fun _ : ℂ ↦ (0 : ℂ)) γ.toPath.extend z₀ ε t) =
+      fun _ ↦ (0 : ℂ) from
+    funext fun _ ↦ by simp only [cpvIntegrand]; split_ifs <;> simp]
   exact intervalIntegral.integral_zero.symm
 
 /-- Congruence rewrite for `HasCauchyPV` via pointwise equality off the singularity:
@@ -96,10 +96,10 @@ theorem HasCauchyPV.congr_pointwise {f g : ℂ → ℂ} {γ : PiecewiseC1Path x 
   simp only [HasCauchyPV] at h ⊢
   refine h.congr' ?_
   filter_upwards [self_mem_nhdsWithin] with ε (hε : 0 < ε)
-  refine intervalIntegral.integral_congr fun t _ => ?_
+  refine intervalIntegral.integral_congr fun t _ ↦ ?_
   simp only [cpvIntegrand]
   split_ifs with hgt
-  · rw [hfg _ fun heq => by rw [heq, sub_self, norm_zero] at hgt; linarith]
+  · rw [hfg _ fun heq ↦ by rw [heq, sub_self, norm_zero] at hgt; linarith]
   · rfl
 
 /-- Finite sum of `HasCauchyPV`: if each `f i` has CPV `L i` along `γ` at `z₀` (with
@@ -108,32 +108,32 @@ theorem HasCauchyPV.finset_sum {ι : Type*} [DecidableEq ι] (T : Finset ι)
     {γ : PiecewiseC1Path x y} {z₀ : ℂ} {f : ι → ℂ → ℂ} {L : ι → ℂ}
     (hf : ∀ i ∈ T, HasCauchyPV (f i) γ z₀ (L i))
     (hfi : ∀ i ∈ T, ∀ ε > 0, IntervalIntegrable
-      (fun t => cpvIntegrand (f i) γ.toPath.extend z₀ ε t) volume 0 1) :
-    HasCauchyPV (fun z => ∑ i ∈ T, f i z) γ z₀ (∑ i ∈ T, L i) := by
+      (fun t ↦ cpvIntegrand (f i) γ.toPath.extend z₀ ε t) volume 0 1) :
+    HasCauchyPV (fun z ↦ ∑ i ∈ T, f i z) γ z₀ (∑ i ∈ T, L i) := by
   induction T using Finset.induction_on with
   | empty => simpa [Finset.sum_empty] using HasCauchyPV.zero_fun (γ := γ) (z₀ := z₀)
   | @insert a T' hia ih =>
     have h_T'_int : ∀ ε > 0, IntervalIntegrable
-        (fun t => cpvIntegrand (fun z => ∑ i ∈ T', f i z) γ.toPath.extend z₀ ε t)
-        volume 0 1 := fun ε hε => by
-      rw [show (fun t => cpvIntegrand (fun z => ∑ i ∈ T', f i z)
+        (fun t ↦ cpvIntegrand (fun z ↦ ∑ i ∈ T', f i z) γ.toPath.extend z₀ ε t)
+        volume 0 1 := fun ε hε ↦ by
+      rw [show (fun t ↦ cpvIntegrand (fun z ↦ ∑ i ∈ T', f i z)
           γ.toPath.extend z₀ ε t) =
-          (fun t => ∑ i ∈ T', cpvIntegrand (f i) γ.toPath.extend z₀ ε t) from
-        funext fun _ => by
+          (fun t ↦ ∑ i ∈ T', cpvIntegrand (f i) γ.toPath.extend z₀ ε t) from
+        funext fun _ ↦ by
           simp only [cpvIntegrand]
           split_ifs
           · rw [Finset.sum_mul]
           · exact Finset.sum_const_zero.symm,
-        show (fun t => ∑ i ∈ T', cpvIntegrand (f i) γ.toPath.extend z₀ ε t) =
-          ∑ i ∈ T', fun t => cpvIntegrand (f i) γ.toPath.extend z₀ ε t from
-          funext fun _ => (Finset.sum_apply _ _ _).symm]
+        show (fun t ↦ ∑ i ∈ T', cpvIntegrand (f i) γ.toPath.extend z₀ ε t) =
+          ∑ i ∈ T', fun t ↦ cpvIntegrand (f i) γ.toPath.extend z₀ ε t from
+          funext fun _ ↦ (Finset.sum_apply _ _ _).symm]
       exact IntervalIntegrable.sum T'
-        (fun i hi => hfi i (Finset.mem_insert_of_mem hi) ε hε)
-    rw [show (fun z => ∑ i ∈ insert a T', f i z) = (fun z => f a z + ∑ i ∈ T', f i z) from
-        funext fun _ => Finset.sum_insert hia, Finset.sum_insert hia]
+        (fun i hi ↦ hfi i (Finset.mem_insert_of_mem hi) ε hε)
+    rw [show (fun z ↦ ∑ i ∈ insert a T', f i z) = (fun z ↦ f a z + ∑ i ∈ T', f i z) from
+        funext fun _ ↦ Finset.sum_insert hia, Finset.sum_insert hia]
     exact HasCauchyPV.add (hf a (Finset.mem_insert_self a T'))
-      (ih (fun i hi => hf i (Finset.mem_insert_of_mem hi))
-        (fun i hi => hfi i (Finset.mem_insert_of_mem hi)))
+      (ih (fun i hi ↦ hf i (Finset.mem_insert_of_mem hi))
+        (fun i hi ↦ hfi i (Finset.mem_insert_of_mem hi)))
       (hfi a (Finset.mem_insert_self a T')) h_T'_int
 
 /-- Pointwise equality of `cpvIntegrandOn S f` with the cutoff integrand of
@@ -147,14 +147,14 @@ private theorem cpvIntegrandOn_eq_of_decomp
     (hε_pos : 0 < ε) :
     cpvIntegrandOn S f γ.toPath.extend ε t =
       cpvIntegrandOn S
-        (fun z => decomp.analyticRemainder z + ∑ s ∈ S, decomp.polarPart s z)
+        (fun z ↦ decomp.analyticRemainder z + ∑ s ∈ S, decomp.polarPart s z)
         γ.toPath.extend ε t := by
   classical
   by_cases h : ∃ s ∈ S, ‖γ.toPath.extend t - s‖ ≤ ε
   · rw [cpvIntegrandOn_of_exists_le h, cpvIntegrandOn_of_exists_le h]
   · have h_far : ∀ s ∈ S, ε < ‖γ.toPath.extend t - s‖ :=
-      fun s hs => lt_of_not_ge fun h_le => h ⟨s, hs, h_le⟩
-    have hγ_notS : γ.toPath.extend t ∉ (↑S : Set ℂ) := fun h_mem => by
+      fun s hs ↦ lt_of_not_ge fun h_le ↦ h ⟨s, hs, h_le⟩
+    have hγ_notS : γ.toPath.extend t ∉ (↑S : Set ℂ) := fun h_mem ↦ by
       have h_ne_zero := h_far _ (Finset.mem_coe.mp h_mem)
       simp at h_ne_zero; linarith
     rw [cpvIntegrandOn_of_forall_gt h_far, cpvIntegrandOn_of_forall_gt h_far,
@@ -200,41 +200,41 @@ theorem residueTheorem_crossing_compositional
     HungerbuhlerWasem.analyticRemainder_hasCauchyPVOn_zero hU_open hU_ne
       hS_in_U γ h_null decomp
   have h_rem_int : ∀ ε > 0, IntervalIntegrable
-      (fun t => cpvIntegrandOn S decomp.analyticRemainder
+      (fun t ↦ cpvIntegrandOn S decomp.analyticRemainder
         γP.toPath.extend ε t) volume 0 1 :=
-    fun ε _ => HungerbuhlerWasem.cpvIntegrandOn_diff_intervalIntegrable γ S
+    fun ε _ ↦ HungerbuhlerWasem.cpvIntegrandOn_diff_intervalIntegrable γ S
       decomp.analyticRemainder_diff hγ_in_U ε
   have h_polar_int : ∀ s ∈ S, ∀ ε > 0, IntervalIntegrable
-      (fun t => cpvIntegrandOn S (decomp.polarPart s)
+      (fun t ↦ cpvIntegrandOn S (decomp.polarPart s)
         γP.toPath.extend ε t) volume 0 1 :=
-    fun s hs ε hε =>
+    fun s hs ε hε ↦
       HungerbuhlerWasem.cpvIntegrandOn_polarPart_intervalIntegrable γ
         hS_in_U decomp hs h_null hε
   have h_sum_polar :=
     HasCauchyPVOn.finset_sum S h_polar_cpv h_polar_int
   have h_sum_polar_int : ∀ ε > 0, IntervalIntegrable
-      (fun t => cpvIntegrandOn S (fun z => ∑ s ∈ S, decomp.polarPart s z)
+      (fun t ↦ cpvIntegrandOn S (fun z ↦ ∑ s ∈ S, decomp.polarPart s z)
         γP.toPath.extend ε t) volume 0 1 := by
     intro ε hε
-    rw [show (fun t => cpvIntegrandOn S
-        (fun z => ∑ s ∈ S, decomp.polarPart s z) γP.toPath.extend ε t) =
-        (fun t => ∑ s ∈ S, cpvIntegrandOn S (decomp.polarPart s)
+    rw [show (fun t ↦ cpvIntegrandOn S
+        (fun z ↦ ∑ s ∈ S, decomp.polarPart s z) γP.toPath.extend ε t) =
+        (fun t ↦ ∑ s ∈ S, cpvIntegrandOn S (decomp.polarPart s)
           γP.toPath.extend ε t) from
-      funext fun _ => by
+      funext fun _ ↦ by
         simp only [cpvIntegrandOn]
         split_ifs
         · exact Finset.sum_const_zero.symm
         · rw [Finset.sum_mul],
-      show (fun t => ∑ s ∈ S, cpvIntegrandOn S (decomp.polarPart s)
-        γP.toPath.extend ε t) = ∑ s ∈ S, fun t => cpvIntegrandOn S (decomp.polarPart s)
-          γP.toPath.extend ε t from funext fun _ => (Finset.sum_apply _ _ _).symm]
-    exact IntervalIntegrable.sum S (fun s hs => h_polar_int s hs ε hε)
+      show (fun t ↦ ∑ s ∈ S, cpvIntegrandOn S (decomp.polarPart s)
+        γP.toPath.extend ε t) = ∑ s ∈ S, fun t ↦ cpvIntegrandOn S (decomp.polarPart s)
+          γP.toPath.extend ε t from funext fun _ ↦ (Finset.sum_apply _ _ _).symm]
+    exact IntervalIntegrable.sum S (fun s hs ↦ h_polar_int s hs ε hε)
   have h_decomp := HasCauchyPVOn.add h_rem_cpv h_sum_polar h_rem_int h_sum_polar_int
   rw [zero_add] at h_decomp
   simp only [HasCauchyPVOn] at h_decomp ⊢
   refine h_decomp.congr' ?_
   filter_upwards [self_mem_nhdsWithin] with ε (hε : 0 < ε)
-  refine intervalIntegral.integral_congr fun t ht => ?_
+  refine intervalIntegral.integral_congr fun t ht ↦ ?_
   rw [uIcc_of_le (zero_le_one' ℝ)] at ht
   exact (cpvIntegrandOn_eq_of_decomp decomp (hγ_in_U t ht) hε).symm
 
@@ -264,20 +264,20 @@ theorem cpv_polarPart_at_uncrossed_pole
   have h_deriv_int : IntervalIntegrable (deriv γP.toPath.extend) MeasureTheory.volume 0 1 :=
     HungerbuhlerWasem.deriv_intervalIntegrable_of_lipschitz γP hLip
   have h_cont_inv_each : ∀ k : Fin (decomp.order s), ContinuousOn
-      (fun t => decomp.coeff s k / (γP.toPath.extend t - s) ^ (k.val + 1))
-      (Icc (0 : ℝ) 1) := fun k => ContinuousOn.div continuousOn_const
+      (fun t ↦ decomp.coeff s k / (γP.toPath.extend t - s) ^ (k.val + 1))
+      (Icc (0 : ℝ) 1) := fun k ↦ ContinuousOn.div continuousOn_const
       ((γP.toPath.continuous_extend.continuousOn.sub continuousOn_const).pow _)
-      fun t ht hzero =>
+      fun t ht hzero ↦
         h_avoid t ht (sub_eq_zero.mp (pow_eq_zero_iff (Nat.succ_pos _).ne' |>.mp hzero))
   have h_pp_curve_cont : ContinuousOn
-      (fun t => decomp.polarPart s (γP.toPath.extend t)) (uIcc (0 : ℝ) 1) := by
+      (fun t ↦ decomp.polarPart s (γP.toPath.extend t)) (uIcc (0 : ℝ) 1) := by
     rw [uIcc_of_le (zero_le_one' ℝ)]
     have h_sum_cont : ContinuousOn
-        (fun t => ∑ k : Fin (decomp.order s),
+        (fun t ↦ ∑ k : Fin (decomp.order s),
           decomp.coeff s k / (γP.toPath.extend t - s) ^ (k.val + 1))
         (Icc (0 : ℝ) 1) :=
-      continuousOn_finsetSum _ fun k _ => h_cont_inv_each k
-    refine h_sum_cont.congr fun t ht => ?_
+      continuousOn_finsetSum _ fun k _ ↦ h_cont_inv_each k
+    refine h_sum_cont.congr fun t ht ↦ ?_
     change decomp.polarPart s (γP.toPath.extend t) =
       ∑ k : Fin (decomp.order s),
         decomp.coeff s k / (γP.toPath.extend t - s) ^ (k.val + 1)
@@ -291,21 +291,21 @@ theorem cpv_polarPart_at_uncrossed_pole
         2 * ↑Real.pi * I * generalizedWindingNumber γP s * residue f s := by
     have h_int_each : ∀ k : Fin (decomp.order s),
         IntervalIntegrable
-          (fun t => decomp.coeff s k /
+          (fun t ↦ decomp.coeff s k /
             (γP.toPath.extend t - s) ^ (k.val + 1) *
             deriv γP.toPath.extend t) volume 0 1 :=
-      fun k => h_deriv_int.continuousOn_mul ((h_cont_inv_each k).mono
+      fun k ↦ h_deriv_int.continuousOn_mul ((h_cont_inv_each k).mono
         (by rw [uIcc_of_le (zero_le_one' ℝ)]))
     have h_polarPart_curve : ∀ t ∈ Icc (0 : ℝ) 1,
         decomp.polarPart s (γP.toPath.extend t) =
           ∑ k : Fin (decomp.order s),
             decomp.coeff s k / (γP.toPath.extend t - s) ^ (k.val + 1) :=
-      fun t ht => decomp.polarPart_eq s hs (γP.toPath.extend t) (h_avoid t ht)
+      fun t ht ↦ decomp.polarPart_eq s hs (γP.toPath.extend t) (h_avoid t ht)
     have h_int_eq : γP.contourIntegral (decomp.polarPart s) =
-        γP.contourIntegral (fun z => ∑ k : Fin (decomp.order s),
+        γP.contourIntegral (fun z ↦ ∑ k : Fin (decomp.order s),
           decomp.coeff s k / (z - s) ^ (k.val + 1)) := by
       simp only [PiecewiseC1Path.contourIntegral]
-      refine intervalIntegral.integral_congr fun t ht => ?_
+      refine intervalIntegral.integral_congr fun t ht ↦ ?_
       rw [uIcc_of_le (zero_le_one' ℝ)] at ht
       change decomp.polarPart s (γP.toPath.extend t) * deriv γP.toPath.extend t =
         (∑ k : Fin (decomp.order s),
@@ -314,17 +314,17 @@ theorem cpv_polarPart_at_uncrossed_pole
       rw [h_polarPart_curve t ht]
     rw [h_int_eq]
     rw [PiecewiseC1Path.contourIntegral_finset_sum Finset.univ
-      (fun k z => decomp.coeff s k / (z - s) ^ (k.val + 1)) γP (fun k _ => h_int_each k)]
+      (fun k z ↦ decomp.coeff s k / (z - s) ^ (k.val + 1)) γP (fun k _ ↦ h_int_each k)]
     by_cases h_order_pos : 0 < decomp.order s
     · have h_split := Finset.sum_eq_single_of_mem
         (s := (Finset.univ : Finset (Fin (decomp.order s))))
         (a := ⟨0, h_order_pos⟩)
-        (f := fun k : Fin (decomp.order s) =>
-          γP.contourIntegral (fun z => decomp.coeff s k / (z - s) ^ (k.val + 1)))
+        (f := fun k : Fin (decomp.order s) ↦
+          γP.contourIntegral (fun z ↦ decomp.coeff s k / (z - s) ^ (k.val + 1)))
         (Finset.mem_univ _)
-        (fun k _ hk_ne => by
+        (fun k _ hk_ne ↦ by
           have hk_ge_1 : k.val ≥ 1 := by
-            have : k.val ≠ 0 := fun h => hk_ne (Fin.ext h)
+            have : k.val ≠ 0 := fun h ↦ hk_ne (Fin.ext h)
             lia
           exact contourIntegral_higherOrder_eq_zero_of_avoids γP h_avoid (by lia)
             _ (h_int_each k))
@@ -334,18 +334,18 @@ theorem cpv_polarPart_at_uncrossed_pole
         ((decomp.residue_eq s hs).trans (dif_pos h_order_pos)).symm]
       set w := generalizedWindingNumber γP s with hw_def
       have h_winding_int_eq :
-          γP.contourIntegral (fun z => (z - s)⁻¹) = 2 * ↑Real.pi * I * w := by
+          γP.contourIntegral (fun z ↦ (z - s)⁻¹) = 2 * ↑Real.pi * I * w := by
         unfold generalizedWindingNumber at hw_def
-        rw [(hasCauchyPV_of_avoids (f := fun z => (z - s)⁻¹) (γ := γP) (z₀ := s)
-          ⟨δ, hδ_pos, fun t ht => hδ_bound t ht⟩).cauchyPV_eq] at hw_def
+        rw [(hasCauchyPV_of_avoids (f := fun z ↦ (z - s)⁻¹) (γ := γP) (z₀ := s)
+          ⟨δ, hδ_pos, fun t ht ↦ hδ_bound t ht⟩).cauchyPV_eq] at hw_def
         rw [hw_def, mul_inv_cancel_left₀ (by norm_num [Real.pi_ne_zero, Complex.I_ne_zero])]
       simp only [div_eq_mul_inv, PiecewiseC1Path.contourIntegral_smul, h_winding_int_eq]
       ring
     · rw [show residue f s = 0 by rw [decomp.residue_eq s hs, dif_neg h_order_pos],
         mul_zero]
-      exact Finset.sum_eq_zero fun k _ => absurd k.isLt (by lia)
+      exact Finset.sum_eq_zero fun k _ ↦ absurd k.isLt (by lia)
   have h_meas : ∀ᶠ ε in 𝓝[>] (0 : ℝ), AEStronglyMeasurable
-      (fun t => cpvIntegrandOn S (decomp.polarPart s)
+      (fun t ↦ cpvIntegrandOn S (decomp.polarPart s)
         γP.toPath.extend ε t)
       (MeasureTheory.volume.restrict (Set.uIoc (0 : ℝ) 1)) := by
     filter_upwards [self_mem_nhdsWithin] with ε (hε : 0 < ε)
@@ -356,14 +356,14 @@ theorem cpv_polarPart_at_uncrossed_pole
       ‖cpvIntegrandOn S (decomp.polarPart s) γP.toPath.extend ε x‖ ≤
         ‖PiecewiseC1Path.contourIntegrand (decomp.polarPart s) γP x‖ := by
     filter_upwards [self_mem_nhdsWithin] with ε (hε : 0 < ε)
-    refine MeasureTheory.ae_of_all _ fun t _ => ?_
+    refine MeasureTheory.ae_of_all _ fun t _ ↦ ?_
     rw [HungerbuhlerWasem.cpvIntegrandOn_eq_indicator_compl γP S
       (decomp.polarPart s) ε t]
     by_cases ht_in : t ∈ (HungerbuhlerWasem.cpv_badSet γP S ε)ᶜ
     · rw [Set.indicator_of_mem ht_in]
     · rw [Set.indicator_of_notMem ht_in, norm_zero]; exact norm_nonneg _
   have h_pointwise : ∀ᵐ x ∂MeasureTheory.volume, x ∈ Set.uIoc (0 : ℝ) 1 →
-      Tendsto (fun ε => cpvIntegrandOn S (decomp.polarPart s)
+      Tendsto (fun ε ↦ cpvIntegrandOn S (decomp.polarPart s)
           γP.toPath.extend ε x) (𝓝[>] 0)
         (𝓝 (PiecewiseC1Path.contourIntegrand (decomp.polarPart s) γP x)) :=
     (MeasureTheory.ae_restrict_iff' measurableSet_uIoc).mp
@@ -374,7 +374,7 @@ theorem cpv_polarPart_at_uncrossed_pole
       generalizedWindingNumber γP s * residue f s : ℂ) =
       γP.contourIntegral (decomp.polarPart s) from h_contourInt.symm]
   exact intervalIntegral.tendsto_integral_filter_of_dominated_convergence
-    (fun t => ‖PiecewiseC1Path.contourIntegrand (decomp.polarPart s) γP t‖)
+    (fun t ↦ ‖PiecewiseC1Path.contourIntegrand (decomp.polarPart s) γP t‖)
     h_meas h_bound h_full.norm h_pointwise
 
 /-- **Laurent polynomial uniqueness — vanishing form.**
@@ -390,7 +390,7 @@ term survives, as it has exponent 0); the analytic side equals `0^N · g(s) = 0`
 when `N ≥ 1`. Hence `c_{N-1} = 0`. Induct down. -/
 private theorem laurent_polynomial_zero_of_eventuallyEq_analytic :
     ∀ (N : ℕ) (c : Fin N → ℂ) {s : ℂ} {g : ℂ → ℂ}, AnalyticAt ℂ g s →
-      (fun z => ∑ k : Fin N, c k / (z - s) ^ (k.val + 1)) =ᶠ[𝓝[≠] s] g →
+      (fun z ↦ ∑ k : Fin N, c k / (z - s) ^ (k.val + 1)) =ᶠ[𝓝[≠] s] g →
       ∀ k : Fin N, c k = 0 := by
   classical
   intro N
@@ -400,10 +400,10 @@ private theorem laurent_polynomial_zero_of_eventuallyEq_analytic :
     exact absurd k.isLt (by lia)
   | succ N ih =>
     intro c s g hg h_eq
-    set P : ℂ → ℂ := fun z => ∑ k : Fin (N + 1), c k * (z - s) ^ (N - k.val) with hP_def
-    set Q : ℂ → ℂ := fun z => (z - s) ^ (N + 1) * g z with hQ_def
+    set P : ℂ → ℂ := fun z ↦ ∑ k : Fin (N + 1), c k * (z - s) ^ (N - k.val) with hP_def
+    set Q : ℂ → ℂ := fun z ↦ (z - s) ^ (N + 1) * g z with hQ_def
     have hP_an : AnalyticAt ℂ P s := by
-      refine Finset.analyticAt_fun_sum _ fun k _ => ?_
+      refine Finset.analyticAt_fun_sum _ fun k _ ↦ ?_
       exact analyticAt_const.mul ((analyticAt_id.sub analyticAt_const).pow _)
     have hQ_an : AnalyticAt ℂ Q s :=
       ((analyticAt_id.sub analyticAt_const).pow (N + 1)).mul hg
@@ -413,7 +413,7 @@ private theorem laurent_polynomial_zero_of_eventuallyEq_analytic :
       have h_lhs : P z = (z - s) ^ (N + 1) *
           (∑ k : Fin (N + 1), c k / (z - s) ^ (k.val + 1)) := by
         rw [hP_def, Finset.mul_sum]
-        refine Finset.sum_congr rfl fun k _ => ?_
+        refine Finset.sum_congr rfl fun k _ ↦ ?_
         rw [div_eq_mul_inv, show (z - s) ^ (N + 1) =
           (z - s) ^ (N - k.val) * (z - s) ^ (k.val + 1) by
             rw [← pow_add]; congr 1; omega]
@@ -426,17 +426,17 @@ private theorem laurent_polynomial_zero_of_eventuallyEq_analytic :
       change (∑ k : Fin (N + 1), c k * (s - s) ^ (N - k.val)) =
         c ⟨N, Nat.lt_succ_self _⟩
       rw [sub_self, Finset.sum_eq_single (⟨N, Nat.lt_succ_self _⟩ : Fin (N + 1))
-        (fun k _ hk => by
+        (fun k _ hk ↦ by
           rw [zero_pow (Nat.pos_iff_ne_zero.mp <| Nat.sub_pos_of_lt <|
-            (Nat.lt_succ_iff.mp k.isLt).lt_of_ne fun h => hk (Fin.ext h)), mul_zero])
-        (fun h => absurd (Finset.mem_univ _) h)]
+            (Nat.lt_succ_iff.mp k.isLt).lt_of_ne fun h ↦ hk (Fin.ext h)), mul_zero])
+        (fun h ↦ absurd (Finset.mem_univ _) h)]
       simp
     have hcN_zero : c ⟨N, Nat.lt_succ_self _⟩ = 0 := by
       rw [← hPs, h_PQ_full.eq_of_nhds]
       change (s - s) ^ (N + 1) * g s = 0
       rw [sub_self, zero_pow (Nat.succ_ne_zero N), zero_mul]
-    set c' : Fin N → ℂ := fun k => c k.castSucc
-    have h_eq' : (fun z => ∑ k : Fin N, c' k / (z - s) ^ (k.val + 1)) =ᶠ[𝓝[≠] s] g := by
+    set c' : Fin N → ℂ := fun k ↦ c k.castSucc
+    have h_eq' : (fun z ↦ ∑ k : Fin N, c' k / (z - s) ^ (k.val + 1)) =ᶠ[𝓝[≠] s] g := by
       filter_upwards [h_eq] with z hz
       rw [show ∑ k : Fin N, c' k / (z - s) ^ (k.val + 1) =
           ∑ k : Fin (N + 1), c k / (z - s) ^ (k.val + 1) from ?_]
@@ -461,26 +461,26 @@ private lemma laurent_sum_extend {N M : ℕ} (hNM : N ≤ M) (c : Fin N → ℂ)
         (if hj : j.val < N then c ⟨j.val, hj⟩ else (0 : ℂ)) /
           (z - s) ^ (j.val + 1) := by
   classical
-  have h_emb : Function.Injective (fun k : Fin N => (⟨k.val, lt_of_lt_of_le k.isLt hNM⟩ : Fin M)) := by
+  have h_emb : Function.Injective (fun k : Fin N ↦ (⟨k.val, lt_of_lt_of_le k.isLt hNM⟩ : Fin M)) := by
     intro a b hab; ext; exact Fin.mk.inj_iff.mp hab
   rw [show (∑ j : Fin M, (if hj : j.val < N then c ⟨j.val, hj⟩ else (0 : ℂ)) /
         (z - s) ^ (j.val + 1)) =
-      ∑ j ∈ (Finset.univ : Finset (Fin M)).filter (fun j => j.val < N),
+      ∑ j ∈ (Finset.univ : Finset (Fin M)).filter (fun j ↦ j.val < N),
         (if hj : j.val < N then c ⟨j.val, hj⟩ else (0 : ℂ)) /
           (z - s) ^ (j.val + 1) from ?_]
   · have h_image : (Finset.univ : Finset (Fin N)).image
-        (fun k => (⟨k.val, lt_of_lt_of_le k.isLt hNM⟩ : Fin M)) =
-        (Finset.univ : Finset (Fin M)).filter (fun j => j.val < N) := by
+        (fun k ↦ (⟨k.val, lt_of_lt_of_le k.isLt hNM⟩ : Fin M)) =
+        (Finset.univ : Finset (Fin M)).filter (fun j ↦ j.val < N) := by
       ext j
       simp only [Finset.mem_image, Finset.mem_univ, true_and, Finset.mem_filter]
       refine ⟨?_, ?_⟩
       · rintro ⟨k, hk⟩; rw [← hk]; exact k.isLt
       · intro hj; exact ⟨⟨j.val, hj⟩, by ext; rfl⟩
-    rw [← h_image, Finset.sum_image (fun a _ b _ h => h_emb h)]
-    refine Finset.sum_congr rfl fun k _ => ?_
+    rw [← h_image, Finset.sum_image (fun a _ b _ h ↦ h_emb h)]
+    refine Finset.sum_congr rfl fun k _ ↦ ?_
     rw [dif_pos k.isLt]
   · rw [Finset.sum_filter]
-    refine Finset.sum_congr rfl fun j _ => ?_
+    refine Finset.sum_congr rfl fun j _ ↦ ?_
     by_cases hj : j.val < N
     · rw [if_pos hj]
     · rw [if_neg hj, dif_neg hj, zero_div]
@@ -494,17 +494,17 @@ index `j`, the extended coefficients agree. -/
 private theorem laurent_extended_coeff_eq_of_diff_analytic
     {N₁ N₂ : ℕ} (c₁ : Fin N₁ → ℂ) (c₂ : Fin N₂ → ℂ)
     {s : ℂ} {h : ℂ → ℂ} (hh : AnalyticAt ℂ h s)
-    (h_diff : (fun z => (∑ k : Fin N₁, c₁ k / (z - s) ^ (k.val + 1)) -
+    (h_diff : (fun z ↦ (∑ k : Fin N₁, c₁ k / (z - s) ^ (k.val + 1)) -
                         (∑ k : Fin N₂, c₂ k / (z - s) ^ (k.val + 1))) =ᶠ[𝓝[≠] s] h) :
     ∀ j : ℕ,
       (if hj : j < N₁ then c₁ ⟨j, hj⟩ else (0 : ℂ)) =
       (if hj : j < N₂ then c₂ ⟨j, hj⟩ else (0 : ℂ)) := by
   classical
   set M : ℕ := max N₁ N₂
-  set d : Fin M → ℂ := fun j =>
+  set d : Fin M → ℂ := fun j ↦
     (if hj : j.val < N₁ then c₁ ⟨j.val, hj⟩ else (0 : ℂ)) -
     (if hj : j.val < N₂ then c₂ ⟨j.val, hj⟩ else (0 : ℂ)) with hd_def
-  have h_sum_eq : (fun z => ∑ j : Fin M, d j / (z - s) ^ (j.val + 1)) =ᶠ[𝓝[≠] s] h := by
+  have h_sum_eq : (fun z ↦ ∑ j : Fin M, d j / (z - s) ^ (j.val + 1)) =ᶠ[𝓝[≠] s] h := by
     filter_upwards [h_diff, self_mem_nhdsWithin] with z hz (hz_ne : z ≠ s)
     have h_d_split : (∑ j : Fin M, d j / (z - s) ^ (j.val + 1)) =
         (∑ j : Fin M,
@@ -514,7 +514,7 @@ private theorem laurent_extended_coeff_eq_of_diff_analytic
           (if hj : j.val < N₂ then c₂ ⟨j.val, hj⟩ else (0 : ℂ)) /
             (z - s) ^ (j.val + 1)) := by
       rw [← Finset.sum_sub_distrib]
-      refine Finset.sum_congr rfl fun j _ => ?_
+      refine Finset.sum_congr rfl fun j _ ↦ ?_
       rw [hd_def, sub_div]
     rw [h_d_split,
       ← laurent_sum_extend (le_max_left N₁ N₂) c₁ s z hz_ne,
@@ -527,8 +527,8 @@ private theorem laurent_extended_coeff_eq_of_diff_analytic
   · have hd_j_zero := hd_zero ⟨j, hj_M⟩
     rw [hd_def] at hd_j_zero
     exact sub_eq_zero.mp hd_j_zero
-  · rw [dif_neg fun h => hj_M (lt_of_lt_of_le h (le_max_left _ _)),
-      dif_neg fun h => hj_M (lt_of_lt_of_le h (le_max_right _ _))]
+  · rw [dif_neg fun h ↦ hj_M (lt_of_lt_of_le h (le_max_left _ _)),
+      dif_neg fun h ↦ hj_M (lt_of_lt_of_le h (le_max_right _ _))]
 
 /-- **Corner-friendly form of `angle_compat_of_condB`** (T-BR-Y10b).
 Drops the `h_t₀_off` hypothesis: returns the angle equation in terms of
@@ -551,38 +551,38 @@ theorem angle_compat_of_condB_anywhere
   have ht_Icc : t₀ ∈ Icc (0 : ℝ) 1 := Ioo_subset_Icc_self ht₀
   obtain ⟨N, a, g, hg, hf_eq, h_angles⟩ :=
     hCondB.laurent_compatible s hs t₀ ht_Icc h_at₀ ht₀
-  set hOther : ℂ → ℂ := fun z =>
+  set hOther : ℂ → ℂ := fun z ↦
     g z - decomp.analyticRemainder z -
       ∑ s' ∈ S.erase s, decomp.polarPart s' z
   have h_arem_an : AnalyticAt ℂ decomp.analyticRemainder s :=
     decomp.analyticRemainder_diff.analyticAt
       (hU_open.mem_nhds (hS_in_U (Finset.mem_coe.mpr hs)))
   have h_otherPolar_an : AnalyticAt ℂ
-      (fun z => ∑ s' ∈ S.erase s, decomp.polarPart s' z) s := by
-    refine Finset.analyticAt_fun_sum _ fun s' hs' => ?_
+      (fun z ↦ ∑ s' ∈ S.erase s, decomp.polarPart s' z) s := by
+    refine Finset.analyticAt_fun_sum _ fun s' hs' ↦ ?_
     have hne : s' ≠ s := (Finset.mem_erase.mp hs').1
     have h_sum_an : AnalyticAt ℂ
-        (fun z => ∑ k : Fin (decomp.order s'),
+        (fun z ↦ ∑ k : Fin (decomp.order s'),
           decomp.coeff s' k / (z - s') ^ (k.val + 1)) s :=
-      Finset.analyticAt_fun_sum _ fun k _ =>
+      Finset.analyticAt_fun_sum _ fun k _ ↦
         analyticAt_const.div ((analyticAt_id.sub analyticAt_const).pow _)
           (pow_ne_zero _ (sub_ne_zero.mpr hne.symm))
     refine h_sum_an.congr ?_
     filter_upwards [isOpen_compl_singleton.mem_nhds
-      (show s ∈ ({s'}ᶜ : Set ℂ) from fun h_eq => hne h_eq.symm)] with z hz
+      (show s ∈ ({s'}ᶜ : Set ℂ) from fun h_eq ↦ hne h_eq.symm)] with z hz
     exact (decomp.polarPart_eq s' (Finset.mem_erase.mp hs').2 z hz).symm
   have hOther_an : AnalyticAt ℂ hOther s :=
     (hg.sub h_arem_an).sub h_otherPolar_an
-  have h_diff : (fun z => (∑ k : Fin (decomp.order s),
+  have h_diff : (fun z ↦ (∑ k : Fin (decomp.order s),
         decomp.coeff s k / (z - s) ^ (k.val + 1)) -
       (∑ k : Fin N, a k / (z - s) ^ (k.val + 1))) =ᶠ[𝓝[≠] s] hOther := by
     filter_upwards [hf_eq, self_mem_nhdsWithin,
       nhdsWithin_le_nhds (hU_open.mem_nhds (hS_in_U (Finset.mem_coe.mpr hs))),
       nhdsWithin_le_nhds ((S.erase s).finite_toSet.isClosed.isOpen_compl.mem_nhds
-        (show s ∉ (↑(S.erase s) : Set ℂ) from fun h_mem =>
+        (show s ∉ (↑(S.erase s) : Set ℂ) from fun h_mem ↦
           (Finset.mem_erase.mp (Finset.mem_coe.mp h_mem)).1 rfl))]
       with z hz hz_ne hz_U hz_not_other
-    have hz_not_S : z ∉ (↑S : Set ℂ) := fun h_mem => by
+    have hz_not_S : z ∉ (↑S : Set ℂ) := fun h_mem ↦ by
       by_cases h_eq : z = s
       · exact hz_ne h_eq
       · exact hz_not_other (Finset.mem_coe.mpr
@@ -628,7 +628,7 @@ theorem angle_compat_of_condB
     (h_at₀ : γ.toPwC1Immersion.toPiecewiseC1Path t₀ = s)
     (h_t₀_off : t₀ ∉ γ.toPwC1Immersion.toPiecewiseC1Path.partition) :
     ∀ (k : Fin (decomp.order s)), 1 ≤ k.val → decomp.coeff s k ≠ 0 →
-      ∃ m : ℤ, ((k.val : ℝ)) * Real.pi = (m : ℝ) * (2 * Real.pi) := fun k hk hk_ne => by
+      ∃ m : ℤ, ((k.val : ℝ)) * Real.pi = (m : ℝ) * (2 * Real.pi) := fun k hk hk_ne ↦ by
   have := angle_compat_of_condB_anywhere hU_open hS_in_U γ decomp hCondB hs ht₀ h_at₀
     k hk hk_ne
   rwa [angleAtCrossing_smooth γ.toPwC1Immersion t₀ ht₀ h_t₀_off] at this
@@ -681,19 +681,19 @@ theorem crossings_finset_of_endpts_off
     simp only [show (γ.toPwC1Immersion : ℝ → ℂ) 0 =
       γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend 0 from rfl,
       γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend_zero]
-    exact fun h_eq => hx_notin_S (h_eq ▸ hs)
+    exact fun h_eq ↦ hx_notin_S (h_eq ▸ hs)
   have h1_ne : (γ.toPwC1Immersion : ℝ → ℂ) 1 ≠ s := by
     simp only [show (γ.toPwC1Immersion : ℝ → ℂ) 1 =
       γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend 1 from rfl,
       γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend_one]
-    exact fun h_eq => hx_notin_S (h_eq ▸ hs)
+    exact fun h_eq ↦ hx_notin_S (h_eq ▸ hs)
   have hfin : Set.Finite (γ.toPwC1Immersion.crossingSet s) :=
     PwC1Immersion.crossingSet_finite γ.toPwC1Immersion s h0_ne h1_ne
   refine ⟨hfin.toFinset, ?_, ?_, ?_⟩
   · intro t ht
     rw [Set.Finite.mem_toFinset] at ht
-    refine ⟨lt_of_le_of_ne ht.1.1 fun h_eq => h0_ne ?_,
-            lt_of_le_of_ne ht.1.2 fun h_eq => h1_ne ?_⟩
+    refine ⟨lt_of_le_of_ne ht.1.1 fun h_eq ↦ h0_ne ?_,
+            lt_of_le_of_ne ht.1.2 fun h_eq ↦ h1_ne ?_⟩
     · rw [← h_eq] at ht; exact ht.2
     · rw [h_eq] at ht; exact ht.2
   · intro t ht
@@ -733,15 +733,15 @@ theorem canonical_derivLimits_at_crossings_exists
       (∀ t ∈ crossings,
         Tendsto (deriv γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend)
           (𝓝[<] t) (𝓝 (L_minus t))) := by
-  refine ⟨fun t =>
+  refine ⟨fun t ↦
     if h_part : t ∈ γ.toPwC1Immersion.toPiecewiseC1Path.partition then
       Classical.choose (γ.toPwC1Immersion.right_deriv_limit t h_part)
     else deriv γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t,
-    fun t =>
+    fun t ↦
     if h_part : t ∈ γ.toPwC1Immersion.toPiecewiseC1Path.partition then
       Classical.choose (γ.toPwC1Immersion.left_deriv_limit t h_part)
     else deriv γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t,
-    fun _ _ => rfl, fun _ _ => rfl, ?_, ?_, ?_, ?_⟩
+    fun _ _ ↦ rfl, fun _ _ ↦ rfl, ?_, ?_, ?_, ?_⟩
   · intro t ht
     by_cases h_part : t ∈ γ.toPwC1Immersion.toPiecewiseC1Path.partition
     · simpa [dif_pos h_part] using
