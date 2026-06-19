@@ -249,7 +249,7 @@ theorem exists_algHom_ker_eq_of_finrank_quotient_eq_one (I : Ideal W.CoordinateR
     rw [Algebra.bijective_algebraMap_iff]
     exact ((Subalgebra.bot_eq_top_iff_finrank_eq_one).mpr hfin).symm
   let ψ := (AlgEquiv.ofBijective (Algebra.ofId F _) hbij).symm
-  refine ⟨ψ.toAlgHom.comp (Ideal.Quotient.mkₐ F I), fun r => ?_⟩
+  refine ⟨ψ.toAlgHom.comp (Ideal.Quotient.mkₐ F I), fun r ↦ ?_⟩
   rw [AlgHom.comp_apply]
   change r ∈ I ↔ ψ (Ideal.Quotient.mkₐ F I r) = 0
   rw [map_eq_zero_iff ψ ψ.injective, Ideal.Quotient.mkₐ_eq_mk, Ideal.Quotient.eq_zero_iff_mem]
@@ -396,8 +396,8 @@ theorem idealNatDegree_relNorm_mul [W.IsElliptic] {I J : Ideal W.CoordinateRing}
     idealNatDegree (Ideal.relNorm F[X] (I * J))
       = idealNatDegree (Ideal.relNorm F[X] I) + idealNatDegree (Ideal.relNorm F[X] J) := by
   rw [map_mul (Ideal.relNorm F[X])]
-  exact idealNatDegree_mul (fun h => hI (Ideal.relNorm_eq_bot_iff.mp h))
-    (fun h => hJ (Ideal.relNorm_eq_bot_iff.mp h))
+  exact idealNatDegree_mul (fun h ↦ hI (Ideal.relNorm_eq_bot_iff.mp h))
+    (fun h ↦ hJ (Ideal.relNorm_eq_bot_iff.mp h))
 
 omit [DecidableEq F] in
 /-- **Principal-ideal codimension via the norm degree.** For a nonzero `a ∈ R`, the relative-norm
@@ -421,12 +421,12 @@ theorem finrank_quotient_eq_sum_smithCoeffs [W.IsElliptic] (I : Ideal W.Coordina
   classical
   haveI hFree : ∀ i, Module.Free F
       (F[X] ⧸ Ideal.span ({Ideal.smithCoeffs (CoordinateRing.basis W) I hI i} : Set F[X])) :=
-    fun i => inferInstance
+    fun i ↦ inferInstance
   haveI hFin : ∀ i, Module.Finite F
       (F[X] ⧸ Ideal.span ({Ideal.smithCoeffs (CoordinateRing.basis W) I hI i} : Set F[X])) :=
-    fun i => inferInstance
+    fun i ↦ inferInstance
   rw [Ideal.finrank_quotient_eq_sum (I := I) (hI := hI) F (CoordinateRing.basis W)]
-  exact Finset.sum_congr rfl (fun i _ => finrank_quotient_span_eq_natDegree)
+  exact Finset.sum_congr rfl (fun i _ ↦ finrank_quotient_span_eq_natDegree)
 
 omit [DecidableEq F] in
 /-- `a • I = ⟨a⟩ * I` for an element `a` and an ideal `I`: scaling an ideal by `a` is the same as
@@ -533,7 +533,6 @@ private noncomputable def quotEquivOneCoeIdealQuot_aux [W.IsElliptic] {J : Ideal
     rw [Submodule.mem_comap]
     change (ν r : K) ∈ (↑J : FractionalIdeal R⁰ K).coeToSubmodule
     have hν : (ν r : K) = algebraMap R K r := by
-      change ((ν r : (1 : FractionalIdeal R⁰ K).coeToSubmodule) : K) = algebraMap R K r
       rw [show ν r = (LinearEquiv.ofEq _ _ hone)
           (LinearEquiv.ofInjective (Algebra.linearMap R K) hinj r) from rfl,
         LinearEquiv.coe_ofEq_apply, LinearEquiv.ofInjective_apply, Algebra.linearMap_apply]
@@ -810,7 +809,7 @@ theorem exists_mem_norm_natDegree_le [W.IsElliptic] (I : Ideal W.CoordinateRing)
   haveI : Nontrivial (LinearMap.ker ψ) := Module.nontrivial_of_finrank_pos hker_pos
   obtain ⟨z, hz⟩ := exists_ne (0 : LinearMap.ker ψ)
   set pq := (z : Polynomial.degreeLT F da × Polynomial.degreeLT F db) with hpq
-  have hpq_ne : pq ≠ 0 := fun h => hz (Subtype.ext h)
+  have hpq_ne : pq ≠ 0 := fun h ↦ hz (Subtype.ext h)
   refine ⟨basisCombMap W da db pq, ?_, basisCombMap_ne_zero pq hpq_ne, ?_⟩
   · have hz0 : ψ pq = 0 := z.2
     rw [hψ, LinearMap.comp_apply, LinearMap.restrictScalars_apply, Submodule.mkQ_apply,
