@@ -26,20 +26,20 @@ noncomputable section
 
 /-- CPV of `(z - rho)^{-1}` exists along `fdBoundary_H H` for `H > sqrt(3)/2`. -/
 theorem cpv_exists_at_rho (H : ℝ) (hH : Real.sqrt 3 / 2 < H) :
-    CauchyPrincipalValueExists' (fun z => (z - ellipticPointRho)⁻¹)
+    CauchyPrincipalValueExists' (fun z ↦ (z - ellipticPointRho)⁻¹)
       (fdBoundary_H H) 0 5 ellipticPointRho :=
   cpv_exists_from_shifted_tendsto (fdBoundary_H H) 0 5 _ _ (pv_integral_at_rho_tendsto H hH)
 
 /-- CPV of `(z - rho')^{-1}` exists along `fdBoundary_H H` for `H > sqrt(3)/2`. -/
 theorem cpv_exists_at_rho_plus_one (H : ℝ) (hH : Real.sqrt 3 / 2 < H) :
-    CauchyPrincipalValueExists' (fun z => (z - ellipticPointRhoPlusOne)⁻¹)
+    CauchyPrincipalValueExists' (fun z ↦ (z - ellipticPointRhoPlusOne)⁻¹)
       (fdBoundary_H H) 0 5 ellipticPointRhoPlusOne :=
   cpv_exists_from_shifted_tendsto (fdBoundary_H H) 0 5 _ _
     (pv_integral_at_rho_plus_one_tendsto H hH)
 
 /-- CPV of `(z - I)^{-1}` exists along `fdBoundary_H H` for `H > 1`. -/
 theorem cpv_exists_at_i (H : ℝ) (hH : 1 < H) :
-    CauchyPrincipalValueExists' (fun z => (z - I)⁻¹) (fdBoundary_H H) 0 5 I :=
+    CauchyPrincipalValueExists' (fun z ↦ (z - I)⁻¹) (fdBoundary_H H) 0 5 I :=
   cpv_exists_from_shifted_tendsto (fdBoundary_H H) 0 5 _ _ (pv_integral_at_i_tendsto H hH)
 
 lemma fdBoundary_H_seg1_re' (H : ℝ) {t : ℝ} (_ht0 : 0 ≤ t) (ht1 : t ≤ 1) :
@@ -80,22 +80,22 @@ lemma cpv_exists_on_smooth_subinterval (H : ℝ) (_hH : Real.sqrt 3 / 2 < H)
     (hL_ne : deriv (fdBoundary_H H) t₀ ≠ 0)
     (hγ_cont_deriv : ContinuousOn (deriv (fdBoundary_H H)) (Set.Icc a' b'))
     (h_inj : ∀ t ∈ Set.Icc a' b', fdBoundary_H H t = fdBoundary_H H t₀ → t = t₀) :
-    CauchyPrincipalValueExists' (fun z => (z - s)⁻¹) (fdBoundary_H H) a' b' s := by
+    CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹) (fdBoundary_H H) a' b' s := by
   have hγ_meas : Measurable (fdBoundary_H H) := (fdBoundary_H_continuous H).measurable
   have hγ_cont : ContinuousOn (fdBoundary_H H) (Set.Icc a' b') :=
     (fdBoundary_H_continuous H).continuousOn
   obtain ⟨limit, h_limit⟩ := pv_limit_via_dyadic hat₀ hL_ne hγ_C2 rfl
     hγ_cont_deriv hγ_meas hγ_cont h_inj
-  exact ⟨limit, h_limit.congr (fun ε => intervalIntegral.integral_congr
-    (fun t _ => by rw [hs]))⟩
+  exact ⟨limit, h_limit.congr (fun ε ↦ intervalIntegral.integral_congr
+    (fun t _ ↦ by rw [hs]))⟩
 
 private lemma fdBoundary_H_cutout_cont_inv (s : ℂ) (H : ℝ) (ε : ℝ) (hε : 0 < ε) :
-    ContinuousOn (fun z => (z - s)⁻¹) ((fdBoundary_H H) '' Set.Icc 0 5 \ Metric.ball s ε) := by
+    ContinuousOn (fun z ↦ (z - s)⁻¹) ((fdBoundary_H H) '' Set.Icc 0 5 \ Metric.ball s ε) := by
   apply ContinuousOn.inv₀
   · exact continuousOn_id.sub continuousOn_const
   · intro z ⟨_, hz_ball⟩
     simp only [Metric.mem_ball, not_lt] at hz_ball
-    refine sub_ne_zero.mpr fun heq => ?_
+    refine sub_ne_zero.mpr fun heq ↦ ?_
     subst heq
     simp [dist_self] at hz_ball
     linarith
@@ -103,10 +103,10 @@ private lemma fdBoundary_H_cutout_cont_inv (s : ℂ) (H : ℝ) (ε : ℝ) (hε :
 private lemma fdBoundary_H_cutout_bound (H : ℝ) (hH : Real.sqrt 3 / 2 < H)
     (s : ℂ) (ε : ℝ) (hε : 0 < ε) :
     ∃ C : ℝ, ∀ t ∈ Set.Icc (0:ℝ) 5,
-      ‖(fun t => if ε < ‖fdBoundary_H H t - s‖ then (fdBoundary_H H t - s)⁻¹ *
+      ‖(fun t ↦ if ε < ‖fdBoundary_H H t - s‖ then (fdBoundary_H H t - s)⁻¹ *
         deriv (fdBoundary_H H) t else 0) t‖ ≤ C := by
   obtain ⟨M, hM_pos, hM_bound⟩ := fdBoundary_H_deriv_bound_ex hH
-  refine ⟨ε⁻¹ * M, fun t _ht => ?_⟩
+  refine ⟨ε⁻¹ * M, fun t _ht ↦ ?_⟩
   simp only
   split_ifs with h
   · calc ‖(fdBoundary_H H t - s)⁻¹ * deriv (fdBoundary_H H) t‖
@@ -132,11 +132,11 @@ private lemma fdBoundary_H_cutout_bound (H : ℝ) (hH : Real.sqrt 3 / 2 < H)
     exact mul_nonneg (inv_nonneg.mpr hε.le) hM_pos.le
 
 private lemma fdBoundary_H_cutout_meas (H : ℝ) (s : ℂ) (ε : ℝ) (hε : 0 < ε) :
-    AEStronglyMeasurable (fun t => if ε < ‖fdBoundary_H H t - s‖ then
+    AEStronglyMeasurable (fun t ↦ if ε < ‖fdBoundary_H H t - s‖ then
         (fdBoundary_H H t - s)⁻¹ * deriv (fdBoundary_H H) t else 0)
       (volume.restrict (Set.Icc 0 5)) :=
   aEStronglyMeasurable_pv_integrand_piecewiseC1
-    (f := fun z => (z - s)⁻¹) (γ := fdBoundary_H H) (a := 0) (b := 5)
+    (f := fun z ↦ (z - s)⁻¹) (γ := fdBoundary_H H) (a := 0) (b := 5)
     (z₀ := s) (ε := ε) (P := fdBoundary_H_partition) (fdBoundary_H_cutout_cont_inv s H ε hε)
     (fdBoundary_H_continuous H).continuousOn (fdBoundary_H_deriv_continuousOn_off_partition H)
 
@@ -144,7 +144,7 @@ private lemma fdBoundary_H_cutout_meas (H : ℝ) (s : ℂ) (ε : ℝ) (hε : 0 <
 on `[0, 5]`. Uses ae-measurability from piecewise C1 structure + uniform bound. -/
 lemma fdBoundary_H_cutout_ii (H : ℝ) (hH : Real.sqrt 3 / 2 < H)
     (s : ℂ) (ε : ℝ) (hε : 0 < ε) :
-    IntervalIntegrable (fun t => if ε < ‖fdBoundary_H H t - s‖ then
+    IntervalIntegrable (fun t ↦ if ε < ‖fdBoundary_H H t - s‖ then
         (fdBoundary_H H t - s)⁻¹ * deriv (fdBoundary_H H) t else 0)
       volume 0 5 := by
   obtain ⟨C, hC⟩ := fdBoundary_H_cutout_bound H hH s ε hε
@@ -161,21 +161,21 @@ and the curve avoids `s` on `[0, a']` and `[b', 5]`, then CPV exists on `[0, 5]`
 This combines `cpv_avoidance` on the complement and `cpv_concat` to glue. -/
 lemma cpv_extend_to_full_interval (H : ℝ) (hH : Real.sqrt 3 / 2 < H)
     (s : ℂ) (a' b' : ℝ) (ha' : 0 ≤ a') (hb' : b' ≤ 5) (hab' : a' < b')
-    (h_sub : CauchyPrincipalValueExists' (fun z => (z - s)⁻¹) (fdBoundary_H H) a' b' s)
+    (h_sub : CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹) (fdBoundary_H H) a' b' s)
     (h_avoid_left : ∀ t ∈ Set.Icc 0 a', fdBoundary_H H t ≠ s)
     (h_avoid_right : ∀ t ∈ Set.Icc b' 5, fdBoundary_H H t ≠ s) :
-    CauchyPrincipalValueExists' (fun z => (z - s)⁻¹) (fdBoundary_H H) 0 5 s := by
+    CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹) (fdBoundary_H H) 0 5 s := by
   have hγ_cont : ContinuousOn (fdBoundary_H H) (Set.Icc 0 5) :=
     (fdBoundary_H_continuous H).continuousOn
-  have h_cpv_left : CauchyPrincipalValueExists' (fun z => (z - s)⁻¹)
+  have h_cpv_left : CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹)
       (fdBoundary_H H) 0 a' s :=
     cpv_avoidance _ _ _ _ _ (hγ_cont.mono (Set.Icc_subset_Icc_right (hab'.le.trans hb')))
       ha' h_avoid_left
-  have h_cpv_right : CauchyPrincipalValueExists' (fun z => (z - s)⁻¹)
+  have h_cpv_right : CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹)
       (fdBoundary_H H) b' 5 s :=
     cpv_avoidance _ _ _ _ _ (hγ_cont.mono (Set.Icc_subset_Icc_left (ha'.trans hab'.le)))
       hb' h_avoid_right
-  have h_cpv_0b' : CauchyPrincipalValueExists' (fun z => (z - s)⁻¹)
+  have h_cpv_0b' : CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹)
       (fdBoundary_H H) 0 b' s := by
     apply cpv_concat _ _ 0 a' b' s h_cpv_left h_sub ha' hab'.le
     intro ε hε
