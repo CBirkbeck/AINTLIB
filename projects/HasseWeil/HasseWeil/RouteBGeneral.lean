@@ -408,7 +408,7 @@ theorem omegaCoeff_mulByInt_succ (k : ℤ) (hk2 : 2 ≤ k) :
 /-- `a_{[n]} = n` for `n ≥ 2`. -/
 theorem omegaCoeff_mulByInt_ge_two (n : ℤ) (hn : 2 ≤ n) :
     omegaPullbackCoeff W (mulByInt W.toAffine n) = algebraMap F KE n := by
-  induction n, hn using Int.le_induction with
+  induction n, hn using Int.leInduction with
   | base => exact omegaPullbackCoeff_mulByInt_two W
   | succ k hk2 ih =>
     rw [omegaCoeff_mulByInt_succ W k hk2, ih, Int.cast_add, Int.cast_one, map_add,
