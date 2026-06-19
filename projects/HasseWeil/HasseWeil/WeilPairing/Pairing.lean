@@ -106,7 +106,7 @@ theorem mulByEllTorsionHom_surjective (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0) :
   have hker_le : Nat.card (mulByEllTorsionHom W ℓ).ker ≤
       Nat.card W.toAffine[(ℓ : ℤ)] := by
     refine Nat.card_le_card_of_injective
-      (f := fun P : (mulByEllTorsionHom W ℓ).ker =>
+      (f := fun P : (mulByEllTorsionHom W ℓ).ker ↦
         (⟨P.val.val, by
           rw [mem_torsionSubgroup]
           have hP0 : (mulByEllTorsionHom W ℓ) P.val = 0 := P.property
