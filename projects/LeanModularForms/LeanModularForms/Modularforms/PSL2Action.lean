@@ -59,7 +59,6 @@ private def pslSmul : PSL(2, ℤ) → ℍ → ℍ :=
   Quotient.lift (fun (a : SL(2, ℤ)) (τ : ℍ) ↦ a • τ) (by
     intro a b hab
     funext τ
-    change a • τ = b • τ
     rw [show b = a * (a⁻¹ * b) by group, mul_smul,
       center_SL2Z_smul_eq _ (QuotientGroup.leftRel_apply.mp hab)])
 
@@ -477,7 +476,6 @@ private def pslSmul_R : PSL(2, ℝ) → ℍ → ℍ :=
   Quotient.lift (fun (a : SL(2, ℝ)) (τ : ℍ) ↦ a • τ) (by
     intro a b hab
     funext τ
-    change a • τ = b • τ
     rw [show b = a * (a⁻¹ * b) by group, mul_smul,
       center_SL2R_smul_eq _ (QuotientGroup.leftRel_apply.mp hab)])
 
