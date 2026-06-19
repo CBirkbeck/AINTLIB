@@ -313,7 +313,7 @@ noncomputable def oneSubECIsogeny (hq : 2 ≤ Fintype.card K) :
       exact le_top
     · have hpb0 : (oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
           (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)).pullback f ≠ 0 :=
-        fun h0 => hf0 ((oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
+        fun h0 ↦ hf0 ((oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
           (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)).pullback_injective
           (h0.trans (map_zero _).symm))
       have htr : ((⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
@@ -419,7 +419,7 @@ noncomputable def oneSubHasCanonicalDualWitness (hq : 2 ≤ Fintype.card K) :
     (oneSub_mulByInt_deg_rangeIncl W p r hq)
     (EC.mulByIntBasepoint_holds (W.baseChange (AlgebraicClosure K)).toAffine
       (oneSubECIsogeny W p r hq).intDegree_ne_zero)
-    (fun g hg => EC.Isogeny.reflects_ordAtInfty (oneSubECIsogeny W p r hq) g hg)
+    (fun g hg ↦ EC.Isogeny.reflects_ordAtInfty (oneSubECIsogeny W p r hq) g hg)
 
 /-- **PAYOFF (c) — THE canonical dual of `(1 − π)_{K̄}`** (Silverman III.6.1): `((1 − π)_{K̄})^`,
 fully unconditional. -/
