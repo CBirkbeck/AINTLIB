@@ -78,9 +78,7 @@ theorem galoisPointHom_one (P : (W₀.baseChange F).toAffine.Point) :
     galoisPointHom W₀ (1 : F ≃ₐ[K] F) P = P := by
   cases P with
   | zero => rfl
-  | some x y h =>
-    rw [galoisPointHom, WeierstrassCurve.Affine.Point.map_some]
-    congr 1
+  | some x y h => rw [galoisPointHom, WeierstrassCurve.Affine.Point.map_some]; congr 1
 
 end GaloisPoint
 
@@ -108,7 +106,7 @@ noncomputable def galoisTorsionRestrictHom (σ : F ≃ₐ[K] F) (n : ℕ) :
     (W₀.baseChange F).toAffine[((ℓ ^ n : ℕ) : ℤ)] →+
       (W₀.baseChange F).toAffine[((ℓ ^ n : ℕ) : ℤ)] :=
   ((galoisPointHom W₀ σ).comp ((W₀.baseChange F).toAffine[((ℓ ^ n : ℕ) : ℤ)]).subtype).codRestrict _
-    (fun P => galoisPointHom_mem_torsion_ellPow W₀ ℓ σ n P.property)
+    (fun P ↦ galoisPointHom_mem_torsion_ellPow W₀ ℓ σ n P.property)
 
 omit [DecidableEq K] [IsAlgClosed F] hℓ in
 @[simp] theorem galoisTorsionRestrictHom_coe (σ : F ≃ₐ[K] F) (n : ℕ)
@@ -157,7 +155,7 @@ The result is again compatible by `galois_comm_tateConn`; `ℤ_[ℓ]`-linearity 
 coordinatewise from the `ZMod (ℓⁿ)`-linearity of each `galoisTorsionRestrict σ n`. -/
 noncomputable def rhoTateAux (σ : F ≃ₐ[K] F) :
     tateModule (W₀.baseChange F) ℓ →ₗ[ℤ_[ℓ]] tateModule (W₀.baseChange F) ℓ where
-  toFun f := ⟨fun n => galoisTorsionRestrict W₀ ℓ σ n (f.val n), fun n => by
+  toFun f := ⟨fun n ↦ galoisTorsionRestrict W₀ ℓ σ n (f.val n), fun n ↦ by
     rw [galois_comm_tateConn W₀ ℓ σ n (f.val (n + 1)), tateCompat_compat]⟩
   map_add' f g := by
     apply Subtype.ext; funext n
@@ -174,17 +172,17 @@ omit [DecidableEq K] [IsAlgClosed F] in
 /-- `rhoTateAux` is functorial in `σ`: `rhoTateAux (σ * τ) = rhoTateAux σ ∘ rhoTateAux τ`. On each
 coordinate this is `galoisPointHom_mul`. -/
 theorem rhoTateAux_mul (σ τ : F ≃ₐ[K] F) :
-    rhoTateAux W₀ ℓ (σ * τ) = (rhoTateAux W₀ ℓ σ).comp (rhoTateAux W₀ ℓ τ) := by
-  refine LinearMap.ext fun f => Subtype.ext (funext fun n => Subtype.ext ?_)
-  exact galoisPointHom_mul W₀ σ τ (f.val n).val
+    rhoTateAux W₀ ℓ (σ * τ) = (rhoTateAux W₀ ℓ σ).comp (rhoTateAux W₀ ℓ τ) :=
+  LinearMap.ext fun f ↦ Subtype.ext (funext fun n ↦
+    Subtype.ext (galoisPointHom_mul W₀ σ τ (f.val n).val))
 
 omit [DecidableEq K] [IsAlgClosed F] in
 /-- `rhoTateAux 1 = id`: the identity automorphism acts trivially. On each coordinate this is
 `galoisPointHom_one`. -/
 theorem rhoTateAux_one :
-    rhoTateAux W₀ ℓ (1 : F ≃ₐ[K] F) = LinearMap.id := by
-  refine LinearMap.ext fun f => Subtype.ext (funext fun n => Subtype.ext ?_)
-  exact galoisPointHom_one W₀ (f.val n).val
+    rhoTateAux W₀ ℓ (1 : F ≃ₐ[K] F) = LinearMap.id :=
+  LinearMap.ext fun f ↦ Subtype.ext (funext fun n ↦
+    Subtype.ext (galoisPointHom_one W₀ (f.val n).val))
 
 /-- **L12.** The Galois action of `σ : F ≃ₐ[K] F` on the Tate module `T_ℓ(E)`, as a `ℤ_[ℓ]`-linear
 **equivalence**. It is `rhoTateAux σ`, with inverse `rhoTateAux σ⁻¹`: the two compose to
@@ -210,16 +208,14 @@ omit [DecidableEq K] [IsAlgClosed F] in
 /-- `rhoTate (σ * τ) = rhoTate σ * rhoTate τ` (the group `M ≃ₗ M` has `(f * g) x = f (g x)`).
 This is `rhoTateAux_mul` repackaged on the `LinearEquiv` level. -/
 theorem rhoTate_mul (σ τ : F ≃ₐ[K] F) :
-    rhoTate W₀ ℓ (σ * τ) = rhoTate W₀ ℓ σ * rhoTate W₀ ℓ τ := by
-  refine LinearEquiv.toLinearMap_injective ?_
-  exact rhoTateAux_mul W₀ ℓ σ τ
+    rhoTate W₀ ℓ (σ * τ) = rhoTate W₀ ℓ σ * rhoTate W₀ ℓ τ :=
+  LinearEquiv.toLinearMap_injective (rhoTateAux_mul W₀ ℓ σ τ)
 
 omit [DecidableEq K] [IsAlgClosed F] in
 /-- `rhoTate 1 = 1` (the identity automorphism). This is `rhoTateAux_one` repackaged on the
 `LinearEquiv` level. -/
-theorem rhoTate_one : rhoTate W₀ ℓ (1 : F ≃ₐ[K] F) = 1 := by
-  refine LinearEquiv.toLinearMap_injective ?_
-  exact rhoTateAux_one W₀ ℓ
+theorem rhoTate_one : rhoTate W₀ ℓ (1 : F ≃ₐ[K] F) = 1 :=
+  LinearEquiv.toLinearMap_injective (rhoTateAux_one W₀ ℓ)
 
 /-- **L13.** The **ℓ-adic representation** `ρ_ℓ : Gal(F/K) → Aut_{ℤ_[ℓ]}(T_ℓ(E))` of the elliptic
 curve `E = W₀.baseChange F`, as a group homomorphism (Silverman III.7, Definition). The
