@@ -270,8 +270,8 @@ theorem comapPointValuationWitness_oneSub (hq : 2 ≤ Fintype.card K) :
     ComapPointValuationWitness (W.baseChange (AlgebraicClosure K))
       (oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
         (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)) where
-  affine := fun P {_x _y} h_ns hQ => comap_pointValuation_oneSub_eq_affine W p r hq P h_ns hQ
-  affineToInfty := fun P hQ => comap_pointValuation_oneSub_eq_infty W p r hq P hQ
+  affine := fun P {_x _y} h_ns hQ ↦ comap_pointValuation_oneSub_eq_affine W p r hq P h_ns hQ
+  affineToInfty := fun P hQ ↦ comap_pointValuation_oneSub_eq_infty W p r hq P hQ
   infinity := inftyOrdTransport_oneSub W p r hq
 
 /-- **`OneSubFrobeniusScaling` for `(1 − π)_{K̄}` — CLOSED with ZERO carried geometric hypotheses**
