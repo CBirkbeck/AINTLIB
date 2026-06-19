@@ -125,7 +125,7 @@ theorem slash_T_p_upper_eval (k : ℤ) (p : ℕ) (hp : Nat.Prime p)
         (Nat.cast_pos.mpr hp.pos)⟩ : ℍ) = glMap (T_p_upper p hp.pos b) • τ :=
     UpperHalfPlane.ext hmob.symm
   convert halg (f (glMap (T_p_upper p hp.pos b) • τ)) using 2 <;>
-    first | exact congr_arg f harg | (push_cast; rfl) | rfl
+    first | exact congr_arg f harg | (push_cast; rfl)
 
 private theorem qParam_smul_T_p_upper_pow (h : ℝ) (p : ℕ) (hp : 0 < p) (b : ℕ)
     (τ : ℍ) (n : ℕ) :
