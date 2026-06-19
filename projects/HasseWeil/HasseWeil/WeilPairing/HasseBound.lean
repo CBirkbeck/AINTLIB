@@ -72,8 +72,8 @@ theorem hasse_bound_unconditional (hq : 2 ≤ Fintype.card K) :
   -- `Nat.card (… .ker)` underneath `pencilKerCard` is never whnf-reduced during unification.
   set deg₀ : ℤ → ℤ → ℤ := pencilKerCard W p₀ (n₀ : ℕ) (pencilJunkPullback W) with hdeg₀
   refine hasse_bound_unconditional_of_baseChange_scalings_coprime W hq deg₀
-    (fun r' s' => hdeg₀ ▸ pencilKerCard_nonneg W p₀ (n₀ : ℕ) (pencilJunkPullback W) r' s')
-    (fun p r hp hcp hcard => ?_)
+    (fun r' s' ↦ hdeg₀ ▸ pencilKerCard_nonneg W p₀ (n₀ : ℕ) (pencilJunkPullback W) r' s')
+    (fun p r hp hcp hcard ↦ ?_)
   -- Discharge `FrobBaseChangeScalingsCoprime` for an arbitrary `(p, r)`, forcing `p = p₀`, `r = n₀`
   -- (`obtain rfl` eliminates the RHS canonical vars, keeping the quantified `p`, `r`).
   obtain rfl : p = p₀ := CharP.eq K hcp hCharP₀
