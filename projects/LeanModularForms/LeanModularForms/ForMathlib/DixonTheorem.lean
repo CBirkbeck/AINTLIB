@@ -60,7 +60,7 @@ variable {x : ℂ}
 private lemma norm_gt_mem_cocompact (R : ℝ) :
     {w : ℂ | R < ‖w‖} ∈ Filter.cocompact ℂ :=
   Filter.mem_cocompact.mpr ⟨Metric.closedBall 0 R, isCompact_closedBall 0 R,
-    fun _ hw => by simpa using hw⟩
+    fun _ hw ↦ by simpa using hw⟩
 
 /-- A function differentiable on an open set `U` is continuous on the image of a
 null-homologous curve in `U`. -/
@@ -68,7 +68,7 @@ private lemma continuousOn_curveImage_of_nullHomologous
     {f : ℂ → ℂ} {U : Set ℂ} (hf : DifferentiableOn ℂ f U)
     {γ : PwC1Immersion x x} (h_null : IsNullHomologous γ U) :
     ContinuousOn f (γ.toPiecewiseC1Path.toPath.extend '' Icc (0 : ℝ) 1) :=
-  hf.continuousOn.mono (fun _ ⟨t, ht, heq⟩ => heq ▸ h_null.image_subset t ht)
+  hf.continuousOn.mono (fun _ ⟨t, ht, heq⟩ ↦ heq ▸ h_null.image_subset t ht)
 
 /-- **Norm bound for `dixonH2`.**
 
@@ -154,7 +154,7 @@ private theorem dixonFunction_eq_zero {f : ℂ → ℂ} {U : Set ℂ}
     (h_entire : Differentiable ℂ (dixonFunction f U γ))
     (h_tendsto : Tendsto (dixonFunction f U γ) (Filter.cocompact ℂ) (nhds 0)) :
     ∀ w, dixonFunction f U γ w = 0 :=
-  fun w => h_entire.apply_eq_of_tendsto_cocompact w h_tendsto
+  fun w ↦ h_entire.apply_eq_of_tendsto_cocompact w h_tendsto
 
 /-- **Assembled version**: the Dixon function is zero when given entireness, eventual
 agreement with `h2`, and curve bounds. -/
@@ -206,9 +206,9 @@ private theorem cauchyIntegralFormula_nullHomologous_at {f : ℂ → ℂ} {U : S
     {w : ℂ} (h_zero_at : dixonFunction f U γ w = 0)
     (hw : w ∈ U) (hoff : ∀ t ∈ Icc (0 : ℝ) 1, γ t ≠ w)
     (h_cauchy_int : IntervalIntegrable
-      (fun t => f (γ t) / (γ t - w) * deriv γ.toPath.extend t) volume 0 1)
+      (fun t ↦ f (γ t) / (γ t - w) * deriv γ.toPath.extend t) volume 0 1)
     (h_base_int : IntervalIntegrable
-      (fun t => (γ t - w)⁻¹ * deriv γ.toPath.extend t) volume 0 1) :
+      (fun t ↦ (γ t - w)⁻¹ * deriv γ.toPath.extend t) volume 0 1) :
     dixonH2 f γ w =
       2 * ↑Real.pi * I * generalizedWindingNumber γ w * f w := by
   rw [dixonFunction_eq_dixonH1 hw] at h_zero_at
@@ -232,20 +232,20 @@ theorem contourIntegral_eq_zero_of_nullHomologous_at
     {f : ℂ → ℂ} {U : Set ℂ} {γ : PiecewiseC1Path x x}
     (w₀ : ℂ) (hw₀_in_U : w₀ ∈ U)
     (hw₀_off : ∀ t ∈ Icc (0 : ℝ) 1, γ t ≠ w₀)
-    (h_zero_at : dixonFunction (fun z => (z - w₀) * f z) U γ w₀ = 0)
+    (h_zero_at : dixonFunction (fun z ↦ (z - w₀) * f z) U γ w₀ = 0)
     (h_cauchy_int : IntervalIntegrable
-      (fun t => (γ t - w₀) * f (γ t) / (γ t - w₀) *
+      (fun t ↦ (γ t - w₀) * f (γ t) / (γ t - w₀) *
         deriv γ.toPath.extend t) volume 0 1)
     (h_base_int : IntervalIntegrable
-      (fun t => (γ t - w₀)⁻¹ * deriv γ.toPath.extend t) volume 0 1) :
+      (fun t ↦ (γ t - w₀)⁻¹ * deriv γ.toPath.extend t) volume 0 1) :
     γ.contourIntegral f = 0 := by
   have h_cif := cauchyIntegralFormula_nullHomologous_at
-    (f := fun z => (z - w₀) * f z) h_zero_at
+    (f := fun z ↦ (z - w₀) * f z) h_zero_at
     hw₀_in_U hw₀_off h_cauchy_int h_base_int
   simp only [sub_self, zero_mul, mul_zero] at h_cif
   refine h_cif ▸ ?_
   simp only [dixonH2, PiecewiseC1Path.contourIntegral]
-  refine intervalIntegral.integral_congr (fun t ht => ?_)
+  refine intervalIntegral.integral_congr (fun t ht ↦ ?_)
   rw [Set.uIcc_of_le (zero_le_one' ℝ)] at ht
   rw [mul_div_cancel_left₀ _ (sub_ne_zero.mpr (hw₀_off t ht))]
 
@@ -271,11 +271,11 @@ private theorem dixonFunction_eq_zero_of_nullHomologous
     (h2_diff : ∀ w, (∀ t ∈ Icc (0 : ℝ) 1, γ.toPiecewiseC1Path t ≠ w) →
       DifferentiableAt ℂ (dixonH2 f γ.toPiecewiseC1Path) w)
     (h_cauchy_int : ∀ w, (∀ t ∈ Icc (0 : ℝ) 1, γ.toPiecewiseC1Path t ≠ w) →
-      IntervalIntegrable (fun t => f (γ.toPiecewiseC1Path t) /
+      IntervalIntegrable (fun t ↦ f (γ.toPiecewiseC1Path t) /
         (γ.toPiecewiseC1Path t - w) *
         deriv γ.toPiecewiseC1Path.toPath.extend t) volume 0 1)
     (h_base_int : ∀ w, (∀ t ∈ Icc (0 : ℝ) 1, γ.toPiecewiseC1Path t ≠ w) →
-      IntervalIntegrable (fun t => (γ.toPiecewiseC1Path t - w)⁻¹ *
+      IntervalIntegrable (fun t ↦ (γ.toPiecewiseC1Path t - w)⁻¹ *
         deriv γ.toPiecewiseC1Path.toPath.extend t) volume 0 1)
     (h_winding_zero_near : ∀ w, w ∉ U →
       (∀ t ∈ Icc (0 : ℝ) 1, γ.toPiecewiseC1Path t ≠ w) →
@@ -294,7 +294,7 @@ private theorem dixonFunction_eq_zero_of_nullHomologous
       dixonH1 f γ.toPiecewiseC1Path w =
         dixonH2 f γ.toPiecewiseC1Path w -
           2 * ↑Real.pi * I * generalizedWindingNumber γ.toPiecewiseC1Path w * f w :=
-    fun w hoff => dixonH1_eq_dixonH2_sub_winding_f w hoff
+    fun w hoff ↦ dixonH1_eq_dixonH2_sub_winding_f w hoff
       (h_cauchy_int w hoff) (h_base_int w hoff)
   exact dixonFunction_eq_zero_of_bounds
     (dixonFunction_differentiable hU hf γ h_null h1_diff h2_diff h_id
@@ -322,11 +322,11 @@ private theorem dixonFunction_eq_zero_of_nullHomologous_unbounded
     (h2_diff : ∀ w, (∀ t ∈ Icc (0 : ℝ) 1, γ.toPiecewiseC1Path t ≠ w) →
       DifferentiableAt ℂ (dixonH2 f γ.toPiecewiseC1Path) w)
     (h_cauchy_int : ∀ w, (∀ t ∈ Icc (0 : ℝ) 1, γ.toPiecewiseC1Path t ≠ w) →
-      IntervalIntegrable (fun t => f (γ.toPiecewiseC1Path t) /
+      IntervalIntegrable (fun t ↦ f (γ.toPiecewiseC1Path t) /
         (γ.toPiecewiseC1Path t - w) *
         deriv γ.toPiecewiseC1Path.toPath.extend t) volume 0 1)
     (h_base_int : ∀ w, (∀ t ∈ Icc (0 : ℝ) 1, γ.toPiecewiseC1Path t ≠ w) →
-      IntervalIntegrable (fun t => (γ.toPiecewiseC1Path t - w)⁻¹ *
+      IntervalIntegrable (fun t ↦ (γ.toPiecewiseC1Path t - w)⁻¹ *
         deriv γ.toPiecewiseC1Path.toPath.extend t) volume 0 1)
     (h_winding_zero_near : ∀ w, w ∉ U →
       (∀ t ∈ Icc (0 : ℝ) 1, γ.toPiecewiseC1Path t ≠ w) →
@@ -348,20 +348,20 @@ when `f ∘ γ` and `γ` are continuous and `γ` is Lipschitz with bound `K`. -/
 private lemma cauchy_integrand_intervalIntegrable
     {f : ℂ → ℂ} {γ : PiecewiseC1Path x x} {K : NNReal}
     (hLip : LipschitzWith K γ.toPath.extend)
-    (h_fγ_cont : ContinuousOn (fun t => f (γ t)) (Icc (0 : ℝ) 1))
+    (h_fγ_cont : ContinuousOn (fun t ↦ f (γ t)) (Icc (0 : ℝ) 1))
     (h_γ_cont : ContinuousOn (γ : ℝ → ℂ) (Icc (0 : ℝ) 1))
     {w : ℂ} (hoff : ∀ t ∈ Icc (0 : ℝ) 1, γ t ≠ w) :
     IntervalIntegrable
-      (fun t => f (γ t) / (γ t - w) * deriv γ.toPath.extend t) volume 0 1 := by
-  have h_cont_inv : ContinuousOn (fun t => (γ t - w)⁻¹) (Icc (0 : ℝ) 1) :=
+      (fun t ↦ f (γ t) / (γ t - w) * deriv γ.toPath.extend t) volume 0 1 := by
+  have h_cont_inv : ContinuousOn (fun t ↦ (γ t - w)⁻¹) (Icc (0 : ℝ) 1) :=
     ContinuousOn.inv₀ (h_γ_cont.sub continuousOn_const)
-      (fun t ht => sub_ne_zero.mpr (hoff t ht))
-  have h_cont_prod : ContinuousOn (fun t => f (γ t) / (γ t - w)) (Icc (0 : ℝ) 1) := by
+      (fun t ht ↦ sub_ne_zero.mpr (hoff t ht))
+  have h_cont_prod : ContinuousOn (fun t ↦ f (γ t) / (γ t - w)) (Icc (0 : ℝ) 1) := by
     simp_rw [div_eq_mul_inv]
     exact h_fγ_cont.mul h_cont_inv
   rw [intervalIntegrable_iff_integrableOn_Ioc_of_le zero_le_one]
   have h_meas : AEStronglyMeasurable
-      (fun t => f (γ t) / (γ t - w) * deriv γ.toPath.extend t)
+      (fun t ↦ f (γ t) / (γ t - w) * deriv γ.toPath.extend t)
       (volume.restrict (Ioc (0 : ℝ) 1)) :=
     ((h_cont_prod.mono Ioc_subset_Icc_self).aestronglyMeasurable
       measurableSet_Ioc).mul (stronglyMeasurable_deriv _).aestronglyMeasurable
@@ -384,8 +384,8 @@ private lemma base_integrand_intervalIntegrable
     (h_γ_cont : ContinuousOn (γ : ℝ → ℂ) (Icc (0 : ℝ) 1))
     {w : ℂ} (hoff : ∀ t ∈ Icc (0 : ℝ) 1, γ t ≠ w) :
     IntervalIntegrable
-      (fun t => (γ t - w)⁻¹ * deriv γ.toPath.extend t) volume 0 1 := by
-  have := cauchy_integrand_intervalIntegrable (f := fun _ => 1) hLip
+      (fun t ↦ (γ t - w)⁻¹ * deriv γ.toPath.extend t) volume 0 1 := by
+  have := cauchy_integrand_intervalIntegrable (f := fun _ ↦ 1) hLip
     continuousOn_const h_γ_cont hoff
   simpa [one_div] using this
 
@@ -397,11 +397,11 @@ private theorem dixonFunction_eq_zero_of_nullHomologous_autoH2_unbounded
     {K : NNReal} (hLip : LipschitzWith K γ.toPiecewiseC1Path.toPath.extend)
     (h1_diff : DifferentiableOn ℂ (dixonH1 f γ.toPiecewiseC1Path) U)
     (h_cauchy_int : ∀ w, (∀ t ∈ Icc (0 : ℝ) 1, γ.toPiecewiseC1Path t ≠ w) →
-      IntervalIntegrable (fun t => f (γ.toPiecewiseC1Path t) /
+      IntervalIntegrable (fun t ↦ f (γ.toPiecewiseC1Path t) /
         (γ.toPiecewiseC1Path t - w) *
         deriv γ.toPiecewiseC1Path.toPath.extend t) volume 0 1)
     (h_base_int : ∀ w, (∀ t ∈ Icc (0 : ℝ) 1, γ.toPiecewiseC1Path t ≠ w) →
-      IntervalIntegrable (fun t => (γ.toPiecewiseC1Path t - w)⁻¹ *
+      IntervalIntegrable (fun t ↦ (γ.toPiecewiseC1Path t - w)⁻¹ *
         deriv γ.toPiecewiseC1Path.toPath.extend t) volume 0 1)
     (h_winding_zero_near : ∀ w, w ∉ U →
       (∀ t ∈ Icc (0 : ℝ) 1, γ.toPiecewiseC1Path t ≠ w) →
@@ -416,7 +416,7 @@ private theorem dixonFunction_eq_zero_of_nullHomologous_autoH2_unbounded
   have hf_cont := continuousOn_curveImage_of_nullHomologous hf h_null
   have h2_diff : ∀ w, (∀ t ∈ Icc (0 : ℝ) 1, γ.toPiecewiseC1Path t ≠ w) →
       DifferentiableAt ℂ (dixonH2 f γ.toPiecewiseC1Path) w :=
-    fun _ hoff => dixonH2_differentiableAt_of_regular hoff hf_cont hLip
+    fun _ hoff ↦ dixonH2_differentiableAt_of_regular hoff hf_cont hLip
   exact dixonFunction_eq_zero_of_nullHomologous_unbounded hU hf γ h_null hLip
     h1_diff h2_diff h_cauchy_int h_base_int h_winding_zero_near
     hM_f_nn hR hM_f hM_d
@@ -435,9 +435,9 @@ private theorem dixonFunction_eq_zero_of_nullHomologous_autoBounds_unbounded
     ∀ w, dixonFunction f U γ.toPiecewiseC1Path w = 0 := by
   have hf_cont := continuousOn_curveImage_of_nullHomologous hf h_null
   have h_fγ_cont : ContinuousOn
-      (fun t => f (γ.toPiecewiseC1Path t)) (Icc (0 : ℝ) 1) :=
+      (fun t ↦ f (γ.toPiecewiseC1Path t)) (Icc (0 : ℝ) 1) :=
     hf_cont.comp γ.toPiecewiseC1Path.toPath.continuous_extend.continuousOn
-      (fun t ht => ⟨t, ht, rfl⟩)
+      (fun t ht ↦ ⟨t, ht, rfl⟩)
   have h_γ_cont : ContinuousOn (γ.toPiecewiseC1Path : ℝ → ℂ) (Icc (0 : ℝ) 1) :=
     γ.toPiecewiseC1Path.toPath.continuous_extend.continuousOn
   obtain ⟨R, hR_bd⟩ := (isCompact_Icc (a := (0 : ℝ)) (b := 1)).bddAbove_image
@@ -445,18 +445,18 @@ private theorem dixonFunction_eq_zero_of_nullHomologous_autoBounds_unbounded
   obtain ⟨M_f, hM_f_bd⟩ := (isCompact_Icc (a := (0 : ℝ)) (b := 1)).bddAbove_image
     h_fγ_cont.norm
   have hR_curve : ∀ t ∈ Icc (0 : ℝ) 1, ‖γ.toPiecewiseC1Path t‖ ≤ R :=
-    fun t ht => hR_bd ⟨t, ht, rfl⟩
+    fun t ht ↦ hR_bd ⟨t, ht, rfl⟩
   have hM_f_curve : ∀ t ∈ Icc (0 : ℝ) 1,
       ‖f (γ.toPiecewiseC1Path t)‖ ≤ max M_f 0 :=
-    fun t ht => le_max_of_le_left (hM_f_bd ⟨t, ht, rfl⟩)
+    fun t ht ↦ le_max_of_le_left (hM_f_bd ⟨t, ht, rfl⟩)
   have hM_f_nn : (0 : ℝ) ≤ max M_f 0 := le_max_right _ _
   have hM_d : ∀ t ∈ Icc (0 : ℝ) 1,
       ‖deriv γ.toPiecewiseC1Path.toPath.extend t‖ ≤ K :=
-    fun _ _ => norm_deriv_le_of_lipschitz hLip
+    fun _ _ ↦ norm_deriv_le_of_lipschitz hLip
   exact dixonFunction_eq_zero_of_nullHomologous_autoH2_unbounded hU hf γ h_null
     hLip h1_diff
-    (fun _ hoff => cauchy_integrand_intervalIntegrable hLip h_fγ_cont h_γ_cont hoff)
-    (fun _ hoff => base_integrand_intervalIntegrable hLip h_γ_cont hoff)
+    (fun _ hoff ↦ cauchy_integrand_intervalIntegrable hLip h_fγ_cont h_γ_cont hoff)
+    (fun _ hoff ↦ base_integrand_intervalIntegrable hLip h_γ_cont hoff)
     h_winding_zero_near hM_f_nn hR_curve hM_f_curve hM_d
 
 /-- **B-5 fully closed for general open (possibly unbounded) U with Lipschitz γ.**
