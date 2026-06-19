@@ -1154,7 +1154,7 @@ theorem density_lift_through_fixedField
   have hsplit : ∀ {s : ℝ}, 1 < s → primeIdealZetaSum Tset s
       = primeIdealZetaSum T₁set s + primeIdealZetaSum T₂set s := by
     intro s hs
-    rw [(Set.union_diff_cancel hT₁sub).symm,
+    rw [(Set.union_sdiff_cancel hT₁sub).symm,
       primeIdealZetaSum_union_of_disjoint (Set.disjoint_sdiff_right) hs]
   have hleafB : Tendsto (fun s : ℝ ↦ primeIdealZetaSum T₂set s
       / primeIdealZetaSum (univ : Set (Ideal (𝓞 ↥(IntermediateField.fixedField
