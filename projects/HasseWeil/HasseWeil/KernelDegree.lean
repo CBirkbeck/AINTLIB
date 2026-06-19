@@ -60,12 +60,12 @@ variable (φ : G →+ H)
     with the kernel. -/
 noncomputable def fiberEquivKer (Q : H) (P₀ : G) (hP₀ : φ P₀ = Q) :
     {P : G // φ P = Q} ≃ φ.ker := {
-  toFun := fun ⟨P, hP⟩ => ⟨P - P₀, by
+  toFun := fun ⟨P, hP⟩ ↦ ⟨P - P₀, by
     simp [AddMonoidHom.mem_ker, map_sub, hP, hP₀]⟩
-  invFun := fun ⟨K, hK⟩ => ⟨K + P₀, by
+  invFun := fun ⟨K, hK⟩ ↦ ⟨K + P₀, by
     simp [AddMonoidHom.mem_ker.mp hK, hP₀]⟩
-  left_inv := fun ⟨P, _⟩ => by simp
-  right_inv := fun ⟨K, _⟩ => by simp }
+  left_inv := fun ⟨P, _⟩ ↦ by simp
+  right_inv := fun ⟨K, _⟩ ↦ by simp }
 
 omit [DecidableEq G] in
 /-- All fibers of a group homomorphism over points in the image have the same
