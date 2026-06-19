@@ -143,12 +143,12 @@ theorem valence_formula_of_two_sides_Hgt1
     (orderAtCusp' f : ℂ) +
     (1/2 : ℂ) * ↑(orderOfVanishingAt' (⇑f) ellipticPointI') +
     (1/3 : ℂ) * ↑(orderOfVanishingAt' (⇑f) ellipticPointRho') +
-    ∑ s ∈ S.filter (fun p =>
+    ∑ s ∈ S.filter (fun p ↦
         p ≠ ellipticPointI' ∧ p ≠ ellipticPointRho' ∧ p ≠ ellipticPointRhoPlusOne' ∧
         ‖(p : ℂ)‖ > 1 ∧ |(p : ℂ).re| < 1/2),
       ↑(orderOfVanishingAt' (⇑f) s) +
     ∑ s ∈ sLeftVertFM S, ↑(orderOfVanishingAt' (⇑f) s) +
-    ∑ s ∈ S.filter (fun p =>
+    ∑ s ∈ S.filter (fun p ↦
         p ≠ ellipticPointRho' ∧ ‖(p : ℂ)‖ = 1 ∧ (p : ℂ).re < 0),
       ↑(orderOfVanishingAt' (⇑f) s) =
     (k : ℂ) / 12 := by
@@ -159,7 +159,7 @@ theorem valence_formula_of_two_sides_Hgt1
   have hH_ge_mod : H_mod ≤ H :=
     ((le_max_right _ _).trans (le_max_left _ _)).trans (lt_add_one _).le
   have hH_gt_1 : 1 < H := hH_res_gt.trans_le hH_ge_res
-  have hH_above : ∀ s ∈ S, (s : ℂ).im < H := fun s hs =>
+  have hH_above : ∀ s ∈ S, (s : ℂ).im < H := fun s hs ↦
     (hH_S s hs).trans_le ((le_max_right _ _).trans (lt_add_one _).le)
   exact ⟨H, mkD H hH_gt_1, hH_above, pvChainIdentity f S
     ⟨mkD H hH_gt_1, hH_above, F H,
