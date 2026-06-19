@@ -49,7 +49,7 @@ theorem mulByInt_isSeparable_of_finiteDim
   have hcoeff := omegaPullbackCoeff_mulByInt_routeB W ℓ hℓ0
   rw [isSeparable_iff_omegaPullbackCoeff_ne_zero_of_finiteDim W (mulByInt W.toAffine ℓ) hfindim,
     hcoeff]
-  exact fun h => hℓ ((map_eq_zero _).mp h)
+  exact fun h ↦ hℓ ((map_eq_zero _).mp h)
 
 /-- **`#E[ℓ] = ℓ²`** (Silverman III.6.4(a)) reduced to the torsion-side witnesses, with separability
 discharged axiom-clean via the formal-group route. Given `ℓ ≠ 0` in `K`, finiteness of the
