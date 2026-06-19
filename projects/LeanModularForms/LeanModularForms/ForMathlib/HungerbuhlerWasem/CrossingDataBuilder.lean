@@ -126,11 +126,11 @@ theorem eventually_differentiable_right
     (γ.toPwC1Immersion.toPiecewiseC1Path.partition.finite_toSet.subset
       diff_subset).isClosed
   filter_upwards [
-    nhdsWithin_le_nhds (hcl.isOpen_compl.mem_nhds (mem_compl fun h => h.2 rfl)),
+    nhdsWithin_le_nhds (hcl.isOpen_compl.mem_nhds (mem_compl fun h ↦ h.2 rfl)),
     nhdsWithin_le_nhds (Ioo_mem_nhds ht₀.1 ht₀.2),
     self_mem_nhdsWithin] with t ht₁ ht₂ ht₃
   exact γ.toPwC1Immersion.toPiecewiseC1Path.differentiable_off_extend t ht₂
-    fun hm => ht₁ ⟨hm, ne_of_gt (mem_Ioi.mp ht₃)⟩
+    fun hm ↦ ht₁ ⟨hm, ne_of_gt (mem_Ioi.mp ht₃)⟩
 
 /-- Differentiability is eventual on `𝓝[<] t₀` for an immersion at interior `t₀`. -/
 theorem eventually_differentiable_left
@@ -142,11 +142,11 @@ theorem eventually_differentiable_left
     (γ.toPwC1Immersion.toPiecewiseC1Path.partition.finite_toSet.subset
       diff_subset).isClosed
   filter_upwards [
-    nhdsWithin_le_nhds (hcl.isOpen_compl.mem_nhds (mem_compl fun h => h.2 rfl)),
+    nhdsWithin_le_nhds (hcl.isOpen_compl.mem_nhds (mem_compl fun h ↦ h.2 rfl)),
     nhdsWithin_le_nhds (Ioo_mem_nhds ht₀.1 ht₀.2),
     self_mem_nhdsWithin] with t ht₁ ht₂ ht₃
   exact γ.toPwC1Immersion.toPiecewiseC1Path.differentiable_off_extend t ht₂
-    fun hm => ht₁ ⟨hm, ne_of_lt (mem_Iio.mp ht₃)⟩
+    fun hm ↦ ht₁ ⟨hm, ne_of_lt (mem_Iio.mp ht₃)⟩
 
 private def reInner (z w : ℂ) : ℝ := z.re * w.re + z.im * w.im
 
@@ -185,7 +185,7 @@ private theorem reInner_lower_bound_right_eventually
   obtain ⟨S, hS_mem, hS_diff⟩ := hγ_diff.exists_mem
   have hr := hasDerivWithinAt_iff_isLittleO.mp <| hasDerivWithinAt_Ioi_iff_Ici.mpr
     (hasDerivWithinAt_Ici_of_tendsto_deriv
-      (fun t ht => (hS_diff t ht).differentiableWithinAt)
+      (fun t ht ↦ (hS_diff t ht).differentiableWithinAt)
       hγ_cont.continuousWithinAt hS_mem hL_right)
   set η : ℝ := ‖L‖ / 8 with hη_def
   have hL_pos : 0 < ‖L‖ := norm_pos_iff.mpr hL
@@ -237,7 +237,7 @@ theorem norm_sub_strictMonoOn_right
     (hL_right : Tendsto (deriv γ) (𝓝[>] t₀) (𝓝 L))
     (hγ_cont : ContinuousAt γ t₀)
     (hγ_diff : ∀ᶠ t in 𝓝[>] t₀, DifferentiableAt ℝ γ t) :
-    ∃ r > 0, StrictMonoOn (fun t => ‖γ t - s‖) (Icc t₀ (t₀ + r)) := by
+    ∃ r > 0, StrictMonoOn (fun t ↦ ‖γ t - s‖) (Icc t₀ (t₀ + r)) := by
   have h_combined : ∀ᶠ t in 𝓝[>] t₀,
       DifferentiableAt ℝ γ t ∧ (t - t₀) * ‖L‖^2 / 2 ≤ reInner (γ t - s) (deriv γ t) :=
     hγ_diff.and (reInner_lower_bound_right_eventually h_at hL hL_right hγ_cont hγ_diff)
@@ -252,17 +252,17 @@ theorem norm_sub_strictMonoOn_right
     rw [Metric.mem_ball, Real.dist_eq, abs_of_pos (sub_pos.mpr ht.1)]
     linarith [ht.2]
   refine ⟨r, hr_pos, ?_⟩
-  set f : ℝ → ℝ := fun t => ‖γ t - s‖^2
-  have h_γ_continuousOn : ContinuousOn γ (Icc t₀ (t₀ + r)) := fun t ht => by
+  set f : ℝ → ℝ := fun t ↦ ‖γ t - s‖^2
+  have h_γ_continuousOn : ContinuousOn γ (Icc t₀ (t₀ + r)) := fun t ht ↦ by
     rcases eq_or_lt_of_le ht.1 with h_eq | h_gt
     · rw [← h_eq]; exact hγ_cont.continuousWithinAt
     · exact (hr_data t ⟨h_gt, ht.2⟩).1.continuousAt.continuousWithinAt
-  have h_f_cont : ContinuousOn f (Icc t₀ (t₀ + r)) := fun t ht =>
+  have h_f_cont : ContinuousOn f (Icc t₀ (t₀ + r)) := fun t ht ↦
     (((h_γ_continuousOn t ht).sub continuousWithinAt_const).norm).pow 2
   have h_int : interior (Icc t₀ (t₀ + r)) = Ioo t₀ (t₀ + r) := interior_Icc
   have h_f_strictMono : StrictMonoOn f (Icc t₀ (t₀ + r)) := by
     apply strictMonoOn_of_hasDerivWithinAt_pos (convex_Icc _ _)
-      (f' := fun t => 2 * reInner (γ t - s) (deriv γ t)) h_f_cont
+      (f' := fun t ↦ 2 * reInner (γ t - s) (deriv γ t)) h_f_cont
     · intro t ht
       rw [h_int] at ht
       have h_d_normSq :=
@@ -290,7 +290,7 @@ private theorem reInner_upper_bound_left_eventually
   obtain ⟨S, hS_mem, hS_diff⟩ := hγ_diff.exists_mem
   have hr := hasDerivWithinAt_iff_isLittleO.mp <| hasDerivWithinAt_Iio_iff_Iic.mpr
     (hasDerivWithinAt_Iic_of_tendsto_deriv
-      (fun t ht => (hS_diff t ht).differentiableWithinAt)
+      (fun t ht ↦ (hS_diff t ht).differentiableWithinAt)
       hγ_cont.continuousWithinAt hS_mem hL_left)
   set η : ℝ := ‖L‖ / 8 with hη_def
   have hL_pos : 0 < ‖L‖ := norm_pos_iff.mpr hL
@@ -334,7 +334,7 @@ theorem norm_sub_strictAntiOn_left
     (hL_left : Tendsto (deriv γ) (𝓝[<] t₀) (𝓝 L))
     (hγ_cont : ContinuousAt γ t₀)
     (hγ_diff : ∀ᶠ t in 𝓝[<] t₀, DifferentiableAt ℝ γ t) :
-    ∃ r > 0, StrictAntiOn (fun t => ‖γ t - s‖) (Icc (t₀ - r) t₀) := by
+    ∃ r > 0, StrictAntiOn (fun t ↦ ‖γ t - s‖) (Icc (t₀ - r) t₀) := by
   have h_combined : ∀ᶠ t in 𝓝[<] t₀,
       DifferentiableAt ℝ γ t ∧ reInner (γ t - s) (deriv γ t) ≤ (t - t₀) * ‖L‖^2 / 2 :=
     hγ_diff.and (reInner_upper_bound_left_eventually h_at hL hL_left hγ_cont hγ_diff)
@@ -349,17 +349,17 @@ theorem norm_sub_strictAntiOn_left
     rw [Metric.mem_ball, Real.dist_eq, abs_sub_comm, abs_of_pos (sub_pos.mpr ht.2)]
     linarith [ht.1]
   refine ⟨r, hr_pos, ?_⟩
-  set f : ℝ → ℝ := fun t => ‖γ t - s‖^2
-  have h_γ_continuousOn : ContinuousOn γ (Icc (t₀ - r) t₀) := fun t ht => by
+  set f : ℝ → ℝ := fun t ↦ ‖γ t - s‖^2
+  have h_γ_continuousOn : ContinuousOn γ (Icc (t₀ - r) t₀) := fun t ht ↦ by
     rcases eq_or_lt_of_le ht.2 with h_eq | h_lt
     · rw [h_eq]; exact hγ_cont.continuousWithinAt
     · exact (hr_data t ⟨ht.1, h_lt⟩).1.continuousAt.continuousWithinAt
-  have h_f_cont : ContinuousOn f (Icc (t₀ - r) t₀) := fun t ht =>
+  have h_f_cont : ContinuousOn f (Icc (t₀ - r) t₀) := fun t ht ↦
     (((h_γ_continuousOn t ht).sub continuousWithinAt_const).norm).pow 2
   have h_int : interior (Icc (t₀ - r) t₀) = Ioo (t₀ - r) t₀ := interior_Icc
   have h_f_strictAnti : StrictAntiOn f (Icc (t₀ - r) t₀) := by
     apply strictAntiOn_of_hasDerivWithinAt_neg (convex_Icc _ _)
-      (f' := fun t => 2 * reInner (γ t - s) (deriv γ t)) h_f_cont
+      (f' := fun t ↦ 2 * reInner (γ t - s) (deriv γ t)) h_f_cont
     · intro t ht
       rw [h_int] at ht
       have h_d_normSq :=
@@ -391,16 +391,16 @@ theorem inv_sub_mul_deriv_intervalIntegrable
     (h_ne : ∀ t ∈ Set.Icc a b,
       γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t ≠ s) :
     IntervalIntegrable
-      (fun t => (γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t - s)⁻¹ *
+      (fun t ↦ (γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t - s)⁻¹ *
         deriv γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t)
       MeasureTheory.volume a b := by
-  set γf : ℝ → ℂ := fun t => γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t
+  set γf : ℝ → ℂ := fun t ↦ γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t
   have hγ_int : IntervalIntegrable (deriv γf) MeasureTheory.volume a b :=
     γ.toClosedPwC1Curve.deriv_extend_intervalIntegrable.mono_set <| by
       rw [Set.uIcc_of_le hab, Set.uIcc_of_le zero_le_one]; exact h_in_Icc
-  have h_cont : ContinuousOn (fun t => (γf t - s)⁻¹) (Set.uIcc a b) := by
+  have h_cont : ContinuousOn (fun t ↦ (γf t - s)⁻¹) (Set.uIcc a b) := by
     rw [Set.uIcc_of_le hab]
     refine (γ.toPwC1Immersion.toPiecewiseC1Path.toPath.continuous_extend.continuousOn.sub
-      continuousOn_const).inv₀ fun t ht h_eq => h_ne t ht ?_
+      continuousOn_const).inv₀ fun t ht h_eq ↦ h_ne t ht ?_
     linear_combination h_eq
-  exact (hγ_int.mul_continuousOn h_cont).congr (fun t _ => by ring)
+  exact (hγ_int.mul_continuousOn h_cont).congr (fun t _ ↦ by ring)
