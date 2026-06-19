@@ -164,17 +164,17 @@ private lemma Ψ_ne_zero {n : ℤ} (hn : n ≠ 0) : W.Ψ n ≠ 0 := by
         have hpy : W.toAffine.polynomialY ≠ 0 := by
           intro hpy
           have h2 : (2 : F) = 0 := by
-            simpa [Affine.polynomialY] using congr_arg (fun (p : F[X][X]) => p.coeff 1) hpy
+            simpa [Affine.polynomialY] using congr_arg (fun (p : F[X][X]) ↦ p.coeff 1) hpy
           have ha1 : W.a₁ = 0 := by
-            have h0c := congr_arg (fun (p : F[X][X]) => p.coeff 0) hpy
+            have h0c := congr_arg (fun (p : F[X][X]) ↦ p.coeff 0) hpy
             simp only [Affine.polynomialY, h2, map_zero, zero_mul, map_add, map_mul, zero_add,
               coeff_add, mul_coeff_zero, coeff_C_zero, coeff_zero] at h0c
-            simpa using congr_arg (fun (p : F[X]) => p.coeff 1) h0c
+            simpa using congr_arg (fun (p : F[X]) ↦ p.coeff 1) h0c
           have ha3 : W.a₃ = 0 := by
-            have h0c := congr_arg (fun (p : F[X][X]) => p.coeff 0) hpy
+            have h0c := congr_arg (fun (p : F[X][X]) ↦ p.coeff 0) hpy
             simp only [Affine.polynomialY, h2, map_zero, zero_mul, map_add, map_mul, zero_add,
               coeff_add, mul_coeff_zero, coeff_C_zero, coeff_zero] at h0c
-            simpa using congr_arg (fun (p : F[X]) => p.coeff 0) h0c
+            simpa using congr_arg (fun (p : F[X]) ↦ p.coeff 0) h0c
           have hΔ : W.Δ = 0 := by
             -- Every `bᵢ` carries a factor of `2`, so `Δ = 0` in char 2.
             have hb₂ : WeierstrassCurve.b₂ W = 0 := by
@@ -498,7 +498,7 @@ theorem mulByInt_coordHom_map_nonZeroDivisors (n : ℤ) (hn : n ≠ 0)
 fraction field. -/
 noncomputable def mulByInt_pullbackRingHom (n : ℤ) (hn : n ≠ 0) : KE →+* KE :=
   IsLocalization.lift (g := mulByInt_coordHom W n hn)
-    (fun (a : nonZeroDivisors R) =>
+    (fun (a : nonZeroDivisors R) ↦
       mulByInt_coordHom_map_nonZeroDivisors W n hn a.1 a.2)
 
 /-- The pullback algebra hom `[n]* : K(E) →ₐ[F] K(E)` for multiplication-by-`n`. -/
