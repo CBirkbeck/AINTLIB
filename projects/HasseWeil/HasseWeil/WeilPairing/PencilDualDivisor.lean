@@ -294,7 +294,7 @@ reviewer prescribed (round 19 Q3), eliminating any char-poly / dual-additivity i
 theorem pencilScaling_of_divisorDual
     (pencilData : ∀ r' s' : ℤ, PencilScalingData W p r (AlgebraicClosure K) r' s') :
     PencilScaling W p r (AlgebraicClosure K)
-      (fun r' s' => ((pencilData r' s').degK : ℤ)) := by
+      (fun r' s' ↦ ((pencilData r' s').degK : ℤ)) := by
   intro r' s' _hps ℓ hℓp _hℓne hℓF
   letI : Fact ℓ.Prime := ⟨hℓp⟩
   -- `((deg r' s').toNat) = (pencilData r' s').degK`.
