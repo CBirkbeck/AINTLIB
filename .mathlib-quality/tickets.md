@@ -37,7 +37,30 @@ T-L2 (leaf #2: completion ROIE) ─► Leaf C (relative use over 𝒪_X(U)) ─�
 ---
 
 ### [T-L1a] `sectionEqualizer` is closed in the product
-- **Status**: open
+- **Status**: open — ⚠ ROUTE OBSTACLE found (beastmode 2026-06-19), needs a replan decision
+- **Progress**:
+  - 2026-06-19 **The reviewer's overlap-equalizer needs a general heterogeneous-`P` intersection
+    the repo deliberately avoids.** Findings: (1) leaf #1 IS real — `cor_8_32_productRestrictionSub_isEmbedding`
+    (RelativePieceKeystone:2405) gets *injectivity* from faithfully-flat **descent** (Stacks 023N,
+    `faithfullyFlat_cocycleMap`/`faithfullyFlat_descent_equalizer`, S⊗_R S — no topology, so descent
+    gives inj but NOT inducing) and delegates *inducing* to `productRestrictionSub_isInducing_tate`
+    (the StructureSheaf:1384 sorry). (2) The reviewer's closedness `E = ker(∏𝒪(Uᵢ) → ∏𝒪(Uᵢ∩Uⱼ))`
+    needs the **topological Čech-1 overlaps** `𝒪(Uᵢ∩Uⱼ)` (T2 target) — i.e. the pairwise intersection
+    *rational data* + the continuous overlap restriction maps. (3) The only intersection in the repo
+    is `RationalLocData.interSamePair` (LaurentRefinementCore:361) which **requires `D₂.P = D₁.P`**
+    (its `hopen` proof rebases `D₂.hopen` via `_hP ▸`). The existing route always pins pieces to a
+    common `P` (`genPieceDatum D₀.P … interSamePair … rfl`). But `RationalCovering.covers : Finset
+    (RationalLocData A)` has pieces with **heterogeneous `.P`**, so `interSamePair` does NOT apply to a
+    general cover. A general intersection (heterogeneous-`P` `hopen`) is substantial NEW infra — exactly
+    what descent was chosen to avoid.
+  - **REPLAN DECISION (user):** (a) build the heterogeneous-`P` Čech-1 infra (general intersection
+    `hopen` + overlap maps + closedness + bundle `ρ̃ →ₗ[A]` + cg/complete/ContinuousSMul on `E` + OMT)
+    — large in-area sub-development; or (b) normalize a general cover to common-`P` first (via
+    `RationalCovering.PinnedTo`, WedhornCoverNormalization:286) then use `interSamePair`; or (c) seek a
+    **descent-compatible inducing** argument (avoid intersections entirely, matching the repo's
+    architecture) — re-read Wedhorn 8.28's actual inducing step (6.18 module-topology vs Banach). The
+    σ-compact-free OMT `wedhorn_6_16_of_topNilpUnit` is ready regardless of which equalizer formulation
+    is chosen.
 - **File**: StructureSheaf.lean (new decls near `productRestrictionSub`, ~L280)
 - **Depends on**: none (pure topology)
 - **Parallel**: yes
