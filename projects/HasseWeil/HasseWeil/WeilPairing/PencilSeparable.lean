@@ -97,7 +97,7 @@ all downstream consumers can use it instead of carrying the `Prop`. -/
 theorem omegaBaseChangeNeZero_holds : OmegaBaseChangeNeZero W L := by
   intro α_L α hpb hα
   rw [omegaPullbackCoeff_baseChangePullback W L α α_L hpb]
-  exact fun h0 => hα (map_eq_zero_iff _
+  exact fun h0 ↦ hα (map_eq_zero_iff _
     ((⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap_injective L) |>.mp h0)
 
 /-- **K̄-separability of the base-changed pencil from the isolated transport** (Silverman III.5.5,
