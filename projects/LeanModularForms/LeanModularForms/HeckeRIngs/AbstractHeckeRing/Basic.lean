@@ -20,7 +20,7 @@ Basic definitions for Hecke rings following Shimura Ch. 3: `HeckePair`, double c
 spaces `HeckeCoset` and `HeckeLeftCoset`, the Hecke ring type `𝕋`, and foundational double coset lemmas.
 -/
 
-open Classical MulOpposite Set DoubleCoset Subgroup Subgroup.Commensurable
+open Set DoubleCoset Subgroup Subgroup.Commensurable
 
 open scoped Pointwise
 
@@ -49,7 +49,7 @@ lemma conjAct_smul_elt_eq (h : H) : ConjAct.toConjAct (h : G) • H = H := by
   have : ConjAct.toConjAct (h : G) • (H : Set G) = H := by
     rw [conjAct_smul_coe_eq, Subgroup.singleton_mul_subgroup h.2,
       Subgroup.subgroup_mul_singleton (by simp)]
-  rw [← Subgroup.coe_pointwise_smul] at this; norm_cast at *
+  rw [← Subgroup.coe_pointwise_smul] at this; exact_mod_cast this
 
 /-- An arithmetic group pair `(H, Δ)` consisting of a subgroup `H` and a submonoid `Δ`
 of a group `G`, satisfying `H ≤ Δ ≤ commensurator(H)`. -/
@@ -218,8 +218,7 @@ lemma set_eq_iUnion_leftCosets (K : Subgroup G) (hK : K ≤ H) :
     rw [hh]
     simp only [coe_mul]
     refine Set.mem_smul_set.mpr ⟨h⁻¹, ?_, ?_⟩
-    · simp
-      exact Subgroup.mem_subgroupOf.mp (SetLike.coe_mem h)
+    · simpa using Subgroup.mem_subgroupOf.mp (SetLike.coe_mem h)
     · simp
   · simp only [Set.mem_iUnion] at ha
     obtain ⟨i, h, hh, rfl⟩ := ha
