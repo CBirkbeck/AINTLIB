@@ -114,7 +114,7 @@ theorem placeTranslate_apply (S : W.toAffine.Point)
 /-- Translation by `O` is the identity place permutation. -/
 @[simp] theorem placeTranslate_zero :
     placeTranslate W (0 : W.toAffine.Point) = Equiv.refl _ := by
-  refine Equiv.ext fun v => ?_
+  refine Equiv.ext fun v ↦ ?_
   rw [placeTranslate_apply, add_zero, Equiv.refl_apply]
   exact WeierstrassCurve.Affine.Point.toAffinePoint_toProjectiveSmoothPoint v
 
@@ -298,7 +298,7 @@ theorem projectiveDivisorOf_translate (S : (W_smooth W).toAffine.Point)
     have hR : (W_smooth W).projectiveDivisorOf (0 : KE) = 0 :=
       (W_smooth W).projectiveDivisorOf_zero
     rw [hL, hR, Finsupp.equivMapDomain_zero]
-  · refine Finsupp.ext fun w => ?_
+  · refine Finsupp.ext fun w ↦ ?_
     rw [Finsupp.equivMapDomain_apply, projectiveDivisorOf_apply_ordProj,
       projectiveDivisorOf_apply_ordProj, Equiv.symm_symm, ordProj_translate W S f hf w]
 
@@ -460,7 +460,7 @@ theorem equivMapDomain_placeTranslate_pullbackDiv (S : (W_smooth W).toAffine.Poi
     (f : W.toAffine.Point →+ W.toAffine.Point) (hker : Finite f.ker) (Q : W.toAffine.Point) :
     Finsupp.equivMapDomain (placeTranslate W S).symm (pullbackDiv (W := W.toAffine) f hker Q) =
       pullbackDiv (W := W.toAffine) f hker (Q - f S) := by
-  refine Finsupp.ext fun w => ?_
+  refine Finsupp.ext fun w ↦ ?_
   rw [Finsupp.equivMapDomain_symm_apply]
   exact pullbackDiv_placeTranslate_apply_general W S f hker Q w
 
@@ -473,7 +473,7 @@ theorem equivMapDomain_placeTranslate_symm_eq_self
     (D : ProjectiveDivisor (W_smooth W))
     (hD : ∀ w, D (placeTranslate W S w) = D w) :
     Finsupp.equivMapDomain (placeTranslate W S).symm D = D := by
-  refine Finsupp.ext fun w => ?_
+  refine Finsupp.ext fun w ↦ ?_
   rw [Finsupp.equivMapDomain_symm_apply]
   exact hD w
 
@@ -488,7 +488,7 @@ theorem equivMapDomain_placeTranslate_pullbackDiv_sub
           pullbackDiv (W := W.toAffine) f hker 0) =
       pullbackDiv (W := W.toAffine) f hker T -
         pullbackDiv (W := W.toAffine) f hker 0 := by
-  refine equivMapDomain_placeTranslate_symm_eq_self W S _ (fun w => ?_)
+  refine equivMapDomain_placeTranslate_symm_eq_self W S _ (fun w ↦ ?_)
   change pullbackDiv (W := W.toAffine) f hker T (placeTranslate W S w) -
       pullbackDiv (W := W.toAffine) f hker 0 (placeTranslate W S w) =
     pullbackDiv (W := W.toAffine) f hker T w -
