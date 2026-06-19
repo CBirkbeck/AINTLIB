@@ -49,7 +49,7 @@ def crossingSet (γ : PwC1Immersion x y) (z₀ : E) : Set ℝ :=
 
 theorem crossingSet_subset_Icc (γ : PwC1Immersion x y) (z₀ : E) :
     γ.crossingSet z₀ ⊆ Icc (0 : ℝ) 1 :=
-  fun _ ht => ht.1
+  fun _ ht ↦ ht.1
 
 /-- The crossing set is closed. -/
 theorem crossingSet_isClosed (γ : PwC1Immersion x y) (z₀ : E) :
@@ -69,8 +69,8 @@ private theorem eventually_not_in_partition_left
   have hmem : p ∉ (↑γ.toPiecewiseC1Path.partition \ {p} : Set ℝ) := by simp
   have h1 : ∀ᶠ t in 𝓝[<] p, t ∈ (↑γ.toPiecewiseC1Path.partition \ {p} : Set ℝ)ᶜ :=
     eventually_nhdsWithin_of_eventually_nhds (hcl.isOpen_compl.mem_nhds hmem)
-  have h2 : ∀ᶠ t in 𝓝[<] p, t < p := eventually_nhdsWithin_of_forall fun t ht => ht
-  exact (h1.and h2).mono fun t ⟨ht_compl, ht_lt⟩ ht_part =>
+  have h2 : ∀ᶠ t in 𝓝[<] p, t < p := eventually_nhdsWithin_of_forall fun t ht ↦ ht
+  exact (h1.and h2).mono fun t ⟨ht_compl, ht_lt⟩ ht_part ↦
     ht_compl ⟨ht_part, ne_of_lt ht_lt⟩
 
 /-- Near `p` from the right, points are eventually not in the partition. -/
@@ -82,8 +82,8 @@ private theorem eventually_not_in_partition_right
   have hmem : p ∉ (↑γ.toPiecewiseC1Path.partition \ {p} : Set ℝ) := by simp
   have h1 : ∀ᶠ t in 𝓝[>] p, t ∈ (↑γ.toPiecewiseC1Path.partition \ {p} : Set ℝ)ᶜ :=
     eventually_nhdsWithin_of_eventually_nhds (hcl.isOpen_compl.mem_nhds hmem)
-  have h2 : ∀ᶠ t in 𝓝[>] p, p < t := eventually_nhdsWithin_of_forall fun t ht => ht
-  exact (h1.and h2).mono fun t ⟨ht_compl, ht_gt⟩ ht_part =>
+  have h2 : ∀ᶠ t in 𝓝[>] p, p < t := eventually_nhdsWithin_of_forall fun t ht ↦ ht
+  exact (h1.and h2).mono fun t ⟨ht_compl, ht_gt⟩ ht_part ↦
     ht_compl ⟨ht_part, ne_of_gt ht_gt⟩
 
 /-- `Ioo q p ⊆ Ioo 0 1` implies `Icc q p ⊆ Icc 0 1` by taking closures. -/
@@ -113,14 +113,14 @@ theorem crossing_isolated_left (γ : PwC1Immersion x y) (z₀ : E) (p : ℝ)
   have hfL_pos : (0 : ℝ) < f L := by
     rw [hf_L]
     exact_mod_cast norm_pos_iff.mpr hL_ne
-  set h : ℝ → ℝ := fun t => f ((γ : ℝ → E) t - z₀) with hh_def
+  set h : ℝ → ℝ := fun t ↦ f ((γ : ℝ → E) t - z₀) with hh_def
   have hh_p : h p = 0 := by simp only [hh_def, hcross, sub_self, map_zero]
   have hp_Ioo := γ.toPiecewiseC1Path.partition_subset hp_part
   have h_ev_smooth := eventually_not_in_partition_left γ p
   have h_ev_Ioo : ∀ᶠ t in 𝓝[<] p, t ∈ Ioo (0 : ℝ) 1 :=
     (eventually_nhdsWithin_of_eventually_nhds (Ioi_mem_nhds hp_pos) |>.and
-      (eventually_nhdsWithin_of_forall fun _ ht => ht)).mono
-      fun _ ⟨h0t, htp⟩ => ⟨h0t, lt_trans htp hp_Ioo.2⟩
+      (eventually_nhdsWithin_of_forall fun _ ht ↦ ht)).mono
+      fun _ ⟨h0t, htp⟩ ↦ ⟨h0t, lt_trans htp hp_Ioo.2⟩
   have h_ev_deriv_pos : ∀ᶠ t in 𝓝[<] p, f (deriv (γ : ℝ → E) t) > 0 :=
     (f.continuous.continuousAt.tendsto.comp hL_tendsto).eventually (Ioi_mem_nhds hfL_pos)
   have h_all : ∀ᶠ t in 𝓝[<] p,
@@ -130,7 +130,7 @@ theorem crossing_isolated_left (γ : PwC1Immersion x y) (z₀ : E) (p : ℝ)
   rw [Filter.Eventually, mem_nhdsLT_iff_exists_Ioo_subset' hp_pos] at h_all
   obtain ⟨q, hq_lt_p, hq_cond⟩ := h_all
   have hqp_sub : Icc q p ⊆ Icc (0 : ℝ) 1 :=
-    Icc_subset_of_Ioo_subset hq_lt_p (fun t ht => (hq_cond ht).2.1)
+    Icc_subset_of_Ioo_subset hq_lt_p (fun t ht ↦ (hq_cond ht).2.1)
   have hh_cont_qp : ContinuousOn h (Icc q p) :=
     f.continuous.comp_continuousOn
       ((γ.toPiecewiseC1Path.continuous.continuousOn.mono hqp_sub).sub continuousOn_const)
@@ -138,14 +138,14 @@ theorem crossing_isolated_left (γ : PwC1Immersion x y) (z₀ : E) (p : ℝ)
     rw [interior_Icc]
     intro s hs
     obtain ⟨hs_smooth, hs_Ioo, hs_dpos⟩ := hq_cond hs
-    have h_sub : HasDerivAt (fun t => (γ : ℝ → E) t - z₀) (deriv (γ : ℝ → E) s - 0) s :=
+    have h_sub : HasDerivAt (fun t ↦ (γ : ℝ → E) t - z₀) (deriv (γ : ℝ → E) s - 0) s :=
       (γ.toPiecewiseC1Path.differentiable_off_extend s hs_Ioo hs_smooth).hasDerivAt.sub
         (hasDerivAt_const s z₀)
     simp only [sub_zero] at h_sub
     exact (f.hasFDerivAt.comp_hasDerivAt s h_sub).deriv ▸ hs_dpos
   have hh_mono := strictMonoOn_of_deriv_pos (convex_Icc q p) hh_cont_qp hh_deriv_pos
   rw [Filter.Eventually, mem_nhdsLT_iff_exists_Ioo_subset' hp_pos]
-  exact ⟨q, hq_lt_p, fun t ht hγt => by
+  exact ⟨q, hq_lt_p, fun t ht hγt ↦ by
     have hht : h t = 0 := by simp only [hh_def, hγt, sub_self, map_zero]
     have : h t < h p := hh_mono (Ioo_subset_Icc_self ht) (right_mem_Icc.mpr hq_lt_p.le) ht.2
     linarith⟩
@@ -161,14 +161,14 @@ theorem crossing_isolated_right (γ : PwC1Immersion x y) (z₀ : E) (p : ℝ)
   have hfL_pos : (0 : ℝ) < f L := by
     rw [hf_L]
     exact_mod_cast norm_pos_iff.mpr hL_ne
-  set h : ℝ → ℝ := fun t => f ((γ : ℝ → E) t - z₀) with hh_def
+  set h : ℝ → ℝ := fun t ↦ f ((γ : ℝ → E) t - z₀) with hh_def
   have hh_p : h p = 0 := by simp only [hh_def, hcross, sub_self, map_zero]
   have hp_Ioo := γ.toPiecewiseC1Path.partition_subset hp_part
   have h_ev_smooth := eventually_not_in_partition_right γ p
   have h_ev_Ioo : ∀ᶠ t in 𝓝[>] p, t ∈ Ioo (0 : ℝ) 1 :=
     (eventually_nhdsWithin_of_eventually_nhds (Iio_mem_nhds hp_lt_one) |>.and
-      (eventually_nhdsWithin_of_forall fun _ ht => ht)).mono
-      fun _ ⟨ht1, htp⟩ => ⟨lt_trans hp_Ioo.1 htp, ht1⟩
+      (eventually_nhdsWithin_of_forall fun _ ht ↦ ht)).mono
+      fun _ ⟨ht1, htp⟩ ↦ ⟨lt_trans hp_Ioo.1 htp, ht1⟩
   have h_ev_deriv_pos : ∀ᶠ t in 𝓝[>] p, f (deriv (γ : ℝ → E) t) > 0 :=
     (f.continuous.continuousAt.tendsto.comp hL_tendsto).eventually (Ioi_mem_nhds hfL_pos)
   have h_all : ∀ᶠ t in 𝓝[>] p,
@@ -178,7 +178,7 @@ theorem crossing_isolated_right (γ : PwC1Immersion x y) (z₀ : E) (p : ℝ)
   rw [Filter.Eventually, mem_nhdsGT_iff_exists_Ioo_subset' hp_lt_one] at h_all
   obtain ⟨r, hr_gt_p, hr_cond⟩ := h_all
   have hpr_sub : Icc p r ⊆ Icc (0 : ℝ) 1 :=
-    Icc_subset_of_Ioo_subset hr_gt_p (fun t ht => (hr_cond ht).2.1)
+    Icc_subset_of_Ioo_subset hr_gt_p (fun t ht ↦ (hr_cond ht).2.1)
   have hh_cont_pr : ContinuousOn h (Icc p r) :=
     f.continuous.comp_continuousOn
       ((γ.toPiecewiseC1Path.continuous.continuousOn.mono hpr_sub).sub continuousOn_const)
@@ -186,14 +186,14 @@ theorem crossing_isolated_right (γ : PwC1Immersion x y) (z₀ : E) (p : ℝ)
     rw [interior_Icc]
     intro s hs
     obtain ⟨hs_smooth, hs_Ioo, hs_dpos⟩ := hr_cond hs
-    have h_sub : HasDerivAt (fun t => (γ : ℝ → E) t - z₀) (deriv (γ : ℝ → E) s - 0) s :=
+    have h_sub : HasDerivAt (fun t ↦ (γ : ℝ → E) t - z₀) (deriv (γ : ℝ → E) s - 0) s :=
       (γ.toPiecewiseC1Path.differentiable_off_extend s hs_Ioo hs_smooth).hasDerivAt.sub
         (hasDerivAt_const s z₀)
     simp only [sub_zero] at h_sub
     exact (f.hasFDerivAt.comp_hasDerivAt s h_sub).deriv ▸ hs_dpos
   have hh_mono := strictMonoOn_of_deriv_pos (convex_Icc p r) hh_cont_pr hh_deriv_pos
   rw [Filter.Eventually, mem_nhdsGT_iff_exists_Ioo_subset' hp_lt_one]
-  exact ⟨r, hr_gt_p, fun t ht hγt => by
+  exact ⟨r, hr_gt_p, fun t ht hγt ↦ by
     have hht : h t = 0 := by simp only [hh_def, hγt, sub_self, map_zero]
     have : h p < h t := hh_mono (left_mem_Icc.mpr hr_gt_p.le) (Ioo_subset_Icc_self ht) ht.1
     linarith⟩
@@ -205,18 +205,18 @@ theorem crossing_isolated (γ : PwC1Immersion x y) (z₀ : E) (t₀ : ℝ)
     ∀ᶠ t in 𝓝[≠] t₀, (γ : ℝ → E) t ≠ z₀ ∨ t ∉ Icc (0 : ℝ) 1 := by
   by_cases hpart : t₀ ∈ γ.toPiecewiseC1Path.partition
   · rw [punctured_nhds_eq_nhdsWithin_sup_nhdsWithin, Filter.eventually_sup]
-    exact ⟨(crossing_isolated_left γ z₀ t₀ hpart ht₀.1 hcross).mono fun t ht => Or.inl ht,
-           (crossing_isolated_right γ z₀ t₀ hpart ht₀.2 hcross).mono fun t ht => Or.inl ht⟩
-  · exact (crossing_isolated_smooth γ z₀ t₀ ht₀ hcross hpart).mono fun t ht => Or.inl ht
+    exact ⟨(crossing_isolated_left γ z₀ t₀ hpart ht₀.1 hcross).mono fun t ht ↦ Or.inl ht,
+           (crossing_isolated_right γ z₀ t₀ hpart ht₀.2 hcross).mono fun t ht ↦ Or.inl ht⟩
+  · exact (crossing_isolated_smooth γ z₀ t₀ ht₀ hcross hpart).mono fun t ht ↦ Or.inl ht
 
 /-- No point of the crossing set in `(0, 1)` is an accumulation point. -/
 theorem crossing_not_accPt (γ : PwC1Immersion x y) (z₀ : E) (t₀ : ℝ)
     (ht₀ : t₀ ∈ Ioo (0 : ℝ) 1) (hcross : (γ : ℝ → E) t₀ = z₀) :
     ¬AccPt t₀ (𝓟 (γ.crossingSet z₀)) := by
   rw [accPt_iff_frequently_nhdsNE, Filter.not_frequently]
-  exact (crossing_isolated γ z₀ t₀ ht₀ hcross).mono fun t ht ht_mem => by
+  exact (crossing_isolated γ z₀ t₀ ht₀ hcross).mono fun t ht ht_mem ↦ by
     simp only [crossingSet, mem_sep_iff] at ht_mem
-    exact ht.elim (fun h => h ht_mem.2) (fun h => h ht_mem.1)
+    exact ht.elim (fun h ↦ h ht_mem.2) (fun h ↦ h ht_mem.1)
 
 /-- **Proposition 2.2** (Hungerbühler–Wasem): The crossing set of a piecewise C¹
 immersion is finite, provided the endpoints avoid `z₀`. -/
@@ -229,8 +229,8 @@ theorem crossingSet_finite (γ : PwC1Immersion x y) (z₀ : E)
   have ha_S : a ∈ γ.crossingSet z₀ :=
     (γ.crossingSet_isClosed z₀).closure_eq ▸ mem_closure_iff_clusterPt.mpr ha_acc.clusterPt
   have ha_Ioo : a ∈ Ioo (0 : ℝ) 1 :=
-    ⟨lt_of_le_of_ne ha_S.1.1 (Ne.symm (fun h => h0 (h ▸ ha_S.2))),
-     lt_of_le_of_ne ha_S.1.2 (fun h => h1 (h ▸ ha_S.2))⟩
+    ⟨lt_of_le_of_ne ha_S.1.1 (Ne.symm (fun h ↦ h0 (h ▸ ha_S.2))),
+     lt_of_le_of_ne ha_S.1.2 (fun h ↦ h1 (h ▸ ha_S.2))⟩
   exact γ.crossing_not_accPt z₀ a ha_Ioo ha_S.2 ha_acc
 
 end PwC1Immersion
