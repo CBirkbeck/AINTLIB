@@ -1,1 +1,1 @@
-FOCUS: vandiver_yPlusFin_subsingleton done; build+axiom-check+commit, then standalone Vandiver MC corollary
+FOCUS: charIdeal_eq_of_linearEquiv (transport) done; build+axiom-check+commit, then record part-ii sub-tickets

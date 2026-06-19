@@ -268,6 +268,25 @@ theorem charIdeal_eq_of_pseudoIso [IsDomain 𝒪] [IsDiscreteValuationRing 𝒪]
   haveI := P.2.1
   rw [localMult_eq_of_pseudoIso P.1 P.2.2 h]
 
+/-- The characteristic ideal is a **linear-isomorphism invariant**: a `Λ`-linear isomorphism
+`M ≃ₗ M'` gives `Ch_Λ M = Ch_Λ M'`.  (An isomorphism is a pseudo-isomorphism — its kernel `⊥`
+and cokernel `M' ⧸ ⊤` are subsingletons, hence finite — so this is `charIdeal_eq_of_pseudoIso`.)
+This is the transport tool by which a Main-Conjecture module isomorphic to `Λ/I` inherits the
+characteristic ideal `I`. -/
+theorem charIdeal_eq_of_linearEquiv [IsDomain 𝒪] [IsDiscreteValuationRing 𝒪]
+    (hM : Module.IsTorsion (IwasawaAlgebra 𝒪) M) (hM' : Module.IsTorsion (IwasawaAlgebra 𝒪) M')
+    (e : M ≃ₗ[IwasawaAlgebra 𝒪] M') :
+    charIdeal 𝒪 M hM = charIdeal 𝒪 M' hM' := by
+  refine charIdeal_eq_of_pseudoIso hM hM' ⟨e.toLinearMap, ?_, ?_⟩
+  · rw [LinearMap.ker_eq_bot.mpr e.injective]; exact Finite.of_subsingleton
+  · rw [LinearMap.range_eq_top.mpr e.surjective]
+    haveI : Subsingleton (M' ⧸ (⊤ : Submodule (IwasawaAlgebra 𝒪) M')) := by
+      refine ⟨fun a b => ?_⟩
+      obtain ⟨a, rfl⟩ := Submodule.Quotient.mk_surjective _ a
+      obtain ⟨b, rfl⟩ := Submodule.Quotient.mk_surjective _ b
+      rw [Submodule.Quotient.eq]; exact Submodule.mem_top
+    exact Finite.of_subsingleton
+
 /-- **Multiplicativity of the characteristic ideal in short exact sequences**
 (CS06, App. A.1, Prop 1; RJW TeX 3679–3681): given `0 → M' → M → M'' → 0` with
 `M', M, M''` finitely generated torsion `Λ`-modules,
