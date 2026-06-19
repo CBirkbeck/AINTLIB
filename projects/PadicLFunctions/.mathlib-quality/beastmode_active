@@ -1,1 +1,1 @@
-FOCUS: charIdealGroup_eq_of_linearEquiv (GOAL A) DONE; commit. Part-ii remaining: CHARIDEALGROUP-QUOT reassembly + CARRIER-BRIDGE
+FOCUS: CHARIDEALGROUP-QUOT (GOAL B) DONE verified axiom-clean. Part-ii remaining: CARRIER-BRIDGE + final assembly
