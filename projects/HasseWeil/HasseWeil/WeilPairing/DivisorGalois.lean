@@ -237,7 +237,7 @@ theorem pointValuation_ringEquivCast {F : Type*} [Field F] [DecidableEq F]
     (P₂ : (⟨V₂.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint)
     (hP : HEq P₁ P₂) (g : V₁.toAffine.FunctionField) :
     (⟨V₂.toAffine⟩ : SmoothPlaneCurve F).pointValuation P₂
-        (RingEquiv.cast (R := fun (V : WeierstrassCurve F) => V.toAffine.FunctionField) hV g) =
+        (RingEquiv.cast (R := fun (V : WeierstrassCurve F) ↦ V.toAffine.FunctionField) hV g) =
       (⟨V₁.toAffine⟩ : SmoothPlaneCurve F).pointValuation P₁ g := by
   subst hV
   obtain rfl := eq_of_heq hP
@@ -251,7 +251,7 @@ theorem ord_P_ringEquivCast {F : Type*} [Field F] [DecidableEq F]
     (P₂ : (⟨V₂.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint)
     (hP : HEq P₁ P₂) (g : V₁.toAffine.FunctionField) :
     (⟨V₂.toAffine⟩ : SmoothPlaneCurve F).ord_P P₂
-        (RingEquiv.cast (R := fun (V : WeierstrassCurve F) => V.toAffine.FunctionField) hV g) =
+        (RingEquiv.cast (R := fun (V : WeierstrassCurve F) ↦ V.toAffine.FunctionField) hV g) =
       (⟨V₁.toAffine⟩ : SmoothPlaneCurve F).ord_P P₁ g := by
   subst hV
   obtain rfl := eq_of_heq hP
@@ -277,7 +277,7 @@ theorem ordAtInfty_ringEquivCast {F : Type*} [Field F] [DecidableEq F]
     (V₁ V₂ : WeierstrassCurve F) (hV : V₁ = V₂)
     (g : V₁.toAffine.FunctionField) :
     (⟨V₂.toAffine⟩ : SmoothPlaneCurve F).ordAtInfty
-        (RingEquiv.cast (R := fun (V : WeierstrassCurve F) => V.toAffine.FunctionField) hV g) =
+        (RingEquiv.cast (R := fun (V : WeierstrassCurve F) ↦ V.toAffine.FunctionField) hV g) =
       (⟨V₁.toAffine⟩ : SmoothPlaneCurve F).ordAtInfty g := by
   subst hV
   rfl
