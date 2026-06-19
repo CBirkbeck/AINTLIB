@@ -45,7 +45,7 @@ variable {N : ℕ} [NeZero N]
 /-- The Fricke matrix `W = (0, -1; N, 0)` as an element of `GL₂(ℚ)` (determinant `N ≠ 0`). -/
 noncomputable def frickeGL (N : ℕ) [NeZero N] : GL (Fin 2) ℚ :=
   GeneralLinearGroup.mkOfDetNeZero !![0, -1; (N : ℚ), 0]
-    (by rw [det_fin_two_of]; simpa using (NeZero.ne (N : ℚ)).symm ∘ Eq.symm)
+    (by rw [det_fin_two_of]; simpa using NeZero.ne (N : ℚ))
 
 @[simp] lemma frickeGL_coe :
     (↑(frickeGL N) : Matrix (Fin 2) (Fin 2) ℚ) = !![0, -1; (N : ℚ), 0] := rfl
@@ -62,7 +62,6 @@ lemma frickeGL_det_pos : 0 < (frickeGL N).det.val := by
 /-- The inverse Fricke matrix `W⁻¹ = (0, 1/N; -1, 0)`. -/
 lemma frickeGL_inv_coe :
     (↑(frickeGL N)⁻¹ : Matrix (Fin 2) (Fin 2) ℚ) = !![0, 1 / (N : ℚ); -1, 0] := by
-  have hN : (N : ℚ) ≠ 0 := NeZero.ne _
   rw [GeneralLinearGroup.coe_inv, frickeGL_coe, Matrix.inv_def,
     show (!![0, -1; (N : ℚ), 0] : Matrix (Fin 2) (Fin 2) ℚ).det = N by
       rw [det_fin_two_of]; ring,
@@ -409,6 +408,13 @@ noncomputable def frickeCharRestrict (k : ℤ) (χ : (ZMod N)ˣ →* ℂˣ) :
         ModularForm ((Gamma1 N).map (mapGL ℝ)) k) =
       frickeOperator k (f : ModularForm ((Gamma1 N).map (mapGL ℝ)) k) := rfl
 
+/-- Applying `frickeOperator` twice scales by `frickeScalar N k` (function form of
+`frickeOperator_frickeOperator`). -/
+private lemma frickeOperator_sq_apply (k : ℤ)
+    (f : ModularForm ((Gamma1 N).map (mapGL ℝ)) k) :
+    frickeOperator k (frickeOperator k f) = frickeScalar N k • f :=
+  LinearMap.congr_fun (frickeOperator_frickeOperator (N := N) k) f
+
 /-- **The Fricke isomorphism** `modFormCharSpace k χ ≃ₗ[ℂ] modFormCharSpace k (chiConj χ)`.
 Its forward map is `frickeCharRestrict`; the inverse is `c⁻¹ •` the other Fricke restriction
 (using `W² = c • id` and `chiConj (chiConj χ) = χ`). -/
@@ -418,23 +424,17 @@ noncomputable def frickeCharEquiv (k : ℤ) (χ : (ZMod N)ˣ →* ℂˣ) :
   invFun := (frickeScalar N k)⁻¹ • frickeCharRestrict k (chiConj χ)
   left_inv f := by
     have hc := frickeScalar_ne_zero (N := N) k
-    have hsq : frickeOperator k (frickeOperator k (f : ModularForm ((Gamma1 N).map (mapGL ℝ)) k)) =
-        frickeScalar N k • (f : ModularForm ((Gamma1 N).map (mapGL ℝ)) k) :=
-      LinearMap.congr_fun (frickeOperator_frickeOperator (N := N) k) _
     apply Subtype.ext
     rw [LinearMap.smul_apply, SetLike.val_smul]
     show (frickeScalar N k)⁻¹ • frickeOperator k (frickeOperator k
         (f : ModularForm ((Gamma1 N).map (mapGL ℝ)) k)) = (f : ModularForm _ k)
-    rw [hsq, smul_smul, inv_mul_cancel₀ hc, one_smul]
+    rw [frickeOperator_sq_apply, smul_smul, inv_mul_cancel₀ hc, one_smul]
   right_inv f := by
     have hc := frickeScalar_ne_zero (N := N) k
-    have hsq : frickeOperator k (frickeOperator k (f : ModularForm ((Gamma1 N).map (mapGL ℝ)) k)) =
-        frickeScalar N k • (f : ModularForm ((Gamma1 N).map (mapGL ℝ)) k) :=
-      LinearMap.congr_fun (frickeOperator_frickeOperator (N := N) k) _
     apply Subtype.ext
     rw [LinearMap.smul_apply]
     show frickeOperator k ((frickeScalar N k)⁻¹ • frickeOperator k
         (f : ModularForm ((Gamma1 N).map (mapGL ℝ)) k)) = (f : ModularForm _ k)
-    rw [map_smul, hsq, smul_smul, inv_mul_cancel₀ hc, one_smul]
+    rw [map_smul, frickeOperator_sq_apply, smul_smul, inv_mul_cancel₀ hc, one_smul]
 
 end HeckeRing.GL2
