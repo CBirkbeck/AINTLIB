@@ -113,7 +113,7 @@ The place at infinity pulls back to `pullbackDiv f h 0 = Σ_{φP=O}(P)` (the ker
 noncomputable def pullbackDivisor (f : W.Point →+ W.Point) (hf : Finite f.ker)
     (D : ProjectiveDivisor (⟨W⟩ : SmoothPlaneCurve F)) :
     ProjectiveDivisor (⟨W⟩ : SmoothPlaneCurve F) :=
-  D.sum fun v n => n • pullbackDiv f hf v.toAffinePoint
+  D.sum fun v n ↦ n • pullbackDiv f hf v.toAffinePoint
 
 @[simp] theorem pullbackDivisor_zero (f : W.Point →+ W.Point) (hf : Finite f.ker) :
     pullbackDivisor f hf 0 = 0 := by
@@ -156,7 +156,7 @@ theorem pullbackDiv_apply (f : W.Point →+ W.Point) (hf : Finite f.ker)
     pullbackDiv f hf Q w = if f w.toAffinePoint = Q then 1 else 0 := by
   classical
   letI : Fintype {R : W.Point // f R = Q} := @Fintype.ofFinite _ (fiber_finite f hf Q)
-  rw [pullbackDiv, Finsupp.finset_sum_apply]
+  rw [pullbackDiv, Finsupp.finsetSum_apply]
   by_cases hwQ : f w.toAffinePoint = Q
   · rw [if_pos hwQ]
     have hwproj : (⟨w.toAffinePoint, hwQ⟩ : {R : W.Point // f R = Q}).val.toProjectiveSmoothPoint =
@@ -175,7 +175,7 @@ theorem pullbackDiv_apply (f : W.Point →+ W.Point) (hf : Finite f.ker)
     · intro hni
       exact absurd (Finset.mem_univ _) hni
   · rw [if_neg hwQ]
-    refine Finset.sum_eq_zero (fun R _ => ?_)
+    refine Finset.sum_eq_zero (fun R _ ↦ ?_)
     rw [Finsupp.single_eq_of_ne]
     intro hcontra
     apply hwQ
@@ -218,7 +218,7 @@ theorem pullbackDivisor_apply (f : W.Point →+ W.Point) (hf : Finite f.ker)
       have := congrArg ProjectiveSmoothPoint.toAffinePoint hcontra
       rwa [Affine.Point.toProjectiveSmoothPoint_toAffinePoint] at this
   rw [Finset.sum_congr rfl hterm,
-    Finset.sum_ite_eq D.support (f w.toAffinePoint).toProjectiveSmoothPoint (fun v => D v)]
+    Finset.sum_ite_eq D.support (f w.toAffinePoint).toProjectiveSmoothPoint (fun v ↦ D v)]
   by_cases hmem : (f w.toAffinePoint).toProjectiveSmoothPoint ∈ D.support
   · rw [if_pos hmem]
   · rw [if_neg hmem, Finsupp.notMem_support_iff.mp hmem]
@@ -248,7 +248,7 @@ theorem projectiveDivisorOf_pullback_eq_pullbackDivisor {φ : Isogeny W W}
     (⟨W⟩ : SmoothPlaneCurve F).projectiveDivisorOf (φ.pullback h) =
       pullbackDivisor φ.toAddMonoidHom inferInstance
         ((⟨W⟩ : SmoothPlaneCurve F).projectiveDivisorOf h) := by
-  refine Finsupp.ext fun w => ?_
+  refine Finsupp.ext fun w ↦ ?_
   rw [hcore h w,
     pullbackDivisor_apply φ.toAddMonoidHom inferInstance
       ((⟨W⟩ : SmoothPlaneCurve F).projectiveDivisorOf h) w]
@@ -285,7 +285,7 @@ theorem inftyOrdTransport_mulByInt (ℓ : ℤ) (hℓ : ℓ ≠ 0) (hℓF : (ℓ 
     InftyOrdTransport (mulByInt W ℓ) := by
   set τ := (mulByInt W ℓ).pullback
   set w := ((⟨W⟩ : SmoothPlaneCurve F).ordAtInftyValuation).comap τ.toRingHom
-  have hw_apply : ∀ g, w g = (⟨W⟩ : SmoothPlaneCurve F).ordAtInftyValuation (τ g) := fun g =>
+  have hw_apply : ∀ g, w g = (⟨W⟩ : SmoothPlaneCurve F).ordAtInftyValuation (τ g) := fun g ↦
     Valuation.comap_apply _ _ _
   have hx : w (x_gen W) = WithZero.exp 2 := by
     rw [hw_apply, show τ (x_gen W) = mulByInt_x W ℓ from mulByInt_pullback_x W ℓ hℓ]
@@ -303,7 +303,7 @@ theorem inftyOrdTransport_mulByInt (ℓ : ℤ) (hℓ : ℓ ≠ 0) (hℓF : (ℓ 
       hy_ne (ordAtInfty_mulByInt_y_eq_neg_three_general ℓ hℓ hℓF)]
     norm_num
   have hc : ∀ c : F, c ≠ 0 →
-      w (algebraMap F KE c) = 1 := fun c hc => by
+      w (algebraMap F KE c) = 1 := fun c hc ↦ by
     rw [hw_apply, show τ (algebraMap F KE c) =
         algebraMap F KE c from τ.commutes c]
     have h_ord : (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty
@@ -311,7 +311,7 @@ theorem inftyOrdTransport_mulByInt (ℓ : ℤ) (hℓ : ℓ ≠ 0) (hℓF : (ℓ 
       rw [(⟨W⟩ : SmoothPlaneCurve F).ordAtInfty_algebraMap_F_nonzero hc]
       rfl
     have h_ne : algebraMap F KE c ≠ 0 :=
-      fun h => hc (FaithfulSMul.algebraMap_injective F _ (h.trans (map_zero _).symm))
+      fun h ↦ hc (FaithfulSMul.algebraMap_injective F _ (h.trans (map_zero _).symm))
     rw [(⟨W⟩ : SmoothPlaneCurve F).ordAtInftyValuation_eq_exp_neg_of_ordAtInfty_eq h_ne h_ord]
     norm_num
   have hval : w = (⟨W⟩ : SmoothPlaneCurve F).ordAtInftyValuation :=
@@ -319,7 +319,7 @@ theorem inftyOrdTransport_mulByInt (ℓ : ℤ) (hℓ : ℓ ≠ 0) (hℓF : (ℓ 
   intro h
   rcases eq_or_ne h 0 with rfl | hh
   · rw [map_zero, (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty_zero]
-  · have hτh_ne : τ h ≠ 0 := fun h0 => hh (τ.injective (h0.trans (map_zero τ).symm))
+  · have hτh_ne : τ h ≠ 0 := fun h0 ↦ hh (τ.injective (h0.trans (map_zero τ).symm))
     obtain ⟨m, hm⟩ : ∃ m : ℤ, (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty (τ h) = (m : WithTop ℤ) :=
       ⟨_, (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty_of_ne hτh_ne⟩
     obtain ⟨n, hn⟩ : ∃ n : ℤ, (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty h = (n : WithTop ℤ) :=
@@ -380,7 +380,7 @@ theorem ord_P_mulByInt_pullback_eq_affine [IsAlgClosed F] (ℓ : ℤ) (hℓ : (�
       (⟨W⟩ : SmoothPlaneCurve F).ord_P ⟨x, y, h_ns⟩ f := by
   have hval := comap_pointValuation_mulByInt_eq_affine (W := W) ℓ hℓ P h_ns hQ
   have hτf_ne : (mulByInt W ℓ).pullback f ≠ 0 :=
-    fun h0 => hf ((mulByInt W ℓ).pullback_injective (h0.trans (map_zero _).symm))
+    fun h0 ↦ hf ((mulByInt W ℓ).pullback_injective (h0.trans (map_zero _).symm))
   obtain ⟨n, hn⟩ : ∃ n : ℤ,
       (⟨W⟩ : SmoothPlaneCurve F).ord_P ⟨x, y, h_ns⟩ f = (n : WithTop ℤ) := by
     obtain ⟨n, hn⟩ := WithTop.ne_top_iff_exists.mp
@@ -413,7 +413,7 @@ theorem ord_P_mulByInt_pullback_eq_infty [IsAlgClosed F] (ℓ : ℤ) (hℓ : (�
       (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty f := by
   have hval := comap_pointValuation_mulByInt_eq_infty (W := W) ℓ hℓ P hQ
   have hτf_ne : (mulByInt W ℓ).pullback f ≠ 0 :=
-    fun h0 => hf ((mulByInt W ℓ).pullback_injective (h0.trans (map_zero _).symm))
+    fun h0 ↦ hf ((mulByInt W ℓ).pullback_injective (h0.trans (map_zero _).symm))
   obtain ⟨n, hn⟩ : ∃ n : ℤ, (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty f = (n : WithTop ℤ) :=
     ⟨_, (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty_of_ne hf⟩
   obtain ⟨m, hm⟩ : ∃ m : ℤ,
@@ -445,7 +445,7 @@ theorem ordTransport_affine_mulByInt [IsAlgClosed F] (ℓ : ℤ) (hℓ : (ℓ : 
     rfl
   set τ := (mulByInt W ℓ).pullback
   have hτh_ne : τ h ≠ 0 :=
-    fun h0 => hh ((mulByInt W ℓ).pullback_injective (h0.trans (map_zero _).symm))
+    fun h0 ↦ hh ((mulByInt W ℓ).pullback_injective (h0.trans (map_zero _).symm))
   obtain ⟨m, hm⟩ : ∃ m : ℤ, (⟨W⟩ : SmoothPlaneCurve F).ord_P P (τ h) = (m : WithTop ℤ) := by
     obtain ⟨m, hm⟩ := WithTop.ne_top_iff_exists.mp
       (((⟨W⟩ : SmoothPlaneCurve F).ord_P_eq_top_iff (τ h)).not.mpr hτh_ne)
