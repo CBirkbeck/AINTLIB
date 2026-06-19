@@ -115,7 +115,7 @@ theorem tensorFunctionFieldEquiv_one_tmul (z : C.toAffine.FunctionField) :
     letI := C.tensorFunctionFieldAlgebra L
     letI : IsScalarTower L (L ⊗[F] C.toAffine.CoordinateRing)
         (L ⊗[F] C.toAffine.FunctionField) :=
-      IsScalarTower.of_algebraMap_eq fun l =>
+      IsScalarTower.of_algebraMap_eq fun l ↦
         ((C.tensorFunctionFieldStructureHom L).commutes l).symm
     have halg : C.tensorFunctionFieldStructureHom L (1 ⊗ₜ[F] u) =
         algebraMap (L ⊗[F] C.toAffine.CoordinateRing) (L ⊗[F] C.toAffine.FunctionField)
