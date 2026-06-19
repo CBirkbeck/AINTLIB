@@ -6833,7 +6833,14 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
   `M ≃ₗ M' ⟹ charIdeal M = charIdeal M'` (an iso is a pseudo-iso). With the G-IMC iso `𝒳⁺ ≅ Λ/I`,
   reduces part (ii) to `charIdealGroup (Λ/I) = I`. Two genuinely-deep prerequisites remain (each
   structure-theorem-scale), so the conjunct is BLOCKED, not dispatchable:
-- **Sub-ticket [CHARIDEAL-QUOT]** `charIdeal (Λ ⧸ span{f}) = span{f}` (`f ≠ 0`, base IwasawaAlgebra 𝒪).
+- **Sub-ticket [CHARIDEAL-QUOT]** — **DONE (2026-06-19, axiom-clean)**, `Iwasawa/StructureTheory/CharIdealQuotient.lean`:
+  `charIdeal_quotient : charIdeal 𝒪 (Λ ⧸ span{f}) htor = span{f}` (`f≠0`, `[IsDiscreteValuationRing 𝒪]`).
+  Route as sketched: `localMult_quotient_span` (= `Ring.ord` of the DVR localization via
+  `localizedQuotientEquiv` + `IsLocalizedModule.iso`/`extendScalarsOfIsLocalization` +
+  `Submodule.localized'_span` + `LinearEquiv.length_eq`) → `ord_eq_addVal` → per-prime values
+  (`ord_of_irreducible`=1, `ord_of_isUnit`=0) → `UniqueFactorizationMonoid.induction_on_prime` with
+  `charIdeal_mul_of_exact`. Bypasses the sorried structure theorem.  ORIGINAL sketch:
+  `charIdeal (Λ ⧸ span{f}) = span{f}` (`f ≠ 0`, base IwasawaAlgebra 𝒪).
   Sketch: (1) `localMult P (Λ/(f)) = v_P(f)` — via `localizedQuotientEquiv` (mathlib:
   `LocalizedModule p (M⧸M') ≃ₗ (LocalizedModule p M)⧸(localized p M')`) reduce to `Module.length Λ_P
   (Λ_P/(f))`, where `Λ_P = Localization.AtPrime P` is a **DVR** (project
