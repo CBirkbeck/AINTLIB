@@ -21,10 +21,10 @@ noncomputable section
 /-- Glue two adjacent CPV intervals `[a, b]` and `[b, c]` into `[a, c]`, discharging the
 shared cutout integrability obligation from `0 ≤ a` and `c ≤ 5`. -/
 private theorem cpv_concat_cutout (H : ℝ) (hH : Real.sqrt 3 / 2 < H) (s : ℂ)
-    (a b c : ℝ) (h_ab : CauchyPrincipalValueExists' (fun z => (z - s)⁻¹) (fdBoundary_H H) a b s)
-    (h_bc : CauchyPrincipalValueExists' (fun z => (z - s)⁻¹) (fdBoundary_H H) b c s)
+    (a b c : ℝ) (h_ab : CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹) (fdBoundary_H H) a b s)
+    (h_bc : CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹) (fdBoundary_H H) b c s)
     (hab : a ≤ b) (hbc : b ≤ c) (h0a : 0 ≤ a) (hc5 : c ≤ 5) :
-    CauchyPrincipalValueExists' (fun z => (z - s)⁻¹) (fdBoundary_H H) a c s := by
+    CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹) (fdBoundary_H H) a c s := by
   apply cpv_concat _ _ a b c s h_ab h_bc hab hbc
   intro ε hε
   exact (fdBoundary_H_cutout_ii H hH s ε hε).mono_set (by
@@ -36,19 +36,19 @@ the `ContDiffAt`, nonvanishing-derivative, continuity, and injectivity obligatio
 private theorem arc_smooth_cpv (H : ℝ) (hH : Real.sqrt 3 / 2 < H) (s : ℂ) {t₀ a' b' : ℝ}
     (ht₀_gt_1 : 1 < t₀) (ht₀_lt_3 : t₀ < 3) (ha' : a' < t₀) (hb' : t₀ < b')
     (ha1 : 1 < a') (hb3 : b' < 3) (hγt₀ : fdBoundary_H H t₀ = s) :
-    CauchyPrincipalValueExists' (fun z => (z - s)⁻¹) (fdBoundary_H H) a' b' s := by
+    CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹) (fdBoundary_H H) a' b' s := by
   apply cpv_exists_on_smooth_subinterval H hH s ⟨ha', hb'⟩ hγt₀
   · have heq : fdBoundary_H H =ᶠ[𝓝 t₀]
-        (fun u => Complex.exp (↑(Real.pi * (1 + u) / 6) * I)) :=
+        (fun u ↦ Complex.exp (↑(Real.pi * (1 + u) / 6) * I)) :=
       Filter.eventuallyEq_iff_exists_mem.mpr ⟨Set.Ioo 1 3,
-        Ioo_mem_nhds ht₀_gt_1 ht₀_lt_3, fun u hu => fdBoundary_H_eq_arc hu.1 hu.2⟩
+        Ioo_mem_nhds ht₀_gt_1 ht₀_lt_3, fun u hu ↦ fdBoundary_H_eq_arc hu.1 hu.2⟩
     exact ContDiffAt.congr_of_eventuallyEq (((Complex.ofRealCLM.contDiff.contDiffAt.comp t₀
-      (by fun_prop : ContDiffAt ℝ 2 (fun u : ℝ => Real.pi * (1 + u) / 6) t₀)).mul
+      (by fun_prop : ContDiffAt ℝ 2 (fun u : ℝ ↦ Real.pi * (1 + u) / 6) t₀)).mul
         contDiffAt_const).cexp) heq
   · exact (fdBoundary_H_hasDerivAt_arc H ht₀_gt_1 ht₀_lt_3).deriv ▸
       mul_ne_zero (exp_ne_zero _)
         (mul_ne_zero (by norm_num [Complex.ofReal_ne_zero]) I_ne_zero)
-  · exact (fdBoundary_H_deriv_continuousOn_Ioo_13 H).mono fun t ht =>
+  · exact (fdBoundary_H_deriv_continuousOn_Ioo_13 H).mono fun t ht ↦
       ⟨by linarith [ht.1], by linarith [ht.2]⟩
   · intro t ht hγt
     have ht' : t ∈ Set.Ioo (1:ℝ) 3 := ⟨by linarith [ht.1], by linarith [ht.2]⟩
@@ -56,12 +56,12 @@ private theorem arc_smooth_cpv (H : ℝ) (hH : Real.sqrt 3 / 2 < H) (s : ℂ) {t
     exact arc_angle_injective ht' ⟨ht₀_gt_1, ht₀_lt_3⟩ hγt
 
 private theorem cpv_exists_at_I_H_lt_one (H : ℝ) (hH : Real.sqrt 3 / 2 < H)
-    (h_arc_cpv : CauchyPrincipalValueExists' (fun z => (z - I)⁻¹)
+    (h_arc_cpv : CauchyPrincipalValueExists' (fun z ↦ (z - I)⁻¹)
         (fdBoundary_H H) (3/2) (5/2) I)
     (h_arc_I_iff : ∀ {t : ℝ}, 1 < t → t < 3 → (fdBoundary_H H t = I ↔ t = 2))
     (h_seg5_ne_I : ∀ {t : ℝ}, 4 < t → t ≤ 5 → fdBoundary_H H t ≠ I)
     (hγ3_ne_I : fdBoundary_H H 3 ≠ I) :
-    CauchyPrincipalValueExists' (fun z => (z - I)⁻¹) (fdBoundary_H H) 0 5 I := by
+    CauchyPrincipalValueExists' (fun z ↦ (z - I)⁻¹) (fdBoundary_H H) 0 5 I := by
   apply cpv_extend_to_full_interval H hH I (3/2) (5/2) (by norm_num) (by norm_num)
     (by norm_num) h_arc_cpv
   · intro t ht h_eq
@@ -86,26 +86,26 @@ private theorem cpv_exists_at_I_H_lt_one (H : ℝ) (hH : Real.sqrt 3 / 2 < H)
         exact h_seg5_ne_I ht4 ht.2 h_eq
 
 private theorem cpv_exists_at_I_H_eq_one (hH : Real.sqrt 3 / 2 < (1 : ℝ))
-    (h_arc_cpv : CauchyPrincipalValueExists' (fun z => (z - I)⁻¹)
+    (h_arc_cpv : CauchyPrincipalValueExists' (fun z ↦ (z - I)⁻¹)
         (fdBoundary_H 1) (3/2) (5/2) I)
     (h_arc_I_iff : ∀ {t : ℝ}, 1 < t → t < 3 → (fdBoundary_H 1 t = I ↔ t = 2))
     (hγ3_ne_I : fdBoundary_H 1 3 ≠ I) :
-    CauchyPrincipalValueExists' (fun z => (z - I)⁻¹) (fdBoundary_H 1) 0 5 I := by
+    CauchyPrincipalValueExists' (fun z ↦ (z - I)⁻¹) (fdBoundary_H 1) 0 5 I := by
   have hγ92 : fdBoundary_H 1 (9/2) = I := by
     rw [fdBoundary_H_eq_seg5_H (by norm_num : (4:ℝ) < 9/2)]; simp [fdBoundary_seg5_H]
-  have h_seg5_cpv : CauchyPrincipalValueExists' (fun z => (z - I)⁻¹)
+  have h_seg5_cpv : CauchyPrincipalValueExists' (fun z ↦ (z - I)⁻¹)
       (fdBoundary_H 1) (17/4) (19/4) I := by
     apply cpv_exists_on_smooth_subinterval 1 hH I
       (⟨by norm_num, by norm_num⟩ : (9/2:ℝ) ∈ Set.Ioo (17/4:ℝ) (19/4)) hγ92
     · refine ContDiffAt.congr_of_eventuallyEq (f := fdBoundary_seg5_H 1) ?_
         (Filter.eventuallyEq_iff_exists_mem.mpr ⟨Set.Ioi 4,
           Ioi_mem_nhds (by norm_num : (4:ℝ) < 9/2),
-          fun s (hs : 4 < s) => fdBoundary_H_eq_seg5_H hs⟩)
+          fun s (hs : 4 < s) ↦ fdBoundary_H_eq_seg5_H hs⟩)
       unfold fdBoundary_seg5_H
       exact (Complex.ofRealCLM.contDiff.contDiffAt.sub contDiffAt_const).add contDiffAt_const
     · exact (fdBoundary_H_hasDerivAt_seg5 1 (show (4:ℝ) < 9/2 by norm_num)).deriv ▸
         one_ne_zero
-    · exact (fdBoundary_H_deriv_continuousOn_Ioo_45 1).mono fun t ht =>
+    · exact (fdBoundary_H_deriv_continuousOn_Ioo_45 1).mono fun t ht ↦
         ⟨by linarith [ht.1], by linarith [ht.2]⟩
     · intro t ht hγt
       have ht4 : 4 < t := by linarith [ht.1]
@@ -115,7 +115,7 @@ private theorem cpv_exists_at_I_H_eq_one (hH : Real.sqrt 3 / 2 < (1 : ℝ))
         (show (4:ℝ) < 9/2 by norm_num) (show (9:ℝ)/2 ≤ 5 by norm_num)
       have : (fdBoundary_H 1 t).re = (fdBoundary_H 1 (9/2)).re := by rw [hγt]
       linarith
-  have h_cpv_0_52 : CauchyPrincipalValueExists' (fun z => (z - I)⁻¹)
+  have h_cpv_0_52 : CauchyPrincipalValueExists' (fun z ↦ (z - I)⁻¹)
       (fdBoundary_H 1) 0 (5/2) I :=
     cpv_concat_cutout 1 hH I 0 (3/2) (5/2)
       (cpv_avoidance _ _ _ _ _ (fdBoundary_H_continuous 1).continuousOn (by norm_num) (by
@@ -127,7 +127,7 @@ private theorem cpv_exists_at_I_H_eq_one (hH : Real.sqrt 3 / 2 < (1 : ℝ))
           rw [(h_arc_I_iff ht1 (by linarith [ht.2])).mp h_eq] at ht
           linarith [ht.2]))
       h_arc_cpv (by norm_num) (by norm_num) (by norm_num) (by norm_num)
-  have h_cpv_52_194 : CauchyPrincipalValueExists' (fun z => (z - I)⁻¹)
+  have h_cpv_52_194 : CauchyPrincipalValueExists' (fun z ↦ (z - I)⁻¹)
       (fdBoundary_H 1) (5/2) (19/4) I :=
     cpv_concat_cutout 1 hH I (5/2) (17/4) (19/4)
       (cpv_avoidance _ _ _ _ _ (fdBoundary_H_continuous 1).continuousOn (by norm_num) (by
@@ -146,11 +146,11 @@ private theorem cpv_exists_at_I_H_eq_one (hH : Real.sqrt 3 / 2 < (1 : ℝ))
             have := fdBoundary_H_seg5_re' 1 ht4 (by linarith [ht.2])
             rw [h_eq] at this; simp at this; linarith [ht.2]))
       h_seg5_cpv (by norm_num) (by norm_num) (by norm_num) (by norm_num)
-  have h_cpv_0_194 : CauchyPrincipalValueExists' (fun z => (z - I)⁻¹)
+  have h_cpv_0_194 : CauchyPrincipalValueExists' (fun z ↦ (z - I)⁻¹)
       (fdBoundary_H 1) 0 (19/4) I :=
     cpv_concat_cutout 1 hH I 0 (5/2) (19/4) h_cpv_0_52 h_cpv_52_194
       (by norm_num) (by norm_num) (by norm_num) (by norm_num)
-  have h_cpv_194_5 : CauchyPrincipalValueExists' (fun z => (z - I)⁻¹)
+  have h_cpv_194_5 : CauchyPrincipalValueExists' (fun z ↦ (z - I)⁻¹)
       (fdBoundary_H 1) (19/4) 5 I := by
     apply cpv_avoidance _ _ _ _ _ (fdBoundary_H_continuous 1).continuousOn (by norm_num)
     intro t ht h_eq
@@ -165,22 +165,22 @@ private theorem cpv_exists_generic_seg1 (H : ℝ) (hH : Real.sqrt 3 / 2 < H) (s 
     (ht₀_mem : 0 ≤ t₀ ∧ t₀ ≤ 5) (hγt₀ : fdBoundary_H H t₀ = s)
     (ht₀_ne_0 : t₀ ≠ 0)
     (ht₀_lt_1 : t₀ < 1) :
-    CauchyPrincipalValueExists' (fun z => (z - s)⁻¹) (fdBoundary_H H) 0 5 s := by
+    CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹) (fdBoundary_H H) 0 5 s := by
   have ht₀_gt_0 : 0 < t₀ := ht₀_mem.1.lt_of_ne ht₀_ne_0.symm
   apply cpv_extend_to_full_interval H hH s (t₀ / 2) ((t₀ + 1) / 2)
     (by linarith) (by linarith) (by linarith)
   · apply cpv_exists_on_smooth_subinterval H hH s
       ⟨by linarith, by linarith⟩ hγt₀
     · have heq : fdBoundary_H H =ᶠ[𝓝 t₀]
-          (fun t => (1/2 : ℂ) + ↑(H - t * (H - Real.sqrt 3 / 2)) * I) :=
+          (fun t ↦ (1/2 : ℂ) + ↑(H - t * (H - Real.sqrt 3 / 2)) * I) :=
         Filter.eventuallyEq_iff_exists_mem.mpr ⟨Set.Iio 1, Iio_mem_nhds ht₀_lt_1,
-          fun t ht => by rw [fdBoundary_H_eq_seg1_H ht.le]; simp [fdBoundary_seg1_H]⟩
+          fun t ht ↦ by rw [fdBoundary_H_eq_seg1_H ht.le]; simp [fdBoundary_seg1_H]⟩
       exact ContDiffAt.congr_of_eventuallyEq
         (contDiffAt_const.add ((Complex.ofRealCLM.contDiff.contDiffAt.comp t₀
           (contDiffAt_const.sub (contDiffAt_id.mul contDiffAt_const))).mul contDiffAt_const)) heq
     · exact (fdBoundary_H_hasDerivAt_seg1 H ht₀_lt_1).deriv ▸
         mul_ne_zero (neg_ne_zero.mpr (sub_ne_zero.mpr (by exact_mod_cast hH.ne'))) I_ne_zero
-    · exact (fdBoundary_H_deriv_continuousOn_Ioo_01 H).mono fun t ht =>
+    · exact (fdBoundary_H_deriv_continuousOn_Ioo_01 H).mono fun t ht ↦
         ⟨by linarith [ht.1], by linarith [ht.2]⟩
     · intro t ht hγt
       have ht1 : t ≤ 1 := by linarith [ht.2]
@@ -246,35 +246,35 @@ private theorem cpv_exists_generic_arc_seg5_cross (H : ℝ) (hH : Real.sqrt 3 / 
     (hγt₀ : fdBoundary_H H t₀ = s)
     (ht₀_gt_1 : 1 < t₀) (ht₀_lt_3 : t₀ < 3)
     (h_re_s_lt : s.re < 1/2) (h_re_s_gt : -(1:ℝ)/2 < s.re)
-    (h_arc_cpv : CauchyPrincipalValueExists' (fun z => (z - s)⁻¹)
+    (h_arc_cpv : CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹)
         (fdBoundary_H H) ((t₀ + 1) / 2) ((t₀ + 3) / 2) s)
     (h_seg5_cross : s.im = H) :
-    CauchyPrincipalValueExists' (fun z => (z - s)⁻¹) (fdBoundary_H H) 0 5 s := by
+    CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹) (fdBoundary_H H) 0 5 s := by
   set t₁ := s.re + 9/2 with ht₁_def
   have ht₁_gt4 : 4 < t₁ := by simp [ht₁_def]; linarith [h_re_s_gt]
   have ht₁_lt5 : t₁ < 5 := by simp [ht₁_def]; linarith [h_re_s_lt]
   have hγt₁ : fdBoundary_H H t₁ = s := by
     rw [fdBoundary_H_eq_seg5_H (by linarith : 4 < t₁)]
     refine Complex.ext ?_ ?_ <;> simp [fdBoundary_seg5_H, ht₁_def, h_seg5_cross]
-  have h_seg5_cpv : CauchyPrincipalValueExists' (fun z => (z - s)⁻¹)
+  have h_seg5_cpv : CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹)
       (fdBoundary_H H) ((t₁ + 4) / 2) ((t₁ + 5) / 2) s := by
     apply cpv_exists_on_smooth_subinterval H hH s
       ⟨by linarith, by linarith⟩ hγt₁
-    · have heq : fdBoundary_H H =ᶠ[𝓝 t₁] (fun t => (↑(t - 9/2) : ℂ) + ↑H * I) :=
+    · have heq : fdBoundary_H H =ᶠ[𝓝 t₁] (fun t ↦ (↑(t - 9/2) : ℂ) + ↑H * I) :=
         Filter.eventuallyEq_iff_exists_mem.mpr
-          ⟨Set.Ioi 4, Ioi_mem_nhds ht₁_gt4, fun u (hu : 4 < u) => by
+          ⟨Set.Ioi 4, Ioi_mem_nhds ht₁_gt4, fun u (hu : 4 < u) ↦ by
             rw [fdBoundary_H_eq_seg5_H hu]; simp [fdBoundary_seg5_H]⟩
       exact ContDiffAt.congr_of_eventuallyEq ((Complex.ofRealCLM.contDiff.contDiffAt.comp t₁
         (contDiffAt_id.sub contDiffAt_const)).add contDiffAt_const) heq
     · exact (fdBoundary_H_hasDerivAt_seg5 H ht₁_gt4).deriv ▸ one_ne_zero
-    · exact (fdBoundary_H_deriv_continuousOn_Ioo_45 H).mono fun t ht =>
+    · exact (fdBoundary_H_deriv_continuousOn_Ioo_45 H).mono fun t ht ↦
         ⟨by linarith [ht.1], by linarith [ht.2]⟩
     · intro t ht hγt
       have h_re_t := fdBoundary_H_seg5_re' H (by linarith [ht.1] : 4 < t) (by linarith [ht.2])
       have h_re_t₁ := fdBoundary_H_seg5_re' H ht₁_gt4 ht₁_lt5.le
       have : (fdBoundary_H H t).re = (fdBoundary_H H t₁).re := by rw [hγt]
       linarith
-  have h_cpv_0_t0h : CauchyPrincipalValueExists' (fun z => (z - s)⁻¹)
+  have h_cpv_0_t0h : CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹)
       (fdBoundary_H H) 0 ((t₀ + 3) / 2) s :=
     cpv_concat_cutout H hH s 0 ((t₀ + 1) / 2) ((t₀ + 3) / 2)
       (cpv_avoidance _ _ _ _ _ (fdBoundary_H_continuous H).continuousOn (by linarith) (by
@@ -289,7 +289,7 @@ private theorem cpv_exists_generic_arc_seg5_cross (H : ℝ) (hH : Real.sqrt 3 / 
             have := h_eq.trans hγt₀.symm
             rwa [fdBoundary_H_eq_arc ht1 ht3, fdBoundary_H_eq_arc ht₀_gt_1 ht₀_lt_3] at this))))
       h_arc_cpv (by linarith) (by linarith) (by linarith) (by linarith)
-  have h_cpv_mid_avoid : CauchyPrincipalValueExists' (fun z => (z - s)⁻¹)
+  have h_cpv_mid_avoid : CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹)
       (fdBoundary_H H) ((t₀ + 3) / 2) ((t₁ + 4) / 2) s := by
     apply cpv_avoidance _ _ _ _ _ (fdBoundary_H_continuous H).continuousOn (by linarith)
     intro t ht h_eq
@@ -309,15 +309,15 @@ private theorem cpv_exists_generic_arc_seg5_cross (H : ℝ) (hH : Real.sqrt 3 / 
         have := fdBoundary_H_seg5_re' H ht4 (by linarith [ht.2])
         rw [h_eq] at this; simp [ht₁_def] at *
         linarith [ht.2]
-  have h_cpv_mid : CauchyPrincipalValueExists' (fun z => (z - s)⁻¹)
+  have h_cpv_mid : CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹)
       (fdBoundary_H H) ((t₀ + 3) / 2) ((t₁ + 5) / 2) s :=
     cpv_concat_cutout H hH s ((t₀ + 3) / 2) ((t₁ + 4) / 2) ((t₁ + 5) / 2)
       h_cpv_mid_avoid h_seg5_cpv (by linarith) (by linarith) (by linarith) (by linarith)
-  have h_cpv_0_t1h : CauchyPrincipalValueExists' (fun z => (z - s)⁻¹)
+  have h_cpv_0_t1h : CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹)
       (fdBoundary_H H) 0 ((t₁ + 5) / 2) s :=
     cpv_concat_cutout H hH s 0 ((t₀ + 3) / 2) ((t₁ + 5) / 2)
       h_cpv_0_t0h h_cpv_mid (by linarith) (by linarith) (by linarith) (by linarith)
-  have h_cpv_end : CauchyPrincipalValueExists' (fun z => (z - s)⁻¹)
+  have h_cpv_end : CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹)
       (fdBoundary_H H) ((t₁ + 5) / 2) 5 s := by
     apply cpv_avoidance _ _ _ _ _ (fdBoundary_H_continuous H).continuousOn (by linarith)
     intro t ht h_eq
@@ -333,10 +333,10 @@ private theorem cpv_exists_generic_arc_no_cross (H : ℝ) (hH : Real.sqrt 3 / 2 
     (hγt₀ : fdBoundary_H H t₀ = s)
     (ht₀_gt_1 : 1 < t₀) (ht₀_lt_3 : t₀ < 3)
     (h_re_s_lt : s.re < 1/2) (h_re_s_gt : -(1:ℝ)/2 < s.re)
-    (h_arc_cpv : CauchyPrincipalValueExists' (fun z => (z - s)⁻¹)
+    (h_arc_cpv : CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹)
         (fdBoundary_H H) ((t₀ + 1) / 2) ((t₀ + 3) / 2) s)
     (h_seg5_cross : ¬(s.im = H)) :
-    CauchyPrincipalValueExists' (fun z => (z - s)⁻¹) (fdBoundary_H H) 0 5 s := by
+    CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹) (fdBoundary_H H) 0 5 s := by
   apply cpv_extend_to_full_interval H hH s ((t₀ + 1) / 2) ((t₀ + 3) / 2)
     (by linarith) (by linarith) (by linarith) h_arc_cpv
   · intro t ht h_eq
@@ -370,7 +370,7 @@ private theorem cpv_exists_generic_arc (H : ℝ) (hH : Real.sqrt 3 / 2 < H) (s :
     (hs_rho : ¬s = ellipticPointRho) (t₀ : ℝ)
     (hγt₀ : fdBoundary_H H t₀ = s)
     (ht₀_gt_1 : 1 < t₀) (ht₀_lt_3 : t₀ < 3) :
-    CauchyPrincipalValueExists' (fun z => (z - s)⁻¹) (fdBoundary_H H) 0 5 s := by
+    CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹) (fdBoundary_H H) 0 5 s := by
   have h_re_s : s.re = Real.cos (Real.pi * (1 + t₀) / 6) := by
     rw [← hγt₀]; exact fdBoundary_H_arc_re' H ht₀_gt_1 ht₀_lt_3
   have h_im_s_arc : s.im = Real.sin (Real.pi * (1 + t₀) / 6) := by
@@ -398,7 +398,7 @@ private theorem cpv_exists_generic_arc (H : ℝ) (hH : Real.sqrt 3 / 2 < H) (s :
         Real.cos_pi_sub, Real.cos_pi_div_three]
       ring
     linarith
-  have h_arc_cpv : CauchyPrincipalValueExists' (fun z => (z - s)⁻¹)
+  have h_arc_cpv : CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹)
       (fdBoundary_H H) ((t₀ + 1) / 2) ((t₀ + 3) / 2) s :=
     arc_smooth_cpv H hH s ht₀_gt_1 ht₀_lt_3 (by linarith) (by linarith)
       (by linarith) (by linarith) hγt₀
@@ -412,15 +412,15 @@ private theorem cpv_exists_generic_seg4 (H : ℝ) (hH : Real.sqrt 3 / 2 < H) (s 
     (hs_rho : ¬s = ellipticPointRho) (t₀ : ℝ)
     (hγt₀ : fdBoundary_H H t₀ = s)
     (ht₀_gt_3 : 3 < t₀) (ht₀_lt_4 : t₀ < 4) :
-    CauchyPrincipalValueExists' (fun z => (z - s)⁻¹) (fdBoundary_H H) 0 5 s := by
+    CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹) (fdBoundary_H H) 0 5 s := by
   apply cpv_extend_to_full_interval H hH s ((t₀ + 3) / 2) ((t₀ + 4) / 2)
     (by linarith) (by linarith) (by linarith)
   · apply cpv_exists_on_smooth_subinterval H hH s
       ⟨by linarith, by linarith⟩ hγt₀
-    · have heq : fdBoundary_H H =ᶠ[𝓝 t₀] (fun t => -(1/2 : ℂ) +
+    · have heq : fdBoundary_H H =ᶠ[𝓝 t₀] (fun t ↦ -(1/2 : ℂ) +
             ↑(Real.sqrt 3 / 2 + (t - 3) * (H - Real.sqrt 3 / 2)) * I) :=
         Filter.eventuallyEq_iff_exists_mem.mpr ⟨Set.Ioo 3 4,
-          Ioo_mem_nhds ht₀_gt_3 ht₀_lt_4, fun u hu => by
+          Ioo_mem_nhds ht₀_gt_3 ht₀_lt_4, fun u hu ↦ by
             rw [fdBoundary_H_eq_seg4_H hu.1 hu.2.le]
             simp [fdBoundary_seg4_H]; norm_num⟩
       exact ContDiffAt.congr_of_eventuallyEq (contDiffAt_const.add
@@ -428,7 +428,7 @@ private theorem cpv_exists_generic_seg4 (H : ℝ) (hH : Real.sqrt 3 / 2 < H) (s 
           ((contDiffAt_id.sub contDiffAt_const).mul contDiffAt_const))).mul contDiffAt_const)) heq
     · exact (fdBoundary_H_hasDerivAt_seg4 H ht₀_gt_3 ht₀_lt_4).deriv ▸
         mul_ne_zero (sub_ne_zero.mpr (by exact_mod_cast hH.ne')) I_ne_zero
-    · exact (fdBoundary_H_deriv_continuousOn_Ioo_34 H).mono fun t ht =>
+    · exact (fdBoundary_H_deriv_continuousOn_Ioo_34 H).mono fun t ht ↦
         ⟨by linarith [ht.1], by linarith [ht.2]⟩
     · intro t ht hγt
       have h_im_t : (fdBoundary_H H t).im =
@@ -509,17 +509,17 @@ private theorem cpv_exists_generic_seg5_normSq_one (H : ℝ) (hH : Real.sqrt 3 /
     (t₀ : ℝ)
     (ht₀_gt_4 : 4 < t₀) (ht₀_lt_5 : t₀ < 5)
     (h_im_s : s.im = H) (h_re_s : s.re = t₀ - 9/2)
-    (h_seg5_cpv : CauchyPrincipalValueExists' (fun z => (z - s)⁻¹)
+    (h_seg5_cpv : CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹)
         (fdBoundary_H H) ((t₀ + 4) / 2) ((t₀ + 5) / 2) s)
     (h_normSq : Complex.normSq s = 1) :
-    CauchyPrincipalValueExists' (fun z => (z - s)⁻¹) (fdBoundary_H H) 0 5 s := by
+    CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹) (fdBoundary_H H) 0 5 s := by
   have h_re_s_lt : s.re < 1/2 := by linarith [h_re_s]
   have h_re_s_gt : -(1:ℝ)/2 < s.re := by linarith [h_re_s]
-  have h_ivt : s.re ∈ (fun t => Real.cos (Real.pi * (1 + t) / 6)) ''
+  have h_ivt : s.re ∈ (fun t ↦ Real.cos (Real.pi * (1 + t) / 6)) ''
       Set.Icc (1:ℝ) 3 := by
     apply intermediate_value_Icc' (by norm_num : (1:ℝ) ≤ 3)
     · exact (Real.continuous_cos.comp
-        (by fun_prop : Continuous (fun t => Real.pi * (1 + t) / 6))).continuousOn
+        (by fun_prop : Continuous (fun t ↦ Real.pi * (1 + t) / 6))).continuousOn
     · constructor
       · rw [show Real.pi * (1 + 3) / 6 = Real.pi - Real.pi / 3 by ring,
           Real.cos_pi_sub, Real.cos_pi_div_three]
@@ -529,11 +529,11 @@ private theorem cpv_exists_generic_seg5_normSq_one (H : ℝ) (hH : Real.sqrt 3 /
         linarith
   obtain ⟨t₁, ht₁_mem, ht₁_cos⟩ := h_ivt
   beta_reduce at ht₁_cos
-  have ht₁_gt1 : 1 < t₁ := ht₁_mem.1.lt_of_ne fun h => by
+  have ht₁_gt1 : 1 < t₁ := ht₁_mem.1.lt_of_ne fun h ↦ by
     rw [← h, show Real.pi * (1 + 1) / 6 = Real.pi / 3 by ring,
       Real.cos_pi_div_three] at ht₁_cos
     linarith
-  have ht₁_lt3 : t₁ < 3 := ht₁_mem.2.lt_of_ne fun h => by
+  have ht₁_lt3 : t₁ < 3 := ht₁_mem.2.lt_of_ne fun h ↦ by
     rw [h, show Real.pi * (1 + 3) / 6 = Real.pi - Real.pi / 3 by ring,
       Real.cos_pi_sub, Real.cos_pi_div_three] at ht₁_cos
     linarith
@@ -551,11 +551,11 @@ private theorem cpv_exists_generic_seg5_normSq_one (H : ℝ) (hH : Real.sqrt 3 /
       rw [ht₁_cos] at h1
       rw [Complex.normSq_apply] at h_normSq
       nlinarith
-  have h_arc_cpv : CauchyPrincipalValueExists' (fun z => (z - s)⁻¹)
+  have h_arc_cpv : CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹)
       (fdBoundary_H H) ((t₁ + 1) / 2) ((t₁ + 3) / 2) s :=
     arc_smooth_cpv H hH s ht₁_gt1 ht₁_lt3 (by linarith) (by linarith)
       (by linarith) (by linarith) hγt₁
-  have h_avoid_start : CauchyPrincipalValueExists' (fun z => (z - s)⁻¹)
+  have h_avoid_start : CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹)
       (fdBoundary_H H) 0 ((t₁ + 1) / 2) s := by
     apply cpv_avoidance _ _ _ _ _ (fdBoundary_H_continuous H).continuousOn (by linarith)
     intro t ht h_eq
@@ -572,11 +572,11 @@ private theorem cpv_exists_generic_seg5_normSq_one (H : ℝ) (hH : Real.sqrt 3 /
         exact h_ne (arc_angle_injective ⟨ht1, ht3⟩ ⟨ht₁_gt1, ht₁_lt3⟩ (by
           have := h_eq.trans hγt₁.symm
           rwa [fdBoundary_H_eq_arc ht1 ht3, fdBoundary_H_eq_arc ht₁_gt1 ht₁_lt3] at this))
-  have h_cpv_0_t1h : CauchyPrincipalValueExists' (fun z => (z - s)⁻¹)
+  have h_cpv_0_t1h : CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹)
       (fdBoundary_H H) 0 ((t₁ + 3) / 2) s :=
     cpv_concat_cutout H hH s 0 ((t₁ + 1) / 2) ((t₁ + 3) / 2)
       h_avoid_start h_arc_cpv (by linarith) (by linarith) (by linarith) (by linarith)
-  have h_avoid_mid : CauchyPrincipalValueExists' (fun z => (z - s)⁻¹)
+  have h_avoid_mid : CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹)
       (fdBoundary_H H) ((t₁ + 3) / 2) ((t₀ + 4) / 2) s := by
     apply cpv_avoidance _ _ _ _ _ (fdBoundary_H_continuous H).continuousOn (by linarith)
     intro t ht h_eq
@@ -595,15 +595,15 @@ private theorem cpv_exists_generic_seg5_normSq_one (H : ℝ) (hH : Real.sqrt 3 /
       · push Not at ht4
         have := fdBoundary_H_seg5_re' H ht4 (by linarith [ht.2])
         rw [h_eq] at this; linarith [h_re_s, ht.2]
-  have h_cpv_mid : CauchyPrincipalValueExists' (fun z => (z - s)⁻¹)
+  have h_cpv_mid : CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹)
       (fdBoundary_H H) ((t₁ + 3) / 2) ((t₀ + 5) / 2) s :=
     cpv_concat_cutout H hH s ((t₁ + 3) / 2) ((t₀ + 4) / 2) ((t₀ + 5) / 2)
       h_avoid_mid h_seg5_cpv (by linarith) (by linarith) (by linarith) (by linarith)
-  have h_cpv_0_t0h : CauchyPrincipalValueExists' (fun z => (z - s)⁻¹)
+  have h_cpv_0_t0h : CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹)
       (fdBoundary_H H) 0 ((t₀ + 5) / 2) s :=
     cpv_concat_cutout H hH s 0 ((t₁ + 3) / 2) ((t₀ + 5) / 2)
       h_cpv_0_t1h h_cpv_mid (by linarith) (by linarith) (by linarith) (by linarith)
-  have h_cpv_end : CauchyPrincipalValueExists' (fun z => (z - s)⁻¹)
+  have h_cpv_end : CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹)
       (fdBoundary_H H) ((t₀ + 5) / 2) 5 s := by
     apply cpv_avoidance _ _ _ _ _ (fdBoundary_H_continuous H).continuousOn (by linarith)
     intro t ht h_eq
@@ -618,12 +618,12 @@ private theorem cpv_exists_generic_seg5_normSq_ne_one (H : ℝ) (hH : Real.sqrt 
     (t₀ : ℝ)
     (ht₀_gt_4 : 4 < t₀) (ht₀_lt_5 : t₀ < 5)
     (h_re_s : s.re = t₀ - 9/2)
-    (h_seg5_cpv : CauchyPrincipalValueExists' (fun z => (z - s)⁻¹)
+    (h_seg5_cpv : CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹)
         (fdBoundary_H H) ((t₀ + 4) / 2) ((t₀ + 5) / 2) s)
     (h_normSq : ¬Complex.normSq s = 1)
     (hs_endpoint : ¬s = 1 / 2 + ↑H * I)
     (h_im_s : s.im = H) :
-    CauchyPrincipalValueExists' (fun z => (z - s)⁻¹) (fdBoundary_H H) 0 5 s := by
+    CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹) (fdBoundary_H H) 0 5 s := by
   apply cpv_extend_to_full_interval H hH s ((t₀ + 4) / 2) ((t₀ + 5) / 2)
     (by linarith) (by linarith) (by linarith) h_seg5_cpv
   · intro t ht h_eq
@@ -661,26 +661,26 @@ private theorem cpv_exists_generic_seg5 (H : ℝ) (hH : Real.sqrt 3 / 2 < H) (s 
     (hs_endpoint : ¬s = 1 / 2 + ↑H * I)
     (ht₀_ne_5 : t₀ ≠ 5)
     (ht₀_gt_4 : 4 < t₀) :
-    CauchyPrincipalValueExists' (fun z => (z - s)⁻¹) (fdBoundary_H H) 0 5 s := by
+    CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹) (fdBoundary_H H) 0 5 s := by
   have ht₀_lt_5 : t₀ < 5 := ht₀_mem.2.lt_of_ne ht₀_ne_5
   have h_im_s : s.im = H := by
     rw [← hγt₀]; exact fdBoundary_H_seg5_im' H ht₀_gt_4 ht₀_lt_5.le
   have h_re_s : s.re = t₀ - 9/2 := by
     rw [← hγt₀]; exact fdBoundary_H_seg5_re' H ht₀_gt_4 ht₀_lt_5.le
-  have h_seg5_cpv : CauchyPrincipalValueExists' (fun z => (z - s)⁻¹)
+  have h_seg5_cpv : CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹)
       (fdBoundary_H H) ((t₀ + 4) / 2) ((t₀ + 5) / 2) s := by
     apply cpv_exists_on_smooth_subinterval H hH s
       ⟨by linarith, by linarith⟩ hγt₀
     · have heq_fn : ∀ u ∈ Set.Ioi (4:ℝ), fdBoundary_H H u =
-          (↑(u - 9/2) : ℂ) + ↑H * I := fun u (hu : 4 < u) => by
+          (↑(u - 9/2) : ℂ) + ↑H * I := fun u (hu : 4 < u) ↦ by
         rw [fdBoundary_H_eq_seg5_H hu]; simp [fdBoundary_seg5_H]
-      have heq : fdBoundary_H H =ᶠ[𝓝 t₀] (fun t => (↑(t - 9/2) : ℂ) + ↑H * I) :=
+      have heq : fdBoundary_H H =ᶠ[𝓝 t₀] (fun t ↦ (↑(t - 9/2) : ℂ) + ↑H * I) :=
         Filter.eventuallyEq_iff_exists_mem.mpr
           ⟨Set.Ioi 4, Ioi_mem_nhds ht₀_gt_4, heq_fn⟩
       exact ContDiffAt.congr_of_eventuallyEq ((Complex.ofRealCLM.contDiff.contDiffAt.comp t₀
         (contDiffAt_id.sub contDiffAt_const)).add contDiffAt_const) heq
     · exact (fdBoundary_H_hasDerivAt_seg5 H ht₀_gt_4).deriv ▸ one_ne_zero
-    · exact (fdBoundary_H_deriv_continuousOn_Ioo_45 H).mono fun t ht =>
+    · exact (fdBoundary_H_deriv_continuousOn_Ioo_45 H).mono fun t ht ↦
         ⟨by linarith [ht.1], by linarith [ht.2]⟩
     · intro t ht hγt
       have ht4 : 4 < t := by linarith [ht.1]
@@ -698,7 +698,7 @@ private theorem cpv_exists_generic_seg5 (H : ℝ) (hH : Real.sqrt 3 / 2 < H) (s 
 /-- For any point on `fdBoundary_H H`, the CPV integral of `(z - s)⁻¹` exists. -/
 theorem fdBoundary_H_cpv_exists_of_onCurve (H : ℝ) (hH : Real.sqrt 3 / 2 < H) (s : ℂ)
     (h_on : ∃ t ∈ Set.Icc (0:ℝ) 5, fdBoundary_H H t = s) :
-    CauchyPrincipalValueExists' (fun z => (z - s)⁻¹) (fdBoundary_H H) 0 5 s := by
+    CauchyPrincipalValueExists' (fun z ↦ (z - s)⁻¹) (fdBoundary_H H) 0 5 s := by
   by_cases hs_rho : s = ellipticPointRho
   · subst hs_rho; exact cpv_exists_at_rho H hH
   by_cases hs_rho' : s = ellipticPointRhoPlusOne
@@ -713,7 +713,7 @@ theorem fdBoundary_H_cpv_exists_of_onCurve (H : ℝ) (hH : Real.sqrt 3 / 2 < H) 
           show Real.pi * (1 + 2) / 6 = Real.pi / 2 by ring,
           show (↑(Real.pi / 2) : ℂ) * I = ↑Real.pi / 2 * I by push_cast; ring]
         exact Complex.exp_pi_div_two_mul_I
-      have h_arc_cpv : CauchyPrincipalValueExists' (fun z => (z - I)⁻¹)
+      have h_arc_cpv : CauchyPrincipalValueExists' (fun z ↦ (z - I)⁻¹)
           (fdBoundary_H H) (3/2) (5/2) I :=
         arc_smooth_cpv H hH I (by norm_num) (by norm_num) (by norm_num) (by norm_num)
           (by norm_num) (by norm_num) hγ2
