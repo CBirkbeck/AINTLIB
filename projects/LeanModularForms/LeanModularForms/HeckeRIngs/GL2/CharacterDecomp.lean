@@ -112,8 +112,7 @@ private lemma exists_charHom_of_iInf_eigenspace_ne_bot [Finite G] {ρ : G →* M
     {χ : G → K} (hχ : ⨅ g, (ρ g).eigenspace (χ g) ≠ ⊥) :
     ∃ χ₀ : G →* Kˣ, (fun g ↦ ((χ₀ g) : K)) = χ := by
   obtain ⟨v, hv_mem, hv_ne⟩ := (Submodule.ne_bot_iff _).mp hχ
-  exact ⟨charDecomp_charHomOfEigenvector ρ χ v hv_ne
-    fun g ↦ (Submodule.mem_iInf _).mp hv_mem g, rfl⟩
+  exact ⟨charDecomp_charHomOfEigenvector ρ χ v hv_ne ((Submodule.mem_iInf _).mp hv_mem), rfl⟩
 
 /-- A finite-order endomorphism of a vector space over a characteristic-zero field is
 semisimple. -/
@@ -230,10 +229,9 @@ theorem ModularForm_Gamma1_iSup_charSpace (k : ℤ) : (⨆ χ : (ZMod N)ˣ →* 
       diamondOp_isSemisimple
   refine le_antisymm le_top (h_top_fun ▸ iSup_le fun χ ↦ ?_)
   by_cases hχ : jointDiamondEigenspace k χ = ⊥
-  · simp [hχ]
+  · simp only [hχ, bot_le]
   · obtain ⟨χ₀, rfl⟩ := exists_charHom_of_jointDiamondEigenspace_ne_bot hχ
-    rw [jointDiamondEigenspace_eq_modFormCharSpace]
-    exact le_iSup _ χ₀
+    exact le_iSup (modFormCharSpace k) χ₀
 
 /-- **The character subspaces form an independent family.** -/
 theorem ModularForm_Gamma1_iSupIndep_charSpace (k : ℤ) :
@@ -357,10 +355,9 @@ theorem modFormCharSpace_iSup_inf_of_diamondOpHom_invariant
   conv_lhs => rw [← h_fun_top]
   refine iSup_le fun χ ↦ ?_
   by_cases hχ : p ⊓ jointDiamondEigenspace k χ = ⊥
-  · simp [hχ]
+  · simp only [hχ, bot_le]
   · obtain ⟨χ₀, rfl⟩ := exists_charHom_of_jointDiamondEigenspace_ne_bot
       (fun h_bot ↦ hχ (by rw [h_bot, inf_bot_eq]))
-    rw [jointDiamondEigenspace_eq_modFormCharSpace]
     exact le_iSup (fun ψ : (ZMod N)ˣ →* ℂˣ ↦ p ⊓ modFormCharSpace k ψ) χ₀
 
 /-- **Character decomposition of a diamond-invariant submodule of
@@ -378,10 +375,9 @@ theorem cuspFormCharSpace_iSup_inf_of_diamondOpCuspHom_invariant
   conv_lhs => rw [← h_fun_top]
   refine iSup_le fun χ ↦ ?_
   by_cases hχ : p ⊓ jointDiamondCuspEigenspace k χ = ⊥
-  · simp [hχ]
+  · simp only [hχ, bot_le]
   · obtain ⟨χ₀, rfl⟩ := exists_charHom_of_jointDiamondCuspEigenspace_ne_bot
       (fun h_bot ↦ hχ (by rw [h_bot, inf_bot_eq]))
-    rw [jointDiamondCuspEigenspace_eq_cuspFormCharSpace]
     exact le_iSup (fun ψ : (ZMod N)ˣ →* ℂˣ ↦ p ⊓ cuspFormCharSpace k ψ) χ₀
 
 /-- **Finsupp-indexed character decomposition of a modular form in a
@@ -429,8 +425,8 @@ theorem ModularForm_Gamma1_endo_ext {k : ℤ}
   refine LinearMap.ext fun f ↦ ?_
   have hf : f ∈ ⨆ χ : (ZMod N)ˣ →* ℂˣ, modFormCharSpace k χ :=
     ModularForm_Gamma1_iSup_charSpace (N := N) k ▸ Submodule.mem_top
-  exact Submodule.iSup_induction _ (motive := fun g ↦ S g = T g) hf h (by simp)
-    fun x y hx hy ↦ by simp [hx, hy]
+  exact Submodule.iSup_induction _ (motive := fun g ↦ S g = T g) hf h (by simp only [map_zero])
+    fun x y hx hy ↦ by simp only [map_add, hx, hy]
 
 end EndoExt
 
