@@ -63,8 +63,8 @@ private lemma exists_pos_min_image {α : Type*} {S : Finset α} (h_nonempty : S.
     (f : ∀ a ∈ S, ℝ) (hf_pos : ∀ a (ha : a ∈ S), 0 < f a ha) :
     ∃ r_min > 0, ∀ a (ha : a ∈ S), r_min ≤ f a ha := by
   obtain ⟨⟨a₀, ha₀⟩, _, h_min⟩ := Finset.exists_min_image S.attach
-    (fun ⟨a, ha⟩ => f a ha) (Finset.attach_nonempty_iff.mpr h_nonempty)
-  exact ⟨_, hf_pos a₀ ha₀, fun a ha => h_min ⟨a, ha⟩ (Finset.mem_attach _ _)⟩
+    (fun ⟨a, ha⟩ ↦ f a ha) (Finset.attach_nonempty_iff.mpr h_nonempty)
+  exact ⟨_, hf_pos a₀ ha₀, fun a ha ↦ h_min ⟨a, ha⟩ (Finset.mem_attach _ _)⟩
 
 /-- Shared boilerplate for the four CPV existence theorems: given crossing
 endpoint/pairwise data at the geometric radius `r_geom` and a shrunk radius
@@ -78,16 +78,16 @@ private lemma multiCrossing_window_data {crossings : Finset ℝ} {r r_geom : ℝ
     (∀ t ∈ crossings, r ≤ t ∧ t ≤ 1 - r) ∧
     (∀ t ∈ crossings, r < t ∧ t < 1 - r) ∧
     (∀ t ∈ crossings, ∀ t' ∈ crossings, t' ≠ t → 2 * r < |t - t'|) :=
-  ⟨fun t_i ht_i_mem t ht =>
+  ⟨fun t_i ht_i_mem t ht ↦
       ⟨by linarith [ht.1, (hr_geom_endpts t_i ht_i_mem).1],
        by linarith [ht.2, (hr_geom_endpts t_i ht_i_mem).2]⟩,
-   fun t ht =>
+   fun t ht ↦
       ⟨hr_le_geom.trans (hr_geom_endpts t ht).1,
        by linarith [(hr_geom_endpts t ht).2]⟩,
-   fun t ht =>
+   fun t ht ↦
       ⟨hr_lt_geom.trans_le (hr_geom_endpts t ht).1,
        by linarith [(hr_geom_endpts t ht).2]⟩,
-   fun t ht t' ht' hne => by linarith [hr_geom_pair t ht t' ht' hne]⟩
+   fun t ht t' ht' hne ↦ by linarith [hr_geom_pair t ht t' ht' hne]⟩
 
 /-- **Per-crossing radius existence**: for each crossing `t_i`, extract a
 positive radius `r_i` such that all four slit-plane chord-quotient/boundary
@@ -135,13 +135,13 @@ private theorem exists_per_crossing_radius
   have hr_le_L₂ : r ≤ r_L₂ := (min_le_right _ _).trans (min_le_right _ _)
   refine ⟨r, L_R, L_L, lt_min (lt_min hr_R₁_pos hr_L₁_pos) (lt_min hr_R₂_pos hr_L₂_pos),
     hL_R_ne, hL_L_ne, h_deriv_right, h_deriv_left, ?_, ?_, ?_, ?_⟩
-  · exact fun a b ha_gt hab hb_le =>
+  · exact fun a b ha_gt hab hb_le ↦
       hr_R₁_slit a b ha_gt hab (hb_le.trans (by linarith [hr_le_R₁]))
-  · exact fun a b ha_ge hab hb_lt =>
+  · exact fun a b ha_ge hab hb_lt ↦
       hr_L₁_slit a b ((by linarith [hr_le_L₁] : t₀ - r_L₁ ≤ a)) hab hb_lt
-  · exact fun r' hr'_pos hr'_le =>
+  · exact fun r' hr'_pos hr'_le ↦
       hr_R₂_endpoint r' hr'_pos (hr'_le.trans hr_le_R₂)
-  · exact fun r' hr'_pos hr'_le h_γ_ne =>
+  · exact fun r' hr'_pos hr'_le h_γ_ne ↦
       hr_L₂_endpoint r' hr'_pos (hr'_le.trans hr_le_L₂) h_γ_ne
 
 /-- **Simple-pole cutoff integrand bounded by `(1/ε) · ‖γ'‖`**, integrable on
@@ -151,22 +151,22 @@ private theorem cpvIntegrand_inv_intervalIntegrable
     {ε : ℝ} (hε_pos : 0 < ε)
     (hab : a ≤ b) (h_in_Icc : Set.Icc a b ⊆ Set.Icc (0 : ℝ) 1) :
     IntervalIntegrable
-      (fun t => cpvIntegrand (fun z => (z - s)⁻¹)
+      (fun t ↦ cpvIntegrand (fun z ↦ (z - s)⁻¹)
         γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend s ε t)
       MeasureTheory.volume a b := by
-  set γf : ℝ → ℂ := fun t => γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t
+  set γf : ℝ → ℂ := fun t ↦ γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t
   have hγ_int : IntervalIntegrable (deriv γf) MeasureTheory.volume a b := by
     refine γ.toClosedPwC1Curve.deriv_extend_intervalIntegrable.mono_set ?_
     rw [Set.uIcc_of_le hab, Set.uIcc_of_le zero_le_one]; exact h_in_Icc
   have h_sm_γf : Measurable γf :=
     γ.toPwC1Immersion.toPiecewiseC1Path.toPath.continuous_extend.measurable
   have h_sm : Measurable
-      (fun u => cpvIntegrand (fun z => (z - s)⁻¹) γf s ε u) := by
+      (fun u ↦ cpvIntegrand (fun z ↦ (z - s)⁻¹) γf s ε u) := by
     unfold cpvIntegrand
     exact Measurable.ite ((h_sm_γf.sub measurable_const).norm measurableSet_Ioi)
       ((h_sm_γf.sub measurable_const).inv.mul (measurable_deriv γf)) measurable_const
-  have h_bd : ∀ u, ‖cpvIntegrand (fun z => (z - s)⁻¹) γf s ε u‖ ≤
-      (1 / ε) * ‖deriv γf u‖ := fun u => by
+  have h_bd : ∀ u, ‖cpvIntegrand (fun z ↦ (z - s)⁻¹) γf s ε u‖ ≤
+      (1 / ε) * ‖deriv γf u‖ := fun u ↦ by
     simp only [cpvIntegrand]
     split_ifs with h_gt
     · rw [norm_mul, norm_inv, inv_eq_one_div]
@@ -185,8 +185,8 @@ private lemma sorted_cons_smooth_bound_restrict {γf : ℝ → ℂ} {s : ℂ}
       → m ≤ ‖γf u - s‖) :
     ∃ m' : ℝ, 0 < m' ∧ ∀ u ∈ Set.Icc (t + r) 1,
       (∀ t' ∈ rest, u ∉ Set.Ioo (t' - r) (t' + r)) → m' ≤ ‖γf u - s‖ := by
-  refine ⟨m, hm_pos, fun u hu h_avoid => ?_⟩
-  refine hm_bound u ⟨by linarith [hu.1, h_a_lt_t, hr_pos], hu.2⟩ fun t' ht' h_in => ?_
+  refine ⟨m, hm_pos, fun u hu h_avoid ↦ ?_⟩
+  refine hm_bound u ⟨by linarith [hu.1, h_a_lt_t, hr_pos], hu.2⟩ fun t' ht' h_in ↦ ?_
   rcases List.mem_cons.mp ht' with rfl | h_in_rest
   · linarith [hu.1, h_in.2]
   · exact h_avoid t' h_in_rest h_in
@@ -220,16 +220,16 @@ private lemma sorted_cons_geometry {r : ℝ} (hr_pos : 0 < r) {γf : ℝ → ℂ
       (∀ t' ∈ rest, γf t' = s) ∧
       (∀ t' ∈ rest, ∀ u ∈ Set.Icc (t' - r) (t' + r), γf u = s → u = t') := by
   have h_t_le_1mr_t : t ≤ 1 - r := h_t_le_1mr t (List.mem_cons_self)
-  have h_rest_gt_t : ∀ t' ∈ rest, t < t' := fun t' ht' =>
+  have h_rest_gt_t : ∀ t' ∈ rest, t < t' := fun t' ht' ↦
     (List.pairwise_cons.mp hsorted.pairwise).1 t' ht'
   refine ⟨hsorted.pairwise.tail.sortedLT, ?_, by linarith, le_of_lt h_a_lt_t,
-    fun u hu => ⟨by linarith [h_t_Ioo_t.1, hu.1, hr_pos], hu.2⟩,
-    fun t' ht' => h_t_le_1mr t' (List.mem_cons_of_mem t ht'),
-    fun t' ht' t'' ht'' hne =>
+    fun u hu ↦ ⟨by linarith [h_t_Ioo_t.1, hu.1, hr_pos], hu.2⟩,
+    fun t' ht' ↦ h_t_le_1mr t' (List.mem_cons_of_mem t ht'),
+    fun t' ht' t'' ht'' hne ↦
       h_pairwise t' (List.mem_cons_of_mem t ht') t'' (List.mem_cons_of_mem t ht'') hne,
-    fun t' ht' => h_t_Ioo t' (List.mem_cons_of_mem t ht'),
-    fun t' ht' => h_t_at t' (List.mem_cons_of_mem t ht'),
-    fun t' ht' => h_local_unique t' (List.mem_cons_of_mem t ht')⟩
+    fun t' ht' ↦ h_t_Ioo t' (List.mem_cons_of_mem t ht'),
+    fun t' ht' ↦ h_t_at t' (List.mem_cons_of_mem t ht'),
+    fun t' ht' ↦ h_local_unique t' (List.mem_cons_of_mem t ht')⟩
   intro t' ht'
   have h_t_lt_t' : t < t' := h_rest_gt_t t' ht'
   have h_pair := h_pairwise t List.mem_cons_self t'
@@ -253,17 +253,17 @@ private theorem cpv_tendsto_along_sorted_corner
       (∀ t ∈ sorted, t ∈ Set.Ioo (0 : ℝ) 1) →
       (∀ t ∈ sorted, γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t = s) →
       (∀ t ∈ sorted, ∃ lam_t : ℂ,
-        Tendsto (fun ε : ℝ =>
+        Tendsto (fun ε : ℝ ↦
           ∫ u in (t - r)..(t + r),
-            cpvIntegrand (fun z => (z - s)⁻¹)
+            cpvIntegrand (fun z ↦ (z - s)⁻¹)
               γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend s ε u)
           (𝓝[>] (0 : ℝ)) (𝓝 lam_t)) →
       (∃ m : ℝ, 0 < m ∧ ∀ u ∈ Set.Icc a 1,
         (∀ t ∈ sorted, u ∉ Set.Ioo (t - r) (t + r)) → m ≤
           ‖γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend u - s‖) →
-      ∃ L : ℂ, Tendsto (fun ε : ℝ =>
+      ∃ L : ℂ, Tendsto (fun ε : ℝ ↦
         ∫ t in a..1,
-          cpvIntegrand (fun z => (z - s)⁻¹)
+          cpvIntegrand (fun z ↦ (z - s)⁻¹)
             γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend s ε t)
         (𝓝[>] (0 : ℝ)) (𝓝 L) := by
   classical
@@ -275,12 +275,12 @@ private theorem cpv_tendsto_along_sorted_corner
     intro a _h_a_lt h_a_le_1 _h_a_in_unit _h_t_le_1mr _h_pairwise
       _h_local_unique _h_t_Ioo _h_t_at _h_window_conv h_smooth_bound
     obtain ⟨m, hm_pos, hm_bound⟩ := h_smooth_bound
-    have h_far_uniform : ∀ u ∈ Set.Icc a 1, m ≤ ‖γf u - s‖ := fun u hu =>
-      hm_bound u hu (fun _ h => absurd h List.not_mem_nil)
+    have h_far_uniform : ∀ u ∈ Set.Icc a 1, m ≤ ‖γf u - s‖ := fun u hu ↦
+      hm_bound u hu (fun _ h ↦ absurd h List.not_mem_nil)
     refine ⟨∫ t in a..1, (γf t - s)⁻¹ * deriv γf t, ?_⟩
-    have h_event : (fun ε : ℝ =>
-        ∫ t in a..1, cpvIntegrand (fun z => (z - s)⁻¹) γf s ε t) =ᶠ[𝓝[>] (0 : ℝ)]
-        (fun _ => ∫ t in a..1, (γf t - s)⁻¹ * deriv γf t) := by
+    have h_event : (fun ε : ℝ ↦
+        ∫ t in a..1, cpvIntegrand (fun z ↦ (z - s)⁻¹) γf s ε t) =ᶠ[𝓝[>] (0 : ℝ)]
+        (fun _ ↦ ∫ t in a..1, (γf t - s)⁻¹ * deriv γf t) := by
       filter_upwards [Ioo_mem_nhdsGT hm_pos] with ε hε
       apply intervalIntegral.integral_congr
       intro u hu
@@ -300,32 +300,32 @@ private theorem cpv_tendsto_along_sorted_corner
       sorted_cons_geometry hr_pos hsorted h_a_lt_t (h_t_Ioo t List.mem_cons_self)
         h_t_le_1mr h_pairwise h_t_Ioo h_t_at h_local_unique
     have h_IH_window_conv : ∀ t' ∈ rest, ∃ lam_t' : ℂ,
-        Tendsto (fun ε : ℝ =>
+        Tendsto (fun ε : ℝ ↦
           ∫ u in (t' - r)..(t' + r),
-            cpvIntegrand (fun z => (z - s)⁻¹) γf s ε u)
+            cpvIntegrand (fun z ↦ (z - s)⁻¹) γf s ε u)
           (𝓝[>] (0 : ℝ)) (𝓝 lam_t') :=
-      fun t' ht' => h_window_conv t' (List.mem_cons_of_mem t ht')
+      fun t' ht' ↦ h_window_conv t' (List.mem_cons_of_mem t ht')
     have h_IH_smooth_bound :=
       sorted_cons_smooth_bound_restrict hr_pos hm_pos h_a_lt_t hm_bound
     obtain ⟨L_rest, hL_rest⟩ := IH hrest_sorted (t + r) h_rest_window_above
       h_t_plus_r_le_1 h_IH_a_in_unit h_IH_t_le h_IH_pair h_IH_local h_IH_t_Ioo
       h_IH_t_at h_IH_window_conv h_IH_smooth_bound
-    have h_smooth_left : ∀ u ∈ Set.Icc a (t - r), m ≤ ‖γf u - s‖ := fun u hu => by
+    have h_smooth_left : ∀ u ∈ Set.Icc a (t - r), m ≤ ‖γf u - s‖ := fun u hu ↦ by
       refine hm_bound u ⟨hu.1, by linarith [hu.2, h_t_le_1mr_t]⟩
-        fun t' ht' h_in_window => ?_
+        fun t' ht' h_in_window ↦ ?_
       rcases List.mem_cons.mp ht' with rfl | h_in_rest
       · linarith [hu.2, h_in_window.1]
       · linarith [hu.2, h_in_window.1, h_rest_window_above t' h_in_rest]
-    have h_ne_smooth_left : ∀ u ∈ Set.Icc a (t - r), γf u ≠ s := fun u hu h_eq => by
+    have h_ne_smooth_left : ∀ u ∈ Set.Icc a (t - r), γf u ≠ s := fun u hu h_eq ↦ by
       have h_bd := h_smooth_left u hu
       rw [h_eq, sub_self, norm_zero] at h_bd; linarith
     set const_left : ℂ := ∫ u in a..(t - r), (γf u - s)⁻¹ * deriv γf u
-    have h_in_unit_left : Set.Icc a (t - r) ⊆ Set.Icc (0 : ℝ) 1 := fun u hu =>
+    have h_in_unit_left : Set.Icc a (t - r) ⊆ Set.Icc (0 : ℝ) 1 := fun u hu ↦
       ⟨le_trans (h_a_in_unit ⟨le_refl _, h_a_le_1⟩).1 hu.1,
        by linarith [hu.2, h_t_le_1mr_t]⟩
-    have h_smooth_left_const : (fun ε : ℝ =>
-        ∫ u in a..(t - r), cpvIntegrand (fun z => (z - s)⁻¹) γf s ε u)
-        =ᶠ[𝓝[>] (0 : ℝ)] (fun _ => const_left) := by
+    have h_smooth_left_const : (fun ε : ℝ ↦
+        ∫ u in a..(t - r), cpvIntegrand (fun z ↦ (z - s)⁻¹) γf s ε u)
+        =ᶠ[𝓝[>] (0 : ℝ)] (fun _ ↦ const_left) := by
       filter_upwards [Ioo_mem_nhdsGT hm_pos] with ε hε
       apply intervalIntegral.integral_congr
       intro u hu
@@ -333,26 +333,26 @@ private theorem cpv_tendsto_along_sorted_corner
       exact cpvIntegrand_of_gt (lt_of_lt_of_le hε.2 (h_smooth_left u hu))
     refine ⟨const_left + lam_t + L_rest, ?_⟩
     have h_t_minus_r_lt_t_plus_r : t - r ≤ t + r := by linarith
-    have h_split_eq : (fun ε : ℝ =>
-        ∫ u in a..1, cpvIntegrand (fun z => (z - s)⁻¹) γf s ε u) =ᶠ[𝓝[>] (0 : ℝ)]
-        (fun ε => (∫ u in a..(t - r), cpvIntegrand (fun z => (z - s)⁻¹) γf s ε u) +
-                  (∫ u in (t - r)..(t + r), cpvIntegrand (fun z => (z - s)⁻¹) γf s ε u) +
-                  (∫ u in (t + r)..1, cpvIntegrand (fun z => (z - s)⁻¹) γf s ε u)) := by
+    have h_split_eq : (fun ε : ℝ ↦
+        ∫ u in a..1, cpvIntegrand (fun z ↦ (z - s)⁻¹) γf s ε u) =ᶠ[𝓝[>] (0 : ℝ)]
+        (fun ε ↦ (∫ u in a..(t - r), cpvIntegrand (fun z ↦ (z - s)⁻¹) γf s ε u) +
+                  (∫ u in (t - r)..(t + r), cpvIntegrand (fun z ↦ (z - s)⁻¹) γf s ε u) +
+                  (∫ u in (t + r)..1, cpvIntegrand (fun z ↦ (z - s)⁻¹) γf s ε u)) := by
       filter_upwards [self_mem_nhdsWithin] with ε (hε_pos : 0 < ε)
       have h_t_minus_r_ge_0 : 0 ≤ t - r := by
         linarith [(h_a_in_unit ⟨le_refl _, h_a_le_1⟩).1, h_a_lt_t]
       have h_in_unit_mid : Set.Icc (t - r) (t + r) ⊆ Set.Icc (0 : ℝ) 1 :=
         Set.Icc_subset_Icc h_t_minus_r_ge_0 h_t_plus_r_le_1
       have h_cpv_int_left : IntervalIntegrable
-          (fun u => cpvIntegrand (fun z => (z - s)⁻¹) γf s ε u)
+          (fun u ↦ cpvIntegrand (fun z ↦ (z - s)⁻¹) γf s ε u)
           MeasureTheory.volume a (t - r) :=
         cpvIntegrand_inv_intervalIntegrable γ hε_pos h_a_lt_t_minus_r h_in_unit_left
       have h_cpv_int_mid : IntervalIntegrable
-          (fun u => cpvIntegrand (fun z => (z - s)⁻¹) γf s ε u)
+          (fun u ↦ cpvIntegrand (fun z ↦ (z - s)⁻¹) γf s ε u)
           MeasureTheory.volume (t - r) (t + r) :=
         cpvIntegrand_inv_intervalIntegrable γ hε_pos h_t_minus_r_lt_t_plus_r h_in_unit_mid
       have h_cpv_int_right : IntervalIntegrable
-          (fun u => cpvIntegrand (fun z => (z - s)⁻¹) γf s ε u)
+          (fun u ↦ cpvIntegrand (fun z ↦ (z - s)⁻¹) γf s ε u)
           MeasureTheory.volume (t + r) 1 :=
         cpvIntegrand_inv_intervalIntegrable γ hε_pos h_t_plus_r_le_1 h_IH_a_in_unit
       rw [← intervalIntegral.integral_add_adjacent_intervals
@@ -379,8 +379,8 @@ private theorem multi_pole_common_radius_corner_simple
   classical
   obtain ⟨r, hr_pos, h_endpts, h_pair, h_part⟩ :=
     multi_pole_common_radius (crossings := crossings) (partition := partition \ crossings)
-      h_nonempty h_Ioo (fun _ ht hP' => (Finset.mem_sdiff.mp hP').2 ht)
-  exact ⟨r, hr_pos, h_endpts, h_pair, fun t ht p hp hp_notin =>
+      h_nonempty h_Ioo (fun _ ht hP' ↦ (Finset.mem_sdiff.mp hP').2 ht)
+  exact ⟨r, hr_pos, h_endpts, h_pair, fun t ht p hp hp_notin ↦
     h_part t ht p (Finset.mem_sdiff.mpr ⟨hp, hp_notin⟩)⟩
 
 /-- **Common radii setup for the multi-crossing CPV theorems.**
@@ -413,7 +413,7 @@ private lemma common_radii_setup {crossings : Finset ℝ} (h_nonempty : crossing
   obtain ⟨h_window_in_unit, h_endpts_r, h_endpts_r_strict, h_pair_r⟩ :=
     multiCrossing_window_data hr_lt_geom.le hr_lt_geom hr_geom_endpts hr_geom_pair
   exact ⟨h_window_in_unit, h_endpts_r, h_endpts_r_strict, h_pair_r,
-    fun t ht => hr_le_chord.trans (hr_chord_min t ht)⟩
+    fun t ht ↦ hr_le_chord.trans (hr_chord_min t ht)⟩
 
 /-- **SortedList plumbing for the recursive multi-crossing infrastructure.**
 Given a `crossings` finset together with the geometric/endpoint/pairwise data
@@ -441,15 +441,15 @@ private lemma sortedList_plumbing {γf : ℝ → ℂ} {s : ℂ}
       (∀ t ∈ sortedList, γf t = s) := by
   classical
   refine ⟨crossings.sort (· ≤ ·), Finset.sortedLT_sort crossings,
-    fun t => Finset.mem_sort _, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · exact fun t ht => by
+    fun t ↦ Finset.mem_sort _, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · exact fun t ht ↦ by
       have ⟨h_gt, _⟩ := h_endpts_r_strict t ((Finset.mem_sort _).mp ht); linarith
-  · exact fun t ht => (h_endpts_r t ((Finset.mem_sort _).mp ht)).2
-  · exact fun t ht t' ht' hne =>
+  · exact fun t ht ↦ (h_endpts_r t ((Finset.mem_sort _).mp ht)).2
+  · exact fun t ht t' ht' hne ↦
       h_pair_r t ((Finset.mem_sort _).mp ht) t' ((Finset.mem_sort _).mp ht') hne
-  · exact fun t ht => h_local_unique_at t ((Finset.mem_sort _).mp ht)
-  · exact fun t ht => h_Ioo t ((Finset.mem_sort _).mp ht)
-  · exact fun t ht => h_at t ((Finset.mem_sort _).mp ht)
+  · exact fun t ht ↦ h_local_unique_at t ((Finset.mem_sort _).mp ht)
+  · exact fun t ht ↦ h_Ioo t ((Finset.mem_sort _).mp ht)
+  · exact fun t ht ↦ h_at t ((Finset.mem_sort _).mp ht)
 
 /-- **Corner-friendly multi-crossing simple-pole CPV existence (T-BR-Y11c).**
 
@@ -473,21 +473,21 @@ theorem hasCauchyPV_inv_sub_multiCrossing_corner
       γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t = s → t ∈ crossings)
     (_h_flat_at_each : ∀ t₀ ∈ crossings,
       IsFlatOfOrder γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t₀ 1) :
-    ∃ L : ℂ, HasCauchyPV (fun z => (z - s)⁻¹)
+    ∃ L : ℂ, HasCauchyPV (fun z ↦ (z - s)⁻¹)
       γ.toPwC1Immersion.toPiecewiseC1Path s L := by
   classical
   set γf : ℝ → ℂ :=
     (γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend : ℝ → ℂ) with hγf_def
   by_cases h_empty : crossings = ∅
-  · have h_avoid : ∀ t ∈ Set.Icc (0 : ℝ) 1, γf t ≠ s := fun t ht h_eq =>
+  · have h_avoid : ∀ t ∈ Set.Icc (0 : ℝ) 1, γf t ≠ s := fun t ht h_eq ↦
       absurd (h_empty ▸ h_complete t ht h_eq) (Finset.notMem_empty t)
     have hγ_cont : Continuous γf :=
       γ.toPwC1Immersion.toPiecewiseC1Path.toPath.continuous_extend
     obtain ⟨t_min, ht_min_mem, ht_min⟩ := isCompact_Icc.exists_isMinOn
       ⟨0, le_rfl, zero_le_one⟩ ((hγ_cont.continuousOn.sub continuousOn_const).norm)
-    refine ⟨_, hasCauchyPV_of_avoids (f := fun z => (z - s)⁻¹)
+    refine ⟨_, hasCauchyPV_of_avoids (f := fun z ↦ (z - s)⁻¹)
       ⟨‖γf t_min - s‖, norm_pos_iff.mpr (sub_ne_zero.mpr (h_avoid t_min ht_min_mem)),
-       fun t ht => ht_min ht⟩⟩
+       fun t ht ↦ ht_min ht⟩⟩
   · have h_nonempty : crossings.Nonempty := Finset.nonempty_iff_ne_empty.mpr h_empty
     have h_per_cross : ∀ t_i ∈ crossings, ∃ (r : ℝ) (L_R L_L : ℂ),
         0 < r ∧ L_R ≠ 0 ∧ L_L ≠ 0 ∧
@@ -499,40 +499,40 @@ theorem hasCauchyPV_inv_sub_multiCrossing_corner
           (γf b - s) / (γf a - s) ∈ Complex.slitPlane) ∧
         (∀ r', 0 < r' → r' ≤ r → (γf (t_i + r') - s) / L_R ∈ Complex.slitPlane) ∧
         (∀ r', 0 < r' → r' ≤ r → γf (t_i - r') ≠ s →
-          (-L_L) / (γf (t_i - r') - s) ∈ Complex.slitPlane) := fun t_i ht_i_mem =>
+          (-L_L) / (γf (t_i - r') - s) ∈ Complex.slitPlane) := fun t_i ht_i_mem ↦
       exists_per_crossing_radius (s := s) (t₀ := t_i) γ (h_Ioo t_i ht_i_mem) (h_at t_i ht_i_mem)
-    let r_at : ∀ t_i ∈ crossings, ℝ := fun t_i ht_i_mem =>
+    let r_at : ∀ t_i ∈ crossings, ℝ := fun t_i ht_i_mem ↦
       (h_per_cross t_i ht_i_mem).choose
     have hr_at_pos : ∀ t_i (ht_i_mem : t_i ∈ crossings), 0 < r_at t_i ht_i_mem :=
-      fun t_i ht_i_mem => (h_per_cross t_i ht_i_mem).choose_spec.choose_spec.choose_spec.1
+      fun t_i ht_i_mem ↦ (h_per_cross t_i ht_i_mem).choose_spec.choose_spec.choose_spec.1
     obtain ⟨r, hr_pos, h_window_in_unit, h_endpts_r, h_endpts_r_strict, h_pair_r,
         hr_le_r_at⟩ := common_radii_setup h_nonempty h_Ioo r_at hr_at_pos
     have h_local_unique_at : ∀ t_i ∈ crossings,
         ∀ t ∈ Set.Icc (t_i - r) (t_i + r), γf t = s → t = t_i :=
-      fun t_i ht_i_mem t ht_in h_eq =>
+      fun t_i ht_i_mem t ht_in h_eq ↦
         multi_pole_local_uniqueness γ hr_pos h_endpts_r h_pair_r
-          (fun t' ht'_in h_eq' => h_complete t' ht'_in h_eq')
+          (fun t' ht'_in h_eq' ↦ h_complete t' ht'_in h_eq')
           ht_i_mem ht_in h_eq
     obtain ⟨m, hm_pos, h_smooth_bound⟩ :=
       multi_pole_smooth_complement_far_bound (γ := γ) (s := s)
-        (crossings := crossings) h_complete (fun _ => r) (fun _ _ => hr_pos)
+        (crossings := crossings) h_complete (fun _ ↦ r) (fun _ _ ↦ hr_pos)
     have h_per_window_conv : ∀ t_i ∈ crossings, ∃ L_i : ℂ,
-        Tendsto (fun ε : ℝ =>
-          ∫ u in (t_i - r)..(t_i + r), cpvIntegrand (fun z => (z - s)⁻¹) γf s ε u)
-          (𝓝[>] (0 : ℝ)) (𝓝 L_i) := fun t_i ht_i_mem => by
+        Tendsto (fun ε : ℝ ↦
+          ∫ u in (t_i - r)..(t_i + r), cpvIntegrand (fun z ↦ (z - s)⁻¹) γf s ε u)
+          (𝓝[>] (0 : ℝ)) (𝓝 L_i) := fun t_i ht_i_mem ↦ by
       have h_lu := h_local_unique_at t_i ht_i_mem
       have hr_at_le := hr_le_r_at t_i ht_i_mem
       obtain ⟨_hr_at_pos, hL_R_ne, hL_L_ne, h_deriv_right, h_deriv_left,
         h_slit_R_at, h_slit_L_at, h_endR_at, h_endL_at⟩ :=
         (h_per_cross t_i ht_i_mem).choose_spec.choose_spec.choose_spec
-      have h_γMinus_ne : γf (t_i - r) ≠ s := fun h_eq => by
+      have h_γMinus_ne : γf (t_i - r) ≠ s := fun h_eq ↦ by
         have := h_lu _ ⟨le_rfl, by linarith⟩ h_eq; linarith
       exact perCrossing_window_integral_tendsto_exact γ (h_Ioo t_i ht_i_mem)
         (h_at t_i ht_i_mem) hr_pos (h_window_in_unit t_i ht_i_mem) h_lu hL_R_ne hL_L_ne
         h_deriv_right h_deriv_left
-        (fun a b ha_gt hab hb_le =>
+        (fun a b ha_gt hab hb_le ↦
           h_slit_R_at a b ha_gt hab (le_trans hb_le (by linarith [hr_at_le])))
-        (fun a b ha_ge hab hb_lt =>
+        (fun a b ha_ge hab hb_lt ↦
           h_slit_L_at a b (le_trans (by linarith [hr_at_le]) ha_ge) hab hb_lt)
         (h_endR_at r hr_pos hr_at_le) (h_endL_at r hr_pos hr_at_le h_γMinus_ne)
     obtain ⟨sortedList, hsorted_lt, h_sorted_eq, h_sorted_a_lt, h_sorted_t_le_1mr,
@@ -540,15 +540,15 @@ theorem hasCauchyPV_inv_sub_multiCrossing_corner
       sortedList_plumbing h_Ioo h_at h_endpts_r h_endpts_r_strict h_pair_r
         h_local_unique_at
     have h_sorted_window_conv : ∀ t ∈ sortedList, ∃ lam_t : ℂ,
-        Tendsto (fun ε : ℝ =>
-          ∫ u in (t - r)..(t + r), cpvIntegrand (fun z => (z - s)⁻¹) γf s ε u)
-          (𝓝[>] (0 : ℝ)) (𝓝 lam_t) := fun t ht =>
+        Tendsto (fun ε : ℝ ↦
+          ∫ u in (t - r)..(t + r), cpvIntegrand (fun z ↦ (z - s)⁻¹) γf s ε u)
+          (𝓝[>] (0 : ℝ)) (𝓝 lam_t) := fun t ht ↦
       h_per_window_conv t ((h_sorted_eq t).mp ht)
     have h_sorted_smooth : ∃ m : ℝ, 0 < m ∧
         ∀ u ∈ Set.Icc (0 : ℝ) 1,
           (∀ t ∈ sortedList, u ∉ Set.Ioo (t - r) (t + r)) → m ≤ ‖γf u - s‖ :=
-      ⟨m, hm_pos, fun u hu h_avoid =>
-        h_smooth_bound u hu fun t_i ht_i_in =>
+      ⟨m, hm_pos, fun u hu h_avoid ↦
+        h_smooth_bound u hu fun t_i ht_i_in ↦
           h_avoid t_i ((h_sorted_eq t_i).mpr ht_i_in)⟩
     obtain ⟨L, hL⟩ := cpv_tendsto_along_sorted_corner γ r hr_pos sortedList hsorted_lt
       (0 : ℝ) h_sorted_a_lt zero_le_one (subset_refl _) h_sorted_t_le_1mr h_sorted_pair
@@ -566,11 +566,11 @@ private theorem pow_inv_mul_deriv_intervalIntegrable
     (h_ne : ∀ t ∈ Set.Icc a b,
       γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t ≠ s) :
     IntervalIntegrable
-      (fun t => c *
+      (fun t ↦ c *
         deriv γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t /
         (γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t - s) ^ k)
       MeasureTheory.volume a b := by
-  set γf : ℝ → ℂ := fun t => γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t
+  set γf : ℝ → ℂ := fun t ↦ γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t
     with hγf_def
   have hγ_int_01 : IntervalIntegrable (deriv γf) MeasureTheory.volume 0 1 :=
     γ.toClosedPwC1Curve.deriv_extend_intervalIntegrable
@@ -580,7 +580,7 @@ private theorem pow_inv_mul_deriv_intervalIntegrable
     exact h_in_Icc
   have hγ_cont : Continuous γf :=
     γ.toPwC1Immersion.toPiecewiseC1Path.toPath.continuous_extend
-  have h_pow_inv_cont : ContinuousOn (fun t => c / (γf t - s) ^ k) (Set.uIcc a b) := by
+  have h_pow_inv_cont : ContinuousOn (fun t ↦ c / (γf t - s) ^ k) (Set.uIcc a b) := by
     rw [Set.uIcc_of_le hab]
     intro t ht
     have h_ft_ne : γf t ≠ s := h_ne t ht
@@ -589,7 +589,7 @@ private theorem pow_inv_mul_deriv_intervalIntegrable
       (ContinuousAt.div continuousAt_const ?_ h_pow_ne)
     refine ContinuousAt.pow ?_ k
     exact (hγ_cont.continuousAt).sub continuousAt_const
-  exact (hγ_int.mul_continuousOn h_pow_inv_cont).congr (fun t _ => by ring)
+  exact (hγ_int.mul_continuousOn h_pow_inv_cont).congr (fun t _ ↦ by ring)
 
 /-- **Cutoff integrand bounded by `‖c‖ / ε^k · ‖γ'‖`**, integrable on `[a, b]`. -/
 private theorem cpvIntegrand_higherOrder_intervalIntegrable
@@ -598,24 +598,24 @@ private theorem cpvIntegrand_higherOrder_intervalIntegrable
     {ε : ℝ} (hε_pos : 0 < ε)
     (hab : a ≤ b) (h_in_Icc : Set.Icc a b ⊆ Set.Icc (0 : ℝ) 1) :
     IntervalIntegrable
-      (fun t => cpvIntegrand (fun z => c / (z - s) ^ k)
+      (fun t ↦ cpvIntegrand (fun z ↦ c / (z - s) ^ k)
         γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend s ε t)
       MeasureTheory.volume a b := by
-  set γf : ℝ → ℂ := fun t => γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t
+  set γf : ℝ → ℂ := fun t ↦ γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t
   have hγ_int : IntervalIntegrable (deriv γf) MeasureTheory.volume a b := by
     refine γ.toClosedPwC1Curve.deriv_extend_intervalIntegrable.mono_set ?_
     rw [Set.uIcc_of_le hab, Set.uIcc_of_le zero_le_one]; exact h_in_Icc
   have h_sm_γf : Measurable γf :=
     γ.toPwC1Immersion.toPiecewiseC1Path.toPath.continuous_extend.measurable
   have h_sm : Measurable
-      (fun u => cpvIntegrand (fun z => c / (z - s) ^ k) γf s ε u) := by
+      (fun u ↦ cpvIntegrand (fun z ↦ c / (z - s) ^ k) γf s ε u) := by
     unfold cpvIntegrand
     exact Measurable.ite ((h_sm_γf.sub measurable_const).norm measurableSet_Ioi)
       (((h_sm_γf.sub measurable_const).pow_const k).const_div c |>.mul (measurable_deriv γf))
       measurable_const
   set M : ℝ := ‖c‖ / ε ^ k
   have h_bd : ∀ u,
-      ‖cpvIntegrand (fun z => c / (z - s) ^ k) γf s ε u‖ ≤ M * ‖deriv γf u‖ := by
+      ‖cpvIntegrand (fun z ↦ c / (z - s) ^ k) γf s ε u‖ ≤ M * ‖deriv γf u‖ := by
     intro u
     simp only [cpvIntegrand]
     split_ifs with h_gt
@@ -641,24 +641,24 @@ private lemma antiderivPow_FTC_on_avoiding
     (h_ne : ∀ u ∈ Set.Icc a b, f u ≠ s)
     (h_diff : ∀ u ∈ Set.Ioo a b \ partSet, HasDerivAt f (deriv f u) u)
     (hf_cont : ContinuousOn f (Set.Icc a b))
-    (h_int : IntervalIntegrable (fun u => c * deriv f u / (f u - s) ^ k)
+    (h_int : IntervalIntegrable (fun u ↦ c * deriv f u / (f u - s) ^ k)
       MeasureTheory.volume a b) :
     ∫ u in a..b, c * deriv f u / (f u - s) ^ k =
       c * antiderivPow s k (f b) - c * antiderivPow s k (f a) := by
-  set F : ℂ → ℂ := fun z => c * antiderivPow s k z
+  set F : ℂ → ℂ := fun z ↦ c * antiderivPow s k z
   have h_F_diff_at : ∀ u ∈ Set.Ioo a b \ partSet,
-      HasDerivAt (fun v => F (f v)) (c * deriv f u / (f u - s) ^ k) u := fun u hu => by
+      HasDerivAt (fun v ↦ F (f v)) (c * deriv f u / (f u - s) ^ k) u := fun u hu ↦ by
     have h_F_at : HasDerivAt F (c * (1 / (f u - s) ^ k)) (f u) :=
       (hasDerivAt_antiderivative_pow_inv_complex hk
         (h_ne u (Set.Ioo_subset_Icc_self hu.1))).const_mul c
     have h_chain := h_F_at.comp u (h_diff u hu)
     rwa [show c * (1 / (f u - s) ^ k) * deriv f u =
         c * deriv f u / (f u - s) ^ k from by ring] at h_chain
-  have h_Fγ_cont : ContinuousOn (fun v => F (f v)) (Set.Icc a b) := fun u hu =>
+  have h_Fγ_cont : ContinuousOn (fun v ↦ F (f v)) (Set.Icc a b) := fun u hu ↦
     (((hasDerivAt_antiderivative_pow_inv_complex hk
       (h_ne u hu)).continuousAt).const_mul c).comp_continuousWithinAt (hf_cont u hu)
   exact MeasureTheory.integral_eq_of_hasDerivAt_off_countable_of_le
-    (fun v => F (f v)) (fun u => c * deriv f u / (f u - s) ^ k)
+    (fun v ↦ F (f v)) (fun u ↦ c * deriv f u / (f u - s) ^ k)
     hab h_partSet_countable h_Fγ_cont h_F_diff_at h_int
 
 /-- **Empty-case higher-order CPV vanishing.** When `γ` avoids `s` on `[0, 1]`,
@@ -671,7 +671,7 @@ private theorem hasCauchyPVOn_higherOrder_of_avoids
     (γ : ClosedPwC1Immersion x) {s : ℂ} {k : ℕ} (hk : 2 ≤ k) (c : ℂ)
     (h_avoid : ∀ t ∈ Set.Icc (0 : ℝ) 1,
       γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t ≠ s) :
-    HasCauchyPVOn {s} (fun z => c / (z - s) ^ k)
+    HasCauchyPVOn {s} (fun z ↦ c / (z - s) ^ k)
       γ.toPwC1Immersion.toPiecewiseC1Path 0 := by
   classical
   set γf : ℝ → ℂ :=
@@ -687,11 +687,11 @@ private theorem hasCauchyPVOn_higherOrder_of_avoids
   have h_partSet_countable : partSet.Countable :=
     γ.toPwC1Immersion.toPiecewiseC1Path.partition.finite_toSet.countable
   have h_diff : ∀ u ∈ Set.Ioo (0 : ℝ) 1 \ partSet, HasDerivAt γf (deriv γf u) u :=
-    fun u ⟨h_u_in, h_u_off⟩ =>
+    fun u ⟨h_u_in, h_u_off⟩ ↦
       (γ.toPwC1Immersion.toPiecewiseC1Path.differentiable_off_extend
         u h_u_in h_u_off).hasDerivAt
   have h_int : IntervalIntegrable
-      (fun u => c * deriv γf u / (γf u - s) ^ k) MeasureTheory.volume 0 1 :=
+      (fun u ↦ c * deriv γf u / (γf u - s) ^ k) MeasureTheory.volume 0 1 :=
     pow_inv_mul_deriv_intervalIntegrable γ c k zero_le_one (subset_refl _) h_avoid
   have h_FTC : ∫ u in (0 : ℝ)..1, c * deriv γf u / (γf u - s) ^ k =
       c * antiderivPow s k (γf 1) - c * antiderivPow s k (γf 0) :=
@@ -699,19 +699,19 @@ private theorem hasCauchyPVOn_higherOrder_of_avoids
       h_diff hγ_cont.continuousOn h_int
   have h_closed : γf 0 = γf 1 := closed_immersion_extend_zero_eq_one γ
   have h_contour : γ.toPwC1Immersion.toPiecewiseC1Path.contourIntegral
-      (fun z => c / (z - s) ^ k) = 0 := by
+      (fun z ↦ c / (z - s) ^ k) = 0 := by
     show ∫ t in (0 : ℝ)..1,
-        (fun z => c / (z - s) ^ k)
+        (fun z ↦ c / (z - s) ^ k)
           (γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t) *
         deriv γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t = 0
-    rw [show (fun t => (fun z => c / (z - s) ^ k)
+    rw [show (fun t ↦ (fun z ↦ c / (z - s) ^ k)
       (γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t) *
       deriv γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t) =
-      (fun u => c * deriv γf u / (γf u - s) ^ k) from
-      funext fun u => by ring, h_FTC, h_closed]
+      (fun u ↦ c * deriv γf u / (γf u - s) ^ k) from
+      funext fun u ↦ by ring, h_FTC, h_closed]
     ring
   rw [← h_contour]
-  exact hasCauchyPVOn_of_avoids ⟨‖γf t_min - s‖, hδ_pos, fun s' hs' t ht => by
+  exact hasCauchyPVOn_of_avoids ⟨‖γf t_min - s‖, hδ_pos, fun s' hs' t ht ↦ by
     rw [Finset.mem_singleton] at hs'; subst hs'; exact ht_min ht⟩
 
 /-- **Inductive higher-order convergence statement, corner-friendly form**.
@@ -728,9 +728,9 @@ private theorem cpv_higherOrder_tendsto_along_sorted_corner
       (∀ t ∈ sorted, t ≤ 1 - r) →
       (∀ t ∈ sorted, ∀ t' ∈ sorted, t' ≠ t → 2 * r < |t - t'|) →
       (∀ t ∈ sorted,
-        Tendsto (fun ε : ℝ =>
+        Tendsto (fun ε : ℝ ↦
           ∫ u in (t - r)..(t + r),
-            cpvIntegrand (fun z => c / (z - s) ^ k)
+            cpvIntegrand (fun z ↦ c / (z - s) ^ k)
               γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend s ε u)
           (𝓝[>] (0 : ℝ))
           (𝓝 (c * (antiderivPow s k
@@ -744,9 +744,9 @@ private theorem cpv_higherOrder_tendsto_along_sorted_corner
       (∀ t ∈ sorted, γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t = s) →
       (∀ t ∈ sorted, ∀ u ∈ Set.Icc (t - r) (t + r),
         γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend u = s → u = t) →
-      Tendsto (fun ε : ℝ =>
+      Tendsto (fun ε : ℝ ↦
         ∫ t in a..1,
-          cpvIntegrand (fun z => c / (z - s) ^ k)
+          cpvIntegrand (fun z ↦ c / (z - s) ^ k)
             γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend s ε t)
         (𝓝[>] (0 : ℝ))
         (𝓝 (c * (antiderivPow s k
@@ -762,9 +762,9 @@ private theorem cpv_higherOrder_tendsto_along_sorted_corner
     intro a _h_a_lt h_a_le_1 h_a_in_unit _h_t_le_1mr _h_pairwise
       _h_window_conv h_smooth_bound _h_t_Ioo _h_t_at _h_local_unique
     obtain ⟨m, hm_pos, hm_bound⟩ := h_smooth_bound
-    have h_far_uniform : ∀ u ∈ Set.Icc a 1, m ≤ ‖γf u - s‖ := fun u hu =>
-      hm_bound u hu (fun _ h => absurd h List.not_mem_nil)
-    have h_ne : ∀ u ∈ Set.Icc a 1, γf u ≠ s := fun u hu h_eq => by
+    have h_far_uniform : ∀ u ∈ Set.Icc a 1, m ≤ ‖γf u - s‖ := fun u hu ↦
+      hm_bound u hu (fun _ h ↦ absurd h List.not_mem_nil)
+    have h_ne : ∀ u ∈ Set.Icc a 1, γf u ≠ s := fun u hu h_eq ↦ by
       have h_bd := h_far_uniform u hu
       rw [h_eq, sub_self, norm_zero] at h_bd; linarith
     set partSet : Set ℝ :=
@@ -772,7 +772,7 @@ private theorem cpv_higherOrder_tendsto_along_sorted_corner
     have h_partSet_countable : partSet.Countable :=
       γ.toPwC1Immersion.toPiecewiseC1Path.partition.finite_toSet.countable
     have h_diff : ∀ u ∈ Set.Ioo a 1 \ partSet, HasDerivAt γf (deriv γf u) u :=
-      fun u ⟨h_u_in, h_u_off⟩ =>
+      fun u ⟨h_u_in, h_u_off⟩ ↦
         (γ.toPwC1Immersion.toPiecewiseC1Path.differentiable_off_extend u
           ⟨by linarith [(h_a_in_unit ⟨le_rfl, h_a_le_1⟩).1, h_u_in.1], h_u_in.2⟩
           h_u_off).hasDerivAt
@@ -782,11 +782,11 @@ private theorem cpv_higherOrder_tendsto_along_sorted_corner
         c * antiderivPow s k (γf 1) - c * antiderivPow s k (γf a) :=
       antiderivPow_FTC_on_avoiding hk c h_a_le_1 partSet h_partSet_countable h_ne
         h_diff hγ_cont (pow_inv_mul_deriv_intervalIntegrable γ c k h_a_le_1 h_a_in_unit h_ne)
-    have h_event : (fun ε : ℝ =>
-        ∫ t in a..1, cpvIntegrand (fun z => c / (z - s) ^ k) γf s ε t) =ᶠ[𝓝[>] (0 : ℝ)]
-        (fun _ => c * antiderivPow s k (γf 1) - c * antiderivPow s k (γf a)) := by
+    have h_event : (fun ε : ℝ ↦
+        ∫ t in a..1, cpvIntegrand (fun z ↦ c / (z - s) ^ k) γf s ε t) =ᶠ[𝓝[>] (0 : ℝ)]
+        (fun _ ↦ c * antiderivPow s k (γf 1) - c * antiderivPow s k (γf a)) := by
       filter_upwards [Ioo_mem_nhdsGT hm_pos] with ε hε
-      rw [show ∫ t in a..1, cpvIntegrand (fun z => c / (z - s) ^ k) γf s ε t =
+      rw [show ∫ t in a..1, cpvIntegrand (fun z ↦ c / (z - s) ^ k) γf s ε t =
           ∫ t in a..1, c * deriv γf t / (γf t - s) ^ k by
         apply intervalIntegral.integral_congr
         intro u hu
@@ -810,27 +810,27 @@ private theorem cpv_higherOrder_tendsto_along_sorted_corner
       sorted_cons_geometry hr_pos hsorted h_a_lt_t (h_t_Ioo t List.mem_cons_self)
         h_t_le_1mr h_pairwise h_t_Ioo h_t_at h_local_unique
     have h_IH_window_conv : ∀ t' ∈ rest,
-        Tendsto (fun ε : ℝ =>
+        Tendsto (fun ε : ℝ ↦
           ∫ u in (t' - r)..(t' + r),
-            cpvIntegrand (fun z => c / (z - s) ^ k) γf s ε u)
+            cpvIntegrand (fun z ↦ c / (z - s) ^ k) γf s ε u)
           (𝓝[>] (0 : ℝ))
           (𝓝 (c * (antiderivPow s k (γf (t' + r)) -
             antiderivPow s k (γf (t' - r))))) :=
-      fun t' ht' => h_window_conv t' (List.mem_cons_of_mem t ht')
+      fun t' ht' ↦ h_window_conv t' (List.mem_cons_of_mem t ht')
     have h_IH_smooth_bound :=
       sorted_cons_smooth_bound_restrict hr_pos hm_pos h_a_lt_t hm_bound
     have hL_rest := IH hrest_sorted (t + r) h_rest_window_above h_t_plus_r_le_1
       h_IH_a_in_unit h_IH_t_le h_IH_pair h_IH_window_conv h_IH_smooth_bound
       h_IH_t_Ioo h_IH_t_at h_IH_local
-    have h_smooth_left : ∀ u ∈ Set.Icc a (t - r), m ≤ ‖γf u - s‖ := fun u hu => by
-      refine hm_bound u ⟨hu.1, by linarith [hu.2, h_t_le_1mr_t]⟩ fun t' ht' h_in_window => ?_
+    have h_smooth_left : ∀ u ∈ Set.Icc a (t - r), m ≤ ‖γf u - s‖ := fun u hu ↦ by
+      refine hm_bound u ⟨hu.1, by linarith [hu.2, h_t_le_1mr_t]⟩ fun t' ht' h_in_window ↦ ?_
       rcases List.mem_cons.mp ht' with rfl | h_in_rest
       · linarith [hu.2, h_in_window.1]
       · linarith [hu.2, h_in_window.1, h_rest_window_above t' h_in_rest]
-    have h_ne_smooth_left : ∀ u ∈ Set.Icc a (t - r), γf u ≠ s := fun u hu h_eq => by
+    have h_ne_smooth_left : ∀ u ∈ Set.Icc a (t - r), γf u ≠ s := fun u hu h_eq ↦ by
       have h_bd := h_smooth_left u hu
       rw [h_eq, sub_self, norm_zero] at h_bd; linarith
-    have h_a_in_unit_left : Set.Icc a (t - r) ⊆ Set.Icc (0 : ℝ) 1 := fun u hu =>
+    have h_a_in_unit_left : Set.Icc a (t - r) ⊆ Set.Icc (0 : ℝ) 1 := fun u hu ↦
       ⟨(h_a_in_unit ⟨le_rfl, h_a_le_1⟩).1.trans hu.1,
        by linarith [hu.2, h_t_le_1mr_t]⟩
     set partSet : Set ℝ :=
@@ -838,14 +838,14 @@ private theorem cpv_higherOrder_tendsto_along_sorted_corner
     have h_partSet_countable : partSet.Countable :=
       γ.toPwC1Immersion.toPiecewiseC1Path.partition.finite_toSet.countable
     have h_diff_left : ∀ u ∈ Set.Ioo a (t - r) \ partSet,
-        HasDerivAt γf (deriv γf u) u := fun u ⟨h_u_in, h_u_off⟩ =>
+        HasDerivAt γf (deriv γf u) u := fun u ⟨h_u_in, h_u_off⟩ ↦
       (γ.toPwC1Immersion.toPiecewiseC1Path.differentiable_off_extend u
         ⟨by linarith [(h_a_in_unit ⟨le_rfl, h_a_le_1⟩).1, h_u_in.1],
          by linarith [h_u_in.2, h_t_le_1mr_t, hr_pos]⟩ h_u_off).hasDerivAt
     have hγ_cont_left : ContinuousOn γf (Set.Icc a (t - r)) :=
       γ.toPwC1Immersion.toPiecewiseC1Path.toPath.continuous_extend.continuousOn
     have h_int_left' : IntervalIntegrable
-        (fun u => c * deriv γf u / (γf u - s) ^ k) MeasureTheory.volume a (t - r) :=
+        (fun u ↦ c * deriv γf u / (γf u - s) ^ k) MeasureTheory.volume a (t - r) :=
       pow_inv_mul_deriv_intervalIntegrable γ c k h_a_lt_t_minus_r
         h_a_in_unit_left h_ne_smooth_left
     have h_FTC_left :
@@ -853,12 +853,12 @@ private theorem cpv_higherOrder_tendsto_along_sorted_corner
         c * antiderivPow s k (γf (t - r)) - c * antiderivPow s k (γf a) :=
       antiderivPow_FTC_on_avoiding hk c h_a_lt_t_minus_r partSet h_partSet_countable
         h_ne_smooth_left h_diff_left hγ_cont_left h_int_left'
-    have h_smooth_left_const : (fun ε : ℝ =>
-        ∫ u in a..(t - r), cpvIntegrand (fun z => c / (z - s) ^ k) γf s ε u)
+    have h_smooth_left_const : (fun ε : ℝ ↦
+        ∫ u in a..(t - r), cpvIntegrand (fun z ↦ c / (z - s) ^ k) γf s ε u)
         =ᶠ[𝓝[>] (0 : ℝ)]
-        (fun _ => c * antiderivPow s k (γf (t - r)) - c * antiderivPow s k (γf a)) := by
+        (fun _ ↦ c * antiderivPow s k (γf (t - r)) - c * antiderivPow s k (γf a)) := by
       filter_upwards [Ioo_mem_nhdsGT hm_pos] with ε hε
-      rw [show ∫ u in a..(t - r), cpvIntegrand (fun z => c / (z - s) ^ k) γf s ε u =
+      rw [show ∫ u in a..(t - r), cpvIntegrand (fun z ↦ c / (z - s) ^ k) γf s ε u =
           ∫ u in a..(t - r), c * deriv γf u / (γf u - s) ^ k by
         apply intervalIntegral.integral_congr
         intro u hu
@@ -867,13 +867,13 @@ private theorem cpv_higherOrder_tendsto_along_sorted_corner
           if_pos (lt_of_lt_of_le hε.2 (h_smooth_left u hu))]; ring]
       exact h_FTC_left
     have h_t_minus_r_lt_t_plus_r : t - r ≤ t + r := by linarith
-    have h_split_eq : (fun ε : ℝ =>
-        ∫ u in a..1, cpvIntegrand (fun z => c / (z - s) ^ k) γf s ε u)
+    have h_split_eq : (fun ε : ℝ ↦
+        ∫ u in a..1, cpvIntegrand (fun z ↦ c / (z - s) ^ k) γf s ε u)
         =ᶠ[𝓝[>] (0 : ℝ)]
-        (fun ε =>
-          (∫ u in a..(t - r), cpvIntegrand (fun z => c / (z - s) ^ k) γf s ε u) +
-          (∫ u in (t - r)..(t + r), cpvIntegrand (fun z => c / (z - s) ^ k) γf s ε u) +
-          (∫ u in (t + r)..1, cpvIntegrand (fun z => c / (z - s) ^ k) γf s ε u)) := by
+        (fun ε ↦
+          (∫ u in a..(t - r), cpvIntegrand (fun z ↦ c / (z - s) ^ k) γf s ε u) +
+          (∫ u in (t - r)..(t + r), cpvIntegrand (fun z ↦ c / (z - s) ^ k) γf s ε u) +
+          (∫ u in (t + r)..1, cpvIntegrand (fun z ↦ c / (z - s) ^ k) γf s ε u)) := by
       filter_upwards [self_mem_nhdsWithin] with ε (hε_pos : 0 < ε)
       have hk_pos : 1 ≤ k := by omega
       have h_t_minus_r_ge_0 : 0 ≤ t - r := by
@@ -881,17 +881,17 @@ private theorem cpv_higherOrder_tendsto_along_sorted_corner
       have h_in_unit_mid : Set.Icc (t - r) (t + r) ⊆ Set.Icc (0 : ℝ) 1 :=
         Set.Icc_subset_Icc h_t_minus_r_ge_0 h_t_plus_r_le_1
       have h_cpv_int_left : IntervalIntegrable
-          (fun u => cpvIntegrand (fun z => c / (z - s) ^ k) γf s ε u)
+          (fun u ↦ cpvIntegrand (fun z ↦ c / (z - s) ^ k) γf s ε u)
           MeasureTheory.volume a (t - r) :=
         cpvIntegrand_higherOrder_intervalIntegrable γ c k hk_pos hε_pos
           h_a_lt_t_minus_r h_a_in_unit_left
       have h_cpv_int_mid : IntervalIntegrable
-          (fun u => cpvIntegrand (fun z => c / (z - s) ^ k) γf s ε u)
+          (fun u ↦ cpvIntegrand (fun z ↦ c / (z - s) ^ k) γf s ε u)
           MeasureTheory.volume (t - r) (t + r) :=
         cpvIntegrand_higherOrder_intervalIntegrable γ c k hk_pos hε_pos
           h_t_minus_r_lt_t_plus_r h_in_unit_mid
       have h_cpv_int_right : IntervalIntegrable
-          (fun u => cpvIntegrand (fun z => c / (z - s) ^ k) γf s ε u)
+          (fun u ↦ cpvIntegrand (fun z ↦ c / (z - s) ^ k) γf s ε u)
           MeasureTheory.volume (t + r) 1 :=
         cpvIntegrand_higherOrder_intervalIntegrable γ c k hk_pos hε_pos
           h_t_plus_r_le_1 h_IH_a_in_unit
@@ -899,15 +899,15 @@ private theorem cpv_higherOrder_tendsto_along_sorted_corner
         (h_cpv_int_left.trans h_cpv_int_mid) h_cpv_int_right,
         ← intervalIntegral.integral_add_adjacent_intervals h_cpv_int_left h_cpv_int_mid]
     refine Tendsto.congr' h_split_eq.symm ?_
-    have h_tendsto_left : Tendsto (fun ε : ℝ =>
-        ∫ u in a..(t - r), cpvIntegrand (fun z => c / (z - s) ^ k) γf s ε u)
+    have h_tendsto_left : Tendsto (fun ε : ℝ ↦
+        ∫ u in a..(t - r), cpvIntegrand (fun z ↦ c / (z - s) ^ k) γf s ε u)
         (𝓝[>] (0 : ℝ))
         (𝓝 (c * antiderivPow s k (γf (t - r)) - c * antiderivPow s k (γf a))) :=
       Tendsto.congr' h_smooth_left_const.symm tendsto_const_nhds
-    have h_combined : Tendsto (fun ε =>
-        (∫ u in a..(t - r), cpvIntegrand (fun z => c / (z - s) ^ k) γf s ε u) +
-        (∫ u in (t - r)..(t + r), cpvIntegrand (fun z => c / (z - s) ^ k) γf s ε u) +
-        (∫ u in (t + r)..1, cpvIntegrand (fun z => c / (z - s) ^ k) γf s ε u))
+    have h_combined : Tendsto (fun ε ↦
+        (∫ u in a..(t - r), cpvIntegrand (fun z ↦ c / (z - s) ^ k) γf s ε u) +
+        (∫ u in (t - r)..(t + r), cpvIntegrand (fun z ↦ c / (z - s) ^ k) γf s ε u) +
+        (∫ u in (t + r)..1, cpvIntegrand (fun z ↦ c / (z - s) ^ k) γf s ε u))
         (𝓝[>] (0 : ℝ))
         (𝓝 ((c * antiderivPow s k (γf (t - r)) - c * antiderivPow s k (γf a)) +
             c * (antiderivPow s k (γf (t + r)) - antiderivPow s k (γf (t - r))) +
@@ -948,9 +948,9 @@ private theorem perCrossing_higherOrder_window_integral_tendsto_corner
       (L_plus / (↑‖L_plus‖ : ℂ)) ^ (k - 1) =
       ((-L_minus) / (↑‖L_minus‖ : ℂ)) ^ (k - 1))
     (c : ℂ) :
-    Tendsto (fun ε : ℝ =>
+    Tendsto (fun ε : ℝ ↦
         ∫ u in (t_i - r)..(t_i + r),
-          cpvIntegrand (fun z => c / (z - s) ^ k)
+          cpvIntegrand (fun z ↦ c / (z - s) ^ k)
             γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend s ε u)
       (𝓝[>] (0 : ℝ))
       (𝓝 (c * (antiderivPow s k
@@ -958,7 +958,7 @@ private theorem perCrossing_higherOrder_window_integral_tendsto_corner
           antiderivPow s k
             (γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend (t_i - r))))) := by
   classical
-  set f : ℝ → ℂ := fun t =>
+  set f : ℝ → ℂ := fun t ↦
     γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t
   have hγ_continuous : Continuous f :=
     γ.toPwC1Immersion.toPiecewiseC1Path.continuous
@@ -981,10 +981,10 @@ private theorem perCrossing_higherOrder_window_integral_tendsto_corner
     (h_min_le.trans (min_le_right _ _)).trans (min_le_left _ _)
   have hr_mono_le_r_L : r_mono ≤ r_L :=
     (h_min_le.trans (min_le_right _ _)).trans (min_le_right _ _)
-  have hγ_mono : StrictMonoOn (fun t => ‖f t - s‖)
+  have hγ_mono : StrictMonoOn (fun t ↦ ‖f t - s‖)
       (Set.Icc t_i (t_i + r_mono)) :=
     hγ_mono_at_radius.mono (Set.Icc_subset_Icc le_rfl (by linarith))
-  have hγ_anti : StrictAntiOn (fun t => ‖f t - s‖)
+  have hγ_anti : StrictAntiOn (fun t ↦ ‖f t - s‖)
       (Set.Icc (t_i - r_mono) t_i) :=
     hγ_anti_at_radius.mono (Set.Icc_subset_Icc (by linarith) le_rfl)
   have hγ_cont_right_delta : ContinuousOn f
@@ -992,11 +992,11 @@ private theorem perCrossing_higherOrder_window_integral_tendsto_corner
   have hγ_cont_left_delta : ContinuousOn f
       (Set.Icc (t_i - r_mono) t_i) := hγ_continuous.continuousOn
   have h_ft_i : f t_i = s := h_at
-  have h_leave_right : ∀ t ∈ Set.Ioc t_i (t_i + r_mono), f t ≠ s := fun t ht heq => by
+  have h_leave_right : ∀ t ∈ Set.Ioc t_i (t_i + r_mono), f t ≠ s := fun t ht heq ↦ by
     have h_strict' : ‖f t_i - s‖ < ‖f t - s‖ :=
       hγ_mono ⟨le_rfl, by linarith [hr_mono_pos]⟩ ⟨ht.1.le, ht.2⟩ ht.1
     rw [h_ft_i, heq] at h_strict'; simp at h_strict'
-  have h_leave_left : ∀ t ∈ Set.Ico (t_i - r_mono) t_i, f t ≠ s := fun t ht heq => by
+  have h_leave_left : ∀ t ∈ Set.Ico (t_i - r_mono) t_i, f t ≠ s := fun t ht heq ↦ by
     have h_strict' : ‖f t_i - s‖ < ‖f t - s‖ :=
       hγ_anti ⟨ht.1, ht.2.le⟩ ⟨by linarith [hr_mono_pos], le_rfl⟩ ht.2
     rw [h_ft_i, heq] at h_strict'; simp at h_strict'
@@ -1025,7 +1025,7 @@ private theorem perCrossing_higherOrder_window_integral_tendsto_corner
       hL_right hL_left h_at hk hkn hn1 h_B
       t_eps_plus t_eps_minus h_plus_to h_plus_radius h_minus_to h_minus_radius
   have h_F_curve_diff_cx :
-      Tendsto (fun ε =>
+      Tendsto (fun ε ↦
         antiderivPow s k (f (t_eps_minus ε)) -
           antiderivPow s k (f (t_eps_plus ε)))
         (𝓝[>] (0 : ℝ)) (𝓝 0) :=
@@ -1055,10 +1055,10 @@ private theorem perCrossing_higherOrder_window_integral_tendsto_corner
     filter_upwards [Ioo_mem_nhdsGT hm_avoid_pos] with ε hε using hε.2
   have ht_i_r_pos : 0 ≤ t_i - r := (h_window_Icc ⟨le_rfl, by linarith⟩).1
   have ht_i_r_le_1 : t_i + r ≤ 1 := (h_window_Icc ⟨by linarith, le_rfl⟩).2
-  have h_eventually_eq : (fun ε : ℝ =>
+  have h_eventually_eq : (fun ε : ℝ ↦
         ∫ u in (t_i - r)..(t_i + r),
-          cpvIntegrand (fun z => c / (z - s) ^ k) f s ε u) =ᶠ[𝓝[>] (0 : ℝ)]
-      (fun ε => c * (antiderivPow s k (f (t_i + r)) - antiderivPow s k (f (t_i - r))) +
+          cpvIntegrand (fun z ↦ c / (z - s) ^ k) f s ε u) =ᶠ[𝓝[>] (0 : ℝ)]
+      (fun ε ↦ c * (antiderivPow s k (f (t_i + r)) - antiderivPow s k (f (t_i - r))) +
         c * (antiderivPow s k (f (t_eps_minus ε)) -
               antiderivPow s k (f (t_eps_plus ε)))) := by
     filter_upwards [h_t_minus_in_window, h_t_plus_in_window, h_minus_radius,
@@ -1070,26 +1070,26 @@ private theorem perCrossing_higherOrder_window_integral_tendsto_corner
     have h_lb : t_i - r ≤ t_eps_minus ε := htme.1.le
     have h_ub : t_eps_plus ε ≤ t_i + r := htpe.2.le
     have h_mid : t_eps_minus ε ≤ t_eps_plus ε := by linarith [htme.2, htpe.1]
-    have h_in_unit_left : Set.Icc (t_i - r) (t_eps_minus ε) ⊆ Set.Icc (0 : ℝ) 1 := fun u hu =>
+    have h_in_unit_left : Set.Icc (t_i - r) (t_eps_minus ε) ⊆ Set.Icc (0 : ℝ) 1 := fun u hu ↦
       ⟨by linarith [hu.1, ht_i_r_pos],
        by linarith [hu.2, htme.2, ht_i_r_le_1, hr_pos]⟩
-    have h_in_unit_right : Set.Icc (t_eps_plus ε) (t_i + r) ⊆ Set.Icc (0 : ℝ) 1 := fun u hu =>
+    have h_in_unit_right : Set.Icc (t_eps_plus ε) (t_i + r) ⊆ Set.Icc (0 : ℝ) 1 := fun u hu ↦
       ⟨by linarith [htpe.1, hu.1, ht_i_r_pos, hr_pos],
        by linarith [hu.2, ht_i_r_le_1]⟩
-    have h_in_unit_mid : Set.Icc (t_eps_minus ε) (t_eps_plus ε) ⊆ Set.Icc (0 : ℝ) 1 := fun u hu =>
+    have h_in_unit_mid : Set.Icc (t_eps_minus ε) (t_eps_plus ε) ⊆ Set.Icc (0 : ℝ) 1 := fun u hu ↦
       ⟨by linarith [hu.1, htme.1, ht_i_r_pos],
        by linarith [hu.2, htpe.2, ht_i_r_le_1]⟩
     have hk_pos : 1 ≤ k := by omega
     have h_int_left : IntervalIntegrable
-        (fun u => cpvIntegrand (fun z => c / (z - s) ^ k) f s ε u)
+        (fun u ↦ cpvIntegrand (fun z ↦ c / (z - s) ^ k) f s ε u)
         MeasureTheory.volume (t_i - r) (t_eps_minus ε) :=
       cpvIntegrand_higherOrder_intervalIntegrable γ c k hk_pos hε_pos h_lb h_in_unit_left
     have h_int_mid : IntervalIntegrable
-        (fun u => cpvIntegrand (fun z => c / (z - s) ^ k) f s ε u)
+        (fun u ↦ cpvIntegrand (fun z ↦ c / (z - s) ^ k) f s ε u)
         MeasureTheory.volume (t_eps_minus ε) (t_eps_plus ε) :=
       cpvIntegrand_higherOrder_intervalIntegrable γ c k hk_pos hε_pos h_mid h_in_unit_mid
     have h_int_right : IntervalIntegrable
-        (fun u => cpvIntegrand (fun z => c / (z - s) ^ k) f s ε u)
+        (fun u ↦ cpvIntegrand (fun z ↦ c / (z - s) ^ k) f s ε u)
         MeasureTheory.volume (t_eps_plus ε) (t_i + r) :=
       cpvIntegrand_higherOrder_intervalIntegrable γ c k hk_pos hε_pos h_ub h_in_unit_right
     have h_split1 := intervalIntegral.integral_add_adjacent_intervals
@@ -1097,9 +1097,9 @@ private theorem perCrossing_higherOrder_window_integral_tendsto_corner
     have h_split2 := intervalIntegral.integral_add_adjacent_intervals
       (h_int_left.trans h_int_mid) h_int_right
     have h_mid_zero : ∫ u in (t_eps_minus ε)..(t_eps_plus ε),
-        cpvIntegrand (fun z => c / (z - s) ^ k) f s ε u = 0 := by
+        cpvIntegrand (fun z ↦ c / (z - s) ^ k) f s ε u = 0 := by
       have h_norm_le_on_Ioo : ∀ u ∈ Set.Ioo (t_eps_minus ε) (t_eps_plus ε),
-          ‖f u - s‖ ≤ ε := fun u hu_strict => by
+          ‖f u - s‖ ≤ ε := fun u hu_strict ↦ by
         by_cases h_le_t_i : u ≤ t_i
         · have htme_in : t_eps_minus ε ∈ Set.Icc (t_i - r_mono) t_i :=
             ⟨htm_ioo.1.le, htm_ioo.2.le⟩
@@ -1114,10 +1114,10 @@ private theorem perCrossing_higherOrder_window_integral_tendsto_corner
           have h_mono_apply : ‖f u - s‖ < ‖f (t_eps_plus ε) - s‖ :=
             hγ_mono ⟨h_le_t_i.le, by linarith [htp_ioo.2, hu_strict.2]⟩ htpe_in hu_strict.2
           rw [hpr] at h_mono_apply; exact h_mono_apply.le
-      have h_eq : (fun u =>
-          cpvIntegrand (fun z => c / (z - s) ^ k) f s ε u) =ᶠ[ae
+      have h_eq : (fun u ↦
+          cpvIntegrand (fun z ↦ c / (z - s) ^ k) f s ε u) =ᶠ[ae
           (MeasureTheory.volume.restrict
-            (Set.uIoc (t_eps_minus ε) (t_eps_plus ε)))] (fun _ => 0) := by
+            (Set.uIoc (t_eps_minus ε) (t_eps_plus ε)))] (fun _ ↦ 0) := by
         rw [Set.uIoc_of_le h_mid]
         have h_singleton_compl_ae : ({t_eps_plus ε}ᶜ : Set ℝ) ∈
             MeasureTheory.ae (MeasureTheory.volume.restrict
@@ -1132,7 +1132,7 @@ private theorem perCrossing_higherOrder_window_integral_tendsto_corner
           ⟨hu.1, lt_of_le_of_ne hu.2 hu_ne_endpt⟩).not_gt]
       simpa using intervalIntegral.integral_congr_ae_restrict h_eq
     have h_left_eq : ∫ u in (t_i - r)..(t_eps_minus ε),
-        cpvIntegrand (fun z => c / (z - s) ^ k) f s ε u =
+        cpvIntegrand (fun z ↦ c / (z - s) ^ k) f s ε u =
         ∫ u in (t_i - r)..(t_eps_minus ε),
           c * deriv f u / (f u - s) ^ k := by
       apply intervalIntegral.integral_congr_ae
@@ -1150,7 +1150,7 @@ private theorem perCrossing_higherOrder_window_integral_tendsto_corner
           rw [hmr] at h_anti_apply; exact h_anti_apply
       simp only [cpvIntegrand, h_norm_gt, ite_true]; ring
     have h_right_eq : ∫ u in (t_eps_plus ε)..(t_i + r),
-        cpvIntegrand (fun z => c / (z - s) ^ k) f s ε u =
+        cpvIntegrand (fun z ↦ c / (z - s) ^ k) f s ε u =
         ∫ u in (t_eps_plus ε)..(t_i + r),
           c * deriv f u / (f u - s) ^ k := by
       apply intervalIntegral.integral_congr_ae
@@ -1165,19 +1165,19 @@ private theorem perCrossing_higherOrder_window_integral_tendsto_corner
               ⟨(lt_trans htpe.1 hu.1).le, h_gt⟩ hu.1
           rw [hpr] at h_mono_apply; exact h_mono_apply
       simp only [cpvIntegrand, h_norm_gt, ite_true]; ring
-    have h_avoids_left : ∀ u ∈ Set.Icc (t_i - r) (t_eps_minus ε), f u ≠ s := fun u hu h_eq => by
+    have h_avoids_left : ∀ u ∈ Set.Icc (t_i - r) (t_eps_minus ε), f u ≠ s := fun u hu h_eq ↦ by
       have h_u_lt_t_i : u < t_i := lt_of_le_of_lt hu.2 htme.2
       linarith [h_local_unique_r u ⟨hu.1, by linarith [h_u_lt_t_i, hr_pos]⟩ h_eq]
-    have h_avoids_right : ∀ u ∈ Set.Icc (t_eps_plus ε) (t_i + r), f u ≠ s := fun u hu h_eq => by
+    have h_avoids_right : ∀ u ∈ Set.Icc (t_eps_plus ε) (t_i + r), f u ≠ s := fun u hu h_eq ↦ by
       have h_t_i_lt_u : t_i < u := lt_of_lt_of_le htpe.1 hu.1
       linarith [h_local_unique_r u ⟨by linarith [h_t_i_lt_u, hr_pos], hu.2⟩ h_eq]
     have h_diff_left : ∀ u ∈ Set.Ioo (t_i - r) (t_eps_minus ε) \ partSet,
-        HasDerivAt f (deriv f u) u := fun u ⟨h_u_in, h_u_off⟩ =>
+        HasDerivAt f (deriv f u) u := fun u ⟨h_u_in, h_u_off⟩ ↦
       (γ.toPwC1Immersion.toPiecewiseC1Path.differentiable_off_extend u
         ⟨lt_of_le_of_lt ht_i_r_pos h_u_in.1,
          by linarith [ht_i_r_le_1, h_u_in.2, htme.2, ht_i_Ioo.2, hr_pos]⟩ h_u_off).hasDerivAt
     have h_diff_right : ∀ u ∈ Set.Ioo (t_eps_plus ε) (t_i + r) \ partSet,
-        HasDerivAt f (deriv f u) u := fun u ⟨h_u_in, h_u_off⟩ =>
+        HasDerivAt f (deriv f u) u := fun u ⟨h_u_in, h_u_off⟩ ↦
       (γ.toPwC1Immersion.toPiecewiseC1Path.differentiable_off_extend u
         ⟨by linarith [ht_i_Ioo.1, htpe.1, h_u_in.1],
          lt_of_lt_of_le h_u_in.2 ht_i_r_le_1⟩ h_u_off).hasDerivAt
@@ -1186,11 +1186,11 @@ private theorem perCrossing_higherOrder_window_integral_tendsto_corner
     have hγ_cont_window_right : ContinuousOn f
         (Set.Icc (t_eps_plus ε) (t_i + r)) := hγ_continuous.continuousOn
     have h_int_left' : IntervalIntegrable
-        (fun u => c * deriv f u / (f u - s) ^ k) MeasureTheory.volume
+        (fun u ↦ c * deriv f u / (f u - s) ^ k) MeasureTheory.volume
         (t_i - r) (t_eps_minus ε) :=
       pow_inv_mul_deriv_intervalIntegrable γ c k h_lb h_in_unit_left h_avoids_left
     have h_int_right' : IntervalIntegrable
-        (fun u => c * deriv f u / (f u - s) ^ k) MeasureTheory.volume
+        (fun u ↦ c * deriv f u / (f u - s) ^ k) MeasureTheory.volume
         (t_eps_plus ε) (t_i + r) :=
       pow_inv_mul_deriv_intervalIntegrable γ c k h_ub h_in_unit_right h_avoids_right
     have h_FTC_left :
@@ -1210,7 +1210,7 @@ private theorem perCrossing_higherOrder_window_integral_tendsto_corner
     ring
   refine Tendsto.congr' h_eventually_eq.symm ?_
   have h_combined := (tendsto_const_nhds.add (h_F_curve_diff_cx.const_mul c) :
-    Tendsto (fun ε =>
+    Tendsto (fun ε ↦
       c * (antiderivPow s k (f (t_i + r)) - antiderivPow s k (f (t_i - r))) +
       c * (antiderivPow s k (f (t_eps_minus ε)) - antiderivPow s k (f (t_eps_plus ε))))
       (𝓝[>] (0 : ℝ)) _)
@@ -1254,18 +1254,18 @@ theorem hasCauchyPVOn_multiCrossing_higherOrder_corner
       (L_plus t / (↑‖L_plus t‖ : ℂ)) ^ (k - 1) =
       ((-(L_minus t)) / (↑‖L_minus t‖ : ℂ)) ^ (k - 1))
     (c : ℂ) :
-    HasCauchyPVOn {s} (fun z => c / (z - s) ^ k)
+    HasCauchyPVOn {s} (fun z ↦ c / (z - s) ^ k)
       γ.toPwC1Immersion.toPiecewiseC1Path 0 := by
   classical
   set γf : ℝ → ℂ :=
     (γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend : ℝ → ℂ) with hγf_def
   by_cases h_empty : crossings = ∅
-  · refine hasCauchyPVOn_higherOrder_of_avoids γ hk c fun t ht h_eq => ?_
+  · refine hasCauchyPVOn_higherOrder_of_avoids γ hk c fun t ht h_eq ↦ ?_
     exact absurd (h_empty ▸ h_complete t ht h_eq) (Finset.notMem_empty t)
   · have h_nonempty : crossings.Nonempty := Finset.nonempty_iff_ne_empty.mpr h_empty
     have h_per_cross : ∀ t_i ∈ crossings, ∃ rr : ℝ, 0 < rr ∧
-        StrictMonoOn (fun t => ‖γf t - s‖) (Set.Icc t_i (t_i + rr)) ∧
-        StrictAntiOn (fun t => ‖γf t - s‖) (Set.Icc (t_i - rr) t_i) := fun t_i ht_i_mem => by
+        StrictMonoOn (fun t ↦ ‖γf t - s‖) (Set.Icc t_i (t_i + rr)) ∧
+        StrictAntiOn (fun t ↦ ‖γf t - s‖) (Set.Icc (t_i - rr) t_i) := fun t_i ht_i_mem ↦ by
       have hγ_cont_at : ContinuousAt γf t_i :=
         γ.toPwC1Immersion.toPiecewiseC1Path.toPath.continuous_extend.continuousAt
       obtain ⟨r_R, hr_R_pos, hmono⟩ :=
@@ -1279,28 +1279,28 @@ theorem hasCauchyPVOn_multiCrossing_higherOrder_corner
       exact ⟨min r_R r_L, lt_min hr_R_pos hr_L_pos,
         hmono.mono (Set.Icc_subset_Icc le_rfl (by linarith [min_le_left r_R r_L])),
         hanti.mono (Set.Icc_subset_Icc (by linarith [min_le_right r_R r_L]) le_rfl)⟩
-    let r_at : ∀ t_i ∈ crossings, ℝ := fun t_i ht_i_mem =>
+    let r_at : ∀ t_i ∈ crossings, ℝ := fun t_i ht_i_mem ↦
       (h_per_cross t_i ht_i_mem).choose
     have hr_at_pos : ∀ t_i (ht_i_mem : t_i ∈ crossings), 0 < r_at t_i ht_i_mem :=
-      fun t_i ht_i_mem => (h_per_cross t_i ht_i_mem).choose_spec.1
+      fun t_i ht_i_mem ↦ (h_per_cross t_i ht_i_mem).choose_spec.1
     obtain ⟨r, hr_pos, h_window_in_unit, h_endpts_r, h_endpts_r_strict, h_pair_r,
         _hr_le_r_at⟩ := common_radii_setup h_nonempty h_Ioo r_at hr_at_pos
     have h_local_unique_at : ∀ t_i ∈ crossings,
         ∀ t ∈ Set.Icc (t_i - r) (t_i + r), γf t = s → t = t_i :=
-      fun t_i ht_i_mem t ht_in h_eq =>
+      fun t_i ht_i_mem t ht_in h_eq ↦
         multi_pole_local_uniqueness γ hr_pos h_endpts_r h_pair_r
-          (fun t' ht'_in h_eq' => h_complete t' ht'_in h_eq')
+          (fun t' ht'_in h_eq' ↦ h_complete t' ht'_in h_eq')
           ht_i_mem ht_in h_eq
     obtain ⟨m, hm_pos, h_smooth_bound⟩ :=
       multi_pole_smooth_complement_far_bound (γ := γ) (s := s)
-        (crossings := crossings) h_complete (fun _ => r) (fun _ _ => hr_pos)
+        (crossings := crossings) h_complete (fun _ ↦ r) (fun _ _ ↦ hr_pos)
     have h_per_window_higher_conv : ∀ t_i ∈ crossings,
-        Tendsto (fun ε : ℝ =>
+        Tendsto (fun ε : ℝ ↦
           ∫ u in (t_i - r)..(t_i + r),
-            cpvIntegrand (fun z => c / (z - s) ^ k) γf s ε u)
+            cpvIntegrand (fun z ↦ c / (z - s) ^ k) γf s ε u)
           (𝓝[>] (0 : ℝ))
           (𝓝 (c * (antiderivPow s k (γf (t_i + r)) -
-            antiderivPow s k (γf (t_i - r))))) := fun t_i ht_i_mem =>
+            antiderivPow s k (γf (t_i - r))))) := fun t_i ht_i_mem ↦
       perCrossing_higherOrder_window_integral_tendsto_corner
         (γ := γ) (s := s) (t_i := t_i) (h_Ioo t_i ht_i_mem) (h_at t_i ht_i_mem) hr_pos
         (h_window_in_unit t_i ht_i_mem) (h_local_unique_at t_i ht_i_mem)
@@ -1312,22 +1312,22 @@ theorem hasCauchyPVOn_multiCrossing_higherOrder_corner
       sortedList_plumbing h_Ioo h_at h_endpts_r h_endpts_r_strict h_pair_r
         h_local_unique_at
     have h_sorted_window_conv : ∀ t ∈ sortedList,
-        Tendsto (fun ε : ℝ =>
+        Tendsto (fun ε : ℝ ↦
           ∫ u in (t - r)..(t + r),
-            cpvIntegrand (fun z => c / (z - s) ^ k) γf s ε u)
+            cpvIntegrand (fun z ↦ c / (z - s) ^ k) γf s ε u)
           (𝓝[>] (0 : ℝ))
           (𝓝 (c * (antiderivPow s k (γf (t + r)) -
-            antiderivPow s k (γf (t - r))))) := fun t ht =>
+            antiderivPow s k (γf (t - r))))) := fun t ht ↦
       h_per_window_higher_conv t ((h_sorted_eq t).mp ht)
     have h_sorted_smooth : ∃ m : ℝ, 0 < m ∧
         ∀ u ∈ Set.Icc (0 : ℝ) 1,
           (∀ t ∈ sortedList, u ∉ Set.Ioo (t - r) (t + r)) → m ≤ ‖γf u - s‖ :=
-      ⟨m, hm_pos, fun u hu h_avoid =>
-        h_smooth_bound u hu fun t_i ht_i_in =>
+      ⟨m, hm_pos, fun u hu h_avoid ↦
+        h_smooth_bound u hu fun t_i ht_i_in ↦
           h_avoid t_i ((h_sorted_eq t_i).mpr ht_i_in)⟩
-    have h_recursive : Tendsto (fun ε : ℝ =>
+    have h_recursive : Tendsto (fun ε : ℝ ↦
         ∫ t in (0 : ℝ)..1,
-          cpvIntegrand (fun z => c / (z - s) ^ k) γf s ε t)
+          cpvIntegrand (fun z ↦ c / (z - s) ^ k) γf s ε t)
         (𝓝[>] (0 : ℝ))
         (𝓝 (c * (antiderivPow s k (γf 1) - antiderivPow s k (γf 0)))) :=
       cpv_higherOrder_tendsto_along_sorted_corner γ r hr_pos c k hk
@@ -1337,7 +1337,7 @@ theorem hasCauchyPVOn_multiCrossing_higherOrder_corner
     have h_closed : γf 0 = γf 1 := closed_immersion_extend_zero_eq_one γ
     rw [show c * (antiderivPow s k (γf 1) - antiderivPow s k (γf 0)) = 0 from by
       rw [← h_closed]; ring] at h_recursive
-    refine Tendsto.congr (fun ε => intervalIntegral.integral_congr fun t _ =>
+    refine Tendsto.congr (fun ε ↦ intervalIntegral.integral_congr fun t _ ↦
       cpvIntegrand_eq_cpvIntegrandOn_singleton) h_recursive
 
 /-- Shared computation for the two `cpv_polarPart_at_multiCrossed_pole_under_condB*`
@@ -1354,10 +1354,10 @@ private lemma sum_simplePole_only_eq_residue
   · rw [dif_pos h_pos, Finset.sum_eq_single (⟨0, h_pos⟩ : Fin (decomp.order s))]
     · rw [if_pos rfl]
     · intro k _ hk
-      rw [if_neg (fun h_eq => hk (Fin.ext h_eq))]
-    · exact fun h => absurd (Finset.mem_univ _) h
+      rw [if_neg (fun h_eq ↦ hk (Fin.ext h_eq))]
+    · exact fun h ↦ absurd (Finset.mem_univ _) h
   · rw [dif_neg h_pos, mul_zero]
-    exact Finset.sum_eq_zero fun k _ => absurd k.isLt (by omega)
+    exact Finset.sum_eq_zero fun k _ ↦ absurd k.isLt (by omega)
 
 /-- **Corner-friendly per-pole polar-part multi-crossing CPV (T-BR-Y11b).**
 
@@ -1395,7 +1395,7 @@ theorem cpv_polarPart_at_multiCrossed_pole_under_condB_corner
         ((-(L_minus t)) / (↑‖L_minus t‖ : ℂ)) ^ k.val)
     /- Simple-pole CPV existence (auto-discharged by single-crossing /
        smooth-only multi-crossing infrastructure for typical callers). -/
-    (h_simple_cpv : ∃ L : ℂ, HasCauchyPV (fun z => (z - s)⁻¹)
+    (h_simple_cpv : ∃ L : ℂ, HasCauchyPV (fun z ↦ (z - s)⁻¹)
       γ.toPwC1Immersion.toPiecewiseC1Path s L) :
     HasCauchyPVOn {s} (decomp.polarPart s)
       γ.toPwC1Immersion.toPiecewiseC1Path
@@ -1408,18 +1408,18 @@ theorem cpv_polarPart_at_multiCrossed_pole_under_condB_corner
   set a : Fin N → ℂ := decomp.coeff s
   set w : ℂ := generalizedWindingNumber γP s
   have h_term_int : ∀ k : Fin N, ∀ ε > 0, IntervalIntegrable
-      (fun t => cpvIntegrand (fun z => a k / (z - s) ^ (k.val + 1))
-        γP.toPath.extend s ε t) volume 0 1 := fun k ε hε =>
+      (fun t ↦ cpvIntegrand (fun z ↦ a k / (z - s) ^ (k.val + 1))
+        γP.toPath.extend s ε t) volume 0 1 := fun k ε hε ↦
     (HungerbuhlerWasem.cpvIntegrandOn_singleMonomial_intervalIntegrable
       γ (S := {s}) (Finset.mem_singleton.mpr rfl) (a k) (k.val + 1) hε).congr
-      (fun _ _ => (cpvIntegrand_eq_cpvIntegrandOn_singleton (z₀ := s)).symm)
-  set L : Fin N → ℂ := fun k =>
+      (fun _ _ ↦ (cpvIntegrand_eq_cpvIntegrandOn_singleton (z₀ := s)).symm)
+  set L : Fin N → ℂ := fun k ↦
     if k.val = 0 then 2 * ↑Real.pi * I * w * a k else 0 with hL_def
   have h_each : ∀ k : Fin N,
-      HasCauchyPV (fun z => a k / (z - s) ^ (k.val + 1)) γP s (L k) := fun k => by
+      HasCauchyPV (fun z ↦ a k / (z - s) ^ (k.val + 1)) γP s (L k) := fun k ↦ by
     by_cases hk : k.val = 0
     · have h_term_eq :
-          (fun z => a k / (z - s) ^ (k.val + 1)) = fun z => a k / (z - s) := by
+          (fun z ↦ a k / (z - s) ^ (k.val + 1)) = fun z ↦ a k / (z - s) := by
         funext z; rw [show (k.val + 1 : ℕ) = 1 by omega, pow_one]
       have h_L_eq : L k = 2 * ↑Real.pi * I * w * a k := by simp [L, hk]
       rw [h_term_eq, h_L_eq]
@@ -1433,14 +1433,14 @@ theorem cpv_polarPart_at_multiCrossed_pole_under_condB_corner
       have h_L_eq : L k = (0 : ℂ) := by simp [L, hk]
       rw [h_L_eq]
       by_cases h_zero : a k = 0
-      · have h_eq : (fun z => a k / (z - s) ^ (k.val + 1)) = fun _ => (0 : ℂ) := by
+      · have h_eq : (fun z ↦ a k / (z - s) ^ (k.val + 1)) = fun _ ↦ (0 : ℂ) := by
           funext z; rw [h_zero, zero_div]
         rw [h_eq]
         exact hasCauchyPV_of_hasCauchyPVOn_singleton
           (HasCauchyPVOn.zero_fun (γ := γP) (S := ({s} : Finset ℂ)))
       · have h_B_at_each : ∀ t ∈ crossings,
             (L_plus t / (↑‖L_plus t‖ : ℂ)) ^ ((k.val + 1) - 1) =
-            ((-(L_minus t)) / (↑‖L_minus t‖ : ℂ)) ^ ((k.val + 1) - 1) := fun t ht => by
+            ((-(L_minus t)) / (↑‖L_minus t‖ : ℂ)) ^ ((k.val + 1) - 1) := fun t ht ↦ by
           rw [show (k.val + 1) - 1 = k.val by omega]; exact h_B k hk_ge_one h_zero t ht
         exact hasCauchyPV_of_hasCauchyPVOn_singleton
           (hasCauchyPVOn_multiCrossing_higherOrder_corner (γ := γ) (s := s)
@@ -1450,19 +1450,19 @@ theorem cpv_polarPart_at_multiCrossed_pole_under_condB_corner
             h_flat_at_each L_plus L_minus hL_plus_ne hL_minus_ne hL_right hL_left
             h_B_at_each (a k))
   have h_sum_cpv : HasCauchyPV
-      (fun z => ∑ k : Fin N, a k / (z - s) ^ (k.val + 1)) γP s
+      (fun z ↦ ∑ k : Fin N, a k / (z - s) ^ (k.val + 1)) γP s
       (∑ k : Fin N, L k) :=
     HasCauchyPV.finset_sum (Finset.univ : Finset (Fin N))
       (γ := γP) (z₀ := s)
-      (f := fun k z => a k / (z - s) ^ (k.val + 1))
-      (L := L) (fun k _ => h_each k) (fun k _ => h_term_int k)
+      (f := fun k z ↦ a k / (z - s) ^ (k.val + 1))
+      (L := L) (fun k _ ↦ h_each k) (fun k _ ↦ h_term_int k)
   have h_sum_L_eq : (∑ k : Fin N, L k) =
       2 * ↑Real.pi * I * w * residue f s := by
     simp only [hL_def]; exact sum_simplePole_only_eq_residue hs decomp w
   refine HasCauchyPV.to_singletonOn ?_
   rw [← h_sum_L_eq]
   exact HasCauchyPV.congr_pointwise h_sum_cpv
-    fun z hz => (decomp.polarPart_eq s hs z hz).symm
+    fun z hz ↦ (decomp.polarPart_eq s hs z hz).symm
 
 /-- **HW3.3 — Corner-friendly clean spec form (T-BR-Y11c).**
 
@@ -1480,7 +1480,7 @@ theorem residueTheorem_crossing_paper_faithful_clean
     (hMero : ∀ s ∈ S, MeromorphicAt f s)
     (hCondB : SatisfiesConditionB γ.toPwC1Immersion f S)
     (hCondA : SatisfiesConditionA' γ.toPwC1Immersion f S
-      (fun s => (PolarPartDecomposition.ofMeromorphicWithCondB hU_open hS_in_U hf
+      (fun s ↦ (PolarPartDecomposition.ofMeromorphicWithCondB hU_open hS_in_U hf
         (γ := γ.toPwC1Immersion) hMero hCondB).order s))
     (hx_notin_S : x ∉ (↑S : Set ℂ)) :
     HasCauchyPVOn S f γ.toPwC1Immersion.toPiecewiseC1Path
@@ -1504,7 +1504,7 @@ theorem residueTheorem_crossing_paper_faithful_clean
       crossings_finset_of_endpts_off γ hs hx_notin_S
     have h_flat_at_each : ∀ t₀ ∈ crossings,
         IsFlatOfOrder γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t₀
-          (decomp.order s) := fun t₀ ht₀ =>
+          (decomp.order s) := fun t₀ ht₀ ↦
       hCondA s hs t₀ (Ioo_subset_Icc_self (h_Ioo' t₀ ht₀)) (h_at' t₀ ht₀) (h_Ioo' t₀ ht₀)
     obtain ⟨L_plus, L_minus, hL_plus_def, hL_minus_def,
         hL_plus_ne, hL_minus_ne, hL_right', hL_left'⟩ :=
@@ -1518,9 +1518,9 @@ theorem residueTheorem_crossing_paper_faithful_clean
         hL_plus_ne hL_minus_ne
     have h_flat_one : ∀ t₀ ∈ crossings,
         IsFlatOfOrder γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t₀ 1 :=
-      fun t₀ ht₀ => isFlatOfOrder_one γ.toPwC1Immersion t₀ (h_Ioo' t₀ ht₀)
+      fun t₀ ht₀ ↦ isFlatOfOrder_one γ.toPwC1Immersion t₀ (h_Ioo' t₀ ht₀)
     have h_simple_cpv : ∃ L : ℂ,
-        HasCauchyPV (fun z => (z - s)⁻¹)
+        HasCauchyPV (fun z ↦ (z - s)⁻¹)
           γ.toPwC1Immersion.toPiecewiseC1Path s L :=
       hasCauchyPV_inv_sub_multiCrossing_corner (γ := γ) (s := s)
         (crossings := crossings) h_Ioo' h_at' h_complete' h_flat_one
