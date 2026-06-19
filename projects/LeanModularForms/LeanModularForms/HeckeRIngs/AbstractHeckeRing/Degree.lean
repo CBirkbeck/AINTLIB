@@ -267,7 +267,6 @@ lemma heckeMultiplicity_deg_sum_eq (D1 D2 D_out1 D_out2 : HeckeCoset P)
         (HeckeCoset.rep D_out1) * HeckeCoset_deg P D_out1 +
         heckeMultiplicity P (HeckeCoset.rep D1) (HeckeCoset.rep D2)
           (HeckeCoset.rep D_out2) * HeckeCoset_deg P D_out2 := by
-    open scoped Classical in
     simp only [deg, RingHom.coe_mk, MonoidHom.coe_mk, OneHom.coe_mk, deg_fun]
     have hsub : (m P (HeckeCoset.rep D1) (HeckeCoset.rep D2)).support ⊆
         ({D_out1, D_out2} : Finset _) := fun A hA ↦ by
