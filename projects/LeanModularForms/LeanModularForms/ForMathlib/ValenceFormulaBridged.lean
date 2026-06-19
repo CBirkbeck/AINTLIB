@@ -84,12 +84,12 @@ theorem valence_formula_textbook_unconditional_FM
     (orderAtCusp' f : ℂ) +
     (1/2 : ℂ) * ↑(orderOfVanishingAt' (⇑f) ellipticPointI') +
     (1/3 : ℂ) * ↑(orderOfVanishingAt' (⇑f) ellipticPointRho') +
-    ∑ s ∈ S.filter (fun p =>
+    ∑ s ∈ S.filter (fun p ↦
         p ≠ ellipticPointI' ∧ p ≠ ellipticPointRho' ∧ p ≠ ellipticPointRhoPlusOne' ∧
         ‖(p : ℂ)‖ > 1 ∧ |(p : ℂ).re| < 1/2),
       ↑(orderOfVanishingAt' (⇑f) s) +
     ∑ s ∈ sLeftVertFM S, ↑(orderOfVanishingAt' (⇑f) s) +
-    ∑ s ∈ S.filter (fun p =>
+    ∑ s ∈ S.filter (fun p ↦
         p ≠ ellipticPointRho' ∧ ‖(p : ℂ)‖ = 1 ∧ (p : ℂ).re < 0),
       ↑(orderOfVanishingAt' (⇑f) s) =
     (k : ℂ) / 12 := by
@@ -110,29 +110,29 @@ theorem valence_formula_textbook_unconditional_FM
   refine valence_formula_unconditional_mkD f S hS hS_complete H_S hH_S (F_int_FM f S)
     H_res hH_res_gt ?_ H_res hH_res_gt ?_
   · intro H hH_ge hH
-    have hH_ge_res : H₀_res ≤ H := hH₀_res_le.trans hH_ge
     set γ := (fdWindingDataFull_unconditional hH).boundary with hγ_def
     have hγ : ∀ t ∈ Icc (0 : ℝ) 1, γ.toPath.extend t = fdBoundaryFun H t :=
       (fdWindingDataFull_unconditional hH).boundary_eq
-    have hH_above : ∀ s ∈ S, (s : ℂ).im < H := fun s hs =>
+    have hH_above : ∀ s ∈ S, (s : ℂ).im < H := fun s hs ↦
       (hH_S s hs).trans_le (hH_S_le.trans hH_ge)
     have h_sum_eq :
         (∑ s ∈ S, generalizedWindingNumber' (fdBoundary_H H) 0 5 (↑s : ℂ) *
           (orderOfVanishingAt' (⇑f) s : ℂ)) =
         ∑ s ∈ S, generalizedWindingNumber γ (↑s : ℂ) *
           (orderOfVanishingAt' (⇑f) s : ℂ) :=
-      Finset.sum_congr rfl fun s hs => by
+      Finset.sum_congr rfl fun s hs ↦ by
         rw [gwnPrime_eq_gwn_of_mem_fd hH (hS s hs) (hH_above s hs)]
     rw [← h_sum_eq]
-    refine (hasCauchyPVOn_of_cauchyPVOn'_tendsto γ hγ (h_res_old hH_ge_res)).congr' ?_
+    refine (hasCauchyPVOn_of_cauchyPVOn'_tendsto γ hγ
+      (h_res_old (hH₀_res_le.trans hH_ge))).congr' ?_
     filter_upwards with ε
     simp only [F_int_FM, dif_pos hH, hγ_def]
   · intro H hH_ge hH
-    have hH_ge_mod : H₀_mod ≤ H := hH₀_mod_le.trans hH_ge
     set γ := (fdWindingDataFull_unconditional hH).boundary with hγ_def
     have hγ : ∀ t ∈ Icc (0 : ℝ) 1, γ.toPath.extend t = fdBoundaryFun H t :=
       (fdWindingDataFull_unconditional hH).boundary_eq
-    refine (hasCauchyPVOn_of_cauchyPVOn'_tendsto γ hγ (h_mod_old hH_ge_mod)).congr' ?_
+    refine (hasCauchyPVOn_of_cauchyPVOn'_tendsto γ hγ
+      (h_mod_old (hH₀_mod_le.trans hH_ge))).congr' ?_
     filter_upwards with ε
     simp only [F_int_FM, dif_pos hH, hγ_def]
 
@@ -154,12 +154,12 @@ theorem valence_formula_textbook_orbit_finsum_FM :
     (1/3 : ℂ) * ↑(orderOfVanishingAt' (⇑f) ellipticPointRho') +
     ∑ᶠ (q : NonEllOrbitFM), ordOrbitQ f q =
     (k : ℂ) / 12 := by
-  refine valence_formula_textbook_orbit_finsum f hf fun S hS hS_complete => ?_
-  set H_S := S.sum (fun s : UpperHalfPlane => (s : ℂ).im) + 1
-  have hH_S : ∀ s ∈ S, (s : ℂ).im < H_S := fun s hs => by
-    have h_le : (s : ℂ).im ≤ S.sum (fun s : UpperHalfPlane => (s : ℂ).im) :=
-      Finset.single_le_sum (f := fun s : UpperHalfPlane => (s : ℂ).im)
-        (fun x _ => x.2.le) hs
+  refine valence_formula_textbook_orbit_finsum f hf fun S hS hS_complete ↦ ?_
+  set H_S := S.sum (fun s : UpperHalfPlane ↦ (s : ℂ).im) + 1
+  have hH_S : ∀ s ∈ S, (s : ℂ).im < H_S := fun s hs ↦ by
+    have h_le : (s : ℂ).im ≤ S.sum (fun s : UpperHalfPlane ↦ (s : ℂ).im) :=
+      Finset.single_le_sum (f := fun s : UpperHalfPlane ↦ (s : ℂ).im)
+        (fun x _ ↦ x.2.le) hs
     linarith
   exact valence_formula_textbook_unconditional_FM f hf S hS hS_complete H_S hH_S
 
