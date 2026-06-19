@@ -225,7 +225,7 @@ isogeny degree (`Int.toNat_natCast`); the per-pair scaling is `pencilScaling_one
 theorem pencilScaling_of_comapData
     (pencilData : ∀ r' s' : ℤ, PencilScalingComapData W p r r' s') :
     PencilScaling W p r (AlgebraicClosure K)
-      (fun r' s' => ((pencilIsogBaseChange W p r (AlgebraicClosure K) r' s'
+      (fun r' s' ↦ ((pencilIsogBaseChange W p r (AlgebraicClosure K) r' s'
         (pencilData r' s').pullback_L).degree : ℤ)) := by
   intro r' s' _hps ℓ hℓp _hℓne hℓF
   letI : Fact ℓ.Prime := ⟨hℓp⟩
@@ -290,7 +290,7 @@ noncomputable def pencilKerCard
       (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField →ₐ[AlgebraicClosure K]
         (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField) :
     ℤ → ℤ → ℤ :=
-  fun r' s' =>
+  fun r' s' ↦
     (Nat.card (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s'
       (pullback_L r' s')).toAddMonoidHom.ker : ℤ)
 
@@ -364,10 +364,10 @@ This is the form `hasse_bound_unconditional_of_baseChange_scalings` consumes wit
 theorem pencilScaling_of_comapData_card
     (pencilData : ∀ r' s' : ℤ, PencilScalingComapDataCard W p r r' s') :
     PencilScaling W p r (AlgebraicClosure K)
-      (pencilKerCard W p r (fun r' s' => (pencilData r' s').pullback_L)) := by
+      (pencilKerCard W p r (fun r' s' ↦ (pencilData r' s').pullback_L)) := by
   intro r' s' _hps ℓ hℓp _hℓne hℓF
   letI : Fact ℓ.Prime := ⟨hℓp⟩
-  rw [show (pencilKerCard W p r (fun r' s' => (pencilData r' s').pullback_L) r' s').toNat =
+  rw [show (pencilKerCard W p r (fun r' s' ↦ (pencilData r' s').pullback_L) r' s').toNat =
       Nat.card (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s'
         (pencilData r' s').pullback_L).toAddMonoidHom.ker from
     Int.toNat_natCast _]
