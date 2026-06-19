@@ -24,22 +24,22 @@ theorem Set.countable_setOf_isolated_points' {S : Set ℝ}
   classical
   by_cases hS : S = ∅
   · simp [hS]
-  choose r hr_pos hr_sep using fun t : S => h t.val t.prop
-  let ball : S → Set ℝ := fun t => Metric.ball t.val (r t / 2)
+  choose r hr_pos hr_sep using fun t : S ↦ h t.val t.prop
+  let ball : S → Set ℝ := fun t ↦ Metric.ball t.val (r t / 2)
   have h_disj : Pairwise (Function.onFun Disjoint ball) := by
     intro ⟨t₁, ht₁⟩ ⟨t₂, ht₂⟩ h_ne
     simp only [Function.onFun, Set.disjoint_iff, ball]
     intro x ⟨hx₁, hx₂⟩
     simp only [Metric.mem_ball, Real.dist_eq] at hx₁ hx₂
-    have h_ne' : t₁ ≠ t₂ := fun heq => h_ne (by simp [heq])
+    have h_ne' : t₁ ≠ t₂ := fun heq ↦ h_ne (by simp [heq])
     rw [abs_sub_comm] at hx₁
     have h4 : r ⟨t₁, ht₁⟩ ≤ |t₁ - t₂| := by
       rw [abs_sub_comm]; exact hr_sep ⟨t₁, ht₁⟩ t₂ ht₂ (Ne.symm h_ne')
     have h5 : r ⟨t₂, ht₂⟩ ≤ |t₁ - t₂| := hr_sep ⟨t₂, ht₂⟩ t₁ ht₁ h_ne'
     linarith [hr_pos ⟨t₁, ht₁⟩, hr_pos ⟨t₂, ht₂⟩, abs_sub_le t₁ x t₂]
-  have h_open : ∀ t : S, IsOpen (ball t) := fun _ => Metric.isOpen_ball
+  have h_open : ∀ t : S, IsOpen (ball t) := fun _ ↦ Metric.isOpen_ball
   have h_nonempty : ∀ t : S, (ball t).Nonempty :=
-    fun t => ⟨t.val, Metric.mem_ball_self (by linarith [hr_pos t])⟩
+    fun t ↦ ⟨t.val, Metric.mem_ball_self (by linarith [hr_pos t])⟩
   exact Set.countable_coe_iff.mp
     (Pairwise.countable_of_isOpen_disjoint h_disj h_open h_nonempty)
 
@@ -68,7 +68,7 @@ theorem preimage_singleton_measure_zero_of_deriv_ne_zero {γ : ℝ → ℂ} {a b
     have h_iso : ∀ t ∈ S \ ↑P, ∃ ε > 0, ∀ s ∈ S \ ↑P, s ≠ t → |s - t| ≥ ε := by
       intro t ⟨ht_S, ht_nP⟩
       obtain ⟨ε, hε_pos, h_sep⟩ := h_isolated t ht_S ht_nP
-      exact ⟨ε, hε_pos, fun s ⟨hs_S, _⟩ hs_ne => h_sep s hs_S hs_ne⟩
+      exact ⟨ε, hε_pos, fun s ⟨hs_S, _⟩ hs_ne ↦ h_sep s hs_S hs_ne⟩
     exact Set.countable_setOf_isolated_points' h_iso
   exact h_countable.measure_zero _
 
@@ -84,8 +84,8 @@ theorem preimage_finset_measure_zero_of_deriv_ne_zero {γ : ℝ → ℂ} {a b : 
       ⋃ s ∈ (↑S : Set ℂ), {t ∈ Icc a b | γ t = s} := by
     ext t
     simp only [Set.mem_setOf_eq, Set.mem_iUnion, Finset.mem_coe]
-    exact ⟨fun ⟨ht_Icc, hmem⟩ => ⟨γ t, hmem, ht_Icc, rfl⟩,
-      fun ⟨_, hs, ht_Icc, hγt⟩ => ⟨ht_Icc, hγt ▸ hs⟩⟩
+    exact ⟨fun ⟨ht_Icc, hmem⟩ ↦ ⟨γ t, hmem, ht_Icc, rfl⟩,
+      fun ⟨_, hs, ht_Icc, hγt⟩ ↦ ⟨ht_Icc, hγt ▸ hs⟩⟩
   rw [h_eq, measure_biUnion_null_iff S.finite_toSet.countable]
   intro s _
   exact preimage_singleton_measure_zero_of_deriv_ne_zero s hγ hγ_diff hγ'_ne
