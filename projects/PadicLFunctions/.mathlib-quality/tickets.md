@@ -6828,11 +6828,14 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
   + `charIdealGroup_quotient`; and discharging h12 is §12's own deferred milestone.
 
 ##### [G-CHARIDEAL] Char-ideal conjunct of thm:vandiver (part ii): `charIdealGroup 𝒳⁺ = I(𝒢⁺)ζ_p`
-- **Status**: BLOCKED (on structure-theorem-scale infra) | **File**: Iwasawa/StructureTheory/CharIdeal.lean + new | **Depends on**: G-IMC (iso, DONE), CHARIDEAL-QUOT, CARRIER-BRIDGE | **Type**: theorem
-- **Progress (2026-06-19)**: transport tool **DONE** — `charIdeal_eq_of_linearEquiv` (CharIdeal.lean, axiom-clean):
-  `M ≃ₗ M' ⟹ charIdeal M = charIdeal M'` (an iso is a pseudo-iso). With the G-IMC iso `𝒳⁺ ≅ Λ/I`,
-  reduces part (ii) to `charIdealGroup (Λ/I) = I`. Two genuinely-deep prerequisites remain (each
-  structure-theorem-scale), so the conjunct is BLOCKED, not dispatchable:
+- **Status**: IN PROGRESS — 3 of 5 sub-lemmas DONE (axiom-clean) | **File**: CharIdeal.lean, CharIdealQuotient.lean, CharIdealGroupQuotient.lean | **Depends on**: G-IMC (iso, DONE), CHARIDEALGROUP-QUOT, CARRIER-BRIDGE | **Type**: theorem
+- **Progress (2026-06-19)** — **DONE (axiom-clean)**:
+  (1) `charIdeal_eq_of_linearEquiv` (CharIdeal.lean) — base char-ideal is a linear-iso invariant.
+  (2) `charIdeal_quotient` (CharIdealQuotient.lean) — `charIdeal(Λ ⧸ (f)) = (f)` (see [CHARIDEAL-QUOT]).
+  (3) `charIdealGroup_eq_of_linearEquiv` (CharIdealGroupQuotient.lean) — equivariant char-ideal is a
+      `Λ(𝒢)`-linear-iso invariant (per-ω reduction to (1) via `isotypicComponent_map_of_linearEquiv`).
+  With the G-IMC iso `𝒳⁺ ≅ Λ(𝒢⁺)/I`, (3) reduces part (ii) to `charIdealGroup(Λ(𝒢⁺)/I) = I`
+  ([CHARIDEALGROUP-QUOT]) modulo the carrier bridge ([CARRIER-BRIDGE]). REMAINING (2 sub-lemmas):
 - **Sub-ticket [CHARIDEAL-QUOT]** — **DONE (2026-06-19, axiom-clean)**, `Iwasawa/StructureTheory/CharIdealQuotient.lean`:
   `charIdeal_quotient : charIdeal 𝒪 (Λ ⧸ span{f}) htor = span{f}` (`f≠0`, `[IsDiscreteValuationRing 𝒪]`).
   Route as sketched: `localMult_quotient_span` (= `Ring.ord` of the DVR localization via
@@ -6861,8 +6864,16 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
   then `PadicMeasure(Δ×Γ) ≅ (PadicMeasure Γ)[Δ]` (measure algebra of a product = group algebra of the
   finite factor over the other) and `PadicMeasure Γ ≅ IwasawaAlgebra ℤ_[p]` (cf. existing
   `Measure.mahlerRingEquiv : PadicMeasure ℤ_[p] ≃+* ℤ_p[[T]]`). ~8–12 lemmas.
-- **Sub-ticket [CHARIDEALGROUP-QUOT]** equivariant reassembly `charIdealGroup (Λ(𝒢⁺)/I) = I`: from
-  CHARIDEAL-QUOT per ω-component (`charIdealComponent`) through the `⨅_ω comap φ_ω` definition.
+- **Sub-ticket [CHARIDEALGROUP-QUOT]** equivariant reassembly `charIdealGroup (Λ(𝒢⁺)/I) = I` (for
+  `I` principal, the application case). Plan: the **ring** isotypic decomposition
+  `IwasawaAlgebraGroup 𝒪 H ≅ ∏_ω IwasawaAlgebra 𝒪` (via the retractions `charAugmentation 𝒪 H ω`
+  (proven: `charAugmentation_comp_algebraMap`) and the `CompleteOrthogonalIdempotents` already used in
+  `isInternal_isotypicComponent`; mathlib `CompleteOrthogonalIdempotents.bijective`/`…equivProd`-style
+  ring product) ⇒ `(Λ(𝒢)/I)^{(ω)} ≅ Λ/I_ω` with `I_ω = φ_ω(I)` principal ⇒ `charIdealComponent ω
+  (Λ(𝒢)/I) = I_ω` (by **CHARIDEAL-QUOT**, DONE) ⇒ `⨅_ω comap φ_ω I_ω = I` (ideal reassembly under
+  the product decomposition). ~5–8 lemmas. The iso-invariance `charIdealGroup_eq_of_linearEquiv`
+  (DONE) then gives `charIdealGroup 𝒳⁺ = charIdealGroup(Λ(𝒢⁺)/I) = I` once CARRIER-BRIDGE supplies
+  the `IwasawaAlgebraGroup` view of `𝒳⁺` and `I`.
 - **Sources**: RJW TeX 3652–3690 (charIdeal), thm:vandiver part (ii); Washington Ch. 13.
 - **Generality**: 𝒪 = ℤ_[p] standing case (`[IsDiscreteValuationRing 𝒪]`).
 
