@@ -215,7 +215,37 @@ Wedhorn Prop 7.19 (p.61, `wedhorn.txt:3176`), Lemma 7.20 (p.61, `:3195`), Lemma 
 ---
 
 ### [T-L3] Analytic Spa point above a non-open prime (leaf #3 = former T-ROIE-4)
-- **Status**: open — discharges `exists_cont_supp_ge_powerBounded_of_nonOpen_prime` (Presheaf.lean:2785)
+- **Status**: in_progress (beastmode 2026-06-19) — discharges `exists_cont_supp_ge_powerBounded_of_nonOpen_prime` (Presheaf.lean:2785)
+- **Progress**:
+  - 2026-06-19: source-confirmed Wedhorn 7.45 (`wedhorn.txt:3488`) gives a **height-1** analytic
+    point with p⊆supp; Prop 7.41 (`wedhorn.txt:3438`) = "height-1 ⟹ v≤1 on A°" (≈6-line proof). The
+    in-repo `exists_spa_point_via_restrictToConvex` (Lemma745:418, proven) gives an analytic
+    continuous point with p⊆supp but bounds on A₀ (not A°) and isn't packaged as height-1. Residual =
+    Prop 7.41 sub-lemma + a height-1 analytic point. Spawning the Prop 7.41 sub-ticket first.
+  - 2026-06-19 **T-L3 REDUCED + PARTIALLY DONE.** T-L3a (Prop 7.41) PROVEN+verified. Relocated
+    `exists_cont_supp_ge_powerBounded_of_nonOpen_prime` after 7.41 in Presheaf.lean and **proved it**
+    via the new leaf `exists_heightOne_analytic_cont_supp_ge_of_nonOpen_prime` (Wedhorn 7.45 height-1
+    point) + 7.41 (the A° bound). Presheaf builds green (2549); StandardCover+Cor832 green (2950) — the
+    relocation/reduction is sound, T-L3 signature unchanged. **The bare T-L3 sorry is gone; the single
+    residual is now the height-1-point leaf `exists_heightOne_analytic_cont_supp_ge_of_nonOpen_prime`.**
+  - **TWO BLOCKERS on discharging the height-1 leaf (= T-L3b, the remaining sorry):**
+    1. **DEEP INFRA** (Rem 4.12 / height-1 generalization): the repo's height-1 machinery is the
+       `ofPrime` coarsening (`mulArchimedean_ofPrime_of_height_one`,
+       `exists_mem_spa_supp_eq_of_nonOpen_prime_via_heightOne_ofPrime`) which still needs the height-1
+       prime `Q` of the valuation ring — the documented "minimal prime above φ(I) is height-1" gap
+       (valuation-ring dimension theory; plan `docs/plans/2026-03-18-valuation-prime-convex.md`).
+       Substantial missing infra (CLAUDE.md isolate-as-leaf + report).
+    2. **⚠ COMPLETENESS SOUNDNESS FLAG (B2-candidate, needs user decision):** Wedhorn 7.45 requires a
+       **complete** affinoid (Prop 5.38, A₀ I-adically complete ⟹ I⊆m); the in-repo analytic-point
+       construction needs `[IsAdicComplete P.I P.A₀]`. But T-L3 (and the StandardCover pair-free
+       consumer `exists_spa_point_with_supp_ge_of_prime`) carry **NO `CompleteSpace`** — the ROIE
+       pair→pair-free migration dropped the pair's completeness without re-adding it. They are USED at
+       complete rings (Cor832:1624 = `presheafValue`, `presheafValue_isAdicComplete`). So discharging
+       T-L3b will need completeness. DECISION (user): (a) add `[CompleteSpace A]` to T-L3 + the
+       StandardCover consumer + thread to the ~5 consumer files (CLAUDE.md-(b)-justified IF T-L3 is
+       genuinely false without completeness — likely, per Wedhorn 7.45); or (b) prove completeness-free
+       via `Spa(A) ≅ Spa(Â)` (Wedhorn 7.48) + 7.45-on-Â (deeper). Do NOT add the hypothesis unilaterally
+       (CLAUDE.md). Logged to `b2_log.jsonl`.
 - **File**: Presheaf.lean (+ Lemma745.lean for the 7.41 sub-leaf)
 - **Depends on**: none
 - **Parallel**: yes
@@ -255,6 +285,49 @@ definition** (reviewer Q4a — ℂ_p-safe).
 #### Generality decision
 Any affinoid `(A, A⁺)`; the `A°` bound is `A⁺`-independent (Prop 7.41 gives `Spa(A,A⁺)` membership for
 *every* ring of integral elements `A⁺`).
+
+---
+
+### [T-L3a] Prop 7.41 — `heightOne_le_one_on_powerBounded` (sub-ticket of T-L3)
+- **Status**: DONE (beastmode 2026-06-19) — `heightOne_le_one_on_powerBounded` proven sorry-free,
+  axiom-clean, `lake build «Adic spaces».Presheaf` green (2549 jobs), no warnings on the decl.
+  Proof: reduce to `v a ≤ 1`; by_contra; analytic ⟹ `b∈A°°, v b≠0`; `MulArchimedean.arch` ⟹
+  `(v b)⁻¹ ≤ (v a)^k` ⟹ `1 ≤ v(aᵏb)`; `aᵏb∈A°°` (pow_mem + isTopologicallyNilpotent_mul) ⟹
+  continuity ⟹ `v(aᵏb)<1`; contradiction. (gcongr for the mul step; not_le for by_contra.)
+- **File**: Presheaf.lean (after `rankOne_valueGroup_of_analytic`, ~3516; deps live there)
+- **Depends on**: none (all ingredients in-repo)
+- **Parent**: T-L3
+- **Type**: theorem
+
+#### Statement
+```lean
+theorem heightOne_le_one_on_powerBounded
+    {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
+    [PlusSubring A] [IsHuberRing A]
+    (x : Spv A) (hx_cont : x ∈ Cont A) (hx_an : ¬ IsOpen (x.supp : Set A))
+    (hArch : letI : ValuativeRel A := x.toValuativeRel;
+      MulArchimedean (ValuativeRel.ValueGroupWithZero A))
+    (a : A) (ha : IsPowerBounded a) : x.vle a 1
+```
+
+#### Proof sketch (Wedhorn 7.41, `wedhorn.txt:3438-3444`)
+Reduce to `v a ≤ 1` (`Valuation.Compatible.vle_iff_le`). By_contra `1 < v a`. Analytic ⟹ `∃ b ∈ A°°`,
+`v b ≠ 0` (`exists_topNilp_ne_zero_of_analytic`); continuity ⟹ `v b < 1` (`topNilp_vle_one_of_continuous`),
+and `v b > 0`. `MulArchimedean.arch (v b)⁻¹ (1 < v a)` ⟹ `∃ k, (v b)⁻¹ ≤ (v a)^k` ⟹ `1 ≤ (v a)^k·v b =
+v(aᵏb)`. But `aᵏb ∈ A°°` (`(ha.pow k).isTopologicallyNilpotent_mul hb_nil`), so continuity ⟹ `v(aᵏb) < 1`.
+`1 ≤ v(aᵏb) < 1`, contradiction.
+
+#### Mathlib lemmas needed
+`MulArchimedean.arch`, `inv_mul_cancel₀`, `mul_le_mul_right'`, `map_mul`, `map_pow`,
+`exists_topNilp_ne_zero_of_analytic`, `topNilp_vle_one_of_continuous`,
+`IsPowerBounded.isTopologicallyNilpotent_mul`, `IsPowerBounded.pow` (verify).
+
+#### Sources
+Wedhorn Prop 7.41 (p.66, `wedhorn.txt:3438`); "height 1" ⟺ `MulArchimedean` value group (Prop 1.14).
+
+#### Generality decision
+`IsPowerBounded a` hypothesis (cleaner than `a ∈ powerBoundedSubring`; convert at the T-L3 call site).
+`MulArchimedean (ValueGroupWithZero A)` is the faithful height-1 encoding (matches `rankOne_valueGroup_of_analytic`).
 
 ---
 

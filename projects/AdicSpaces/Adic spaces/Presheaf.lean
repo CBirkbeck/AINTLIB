@@ -2770,25 +2770,11 @@ theorem support_eq_maximal_of_le {A : Type*} [CommRing A] {v : Spv A} {𝔪 : Id
     (h𝔪 : 𝔪.IsMaximal) (h : 𝔪 ≤ v.supp) : v.supp = 𝔪 :=
   (h𝔪.eq_of_le (instIsPrimeSupp v).ne_top h).symm
 
-/-- **Wedhorn 7.45 + 7.41 (height-one bound form)** — the source-justified leaf underlying the
-faithful non-open-prime Spa-point existence. For a non-open prime `𝔭` of a complete affinoid
-ring there is a continuous valuation `v` with `𝔭 ≤ supp v` bounded by `1` on **all** power-bounded
-elements `A°` (not merely on a ring of definition `A₀`).
-
-The valuation is the analytic point of Lemma 7.45 (convex-subgroup retraction `Spv A → Spv(A, I)`
-of 7.1.2), vertically generalised to **height one** (Remark 4.12); Prop 7.41 then gives `v(a) ≤ 1`
-for every `a ∈ A°`. This is the faithful replacement for the artifact bound "`v ≤ 1` on `A⁺` via
-`A⁺ ⊆ A₀`": once `v` is bounded on `A°`, ANY ring of integral elements `A⁺ ⊆ A°` lands in
-`Spa(A, A⁺)` (expert-review 2026-06-18, Q4 — `A⁺ ⊆ A₀` is a proof artifact, not part of Wedhorn's
-theory). EXTERNAL: packages Wedhorn 7.45 + 7.41 + Remark 4.12; the repo's `restrictToConvex`
-construction supplies the analytic point but bounds only on `A₀`, omitting the height-one step. -/
-theorem exists_cont_supp_ge_powerBounded_of_nonOpen_prime
-    {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
-    [IsTopologicalRing A] [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
-    {𝔭 : Ideal A} [𝔭.IsPrime] (h𝔭 : ¬ IsOpen (𝔭 : Set A)) :
-    ∃ v : Spv A, v ∈ Cont A ∧ 𝔭 ≤ v.supp ∧
-      ∀ a ∈ (TopologicalRing.powerBoundedSubring A : Set A), v.vle a 1 :=
-  sorry
+-- `exists_cont_supp_ge_powerBounded_of_nonOpen_prime` (Wedhorn 7.45 + 7.41) is defined
+-- BELOW, immediately after `heightOne_le_one_on_powerBounded` (Prop 7.41) — its proof now
+-- consumes 7.41, so it must follow it in file order. It is reduced to the single faithful
+-- leaf `exists_heightOne_analytic_cont_supp_ge_of_nonOpen_prime` (the height-one analytic
+-- point of Lemma 7.45) + Prop 7.41 (the A° bound, now proven).
 
 -- Note: `maxIdeal_isClosed_of_complete_huber` and the bundled
 -- `prop_7_51_maxIdeal_closed_and_spa_point` are stated **below**
@@ -3514,6 +3500,104 @@ theorem rankOne_valueGroup_of_analytic
   -- which closes step 3a using `hArch` (statement is false without it;
   -- CLAUDE.md rule (b)).
   exact rankOne_embedding_of_topNilp_witness x hx_cont b hb_topNilp hb_ne hArch
+
+/-- **Wedhorn Proposition 7.41** (`wedhorn.txt:3438`, p. 66). A height-one analytic continuous
+valuation `x` on a Huber ring is bounded by `1` on every power-bounded element. "Height one" is
+encoded faithfully as `MulArchimedean (ValueGroupWithZero A)` (Prop 1.14: a value group of rank
+`≤ 1` is archimedean), the same form `rankOne_valueGroup_of_analytic` uses.
+
+Wedhorn's proof: if `v a > 1` for `a ∈ A°`, pick `b ∈ A°°` with `v b ≠ 0` (analytic); as `Γ_x` is
+archimedean there is `k` with `v(a)^k ≥ v(b)⁻¹`, i.e. `v(aᵏb) ≥ 1`; but `aᵏb ∈ A°°`, so continuity
+forces `v(aᵏb) < 1`. Contradiction.
+
+In particular `x ∈ Spa(A, A⁺)` for every ring of integral elements `A⁺ ⊆ A°`. -/
+theorem heightOne_le_one_on_powerBounded
+    {A : Type*} [CommRing A] [TopologicalSpace A]
+    [PlusSubring A] [IsHuberRing A]
+    (x : Spv A) (hx_cont : x ∈ Cont A) (hx_an : ¬ IsOpen (x.supp : Set A))
+    (hArch :
+      letI : ValuativeRel A := x.toValuativeRel
+      MulArchimedean (ValuativeRel.ValueGroupWithZero A))
+    (a : A) (ha : TopologicalRing.IsPowerBounded a) :
+    x.vle a 1 := by
+  letI : ValuativeRel A := x.toValuativeRel
+  haveI : MulArchimedean (ValuativeRel.ValueGroupWithZero A) := hArch
+  rw [Valuation.Compatible.vle_iff_le (v := ValuativeRel.valuation A) a 1, map_one]
+  by_contra h_not
+  rw [not_le] at h_not
+  -- `h_not : 1 < v a`.
+  obtain ⟨b, hb_nil, hb_ne⟩ := exists_topNilp_ne_zero_of_analytic x hx_cont hx_an
+  have hvb_pos : 0 < ValuativeRel.valuation A b := by
+    rw [zero_lt_iff]; intro h0
+    exact hb_ne (by
+      rw [Valuation.Compatible.vle_iff_le (v := ValuativeRel.valuation A) b 0, h0, map_zero])
+  have hvb_ne : ValuativeRel.valuation A b ≠ 0 := ne_of_gt hvb_pos
+  -- Archimedean: `∃ k, (v b)⁻¹ ≤ (v a)^k`.
+  obtain ⟨k, hk⟩ := MulArchimedean.arch (ValuativeRel.valuation A b)⁻¹ h_not
+  -- `1 ≤ (v a)^k * v b`.
+  have h1le : (1 : ValuativeRel.ValueGroupWithZero A) ≤
+      (ValuativeRel.valuation A a) ^ k * ValuativeRel.valuation A b := by
+    rw [← inv_mul_cancel₀ hvb_ne]
+    gcongr
+  have hval_eq : (ValuativeRel.valuation A a) ^ k * ValuativeRel.valuation A b =
+      ValuativeRel.valuation A (a ^ k * b) := by rw [map_mul, map_pow]
+  rw [hval_eq] at h1le
+  -- `aᵏb ∈ A°°` (`aᵏ` power-bounded, `b` topologically nilpotent).
+  have hak : TopologicalRing.IsPowerBounded (a ^ k) :=
+    pow_mem (S := TopologicalRing.powerBoundedSubring.toSubring A) ha k
+  have hakb_nil : IsTopologicallyNilpotent (a ^ k * b) :=
+    hak.isTopologicallyNilpotent_mul hb_nil
+  -- `v (aᵏb) ≠ 0` (it is `≥ 1`).
+  have hakb_ne : ¬ x.vle (a ^ k * b) 0 := by
+    rw [Valuation.Compatible.vle_iff_le (v := ValuativeRel.valuation A) (a ^ k * b) 0, map_zero]
+    exact not_le.mpr (lt_of_lt_of_le one_pos h1le)
+  -- Continuity ⟹ `v (aᵏb) < 1`, contradicting `1 ≤ v (aᵏb)`.
+  have hlt : ValuativeRel.valuation A (a ^ k * b) < 1 :=
+    topNilp_vle_one_of_continuous x hx_cont (a ^ k * b) hakb_nil hakb_ne
+  exact absurd (lt_of_le_of_lt h1le hlt) (lt_irrefl 1)
+
+/-- **Wedhorn Lemma 7.45 (height-one analytic point), general case** (`wedhorn.txt:3487-3506`).
+For a non-open prime `𝔭` there is a continuous **analytic** valuation `x` of **height one**
+(encoded as `MulArchimedean (ValueGroupWithZero A)`, Prop 1.14) with `𝔭 ≤ supp x`.
+
+FAITHFUL LEAF (`sorry`): Wedhorn builds an analytic continuous `v` with `𝔭 ≤ supp v` (the repo's
+`PairOfDefinition.exists_spa_point_via_restrictToConvex` supplies this), then passes to its
+height-one **vertical generalisation** `x` (Remark 4.12, valid since `v` is microbial). The repo's
+height-one machinery is the `ofPrime` coarsening (`ValuationSubring.mulArchimedean_ofPrime_of_height_one`,
+`exists_mem_spa_supp_eq_of_nonOpen_prime_via_heightOne_ofPrime`), which still needs the height-one
+prime `Q` of the valuation ring — the documented "minimal prime above `φ(I)` is height-one" gap
+(valuation-ring dimension theory). Isolated as one named leaf per CLAUDE.md; consumed by
+`exists_cont_supp_ge_powerBounded_of_nonOpen_prime` below via Prop 7.41
+(`heightOne_le_one_on_powerBounded`), which discharges the `A°` bound. -/
+theorem exists_heightOne_analytic_cont_supp_ge_of_nonOpen_prime
+    {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
+    [IsTopologicalRing A] [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
+    {𝔭 : Ideal A} [𝔭.IsPrime] (h𝔭 : ¬ IsOpen (𝔭 : Set A)) :
+    ∃ x : Spv A, x ∈ Cont A ∧ 𝔭 ≤ x.supp ∧ ¬ IsOpen (x.supp : Set A) ∧
+      (letI : ValuativeRel A := x.toValuativeRel
+       MulArchimedean (ValuativeRel.ValueGroupWithZero A)) :=
+  sorry
+
+/-- **Wedhorn 7.45 + 7.41 (height-one bound form)** — the source-justified leaf underlying the
+faithful non-open-prime Spa-point existence. For a non-open prime `𝔭` there is a continuous
+valuation `v` with `𝔭 ≤ supp v` bounded by `1` on **all** power-bounded elements `A°` (not merely
+on a ring of definition `A₀`).
+
+Now REDUCED (beastmode 2026-06-19) to two pieces, both source-faithful:
+`exists_heightOne_analytic_cont_supp_ge_of_nonOpen_prime` (Wedhorn 7.45, the height-one analytic
+point — the remaining deep leaf) + `heightOne_le_one_on_powerBounded` (Prop 7.41, the `A°` bound,
+PROVEN). Once `v` is bounded on `A°`, ANY ring of integral elements `A⁺ ⊆ A°` lands in `Spa(A, A⁺)`
+(expert-review 2026-06-18, Q4 — `A⁺ ⊆ A₀` is a proof artifact, not part of Wedhorn's theory). -/
+theorem exists_cont_supp_ge_powerBounded_of_nonOpen_prime
+    {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
+    [IsTopologicalRing A] [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
+    {𝔭 : Ideal A} [𝔭.IsPrime] (h𝔭 : ¬ IsOpen (𝔭 : Set A)) :
+    ∃ v : Spv A, v ∈ Cont A ∧ 𝔭 ≤ v.supp ∧
+      ∀ a ∈ (TopologicalRing.powerBoundedSubring A : Set A), v.vle a 1 := by
+  obtain ⟨x, hx_cont, hx_supp, hx_an, hArch⟩ :=
+    exists_heightOne_analytic_cont_supp_ge_of_nonOpen_prime (A := A) h𝔭
+  exact ⟨x, hx_cont, hx_supp,
+    fun a ha => heightOne_le_one_on_powerBounded x hx_cont hx_an hArch a ha⟩
 
 /-- **(T-H.2.b.2.β, Wedhorn 1.14 / Mathlib lookup)** *"A
 `LinearOrderedCommGroupWithZero` that order-embeds into `ℝ>0` is
