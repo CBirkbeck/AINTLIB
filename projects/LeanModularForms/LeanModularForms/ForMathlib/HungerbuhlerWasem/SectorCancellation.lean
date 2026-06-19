@@ -117,7 +117,7 @@ theorem F_curve_diff_tendsto_zero_under_conditionB
     (h_plus_radius : ∀ᶠ ε in 𝓝[>] (0 : ℝ), ‖γ (t_eps_plus ε) - s‖ = ε)
     (h_minus_to : Tendsto t_eps_minus (𝓝[>] (0 : ℝ)) (𝓝[<] t₀))
     (h_minus_radius : ∀ᶠ ε in 𝓝[>] (0 : ℝ), ‖γ (t_eps_minus ε) - s‖ = ε) :
-    Tendsto (fun ε =>
+    Tendsto (fun ε ↦
       ‖(-(↑(k - 1) : ℂ)⁻¹ * ((γ (t_eps_minus ε) - s) ^ (k - 1))⁻¹) -
         (-(↑(k - 1) : ℂ)⁻¹ * ((γ (t_eps_plus ε) - s) ^ (k - 1))⁻¹)‖)
       (𝓝[>] (0 : ℝ)) (𝓝 0) := by
@@ -125,7 +125,7 @@ theorem F_curve_diff_tendsto_zero_under_conditionB
         h_flat hL_plus h_deriv_right hL_right h_s hk hkn hn1).comp h_plus_to).add
       ((F_diff_at_tangent_target_tendsto_zero_left
         h_flat hL_minus h_deriv_left hL_left h_s hk hkn hn1).comp h_minus_to)
-  have h_sum : Tendsto (fun ε =>
+  have h_sum : Tendsto (fun ε ↦
       ‖-(↑(k - 1) : ℂ)⁻¹ * ((γ (t_eps_plus ε) - s) ^ (k - 1))⁻¹ -
           -(↑(k - 1) : ℂ)⁻¹ *
             (((s + (‖γ (t_eps_plus ε) - s‖ / ‖L_plus‖ : ℝ) • L_plus) - s)
@@ -138,7 +138,7 @@ theorem F_curve_diff_tendsto_zero_under_conditionB
     convert h_sum_raw using 2
     all_goals simp
   refine tendsto_of_tendsto_of_tendsto_of_le_of_le' tendsto_const_nhds h_sum
-    (Eventually.of_forall fun _ => norm_nonneg _) ?_
+    (Eventually.of_forall fun _ ↦ norm_nonneg _) ?_
   filter_upwards [h_plus_radius, h_minus_radius] with ε hpr hmr
   have h_targets_eq :
       -(↑(k - 1) : ℂ)⁻¹ *
