@@ -195,9 +195,9 @@ theorem hfact_of_dualComp (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0)
     (k₀ := k₀) hk₀_ne hk₀_div
   have hgU_ne : weilFunction W ℓ hℓ (δ T) hU ≠ 0 := weilFunction_ne_zero W ℓ hℓ _ hU
   have hu_ne : (mulByInt W.toAffine ℓ).pullback k₀ ≠ 0 :=
-    fun h0 => hk₀_ne ((mulByInt W.toAffine ℓ).pullback_injective (h0.trans (map_zero _).symm))
+    fun h0 ↦ hk₀_ne ((mulByInt W.toAffine ℓ).pullback_injective (h0.trans (map_zero _).symm))
   have hpb_ne : φ.pullback (weilFunction W ℓ hℓ T hT) ≠ 0 :=
-    fun h0 => weilFunction_ne_zero W ℓ hℓ T hT
+    fun h0 ↦ weilFunction_ne_zero W ℓ hℓ T hT
       (φ.pullback_injective (h0.trans (map_zero _).symm))
   set rhs := weilFunction W ℓ hℓ (δ T) hU * (mulByInt W.toAffine ℓ).pullback k₀
   have hrhs_ne : rhs ≠ 0 := mul_ne_zero hgU_ne hu_ne
@@ -239,9 +239,9 @@ theorem hfact_of_dualComp_image (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0)
     (k₀ := k₀) hk₀_ne hk₀_div
   have hgU_ne : weilFunction W ℓ hℓ (δ T) hU ≠ 0 := weilFunction_ne_zero W ℓ hℓ _ hU
   have hu_ne : (mulByInt W.toAffine ℓ).pullback k₀ ≠ 0 :=
-    fun h0 => hk₀_ne ((mulByInt W.toAffine ℓ).pullback_injective (h0.trans (map_zero _).symm))
+    fun h0 ↦ hk₀_ne ((mulByInt W.toAffine ℓ).pullback_injective (h0.trans (map_zero _).symm))
   have hpb_ne : φ.pullback (weilFunction W ℓ hℓ T hT) ≠ 0 :=
-    fun h0 => weilFunction_ne_zero W ℓ hℓ T hT
+    fun h0 ↦ weilFunction_ne_zero W ℓ hℓ T hT
       (φ.pullback_injective (h0.trans (map_zero _).symm))
   set rhs := weilFunction W ℓ hℓ (δ T) hU * (mulByInt W.toAffine ℓ).pullback k₀
   have hrhs_ne : rhs ≠ 0 := mul_ne_zero hgU_ne hu_ne
@@ -471,9 +471,9 @@ theorem hfact_image_noδ (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0)
   have hgU_ne : weilFunction W ℓ hℓ (Nat.card φ.toAddMonoidHom.ker • P₀) hU ≠ 0 :=
     weilFunction_ne_zero W ℓ hℓ _ hU
   have hu_ne : (mulByInt W.toAffine ℓ).pullback k₀ ≠ 0 :=
-    fun h0 => hk₀_ne ((mulByInt W.toAffine ℓ).pullback_injective (h0.trans (map_zero _).symm))
+    fun h0 ↦ hk₀_ne ((mulByInt W.toAffine ℓ).pullback_injective (h0.trans (map_zero _).symm))
   have hpb_ne : φ.pullback (weilFunction W ℓ hℓ (φ.toAddMonoidHom P₀) hT) ≠ 0 :=
-    fun h0 => weilFunction_ne_zero W ℓ hℓ (φ.toAddMonoidHom P₀) hT
+    fun h0 ↦ weilFunction_ne_zero W ℓ hℓ (φ.toAddMonoidHom P₀) hT
       (φ.pullback_injective (h0.trans (map_zero _).symm))
   set rhs := weilFunction W ℓ hℓ (Nat.card φ.toAddMonoidHom.ker • P₀) hU *
     (mulByInt W.toAffine ℓ).pullback k₀
