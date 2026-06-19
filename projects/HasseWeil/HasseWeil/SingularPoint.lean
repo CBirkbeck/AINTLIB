@@ -104,7 +104,7 @@ theorem exists_singular_of_Δ_eq_zero (h2 : (2 : F) ≠ 0) (hΔ : W.Δ = 0) :
   obtain ⟨x, y, z, hroots⟩ := (Cubic.splits_iff_roots_eq_three ha).mp hsplits
   have hdup : x = y ∨ x = z ∨ y = z := by
     by_contra hall
-    push_neg at hall
+    push Not at hall
     exact absurd ⟨hall.1, hall.2.1, hall.2.2⟩
       (not_not.mpr hdisc ∘ (Cubic.discr_ne_zero_iff_roots_ne ha hroots).mpr)
   suffices key : ∀ (x₀ : F),
@@ -172,7 +172,7 @@ a singular point if and only if `Δ = 0`. -/
 theorem exists_singular_iff_Δ_eq_zero [IsAlgClosed F] {W : WeierstrassCurve F}
     (h2 : (2 : F) ≠ 0) :
     (∃ x y, W.Singular x y) ↔ W.Δ = 0 :=
-  ⟨fun ⟨_, _, h⟩ => Δ_eq_zero_of_singular h, exists_singular_of_Δ_eq_zero W h2⟩
+  ⟨fun ⟨_, _, h⟩ ↦ Δ_eq_zero_of_singular h, exists_singular_of_Δ_eq_zero W h2⟩
 
 /-! ### Node and cusp characterization -/
 
@@ -208,7 +208,7 @@ theorem hasNode_iff [IsAlgClosed F] {W : WeierstrassCurve F} (h2 : (2 : F) ≠ 0
   · exact HasNode.Δ_eq_zero_and_c₄_ne_zero
   · intro ⟨hΔ, hc₄⟩
     obtain ⟨x₀, y₀, hsing⟩ := exists_singular_of_Δ_eq_zero W h2 hΔ
-    exact ⟨x₀, y₀, hsing, fun hdisc => hc₄ (by
+    exact ⟨x₀, y₀, hsing, fun hdisc ↦ hc₄ (by
       rw [c₄_eq_tangentConeDisc_sq_of_singular hsing, hdisc]; ring)⟩
 
 /-- Over an algebraically closed field of characteristic ≠ 2, a Weierstrass curve has a cusp
