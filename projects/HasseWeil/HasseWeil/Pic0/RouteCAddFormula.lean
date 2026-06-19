@@ -291,7 +291,7 @@ theorem dualAddResidual_iff_sigma_vanishes
       (∀ Q : E.Point, Curves.projectiveDivisorSum E
         (tosPullDivisor ch hinj hfin ch₁ hinj₁ hfin₁ ch₂ hinj₂ hfin₂ Q) = 0) := by
   unfold DualAddMulByIntResidual
-  refine forall_congr' (fun Q => ?_)
+  refine forall_congr' (fun Q ↦ ?_)
   rw [sigma_tosPullDivisor]
   constructor
   · intro hadd; rw [hadd]; abel
