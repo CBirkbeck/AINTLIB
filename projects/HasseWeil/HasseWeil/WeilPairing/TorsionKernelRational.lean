@@ -312,7 +312,7 @@ theorem adjoin_x_gen_y_gen_eq_top :
     rw [IntermediateField.adjoin_le_iff]
     intro w hw; rw [Set.mem_singleton_iff] at hw; rw [hw]; exact hxS
   have hpolyS : ∀ p : F[X], algebraMap F[X] W.toAffine.FunctionField p ∈ S :=
-    fun p => hadjx (algebraMapPoly_mem_adjoin_x_gen W p)
+    fun p ↦ hadjx (algebraMapPoly_mem_adjoin_x_gen W p)
   have hRmem : ∀ r : W.toAffine.CoordinateRing,
       algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField r ∈ S := by
     intro r
@@ -363,7 +363,7 @@ theorem sigma_genCoord_mem_range_proto [IsAlgClosed F] (ℓ : ℤ) (hℓ : ℓ �
   have hsc : ∀ φ : W.toAffine.FunctionField →ₐ[F] Ω,
       (ℓ : ℤ) • WeierstrassCurve.Affine.Point.map (W' := W.toAffine) φ (genericPoint W) =
         WeierstrassCurve.Affine.Point.map (W' := W.toAffine) φ
-          (Affine.Point.some (mulByInt_x W ℓ) (mulByInt_y W ℓ) hns_mul) := fun φ =>
+          (Affine.Point.some (mulByInt_x W ℓ) (mulByInt_y W ℓ) hns_mul) := fun φ ↦
     (map_zsmul (WeierstrassCurve.Affine.Point.map (W' := W.toAffine) φ) ℓ
       (genericPoint W)).symm.trans (congrArg _ hsmul)
   have hkey : (ℓ : ℤ) • gP = (ℓ : ℤ) • ιP := by
@@ -501,12 +501,12 @@ theorem minpoly_gen_splits_of_mem_range [IsAlgClosed F] (ℓ : ℤ) (_hℓ : ℓ
       (AlgebraicClosure W.toAffine.FunctionField) _ _ _ _ _ algB
       (((algebraMap W.toAffine.FunctionField (AlgebraicClosure W.toAffine.FunctionField)).comp
         (mulByInt W.toAffine ℓ).pullback.toRingHom).toAlgebra) _ _ _ htower ψ
-  have hgψ : ∀ z, g z = ψ z := fun z =>
+  have hgψ : ∀ z, g z = ψ z := fun z ↦
     @AlgHom.restrictScalars_apply F W.toAffine.FunctionField W.toAffine.FunctionField
       (AlgebraicClosure W.toAffine.FunctionField) _ _ _ _ _ algB
       (((algebraMap W.toAffine.FunctionField (AlgebraicClosure W.toAffine.FunctionField)).comp
         (mulByInt W.toAffine ℓ).pullback.toRingHom).toAlgebra) _ _ _ htower ψ z
-  obtain ⟨b, hb⟩ := hmem g (fun z => (hgψ _).trans (hψfix z))
+  obtain ⟨b, hb⟩ := hmem g (fun z ↦ (hgψ _).trans (hψfix z))
   exact ⟨b, hb.trans (hgψ a)⟩
 
 /-- **The deep residual** (Silverman III.4.10c): the minimal polynomials over `[ℓ]*K(E)` of the
@@ -521,8 +521,8 @@ theorem mulByInt_genCoords_minpoly_splits [IsAlgClosed F] (ℓ : ℤ) (hℓ : �
     Polynomial.Splits ((minpoly W.toAffine.FunctionField (y_gen W)).map
         (algebraMap W.toAffine.FunctionField W.toAffine.FunctionField)) := by
   classical
-  refine ⟨minpoly_gen_splits_of_mem_range W ℓ hℓ (x_gen W) (fun g hfix => ?_),
-          minpoly_gen_splits_of_mem_range W ℓ hℓ (y_gen W) (fun g hfix => ?_)⟩
+  refine ⟨minpoly_gen_splits_of_mem_range W ℓ hℓ (x_gen W) (fun g hfix ↦ ?_),
+          minpoly_gen_splits_of_mem_range W ℓ hℓ (y_gen W) (fun g hfix ↦ ?_)⟩
   · exact (sigma_genCoord_mem_range_proto W ℓ hℓ
       (IsScalarTower.toAlgHom F W.toAffine.FunctionField
         (AlgebraicClosure W.toAffine.FunctionField)) g hfix).1
@@ -549,7 +549,7 @@ theorem h_normal_mulByInt [IsAlgClosed F] (ℓ : ℤ) (hℓ : ℓ ≠ 0) :
   haveI halg : Algebra.IsAlgebraic W.toAffine.FunctionField W.toAffine.FunctionField :=
     Algebra.IsAlgebraic.of_finite _ _
   obtain ⟨hsx, hsy⟩ := mulByInt_genCoords_minpoly_splits W ℓ hℓ
-  refine normal_iff.mpr fun z => ⟨(halg.isAlgebraic z).isIntegral, ?_⟩
+  refine normal_iff.mpr fun z ↦ ⟨(halg.isAlgebraic z).isIntegral, ?_⟩
   have hz : z ∈ IntermediateField.adjoin W.toAffine.FunctionField
       ({x_gen W, y_gen W} : Set W.toAffine.FunctionField) := by
     have hsub : IntermediateField.adjoin F ({x_gen W, y_gen W} : Set W.toAffine.FunctionField) ≤
@@ -560,7 +560,7 @@ theorem h_normal_mulByInt [IsAlgClosed F] (ℓ : ℤ) (hℓ : ℓ ≠ 0) :
       z ∈ IntermediateField.adjoin F ({x_gen W, y_gen W} : Set W.toAffine.FunctionField))
   refine IntermediateField.splits_of_mem_adjoin
     (F := W.toAffine.FunctionField) (K := W.toAffine.FunctionField)
-    (L := W.toAffine.FunctionField) (splits := fun x hx => ?_) hz
+    (L := W.toAffine.FunctionField) (splits := fun x hx ↦ ?_) hz
   simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hx
   rcases hx with rfl | rfl
   · exact ⟨(halg.isAlgebraic _).isIntegral, hsx⟩
