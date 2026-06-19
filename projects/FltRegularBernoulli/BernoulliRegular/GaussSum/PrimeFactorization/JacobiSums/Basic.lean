@@ -273,6 +273,11 @@ lemma distinguishedPrimeAboveP_ramificationIdx_over_characterSubfield :
     exact h
   haveI : (distinguishedPrimeAboveP p L).LiesOver Pchar := by
     rw [Ideal.liesOver_iff]
+  have hPchar_ne : Pchar ≠ ⊥ := by
+    have := (show Pchar.IsMaximal from inferInstance)
+    exact Ring.ne_bot_of_isMaximal_of_not_isField this
+      (NumberField.RingOfIntegers.not_isField (characterSubfield (L := L) (p := p)))
+  rw [Ideal.ramificationIdx_eq_ramificationIdx' Pchar _ hPchar_ne]
   exact (Ideal.ramificationIdxIn_eq_ramificationIdx
       (p := Pchar) (P := distinguishedPrimeAboveP p L) (G := ↥GBC)).symm.trans hmul
 

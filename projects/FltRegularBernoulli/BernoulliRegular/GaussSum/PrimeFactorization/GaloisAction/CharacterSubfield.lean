@@ -116,12 +116,13 @@ lemma characterSubfieldPrime_inertiaDeg_eq_one :
     have hmod : 1 ≡ p [MOD p - 1] := by
       rw [Nat.modEq_iff_dvd' hp.out.one_le]
     simpa using (ZMod.natCast_eq_natCast_iff p 1 (p - 1)).2 hmod.symm
-  rw [IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd
-    (p := p)
-    (m := p - 1)
-    (K := characterSubfield (L := L) (p := p))
-    (P := Pchar)
-    hm]
+  haveI : (𝔭 : Ideal ℤ).IsMaximal := Int.ideal_span_isMaximal_of_prime p
+  haveI : Pchar.IsMaximal :=
+    Ideal.IsMaximal.of_liesOver_isMaximal (p := 𝔭) (P := Pchar)
+  rw [Ideal.inertiaDeg_eq_inertiaDeg',
+      IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd
+        (p := p) (m := p - 1)
+        (K := characterSubfield (L := L) (p := p)) (P := Pchar) hm]
   simp [hp_cast]
 
 lemma characterSubfieldPrime_absNorm_eq_p :

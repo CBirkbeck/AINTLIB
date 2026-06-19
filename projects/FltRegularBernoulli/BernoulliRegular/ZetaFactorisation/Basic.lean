@@ -845,7 +845,12 @@ lemma primesOver_inertiaDeg_eq_one_at_p (P : Ideal (𝓞 K))
   haveI : P.IsPrime := hP.1
   haveI : P.LiesOver (Ideal.span {(p : ℤ)}) := by
     simpa [rationalPrimeIdeal] using hP.2
-  simpa [rationalPrimeIdeal] using IsCyclotomicExtension.Rat.inertiaDeg_eq_of_prime p K P
+  haveI hbase : (Ideal.span {(p : ℤ)} : Ideal ℤ).IsMaximal :=
+    Int.ideal_span_isMaximal_of_prime p
+  haveI hPmax : P.IsMaximal :=
+    Ideal.IsMaximal.of_liesOver_isMaximal (p := Ideal.span {(p : ℤ)}) (P := P)
+  simp only [rationalPrimeIdeal, Ideal.inertiaDeg_eq_inertiaDeg']
+  exact IsCyclotomicExtension.Rat.inertiaDeg_eq_of_prime p K P
 
 lemma primesOver_ramificationIdx_eq_prime_sub_one_at_p (P : Ideal (𝓞 K))
     (hP : P ∈ Ideal.primesOver (rationalPrimeIdeal p) (𝓞 K)) :
@@ -853,7 +858,11 @@ lemma primesOver_ramificationIdx_eq_prime_sub_one_at_p (P : Ideal (𝓞 K))
   haveI : P.IsPrime := hP.1
   haveI : P.LiesOver (Ideal.span {(p : ℤ)}) := by
     simpa [rationalPrimeIdeal] using hP.2
-  simpa [rationalPrimeIdeal] using IsCyclotomicExtension.Rat.ramificationIdx_eq_of_prime p K P
+  have hp_ne : (Ideal.span {(p : ℤ)} : Ideal ℤ) ≠ ⊥ := by
+    simp [hp.out.ne_zero]
+  simp only [rationalPrimeIdeal]
+  rw [Ideal.ramificationIdx_eq_ramificationIdx' (Ideal.span {(p : ℤ)}) P hp_ne]
+  exact IsCyclotomicExtension.Rat.ramificationIdx_eq_of_prime p K P
 
 lemma primesOver_at_p_package :
     (∀ P ∈ Ideal.primesOver (rationalPrimeIdeal p) (𝓞 K),
@@ -873,8 +882,11 @@ lemma primesOver_inertiaDeg_eq_localResidueDegree {ℓ : ℕ} [Fact ℓ.Prime]
   haveI : P.LiesOver (Ideal.span {(ℓ : ℤ)}) := hP.2
   have hcop : ¬ ℓ ∣ p := fun h => hℓp ((Nat.prime_dvd_prime_iff_eq
     (Fact.out : ℓ.Prime) hp.out).mp h)
-  unfold rationalPrimeIdeal
-  rw [IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd ℓ K P hcop]
+  haveI hbase : (Ideal.span {(ℓ : ℤ)} : Ideal ℤ).IsMaximal := Int.ideal_span_isMaximal_of_prime ℓ
+  haveI hPmax : P.IsMaximal :=
+    Ideal.IsMaximal.of_liesOver_isMaximal (p := Ideal.span {(ℓ : ℤ)}) (P := P)
+  simp only [rationalPrimeIdeal, Ideal.inertiaDeg_eq_inertiaDeg',
+    IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd ℓ K P hcop]
   unfold localResidueDegree unitOfPrimeNe
   rw [← orderOf_units]
   rfl
@@ -887,6 +899,10 @@ lemma primesOver_ramificationIdx_eq_one {ℓ : ℕ} [Fact ℓ.Prime]
   haveI : P.LiesOver (Ideal.span {(ℓ : ℤ)}) := hP.2
   have hcop : ¬ ℓ ∣ p := fun h => hℓp ((Nat.prime_dvd_prime_iff_eq
     (Fact.out : ℓ.Prime) hp.out).mp h)
+  have hℓ_ne : (Ideal.span {(ℓ : ℤ)} : Ideal ℤ) ≠ ⊥ := by
+    simp [(Fact.out : ℓ.Prime).ne_zero]
+  simp only [rationalPrimeIdeal]
+  rw [Ideal.ramificationIdx_eq_ramificationIdx' (Ideal.span {(ℓ : ℤ)}) P hℓ_ne]
   exact IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd ℓ K P hcop
 
 lemma ncard_primesOver_eq_localPrimeCount {ℓ : ℕ} [Fact ℓ.Prime] (hℓp : ℓ ≠ p) :

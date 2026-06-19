@@ -444,10 +444,13 @@ theorem f_eq_one_of_canonicalTraceForm_atSpan
   haveI : P.IsPrime := (show P.IsMaximal from inferInstance).isPrime
   have _ : IsGaloisGroup Gal(K/ℚ) ℤ (𝓞 K) :=
     IsGaloisGroup.of_isFractionRing (Gal(K/ℚ)) ℤ (𝓞 K) ℚ K
+  haveI hq_max : (Ideal.span ({(ℓ : ℤ)} : Set ℤ) : Ideal ℤ).IsMaximal :=
+    Int.ideal_span_isMaximal_of_prime ℓ
   have hf_P :
       (Ideal.span ({(ℓ : ℤ)} : Set ℤ)).inertiaDeg P = 1 := by
-    rw [← Ideal.inertiaDegIn_eq_inertiaDeg
-      (p := Ideal.span ({(ℓ : ℤ)} : Set ℤ)) (P := P) (G := Gal(K/ℚ))]
+    rw [Ideal.inertiaDeg_eq_inertiaDeg',
+        ← Ideal.inertiaDegIn_eq_inertiaDeg
+          (p := Ideal.span ({(ℓ : ℤ)} : Set ℤ)) (P := P) (G := Gal(K/ℚ))]
     exact hf
   exact hf_S.trans hf_P
 

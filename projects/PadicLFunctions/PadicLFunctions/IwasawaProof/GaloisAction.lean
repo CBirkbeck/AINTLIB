@@ -180,7 +180,9 @@ theorem zetaSys_ne_inv (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n) :
 /-- `⟨ξ_n, _⟩` is integral over `ℚ_p` inside `K_n` (it is a root of unity). -/
 private theorem isIntegral_zetaSysK (n : ℕ) :
     IsIntegral ℚ_[p] (⟨zetaSys p n, zetaSys_mem_K p n⟩ : K p n) :=
-  ((zetaSysK_primitiveRoot p n).isIntegral (pow_pos hp.out.pos n)).tower_top
+  ⟨Polynomial.X ^ p ^ n - Polynomial.C 1,
+    Polynomial.monic_X_pow_sub_C 1 (pow_ne_zero _ hp.out.ne_zero),
+    by simp [(zetaSysK_primitiveRoot p n).pow_eq_one]⟩
 
 /-- `K_n` is generated over `ℚ_p` by `⟨ξ_n, _⟩` as a subalgebra of itself: the adjoin of
 the generator is `⊤`. (`K_n = ℚ_p(ξ_n)`, so `ξ_n` generates the whole field.) -/

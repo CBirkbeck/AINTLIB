@@ -70,7 +70,8 @@ theorem dworkParameterPowerLinearMap_coeff_mem_primeIdeal_of_eq_zero
               have hmul : term j ∈ I ^ (p - 1) * I ^ (j : ℕ) :=
                 Ideal.mul_mem_mul hcoeff hpow
               have hmul' : term j ∈ I ^ ((p - 1) + (j : ℕ)) := by
-                simpa [term, I, varpi, pow_add] using hmul
+                rw [← pow_add] at hmul
+                exact hmul
               have hle : (i : ℕ) + 1 ≤ (p - 1) + (j : ℕ) := by
                 have hi_lt : (i : ℕ) < p - 1 := i.2
                 omega

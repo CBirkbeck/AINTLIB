@@ -118,9 +118,14 @@ theorem inertiaGroup_trivial_of_unramified [IsGalois K L]
     let : Field (𝓞 K ⧸ 𝔓.under (𝓞 K)) := Ideal.Quotient.field _
     let : Field (𝓞 L ⧸ 𝔓) := Ideal.Quotient.field _
     exact IsGalois.to_isSeparable
-  rwa [Subgroup.eq_bot_iff_card,
-      Ideal.card_inertia_eq_ramificationIdxIn (𝔓.under (𝓞 K)) hpbot 𝔓,
-      Ideal.ramificationIdxIn_eq_ramificationIdx (𝔓.under (𝓞 K)) 𝔓 Gal(L/K)]
+  haveI : Finite (𝓞 K ⧸ 𝔓.under (𝓞 K)) := Ideal.finiteQuotientOfFreeOfNeBot _ hpbot
+  haveI hlo : 𝔓.LiesOver (𝔓.under (𝓞 K)) := inferInstance
+  have hcard : Nat.card (Ideal.inertia Gal(L/K) 𝔓) =
+      Ideal.ramificationIdx (𝔓.under (𝓞 K)) 𝔓 := by
+    rw [Ideal.card_inertia_eq_ramificationIdxIn (G := Gal(L/K)) (𝔓.under (𝓞 K)) 𝔓,
+      Ideal.ramificationIdxIn_eq_ramificationIdx (𝔓.under (𝓞 K)) 𝔓 Gal(L/K),
+      ← Ideal.ramificationIdx_eq_ramificationIdx' (𝔓.under (𝓞 K)) 𝔓 hpbot]
+  rw [Subgroup.eq_bot_iff_card, hcard, hunr]
 
 /-- The Galois group acts faithfully on `𝓞 L`, via mathlib's `IsGaloisGroup` for the ring
 extension `(𝓞 K, 𝓞 L)`. Pinning the base `𝓞 K` here lets instance search find this at every
@@ -276,9 +281,12 @@ theorem card_primesAbove_mul_finrank_eq
     let : Field (𝓞 K ⧸ 𝔓₀.under (𝓞 K)) := Ideal.Quotient.field _
     let : Field (𝓞 L ⧸ 𝔓₀) := Ideal.Quotient.field _
     exact IsGalois.to_isSeparable
+  haveI : Finite (𝓞 K ⧸ 𝔓₀.under (𝓞 K)) := Ideal.finiteQuotientOfFreeOfNeBot _ hp_under_bot
   have H := Ideal.ncard_primesOver_mul_card_inertia_mul_finrank
     (G := Gal(L/K)) (𝔓₀.under (𝓞 K)) 𝔓₀
-  rw [inertiaGroup_trivial_of_unramified K L 𝔓₀ he, Subgroup.card_bot, mul_one] at H
+  rw [inertiaGroup_trivial_of_unramified K L 𝔓₀ he, Subgroup.card_bot, mul_one,
+      ← Ideal.inertiaDeg_eq_inertiaDeg' (𝔓₀.under (𝓞 K)) 𝔓₀,
+      Ideal.inertiaDeg_algebraMap (𝔓₀.under (𝓞 K)) 𝔓₀] at H
   have hset : (𝔓₀.under (𝓞 K)).primesOver (𝓞 L)
       = {𝔓 : Ideal (𝓞 L) | 𝔓.IsPrime ∧ 𝔓.LiesOver 𝔭 ∧ 𝔓 ≠ ⊥} := by
     ext 𝔓

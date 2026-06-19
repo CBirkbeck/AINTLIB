@@ -87,8 +87,11 @@ theorem ramificationIdx_span_natCast_eq_one_of_ne
     IsCyclotomicExtension.isGalois ({p} : Set ℕ) (K := ℚ) (L := K)
   have _ : IsGaloisGroup Gal(K/ℚ) ℤ (𝓞 K) :=
     IsGaloisGroup.of_isFractionRing (Gal(K/ℚ)) ℤ (𝓞 K) ℚ K
-  rw [← Ideal.ramificationIdxIn_eq_ramificationIdx
-    (p := Ideal.span ({(ℓ : ℤ)} : Set ℤ)) (P := P) (G := Gal(K/ℚ))]
+  have hℓ_ne : (Ideal.span ({(ℓ : ℤ)} : Set ℤ) : Ideal ℤ) ≠ ⊥ := by
+    simp [(Fact.out : Nat.Prime ℓ).ne_zero]
+  rw [Ideal.ramificationIdx_eq_ramificationIdx' _ P hℓ_ne,
+      ← Ideal.ramificationIdxIn_eq_ramificationIdx
+        (p := Ideal.span ({(ℓ : ℤ)} : Set ℤ)) (P := P) (G := Gal(K/ℚ))]
   exact ramificationIdxIn_span_natCast_eq_one_of_ne (K := K) hℓ_ne_p
 
 /-- In `ℚ(ζ_p)`, any prime of `𝓞 K` above `ℓ ≠ p` has inertia degree equal
@@ -105,8 +108,13 @@ theorem inertiaDeg_span_natCast_eq_orderOf_of_ne
     IsCyclotomicExtension.isGalois ({p} : Set ℕ) (K := ℚ) (L := K)
   have _ : IsGaloisGroup Gal(K/ℚ) ℤ (𝓞 K) :=
     IsGaloisGroup.of_isFractionRing (Gal(K/ℚ)) ℤ (𝓞 K) ℚ K
-  rw [← Ideal.inertiaDegIn_eq_inertiaDeg
-    (p := Ideal.span ({(ℓ : ℤ)} : Set ℤ)) (P := P) (G := Gal(K/ℚ))]
+  haveI hq_max : (Ideal.span ({(ℓ : ℤ)} : Set ℤ) : Ideal ℤ).IsMaximal :=
+    Int.ideal_span_isMaximal_of_prime ℓ
+  haveI hP_max : P.IsMaximal :=
+    Ideal.IsMaximal.of_liesOver_isMaximal (p := Ideal.span ({(ℓ : ℤ)} : Set ℤ)) (P := P)
+  rw [Ideal.inertiaDeg_eq_inertiaDeg',
+      ← Ideal.inertiaDegIn_eq_inertiaDeg
+        (p := Ideal.span ({(ℓ : ℤ)} : Set ℤ)) (P := P) (G := Gal(K/ℚ))]
   exact inertiaDegIn_span_natCast_eq_orderOf_of_ne (K := K) hℓ_ne_p
 
 /-- If `ℓ` has order one modulo `p`, then `(ℓ)` has inertia degree one in

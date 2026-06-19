@@ -622,8 +622,9 @@ theorem ramificationIdx_Lplus_over_Kplus_dvd_p
         (p := p) (K := K) (α₀ := α₀) (hα₀ := hα₀) (h_irr := h_irr)
         (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerSigmaTildePkg
           (p := p) K α₀ hα₀ h_anti h_irr h_irr_g h_alpha_sq_ne))) =
-      𝔭.ramificationIdx 𝔓 :=
-    Ideal.ramificationIdxIn_eq_ramificationIdx 𝔭 𝔓
+      𝔭.ramificationIdx 𝔓 := by
+    rw [Ideal.ramificationIdx_eq_ramificationIdx' 𝔭 𝔓 h𝔭_ne_bot]
+    exact Ideal.ramificationIdxIn_eq_ramificationIdx 𝔭 𝔓
       Gal((BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerRealSubfield
         (p := p) (K := K) (α₀ := α₀) (hα₀ := hα₀) (h_irr := h_irr)
         (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerSigmaTildePkg
@@ -641,7 +642,6 @@ theorem ramificationIdx_Lplus_over_Kplus_dvd_p
         (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerSigmaTildePkg
           (p := p) K α₀ hα₀ h_anti h_irr h_irr_g h_alpha_sq_ne))/
         (NumberField.maximalRealSubfield K)))
-    h𝔭_ne_bot
   -- Nat.card Gal(L⁺/K⁺) = [L⁺ : K⁺] = p.
   have h_card_eq_p : Nat.card Gal((BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerRealSubfield
         (p := p) (K := K) (α₀ := α₀) (hα₀ := hα₀) (h_irr := h_irr)

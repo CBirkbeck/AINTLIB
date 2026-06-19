@@ -351,7 +351,7 @@ lemma card_primesAboveP :
         (n := p * (p - 1)) (K := L) (p := p) (k := 0) (m := p - 1) (by simp) hm)
   have hmain :=
     Ideal.ncard_primesOver_mul_ramificationIdxIn_mul_inertiaDegIn
-      (A := ℤ) (B := 𝓞 L) (G := Gal(L / ℚ)) (p := 𝔭) hp0
+      (A := ℤ) (B := 𝓞 L) (G := Gal(L / ℚ)) (p := 𝔭)
   rw [← coe_primesAboveP (p := p) (L := L), Set.ncard_coe_finset, hram, hinertia, mul_one,
     show Nat.card Gal(L / ℚ) = Module.finrank ℚ L by
       simpa using (IsGalois.card_aut_eq_finrank (F := ℚ) (E := L)),
@@ -399,7 +399,7 @@ lemma ncard_primesOver_characterSubfield_eq_totient_pred :
     Ideal.ncard_primesOver_mul_ramificationIdxIn_mul_inertiaDegIn
       (A := ℤ) (B := 𝓞 (characterSubfield (L := L) (p := p)))
       (G := Gal(characterSubfield (L := L) (p := p) / ℚ))
-      (p := 𝔭) hp0
+      (p := 𝔭)
   rw [hram, hinertia, one_mul, mul_one,
     show Nat.card Gal(characterSubfield (L := L) (p := p) / ℚ) =
         Module.finrank ℚ (characterSubfield (L := L) (p := p)) by
@@ -451,7 +451,6 @@ lemma ncard_primesOver_characterSubfieldPrime_eq_one
       (G := Gal(characterSubfield (L := L) (p := p) / ℚ))
       (GAC := Gal(L / ℚ))
       (GBC := ↥GBC)
-      hp0
   have hL :
       (Ideal.primesOver 𝔭 (𝓞 L)).ncard = Nat.totient (p - 1) := by
     rw [← coe_primesAboveP (p := p) (L := L), Set.ncard_coe_finset]

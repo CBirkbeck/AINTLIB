@@ -5,6 +5,7 @@ Authors: Bernoulli-Regular project contributors
 -/
 import BernoulliRegular.BernoulliFast.Correctness
 import Mathlib.Data.List.Defs
+import Lean.Elab.Tactic.Cbv
 
 /-!
 # `cbv`-optimized Bernoulli number evaluation

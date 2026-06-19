@@ -92,6 +92,7 @@ lemma count_primeAboveP_span_p {P : Ideal (𝓞 L)} [P.IsPrime] [P.LiesOver 𝔭
       (show (p : 𝓞 L) ≠ 0 by exact_mod_cast hp.out.ne_zero)
   have hram :
       Ideal.ramificationIdx 𝔭 P = p - 1 := by
+    rw [Ideal.ramificationIdx_eq_ramificationIdx' (q := P) (p := 𝔭) (hp := by simp [hp.out.ne_zero])]
     simpa using
       (IsCyclotomicExtension.Rat.ramificationIdx_eq
         (p := p) (n := N) (k := 0) (m := p - 1) (K := L) (P := P) (by simp)

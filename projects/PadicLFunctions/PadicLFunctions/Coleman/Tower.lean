@@ -199,7 +199,9 @@ instance isCyclotomicExtension_K {n : ℕ} [NeZero (p ^ n)] :
     IsCyclotomicExtension {p ^ n} ℚ_[p] (K p n) := by
   have hζ := zetaSys_primitiveRoot p n
   have hint : IsIntegral ℚ_[p] (zetaSys p n) :=
-    (hζ.isIntegral (pow_pos hp.out.pos n)).tower_top
+    ⟨Polynomial.X ^ p ^ n - Polynomial.C 1,
+      Polynomial.monic_X_pow_sub_C 1 (pow_ne_zero _ hp.out.ne_zero),
+      by simp [hζ.pow_eq_one]⟩
   change IsCyclotomicExtension {p ^ n} ℚ_[p] (K p n).toSubalgebra
   rw [K, IntermediateField.adjoin_simple_toSubalgebra_of_isAlgebraic hint.isAlgebraic]
   exact hζ.adjoin_isCyclotomicExtension ℚ_[p]
@@ -444,7 +446,10 @@ private theorem finrank_adjoin_primitiveRoot {n : ℕ} {w : ℂ_[p]}
     (hw : IsPrimitiveRoot w (p ^ (n + 1))) :
     Module.finrank ℚ_[p] (IntermediateField.adjoin ℚ_[p] {w}) = Nat.totient (p ^ (n + 1)) := by
   haveI : NeZero (p ^ (n + 1)) := ⟨(pow_pos hp.out.pos (n + 1)).ne'⟩
-  have hint : IsIntegral ℚ_[p] w := (hw.isIntegral (pow_pos hp.out.pos (n + 1))).tower_top
+  have hint : IsIntegral ℚ_[p] w :=
+    ⟨Polynomial.X ^ p ^ (n + 1) - Polynomial.C 1,
+      Polynomial.monic_X_pow_sub_C 1 (pow_ne_zero _ hp.out.ne_zero),
+      by simp [hw.pow_eq_one]⟩
   haveI : IsCyclotomicExtension {p ^ (n + 1)} ℚ_[p]
       (IntermediateField.adjoin ℚ_[p] {w}) := by
     change IsCyclotomicExtension {p ^ (n + 1)} ℚ_[p]

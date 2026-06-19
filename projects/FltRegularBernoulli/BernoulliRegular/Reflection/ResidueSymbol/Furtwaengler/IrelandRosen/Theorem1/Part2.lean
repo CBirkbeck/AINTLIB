@@ -320,10 +320,14 @@ noncomputable def canonicalPrimeSourceData
     CyclotomicLocalSetup.natCast_mem_of_under_eq
       (ℓ₀ := ℓ) (K₀ := K) (R' := R') P Q h_lies hℓ_in_P
   letI : Q.LiesOver q := Ideal.LiesOver.trans Q P q
+  haveI hq_max : q.IsMaximal := Int.ideal_span_isMaximal_of_prime ℓ
+  have hq_ne : q ≠ ⊥ := by simp [q, hℓ_prime_nat.ne_zero]
+  haveI hP_max : P.IsMaximal := inferInstance
   have h_abs_inertia :
       q.inertiaDeg Q = orderOf (ℓ : ZMod m) := by
     have hn : ℓ * m = ℓ ^ (0 + 1) * m := by
       simp
+    rw [Ideal.inertiaDeg_eq_inertiaDeg']
     simpa [q] using
       (IsCyclotomicExtension.Rat.inertiaDeg_eq
         (n := ℓ * m) (p := ℓ) (k := 0) (m := m)
@@ -346,12 +350,14 @@ noncomputable def canonicalPrimeSourceData
       q.ramificationIdx Q = ℓ - 1 := by
     have hn : ℓ * m = ℓ ^ (0 + 1) * m := by
       simp
+    rw [Ideal.ramificationIdx_eq_ramificationIdx' q Q hq_ne]
     simpa [q] using
       (IsCyclotomicExtension.Rat.ramificationIdx_eq
         (n := ℓ * m) (p := ℓ) (k := 0) (m := m)
         (K := R') (P := Q) hn hm_not_dvd_ell)
   have h_base_ram :
       q.ramificationIdx P = 1 := by
+    rw [Ideal.ramificationIdx_eq_ramificationIdx' q P hq_ne]
     simpa [q] using
       (IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd
         (p := ℓ) (m := p) (K := K) (P := P)
@@ -364,6 +370,7 @@ noncomputable def canonicalPrimeSourceData
     rw [← h_ram_tower, h_abs_ram]
   have h_base_inertia :
       q.inertiaDeg P = orderOf (ℓ : ZMod p) := by
+    rw [Ideal.inertiaDeg_eq_inertiaDeg']
     simpa [q] using
       (IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd
         (p := ℓ) (m := p) (K := K) (P := P)

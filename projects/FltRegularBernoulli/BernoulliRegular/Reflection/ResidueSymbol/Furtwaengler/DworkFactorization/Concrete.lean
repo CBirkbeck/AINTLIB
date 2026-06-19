@@ -183,8 +183,8 @@ theorem quotient_mk_dworkThetaTrunc_artinHasseAtTo_eq_one_add_pi_mul_mod_sq_of_o
           (Ideal.Quotient.mk (S.Q ^ 2) (coeff 1 * u ^ 1) +
             ∑ n ∈ (Finset.range (N + 1) \ {0}) \ {1},
               Ideal.Quotient.mk (S.Q ^ 2) (coeff n * u ^ n)) := by
-            rw [Finset.sum_eq_add_sum_diff_singleton_of_mem h0mem]
-            rw [Finset.sum_eq_add_sum_diff_singleton_of_mem h1mem]
+            simp only [Finset.sdiff_singleton_eq_erase] at h0mem h1mem ⊢
+            rw [← Finset.add_sum_erase _ _ h0mem, ← Finset.add_sum_erase _ _ h1mem]
     _ = Ideal.Quotient.mk (S.Q ^ 2) (1 + S.π * u) := by
             rw [htail]
             simp only [pow_zero, pow_one, mul_one, add_zero]

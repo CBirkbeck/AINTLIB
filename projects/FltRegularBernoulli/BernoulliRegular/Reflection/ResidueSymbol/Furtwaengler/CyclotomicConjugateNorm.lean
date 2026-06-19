@@ -182,7 +182,8 @@ theorem map_extendedRelNorm_prime_eq_cyclotomicConjugates_prod_pow
       Ideal.relNorm ℤ P = (P.under ℤ) ^ f := by
     have h := Ideal.relNorm_eq_pow_of_isMaximal (R := ℤ) (S := 𝓞 K) P (P.under ℤ)
     dsimp [f]
-    rw [Ideal.inertiaDegIn_eq_inertiaDeg (P.under ℤ) P Gal(K/ℚ)]
+    rw [Ideal.inertiaDegIn_eq_inertiaDeg (P.under ℤ) P Gal(K/ℚ),
+      ← Ideal.inertiaDeg_eq_inertiaDeg' (p := P.under ℤ) (q := P)]
     exact h
   have hprimes :
       ((P.under ℤ).primesOver (𝓞 K)).toFinset =
@@ -207,7 +208,8 @@ theorem map_extendedRelNorm_prime_eq_cyclotomicConjugates_prod_pow
       haveI : Q.LiesOver (P.under ℤ) :=
         ⟨(under_eq_of_mem_cyclotomicConjugates (p := p) (K := K) hQ).symm⟩
       dsimp [e]
-      rw [Ideal.ramificationIdxIn_eq_ramificationIdx (P.under ℤ) Q Gal(K/ℚ)]
+      rw [Ideal.ramificationIdxIn_eq_ramificationIdx (P.under ℤ) Q Gal(K/ℚ),
+        ← Ideal.ramificationIdx_eq_ramificationIdx' (q := Q) (hp := h_under_ne)]
   rw [extendedRelNormIdeal, hrel, Ideal.map_pow, hmap_under]
   dsimp [e, f]
   rw [← Finset.prod_pow]

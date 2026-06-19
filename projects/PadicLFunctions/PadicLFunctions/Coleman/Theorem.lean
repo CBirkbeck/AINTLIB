@@ -138,8 +138,11 @@ theorem evalPi_pow (f : PowerSeries ℤ_[p]) (k : ℕ) {n : ℕ} (hn : 1 ≤ n) 
 unity, so `ℚ_p(ξ_{p^n})` is a finite extension). Re-derived locally via
 `adjoin.finiteDimensional` (the Tower instance is private). -/
 private theorem finiteDimensional_K (n : ℕ) : FiniteDimensional ℚ_[p] (K p n) := by
+  have hζ := zetaSys_primitiveRoot p n
   have hint : IsIntegral ℚ_[p] (zetaSys p n) :=
-    ((zetaSys_primitiveRoot p n).isIntegral (pow_pos hp.out.pos n)).tower_top
+    ⟨Polynomial.X ^ p ^ n - Polynomial.C 1,
+      Polynomial.monic_X_pow_sub_C 1 (pow_ne_zero _ hp.out.ne_zero),
+      by simp [hζ.pow_eq_one]⟩
   exact IntermediateField.adjoin.finiteDimensional hint
 
 /-- `K_n` is closed in `ℂ_p`: a finite-dimensional `ℚ_p`-subspace of a normed space
@@ -481,8 +484,12 @@ theorem exists_residue_pi {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]} (hx : x ∈ K p
       rw [show zetaSys p n = pi p n + 1 by rw [pi]; ring]
       exact add_mem (IntermediateField.mem_adjoin_simple_self _ _) (one_mem _)
   have hint : IsIntegral ℚ_[p] (pi p n) := by
-    rw [pi]; exact (((zetaSys_primitiveRoot p n).isIntegral (pow_pos hp.out.pos n)).tower_top).sub
-      isIntegral_one
+    have hζ := zetaSys_primitiveRoot p n
+    have hzeta : IsIntegral ℚ_[p] (zetaSys p n) :=
+      ⟨Polynomial.X ^ p ^ n - Polynomial.C 1,
+        Polynomial.monic_X_pow_sub_C 1 (pow_ne_zero _ hp.out.ne_zero),
+        by simp [hζ.pow_eq_one]⟩
+    rw [pi]; exact hzeta.sub isIntegral_one
   set pb := IntermediateField.adjoin.powerBasis hint with hpb
   set xes : ℚ_[p]⟮pi p n⟯ := ⟨x, hKeq ▸ hx⟩ with hxes
   set q : Fin pb.dim → ℚ_[p] := fun i => pb.basis.repr xes i with hq

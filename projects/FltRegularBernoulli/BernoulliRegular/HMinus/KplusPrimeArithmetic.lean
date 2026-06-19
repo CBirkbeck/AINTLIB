@@ -561,15 +561,19 @@ lemma primesOver_inertiaDeg_eq_localResidueDegreePlus
     IsGaloisGroup.of_isFractionRing (Gal(K/K⁺)) (𝓞 (K⁺)) (𝓞 K) (K⁺) K
   have hquad : (Ideal.primesOver PPlus (𝓞 K)).ncard * PPlus.inertiaDeg P = 2 := by
     have hfund := Ideal.ncard_primesOver_mul_ramificationIdxIn_mul_inertiaDegIn
-      (p := PPlus) (hpb := hPPlus_ne_bot)
+      (p := PPlus)
       (B := 𝓞 K) (G := Gal(K/K⁺))
     have hcard_gal : Nat.card Gal(K/K⁺) = 2 :=
       (IsGalois.card_aut_eq_finrank K⁺ K).trans (finrank_K_over_Kplus (K := K))
-    rw [hcard_gal,
-      Ideal.ramificationIdxIn_eq_ramificationIdx (p := PPlus) (P := P) (G := Gal(K/K⁺)),
-      Ideal.inertiaDegIn_eq_inertiaDeg (p := PPlus) (P := P) (G := Gal(K/K⁺)),
-      hram_rel] at hfund
-    simpa using hfund
+    have hram_in : PPlus.ramificationIdxIn (𝓞 K) = 1 := by
+      rw [Ideal.ramificationIdxIn_eq_ramificationIdx (p := PPlus) (P := P) (G := Gal(K/K⁺))]
+      rw [← Ideal.ramificationIdx_eq_ramificationIdx' (q := P) (p := PPlus) (hp := hPPlus_ne_bot)]
+      exact hram_rel
+    have hinertia_in : PPlus.inertiaDegIn (𝓞 K) = PPlus.inertiaDeg P := by
+      rw [Ideal.inertiaDegIn_eq_inertiaDeg (p := PPlus) (P := P) (G := Gal(K/K⁺))]
+      rw [← Ideal.inertiaDeg_eq_inertiaDeg' (p := PPlus) (q := P)]
+    rw [hcard_gal, hram_in, hinertia_in, one_mul] at hfund
+    exact hfund
   have hinertia_tower :
       (rationalPrimeIdeal ℓ).inertiaDeg P =
         (rationalPrimeIdeal ℓ).inertiaDeg PPlus * PPlus.inertiaDeg P := by

@@ -293,6 +293,10 @@ lemma normalizedBoundaryPrime_ramificationIdx_over_additiveSubfield :
   haveI : (normalizedBoundaryPrime (p := p) (L := L)).LiesOver Padd := by
     rw [Ideal.liesOver_iff,
       normalizedBoundaryPrime_under_additiveSubfield (p := p) (L := L)]
+  have hPadd_ne : Padd ≠ ⊥ :=
+    Ring.ne_bot_of_isMaximal_of_not_isField (show Padd.IsMaximal from inferInstance)
+      (NumberField.RingOfIntegers.not_isField (additiveSubfield (L := L) (p := p)))
+  rw [Ideal.ramificationIdx_eq_ramificationIdx' Padd _ hPadd_ne]
   exact (Ideal.ramificationIdxIn_eq_ramificationIdx
       (p := Padd) (P := normalizedBoundaryPrime (p := p) (L := L)) (G := ↥GBC)).symm.trans
     hramIn

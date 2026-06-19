@@ -244,6 +244,7 @@ private theorem prime_dvd_natAbs_discr_cyclotomic_dvd
     rw [Ne, Ideal.span_singleton_eq_bot]; exact hpprime.ne_zero
   have hPbot : P ≠ ⊥ := Ideal.ne_bot_of_liesOver_of_ne_bot hspanbot P
   rw [Algebra.isUnramifiedAt_iff_of_isDedekindDomain (R := ℤ) (S := 𝓞 E) hPbot, hlo.over.symm]
+  rw [Ideal.ramificationIdx_eq_ramificationIdx' _ P hspanbot]
   exact IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd p E P hpm
 
 /-- **C2a — cyclotomic degree over the base** (the deep ramification/Minkowski leaf). Source

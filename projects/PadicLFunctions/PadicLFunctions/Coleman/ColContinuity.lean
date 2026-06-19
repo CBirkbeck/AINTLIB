@@ -793,7 +793,9 @@ hence closed. -/
 theorem isClosed_KCp (n : ℕ) : IsClosed (X := ℂ_[p]) (K p n : Set ℂ_[p]) := by
   haveI : FiniteDimensional ℚ_[p] (K p n).toSubmodule := by
     have hint : IsIntegral ℚ_[p] (zetaSys p n) :=
-      ((zetaSys_primitiveRoot p n).isIntegral (pow_pos hp.out.pos n)).tower_top
+      ⟨Polynomial.X ^ p ^ n - Polynomial.C 1,
+        Polynomial.monic_X_pow_sub_C 1 (pow_ne_zero _ hp.out.ne_zero),
+        by simp [(zetaSys_primitiveRoot p n).pow_eq_one]⟩
     exact IntermediateField.adjoin.finiteDimensional hint
   exact (K p n).toSubmodule.closed_of_finiteDimensional
 

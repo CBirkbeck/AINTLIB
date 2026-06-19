@@ -292,9 +292,11 @@ private theorem stabilizer_intermediate_eq_top_of_frobenius
   have hinertK : (𝔓.under (𝓞 K)).inertiaDeg 𝔓 = orderOf σ := by
     rw [Ideal.inertiaDeg_algebraMap, orderOf_eq_finrank_of_isArithFrobAt K L σ 𝔓 hraK hfrob]
   have hcardstab' : Nat.card (MulAction.stabilizer Gal(L/K) 𝔓) = orderOf σ := by
-    rw [Ideal.card_stabilizer_eq (𝔓.under (𝓞 K)) hpbot 𝔓,
-      Ideal.ramificationIdxIn_eq_ramificationIdx (𝔓.under (𝓞 K)) 𝔓 Gal(L/K), hraK, one_mul,
-      Ideal.inertiaDegIn_eq_inertiaDeg (𝔓.under (𝓞 K)) 𝔓 Gal(L/K), hinertK]
+    rw [Ideal.card_stabilizer_eq (𝔓.under (𝓞 K)) 𝔓,
+      Ideal.ramificationIdxIn_eq_ramificationIdx (𝔓.under (𝓞 K)) 𝔓 Gal(L/K),
+      ← Ideal.ramificationIdx_eq_ramificationIdx' (𝔓.under (𝓞 K)) 𝔓 hpbot, hraK, one_mul,
+      Ideal.inertiaDegIn_eq_inertiaDeg (𝔓.under (𝓞 K)) 𝔓 Gal(L/K),
+      ← Ideal.inertiaDeg_eq_inertiaDeg' (𝔓.under (𝓞 K)) 𝔓, hinertK]
   have hstab : Subgroup.zpowers σ = MulAction.stabilizer Gal(L/K) 𝔓 :=
     Subgroup.eq_of_le_of_card_ge (by rwa [Subgroup.zpowers_le])
       (by rw [Nat.card_zpowers, hcardstab'])
@@ -358,10 +360,12 @@ private theorem inertiaDeg_under_E_eq_one_of_frobenius
     stabilizer_intermediate_eq_top_of_frobenius σ 𝔓 hunrK hPK hfrob horderE
   have hcardE : Nat.card (MulAction.stabilizer Gal(L/(↥E)) 𝔓)
       = (𝔓.under (𝓞 ↥E)).ramificationIdxIn (𝓞 L) * (𝔓.under (𝓞 ↥E)).inertiaDegIn (𝓞 L) :=
-    Ideal.card_stabilizer_eq (𝔓.under (𝓞 ↥E)) hpEbot 𝔓
+    Ideal.card_stabilizer_eq (𝔓.under (𝓞 ↥E)) 𝔓
   rw [hstabE, Subgroup.card_top,
-    Ideal.ramificationIdxIn_eq_ramificationIdx (𝔓.under (𝓞 ↥E)) 𝔓 Gal(L/(↥E)), hraE, one_mul,
+    Ideal.ramificationIdxIn_eq_ramificationIdx (𝔓.under (𝓞 ↥E)) 𝔓 Gal(L/(↥E)),
+    ← Ideal.ramificationIdx_eq_ramificationIdx' (𝔓.under (𝓞 ↥E)) 𝔓 hpEbot, hraE, one_mul,
     Ideal.inertiaDegIn_eq_inertiaDeg (𝔓.under (𝓞 ↥E)) 𝔓 Gal(L/(↥E)),
+    ← Ideal.inertiaDeg_eq_inertiaDeg' (𝔓.under (𝓞 ↥E)) 𝔓,
     Ideal.inertiaDeg_algebraMap] at hcardE
   have hinertTower : (𝔓.under (𝓞 K)).inertiaDeg 𝔓
       = (𝔓.under (𝓞 K)).inertiaDeg (𝔓.under (𝓞 ↥E))

@@ -593,7 +593,7 @@ theorem cyclotomicConjugates_card_mul_ramificationIdxIn_mul_inertiaDegIn
   haveI : FiniteDimensional ℚ K :=
     IsCyclotomicExtension.finiteDimensional ({p} : Set ℕ) ℚ K
   have hfid := Ideal.ncard_primesOver_mul_ramificationIdxIn_mul_inertiaDegIn
-    (A := ℤ) (B := 𝓞 K) (G := Gal(K/ℚ)) hu_ne
+    (A := ℤ) (B := 𝓞 K) (G := Gal(K/ℚ)) (p := q.under ℤ)
   have hcard : (Ideal.primesOver (q.under ℤ) (𝓞 K)).ncard =
       (cyclotomicConjugates (p := p) (K := K) q).card := by
     rw [← coe_cyclotomicConjugates (p := p) (K := K) (q := q),

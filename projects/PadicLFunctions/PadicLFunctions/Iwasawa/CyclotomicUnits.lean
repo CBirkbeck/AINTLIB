@@ -247,7 +247,9 @@ lemma cycloTower1_le_unitsTower1 : cycloTower1 p ≤ unitsTower1 p :=
 /-- `ξ_{p^n}` is integral over `ℤ` (a primitive `p^n`-th root of unity, hence a root
 of unity, hence integral). -/
 private theorem zetaSys_isIntegral (n : ℕ) : IsIntegral ℤ (zetaSys p n) :=
-  (zetaSys_primitiveRoot p n).isIntegral (pow_pos hp.out.pos n)
+  ⟨Polynomial.X ^ p ^ n - Polynomial.C 1,
+    Polynomial.monic_X_pow_sub_C 1 (pow_ne_zero _ hp.out.ne_zero),
+    by simp [(zetaSys_primitiveRoot p n).pow_eq_one]⟩
 
 /-- `c_n(a) = (ξ^a−1)/(ξ−1) = Σ_{i<a} ξ^i`: the cyclotomic unit is the geometric sum.
 Clear the denominator (`ξ−1 ≠ 0` for `n ≥ 1`) and apply `geom_sum_mul`. -/
@@ -535,14 +537,14 @@ private theorem zetaSysU_pow_mem_cycloUnits {n : ℕ} (hn : 1 ≤ n) (k : ℕ) :
     exact pow_mem (IntermediateField.mem_adjoin_simple_self ℚ _) k
   · -- `ξ_n^k` integral over `ℤ`
     rw [Units.val_pow_eq_pow_val, zetaSysU_val]
-    exact ((zetaSys_primitiveRoot p n).isIntegral (pow_pos hp.out.pos n)).pow k
+    exact (zetaSys_isIntegral p n).pow k
   · -- `(ξ_n^k)⁻¹ = (ξ_n⁻¹)^k` integral over `ℤ` (`ξ_n⁻¹ = ξ_n^{p^n−1}` is a root of unity)
     rw [show (((zetaSysU p hn ^ k)⁻¹ : ℂ_[p]ˣ) : ℂ_[p]) = ((zetaSys p n)⁻¹) ^ k from by
       rw [Units.val_inv_eq_inv_val, Units.val_pow_eq_pow_val, zetaSysU_val, inv_pow]]
     refine IsIntegral.pow ?_ k
     -- `ξ_n⁻¹ = ξ_n^{p^n − 1}`, an integral power
     rw [show (zetaSys p n)⁻¹ = (zetaSys p n) ^ (p ^ n - 1) from ?_]
-    · exact ((zetaSys_primitiveRoot p n).isIntegral (pow_pos hp.out.pos n)).pow _
+    · exact (zetaSys_isIntegral p n).pow _
     · refine inv_eq_of_mul_eq_one_left ?_
       rw [← pow_succ, Nat.sub_add_cancel (Nat.one_le_pow _ _ hp.out.pos),
         (zetaSys_primitiveRoot p n).pow_eq_one]

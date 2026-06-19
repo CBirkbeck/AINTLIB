@@ -249,13 +249,13 @@ theorem gammaUnit_mem_cycloUnitsPlus {a : ℕ} (ha : ¬ (p : ℕ) ∣ a) (hp2 : 
       · rw [Units.val_mk0, gammaUnit]
         refine (?_ : IsIntegral ℤ (zhp p (halfExp p a n))).mul ?_
         · rw [zhp]
-          exact ((zetaSys_primitiveRoot p n).isIntegral (pow_pos hp.out.pos n)).pow _
+          exact IsIntegral.pow (show IsIntegral ℤ (zetaSys p n) from ⟨Polynomial.X ^ p ^ n - Polynomial.C 1, Polynomial.monic_X_pow_sub_C 1 (pow_ne_zero _ hp.out.ne_zero), by simp [(zetaSys_primitiveRoot p n).pow_eq_one]⟩) _
         · exact isIntegral_cycloUnit p ha hn
       · rw [show (((Units.mk0 (gammaUnit p a n) hγ0)⁻¹ : ℂ_[p]ˣ) : ℂ_[p])
             = (gammaUnit p a n)⁻¹ from rfl, gammaUnit, mul_inv]
         refine (?_ : IsIntegral ℤ (zhp p (halfExp p a n))⁻¹).mul ?_
         · rw [← zhp_neg]; rw [zhp]
-          exact ((zetaSys_primitiveRoot p n).isIntegral (pow_pos hp.out.pos n)).pow _
+          exact IsIntegral.pow (show IsIntegral ℤ (zetaSys p n) from ⟨Polynomial.X ^ p ^ n - Polynomial.C 1, Polynomial.monic_X_pow_sub_C 1 (pow_ne_zero _ hp.out.ne_zero), by simp [(zetaSys_primitiveRoot p n).pow_eq_one]⟩) _
         · exact isIntegral_inv_cycloUnit p ha hn
   · -- `γ ∈ F_n⁺`
     rw [Units.val_mk0]; exact gammaUnit_mem_FglobalPlus p hp2 hn
