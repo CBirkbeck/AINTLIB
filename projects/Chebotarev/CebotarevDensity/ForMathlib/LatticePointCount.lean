@@ -44,7 +44,7 @@ the frontier `∂s` (`abs_card_inter_sub_volume_mul_pow_le`); that count is `O(n
   K. Debaene.
 -/
 
-open Submodule Pointwise MeasureTheory Set BoxIntegral BoxIntegral.unitPartition
+open Submodule Pointwise MeasureTheory Set BoxIntegral.unitPartition
 
 open scoped NNReal
 
@@ -104,7 +104,7 @@ theorem ncard_index_image_le_of_diam_le (n : ℕ) [NeZero n] {T : Set (ι → �
     (index n '' T).ncard ≤ (2 * ⌈(n : ℝ) * r⌉₊ + 1) ^ Fintype.card ι := by
   classical
   rcases T.eq_empty_or_nonempty with rfl | ⟨x₀, hx₀⟩
-  · simp
+  · simp only [image_empty, ncard_empty, zero_le]
   set K : ℕ := ⌈(n : ℝ) * r⌉₊ with hK
   set c : ι → ℤ := index n x₀ with hc
   set F : Finset (ι → ℤ) := Fintype.piFinset fun i ↦ Finset.Icc (c i - K) (c i + K) with hF
@@ -178,10 +178,9 @@ theorem ncard_index_image_chart_le {M : ℝ≥0} {φ : (Fin (Fintype.card ι - 1
     intro v
     have hbddφ : Bornology.IsBounded (φ '' (Set.Icc 0 1 ∩ q ⁻¹' {v})) :=
       hφ.isBounded_image ((Metric.isBounded_Icc 0 1).subset Set.inter_subset_left)
-    have hdimg : Metric.diam (φ '' (Set.Icc 0 1 ∩ q ⁻¹' {v})) ≤ (M : ℝ) * (1 / n) := by
-      refine (hφ.diam_image_le _ ((Metric.isBounded_Icc 0 1).subset
-        Set.inter_subset_left)).trans ?_
-      exact mul_le_mul_of_nonneg_left (hdiam v) (by positivity)
+    have hdimg : Metric.diam (φ '' (Set.Icc 0 1 ∩ q ⁻¹' {v})) ≤ (M : ℝ) * (1 / n) :=
+      (hφ.diam_image_le _ ((Metric.isBounded_Icc 0 1).subset Set.inter_subset_left)).trans
+        (mul_le_mul_of_nonneg_left (hdiam v) (by positivity))
     refine (ncard_index_image_le_of_diam_le n (by positivity) hdimg hbddφ).trans ?_
     rw [show (n : ℝ) * ((M : ℝ) * (1 / n)) = (M : ℝ) by field_simp]
   have hfin : ∀ v : Fin (Fintype.card ι - 1) → ℤ,
@@ -194,7 +193,8 @@ theorem ncard_index_image_chart_le {M : ℝ≥0} {φ : (Fin (Fintype.card ι - 1
   rw [Finset.sum_const, nsmul_eq_mul, mul_comm]
   have hcardT : T.card = (n + 1) ^ (Fintype.card ι - 1) := by
     rw [hT, Pi.card_Icc]
-    simp [Int.card_Icc]
+    simp only [Pi.zero_apply, Int.card_Icc, sub_zero, Int.toNat_natCast_add_one, Finset.prod_const,
+      Finset.card_univ, Fintype.card_fin]
   rw [hcardT, Nat.cast_id]
 
 /-- **Boundary-cell count.** If `∂s` is covered by `m` images `φⱼ '' [0,1]ᵈ⁻¹` of
@@ -264,7 +264,7 @@ private lemma measureReal_biUnion_box (n : ℕ) [NeZero n] (t : Finset (ι → �
       volume.real (box n ν : Set (ι → ℝ)) = 1 / (n : ℝ) ^ Fintype.card ι := by
     intro ν
     rw [measureReal_def, volume_box]
-    simp
+    simp only [one_div, ENNReal.toReal_inv, ENNReal.toReal_pow, ENNReal.toReal_natCast]
   rw [measureReal_biUnion_finset (fun ν _ ν' _ h ↦ disjoint.mp h)
     (fun ν _ ↦ (box n ν).measurableSet_coe) (fun ν _ ↦ (box n ν).isBounded.measure_lt_top.ne)]
   simp_rw [hvol_box]
@@ -283,9 +283,9 @@ theorem abs_card_inter_sub_volume_mul_pow_le {s : Set (ι → ℝ)}
   have hne : NeZero n := ⟨Nat.one_le_iff_ne_zero.mp hn⟩
   have hn0 : (0 : ℝ) < (n : ℝ) := by exact_mod_cast Nat.pos_of_ne_zero hne.out
   have hvs : volume s ≠ ⊤ := hbdd.measure_lt_top.ne
-  set Inside : Set (ι → ℤ) := {ν | (box n ν : Set (ι → ℝ)) ⊆ s} with hInside
-  set Meet : Set (ι → ℤ) := {ν | ((box n ν : Set (ι → ℝ)) ∩ s).Nonempty} with hMeet
-  set Bd : Set (ι → ℤ) := index n '' frontier s with hBd
+  set Inside : Set (ι → ℤ) := {ν | (box n ν : Set (ι → ℝ)) ⊆ s}
+  set Meet : Set (ι → ℤ) := {ν | ((box n ν : Set (ι → ℝ)) ∩ s).Nonempty}
+  set Bd : Set (ι → ℤ) := index n '' frontier s
   have hInsideFin : Inside.Finite := setFinite_index n hmeas.nullMeasurableSet hvs
   have hBdFin : Bd.Finite :=
     setFinite_index_image_of_isBounded n (hbdd.closure.subset frontier_subset_closure)
