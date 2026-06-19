@@ -63,9 +63,9 @@ private lemma arcRef_I_eq_at_15 (H : ℝ) :
   push_cast; ring
 
 private lemma arcRef_I_eventuallyEq (H : ℝ) {t : ℝ} (ht1 : 1/5 < t) (ht2 : t < 3/5) :
-    (fun s => fdBoundaryFun H s - I) =ᶠ[𝓝 t] arcRef_I :=
+    (fun s ↦ fdBoundaryFun H s - I) =ᶠ[𝓝 t] arcRef_I :=
   Filter.eventually_of_mem (Filter.inter_mem (Ioi_mem_nhds ht1) (Iio_mem_nhds ht2))
-    fun _ ⟨hs1, hs2⟩ => arcRef_I_eq H hs1 hs2.le
+    fun _ ⟨hs1, hs2⟩ ↦ arcRef_I_eq H hs1 hs2.le
 
 private lemma arcRef_I_slitPlane_seg2 {t : ℝ} (ht1 : 1/5 ≤ t) (ht2 : t < 2/5) :
     arcRef_I t ∈ Complex.slitPlane := by
@@ -89,49 +89,49 @@ private lemma arcRef_I_neg_slitPlane_seg3 {t : ℝ} (ht2 : 2/5 < t) (ht3 : t ≤
   linarith [Real.cos_neg_of_pi_div_two_lt_of_lt hgt hlt]
 
 private lemma integrand_form_eq (f : ℝ → ℂ) (z : ℂ) (t : ℝ) :
-    (f t - z)⁻¹ * deriv f t = deriv (fun s => f s - z) t / (f t - z) := by
+    (f t - z)⁻¹ * deriv f t = deriv (fun s ↦ f s - z) t / (f t - z) := by
   rw [← deriv_sub_const z, div_eq_mul_inv, mul_comm]
 
 private theorem seg2_ftc_I (H : ℝ) {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < 1/5) :
-    IntervalIntegrable (fun t => deriv (fun s => fdBoundaryFun H s - I) t /
+    IntervalIntegrable (fun t ↦ deriv (fun s ↦ fdBoundaryFun H s - I) t /
       (fdBoundaryFun H t - I)) volume (1/5) (2/5 - δ) ∧
-    ∫ t in (1/5 : ℝ)..(2/5 - δ), deriv (fun s => fdBoundaryFun H s - I) t /
+    ∫ t in (1/5 : ℝ)..(2/5 - δ), deriv (fun s ↦ fdBoundaryFun H s - I) t /
       (fdBoundaryFun H t - I) =
       Complex.log (fdBoundaryFun H (2/5 - δ) - I) -
       Complex.log (fdBoundaryFun H (1/5) - I) :=
   LogDerivFTC.ftc_log_pieceFM (by linarith)
     arcRef_I_contDiff.continuous.continuousOn
-    (fun _ _ => arcRef_I_contDiff.differentiable (by norm_num) |>.differentiableAt)
+    (fun _ _ ↦ arcRef_I_contDiff.differentiable (by norm_num) |>.differentiableAt)
     (arcRef_I_contDiff.continuous_deriv le_top).continuousOn
-    (fun _ ht => arcRef_I_slitPlane_seg2 (by linarith [ht.1]) (by linarith [ht.2, hδ]))
-    (fun _ ht => ⟨arcRef_I_eq H (by linarith [ht.1]) (by linarith [ht.2]),
+    (fun _ ht ↦ arcRef_I_slitPlane_seg2 (by linarith [ht.1]) (by linarith [ht.2, hδ]))
+    (fun _ ht ↦ ⟨arcRef_I_eq H (by linarith [ht.1]) (by linarith [ht.2]),
       (arcRef_I_eventuallyEq H (by linarith [ht.1]) (by linarith [ht.2, hδ])).deriv_eq⟩)
     (arcRef_I_eq_at_15 H)
     (arcRef_I_eq H (by linarith) (by linarith))
 
 private theorem seg3_ftc_neg_I (H : ℝ) {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < 1/5) :
-    IntervalIntegrable (fun t => deriv (fun s => fdBoundaryFun H s - I) t /
+    IntervalIntegrable (fun t ↦ deriv (fun s ↦ fdBoundaryFun H s - I) t /
       (fdBoundaryFun H t - I)) volume (2/5 + δ) (3/5) ∧
-    ∫ t in (2/5 + δ)..(3/5 : ℝ), deriv (fun s => fdBoundaryFun H s - I) t /
+    ∫ t in (2/5 + δ)..(3/5 : ℝ), deriv (fun s ↦ fdBoundaryFun H s - I) t /
       (fdBoundaryFun H t - I) =
       Complex.log (-(fdBoundaryFun H (3/5) - I)) -
       Complex.log (-(fdBoundaryFun H (2/5 + δ) - I)) := by
   have hab : (2/5 + δ) ≤ (3/5 : ℝ) := by linarith
   have h_piece := LogDerivFTC.ftc_log_neg_on_segment (f := arcRef_I) hab
     arcRef_I_contDiff.continuous.continuousOn
-    (fun _ _ => arcRef_I_contDiff.differentiable (by norm_num) |>.differentiableAt)
+    (fun _ _ ↦ arcRef_I_contDiff.differentiable (by norm_num) |>.differentiableAt)
     (arcRef_I_contDiff.continuous_deriv le_top).continuousOn
-    (fun _ ht => arcRef_I_neg_slitPlane_seg3 (by linarith [ht.1]) ht.2)
+    (fun _ ht ↦ arcRef_I_neg_slitPlane_seg3 (by linarith [ht.1]) ht.2)
   have h_ae : ∀ᵐ t ∂volume, t ∈ Ι (2/5 + δ) (3/5 : ℝ) →
-      deriv (fun s => fdBoundaryFun H s - I) t / (fdBoundaryFun H t - I) =
+      deriv (fun s ↦ fdBoundaryFun H s - I) t / (fdBoundaryFun H t - I) =
       deriv arcRef_I t / arcRef_I t := by
     filter_upwards [compl_mem_ae_iff.mpr (measure_singleton (3/5 : ℝ))] with t ht_ne ht_mem
     rw [uIoc_of_le hab] at ht_mem
-    have ht_lt : t < 3/5 := ht_mem.2.lt_of_ne fun h => ht_ne (mem_singleton_iff.mpr h)
+    have ht_lt : t < 3/5 := ht_mem.2.lt_of_ne fun h ↦ ht_ne (mem_singleton_iff.mpr h)
     have ht_gt : 1/5 < t := by linarith [ht_mem.1]
     rw [arcRef_I_eq H ht_gt ht_lt.le, (arcRef_I_eventuallyEq H ht_gt ht_lt).deriv_eq]
   exact ⟨h_piece.1.congr_ae ((ae_restrict_iff' measurableSet_uIoc).mpr
-      (h_ae.mono fun t ht hm => (ht hm).symm)),
+      (h_ae.mono fun t ht hm ↦ (ht hm).symm)),
     by rw [intervalIntegral.integral_congr_ae h_ae, h_piece.2,
       arcRef_I_eq H (by linarith) le_rfl,
       arcRef_I_eq H (by linarith) (by linarith)]⟩
@@ -142,7 +142,7 @@ private def seg4Ref_I (H : ℝ) (t : ℝ) : ℂ := (-1/2 : ℂ) +
 private lemma seg4Ref_I_contDiff (H : ℝ) : ContDiff ℝ ⊤ (seg4Ref_I H) := by
   unfold seg4Ref_I
   exact contDiff_const.add ((Complex.ofRealCLM.contDiff.comp (by fun_prop :
-    ContDiff ℝ ⊤ fun x : ℝ =>
+    ContDiff ℝ ⊤ fun x : ℝ ↦
       Real.sqrt 3 / 2 - 1 + (5 * x - 3) * (H - Real.sqrt 3 / 2))).mul contDiff_const)
 
 private lemma seg4Ref_I_neg_slitPlane (H : ℝ) (t : ℝ) :
@@ -165,32 +165,32 @@ private lemma seg4Ref_I_eq (H : ℝ) {t : ℝ} (ht3 : 3/5 < t) (ht4 : t ≤ 4/5)
   push_cast; ring
 
 private lemma seg4Ref_I_eventuallyEq (H : ℝ) {t : ℝ} (ht3 : 3/5 < t) (ht4 : t < 4/5) :
-    (fun s => fdBoundaryFun H s - I) =ᶠ[𝓝 t] seg4Ref_I H :=
+    (fun s ↦ fdBoundaryFun H s - I) =ᶠ[𝓝 t] seg4Ref_I H :=
   Filter.eventually_of_mem (Filter.inter_mem (Ioi_mem_nhds ht3) (Iio_mem_nhds ht4))
-    fun _ ⟨hs3, hs4⟩ => seg4Ref_I_eq H hs3 hs4.le
+    fun _ ⟨hs3, hs4⟩ ↦ seg4Ref_I_eq H hs3 hs4.le
 
 private theorem seg4_ftc_neg_I (H : ℝ) :
-    IntervalIntegrable (fun t => deriv (fun s => fdBoundaryFun H s - I) t /
+    IntervalIntegrable (fun t ↦ deriv (fun s ↦ fdBoundaryFun H s - I) t /
       (fdBoundaryFun H t - I)) volume (3/5) (4/5) ∧
-    ∫ t in (3/5 : ℝ)..(4/5), deriv (fun s => fdBoundaryFun H s - I) t /
+    ∫ t in (3/5 : ℝ)..(4/5), deriv (fun s ↦ fdBoundaryFun H s - I) t /
       (fdBoundaryFun H t - I) =
       Complex.log (-(fdBoundaryFun H (4/5) - I)) -
       Complex.log (-(fdBoundaryFun H (3/5) - I)) := by
   have h_piece := LogDerivFTC.ftc_log_neg_on_segment (by norm_num : (3/5 : ℝ) ≤ 4/5)
     (seg4Ref_I_contDiff H).continuous.continuousOn
-    (fun _ _ => (seg4Ref_I_contDiff H).differentiable (by norm_num) |>.differentiableAt)
+    (fun _ _ ↦ (seg4Ref_I_contDiff H).differentiable (by norm_num) |>.differentiableAt)
     ((seg4Ref_I_contDiff H).continuous_deriv le_top).continuousOn
-    (fun _ _ => seg4Ref_I_neg_slitPlane H _)
+    (fun _ _ ↦ seg4Ref_I_neg_slitPlane H _)
   have h_ae : ∀ᵐ t ∂volume, t ∈ Ι (3/5 : ℝ) (4/5) →
-      deriv (fun s => fdBoundaryFun H s - I) t / (fdBoundaryFun H t - I) =
+      deriv (fun s ↦ fdBoundaryFun H s - I) t / (fdBoundaryFun H t - I) =
       deriv (seg4Ref_I H) t / seg4Ref_I H t := by
     filter_upwards [compl_mem_ae_iff.mpr (measure_singleton (4/5 : ℝ))] with t ht_ne ht_mem
     rw [uIoc_of_le (by norm_num : (3/5 : ℝ) ≤ 4/5)] at ht_mem
-    have ht_lt : t < 4/5 := ht_mem.2.lt_of_ne fun h => ht_ne (mem_singleton_iff.mpr h)
+    have ht_lt : t < 4/5 := ht_mem.2.lt_of_ne fun h ↦ ht_ne (mem_singleton_iff.mpr h)
     rw [seg4Ref_I_eq H (by linarith [ht_mem.1]) ht_lt.le,
       (seg4Ref_I_eventuallyEq H (by linarith [ht_mem.1]) ht_lt).deriv_eq]
   exact ⟨h_piece.1.congr_ae ((ae_restrict_iff' measurableSet_uIoc).mpr
-      (h_ae.mono fun t ht hm => (ht hm).symm)),
+      (h_ae.mono fun t ht hm ↦ (ht hm).symm)),
     by rw [intervalIntegral.integral_congr_ae h_ae, h_piece.2,
       seg4Ref_I_eq_35 H, seg4Ref_I_eq_45 H]⟩
 
@@ -212,8 +212,8 @@ private lemma seg5Ref_I_eq (H : ℝ) {t : ℝ} (ht : 4/5 < t) :
   ring
 
 private lemma seg5Ref_I_eventuallyEq (H : ℝ) {t : ℝ} (ht : 4/5 < t) :
-    (fun s => fdBoundaryFun H s - I) =ᶠ[𝓝 t] seg5Ref_I H :=
-  Filter.eventually_of_mem (Ioi_mem_nhds ht) fun _ hs => seg5Ref_I_eq H hs
+    (fun s ↦ fdBoundaryFun H s - I) =ᶠ[𝓝 t] seg5Ref_I H :=
+  Filter.eventually_of_mem (Ioi_mem_nhds ht) fun _ hs ↦ seg5Ref_I_eq H hs
 
 private lemma seg5Ref_I_eq_45 (H : ℝ) :
     fdBoundaryFun H (4/5) - I = seg5Ref_I H (4/5) := by
@@ -224,18 +224,18 @@ private lemma seg5Ref_I_eq_1 (H : ℝ) :
   simp [fdBoundaryFun_at_one, seg5Ref_I, fdStart]; ring
 
 private theorem seg5_ftc_full_I (H : ℝ) (hH : 1 < H) :
-    IntervalIntegrable (fun t => deriv (fun s => fdBoundaryFun H s - I) t /
+    IntervalIntegrable (fun t ↦ deriv (fun s ↦ fdBoundaryFun H s - I) t /
       (fdBoundaryFun H t - I)) volume (4/5) 1 ∧
-    ∫ t in (4/5 : ℝ)..1, deriv (fun s => fdBoundaryFun H s - I) t /
+    ∫ t in (4/5 : ℝ)..1, deriv (fun s ↦ fdBoundaryFun H s - I) t /
       (fdBoundaryFun H t - I) =
       Complex.log (fdBoundaryFun H 1 - I) -
       Complex.log (fdBoundaryFun H (4/5) - I) :=
   LogDerivFTC.ftc_log_pieceFM (by norm_num)
     (seg5Ref_I_contDiff H).continuous.continuousOn
-    (fun _ _ => (seg5Ref_I_contDiff H).differentiable (by norm_num) |>.differentiableAt)
+    (fun _ _ ↦ (seg5Ref_I_contDiff H).differentiable (by norm_num) |>.differentiableAt)
     ((seg5Ref_I_contDiff H).continuous_deriv le_top).continuousOn
-    (fun _ _ => seg5Ref_I_slitPlane H hH _)
-    (fun _ ht => ⟨seg5Ref_I_eq H (by linarith [ht.1]),
+    (fun _ _ ↦ seg5Ref_I_slitPlane H hH _)
+    (fun _ ht ↦ ⟨seg5Ref_I_eq H (by linarith [ht.1]),
       (seg5Ref_I_eventuallyEq H (by linarith [ht.1])).deriv_eq⟩)
     (seg5Ref_I_eq_45 H)
     (seg5Ref_I_eq_1 H)
@@ -272,11 +272,11 @@ private lemma fdBoundary_sub_I_at_2p_im_neg (H : ℝ) {δ : ℝ} (hδ : 0 < δ) 
 private lemma right_integral_34_branch_corrected (H : ℝ) (hH : 1 < H) {δ : ℝ}
     (hδ : 0 < δ) (hδ' : δ < 1/5)
     (hright34 : ∫ t in (2/5 + δ)..(4/5 : ℝ),
-        deriv (fun s => fdBoundaryFun H s - I) t / (fdBoundaryFun H t - I) =
+        deriv (fun s ↦ fdBoundaryFun H s - I) t / (fdBoundaryFun H t - I) =
         Complex.log (-(fdBoundaryFun H (4/5) - I)) -
         Complex.log (-(fdBoundaryFun H (2/5 + δ) - I))) :
     ∫ t in (2/5 + δ)..(4/5 : ℝ),
-      deriv (fun s => fdBoundaryFun H s - I) t / (fdBoundaryFun H t - I) =
+      deriv (fun s ↦ fdBoundaryFun H s - I) t / (fdBoundaryFun H t - I) =
       Complex.log (fdBoundaryFun H (4/5) - I) -
       Complex.log (fdBoundaryFun H (2/5 + δ) - I) - 2 * ↑Real.pi * I := by
   have h_branch_2pδ : Complex.log (-(fdBoundaryFun H (2/5 + δ) - I)) =
@@ -303,13 +303,13 @@ theorem fdBoundary_ftc_telescope_I (H : ℝ) (hH : 1 < H) {δ : ℝ}
   have p4 := seg4_ftc_neg_I H
   have p5 := seg5_ftc_full_I H hH
   have hleft : ∫ t in (0 : ℝ)..(2/5 - δ),
-      deriv (fun s => fdBoundaryFun H s - I) t / (fdBoundaryFun H t - I) =
+      deriv (fun s ↦ fdBoundaryFun H s - I) t / (fdBoundaryFun H t - I) =
       Complex.log (fdBoundaryFun H (2/5 - δ) - I) - Complex.log (fdBoundaryFun H 0 - I) := by
     rw [← intervalIntegral.integral_add_adjacent_intervals p1.1 p2.1, p1.2, p2.2]; ring
   have hright34' := right_integral_34_branch_corrected H hH hδ hδ' (by
     rw [← intervalIntegral.integral_add_adjacent_intervals p3.1 p4.1, p3.2, p4.2]; ring)
   have hright : ∫ t in (2/5 + δ)..(1 : ℝ),
-      deriv (fun s => fdBoundaryFun H s - I) t / (fdBoundaryFun H t - I) =
+      deriv (fun s ↦ fdBoundaryFun H s - I) t / (fdBoundaryFun H t - I) =
       Complex.log (fdBoundaryFun H 1 - I) -
       Complex.log (fdBoundaryFun H (2/5 + δ) - I) - 2 * ↑Real.pi * I := by
     rw [← intervalIntegral.integral_add_adjacent_intervals (p3.1.trans p4.1) p5.1,
@@ -323,7 +323,7 @@ private def E_atI (H : ℝ) (ε : ℝ) : ℂ :=
 private lemma arcsinDelta_tendsto_nhdsWithin :
     Tendsto arcsinDelta (𝓝[>] 0) (𝓝[>] 0) := by
   apply tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within
-  · have hcont : ContinuousAt (fun ε : ℝ =>
+  · have hcont : ContinuousAt (fun ε : ℝ ↦
         12 / (5 * Real.pi) * Real.arcsin (ε / 2)) 0 := by fun_prop
     convert hcont.tendsto.mono_left nhdsWithin_le_nhds using 1
     · rfl
@@ -345,15 +345,15 @@ def arcFTCHyp_atI {H : ℝ} (hH : 1 < H) {γ : PiecewiseC1Path (fdStart H) (fdSt
     (hγ : ∀ t ∈ Icc (0 : ℝ) 1, γ.toPath.extend t = fdBoundaryFun H t) :
     ArcFTCHyp γ I (2/5) arcsinDelta (min (1/3) (H - 1)) (-(↑Real.pi * I)) where
   E := E_atI H
-  h_ftc := fun ε hε hεt => by
+  h_ftc := fun ε hε hεt ↦ by
     have hδ := arcsinDelta_pos hε
     have hδ' := arcsinDelta_lt_one_fifth hε (lt_of_lt_of_le hεt (min_le_left _ _))
     rw [transfer_integral I (by linarith) le_rfl (by linarith) hγ,
       transfer_integral I (by linarith) (by linarith) le_rfl hγ]
     exact fdBoundary_ftc_telescope_I H hH hδ hδ'
-  hint_left := fun ε hε hεt => gamma_integrable_left_of_I hH hγ (arcsinDelta_pos hε)
+  hint_left := fun ε hε hεt ↦ gamma_integrable_left_of_I hH hγ (arcsinDelta_pos hε)
     (arcsinDelta_lt_one_fifth hε (lt_of_lt_of_le hεt (min_le_left _ _)))
-  hint_right := fun ε hε hεt => gamma_integrable_right_of_I hH hγ (arcsinDelta_pos hε)
+  hint_right := fun ε hε hεt ↦ gamma_integrable_right_of_I hH hγ (arcsinDelta_pos hε)
     (arcsinDelta_lt_one_fifth hε (lt_of_lt_of_le hεt (min_le_left _ _)))
   h_limit := E_atI_tendsto H
 
