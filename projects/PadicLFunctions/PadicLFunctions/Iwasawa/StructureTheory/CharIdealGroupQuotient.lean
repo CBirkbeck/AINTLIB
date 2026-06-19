@@ -443,4 +443,26 @@ theorem charIdealGroup_quotient [IsDomain 𝒪] [IsDiscreteValuationRing 𝒪]
         (charAugmentation_ne_zero_of_isTorsion 𝒪 H ω htor) htor]
   rw [heq, iInf_comap_charAugmentation_span_singleton 𝒪 H hcomplete g]
 
+/-- **The characteristic-ideal half of `thm:vandiver`, abstract form.**  A finitely generated torsion
+`Λ(𝒢)`-module `X` that is `Λ(𝒢)`-linearly isomorphic to `Λ(𝒢) ⧸ (g)` has `Ch_{Λ(𝒢)}(X) = (g)`.
+Combining `charIdealGroup_eq_of_linearEquiv` (iso-invariance) with `charIdealGroup_quotient`
+(the cyclic computation).  In the Iwasawa Main Conjecture this is applied with `X = 𝒳⁺_∞`, the iso
+the carrier-bridged `iwasawa_main_conjecture_vandiver`, and `g` the generator of `I(𝒢⁺)ζ_p`. -/
+theorem charIdealGroup_of_quotientEquiv [IsDomain 𝒪] [IsDiscreteValuationRing 𝒪]
+    [Invertible (Fintype.card H : 𝒪)] [IsNoetherianRing 𝒪] [Fintype (H →* 𝒪ˣ)]
+    (hcomplete : ∑ ω : H →* 𝒪ˣ, isotypicIdempotent 𝒪 H ω = 1)
+    {X : Type*} [AddCommGroup X] [Module (IwasawaAlgebraGroup 𝒪 H) X]
+    [Module.Finite (IwasawaAlgebraGroup 𝒪 H) X]
+    {g : IwasawaAlgebraGroup 𝒪 H}
+    [Module.Finite (IwasawaAlgebraGroup 𝒪 H) (IwasawaAlgebraGroup 𝒪 H ⧸ Ideal.span {g})]
+    (hX : Module.IsTorsion (IwasawaAlgebraGroup 𝒪 H) X)
+    (e : X ≃ₗ[IwasawaAlgebraGroup 𝒪 H] (IwasawaAlgebraGroup 𝒪 H ⧸ Ideal.span {g})) :
+    charIdealGroup 𝒪 H X hX = Ideal.span {g} := by
+  have hQ : Module.IsTorsion (IwasawaAlgebraGroup 𝒪 H)
+      (IwasawaAlgebraGroup 𝒪 H ⧸ Ideal.span {g}) := fun y => by
+    obtain ⟨x, rfl⟩ := e.surjective y
+    obtain ⟨a, ha⟩ := @hX x
+    exact ⟨a, by rw [Submonoid.smul_def, ← map_smul, ← Submonoid.smul_def, ha, map_zero]⟩
+  rw [charIdealGroup_eq_of_linearEquiv 𝒪 H hX hQ e, charIdealGroup_quotient 𝒪 H hcomplete hQ]
+
 end Iwasawa
