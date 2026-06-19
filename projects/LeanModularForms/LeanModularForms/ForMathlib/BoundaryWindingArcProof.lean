@@ -268,16 +268,16 @@ def smoothBoundaryData_arc_of_ftcHyp {H : ℝ} (hH : 1 < H)
   δ := arcsinDelta
   threshold := arcThreshold H θ₀
   hthresh := arcThreshold_pos hH h_lo h_hi
-  hδ_pos := fun ε hε _ => arcsinDelta_pos hε
-  hδ_small := fun ε hε hε_thr => by
+  hδ_pos := fun ε hε _ ↦ arcsinDelta_pos hε
+  hδ_small := fun ε hε hε_thr ↦ by
     obtain ⟨hδ_lo, hδ_hi⟩ := arcsinDelta_lt_arcT₀_bounds h_lo h_hi hε hε_thr
     refine lt_min ?_ ?_
     · linarith [arcT₀_gt_one_fifth h_lo]
     · linarith [arcT₀_lt_three_fifths h_hi]
-  h_far := fun ε hε hε_thr t ht hδt => by
+  h_far := fun ε hε hε_thr t ht hδt ↦ by
     rw [hγ t ht]
     exact arc_far_bound hH h_lo h_hi hε hε_thr ht hδt
-  h_near := fun ε hε hε_thr t ht => by
+  h_near := fun ε hε hε_thr t ht ↦ by
     obtain ⟨hδ_lo, hδ_hi⟩ := arcsinDelta_lt_arcT₀_bounds h_lo h_hi hε hε_thr
     obtain ⟨h_lo_bound, h_hi_bound⟩ := abs_le.mp ht
     rw [hγ t ⟨by linarith, by linarith⟩]
