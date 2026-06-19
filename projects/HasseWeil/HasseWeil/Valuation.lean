@@ -27,10 +27,10 @@ variable {F : Type*} [Field F]
 private theorem eval_poly_deriv_eq_polynomialX_eval (W : Affine F) (y₀ : F) :
     (W.polynomial.eval (C y₀)).derivative = W.polynomialX.eval (C y₀) := by
   unfold Affine.polynomial Affine.polynomialX
-  simp only [eval_C, eval_X, eval_neg, eval_add, eval_sub, eval_mul, eval_pow,
-    derivative_C, derivative_X, derivative_X_pow, derivative_neg, derivative_add,
+  simp only [eval_C, eval_X, eval_add, eval_sub, eval_mul, eval_pow,
+    derivative_C, derivative_X, derivative_X_pow, derivative_add,
     derivative_sub, derivative_mul, derivative_sq,
-    map_ofNat, C_0, C_1, C_neg, C_add, C_sub, C_mul, C_pow]
+    map_ofNat, C_add, C_mul, C_pow]
   ring_nf; simp [C_ofNat]
 
 variable (W : Affine F)
@@ -47,8 +47,6 @@ theorem pointIdeal_isMaximal {x y : F} (h : W.Nonsingular x y) :
 
 /-! ### Algebraic lemma: YClass · Q ∈ ⟨XClass⟩ -/
 
--- Type class synthesis in CoordinateRing is expensive.
-set_option maxHeartbeats 800000 in
 /-- `YClass · Q ∈ ⟨XClass⟩` from the curve equation linearization. -/
 theorem yclass_mul_quot_in_xclass_span {x₀ y₀ : F} (h : W.Equation x₀ y₀) :
     Affine.CoordinateRing.YClass W (C y₀) *
@@ -61,18 +59,17 @@ theorem yclass_mul_quot_in_xclass_span {x₀ y₀ : F} (h : W.Equation x₀ y₀
   simp only [map_add, map_mul, mk_self] at hmk
   show Affine.CoordinateRing.mk W (Y - C (C y₀)) *
     Affine.CoordinateRing.mk W (W.polynomial /ₘ (Y - C (C y₀))) ∈ _
-  rw [(neg_eq_of_add_eq_zero_right hmk).symm]
+  rw [← neg_eq_of_add_eq_zero_right hmk]
   refine neg_mem ?_
   obtain ⟨g, hg⟩ := dvd_iff_isRoot.mpr h
   have : Affine.CoordinateRing.mk W (C (W.polynomial.eval (C y₀))) =
       Affine.CoordinateRing.XClass W x₀ * Affine.CoordinateRing.mk W (C g) := by
     simp only [Affine.CoordinateRing.XClass, ← map_mul, ← hg]
   rw [this]
-  exact Ideal.mul_mem_right _ _ (Ideal.subset_span (show _ ∈ ({_} : Set _) from rfl))
+  exact Ideal.mul_mem_right _ _ (Ideal.subset_span rfl)
 
 /-! ### Q.evalEval = polynomialY.evalEval via derivative -/
 
-set_option maxHeartbeats 800000 in
 /-- The quotient `Q` evaluates to `polynomialY` at `(x₀, y₀)`. -/
 theorem quot_evalEval_eq_polynomialY {x₀ y₀ : F} (h : W.Equation x₀ y₀) :
     Polynomial.evalEval x₀ y₀ (W.polynomial /ₘ (Y - C (C y₀ : F[X]))) =
@@ -86,15 +83,14 @@ theorem quot_evalEval_eq_polynomialY {x₀ y₀ : F} (h : W.Equation x₀ y₀) 
     derivative_X, derivative_C, sub_zero, one_mul] at hd
   have hpoly : W.polynomial.derivative = W.polynomialY := by
     unfold Affine.polynomial Affine.polynomialY
-    simp only [derivative_C, derivative_X, derivative_X_pow, derivative_neg, derivative_add,
+    simp only [derivative_C, derivative_X, derivative_add,
       derivative_sub, derivative_mul, derivative_sq]; C_simp; ring1
   rw [hpoly] at hd
   have heval : Polynomial.evalEval x₀ y₀ (Q + (X - C (C y₀)) * Q.derivative) =
       Polynomial.evalEval x₀ y₀ Q := by
     simp [Polynomial.evalEval, eval_add, eval_mul, eval_sub, eval_X, eval_C,
       sub_self, zero_mul, add_zero]
-  exact (show Polynomial.evalEval x₀ y₀ Q = Polynomial.evalEval x₀ y₀ W.polynomialY from by
-    rw [← heval, hd])
+  rw [← heval, hd]
 
 /-! ### mk(Q) ∉ XYIdeal when polynomialY ≠ 0 -/
 
@@ -137,7 +133,6 @@ These mirror the helpers above but operate on `g := W.polynomial.eval
 (C y₀) /ₘ (X - C x₀)` (the inner X-quotient) instead of `Q :=
 W.polynomial /ₘ (Y - C (C y₀))` (the Y-quotient). -/
 
-set_option maxHeartbeats 800000 in
 /-- **X-side analog of `yclass_mul_quot_in_xclass_span`**: `XClass · mk(C g) ∈
 ⟨YClass⟩` where `g := W.polynomial.eval (C y₀) /ₘ (X - C x₀)`. From the
 inner X-factorization combined with the Y-mod-by-monic identity. -/
@@ -146,7 +141,7 @@ theorem xclass_mul_C_g_in_yclass_span {x₀ y₀ : F} (h : W.Equation x₀ y₀)
       Affine.CoordinateRing.mk W
         (C (W.polynomial.eval (C y₀) /ₘ (X - C x₀))) ∈
       Ideal.span {Affine.CoordinateRing.YClass W (C y₀)} := by
-  set g := W.polynomial.eval (C y₀) /ₘ (X - C x₀) with hgdef
+  set g := W.polynomial.eval (C y₀) /ₘ (X - C x₀)
   -- Inner factorization: W(X,y₀) = (X - x₀) · g.
   have hinner : W.polynomial.eval (C y₀) = (X - C x₀) * g := by
     have := modByMonic_add_div (W.polynomial.eval (C y₀)) (X - C x₀)
@@ -163,18 +158,16 @@ theorem xclass_mul_C_g_in_yclass_span {x₀ y₀ : F} (h : W.Equation x₀ y₀)
   -- Factor: mk(C(W.eval(Cy₀))) = XClass · mk(C g).
   rw [hinner, map_mul] at hmk
   -- hmk: XClass·mk(Cg) + YClass·mk(Q) = 0, so XClass·mk(Cg) = -(YClass·mk(Q)).
-  have : Affine.CoordinateRing.mk W (C (X - C x₀)) *
+  have hsplit : Affine.CoordinateRing.mk W (C (X - C x₀)) *
       Affine.CoordinateRing.mk W (C g) =
       -(Affine.CoordinateRing.mk W (Y - C (C y₀)) *
         Affine.CoordinateRing.mk W (W.polynomial /ₘ (Y - C (C y₀)))) :=
     eq_neg_of_add_eq_zero_left hmk
   show Affine.CoordinateRing.mk W (C (X - C x₀)) *
     Affine.CoordinateRing.mk W (C g) ∈ _
-  rw [this]
-  refine neg_mem ?_
-  exact Ideal.mul_mem_right _ _ (Ideal.subset_span rfl)
+  rw [hsplit]
+  exact neg_mem (Ideal.mul_mem_right _ _ (Ideal.subset_span rfl))
 
-set_option maxHeartbeats 800000 in
 /-- **X-side analog of `mk_quot_not_mem`**: `mk(C g) ∉ XYIdeal` when
 `polynomialX(P) ≠ 0`. Uses the derivative trick: `g.eval x₀ =
 polynomialX.evalEval x₀ y₀`. -/
@@ -184,7 +177,7 @@ theorem mk_C_g_not_mem {x₀ y₀ : F}
     Affine.CoordinateRing.mk W
         (C (W.polynomial.eval (C y₀) /ₘ (X - C x₀))) ∉
       Affine.CoordinateRing.XYIdeal W x₀ (Polynomial.C y₀) := by
-  set g := W.polynomial.eval (C y₀) /ₘ (X - C x₀) with hgdef
+  set g := W.polynomial.eval (C y₀) /ₘ (X - C x₀)
   intro hmem
   have hker : Affine.CoordinateRing.XYIdeal W x₀ (Polynomial.C y₀) ≤
       RingHom.ker (AdjoinRoot.evalEval h) := by
@@ -212,7 +205,7 @@ theorem mk_C_g_not_mem {x₀ y₀ : F}
   have hd := congr_arg Polynomial.derivative hdiv2
   rw [derivative_mul, derivative_sub, derivative_X, derivative_C, sub_zero,
     one_mul] at hd
-  have he := congr_arg (fun r => r.eval x₀) hd
+  have he := congr_arg (fun r ↦ r.eval x₀) hd
   simp only [eval_add, eval_mul, eval_sub, eval_X, eval_C, sub_self, zero_mul,
     add_zero] at he
   have hpX : (W.polynomial.eval (C y₀)).derivative = W.polynomialX.eval (C y₀) :=
@@ -224,15 +217,14 @@ theorem mk_C_g_not_mem {x₀ y₀ : F}
 /-! ### The local ring is a DVR -/
 
 private theorem mem_of_mul_unit {R : Type*} [CommRing R] {I : Ideal R}
-    {a b : R} (hmul : a * b ∈ I) (hb : IsUnit b) : a ∈ I := by
-  obtain ⟨u, rfl⟩ := hb; simpa [mul_assoc] using I.mul_mem_right ↑u⁻¹ hmul
+    {a b : R} (hmul : a * b ∈ I) (hb : IsUnit b) : a ∈ I :=
+  (I.mul_unit_mem_iff_mem hb).mp hmul
 
 private theorem map_mem_span_sing {R S : Type*} [CommRing R] [CommRing S]
     (f : R →+* S) {a x : R} (hmem : x ∈ span ({a} : Set R)) :
-    f x ∈ span ({f a} : Set S) := by
-  rw [mem_span_singleton] at hmem ⊢; obtain ⟨c, rfl⟩ := hmem; exact ⟨f c, by rw [map_mul]⟩
+    f x ∈ span ({f a} : Set S) :=
+  Set.image_singleton ▸ Ideal.map_span f {a} ▸ Ideal.mem_map_of_mem f hmem
 
-set_option maxHeartbeats 3200000 in
 /-- The local ring of an elliptic curve at a nonsingular point is a DVR. -/
 theorem localRing_isDVR {x₀ y₀ : F} (h : W.Nonsingular x₀ y₀) :
     let P := pointIdeal W x₀ y₀
@@ -243,89 +235,25 @@ theorem localRing_isDVR {x₀ y₀ : F} (h : W.Nonsingular x₀ y₀) :
   -- Nonsingularity: WLOG polynomialY.evalEval x₀ y₀ ≠ 0
   -- (The other case swaps X↔Y roles; we handle the Y case.)
   obtain ⟨heq, hX | hY⟩ := h
-  · -- Case: polynomialX ≠ 0 — show XClass ∈ ⟨YClass⟩, so 𝔪 = ⟨YClass⟩
-    -- From Y-division + inner factorization: XClass·mk(C(g)) ∈ ⟨YClass⟩
-    -- where g = W(X,y₀) /ₘ (X - C x₀). And g(x₀) = polynomialX(P) ≠ 0.
-    set g := W.polynomial.eval (C y₀) /ₘ (X - C x₀) with hgdef
-    -- Inner factorization: W(X,y₀) = (X-x₀)·g (since W(x₀,y₀) = 0)
-    have hinner : W.polynomial.eval (C y₀) = (X - C x₀) * g := by
-      have h := modByMonic_add_div (W.polynomial.eval (C y₀)) (X - C x₀)
-      rw [modByMonic_X_sub_C_eq_C_eval,
-        show (W.polynomial.eval (C y₀)).eval x₀ = 0 from heq, C_0, zero_add] at h
-      exact h.symm
-    -- Y-division: mk(C(W(X,y₀))) + YClass·mk(Q) = 0
-    have h1 := modByMonic_X_sub_C_eq_C_eval W.polynomial (C y₀ : F[X])
-    have h2 := modByMonic_add_div W.polynomial (Y - C (C y₀ : F[X]))
-    rw [h1] at h2
-    have hmk := congr_arg (Affine.CoordinateRing.mk W) h2
-    simp only [map_add, map_mul, mk_self] at hmk
-    -- Factor: mk(C(W(X,y₀))) = XClass·mk(C(g))
-    rw [hinner, map_mul] at hmk
-    -- hmk: mk(C(X-x₀)) * mk(C(g)) + mk(Y-y₀) * mk(Q) = 0
-    -- mk(C(X-x₀)) = XClass, mk(Y-y₀) = YClass (by definition)
-    have hxmem : Affine.CoordinateRing.mk W (C (X - C x₀)) *
-        Affine.CoordinateRing.mk W (C g) ∈
-        span {Affine.CoordinateRing.YClass W (C y₀)} := by
-      -- hmk: a + b = 0 where b = YClass * mk(Q)
-      -- So a = -b ∈ span{YClass}
-      have hab : Affine.CoordinateRing.mk W (C (X - C x₀)) *
-          Affine.CoordinateRing.mk W (C g) =
-          -(Affine.CoordinateRing.mk W (Y - C (C y₀)) *
-            Affine.CoordinateRing.mk W (W.polynomial /ₘ (Y - C (C y₀)))) := by
-        exact eq_neg_of_add_eq_zero_left hmk
-      rw [hab]; exact neg_mem (mul_mem_right _ _ (subset_span rfl))
-    -- g(x₀) = polynomialX.evalEval x₀ y₀ ≠ 0
-    have hgnotin : Affine.CoordinateRing.mk W (C g) ∉
-        Affine.CoordinateRing.XYIdeal W x₀ (C y₀) := by
-      intro hmem
-      have hker : Affine.CoordinateRing.XYIdeal W x₀ (C y₀) ≤
-          RingHom.ker (AdjoinRoot.evalEval heq) := by
-        rw [Affine.CoordinateRing.XYIdeal]; apply span_le.mpr
-        intro z hz; simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hz
-        rcases hz with rfl | rfl
-        · exact RingHom.mem_ker.mpr <| by
-            unfold Affine.CoordinateRing.XClass; rw [AdjoinRoot.evalEval_mk]
-            simp [Polynomial.evalEval, eval_C, eval_X, eval_sub]
-        · exact RingHom.mem_ker.mpr <| by
-            unfold Affine.CoordinateRing.YClass; rw [AdjoinRoot.evalEval_mk]
-            simp [Polynomial.evalEval, eval_C, eval_X, eval_sub]
-      have hev := RingHom.mem_ker.mp (hker hmem)
-      rw [AdjoinRoot.evalEval_mk] at hev
-      simp only [Polynomial.evalEval, eval_C] at hev
-      -- hev: g.eval x₀ = 0. Show g.eval x₀ = polynomialX.evalEval x₀ y₀ ≠ 0 → contradiction.
-      -- Derivative trick: g.eval x₀ = W(X,y₀)'.eval x₀ = polynomialX.evalEval x₀ y₀
-      have hdiv2 := modByMonic_add_div (W.polynomial.eval (C y₀)) (X - C x₀)
-      rw [modByMonic_X_sub_C_eq_C_eval,
-        show (W.polynomial.eval (C y₀)).eval x₀ = 0 from heq, C_0, zero_add] at hdiv2
-      -- hdiv2: (X - C x₀) * g = W.polynomial.eval (C y₀)
-      have hd := congr_arg Polynomial.derivative hdiv2
-      rw [derivative_mul, derivative_sub, derivative_X, derivative_C, sub_zero, one_mul] at hd
-      -- hd: g + (X - C x₀) * g' = (W.polynomial.eval (C y₀)).derivative
-      have he := congr_arg (fun r => r.eval x₀) hd
-      simp only [eval_add, eval_mul, eval_sub, eval_X, eval_C, sub_self, zero_mul,
-        add_zero] at he
-      -- he: g.eval x₀ = (W.polynomial.eval (C y₀)).derivative.eval x₀
-      -- And (W.polynomial.eval(Cy₀)).derivative = polynomialX.eval(Cy₀)
-      have hpX : (W.polynomial.eval (C y₀)).derivative = W.polynomialX.eval (C y₀) :=
-        eval_poly_deriv_eq_polynomialX_eval W y₀
-      rw [hpX] at he
-      -- he: g.eval x₀ = W.polynomialX.eval(Cy₀).eval x₀ = polynomialX.evalEval x₀ y₀
-      exact hX (show Polynomial.evalEval x₀ y₀ W.polynomialX = 0 by
-        simp only [Polynomial.evalEval]; rw [← he]; exact hev)
-    -- Assembly: XClass ∈ ⟨YClass⟩ in localization → 𝔪 principal → DVR
+  · -- Case: polynomialX ≠ 0 — `XClass · mk(C g) ∈ ⟨YClass⟩` with `mk(C g)` a unit in the
+    -- localization (since `g(x₀) = polynomialX(P) ≠ 0`), so `XClass ∈ ⟨YClass⟩` and `𝔪 = ⟨YClass⟩`.
+    -- (Symmetric to the `polynomialY ≠ 0` case below, swapping the X- and Y-side helpers.)
     have hmul_mem : f (Affine.CoordinateRing.XClass W x₀) *
-        f (Affine.CoordinateRing.mk W (C g)) ∈
+        f (Affine.CoordinateRing.mk W (C (W.polynomial.eval (C y₀) /ₘ (X - C x₀)))) ∈
         span {f (Affine.CoordinateRing.YClass W (C y₀))} := by
-      rw [← map_mul]; exact map_mem_span_sing f hxmem
-    have hunit : IsUnit (f (Affine.CoordinateRing.mk W (C g))) :=
+      rw [← map_mul]; exact map_mem_span_sing f (xclass_mul_C_g_in_yclass_span W heq)
+    have hunit : IsUnit (f (Affine.CoordinateRing.mk W
+        (C (W.polynomial.eval (C y₀) /ₘ (X - C x₀))))) :=
       IsLocalization.map_units (Localization.AtPrime P)
-        (⟨_, hgnotin⟩ : P.primeCompl)
-    have halg_x := mem_of_mul_unit hmul_mem hunit
+        (⟨_, mk_C_g_not_mem W heq hX⟩ : P.primeCompl)
+    have halg_x : f (Affine.CoordinateRing.XClass W x₀) ∈
+        span {f (Affine.CoordinateRing.YClass W (C y₀))} :=
+      mem_of_mul_unit hmul_mem hunit
     have hmap_eq : Ideal.map f P = span {f (Affine.CoordinateRing.YClass W (C y₀))} := by
       show Ideal.map f (span {Affine.CoordinateRing.XClass W x₀,
         Affine.CoordinateRing.YClass W (C y₀)}) = _
       rw [map_span, Set.image_pair]
-      exact le_antisymm (span_le.mpr fun z hz => by
+      exact le_antisymm (span_le.mpr fun z hz ↦ by
         simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hz
         exact hz.elim (· ▸ halg_x) (· ▸ subset_span rfl))
         (span_mono (Set.singleton_subset_iff.mpr (Set.mem_insert_of_mem _ rfl)))
@@ -357,7 +285,7 @@ theorem localRing_isDVR {x₀ y₀ : F} (h : W.Nonsingular x₀ y₀) :
       show Ideal.map f (span {Affine.CoordinateRing.XClass W x₀,
         Affine.CoordinateRing.YClass W (C y₀)}) = _
       rw [map_span, Set.image_pair]
-      exact le_antisymm (span_le.mpr fun z hz => by
+      exact le_antisymm (span_le.mpr fun z hz ↦ by
         simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hz
         exact hz.elim (· ▸ subset_span rfl) (· ▸ halg_y))
         (span_mono (Set.singleton_subset_iff.mpr (Set.mem_insert _ _)))
