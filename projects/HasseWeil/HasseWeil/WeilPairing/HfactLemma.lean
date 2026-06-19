@@ -96,7 +96,7 @@ theorem pullbackDivisor_comm {f g : W.toAffine.Point →+ W.toAffine.Point}
     (D : ProjectiveDivisor (⟨W.toAffine⟩ : SmoothPlaneCurve F)) :
     pullbackDivisor f hf (pullbackDivisor g hg D) =
       pullbackDivisor g hg (pullbackDivisor f hf D) := by
-  refine Finsupp.ext fun w => ?_
+  refine Finsupp.ext fun w ↦ ?_
   rw [pullbackDivisor_apply, pullbackDivisor_apply, pullbackDivisor_apply, pullbackDivisor_apply,
     Affine.Point.toProjectiveSmoothPoint_toAffinePoint,
     Affine.Point.toProjectiveSmoothPoint_toAffinePoint]
@@ -214,7 +214,7 @@ theorem hfact_projectiveDivisorOf_eq (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0)
   set κU := Curves.kappaDivisor W.toAffine U with hκU
   have hgU_ne : weilFunction W ℓ hℓ U hU ≠ 0 := weilFunction_ne_zero W ℓ hℓ U hU
   have hu_ne : (mulByInt W.toAffine ℓ).pullback k₀ ≠ 0 :=
-    fun h0 => hk₀_ne ((mulByInt W.toAffine ℓ).pullback_injective (h0.trans (map_zero _).symm))
+    fun h0 ↦ hk₀_ne ((mulByInt W.toAffine ℓ).pullback_injective (h0.trans (map_zero _).symm))
   -- LHS: `div(φ^* g_T) = φ^*(div g_T) = φ^*([ℓ]^* κT) = [ℓ]^*(φ^* κT)`.
   have hLHS : (⟨W.toAffine⟩ : SmoothPlaneCurve F).projectiveDivisorOf
         (φ.pullback (weilFunction W ℓ hℓ T hT)) =
@@ -282,9 +282,9 @@ theorem hfact_of_picDualDivisorClass (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0)
   have hgU_ne : weilFunction W ℓ hℓ ((φ.picDual ch hinj hfin) T) hU ≠ 0 :=
     weilFunction_ne_zero W ℓ hℓ _ hU
   have hu_ne : (mulByInt W.toAffine ℓ).pullback k₀ ≠ 0 :=
-    fun h0 => hk₀_ne ((mulByInt W.toAffine ℓ).pullback_injective (h0.trans (map_zero _).symm))
+    fun h0 ↦ hk₀_ne ((mulByInt W.toAffine ℓ).pullback_injective (h0.trans (map_zero _).symm))
   have hpb_ne : φ.pullback (weilFunction W ℓ hℓ T hT) ≠ 0 :=
-    fun h0 => weilFunction_ne_zero W ℓ hℓ T hT
+    fun h0 ↦ weilFunction_ne_zero W ℓ hℓ T hT
       (φ.pullback_injective (h0.trans (map_zero _).symm))
   set rhs := weilFunction W ℓ hℓ ((φ.picDual ch hinj hfin) T) hU *
     (mulByInt W.toAffine ℓ).pullback k₀ with hrhs
