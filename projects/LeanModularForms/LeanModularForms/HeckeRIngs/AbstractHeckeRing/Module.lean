@@ -12,7 +12,7 @@ The module action of `𝕋 P ℤ` on `HeckeModule P ℤ` (formal sums of left co
 theorem `eq_of_smul_eq_smul_𝕋`.
 -/
 
-open Classical MulOpposite Set DoubleCoset Subgroup
+open Classical
 
 open scoped Pointwise
 
@@ -21,8 +21,6 @@ namespace HeckeRing
 variable {G : Type*} [Group G]
 
 variable (P : HeckePair G) (Z : Type*) [CommRing Z]
-
-open Finsupp
 
 /-- The scalar multiplication on `𝕋` by itself, defined as reverse multiplication. -/
 noncomputable instance (priority := 1200) instSMul𝕋 : SMul (𝕋 P ℤ) (𝕋 P ℤ) where
@@ -150,10 +148,7 @@ lemma smul_zero_HeckeModule (T : 𝕋 P Z) : T • (0 : HeckeModule P Z) = 0 := 
   show Finsupp.sum T (fun D1 b₁ ↦ Finsupp.sum 0 fun m b₂ ↦
     ∑ i ∈ smulOrbit P (HeckeCoset.rep D1) (HeckeLeftCoset.rep m),
       Finsupp.single i (b₁ * b₂)) = 0
-  rw [show (fun D1 b₁ ↦ Finsupp.sum (0 : HeckeLeftCoset P →₀ Z) fun m b₂ ↦
-    ∑ i ∈ smulOrbit P (HeckeCoset.rep D1) (HeckeLeftCoset.rep m),
-      Finsupp.single i (b₁ * b₂)) = (fun _ _ ↦ (0 : HeckeLeftCoset P →₀ Z)) from by
-        ext; rw [Finsupp.sum_zero_index]]
+  simp_rw [Finsupp.sum_zero_index]
   exact Finsupp.sum_fun_zero _
 
 /-- The module action is additive in the module argument. -/
@@ -215,7 +210,7 @@ lemma smulOrbit_disjoint_of_ne (g₁ g₂ : P.Δ) (β : P.Δ) (hne : (⟦g₁⟧
       simp only [Subgroup.coe_mul, Subgroup.coe_inv]; group
     rw [this]; exact hstep.symm
   show DoubleCoset.doubleCoset (g₁ : G) P.H P.H = DoubleCoset.doubleCoset (g₂ : G) P.H P.H
-  conv_lhs => rw [show (g₁ : G) = _ from hg]
+  rw [hg]
   exact (DoubleCoset.doubleCoset_mul_right_eq_self P ⟨k, hk⟩ _).trans
     (doset_mul_left_eq_self P (i₁.out⁻¹ * i₂.out) _)
 
@@ -236,8 +231,7 @@ private lemma smul_one_eval (T : 𝕋 P Z) (D : HeckeCoset P) (m : HeckeLeftCose
   show (∑ x ∈ T.support,
     ∑ i ∈ smulOrbit P (HeckeCoset.rep x) (HeckeLeftCoset.rep (HeckeLeftCoset.one P)),
       Finsupp.single i (T.toFun x)) m = T.toFun D
-  rw [Finsupp.finset_sum_apply]
-  simp_rw [Finsupp.finset_sum_apply, Finsupp.single_apply]
+  simp_rw [Finsupp.finsetSum_apply, Finsupp.single_apply]
   rw [Finset.sum_eq_single D]
   · rw [Finset.sum_eq_single_of_mem m hm (fun b _ hb ↦ if_neg hb), if_pos rfl]
   · intro D' _ hne
