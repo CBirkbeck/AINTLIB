@@ -493,8 +493,26 @@ finite-level class-group modules $`\sY_n^+ = \Cl(F_n^+)\otimes_\Z\Zp` as `YPlusF
 Mathlib's class group of the cyclotomic tower. The Vandiver vanishing
 {bpref "imc-vandiver-consequences"}[] (i), $`p\nmid h_1^+ \Rightarrow \sY_\infty^+ = 0`, is
 **proved** in `Galois/Coinvariants.lean` (`yPlus_subsingleton`) from the control theorem
-{bpref "imc-coinvariants"}[] and Nakayama's lemma. The collapse of the four-term sequence to
-{bpref "imc-vandiver"}[] is then pure algebra over {bpref "imc-cft-units-2"}[].
+{bpref "imc-coinvariants"}[] and Nakayama's lemma; it is grounded in the *concrete* Vandiver
+condition by `vandiver_yPlusFin_subsingleton` (and its general engine
+`subsingleton_padicTensor_of_not_dvd_card`: $`\Zp\otimes_\Z A = 0` for finite $`A` with
+$`p\nmid\#A`, since $`\#A` annihilates the tensor and is a unit in $`\Zp`).
+
+The collapse of the four-term sequence {bpref "imc-cft-units-2"}[] to the isomorphism
+$`\sX_\infty^+ \cong \sU^+/\sC^+` is **proved** in `Galois/Sequence.lean`
+(`CFTUnitsData.xPlus_equiv_uModCPlus`): when $`\sY_\infty^+ = 0` the map $`\Gal(\sM^+/\sL^+) \to
+\sX_\infty^+` is an isomorphism, and $`\sE^+ = \sC^+` ({bpref "imc-vandiver-consequences"}[](iii))
+closes the quotient. Composing with the §12 analytic identification $`\sU^+/\sC^+ \cong
+\Lam(\GG^+)/I` ({bpref "coleman-map"}[]) gives the **isomorphism half** of
+{bpref "imc-vandiver"}[], formalised as `iwasawa_main_conjecture_vandiver` and — from the bare
+class-number hypothesis $`p \nmid h_1^+` — `iwasawa_main_conjecture_of_vandiver` in
+`IwasawaProof/MainConjecture.lean` (both axiom-clean). The characteristic-ideal half
+$`\Ch_{\Lam(\GG^+)}(\sX_\infty^+) = I(\GG^+)\zeta_p` reduces, via the proved
+*isomorphism invariance* of $`\Ch` (`charIdeal_eq_of_linearEquiv` in `CharIdeal.lean`), to
+$`\Ch(\Lam/I) = I`; that identity (length-at-each-height-one-prime equals the valuation,
+through Mathlib's `\ord`/`ord_eq_addVal`, and the unique-factorisation divisor identity in
+$`\Lam`) together with the $`\Lam(\GG^+) \cong` Iwasawa-group-algebra carrier bridge is the
+remaining structure-theoretic work (de-risked, ticketed).
 
 **Class field theory as a bundled input.** Global class field theory is not yet in Mathlib.
 Mirroring the source's own practice of citing {Informal.citet "washington"}[] for these classical
