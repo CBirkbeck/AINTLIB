@@ -82,7 +82,7 @@ theorem mulByInt_pointMap_injective_of_geometric
     rw [sub_smul, h P, sub_self]
   -- Then the whole group injects into the (finite) `(m−n)`-torsion subtype, forcing `Finite G`.
   haveI : Finite {P : G // (m - n) • P = 0} := htor (m - n) hk
-  have hinj : Function.Injective (fun P : G => (⟨P, hkill P⟩ : {P : G // (m - n) • P = 0})) := by
+  have hinj : Function.Injective (fun P : G ↦ (⟨P, hkill P⟩ : {P : G // (m - n) • P = 0})) := by
     intro P Q hPQ
     exact congrArg Subtype.val hPQ
   haveI : Finite G := Finite.of_injective _ hinj
@@ -114,13 +114,13 @@ theorem mulByInt_pointMap_injective_of_infinite_point
     -- `E[k] = {P | k • P = 0}` (its carrier), so the two subtypes are equivalent.
     haveI : Finite (E[k] : AddSubgroup E.Point) := htor k hk
     have hcarrier : ∀ P : E.Point, (P ∈ (E[k] : AddSubgroup E.Point)) ↔ k • P = 0 :=
-      fun P => mem_torsionSubgroup E k P
+      fun P ↦ mem_torsionSubgroup E k P
     refine Finite.of_equiv (E[k] : AddSubgroup E.Point) ?_
     exact {
-      toFun := fun P => ⟨P.1, (hcarrier P.1).mp P.2⟩
-      invFun := fun P => ⟨P.1, (hcarrier P.1).mpr P.2⟩
-      left_inv := fun P => rfl
-      right_inv := fun P => rfl }
+      toFun := fun P ↦ ⟨P.1, (hcarrier P.1).mp P.2⟩
+      invFun := fun P ↦ ⟨P.1, (hcarrier P.1).mpr P.2⟩
+      left_inv := fun P ↦ rfl
+      right_inv := fun P ↦ rfl }
   · intro P
     have := h P
     simpa only [mulByInt_apply] using this
@@ -363,7 +363,7 @@ theorem degree_eq_N_via_picDual_geometric
           isogTrace (frobeniusIsog W) (isogOneSub_negFrobenius W hq) * r * s + s ^ 2)
       ).toAddMonoidHom := h_pushpull.symm.trans h_vieta
   -- Geometric injectivity collapses the point-map identity to the integer equality.
-  exact hgeom (fun P => DFunLike.congr_fun h_eq P)
+  exact hgeom (fun P ↦ DFunLike.congr_fun h_eq P)
 
 /-! ### Part (A)+(B): `degree_eq_N_via_picDual_geometric_v2` — `hnat` and `hdual_hom` DISCHARGED
 
@@ -453,7 +453,7 @@ theorem hpoint_of_toPointMap_compat
   rw [WeierstrassCurve.Affine.Point.toClassEquiv'_apply, hcompat x y h,
     HasseWeil.Curves.CurveMap.toClass_toPointMap coordHom P hne]
   -- Both sides are `mk0` of the same `comap` ideal; the membership proofs are irrelevant.
-  exact congrArg (fun J => Additive.ofMul (ClassGroup.mk0 J)) (Subtype.ext hideal)
+  exact congrArg (fun J ↦ Additive.ofMul (ClassGroup.mk0 J)) (Subtype.ext hideal)
 
 /-- **Route C (geometric) v2: `deg(rπ − s) = N` with `hnat` and `hdual_hom` DISCHARGED.**
 
@@ -742,7 +742,7 @@ theorem hgeom_of_infinite_point
       (∀ P : W.toAffine.Point,
         (mulByInt W.toAffine m).toAddMonoidHom P = (mulByInt W.toAffine n).toAddMonoidHom P) →
       m = n :=
-  fun {m n} h => mulByInt_pointMap_injective_of_infinite_point W.toAffine htor h
+  fun {m n} h ↦ mulByInt_pointMap_injective_of_infinite_point W.toAffine htor h
 
 /-! ### Part (B) v3: discharge `hpicval` to the SINGLE precise III.6.2(c)/III.8 residual
 
