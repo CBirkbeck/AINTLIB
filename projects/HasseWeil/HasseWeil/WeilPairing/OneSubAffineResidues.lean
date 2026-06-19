@@ -200,7 +200,7 @@ theorem W_KE_map_functionFieldMap :
   have key : ∀ a : K, (⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap (AlgebraicClosure K)
         (algebraMap K W.toAffine.FunctionField a) =
       algebraMap (AlgebraicClosure K) (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField
-        (algebraMap K (AlgebraicClosure K) a) := fun a => by
+        (algebraMap K (AlgebraicClosure K) a) := fun a ↦ by
     rw [SmoothPlaneCurve.functionFieldMap_algebraMap_F,
       ← IsScalarTower.algebraMap_apply K (AlgebraicClosure K)
         (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField]
@@ -891,7 +891,7 @@ theorem oneSub_two_residues_doubling (hq : 2 ≤ Fintype.card K)
   set α := oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K) (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq) with hα
   obtain ⟨hfrobneg, hne1⟩ := oneSub_frob_eq_neg_at_doubling W p r hq P h_ns hx_eq hQ
   have huP : 2 * P.y + (W.baseChange (AlgebraicClosure K)).a₁ * P.x + (W.baseChange (AlgebraicClosure K)).a₃ ≠ 0 := by
-    have hne : (W.baseChange (AlgebraicClosure K)).toAffine.negY P.x P.y ≠ P.y := fun h => hne1 (by rw [hfrobneg, h])
+    have hne : (W.baseChange (AlgebraicClosure K)).toAffine.negY P.x P.y ≠ P.y := fun h ↦ hne1 (by rw [hfrobneg, h])
     intro h0
     apply hne
     rw [WeierstrassCurve.Affine.negY]; linear_combination -h0
