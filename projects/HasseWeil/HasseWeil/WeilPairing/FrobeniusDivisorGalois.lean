@@ -199,7 +199,7 @@ theorem ordAtInfty_algebraMap_crFrobEquiv
   · subst hu
     rw [map_zero, map_zero, map_zero, SmoothPlaneCurve.ordAtInfty_zero,
       SmoothPlaneCurve.ordAtInfty_zero]
-  · have hcu : crFrobEquiv W u ≠ 0 := fun h =>
+  · have hcu : crFrobEquiv W u ≠ 0 := fun h ↦
       hu ((EquivLike.injective (crFrobEquiv W)) (by rw [h, map_zero]))
     rw [(⟨((W.baseChange (AlgebraicClosure K)).map _).toAffine⟩ :
           SmoothPlaneCurve (AlgebraicClosure K)).ordAtInfty_algebraMap_coordinateRing _ hcu,
@@ -242,12 +242,12 @@ theorem ordAtInfty_ffFrobEquivRaw
       (coeffFrobEquiv (K := K) : AlgebraicClosure K →+* AlgebraicClosure K)).toAffine.FunctionField
       (crFrobEquiv W u) ≠ 0 :=
     (map_ne_zero_iff _ (IsFractionRing.injective _ _)).mpr
-      (fun h => hu_ne ((EquivLike.injective (crFrobEquiv W)) (by rw [h, map_zero])))
+      (fun h ↦ hu_ne ((EquivLike.injective (crFrobEquiv W)) (by rw [h, map_zero])))
   have hcv_map_ne : algebraMap _ ((W.baseChange (AlgebraicClosure K)).map
       (coeffFrobEquiv (K := K) : AlgebraicClosure K →+* AlgebraicClosure K)).toAffine.FunctionField
       (crFrobEquiv W v) ≠ 0 :=
     (map_ne_zero_iff _ (IsFractionRing.injective _ _)).mpr
-      (fun h => hv_ne ((EquivLike.injective (crFrobEquiv W)) (by rw [h, map_zero])))
+      (fun h ↦ hv_ne ((EquivLike.injective (crFrobEquiv W)) (by rw [h, map_zero])))
   rw [(⟨((W.baseChange (AlgebraicClosure K)).map _).toAffine⟩ :
       SmoothPlaneCurve (AlgebraicClosure K)).ordAtInfty_div_eq_mul_inv _ hcu_map_ne hcv_map_ne,
     (⟨((W.baseChange (AlgebraicClosure K)).map _).toAffine⟩ :
@@ -468,7 +468,7 @@ theorem projectiveDivisorOf_frobeniusFunctionFieldEquiv_weilFunction
   have hπ0 : HasseWeil.geomFrobeniusPoint W
       (0 : (W.baseChange (AlgebraicClosure K)).toAffine.Point) =
       (0 : (W.baseChange (AlgebraicClosure K)).toAffine.Point) := map_zero _
-  refine Finsupp.ext fun w => ?_
+  refine Finsupp.ext fun w ↦ ?_
   cases w with
   | infinity =>
     rw [HasseWeil.Curves.SmoothPlaneCurve.projectiveDivisorOf_apply_infinity,
