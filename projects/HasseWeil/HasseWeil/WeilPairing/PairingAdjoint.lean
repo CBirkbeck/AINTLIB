@@ -179,7 +179,7 @@ theorem weilPairing_adjoint_core (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0)
   have hgU_ne : gU ≠ 0 := weilFunction_ne_zero W ℓ hℓ U hU
   -- `φ^* g_T ≠ 0` (injective pullback of a nonzero function).
   have hpb_ne : φ.pullback gT ≠ 0 :=
-    fun h0 => hgT_ne (φ.pullback_injective (h0.trans (map_zero _).symm))
+    fun h0 ↦ hgT_ne (φ.pullback_injective (h0.trans (map_zero _).symm))
   -- EVALUATION 1: via `hcomm` and the pairing relation `τ_{φS}^* g_T = e_ℓ(φS,T)·g_T`.
   have heval1 : translateAlgEquivOfPoint W S (φ.pullback gT) =
       algebraMap F KE (weilPairing W ℓ hℓ (φ.toAddMonoidHom S) T hφS hT) * φ.pullback gT := by
