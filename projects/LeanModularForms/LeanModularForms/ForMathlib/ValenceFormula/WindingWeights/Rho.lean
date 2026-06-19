@@ -3,8 +3,8 @@ Copyright (c) 2024. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors:
 -/
-import LeanModularForms.ForMathlib.ValenceFormula.WindingWeights.Common
 import LeanModularForms.ForMathlib.ContourIntegral.CrossingLimit
+import LeanModularForms.ForMathlib.ValenceFormula.WindingWeights.Common
 
 /-!
 # Winding Number Weight at ρ
@@ -115,7 +115,6 @@ theorem fdBoundary_H_sub_rho_slitPlane (H : ℝ) (hH : Real.sqrt 3 / 2 < H)
           · exact fdBoundary_H_sub_rho_seg3_slitPlane H hH h3lt h4
           · exact fdBoundary_H_sub_rho_seg4_slitPlane H hH h4 ht.2
 
-
 private lemma rho_re_identity (δ : ℝ) :
     -Real.sin (Real.pi / 6 - δ * Real.pi / 6) + 1 / 2 =
       2 * Real.sin (δ * Real.pi / 12) * Real.cos (Real.pi / 6 - δ * Real.pi / 12) := by
@@ -180,7 +179,6 @@ private lemma arg_approach_rho_left_helper (hδ : 0 < δ) (hδ_small : δ < 1) :
       (sin_delta_pi_div_twelve_pos hδ (by linarith)))
     ⟨by nlinarith [Real.pi_pos], by nlinarith [Real.pi_pos]⟩
 
-
 private lemma g_seg3_value (H : ℝ) {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ ≤ 1) :
     fdBoundary_H H (3 + δ) - ellipticPointRho = ↑(δ * (H - Real.sqrt 3 / 2)) * I := by
   rw [fdBoundary_H_seg4 H (by linarith) (by linarith) (by linarith) (by linarith : 3 + δ ≤ 4)]
@@ -244,30 +242,30 @@ private lemma g_norm_ge_seg4 (H : ℝ) (hH : Real.sqrt 3 / 2 < H)
 
 private lemma ftc_logDeriv_telescope_rho (H : ℝ) (hH : Real.sqrt 3 / 2 < H)
     {δ_L δ_R : ℝ} (hδ_L : 0 < δ_L) (hδ_L1 : δ_L < 1) (hδ_R : 0 < δ_R) (hδ_R1 : δ_R < 1) :
-    let g := fun t => fdBoundary_H H t - (ellipticPointRho : ℂ)
-    IntervalIntegrable (fun t => deriv g t / g t) volume 0 (3 - δ_L) ∧
-    IntervalIntegrable (fun t => deriv g t / g t) volume (3 + δ_R) 5 ∧
+    let g := fun t ↦ fdBoundary_H H t - (ellipticPointRho : ℂ)
+    IntervalIntegrable (fun t ↦ deriv g t / g t) volume 0 (3 - δ_L) ∧
+    IntervalIntegrable (fun t ↦ deriv g t / g t) volume (3 + δ_R) 5 ∧
     ((∫ t in (0:ℝ)..(3 - δ_L), deriv g t / g t) + (∫ t in (3 + δ_R)..(5:ℝ), deriv g t / g t) =
     Complex.log (g (3 - δ_L)) - Complex.log (g (3 + δ_R))) := by
   intro g
   set ρ : ℂ := ellipticPointRho with hρ_def
   set h₀ : ℝ → ℂ :=
-    fun t => 1 + (↑H - ↑t * (↑H - ↑(Real.sqrt 3) / 2) - ↑(Real.sqrt 3) / 2) * I
-  set h₁ : ℝ → ℂ := fun t => exp (↑(Real.pi * (1 + t) / 6) * I) - ρ
-  set h₂ : ℝ → ℂ := fun t => ↑((t - 3) * (H - Real.sqrt 3 / 2)) * I
-  set h₃ : ℝ → ℂ := fun t => ↑(t - 4) + ↑(H - Real.sqrt 3 / 2) * I
-  have hg_eq_h₀ : ∀ t, t ≤ 1 → g t = h₀ t := fun t ht => by
+    fun t ↦ 1 + (↑H - ↑t * (↑H - ↑(Real.sqrt 3) / 2) - ↑(Real.sqrt 3) / 2) * I
+  set h₁ : ℝ → ℂ := fun t ↦ exp (↑(Real.pi * (1 + t) / 6) * I) - ρ
+  set h₂ : ℝ → ℂ := fun t ↦ ↑((t - 3) * (H - Real.sqrt 3 / 2)) * I
+  set h₃ : ℝ → ℂ := fun t ↦ ↑(t - 4) + ↑(H - Real.sqrt 3 / 2) * I
+  have hg_eq_h₀ : ∀ t, t ≤ 1 → g t = h₀ t := fun t ht ↦ by
     show fdBoundary_H H t - ρ = h₀ t
     rw [fdBoundary_H_seg1 H ht]
     simp only [hρ_def, ellipticPointRho, ellipticPointRho', UpperHalfPlane.coe_mk, h₀]; ring
-  have hg_eq_h₁ : ∀ t, 1 < t → t < 3 → g t = h₁ t := fun t ht1 ht3 =>
+  have hg_eq_h₁ : ∀ t, 1 < t → t < 3 → g t = h₁ t := fun t ht1 ht3 ↦
     show fdBoundary_H H t - ρ = h₁ t by rw [fdBoundary_H_eq_arc ht1 ht3]
-  have hg_eq_h₂ : ∀ t, 3 < t → t ≤ 4 → g t = h₂ t := fun t ht3 ht4 => by
+  have hg_eq_h₂ : ∀ t, 3 < t → t ≤ 4 → g t = h₂ t := fun t ht3 ht4 ↦ by
     show fdBoundary_H H t - ρ = h₂ t
     rw [fdBoundary_H_seg4 H (by linarith) (by linarith) (by linarith) ht4]
     simp only [hρ_def, ellipticPointRho, ellipticPointRho', UpperHalfPlane.coe_mk, h₂]
     push_cast; ring
-  have hg_eq_h₃ : ∀ t, 4 < t → g t = h₃ t := fun t ht4 => by
+  have hg_eq_h₃ : ∀ t, 4 < t → g t = h₃ t := fun t ht4 ↦ by
     show fdBoundary_H H t - ρ = h₃ t
     rw [fdBoundary_H_seg5 H (by linarith) (by linarith) (by linarith) (by linarith)]
     simp only [hρ_def, ellipticPointRho, ellipticPointRho', UpperHalfPlane.coe_mk, h₃]
@@ -291,9 +289,9 @@ private lemma ftc_logDeriv_telescope_rho (H : ℝ) (hH : Real.sqrt 3 / 2 < H)
     simp only [hρ_def, ellipticPointRho, ellipticPointRho', UpperHalfPlane.coe_mk, h₃]
     push_cast; ring
   have hg5 : g 5 = h₃ 5 := hg_eq_h₃ 5 (by norm_num)
-  have hd_h₀ : ∀ t : ℝ, HasDerivAt h₀ (-(↑(H - Real.sqrt 3 / 2) : ℂ) * I) t := fun t => by
+  have hd_h₀ : ∀ t : ℝ, HasDerivAt h₀ (-(↑(H - Real.sqrt 3 / 2) : ℂ) * I) t := fun t ↦ by
     set c : ℂ := ↑(H - Real.sqrt 3 / 2) * I
-    have h_eq : h₀ = fun (s : ℝ) => (1 + c) + (-c) * ↑s := by
+    have h_eq : h₀ = fun (s : ℝ) ↦ (1 + c) + (-c) * ↑s := by
       ext s; simp only [h₀, c]; push_cast; ring
     rw [h_eq, show -(↑(H - Real.sqrt 3 / 2) : ℂ) * I = -c by simp [c]; ring]
     exact ((Complex.ofRealCLM.hasDerivAt (x := t)).const_mul (-c)).const_add (1 + c)
@@ -306,37 +304,37 @@ private lemma ftc_logDeriv_telescope_rho (H : ℝ) (hH : Real.sqrt 3 / 2 < H)
   have hd_h₃ : ∀ t : ℝ, HasDerivAt h₃ 1 t :=
     hasDerivAt_seg5_line 4 (↑(H - Real.sqrt 3 / 2) * I)
   have heq_01 : ∀ t ∈ Ioo (0:ℝ) 1, g t = h₀ t ∧ deriv g t = deriv h₀ t :=
-    heq_deriv_of_eq_on_nhds (U := Iio (1:ℝ)) (fun _ ht => Iio_mem_nhds ht.2)
-      (fun s hs => hg_eq_h₀ s hs.le)
+    heq_deriv_of_eq_on_nhds (U := Iio (1:ℝ)) (fun _ ht ↦ Iio_mem_nhds ht.2)
+      (fun s hs ↦ hg_eq_h₀ s hs.le)
   have heq_1_3mδ : ∀ t ∈ Ioo (1:ℝ) (3 - δ_L),
       g t = h₁ t ∧ deriv g t = deriv h₁ t :=
     heq_deriv_of_eq_on_nhds (U := Ioo (1:ℝ) 3)
-      (fun _ ht => Ioo_mem_nhds ht.1 (by linarith [ht.2]))
-      (fun s hs => hg_eq_h₁ s hs.1 hs.2)
+      (fun _ ht ↦ Ioo_mem_nhds ht.1 (by linarith [ht.2]))
+      (fun s hs ↦ hg_eq_h₁ s hs.1 hs.2)
   have heq_3pδ_4 : ∀ t ∈ Ioo (3 + δ_R) (4:ℝ),
       g t = h₂ t ∧ deriv g t = deriv h₂ t :=
     heq_deriv_of_eq_on_nhds (U := Ioo (3:ℝ) 4)
-      (fun _ ht => Ioo_mem_nhds (by linarith [ht.1]) ht.2)
-      (fun s hs => hg_eq_h₂ s hs.1 hs.2.le)
+      (fun _ ht ↦ Ioo_mem_nhds (by linarith [ht.1]) ht.2)
+      (fun s hs ↦ hg_eq_h₂ s hs.1 hs.2.le)
   have heq_45 : ∀ t ∈ Ioo (4:ℝ) 5, g t = h₃ t ∧ deriv g t = deriv h₃ t :=
     heq_deriv_of_eq_on_nhds (U := Ioi (4:ℝ))
-      (fun _ ht => Ioi_mem_nhds ht.1) (fun s hs => hg_eq_h₃ s hs)
+      (fun _ ht ↦ Ioi_mem_nhds ht.1) (fun s hs ↦ hg_eq_h₃ s hs)
   have hh₀_cont : ContinuousOn h₀ (Icc 0 1) :=
-    fun t _ => (hd_h₀ t).continuousAt.continuousWithinAt
+    fun t _ ↦ (hd_h₀ t).continuousAt.continuousWithinAt
   have hh₁_cont : ContinuousOn h₁ (Icc 1 (3 - δ_L)) :=
-    fun t _ => (hd_h₁ t).continuousAt.continuousWithinAt
+    fun t _ ↦ (hd_h₁ t).continuousAt.continuousWithinAt
   have hh₂_cont : ContinuousOn h₂ (Icc (3 + δ_R) 4) :=
-    fun t _ => (hd_h₂ t).continuousAt.continuousWithinAt
+    fun t _ ↦ (hd_h₂ t).continuousAt.continuousWithinAt
   have hh₃_cont : ContinuousOn h₃ (Icc 4 5) :=
-    fun t _ => (hd_h₃ t).continuousAt.continuousWithinAt
+    fun t _ ↦ (hd_h₃ t).continuousAt.continuousWithinAt
   have hh₀_diff : ∀ t ∈ Ioo (0:ℝ) 1, DifferentiableAt ℝ h₀ t :=
-    fun t _ => (hd_h₀ t).differentiableAt
+    fun t _ ↦ (hd_h₀ t).differentiableAt
   have hh₁_diff : ∀ t ∈ Ioo (1:ℝ) (3 - δ_L), DifferentiableAt ℝ h₁ t :=
-    fun t _ => (hd_h₁ t).differentiableAt
+    fun t _ ↦ (hd_h₁ t).differentiableAt
   have hh₂_diff : ∀ t ∈ Ioo (3 + δ_R) (4:ℝ), DifferentiableAt ℝ h₂ t :=
-    fun t _ => (hd_h₂ t).differentiableAt
+    fun t _ ↦ (hd_h₂ t).differentiableAt
   have hh₃_diff : ∀ t ∈ Ioo (4:ℝ) 5, DifferentiableAt ℝ h₃ t :=
-    fun t _ => (hd_h₃ t).differentiableAt
+    fun t _ ↦ (hd_h₃ t).differentiableAt
   have hh₀_deriv_cont : ContinuousOn (deriv h₀) (Icc 0 1) :=
     continuousOn_deriv_of_const _ hd_h₀ 0 1
   have hh₁_deriv_cont : ContinuousOn (deriv h₁) (Icc 1 (3 - δ_L)) :=
@@ -345,18 +343,18 @@ private lemma ftc_logDeriv_telescope_rho (H : ℝ) (hH : Real.sqrt 3 / 2 < H)
     continuousOn_deriv_of_const _ hd_h₂ (3 + δ_R) 4
   have hh₃_deriv_cont : ContinuousOn (deriv h₃) (Icc 4 5) :=
     continuousOn_deriv_of_const _ hd_h₃ 4 5
-  have hh₀_slit : ∀ t ∈ Icc (0:ℝ) 1, h₀ t ∈ slitPlane := fun t ht => by
+  have hh₀_slit : ∀ t ∈ Icc (0:ℝ) 1, h₀ t ∈ slitPlane := fun t ht ↦ by
     rw [← hg_eq_h₀ t ht.2]; exact fdBoundary_H_sub_rho_seg0_slitPlane H ht.2
-  have hh₁_slit : ∀ t ∈ Icc (1:ℝ) (3 - δ_L), h₁ t ∈ slitPlane := fun t ⟨ht1, ht3⟩ => by
+  have hh₁_slit : ∀ t ∈ Icc (1:ℝ) (3 - δ_L), h₁ t ∈ slitPlane := fun t ⟨ht1, ht3⟩ ↦ by
     rcases eq_or_lt_of_le ht1 with rfl | ht1'
     · rw [← hg1_1]
       exact fdBoundary_H_sub_rho_slitPlane H hH ⟨by norm_num, by linarith⟩ (by linarith)
     · rw [← hg_eq_h₁ t ht1' (by linarith)]
       exact fdBoundary_H_sub_rho_slitPlane H hH ⟨by linarith, by linarith⟩ (by linarith)
-  have hh₂_slit : ∀ t ∈ Icc (3 + δ_R) (4:ℝ), h₂ t ∈ slitPlane := fun t ⟨ht3, ht4⟩ => by
+  have hh₂_slit : ∀ t ∈ Icc (3 + δ_R) (4:ℝ), h₂ t ∈ slitPlane := fun t ⟨ht3, ht4⟩ ↦ by
     rw [← hg_eq_h₂ t (by linarith) ht4]
     exact fdBoundary_H_sub_rho_slitPlane H hH ⟨by linarith, by linarith⟩ (by linarith)
-  have hh₃_slit : ∀ t ∈ Icc (4:ℝ) 5, h₃ t ∈ slitPlane := fun t ⟨ht4, ht5⟩ => by
+  have hh₃_slit : ∀ t ∈ Icc (4:ℝ) 5, h₃ t ∈ slitPlane := fun t ⟨ht4, ht5⟩ ↦ by
     rcases eq_or_lt_of_le ht4 with rfl | ht4'
     · rw [← hg4_3]
       exact fdBoundary_H_sub_rho_slitPlane H hH ⟨by norm_num, by norm_num⟩ (by norm_num)
@@ -373,8 +371,8 @@ private lemma ftc_logDeriv_telescope_rho (H : ℝ) (hH : Real.sqrt 3 / 2 < H)
   have piece₃ := ftc_log_pieceFM (by norm_num : (4:ℝ) ≤ 5)
     hh₃_cont hh₃_diff hh₃_deriv_cont hh₃_slit heq_45 hg4_3 hg5
   refine ⟨piece₀.1.trans piece₁.1, piece₂.1.trans piece₃.1, ?_⟩
-  rw [(intervalIntegral.integral_add_adjacent_intervals piece₀.1 piece₁.1).symm,
-      (intervalIntegral.integral_add_adjacent_intervals piece₂.1 piece₃.1).symm,
+  rw [← intervalIntegral.integral_add_adjacent_intervals piece₀.1 piece₁.1,
+      ← intervalIntegral.integral_add_adjacent_intervals piece₂.1 piece₃.1,
       piece₀.2, piece₁.2, piece₂.2, piece₃.2]
   have hg_closed : g 0 = g 5 := fdBoundary_H_sub_closed H ρ
   rw [hg_closed]
@@ -404,9 +402,9 @@ private lemma norm_le_middle_rho (H : ℝ) (hH : Real.sqrt 3 / 2 < H)
         ← h_norm_R, g_norm_seg3 H hH hδ_R_pos (le_of_lt hδ_R_lt_one)]
     exact mul_le_mul_of_nonneg_right (by linarith : t - 3 ≤ δ_R) hH_gap.le
 
-private def δ_L_rho : ℝ → ℝ := fun ε => 12 / Real.pi * Real.arcsin (ε / 2)
+private def δ_L_rho : ℝ → ℝ := fun ε ↦ 12 / Real.pi * Real.arcsin (ε / 2)
 
-private def δ_R_rho (H : ℝ) : ℝ → ℝ := fun ε => ε / (H - Real.sqrt 3 / 2)
+private def δ_R_rho (H : ℝ) : ℝ → ℝ := fun ε ↦ ε / (H - Real.sqrt 3 / 2)
 
 private lemma δ_rho_props (H : ℝ) {ε : ℝ} (hε_pos : 0 < ε)
     (hε_lt : ε < min (H - Real.sqrt 3 / 2) (2 * Real.sin (Real.pi / 12))) :
@@ -431,7 +429,7 @@ private lemma δ_rho_props (H : ℝ) {ε : ℝ} (hε_pos : 0 < ε)
     by linarith, by linarith, harcsin_lt, hδL_angle⟩
 
 private lemma pv_norm_bounds_rho (H : ℝ) (hH : Real.sqrt 3 / 2 < H) :
-    let g := fun t => fdBoundary_H H t - (ellipticPointRho : ℂ)
+    let g := fun t ↦ fdBoundary_H H t - (ellipticPointRho : ℂ)
     let threshold := min (H - Real.sqrt 3 / 2) (2 * Real.sin (Real.pi / 12))
     (∀ ε : ℝ, 0 < ε → ε < threshold → ∀ t ∈ Ico (0 : ℝ) (3 - δ_L_rho ε), ε < ‖g t - 0‖) ∧
     (∀ ε : ℝ, 0 < ε → ε < threshold → ∀ t ∈ Ioc (3 + δ_R_rho H ε) (5 : ℝ), ε < ‖g t - 0‖) ∧
@@ -485,19 +483,19 @@ private lemma pv_norm_bounds_rho (H : ℝ) (hH : Real.sqrt 3 / 2 < H) :
       (h_norm_L ε hε_pos hε_lt) (h_norm_R ε hε_pos hε_lt) hH_gap t ht_lo ht_hi)
 
 private lemma pv_integrals_rho (H : ℝ) (hH : Real.sqrt 3 / 2 < H) :
-    let g := fun t => fdBoundary_H H t - (ellipticPointRho : ℂ)
+    let g := fun t ↦ fdBoundary_H H t - (ellipticPointRho : ℂ)
     let threshold := min (H - Real.sqrt 3 / 2) (2 * Real.sin (Real.pi / 12))
     (∀ ε : ℝ, 0 < ε → ε < threshold →
       (∫ t in (0:ℝ)..(3 - δ_L_rho ε), (g t - 0)⁻¹ * deriv g t) +
       (∫ t in (3 + δ_R_rho H ε)..(5:ℝ), (g t - 0)⁻¹ * deriv g t) =
       Complex.log (g (3 - δ_L_rho ε)) - Complex.log (g (3 + δ_R_rho H ε))) ∧
     (∀ ε : ℝ, 0 < ε → ε < threshold →
-      IntervalIntegrable (fun t => (g t - 0)⁻¹ * deriv g t) volume 0 (3 - δ_L_rho ε)) ∧
+      IntervalIntegrable (fun t ↦ (g t - 0)⁻¹ * deriv g t) volume 0 (3 - δ_L_rho ε)) ∧
     (∀ ε : ℝ, 0 < ε → ε < threshold →
-      IntervalIntegrable (fun t => (g t - 0)⁻¹ * deriv g t) volume (3 + δ_R_rho H ε) 5) := by
+      IntervalIntegrable (fun t ↦ (g t - 0)⁻¹ * deriv g t) volume (3 + δ_R_rho H ε) 5) := by
   intro g _threshold
   have key : ∀ t : ℝ, (g t - 0)⁻¹ * deriv g t = deriv g t / g t :=
-    fun t => by simp only [sub_zero, div_eq_mul_inv, mul_comm]
+    fun t ↦ by simp only [sub_zero, div_eq_mul_inv, mul_comm]
   refine ⟨?_, ?_, ?_⟩
   · intro ε hε_pos hε_lt
     obtain ⟨h1, h2, h3, h4, _⟩ := δ_rho_props H hε_pos hε_lt
@@ -514,10 +512,10 @@ private lemma pv_integrals_rho (H : ℝ) (hH : Real.sqrt 3 / 2 < H) :
       (by norm_num : (0:ℝ) < 1/2) (by norm_num : (1/2:ℝ) < 1) h3 h4).2.1
 
 private lemma pv_log_limit_at_rho (H : ℝ) (hH : Real.sqrt 3 / 2 < H) :
-    let g := fun t => fdBoundary_H H t - (ellipticPointRho : ℂ)
+    let g := fun t ↦ fdBoundary_H H t - (ellipticPointRho : ℂ)
     let δ_L : ℝ → ℝ := δ_L_rho
     let δ_R : ℝ → ℝ := δ_R_rho H
-    Tendsto (fun ε => Complex.log (g (3 - δ_L ε)) - Complex.log (g (3 + δ_R ε)))
+    Tendsto (fun ε ↦ Complex.log (g (3 - δ_L ε)) - Complex.log (g (3 + δ_R ε)))
       (nhdsWithin 0 (Ioi 0)) (nhds (-(I * ↑Real.pi / 3))) := by
   intro g δ_L δ_R
   have hH_gap : 0 < H - Real.sqrt 3 / 2 := by linarith
@@ -561,11 +559,11 @@ private lemma pv_log_limit_at_rho (H : ℝ) (hH : Real.sqrt 3 / 2 < H) :
 
 /-- The PV integral of `(γ-ρ)⁻¹ γ'` over `[0,5]` with ε-ball cutoff tends to `-iπ/3`. -/
 theorem pv_integral_at_rho_tendsto (H : ℝ) (hH : Real.sqrt 3 / 2 < H) :
-    Tendsto (fun ε => ∫ t in (0:ℝ)..5, if ‖fdBoundary_H H t - ellipticPointRho‖ > ε
+    Tendsto (fun ε ↦ ∫ t in (0:ℝ)..5, if ‖fdBoundary_H H t - ellipticPointRho‖ > ε
       then (fdBoundary_H H t - ellipticPointRho)⁻¹ *
-           deriv (fun s => fdBoundary_H H s - ellipticPointRho) t
+           deriv (fun s ↦ fdBoundary_H H s - ellipticPointRho) t
       else 0) (𝓝[>] 0) (𝓝 (-(I * ↑Real.pi / 3))) := by
-  set g := fun t => fdBoundary_H H t - (ellipticPointRho : ℂ) with hg_def
+  set g := fun t ↦ fdBoundary_H H t - (ellipticPointRho : ℂ) with hg_def
   have hH_gap : 0 < H - Real.sqrt 3 / 2 := by linarith
   have h2sin_pos := two_sin_pi_div_twelve_pos
   let δ_L : ℝ → ℝ := δ_L_rho
@@ -577,18 +575,18 @@ theorem pv_integral_at_rho_tendsto (H : ℝ) (hH : Real.sqrt 3 / 2 < H) :
     (γ := g) (a := 0) (b := 5) (s := 0) (L := -(I * ↑Real.pi / 3))
     (t₀ := 3) (by constructor <;> norm_num : (3 : ℝ) ∈ Ioo 0 5)
     (δ_left := δ_L) (δ_right := δ_R) (lt_min hH_gap h2sin_pos)
-    (fun ε hp hl => (δ_rho_props H hp hl).1)
-    (fun ε hp hl => (δ_rho_props H hp hl).2.2.1)
-    (fun ε hp hl => by simp only [sub_zero]; linarith [(δ_rho_props H hp hl).2.1])
-    (fun ε hp hl => by linarith [(δ_rho_props H hp hl).2.2.2.1])
+    (fun ε hp hl ↦ (δ_rho_props H hp hl).1)
+    (fun ε hp hl ↦ (δ_rho_props H hp hl).2.2.1)
+    (fun ε hp hl ↦ by simp only [sub_zero]; linarith [(δ_rho_props H hp hl).2.1])
+    (fun ε hp hl ↦ by linarith [(δ_rho_props H hp hl).2.2.2.1])
     h_far_left h_far_right h_near
-    (E := fun ε => Complex.log (g (3 - δ_L ε)) - Complex.log (g (3 + δ_R ε)))
+    (E := fun ε ↦ Complex.log (g (3 - δ_L ε)) - Complex.log (g (3 + δ_R ε)))
     h_ftc_api hint_left hint_right (pv_log_limit_at_rho H hH)
-  have h_eq : (fun ε => ∫ t in (0:ℝ)..5,
+  have h_eq : (fun ε ↦ ∫ t in (0:ℝ)..5,
       if ‖fdBoundary_H H t - ellipticPointRho‖ > ε
       then (fdBoundary_H H t - ellipticPointRho)⁻¹ *
-           deriv (fun s => fdBoundary_H H s - ellipticPointRho) t
-      else 0) = (fun ε => ∫ t in (0:ℝ)..5,
+           deriv (fun s ↦ fdBoundary_H H s - ellipticPointRho) t
+      else 0) = (fun ε ↦ ∫ t in (0:ℝ)..5,
       if ‖g t - 0‖ > ε then (g t - 0)⁻¹ * deriv g t else 0) := by
     funext ε; congr 1; funext t; simp only [hg_def, sub_zero]
   rw [h_eq]; exact h_tendsto
