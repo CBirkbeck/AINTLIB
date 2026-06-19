@@ -322,7 +322,7 @@ private theorem prod_galoisCharacter_one_sub {G : Type*} [CommGroup G] [Finite G
     have hkereq : Nat.card (charEval σ).ker = Nat.card G / f := charEval_ker_card σ
     rw [hkereq] at hcardG
     exact Nat.eq_of_mul_eq_mul_right (hkereq ▸ Nat.card_pos)
-      (by rw [← hcardG, ← (Nat.mul_div_cancel' hdvd).symm])
+      (by rw [← hcardG, Nat.mul_div_cancel' hdvd])
   have himg : Finset.univ.image evC = t :=
     Finset.eq_of_subset_of_card_le hsub
       (by rw [himgcard, ht, (Complex.isPrimitiveRoot_exp f hfpos.ne').card_nthRootsFinset])
@@ -1306,7 +1306,6 @@ private theorem abs_sub_kappa_mul_div_le {N Nb : ℕ} {RCb κ₀ C₀ α e₂ : 
     _ ≤ C₀ * ((N : ℝ) ^ α * (Nb : ℝ) ^ e₂) + |κ₀| := by rw [mul_one]; gcongr
     _ = C₀ * (N : ℝ) ^ α * (Nb : ℝ) ^ e₂ + |κ₀| := by ring
 
-open UniqueFactorizationMonoid in
 /-- **The bad-part inverse-norm tail bound.** With `e₂ = 1/d − 1 < 0`, the bad-part partial sum
 `T_N = ∑_{𝔟 ∈ badFinset N} (N𝔟)⁻¹` converges to `T = ⨆_N T_N` with tail
 `T − T_N ≤ N^{−1/d}·E₂`, where `E₂` bounds the `e₂`-Euler sum (`hEuler`). On the difference set
@@ -1369,7 +1368,6 @@ private theorem ciSup_sum_inv_absNorm_sub_le
   · have : Tfun M ≤ Tfun N := hTmono hMN.le
     nlinarith [mul_nonneg hNrpow_nn hE₂nn]
 
-open UniqueFactorizationMonoid in
 /-- **The bad-part finset cardinality bound** `|badFinset N| ≤ N^α·E₂` (with `α = -e₂`). Each
 `𝔟 ∈ badFinset N` has `N𝔟 ≤ N`, so `1 = (N𝔟)^α·(N𝔟)^{e₂} ≤ N^α·(N𝔟)^{e₂}`; summing the constant
 `1` over the finset and bounding by the `e₂`-Euler sum `E₂` (`hsumE₂`) gives the result. -/
@@ -1437,8 +1435,8 @@ private theorem card_fibre_bound_two_le {ζ : L} (hζ : IsPrimitiveRoot ζ m)
   have hN𝔭2 : ∀ 𝔭 ∈ P, (2 : ℝ) ≤ (Ideal.absNorm 𝔭 : ℝ) := by
     intro 𝔭 h𝔭
     rw [hP, Set.Finite.mem_toFinset] at h𝔭
-    have h1 : Ideal.absNorm 𝔭 ≠ 1 := fun h => h𝔭.1.ne_top (Ideal.absNorm_eq_one_iff.mp h)
-    have h0 : Ideal.absNorm 𝔭 ≠ 0 := fun h => h𝔭.2.1 (Ideal.absNorm_eq_zero_iff.mp h)
+    have h1 : Ideal.absNorm 𝔭 ≠ 1 := fun h ↦ h𝔭.1.ne_top (Ideal.absNorm_eq_one_iff.mp h)
+    have h0 : Ideal.absNorm 𝔭 ≠ 0 := fun h ↦ h𝔭.2.1 (Ideal.absNorm_eq_zero_iff.mp h)
     exact_mod_cast (show 2 ≤ Ideal.absNorm 𝔭 by lia)
   have hxlt : ∀ e : ℝ, e < 0 → ∀ 𝔭 ∈ P, ((Ideal.absNorm 𝔭 : ℝ)) ^ e < 1 := by
     intro e he 𝔭 h𝔭
@@ -1449,44 +1447,44 @@ private theorem card_fibre_bound_two_le {ζ : L} (hζ : IsPrimitiveRoot ζ m)
   set E₂ : ℝ := ∏ 𝔭 ∈ P, (1 - ((Ideal.absNorm 𝔭 : ℝ)) ^ e₂)⁻¹ with hE₂
   obtain ⟨κ₀, C₀, hunif⟩ := exists_kappa_uniform K L m hζ
   set Tfun : ℕ → ℝ :=
-    fun N => ∑ 𝔟 ∈ (finite_isBadPart K L m N).toFinset, ((Ideal.absNorm 𝔟 : ℝ))⁻¹ with hTfun
+    fun N ↦ ∑ 𝔟 ∈ (finite_isBadPart K L m N).toFinset, ((Ideal.absNorm 𝔟 : ℝ))⁻¹ with hTfun
   have hTfun_eq : ∀ N, Tfun N
       = ∑ 𝔟 ∈ (finite_isBadPart K L m N).toFinset, ((Ideal.absNorm 𝔟 : ℝ)) ^ (-1 : ℝ) := by
     intro N
-    rw [hTfun]; refine Finset.sum_congr rfl fun 𝔟 _ => ?_
+    rw [hTfun]; refine Finset.sum_congr rfl fun 𝔟 _ ↦ ?_
     rw [Real.rpow_neg_one]
-  have hTbdd : ∀ N, Tfun N ≤ E₁ := fun N => by
+  have hTbdd : ∀ N, Tfun N ≤ E₁ := fun N ↦ by
     rw [hTfun_eq N]; exact sum_rpow_badFinset_le K L m N (-1) hxlt1
   have hTmono : Monotone Tfun := by
     intro N M hNM
     exact Finset.sum_le_sum_of_subset_of_nonneg (badFinset_subset_of_le K L m hNM)
-      (fun 𝔟 _ _ => by positivity)
+      (fun 𝔟 _ _ ↦ by positivity)
   set T : ℝ := ⨆ N, Tfun N
-  have hTbddAbove : BddAbove (Set.range Tfun) := ⟨E₁, fun y ⟨N, hN⟩ => hN ▸ hTbdd N⟩
-  have hTfun_le_T : ∀ N, Tfun N ≤ T := fun N => le_ciSup hTbddAbove N
+  have hTbddAbove : BddAbove (Set.range Tfun) := ⟨E₁, fun y ⟨N, hN⟩ ↦ hN ▸ hTbdd N⟩
+  have hTfun_le_T : ∀ N, Tfun N ≤ T := fun N ↦ le_ciSup hTbddAbove N
   have hE₂nn : 0 ≤ E₂ := by
-    rw [hE₂]; refine Finset.prod_nonneg fun 𝔭 h𝔭 => ?_
+    rw [hE₂]; refine Finset.prod_nonneg fun 𝔭 h𝔭 ↦ ?_
     have := hxlt2 𝔭 h𝔭; positivity
-  have htail : ∀ N : ℕ, 1 ≤ N → T - Tfun N ≤ (N : ℝ) ^ (-(d : ℝ)⁻¹) * E₂ := fun N hN1 =>
+  have htail : ∀ N : ℕ, 1 ≤ N → T - Tfun N ≤ (N : ℝ) ^ (-(d : ℝ)⁻¹) * E₂ := fun N hN1 ↦
     ciSup_sum_inv_absNorm_sub_le K L m he₂ hE₂nn
-      (fun M => sum_rpow_badFinset_le K L m M e₂ hxlt2) N hN1
-  refine ⟨κ₀ * T, (C₀ + 2 * |κ₀|) * E₂, fun g N hN1 => ?_⟩
+      (fun M ↦ sum_rpow_badFinset_le K L m M e₂ hxlt2) N hN1
+  refine ⟨κ₀ * T, (C₀ + 2 * |κ₀|) * E₂, fun g N hN1 ↦ ?_⟩
   have hNposR : (0 : ℝ) < (N : ℝ) := by exact_mod_cast hN1
   have hNα_nn : (0 : ℝ) ≤ (N : ℝ) ^ α := Real.rpow_nonneg (Nat.cast_nonneg N) _
   rw [card_L2_eq_sum_residue K L m hζ g N, Nat.cast_sum]
   set a : Ideal (𝓞 K) → (ZMod m)ˣ :=
-    fun 𝔟 => hζ.autToPow K (g * (frobeniusIdeal K L 𝔟)⁻¹)
-  set RC : Ideal (𝓞 K) → ℝ := fun 𝔟 =>
+    fun 𝔟 ↦ hζ.autToPow K (g * (frobeniusIdeal K L 𝔟)⁻¹)
+  set RC : Ideal (𝓞 K) → ℝ := fun 𝔟 ↦
     (Nat.card {I : (Ideal (𝓞 K))⁰ // Ideal.absNorm (I : Ideal (𝓞 K)) ≤ N / Ideal.absNorm 𝔟 ∧
       ((Ideal.absNorm (I : Ideal (𝓞 K)) : ZMod m)) = ((a 𝔟 : (ZMod m)ˣ) : ZMod m)} : ℝ)
   change |(∑ 𝔟 ∈ (finite_isBadPart K L m N).toFinset, RC 𝔟) - κ₀ * T * (N : ℝ)| ≤ _
-  have hamem : ∀ 𝔟, a 𝔟 ∈ (hζ.autToPow K).range := fun 𝔟 => ⟨_, rfl⟩
+  have hamem : ∀ 𝔟, a 𝔟 ∈ (hζ.autToPow K).range := fun 𝔟 ↦ ⟨_, rfl⟩
   have hC₀nn : 0 ≤ C₀ := by
     have h := hunif 1 (one_mem _) 1 (le_refl 1)
     simp only [Nat.cast_one, Real.one_rpow, mul_one] at h
     exact le_trans (abs_nonneg _) h
   have hbadmem : ∀ 𝔟 ∈ (finite_isBadPart K L m N).toFinset,
-      𝔟 ≠ ⊥ ∧ Ideal.absNorm 𝔟 ≤ N := fun 𝔟 h𝔟 => by
+      𝔟 ≠ ⊥ ∧ Ideal.absNorm 𝔟 ≤ N := fun 𝔟 h𝔟 ↦ by
     rw [Set.Finite.mem_toFinset] at h𝔟; exact ⟨h𝔟.1, h𝔟.2.2⟩
   have hperbad : ∀ 𝔟 ∈ (finite_isBadPart K L m N).toFinset,
       |RC 𝔟 - κ₀ * ((N : ℝ) / (Ideal.absNorm 𝔟 : ℝ))|
@@ -1494,13 +1492,13 @@ private theorem card_fibre_bound_two_le {ζ : L} (hζ : IsPrimitiveRoot ζ m)
     intro 𝔟 h𝔟
     obtain ⟨hb0, hbN⟩ := hbadmem 𝔟 h𝔟
     have hbpos : 0 < Ideal.absNorm 𝔟 :=
-      Nat.pos_of_ne_zero fun h => hb0 (Ideal.absNorm_eq_zero_iff.mp h)
+      Nat.pos_of_ne_zero fun h ↦ hb0 (Ideal.absNorm_eq_zero_iff.mp h)
     exact abs_sub_kappa_mul_div_le hbpos hαnn hαe₂ hC₀nn
       (hunif (a 𝔟) (hamem 𝔟) _ ((Nat.one_le_div_iff hbpos).mpr hbN))
   have hsum_div : ∑ 𝔟 ∈ (finite_isBadPart K L m N).toFinset, (N : ℝ) / (Ideal.absNorm 𝔟 : ℝ)
       = (N : ℝ) * Tfun N := by
     rw [hTfun, Finset.mul_sum]
-    refine Finset.sum_congr rfl fun 𝔟 _ => ?_
+    refine Finset.sum_congr rfl fun 𝔟 _ ↦ ?_
     rw [div_eq_mul_inv]
   have hsumE₂ : ∑ 𝔟 ∈ (finite_isBadPart K L m N).toFinset, ((Ideal.absNorm 𝔟 : ℝ)) ^ e₂ ≤ E₂ :=
     sum_rpow_badFinset_le K L m N e₂ hxlt2
@@ -1593,7 +1591,7 @@ private theorem associated_natCast_sub_one_pow {A : Type*} [CommRing A] [IsDomai
 private theorem two_le_pow_mul_pred {p k : ℕ} (hp : p.Prime) (hbad : ¬ (p = 2 ∧ k = 0)) :
     2 ≤ p ^ k * (p - 1) := by
   rcases eq_or_ne p 2 with rfl | hp2
-  · have hk : 1 ≤ k := Nat.one_le_iff_ne_zero.mpr fun h => hbad ⟨rfl, h⟩
+  · have hk : 1 ≤ k := Nat.one_le_iff_ne_zero.mpr fun h ↦ hbad ⟨rfl, h⟩
     calc 2 = 2 ^ 1 * (2 - 1) := by norm_num
       _ ≤ 2 ^ k * (2 - 1) := Nat.mul_le_mul_right _ (Nat.pow_le_pow_right (by norm_num) hk)
   · have hp3 : 3 ≤ p := hp.two_le.lt_of_ne (Ne.symm hp2)
@@ -1609,7 +1607,7 @@ private theorem factorization_two_ne_one_of_mod_four {m : ℕ} (hm0 : m ≠ 0) (
     have h : (2 : ℕ) ^ 1 ∣ m :=
       (Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hm0).mpr (by lia)
     simpa using h
-  have h4ndvd : ¬ 4 ∣ m := fun h4 =>
+  have h4ndvd : ¬ 4 ∣ m := fun h4 ↦
     absurd ((Nat.Prime.pow_dvd_iff_le_factorization Nat.prime_two hm0).mp
       (by rwa [show (4 : ℕ) = 2 ^ 2 by norm_num] at h4)) (by lia)
   exact hm (by omega)
@@ -1627,7 +1625,7 @@ private theorem span_singleton_natCast_eq_of_finrank_eq_one
   have hle : Ideal.span {(p : 𝓞 K)} ≤ 𝔭 := (Ideal.span_singleton_le_iff_mem _).mpr hmem
   obtain ⟨C, hC⟩ := Ideal.dvd_iff_le.mpr hle
   have hNmul : Ideal.absNorm 𝔭 * Ideal.absNorm C = p := by rw [← map_mul, ← hC, hNspan]
-  have hN𝔭1 : Ideal.absNorm 𝔭 ≠ 1 := fun h => ‹𝔭.IsPrime›.ne_top (Ideal.absNorm_eq_one_iff.mp h)
+  have hN𝔭1 : Ideal.absNorm 𝔭 ≠ 1 := fun h ↦ ‹𝔭.IsPrime›.ne_top (Ideal.absNorm_eq_one_iff.mp h)
   have hN𝔭eq : Ideal.absNorm 𝔭 = p :=
     (Nat.Prime.eq_one_or_self_of_dvd hp _ ⟨_, hNmul.symm⟩).resolve_left hN𝔭1
   have hNC1 : Ideal.absNorm C = 1 := by
@@ -1714,7 +1712,7 @@ private theorem coprime_absNorm_of_unramified_of_finrank_eq_one
     exact dvd_trans (pow_dvd_pow 𝔓 hφ2) (pow_dvd_pow_of_dvd hdvd1 _)
   simpa using pow_sub_one_dvd_differentIdeal (𝓞 K) 𝔓 2 h𝔭 hdvd2
 
-open UniqueFactorizationMonoid nonZeroDivisors in
+open UniqueFactorizationMonoid in
 /-- **The L2 fibre bound, `d = 1` branch.** When `[K : ℚ] = 1` the bad-prime set is empty, so the
 bad-part set is the single ideal `⊤` (`badFinset N = {⊤}`) and the L2 count is one good-fibre count
 `RC(autToPow g, N)`, bounded directly by the `g`-uniform estimate (`exists_kappa_uniform`) with
@@ -1728,11 +1726,11 @@ private theorem card_fibre_bound_eq_one {ζ : L} (hζ : IsPrimitiveRoot ζ m)
         ≤ C' * (N : ℝ) ^ (1 - (Module.finrank ℚ K : ℝ)⁻¹) := by
   classical
   obtain ⟨κ₀, C₀, hunif⟩ := exists_kappa_uniform K L m hζ
-  refine ⟨κ₀, C₀, fun g N hN1 => ?_⟩
+  refine ⟨κ₀, C₀, fun g N hN1 ↦ ?_⟩
   have hbadtop : (finite_isBadPart K L m N).toFinset = {⊤} := by
-    refine Finset.eq_singleton_iff_unique_mem.mpr ⟨?_, fun 𝔟 h𝔟 => ?_⟩
+    refine Finset.eq_singleton_iff_unique_mem.mpr ⟨?_, fun 𝔟 h𝔟 ↦ ?_⟩
     · rw [Set.Finite.mem_toFinset]
-      refine ⟨by rw [Ne, ← Ideal.one_eq_top]; exact one_ne_zero, fun 𝔭 h𝔭 => ?_, ?_⟩
+      refine ⟨by rw [Ne, ← Ideal.one_eq_top]; exact one_ne_zero, fun 𝔭 h𝔭 ↦ ?_, ?_⟩
       · rw [← Ideal.one_eq_top, normalizedFactors_one] at h𝔭
         exact absurd h𝔭 (Multiset.notMem_zero _)
       · rw [Ideal.absNorm_top]; exact hN1
@@ -1825,13 +1823,13 @@ private theorem card_unramifiedSupported_frobeniusValueFibre_eq_sum
       Finite {𝔞 : Ideal (𝓞 K) //
         𝔞 ≠ ⊥ ∧ Ideal.absNorm 𝔞 ≤ N ∧
           (∀ 𝔭 ∈ UniqueFactorizationMonoid.normalizedFactors 𝔞, UnramifiedIn K L 𝔭) ∧
-            frobeniusIdeal K L 𝔞 = g.1} := fun g =>
+            frobeniusIdeal K L 𝔞 = g.1} := fun g ↦
     Finite.of_injective
-      (fun a => (⟨a.1, a.2.2.1⟩ : {𝔞 : Ideal (𝓞 K) // Ideal.absNorm 𝔞 ≤ N}))
-      (fun _ _ hab => by ext1; simpa using hab)
+      (fun a ↦ (⟨a.1, a.2.2.1⟩ : {𝔞 : Ideal (𝓞 K) // Ideal.absNorm 𝔞 ≤ N}))
+      (fun _ _ hab ↦ by ext1; simpa using hab)
   rw [← Nat.card_sigma]
   refine (Nat.card_congr (Equiv.ofBijective
-    (fun a => (⟨a.2.1, a.2.2.1, a.2.2.2.1, a.2.2.2.2.1, by rw [a.2.2.2.2.2]; exact a.1.2⟩ :
+    (fun a ↦ (⟨a.2.1, a.2.2.1, a.2.2.2.1, a.2.2.2.2.1, by rw [a.2.2.2.2.2]; exact a.1.2⟩ :
       {𝔞 : Ideal (𝓞 K) //
         𝔞 ≠ ⊥ ∧ Ideal.absNorm 𝔞 ≤ N ∧
           (∀ 𝔭 ∈ UniqueFactorizationMonoid.normalizedFactors 𝔞, UnramifiedIn K L 𝔭) ∧
@@ -1882,7 +1880,7 @@ theorem exists_card_galoisCharacterOnIdeal_eq_const_mul_add_pow
   classical
   obtain ⟨κ, C₂, hL2⟩ := exists_card_frobeniusIdeal_fibre_sub_kappa_mul_le K L m hm
   set κ₀ : ℕ := Nat.card (MonoidHom.ker χ) with hκ₀
-  refine ⟨(κ₀ : ℝ) * κ, (κ₀ : ℝ) * C₂, fun ζ hζ N hN => ?_⟩
+  refine ⟨(κ₀ : ℝ) * κ, (κ₀ : ℝ) * C₂, fun ζ hζ N hN ↦ ?_⟩
   set P : ℝ := (N : ℝ) ^ (1 - (Module.finrank ℚ K : ℝ)⁻¹) with hP
   have hord : 0 < orderOf χ := orderOf_pos_iff.mpr (isOfFinOrder_of_finite χ)
   have hζ0 : ζ ≠ 0 := by
@@ -1914,7 +1912,7 @@ theorem exists_card_galoisCharacterOnIdeal_eq_const_mul_add_pow
     have heq : {g : Gal(L/K) // (χ g : ℂ) = ζ} = {g : Gal(L/K) // χ g = ζu} := by
       congr 1; ext g
       rw [← hζuval]
-      exact ⟨fun h => Units.ext h, fun h => congrArg Units.val h⟩
+      exact ⟨fun h ↦ Units.ext h, fun h ↦ congrArg Units.val h⟩
     rw [heq]
     letI : CommGroup Gal(L/K) := { mul_comm := mul_comm' }
     exact card_charFibre_eq_card_ker χ ζu hζun
@@ -1942,7 +1940,7 @@ theorem exists_card_galoisCharacterOnIdeal_eq_const_mul_add_pow
                 frobeniusIdeal K L 𝔞 = g.1} : ℝ) - κ * N| :=
           Finset.abs_sum_le_sum_abs _ _
     _ ≤ ∑ _g : {g : Gal(L/K) // (χ g : ℂ) = ζ}, C₂ * P :=
-          Finset.sum_le_sum fun g _ => hL2 g.1 N hN
+          Finset.sum_le_sum fun g _ ↦ hL2 g.1 N hN
     _ = (κ₀ : ℝ) * C₂ * P := by
           rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul, hcardℝ]; ring
 
@@ -2516,7 +2514,7 @@ convergence (`summable_norm_primeIdeal_factor_sub_one`), and the value is pinned
 prime-ideal Euler product `dedekindZeta_eq_tprod_primeIdeal`. -/
 private theorem hasProd_primeIdeal_factor
     (L : Type*) [Field L] [NumberField L] {s : ℂ} (hs : 1 < s.re) :
-    HasProd (fun 𝔓 : {𝔓 : Ideal (𝓞 L) // 𝔓.IsPrime ∧ 𝔓 ≠ ⊥} =>
+    HasProd (fun 𝔓 : {𝔓 : Ideal (𝓞 L) // 𝔓.IsPrime ∧ 𝔓 ≠ ⊥} ↦
         (1 - (Ideal.absNorm 𝔓.1 : ℂ) ^ (-s))⁻¹) (NumberField.dedekindZeta L s) := by
   have hmul : Multipliable fun 𝔓 : {𝔓 : Ideal (𝓞 L) // 𝔓.IsPrime ∧ 𝔓 ≠ ⊥} ↦
       (1 - (Ideal.absNorm 𝔓.1 : ℂ) ^ (-s))⁻¹ := by
@@ -2534,7 +2532,7 @@ then rebuild multipliability with `multipliable_one_add_of_summable`.) -/
 private theorem multipliable_primeIdeal_factor_subtype
     (L : Type*) [Field L] [NumberField L] {s : ℂ} (hs : 1 < s.re)
     (p : {𝔓 : Ideal (𝓞 L) // 𝔓.IsPrime ∧ 𝔓 ≠ ⊥} → Prop) :
-    Multipliable fun 𝔓 : {𝔓 : {𝔓 : Ideal (𝓞 L) // 𝔓.IsPrime ∧ 𝔓 ≠ ⊥} // p 𝔓} =>
+    Multipliable fun 𝔓 : {𝔓 : {𝔓 : Ideal (𝓞 L) // 𝔓.IsPrime ∧ 𝔓 ≠ ⊥} // p 𝔓} ↦
       (1 - (Ideal.absNorm 𝔓.1.1 : ℂ) ^ (-s))⁻¹ := by
   have hsum : Summable ((fun 𝔓 : {𝔓 : Ideal (𝓞 L) // 𝔓.IsPrime ∧ 𝔓 ≠ ⊥} ↦
       ‖(1 - (Ideal.absNorm 𝔓.1 : ℂ) ^ (-s))⁻¹ - 1‖) ∘ (↑) :
@@ -2551,7 +2549,7 @@ is a sub-sum of the absolutely convergent `ζ_K`. -/
 private theorem multipliable_artinLocalFactor
     (K L : Type*) [Field K] [NumberField K] [Field L] [NumberField L] [Algebra K L] [IsGalois K L]
     (χ : galoisCharacter K L) {s : ℂ} (hs : 1 < s.re) :
-    Multipliable fun 𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ UnramifiedIn K L 𝔭} =>
+    Multipliable fun 𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime ∧ UnramifiedIn K L 𝔭} ↦
       (1 - (χ (frobeniusClass K L 𝔭.1).out : ℂ) * (Ideal.absNorm 𝔭.1 : ℂ) ^ (-s))⁻¹ := by
   have hsum : Summable fun 𝔞 : NonzeroIdeal K ↦ ‖(Ideal.absNorm 𝔞.1 : ℂ) ^ (-s)‖ :=
     (hasSum_nonzeroIdeal_absNorm_cpow K hs).summable.norm
