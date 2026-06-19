@@ -151,7 +151,7 @@ noncomputable def pullbackDegZero (f : W.toAffine.Point →+ W.toAffine.Point) (
     ((pullbackDivisorHom (W := W.toAffine) f hf).comp
       (ProjectiveDivisor.degZero (⟨W.toAffine⟩ : SmoothPlaneCurve F)).subtype)
     (ProjectiveDivisor.degZero (⟨W.toAffine⟩ : SmoothPlaneCurve F))
-    (fun D => by
+    (fun D ↦ by
       rw [Curves.ProjectiveDivisor.mem_degZero, AddMonoidHom.comp_apply,
         AddSubgroup.coe_subtype, pullbackDivisorHom_apply,
         degree_pullbackDivisor W f hf hsurj,
@@ -193,7 +193,7 @@ theorem pullbackDivisor_mem_projPrincipal (φ : Isogeny W.toAffine W.toAffine)
   obtain ⟨h, hh_ne, hh_div⟩ := hD
   -- `φ^*(div h) = div(φ^* h)`, the pullback function's divisor — principal, with `φ^* h ≠ 0`.
   refine ⟨φ.pullback h, ?_, ?_⟩
-  · exact fun h0 => hh_ne (φ.pullback_injective (h0.trans (map_zero _).symm))
+  · exact fun h0 ↦ hh_ne (φ.pullback_injective (h0.trans (map_zero _).symm))
   · rw [projectiveDivisorOf_pullback_eq_pullbackDivisor hproj h, hh_div]
 
 end Preserve
@@ -225,7 +225,7 @@ noncomputable def pullbackPicZero (φ : Isogeny W.toAffine W.toAffine) [Finite �
         ((⟨W.toAffine⟩ : SmoothPlaneCurve F).projPrincipalSubgroup.addSubgroupOf
           (ProjectiveDivisor.degZero (⟨W.toAffine⟩ : SmoothPlaneCurve F)))).comp
       (pullbackDegZero W φ.toAddMonoidHom inferInstance hsurj))
-    (fun D hD => by
+    (fun D hD ↦ by
       -- Well-defined: `φ^*` of a principal `Div⁰` element is principal.
       change QuotientAddGroup.mk' _ (pullbackDegZero W φ.toAddMonoidHom inferInstance hsurj D) = 0
       rw [QuotientAddGroup.mk'_apply, QuotientAddGroup.eq_zero_iff]
