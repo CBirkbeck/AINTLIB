@@ -186,7 +186,7 @@ lemma smulX_two : smulX 2 = smulX 1 - ψᵤ 3 / (ψᵤ 2) ^ 2 := by
 lemma smulX_sub_smulX (hm : m ≠ 0) (hn : n ≠ 0) :
     smulX m - smulX n = (ψᵤ (n + m) * ψᵤ (n - m)) / (ψᵤ n * ψᵤ m) ^ 2 := by
   rw [smulX_eq hm, smulX_eq hn,
-    show ∀ (c a b : Universal.Field), c - a - (c - b) = b - a from fun c a b => by ring,
+    show ∀ (c a b : Universal.Field), c - a - (c - b) = b - a from fun c a b ↦ by ring,
     div_sub_div]
   · rw [mul_pow]; congr; convert (isEllSequence_ψᵤ n m 1).symm using 1
     · ring
@@ -370,12 +370,12 @@ theorem zsmul_point_eq_smulX_smulY : n ≠ 0 →
         ← add_right_cancel_iff (a := _U.a₁ * smulX (n2 + 1 : ℕ) + _U.a₃)]
       convert smulY_add_sub_negY (n := n2) one_ne_zero (by omega) (by omega) (by omega) using 1
       · simp_rw [Affine.negY, Nat.cast_add]; norm_cast
-        simp only [_U, two_nsmul, two_mul]; abel
+        simp only [_U, two_mul]; abel
       convert _U.addY_sub_negY_addY (smulY n2) (smulY 1) ne using 1
       · rw [Affine.negY, ← X_eq]; ring
       · rw [← X_eq]; rfl
     rw [X_eq, Y_eq, n2.cast_add, add_zsmul, eq, eq2]
-    exact ⟨Affine.nonsingular_add ns2 ns (fun h => ne h.1), add_of_X_ne ne⟩
+    exact ⟨Affine.nonsingular_add ns2 ns (fun h ↦ ne h.1), add_of_X_ne ne⟩
   | neg ih n =>
     rw [neg_ne_zero]; intro h0
     obtain ⟨ns, eq⟩ := ih n h0
@@ -439,7 +439,7 @@ lemma dblZ_smulPoly : dblZ curvePoly (smulPoly n) = curve.ψ (2 * n) := by
     WeierstrassCurve.Affine.baseChange WeierstrassCurve.baseChange
   simp_rw [fin3_def_ext, WeierstrassCurve.map]
   rw [← ψc_spec _ n]; congr; convert curve.ω_spec n using 1
-  simp_rw [show ∀ x, CC x = (algebraMap _ Poly) x from fun _ => rfl]
+  simp_rw [show ∀ x, CC x = (algebraMap _ Poly) x from fun _ ↦ rfl]
   norm_num; ring
 
 lemma nonsingular_smulField : Nonsingular curveField (smulField n) := by
@@ -457,15 +457,11 @@ private lemma add_point_of_ne_eq_addXYZ {P Q : Point (baseChange curve Universal
   rw [Point.add_point, hv, hw, addMap_eq, add_of_not_equiv]
   intro h; exact hne (Point.ext_iff.mpr (hv ▸ hw ▸ Quotient.eq.mpr h))
 
-set_option maxRecDepth 2048 in
 lemma dblXYZ_smulField : dblXYZ curveField (smulField n) = smulField (2 * n) := by
   obtain rfl | hn := eq_or_ne n 0
   · simp only [mul_zero, smulField, smulPoly, comp_fin3]
     simp only [dblXYZ, dblX, dblY, dblZ, dblU_eq, negY, negDblY, curveField, fin3_def_ext]
-    ext i; fin_cases i <;>
-      simp [dblXYZ, dblX, dblY, dblZ, dblU_eq, negY, negDblY,
-        smulField, smulPoly, curveField, fin3_def_ext] <;>
-      norm_num
+    ext i; fin_cases i <;> simp [fin3_def_ext] <;> norm_num
   refine (equiv_iff_eq_of_Z_eq ?_ (ψᵤ_ne_zero <| mul_ne_zero two_ne_zero hn)).mp
     (Quotient.exact ?_)
   · simp only [smulField, smulPoly, fin3_def_ext, Function.comp, ← dblZ_smulPoly, ← map_dblZ]; rfl
@@ -485,7 +481,7 @@ lemma ω_neg_eq_neg_negY : curve.ω (-n) = -negY curvePoly (smulPoly n) := by
   unfold smulPoly WeierstrassCurve.Jacobian.negY curvePoly
     WeierstrassCurve.Affine.baseChange WeierstrassCurve.baseChange
   simp_rw [ω_neg, fin3_def_ext, WeierstrassCurve.map,
-    show ∀ x, CC x = (algebraMap _ Poly) x from fun _ => rfl]
+    show ∀ x, CC x = (algebraMap _ Poly) x from fun _ ↦ rfl]
   norm_num; ring
 
 lemma smulPoly_neg : smulPoly (-n) = (-1 : Poly) • neg curvePoly (smulPoly n) := by
@@ -500,7 +496,6 @@ lemma smulField_neg : smulField (-n) = (-1 : Universal.Field) • neg curveField
 lemma smulPoly_zero : smulPoly 0 = ![1, 1, 0] := by simp [smulPoly]
 lemma smulField_zero : smulField 0 = ![1, 1, 0] := by simp [smulField, smulPoly_zero, comp_fin3]
 
-set_option maxHeartbeats 400000 in
 lemma addXYZ_smulField :
     addXYZ curveField (smulField m) (smulField n) =
       polyToField (curve.ψ (n - m)) • smulField (n + m) := by
@@ -510,7 +505,7 @@ lemma addXYZ_smulField :
     simp_rw [zero_mul]
   obtain rfl | ne_neg := eq_or_ne n (-m)
   · have jac_one_smul : ∀ (P : Fin 3 → Universal.Field), (1 : Universal.Field) • P = P :=
-      fun _ => by simp only [smul_fin3, one_pow, one_mul, fin3_def]
+      fun _ ↦ by simp only [smul_fin3, one_pow, one_mul, fin3_def]
     rw [← jac_one_smul (smulField m), smulField_neg, neg_add_cancel,
       addXYZ_smul, one_mul, neg_one_sq (R := Universal.Field), addXYZ_neg nonsingular_smulField.1,
       jac_one_smul, show (-m - m : ℤ) = -(2 * m) from by ring,
