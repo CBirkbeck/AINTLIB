@@ -96,11 +96,11 @@ theorem contourIntegral_higherOrder_eq_zero_of_avoids
     (h_avoids : ∀ t ∈ Set.Icc (0 : ℝ) 1, γ.toPath.extend t ≠ s)
     {k : ℕ} (hk : 2 ≤ k) (c : ℂ)
     (h_int : IntervalIntegrable
-      (fun t => c / (γ.toPath.extend t - s) ^ k * deriv γ.toPath.extend t)
+      (fun t ↦ c / (γ.toPath.extend t - s) ^ k * deriv γ.toPath.extend t)
       volume 0 1) :
-    γ.contourIntegral (fun z => c / (z - s) ^ k) = 0 := by
+    γ.contourIntegral (fun z ↦ c / (z - s) ^ k) = 0 := by
   have hk_natcast : ((k - 1 : ℕ) : ℂ) ≠ 0 := by rw [Nat.cast_ne_zero]; omega
-  set F : ℂ → ℂ := fun z =>
+  set F : ℂ → ℂ := fun z ↦
     (-c / ((k - 1 : ℕ) : ℂ)) * (z - s) ^ (-((k - 1 : ℕ) : ℤ))
   have hF : ∀ z ∈ ({s} : Set ℂ)ᶜ, HasDerivAt F (c / (z - s) ^ k) z := by
     intro z hz
@@ -129,7 +129,7 @@ theorem deriv_intervalIntegrable_of_lipschitz (γP : PiecewiseC1Path x x) {K : N
   refine MeasureTheory.Measure.integrableOn_of_bounded measure_Ioc_lt_top.ne
     (stronglyMeasurable_deriv _).aestronglyMeasurable
     (ae_restrict_of_ae (Filter.Eventually.of_forall
-      (fun _ => norm_deriv_le_of_lipschitz hLip)))
+      (fun _ ↦ norm_deriv_le_of_lipschitz hLip)))
 
 /-- The contour integral of the analytic remainder along a null-homologous
 closed γ in U vanishes — even when γ passes through poles of f, because the
@@ -150,14 +150,14 @@ theorem analyticRemainder_contourIntegral_zero
   obtain ⟨δ', hδ'_pos, hδ'_bound⟩ := avoids_delta_bound γP w₀ hw₀_off
   have h_deriv_int := deriv_intervalIntegrable_of_lipschitz γP hLip
   have h_dixon_G :
-      dixonFunction (fun z => (z - w₀) * decomp.analyticRemainder z) U γP w₀ = 0 :=
+      dixonFunction (fun z ↦ (z - w₀) * decomp.analyticRemainder z) U γP w₀ = 0 :=
     dixonFunction_eq_zero_of_nullHomologous_open_full_unbounded hU_open
-      (fun z hz => ((differentiableAt_id.sub_const w₀).differentiableWithinAt).mul
+      (fun z hz ↦ ((differentiableAt_id.sub_const w₀).differentiableWithinAt).mul
         (decomp.analyticRemainder_diff z hz))
       γ.toPwC1Immersion h_null hLip
-      (fun w hw_notin h_avoid_local =>
+      (fun w hw_notin h_avoid_local ↦
         h_null.winding_zero_nhds_of_not_mem_of_closed hw_notin h_avoid_local hLip) w₀
-  have h_inv_cont : ContinuousOn (fun t => (γP t - w₀)⁻¹) (uIcc (0 : ℝ) 1) := by
+  have h_inv_cont : ContinuousOn (fun t ↦ (γP t - w₀)⁻¹) (uIcc (0 : ℝ) 1) := by
     rw [uIcc_of_le (zero_le_one' ℝ)]
     refine ContinuousOn.inv₀
       (γP.toPath.continuous_extend.continuousOn.sub continuousOn_const) ?_
@@ -173,7 +173,7 @@ theorem analyticRemainder_contourIntegral_zero
       exact decomp.analyticRemainder_diff.continuousOn.comp
         γP.toPath.continuous_extend.continuousOn h_null.image_subset
   have h_cauchy_int : IntervalIntegrable
-      (fun t => (γP t - w₀) * decomp.analyticRemainder (γP t) / (γP t - w₀) *
+      (fun t ↦ (γP t - w₀) * decomp.analyticRemainder (γP t) / (γP t - w₀) *
         deriv γP.toPath.extend t) MeasureTheory.volume 0 1 := by
     refine h_rem_int.congr ?_
     intro t ht
@@ -200,17 +200,17 @@ theorem volume_preimage_finset_in_Icc01_zero
   set P : Finset ℝ := insert 0 (insert 1 γP.partition)
   have h_in_Ioo : ∀ t ∈ Icc (0 : ℝ) 1, t ∉ P → t ∈ Ioo (0 : ℝ) 1 := by
     intro t ht htP
-    have h0 : t ≠ 0 := fun h => htP (h ▸ Finset.mem_insert_self _ _)
-    have h1 : t ≠ 1 := fun h => htP (h ▸
+    have h0 : t ≠ 0 := fun h ↦ htP (h ▸ Finset.mem_insert_self _ _)
+    have h1 : t ≠ 1 := fun h ↦ htP (h ▸
       Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))
     exact ⟨lt_of_le_of_ne ht.1 (Ne.symm h0), lt_of_le_of_ne ht.2 h1⟩
-  have h_not_part : ∀ t ∈ Icc (0 : ℝ) 1, t ∉ P → t ∉ γP.partition := fun t _ htP h_part =>
+  have h_not_part : ∀ t ∈ Icc (0 : ℝ) 1, t ∉ P → t ∉ γP.partition := fun t _ htP h_part ↦
     htP (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem h_part))
   exact preimage_finset_measure_zero_of_deriv_ne_zero S
     γP.toPath.continuous_extend.continuousOn
-    (fun t ht htP => γP.differentiable_off_extend t (h_in_Ioo t ht htP)
+    (fun t ht htP ↦ γP.differentiable_off_extend t (h_in_Ioo t ht htP)
       (h_not_part t ht htP))
-    (fun t ht htP => γ.toPwC1Immersion.deriv_ne_zero t (h_in_Ioo t ht htP)
+    (fun t ht htP ↦ γ.toPwC1Immersion.deriv_ne_zero t (h_in_Ioo t ht htP)
       (h_not_part t ht htP))
 
 /-- For a function `g` differentiable on `U` and a closed piecewise-`C¹`
@@ -240,7 +240,7 @@ private theorem cpv_badSet_measurableSet (γP : PiecewiseC1Path x x) (S : Finset
   have h_eq : cpv_badSet γP S ε = ⋃ s ∈ S, {t : ℝ | ‖γP.toPath.extend t - s‖ ≤ ε} := by
     ext t; simp [cpv_badSet]
   rw [h_eq]
-  exact (isClosed_biUnion_finset fun s _ => isClosed_le
+  exact (isClosed_biUnion_finset fun s _ ↦ isClosed_le
     ((γP.toPath.continuous_extend.sub continuous_const).norm) continuous_const).measurableSet
 
 /-- Express `cpvIntegrandOn S g γ.extend ε` as an indicator of the contour
@@ -266,15 +266,15 @@ theorem cpvIntegrandOn_diff_intervalIntegrable
     (hγ_in_U : ∀ t ∈ Icc (0 : ℝ) 1,
       γ.toPwC1Immersion.toPiecewiseC1Path t ∈ U) (ε : ℝ) :
     IntervalIntegrable
-      (fun t => cpvIntegrandOn S g
+      (fun t ↦ cpvIntegrandOn S g
         γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend ε t)
       MeasureTheory.volume 0 1 := by
   classical
   set γP : PiecewiseC1Path x x := γ.toPwC1Immersion.toPiecewiseC1Path
   have h_full := contourIntegrand_diff_intervalIntegrable γ h_diff hγ_in_U
-  rw [show (fun t => cpvIntegrandOn S g γP.toPath.extend ε t) =
+  rw [show (fun t ↦ cpvIntegrandOn S g γP.toPath.extend ε t) =
     (cpv_badSet γP S ε)ᶜ.indicator (PiecewiseC1Path.contourIntegrand g γP) from
-    funext fun t => cpvIntegrandOn_eq_indicator_compl γP S g ε t]
+    funext fun t ↦ cpvIntegrandOn_eq_indicator_compl γP S g ε t]
   rw [intervalIntegrable_iff] at h_full ⊢
   exact h_full.indicator (cpv_badSet_measurableSet γP S ε).compl
 
@@ -295,7 +295,7 @@ theorem cpvIntegrandOn_tendsto_contourIntegrand_ae
     (γ : ClosedPwC1Immersion x) (S : Finset ℂ) (g : ℂ → ℂ) :
     ∀ᵐ t ∂(MeasureTheory.volume.restrict (Ι (0 : ℝ) 1)),
       Tendsto
-        (fun ε => cpvIntegrandOn S g
+        (fun ε ↦ cpvIntegrandOn S g
           γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend ε t)
         (𝓝[>] 0)
         (𝓝 (PiecewiseC1Path.contourIntegrand g
@@ -307,18 +307,18 @@ theorem cpvIntegrandOn_tendsto_contourIntegrand_ae
   rw [MeasureTheory.ae_restrict_iff' measurableSet_Icc] at h_ae
   filter_upwards [h_ae] with t h_not_mem ht
   have h_not_mem' : γP t ∉ (↑S : Set ℂ) := h_not_mem ⟨le_of_lt ht.1, ht.2⟩
-  have h_far : ∀ s ∈ S, 0 < ‖γP.toPath.extend t - s‖ := fun s hs =>
-    norm_pos_iff.mpr <| sub_ne_zero.mpr <| fun heq =>
+  have h_far : ∀ s ∈ S, 0 < ‖γP.toPath.extend t - s‖ := fun s hs ↦
+    norm_pos_iff.mpr <| sub_ne_zero.mpr <| fun heq ↦
       h_not_mem' (heq ▸ Finset.mem_coe.mpr hs : γP.toPath.extend t ∈ (↑S : Set ℂ))
   suffices h_lim_const :
-      (fun ε => cpvIntegrandOn S g γP.toPath.extend ε t) =ᶠ[𝓝[>] 0]
-        (fun _ => PiecewiseC1Path.contourIntegrand g γP t) from
+      (fun ε ↦ cpvIntegrandOn S g γP.toPath.extend ε t) =ᶠ[𝓝[>] 0]
+        (fun _ ↦ PiecewiseC1Path.contourIntegrand g γP t) from
     Tendsto.congr' h_lim_const.symm tendsto_const_nhds
   by_cases hS : S.Nonempty
   · obtain ⟨δ, hδ_mem, hδ_min⟩ := Finset.exists_min_image S
-      (fun s => ‖γP.toPath.extend t - s‖) hS
+      (fun s ↦ ‖γP.toPath.extend t - s‖) hS
     filter_upwards [Ioo_mem_nhdsGT (h_far δ hδ_mem)] with ε hε
-    rw [cpvIntegrandOn_of_forall_gt fun s hs => lt_of_lt_of_le hε.2 (hδ_min s hs)]
+    rw [cpvIntegrandOn_of_forall_gt fun s hs ↦ lt_of_lt_of_le hε.2 (hδ_min s hs)]
     rfl
   · have h_empty : S = ∅ := Finset.not_nonempty_iff_eq_empty.mp hS
     filter_upwards [self_mem_nhdsWithin] with ε _
@@ -345,7 +345,7 @@ theorem analyticRemainder_hasCauchyPVOn_zero
   have h_full := contourIntegrand_diff_intervalIntegrable γ
     decomp.analyticRemainder_diff hγ_in_U
   have h_meas : ∀ᶠ ε in 𝓝[>] (0 : ℝ), AEStronglyMeasurable
-      (fun t => cpvIntegrandOn S decomp.analyticRemainder
+      (fun t ↦ cpvIntegrandOn S decomp.analyticRemainder
         γP.toPath.extend ε t)
       (MeasureTheory.volume.restrict (Set.uIoc (0 : ℝ) 1)) := by
     filter_upwards [self_mem_nhdsWithin] with ε (hε : 0 < ε)
@@ -356,14 +356,14 @@ theorem analyticRemainder_hasCauchyPVOn_zero
       ‖cpvIntegrandOn S decomp.analyticRemainder γP.toPath.extend ε x‖ ≤
         ‖PiecewiseC1Path.contourIntegrand decomp.analyticRemainder γP x‖ := by
     filter_upwards [self_mem_nhdsWithin] with ε (hε : 0 < ε)
-    refine MeasureTheory.ae_of_all _ fun t _ => ?_
+    refine MeasureTheory.ae_of_all _ fun t _ ↦ ?_
     rw [cpvIntegrandOn_eq_indicator_compl γP S decomp.analyticRemainder ε t]
     by_cases ht_in : t ∈ (cpv_badSet γP S ε)ᶜ
     · rw [Set.indicator_of_mem ht_in]
     · rw [Set.indicator_of_notMem ht_in, norm_zero]
       exact norm_nonneg _
   have h_pointwise : ∀ᵐ x ∂MeasureTheory.volume, x ∈ Set.uIoc (0 : ℝ) 1 →
-      Tendsto (fun ε => cpvIntegrandOn S decomp.analyticRemainder
+      Tendsto (fun ε ↦ cpvIntegrandOn S decomp.analyticRemainder
           γP.toPath.extend ε x) (𝓝[>] 0)
         (𝓝 (PiecewiseC1Path.contourIntegrand decomp.analyticRemainder γP x)) := by
     have := cpvIntegrandOn_tendsto_contourIntegrand_ae γ S decomp.analyticRemainder
@@ -371,7 +371,7 @@ theorem analyticRemainder_hasCauchyPVOn_zero
   unfold HasCauchyPVOn
   rw [← analyticRemainder_contourIntegral_zero hU_open hU_ne hS_in_U γ h_null decomp]
   exact intervalIntegral.tendsto_integral_filter_of_dominated_convergence
-    (fun t => ‖PiecewiseC1Path.contourIntegrand decomp.analyticRemainder γP t‖)
+    (fun t ↦ ‖PiecewiseC1Path.contourIntegrand decomp.analyticRemainder γP t‖)
     h_meas h_bound h_full.norm h_pointwise
 
 /-- Interval-integrability of the cutoff integrand of a polar part of the
@@ -383,7 +383,7 @@ theorem cpvIntegrandOn_polarPart_intervalIntegrable
     (decomp : PolarPartDecomposition f S U) {s : ℂ} (hs : s ∈ S)
     (_h_null : IsNullHomologous γ.toPwC1Immersion U) {ε : ℝ} (hε : 0 < ε) :
     IntervalIntegrable
-      (fun t => cpvIntegrandOn S (decomp.polarPart s)
+      (fun t ↦ cpvIntegrandOn S (decomp.polarPart s)
         γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend ε t)
       MeasureTheory.volume 0 1 := by
   classical
@@ -391,23 +391,23 @@ theorem cpvIntegrandOn_polarPart_intervalIntegrable
   set γP : PiecewiseC1Path x x := γ.toPwC1Immersion.toPiecewiseC1Path
   set N : ℕ := decomp.order s
   set a : Fin N → ℂ := decomp.coeff s
-  set laurentSum : ℂ → ℂ := fun z => ∑ k : Fin N, a k / (z - s) ^ (k.val + 1)
-  set h_curve : ℝ → ℂ := fun t =>
+  set laurentSum : ℂ → ℂ := fun z ↦ ∑ k : Fin N, a k / (z - s) ^ (k.val + 1)
+  set h_curve : ℝ → ℂ := fun t ↦
     laurentSum (γP.toPath.extend t) * deriv γP.toPath.extend t
   have h_far_of : ∀ t ∈ (cpv_badSet γP S ε)ᶜ, ∀ s' ∈ S,
-      ε < ‖γP.toPath.extend t - s'‖ := fun t ht_in s' hs' => by
+      ε < ‖γP.toPath.extend t - s'‖ := fun t ht_in s' hs' ↦ by
     simp only [cpv_badSet, Set.mem_compl_iff, Set.mem_setOf_eq, not_exists, not_and,
       not_le] at ht_in
     exact ht_in s' hs'
   have h_indicator_eq' :
-      (fun t => cpvIntegrandOn S (decomp.polarPart s)
+      (fun t ↦ cpvIntegrandOn S (decomp.polarPart s)
         γP.toPath.extend ε t) =
       (cpv_badSet γP S ε)ᶜ.indicator h_curve := by
     funext t
     rw [cpvIntegrandOn_eq_indicator_compl γP S (decomp.polarPart s) ε t]
     by_cases ht_in : t ∈ (cpv_badSet γP S ε)ᶜ
     · rw [Set.indicator_of_mem ht_in, Set.indicator_of_mem ht_in]
-      have h_ne : γP.toPath.extend t ≠ s := fun heq => by
+      have h_ne : γP.toPath.extend t ≠ s := fun heq ↦ by
         have := h_far_of t ht_in s hs
         rw [heq, sub_self, norm_zero] at this; linarith
       change decomp.polarPart s (γP.toPath.extend t) *
@@ -418,19 +418,19 @@ theorem cpvIntegrandOn_polarPart_intervalIntegrable
   set M_polar : ℝ := ∑ k : Fin N, ‖a k‖ / ε ^ (k.val + 1)
   set M : ℝ := M_polar * K
   have h_M_polar_nonneg : 0 ≤ M_polar :=
-    Finset.sum_nonneg (fun k _ => div_nonneg (norm_nonneg _) (pow_nonneg hε.le _))
+    Finset.sum_nonneg (fun k _ ↦ div_nonneg (norm_nonneg _) (pow_nonneg hε.le _))
   have h_M_nonneg : 0 ≤ M := mul_nonneg h_M_polar_nonneg (NNReal.coe_nonneg K)
-  have h_bound_on_compl : ∀ t ∈ (cpv_badSet γP S ε)ᶜ, ‖h_curve t‖ ≤ M := fun t ht_in =>
+  have h_bound_on_compl : ∀ t ∈ (cpv_badSet γP S ε)ᶜ, ‖h_curve t‖ ≤ M := fun t ht_in ↦
     calc ‖h_curve t‖ = ‖laurentSum (γP.toPath.extend t)‖ *
           ‖deriv γP.toPath.extend t‖ := norm_mul _ _
       _ ≤ M_polar * K := mul_le_mul
-          ((norm_sum_le _ _).trans <| Finset.sum_le_sum fun k _ => by
+          ((norm_sum_le _ _).trans <| Finset.sum_le_sum fun k _ ↦ by
             rw [norm_div, norm_pow]
             exact div_le_div_of_nonneg_left (norm_nonneg _) (pow_pos hε _)
               (pow_le_pow_left₀ hε.le (h_far_of t ht_in s hs).le _))
           (norm_deriv_le_of_lipschitz hLip) (norm_nonneg _) h_M_polar_nonneg
   have h_curve_meas : Measurable h_curve :=
-    (Finset.measurable_sum (Finset.univ : Finset (Fin N)) fun k _ =>
+    (Finset.measurable_sum (Finset.univ : Finset (Fin N)) fun k _ ↦
       Measurable.const_div ((γP.toPath.continuous_extend.measurable.sub_const s).pow_const _) _)
       |>.mul (measurable_deriv _)
   rw [intervalIntegrable_iff, h_indicator_eq']
