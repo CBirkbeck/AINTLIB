@@ -3,10 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import HasseWeil.AdditionPullback.Frobenius
+import HasseWeil.Hasse.HoleE
 import HasseWeil.Verschiebung.IsDual
 import HasseWeil.Verschiebung.QthRoots
-import HasseWeil.Hasse.HoleE
-import HasseWeil.AdditionPullback.Frobenius
 
 /-!
 # Wire-up: Verschiebung witness → HOLE E (Session 6)
@@ -111,15 +111,9 @@ theorem qth_root_of_q_factors_through_frobenius
         g ^ Fintype.card K =
           (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback z := by
   obtain ⟨ψ, h_eq⟩ := h_factor
-  intro z
-  refine ⟨ψ.pullback z, ?_⟩
-  have h_pb : (ψ.comp (frobeniusIsog W)).pullback z =
-      (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback z := by
-    rw [h_eq]
-  rw [show (ψ.comp (frobeniusIsog W)).pullback z =
-        (frobeniusIsog W).pullback (ψ.pullback z) from rfl] at h_pb
-  rw [frobeniusIsog_pullback_apply] at h_pb
-  exact h_pb
+  refine fun z ↦ ⟨ψ.pullback z, ?_⟩
+  rw [← h_eq, show (ψ.comp (frobeniusIsog W)).pullback z =
+    (frobeniusIsog W).pullback (ψ.pullback z) from rfl, frobeniusIsog_pullback_apply]
 
 /-- **IsDualOf certificate from [q]-Frobenius factorization**: chains
 `qth_root_of_q_factors_through_frobenius` with
@@ -189,9 +183,9 @@ theorem iterated_silverman_II_2_12_of_subset_witness
         ψ.comp (frobeniusIsog W) =
           mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)) ∧
     IsDualOf W.toAffine
-      (verschiebungIsog_of_witness W h_subset) (frobeniusIsog W) := by
-  refine ⟨mulByInt_q_factor_isog_of_subset_witness W h_subset, ?_⟩
-  exact verschiebungIsog_of_witness_isDualOf_frobenius W h_subset
+      (verschiebungIsog_of_witness W h_subset) (frobeniusIsog W) :=
+  ⟨mulByInt_q_factor_isog_of_subset_witness W h_subset,
+    verschiebungIsog_of_witness_isDualOf_frobenius W h_subset⟩
 
 end Conditional
 
