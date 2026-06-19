@@ -174,9 +174,9 @@ theorem frobeniusGenericCovariance_frob_tau_comm
     rw [WeierstrassCurve.Affine.Point.map_some (W' := W), WeierstrassCurve.Affine.Point.map_some (W' := W),
       WeierstrassCurve.Affine.Point.map_some (W' := W), WeierstrassCurve.Affine.Point.map_some (W' := W)]
     refine (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mpr ⟨?_, ?_⟩
-    · simp only [AlgEquiv.toAlgHom_eq_coe, FiniteField.coe_frobeniusAlgHom]
+    · simp only [FiniteField.coe_frobeniusAlgHom]
       exact map_pow (HasseWeil.translateAlgEquivOfPoint (W.baseChange (AlgebraicClosure K)) S) x _
-    · simp only [AlgEquiv.toAlgHom_eq_coe, FiniteField.coe_frobeniusAlgHom]
+    · simp only [FiniteField.coe_frobeniusAlgHom]
       exact map_pow (HasseWeil.translateAlgEquivOfPoint (W.baseChange (AlgebraicClosure K)) S) y _
 
 /-- **The Frobenius generic-point covariance leaf over `K̄`** (Silverman III.8.2 for `π̄`), axiom-clean
