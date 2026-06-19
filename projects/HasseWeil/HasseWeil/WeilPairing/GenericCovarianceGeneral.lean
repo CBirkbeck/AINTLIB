@@ -208,10 +208,10 @@ theorem EvaluatesTo.div {P : (W_smooth W).SmoothPoint} {f g : KE} {c d : F}
     (hf : EvaluatesTo W P f c) (hg : EvaluatesTo W P g d) (hd : d ≠ 0) :
     EvaluatesTo W P (f / g) (c / d) := by
   have hvg : (W_smooth W).pointValuation P g = 1 := hg.pointValuation_eq_one hd
-  have hgne : g ≠ 0 := fun h0 => by
+  have hgne : g ≠ 0 := fun h0 ↦ by
     rw [h0] at hvg
     exact zero_ne_one ((Valuation.map_zero _).symm.trans hvg)
-  have hdne : algebraMap F KE d ≠ 0 := fun h0 => hd <|
+  have hdne : algebraMap F KE d ≠ 0 := fun h0 ↦ hd <|
     (map_eq_zero_iff _ (FaithfulSMul.algebraMap_injective F KE)).mp h0
   -- `f/g − c/d = N / (g·d)` with `N = (f − c)·d + c·(d − g)`.
   have hrw : f / g - algebraMap F KE (c / d) =
@@ -320,7 +320,7 @@ theorem evaluatesTo_translate (P : (W_smooth W).SmoothPoint)
     rw [hτ, h0, map_zero]
     exact (Valuation.map_zero _).trans_lt zero_lt_one
   · have hτ0 : translateAlgEquivOfPoint W (Affine.Point.some xs ys hnsS)
-        (f - algebraMap F KE c) ≠ 0 := fun hz => h0 <|
+        (f - algebraMap F KE c) ≠ 0 := fun hz ↦ h0 <|
       (translateAlgEquivOfPoint W (Affine.Point.some xs ys hnsS)).injective
         (hz.trans (map_zero _).symm)
     have hord := translate_ord_eq_all_nonzero W P xs ys hnsS h (f - algebraMap F KE c) h0
@@ -361,7 +361,7 @@ variable {W}
 /-- `toAffinePoint` is injective on smooth points. -/
 private theorem toAffinePoint_injective :
     Function.Injective
-      (fun P : (W_smooth W).SmoothPoint => P.toAffinePoint) := by
+      (fun P : (W_smooth W).SmoothPoint ↦ P.toAffinePoint) := by
   intro P Q h
   simp only [Curves.SmoothPlaneCurve.SmoothPoint.toAffinePoint_def] at h
   obtain ⟨hx, hy⟩ := (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mp h
@@ -377,7 +377,7 @@ theorem PullbackEvaluation.finite_fiber {β : Isogeny W.toAffine W.toAffine}
   -- the point-level kernel is finite: `0` plus the affine kernel, which lies inside `bad`.
   have hker : {R : W.toAffine.Point | β.toAddMonoidHom R = 0}.Finite := by
     refine (Set.Finite.insert (0 : W.toAffine.Point)
-      ((hbad.image (fun P : (W_smooth W).SmoothPoint => P.toAffinePoint)))).subset ?_
+      ((hbad.image (fun P : (W_smooth W).SmoothPoint ↦ P.toAffinePoint)))).subset ?_
     rintro (_ | ⟨x, y, hns⟩) hR
     · exact Set.mem_insert_iff.mpr (Or.inl WeierstrassCurve.Affine.Point.zero_def.symm)
     · refine Set.mem_insert_iff.mpr (Or.inr ⟨⟨x, y, hns⟩, ?_, rfl⟩)
@@ -390,7 +390,7 @@ theorem PullbackEvaluation.finite_fiber {β : Isogeny W.toAffine W.toAffine}
   rcases Set.eq_empty_or_nonempty
     {P : (W_smooth W).SmoothPoint | β.toAddMonoidHom P.toAffinePoint = Q} with hemp | ⟨P₀, hP₀⟩
   · rw [hemp]; exact Set.finite_empty
-  · refine Set.Finite.of_finite_image (f := fun P : (W_smooth W).SmoothPoint =>
+  · refine Set.Finite.of_finite_image (f := fun P : (W_smooth W).SmoothPoint ↦
       P.toAffinePoint - P₀.toAffinePoint) ?_ ?_
     · refine hker.subset ?_
       rintro R ⟨P, hP, rfl⟩
@@ -518,8 +518,8 @@ theorem mapTranslateGenericPoint_of_pullbackEvaluation [IsAlgClosed F]
         ∃ h' : (P.toAffinePoint + Sk).IsSome,
           P.translate_of_finite Sk h' ∈ bad}.Finite := by
       refine (Set.Finite.preimage toAffinePoint_injective.injOn
-        (((hbad.image (fun P : (W_smooth W).SmoothPoint => P.toAffinePoint)).image
-          (fun R => R - Sk)))).subset ?_
+        (((hbad.image (fun P : (W_smooth W).SmoothPoint ↦ P.toAffinePoint)).image
+          (fun R ↦ R - Sk)))).subset ?_
       rintro P ⟨h', hmem⟩
       refine ⟨(P.translate_of_finite Sk h').toAffinePoint, ⟨_, hmem, rfl⟩, ?_⟩
       change (P.translate_of_finite Sk h').toAffinePoint - Sk = P.toAffinePoint
@@ -561,11 +561,11 @@ theorem mapTranslateGenericPoint_of_pullbackEvaluation [IsAlgClosed F]
             EvaluatesTo W P By c) := by
         intro P hP
         rw [Set.mem_union, Set.mem_union] at hP
-        push_neg at hP
+        push Not at hP
         obtain ⟨⟨hP1, hP2⟩, hP3⟩ := hP
         rw [Set.mem_setOf_eq, not_not] at hP2
         rw [Set.mem_setOf_eq] at hP3
-        push_neg at hP3
+        push Not at hP3
         obtain ⟨xI, yI, hI, hβsum, hτx, hτy⟩ := hkey P hP1 hP2 (hP3 hP2)
         obtain ⟨xP, yP, hPns, heqP, hxP, hyP⟩ := hw P hP1
         -- `β P + 0 = β P`, so the image coordinates agree.
@@ -574,9 +574,9 @@ theorem mapTranslateGenericPoint_of_pullbackEvaluation [IsAlgClosed F]
           (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mp hβsum
         exact ⟨⟨xI, hτx, hxx ▸ hxP⟩, ⟨yI, hτy, hyy ▸ hyP⟩⟩
       have hX0 : (translateAlgEquivOfPoint W Sk).toAlgHom Bx = Bx :=
-        eq_of_evaluatesTo_cofinite W hbadS (fun P hP => (hcoords P hP).1)
+        eq_of_evaluatesTo_cofinite W hbadS (fun P hP ↦ (hcoords P hP).1)
       have hY0 : (translateAlgEquivOfPoint W Sk).toAlgHom By = By :=
-        eq_of_evaluatesTo_cofinite W hbadS (fun P hP => (hcoords P hP).2)
+        eq_of_evaluatesTo_cofinite W hbadS (fun P hP ↦ (hcoords P hP).2)
       have hzero_add : Affine.Point.some Bx By hns1 =
           Affine.Point.some Bx By hns1 +
             HasseWeil.liftPointToKE W (β.toAddMonoidHom Sk) := by
@@ -599,13 +599,13 @@ theorem mapTranslateGenericPoint_of_pullbackEvaluation [IsAlgClosed F]
         rw [hTeq]
         exact HasseWeil.liftPointToKE_some W xT yT hT
       set ℓKE : KE := (By - algebraMap F KE yT) / (Bx - algebraMap F KE xT) with hℓKE
-      have hns3 := WeierstrassCurve.Affine.nonsingular_add hns1 hTns' (fun hc => hne hc.1)
+      have hns3 := WeierstrassCurve.Affine.nonsingular_add hns1 hTns' (fun hc ↦ hne hc.1)
       rw [WeierstrassCurve.Affine.slope_of_X_ne hne] at hns3
       have hadd : Affine.Point.some Bx By hns1 + Affine.Point.some (algebraMap F KE xT)
             (algebraMap F KE yT) hTns' =
           Affine.Point.some ((W_KE W).toAffine.addX Bx (algebraMap F KE xT) ℓKE)
             ((W_KE W).toAffine.addY Bx (algebraMap F KE xT) By ℓKE) hns3 := by
-        rw [WeierstrassCurve.Affine.Point.add_some (fun hc => hne hc.1)]
+        rw [WeierstrassCurve.Affine.Point.add_some (fun hc ↦ hne hc.1)]
         exact (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mpr
           ⟨by rw [WeierstrassCurve.Affine.slope_of_X_ne hne],
            by rw [WeierstrassCurve.Affine.slope_of_X_ne hne]⟩
@@ -637,7 +637,7 @@ theorem mapTranslateGenericPoint_of_pullbackEvaluation [IsAlgClosed F]
         obtain ⟨⟨⟨⟨hP1, hP2⟩, hP3⟩, hP4⟩, hP5⟩ := hP
         rw [Set.mem_setOf_eq, not_not] at hP2
         rw [Set.mem_setOf_eq] at hP3 hP4 hP5
-        push_neg at hP3
+        push Not at hP3
         obtain ⟨xI, yI, hI, hβsum, hτx, hτy⟩ := hkey P hP1 hP2 (hP3 hP2)
         obtain ⟨xP, yP, hPns, heqP, hxP, hyP⟩ := hw P hP1
         -- the image is not `±T`, so its `x`-coordinate differs from `x_T`
@@ -652,12 +652,12 @@ theorem mapTranslateGenericPoint_of_pullbackEvaluation [IsAlgClosed F]
         -- the F-level group law: `β P + T` in coordinates
         set ℓF : F := (yP - yT) / (xP - xT) with hℓF
         have hns3F := WeierstrassCurve.Affine.nonsingular_add hPns hT
-          (fun hc => hxPT hc.1)
+          (fun hc ↦ hxPT hc.1)
         rw [WeierstrassCurve.Affine.slope_of_X_ne hxPT] at hns3F
         have haddF : β.toAddMonoidHom P.toAffinePoint + β.toAddMonoidHom Sk =
             Affine.Point.some (W.toAffine.addX xP xT ℓF)
               (W.toAffine.addY xP xT yP ℓF) hns3F := by
-          rw [heqP, hTeq, WeierstrassCurve.Affine.Point.add_some (fun hc => hxPT hc.1)]
+          rw [heqP, hTeq, WeierstrassCurve.Affine.Point.add_some (fun hc ↦ hxPT hc.1)]
           exact (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mpr
             ⟨by rw [WeierstrassCurve.Affine.slope_of_X_ne hxPT],
              by rw [WeierstrassCurve.Affine.slope_of_X_ne hxPT]⟩
@@ -689,10 +689,10 @@ theorem mapTranslateGenericPoint_of_pullbackEvaluation [IsAlgClosed F]
         exact ⟨⟨xI, hτx, hxx ▸ haddXev⟩, ⟨yI, hτy, hyy ▸ haddYev⟩⟩
       have hX : (translateAlgEquivOfPoint W Sk).toAlgHom Bx =
           (W_KE W).toAffine.addX Bx (algebraMap F KE xT) ℓKE :=
-        eq_of_evaluatesTo_cofinite W hbadS (fun P hP => (hcoords P hP).1)
+        eq_of_evaluatesTo_cofinite W hbadS (fun P hP ↦ (hcoords P hP).1)
       have hY : (translateAlgEquivOfPoint W Sk).toAlgHom By =
           (W_KE W).toAffine.addY Bx (algebraMap F KE xT) By ℓKE :=
-        eq_of_evaluatesTo_cofinite W hbadS (fun P hP => (hcoords P hP).2)
+        eq_of_evaluatesTo_cofinite W hbadS (fun P hP ↦ (hcoords P hP).2)
       exact ((congrArg (WeierstrassCurve.Affine.Point.map (W' := W)
           (translateAlgEquivOfPoint W Sk).toAlgHom) hgen1).trans
         (hτmap.trans
