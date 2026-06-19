@@ -86,4 +86,46 @@ theorem yPlus_subsingleton (D : VandiverData p YPlus) (hv : Subsingleton (YPlusF
 
 end VandiverData
 
+/-- **`p`-adic torsion vanishing**: for a finite abelian group `A` whose order is prime to `p`,
+the `p`-adic tensor `ℤ_p ⊗_ℤ A` is trivial.  (The order `n = |A|` annihilates `A` — hence, through
+the right tensorand, the whole tensor — while `n` is a *unit* in `ℤ_p` since `p ∤ n`; an annihilating
+unit forces the module to vanish.) -/
+theorem subsingleton_padicTensor_of_not_dvd_card {p : ℕ} [Fact p.Prime] {A : Type*}
+    [AddCommGroup A] [Finite A] (hp : ¬ (p : ℕ) ∣ Nat.card A) :
+    Subsingleton (TensorProduct ℤ ℤ_[p] A) := by
+  -- the order `n = |A|` annihilates the whole tensor (it kills the right tensorand).
+  have hann : ∀ z : TensorProduct ℤ ℤ_[p] A, (Nat.card A : ℤ_[p]) • z = 0 := by
+    intro z
+    induction z using TensorProduct.induction_on with
+    | zero => exact smul_zero _
+    | tmul x a =>
+        haveI := Fintype.ofFinite A
+        rw [TensorProduct.smul_tmul', Nat.cast_smul_eq_nsmul, TensorProduct.smul_tmul,
+          Nat.card_eq_fintype_card, card_nsmul_eq_zero, TensorProduct.tmul_zero]
+    | add z w hz hw => rw [smul_add, hz, hw, add_zero]
+  -- `n` is a unit in `ℤ_p` (since `p ∤ n`); an annihilating unit forces every element to `0`.
+  have hunit : IsUnit (Nat.card A : ℤ_[p]) :=
+    PadicInt.isUnit_iff.mpr
+      (PadicInt.norm_natCast_eq_one_iff.mpr ((Nat.Prime.coprime_iff_not_dvd Fact.out).mpr hp))
+  obtain ⟨u, hu⟩ := hunit
+  refine ⟨fun z w => ?_⟩
+  have key : ∀ y : TensorProduct ℤ ℤ_[p] A, y = 0 := fun y => by
+    have hy := hann y
+    rw [← hu] at hy
+    have := congrArg (fun t => (↑u⁻¹ : ℤ_[p]) • t) hy
+    simpa [smul_smul] using this
+  rw [key z, key w]
+
+/-- **Vandiver's condition** for `p`: `p ∤ h₁⁺`, the class number of the level-1 real cyclotomic
+field `F_1⁺ = ℚ(μ_p)⁺`. -/
+def Vandiver (p : ℕ) [Fact p.Prime] : Prop :=
+  ¬ (p : ℕ) ∣ Nat.card (ClassGroup (NumberField.RingOfIntegers (RealCyclotomic p 1)))
+
+/-- A Vandiver prime kills the `p`-part of the level-1 class group: `𝒴⁺_1 = ℤ_p ⊗ Cl(F_1⁺) = 0`.
+This supplies the `Subsingleton (YPlusFin p 1)` hypothesis of `yPlus_subsingleton`. -/
+theorem vandiver_yPlusFin_subsingleton {p : ℕ} [Fact p.Prime] (h : Vandiver p) :
+    Subsingleton (YPlusFin p 1) :=
+  subsingleton_padicTensor_of_not_dvd_card
+    (A := Additive (ClassGroup (NumberField.RingOfIntegers (RealCyclotomic p 1)))) h
+
 end Iwasawa.Galois

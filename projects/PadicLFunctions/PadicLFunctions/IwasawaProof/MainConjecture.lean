@@ -55,4 +55,17 @@ theorem iwasawa_main_conjecture_vandiver {I : Ideal (LambdaGPlus p)}
   obtain ⟨f⟩ := h12
   exact ⟨e.trans f⟩
 
+/-- **The Iwasawa Main Conjecture for Vandiver primes, from the class-number condition.**  This is
+`iwasawa_main_conjecture_vandiver` with the abstract vanishing hypothesis `Subsingleton 𝒴⁺_∞`
+discharged from the *concrete* Vandiver condition `Vandiver p` (`p ∤ h₁⁺`): the chain is
+`Vandiver p → 𝒴⁺_1 = 0` (`vandiver_yPlusFin_subsingleton`) `→ 𝒴⁺_∞ = 0`
+(`VandiverData.yPlus_subsingleton`, Nakayama) `→ 𝒳⁺_∞ ≅ Λ(𝒢⁺)/I`. -/
+theorem iwasawa_main_conjecture_of_vandiver {I : Ideal (LambdaGPlus p)}
+    {D : IwasawaGaloisData p XPlus YPlus MmodL} (vd : VandiverData p YPlus)
+    (cd : CFTUnitsData (UPlus := UPlus) p D) (hv : Vandiver p) (hEC : cd.EPlus = cd.CPlus)
+    (h12 : Nonempty ((UPlus ⧸ cd.CPlus) ≃ₗ[LambdaGPlus p] (LambdaGPlus p ⧸ I))) :
+    Nonempty (XPlus ≃ₗ[LambdaGPlus p] (LambdaGPlus p ⧸ I)) :=
+  iwasawa_main_conjecture_vandiver (p := p) cd
+    (vd.yPlus_subsingleton (vandiver_yPlusFin_subsingleton hv)) hEC h12
+
 end Iwasawa.Galois

@@ -1,1 +1,1 @@
-FOCUS: G-IMC capstone done (iwasawa_main_conjecture_vandiver); axiom-check + commit
+FOCUS: vandiver_yPlusFin_subsingleton done; build+axiom-check+commit, then standalone Vandiver MC corollary
