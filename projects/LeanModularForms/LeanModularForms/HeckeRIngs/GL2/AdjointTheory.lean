@@ -154,13 +154,9 @@ private theorem preservesCusps_sub {T₁ T₂ : Module.End ℂ (ModularForm ((Ga
     (h₁ : PreservesCusps T₁) (h₂ : PreservesCusps T₂) : PreservesCusps (T₁ - T₂) := by
   intro f c hc
   let g₁ : CuspForm ((Gamma1 N).map (mapGL ℝ)) k :=
-    { toSlashInvariantForm := (T₁ f.toModularForm').toSlashInvariantForm
-      holo' := (T₁ f.toModularForm').holo'
-      zero_at_cusps' := h₁ f }
+    { T₁ f.toModularForm' with zero_at_cusps' := h₁ f }
   let g₂ : CuspForm ((Gamma1 N).map (mapGL ℝ)) k :=
-    { toSlashInvariantForm := (T₂ f.toModularForm').toSlashInvariantForm
-      holo' := (T₂ f.toModularForm').holo'
-      zero_at_cusps' := h₂ f }
+    { T₂ f.toModularForm' with zero_at_cusps' := h₂ f }
   exact (g₁ - g₂).zero_at_cusps' hc
 
 omit [NeZero N] in
@@ -408,8 +404,7 @@ theorem peterssonInner_slash_adjoint (D : Set ℍ) (α : GL (Fin 2) ℝ) (hα : 
       ↑|α.det.val| ^ (k - 2) * petersson k f g' (α • τ) := by
     intro τ
     rw [hg_decomp, petersson_slash,
-      show σ α = ContinuousAlgEquiv.refl ℝ ℂ by
-        simp [σ]; intro hcontra; exact absurd hα (not_lt.mpr hcontra),
+      show σ α = ContinuousAlgEquiv.refl ℝ ℂ by simp only [σ, hα, ↓reduceIte],
       ContinuousAlgEquiv.refl_apply]
   simp_rw [h_eq]
   symm
