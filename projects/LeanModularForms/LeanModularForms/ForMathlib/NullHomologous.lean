@@ -67,7 +67,7 @@ null-homologous in `V`. -/
 theorem IsNullHomologous.mono {γ : PwC1Immersion x x} {U V : Set ℂ}
     (h : IsNullHomologous γ U) (hUV : U ⊆ V) : IsNullHomologous γ V where
   image_subset t ht := hUV (h.image_subset t ht)
-  winding_zero z hz := h.winding_zero z (fun hmem => hz (hUV hmem))
+  winding_zero z hz := h.winding_zero z (fun hmem ↦ hz (hUV hmem))
 
 /-! ### Auxiliary lemmas -/
 
@@ -80,10 +80,10 @@ theorem avoids_delta_bound (γ : PiecewiseC1Path x x) (z₀ : ℂ)
   have h_nonempty : (γ.toPath.extend '' Icc (0 : ℝ) 1).Nonempty :=
     ⟨γ.toPath.extend 0, mem_image_of_mem _ (left_mem_Icc.mpr zero_le_one)⟩
   have h_not_mem : z₀ ∉ γ.toPath.extend '' Icc (0 : ℝ) 1 :=
-    fun ⟨t, ht, heq⟩ => h_avoids t ht heq
+    fun ⟨t, ht, heq⟩ ↦ h_avoids t ht heq
   have h_pos : 0 < Metric.infDist z₀ (γ.toPath.extend '' Icc (0 : ℝ) 1) :=
     (h_compact.isClosed.notMem_iff_infDist_pos h_nonempty).mp h_not_mem
-  exact ⟨_, h_pos, fun t ht => by
+  exact ⟨_, h_pos, fun t ht ↦ by
     calc Metric.infDist z₀ _ ≤ dist z₀ (γ.toPath.extend t) :=
           Metric.infDist_le_dist_of_mem (mem_image_of_mem _ ht)
       _ = ‖γ.toPath.extend t - z₀‖ := by rw [Complex.dist_eq, norm_sub_rev]⟩
@@ -123,10 +123,10 @@ private lemma contourIntegral_inv_norm_le_of_far
     (hR : ∀ t ∈ Icc (0 : ℝ) 1, ‖γ.toPath.extend t‖ ≤ R)
     (hM_d : ∀ t ∈ Icc (0 : ℝ) 1, ‖deriv γ.toPath.extend t‖ ≤ M_d)
     {w : ℂ} (hw : R < ‖w‖) :
-    ‖γ.contourIntegral (fun z => (z - w)⁻¹)‖ ≤ M_d / (‖w‖ - R) := by
+    ‖γ.contourIntegral (fun z ↦ (z - w)⁻¹)‖ ≤ M_d / (‖w‖ - R) := by
   have hpos : 0 < ‖w‖ - R := by linarith
   have h_dist_lb : ∀ t ∈ Icc (0 : ℝ) 1, ‖w‖ - R ≤ ‖γ.toPath.extend t - w‖ :=
-    fun t ht => by
+    fun t ht ↦ by
       have := norm_sub_norm_le w (γ.toPath.extend t)
       rw [norm_sub_rev] at this
       linarith [hR t ht]
@@ -166,7 +166,7 @@ theorem generalizedWindingNumber_eq_zero_of_far_lipschitz
   have hR_bound : ∀ t ∈ Icc (0 : ℝ) 1, ‖γ.toPath.extend t‖ ≤ R :=
     lipschitzWith_norm_bound_on_Icc01 hLip
   have h_dist_lb : ∀ t ∈ Icc (0 : ℝ) 1,
-      (‖w‖ - R) ≤ ‖γ.toPath.extend t - w‖ := fun t ht => by
+      (‖w‖ - R) ≤ ‖γ.toPath.extend t - w‖ := fun t ht ↦ by
     have := norm_sub_norm_le w (γ.toPath.extend t)
     rw [norm_sub_rev] at this
     linarith [hR_bound t ht]
@@ -175,7 +175,7 @@ theorem generalizedWindingNumber_eq_zero_of_far_lipschitz
   obtain ⟨n, hn⟩ :=
     hasGeneralizedWindingNumber_integer_of_closed γ.toPiecewiseC1Path hδ
       (intervalIntegrable_div_lipschitz γ.toPiecewiseC1Path hpos h_dist_lb hLip)
-  have h_eq_int : γ.toPiecewiseC1Path.contourIntegral (fun z => (z - w)⁻¹) =
+  have h_eq_int : γ.toPiecewiseC1Path.contourIntegral (fun z ↦ (z - w)⁻¹) =
       2 * ↑Real.pi * I * (n : ℂ) :=
     tendsto_nhds_unique (hasCauchyPV_of_avoids hδ) hn
   have h_norm_2piIn : ‖(2 : ℂ) * (↑Real.pi : ℂ) * I * (n : ℂ)‖ =
@@ -187,7 +187,7 @@ theorem generalizedWindingNumber_eq_zero_of_far_lipschitz
   have hL : 2 * Real.pi * (|n| : ℝ) ≤ (K : ℝ) / (‖w‖ - R) := by
     rw [← h_norm_2piIn, ← h_eq_int]
     exact contourIntegral_inv_norm_le_of_far hR_bound
-      (fun _ _ => norm_deriv_le_of_lipschitz hLip) hR_w
+      (fun _ _ ↦ norm_deriv_le_of_lipschitz hLip) hR_w
   have h_div_lt : (K : ℝ) / (‖w‖ - R) < 2 * Real.pi := by
     rw [div_lt_iff₀ hpos]
     have h_K_lt : (K : ℝ) / (2 * Real.pi) < ‖w‖ - R := by linarith
@@ -214,13 +214,13 @@ theorem winding_eventually_zero_cocompact_of_lipschitz
   set RR : ℝ := R + (K : ℝ) / (2 * Real.pi) with hRR_def
   have h_mem : {w : ℂ | RR < ‖w‖} ∈ Filter.cocompact ℂ := by
     rw [Filter.mem_cocompact]
-    exact ⟨Metric.closedBall 0 RR, isCompact_closedBall 0 RR, fun w hw => by
+    exact ⟨Metric.closedBall 0 RR, isCompact_closedBall 0 RR, fun w hw ↦ by
       simpa [mem_compl_iff, Metric.mem_closedBall, dist_zero_right, not_le] using hw⟩
   filter_upwards [h_mem] with w (hw : RR < ‖w‖)
   have h_2pi_pos : (0 : ℝ) < 2 * Real.pi := by positivity
   have h_K_div_2pi_nn : (0 : ℝ) ≤ (K : ℝ) / (2 * Real.pi) :=
     div_nonneg (NNReal.coe_nonneg _) h_2pi_pos.le
-  refine ⟨fun t ht heq => ?_,
+  refine ⟨fun t ht heq ↦ ?_,
     generalizedWindingNumber_eq_zero_of_far_lipschitz hLip hw⟩
   have hbd := lipschitzWith_norm_bound_on_Icc01 hLip t ht
   rw [show γ.toPath.extend t = w from heq] at hbd
@@ -245,7 +245,7 @@ theorem IsNullHomologous.winding_zero_nhds_of_not_mem_of_closed
   obtain ⟨ε, hε_pos, h_const⟩ :=
     Complex.generalizedWindingNumber_locally_const_of_closed
       γ.toPiecewiseC1Path h_avoid hLip
-  exact ⟨ε, hε_pos, fun w' hw' => by rw [h_const w' hw', h_null.winding_zero w hw]⟩
+  exact ⟨ε, hε_pos, fun w' hw' ↦ by rw [h_const w' hw', h_null.winding_zero w hw]⟩
 
 /-! ### Convex domains -/
 
