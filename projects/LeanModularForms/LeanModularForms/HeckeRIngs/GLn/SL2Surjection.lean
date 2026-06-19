@@ -102,7 +102,6 @@ theorem IsCoprime.lift_to_int {d : ℕ} [NeZero d] {a c : ZMod d} (hac : IsCopri
     obtain ⟨c₀, r₀, hc₀, hr₀, hcop⟩ := ih c₁ (a₁ % c₁)
       (Nat.lt_succ_iff.mp ((natAbs_emod_lt a₁ c₁ hc₁).trans_le hle)) (isCoprime_emod hac)
     refine ⟨r₀ + a₁ / c₁ * c₀, c₀, ?_, hc₀, hcop.symm.add_mul_right_left _⟩
-    change ((r₀ + a₁ / c₁ * c₀ : ℤ) : ZMod d) = (a₁ : ZMod d)
     conv_rhs => rw [show a₁ = a₁ % c₁ + a₁ / c₁ * c₁ from by
       have := Int.mul_ediv_add_emod a₁ c₁; linarith]
     push_cast
@@ -195,7 +194,6 @@ theorem SL2_reduction_surjective (d : ℕ) [NeZero d] :
         (inv_mul_10_eq_zero M g₀ hcol0 hcol1)
     obtain ⟨τ, hτ⟩ := upperUniTri_mem_range d t
     refine ⟨σ * τ, ?_⟩
-    change _ = g₀
     rw [map_mul, show g₀ = M * (M⁻¹ * g₀) by group, hQ, ← hτ]
 
 end SL2Reduction
