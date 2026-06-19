@@ -278,12 +278,12 @@ structure CornerFTCHyp {x y : ℂ} (γ : PiecewiseC1Path x y) (z₀ : ℂ)
   /-- Integrability on the left segment. -/
   hint_left : ∀ ε, 0 < ε → ε < threshold →
     IntervalIntegrable
-      (fun t => (γ.toPath.extend t - z₀)⁻¹ * deriv γ.toPath.extend t)
+      (fun t ↦ (γ.toPath.extend t - z₀)⁻¹ * deriv γ.toPath.extend t)
       volume 0 (t₀ - δ_left ε)
   /-- Integrability on the right segment. -/
   hint_right : ∀ ε, 0 < ε → ε < threshold →
     IntervalIntegrable
-      (fun t => (γ.toPath.extend t - z₀)⁻¹ * deriv γ.toPath.extend t)
+      (fun t ↦ (γ.toPath.extend t - z₀)⁻¹ * deriv γ.toPath.extend t)
       volume (t₀ + δ_right ε) 1
   /-- `E(epsilon) -> L` as `epsilon -> 0+`. -/
   h_limit : Tendsto E (𝓝[>] 0) (𝓝 L)
@@ -422,25 +422,25 @@ theorem hasWindingNumber_atRho_of_cornerFtcHyp {H : ℝ} (hH : 1 < H)
   have hH_valid : fdHeightValid H := fdHeightValid_of_one_lt H hH
   have hH' : 0 < H - Real.sqrt 3 / 2 := by unfold fdHeightValid at hH_valid; linarith
   have hthresh : 0 < min (1/3 : ℝ) (H - Real.sqrt 3 / 2) := lt_min (by norm_num) hH'
-  have h_pv : HasCauchyPV (fun z => (z - ellipticPointRho)⁻¹) γ ellipticPointRho
+  have h_pv : HasCauchyPV (fun z ↦ (z - ellipticPointRho)⁻¹) γ ellipticPointRho
       (-(↑Real.pi / 3 * I)) := by
     simp only [HasCauchyPV]
     apply PVSplitting.pv_tendsto_of_crossing_limit_asymmetric
       (ht₀ := show (3/5 : ℝ) ∈ Ioo 0 1 from ⟨by norm_num, by norm_num⟩)
       (hthresh := hthresh)
       (δ_left := arcsinDelta) (δ_right := vertDelta H)
-      (hδL_pos := fun ε hε _ => arcsinDelta_pos hε)
-      (hδR_pos := fun ε hε _ => vertDelta_pos hH_valid hε)
-      (hδL_small := fun ε hε hεt => by
+      (hδL_pos := fun ε hε _ ↦ arcsinDelta_pos hε)
+      (hδR_pos := fun ε hε _ ↦ vertDelta_pos hH_valid hε)
+      (hδL_small := fun ε hε hεt ↦ by
         linarith [arcsinDelta_lt_one_fifth hε (lt_of_lt_of_le hεt (min_le_left _ _))])
-      (hδR_small := fun ε hε hεt => by
+      (hδR_small := fun ε hε hεt ↦ by
         linarith [vertDelta_lt_one_fifth hH_valid
           (lt_of_lt_of_le hεt (min_le_right _ _))])
-      (h_far_left := fun ε hε hεt t ht =>
+      (h_far_left := fun ε hε hεt t ht ↦
         rho_far_left γ hγ hε (lt_of_lt_of_le hεt (min_le_left _ _)) ht)
-      (h_far_right := fun ε hε hεt t ht =>
+      (h_far_right := fun ε hε hεt t ht ↦
         rho_far_right hH γ hγ hε (lt_of_lt_of_le hεt (min_le_right _ _)) ht)
-      (h_near := fun ε hε hεt t ht =>
+      (h_near := fun ε hε hεt t ht ↦
         rho_near hH γ hγ hε (lt_of_lt_of_le hεt (min_le_left _ _))
           (lt_of_lt_of_le hεt (min_le_right _ _)) ht)
       (h_ftc := ftcHyp.h_ftc)
@@ -464,24 +464,24 @@ theorem hasWindingNumber_atRhoPlusOne_of_cornerFtcHyp {H : ℝ} (hH : 1 < H)
   have hH_valid : fdHeightValid H := fdHeightValid_of_one_lt H hH
   have hH' : 0 < H - Real.sqrt 3 / 2 := by unfold fdHeightValid at hH_valid; linarith
   have hthresh : 0 < min (1/3 : ℝ) (H - Real.sqrt 3 / 2) := lt_min (by norm_num) hH'
-  have h_pv : HasCauchyPV (fun z => (z - ellipticPointRhoPlusOne)⁻¹) γ
+  have h_pv : HasCauchyPV (fun z ↦ (z - ellipticPointRhoPlusOne)⁻¹) γ
       ellipticPointRhoPlusOne (-(↑Real.pi / 3 * I)) := by
     simp only [HasCauchyPV]
     apply PVSplitting.pv_tendsto_of_crossing_limit_asymmetric
       (ht₀ := show (1/5 : ℝ) ∈ Ioo 0 1 from ⟨by norm_num, by norm_num⟩)
       (hthresh := hthresh)
       (δ_left := vertDelta H) (δ_right := arcsinDelta)
-      (hδL_pos := fun ε hε _ => vertDelta_pos hH_valid hε)
-      (hδR_pos := fun ε hε _ => arcsinDelta_pos hε)
-      (hδL_small := fun ε hε hεt =>
+      (hδL_pos := fun ε hε _ ↦ vertDelta_pos hH_valid hε)
+      (hδR_pos := fun ε hε _ ↦ arcsinDelta_pos hε)
+      (hδL_small := fun ε hε hεt ↦
         vertDelta_lt_one_fifth hH_valid (lt_of_lt_of_le hεt (min_le_right _ _)))
-      (hδR_small := fun ε hε hεt => by
+      (hδR_small := fun ε hε hεt ↦ by
         linarith [arcsinDelta_lt_one_fifth hε (lt_of_lt_of_le hεt (min_le_left _ _))])
-      (h_far_left := fun ε hε _ t ht => rhoPlusOne_far_left hH γ hγ hε ht)
-      (h_far_right := fun ε hε hεt t ht =>
+      (h_far_left := fun ε hε _ t ht ↦ rhoPlusOne_far_left hH γ hγ hε ht)
+      (h_far_right := fun ε hε hεt t ht ↦
         rhoPlusOne_far_right hH γ hγ hε (lt_of_lt_of_le hεt (min_le_left _ _))
           (lt_of_lt_of_le hεt (min_le_right _ _)) ht)
-      (h_near := fun ε hε hεt t ht =>
+      (h_near := fun ε hε hεt t ht ↦
         rhoPlusOne_near hH γ hγ hε (lt_of_lt_of_le hεt (min_le_left _ _))
           (lt_of_lt_of_le hεt (min_le_right _ _)) ht)
       (h_ftc := ftcHyp.h_ftc)
