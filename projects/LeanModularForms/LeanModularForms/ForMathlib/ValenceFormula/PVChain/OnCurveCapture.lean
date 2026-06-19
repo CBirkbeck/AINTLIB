@@ -32,6 +32,16 @@ variable {k : ℤ} (f : ModularForm (Gamma 1) k) (hf : f ≠ 0)
 
 include hf
 
+/-- A point of `𝒟` at which `f ∘ ofComplex` vanishes lies in any completeness set `S`. -/
+private lemma mem_S_of_mem_fd_of_compZero (S : Finset ℍ)
+    (hS_complete : ∀ p, p ∈ 𝒟 → orderOfVanishingAt' (⇑f) p ≠ 0 → p ∈ S)
+    {z : ℂ} (h_im_pos : 0 < z.im) (hp_fd : (⟨z, h_im_pos⟩ : ℍ) ∈ 𝒟)
+    (h_zero : modularFormCompOfComplex f z = 0) : (⟨z, h_im_pos⟩ : ℍ) ∈ S := by
+  have hp_zero : f ⟨z, h_im_pos⟩ = 0 := by
+    simpa [modularFormCompOfComplex, UpperHalfPlane.ofComplex_apply_of_im_pos h_im_pos]
+      using h_zero
+  exact hS_complete _ hp_fd (orderOfVanishingAt'_ne_zero_of_eq_zeroFM f hf _ hp_zero)
+
 /-- Arc points with ‖·‖ = 1 are captured by `sArcOfS S`. -/
 theorem oncurve_arc_capture
     (S : Finset ℍ)
@@ -59,10 +69,7 @@ theorem oncurve_arc_capture
     change 1 ≤ Complex.normSq z
     rw [Complex.normSq_apply]
     nlinarith
-  have hp_zero : f p = 0 := by
-    simpa [modularFormCompOfComplex, UpperHalfPlane.ofComplex_apply_of_im_pos h_im_pos]
-      using h_zero
-  have hp_in_S := hS_complete p hp_fd (orderOfVanishingAt'_ne_zero_of_eq_zeroFM f hf p hp_zero)
+  have hp_in_S := mem_S_of_mem_fd_of_compZero f hf S hS_complete h_im_pos hp_fd h_zero
   simp only [sArcOfS, Finset.coe_union, Finset.coe_image, Finset.coe_insert,
     Finset.coe_singleton, Set.mem_union, Set.mem_image]
   exact .inl (.inl ⟨p, Finset.mem_filter.mpr ⟨hp_in_S, h_norm⟩, rfl⟩)
@@ -76,7 +83,7 @@ theorem oncurve_vert_capture
     (fdBoundary_H H' t : ℂ) ∈ (↑(sVertOfS S) : Set ℂ) := by
   set z := fdBoundary_H H' t with hz_def
   have hz_seg : z = fdBoundary_seg1_H H' t := by
-    rw [hz_def, fdBoundary_H_eq_seg1_H (le_of_lt ht.2)]
+    rw [hz_def, fdBoundary_H_eq_seg1_H ht.2.le]
   have h_re : z.re = 1/2 := by
     rw [hz_seg]
     simp [fdBoundary_seg1_H, add_re, mul_re, I_re, I_im, ofReal_re, ofReal_im]
@@ -109,10 +116,7 @@ theorem oncurve_vert_capture
     · change |z.re| ≤ 1/2
       rw [h_re]
       norm_num
-  have hp_zero : f p = 0 := by
-    simpa [modularFormCompOfComplex, UpperHalfPlane.ofComplex_apply_of_im_pos h_im_pos]
-      using h_zero
-  have hp_in_S := hS_complete p hp_fd (orderOfVanishingAt'_ne_zero_of_eq_zeroFM f hf p hp_zero)
+  have hp_in_S := mem_S_of_mem_fd_of_compZero f hf S hS_complete h_im_pos hp_fd h_zero
   unfold sVertOfS
   rw [Finset.coe_union, Finset.coe_union, Finset.coe_union, Finset.coe_image]
   exact .inl (.inl (.inl ⟨p, Finset.mem_filter.mpr ⟨hp_in_S, h_re, h_norm_gt⟩, rfl⟩))
@@ -131,10 +135,7 @@ theorem height_contradiction
     change 1 ≤ Complex.normSq z
     rw [Complex.normSq_apply]
     nlinarith [sq_abs z.im]
-  have hp_zero : f p = 0 := by
-    simpa [modularFormCompOfComplex, UpperHalfPlane.ofComplex_apply_of_im_pos h_im_pos]
-      using h_zero
-  have hp_in_S := hS_complete p hp_fd (orderOfVanishingAt'_ne_zero_of_eq_zeroFM f hf p hp_zero)
+  have hp_in_S := mem_S_of_mem_fd_of_compZero f hf S hS_complete h_im_pos hp_fd h_zero
   linarith [hH_bound p hp_in_S, h_im]
 
 omit hf in
@@ -153,7 +154,7 @@ theorem oncurve_seg4_capture
     fdBoundary_H H t ∈ (↑(sVertOfS S) : Set ℂ) := by
   set z := fdBoundary_H H t
   have hz_seg : z = fdBoundary_seg4_H H t :=
-    fdBoundary_H_eq_seg4_H (by linarith [ht.1]) (le_of_lt ht.2)
+    fdBoundary_H_eq_seg4_H (by linarith [ht.1]) ht.2.le
   set s := 4 - t with hs_def
   have hs_Ioo : s ∈ Set.Ioo (0:ℝ) 1 := ⟨by linarith [ht.2], by linarith [ht.1]⟩
   have h4s : (4:ℝ) - s = t := by simp [hs_def]
@@ -201,10 +202,7 @@ theorem oncurve_seg4_capture
     rw [Complex.normSq_apply]
     nlinarith [mul_self_le_mul_self (by positivity : 0 ≤ Real.sqrt 3 / 2) h_im_gt.le,
       Real.sq_sqrt (show (0:ℝ) ≤ 3 by norm_num)]
-  have hp_zero : f p = 0 := by
-    simpa [modularFormCompOfComplex, UpperHalfPlane.ofComplex_apply_of_im_pos h_im_pos]
-      using h_zero_seg1
-  have hp_in_S := hS_complete p hp_fd (orderOfVanishingAt'_ne_zero_of_eq_zeroFM f hf p hp_zero)
+  have hp_in_S := mem_S_of_mem_fd_of_compZero f hf S hS_complete h_im_pos hp_fd h_zero_seg1
   rw [h_seg_eq]
   unfold sVertOfS
   rw [Finset.coe_union, Finset.coe_union, Finset.coe_union]
@@ -248,11 +246,11 @@ theorem oncurve_full_capture (S : Finset ℍ)
       · rcases (eq_or_lt_of_le h4 : t = 4 ∨ t < 4) with rfl | h4s
         · exfalso
           refine height_contradiction f hf S hS_complete hH_ge1 hH_bound ?_ ?_ h_zero
-          · rw [fdBoundary_H_eq_seg4_H (by norm_num : (3:ℝ) < 4) (le_refl 4)]
+          · rw [fdBoundary_H_eq_seg4_H (by norm_num : (3:ℝ) < 4) le_rfl]
             simp [fdBoundary_seg4_H, add_im, neg_im, mul_im, I_re, I_im, ofReal_re, ofReal_im,
               div_ofNat]
             ring
-          · rw [fdBoundary_H_eq_seg4_H (by norm_num : (3:ℝ) < 4) (le_refl 4)]
+          · rw [fdBoundary_H_eq_seg4_H (by norm_num : (3:ℝ) < 4) le_rfl]
             simp [fdBoundary_seg4_H, add_re, neg_re, mul_re, I_re, I_im, ofReal_re, ofReal_im,
               div_ofNat]
             norm_num
