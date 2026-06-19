@@ -651,9 +651,8 @@ private lemma joint_eigenspace_subset_isCommonEigenfunction (χ : (ZMod N)ˣ →
         a • (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) := by
   intro n hn_cop
   haveI : NeZero n.val := ⟨n.pos.ne'⟩
-  refine ⟨ev ⟨n, hn_cop⟩, ?_⟩
-  exact congr_arg Subtype.val
-    (Module.End.mem_eigenspace_iff.mp ((Submodule.mem_iInf _).mp hf ⟨n, hn_cop⟩))
+  exact ⟨ev ⟨n, hn_cop⟩, congr_arg Subtype.val
+    (Module.End.mem_eigenspace_iff.mp ((Submodule.mem_iInf _).mp hf ⟨n, hn_cop⟩))⟩
 
 private lemma jointEigenspace_petN_orthogonal (χ : (ZMod N)ˣ →* ℂˣ)
     [FiniteDimensional ℂ (cuspFormCharSpace k χ)] {ev₁ ev₂ : CoprimeIndex N → ℂ}
@@ -753,8 +752,7 @@ private lemma heckeFamily_restrict_pairwise_commute
   have hcfun := DFunLike.congr_fun (heckeFamily_commute_all (k := k) χ i j)
     (x : cuspFormCharSpace k χ)
   simp only [Module.End.mul_apply] at hcfun ⊢
-  simp only [LinearMap.restrict_coe_apply]
-  exact hcfun
+  simpa only [LinearMap.coe_restrict_apply] using hcfun
 
 /-- The joint eigenspace decomposition for the restriction of `heckeFamily` to a stable
 submodule fills the whole submodule (proof helper for
@@ -795,8 +793,7 @@ private lemma isCommonEigenfunction_of_mem_iInf_eigenspace_restrict (χ : (ZMod 
   refine ⟨ev ⟨n, hn_cop⟩, ?_⟩
   have heq := Module.End.mem_eigenspace_iff.mp ((Submodule.mem_iInf _).mp hv ⟨n, hn_cop⟩)
   have heq_V : (heckeFamily k χ ⟨n, hn_cop⟩) (v : p).1 = ev ⟨n, hn_cop⟩ • (v : p).1 := by
-    have := congr_arg (Subtype.val) heq
-    simpa only [LinearMap.restrict_coe_apply, SetLike.val_smul] using this
+    simpa only [LinearMap.coe_restrict_apply, SetLike.val_smul] using congr_arg Subtype.val heq
   have h := congr_arg (Subtype.val) heq_V
   simp only [SetLike.val_smul] at h
   exact h
@@ -846,7 +843,7 @@ theorem exists_eigenform_decomposition_of_invariant
     have hval : (gp : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) =
         ∑ ev ∈ fc.support, hForm ev := by
       rw [← hsum_p, hForm_def]
-      simp only [AddSubmonoidClass.coe_finset_sum]
+      simp only [AddSubmonoidClass.coe_finsetSum]
     exact hval
   rw [hsum_form, ← Finset.sum_coe_sort fc.support (fun ev ↦ hForm ev)]
 
