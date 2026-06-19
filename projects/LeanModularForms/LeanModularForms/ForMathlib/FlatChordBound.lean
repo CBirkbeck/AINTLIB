@@ -47,8 +47,8 @@ This is the bound used in Phase 3.3 chord analysis. -/
 theorem orthogonal_deviation_at_radius_right
     {γ : ℝ → ℂ} {t₀ : ℝ} {s L : ℂ} {n : ℕ} (h_flat : IsFlatOfOrder γ t₀ n)
     (hL : L ≠ 0) (hL_right : Tendsto (deriv γ) (𝓝[>] t₀) (𝓝 L)) (h_s : γ t₀ = s) :
-    (fun t : ℝ => ‖tangentDeviation (γ t - s) L‖) =o[𝓝[>] t₀]
-      (fun t => ‖γ t - s‖ ^ n) := by
+    (fun t : ℝ ↦ ‖tangentDeviation (γ t - s) L‖) =o[𝓝[>] t₀]
+      (fun t ↦ ‖γ t - s‖ ^ n) := by
   subst h_s
   exact h_flat.right_flat L hL hL_right
 
@@ -56,8 +56,8 @@ theorem orthogonal_deviation_at_radius_right
 theorem orthogonal_deviation_at_radius_left
     {γ : ℝ → ℂ} {t₀ : ℝ} {s L : ℂ} {n : ℕ} (h_flat : IsFlatOfOrder γ t₀ n)
     (hL : L ≠ 0) (hL_left : Tendsto (deriv γ) (𝓝[<] t₀) (𝓝 L)) (h_s : γ t₀ = s) :
-    (fun t : ℝ => ‖tangentDeviation (γ t - s) L‖) =o[𝓝[<] t₀]
-      (fun t => ‖γ t - s‖ ^ n) := by
+    (fun t : ℝ ↦ ‖tangentDeviation (γ t - s) L‖) =o[𝓝[<] t₀]
+      (fun t ↦ ‖γ t - s‖ ^ n) := by
   subst h_s
   exact h_flat.left_flat L hL hL_left
 
