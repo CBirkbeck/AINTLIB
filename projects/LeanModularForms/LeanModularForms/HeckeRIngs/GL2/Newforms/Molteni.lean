@@ -181,6 +181,64 @@ theorem not_equiv'_primeRestrict {p : ℕ} (hp : p.Prime) {F G : ℕ → ℂ}
   rw [badPrimes_primeRestrict_eq hp]
   exact h.diff (Set.finite_singleton p)
 
+/-- The prime-restriction `F^{(p)}` satisfies the **same** prime-power recurrence as `F`, except the
+weight is forced to vanish at the deleted prime `p` (`w' q = if q = p then 0 else w q`).  At `q = p`
+every prime power `p^{r+2}, p^{r+1}, p` is killed by the restriction and the weight is `0`, so the
+recurrence reads `0 = 0·0 − 0·· = 0`; at `q ≠ p` it is the genuine recurrence for `F`. -/
+theorem primeRestrict_rec {p : ℕ} (hp : p.Prime) {w : ℕ → ℂ} {F : ℕ → ℂ}
+    (hrec : ∀ q : ℕ, q.Prime → ∀ r : ℕ, F (q ^ (r + 2)) = F q * F (q ^ (r + 1)) - w q * F (q ^ r)) :
+    ∀ q : ℕ, q.Prime → ∀ r : ℕ,
+      IsMultiplicative'.primeRestrict p F (q ^ (r + 2)) =
+        IsMultiplicative'.primeRestrict p F q * IsMultiplicative'.primeRestrict p F (q ^ (r + 1)) -
+          (if q = p then 0 else w q) * IsMultiplicative'.primeRestrict p F (q ^ r) := by
+  intro q hq r
+  by_cases hqp : q = p
+  · have hpq : p ∣ q := dvd_of_eq hqp.symm
+    have h1 : IsMultiplicative'.primeRestrict p F (q ^ (r + 2)) = 0 :=
+      IsMultiplicative'.primeRestrict_of_dvd (hpq.trans (dvd_pow_self q (by omega)))
+    have h2 : IsMultiplicative'.primeRestrict p F q = 0 :=
+      IsMultiplicative'.primeRestrict_of_dvd hpq
+    rw [if_pos hqp, h1, h2]; ring
+  · have hndq : ¬ p ∣ q := fun h => hqp ((Nat.prime_dvd_prime_iff_eq hp hq).mp h).symm
+    have hnd : ∀ j : ℕ, ¬ p ∣ q ^ j := fun j h => hndq (hp.dvd_of_dvd_pow h)
+    rw [if_neg hqp, IsMultiplicative'.primeRestrict_of_not_dvd (hnd (r + 2)),
+      IsMultiplicative'.primeRestrict_of_not_dvd hndq,
+      IsMultiplicative'.primeRestrict_of_not_dvd (hnd (r + 1)),
+      IsMultiplicative'.primeRestrict_of_not_dvd (hnd r)]
+    exact hrec q hq r
+
+/-- If the prime-restrictions `F^{(p)}, G^{(p)}` are equal, then `F` and `G` agree at every prime
+power away from `p`, i.e. `badPrimes F G ⊆ {p}`. -/
+theorem badPrimes_subset_singleton_of_primeRestrict_eq {p : ℕ} (hp : p.Prime) {F G : ℕ → ℂ}
+    (h : IsMultiplicative'.primeRestrict p F = IsMultiplicative'.primeRestrict p G) :
+    badPrimes F G ⊆ {p} := by
+  rintro q ⟨hqprime, a, ha1, hne⟩
+  rw [Set.mem_singleton_iff]
+  by_contra hqp
+  have hnd : ¬ p ∣ q ^ a := fun hd =>
+    hqp ((Nat.prime_dvd_prime_iff_eq hp hqprime).mp (hp.dvd_of_dvd_pow hd)).symm
+  refine hne ?_
+  have := congrFun h (q ^ a)
+  rwa [IsMultiplicative'.primeRestrict_of_not_dvd hnd,
+    IsMultiplicative'.primeRestrict_of_not_dvd hnd] at this
+
+/-- Two distinct multiplicative functions whose bad-prime set is contained in `{p}` must actually
+differ at `p` (otherwise they would agree at every prime power, hence be equal). -/
+theorem mem_badPrimes_of_ne_of_subset_singleton {p : ℕ} {F G : ℕ → ℂ}
+    (hF : IsMultiplicative' F) (hG : IsMultiplicative' G)
+    (hF0 : F 0 = 0) (hG0 : G 0 = 0) (hne : F ≠ G) (hsub : badPrimes F G ⊆ {p}) :
+    p ∈ badPrimes F G := by
+  by_contra hp
+  refine hne (funext fun n => ?_)
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · rw [hF0, hG0]
+  refine eq_of_eq_on_prime_powers hF hG (fun q hq a ha => ?_) n hn
+  by_contra hqa
+  have : q ∈ badPrimes F G := ⟨hq, a, ha, hqa⟩
+  rcases hsub this with hqp
+  rw [Set.mem_singleton_iff] at hqp
+  exact hp (hqp ▸ this)
+
 /-- **Molteni's linear-independence lemma, all-nonzero (support) form.**  Strong induction on
 `|s|` proving the contrapositive: a family of pairwise non-equivalent multiplicative functions
 indexed by a finite set `s`, *all* of whose coefficients are nonzero, cannot satisfy a vanishing

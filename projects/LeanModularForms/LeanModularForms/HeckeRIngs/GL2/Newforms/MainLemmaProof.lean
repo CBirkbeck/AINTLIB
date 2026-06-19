@@ -6,6 +6,7 @@ Authors: LeanModularForms contributors
 import LeanModularForms.HeckeRIngs.GL2.Newforms.MainLemma
 import LeanModularForms.HeckeRIngs.GL2.Newforms.Molteni
 import LeanModularForms.SMOObligations
+import Mathlib.NumberTheory.LSeries.PrimesInAP
 
 /-!
 # The Atkin–Lehner Main Lemma (DS Theorem 5.7.1), assembled
@@ -532,6 +533,109 @@ private lemma evCusp_ppow_rec
   rw [hrec, smul_smul, smul_smul, smul_smul]
   module
 
+/-- Zero-extension of an eigensystem `ev : ℕ+ → ℂ` to `ℕ → ℂ`: `ev n` at positive `n` coprime to
+`N`, and `0` elsewhere — the multiplicative function fed to Molteni's independence lemma. -/
+private def eigenZeroExt (ev : ℕ+ → ℂ) : ℕ → ℂ :=
+  fun n => if h : 0 < n ∧ Nat.Coprime n N then ev ⟨n, h.1⟩ else 0
+
+omit [NeZero N] in
+private lemma eigenZeroExt_coprime (ev : ℕ+ → ℂ) {n : ℕ} (hn : 0 < n) (hc : Nat.Coprime n N) :
+    eigenZeroExt (N := N) ev n = ev ⟨n, hn⟩ := dif_pos ⟨hn, hc⟩
+
+omit [NeZero N] in
+private lemma eigenZeroExt_not (ev : ℕ+ → ℂ) {n : ℕ} (h : ¬ (0 < n ∧ Nat.Coprime n N)) :
+    eigenZeroExt (N := N) ev n = 0 := dif_neg h
+
+/-- `ev 1 = 1` for the eigensystem of a nonzero common Hecke eigenfunction (from `T_1 = id`,
+cancelling the nonzero form). -/
+private lemma evCusp_one_eq_one {H : CuspForm ((Gamma1 N).map (mapGL ℝ)) k} (hH : H ≠ 0)
+    (ev : ℕ+ → ℂ)
+    (hev : ∀ (m : ℕ+) (_ : NeZero m.val), Nat.Coprime m.val N →
+       heckeT_n_cusp k m.val H = ev m • H) :
+    ev (1 : ℕ+) = 1 := by
+  set F : ModularForm ((Gamma1 N).map (mapGL ℝ)) k := H.toModularForm' with hF_def
+  have hF_ne : F ≠ 0 := fun hF0 ↦ hH (by
+    ext z; exact congrFun (congrArg (⇑· : ModularForm _ k → _) hF0) z)
+  have h1 : heckeT_n (N := N) k 1 F = ev (1 : ℕ+) • F := by
+    rw [hF_def, ← heckeT_n_cusp_toModularForm']
+    exact congrArg _ (hev (1 : ℕ+) ⟨one_ne_zero⟩ (Nat.coprime_one_left N))
+  rw [heckeT_n_one, Module.End.one_apply] at h1
+  exact smul_eq_smul_cancel_mf hF_ne (h1.symm.trans (one_smul ℂ F).symm)
+
+/-- **Prime-square relation.**  For a nonzero common Hecke eigenfunction `H ∈ char(χ)` with
+eigensystem `ev`, and a prime `q ∤ N`, `ev(q²) = ev(q)² − χ(q)·q^{k-1}`.  This is the `r = 0` case of
+`evCusp_ppow_rec` (with `ev 1 = 1`). -/
+private lemma evCusp_prime_sq {H : CuspForm ((Gamma1 N).map (mapGL ℝ)) k} (hH : H ≠ 0)
+    {χ : (ZMod N)ˣ →* ℂˣ} (hHχ : H ∈ cuspFormCharSpace k χ) (ev : ℕ+ → ℂ)
+    (hev : ∀ (m : ℕ+) (_ : NeZero m.val), Nat.Coprime m.val N →
+       heckeT_n_cusp k m.val H = ev m • H)
+    {q : ℕ} (hq : Nat.Prime q) (hqN : Nat.Coprime q N) :
+    ev ⟨q ^ 2, pow_pos hq.pos 2⟩ =
+      ev ⟨q, hq.pos⟩ ^ 2 - (χ (ZMod.unitOfCoprime q hqN) : ℂ) * (q : ℂ) ^ (k - 1) := by
+  have hr := evCusp_ppow_rec hH hHχ ev hev hq hqN 0
+  have b1 : ev ⟨q ^ (0 + 1), pow_pos hq.pos (0 + 1)⟩ = ev ⟨q, hq.pos⟩ :=
+    congrArg ev (Subtype.ext (by simp))
+  have b0 : ev ⟨q ^ 0, pow_pos hq.pos 0⟩ = (1 : ℂ) := evCusp_one_eq_one hH ev hev
+  rw [b1, b0, mul_one] at hr
+  rw [hr]; ring
+
+/-- **Cross-character non-equivalence (Step 1 of L3).**  Eigensystems of nonzero common Hecke
+eigenfunctions lying in *distinct* Nebentypus spaces `χ ≠ χ'` are Molteni-non-equivalent: their
+zero-extensions differ at infinitely many primes.
+
+At a prime `q ∤ N` the prime-square relation gives `χ(q)·q^{k-1} = ev(q)² − ev(q²)`, so agreement of
+the two eigensystems at both `q` and `q²` would force `χ(q) = χ'(q)`.  Picking (from `χ ≠ χ'`) a unit
+`u` with `χ(u) ≠ χ'(u)`, Dirichlet's theorem supplies infinitely many primes `q ≡ u (mod N)`, at
+each of which `χ(q) = χ(u) ≠ χ'(u) = χ'(q)` — forcing a difference at `q` or `q²`, so each such `q`
+is a bad prime. -/
+private lemma eigensystem_not_equiv_of_char_ne
+    {χ χ' : (ZMod N)ˣ →* ℂˣ} (hχ : χ ≠ χ')
+    {h h' : CuspForm ((Gamma1 N).map (mapGL ℝ)) k} (hh_ne : h ≠ 0) (hh'_ne : h' ≠ 0)
+    (hh_char : h ∈ cuspFormCharSpace k χ) (hh'_char : h' ∈ cuspFormCharSpace k χ')
+    (ev ev' : ℕ+ → ℂ)
+    (hev : ∀ (m : ℕ+) (_ : NeZero m.val), Nat.Coprime m.val N →
+       heckeT_n_cusp k m.val h = ev m • h)
+    (hev' : ∀ (m : ℕ+) (_ : NeZero m.val), Nat.Coprime m.val N →
+       heckeT_n_cusp k m.val h' = ev' m • h') :
+    ¬ HeckeRing.GL2.Molteni.Equiv' (eigenZeroExt (N := N) ev) (eigenZeroExt (N := N) ev') := by
+  classical
+  rw [HeckeRing.GL2.Molteni.not_equiv'_iff]
+  -- a unit `u` separating the characters
+  obtain ⟨u, hu⟩ := DFunLike.ne_iff.mp hχ
+  have hu_ne : (χ u : ℂ) ≠ (χ' u : ℂ) := fun he => hu (Units.ext he)
+  -- Dirichlet: infinitely many primes `≡ u (mod N)`
+  have hdir : {p : ℕ | p.Prime ∧ (p : ZMod N) = (u : ZMod N)}.Infinite :=
+    Nat.infinite_setOf_prime_and_eq_mod u.isUnit
+  refine hdir.mono ?_
+  rintro p ⟨hp, hpu⟩
+  simp only [HeckeRing.GL2.Molteni.badPrimes, Set.mem_setOf_eq]
+  have hpN : Nat.Coprime p N := (ZMod.isUnit_iff_coprime p N).mp (hpu ▸ u.isUnit)
+  have hunit : (χ (ZMod.unitOfCoprime p hpN) : ℂ) = (χ u : ℂ) := by
+    rw [show ZMod.unitOfCoprime p hpN = u from Units.ext (by rw [ZMod.coe_unitOfCoprime, hpu])]
+  have hunit' : (χ' (ZMod.unitOfCoprime p hpN) : ℂ) = (χ' u : ℂ) := by
+    rw [show ZMod.unitOfCoprime p hpN = u from Units.ext (by rw [ZMod.coe_unitOfCoprime, hpu])]
+  refine ⟨hp, ?_⟩
+  by_contra hcon
+  push Not at hcon
+  -- agreement at `p` (`a = 1`) and `p²` (`a = 2`)
+  have hpos1 : (0 : ℕ) < p ^ 1 := pow_pos hp.pos 1
+  have hpos2 : (0 : ℕ) < p ^ 2 := pow_pos hp.pos 2
+  have hcop1 : Nat.Coprime (p ^ 1) N := hpN.pow_left 1
+  have hcop2 : Nat.Coprime (p ^ 2) N := hpN.pow_left 2
+  have agree1 := hcon 1 le_rfl
+  have agree2 := hcon 2 (by norm_num)
+  rw [eigenZeroExt_coprime ev hpos1 hcop1, eigenZeroExt_coprime ev' hpos1 hcop1] at agree1
+  rw [eigenZeroExt_coprime ev hpos2 hcop2, eigenZeroExt_coprime ev' hpos2 hcop2] at agree2
+  rw [show ev ⟨p ^ 1, hpos1⟩ = ev ⟨p, hp.pos⟩ from congrArg ev (Subtype.ext (by simp)),
+    show ev' ⟨p ^ 1, hpos1⟩ = ev' ⟨p, hp.pos⟩ from congrArg ev' (Subtype.ext (by simp))] at agree1
+  have psq := evCusp_prime_sq hh_ne hh_char ev hev hp hpN
+  have psq' := evCusp_prime_sq hh'_ne hh'_char ev' hev' hp hpN
+  rw [psq, psq', hunit, hunit', agree1] at agree2
+  apply hu_ne
+  have hcancel : (χ u : ℂ) * (p : ℂ) ^ (k - 1) = (χ' u : ℂ) * (p : ℂ) ^ (k - 1) := by
+    linear_combination -agree2
+  exact mul_right_cancel₀ (zpow_ne_zero _ (by exact_mod_cast hp.pos.ne')) hcancel
+
 /-! ### Linear independence of distinct Hecke eigensystems (the engine of L3)
 
 We isolate the purely-arithmetic core: a family `G : ι → ℕ → ℂ` of **elementary-multiplicative**
@@ -706,6 +810,135 @@ private theorem support_eq_empty_of_pairwise_distinct_rec
   rw [hs'_empty] at hi₀s'
   exact absurd hi₀s' (Finset.notMem_empty i₀)
 
+/-- **Mixed independence core.**  Generalises both `support_eq_empty_of_pairwise_distinct_rec`
+(single common weight) and Molteni's `support_eq_empty_of_pairwise_not_equiv'` (pairwise
+non-equivalent): pairwise *distinct* multiplicative `G i` with per-index weight `w i` and
+prime-power recurrence, such that any two indices are **either non-equivalent or share a weight**
+(`hsep`), cannot satisfy a vanishing relation with all-nonzero coefficients — so `s = ∅`.
+
+Strong induction on `|s|`.  If all weights on `s` agree, the constant-weight recurrence core
+finishes.  Otherwise let `L` be the (finite) set of primes occurring in the bad-prime sets of
+*equivalent* pairs; `primeRestrict` at any `p ∉ L` preserves distinctness, so the inductive
+hypothesis gives `G i (p^a) = G r (p^a)` for all `p ∉ L` (the "key").  A cross-weight (hence
+non-equivalent, by `hsep`) partner `i₁` of `r` then agrees with `G r` off the finite `L`, making
+them equivalent — contradicting `¬ Equiv' (G i₁) (G r)`. -/
+private theorem support_eq_empty_mixed
+    {ι : Type*} [DecidableEq ι] (w : ι → ℕ → ℂ) (s : Finset ι) (G : ι → ℕ → ℂ)
+    (hmul : ∀ i ∈ s, HeckeRing.GL2.Molteni.IsMultiplicative' (G i))
+    (hzero : ∀ i ∈ s, G i 0 = 0)
+    (hrec : ∀ i ∈ s, ∀ p : ℕ, p.Prime → ∀ t : ℕ,
+      G i (p ^ (t + 2)) = G i p * G i (p ^ (t + 1)) - w i p * G i (p ^ t))
+    (hdist : ∀ i ∈ s, ∀ j ∈ s, i ≠ j → G i ≠ G j)
+    (hsep : ∀ i ∈ s, ∀ j ∈ s, i ≠ j →
+      ¬ HeckeRing.GL2.Molteni.Equiv' (G i) (G j) ∨ w i = w j)
+    (c : ι → ℂ) (hc : ∀ i ∈ s, c i ≠ 0)
+    (hrel : ∀ n : ℕ, 1 ≤ n → ∑ i ∈ s, c i * G i n = 0) :
+    s = ∅ := by
+  classical
+  induction hcard : s.card using Nat.strong_induction_on generalizing w s G c with
+  | _ M ih =>
+  subst hcard
+  rcases Finset.eq_empty_or_nonempty s with hs | ⟨r, hrs⟩
+  · exact hs
+  by_cases hsingle : ∀ i ∈ s, w i = w r
+  · refine support_eq_empty_of_pairwise_distinct_rec (w := w r) s G hmul hzero
+      (fun i hi p hp t => ?_) hdist c hc hrel
+    rw [← hsingle i hi]; exact hrec i hi p hp t
+  push_neg at hsingle
+  obtain ⟨i₁, hi₁s, hi₁w⟩ := hsingle
+  exfalso
+  set L : Set ℕ := ⋃ i ∈ (s : Set ι), ⋃ j ∈ (s : Set ι),
+      (if HeckeRing.GL2.Molteni.Equiv' (G i) (G j)
+        then HeckeRing.GL2.Molteni.badPrimes (G i) (G j) else ∅) with hL_def
+  have hL_fin : L.Finite :=
+    Set.Finite.biUnion s.finite_toSet fun i _ =>
+      Set.Finite.biUnion s.finite_toSet fun j _ => by
+        by_cases h : HeckeRing.GL2.Molteni.Equiv' (G i) (G j)
+        · simp only [h, if_true]; exact h
+        · simp only [h, if_false]; exact Set.finite_empty
+  have hmemL : ∀ i ∈ s, ∀ j ∈ s, i ≠ j → ∀ p : ℕ, p.Prime →
+      HeckeRing.GL2.Molteni.IsMultiplicative'.primeRestrict p (G i) = HeckeRing.GL2.Molteni.IsMultiplicative'.primeRestrict p (G j) →
+      p ∈ L := by
+    intro i hi j hj hij p hp heq
+    have hsub := HeckeRing.GL2.Molteni.badPrimes_subset_singleton_of_primeRestrict_eq hp heq
+    have hpmem : p ∈ HeckeRing.GL2.Molteni.badPrimes (G i) (G j) :=
+      HeckeRing.GL2.Molteni.mem_badPrimes_of_ne_of_subset_singleton (hmul i hi) (hmul j hj)
+        (hzero i hi) (hzero j hj) (hdist i hi j hj hij) hsub
+    have hequiv : HeckeRing.GL2.Molteni.Equiv' (G i) (G j) :=
+      Set.Finite.subset (Set.finite_singleton p) hsub
+    refine Set.mem_biUnion (Finset.mem_coe.mpr hi) (Set.mem_biUnion (Finset.mem_coe.mpr hj) ?_)
+    simp only [hequiv, if_true]; exact hpmem
+  have hkey : ∀ p : ℕ, p.Prime → p ∉ L → ∀ a : ℕ, 1 ≤ a → ∀ i ∈ s,
+      G i (p ^ a) = G r (p ^ a) := by
+    intro p hp hpL a ha1 i his
+    set c' : ι → ℂ := fun i => c i * (G i (p ^ a) - G r (p ^ a)) with hc'_def
+    set GG : ι → ℕ → ℂ := fun i => HeckeRing.GL2.Molteni.IsMultiplicative'.primeRestrict p (G i) with hGG_def
+    set ww : ι → ℕ → ℂ := fun i q => if q = p then 0 else w i q with hww_def
+    set s' : Finset ι := (s.erase r).filter (fun i => c' i ≠ 0) with hs'_def
+    have hs'_sub : s' ⊆ s := (Finset.filter_subset _ _).trans (Finset.erase_subset _ _)
+    have hmem_s' : ∀ i, i ∈ s' ↔ (i ∈ s ∧ i ≠ r) ∧ c' i ≠ 0 := fun i => by
+      simp only [hs'_def, Finset.mem_filter, Finset.mem_erase]; tauto
+    have hrel' : ∀ n : ℕ, 1 ≤ n → ∑ i ∈ s', c' i * GG i n = 0 := by
+      intro n hn
+      by_cases hpn : p ∣ n
+      · apply Finset.sum_eq_zero; intro i _
+        simp only [hGG_def, HeckeRing.GL2.Molteni.IsMultiplicative'.primeRestrict_of_dvd hpn, mul_zero]
+      · have hpan : Nat.Coprime (p ^ a) n :=
+          ((Nat.Prime.coprime_iff_not_dvd hp).mpr hpn).pow_left a
+        have hpan_pos : 1 ≤ p ^ a * n := Nat.one_le_iff_ne_zero.mpr
+          (Nat.mul_ne_zero (pow_pos hp.pos a).ne' (by omega))
+        have hexp : ∑ i ∈ s, c i * (G i (p ^ a) * G i n) = 0 := by
+          rw [← hrel (p ^ a * n) hpan_pos]
+          refine Finset.sum_congr rfl fun i his' => ?_
+          rw [(hmul i his').map_mul_of_coprime hpan]
+        have hsub2 : ∑ i ∈ s, c' i * G i n = 0 := by
+          have heq : ∑ i ∈ s, c' i * G i n =
+              (∑ i ∈ s, c i * (G i (p ^ a) * G i n)) - G r (p ^ a) * ∑ i ∈ s, c i * G i n := by
+            rw [Finset.mul_sum, ← Finset.sum_sub_distrib]
+            refine Finset.sum_congr rfl fun i _ => ?_; simp only [hc'_def]; ring
+          rw [heq, hexp, hrel n hn, mul_zero, sub_zero]
+        rw [show (∑ i ∈ s', c' i * GG i n) = ∑ i ∈ s', c' i * G i n from
+          Finset.sum_congr rfl fun i _ => by
+            simp only [hGG_def, HeckeRing.GL2.Molteni.IsMultiplicative'.primeRestrict_of_not_dvd hpn], ← hsub2]
+        refine Finset.sum_subset hs'_sub fun i hi_s hi_s' => ?_
+        rw [show c' i = 0 from by
+          by_contra hne0
+          exact hi_s' ((hmem_s' i).mpr ⟨⟨hi_s, by rintro rfl; exact hne0 (by simp [hc'_def])⟩,
+            hne0⟩), zero_mul]
+    have hs'_card : s'.card < s.card :=
+      lt_of_le_of_lt (Finset.card_le_card (Finset.filter_subset _ (s.erase r)))
+        (Finset.card_erase_lt_of_mem hrs)
+    have hdist' : ∀ i ∈ s', ∀ j ∈ s', i ≠ j → GG i ≠ GG j := fun i hi j hj hij heq =>
+      hpL (hmemL i (hs'_sub hi) j (hs'_sub hj) hij p hp heq)
+    have hs'_empty : s' = ∅ :=
+      ih s'.card hs'_card ww s' GG
+        (fun i hi => HeckeRing.GL2.Molteni.IsMultiplicative'.isMultiplicative'_primeRestrict hp (hmul i (hs'_sub hi)))
+        (fun i _ => HeckeRing.GL2.Molteni.IsMultiplicative'.primeRestrict_of_dvd (dvd_zero p))
+        (fun i hi => HeckeRing.GL2.Molteni.primeRestrict_rec hp (hrec i (hs'_sub hi)))
+        hdist'
+        (fun i hi j hj hij => by
+          rcases hsep i (hs'_sub hi) j (hs'_sub hj) hij with hne | hweq
+          · exact Or.inl (HeckeRing.GL2.Molteni.not_equiv'_primeRestrict hp hne)
+          · exact Or.inr (funext fun q => by simp only [hww_def, hweq]))
+        c' (fun i hi => ((hmem_s' i).mp hi).2) hrel' rfl
+    by_cases hir : i = r
+    · rw [hir]
+    · have hc'i : c' i = 0 := by
+        by_contra hne0
+        have hmem : i ∈ s' := (hmem_s' i).mpr ⟨⟨his, hir⟩, hne0⟩
+        rw [hs'_empty] at hmem; exact absurd hmem (Finset.notMem_empty i)
+      rcases mul_eq_zero.mp hc'i with h | h
+      · exact absurd h (hc i his)
+      · exact sub_eq_zero.mp h
+  have hi₁r : i₁ ≠ r := fun h => hi₁w (by rw [h])
+  have hbad_sub : HeckeRing.GL2.Molteni.badPrimes (G i₁) (G r) ⊆ L := by
+    rintro p ⟨hpprime, a, ha1, hne⟩
+    by_contra hpL
+    exact hne (hkey p hpprime hpL a ha1 i₁ hi₁s)
+  rcases hsep i₁ hi₁s r hrs hi₁r with hne | hweq
+  · exact hne (Set.Finite.subset hL_fin hbad_sub)
+  · exact hi₁w hweq
+
 /-- **L3 (linear independence of distinct Hecke eigensystems), single Nebentypus space.**
 
 A finite family `H i` of **nonzero common Hecke eigenfunctions** lying in *one* Nebentypus space `χ`
@@ -847,47 +1080,17 @@ private lemma eigensystems_linearIndependent_charSpace
   rw [hsupp_empty] at this
   exact absurd this (Finset.notMem_empty i)
 
-/-- **Cross-character separation of an eigensystem relation.**  Given a family `H i ∈ char(tag i)`
-of nonzero common Hecke eigenfunctions (eigensystems `ev i`) whose eigensystem-combination
-`∑ᵢ cᵢ·evᵢ(m)` vanishes at every coprime `m`, the partial sum over the pieces of any *single*
-Nebentypus `χ` already vanishes: `∑_{tag i = χ} cᵢ·evᵢ(m) = 0`.
-
-*Isolated `sorry` (the sole remaining gap).*  This is the cross-Nebentypus content of strong
-multiplicity one: equivalently, the eigensystems attached to distinct characters span linearly
-independent subspaces of `ℂ^{(coprime indices)}`.  The genuinely missing input is the **prime**
-version of multiplicity one — *distinct Hecke eigensystems differ at infinitely many primes* — which
-upgrades the index-version SMO present in the repo (`strongMultiplicityOne_axiom_clean`, agreement
-off a finite **index** set ⟹ equality) to agreement off a finite **prime** set.  The diamond
-operator `⟨d⟩` does not act on the eigenvalue *functions* (only on forms), and its action on the
-Fourier coefficients of a non-eigenform is not computable from the form's own coprime coefficients,
-so the character cannot be projected out at the function level; and the single-character
-minimal-relation argument (`support_eq_empty_of_pairwise_distinct_rec`) does not transfer because the
-prime-power-recurrence weight `χ(p)·p^{k-1}` is no longer constant across the family.  See the report
-for the full obstruction analysis. -/
-private lemma eigensystem_charPart_eq_zero
-    {ι : Type} [Fintype ι] [DecidableEq ((ZMod N)ˣ →* ℂˣ)]
-    (tag : ι → (ZMod N)ˣ →* ℂˣ)
-    (H : ι → CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (hH_ne : ∀ i, H i ≠ 0)
-    (hH_char : ∀ i, H i ∈ cuspFormCharSpace k (tag i))
-    (ev : ι → ℕ+ → ℂ)
-    (hev : ∀ i (m : ℕ+) (_ : NeZero m.val), Nat.Coprime m.val N →
-       heckeT_n_cusp k m.val (H i) = ev i m • H i)
-    (c : ι → ℂ)
-    (h_rel : ∀ m : ℕ+, Nat.Coprime m.val N → ∑ i, c i * ev i m = 0)
-    (χ : (ZMod N)ˣ →* ℂˣ) (m : ℕ+) (hm : Nat.Coprime m.val N) :
-    ∑ i ∈ Finset.univ.filter (fun i ↦ tag i = χ), c i * ev i m = 0 := by
-  sorry
-
 /-- **L3 (linear independence of distinct Hecke eigensystems).**
 
 A finite family `H i ∈ char(tag i)` of nonzero common Hecke eigenfunctions, pairwise distinct at
 some coprime index, is `ℂ`-linearly independent as eigensystems: scalars `c` with
 `∑ᵢ cᵢ·evᵢ(m) = 0` (coprime `m`) all vanish.
 
-**Proof.**  By `eigensystem_charPart_eq_zero` the relation already vanishes character-by-character,
-`∑_{tag i = χ} cᵢ·evᵢ(m) = 0` (coprime `m`); within a single Nebentypus the eigensystems are linearly
-independent by `eigensystems_linearIndependent_charSpace` (the prime-power-recurrence minimal-relation
-argument), giving `cᵢ = 0` for every `i`. -/
+We zero-extend each eigensystem to a multiplicative `G i = eigenZeroExt (ev i)`, with per-index
+weight `w i p = χᵢ(p)·p^{k-1}` (`χᵢ = tag i`), and feed the mixed independence core
+`support_eq_empty_mixed`.  Its separation hypothesis is supplied by: same-character pieces share the
+weight, while distinct-character pieces are Molteni-non-equivalent
+(`eigensystem_not_equiv_of_char_ne`, via Dirichlet and the prime-square relation). -/
 private lemma eigensystems_linearIndependent
     {ι : Type} [Fintype ι]
     (tag : ι → (ZMod N)ˣ →* ℂˣ)
@@ -901,27 +1104,93 @@ private lemma eigensystems_linearIndependent
     (h_rel : ∀ m : ℕ+, Nat.Coprime m.val N → ∑ i, c i * ev i m = 0) :
     ∀ i, c i = 0 := by
   classical
-  intro i₀
-  -- Restrict to the Nebentypus `χ₀ := tag i₀`: the per-character relation holds
-  -- (`eigensystem_charPart_eq_zero`) and the single-character L3 applies.
-  set χ₀ : (ZMod N)ˣ →* ℂˣ := tag i₀ with hχ₀_def
-  set s₀ : Finset ι := Finset.univ.filter (fun i ↦ tag i = χ₀) with hs₀_def
-  have hi₀s₀ : i₀ ∈ s₀ := Finset.mem_filter.mpr ⟨Finset.mem_univ _, rfl⟩
-  -- Single-character L3 on the `χ₀`-subfamily (indexed by the subtype `↥s₀`).
-  have key : ∀ j : ↥s₀, c j.val = 0 :=
-    eigensystems_linearIndependent_charSpace (N := N) χ₀
-      (fun j ↦ H j.val) (fun j ↦ hH_ne j.val)
-      (fun j ↦ by
-        have : tag j.val = χ₀ := (Finset.mem_filter.mp j.2).2
-        exact this ▸ hH_char j.val)
-      (fun j ↦ ev j.val) (fun j m hm hmcop ↦ hev j.val m hm hmcop)
-      (fun j j' hjj' ↦ h_distinct j.val j'.val (fun h ↦ hjj' (Subtype.ext h)))
-      (fun j ↦ c j.val)
-      (fun m hm ↦ by
-        -- `∑_{j ∈ ↥s₀} c j · ev j m = ∑_{tag i = χ₀} c i · ev i m = 0`
-        rw [Finset.sum_coe_sort s₀ (fun i ↦ c i * ev i m)]
-        exact eigensystem_charPart_eq_zero (N := N) tag H hH_ne hH_char ev hev c h_rel χ₀ m hm)
-  exact key ⟨i₀, hi₀s₀⟩
+  set G : ι → ℕ → ℂ := fun i => eigenZeroExt (ev i) with hG_def
+  have hG_pos : ∀ (i : ι) (n : ℕ) (hn : 0 < n) (_ : Nat.Coprime n N),
+      G i n = ev i ⟨n, hn⟩ := fun i n hn hcop => eigenZeroExt_coprime (ev i) hn hcop
+  have hG_zero0 : ∀ (i : ι) (n : ℕ), (¬ (0 < n ∧ Nat.Coprime n N)) → G i n = 0 :=
+    fun i n h => eigenZeroExt_not (ev i) h
+  have hev1 : ∀ i, ev i (1 : ℕ+) = 1 := fun i => evCusp_one_eq_one (hH_ne i) (ev i) (hev i)
+  have hmul : ∀ i, HeckeRing.GL2.Molteni.IsMultiplicative' (G i) := by
+    intro i
+    refine ⟨?_, ?_⟩
+    · rw [hG_pos i 1 one_pos (Nat.coprime_one_left N),
+        show (⟨1, one_pos⟩ : ℕ+) = (1 : ℕ+) from rfl, hev1 i]
+    · intro a b hab
+      by_cases ha : 0 < a
+      · by_cases hb : 0 < b
+        · by_cases hacop : Nat.Coprime a N
+          · by_cases hbcop : Nat.Coprime b N
+            · have hab_pos : 0 < a * b := Nat.mul_pos ha hb
+              have habcop : Nat.Coprime (a * b) N := Nat.Coprime.mul_left hacop hbcop
+              rw [hG_pos i (a * b) hab_pos habcop, hG_pos i a ha hacop, hG_pos i b hb hbcop]
+              have := evCusp_mul_coprime (hH_ne i) (ev i) (hev i) ⟨a, ha⟩ ⟨b, hb⟩ hacop hbcop hab
+              simpa using this
+            · rw [hG_zero0 i b (fun h => hbcop h.2), mul_zero,
+                hG_zero0 i (a * b) (fun h => hbcop (Nat.Coprime.coprime_dvd_left
+                  ⟨a, mul_comm a b⟩ h.2))]
+          · rw [hG_zero0 i a (fun h => hacop h.2), zero_mul,
+              hG_zero0 i (a * b) (fun h => hacop (Nat.Coprime.coprime_dvd_left ⟨b, rfl⟩ h.2))]
+        · rw [show b = 0 by omega, mul_zero, hG_zero0 i 0 (by simp), mul_zero]
+      · rw [show a = 0 by omega, zero_mul, hG_zero0 i 0 (by simp), zero_mul]
+  have hzero : ∀ i, G i 0 = 0 := fun i => hG_zero0 i 0 (by simp)
+  set w : ι → ℕ → ℂ := fun i p =>
+    if hp : Nat.Coprime p N then (tag i (ZMod.unitOfCoprime p hp) : ℂ) * (p : ℂ) ^ (k - 1) else 0
+    with hw_def
+  have hrec : ∀ i, ∀ p : ℕ, p.Prime → ∀ r : ℕ,
+      G i (p ^ (r + 2)) = G i p * G i (p ^ (r + 1)) - w i p * G i (p ^ r) := by
+    intro i p hp r
+    by_cases hpN : Nat.Coprime p N
+    · have hcop_pow : ∀ j : ℕ, Nat.Coprime (p ^ j) N := fun j => hpN.pow_left j
+      have hpos_pow : ∀ j : ℕ, 0 < p ^ j := fun j => pow_pos hp.pos j
+      rw [hG_pos i _ (hpos_pow _) (hcop_pow _), hG_pos i p hp.pos hpN,
+        hG_pos i _ (hpos_pow _) (hcop_pow _), hG_pos i _ (hpos_pow _) (hcop_pow _),
+        show w i p = (tag i (ZMod.unitOfCoprime p hpN) : ℂ) * (p : ℂ) ^ (k - 1) from dif_pos hpN]
+      have hr := evCusp_ppow_rec (hH_ne i) (hH_char i) (ev i) (hev i) hp hpN r
+      have e1 : (⟨p ^ (r + 2), pow_pos hp.pos _⟩ : ℕ+) = ⟨p ^ (r + 2), hpos_pow _⟩ := rfl
+      have e3 : (⟨p ^ (r + 1), pow_pos hp.pos _⟩ : ℕ+) = ⟨p ^ (r + 1), hpos_pow _⟩ := rfl
+      have e4 : (⟨p ^ r, pow_pos hp.pos _⟩ : ℕ+) = ⟨p ^ r, hpos_pow _⟩ := rfl
+      rw [← e1, ← e3, ← e4, hr, mul_assoc]
+    · have hpdvd : ¬ Nat.Coprime p N := hpN
+      have hnc : ∀ j : ℕ, 0 < j → ¬ Nat.Coprime (p ^ j) N := by
+        intro j hj hc
+        exact hpdvd (Nat.Coprime.coprime_dvd_left (dvd_pow_self p hj.ne') hc)
+      rw [hG_zero0 i _ (fun h => hnc (r + 2) (by omega) h.2),
+        hG_zero0 i p (fun h => hpdvd h.2), zero_mul,
+        show w i p = 0 from dif_neg hpN, zero_mul, sub_zero]
+  have hdist : ∀ i j, i ≠ j → G i ≠ G j := by
+    intro i j hij hGeq
+    obtain ⟨m, hmcop, hm_ne⟩ := h_distinct i j hij
+    apply hm_ne
+    have h1 : G i m.val = ev i m := hG_pos i m.val m.pos hmcop
+    have h2 : G j m.val = ev j m := hG_pos j m.val m.pos hmcop
+    rw [← h1, ← h2, hGeq]
+  have hsep : ∀ i j, i ≠ j →
+      ¬ HeckeRing.GL2.Molteni.Equiv' (G i) (G j) ∨ w i = w j := by
+    intro i j hij
+    by_cases htag : tag i = tag j
+    · exact Or.inr (funext fun p => by simp only [hw_def, htag])
+    · exact Or.inl (eigensystem_not_equiv_of_char_ne htag (hH_ne i) (hH_ne j) (hH_char i)
+        (hH_char j) (ev i) (ev j) (hev i) (hev j))
+  have hrelG : ∀ n : ℕ, 1 ≤ n → ∑ i, c i * G i n = 0 := by
+    intro n hn
+    by_cases hncop : Nat.Coprime n N
+    · have heq : ∑ i, c i * G i n = ∑ i, c i * ev i ⟨n, hn⟩ :=
+        Finset.sum_congr rfl fun i _ => by rw [hG_pos i n hn hncop]
+      rw [heq]; exact h_rel ⟨n, hn⟩ hncop
+    · exact Finset.sum_eq_zero fun i _ => by rw [hG_zero0 i n (fun h => hncop h.2), mul_zero]
+  have hsupp_empty : (Finset.univ.filter (fun i => c i ≠ 0)) = ∅ := by
+    refine support_eq_empty_mixed w _ G
+      (fun i _ => hmul i) (fun i _ => hzero i) (fun i _ => hrec i)
+      (fun i _ j _ hij => hdist i j hij) (fun i _ j _ hij => hsep i j hij)
+      c (fun i hi => (Finset.mem_filter.mp hi).2) ?_
+    intro n hn
+    rw [Finset.sum_filter_of_ne fun i _ h => left_ne_zero_of_mul h]
+    exact hrelG n hn
+  intro i
+  by_contra hci
+  have : i ∈ Finset.univ.filter (fun i => c i ≠ 0) := Finset.mem_filter.mpr ⟨Finset.mem_univ i, hci⟩
+  rw [hsupp_empty] at this
+  exact absurd this (Finset.notMem_empty i)
 
 omit [NeZero N] in
 /-- **Eigensystems as functions are determined off the coprime indices.**  If two eigensystems
