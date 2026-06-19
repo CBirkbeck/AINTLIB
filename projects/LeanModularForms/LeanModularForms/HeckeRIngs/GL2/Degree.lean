@@ -37,8 +37,11 @@ theorem deg_T_diag_ppow (i k : ℕ) (hk : 0 < k) :
     (fun j ↦ by fin_cases j <;> exact pow_pos hp.pos _)
     (fun j hj ↦ by
       obtain rfl : j = 0 := by lia
-      simpa using Nat.pow_dvd_pow p (Nat.le_add_right i k))
-    k hk (by simp [Nat.pow_div (Nat.le_add_right i k) hp.pos])
+      simpa only [Fin.zero_eta, Fin.isValue, Matrix.cons_val_zero, zero_add, Fin.mk_one,
+        Matrix.cons_val_one, Matrix.cons_val_fin_one] using Nat.pow_dvd_pow p (Nat.le_add_right i k))
+    k hk (by
+      simp only [Fin.isValue, Matrix.cons_val_one, Matrix.cons_val_fin_one, Matrix.cons_val_zero,
+        Nat.pow_div (Nat.le_add_right i k) hp.pos, add_tsub_cancel_left])
 
 /-- Scalar case: `deg(T(c, c)) = 1`. -/
 theorem deg_T_diag_scalar (c : ℕ) (hc : 0 < c) :
@@ -47,7 +50,8 @@ theorem deg_T_diag_scalar (c : ℕ) (hc : 0 < c) :
 
 private lemma deg_T_ad_of_pos (a d : ℕ) (ha : 0 < a) (hd : 0 < d) (hdvd : a ∣ d) :
     deg (GL_pair 2) (T_ad a d) = HeckeCoset_deg (GL_pair 2) (T_diag ![a, d]) := by
-  simp [T_ad_of_pos a d ha hd hdvd, T_elem]
+  simp only [T_ad_of_pos a d ha hd hdvd, T_elem, Nat.succ_eq_add_one, Nat.reduceAdd, deg_T_single,
+    one_mul]
 
 include hp in
 private lemma deg_ppow_term_lt (i k : ℕ) (h2i : 2 * i < k) :
@@ -98,10 +102,13 @@ theorem deg_T_sum_prime_pow (k : ℕ) :
   induction k using Nat.twoStepInduction with
   | zero =>
     rw [T_sum_ppow_expansion p hp 0, map_sum]
-    simp
+    simp only [Nat.zero_div, zero_add, Finset.range_one, zero_tsub, pow_zero, Finset.sum_singleton,
+      T_ad_one_one, map_one]
   | one =>
     rw [T_sum_ppow_expansion p hp 1, map_sum]
-    simpa [geom_sum_two] using deg_ppow_term_lt p hp 0 1 (by lia)
+    simpa only [Nat.reduceDiv, zero_add, Finset.range_one, Finset.sum_singleton, pow_zero, tsub_zero,
+      pow_one, Nat.reduceAdd, geom_sum_two, mul_zero, tsub_self, one_mul, Nat.cast_add,
+      Nat.cast_one] using deg_ppow_term_lt p hp 0 1 (by lia)
   | more k ih _ => exact deg_T_sum_prime_pow_aux p hp k ih
 
 /-- Theorem 3.24(7): `deg(T(m)) = σ₁(m)`. -/
@@ -109,7 +116,10 @@ theorem deg_T_sum (m : ℕ+) : deg (GL_pair 2) (T_sum m) = (σ 1) (m : ℕ) := b
   obtain ⟨n, hn⟩ := m
   induction n using Nat.recOnPosPrimePosCoprime with
   | zero => exact absurd hn (lt_irrefl 0)
-  | one => simp [T_sum]
+  | one =>
+    simp only [T_sum, PNat.mk_ofNat, PNat.val_ofNat, Nat.divisors_one, Finset.sum_singleton,
+      Order.lt_one_iff, Nat.div_self, T_ad_one_one, map_one, ArithmeticFunction.sigma_one,
+      Nat.cast_one]
   | prime_pow p k hp _ =>
     rw [deg_T_sum_prime_pow p hp k]
     exact_mod_cast (ArithmeticFunction.sigma_one_apply_prime_pow hp).symm
