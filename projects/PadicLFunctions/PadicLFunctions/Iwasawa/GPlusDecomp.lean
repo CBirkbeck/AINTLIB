@@ -106,6 +106,24 @@ theorem pZpLog_mul (hp2 : p ≠ 2) {x y : ℤ_[p]} (hx : x - 1 ∈ Ideal.span {(
     exact inExpBall_of_mem_span p hp2 hy
   rw [padicLog_mul (L := ℚ_[p]) p hballx hbally]
 
+/-- `pZpLog 1 = 0`. -/
+theorem pZpLog_one (hp2 : p ≠ 2) : pZpLog p (1 : ℤ_[p]) = 0 := by
+  have h1 : (1 : ℤ_[p]) - 1 ∈ Ideal.span {(p : ℤ_[p])} := by simp
+  have h := pZpLog_mul p hp2 h1 h1
+  rw [mul_one] at h
+  have h2 : pZpLog p 1 + pZpLog p 1 = pZpLog p 1 + 0 := by rw [add_zero]; exact h.symm
+  exact add_left_cancel h2
+
+/-- **The p-adic logarithm is an isometry (shifted) on `1 + pℤ_p`**: `‖pZpLog x‖ = ‖x − 1‖`.
+The integral incarnation of `norm_padicLog`. -/
+theorem norm_pZpLog (hp2 : p ≠ 2) {x : ℤ_[p]} (hx : x - 1 ∈ Ideal.span {(p : ℤ_[p])}) :
+    ‖pZpLog p x‖ = ‖x - 1‖ := by
+  have hxsub : ((x : ℚ_[p]) - 1) = ((x - 1 : ℤ_[p]) : ℚ_[p]) := by
+    rw [PadicInt.coe_sub, PadicInt.coe_one]
+  have hball : InExpBall p ((x : ℚ_[p]) - 1) := by rw [hxsub]; exact inExpBall_of_mem_span p hp2 hx
+  rw [PadicInt.norm_def, pZpLog_coe p hp2 hx, norm_padicLog (L := ℚ_[p]) p hball, hxsub,
+    ← PadicInt.norm_def]
+
 /-- `pZpExp` of a sum is the product on `pℤ_p` (`padicExp_add` over `ℚ_p`). -/
 theorem pZpExp_add (hp2 : p ≠ 2) {x y : ℤ_[p]} (hx : x ∈ Ideal.span {(p : ℤ_[p])})
     (hy : y ∈ Ideal.span {(p : ℤ_[p])}) :
