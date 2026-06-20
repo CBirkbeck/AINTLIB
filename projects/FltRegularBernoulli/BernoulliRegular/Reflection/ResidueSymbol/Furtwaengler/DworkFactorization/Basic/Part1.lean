@@ -532,12 +532,12 @@ theorem powerSeries_subst_C_eq_C_sum_range_of_pow_succ_eq_zero
       exact hd (by simp [hpow])
   · rw [PowerSeries.coeff_subst' hsubst]
     rw [finsum_eq_zero_of_forall_eq_zero]
-    · exact (PowerSeries.coeff_ne_zero_C hm).symm
+    · exact (PowerSeries.coeff_C_of_ne_zero hm).symm
     · intro d
       have hcoeff :
           PowerSeries.coeff m ((PowerSeries.C a : PowerSeries A) ^ d) = 0 := by
         rw [← map_pow (PowerSeries.C : A →+* PowerSeries A) a d]
-        exact PowerSeries.coeff_ne_zero_C hm
+        exact PowerSeries.coeff_C_of_ne_zero hm
       simp [hcoeff]
 
 /-- Substitution of a nilpotent constant into a power series is the constant
