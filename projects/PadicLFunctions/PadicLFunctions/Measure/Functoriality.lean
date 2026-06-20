@@ -125,4 +125,52 @@ lemma mahlerPushforwardRingHom_apply {G : Type*} [TopologicalSpace G] [CommMonoi
     (hone : m 1 = 0) (μ : PadicMeasure p G) (f : C(ℤ_[p], ℤ_[p])) :
     mahlerPushforwardRingHom p m hmul hone μ f = μ (f.comp m) := rfl
 
+/-- Pushforward along a continuous `add→mul` homomorphism `m : ℤ_p → G` (`m(a+b) = ma·mb`,
+`m 0 = 1`), *out of* the Mahler (additive) algebra: a ring hom `PadicMeasure p ℤ_[p] →+* PadicMeasure
+p G`.  The reverse direction of `mahlerPushforwardRingHom` (for `m = exp`). -/
+def expPushforwardRingHom {G : Type*} [TopologicalSpace G] [CommMonoid G] [ContinuousMul G]
+    [CompactSpace G] (m : C(ℤ_[p], G)) (hmul : ∀ a b, m (a + b) = m a * m b) (hzero : m 0 = 1) :
+    PadicMeasure p ℤ_[p] →+* PadicMeasure p G where
+  toFun := pushforward p m
+  map_zero' := rfl
+  map_add' _ _ := rfl
+  map_one' := by
+    rw [one_def, pushforward_dirac, hzero, ← conv_one_def]
+  map_mul' μ ν := by
+    refine LinearMap.ext fun f => ?_
+    rw [pushforward_apply, mul_apply, conv_mul_apply, pushforward_apply]
+    congr 1
+    refine ContinuousMap.ext fun a => ?_
+    simp only [innerInt_apply, convInner, ContinuousMap.comp_apply, pushforward_apply,
+      ContinuousMap.coe_mk]
+    congr 1
+    refine ContinuousMap.ext fun b => ?_
+    simp only [ContinuousMap.curry_apply, ContinuousMap.comp_apply, mulCM₂, ContinuousMap.coe_mk]
+    rw [hmul a b]
+
+/-- A **continuous `mul↔add` isomorphism** `G ≅ (ℤ_p, +)` (given by mutually-inverse continuous maps
+`log : G → ℤ_p`, `exp : ℤ_p → G` with the homomorphism equations) induces a ring isomorphism from the
+convolution algebra of `G` to the **Mahler** algebra `PadicMeasure p ℤ_[p]`.  For `G = Γ` the
+pro-cyclic 1-units and `log`/`exp` the p-adic logarithm/exponential, this is the `Γ`-factor of the
+carrier bridge (compose with `mahlerRingEquiv` to reach `ℤ_p⟦T⟧`). -/
+def mahlerPushforwardRingEquiv {G : Type*} [TopologicalSpace G] [CommMonoid G] [ContinuousMul G]
+    [CompactSpace G] (logCM : C(G, ℤ_[p])) (expCM : C(ℤ_[p], G))
+    (hlogmul : ∀ x y, logCM (x * y) = logCM x + logCM y) (hlogone : logCM 1 = 0)
+    (hleft : ∀ x, expCM (logCM x) = x) (hright : ∀ a, logCM (expCM a) = a) :
+    PadicMeasure p G ≃+* PadicMeasure p ℤ_[p] where
+  __ := mahlerPushforwardRingHom p logCM hlogmul hlogone
+  invFun := pushforward p expCM
+  left_inv μ := by
+    refine LinearMap.ext fun f => ?_
+    show pushforward p expCM (pushforward p logCM μ) f = μ f
+    rw [pushforward_apply, pushforward_apply]
+    congr 1
+    exact ContinuousMap.ext fun x => by simp [hleft]
+  right_inv ν := by
+    refine LinearMap.ext fun f => ?_
+    show pushforward p logCM (pushforward p expCM ν) f = ν f
+    rw [pushforward_apply, pushforward_apply]
+    congr 1
+    exact ContinuousMap.ext fun a => by simp [hright]
+
 end PadicMeasure
