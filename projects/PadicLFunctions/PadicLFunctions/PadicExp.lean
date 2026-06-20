@@ -564,14 +564,14 @@ theorem log_subst_exp_sub_one :
       rw [map_sub, map_one, constantCoeff_exp, sub_self]
     exact h
 
-omit [CompleteSpace L] in
 /-- The `n`-th power of an (unconditionally) summable family, as a `HasSum` over tuples
 `Fin n → ℕ` — the iterated nonarchimedean Cauchy product. -/
-theorem hasSum_pow_fin {f : ℕ → L} {a : L} (hf : HasSum f a) (n : ℕ) :
+theorem hasSum_pow_fin {R : Type*} [CommRing R] [UniformSpace R] [IsUniformAddGroup R]
+    [NonarchimedeanRing R] {f : ℕ → R} {a : R} (hf : HasSum f a) (n : ℕ) :
     HasSum (fun φ : Fin n → ℕ => ∏ i, f (φ i)) (a ^ n) := by
   induction n with
   | zero =>
-    have h : (fun φ : Fin 0 → ℕ => ∏ i, f (φ i)) = fun _ => (1 : L) := by funext φ; simp
+    have h : (fun φ : Fin 0 → ℕ => ∏ i, f (φ i)) = fun _ => (1 : R) := by funext φ; simp
     rw [h, pow_zero]
     exact hasSum_unique _
   | succ n ih =>
