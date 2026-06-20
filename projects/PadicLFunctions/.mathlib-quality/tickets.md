@@ -6863,7 +6863,22 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
   UFD divisor identity). **NOTE**: the project's structure theorem
   `fg_pseudoIso_canonical` (StructureTheorem.lean:167) is itself `sorry`; CHARIDEAL-QUOT is the
   UFD-detour that avoids it, but is comparable in scale.
-- **Sub-ticket [CARRIER-BRIDGE]** `PadicMeasure p (GPlus p) ≃+* IwasawaAlgebraGroup ℤ_[p] Δ`
+- **Sub-ticket [CARRIER-BRIDGE]** — **IN PROGRESS (2026-06-20): machinery DONE (axiom-clean), composition assembled modulo 2 group isos**:
+  * `Measure/Functoriality.lean`: `pushforwardRingHom`/`pushforwardRingEquiv` (functoriality along a
+    continuous monoid hom/iso); `mahlerPushforwardRingHom`/`expPushforwardRingHom`/
+    `mahlerPushforwardRingEquiv` (Γ-factor: a mul↔add iso `G≅(ℤ_p,+)` gives `PadicMeasure G ≃+*
+    PadicMeasure ℤ_[p]` Mahler, ∘ `mahlerRingEquiv` → `ℤ_p⟦T⟧`). All axiom-clean.
+  * `Measure/FiniteProduct.lean`: `finiteProductRingEquiv : PadicMeasure(Δ×Y) ≃+* MonoidAlgebra
+    (PadicMeasure Y) Δ` (Δ finite). Axiom-clean. (Built by a worker, verified.)
+  * `Iwasawa/CarrierBridge.lean`: `carrierBridge : PadicMeasure p (GPlus p) ≃+* IwasawaAlgebraGroup
+    ℤ_[p] Δ`, composing the above + `MonoidAlgebra.mapRingEquiv` (coefficient base-change). Axiom-clean.
+    **Takes the 2 group isos as bundled inputs**: `𝒢⁺ ≅ Δ×Γ` and `Γ ≅ (ℤ_p,+)` (log iso).
+  * REMAINING: (i) `Iwasawa/GPlusDecomp.lean` — discharge the 2 group isos (Teichmüller `ℤ_p^×≅μ_{p-1}×(1+pℤ_p)`,
+    the `/±1` quotient, and the log iso `1+pℤ_p≅ℤ_p` assembled from `PadicExp.lean`'s `pZpLog`/`pZpExp`/
+    `onePAdicPow`). *In progress (worker).* (ii) FINAL ASSEMBLY — transport the MC iso across `carrierBridge`
+    (`Ideal.quotientEquiv` + `Module.compHom`) to get `𝒳⁺ ≃ₗ[IwasawaAlgebraGroup] .../(Φ ζ)`, then
+    `charIdealGroup_of_quotientEquiv` ⟹ `charIdealGroup 𝒳⁺ = Φ(zetaIdealPlus)`.
+  ORIGINAL: `PadicMeasure p (GPlus p) ≃+* IwasawaAlgebraGroup ℤ_[p] Δ`
   (carrier identification so `charIdealGroup` — defined over `IwasawaAlgebraGroup 𝒪 H` — applies to
   `𝒳⁺`, a module over `LambdaGPlus p = PadicMeasure p (GPlus p)`). Sketch: `GPlus = ℤ_[p]ˣ/±1 ≅ Δ × Γ`
   (Teichmüller split `Δ` = prime-to-p torsion, `Γ ≅ ℤ_[p]`; project `ResidueField.normCompat_eq_teichmuller_mul_principal`),
