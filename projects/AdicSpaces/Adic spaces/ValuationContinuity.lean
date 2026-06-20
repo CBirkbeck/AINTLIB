@@ -54,7 +54,7 @@ theorem isContinuous_of_ideal_pow_lt
     v.IsContinuous := by
   intro γ
   by_cases hγ : γ = 0
-  · subst hγ; simp [not_lt_zero']
+  · subst hγ; simp [not_lt_zero]
   · obtain ⟨n, hn⟩ := h γ (zero_lt_iff.mpr hγ)
     have h_sub : P.A₀.subtype '' ((P.I ^ n : Ideal P.A₀) : Set P.A₀) ⊆
         { a | v a < γ } := by
@@ -304,7 +304,7 @@ theorem valuation_le_on_ideal_of_le_on_generators
   rw [← hS] at ha
   induction ha using Submodule.span_induction with
   | mem x hx => exact h_gen x (Finset.mem_coe.mp hx)
-  | zero => simp only [map_zero]; exact zero_le'
+  | zero => simp only [map_zero]; exact zero_le
   | add x y _ _ hx hy =>
     calc v (A₀.subtype (x + y))
         ≤ max (v (A₀.subtype x)) (v (A₀.subtype y)) := by
