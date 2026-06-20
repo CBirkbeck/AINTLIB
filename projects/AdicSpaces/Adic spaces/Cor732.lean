@@ -100,7 +100,7 @@ lemma dominatedBy_mono_on_spa
     (Valuation.Compatible.vle_iff_le (v := w) _ _).mp hvt
   have hπ_le_one : w π ≤ 1 := valuation_pi_le_one_on_spa hvSpa hπ_tn
   refine (Valuation.Compatible.vle_iff_le (v := w) _ _).mpr (le_trans ?_ h_t)
-  simpa only [map_pow] using pow_le_pow_of_le_one zero_le' hπ_le_one hnm
+  simpa only [map_pow] using pow_le_pow_of_le_one zero_le hπ_le_one hnm
 
 /-! ### Coverage: every Spa-point lies in some `dominatedBy` -/
 
@@ -216,7 +216,7 @@ theorem exists_dominating_unit
       (Valuation.Compatible.vle_iff_le (v := w) _ _).mp hvt
     have hπ_le_one : w πA ≤ 1 := valuation_pi_le_one_on_spa hvSpa hπ_tn
     rw [Valuation.Compatible.vle_iff_le (v := w), hπN1_unit.unit_spec, pow_succ, map_mul]
-    exact le_trans (mul_le_of_le_one_right zero_le' hπ_le_one) h_t
+    exact le_trans (mul_le_of_le_one_right zero_le hπ_le_one) h_t
   · -- `¬ v.vle t (πA^(N+1))` via strict `w πA < 1`.
     letI : ValuativeRel A := v.toValuativeRel
     haveI : MulArchimedean (ValuativeRel.ValueGroupWithZero A) := hArch v
@@ -316,7 +316,7 @@ theorem exists_pow_dominated_finset
         (hT_topnilp t htT) ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr h)
     refine (Valuation.Compatible.vle_iff_le (v := w) _ _).mpr
       (le_trans ?_ ((Valuation.Compatible.vle_iff_le (v := w) _ _).mp h_n_t.1))
-    simpa only [map_pow] using pow_le_pow_of_le_one zero_le' h_t_le_one h_n_le
+    simpa only [map_pow] using pow_le_pow_of_le_one zero_le h_t_le_one h_n_le
   -- Monotonicity in m on X (via w t ≤ 1 from Spa membership).
   have hU_mono : ∀ m m', m ≤ m' → U m ⊆ U m' := by
     intro m m' hmm' x hx_m
@@ -333,7 +333,7 @@ theorem exists_pow_dominated_finset
         (hT_topnilp t htT) ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr h)
     refine (Valuation.Compatible.vle_iff_le (v := w) _ _).mpr
       (le_trans ?_ ((Valuation.Compatible.vle_iff_le (v := w) _ _).mp hvtm))
-    simpa only [map_pow] using pow_le_pow_of_le_one zero_le' h_t_le_one hmm'
+    simpa only [map_pow] using pow_le_pow_of_le_one zero_le h_t_le_one hmm'
   -- QC subcover.
   have hX_subset : X ⊆ ⋃ m, U m := fun x hx =>
     Set.mem_iUnion.mpr (h_per_x x hx)
