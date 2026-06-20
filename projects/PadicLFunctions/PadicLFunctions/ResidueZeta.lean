@@ -976,7 +976,7 @@ theorem p_mul_constantCoeff_mahlerK_rhoA {a : ℕ} (ha : ¬ (p : ℕ) ∣ a)
         Nat.coprime_comm.mp (hp.out.coprime_iff_not_dvd.mpr fun hdvd =>
           absurd (Nat.le_of_dvd hjpos hdvd) (by omega : ¬ p ≤ (j : ℕ)))
       exact (by rw [pow_one] at *; exact hξ.pow_of_coprime (j : ℕ) hcop :
-        IsPrimitiveRoot (ξ ^ (j : ℕ)) (p ^ 1)).norm_sub_one_lt (p := p) le_rfl
+        IsPrimitiveRoot (ξ ^ (j : ℕ)) (p ^ 1)).norm_sub_one_lt (p := p)
   have hzp : ∀ j : Fin p, (1 + (ξ ^ (j : ℕ) - 1)) ^ p = 1 := fun j => by
     rw [show (1 : K) + (ξ ^ (j : ℕ) - 1) = ξ ^ (j : ℕ) by ring, ← pow_mul, mul_comm,
       pow_mul, hξ.pow_eq_one, one_pow]
@@ -1335,7 +1335,7 @@ private lemma seriesEval_FtildeA_at_root {a : ℕ} (ha : ¬ (p : ℕ) ∣ a) (ha
         Nat.coprime_comm.mp (hp.out.coprime_iff_not_dvd.mpr fun hdvd =>
           absurd (Nat.le_of_dvd hipos hdvd) (by omega : ¬ p ≤ (i : ℕ)))
       exact (by rw [pow_one] at *; exact hξ.pow_of_coprime (i : ℕ) hcop :
-        IsPrimitiveRoot (ξ ^ (i : ℕ)) (p ^ 1)).norm_sub_one_lt (p := p) le_rfl
+        IsPrimitiveRoot (ξ ^ (i : ℕ)) (p ^ 1)).norm_sub_one_lt (p := p)
   have h1z : (1 : K) + z = ξ ^ (i : ℕ) := by rw [hzdef]; ring
   -- the three summability facts at `z`
   have hsC : Summable fun n : ℕ =>
@@ -1495,7 +1495,7 @@ theorem sum_seriesEval_FtildeA (hp2 : p ≠ 2) {a : ℕ} (ha : ¬ (p : ℕ) ∣ 
         Nat.coprime_comm.mp (hp.out.coprime_iff_not_dvd.mpr fun hdvd =>
           absurd (Nat.le_of_dvd hipos hdvd) (by omega : ¬ p ≤ (i : ℕ)))
       exact (by rw [pow_one] at *; exact hξ.pow_of_coprime (i : ℕ) hcop :
-        IsPrimitiveRoot (ξ ^ (i : ℕ)) (p ^ 1)).norm_sub_one_lt (p := p) le_rfl
+        IsPrimitiveRoot (ξ ^ (i : ℕ)) (p ^ 1)).norm_sub_one_lt (p := p)
   -- Step 3 per-point, summed
   rw [show (∑ i : Fin p, seriesEval (FtildeA p K a) (ξ ^ (i : ℕ) - 1))
       = ∑ i : Fin p, (-(extLog p ((a : K))) - padicLog p (u i)) from
