@@ -62,7 +62,7 @@ theorem preimage_singleton_measure_zero_of_deriv_ne_zero {γ : ℝ → ℂ} {a b
     by_contra! h_lt
     exact h_ball (by simpa [Real.dist_eq] using h_lt) (by simp [ht_ne]) ht_eq
   have h_countable : S.Countable := by
-    rw [show S = (S ∩ ↑P) ∪ (S \ ↑P) from (Set.inter_union_diff S ↑P).symm]
+    rw [show S = (S ∩ ↑P) ∪ (S \ ↑P) from (Set.inter_union_sdiff S ↑P).symm]
     refine Set.Countable.union ?_ ?_
     · exact (P.finite_toSet.subset Set.inter_subset_right).countable
     have h_iso : ∀ t ∈ S \ ↑P, ∃ ε > 0, ∀ s ∈ S \ ↑P, s ≠ t → |s - t| ≥ ε := by
