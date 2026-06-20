@@ -257,6 +257,47 @@ noncomputable def gammaProj : ℤ_[p]ˣ →* Gamma p where
       = (u * (teichmuller p u)⁻¹) * (v * (teichmuller p v)⁻¹)
     rw [map_mul, _root_.mul_inv, mul_mul_mul_comm]
 
+/-- `ω` is trivial on `1`-units: `g ≡ 1 (mod p) ⟹ ω(g) = 1`. -/
+theorem teichmuller_oneUnit (g : ℤ_[p]ˣ) (hg : g ∈ OneUnits p) : teichmuller p g = 1 := by
+  apply Units.ext
+  rw [teichmuller_coe, Units.val_one]
+  show teichmullerFun p ((g : ℤ_[p]ˣ) : ℤ_[p]) = 1
+  rw [teichmullerFun_eq_of_sub_mem p (y := 1) hg]
+  show teichmullerZMod p (toZMod 1) = 1
+  rw [map_one, map_one]
+
+/-- `ω` is idempotent: `ω(ω(u)) = ω(u)`. -/
+theorem teichmuller_idem (u : ℤ_[p]ˣ) : teichmuller p (teichmuller p u) = teichmuller p u := by
+  apply Units.ext
+  rw [teichmuller_coe, teichmuller_coe]
+  show teichmullerFun p (teichmullerFun p ((u : ℤ_[p]ˣ) : ℤ_[p]))
+    = teichmullerFun p ((u : ℤ_[p]ˣ) : ℤ_[p])
+  rw [teichmullerFun, teichmullerFun, toZMod_teichmullerZMod]
+
+/-- **The Teichmüller splitting** `ℤ_[p]ˣ ≃* μ_{p−1} × Γ` (`μ_{p−1} = range ω`, `Γ` the `1`-units):
+`u ↦ (ω(u), u·ω(u)⁻¹)`, inverse `(t, g) ↦ t·g`.  Left inverse: `ω(u)·(u·ω(u)⁻¹) = u`; right inverse:
+`ω(t·g) = ω(t)·ω(g) = t·1 = t` (`teichmuller_idem`, `teichmuller_oneUnit`) and the `Γ`-part returns `g`. -/
+noncomputable def unitsSplitEquiv : ℤ_[p]ˣ ≃* ((teichmuller p).range × Gamma p) where
+  toFun u := (⟨teichmuller p u, u, rfl⟩, gammaProj p u)
+  invFun tg := (tg.1 : ℤ_[p]ˣ) * (tg.2 : ℤ_[p]ˣ)
+  left_inv u := by
+    show (teichmuller p u : ℤ_[p]ˣ) * (u * (teichmuller p u)⁻¹) = u
+    rw [mul_comm (teichmuller p u : ℤ_[p]ˣ), inv_mul_cancel_right]
+  right_inv := by
+    rintro ⟨⟨t, u, rfl⟩, g⟩
+    have h1 : teichmuller p ((teichmuller p u : ℤ_[p]ˣ) * (g : ℤ_[p]ˣ)) = teichmuller p u := by
+      rw [map_mul, teichmuller_idem, teichmuller_oneUnit p g g.2, mul_one]
+    apply Prod.ext
+    · apply Subtype.ext; exact h1
+    · apply Subtype.ext
+      show (teichmuller p u : ℤ_[p]ˣ) * (g : ℤ_[p]ˣ)
+        * (teichmuller p ((teichmuller p u : ℤ_[p]ˣ) * (g : ℤ_[p]ˣ)))⁻¹ = (g : ℤ_[p]ˣ)
+      rw [h1, mul_comm (teichmuller p u : ℤ_[p]ˣ) (g : ℤ_[p]ˣ), mul_inv_cancel_right]
+  map_mul' u v := by
+    apply Prod.ext
+    · apply Subtype.ext; show teichmuller p (u * v) = _; rw [map_mul]; rfl
+    · exact (gammaProj p).map_mul u v
+
 /-! ## The logarithm isomorphism `Γ ≅ (ℤ_p, +)` as continuous maps -/
 
 /-- **The p-adic exponential is a difference-isometry on `pℤ_p`**: `‖pZpExp x − pZpExp y‖ = ‖x − y‖`
