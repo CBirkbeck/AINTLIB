@@ -381,7 +381,7 @@ private lemma m6_2_delta_diag_commute {N : ℕ} [NeZero N] {k : ℤ}
     (by simp [Matrix.GeneralLinearGroup.det, Matrix.GeneralLinearGroup.mkOfDetNeZero,
         Matrix.det_fin_two]; exact_mod_cast hp.pos)
   simp only [HeckeRing.GL2.coe_modularFormLevelRaise, HeckeRing.GL2.levelRaiseFun,
-    ModularForm.smul_slash, hσ_D, RingHom.id_apply, ← SlashAction.slash_mul]
+    ModularForm.smul_slash, hσ_D, ← SlashAction.slash_mul]
   congr 2
   refine Matrix.GeneralLinearGroup.ext fun i j ↦ ?_
   fin_cases i <;> fin_cases j <;>
