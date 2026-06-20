@@ -226,8 +226,7 @@ private lemma Gamma0_left_coset_of_Npow_det (N : ℕ) [NeZero N]
     have := mul_right_cancel₀ (show (↑m : ℤ) ≠ 0 from by omega) (show
       (A 0 0 * q₂ + q₁ * (↑N * c₀)) * ↑m = 1 * ↑m by rw [one_mul]; exact h1)
     linarith
-  · change (↑N : ℤ) ∣ !![A 0 0, -q₁; ↑N * c₀, q₂] 1 0
-    norm_num [Matrix.of_apply, Matrix.cons_val_one, Matrix.head_cons,
+  · norm_num [Matrix.of_apply, Matrix.cons_val_one, Matrix.head_cons,
       Matrix.cons_val', Matrix.cons_val_zero]
   · have h00 : A 0 0 = A 0 0 * 1 + (-q₁) * 0 := by ring
     have h01 : A 0 1 = A 0 0 * r + (-q₁) * ↑m := by linarith [hq₁]
