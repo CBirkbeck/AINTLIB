@@ -110,7 +110,7 @@ noncomputable def limZModToPadic : compatSubring ℓ →+* ℤ_[ℓ] :=
 
 /-- The forward map `ℤ_[ℓ] → lim ZMod (ℓ^n)`: `z ↦ (n ↦ toZModPow n z)`. -/
 noncomputable def padicToLimZMod : ℤ_[ℓ] →+* compatSubring ℓ :=
-  RingHom.codRestrict (Pi.ringHom (fun n : ℕ => PadicInt.toZModPow n)) (compatSubring ℓ)
+  RingHom.codRestrict (RingHom.pi (fun n : ℕ => PadicInt.toZModPow n)) (compatSubring ℓ)
     (fun z n => RingHom.congr_fun (PadicInt.zmod_cast_comp_toZModPow n (n + 1) n.le_succ) z)
 
 omit [Fact ℓ.Prime] in
