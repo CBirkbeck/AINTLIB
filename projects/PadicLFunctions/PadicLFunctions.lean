@@ -6,6 +6,7 @@ import PadicLFunctions.Measure.Toolbox
 import PadicLFunctions.Measure.UnitsZp
 import PadicLFunctions.Measure.Fubini
 import PadicLFunctions.Measure.PseudoMeasure
+import PadicLFunctions.Measure.Functoriality
 import PadicLFunctions.KubotaLeopoldt.ZetaValues
 import PadicLFunctions.KubotaLeopoldt.ZetaValuesComplex
 import PadicLFunctions.KubotaLeopoldt.MuA
