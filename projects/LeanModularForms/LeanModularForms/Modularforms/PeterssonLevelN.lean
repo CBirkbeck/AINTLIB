@@ -50,6 +50,7 @@ variable {N : ℕ} [NeZero N] {k : ℤ}
 
 instance : Fintype (SL(2, ℤ) ⧸ Gamma1 N) := Subgroup.fintypeQuotientOfFiniteIndex
 
+omit [NeZero N] in
 /-- For `γ ∈ Γ₁(N)`, the weight-`k` slash action on a `Γ₁(N)`-cusp form is trivial. -/
 theorem slash_Gamma1_eq
     (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
@@ -99,12 +100,14 @@ theorem integrableOn_petersson_slash
     |>.aestronglyMeasurable.restrict)
     C (ae_of_all _ fun τ ↦ hC (δ • τ))
 
+omit [NeZero N] in
 private theorem out_one_mem_Gamma1 :
     ((⟦1⟧ : SL(2, ℤ) ⧸ Gamma1 N)).out ∈ Gamma1 N := by
   have h := Quotient.exact ((⟦1⟧ : SL(2, ℤ) ⧸ Gamma1 N).out_eq)
   change (QuotientGroup.leftRel (Gamma1 N)).r _ _ at h
   rw [QuotientGroup.leftRel_apply] at h; simpa using h
 
+omit [NeZero N] in
 private theorem identity_coset_eq_pet
     (f g : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
     peterssonInner k fd
@@ -131,6 +134,7 @@ private theorem measurableSet_fd' : MeasurableSet (fd : Set ℍ) :=
     (isClosed_le (continuous_abs.comp UpperHalfPlane.continuous_re)
       continuous_const)).measurableSet
 
+omit [NeZero N] in
 /-- Each summand of `petN f f` is a non-negative real number. -/
 theorem petN_summand_nonneg
     (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
@@ -553,16 +557,19 @@ noncomputable def slLeftMul (h : SL(2, ℤ)) :
       refine QuotientGroup.eq.mpr ?_
       rw [show (h * a)⁻¹ * (h * b) = a⁻¹ * b from by group]; exact hab)
 
+omit [NeZero N] in
 @[simp]
 theorem slLeftMul_mk (h g : SL(2, ℤ)) :
     slLeftMul h (QuotientGroup.mk g : SL(2, ℤ) ⧸ Gamma1 N) =
       QuotientGroup.mk (h * g) :=
   rfl
 
+omit [NeZero N] in
 theorem slLeftMul_one (q : SL(2, ℤ) ⧸ Gamma1 N) : slLeftMul 1 q = q := by
   induction q using QuotientGroup.induction_on with
   | _ g => simp
 
+omit [NeZero N] in
 theorem slLeftMul_comp (h₁ h₂ : SL(2, ℤ)) (q : SL(2, ℤ) ⧸ Gamma1 N) :
     slLeftMul h₁ (slLeftMul h₂ q) = slLeftMul (h₁ * h₂) q := by
   induction q using QuotientGroup.induction_on with
@@ -756,11 +763,13 @@ noncomputable def Gamma1QuotEquivOfGamma0
   right_inv := fun q ↦ by induction q using Quotient.inductionOn with
     | h δ => simp [Quotient.map_mk, mul_assoc]
 
+omit [NeZero N] in
 @[simp]
 theorem Gamma1QuotEquivOfGamma0_mk (γ : SL(2, ℤ)) (hγ : γ ∈ Gamma0 N)
     (δ : SL(2, ℤ)) :
     Gamma1QuotEquivOfGamma0 γ hγ ⟦δ⟧ = ⟦δ * γ⁻¹⟧ := rfl
 
+omit [NeZero N] in
 /-- The Petersson integrand `petersson k f g` is `Γ₁(N)`-invariant: for `γ ∈ Γ₁(N)`,
 `petersson k f g (γ • τ) = petersson k f g τ`. -/
 theorem petersson_Gamma1_invariant (f g : CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
@@ -769,6 +778,7 @@ theorem petersson_Gamma1_invariant (f g : CuspForm ((Gamma1 N).map (mapGL ℝ)) 
   rw [← petersson_slash_SL, slash_Gamma1_eq f γ hγ, slash_Gamma1_eq g γ hγ]
 
 
+omit [NeZero N] in
 /-- Each `petN` summand equals an integral over a translate of `fd`:
 `peterssonInner k fd (f∣q⁻¹) (g∣q⁻¹) = ∫_{q⁻¹ • fd} petersson k f g dμ`. -/
 theorem petN_summand_eq_setIntegral
@@ -781,6 +791,7 @@ theorem petN_summand_eq_setIntegral
     ← (measurePreserving_smul q.out⁻¹ μ_hyp).setIntegral_image_emb
       (measurableEmbedding_const_smul _)]
 
+omit [NeZero N] in
 /-- Integral over a `Γ₁(N)`-translate of any `SL₂(ℤ)`-coset tile equals the
 integral over the original tile, for `Γ₁(N)`-invariant integrands ([DS] Lemma
 5.5.1): for `η ∈ Γ₁(N)` and any set `S`, `∫_{η • S} h dμ = ∫_S h dμ` when
@@ -791,6 +802,7 @@ theorem setIntegral_Gamma1_smul_eq
     ∫ τ in η • S, h τ ∂μ_hyp = ∫ τ in S, h τ ∂μ_hyp := by
   rw [setIntegral_smul_eq h η S]; congr 1; ext τ; exact h_inv τ
 
+omit [NeZero N] in
 /-- Specialization of `setIntegral_Gamma1_smul_eq` to the Petersson integrand of
 two `Γ₁(N)`-cusp forms: for `η ∈ Γ₁(N)` and any set `S ⊆ ℍ`,
 `∫_{η • S} petersson k f g dμ = ∫_S petersson k f g dμ`. -/
@@ -847,6 +859,7 @@ theorem petN_slash_invariant
   exact (Gamma1 N).inv_mem ((Gamma1 N).mul_mem (out_mem (δ * γ⁻¹))
     (HeckeRing.GL2.Gamma0_normalizes_Gamma1 ⟨γ, hγ⟩ _ ((Gamma1 N).inv_mem (out_mem δ))))
 
+omit [NeZero N] in
 /-- `∫_{q.out⁻¹ • fd} h dμ = ∫_{q.out⁻¹ • fdo} h dμ` for any `h`: the SL-tile
 integrals over `fd` and `fdo` agree (the boundary `fd \ fdo` has measure zero). -/
 theorem setIntegral_SL_tile_fd_eq_fdo
@@ -973,8 +986,3 @@ abbrev union (F : FiniteTileFundamentalDomain μ ι T) : Set X := ⋃ i, F.tile 
 
 
 end FiniteTileFundamentalDomain
-
-
-
-
-
