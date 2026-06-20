@@ -279,7 +279,7 @@ lemma normalizedBoundaryPrime_ramificationIdx_over_additiveSubfield :
         (n := p * (p - 1)) (K := L) (p := p) (k := 0) (m := p - 1) (by simp)
         hm_total)
   have hmul :=
-    Ideal.ramificationIdxIn_mul_ramificationIdxIn'
+    Ideal.ramificationIdxIn_mul_ramificationIdxIn
       (A := ℤ)
       (B := 𝓞 (additiveSubfield (L := L) (p := p)))
       (C := 𝓞 L)
