@@ -138,7 +138,35 @@ product (the OMT needs an additive/`A`-module structure on the target, not a rin
 ---
 
 ### [T-L1b] `sectionEqualizer` is a complete, countably-based A-module; `ρ̃ : R → E` continuous bijection
-- **Status**: open
+- **Status**: in_progress (beastmode 2026-06-20) — 3 foundational pieces DONE; OMT-assembly core remains.
+- **Progress**:
+  - 2026-06-20 LANDED (StructureSheaf.lean, all green 2787 jobs): `sectionEqualizer_isClosed` (T-L1a),
+    `productRestrictionSub_mem_sectionEqualizer` (image ⊆ E, via `restrictionMap_comp`, no gluing),
+    `sectionEqualizer_completeSpace` (E complete = closed in complete ∏).
+  - **REMAINING OMT-assembly pieces (the sub-ticket plan; infra is non-ambient):**
+    1. `presheafValue_uniformity_isCountablyGenerated (D)` — ⚠ HITS A MATHLIB DIAMOND (beastmode
+       2026-06-20, attempted+reverted to keep green): the LaurentRefinementCore:2660-2694 metric chain
+       proves cg for `@uniformity (presheafValue D) PseudoMetricSpace.toUniformSpace`, but the OMT needs
+       it for the AMBIENT `instUniformSpacePresheafValue D`, and the two are NOT defeq (the metric goes
+       through `UniformSpace.pseudoMetricSpace` of the localization → a compounding completion-metric
+       uniformity diamond). `FirstCountableTopology (presheafValue D)` does NOT auto-derive (completion
+       of first-countable isn't first-countable without metrizability). `lean_loogle` found no
+       `IsCountablyGenerated (uniformity (Completion _))` lemma. RESOLUTION OPTIONS: (i) prove the
+       uniformity-FILTER equality `@uniformity _ ambient = @uniformity _ metric` and transport cg;
+       (ii) restructure E's uniformity via the metric throughout (messy); (iii) find/add a mathlib
+       `UniformSpace.Completion` cg-preservation lemma. Then `sectionEqualizer_isCountablyGenerated`
+       via finite-Pi + `Filter.comap.isCountablyGenerated` (the Pi/comap part is easy once (1) lands).
+    2. E as an **A-module**: `letI : Module A (presheafValue D) := (canonicalMap D).toAlgebra.toModule`
+       (non-ambient, cf. FlatnessResults:72-75) + Pi.module + the submodule/`ContinuousSMul` on E.
+    3. `productRestrictionToEqualizer : presheafValue C.base →ₗ[A] E` (corestrict via the mem lemma;
+       A-linear since restrictionMap is an A-algebra hom).
+    4. **Bijective**: injective (the separation, `IsOXAcyclic.separation` / descent); surjective
+       (`lemma_8_34_gluing` — needs `[CompleteSpace A][CompatiblePlusSubring A]`, the SIGNATURE
+       CASCADE: extend `productRestrictionSub_isInducing_tate` (StructureSheaf:1384) with those +
+       thread through `cor_8_32_productRestrictionSub_isInducing/_isEmbedding` (RelativePieceKeystone);
+       the headline already has them).
+    5. T-L1c: `wedhorn_6_16_of_topNilpUnit` ρ̃ → IsOpenMap → continuous+bijective+open ⇒ homeo →
+       `IsInducing.comp IsInducing.subtypeVal` ⇒ `productRestrictionSub_isInducing_tate`.
 - **File**: StructureSheaf.lean
 - **Depends on**: T-L1a; **Leaf C** (gluing surjectivity); T-L3 (injectivity, transitively)
 - **Parallel**: no (needs gluing)
