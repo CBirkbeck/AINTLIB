@@ -147,7 +147,7 @@ theorem isContinuous_of_restriction_isContinuous (P : PairOfDefinition A) {Γ₀
     v.IsContinuous := by
   intro γ
   by_cases hγ : γ = 0
-  · subst hγ; simp only [not_lt_zero', Set.setOf_false, isOpen_empty]
+  · subst hγ; simp only [not_lt_zero, Set.setOf_false, isOpen_empty]
   rw [show { a : A | v a < γ } =
     (v.ltAddSubgroup (Units.mk0 γ hγ) : Set A) from by ext; simp only [Set.mem_setOf_eq,
       Valuation.ltAddSubgroup, Units.val_mk0, AddSubgroup.coe_set_mk, AddSubmonoid.coe_set_mk,
