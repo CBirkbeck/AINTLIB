@@ -1076,6 +1076,9 @@ private lemma mdifferentiable_descendCosetList_slash_sum {M : ℕ} [NeZero M]
         descendCosetList p M hp v) from funext fun z ↦ (Finset.sum_apply _ _ _).symm]
   exact MDifferentiable.sum (fun v _ ↦ (ModularFormClass.holo G).slash k _)
 
+/-- The weight-`k` cusp form on `Γ₁((q·M_q)/p)` obtained from a cusp form `F_q` on `Γ₁(M_q)`
+(in the `χ_F`-eigenspace) by the `V_q` level-raise to `Γ₁(q·M_q)` followed by the slash-sum
+descent by the prime `p`. -/
 noncomputable def slash_sum_V_q_cuspForm_descend
     {M_q : ℕ} [NeZero M_q] {k : ℤ}
     (p : ℕ) [NeZero p] (hp : p.Prime) (hpM_q : p ∣ M_q) [NeZero (M_q / p)]
@@ -1179,7 +1182,6 @@ lemma per_q_slash_sum_at_deep_qexp_zero
         (⇑(HeckeRing.GL2.modularFormLevelRaise (M_q / p) q k G_q.toModularForm') :
           UpperHalfPlane → ℂ) z) := by
     funext z
-    change _ = (⇑(HeckeRing.GL2.modularFormLevelRaise _ _ _ _)) z
     rw [HeckeRing.GL2.modularFormLevelRaise_apply]
     rfl
   have h_slash_sum_eq : (fun z : UpperHalfPlane ↦ ∑ v : Fin (descendCosetCount p (q * M_q)),
