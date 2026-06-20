@@ -197,14 +197,14 @@ theorem ncard_index_image_chart_le {M : ℝ≥0} {φ : (Fin (Fintype.card ι - 1
       Finset.card_univ, Fintype.card_fin]
   rw [hcardT, Nat.cast_id]
 
-/-- **Boundary-cell count.** If `∂s` is covered by `m` images `φⱼ '' [0,1]ᵈ⁻¹` of
-`M`-Lipschitz maps, the number of grid cells meeting `∂s` is `O(nᵈ⁻¹)`, with constant
-`m · (2⌈M⌉₊+1)ᵈ · 2ᵈ⁻¹`. -/
-theorem ncard_index_image_frontier_le {s : Set (ι → ℝ)} {m : ℕ} {M : ℝ≥0}
+/-- **Boundary-cell count.** If a set `t` is covered by `m` images `φⱼ '' [0,1]ᵈ⁻¹` of
+`M`-Lipschitz maps, the number of grid cells meeting `t` is `O(nᵈ⁻¹)`, with constant
+`m · (2⌈M⌉₊+1)ᵈ · 2ᵈ⁻¹`. (The boundary-cell estimate is the case `t = ∂s`.) -/
+theorem ncard_index_image_frontier_le {t : Set (ι → ℝ)} {m : ℕ} {M : ℝ≥0}
     {φ : Fin m → (Fin (Fintype.card ι - 1) → ℝ) → (ι → ℝ)}
-    (hφ : ∀ j, LipschitzWith M (φ j)) (hcov : frontier s ⊆ ⋃ j, φ j '' Set.Icc 0 1)
+    (hφ : ∀ j, LipschitzWith M (φ j)) (hcov : t ⊆ ⋃ j, φ j '' Set.Icc 0 1)
     {n : ℕ} (hn : 1 ≤ n) :
-    (index n '' frontier s).ncard
+    (index n '' t).ncard
       ≤ (m * (2 * ⌈(M : ℝ)⌉₊ + 1) ^ Fintype.card ι * 2 ^ (Fintype.card ι - 1))
           * n ^ (Fintype.card ι - 1) := by
   classical
@@ -213,7 +213,7 @@ theorem ncard_index_image_frontier_le {s : Set (ι → ℝ)} {m : ℕ} {M : ℝ�
     (hφ j).isBounded_image (Metric.isBounded_Icc 0 1)
   have hfin : ∀ j : Fin m, (index n '' (φ j '' Set.Icc 0 1)).Finite := fun j ↦
     setFinite_index_image_of_isBounded n (hbddφ j)
-  have hsub : index n '' frontier s ⊆ ⋃ j, index n '' (φ j '' Set.Icc 0 1) := by
+  have hsub : index n '' t ⊆ ⋃ j, index n '' (φ j '' Set.Icc 0 1) := by
     rw [← Set.image_iUnion]
     exact Set.image_mono hcov
   refine (Set.ncard_le_ncard hsub (Set.finite_iUnion hfin)).trans ?_
