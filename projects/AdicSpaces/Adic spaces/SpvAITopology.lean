@@ -522,7 +522,7 @@ theorem restrictIdeal_isEquiv_of_cGammaIdeal_univ {Γ₀ : Type*}
   intro r s
   by_cases hr : v r = 0
   · rw [Valuation.restrictIdeal_apply_zero v I hr, hr]
-    simp only [zero_le']
+    simp only [zero_le]
   · have hr_mem := huniv r hr
     rw [Valuation.restrictIdeal_apply_of_mem v I hr hr_mem]
     by_cases hs : v s = 0
