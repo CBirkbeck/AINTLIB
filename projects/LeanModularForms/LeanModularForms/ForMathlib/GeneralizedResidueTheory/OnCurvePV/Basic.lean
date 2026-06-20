@@ -181,7 +181,7 @@ theorem aEStronglyMeasurable_pv_integrand_piecewiseC1
     have h_maps : MapsTo γ ((S ∩ Icc a b) \ P) (γ '' Icc a b \ Metric.ball z₀ ε) :=
       fun _ ⟨⟨hs_S, hs_Icc⟩, _⟩ ↦ ⟨mem_image_of_mem γ hs_Icc, h_notBall hs_S⟩
     exact ((hf (γ t) hγt_in).comp
-      ((hγ t ht_Icc).mono (diff_subset.trans inter_subset_right)) h_maps).mul
+      ((hγ t ht_Icc).mono (sdiff_subset.trans inter_subset_right)) h_maps).mul
       ((hγ'_off_P t ⟨ht_Icc, ht_nP⟩).mono
         (fun x ⟨⟨_, hx_Icc⟩, hx_nP⟩ ↦ ⟨hx_Icc, hx_nP⟩))
   have h_base_meas : AEStronglyMeasurable (fun t ↦ f (γ t) * deriv γ t)
@@ -199,7 +199,7 @@ theorem aEStronglyMeasurable_pv_integrand_piecewiseC1
           volume.restrict (↑P ∩ (S ∩ Icc a b)) := by
       rw [← Measure.restrict_union h_disj hP_inter_meas]
       congr 1
-      ext x; simp [mem_union, mem_diff, mem_inter_iff]; tauto
+      ext x; simp [mem_union, Set.mem_sdiff, mem_inter_iff]; tauto
     rw [h_eq]
     apply AEStronglyMeasurable.add_measure (h_cont.aestronglyMeasurable (μ := volume) h_diff_meas)
     simp only [Measure.restrict_eq_zero.mpr hP_meas_zero]
