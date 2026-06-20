@@ -506,6 +506,8 @@ private lemma miyake_4_6_14_delta_slash_sum_coeff_zero
       l'.primeFactors.attach (fun q _ ↦ funext (hΦ_q_fun q)) m
       (fun q _ ↦ h_per_q_zero q)
 
+/-- The level descent of a cusp form `f` from `Γ₁(N)` to `Γ₁(N/p)`: the weight-`k` cusp form
+obtained by summing the weight-`k` slash-actions of `f` over the descent cosets (Miyake §4.6.14). -/
 noncomputable def descendSlashSumCuspForm {N : ℕ} [NeZero N] {k : ℤ} (χ : (ZMod N)ˣ →* ℂˣ)
     (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (p : ℕ) [NeZero p] (hp : p.Prime) (hpN : p ∣ N)
     [NeZero (N / p)] (χ' : (ZMod (N / p))ˣ →* ℂˣ)
