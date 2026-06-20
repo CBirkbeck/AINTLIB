@@ -6885,9 +6885,16 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
     `Γ` subtype (CompactSpace as closed subgroup of compact `ℤ_[p]ˣ`, ContinuousMul), continuity of
     `logCM` (from the difference-isometry `‖pZpLog x - pZpLog y‖ = ‖x-y‖`, provable from `pZpLog_mul`+
     `norm_pZpLog`+inverses) and `expCM` (Lipschitz, cf. `PadicExp.lean:1173` `norm_padicExp_sub_padicExp`).
-    (b) `gplusEquiv` — `GPlus ≅ Δ×Γ` via Teichmüller (`ResidueField.normCompat_eq_teichmuller_mul_principal`,
-    `ℤ_p^×≅μ_{p-1}×(1+pℤ_p)`) + the `/±1` quotient (`Δ = μ_{p-1}/{±1}`). This is paper-scale classical
-    p-adic structure theory — legitimately bundleable like CFT if not internalized.
+    (b) `gplusEquiv` — `GPlus ≅ Δ×Γ` via Teichmüller + the `/±1` quotient (`Δ = μ_{p-1}/{±1}`).
+    **Scoped infrastructure (2026-06-20)**: `CompactSpace ℤ_[p]ˣ` is an AUTOMATIC instance
+    (`Units.instCompactSpaceOfT1SpaceOfContinuousMul`, mathlib) — no gap. The Teichmüller MonoidHom
+    `PadicInt.teichmuller : ℤ_[p]ˣ →* ℤ_[p]ˣ` EXISTS (`Interpolation/Branches.lean:180`, with
+    `teichmuller_coe`, `teichmullerFun_mul`, `teichmullerFun_pow_card_sub_one` = `(p-1)`-torsion). The
+    splitting: `u ↦ (teichmuller u, u · (teichmuller u)⁻¹)` with the second factor a principal 1-unit
+    (lands in the worker's `Γ`/`OneUnits`). `Δ := range(teichmuller)/{±1}` (or `μ_{p-1}/{±1}`), finite of
+    order `(p-1)/2`, `Invertible ((p-1)/2 : ℤ_[p])` since prime-to-p. The `/±1` quotient: `GPlus = ℤ_[p]ˣ/⟨-1⟩`,
+    `-1 = teichmuller(-1) ∈ μ_{p-1}`, so it only quotients the Δ-factor. DEPENDS on the worker's `Γ` type
+    (in progress). Still paper-scale but fully de-risked; legitimately bundleable like CFT if not internalized.
   ORIGINAL: `PadicMeasure p (GPlus p) ≃+* IwasawaAlgebraGroup ℤ_[p] Δ`
   (carrier identification so `charIdealGroup` — defined over `IwasawaAlgebraGroup 𝒪 H` — applies to
   `𝒳⁺`, a module over `LambdaGPlus p = PadicMeasure p (GPlus p)`). Sketch: `GPlus = ℤ_[p]ˣ/±1 ≅ Δ × Γ`
