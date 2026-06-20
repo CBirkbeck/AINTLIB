@@ -75,7 +75,9 @@ private lemma m7_NeZero_Nl2_div_q {N l q : ℕ} [NeZero (N * l ^ 2)]
 
 private lemma m7_levelRaiseFun_zero (q : ℕ) [NeZero q] (k : ℤ) :
     (levelRaiseFun q k (0 : UpperHalfPlane → ℂ)) = 0 := by
-  ext τ; simp [levelRaiseFun]
+  ext τ
+  simp only [levelRaiseFun, SlashAction.zero_slash, Pi.smul_apply, Pi.zero_apply, smul_eq_mul,
+    mul_zero]
 
 private lemma m7_qExp_coeff_levelRaise_case_A {M q : ℕ} [NeZero M] [NeZero q] {k : ℤ}
     {Γ : Subgroup (GL (Fin 2) ℝ)}
@@ -96,7 +98,7 @@ private lemma m7_qExp_coeff_levelRaise_case_A {M q : ℕ} [NeZero M] [NeZero q] 
 private lemma m7_qExp_coeff_of_fun_eq_zero {Γ : Subgroup (GL (Fin 2) ℝ)} {k : ℤ}
     {g : CuspForm Γ k} (hg : (⇑g : UpperHalfPlane → ℂ) = 0) (n : ℕ) :
     (PowerSeries.coeff n) (UpperHalfPlane.qExpansion (1 : ℝ) ⇑g) = 0 := by
-  simp [hg, qExpansion_zero]
+  simp only [hg, qExpansion_zero, map_zero]
 
 private lemma m7_qExp_zero_branch {Γ : Subgroup (GL (Fin 2) ℝ)} {k : ℤ}
     (q n : ℕ) :
@@ -104,7 +106,7 @@ private lemma m7_qExp_zero_branch {Γ : Subgroup (GL (Fin 2) ℝ)} {k : ℤ}
         (PowerSeries.coeff (n / q))
           (UpperHalfPlane.qExpansion (1 : ℝ) (⇑(0 : CuspForm Γ k)))
       else (0 : ℂ)) = 0 := by
-  simp [qExpansion_zero]
+  simp only [CuspForm.coe_zero, qExpansion_zero, map_zero, ite_self]
 
 private lemma m7_eq_q_of_mem_factors_one_eq_l {l l' q q' : ℕ} (hl'_eq1 : 1 = l')
     (h_pf_eq : l.primeFactors = insert q l'.primeFactors)
@@ -115,7 +117,6 @@ private lemma m7_mem_l'_of_ne_q {l l' q q' : ℕ}
     (h_pf_eq : l.primeFactors = insert q l'.primeFactors)
     (hq' : q' ∈ l.primeFactors) (hq'_ne : q' ≠ q) : q' ∈ l'.primeFactors :=
   (Finset.mem_insert.mp (h_pf_eq ▸ hq')).resolve_left hq'_ne
-
 
 private lemma m7_qExp_split_f_eq_f'_plus_hform {ϕ_f ϕ_f' ϕ_h : PowerSeries ℂ} {q : ℕ}
     (hf'_qexp : ∀ n : ℕ,
@@ -525,7 +526,7 @@ private lemma Miyake467Decomp_inductive_step_level_relations {N : ℕ} [NeZero N
 the level-`(N·q²)/q` typeclass at the conductor-theorem application in the inductive step. -/
 private lemma m7_NeZero_Nq2_div_q {N q : ℕ} [NeZero N] (hq_prime : q.Prime) :
     NeZero ((N * q ^ 2) / q) := by
-  rw [show N * q ^ 2 / q = N * q from by
+  rw [show N * q ^ 2 / q = N * q by
     rw [sq, ← mul_assoc, Nat.mul_div_cancel _ hq_prime.pos]]
   exact ⟨Nat.mul_ne_zero (NeZero.ne N) hq_prime.ne_zero⟩
 
@@ -766,7 +767,7 @@ private lemma Miyake467Decomp_inductive_step {N : ℕ} [NeZero N] {k : ℤ} (n :
   have hq_prime : q.Prime := Nat.prime_of_mem_primeFactors hq_in
   have hq_dvd_l : q ∣ l := Nat.dvd_of_mem_primeFactors hq_in
   haveI hq_ne : NeZero q := ⟨hq_prime.ne_zero⟩
-  set l' := l / q with hl'_def
+  set l' := l / q
   obtain ⟨hl'_sqfree, hq_dvd_l', hl'_pos, h_pf_eq, hq_not_in_l', hl'_pf_card⟩ :=
     Miyake467Decomp_inductive_step_factor_structure l q hl_sqfree hq_in hl_card
   haveI hNl2_ne : NeZero (N * l ^ 2) :=
@@ -877,7 +878,7 @@ theorem miyake_4_6_7_squarefree_decomp_with_lower_level
 
 private lemma qExpansion_one_coe_zero_coeff (f : UpperHalfPlane → ℂ) (hf : f = 0) (n : ℕ) :
     (UpperHalfPlane.qExpansion (1 : ℝ) f).coeff n = 0 := by
-  subst hf; simp [qExpansion_zero]
+  subst hf; simp only [qExpansion_zero, map_zero]
 
 private lemma qExpansion_one_cuspForm_cast_coeff {A B : ℕ} {k : ℤ} (h : A = B)
     (x : CuspForm ((Gamma1 A).map (mapGL ℝ)) k) (n : ℕ) :
@@ -1015,7 +1016,7 @@ lemma modularForm_fun_eq_of_qExp_eq_at_period_one
   have h_diff_qExp_zero : UpperHalfPlane.qExpansion (1 : ℝ) (f - g) = 0 := by
     rw [ModularForm.qExpansion_sub one_pos h_period f g]
     ext n
-    simp [map_sub, h_qExp_eq n]
+    simp only [map_sub, h_qExp_eq n, sub_self, map_zero]
   have h_diff_zero : f - g = 0 :=
     (ModularForm.qExpansion_eq_zero_iff one_pos h_period (f := f - g)).mp h_diff_qExp_zero
   funext z
@@ -1039,7 +1040,7 @@ lemma miyake_descent_l_prime_eq_one_helper
     rw [show (Gamma1 (p * M)).map (mapGL ℝ) =
         (Gamma1 (p * M) : Subgroup (GL (Fin 2) ℝ)) from rfl,
       strictPeriods_Gamma1]
-    exact ⟨1, by simp⟩
+    exact ⟨1, by simp only [one_smul]⟩
   haveI : NeZero (p * M) := hp_M_eq_N ▸ inferInstance
   exact modularForm_fun_eq_of_qExp_eq_at_period_one (M := p * M)
     (k := k) h1_period_pM
@@ -1108,7 +1109,7 @@ noncomputable def slash_sum_V_q_cuspForm_descend
       (k := k) _ V_q_F_q).mpr hV_q_F_q_char
   have h_Mq_div_p_dvd_qMq_div_p : M_q / p ∣ (q * M_q) / p := by
     obtain ⟨a, rfl⟩ := hpM_q
-    simp [Nat.mul_div_cancel_left _ hp.pos, mul_comm q, mul_assoc]
+    simp only [Nat.mul_div_cancel_left _ hp.pos, mul_comm q, mul_assoc, dvd_mul_right]
   let χ_F_low_lifted : (ZMod ((q * M_q) / p))ˣ →* ℂˣ :=
     χ_F_low.comp (ZMod.unitsMap h_Mq_div_p_dvd_qMq_div_p)
   have h_χ_F_lifted_factor :
@@ -1249,7 +1250,8 @@ private lemma coe_finset_sum_modularForm_apply {ι : Type*} [DecidableEq ι]
     (s : Finset ι) (F : ι → ModularForm ((Gamma1 M).map (mapGL ℝ)) k) (z : UpperHalfPlane) :
     ((∑ q ∈ s, F q : ModularForm ((Gamma1 M).map (mapGL ℝ)) k) : UpperHalfPlane → ℂ) z =
       ∑ q ∈ s, (⇑(F q) : UpperHalfPlane → ℂ) z := by
-  refine Finset.induction_on s (by simp) fun q s hqs ih ↦ ?_
+  refine Finset.induction_on s (by simp only [Finset.sum_empty, ModularForm.zero_apply])
+    fun q s hqs ih ↦ ?_
   rw [Finset.sum_insert hqs, Finset.sum_insert hqs, ModularForm.coe_add, Pi.add_apply, ih]
 
 /-- A modular form whose `q`-expansion coefficients are, term by term, the sum of the
@@ -1264,7 +1266,7 @@ private lemma modularForm_eq_sum_of_qExpansion_coeff_eq {M : ℕ} [NeZero M] {k 
       ∑ q ∈ s, (UpperHalfPlane.qExpansion (1 : ℝ) (φ q)).coeff n) :
     (⇑G : UpperHalfPlane → ℂ) =
       fun z ↦ ∑ q ∈ s, (⇑(φ q) : UpperHalfPlane → ℂ) z := by
-  set RHS_sum : ModularForm ((Gamma1 M).map (mapGL ℝ)) k := ∑ q ∈ s, φ q with hRHS
+  set RHS_sum : ModularForm ((Gamma1 M).map (mapGL ℝ)) k := ∑ q ∈ s, φ q
   have h_eq : (⇑G : UpperHalfPlane → ℂ) = ⇑RHS_sum := by
     apply modularForm_fun_eq_of_qExp_eq_at_period_one h_period
     intro n
