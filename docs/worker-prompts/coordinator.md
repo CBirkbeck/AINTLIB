@@ -21,8 +21,8 @@ Each firing, in order:
    Any result → a bump/rename is in progress → **exit immediately, do nothing else**.
 
 2. **Fleet status.** Pull open issues once and tally: `state:todo` (and how many are unassigned),
-   `state:in-progress`, `state:review`, by lane. Note how many `lane:cleanup` closed in the last ~2h
-   (throughput).
+   `state:in-progress`, `state:changes-requested`, `state:review`, by lane. Note how many
+   `lane:cleanup` closed in the last ~2h (throughput).
 
 3. **Reset stuck tickets.** For each `state:in-progress` issue whose `updatedAt` is **>2h ago** and
    which has **no open linked PR**: relabel `state:in-progress`→`state:todo`, `--remove-assignee`,
@@ -40,6 +40,9 @@ Each firing, in order:
      human can review + merge. **Do not merge it yourself.**
    - **Mathlib bump:** if the `lakefile.toml` mathlib `rev` hasn't moved in **>24h** (or you can see
      mathlib master is well ahead), note **"bump due"**. **Do not bump.**
+   - **Worker redo requests:** if you need a worker to redo something, never leave only a comment.
+     Relabel the ticket `state:changes-requested`, comment the specific fix, leave any branch/PR open,
+     and unassign so the worker sees it in its priority queue.
 
 6. **Report** exactly one line, e.g.:
    `coordinator: todo=236(unassigned 236) inprog=2 review=0 | reset 0 | filed 0 (queue≥40) | bump:ok | review-PRs:0`
