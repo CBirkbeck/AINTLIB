@@ -140,7 +140,7 @@ theorem exists_primeCompl_natCast_ell_pow_denom_of_mem_Q_pow
   have hquot_val :
       v.valuation R' (algebraMap (𝓞 R') R' x / algebraMap (𝓞 R') R' e) ≤ 1 := by
     simpa [div_eq_mul_inv, v.valuation_of_algebraMap (K := R'), hval_e] using
-      div_le_one_of_le₀ hval_x zero_le'
+      div_le_one_of_le₀ hval_x zero_le
   obtain ⟨y, d, hfrac⟩ :=
     v.exists_primeCompl_mul_eq_of_integer (K := R')
       (algebraMap (𝓞 R') R' x / algebraMap (𝓞 R') R' e) hquot_val
