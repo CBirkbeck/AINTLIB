@@ -488,22 +488,26 @@ theorem oneAddX_mul_derivative_log (A : Type*) [CommRing A] [Algebra ℚ A] :
     ring
 
 /-- **Formal identity (i)** (RJW Lem 5.14 / decomposition E4, Washington Prop 5.3 route):
-`exp(log(1 + X)) = 1 + X` as formal power series over `ℚ_[p]`. Proved from
+`exp(log(1 + X)) = 1 + X` as formal power series over any `ℚ`-algebra `A`. Proved from
 `(1 + X)·D F = F` with `F(0) = 1` by coefficient recursion. -/
-theorem exp_subst_log :
-    (exp ℚ_[p]).subst (PowerSeries.log ℚ_[p]) = 1 + PowerSeries.X := by
-  have hg : HasSubst (PowerSeries.log ℚ_[p]) := HasSubst.log
-  set F := (exp ℚ_[p]).subst (PowerSeries.log ℚ_[p]) with hF
-  have hDF : d⁄dX ℚ_[p] F = F * d⁄dX ℚ_[p] (PowerSeries.log ℚ_[p]) := by
-    rw [hF, derivative_subst ℚ_[p] hg, derivative_exp]
-  have hrec : (1 + PowerSeries.X) * d⁄dX ℚ_[p] F = F := by
+theorem exp_subst_log (A : Type*) [CommRing A] [Algebra ℚ A] :
+    (exp A).subst (PowerSeries.log A) = 1 + PowerSeries.X := by
+  have hg : HasSubst (PowerSeries.log A) := HasSubst.log
+  -- every positive `ℕ`-cast is a unit in a `ℚ`-algebra (its preimage `(n : ℚ)` is a unit)
+  have hunit : ∀ n : ℕ, n ≠ 0 → IsUnit ((n : ℕ) : A) := fun n hn => by
+    rw [← map_natCast (algebraMap ℚ A)]
+    exact (isUnit_iff_ne_zero.mpr (by exact_mod_cast hn)).map _
+  set F := (exp A).subst (PowerSeries.log A) with hF
+  have hDF : d⁄dX A F = F * d⁄dX A (PowerSeries.log A) := by
+    rw [hF, derivative_subst A hg, derivative_exp]
+  have hrec : (1 + PowerSeries.X) * d⁄dX A F = F := by
     rw [hDF, ← mul_assoc, mul_comm (1 + PowerSeries.X) F, mul_assoc,
       oneAddX_mul_derivative_log, mul_one]
   have hc0 : constantCoeff F = 1 := by
-    rw [hF, show (constantCoeff ((exp ℚ_[p]).subst (PowerSeries.log ℚ_[p])))
-        = MvPowerSeries.constantCoeff ((exp ℚ_[p]).subst (PowerSeries.log ℚ_[p])) from rfl,
+    rw [hF, show (constantCoeff ((exp A).subst (PowerSeries.log A)))
+        = MvPowerSeries.constantCoeff ((exp A).subst (PowerSeries.log A)) from rfl,
       constantCoeff_subst hg, finsum_eq_single _ 0 fun d hd => by
-        have h0 : MvPowerSeries.constantCoeff (PowerSeries.log ℚ_[p]) = (0 : ℚ_[p]) :=
+        have h0 : MvPowerSeries.constantCoeff (PowerSeries.log A) = (0 : A) :=
           constantCoeff_log
         rw [map_pow, h0, zero_pow hd, smul_zero]]
     simp
@@ -513,7 +517,7 @@ theorem exp_subst_log :
     simp only [Nat.cast_zero, zero_add, mul_one] at e0
     rw [e0, coeff_zero_eq_constantCoeff, hc0]
   have hrecn : ∀ m : ℕ,
-      coeff (m + 2) F * ((m : ℚ_[p]) + 2) = -(m : ℚ_[p]) * coeff (m + 1) F := by
+      coeff (m + 2) F * ((m : A) + 2) = -(m : A) * coeff (m + 1) F := by
     intro m
     have e := congrArg (coeff (m + 1)) hrec
     rw [add_mul, one_mul, map_add, coeff_succ_X_mul, coeff_derivative, coeff_derivative] at e
@@ -525,15 +529,17 @@ theorem exp_subst_log :
     | zero =>
       have h := hrecn 0
       simp only [Nat.cast_zero, neg_zero, zero_mul, zero_add] at h
-      exact (mul_eq_zero.mp h).resolve_right (by norm_num)
+      have h2 : IsUnit (2 : A) := by
+        rw [show (2 : A) = ((2 : ℕ) : A) by norm_cast]; exact hunit 2 (by norm_num)
+      exact (h2.mul_left_eq_zero).mp h
     | succ k ih =>
       have h := hrecn (k + 1)
       rw [ih, mul_zero] at h
-      have hne : ((k : ℚ_[p]) + 1 + 2) ≠ 0 := by
-        rw [show ((k : ℚ_[p]) + 1 + 2) = ((k + 3 : ℕ) : ℚ_[p]) by push_cast; ring]
-        exact Nat.cast_ne_zero.mpr (by omega)
       push_cast at h
-      exact (mul_eq_zero.mp h).resolve_right hne
+      have hu : IsUnit ((k : A) + 1 + 2) := by
+        rw [show ((k : A) + 1 + 2) = ((k + 3 : ℕ) : A) by push_cast; ring]
+        exact hunit (k + 3) (by omega)
+      exact (hu.mul_left_eq_zero).mp h
   ext n
   match n with
   | 0 => rw [coeff_zero_eq_constantCoeff, hc0]; simp
