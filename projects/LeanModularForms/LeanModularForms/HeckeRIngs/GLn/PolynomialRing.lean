@@ -887,8 +887,8 @@ lemma monomial_eval_kronecker (p : ℕ) (hp : p.Prime)
 private lemma prod_T_gen_pow_eq_two (p : ℕ) (d : Fin 2 →₀ ℕ) :
     (∏ k ∈ d.support, T_gen 2 p k ^ d k) = T_gen 2 p 0 ^ (d 0) * T_gen 2 p 1 ^ (d 1) := by
   rw [Finset.prod_subset (Finset.subset_univ d.support) (fun k _ hk ↦ by
-    rw [Finsupp.notMem_support_iff.mp hk, pow_zero]; rfl)]
-  rw [Fin.prod_univ_two]; rfl
+    rw [Finsupp.notMem_support_iff.mp hk, pow_zero])]
+  rw [Fin.prod_univ_two]
 
 /-- Evaluating `evalHom 2 p R` at the coset `D` expands as
 `∑_{d ∈ supp R} (R.coeff d) · (T_gen(p,0)^{d 0} · T_gen(p,1)^{d 1}) D`. -/
