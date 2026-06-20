@@ -160,15 +160,14 @@ theorem map_c (η : nthRootsFinset 37 (1 : 𝓞 K)) :
         (ringOfIntegersComplexConj K).toRingEquiv.toRingHom =
       divZetaSubOneDvdGcd hp D.hζ D.equation D.hy η := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  have h37z : (D.hζ.unit'.1) ^ 37 = 1 := by
-    rw [← Units.val_pow_eq_pow_val, D.hζ.unit'_pow, Units.val_one]
+  have h37z : (D.hζ.toInteger) ^ 37 = 1 := D.hζ.toInteger_isPrimitiveRoot.pow_eq_one
   have h37e : (η : 𝓞 K) ^ 37 = 1 := (mem_nthRootsFinset (by norm_num) _).mp η.2
   have hkey := m_mul_c_mul_p hp D.hζ D.equation D.hy η
   have hmap := congrArg
     (Ideal.map (ringOfIntegersComplexConj K).toRingEquiv.toRingHom) hkey
   rw [Ideal.map_mul, Ideal.map_mul, D.map_gcd,
     caseII_map_zetaSubOne_span h37z, D.map_span_x_add_y_eta h37e, ← hkey] at hmap
-  have hpne : Ideal.span {(D.hζ.unit'.1 - 1 : 𝓞 K)} ≠ 0 := p_ne_zero D.hζ
+  have hpne : Ideal.span {(D.hζ.toInteger - 1 : 𝓞 K)} ≠ 0 := p_ne_zero D.hζ
   have hmne : gcd (Ideal.span {D.x}) (Ideal.span {D.y}) ≠ 0 := m_ne_zero D.hζ D.hy
   exact mul_left_cancel₀ hmne (mul_right_cancel₀ hpne hmap)
 

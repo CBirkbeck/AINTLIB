@@ -357,9 +357,8 @@ theorem valuedLambdaQuotientDworkCoeffModSq_evalₐ
         (AdicCompletion.evalₐ (lambdaIdeal p K) (2 * (p - 1)) x)
         =
       valuedLambdaQuotientDworkCoeffModSq (p := p) (K := K) i
-        (Ideal.Quotient.mk ((lambdaIdeal p K) ^ (2 * (p - 1))) r) := by
-          simpa [I] using congrArg
-            (valuedLambdaQuotientDworkCoeffModSq (p := p) (K := K) i) hr.symm
+        (Ideal.Quotient.mk ((lambdaIdeal p K) ^ (2 * (p - 1))) r) :=
+          congrArg (valuedLambdaQuotientDworkCoeffModSq (p := p) (K := K) i) hr.symm
     _ =
       rationalPadicIntegerToZModSq p
         ((dworkParameterPowerBasis p K).repr (algebraMap R S r) i) := by

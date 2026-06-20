@@ -166,10 +166,10 @@ def CaseIIRealDescentSolution37 : Prop :=
     ∃ (x' y' z' : 𝓞 (CyclotomicField 37 ℚ)) (ε' : (𝓞 (CyclotomicField 37 ℚ))ˣ),
       ringOfIntegersComplexConj (CyclotomicField 37 ℚ) x' = x' ∧
       ringOfIntegersComplexConj (CyclotomicField 37 ℚ) y' = y' ∧
-      ¬ (D.hζ.unit'.1 - 1) ∣ y' ∧
-      ¬ (D.hζ.unit'.1 - 1) ∣ z' ∧
+      ¬ (D.hζ.toInteger - 1) ∣ y' ∧
+      ¬ (D.hζ.toInteger - 1) ∣ z' ∧
       x' ^ 37 + y' ^ 37 =
-        (ε' : 𝓞 (CyclotomicField 37 ℚ)) * ((D.hζ.unit'.1 - 1) ^ m * z') ^ 37
+        (ε' : 𝓞 (CyclotomicField 37 ℚ)) * ((D.hζ.toInteger - 1) ^ m * z') ^ 37
 
 /-- **The target reality-preserving descent step follows from the explicit σ-fixed solution.**
 
@@ -240,10 +240,10 @@ theorem caseIIRealDescentSolution_conclusion_realized
     {k : ℕ} (D' : RealCaseIIData37 (CyclotomicField 37 ℚ) k) :
     ringOfIntegersComplexConj (CyclotomicField 37 ℚ) D'.x = D'.x ∧
     ringOfIntegersComplexConj (CyclotomicField 37 ℚ) D'.y = D'.y ∧
-    ¬ (D'.hζ.unit'.1 - 1) ∣ D'.y ∧
-    ¬ (D'.hζ.unit'.1 - 1) ∣ D'.z ∧
+    ¬ (D'.hζ.toInteger - 1) ∣ D'.y ∧
+    ¬ (D'.hζ.toInteger - 1) ∣ D'.z ∧
     D'.x ^ 37 + D'.y ^ 37 =
-      (D'.ε : 𝓞 (CyclotomicField 37 ℚ)) * ((D'.hζ.unit'.1 - 1) ^ (k + 1) * D'.z) ^ 37 :=
+      (D'.ε : 𝓞 (CyclotomicField 37 ℚ)) * ((D'.hζ.toInteger - 1) ^ (k + 1) * D'.z) ^ 37 :=
   ⟨D'.x_real, D'.y_real, D'.hy, D'.hz, D'.equation⟩
 
 /-- **The `CaseIIRealDescentSolution37` domain is inhabited, from a Case-II integer FLT solution.**

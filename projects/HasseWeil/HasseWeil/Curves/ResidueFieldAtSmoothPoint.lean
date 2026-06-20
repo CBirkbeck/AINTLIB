@@ -241,16 +241,14 @@ theorem CurveMap.CoordHom.ef_one_of_ram_one_and_algClosed
       P.LiesOver Q)
     (hRamOne :
       letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
-      Ideal.ramificationIdx
-        (algebraMap C₂.CoordinateRing C₁.CoordinateRing) Q P = 1)
+      Ideal.ramificationIdx Q P = 1)
     (hScalarTower :
       letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
       letI : Field (C₂.CoordinateRing ⧸ Q) := Ideal.Quotient.field Q
       letI : Field (C₁.CoordinateRing ⧸ P) := Ideal.Quotient.field P
       IsScalarTower F (C₂.CoordinateRing ⧸ Q) (C₁.CoordinateRing ⧸ P)) :
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
-    Ideal.ramificationIdx
-        (algebraMap C₂.CoordinateRing C₁.CoordinateRing) Q P *
+    Ideal.ramificationIdx Q P *
       Ideal.inertiaDeg Q P = 1 := by
   letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
   have h_f : Ideal.inertiaDeg Q P = 1 :=
@@ -272,17 +270,6 @@ Strategy:
 4. Pick a good Q; for each P above, combine Piece 2/3 (e = 1) + Piece 9 (f = 1).
 5. Apply Piece 8. -/
 
-/-- Contraction of a height-one prime of `B` to a height-one prime of `A`
-along the algebra map. Valid whenever `A` is nontrivial, `B` is a domain,
-and `B` is integral over `A`. -/
-noncomputable def _root_.IsDedekindDomain.HeightOneSpectrum.under
-    {A : Type*} [CommRing A] [Nontrivial A]
-    {B : Type*} [CommRing B] [IsDomain B] [Algebra A B] [Algebra.IsIntegral A B]
-    (P : IsDedekindDomain.HeightOneSpectrum B) :
-    IsDedekindDomain.HeightOneSpectrum A where
-  asIdeal := P.asIdeal.under A
-  isPrime := Ideal.IsPrime.under A P.asIdeal
-  ne_bot := Ideal.under_ne_bot A P.ne_bot
 
 set_option synthInstance.maxHeartbeats 400000 in
 set_option maxHeartbeats 2000000 in
@@ -310,7 +297,7 @@ theorem CurveMap.exists_heightOneSpectrum_fiber_card_eq_sepDegree_unconditional
         (FractionRing.liftAlgebra C₂.CoordinateRing (FractionRing C₁.CoordinateRing))) :
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
     ∃ Q : IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing,
-      (primesOverFinset Q.asIdeal C₁.CoordinateRing).card = φ.separableDegree := by
+      (IsDedekindDomain.primesOverFinset Q.asIdeal C₁.CoordinateRing).card = φ.separableDegree := by
   have hfin : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _
       coordHom.toAlgebra.toModule := by
     exact coordHom.module_finite
@@ -341,12 +328,12 @@ theorem CurveMap.exists_heightOneSpectrum_fiber_card_eq_sepDegree_unconditional
   have hgood_ne : ∃ Q : IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing,
       ∀ P : IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing,
         P.asIdeal ∣ differentIdeal C₂.CoordinateRing C₁.CoordinateRing →
-        P.under ≠ Q := by
+        P.under C₂.CoordinateRing ≠ Q := by
     by_contra h
-    push_neg at h
+    push Not at h
     apply hinf_C2
     have hsub : ({P : IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing | True} : Set _)
-        ⊆ (fun P : IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing => P.under)
+        ⊆ (fun P : IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing => P.under C₂.CoordinateRing)
           '' {P | P.asIdeal ∣ differentIdeal C₂.CoordinateRing C₁.CoordinateRing} := by
       intro Q _
       obtain ⟨P, hPdvd, hPeq⟩ := h Q
@@ -360,7 +347,7 @@ theorem CurveMap.exists_heightOneSpectrum_fiber_card_eq_sepDegree_unconditional
     coordHom hsep Q
   intro P hP_mem
   -- Unpack membership: P prime, P lies over Q.asIdeal.
-  rw [mem_primesOverFinset_iff Q.ne_bot] at hP_mem
+  rw [IsDedekindDomain.mem_primesOverFinset_iff Q.ne_bot] at hP_mem
   obtain ⟨hP_prime, hP_lies⟩ := hP_mem
   haveI := hP_prime
   haveI := hP_lies
@@ -368,7 +355,7 @@ theorem CurveMap.exists_heightOneSpectrum_fiber_card_eq_sepDegree_unconditional
   -- Wrap as height-one spectrum and show P' ∉ bad locus.
   let P' : IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing :=
     ⟨P, hP_prime, hP_ne⟩
-  have hP'_under_eq : P'.under = Q := by
+  have hP'_under_eq : P'.under C₂.CoordinateRing = Q := by
     apply IsDedekindDomain.HeightOneSpectrum.ext
     show P.under C₂.CoordinateRing = Q.asIdeal
     exact (Ideal.over_def P Q.asIdeal).symm
@@ -377,8 +364,7 @@ theorem CurveMap.exists_heightOneSpectrum_fiber_card_eq_sepDegree_unconditional
   -- Pieces 2 + 3 ⇒ ramificationIdx = 1.
   haveI hUnram : Algebra.IsUnramifiedAt C₂.CoordinateRing P :=
     IsDedekindDomain.isUnramifiedAt_of_not_dvd_differentIdeal hsepFF hP'_nd
-  have hram : Ideal.ramificationIdx
-      (algebraMap C₂.CoordinateRing C₁.CoordinateRing) Q.asIdeal P = 1 := by
+  have hram : Ideal.ramificationIdx Q.asIdeal P = 1 := by
     have := IsDedekindDomain.ramificationIdx_eq_one_of_isUnramifiedAt_of_ne_bot
       (A := C₂.CoordinateRing) (B := C₁.CoordinateRing) (P := P) hP_ne
     rwa [← Ideal.over_def P Q.asIdeal] at this

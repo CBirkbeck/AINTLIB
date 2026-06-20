@@ -30,7 +30,7 @@ namespace HasseWeil.EC
 
 open WeierstrassCurve
 
-variable {F : Type*} [Field F]
+variable {F : Type*} [Field F] [DecidableEq F]
 
 /-- The **nonsingular locus** `E_ns` of a Weierstrass curve `E` over a field `F`.
 

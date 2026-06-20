@@ -251,13 +251,13 @@ def Cor823DescentUnitModSqCongruence37
     (D : CaseIIData37 (CyclotomicField 37 ℚ) m)
     {x' y' z' : 𝓞 (CyclotomicField 37 ℚ)}
     {ε₁ ε₂ ε₃ : (𝓞 (CyclotomicField 37 ℚ))ˣ},
-    ¬ (D.hζ.unit'.1 - 1) ∣ x' →
-    ¬ (D.hζ.unit'.1 - 1) ∣ y' →
-    ¬ (D.hζ.unit'.1 - 1) ∣ z' →
+    ¬ (D.hζ.toInteger - 1) ∣ x' →
+    ¬ (D.hζ.toInteger - 1) ∣ y' →
+    ¬ (D.hζ.toInteger - 1) ∣ z' →
     ((ε₁ : 𝓞 (CyclotomicField 37 ℚ)) * x' ^ 37 +
       (ε₂ : 𝓞 (CyclotomicField 37 ℚ)) * y' ^ 37 =
         (ε₃ : 𝓞 (CyclotomicField 37 ℚ)) *
-          ((D.hζ.unit'.1 - 1) ^ m * z') ^ 37) →
+          ((D.hζ.toInteger - 1) ^ m * z') ^ 37) →
     ∃ (ν : (𝓞 (NumberField.maximalRealSubfield (CyclotomicField 37 ℚ)))ˣ) (c : ℤ),
       ((37 : 𝓞 (CyclotomicField 37 ℚ)) ^ 2) ∣
         (((ε₁ / ε₂ *
@@ -367,13 +367,13 @@ def Cor823CorrectedUnitPthPowerRationalModP37
     (D : CaseIIData37 (CyclotomicField 37 ℚ) m)
     {x' y' z' : 𝓞 (CyclotomicField 37 ℚ)}
     {ε₁ ε₂ ε₃ : (𝓞 (CyclotomicField 37 ℚ))ˣ},
-    ¬ (D.hζ.unit'.1 - 1) ∣ x' →
-    ¬ (D.hζ.unit'.1 - 1) ∣ y' →
-    ¬ (D.hζ.unit'.1 - 1) ∣ z' →
+    ¬ (D.hζ.toInteger - 1) ∣ x' →
+    ¬ (D.hζ.toInteger - 1) ∣ y' →
+    ¬ (D.hζ.toInteger - 1) ∣ z' →
     ((ε₁ : 𝓞 (CyclotomicField 37 ℚ)) * x' ^ 37 +
       (ε₂ : 𝓞 (CyclotomicField 37 ℚ)) * y' ^ 37 =
         (ε₃ : 𝓞 (CyclotomicField 37 ℚ)) *
-          ((D.hζ.unit'.1 - 1) ^ m * z') ^ 37) →
+          ((D.hζ.toInteger - 1) ^ m * z') ^ 37) →
     ∃ (ν : (𝓞 (NumberField.maximalRealSubfield (CyclotomicField 37 ℚ)))ˣ)
       (w : (𝓞 (CyclotomicField 37 ℚ))ˣ) (c : ℤ),
       (37 : 𝓞 (CyclotomicField 37 ℚ)) ∣

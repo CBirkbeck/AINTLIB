@@ -146,8 +146,8 @@ theorem sum_units_leadingProd_eq_neg_one {i : ℕ} (hip : i < p - 1) :
     let φ : (ZMod p)ˣ ↪ ZMod p := ⟨fun x ↦ x, Units.val_injective⟩
     have hmap : (Finset.univ : Finset (ZMod p)ˣ).map φ = Finset.univ \ {0} := by
       ext x
-      simpa only [Finset.mem_map, Finset.mem_univ, Function.Embedding.coeFn_mk, true_and,
-        Finset.mem_sdiff, Finset.mem_singleton, φ] using isUnit_iff_ne_zero
+      simp only [Finset.mem_map, Finset.mem_univ, Function.Embedding.coeFn_mk, true_and,
+        Finset.mem_sdiff, Finset.mem_singleton, φ, ← isUnit_iff_ne_zero, IsUnit]
     rw [← hmap, Finset.sum_map]
     rfl
   have hsplit : ∑ b : ZMod p, f b = f 0 + ∑ b : (ZMod p)ˣ, f (b : ZMod p) := by
@@ -547,7 +547,7 @@ theorem addVal_gaussSum_eq {i : ℕ} (_hi1 : 1 ≤ i) (hip : i < p)
     have hne : addVal S.O (S.gaussSumCoeff i i) ≠ 0 := fun hz =>
       hnu ((addVal_eq_zero_iff).mp hz)
     have h1 : (1 : ℕ∞) ≤ addVal S.O (S.gaussSumCoeff i i) :=
-      ENat.one_le_iff_ne_zero.mpr hne
+      Order.one_le_iff_ne_zero.mpr hne
     have hdvd : S.π ^ 1 ∣ S.gaussSumCoeff i i :=
       (S.le_addVal_iff_pi_pow_dvd _ 1).mp (by exact_mod_cast h1)
     rw [pow_one] at hdvd

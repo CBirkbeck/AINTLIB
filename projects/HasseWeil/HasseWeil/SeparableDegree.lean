@@ -26,7 +26,7 @@ open WeierstrassCurve Field
 
 namespace HasseWeil
 
-namespace Isogeny
+namespace PullbackIsogeny
 
 variable {F : Type*} [Field F]
 variable {W₁ W₂ : Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
@@ -57,6 +57,6 @@ theorem sepDegree_le_degree (φ : PullbackIsogeny F W₁ W₂)
   unfold sepDegree degree
   exact @Field.finSepDegree_le_finrank W₂.FunctionField W₁.FunctionField _ _ φ.toAlgebra hfin
 
-end Isogeny
+end PullbackIsogeny
 
 end HasseWeil

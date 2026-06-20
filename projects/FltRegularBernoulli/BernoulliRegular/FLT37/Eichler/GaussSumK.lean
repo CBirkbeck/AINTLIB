@@ -87,6 +87,8 @@ theorem ramificationIdx_eq_one_of_ne
   have hndvd : ¬ ℓ ∣ p := fun h =>
     hne ((Nat.prime_dvd_prime_iff_eq hℓ.out hp.out).mp h)
   haveI : NeZero p := ⟨hp.out.ne_zero⟩
+  have h𝓵ne : 𝓵 ≠ ⊥ := by simpa using hℓ.out.ne_zero
+  rw [ramificationIdx_eq_ramificationIdx' 𝓵 𝔮 h𝓵ne]
   exact IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd
     (p := ℓ) (K := K) (P := 𝔮) (m := p) hndvd
 
@@ -102,6 +104,10 @@ theorem inertiaDeg_eq_orderOf
   have hndvd : ¬ ℓ ∣ p := fun h =>
     hne ((Nat.prime_dvd_prime_iff_eq hℓ.out hp.out).mp h)
   haveI : NeZero p := ⟨hp.out.ne_zero⟩
+  have h𝓵ne' : 𝓵 ≠ ⊥ := by simpa using hℓ.out.ne_zero
+  haveI h𝔮ne : 𝔮 ≠ ⊥ := ne_bot_of_liesOver_of_ne_bot h𝓵ne' 𝔮
+  haveI : 𝔮.IsMaximal := (inferInstance : 𝔮.IsPrime).isMaximal h𝔮ne
+  rw [inertiaDeg_eq_inertiaDeg' 𝓵 𝔮]
   exact IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd
     (p := ℓ) (K := K) (P := 𝔮) (m := p) hndvd
 
@@ -154,7 +160,7 @@ theorem ncard_primesOver_eq_sub_one_of_natCast_eq_one
   -- The Galois fundamental identity: `g · (e · f) = #Gal(K/ℚ)`.
   have hfund :=
     Ideal.ncard_primesOver_mul_ramificationIdxIn_mul_inertiaDegIn
-      (p := 𝓵) (span_ell_ne_bot (ℓ := ℓ)) (𝓞 K) (Gal(K / ℚ))
+      (p := 𝓵) (B := 𝓞 K) (G := Gal(K / ℚ))
   -- `e = 1`: ramification index of `ℓ` in `K` is `1`.
   have he : (𝓵 : Ideal ℤ).ramificationIdxIn (𝓞 K) = 1 :=
     IsCyclotomicExtension.Rat.ramificationIdxIn_eq_of_not_dvd
@@ -539,6 +545,7 @@ lemma gaussSumL_count_add_inv_eq_sub_one
     exact ne_bot_of_liesOver_of_ne_bot hℓ0 𝔓
   -- `e(𝔓|ℓ) = ℓ - 1` for `L = ℚ(ζ_{pℓ})`: write `pℓ = ℓ^1 · p`, `ℓ ∤ p`.
   have hram : Ideal.ramificationIdx (Ideal.span {(ℓ : ℤ)}) 𝔓 = ℓ - 1 := by
+    rw [ramificationIdx_eq_ramificationIdx' (Ideal.span {(ℓ : ℤ)}) 𝔓 (by simpa using hℓ.out.ne_zero)]
     have := IsCyclotomicExtension.Rat.ramificationIdx_eq
       (n := p * ℓ) (m := p) (p := ℓ) (k := 0) (K := L) (P := 𝔓) (by ring) hℓp
     simpa using this
