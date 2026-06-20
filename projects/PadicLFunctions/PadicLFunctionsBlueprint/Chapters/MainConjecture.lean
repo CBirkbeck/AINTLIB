@@ -517,11 +517,33 @@ length-at-each-height-one-prime $`=` valuation through Mathlib's `Ring.ord`/`ord
 unique-factorisation divisor identity in $`\Lam`), and the *equivariant* reassembly
 $`\Ch_{\Lam(\GG)}(\Lam(\GG)/(g)) = (g)` (`charIdealGroup_quotient`), with both `Ch` and `Ch_{Λ(𝒢)}`
 shown to be linear-isomorphism invariants (`charIdeal_eq_of_linearEquiv`,
-`charIdealGroup_eq_of_linearEquiv`).  The single remaining concrete input is the
-$`\Lam(\GG^+) \cong` Iwasawa-group-algebra **carrier bridge**
-(`PadicMeasure(\GG^+) \cong` `IwasawaAlgebraGroup`, from $`\Zpx/\{\pm1\} \cong \Delta\times\Gamma`),
-which produces the `Λ(𝒢)`-linear isomorphism `e` feeding `charIdealGroup_of_quotientEquiv` (ticket
-`CARRIER-BRIDGE`).
+`charIdealGroup_eq_of_linearEquiv`).
+
+**The carrier bridge and the unified capstone.**  The two carriers — §12's measure algebra
+$`\Lam(\GG^+) = \mathrm{PadicMeasure}(\GG^+)` and the structure-theory group algebra
+`IwasawaAlgebraGroup ℤ_p Δ` — are connected by the **carrier bridge** ring isomorphism
+`carrierBridge` (`Iwasawa/CarrierBridge.lean`), assembled (all pieces axiom-clean) from: pushforward
+*functoriality* of measure algebras along continuous group homomorphisms (`Measure/Functoriality.lean`:
+`pushforwardRingEquiv`, and `mahlerPushforwardRingEquiv` realising the $`\Gamma`-factor
+$`\mathrm{PadicMeasure}(\Gamma)\cong\Zp\llbracket T\rrbracket` via the logarithm); the
+*measure-of-a-finite-product* isomorphism `finiteProductRingEquiv :`
+$`\mathrm{PadicMeasure}(\Delta\times\Gamma)\cong(\mathrm{PadicMeasure}\,\Gamma)[\Delta]`
+(`Measure/FiniteProduct.lean`); and `MonoidAlgebra.mapRingEquiv` for the coefficient base change.
+Given the bridge `Φ`, transporting the Main-Conjecture quotient across it
+(`transportQuotientEquiv`, `Module.compHom` + `Ideal.quotientEquiv`) and applying
+`charIdealGroup_of_quotientEquiv` yields the characteristic-ideal half
+`charIdealGroup_eq_of_carrierBridge` ($`\Ch(\sX_\infty^+) = (\Phi\,g)`).  Both halves are combined in
+the unified capstone `iwasawa_main_conjecture_full` (`IwasawaProof/Capstone.lean`, axiom-clean):
+from the bundled Galois/CFT/Vandiver data, the §12 identification, and the carrier bridge `Φ`, it
+delivers simultaneously $`\sX_\infty^+\cong\Lam(\GG^+)/(g)` and $`\Ch_{\Lam(\GG^+)}(\sX_\infty^+)=(\Phi\,g)`.
+
+The one input still bundled rather than internalised is `Φ` itself, equivalently the p-adic group
+decomposition $`\GG^+ = \Zpx/\{\pm1\} \cong \Delta\times\Gamma` (Teichmüller, $`\Delta=\mu_{p-1}/\{\pm1\}`)
+together with the logarithm isomorphism $`\Gamma = 1+p\Zp \cong (\Zp,+)`.  Its analytic heart is
+already formalised (`Iwasawa/GPlusDecomp.lean`, axiom-clean): the homomorphism and inverse laws
+`pZpLog_mul`, `pZpExp_add`, `pZpExp_pZpLog`, `pZpLog_pZpExp`, and the logarithm isometry
+$`\lVert\log x\rVert = \lVert x-1\rVert` (`norm_pZpLog`); what remains is to package these as the
+continuous group isomorphisms feeding `carrierBridge` — classical p-adic structure theory.
 
 **Class field theory as a bundled input.** Global class field theory is not yet in Mathlib.
 Mirroring the source's own practice of citing {Informal.citet "washington"}[] for these classical

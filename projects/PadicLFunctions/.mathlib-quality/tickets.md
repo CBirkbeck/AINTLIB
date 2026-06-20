@@ -6873,11 +6873,21 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
   * `Iwasawa/CarrierBridge.lean`: `carrierBridge : PadicMeasure p (GPlus p) ≃+* IwasawaAlgebraGroup
     ℤ_[p] Δ`, composing the above + `MonoidAlgebra.mapRingEquiv` (coefficient base-change). Axiom-clean.
     **Takes the 2 group isos as bundled inputs**: `𝒢⁺ ≅ Δ×Γ` and `Γ ≅ (ℤ_p,+)` (log iso).
-  * REMAINING: (i) `Iwasawa/GPlusDecomp.lean` — discharge the 2 group isos (Teichmüller `ℤ_p^×≅μ_{p-1}×(1+pℤ_p)`,
-    the `/±1` quotient, and the log iso `1+pℤ_p≅ℤ_p` assembled from `PadicExp.lean`'s `pZpLog`/`pZpExp`/
-    `onePAdicPow`). *In progress (worker).* (ii) FINAL ASSEMBLY — transport the MC iso across `carrierBridge`
-    (`Ideal.quotientEquiv` + `Module.compHom`) to get `𝒳⁺ ≃ₗ[IwasawaAlgebraGroup] .../(Φ ζ)`, then
-    `charIdealGroup_of_quotientEquiv` ⟹ `charIdealGroup 𝒳⁺ = Φ(zetaIdealPlus)`.
+  * FINAL ASSEMBLY — **DONE**: `IwasawaProof/CharIdealConjunct.lean` `transportQuotientEquiv` (ring iso
+    + R-quotient iso ⟹ S-quotient iso via `Ideal.quotientEquiv` + `Module.compHom`) and
+    `charIdealGroup_eq_of_carrierBridge` (∘ `charIdealGroup_of_quotientEquiv` ⟹ `charIdealGroup X = Φ g`).
+    Axiom-clean. And `IwasawaProof/Capstone.lean` `iwasawa_main_conjecture_full` — **BOTH halves of
+    thm:vandiver in one theorem**, modulo the bundled `Φ`. Axiom-clean.
+  * REMAINING (the ONLY un-internalized input): `Iwasawa/GPlusDecomp.lean` — discharge the 2 group isos
+    feeding `carrierBridge`. **Analytic core DONE (axiom-clean)**: `pZpLog_mul`/`pZpExp_add` (homs),
+    `pZpExp_pZpLog`/`pZpLog_pZpExp` (inverses), `pZpLog_one`, `norm_pZpLog` (log isometry `‖pZpLog x‖=‖x-1‖`).
+    TODO: (a) `gammaLogEquiv` — bundle into a continuous monoid iso `Γ=1+pℤ_p ≅ (ℤ_p,+)`: needs the
+    `Γ` subtype (CompactSpace as closed subgroup of compact `ℤ_[p]ˣ`, ContinuousMul), continuity of
+    `logCM` (from the difference-isometry `‖pZpLog x - pZpLog y‖ = ‖x-y‖`, provable from `pZpLog_mul`+
+    `norm_pZpLog`+inverses) and `expCM` (Lipschitz, cf. `PadicExp.lean:1173` `norm_padicExp_sub_padicExp`).
+    (b) `gplusEquiv` — `GPlus ≅ Δ×Γ` via Teichmüller (`ResidueField.normCompat_eq_teichmuller_mul_principal`,
+    `ℤ_p^×≅μ_{p-1}×(1+pℤ_p)`) + the `/±1` quotient (`Δ = μ_{p-1}/{±1}`). This is paper-scale classical
+    p-adic structure theory — legitimately bundleable like CFT if not internalized.
   ORIGINAL: `PadicMeasure p (GPlus p) ≃+* IwasawaAlgebraGroup ℤ_[p] Δ`
   (carrier identification so `charIdealGroup` — defined over `IwasawaAlgebraGroup 𝒪 H` — applies to
   `𝒳⁺`, a module over `LambdaGPlus p = PadicMeasure p (GPlus p)`). Sketch: `GPlus = ℤ_[p]ˣ/±1 ≅ Δ × Γ`
