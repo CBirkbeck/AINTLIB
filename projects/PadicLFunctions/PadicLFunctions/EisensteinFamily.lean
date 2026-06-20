@@ -143,15 +143,23 @@ theorem unitsTwist_moment (μ : PadicMeasure p ℤ_[p]ˣ) (k : ℕ) :
       = μ (PadicMeasure.unitsPowCM p (k + 1)) :=
   unitsCmul_powCM_one_moment p μ k
 
+/-- Multiplying a Dirac by a continuous function rescales it by the value of
+that function at the point: `(φ · δ_g) = φ(g) · δ_g`. The x-twist's action on
+Diracs (`unitsTwist_dirac`) is the special case `φ = x`. -/
+theorem unitsCmul_dirac (φ : C(ℤ_[p]ˣ, ℤ_[p])) (g : ℤ_[p]ˣ) :
+    PadicMeasure.unitsCmul p φ (PadicMeasure.dirac p g)
+      = (φ g) • PadicMeasure.dirac p g := by
+  refine LinearMap.ext fun f => ?_
+  rw [PadicMeasure.unitsCmul_apply, PadicMeasure.dirac_apply, LinearMap.smul_apply,
+    PadicMeasure.dirac_apply, ContinuousMap.mul_apply, smul_eq_mul]
+
 /-- The twist sends Diracs to scaled Diracs: `τ(δ_g) = g·δ_g`. -/
 theorem unitsTwist_dirac (g : ℤ_[p]ˣ) :
     unitsTwist p (PadicMeasure.dirac p g)
       = (g : ℤ_[p]) • PadicMeasure.dirac p g := by
-  refine LinearMap.ext fun f => ?_
-  change PadicMeasure.unitsCmul p (PadicMeasure.unitsPowCM p 1) (PadicMeasure.dirac p g) f
-    = ((g : ℤ_[p]) • PadicMeasure.dirac p g) f
-  rw [PadicMeasure.unitsCmul_apply, PadicMeasure.dirac_apply, LinearMap.smul_apply,
-    PadicMeasure.dirac_apply, ContinuousMap.mul_apply, smul_eq_mul]
+  rw [show unitsTwist p (PadicMeasure.dirac p g)
+      = PadicMeasure.unitsCmul p (PadicMeasure.unitsPowCM p 1) (PadicMeasure.dirac p g) from rfl,
+    unitsCmul_dirac]
   congr 1
   simp [PadicMeasure.unitsPowCM]
 
