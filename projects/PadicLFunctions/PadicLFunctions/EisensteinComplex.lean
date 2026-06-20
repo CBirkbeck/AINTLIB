@@ -37,11 +37,11 @@ open scoped MatrixGroups Real ArithmeticFunction.sigma
 
 namespace PadicLFunctions
 
-variable (p : ℕ) [hp : Fact p.Prime]
+variable (p : ℕ) [NeZero p]
 
 section sigmaArithmetic
 
-omit hp in
+omit [NeZero p] in
 /-- For `p ∤ n` the prime-to-`p` divisor sum is the full divisor sum:
 `σ^p_k(n) = σ_k(n)`. -/
 theorem sigmaP_eq_of_not_dvd {n : ℕ} (hn : ¬ (p : ℕ) ∣ n) (k : ℕ) :
@@ -57,7 +57,7 @@ theorem sigmaP_add_pow_mul_sigma_div {n : ℕ} (hn : (p : ℕ) ∣ n) (hn0 : n �
     (k : ℕ) :
     sigmaP p k n + p ^ k * ArithmeticFunction.sigma k (n / p)
       = ArithmeticFunction.sigma k n := by
-  have hp0 : 0 < p := hp.out.pos
+  have hp0 : 0 < p := NeZero.pos p
   -- The `p`-divisible divisors of `n` are `p·e` for `e` a divisor of `n/p`.
   have hcompl :
       ∑ d ∈ n.divisors.filter (fun d => (p : ℕ) ∣ d), d ^ k
@@ -100,7 +100,7 @@ noncomputable def pScale (z : ℍ) : ℍ :=
   ⟨(p : ℂ) * z, by
     rw [Complex.mul_im, Complex.natCast_im, Complex.natCast_re, zero_mul, add_zero,
       UpperHalfPlane.coe_im]
-    exact mul_pos (Nat.cast_pos.mpr hp.out.pos) z.im_pos⟩
+    exact mul_pos (Nat.cast_pos.mpr (NeZero.pos p)) z.im_pos⟩
 
 /-- RJW's normalisation of the Eisenstein series (TeX 2371):
 `E_k = ζ(1−k)/2 + Σ_{n≥1}σ_{k−1}(n)qⁿ`, i.e. `(ζ(1−k)/2)·E` for mathlib's
@@ -191,7 +191,7 @@ theorem hasSum_stabilisedEisenstein {k : ℕ} (hk : 4 ≤ k) (hk2 : Even k)
         * Complex.exp (2 * Real.pi * Complex.I * (z : ℂ)) ^ n)
       (rjwEisenstein (k := k) (by omega) z
         - (p : ℂ) ^ (k - 1) * rjwEisenstein (k := k) (by omega) (pScale p z)) := by
-  have hp0 : 0 < p := hp.out.pos
+  have hp0 : 0 < p := NeZero.pos p
   have hpne : (p : ℕ) ≠ 0 := hp0.ne'
   set q : ℂ := Complex.exp (2 * π * I * (z : ℂ)) with hq
   -- the per-point coefficient function for `rjwEisenstein`
@@ -265,7 +265,7 @@ private lemma Gamma1_map_le_range (N : ℕ) :
     (Gamma1 N).map (mapGL ℝ) ≤ (mapGL ℝ : SL(2, ℤ) →* GL (Fin 2) ℝ).range :=
   fun _ ⟨γ, _, hγ⟩ => ⟨γ, hγ⟩
 
-omit hp in
+omit [NeZero p] in
 /-- `ModularForm.E hk` is invariant under the weight-`k` slash action of `mapGL ℝ γ`
 for every `γ : SL(2, ℤ)`, since `mapGL ℝ γ ∈ 𝒮ℒ = MonoidHom.range (mapGL ℝ)`. -/
 private lemma E_slash_mapGL {k : ℕ} (hk : 3 ≤ k) (γ : SL(2, ℤ)) :
@@ -278,7 +278,6 @@ private lemma E_slash_mapGL {k : ℕ} (hk : 3 ≤ k) (γ : SL(2, ℤ)) :
 level-raise (Miyake §4.6 Lem 4.6.1) of `E` restricted to `Γ₁(1)`. -/
 private noncomputable def stabilisedDiff {k : ℕ} (hk : 3 ≤ k) :
     ModularForm ((Gamma1 (p * 1)).map (mapGL ℝ)) (k : ℤ) :=
-  haveI : NeZero p := ⟨hp.out.pos.ne'⟩
   (ModularForm.E hk).restrictSubgroup (Gamma1_map_le_range (p * 1))
     - ((p : ℂ) ^ (k - 1)) •
       modularFormLevelRaise 1 p (k : ℤ)
@@ -286,11 +285,9 @@ private noncomputable def stabilisedDiff {k : ℕ} (hk : 3 ≤ k) :
 
 /-- The underlying function of `stabilisedDiff` is `E_k − p^{k−1}·levelRaiseFun p k E_k`. -/
 private lemma coe_stabilisedDiff {k : ℕ} (hk : 3 ≤ k) :
-    haveI : NeZero p := ⟨hp.out.pos.ne'⟩
     (⇑(stabilisedDiff p hk) : ℍ → ℂ)
       = ⇑(ModularForm.E hk)
         - ((p : ℂ) ^ (k - 1)) • levelRaiseFun p (k : ℤ) ⇑(ModularForm.E hk) := by
-  haveI : NeZero p := ⟨hp.out.pos.ne'⟩
   rfl
 
 /-- **The heart of `Γ₀(p)`-modularity.** The function `E_k − p^{k−1}·ι_p(E_k)` is
@@ -303,13 +300,11 @@ the down-conjugation bridge `slash_mapGL_levelRaiseFun` rewrites the slash by
 (`levelRaiseConjOfDvd_mem_Gamma0`); the latter slash also fixes `E`. -/
 private lemma stabilisedDiff_slash_mapGL {k : ℕ} (hk : 3 ≤ k)
     (γ : SL(2, ℤ)) (hγ : γ ∈ Gamma0 p) :
-    haveI : NeZero p := ⟨hp.out.pos.ne'⟩
     ((⇑(ModularForm.E hk) : ℍ → ℂ)
         - ((p : ℂ) ^ (k - 1)) • levelRaiseFun p (k : ℤ) ⇑(ModularForm.E hk))
         ∣[(k : ℤ)] (mapGL ℝ γ : GL (Fin 2) ℝ)
       = ⇑(ModularForm.E hk)
         - ((p : ℂ) ^ (k - 1)) • levelRaiseFun p (k : ℤ) ⇑(ModularForm.E hk) := by
-  haveI : NeZero p := ⟨hp.out.pos.ne'⟩
   have hσγ : UpperHalfPlane.σ (mapGL ℝ γ : GL (Fin 2) ℝ)
       = ContinuousAlgEquiv.refl ℝ ℂ := by
     rw [UpperHalfPlane.σ, if_pos (show (0 : ℝ) < (Matrix.GeneralLinearGroup.det (mapGL ℝ γ)).val by
@@ -334,7 +329,6 @@ matches `rjwEisenstein` only up to the `ζ(1−k)/2` factor — see
 `stabilisedEisenstein_smul_apply`. -/
 noncomputable def stabilisedEisenstein {k : ℕ} (hk : 3 ≤ k) :
     ModularForm ((Gamma0 p).map (mapGL ℝ)) (k : ℤ) :=
-  haveI : NeZero p := ⟨hp.out.pos.ne'⟩
   { toFun := ⇑(stabilisedDiff p hk)
     slash_action_eq' := by
       rintro _ ⟨γ, hγ, rfl⟩
@@ -351,7 +345,6 @@ is the `p`-stabilisation `E_k(z) − p^{k−1}E_k(pz)`, where `E_k` is mathlib's
 theorem stabilisedEisenstein_apply {k : ℕ} (hk : 3 ≤ k) (z : ℍ) :
     stabilisedEisenstein p hk z
       = ModularForm.E hk z - (p : ℂ) ^ (k - 1) * ModularForm.E hk (pScale p z) := by
-  haveI : NeZero p := ⟨hp.out.pos.ne'⟩
   have hpt : (levelRaiseMatrix p • z : ℍ) = pScale p z :=
     UpperHalfPlane.ext (by rw [coe_levelRaiseMatrix_smul]; rfl)
   change (⇑(stabilisedDiff p hk) : ℍ → ℂ) z = _
