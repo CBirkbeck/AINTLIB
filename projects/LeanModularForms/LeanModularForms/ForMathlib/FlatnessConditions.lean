@@ -176,7 +176,7 @@ theorem isFlatOfOrder_one (γ : PwC1Immersion x y) (t₀ : ℝ)
     IsFlatOfOrder (γ : ℝ → ℂ) t₀ 1 := by
   have hcont : ContinuousAt (γ : ℝ → ℂ) t₀ := γ.continuous.continuousAt
   have hcl : IsClosed ((↑γ.toPiecewiseC1Path.partition : Set ℝ) \ {t₀}) :=
-    (γ.toPiecewiseC1Path.partition.finite_toSet.subset diff_subset).isClosed
+    (γ.toPiecewiseC1Path.partition.finite_toSet.subset sdiff_subset).isClosed
   have hmem : (↑γ.toPiecewiseC1Path.partition \ {t₀} : Set ℝ)ᶜ ∈ 𝓝 t₀ :=
     hcl.isOpen_compl.mem_nhds (mem_compl (fun h ↦ h.2 rfl))
   have hIoo : Ioo (0 : ℝ) 1 ∈ 𝓝 t₀ := Ioo_mem_nhds ht₀.1 ht₀.2
