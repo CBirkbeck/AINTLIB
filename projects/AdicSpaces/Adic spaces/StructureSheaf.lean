@@ -327,6 +327,35 @@ theorem sectionEqualizer_completeSpace (C : RationalCovering A) :
     CompleteSpace ↥(sectionEqualizer A C) :=
   (sectionEqualizer_isClosed A C).completeSpace_coe
 
+omit [PlusSubring A] [HasLocLiftPowerBounded A] in
+/-- The uniformity of `𝒪_X(D)` is **countably generated** (Henkel's "countable fundamental
+system of nbhds of `0`"): the localization has a countable nbhd-of-`0` basis (`locBasis`), so its
+completion is metrizable, giving `nhds 0` a countable basis; for a uniform additive group this is
+the uniformity being countably generated. -/
+theorem presheafValue_uniformity_isCountablyGenerated (D : RationalLocData A) :
+    Filter.IsCountablyGenerated (uniformity (presheafValue D)) := by
+  letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+  haveI : (nhds (0 : Localization.Away D.s)).IsCountablyGenerated :=
+    (locBasis D.P D.T D.s D.hopen).hasBasis_nhds_zero.isCountablyGenerated
+  haveI : Filter.IsCountablyGenerated (uniformity (Localization.Away D.s)) :=
+    IsUniformAddGroup.uniformity_countably_generated
+  haveI : (nhds (0 : presheafValue D)).IsCountablyGenerated := by
+    letI : PseudoMetricSpace (Localization.Away D.s) := UniformSpace.pseudoMetricSpace _
+    letI : MetricSpace (presheafValue D) := UniformSpace.Completion.instMetricSpace
+    infer_instance
+  exact IsUniformAddGroup.uniformity_countably_generated
+
+/-- The uniformity on the section equalizer `E` is **countably generated**: `E` carries the
+subspace uniformity (the comap of `Subtype.val`) of the finite product `∏_D 𝒪_X(D)`, whose
+uniformity is countably generated (finite product of countably-generated completions). -/
+theorem sectionEqualizer_isCountablyGenerated (C : RationalCovering A) :
+    Filter.IsCountablyGenerated (uniformity ↥(sectionEqualizer A C)) := by
+  haveI : ∀ D : ↥C.covers, Filter.IsCountablyGenerated (uniformity (presheafValue D.1)) :=
+    fun D => presheafValue_uniformity_isCountablyGenerated A D.1
+  exact Filter.comap.isCountablyGenerated _ _
+
 /-- An affinoid ring `(A, A⁺)` is **sheafy** if the structure presheaf `𝒪_X` on
 `Spa(A, A⁺)` is a sheaf of **topological** rings (Definition 8.26 of Wedhorn).
 By Remark 8.20, this is equivalent to two conditions on every rational cover `C` —
