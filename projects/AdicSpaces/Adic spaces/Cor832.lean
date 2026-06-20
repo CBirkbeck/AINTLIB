@@ -404,7 +404,7 @@ theorem hSpa_surj_from_spanTop
     IsLocalization.isPrime_of_isPrime_disjoint
       (Submonoid.powers (C.base.canonicalMap D.1.s))
       (presheafValue D.1) p hp hdisj, ?_⟩
-  exact IsLocalization.comap_map_of_isPrime_disjoint
+  exact IsLocalization.under_map_of_isPrime_disjoint
     (Submonoid.powers (C.base.canonicalMap D.1.s))
     (presheafValue D.1) hp hdisj
 
