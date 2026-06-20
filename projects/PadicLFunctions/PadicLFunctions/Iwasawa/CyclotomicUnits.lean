@@ -260,11 +260,16 @@ private theorem cycloUnit_eq_geomSum {a : ℕ} {n : ℕ} (hn : 1 ≤ n) :
   rw [cycloUnit, div_eq_iff hne, geom_sum_mul]
 
 /-- `c_n(a) = 1 + ξ + ⋯ + ξ^{a−1}` is integral over `ℤ` (a `ℤ`-polynomial in the
-`ℤ`-integral `ξ`). -/
-theorem isIntegral_cycloUnit {a : ℕ} (_ha : ¬ (p : ℕ) ∣ a) {n : ℕ} (hn : 1 ≤ n) :
-    IsIntegral ℤ (cycloUnit p a n) := by
-  rw [cycloUnit_eq_geomSum p hn]
-  exact IsIntegral.sum _ fun i _ => (zetaSys_isIntegral p n).pow i
+`ℤ`-integral `ξ`). For `n ≥ 1` this is the geometric sum; at `n = 0` the cyclotomic
+unit is the junk value `0` (since `ξ_{p^0} = 1`), which is integral, so no hypothesis
+on `a` or `n` is needed. -/
+theorem isIntegral_cycloUnit (a n : ℕ) : IsIntegral ℤ (cycloUnit p a n) := by
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · have h0 : zetaSys p 0 = 1 :=
+      IsPrimitiveRoot.one_right_iff.mp (by simpa using zetaSys_primitiveRoot p 0)
+    rw [cycloUnit, h0]; simp [isIntegral_zero]
+  · rw [cycloUnit_eq_geomSum p hn]
+    exact IsIntegral.sum _ fun i _ => (zetaSys_isIntegral p n).pow i
 
 /-- `orderOf ξ_{p^n} = p^n` (the primitive-root order). -/
 private theorem orderOf_zetaSys (n : ℕ) : orderOf (zetaSys p n) = p ^ n :=
@@ -412,7 +417,7 @@ private theorem cyclo_elems_mem_globalUnits {a : ℕ} (ha : ¬ (p : ℕ) ∣ a) 
     rw [dif_pos hn, Units.val_mk0]
   refine ⟨?_, ?_, ?_⟩
   · rw [hval]; exact cycloUnit_mem_Fglobal p hn
-  · rw [hval]; exact isIntegral_cycloUnit p ha hn
+  · rw [hval]; exact isIntegral_cycloUnit p a n
   · rw [Units.val_inv_eq_inv_val, hval]; exact isIntegral_inv_cycloUnit p ha hn
 
 /-- **RJW TeX 3084**: `c_n(a) ∈ 𝒟_n` — membership in the generated subgroup (the
