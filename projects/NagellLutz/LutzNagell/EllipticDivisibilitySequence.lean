@@ -1346,10 +1346,12 @@ lemma normEDS_mul_complEDS (m n : ℤ) :
     simpa only [map_mul, map_normEDS, map_complEDS, aeval_X] using this
 
 omit ellW ellU one two dvd₁₂ dvd₁₃ dvd₂₄ h₁ h₂ in
-lemma normEDS_mul_complEDS_div {m : ℤ} (hm : m ≠ 0) (n : ℤ) (dvd : m ∣ n) :
+lemma normEDS_mul_complEDS_div {m : ℤ} (n : ℤ) (dvd : m ∣ n) :
     normEDS b c d m * complEDS b c d m (n / m) = normEDS b c d n := by
-  obtain ⟨n, rfl⟩ := dvd
-  rw [Int.mul_ediv_cancel_left _ hm, normEDS_mul_complEDS, mul_comm]
+  rcases eq_or_ne m 0 with rfl | hm
+  · obtain ⟨n, rfl⟩ := dvd; simp
+  · obtain ⟨n, rfl⟩ := dvd
+    rw [Int.mul_ediv_cancel_left _ hm, normEDS_mul_complEDS, mul_comm]
 
 namespace EllSequence
 
@@ -1392,15 +1394,15 @@ lemma invarDenom_eq_redInvarDenom_mul :
   have hd2 {m} := hd 2 m ⟨3, rfl⟩
   have hd3 {m} := hd 3 m ⟨2, rfl⟩
   rw [invarDenom, redInvarDenom]; split_ifs with h h h h h h -- slow
-  · rw [← normEDS_mul_complEDS_div h6 _ (Int.dvd_of_emod_eq_zero h), normEDS_six_eq_mul]; ring
-  · rw [← normEDS_mul_complEDS_div h6 _ (Int.dvd_self_sub_of_emod_eq h), normEDS_six_eq_mul]; ring
-  · rw [show m + 1 = m + 6 - 5 by abel, ← normEDS_mul_complEDS_div h6 _ (Int.dvd_self_sub_of_emod_eq (Int.emod_eq_add_self_emod.symm.trans h)), normEDS_six_eq_mul]; ring
-  on_goal 1 => rw [← normEDS_mul_complEDS_div h3 _ (hd3 <| by simp [h, Int.add_emod]),
-    ← normEDS_mul_complEDS_div two_ne_zero m (hd2 <| by simp [h])]
-  on_goal 2 => rw [← normEDS_mul_complEDS_div h3 (m - 1) (hd3 <| by simp [h, Int.sub_emod]),
-    ← normEDS_mul_complEDS_div two_ne_zero m (hd2 <| by simp [h])]
-  on_goal 3 => rw [← normEDS_mul_complEDS_div h3 m (hd3 <| by simp [h]),
-    ← normEDS_mul_complEDS_div two_ne_zero (m - 1) (hd2 <| by simp [h, Int.sub_emod])]
+  · rw [← normEDS_mul_complEDS_div _ (Int.dvd_of_emod_eq_zero h), normEDS_six_eq_mul]; ring
+  · rw [← normEDS_mul_complEDS_div _ (Int.dvd_self_sub_of_emod_eq h), normEDS_six_eq_mul]; ring
+  · rw [show m + 1 = m + 6 - 5 by abel, ← normEDS_mul_complEDS_div _ (Int.dvd_self_sub_of_emod_eq (Int.emod_eq_add_self_emod.symm.trans h)), normEDS_six_eq_mul]; ring
+  on_goal 1 => rw [← normEDS_mul_complEDS_div _ (hd3 <| by simp [h, Int.add_emod]),
+    ← normEDS_mul_complEDS_div m (hd2 <| by simp [h])]
+  on_goal 2 => rw [← normEDS_mul_complEDS_div (m - 1) (hd3 <| by simp [h, Int.sub_emod]),
+    ← normEDS_mul_complEDS_div m (hd2 <| by simp [h])]
+  on_goal 3 => rw [← normEDS_mul_complEDS_div m (hd3 <| by simp [h]),
+    ← normEDS_mul_complEDS_div (m - 1) (hd2 <| by simp [h, Int.sub_emod])]
   on_goal 4 =>
     have h0 := Int.emod_nonneg m h6
     have lt := Int.emod_lt_of_pos m (show 0 < 6 by decide)
