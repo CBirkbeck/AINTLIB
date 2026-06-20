@@ -195,7 +195,7 @@ private lemma gaussSum_inv_ne_zero {θ : DirichletCharacter ℂ N} (hθ : θ.IsP
 /-- The Gauss-sum/Fourier rearrangement of the L-series of a primitive `θ` for
 `Re s > 1`: `L(θ, s) = G(θ⁻¹)⁻¹ · Σ_c θ⁻¹(c)·L(n ↦ εⁿᶜ, s)`. -/
 theorem LSeries_eq_gaussSum_inv_mul_sum {θ : DirichletCharacter ℂ N}
-    (hθ : θ.IsPrimitive) (_hθ1 : θ ≠ 1) {ε : ℂ}
+    (hθ : θ.IsPrimitive) {ε : ℂ}
     (hε : IsPrimitiveRoot ε N) {s : ℂ} (hs : 1 < s.re) :
     LSeries (fun n => θ n) s
       = (gaussSum θ⁻¹ (AddChar.zmodChar N hε.pow_eq_one))⁻¹
@@ -460,7 +460,7 @@ theorem LFunction_one_eq {θ : DirichletCharacter ℂ N} (hθ : θ.IsPrimitive)
         θ⁻¹ (c : ZMod N) * LSeries (fun n => ε ^ (n * ((c : ZMod N)).val)) (s : ℂ) := by
     filter_upwards [self_mem_nhdsWithin] with s hs
     have hsre : 1 < (s : ℂ).re := by simpa using (Set.mem_Ioi.mp hs)
-    rw [LFunction_eq_LSeries θ hsre, LSeries_eq_gaussSum_inv_mul_sum hθ hθ1 hε hsre, hG]
+    rw [LFunction_eq_LSeries θ hsre, LSeries_eq_gaussSum_inv_mul_sum hθ hε hsre, hG]
   rw [tendsto_nhds_unique hcont (hbdry.congr' heq.symm), Finset.mul_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun c _ => ?_
   ring
