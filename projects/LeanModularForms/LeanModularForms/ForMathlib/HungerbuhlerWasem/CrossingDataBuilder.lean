@@ -124,7 +124,7 @@ theorem eventually_differentiable_right
   have hcl : IsClosed
       ((↑γ.toPwC1Immersion.toPiecewiseC1Path.partition : Set ℝ) \ {t₀}) :=
     (γ.toPwC1Immersion.toPiecewiseC1Path.partition.finite_toSet.subset
-      diff_subset).isClosed
+      sdiff_subset).isClosed
   filter_upwards [
     nhdsWithin_le_nhds (hcl.isOpen_compl.mem_nhds (mem_compl fun h ↦ h.2 rfl)),
     nhdsWithin_le_nhds (Ioo_mem_nhds ht₀.1 ht₀.2),
@@ -140,7 +140,7 @@ theorem eventually_differentiable_left
   have hcl : IsClosed
       ((↑γ.toPwC1Immersion.toPiecewiseC1Path.partition : Set ℝ) \ {t₀}) :=
     (γ.toPwC1Immersion.toPiecewiseC1Path.partition.finite_toSet.subset
-      diff_subset).isClosed
+      sdiff_subset).isClosed
   filter_upwards [
     nhdsWithin_le_nhds (hcl.isOpen_compl.mem_nhds (mem_compl fun h ↦ h.2 rfl)),
     nhdsWithin_le_nhds (Ioo_mem_nhds ht₀.1 ht₀.2),
