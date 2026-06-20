@@ -2069,7 +2069,7 @@ private lemma presheafValue_mvRestricted_iU_denseRange
             restrictedMvPowerSeriesSubring m (presheafValue D)) ^ (v j)) :
             MvPowerSeries (Fin m) (presheafValue D)) =
           v.prod fun s e ↦ MvPowerSeries.X s ^ e := by
-        rw [SubmonoidClass.coe_finset_prod, Finsupp.prod_fintype]
+        rw [SubmonoidClass.coe_finsetProd, Finsupp.prod_fintype]
         · refine Finset.prod_congr rfl (fun j _ ↦ ?_)
           rw [SubmonoidClass.coe_pow]
         · intro j; rw [pow_zero]
@@ -2085,7 +2085,7 @@ private lemma presheafValue_mvRestricted_iU_denseRange
     -- the `MvPolynomial` coe ring hom so `map_sum` lands on a `RingHom`).
     have hg_sum : g = ∑ v ∈ box, term v := by
       apply Subtype.ext
-      rw [AddSubmonoidClass.coe_finset_sum]
+      rw [AddSubmonoidClass.coe_finsetSum]
       simp only [hterm_val]
       -- `∑ v∈box, monomial v (g.val v) = ↑(∑ v∈box, MvPolynomial.monomial v (g.val v))`.
       rw [show (∑ v ∈ box, MvPowerSeries.monomial v (g.val v) :
