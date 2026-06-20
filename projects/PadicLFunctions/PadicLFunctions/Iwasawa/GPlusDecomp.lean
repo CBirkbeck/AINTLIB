@@ -345,6 +345,54 @@ theorem teichmuller_neg_one (hp2 : p ≠ 2) : teichmuller p (-1) = -1 := by
     rw [h2] at hlt; exact lt_irrefl 1 hlt
   · rw [h1, Units.val_neg, Units.val_one]
 
+/-- `-1` as an element of `μ_{p−1} = range ω` (via `ω(-1) = -1`). -/
+noncomputable def negOneT (hp2 : p ≠ 2) : (teichmuller p).range :=
+  ⟨-1, -1, teichmuller_neg_one p hp2⟩
+
+/-- **The finite torsion factor** `Δ = μ_{p−1} / ⟨-1⟩`. -/
+abbrev Delta (hp2 : p ≠ 2) : Type _ :=
+  (teichmuller p).range ⧸ Subgroup.zpowers (negOneT p hp2)
+
+/-- Under `unitsSplitEquiv`, `-1 ↦ (negOneT, 1)` — it lives purely in the `μ_{p−1}` factor. -/
+theorem unitsSplitEquiv_neg_one (hp2 : p ≠ 2) :
+    unitsSplitEquiv p (-1) = (negOneT p hp2, 1) := by
+  apply Prod.ext
+  · apply Subtype.ext; exact teichmuller_neg_one p hp2
+  · apply Subtype.ext
+    show (-1 : ℤ_[p]ˣ) * (teichmuller p (-1))⁻¹ = 1
+    rw [teichmuller_neg_one p hp2]; norm_num
+
+/-- `zpowers (a, 1) = (zpowers a).prod ⊥` in a product group. -/
+theorem zpowers_prod_bot {A B : Type*} [Group A] [Group B] (a : A) :
+    Subgroup.zpowers ((a, 1) : A × B) = (Subgroup.zpowers a).prod ⊥ := by
+  have hmem : ((a, 1) : A × B) ∈ (Subgroup.zpowers a).prod ⊥ :=
+    ⟨Subgroup.mem_zpowers a, Subgroup.mem_bot.mpr rfl⟩
+  refine le_antisymm (Subgroup.zpowers_le.mpr hmem) ?_
+  rintro ⟨x, y⟩ h
+  rw [Subgroup.mem_prod, Subgroup.mem_bot] at h
+  obtain ⟨hx, hy⟩ := h; subst hy
+  obtain ⟨n, hn⟩ := Subgroup.mem_zpowers_iff.mp hx
+  refine ⟨n, Prod.ext ?_ ?_⟩
+  · change a ^ n = x; exact hn
+  · change (1 : B) ^ n = 1; exact one_zpow n
+
+/-- **The `/±1` quotient** `GPlus ≃* Δ × Γ`.  `unitsSplitEquiv` carries `⟨-1⟩` to `⟨(negOneT,1)⟩ =
+⟨negOneT⟩ × ⊥` (`unitsSplitEquiv_neg_one`, `zpowers_prod_bot`); transporting the quotient
+(`QuotientGroup.congr`) and splitting the product quotient (`QuotientGroup.prodMulEquiv`,
+`QuotientGroup.quotientBot`) gives `GPlus ≃* (μ_{p−1}/⟨-1⟩) × Γ = Δ × Γ`. -/
+noncomputable def gplusMulEquiv (hp2 : p ≠ 2) :
+    PadicMeasure.GPlus p ≃* (Delta p hp2 × Gamma p) := by
+  have he : Subgroup.map (unitsSplitEquiv p).toMonoidHom (Subgroup.zpowers (-1 : ℤ_[p]ˣ))
+      = (Subgroup.zpowers (negOneT p hp2)).prod ⊥ := by
+    rw [MonoidHom.map_zpowers,
+      show (unitsSplitEquiv p).toMonoidHom (-1) = (negOneT p hp2, 1) from
+        unitsSplitEquiv_neg_one p hp2]
+    exact zpowers_prod_bot _
+  exact (QuotientGroup.congr (Subgroup.zpowers (-1 : ℤ_[p]ˣ))
+      ((Subgroup.zpowers (negOneT p hp2)).prod ⊥) (unitsSplitEquiv p) he).trans
+    ((QuotientGroup.prodMulEquiv (Subgroup.zpowers (negOneT p hp2)) ⊥).trans
+      (MulEquiv.prodCongr (MulEquiv.refl _) (QuotientGroup.quotientBot)))
+
 /-! ## The logarithm isomorphism `Γ ≅ (ℤ_p, +)` as continuous maps -/
 
 /-- **The p-adic exponential is a difference-isometry on `pℤ_p`**: `‖pZpExp x − pZpExp y‖ = ‖x − y‖`

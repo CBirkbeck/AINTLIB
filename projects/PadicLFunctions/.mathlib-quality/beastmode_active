@@ -1,1 +1,1 @@
-FOCUS: gplusEquiv structural core DONE (splitting+finiteness+neg_one). Next: /±1 quotient GPlus≅Δ×Γ (QuotientGroup.congr + (A×B)/(H×⊥)), then continuity, then assemble carrierBridge Φ.
+FOCUS: gplusMulEquiv (GPlus≃*Δ×Γ) DONE. Remaining: continuity→≃ₜ*, Δ instances+completeness, assemble carrierBridge Φ.
