@@ -1,1 +1,1 @@
-FOCUS: gammaLogEquiv data COMPLETE (logCM/expCM + 4 equations). Next: gplusEquiv (GPlus≅Δ×Γ Teichmüller) then assemble carrierBridge Φ.
+FOCUS: gplusEquiv — gammaProj (1-unit projection) DONE; next the splitting ℤ_[p]ˣ ≃* μ_{p-1}×Γ via (teichmuller, gammaProj), then /±1 quotient.

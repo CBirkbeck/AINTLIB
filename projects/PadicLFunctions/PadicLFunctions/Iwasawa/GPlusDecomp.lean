@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import PadicLFunctions.PadicExp
 import PadicLFunctions.Iwasawa.PlusPart
+import PadicLFunctions.Interpolation.Branches
 import Mathlib.Topology.Algebra.ContinuousMonoidHom
 import Mathlib.Topology.Algebra.Module.Compact
 import Mathlib.Topology.ContinuousMap.Units
@@ -223,6 +224,38 @@ theorem isClosed_oneUnits : IsClosed (OneUnits p : Set ℤ_[p]ˣ) := by
 (`Units.instCompactSpaceOfT1SpaceOfContinuousMul` makes `ℤ_[p]ˣ` compact). -/
 instance instCompactSpaceGamma : CompactSpace (Gamma p) :=
   isCompact_iff_compactSpace.mp ((isClosed_oneUnits p).isCompact)
+
+/-! ## The Teichmüller splitting `ℤ_[p]ˣ ≅ μ_{p−1} × Γ` (the `gplusEquiv` foundation) -/
+
+/-- The **principal (`1`-unit) part** `u · ω(u)⁻¹` lies in `Γ`: since `ω(u) ≡ u (mod p)`
+(`teichmullerFun_sub_self_mem`), `u·ω(u)⁻¹ − 1 = (u − ω(u))·ω(u)⁻¹ ∈ pℤ_p`. -/
+theorem oneUnitPart_mem (u : ℤ_[p]ˣ) : (u * (teichmuller p u)⁻¹) ∈ OneUnits p := by
+  show ((u * (teichmuller p u)⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) - 1 ∈ Ideal.span {(p : ℤ_[p])}
+  have ht : ((teichmuller p u : ℤ_[p]ˣ) : ℤ_[p]) = teichmullerFun p (u : ℤ_[p]) := teichmuller_coe p u
+  have hinv : ((teichmuller p u : ℤ_[p]ˣ) : ℤ_[p]) * (((teichmuller p u)⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) = 1 := by
+    rw [← Units.val_mul, mul_inv_cancel, Units.val_one]
+  have key : ((u * (teichmuller p u)⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) - 1
+      = (((u : ℤ_[p]ˣ) : ℤ_[p]) - teichmullerFun p (u : ℤ_[p]))
+        * (((teichmuller p u)⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) := by
+    rw [Units.val_mul, sub_mul,
+      show ((u : ℤ_[p]ˣ) : ℤ_[p]) * (((teichmuller p u)⁻¹ : ℤ_[p]ˣ) : ℤ_[p])
+          = ((u * (teichmuller p u)⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) from by rw [Units.val_mul], ← ht, hinv]
+  rw [key]
+  exact Ideal.mul_mem_right _ _ (by
+    rw [show ((u : ℤ_[p]ˣ) : ℤ_[p]) - teichmullerFun p (u : ℤ_[p])
+        = -(teichmullerFun p (u : ℤ_[p]) - (u : ℤ_[p])) from by ring]
+    exact Submodule.neg_mem _ (teichmullerFun_sub_self_mem p (u : ℤ_[p])))
+
+/-- The **principal-part projection** `ℤ_[p]ˣ →* Γ`, `u ↦ u · ω(u)⁻¹` — a monoid hom because `ω`
+is (`teichmuller`) and `ℤ_[p]ˣ` is commutative. -/
+noncomputable def gammaProj : ℤ_[p]ˣ →* Gamma p where
+  toFun u := ⟨u * (teichmuller p u)⁻¹, oneUnitPart_mem p u⟩
+  map_one' := by apply Subtype.ext; simp
+  map_mul' u v := by
+    apply Subtype.ext
+    show (u * v) * (teichmuller p (u * v))⁻¹
+      = (u * (teichmuller p u)⁻¹) * (v * (teichmuller p v)⁻¹)
+    rw [map_mul, _root_.mul_inv, mul_mul_mul_comm]
 
 /-! ## The logarithm isomorphism `Γ ≅ (ℤ_p, +)` as continuous maps -/
 
