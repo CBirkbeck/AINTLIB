@@ -123,7 +123,7 @@ theorem exists_lipschitzWith_comp_clampUnit {ι κ : Type*} [Fintype ι] [Fintyp
 
 variable (K : Type*) [Field K] [NumberField K]
 
-theorem contDiff_expMapBasis : ContDiff ℝ 1 (⇑(expMapBasis (K := K))) := by
+theorem contDiff_expMapBasis {n : WithTop ℕ∞} : ContDiff ℝ n (⇑(expMapBasis (K := K))) := by
   classical
   rw [show ⇑(expMapBasis (K := K)) = fun x : realSpace K ↦
       Real.exp (x w₀) • fun w : InfinitePlace K ↦
