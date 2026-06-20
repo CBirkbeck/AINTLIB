@@ -121,11 +121,14 @@ theorem norm_onePAdicPow_sub_one (hp2 : p ≠ 2) {y : ℤ_[p]}
   rw [hℓ, PadicInt.norm_def, pZpLog_coe p hp2 hy, norm_padicLog (L := ℚ_[p]) p hball,
     ← PadicInt.coe_one, ← PadicInt.coe_sub, ← PadicInt.norm_def]
 
-/-- R7.2a: the Teichmüller value of a topological generator is a primitive
-`(p−1)`-th root of unity (its reduction generates `(ZMod p)ˣ`). -/
+/-- R7.2a: the Teichmüller value of a unit whose reduction mod `p` generates
+`(ZMod p)ˣ` is a primitive `(p−1)`-th root of unity.
+
+Only the level-1 reduction generating is used, so the hypothesis is the single
+instance `Subgroup.zpowers (unitsToZModPow p 1 u) = ⊤` rather than the stronger
+`∀ n, … = ⊤` (a topological generator of `ℤ_p^×`, the main intended source). -/
 theorem teichmuller_isPrimitiveRoot {u : ℤ_[p]ˣ}
-    (hgen : ∀ n : ℕ, Subgroup.zpowers (PadicMeasure.unitsToZModPow p n u)
-      = ⊤) :
+    (hgen : Subgroup.zpowers (PadicMeasure.unitsToZModPow p 1 u) = ⊤) :
     IsPrimitiveRoot (PadicInt.teichmuller p u) (p - 1) := by
   haveI : Fact (1 < p) := ⟨hp.out.one_lt⟩
   rw [IsPrimitiveRoot.iff_orderOf]
@@ -137,7 +140,7 @@ theorem teichmuller_isPrimitiveRoot {u : ℤ_[p]ˣ}
     orderOf_dvd_of_pow_eq_one hpow
   -- the level-1 reduction `g := unitsToZModPow p 1 u` generates, so `orderOf g = p−1`
   have ho1 : orderOf (PadicMeasure.unitsToZModPow p 1 u) = p - 1 := by
-    rw [orderOf_eq_card_of_forall_mem_zpowers fun x => hgen 1 ▸ Subgroup.mem_top x,
+    rw [orderOf_eq_card_of_forall_mem_zpowers fun x => hgen ▸ Subgroup.mem_top x,
       Nat.card_eq_fintype_card, ZMod.card_units_eq_totient, pow_one,
       Nat.totient_prime hp.out]
   -- `ω(u)` reduces to the same residue as `u` mod `p`, so `g = unitsToZModPow p 1 ω(u)`
@@ -170,7 +173,7 @@ private lemma norm_teichmuller_pow_sub_one_eq_one {u : ℤ_[p]ˣ}
       Units.ext (by rw [Units.val_pow_eq_pow_val, PadicInt.teichmuller_coe,
         PadicInt.teichmullerFun, ← map_pow, h, map_one, Units.val_one])
     have hdvd : p - 1 ∣ i := by
-      rw [(teichmuller_isPrimitiveRoot p hgen).eq_orderOf]
+      rw [(teichmuller_isPrimitiveRoot p (hgen 1)).eq_orderOf]
       exact orderOf_dvd_of_pow_eq_one hu1
     exact absurd (Nat.le_of_dvd hi0 hdvd) (by omega)
   -- nonzero reduction ⟺ norm one
