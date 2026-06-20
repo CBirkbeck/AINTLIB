@@ -304,6 +304,22 @@ theorem sectionEqualizer_isClosed (C : RationalCovering A) :
     ((restrictionMapHom_continuous D₁.1 D₃ h₃₁).comp (continuous_apply D₁))
     ((restrictionMapHom_continuous D₂.1 D₃ h₃₂).comp (continuous_apply D₂))
 
+/-- The image of `productRestrictionSub` lands in the `sectionEqualizer` — i.e. a global
+section restricts compatibly to every common refinement (the easy "separation" direction of
+the equalizer, via functoriality of restriction `restrictionMap_comp`; no gluing needed). -/
+theorem productRestrictionSub_mem_sectionEqualizer (C : RationalCovering A)
+    (x : presheafValue C.base) :
+    productRestrictionSub A C x ∈ sectionEqualizer A C := by
+  intro D₁ D₂ D₃ h₃₁ h₃₂
+  obtain ⟨D₁, hD₁⟩ := D₁
+  obtain ⟨D₂, hD₂⟩ := D₂
+  have e₁ := congr_fun (restrictionMap_comp C.base D₁ D₃ (C.hsubset D₁ hD₁) h₃₁) x
+  have e₂ := congr_fun (restrictionMap_comp C.base D₂ D₃ (C.hsubset D₂ hD₂) h₃₂) x
+  simp only [Function.comp_apply] at e₁ e₂
+  change restrictionMap D₁ D₃ h₃₁ (restrictionMap C.base D₁ (C.hsubset D₁ hD₁) x) =
+      restrictionMap D₂ D₃ h₃₂ (restrictionMap C.base D₂ (C.hsubset D₂ hD₂) x)
+  rw [e₁, e₂]
+
 /-- An affinoid ring `(A, A⁺)` is **sheafy** if the structure presheaf `𝒪_X` on
 `Spa(A, A⁺)` is a sheaf of **topological** rings (Definition 8.26 of Wedhorn).
 By Remark 8.20, this is equivalent to two conditions on every rational cover `C` —
