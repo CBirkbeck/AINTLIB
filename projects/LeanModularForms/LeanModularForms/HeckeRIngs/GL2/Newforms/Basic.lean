@@ -324,7 +324,7 @@ noncomputable def cuspFormsOldProjection (N : ℕ) [NeZero N] (k : ℤ) :
     CuspForm ((Gamma1 N).map (mapGL ℝ)) k →ₗ[ℂ]
       CuspForm ((Gamma1 N).map (mapGL ℝ)) k :=
   (cuspFormsOld N k).subtype ∘ₗ
-    Submodule.linearProjOfIsCompl (cuspFormsOld N k) (cuspFormsNew N k)
+    Submodule.projectionOnto (cuspFormsOld N k) (cuspFormsNew N k)
       cuspFormsOld_isCompl_cuspFormsNew
 
 /-- **Newform linear projection.**  The `ℂ`-linear endomorphism of
@@ -334,7 +334,7 @@ noncomputable def cuspFormsNewProjection (N : ℕ) [NeZero N] (k : ℤ) :
     CuspForm ((Gamma1 N).map (mapGL ℝ)) k →ₗ[ℂ]
       CuspForm ((Gamma1 N).map (mapGL ℝ)) k :=
   (cuspFormsNew N k).subtype ∘ₗ
-    Submodule.linearProjOfIsCompl (cuspFormsNew N k) (cuspFormsOld N k)
+    Submodule.projectionOnto (cuspFormsNew N k) (cuspFormsOld N k)
       cuspFormsOld_isCompl_cuspFormsNew.symm
 
 /-- **Oldform part.**  The image of `f` under the oldform projection.
@@ -369,7 +369,7 @@ theorem oldPart_add_newPart (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
 @[simp] theorem oldPart_of_mem_cuspFormsOld
     {f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k} (hf : f ∈ cuspFormsOld N k) :
     oldPart f = f := by
-  have h := Submodule.linearProjOfIsCompl_apply_left
+  have h := Submodule.projectionOnto_apply_left
     cuspFormsOld_isCompl_cuspFormsNew ⟨f, hf⟩
   unfold oldPart cuspFormsOldProjection
   exact congr_arg ((cuspFormsOld N k).subtype) h
@@ -386,7 +386,7 @@ theorem oldPart_add_newPart (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
 @[simp] theorem newPart_of_mem_cuspFormsNew
     {f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k} (hf : f ∈ cuspFormsNew N k) :
     newPart f = f := by
-  have h := Submodule.linearProjOfIsCompl_apply_left
+  have h := Submodule.projectionOnto_apply_left
     cuspFormsOld_isCompl_cuspFormsNew.symm ⟨f, hf⟩
   unfold newPart cuspFormsNewProjection
   exact congr_arg ((cuspFormsNew N k).subtype) h
