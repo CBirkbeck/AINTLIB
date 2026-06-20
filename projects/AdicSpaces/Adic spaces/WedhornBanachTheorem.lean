@@ -425,6 +425,51 @@ theorem wedhorn_6_16_of_topNilpUnit
   -- Translation invariance: open at `0` ⇒ open everywhere.
   exact AddMonoidHom._sub_lemma_translation f.toAddMonoidHom h_zero
 
+open scoped Pointwise in
+/-- **Topological embedding from a closed range via the σ-compact-free OMT.** If
+`f : M →ₗ[A] N` is a continuous *injective* `A`-linear map between topological `A`-modules
+over a ring with a topologically nilpotent unit `ϖ`, with `M` complete + countably-based and
+the range of `f` closed (hence complete) + countably-based, then `f` is a topological
+embedding — here phrased as `IsInducing ⇑f`. *Proof.* The corestriction `f̃ : M → range f`
+is a continuous bijection (surjective onto its range, injective since `f` is); by Banach's
+σ-compact-free OMT (`wedhorn_6_16_of_topNilpUnit`) it is open, hence a homeomorphism, hence
+inducing; compose with the closed-subtype inclusion `range f ↪ N`, itself inducing. This is
+the embedding half of Wedhorn Thm 8.28(b). -/
+theorem isInducing_of_closedRange_of_topNilpUnit
+    {A : Type u} [CommRing A] [TopologicalSpace A]
+    {M : Type*} [AddCommGroup M] [Module A M] [UniformSpace M] [IsUniformAddGroup M]
+      [CompleteSpace M] [(uniformity M).IsCountablyGenerated] [ContinuousSMul A M]
+    {N : Type*} [AddCommGroup N] [Module A N] [UniformSpace N] [IsUniformAddGroup N]
+      [CompleteSpace N] [(uniformity N).IsCountablyGenerated] [ContinuousSMul A N] [T2Space N]
+    {ϖ : A} (hϖ : IsTopologicallyNilpotent ϖ) (hϖu : IsUnit ϖ)
+    (f : M →ₗ[A] N) (hf : Continuous f) (hinj : Function.Injective f)
+    (hcl : IsClosed (LinearMap.range f : Set N)) :
+    Topology.IsInducing (⇑f) := by
+  -- The (closed) range, as a complete + countably-based topological `A`-module.
+  haveI : IsUniformAddGroup ↥(LinearMap.range f) :=
+    show IsUniformAddGroup ↥(LinearMap.range f).toAddSubgroup from inferInstance
+  haveI : T2Space ↥(LinearMap.range f) := inferInstance
+  haveI : CompleteSpace ↥(LinearMap.range f) := hcl.completeSpace_coe
+  haveI : (uniformity ↥(LinearMap.range f)).IsCountablyGenerated :=
+    Filter.comap.isCountablyGenerated _ _
+  haveI : ContinuousSMul A ↥(LinearMap.range f) := by
+    refine ⟨?_⟩
+    rw [show (fun p : A × ↥(LinearMap.range f) => p.1 • p.2)
+        = fun p => ⟨p.1 • (p.2 : N), Submodule.smul_mem _ p.1 p.2.2⟩ from rfl]
+    exact Topology.IsInducing.subtypeVal.continuous_iff.mpr
+      (continuous_smul.comp (continuous_fst.prodMk (continuous_subtype_val.comp continuous_snd)))
+  -- `f̃ : M → range f`, the corestriction: continuous, bijective, and open by the OMT.
+  have hcont : Continuous f.rangeRestrict :=
+    Topology.IsInducing.subtypeVal.continuous_iff.mpr hf
+  have hopen : IsOpenMap f.rangeRestrict :=
+    wedhorn_6_16_of_topNilpUnit hϖ hϖu f.rangeRestrict hcont (LinearMap.surjective_rangeRestrict f)
+  have hinjRR : Function.Injective f.rangeRestrict := fun x y h => hinj (Subtype.ext_iff.mp h)
+  have hindRR : Topology.IsInducing f.rangeRestrict :=
+    ((Equiv.ofBijective _ ⟨hinjRR, LinearMap.surjective_rangeRestrict f⟩).toHomeomorphOfContinuousOpen
+      hcont hopen).isInducing
+  -- `⇑f = Subtype.val ∘ f̃`; compose inducings.
+  exact Topology.IsInducing.subtypeVal.comp hindRR
+
 /-! ## Wedhorn 6.17 (= BGR §3.7.2/2) — noetherian iff every (sub)module closed
 
 For a complete Tate-like ring `A` and a complete topological `A`-module `M`

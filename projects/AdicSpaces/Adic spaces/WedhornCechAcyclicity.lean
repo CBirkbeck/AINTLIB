@@ -11,6 +11,7 @@ import «Adic spaces».AuditCleanWrappers
 import «Adic spaces».SpaCompactNoHArch
 import «Adic spaces».Wedhorn828
 import «Adic spaces».RelativePieceKeystone
+import «Adic spaces».WedhornBanachTheorem
 
 /-!
 # Wedhorn-Čech acyclicity: bridge to `IsSheafy`
@@ -12847,6 +12848,79 @@ theorem lemma_8_34_gluing
   classical
   exact (every_rational_cover_is_OXAcyclic C hC).gluing g hcompat
 
+/-- **Topological inducing of the product restriction (embedding half of Thm 8.28(b)),
+equalizer + σ-compact-free OMT route** (expert-review 2026-06-20, Q1). The A-linear product
+restriction `ρ̃ : 𝒪_X(U) → ∏ᵢ 𝒪_X(Uᵢ)` has range = the closed `sectionEqualizer` (image ⊆ E by
+`productRestrictionSub_mem_sectionEqualizer`; E ⊆ image by gluing `lemma_8_34_gluing`); the range
+is complete + countably-based, so Banach's σ-compact-free OMT (`wedhorn_6_16_of_topNilpUnit`, via
+the Tate unit) makes the corestriction open, hence a homeomorphism onto its range, hence `ρ̃` is a
+topological embedding (here: inducing). -/
+theorem productRestrictionSub_isInducing_via_equalizer
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [CompatiblePlusSubring A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    (C : RationalCovering A) (hC : C.IsRational) :
+    Topology.IsInducing (productRestrictionSub A C) := by
+  classical
+  letI instModPiD : ∀ D : ↥C.covers, Module A (presheafValue D.1) :=
+    fun D => RingHom.toModule (RationalLocData.canonicalMap D.1)
+  letI instModBase : Module A (presheafValue C.base) :=
+    RingHom.toModule (RationalLocData.canonicalMap C.base)
+  letI instModPi : Module A (∀ D : ↥C.covers, presheafValue D.1) := Pi.module _ _ _
+  -- The A-linear product restriction `ρ̃ : 𝒪_X(U) →ₗ[A] ∏ᵢ 𝒪_X(Uᵢ)`.
+  let rho : presheafValue C.base →ₗ[A] (∀ D : ↥C.covers, presheafValue D.1) :=
+    { toFun := productRestrictionSub A C
+      map_add' := fun x y => by
+        funext D
+        exact map_add (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)) x y
+      map_smul' := fun a x => by
+        funext D
+        show restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)
+            ((RationalLocData.canonicalMap C.base) a * x) =
+          (RationalLocData.canonicalMap D.1) a *
+            restrictionMapHom C.base D.1 (C.hsubset D.1 D.2) x
+        rw [map_mul]
+        congr 1
+        exact productRestriction_comp_canonicalMap (A := A) C a D.1 D.2 }
+  -- `range ρ̃ = sectionEqualizer` (image ⊆ E by mem; E ⊆ image by gluing).
+  have hrange : (LinearMap.range rho : Set (∀ D : ↥C.covers, presheafValue D.1)) =
+      sectionEqualizer A C := by
+    ext s
+    constructor
+    · rintro ⟨x, rfl⟩
+      exact productRestrictionSub_mem_sectionEqualizer A C x
+    · intro hs
+      obtain ⟨x, hx⟩ := lemma_8_34_gluing C hC s hs
+      exact ⟨x, funext fun D => hx D⟩
+  have hclosed : IsClosed (LinearMap.range rho : Set (∀ D : ↥C.covers, presheafValue D.1)) := by
+    rw [hrange]; exact sectionEqualizer_isClosed A C
+  -- Countable bases + `ContinuousSMul` on the source and the product codomain.
+  haveI : (uniformity (presheafValue C.base)).IsCountablyGenerated :=
+    presheafValue_uniformity_isCountablyGenerated (A := A) C.base
+  haveI : ∀ D : ↥C.covers, (uniformity (presheafValue D.1)).IsCountablyGenerated :=
+    fun D => presheafValue_uniformity_isCountablyGenerated (A := A) D.1
+  haveI : ContinuousSMul A (presheafValue C.base) :=
+    ⟨continuous_mul.comp (((canonicalMap_continuous C.base).comp continuous_fst).prodMk
+      continuous_snd)⟩
+  haveI : ∀ D : ↥C.covers, ContinuousSMul A (presheafValue D.1) :=
+    fun D => ⟨continuous_mul.comp (((canonicalMap_continuous D.1).comp continuous_fst).prodMk
+      continuous_snd)⟩
+  haveI : ContinuousSMul A (∀ D : ↥C.covers, presheafValue D.1) := inferInstance
+  -- `ρ̃` continuous (componentwise); injective by Cor 8.32 separation.
+  have hrho_cont : Continuous rho :=
+    continuous_pi fun D => restrictionMapHom_continuous C.base D.1 (C.hsubset D.1 D.2)
+  have hinj : Function.Injective (rho : presheafValue C.base → _) := fun x y h =>
+    cor_8_32_productRestrictionSub_injective C hC h
+  -- A topologically nilpotent unit of the Tate ring `A`.
+  obtain ⟨ϖ, hϖ⟩ := ‹IsTateRing A›.exists_topologicallyNilpotent_unit
+  -- Continuous injective `A`-linear map with closed range over a ring with a topologically
+  -- nilpotent unit ⇒ topological embedding, by the σ-compact-free Banach OMT. The two
+  -- non-canonical `presheafValue` module instances are supplied explicitly (the FlatnessResults
+  -- pattern): they are not reliably synthesised inside the OMT's deep instance bundle.
+  exact @isInducing_of_closedRange_of_topNilpUnit A _ _ (presheafValue C.base) _ instModBase
+    _ _ _ _ _ (∀ D : ↥C.covers, presheafValue D.1) _ instModPi _ _ _ _ _ _
+    ϖ hϖ ϖ.isUnit rho hrho_cont hinj hclosed
+
 set_option linter.unusedSectionVars false in
 /-- **Theorem 8.28(b)** (Wedhorn p. 81, wedhorn.txt:4143; assembled from Cor 8.32
 (separation/embedding) and Lemma 8.34 (gluing)): *if `A` is a complete strongly
@@ -12858,7 +12932,10 @@ theorem isSheafy_of_stronglyNoetherian_828b
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A] [CompatiblePlusSubring A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A] : IsSheafy A where
-  embedding C hC := cor_8_32_productRestrictionSub_isEmbedding C hC
+  -- Embedding via the equalizer + σ-compact-free OMT route (expert-review 2026-06-20, Q1):
+  -- inducing from the closed `sectionEqualizer` range, NOT the Prop-6.18 module-topology leaf.
+  embedding C hC := ⟨productRestrictionSub_isInducing_via_equalizer C hC,
+    cor_8_32_productRestrictionSub_injective C hC⟩
   gluing C hC f hcompat := lemma_8_34_gluing C hC f hcompat
 
 end ValuationSpectrum
