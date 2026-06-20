@@ -159,12 +159,12 @@ lemma net_add_sub_iff (m n : ℤ) :
     net W (m + n) m (m - n) n = 0 ↔
       W (2 * (m + n)) * W (m - n) * W m * W n =
         (W (2 * m + n) * W (2 * n) * W m - W (m + 2 * n) * W (2 * m) * W n) * W (m + n) := by
-  simp_rw [net, show m + n + m + n = 2 * (m + n) from by ring,
-    show m + n - m = n from by ring, show m - n + n = m from by ring,
-    show m + n + (m - n) + n = 2 * m + n from by ring,
-    show m + n - (m - n) = 2 * n from by ring,
-    show m + (m - n) + n = 2 * m from by ring,
-    show m - (m - n) = n from by ring, show m + n + n = m + 2 * n from by ring]
+  simp_rw [net, show m + n + m + n = 2 * (m + n) by ring,
+    show m + n - m = n by ring, show m - n + n = m by ring,
+    show m + n + (m - n) + n = 2 * m + n by ring,
+    show m + n - (m - n) = 2 * n by ring,
+    show m + (m - n) + n = 2 * m by ring,
+    show m - (m - n) = n by ring, show m + n + n = m + 2 * n by ring]
   constructor <;> intro h <;> linear_combination h
 
 lemma addMulSub_two_zero : addMulSub W 2 0 = W 1 ^ 2 := (sq _).symm
@@ -631,7 +631,7 @@ lemma IsDivSequence.smul (h : IsDivSequence W) (x : R) : IsDivSequence (x • W)
 lemma IsEllDivSequence.smul (h : IsEllDivSequence W) (x : R) : IsEllDivSequence (x • W) :=
   ⟨h.left.smul x, h.right.smul x⟩
 
-lemma IsEllSequence.map (h : IsEllSequence W) : IsEllSequence (f ∘ W) := fun m n r => by
+lemma IsEllSequence.map (h : IsEllSequence W) : IsEllSequence (f ∘ W) := fun m n r ↦ by
   simpa only [Rel₃, Function.comp_apply, map_mul, map_pow, map_sub] using congr_arg f (h m n r)
 
 lemma IsDivSequence.map (h : IsDivSequence W) : IsDivSequence (f ∘ W) :=
@@ -666,7 +666,7 @@ lemma sub_add_neg_sub_mul_eq_zero (m n r : ℤ) :
     (W (m - n) + W (-(m - n))) * W (m + n) * W r ^ 2 = 0 := by
   have := congr($(ell m n r) + $(ell n m r))
   rw [add_comm n, ← right_distrib, ← left_distrib, mul_comm (W _)] at this
-  rw [show (-(m - n) : ℤ) = n - m from by ring]
+  rw [show (-(m - n) : ℤ) = n - m by ring]
   convert this using 1; ring
 
 variable (one : W 1 ∈ R⁰) (two : W 2 ∈ R⁰)
@@ -678,13 +678,13 @@ lemma neg (m : ℤ) : W (-m) = - W m := by
   obtain ⟨m, rfl|rfl⟩ := m.even_or_odd'
   · refine two.2 _ ((pow_mem one 2).2 _ ?_)
     have := sub_add_neg_sub_mul_eq_zero ell (1 - ↑m) (↑m + 1) 1
-    rw [show ((1 : ℤ) - ↑m - (↑m + 1)) = -(2 * ↑m) from by omega,
-      show ((1 : ℤ) - ↑m + (↑m + 1)) = 2 from by omega] at this
+    rw [show ((1 : ℤ) - ↑m - (↑m + 1)) = -(2 * ↑m) by omega,
+      show ((1 : ℤ) - ↑m + (↑m + 1)) = 2 by omega] at this
     simpa [neg_neg] using this
   · refine one.2 _ ((pow_mem one 2).2 _ ?_)
     have := sub_add_neg_sub_mul_eq_zero ell (-↑m) (↑m + 1) 1
-    rw [show ((-↑m : ℤ) - (↑m + 1)) = -(2 * ↑m + 1) from by omega,
-      show ((-↑m : ℤ) + (↑m + 1)) = 1 from by omega] at this
+    rw [show ((-↑m : ℤ) - (↑m + 1)) = -(2 * ↑m + 1) by omega,
+      show ((-↑m : ℤ) + (↑m + 1)) = 1 by omega] at this
     simpa [neg_neg] using this
 
 protected lemma rel₄ {a b c d : ℤ} (same : HaveSameParity₄ a b c d) : rel₄ W a b c d = 0 :=
@@ -963,8 +963,7 @@ private theorem IsEllSequence.normEDS_of_mem_nonZeroDivisors (hb : b ∈ R⁰) :
     intro m hm <;> rw [GE.ge, ← sub_nonneg] at hm
   · lift m - 2 to ℕ using hm with k hk
     rw [← eq_sub_iff_add_eq.mp hk, OddRec, normEDS_one, one_pow, mul_one]
-    have h := normEDS_odd b c d (↑k + 2)
-    convert h using 2
+    convert normEDS_odd b c d (↑k + 2) using 2
   · lift m - 3 to ℕ using hm with k hk
     rw [← eq_sub_iff_add_eq.mp hk, EvenRec, normEDS_one, normEDS_two, one_pow, mul_one]
     convert normEDS_even b c d (↑k + 3) using 1
@@ -1005,8 +1004,8 @@ noncomputable def normEDSRec {P : ℕ → Sort u}
     (even : ∀ m : ℕ, P (m + 1) → P (m + 2) → P (m + 3) → P (m + 4) → P (m + 5) → P (2 * (m + 3)))
     (odd : ∀ m : ℕ, P (m + 1) → P (m + 2) → P (m + 3) → P (m + 4) → P (2 * (m + 2) + 1)) (n : ℕ) :
     P n :=
-  normEDSRec' zero one two three four (fun _ ih => by apply even <;> exact ih _ <| by linarith only)
-    (fun _ ih => by apply odd <;> exact ih _ <| by linarith only) n
+  normEDSRec' zero one two three four (fun _ ih ↦ by apply even <;> exact ih _ <| by linarith only)
+    (fun _ ih ↦ by apply odd <;> exact ih _ <| by linarith only) n
 
 section Complement
 
@@ -1326,7 +1325,7 @@ private lemma normEDS_mul_complEDS_of_mem (hb : b ∈ R⁰) {m : ℤ}
     (by rw [normEDS_one]; exact one_mem _)
     (by rw [normEDS_two]; exact hb)
     (normEDS b c d) (compl₂EDS b c d)
-    (fun m => by rw [normEDS_one, one_mul])
+    (fun m ↦ by rw [normEDS_one, one_mul])
     (normEDS_mul_compl₂EDS b c d)
     m n hm
 
@@ -1489,8 +1488,8 @@ lemma invar₂_normEDS {m : ℤ} :
     (c := X Param.C) (d := X D) (mem_nonZeroDivisors_of_ne_zero <| X_ne_zero (R := ℤ) B) m))
   rw [← universalNormEDS] at this
   simp only [map_mul, map_invarNum, map_invarDenom, map_add, map_pow, aeval_X] at this
-  rwa [show (⇑(aeval fun t => Param.rec b c d t) ∘ universalNormEDS) =
-    normEDS b c d from funext fun n => by simp [universalNormEDS, map_normEDS, aeval_X]] at this
+  rwa [show (⇑(aeval fun t ↦ Param.rec b c d t) ∘ universalNormEDS) =
+    normEDS b c d from funext fun n ↦ by simp [universalNormEDS, map_normEDS, aeval_X]] at this
 
 omit ellW ellU in
 private lemma redInvar_normEDS_of_mem_nonZeroDivisors (hb : b ∈ R⁰) (hc : c ∈ R⁰) (m : ℤ) :
@@ -1633,8 +1632,8 @@ then we have `P n` for all `n : ℕ`. -/
 noncomputable def complEDSRec {P : ℕ → Sort u} (zero : P 0) (one : P 1)
     (even : ∀ m : ℕ, P (m + 1) → P (2 * (m + 1)))
     (odd : ∀ m : ℕ, P (m + 1) → P (m + 2) → P (2 * (m + 1) + 1)) (n : ℕ) : P n :=
-  complEDSRec' zero one (fun _ ih => even _ <| ih _ <| by linarith only)
-    (fun _ ih => odd _ (ih _ <| by linarith only) <| ih _ <| by linarith only) n
+  complEDSRec' zero one (fun _ ih ↦ even _ <| ih _ <| by linarith only)
+    (fun _ ih ↦ odd _ (ih _ <| by linarith only) <| ih _ <| by linarith only) n
 
 end ComplEDS
 
