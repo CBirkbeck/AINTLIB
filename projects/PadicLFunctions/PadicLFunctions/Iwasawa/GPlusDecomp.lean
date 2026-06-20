@@ -317,6 +317,34 @@ instance instFiniteTeichRange : Finite ((teichmuller p).range) := by
     toZMod_teichmullerZMod, toZMod_teichmullerZMod] at h
   exact h
 
+/-- `ω(-1) = -1` for odd `p`: `ω(-1)² = ω(1) = 1` forces `ω(-1) = ±1`, and `ω(-1) ≡ -1 (mod p)`
+excludes `+1` (else `2 ∈ pℤ_p`, impossible for `p` odd). -/
+theorem teichmuller_neg_one (hp2 : p ≠ 2) : teichmuller p (-1) = -1 := by
+  apply Units.ext
+  have hsq : ((teichmuller p (-1) : ℤ_[p]ˣ) : ℤ_[p]) * ((teichmuller p (-1) : ℤ_[p]ˣ) : ℤ_[p]) = 1 := by
+    rw [← Units.val_mul, ← map_mul]; norm_num
+  have hred : ((teichmuller p (-1) : ℤ_[p]ˣ) : ℤ_[p]) - (-1 : ℤ_[p]) ∈ Ideal.span {(p : ℤ_[p])} := by
+    have h := teichmullerFun_sub_self_mem p ((-1 : ℤ_[p]ˣ) : ℤ_[p])
+    simpa [teichmuller_coe] using h
+  rcases mul_self_eq_one_iff.mp hsq with h1 | h1
+  · exfalso
+    rw [h1, show (1 : ℤ_[p]) - (-1) = 2 from by ring] at hred
+    obtain ⟨c, hc⟩ := Ideal.mem_span_singleton.mp hred
+    have h2 : ‖(2 : ℤ_[p])‖ = 1 := by
+      rw [show (2 : ℤ_[p]) = ((2 : ℕ) : ℤ_[p]) from by norm_num]
+      exact PadicInt.norm_natCast_eq_one_iff.mpr
+        (Odd.coprime_two_right (hp.out.odd_of_ne_two hp2))
+    have hplt : ‖(p : ℤ_[p])‖ < 1 := by
+      rw [PadicInt.norm_p]; exact inv_lt_one_of_one_lt₀ (by exact_mod_cast hp.out.one_lt)
+    rw [hc, norm_mul] at h2
+    have hlt : ‖(p : ℤ_[p])‖ * ‖c‖ < 1 :=
+      calc ‖(p : ℤ_[p])‖ * ‖c‖ ≤ ‖(p : ℤ_[p])‖ * 1 :=
+            mul_le_mul_of_nonneg_left (PadicInt.norm_le_one c) (norm_nonneg _)
+        _ = ‖(p : ℤ_[p])‖ := mul_one _
+        _ < 1 := hplt
+    rw [h2] at hlt; exact lt_irrefl 1 hlt
+  · rw [h1, Units.val_neg, Units.val_one]
+
 /-! ## The logarithm isomorphism `Γ ≅ (ℤ_p, +)` as continuous maps -/
 
 /-- **The p-adic exponential is a difference-isometry on `pℤ_p`**: `‖pZpExp x − pZpExp y‖ = ‖x − y‖`
