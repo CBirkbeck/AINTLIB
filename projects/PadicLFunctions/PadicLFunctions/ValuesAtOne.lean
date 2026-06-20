@@ -1604,12 +1604,10 @@ theorem LpFunction_one {D : ℕ} [NeZero D] (hD1 : 1 < D)
     {ε : K} (hε : IsPrimitiveRoot ε (D * p ^ n))
     {εp : integerRing K} (hεp : IsPrimitiveRoot εp (p ^ n))
     (hsplit : ε = ((ζ : K)) * ((εp : K))) {ξ : K}
-    (hξ : IsPrimitiveRoot ξ p)
-    {G : K} (_hG : IsUnit G)
-    (hGval : G = (gaussSum θK⁻¹ (AddChar.zmodChar (D * p ^ n)
-      hε.pow_eq_one))) :
+    (hξ : IsPrimitiveRoot ξ p) :
     LpFunction p K η hζ hD χ 1
-      = -(1 - θK ((p : ZMod (D * p ^ n))) * (p : K)⁻¹) * G⁻¹
+      = -(1 - θK ((p : ZMod (D * p ^ n))) * (p : K)⁻¹)
+          * (gaussSum θK⁻¹ (AddChar.zmodChar (D * p ^ n) hε.pow_eq_one))⁻¹
         * ∑ c ∈ Finset.range (D * p ^ n),
             θK⁻¹ ((c : ZMod (D * p ^ n))) * extLog p (1 - ε ^ c) := by
   classical
@@ -1773,8 +1771,8 @@ theorem LpFunction_one {D : ℕ} [NeZero D] (hD1 : 1 < D)
           ← PowerSeries.coeff_zero_eq_constantCoeff_apply, PowerSeries.coeff_map]
         rfl, ← hGηK]
   -- the headline Gauss sum factors at the split root: `G = G_η·G_χ`
-  have hGprod : G = GηK * GχK := by
-    rw [hGval, hGηK, hGχK, hGχR]
+  have hGprod : gaussSum θK⁻¹ (AddChar.zmodChar (D * p ^ n) hε.pow_eq_one) = GηK * GχK := by
+    rw [hGηK, hGχK, hGχR]
     have hgsplit : gaussSum θK⁻¹ (AddChar.zmodChar (D * p ^ n) hε.pow_eq_one)
         = gaussSum θK⁻¹ (AddChar.zmodChar (D * p ^ n)
             (show ((ζ : K) * (εp : K)) ^ (D * p ^ n) = 1 from by
