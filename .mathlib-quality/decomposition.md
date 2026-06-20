@@ -7,6 +7,61 @@ Source mapping verified against Wedhorn's bibliography (`wedhorn.txt:5725-5745`)
 **[Hu3]** = A generalization (1994). Build is green (3190 jobs); these are the only
 critical-path sorries.
 
+## ★★★ ADVERSARIAL DECOMPOSE round 3 (2026-06-20) — the T-L1c inducing assembly (read FIRST)
+
+Target: the in-WCA `productRestrictionSub_isInducing_via_equalizer` route (reviewer #2's
+equalizer+OMT, post the 5 landed topological foundations + the cracked cg-diamond). Disposition:
+break the assembly before building it. **VERDICT: SURVIVED — no fatal flaw; every ingredient
+verified to exist; the residual is effort (module/ContinuousSMul/OMT plumbing + a headline rewire),
+not a gap.**
+
+Decomposition (sub-leaves of the inducing proof):
+- **L-A `ContinuousSMul A (presheafValue D)` (+ Pi + E).** The A-action is `a • x = canonicalMap a * x`.
+- **L-B `Module A (presheafValue D)` + E as an A-`Submodule`.** Non-ambient `letI` (FlatnessResults
+  `RingHom.toModule (canonicalMap D)` pattern) + `Pi.module` + the equalizer submodule.
+- **L-C `ρ̃ : R →ₗ[A] E` bijective.** Corestrict `productRestrictionSub` (lands in E via
+  `productRestrictionSub_mem_sectionEqualizer`), A-linear; injective = `cor_8_32_…injective`;
+  surjective = `lemma_8_34_gluing` (its `hcompat` IS E's membership predicate).
+- **L-D OMT → homeo → inducing.** `wedhorn_6_16_of_topNilpUnit ϖ … ρ̃` → `IsOpenMap` →
+  continuous+bijective+open ⇒ homeo → `ρ = subtypeVal ∘ ρ̃` inducing.
+- **L-E headline rewire.** `embedding := ⟨L-D inducing, cor_8_32_…injective⟩`.
+
+### Attacks attempted
+- **[1] Import-cycle attack (L-E/L-D).** WCA must import `WedhornBanachTheorem` for the OMT.
+  CHECKED: `WedhornBanachTheorem` imports only `BanachOMT` + `HuberRings` (upstream); 0 imports of
+  StructureSheaf/RPK/WCA/Cor832/GeometricReduction. **No cycle** — the import is safe.
+- **[2] Prior-B2 attack.** `b2_log.jsonl` grep for inducing/embedding/equalizer/productRestriction/
+  isOpenMap/sectionEqualizer → **empty**. No prior B2 on this assembly.
+- **[3] A-linearity attack (L-C, the sharpest).** The OMT needs `ρ̃ : →ₗ[A]`, so `productRestrictionSub`
+  must be A-LINEAR w.r.t. the `canonicalMap.toModule` structures — i.e. `restrictionMap (canonicalMap a)
+  = canonicalMap a`. CHECKED: **`productRestriction_comp_canonicalMap` (StructureSheaf:1682)** gives
+  exactly `productRestriction A C (C.base.canonicalMap a) D hD = D.canonicalMap a`. Coherence EXISTS.
+  Attack fails to break it.
+- **[4] ContinuousSMul-discharge attack (L-A).** Continuity of `(a,x) ↦ canonicalMap a * x` needs
+  `canonicalMap` continuous + `presheafValue` `ContinuousMul`. CHECKED: **`canonicalMap_continuous`
+  (PresheafIdentification:888)** + `presheafValue` is a topological ring. Provable (~3 lines); E/Pi via
+  `Pi.continuousSMul` + subtype. No gap.
+- **[5] OMT-precondition attack (L-D).** `wedhorn_6_16_of_topNilpUnit` needs M,N: AddCommGroup/Module A/
+  UniformSpace/IsUniformAddGroup/CompleteSpace/cg/T2/ContinuousSMul + a topNilp unit. M=`presheafValue
+  base`, N=`↥sectionEqualizer`: cg ✓ (landed), complete ✓ (landed), T2 ✓, Module/ContinuousSMul (L-A/L-B),
+  ϖ ✓ (`IsTateRing.exists_topologicallyNilpotent_unit`). Every precondition is producible.
+- **[6] Surjectivity-composition attack (L-C).** Could gluing's output mismatch E's membership? CHECKED:
+  `lemma_8_34_gluing`'s `hcompat` hypothesis is the SAME `∀ D₁ D₂ D₃ h₃₁ h₃₂, restrictionMap … = …`
+  predicate as `sectionEqualizer`'s carrier (verified earlier, StructureSheaf:311 ↔ WCA:12841). So for
+  `e ∈ E`, `lemma_8_34_gluing e.val e.property` gives the global preimage ⇒ `ρ̃` surjective. Matches.
+- **[7] Headline-rewire / instance attack (L-E).** The new inducing needs `[CompleteSpace A]
+  [CompatiblePlusSubring A]` (from gluing). The headline `isSheafy_of_stronglyNoetherian_828b` HAS both.
+  `[CompatiblePlusSubring A]` is on the BASE `A` (Tate, fine — it's false only for COMPLETIONS, which
+  this is not). Rewire `embedding := ⟨new_inducing, cor_8_32_…injective⟩` is sound. The upstream
+  StructureSheaf `productRestrictionSub_isInducing_tate` sorry becomes orphaned (off the headline path).
+
+**Verdict: the equalizer+OMT inducing route is FEASIBLE and faithful.** All discharges verified against
+in-repo decls (`productRestriction_comp_canonicalMap`, `canonicalMap_continuous`, `lemma_8_34_gluing`,
+`cor_8_32_…injective`, `wedhorn_6_16_of_topNilpUnit`, the 5 sectionEqualizer foundations). No mathlib
+gap, no false leaf, no orphan. Build it in WCA (next `/beastmode`).
+
+---
+
 ## ★★ ADVERSARIAL DECOMPOSE round 2 (2026-06-19) — attack logs per leaf (read FIRST)
 
 Disposition: opposing the plan. Each leaf attacked across the 5 categories + prior-B2 log
