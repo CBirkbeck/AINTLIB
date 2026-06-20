@@ -118,11 +118,9 @@ lemma qExpansion_one_coeff_one_heckeT_n_cusp_eq_coeff
   simpa only [Nat.Coprime, Nat.gcd_one_left, dite_true, Nat.cast_one, one_zpow,
     h_unit_one, map_one, Units.val_one, one_mul, Nat.div_one] using h
 
-/-- For a `Newform` f lying in a character eigenspace `modFormCharSpace k χ`,
-the eigenvalue at `n` (coprime to `N`) equals the `n`-th **canonical
-Fourier coefficient** of `f` (period `h = 1`).  The character hypothesis
-`hf_char` is required because `fourierCoeff_heckeT_n_period_one` is stated for
-forms living in a single Nebentypus eigenspace. -/
+/-- For a `Newform` `f` in the character eigenspace `modFormCharSpace k χ`, the
+eigenvalue at `n` (coprime to `N`) equals the `n`-th canonical Fourier
+coefficient of `f` (period `h = 1`). -/
 theorem Newform.eigenvalue_eq_coeff (f : Newform N k) (n : ℕ+)
     (hn : Nat.Coprime n.val N) (χ : (ZMod N)ˣ →* ℂˣ)
     (hf_char : f.toCuspForm.toModularForm' ∈ modFormCharSpace k χ) :
