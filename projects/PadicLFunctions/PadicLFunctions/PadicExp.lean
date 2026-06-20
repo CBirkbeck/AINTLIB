@@ -326,6 +326,16 @@ theorem sub_one_mul_padicValNat_succ_le (n : ℕ) :
       linarith [hbern, hle']
     exact_mod_cast hgoal
 
+section LogBall
+
+/- The logarithm only ever uses the scalar action through the norm identity
+`‖c • y‖ = ‖c‖‖y‖` (`norm_smul`), never the algebra/ring structure of `ℚ_[p] → L`
+(unlike the exponential, whose multiplicativity proof needs `Algebra.smul_def`).
+So the whole `padicLog` development weakens from `[NormedAlgebra ℚ_[p] L]` to a
+`ℚ_[p]`-module whose norm is multiplicative on the action (`NormSMulClass`). -/
+variable {L : Type*} [NormedField L] [Module ℚ_[p] L] [NormSMulClass ℚ_[p] L]
+  [IsUltrametricDist L] [CompleteSpace L]
+
 omit [IsUltrametricDist L] [CompleteSpace L] in
 /-- The logarithm terms decay geometrically at the `(p−1)`-th power level:
 `‖(−1)^n·(n+1)⁻¹•y^{n+1}‖^{p−1} ≤ ‖y‖^{p−1}·(p‖y‖^{p−1})^n`. -/
@@ -463,6 +473,8 @@ theorem norm_padicLog {x : L} (hx : InExpBall p (x - 1)) :
     · exact le_trans (hN n hn.le).le (le_max_right _ _)
   rw [IsUltrametricDist.norm_add_eq_max_of_norm_ne_norm htail.ne']
   exact max_eq_left htail.le
+
+end LogBall
 
 section Inversion
 
