@@ -448,8 +448,9 @@ ball `‖z−1‖ < 1` by aligning the convergent `padicLog` series with the for
 `formalLog` and pushing `phiSeries_formalLog : φ formalLog = p·formalLog` through the
 `seriesEval` bridge. Decomposition R6.6, ticket T618. -/
 
-omit [CompleteSpace K] [CharZero K] in
-/-- T618: the open unit ball `‖x − 1‖ < 1` is closed under powers (ultrametric). -/
+omit [NormedAlgebra ℚ_[p] K] [CompleteSpace K] [CharZero K] in
+/-- The open unit ball `‖x − 1‖ < 1` is closed under powers, in any ultrametric normed field
+(no `p`-adic algebra structure needed). -/
 theorem boundary_norm_pow_sub_one_lt_one {x : K} (hx : ‖x - 1‖ < 1) (n : ℕ) : ‖x ^ n - 1‖ < 1 := by
   induction n with
   | zero => rw [pow_zero, sub_self, norm_zero]; exact one_pos
