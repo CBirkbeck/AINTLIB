@@ -124,6 +124,26 @@ theorem norm_pZpLog (hp2 : p ≠ 2) {x : ℤ_[p]} (hx : x - 1 ∈ Ideal.span {(p
   rw [PadicInt.norm_def, pZpLog_coe p hp2 hx, norm_padicLog (L := ℚ_[p]) p hball, hxsub,
     ← PadicInt.norm_def]
 
+/-- **The p-adic logarithm is a difference-isometry on `1 + pℤ_p`**: `‖pZpLog x − pZpLog y‖ = ‖x − y‖`.
+Since `padicExp` is an isometry on the convergence ball (`norm_padicExp_sub_padicExp`) and `padicLog`
+is its two-sided inverse there (`padicExp_padicLog`), the logarithm is an isometry too — no `ℤ_p`-unit
+inverses needed.  This gives (uniform) continuity of `logCM` for the `Γ ≅ ℤ_p` carrier-bridge factor. -/
+theorem norm_pZpLog_sub (hp2 : p ≠ 2) {x y : ℤ_[p]} (hx : x - 1 ∈ Ideal.span {(p : ℤ_[p])})
+    (hy : y - 1 ∈ Ideal.span {(p : ℤ_[p])}) :
+    ‖pZpLog p x - pZpLog p y‖ = ‖x - y‖ := by
+  have hballx : InExpBall p ((x : ℚ_[p]) - 1) := by
+    rw [show ((x : ℚ_[p]) - 1) = ((x - 1 : ℤ_[p]) : ℚ_[p]) by push_cast; ring]
+    exact inExpBall_of_mem_span p hp2 hx
+  have hbally : InExpBall p ((y : ℚ_[p]) - 1) := by
+    rw [show ((y : ℚ_[p]) - 1) = ((y - 1 : ℤ_[p]) : ℚ_[p]) by push_cast; ring]
+    exact inExpBall_of_mem_span p hp2 hy
+  have ha : InExpBall p (padicLog p (x : ℚ_[p])) := by rw [InExpBall, norm_padicLog p hballx]; exact hballx
+  have hb : InExpBall p (padicLog p (y : ℚ_[p])) := by rw [InExpBall, norm_padicLog p hbally]; exact hbally
+  have key := norm_padicExp_sub_padicExp p ha hb
+  rw [padicExp_padicLog p hballx, padicExp_padicLog p hbally] at key
+  rw [PadicInt.norm_def, PadicInt.coe_sub, pZpLog_coe p hp2 hx, pZpLog_coe p hp2 hy, ← key,
+    PadicInt.norm_def, PadicInt.coe_sub]
+
 /-- `pZpExp` of a sum is the product on `pℤ_p` (`padicExp_add` over `ℚ_p`). -/
 theorem pZpExp_add (hp2 : p ≠ 2) {x y : ℤ_[p]} (hx : x ∈ Ideal.span {(p : ℤ_[p])})
     (hy : y ∈ Ideal.span {(p : ℤ_[p])}) :
