@@ -580,10 +580,10 @@ theorem hasSum_pow_fin {f : ℕ → L} {a : L} (hf : HasSum f a) (n : ℕ) :
     rw [heq]
     exact hmul
 
-omit [CompleteSpace L] in
+omit [CompleteSpace L] [NormedAlgebra ℚ_[p] L] in
 /-- Evaluating `G ^ n` at `y` is the `n`-th power of evaluating `G` at `y`: the summability
 half (by induction via the nonarchimedean Cauchy product). -/
-theorem summable_eval_pow (G : PowerSeries ℚ_[p]) (y : L)
+theorem summable_eval_pow [Algebra ℚ_[p] L] (G : PowerSeries ℚ_[p]) (y : L)
     (hG : Summable fun m : ℕ => (coeff m G : ℚ_[p]) • y ^ m) (n : ℕ) :
     Summable fun k : ℕ => (coeff k (G ^ n) : ℚ_[p]) • y ^ k := by
   induction n with
