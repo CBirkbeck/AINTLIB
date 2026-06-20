@@ -619,10 +619,10 @@ theorem summable_eval_pow [Algebra ℚ_[p] L] (G : PowerSeries ℚ_[p]) (y : L)
     rw [smul_mul_smul_comm,
       show y ^ ab.1 * y ^ ab.2 = y ^ j by rw [← pow_add, Finset.mem_antidiagonal.mp hab]]
 
-omit [CompleteSpace L] in
+omit [NormedAlgebra ℚ_[p] L] [CompleteSpace L] in
 /-- Evaluating `G ^ n` at `y` is the `n`-th power of evaluating `G` at `y`: the value
 identity (by induction via the nonarchimedean Cauchy product). -/
-theorem tsum_eval_pow (G : PowerSeries ℚ_[p]) (y : L)
+theorem tsum_eval_pow [Algebra ℚ_[p] L] (G : PowerSeries ℚ_[p]) (y : L)
     (hG : Summable fun m : ℕ => (coeff m G : ℚ_[p]) • y ^ m) (n : ℕ) :
     (∑' m : ℕ, (coeff m G : ℚ_[p]) • y ^ m) ^ n
       = ∑' k : ℕ, (coeff k (G ^ n) : ℚ_[p]) • y ^ k := by
@@ -674,12 +674,14 @@ theorem tsum_coeff_pow_eq_coeff_subst (F G : PowerSeries ℚ_[p]) (hG : HasSubst
     rw [not_lt] at hle
     exact hn (by rw [hN n hle k le_rfl, smul_zero])
 
+omit [NormedAlgebra ℚ_[p] L] in
 /-- **Evaluation bridge** (RJW Lem 5.14 / decomposition E4, Washington Prop 5.3 route):
 the evaluation at `y` of a formal substitution `F.subst G` equals the composed convergent
 sum, provided the total product family over `ℕ × ℕ` is summable. The proof regroups the
 double sum by ultrametric Fubini (`Summable.tsum_comm`), using `tsum_eval_pow` for the inner
 power and `tsum_coeff_pow_eq_coeff_subst` for the formal coefficients. -/
-theorem master_bridge (F G : PowerSeries ℚ_[p]) (y : L) (hG : HasSubst G)
+theorem master_bridge [Algebra ℚ_[p] L] [ContinuousSMul ℚ_[p] L]
+    (F G : PowerSeries ℚ_[p]) (y : L) (hG : HasSubst G)
     (hGsum : Summable fun m : ℕ => (coeff m G : ℚ_[p]) • y ^ m)
     (hprod : Summable fun nk : ℕ × ℕ =>
       ((coeff nk.1 F : ℚ_[p]) * (coeff nk.2 (G ^ nk.1) : ℚ_[p])) • y ^ nk.2) :
