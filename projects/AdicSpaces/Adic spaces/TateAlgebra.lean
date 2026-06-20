@@ -756,7 +756,7 @@ theorem ringEquivMvPolynomial_X [DiscreteTopology A] :
   simp only [toMvPolynomial, toFinsupp, Finsupp.onFinset_apply]
   change MvPowerSeries.coeff s (MvPowerSeries.X (0 : Fin 1)) = _
   rw [MvPowerSeries.coeff_X]
-  rw [MvPolynomial.coeff_X']
+  rw [MvPolynomial.coeff_X]
   simp only [eq_comm]
 
 theorem evalFHom_algebraMap [DiscreteTopology A] (f a : A) :
@@ -1593,7 +1593,7 @@ theorem muMap_surjective
           p (Pi.single x 1), _⟩ : ↥(restrictedModule A M))).val s =
         ∑ x : Fin n, (restrictedModule_fin_equiv n h x : ↥(TateAlgebra A)).val s •
           p (Pi.single x 1) from by
-      simp only [AddSubmonoidClass.coe_finset_sum]
+      simp only [AddSubmonoidClass.coe_finsetSum]
       exact Fintype.sum_apply s _]
     rfl
   rw [lhs]
