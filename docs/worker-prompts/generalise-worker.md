@@ -20,14 +20,13 @@ Loop until your lane is empty or a freeze is active:
 
 1. **Freeze check.** `gh issue list --repo CBirkbeck/AINTLIB --label freeze:active --state open`.
    Any result → exit this run cleanly.
-2. **Claim (atomic).** `gh issue list --repo CBirkbeck/AINTLIB --label lane:generalise --label state:todo --search "no:assignee" --json number,title`.
-   None → exit. Else take the lowest number and
-   `gh issue edit <n> --repo CBirkbeck/AINTLIB --add-assignee @me --add-label state:in-progress --remove-label state:todo`,
-   then comment "claimed". If already assigned, re-query.
-3. **Work.** `git fetch origin main`; branch `generalise/<n>` off `origin/main`. Read the issue body for
-   the target declaration(s)/file. **If the target's proof contains a `sorry`, skip it** — comment,
-   relabel back to `state:todo`, unassign — `sorry`s are the owning producer's WIP, never fleet work.
-   Otherwise run **`/generalise`** on that target.
+2. **Claim (atomic) — reviewer change-requests come FIRST.** Two queues, in this order; (a) is your *inbox*:
+   - **(a) Bounced-back reviews (priority):** `gh issue list --repo CBirkbeck/AINTLIB --label lane:generalise --label state:changes-requested --search "no:assignee" --json number,title`. A reviewer found a problem with a PR and sent it back — **finish these before taking new work.** Claim the lowest: `gh issue edit <n> --repo CBirkbeck/AINTLIB --add-assignee @me --add-label state:in-progress --remove-label state:changes-requested`.
+   - **(b) New work:** else `gh issue list --repo CBirkbeck/AINTLIB --label lane:generalise --label state:todo --search "no:assignee" --json number,title`. Claim the lowest with `--add-assignee @me --add-label state:in-progress --remove-label state:todo`.
+   Comment "claimed". If already assigned, re-query. None in either queue → exit.
+3. **Work.**
+   - **If this is a change-request (2a):** the reviewer told you exactly what to fix — read it: `gh issue view <n> --repo CBirkbeck/AINTLIB --comments` (and the PR thread, `gh pr view <its PR> --comments`). Then **reuse the EXISTING branch** (do NOT start fresh): `git fetch origin generalise/<n> && LEAN4_GUARDRAILS_BYPASS=1 git checkout generalise/<n>`; rebase onto `origin/main` if it moved; address exactly what was requested.
+   - **If this is new work (2b):** `git fetch origin main`; branch `generalise/<n>` off `origin/main`; read the issue body for the target. Run **`/generalise`** on it. **If the target's proof contains a `sorry`, skip it** — comment, relabel back to `state:todo`, unassign — `sorry`s are the owning producer's WIP, never fleet work.
 4. **Verify (hard bar):** `lake build <lib>` green; **zero new `sorry`**; `#print axioms` unchanged
    (only `propext` / `Classical.choice` / `Quot.sound`); **every prior consumer of the declaration still
    compiles** (you generalised, so the old statement must follow from the new one). If a consumer breaks,
@@ -36,12 +35,22 @@ Loop until your lane is empty or a freeze is active:
    is genuinely **mathematically impossible** (the proof *fundamentally* needs the hypothesis you'd drop),
    and then your comment MUST name the **specific obstruction** — the exact proof step or lemma that
    requires it — not a generic "too hard" / "too much work" / "this is a lot of effort".
+   If, after genuine analysis, the target is **not mechanically generalisable** because it is already
+   maximally general, concrete with no type variable to weaken, uses every instance hypothesis, or the
+   general form is already in mathlib, do **not** bounce it back to `state:todo`. Instead relabel
+   `state:in-progress`→`state:review`, add label `generalise:triage`, and comment with the bucket plus
+   specific evidence, e.g. "already-general: identities use subtraction, `CommRing` is the floor". Then
+   STOP — the reviewer closes it. This is a documented disposition, not a lazy bail; vague "too hard" /
+   "too much work" comments are still defects.
 5. **Hand to review (do NOT merge).** Re-check freeze. `git fetch origin main`; rebase if main moved and
    re-verify. Push; `gh pr create --fill --base main` and in the PR body summarise **exactly how the
    statement changed** (old vs new hypotheses/type). **Only now** relabel the issue
    `state:in-progress`→`state:review` and comment "ready for coordinator review: <one-line diff of the
-   statement>". **You may NEVER move a ticket to `state:review` without a pushed, building PR attached** —
-   a `review` label with no PR is a defect (it strands the ticket; the coordinator has nothing to merge).
+   statement>". **Except for documented `generalise:triage` dispositions from step 4, you may NEVER move a
+   ticket to `state:review` without a pushed, building PR attached** — a plain `review` label with no PR is a
+   defect (it strands the ticket; the coordinator has nothing to merge).
+   (**Addressing a change-request?** The PR already exists — just re-push the existing branch, relabel
+   `state:in-progress`→`state:review`, and comment "addressed: <what you changed>"; do NOT open a second PR.)
    **Stop here — the coordinator reviews and merges.**
 6. **Next ticket.** When the lane is empty or a freeze appears, exit.
 
@@ -60,11 +69,12 @@ and hold yourself to it:
   is long" — none of these justify abandoning a ticket. That is precisely the work this lane exists to do.
 - **`EXPENSIVE` does not downgrade or excuse a ticket.** Mathlib's value is the *right* statement, not the
   cheap one. Budget the time and finish it.
-- **A generalise ticket is DONE only when you have re-proved the weaker statement, fixed all consumers, met
-  the hard bar, and opened a green PR.** Anything short of that is unfinished — keep working.
+- **A real generalise ticket is DONE only when you have re-proved the weaker statement, fixed all consumers,
+  met the hard bar, and opened a green PR.** Anything short of that is unfinished — keep working.
 - **The only legitimate stop-and-relabel reasons** are: (a) the target contains a `sorry` (producer WIP), or
   (b) the generalisation is genuinely *mathematically impossible* and you have documented the **specific**
-  proof-level obstruction. Vague difficulty/effort complaints are not acceptable — if you write one, you have
-  not done your job.
+  proof-level obstruction, or (c) the target is a documented `generalise:triage` false positive with bucket
+  and evidence. Vague difficulty/effort complaints are not acceptable — if you write one, you have not done
+  your job.
 - **Do not strand tickets.** Never leave a ticket `in-progress`/`review` without either a green PR or a
-  precise mathematical reason. If you claim it, you own it to completion.
+  documented triage disposition. If you claim it, you own it to completion.

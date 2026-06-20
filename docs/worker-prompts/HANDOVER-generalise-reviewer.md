@@ -42,7 +42,14 @@ Issue **#1892** already groups the ~21 looping TODO false-positives by reason wi
    `lake build Common FltRegular HasseWeil LeanModularForms "«Adic spaces»" BernoulliRegular PadicLFunctions LutzNagell CebotarevDensity`
    (Why not `build_all.sh`? It builds *orphan* modules too, which carry **pre-existing WIP/Verso breakage unrelated to your PRs** — it'll always be red. The 9-lib gate is the reachable code; it catches the only real risk: a broken in-gate consumer.)
 5. **green ⟹ sound.** A generalise PR is a proof *re-verified against the weaker statement*; if the gate is green, the weakening type-checks and every consumer still compiles (they satisfy the weaker premise). So **green-only merge is safe** — you don't need to hand-audit the math, just confirm the gate + sanity-read the old→new diff in the PR body.
-6. **Land it:** confirm FF (`git rev-list --count HEAD..origin/main` = 0; rebase if a worker slipped one in), `LEAN4_GUARDRAILS_BYPASS=1 git push origin integrate-generalise:main`, close the issues, delete the `generalise/<n>` branches, close the freeze. If a PR breaks the gate, **exclude it, re-verify, push the rest**, and comment on the breaker for the worker.
+6. **Land it:** confirm FF (`git rev-list --count HEAD..origin/main` = 0; rebase if a worker slipped one in), `LEAN4_GUARDRAILS_BYPASS=1 git push origin integrate-generalise:main`, close the issues, delete the `generalise/<n>` branches, close the freeze. If a PR breaks the gate or is otherwise wrong, **exclude it and send it back via the round-trip below** — don't merge it.
+
+## Requesting changes from the worker (the round-trip)
+**Critical:** the fleet is *pull-based on state labels* — a worker scans for tickets to claim and **never reads comments on its own `state:review` tickets**. So a bare comment "this is wrong, fix X" is **invisible** to the worker. To actually send work back you MUST change the ticket's *state*:
+- Leave the PR + `generalise/<n>` branch **open** (the worker reuses the same branch — do NOT close/merge).
+- Comment the **specific required fix** on the issue (and/or the PR) — concrete, e.g. "the weakened `[Field K]`→`[CommRing K]` is unsound: line 40 uses `inv`; restrict to `[DivisionRing K]` instead."
+- Relabel `state:review` → `state:changes-requested` and **unassign** (`gh issue edit <n> --add-label state:changes-requested --remove-label state:review --remove-assignee <worker>`).
+That's it. The worker's next cron firing scans `state:changes-requested` **as its priority queue** (ahead of new work), reads your comment, fixes on the existing branch, re-pushes, and relabels back to `state:review` for you. (The `state:changes-requested` label already exists.) Iterate until it's mergeable, then merge per the flow above.
 
 ## Safety / what a generalise must never do
 A generalise weakens **hypotheses** — it must **not** change what a theorem *means* or drop a hypothesis the result genuinely needs. The worker re-proves it (green); you confirm the gate and the diff. Never add a `sorry`; never bump; idle during freezes.

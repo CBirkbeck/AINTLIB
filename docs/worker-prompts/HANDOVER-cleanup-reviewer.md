@@ -46,5 +46,8 @@ Then: re-check freeze; `git fetch origin main`, rebase + re-verify if main moved
 - **Freeze = idle.** During any `freeze:active`, finish your current merge then stop claiming until it closes.
 - **`main` is multi-worker and moves constantly** — always re-fetch + rebase + re-verify immediately before merging.
 
+## Sending work back to a worker (rare for cleanup)
+Cleanup auto-merges on green, so you rarely bounce work back. But if you ever need a worker to redo something, **never just leave a comment** — the fleet is pull-based on *state labels* and a worker never reads comments on its own tickets, so a bare comment is invisible. Use the round-trip: relabel the ticket `state:changes-requested`, comment the **specific** required fix, leave any branch/PR open, and unassign. The worker's next firing scans `state:changes-requested` as its priority queue, reads your comment, and fixes on the existing branch.
+
 ## Self-schedule
 On your first firing, `CronList`; if you have no recurring cleanup job, create one (`CronCreate`, ~every 30 min): *"In `<pwd>`, read `docs/worker-prompts/HANDOVER-cleanup-reviewer.md` and do exactly what it says."* Never duplicate.

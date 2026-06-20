@@ -22,11 +22,12 @@ path (`pwd`). If one already exists, skip — never duplicate. Then continue.
 Loop until the queue is empty or a freeze is active:
 
 1. **Freeze check.** `gh issue list --repo CBirkbeck/AINTLIB --label freeze:active --state open`. Any result → exit cleanly.
-2. **Claim.** `gh issue list --repo CBirkbeck/AINTLIB --label state:todo --search "no:assignee" --limit 50 --json number,title,labels`.
-   None → exit. Pick the lowest number, then
-   `gh issue edit <n> --repo CBirkbeck/AINTLIB --add-assignee @me --add-label state:in-progress --remove-label state:todo`,
-   comment "claimed". If it's already assigned, re-query (another worker beat you).
-3. **Do the work**, on a branch `<lane>/<n>` off the latest `origin/main`, per the ticket's lane label:
+2. **Claim — reviewer change-requests come FIRST.** Two queues, in order; (a) is your *inbox* (a reviewer bounced a PR back for fixes — generalise lane):
+   - **(a)** `gh issue list --repo CBirkbeck/AINTLIB --label state:changes-requested --search "no:assignee" --limit 50 --json number,title,labels` → claim lowest with `gh issue edit <n> --add-assignee @me --add-label state:in-progress --remove-label state:changes-requested`. Finish these before new work.
+   - **(b)** else `gh issue list --repo CBirkbeck/AINTLIB --label state:todo --search "no:assignee" --limit 50 --json number,title,labels` → claim lowest with `--add-assignee @me --add-label state:in-progress --remove-label state:todo`.
+   Comment "claimed". Already assigned → re-query. None in either → exit.
+3. **Do the work**, on a branch `<lane>/<n>` off the latest `origin/main`, per the ticket's lane label.
+   **If you claimed a `state:changes-requested` ticket (2a):** read the reviewer's required fixes — `gh issue view <n> --comments` + the PR thread `gh pr view <PR> --comments`; **reuse the EXISTING branch** `git fetch origin <lane>/<n> && LEAN4_GUARDRAILS_BYPASS=1 git checkout <lane>/<n>` (rebase onto main if it moved); address exactly what was asked; then re-verify (step 4) and re-push to the SAME PR (step 5) — relabel `state:in-progress`→`state:review`, comment "addressed: …", no new PR. **Otherwise (new `state:todo` work):**
    - **`lane:cleanup`** → run the **complete `/cleanup` skill** on the target file — the full methodical pass
      over *every* declaration: mathlib-**style audit**, best-**mathlib-API** check, **naming** conventions,
      **dedup**, `simp`/instance hygiene, **and then** golfing. **Do NOT shortcut to the proof-golfer agent** —
