@@ -30,16 +30,41 @@ Loop until your lane is empty or a freeze is active:
    Otherwise run **`/generalise`** on that target.
 4. **Verify (hard bar):** `lake build <lib>` green; **zero new `sorry`**; `#print axioms` unchanged
    (only `propext` / `Classical.choice` / `Quot.sound`); **every prior consumer of the declaration still
-   compiles** (you generalised, so the old statement must follow from the new one). If you can't meet the
-   bar, comment why, relabel back to `state:todo`, unassign, move on.
+   compiles** (you generalised, so the old statement must follow from the new one). If a consumer breaks,
+   **FIX it** — the old statement follows from the new one, so each call site still type-checks after light
+   adjustment; that adjustment is part of your job. Only relabel back to `state:todo` if the generalisation
+   is genuinely **mathematically impossible** (the proof *fundamentally* needs the hypothesis you'd drop),
+   and then your comment MUST name the **specific obstruction** — the exact proof step or lemma that
+   requires it — not a generic "too hard" / "too much work" / "this is a lot of effort".
 5. **Hand to review (do NOT merge).** Re-check freeze. `git fetch origin main`; rebase if main moved and
    re-verify. Push; `gh pr create --fill --base main` and in the PR body summarise **exactly how the
-   statement changed** (old vs new hypotheses/type). Relabel the issue `state:in-progress`→`state:review`
-   and comment "ready for coordinator review: <one-line diff of the statement>". **Stop here — the
-   coordinator reviews and merges.**
+   statement changed** (old vs new hypotheses/type). **Only now** relabel the issue
+   `state:in-progress`→`state:review` and comment "ready for coordinator review: <one-line diff of the
+   statement>". **You may NEVER move a ticket to `state:review` without a pushed, building PR attached** —
+   a `review` label with no PR is a defect (it strands the ticket; the coordinator has nothing to merge).
+   **Stop here — the coordinator reviews and merges.**
 6. **Next ticket.** When the lane is empty or a freeze appears, exit.
 
 Generalise **only** as far as the proof actually supports — never weaken a statement past what's proved,
 and never change what a theorem *means* (e.g. don't drop a hypothesis the result genuinely needs). When
 in doubt, generalise conservatively and flag the uncertainty in the PR for the coordinator. **Never** add
 `sorry`/`admit`; **never** run `lake update` or bump mathlib.
+
+## Finish the work — no lazy bailing
+
+`/generalise` exists to do the **hard** work of finding and proving the right statement. A long, fiddly, or
+multi-step re-proof — and fixing every consumer afterwards — **is the job**, not a reason to quit. Read this
+and hold yourself to it:
+
+- **Effort is never an excuse.** "This took a lot of work", "this is hard", "too many call sites", "the proof
+  is long" — none of these justify abandoning a ticket. That is precisely the work this lane exists to do.
+- **`EXPENSIVE` does not downgrade or excuse a ticket.** Mathlib's value is the *right* statement, not the
+  cheap one. Budget the time and finish it.
+- **A generalise ticket is DONE only when you have re-proved the weaker statement, fixed all consumers, met
+  the hard bar, and opened a green PR.** Anything short of that is unfinished — keep working.
+- **The only legitimate stop-and-relabel reasons** are: (a) the target contains a `sorry` (producer WIP), or
+  (b) the generalisation is genuinely *mathematically impossible* and you have documented the **specific**
+  proof-level obstruction. Vague difficulty/effort complaints are not acceptable — if you write one, you have
+  not done your job.
+- **Do not strand tickets.** Never leave a ticket `in-progress`/`review` without either a green PR or a
+  precise mathematical reason. If you claim it, you own it to completion.
