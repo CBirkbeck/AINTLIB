@@ -149,7 +149,11 @@ continuous additive character of `ℤ_[p]` (mathlib
 `PadicInt.addChar_of_value_at_one`). Classical; cf. RJW's use of `μ_{p^n}`
 throughout §5.1 (TeX 1647–1692). -/
 theorem _root_.IsPrimitiveRoot.norm_sub_one_lt {ζ : L} {n : ℕ}
-    (hζ : IsPrimitiveRoot ζ (p ^ n)) (hn : 1 ≤ n) : ‖ζ - 1‖ < 1 := by
+    (hζ : IsPrimitiveRoot ζ (p ^ n)) : ‖ζ - 1‖ < 1 := by
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · -- `n = 0`: `IsPrimitiveRoot ζ (p ^ 0) = IsPrimitiveRoot ζ 1`, so `ζ = 1`.
+    rw [pow_zero, IsPrimitiveRoot.one_right_iff] at hζ
+    simp [hζ]
   by_contra hcon
   push Not at hcon
   set x : L := ζ - 1 with hxdef
@@ -200,7 +204,7 @@ omit [CompleteSpace L] in
 theorem _root_.IsPrimitiveRoot.tendsto_pow_sub_one {ζ : L} {n : ℕ}
     (hζ : IsPrimitiveRoot ζ (p ^ n)) (hn : 1 ≤ n) :
     Tendsto ((ζ - 1) ^ ·) atTop (𝓝 0) :=
-  tendsto_pow_atTop_nhds_zero_of_norm_lt_one (hζ.norm_sub_one_lt hn)
+  tendsto_pow_atTop_nhds_zero_of_norm_lt_one (hζ.norm_sub_one_lt)
 
 omit [CompleteSpace L] in
 /-- W3: for `ζ` a primitive `D`-th root of unity with `p ∤ D` and `D ∤ c`,

@@ -159,7 +159,7 @@ lemma norm_pow_sub_one_lt_one {ζ : integerRing K} {n : ℕ}
       have h0 : IsPrimitiveRoot (ζ ^ c) (orderOf (ζ ^ c)) := IsPrimitiveRoot.orderOf _
       rw [hj] at h0
       exact h0.map_of_injective (f := (integerRing K).subtype) fun _ _ h => Subtype.ext h
-    exact hprim.norm_sub_one_lt hj1
+    exact hprim.norm_sub_one_lt
 
 omit [CompleteSpace K] in
 /-- `ζ^c − 1` is topologically nilpotent for `ζ ∈ μ_{p^n}`. -/

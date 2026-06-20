@@ -1094,7 +1094,7 @@ theorem sum_seriesEval_mahlerK {ξ : K} (hξ : IsPrimitiveRoot ξ p)
           absurd (Nat.le_of_dvd hjpos hdvd) (by omega : ¬ p ≤ (j : ℕ))))
       have hprim : IsPrimitiveRoot (ξ ^ (j : ℕ)) (p ^ 1) := by
         rw [pow_one]; exact hξ.pow_of_coprime (j : ℕ) hcop
-      exact hprim.norm_sub_one_lt (p := p) le_rfl
+      exact hprim.norm_sub_one_lt (p := p)
   have hdig : mahlerK p K μ
       = ∑ i : Fin p, (1 + PowerSeries.X) ^ (i : ℕ) * phiSeries p (mahlerK p K (ν i)) := by
     simp only [mahlerK]

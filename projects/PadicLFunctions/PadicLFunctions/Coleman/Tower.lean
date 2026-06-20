@@ -319,7 +319,7 @@ theorem norm_pi_pow_totient {n : ℕ} (hn : 1 ≤ n) :
   rw [← hprodnorm, hpnorm]
 
 theorem norm_pi_lt_one {n : ℕ} (hn : 1 ≤ n) : ‖pi p n‖ < 1 :=
-  (zetaSys_primitiveRoot p n).norm_sub_one_lt hn
+  (zetaSys_primitiveRoot p n).norm_sub_one_lt
 
 theorem pi_ne_zero {n : ℕ} (hn : 1 ≤ n) : pi p n ≠ 0 := by
   rw [pi, sub_ne_zero]

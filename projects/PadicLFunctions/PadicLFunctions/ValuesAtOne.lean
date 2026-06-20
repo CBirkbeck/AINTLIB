@@ -869,7 +869,7 @@ theorem p_mul_constantCoeff_mahlerK_rhoTheta {D : ℕ} [NeZero D] (hD1 : 1 < D)
         Nat.coprime_comm.mp (hp.out.coprime_iff_not_dvd.mpr fun hdvd =>
           absurd (Nat.le_of_dvd hjpos hdvd) (by omega : ¬ p ≤ (j : ℕ)))
       exact (by rw [pow_one] at *; exact hξ.pow_of_coprime (j : ℕ) hcop :
-        IsPrimitiveRoot (ξ ^ (j : ℕ)) (p ^ 1)).norm_sub_one_lt (p := p) le_rfl
+        IsPrimitiveRoot (ξ ^ (j : ℕ)) (p ^ 1)).norm_sub_one_lt (p := p)
   have hzp : ∀ j : Fin p, (1 + (ξ ^ (j : ℕ) - 1)) ^ p = 1 := fun j => by
     rw [show (1 : K) + (ξ ^ (j : ℕ) - 1) = ξ ^ (j : ℕ) by ring, ← pow_mul, mul_comm, pow_mul,
       hξ.pow_eq_one, one_pow]
@@ -1371,7 +1371,7 @@ theorem sum_seriesEval_Ftilde {N : ℕ} [NeZero N] (hN : 1 < N)
         Nat.coprime_comm.mp (hp.out.coprime_iff_not_dvd.mpr fun hdvd =>
           absurd (Nat.le_of_dvd hipos hdvd) (by omega : ¬ p ≤ (i : ℕ)))
       exact (by rw [pow_one] at *; exact hξ.pow_of_coprime (i : ℕ) hcop :
-        IsPrimitiveRoot (ξ ^ (i : ℕ)) (p ^ 1)).norm_sub_one_lt (p := p) le_rfl
+        IsPrimitiveRoot (ξ ^ (i : ℕ)) (p ^ 1)).norm_sub_one_lt (p := p)
   -- Step A: `seriesEval F̃ (ξ^i − 1) = −Σ_c θ⁻¹(c)·extLog(ξ^i·ε^c − 1)`
   have hstepA : ∀ i : Fin p, seriesEval (Ftilde p K θ hε) (ξ ^ (i : ℕ) - 1)
       = -∑ c ∈ Finset.range N, θ⁻¹ ((c : ZMod N)) * extLog p (ξ ^ (i : ℕ) * ε ^ c - 1) := by
