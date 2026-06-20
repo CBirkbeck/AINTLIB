@@ -823,10 +823,15 @@ theorem summable_prod_family (F G : PowerSeries ℚ_[p]) (y : L) (hy : InExpBall
       linarith [le_trans hεb hb, hK x.2 hgt.le]
     exact ⟨by omega, by omega⟩
 
-/-- `(‖(n : ℚ_[p])‖^{p−1})⁻¹ ≤ p^{n−1}` for `n ≥ 1` (the inverted Legendre bound for the
-plain integer `n`, used for the `log` coefficients). -/
-theorem norm_natCast_inv_pow_le (n : ℕ) (hn : 1 ≤ n) :
+/-- `(‖(n : ℚ_[p])‖^{p−1})⁻¹ ≤ p^{n−1}` for every `n` (the inverted Legendre bound for the
+plain integer `n`, used for the `log` coefficients). For `n = 0` both sides reduce to
+`0 ≤ 1`. -/
+theorem norm_natCast_inv_pow_le (n : ℕ) :
     (‖(n : ℚ_[p])‖ ^ (p - 1))⁻¹ ≤ (p : ℝ) ^ (n - 1) := by
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · rw [Nat.cast_zero, norm_zero, zero_pow (by have := hp.out.one_lt; omega : p - 1 ≠ 0),
+      inv_zero, Nat.zero_sub, pow_zero]
+    exact zero_le_one
   have hval : ‖(n : ℚ_[p])‖ = (p : ℝ) ^ (-(padicValNat p n : ℤ)) := by
     rw [Padic.norm_eq_zpow_neg_valuation (Nat.cast_ne_zero.2 (by omega : n ≠ 0)),
       Padic.valuation_natCast]
@@ -855,7 +860,7 @@ theorem norm_coeff_log_le (n : ℕ) (hn : 1 ≤ n) :
   rw [coeff_log, if_neg (by omega : n ≠ 0), map_div₀, map_pow, map_neg, map_one, map_natCast,
     norm_div, norm_pow, norm_neg, norm_one, one_pow, div_pow, one_pow]
   rw [← inv_eq_one_div]
-  exact norm_natCast_inv_pow_le p n hn
+  exact norm_natCast_inv_pow_le p n
 
 omit [IsUltrametricDist L] [CompleteSpace L] in
 /-- `padicExp z = ∑ₙ [Xⁿ]exp · zⁿ`: the exponential as the evaluation of `PowerSeries.exp`. -/
