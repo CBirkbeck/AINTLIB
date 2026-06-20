@@ -682,7 +682,7 @@ theorem exists_spa_point_in_rationalOpen_of_isOpen_prime
     · apply isContinuous_ofValuation_of; intro γ
       by_cases hγ : γ = 0
       · subst hγ; convert isOpen_empty
-        ext a; simp [not_lt_zero']
+        ext a; simp [not_lt_zero]
       · by_cases h1 : (1 : WithZero (Multiplicative ℤ)) < γ
         · convert isOpen_univ; ext a
           simp only [Set.mem_setOf_eq, Set.mem_univ, iff_true, w, Valuation.comap_apply]
