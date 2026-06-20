@@ -6890,18 +6890,22 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
     (continuous maps, via `LipschitzOnWith` of `divP∘pZpLog` / `Units.continuous_iff` for `expUnit`);
     the 4 equations `logCM_mul`/`logCM_one`/`expCM_logCM`/`logCM_expCM`; helpers `divP_add`,
     `norm_pZpExp_sub`, `continuous_pZpExp_mul`.
-    **gplusEquiv structural core — COMPLETE & axiom-clean (2026-06-21)**: `gammaProj` (1-unit projection
-    `ℤ_[p]ˣ →* Γ`, `u↦u·ω(u)⁻¹`); `unitsSplitEquiv : ℤ_[p]ˣ ≃* μ_{p-1}×Γ` (the Teichmüller splitting,
-    `u↦(ω(u),u·ω(u)⁻¹)`); `teichmuller_oneUnit`/`teichmuller_idem`/`teichmuller_neg_one` (ω(-1)=-1);
-    `instFiniteTeichRange` (μ_{p-1} finite). REMAINING for the full carrier bridge `Φ`:
-    (i) the `/±1` quotient `GPlus = ℤ_[p]ˣ/⟨-1⟩ ≃* (μ_{p-1}/⟨-1⟩)×Γ = Δ×Γ` — via `unitsSplitEquiv` +
-    `QuotientGroup.congr` (transport `⟨-1⟩ ↦ ⟨(-1,1)⟩` by `teichmuller_neg_one`) + `(A×B)/(H×⊥)≃(A/H)×B`;
-    (ii) continuity → `≃ₜ*` (teichmuller continuous via `isLocallyConstant_teichmullerFun`, gammaProj/inv);
-    (iii) assemble `carrierBridge Φ` from gplusEquiv + gammaLogEquiv (convert to the `C(_,_)`+equations form);
-    (iv) `Δ` instances for `charIdealGroup`: `[Fintype Δ]` (from instFiniteTeichRange), `[Invertible
-    ((p-1)/2 : ℤ_[p])]` (prime-to-p), and the **completeness `∑_ω e_ω = 1`** (Fourier/orthogonality over
-    ℤ_[p], using μ_{(p-1)/2}⊆ℤ_[p] via Teichmüller — the deepest remaining piece). (iv) + capstone
-    instantiation also need the separately-bundled CFT/§12, so full internalisation = the whole IMC.
+    **gplusEquiv — algebraic core + continuity foundations COMPLETE & axiom-clean (2026-06-21)**:
+    `gammaProj` (1-unit projection `ℤ_[p]ˣ →* Γ`, `u↦u·ω(u)⁻¹`); `unitsSplitEquiv : ℤ_[p]ˣ ≃* μ_{p-1}×Γ`
+    (Teichmüller splitting); `teichmuller_oneUnit`/`teichmuller_idem`/`teichmuller_neg_one`;
+    `instFiniteTeichRange` (μ_{p-1} finite); `negOneT`, `Delta = μ_{p-1}/⟨-1⟩`, `zpowers_prod_bot`,
+    `unitsSplitEquiv_neg_one`, and **`gplusMulEquiv : GPlus ≃* Δ×Γ`** (the /±1 quotient, via
+    `QuotientGroup.congr`+`prodMulEquiv`+`quotientBot`); `continuous_teichmuller` + `continuous_gammaProj`
+    (continuity foundations). `Delta` has `Finite`/`CommGroup`/`TopologicalSpace` instances automatically.
+    REMAINING for the full carrier bridge `Φ`:
+    (i) the **homeomorphism** `GPlus ≃ₜ* Δ×Γ` — promote `gplusMulEquiv` to continuous both ways (forward
+    via quotient-lift of `unitsSplitEquiv`'s continuity; `DiscreteTopology Δ` from finite⊆T2 range);
+    (ii) assemble `carrierBridge Φ` from the homeomorphism + the (done) gammaLogEquiv, converting to the
+    `C(_,_)`+equations form `carrierBridge` consumes → yields the ring iso `LambdaGPlus p ≃+* IwasawaAlgebraGroup ℤ_[p] Δ`;
+    (iii) for the capstone *application* (not the bridge): `[Invertible ((p-1)/2 : ℤ_[p])]` (prime-to-p)
+    and the **completeness `∑_ω e_ω = 1`** (Fourier/orthogonality over ℤ_[p], using μ_{(p-1)/2}⊆ℤ_[p] via
+    Teichmüller — the deepest remaining piece). (iii) + capstone instantiation also need the separately-
+    bundled CFT/§12, so full end-to-end internalisation = the whole IMC.
     OLD: `gplusEquiv` — `GPlus ≅ Δ×Γ` via Teichmüller + the `/±1` quotient (`Δ = μ_{p-1}/{±1}`).
     **Scoped infrastructure (2026-06-20)**: `CompactSpace ℤ_[p]ˣ` is an AUTOMATIC instance
     (`Units.instCompactSpaceOfT1SpaceOfContinuousMul`, mathlib) — no gap. The Teichmüller MonoidHom

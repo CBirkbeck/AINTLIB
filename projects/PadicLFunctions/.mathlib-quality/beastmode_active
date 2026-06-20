@@ -1,1 +1,1 @@
-FOCUS: gplusMulEquiv (GPlus≃*Δ×Γ) DONE. Remaining: continuity→≃ₜ*, Δ instances+completeness, assemble carrierBridge Φ.
+FOCUS: gplusMulEquiv + continuity foundations done. Next: homeomorphism GPlus≃ₜ*Δ×Γ (quotient-lift continuity + DiscreteTopology Δ), then assemble carrierBridge Φ.
