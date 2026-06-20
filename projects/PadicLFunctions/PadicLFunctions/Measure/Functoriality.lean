@@ -1,4 +1,5 @@
 import PadicLFunctions.Measure.PseudoMeasure
+import PadicLFunctions.Measure.Convolution
 
 /-!
 # Functoriality of the convolution measure algebra  (S13-G, CARRIER-BRIDGE step 1)
@@ -86,5 +87,42 @@ lemma pushforwardRingEquiv_apply (e : C(G, G')) (e' : C(G', G))
     (hleft : ∀ x, e' (e x) = x) (hright : ∀ y, e (e' y) = y)
     (μ : PadicMeasure p G) (f : C(G', ℤ_[p])) :
     pushforwardRingEquiv p e e' hmul hone hleft hright μ f = μ (f.comp e) := rfl
+
+/-! ## Pushforward into the additive (Mahler) algebra `Λ(ℤ_p) = ℤ_p⟦T⟧`
+
+The Iwasawa algebra of the additive group is `PadicMeasure p ℤ_[p]` with the **Mahler** ring
+structure (`Measure/Convolution.lean`, `δ_a·δ_b = δ_{a+b}`, `1 = δ_0`).  A continuous map
+`m : G → ℤ_p` from a multiplicative group that turns multiplication into addition (`m(xy) = mx + my`,
+`m 1 = 0`) pushes measures forward to a **ring homomorphism** `PadicMeasure p G →+* PadicMeasure p ℤ_[p]`.
+For `G = Γ` the pro-cyclic 1-units and `m = log`, this is the `Γ`-factor of the carrier bridge. -/
+
+/-- Pushforward along a continuous `mul→add` homomorphism `m : G → ℤ_p`, valued in the **Mahler**
+(additive) convolution algebra `PadicMeasure p ℤ_[p]`.  Ring hom because `m(xy) = mx + my` matches
+the additive convolution (`mul_apply`/`convInner`). -/
+def mahlerPushforwardRingHom {G : Type*} [TopologicalSpace G] [CommMonoid G] [ContinuousMul G]
+    [CompactSpace G] (m : C(G, ℤ_[p])) (hmul : ∀ x y, m (x * y) = m x + m y) (hone : m 1 = 0) :
+    PadicMeasure p G →+* PadicMeasure p ℤ_[p] where
+  toFun := pushforward p m
+  map_zero' := rfl
+  map_add' _ _ := rfl
+  map_one' := by
+    rw [conv_one_def, pushforward_dirac, hone, one_def]
+  map_mul' μ ν := by
+    refine LinearMap.ext fun f => ?_
+    rw [pushforward_apply, conv_mul_apply, mul_apply, pushforward_apply]
+    congr 1
+    refine ContinuousMap.ext fun x => ?_
+    simp only [innerInt_apply, convInner, ContinuousMap.comp_apply, pushforward_apply,
+      ContinuousMap.coe_mk]
+    congr 1
+    refine ContinuousMap.ext fun y => ?_
+    simp only [ContinuousMap.curry_apply, ContinuousMap.comp_apply, mulCM₂, ContinuousMap.coe_mk]
+    rw [hmul x y]
+
+@[simp]
+lemma mahlerPushforwardRingHom_apply {G : Type*} [TopologicalSpace G] [CommMonoid G]
+    [ContinuousMul G] [CompactSpace G] (m : C(G, ℤ_[p])) (hmul : ∀ x y, m (x * y) = m x + m y)
+    (hone : m 1 = 0) (μ : PadicMeasure p G) (f : C(ℤ_[p], ℤ_[p])) :
+    mahlerPushforwardRingHom p m hmul hone μ f = μ (f.comp m) := rfl
 
 end PadicMeasure
