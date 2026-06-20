@@ -3,6 +3,7 @@ import LutzNagell.ZSMul
 import LutzNagell.LutzNagellTheorem.GeneralDenominators
 import LutzNagell.LutzNagellTheorem.EvalBridge
 import LutzNagell.LutzNagellTheorem.GeneralCurve
+import LutzNagell.LutzNagellTheorem.PIDPrimeOrder
 import Mathlib.RingTheory.Polynomial.RationalRoot
 import Mathlib.RingTheory.Localization.Rat
 
@@ -56,12 +57,8 @@ theorem evalEval_ψ_eq_zero_of_zsmul_eq_zero_general
     {x y : ℚ} (hns : (curveQ W).toAffine.Nonsingular x y) (n : ℤ)
     (htors : n • (Jacobian.Point.fromAffine
       (Affine.Point.some _ _ hns)) = 0) :
-    ((curveQ W).ψ n).evalEval x y = 0 := by
-  have heval := zsmul_eq_smulEval (curveQ W) hns n
-  have hzero := Jacobian.Point.zero_point (W' := (curveQ W).toJacobian)
-  rw [Jacobian.Point.ext_iff] at htors
-  rw [heval, hzero] at htors
-  exact (Jacobian.Z_eq_zero_of_equiv (Quotient.exact htors)).mpr rfl
+    ((curveQ W).ψ n).evalEval x y = 0 :=
+  PID.evalEval_ψ_eq_zero_of_zsmul_eq_zero W hns n htors
 
 /-! ### ψ₂ = 0 implies 2•P = 0 (converse direction) -/
 
