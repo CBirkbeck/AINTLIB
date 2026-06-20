@@ -61,8 +61,10 @@ theorem norm_factorial_le {n : ℕ} (hn : 1 ≤ n) :
   linarith [hcast]
 
 /-- Membership in the open convergence ball `‖x‖ < p^{−1/(p−1)}` of the
-`p`-adic exponential, stated rpow-free: `‖x‖^{p−1} < p⁻¹`. -/
-def InExpBall (p : ℕ) {L : Type*} [NormedField L] (x : L) : Prop :=
+`p`-adic exponential, stated rpow-free: `‖x‖^{p−1} < p⁻¹`. Only a `Norm`
+is needed to state it (the predicate is a bound on the real number `‖x‖`);
+the `p`-adic-exp lemmas that consume it supply the analytic structure. -/
+def InExpBall (p : ℕ) {L : Type*} [Norm L] (x : L) : Prop :=
   ‖x‖ ^ (p - 1) < (p : ℝ)⁻¹
 
 /-- The inverted Legendre bound: `‖n!‖^{-(p−1)} ≤ p^{n−1}` for `n ≥ 1`. -/
