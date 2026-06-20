@@ -37,7 +37,39 @@ T-L2 (leaf #2: completion ROIE) ─► Leaf C (relative use over 𝒪_X(U)) ─�
 ---
 
 ### [T-L1a] `sectionEqualizer` is closed in the product
-- **Status**: open — ⚠ ROUTE OBSTACLE found (beastmode 2026-06-19), needs a replan decision
+- **Status**: open — ✅ ROUTE RESOLVED (expert-review #2, 2026-06-20). Build via the
+  **common-refinement compatibility predicate**, NOT pairwise intersections.
+- **RESOLUTION (expert-review #2 reply, Q1):** routes (a) [descent⟹closed] and (c) [6.18] are
+  rejected (faithful flatness gives no topological strictness; 6.18 on the subspace topology is
+  circular). The canonical route is Čech-closedness, but using **ALL common rational refinements**
+  `D₃` (rationalOpen ⊆ both pieces), NOT a single intersection datum — each `isClosed_eq` of two
+  continuous `restrictionMap`s, intersected. **This sidesteps the heterogeneous-`P` problem entirely
+  and needs NO new intersection API.** CRITICAL: the project's `IsSheafy.gluing` field
+  (StructureSheaf:311-320) is **ALREADY stated with exactly this common-refinement predicate**
+  (`∀ D₁ D₂ D₃ h₃₁ h₃₂, restrictionMap D₁ D₃ (f D₁) = restrictionMap D₂ D₃ (f D₂)`), so NO bridge
+  theorem (`tensorCocycle_iff_commonRefinementCompatible`) is needed — define `sectionEqualizer` as
+  the carrier of that predicate and reuse the gluing/separation theorem directly.
+
+#### Statement (REVISED — common-refinement form)
+```lean
+def sectionEqualizer (C : RationalCovering A) : Set (∀ D : ↥C.covers, presheafValue D.1) :=
+  {s | ∀ (D₁ D₂ : ↥C.covers) (D₃ : RationalLocData A)
+        (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
+        (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₂.1.T D₂.1.s),
+        restrictionMap D₁.1 D₃ h₃₁ (s D₁) = restrictionMap D₂.1 D₃ h₃₂ (s D₂)}
+theorem sectionEqualizer_isClosed (C : RationalCovering A) : IsClosed (sectionEqualizer C) := by sorry
+```
+#### Proof sketch
+`isClosed_iInter` over `(D₁,D₂,D₃,h₃₁,h₃₂)` of `isClosed_eq (continuous_restrictionMap.comp (continuous_apply D₁)) (…D₂)`.
+`restrictionMap`/`restrictionMapHom` continuity = `restrictionMapAlg_continuous` (Presheaf:1353);
+`presheafValue D₃` is T2; `continuous_apply` for the product projections.
+#### Mathlib lemmas needed
+`isClosed_iInter`, `isClosed_eq`, `Continuous.comp`, `continuous_apply`, `restrictionMapHom` continuity.
+#### Risks (reviewer): give `E` the R-module structure via `R→S` + verify subspace `ContinuousSMul`;
+closed-subspace / finite-product `IsCountablyGenerated` instances likely need explicit `haveI`s.
+
+(superseded original below — kept for the `overlapDiff`/AddSubgroup phrasing only)
+- **Status (orig)**: open
 - **Progress**:
   - 2026-06-19 **The reviewer's overlap-equalizer needs a general heterogeneous-`P` intersection
     the repo deliberately avoids.** Findings: (1) leaf #1 IS real — `cor_8_32_productRestrictionSub_isEmbedding`
@@ -269,6 +301,25 @@ Wedhorn Prop 7.19 (p.61, `wedhorn.txt:3176`), Lemma 7.20 (p.61, `:3195`), Lemma 
        genuinely false without completeness — likely, per Wedhorn 7.45); or (b) prove completeness-free
        via `Spa(A) ≅ Spa(Â)` (Wedhorn 7.48) + 7.45-on-Â (deeper). Do NOT add the hypothesis unilaterally
        (CLAUDE.md). Logged to `b2_log.jsonl`.
+  - 2026-06-20 **✅ COMPLETENESS RESOLVED (expert-review #2, Q2): completeness IS essential — ADD
+    `[CompleteSpace A]`.** Reviewer gave a counterexample proving the no-completeness statement FALSE:
+    `A = 𝔽_p[x]` with the `(x)`-adic topology, `A⁺ = A`, `𝔭 = (x-1)`. `(x-1)` is non-open + dense
+    (`1 = x + (1-x) ∈ (x)+(x-1)`); any valuation with support `(x-1)` factors through `𝔽_p` (trivial,
+    so open support), so NO continuous valuation has support `⊇ (x-1)`; and in `𝔽_p[[x]]`, `x-1` is a
+    unit so no prime lies over it (completion-invariance of Spa transports valuations, not primes —
+    dense primes vanish). So CLAUDE.md-(b) is satisfied: add `[CompleteSpace A]` (right-uniformity form)
+    to T-L3, `exists_heightOne_analytic_cont_supp_ge_of_nonOpen_prime` (T-L3b), AND the StandardCover
+    pair-free consumer `exists_spa_point_with_supp_ge_of_prime`; thread from the headline (complete) down.
+    Record the counterexample as a regression note.
+  - 2026-06-20 **✅ HEIGHT-1 LEAF ROUTE (T-L3b) RESOLVED (expert-review #2, Q3): ordered-group fact,
+    NO blow-up/Krull–Akizuki.** Discharge plan: (1) ordered-group lemma
+    `exists_convexSubgroup_quotient_height_one_of_microbial` — microbial `Γ` ⟹ ∃ nontrivial order hom
+    `φ : Γ → ℝ` (Wedhorn 5.46), `H := ker φ` (convex, proper), `Γ/H ≅ im φ ⊆ ℝ` archimedean ⟹ height 1;
+    (2) valuation wrapper `Valuation.exists_heightOne_verticalGenerization` (same support, vertical
+    generization, height 1); (3) continuity-under-vertical-generization (Wedhorn Rem 7.42). The
+    in-repo `embed_archimedean_valueGroup_into_real` (Presheaf, a `sorry`) is the bracket→ℝ direction;
+    the cleaner route is microbial⟹order-hom (5.46) then `MulArchimedean (Γ/H)`. Blow-up/normalization
+    belong ONLY to the noetherian discrete-valuation refinement (not this leaf).
 - **File**: Presheaf.lean (+ Lemma745.lean for the 7.41 sub-leaf)
 - **Depends on**: none
 - **Parallel**: yes

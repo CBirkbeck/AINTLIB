@@ -5,8 +5,10 @@
 - Goal of brief: settle the **embedding/inducing** route for Thm 8.28(b) + 2 soundness checks
 - Scope: the embedding half of sheafiness (`ρ : 𝒪(U) → ∏𝒪(Uᵢ)` a topological embedding) + the
   non-open-prime point's completeness + the height-1 generalisation
-- Reply received: false
-- Reply integrated: false
+- Reply received: true (2026-06-20)
+- Reply integrated: true (2026-06-20) — see `integration.md`. Q1 route resolved (common-refinement,
+  already the project's gluing form), Q2 completeness confirmed essential (add `[CompleteSpace A]`),
+  Q3 height-1 = ordered-group fact (no blow-up).
 
 ## Questions asked (verbatim §4 of brief)
 | # | Question |
