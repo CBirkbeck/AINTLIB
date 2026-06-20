@@ -202,7 +202,7 @@ theorem _root_.IsPrimitiveRoot.norm_sub_one_lt {ζ : L} {n : ℕ}
 omit [CompleteSpace L] in
 /-- W2': hence `ζ - 1` is topologically nilpotent (powers tend to `0`). -/
 theorem _root_.IsPrimitiveRoot.tendsto_pow_sub_one {ζ : L} {n : ℕ}
-    (hζ : IsPrimitiveRoot ζ (p ^ n)) (hn : 1 ≤ n) :
+    (hζ : IsPrimitiveRoot ζ (p ^ n)) :
     Tendsto ((ζ - 1) ^ ·) atTop (𝓝 0) :=
   tendsto_pow_atTop_nhds_zero_of_norm_lt_one (hζ.norm_sub_one_lt)
 
