@@ -304,21 +304,27 @@ theorem padicExp_add {x y : L} (hx : InExpBall p x) (hy : InExpBall p y) :
       rw [Algebra.smul_def, map_natCast, mul_comm],
     smul_smul, hchoose]
 
+omit hp in
 /-- `(p−1)·v_p(n+1) ≤ n`: the valuation growth of the logarithm denominators
-(`p^v ∣ n+1` and Bernoulli `1 + v(p−1) ≤ p^v`). -/
+(`p^v ∣ n+1` and Bernoulli `1 + v(p−1) ≤ p^v`). Holds for every `p : ℕ`
+(no primality needed): for `p ≤ 1` the factor `p − 1` is `0`, and for `p ≥ 2`
+it is the Bernoulli/divisibility estimate. -/
 theorem sub_one_mul_padicValNat_succ_le (n : ℕ) :
     (p - 1) * padicValNat p (n + 1) ≤ n := by
-  set v : ℕ := padicValNat p (n + 1)
-  have hle : p ^ v ≤ n + 1 := Nat.le_of_dvd (Nat.succ_pos n) pow_padicValNat_dvd
-  have hbern : 1 + (v : ℤ) * ((p : ℤ) - 1) ≤ (p : ℤ) ^ v := by
-    have h2 : (-2 : ℤ) ≤ (p : ℤ) - 1 := by have := hp.out.pos; omega
-    simpa using one_add_mul_le_pow h2 v
-  have hgoal : ((p - 1 : ℕ) : ℤ) * (v : ℤ) ≤ (n : ℤ) := by
-    have hps : ((p - 1 : ℕ) : ℤ) = (p : ℤ) - 1 := by have := hp.out.one_le; omega
-    have hle' : ((p : ℤ)) ^ v ≤ (n : ℤ) + 1 := by exact_mod_cast hle
-    rw [hps]
-    linarith [hbern, hle']
-  exact_mod_cast hgoal
+  rcases le_or_gt p 1 with hp1 | hp1
+  · rw [show p - 1 = 0 by omega, Nat.zero_mul]
+    exact Nat.zero_le n
+  · set v : ℕ := padicValNat p (n + 1)
+    have hle : p ^ v ≤ n + 1 := Nat.le_of_dvd (Nat.succ_pos n) pow_padicValNat_dvd
+    have hbern : 1 + (v : ℤ) * ((p : ℤ) - 1) ≤ (p : ℤ) ^ v := by
+      have h2 : (-2 : ℤ) ≤ (p : ℤ) - 1 := by omega
+      simpa using one_add_mul_le_pow h2 v
+    have hgoal : ((p - 1 : ℕ) : ℤ) * (v : ℤ) ≤ (n : ℤ) := by
+      have hps : ((p - 1 : ℕ) : ℤ) = (p : ℤ) - 1 := by omega
+      have hle' : ((p : ℤ)) ^ v ≤ (n : ℤ) + 1 := by exact_mod_cast hle
+      rw [hps]
+      linarith [hbern, hle']
+    exact_mod_cast hgoal
 
 omit [IsUltrametricDist L] [CompleteSpace L] in
 /-- The logarithm terms decay geometrically at the `(p−1)`-th power level:
