@@ -320,6 +320,13 @@ theorem productRestrictionSub_mem_sectionEqualizer (C : RationalCovering A)
       restrictionMap D₂ D₃ h₃₂ (restrictionMap C.base D₂ (C.hsubset D₂ hD₂) x)
   rw [e₁, e₂]
 
+/-- The section equalizer is a **complete** space: it is closed (`sectionEqualizer_isClosed`)
+in the finite product `∏_D 𝒪_X(D)` of complete completions, hence complete as a closed
+subspace. (Foundation for applying the Banach OMT to `ρ̃ : 𝒪_X(U) → E`.) -/
+theorem sectionEqualizer_completeSpace (C : RationalCovering A) :
+    CompleteSpace ↥(sectionEqualizer A C) :=
+  (sectionEqualizer_isClosed A C).completeSpace_coe
+
 /-- An affinoid ring `(A, A⁺)` is **sheafy** if the structure presheaf `𝒪_X` on
 `Spa(A, A⁺)` is a sheaf of **topological** rings (Definition 8.26 of Wedhorn).
 By Remark 8.20, this is equivalent to two conditions on every rational cover `C` —
