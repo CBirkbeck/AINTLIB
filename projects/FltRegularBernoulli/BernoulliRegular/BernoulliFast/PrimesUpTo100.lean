@@ -30,7 +30,7 @@ private theorem not_regular_of_dvd_bernoulli_value
     {p k : ℕ} [Fact p.Prime] (hp_odd : p ≠ 2)
     (hk : 1 ≤ k) (hk_range : 2 * k ≤ p - 3)
     (hdiv : (p : ℤ) ∣ (bernoulli (2 * k)).num) :
-    ¬ IsRegularPrime p := fun hreg =>
+    ¬ IsRegularPrime p := fun hreg ↦
   ((KummerCriterion (p := p) hp_odd).mp hreg k hk hk_range) hdiv
 
 macro "regular_prime_by_values" p:num upper:num : tactic => `(tactic|
