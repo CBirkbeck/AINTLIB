@@ -327,7 +327,7 @@ theorem locSubringToRingOfDef_val_eq_symm_comp_of (D : RationalLocData A)
     haveI : IsUniformAddGroup D.completedLocSubring :=
       IsUniformAddGroup.comap D.completedLocSubring.subtype.toAddMonoidHom
     have hui : IsUniformInducing D.locSubringToCompleted := by
-      refine isUniformEmbedding_subtype_val.isUniformInducing.isUniformInducing_comp_iff.mp ?_
+      refine isUniformEmbedding_subtype_val.isUniformInducing.of_comp_iff.mp ?_
       change IsUniformInducing (Subtype.val ∘ ⇑D.locSubringToCompleted)
       exact CompletionLocalization.locSubringToPresheafValue_isUniformInducing D
     have hdense : DenseRange D.locSubringToCompleted := by
