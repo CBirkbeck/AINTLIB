@@ -352,53 +352,53 @@ def mkFracExpr (f : Frac) : Expr :=
 
 def mkListLit (α : Expr) (u : Level) (xs : Array Expr) : Expr :=
   let nil := mkApp (mkConst ``List.nil [u]) α
-  xs.foldr (fun x acc => mkApp3 (mkConst ``List.cons [u]) α x acc) nil
+  xs.foldr (fun x acc ↦ mkApp3 (mkConst ``List.cons [u]) α x acc) nil
 
 end CbvBernoulli
 
 open CbvBernoulli
 
-cbv_simproc cbv_eval simpSimplify (simplify _) := fun e => do
+cbv_simproc cbv_eval simpSimplify (simplify _) := fun e ↦ do
   let_expr simplify a := e | return .rfl
   let some f := getFracValue? a | return .rfl
   let result ← Sym.share (mkFracExpr (simplify f))
   return .step result (← Sym.mkEqRefl result)
 
-cbv_simproc cbv_eval simpNegF (negF _) := fun e => do
+cbv_simproc cbv_eval simpNegF (negF _) := fun e ↦ do
   let_expr negF a := e | return .rfl
   let some f := getFracValue? a | return .rfl
   let result ← Sym.share (mkFracExpr (negF f))
   return .step result (← Sym.mkEqRefl result)
 
-cbv_simproc cbv_eval simpAddF (addF _ _) := fun e => do
+cbv_simproc cbv_eval simpAddF (addF _ _) := fun e ↦ do
   let_expr addF a b := e | return .rfl
   let some f₁ := getFracValue? a | return .rfl
   let some f₂ := getFracValue? b | return .rfl
   let result ← Sym.share (mkFracExpr (addF f₁ f₂))
   return .step result (← Sym.mkEqRefl result)
 
-cbv_simproc cbv_eval simpMulF (mulF _ _) := fun e => do
+cbv_simproc cbv_eval simpMulF (mulF _ _) := fun e ↦ do
   let_expr mulF a b := e | return .rfl
   let some f₁ := getFracValue? a | return .rfl
   let some f₂ := getFracValue? b | return .rfl
   let result ← Sym.share (mkFracExpr (mulF f₁ f₂))
   return .step result (← Sym.mkEqRefl result)
 
-cbv_simproc cbv_eval simpMulN (mulN _ _) := fun e => do
+cbv_simproc cbv_eval simpMulN (mulN _ _) := fun e ↦ do
   let_expr mulN a c := e | return .rfl
   let some f := getFracValue? a | return .rfl
   let some c := Sym.getNatValue? c | return .rfl
   let result ← Sym.share (mkFracExpr (mulN f c))
   return .step result (← Sym.mkEqRefl result)
 
-cbv_simproc cbv_eval simpMulZ (mulZ _ _) := fun e => do
+cbv_simproc cbv_eval simpMulZ (mulZ _ _) := fun e ↦ do
   let_expr mulZ a z := e | return .rfl
   let some f := getFracValue? a | return .rfl
   let some z := CbvBernoulli.getIntValue? z | return .rfl
   let result ← Sym.share (mkFracExpr (mulZ f z))
   return .step result (← Sym.mkEqRefl result)
 
-cbv_simproc cbv_eval simpDivN (divN _ _) := fun e => do
+cbv_simproc cbv_eval simpDivN (divN _ _) := fun e ↦ do
   let_expr divN a d := e | return .rfl
   let some f := getFracValue? a | return .rfl
   let some d := Sym.getNatValue? d | return .rfl
@@ -407,7 +407,7 @@ cbv_simproc cbv_eval simpDivN (divN _ _) := fun e => do
 
 /-- `xs ++ ys` for literal lists becomes a single literal list. -/
 cbv_simproc cbv_eval simpListAppend (@HAppend.hAppend (List _) (List _) (List _) _ _ _) :=
-    fun e => do
+    fun e ↦ do
   let_expr HAppend.hAppend α _ _ _ a b := e | return .rfl
   let_expr List β := α | return .rfl
   let some aElems := getListLitElems a | return .rfl
@@ -416,13 +416,13 @@ cbv_simproc cbv_eval simpListAppend (@HAppend.hAppend (List _) (List _) (List _)
   let result ← Sym.share (mkListLit β u (aElems ++ bElems))
   return .step result (← Sym.mkEqRefl result)
 
-cbv_simproc cbv_eval simpListLength (List.length _) := fun e => do
+cbv_simproc cbv_eval simpListLength (List.length _) := fun e ↦ do
   let_expr List.length _ a := e | return .rfl
   let some elems := getListLitElems a | return .rfl
   let result ← Sym.share (toExpr elems.size)
   return .step result (← Sym.mkEqRefl result)
 
-cbv_simproc cbv_eval simpListTail (List.tail _) := fun e => do
+cbv_simproc cbv_eval simpListTail (List.tail _) := fun e ↦ do
   let_expr List.tail α a := e | return .rfl
   let some elems := getListLitElems a | return .rfl
   let .succ u := (← Sym.getLevel α) | return .rfl
@@ -430,35 +430,35 @@ cbv_simproc cbv_eval simpListTail (List.tail _) := fun e => do
   let result ← Sym.share (mkListLit α u tail)
   return .step result (← Sym.mkEqRefl result)
 
-cbv_simproc cbv_eval simpListZipWith (List.zipWith _ _ _) := fun e => do
+cbv_simproc cbv_eval simpListZipWith (List.zipWith _ _ _) := fun e ↦ do
   let_expr List.zipWith _ _ γ f a b := e | return .rfl
   let some aElems := getListLitElems a | return .rfl
   let some bElems := getListLitElems b | return .rfl
   let k := min aElems.size bElems.size
-  let out ← (Array.range k).mapM fun i =>
+  let out ← (Array.range k).mapM fun i ↦
     Sym.share (mkApp2 f aElems[i]! bElems[i]!)
   let .succ u := (← Sym.getLevel γ) | return .rfl
   let result ← Sym.share (mkListLit γ u out)
   return .step result (← Sym.mkEqRefl result)
 
-cbv_simproc cbv_eval simpListZip (List.zip _ _) := fun e => do
+cbv_simproc cbv_eval simpListZip (List.zip _ _) := fun e ↦ do
   let_expr List.zip α β a b := e | return .rfl
   let some aElems := getListLitElems a | return .rfl
   let some bElems := getListLitElems b | return .rfl
   let k := min aElems.size bElems.size
   let .succ uα := (← Sym.getLevel α) | return .rfl
   let .succ uβ := (← Sym.getLevel β) | return .rfl
-  let out ← (Array.range k).mapM fun i =>
+  let out ← (Array.range k).mapM fun i ↦
     Sym.share (mkApp4 (mkConst ``Prod.mk [uα, uβ]) α β aElems[i]! bElems[i]!)
   let prodT := mkApp2 (mkConst ``Prod [uα, uβ]) α β
   let u := mkLevelMax uα uβ
   let result ← Sym.share (mkListLit prodT u out)
   return .step result (← Sym.mkEqRefl result)
 
-cbv_simproc cbv_eval simpListMap (List.map _ _) := fun e => do
+cbv_simproc cbv_eval simpListMap (List.map _ _) := fun e ↦ do
   let_expr List.map _ β f a := e | return .rfl
   let some aElems := getListLitElems a | return .rfl
-  let out ← aElems.mapM fun x => Sym.share (mkApp f x)
+  let out ← aElems.mapM fun x ↦ Sym.share (mkApp f x)
   let .succ u := (← Sym.getLevel β) | return .rfl
   let result ← Sym.share (mkListLit β u out)
   return .step result (← Sym.mkEqRefl result)
@@ -623,7 +623,7 @@ theorem bernoulliFrac_toRat_eq_bernoulli (n : Nat) :
 /-- Next Pascal row: `[C(n,0), C(n,1), ..., C(n,n)]` to
 `[C(n+1,0), C(n+1,1), ..., C(n+1,n+1)]`. -/
 private def nextPascalRow (row : List Nat) : List Nat :=
-  let mid := (row.zip row.tail).map (fun (a, b) => a + b)
+  let mid := (row.zip row.tail).map (fun (a, b) ↦ a + b)
   [1] ++ mid ++ [1]
 
 /-- Given known Bernoulli numbers and the matching Pascal row, compute the
@@ -631,7 +631,7 @@ next Bernoulli number.  `bs.zip row` truncates to `bs.length` pairs; the row
 is intentionally one coefficient longer. -/
 private def nextBernoulli (bs : List Frac) (row : List Nat) : Frac :=
   let k := bs.length
-  let weightedSum := (bs.zip row).foldl (fun acc (bj, cj) => addF acc (mulN bj cj)) (0, 1)
+  let weightedSum := (bs.zip row).foldl (fun acc (bj, cj) ↦ addF acc (mulN bj cj)) (0, 1)
   negF (divN weightedSum (k + 1))
 
 /-- Carry the Pascal row as a second accumulator. -/
