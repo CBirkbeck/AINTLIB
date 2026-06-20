@@ -296,7 +296,7 @@ lemma lunipPsi_injective (hp : Nat.Prime p) (hpN : ¬ Nat.Coprime p N) :
         GeneralLinearGroup.mkOfDetNeZero, Matrix.mul_apply, Fin.sum_univ_two,
         Matrix.cons_val', Matrix.cons_val_zero, Matrix.cons_val_one,
         Matrix.of_apply, Matrix.cons_val_fin_one, Matrix.empty_val'] <;>
-      (try simp) <;> (try field_simp) <;> (try ring)
+      (try simp); (try field_simp); (try ring)
   rw [hmat] at hmem
   obtain ⟨γ, hγ, hγeq⟩ := Subgroup.mem_map.mp hmem
   have hentry : ((γ : Matrix (Fin 2) (Fin 2) ℤ) 1 0 : ℚ) =
