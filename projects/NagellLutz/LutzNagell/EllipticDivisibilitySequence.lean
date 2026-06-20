@@ -1264,18 +1264,22 @@ variable (one : W 1 ∈ R⁰) (two : W 2 ∈ R⁰)
   (dvd₁₂ : W 1 ∣ W 2) (dvd₁₃ : W 1 ∣ W 3) (dvd₂₄ : W 2 ∣ W 4)
 include one two dvd₁₂ dvd₁₃ dvd₂₄
 
-omit ellU in
+omit ellU one in
+/-- An elliptic sequence whose second term is not a zero divisor and which divides its second,
+third and fourth terms appropriately is a constant multiple of a normalised EDS.
+The first term is automatically not a zero divisor: it divides `W 2 ∈ R⁰`. -/
 theorem IsEllSequence.eq_normEDS_of_dvd : ∃ b c d, W = (W 1 * normEDS b c d ·) :=
   have ⟨b, h₁₂⟩ := dvd₁₂; have ⟨c, h₁₃⟩ := dvd₁₃; have ⟨d, h₂₄⟩ := dvd₂₄
+  have one : W 1 ∈ R⁰ := (mul_mem_nonZeroDivisors.mp (h₁₂ ▸ two)).1
   ⟨b, c, d, @IsEllSequence.ext _ _ _ _ ellW (IsEllSequence.smul IsEllSequence.normEDS _)
     one two (by simp) (by simp [h₁₂]) (by simp [h₁₃]) (by rw [h₂₄, h₁₂, normEDS_four]; ring)⟩
 
-omit ellW ellU dvd₁₂ dvd₁₃ dvd₂₄ in
-/-- An EDS whose first two terms are not zero divisors
+omit ellW ellU one dvd₁₂ dvd₁₃ dvd₂₄ in
+/-- An EDS whose second term is not a zero divisor
 is a constant multiple of a normalised EDS. -/
 theorem IsEllDivSequence.eq_normEDS (h : IsEllDivSequence W) :
     ∃ b c d, W = (W 1 * normEDS b c d ·) :=
-  h.1.eq_normEDS_of_dvd one two (h.2 _ _ ⟨2, by ring⟩) (h.2 _ _ ⟨3, by ring⟩) (h.2 _ _ ⟨2, by ring⟩)
+  h.1.eq_normEDS_of_dvd two (h.2 _ _ ⟨2, by ring⟩) (h.2 _ _ ⟨3, by ring⟩) (h.2 _ _ ⟨2, by ring⟩)
 
 section Complement
 
@@ -1438,18 +1442,18 @@ omit ellW ellU one two dvd₁₂ dvd₁₃ dvd₂₄ in
 protected theorem IsEllDivSequence.normEDS : IsEllDivSequence (normEDS b c d) :=
   ⟨IsEllSequence.normEDS, IsDivSequence.normEDS⟩
 
-omit ellU in
+omit ellU one in
 /-- An elliptic sequence is a divisibility sequence if it satisfies three base cases
-of the divisibility condition, provided its first two terms are not zero divisors. -/
+of the divisibility condition, provided its second term is not a zero divisor. -/
 lemma IsEllSequence.isDivSequence_of_dvd : IsDivSequence W := by
-  obtain ⟨b, c, d, h⟩ := ellW.eq_normEDS_of_dvd one two dvd₁₂ dvd₁₃ dvd₂₄
+  obtain ⟨b, c, d, h⟩ := ellW.eq_normEDS_of_dvd two dvd₁₂ dvd₁₃ dvd₂₄
   intro m n hmn
   rw [congr_fun h m, congr_fun h n]
   exact mul_dvd_mul_left (W 1) (IsDivSequence.normEDS m n hmn)
 
-omit ellU in
+omit ellU one in
 lemma IsEllSequence.isEllDivSequence_of_dvd : IsEllDivSequence W :=
-  ⟨ellW, ellW.isDivSequence_of_dvd one two dvd₁₂ dvd₁₃ dvd₂₄⟩
+  ⟨ellW, ellW.isDivSequence_of_dvd two dvd₁₂ dvd₁₃ dvd₂₄⟩
 
 end Divisibility
 
