@@ -435,41 +435,34 @@ lemma map_preΨ₄ : (W.map f).preΨ₄ = W.preΨ₄.map f := by
 
 @[simp]
 lemma map_preΨ' (n : ℕ) : (W.map f).preΨ' n = (W.preΨ' n).map f := by
-  simp only [preΨ', map_Ψ₂Sq, map_Ψ₃, map_preΨ₄, ← coe_mapRingHom, map_preNormEDS']
-  simp only [map_pow, coe_mapRingHom]
+  simp [preΨ', map_preNormEDS', ← coe_mapRingHom]
 
 @[simp]
 lemma map_preΨ (n : ℤ) : (W.map f).preΨ n = (W.preΨ n).map f := by
-  simp only [preΨ, map_Ψ₂Sq, map_Ψ₃, map_preΨ₄, ← coe_mapRingHom, map_preNormEDS]
-  simp only [map_pow, coe_mapRingHom]
+  simp [preΨ, map_preNormEDS, ← coe_mapRingHom]
 
 @[simp]
 lemma map_ΨSq (n : ℤ) : (W.map f).ΨSq n = (W.ΨSq n).map f := by
-  simp only [ΨSq, map_preΨ, map_Ψ₂Sq, ← coe_mapRingHom]
-  simp only [map_pow, map_mul, map_one, apply_ite <| mapRingHom f, coe_mapRingHom]
+  simp [ΨSq, ← coe_mapRingHom, apply_ite <| mapRingHom f]
 
 @[simp]
 lemma map_Ψ (n : ℤ) : (W.map f).Ψ n = (W.Ψ n).map (mapRingHom f) := by
-  simp only [Ψ, map_preΨ, map_ψ₂, ← coe_mapRingHom]
-  simp only [map_mul, map_one, map_C, apply_ite <| mapRingHom _, coe_mapRingHom]
+  rw [← coe_mapRingHom]
+  simp [Ψ, apply_ite <| mapRingHom _]
 
 @[simp]
 lemma map_Φ (n : ℤ) : (W.map f).Φ n = (W.Φ n).map f := by
-  simp only [Φ, map_ΨSq, map_preΨ, map_Ψ₂Sq]
-  simp only [Polynomial.map_sub, Polynomial.map_mul, Polynomial.map_one,
-    Polynomial.map_X, apply_ite (Polynomial.map f)]
+  rw [← coe_mapRingHom]
+  simp [Φ, map_sub, apply_ite <| mapRingHom f]
 
 @[simp]
 lemma map_ψ (n : ℤ) : (W.map f).ψ n = (W.ψ n).map (mapRingHom f) := by
-  simp only [ψ, map_ψ₂, map_Ψ₃, map_preΨ₄, ← coe_mapRingHom, map_normEDS]
-  simp only [map_C, coe_mapRingHom]
+  rw [← coe_mapRingHom]
+  simp [ψ, map_normEDS]
 
 @[simp]
 lemma map_φ (n : ℤ) : (W.map f).φ n = (W.φ n).map (mapRingHom f) := by
-  unfold φ
-  rw [map_ψ, map_ψ, map_ψ]
-  simp only [Polynomial.map_sub, Polynomial.map_mul, Polynomial.map_pow, Polynomial.map_C,
-    Polynomial.map_X, coe_mapRingHom]
+  simp [φ]
 
 end Map
 
