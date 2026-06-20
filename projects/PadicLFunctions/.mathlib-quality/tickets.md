@@ -6885,7 +6885,24 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
     `Γ` subtype (CompactSpace as closed subgroup of compact `ℤ_[p]ˣ`, ContinuousMul), continuity of
     `logCM` (from the difference-isometry `‖pZpLog x - pZpLog y‖ = ‖x-y‖`, provable from `pZpLog_mul`+
     `norm_pZpLog`+inverses) and `expCM` (Lipschitz, cf. `PadicExp.lean:1173` `norm_padicExp_sub_padicExp`).
-    (b) `gplusEquiv` — `GPlus ≅ Δ×Γ` via Teichmüller + the `/±1` quotient (`Δ = μ_{p-1}/{±1}`).
+    **gammaLogEquiv (Γ≅ℤ_p) — COMPLETE & axiom-clean (2026-06-21)**: `Gamma`/`OneUnits` (the 1-units
+    subgroup) + `instCompactSpaceGamma` (closed subgroup of compact `ℤ_[p]ˣ`); `logCM`/`expCM`
+    (continuous maps, via `LipschitzOnWith` of `divP∘pZpLog` / `Units.continuous_iff` for `expUnit`);
+    the 4 equations `logCM_mul`/`logCM_one`/`expCM_logCM`/`logCM_expCM`; helpers `divP_add`,
+    `norm_pZpExp_sub`, `continuous_pZpExp_mul`.
+    **gplusEquiv structural core — COMPLETE & axiom-clean (2026-06-21)**: `gammaProj` (1-unit projection
+    `ℤ_[p]ˣ →* Γ`, `u↦u·ω(u)⁻¹`); `unitsSplitEquiv : ℤ_[p]ˣ ≃* μ_{p-1}×Γ` (the Teichmüller splitting,
+    `u↦(ω(u),u·ω(u)⁻¹)`); `teichmuller_oneUnit`/`teichmuller_idem`/`teichmuller_neg_one` (ω(-1)=-1);
+    `instFiniteTeichRange` (μ_{p-1} finite). REMAINING for the full carrier bridge `Φ`:
+    (i) the `/±1` quotient `GPlus = ℤ_[p]ˣ/⟨-1⟩ ≃* (μ_{p-1}/⟨-1⟩)×Γ = Δ×Γ` — via `unitsSplitEquiv` +
+    `QuotientGroup.congr` (transport `⟨-1⟩ ↦ ⟨(-1,1)⟩` by `teichmuller_neg_one`) + `(A×B)/(H×⊥)≃(A/H)×B`;
+    (ii) continuity → `≃ₜ*` (teichmuller continuous via `isLocallyConstant_teichmullerFun`, gammaProj/inv);
+    (iii) assemble `carrierBridge Φ` from gplusEquiv + gammaLogEquiv (convert to the `C(_,_)`+equations form);
+    (iv) `Δ` instances for `charIdealGroup`: `[Fintype Δ]` (from instFiniteTeichRange), `[Invertible
+    ((p-1)/2 : ℤ_[p])]` (prime-to-p), and the **completeness `∑_ω e_ω = 1`** (Fourier/orthogonality over
+    ℤ_[p], using μ_{(p-1)/2}⊆ℤ_[p] via Teichmüller — the deepest remaining piece). (iv) + capstone
+    instantiation also need the separately-bundled CFT/§12, so full internalisation = the whole IMC.
+    OLD: `gplusEquiv` — `GPlus ≅ Δ×Γ` via Teichmüller + the `/±1` quotient (`Δ = μ_{p-1}/{±1}`).
     **Scoped infrastructure (2026-06-20)**: `CompactSpace ℤ_[p]ˣ` is an AUTOMATIC instance
     (`Units.instCompactSpaceOfT1SpaceOfContinuousMul`, mathlib) — no gap. The Teichmüller MonoidHom
     `PadicInt.teichmuller : ℤ_[p]ˣ →* ℤ_[p]ˣ` EXISTS (`Interpolation/Branches.lean:180`, with

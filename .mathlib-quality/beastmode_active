@@ -1,1 +1,1 @@
-FOCUS: gplusEquiv — gammaProj (1-unit projection) DONE; next the splitting ℤ_[p]ˣ ≃* μ_{p-1}×Γ via (teichmuller, gammaProj), then /±1 quotient.
+FOCUS: gplusEquiv structural core DONE (splitting+finiteness+neg_one). Next: /±1 quotient GPlus≅Δ×Γ (QuotientGroup.congr + (A×B)/(H×⊥)), then continuity, then assemble carrierBridge Φ.
