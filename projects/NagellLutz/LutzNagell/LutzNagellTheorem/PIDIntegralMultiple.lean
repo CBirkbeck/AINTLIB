@@ -1,6 +1,6 @@
 import LutzNagell.DivisionPolynomialDegree
-import LutzNagell.ZSMul
 import LutzNagell.LutzNagellTheorem.PIDPrimeOrder
+import LutzNagell.ZSMul
 import Mathlib.RingTheory.Polynomial.RationalRoot
 
 /-!
@@ -26,16 +26,13 @@ omit [UniqueFactorizationMonoid R] in
 theorem monic_Φ_sub_smul_ΨSq
     {n : ℤ} (hn : (n : R) ≠ 0) (c : R) :
     (W.Φ n - C c * W.ΨSq n).Monic := by
-  have hn_int : n ≠ 0 := by intro h; exact hn (by simp [h])
-  apply Polynomial.Monic.sub_of_left (leadingCoeff_Φ _ n)
-  apply degree_lt_degree
+  have hn0 : n ≠ 0 := by rintro rfl; simp at hn
+  refine Polynomial.Monic.sub_of_left (leadingCoeff_Φ _ n) (degree_lt_degree ?_)
   calc (C c * W.ΨSq n).natDegree
       _ ≤ (W.ΨSq n).natDegree := natDegree_C_mul_le _ _
       _ = n.natAbs ^ 2 - 1 := natDegree_ΨSq _ hn
-      _ < n.natAbs ^ 2 := Nat.pred_lt (pow_ne_zero 2 (Int.natAbs_pos.mpr hn_int).ne')
+      _ < n.natAbs ^ 2 := Nat.pred_lt (pow_ne_zero 2 (Int.natAbs_ne_zero.mpr hn0))
       _ = (W.Φ n).natDegree := (natDegree_Φ _ n).symm
-
-/-! ### The x-coordinate formula -/
 
 omit [IsDomain R] [UniqueFactorizationMonoid R] [IsFractionRing R K] in
 /-- The x-coordinate of `n • P` satisfies `x' · ΨSq_n(x) = Φ_n(x)`. -/
@@ -45,17 +42,15 @@ theorem x_coord_nsmul_eq
     {x' y' : K} (hns' : (curveK R K W).toAffine.Nonsingular x' y')
     (hnP : n • (Affine.Point.some _ _ hns) = Affine.Point.some _ _ hns') :
     x' * ((curveK R K W).ΨSq n).eval x = ((curveK R K W).Φ n).eval x := by
-  classical
-  open Jacobian in
   have hJac : n • Jacobian.Point.fromAffine (Affine.Point.some _ _ hns) =
       Jacobian.Point.fromAffine (Affine.Point.some _ _ hns') := by
     have h := congrArg (Jacobian.Point.toAffineAddEquiv (curveK R K W)).symm hnP
-    simp only [map_zsmul] at h
-    convert h using 1
+    rw [map_zsmul] at h
+    simpa using h
   have hsmul := zsmul_eq_smulEval (curveK R K W) hns n
   open Jacobian in
   have hX := X_eq_of_equiv (show smulEval (curveK R K W) x y n ≈ ![x', y', 1] by
-    rw [Jacobian.Point.ext_iff] at hJac; rw [hsmul] at hJac; exact Quotient.exact hJac)
+    rw [Jacobian.Point.ext_iff, hsmul] at hJac; exact Quotient.exact hJac)
   simp only [smulEval, Function.comp, Matrix.cons_val_zero, Matrix.cons_val_two,
     Matrix.head_cons, Matrix.tail_cons] at hX
   norm_num at hX
@@ -66,8 +61,6 @@ theorem x_coord_nsmul_eq
   rw [hΨSq] at hX
   exact hX.symm
 
-/-! ### x integral from the coordinate formula + monic polynomial -/
-
 /-- If `n • P` has integral x-coordinate, then `P` has integral x-coordinate. -/
 theorem x_isInteger_of_nsmul_x_isInteger
     {x y : K} (hns : (curveK R K W).toAffine.Nonsingular x y)
@@ -77,15 +70,9 @@ theorem x_isInteger_of_nsmul_x_isInteger
     {c : R} (hc : algebraMap R K c = x') :
     IsLocalization.IsInteger R x := by
   have hcoord := x_coord_nsmul_eq W hns hn hns' hnP
-  rw [← hc] at hcoord
-  have hΦ_map : (curveK R K W).Φ n = (W.Φ n).map (algebraMap R K) := by
-    simp [curveK, map_Φ]
-  have hΨSq_map : (curveK R K W).ΨSq n = (W.ΨSq n).map (algebraMap R K) := by
-    simp [curveK, map_ΨSq]
   have hroot : aeval x (W.Φ n - C c * W.ΨSq n) = 0 := by
-    rw [aeval_def, eval₂_eq_eval_map, Polynomial.map_sub, Polynomial.map_mul, Polynomial.map_C,
-      ← hΦ_map, ← hΨSq_map]
-    simp only [eval_sub, eval_mul, eval_C]
+    simp only [← hc, curveK, map_Φ, map_ΨSq, aeval_def, eval₂_eq_eval_map, Polynomial.map_sub,
+      Polynomial.map_mul, Polynomial.map_C, eval_sub, eval_mul, eval_C] at hcoord ⊢
     linear_combination -hcoord
   exact isInteger_of_is_root_of_monic (monic_Φ_sub_smul_ΨSq W hn_R c) hroot
 
@@ -98,11 +85,9 @@ theorem isInteger_of_nsmul_isInteger
     (hx' : IsLocalization.IsInteger R x') (_hy' : IsLocalization.IsInteger R y') :
     (IsLocalization.IsInteger R x) ∧ IsLocalization.IsInteger R y := by
   obtain ⟨c, hc⟩ := hx'
-  have hx_int := x_isInteger_of_nsmul_x_isInteger W hns hn hn_R hns' hnP hc
-  refine ⟨hx_int, ?_⟩
-  obtain ⟨x₀, hx₀⟩ := hx_int
-  exact y_isInteger_of_x_isInteger_on_curve W
-    ((curveK_equation_iff R K W x y).mp hns.left) hx₀
+  obtain ⟨x₀, hx₀⟩ := x_isInteger_of_nsmul_x_isInteger W hns hn hn_R hns' hnP hc
+  exact ⟨⟨x₀, hx₀⟩, y_isInteger_of_x_isInteger_on_curve W
+    ((curveK_equation_iff R K W x y).mp hns.left) hx₀⟩
 
 end PID
 end LutzNagell
