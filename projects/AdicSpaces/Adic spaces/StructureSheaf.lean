@@ -276,6 +276,34 @@ noncomputable def productRestrictionSub (C : RationalCovering A) :
     presheafValue C.base → ∀ (D : ↥C.covers), presheafValue D.1 :=
   fun x ⟨D, hD⟩ ↦ restrictionMap C.base D (C.hsubset D hD) x
 
+/-- The **section equalizer** of a rational covering `C`: the families `(s_D)` that agree
+on every *common rational refinement* `D₃` of two cover pieces — the common-refinement form
+of Čech compatibility (matching the `IsSheafy.gluing` predicate). This is the
+compatible-family locus `E ⊆ ∏_D 𝒪_X(D)`, equal to the image of `productRestrictionSub` by
+gluing. Using all common refinements (rather than a single chosen intersection datum) avoids
+constructing pairwise intersections of pieces with heterogeneous pairs of definition. -/
+def sectionEqualizer (C : RationalCovering A) :
+    Set (∀ D : ↥C.covers, presheafValue D.1) :=
+  {s | ∀ (D₁ D₂ : ↥C.covers) (D₃ : RationalLocData A)
+        (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
+        (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₂.1.T D₂.1.s),
+        restrictionMap D₁.1 D₃ h₃₁ (s D₁) = restrictionMap D₂.1 D₃ h₃₂ (s D₂)}
+
+/-- The section equalizer is **closed** in the product. It is the intersection, over all
+`(D₁, D₂, D₃, h₃₁, h₃₂)`, of the loci `{s | res_{D₁,D₃}(s D₁) = res_{D₂,D₃}(s D₂)}`, each of
+which is the equalizer of two continuous maps into the Hausdorff completion `𝒪_X(D₃)`, hence
+closed (`isClosed_eq`). This is the topological input for the embedding step of sheafiness
+(expert-review 2026-06-20, Q1: Čech-closedness via common refinements). -/
+theorem sectionEqualizer_isClosed (C : RationalCovering A) :
+    IsClosed (sectionEqualizer A C) := by
+  unfold sectionEqualizer
+  simp only [Set.setOf_forall]
+  refine isClosed_iInter fun D₁ => isClosed_iInter fun D₂ => isClosed_iInter fun D₃ =>
+    isClosed_iInter fun h₃₁ => isClosed_iInter fun h₃₂ => ?_
+  exact isClosed_eq
+    ((restrictionMapHom_continuous D₁.1 D₃ h₃₁).comp (continuous_apply D₁))
+    ((restrictionMapHom_continuous D₂.1 D₃ h₃₂).comp (continuous_apply D₂))
+
 /-- An affinoid ring `(A, A⁺)` is **sheafy** if the structure presheaf `𝒪_X` on
 `Spa(A, A⁺)` is a sheaf of **topological** rings (Definition 8.26 of Wedhorn).
 By Remark 8.20, this is equivalent to two conditions on every rational cover `C` —

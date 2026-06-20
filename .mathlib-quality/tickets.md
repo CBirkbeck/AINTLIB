@@ -37,8 +37,13 @@ T-L2 (leaf #2: completion ROIE) ─► Leaf C (relative use over 𝒪_X(U)) ─�
 ---
 
 ### [T-L1a] `sectionEqualizer` is closed in the product
-- **Status**: open — ✅ ROUTE RESOLVED (expert-review #2, 2026-06-20). Build via the
-  **common-refinement compatibility predicate**, NOT pairwise intersections.
+- **Status**: ✅ DONE (beastmode 2026-06-20) — `sectionEqualizer` (common-refinement form) +
+  `sectionEqualizer_isClosed` PROVEN sorry-free in StructureSheaf.lean (just after
+  `productRestrictionSub`); `lake build «Adic spaces».StructureSheaf` green (2787 jobs), no
+  warnings on the decls. Proof: `unfold; simp only [Set.setOf_forall]; isClosed_iInter ×5;
+  isClosed_eq (restrictionMapHom_continuous _ _ _ |>.comp (continuous_apply _)) (…)`. The
+  reviewer's common-refinement predicate matched `IsSheafy.gluing` exactly — no intersection API,
+  no tensor bridge. Was: ROUTE RESOLVED (expert-review #2, 2026-06-20), common-refinement form.
 - **RESOLUTION (expert-review #2 reply, Q1):** routes (a) [descent⟹closed] and (c) [6.18] are
   rejected (faithful flatness gives no topological strictness; 6.18 on the subspace topology is
   circular). The canonical route is Čech-closedness, but using **ALL common rational refinements**
