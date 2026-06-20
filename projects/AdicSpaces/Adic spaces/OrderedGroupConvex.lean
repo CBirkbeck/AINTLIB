@@ -105,7 +105,7 @@ omit [IsOrderedMonoid Γ] in
 
 /-- Convex subgroups are normal (automatic for commutative groups). -/
 instance normal (H : ConvexSubgroup Γ) : H.toSubgroup.Normal :=
-  Subgroup.normal_of_comm H.toSubgroup
+  Subgroup.normal_of_isMulCommutative H.toSubgroup
 
 omit [IsOrderedMonoid Γ] in
 /-- An element `γ` with `1 ≤ γ` is in `H` iff `γ⁻¹` is. -/
