@@ -65,7 +65,7 @@ private theorem eventually_not_in_partition_left
     (γ : PwC1Immersion x y) (p : ℝ) :
     ∀ᶠ t in 𝓝[<] p, t ∉ γ.toPiecewiseC1Path.partition := by
   have hcl : _root_.IsClosed ((↑γ.toPiecewiseC1Path.partition \ {p} : Set ℝ)) :=
-    (γ.toPiecewiseC1Path.partition.finite_toSet.subset diff_subset).isClosed
+    (γ.toPiecewiseC1Path.partition.finite_toSet.subset sdiff_subset).isClosed
   have hmem : p ∉ (↑γ.toPiecewiseC1Path.partition \ {p} : Set ℝ) := by simp
   have h1 : ∀ᶠ t in 𝓝[<] p, t ∈ (↑γ.toPiecewiseC1Path.partition \ {p} : Set ℝ)ᶜ :=
     eventually_nhdsWithin_of_eventually_nhds (hcl.isOpen_compl.mem_nhds hmem)
@@ -78,7 +78,7 @@ private theorem eventually_not_in_partition_right
     (γ : PwC1Immersion x y) (p : ℝ) :
     ∀ᶠ t in 𝓝[>] p, t ∉ γ.toPiecewiseC1Path.partition := by
   have hcl : _root_.IsClosed ((↑γ.toPiecewiseC1Path.partition \ {p} : Set ℝ)) :=
-    (γ.toPiecewiseC1Path.partition.finite_toSet.subset diff_subset).isClosed
+    (γ.toPiecewiseC1Path.partition.finite_toSet.subset sdiff_subset).isClosed
   have hmem : p ∉ (↑γ.toPiecewiseC1Path.partition \ {p} : Set ℝ) := by simp
   have h1 : ∀ᶠ t in 𝓝[>] p, t ∈ (↑γ.toPiecewiseC1Path.partition \ {p} : Set ℝ)ᶜ :=
     eventually_nhdsWithin_of_eventually_nhds (hcl.isOpen_compl.mem_nhds hmem)
