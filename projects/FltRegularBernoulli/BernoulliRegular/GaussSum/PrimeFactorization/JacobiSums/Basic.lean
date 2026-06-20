@@ -262,7 +262,7 @@ lemma distinguishedPrimeAboveP_ramificationIdx_over_characterSubfield :
         (n := p * (p - 1)) (K := L) (p := p) (k := 0) (m := p - 1) (by simp) hm)
   have hmul :
       Ideal.ramificationIdxIn Pchar (𝓞 L) = p - 1 := by
-    have h := Ideal.ramificationIdxIn_mul_ramificationIdxIn'
+    have h := Ideal.ramificationIdxIn_mul_ramificationIdxIn
       (A := ℤ)
       (B := 𝓞 (characterSubfield (L := L) (p := p)))
       (C := 𝓞 L)
