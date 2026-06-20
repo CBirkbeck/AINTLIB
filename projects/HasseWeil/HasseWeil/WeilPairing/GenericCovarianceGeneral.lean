@@ -287,7 +287,7 @@ theorem eq_of_evaluatesTo_cofinite [IsAlgClosed F] {f g : KE}
   haveI hEll : (W_smooth W).toAffine.IsElliptic := ‹W.toAffine.IsElliptic›
   haveI : Infinite (W_smooth W).SmoothPoint := (W_smooth W).smoothPoint_infinite
   have hinf : (Set.univ \ badS : Set (W_smooth W).SmoothPoint).Infinite :=
-    Set.infinite_univ.diff hfin
+    Set.infinite_univ.sdiff hfin
   refine ((W_smooth W).finite_setOf_ord_P_nonzero hD).not_infinite (hinf.mono ?_)
   intro P hP
   exact hzero P hP.2
