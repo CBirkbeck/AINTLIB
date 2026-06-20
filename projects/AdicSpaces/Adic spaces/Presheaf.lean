@@ -602,7 +602,7 @@ noncomputable def RationalLocData.completedAbstractCompletion (D : RationalLocDa
     complete := hclosed.completeSpace_coe
     separation := Subtype.t0Space
     isUniformInducing :=
-      isUniformEmbedding_subtype_val.isUniformInducing.isUniformInducing_comp_iff.mp
+      isUniformEmbedding_subtype_val.isUniformInducing.of_comp_iff.mp
         D.locSubringToCompleted_val_isUniformInducing
     dense := by
       intro ⟨x, hx⟩
@@ -747,12 +747,12 @@ private theorem mem_prime_of_rational_subset_open {A : Type*} [CommRing A]
     refine ⟨?_, ?_⟩
     · apply isContinuous_ofValuation_of; intro γ
       by_cases hγ : γ = 0
-      · subst hγ; convert isOpen_empty; ext a; simp [not_lt_zero']
+      · subst hγ; convert isOpen_empty; ext a; simp [not_lt_zero]
       · by_cases h1 : (1 : WithZero (Multiplicative ℤ)) < γ
         · convert isOpen_univ; ext a
           simp only [Set.mem_setOf_eq, Set.mem_univ, iff_true, w, Valuation.comap_apply]
           exact lt_of_le_of_lt (Valuation.one_apply_le_one _) h1
-        · push_neg at h1
+        · push Not at h1
           suffices {a : A | w a < γ} = (p : Set A) by rw [this]; exact hp_open
           ext a; simp only [Set.mem_setOf_eq]; constructor
           · intro ha
@@ -1920,7 +1920,7 @@ theorem isIntegral_of_forall_continuous_valuation_le_one
               (pow_pos (zero_lt_iff.mpr (ha₀_val_eq ▸ hg_ne0)) n)
               (not_le.mp (by rw [ValuationSubring.valuation_le_one_iff]; exact hx_notV))
           have hsnx_ne : v₀_A₀ ⟨s ^ n * x, hn⟩ ≠ 0 :=
-            ne_of_gt (lt_of_le_of_lt zero_le' hv₀_lt)
+            ne_of_gt (lt_of_le_of_lt zero_le hv₀_lt)
           have hv₀_sn_eq : v₀_A₀ ⟨s ^ n, hsn_A₀⟩ = (v₀_A₀ t₀) ^ n := by
             exact hsn_eq ▸ map_pow v₀_A₀ t₀ n
           have hsn_ne : v₀_A₀ ⟨s ^ n, hsn_A₀⟩ ≠ 0 := by
@@ -3226,7 +3226,7 @@ private theorem topNilp_vle_one_of_continuous
   -- If `v(b) ≥ 1`, then `v(b)^n ≥ 1` for every `n` (`one_le_pow₀`), which
   -- contradicts the existence of an `n` with `v(b)^n < 1`. Hence `v(b) < 1`.
   by_contra h_not_lt
-  push_neg at h_not_lt
+  push Not at h_not_lt
   obtain ⟨n, hn⟩ := h_ev
   exact absurd (one_le_pow₀ h_not_lt (n := n)) (not_le.mpr hn)
 
@@ -3298,7 +3298,7 @@ private theorem valueGroup_archimedean_pair_of_topNilp_lt_one
     refine ⟨(k : ℤ) - 1, ?_⟩
     intro n hn
     by_contra hnb
-    push_neg at hnb
+    push Not at hnb
     have hkle : (k : ℤ) ≤ n := by omega
     have hdiff : (0 : ℤ) ≤ n - (k : ℤ) := by omega
     have hβu_pow_le_one : βu ^ (n - (k : ℤ)) ≤ 1 := by
@@ -3318,7 +3318,7 @@ private theorem valueGroup_archimedean_pair_of_topNilp_lt_one
   obtain ⟨n, hn_lt, hn_max⟩ := Int.exists_greatest_of_bdd hbd hne
   refine ⟨n, ?_, ?_⟩
   · by_contra hnp1
-    push_neg at hnp1
+    push Not at hnp1
     have hlt : γu < βu ^ (n + 1) := (hcast_lt _).mpr hnp1
     have hle : n + 1 ≤ n := hn_max _ hlt
     omega
