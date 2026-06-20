@@ -107,7 +107,7 @@ lemma BernoulliGen_one_of_ne_one [IsDomain R] [NeZero N]
   conv_lhs =>
     rw [show (∑ a : ZMod N, χ a * algebraMap ℚ R (2⁻¹ : ℚ))
           = algebraMap ℚ R (2⁻¹ : ℚ) * ∑ a : ZMod N, χ a from by
-      rw [Finset.mul_sum]; exact Finset.sum_congr rfl fun a _ => mul_comm _ _]
+      rw [Finset.mul_sum]; exact Finset.sum_congr rfl fun a _ ↦ mul_comm _ _]
   rw [MulChar.sum_eq_zero_of_ne_one hχ, mul_zero, sub_zero]
 
 /-- **Diekmann eq. 24/27** (T006), cleared form: `N · B_{1, χ} = ∑_a χ(a) · a`
@@ -118,7 +118,7 @@ lemma natCast_mul_BernoulliGen_one_of_ne_one [IsDomain R] [NeZero N]
     (N : R) * BernoulliGen χ 1 =
       ∑ a : ZMod N, χ a * (a.val : R) := by
   rw [BernoulliGen_one_of_ne_one hχ, Finset.mul_sum]
-  refine Finset.sum_congr rfl fun a _ => ?_
+  refine Finset.sum_congr rfl fun a _ ↦ ?_
   have hN_R : (N : R) = algebraMap ℚ R (N : ℚ) := by push_cast; rfl
   rw [hN_R, show algebraMap ℚ R ((N : ℚ)) * (χ a * algebraMap ℚ R ((a.val : ℚ) / N)) =
         χ a * (algebraMap ℚ R (N : ℚ) * algebraMap ℚ R ((a.val : ℚ) / N)) from by ring,
@@ -157,19 +157,19 @@ lemma orderOf_teichmullerCharQp :
     simp only [pow_orderOf_eq_one]
   have hpowZ : (teichmullerChar p) ^ orderOf (teichmullerCharQp p) = 1 :=
     (MulChar.ringHomComp_eq_one_iff (f := PadicInt.Coe.ringHom)
-      (hf := fun _ _ h => Subtype.coe_injective h)).mp hpowQ'
+      (hf := fun _ _ h ↦ Subtype.coe_injective h)).mp hpowQ'
   simpa [orderOf_teichmullerChar (p := p)] using orderOf_dvd_of_pow_eq_one hpowZ
 
 lemma teichmullerCharQp_pow_eq_one_iff (n : ℕ) :
     (teichmullerCharQp p) ^ n = 1 ↔ (p - 1) ∣ n := by
-  refine ⟨fun hpow => ?_, ?_⟩
+  refine ⟨fun hpow ↦ ?_, ?_⟩
   · simpa [orderOf_teichmullerCharQp (p := p)] using orderOf_dvd_of_pow_eq_one hpow
   · rintro ⟨m, rfl⟩
     rw [← orderOf_teichmullerCharQp (p := p), pow_mul, pow_orderOf_eq_one, one_pow]
 
 lemma teichmullerCharQp_pow_ne_one_of_not_dvd {n : ℕ} (hn : ¬ (p - 1) ∣ n) :
     (teichmullerCharQp p) ^ n ≠ 1 :=
-  fun hpow => hn ((teichmullerCharQp_pow_eq_one_iff (p := p) n).mp hpow)
+  fun hpow ↦ hn ((teichmullerCharQp_pow_eq_one_iff (p := p) n).mp hpow)
 
 omit [Algebra ℚ R] in
 /-- **Diekmann eq. 29** (T008): for an odd prime `p`, the boundary
@@ -214,14 +214,14 @@ lemma bernoulliGen_teichmuller_inverse_eq_p_sub_one_div_p_add_padicInt
   have hS_mod : PadicInt.toZMod S = (p - 1 : ZMod p) := by
     have hsplit :
         (∑ a : ZMod p, if a = 0 then 0 else 1) =
-          (Finset.univ.erase (0 : ZMod p)).sum (fun _ => (1 : ZMod p)) := by
+          (Finset.univ.erase (0 : ZMod p)).sum (fun _ ↦ (1 : ZMod p)) := by
       rw [← Finset.sum_erase_add _ _ (Finset.mem_univ 0), if_pos rfl, add_zero]
-      refine Finset.sum_congr rfl fun a ha => ?_
+      refine Finset.sum_congr rfl fun a ha ↦ ?_
       simp [(Finset.mem_erase.mp ha).1]
     calc
       PadicInt.toZMod S = ∑ a : ZMod p, if a = 0 then 0 else 1 := by
-        dsimp [S]; rw [map_sum]; exact Finset.sum_congr rfl fun a _ => hterm a
-      _ = (Finset.univ.erase (0 : ZMod p)).sum (fun _ => (1 : ZMod p)) := hsplit
+        dsimp [S]; rw [map_sum]; exact Finset.sum_congr rfl fun a _ ↦ hterm a
+      _ = (Finset.univ.erase (0 : ZMod p)).sum (fun _ ↦ (1 : ZMod p)) := hsplit
       _ = (p - 1 : ZMod p) := by
         have hcard : (Finset.univ.erase (0 : ZMod p)).card = p - 1 := by simp [ZMod.card p]
         rw [Finset.sum_const, hcard, nsmul_eq_mul, mul_one, Nat.cast_sub hp.one_le]
@@ -239,7 +239,7 @@ lemma bernoulliGen_teichmuller_inverse_eq_p_sub_one_div_p_add_padicInt
   rw [PadicInt.maximalIdeal_eq_span_p, Ideal.mem_span_singleton] at hS_mem
   rcases hS_mem with ⟨z, hz⟩
   have hzQ_sub : (S : ℚ_[p]) - (p - 1 : ℚ_[p]) = (p : ℚ_[p]) * z := by
-    simpa using congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hz
+    simpa using congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hz
   have hpQ_ne_zero : (p : ℚ_[p]) ≠ 0 := by exact_mod_cast hp.ne_zero
   refine ⟨z, (mul_right_inj' hpQ_ne_zero).mp ?_⟩
   calc
@@ -267,7 +267,7 @@ lemma sum_chi_val_eq_sum_chi_val_neg
     ∑ a : ZMod N, χ a * (a.val : R) =
       ∑ a : ZMod N, χ a * ((-a).val : R) :=
   Fintype.sum_equiv (Equiv.neg (ZMod N))
-    (fun a => χ a * (a.val : R)) (fun a => χ a * ((-a).val : R)) fun a => by
+    (fun a ↦ χ a * (a.val : R)) (fun a ↦ χ a * ((-a).val : R)) fun a ↦ by
     change χ a * (a.val : R) = χ (-a) * (-(-a)).val
     rw [hχ_even.eval_neg, neg_neg]
 
@@ -296,7 +296,7 @@ lemma sum_chi_val_eq_zero_of_even_ne_one
         ∑ a : ZMod N, χ a * ((a.val : R) + ((-a).val : R)) := by
     rw [two_mul]
     nth_rewrite 1 [sum_chi_val_eq_sum_chi_val_neg hχ_even]
-    rw [← Finset.sum_add_distrib]; exact Finset.sum_congr rfl fun _ _ => by ring
+    rw [← Finset.sum_add_distrib]; exact Finset.sum_congr rfl fun _ _ ↦ by ring
   -- Step 2: the pairing makes the inner sum collapse to `N · ∑_{a ≠ 0} χ(a) = 0`.
   have h_rhs : ∑ a : ZMod N, χ a * ((a.val : R) + ((-a).val : R)) = 0 := by
     simp_rw [val_add_val_neg_cast, mul_ite, mul_zero]
@@ -351,7 +351,7 @@ hence does not divide `n.choose k` for any `k`. -/
 lemma padicValNat_choose_eq_zero_of_lt {p : ℕ} [hp : Fact p.Prime]
     {n k : ℕ} (h : n < p) : padicValNat p (n.choose k) = 0 := by
   by_cases hle : k ≤ n
-  · have hfac : ¬ p ∣ n.choose k := fun hdvd => by
+  · have hfac : ¬ p ∣ n.choose k := fun hdvd ↦ by
       have h_fac : n.choose k ∣ n.factorial :=
         ⟨k.factorial * (n - k).factorial, by
           rw [← mul_assoc, Nat.choose_mul_factorial_mul_factorial hle]⟩
@@ -395,8 +395,8 @@ theorem bernoulli_mem_padicInt_of_lt_sub_one {p : ℕ} [hp : Fact p.Prime]
     push_cast; linarith [h_sum]
   -- Extract `ℤ_[p]`-witnesses for `bernoulli j`, `j < k`.
   have hj_wit : ∀ j, j < k → ∃ z : ℤ_[p], (bernoulli j : ℚ_[p]) = (z : ℚ_[p]) :=
-    fun j hj => ih j hj (Nat.lt_of_lt_of_le hj (Nat.le_of_lt hk))
-  let z_of : ℕ → ℤ_[p] := fun j =>
+    fun j hj ↦ ih j hj (Nat.lt_of_lt_of_le hj (Nat.le_of_lt hk))
+  let z_of : ℕ → ℤ_[p] := fun j ↦
     if h : j < k then (hj_wit j h).choose else 0
   have hz_of : ∀ j, j < k → (bernoulli j : ℚ_[p]) = ((z_of j : ℤ_[p]) : ℚ_[p]) := by
     intro j hj; simp only [z_of, dif_pos hj]; exact (hj_wit j hj).choose_spec
@@ -404,7 +404,7 @@ theorem bernoulli_mem_padicInt_of_lt_sub_one {p : ℕ} [hp : Fact p.Prime]
   have hS_coe : (S : ℚ_[p]) =
       ∑ j ∈ Finset.range k, (Nat.choose (k + 1) j : ℚ_[p]) * (bernoulli j : ℚ_[p]) := by
     simp only [S, PadicInt.coe_sum]
-    refine Finset.sum_congr rfl fun j hj => ?_
+    refine Finset.sum_congr rfl fun j hj ↦ ?_
     rw [PadicInt.coe_mul, PadicInt.coe_natCast, hz_of j (Finset.mem_range.mp hj)]
   have h_kp1_unit : IsUnit ((k + 1 : ℕ) : ℤ_[p]) := by
     rw [PadicInt.isUnit_iff, PadicInt.norm_natCast_eq_one_iff]
@@ -413,7 +413,7 @@ theorem bernoulli_mem_padicInt_of_lt_sub_one {p : ℕ} [hp : Fact p.Prime]
   have h_bern_Qp : ((k + 1 : ℕ) : ℚ_[p]) * ((_root_.bernoulli k : ℚ) : ℚ_[p]) =
       -∑ j ∈ Finset.range k,
         (Nat.choose (k + 1) j : ℚ_[p]) * ((_root_.bernoulli j : ℚ) : ℚ_[p]) := by
-    have h_cast := congrArg (fun q : ℚ => (q : ℚ_[p])) h_bern_rat
+    have h_cast := congrArg (fun q : ℚ ↦ (q : ℚ_[p])) h_bern_rat
     push_cast at h_cast ⊢
     exact h_cast
   rw [← hS_coe] at h_bern_Qp
@@ -500,7 +500,7 @@ lemma exists_padicInt_bernoulli_factor {p : ℕ} [hp : Fact p.Prime] (hp_odd : p
             (D : ℚ_[p]) =
           -((_root_.bernoulli n).num : ℚ_[p]) := by
       simpa [D] using
-        congrArg (fun q : ℚ => (q : ℚ_[p]))
+        congrArg (fun q : ℚ ↦ (q : ℚ_[p]))
           (bernoulli_factor_mul_den (n := n) hn_pos.ne')
     have ha_mul : (((a : ℤ_[p]) : ℚ_[p])) * (D : ℚ_[p]) =
         -((_root_.bernoulli n).num : ℚ_[p]) := by
@@ -566,20 +566,20 @@ theorem bernoulli_pSubOne_add_inv_p_mem_padicInt
     linarith [h_sum]
   -- Step 2: build the ℤ_[p]-witness `z` such that `p * z = p * bernoulli(p-1) + 1` in ℚ_[p].
   -- Each `C(p, k + 1) = p * c_k` (Nat divisibility, `c_k := C(p, k+1) / p`).
-  have h_pdvd : ∀ k, k < p - 2 → p ∣ Nat.choose p (k + 1) := fun k hk =>
+  have h_pdvd : ∀ k, k < p - 2 → p ∣ Nat.choose p (k + 1) := fun k hk ↦
     Nat.Prime.dvd_choose_self hp (by omega) (by omega)
   -- ℤ_[p]-witnesses for each `bernoulli (k + 1)`, `k < p - 2`:
   have h_wit : ∀ k, k < p - 2 → ∃ z : ℤ_[p],
-      ((_root_.bernoulli (k + 1) : ℚ) : ℚ_[p]) = (z : ℚ_[p]) := fun k hk =>
+      ((_root_.bernoulli (k + 1) : ℚ) : ℚ_[p]) = (z : ℚ_[p]) := fun k hk ↦
     bernoulli_mem_padicInt_of_lt_sub_one hp_odd (k + 1) (by omega)
-  let z_of : ℕ → ℤ_[p] := fun k =>
+  let z_of : ℕ → ℤ_[p] := fun k ↦
     if h : k < p - 2 then (h_wit k h).choose else 0
   have hz_of : ∀ k, k < p - 2 →
       ((_root_.bernoulli (k + 1) : ℚ) : ℚ_[p]) = (z_of k : ℚ_[p]) := by
     intro k hk; simp only [z_of, dif_pos hk]; exact (h_wit k hk).choose_spec
   -- `c k : ℕ := C(p, k + 1) / p`, satisfying `p * c k = C(p, k + 1)` for `k < p - 2`.
-  let c : ℕ → ℕ := fun k => Nat.choose p (k + 1) / p
-  have hc_eq : ∀ k, k < p - 2 → p * c k = Nat.choose p (k + 1) := fun k hk =>
+  let c : ℕ → ℕ := fun k ↦ Nat.choose p (k + 1) / p
+  have hc_eq : ∀ k, k < p - 2 → p * c k = Nat.choose p (k + 1) := fun k hk ↦
     Nat.mul_div_cancel' (h_pdvd k hk)
   -- Define the witness.
   let z : ℤ_[p] := -∑ k ∈ Finset.range (p - 2), (c k : ℤ_[p]) * z_of k
@@ -592,13 +592,13 @@ theorem bernoulli_pSubOne_add_inv_p_mem_padicInt
       -∑ k ∈ Finset.range (p - 2),
         (Nat.choose p (k + 1) : ℚ_[p]) *
           ((_root_.bernoulli (k + 1) : ℚ) : ℚ_[p]) := by
-    have h_cast := congrArg (fun q : ℚ => (q : ℚ_[p])) h_identity
+    have h_cast := congrArg (fun q : ℚ ↦ (q : ℚ_[p])) h_identity
     push_cast at h_cast; exact h_cast
   -- Translate `z` back through the coercion `ℤ_[p] → ℚ_[p]`.
   have h_z_coe : (z : ℚ_[p]) =
       -∑ k ∈ Finset.range (p - 2), (c k : ℚ_[p]) * ((z_of k : ℤ_[p]) : ℚ_[p]) := by
     simp only [z, PadicInt.coe_neg, PadicInt.coe_sum]
-    refine congrArg Neg.neg (Finset.sum_congr rfl fun k _ => ?_)
+    refine congrArg Neg.neg (Finset.sum_congr rfl fun k _ ↦ ?_)
     rw [PadicInt.coe_mul, PadicInt.coe_natCast]
   -- Key step: `p * bernoulli (p - 1) + 1 = p * z` in `ℚ_[p]`.
   have h_times_p :
@@ -607,7 +607,7 @@ theorem bernoulli_pSubOne_add_inv_p_mem_padicInt
     rw [h_identity_Qp, h_z_coe, mul_neg]
     refine congrArg Neg.neg ?_
     rw [Finset.mul_sum]
-    refine Finset.sum_congr rfl fun k hk => ?_
+    refine Finset.sum_congr rfl fun k hk ↦ ?_
     have hk' : k < p - 2 := Finset.mem_range.mp hk
     rw [show (Nat.choose p (k + 1) : ℚ_[p]) = (p : ℚ_[p]) * (c k : ℚ_[p]) from ?_,
       hz_of k hk']
