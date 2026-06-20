@@ -544,7 +544,7 @@ theorem fg_topologicalClosure_isClosed
         simp only [Pi.smul_apply, smul_eq_mul, RingHom.id_apply, Finset.smul_sum, smul_smul] }
   have hπ_cont : Continuous π := by
     change Continuous fun a : (Fin n → A) => ∑ i, a i • g i
-    exact continuous_finset_sum _ fun i _ => (continuous_apply i).smul continuous_const
+    exact continuous_finsetSum _ fun i _ => (continuous_apply i).smul continuous_const
   have hπ_surj : Function.Surjective π := by
     intro x
     have hx : x ∈ Submodule.span A (Set.range g) := hg_span ▸ Submodule.mem_top
@@ -946,7 +946,7 @@ theorem _sub_lemma_L4_2_continuous_via_OMT
   -- ν continuous via ContinuousSMul A M.
   have hν_cont : Continuous ν := by
     change Continuous fun a : (Fin n → A) => ∑ i, a i • s i
-    exact continuous_finset_sum _ fun i _ => (continuous_apply i).smul continuous_const
+    exact continuous_finsetSum _ fun i _ => (continuous_apply i).smul continuous_const
   -- ν surjective from hs.
   have hν_surj : Function.Surjective ν := by
     intro m
@@ -962,7 +962,7 @@ theorem _sub_lemma_L4_2_continuous_via_OMT
   have hfν_cont : Continuous (f ∘ ν) := by
     change Continuous fun a : (Fin n → A) => f (∑ i, a i • s i)
     simp only [map_sum, map_smul]
-    exact continuous_finset_sum _ fun i _ => (continuous_apply i).smul continuous_const
+    exact continuous_finsetSum _ fun i _ => (continuous_apply i).smul continuous_const
   -- f continuous via quotient map.
   exact hν_quot.continuous_iff.mpr hfν_cont
 
@@ -1061,7 +1061,7 @@ theorem _sub_lemma_L4_3_strict_via_closed_image
             smul_smul] }
     have hν_cont : Continuous ν := by
       change Continuous fun a : (Fin n → A) => ∑ i, a i • s i
-      exact continuous_finset_sum _ fun i _ => (continuous_apply i).smul continuous_const
+      exact continuous_finsetSum _ fun i _ => (continuous_apply i).smul continuous_const
     have hν_surj : Function.Surjective ν := by
       intro m
       have hm : m ∈ Submodule.span A (Set.range s) := hs ▸ Submodule.mem_top
@@ -1074,7 +1074,7 @@ theorem _sub_lemma_L4_3_strict_via_closed_image
     have hfν_cont : Continuous (f ∘ ν) := by
       change Continuous fun a : (Fin n → A) => f (∑ i, a i • s i)
       simp only [map_sum, map_smul]
-      exact continuous_finset_sum _ fun i _ => (continuous_apply i).smul continuous_const
+      exact continuous_finsetSum _ fun i _ => (continuous_apply i).smul continuous_const
     exact hν_quot.continuous_iff.mpr hfν_cont
   -- Step 4b: `f.rangeRestrict` is continuous (Subtype.val ∘ f.rangeRestrict = f).
   have hf_rangeRestrict_cont : Continuous (f.rangeRestrict : M →ₗ[A] LinearMap.range f) :=
