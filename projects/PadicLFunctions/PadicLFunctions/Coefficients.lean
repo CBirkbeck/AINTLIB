@@ -206,16 +206,30 @@ theorem _root_.IsPrimitiveRoot.tendsto_pow_sub_one {ζ : L} {n : ℕ}
     Tendsto ((ζ - 1) ^ ·) atTop (𝓝 0) :=
   tendsto_pow_atTop_nhds_zero_of_norm_lt_one (hζ.norm_sub_one_lt)
 
-omit [CompleteSpace L] in
-/-- W3: for `ζ` a primitive `D`-th root of unity with `p ∤ D` and `D ∤ c`,
-the element `ζ^c − 1` has norm one (hence is a unit of the integer ring).
+omit [IsUltrametricDist L] [CompleteSpace L] in
+/-- In a normed `ℚ_[p]`-algebra, a natural number prime to `p` has norm one
+(the algebra map is an isometry on scalars and `‖(D : ℚ_[p])‖ = 1 ↔ p ∤ D`).
+This is the bridge that specialises `IsPrimitiveRoot.norm_pow_sub_one_eq_one`
+back to the `p ∤ D` hypothesis used throughout §5. -/
+theorem norm_natCast_eq_one_of_not_dvd {D : ℕ} (hD : ¬ (p : ℕ) ∣ D) :
+    ‖(D : L)‖ = 1 := by
+  rw [show ((D : ℕ) : L) = algebraMap ℚ_[p] L ((D : ℕ) : ℚ_[p]) by simp [map_natCast],
+    norm_algebraMap', Padic.norm_natCast_eq_one_iff]
+  exact (Nat.Prime.coprime_iff_not_dvd hp.out).2 hD
+
+omit [NormedAlgebra ℚ_[p] L] [CompleteSpace L] in
+/-- W3: for `ζ` a primitive `D`-th root of unity with `‖(D : L)‖ = 1` and
+`D ∤ c`, the element `ζ^c − 1` has norm one (hence is a unit of the integer
+ring). The norm-one hypothesis on `D` is the abstract content; in the §5
+application `‖(D : L)‖ = 1` follows from `p ∤ D` via the `ℚ_[p]`-algebra
+structure (`Padic.norm_natCast_eq_one_iff`).
 
 Source (TeX 1798): "and `ε_D^c − 1 ∈ 𝒪_L^×` (since it has norm dividing
 `D`)". -/
 theorem _root_.IsPrimitiveRoot.norm_pow_sub_one_eq_one {ζ : L} {D : ℕ}
-    (hζ : IsPrimitiveRoot ζ D) (hD : ¬ (p : ℕ) ∣ D) {c : ℕ} (hc : ¬ D ∣ c) :
+    (hζ : IsPrimitiveRoot ζ D) (hD : ‖(D : L)‖ = 1) {c : ℕ} (hc : ¬ D ∣ c) :
     ‖ζ ^ c - 1‖ = 1 := by
-  have hD0 : D ≠ 0 := fun h => hD (h ▸ dvd_zero _)
+  have hD0 : D ≠ 0 := fun h => by simp [h] at hD
   obtain ⟨n, rfl⟩ : ∃ n, D = n + 1 := ⟨D - 1, by omega⟩
   -- all the factors `1 - ζ^(k+1)` have norm at most one
   have hζ1 : ‖ζ‖ = 1 := by
@@ -224,12 +238,10 @@ theorem _root_.IsPrimitiveRoot.norm_pow_sub_one_eq_one {ζ : L} {D : ℕ}
   have hfac : ∀ k, ‖1 - ζ ^ (k + 1)‖ ≤ 1 := fun k => by
     rw [sub_eq_add_neg]
     exact (IsUltrametricDist.norm_add_le_max 1 _).trans (by simp [norm_pow, hζ1])
-  -- the product of the factors is `D`, whose norm is one since `p ∤ D`
+  -- the product of the factors is `D`, whose norm is one by hypothesis
   have hprodD : ‖∏ k ∈ Finset.range n, (1 - ζ ^ (k + 1))‖ = 1 := by
-    rw [hζ.prod_one_sub_pow_eq_order,
-      show ((n : L) + 1) = algebraMap ℚ_[p] L ((n + 1 : ℕ) : ℚ_[p]) by push_cast [map_natCast]; ring,
-      norm_algebraMap', Padic.norm_natCast_eq_one_iff]
-    exact (Nat.Prime.coprime_iff_not_dvd hp.out).2 hD
+    rw [hζ.prod_one_sub_pow_eq_order]
+    exact_mod_cast hD
   -- hence every individual factor has norm exactly one
   have hone : ∀ i ∈ Finset.range n, ‖1 - ζ ^ (i + 1)‖ = 1 := by
     intro i hi

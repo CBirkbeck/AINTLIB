@@ -67,7 +67,7 @@ theorem norm_one_sub_pow_eq_one {D : ℕ} [NeZero D] (_hD1 : 1 < D)
     (hD : ¬ (p : ℕ) ∣ D) {ε : K} (hε : IsPrimitiveRoot ε D) {c : ℕ}
     (hc : ¬ D ∣ c) : ‖1 - ε ^ c‖ = 1 := by
   rw [← norm_neg, neg_sub]
-  exact hε.norm_pow_sub_one_eq_one (p := p) hD hc
+  exact hε.norm_pow_sub_one_eq_one (norm_natCast_eq_one_of_not_dvd hD) hc
 
 omit [CompleteSpace K] [CharZero K] in
 /-- P6-p9 helper: from `‖x^m − 1‖ = 1` and `‖x‖ ≤ 1` conclude `‖x − 1‖ = 1`.
@@ -119,7 +119,7 @@ theorem norm_pow_sub_one_eq_one_of_unit {D : ℕ} [NeZero D] (hD1 : 1 < D)
       (by rw [← pow_mul, mul_comm, pow_mul, hε.pow_eq_one, one_pow]) (NeZero.ne _)
   have hpow1 : ‖(ε ^ c) ^ p ^ n - 1‖ = 1 := by
     rw [← pow_mul, mul_comm c (p ^ n), pow_mul]
-    exact hεD.norm_pow_sub_one_eq_one (p := p) hD hDc
+    exact hεD.norm_pow_sub_one_eq_one (norm_natCast_eq_one_of_not_dvd hD) hDc
   exact norm_sub_one_eq_one_of_pow hpow1 hεc.le
 
 /-- A unit's `Ring.inverse` is the unique right inverse. -/

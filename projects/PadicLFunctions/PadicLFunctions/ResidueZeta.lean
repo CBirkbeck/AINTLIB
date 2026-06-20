@@ -738,27 +738,13 @@ private lemma mahlerK_baseChange_muA (a : ℕ) :
   rw [PowerSeries.coeff_map, PowerSeries.coeff_map, PowerSeries.coeff_map]
   rfl
 
-omit [IsUltrametricDist K] [CompleteSpace K] [CharZero K] in
-/-- `‖(a : K)‖ = 1` when `p ∤ a` (the cast factors through `algebraMap ℚ_[p] K`,
-which is norm-preserving; `‖(a : ℚ_[p])‖ = 1` since `p ∤ a`). -/
-private lemma norm_natCast_eq_one_of_not_dvd {a : ℕ} (ha : ¬ (p : ℕ) ∣ a) :
-    ‖((a : ℕ) : K)‖ = 1 := by
-  rw [show ((a : ℕ) : K) = algebraMap ℚ_[p] K ((a : ℕ) : ℚ_[p]) from (map_natCast _ _).symm,
-    norm_algebraMap']
-  refine le_antisymm (by simpa using Padic.norm_int_le_one (p := p) (a : ℤ)) ?_
-  by_contra h
-  rw [not_le] at h
-  have he : ((a : ℤ) : ℚ_[p]) = ((a : ℕ) : ℚ_[p]) := by push_cast; ring
-  rw [← he] at h
-  exact ha (by exact_mod_cast (Padic.norm_intCast_lt_one_iff (p := p)).mp h)
-
 omit [CompleteSpace K] [CharZero K] in
 /-- The coefficients of `u_a` are integral (`= a⁻¹·C(a, n+1)`, `‖a⁻¹‖ = 1` for
 `p ∤ a` and binomial coefficients are integral in the ultrametric field). -/
 private lemma norm_coeff_uA_le_one {a : ℕ} (ha : ¬ (p : ℕ) ∣ a) (n : ℕ) :
     ‖PowerSeries.coeff n (uA K a)‖ ≤ 1 := by
   rw [uA, PowerSeries.coeff_mk, norm_mul, norm_inv,
-    norm_natCast_eq_one_of_not_dvd (p := p) K ha, inv_one, one_mul]
+    norm_natCast_eq_one_of_not_dvd (p := p) ha, inv_one, one_mul]
   exact IsUltrametricDist.norm_natCast_le_one K _
 
 omit [CompleteSpace K] in
@@ -1570,7 +1556,7 @@ theorem sum_seriesEval_FtildeA (hp2 : p ≠ 2) {a : ℕ} (ha : ¬ (p : ℕ) ∣ 
         (by rw [inv_lt_one_iff₀]; right; exact_mod_cast hp.out.one_lt)
     have hinvnorm : ‖(((a : K)) ^ (p - 1))⁻¹ - 1‖ < 1 := by
       have hnorm1 : ‖((a : K)) ^ (p - 1)‖ = 1 := by
-        rw [norm_pow, norm_natCast_eq_one_of_not_dvd (p := p) K ha, one_pow]
+        rw [norm_pow, norm_natCast_eq_one_of_not_dvd (p := p) ha, one_pow]
       rw [show (((a : K)) ^ (p - 1))⁻¹ - 1 = (((a : K)) ^ (p - 1))⁻¹ * (1 - ((a : K)) ^ (p - 1))
           from by field_simp, norm_mul, norm_inv, hnorm1, inv_one, one_mul,
         show (1 : K) - ((a : K)) ^ (p - 1) = -(((a : K)) ^ (p - 1) - 1) from by ring, norm_neg]

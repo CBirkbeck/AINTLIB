@@ -47,7 +47,7 @@ theorem isUnit_root_mul_one_add_X_sub_one {ζ : integerRing K} {D : ℕ}
   refine integerRing.isUnit_of_norm_eq_one ?_
   have hζK : IsPrimitiveRoot ((ζ : K)) D :=
     hζ.map_of_injective (f := (integerRing K).subtype) fun _ _ h => Subtype.ext h
-  simpa using hζK.norm_pow_sub_one_eq_one (p := p) hD hc
+  simpa using hζK.norm_pow_sub_one_eq_one (norm_natCast_eq_one_of_not_dvd hD) hc
 
 omit [CompleteSpace K] [CharZero K] in
 /-- The Gauss sum `G(η⁻¹)` of a primitive character of conductor `D` coprime
@@ -115,7 +115,8 @@ theorem isUnit_root_mul_pow_one_add_X_sub_one {ζ : integerRing K} {D : ℕ}
   refine integerRing.isUnit_of_norm_eq_one ?_
   have hζK : IsPrimitiveRoot ((ζ : K)) D :=
     hζ.map_of_injective (f := (integerRing K).subtype) fun _ _ h => Subtype.ext h
-  have h1 : ‖(ζ : K) ^ c - 1‖ = 1 := hζK.norm_pow_sub_one_eq_one (p := p) hD hc
+  have h1 : ‖(ζ : K) ^ c - 1‖ = 1 :=
+    hζK.norm_pow_sub_one_eq_one (norm_natCast_eq_one_of_not_dvd hD) hc
   have hζ1 : ‖(ζ : K) ^ c‖ = 1 :=
     norm_eq_one_of_pow_eq_one (L := K)
       (by rw [← pow_mul, mul_comm c D, pow_mul, hζK.pow_eq_one, one_pow]) hD0
