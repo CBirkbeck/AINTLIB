@@ -30,27 +30,27 @@ variable {N : ℕ} [NeZero N]
 /-- Gauss sums factor over coprime levels (CRT): for `θ` the product of `η`
 (level `D`) and `χ` (level `M`) at level `DM` and the **split** additive
 character `ε = εD·εM`, `G(θ) = G(η)·G(χ)`. -/
-theorem gaussSum_mul_coprime {R : Type*} [CommRing R] [IsDomain R]
+theorem gaussSum_mul_coprime {R : Type*} [CommRing R]
     {D M : ℕ} [NeZero D] [NeZero M] (hco : Nat.Coprime D M)
     (η : DirichletCharacter R D) (χ : DirichletCharacter R M)
     {θ : DirichletCharacter R (D * M)}
     (hθ : θ = DirichletCharacter.changeLevel (Dvd.intro _ rfl) η
       * DirichletCharacter.changeLevel (Dvd.intro_left _ rfl) χ)
-    {εD εM : R} (hεD : IsPrimitiveRoot εD D) (hεM : IsPrimitiveRoot εM M) :
+    {εD εM : R} (hεD : εD ^ D = 1) (hεM : εM ^ M = 1) :
     gaussSum θ (AddChar.zmodChar (D * M)
         (show (εD * εM) ^ (D * M) = 1 from by
-          rw [mul_pow, pow_mul, hεD.pow_eq_one, one_pow, one_mul,
-            mul_comm D M, pow_mul, hεM.pow_eq_one, one_pow]))
-      = gaussSum η (AddChar.zmodChar D hεD.pow_eq_one)
-        * gaussSum χ (AddChar.zmodChar M hεM.pow_eq_one) := by
+          rw [mul_pow, pow_mul, hεD, one_pow, one_mul,
+            mul_comm D M, pow_mul, hεM, one_pow]))
+      = gaussSum η (AddChar.zmodChar D hεD)
+        * gaussSum χ (AddChar.zmodChar M hεM) := by
   classical
   set e := ZMod.chineseRemainder hco with he
   set ψ := AddChar.zmodChar (D * M)
     (show (εD * εM) ^ (D * M) = 1 from by
-      rw [mul_pow, pow_mul, hεD.pow_eq_one, one_pow, one_mul,
-        mul_comm D M, pow_mul, hεM.pow_eq_one, one_pow]) with hψ
-  set ψD := AddChar.zmodChar D hεD.pow_eq_one with hψD
-  set ψM := AddChar.zmodChar M hεM.pow_eq_one with hψM
+      rw [mul_pow, pow_mul, hεD, one_pow, one_mul,
+        mul_comm D M, pow_mul, hεM, one_pow]) with hψ
+  set ψD := AddChar.zmodChar D hεD with hψD
+  set ψM := AddChar.zmodChar M hεM with hψM
   have hfst : ∀ a : ZMod (D * M), (e a).1 = (ZMod.cast a : ZMod D) := fun a => Prod.fst_zmod_cast a
   have hsnd : ∀ a : ZMod (D * M), (e a).2 = (ZMod.cast a : ZMod M) := fun a => Prod.snd_zmod_cast a
   have hθfac : ∀ a : ZMod (D * M),

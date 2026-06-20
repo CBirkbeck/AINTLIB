@@ -1785,7 +1785,7 @@ theorem LpFunction_one {D : ℕ} [NeZero D] (hD1 : 1 < D)
       rw [hθKfac, mul_inv]; congr 1 <;> exact (map_inv _ _).symm
     rw [hgsplit, coe_gaussSum_zmodChar η hζ hζK, coe_gaussSum_zmodChar χ hεp hεpK]
     exact ValuesAtOneComplex.gaussSum_mul_coprime hco (toFieldChar η)⁻¹ (toFieldChar χ)⁻¹
-      hθinvfac hζK hεpK
+      hθinvfac hζK.pow_eq_one hεpK.pow_eq_one
   -- STEP 4 (final algebra): combine T615 + T616, divide by `p`, flip signs, factor `G`
   have hp0 : (p : K) ≠ 0 := by exact_mod_cast hp.out.ne_zero
   rw [hT616] at hT615
