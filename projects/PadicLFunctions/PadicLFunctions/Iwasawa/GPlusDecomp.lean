@@ -82,6 +82,14 @@ theorem divP_sub {z w : ℤ_[p]} (hz : z ∈ Ideal.span {(p : ℤ_[p])})
     PadicInt.coe_sub]
   ring
 
+/-- `divP` is additive on `pℤ_p`. -/
+theorem divP_add {z w : ℤ_[p]} (hz : z ∈ Ideal.span {(p : ℤ_[p])})
+    (hw : w ∈ Ideal.span {(p : ℤ_[p])}) :
+    divP p (z + w) = divP p z + divP p w := by
+  apply PadicInt.ext
+  rw [PadicInt.coe_add, divP_coe p (Ideal.add_mem _ hz hw), divP_coe p hz, divP_coe p hw,
+    PadicInt.coe_add]; ring
+
 /-- On `pℤ_p`, `‖divP t‖ = p · ‖t‖`. -/
 theorem norm_divP {t : ℤ_[p]} (ht : t ∈ Ideal.span {(p : ℤ_[p])}) :
     ‖divP p t‖ = (p : ℝ) * ‖t‖ := by
@@ -299,5 +307,34 @@ noncomputable def expCM (hp2 : p ≠ 2) : C(ℤ_[p], Gamma p) where
     · show Continuous (fun a : ℤ_[p] => ((expUnit p hp2 a)⁻¹ : ℤ_[p]ˣ).val)
       simp only [expUnit_inv]
       exact (continuous_pZpExp_mul p hp2).comp continuous_neg
+
+/-! ## The four homomorphism / inverse equations of `Γ ≅ (ℤ_p,+)` (the `gammaLogEquiv` data) -/
+
+/-- `logCM` is multiplicative→additive: `log(uv)/p = log u/p + log v/p`. -/
+theorem logCM_mul (hp2 : p ≠ 2) (u v : Gamma p) :
+    logCM p hp2 (u * v) = logCM p hp2 u + logCM p hp2 v := by
+  show divP p (pZpLog p ((↑(u * v) : ℤ_[p]ˣ) : ℤ_[p])) = divP p (pZpLog p _) + divP p (pZpLog p _)
+  have huv : ((↑(u * v) : ℤ_[p]ˣ) : ℤ_[p]) = ((↑u : ℤ_[p]ˣ) : ℤ_[p]) * ((↑v : ℤ_[p]ˣ) : ℤ_[p]) := by
+    rw [Subgroup.coe_mul, Units.val_mul]
+  rw [huv, pZpLog_mul p hp2 u.2 v.2, divP_add p (pZpLog_mem p hp2 u.2) (pZpLog_mem p hp2 v.2)]
+
+/-- `logCM 1 = 0`. -/
+theorem logCM_one (hp2 : p ≠ 2) : logCM p hp2 1 = 0 := by
+  show divP p (pZpLog p ((↑(1 : Gamma p) : ℤ_[p]ˣ) : ℤ_[p])) = 0
+  rw [show ((↑(1 : Gamma p) : ℤ_[p]ˣ) : ℤ_[p]) = 1 by rw [OneMemClass.coe_one, Units.val_one],
+    pZpLog_one p hp2]
+  apply PadicInt.ext; rw [divP_coe p (by simp), PadicInt.coe_zero, zero_div]
+
+/-- `exp(p · (log u / p)) = u` — left inverse. -/
+theorem expCM_logCM (hp2 : p ≠ 2) (u : Gamma p) : expCM p hp2 (logCM p hp2 u) = u := by
+  apply Subtype.ext; apply Units.ext
+  show pZpExp p ((p : ℤ_[p]) * divP p (pZpLog p ((↑u : ℤ_[p]ˣ) : ℤ_[p]))) = ((↑u : ℤ_[p]ˣ) : ℤ_[p])
+  rw [mul_divP p (pZpLog_mem p hp2 u.2), pZpExp_pZpLog p hp2 u.2]
+
+/-- `log(exp(p · a))/p = a` — right inverse. -/
+theorem logCM_expCM (hp2 : p ≠ 2) (a : ℤ_[p]) : logCM p hp2 (expCM p hp2 a) = a := by
+  show divP p (pZpLog p ((↑(expCM p hp2 a) : ℤ_[p]ˣ) : ℤ_[p])) = a
+  rw [show ((↑(expCM p hp2 a) : ℤ_[p]ˣ) : ℤ_[p]) = pZpExp p ((p : ℤ_[p]) * a) from rfl,
+    pZpLog_pZpExp p hp2 (Ideal.mem_span_singleton'.2 ⟨a, by ring⟩), divP_mul_self]
 
 end PadicLFunctions

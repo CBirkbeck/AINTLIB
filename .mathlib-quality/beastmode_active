@@ -1,1 +1,1 @@
-FOCUS: GPlusDecomp logCM/expCM continuous maps DONE; add 4 equation lemmas (logCM_mul/one, expCM∘logCM, logCM∘expCM) then bundle gammaLogEquiv into carrierBridge
+FOCUS: gammaLogEquiv data COMPLETE (logCM/expCM + 4 equations). Next: gplusEquiv (GPlus≅Δ×Γ Teichmüller) then assemble carrierBridge Φ.
