@@ -1,1 +1,1 @@
-FOCUS: §13 milestone — full MC capstone + carrier-bridge machinery + analytic core all proven/pushed. Remaining: gammaLogEquiv + gplusEquiv (classical p-adic group iso bundling).
+FOCUS: GPlusDecomp logCM/expCM continuous maps DONE; add 4 equation lemmas (logCM_mul/one, expCM∘logCM, logCM∘expCM) then bundle gammaLogEquiv into carrierBridge

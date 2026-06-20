@@ -6,6 +6,8 @@ Authors: Chris Birkbeck
 import PadicLFunctions.PadicExp
 import PadicLFunctions.Iwasawa.PlusPart
 import Mathlib.Topology.Algebra.ContinuousMonoidHom
+import Mathlib.Topology.Algebra.Module.Compact
+import Mathlib.Topology.ContinuousMap.Units
 
 /-!
 # The group-theoretic decomposition of `GPlus` for the carrier bridge
@@ -176,5 +178,126 @@ theorem pZpLog_pZpExp (hp2 : p ≠ 2) {y : ℤ_[p]} (hy : y ∈ Ideal.span {(p :
 theorem pZpExp_zero (hp2 : p ≠ 2) : pZpExp p (0 : ℤ_[p]) = 1 := by
   apply PadicInt.ext
   rw [pZpExp_coe p hp2 (Ideal.zero_mem _), PadicInt.coe_zero, padicExp_zero, PadicInt.coe_one]
+
+/-! ## The compact group `Γ` of principal `1`-units -/
+
+/-- The subgroup of **principal `1`-units** `{u : ℤ_[p]ˣ // (u : ℤ_[p]) - 1 ∈ pℤ_p}`.
+This is the pro-cyclic factor `Γ` of `ℤ_[p]ˣ` (for odd `p`). It is closed under `*`
+(`PadicInt.mul_sub_one_mem`) and `⁻¹` (`u⁻¹ - 1 = -u⁻¹·(u-1)`). -/
+def OneUnits : Subgroup ℤ_[p]ˣ where
+  carrier := {u | ((u : ℤ_[p]ˣ) : ℤ_[p]) - 1 ∈ Ideal.span {(p : ℤ_[p])}}
+  one_mem' := by simp
+  mul_mem' {u v} hu hv := by
+    simpa only [Set.mem_setOf_eq, Units.val_mul] using PadicInt.mul_sub_one_mem p hu hv
+  inv_mem' {u} hu := by
+    simp only [Set.mem_setOf_eq] at hu ⊢
+    have hval : ((u⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) * ((u : ℤ_[p]ˣ) : ℤ_[p]) = 1 := by
+      rw [← Units.val_mul, inv_mul_cancel, Units.val_one]
+    have hrw : ((u⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) - 1
+        = -((u⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) * (((u : ℤ_[p]ˣ) : ℤ_[p]) - 1) := by
+      rw [neg_mul, mul_sub, mul_one, hval]; ring
+    rw [hrw]
+    exact Ideal.mul_mem_left _ _ hu
+
+/-- `Γ` — the principal `1`-units as a type. -/
+abbrev Gamma : Type _ := OneUnits p
+
+/-- The carrier of `OneUnits` is **closed** in `ℤ_[p]ˣ`: it is the preimage of the
+closed ideal `pℤ_p` (closed since `ℤ_[p]` is a compact Hausdorff Noetherian topological
+ring, `IsNoetherianRing.isClosed_ideal`) under the continuous map `u ↦ (u : ℤ_[p]) - 1`. -/
+theorem isClosed_oneUnits : IsClosed (OneUnits p : Set ℤ_[p]ˣ) := by
+  have hcont : Continuous (fun u : ℤ_[p]ˣ => ((u : ℤ_[p]ˣ) : ℤ_[p]) - 1) :=
+    (Units.continuous_val).sub continuous_const
+  have hclosed : IsClosed (↑(Ideal.span {(p : ℤ_[p])}) : Set ℤ_[p]) := inferInstance
+  exact hclosed.preimage hcont
+
+/-- `Γ` is a **compact space**: it is a closed subgroup of the compact group `ℤ_[p]ˣ`
+(`Units.instCompactSpaceOfT1SpaceOfContinuousMul` makes `ℤ_[p]ˣ` compact). -/
+instance instCompactSpaceGamma : CompactSpace (Gamma p) :=
+  isCompact_iff_compactSpace.mp ((isClosed_oneUnits p).isCompact)
+
+/-! ## The logarithm isomorphism `Γ ≅ (ℤ_p, +)` as continuous maps -/
+
+/-- **The p-adic exponential is a difference-isometry on `pℤ_p`**: `‖pZpExp x − pZpExp y‖ = ‖x − y‖`
+(integral incarnation of `norm_padicExp_sub_padicExp`). -/
+theorem norm_pZpExp_sub (hp2 : p ≠ 2) {x y : ℤ_[p]} (hx : x ∈ Ideal.span {(p : ℤ_[p])})
+    (hy : y ∈ Ideal.span {(p : ℤ_[p])}) :
+    ‖pZpExp p x - pZpExp p y‖ = ‖x - y‖ := by
+  rw [PadicInt.norm_def, PadicInt.coe_sub, pZpExp_coe p hp2 hx, pZpExp_coe p hp2 hy,
+    norm_padicExp_sub_padicExp p (inExpBall_of_mem_span p hp2 hx) (inExpBall_of_mem_span p hp2 hy),
+    ← PadicInt.coe_sub, ← PadicInt.norm_def]
+
+/-- **`logCM`** — the continuous map `Γ → ℤ_p`, `u ↦ log(u)/p`.  Continuity: `divP ∘ pZpLog` is
+`LipschitzOnWith p` on the `1`-units (`divP_sub`, `norm_divP`, `norm_pZpLog_sub`), composed with the
+continuous value coercion `Γ → ℤ_p` whose image lies in the `1`-units. -/
+noncomputable def logCM (hp2 : p ≠ 2) : C(Gamma p, ℤ_[p]) where
+  toFun u := divP p (pZpLog p ((↑u : ℤ_[p]ˣ) : ℤ_[p]))
+  continuous_toFun := by
+    have hF : ContinuousOn (fun x : ℤ_[p] => divP p (pZpLog p x))
+        {x : ℤ_[p] | x - 1 ∈ Ideal.span {(p : ℤ_[p])}} := by
+      have hlip : LipschitzOnWith (p : NNReal) (fun x : ℤ_[p] => divP p (pZpLog p x))
+          {x : ℤ_[p] | x - 1 ∈ Ideal.span {(p : ℤ_[p])}} := by
+        rw [lipschitzOnWith_iff_dist_le_mul]
+        intro x hx y hy
+        have hlx : pZpLog p x ∈ Ideal.span {(p : ℤ_[p])} := pZpLog_mem p hp2 hx
+        have hly : pZpLog p y ∈ Ideal.span {(p : ℤ_[p])} := pZpLog_mem p hp2 hy
+        rw [dist_eq_norm, dist_eq_norm, divP_sub p hlx hly, norm_divP p (Ideal.sub_mem _ hlx hly),
+          norm_pZpLog_sub p hp2 hx hy]
+        simp [NNReal.coe_natCast]
+      exact hlip.continuousOn
+    exact hF.comp_continuous (Units.continuous_val.comp continuous_subtype_val) (fun u => u.2)
+
+/-- The unit `exp(p·a) ∈ ℤ_[p]ˣ` (with explicit inverse `exp(p·(−a))`), used to land `expCM` in the
+group of units. -/
+noncomputable def expUnit (hp2 : p ≠ 2) (a : ℤ_[p]) : ℤ_[p]ˣ where
+  val := pZpExp p ((p : ℤ_[p]) * a)
+  inv := pZpExp p ((p : ℤ_[p]) * (-a))
+  val_inv := by
+    rw [← pZpExp_add p hp2 (Ideal.mem_span_singleton'.2 ⟨a, by ring⟩)
+      (Ideal.mem_span_singleton'.2 ⟨-a, by ring⟩),
+      show (p : ℤ_[p]) * a + (p : ℤ_[p]) * (-a) = 0 from by ring, pZpExp_zero p hp2]
+  inv_val := by
+    rw [← pZpExp_add p hp2 (Ideal.mem_span_singleton'.2 ⟨-a, by ring⟩)
+      (Ideal.mem_span_singleton'.2 ⟨a, by ring⟩),
+      show (p : ℤ_[p]) * (-a) + (p : ℤ_[p]) * a = 0 from by ring, pZpExp_zero p hp2]
+
+@[simp] theorem expUnit_val (hp2 : p ≠ 2) (a : ℤ_[p]) :
+    ((expUnit p hp2 a : ℤ_[p]ˣ) : ℤ_[p]) = pZpExp p ((p : ℤ_[p]) * a) := rfl
+
+@[simp] theorem expUnit_inv (hp2 : p ≠ 2) (a : ℤ_[p]) :
+    ((expUnit p hp2 a)⁻¹ : ℤ_[p]ˣ).val = pZpExp p ((p : ℤ_[p]) * (-a)) := rfl
+
+/-- `exp(p·a)` is a principal `1`-unit, so `expUnit a ∈ Γ`. -/
+theorem expUnit_mem (hp2 : p ≠ 2) (a : ℤ_[p]) : expUnit p hp2 a ∈ OneUnits p := by
+  show ((expUnit p hp2 a : ℤ_[p]ˣ) : ℤ_[p]) - 1 ∈ Ideal.span {(p : ℤ_[p])}
+  rw [expUnit_val]
+  exact pZpExp_sub_one_mem p hp2 (Ideal.mem_span_singleton'.2 ⟨a, by ring⟩)
+
+/-- `a ↦ pZpExp (p·a)` is continuous (`ContinuousOn pZpExp` on `pℤ_p`, via the exp isometry,
+precomposed with the continuous `a ↦ p·a` landing in `pℤ_p`). -/
+theorem continuous_pZpExp_mul (hp2 : p ≠ 2) :
+    Continuous (fun a : ℤ_[p] => pZpExp p ((p : ℤ_[p]) * a)) := by
+  have hE : ContinuousOn (pZpExp p) {x : ℤ_[p] | x ∈ Ideal.span {(p : ℤ_[p])}} := by
+    have hlip : LipschitzOnWith 1 (pZpExp p) {x : ℤ_[p] | x ∈ Ideal.span {(p : ℤ_[p])}} := by
+      rw [lipschitzOnWith_iff_dist_le_mul]
+      intro x hx y hy
+      rw [dist_eq_norm, dist_eq_norm, norm_pZpExp_sub p hp2 hx hy]
+      simp
+    exact hlip.continuousOn
+  exact hE.comp_continuous (continuous_const.mul continuous_id)
+    (fun a => Ideal.mem_span_singleton'.2 ⟨a, by ring⟩)
+
+/-- **`expCM`** — the continuous map `ℤ_p → Γ`, `a ↦ exp(p·a)`.  Continuity into the units uses
+`Units.continuous_iff` (both the value `exp(p·a)` and the inverse `exp(p·(−a))` are continuous). -/
+noncomputable def expCM (hp2 : p ≠ 2) : C(ℤ_[p], Gamma p) where
+  toFun a := ⟨expUnit p hp2 a, expUnit_mem p hp2 a⟩
+  continuous_toFun := by
+    refine continuous_induced_rng.2 (Units.continuous_iff.2 ⟨?_, ?_⟩)
+    · show Continuous (fun a : ℤ_[p] => ((expUnit p hp2 a : ℤ_[p]ˣ) : ℤ_[p]))
+      simp only [expUnit_val]
+      exact continuous_pZpExp_mul p hp2
+    · show Continuous (fun a : ℤ_[p] => ((expUnit p hp2 a)⁻¹ : ℤ_[p]ˣ).val)
+      simp only [expUnit_inv]
+      exact (continuous_pZpExp_mul p hp2).comp continuous_neg
 
 end PadicLFunctions
