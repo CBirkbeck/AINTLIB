@@ -10,6 +10,7 @@ import PadicLFunctions.Measure.Functoriality
 import PadicLFunctions.Iwasawa.CarrierBridge
 import PadicLFunctions.Iwasawa.GPlusDecomp
 import PadicLFunctions.IwasawaProof.CharIdealConjunct
+import PadicLFunctions.IwasawaProof.Capstone
 import PadicLFunctions.Measure.FiniteProduct
 import PadicLFunctions.KubotaLeopoldt.ZetaValues
 import PadicLFunctions.KubotaLeopoldt.ZetaValuesComplex
