@@ -547,26 +547,27 @@ theorem exp_subst_log (A : Type*) [CommRing A] [Algebra ℚ A] :
   | (k + 2) => rw [hzero k, map_add, coeff_one, coeff_X]; simp
 
 /-- **Formal identity (ii)** (RJW Lem 5.14 / decomposition E4, Washington Prop 5.3 route):
-`log(1 + (exp − 1)) = X` as formal power series over `ℚ_[p]`. Proved by `derivative.ext`
+`log(1 + (exp − 1)) = X` as formal power series over any `ℚ`-algebra `A`. Proved by `derivative.ext`
 from `D(log.subst(exp−1)) = 1` and matching constant coefficients. -/
-theorem log_subst_exp_sub_one :
-    (PowerSeries.log ℚ_[p]).subst (exp ℚ_[p] - 1) = PowerSeries.X := by
-  have hg : HasSubst (exp ℚ_[p] - 1) := HasSubst.exp_sub_one
+theorem log_subst_exp_sub_one (A : Type*) [CommRing A] [Algebra ℚ A] :
+    (PowerSeries.log A).subst (exp A - 1) = PowerSeries.X := by
+  have hg : HasSubst (exp A - 1) := HasSubst.exp_sub_one
+  haveI : IsAddTorsionFree A := IsAddTorsionFree.of_module_rat A
   refine PowerSeries.derivative.ext ?_ ?_
-  · rw [derivative_subst ℚ_[p] hg, map_sub, derivative_exp, Derivation.map_one_eq_zero,
+  · rw [derivative_subst A hg, map_sub, derivative_exp, Derivation.map_one_eq_zero,
       sub_zero, derivative_X]
-    have key : ((1 + PowerSeries.X) * d⁄dX ℚ_[p] (PowerSeries.log ℚ_[p])).subst
-        (exp ℚ_[p] - 1) = 1 := by
+    have key : ((1 + PowerSeries.X) * d⁄dX A (PowerSeries.log A)).subst
+        (exp A - 1) = 1 := by
       rw [oneAddX_mul_derivative_log, ← coe_substAlgHom hg, map_one]
-    have hone : (1 : PowerSeries ℚ_[p]).subst (exp ℚ_[p] - 1) = 1 := by
+    have hone : (1 : PowerSeries A).subst (exp A - 1) = 1 := by
       rw [← coe_substAlgHom hg, map_one]
     rw [subst_mul hg, subst_add hg, hone, subst_X hg,
-      show (1 : PowerSeries ℚ_[p]) + (exp ℚ_[p] - 1) = exp ℚ_[p] by ring] at key
+      show (1 : PowerSeries A) + (exp A - 1) = exp A by ring] at key
     rw [mul_comm]
     exact key
   · rw [PowerSeries.constantCoeff_X]
     refine constantCoeff_subst_eq_zero ?_ _ constantCoeff_log
-    have h : PowerSeries.constantCoeff (exp ℚ_[p] - 1) = (0 : ℚ_[p]) := by
+    have h : PowerSeries.constantCoeff (exp A - 1) = (0 : A) := by
       rw [map_sub, map_one, constantCoeff_exp, sub_self]
     exact h
 
