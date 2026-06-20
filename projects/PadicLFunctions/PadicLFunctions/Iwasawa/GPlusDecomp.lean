@@ -298,6 +298,25 @@ noncomputable def unitsSplitEquiv : ℤ_[p]ˣ ≃* ((teichmuller p).range × Gam
     · apply Subtype.ext; show teichmuller p (u * v) = _; rw [map_mul]; rfl
     · exact (gammaProj p).map_mul u v
 
+/-- `ω(u)` depends only on `u mod p`: `ω(u) = teichmullerZMod (toZMod u)`. -/
+theorem teichmuller_eq_teichmullerZMod_toZMod (u : ℤ_[p]ˣ) :
+    ((teichmuller p u : ℤ_[p]ˣ) : ℤ_[p]) = teichmullerZMod p (toZMod ((u : ℤ_[p]ˣ) : ℤ_[p])) := by
+  rw [teichmuller_coe]; rfl
+
+/-- `μ_{p−1} = range ω` is **finite**: `ω` factors through the finite `ZMod p` (`u ↦ ω(u)` depends
+only on `toZMod u`), so the map `range ω → ZMod p`, `t ↦ toZMod t`, is injective. -/
+instance instFiniteTeichRange : Finite ((teichmuller p).range) := by
+  apply Finite.of_injective
+    (fun t : (teichmuller p).range => toZMod (((t : ℤ_[p]ˣ)) : ℤ_[p]))
+  rintro ⟨t, u, rfl⟩ ⟨s, v, rfl⟩ h
+  simp only at h
+  apply Subtype.ext; apply Units.ext
+  rw [teichmuller_eq_teichmullerZMod_toZMod, teichmuller_eq_teichmullerZMod_toZMod]
+  congr 1
+  rw [teichmuller_eq_teichmullerZMod_toZMod, teichmuller_eq_teichmullerZMod_toZMod,
+    toZMod_teichmullerZMod, toZMod_teichmullerZMod] at h
+  exact h
+
 /-! ## The logarithm isomorphism `Γ ≅ (ℤ_p, +)` as continuous maps -/
 
 /-- **The p-adic exponential is a difference-isometry on `pℤ_p`**: `‖pZpExp x − pZpExp y‖ = ‖x − y‖`
