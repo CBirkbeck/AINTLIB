@@ -53,7 +53,6 @@ private noncomputable def Gamma0_AL_hom (N : ℕ) [NeZero N] :
     simp only [MulOpposite.unop_op, MulOpposite.unop_mul]
     have h1 : (GL_transposeEquiv 2 (a * b)).unop =
         (GL_transposeEquiv 2 b).unop * (GL_transposeEquiv 2 a).unop := by
-      change MulOpposite.unop (GL_transposeEquiv 2 (a * b)) = _
       rw [map_mul]; rfl
     rw [h1]; group
 
@@ -64,8 +63,6 @@ private lemma Gamma0_AL_involutive (N : ℕ) [NeZero N] (g : GL (Fin 2) ℚ) :
       (GL_transposeEquiv 2 (wN N)⁻¹).unop *
       (GL_transposeEquiv 2 (GL_transposeEquiv 2 g).unop).unop *
       (GL_transposeEquiv 2 (wN N)).unop := by
-    change MulOpposite.unop (GL_transposeEquiv 2
-      (wN N * (GL_transposeEquiv 2 g).unop * (wN N)⁻¹)) = _
     rw [map_mul, map_mul]
     simp only [MulOpposite.unop_mul]; group
   have h_wN : (GL_transposeEquiv 2 (wN N)).unop = wN N :=
@@ -894,6 +891,7 @@ private lemma Gamma0_onHeckeCoset_eq (N : ℕ) [NeZero N]
   exact HeckeCoset.eq_mk_of_mem (Gamma0_AL_in_doubleCoset N _ (HeckeCoset.rep D).2)
 
 /-- `𝕋 (Gamma0_pair N) ℤ` is a commutative ring (Shimura Prop 3.8 for `Γ₀(N)`). -/
+@[reducible]
 noncomputable def instCommRing_Gamma0 (N : ℕ) [NeZero N] :
     CommRing (HeckeRing.𝕋 (Gamma0_pair N) ℤ) :=
   instCommRing_of_antiInvolution (Gamma0_antiInvolution N) (Gamma0_onHeckeCoset_eq N)
