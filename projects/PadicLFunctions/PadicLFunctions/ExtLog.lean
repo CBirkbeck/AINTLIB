@@ -33,26 +33,33 @@ variable (p : ℕ) [hp : Fact p.Prime]
 variable {L : Type*} [NormedField L] [NormedAlgebra ℚ_[p] L]
   [IsUltrametricDist L] [CompleteSpace L]
 
-omit [NormedAlgebra ℚ_[p] L] [IsUltrametricDist L] [CompleteSpace L] in
+section ExpBallSeminormedRing
+/- The exp-ball multiplicative closure facts hold in any (possibly
+noncommutative) ultrametric seminormed ring with `‖1‖ = 1`: only `norm_zero`,
+the submultiplicative `norm_mul_le`, `norm_one` and the strong (ultrametric)
+triangle inequality are used. This subsumes the `NormedField ℚ_[p]`-algebra
+setting in which they were originally stated. -/
+variable {R : Type*} [SeminormedRing R] [NormOneClass R] [IsUltrametricDist R]
+
+omit [NormOneClass R] [IsUltrametricDist R] in
 /-- Members of the exponential ball have norm less than one. -/
-theorem norm_lt_one_of_inExpBall {w : L} (hw : InExpBall p w) : ‖w‖ < 1 := by
+theorem norm_lt_one_of_inExpBall {w : R} (hw : InExpBall p w) : ‖w‖ < 1 := by
   by_contra h
   exact absurd hw (not_lt.mpr (le_trans
     (inv_le_one_of_one_le₀ (by exact_mod_cast hp.out.one_le))
     (one_le_pow₀ (not_lt.mp h))))
 
-omit [NormedAlgebra ℚ_[p] L] [CompleteSpace L] in
 /-- W6a-a1: the translated exponential ball `1 + B` is closed under
 multiplication (ultrametric). -/
-theorem mul_mem_expBall {y z : L} (hy : InExpBall p (y - 1))
+theorem mul_mem_expBall {y z : R} (hy : InExpBall p (y - 1))
     (hz : InExpBall p (z - 1)) : InExpBall p (y * z - 1) := by
   have key : ‖y * z - 1‖ ≤ max ‖y - 1‖ ‖z - 1‖ := by
-    rw [show y * z - 1 = (y - 1) * z + (z - 1) by ring]
+    rw [show y * z - 1 = (y - 1) * z + (z - 1) by noncomm_ring]
     refine le_trans (IsUltrametricDist.norm_add_le_max _ _)
       (max_le_max ?_ le_rfl)
-    rw [norm_mul]
+    refine le_trans (norm_mul_le _ _) ?_
     have hz1 : ‖z‖ ≤ 1 := by
-      rw [show z = (z - 1) + 1 by ring]
+      rw [show z = (z - 1) + 1 by noncomm_ring]
       exact le_trans (IsUltrametricDist.norm_add_le_max _ _)
         (max_le (norm_lt_one_of_inExpBall p hz).le norm_one.le)
     exact mul_le_of_le_one_right (norm_nonneg _) hz1
@@ -62,9 +69,8 @@ theorem mul_mem_expBall {y z : L} (hy : InExpBall p (y - 1))
         rcases max_cases ‖y - 1‖ ‖z - 1‖ with ⟨h1, _⟩ | ⟨h1, _⟩ <;> rw [h1]
         exacts [hy, hz]
 
-omit [NormedAlgebra ℚ_[p] L] [CompleteSpace L] in
 /-- The exponential ball is closed under powers. -/
-theorem pow_mem_expBall {y : L} (hy : InExpBall p (y - 1)) (n : ℕ) :
+theorem pow_mem_expBall {y : R} (hy : InExpBall p (y - 1)) (n : ℕ) :
     InExpBall p (y ^ n - 1) := by
   induction n with
   | zero =>
@@ -74,6 +80,8 @@ theorem pow_mem_expBall {y : L} (hy : InExpBall p (y - 1)) (n : ℕ) :
   | succ k ih =>
     rw [pow_succ]
     exact mul_mem_expBall p ih hy
+
+end ExpBallSeminormedRing
 
 /-- W6a-a2: the logarithm of a power on the ball. -/
 theorem padicLog_pow {y : L} (hy : InExpBall p (y - 1)) (n : ℕ) :
