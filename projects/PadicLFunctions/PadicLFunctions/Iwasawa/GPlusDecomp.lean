@@ -345,6 +345,37 @@ theorem teichmuller_neg_one (hp2 : p ≠ 2) : teichmuller p (-1) = -1 := by
     rw [h2] at hlt; exact lt_irrefl 1 hlt
   · rw [h1, Units.val_neg, Units.val_one]
 
+/-- The Teichmüller character `ω : ℤ_[p]ˣ →* ℤ_[p]ˣ` is **continuous** (its value is locally constant,
+`isLocallyConstant_teichmullerFun`; continuity into the units is `Units.continuous_iff`). -/
+theorem continuous_teichmuller : Continuous (teichmuller p) := by
+  rw [Units.continuous_iff]
+  refine ⟨?_, ?_⟩
+  · rw [show (Units.val ∘ (teichmuller p)) = fun u : ℤ_[p]ˣ => teichmullerFun p (u : ℤ_[p]) from
+      funext fun u => teichmuller_coe p u]
+    exact (isLocallyConstant_teichmullerFun p).continuous.comp Units.continuous_val
+  · rw [show (fun u : ℤ_[p]ˣ => ((teichmuller p u)⁻¹ : ℤ_[p]ˣ).val)
+        = fun u : ℤ_[p]ˣ => teichmullerFun p ((u⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) from
+      funext fun u => by rw [← map_inv, teichmuller_coe]]
+    exact (isLocallyConstant_teichmullerFun p).continuous.comp
+      (Units.continuous_val.comp continuous_inv)
+
+/-- The principal-part projection `gammaProj : ℤ_[p]ˣ →* Γ` is **continuous** (`u ↦ u·ω(u)⁻¹`, both
+factors continuous; continuity into the `Γ ⊆ ℤ_[p]ˣ` subtype via `Units.continuous_iff`). -/
+theorem continuous_gammaProj : Continuous (gammaProj p) := by
+  rw [continuous_induced_rng, Units.continuous_iff]
+  refine ⟨?_, ?_⟩
+  · show Continuous (fun u : ℤ_[p]ˣ => ((u * (teichmuller p u)⁻¹ : ℤ_[p]ˣ) : ℤ_[p]))
+    simp only [Units.val_mul]
+    exact (Units.continuous_val).mul ((Units.continuous_val.comp continuous_inv).comp
+      (continuous_teichmuller p))
+  · show Continuous (fun u : ℤ_[p]ˣ => (((u * (teichmuller p u)⁻¹ : ℤ_[p]ˣ))⁻¹ : ℤ_[p]ˣ).val)
+    have : (fun u : ℤ_[p]ˣ => (((u * (teichmuller p u)⁻¹ : ℤ_[p]ˣ))⁻¹ : ℤ_[p]ˣ).val)
+        = fun u : ℤ_[p]ˣ => ((teichmuller p u : ℤ_[p]ˣ) : ℤ_[p]) * ((u⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) := by
+      funext u; rw [_root_.mul_inv, inv_inv, Units.val_mul, mul_comm]
+    rw [this]
+    exact ((Units.continuous_val).comp (continuous_teichmuller p)).mul
+      (Units.continuous_val.comp continuous_inv)
+
 /-- `-1` as an element of `μ_{p−1} = range ω` (via `ω(-1) = -1`). -/
 noncomputable def negOneT (hp2 : p ≠ 2) : (teichmuller p).range :=
   ⟨-1, -1, teichmuller_neg_one p hp2⟩
