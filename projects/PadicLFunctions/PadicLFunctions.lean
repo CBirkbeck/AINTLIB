@@ -8,6 +8,7 @@ import PadicLFunctions.Measure.Fubini
 import PadicLFunctions.Measure.PseudoMeasure
 import PadicLFunctions.Measure.Functoriality
 import PadicLFunctions.Iwasawa.CarrierBridge
+import PadicLFunctions.Iwasawa.GPlusDecomp
 import PadicLFunctions.IwasawaProof.CharIdealConjunct
 import PadicLFunctions.Measure.FiniteProduct
 import PadicLFunctions.KubotaLeopoldt.ZetaValues
