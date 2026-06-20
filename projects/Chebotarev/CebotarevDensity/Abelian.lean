@@ -1501,15 +1501,15 @@ order, so without it the statement is false (one `gᵢ` could dip to `-∞` whil
 keeping a spurious `liminf` and the sum still converging). At the only call site
 (`chebotarev_abelian`) each `gᵢ` is a ratio of nonnegative Dirichlet sums, hence
 `0 ≤ gᵢ`, so `hbelow` is immediate. -/
-theorem tendsto_inv_card_of_liminf_ge_of_sum_tendsto_one {ι : Type*} [Fintype ι] (g : ι → ℝ → ℝ)
-    (hlo : ∀ i, (Fintype.card ι : ℝ)⁻¹ ≤ Filter.liminf (g i) (𝓝[>] (1 : ℝ)))
-    (hbelow : ∀ i, Filter.IsBoundedUnder (· ≥ ·) (𝓝[>] (1 : ℝ)) (g i))
-    (hsum : Filter.Tendsto (fun s ↦ ∑ i, g i s) (𝓝[>] (1 : ℝ)) (𝓝 1)) (i₀ : ι) :
-    Filter.Tendsto (g i₀) (𝓝[>] (1 : ℝ)) (𝓝 (Fintype.card ι : ℝ)⁻¹) := by
+theorem tendsto_inv_card_of_liminf_ge_of_sum_tendsto_one {ι : Type*} [Fintype ι]
+    {γ : Type*} {l : Filter γ} [l.NeBot] (g : ι → γ → ℝ)
+    (hlo : ∀ i, (Fintype.card ι : ℝ)⁻¹ ≤ Filter.liminf (g i) l)
+    (hbelow : ∀ i, Filter.IsBoundedUnder (· ≥ ·) l (g i))
+    (hsum : Filter.Tendsto (fun s ↦ ∑ i, g i s) l (𝓝 (1 : ℝ))) (i₀ : ι) :
+    Filter.Tendsto (g i₀) l (𝓝 (Fintype.card ι : ℝ)⁻¹) := by
   classical
-  set l : Filter ℝ := 𝓝[>] (1 : ℝ) with hl
   set N : ℕ := Fintype.card ι with hN
-  set F : ℝ → ℝ := fun s ↦ ∑ i, g i s with hF
+  set F : γ → ℝ := fun s ↦ ∑ i, g i s with hF
   have hFle : l.IsBoundedUnder (· ≤ ·) F := hsum.isBoundedUnder_le
   have hFlimsup : limsup F l = 1 := hsum.limsup_eq
   have hgle : ∀ i, l.IsBoundedUnder (· ≤ ·) (g i) :=
