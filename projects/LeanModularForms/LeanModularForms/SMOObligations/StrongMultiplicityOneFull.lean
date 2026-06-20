@@ -77,6 +77,24 @@ private lemma qExpansion_one_coeff_one_smul_local
     ModularForm.qExpansion_smul one_pos (one_mem_strictPeriods_Gamma1_map N), PowerSeries.coeff_smul,
     smul_eq_mul]
 
+/-- Membership in the Nebentypus space transfers from `g.toModularForm'` (the `CuspForm`→`ModularForm`
+coercion used throughout the eigenform API) to `cuspFormCharSpace`, bridging the defeq mismatch
+between `toModularForm'` and `cuspFormToModularForm`. -/
+private theorem mem_cuspFormCharSpace_of_toModularForm'_mem (χ : (ZMod N)ˣ →* ℂˣ)
+    {g : CuspForm ((Gamma1 N).map (mapGL ℝ)) k}
+    (hg : g.toModularForm' ∈ modFormCharSpace k χ) :
+    g ∈ cuspFormCharSpace k χ :=
+  (cuspFormToModularForm_mem_modFormCharSpace_iff_mem_cuspFormCharSpace (k := k) χ g).mp
+    (by convert hg using 1; exact ModularForm.ext fun _ ↦ rfl)
+
+/-- Reverse of `mem_cuspFormCharSpace_of_toModularForm'_mem`: a single-character cusp form lifts to
+the Nebentypus `ModularForm` space via the `toModularForm'` coercion. -/
+private theorem toModularForm'_mem_modFormCharSpace_of_mem (χ : (ZMod N)ˣ →* ℂˣ)
+    {g : CuspForm ((Gamma1 N).map (mapGL ℝ)) k}
+    (hg : g ∈ cuspFormCharSpace k χ) :
+    g.toModularForm' ∈ modFormCharSpace k χ :=
+  (cuspFormToModularForm_mem_modFormCharSpace_iff_mem_cuspFormCharSpace (k := k) χ g).mpr hg
+
 /-- **Miyake Lemma 4.5.15(1)** (un-normalised form, period 1).  For an `Eigenform g`
 lying in the Nebentypus space `χ` and `n` coprime to the level, the `n`-th Fourier
 coefficient equals the leading coefficient times the classical Hecke eigenvalue:
@@ -121,8 +139,7 @@ theorem coeff_one_ne_zero_of_mem_cuspFormsNew_of_eigen
       rwa [h1, zero_mul] at hcoeff
   exact hg_ne (Submodule.disjoint_def.mp cuspFormsOld_disjoint_cuspFormsNew _
     (mainLemma_charSpace_routeB χ g.toCuspForm
-      ((cuspFormToModularForm_mem_modFormCharSpace_iff_mem_cuspFormCharSpace (k := k) χ
-        g.toCuspForm).mp (by convert hgχ using 1; exact ModularForm.ext fun _ ↦ rfl)) h_vanish)
+      (mem_cuspFormCharSpace_of_toModularForm'_mem χ hgχ) h_vanish)
         hg_new)
 
 /-- **Miyake Lemma 4.6.2** (eigenvalue-preservation form).  If `h` is a `T_n`-eigenform
@@ -170,8 +187,7 @@ theorem exists_eigenform_decomposition_mem_cuspFormsNew
       (∀ i, h i ∈ cuspFormsNew N k) ∧ (∀ i, h i ∈ cuspFormCharSpace k χ) ∧
         (∀ i, IsEigenform (h i)) ∧ g = ∑ i, h i := by
   have hg_char : g ∈ cuspFormCharSpace k χ :=
-    (cuspFormToModularForm_mem_modFormCharSpace_iff_mem_cuspFormCharSpace (k := k) χ g).mp
-      (by convert hgχ using 1; exact ModularForm.ext fun _ ↦ rfl)
+    mem_cuspFormCharSpace_of_toModularForm'_mem χ hgχ
   obtain ⟨ι, hι, h, h_new, h_char, h_eigen, h_sum⟩ :=
     exists_eigenform_decomposition_of_invariant χ (cuspFormsNew N k)
       (fun n _ hn f hf ↦ heckeT_n_preserves_cuspFormsNew n hn f hf) g hg_char hg_new
@@ -342,8 +358,7 @@ theorem exists_levelRaise_eigen_decomposition_of_mem_cuspFormsOldChar
       (LevelRaiseEigenDecomp.zero m_χ) (fun ψ _ ↦ ?_)
     obtain ⟨ι, hι, hh, hh_new, hh_char, hh_eig, hh_sum⟩ :=
       exists_eigenform_decomposition_mem_cuspFormsNew ψ (cfs ψ) (hcfs_mem ψ).1
-        ((cuspFormToModularForm_mem_modFormCharSpace_iff_mem_cuspFormCharSpace (k := k) ψ
-          (cfs ψ)).mpr (hcfs_mem ψ).2)
+        (toModularForm'_mem_modFormCharSpace_of_mem ψ (hcfs_mem ψ).2)
     refine ⟨ι, hι, fun _ ↦ M, fun _ ↦ l, fun _ ↦ hM, fun _ ↦ hl, fun _ ↦ hcond,
       fun _ ↦ hMne, fun _ ↦ heq, hh, fun _ ↦ ψ, hh_new, hh_eig, hh_char, ?_⟩
     rw [hh_sum, map_sum]
@@ -919,10 +934,8 @@ theorem newPart_eq_smul_of_shared_eigenvalues
       (modFormCharSpace k χ).smul_mem b₁⁻¹ hgχ
     have h_diff_char : g₁ - f.toCuspForm ∈ cuspFormCharSpace k χ :=
       (cuspFormCharSpace k χ).sub_mem
-        ((cuspFormToModularForm_mem_modFormCharSpace_iff_mem_cuspFormCharSpace (k := k) χ
-          g₁).mp (by convert hg₁_char using 1; exact ModularForm.ext fun _ ↦ rfl))
-        ((cuspFormToModularForm_mem_modFormCharSpace_iff_mem_cuspFormCharSpace (k := k) χ
-          f.toCuspForm).mp (by convert hfχ using 1; exact ModularForm.ext fun _ ↦ rfl))
+        (mem_cuspFormCharSpace_of_toModularForm'_mem χ hg₁_char)
+        (mem_cuspFormCharSpace_of_toModularForm'_mem χ hfχ)
     have h_vanish : ∀ n : ℕ, Nat.Coprime n N →
         (UpperHalfPlane.qExpansion (1 : ℝ) (g₁ - f.toCuspForm)).coeff n = 0 := by
       intro n hn
@@ -1076,7 +1089,7 @@ private theorem oldPart_lam_eq_eigenvalue_aux
     ∀ n : ℕ+, Nat.Coprime n.val N → lam n = f.eigenvalue n := by
   set h_eig_b : Eigenform M k := eigenformOfIsEigenform ψ h hh_char ⟨lam, hh_eig⟩
   have hψ_mod' : h_eig_b.toCuspForm.toModularForm' ∈ modFormCharSpace k ψ :=
-    (cuspFormToModularForm_mem_modFormCharSpace_iff_mem_cuspFormCharSpace (k := k) ψ h).mpr hh_char
+    toModularForm'_mem_modFormCharSpace_of_mem ψ hh_char
   have h_off : ∀ n : ℕ+, Nat.Coprime n.val N → n.val ∉ S →
       f.eigenvalue n = h_eig_b.eigenvalue n := fun n hn hnS ↦ by
     rw [eigenformOfIsEigenform_eigenvalue ψ h hh_char lam hh_eig hh_ne n
@@ -1113,7 +1126,7 @@ private theorem oldPart_diff_qExpansion_coeff_eq_zero
   set h_eig_b : Eigenform M k := eigenformOfIsEigenform ψ h hh_char ⟨lam, hh_eig⟩
   have hh_eig_b_cusp : h_eig_b.toCuspForm = h := rfl
   have hψ_mod' : h_eig_b.toCuspForm.toModularForm' ∈ modFormCharSpace k ψ :=
-    (cuspFormToModularForm_mem_modFormCharSpace_iff_mem_cuspFormCharSpace (k := k) ψ h).mpr hh_char
+    toModularForm'_mem_modFormCharSpace_of_mem ψ hh_char
   set c₁' := (UpperHalfPlane.qExpansion (1 : ℝ) h).coeff 1
   set ιh : CuspForm ((Gamma1 N).map (mapGL ℝ)) k := levelInclude_cusp hMN k h with hιh_def
   have h_lam_eq : ∀ n : ℕ+, Nat.Coprime n.val N → lam n = f.eigenvalue n :=
@@ -1203,7 +1216,7 @@ theorem oldPart_eq_zero_of_shared_eigenvalues
     exists_matching_summand f χ m_χ g_old hg_old hg_old_char hg0 S h_eig
   set h_eig_b : Eigenform M k := eigenformOfIsEigenform ψ h hh_char ⟨lam, hh_eig⟩
   have hψ_mod' : h_eig_b.toCuspForm.toModularForm' ∈ modFormCharSpace k ψ :=
-    (cuspFormToModularForm_mem_modFormCharSpace_iff_mem_cuspFormCharSpace (k := k) ψ h).mpr hh_char
+    toModularForm'_mem_modFormCharSpace_of_mem ψ hh_char
   set c₁' := (UpperHalfPlane.qExpansion (1 : ℝ) h).coeff 1
   have hc₁'_ne : c₁' ≠ 0 :=
     coeff_one_ne_zero_of_mem_cuspFormsNew_of_eigen h_eig_b ψ hψ_mod' hh_new hh_ne
@@ -1213,8 +1226,7 @@ theorem oldPart_eq_zero_of_shared_eigenvalues
     rwa [hψχ] at this
   have h_diff_char : ιh - c₁' • f.toCuspForm ∈ cuspFormCharSpace k χ :=
     (cuspFormCharSpace k χ).sub_mem hιh_char ((cuspFormCharSpace k χ).smul_mem c₁'
-      ((cuspFormToModularForm_mem_modFormCharSpace_iff_mem_cuspFormCharSpace (k := k) χ
-        f.toCuspForm).mp (by convert hfχ using 1; exact ModularForm.ext fun _ ↦ rfl)))
+      (mem_cuspFormCharSpace_of_toModularForm'_mem χ hfχ))
   have h_vanish := oldPart_diff_qExpansion_coeff_eq_zero f χ hfχ hMN ψ hψχ h hh_char lam
     hh_eig hh_ne hc₁'_ne S hh_lam
   have hf_ext : f.toCuspForm ∈ cuspFormsOldExtended N k :=
@@ -1238,8 +1250,7 @@ theorem strongMultiplicityOne_constMul
       f.eigenvalue n = g.eigenvalue n) :
     ∃ c : ℂ, g.toCuspForm = c • f.toCuspForm := by
   have hgχ_cusp : g.toCuspForm ∈ cuspFormCharSpace k χ :=
-    (cuspFormToModularForm_mem_modFormCharSpace_iff_mem_cuspFormCharSpace (k := k) χ
-      g.toCuspForm).mp (by convert hgχ using 1; exact ModularForm.ext fun _ ↦ rfl)
+    mem_cuspFormCharSpace_of_toModularForm'_mem χ hgχ
   set χ_dir : DirichletCharacter ℂ N := Newform.dirichletLift χ
   have h_round : χ_dir.toUnitHom = χ := MulChar.equivToUnitHom.apply_symm_apply χ
   have h_old_char : oldPart g.toCuspForm ∈ cuspFormsOldChar N k χ χ_dir.conductor := by
