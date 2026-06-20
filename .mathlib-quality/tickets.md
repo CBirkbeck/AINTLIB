@@ -210,7 +210,25 @@ such spaces … separation+gluing give a continuous bijection ρ̃ : R → E." G
 ---
 
 ### [T-L1c] `productRestrictionSub_isInducing_tate` via the σ-compact-free OMT
-- **Status**: open — replaces the bare `sorry` at StructureSheaf.lean:1384
+- **Status**: open — ⚠ ARCHITECTURE: prove in WedhornCechAcyclicity, NOT StructureSheaf.
+- **Progress**:
+  - 2026-06-20 (beastmode) cg-uniformity diamond CRACKED + 5 topological foundations landed in
+    StructureSheaf (sectionEqualizer_isClosed/_completeSpace/_isCountablyGenerated,
+    productRestrictionSub_mem_sectionEqualizer, presheafValue_uniformity_isCountablyGenerated).
+  - **ARCHITECTURE FINDING:** the OMT inducing route needs `ρ̃ : R → E` SURJECTIVE = the gluing
+    (`lemma_8_34_gluing`, in WedhornCechAcyclicity). But `productRestrictionSub_isInducing_tate`
+    lives in StructureSheaf (UPSTREAM of WCA — WCA imports StructureSheaf). So the inducing CANNOT
+    use gluing where it currently lives (import cycle). RESOLUTION: prove a new
+    `productRestrictionSub_isInducing_via_equalizer` IN WCA (downstream of gluing + the 5 foundations
+    + the OMT) and **rewire the headline's `embedding` field** to `⟨new_inducing, cor_8_32_…injective⟩`
+    (keep the RPK injectivity; bypass the StructureSheaf inducing sorry, which becomes orphaned).
+  - **REMAINING (in WCA):** (1) E as an **A-Submodule** of `∏_D 𝒪_X(D)` — `letI : Module A (presheafValue D)`
+    `:= (canonicalMap D).toAlgebra.toModule` per D (FlatnessResults:72 pattern) + `Pi.module` + the
+    submodule from the A-linear restriction-map equalizer; (2) `ContinuousSMul A` on R and E (continuity
+    of the A-action via `canonicalMap`); (3) `ρ̃ : R →ₗ[A] E` (corestrict, A-linear) continuous; (4)
+    surjective (`lemma_8_34_gluing` + `productRestrictionSub_mem_sectionEqualizer`) + injective
+    (`cor_8_32_…injective`); (5) `wedhorn_6_16_of_topNilpUnit ϖ … ρ̃` → IsOpenMap → homeo →
+    `IsInducing.subtypeVal.comp` ⇒ inducing. ϖ from `IsTateRing.exists_topologicallyNilpotent_unit`.
 - **File**: StructureSheaf.lean:1384
 - **Depends on**: T-L1a, T-L1b
 - **Parallel**: no
