@@ -170,7 +170,7 @@ theorem Isogeny.pullback_eq_of_pointMap_eqOn_infinite
     {S : Set (W_smooth W).SmoothPoint} (hS : S.Infinite)
     (h : ∀ P ∈ S, α.toAddMonoidHom P.toAffinePoint = β.toAddMonoidHom P.toAffinePoint) :
     α.pullback = β.pullback := by
-  have hS' : (S \ (badα ∪ badβ)).Infinite := hS.diff (hbadα.union hbadβ)
+  have hS' : (S \ (badα ∪ badβ)).Infinite := hS.sdiff (hbadα.union hbadβ)
   -- at every common good point the pulled-back generators take the same value
   have key : ∀ P ∈ S \ (badα ∪ badβ),
       (∃ c : F, EvaluatesTo W P (α.pullback (x_gen W)) c ∧
@@ -215,7 +215,7 @@ theorem Isogeny.pullback_eq_of_pointMap_eqOn_infinite_points
     | some x y hns => exact ⟨⟨x, y, hns⟩, rfl⟩
   have hpre : ((fun P : (W_smooth W).SmoothPoint ↦ P.toAffinePoint) ⁻¹'
       (T \ {0})).Infinite :=
-    (hT.diff (Set.finite_singleton 0)).preimage hsub
+    (hT.sdiff (Set.finite_singleton 0)).preimage hsub
   exact Isogeny.pullback_eq_of_pointMap_eqOn_infinite hbadα hbadβ hwα hwβ hpre
     fun P hP ↦ h P.toAffinePoint hP.1
 
