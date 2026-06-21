@@ -531,7 +531,7 @@ lemma support_mul_exists (f g : HeckeAlgebra 2) (D : HeckeCoset (GL_pair 2))
   have h : (Finsupp.sum f (fun D₁ b₁ ↦ Finsupp.sum g (fun D₂ b₂ ↦
       b₁ • b₂ • HeckeRing.m (GL_pair 2) (HeckeCoset.rep D₁)
         (HeckeCoset.rep D₂)))) D ≠ 0 := hD
-  simp only [Finsupp.sum, Finsupp.finset_sum_apply, Finsupp.smul_apply, smul_eq_mul] at h
+  simp only [Finsupp.sum, Finsupp.finsetSum_apply, Finsupp.smul_apply, smul_eq_mul] at h
   obtain ⟨D₁, hD₁_mem, h₁⟩ := Finset.exists_ne_zero_of_sum_ne_zero h
   obtain ⟨D₂, hD₂_mem, h₂⟩ := Finset.exists_ne_zero_of_sum_ne_zero h₁
   have hfD₁ := Finsupp.mem_support_iff.mp hD₁_mem
