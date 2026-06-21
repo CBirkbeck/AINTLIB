@@ -2,6 +2,33 @@ module
 
 public import BernoulliRegular.CyclotomicUnits.DworkParameter.Part8Conjugation
 
+/-!
+# The corrected Dwork parameter: vanishing of the finite Artin--Hasse logarithm
+
+This file evaluates the integral Artin--Hasse exponential at the Dwork parameter modulo
+powers of the principal `lambda`-ideal, identifies the resulting finite logarithm with the
+same-prime finite logarithm of `lambda`, and assembles these compatible finite coordinates
+into a completed element. It then shows that element — and hence every finite coordinate —
+vanishes, which is the `p`-torsion input to the same-prime principal-unit argument.
+
+## Main definitions
+
+* `dworkParameterExpApprox`: the finite Artin--Hasse exponential approximants evaluated at
+  the Dwork parameter approximants.
+* `dworkParameterFiniteArtinHasseLogCoord`: the finite Artin--Hasse logarithm coordinates,
+  packaged for adic-completion assembly.
+* `artinHasseLog_eval_dworkParameter`: the completed Artin--Hasse logarithm of the Dwork
+  parameter, assembled from its compatible finite quotient coordinates.
+
+## Main results
+
+* `dworkParameter_eval_exp_mod`: the finite-quotient form of `E_p(G_p(lambda)) = zeta_p`.
+* `dworkParameterFiniteArtinHasseLog_eq_zero`: each finite Artin--Hasse logarithm of the
+  Dwork parameter vanishes.
+* `artinHasseLog_eval_dworkParameter_eq_zero`: the completed Artin--Hasse logarithm of the
+  Dwork parameter is zero.
+-/
+
 @[expose] public section
 
 noncomputable section
@@ -170,7 +197,7 @@ theorem dworkParameter_eval_exp_mod (N : ℕ) :
     q.comp (rIntegralRatToValuedInteger p K)
   let hE : Furtwaengler.DieudonneDwork.IsRIntegralPS p
       (Furtwaengler.artinHasseExpSeries p) :=
-    fun n => Furtwaengler.artinHasseExpSeries_coeff_isRIntegral p n
+    Furtwaengler.artinHasseExpSeries_coeff_isRIntegral p
   let hInv : Furtwaengler.DieudonneDwork.IsRIntegralPS p
       (FormalDwork.inverseSeries p) :=
     FormalDwork.inverseSeries_isPIntegral p
@@ -204,8 +231,7 @@ theorem dworkParameter_eval_exp_mod (N : ℕ) :
       dworkParameterApprox p K (N + 1) ∈ lambdaIdeal p K :=
     dworkParameterApprox_mem_lambdaIdeal (p := p) (K := K) (N + 1)
   have hgammaNil : gammabar ^ (N + 1) = 0 := by
-    rw [hgammaMk]
-    rw [← map_pow, Ideal.Quotient.eq_zero_iff_mem]
+    rw [hgammaMk, ← map_pow, Ideal.Quotient.eq_zero_iff_mem]
     exact Ideal.pow_mem_pow hgammaMem (N + 1)
   have hSubInv :
       PowerSeries.subst (PowerSeries.C lambdabar) Ips = PowerSeries.C gammabar := by
@@ -293,9 +319,8 @@ theorem quotient_mk_dworkParameterExpApprox_eq_trunc_eval (N : ℕ) :
           (dworkParameterApprox p K N)) := by
   classical
   dsimp only [dworkParameterExpApprox]
-  rw [PowerSeries.eval₂_trunc_eq_sum_range]
-  rw [map_sum]
-  rw [PowerSeries.eval₂_trunc_eq_sum_range]
+  rw [PowerSeries.eval₂_trunc_eq_sum_range, map_sum,
+    PowerSeries.eval₂_trunc_eq_sum_range]
   refine Finset.sum_congr rfl ?_
   intro n _hn
   simp [map_pow]
@@ -344,9 +369,9 @@ theorem quotient_mk_samePrimeFiniteArtinHasseExpCoord_dworkParameterApprox_eq_la
           (dworkParameterApprox p K (N + 1))) =
       Ideal.Quotient.mk ((lambdaIdeal p K) ^ (N + 1))
         (valuedCyclotomicLambdaInteger p K) := by
-  rw [samePrimeFiniteArtinHasseExpCoord, map_sub]
-  rw [samePrimeFiniteArtinHasseExp_dworkParameterApprox]
-  rw [quotient_mk_dworkParameterExpApprox_eq_zeta]
+  rw [samePrimeFiniteArtinHasseExpCoord, map_sub,
+    samePrimeFiniteArtinHasseExp_dworkParameterApprox,
+    quotient_mk_dworkParameterExpApprox_eq_zeta]
   simp [valuedCyclotomicZetaInteger_eq_one_add_lambda]
 
 theorem samePrimeFiniteArtinHasseExpCoord_dworkParameterApprox_sub_lambda_mem
@@ -439,8 +464,8 @@ theorem samePrimeNatDivEval_factorPow {M N n s : ℕ} (hMN : M ≤ N)
     Ideal.Quotient.factorPow (lambdaIdeal p K) (Nat.succ_le_succ hMN)
         (samePrimeNatDivEval (p := p) (K := K) N n s hn z hz) =
       samePrimeNatDivEval (p := p) (K := K) M n s hn z hz := by
-  rw [samePrimeNatDivEval, samePrimeNatDivEval]
-  rw [map_mul, quotientNatCastInv_factorPow (p := p) (K := K) hMN]
+  rw [samePrimeNatDivEval, samePrimeNatDivEval, map_mul,
+    quotientNatCastInv_factorPow (p := p) (K := K) hMN]
   rfl
 
 theorem samePrimeFiniteLogTermCore_factorPow {M N n : ℕ} (hMN : M ≤ N)
@@ -460,8 +485,8 @@ theorem samePrimeFiniteLogTerm_factorPow {M N n : ℕ} (hMN : M ≤ N)
     Ideal.Quotient.factorPow (lambdaIdeal p K) (Nat.succ_le_succ hMN)
         (samePrimeFiniteLogTerm (p := p) (K := K) N n x hx) =
       samePrimeFiniteLogTerm (p := p) (K := K) M n x hx := by
-  rw [samePrimeFiniteLogTerm, samePrimeFiniteLogTerm]
-  rw [map_mul, map_pow, samePrimeFiniteLogTermCore_factorPow (p := p) (K := K) hMN hx]
+  rw [samePrimeFiniteLogTerm, samePrimeFiniteLogTerm, map_mul, map_pow,
+    samePrimeFiniteLogTermCore_factorPow (p := p) (K := K) hMN hx]
   rfl
 
 theorem samePrimeFiniteLog_factorPow {M N : ℕ} (hMN : M ≤ N)
