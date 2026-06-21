@@ -51,8 +51,7 @@ It imports only; it does **not** modify any existing file.
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Polynomial NumberField.IsCMField
-open scoped nonZeroDivisors
+open NumberField Polynomial NumberField.IsCMField
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -98,15 +97,13 @@ theorem map_gcd :
   have hx : (Ideal.span ({D.x} : Set (𝓞 K))).map
         (ringOfIntegersComplexConj K).toRingEquiv.toRingHom =
       Ideal.span ({D.y} : Set (𝓞 K)) := by
-    rw [Ideal.map_span, Set.image_singleton]
-    have : (ringOfIntegersComplexConj K).toRingEquiv.toRingHom D.x = D.y := D.x_conj
-    rw [this]
+    rw [Ideal.map_span, Set.image_singleton, show
+      (ringOfIntegersComplexConj K).toRingEquiv.toRingHom D.x = D.y from D.x_conj]
   have hy : (Ideal.span ({D.y} : Set (𝓞 K))).map
         (ringOfIntegersComplexConj K).toRingEquiv.toRingHom =
       Ideal.span ({D.x} : Set (𝓞 K)) := by
-    rw [Ideal.map_span, Set.image_singleton]
-    have : (ringOfIntegersComplexConj K).toRingEquiv.toRingHom D.y = D.x := D.y_conj
-    rw [this]
+    rw [Ideal.map_span, Set.image_singleton, show
+      (ringOfIntegersComplexConj K).toRingEquiv.toRingHom D.y = D.x from D.y_conj]
   rw [hx, hy, sup_comm, ← Ideal.gcd_eq_sup]
 
 /-- **`σ(x + y·η) = η⁻¹·(x + y·η)`** over a σ-conjugate pair: the conjugate of the Washington
@@ -133,14 +130,8 @@ theorem map_span_x_add_y_eta {η : 𝓞 K} (hη : η ^ 37 = 1) :
       η ^ 36 * (D.x + D.y * η) := D.conj_x_add_y_eta hη
   rw [hfe, Ideal.span_singleton_eq_span_singleton]
   -- `Associated (η³⁶·(x+yη)) (x+yη)`: the unit `u = η` (since `η³⁶·(x+yη)·η = η³⁷·(x+yη) = x+yη`).
-  have hu37 : η * η ^ 36 = 1 := by rw [show η * η ^ 36 = η ^ 37 from by ring, hη]
-  have hu37' : η ^ 36 * η = 1 := by rw [mul_comm]; exact hu37
-  refine ⟨⟨η, η ^ 36, hu37, hu37'⟩, ?_⟩
-  -- Goal: `η³⁶·(x+yη)·η = x+yη`; reduce via `η³⁶·η = 1`.
-  rw [Units.val_mk]
-  calc η ^ 36 * (D.x + D.y * η) * η
-      = (η ^ 36 * η) * (D.x + D.y * η) := by ring
-    _ = D.x + D.y * η := by rw [hu37', one_mul]
+  exact ⟨⟨η, η ^ 36, by linear_combination hη, by linear_combination hη⟩,
+    by linear_combination (D.x + D.y * η) * hη⟩
 
 /-! ## 3. σ-fixedness of the Washington ideals `𝔠(η)`, `𝔞(η)` over a σ-conjugate pair
 
@@ -171,7 +162,6 @@ theorem map_c (η : nthRootsFinset 37 (1 : 𝓞 K)) :
   have hmne : gcd (Ideal.span {D.x}) (Ideal.span {D.y}) ≠ 0 := m_ne_zero D.hζ D.hy
   exact mul_left_cancel₀ hmne (mul_right_cancel₀ hpne hmap)
 
-set_option maxRecDepth 1000 in
 /-- **`σ𝔞(η) = 𝔞(η)`** over a σ-conjugate pair — the central conjugation identity, *cleaner* than
 the individually-real `caseII_map_rootIdeal` (`σ𝔞(η) = 𝔞(η⁻¹)`).  Here each root ideal is its own
 conjugate.  Proof: `σ` of `(𝔞 η)^37 = 𝔠(η)` gives `(σ𝔞(η))^37 = 𝔠(η) = (𝔞(η))^37` (`map_c`), then
