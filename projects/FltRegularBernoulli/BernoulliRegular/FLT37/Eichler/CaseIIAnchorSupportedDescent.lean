@@ -190,7 +190,7 @@ theorem caseIIWashingtonAnchorSquareDatum37_anchor_pow_ne_bot
         Ideal.span ({D.z} : Set (𝓞 (CyclotomicField 37 ℚ))) :=
     caseII_a_eta_zero_dvd_z D.toCaseIIData37 (by decide)
   have h𝔞₀_ne : aEtaZeroDvdPPow (by decide : (37 : ℕ) ≠ 2) D.hζ D.equation D.hy ≠ 0 :=
-    fun h0 => hz_ne (by rw [h0] at h𝔞₀_dvd_z; exact zero_dvd_iff.mp h𝔞₀_dvd_z)
+    fun h0 ↦ hz_ne (by rw [h0] at h𝔞₀_dvd_z; exact zero_dvd_iff.mp h𝔞₀_dvd_z)
   exact pow_ne_zero k h𝔞₀_ne
 
 /-- **The ideal side of the residual is always satisfiable: `𝔞₀ᵏ` is principal for some `k ≥ 1`.**
@@ -215,7 +215,7 @@ theorem caseII_exists_anchor_pow_isPrincipal
       caseIIData37_span_z_ne_bot D.toCaseIIData37
     have h𝔞₀_dvd_z : 𝔞₀ ∣ Ideal.span ({D.z} : Set (𝓞 (CyclotomicField 37 ℚ))) :=
       caseII_a_eta_zero_dvd_z D.toCaseIIData37 (by decide)
-    exact fun h0 => hz_ne (by rw [h0] at h𝔞₀_dvd_z; exact zero_dvd_iff.mp h𝔞₀_dvd_z)
+    exact fun h0 ↦ hz_ne (by rw [h0] at h𝔞₀_dvd_z; exact zero_dvd_iff.mp h𝔞₀_dvd_z)
   set d := Fintype.card (ClassGroup (𝓞 (CyclotomicField 37 ℚ)))
   have hd_pos : 1 ≤ d := Fintype.card_pos
   refine ⟨d, hd_pos, ?_⟩
