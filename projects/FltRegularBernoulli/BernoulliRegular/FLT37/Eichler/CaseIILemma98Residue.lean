@@ -227,8 +227,8 @@ theorem caseIILemma98Residue_descentUnit_isPthPower_of_identification
   set Q0 := caseII_data_pair_realGenerator_K D D.etaZero with hQ0def
   -- Pass to the residue field.
   set Q := Ideal.Quotient.mk 𝔩 with hQ
-  have hX0 : Q X ≠ 0 := fun h => hX ((Ideal.Quotient.eq_zero_iff_mem).mp h)
-  have hQ00 : Q Q0 ≠ 0 := fun h => hQ0 ((Ideal.Quotient.eq_zero_iff_mem).mp h)
+  have hX0 : Q X ≠ 0 := fun h ↦ hX ((Ideal.Quotient.eq_zero_iff_mem).mp h)
+  have hQ00 : Q Q0 ≠ 0 := fun h ↦ hQ0 ((Ideal.Quotient.eq_zero_iff_mem).mp h)
   -- Residue-field form of the producer identity: `Q(X)^37 · Q(Qη) · Q(U) = Q(Y)^37 · Q(Q0)`.
   have hbalQ : Q X ^ 37 * Q Qη * Q U = Q Y ^ 37 * Q Q0 := by
     have := congrArg Q hbal
