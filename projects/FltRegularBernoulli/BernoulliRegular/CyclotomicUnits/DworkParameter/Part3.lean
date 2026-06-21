@@ -2,6 +2,31 @@ module
 
 public import BernoulliRegular.CyclotomicUnits.DworkParameter.Part2
 
+/-!
+# The same-prime finite logarithm and its additivity
+
+This file defines the ordinary finite logarithm `samePrimeFiniteLog` on principal units
+`1 + x` with `x` in the lambda ideal, valued in the truncation
+`ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1)`, and develops the bookkeeping needed
+for its additivity over products.
+
+## Main definitions
+
+* `samePrimeFiniteLog`: the truncated finite logarithm of `1 + x`.
+* `samePrimeFiniteLogLocalizedPolynomial`: the same value re-expressed through the
+  degree-indexed localized evaluator.
+* `samePrimeFiniteLogProductHomogeneousGrid`: the homogeneous grid used to compare the
+  logarithm of a product against the sum of the logarithms.
+
+## Main results
+
+* `samePrimeFiniteLog_eq_samePrimeFiniteLogLocalizedPolynomial`: the two presentations agree.
+* `samePrimeFiniteLog_eq_of_sub_mem`: the logarithm depends only on `x` modulo
+  `(lambdaIdeal p K) ^ (N + 1)`.
+* `samePrimeFiniteLogAdditivity_degree_sum_eq_zero`: the product-versus-sum discrepancy
+  vanishes degree by degree, the key input to additivity.
+-/
+
 @[expose] public section
 
 noncomputable section
@@ -72,14 +97,14 @@ theorem pow_sub_pow_mem_lambdaIdeal_pow_add {N n : ℕ} (hn : n ≠ 0)
     rw [← pow_add] at hmul
     have hidx : i + (n - 1 - i) = n - 1 := by
       have hi_lt : i < n := Finset.mem_range.mp hi
-      omega
+      lia
     simpa [hidx] using hmul
   have hprod : (x - y) * g ∈ (lambdaIdeal p K) ^ (N + n) := by
     have hmul : (x - y) * g ∈
         (lambdaIdeal p K) ^ (N + 1) * (lambdaIdeal p K) ^ (n - 1) :=
       Ideal.mul_mem_mul hxy hg
     rw [← pow_add] at hmul
-    have hidx : (N + 1) + (n - 1) = N + n := by omega
+    have hidx : (N + 1) + (n - 1) = N + n := by lia
     simpa [hidx] using hmul
   have hgeom : (x - y) * g = x ^ n - y ^ n := by
     change (x - y) *
@@ -115,7 +140,7 @@ theorem samePrimeFiniteLogTermCore_eq_of_sub_mem {N n : ℕ} (hn : n ≠ 0)
       have hsum : den + s = n := by
         simpa [den, s] using
           factorization_mul_pred_add_samePrimeFiniteLogTermOrder (p := p) hn
-      omega
+      lia
     exact Ideal.pow_le_pow_right hle hpowdiff
   have hsub_eval :
       samePrimeNatDivEval (p := p) (K := K) N n s hn
@@ -177,7 +202,7 @@ noncomputable def samePrimeFiniteLogLocalizedTerm (N n : ℕ)
         (by
           have h := Nat.factorization_mul_pred_le_pred
             (ell := p) (n := n) (Fact.out : Nat.Prime p) hn
-          omega)
+          lia)
 
 noncomputable def samePrimeFiniteLogLocalizedPolynomial (N : ℕ)
     (x : ValuedIntegerRing p K) (hx : x ∈ lambdaIdeal p K) :
@@ -263,10 +288,8 @@ theorem samePrimeFiniteLogProductArgPoly_coeff_mem_lambdaIdeal_pow
         Ideal.mul_mem_mul hx hy
       simpa [pow_two] using hmul
     simpa [samePrimeFiniteLogProductArgPoly, Polynomial.coeff_monomial] using hxy
-  have hne1 : 1 ≠ d := fun h =>
-    h1 h.symm
-  have hne2 : 2 ≠ d := fun h =>
-    h2 h.symm
+  have hne1 : 1 ≠ d := fun h => h1 h.symm
+  have hne2 : 2 ≠ d := fun h => h2 h.symm
   simp [samePrimeFiniteLogProductArgPoly, Polynomial.coeff_monomial, hne1, hne2]
 
 theorem samePrimeFiniteLogProductArgPoly_pow_coeff_mem_lambdaIdeal_pow
@@ -324,8 +347,7 @@ theorem coeff_subst_log_coe_eq_sum_Icc
     simpa [Polynomial.constantCoeff_coe] using hP0
   have hsubst : PowerSeries.HasSubst (P : PowerSeries A) :=
     PowerSeries.HasSubst.of_constantCoeff_zero' hconst
-  rw [PowerSeries.coeff_subst' hsubst]
-  rw [finsum_eq_sum_of_support_subset]
+  rw [PowerSeries.coeff_subst' hsubst, finsum_eq_sum_of_support_subset]
   · refine Finset.sum_congr rfl ?_
     intro n hn
     have hn0 : n ≠ 0 := by
@@ -341,7 +363,7 @@ theorem coeff_subst_log_coe_eq_sum_Icc
     · have hdn : d < n := by
         by_contra hdn
         have hn1 : 1 ≤ n := Nat.succ_le_of_lt (Nat.pos_of_ne_zero hn0)
-        have hnd : n ≤ d := by omega
+        have hnd : n ≤ d := by lia
         exact hnI (Finset.mem_Icc.mpr ⟨hn1, hnd⟩)
       have hcoeff := coeff_pow_coe_eq_zero_of_lt_of_constantCoeff_eq_zero P hP0 hdn
       simp [hcoeff] at hnmem
@@ -589,7 +611,7 @@ theorem samePrimeFiniteLogAdditivity_den_exponent_le {n d : ℕ}
     n.factorization p * (p - 1) ≤ d := by
   have h := Nat.factorization_mul_pred_le_pred
     (ell := p) (n := n) (Fact.out : Nat.Prime p) hn
-  omega
+  lia
 
 theorem samePrimeFiniteLogAdditivity_degree_sum_eq_zero (N d : ℕ)
     {x y : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
@@ -749,15 +771,15 @@ theorem samePrimeFiniteLogAdditivity_term_eq (N d n : ℕ) (hn : n ≠ 0)
         (samePrimeNatDivEvalAtDegree (p := p) (K := K) N n d hn zxy hzxy hden -
           samePrimeNatDivEvalAtDegree (p := p) (K := K) N n d hn zx hzx hden -
           samePrimeNatDivEvalAtDegree (p := p) (K := K) N n d hn zy hzy hden) := by
-        rw [hmk_s]
-        rw [samePrimeNatDivEvalAtDegree_add (p := p) (K := K) hn
-          hsubx (((lambdaIdeal p K) ^ d).neg_mem hzy) hsubxy hden]
-        rw [samePrimeNatDivEvalAtDegree_add (p := p) (K := K) hn
-          hzxy (((lambdaIdeal p K) ^ d).neg_mem hzx) hsubx hden]
-        rw [samePrimeNatDivEvalAtDegree_neg (p := p) (K := K) hn
-          hzx (((lambdaIdeal p K) ^ d).neg_mem hzx) hden]
-        rw [samePrimeNatDivEvalAtDegree_neg (p := p) (K := K) hn
-          hzy (((lambdaIdeal p K) ^ d).neg_mem hzy) hden]
+        rw [hmk_s,
+          samePrimeNatDivEvalAtDegree_add (p := p) (K := K) hn
+            hsubx (((lambdaIdeal p K) ^ d).neg_mem hzy) hsubxy hden,
+          samePrimeNatDivEvalAtDegree_add (p := p) (K := K) hn
+            hzxy (((lambdaIdeal p K) ^ d).neg_mem hzx) hsubx hden,
+          samePrimeNatDivEvalAtDegree_neg (p := p) (K := K) hn
+            hzx (((lambdaIdeal p K) ^ d).neg_mem hzx) hden,
+          samePrimeNatDivEvalAtDegree_neg (p := p) (K := K) hn
+            hzy (((lambdaIdeal p K) ^ d).neg_mem hzy) hden]
         ring
     _ = _ := by
         ring
@@ -826,7 +848,6 @@ theorem samePrimeFiniteLogProductHomogeneousGrid_eq_degree_sum (N : ℕ)
                   (samePrimeFiniteLogAdditivity_den_exponent_le (p := p) hn hnd)
               else 0) := by
         rw [Finset.sum_comm]
-
 
 end DworkParameter
 end PadicLogSetup
