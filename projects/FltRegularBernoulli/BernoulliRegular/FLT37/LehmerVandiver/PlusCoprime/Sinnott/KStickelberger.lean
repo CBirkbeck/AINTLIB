@@ -2,7 +2,6 @@ import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.ClassGroupMinus
 import BernoulliRegular.ClassGroupExtension
 import Mathlib.NumberTheory.NumberField.Basic
 
-
 /-!
 # LV007c: K-side Stickelberger annihilator from L-side
 
