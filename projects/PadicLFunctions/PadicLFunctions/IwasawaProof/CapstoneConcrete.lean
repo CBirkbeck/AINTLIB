@@ -32,12 +32,14 @@ variable {XPlus YPlus MmodL UPlus : Type*}
   [AddCommGroup MmodL] [Module (LambdaGPlus p) MmodL]
   [AddCommGroup UPlus] [Module (LambdaGPlus p) UPlus]
 
-/-- **The Vandiver Main Conjecture, both halves, with the concrete carrier bridge.**  Identical to
-`iwasawa_main_conjecture_full` but with `Φ` discharged by the assembled `carrierBridgeFull p hp2`
-(`Δ = Delta p hp2 = μ_{p−1}/⟨-1⟩`).  Inputs reduced to the Galois/CFT/Vandiver data and `h12`; the
-completeness is discharged internally by `isotypicIdempotent_sum_eq_one`. -/
+/-- **The Vandiver Main Conjecture, both halves, fully reduced.**  `iwasawa_main_conjecture_full`
+with the carrier bridge `Φ` discharged by `carrierBridgeFull` (`Δ = Delta p hp2 = μ_{p−1}/⟨-1⟩`), the
+isotypic completeness `∑_ω e_ω = 1` discharged by `isotypicIdempotent_sum_eq_one`, and the `Δ`
+typeclass instances (`Fintype (Δ →* ℤ_[p]ˣ)`, `Invertible (|Δ| : ℤ_[p])`) all derived.  The **only**
+remaining hypotheses are the genuinely-classical inputs the project bundles by design: the Galois data
+`D`, the class-field-theory data `cd : CFTUnitsData`, the Vandiver vanishing `hY` + `hEC`, and the §12
+analytic identification `h12`. -/
 theorem iwasawa_main_conjecture_full_concrete (hp2 : p ≠ 2)
-    [Invertible (Fintype.card (Delta p hp2) : ℤ_[p])]
     {D : IwasawaGaloisData p XPlus YPlus MmodL} (cd : CFTUnitsData (UPlus := UPlus) p D)
     (hY : Subsingleton YPlus) (hEC : cd.EPlus = cd.CPlus)
     {g : LambdaGPlus p}

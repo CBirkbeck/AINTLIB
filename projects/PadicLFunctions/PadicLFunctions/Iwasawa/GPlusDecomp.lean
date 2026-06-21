@@ -426,6 +426,32 @@ noncomputable instance instFintypeCharHomDelta (hp2 : p ≠ 2) :
   Fintype.ofEquiv (Delta p hp2)
     (CommGroup.monoidHom_mulEquiv_of_hasEnoughRootsOfUnity (Delta p hp2) ℤ_[p]).some.symm.toEquiv
 
+/-- `p ∤ |Δ|`: `|Δ| ∣ |μ_{p−1}| ∣ (p − 1)` (the cyclic `μ_{p−1}` has every element of order dividing
+`p − 1`), and `p ∤ (p − 1)`. -/
+theorem not_p_dvd_card_Delta (hp2 : p ≠ 2) : ¬ (p ∣ Fintype.card (Delta p hp2)) := by
+  haveI : Fintype ((teichmuller p).range) := Fintype.ofFinite _
+  have hrange : Nat.card ((teichmuller p).range) ∣ (p - 1) := by
+    obtain ⟨g, hg⟩ := IsCyclic.exists_generator (α := (teichmuller p).range)
+    have hgord : orderOf g ∣ (p - 1) := by
+      apply orderOf_dvd_of_pow_eq_one
+      apply Subtype.ext; apply Units.ext
+      rw [SubmonoidClass.coe_pow, Subgroup.coe_one, Units.val_one, Units.val_pow_eq_pow_val]
+      obtain ⟨u, hu⟩ := g.2
+      rw [← hu, teichmuller_coe]; exact teichmullerFun_pow_card_sub_one p u
+    rwa [orderOf_eq_card_of_forall_mem_zpowers hg] at hgord
+  have hd : Nat.card (Delta p hp2) ∣ (p - 1) := (Subgroup.card_quotient_dvd_card _).trans hrange
+  rw [Nat.card_eq_fintype_card] at hd
+  intro hpd
+  have hle := Nat.le_of_dvd (by have := hp.out.two_le; omega) (hpd.trans hd)
+  have := hp.out.two_le; omega
+
+/-- `|Δ| = (p−1)/2` is invertible in `ℤ_[p]` (it is prime to `p`, `not_p_dvd_card_Delta`). -/
+noncomputable instance instInvertibleCardDelta (hp2 : p ≠ 2) :
+    Invertible (Fintype.card (Delta p hp2) : ℤ_[p]) :=
+  (show IsUnit (Fintype.card (Delta p hp2) : ℤ_[p]) from
+    PadicInt.isUnit_iff.mpr (PadicInt.norm_natCast_eq_one_iff.mpr
+      ((Nat.Prime.coprime_iff_not_dvd hp.out).mpr (not_p_dvd_card_Delta p hp2)))).invertible
+
 /-- Under `unitsSplitEquiv`, `-1 ↦ (negOneT, 1)` — it lives purely in the `μ_{p−1}` factor. -/
 theorem unitsSplitEquiv_neg_one (hp2 : p ≠ 2) :
     unitsSplitEquiv p (-1) = (negOneT p hp2, 1) := by
