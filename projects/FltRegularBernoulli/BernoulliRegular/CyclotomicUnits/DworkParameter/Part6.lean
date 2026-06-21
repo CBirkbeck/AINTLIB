@@ -426,6 +426,168 @@ theorem samePrimeFiniteArtinHasseLogTerm_eq_zero_of_succ_le_index
     (hr.trans (le_samePrimeArtinHasseLogTermOrder (p := p) r))
 
 set_option linter.style.longLine false in
+/-- The attached `samePrimeNatDivEval`-sum of a pointwise difference `num - target`
+splits as the difference of the two attached eval-sums, using additivity of
+`samePrimeNatDivEval` on the shared membership level. -/
+private theorem samePrimeNatDivEval_attach_sum_sub_eq
+    (N d : ℕ) (num target : ℕ → ValuedIntegerRing p K)
+    (hnum0 : ∀ a : {n // n ∈ Finset.Icc 1 d},
+      num a.1 ∈ (lambdaIdeal p K) ^ (a.1.factorization p * (p - 1) + 0))
+    (htarget0 : ∀ a : {n // n ∈ Finset.Icc 1 d},
+      target a.1 ∈ (lambdaIdeal p K) ^ (a.1.factorization p * (p - 1) + 0))
+    (hz0 : ∀ n ∈ Finset.Icc 1 d,
+      (num n - target n) ∈ (lambdaIdeal p K) ^ (n.factorization p * (p - 1) + 0)) :
+    (∑ a ∈ (Finset.Icc 1 d).attach,
+      samePrimeNatDivEval (p := p) (K := K) N a.1 0
+        (by
+          have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp a.2).1
+          exact Nat.ne_zero_of_lt ha1)
+        (num a.1 - target a.1) (hz0 a.1 a.2))
+      =
+    (∑ a ∈ (Finset.Icc 1 d).attach,
+      samePrimeNatDivEval (p := p) (K := K) N a.1 0
+        (by
+          have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp a.2).1
+          exact Nat.ne_zero_of_lt ha1)
+        (num a.1) (hnum0 a)) -
+    (∑ a ∈ (Finset.Icc 1 d).attach,
+      samePrimeNatDivEval (p := p) (K := K) N a.1 0
+        (by
+          have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp a.2).1
+          exact Nat.ne_zero_of_lt ha1)
+        (target a.1) (htarget0 a)) := by
+  rw [← Finset.sum_sub_distrib]
+  refine Finset.sum_congr rfl ?_
+  intro a _ha
+  have han : a.1 ≠ 0 := by
+    have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp a.2).1
+    exact Nat.ne_zero_of_lt ha1
+  have hneg : -target a.1 ∈
+      (lambdaIdeal p K) ^ (a.1.factorization p * (p - 1) + 0) :=
+    ((lambdaIdeal p K) ^ (a.1.factorization p * (p - 1) + 0)).neg_mem (htarget0 a)
+  have hz_add : num a.1 - target a.1 = num a.1 + -target a.1 := by
+    rw [sub_eq_add_neg]
+  have hz_add_mem :
+      num a.1 + -target a.1 ∈
+        (lambdaIdeal p K) ^ (a.1.factorization p * (p - 1) + 0) := by
+    simpa [← hz_add] using hz0 a.1 a.2
+  have hadd :
+      samePrimeNatDivEval (p := p) (K := K) N a.1 0 han
+          (num a.1 + -target a.1) hz_add_mem =
+        samePrimeNatDivEval (p := p) (K := K) N a.1 0 han
+            (num a.1) (hnum0 a) +
+          samePrimeNatDivEval (p := p) (K := K) N a.1 0 han
+            (-target a.1) hneg :=
+    samePrimeNatDivEval_add (p := p) (K := K) (N := N)
+      (n := a.1) (s := 0) han (hnum0 a) hneg hz_add_mem
+  calc
+    samePrimeNatDivEval (p := p) (K := K) N a.1 0 han
+        (num a.1 - target a.1) (hz0 a.1 a.2)
+        =
+      samePrimeNatDivEval (p := p) (K := K) N a.1 0 han
+        (num a.1 + -target a.1) hz_add_mem :=
+        samePrimeNatDivEval_eq_of_eq (p := p) (K := K) han hz_add
+          (hz0 a.1 a.2) hz_add_mem
+    _ =
+      samePrimeNatDivEval (p := p) (K := K) N a.1 0 han
+          (num a.1) (hnum0 a) +
+        samePrimeNatDivEval (p := p) (K := K) N a.1 0 han
+          (-target a.1) hneg := hadd
+    _ =
+      samePrimeNatDivEval (p := p) (K := K) N a.1 0 han
+          (num a.1) (hnum0 a) -
+        samePrimeNatDivEval (p := p) (K := K) N a.1 0 han
+          (target a.1) (htarget0 a) := by
+        rw [samePrimeNatDivEval_neg (p := p) (K := K) han (htarget0 a) hneg]
+        ring
+
+set_option linter.style.longLine false in
+/-- The attached `samePrimeNatDivEval`-sum of the indicator `target` supported at
+`n = p ^ r` (value `x ^ (p ^ r)`) collapses to the single nonzero term and equals
+the same-prime finite Artin--Hasse log term. -/
+private theorem samePrimeNatDivEval_attach_sum_target_eq_finiteArtinHasseLogTerm
+    (N r : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
+    (htarget0 : ∀ a : {n // n ∈ Finset.Icc 1 (p ^ r)},
+      (if a.1 = p ^ r then x ^ (p ^ r) else 0) ∈
+        (lambdaIdeal p K) ^ (a.1.factorization p * (p - 1) + 0)) :
+    (∑ a ∈ (Finset.Icc 1 (p ^ r)).attach,
+      samePrimeNatDivEval (p := p) (K := K) N a.1 0
+        (by
+          have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp a.2).1
+          exact Nat.ne_zero_of_lt ha1)
+        (if a.1 = p ^ r then x ^ (p ^ r) else 0) (htarget0 a)) =
+      samePrimeFiniteArtinHasseLogTerm (p := p) (K := K) N r x hx := by
+  have hd_ne : p ^ r ≠ 0 := pow_ne_zero r (Fact.out : Nat.Prime p).ne_zero
+  have hxd : x ^ (p ^ r) ∈ (lambdaIdeal p K) ^ (p ^ r) := Ideal.pow_mem_pow hx (p ^ r)
+  let a0 : {n // n ∈ Finset.Icc 1 (p ^ r)} := ⟨p ^ r, Finset.mem_Icc.mpr ⟨by
+    have hdpos : 0 < p ^ r := Nat.pos_of_ne_zero hd_ne
+    exact Nat.succ_le_of_lt hdpos, le_rfl⟩⟩
+  let targetEval : {n // n ∈ Finset.Icc 1 (p ^ r)} →
+      ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1) := fun a ↦
+    samePrimeNatDivEval (p := p) (K := K) N a.1 0
+      (by
+        have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp a.2).1
+        exact Nat.ne_zero_of_lt ha1)
+      (if a.1 = p ^ r then x ^ (p ^ r) else 0) (htarget0 a)
+  change (∑ a ∈ (Finset.Icc 1 (p ^ r)).attach, targetEval a) =
+    samePrimeFiniteArtinHasseLogTerm (p := p) (K := K) N r x hx
+  calc
+    (∑ a ∈ (Finset.Icc 1 (p ^ r)).attach, targetEval a) = targetEval a0 := by
+      refine Finset.sum_eq_single (s := (Finset.Icc 1 (p ^ r)).attach)
+        (a := a0) (f := targetEval) ?zero ?not_mem
+      · intro a _ha hne
+        dsimp [targetEval]
+        have han : a.1 ≠ 0 := by
+          have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp a.2).1
+          exact Nat.ne_zero_of_lt ha1
+        have ha_ne : a.1 ≠ p ^ r := fun ha ↦
+          hne (Subtype.ext ha)
+        have htarget_zero : (if a.1 = p ^ r then x ^ (p ^ r) else 0) = 0 := by
+          simp [ha_ne]
+        have hzero :
+            (0 : ValuedIntegerRing p K) ∈
+              (lambdaIdeal p K) ^ (a.1.factorization p * (p - 1) + 0) :=
+          zero_mem _
+        calc
+          samePrimeNatDivEval (p := p) (K := K) N a.1 0
+              (by
+                have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp a.2).1
+                exact Nat.ne_zero_of_lt ha1)
+              (if a.1 = p ^ r then x ^ (p ^ r) else 0) (htarget0 a)
+              =
+            samePrimeNatDivEval (p := p) (K := K) N a.1 0 han 0 hzero :=
+              samePrimeNatDivEval_eq_of_eq (p := p) (K := K) han
+                htarget_zero (htarget0 a) hzero
+          _ = 0 :=
+              samePrimeNatDivEval_zero (p := p) (K := K)
+                (N := N) (n := a.1) (s := 0) han hzero
+      · intro ha0
+        simp [a0] at ha0
+    _ = samePrimeFiniteArtinHasseLogTerm (p := p) (K := K) N r x hx := by
+      dsimp [targetEval]
+      have hden : (p ^ r).factorization p * (p - 1) ≤ p ^ r :=
+        samePrimeFiniteArtinHasse_den_exponent_le (p := p) hd_ne le_rfl
+      have htarget0_d :
+          x ^ (p ^ r) ∈
+            (lambdaIdeal p K) ^ ((p ^ r).factorization p * (p - 1) + 0) :=
+        Ideal.pow_le_pow_right hden hxd
+      calc
+        samePrimeNatDivEval (p := p) (K := K) N a0.1 0
+            (by
+              have ha1 : 1 ≤ a0.1 := (Finset.mem_Icc.mp a0.2).1
+              exact Nat.ne_zero_of_lt ha1)
+            (if a0.1 = p ^ r then x ^ (p ^ r) else 0) (htarget0 a0)
+            =
+          samePrimeNatDivEval (p := p) (K := K) N (p ^ r) 0 hd_ne
+            (x ^ (p ^ r)) htarget0_d :=
+            samePrimeNatDivEval_eq_of_eq (p := p) (K := K) hd_ne
+              (by simp [a0]) (htarget0 a0) htarget0_d
+        _ =
+          samePrimeFiniteArtinHasseLogTerm (p := p) (K := K) N r x hx :=
+            samePrimeNatDivEval_prime_pow_zero_eq_finiteArtinHasseLogTerm
+              (p := p) (K := K) N r hx htarget0_d
+
+set_option linter.style.longLine false in
 set_option maxHeartbeats 800000 in
 -- This is the same-prime port of the homogeneous `p^r` slice comparison; it
 -- expands three attached finite sums and transports finite-log additivity.
@@ -521,50 +683,9 @@ theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_logTerm_of_f
           (by
             have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp a.2).1
             exact Nat.ne_zero_of_lt ha1)
-          (target a.1) (htarget0 a)) := by
-    rw [← Finset.sum_sub_distrib]
-    refine Finset.sum_congr rfl ?_
-    intro a _ha
-    have han : a.1 ≠ 0 := by
-      have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp a.2).1
-      exact Nat.ne_zero_of_lt ha1
-    have hneg : -target a.1 ∈
-        (lambdaIdeal p K) ^ (a.1.factorization p * (p - 1) + 0) :=
-      ((lambdaIdeal p K) ^ (a.1.factorization p * (p - 1) + 0)).neg_mem (htarget0 a)
-    have hz_add : z a.1 = num a.1 + -target a.1 := by
-      simp [z, sub_eq_add_neg]
-    have hz_add_mem :
-        num a.1 + -target a.1 ∈
-          (lambdaIdeal p K) ^ (a.1.factorization p * (p - 1) + 0) := by
-      simpa [← hz_add] using hz0 a.1 a.2
-    have hadd :
-        samePrimeNatDivEval (p := p) (K := K) N a.1 0 han
-            (num a.1 + -target a.1) hz_add_mem =
-          samePrimeNatDivEval (p := p) (K := K) N a.1 0 han
-              (num a.1) (hnum0 a) +
-            samePrimeNatDivEval (p := p) (K := K) N a.1 0 han
-              (-target a.1) hneg :=
-      samePrimeNatDivEval_add (p := p) (K := K) (N := N)
-        (n := a.1) (s := 0) han (hnum0 a) hneg hz_add_mem
-    calc
-      samePrimeNatDivEval (p := p) (K := K) N a.1 0 han (z a.1) (hz0 a.1 a.2)
-          =
-        samePrimeNatDivEval (p := p) (K := K) N a.1 0 han
-          (num a.1 + -target a.1) hz_add_mem :=
-          samePrimeNatDivEval_eq_of_eq (p := p) (K := K) han hz_add
-            (hz0 a.1 a.2) hz_add_mem
-      _ =
-        samePrimeNatDivEval (p := p) (K := K) N a.1 0 han
-            (num a.1) (hnum0 a) +
-          samePrimeNatDivEval (p := p) (K := K) N a.1 0 han
-            (-target a.1) hneg := hadd
-      _ =
-        samePrimeNatDivEval (p := p) (K := K) N a.1 0 han
-            (num a.1) (hnum0 a) -
-          samePrimeNatDivEval (p := p) (K := K) N a.1 0 han
-            (target a.1) (htarget0 a) := by
-          rw [samePrimeNatDivEval_neg (p := p) (K := K) han (htarget0 a) hneg]
-          ring
+          (target a.1) (htarget0 a)) :=
+    samePrimeNatDivEval_attach_sum_sub_eq (p := p) (K := K) N d num target
+      hnum0 htarget0 hz0
   have htarget_sum :
       (∑ a ∈ (Finset.Icc 1 d).attach,
         samePrimeNatDivEval (p := p) (K := K) N a.1 0
@@ -572,73 +693,9 @@ theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_logTerm_of_f
             have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp a.2).1
             exact Nat.ne_zero_of_lt ha1)
           (target a.1) (htarget0 a)) =
-        samePrimeFiniteArtinHasseLogTerm (p := p) (K := K) N r x hx := by
-    let a0 : {n // n ∈ Finset.Icc 1 d} := ⟨d, Finset.mem_Icc.mpr ⟨by
-      have hdpos : 0 < d := Nat.pos_of_ne_zero hd_ne
-      exact Nat.succ_le_of_lt hdpos, le_rfl⟩⟩
-    let targetEval : {n // n ∈ Finset.Icc 1 d} →
-        ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1) := fun a ↦
-      samePrimeNatDivEval (p := p) (K := K) N a.1 0
-        (by
-          have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp a.2).1
-          exact Nat.ne_zero_of_lt ha1)
-        (target a.1) (htarget0 a)
-    change (∑ a ∈ (Finset.Icc 1 d).attach, targetEval a) =
-      samePrimeFiniteArtinHasseLogTerm (p := p) (K := K) N r x hx
-    calc
-      (∑ a ∈ (Finset.Icc 1 d).attach, targetEval a) = targetEval a0 := by
-        refine Finset.sum_eq_single (s := (Finset.Icc 1 d).attach)
-          (a := a0) (f := targetEval) ?zero ?not_mem
-        · intro a _ha hne
-          dsimp [targetEval]
-          have han : a.1 ≠ 0 := by
-            have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp a.2).1
-            exact Nat.ne_zero_of_lt ha1
-          have ha_ne : a.1 ≠ d := fun ha ↦
-            hne (Subtype.ext ha)
-          have htarget_zero : target a.1 = 0 := by
-            simp [target, ha_ne]
-          have hzero :
-              (0 : ValuedIntegerRing p K) ∈
-                (lambdaIdeal p K) ^ (a.1.factorization p * (p - 1) + 0) :=
-            zero_mem _
-          calc
-            samePrimeNatDivEval (p := p) (K := K) N a.1 0
-                (by
-                  have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp a.2).1
-                  exact Nat.ne_zero_of_lt ha1)
-                (target a.1) (htarget0 a)
-                =
-              samePrimeNatDivEval (p := p) (K := K) N a.1 0 han 0 hzero :=
-                samePrimeNatDivEval_eq_of_eq (p := p) (K := K) han
-                  htarget_zero (htarget0 a) hzero
-            _ = 0 :=
-                samePrimeNatDivEval_zero (p := p) (K := K)
-                  (N := N) (n := a.1) (s := 0) han hzero
-        · intro ha0
-          simp [a0] at ha0
-      _ = samePrimeFiniteArtinHasseLogTerm (p := p) (K := K) N r x hx := by
-        dsimp [targetEval]
-        have hden : d.factorization p * (p - 1) ≤ d :=
-          samePrimeFiniteArtinHasse_den_exponent_le (p := p) hd_ne le_rfl
-        have htarget0_d :
-            x ^ d ∈ (lambdaIdeal p K) ^ (d.factorization p * (p - 1) + 0) :=
-          Ideal.pow_le_pow_right hden hxd
-        calc
-          samePrimeNatDivEval (p := p) (K := K) N a0.1 0
-              (by
-                have ha1 : 1 ≤ a0.1 := (Finset.mem_Icc.mp a0.2).1
-                exact Nat.ne_zero_of_lt ha1)
-              (target a0.1) (htarget0 a0)
-              =
-            samePrimeNatDivEval (p := p) (K := K) N d 0 hd_ne (x ^ d) htarget0_d :=
-              samePrimeNatDivEval_eq_of_eq (p := p) (K := K) hd_ne
-                (by simp [a0, target]) (htarget0 a0) htarget0_d
-          _ =
-            samePrimeFiniteArtinHasseLogTerm (p := p) (K := K) N r x hx := by
-              simpa [d] using
-                samePrimeNatDivEval_prime_pow_zero_eq_finiteArtinHasseLogTerm
-                  (p := p) (K := K) N r hx (by simpa [d] using htarget0_d)
+        samePrimeFiniteArtinHasseLogTerm (p := p) (K := K) N r x hx :=
+    samePrimeNatDivEval_attach_sum_target_eq_finiteArtinHasseLogTerm
+      (p := p) (K := K) N r hx htarget0
   have hdegree :
       samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum
           (p := p) (K := K) N d x hx =
