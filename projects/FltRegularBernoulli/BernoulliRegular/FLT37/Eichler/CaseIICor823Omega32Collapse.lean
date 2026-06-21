@@ -268,7 +268,7 @@ input class), and every cyclotomic representative datum of `u`'s class — a rea
 `v ∈ C⁺` with `u·v⁻¹ ∈ pPowerSubgroup (E⁺) 37` written as `v = CPlusExponentProduct s e` — the
 single `j = 15` half-range Teichmüller-Vandermonde row of `ē` vanishes:
 
-  `(vandermondeTeichmullerEvenSubOneMatrix.mulVec (fun a => (e a : ZMod 37))) 15 = 0`.
+  `(vandermondeTeichmullerEvenSubOneMatrix.mulVec (fun a ↦ (e a : ZMod 37))) 15 = 0`.
 
 This is Washington Proposition 8.12 at `i = 32`, second order: at `j = 15` the matrix row factor is
 `B₃₂/32 mod 37²` (the second-order analog of the first-order `B₃₂/32 mod 37 = 0`), non-degenerate by
@@ -293,7 +293,7 @@ def Cor823Omega32SecondOrderVandermonde37
       CPlusExponentProduct (p := 37) (K := CyclotomicField 37 ℚ) (by decide) s e = v →
       u * v⁻¹ ∈ pPowerSubgroup (EPlus (K := CyclotomicField 37 ℚ)) 37 →
       (vandermondeTeichmullerEvenSubOneMatrix (p := 37) (by norm_num)).mulVec
-          (fun a : Fin (kummerLogRank 37) => (e a : ZMod 37)) (15 : Fin (kummerLogRank 37)) = 0
+          (fun a : Fin (kummerLogRank 37) ↦ (e a : ZMod 37)) (15 : Fin (kummerLogRank 37)) = 0
 
 /-- **The second-order residual's consequent is inhabited** (non-vacuity, proven): for `u = 1`,
 `c = 1`, the trivial cyclotomic representative `v = 1`, `s = 0`, `e = 0` satisfies the antecedents
@@ -305,9 +305,9 @@ theorem cor823Omega32SecondOrderVandermonde37_consequent_inhabited
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)] :
     (vandermondeTeichmullerEvenSubOneMatrix (p := 37) (by norm_num)).mulVec
-        (fun a : Fin (kummerLogRank 37) => ((0 : Fin (kummerLogRank 37) → ℤ) a : ZMod 37))
+        (fun a : Fin (kummerLogRank 37) ↦ ((0 : Fin (kummerLogRank 37) → ℤ) a : ZMod 37))
         (15 : Fin (kummerLogRank 37)) = 0 := by
-  rw [show (fun a : Fin (kummerLogRank 37) => ((0 : Fin (kummerLogRank 37) → ℤ) a : ZMod 37)) =
+  rw [show (fun a : Fin (kummerLogRank 37) ↦ ((0 : Fin (kummerLogRank 37) → ℤ) a : ZMod 37)) =
       (0 : Fin (kummerLogRank 37) → ZMod 37) from by funext a; simp]
   rw [Matrix.mulVec_zero, Pi.zero_apply]
 
@@ -351,7 +351,7 @@ theorem cor823Omega32SecondOrderCollapse37_of_vandermonde
       (by decide) hvCPlus
   -- (2) the residual: `(V·ē)_15 = 0`.
   have hV15 : (vandermondeTeichmullerEvenSubOneMatrix (p := 37) (by norm_num)).mulVec
-      (fun a : Fin (kummerLogRank 37) => (e a : ZMod 37)) (15 : Fin (kummerLogRank 37)) = 0 :=
+      (fun a : Fin (kummerLogRank 37) ↦ (e a : ZMod 37)) (15 : Fin (kummerLogRank 37)) = 0 :=
     hV u c hc v s e hse hdiv
   -- (3) R3 inversion at `j = 15`: `(V·ē)_15 = 9 · decomp (∑ e_a g_a) 15`, `9 ≠ 0`.
   have hcollapse := caseIIEx811Eigen_vandermonde_eq_nine_smul e (15 : Fin (kummerLogRank 37))
