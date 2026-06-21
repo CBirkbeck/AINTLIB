@@ -285,7 +285,7 @@ theorem kummerLogColumnFiniteLog_eq_normalizedUnit_square
   have harg :
       kummerLogColumnFiniteLogArg (p := p) (K := K) hp_three a =
         (((u : ValuedIntegerRing p K) ^ (p - 1)) ^ 2 - 1) := by
-    have hval := congrArg (fun w : (ValuedIntegerRing p K)ˣ => (w : ValuedIntegerRing p K)) huv
+    have hval := congrArg (fun w : (ValuedIntegerRing p K)ˣ ↦ (w : ValuedIntegerRing p K)) huv
     simp only [Units.val_pow_eq_pow_val] at hval
     calc
       kummerLogColumnFiniteLogArg (p := p) (K := K) hp_three a =
@@ -781,7 +781,7 @@ integer coefficient ring, represented by shifting the coefficients of
 `E_p(T)-1`. -/
 def integralArtinHasseNormalizedExpMinusOneSeries :
     PowerSeries (ValuedIntegerRing p K) :=
-  PowerSeries.mk fun n =>
+  PowerSeries.mk fun n ↦
     (PowerSeries.coeff (R := ValuedIntegerRing p K) (n + 1))
       (integralExpMinusOneSeries p K)
 
@@ -791,7 +791,7 @@ omit [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 by shifting the coefficients of `E_p(T)-1`. -/
 def rationalArtinHasseNormalizedExpMinusOneSeries :
     PowerSeries ℚ :=
-  PowerSeries.mk fun n =>
+  PowerSeries.mk fun n ↦
     (PowerSeries.coeff (R := ℚ) (n + 1))
       (PadicLogSetup.FormalDwork.expMinusOneSeries p)
 
@@ -810,7 +810,7 @@ omit [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 theorem rationalArtinHasseNormalizedExpMinusOneSeries_isPIntegral :
     Furtwaengler.DieudonneDwork.IsRIntegralPS p
       (rationalArtinHasseNormalizedExpMinusOneSeries p) :=
-  fun n => by
+  fun n ↦ by
     simpa [rationalArtinHasseNormalizedExpMinusOneSeries] using
       PadicLogSetup.FormalDwork.expMinusOneSeries_isPIntegral p (n + 1)
 
