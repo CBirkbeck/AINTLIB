@@ -146,7 +146,7 @@ theorem quotient_mk_samePrimeFiniteArtinHasseNormalizedLogHomogeneousNumerator_f
         ∑ n ∈ Finset.Icc 1 d,
           φ (rationalArtinHasseNormalizedFactorialWeightedLogCoeff p d n) :=
         (Finset.mul_sum (s := Finset.Icc 1 d)
-          (f := fun n => φ
+          (f := fun n ↦ φ
             (rationalArtinHasseNormalizedFactorialWeightedLogCoeff p d n))
           xbar_d).symm
     _ =
@@ -159,7 +159,7 @@ theorem quotient_mk_samePrimeFiniteArtinHasseNormalizedLogHomogeneousNumerator_f
               φ (∑ n ∈ Finset.Icc 1 d,
                 rationalArtinHasseNormalizedFactorialWeightedLogCoeff p d n) :=
           (map_sum φ
-            (fun n => rationalArtinHasseNormalizedFactorialWeightedLogCoeff p d n)
+            (fun n ↦ rationalArtinHasseNormalizedFactorialWeightedLogCoeff p d n)
             (Finset.Icc 1 d)).symm
         rw [hmapsum]
 
@@ -509,7 +509,7 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum_eq_zero_
     samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum
         (p := p) (K := K) N d x hx = 0 := by
   classical
-  let z : ℕ → ValuedIntegerRing p K := fun n =>
+  let z : ℕ → ValuedIntegerRing p K := fun n ↦
     samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousNumerator
       (p := p) (K := K) N n d x
   have hz0 : ∀ n ∈ Finset.Icc 1 d,
@@ -567,7 +567,7 @@ theorem natCast_factorial_mul_samePrimeFiniteArtinHasseNormalizedCoordLogHomogen
   let A : Type _ := ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1)
   let q : ValuedIntegerRing p K →+* A :=
     samePrimeQuotientMap (p := p) (K := K) N
-  let z : ℕ → ValuedIntegerRing p K := fun n =>
+  let z : ℕ → ValuedIntegerRing p K := fun n ↦
     samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousNumerator
       (p := p) (K := K) N n d x
   have hz0 : ∀ n ∈ Finset.Icc 1 d,
@@ -655,7 +655,7 @@ theorem natCast_factorial_mul_samePrimeFiniteArtinHasseNormalizedCoordLogHomogen
         rw [map_sum]
         simpa [q] using
           (Finset.sum_attach (s := Finset.Icc 1 d)
-            (f := fun n : ℕ =>
+            (f := fun n : ℕ ↦
               q (((d.factorial / n : ℕ) : ValuedIntegerRing p K) * z n)))
 
 set_option linter.style.longLine false in
@@ -753,7 +753,7 @@ theorem samePrimeFiniteArtinHasseNormalizedLogHomogeneousNumerator_factorial_wei
   have hfac :
       d.factorial.factorization p =
         (d.factorial / n).factorization p + n.factorization p := by
-    have h := congrArg (fun f : ℕ →₀ ℕ => f p)
+    have h := congrArg (fun f : ℕ →₀ ℕ ↦ f p)
       (Nat.factorization_mul hdiv_ne hn0)
     simpa [hmul_div] using h
   have htarget :
