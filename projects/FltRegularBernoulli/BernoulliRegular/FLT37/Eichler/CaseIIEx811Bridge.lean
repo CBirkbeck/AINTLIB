@@ -408,7 +408,7 @@ theorem leadingExponentEx811Core37_antecedent_inhabited
             (∑ a : Fin (kummerLogRank 37),
               e a • kummerLogCompletedColumn (p := 37) (K := CyclotomicField 37 ℚ)
                 (by decide) a) = 0 := by
-  refine ⟨0, fun N _hN => ?_⟩
+  refine ⟨0, fun N _hN ↦ ?_⟩
   simp
 
 set_option maxHeartbeats 1600000 in
@@ -490,7 +490,7 @@ theorem caseIIEx811Bridge_freePartClass_eq
           (Additive.ofMul (CPlusGenerator (p := 37) (K := CyclotomicField 37 ℚ) (by norm_num) a))) =
       FLT37.realUnitToFreePartModP (K := CyclotomicField 37 ℚ) (Additive.ofMul v) :=
     (FLT37.realUnitToFreePartModP_CPlusExponentProduct s e).symm.trans
-      (congrArg (fun w => FLT37.realUnitToFreePartModP (K := CyclotomicField 37 ℚ)
+      (congrArg (fun w ↦ FLT37.realUnitToFreePartModP (K := CyclotomicField 37 ℚ)
         (Additive.ofMul w)) hse)
   exact hv.trans (caseIIEx811Bridge_realUnitToFreePartModP_eq_of_div_mem_pPowerSubgroup hdiv).symm
 
@@ -539,7 +539,7 @@ theorem leadingExponentBridge37_of_ex811Core
           (∑ a : Fin (kummerLogRank 37),
             e a • kummerLogCompletedColumn (p := 37) (K := CyclotomicField 37 ℚ)
               (by decide) a) = 0 :=
-    fun N hN => caseIIEx811Bridge_kummerLogSum_evalₐ_eq_zero hse hdiv hu hN
+    fun N hN ↦ caseIIEx811Bridge_kummerLogSum_evalₐ_eq_zero hse hdiv hu hN
   -- `hcore`'s eigencomponent argument is written *identically* to `hcls`'s LHS, so the rewrite
   -- below is purely syntactic (no `whnf` reconciliation of the two free-part sums).
   have hcore : caseIIResidueProvenance_decomp
