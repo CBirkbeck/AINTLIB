@@ -80,9 +80,7 @@ def ConjPairCaseIIData37.of_realConjPairSolution {m : ℕ} (D : RealCaseIIData37
     (hz' : ¬ (D.hζ.unit'.1 - 1) ∣ z')
     (e' : x' ^ 37 + y' ^ 37 = (ε' : 𝓞 K) * ((D.hζ.unit'.1 - 1) ^ m * z') ^ 37) :
     ConjPairCaseIIData37 K (m - 1) := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  have hm : 1 ≤ m := D.toCaseIIData37.one_le_m
-  have hm_sub : m - 1 + 1 = m := Nat.sub_add_cancel hm
+  have hm_sub : m - 1 + 1 = m := Nat.sub_add_cancel D.toCaseIIData37.one_le_m
   exact
     { ζ := D.ζ
       hζ := D.hζ
@@ -168,7 +166,6 @@ theorem realToConjPair_descent_step
     (hprinc : CaseIIPrincipalizationAgainstEtaZero
       37 (CyclotomicField 37 ℚ) (by decide : (37 : ℕ) ≠ 2) D.hζ D.equation D.hy) :
     ∃ m' : ℕ, m' < m ∧ Nonempty (ConjPairCaseIIData37 (CyclotomicField 37 ℚ) m') := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   -- Assumption II, assembled from R3 (proven) + R4(i)+R4(ii).
   have h_assumptionII : WashingtonCaseIIExactQuotientUnitPower37Source :=
     caseIIOmega32_assumptionII_of_section91Ident_dvdZ caseII_section91Ident caseII_dvdZ
@@ -216,7 +213,6 @@ theorem caseIIRealToConjPairSigmaEquivariant_conclusion_realized
     ((1 : (𝓞 (CyclotomicField 37 ℚ))ˣ) : 𝓞 (CyclotomicField 37 ℚ)) * D'.x ^ 37 +
         ((1 : (𝓞 (CyclotomicField 37 ℚ))ˣ) : 𝓞 (CyclotomicField 37 ℚ)) * D'.y ^ 37 =
       (D'.ε : 𝓞 (CyclotomicField 37 ℚ)) * ((D'.hζ.unit'.1 - 1) ^ (k + 1) * D'.z) ^ 37 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   refine ⟨?_, D'.hy, D'.hz, D'.x_conj, map_one _, ?_⟩
   · -- `(ζ-1) ∤ D'.x`: `σ` fixes `span{ζ-1}` (`caseII_map_zetaSubOne_span`) and `σD'.x = D'.y`, so
     -- `(ζ-1)∣D'.x ⟺ D'.x ∈ span{ζ-1} ⟺ D'.y = σD'.x ∈ σ(span{ζ-1}) = span{ζ-1} ⟺ (ζ-1)∣D'.y`.
