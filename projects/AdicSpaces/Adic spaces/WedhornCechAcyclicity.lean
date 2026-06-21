@@ -10939,6 +10939,111 @@ private theorem wca_restrictionMap_bijective_of_rationalOpen_eq
   exact Function.bijective_iff_has_inverse.mpr
     ⟨restrictionMap D' D h_eq.le, congrFun hcomp1, congrFun hcomp2⟩
 
+set_option linter.unusedSectionVars false in
+/-- Every piece of the B-level image gen-cover is `genPieceDatum` at the canonical
+image `canMap t` of some `t ∈ T` — the choice fact backing the `tof` selector. -/
+private theorem imageGenCover_piece_exists_gen
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A] [DecidableEq A]
+    (D₀ : RationalLocData A) (T : Finset A)
+    (hspan : Ideal.span (T : Set A) = ⊤)
+    (E : ↥(imageGenCover D₀ T hspan).covers) :
+    ∃ t, t ∈ T ∧ E.1 = imagePieceDatum D₀ T t hspan := by
+  haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
+  haveI hNoethB : IsNoetherianRing (presheafValue D₀) :=
+    presheafValue_isNoetherianRing_faithful D₀
+  haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
+    presheafValue_isStronglyNoetherian_faithful D₀
+  haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  classical
+  obtain ⟨E, hE⟩ := E
+  have hE' : E ∈ (T.image D₀.canonicalMap).image (fun u ↦
+      genPieceDatum (presheafValue_concretePair D₀) (T.image D₀.canonicalMap) u
+        (imageGenCover_span D₀ T hspan)) := hE
+  rw [Finset.mem_image] at hE'
+  obtain ⟨u, hu, rfl⟩ := hE'
+  rw [Finset.mem_image] at hu
+  obtain ⟨t, ht, rfl⟩ := hu
+  exact ⟨t, ht, rfl⟩
+
+set_option maxHeartbeats 1600000 in
+set_option linter.unusedSectionVars false in
+/-- **G3c-gluing, B-compatibility step**: for `t₁ t₂ ∈ T`, the transported image-piece
+sections `equiv·gᵢ` agree after restriction into any common target `E₃` (contained in
+both image pieces), given A-side compatibility of `g₁, g₂`. Factor `E₃` through the
+double piece `imagePiece t₁ ∩ imagePiece t₂`, then apply `genPiece_family_pair_compat`. -/
+private theorem genPiece_imageFamily_pair_restr
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A] [DecidableEq A]
+    (D₀ : RationalLocData A) (T : Finset A)
+    (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A)
+    (g₁ : presheafValue (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl))
+    (g₂ : presheafValue (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl))
+    (hcompat : ∀ (D₃ : RationalLocData A)
+      (h₃₁ : rationalOpen D₃.T D₃.s ⊆
+        rationalOpen (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).T
+          (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).s)
+      (h₃₂ : rationalOpen D₃.T D₃.s ⊆
+        rationalOpen (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).T
+          (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).s),
+      restrictionMap _ D₃ h₃₁ g₁ = restrictionMap _ D₃ h₃₂ g₂)
+    (E₃ : RationalLocData (presheafValue D₀))
+    (h₃₁ : rationalOpen E₃.T E₃.s ⊆
+      rationalOpen (imagePieceDatum D₀ T t₁ hspan).T (imagePieceDatum D₀ T t₁ hspan).s)
+    (h₃₂ : rationalOpen E₃.T E₃.s ⊆
+      rationalOpen (imagePieceDatum D₀ T t₂ hspan).T (imagePieceDatum D₀ T t₂ hspan).s) :
+    haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
+    haveI : IsNoetherianRing (presheafValue D₀) :=
+      presheafValue_isNoetherianRing_faithful D₀
+    haveI : IsStronglyNoetherian (presheafValue D₀) :=
+      presheafValue_isStronglyNoetherian_faithful D₀
+    haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    restrictionMap (imagePieceDatum D₀ T t₁ hspan) E₃ h₃₁
+        (genPiece_relative_equiv D₀ T t₁ hspan g₁) =
+      restrictionMap (imagePieceDatum D₀ T t₂ hspan) E₃ h₃₂
+        (genPiece_relative_equiv D₀ T t₂ hspan g₂) := by
+  haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
+  haveI hNoethB : IsNoetherianRing (presheafValue D₀) :=
+    presheafValue_isNoetherianRing_faithful D₀
+  haveI hSNB : IsStronglyNoetherian (presheafValue D₀) :=
+    presheafValue_isStronglyNoetherian_faithful D₀
+  haveI hHuberB : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  letI : DecidableEq (presheafValue D₀) := Classical.decEq _
+  letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
+  have hE₁₂ : rationalOpen E₃.T E₃.s ⊆
+      rationalOpen ((imagePieceDatum D₀ T t₁ hspan).interSamePair
+        (imagePieceDatum D₀ T t₂ hspan) rfl).T
+        ((imagePieceDatum D₀ T t₁ hspan).interSamePair
+          (imagePieceDatum D₀ T t₂ hspan) rfl).s := by
+    rw [RationalLocData.interSamePair_rationalOpen]
+    exact fun v hv ↦ ⟨h₃₁ hv, h₃₂ hv⟩
+  rw [show restrictionMap (imagePieceDatum D₀ T t₁ hspan) E₃ h₃₁
+      (genPiece_relative_equiv D₀ T t₁ hspan g₁) =
+    restrictionMap _ E₃ hE₁₂
+      (restrictionMap (imagePieceDatum D₀ T t₁ hspan)
+        ((imagePieceDatum D₀ T t₁ hspan).interSamePair
+          (imagePieceDatum D₀ T t₂ hspan) rfl)
+        (RationalLocData.interSamePair_subset_left _ _ _)
+        (genPiece_relative_equiv D₀ T t₁ hspan g₁)) from
+    (congrFun (restrictionMap_comp (imagePieceDatum D₀ T t₁ hspan) _ E₃
+      (RationalLocData.interSamePair_subset_left _ _ _) hE₁₂) _).symm]
+  rw [show restrictionMap (imagePieceDatum D₀ T t₂ hspan) E₃ h₃₂
+      (genPiece_relative_equiv D₀ T t₂ hspan g₂) =
+    restrictionMap _ E₃ hE₁₂
+      (restrictionMap (imagePieceDatum D₀ T t₂ hspan)
+        ((imagePieceDatum D₀ T t₁ hspan).interSamePair
+          (imagePieceDatum D₀ T t₂ hspan) rfl)
+        (RationalLocData.interSamePair_subset_right _ _ _)
+        (genPiece_relative_equiv D₀ T t₂ hspan g₂)) from
+    (congrFun (restrictionMap_comp (imagePieceDatum D₀ T t₂ hspan) _ E₃
+      (RationalLocData.interSamePair_subset_right _ _ _) hE₁₂) _).symm]
+  congr 1
+  exact genPiece_family_pair_compat D₀ T hspan t₁ t₂ g₁ g₂ hcompat
+
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- **G3c-gluing (assembly)**: given the B-side gluing of the image cover, every
@@ -11000,16 +11105,8 @@ theorem genRestrictedCover_gluing
   have hchoose : ∀ E : ↥(imageGenCover D₀ T hspan).covers,
       ∃ t, t ∈ T ∧ E.1 = genPieceDatum (presheafValue_concretePair D₀)
         (T.image D₀.canonicalMap) (D₀.canonicalMap t)
-        (imageGenCover_span D₀ T hspan) := by
-    rintro ⟨E, hE⟩
-    have hE' : E ∈ (T.image D₀.canonicalMap).image (fun u ↦
-        genPieceDatum (presheafValue_concretePair D₀) (T.image D₀.canonicalMap) u
-          (imageGenCover_span D₀ T hspan)) := hE
-    rw [Finset.mem_image] at hE'
-    obtain ⟨u, hu, rfl⟩ := hE'
-    rw [Finset.mem_image] at hu
-    obtain ⟨t, ht, rfl⟩ := hu
-    exact ⟨t, ht, rfl⟩
+        (imageGenCover_span D₀ T hspan) :=
+    fun E ↦ imageGenCover_piece_exists_gen D₀ T hspan E
   set tof : ↥(imageGenCover D₀ T hspan).covers → A := fun E ↦ (hchoose E).choose
     with htof
   have htof_mem : ∀ E, tof E ∈ T := fun E ↦ (hchoose E).choose_spec.1
@@ -11063,43 +11160,11 @@ theorem genRestrictedCover_gluing
         (D₀.canonicalMap (tof E₂)) (imageGenCover_span D₀ T hspan) from rfl,
         ← htof_eq E₂]
       exact h₃₂
-    have hE₁₂ : rationalOpen E₃.T E₃.s ⊆
-        rationalOpen ((imagePieceDatum D₀ T (tof E₁) hspan).interSamePair
-          (imagePieceDatum D₀ T (tof E₂) hspan) rfl).T
-          ((imagePieceDatum D₀ T (tof E₁) hspan).interSamePair
-            (imagePieceDatum D₀ T (tof E₂) hspan) rfl).s := by
-      rw [RationalLocData.interSamePair_rationalOpen]
-      exact fun v hv ↦ ⟨h₃₁' hv, h₃₂' hv⟩
-    -- rewrite both sides through the E₁₂-factoring
-    rw [show restrictionMap (genPieceDatum (presheafValue_concretePair D₀)
-        (T.image D₀.canonicalMap) (D₀.canonicalMap (tof E₁))
-        (imageGenCover_span D₀ T hspan)) E₃ (by rw [← htof_eq E₁]; exact h₃₁)
-        (genPiece_relative_equiv D₀ T (tof E₁) hspan (f (tof E₁) (htof_mem E₁))) =
-      restrictionMap _ E₃ hE₁₂
-        (restrictionMap (imagePieceDatum D₀ T (tof E₁) hspan)
-          ((imagePieceDatum D₀ T (tof E₁) hspan).interSamePair
-            (imagePieceDatum D₀ T (tof E₂) hspan) rfl)
-          (RationalLocData.interSamePair_subset_left _ _ _)
-          (genPiece_relative_equiv D₀ T (tof E₁) hspan (f (tof E₁) (htof_mem E₁)))) from
-      (congrFun (restrictionMap_comp (imagePieceDatum D₀ T (tof E₁) hspan) _ E₃
-        (RationalLocData.interSamePair_subset_left _ _ _) hE₁₂) _).symm]
-    rw [show restrictionMap (genPieceDatum (presheafValue_concretePair D₀)
-        (T.image D₀.canonicalMap) (D₀.canonicalMap (tof E₂))
-        (imageGenCover_span D₀ T hspan)) E₃ (by rw [← htof_eq E₂]; exact h₃₂)
-        (genPiece_relative_equiv D₀ T (tof E₂) hspan (f (tof E₂) (htof_mem E₂))) =
-      restrictionMap _ E₃ hE₁₂
-        (restrictionMap (imagePieceDatum D₀ T (tof E₂) hspan)
-          ((imagePieceDatum D₀ T (tof E₁) hspan).interSamePair
-            (imagePieceDatum D₀ T (tof E₂) hspan) rfl)
-          (RationalLocData.interSamePair_subset_right _ _ _)
-          (genPiece_relative_equiv D₀ T (tof E₂) hspan (f (tof E₂) (htof_mem E₂)))) from
-      (congrFun (restrictionMap_comp (imagePieceDatum D₀ T (tof E₂) hspan) _ E₃
-        (RationalLocData.interSamePair_subset_right _ _ _) hE₁₂) _).symm]
-    congr 1
-    exact genPiece_family_pair_compat D₀ T hspan (tof E₁) (tof E₂)
+    exact genPiece_imageFamily_pair_restr D₀ T hspan (tof E₁) (tof E₂)
       (f (tof E₁) (htof_mem E₁)) (f (tof E₂) (htof_mem E₂))
       (fun D₃ h₃₁ h₃₂ ↦ hcompat (tof E₁) (htof_mem E₁) (tof E₂) (htof_mem E₂)
         D₃ h₃₁ h₃₂)
+      E₃ h₃₁' h₃₂'
   -- glue at B
   obtain ⟨y, hy⟩ := hBglue g hgcompat
   -- pull back through the global-sections identification and verify per piece
