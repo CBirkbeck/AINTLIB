@@ -47,8 +47,6 @@ namespace CurveMap
 
 variable {F : Type*} [Field F] {C₁ C₂ : SmoothPlaneCurve F}
 
-set_option synthInstance.maxHeartbeats 200000 in
-set_option maxHeartbeats 1600000 in
 /-- **T-II-2-009, algebraic direction** (unramified + trivial residue
 degrees ⇒ fiber count = degree). Given a `CurveMap` with `CoordHom`
 witness and a maximal ideal `p ⊂ C₂.CoordinateRing` that is
@@ -67,7 +65,7 @@ theorem primesOverFinset_card_eq_degree_of_unramified
         Ideal.inertiaDeg p P = 1) :
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
     (IsDedekindDomain.primesOverFinset p C₁.CoordinateRing).card = φ.degree := by
-  letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
+  letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
   have hsum := φ.sum_ramificationIdx_mul_inertiaDeg_eq_degree
     coordHom coordHom.module_finite hpMax hp0
   -- Σ_{P ∈ S} (e · f) = deg. With each e·f = 1, LHS = S.card.
@@ -121,8 +119,8 @@ divide `differentIdeal A B` is finite. These are the "ramified primes"
 in the `A → B` extension (primes above which at least one prime of `B`
 has `e_P ≥ 2`). Silverman II.2.6(b) "finitely many bad Q". -/
 theorem _root_.IsDedekindDomain.finite_ramified_primes
-    {A : Type*} [CommRing A] [IsDomain A] [IsDedekindDomain A]
-    {B : Type*} [CommRing B] [IsDomain B] [IsDedekindDomain B]
+    {A : Type*} [CommRing A] [IsDedekindDomain A]
+    {B : Type*} [CommRing B] [IsDedekindDomain B]
     [Algebra A B] [Module.Finite A B]
     [Module.IsTorsionFree A B] [FaithfulSMul A B]
     (hsep : @Algebra.IsSeparable (FractionRing A) (FractionRing B) _ _
@@ -144,8 +142,8 @@ easier direction as a standalone lemma for use in Pieces 3–5. -/
 /-- **T-II-2-009 Piece 2**: a prime of `B` that does not divide the
 different ideal is unramified over `A`. -/
 theorem _root_.IsDedekindDomain.isUnramifiedAt_of_not_dvd_differentIdeal
-    {A : Type*} [CommRing A] [IsDomain A] [IsDedekindDomain A]
-    {B : Type*} [CommRing B] [IsDomain B] [IsDedekindDomain B]
+    {A : Type*} [CommRing A] [IsDedekindDomain A]
+    {B : Type*} [CommRing B] [IsDedekindDomain B]
     [Algebra A B] [Module.Finite A B]
     [Module.IsTorsionFree A B] [FaithfulSMul A B]
     (hsep : @Algebra.IsSeparable (FractionRing A) (FractionRing B) _ _
@@ -191,13 +189,13 @@ exists a prime `P` of `B` outside the ramified locus. Piece 2 then turns
 infinitely many height-one primes, we extract a specific prime
 `P : HeightOneSpectrum B` that is unramified over `A`. -/
 theorem _root_.IsDedekindDomain.exists_unramified_prime
-    {A : Type*} [CommRing A] [IsDomain A] [IsDedekindDomain A]
-    {B : Type*} [CommRing B] [IsDomain B] [IsDedekindDomain B]
+    {A : Type*} [CommRing A] [IsDedekindDomain A]
+    {B : Type*} [CommRing B] [IsDedekindDomain B]
     [Algebra A B] [Module.Finite A B]
     [Module.IsTorsionFree A B] [FaithfulSMul A B]
     (hsep : @Algebra.IsSeparable (FractionRing A) (FractionRing B) _ _
       (FractionRing.liftAlgebra A (FractionRing B)))
-    (hinf : Set.Infinite {P : IsDedekindDomain.HeightOneSpectrum B | True}) :
+    (hinf : Set.Infinite {_P : IsDedekindDomain.HeightOneSpectrum B | True}) :
     ∃ P : IsDedekindDomain.HeightOneSpectrum B,
       Algebra.IsUnramifiedAt A P.asIdeal := by
   have hfin_bad := IsDedekindDomain.finite_ramified_primes (A := A) (B := B) hsep
@@ -245,14 +243,14 @@ algebraically closed base (or for F-rational smooth points), and
 supplied as a separate hypothesis when needed (see
 `primesOverFinset_card_eq_degree_of_unramified`). -/
 theorem _root_.IsDedekindDomain.exists_unramifiedPrime_ramificationIdx_eq_one
-    {A : Type*} [CommRing A] [IsDomain A] [IsDedekindDomain A]
-    {B : Type*} [CommRing B] [IsDomain B] [IsDedekindDomain B]
+    {A : Type*} [CommRing A] [IsDedekindDomain A]
+    {B : Type*} [CommRing B] [IsDedekindDomain B]
     [Algebra A B] [Module.Finite A B]
     [Module.IsTorsionFree A B] [FaithfulSMul A B]
     [Algebra.EssFiniteType A B]
     (hsep : @Algebra.IsSeparable (FractionRing A) (FractionRing B) _ _
       (FractionRing.liftAlgebra A (FractionRing B)))
-    (hinf : Set.Infinite {P : IsDedekindDomain.HeightOneSpectrum B | True}) :
+    (hinf : Set.Infinite {_P : IsDedekindDomain.HeightOneSpectrum B | True}) :
     ∃ P : IsDedekindDomain.HeightOneSpectrum B,
       Ideal.ramificationIdx (P.asIdeal.under A) P.asIdeal = 1 := by
   obtain ⟨P, hunram⟩ := IsDedekindDomain.exists_unramified_prime hsep hinf
@@ -336,7 +334,7 @@ curve, via the bijection `SmoothPoint ≃ HeightOneSpectrum` from
 theorem heightOneSpectrum_infinite
     [IsAlgClosed F] (C : SmoothPlaneCurve F) [C.toAffine.IsElliptic]
     [IsIntegrallyClosed C.CoordinateRing] :
-    Set.Infinite ({P : IsDedekindDomain.HeightOneSpectrum C.CoordinateRing |
+    Set.Infinite ({_P : IsDedekindDomain.HeightOneSpectrum C.CoordinateRing |
       True}) := by
   haveI : Infinite C.SmoothPoint := C.smoothPoint_infinite
   haveI : Infinite (IsDedekindDomain.HeightOneSpectrum C.CoordinateRing) :=
