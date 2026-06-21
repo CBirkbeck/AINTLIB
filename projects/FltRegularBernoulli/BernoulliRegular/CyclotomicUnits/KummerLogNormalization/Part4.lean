@@ -40,8 +40,8 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm_eq_zero_of_cu
     have hden : n.factorization p * (p - 1) ≤ d :=
       samePrimeFiniteArtinHasse_den_exponent_le (p := p) hn hnd
     rw [samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm_eq_signed_eval
-      (p := p) (K := K) N n d hx hn hnd]
-    rw [samePrimeNatDivEvalAtDegree_eq_zero_of_cutoff_le
+      (p := p) (K := K) N n d hx hn hnd,
+      samePrimeNatDivEvalAtDegree_eq_zero_of_cutoff_le
       (p := p) (K := K) (N := N) (n := n) (d := d) hn hnd hcut hcoeff hden]
     simp
   · simp [samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm,
@@ -383,8 +383,7 @@ theorem artinHasseNormalizedExpMinusOneEval_evalₐ_one
         (p := p) (K := K)
     rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply] at hconst
     simpa using hconst
-  rw [integralArtinHasseNormalizedExpMinusOneSeries_coeff]
-  rw [hcoeff]
+  rw [integralArtinHasseNormalizedExpMinusOneSeries_coeff, hcoeff]
   simp
 
 omit [NumberField.IsCMField K] in
@@ -851,8 +850,7 @@ theorem kummerLogDworkArtinHasseSpecializedFiniteLog_factorPow_eq_normalizedAppr
             (p := p) (K := K)
             (kummerLogColumnIndex (p := p) hp_three a : ZMod p) (p - 2))) := by
   rw [kummerLogDworkArtinHasseSpecializedFiniteLog_eq_normalizedApprox_logs
-    (p := p) (K := K) hp_three a]
-  rw [map_sub]
+    (p := p) (K := K) hp_three a, map_sub]
 
 theorem concreteKummerLogVector_evalₐ_pow_pred_eq_two_nsmul_dworkArtinHasseSpecializedFiniteLog
     (hp_three : 3 ≤ p) (a : Fin (kummerLogRank p)) :
