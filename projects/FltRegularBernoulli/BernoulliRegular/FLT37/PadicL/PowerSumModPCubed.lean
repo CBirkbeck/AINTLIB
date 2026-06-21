@@ -183,7 +183,8 @@ theorem faulhaber_remainder_term_thirtytwo_mem_h_p_cubed
             change ((h2_unit.unit * h2_unit.unit⁻¹ : (ℤ_[37])ˣ).val : ℤ_[37]) = 1
             simp
           have htwo_mul_inv_Qp : (2 : ℚ_[37]) * ((twoInv : ℤ_[37]) : ℚ_[37]) = 1 := by
-            simpa using congrArg (fun x : ℤ_[37] => (x : ℚ_[37])) htwo_mul_inv
+            have := congrArg (fun x : ℤ_[37] => (x : ℚ_[37])) htwo_mul_inv
+            push_cast at this; exact this
           refine ⟨-twoInv, ?_⟩
           rw [h1, bernoulli_one]
           have h2Q_ne : (2 : ℚ_[37]) ≠ 0 := by norm_num

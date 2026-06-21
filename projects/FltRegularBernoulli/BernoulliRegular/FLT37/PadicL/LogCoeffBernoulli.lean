@@ -201,8 +201,9 @@ theorem sum_units_val_pow_eq_sum_range {i : ℕ} (hi0 : 0 < i) :
   let φ : (ZMod p)ˣ ↪ ZMod p := ⟨fun x ↦ x, Units.val_injective⟩
   have hmap : (Finset.univ : Finset (ZMod p)ˣ).map φ = Finset.univ \ {0} := by
     ext x
-    simpa only [Finset.mem_map, Finset.mem_univ, Function.Embedding.coeFn_mk, true_and,
-      Finset.mem_sdiff, Finset.mem_singleton, φ] using isUnit_iff_ne_zero
+    simp only [Finset.mem_map, Finset.mem_univ, Function.Embedding.coeFn_mk, true_and,
+      Finset.mem_sdiff, Finset.mem_singleton, φ]
+    exact isUnit_iff_ne_zero
   rw [← hmap, Finset.sum_map]
   rfl
 

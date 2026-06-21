@@ -80,7 +80,7 @@ For every real Case-II datum `D` satisfying the (proven) `η₀`-principalizatio
 **whose adjacent corrected radical `α` at `η = D.etaOne = ζ` is NOT a unit** of `𝓞 K` (the
 non-terminal regime), there is a real Case-II datum `D'` whose Fermat variable `z'` is
 **anchor-supported**: every prime factor of `(z')` is a prime factor of the `𝔭`-free anchor
-`𝔞₀ = a_eta_zero_dvd_p_pow` (Washington's `B₀`).
+`𝔞₀ = aEtaZeroDvdPPow` (Washington's `B₀`).
 
 This is the new variable `ξ₁ = ρ₀²` of Washington's conjugate-norm reassembly: from the proven
 producer `caseII_pair_real_caseI_form_of_realCaseIIData37` (the individually-real

@@ -304,7 +304,11 @@ theorem valuedLambdaQuotientDworkCoeffModSq_quotientMap_cyclotomic
       (p := p) (K := K) a
       (algebraMap (ValuedIntegerRing p K) (DworkCompleteIntegerRing p K) x) i
   rw [dworkCompleteCyclotomicEquiv_algebraMap_valuedInteger (p := p) (K := K) a x] at hcoord
-  simpa [valuedLambdaQuotientDworkCoeffModSq_mk] using hcoord
+  rw [show (Quotient.mk'' x : ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (2 * (p - 1))) =
+        Ideal.Quotient.mk ((lambdaIdeal p K) ^ (2 * (p - 1))) x from rfl,
+    Ideal.quotientMap_mk, valuedLambdaQuotientDworkCoeffModSq_mk,
+    valuedLambdaQuotientDworkCoeffModSq_mk]
+  exact hcoord
 
 /-! ## 5. The level-`71` coordinate column factor: scaled coordinate = Teichmüller factor × unscaled
 

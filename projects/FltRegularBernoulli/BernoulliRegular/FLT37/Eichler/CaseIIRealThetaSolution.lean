@@ -120,7 +120,7 @@ theorem caseII_real_theta_sigmaFixed_of_principalization
     ∃ α : CyclotomicField 37 ℚ,
       FractionalIdeal.spanSingleton (𝓞 (CyclotomicField 37 ℚ))⁰ α =
         (rootDivZetaSubOneDvdGcd (by decide : (37 : ℕ) ≠ 2) D.hζ D.equation D.hy η /
-          a_eta_zero_dvd_p_pow (by decide : (37 : ℕ) ≠ 2) D.hζ D.equation D.hy
+          aEtaZeroDvdPPow (by decide : (37 : ℕ) ≠ 2) D.hζ D.equation D.hy
           : FractionalIdeal (𝓞 (CyclotomicField 37 ℚ))⁰ (CyclotomicField 37 ℚ)) ∧
       NumberField.IsCMField.complexConj (CyclotomicField 37 ℚ)
           ((α - ζ ^ a * NumberField.IsCMField.complexConj (CyclotomicField 37 ℚ) α) /
@@ -155,9 +155,9 @@ theorem caseII_map_rootIdeal_and_anchor
     (rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy η).map
         (ringOfIntegersComplexConj K).toRingEquiv.toRingHom =
       rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy (caseII_etaInv η) ∧
-    (a_eta_zero_dvd_p_pow hp D.hζ D.equation D.hy).map
+    (aEtaZeroDvdPPow hp D.hζ D.equation D.hy).map
         (ringOfIntegersComplexConj K).toRingEquiv.toRingHom =
-      a_eta_zero_dvd_p_pow hp D.hζ D.equation D.hy :=
+      aEtaZeroDvdPPow hp D.hζ D.equation D.hy :=
   ⟨D.map_rootIdeal hp η, caseII_map_a_eta_zero D hp⟩
 
 omit [NumberField.IsCMField (CyclotomicField 37 ℚ)] in
@@ -174,10 +174,12 @@ theorem caseII_etaInv_etaOne_notMem_pair
     caseII_etaInv D.etaOne ≠ D.etaTwo := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   -- (D.etaOne : 𝓞 K) = ζ, so (caseII_etaInv D.etaOne : 𝓞 K) = ζ^36.
+  have hunit_eq : (D.hζ.unit'.1 : 𝓞 K) = D.hζ.toInteger :=
+    IsUnit.unit_spec (D.hζ.toInteger_isPrimitiveRoot.isUnit (NeZero.ne 37))
   have h_one : (D.etaOne : 𝓞 K) = D.hζ.unit'.1 := by
-    rw [caseII_etaOne_coe_eq, caseII_etaZero_eq_one D hp, one_mul]
+    rw [hunit_eq, caseII_etaOne_coe_eq, caseII_etaZero_eq_one D hp, one_mul]
   have h_two : (D.etaTwo : 𝓞 K) = D.hζ.unit'.1 ^ 2 := by
-    rw [caseII_etaTwo_coe_eq, caseII_etaZero_eq_one D hp, one_mul, sq]
+    rw [hunit_eq, caseII_etaTwo_coe_eq, caseII_etaZero_eq_one D hp, one_mul, sq]
   have h_inv : (caseII_etaInv D.etaOne : 𝓞 K) = D.hζ.unit'.1 ^ 36 := by
     rw [caseII_etaInv_coe, h_one]
   have hζ37 : (D.hζ.unit'.1 : 𝓞 K) ^ 37 = 1 := D.hζ.unit'_coe.pow_eq_one

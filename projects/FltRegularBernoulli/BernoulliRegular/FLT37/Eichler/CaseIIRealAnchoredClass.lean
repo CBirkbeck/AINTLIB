@@ -168,7 +168,7 @@ theorem caseII_rootClass_eq_etaInv_of_pthPower {m : ℕ} (D : RealCaseIIData37 K
 /-- **The anchor root is conjugation-stable: `caseII_etaInv η₀ = η₀`.**
 
 Over real data `σ` fixes the prime `𝔭 = (ζ-1)` and `σ(𝔞(η₀)) = 𝔞(η₀⁻¹)`, so `𝔭 ∣ 𝔞(η₀)`
-(`p_dvd_a_iff`, since `η₀ = zeta_sub_one_dvd_root`) transports to `𝔭 ∣ 𝔞(η₀⁻¹)` — using `m ≥ 1`
+(`p_dvd_a_iff`, since `η₀ = zetaSubOneDvdRoot`) transports to `𝔭 ∣ 𝔞(η₀⁻¹)` — using `m ≥ 1`
 (`CaseIIData37.one_le_m`) via `𝔭^m ∣ 𝔞(η₀⁻¹)` (`caseII_p_pow_dvd_a_caseII_etaInv_etaZero`).  By
 uniqueness of the `𝔭`-divisible root (`p_dvd_a_iff` again) `caseII_etaInv η₀ = η₀`.  Hence the
 anchor root class is automatically conjugate-fixed (`A(η₀) = A(η₀⁻¹)`), with no Lemma-9.2 input. -/
@@ -332,7 +332,7 @@ theorem caseII_real_etaZeroPrincipalization_of_pthPower
       D.hζ D.equation D.hy := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   intro η hη
-  -- `D.etaZero = zeta_sub_one_dvd_root …`; the class equality `[𝔞(η)] = [𝔞(η₀)]` over real data.
+  -- `D.etaZero = zetaSubOneDvdRoot …`; the class equality `[𝔞(η)] = [𝔞(η₀)]` over real data.
   have hη' : η ≠ D.etaZero := hη
   have h_classEq := caseII_real_anchored_class_trivial_of_pthPower h_radical D η hη'
   -- `[𝔞(η)] = [𝔞(η₀)] ⟹ 𝔞(η)/𝔞(η₀) principal ⟹ 𝔞(η)/𝔞₀ principal`.

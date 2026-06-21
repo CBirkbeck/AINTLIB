@@ -86,7 +86,7 @@ For a real Case-II datum `D` whose adjacent corrected radical
 `α = (-η)⁻¹·(x+yη)/(x+yη⁻¹)` at `η = D.etaOne = ζ` is **not** a unit of `𝓞 K` (the non-terminal
 condition `𝔞(η)/𝔞(η⁻¹) ≠ (1)`, i.e. some `Bₐ ≠ (1)`, `a ≥ 1`), there is a **real**, `𝔭`-coprime
 element `ξ₁ : 𝓞 K` — the conjugate norm `ρ₀·σρ₀` of a generator `ρ₀` of a principal power of the
-`𝔭`-free anchor `𝔞₀ = a_eta_zero_dvd_p_pow` — whose principal ideal `(ξ₁)` has **strictly fewer**
+`𝔭`-free anchor `𝔞₀ = aEtaZeroDvdPPow` — whose principal ideal `(ξ₁)` has **strictly fewer**
 distinct prime factors than the Fermat variable `(D.z)`:  `count (ξ₁) < caseIIZFactorCount D`.
 
 Construction (all proven): `caseII_anchorPow_conjNorm_real_span` gives `ξ₁ = ρ₀σρ₀` real,

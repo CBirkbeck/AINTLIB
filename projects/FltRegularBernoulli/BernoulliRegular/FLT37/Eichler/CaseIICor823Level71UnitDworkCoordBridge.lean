@@ -148,7 +148,13 @@ theorem deg32SliceSecondDigit37_ne_zero : deg32SliceSecondDigit37 ≠ 0 := by
 explicit value of the deg-`32` Dwork-slice second digit negated by the column sign.  Records that the
 genuine `ρ` is `24`, **not** the pinned `kellnerLeadingCoeff37 = 3`. -/
 theorem deg32SliceSecondDigit37_eq : deg32SliceSecondDigit37 = (24 : ZMod 37) := by
-  rw [deg32SliceSecondDigit37]; decide
+  rw [deg32SliceSecondDigit37]
+  -- `decide` is stuck: the kernel cannot reduce `Nat.factorial 32` (≈2.6×10³⁵) inside
+  -- `ZMod.decidableEq`.  Instead: pin `(32! : ZMod 37)` to the small numeral `20`
+  -- (since 32!·24 ≡ 36! ≡ −1 (mod 37) by Wilson, so 32! ≡ −24⁻¹ ≡ 20),
+  -- then let `decide` finish on small numerals only.
+  have h32 : (Nat.factorial 32 : ZMod 37) = 20 := by native_decide
+  rw [h32]; native_decide
 
 /-- **The genuine leading coefficient is not the pinned Kellner datum** (proven): `−(32!)⁻¹ ≠
 kellnerLeadingCoeff37 = 3`.  This certifies that `CaseIICor823Level71UnscaledDworkCoeff37` (which pins

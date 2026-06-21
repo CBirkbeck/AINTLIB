@@ -112,18 +112,18 @@ theorem caseII_realCaseIIData37_rescale_z
   -- `((ζ−1)^{m'+1}·w)³⁷ = u³⁷·((ζ−1)^{m'+1}·D'.z)³⁷`, then absorb.
   have hw_eq : w = D'.z * (u : 𝓞 (CyclotomicField 37 ℚ)) := hu.symm
   have hkey :
-      ((D'.hζ.unit'.1 - 1) ^ (m' + 1) * w) ^ 37 =
+      ((D'.hζ.toInteger - 1) ^ (m' + 1) * w) ^ 37 =
         ((u : 𝓞 (CyclotomicField 37 ℚ)) ^ 37) *
-          ((D'.hζ.unit'.1 - 1) ^ (m' + 1) * D'.z) ^ 37 := by
+          ((D'.hζ.toInteger - 1) ^ (m' + 1) * D'.z) ^ 37 := by
     rw [hw_eq]; ring
   rw [hkey]
   -- `D'.ε·(...)³⁷ = (D'.ε·u⁻³⁷)·(u³⁷·(...)³⁷)`.
   have hueq :
       ((D'.ε : 𝓞 (CyclotomicField 37 ℚ)) * ((u⁻¹ : (𝓞 (CyclotomicField 37 ℚ))ˣ) : _) ^ 37) *
           ((u : 𝓞 (CyclotomicField 37 ℚ)) ^ 37 *
-            ((D'.hζ.unit'.1 - 1) ^ (m' + 1) * D'.z) ^ 37) =
+            ((D'.hζ.toInteger - 1) ^ (m' + 1) * D'.z) ^ 37) =
         (D'.ε : 𝓞 (CyclotomicField 37 ℚ)) *
-          ((D'.hζ.unit'.1 - 1) ^ (m' + 1) * D'.z) ^ 37 := by
+          ((D'.hζ.toInteger - 1) ^ (m' + 1) * D'.z) ^ 37 := by
     have hcancel :
         ((u⁻¹ : (𝓞 (CyclotomicField 37 ℚ))ˣ) : 𝓞 (CyclotomicField 37 ℚ)) ^ 37 *
           (u : 𝓞 (CyclotomicField 37 ℚ)) ^ 37 = 1 := by
@@ -131,13 +131,13 @@ theorem caseII_realCaseIIData37_rescale_z
     calc
       ((D'.ε : 𝓞 (CyclotomicField 37 ℚ)) * ((u⁻¹ : (𝓞 (CyclotomicField 37 ℚ))ˣ) : _) ^ 37) *
             ((u : 𝓞 (CyclotomicField 37 ℚ)) ^ 37 *
-              ((D'.hζ.unit'.1 - 1) ^ (m' + 1) * D'.z) ^ 37)
+              ((D'.hζ.toInteger - 1) ^ (m' + 1) * D'.z) ^ 37)
           = (D'.ε : 𝓞 (CyclotomicField 37 ℚ)) *
               ((((u⁻¹ : (𝓞 (CyclotomicField 37 ℚ))ˣ) : _) ^ 37 *
                 (u : 𝓞 (CyclotomicField 37 ℚ)) ^ 37) *
-              ((D'.hζ.unit'.1 - 1) ^ (m' + 1) * D'.z) ^ 37) := by ring
+              ((D'.hζ.toInteger - 1) ^ (m' + 1) * D'.z) ^ 37) := by ring
       _ = (D'.ε : 𝓞 (CyclotomicField 37 ℚ)) *
-              ((D'.hζ.unit'.1 - 1) ^ (m' + 1) * D'.z) ^ 37 := by rw [hcancel, one_mul]
+              ((D'.hζ.toInteger - 1) ^ (m' + 1) * D'.z) ^ 37 := by rw [hcancel, one_mul]
   -- Now `x'³⁷ + y'³⁷ = D'.ε·(...)³⁷` is `D'.equation`.
   rw [show ((D'.ε * (u⁻¹) ^ 37 : (𝓞 (CyclotomicField 37 ℚ))ˣ) : 𝓞 (CyclotomicField 37 ℚ)) =
         (D'.ε : 𝓞 (CyclotomicField 37 ℚ)) * ((u⁻¹ : (𝓞 (CyclotomicField 37 ℚ))ˣ) : _) ^ 37 by
@@ -151,7 +151,7 @@ theorem caseII_realCaseIIData37_rescale_z
 (GTM 83 p. 172).
 
 From a real Case-II datum `D` and an exponent `k ≥ 1` for which the anchor power `𝔞₀ᵏ` is
-principal (`𝔞₀ = a_eta_zero_dvd_p_pow`), there is a real Case-II datum `D'` whose Fermat variable
+principal (`𝔞₀ = aEtaZeroDvdPPow`), there is a real Case-II datum `D'` whose Fermat variable
 generates exactly that power: `(D'.z) = 𝔞₀ᵏ`.
 
 This is the **sharpened** form of `CaseIIRealAnchorDatumAssembly37`: the genuine content is the
@@ -162,10 +162,10 @@ incompatible with the linear `RealCaseIIData37` measure `37·(m'+1)`; see the fi
 `def … : Prop` (**not** an axiom), certified non-vacuous below. -/
 def CaseIIRealAnchorDatumIdeal37 : Prop :=
   ∀ {m : ℕ} (D : RealCaseIIData37 (CyclotomicField 37 ℚ) m) (k : ℕ), 1 ≤ k →
-    (a_eta_zero_dvd_p_pow (by decide : (37 : ℕ) ≠ 2) D.hζ D.equation D.hy ^ k).IsPrincipal →
+    (aEtaZeroDvdPPow (by decide : (37 : ℕ) ≠ 2) D.hζ D.equation D.hy ^ k).IsPrincipal →
     ∃ (m' : ℕ) (D' : RealCaseIIData37 (CyclotomicField 37 ℚ) m'),
       Ideal.span ({D'.z} : Set (𝓞 (CyclotomicField 37 ℚ))) =
-        a_eta_zero_dvd_p_pow (by decide : (37 : ℕ) ≠ 2) D.hζ D.equation D.hy ^ k
+        aEtaZeroDvdPPow (by decide : (37 : ℕ) ≠ 2) D.hζ D.equation D.hy ^ k
 
 /-- **`CaseIIRealAnchorDatumAssembly37` from the sharpened ideal residual.**
 
@@ -185,7 +185,7 @@ theorem caseIIRealAnchorDatumAssembly37_of_ideal
     CaseIIRealAnchorDatumAssembly37 := by
   intro m D w k hk _hw_real _hw_p hw_span
   -- `(w) = 𝔞₀ᵏ` makes `𝔞₀ᵏ` principal (generator `w`).
-  have hprinc : (a_eta_zero_dvd_p_pow (by decide : (37 : ℕ) ≠ 2)
+  have hprinc : (aEtaZeroDvdPPow (by decide : (37 : ℕ) ≠ 2)
       D.hζ D.equation D.hy ^ k).IsPrincipal :=
     ⟨w, hw_span.symm⟩
   -- The ideal residual: a real datum with `(D'.z) = 𝔞₀ᵏ`.
@@ -227,9 +227,12 @@ as the genuine residual. -/
 theorem caseII_realCaseIIData37_lambda_content_mul_p
     {m : ℕ} (D : RealCaseIIData37 (CyclotomicField 37 ℚ) m) :
     (D.hζ.unit'.1 - 1) ^ (37 * (m + 1)) ∣ D.x ^ 37 + D.y ^ 37 := by
+  -- `↑D.hζ.unit' = D.hζ.toInteger` by the shim `IsUnit.unit_spec`.
+  have hζ_eq : D.hζ.unit'.1 = D.hζ.toInteger :=
+    IsUnit.unit_spec (D.hζ.toInteger_isPrimitiveRoot.isUnit (NeZero.ne 37))
   -- `D.x³⁷ + D.y³⁷ = ε·((ζ−1)^{m+1}·z)³⁷ = ε·(ζ−1)^{37·(m+1)}·z³⁷`.
   refine ⟨(D.ε : 𝓞 (CyclotomicField 37 ℚ)) * D.z ^ 37, ?_⟩
-  rw [D.equation, mul_pow, ← pow_mul, Nat.mul_comm (m + 1) 37]
+  rw [hζ_eq, D.equation, mul_pow, ← pow_mul, Nat.mul_comm (m + 1) 37]
   ring
 
 /-! ## 4. Non-vacuity of the ideal residual, and the FLT37 endpoint -/
@@ -242,7 +245,7 @@ theorem caseIIRealAnchorDatumIdeal37_hyp_satisfiable
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     {m : ℕ} (D : RealCaseIIData37 (CyclotomicField 37 ℚ) m) :
     ∃ k : ℕ, 1 ≤ k ∧
-      (a_eta_zero_dvd_p_pow (by decide : (37 : ℕ) ≠ 2) D.hζ D.equation D.hy ^ k).IsPrincipal :=
+      (aEtaZeroDvdPPow (by decide : (37 : ℕ) ≠ 2) D.hζ D.equation D.hy ^ k).IsPrincipal :=
   caseII_exists_anchor_pow_isPrincipal D
 
 /-- **Non-vacuity (conclusion is genuine existence).**  The ideal residual's conclusion shape — a
@@ -252,7 +255,7 @@ real datum `D'` with `(D'.z) = 𝔞₀ᵏ` — is genuine existence, not `False`
 theorem caseIIRealAnchorDatumIdeal37_concl_nonvacuous
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     {m : ℕ} (D : RealCaseIIData37 (CyclotomicField 37 ℚ) m) {k : ℕ} :
-    a_eta_zero_dvd_p_pow (by decide : (37 : ℕ) ≠ 2) D.hζ D.equation D.hy ^ k ≠ 0 :=
+    aEtaZeroDvdPPow (by decide : (37 : ℕ) ≠ 2) D.hζ D.equation D.hy ^ k ≠ 0 :=
   caseIIWashingtonAnchorSquareDatum37_anchor_pow_ne_bot D
 
 /-- **FLT37 via the sharpened ideal residual `CaseIIRealAnchorDatumIdeal37`.**

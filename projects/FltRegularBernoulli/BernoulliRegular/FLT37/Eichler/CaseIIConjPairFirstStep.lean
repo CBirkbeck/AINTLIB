@@ -70,10 +70,10 @@ theorem caseII_real_conj_integral_cross {m : ℕ} (D : RealCaseIIData37 K m) (hp
     (η : nthRootsFinset 37 (1 : 𝓞 K)) {a b : 𝓞 K}
     (hcross : rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy η *
         Ideal.span ({b} : Set (𝓞 K)) =
-      a_eta_zero_dvd_p_pow hp D.hζ D.equation D.hy * Ideal.span ({a} : Set (𝓞 K))) :
+      aEtaZeroDvdPPow hp D.hζ D.equation D.hy * Ideal.span ({a} : Set (𝓞 K))) :
     rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy (caseII_etaInv η) *
         Ideal.span ({ringOfIntegersComplexConj K b} : Set (𝓞 K)) =
-      a_eta_zero_dvd_p_pow hp D.hζ D.equation D.hy *
+      aEtaZeroDvdPPow hp D.hζ D.equation D.hy *
         Ideal.span ({ringOfIntegersComplexConj K a} : Set (𝓞 K)) := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   -- Apply `Ideal.map σ` to `hcross`.
@@ -92,18 +92,18 @@ theorem caseII_real_conj_generator_span {m : ℕ} (D : RealCaseIIData37 K m) (hp
     (hb_conj : ¬ (D.hζ.unit'.1 - 1) ∣ ringOfIntegersComplexConj K b)
     (hcross : rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy (caseII_etaInv η) *
         Ideal.span ({ringOfIntegersComplexConj K b} : Set (𝓞 K)) =
-      a_eta_zero_dvd_p_pow hp D.hζ D.equation D.hy *
+      aEtaZeroDvdPPow hp D.hζ D.equation D.hy *
         Ideal.span ({ringOfIntegersComplexConj K a} : Set (𝓞 K))) :
     FractionalIdeal.spanSingleton (𝓞 K)⁰
         ((ringOfIntegersComplexConj K a : K) / (ringOfIntegersComplexConj K b : K)) =
       (rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy (caseII_etaInv η) /
-        a_eta_zero_dvd_p_pow hp D.hζ D.equation D.hy
+        aEtaZeroDvdPPow hp D.hζ D.equation D.hy
         : FractionalIdeal (𝓞 K)⁰ K) := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   -- `(σb) ≠ 0` and `𝔞₀ ≠ 0`, so both denominators in the fractional identity are nonzero.
   have hσb_ne : (ringOfIntegersComplexConj K b : 𝓞 K) ≠ 0 := by
     intro h; exact hb_conj (h ▸ dvd_zero _)
-  have ha0_ne : (a_eta_zero_dvd_p_pow hp D.hζ D.equation D.hy : FractionalIdeal (𝓞 K)⁰ K) ≠ 0 := by
+  have ha0_ne : (aEtaZeroDvdPPow hp D.hζ D.equation D.hy : FractionalIdeal (𝓞 K)⁰ K) ≠ 0 := by
     rw [Ne, FractionalIdeal.coeIdeal_eq_zero]
     intro h; exact not_p_div_a_zero hp D.hζ D.equation D.hy D.hz (h ▸ dvd_zero _)
   -- Split `spanSingleton(σa/σb)` into `spanSingleton(σa)/spanSingleton(σb)`, then `div_eq_div_iff`.

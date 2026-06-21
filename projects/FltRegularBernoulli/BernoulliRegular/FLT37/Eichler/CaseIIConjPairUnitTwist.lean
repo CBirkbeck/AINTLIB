@@ -118,12 +118,12 @@ theorem caseII_assocUnit_sigma_twist {m : ℕ} (D : RealCaseIIData37 K m) (hp : 
     (hspan₁ :
       FractionalIdeal.spanSingleton (𝓞 K)⁰ (a₁ / b₁ : K) =
         rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy η /
-          a_eta_zero_dvd_p_pow hp D.hζ D.equation D.hy)
+          aEtaZeroDvdPPow hp D.hζ D.equation D.hy)
     (hspan₂ :
       FractionalIdeal.spanSingleton (𝓞 K)⁰
           ((ringOfIntegersComplexConj K a₁ : K) / (ringOfIntegersComplexConj K b₁ : K)) =
         rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy (caseII_etaInv η) /
-          a_eta_zero_dvd_p_pow hp D.hζ D.equation D.hy) :
+          aEtaZeroDvdPPow hp D.hζ D.equation D.hy) :
     unitsComplexConj K
         (associated_eta_zero_unit_of_spanSingleton hp D.hζ D.equation D.hy D.hz η hb₁ hspan₁) =
       (-1) ^ m *
@@ -135,13 +135,11 @@ theorem caseII_assocUnit_sigma_twist {m : ℕ} (D : RealCaseIIData37 K m) (hp : 
     with hU₁def
   set U₂ := associated_eta_zero_unit_of_spanSingleton hp D.hζ D.equation D.hy D.hz
     (caseII_etaInv η) hb₂ hspan₂ with hU₂def
-  -- `ζ^37 = 1` and the anchor index `η₀ = zeta_sub_one_dvd_root` is real (`= 1`).
-  have h37z : (D.hζ.unit'.1 : 𝓞 K) ^ 37 = 1 := by
-    rw [← Units.val_pow_eq_pow_val, D.hζ.unit'_pow, Units.val_one]
-  have hη0z : (zeta_sub_one_dvd_root hp D.hζ D.equation D.hy : 𝓞 K) = 1 := by
-    have := caseII_etaZero_eq_one D hp
-    -- `D.etaZero = zeta_sub_one_dvd_root …`; `caseII_etaZero_eq_one : D.etaZero = 1`.
-    simpa [CaseIIData37.etaZero] using congrArg (Subtype.val) this
+  -- `ζ^37 = 1` and the anchor index `η₀ = zetaSubOneDvdRoot` is real (`= 1`).
+  have h37z : (D.hζ.toInteger : 𝓞 K) ^ 37 = 1 := D.hζ.toInteger_isPrimitiveRoot.pow_eq_one
+  have hη0z : (zetaSubOneDvdRoot hp D.hζ D.equation D.hy : 𝓞 K) = 1 := by
+    have hηZ : zetaSubOneDvdRoot hp D.hζ D.equation D.hy = D.etaZero := rfl
+    rw [hηZ]; exact caseII_etaZero_eq_one D hp
   -- The determining specs of `U₁` and `U₂`.
   have spec₁ := associated_eta_zero_unit_spec_of_spanSingleton hp D.hζ D.equation D.hy D.hz η hb₁
     hspan₁
@@ -158,7 +156,7 @@ theorem caseII_assocUnit_sigma_twist {m : ℕ} (D : RealCaseIIData37 K m) (hp : 
   -- LHS of `σ spec₁`: `σ(U₁) · (x+y·η₀) · (σ a₁)³⁷` (anchor and `x,y` real).
   rw [map_mul, map_mul, map_pow] at hσspec₁
   -- the anchor radical `x + y·η₀ = x + y` (real); coefficient becomes itself.
-  rw [show (D.x + D.y * (zeta_sub_one_dvd_root hp D.hζ D.equation D.hy : 𝓞 K)) = D.x + D.y from by
+  rw [show (D.x + D.y * (zetaSubOneDvdRoot hp D.hζ D.equation D.hy : 𝓞 K)) = D.x + D.y from by
     rw [hη0z, mul_one]] at hσspec₁
   rw [caseII_x_add_y_real D.x_real D.y_real] at hσspec₁
   -- RHS of `σ spec₁`: `σ(x+y·η)·σ((ζ-1)^{m·37})·σ(b₁³⁷)`.  Split outer products (`map_mul`) only,
@@ -168,13 +166,13 @@ theorem caseII_assocUnit_sigma_twist {m : ℕ} (D : RealCaseIIData37 K m) (hp : 
       ((mem_nthRootsFinset (by norm_num) _).mp η.2),
     caseII_real_zeta_sub_one_pow_conj (K := K) m h37z, map_pow] at hσspec₁
   -- `spec₂` with anchor simplified: `(U₂)·(x+y)·(σa₁)³⁷ = (x+y·η³⁶)·(ζ-1)^{m·37}·(σb₁)³⁷`.
-  rw [show (D.x + D.y * (zeta_sub_one_dvd_root hp D.hζ D.equation D.hy : 𝓞 K)) = D.x + D.y from by
+  rw [show (D.x + D.y * (zetaSubOneDvdRoot hp D.hζ D.equation D.hy : 𝓞 K)) = D.x + D.y from by
     rw [hη0z, mul_one], caseII_etaInv_coe] at spec₂
   -- Now `hσspec₁ : σ(U₁)·(x+y)·(σa₁)³⁷ = (x+y·η³⁶)·((-1)^m·(ζ-1)^{m·37})·(σb₁)³⁷`,
   -- and the RHS `= (-1)^m·[(x+y·η³⁶)·(ζ-1)^{m·37}·(σb₁)³⁷] = (-1)^m·[(U₂:𝓞K)·(x+y)·(σa₁)³⁷]`.
   -- `σ a₁ ≠ 0`: from `spec₂`'s nonzero RHS (`x+y·η³⁶ ≠ 0`, `(ζ-1) ≠ 0`, `σb₁ ≠ 0`).
   have hσa_ne : (ringOfIntegersComplexConj K a₁ : 𝓞 K) ≠ 0 := by
-    have hrhs_ne : ((D.x + D.y * (η : 𝓞 K) ^ 36) * (D.hζ.unit'.1 - 1) ^ (m * 37) *
+    have hrhs_ne : ((D.x + D.y * (η : 𝓞 K) ^ 36) * (D.hζ.toInteger - 1) ^ (m * 37) *
         ringOfIntegersComplexConj K b₁ ^ 37 : 𝓞 K) ≠ 0 := by
       refine mul_ne_zero (mul_ne_zero ?_ (pow_ne_zero _ ?_)) (pow_ne_zero _ ?_)
       · have h36 : ((η : 𝓞 K) ^ 36) ^ 37 = 1 := by
@@ -189,7 +187,7 @@ theorem caseII_assocUnit_sigma_twist {m : ℕ} (D : RealCaseIIData37 K m) (hp : 
     rw [← spec₂, h]; ring
   have hxy_ne : (D.x + D.y : 𝓞 K) ≠ 0 := by
     have := x_plus_y_mul_ne_zero hp D.hζ D.equation D.hz
-      (zeta_sub_one_dvd_root hp D.hζ D.equation D.hy)
+      (zetaSubOneDvdRoot hp D.hζ D.equation D.hy)
     rwa [hη0z, mul_one] at this
   have hprod_ne : ((D.x + D.y) * ringOfIntegersComplexConj K a₁ ^ 37 : 𝓞 K) ≠ 0 :=
     mul_ne_zero hxy_ne (pow_ne_zero _ hσa_ne)
@@ -199,7 +197,7 @@ theorem caseII_assocUnit_sigma_twist {m : ℕ} (D : RealCaseIIData37 K m) (hp : 
       ((-1 : 𝓞 K) ^ m * (U₂ : 𝓞 K)) * ((D.x + D.y) * ringOfIntegersComplexConj K a₁ ^ 37) := by
     have hσspec₁' : ringOfIntegersComplexConj K (U₁ : 𝓞 K) * (D.x + D.y) *
         ringOfIntegersComplexConj K a₁ ^ 37 =
-        (-1 : 𝓞 K) ^ m * ((D.x + D.y * (η : 𝓞 K) ^ 36) * (D.hζ.unit'.1 - 1) ^ (m * 37) *
+        (-1 : 𝓞 K) ^ m * ((D.x + D.y * (η : 𝓞 K) ^ 36) * (D.hζ.toInteger - 1) ^ (m * 37) *
           ringOfIntegersComplexConj K b₁ ^ 37) := by
       rw [hσspec₁]; ring
     rw [show ringOfIntegersComplexConj K (U₁ : 𝓞 K) *

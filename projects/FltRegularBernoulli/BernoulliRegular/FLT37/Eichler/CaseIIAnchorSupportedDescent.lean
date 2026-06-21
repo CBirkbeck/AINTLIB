@@ -7,7 +7,7 @@ This file attacks the single remaining Case-II residual `CaseIIAnchorSupportedDe
 (`CaseIIFactorDescentStep.lean`) — the Washington *Cyclotomic Fields* (2nd ed. GTM 83) §9.1
 Theorem 9.4 descent **construction**: from a real Case-II Fermat configuration build a next-level
 real datum whose Fermat variable `z'` is **anchor-supported** (every prime of `(z')` divides the
-`𝔭`-free anchor `𝔞₀ = a_eta_zero_dvd_p_pow`, Washington's `B₀`).
+`𝔭`-free anchor `𝔞₀ = aEtaZeroDvdPPow`, Washington's `B₀`).
 
 ## What is PROVEN here (the sound support arithmetic of `ξ₁ = ρ₀²`)
 
@@ -87,7 +87,7 @@ theorem caseII_normalizedFactors_pow_toFinset
 /-- **Anchor support from `(z') = 𝔞₀ᵏ`** (Washington's `(ξ₁) = B₀²` ⟹ `support(ξ₁) = support(B₀)`).
 
 If the new variable `z'` has principal ideal `(z')` equal to a power `𝔞₀ᵏ` (`k ≥ 1`) of the `𝔭`-free
-anchor `𝔞₀ = a_eta_zero_dvd_p_pow`, then every prime factor of `(z')` is a prime factor of `𝔞₀` —
+anchor `𝔞₀ = aEtaZeroDvdPPow`, then every prime factor of `(z')` is a prime factor of `𝔞₀` —
 the literal target conclusion of `CaseIIAnchorSupportedDescent37`.  Sound and direct from
 `caseII_normalizedFactors_pow_toFinset`. -/
 theorem caseII_anchorSupported_of_span_eq_anchorPow {m : ℕ}
@@ -112,7 +112,7 @@ p. 172).
 
 For every real Case-II datum `D` in the non-terminal regime (the adjacent corrected radical `α` at
 `η = D.etaOne = ζ` is **not** a unit), there is a real Case-II datum `D'` whose Fermat variable
-generates a power of the anchor: `(D'.z) = 𝔞₀ᵏ` for some `k ≥ 1`, where `𝔞₀ = a_eta_zero_dvd_p_pow`
+generates a power of the anchor: `(D'.z) = 𝔞₀ᵏ` for some `k ≥ 1`, where `𝔞₀ = aEtaZeroDvdPPow`
 is the `𝔭`-free anchor `B₀` of `D`.
 
 This is the faithful Washington §9.1 construction of the new variable `ξ₁ = ρ₀²`: the conjugate-norm

@@ -189,7 +189,7 @@ ingredient of the symmetric descent equation. -/
 /-- **[TARGET 2] Real conjugate-norm generator of an anchor power** (Washington `(ξ₁) = B₀²`, real).
 
 For a real Case-II datum `D` there is a **real**, `𝔭`-coprime `ξ₁ : 𝓞 K` and `k ≥ 1` with
-`(ξ₁) = 𝔞₀^k`, where `𝔞₀ = a_eta_zero_dvd_p_pow` is the `𝔭`-free anchor.  This is the conjugate
+`(ξ₁) = 𝔞₀^k`, where `𝔞₀ = aEtaZeroDvdPPow` is the `𝔭`-free anchor.  This is the conjugate
 norm `ξ₁ = ρ₀σρ₀` of a generator `ρ₀` of a principal power of `𝔞₀`; reality and the anchor-square
 ideal are both proven in `caseII_anchorPow_conjNorm_real_span`.
 
@@ -202,7 +202,7 @@ theorem caseII_section91_conjNorm_real_generator
       ringOfIntegersComplexConj (CyclotomicField 37 ℚ) ξ₁ = ξ₁ ∧
       ¬ (D.hζ.unit'.1 - 1) ∣ ξ₁ ∧
       Ideal.span ({ξ₁} : Set (𝓞 (CyclotomicField 37 ℚ))) =
-        a_eta_zero_dvd_p_pow (by decide : (37 : ℕ) ≠ 2) D.hζ D.equation D.hy ^ k :=
+        aEtaZeroDvdPPow (by decide : (37 : ℕ) ≠ 2) D.hζ D.equation D.hy ^ k :=
   caseII_anchorPow_conjNorm_real_span D
 
 variable {K : Type} [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K]

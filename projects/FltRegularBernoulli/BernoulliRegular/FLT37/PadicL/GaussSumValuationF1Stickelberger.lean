@@ -110,8 +110,9 @@ theorem gaussSum_eq_mathlib (i : ℕ) :
   -- Mathlib's Gauss sum, split off the `a = 0` term (which vanishes since `χ 0 = 0`).
   have hmathlib : _root_.gaussSum (S.teichCharPow i) S.addCharPi =
       ∑ a ∈ Finset.univ \ {(0 : ZMod p)}, S.teichCharPow i a * S.addCharPi a := by
-    have hsplit := Finset.sum_eq_sum_diff_singleton_add (Finset.mem_univ (0 : ZMod p))
-      (fun a : ZMod p => S.teichCharPow i a * S.addCharPi a)
+    have hsplit := (Finset.sum_erase_add Finset.univ
+      (fun a : ZMod p => S.teichCharPow i a * S.addCharPi a) (Finset.mem_univ (0 : ZMod p))).symm
+    rw [Finset.erase_eq] at hsplit
     rw [MulChar.map_zero, zero_mul, add_zero] at hsplit
     exact hsplit
   rw [hmathlib]
@@ -119,8 +120,9 @@ theorem gaussSum_eq_mathlib (i : ℕ) :
   let φ : (ZMod p)ˣ ↪ ZMod p := ⟨fun x ↦ x, Units.val_injective⟩
   have hmap : (Finset.univ : Finset (ZMod p)ˣ).map φ = Finset.univ \ {0} := by
     ext x
-    simpa only [Finset.mem_map, Finset.mem_univ, Function.Embedding.coeFn_mk, true_and,
-      Finset.mem_sdiff, Finset.mem_singleton, φ] using isUnit_iff_ne_zero
+    simp only [Finset.mem_map, Finset.mem_univ, Function.Embedding.coeFn_mk, true_and,
+      Finset.mem_sdiff, Finset.mem_singleton, φ]
+    exact isUnit_iff_ne_zero
   rw [← hmap, Finset.sum_map]
   unfold StickelbergerF1Setup.gaussSum
   refine Finset.sum_congr rfl fun a _ => ?_

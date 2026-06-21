@@ -2520,7 +2520,7 @@ theorem caseII_anchor_pair_div_p_pow_two_m_sigma_fixed {m : ℕ} (D : RealCaseII
   exact (mul_left_cancel₀ h_p_pow_ne_bot h_sigma_spec).symm
 
 /-- **σ-conjugate of `a_eta_zero_dvd_p_pow_spec`.** The 𝔭-coprime part of `𝔞(caseII_etaInv η₀)`
-is `(a_eta_zero_dvd_p_pow).map σ`, satisfying `𝔭^m · (a_eta_zero_dvd_p_pow).map σ =
+is `(aEtaZeroDvdPPow).map σ`, satisfying `𝔭^m · (aEtaZeroDvdPPow).map σ =
 𝔞(caseII_etaInv η₀)`. Obtained by applying σ to the original `a_eta_zero_dvd_p_pow_spec` and
 simplifying via `σ(𝔭) = 𝔭` and `σ(𝔞(η₀)) = 𝔞(caseII_etaInv η₀)`. -/
 theorem caseII_a_etaInv_dvd_p_pow_spec {m : ℕ} (D : RealCaseIIData37 K m)

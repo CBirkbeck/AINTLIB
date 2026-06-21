@@ -339,7 +339,7 @@ free-content frame.  **A structural reduction target whose truth is OPEN** (see 
 content-parity obstruction); *not* asserted true.
 
 From a real Case-II datum `D` and a **real**, `𝔭`-coprime element `w : 𝓞 K` whose principal ideal is
-a power `𝔞₀ᵏ` (`k ≥ 1`) of `D`'s `𝔭`-free anchor `𝔞₀ = a_eta_zero_dvd_p_pow` — *exactly* the
+a power `𝔞₀ᵏ` (`k ≥ 1`) of `D`'s `𝔭`-free anchor `𝔞₀ = aEtaZeroDvdPPow` — *exactly* the
 conjugate norm `ξ₁ = ρ₀σρ₀` produced by `caseII_anchorPow_conjNorm_real_span` — there exist `n'` and
 a free-content Case-II datum `D' : FreeContentCaseIIData37 K n'` whose Fermat variable **is** `w`
 (`D'.z = w`).

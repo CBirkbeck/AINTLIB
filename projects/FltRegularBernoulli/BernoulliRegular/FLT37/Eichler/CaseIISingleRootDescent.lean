@@ -96,7 +96,7 @@ def CaseIIAdjacentSingleRootQuotientPrincipal37
 
 /-- **`𝔞(η)/𝔞(η₀)` principal as a fractional ideal `⟹` `IsPrincipal(𝔞(η)/𝔞₀)`.**
 
-The anchored quotient `𝔞(η)/𝔞₀` (`𝔞₀ = a_eta_zero_dvd_p_pow`, the `𝔭`-coprime part of `𝔞(η₀)`) is
+The anchored quotient `𝔞(η)/𝔞₀` (`𝔞₀ = aEtaZeroDvdPPow`, the `𝔭`-coprime part of `𝔞(η₀)`) is
 principal whenever the *root* quotient `𝔞(η)/𝔞(η₀)` is principal as a fractional ideal.  The `𝔭^m`
 correction is principal (`𝔭 = (ζ-1)` is principal), so it cannot break principality.  Mirrors the
 final ideal-bookkeeping steps of `caseII_a_div_a_zero_isPrincipal_of_realIdealModel`
@@ -280,7 +280,7 @@ theorem caseIIPrincipalizationAgainstEtaZero_of_anchoredClassTrivial37
       D.hζ D.equation D.hy := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   intro η hη
-  -- `D.etaZero = zeta_sub_one_dvd_root …`, `D.rootIdeal η = rootDivZetaSubOneDvdGcd …`.
+  -- `D.etaZero = zetaSubOneDvdRoot …`, `D.rootIdeal η = rootDivZetaSubOneDvdGcd …`.
   have hη' : η ≠ D.etaZero := hη
   have h_root := caseII_rootQuotientPrincipal_of_classEq D (by decide : (37 : ℕ) ≠ 2) η
     (h_class D η hη')

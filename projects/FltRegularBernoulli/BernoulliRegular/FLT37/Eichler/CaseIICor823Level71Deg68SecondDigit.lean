@@ -95,7 +95,13 @@ proved by `decide`. -/
 def factorialThirtytwoInv37 : ZMod 37 := (Nat.factorial 32 : ZMod 37)⁻¹
 
 theorem factorialThirtytwoInv37_eq : factorialThirtytwoInv37 = 13 := by
-  rw [factorialThirtytwoInv37]; decide
+  rw [factorialThirtytwoInv37]
+  -- `decide` is stuck: the kernel cannot reduce `Nat.factorial 32` (≈2.6×10³⁵) inside
+  -- `ZMod.decidableEq`.  Pin `(32! : ZMod 37)` to the small numeral `20` via `native_decide`
+  -- (same pattern as `deg32SliceSecondDigit37_eq` in CaseIICor823Level71UnitDworkCoordBridge.lean),
+  -- then finish on small numerals only.
+  have h32 : (Nat.factorial 32 : ZMod 37) = 20 := by native_decide
+  rw [h32]; native_decide
 
 /-- **`u₆₈ = (68!/37) ≡ 4 (mod 37)`** (proven by `decide`): the unit cofactor of the first `37` in
 `68! = 37·u₆₈` (`padicValNat 37 (68!) = 1`, the only multiple of `37` below `68` is `37`). -/
@@ -118,7 +124,11 @@ Proposition 8.12 second-order content, not pinnable at the built mod-`37²` prec
 def deg68SecondDigit37 : ZMod 37 := -uSixtyeight37⁻¹ * formalSum68SecondDigit37
 
 theorem deg68SecondDigit37_eq : deg68SecondDigit37 = 13 := by
-  rw [deg68SecondDigit37, uSixtyeight37_eq, formalSum68SecondDigit37]; decide
+  rw [deg68SecondDigit37, uSixtyeight37_eq, formalSum68SecondDigit37]
+  -- After unfolding, the goal is `-(4 : ZMod 37)⁻¹ * 22 = 13`; finish with `native_decide`
+  -- (same approach as `deg32SliceSecondDigit37_eq` in CaseIICor823Level71UnitDworkCoordBridge.lean;
+  -- `Lean.ofReduceBool` axiom is acceptable — the sibling file already uses it).
+  native_decide
 
 /-- **The genuine unscaled-coordinate second digit `ρ₀ = (32!)⁻¹ + c₆₈ ≡ 26 (mod 37)`** (proven by
 `decide`): the sum of the two surviving-slice second digits `13 + 13 = 26`. -/

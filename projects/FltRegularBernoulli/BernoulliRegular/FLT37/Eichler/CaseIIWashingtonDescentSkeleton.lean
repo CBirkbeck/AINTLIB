@@ -17,7 +17,7 @@ of non-Washington constructions.  Washington's real-anchor (`B₀ ∈ Cl(K⁺)` 
 `37 ∤ h⁺`) + real-units (Lemma 9.2) mechanism is clean.  The two genuine-new leaves are:
 
 * **L1 `caseII_anchor_real_rho0`** (Washington p.169): from `37 ∤ h⁺`, the real anchor root ideal
-  `B₀ = a_eta_zero_dvd_p_pow` (real, `[B₀] ∈ Cl(K⁺)`, `[B₀]³⁷ = 1`) is principal with a **real**
+  `B₀ = aEtaZeroDvdPPow` (real, `[B₀] ∈ Cl(K⁺)`, `[B₀]³⁷ = 1`) is principal with a **real**
   generator `ρ₀` (`ringOfIntegersComplexConj K ρ₀ = ρ₀`), giving the anchor equation
   `algebraMap(x+y) = η₀ · Λ^e · ρ₀³⁷` with `η₀` a **real** unit.  Crucially `B₀ ∈ Cl(K⁺)` (NOT
   `Cl(K)`: `37 ∣ h⁻` but `37 ∤ h⁺`), and `k' = 1` (direct principal), **not** the conjugate-norm
@@ -64,7 +64,7 @@ variable [NumberField.IsCMField (CyclotomicField 37 ℚ)]
 /-- **[L1 — REAL ANCHOR] Washington's real anchor generator `ρ₀`** (Washington GTM 83 §9.1 p.169).
 
 For a real Case-II datum `D` with coprime Fermat variables, the `𝔭`-free anchor root ideal
-`B₀ = a_eta_zero_dvd_p_pow` is **real** (`σ B₀ = B₀`, since `η₀ = 1`), `B₀³⁷` is principal, and its
+`B₀ = aEtaZeroDvdPPow` is **real** (`σ B₀ = B₀`, since `η₀ = 1`), `B₀³⁷` is principal, and its
 class lies in `Cl(K⁺)` with `[B₀]³⁷ = 1`; the proven `37 ∤ h⁺` (`Sinnott.flt37_not_dvd_hPlus`) then
 forces `[B₀] = 1`, i.e. `B₀ = (ρ₀)` with a **real** generator `ρ₀`
 (`ringOfIntegersComplexConj K ρ₀ = ρ₀`, `k' = 1`, NOT the conjugate norm `𝔞₀^{2k'}`).  Hence the
@@ -87,7 +87,7 @@ theorem caseII_anchor_real_rho0
       -- `ρ₀` is a **real** generator of the anchor (the `Cl(K⁺)`-Vandiver content):
       ringOfIntegersComplexConj (CyclotomicField 37 ℚ) ρ0 = ρ0 ∧
       Ideal.span ({ρ0} : Set (𝓞 (CyclotomicField 37 ℚ))) =
-        a_eta_zero_dvd_p_pow (by decide : (37 : ℕ) ≠ 2) D.hζ D.equation D.hy ∧
+        aEtaZeroDvdPPow (by decide : (37 : ℕ) ≠ 2) D.hζ D.equation D.hy ∧
       -- `η₀` is a **real** unit (the `hη0real` input):
       complexConj (CyclotomicField 37 ℚ) (η0 : CyclotomicField 37 ℚ) =
           (η0 : CyclotomicField 37 ℚ) ∧

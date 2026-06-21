@@ -369,14 +369,12 @@ theorem valuedLambdaQuotientDworkCoeffModCube_evalₐ
     valuedLambdaQuotientDworkCoeffModCube (p := p) (K := K) i
         (AdicCompletion.evalₐ (lambdaIdeal p K) (3 * (p - 1)) x)
         =
-      valuedLambdaQuotientDworkCoeffModCube (p := p) (K := K) i
-        (Ideal.Quotient.mk ((lambdaIdeal p K) ^ (3 * (p - 1))) r) := by
-          simpa [I] using congrArg
-            (valuedLambdaQuotientDworkCoeffModCube (p := p) (K := K) i) hr.symm
-    _ =
       rationalPadicIntegerToZModCube p
         ((dworkParameterPowerBasis p K).repr (algebraMap R S r) i) := by
-          rw [valuedLambdaQuotientDworkCoeffModCube_mk]
+          have := congrArg
+            (valuedLambdaQuotientDworkCoeffModCube (p := p) (K := K) i) hr.symm
+          simp only [I] at this
+          rw [this, valuedLambdaQuotientDworkCoeffModCube_mk]
     _ =
       rationalPadicIntegerToZModCube p
         ((dworkParameterPowerBasis p K).repr x i) :=

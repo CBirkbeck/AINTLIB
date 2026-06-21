@@ -1016,4 +1016,17 @@ theorem unit'_pow {K : Type*} [Field K] {ζ : K} {n : ℕ} [NeZero n]
   rw [Units.val_pow_eq_pow_val, Units.val_one, unit', IsUnit.unit_spec]
   exact h.toInteger_isPrimitiveRoot.pow_eq_one
 
+/-- Compatibility shim restoring the removed `IsPrimitiveRoot.unit'_coe`: the coercion of
+`h.unit'` back to `𝓞 K` is itself a primitive `n`-th root of unity (it is definitionally
+`h.toInteger`). -/
+theorem unit'_coe {K : Type*} [Field K] {ζ : K} {n : ℕ} [NeZero n]
+    (h : IsPrimitiveRoot ζ n) :
+    IsPrimitiveRoot ((h.unit' : (NumberField.RingOfIntegers K)ˣ) :
+      NumberField.RingOfIntegers K) n := by
+  have hc : ((h.unit' : (NumberField.RingOfIntegers K)ˣ) :
+      NumberField.RingOfIntegers K) = h.toInteger :=
+    IsUnit.unit_spec (h.toInteger_isPrimitiveRoot.isUnit (NeZero.ne n))
+  rw [hc]
+  exact h.toInteger_isPrimitiveRoot
+
 end IsPrimitiveRoot
