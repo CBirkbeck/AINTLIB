@@ -23,10 +23,25 @@ INTERNALIZED (all proved, axiom-clean) this development:
   assumption discharged from `HasEnoughRootsOfUnity ℤ_[p] (exponent Δ)` (Teichmüller roots) +
   character duality; all `Δ` typeclass instances (`Fintype`, `Invertible |Δ|`) derived.
 
-REMAINING (bundled by design, per the architecture + the 2026-06-18 expert review):
-- **CFT** (`CFTUnitsData`) — classical class field theory, not yet in mathlib.
-- **§12 `h12`** (`col_image_cycloTower1_eq_zetaIdeal`) — the Coleman-density "genuine §13/IMC-deferred
-  core"; the T1220+ density chain (`Coleman/ColContinuity.lean`, `IwasawaProof/TowerDensity.lean`).
+UPDATE (2026-06-21): **§12 is DONE.** `iwasawa_theorem` (`𝒰⁺_{∞,1}/𝒞⁺_{∞,1} ≃+ Λ(𝒢⁺)/I(𝒢⁺)ζ_p`),
+`col_image_cycloTower1_eq_zetaIdeal`, and `iwasawa_exact_sequence` are all **PROVED and axiom-clean**
+in `IwasawaProof/Main.lean` (orchestrator-verified: `#print axioms` = the standard three, no sorryAx;
+Main.lean sorry-free). They were closed via the **faithful plus/minus Route-P** (`col_mem` splits
+`Col u` into the `c`-plus part — handled by the proved `col_mem_zetaIdeal_of_mem_cycloTower1Plus` —
+and the `c`-minus part `∈ ℤ_p(1) = ker Col`), NOT the density route; the entire `[T1220–T1225]`
+density chain is therefore **SUPERSEDED** (its `_of_density` route was unsound at the free level-0
+coordinate, T1220 B2-logged). The board had been stale (`+sorryAx`).
+
+REMAINING (genuinely bundled-by-necessity / off the plan's chosen path):
+- **CFT** (`CFTUnitsData`'s `cft` field, the `Gal(𝓜⁺/𝓛⁺) ≅ 𝒰⁺/𝓔⁺` identification) — global class
+  field theory, **not in mathlib** (verified: no `RayClassGroup`/Artin reciprocity), so bundled by
+  necessity per plan + expert review; building it is a multi-week paper-scale development (B3-scale).
+- The **Λ(𝒢⁺)-linear refinement** of `iwasawa_theorem` (it is proved as an *additive* iso; the
+  `Λ`-linear upgrade needs the `Col`-`smul` intertwining ≡ the deliberately-absent `Continuous(Col)`,
+  which the whole §12 Coleman pipeline was built to AVOID). So the capstone's `h12` (stated `≃ₗ[Λ]`)
+  takes the Λ-linear form as part of the bundle; §12 supplies its additive core.
+- The Λ-module **structure theorem** `fg_pseudoIso_canonical` — deliberately BYPASSED by the
+  length-theoretic `charIdeal` reroute (not needed for the capstone).
 
 ## Goal
 
