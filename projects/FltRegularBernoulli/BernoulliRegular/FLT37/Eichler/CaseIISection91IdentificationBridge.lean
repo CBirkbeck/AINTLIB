@@ -81,7 +81,6 @@ data, by the proven real-data §9.1-id.  We extract exactly that conjunct (the p
 together with the Lemma-9.8 opening it rests on, to mark what is genuinely established (versus the
 over-stated abstract claim about a free `ε₁/ε₂`). -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **The sound Assumption-II content on the producer descent object** (proven, axiom-clean).
 
 For a real datum `D` with `ℓ ∣ z` (Lemma 9.7), Lemma 9.6 (`D.x, D.y ∉ lv149`), and the Fermat-data
@@ -104,8 +103,8 @@ theorem caseIISection91_real_assumptionII_shape
     BernoulliRegular.IsPthPowerModPrime 37 lv149
         (caseIISection91_descentUnit D η G lv149) ∧
       (D.x + D.y ∈ lv149) :=
-  ⟨((caseIISection91DescentUnitIdentificationReal37_proven hSO D η G hz hxl hyl hX hQ0).2).2,
-    ((caseIISection91DescentUnitIdentificationReal37_proven hSO D η G hz hxl hyl hX hQ0).2).1⟩
+  have h := (caseIISection91DescentUnitIdentificationReal37_proven hSO D η G hz hxl hyl hX hQ0).2
+  ⟨h.2, h.1⟩
 
 /-! ## 2. R4(ii) `ℓ ∣ z` is proven at the base — the remaining gap is purely architectural
 
@@ -115,7 +114,6 @@ base both R4(i) (producer local power) and R4(ii) (`ℓ ∣ z`) hold soundly.  S
 gap is the abstract↔real re-pointing of the descent's `h_unit` from the over-stated abstract
 universal to the producer-constructed descent unit — not any missing arithmetic. -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **R4(ii) `ℓ ∣ z` at the base, with the producer local power available** (proven, axiom-clean
 given the carried second-order Bernoulli input).
 
