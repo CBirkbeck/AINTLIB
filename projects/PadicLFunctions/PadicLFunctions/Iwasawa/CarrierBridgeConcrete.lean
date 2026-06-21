@@ -40,7 +40,6 @@ logarithm isomorphism `Γ ≅ ℤ_p` (`logCM`/`expCM`) through the measure-funct
 This discharges the previously-bundled carrier-bridge input of the Main-Conjecture capstone. -/
 def carrierBridgeFull (hp2 : p ≠ 2) :
     PadicMeasure p (GPlus p) ≃+* Iwasawa.IwasawaAlgebraGroup ℤ_[p] (Delta p hp2) := by
-  letI : Fintype (Delta p hp2) := Fintype.ofFinite _
   letI : DecidableEq (Delta p hp2) := Classical.decEq _
   exact carrierBridge p
     (⟨gplusMulEquiv p hp2, continuous_gplusMulEquiv p hp2⟩ : C(GPlus p, _))

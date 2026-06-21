@@ -12,6 +12,7 @@ import PadicLFunctions.Iwasawa.CarrierBridgeConcrete
 import PadicLFunctions.Iwasawa.GPlusDecomp
 import PadicLFunctions.IwasawaProof.CharIdealConjunct
 import PadicLFunctions.IwasawaProof.Capstone
+import PadicLFunctions.IwasawaProof.CapstoneConcrete
 import PadicLFunctions.Measure.FiniteProduct
 import PadicLFunctions.KubotaLeopoldt.ZetaValues
 import PadicLFunctions.KubotaLeopoldt.ZetaValuesComplex

@@ -384,6 +384,10 @@ noncomputable def negOneT (hp2 : p ≠ 2) : (teichmuller p).range :=
 abbrev Delta (hp2 : p ≠ 2) : Type _ :=
   (teichmuller p).range ⧸ Subgroup.zpowers (negOneT p hp2)
 
+/-- `Δ` is a finite type (quotient of the finite `μ_{p−1}`). -/
+noncomputable instance instFintypeDelta (hp2 : p ≠ 2) : Fintype (Delta p hp2) :=
+  Fintype.ofFinite _
+
 /-- Under `unitsSplitEquiv`, `-1 ↦ (negOneT, 1)` — it lives purely in the `μ_{p−1}` factor. -/
 theorem unitsSplitEquiv_neg_one (hp2 : p ≠ 2) :
     unitsSplitEquiv p (-1) = (negOneT p hp2, 1) := by
