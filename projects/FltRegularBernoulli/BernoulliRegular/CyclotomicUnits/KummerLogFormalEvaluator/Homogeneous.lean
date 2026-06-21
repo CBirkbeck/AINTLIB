@@ -51,7 +51,7 @@ theorem valuedLambdaQuotientDworkCoeffModP_factorPow_samePrimeFiniteLog_normaliz
   rw [map_sum]
   exact valuedLambdaQuotientDworkCoeffModP_sum (p := p) (K := K) i
     (Finset.range (samePrimeFiniteLogCutoff (p := p) (p - 2)))
-    (fun d =>
+    (fun d ↦
       Ideal.Quotient.factorPow (lambdaIdeal p K) (by omega :
           p - 1 ≤ (p - 2) + 1)
         (samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum
@@ -255,7 +255,7 @@ theorem dworkRamificationCorrection_evenCoeff_eq_zero_of_sub_residue
     have hne : (i : ℕ) ≠ 1 := by
       dsimp [i]
       omega
-    have hne_fin : i ≠ (⟨1, by omega⟩ : Fin (p - 1)) := fun h =>
+    have hne_fin : i ≠ (⟨1, by omega⟩ : Fin (p - 1)) := fun h ↦
       hne (congrArg Fin.val h)
     rw [show y =
         algebraMap R₀ S (-(c ^ p)) * dworkParameter p K ^ 1 by
@@ -524,13 +524,13 @@ theorem samePrimeFiniteLogTerm_normalizedArtinHasseCoord_eq_homogeneous_quotient
   rw [samePrimeFiniteLogTerm_normalizedArtinHasseCoord_eq_homogeneous_cutoff_sum
     (p := p) (K := K) N n hx]
   let C : ℕ := samePrimeFiniteLogCutoff (p := p) N
-  let f : ℕ → ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1) := fun d =>
+  let f : ℕ → ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1) := fun d ↦
     samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm
       (p := p) (K := K) N n d x hx
   have hprec_le_cut : N + 1 ≤ C := by
     dsimp [C, samePrimeFiniteLogCutoff]
     exact Nat.le_mul_of_pos_left (N + 1) (Fact.out : Nat.Prime p).pos
-  have hsubset : Finset.range (N + 1) ⊆ Finset.range C := fun d hd =>
+  have hsubset : Finset.range (N + 1) ⊆ Finset.range C := fun d hd ↦
     Finset.mem_range.mpr ((Finset.mem_range.mp hd).trans_le hprec_le_cut)
   exact (Finset.sum_subset hsubset (by
     intro d _hdC hdSmall
