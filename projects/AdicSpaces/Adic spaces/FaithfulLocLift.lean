@@ -380,10 +380,34 @@ theorem mem_plus_of_forall_spa_vle_one
       (hq'eq.trans hs_supp.symm) (FractionRing (↑Radj ⧸ s.supp)) (FractionRing (Localization.Away x ⧸ q'))
     refine ⟨ValuationSpectrum.comap (algebraMap (presheafValue D') (Localization.Away x))
       (ValuationSpectrum.ofValuation t), ?_, ?_⟩
-    · -- HU-e(1): `v ∈ Spa(B, B⁺)`: `v ≤ 1` on `B⁺` (from `s ≤ 1`), `v ≤ 1` on `B°°` (`G` open:
-      -- `xⁿ·x⁻¹ ∈ G`, `xⁿ ∈ p ⟹ s(xⁿ) ≤ 1`), `v ∈ Spv(B, B°°·B)`; continuity via
-      -- `Spv.isContinuous_of_isInSpvAI_of_lt_one` (Wedhorn 7.10 reverse, huber2.txt:654-657).
-      sorry
+    · -- HU-e(1): `v ∈ Spa(B, B⁺)` = `v.IsContinuous ∧ ∀ f ∈ B⁺, v.vle f 1` (`mem_spa_iff`).
+      rw [mem_spa_iff]
+      refine ⟨?_, ?_⟩
+      · -- Continuity of `v` (Huber [Hu2] (3.1) = Wedhorn Thm 7.10 reverse, huber2.txt:654-657).
+        -- Huber: "(a),(b) follow from `s(x⁻¹)<1`, `s(g)<1`; (c) for `a ∈ A°°`: `G` open ⟹ `∃n, xⁿa ∈ G`
+        -- and `a ∈ G`, so in `G[x⁻¹]`, `aⁿ = g·x⁻¹` with `a⁻¹ ∈ p`, giving `s(a) ≤ 1` hence `v(a) ≤ 1`;
+        -- (d) `v ∈ Spv(A, A°°·A)` by construction. We conclude from (3.1) and (c),(d) that `v` is
+        -- continuous." The criterion (3.1) = Wedhorn 7.10 reverse is the project's `SpvAITopology`
+        -- 7.5/7.10 spectral-space machinery; properties (c) `v ≤ 1` on `B°°` (the `G`-open localization
+        -- argument) and (d) `v ∈ Spv(B, B°°·B)` feed it. -- LEAF (Huber's (3.1)/Wedhorn 7.10 reverse).
+        sorry
+      · -- `v ≤ 1` on `B⁺` (Huber property (b)): `f ∈ B⁺ ⊆ R := B⁺[x⁻¹]`, so `s f ≤ 1` (`hs_le`),
+        -- transported to `v` by the extension equivalence `s ≈ t ∘ (R ↪ B_x)` (`ht_equiv`).
+        intro f hf
+        rw [comap_vle]
+        letI : ValuativeRel (Localization.Away x) := (ValuationSpectrum.ofValuation t).toValuativeRel
+        haveI : t.Compatible := Valuation.Compatible.ofValuation t
+        refine (Valuation.Compatible.vle_iff_le (v := t) _ _).mpr ?_
+        rw [map_one, map_one]
+        have hg_mem : algebraMap (presheafValue D') (Localization.Away x) f ∈ Radj := by
+          rw [hRadj]
+          exact (Algebra.adjoin (↥(presheafValue D')⁺)
+            {(IsLocalization.Away.invSelf x : Localization.Away x)}).algebraMap_mem ⟨f, hf⟩
+        have hkey := (ht_equiv
+          (⟨algebraMap (presheafValue D') (Localization.Away x) f, hg_mem⟩ : ↥Radj) 1).mp
+          (by rw [map_one]; exact hs_le _)
+        rw [Valuation.comap_apply, Valuation.comap_apply, map_one, map_one] at hkey
+        exact hkey
     · -- HU-e(2): `¬ v.vle x 1`, i.e. `v(x) > 1`: from `s(x⁻¹) < 1` and `x⁻¹ · x = 1` in `B_x`.
       have hbridge : ∀ a b : presheafValue D',
           (ValuationSpectrum.comap (algebraMap (presheafValue D') (Localization.Away x))
