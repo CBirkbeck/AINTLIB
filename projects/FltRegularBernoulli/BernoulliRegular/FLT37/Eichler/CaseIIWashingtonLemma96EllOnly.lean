@@ -118,7 +118,7 @@ theorem caseII_factorGenerator_integral_of_unitInt
       one_mem_nthRootsFinset (by norm_num)
     have hne : (η : 𝓞 (CyclotomicField 37 ℚ)) ≠ (1 : 𝓞 (CyclotomicField 37 ℚ)) := by
       have h1 : (η : 𝓞 (CyclotomicField 37 ℚ)) ≠ (D.etaZero : 𝓞 (CyclotomicField 37 ℚ)) :=
-        fun h => hη (Subtype.ext h)
+        fun h ↦ hη (Subtype.ext h)
       rwa [caseII_etaZero_eq_one D hp] at h1
     have hpair := D.hζ.toInteger_isPrimitiveRoot
       |>.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
@@ -127,7 +127,9 @@ theorem caseII_factorGenerator_integral_of_unitInt
     have hassoc : Associated (1 - (η : 𝓞 (CyclotomicField 37 ℚ))) (D.hζ.toInteger - 1) := by
       have hneg : Associated (1 - (η : 𝓞 (CyclotomicField 37 ℚ)))
           ((η : 𝓞 (CyclotomicField 37 ℚ)) - 1) := by
-        refine ⟨-1, ?_⟩; rw [Units.val_neg, Units.val_one]; ring
+        refine ⟨-1, ?_⟩
+        rw [Units.val_neg, Units.val_one]
+        ring
       exact hneg.trans hpair.symm
     exact hassoc.dvd
   -- `ρ_a³⁷ = algebraMap(M·N·u_a⁻¹)`.
@@ -151,7 +153,8 @@ theorem caseII_factorGenerator_integral_of_unitInt
           (1 - algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (η : 𝓞 _)) *
             (algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) N *
               algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) M) := by
-        rw [hkey, hNeq]; ring
+        rw [hkey, hNeq]
+        ring
       exact mul_left_cancel₀ hden_ne h3
     -- Divide by `η_a = algebraMap u_a`.
     have huinv : algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ)
@@ -197,7 +200,7 @@ theorem caseII_assumptionII_unit_integral
         ((ua * ub⁻¹ : (𝓞 (CyclotomicField 37 ℚ))ˣ) : 𝓞 (CyclotomicField 37 ℚ)) := by
     have hv37' : (v : CyclotomicField 37 ℚ) ^ 37 =
         (ηa : CyclotomicField 37 ℚ) * (ηb : CyclotomicField 37 ℚ)⁻¹ := by
-      have h := congrArg (fun w : (CyclotomicField 37 ℚ)ˣ => (w : CyclotomicField 37 ℚ)) hII
+      have h := congrArg (fun w : (CyclotomicField 37 ℚ)ˣ ↦ (w : CyclotomicField 37 ℚ)) hII
       simp only [Units.val_mul, Units.val_pow_eq_pow_val] at h
       rw [h, mul_assoc, mul_inv_cancel₀ ηb.ne_zero, mul_one]
     rw [hv37', Units.val_mul, map_mul, hua,
@@ -214,7 +217,8 @@ theorem caseII_assumptionII_unit_integral
   -- `vi³⁷ = ↑(u_a·u_b⁻¹)` in `𝓞 K`, a unit; hence `vi` is a unit.
   have hvi37 : vi ^ 37 = ((ua * ub⁻¹ : (𝓞 (CyclotomicField 37 ℚ))ˣ) :
       𝓞 (CyclotomicField 37 ℚ)) := by
-    apply hinj; rw [map_pow, hvi, hv37]
+    apply hinj
+    rw [map_pow, hvi, hv37]
   have hvi_unit : IsUnit vi := by
     refine IsUnit.of_mul_eq_one (a := vi) (vi ^ 36 *
       (((ua * ub⁻¹ : (𝓞 (CyclotomicField 37 ℚ))ˣ)⁻¹ : (𝓞 (CyclotomicField 37 ℚ))ˣ) :
@@ -392,16 +396,18 @@ theorem caseII_integer_descended_equation_of_unitInt
   have hinj : Function.Injective am := FaithfulSMul.algebraMap_injective _ _
   -- `algebraMap (σR z) = complexConj (algebraMap z)`.
   have hσRcoe : ∀ z : 𝓞 (CyclotomicField 37 ℚ),
-      am (σR z) = complexConj (CyclotomicField 37 ℚ) (am z) := fun z => by
+      am (σR z) = complexConj (CyclotomicField 37 ℚ) (am z) := fun z ↦ by
     rw [ham, ← coe_ringOfIntegersComplexConj]
   -- `algebraMap (σR ra) = complexConj ρa`, similarly `σR rb`.
   have hσra : am (σR ra) = complexConj (CyclotomicField 37 ℚ) ρa := by rw [hσRcoe, hra]
   have hσrb : am (σR rb) = complexConj (CyclotomicField 37 ℚ) ρb := by rw [hσRcoe, hrb]
   -- `σR vU = vU` (real), `σR ra` involutive, etc.
   have hσRvU : σR (vU : 𝓞 (CyclotomicField 37 ℚ)) = (vU : 𝓞 _) := by
-    apply hinj; rw [hσRcoe, hvU, hv_real]
-  have hσRinv : ∀ z : 𝓞 (CyclotomicField 37 ℚ), σR (σR z) = z := fun z => by
-    apply hinj; rw [hσRcoe, hσRcoe, complexConj_apply_apply]
+    apply hinj
+    rw [hσRcoe, hvU, hv_real]
+  have hσRinv : ∀ z : 𝓞 (CyclotomicField 37 ℚ), σR (σR z) = z := fun z ↦ by
+    apply hinj
+    rw [hσRcoe, hσRcoe, complexConj_apply_apply]
   -- The §9.1 crux unit `θ'_int : (𝓞 K)ˣ` (real) at the roots `ζ`, `ζ²`.
   obtain ⟨θ'_int, hθ'_real, hθ'_id⟩ :=
     washington_section91_crux_unit (K := CyclotomicField 37 ℚ) hζ37 hζ2_37 hζ1 hζ2_1 hAB hABp
@@ -413,13 +419,15 @@ theorem caseII_integer_descended_equation_of_unitInt
   have hζ36_ne1 : ζ ^ 36 ≠ 1 := by
     intro h
     have : ζ ^ 37 = ζ ^ 36 * ζ := by rw [← pow_succ]
-    rw [hζ37, h, one_mul] at this; exact hζ1 this.symm
+    rw [hζ37, h, one_mul] at this
+    exact hζ1 this.symm
   have hζ2_36_ne1 : (ζ ^ 2) ^ 36 ≠ 1 := by
     intro h
     have : (ζ ^ 2) ^ 37 = (ζ ^ 2) ^ 36 * ζ ^ 2 := by rw [← pow_succ]
-    rw [hζ2_37, h, one_mul] at this; exact hζ2_1 this.symm
+    rw [hζ2_37, h, one_mul] at this
+    exact hζ2_1 this.symm
   have hroot_ne : ∀ w : 𝓞 (CyclotomicField 37 ℚ), w ≠ 1 → (1 : CyclotomicField 37 ℚ) - am w ≠ 0 :=
-    fun w hw h => hw (hinj (by rw [map_one]; linear_combination -h))
+    fun w hw h ↦ hw (hinj (by rw [map_one]; linear_combination -h))
   have h1ζ_ne := hroot_ne ζ hζ1
   have h1ζ36_ne := hroot_ne (ζ ^ 36) hζ36_ne1
   have h1ζ2_ne := hroot_ne (ζ ^ 2) hζ2_1
@@ -434,18 +442,19 @@ theorem caseII_integer_descended_equation_of_unitInt
   have hζs36_ne1 : ζs ^ 36 ≠ 1 := by
     intro h
     have : ζs ^ 37 = ζs ^ 36 * ζs := by rw [← pow_succ]
-    rw [hζs37, h, one_mul] at this; exact hζs1 this.symm
+    rw [hζs37, h, one_mul] at this
+    exact hζs1 this.symm
   have hΛint_ne : (1 - ζs) * (1 - ζs ^ 36) ≠ 0 :=
-    mul_ne_zero (sub_ne_zero.mpr fun h => hζs1 h.symm) (sub_ne_zero.mpr fun h => hζs36_ne1 h.symm)
+    mul_ne_zero (sub_ne_zero.mpr fun h ↦ hζs1 h.symm) (sub_ne_zero.mpr fun h ↦ hζs36_ne1 h.symm)
   have hΛam_ne : am ((1 - ζs) * (1 - ζs ^ 36)) ≠ 0 := by
-    rw [Ne, map_eq_zero_iff _ hinj]; exact hΛint_ne
+    rw [Ne, map_eq_zero_iff _ hinj]
+    exact hΛint_ne
   have hρ0_ne : ρ0 ≠ 0 := by
     intro h0
     have hxy_ne : D.x + D.y ≠ 0 := caseII_data_x_add_y_ne_zero D hp
     apply hxy_ne
     apply hinj
-    rw [map_zero, hanchor, h0]
-    rw [map_zero, zero_pow (by decide : (37 : ℕ) ≠ 0), mul_zero]
+    rw [map_zero, hanchor, h0, map_zero, zero_pow (by decide : (37 : ℕ) ≠ 0), mul_zero]
   -- The field descended equation, via `washington_section91_reassembly`.
   have hfield :
       ((v : CyclotomicField 37 ℚ) ^ 2 * (ρa * complexConj (CyclotomicField 37 ℚ) ρa)) ^ 37 +
@@ -453,10 +462,12 @@ theorem caseII_integer_descended_equation_of_unitInt
         am (δ' : 𝓞 _) * (am ((1 - ζs) * (1 - ζs ^ 36))) ^ (2 * e - 1) * ((am ρ0) ^ 2) ^ 37 := by
     have hmapη0 : ((Units.map (am : 𝓞 (CyclotomicField 37 ℚ) →* CyclotomicField 37 ℚ) u0 :
         (CyclotomicField 37 ℚ)ˣ) : CyclotomicField 37 ℚ) = am (u0 : 𝓞 _) := by
-      rw [Units.coe_map]; rfl
+      rw [Units.coe_map]
+      rfl
     have hmapθ' : ((Units.map (am : 𝓞 (CyclotomicField 37 ℚ) →* CyclotomicField 37 ℚ) θ'_int :
         (CyclotomicField 37 ℚ)ˣ) : CyclotomicField 37 ℚ) = am (θ'_int : 𝓞 _) := by
-      rw [Units.coe_map]; rfl
+      rw [Units.coe_map]
+      rfl
     have hΛacoe : ((Units.mk0 ((1 - am ζ) * (1 - am (ζ ^ 36))) (mul_ne_zero h1ζ_ne h1ζ36_ne) :
         (CyclotomicField 37 ℚ)ˣ) : CyclotomicField 37 ℚ) = (1 - am ζ) * (1 - am (ζ ^ 36)) := rfl
     have hΛbcoe : ((Units.mk0 ((1 - am (ζ ^ 2)) * (1 - am ((ζ ^ 2) ^ 36)))
@@ -602,11 +613,6 @@ def CaseIIWashingtonLemma96EllOnly37 : Prop :=
               -(ρb * complexConj (CyclotomicField 37 ℚ) ρb) →
           θ ∉ lv149)
 
--- The bumped `maxHeartbeats` is needed because `intro` must unfold the very large
--- `CaseIIWashingtonLemma96PropagationData37` / `CaseIIWashingtonLemma96EllOnly37` defs (each a long
--- chain of `∀`/`→` over the §9.1 datum), and the final `exact` reassembles the equally large
--- propagation conclusion; the unfolding/`whnf` of these big `def … : Prop`s exceeds the default.
-set_option maxHeartbeats 800000 in
 /-- **[T-R2-L5c — THE INTEGER-WITNESS PACKAGING DISCHARGE] The propagation data follows from the
 `ℓ`-only data** (proven, axiom-clean): `CaseIIWashingtonLemma96EllOnly37 →
 CaseIIWashingtonLemma96PropagationData37`.
@@ -671,7 +677,7 @@ theorem caseIIWashingtonLemma96PropagationData37_of_lemma96EllOnly
           (1 - (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger ^ 36))) ^ (2 * e - 1) ≠ 0 := by
       refine pow_ne_zero _ ?_
       rw [Ne, map_eq_zero_iff _ hinj]
-      refine mul_ne_zero (sub_ne_zero.mpr fun h => ?_) (sub_ne_zero.mpr fun h => ?_)
+      refine mul_ne_zero (sub_ne_zero.mpr fun h ↦ ?_) (sub_ne_zero.mpr fun h ↦ ?_)
       · exact (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger_isPrimitiveRoot.ne_one
           (by decide : 1 < 37) h.symm
       · have hp37 : (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger ^ 37 = 1 :=
