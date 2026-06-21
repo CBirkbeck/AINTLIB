@@ -385,7 +385,42 @@ theorem mem_plus_of_forall_spa_vle_one
       -- `Spv.isContinuous_of_isInSpvAI_of_lt_one` (Wedhorn 7.10 reverse, huber2.txt:654-657).
       sorry
     · -- HU-e(2): `¬ v.vle x 1`, i.e. `v(x) > 1`: from `s(x⁻¹) < 1` and `x⁻¹ · x = 1` in `B_x`.
-      sorry
+      have hbridge : ∀ a b : presheafValue D',
+          (ValuationSpectrum.comap (algebraMap (presheafValue D') (Localization.Away x))
+            (ValuationSpectrum.ofValuation t)).vle a b ↔
+          t (algebraMap (presheafValue D') (Localization.Away x) a) ≤
+            t (algebraMap (presheafValue D') (Localization.Away x) b) := by
+        intro a b
+        rw [comap_vle]
+        letI : ValuativeRel (Localization.Away x) := (ValuationSpectrum.ofValuation t).toValuativeRel
+        haveI : t.Compatible := Valuation.Compatible.ofValuation t
+        exact Valuation.Compatible.vle_iff_le _ _
+      intro hvle
+      rw [hbridge, map_one, map_one] at hvle
+      -- `t(x⁻¹) < 1` (from `s(x⁻¹) < 1` via the equivalence `s ≈ t ∘ (R ↪ B_x)`).
+      have ht_inv : t (IsLocalization.Away.invSelf x) < 1 := by
+        rw [← not_le]
+        intro hge
+        have h2 : s (1 : ↑Radj) ≤
+            s ⟨IsLocalization.Away.invSelf x, Algebra.subset_adjoin (Set.mem_singleton _)⟩ := by
+          refine (ht_equiv 1 _).mpr ?_
+          simp only [Valuation.comap_apply, map_one]
+          exact hge
+        rw [map_one] at h2
+        exact absurd h2 (not_le.mpr (hs_lt _ hxinv𝔪))
+      -- `t(x) · t(x⁻¹) = 1`, so `t(x) ≤ 1` would force `t(x⁻¹) ≥ 1`, contradicting `ht_inv`.
+      have hprod : t (algebraMap (presheafValue D') (Localization.Away x) x) *
+          t (IsLocalization.Away.invSelf x) = 1 := by
+        rw [← map_mul, IsLocalization.Away.mul_invSelf, map_one]
+      have hlt : t (algebraMap (presheafValue D') (Localization.Away x) x) *
+          t (IsLocalization.Away.invSelf x) < 1 := by
+        calc t (algebraMap (presheafValue D') (Localization.Away x) x) *
+              t (IsLocalization.Away.invSelf x)
+            ≤ 1 * t (IsLocalization.Away.invSelf x) := by gcongr
+          _ = t (IsLocalization.Away.invSelf x) := one_mul _
+          _ < 1 := ht_inv
+      rw [hprod] at hlt
+      exact lt_irrefl 1 hlt
   exact hw (hx w hw_spa)
 
 set_option linter.unusedSectionVars false in
