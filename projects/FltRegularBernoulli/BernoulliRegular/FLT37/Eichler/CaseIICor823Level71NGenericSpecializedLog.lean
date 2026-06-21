@@ -257,7 +257,7 @@ theorem dworkParameterPowerBasis_repr_dworkCompleteCyclotomicEquiv_toZModSq
   have haction :
       Conjugation.dworkCompleteCyclotomicEquiv (p := p) K a x =
         dworkParameterPowerLinearMap p K
-          (fun i : Fin (p - 1) =>
+          (fun i : Fin (p - 1) ↦
             rationalPadicTeichmuller p (a : ZMod p) ^ (i : ℕ) * c i) := by
     rw [← hx]
     exact Conjugation.dworkCompleteCyclotomicEquiv_powerLinearMap (p := p) (K := K) a c
@@ -268,7 +268,7 @@ theorem dworkParameterPowerBasis_repr_dworkCompleteCyclotomicEquiv_toZModSq
     have hrepr :=
       congrFun
         (dworkParameterPowerBasis_repr_powerLinearMap (p := p) (K := K)
-          (fun i : Fin (p - 1) =>
+          (fun i : Fin (p - 1) ↦
             rationalPadicTeichmuller p (a : ZMod p) ^ (i : ℕ) * c i)) i
     rw [haction]
     simpa using hrepr
