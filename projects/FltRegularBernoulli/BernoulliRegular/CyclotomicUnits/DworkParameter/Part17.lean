@@ -48,10 +48,8 @@ theorem quotient_mk_scaledDworkParameterExpApprox_eq_evalIntegralPowerSeriesMod
       (PowerSeries.trunc (N + 1) (PowerSeries.map q (integralExpSeries p K))).eval₂
         (RingHom.id (R ⧸ I ^ (N + 1)))
         (AdicCompletion.evalₐ I (N + 1) (scaledDworkParameter p K a))
-  rw [scaledDworkParameter_evalₐ]
-  rw [PowerSeries.eval₂_trunc_eq_sum_range]
-  rw [map_sum]
-  rw [PowerSeries.eval₂_trunc_eq_sum_range]
+  rw [scaledDworkParameter_evalₐ, PowerSeries.eval₂_trunc_eq_sum_range, map_sum,
+    PowerSeries.eval₂_trunc_eq_sum_range]
   refine Finset.sum_congr rfl ?_
   intro n _hn
   simp [q, map_pow]
@@ -181,14 +179,8 @@ theorem zetaPow_pow_prime_eq_one (a : ZMod p) :
 theorem zetaPow_mul_zetaPow_pred_eq_one (a : ZMod p) :
     valuedCyclotomicZetaInteger p K ^ a.val *
         (valuedCyclotomicZetaInteger p K ^ a.val) ^ (p - 1) = 1 := by
-  let z : R := valuedCyclotomicZetaInteger p K ^ a.val
-  have hz : z ^ p = 1 := zetaPow_pow_prime_eq_one (p := p) (K := K) a
-  have hp1 : 1 ≤ p := le_of_lt (Fact.out : Nat.Prime p).one_lt
-  calc
-    z * z ^ (p - 1) = z ^ (p - 1) * z := by rw [mul_comm]
-    _ = z ^ ((p - 1) + 1) := by rw [pow_succ]
-    _ = z ^ p := by rw [Nat.sub_add_cancel hp1]
-    _ = 1 := hz
+  rw [mul_pow_sub_one (Fact.out : Nat.Prime p).ne_zero,
+    zetaPow_pow_prime_eq_one (p := p) (K := K) a]
 
 theorem scaledDworkParameterExpApprox_sub_zetaPow_mem_sq
     (a : ZMod p) :
@@ -302,17 +294,11 @@ theorem scaledDworkParameterExpApprox_sub_zetaPow_mem_step
     rw [hlogProd, hlogx, zero_add] at hadd
     exact hadd.symm
   have hm : 2 ≤ N + 1 := Nat.succ_le_succ hN
-  have hwI' : w ∈ I :=
-    Ideal.pow_le_self (Nat.ne_of_gt (lt_of_lt_of_le (by decide : 0 < 2) hm)) hwPow
-  have hlogw' :
-      samePrimeFiniteLog (p := p) (K := K) (N + 1) w hwI' = 0 := by
-    rw [samePrimeFiniteLog_eq_of_eq (p := p) (K := K) (by rfl) hwI' hwI]
-    exact hlogw
   have hmk :
       Ideal.Quotient.mk (I ^ ((N + 1) + 1)) w = 0 := by
     rw [← samePrimeFiniteLog_eq_mk_of_mem_pow_of_two_le
       (p := p) (K := K) hm hwPow]
-    exact hlogw'
+    exact hlogw
   have hwNext : w ∈ I ^ (N + 2) := by
     simpa [Nat.add_assoc] using Ideal.Quotient.eq_zero_iff_mem.mp hmk
   have hfinal : z * w ∈ I ^ (N + 2) :=
@@ -366,19 +352,9 @@ theorem artinHasseExp_eval_scaledDworkParameter_eq_zeta_pow
   intro N
   cases N with
   | zero =>
-      calc
-        AdicCompletion.evalₐ (lambdaIdeal p K) 0
-            (artinHasseExp_eval_scaledDworkParameter p K a) = 0 :=
-          quotient_pow_zero_eq_zero (p := p) (K := K) (lambdaIdeal p K)
-            (AdicCompletion.evalₐ (lambdaIdeal p K) 0
-              (artinHasseExp_eval_scaledDworkParameter p K a))
-        _ = AdicCompletion.evalₐ (lambdaIdeal p K) 0
-            (AdicCompletion.of (lambdaIdeal p K) R
-              (valuedCyclotomicZetaInteger p K ^ a.val)) :=
-          (quotient_pow_zero_eq_zero (p := p) (K := K) (lambdaIdeal p K)
-            (AdicCompletion.evalₐ (lambdaIdeal p K) 0
-              (AdicCompletion.of (lambdaIdeal p K) R
-                (valuedCyclotomicZetaInteger p K ^ a.val)))).symm
+      -- The codomain `R ⧸ I ^ 0` is trivial, so both evaluations are `0`.
+      exact (quotient_pow_zero_eq_zero (p := p) (K := K) (lambdaIdeal p K) _).trans
+        (quotient_pow_zero_eq_zero (p := p) (K := K) (lambdaIdeal p K) _).symm
   | succ N =>
       rw [artinHasseExp_eval_scaledDworkParameter_evalₐ,
         ← quotient_mk_scaledDworkParameterExpApprox_eq_evalIntegralPowerSeriesMod
