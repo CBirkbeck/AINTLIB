@@ -1,6 +1,5 @@
 import BernoulliRegular.FLT37.LehmerVandiver.CaseI.ClassEqFromKummerRatioInt
 
-
 /-!
 # LV010-class-eq-1d: Class equality from σ-conjugate Kummer equation
 
@@ -35,7 +34,6 @@ namespace LehmerVandiver
 
 namespace CaseI
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Class equality from σ-conjugate Kummer equation in 𝓞 K.** Given:
 - `(α) = 𝔞^p` and `(σα) = (σ𝔞)^p` (case-I factor identities)
 - `α · δ^p = σ(α) · γ^p` for nonzero γ, δ ∈ 𝓞 K
@@ -66,21 +64,12 @@ theorem caseI_class_eq_complexConj_of_conj_kummer_eq
       ClassGroup.mk0
         (⟨𝔞, mem_nonZeroDivisors_iff_ne_zero.mpr h𝔞_nz⟩
           : nonZeroDivisors (Ideal (𝓞 K))) := by
-  -- Convert `α · δ^p = σα · γ^p` into `(𝔞·(δ))^p = (σ𝔞·(γ))^p`.
-  -- Step 1: take ideal spans of both sides of h_kummer_eq.
   have h_ideal_eq : Ideal.span ({α * δ ^ p} : Set (𝓞 K)) =
       Ideal.span ({ringOfIntegersComplexConj K α * γ ^ p} : Set (𝓞 K)) := by
     rw [h_kummer_eq]
-  -- Step 2: convert α·δ^p span to span{α}·(span{δ})^p.
-  rw [← Ideal.span_singleton_mul_span_singleton, ← Ideal.span_singleton_pow] at h_ideal_eq
-  -- Step 3: convert σα·γ^p span similarly.
-  rw [← Ideal.span_singleton_mul_span_singleton (ringOfIntegersComplexConj K α) (γ ^ p),
-      ← Ideal.span_singleton_pow] at h_ideal_eq
-  -- Step 4: substitute h_ideal and h_conj_ideal.
-  rw [h_ideal, h_conj_ideal] at h_ideal_eq
-  -- Step 5: combine 𝔞^p · (δ)^p = (𝔞·(δ))^p, similarly for σ𝔞·(γ).
-  rw [← mul_pow, ← mul_pow] at h_ideal_eq
-  -- Step 6: apply caseI_class_eq_of_ideal_pow_factored (with γ, δ matching).
+  rw [← Ideal.span_singleton_mul_span_singleton, ← Ideal.span_singleton_pow,
+    ← Ideal.span_singleton_mul_span_singleton (ringOfIntegersComplexConj K α) (γ ^ p),
+    ← Ideal.span_singleton_pow, h_ideal, h_conj_ideal, ← mul_pow, ← mul_pow] at h_ideal_eq
   apply caseI_class_eq_of_ideal_pow_factored hp_pos h𝔞_nz
   · intro h
     exact h𝔞_nz <| (Ideal.map_eq_bot_iff_of_injective
