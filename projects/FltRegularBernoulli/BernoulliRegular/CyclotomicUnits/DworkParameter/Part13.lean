@@ -101,12 +101,12 @@ theorem rationalPadicPrimeIdeal_pow_isOpen (n : ℕ) :
       have hpF' : algebraMap ℚ F (p : ℚ) ≠ 0 :=
         (map_ne_zero (algebraMap ℚ F)).mpr hpQ
       simpa [R₀] using hpF'
-    have hpR : (p : R₀) ≠ 0 := fun hp => hpF (congrArg Subtype.val hp)
+    have hpR : (p : R₀) ≠ 0 := fun hp ↦ hpF (congrArg Subtype.val hp)
     exact pow_ne_zero n hpR (Subtype.ext h)
   have hopenF : IsOpen {x : F | Valued.v.restrict x ≤ r} :=
     Valued.isOpen_closedBall (R := F) (r := r) hr
   have hpre :
-      ((fun x : R₀ => (x : F)) ⁻¹' {x : F | Valued.v.restrict x ≤ r}) =
+      ((fun x : R₀ ↦ (x : F)) ⁻¹' {x : F | Valued.v.restrict x ≤ r}) =
         (((rationalPadicPrimeIdeal p) ^ n : Ideal R₀) : Set R₀) := by
     ext x
     rw [Set.mem_preimage, Set.mem_setOf_eq]
@@ -190,9 +190,9 @@ theorem rationalPadicPrimeIdeal_eq_maximalIdeal :
     · simp [hc0]
     have hvne0 : Valued.v ((c : R₀) : F) ≠ 0 := by
       rw [Valuation.ne_zero_iff]
-      exact fun h => hc0 (Subtype.ext h)
+      exact fun h ↦ hc0 (Subtype.ext h)
     have hvle1 : Valued.v ((c : R₀) : F) ≤ 1 := c.property
-    have hvne1 : Valued.v ((c : R₀) : F) ≠ 1 := fun hv1 =>
+    have hvne1 : Valued.v ((c : R₀) : F) ≠ 1 := fun hv1 ↦
       hcmax (hunit.mpr hv1)
     have hvlt1 : Valued.v ((c : R₀) : F) < 1 := lt_of_le_of_ne hvle1 hvne1
     have hloglt : WithZero.log (Valued.v ((c : R₀) : F)) < (0 : ℤ) := by
@@ -365,10 +365,10 @@ instance instIsPrecompletePiFinite
   prec' f hf := by
     classical
     have hcoord : ∀ i : ι, ∃ L : R, ∀ n : ℕ,
-        f n i ≡ L [SMOD (J ^ n • (⊤ : Submodule R R))] := fun i =>
+        f n i ≡ L [SMOD (J ^ n • (⊤ : Submodule R R))] := fun i ↦
       (inferInstance : IsPrecomplete J R).prec
-        (f := fun n => f n i)
-        (fun {m n} hmn => by
+        (f := fun n ↦ f n i)
+        (fun {m n} hmn ↦ by
           rw [SModEq.sub_mem]
           have hmem :
               f m - f n ∈
@@ -377,9 +377,9 @@ instance instIsPrecompletePiFinite
           simpa [Pi.sub_apply, smul_eq_mul, Ideal.mul_top] using
             pi_apply_mem_of_mem_ideal_smul_top (J ^ m) hmem i)
     choose L hL using hcoord
-    refine ⟨L, fun n => ?_⟩
+    refine ⟨L, fun n ↦ ?_⟩
     rw [SModEq.sub_mem]
-    exact pi_mem_ideal_smul_top_of_forall_mem (J ^ n) (fun i => by
+    exact pi_mem_ideal_smul_top_of_forall_mem (J ^ n) (fun i ↦ by
       simpa [smul_eq_mul, Ideal.mul_top] using SModEq.sub_mem.mp (hL i n))
 
 instance instIsPrecompleteRationalPadicPowerCoefficients :
@@ -509,7 +509,7 @@ theorem dworkParameterPowerLinearMap_mem_parameterIdeal_pow_mul_pred_of_mem_prim
       (dworkParameterIdeal p K) ^ (q * (p - 1)) :=
   dworkParameterPowerLinearMap_mem_parameterIdeal_pow_mul_pred_of_forall_mem_primeIdeal_pow
     (p := p) (K := K)
-    (fun i => pi_apply_mem_of_mem_ideal_smul_top
+    (fun i ↦ pi_apply_mem_of_mem_ideal_smul_top
       ((rationalPadicPrimeIdeal p) ^ q) ha i)
 
 set_option maxHeartbeats 1200000 in
