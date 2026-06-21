@@ -312,7 +312,7 @@ theorem caseIICor823Level71SecondOrderPartValue37_of_soundPieces
     CaseIICor823Level71SecondOrderPartValue37 := by
   obtain ⟨ρ₀, hρ₀_ne, hUnscaled⟩ := hNonDeg
   exact ⟨-ρ₀, neg_ne_zero.mpr hρ₀_ne,
-    fun a => caseIICor823Level71SoundSecondOrderPartValue hLog hUnscaled a⟩
+    fun a ↦ caseIICor823Level71SoundSecondOrderPartValue hLog hUnscaled a⟩
 
 /-! ## 5. R4 and the FLT37 endpoint, from the two sound pieces -/
 
