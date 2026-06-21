@@ -193,7 +193,7 @@ theorem lambdaValuation_cyclotomicSigma_le_one_of_le_one
     ⟨e d.1, cyclotomicRingOfIntegersEquiv_notMem_lambda
       (p := p) (K := K) a hd_not⟩
   let n' : 𝓞 K := e n
-  have hd'_ne : (d' : 𝓞 K) ≠ 0 := fun hd =>
+  have hd'_ne : (d' : 𝓞 K) ≠ 0 := fun hd ↦
     d'.2 (by simp [hd])
   have hmul :
       σ x * algebraMap (𝓞 K) K (d' : 𝓞 K) =
@@ -211,7 +211,7 @@ theorem lambdaValuation_cyclotomicSigma_le_one_of_le_one
     · exact hmul
     · exact NumberField.RingOfIntegers.coe_ne_zero_iff.mpr hd'_ne
   rw [hquot]
-  exact (v.valuation_div_le_one_iff K n' hd'_ne (fun hd => False.elim (d'.2 hd))).2 d'.2
+  exact (v.valuation_div_le_one_iff K n' hd'_ne (fun hd ↦ False.elim (d'.2 hd))).2 d'.2
 
 theorem cyclotomicSigmaOfUnit_inv_apply_apply
     (a : CyclotomicUnitDelta p) (x : K) :
@@ -221,7 +221,7 @@ theorem cyclotomicSigmaOfUnit_inv_apply_apply
       cyclotomicSigmaOfUnit (p := p) K a⁻¹ *
           cyclotomicSigmaOfUnit (p := p) K a = 1 := by
     rw [← cyclotomicSigmaOfUnit_mul, inv_mul_cancel, cyclotomicSigmaOfUnit_one]
-  have h := congrArg (fun σ : Gal(K / ℚ) => σ x) hmul
+  have h := congrArg (fun σ : Gal(K / ℚ) ↦ σ x) hmul
   simpa using h
 
 theorem lambdaValuation_cyclotomicSigma_le_one_iff
@@ -331,7 +331,7 @@ noncomputable def valuedIntegerCyclotomicEquiv
   (valuedCompletionCyclotomicEquiv (p := p) K a).restrict
     ((lambdaHeightOneSpectrum p K).adicCompletionIntegers K)
     ((lambdaHeightOneSpectrum p K).adicCompletionIntegers K)
-    (fun x => by
+    (fun x ↦ by
       rw [IsDedekindDomain.HeightOneSpectrum.mem_adicCompletionIntegers,
         IsDedekindDomain.HeightOneSpectrum.mem_adicCompletionIntegers]
       exact (valuedCompletionCyclotomicEquiv_le_one_iff
@@ -545,7 +545,7 @@ theorem quotientMap_evalIntegralPowerSeriesMod_complexConj
       PowerSeries.map φ (PowerSeries.map q F) = PowerSeries.map q F := by
     ext n
     have hn : e (PowerSeries.coeff n F) = PowerSeries.coeff n F := by
-      have h := congrArg (fun G : R⟦X⟧ => PowerSeries.coeff n G) hF
+      have h := congrArg (fun G : R⟦X⟧ ↦ PowerSeries.coeff n G) hF
       simpa [PowerSeries.coeff_map] using h
     change φ (q (PowerSeries.coeff n F)) = q (PowerSeries.coeff n F)
     change (φ.comp q) (PowerSeries.coeff n F) = q (PowerSeries.coeff n F)
@@ -618,7 +618,7 @@ theorem dworkCompleteComplexConj_dworkParameter :
   apply AdicCompletion.ext_evalₐ
   intro N
   rw [evalIntegralPowerSeries_evalₐ, dworkConjugateParameter_evalₐ]
-  exact congrArg (fun y : DworkCompleteIntegerRing p K =>
+  exact congrArg (fun y : DworkCompleteIntegerRing p K ↦
     evalIntegralPowerSeriesMod p K (integralInverseSeries p K) y N)
       (dworkCompleteComplexConj_dworkCompleteLambda (p := p) (K := K))
 
