@@ -79,7 +79,7 @@ theorem caseII_prod_rootIdeal_eq {m : ℕ} (D : CaseIIData37 K m) (hp : (37 : �
         Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) ^ m) ^ 37 := by
     rw [← Finset.prod_pow]
     rw [Finset.prod_congr rfl
-      (fun η _ => root_div_zeta_sub_one_dvd_gcd_spec hp D.hζ D.equation D.hy η)]
+      (fun η _ ↦ root_div_zeta_sub_one_dvd_gcd_spec hp D.hζ D.equation D.hy η)]
     exact prod_c hp D.hζ D.equation D.hy
   -- `p`-th root uniqueness in the ideal monoid: both `dvd` directions, then `le_antisymm`.
   have hAB := (UniqueFactorizationMonoid.pow_dvd_pow_iff_dvd (n := 37) (by norm_num)).mp hpow.dvd
@@ -337,7 +337,7 @@ theorem caseII_coprime_a_eta_zero_rootIdeal {m : ℕ} (D : CaseIIData37 K m) (hp
         (zetaSubOneDvdRoot hp D.hζ D.equation D.hy) :=
     Dvd.intro_left _ (a_eta_zero_dvd_p_pow_spec hp D.hζ D.equation D.hy)
   exact IsCoprime.of_isCoprime_of_dvd_left
-    (caseII_coprime_rootIdeal D hp _ η₁ (fun h => hη₁ h.symm)) h𝔞₀_dvd_𝔞
+    (caseII_coprime_rootIdeal D hp _ η₁ (fun h ↦ hη₁ h.symm)) h𝔞₀_dvd_𝔞
 
 /-! ## 5. The strict factor drop from an anchor-supported new variable
 
@@ -381,7 +381,7 @@ theorem caseIIZFactorCount_strict_of_anchor_supported {m : ℕ} (D : RealCaseIID
   have h𝔞₀_dvd_z : 𝔞₀ ∣ Ideal.span ({D.z} : Set (𝓞 K)) :=
     caseII_a_eta_zero_dvd_z D.toCaseIIData37 hp
   have h𝔞₀_ne : 𝔞₀ ≠ 0 :=
-    fun h0 => hz_ne (by rw [h0] at h𝔞₀_dvd_z; exact zero_dvd_iff.mp h𝔞₀_dvd_z)
+    fun h0 ↦ hz_ne (by rw [h0] at h𝔞₀_dvd_z; exact zero_dvd_iff.mp h𝔞₀_dvd_z)
   have hsupp_anchor_z : (normalizedFactors 𝔞₀).toFinset ⊆
       (normalizedFactors (Ideal.span ({D.z} : Set (𝓞 K)))).toFinset := by
     intro p hp_mem
@@ -409,7 +409,7 @@ theorem caseIIZFactorCount_strict_of_anchor_supported {m : ℕ} (D : RealCaseIID
       ((caseII_coprime_a_eta_zero_rootIdeal D.toCaseIIData37 hp η₁ hη₁_ne).isUnit_of_dvd'
         hq_dvd_𝔞₀ hq_dvd_a)
   have hq_notMem_z' : q ∉ (normalizedFactors (Ideal.span ({z'} : Set (𝓞 K)))).toFinset :=
-    fun h => hq_notMem_anchor (hsupp h)
+    fun h ↦ hq_notMem_anchor (hsupp h)
   have hq_z' : q ∈ (normalizedFactors (Ideal.span ({D.z} : Set (𝓞 K)))).toFinset :=
     Multiset.mem_toFinset.mpr hq_z
   exact caseIIZFactorCount_strict_of_support_subset hsub hq_z' hq_notMem_z'
