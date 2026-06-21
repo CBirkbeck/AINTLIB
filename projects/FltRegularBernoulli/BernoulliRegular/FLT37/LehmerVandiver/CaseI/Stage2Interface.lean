@@ -183,9 +183,9 @@ theorem stage2KummerRatioK_of_regular (hp_odd : p ≠ 2)
     apply hcaseI
     rw [h0]
     exact dvd_zero _
-  have ha : a ≠ 0 := fun h => habc (by rw [h]; ring)
-  have hb : b ≠ 0 := fun h => habc (by rw [h]; ring)
-  have hc : c ≠ 0 := fun h => habc (by rw [h]; ring)
+  have ha : a ≠ 0 := fun h ↦ habc (by rw [h]; ring)
+  have hb : b ≠ 0 := fun h ↦ habc (by rw [h]; ring)
+  have hc : c ≠ 0 := fun h ↦ habc (by rw [h]; ring)
   exact absurd heq (hflt_int a b c ha hb hc)
 
 end CaseI
