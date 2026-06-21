@@ -123,33 +123,26 @@ theorem caseIISection91_isPthPower_of_identification {m : ℕ} (D : RealCaseIIDa
           caseII_data_pair_realGenerator_K D η *
             algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K) (u_KP : 𝓞 _) ∈ 𝔩) :
     BernoulliRegular.IsPthPowerModPrime 37 𝔩 δ := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   letI : Field (𝓞 K ⧸ 𝔩) := Ideal.Quotient.field 𝔩
-  set X := algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K) G.xPlus with hXdef
-  set Y := algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K) G.yPlus with hYdef
-  set U := algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K) (u_KP : 𝓞 _) with hUdef
-  set Qη := caseII_data_pair_realGenerator_K D η with hQη
-  set Q0 := caseII_data_pair_realGenerator_K D D.etaZero with hQ0def
-  -- Pass to the residue field.
-  set Q := Ideal.Quotient.mk 𝔩 with hQ
-  have hX0 : Q X ≠ 0 := fun h => hX ((Ideal.Quotient.eq_zero_iff_mem).mp h)
-  have hQ00 : Q Q0 ≠ 0 := fun h => hQ0 ((Ideal.Quotient.eq_zero_iff_mem).mp h)
-  -- Residue form of the producer identity: `Q(X)^37 · Q(Qη) · Q(U) = Q(Y)^37 · Q(Q0)`.
+  -- Pass to the residue field, abbreviating the integral data.
+  set X := algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K) G.xPlus
+  set Y := algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K) G.yPlus
+  set U := algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K) (u_KP : 𝓞 _)
+  set Qη := caseII_data_pair_realGenerator_K D η
+  set Q0 := caseII_data_pair_realGenerator_K D D.etaZero
+  set Q := Ideal.Quotient.mk 𝔩
+  have hX0 : Q X ≠ 0 := fun h => hX (Ideal.Quotient.eq_zero_iff_mem.mp h)
+  have hQ00 : Q Q0 ≠ 0 := fun h => hQ0 (Ideal.Quotient.eq_zero_iff_mem.mp h)
+  -- Residue forms of the producer identity and of the §9.1 identification.
   have hbalQ : Q X ^ 37 * Q Qη * Q U = Q Y ^ 37 * Q Q0 := by
-    have := congrArg Q hbal
-    simpa only [map_mul, map_pow] using this
-  -- Residue form of the §9.1 identification: `Q(δ) · Q(Q0) = Q(Qη) · Q(U)`.
+    simpa only [map_mul, map_pow] using congrArg Q hbal
   have hidentQ : Q δ * Q Q0 = Q Qη * Q U := by
     rw [← Ideal.Quotient.eq] at h_ident
     simpa only [map_mul] using h_ident
-  -- Hence `Q(X)^37 · Q(δ) · Q(Q0) = Q(Y)^37 · Q(Q0)`; cancel `Q(Q0) ≠ 0`.
-  have hcancel : Q X ^ 37 * Q δ = Q Y ^ 37 := by
-    have h1 : Q X ^ 37 * (Q δ * Q Q0) = Q Y ^ 37 * Q Q0 := by
-      rw [hidentQ, ← mul_assoc]; exact hbalQ
-    have h2 : (Q X ^ 37 * Q δ) * Q Q0 = Q Y ^ 37 * Q Q0 := by
-      rw [mul_assoc]; exact h1
-    exact mul_right_cancel₀ hQ00 h2
-  -- So `Q(δ) = (Q(Y) · Q(X)⁻¹)^37` — a `37`-th power in the residue field.
+  -- Substitute the identification into the producer identity and cancel `Q Q0 ≠ 0`.
+  have hcancel : Q X ^ 37 * Q δ = Q Y ^ 37 :=
+    mul_right_cancel₀ hQ00 <| by rw [mul_assoc, hidentQ, ← mul_assoc]; exact hbalQ
+  -- So `Q δ = (Q Y · (Q X)⁻¹)^37`, a `37`-th power in the residue field.
   refine ⟨Q Y * (Q X)⁻¹, ?_⟩
   rw [mul_pow, inv_pow]
   field_simp
@@ -216,32 +209,27 @@ theorem caseIISection91_residue_identification {m : ℕ} (D : RealCaseIIData37 K
     caseIISection91_descentUnit D η G 𝔩 * caseII_data_pair_realGenerator_K D D.etaZero -
         caseII_data_pair_realGenerator_K D η *
           algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K) (u_KP : 𝓞 _) ∈ 𝔩 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   letI : Field (𝓞 K ⧸ 𝔩) := Ideal.Quotient.field 𝔩
-  set X := algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K) G.xPlus with hXdef
-  set Y := algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K) G.yPlus with hYdef
-  set U := algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K) (u_KP : 𝓞 _) with hUdef
-  set Qη := caseII_data_pair_realGenerator_K D η with hQη
-  set Q0 := caseII_data_pair_realGenerator_K D D.etaZero with hQ0def
-  set Q := Ideal.Quotient.mk 𝔩 with hQ
-  have hX0 : Q X ≠ 0 := fun h => hX ((Ideal.Quotient.eq_zero_iff_mem).mp h)
-  -- The identification membership is equivalent to a residue-field equation.
+  set X := algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K) G.xPlus
+  set Y := algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K) G.yPlus
+  set U := algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K) (u_KP : 𝓞 _)
+  set Qη := caseII_data_pair_realGenerator_K D η
+  set Q0 := caseII_data_pair_realGenerator_K D D.etaZero
+  set Q := Ideal.Quotient.mk 𝔩
+  have hX0 : Q X ≠ 0 := fun h => hX (Ideal.Quotient.eq_zero_iff_mem.mp h)
+  -- The membership is equivalent to the residue-field equation
+  -- `(Q Y · (Q X)⁻¹)^37 · Q Q0 = Q Qη · Q U`.
   rw [← Ideal.Quotient.eq_zero_iff_mem, map_sub, map_mul, map_mul,
     caseIISection91_descentUnit_mk D η G 𝔩, sub_eq_zero]
-  -- Goal: `(Q Y · (Q X)⁻¹)^37 · Q Q0 = Q Qη · Q U`.
   -- Residue form of the producer identity: `Q X^37 · Q Qη · Q U = Q Y^37 · Q Q0`.
   have hbalQ : Q X ^ 37 * Q Qη * Q U = Q Y ^ 37 * Q Q0 := by
-    have := congrArg Q hbal
-    simpa only [map_mul, map_pow] using this
+    simpa only [map_mul, map_pow] using congrArg Q hbal
   have hX37 : Q X ^ 37 ≠ 0 := pow_ne_zero 37 hX0
-  -- Multiply both sides by `Q X ^ 37`; the LHS collapses via `Q X^37 · (Q X^37)⁻¹ = 1`.
+  -- Multiply both sides by `Q X^37`; the left collapses via `Q X^37 · (Q X^37)⁻¹ = 1`.
   refine mul_left_cancel₀ hX37 ?_
   rw [mul_pow, inv_pow]
-  -- LHS = `Q X^37 · (Q Y^37 · (Q X^37)⁻¹ · Q Q0) = Q Y^37 · Q Q0`.
   rw [show Q X ^ 37 * (Q Y ^ 37 * (Q X ^ 37)⁻¹ * Q Q0) = Q Y ^ 37 * Q Q0 *
-      (Q X ^ 37 * (Q X ^ 37)⁻¹) from by ring, mul_inv_cancel₀ hX37, mul_one]
-  -- RHS = `Q X^37 · (Q Qη · Q U) = Q X^37 · Q Qη · Q U = Q Y^37 · Q Q0` by `hbalQ`.
-  rw [← mul_assoc]
+      (Q X ^ 37 * (Q X ^ 37)⁻¹) from by ring, mul_inv_cancel₀ hX37, mul_one, ← mul_assoc]
   exact hbalQ.symm
 
 /-! ## 3. The local-power half of Lemma 9.8 for the §9.1 descent unit
@@ -291,7 +279,6 @@ whose descent unit is *this* producer ratio, and discharge its **local-power con
 non-circularly from the σ-stable producer.  (The residue-equations conjunct is the separate
 Corollary-8.15 / Lemma-9.9 free-part content.) -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **The producer-link Washington Lemma-9.8 local power over a real Case-II datum** (a `def … :
 Prop`, **not** an axiom, **not** Assumption II).
 
