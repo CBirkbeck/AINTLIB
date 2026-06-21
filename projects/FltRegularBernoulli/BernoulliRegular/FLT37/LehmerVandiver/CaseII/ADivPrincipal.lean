@@ -2,7 +2,6 @@ import BernoulliRegular.FLT37.LehmerVandiver.CaseII.PrincipalDischarge
 import BernoulliRegular.FLT37.LehmerVandiver.CaseII.SpecificDischarge
 import FltRegular.CaseII.InductionStep
 
-
 /-!
 # LV-CaseII parametric `a_div_principal`
 
@@ -559,7 +558,7 @@ def caseIIBridge_of_discharges
     (h_discharge : CaseIIPrincipalDischarge p (CyclotomicField p ℚ))
     (h_kummer : AdaptedKummersLemma p (CyclotomicField p ℚ)) :
     BernoulliRegular.CaseIIBridge p (CyclotomicField p ℚ) i where
-  no_caseII_solution := fun _ _ _ _ _ hprod hgcd hcase =>
+  no_caseII_solution := fun _ _ _ _ _ hprod hgcd hcase ↦
     caseII_of_discharges h_discharge h_kummer hodd hprod hgcd hcase
 
 set_option backward.isDefEq.respectTransparency false in
