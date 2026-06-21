@@ -1589,7 +1589,7 @@ theorem antiKummerSigmaTildeInvolutive_restricts_K
   -- f₁ α₀ = σ̃ (algMap α₀) = algMap α₀⁻¹ = algMap (σ α₀) = f₂ α₀.
   show f₁ α₀ = f₂ α₀
   simp only [f₁, f₂, hf₁, hf₂, AlgHom.coe_comp, Function.comp_apply,
-    IsScalarTower.coe_toAlgHom', AlgEquiv.toAlgHom_eq_coe,
+    IsScalarTower.coe_toAlgHom',
     AlgEquiv.coe_algHom]
   rw [antiKummerSigmaTildeInvolutive_apply_algebraMap_alpha
     (p := p) K α₀ hα₀ h_anti h_irr h_irr_g, h_anti]
