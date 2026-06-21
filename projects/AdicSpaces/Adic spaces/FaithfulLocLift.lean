@@ -172,9 +172,12 @@ theorem exists_valuation_extension_of_prime_over
   obtain ⟨Γ', _, w, hw⟩ := exists_comap_isEquiv_of_field_hom ι sF
   refine ⟨Γ', ‹LinearOrderedCommGroupWithZero Γ'›,
     Valuation.comap ((algebraMap (S ⧸ q') L).comp (Ideal.Quotient.mk q')) w, ?_⟩
-  -- IsEquiv chase: `s ≈ comap (R→S) (comap (S→L) w)`. The square `R→S→L = R→R⧸supp→F→L` commutes
-  -- (`Ideal.quotientMap` + `IsFractionRing.lift_algebraMap`); chaining `s ≈ comap(mk) sQuot`
-  -- (`onQuot`), `sQuot ≈ comap(algebraMap) sF` (`extendToLocalization`), and `hw : sF ≈ comap ι w`.
+  -- IsEquiv chase: `s ≈ comap (R→S) (comap (S→L) w)` — mechanically complete (worked out on the
+  -- T-L4-EXT ticket): commuting square `R→S→L = R→R⧸supp→F→L` (`Ideal.quotientMap_comp_mk` +
+  -- `IsFractionRing.lift_algebraMap`) reduces to `s = comap(mk) sQuot` (`onQuot`),
+  -- `sQuot = comap(algebraMap) sF` (`extendToLocalization_apply_map_apply`), and `hw`. ⚠ The direct
+  -- proof times out (`isDefEq`/`whnf`) from the heavy `let sF`/`let ι` unfolds; needs extraction to a
+  -- helper lemma over OPAQUE `(sQuot sF ι w)` params (no `extendToLocalization`/`lift` unfolding).
   sorry
 
 set_option linter.unusedSectionVars false in
