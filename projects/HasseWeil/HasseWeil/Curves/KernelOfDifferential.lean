@@ -77,11 +77,7 @@ theorem kaehlerD_eq_zero_iff_mem_frobenius_fieldRange (p : ℕ) [Fact p.Prime] [
   letI : DecidableEq F := Classical.decEq F
   haveI : CharP KE p := charP_of_injective_algebraMap (algebraMap F KE).injective p
   rw [kaehlerD_eq_zero_iff_mem_pth_powers W p w]
-  constructor
-  · rintro ⟨g, hg⟩
-    exact ⟨g, by rw [frobenius_def]; exact hg⟩
-  · rintro ⟨g, hg⟩
-    exact ⟨g, by rw [← hg, frobenius_def]⟩
+  exact ⟨fun ⟨g, hg⟩ ↦ ⟨g, hg⟩, fun ⟨g, hg⟩ ↦ ⟨g, hg⟩⟩
 
 /-- **An inseparable isogeny kills all differentials**: if `α` is not separable, the
 induced additive map `α.pullbackKaehler` on the one-dimensional `Ω[K(E)/F]` is
@@ -124,8 +120,7 @@ theorem pullback_fieldRange_le_frobenius_fieldRange_of_not_isSeparable (p : ℕ)
     α.pullback.toRingHom.fieldRange ≤ (frobenius KE p).fieldRange := by
   haveI : CharP KE p := charP_of_injective_algebraMap (algebraMap F KE).injective p
   rintro _ ⟨f, rfl⟩
-  obtain ⟨g, hg⟩ := pullback_mem_pth_powers_of_not_isSeparable W p α h f
-  exact ⟨g, by rw [frobenius_def]; exact hg⟩
+  exact pullback_mem_pth_powers_of_not_isSeparable W p α h f
 
 end BasicWorld
 
@@ -156,10 +151,9 @@ theorem Isogeny.isSeparable_of_algebra_isSeparable (φ : Isogeny V V)
   haveI : Algebra.IsSeparable V.FunctionField V.FunctionField := hsep
   have heq : φ.toCurveMap.separableDegree = φ.toCurveMap.degree :=
     Field.finSepDegree_eq_finrank_of_isSeparable V.FunctionField V.FunctionField
-  have hpos : 0 < φ.toCurveMap.degree := φ.degree_pos
   change φ.toCurveMap.degree / φ.toCurveMap.separableDegree = 1
   rw [heq]
-  exact Nat.div_self hpos
+  exact Nat.div_self φ.degree_pos
 
 /-- **G1 corollary (EC world)**: the pullback image of an inseparable EC-isogeny consists
 of `p`-th powers — `Im(φ*) ⊆ K(E)^p` (Silverman II.2.12's existence input for the
