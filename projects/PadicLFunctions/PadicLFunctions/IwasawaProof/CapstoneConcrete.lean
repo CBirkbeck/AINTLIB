@@ -37,7 +37,7 @@ variable {XPlus YPlus MmodL UPlus : Type*}
 (`Δ = Delta p hp2 = μ_{p−1}/⟨-1⟩`).  Inputs reduced to the Galois/CFT/Vandiver data and `h12`; the
 completeness is discharged internally by `isotypicIdempotent_sum_eq_one`. -/
 theorem iwasawa_main_conjecture_full_concrete (hp2 : p ≠ 2)
-    [Invertible (Fintype.card (Delta p hp2) : ℤ_[p])] [Fintype (Delta p hp2 →* ℤ_[p]ˣ)]
+    [Invertible (Fintype.card (Delta p hp2) : ℤ_[p])]
     {D : IwasawaGaloisData p XPlus YPlus MmodL} (cd : CFTUnitsData (UPlus := UPlus) p D)
     (hY : Subsingleton YPlus) (hEC : cd.EPlus = cd.CPlus)
     {g : LambdaGPlus p}

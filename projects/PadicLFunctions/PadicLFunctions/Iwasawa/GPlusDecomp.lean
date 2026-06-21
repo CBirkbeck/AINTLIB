@@ -8,6 +8,7 @@ import PadicLFunctions.Iwasawa.PlusPart
 import PadicLFunctions.Interpolation.Branches
 import Mathlib.Topology.Algebra.ContinuousMonoidHom
 import Mathlib.RingTheory.RootsOfUnity.EnoughRootsOfUnity
+import Mathlib.GroupTheory.FiniteAbelian.Duality
 import Mathlib.Topology.Algebra.Module.Compact
 import Mathlib.Topology.ContinuousMap.Units
 
@@ -418,6 +419,12 @@ instance instHasEnoughRootsOfUnityExponentDelta (hp2 : p ≠ 2) :
     HasEnoughRootsOfUnity ℤ_[p] (Monoid.exponent (Delta p hp2)) := by
   haveI : NeZero (p - 1) := ⟨Nat.sub_ne_zero_of_lt hp.out.one_lt⟩
   exact HasEnoughRootsOfUnity.of_dvd ℤ_[p] (exponent_Delta_dvd p hp2)
+
+/-- The character group `Δ →* ℤ_[p]ˣ` is finite (`≃* Δ` by the duality, `Δ` finite). -/
+noncomputable instance instFintypeCharHomDelta (hp2 : p ≠ 2) :
+    Fintype (Delta p hp2 →* ℤ_[p]ˣ) :=
+  Fintype.ofEquiv (Delta p hp2)
+    (CommGroup.monoidHom_mulEquiv_of_hasEnoughRootsOfUnity (Delta p hp2) ℤ_[p]).some.symm.toEquiv
 
 /-- Under `unitsSplitEquiv`, `-1 ↦ (negOneT, 1)` — it lives purely in the `μ_{p−1}` factor. -/
 theorem unitsSplitEquiv_neg_one (hp2 : p ≠ 2) :

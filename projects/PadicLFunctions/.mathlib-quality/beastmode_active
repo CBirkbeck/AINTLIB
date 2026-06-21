@@ -1,1 +1,1 @@
-FOCUS: completeness discharged in capstone_concrete (hcomplete removed). Remaining bundled: CFT + §12 only (+ 2 dischargeable instance hyps). Major milestone.
+FOCUS: capstone needs only [Invertible (card Δ)] + CFT + §12. Try discharging Invertible (card Δ | p-1 via range cyclic ⟹ p∤card Δ ⟹ unit).
