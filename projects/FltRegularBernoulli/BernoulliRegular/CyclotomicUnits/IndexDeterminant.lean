@@ -41,7 +41,7 @@ theorem det_submatrix_equiv_equiv_sq
     let σ : Equiv.Perm ι := e₂.symm.trans e₁.symm.symm
     have hunit : (Equiv.Perm.sign σ) ^ 2 = 1 :=
       Int.units_pow_two _
-    have hcast := congrArg (fun u : ℤˣ => ((u : ℂ))) hunit
+    have hcast := congrArg (fun u : ℤˣ ↦ ((u : ℂ))) hunit
     push_cast at hcast
     simpa [σ] using hcast
   rw [hsign, one_mul]
@@ -59,7 +59,7 @@ noncomputable def kplusPlaceStarEquivNonidentityShifted
   have h_w₀ : e NumberField.Units.dirichletUnitTheorem.w₀ = 1 :=
     FLT37.Sinnott.KplusInfinitePlaceEquivCyclotomicEvenDelta_shifted_apply_w₀
       (p := p) K hp_two
-  exact e.subtypeEquiv (fun v => by
+  exact e.subtypeEquiv (fun v ↦ by
     constructor
     · intro hv h_eq
       apply hv
@@ -86,14 +86,14 @@ finite cyclotomic-unit family indices with the non-identity even quotient. -/
 theorem detASubB_sq_eq_deletedFourier_sq
     (hp_odd : p ≠ 2) (hp_three : 3 ≤ p) (hp_two : 2 < p) (hp_ge_five : 5 ≤ p) :
     haveI : DecidableEq (InfinitePlace K⁺) := Classical.decEq _
-    haveI : DecidablePred (fun w : InfinitePlace K⁺ =>
-        w ≠ NumberField.Units.dirichletUnitTheorem.w₀) := fun _ => instDecidableNot
+    haveI : DecidablePred (fun w : InfinitePlace K⁺ ↦
+        w ≠ NumberField.Units.dirichletUnitTheorem.w₀) := fun _ ↦ instDecidableNot
     haveI : Fintype {w : InfinitePlace K⁺ //
         w ≠ NumberField.Units.dirichletUnitTheorem.w₀} :=
-      Subtype.fintype (fun w : InfinitePlace K⁺ =>
+      Subtype.fintype (fun w : InfinitePlace K⁺ ↦
         w ≠ NumberField.Units.dirichletUnitTheorem.w₀)
     haveI : DecidableEq {w : InfinitePlace K⁺ //
-        w ≠ NumberField.Units.dirichletUnitTheorem.w₀} := fun a b => a.instDecidableEq b
+        w ≠ NumberField.Units.dirichletUnitTheorem.w₀} := fun a b ↦ a.instDecidableEq b
     (((((FLT37.Sinnott.sinnottMatrixA p K -
       FLT37.Sinnott.sinnottMatrixB p K).det : ℝ) : ℂ)) ^ 2 : ℂ) =
       (deletedConvolutionMulMatrixAtReindexed
@@ -103,14 +103,14 @@ theorem detASubB_sq_eq_deletedFourier_sq
         (FLT37.Sinnott.convolutionLogNormDescended p)).det ^ 2 := by
   classical
   letI : DecidableEq (InfinitePlace K⁺) := Classical.decEq _
-  letI : DecidablePred (fun w : InfinitePlace K⁺ =>
-      w ≠ NumberField.Units.dirichletUnitTheorem.w₀) := fun _ => instDecidableNot
+  letI : DecidablePred (fun w : InfinitePlace K⁺ ↦
+      w ≠ NumberField.Units.dirichletUnitTheorem.w₀) := fun _ ↦ instDecidableNot
   letI : Fintype {w : InfinitePlace K⁺ //
       w ≠ NumberField.Units.dirichletUnitTheorem.w₀} :=
-    Subtype.fintype (fun w : InfinitePlace K⁺ =>
+    Subtype.fintype (fun w : InfinitePlace K⁺ ↦
       w ≠ NumberField.Units.dirichletUnitTheorem.w₀)
   letI : DecidableEq {w : InfinitePlace K⁺ //
-      w ≠ NumberField.Units.dirichletUnitTheorem.w₀} := fun a b => a.instDecidableEq b
+      w ≠ NumberField.Units.dirichletUnitTheorem.w₀} := fun a b ↦ a.instDecidableEq b
   let rowEquiv :=
     kplusPlaceStarEquivNonidentityShifted (p := p) (K := K) hp_two
   let colEquiv :=
@@ -179,25 +179,25 @@ CU-08 deleted Fourier determinant, for the `p ≥ 5` branch. -/
 theorem detASubBSqEqProdNontrivialQeSq_of_deletedFourier
     (hp_odd : p ≠ 2) (hp_three : 3 ≤ p) (hp_two : 2 < p) (hp_ge_five : 5 ≤ p) :
     haveI : DecidableEq (InfinitePlace K⁺) := Classical.decEq _
-    haveI : DecidablePred (fun w : InfinitePlace K⁺ =>
-        w ≠ NumberField.Units.dirichletUnitTheorem.w₀) := fun _ => instDecidableNot
+    haveI : DecidablePred (fun w : InfinitePlace K⁺ ↦
+        w ≠ NumberField.Units.dirichletUnitTheorem.w₀) := fun _ ↦ instDecidableNot
     haveI : Fintype {w : InfinitePlace K⁺ //
         w ≠ NumberField.Units.dirichletUnitTheorem.w₀} :=
-      Subtype.fintype (fun w : InfinitePlace K⁺ =>
+      Subtype.fintype (fun w : InfinitePlace K⁺ ↦
         w ≠ NumberField.Units.dirichletUnitTheorem.w₀)
     haveI : DecidableEq {w : InfinitePlace K⁺ //
-        w ≠ NumberField.Units.dirichletUnitTheorem.w₀} := fun a b => a.instDecidableEq b
+        w ≠ NumberField.Units.dirichletUnitTheorem.w₀} := fun a b ↦ a.instDecidableEq b
     FLT37.Sinnott.DetASubBSqEqProdNontrivialQeSq (p := p) K := by
   classical
   letI : DecidableEq (InfinitePlace K⁺) := Classical.decEq _
-  letI : DecidablePred (fun w : InfinitePlace K⁺ =>
-      w ≠ NumberField.Units.dirichletUnitTheorem.w₀) := fun _ => instDecidableNot
+  letI : DecidablePred (fun w : InfinitePlace K⁺ ↦
+      w ≠ NumberField.Units.dirichletUnitTheorem.w₀) := fun _ ↦ instDecidableNot
   letI : Fintype {w : InfinitePlace K⁺ //
       w ≠ NumberField.Units.dirichletUnitTheorem.w₀} :=
-    Subtype.fintype (fun w : InfinitePlace K⁺ =>
+    Subtype.fintype (fun w : InfinitePlace K⁺ ↦
       w ≠ NumberField.Units.dirichletUnitTheorem.w₀)
   letI : DecidableEq {w : InfinitePlace K⁺ //
-      w ≠ NumberField.Units.dirichletUnitTheorem.w₀} := fun a b => a.instDecidableEq b
+      w ≠ NumberField.Units.dirichletUnitTheorem.w₀} := fun a b ↦ a.instDecidableEq b
   unfold FLT37.Sinnott.DetASubBSqEqProdNontrivialQeSq
   rw [detASubB_sq_eq_deletedFourier_sq
     (p := p) (K := K) hp_odd hp_three hp_two hp_ge_five]
