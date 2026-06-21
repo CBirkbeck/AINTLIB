@@ -700,21 +700,63 @@ theorem count_relNorm_eq_sum_fiber :
   · intro Q' hQ'
     rfl
 
+/-- **Infinity coefficient pinned by degree**: two projective divisors on `C` with
+equal degree whose coefficients agree at every affine place agree at infinity as
+well.  (The difference is supported only at infinity, so its degree *is* its
+infinity coefficient.)  This pins the place at infinity in `II.3.6` once the affine
+coefficients are matched and both divisors have degree `0`. -/
+private theorem projDivisor_infinity_coeff_eq_of_affine_eq {C : SmoothPlaneCurve F}
+    (D₁ D₂ : ProjectiveDivisor C) (hdeg : D₁.degree = D₂.degree)
+    (haff : ∀ Q : C.SmoothPoint,
+      D₁ (ProjectiveSmoothPoint.affine Q) = D₂ (ProjectiveSmoothPoint.affine Q)) :
+    D₁ ProjectiveSmoothPoint.infinity = D₂ ProjectiveSmoothPoint.infinity := by
+  classical
+  set E : ProjectiveDivisor C := D₁ - D₂ with hE_def
+  have hE_aff : ∀ Q : C.SmoothPoint, E (ProjectiveSmoothPoint.affine Q) = 0 := by
+    intro Q
+    rw [hE_def, Finsupp.sub_apply, haff Q, sub_self]
+  have hE_supp : E.support ⊆ {ProjectiveSmoothPoint.infinity} := by
+    intro x hx
+    rw [Finsupp.mem_support_iff] at hx
+    cases x with
+    | affine Q => exact absurd (hE_aff Q) hx
+    | infinity => exact Finset.mem_singleton_self _
+  have hE_single : E = Finsupp.single ProjectiveSmoothPoint.infinity
+      (E ProjectiveSmoothPoint.infinity) :=
+    (Finsupp.support_subset_singleton.mp hE_supp)
+  have hE_deg : E.degree = 0 := by
+    rw [hE_def, ProjectiveDivisor.degree_sub, hdeg, sub_self]
+  have hEinf : E ProjectiveSmoothPoint.infinity = 0 := by
+    have : E.degree = E ProjectiveSmoothPoint.infinity := by
+      conv_lhs => rw [hE_single]
+      unfold ProjectiveDivisor.degree
+      rw [Finsupp.sum_single_index rfl]
+    rw [this] at hE_deg
+    exact hE_deg
+  have : D₁ ProjectiveSmoothPoint.infinity - D₂ ProjectiveSmoothPoint.infinity = 0 := by
+    rw [← Finsupp.sub_apply]; exact hEinf
+  linarith [this]
+
 set_option synthInstance.maxHeartbeats 100000 in
 -- Synthesising the cross-algebra `Algebra C₂.CR C₁.FF` for the scalar towers (needed
--- by `Algebra.algebraMap_intNorm`) plus the `tower1` derivation are heartbeat-heavy,
--- hence the scoped bumps.
-set_option maxHeartbeats 500000 in
-/-- **The `algebraMap` case of the norm–conorm identity — Silverman II.3.6**: for a
-nonzero `w ∈ F[C₁]`, `div(N_φ (algebraMap w)) = φ_∗(div(algebraMap w))`.  Affine
-coefficients are matched via the count identity `count_relNorm_eq_sum_fiber` and the
-fibre bijection `{primes over m_Q} ≃ {P : φP = Q}`; the infinity coefficient is forced
-by both projective divisors having degree `0`. -/
-theorem projectiveDivisorOf_pushforward_algebraMap_eq
-    (w : C₁.CoordinateRing) (hw : w ≠ 0) :
-    C₂.projectiveDivisorOf (φ.pushforward (algebraMap C₁.CoordinateRing C₁.FunctionField w)) =
-      φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf
-        (algebraMap C₁.CoordinateRing C₁.FunctionField w)) := by
+-- by `Algebra.algebraMap_intNorm`) is heartbeat-heavy, hence the scoped bumps.
+set_option maxHeartbeats 400000 in
+include φ cd in
+/-- **Conorm of an `algebraMap` is the `algebraMap` of the integral norm**: for
+`w ∈ F[C₁]`, the pushforward `φ_∗(algebraMap w)` equals `algebraMap (N_{F[C₂]} w)`,
+the image in `K(C₂)` of the integral norm of `w` for the finite ring extension
+`F[C₂] → F[C₁]` induced by `cd`.  This is the algebraic reformulation underlying
+the `algebraMap` case of `II.3.6`. -/
+private theorem pushforward_algebraMap_eq_algebraMap_intNorm (w : C₁.CoordinateRing) :
+    letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+    haveI : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      cd.module_finite
+    haveI : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      isTorsionFree_coordHom φ cd
+    φ.pushforward (algebraMap C₁.CoordinateRing C₁.FunctionField w) =
+      algebraMap C₂.CoordinateRing C₂.FunctionField
+        (Algebra.intNorm C₂.CoordinateRing C₁.CoordinateRing w) := by
   classical
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
   letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
@@ -740,200 +782,232 @@ theorem projectiveDivisorOf_pushforward_algebraMap_eq
     rfl
   haveI hfd : FiniteDimensional C₂.FunctionField C₁.FunctionField :=
     finiteDimensional_functionField φ cd
-  have hpush_alg : ∀ w : C₁.CoordinateRing,
-      φ.pushforward (algebraMap C₁.CoordinateRing C₁.FunctionField w) =
-        algebraMap C₂.CoordinateRing C₂.FunctionField
-          (Algebra.intNorm C₂.CoordinateRing C₁.CoordinateRing w) := by
-    intro w
-    rw [Algebra.algebraMap_intNorm (A := C₂.CoordinateRing) (B := C₁.CoordinateRing)
-      (K := C₂.FunctionField) (L := C₁.FunctionField) w]
-    rfl
-  have hnorm_ne : ∀ w : C₁.CoordinateRing, w ≠ 0 →
-      Algebra.intNorm C₂.CoordinateRing C₁.CoordinateRing w ≠ 0 := by
-    intro w hw
-    have hw_FF : algebraMap C₁.CoordinateRing C₁.FunctionField w ≠ 0 := by
-      intro h
-      exact hw ((IsFractionRing.injective C₁.CoordinateRing C₁.FunctionField)
-        (h.trans (map_zero _).symm))
-    have hpush_ne : φ.pushforward (algebraMap C₁.CoordinateRing C₁.FunctionField w) ≠ 0 :=
-      (IsUnit.map φ.pushforward (isUnit_iff_ne_zero.mpr hw_FF)).ne_zero
-    rw [hpush_alg w] at hpush_ne
-    intro hN
-    rw [hN, map_zero] at hpush_ne
-    exact hpush_ne rfl
-  have hcount : ∀ (w : C₁.CoordinateRing), w ≠ 0 → ∀ (Q : C₂.SmoothPoint),
-      (Associates.mk (C₂.maximalIdealAt Q)).count
-        (Associates.mk (Ideal.span
-          {Algebra.intNorm C₂.CoordinateRing C₁.CoordinateRing w})).factors =
+  rw [Algebra.algebraMap_intNorm (A := C₂.CoordinateRing) (B := C₁.CoordinateRing)
+    (K := C₂.FunctionField) (L := C₁.FunctionField) w]
+  rfl
+
+include φ cd in
+/-- **The integral norm of a nonzero element is nonzero**: for `w ∈ F[C₁]` with
+`w ≠ 0`, `N_{F[C₂]} w ≠ 0`.  Follows from
+`pushforward_algebraMap_eq_algebraMap_intNorm` since `φ_∗` and `algebraMap` both
+preserve nonzeroness. -/
+private theorem intNorm_ne_zero_of_ne_zero (w : C₁.CoordinateRing) (hw : w ≠ 0) :
+    letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+    haveI : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      cd.module_finite
+    haveI : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      isTorsionFree_coordHom φ cd
+    Algebra.intNorm C₂.CoordinateRing C₁.CoordinateRing w ≠ 0 := by
+  classical
+  letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+  letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+  haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    cd.module_finite
+  haveI htf : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    isTorsionFree_coordHom φ cd
+  have hw_FF : algebraMap C₁.CoordinateRing C₁.FunctionField w ≠ 0 := by
+    intro h
+    exact hw ((IsFractionRing.injective C₁.CoordinateRing C₁.FunctionField)
+      (h.trans (map_zero _).symm))
+  have hpush_ne : φ.pushforward (algebraMap C₁.CoordinateRing C₁.FunctionField w) ≠ 0 :=
+    (IsUnit.map φ.pushforward (isUnit_iff_ne_zero.mpr hw_FF)).ne_zero
+  rw [pushforward_algebraMap_eq_algebraMap_intNorm φ cd w] at hpush_ne
+  intro hN
+  rw [hN, map_zero] at hpush_ne
+  exact hpush_ne rfl
+
+set_option synthInstance.maxHeartbeats 100000 in
+-- The fibre bijection `{primes over m_Q} ≃ {P : φP = Q}` and the supporting
+-- `LiesOver`/`maximalIdealAt` defeq are heartbeat-heavy, hence the scoped bumps.
+set_option maxHeartbeats 400000 in
+include φ cd in
+/-- **The pushforward coefficient at an affine place is the fibre sum** (the heart of
+the affine matching in `II.3.6`): the `affine Q` coefficient of
+`φ_∗(div(algebraMap w))` equals `Σ_{Q' over m_Q} count_{Q'}(span{w})`, the sum over
+the primes `Q'` of `F[C₁]` lying over the maximal ideal `m_Q`.  Proof via the fibre
+bijection `{P : φP = Q} ≃ {primes over m_Q}` (`exists_smoothPoint_of_isMaximal` +
+`maximalIdealAt_liesOver_toPointMap`), realised as a `Finset.sum_subset` /
+`Finset.sum_image` reindexing of the `mapDomain` defining `pushforwardDivisorVal`. -/
+private theorem pushforwardDivisorVal_projectiveDivisorOf_affine_eq_sum_fiber
+    (w : C₁.CoordinateRing) (hw : w ≠ 0) (Q : C₂.SmoothPoint) :
+    letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+    haveI : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      cd.module_finite
+    haveI : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      isTorsionFree_coordHom φ cd
+    φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf
+        (algebraMap C₁.CoordinateRing C₁.FunctionField w))
+        (ProjectiveSmoothPoint.affine Q) =
       ∑ Q' ∈ IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q) C₁.CoordinateRing,
-        (Associates.mk Q').count (Associates.mk (Ideal.span ({w} : Set _))).factors :=
-    count_relNorm_eq_sum_fiber φ cd
+        ((Associates.mk Q').count (Associates.mk (Ideal.span ({w} : Set _))).factors : ℤ) := by
+  classical
+  letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+  letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+  haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    cd.module_finite
+  haveI htf : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    isTorsionFree_coordHom φ cd
+  set D := C₁.projectiveDivisorOf (algebraMap C₁.CoordinateRing C₁.FunctionField w) with hD_def
+  set p : Ideal C₂.CoordinateRing := C₂.maximalIdealAt Q with hp_def
+  haveI hpMax : p.IsMaximal := C₂.maximalIdealAt_isMaximal Q
+  have hp_ne : p ≠ ⊥ := C₂.maximalIdealAt_ne_bot Q
+  have hDaff : ∀ P' : C₁.SmoothPoint,
+      D (ProjectiveSmoothPoint.affine P') =
+        ((Associates.mk (C₁.maximalIdealAt P')).count
+          (Associates.mk (Ideal.span ({w} : Set _))).factors : ℤ) := by
+    intro P'
+    rw [hD_def, C₁.projectiveDivisorOf_apply_affine,
+      C₁.ord_P_algebraMap_eq_count P' hw, WithTop.untopD_coe]
+  have hRHS_supp : φ.pushforwardDivisorVal cd D (ProjectiveSmoothPoint.affine Q) =
+      ∑ x ∈ D.support.filter
+        (fun x ↦ placeImage φ cd x = ProjectiveSmoothPoint.affine Q), D x := by
+    rw [pushforwardDivisorVal_apply, Finsupp.mapDomain,
+      Finsupp.sum_apply, Finsupp.sum, Finset.sum_filter]
+    apply Finset.sum_congr rfl
+    intro x hx
+    rw [Finsupp.single_apply]
+  -- the fibre bijection
+  have hpoint : ∀ Q' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing,
+      ∃ P' : C₁.SmoothPoint, C₁.maximalIdealAt P' = Q' ∧ toPointMap cd P' = Q := by
+    intro Q' hQ'
+    rw [IsDedekindDomain.mem_primesOverFinset_iff (B := C₁.CoordinateRing) hp_ne] at hQ'
+    obtain ⟨hQ'prime, hQ'lies⟩ := hQ'
+    haveI : Q'.IsPrime := hQ'prime
+    haveI : Q'.LiesOver p := hQ'lies
+    haveI hQ'max : Q'.IsMaximal := Ideal.IsPrime.isMaximal hQ'prime (by
+      intro h; apply hp_ne
+      have : p = Q'.under C₂.CoordinateRing := hQ'lies.over
+      rw [this, h, Ideal.under_bot])
+    obtain ⟨P', hP'⟩ := C₁.exists_smoothPoint_of_isMaximal hQ'max
+    refine ⟨P', hP', ?_⟩
+    haveI hlies' : (C₁.maximalIdealAt P').LiesOver
+        (C₂.maximalIdealAt (toPointMap cd P')) :=
+      maximalIdealAt_liesOver_toPointMap φ cd P'
+    have h1 : C₂.maximalIdealAt (toPointMap cd P') =
+        (C₁.maximalIdealAt P').under C₂.CoordinateRing := hlies'.over
+    have h2 : p = Q'.under C₂.CoordinateRing := hQ'lies.over
+    rw [hP'] at h1
+    exact C₂.maximalIdealAt_injective (h1.trans h2.symm)
+  let pt : (Q' : Ideal C₁.CoordinateRing) → Q' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing →
+      C₁.SmoothPoint := fun Q' hQ' ↦ (hpoint Q' hQ').choose
+  have hpt_ideal : ∀ Q' (hQ' : Q' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing),
+      C₁.maximalIdealAt (pt Q' hQ') = Q' := fun Q' hQ' ↦ (hpoint Q' hQ').choose_spec.1
+  have hpt_Q : ∀ Q' (hQ' : Q' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing),
+      toPointMap cd (pt Q' hQ') = Q := fun Q' hQ' ↦ (hpoint Q' hQ').choose_spec.2
+  let fibreFinset : Finset (ProjectiveSmoothPoint C₁) :=
+    (IsDedekindDomain.primesOverFinset p C₁.CoordinateRing).attach.image
+      (fun Q' ↦ ProjectiveSmoothPoint.affine (pt Q'.1 Q'.2))
+  have hstep1 :
+      (∑ x ∈ D.support.filter
+        (fun x ↦ placeImage φ cd x = ProjectiveSmoothPoint.affine Q), D x) =
+      ∑ x ∈ fibreFinset, D x := by
+    apply Finset.sum_subset
+    · intro x hx
+      rw [Finset.mem_filter] at hx
+      obtain ⟨hx_supp, hx_place⟩ := hx
+      cases x with
+      | infinity => simp [placeImage] at hx_place
+      | affine P' =>
+        simp only [placeImage, ProjectiveSmoothPoint.affine.injEq] at hx_place
+        subst hx_place
+        haveI hlies' : (C₁.maximalIdealAt P').LiesOver
+            (C₂.maximalIdealAt (toPointMap cd P')) :=
+          maximalIdealAt_liesOver_toPointMap φ cd P'
+        have hmemP : C₁.maximalIdealAt P' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing := by
+          rw [IsDedekindDomain.mem_primesOverFinset_iff (B := C₁.CoordinateRing) hp_ne]
+          exact ⟨(C₁.maximalIdealAt_isMaximal P').isPrime, hlies'⟩
+        simp only [fibreFinset, Finset.mem_image, Finset.mem_attach, true_and,
+          Subtype.exists]
+        refine ⟨C₁.maximalIdealAt P', hmemP, ?_⟩
+        congr 1
+        apply C₁.maximalIdealAt_injective
+        rw [hpt_ideal _ hmemP]
+    · intro x hx_fib hx_notfilt
+      simp only [fibreFinset, Finset.mem_image, Finset.mem_attach, true_and,
+        Subtype.exists] at hx_fib
+      obtain ⟨Q', hQ'mem, hxeq⟩ := hx_fib
+      have hplace : placeImage φ cd x = ProjectiveSmoothPoint.affine Q := by
+        rw [← hxeq]; simp only [placeImage]; rw [hpt_Q Q' hQ'mem]
+      rw [Finset.mem_filter, not_and] at hx_notfilt
+      by_contra hDx
+      exact hx_notfilt (Finsupp.mem_support_iff.mpr hDx) hplace
+  have hstep2 : (∑ x ∈ fibreFinset, D x) =
+      ∑ Q' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing,
+        ((Associates.mk Q').count (Associates.mk (Ideal.span ({w} : Set _))).factors : ℤ) := by
+    rw [show fibreFinset = (IsDedekindDomain.primesOverFinset p C₁.CoordinateRing).attach.image
+        (fun Q' ↦ ProjectiveSmoothPoint.affine (pt Q'.1 Q'.2)) from rfl]
+    rw [Finset.sum_image (by
+      intro a _ b _ hab
+      simp only [ProjectiveSmoothPoint.affine.injEq] at hab
+      apply Subtype.ext
+      have hh : C₁.maximalIdealAt (pt a.1 a.2) = C₁.maximalIdealAt (pt b.1 b.2) := by
+        rw [hab]
+      rw [hpt_ideal a.1 a.2, hpt_ideal b.1 b.2] at hh
+      exact hh)]
+    rw [← Finset.sum_attach (IsDedekindDomain.primesOverFinset p C₁.CoordinateRing)
+      (fun Q' ↦ ((Associates.mk Q').count
+        (Associates.mk (Ideal.span ({w} : Set _))).factors : ℤ))]
+    apply Finset.sum_congr rfl
+    intro Q' _
+    rw [hDaff (pt Q'.1 Q'.2), hpt_ideal Q'.1 Q'.2]
+  rw [hRHS_supp, hstep1, hstep2]
+
+set_option synthInstance.maxHeartbeats 100000 in
+-- Synthesising the cross-algebra `Algebra C₂.CR C₁.FF` for the scalar towers (needed
+-- by `Algebra.algebraMap_intNorm`) plus the `tower1` derivation are heartbeat-heavy,
+-- hence the scoped bumps.
+set_option maxHeartbeats 500000 in
+/-- **The `algebraMap` case of the norm–conorm identity — Silverman II.3.6**: for a
+nonzero `w ∈ F[C₁]`, `div(N_φ (algebraMap w)) = φ_∗(div(algebraMap w))`.  Affine
+coefficients are matched via the count identity `count_relNorm_eq_sum_fiber` and the
+fibre bijection `{primes over m_Q} ≃ {P : φP = Q}`; the infinity coefficient is forced
+by both projective divisors having degree `0`. -/
+theorem projectiveDivisorOf_pushforward_algebraMap_eq
+    (w : C₁.CoordinateRing) (hw : w ≠ 0) :
+    C₂.projectiveDivisorOf (φ.pushforward (algebraMap C₁.CoordinateRing C₁.FunctionField w)) =
+      φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf
+        (algebraMap C₁.CoordinateRing C₁.FunctionField w)) := by
+  classical
+  -- Re-establish the `cd`-induced coordinate-ring algebra `F[C₂] → F[C₁]` (and its
+  -- finiteness/torsion-freeness) so the `Algebra.intNorm` statements typecheck.
+  letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+  letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+  haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    cd.module_finite
+  haveI htf : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    isTorsionFree_coordHom φ cd
   set LHS := C₂.projectiveDivisorOf
     (φ.pushforward (algebraMap C₁.CoordinateRing C₁.FunctionField w)) with hLHS_def
   set RHS := φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf
     (algebraMap C₁.CoordinateRing C₁.FunctionField w)) with hRHS_def
-  set D := C₁.projectiveDivisorOf (algebraMap C₁.CoordinateRing C₁.FunctionField w) with hD_def
-  have hnw : Algebra.intNorm C₂.CoordinateRing C₁.CoordinateRing w ≠ 0 := hnorm_ne w hw
-  -- Affine coefficient agreement.
+  have hnw : Algebra.intNorm C₂.CoordinateRing C₁.CoordinateRing w ≠ 0 :=
+    intNorm_ne_zero_of_ne_zero φ cd w hw
+  -- Affine coefficients agree: both equal `count_{m_Q}(span{intNorm w})`, matched to
+  -- the fibre sum via `count_relNorm_eq_sum_fiber` and the affine fibre identity.
   have h_aff : ∀ Q : C₂.SmoothPoint,
       LHS (ProjectiveSmoothPoint.affine Q) = RHS (ProjectiveSmoothPoint.affine Q) := by
     intro Q
-    -- LHS coeff = count_{m_Q}(span{intNorm w})
     have hLHS_coeff : LHS (ProjectiveSmoothPoint.affine Q) =
         ((Associates.mk (C₂.maximalIdealAt Q)).count
           (Associates.mk (Ideal.span
             {Algebra.intNorm C₂.CoordinateRing C₁.CoordinateRing w})).factors : ℤ) := by
-      rw [hLHS_def, hpush_alg w, C₂.projectiveDivisorOf_apply_affine,
+      rw [hLHS_def, pushforward_algebraMap_eq_algebraMap_intNorm φ cd w,
+        C₂.projectiveDivisorOf_apply_affine,
         C₂.ord_P_algebraMap_eq_count Q hnw, WithTop.untopD_coe]
-    -- RHS coeff = ∑ IsDedekindDomain.primesOverFinset count, matched to LHS via hcount.
-    set p : Ideal C₂.CoordinateRing := C₂.maximalIdealAt Q with hp_def
-    haveI hpMax : p.IsMaximal := C₂.maximalIdealAt_isMaximal Q
-    have hp_ne : p ≠ ⊥ := C₂.maximalIdealAt_ne_bot Q
-    have hDaff : ∀ P' : C₁.SmoothPoint,
-        D (ProjectiveSmoothPoint.affine P') =
-          ((Associates.mk (C₁.maximalIdealAt P')).count
-            (Associates.mk (Ideal.span ({w} : Set _))).factors : ℤ) := by
-      intro P'
-      rw [hD_def, C₁.projectiveDivisorOf_apply_affine,
-        C₁.ord_P_algebraMap_eq_count P' hw, WithTop.untopD_coe]
-    have hRHS_coeff : RHS (ProjectiveSmoothPoint.affine Q) =
-        ∑ Q' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing,
-          ((Associates.mk Q').count (Associates.mk (Ideal.span ({w} : Set _))).factors : ℤ) := by
-      have hRHS_supp : RHS (ProjectiveSmoothPoint.affine Q) =
-          ∑ x ∈ D.support.filter
-            (fun x ↦ placeImage φ cd x = ProjectiveSmoothPoint.affine Q), D x := by
-        rw [hRHS_def, pushforwardDivisorVal_apply, Finsupp.mapDomain,
-          Finsupp.sum_apply, Finsupp.sum, Finset.sum_filter]
-        apply Finset.sum_congr rfl
-        intro x hx
-        rw [Finsupp.single_apply]
-      -- the fibre bijection
-      have hpoint : ∀ Q' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing,
-          ∃ P' : C₁.SmoothPoint, C₁.maximalIdealAt P' = Q' ∧ toPointMap cd P' = Q := by
-        intro Q' hQ'
-        rw [IsDedekindDomain.mem_primesOverFinset_iff (B := C₁.CoordinateRing) hp_ne] at hQ'
-        obtain ⟨hQ'prime, hQ'lies⟩ := hQ'
-        haveI : Q'.IsPrime := hQ'prime
-        haveI : Q'.LiesOver p := hQ'lies
-        haveI hQ'max : Q'.IsMaximal := Ideal.IsPrime.isMaximal hQ'prime (by
-          intro h; apply hp_ne
-          have : p = Q'.under C₂.CoordinateRing := hQ'lies.over
-          rw [this, h, Ideal.under_bot])
-        obtain ⟨P', hP'⟩ := C₁.exists_smoothPoint_of_isMaximal hQ'max
-        refine ⟨P', hP', ?_⟩
-        haveI hlies' : (C₁.maximalIdealAt P').LiesOver
-            (C₂.maximalIdealAt (toPointMap cd P')) :=
-          maximalIdealAt_liesOver_toPointMap φ cd P'
-        have h1 : C₂.maximalIdealAt (toPointMap cd P') =
-            (C₁.maximalIdealAt P').under C₂.CoordinateRing := hlies'.over
-        have h2 : p = Q'.under C₂.CoordinateRing := hQ'lies.over
-        rw [hP'] at h1
-        exact C₂.maximalIdealAt_injective (h1.trans h2.symm)
-      let pt : (Q' : Ideal C₁.CoordinateRing) → Q' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing →
-          C₁.SmoothPoint := fun Q' hQ' ↦ (hpoint Q' hQ').choose
-      have hpt_ideal : ∀ Q' (hQ' : Q' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing),
-          C₁.maximalIdealAt (pt Q' hQ') = Q' := fun Q' hQ' ↦ (hpoint Q' hQ').choose_spec.1
-      have hpt_Q : ∀ Q' (hQ' : Q' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing),
-          toPointMap cd (pt Q' hQ') = Q := fun Q' hQ' ↦ (hpoint Q' hQ').choose_spec.2
-      let fibreFinset : Finset (ProjectiveSmoothPoint C₁) :=
-        (IsDedekindDomain.primesOverFinset p C₁.CoordinateRing).attach.image
-          (fun Q' ↦ ProjectiveSmoothPoint.affine (pt Q'.1 Q'.2))
-      have hstep1 :
-          (∑ x ∈ D.support.filter
-            (fun x ↦ placeImage φ cd x = ProjectiveSmoothPoint.affine Q), D x) =
-          ∑ x ∈ fibreFinset, D x := by
-        apply Finset.sum_subset
-        · intro x hx
-          rw [Finset.mem_filter] at hx
-          obtain ⟨hx_supp, hx_place⟩ := hx
-          cases x with
-          | infinity => simp [placeImage] at hx_place
-          | affine P' =>
-            simp only [placeImage, ProjectiveSmoothPoint.affine.injEq] at hx_place
-            subst hx_place
-            haveI hlies' : (C₁.maximalIdealAt P').LiesOver
-                (C₂.maximalIdealAt (toPointMap cd P')) :=
-              maximalIdealAt_liesOver_toPointMap φ cd P'
-            have hmemP : C₁.maximalIdealAt P' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing := by
-              rw [IsDedekindDomain.mem_primesOverFinset_iff (B := C₁.CoordinateRing) hp_ne]
-              exact ⟨(C₁.maximalIdealAt_isMaximal P').isPrime, hlies'⟩
-            simp only [fibreFinset, Finset.mem_image, Finset.mem_attach, true_and,
-              Subtype.exists]
-            refine ⟨C₁.maximalIdealAt P', hmemP, ?_⟩
-            congr 1
-            apply C₁.maximalIdealAt_injective
-            rw [hpt_ideal _ hmemP]
-        · intro x hx_fib hx_notfilt
-          simp only [fibreFinset, Finset.mem_image, Finset.mem_attach, true_and,
-            Subtype.exists] at hx_fib
-          obtain ⟨Q', hQ'mem, hxeq⟩ := hx_fib
-          have hplace : placeImage φ cd x = ProjectiveSmoothPoint.affine Q := by
-            rw [← hxeq]; simp only [placeImage]; rw [hpt_Q Q' hQ'mem]
-          rw [Finset.mem_filter, not_and] at hx_notfilt
-          by_contra hDx
-          exact hx_notfilt (Finsupp.mem_support_iff.mpr hDx) hplace
-      have hstep2 : (∑ x ∈ fibreFinset, D x) =
-          ∑ Q' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing,
-            ((Associates.mk Q').count (Associates.mk (Ideal.span ({w} : Set _))).factors : ℤ) := by
-        rw [show fibreFinset = (IsDedekindDomain.primesOverFinset p C₁.CoordinateRing).attach.image
-            (fun Q' ↦ ProjectiveSmoothPoint.affine (pt Q'.1 Q'.2)) from rfl]
-        rw [Finset.sum_image (by
-          intro a _ b _ hab
-          simp only [ProjectiveSmoothPoint.affine.injEq] at hab
-          apply Subtype.ext
-          have hh : C₁.maximalIdealAt (pt a.1 a.2) = C₁.maximalIdealAt (pt b.1 b.2) := by
-            rw [hab]
-          rw [hpt_ideal a.1 a.2, hpt_ideal b.1 b.2] at hh
-          exact hh)]
-        rw [← Finset.sum_attach (IsDedekindDomain.primesOverFinset p C₁.CoordinateRing)
-          (fun Q' ↦ ((Associates.mk Q').count
-            (Associates.mk (Ideal.span ({w} : Set _))).factors : ℤ))]
-        apply Finset.sum_congr rfl
-        intro Q' _
-        rw [hDaff (pt Q'.1 Q'.2), hpt_ideal Q'.1 Q'.2]
-      rw [hRHS_supp, hstep1, hstep2]
-    rw [hLHS_coeff, hRHS_coeff]
-    exact_mod_cast hcount w hw Q
-  -- Infinity coefficient forced by degree.
+    rw [hLHS_coeff, hRHS_def,
+      pushforwardDivisorVal_projectiveDivisorOf_affine_eq_sum_fiber φ cd w hw Q]
+    exact_mod_cast count_relNorm_eq_sum_fiber φ cd w hw Q
+  -- Infinity coefficient forced by degree: both divisors have degree `0`.
   apply Finsupp.ext
   intro v
   cases v with
   | affine Q => exact h_aff Q
   | infinity =>
-    -- LHS and RHS have equal degree 0; affine parts agree ⟹ infinity coeffs agree.
-    have hLHS_deg : LHS.degree = 0 := by
-      rw [hLHS_def]; exact C₂.projectiveDivisorOf_degree_eq_zero _
-    have hRHS_deg : RHS.degree = 0 := by
-      rw [hRHS_def, degree_pushforwardDivisorVal, hD_def]
-      exact C₁.projectiveDivisorOf_degree_eq_zero _
-    -- E := LHS - RHS is supported only at infinity, with degree 0.
-    set E : ProjectiveDivisor C₂ := LHS - RHS with hE_def
-    have hE_aff : ∀ Q : C₂.SmoothPoint, E (ProjectiveSmoothPoint.affine Q) = 0 := by
-      intro Q
-      rw [hE_def, Finsupp.sub_apply, h_aff Q, sub_self]
-    have hE_supp : E.support ⊆ {ProjectiveSmoothPoint.infinity} := by
-      intro x hx
-      rw [Finsupp.mem_support_iff] at hx
-      cases x with
-      | affine Q => exact absurd (hE_aff Q) hx
-      | infinity => exact Finset.mem_singleton_self _
-    have hE_single : E = Finsupp.single ProjectiveSmoothPoint.infinity
-        (E ProjectiveSmoothPoint.infinity) :=
-      (Finsupp.support_subset_singleton.mp hE_supp)
-    have hE_deg : E.degree = 0 := by
-      rw [hE_def]; unfold ProjectiveDivisor.degree
-      rw [show (LHS - RHS).sum (fun _ n ↦ n) = LHS.degree - RHS.degree from
-        (ProjectiveDivisor.degree_sub LHS RHS), hLHS_deg, hRHS_deg, sub_zero]
-    have hEinf : E ProjectiveSmoothPoint.infinity = 0 := by
-      have : E.degree = E ProjectiveSmoothPoint.infinity := by
-        conv_lhs => rw [hE_single]
-        unfold ProjectiveDivisor.degree
-        rw [Finsupp.sum_single_index rfl]
-      rw [this] at hE_deg
-      exact hE_deg
-    have : LHS ProjectiveSmoothPoint.infinity - RHS ProjectiveSmoothPoint.infinity = 0 := by
-      rw [← Finsupp.sub_apply]; exact hEinf
-    linarith [this]
+    refine projDivisor_infinity_coeff_eq_of_affine_eq LHS RHS ?_ h_aff
+    rw [hLHS_def, hRHS_def, C₂.projectiveDivisorOf_degree_eq_zero,
+      degree_pushforwardDivisorVal, C₁.projectiveDivisorOf_degree_eq_zero]
 
 end NormConormSteps
 
