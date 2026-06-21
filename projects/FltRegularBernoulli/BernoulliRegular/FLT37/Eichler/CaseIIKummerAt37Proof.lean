@@ -80,34 +80,29 @@ lemma zeta_sub_one_ne_zero : (hζ.toInteger - 1 : 𝓞 K) ≠ 0 :=
 lemma isMaximal_span_zeta_sub_one :
     (Ideal.span {(hζ.toInteger - 1 : 𝓞 K)}).IsMaximal := by
   haveI : Fact (Nat.Prime p) := hpri
-  have hbot : (Ideal.span {(hζ.toInteger - 1 : 𝓞 K)}) ≠ ⊥ := by
-    rw [Ne, Ideal.span_singleton_eq_bot]
-    exact hζ.toInteger_isPrimitiveRoot.sub_one_ne_zero hpri.out.one_lt
+  have hbot : (Ideal.span {(hζ.toInteger - 1 : 𝓞 K)}) ≠ ⊥ :=
+    mt Ideal.span_singleton_eq_bot.mp (zeta_sub_one_ne_zero hζ)
   haveI : (Ideal.span {(hζ.toInteger - 1 : 𝓞 K)}).IsPrime :=
-    (Ideal.span_singleton_prime
-      (hζ.toInteger_isPrimitiveRoot.sub_one_ne_zero hpri.out.one_lt)).mpr hζ.zeta_sub_one_prime'
+    (Ideal.span_singleton_prime (zeta_sub_one_ne_zero hζ)).mpr hζ.zeta_sub_one_prime'
   exact Ideal.IsPrime.isMaximal inferInstance hbot
 
 omit [NumberField K] [IsCyclotomicExtension {p} ℚ K] in
 /-- `span{ζ-1} ≠ ⊥`. -/
 lemma span_zeta_sub_one_ne_bot :
-    (Ideal.span {(hζ.toInteger - 1 : 𝓞 K)}) ≠ ⊥ := by
-  rw [Ne, Ideal.span_singleton_eq_bot]
-  exact hζ.toInteger_isPrimitiveRoot.sub_one_ne_zero hpri.out.one_lt
+    (Ideal.span {(hζ.toInteger - 1 : 𝓞 K)}) ≠ ⊥ :=
+  mt Ideal.span_singleton_eq_bot.mp (zeta_sub_one_ne_zero hζ)
 
 /-- **Coprimality from non-divisibility**: if `(ζ-1) ∤ c` then `c` and `ζ-1` are coprime in `𝓞 K`.
 `span{ζ-1}` is maximal, and `c ∉ span{ζ-1}`, so `span{c} ⊔ span{ζ-1} = ⊤`. -/
 lemma isCoprime_of_not_zeta_sub_one_dvd {c : 𝓞 K} (hc : ¬ (hζ.toInteger - 1 : 𝓞 K) ∣ c) :
     IsCoprime c (hζ.toInteger - 1 : 𝓞 K) := by
   haveI : Fact (Nat.Prime p) := hpri
-  haveI := isMaximal_span_zeta_sub_one hζ
+  haveI hmax := isMaximal_span_zeta_sub_one hζ
   rw [← Ideal.isCoprime_span_singleton_iff]
   refine Ideal.coprime_of_no_prime_ge ?_
   intro P hcP hzP hP
   -- `span{ζ-1} ≤ P` with `span{ζ-1}` maximal forces `P = span{ζ-1}`; then `c ∈ P` contradicts `hc`.
-  have hPtop : P ≠ ⊤ := hP.ne_top
-  have hPeq : Ideal.span {(hζ.toInteger - 1 : 𝓞 K)} = P :=
-    ((isMaximal_span_zeta_sub_one hζ).eq_of_le hPtop hzP)
+  have hPeq : Ideal.span {(hζ.toInteger - 1 : 𝓞 K)} = P := hmax.eq_of_le hP.ne_top hzP
   have hcmem : c ∈ P := hcP (Ideal.mem_span_singleton_self c)
   rw [← hPeq, Ideal.mem_span_singleton] at hcmem
   exact hc hcmem
@@ -128,15 +123,14 @@ lemma zeta_sub_one_pow_dvd_pow_sub_one {γ : 𝓞 K}
   have hpow : γ ^ p - 1 = j ^ p + (p : 𝓞 K) * j * r := by
     rw [hγeq, hr]; ring
   rw [hpow]
-  refine dvd_add ?_ ?_
-  · -- `ϖ^p ∣ j^p` since `ϖ ∣ j`.
-    exact pow_dvd_pow_of_dvd hγ p
-  · -- `ϖ^p ∣ p·j·r`: `ϖ^{p-1} ∣ p` and `ϖ ∣ j`, so `ϖ^p = ϖ^{p-1}·ϖ ∣ p·j ∣ p·j·r`.
-    have hpdvd : ϖ ^ (p - 1) ∣ (p : 𝓞 K) := (associated_zeta_sub_one_pow_prime hζ).dvd
-    have hsplit : ϖ ^ p = ϖ ^ (p - 1) * ϖ := by
-      rw [← pow_succ, Nat.sub_add_cancel hpri.out.one_lt.le]
-    rw [hsplit, mul_assoc]
-    exact mul_dvd_mul hpdvd (Dvd.dvd.mul_right hγ r)
+  -- `ϖ^p ∣ j^p` since `ϖ ∣ j`; for the cross term, `ϖ^{p-1} ∣ p` and `ϖ ∣ j` give
+  -- `ϖ^p = ϖ^{p-1}·ϖ ∣ p·j ∣ p·j·r`.
+  refine dvd_add (pow_dvd_pow_of_dvd hγ p) ?_
+  have hpdvd : ϖ ^ (p - 1) ∣ (p : 𝓞 K) := (associated_zeta_sub_one_pow_prime hζ).dvd
+  have hsplit : ϖ ^ p = ϖ ^ (p - 1) * ϖ := by
+    rw [← pow_succ, Nat.sub_add_cancel hpri.out.one_lt.le]
+  rw [hsplit, mul_assoc]
+  exact mul_dvd_mul hpdvd (Dvd.dvd.mul_right hγ r)
 
 end Arith
 
@@ -175,10 +169,7 @@ lemma exists_integral_primary_radical (_hp : p ≠ 2) (α : K) {c N : 𝓞 K}
   obtain ⟨s, t, hst⟩ := isCoprime_of_not_zeta_sub_one_dvd hζ hc
   -- `γ := s·c`.
   set γ : 𝓞 K := s * c with hγ_def
-  have hγ_sub_one : ϖ ∣ γ - 1 := by
-    refine ⟨-t, ?_⟩
-    have : γ - 1 = - (t * ϖ) := by rw [hγ_def]; linear_combination hst
-    rw [this]; ring
+  have hγ_sub_one : ϖ ∣ γ - 1 := ⟨-t, by rw [hγ_def]; linear_combination hst⟩
   have hγ_ne : γ ≠ 0 := by
     -- If `γ = 0` then `ϖ ∣ γ - 1 = -1`, so `ϖ` is a unit — contradiction.
     intro h0
@@ -188,7 +179,11 @@ lemma exists_integral_primary_radical (_hp : p ≠ 2) (α : K) {c N : 𝓞 K}
   -- The integral radical `a := γ^p + ϖ^p·(N·s^p·c^{p-1})`.
   set M : 𝓞 K := N * s ^ p * c ^ (p - 1) with hM_def
   set a : 𝓞 K := γ ^ p + ϖ ^ p * M with ha_def
-  refine ⟨a, γ, hγ_ne, ?_, ?_, ?_⟩
+  -- `ϖ^p ∣ a - 1 = (γ^p - 1) + ϖ^p·M` (primarity), used for both the congruence and `¬ ϖ ∣ a`.
+  have ha_cong : ϖ ^ p ∣ a - 1 := by
+    rw [ha_def, show γ ^ p + ϖ ^ p * M - 1 = (γ ^ p - 1) + ϖ ^ p * M from by ring]
+    exact dvd_add (zeta_sub_one_pow_dvd_pow_sub_one hζ hγ_sub_one) (Dvd.intro M rfl)
+  refine ⟨a, γ, hγ_ne, ?_, ha_cong, ?_⟩
   · -- `algebraMap a = α·γ^p`.  Field identity from `hform`: `(α-1)·c = ϖ^p·N`.
     -- Split-map form of the primary witness.
     have hform' : (α - 1) * algebraMap (𝓞 K) K c =
@@ -214,18 +209,10 @@ lemma exists_integral_primary_radical (_hp : p ≠ 2) (α : K) {c N : 𝓞 K}
     rw [hBsplit]
     linear_combination
       (-(algebraMap (𝓞 K) K s ^ p * algebraMap (𝓞 K) K c ^ (p - 1))) * hform'
-  · -- `ϖ^p ∣ a - 1 = (γ^p - 1) + ϖ^p·M`.
-    rw [ha_def, show γ ^ p + ϖ ^ p * M - 1 = (γ ^ p - 1) + ϖ ^ p * M from by ring]
-    exact dvd_add (zeta_sub_one_pow_dvd_pow_sub_one hζ hγ_sub_one) (Dvd.intro M rfl)
-  · -- `¬ ϖ ∣ a`: `a ≡ γ^p ≡ 1 mod ϖ`, so `ϖ ∣ a ⟹ ϖ ∣ 1`.
+  · -- `¬ ϖ ∣ a`: `a ≡ 1 mod ϖ` (from `ϖ ∣ ϖ^p ∣ a - 1`), so `ϖ ∣ a ⟹ ϖ ∣ 1`.
     intro hdvd
-    refine hζ.zeta_sub_one_prime'.not_unit ?_
-    refine isUnit_of_dvd_one ?_
-    have hγp : ϖ ∣ γ ^ p - 1 :=
-      (dvd_pow_self ϖ hpri.out.ne_zero).trans (zeta_sub_one_pow_dvd_pow_sub_one hζ hγ_sub_one)
-    have ha1 : ϖ ∣ a - 1 := by
-      rw [ha_def, show γ ^ p + ϖ ^ p * M - 1 = (γ ^ p - 1) + ϖ ^ p * M from by ring]
-      exact dvd_add hγp (Dvd.dvd.mul_right (dvd_pow_self ϖ hpri.out.ne_zero) M)
+    refine hζ.zeta_sub_one_prime'.not_unit (isUnit_of_dvd_one ?_)
+    have ha1 : ϖ ∣ a - 1 := (dvd_pow_self ϖ hpri.out.ne_zero).trans ha_cong
     have : ϖ ∣ a - (a - 1) := dvd_sub hdvd ha1
     rwa [sub_sub_cancel] at this
 
@@ -256,6 +243,7 @@ open FLT37.LehmerVandiver.CaseI.AntiKummer FLT37.LehmerVandiver.CaseI
 variable {K : Type} {p : ℕ} [hpri : Fact p.Prime] [Field K] [NumberField K]
   [IsCyclotomicExtension {p} ℚ K] [NumberField.IsCMField K] {ζ : K} (hζ : IsPrimitiveRoot ζ p)
 
+omit [NumberField.IsCMField K] in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 -- The `antiKummerLift` splitting-field whnf and the `IsUnramifiedAt`/different-ideal coercions make
@@ -375,8 +363,6 @@ Instantiate the per-prime assembly at `p = 37`, `K = ℚ(ζ₃₇)`, matching th
 namespace BernoulliRegular.FLT37.Eichler
 
 open FLT37.LehmerVandiver.CaseI.AntiKummer
-
-variable [NumberField.IsCMField (CyclotomicField 37 ℚ)]
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
