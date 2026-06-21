@@ -621,13 +621,13 @@ theorem fltCaseI_phi_3_iff_a_eq_b_mod_p
     (mirimanoffPolynomial p 3).eval (-(a : ZMod p) * ((b : ZMod p))⁻¹) = 0 ↔
     (a : ZMod p) = (b : ZMod p) := by
   -- Both sides ⟺ t = -1 where t = -a/b.
-  have ha_ne : (a : ZMod p) ≠ 0 := fun h => ha (by
+  have ha_ne : (a : ZMod p) ≠ 0 := fun h ↦ ha (by
     have h_int : ((a : ℤ) : ZMod p) = 0 := h
     rwa [ZMod.intCast_zmod_eq_zero_iff_dvd] at h_int)
-  have hb_ne : (b : ZMod p) ≠ 0 := fun h => hb (by
+  have hb_ne : (b : ZMod p) ≠ 0 := fun h ↦ hb (by
     have h_int : ((b : ℤ) : ZMod p) = 0 := h
     rwa [ZMod.intCast_zmod_eq_zero_iff_dvd] at h_int)
-  have hab_ne : ((a : ZMod p) + (b : ZMod p)) ≠ 0 := fun h => h_ab (by
+  have hab_ne : ((a : ZMod p) + (b : ZMod p)) ≠ 0 := fun h ↦ h_ab (by
     have h_int : ((a + b : ℤ) : ZMod p) = 0 := by push_cast; linear_combination h
     rwa [ZMod.intCast_zmod_eq_zero_iff_dvd] at h_int)
   set t : ZMod p := -(a : ZMod p) * ((b : ZMod p))⁻¹ with ht_def
@@ -649,7 +649,7 @@ theorem fltCaseI_phi_3_iff_a_eq_b_mod_p
         1 * (b : ZMod p) := by rw [h]
     rw [mul_assoc, inv_mul_cancel₀ hb_ne, mul_one, one_mul] at h_eq
     linear_combination -h_eq
-  refine ⟨fun h_phi => ?_, fun h_eq => ?_⟩
+  refine ⟨fun h_phi ↦ ?_, fun h_eq ↦ ?_⟩
   · -- φ_3(t) = 0 ⟹ t = -1 (since t ≠ 0) ⟹ a ≡ b.
     rcases mirimanoffPolynomial_three_eval_eq_zero_imp p t ht_ne_one h_phi with h0 | h_neg_one
     · exact absurd h0 ht_ne_zero
@@ -700,13 +700,13 @@ theorem mirimanoffPolynomialVanishingOdd_of_phi_3
       (-(a : ZMod p) * ((b : ZMod p))⁻¹) = 0) :
     MirimanoffPolynomialVanishingOdd p a b := by
   -- Translate hypotheses to ZMod p facts.
-  have ha_ne : (a : ZMod p) ≠ 0 := fun h => ha (by
+  have ha_ne : (a : ZMod p) ≠ 0 := fun h ↦ ha (by
     have h_int : ((a : ℤ) : ZMod p) = 0 := h
     rwa [ZMod.intCast_zmod_eq_zero_iff_dvd] at h_int)
-  have h_b_ne : (b : ZMod p) ≠ 0 := fun h => hb (by
+  have h_b_ne : (b : ZMod p) ≠ 0 := fun h ↦ hb (by
     have h_int : ((b : ℤ) : ZMod p) = 0 := h
     rwa [ZMod.intCast_zmod_eq_zero_iff_dvd] at h_int)
-  have hab_ne : ((a : ZMod p) + (b : ZMod p)) ≠ 0 := fun h => h_ab (by
+  have hab_ne : ((a : ZMod p) + (b : ZMod p)) ≠ 0 := fun h ↦ h_ab (by
     have h_int : ((a + b : ℤ) : ZMod p) = 0 := by push_cast; linear_combination h
     rwa [ZMod.intCast_zmod_eq_zero_iff_dvd] at h_int)
   set t : ZMod p := -(a : ZMod p) * ((b : ZMod p))⁻¹ with ht_def
@@ -770,7 +770,7 @@ theorem mirimanoffPolynomialVanishingOdd_of_a_eq_b_mod_p
     MirimanoffPolynomialVanishingOdd p a b := by
   apply mirimanoffPolynomialVanishingOdd_of_phi_3 hp_odd ha hb h_ab
   -- Show φ_3(t) = 0 where t = -a/b.
-  have hb_ne : (b : ZMod p) ≠ 0 := fun h => hb (by
+  have hb_ne : (b : ZMod p) ≠ 0 := fun h ↦ hb (by
     have h_int : ((b : ℤ) : ZMod p) = 0 := h
     rwa [ZMod.intCast_zmod_eq_zero_iff_dvd] at h_int)
   -- Compute t = -a/b = -1 using a = b in ZMod p.
@@ -807,7 +807,7 @@ theorem fltCaseI_a_eq_b_iff_two_m_one_eq_one
       exact_mod_cast hm_1
     push_cast at h_zmod
     linear_combination h_zmod
-  refine ⟨fun h_eq => ?_, fun h_two_m => ?_⟩
+  refine ⟨fun h_eq ↦ ?_, fun h_two_m ↦ ?_⟩
   · -- a ≡ b ⟹ 2·m_1 ≡ 1.
     have hb_ne : (b : ZMod p) ≠ 0 := by
       intro h
