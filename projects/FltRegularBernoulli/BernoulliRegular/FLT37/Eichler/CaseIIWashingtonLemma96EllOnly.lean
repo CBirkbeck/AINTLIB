@@ -299,6 +299,248 @@ def CaseIIIntDescOutput37 {m : ℕ} (_D : RealCaseIIData37 (CyclotomicField 37 �
           (1 - (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger ^ 36)) ^ (2 * e - 1) *
         (ρ0 ^ 2) ^ 37
 
+/-- **[L5c — primitive-root powers `ζ`, `ζ²`]** The root-of-unity / distinctness facts for the two
+§9.1 roots `ζ = D.hζ.toInteger` and `ζ²`: both are `37`-th roots of unity, neither equals `1`, they
+are distinct, and `ζ·ζ² ≠ 1` (i.e. the exponents `1, 2` are `≢ ±` each other mod `37`). -/
+private theorem caseII_descended_root_pow_facts
+    {m : ℕ} (D : RealCaseIIData37 (CyclotomicField 37 ℚ) m) :
+    D.hζ.toInteger ^ 37 = 1 ∧ D.hζ.toInteger ≠ 1 ∧
+      (D.hζ.toInteger ^ 2) ^ 37 = 1 ∧ D.hζ.toInteger ^ 2 ≠ 1 ∧
+        D.hζ.toInteger ≠ D.hζ.toInteger ^ 2 ∧ D.hζ.toInteger * D.hζ.toInteger ^ 2 ≠ 1 := by
+  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  set ζ : 𝓞 (CyclotomicField 37 ℚ) := D.hζ.toInteger with hζ_def
+  have hζ37 : ζ ^ 37 = 1 := D.hζ.toInteger_isPrimitiveRoot.pow_eq_one
+  have hζ1 : ζ ≠ 1 := D.hζ.toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37)
+  have hζ2_37 : (ζ ^ 2) ^ 37 = 1 := by rw [← pow_mul, mul_comm, pow_mul, hζ37, one_pow]
+  have hζ2_1 : ζ ^ 2 ≠ 1 := by
+    intro h
+    have : (37 : ℕ) ∣ 2 := (D.hζ.toInteger_isPrimitiveRoot.pow_eq_one_iff_dvd 2).mp h
+    omega
+  have hAB : ζ ≠ ζ ^ 2 := by
+    intro h
+    have := D.hζ.toInteger_isPrimitiveRoot.pow_inj (i := 1) (j := 2) (by norm_num) (by norm_num)
+      (by rw [pow_one]; exact h)
+    omega
+  have hABp : ζ * ζ ^ 2 ≠ 1 := by
+    rw [show ζ * ζ ^ 2 = ζ ^ 3 from by ring]
+    intro h
+    have : (37 : ℕ) ∣ 3 := (D.hζ.toInteger_isPrimitiveRoot.pow_eq_one_iff_dvd 3).mp h
+    omega
+  exact ⟨hζ37, hζ1, hζ2_37, hζ2_1, hAB, hABp⟩
+
+/-- **[L5c — the descended integer building blocks]** The §9.1 factor generators `ρ_a, ρ_b` and the
+Assumption-II unit `v` are integral: from the integral factor-unit witnesses `u_a, u_b`
+(`algebraMap u_a = η_a`, `algebraMap u_b = η_b`) and the positive factor equations at `ζ, ζ²` plus
+Assumption II `η_a = v³⁷·η_b`, there are integer generators `r_a, r_b : 𝓞 K`
+(`algebraMap r_a = ρ_a`, `algebraMap r_b = ρ_b`) and an integral unit `vU : (𝓞 K)ˣ`
+(`algebraMap vU = v`).  (Combines `caseII_factorGenerator_integral_of_unitInt` ×2 and
+`caseII_assumptionII_unit_integral`, hiding the `nthRootsFinset` / `η₀ = 1` plumbing.) -/
+private theorem caseII_descended_integral_witnesses
+    {m : ℕ} (D : RealCaseIIData37 (CyclotomicField 37 ℚ) m)
+    (ηa ηb v : (CyclotomicField 37 ℚ)ˣ) (ρa ρb : CyclotomicField 37 ℚ)
+    (ua ub : (𝓞 (CyclotomicField 37 ℚ))ˣ)
+    (hua : algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (ua : 𝓞 _) =
+      (ηa : CyclotomicField 37 ℚ))
+    (hub : algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (ub : 𝓞 _) =
+      (ηb : CyclotomicField 37 ℚ))
+    (hfa : algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.x +
+        algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger) *
+          algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.y =
+      (1 - algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger)) *
+        (ηa : CyclotomicField 37 ℚ) * ρa ^ 37)
+    (hfb : algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.x +
+        algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger ^ 2) *
+          algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.y =
+      (1 - algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger ^ 2)) *
+        (ηb : CyclotomicField 37 ℚ) * ρb ^ 37)
+    (hII : (ηa : (CyclotomicField 37 ℚ)ˣ) = v ^ 37 * ηb) :
+    ∃ (ra rb : 𝓞 (CyclotomicField 37 ℚ)) (vU : (𝓞 (CyclotomicField 37 ℚ))ˣ),
+      algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) ra = ρa ∧
+        algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) rb = ρb ∧
+        algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (vU : 𝓞 _) =
+          (v : CyclotomicField 37 ℚ) := by
+  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have hp : (37 : ℕ) ≠ 2 := by decide
+  obtain ⟨_, hζ1, hζ2_37, hζ2_1, _, _⟩ := caseII_descended_root_pow_facts D
+  set ζ : 𝓞 (CyclotomicField 37 ℚ) := D.hζ.toInteger with hζ_def
+  -- `η₀ = 1` (`caseII_etaZero_eq_one`).
+  have hetaZero : (D.etaZero : 𝓞 (CyclotomicField 37 ℚ)) = 1 := by
+    rw [caseII_etaZero_eq_one D hp]
+  have hηOne_ne : (⟨ζ, D.hζ.toInteger_isPrimitiveRoot.mem_nthRootsFinset (by decide : 0 < 37)⟩ :
+      nthRootsFinset 37 (1 : 𝓞 (CyclotomicField 37 ℚ))) ≠ D.etaZero := by
+    intro h
+    exact hζ1 (by have := Subtype.ext_iff.mp h; rw [hetaZero] at this; exact this)
+  obtain ⟨ra, hra⟩ := caseII_factorGenerator_integral_of_unitInt D
+    ⟨ζ, D.hζ.toInteger_isPrimitiveRoot.mem_nthRootsFinset (by decide : 0 < 37)⟩ hηOne_ne ηa ρa ua
+    hua hfa
+  have hmem2 : ζ ^ 2 ∈ nthRootsFinset 37 (1 : 𝓞 (CyclotomicField 37 ℚ)) :=
+    (mem_nthRootsFinset (by norm_num) _).mpr hζ2_37
+  have hηTwo_ne : (⟨ζ ^ 2, hmem2⟩ : nthRootsFinset 37 (1 : 𝓞 (CyclotomicField 37 ℚ))) ≠
+      D.etaZero := by
+    intro h
+    exact hζ2_1 (by have := Subtype.ext_iff.mp h; rw [hetaZero] at this; exact this)
+  obtain ⟨rb, hrb⟩ := caseII_factorGenerator_integral_of_unitInt D ⟨ζ ^ 2, hmem2⟩ hηTwo_ne ηb ρb ub
+    hub (by
+      rw [show ((⟨ζ ^ 2, hmem2⟩ : nthRootsFinset 37 (1 : 𝓞 (CyclotomicField 37 ℚ))) :
+        𝓞 (CyclotomicField 37 ℚ)) = ζ ^ 2 from rfl]; exact hfb)
+  obtain ⟨vU, hvU⟩ := caseII_assumptionII_unit_integral ηa ηb v ua ub hua hub hII
+  exact ⟨ra, rb, vU, hra, hrb, hvU⟩
+
+open scoped Classical in
+/-- **[L5c — the field descended Fermat equation, integer unit]** The §9.1 reassembly packaged as a
+field identity with an **integer** σ-fixed descent unit `δ' = u₀²·θ'·u_b⁻² : (𝓞 K)ˣ` (`θ'` the §9.1
+crux unit, obtained internally).  From the positive factor equations at `ζ, ζ²`, the reality of the
+factor units `η_a, η_b`, the anchor equation, and Assumption II `η_a = v³⁷·η_b`:
+```
+(v²·ρ_a·σρ_a)³⁷ + (-ρ_b·σρ_b)³⁷ = algebraMap δ' · (algebraMap Λ)^{2e-1} · ((algebraMap ρ₀)²)³⁷,
+```
+with `Λ = (1−ζ)(1−ζ³⁶)`.  (Wraps the `washington_section91_reassembly` adaptation; the integer
+witness `δ'` is what lets the equation descend to `𝓞 K` in the main producer.) -/
+private theorem caseII_descended_field_equation
+    {m : ℕ} (D : RealCaseIIData37 (CyclotomicField 37 ℚ) m)
+    (e : ℕ) (he : 1 ≤ e) (u0 ub : (𝓞 (CyclotomicField 37 ℚ))ˣ)
+    (ρ0 : 𝓞 (CyclotomicField 37 ℚ)) (ρa ρb : CyclotomicField 37 ℚ)
+    (ηa ηb v : (CyclotomicField 37 ℚ)ˣ)
+    (hub : algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (ub : 𝓞 _) =
+      (ηb : CyclotomicField 37 ℚ))
+    (hanchor : algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.x + D.y) =
+      algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (u0 : 𝓞 _) *
+        (algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ)
+          ((1 - (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger) *
+            (1 - (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger ^ 36))) ^ e *
+        algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) ρ0 ^ 37)
+    (hηa : complexConj (CyclotomicField 37 ℚ) (ηa : CyclotomicField 37 ℚ) =
+      (ηa : CyclotomicField 37 ℚ))
+    (hηb : complexConj (CyclotomicField 37 ℚ) (ηb : CyclotomicField 37 ℚ) =
+      (ηb : CyclotomicField 37 ℚ))
+    (hfa : algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.x +
+        algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger) *
+          algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.y =
+      (1 - algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger)) *
+        (ηa : CyclotomicField 37 ℚ) * ρa ^ 37)
+    (hfb : algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.x +
+        algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger ^ 2) *
+          algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.y =
+      (1 - algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger ^ 2)) *
+        (ηb : CyclotomicField 37 ℚ) * ρb ^ 37)
+    (hII : (ηa : (CyclotomicField 37 ℚ)ˣ) = v ^ 37 * ηb) :
+    ∃ δ' : (𝓞 (CyclotomicField 37 ℚ))ˣ,
+      ((v : CyclotomicField 37 ℚ) ^ 2 * (ρa * complexConj (CyclotomicField 37 ℚ) ρa)) ^ 37 +
+          (-(ρb * complexConj (CyclotomicField 37 ℚ) ρb)) ^ 37 =
+        algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (δ' : 𝓞 _) *
+          (algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ)
+            ((1 - (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger) *
+              (1 - (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger ^ 36))) ^ (2 * e - 1) *
+          ((algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) ρ0) ^ 2) ^ 37 := by
+  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  obtain ⟨hζ37, hζ1, hζ2_37, hζ2_1, hAB, hABp⟩ := caseII_descended_root_pow_facts D
+  set ζ : 𝓞 (CyclotomicField 37 ℚ) := D.hζ.toInteger with hζ_def
+  set am := algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) with ham
+  have hinj : Function.Injective am := FaithfulSMul.algebraMap_injective _ _
+  -- The §9.1 crux unit `θ'_int : (𝓞 K)ˣ` (real) at the roots `ζ`, `ζ²`.
+  obtain ⟨θ'_int, _, hθ'_id⟩ :=
+    washington_section91_crux_unit (K := CyclotomicField 37 ℚ) hζ37 hζ2_37 hζ1 hζ2_1 hAB hABp
+  -- The descent unit `δ' = u₀²·θ'·u_b⁻²`.
+  set δ' : (𝓞 (CyclotomicField 37 ℚ))ˣ := u0 ^ 2 * θ'_int * ub⁻¹ ^ 2 with hδ'_def
+  refine ⟨δ', ?_⟩
+  -- Nonzero facts.
+  have hζ36_37 : (ζ ^ 36) ^ 37 = 1 := by
+    rw [← pow_mul, show 36 * 37 = 37 * 36 from by norm_num, pow_mul, hζ37, one_pow]
+  have hζ36_ne1 : ζ ^ 36 ≠ 1 := by
+    intro h
+    have : ζ ^ 37 = ζ ^ 36 * ζ := by rw [← pow_succ]
+    rw [hζ37, h, one_mul] at this
+    exact hζ1 this.symm
+  have hζ2_36_ne1 : (ζ ^ 2) ^ 36 ≠ 1 := by
+    intro h
+    have : (ζ ^ 2) ^ 37 = (ζ ^ 2) ^ 36 * ζ ^ 2 := by rw [← pow_succ]
+    rw [hζ2_37, h, one_mul] at this
+    exact hζ2_1 this.symm
+  have hroot_ne : ∀ w : 𝓞 (CyclotomicField 37 ℚ), w ≠ 1 → (1 : CyclotomicField 37 ℚ) - am w ≠ 0 :=
+    fun w hw h ↦ hw (hinj (by rw [map_one]; linear_combination -h))
+  have h1ζ_ne := hroot_ne ζ hζ1
+  have h1ζ36_ne := hroot_ne (ζ ^ 36) hζ36_ne1
+  have h1ζ2_ne := hroot_ne (ζ ^ 2) hζ2_1
+  have h1ζ2_36_ne := hroot_ne ((ζ ^ 2) ^ 36) hζ2_36_ne1
+  -- `Λ` (anchor uniformizer) `≠ 0`.
+  set ζs : 𝓞 (CyclotomicField 37 ℚ) := (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger
+    with hζs_def
+  have hζs37 : ζs ^ 37 = 1 :=
+    (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger_isPrimitiveRoot.pow_eq_one
+  have hζs1 : ζs ≠ 1 :=
+    (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37)
+  have hζs36_ne1 : ζs ^ 36 ≠ 1 := by
+    intro h
+    have : ζs ^ 37 = ζs ^ 36 * ζs := by rw [← pow_succ]
+    rw [hζs37, h, one_mul] at this
+    exact hζs1 this.symm
+  have hΛint_ne : (1 - ζs) * (1 - ζs ^ 36) ≠ 0 :=
+    mul_ne_zero (sub_ne_zero.mpr fun h ↦ hζs1 h.symm) (sub_ne_zero.mpr fun h ↦ hζs36_ne1 h.symm)
+  have hΛam_ne : am ((1 - ζs) * (1 - ζs ^ 36)) ≠ 0 := by
+    rw [Ne, map_eq_zero_iff _ hinj]
+    exact hΛint_ne
+  have hmem2 : ζ ^ 2 ∈ nthRootsFinset 37 (1 : 𝓞 (CyclotomicField 37 ℚ)) :=
+    (mem_nthRootsFinset (by norm_num) _).mpr hζ2_37
+  -- The field descended equation, via `washington_section91_reassembly`.
+  have hmapη0 : ((Units.map (am : 𝓞 (CyclotomicField 37 ℚ) →* CyclotomicField 37 ℚ) u0 :
+      (CyclotomicField 37 ℚ)ˣ) : CyclotomicField 37 ℚ) = am (u0 : 𝓞 _) := by
+    rw [Units.coe_map]
+    rfl
+  have hmapθ' : ((Units.map (am : 𝓞 (CyclotomicField 37 ℚ) →* CyclotomicField 37 ℚ) θ'_int :
+      (CyclotomicField 37 ℚ)ˣ) : CyclotomicField 37 ℚ) = am (θ'_int : 𝓞 _) := by
+    rw [Units.coe_map]
+    rfl
+  have hΛacoe : ((Units.mk0 ((1 - am ζ) * (1 - am (ζ ^ 36))) (mul_ne_zero h1ζ_ne h1ζ36_ne) :
+      (CyclotomicField 37 ℚ)ˣ) : CyclotomicField 37 ℚ) = (1 - am ζ) * (1 - am (ζ ^ 36)) := rfl
+  have hΛbcoe : ((Units.mk0 ((1 - am (ζ ^ 2)) * (1 - am ((ζ ^ 2) ^ 36)))
+      (mul_ne_zero h1ζ2_ne h1ζ2_36_ne) : (CyclotomicField 37 ℚ)ˣ) : CyclotomicField 37 ℚ) =
+      (1 - am (ζ ^ 2)) * (1 - am ((ζ ^ 2) ^ 36)) := rfl
+  have hΛcoe : ((Units.mk0 (am ((1 - ζs) * (1 - ζs ^ 36))) hΛam_ne :
+      (CyclotomicField 37 ℚ)ˣ) : CyclotomicField 37 ℚ) = am ((1 - ζs) * (1 - ζs ^ 36)) := rfl
+  -- the descent unit `η0²·θ'·ηb⁻²` (with the *field* `ηb`) equals `am δ'`.
+  have hδ'coe : ((Units.map (am : 𝓞 (CyclotomicField 37 ℚ) →* CyclotomicField 37 ℚ) u0 ^ 2 *
+        Units.map (am : 𝓞 (CyclotomicField 37 ℚ) →* CyclotomicField 37 ℚ) θ'_int *
+        ηb⁻¹ ^ 2 : (CyclotomicField 37 ℚ)ˣ) : CyclotomicField 37 ℚ) = am (δ' : 𝓞 _) := by
+    have hηbinv : ((ηb⁻¹ : (CyclotomicField 37 ℚ)ˣ) : CyclotomicField 37 ℚ) =
+        am ((ub⁻¹ : (𝓞 (CyclotomicField 37 ℚ))ˣ) : 𝓞 _) := by
+      rw [Units.val_inv_eq_inv_val, ← hub, map_units_inv]
+    rw [Units.val_mul, Units.val_mul, Units.val_pow_eq_pow_val, Units.val_pow_eq_pow_val,
+      hmapη0, hmapθ', hηbinv, hδ'_def, Units.val_mul, Units.val_mul, Units.val_pow_eq_pow_val,
+      Units.val_pow_eq_pow_val, map_mul, map_mul, map_pow, map_pow]
+  rw [← hδ'coe]
+  refine washington_section91_reassembly (x := am D.x) (y := am D.y)
+    (ρa := ρa) (ρb := ρb) (ρ0 := am ρ0)
+    (zpa := am ζ) (zna := am (ζ ^ 36)) (zpb := am (ζ ^ 2)) (znb := am ((ζ ^ 2) ^ 36))
+    (ηa := ηa) (ηb := ηb)
+    (η0 := Units.map (am : 𝓞 (CyclotomicField 37 ℚ) →* CyclotomicField 37 ℚ) u0)
+    (u := v) (θ' := Units.map (am : 𝓞 (CyclotomicField 37 ℚ) →* CyclotomicField 37 ℚ) θ'_int)
+    (Λa := Units.mk0 ((1 - am ζ) * (1 - am (ζ ^ 36))) (mul_ne_zero h1ζ_ne h1ζ36_ne))
+    (Λb := Units.mk0 ((1 - am (ζ ^ 2)) * (1 - am ((ζ ^ 2) ^ 36)))
+      (mul_ne_zero h1ζ2_ne h1ζ2_36_ne))
+    (Λ := Units.mk0 (am ((1 - ζs) * (1 - ζs ^ 36))) hΛam_ne)
+    (e := e) he ?_ ?_ hΛacoe hΛbcoe ?_ ?_ ?_ ?_ ?_ hII ?_
+  · rw [← map_mul, show ζ * ζ ^ 36 = ζ ^ 37 from by ring, hζ37, map_one]
+  · rw [← map_mul, show ζ ^ 2 * (ζ ^ 2) ^ 36 = (ζ ^ 2) ^ 37 from by ring, hζ2_37, map_one]
+  · exact hfa
+  · exact caseII_factorEq_neg_of_pos D
+      ⟨ζ, D.hζ.toInteger_isPrimitiveRoot.mem_nthRootsFinset (by decide : 0 < 37)⟩ ηa ρa hηa hfa
+  · exact hfb
+  · have hneg := caseII_factorEq_neg_of_pos D ⟨ζ ^ 2, hmem2⟩ ηb ρb hηb (by
+      rw [show ((⟨ζ ^ 2, hmem2⟩ : nthRootsFinset 37 (1 : 𝓞 (CyclotomicField 37 ℚ))) :
+        𝓞 (CyclotomicField 37 ℚ)) = ζ ^ 2 from rfl]; exact hfb)
+    rwa [show ((⟨ζ ^ 2, hmem2⟩ : nthRootsFinset 37 (1 : 𝓞 (CyclotomicField 37 ℚ))) :
+      𝓞 (CyclotomicField 37 ℚ)) = ζ ^ 2 from rfl] at hneg
+  · -- `hanchor`.
+    rw [hmapη0, hΛcoe, ← map_add]
+    convert hanchor using 2
+  · -- `hcrux`.
+    rw [hΛacoe, hΛbcoe, hmapθ', hΛcoe,
+      show (1 - am ζ) * (1 - am (ζ ^ 36)) = am ((1 - ζ) * (1 - ζ ^ 36)) from by
+        rw [map_mul, map_sub, map_sub, map_one],
+      show (1 - am (ζ ^ 2)) * (1 - am ((ζ ^ 2) ^ 36)) =
+        am ((1 - ζ ^ 2) * (1 - (ζ ^ 2) ^ 36)) from by rw [map_mul, map_sub, map_sub, map_one]]
+    exact hθ'_id
+
 open scoped Classical in
 /-- **[L5c — integer descended equation, `δ'` constructed]** From the §9.1 positive factor equations
 at `ζ`, `ζ²` (real factor units `η_a = algebraMap u_a`, `η_b = algebraMap u_b`), the real anchor
@@ -348,183 +590,32 @@ theorem caseII_integer_descended_equation_of_unitInt
     CaseIIIntDescOutput37 D e ρ0 v ρa ρb := by
   rw [CaseIIIntDescOutput37]
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  have hp : (37 : ℕ) ≠ 2 := by decide
   set σR := NumberField.IsCMField.ringOfIntegersComplexConj (CyclotomicField 37 ℚ)
-  -- The two roots `ζ`, `ζ²`, with the root-of-unity / distinctness facts.
-  set ζ : 𝓞 (CyclotomicField 37 ℚ) := D.hζ.toInteger with hζ_def
-  have hζ37 : ζ ^ 37 = 1 := D.hζ.toInteger_isPrimitiveRoot.pow_eq_one
-  have hζ1 : ζ ≠ 1 := D.hζ.toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37)
-  have hζ2_37 : (ζ ^ 2) ^ 37 = 1 := by rw [← pow_mul, mul_comm, pow_mul, hζ37, one_pow]
-  have hζ2_1 : ζ ^ 2 ≠ 1 := by
-    intro h
-    have : (37 : ℕ) ∣ 2 := (D.hζ.toInteger_isPrimitiveRoot.pow_eq_one_iff_dvd 2).mp h
-    omega
-  have hAB : ζ ≠ ζ ^ 2 := by
-    intro h
-    have := D.hζ.toInteger_isPrimitiveRoot.pow_inj (i := 1) (j := 2) (by norm_num) (by norm_num)
-      (by rw [pow_one]; exact h)
-    omega
-  have hABp : ζ * ζ ^ 2 ≠ 1 := by
-    rw [show ζ * ζ ^ 2 = ζ ^ 3 from by ring]
-    intro h
-    have : (37 : ℕ) ∣ 3 := (D.hζ.toInteger_isPrimitiveRoot.pow_eq_one_iff_dvd 3).mp h
-    omega
-  -- `η₀ = 1` (`caseII_etaZero_eq_one`).
-  have hetaZero : (D.etaZero : 𝓞 (CyclotomicField 37 ℚ)) = 1 := by
-    rw [caseII_etaZero_eq_one D hp]
-  -- `ρ_a, ρ_b ∈ 𝓞 K` (factor generators integral, the key insight).
-  have hηOne_ne : (⟨ζ, D.hζ.toInteger_isPrimitiveRoot.mem_nthRootsFinset (by decide : 0 < 37)⟩ :
-      nthRootsFinset 37 (1 : 𝓞 (CyclotomicField 37 ℚ))) ≠ D.etaZero := by
-    intro h
-    exact hζ1 (by have := Subtype.ext_iff.mp h; rw [hetaZero] at this; exact this)
-  obtain ⟨ra, hra⟩ := caseII_factorGenerator_integral_of_unitInt D
-    ⟨ζ, D.hζ.toInteger_isPrimitiveRoot.mem_nthRootsFinset (by decide : 0 < 37)⟩ hηOne_ne ηa ρa ua
-    hua hfa
-  have hmem2 : ζ ^ 2 ∈ nthRootsFinset 37 (1 : 𝓞 (CyclotomicField 37 ℚ)) :=
-    (mem_nthRootsFinset (by norm_num) _).mpr hζ2_37
-  have hηTwo_ne : (⟨ζ ^ 2, hmem2⟩ : nthRootsFinset 37 (1 : 𝓞 (CyclotomicField 37 ℚ))) ≠
-      D.etaZero := by
-    intro h
-    exact hζ2_1 (by have := Subtype.ext_iff.mp h; rw [hetaZero] at this; exact this)
-  obtain ⟨rb, hrb⟩ := caseII_factorGenerator_integral_of_unitInt D ⟨ζ ^ 2, hmem2⟩ hηTwo_ne ηb ρb ub
-    hub (by
-      rw [show ((⟨ζ ^ 2, hmem2⟩ : nthRootsFinset 37 (1 : 𝓞 (CyclotomicField 37 ℚ))) :
-        𝓞 (CyclotomicField 37 ℚ)) = ζ ^ 2 from rfl]; exact hfb)
-  -- `v ∈ 𝓞 K` (Assumption-II unit integral).
-  obtain ⟨vU, hvU⟩ := caseII_assumptionII_unit_integral ηa ηb v ua ub hua hub hII
   set am := algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) with ham
   have hinj : Function.Injective am := FaithfulSMul.algebraMap_injective _ _
-  -- `algebraMap (σR z) = complexConj (algebraMap z)`.
+  -- `ρ_a, ρ_b, v` are integral (the key insight): integer generators `r_a, r_b` and unit `vU`.
+  obtain ⟨ra, rb, vU, hra, hrb, hvU⟩ :=
+    caseII_descended_integral_witnesses D ηa ηb v ρa ρb ua ub hua hub hfa hfb hII
+  -- `algebraMap (σR ·) = complexConj (algebraMap ·)`, and `σR` is involutive / fixes the real `vU`.
   have hσRcoe : ∀ z : 𝓞 (CyclotomicField 37 ℚ),
       am (σR z) = complexConj (CyclotomicField 37 ℚ) (am z) := fun z ↦ by
     rw [ham, ← coe_ringOfIntegersComplexConj]
-  -- `algebraMap (σR ra) = complexConj ρa`, similarly `σR rb`.
   have hσra : am (σR ra) = complexConj (CyclotomicField 37 ℚ) ρa := by rw [hσRcoe, hra]
   have hσrb : am (σR rb) = complexConj (CyclotomicField 37 ℚ) ρb := by rw [hσRcoe, hrb]
-  -- `σR vU = vU` (real), `σR ra` involutive, etc.
   have hσRvU : σR (vU : 𝓞 (CyclotomicField 37 ℚ)) = (vU : 𝓞 _) := by
-    apply hinj
-    rw [hσRcoe, hvU, hv_real]
+    apply hinj; rw [hσRcoe, hvU, hv_real]
   have hσRinv : ∀ z : 𝓞 (CyclotomicField 37 ℚ), σR (σR z) = z := fun z ↦ by
-    apply hinj
-    rw [hσRcoe, hσRcoe, complexConj_apply_apply]
-  -- The §9.1 crux unit `θ'_int : (𝓞 K)ˣ` (real) at the roots `ζ`, `ζ²`.
-  obtain ⟨θ'_int, hθ'_real, hθ'_id⟩ :=
-    washington_section91_crux_unit (K := CyclotomicField 37 ℚ) hζ37 hζ2_37 hζ1 hζ2_1 hAB hABp
-  -- The descent unit `δ' = u₀²·θ'·u_b⁻²`.
-  set δ' : (𝓞 (CyclotomicField 37 ℚ))ˣ := u0 ^ 2 * θ'_int * ub⁻¹ ^ 2 with hδ'_def
-  -- Nonzero facts.
-  have hζ36_37 : (ζ ^ 36) ^ 37 = 1 := by
-    rw [← pow_mul, show 36 * 37 = 37 * 36 from by norm_num, pow_mul, hζ37, one_pow]
-  have hζ36_ne1 : ζ ^ 36 ≠ 1 := by
-    intro h
-    have : ζ ^ 37 = ζ ^ 36 * ζ := by rw [← pow_succ]
-    rw [hζ37, h, one_mul] at this
-    exact hζ1 this.symm
-  have hζ2_36_ne1 : (ζ ^ 2) ^ 36 ≠ 1 := by
-    intro h
-    have : (ζ ^ 2) ^ 37 = (ζ ^ 2) ^ 36 * ζ ^ 2 := by rw [← pow_succ]
-    rw [hζ2_37, h, one_mul] at this
-    exact hζ2_1 this.symm
-  have hroot_ne : ∀ w : 𝓞 (CyclotomicField 37 ℚ), w ≠ 1 → (1 : CyclotomicField 37 ℚ) - am w ≠ 0 :=
-    fun w hw h ↦ hw (hinj (by rw [map_one]; linear_combination -h))
-  have h1ζ_ne := hroot_ne ζ hζ1
-  have h1ζ36_ne := hroot_ne (ζ ^ 36) hζ36_ne1
-  have h1ζ2_ne := hroot_ne (ζ ^ 2) hζ2_1
-  have h1ζ2_36_ne := hroot_ne ((ζ ^ 2) ^ 36) hζ2_36_ne1
-  -- `Λ` (anchor uniformizer) `≠ 0` and `ρ₀ ≠ 0`.
-  set ζs : 𝓞 (CyclotomicField 37 ℚ) := (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger
-    with hζs_def
-  have hζs37 : ζs ^ 37 = 1 :=
-    (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger_isPrimitiveRoot.pow_eq_one
-  have hζs1 : ζs ≠ 1 :=
-    (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37)
-  have hζs36_ne1 : ζs ^ 36 ≠ 1 := by
-    intro h
-    have : ζs ^ 37 = ζs ^ 36 * ζs := by rw [← pow_succ]
-    rw [hζs37, h, one_mul] at this
-    exact hζs1 this.symm
-  have hΛint_ne : (1 - ζs) * (1 - ζs ^ 36) ≠ 0 :=
-    mul_ne_zero (sub_ne_zero.mpr fun h ↦ hζs1 h.symm) (sub_ne_zero.mpr fun h ↦ hζs36_ne1 h.symm)
-  have hΛam_ne : am ((1 - ζs) * (1 - ζs ^ 36)) ≠ 0 := by
-    rw [Ne, map_eq_zero_iff _ hinj]
-    exact hΛint_ne
-  have hρ0_ne : ρ0 ≠ 0 := by
-    intro h0
-    have hxy_ne : D.x + D.y ≠ 0 := caseII_data_x_add_y_ne_zero D hp
-    apply hxy_ne
-    apply hinj
-    rw [map_zero, hanchor, h0, map_zero, zero_pow (by decide : (37 : ℕ) ≠ 0), mul_zero]
-  -- The field descended equation, via `washington_section91_reassembly`.
-  have hfield :
-      ((v : CyclotomicField 37 ℚ) ^ 2 * (ρa * complexConj (CyclotomicField 37 ℚ) ρa)) ^ 37 +
-          (-(ρb * complexConj (CyclotomicField 37 ℚ) ρb)) ^ 37 =
-        am (δ' : 𝓞 _) * (am ((1 - ζs) * (1 - ζs ^ 36))) ^ (2 * e - 1) * ((am ρ0) ^ 2) ^ 37 := by
-    have hmapη0 : ((Units.map (am : 𝓞 (CyclotomicField 37 ℚ) →* CyclotomicField 37 ℚ) u0 :
-        (CyclotomicField 37 ℚ)ˣ) : CyclotomicField 37 ℚ) = am (u0 : 𝓞 _) := by
-      rw [Units.coe_map]
-      rfl
-    have hmapθ' : ((Units.map (am : 𝓞 (CyclotomicField 37 ℚ) →* CyclotomicField 37 ℚ) θ'_int :
-        (CyclotomicField 37 ℚ)ˣ) : CyclotomicField 37 ℚ) = am (θ'_int : 𝓞 _) := by
-      rw [Units.coe_map]
-      rfl
-    have hΛacoe : ((Units.mk0 ((1 - am ζ) * (1 - am (ζ ^ 36))) (mul_ne_zero h1ζ_ne h1ζ36_ne) :
-        (CyclotomicField 37 ℚ)ˣ) : CyclotomicField 37 ℚ) = (1 - am ζ) * (1 - am (ζ ^ 36)) := rfl
-    have hΛbcoe : ((Units.mk0 ((1 - am (ζ ^ 2)) * (1 - am ((ζ ^ 2) ^ 36)))
-        (mul_ne_zero h1ζ2_ne h1ζ2_36_ne) : (CyclotomicField 37 ℚ)ˣ) : CyclotomicField 37 ℚ) =
-        (1 - am (ζ ^ 2)) * (1 - am ((ζ ^ 2) ^ 36)) := rfl
-    have hΛcoe : ((Units.mk0 (am ((1 - ζs) * (1 - ζs ^ 36))) hΛam_ne :
-        (CyclotomicField 37 ℚ)ˣ) : CyclotomicField 37 ℚ) = am ((1 - ζs) * (1 - ζs ^ 36)) := rfl
-    -- the descent unit `η0²·θ'·ηb⁻²` (with the *field* `ηb`) equals `am δ'`.
-    have hδ'coe : ((Units.map (am : 𝓞 (CyclotomicField 37 ℚ) →* CyclotomicField 37 ℚ) u0 ^ 2 *
-          Units.map (am : 𝓞 (CyclotomicField 37 ℚ) →* CyclotomicField 37 ℚ) θ'_int *
-          ηb⁻¹ ^ 2 : (CyclotomicField 37 ℚ)ˣ) : CyclotomicField 37 ℚ) = am (δ' : 𝓞 _) := by
-      have hηbinv : ((ηb⁻¹ : (CyclotomicField 37 ℚ)ˣ) : CyclotomicField 37 ℚ) =
-          am ((ub⁻¹ : (𝓞 (CyclotomicField 37 ℚ))ˣ) : 𝓞 _) := by
-        rw [Units.val_inv_eq_inv_val, ← hub, map_units_inv]
-      rw [Units.val_mul, Units.val_mul, Units.val_pow_eq_pow_val, Units.val_pow_eq_pow_val,
-        hmapη0, hmapθ', hηbinv, hδ'_def, Units.val_mul, Units.val_mul, Units.val_pow_eq_pow_val,
-        Units.val_pow_eq_pow_val, map_mul, map_mul, map_pow, map_pow]
-    rw [← hδ'coe]
-    refine washington_section91_reassembly (x := am D.x) (y := am D.y)
-      (ρa := ρa) (ρb := ρb) (ρ0 := am ρ0)
-      (zpa := am ζ) (zna := am (ζ ^ 36)) (zpb := am (ζ ^ 2)) (znb := am ((ζ ^ 2) ^ 36))
-      (ηa := ηa) (ηb := ηb)
-      (η0 := Units.map (am : 𝓞 (CyclotomicField 37 ℚ) →* CyclotomicField 37 ℚ) u0)
-      (u := v) (θ' := Units.map (am : 𝓞 (CyclotomicField 37 ℚ) →* CyclotomicField 37 ℚ) θ'_int)
-      (Λa := Units.mk0 ((1 - am ζ) * (1 - am (ζ ^ 36))) (mul_ne_zero h1ζ_ne h1ζ36_ne))
-      (Λb := Units.mk0 ((1 - am (ζ ^ 2)) * (1 - am ((ζ ^ 2) ^ 36)))
-        (mul_ne_zero h1ζ2_ne h1ζ2_36_ne))
-      (Λ := Units.mk0 (am ((1 - ζs) * (1 - ζs ^ 36))) hΛam_ne)
-      (e := e) he ?_ ?_ hΛacoe hΛbcoe ?_ ?_ ?_ ?_ ?_ hII ?_
-    · rw [← map_mul, show ζ * ζ ^ 36 = ζ ^ 37 from by ring, hζ37, map_one]
-    · rw [← map_mul, show ζ ^ 2 * (ζ ^ 2) ^ 36 = (ζ ^ 2) ^ 37 from by ring, hζ2_37, map_one]
-    · exact hfa
-    · exact caseII_factorEq_neg_of_pos D
-        ⟨ζ, D.hζ.toInteger_isPrimitiveRoot.mem_nthRootsFinset (by decide : 0 < 37)⟩ ηa ρa hηa hfa
-    · exact hfb
-    · have hneg := caseII_factorEq_neg_of_pos D ⟨ζ ^ 2, hmem2⟩ ηb ρb hηb (by
-        rw [show ((⟨ζ ^ 2, hmem2⟩ : nthRootsFinset 37 (1 : 𝓞 (CyclotomicField 37 ℚ))) :
-          𝓞 (CyclotomicField 37 ℚ)) = ζ ^ 2 from rfl]; exact hfb)
-      rwa [show ((⟨ζ ^ 2, hmem2⟩ : nthRootsFinset 37 (1 : 𝓞 (CyclotomicField 37 ℚ))) :
-        𝓞 (CyclotomicField 37 ℚ)) = ζ ^ 2 from rfl] at hneg
-    · -- `hanchor`.
-      rw [hmapη0, hΛcoe, ← map_add]
-      convert hanchor using 2
-    · -- `hcrux`.
-      rw [hΛacoe, hΛbcoe, hmapθ', hΛcoe,
-        show (1 - am ζ) * (1 - am (ζ ^ 36)) = am ((1 - ζ) * (1 - ζ ^ 36)) from by
-          rw [map_mul, map_sub, map_sub, map_one],
-        show (1 - am (ζ ^ 2)) * (1 - am ((ζ ^ 2) ^ 36)) =
-          am ((1 - ζ ^ 2) * (1 - (ζ ^ 2) ^ 36)) from by rw [map_mul, map_sub, map_sub, map_one]]
-      exact hθ'_id
+    apply hinj; rw [hσRcoe, hσRcoe, complexConj_apply_apply]
+  -- The field descended Fermat equation with an integer σ-fixed descent unit `δ'`.
+  obtain ⟨δ', hfield⟩ :=
+    caseII_descended_field_equation D e he u0 ub ρ0 ρa ρb ηa ηb v hub hanchor hηa hηb hfa hfb hII
   -- The integer-witness `algebraMap` specs (the conjugate-norm blocks).
   have hωspec : am (vU ^ 2 * (ra * σR ra)) =
       (v : CyclotomicField 37 ℚ) ^ 2 * (ρa * complexConj (CyclotomicField 37 ℚ) ρa) := by
     rw [map_mul, map_pow, hvU, map_mul, hra, hσra]
   have hθspec : am (-(rb * σR rb)) = -(ρb * complexConj (CyclotomicField 37 ℚ) ρb) := by
     rw [map_neg, map_mul, hrb, hσrb]
-  -- The integer conjugate-norm blocks and the assembled bundle.
+  -- The integer conjugate-norm blocks `ω, θ`, with reality and the descended equation.
   refine ⟨vU ^ 2 * (ra * σR ra), -(rb * σR rb), δ', hωspec, hθspec, ?_, ?_, ?_⟩
   · rw [map_mul, map_pow, hσRvU, map_mul, hσRinv ra, mul_comm (σR ra) ra]
   · rw [map_neg, map_mul, hσRinv rb, mul_comm (σR rb) rb]
