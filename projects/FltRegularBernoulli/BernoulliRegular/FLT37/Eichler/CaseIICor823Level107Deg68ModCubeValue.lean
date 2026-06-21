@@ -1,7 +1,5 @@
 import BernoulliRegular.FLT37.Eichler.CaseIICor823Level107Deg68ModCubeExtraction
 
-set_option linter.style.longLine false
-
 /-!
 # The mod-`37³` degree-`68` Dwork-slice value, and the genuine second digit `c₆₈ = 4` of the
 # level-`107` deg-`68` coordinate
