@@ -82,8 +82,7 @@ It imports only; it does **not** modify any existing file.
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Polynomial NumberField.IsCMField
-open scoped nonZeroDivisors
+open NumberField NumberField.IsCMField
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -104,9 +103,8 @@ theorem caseII_zeta_sub_one_not_dvd_unit_mul {m : ℕ}
     (D : ConjPairCaseIIData37 (CyclotomicField 37 ℚ) m)
     (δ : (𝓞 (CyclotomicField 37 ℚ))ˣ) {x : 𝓞 (CyclotomicField 37 ℚ)}
     (hx : ¬ (D.hζ.unit'.1 - 1) ∣ x) :
-    ¬ (D.hζ.unit'.1 - 1) ∣ (δ : 𝓞 (CyclotomicField 37 ℚ)) * x := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  exact (D.hζ.zeta_sub_one_prime').not_dvd_mul
+    ¬ (D.hζ.unit'.1 - 1) ∣ (δ : 𝓞 (CyclotomicField 37 ℚ)) * x :=
+  (D.hζ.zeta_sub_one_prime').not_dvd_mul
     (fun h => absurd (isUnit_of_dvd_unit h δ.isUnit) (D.hζ.zeta_sub_one_prime').not_unit) hx
 
 omit [NumberField.IsCMField (CyclotomicField 37 ℚ)] in
@@ -127,15 +125,10 @@ theorem caseII_clearLeadingUnits {K : Type} [Field K] [NumberField K]
     (heq : (ε₁ : 𝓞 K) * X ^ 37 + (ε₂ : 𝓞 K) * Y ^ 37 = (ε₃ : 𝓞 K) * W ^ 37)
     (hδ : ε₁ / ε₂ = δ ^ 37) :
     ((δ : 𝓞 K) * X) ^ 37 + Y ^ 37 = ((ε₃ / ε₂ : (𝓞 K)ˣ) : 𝓞 K) * W ^ 37 := by
-  -- `(δX)³⁷ = δ³⁷·X³⁷ = (ε₁/ε₂)·X³⁷`.
-  have hδpow : ((δ : 𝓞 K) * X) ^ 37 = ((ε₁ / ε₂ : (𝓞 K)ˣ) : 𝓞 K) * X ^ 37 := by
-    rw [mul_pow, ← Units.val_pow_eq_pow_val, ← hδ]
-  rw [hδpow]
-  -- Divide `heq` through by `ε₂` (a unit); same rewrite sequence as the proven `exists_solution'`
-  -- clearing (`SpecificChain.lean`).
-  rw [← mul_right_inj' ε₂.isUnit.ne_zero, mul_add, ← mul_assoc,
-    ← Units.val_mul, mul_div_cancel, ← mul_assoc, ← Units.val_mul,
-    mul_div_cancel]
+  -- `(δX)³⁷ = δ³⁷·X³⁷ = (ε₁/ε₂)·X³⁷`, then divide `heq` through by `ε₂` (a unit) — the same
+  -- rewrite sequence as the proven `exists_solution'` clearing (`SpecificChain.lean`).
+  rw [mul_pow, ← Units.val_pow_eq_pow_val, ← hδ, ← mul_right_inj' ε₂.isUnit.ne_zero, mul_add,
+    ← mul_assoc, ← Units.val_mul, mul_div_cancel, ← mul_assoc, ← Units.val_mul, mul_div_cancel]
   exact heq
 
 /-! ## 2. The clean single-unit descent equation over a σ-conjugate-pair datum, via Assumption II
@@ -173,7 +166,6 @@ theorem ConjPairCaseIIData37.exists_clean_descent_equation
       ¬ (D.hζ.unit'.1 - 1) ∣ Z ∧
       X ^ 37 + Y ^ 37 =
         (ε' : 𝓞 (CyclotomicField 37 ℚ)) * ((D.hζ.unit'.1 - 1) ^ m * Z) ^ 37 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   -- The proven six-unit descent equation over the σ-conjugate pair.
   obtain ⟨x', y', z', ε₁, ε₂, ε₃, hx', hy', hz', e'⟩ := D.exists_sixUnit_descent_equation
   -- Assumption II at the genuine descent units `ε₁/ε₂`.
