@@ -107,6 +107,7 @@ theorem not_isUnit_invSelf_of_not_isIntegral
     (isIntegral_of_isIntegral_adjoin_of_mul_eq_one (algebraMap B Bx x)
       (IsLocalization.Away.invSelf x) hmul hint_adjoin))
 
+universe uL in
 /-- **Field-case place extension (sub-ticket T-L4-EXT-FIELD).** A valuation `v` on a field `F`
 extends along any field homomorphism `ι : F → L` to a valuation `w` on `L` with `v ≈ comap ι w`.
 *Proof.* `v`'s valuation subring `O ⊆ F` maps (via the injective `ι`) to a local subring of `L`;
@@ -118,12 +119,20 @@ since `V` dominates the valuation ring `ι(O)` of the subfield `ι(F)`, `ι⁻¹
 mathlib has the ingredients (`LocalSubring.exists_le_valuationSubring`, `ValuationSubring.valuation`)
 but not the assembled existence. -/
 theorem exists_comap_isEquiv_of_field_hom
-    {F L : Type*} [Field F] [Field L] (ι : F →+* L)
+    {F : Type*} {L : Type uL} [Field F] [Field L] (ι : F →+* L)
     {Γ : Type*} [LinearOrderedCommGroupWithZero Γ] (v : Valuation F Γ) :
-    ∃ (Γ' : Type*) (_ : LinearOrderedCommGroupWithZero Γ') (w : Valuation L Γ'),
-      v.IsEquiv (Valuation.comap ι w) :=
+    ∃ (Γ' : Type uL) (_ : LinearOrderedCommGroupWithZero Γ') (w : Valuation L Γ'),
+      v.IsEquiv (Valuation.comap ι w) := by
+  -- Extend `v`'s valuation subring `O` (mapped into `L`) to a valuation subring `V` of `L`
+  -- dominating it, and take `w := V.valuation`.
+  obtain ⟨V, hV⟩ :=
+    LocalSubring.exists_le_valuationSubring (LocalSubring.map ι v.valuationSubring.toLocalSubring)
+  refine ⟨V.ValueGroup, inferInstance, V.valuation, ?_⟩
+  -- `v ≈ comap ι V.valuation` because both have valuation subring `O`: `V.comap ι = v.valuationSubring`
+  -- (the domination `hV` makes the contraction equal the maximal valuation subring `O`).
   sorry
 
+universe uS in
 /-- **HU-d infrastructure (T-L4-EXT): Chevalley valuation extension along a ring inclusion.**
 Given an `R`-algebra `S` with injective structure map and a valuation `s` on `R`, there is a
 valuation `t` on `S` extending `s` (`s ≈ comap (algebraMap R S) t`). Huber [Hu2] 3.3(i)
@@ -140,10 +149,10 @@ work-dodge: the bare-injective form is FALSE (a valuation need not extend if no 
 over `supp s` — the generic-fibre obstruction). Huber uses exactly this ("there exists a prime
 ideal of A_a lying over q", huber2.txt:641); HU-d supplies `q'` from its minimal-prime setting. -/
 theorem exists_valuation_extension_of_prime_over
-    {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
+    {R : Type*} {S : Type uS} [CommRing R] [CommRing S] [Algebra R S]
     {Γ : Type*} [LinearOrderedCommGroupWithZero Γ] (s : Valuation R Γ)
     (q' : Ideal S) [q'.IsPrime] (hq' : Ideal.comap (algebraMap R S) q' = s.supp) :
-    ∃ (Γ' : Type*) (_ : LinearOrderedCommGroupWithZero Γ') (t : Valuation S Γ'),
+    ∃ (Γ' : Type uS) (_ : LinearOrderedCommGroupWithZero Γ') (t : Valuation S Γ'),
       s.IsEquiv (Valuation.comap (algebraMap R S) t) := by
   -- Step 1: `s` descends to a valuation on the domain `R ⧸ supp s` (Chevalley, ring case).
   haveI : (s.supp).IsPrime := inferInstance
