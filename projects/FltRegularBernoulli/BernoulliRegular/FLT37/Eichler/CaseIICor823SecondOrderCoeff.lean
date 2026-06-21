@@ -254,9 +254,9 @@ noncomputable def dworkParameterQuotientCoeffModSq
     (i : Fin (p - 1)) :
     DworkCompleteIntegerRing p K ⧸ (dworkParameterIdeal p K) ^ (2 * (p - 1)) →
       ZMod (p ^ 2) :=
-  fun q =>
+  fun q ↦
     Quotient.liftOn' q
-      (fun x : DworkCompleteIntegerRing p K =>
+      (fun x : DworkCompleteIntegerRing p K ↦
         rationalPadicIntegerToZModSq p
           ((dworkParameterPowerBasis p K).repr x i))
       (by
@@ -299,7 +299,7 @@ after mapping the representative into the completed Dwork ring.  Second-order an
 noncomputable def valuedLambdaQuotientDworkCoeffModSq
     (i : Fin (p - 1)) :
     ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (2 * (p - 1)) → ZMod (p ^ 2) :=
-  fun q =>
+  fun q ↦
     dworkParameterQuotientCoeffModSq (p := p) (K := K) i
       (Ideal.quotientMap ((dworkParameterIdeal p K) ^ (2 * (p - 1)))
         (algebraMap (ValuedIntegerRing p K) (DworkCompleteIntegerRing p K))
@@ -400,7 +400,7 @@ theorem dworkParameterQuotientCoeffModSq_mk_add
       (dworkParameterPowerBasis p K).repr (x + y) i =
         ((dworkParameterPowerBasis p K).repr x +
           (dworkParameterPowerBasis p K).repr y) i :=
-    congrArg (fun f => f i) ((dworkParameterPowerBasis p K).repr.map_add x y)
+    congrArg (fun f ↦ f i) ((dworkParameterPowerBasis p K).repr.map_add x y)
   rw [hrepr]
   change rationalPadicIntegerToZModSq p
       ((dworkParameterPowerBasis p K).repr x i +
@@ -425,7 +425,7 @@ theorem dworkParameterQuotientCoeffModSq_mk_neg
   have hrepr :
       (dworkParameterPowerBasis p K).repr (-x) i =
         (-(dworkParameterPowerBasis p K).repr x) i :=
-    congrArg (fun f => f i) ((dworkParameterPowerBasis p K).repr.map_neg x)
+    congrArg (fun f ↦ f i) ((dworkParameterPowerBasis p K).repr.map_neg x)
   rw [hrepr]
   change rationalPadicIntegerToZModSq p
       (-(dworkParameterPowerBasis p K).repr x i) =
@@ -452,7 +452,7 @@ theorem dworkParameterQuotientCoeffModSq_mk_sub
       (dworkParameterPowerBasis p K).repr (x - y) i =
         ((dworkParameterPowerBasis p K).repr x -
           (dworkParameterPowerBasis p K).repr y) i :=
-    congrArg (fun f => f i) ((dworkParameterPowerBasis p K).repr.map_sub x y)
+    congrArg (fun f ↦ f i) ((dworkParameterPowerBasis p K).repr.map_sub x y)
   rw [hrepr]
   change rationalPadicIntegerToZModSq p
       ((dworkParameterPowerBasis p K).repr x i -
