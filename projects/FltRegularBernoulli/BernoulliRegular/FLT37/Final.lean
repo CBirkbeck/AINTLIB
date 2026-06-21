@@ -100,24 +100,22 @@ theorem VandiverIIIHypothesis_iff_isIrregularIndex (ℓ : ℕ) :
   unfold VandiverIIIHypothesis IsIrregularIndex
   refine ⟨?_, ?_⟩
   · rintro ⟨h4, h⟩
-    exact ⟨h4, fun k ⟨h1, h2, hd⟩ => h k h1 h2 hd⟩
+    exact ⟨h4, fun k ⟨h1, h2, hd⟩ ↦ h k h1 h2 hd⟩
   · rintro ⟨h4, h⟩
-    exact ⟨h4, fun k h1 h2 hd => h k ⟨h1, h2, hd⟩⟩
+    exact ⟨h4, fun k h1 h2 hd ↦ h k ⟨h1, h2, hd⟩⟩
 
-/-- The hypothesis is verified for `ℓ = 37`. The two conjuncts come from a
-trivial `decide` and `irregular_index_even_thirtyseven` (FLT37a). -/
+/-- The Vandiver III hypothesis is verified for `ℓ = 37`. -/
 theorem vandiverIIIHypothesis_thirtyseven : VandiverIIIHypothesis 37 :=
   ⟨by decide, irregular_index_even_thirtyseven⟩
 
-/-- Vandiver's Theorem III as a quantified statement. Once tickets FLT37b–g
-discharge this, the unconditional `FermatLastTheoremFor 37` is immediate. -/
+/-- Vandiver's Theorem III as a quantified statement: every odd prime
+`ℓ ≡ 1 (mod 4)` whose irregular Bernoulli indices are all even satisfies
+`FermatLastTheoremFor ℓ`. -/
 def VandiverIII : Prop :=
   ∀ ℓ : ℕ, ℓ.Prime → VandiverIIIHypothesis ℓ → FermatLastTheoremFor ℓ
 
 /-- The first-case half of Vandiver Theorem III: the parity hypothesis on
-irregular indices implies Case I of FLT for `ℓ`. Used in the planned
-decomposition `VandiverIIICaseI ∧ VandiverIIICaseII → VandiverIII`
-(ticket FLT37g). -/
+irregular indices implies Case I of FLT for `ℓ`. -/
 def VandiverIIICaseI : Prop :=
   ∀ ⦃a b c : ℤ⦄ {ℓ : ℕ}, ℓ.Prime → VandiverIIIHypothesis ℓ →
     ¬ (ℓ : ℤ) ∣ a * b * c → a ^ ℓ + b ^ ℓ ≠ c ^ ℓ
@@ -130,14 +128,8 @@ def VandiverIIICaseII : Prop :=
     a * b * c ≠ 0 → ({a, b, c} : Finset ℤ).gcd id = 1 →
     ((ℓ : ℤ) ∣ a * b * c) → a ^ ℓ + b ^ ℓ ≠ c ^ ℓ
 
-/-- **Vandiver III decomposition (FLT37g).**
-
-The two halves combine into `VandiverIII` exactly as
-`flt-regular`'s `flt_regular` combines `caseI` and `caseII`:
-
-* reduce to integers via `fermatLastTheoremFor_iff_int`,
-* coprimify via `MayAssume.coprime`,
-* split on `ℓ ∣ a*b*c`. -/
+/-- **Vandiver III decomposition.** `VandiverIIICaseI` and `VandiverIIICaseII`
+together imply `VandiverIII`. -/
 theorem vandiverIII_of_caseI_caseII
     (hI : VandiverIIICaseI) (hII : VandiverIIICaseII) :
     VandiverIII := by
@@ -152,60 +144,32 @@ theorem vandiverIII_of_caseI_caseII
   · exact hII hℓ hVH hprod' hgcd case e'
   · exact hI hℓ hVH case e'
 
-/-- **Conditional FLT for 37 (FLT37h skeleton).** Assuming Vandiver Theorem III,
-`FermatLastTheoremFor 37` follows by combining `VandiverIIIHypothesis 37` —
-which is unconditional and built from FLT37a + the existing irregularity
-witness for 37 — with the Vandiver III hypothesis. -/
+/-- **Conditional FLT for 37.** Assuming Vandiver Theorem III,
+`FermatLastTheoremFor 37` holds. -/
 theorem fermatLastTheoremFor_thirtyseven_of_vandiverIII
     (h_VT3 : VandiverIII) :
     FermatLastTheoremFor 37 :=
   h_VT3 37 (by decide) vandiverIIIHypothesis_thirtyseven
 
 /-- **Direct conditional FLT for 37.** Assuming `VandiverIIICaseI` and
-`VandiverIIICaseII`, `FermatLastTheoremFor 37` follows. This composes
-the Case-decomposition (`vandiverIII_of_caseI_caseII`) with the
-specialisation to `ℓ = 37` (`fermatLastTheoremFor_thirtyseven_of_vandiverIII`),
-making the remaining mathematical content (FLT37e, FLT37f) the only
-outstanding work. -/
+`VandiverIIICaseII`, `FermatLastTheoremFor 37` holds. -/
 theorem fermatLastTheoremFor_thirtyseven_of_caseI_caseII
     (hI : VandiverIIICaseI) (hII : VandiverIIICaseII) :
     FermatLastTheoremFor 37 :=
   fermatLastTheoremFor_thirtyseven_of_vandiverIII (vandiverIII_of_caseI_caseII hI hII)
 
-/-! ## Concrete `ℓ = 37` specialisations
-
-For convenience, the universal `VandiverIIICaseI`/`II` hypotheses can be
-instantiated at `ℓ = 37` using `vandiverIIIHypothesis_thirtyseven`. The
-result is exactly Case I (resp. Case II) of FLT for `37` — concrete
-proof targets for tickets FLT37e and FLT37f. -/
-
 /-- Specialisation of `VandiverIIICaseI` to `ℓ = 37`. The parity hypothesis
 is already verified for 37, so this is the bare Case I statement. -/
 theorem caseI_thirtyseven_of_VandiverIIICaseI (hI : VandiverIIICaseI) :
     ∀ ⦃a b c : ℤ⦄, ¬ (37 : ℤ) ∣ a * b * c → a ^ 37 + b ^ 37 ≠ c ^ 37 :=
-  fun _ _ _ => hI (by decide) vandiverIIIHypothesis_thirtyseven
+  fun _ _ _ ↦ hI (by decide) vandiverIIIHypothesis_thirtyseven
 
 /-- Specialisation of `VandiverIIICaseII` to `ℓ = 37`, in the
 post-coprimification form. -/
 theorem caseII_thirtyseven_of_VandiverIIICaseII (hII : VandiverIIICaseII) :
     ∀ ⦃a b c : ℤ⦄, a * b * c ≠ 0 → ({a, b, c} : Finset ℤ).gcd id = 1 →
       (37 : ℤ) ∣ a * b * c → a ^ 37 + b ^ 37 ≠ c ^ 37 :=
-  fun _ _ _ => hII (by decide) vandiverIIIHypothesis_thirtyseven
-
-/-! ## ℓ = 37 case I conditional theorems
-
-The case I conditional closure for `ℓ = 37` runs through the
-`MirimanoffBernoulliConclusion` predicate (the per-`n` Bernoulli
-divisibility statement) combined with the verified parity hypothesis
-`vandiverIIIHypothesis_thirtyseven`.
-
-The previous `MirimanoffPolynomialVanishing + MirimanoffBernoulliIdentity`
-chain (theorems `caseI_thirtyseven_under_predicates`,
-`fermatLastTheoremFor_thirtyseven_of_predicates_and_caseII`, and the
-`φ_3` / `a ≡ b` specialisations) has been removed: with the corrected
-product-form `MBI` (`φ_n(t)·B_{p-n} ≡ 0 (mod p)`) the bridge step
-`MV + MBI ⟹ MBC` is no longer logically sound. See the comment in
-`CaseI.lean` for details. -/
+  fun _ _ _ ↦ hII (by decide) vandiverIIIHypothesis_thirtyseven
 
 /-- **ℓ = 37 conditional case I via `MirimanoffBernoulliConclusion`.**
 Takes the higher-level Bernoulli-divisibility predicate directly. -/
@@ -223,8 +187,8 @@ theorem caseI_thirtyseven_of_bernoulli_conclusion
     hMC vandiverIIIHypothesis_thirtyseven.2
 
 /-- **ℓ = 37 final assembly via `MirimanoffBernoulliConclusion`.**
-Cleaner version of `fermatLastTheoremFor_thirtyseven_of_predicates_and_caseII`
-that takes the higher-level Bernoulli-divisibility predicate directly. -/
+The case I Bernoulli-divisibility predicate together with `VandiverIIICaseII`
+yields `FermatLastTheoremFor 37`. -/
 theorem fermatLastTheoremFor_thirtyseven_of_conclusion_and_caseII
     (h_conclusion : ∀ ⦃a b c : ℤ⦄, a ^ 37 + b ^ 37 = c ^ 37 →
       ¬ (37 : ℤ) ∣ b → ¬ (37 : ℤ) ∣ c →
@@ -237,11 +201,11 @@ theorem fermatLastTheoremFor_thirtyseven_of_conclusion_and_caseII
   intro a b c ha hb hc heq
   have hprod := mul_ne_zero (mul_ne_zero ha hb) hc
   obtain ⟨e', hgcd, hprod'⟩ := FltRegular.MayAssume.coprime heq hprod
-  set d : ℤ := ({a, b, c} : Finset ℤ).gcd id with hd_def
+  set d : ℤ := ({a, b, c} : Finset ℤ).gcd id
   by_cases case : (37 : ℤ) ∣ (a / d) * (b / d) * (c / d)
   · exact hII (by decide) vandiverIIIHypothesis_thirtyseven hprod' hgcd case e'
-  · have h_not_b : ¬ (37 : ℤ) ∣ (b / d) := fun h => case ((h.mul_left _).mul_right _)
-    have h_not_c : ¬ (37 : ℤ) ∣ (c / d) := fun h => case (h.mul_left _)
+  · have h_not_b : ¬ (37 : ℤ) ∣ (b / d) := fun h ↦ case ((h.mul_left _).mul_right _)
+    have h_not_c : ¬ (37 : ℤ) ∣ (c / d) := fun h ↦ case (h.mul_left _)
     exact caseI_thirtyseven_of_bernoulli_conclusion e' h_not_c h_not_b
       (h_conclusion e' h_not_b h_not_c)
 
@@ -260,28 +224,17 @@ theorem fermatLastTheoremFor_thirtyseven_of_conclusion_and_vandiverLemma1
   intro a b c ha hb hc heq
   have hprod := mul_ne_zero (mul_ne_zero ha hb) hc
   obtain ⟨e', hgcd, hprod'⟩ := FltRegular.MayAssume.coprime heq hprod
-  set d : ℤ := ({a, b, c} : Finset ℤ).gcd id with hd_def
+  set d : ℤ := ({a, b, c} : Finset ℤ).gcd id
   by_cases case : (37 : ℤ) ∣ (a / d) * (b / d) * (c / d)
   · exact h_caseII hprod' hgcd case e'
-  · have h_not_b : ¬ (37 : ℤ) ∣ (b / d) := fun h => case ((h.mul_left _).mul_right _)
-    have h_not_c : ¬ (37 : ℤ) ∣ (c / d) := fun h => case (h.mul_left _)
+  · have h_not_b : ¬ (37 : ℤ) ∣ (b / d) := fun h ↦ case ((h.mul_left _).mul_right _)
+    have h_not_c : ¬ (37 : ℤ) ∣ (c / d) := fun h ↦ case (h.mul_left _)
     exact caseI_thirtyseven_of_bernoulli_conclusion e' h_not_c h_not_b
       (h_conclusion e' h_not_b h_not_c)
 
-/-! ## ℓ = 37 reduction: MBI + parity ⟹ `a ≡ b (mod 37)`
-
-The bridge `fltCaseI_a_eq_b_mod_p_of_mbi_and_parity` (in `CaseI.lean`)
-specialises to `ℓ = 37` to give the integer congruence directly from
-`MirimanoffBernoulliIdentity`. This isolates the substantive F37-A
-content (discharging MBI) from the case II / Vandiver Lemma 1 closure
-(F37-D). -/
-
-/-- **ℓ = 37 case I reduction: MBI ⟹ `a ≡ b (mod 37)`.**
-
-Specialises `fltCaseI_a_eq_b_mod_p_of_mbi_and_parity` to `ℓ = 37`,
-using the verified parity hypothesis `vandiverIIIHypothesis_thirtyseven`.
-Inputs are an FLT case I solution at 37 and the per-solution
-`MirimanoffBernoulliIdentity 37 a b`. -/
+/-- **ℓ = 37 case I reduction: MBI ⟹ `a ≡ b (mod 37)`.** From an FLT case I
+solution at 37 and `MirimanoffBernoulliIdentity 37 a b`, the congruence
+`a ≡ b (mod 37)` holds. -/
 theorem caseI_thirtyseven_a_eq_b_of_mbi
     {a b c : ℤ}
     (heq : a ^ 37 + b ^ 37 = c ^ 37)
@@ -295,10 +248,8 @@ theorem caseI_thirtyseven_a_eq_b_of_mbi
     vandiverIIIHypothesis_thirtyseven.2
 
 /-- **ℓ = 37 case I reduction: MBI ⟹ `MirimanoffPolynomialVanishingOdd 37`.**
-
-Specialises `mirimanoffPolynomialVanishingOdd_of_mbi_and_parity` to
-`ℓ = 37`. Equivalent in content to `caseI_thirtyseven_a_eq_b_of_mbi`
-(both encode `t = -1`), expressed at the polynomial level. -/
+The polynomial-level form of `caseI_thirtyseven_a_eq_b_of_mbi` (both encode
+`t = -1`). -/
 theorem caseI_thirtyseven_polynomialVanishing_of_mbi
     {a b c : ℤ}
     (heq : a ^ 37 + b ^ 37 = c ^ 37)
@@ -312,10 +263,8 @@ theorem caseI_thirtyseven_polynomialVanishing_of_mbi
     (by omega) (by decide) (by decide) heq ha hb hc hMI
     vandiverIIIHypothesis_thirtyseven.2
 
-/-- **ℓ = 37 specialisation of the F37-A3 descent sum bridge.**
-
-Once F37-A2 supplies proportional descent data for the `(ζ - 1)^2`
-coefficients `w_k`, their weighted sum is a scalar multiple of `φ_3(t)`. -/
+/-- **ℓ = 37 descent sum bridge.** For descent data `w` with constant `C`,
+the weighted sum `∑ w k * t ^ k` equals `C * φ₃(t)`. -/
 theorem caseI_thirtyseven_wIntDescent_sum_eq_const_mul_phi_three
     {w : ℕ → ZMod 37} {C t : ZMod 37}
     (h : WIntDescentData 37 w C) :
@@ -332,27 +281,6 @@ theorem caseI_thirtyseven_wIntDescent_sum_eq_zero_of_phi_three_eq_zero
     (∑ k ∈ Finset.Ico 1 37, w k * t ^ k) = 0 := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   exact WIntDescentData.sum_eq_zero_of_phi_three_eq_zero h hφ
-
-/-! ## ℓ = 37: Vandiver's plus-side coprimality predicate
-
-The case I decomposition (`fltCaseI_*_of_regular` family in `CaseI.lean`)
-currently requires full regularity `(37 : ℕ).Coprime |Cl(𝓞 K)|`. For
-`p = 37` this is *false* — `37` is irregular and `37 ∣ h⁻(K)` (witness
-`B_32` divisibility, see `thirtyseven_dvd_bernoulli_thirtytwo_num`).
-
-The classical Vandiver-style approach for irregular primes is to use
-the weaker "plus-side coprimality" `(37 : ℕ).Coprime h⁺(K)`, which is
-asserted by Vandiver's conjecture and verified computationally for all
-primes `< 1.6 × 10⁸` (Buhler/Crandall/Sompolski). For `p = 37`, this
-fact is true but its formalised proof requires class-number computation
-that is currently out of scope.
-
-We expose it here as the predicate `Vandiver37PlusCoprime`, to be
-discharged either:
-
-* externally as a hypothesis (currently);
-* eventually via a formalised computation of
-  `hPlus (CyclotomicField 37 ℚ)`. -/
 
 instance fact_prime_thirtyseven : Fact (Nat.Prime 37) :=
   ⟨by decide⟩
@@ -372,11 +300,7 @@ instance cyclotomicField_thirtyseven_isCMField :
 Asserts `(37 : ℕ).Coprime (hPlus (CyclotomicField 37 ℚ))`. This is a
 particular case of Vandiver's conjecture (`p ∤ h⁺` for the cyclotomic
 field of conductor `p`) — verified computationally for `p = 37` but
-not yet formalised here.
-
-Together with the Vandiver III parity hypothesis (irregular indices
-have even `k`) and T044 reflection, it discharges the regularity
-hypothesis used by the case I decomposition for irregular `p = 37`. -/
+not yet formalised here. -/
 def Vandiver37PlusCoprime : Prop :=
   (37 : ℕ).Coprime (hPlus (CyclotomicField 37 ℚ))
 
