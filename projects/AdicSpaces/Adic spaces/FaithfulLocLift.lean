@@ -116,11 +116,16 @@ localization `Bx`. mathlib has the field-case ingredients (`LocalSubring.exists_
 constructive ring-case extension; assembled here via the support→fraction-field→Chevalley route.
 
 **Status: `sorry`** (sub-ticket T-L4-EXT, parent T-L4 / Huber 3.3(i) HU-d). Standard commutative
-algebra (Chevalley's extension theorem for rings), in mathlib's scope. -/
-theorem exists_valuation_extension_of_injective
+algebra (Chevalley's extension theorem for rings), in mathlib's scope.
+
+⚠ The lying-over prime `q'` (with `comap q' = supp s`) is a **necessary** hypothesis, not a
+work-dodge: the bare-injective form is FALSE (a valuation need not extend if no prime of `S` lies
+over `supp s` — the generic-fibre obstruction). Huber uses exactly this ("there exists a prime
+ideal of A_a lying over q", huber2.txt:641); HU-d supplies `q'` from its minimal-prime setting. -/
+theorem exists_valuation_extension_of_prime_over
     {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
-    (hinj : Function.Injective (algebraMap R S))
-    {Γ : Type*} [LinearOrderedCommGroupWithZero Γ] (s : Valuation R Γ) :
+    {Γ : Type*} [LinearOrderedCommGroupWithZero Γ] (s : Valuation R Γ)
+    (q' : Ideal S) [q'.IsPrime] (hq' : Ideal.comap (algebraMap R S) q' = s.supp) :
     ∃ (Γ' : Type*) (_ : LinearOrderedCommGroupWithZero Γ') (t : Valuation S Γ'),
       s.IsEquiv (Valuation.comap (algebraMap R S) t) :=
   sorry

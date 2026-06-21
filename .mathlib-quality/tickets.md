@@ -628,15 +628,20 @@ FaithfulLocLift. **First /beastmode step**: state HU-a…e as `:= by sorry` and 
   valuation on the subring `R[x⁻¹] ⊆ Bx`; HU-d needs `t` on `Bx` extending `s`, then
   `Spv.comap (algebraMap B Bx)` gives `v : Spv B`.
 
-#### Statement (Chevalley extension, the form HU-d consumes)
+#### Statement (Chevalley extension, the form HU-d consumes) — ⚠ lying-over hypothesis REQUIRED
 ```lean
-theorem Valuation.exists_extension_of_injective
+theorem exists_valuation_extension_of_prime_over
     {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
-    (hinj : Function.Injective (algebraMap R S))   -- or the relevant flatness/lying-over hyp
-    {Γ : Type*} [LinearOrderedCommGroupWithZero Γ] (s : Valuation R Γ) :
+    {Γ : Type*} [LinearOrderedCommGroupWithZero Γ] (s : Valuation R Γ)
+    (q' : Ideal S) [q'.IsPrime] (hq' : Ideal.comap (algebraMap R S) q' = s.supp) :
     ∃ (Γ' : Type*) (_ : LinearOrderedCommGroupWithZero Γ') (t : Valuation S Γ'),
       s.IsEquiv (Valuation.comap (algebraMap R S) t) := by sorry
 ```
+**Adversarial correction (2026-06-21):** the bare-injective form is FALSE (a valuation need not
+extend with no prime over `supp s` — generic-fibre obstruction). The lying-over prime `q'` is a
+NECESSARY hypothesis (CLAUDE.md-justified: false without it); Huber supplies it (huber2.txt:641
+"a prime ideal of A_a lying over q"). HU-d must construct `q'` (prime of `Bx` over the minimal
+prime of `R[x⁻¹]`) — a further sub-step (going-up/structure of the localization `Bx`).
 
 #### Proof sketch (Chevalley/Zorn, ring case)
 1. Let `q = supp(s)`; `s` factors through `R/q ↪ Frac(R/q) = F` as a valuation `s̄` with valuation
