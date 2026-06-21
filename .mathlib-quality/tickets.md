@@ -660,10 +660,21 @@ prime of `R[x⁻¹]`) — a further sub-step (going-up/structure of the localiza
   `Subring.exists_le_valuationSubring_of_isIntegrallyClosedIn`) + the `HasExtension` predicate; the
   ring-case constructor must be assembled. Moderate (standard, in mathlib's scope) — NOT research-scale.
 
-#### Mathlib lemmas needed
-`LocalSubring.exists_le_valuationSubring`, `IsLocalRing.exists_factor_valuationRing`,
-`Valuation.comap`, `Valuation.IsEquiv`, support/`Frac` API, `Ideal.exists_minimalPrimes_le` /
-lying-over (`PrimeSpectrum.comap` surjectivity for the relevant inclusion).
+#### Mathlib lemmas needed (ALL FOUND 2026-06-21 — turnkey)
+- Step 1 ✅DONE: `Valuation.onQuot` (`s.onQuot le_rfl : Valuation (R⧸supp s) Γ`) +
+  `Valuation.instIsPrimeSuppOfNontrivialOfNoZeroDivisors` (supp prime).
+- Step 2 (domain → fraction field): `Valuation.extendToLocalization`
+  (`(v) (hS : S ≤ v.supp.primeCompl) (B) [IsLocalization S B] : Valuation B Γ`) at
+  `S = nonZeroDivisors (R⧸supp)`, `B = FractionRing (R⧸supp)`; needs `sQuot.supp = ⊥` (onQuot kills supp).
+  + `extendToLocalization_apply_map_apply` / `_mk'` for value computations.
+- Step 3 (embed via `hq'`): `R⧸supp ↪ S⧸q'` (Ideal.quotientMap from `hq' : comap q' = supp`);
+  `IsFractionRing.lift`/`FractionRing` functoriality → `F ↪ L = FractionRing (S⧸q')`.
+- Step 4 (extend valuation ring + back): `LocalSubring.exists_le_valuationSubring`
+  (`(A : LocalSubring K) : ∃ V, A ≤ V.toLocalSubring`) on the image of `sQuot_F.valuationSubring` in `L`;
+  `ValuationSubring.valuation (V : ValuationSubring L) : Valuation L V.ValueGroup`;
+  `t := Valuation.comap (S → S⧸q' → L) V.valuation`; `Valuation.isEquiv_valuation_valuationSubring`,
+  `ValuationSubring.integer_valuation`, `Valuation.IsEquiv` transitivity for the final `s.IsEquiv (comap t)`.
+- Lying-over `q'` (HU-d supplies it): `Ideal.exists_minimalPrimes_le` + the localization structure of `Bx`.
 
 ---
 
