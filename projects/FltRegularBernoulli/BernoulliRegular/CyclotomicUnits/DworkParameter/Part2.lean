@@ -231,7 +231,7 @@ theorem samePrimeNatDivEval_sum {ι : Type*} {N n s : ℕ}
   · intro a t hat ih hsum
     have htail : (∑ i ∈ t, z i) ∈
         (lambdaIdeal p K) ^ (n.factorization p * (p - 1) + s) :=
-      Ideal.sum_mem _ fun i _hi => hz i
+      Ideal.sum_mem _ fun i _hi ↦ hz i
     have hadd : z a + ∑ i ∈ t, z i ∈
         (lambdaIdeal p K) ^ (n.factorization p * (p - 1) + s) := by
       simpa [Finset.sum_insert, hat] using hsum
@@ -277,7 +277,7 @@ theorem samePrimeNatDivEval_mul_denominator_right {N n m s : ℕ} (hn : n ≠ 0)
   let cm : ℕ := ordCompl[p] m
   have hfac : (n * m).factorization p = vn + vm := by
     simpa [vn, vm] using
-      congrArg (fun f : ℕ →₀ ℕ => f p) (Nat.factorization_mul hn hm)
+      congrArg (fun f : ℕ →₀ ℕ ↦ f p) (Nat.factorization_mul hn hm)
   have hspec : ((p : R) ^ vn) * y = z := by
     simpa [R, vn, y] using
       samePrimeNatDivNumerator_mul_spec (p := p) (K := K) hz
@@ -358,7 +358,7 @@ theorem samePrimeNatDivEval_add_common_denominator {N n m s : ℕ} (hn : n ≠ 0
   have hfac : (n * m).factorization p =
       n.factorization p + m.factorization p := by
     simpa using
-      congrArg (fun f : ℕ →₀ ℕ => f p) (Nat.factorization_mul hn hm)
+      congrArg (fun f : ℕ →₀ ℕ ↦ f p) (Nat.factorization_mul hn hm)
   have hmz : (m : ValuedIntegerRing p K) * z ∈
       (lambdaIdeal p K) ^ ((n * m).factorization p * (p - 1) + s) := by
     have h := natCast_mul_mem_lambdaIdeal_pow_factorization_mul_pred_add
@@ -415,7 +415,7 @@ theorem samePrimeNatDivEval_factorial_weighted_mem {d n s : ℕ} (hn : n ≠ 0)
   have hfac :
       d.factorial.factorization p =
         (d.factorial / n).factorization p + n.factorization p := by
-    have h := congrArg (fun f : ℕ →₀ ℕ => f p) (Nat.factorization_mul hm hn)
+    have h := congrArg (fun f : ℕ →₀ ℕ ↦ f p) (Nat.factorization_mul hm hn)
     simpa [hmul_div] using h
   have h := natCast_mul_mem_lambdaIdeal_pow_factorization_mul_pred_add
     (p := p) (K := K) (c := d.factorial / n) hz
@@ -463,7 +463,7 @@ theorem samePrimeNatDivEval_Icc_sum_eq_zero_of_factorial_weighted_sum_eq_zero
   classical
   let t : Finset {n // n ∈ Finset.Icc 1 d} := (Finset.Icc 1 d).attach
   let w : {n // n ∈ Finset.Icc 1 d} → ValuedIntegerRing p K :=
-    fun a => ((d.factorial / a.1 : ℕ) : ValuedIntegerRing p K) * z a.1
+    fun a ↦ ((d.factorial / a.1 : ℕ) : ValuedIntegerRing p K) * z a.1
   have hw : ∀ a, w a ∈
       (lambdaIdeal p K) ^ (d.factorial.factorization p * (p - 1) + s) := by
     intro a
@@ -476,7 +476,7 @@ theorem samePrimeNatDivEval_Icc_sum_eq_zero_of_factorial_weighted_sum_eq_zero
           ((d.factorial / n : ℕ) : ValuedIntegerRing p K) * z n by
       simpa [t, w] using
         (Finset.sum_attach (Finset.Icc 1 d)
-          (fun n => ((d.factorial / n : ℕ) : ValuedIntegerRing p K) * z n))]
+          (fun n ↦ ((d.factorial / n : ℕ) : ValuedIntegerRing p K) * z n))]
     exact hclear
   have hsum_mem : (∑ a ∈ t, w a) ∈
       (lambdaIdeal p K) ^ (d.factorial.factorization p * (p - 1) + s) := by
@@ -531,7 +531,7 @@ theorem samePrimeNatDivEval_Icc_sum_eq_zero_of_factorial_weighted_sum_mem_lambda
   classical
   let T : Finset {n // n ∈ Finset.Icc 1 d} := (Finset.Icc 1 d).attach
   let w : {n // n ∈ Finset.Icc 1 d} → ValuedIntegerRing p K :=
-    fun a => ((d.factorial / a.1 : ℕ) : ValuedIntegerRing p K) * z a.1
+    fun a ↦ ((d.factorial / a.1 : ℕ) : ValuedIntegerRing p K) * z a.1
   have hw : ∀ a, w a ∈
       (lambdaIdeal p K) ^ (d.factorial.factorization p * (p - 1) + s) := by
     intro a
@@ -540,7 +540,7 @@ theorem samePrimeNatDivEval_Icc_sum_eq_zero_of_factorial_weighted_sum_mem_lambda
       (p := p) (K := K) (Nat.ne_zero_of_lt ha.1) ha.2 (hz a.1 a.2)
   have hsum_s : (∑ a ∈ T, w a) ∈
       (lambdaIdeal p K) ^ (d.factorial.factorization p * (p - 1) + s) :=
-    Ideal.sum_mem _ fun a _ha => hw a
+    Ideal.sum_mem _ fun a _ha ↦ hw a
   have hsum_t : (∑ a ∈ T, w a) ∈
       (lambdaIdeal p K) ^ (d.factorial.factorization p * (p - 1) + t) := by
     rw [show (∑ a ∈ T, w a) =
@@ -548,7 +548,7 @@ theorem samePrimeNatDivEval_Icc_sum_eq_zero_of_factorial_weighted_sum_mem_lambda
           ((d.factorial / n : ℕ) : ValuedIntegerRing p K) * z n by
       simpa [T, w] using
         (Finset.sum_attach (Finset.Icc 1 d)
-          (fun n => ((d.factorial / n : ℕ) : ValuedIntegerRing p K) * z n))]
+          (fun n ↦ ((d.factorial / n : ℕ) : ValuedIntegerRing p K) * z n))]
     exact hclear
   calc
     (∑ a ∈ (Finset.Icc 1 d).attach,
