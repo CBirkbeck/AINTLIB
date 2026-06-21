@@ -783,6 +783,202 @@ theorem ord_P_translateY_T4_coef_nonneg
     SmoothPlaneCurve.ord_P_add_le (P := P) _ _
   exact (le_min h12' h_neg_a3_nn).trans h123
 
+omit [Fintype K] in
+/-- Nonnegativity of `ord_P (y_gen)`: the generic `y`-coordinate has no pole at any smooth point,
+since its `pointValuation` is `≤ 1`.  Extracted from `ord_P_translateY_xy_eq_neg_three_at_2tor`. -/
+private theorem ord_P_y_gen_nonneg {P : (W_smooth W).SmoothPoint} :
+    (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P (y_gen W) := by
+  by_cases hf : y_gen W = 0
+  · rw [hf]
+    rw [show ((W_smooth W).ord_P P (0 : KE)) = ⊤ from
+        SmoothPlaneCurve.ord_P_zero]
+    exact le_top
+  · have h_v_le : (W_smooth W).pointValuation P (y_gen W) ≤ 1 :=
+      pointValuation_y_gen_le_one W P
+    have hv : (W_smooth W).pointValuation P (y_gen W) ≠ 0 :=
+      ((W_smooth W).pointValuation P).ne_zero_iff.mpr hf
+    unfold SmoothPlaneCurve.ord_P
+    rw [dif_neg hv]
+    rw [show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl,
+        WithTop.coe_le_coe]
+    have h_unz_le : WithZero.unzero hv ≤ 1 := by
+      rw [← WithZero.coe_le_coe, WithZero.coe_one, WithZero.coe_unzero]
+      exact h_v_le
+    have h_toAdd : (WithZero.unzero hv).toAdd ≤ 0 := by
+      have h1 : ((1 : Multiplicative ℤ)).toAdd = (0 : ℤ) := rfl
+      have h2 : Multiplicative.toAdd (WithZero.unzero hv) ≤
+          Multiplicative.toAdd (1 : Multiplicative ℤ) := h_unz_le
+      rw [h1] at h2; exact h2
+    omega
+
+omit [Fintype K] in
+/-- The `T2` term `-(2·a₁·yd²·xd)` has `ord_P ≥ 4` at 2-torsion, given `ord_P yd = 1`, `ord_P xd = 2`
+and `ord_P a₁ ≥ 0`.  Extracted from `ord_P_translateY_xy_eq_neg_three_at_2tor`. -/
+private theorem ord_P_translateY_T2_term_ge_four
+    {P : (W_smooth W).SmoothPoint} {a1 yd xd : KE}
+    (h_yd_sq : (W_smooth W).ord_P P (yd ^ 2) = ((2 : ℤ) : WithTop ℤ))
+    (h_xd_ord_eq : (W_smooth W).ord_P P xd = ((2 : ℤ) : WithTop ℤ))
+    (h_a1_nn : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P a1) :
+    ((4 : ℤ) : WithTop ℤ) ≤
+      (W_smooth W).ord_P P (-((2 : KE) * a1 * yd ^ 2 * xd)) := by
+  have h_neg : (W_smooth W).ord_P P (-((2 : KE) * a1 * yd ^ 2 * xd)) =
+      (W_smooth W).ord_P P ((2 : KE) * a1 * yd ^ 2 * xd) :=
+    SmoothPlaneCurve.ord_P_neg (P := P) _
+  rw [h_neg]
+  have h_mul₁ : (W_smooth W).ord_P P ((2 : KE) * a1 * yd ^ 2 * xd) =
+      (W_smooth W).ord_P P ((2 : KE) * a1 * yd ^ 2) +
+        (W_smooth W).ord_P P xd :=
+    SmoothPlaneCurve.ord_P_mul (P := P) _ _
+  have h_mul₂ : (W_smooth W).ord_P P ((2 : KE) * a1 * yd ^ 2) =
+      (W_smooth W).ord_P P ((2 : KE) * a1) +
+        (W_smooth W).ord_P P (yd ^ 2) :=
+    SmoothPlaneCurve.ord_P_mul (P := P) _ _
+  rw [h_mul₁, h_mul₂, h_yd_sq, h_xd_ord_eq]
+  have h_2a1_nn : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P ((2 : KE) * a1) := by
+    have h_mul : (W_smooth W).ord_P P ((2 : KE) * a1) =
+        (W_smooth W).ord_P P (2 : KE) +
+          (W_smooth W).ord_P P a1 :=
+      SmoothPlaneCurve.ord_P_mul (P := P) _ _
+    rw [h_mul]
+    have h_two_nn : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P (2 : KE) := by
+      have h_two_eq : (2 : KE) = algebraMap K KE 2 := by rw [map_ofNat]
+      rw [h_two_eq]
+      exact ord_P_algebraMap_F_nonneg W P 2
+    calc (0 : WithTop ℤ)
+        = 0 + 0 := by rw [zero_add]
+      _ ≤ (W_smooth W).ord_P P (2 : KE) +
+            (W_smooth W).ord_P P a1 :=
+          add_le_add h_two_nn h_a1_nn
+  have h_assoc : (W_smooth W).ord_P P ((2 : KE) * a1) +
+      ((2 : ℤ) : WithTop ℤ) + ((2 : ℤ) : WithTop ℤ) =
+      (W_smooth W).ord_P P ((2 : KE) * a1) +
+        (((2 : ℤ) : WithTop ℤ) + ((2 : ℤ) : WithTop ℤ)) :=
+    add_assoc _ _ _
+  rw [h_assoc]
+  calc ((4 : ℤ) : WithTop ℤ)
+      = 0 + (((2 : ℤ) : WithTop ℤ) + ((2 : ℤ) : WithTop ℤ)) := by rfl
+    _ ≤ (W_smooth W).ord_P P ((2 : KE) * a1) +
+          (((2 : ℤ) : WithTop ℤ) + ((2 : ℤ) : WithTop ℤ)) :=
+        add_le_add h_2a1_nn (le_refl _)
+
+omit [Fintype K] in
+/-- The `T3` term `(yd·(a₂ + 2x + xk') - a₁²·yd)·xd²` has `ord_P ≥ 4` at 2-torsion: the coefficient is
+nonnegative (`ord_P_translateY_T3_coef_nonneg`) and `ord_P xd² = 4`.  Extracted from
+`ord_P_translateY_xy_eq_neg_three_at_2tor`. -/
+private theorem ord_P_translateY_T3_term_ge_four
+    {P : (W_smooth W).SmoothPoint} {a1 a2 yd xd xk' : KE}
+    (h_yd_ord : (W_smooth W).ord_P P yd = ((1 : ℤ) : WithTop ℤ))
+    (h_xd_sq_eq : (W_smooth W).ord_P P (xd ^ 2) = ((4 : ℤ) : WithTop ℤ))
+    (h_xg_nn : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P (x_gen W))
+    (h_a1_nn : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P a1)
+    (h_a2_nn : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P a2)
+    (h_xk_nn : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P xk') :
+    ((4 : ℤ) : WithTop ℤ) ≤
+      (W_smooth W).ord_P P
+        ((yd * (a2 + (2 : KE) * x_gen W + xk') - a1 ^ 2 * yd) * xd ^ 2) := by
+  have h_T3_coef_nn : (0 : WithTop ℤ) ≤
+      (W_smooth W).ord_P P
+        (yd * (a2 + (2 : KE) * x_gen W + xk') - a1 ^ 2 * yd) :=
+    ord_P_translateY_T3_coef_nonneg W h_yd_ord h_xg_nn h_a1_nn h_a2_nn h_xk_nn
+  have h_mul : (W_smooth W).ord_P P
+        ((yd * (a2 + (2 : KE) * x_gen W + xk') - a1 ^ 2 * yd) * xd ^ 2) =
+      (W_smooth W).ord_P P (yd * (a2 + (2 : KE) * x_gen W + xk') - a1 ^ 2 * yd) +
+        (W_smooth W).ord_P P (xd ^ 2) :=
+    SmoothPlaneCurve.ord_P_mul (P := P) _ _
+  rw [h_mul, h_xd_sq_eq]
+  calc ((4 : ℤ) : WithTop ℤ) = 0 + ((4 : ℤ) : WithTop ℤ) := by rw [zero_add]
+    _ ≤ (W_smooth W).ord_P P (yd * (a2 + (2 : KE) * x_gen W + xk') - a1 ^ 2 * yd) +
+          ((4 : ℤ) : WithTop ℤ) :=
+        add_le_add h_T3_coef_nn (le_refl _)
+
+omit [Fintype K] in
+/-- The `T4` term `(-y + a₁·(a₂ + x + xk') - a₃)·xd³` has `ord_P ≥ 6` at 2-torsion: the coefficient is
+nonnegative (`ord_P_translateY_T4_coef_nonneg`) and `ord_P xd³ = 6`.  Extracted from
+`ord_P_translateY_xy_eq_neg_three_at_2tor`. -/
+private theorem ord_P_translateY_T4_term_ge_six
+    {P : (W_smooth W).SmoothPoint} {a1 a2 a3 xd xk' : KE}
+    (h_xd_cube_eq : (W_smooth W).ord_P P (xd ^ 3) = ((6 : ℤ) : WithTop ℤ))
+    (h_xg_nn : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P (x_gen W))
+    (h_yg_nn : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P (y_gen W))
+    (h_a1_nn : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P a1)
+    (h_a2_nn : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P a2)
+    (h_a3_nn : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P a3)
+    (h_xk_nn : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P xk') :
+    ((6 : ℤ) : WithTop ℤ) ≤
+      (W_smooth W).ord_P P
+        ((-y_gen W + a1 * (a2 + x_gen W + xk') - a3) * xd ^ 3) := by
+  have h_T4_coef_nn : (0 : WithTop ℤ) ≤
+      (W_smooth W).ord_P P
+        (-y_gen W + a1 * (a2 + x_gen W + xk') - a3) :=
+    ord_P_translateY_T4_coef_nonneg W h_xg_nn h_yg_nn h_a1_nn h_a2_nn h_a3_nn h_xk_nn
+  have h_mul : (W_smooth W).ord_P P
+        ((-y_gen W + a1 * (a2 + x_gen W + xk') - a3) * xd ^ 3) =
+      (W_smooth W).ord_P P (-y_gen W + a1 * (a2 + x_gen W + xk') - a3) +
+        (W_smooth W).ord_P P (xd ^ 3) :=
+    SmoothPlaneCurve.ord_P_mul (P := P) _ _
+  rw [h_mul, h_xd_cube_eq]
+  calc ((6 : ℤ) : WithTop ℤ) = 0 + ((6 : ℤ) : WithTop ℤ) := by rw [zero_add]
+    _ ≤ (W_smooth W).ord_P P (-y_gen W + a1 * (a2 + x_gen W + xk') - a3) +
+          ((6 : ℤ) : WithTop ℤ) :=
+        add_le_add h_T4_coef_nn (le_refl _)
+
+omit [Fintype K] in
+/-- Extract `ord_P f = -3` from `ord_P (f · g) = 3` and `ord_P g = 6`: since `f · g` has finite order,
+`f ≠ 0`, so `ord_P f` is a finite integer `k` with `k + 6 = 3`.  Extracted from
+`ord_P_translateY_xy_eq_neg_three_at_2tor` (with `g = xd³`). -/
+private theorem ord_P_eq_neg_three_of_mul_eq_three
+    {P : (W_smooth W).SmoothPoint} {f g : KE}
+    (h_LHS_ord : (W_smooth W).ord_P P (f * g) = ((3 : ℤ) : WithTop ℤ))
+    (h_g_ord : (W_smooth W).ord_P P g = ((6 : ℤ) : WithTop ℤ)) :
+    (W_smooth W).ord_P P f = ((-3 : ℤ) : WithTop ℤ) := by
+  have h_split₁ : (W_smooth W).ord_P P (f * g) =
+      (W_smooth W).ord_P P f + (W_smooth W).ord_P P g :=
+    SmoothPlaneCurve.ord_P_mul (P := P) f g
+  rw [h_split₁, h_g_ord] at h_LHS_ord
+  have h_f_ne : f ≠ 0 := by
+    intro h_zero
+    rw [h_zero] at h_LHS_ord
+    rw [show ((W_smooth W).ord_P P (0 : KE)) = ⊤ from
+        Curves.SmoothPlaneCurve.ord_P_zero] at h_LHS_ord
+    simp at h_LHS_ord
+  have h_f_ne_top : (W_smooth W).ord_P P f ≠ ⊤ :=
+    (SmoothPlaneCurve.ord_P_eq_top_iff _).not.mpr h_f_ne
+  cases ht_case : (W_smooth W).ord_P P f with
+  | top => exact absurd ht_case h_f_ne_top
+  | coe k =>
+      rw [ht_case] at h_LHS_ord
+      have h_int_eq : k + 6 = 3 := by
+        have h_sum : ((k + 6 : ℤ) : WithTop ℤ) = ((3 : ℤ) : WithTop ℤ) := by
+          rw [show ((k + 6 : ℤ) : WithTop ℤ) =
+            ((k : ℤ) : WithTop ℤ) + ((6 : ℤ) : WithTop ℤ) from by
+              push_cast; ring]
+          exact h_LHS_ord
+        exact_mod_cast h_sum
+      have h_k_eq : k = -3 := by omega
+      exact_mod_cast h_k_eq
+
+omit [Fintype K] in
+/-- A four-term sum `d + (A + (B + C))` has `ord_P` equal to that of its dominant term `d` when
+`ord_P d = 3` and each of `A`, `B`, `C` has `ord_P ≥ 4`.  Extracted from
+`ord_P_translateY_xy_eq_neg_three_at_2tor`. -/
+private theorem ord_P_dominant_sum_eq_three
+    {P : (W_smooth W).SmoothPoint} {d A B C : KE}
+    (h_d : (W_smooth W).ord_P P d = ((3 : ℤ) : WithTop ℤ))
+    (h_A : ((4 : ℤ) : WithTop ℤ) ≤ (W_smooth W).ord_P P A)
+    (h_B : ((4 : ℤ) : WithTop ℤ) ≤ (W_smooth W).ord_P P B)
+    (h_C : ((6 : ℤ) : WithTop ℤ) ≤ (W_smooth W).ord_P P C) :
+    (W_smooth W).ord_P P (d + (A + (B + C))) = ((3 : ℤ) : WithTop ℤ) := by
+  have h_BC : ((4 : ℤ) : WithTop ℤ) ≤ (W_smooth W).ord_P P (B + C) := by
+    have h_C' : ((4 : ℤ) : WithTop ℤ) ≤ (W_smooth W).ord_P P C :=
+      le_trans (by exact_mod_cast (show (4 : ℤ) ≤ 6 by norm_num)) h_C
+    exact (le_min h_B h_C').trans (SmoothPlaneCurve.ord_P_add_le (P := P) B C)
+  have h_ABC : ((4 : ℤ) : WithTop ℤ) ≤ (W_smooth W).ord_P P (A + (B + C)) :=
+    (le_min h_A h_BC).trans (SmoothPlaneCurve.ord_P_add_le (P := P) A (B + C))
+  have h_strict : (W_smooth W).ord_P P d < (W_smooth W).ord_P P (A + (B + C)) := by
+    rw [h_d]
+    exact lt_of_lt_of_le (by exact_mod_cast (show (3 : ℤ) < 4 by norm_num)) h_ABC
+  exact (SmoothPlaneCurve.ord_P_add_eq_of_lt h_strict).trans h_d
+
 set_option linter.unusedDecidableInType false in
 omit [Fintype K] in
 /-- **`ord_P (translateY_xy) = -3` at smooth 2-torsion `T`** via the algebraic
@@ -821,29 +1017,8 @@ theorem ord_P_translateY_xy_eq_neg_three_at_2tor (xk yk : K)
     ord_P_algebraMap_F_nonneg W P W.a₃
   have h_xk_nn : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P xk' :=
     ord_P_algebraMap_F_nonneg W P xk
-  have h_yg_nn : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P (y_gen W) := by
-    by_cases hf : y_gen W = 0
-    · rw [hf]
-      rw [show ((W_smooth W).ord_P P (0 : KE)) = ⊤ from
-          SmoothPlaneCurve.ord_P_zero]
-      exact le_top
-    · have h_v_le : (W_smooth W).pointValuation P (y_gen W) ≤ 1 :=
-        pointValuation_y_gen_le_one W P
-      have hv : (W_smooth W).pointValuation P (y_gen W) ≠ 0 :=
-        ((W_smooth W).pointValuation P).ne_zero_iff.mpr hf
-      unfold SmoothPlaneCurve.ord_P
-      rw [dif_neg hv]
-      rw [show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl,
-          WithTop.coe_le_coe]
-      have h_unz_le : WithZero.unzero hv ≤ 1 := by
-        rw [← WithZero.coe_le_coe, WithZero.coe_one, WithZero.coe_unzero]
-        exact h_v_le
-      have h_toAdd : (WithZero.unzero hv).toAdd ≤ 0 := by
-        have h1 : ((1 : Multiplicative ℤ)).toAdd = (0 : ℤ) := rfl
-        have h2 : Multiplicative.toAdd (WithZero.unzero hv) ≤
-            Multiplicative.toAdd (1 : Multiplicative ℤ) := h_unz_le
-        rw [h1] at h2; exact h2
-      omega
+  have h_yg_nn : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P (y_gen W) :=
+    ord_P_y_gen_nonneg W
   -- ord(yd^3) = 3 (at 2-tor — replaces non-2-tor's = 0).
   have h_yd_cube : (W_smooth W).ord_P P (yd^3) = ((3 : ℤ) : WithTop ℤ) := by
     have h_pow : (W_smooth W).ord_P P (yd^3) =
@@ -867,123 +1042,34 @@ theorem ord_P_translateY_xy_eq_neg_three_at_2tor (xk yk : K)
     rw [h_pow, h_xd_ord_eq]; rfl
   -- T2 = -2·a1·yd²·xd, ord ≥ 4 at 2-tor (vs ≥ 1 at non-2-tor).
   have h_T2 : ((4 : ℤ) : WithTop ℤ) ≤
-      (W_smooth W).ord_P P (-((2 : KE) * a1 * yd^2 * xd)) := by
-    have h_neg : (W_smooth W).ord_P P (-((2 : KE) * a1 * yd^2 * xd)) =
-        (W_smooth W).ord_P P ((2 : KE) * a1 * yd^2 * xd) :=
-      SmoothPlaneCurve.ord_P_neg (P := P) _
-    rw [h_neg]
-    have h_mul₁ : (W_smooth W).ord_P P ((2 : KE) * a1 * yd^2 * xd) =
-        (W_smooth W).ord_P P ((2 : KE) * a1 * yd^2) +
-          (W_smooth W).ord_P P xd :=
-      SmoothPlaneCurve.ord_P_mul (P := P) _ _
-    have h_mul₂ : (W_smooth W).ord_P P ((2 : KE) * a1 * yd^2) =
-        (W_smooth W).ord_P P ((2 : KE) * a1) +
-          (W_smooth W).ord_P P (yd^2) :=
-      SmoothPlaneCurve.ord_P_mul (P := P) _ _
-    rw [h_mul₁, h_mul₂, h_yd_sq, h_xd_ord_eq]
-    have h_2a1_nn : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P ((2 : KE) * a1) := by
-      have h_mul : (W_smooth W).ord_P P ((2 : KE) * a1) =
-          (W_smooth W).ord_P P (2 : KE) +
-            (W_smooth W).ord_P P a1 :=
-        SmoothPlaneCurve.ord_P_mul (P := P) _ _
-      rw [h_mul]
-      have h_two_nn : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P (2 : KE) := by
-        have h_two_eq : (2 : KE) = algebraMap K KE 2 := by rw [map_ofNat]
-        rw [h_two_eq]
-        exact ord_P_algebraMap_F_nonneg W P 2
-      calc (0 : WithTop ℤ)
-          = 0 + 0 := by rw [zero_add]
-        _ ≤ (W_smooth W).ord_P P (2 : KE) +
-              (W_smooth W).ord_P P a1 :=
-            add_le_add h_two_nn h_a1_nn
-    have h_assoc : (W_smooth W).ord_P P ((2 : KE) * a1) +
-        ((2 : ℤ) : WithTop ℤ) + ((2 : ℤ) : WithTop ℤ) =
-        (W_smooth W).ord_P P ((2 : KE) * a1) +
-          (((2 : ℤ) : WithTop ℤ) + ((2 : ℤ) : WithTop ℤ)) :=
-      add_assoc _ _ _
-    rw [h_assoc]
-    calc ((4 : ℤ) : WithTop ℤ)
-        = 0 + (((2 : ℤ) : WithTop ℤ) + ((2 : ℤ) : WithTop ℤ)) := by rfl
-      _ ≤ (W_smooth W).ord_P P ((2 : KE) * a1) +
-            (((2 : ℤ) : WithTop ℤ) + ((2 : ℤ) : WithTop ℤ)) :=
-          add_le_add h_2a1_nn (le_refl _)
-  have h_T3_coef_nn : (0 : WithTop ℤ) ≤
-      (W_smooth W).ord_P P
-        (yd * (a2 + (2 : KE) * x_gen W + xk') - a1^2 * yd) :=
-    ord_P_translateY_T3_coef_nonneg W h_yd_ord h_xg_nn h_a1_nn h_a2_nn h_xk_nn
+      (W_smooth W).ord_P P (-((2 : KE) * a1 * yd^2 * xd)) :=
+    ord_P_translateY_T2_term_ge_four W h_yd_sq h_xd_ord_eq h_a1_nn
+  -- T3 = (yd·(a2 + 2x + xk') - a1²·yd)·xd², ord ≥ 4 at 2-tor.
   have h_T3 : ((4 : ℤ) : WithTop ℤ) ≤
       (W_smooth W).ord_P P
-        ((yd * (a2 + (2 : KE) * x_gen W + xk') - a1^2 * yd) * xd^2) := by
-    have h_mul : (W_smooth W).ord_P P
-          ((yd * (a2 + (2 : KE) * x_gen W + xk') - a1^2 * yd) * xd^2) =
-        (W_smooth W).ord_P P (yd * (a2 + (2 : KE) * x_gen W + xk') - a1^2 * yd) +
-          (W_smooth W).ord_P P (xd^2) :=
-      SmoothPlaneCurve.ord_P_mul (P := P) _ _
-    rw [h_mul, h_xd_sq_eq]
-    calc ((4 : ℤ) : WithTop ℤ) = 0 + ((4 : ℤ) : WithTop ℤ) := by rw [zero_add]
-      _ ≤ (W_smooth W).ord_P P (yd * (a2 + (2 : KE) * x_gen W + xk') - a1^2 * yd) +
-            ((4 : ℤ) : WithTop ℤ) :=
-          add_le_add h_T3_coef_nn (le_refl _)
-  have h_T4_coef_nn : (0 : WithTop ℤ) ≤
-      (W_smooth W).ord_P P
-        (-y_gen W + a1 * (a2 + x_gen W + xk') - a3) :=
-    ord_P_translateY_T4_coef_nonneg W h_xg_nn h_yg_nn h_a1_nn h_a2_nn h_a3_nn h_xk_nn
+        ((yd * (a2 + (2 : KE) * x_gen W + xk') - a1^2 * yd) * xd^2) :=
+    ord_P_translateY_T3_term_ge_four W h_yd_ord h_xd_sq_eq h_xg_nn h_a1_nn h_a2_nn
+      h_xk_nn
+  -- T4 = (-y + a1·(a2 + x + xk') - a3)·xd³, ord ≥ 6 at 2-tor.
   have h_T4 : ((6 : ℤ) : WithTop ℤ) ≤
       (W_smooth W).ord_P P
-        ((-y_gen W + a1 * (a2 + x_gen W + xk') - a3) * xd^3) := by
-    have h_mul : (W_smooth W).ord_P P
-          ((-y_gen W + a1 * (a2 + x_gen W + xk') - a3) * xd^3) =
-        (W_smooth W).ord_P P (-y_gen W + a1 * (a2 + x_gen W + xk') - a3) +
-          (W_smooth W).ord_P P (xd^3) :=
-      SmoothPlaneCurve.ord_P_mul (P := P) _ _
-    rw [h_mul, h_xd_cube_eq]
-    calc ((6 : ℤ) : WithTop ℤ) = 0 + ((6 : ℤ) : WithTop ℤ) := by rw [zero_add]
-      _ ≤ (W_smooth W).ord_P P (-y_gen W + a1 * (a2 + x_gen W + xk') - a3) +
-            ((6 : ℤ) : WithTop ℤ) :=
-          add_le_add h_T4_coef_nn (le_refl _)
+        ((-y_gen W + a1 * (a2 + x_gen W + xk') - a3) * xd^3) :=
+    ord_P_translateY_T4_term_ge_six W h_xd_cube_eq h_xg_nn h_yg_nn h_a1_nn h_a2_nn
+      h_a3_nn h_xk_nn
   -- ord(-yd³) = 3 (at 2-tor, this is the DOMINANT term).
   have h_neg_yd_cube : (W_smooth W).ord_P P (-(yd^3)) = ((3 : ℤ) : WithTop ℤ) := by
     have h_neg_eq : (W_smooth W).ord_P P (-(yd^3)) =
         (W_smooth W).ord_P P (yd^3) :=
       SmoothPlaneCurve.ord_P_neg (P := P) _
     rw [h_neg_eq]; exact h_yd_cube
-  have h_T234 : ((4 : ℤ) : WithTop ℤ) ≤
-      (W_smooth W).ord_P P
-        (-((2 : KE) * a1 * yd^2 * xd) +
-          ((yd * (a2 + (2 : KE) * x_gen W + xk') - a1^2 * yd) * xd^2 +
-            (-y_gen W + a1 * (a2 + x_gen W + xk') - a3) * xd^3)) := by
-    have h_T34_le_four : ((4 : ℤ) : WithTop ℤ) ≤
-        (W_smooth W).ord_P P
-          ((yd * (a2 + (2 : KE) * x_gen W + xk') - a1^2 * yd) * xd^2 +
-            (-y_gen W + a1 * (a2 + x_gen W + xk') - a3) * xd^3) := by
-      have h_T4_le_four : ((4 : ℤ) : WithTop ℤ) ≤
-          (W_smooth W).ord_P P
-            ((-y_gen W + a1 * (a2 + x_gen W + xk') - a3) * xd^3) :=
-        le_trans (by exact_mod_cast (show (4 : ℤ) ≤ 6 by norm_num)) h_T4
-      have h_add := SmoothPlaneCurve.ord_P_add_le (P := P)
-        ((yd * (a2 + (2 : KE) * x_gen W + xk') - a1^2 * yd) * xd^2)
-        ((-y_gen W + a1 * (a2 + x_gen W + xk') - a3) * xd^3)
-      exact (le_min h_T3 h_T4_le_four).trans h_add
-    have h_add := SmoothPlaneCurve.ord_P_add_le (P := P)
-      (-((2 : KE) * a1 * yd^2 * xd))
-      ((yd * (a2 + (2 : KE) * x_gen W + xk') - a1^2 * yd) * xd^2 +
-        (-y_gen W + a1 * (a2 + x_gen W + xk') - a3) * xd^3)
-    exact (le_min h_T2 h_T34_le_four).trans h_add
-  have h_strict : (W_smooth W).ord_P P (-(yd^3)) <
-      (W_smooth W).ord_P P
-        (-((2 : KE) * a1 * yd^2 * xd) +
-          ((yd * (a2 + (2 : KE) * x_gen W + xk') - a1^2 * yd) * xd^2 +
-            (-y_gen W + a1 * (a2 + x_gen W + xk') - a3) * xd^3)) := by
-    rw [h_neg_yd_cube]
-    exact lt_of_lt_of_le (by exact_mod_cast (show (3 : ℤ) < 4 by norm_num))
-      h_T234
+  -- Dominant-term combination: ord(-yd³ + (T2 + (T3 + T4))) = 3.
   have h_RHS' : (W_smooth W).ord_P P
       (-(yd^3) +
         (-((2 : KE) * a1 * yd^2 * xd) +
           ((yd * (a2 + (2 : KE) * x_gen W + xk') - a1^2 * yd) * xd^2 +
             (-y_gen W + a1 * (a2 + x_gen W + xk') - a3) * xd^3))) =
       ((3 : ℤ) : WithTop ℤ) :=
-    (SmoothPlaneCurve.ord_P_add_eq_of_lt h_strict).trans h_neg_yd_cube
+    ord_P_dominant_sum_eq_three W h_neg_yd_cube h_T2 h_T3 h_T4
   have h_id : translateY_xy W xk yk * xd^3 =
       -(yd^3) +
         (-((2 : KE) * a1 * yd^2 * xd) +
@@ -994,33 +1080,8 @@ theorem ord_P_translateY_xy_eq_neg_three_at_2tor (xk yk : K)
     ring
   have h_LHS_ord : (W_smooth W).ord_P P (translateY_xy W xk yk * xd^3) =
       ((3 : ℤ) : WithTop ℤ) := h_id ▸ h_RHS'
-  have h_split₁ : (W_smooth W).ord_P P (translateY_xy W xk yk * xd^3) =
-      (W_smooth W).ord_P P (translateY_xy W xk yk) +
-      (W_smooth W).ord_P P (xd^3) :=
-    SmoothPlaneCurve.ord_P_mul (P := P) (translateY_xy W xk yk) (xd^3)
-  rw [h_split₁, h_xd_cube_eq] at h_LHS_ord
-  -- h_LHS_ord : ord_P translateY + 6 = 3 ⟹ ord_P translateY = -3.
-  have h_tY_ne : translateY_xy W xk yk ≠ 0 := by
-    intro h_zero
-    rw [h_zero] at h_LHS_ord
-    rw [show ((W_smooth W).ord_P P (0 : KE)) = ⊤ from
-        Curves.SmoothPlaneCurve.ord_P_zero] at h_LHS_ord
-    simp at h_LHS_ord
-  have h_tY_ne_top : (W_smooth W).ord_P P (translateY_xy W xk yk) ≠ ⊤ :=
-    (SmoothPlaneCurve.ord_P_eq_top_iff _).not.mpr h_tY_ne
-  cases ht_case : (W_smooth W).ord_P P (translateY_xy W xk yk) with
-  | top => exact absurd ht_case h_tY_ne_top
-  | coe k =>
-      rw [ht_case] at h_LHS_ord
-      have h_int_eq : k + 6 = 3 := by
-        have h_sum : ((k + 6 : ℤ) : WithTop ℤ) = ((3 : ℤ) : WithTop ℤ) := by
-          rw [show ((k + 6 : ℤ) : WithTop ℤ) =
-            ((k : ℤ) : WithTop ℤ) + ((6 : ℤ) : WithTop ℤ) from by
-              push_cast; ring]
-          exact h_LHS_ord
-        exact_mod_cast h_sum
-      have h_k_eq : k = -3 := by omega
-      exact_mod_cast h_k_eq
+  -- ord_P translateY + 6 = 3 ⟹ ord_P translateY = -3.
+  exact ord_P_eq_neg_three_of_mul_eq_three W h_LHS_ord h_xd_cube_eq
 
 /-- **Type abbreviation for the y-side substantive value at 2-torsion T**:
 `ord_P (translateY_xy) = -3` at the negated point. This is the single
