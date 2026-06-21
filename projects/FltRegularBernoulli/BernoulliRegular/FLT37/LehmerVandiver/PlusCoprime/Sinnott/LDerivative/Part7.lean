@@ -25,19 +25,9 @@ theorem sum_subtype_ne_eq_sum_erase
     {α : Type*} [Fintype α] [DecidableEq α] (a₀ : α) (f : α → ℂ)
     [Fintype {x : α // x ≠ a₀}] :
     ∑ x : {x : α // x ≠ a₀}, f x.val =
-      ∑ x ∈ (Finset.univ : Finset α).erase a₀, f x := by
-  classical
-  refine Finset.sum_bij (fun (x : {x : α // x ≠ a₀}) _ => x.val) ?_ ?_ ?_ ?_
-  · intro x _
-    rw [Finset.mem_erase]
-    exact ⟨x.property, Finset.mem_univ _⟩
-  · intro x₁ _ x₂ _ h
-    exact Subtype.ext h
-  · intro x hx
-    rw [Finset.mem_erase] at hx
-    obtain ⟨h_ne, _⟩ := hx
-    exact ⟨⟨x, h_ne⟩, Finset.mem_univ _, rfl⟩
-  · intro x _; rfl
+      ∑ x ∈ (Finset.univ : Finset α).erase a₀, f x :=
+  (Finset.sum_subtype ((Finset.univ : Finset α).erase a₀)
+    (fun x => by simp [Finset.mem_erase]) f).symm
 
 /-- **Character-eigenvalue of `(A - B)` along columns**:
 
@@ -79,19 +69,18 @@ theorem sum_char_sinnottMatrix_A_sub_B_eigenvalue
         convolutionMatrixLogNormEven p
           (kplusEmbeddingIndexQuotient (p := p) K
             NumberField.Units.dirichletUnitTheorem.w₀) 1) := by
-  classical
   letI : Fintype {c : BernoulliRegular.CyclotomicEvenDelta p //
       c ≠ kplusEmbeddingIndexQuotient (p := p) K
         NumberField.Units.dirichletUnitTheorem.w₀} :=
     Fintype.ofFinite _
-  rw [sum_kplus_not_w₀_char_sinnottMatrix_A_sub_B (p := p) K hp_odd hp_three hp_two ξ i]
-  rw [sum_subtype_ne_eq_sum_erase
-    (kplusEmbeddingIndexQuotient (p := p) K
-      NumberField.Units.dirichletUnitTheorem.w₀)
-    (fun c => ξ c * (convolutionMatrixLogNormEven p c
-        (BernoulliRegular.cyclotomicEvenDeltaQuotient p
-          (familyIndexAsUnit p K hp_odd hp_three i)) -
-      convolutionMatrixLogNormEven p c 1))]
+  rw [sum_kplus_not_w₀_char_sinnottMatrix_A_sub_B (p := p) K hp_odd hp_three hp_two ξ i,
+    sum_subtype_ne_eq_sum_erase
+      (kplusEmbeddingIndexQuotient (p := p) K
+        NumberField.Units.dirichletUnitTheorem.w₀)
+      (fun c => ξ c * (convolutionMatrixLogNormEven p c
+          (BernoulliRegular.cyclotomicEvenDeltaQuotient p
+            (familyIndexAsUnit p K hp_odd hp_three i)) -
+        convolutionMatrixLogNormEven p c 1))]
   exact sum_char_convolutionMatrixLogNormEven_col_diff_restricted (p := p) ξ
     (BernoulliRegular.cyclotomicEvenDeltaQuotient p
       (familyIndexAsUnit p K hp_odd hp_three i))
@@ -130,20 +119,13 @@ theorem sum_sinnottMatrix_A_sub_B_trivial
       convolutionMatrixLogNormEven p
         (kplusEmbeddingIndexQuotient (p := p) K
           NumberField.Units.dirichletUnitTheorem.w₀) 1) := by
-  classical
-  letI : Fintype {c : BernoulliRegular.CyclotomicEvenDelta p //
-      c ≠ kplusEmbeddingIndexQuotient (p := p) K
-        NumberField.Units.dirichletUnitTheorem.w₀} :=
-    Fintype.ofFinite _
   have h := sum_char_sinnottMatrix_A_sub_B_eigenvalue (p := p) K hp_odd hp_three hp_two
     (1 : MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) i
-  -- Simplify ξ = 1 throughout.
   have h_one_apply : ∀ c : BernoulliRegular.CyclotomicEvenDelta p,
       (1 : MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) c = 1 := fun c =>
     MulChar.one_apply (Group.isUnit c)
   simp only [h_one_apply, one_mul] at h
   rw [h]
-  -- The trivial-character eigenvalue (1 - 1) · qe(1) = 0; absorbed in `simp only`.
   ring
 
 /-- **Sinnott `(A - B)` entry via shifted bijection**:
@@ -170,9 +152,7 @@ theorem sinnottMatrix_A_sub_B_apply_eq_sub_shifted
           (kplusEmbeddingIndexQuotientShifted (p := p) K w.val *
             kplusEmbeddingIndexQuotient (p := p) K
               NumberField.Units.dirichletUnitTheorem.w₀) 1 := by
-  classical
   rw [sinnottMatrix_A_sub_B_apply_eq_sub p K hp_odd hp_three i w]
-  -- k_shifted(w) * k(w₀) = (k(w) * k(w₀)⁻¹) * k(w₀) = k(w).
   unfold kplusEmbeddingIndexQuotientShifted
   rw [show (kplusEmbeddingIndexQuotient p K w.val *
       (kplusEmbeddingIndexQuotient p K
@@ -299,8 +279,7 @@ theorem sinnottMatrix_A_sub_B_eq_U_sub_rank_one
           sinnottRankOnePerturbationVec p K w := by
   funext i w
   rw [sinnottMatrix_A_sub_B_apply_eq_sub p K hp_odd hp_three i w]
-  unfold sinnottShiftedConvolutionMatrix sinnottRankOnePerturbationVec
-  rw [Matrix.of_apply]
+  rfl
 
 /-- **`sinnottRankOnePerturbationVec` simp**: unwinds to the convolution-matrix entry. -/
 @[simp]
@@ -350,10 +329,8 @@ theorem sinnottShiftedConvolutionMatrix_eq_submatrix_transpose
             (NumberField.maximalRealSubfield K) //
             w ≠ NumberField.Units.dirichletUnitTheorem.w₀}) =>
           BernoulliRegular.cyclotomicEvenDeltaQuotient p
-            (familyIndexAsUnit p K hp_odd hp_three i))) := by
-  ext i w
-  simp only [sinnottShiftedConvolutionMatrix, Matrix.of_apply,
-    Matrix.transpose_apply, Matrix.submatrix_apply]
+            (familyIndexAsUnit p K hp_odd hp_three i))) :=
+  rfl
 
 /-- **Sinnott convolution matrix non-vanishing (named Prop)**: the determinant
 of the shifted-convolution sub-matrix `U` is a unit in ℂ.
@@ -381,9 +358,8 @@ theorem sinnottRankOnePerturbationVec_eq_convolutionLogNormDescended
         w ≠ NumberField.Units.dirichletUnitTheorem.w₀}) :
     sinnottRankOnePerturbationVec p K w =
       convolutionLogNormDescended p
-        (kplusEmbeddingIndexQuotient (p := p) K w.val) := by
-  unfold sinnottRankOnePerturbationVec
-  exact convolutionMatrixLogNormEven_col_one p _
+        (kplusEmbeddingIndexQuotient (p := p) K w.val) :=
+  convolutionMatrixLogNormEven_col_one p _
 
 /-- **Determinant of Sinnott matrix in `2^((p-3)/2) · det(A-B)` form**: the
 factor-of-2 extraction at the determinant level. -/
