@@ -33,8 +33,6 @@ the corrected second digit `r₆₈ = 21` in the actual power series.
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83, §8.4.
 -/
 
-set_option linter.style.longLine false
-
 @[expose] public section
 
 noncomputable section
@@ -68,7 +66,6 @@ theorem formalSum68_rat_eq :
         (CyclotomicUnits.rationalArtinHasseNormalizedExpMinusOneSeries 37) =
       ArtinHasse37.logG from rfl,
     ArtinHasse37.coeff_logG_eq (by norm_num : (68 : ℕ) ≤ 68)]
-
 
 set_option maxRecDepth 20000 in
 set_option maxHeartbeats 4000000 in
