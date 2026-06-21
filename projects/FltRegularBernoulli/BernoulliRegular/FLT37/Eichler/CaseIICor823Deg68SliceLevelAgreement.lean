@@ -1,8 +1,6 @@
 import BernoulliRegular.FLT37.Eichler.CaseIICor823Deg68NumeratorLevelDiff
 import BernoulliRegular.FLT37.Eichler.CaseIICor823Level71Deg68BridgeReduction
 
-set_option linter.style.longLine false
-
 /-!
 # The level-`107` deg-`68` slice, folded to precision `72`, **equals** the level-`71` deg-`68` slice
 
