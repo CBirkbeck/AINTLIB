@@ -1,5 +1,35 @@
 # Development Plan: §13 Stage G — Galois Λ-modules + the Vandiver IMC
 
+## FOUNDATION REBUILD — source-grounded roadmap (RJW arXiv:2309.15692 §13.2; re-read, not memory)
+
+`Iwasawa/GaloisFoundation.lean` builds RJW §13.2's REAL objects bottom-up. All bricks below are
+committed, axiom-clean (`propext/Classical.choice/Quot.sound`), umbrella green.
+
+DONE (bricks 1–6):
+- **1** `Fₙ=ℚ(μ_{pⁿ})`; **2** `Fₙ⁺` (maximalRealSubfield), CM `[Fₙ:Fₙ⁺]=2`, `Gal(Fₙ/ℚ)≅(ℤ/pⁿ)ˣ`.
+- **3** nested tower `F∞=⋃Fₙ` in `Ω=ℚ̄` (zeta, F, monotone, Finf); **4** `Γ=Gal(F∞/ℚ)` (IsGalois via
+  `normal_iSup`+perfect); **4b** real tower `F∞⁺=⋃ℚ(ζ+ζ⁻¹)` (powSum/Chebyshev), `Γ⁺`.
+- **5** `Fₙ,Fₙ⁺` number fields (⟹ `𝓞`, primes); absolute Galois groups `Gal(ℚ̄/Fₙ⁺)`, `Gal(ℚ̄/F∞⁺)`.
+- **6** `IsUnramifiedOutsideP` (via mathlib `IsUnramifiedAt`); `IsAdmissibleM/L`; `Mₙ⁺,Lₙ⁺` = ⨆ admissible
+  layers; `M∞⁺,L∞⁺` = adjoin over F∞⁺; **`X∞⁺=Gal(M∞⁺/F∞⁺)`, `Y∞⁺=Gal(L∞⁺/F∞⁺)`** — the central
+  module of Thm 13.11, now GENUINELY CONSTRUCTED (was the fake `Type*` stand-in).
+
+REUSE found in AINTLIB (one build unit): `FltRegular.NumberTheory.Unramified` (`IsUnramifiedAt`,
+`Algebra.Unramified`, separable-minpoly criteria); `FltRegularBernoulli` HilbertClassField/Reflection/
+Thaine (class-group-mod-p module, CFT data-interface pattern — honestly labelled stand-ins there).
+
+REMAINING (source-grounded; each piece real, no bundling):
+- **Γ⁺-action on X∞⁺ (Remark 13.7)** `σ·x=σ̃xσ̃⁻¹`. Tools identified: `AlgEquiv.restrictNormalHom`
+  (`Gal(M∞⁺/ℚ)↠Gal(F∞⁺/ℚ)`, surjective = lifts) + `X∞⁺=ker` + `ConjAct`; needs **X∞⁺ abelian**
+  (compositum-of-abelians) for well-defined descent to `Γ⁺=G/X∞⁺`. ⟹ `Λ(Γ⁺)`-module (needed to STATE Thm 13.11).
+- **Galois SES** `0→Gal(M∞⁺/L∞⁺)→X∞⁺→Y∞⁺→0` (fundamental thm of Galois theory; `L∞⁺≤M∞⁺`).
+- **CFT input = the ONE permitted assumption** — Prop 13.13 `0→E∞,₁⁺→U∞,₁⁺→Gal(M∞⁺/L∞⁺)→0`
+  ([Was97 Cor 13.6]); stated about the REAL constructed objects (units `U⁺` etc. from §12).
+- **Cor 13.14** (13.13 + SES + 3rd iso); **Prop 13.15/(13.2)** `Yₙ⁺≅Cl(Fₙ⁺)⊗ℤp` (Hilbert CFT, cf.
+  FltRegularBernoulli); **Cor 13.16** (Vandiver) `Y∞⁺=0`, `E∞,₁⁺/C∞,₁⁺=0`.
+- **Thm 11.9** `U∞,₁⁺/C∞,₁⁺≅Λ(Γ⁺)/I(Γ⁺)ζp` (PadicLFunctions §12 `iwasawa_theorem`; Λ-linear refinement open).
+- **Thm 13.11**: chain `X∞⁺ ≅ U∞,₁⁺/C∞,₁⁺ ≅ Λ(Γ⁺)/I(Γ⁺)ζp` (Cor 13.14+13.16(i,iii); Thm 11.9).
+
 ## STATUS (audited & corrected 2026-06-21) — §13 CAPSTONE RETRACTED; foundation rebuild started
 
 **The earlier "capstone" was NOT a faithful proof of RJW Thm 13.11 and has been removed.** It
