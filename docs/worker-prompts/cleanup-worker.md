@@ -21,6 +21,9 @@ Loop until your lane is empty or a freeze is active:
    None → exit. Else take the lowest number and
    `gh issue edit <n> --repo CBirkbeck/AINTLIB --add-assignee @me --add-label state:in-progress --remove-label state:todo`,
    then comment "claimed". If the edit shows it's already assigned, re-query (someone beat you).
+   **Protected paths:** before claiming, check `docs/worker-prompts/protected-paths.txt` — if the ticket's
+   target file matches a line there, do NOT claim it; comment "protected: dev-extraction in progress (#2546)",
+   leave it `state:todo`, and take the next lowest. (Those files are reserved for an active dev branch.)
 3. **Work.** `git fetch origin main`; create branch `cleanup/<n>` off `origin/main`. The issue targets a
    whole **file**. Run **`/cleanup` on that file** — it golfs *every* declaration in it, so you clean many
    lemmas in one ticket. **Preserve docstrings and math-explanatory comments — deleting documentation is

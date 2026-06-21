@@ -24,6 +24,9 @@ Loop until your lane is empty or a freeze is active:
    - **(a) Bounced-back reviews (priority):** `gh issue list --repo CBirkbeck/AINTLIB --label lane:generalise --label state:changes-requested --search "no:assignee" --json number,title`. A reviewer found a problem with a PR and sent it back — **finish these before taking new work.** Claim the lowest: `gh issue edit <n> --repo CBirkbeck/AINTLIB --add-assignee @me --add-label state:in-progress --remove-label state:changes-requested`.
    - **(b) New work:** else `gh issue list --repo CBirkbeck/AINTLIB --label lane:generalise --label state:todo --search "no:assignee" --json number,title`. Claim the lowest with `--add-assignee @me --add-label state:in-progress --remove-label state:todo`.
    Comment "claimed". If already assigned, re-query. None in either queue → exit.
+   **Protected paths:** before claiming, check `docs/worker-prompts/protected-paths.txt` — if the ticket's
+   target file matches a line there, do NOT claim it; comment "protected: dev-extraction in progress (#2546)",
+   leave it, and take the next lowest. (Reserved for an active dev branch.)
 3. **Work.**
    - **If this is a change-request (2a):** the reviewer told you exactly what to fix — read it: `gh issue view <n> --repo CBirkbeck/AINTLIB --comments` (and the PR thread, `gh pr view <its PR> --comments`). Then **reuse the EXISTING branch** (do NOT start fresh): `git fetch origin generalise/<n> && LEAN4_GUARDRAILS_BYPASS=1 git checkout generalise/<n>`; rebase onto `origin/main` if it moved; address exactly what was requested.
    - **If this is new work (2b):** `git fetch origin main`; branch `generalise/<n>` off `origin/main`; read the issue body for the target. Run **`/generalise`** on it. **If the target's proof contains a `sorry`, skip it** — comment, relabel back to `state:todo`, unassign — `sorry`s are the owning producer's WIP, never fleet work.

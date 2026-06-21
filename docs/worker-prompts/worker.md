@@ -26,6 +26,9 @@ Loop until the queue is empty or a freeze is active:
    - **(a)** `gh issue list --repo CBirkbeck/AINTLIB --label state:changes-requested --search "no:assignee" --limit 50 --json number,title,labels` → claim lowest with `gh issue edit <n> --add-assignee @me --add-label state:in-progress --remove-label state:changes-requested`. Finish these before new work.
    - **(b)** else `gh issue list --repo CBirkbeck/AINTLIB --label state:todo --search "no:assignee" --limit 50 --json number,title,labels` → claim lowest with `--add-assignee @me --add-label state:in-progress --remove-label state:todo`.
    Comment "claimed". Already assigned → re-query. None in either → exit.
+   **Protected paths:** before claiming (either queue), check `docs/worker-prompts/protected-paths.txt` — if the
+   ticket's target file matches a line there, do NOT claim it; comment "protected: dev-extraction in progress
+   (#2546)", leave it in place, and take the next lowest. (Those files are reserved for an active dev branch.)
 3. **Do the work**, on a branch `<lane>/<n>` off the latest `origin/main`, per the ticket's lane label.
    **If you claimed a `state:changes-requested` ticket (2a):** read the reviewer's required fixes — `gh issue view <n> --comments` + the PR thread `gh pr view <PR> --comments`; **reuse the EXISTING branch** `git fetch origin <lane>/<n> && LEAN4_GUARDRAILS_BYPASS=1 git checkout <lane>/<n>` (rebase onto main if it moved); address exactly what was asked; then re-verify (step 4) and re-push to the SAME PR (step 5) — relabel `state:in-progress`→`state:review`, comment "addressed: …", no new PR. **Otherwise (new `state:todo` work):**
    - **`lane:cleanup`** → run the **complete `/cleanup` skill** on the target file — the full methodical pass
