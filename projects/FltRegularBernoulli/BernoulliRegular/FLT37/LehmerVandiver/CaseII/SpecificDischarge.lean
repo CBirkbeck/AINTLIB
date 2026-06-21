@@ -2,7 +2,6 @@ import BernoulliRegular.FLT37.LehmerVandiver.CaseII.PrincipalDischarge
 import FltRegular.CaseII.InductionStep
 import FltRegular.NumberTheory.KummersLemma.KummersLemma
 
-
 /-!
 # LV-CaseII specific principalization discharge (refined)
 
@@ -508,7 +507,7 @@ program (or its refined `OnSpecific` variant). -/
 theorem adaptedKummersLemma_of_regular [Fintype (ClassGroup (𝓞 K))]
     (hreg : p.Coprime <| Fintype.card <| ClassGroup (𝓞 K))
     (hp_ne_two : p ≠ 2) :
-    AdaptedKummersLemma p K := fun u hcong =>
+    AdaptedKummersLemma p K := fun u hcong ↦
   eq_pow_prime_of_unit_of_congruent (K := K) hp_ne_two hreg u hcong
 
 set_option backward.isDefEq.respectTransparency false in
@@ -523,7 +522,7 @@ the predicate must be filled via class-equality analysis on the
 specific case-II ideals (`CaseIIPrincipalDischargeOnSpecific`). -/
 theorem caseIIPrincipalDischarge_of_regular [Fintype (ClassGroup (𝓞 K))]
     (hreg : p.Coprime <| Fintype.card <| ClassGroup (𝓞 K)) :
-    CaseIIPrincipalDischarge p K := fun I hIp =>
+    CaseIIPrincipalDischarge p K := fun I hIp ↦
   isPrincipal_of_isPrincipal_pow_of_Coprime' p hreg I hIp
 
 set_option backward.isDefEq.respectTransparency false in
