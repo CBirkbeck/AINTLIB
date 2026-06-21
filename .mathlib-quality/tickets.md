@@ -540,15 +540,21 @@ Wedhorn Prop 7.41 (p.66, `wedhorn.txt:3438`); "height 1" ⟺ `MulArchimedean` va
     - ✅ HU-e(2): `¬ v.vle x 1` (v(x)>1) — bridge `v.vle ↔ t∘(B→Bx)` via `Valuation.Compatible.vle_iff_le`,
       `t(x⁻¹)<1` (from `s(x⁻¹)<1` + `ht_equiv`), `x⁻¹·x=1` (`mul_invSelf`) ⟹ `t(x)>1`.
     - ✅ HU-e(1b): `v ≤ 1` on `B⁺` — `f∈B⁺ ⊆ R`, `s f ≤ 1` (`hs_le`) transported by `ht_equiv`.
-    - ⏳ **ONE leaf left = HU-e(1a) continuity** (`v.IsContinuous`). The criterion IS proven sorry-free
-      (`Spv.isContinuous_of_isInSpvAI_of_lt_one`, SpvAI.lean:294, axiom-clean). Applying it needs
-      `P:PairOfDefinition` (have: `IsHuberRing.exists_pairOfDefinition` / `presheafValue_pairOfDefinition_concrete`),
-      `h_in:IsInSpvAI` (Huber d), `h_lt_one:v<1 on I` (Huber c, G-open argument), `h_le_one:v≤1 on A₀`.
-      ⚠ **FAITHFULNESS FLAG (A₀ vs A°°):** the in-repo criterion's `h_le_one` is over the ring of
-      definition `A₀`, but Huber's (3.1) uses `A°°` (weaker); since `A⁺ ⊆ A₀` (Presheaf:236) the proven
-      `v≤1 on A⁺` does NOT give `v≤1 on A₀`. Resolve by proving an `A°°`-form criterion (Huber-faithful)
-      OR choosing `P` with `A₀ ⊆ {v≤1}`. Faithful cited-external leaf (Huber's own (3.1)). Documented
-      in the `mem_plus` continuity `sorry`.
+    - ⏳ **ONE leaf left = HU-e(1a) continuity** (`v.IsContinuous`).
+      ✅ **A°°-FORM CRITERION BUILT sorry-free 2026-06-21** (the key faithful piece). Source-verified
+      (Huber Thm 3.1, huber2.txt:585): the faithful criterion uses `A°°` not `A₀`. The in-repo
+      `Spv.isContinuous_of_isInSpvAI_of_lt_one` is the **A₀-form** (h_le_one over the ring of definition),
+      STRONGER than Huber's `A°°`-form — since `A⁺⊆A₀` (Presheaf:236) and `v≤1` is known only on `A⁺`, it
+      is NOT applicable here. Built the faithful replacement in SpvAI.lean (commit): `cofinalValue_principal_pow_lt`
+      (the `I^n` decay for PRINCIPAL `I=(π)` via `a=π^(n-1)(πb)`, `πb∈A°°` — uses `v≤1 on A°°`, NOT `A₀`) +
+      `Spv.isContinuous_of_isInSpvAI_of_lt_one_principal` (Huber 3.1 reverse, A°°-form).
+      **Remaining wiring** (`P:=IsTateRing.principalPair B`; witness `restrictIdeal v (Ideal.map A₀.subtype P.I)`,
+      which preserves `v(x)>1` [v(x)≥1∈cΓ] and `v≤1 on B⁺`; (c) `v≤1 on B°°` via `B°°⊆B⁺`) bottoms at
+      property (d) `IsInSpvAI`, i.e. the **documented project sorry `ofValuation_restrictIdeal_isInSpvAI`**
+      (SpvAITopology.lean:484 = Wedhorn 7.4(ii)/7.5(2): the `ConvexSubgroup.minContain` cofinal/microbial
+      dichotomy — a deep standalone spectral-machinery leaf, one of SpvAITopology's 37 sorries). THE single
+      remaining bottom of T-L4's continuity = this Wedhorn 7.4(ii) dichotomy. Faithful cited-external
+      (Huber Thm 3.1). All other parts of Huber 3.3(i) ✓ proven.
 
 #### Statement
 ```lean
