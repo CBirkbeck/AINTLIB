@@ -2,7 +2,6 @@ import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.CyclotomicUnitF
 import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.PollaczekFamilyDescent
 import Mathlib.NumberTheory.NumberField.Units.DirichletTheorem
 
-
 /-!
 # Logarithmic embedding of cyclotomic-unit family elements
 
@@ -299,7 +298,6 @@ theorem log_norm_cyclotomicUnit_eq_sub
           (w ((((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K) : K) ^ k - 1)) := by
     rw [← Real.log_mul h_w_cycU h_w_zsub, h_prod]
   linarith
-
 
 /-! ## PF-1-Real: `realCyclotomicUnit` log via `cyclotomicUnit` log
 
