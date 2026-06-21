@@ -172,7 +172,7 @@ injective on `{1,…,18}` in `𝔽₃₇` — the elementary, inverse-free fact 
 `caseIIThm95_sq_inv_injective`.  Pure `ZMod 37` arithmetic (`+`, `*`, `^`, `=`),
 so kernel-reducible by `decide` (no field inverse, no `ZMod.val`). -/
 theorem caseIIThm95_sq_injective :
-    Function.Injective (fun a : Fin 18 => ((a.1 + 1 : ℕ) : ZMod 37) ^ 2) := by
+    Function.Injective (fun a : Fin 18 ↦ ((a.1 + 1 : ℕ) : ZMod 37) ^ 2) := by
   decide
 
 /-- **`a ↦ (a⁻¹)²` is injective on the half-range `{1,…,18}` in `𝔽₃₇`.**  The
@@ -186,7 +186,7 @@ defined by well-founded `Nat.gcdA` recursion); instead we reduce to the proven
 (`Fact (Nat.Prime 37)`), `(a⁻¹)² = (a²)⁻¹` (`inv_pow`) and `·⁻¹` is injective
 (`inv_injective`), so `(a⁻¹)² = (b⁻¹)²` gives `a² = b²`, whence `a = b`. -/
 theorem caseIIThm95_sq_inv_injective :
-    Function.Injective (fun a : Fin 18 => ((a.1 + 1 : ℕ) : ZMod 37)⁻¹ ^ 2) := by
+    Function.Injective (fun a : Fin 18 ↦ ((a.1 + 1 : ℕ) : ZMod 37)⁻¹ ^ 2) := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   intro a b hab
   have hab2 : ((a.1 + 1 : ℕ) : ZMod 37) ^ 2 = ((b.1 + 1 : ℕ) : ZMod 37) ^ 2 := by
@@ -202,7 +202,7 @@ minimal counterexample": it is `det(a^{-i})` up to the unit factor `∏ₐ w_a`,
 "essentially a Vandermonde determinant" in Washington's words.  Proven from
 `caseIIThm95_sq_inv_injective` via mathlib `det_vandermonde_ne_zero_iff`. -/
 theorem caseIIThm95_vandermonde_det_ne_zero :
-    (Matrix.vandermonde (fun a : Fin 18 => ((a.1 + 1 : ℕ) : ZMod 37)⁻¹ ^ 2)).det ≠ 0 := by
+    (Matrix.vandermonde (fun a : Fin 18 ↦ ((a.1 + 1 : ℕ) : ZMod 37)⁻¹ ^ 2)).det ≠ 0 := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   rw [Matrix.det_vandermonde_ne_zero_iff]
   exact caseIIThm95_sq_inv_injective
@@ -257,12 +257,12 @@ theorem caseIIThm95_coeff_collapse_even (c : Fin 18 → ZMod 37)
       ∑ i : Fin 18, c i * (((a.1 + 1 : ℕ) : ZMod 37)⁻¹) ^ (2 * (i.1 + 1)) = 0) :
     c = 0 := by
   -- Reduce the even-index form to the Vandermonde form by pulling out (a⁻¹)².
-  refine caseIIThm95_coeff_collapse c (fun a => ?_)
+  refine caseIIThm95_coeff_collapse c (fun a ↦ ?_)
   have hfactor : ∑ i : Fin 18, c i * (((a.1 + 1 : ℕ) : ZMod 37)⁻¹ ^ 2) ^ (i : ℕ) =
       (((a.1 + 1 : ℕ) : ZMod 37)⁻¹ ^ 2)⁻¹ *
         ∑ i : Fin 18, c i * (((a.1 + 1 : ℕ) : ZMod 37)⁻¹) ^ (2 * (i.1 + 1)) := by
     rw [Finset.mul_sum]
-    refine Finset.sum_congr rfl (fun i _ => ?_)
+    refine Finset.sum_congr rfl (fun i _ ↦ ?_)
     -- (a⁻¹)^{2(i+1)} = (a⁻¹)² · ((a⁻¹)²)^i, and ((a⁻¹)²)⁻¹·(a⁻¹)² = 1.
     have hpow : (((a.1 + 1 : ℕ) : ZMod 37)⁻¹) ^ (2 * (i.1 + 1)) =
         ((a.1 + 1 : ℕ) : ZMod 37)⁻¹ ^ 2 * (((a.1 + 1 : ℕ) : ZMod 37)⁻¹ ^ 2) ^ (i : ℕ) := by
@@ -354,7 +354,7 @@ theorem caseIIThm95Descent37_of_lemma99Bridge
     CaseIIThm95Descent37 := by
   intro hV
   refine FLT37.LehmerVandiver.CaseII.caseIIBridge_thirtyseven_of_descent_step
-    (fun hV' hSO {_m} D =>
+    (fun hV' hSO {_m} D ↦
       FLT37.LehmerVandiver.CaseII.caseII_descent_step_under_vandiver37
         h_adjGens h_lemma99 hV' hSO D)
 
