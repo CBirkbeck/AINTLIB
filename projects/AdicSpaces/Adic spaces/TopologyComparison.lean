@@ -249,6 +249,107 @@ private theorem scaledCoeff_zero_tX_mul (f t : A) (g : ↥(TateAlgebra A)) :
     algebraMap A _ t * (TateAlgebra.X * g) from by ring,
     TateAlgebra.coeff_algebraMap_mul, TateAlgebra.coeff_zero_X_mul, mul_zero, mul_zero]
 
+/-- The self-preserving T-topology neighborhood `G` used in the continuity proof:
+the set of `g ∈ A⟨X⟩` whose scaled coefficients `s ^ n · coeff n g` lie in the
+image of `I ^ (M + (N - n) * C)` for every `n ≤ N`. The `(N - n) * C` shift budget
+is what lets `G` absorb a multiplication by `algebraMap t * X` (Artin-Rees). -/
+private def artinReesNhd (P : PairOfDefinition A) (s : A) (C M N : ℕ) :
+    Set ↥(TateAlgebra A) := fun g ↦
+  ∀ n : ℕ, n ≤ N →
+    s ^ n * TateAlgebra.coeff n g ∈
+      Subtype.val '' ((P.I ^ (M + (N - n) * C) : Ideal P.A₀) : Set P.A₀)
+
+set_option linter.unusedSectionVars false in
+/-- `0 ∈ artinReesNhd`. -/
+private theorem zero_mem_artinReesNhd (P : PairOfDefinition A) (s : A) (C M N : ℕ) :
+    (0 : ↥(TateAlgebra A)) ∈ artinReesNhd P s C M N := by
+  intro n _
+  have : TateAlgebra.coeff n (0 : ↥(TateAlgebra A)) = 0 := map_zero _
+  rw [this, mul_zero]
+  exact ⟨0, (P.I ^ _).zero_mem, rfl⟩
+
+set_option linter.unusedSectionVars false in
+/-- `artinReesNhd` is closed under addition. -/
+private theorem add_mem_artinReesNhd (P : PairOfDefinition A) (s : A) (C M N : ℕ)
+    {a b : ↥(TateAlgebra A)} (ha : a ∈ artinReesNhd P s C M N)
+    (hb : b ∈ artinReesNhd P s C M N) : a + b ∈ artinReesNhd P s C M N := by
+  intro n hn
+  have hcoeff_add : TateAlgebra.coeff n (a + b) =
+      TateAlgebra.coeff n a + TateAlgebra.coeff n b := map_add _ _ _
+  rw [hcoeff_add, mul_add]
+  obtain ⟨x, hx, hx_eq⟩ := ha n hn
+  obtain ⟨y, hy, hy_eq⟩ := hb n hn
+  exact ⟨x + y, (P.I ^ _).add_mem hx hy, by rw [Subring.coe_add, ← hx_eq, ← hy_eq]⟩
+
+set_option linter.unusedSectionVars false in
+/-- `artinReesNhd` is closed under negation. -/
+private theorem neg_mem_artinReesNhd (P : PairOfDefinition A) (s : A) (C M N : ℕ)
+    {a : ↥(TateAlgebra A)} (ha : a ∈ artinReesNhd P s C M N) :
+    -a ∈ artinReesNhd P s C M N := by
+  intro n hn
+  have hcoeff_neg : TateAlgebra.coeff n (-a) = -TateAlgebra.coeff n a := map_neg _ _
+  rw [hcoeff_neg, mul_neg]
+  obtain ⟨x, hx, hx_eq⟩ := ha n hn
+  exact ⟨-x, (P.I ^ _).neg_mem hx, by rw [NegMemClass.coe_neg, ← hx_eq]⟩
+
+/-- `artinReesNhd` is a neighborhood of `0` in the T-topology: it is the finite
+intersection (over `n ≤ N`) of preimages of the open sets `val '' I^…` under the
+continuous scaled-coefficient maps. -/
+private theorem artinReesNhd_mem_nhds (P : PairOfDefinition A) (s : A) (C M N : ℕ) :
+    artinReesNhd P s C M N ∈
+      @nhds _ (TateAlgebraWedhorn.tateTopologyT s) 0 := by
+  letI τT : TopologicalSpace ↥(TateAlgebra A) := TateAlgebraWedhorn.tateTopologyT s
+  have hG_eq : artinReesNhd P s C M N =
+      ⋂ (i : Fin (N + 1)), {g | s ^ (i : ℕ) * TateAlgebra.coeff (i : ℕ) g ∈
+        Subtype.val '' ((P.I ^ (M + (N - (i : ℕ)) * C) : Ideal P.A₀) : Set P.A₀)} := by
+    ext g; simp only [artinReesNhd, Set.mem_iInter, Set.mem_setOf_eq]
+    constructor
+    · intro hg ⟨i, hi⟩; exact hg i (by omega)
+    · intro hg n hn; exact hg ⟨n, by omega⟩
+  rw [mem_nhds_iff]
+  refine ⟨_, le_refl _, ?_, zero_mem_artinReesNhd P s C M N⟩
+  rw [hG_eq]
+  exact isOpen_iInter_of_finite fun ⟨n, _⟩ ↦
+    (P.pow_image_isOpen _).preimage
+      (TateAlgebraWedhorn.tateTopologyT_continuous_scaledCoeff s n)
+
+set_option linter.unusedSectionVars false in
+/-- `artinReesNhd` is stable under multiplication by `algebraMap a₀` for `a₀ ∈ A₀`:
+multiplying scales each coefficient by `a₀`, and `a₀ · I^k ⊆ I^k`. -/
+private theorem mul_algebraMap_mem_artinReesNhd (P : PairOfDefinition A) (s : A)
+    (C M N : ℕ) (a₀ : P.A₀) {g : ↥(TateAlgebra A)}
+    (hg : g ∈ artinReesNhd P s C M N) :
+    algebraMap A _ (a₀ : A) * g ∈ artinReesNhd P s C M N := by
+  intro n hn
+  rw [scaledCoeff_algebraMap_mul]
+  obtain ⟨b, hb, hb_eq⟩ := hg n hn
+  exact ⟨a₀ * b, Ideal.mul_mem_left _ _ hb, by rw [MulMemClass.coe_mul, ← hb_eq]⟩
+
+set_option linter.unusedSectionVars false in
+/-- `artinReesNhd` is stable under multiplication by `algebraMap t * X` for any `t`
+with the Artin-Rees shift property `hC_shift`: the `X` shifts the coefficient index
+up by one (consuming one unit of the `(N - n) * C` budget), and `s * t` carries
+`I^(j+C)` back into `I^j`. -/
+private theorem mul_algebraMap_X_mem_artinReesNhd (P : PairOfDefinition A) (s t : A)
+    (C M N : ℕ)
+    (hC_shift : ∀ (k : ℕ) (b : P.A₀), (b : P.A₀) ∈ P.I ^ (k + C) →
+      s * t * (b : A) ∈ Subtype.val '' ((P.I ^ k : Ideal P.A₀) : Set P.A₀))
+    {g : ↥(TateAlgebra A)} (hg : g ∈ artinReesNhd P s C M N) :
+    algebraMap A _ t * TateAlgebra.X * g ∈ artinReesNhd P s C M N := by
+  intro n hn
+  by_cases hn0 : n = 0
+  · subst hn0
+    rw [scaledCoeff_zero_tX_mul]; exact ⟨0, (P.I ^ _).zero_mem, rfl⟩
+  · obtain ⟨n', rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn0
+    rw [scaledCoeff_succ_tX_mul]
+    have hn' : n' ≤ N := by omega
+    obtain ⟨b, hb, hb_eq⟩ := hg n' hn'
+    rw [← hb_eq]
+    have hkey : M + (N - n') * C = (M + (N - (n' + 1)) * C) + C := by
+      have : N - n' = N - (n' + 1) + 1 := by omega
+      rw [this, add_mul, one_mul]; omega
+    exact hC_shift (M + (N - (n' + 1)) * C) b (hkey ▸ hb)
+
 set_option linter.unusedSectionVars false in
 /-- For any neighborhood W of 0 in the quotient T-topology, there exists m such that
 for all r in locSubring and b in I^m, the product phi(r) * mk(algebraMap(b)) lands in W.
@@ -318,11 +419,8 @@ private theorem locToQuotient_mul_small_constant_mem (D : RationalLocData A)
   choose m_fn hm_fn using hm_exists
   let N := (Idx.image (fun i : Fin 1 →₀ ℕ ↦ i 0)).sup id
   let M := (Idx.image m_fn).sup id
-  -- Step 5: Construct G — the self-preserving neighborhood.
-  let G : Set ↥(TateAlgebra A) := fun g ↦
-    ∀ n : ℕ, n ≤ N →
-      s ^ n * TateAlgebra.coeff n g ∈
-        Subtype.val '' ((P.I ^ (M + (N - n) * C) : Ideal P.A₀) : Set P.A₀)
+  -- Step 5: Construct G — the self-preserving neighborhood (see `artinReesNhd`).
+  let G : Set ↥(TateAlgebra A) := artinReesNhd P s C M N
   -- Step 5a: G is contained in mk⁻¹(W).
   have hG_sub_W : G ⊆ mk ⁻¹' W := by
     intro g hg
@@ -349,82 +447,25 @@ private theorem locToQuotient_mul_small_constant_mem (D : RationalLocData A)
     -- TateAlgebra.coeff (i 0) g = MvPowerSeries.coeff A (Finsupp.single 0 (i 0)) g
     --                            = g.val (Finsupp.single 0 (i 0)) = g.val i
     -- So the result follows from hg_i + hsub + hm_fn.
-    -- We use hi_eq to convert: g.val i = g.val (Finsupp.single 0 (i 0))
-    -- which equals TateAlgebra.coeff (i 0) g.
-    -- g.val i = TateAlgebra.coeff (i 0) g since i = Finsupp.single 0 (i 0).
-    -- So scaleIncl = s^(i 0) * TateAlgebra.coeff (i 0) g.
     have hscale : s ^ i 0 * g.val i =
         s ^ i 0 * TateAlgebra.coeff (i 0) g := by
       congr 1; change g.val i = g.val (Finsupp.single 0 (i 0)); rw [← hi_eq]
     rw [hscale]
     exact hm_fn i (hsub hg_i)
-  -- Step 5b: G is an additive subgroup.
-  have hG_zero : (0 : ↥(TateAlgebra A)) ∈ G := by
-    intro n _
-    have : TateAlgebra.coeff n (0 : ↥(TateAlgebra A)) = 0 := map_zero _
-    rw [this, mul_zero]
-    exact ⟨0, (P.I ^ _).zero_mem, rfl⟩
-  have hG_add : ∀ {a b}, a ∈ G → b ∈ G → a + b ∈ G := by
-    intro a b ha hb n hn
-    have hcoeff_add : TateAlgebra.coeff n (a + b) =
-        TateAlgebra.coeff n a + TateAlgebra.coeff n b := map_add _ _ _
-    rw [hcoeff_add, mul_add]
-    obtain ⟨x, hx, hx_eq⟩ := ha n hn
-    obtain ⟨y, hy, hy_eq⟩ := hb n hn
-    exact ⟨x + y, (P.I ^ _).add_mem hx hy,
-      by rw [Subring.coe_add, ← hx_eq, ← hy_eq]⟩
-  have hG_neg : ∀ {a}, a ∈ G → -a ∈ G := by
-    intro a ha n hn
-    have hcoeff_neg : TateAlgebra.coeff n (-a) = -TateAlgebra.coeff n a := map_neg _ _
-    rw [hcoeff_neg, mul_neg]
-    obtain ⟨x, hx, hx_eq⟩ := ha n hn
-    exact ⟨-x, (P.I ^ _).neg_mem hx, by rw [NegMemClass.coe_neg, ← hx_eq]⟩
-  -- Step 5c: G ∈ nhds 0 in the T-topology.
-  have hG_eq : G = ⋂ (i : Fin (N + 1)), {g | s ^ (i : ℕ) * TateAlgebra.coeff (i : ℕ) g ∈
-      Subtype.val '' ((P.I ^ (M + (N - (i : ℕ)) * C) : Ideal P.A₀) : Set P.A₀)} := by
-    ext g; simp only [Set.mem_iInter, Set.mem_setOf_eq]
-    constructor
-    · intro hg ⟨i, hi⟩; exact hg i (by omega)
-    · intro hg n hn; exact hg ⟨n, by omega⟩
-  have hG_nhds : G ∈ @nhds _ τT 0 := by
-    rw [mem_nhds_iff]
-    refine ⟨G, le_refl _, ?_, hG_zero⟩
-    rw [hG_eq]
-    exact isOpen_iInter_of_finite fun ⟨n, _⟩ ↦
-      (P.pow_image_isOpen _).preimage
-        (TateAlgebraWedhorn.tateTopologyT_continuous_scaledCoeff s n)
+  -- Step 5b/5c: G is an additive subgroup and a T-topology neighborhood of 0.
+  have hG_zero : (0 : ↥(TateAlgebra A)) ∈ G := zero_mem_artinReesNhd P s C M N
+  have hG_add : ∀ {a b}, a ∈ G → b ∈ G → a + b ∈ G :=
+    fun ha hb ↦ add_mem_artinReesNhd P s C M N ha hb
+  have hG_neg : ∀ {a}, a ∈ G → -a ∈ G := fun ha ↦ neg_mem_artinReesNhd P s C M N ha
+  have hG_nhds : G ∈ @nhds _ τT 0 := artinReesNhd_mem_nhds P s C M N
   -- Step 6: G is stable under algebraMap(a₀) * · for a₀ ∈ A₀.
   have hG_stable_alg : ∀ (a₀ : P.A₀) (g : ↥(TateAlgebra A)),
-      g ∈ G → algebraMap A _ (a₀ : A) * g ∈ G := by
-    intro a₀ g hg n hn
-    have hrw : s ^ n * TateAlgebra.coeff n (algebraMap A _ (a₀ : A) * g) =
-        (a₀ : A) * (s ^ n * TateAlgebra.coeff n g) := scaledCoeff_algebraMap_mul _ _ _ _
-    rw [hrw]
-    obtain ⟨b, hb, hb_eq⟩ := hg n hn
-    exact ⟨a₀ * b, Ideal.mul_mem_left _ _ hb, by rw [MulMemClass.coe_mul, ← hb_eq]⟩
+      g ∈ G → algebraMap A _ (a₀ : A) * g ∈ G :=
+    fun a₀ g hg ↦ mul_algebraMap_mem_artinReesNhd P s C M N a₀ hg
   -- Step 7: G is stable under algebraMap(t)*X * · for t ∈ T.
   have hG_stable_tX : ∀ (t : T) (g : ↥(TateAlgebra A)),
-      g ∈ G → algebraMap A _ (t : A) * TateAlgebra.X * g ∈ G := by
-    intro t g hg n hn
-    by_cases hn0 : n = 0
-    · subst hn0
-      have hrw0 : s ^ 0 * TateAlgebra.coeff 0
-          (algebraMap A _ (t : A) * TateAlgebra.X * g) = 0 :=
-        scaledCoeff_zero_tX_mul _ _ _
-      rw [hrw0]; exact ⟨0, (P.I ^ _).zero_mem, rfl⟩
-    · obtain ⟨n', rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn0
-      have hrw_succ : s ^ (n' + 1) * TateAlgebra.coeff (n' + 1)
-          (algebraMap A _ (t : A) * TateAlgebra.X * g) =
-          s * t * (s ^ n' * TateAlgebra.coeff n' g) :=
-        scaledCoeff_succ_tX_mul _ _ _ _
-      rw [hrw_succ]
-      have hn' : n' ≤ N := by omega
-      obtain ⟨b, hb, hb_eq⟩ := hg n' hn'
-      rw [← hb_eq]
-      have hkey : M + (N - n') * C = (M + (N - (n' + 1)) * C) + C := by
-        have : N - n' = N - (n' + 1) + 1 := by omega
-        rw [this, add_mul, one_mul]; omega
-      exact hC_shift t (M + (N - (n' + 1)) * C) b (hkey ▸ hb)
+      g ∈ G → algebraMap A _ (t : A) * TateAlgebra.X * g ∈ G :=
+    fun t g hg ↦ mul_algebraMap_X_mem_artinReesNhd P s t C M N (hC_shift t) hg
   -- Step 8: Find m such that algebraMap(I^m) maps into G.
   -- Use continuity of mk ∘ algebraMap: preimage of G (which is a nhd of 0 in
   -- the T-topology) under algebraMap gives a nhd of 0 in A.
