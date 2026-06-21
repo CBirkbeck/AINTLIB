@@ -1,5 +1,33 @@
 # Development Plan: §13 Stage G — Galois Λ-modules + the Vandiver IMC
 
+## ACHIEVEMENT STATUS (2026-06-21) — capstone reduced to CFT + §12
+
+The Vandiver IMC capstone is **formalised and axiom-clean**, reduced to exactly two bundled
+classical/analytic inputs. `Iwasawa.Galois.iwasawa_main_conjecture_full_concrete`
+(`IwasawaProof/CapstoneConcrete.lean`, axioms = `propext, Classical.choice, Quot.sound`) delivers
+**both halves** of `thm:vandiver` — `𝒳⁺_∞ ≅ Λ(𝒢⁺)/(g)` and `charIdealGroup 𝒳⁺_∞ = (Φ g)` — with **no
+hypotheses beyond**: the Galois data, the Vandiver vanishing, the class-field-theory data
+`CFTUnitsData`, and the §12 analytic identification `h12`.
+
+INTERNALIZED (all proved, axiom-clean) this development:
+- **Structure theory**: `charIdeal` (length-theoretic), `charIdeal_quotient` (`Ch(Λ/(f))=(f)` via
+  `Ring.ord`/`ord_eq_addVal` + UFD), isotypic decomposition, `charIdealGroup_quotient`,
+  `charIdealGroup_of_quotientEquiv`, both `charIdeal`/`charIdealGroup` iso-invariances.
+- **Galois side**: `IwasawaGaloisData`, the Nakayama Vandiver vanishing `yPlus_subsingleton`
+  (+ `vandiver_yPlusFin_subsingleton` from `p∤h₁⁺`), the four-term collapse `xPlus_equiv_uModCPlus`.
+- **Carrier bridge Φ** (`carrierBridgeFull`, fully assembled): measure functoriality
+  (`pushforwardRingEquiv`, `mahlerPushforwardRingEquiv`), `finiteProductRingEquiv`, the Teichmüller
+  decomposition `𝒢⁺ ≅ Δ×Γ` (`gplusMulEquiv`→`gplusHomeo` via compact→T2), and the logarithm iso
+  `Γ ≅ ℤ_p` (`logCM`/`expCM` + the 4 laws, continuity from the log/exp isometries).
+- **Isotypic completeness** `∑_ω e_ω = 1` (`isotypicIdempotent_sum_eq_one`): the "extend L"
+  assumption discharged from `HasEnoughRootsOfUnity ℤ_[p] (exponent Δ)` (Teichmüller roots) +
+  character duality; all `Δ` typeclass instances (`Fintype`, `Invertible |Δ|`) derived.
+
+REMAINING (bundled by design, per the architecture + the 2026-06-18 expert review):
+- **CFT** (`CFTUnitsData`) — classical class field theory, not yet in mathlib.
+- **§12 `h12`** (`col_image_cycloTower1_eq_zetaIdeal`) — the Coleman-density "genuine §13/IMC-deferred
+  core"; the T1220+ density chain (`Coleman/ColContinuity.lean`, `IwasawaProof/TowerDensity.lean`).
+
 ## Goal
 
 Formalise RJW §13.2–§13.3 (arXiv:2309.15692): the Galois-theoretic side of the Iwasawa
