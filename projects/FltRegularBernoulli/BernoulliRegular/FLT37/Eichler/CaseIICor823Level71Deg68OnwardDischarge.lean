@@ -2,8 +2,6 @@ import BernoulliRegular.FLT37.Eichler.CaseIICor823Level71Deg68ModCubeRelation
 import BernoulliRegular.FLT37.Eichler.CaseIICor823Level71Deg68SecondDigitCorrected
 import BernoulliRegular.FLT37.Eichler.CaseIICor823Level71FormalSum68Value
 
-set_option linter.style.longLine false
-
 /-!
 # Discharging `CaseIICor823Level71Deg68OnwardCorrection37` from the deg-`68` slice value (grounded in
 # the mod-`37³` relation) and the deg-`≠32,68` slice-vanishing; and the FLT37 endpoint
