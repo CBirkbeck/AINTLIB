@@ -300,7 +300,7 @@ theorem samePrimeFiniteLog_quotientMap_cyclotomic {N : ℕ}
   classical
   unfold samePrimeFiniteLog
   rw [map_sum]
-  exact Finset.sum_congr rfl fun n _hn =>
+  exact Finset.sum_congr rfl fun n _hn ↦
     samePrimeFiniteLogTerm_quotientMap_cyclotomic (p := p) (K := K) a hx
 
 section FinsetProducts
@@ -344,7 +344,7 @@ theorem samePrimeFiniteLogFinsetProductCoord_mem_lambdaIdeal
       simp
   | insert a s ha ih =>
       have hs : samePrimeFiniteLogFinsetProductCoord (p := p) (K := K) s x ∈
-          lambdaIdeal p K := ih (fun i hi => hx i (Finset.mem_insert_of_mem hi))
+          lambdaIdeal p K := ih (fun i hi ↦ hx i (Finset.mem_insert_of_mem hi))
       have haI : x a ∈ lambdaIdeal p K := hx a (Finset.mem_insert_self a s)
       have hprod :
           samePrimeFiniteLogProductCoord (p := p) (K := K)
@@ -369,7 +369,7 @@ theorem samePrimeFiniteLog_finsetProductCoord
       simp [samePrimeFiniteLog_arg_zero]
   | insert a s ha ih =>
       have hs : ∀ i ∈ s, x i ∈ lambdaIdeal p K :=
-        fun i hi => hx i (Finset.mem_insert_of_mem hi)
+        fun i hi ↦ hx i (Finset.mem_insert_of_mem hi)
       have hcoord_mem :
           samePrimeFiniteLogFinsetProductCoord (p := p) (K := K) s x ∈
             lambdaIdeal p K :=
@@ -418,7 +418,7 @@ theorem samePrimeFiniteLog_finsetProductCoord
                 · simp [add_comm]
                 · intro b _hb c _hc hbc
                   have hval : b.1 = c.1 :=
-                    congrArg (fun z : {i // i ∈ insert a s} => z.1) hbc
+                    congrArg (fun z : {i // i ∈ insert a s} ↦ z.1) hbc
                   exact Subtype.ext hval
               · simp [ha]
 
@@ -523,7 +523,7 @@ theorem quotientMap_evalIntegralPowerSeriesMod_cyclotomic
       PowerSeries.map φ (PowerSeries.map q F) = PowerSeries.map q F := by
     ext n
     have hn : e (PowerSeries.coeff n F) = PowerSeries.coeff n F := by
-      have h := congrArg (fun G : PowerSeries R => PowerSeries.coeff n G) hF
+      have h := congrArg (fun G : PowerSeries R ↦ PowerSeries.coeff n G) hF
       simpa [PowerSeries.coeff_map] using h
     rw [PowerSeries.coeff_map, PowerSeries.coeff_map]
     change φ (q (PowerSeries.coeff n F)) = q (PowerSeries.coeff n F)
@@ -874,7 +874,7 @@ theorem dworkCompleteCyclotomicEquiv_powerLinearMap
     dworkCompleteCyclotomicEquiv (p := p) K a
         (dworkParameterPowerLinearMap p K c) =
       dworkParameterPowerLinearMap p K
-        (fun i => rationalPadicTeichmuller p (a : ZMod p) ^ (i : ℕ) * c i) := by
+        (fun i ↦ rationalPadicTeichmuller p (a : ZMod p) ^ (i : ℕ) * c i) := by
   classical
   rw [dworkParameterPowerLinearMap_apply, dworkParameterPowerLinearMap_apply]
   rw [map_sum]
