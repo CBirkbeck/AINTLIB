@@ -6897,15 +6897,19 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
     `unitsSplitEquiv_neg_one`, and **`gplusMulEquiv : GPlus ≃* Δ×Γ`** (the /±1 quotient, via
     `QuotientGroup.congr`+`prodMulEquiv`+`quotientBot`); `continuous_teichmuller` + `continuous_gammaProj`
     (continuity foundations). `Delta` has `Finite`/`CommGroup`/`TopologicalSpace` instances automatically.
-    REMAINING for the full carrier bridge `Φ`:
-    (i) the **homeomorphism** `GPlus ≃ₜ* Δ×Γ` — promote `gplusMulEquiv` to continuous both ways (forward
-    via quotient-lift of `unitsSplitEquiv`'s continuity; `DiscreteTopology Δ` from finite⊆T2 range);
-    (ii) assemble `carrierBridge Φ` from the homeomorphism + the (done) gammaLogEquiv, converting to the
-    `C(_,_)`+equations form `carrierBridge` consumes → yields the ring iso `LambdaGPlus p ≃+* IwasawaAlgebraGroup ℤ_[p] Δ`;
-    (iii) for the capstone *application* (not the bridge): `[Invertible ((p-1)/2 : ℤ_[p])]` (prime-to-p)
-    and the **completeness `∑_ω e_ω = 1`** (Fourier/orthogonality over ℤ_[p], using μ_{(p-1)/2}⊆ℤ_[p] via
-    Teichmüller — the deepest remaining piece). (iii) + capstone instantiation also need the separately-
-    bundled CFT/§12, so full end-to-end internalisation = the whole IMC.
+    **CARRIER BRIDGE Φ — FULLY INTERNALIZED (2026-06-21, axiom-clean)**: `gplusMulEquiv` promoted to
+    `gplusHomeo` (GPlus≃ₜΔ×Γ, via `continuous_gplusMulEquiv` + compact→T2 `homeoOfEquivCompactToT2`);
+    `carrierBridgeFull : PadicMeasure p (GPlus p) ≃+* IwasawaAlgebraGroup ℤ_[p] Δ`
+    (`Iwasawa/CarrierBridgeConcrete.lean`) — Φ is now an assembled TERM, not a hypothesis. Instantiated
+    in `iwasawa_main_conjecture_full_concrete` (`IwasawaProof/CapstoneConcrete.lean`): both halves of
+    thm:vandiver with Φ discharged. `instFintypeDelta`/`instDiscreteTopologyDelta` registered.
+    **REMAINING bundled inputs (all classical/analytic, project-designated bundleable):**
+    (1) CFT (`CFTUnitsData`); (2) §12 analytic `h12` (the T1220+ density chain);
+    (3) for the char-ideal half's application: `[Invertible ((p-1)/2 : ℤ_[p])]` (prime-to-p) + the
+    **isotypic completeness `∑_ω e_ω = 1`** over Δ. SCOPED: reachable via mathlib `HasEnoughRootsOfUnity R n`
+    + `DirichletCharacter.sum_char_inv_mul_char_eq` / `Mathlib.Analysis.Fourier.FiniteAbelian` (Pontryagin
+    duality), once `HasEnoughRootsOfUnity ℤ_[p] ((p-1)/2)` is established from the Teichmüller roots
+    μ_{p-1}⊆ℤ_[p] (bounded sub-development); then `∑_ω e_ω = (1/|Δ|)∑_h(∑_ω ω(h)⁻¹)[h] = 1` by orthogonality.
     OLD: `gplusEquiv` — `GPlus ≅ Δ×Γ` via Teichmüller + the `/±1` quotient (`Δ = μ_{p-1}/{±1}`).
     **Scoped infrastructure (2026-06-20)**: `CompactSpace ℤ_[p]ˣ` is an AUTOMATIC instance
     (`Units.instCompactSpaceOfT1SpaceOfContinuousMul`, mathlib) — no gap. The Teichmüller MonoidHom
