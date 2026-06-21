@@ -68,12 +68,12 @@ descent. -/
 lemma extensionMap_spanSingleton (x : FractionRing A) :
     extensionMap A B (spanSingleton _ x) =
       spanSingleton _ (fractionRingMap A B x) := by
-  refine FractionalIdeal.ext fun y => ?_
+  refine FractionalIdeal.ext fun y ↦ ?_
   rw [show extensionMap A B = FractionalIdeal.extendedHom' _
         (algebraMap_nonZeroDivisors_le A B) from rfl,
       FractionalIdeal.extendedHom'_apply, FractionalIdeal.mem_extended_iff,
       FractionalIdeal.mem_spanSingleton, ← Submodule.mem_span_singleton]
-  refine ⟨fun hy => Submodule.span_le.2 ?_ hy, fun hy => Submodule.span_le.2 ?_ hy⟩
+  refine ⟨fun hy ↦ Submodule.span_le.2 ?_ hy, fun hy ↦ Submodule.span_le.2 ?_ hy⟩
   · rintro _ ⟨w, hw, rfl⟩
     rw [SetLike.mem_coe, FractionalIdeal.mem_spanSingleton] at hw
     obtain ⟨a, rfl⟩ := hw
@@ -169,7 +169,7 @@ theorem extensionMap_injective_iff :
     exact h _ (by rwa [extensionMap_mk])
   · intro h x
     exact ClassGroup.induction (K := FractionRing A)
-      (fun I hI => by rw [extensionMap_mk] at hI; exact h I hI) x
+      (fun I hI ↦ by rw [extensionMap_mk] at hI; exact h I hI) x
 
 end ClassGroup
 
