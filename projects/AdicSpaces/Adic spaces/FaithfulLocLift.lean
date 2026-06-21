@@ -387,17 +387,20 @@ theorem mem_plus_of_forall_spa_vle_one
         -- Huber: "(c) for `a ∈ A°°`: `G` open ⟹ `∃n, xⁿa ∈ G` and `a ∈ G`, so in `G[x⁻¹]`,
         -- `aⁿ = g·x⁻¹` with `x⁻¹ ∈ p`, giving `s(aⁿ) ≤ 1` hence `v(a) ≤ 1`; (d) `v ∈ Spv(A, A°°·A)` by
         -- construction. We conclude from (3.1) and (c),(d) that `v` is continuous."
-        -- The criterion (3.1) IS proven sorry-free in this project:
-        -- `Spv.isContinuous_of_isInSpvAI_of_lt_one` (SpvAI.lean:294, axiom-clean). Applying it needs:
-        --   • `P : PairOfDefinition B` — available: `(IsHuberRing.exists_pairOfDefinition).some`, or the
-        --     concrete `presheafValue_pairOfDefinition_concrete` (PresheafTateStructure.lean:859);
-        --   • `h_le_one : v ≤ 1 on P.A₀`  ⚠ the project criterion uses the ring of definition `A₀`,
-        --     NOT Huber's `A°°`; since `A⁺ ⊆ A₀` (Presheaf.lean:236, the *wrong* direction) the proven
-        --     `v ≤ 1 on A⁺` does not give this directly — must either (i) construct/choose `P` with
-        --     `A₀ ⊆ {v ≤ 1}`, or (ii) prove an `A°°`-form criterion matching Huber's (3.1) exactly;
-        --   • `h_lt_one : v < 1 on P.I` (Huber's (c), the `G`-open localization argument: `aⁿ = g·x⁻¹`,
-        --     `x⁻¹ ∈ p ⟹ s(aⁿ) ≤ 1`);  • `h_in : Spv.IsInSpvAI v (I·B)` (Huber's (d), by construction).
-        -- LEAF — faithful cited-external (Huber's (3.1)); criterion in-repo, A₀-vs-A°° reconciliation TODO.
+        -- SOURCE-VERIFIED faithful route (Huber Thm 3.1, huber2.txt:585):
+        --   `Cont A = {v ∈ Spv(A, A°°·A) | v(a) ≤ 1 ∀ a ∈ A°°}`  (A°° = topologically nilpotent set).
+        -- So the FAITHFUL continuity criterion is the **A°°-form**: `v ∈ Spv(B, B°°·B)` (property (d)) and
+        -- `v(a) ≤ 1 ∀ a ∈ B°°` (property (c)) ⟹ `v` continuous. Huber's reverse-direction proof
+        -- (huber2.txt:589-602): (1) `v(a)` cofinal in `Γv` for `a ∈ A°°` (microbial via (2.5), else the
+        -- `t·aⁿ ∈ A°°` cofinality trick); then for a nbhd basis `{Uⁿ}` with `T·U ⊆ U` finite `T`, pick
+        -- `n` with `(max_{t∈T} v(t))ⁿ < γ`, giving `v < γ` on `U^{n+1}` ⟹ continuous.
+        -- ⚠ The in-repo `Spv.isContinuous_of_isInSpvAI_of_lt_one` (SpvAI.lean:294, axiom-clean) is the
+        -- **A₀-form** (hypotheses `v ≤ 1 on A₀`, `v < 1 on I` over a `PairOfDefinition`), which is
+        -- STRONGER than Huber's A°°-form (`A⁺ ⊆ A₀`, Presheaf:236, and `v ≤ 1` is only known on `A⁺`),
+        -- so it is NOT directly applicable here. Faithful discharge = prove the A°°-form of Huber 3.1
+        -- reverse (adapting the SpvAI.lean:294 microbial+cofinality proof from `A₀`/`I` to `A°°`), then
+        -- supply (c) (the `G`-open argument: `a ∈ B°° ⟹ aⁿ = g·x⁻¹ ∈ p ⟹ s(aⁿ) ≤ 1`) and (d).
+        -- LEAF — faithful cited-external (Huber Thm 3.1, A°°-form). All other parts of Huber 3.3(i) ✓.
         sorry
       · -- `v ≤ 1` on `B⁺` (Huber property (b)): `f ∈ B⁺ ⊆ R := B⁺[x⁻¹]`, so `s f ≤ 1` (`hs_le`),
         -- transported to `v` by the extension equivalence `s ≈ t ∘ (R ↪ B_x)` (`ht_equiv`).
