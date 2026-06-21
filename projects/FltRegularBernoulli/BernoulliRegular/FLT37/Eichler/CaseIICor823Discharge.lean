@@ -123,7 +123,7 @@ theorem caseIICor823_CPlusExponentProduct_mem_pPowerSubgroup_of_dvd
     ((pPowerSubgroup (EPlus (K := CyclotomicField 37 ℚ)) 37).zpow_mem
       caseIICor823_neg_one_mem_pPowerSubgroup s) ?_
   -- Each generator power is a `37`-th power because `37 ∣ e a`.
-  refine Subgroup.prod_mem _ (fun a _ => ?_)
+  refine Subgroup.prod_mem _ (fun a _ ↦ ?_)
   obtain ⟨k, hk⟩ := he a
   refine ⟨CPlusGenerator (p := 37) (K := CyclotomicField 37 ℚ) (by decide) a ^ k,
     Subgroup.mem_top _, ?_⟩
@@ -156,9 +156,9 @@ theorem caseIICor823_mem_pPowerSubgroup_of_freePartClass_zero
   -- Linear independence forces each `(e a : ZMod 37) = 0`.
   have hcoeff : ∀ a, ((e a : ℤ) : ZMod 37) = 0 :=
     Fintype.linearIndependent_iff.mp caseIIEx811Eigen_genImg_linearIndependent
-      (fun a => ((e a : ℤ) : ZMod 37)) hzero
+      (fun a ↦ ((e a : ℤ) : ZMod 37)) hzero
   -- `(e a : ZMod 37) = 0 ↔ 37 ∣ e a`.
-  have hdvd : ∀ a, (37 : ℤ) ∣ e a := fun a =>
+  have hdvd : ∀ a, (37 : ℤ) ∣ e a := fun a ↦
     (ZMod.intCast_zmod_eq_zero_iff_dvd (e a) 37).mp (hcoeff a)
   exact caseIICor823_CPlusExponentProduct_mem_pPowerSubgroup_of_dvd s e hdvd
 
@@ -282,7 +282,7 @@ theorem caseIICor823_real_isPthPower_of_omega32Collapse
       FLT37.realUnitToFreePartModP (K := CyclotomicField 37 ℚ) (Additive.ofMul u) = 0 := by
     rw [caseIIResidueProvenance_decomp_spec
       (FLT37.realUnitToFreePartModP (K := CyclotomicField 37 ℚ) (Additive.ofMul u))]
-    refine Finset.sum_eq_zero (fun j _ => ?_)
+    refine Finset.sum_eq_zero (fun j _ ↦ ?_)
     rw [hall j, zero_smul]
   -- (6) Step D: `v_C = CPlusExponentProduct s e` with vanishing free-part class is a `37`-th power.
   obtain ⟨s, e, hse⟩ :=
@@ -340,12 +340,12 @@ theorem caseIICor823_zeta_pow_eq_one_of_dvd
   -- Reduce to `n % 37 = 0`.
   by_contra hne
   -- `ζU ^ (n % 37) = 1` would follow if `n % 37 = 0`; so `n % 37 ≠ 0`.
-  have hmod_ne : n % 37 ≠ 0 := fun h0 => hne (by rw [hred, h0, pow_zero])
+  have hmod_ne : n % 37 ≠ 0 := fun h0 ↦ hne (by rw [hred, h0, pow_zero])
   have hmod_lt : n % 37 < 37 := Nat.mod_lt n (by norm_num)
   -- `n % 37 < 37` is coprime to the prime `37` (it is positive and below `37`).
   have hcop : (n % 37).Coprime 37 :=
     Nat.Coprime.symm ((Nat.Prime.coprime_iff_not_dvd (by decide)).mpr
-      (fun hdvd' => by have := Nat.le_of_dvd (by omega) hdvd'; omega))
+      (fun hdvd' ↦ by have := Nat.le_of_dvd (by omega) hdvd'; omega))
   -- `↑(ζU ^ (n % 37)) − 1` is associated to `ζ − 1`, hence prime.
   have hassoc : Associated ζm1
       ((ζU : 𝓞 (CyclotomicField 37 ℚ)) ^ (n % 37) - 1) :=
