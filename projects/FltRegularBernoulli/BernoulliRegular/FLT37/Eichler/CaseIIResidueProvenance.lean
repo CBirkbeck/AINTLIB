@@ -96,7 +96,7 @@ every free-part class decomposes over the eigenvectors `caseIIConjugateResidue_e
 /-- **The `Fin 18` eigenvector at an index `< 17` is the corresponding span-family member.**
 `caseIIConjugateResidue_eigenvector j` (for `j : Fin 18`) is by definition the mod-`37` free-part
 class of `pollaczekUnit 37 K (2(j.1+1))`; for `j.1 = k.1` with `k : Fin 17` this is the `k`-th
-member of the spanning family `fun k : Fin 17 => [pollaczekUnit 37 K (2k+2)]` of
+member of the spanning family `fun k : Fin 17 ↦ [pollaczekUnit 37 K (2k+2)]` of
 `pollaczekUnit_image_span_eq_top`, since `2(j.1+1) = 2·k.1 + 2`. -/
 theorem caseIIResidueProvenance_eigenvector_castSucc
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
@@ -131,14 +131,14 @@ theorem caseIIResidueProvenance_exists_decomp
   have hspan := pollaczekUnit_image_span_eq_top (K := CyclotomicField 37 ℚ)
     caseIIGaloisEigen_pollaczekClasses_ne_zero
   -- `x` is a `Fin 17`-combination of the spanning family.
-  have hx : x ∈ Submodule.span (ZMod 37) (Set.range (fun k : Fin 17 =>
+  have hx : x ∈ Submodule.span (ZMod 37) (Set.range (fun k : Fin 17 ↦
       cyclotomicUnitFreePartModPClass (p := 37) (CyclotomicField 37 ℚ)
         (Additive.ofMul (cyclotomicUnitFreeClass (CyclotomicField 37 ℚ)
           (FLT37.pollaczekUnit 37 (CyclotomicField 37 ℚ) (2 * (k : ℕ) + 2)))))) := by
     rw [hspan]; exact Submodule.mem_top
   obtain ⟨c17, hc17⟩ := (Submodule.mem_span_range_iff_exists_fun _).mp hx
   -- Extend the `Fin 17` family by `0` at `j = 17`.
-  refine ⟨fun j => if h : (j : ℕ) < 17 then c17 ⟨j, h⟩ else 0, ?_, ?_⟩
+  refine ⟨fun j ↦ if h : (j : ℕ) < 17 then c17 ⟨j, h⟩ else 0, ?_, ?_⟩
   · -- The `Fin 18` RHS sum collapses to the `Fin 17` sum, which is `x` by `hc17`.
     symm
     rw [Fin.sum_univ_castSucc]
@@ -148,9 +148,9 @@ theorem caseIIResidueProvenance_exists_decomp
       rw [dif_neg (by rw [Fin.val_last]; exact lt_irrefl 17), zero_smul]
     rw [hlast, add_zero, ← hc17]
     -- The first seventeen block terms match the span-family combination.
-    refine Finset.sum_congr rfl (fun k _ => ?_)
+    refine Finset.sum_congr rfl (fun k _ ↦ ?_)
     beta_reduce
-    have hcoe : ((Fin.castSucc k : Fin 18) : ℕ) = (k : ℕ) := Fin.coe_castSucc k
+    have hcoe : ((Fin.castSucc k : Fin 18) : ℕ) = (k : ℕ) := Fin.val_castSucc k
     -- The dite coefficient at `castSucc k` is `c17 k`.
     have hcoeff : (if h : ((Fin.castSucc k : Fin 18) : ℕ) < 17 then
           c17 ⟨Fin.castSucc k, h⟩ else (0 : ZMod 37)) = c17 k := by
