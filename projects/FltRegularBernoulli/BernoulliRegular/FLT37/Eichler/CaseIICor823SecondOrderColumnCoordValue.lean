@@ -212,7 +212,7 @@ numerator/denominator to their proven values (`bernoulli_thirtytwo_num_eq`,
 theorem firstOrderStructureLiftFactor_eq : firstOrderStructureLiftFactor = 407 := by
   unfold firstOrderStructureLiftFactor
   rw [bernoulli_thirtytwo_num_eq, bernoulli_thirtytwo_den_eq]
-  decide
+  decide +kernel
 
 /-- **The stated second-order Bernoulli factor evaluates to `1073 = 37·29`** (proven).
 `caseIICor823SecondOrderBernoulliFactorModSq = B₃₂.num·32⁻¹` (note: no `B₃₂.den`, no `(32!)`, no `2`
@@ -223,7 +223,7 @@ theorem caseIICor823SecondOrderBernoulliFactorModSq_eq_val :
     caseIICor823SecondOrderBernoulliFactorModSq = 1073 := by
   unfold caseIICor823SecondOrderBernoulliFactorModSq
   rw [bernoulli_thirtytwo_num_eq]
-  decide
+  decide +kernel
 
 /-- **The first-order-structure lift differs from the stated factor** (proven by `decide`):
 `firstOrderStructureLiftFactor ≠ caseIICor823SecondOrderBernoulliFactorModSq` in `ZMod 37²`
