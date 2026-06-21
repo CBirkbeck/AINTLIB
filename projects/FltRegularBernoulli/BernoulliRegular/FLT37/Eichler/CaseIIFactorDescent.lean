@@ -396,7 +396,7 @@ theorem no_realCaseIIData37_of_factorDescent
   classical
   rintro ⟨m, ⟨D⟩⟩
   -- The predicate "factor count `n` is achieved by some real datum".
-  let P : ℕ → Prop := fun n => ∃ (k : ℕ) (E : RealCaseIIData37 (CyclotomicField 37 ℚ) k),
+  let P : ℕ → Prop := fun n ↦ ∃ (k : ℕ) (E : RealCaseIIData37 (CyclotomicField 37 ℚ) k),
     caseIIZFactorCount E.toCaseIIData37 = n
   have hP : ∃ n, P n := ⟨_, m, D, rfl⟩
   -- `Nat.find hP` is the minimal achieved factor count; `Dmin` realises it.
