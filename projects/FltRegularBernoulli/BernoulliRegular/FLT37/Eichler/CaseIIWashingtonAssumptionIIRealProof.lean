@@ -312,49 +312,45 @@ theorem caseII_washington_factorRatio_localPower
   linear_combination Q (εp : 𝓞 (CyclotomicField 37 ℚ)) * hE1 -
     Q (εp : 𝓞 (CyclotomicField 37 ℚ)) * hE2
 
-/-! ## 5. The main theorem: real Assumption II for the §9.1 factor units, over the `ℓ ∣ z` datum -/
+/-! ## 4b. The algebraic-descent core and the assembly helpers of the main theorem
 
-/-- **[F1 — REAL ASSUMPTION II, PROVEN]** (axiom-clean, under the carried Kellner input
-`NoSecondOrderIrregularPair 37 32`).
+Three private helpers carve the §9.1 real-Assumption-II argument into its three independent stages,
+so the main theorem reads as the outline §A–§K:
 
-For a real `ℓ ∣ z` datum `D : RealCaseIIDvdZData37 m` with coprime Fermat variables, **every**
-choice of real factor units `η_a, η_b : Kˣ` and generators `ρ_a, ρ_b : K` satisfying the two §9.1
-factor equations at `ζ, ζ²` admits a **real** unit `v : Kˣ` with `η_a = v³⁷·η_b`.
+* `caseII_washington_etaZero_descent` (§A–§G) — the **algebraic descent**: from the integral L2
+  producer, the `(1+ζ)`-unit, the L1 anchor, the three-term §9.1 reassembly, the proven
+  Corollary-8.15 single-index expansion, the Lemma-9.9 local power, and the proven discrete-log
+  collapse, it produces a normalised integral representation `(η_a⁰,ρ_a⁰), (η_b⁰,ρ_b⁰)` of the two
+  factor equations whose factor-unit ratio is `−(37`-th power`)`: `η_a⁰ = −T₀³⁷·η_b⁰`.
+* `caseII_washington_factorRepresentation_pow_eq` (§H) — the **representation comparison**: any two
+  unit/generator pairs satisfying the same factor equation `x+ζ^a y = (1−ζ^a)·η·ρ³⁷` (nonzero RHS)
+  have nonzero generators and equal `η·ρ³⁷`.
+* `caseII_washington_realRoot_of_factorRatio` (§I–§K) — the **real root**: from the two comparisons
+  and `η_a⁰ = −T₀³⁷·η_b⁰`, the combined root `T = −T₀·(ρ_a⁰ρ_b)/(ρ_aρ_b⁰)` gives `η_a/η_b = T³⁷`,
+  conjugation-fixed by reality of `η_a, η_b`, whose real `37`-th root (the `ζ^{19j}`-absorption)
+  is the required `v`. -/
 
-This is the **real-Assumption-II conjunct** of the clean Case-II residual
-`CaseIIWashingtonCaseII37` (and exactly the statement `CaseIIWashingtonAssumptionIIReal37`),
-discharged by the route-(a) finite-field machinery: the proven integral L2 producer + the
-three-term §9.1 reassembly (`caseII_washington_threeTermInstance`) make `−(u_a/u_b)` a genuine
-descent unit; the **proven** Corollary-8.15 single-index expansion
-(`caseII_corollary815_singleIndexExpansion37_proven`), the Lemma-9.9 local power
-(`caseII_washington_factorRatio_localPower`, from the proven real-data Lemma 9.8), and the
-**proven** discrete-log collapse (`caseIIThm95_descentUnit_isPow_of_singleIndexExpansion`,
-operative core `ind₃₇ E₃₂ ≠ 0`) make it a **global** `37`-th power; and the `ζ^{19j}`-absorption
-(`caseII_washington_real_root_of_pow_real`) produces the **real** root. -/
-theorem caseII_washington_assumptionII_real_of_dvdZ
+/-- **Algebraic descent (§A–§G), axiom-clean** under the carried Kellner input.  From coprime real
+`ℓ ∣ z` data, the §9.1 machinery yields a normalised integral factor representation
+`(η_a⁰,ρ_a⁰), (η_b⁰,ρ_b⁰)` — both factor units real and integral — whose ratio is minus a
+`37`-th power: `η_a⁰ = −T₀³⁷·η_b⁰`, with `T₀ = algebraMap ε'` the image of the descent unit. -/
+private theorem caseII_washington_etaZero_descent
     (hSO : NoSecondOrderIrregularPair 37 32)
     {m : ℕ} (D : RealCaseIIDvdZData37 m)
     (hcop : IsCoprime (Ideal.span ({D.x} : Set (𝓞 (CyclotomicField 37 ℚ))))
-      (Ideal.span ({D.y} : Set (𝓞 (CyclotomicField 37 ℚ)))))
-    (ηa ηb : (CyclotomicField 37 ℚ)ˣ) (ρa ρb : CyclotomicField 37 ℚ)
-    (hηa : complexConj (CyclotomicField 37 ℚ) (ηa : CyclotomicField 37 ℚ) =
-      (ηa : CyclotomicField 37 ℚ))
-    (hηb : complexConj (CyclotomicField 37 ℚ) (ηb : CyclotomicField 37 ℚ) =
-      (ηb : CyclotomicField 37 ℚ))
-    (hfa : algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.x +
-        algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger) *
-          algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.y =
-      (1 - algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger)) *
-        (ηa : CyclotomicField 37 ℚ) * ρa ^ 37)
-    (hfb : algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.x +
-        algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger ^ 2) *
-          algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.y =
-      (1 - algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger ^ 2)) *
-        (ηb : CyclotomicField 37 ℚ) * ρb ^ 37) :
-    ∃ v : (CyclotomicField 37 ℚ)ˣ,
-      complexConj (CyclotomicField 37 ℚ) (v : CyclotomicField 37 ℚ) =
-        (v : CyclotomicField 37 ℚ) ∧
-      (ηa : (CyclotomicField 37 ℚ)ˣ) = v ^ 37 * ηb := by
+      (Ideal.span ({D.y} : Set (𝓞 (CyclotomicField 37 ℚ))))) :
+    ∃ (ηa₀ ηb₀ : (CyclotomicField 37 ℚ)ˣ) (ρa₀ ρb₀ T₀ : CyclotomicField 37 ℚ),
+      (algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.x +
+          algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger) *
+            algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.y =
+        (1 - algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger)) *
+          (ηa₀ : CyclotomicField 37 ℚ) * ρa₀ ^ 37) ∧
+      (algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.x +
+          algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger ^ 2) *
+            algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.y =
+        (1 - algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger ^ 2)) *
+          (ηb₀ : CyclotomicField 37 ℚ) * ρb₀ ^ 37) ∧
+      (ηa₀ : CyclotomicField 37 ℚ) = -(T₀ ^ 37) * (ηb₀ : CyclotomicField 37 ℚ) := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   have hp : (37 : ℕ) ≠ 2 := by decide
   have hinj : Function.Injective (algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ)) :=
@@ -442,7 +438,6 @@ theorem caseII_washington_assumptionII_real_of_dvdZ
   simp only [Units.val_mul, Units.val_neg, Units.val_pow_eq_pow_val, map_mul, map_neg, map_pow,
     hua, hub] at hKval
   rw [hεpK] at hKval
-  -- `hKey : (algebraMap ε')³⁷·(−((ζK+1)·η_b⁰)) = (ζK+1)·η_a⁰`.
   set ζK : CyclotomicField 37 ℚ :=
     algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger) with hζK
   set εK : CyclotomicField 37 ℚ :=
@@ -455,106 +450,163 @@ theorem caseII_washington_assumptionII_real_of_dvdZ
         (εp : 𝓞 (CyclotomicField 37 ℚ)) = 0 := by rw [hεpK]; exact h0
     rw [map_eq_zero_iff _ hinj] at this
     exact Units.ne_zero εp this
-  have hKey : (ηa₀ : CyclotomicField 37 ℚ) = -(εK ^ 37) * (ηb₀ : CyclotomicField 37 ℚ) := by
-    refine mul_left_cancel₀ hεpK_ne ?_
-    linear_combination -hKval
-  -- §H. Compare the GIVEN `(η_a, ρ_a)` with the producer's `(η_a⁰, ρ_a⁰)`: `37`-th-power ratio.
-  have h1ζK_ne : (1 : CyclotomicField 37 ℚ) - ζK ≠ 0 := by
-    intro h0
-    have hζ1 : ζK = 1 := by linear_combination -h0
-    rw [hζK, show (1 : CyclotomicField 37 ℚ) =
-      algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) 1 from (map_one _).symm] at hζ1
-    exact D.hζ.toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37) (hinj hζ1)
-  have h1ζ2K_ne : (1 : CyclotomicField 37 ℚ) -
-      algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger ^ 2) ≠ 0 := by
-    intro h0
-    have hζ1 : algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ)
-        (D.hζ.toInteger ^ 2) = 1 := by linear_combination -h0
-    rw [show (1 : CyclotomicField 37 ℚ) =
-      algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) 1 from (map_one _).symm] at hζ1
-    exact D.hζ.toInteger_isPrimitiveRoot.pow_ne_one_of_pos_of_lt (by omega) (by decide : 2 < 37)
-      (hinj hζ1)
-  -- The numerators `x + ζ·y`, `x + ζ²·y` are nonzero in `K`.
-  have hnum_a : algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.x +
-      ζK * algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.y ≠ 0 := by
-    have h := caseII_algebraMap_x_add_y_eta_ne_zero D.toRealCaseIIData37 hp D.etaOne
-    rw [hηOne] at h
-    intro h0
-    refine h ?_
-    rw [map_add, map_mul]
-    linear_combination h0
-  have hnum_b : algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.x +
-      algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger ^ 2) *
-        algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.y ≠ 0 := by
-    have h := caseII_algebraMap_x_add_y_eta_ne_zero D.toRealCaseIIData37 hp D.etaTwo
-    rw [hηTwo] at h
-    intro h0
-    refine h ?_
-    rw [map_add, map_mul]
-    linear_combination h0
-  -- Nonvanishing of the four generators.
-  have hρa_ne : ρa ≠ 0 := by
-    intro h0
-    refine hnum_a ?_
-    rw [hfa, h0, zero_pow (by decide : (37 : ℕ) ≠ 0), mul_zero]
-  have hρa₀_ne : ρa₀ ≠ 0 := by
-    intro h0
-    refine hnum_a ?_
-    rw [hfa₀, h0, zero_pow (by decide : (37 : ℕ) ≠ 0), mul_zero]
-  have hρb_ne : ρb ≠ 0 := by
-    intro h0
-    refine hnum_b ?_
-    rw [hfb, h0, zero_pow (by decide : (37 : ℕ) ≠ 0), mul_zero]
-  have hρb₀_ne : ρb₀ ≠ 0 := by
-    intro h0
-    refine hnum_b ?_
-    rw [hfb₀, h0, zero_pow (by decide : (37 : ℕ) ≠ 0), mul_zero]
-  -- The `37`-th-power comparison equations.
-  have heqa : (ηa : CyclotomicField 37 ℚ) * ρa ^ 37 =
-      (ηa₀ : CyclotomicField 37 ℚ) * ρa₀ ^ 37 := by
-    have h := hfa.symm.trans hfa₀
-    have h' : (1 - ζK) * ((ηa : CyclotomicField 37 ℚ) * ρa ^ 37) =
-        (1 - ζK) * ((ηa₀ : CyclotomicField 37 ℚ) * ρa₀ ^ 37) := by linear_combination h
-    exact mul_left_cancel₀ h1ζK_ne h'
-  have heqb : (ηb : CyclotomicField 37 ℚ) * ρb ^ 37 =
-      (ηb₀ : CyclotomicField 37 ℚ) * ρb₀ ^ 37 := by
-    have h := hfb.symm.trans hfb₀
-    have h' : (1 - algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ)
-        (D.hζ.toInteger ^ 2)) * ((ηb : CyclotomicField 37 ℚ) * ρb ^ 37) =
-        (1 - algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ)
-          (D.hζ.toInteger ^ 2)) * ((ηb₀ : CyclotomicField 37 ℚ) * ρb₀ ^ 37) := by
-      linear_combination h
-    exact mul_left_cancel₀ h1ζ2K_ne h'
-  -- §I. The combined root `T` and the value identity `η_a = T³⁷·η_b`.
-  set T : CyclotomicField 37 ℚ := -εK * (ρa₀ * ρb) / (ρa * ρb₀) with hT
+  refine ⟨ηa₀, ηb₀, ρa₀, ρb₀, εK, hfa₀, hfb₀, ?_⟩
+  -- `hKey : (algebraMap ε')³⁷·(−((ζK+1)·η_b⁰)) = (ζK+1)·η_a⁰`.
+  refine mul_left_cancel₀ hεpK_ne ?_
+  linear_combination -hKval
+
+omit [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
+  [NumberField.IsCMField (CyclotomicField 37 ℚ)] in
+/-- **Representation comparison (§H).**  Any two unit/generator pairs `(η,ρ)`, `(η₀,ρ₀)` solving the
+same factor equation `(1−c)·η·ρ³⁷ = n` with `1 − c ≠ 0` and `n ≠ 0` have **nonzero** generators and
+**equal** `37`-th-power values `η·ρ³⁷ = η₀·ρ₀³⁷` (cancelling `1 − c`). -/
+private theorem caseII_washington_factorRepresentation_pow_eq
+    {K : Type*} [Field K] {c n : K} (hc : (1 : K) - c ≠ 0) (hn : n ≠ 0)
+    {η η₀ : Kˣ} {ρ ρ₀ : K}
+    (h : (1 - c) * (η : K) * ρ ^ 37 = n) (h₀ : (1 - c) * (η₀ : K) * ρ₀ ^ 37 = n) :
+    ρ ≠ 0 ∧ ρ₀ ≠ 0 ∧ (η : K) * ρ ^ 37 = (η₀ : K) * ρ₀ ^ 37 := by
+  have hρ : ρ ≠ 0 := by
+    rintro rfl
+    exact hn (by rw [← h, zero_pow (by decide : (37 : ℕ) ≠ 0), mul_zero])
+  have hρ₀ : ρ₀ ≠ 0 := by
+    rintro rfl
+    exact hn (by rw [← h₀, zero_pow (by decide : (37 : ℕ) ≠ 0), mul_zero])
+  refine ⟨hρ, hρ₀, mul_left_cancel₀ hc ?_⟩
+  linear_combination h - h₀
+
+omit [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)] in
+/-- **Real `37`-th root from the factor data (§I–§K).**  Given the producer's ratio
+`η_a⁰ = −T₀³⁷·η_b⁰` and the two representation comparisons `η_a·ρ_a³⁷ = η_a⁰·ρ_a⁰³⁷`,
+`η_b·ρ_b³⁷ = η_b⁰·ρ_b⁰³⁷` (nonzero generators), the combined root `T = −T₀·(ρ_a⁰ρ_b)/(ρ_aρ_b⁰)`
+satisfies `η_a/η_b = T³⁷`; reality of `η_a, η_b` makes it conjugation-fixed, so its real `37`-th
+root `v` (`caseII_washington_real_root_of_pow_real`) gives `η_a = v³⁷·η_b` with `v` real. -/
+private theorem caseII_washington_realRoot_of_factorRatio
+    {ζ : CyclotomicField 37 ℚ} (hζ : IsPrimitiveRoot ζ 37)
+    {ηa ηb ηa₀ ηb₀ : (CyclotomicField 37 ℚ)ˣ} {ρa ρb ρa₀ ρb₀ T₀ : CyclotomicField 37 ℚ}
+    (hρa : ρa ≠ 0) (hρb₀ : ρb₀ ≠ 0)
+    (hηa : complexConj (CyclotomicField 37 ℚ) (ηa : CyclotomicField 37 ℚ) =
+      (ηa : CyclotomicField 37 ℚ))
+    (hηb : complexConj (CyclotomicField 37 ℚ) (ηb : CyclotomicField 37 ℚ) =
+      (ηb : CyclotomicField 37 ℚ))
+    (hKey : (ηa₀ : CyclotomicField 37 ℚ) = -(T₀ ^ 37) * (ηb₀ : CyclotomicField 37 ℚ))
+    (heqa : (ηa : CyclotomicField 37 ℚ) * ρa ^ 37 = (ηa₀ : CyclotomicField 37 ℚ) * ρa₀ ^ 37)
+    (heqb : (ηb : CyclotomicField 37 ℚ) * ρb ^ 37 = (ηb₀ : CyclotomicField 37 ℚ) * ρb₀ ^ 37) :
+    ∃ v : (CyclotomicField 37 ℚ)ˣ,
+      complexConj (CyclotomicField 37 ℚ) (v : CyclotomicField 37 ℚ) =
+        (v : CyclotomicField 37 ℚ) ∧
+      (ηa : (CyclotomicField 37 ℚ)ˣ) = v ^ 37 * ηb := by
+  -- The combined root `T` and the value identity `η_a = T³⁷·η_b`.
+  set T : CyclotomicField 37 ℚ := -T₀ * (ρa₀ * ρb) / (ρa * ρb₀) with hT
   have hηaT : (ηa : CyclotomicField 37 ℚ) = T ^ 37 * (ηb : CyclotomicField 37 ℚ) := by
     rw [hT]
     field_simp
-    linear_combination ρb₀ ^ 37 * heqa + (εK ^ 37 * ρa₀ ^ 37) * heqb +
+    linear_combination ρb₀ ^ 37 * heqa + (T₀ ^ 37 * ρa₀ ^ 37) * heqb +
       (ρa₀ ^ 37 * ρb₀ ^ 37) * hKey
   have hT_ne : T ≠ 0 := by
     intro h0
-    rw [h0] at hηaT
-    rw [zero_pow (by decide : (37 : ℕ) ≠ 0), zero_mul] at hηaT
+    rw [h0, zero_pow (by decide : (37 : ℕ) ≠ 0), zero_mul] at hηaT
     exact Units.ne_zero ηa hηaT
-  -- §J. Reality of `T³⁷ = η_a/η_b`, and the real `37`-th root.
+  -- Reality of `T³⁷ = η_a/η_b`, and the real `37`-th root.
   have hT37 : T ^ 37 = (ηa : CyclotomicField 37 ℚ) / (ηb : CyclotomicField 37 ℚ) := by
-    rw [hηaT]
-    field_simp
+    rw [hηaT]; field_simp
   have hreal37 : complexConj (CyclotomicField 37 ℚ) (((Units.mk0 T hT_ne :
       (CyclotomicField 37 ℚ)ˣ) : CyclotomicField 37 ℚ) ^ 37) =
       ((Units.mk0 T hT_ne : (CyclotomicField 37 ℚ)ˣ) : CyclotomicField 37 ℚ) ^ 37 := by
     rw [Units.val_mk0, hT37, map_div₀, hηa, hηb]
   obtain ⟨v, hv_real, hv37⟩ :=
-    caseII_washington_real_root_of_pow_real D.hζ (Units.mk0 T hT_ne) hreal37
+    caseII_washington_real_root_of_pow_real hζ (Units.mk0 T hT_ne) hreal37
   refine ⟨v, hv_real, ?_⟩
-  -- §K. Conclude `η_a = v³⁷·η_b` (unit equality via values).
+  -- Conclude `η_a = v³⁷·η_b` (unit equality via values).
   have hv37_val : ((v : CyclotomicField 37 ℚ)) ^ 37 = T ^ 37 := by
     have := congrArg (fun z : (CyclotomicField 37 ℚ)ˣ => (z : CyclotomicField 37 ℚ)) hv37
     simpa [Units.val_pow_eq_pow_val] using this
   ext
   rw [Units.val_mul, Units.val_pow_eq_pow_val, hv37_val]
   exact hηaT
+
+/-! ## 5. The main theorem: real Assumption II for the §9.1 factor units, over the `ℓ ∣ z` datum -/
+
+/-- **[F1 — REAL ASSUMPTION II, PROVEN]** (axiom-clean, under the carried Kellner input
+`NoSecondOrderIrregularPair 37 32`).
+
+For a real `ℓ ∣ z` datum `D : RealCaseIIDvdZData37 m` with coprime Fermat variables, **every**
+choice of real factor units `η_a, η_b : Kˣ` and generators `ρ_a, ρ_b : K` satisfying the two §9.1
+factor equations at `ζ, ζ²` admits a **real** unit `v : Kˣ` with `η_a = v³⁷·η_b`.
+
+This is the **real-Assumption-II conjunct** of the clean Case-II residual
+`CaseIIWashingtonCaseII37` (and exactly the statement `CaseIIWashingtonAssumptionIIReal37`),
+discharged by the route-(a) finite-field machinery: the proven integral L2 producer + the
+three-term §9.1 reassembly (`caseII_washington_threeTermInstance`) make `−(u_a/u_b)` a genuine
+descent unit; the **proven** Corollary-8.15 single-index expansion
+(`caseII_corollary815_singleIndexExpansion37_proven`), the Lemma-9.9 local power
+(`caseII_washington_factorRatio_localPower`, from the proven real-data Lemma 9.8), and the
+**proven** discrete-log collapse (`caseIIThm95_descentUnit_isPow_of_singleIndexExpansion`,
+operative core `ind₃₇ E₃₂ ≠ 0`) make it a **global** `37`-th power; and the `ζ^{19j}`-absorption
+(`caseII_washington_real_root_of_pow_real`) produces the **real** root. -/
+theorem caseII_washington_assumptionII_real_of_dvdZ
+    (hSO : NoSecondOrderIrregularPair 37 32)
+    {m : ℕ} (D : RealCaseIIDvdZData37 m)
+    (hcop : IsCoprime (Ideal.span ({D.x} : Set (𝓞 (CyclotomicField 37 ℚ))))
+      (Ideal.span ({D.y} : Set (𝓞 (CyclotomicField 37 ℚ)))))
+    (ηa ηb : (CyclotomicField 37 ℚ)ˣ) (ρa ρb : CyclotomicField 37 ℚ)
+    (hηa : complexConj (CyclotomicField 37 ℚ) (ηa : CyclotomicField 37 ℚ) =
+      (ηa : CyclotomicField 37 ℚ))
+    (hηb : complexConj (CyclotomicField 37 ℚ) (ηb : CyclotomicField 37 ℚ) =
+      (ηb : CyclotomicField 37 ℚ))
+    (hfa : algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.x +
+        algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger) *
+          algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.y =
+      (1 - algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger)) *
+        (ηa : CyclotomicField 37 ℚ) * ρa ^ 37)
+    (hfb : algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.x +
+        algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger ^ 2) *
+          algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.y =
+      (1 - algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger ^ 2)) *
+        (ηb : CyclotomicField 37 ℚ) * ρb ^ 37) :
+    ∃ v : (CyclotomicField 37 ℚ)ˣ,
+      complexConj (CyclotomicField 37 ℚ) (v : CyclotomicField 37 ℚ) =
+        (v : CyclotomicField 37 ℚ) ∧
+      (ηa : (CyclotomicField 37 ℚ)ˣ) = v ^ 37 * ηb := by
+  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have hp : (37 : ℕ) ≠ 2 := by decide
+  have hinj : Function.Injective (algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ)) :=
+    FaithfulSMul.algebraMap_injective _ _
+  have hηOne : (D.etaOne : 𝓞 (CyclotomicField 37 ℚ)) = D.hζ.toInteger :=
+    caseII_etaOne_coe_eq_zeta D.toRealCaseIIData37 hp
+  have hηTwo : (D.etaTwo : 𝓞 (CyclotomicField 37 ℚ)) = D.hζ.toInteger ^ 2 := by
+    rw [caseII_etaTwo_coe_eq_zeta_sq D.toRealCaseIIData37 hp]; exact (pow_two _).symm
+  -- §A–§G. Algebraic descent: a normalised integral representation with `η_a⁰ = −T₀³⁷·η_b⁰`.
+  obtain ⟨ηa₀, ηb₀, ρa₀, ρb₀, T₀, hfa₀, hfb₀, hKey⟩ :=
+    caseII_washington_etaZero_descent hSO D hcop
+  -- §H. The two §9.1 numerators are nonzero, so the given and producer representations compare.
+  have hnum_a : algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.x +
+      algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger) *
+        algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.y ≠ 0 := by
+    have h := caseII_algebraMap_x_add_y_eta_ne_zero D.toRealCaseIIData37 hp D.etaOne
+    rw [hηOne] at h
+    refine fun h0 => h ?_
+    rw [map_add, map_mul]; linear_combination h0
+  have hnum_b : algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.x +
+      algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger ^ 2) *
+        algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.y ≠ 0 := by
+    have h := caseII_algebraMap_x_add_y_eta_ne_zero D.toRealCaseIIData37 hp D.etaTwo
+    rw [hηTwo] at h
+    refine fun h0 => h ?_
+    rw [map_add, map_mul]; linear_combination h0
+  have h1ζK_ne : (1 : CyclotomicField 37 ℚ) -
+      algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger) ≠ 0 :=
+    fun h0 => D.hζ.toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37)
+      (hinj (by rw [map_one]; linear_combination -h0))
+  have h1ζ2K_ne : (1 : CyclotomicField 37 ℚ) -
+      algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger ^ 2) ≠ 0 :=
+    fun h0 => D.hζ.toInteger_isPrimitiveRoot.pow_ne_one_of_pos_of_lt (by omega) (by decide : 2 < 37)
+      (hinj (by rw [map_one]; linear_combination -h0))
+  obtain ⟨hρa_ne, _, heqa⟩ :=
+    caseII_washington_factorRepresentation_pow_eq h1ζK_ne hnum_a hfa.symm hfa₀.symm
+  obtain ⟨_, hρb₀_ne, heqb⟩ :=
+    caseII_washington_factorRepresentation_pow_eq h1ζ2K_ne hnum_b hfb.symm hfb₀.symm
+  -- §I–§K. The combined real `37`-th root.
+  exact caseII_washington_realRoot_of_factorRatio D.hζ hρa_ne hρb₀_ne hηa hηb hKey heqa heqb
 
 /-- **`CaseIIWashingtonAssumptionIIReal37` is PROVEN** (axiom-clean) from the carried Kellner
 input `NoSecondOrderIrregularPair 37 32` alone: the real-Assumption-II conjunct of the clean
