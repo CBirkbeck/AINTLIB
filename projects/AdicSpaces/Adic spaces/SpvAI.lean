@@ -256,6 +256,44 @@ theorem cofinalValue_ideal_pow_lt {A : Type*} [CommRing A] [TopologicalSpace A]
       _ = v (P.A₀.subtype x) := one_mul _
       _ < γ := hx
 
+/-- **Per-`v` uniform decay on `I^n` for a PRINCIPAL ideal of definition, from
+`v ≤ 1` on topologically nilpotent elements (NOT on all of `A₀`).** When `P.I =
+(π)` is principal, an element `a ∈ I^n = (π^n)` factors as `a = π^(n-1)·(π·b)`
+with `π·b ∈ I ⊆ A°°` (topologically nilpotent), so `v(a) = v(π)^(n-1)·v(π·b) ≤
+v(π)^(n-1)`, and cofinality of `v(π)` finishes. This is the **faithful** form of
+Huber's bound (huber2.txt:599-602: products of `A°°`-elements, no `A₀`-coefficient
+decomposition), avoiding the over-strong `v ≤ 1 on A₀` hypothesis of
+`cofinalValue_ideal_pow_lt`. -- INFRASTRUCTURE (principal-ideal specialisation). -/
+theorem cofinalValue_principal_pow_lt {A : Type*} [CommRing A] [TopologicalSpace A]
+    {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀]
+    {v : Valuation A Γ₀} (P : PairOfDefinition A) {π : P.A₀} (hπ : P.I = Ideal.span {π})
+    (h_le : ∀ a : A, IsTopologicallyNilpotent a → v a ≤ 1)
+    (h_cof : Valuation.CofinalValue v (P.A₀.subtype π))
+    (γ : Γ₀) (hγ : 0 < γ) :
+    ∃ n : ℕ, ∀ a : P.A₀, a ∈ P.I ^ n → v (P.A₀.subtype a) < γ := by
+  obtain ⟨m, hm⟩ := h_cof γ hγ
+  refine ⟨m + 1, fun a ha => ?_⟩
+  rw [hπ, Ideal.span_singleton_pow, Ideal.mem_span_singleton] at ha
+  obtain ⟨b, hb⟩ := ha
+  -- `π · b ∈ P.I = (π)`, hence topologically nilpotent.
+  have hπb_mem : π * b ∈ P.I := by
+    rw [hπ]; exact Ideal.mul_mem_right b _ (Ideal.mem_span_singleton_self π)
+  have hπb_nilp : IsTopologicallyNilpotent (P.A₀.subtype (π * b)) :=
+    P.isTopologicallyNilpotent_of_mem hπb_mem
+  have hπb_le : v (P.A₀.subtype (π * b)) ≤ 1 := h_le _ hπb_nilp
+  -- `subtype a = subtype π ^ m * subtype (π * b)`.
+  have ha_eq : P.A₀.subtype a = P.A₀.subtype π ^ m * P.A₀.subtype (π * b) := by
+    rw [hb]
+    simp only [map_mul, map_pow]
+    rw [pow_succ]
+    ring
+  rw [ha_eq, map_mul, map_pow]
+  calc v (P.A₀.subtype π) ^ m * v (P.A₀.subtype (π * b))
+      ≤ v (P.A₀.subtype π) ^ m * 1 := by
+        exact mul_le_mul_left' hπb_le _
+    _ = v (P.A₀.subtype π) ^ m := mul_one _
+    _ < γ := hm
+
 /-- **Wedhorn 7.10 reverse direction (project form, cofinality disjunct
 case).** For an `f`-adic ring `A` with pair of definition `P`, if
 `v : Spv A` satisfies the **cofinality disjunct** of `Spv.IsInSpvAI`
@@ -362,6 +400,70 @@ theorem Spv.isContinuous_of_isInSpvAI_of_lt_one [TopologicalSpace A]
             exact (mul_lt_mul_iff_right₀ h_inv_pos).mpr hb_lt_one
         _ = (wv t)⁻¹ := one_mul _
     -- v(c)^(n_0+1) < v(t)⁻¹ ≤ γ'.
+    exact lt_of_lt_of_le h_pow_lt_inv h_vt_inv_le
+
+/-- **Wedhorn 7.10 reverse direction, A°°-form via a PRINCIPAL pair (faithful to
+Huber Thm 3.1).** Same conclusion as `isContinuous_of_isInSpvAI_of_lt_one`, but for
+a principal ideal of definition `P.I = (π)` and with the boundedness hypothesis on
+the **topologically nilpotent elements** (`A°°`) rather than on all of the ring of
+definition `A₀`. This matches Huber's actual hypothesis (Thm 3.1, huber2.txt:586:
+`Cont A = {v ∈ Spv(A, A°°·A) | v(a) ≤ 1 ∀ a ∈ A°°}`) — the `A₀`-form is over-strong.
+The cofinality of `v(π)` (the single generator) comes from the `IsInSpvAI` disjunct
+exactly as in `isContinuous_of_isInSpvAI_of_lt_one`; the `I^n` decay uses the
+principal bound `cofinalValue_principal_pow_lt`. -/
+theorem Spv.isContinuous_of_isInSpvAI_of_lt_one_principal [TopologicalSpace A]
+    [IsTopologicalRing A]
+    (P : PairOfDefinition A) {π : P.A₀} (hπ : P.I = Ideal.span {π}) (v : Spv A)
+    (h_in : Spv.IsInSpvAI v (Ideal.map P.A₀.subtype P.I))
+    (h_le_AOO : ∀ a : A, IsTopologicallyNilpotent a →
+      letI : ValuativeRel A := v.toValuativeRel
+      (ValuativeRel.valuation A) a ≤ 1)
+    (h_lt_one : ∀ a ∈ P.I,
+      letI : ValuativeRel A := v.toValuativeRel
+      (ValuativeRel.valuation A) (P.A₀.subtype a) < 1) :
+    letI : ValuativeRel A := v.toValuativeRel
+    (ValuativeRel.valuation A).IsContinuous := by
+  letI : ValuativeRel A := v.toValuativeRel
+  set wv := ValuativeRel.valuation A with hwv_def
+  refine Valuation.isContinuous_of_ideal_pow_lt P wv ?_
+  intro γ hγ
+  apply cofinalValue_principal_pow_lt P hπ h_le_AOO ?_ γ hγ
+  -- Goal: `CofinalValue wv (P.A₀.subtype π)`.
+  rcases h_in with h_cof | h_micr
+  · exact h_cof _ (Ideal.mem_map_of_mem _ (hπ ▸ Ideal.mem_span_singleton_self π))
+  · -- Microbial disjunct: the t-trick with `c := π` (as in the A₀-form proof).
+    intro γ' hγ'
+    obtain ⟨t, h_vt_ne, h_vt_inv_le⟩ := h_micr.exists_inv_le hγ'
+    have hπ_topnilp : IsTopologicallyNilpotent (P.A₀.subtype π) :=
+      P.isTopologicallyNilpotent_of_mem (hπ ▸ Ideal.mem_span_singleton_self π)
+    obtain ⟨n_0, hn_0⟩ := PairOfDefinition.exists_pow_mul_mem_A₀ P hπ_topnilp t
+    refine ⟨n_0 + 1, ?_⟩
+    let b : P.A₀ := π * ⟨(P.A₀.subtype π) ^ n_0 * t, hn_0⟩
+    have hb_mem_I : b ∈ P.I := by
+      rw [hπ]; exact Ideal.mul_mem_right _ _ (Ideal.mem_span_singleton_self π)
+    have hb_lt_one : wv (P.A₀.subtype b) < 1 := h_lt_one b hb_mem_I
+    have hb_eq : wv (P.A₀.subtype b) =
+        wv (P.A₀.subtype π) ^ (n_0 + 1) * wv t := by
+      change wv (P.A₀.subtype (π * ⟨(P.A₀.subtype π) ^ n_0 * t, hn_0⟩)) = _
+      rw [show (P.A₀.subtype (π * ⟨(P.A₀.subtype π) ^ n_0 * t, hn_0⟩) : A) =
+          P.A₀.subtype π * ((P.A₀.subtype π) ^ n_0 * t) from by simp]
+      rw [map_mul, map_mul, map_pow]
+      rw [show wv (P.A₀.subtype π) ^ (n_0 + 1)
+          = wv (P.A₀.subtype π) * wv (P.A₀.subtype π) ^ n_0 from by rw [pow_succ']]
+      rw [mul_assoc]
+    rw [hb_eq] at hb_lt_one
+    have h_pow_lt_inv : wv (P.A₀.subtype π) ^ (n_0 + 1) < (wv t)⁻¹ := by
+      have h_vt_pos : 0 < wv t := zero_lt_iff.mpr h_vt_ne
+      have h_inv_pos : 0 < (wv t)⁻¹ := inv_pos.mpr h_vt_pos
+      have h_x_eq : wv (P.A₀.subtype π) ^ (n_0 + 1) =
+          (wv (P.A₀.subtype π) ^ (n_0 + 1) * wv t) * (wv t)⁻¹ := by
+        rw [mul_assoc, mul_inv_cancel₀ h_vt_ne, mul_one]
+      rw [h_x_eq]
+      calc (wv (P.A₀.subtype π) ^ (n_0 + 1) * wv t) * (wv t)⁻¹
+          < 1 * (wv t)⁻¹ := by
+            rw [mul_comm _ ((wv t)⁻¹), mul_comm 1 ((wv t)⁻¹)]
+            exact (mul_lt_mul_iff_right₀ h_inv_pos).mpr hb_lt_one
+        _ = (wv t)⁻¹ := one_mul _
     exact lt_of_lt_of_le h_pow_lt_inv h_vt_inv_le
 
 /-- **Wedhorn 7.11(1) forward / 7.10 forward direction.** For a continuous
