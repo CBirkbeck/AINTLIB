@@ -86,7 +86,7 @@ logarithm vector. -/
 def kummerLogMatrix
     (hp_five : 5 ≤ p) (logVec : KummerLogVector (p := p) (K := K)) :
     Matrix (Fin (kummerLogRank p)) (Fin (kummerLogRank p)) (ZMod p) :=
-  fun j a => kummerLogCoeff (p := p) (K := K) hp_five logVec j a
+  fun j a ↦ kummerLogCoeff (p := p) (K := K) hp_five logVec j a
 
 @[simp]
 theorem kummerLogMatrix_apply
@@ -487,7 +487,7 @@ noncomputable def kummerLogCompletedColumn
     DworkCompleteIntegerRing p K :=
   let R : Type _ := ValuedIntegerRing p K
   let I : Ideal R := lambdaIdeal p K
-  ⟨fun N =>
+  ⟨fun N ↦
       (Ideal.quotientEquivAlgOfEq R (by
         ext y
         simp : (I ^ N • ⊤ : Ideal R) = I ^ N)).symm
@@ -730,7 +730,7 @@ theorem samePrimeFiniteLog_quotientMap_complexConj {N : ℕ}
   classical
   unfold samePrimeFiniteLog
   rw [map_sum]
-  exact Finset.sum_congr rfl fun n _hn =>
+  exact Finset.sum_congr rfl fun n _hn ↦
     samePrimeFiniteLogTerm_quotientMap_complexConj (p := p) (K := K) hx
 
 end PadicLogSetup.DworkParameter.Conjugation
@@ -741,7 +741,7 @@ theorem samePrimeFiniteLog_level_zero
     samePrimeFiniteLog (p := p) (K := K) 0 x hx = 0 := by
   classical
   unfold samePrimeFiniteLog
-  refine Finset.sum_eq_zero fun n _hn => ?_
+  refine Finset.sum_eq_zero fun n _hn ↦ ?_
   by_cases hn : n = 0
   · subst n
     simp
