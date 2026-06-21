@@ -394,13 +394,20 @@ theorem mem_plus_of_forall_spa_vle_one
         -- (huber2.txt:589-602): (1) `v(a)` cofinal in `Γv` for `a ∈ A°°` (microbial via (2.5), else the
         -- `t·aⁿ ∈ A°°` cofinality trick); then for a nbhd basis `{Uⁿ}` with `T·U ⊆ U` finite `T`, pick
         -- `n` with `(max_{t∈T} v(t))ⁿ < γ`, giving `v < γ` on `U^{n+1}` ⟹ continuous.
-        -- ⚠ The in-repo `Spv.isContinuous_of_isInSpvAI_of_lt_one` (SpvAI.lean:294, axiom-clean) is the
-        -- **A₀-form** (hypotheses `v ≤ 1 on A₀`, `v < 1 on I` over a `PairOfDefinition`), which is
-        -- STRONGER than Huber's A°°-form (`A⁺ ⊆ A₀`, Presheaf:236, and `v ≤ 1` is only known on `A⁺`),
-        -- so it is NOT directly applicable here. Faithful discharge = prove the A°°-form of Huber 3.1
-        -- reverse (adapting the SpvAI.lean:294 microbial+cofinality proof from `A₀`/`I` to `A°°`), then
-        -- supply (c) (the `G`-open argument: `a ∈ B°° ⟹ aⁿ = g·x⁻¹ ∈ p ⟹ s(aⁿ) ≤ 1`) and (d).
-        -- LEAF — faithful cited-external (Huber Thm 3.1, A°°-form). All other parts of Huber 3.3(i) ✓.
+        -- ✅ The faithful **A°°-form criterion is now BUILT, sorry-free** (this session):
+        -- `Spv.isContinuous_of_isInSpvAI_of_lt_one_principal` (SpvAI.lean) — for a PRINCIPAL pair
+        -- (`P.I = (π)`, available via `IsTateRing.principalPair B`), with the boundedness hypothesis on
+        -- `A°°` (Huber's, not the over-strong `A₀`-form), using the new `cofinalValue_principal_pow_lt`
+        -- (the faithful `I^n` decay `a = π^(n-1)·(πb)`, `πb ∈ A°°`). Remaining to wire it in:
+        --   • P := `IsTateRing.principalPair (presheafValue D')`; witness ⤳ `restrictIdeal v (J)` with
+        --     `J = Ideal.map P.A₀.subtype P.I` (Huber's `u|cΓ`; `restrictIdeal` preserves `v(x) > 1`
+        --     since `v(x) ≥ 1 ∈ cΓ`, and keeps `v ≤ 1 on B⁺` as `≤ 1`/`0` — so HU-e(2)/(1b) transfer);
+        --   • (c) `v ≤ 1 on A°°`: `B°° ⊆ B⁺` (open + integrally closed) + the proven `v ≤ 1 on B⁺`;
+        --   • (d) `IsInSpvAI (restrictIdeal v J) J`: `restrictIdeal_isInSpvAI` — ⚠ this bottoms at the
+        --     **documented project sorry `ofValuation_restrictIdeal_isInSpvAI`** (SpvAITopology.lean:484
+        --     = Wedhorn 7.4(ii)/7.5(2): the convex-subgroup cofinal/microbial dichotomy), one of the
+        --     spectral-machinery leaves. THIS is the single remaining bottom of the continuity.
+        -- LEAF — reduced to property (d) = Wedhorn 7.4(ii) dichotomy (`ofValuation_restrictIdeal_isInSpvAI`).
         sorry
       · -- `v ≤ 1` on `B⁺` (Huber property (b)): `f ∈ B⁺ ⊆ R := B⁺[x⁻¹]`, so `s f ≤ 1` (`hs_le`),
         -- transported to `v` by the extension equivalence `s ≈ t ∘ (R ↪ B_x)` (`ht_equiv`).
