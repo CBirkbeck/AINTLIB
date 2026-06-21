@@ -384,12 +384,20 @@ theorem mem_plus_of_forall_spa_vle_one
       rw [mem_spa_iff]
       refine ⟨?_, ?_⟩
       · -- Continuity of `v` (Huber [Hu2] (3.1) = Wedhorn Thm 7.10 reverse, huber2.txt:654-657).
-        -- Huber: "(a),(b) follow from `s(x⁻¹)<1`, `s(g)<1`; (c) for `a ∈ A°°`: `G` open ⟹ `∃n, xⁿa ∈ G`
-        -- and `a ∈ G`, so in `G[x⁻¹]`, `aⁿ = g·x⁻¹` with `a⁻¹ ∈ p`, giving `s(a) ≤ 1` hence `v(a) ≤ 1`;
-        -- (d) `v ∈ Spv(A, A°°·A)` by construction. We conclude from (3.1) and (c),(d) that `v` is
-        -- continuous." The criterion (3.1) = Wedhorn 7.10 reverse is the project's `SpvAITopology`
-        -- 7.5/7.10 spectral-space machinery; properties (c) `v ≤ 1` on `B°°` (the `G`-open localization
-        -- argument) and (d) `v ∈ Spv(B, B°°·B)` feed it. -- LEAF (Huber's (3.1)/Wedhorn 7.10 reverse).
+        -- Huber: "(c) for `a ∈ A°°`: `G` open ⟹ `∃n, xⁿa ∈ G` and `a ∈ G`, so in `G[x⁻¹]`,
+        -- `aⁿ = g·x⁻¹` with `x⁻¹ ∈ p`, giving `s(aⁿ) ≤ 1` hence `v(a) ≤ 1`; (d) `v ∈ Spv(A, A°°·A)` by
+        -- construction. We conclude from (3.1) and (c),(d) that `v` is continuous."
+        -- The criterion (3.1) IS proven sorry-free in this project:
+        -- `Spv.isContinuous_of_isInSpvAI_of_lt_one` (SpvAI.lean:294, axiom-clean). Applying it needs:
+        --   • `P : PairOfDefinition B` — available: `(IsHuberRing.exists_pairOfDefinition).some`, or the
+        --     concrete `presheafValue_pairOfDefinition_concrete` (PresheafTateStructure.lean:859);
+        --   • `h_le_one : v ≤ 1 on P.A₀`  ⚠ the project criterion uses the ring of definition `A₀`,
+        --     NOT Huber's `A°°`; since `A⁺ ⊆ A₀` (Presheaf.lean:236, the *wrong* direction) the proven
+        --     `v ≤ 1 on A⁺` does not give this directly — must either (i) construct/choose `P` with
+        --     `A₀ ⊆ {v ≤ 1}`, or (ii) prove an `A°°`-form criterion matching Huber's (3.1) exactly;
+        --   • `h_lt_one : v < 1 on P.I` (Huber's (c), the `G`-open localization argument: `aⁿ = g·x⁻¹`,
+        --     `x⁻¹ ∈ p ⟹ s(aⁿ) ≤ 1`);  • `h_in : Spv.IsInSpvAI v (I·B)` (Huber's (d), by construction).
+        -- LEAF — faithful cited-external (Huber's (3.1)); criterion in-repo, A₀-vs-A°° reconciliation TODO.
         sorry
       · -- `v ≤ 1` on `B⁺` (Huber property (b)): `f ∈ B⁺ ⊆ R := B⁺[x⁻¹]`, so `s f ≤ 1` (`hs_le`),
         -- transported to `v` by the extension equivalence `s ≈ t ∘ (R ↪ B_x)` (`ht_equiv`).
