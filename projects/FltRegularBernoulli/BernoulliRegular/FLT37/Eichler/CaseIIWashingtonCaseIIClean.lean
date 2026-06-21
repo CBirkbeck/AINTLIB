@@ -343,7 +343,7 @@ theorem caseII_zeta_sub_one_not_dvd_factorGenerator
       one_mem_nthRootsFinset (by norm_num)
     have hne : (η : 𝓞 (CyclotomicField 37 ℚ)) ≠ (1 : 𝓞 (CyclotomicField 37 ℚ)) := by
       have h1 : (η : 𝓞 (CyclotomicField 37 ℚ)) ≠ (D.etaZero : 𝓞 (CyclotomicField 37 ℚ)) :=
-        fun h => hη (Subtype.ext h)
+        fun h ↦ hη (Subtype.ext h)
       rwa [caseII_etaZero_eq_one D hp] at h1
     have hpair :=
       D.hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
@@ -707,7 +707,7 @@ theorem caseIISection91PContentExtractionDataWithUnits37_of_caseII
           (1 - (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger ^ 36))) ^ (2 * e - 1) ≠ 0 := by
       refine pow_ne_zero _ ?_
       rw [Ne, map_eq_zero_iff _ hinj]
-      refine mul_ne_zero (sub_ne_zero.mpr fun h => ?_) (sub_ne_zero.mpr fun h => ?_)
+      refine mul_ne_zero (sub_ne_zero.mpr fun h ↦ ?_) (sub_ne_zero.mpr fun h ↦ ?_)
       · exact (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger_isPrimitiveRoot.ne_one
           (by decide : 1 < 37) h.symm
       · have hp37 : (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger ^ 37 = 1 :=
@@ -822,7 +822,7 @@ theorem no_pContent_freeContentCaseIIDvdZData37_withUnits
     ¬ ∃ m : ℕ, Nonempty (FreeContentCaseIIDvdZData37 (37 * (m + 1))) := by
   classical
   rintro ⟨m₀, ⟨D₀⟩⟩
-  let P : ℕ → Prop := fun k =>
+  let P : ℕ → Prop := fun k ↦
     ∃ (m : ℕ) (E : FreeContentCaseIIDvdZData37 (37 * (m + 1))), caseIIFreeDvdZFactorCount E = k
   have hP : ∃ k, P k := ⟨_, m₀, D₀, rfl⟩
   obtain ⟨mmin, Dmin, hk⟩ := Nat.find_spec hP
