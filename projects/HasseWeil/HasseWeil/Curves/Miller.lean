@@ -1358,10 +1358,9 @@ theorem divZeroReduce_holds
 C.CoordinateRing]` (acceptable per the §5 alg-closure-internal reframe),
 the bundled `AFInputs` record is constructible directly from the shipped
 Miller / DivZeroReduce / NoFinitePolesBridge unconditionals. -/
-noncomputable def afInputs_unconditional
+theorem afInputs_unconditional
     [IsAlgClosed F] [NeZero (2 : F)] [NeZero (3 : F)]
-    [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing] :
+    [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing] :
     AFInputs W where
   miller := miller_hypothesis_holds W
   divZeroReduce := divZeroReduce_holds W
@@ -1377,8 +1376,7 @@ downstream consumers in the §5 cascade (T-III-6-002 → §5.4 keystone → III.
 → qf_nonneg). -/
 noncomputable def picZeroIsoE
     [IsAlgClosed F] [NeZero (2 : F)] [NeZero (3 : F)]
-    [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing] :
+    [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing] :
     SmoothPlaneCurve.PicProj₀ (⟨W⟩ : SmoothPlaneCurve F) ≃+ W.Point :=
   picZeroIsoE_of_AFInputs (afInputs_unconditional W)
 
@@ -1391,8 +1389,7 @@ noncomputable def picZeroIsoE_baseChange
     {L : Type*} [Field L] [Algebra F L] [DecidableEq L]
     [IsAlgClosed L] [NeZero (2 : L)] [NeZero (3 : L)]
     [(W.baseChange L).IsElliptic]
-    [IsDedekindDomain (⟨W.baseChange L⟩ : SmoothPlaneCurve L).CoordinateRing]
-    [IsIntegrallyClosed (⟨W.baseChange L⟩ : SmoothPlaneCurve L).CoordinateRing] :
+    [IsDedekindDomain (⟨W.baseChange L⟩ : SmoothPlaneCurve L).CoordinateRing] :
     SmoothPlaneCurve.PicProj₀ (⟨W.baseChange L⟩ : SmoothPlaneCurve L) ≃+
       WeierstrassCurve.Affine.Point (W.baseChange L) :=
   picZeroIsoE (W.baseChange L)
@@ -1403,7 +1400,6 @@ consumers that need to apply the κ map. -/
 @[simp] theorem picZeroIsoE_symm_apply
     [IsAlgClosed F] [NeZero (2 : F)] [NeZero (3 : F)]
     [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
     (P : W.Point) :
     (picZeroIsoE W).symm P = picZeroOfPoint W P := rfl
 
@@ -1412,7 +1408,6 @@ of the isomorphism inverts `picZeroOfPoint`. -/
 @[simp] theorem picZeroIsoE_picZeroOfPoint
     [IsAlgClosed F] [NeZero (2 : F)] [NeZero (3 : F)]
     [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
     (P : W.Point) :
     picZeroIsoE W (picZeroOfPoint W P) = P := by
   rw [← picZeroIsoE_symm_apply W P, (picZeroIsoE W).apply_symm_apply]
@@ -1424,7 +1419,6 @@ for any principal projective divisor `D ∈ ProjPrincipalSubgroup`,
 theorem projectiveDivisorSum_eq_zero_of_principal
     [IsAlgClosed F] [NeZero (2 : F)] [NeZero (3 : F)]
     [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
     {D : ProjectiveDivisor (⟨W⟩ : SmoothPlaneCurve F)}
     (hD : D ∈ (⟨W⟩ : SmoothPlaneCurve F).projPrincipalSubgroup) :
     projectiveDivisorSum W D = 0 :=
@@ -1439,7 +1433,6 @@ the `right_inv` of `picZeroIsoE`. -/
 theorem sigmaBar_picZeroOfPoint
     [IsAlgClosed F] [NeZero (2 : F)] [NeZero (3 : F)]
     [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
     (P : W.Point) :
     picZeroIsoE W (picZeroOfPoint W P) = P :=
   picZeroIsoE_picZeroOfPoint W P
@@ -1450,7 +1443,6 @@ of Pic⁰ is `picZeroOfPoint W P` for some P. This is the `left_inv` of
 theorem picZeroOfPoint_sigmaBar
     [IsAlgClosed F] [NeZero (2 : F)] [NeZero (3 : F)]
     [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
     (D : SmoothPlaneCurve.PicProj₀ (⟨W⟩ : SmoothPlaneCurve F)) :
     picZeroOfPoint W (picZeroIsoE W D) = D := by
   rw [← picZeroIsoE_symm_apply W (picZeroIsoE W D), (picZeroIsoE W).symm_apply_apply]
@@ -1476,8 +1468,7 @@ injective): the κ map `P ↦ [(P) - (O)] : W.Point → PicProj₀` is injective
 This is the `Equiv.symm` form of `picZeroIsoE`. -/
 theorem picZeroOfPoint_injective
     [IsAlgClosed F] [NeZero (2 : F)] [NeZero (3 : F)]
-    [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing] :
+    [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing] :
     Function.Injective (picZeroOfPoint W) := by
   intro P Q hPQ
   have h_iso : (picZeroIsoE W).symm P = (picZeroIsoE W).symm Q := by
@@ -1490,8 +1481,7 @@ theorem picZeroOfPoint_injective
 isomorphism as an `AddEquiv`. -/
 noncomputable abbrev picZeroEquiv
     [IsAlgClosed F] [NeZero (2 : F)] [NeZero (3 : F)]
-    [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing] :
+    [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing] :
     SmoothPlaneCurve.PicProj₀ (⟨W⟩ : SmoothPlaneCurve F) ≃+ W.Point :=
   picZeroIsoE W
 
@@ -1512,8 +1502,6 @@ theorem AddHomProperty_of_pushforward_principal
     {W₁ W₂ : WeierstrassCurve.Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
     [IsDedekindDomain (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing]
     [IsDedekindDomain (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing]
     (φ : HasseWeil.EC.Isogeny W₁ W₂)
     (cd : φ.toCurveMap.CoordHom)
     (h_pres : ∀ D : ProjectiveDivisor (⟨W₁⟩ : SmoothPlaneCurve F),
@@ -1534,7 +1522,6 @@ equivalence to Pic⁰. -/
 theorem kappaDivisor_inj
     [IsAlgClosed F] [NeZero (2 : F)] [NeZero (3 : F)]
     [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
     {P Q : W.Point}
     (h : SmoothPlaneCurve.ProjLinearlyEquiv (⟨W⟩ : SmoothPlaneCurve F)
       (kappaDivisor W P) (kappaDivisor W Q)) :
@@ -1563,8 +1550,6 @@ variable {F : Type*} [Field F] [DecidableEq F]
 variable {W : WeierstrassCurve.Affine F} [W.IsElliptic]
 variable [IsAlgClosed F] [NeZero (2 : F)] [NeZero (3 : F)]
 variable [IsDedekindDomain
-  (⟨W⟩ : HasseWeil.Curves.SmoothPlaneCurve F).CoordinateRing]
-variable [IsIntegrallyClosed
   (⟨W⟩ : HasseWeil.Curves.SmoothPlaneCurve F).CoordinateRing]
 
 /-- **Pic⁰ pushforward via canonical iso**: instantiates
@@ -1656,8 +1641,6 @@ noncomputable def frobeniusPicPushforward_charP_prime
     [IsAlgClosed L] [NeZero (2 : L)] [NeZero (3 : L)] [ExpChar L p]
     [(W₀.baseChange L).toAffine.IsElliptic]
     [IsDedekindDomain (⟨(W₀.baseChange L).toAffine⟩ :
-      HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing]
-    [IsIntegrallyClosed (⟨(W₀.baseChange L).toAffine⟩ :
       HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing] :
     HasseWeil.Curves.SmoothPlaneCurve.PicProj₀
         (⟨(W₀.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L) →+
@@ -1679,8 +1662,6 @@ theorem frobeniusPicPushforward_charP_prime_picZeroOfPoint
     [IsAlgClosed L] [NeZero (2 : L)] [NeZero (3 : L)] [ExpChar L p]
     [(W₀.baseChange L).toAffine.IsElliptic]
     [IsDedekindDomain (⟨(W₀.baseChange L).toAffine⟩ :
-      HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing]
-    [IsIntegrallyClosed (⟨(W₀.baseChange L).toAffine⟩ :
       HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing]
     (P : (W₀.baseChange L).toAffine.Point) :
     frobeniusPicPushforward_charP_prime p k W₀ L
@@ -1706,8 +1687,6 @@ noncomputable def verschiebungPicPullback_charP_prime
     [(W₀.baseChange L).toAffine.IsElliptic]
     [IsDedekindDomain (⟨(W₀.baseChange L).toAffine⟩ :
       HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing]
-    [IsIntegrallyClosed (⟨(W₀.baseChange L).toAffine⟩ :
-      HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing]
     (α_dual : HasseWeil.Isogeny (W₀.baseChange L).toAffine
       (W₀.baseChange L).toAffine) :
     HasseWeil.Curves.SmoothPlaneCurve.PicProj₀
@@ -1731,8 +1710,6 @@ theorem verschiebungPicPullback_comp_frobeniusPicPushforward
     [IsAlgClosed L] [NeZero (2 : L)] [NeZero (3 : L)] [ExpChar L p]
     [(W₀.baseChange L).toAffine.IsElliptic]
     [IsDedekindDomain (⟨(W₀.baseChange L).toAffine⟩ :
-      HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing]
-    [IsIntegrallyClosed (⟨(W₀.baseChange L).toAffine⟩ :
       HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing]
     (α_dual : HasseWeil.Isogeny (W₀.baseChange L).toAffine
       (W₀.baseChange L).toAffine)
@@ -1763,8 +1740,6 @@ noncomputable def frobeniusDualViaPicZero_charP_prime
     [(W₀.baseChange L).toAffine.IsElliptic]
     [IsDedekindDomain (⟨(W₀.baseChange L).toAffine⟩ :
       HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing]
-    [IsIntegrallyClosed (⟨(W₀.baseChange L).toAffine⟩ :
-      HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing]
     (α_dual : HasseWeil.Isogeny (W₀.baseChange L).toAffine
       (W₀.baseChange L).toAffine) :
     HasseWeil.Isogeny (W₀.baseChange L).toAffine
@@ -1785,8 +1760,6 @@ theorem frobeniusDualViaPicZero_charP_prime_comp_property
     [IsAlgClosed L] [NeZero (2 : L)] [NeZero (3 : L)] [ExpChar L p]
     [(W₀.baseChange L).toAffine.IsElliptic]
     [IsDedekindDomain (⟨(W₀.baseChange L).toAffine⟩ :
-      HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing]
-    [IsIntegrallyClosed (⟨(W₀.baseChange L).toAffine⟩ :
       HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing]
     (α_dual : HasseWeil.Isogeny (W₀.baseChange L).toAffine
       (W₀.baseChange L).toAffine)
@@ -1813,8 +1786,6 @@ noncomputable def frobeniusPicPushforward_charP_pow
     [IsAlgClosed L] [NeZero (2 : L)] [NeZero (3 : L)] [ExpChar L p]
     [(W₀.baseChange L).toAffine.IsElliptic]
     [IsDedekindDomain (⟨(W₀.baseChange L).toAffine⟩ :
-      HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing]
-    [IsIntegrallyClosed (⟨(W₀.baseChange L).toAffine⟩ :
       HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing] :
     HasseWeil.Curves.SmoothPlaneCurve.PicProj₀
         (⟨(W₀.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L) →+
@@ -1835,8 +1806,6 @@ theorem frobeniusPicPushforward_charP_pow_picZeroOfPoint
     [IsAlgClosed L] [NeZero (2 : L)] [NeZero (3 : L)] [ExpChar L p]
     [(W₀.baseChange L).toAffine.IsElliptic]
     [IsDedekindDomain (⟨(W₀.baseChange L).toAffine⟩ :
-      HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing]
-    [IsIntegrallyClosed (⟨(W₀.baseChange L).toAffine⟩ :
       HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing]
     (P : (W₀.baseChange L).toAffine.Point) :
     frobeniusPicPushforward_charP_pow p r k W₀ L
@@ -1859,8 +1828,6 @@ noncomputable def verschiebungPicPullback_charP_pow
     [(W₀.baseChange L).toAffine.IsElliptic]
     [IsDedekindDomain (⟨(W₀.baseChange L).toAffine⟩ :
       HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing]
-    [IsIntegrallyClosed (⟨(W₀.baseChange L).toAffine⟩ :
-      HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing]
     (α_dual : HasseWeil.Isogeny (W₀.baseChange L).toAffine
       (W₀.baseChange L).toAffine) :
     HasseWeil.Curves.SmoothPlaneCurve.PicProj₀
@@ -1881,8 +1848,6 @@ theorem verschiebungPicPullback_comp_frobeniusPicPushforward_charP_pow
     [IsAlgClosed L] [NeZero (2 : L)] [NeZero (3 : L)] [ExpChar L p]
     [(W₀.baseChange L).toAffine.IsElliptic]
     [IsDedekindDomain (⟨(W₀.baseChange L).toAffine⟩ :
-      HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing]
-    [IsIntegrallyClosed (⟨(W₀.baseChange L).toAffine⟩ :
       HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing]
     (α_dual : HasseWeil.Isogeny (W₀.baseChange L).toAffine
       (W₀.baseChange L).toAffine)
@@ -1911,8 +1876,6 @@ noncomputable def frobeniusDualViaPicZero_charP_pow
     [(W₀.baseChange L).toAffine.IsElliptic]
     [IsDedekindDomain (⟨(W₀.baseChange L).toAffine⟩ :
       HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing]
-    [IsIntegrallyClosed (⟨(W₀.baseChange L).toAffine⟩ :
-      HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing]
     (α_dual : HasseWeil.Isogeny (W₀.baseChange L).toAffine
       (W₀.baseChange L).toAffine) :
     HasseWeil.Isogeny (W₀.baseChange L).toAffine
@@ -1930,8 +1893,6 @@ theorem frobeniusDualViaPicZero_charP_pow_comp_property
     [IsAlgClosed L] [NeZero (2 : L)] [NeZero (3 : L)] [ExpChar L p]
     [(W₀.baseChange L).toAffine.IsElliptic]
     [IsDedekindDomain (⟨(W₀.baseChange L).toAffine⟩ :
-      HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing]
-    [IsIntegrallyClosed (⟨(W₀.baseChange L).toAffine⟩ :
       HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing]
     (α_dual : HasseWeil.Isogeny (W₀.baseChange L).toAffine
       (W₀.baseChange L).toAffine)
@@ -1961,7 +1922,6 @@ principal (witnessed by `coordY − algMap linePoly`). -/
 theorem projectiveDivisorSum_chord_line
     [IsAlgClosed F] [NeZero (2 : F)] [NeZero (3 : F)] [C.toAffine.IsElliptic]
     [IsDedekindDomain C.CoordinateRing]
-    [IsIntegrallyClosed C.CoordinateRing]
     (SP SQ : C.SmoothPoint)
     (hxy : ¬(SP.x = SQ.x ∧ SP.y = C.toAffine.negY SQ.x SQ.y)) :
     HasseWeil.Curves.projectiveDivisorSum C.toAffine
@@ -1980,7 +1940,6 @@ equals zero. Direct corollary. -/
 theorem projectiveDivisorSum_vertical_line_of_principal
     [IsAlgClosed F] [NeZero (2 : F)] [NeZero (3 : F)] [C.toAffine.IsElliptic]
     [IsDedekindDomain C.CoordinateRing]
-    [IsIntegrallyClosed C.CoordinateRing]
     (P : C.SmoothPoint) :
     HasseWeil.Curves.projectiveDivisorSum C.toAffine
       (Finsupp.single (HasseWeil.Curves.ProjectiveSmoothPoint.affine P) (1 : ℤ)
@@ -2002,7 +1961,7 @@ element from `F[C]` equals `intValuation` of the height-one prime
 `pointValuation_algebraMap_eq_exp_count` (project) and `intValuation_if_neg`
 (mathlib). -/
 theorem pointValuation_algebraMap_eq_intValuation
-    [IsDedekindDomain C.CoordinateRing] [IsIntegrallyClosed C.CoordinateRing]
+    [IsDedekindDomain C.CoordinateRing]
     (P : C.SmoothPoint) (u : C.CoordinateRing) :
     C.pointValuation P (algebraMap C.CoordinateRing C.FunctionField u) =
       (HasseWeil.Curves.smoothPointToHeightOne C.toAffine P).intValuation u := by
