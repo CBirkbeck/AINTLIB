@@ -276,4 +276,66 @@ abbrev AbsGalFPlus (n : ℕ) : Type := Om ≃ₐ[FPlus p n] Om
 of) this group; `M⁺_∞ ⊆ Ω` is the corresponding fixed field. -/
 abbrev AbsGalFinfPlus : Type := Om ≃ₐ[FinfPlus p] Om
 
+/-! ### Brick 6 — the maximal extensions `M⁺ₙ`, `L⁺ₙ` and the Galois modules `X⁺_∞`, `Y⁺_∞`
+
+**Verbatim from RJW §13.2** (the protagonists of the Galois side of the Main Conjecture):
+* `M⁺ₙ` = maximal abelian `p`-extension of `F⁺ₙ` unramified outside `p⁺ₙ`,
+* `L⁺ₙ` = maximal unramified abelian `p`-extension of `F⁺ₙ`,
+* `M⁺_∞ = ⋃ₙ M⁺ₙ`, `L⁺_∞ = ⋃ₙ L⁺ₙ`,
+* `X⁺_∞ = Gal(M⁺_∞/F⁺_∞)`, `Y⁺_∞ = Gal(L⁺_∞/F⁺_∞)`.
+
+Each maximal extension is realised as the compositum (`⨆`) inside `Ω` of its **finite** abelian
+`p`-power layers carrying the required ramification — so the ramification condition is checked on
+finite extensions of the number field `F⁺ₙ`, where mathlib's `IsUnramifiedAt` and
+`FltRegular.NumberTheory.Unramified` apply. Since `p⁺ₙ` is the unique prime of `F⁺ₙ` above `p`,
+"unramified outside `p⁺ₙ`" means: unramified at every prime `P` of `𝓞_L` with residue characteristic
+`≠ p`, i.e. `p ∉ P`. This is the genuine construction — no `Type*` stand-in, no bundled isomorphism. -/
+
+open NumberField in
+/-- A finite layer `L` over the number field `F⁺ₙ` is itself a number field (tower `ℚ → F⁺ₙ → L`),
+so it has a ring of integers `𝓞_L` and primes. -/
+theorem numberField_of_finite_layer (n : ℕ) (L : IntermediateField (FPlus p n) Om)
+    [FiniteDimensional (FPlus p n) L] : NumberField L := by
+  haveI : FiniteDimensional ℚ (FPlus p n) := instFiniteDimensionalFPlus p n
+  haveI : FiniteDimensional ℚ (L : Type _) := Module.Finite.trans (FPlus p n) (L : Type _)
+  exact ⟨⟩
+
+open NumberField in
+/-- (RJW §13.2) `L/F⁺ₙ` is **unramified outside `p`**: it is unramified at every prime `P` of `𝓞_L`
+whose residue characteristic is `≠ p` (equivalently `p ∉ P`). As `p⁺ₙ` is the unique prime of `F⁺ₙ`
+above `p`, this is exactly RJW's "unramified outside `p⁺ₙ`". -/
+def IsUnramifiedOutsideP (n : ℕ) (L : IntermediateField (FPlus p n) Om)
+    [FiniteDimensional (FPlus p n) L] : Prop :=
+  haveI := numberField_of_finite_layer p n L
+  ∀ (P : Ideal (𝓞 L)) [P.IsPrime], (p : 𝓞 L) ∉ P → Algebra.IsUnramifiedAt (𝓞 (FPlus p n)) P
+
+/-- A finite **abelian `p`-power** layer over `F⁺ₙ` that is **unramified outside `p`** — the building
+block of `M⁺ₙ`. A genuine predicate (not a bundled hypothesis): finiteness, Galois, commutative Galois
+group, `p`-power degree, and the ramification condition above. -/
+def IsAdmissibleM (n : ℕ) (L : IntermediateField (FPlus p n) Om) : Prop :=
+  ∃ h : FiniteDimensional (FPlus p n) L,
+    IsGalois (FPlus p n) L ∧
+    (∀ σ τ : L ≃ₐ[FPlus p n] L, σ * τ = τ * σ) ∧
+    (∃ k : ℕ, Module.finrank (FPlus p n) L = p ^ k) ∧
+    @IsUnramifiedOutsideP p _ n L h
+
+/-- `M⁺ₙ` = maximal abelian `p`-extension of `F⁺ₙ` unramified outside `p⁺ₙ` (RJW §13.2), realised as
+the compositum inside `Ω` of all its finite admissible layers. A genuine field, not a stand-in. -/
+def MPlusN (n : ℕ) : IntermediateField (FPlus p n) Om :=
+  ⨆ (L : IntermediateField (FPlus p n) Om) (_ : IsAdmissibleM p n L), L
+
+/-- A finite abelian `p`-power layer over `F⁺ₙ` that is **unramified everywhere** — the building
+block of `L⁺ₙ` (the `p`-Hilbert class field tower). -/
+def IsAdmissibleL (n : ℕ) (L : IntermediateField (FPlus p n) Om) : Prop :=
+  ∃ _ : FiniteDimensional (FPlus p n) L,
+    IsGalois (FPlus p n) L ∧
+    (∀ σ τ : L ≃ₐ[FPlus p n] L, σ * τ = τ * σ) ∧
+    (∃ k : ℕ, Module.finrank (FPlus p n) L = p ^ k) ∧
+    Algebra.Unramified (NumberField.RingOfIntegers (FPlus p n)) (NumberField.RingOfIntegers L)
+
+/-- `L⁺ₙ` = maximal unramified abelian `p`-extension of `F⁺ₙ` (RJW §13.2; the `p`-Hilbert class
+field of `F⁺ₙ`), as the compositum inside `Ω` of its finite admissible layers. -/
+def LPlusN (n : ℕ) : IntermediateField (FPlus p n) Om :=
+  ⨆ (L : IntermediateField (FPlus p n) Om) (_ : IsAdmissibleL p n L), L
+
 end Iwasawa.GaloisFoundation
