@@ -34,7 +34,6 @@ namespace LehmerVandiver
 
 namespace CaseI
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Class equality from ideal-level Kummer cancellation.** Given:
 - `𝔞, σ𝔞 : Ideal (𝓞 K)`, both nonzero
 - `γ, δ : 𝓞 K`, both nonzero
@@ -54,32 +53,16 @@ theorem caseI_class_eq_of_ideal_pow_factored
       ClassGroup.mk0
         (⟨𝔞, mem_nonZeroDivisors_iff_ne_zero.mpr h𝔞_nz⟩
           : nonZeroDivisors (Ideal (𝓞 K))) := by
-  have hγ_ne : Ideal.span ({γ} : Set (𝓞 K)) ≠ ⊥ := by
-    intro h
-    rw [Ideal.span_singleton_eq_bot] at h
-    exact hγ h
-  have hδ_ne : Ideal.span ({δ} : Set (𝓞 K)) ≠ ⊥ := by
-    intro h
-    rw [Ideal.span_singleton_eq_bot] at h
-    exact hδ h
-  have h𝔞γ_ne : 𝔞 * Ideal.span ({γ} : Set (𝓞 K)) ≠ ⊥ := by
-    intro h
-    rw [Ideal.mul_eq_bot] at h
-    rcases h with h | h
-    · exact h𝔞_nz h
-    · exact hγ_ne h
-  have h𝔞'δ_ne : 𝔞' * Ideal.span ({δ} : Set (𝓞 K)) ≠ ⊥ := by
-    intro h
-    rw [Ideal.mul_eq_bot] at h
-    rcases h with h | h
-    · exact h𝔞'_nz h
-    · exact hδ_ne h
-  -- Apply Ideal.pow_left_inj_of_ne_zero.
+  have hγ_ne : Ideal.span ({γ} : Set (𝓞 K)) ≠ ⊥ :=
+    mt Ideal.span_singleton_eq_bot.mp hγ
+  have hδ_ne : Ideal.span ({δ} : Set (𝓞 K)) ≠ ⊥ :=
+    mt Ideal.span_singleton_eq_bot.mp hδ
+  have h𝔞γ_ne : 𝔞 * Ideal.span ({γ} : Set (𝓞 K)) ≠ ⊥ := mul_ne_zero h𝔞_nz hγ_ne
+  have h𝔞'δ_ne : 𝔞' * Ideal.span ({δ} : Set (𝓞 K)) ≠ ⊥ := mul_ne_zero h𝔞'_nz hδ_ne
   have h_canceled : 𝔞 * Ideal.span ({γ} : Set (𝓞 K)) =
       𝔞' * Ideal.span ({δ} : Set (𝓞 K)) :=
     Ideal.pow_left_inj_of_ne_zero (n := p) (Nat.pos_iff_ne_zero.mp hp_pos)
       h𝔞γ_ne h𝔞'δ_ne h_pow_eq
-  -- Take classes and cancel principal pieces.
   have hγ_principal :
       ClassGroup.mk0
         (⟨Ideal.span ({γ} : Set (𝓞 K)),
@@ -124,7 +107,6 @@ theorem caseI_class_eq_of_ideal_pow_factored
           ⟨Ideal.span ({δ} : Set _),
             mem_nonZeroDivisors_iff_ne_zero.mpr hδ_ne⟩ from rfl,
         map_mul, hδ_principal, mul_one]
-  -- Combine: [𝔞·(γ)] = [𝔞'·(δ)] = [𝔞'].
   have h_class_eq : ClassGroup.mk0
       (⟨𝔞 * Ideal.span ({γ} : Set (𝓞 K)),
         mem_nonZeroDivisors_iff_ne_zero.mpr h𝔞γ_ne⟩
