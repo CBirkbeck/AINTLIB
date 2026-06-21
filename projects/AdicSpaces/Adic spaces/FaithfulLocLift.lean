@@ -231,12 +231,13 @@ theorem exists_valuation_extension_of_prime_over
   obtain ⟨Γ', _, w, hw⟩ := exists_comap_isEquiv_of_field_hom ι sF
   refine ⟨Γ', ‹LinearOrderedCommGroupWithZero Γ'›,
     Valuation.comap ((algebraMap (S ⧸ q') L).comp (Ideal.Quotient.mk q')) w, ?_⟩
-  -- IsEquiv chase: `s ≈ comap (R→S) (comap (S→L) w)` — mechanically complete (worked out on the
-  -- T-L4-EXT ticket): commuting square `R→S→L = R→R⧸supp→F→L` (`Ideal.quotientMap_comp_mk` +
-  -- `IsFractionRing.lift_algebraMap`) reduces to `s = comap(mk) sQuot` (`onQuot`),
-  -- `sQuot = comap(algebraMap) sF` (`extendToLocalization_apply_map_apply`), and `hw`. ⚠ The direct
-  -- proof times out (`isDefEq`/`whnf`) from the heavy `let sF`/`let ι` unfolds; needs extraction to a
-  -- helper lemma over OPAQUE `(sQuot sF ι w)` params (no `extendToLocalization`/`lift` unfolding).
+  -- IsEquiv chase: `s ≈ comap (R→S) (comap (S→L) w)` — mechanically complete (full proof on the
+  -- T-L4-EXT-CHASE ticket): the ring-hom square `R→S→L = R→R⧸supp→F→L` (`Ideal.quotientMap_comp_mk`
+  -- + `IsFractionRing.lift_algebraMap` + `comap_comp`) reshapes the goal; then `sF.comap(algebraMap)
+  -- = sQuot` (`extendToLocalization_apply_map_apply`), `sQuot.comap(mk) = s` (`onQuot`, `rfl`), and
+  -- `hw` close it. ⚠ The `he2` step (`extendToLocalization` on the heavy `FractionRing F`) blows the
+  -- whnf heartbeat limit even with `clear_value`; needs step 2 reformulated to a lighter `F`
+  -- construction (e.g. `IsFractionRing`-generic `F` as a hypothesis, not `FractionRing`).
   sorry
 
 set_option linter.unusedSectionVars false in
