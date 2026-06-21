@@ -90,9 +90,9 @@ theorem det_cyclotomicEven_logNorm_deletedMul_sq_eq_prod_quotientEigenvalue_sq
     (FLT37.Sinnott.convolutionLogNormDescended p)]
   congr 1
   rw [Finset.prod_subtype
-    (p := fun ξ : MulChar (CyclotomicEvenDelta p) ℂ => ξ ≠ 1)
+    (p := fun ξ : MulChar (CyclotomicEvenDelta p) ℂ ↦ ξ ≠ 1)
     (s := (Finset.univ : Finset (MulChar (CyclotomicEvenDelta p) ℂ)).erase 1)
-    (f := fun ξ => FLT37.Sinnott.quotientEigenvalue p ξ)]
+    (f := fun ξ ↦ FLT37.Sinnott.quotientEigenvalue p ξ)]
   · refine Finset.prod_congr rfl ?_
     intro ξ _
     unfold deletedFourierCoeffMul FLT37.Sinnott.quotientEigenvalue
@@ -126,9 +126,9 @@ theorem
         ∏ ξ ∈ (Finset.univ : Finset (MulChar (CyclotomicEvenDelta p) ℂ)).erase 1,
           (ξ h₀)⁻¹ := by
     rw [Finset.prod_subtype
-      (p := fun ξ : MulChar (CyclotomicEvenDelta p) ℂ => ξ ≠ 1)
+      (p := fun ξ : MulChar (CyclotomicEvenDelta p) ℂ ↦ ξ ≠ 1)
       (s := (Finset.univ : Finset (MulChar (CyclotomicEvenDelta p) ℂ)).erase 1)
-      (f := fun ξ => (ξ h₀)⁻¹)]
+      (f := fun ξ ↦ (ξ h₀)⁻¹)]
     intro ξ
     simp [Finset.mem_erase]
   have hprod :
@@ -138,9 +138,9 @@ theorem
         ∏ ξ ∈ (Finset.univ : Finset (MulChar (CyclotomicEvenDelta p) ℂ)).erase 1,
           FLT37.Sinnott.quotientEigenvalue p ξ := by
     rw [Finset.prod_subtype
-      (p := fun ξ : MulChar (CyclotomicEvenDelta p) ℂ => ξ ≠ 1)
+      (p := fun ξ : MulChar (CyclotomicEvenDelta p) ℂ ↦ ξ ≠ 1)
       (s := (Finset.univ : Finset (MulChar (CyclotomicEvenDelta p) ℂ)).erase 1)
-      (f := fun ξ => FLT37.Sinnott.quotientEigenvalue p ξ)]
+      (f := fun ξ ↦ FLT37.Sinnott.quotientEigenvalue p ξ)]
     · refine Finset.prod_congr rfl ?_
       intro ξ _
       unfold deletedFourierCoeffMul FLT37.Sinnott.quotientEigenvalue
@@ -168,9 +168,9 @@ theorem det_cyclotomicEven_logNorm_deletedMulAtReindexed_sq_eq_prod_quotientEige
     (FLT37.Sinnott.convolutionLogNormDescended p)]
   congr 1
   rw [Finset.prod_subtype
-    (p := fun ξ : MulChar (CyclotomicEvenDelta p) ℂ => ξ ≠ 1)
+    (p := fun ξ : MulChar (CyclotomicEvenDelta p) ℂ ↦ ξ ≠ 1)
     (s := (Finset.univ : Finset (MulChar (CyclotomicEvenDelta p) ℂ)).erase 1)
-    (f := fun ξ => FLT37.Sinnott.quotientEigenvalue p ξ)]
+    (f := fun ξ ↦ FLT37.Sinnott.quotientEigenvalue p ξ)]
   · refine Finset.prod_congr rfl ?_
     intro ξ _
     unfold deletedFourierCoeffMul FLT37.Sinnott.quotientEigenvalue
