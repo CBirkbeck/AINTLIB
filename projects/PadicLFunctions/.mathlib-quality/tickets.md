@@ -6910,12 +6910,14 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
     `instHasEnoughRootsOfUnity : HasEnoughRootsOfUnity ℤ_[p] (p-1)` is **DONE** (GPlusDecomp, axiom-clean,
     from `PadicInt.exists_primitiveRoot_card_sub_one` + `rootsOfUnity.isCyclic`). Path to `∑_ω e_ω = 1`:
     (a) `HasEnoughRootsOfUnity ℤ_[p] (Monoid.exponent Δ)` — from the (p-1) instance via divisor-closure
-    (`exponent Δ | card Δ | (p-1)`); (b) the dual is complete:
-    `CommGroup.monoidHom_mulEquiv_of_hasEnoughRootsOfUnity : Nonempty ((Δ →* ℤ_[p]ˣ) ≃* Δ)` ⟹
-    `card (Δ →* ℤ_[p]ˣ) = card Δ`; (c) character orthogonality `∑_ω ω(h)⁻¹ = card Δ · δ_{h,1}`
-    (`MulChar.Duality`/`DirichletCharacter.sum_char_inv_mul_char_eq` adapted to `Δ →* ℤ_[p]ˣ`); (d)
-    `∑_ω e_ω = (card Δ)⁻¹ ∑_h (∑_ω ω(h)⁻¹)[h] = (card Δ)⁻¹·(card Δ)·[1] = 1`. A bounded assembly (~6-8
-    lemmas) over existing mathlib duality; no longer an open-ended sub-development.
+    (`exponent Δ | card Δ | (p-1)`); (b) **separation** `a≠1 → ∃ ω, ω a≠1` =
+    `MulChar.exists_apply_ne_one_of_hasEnoughRootsOfUnity` (test-compiled 2026-06-21 modulo the
+    `(Δ→*ℤ_[p]ˣ) ≃ MulChar Δ ℤ_[p]` bridge — Δ a group ⟹ `MulChar.equivToUnitHom`); (c) dual cardinality
+    `card (Δ→*ℤ_[p]ˣ)=card Δ` (`CommGroup.monoidHom_mulEquiv_of_hasEnoughRootsOfUnity` /
+    `MulChar.card_eq_card_units_of_hasEnoughRootsOfUnity`); (d) dual orthogonality `∑_ω ω(h)⁻¹=card Δ·δ_{h,1}`
+    (h=1 trivial; h≠1 reindex by separating ω₀, mirroring the existing `charSum_eq_zero`); (e)
+    `∑_ω e_ω = (card Δ)⁻¹ ∑_h (∑_ω ω(h)⁻¹)·single h = single 1 1 = 1`. Bounded ~6-8 lemma assembly over
+    existing mathlib `MulChar`/`HasEnoughRootsOfUnity` duality + `charSum_eq_zero`; no longer open-ended.
     OLD: `gplusEquiv` — `GPlus ≅ Δ×Γ` via Teichmüller + the `/±1` quotient (`Δ = μ_{p-1}/{±1}`).
     **Scoped infrastructure (2026-06-20)**: `CompactSpace ℤ_[p]ˣ` is an AUTOMATIC instance
     (`Units.instCompactSpaceOfT1SpaceOfContinuousMul`, mathlib) — no gap. The Teichmüller MonoidHom
