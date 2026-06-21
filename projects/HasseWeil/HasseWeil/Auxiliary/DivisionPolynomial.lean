@@ -235,8 +235,6 @@ lemma polyToField_ψ₂Sq : polyToField (C curve.Ψ₂Sq) = ψᵤ 2 ^ 2 := by
 
 namespace Affine
 
-attribute [local instance] Classical.propDecidable
-
 variable (n)
 /-- The X-coordinate of `n • (X, Y)` on the universal curve. -/
 def smulX : Universal.Field := polyToField (curve.φ n) / (ψᵤ n) ^ 2
@@ -806,7 +804,7 @@ variable {F : Type*} [Field F] (W : WeierstrassCurve F) {n : ℤ}
 /-- The degree of the rational map `[n]` on x-coordinates is `n²` (Sutherland
 Theorem 6.9): since `[n](x) = Φ_n(x) / ΨSq_n(x)` is in lowest terms by coprimality,
 its degree is `max (natDegree Φ_n) (natDegree ΨSq_n) = n²`. -/
-theorem degree_mulByN_eq_sq [Nontrivial F] :
+theorem degree_mulByN_eq_sq :
     max (W.Φ n).natDegree (W.ΨSq n).natDegree = n.natAbs ^ 2 := by
   rw [W.natDegree_Φ n]
   exact max_eq_left ((W.natDegree_ΨSq_le n).trans (Nat.sub_le _ _))
