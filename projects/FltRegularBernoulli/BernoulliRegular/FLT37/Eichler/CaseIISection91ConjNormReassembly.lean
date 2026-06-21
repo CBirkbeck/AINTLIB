@@ -316,7 +316,7 @@ theorem washington_L_associated {η : 𝓞 K} (hη : η ^ 37 = 1) (hη1 : η ≠
     linear_combination this
   rw [hExpand]
   exact caseII_eta_trace_diff_associated_zeta_sub_one_sq (zeta_spec 37 ℚ K).toInteger_isPrimitiveRoot
-    (one_pow 37) hη (fun h => hη1 h.symm) (by simpa using hη1)
+    (one_pow 37) hη (fun h ↦ hη1 h.symm) (by simpa using hη1)
 
 /-- **Washington §9.1 step 5 — the crux unit identity** (for `K` cyclotomic of conductor `37`).
 
