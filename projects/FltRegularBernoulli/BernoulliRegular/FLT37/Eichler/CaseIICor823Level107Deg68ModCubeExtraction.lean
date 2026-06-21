@@ -1,8 +1,6 @@
 import BernoulliRegular.FLT37.Eichler.CaseIICor823ThirdOrderCoeff
 import BernoulliRegular.FLT37.Eichler.CaseIICor823Level71Deg68ModCubeResidue
 
-set_option linter.style.longLine false
-
 /-!
 # The mod-`37³` degree-`68` Dwork-slice factorial extraction (at the level-`107` precision)
 
