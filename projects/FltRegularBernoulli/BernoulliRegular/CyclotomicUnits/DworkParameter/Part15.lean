@@ -30,7 +30,7 @@ theorem continuous_valuedCompletionCyclotomicEquiv
   let w : Valuation K ℤᵐ⁰ := v.comap σ.toRingHom
   let h : v.IsEquiv w :=
     lambdaValuation_isEquiv_comap_cyclotomicSigma (p := p) (K := K) a
-  change Continuous fun x =>
+  change Continuous fun x ↦
     (((UniformSpace.Completion.mapRingEquiv
       (WithVal.congr v w (RingEquiv.refl K))
       h.uniformContinuous_congr.continuous
@@ -39,7 +39,7 @@ theorem continuous_valuedCompletionCyclotomicEquiv
       (WithVal.congr w v σ)
       (uniformContinuous_withValCongr_comap (K := K) v σ).continuous
       (uniformContinuous_withValCongr_comap_symm (K := K) v σ).continuous)) x)
-  change Continuous fun x =>
+  change Continuous fun x ↦
     UniformSpace.Completion.map (WithVal.congr w v σ)
       (UniformSpace.Completion.map (WithVal.congr v w (RingEquiv.refl K)) x)
   exact UniformSpace.Completion.continuous_map.comp UniformSpace.Completion.continuous_map
@@ -150,7 +150,7 @@ theorem dworkEvenParameterAdjoin_le_fixed (hp_two : 2 < p) :
 def dworkSignedCoefficients
     (a : Fin (p - 1) → RationalPadicIntegerRing p) :
     Fin (p - 1) → RationalPadicIntegerRing p :=
-  fun i => (-1 : RationalPadicIntegerRing p) ^ (i : ℕ) * a i
+  fun i ↦ (-1 : RationalPadicIntegerRing p) ^ (i : ℕ) * a i
 
 set_option maxHeartbeats 800000 in
 -- The proof normalizes nested algebra maps from the rational integer ring.
@@ -343,7 +343,7 @@ theorem dworkEvenCoeffExtend_single
     have hi : Even ((i.1 : Fin (p - 1)) : ℕ) := i.2
     simp [dworkEvenCoeffExtend, hi]
   · by_cases hj : Even (j : ℕ)
-    · have hsub : (⟨j, hj⟩ : dworkEvenPowerIndex p) ≠ i := fun h =>
+    · have hsub : (⟨j, hj⟩ : dworkEvenPowerIndex p) ≠ i := fun h ↦
         hji (congrArg Subtype.val h)
       simp [dworkEvenCoeffExtend, hj, hji, hsub]
     · simp [dworkEvenCoeffExtend, hj, hji]
@@ -393,9 +393,9 @@ theorem dworkEvenPowerLinearMap_surjective (hp_two : 2 < p) :
     rw [ha]
     exact x.2
   have hodd : ∀ i : Fin (p - 1), Odd (i : ℕ) → a i = 0 :=
-    fun i hi => dworkParameterPowerLinearMap_odd_coeff_eq_zero_of_fixed
+    fun i hi ↦ dworkParameterPowerLinearMap_odd_coeff_eq_zero_of_fixed
       (p := p) (K := K) hp_two ha_fixed i hi
-  let b : dworkEvenPowerIndex p → RationalPadicIntegerRing p := fun i => a i.1
+  let b : dworkEvenPowerIndex p → RationalPadicIntegerRing p := fun i ↦ a i.1
   refine ⟨b, ?_⟩
   apply Subtype.ext
   change dworkParameterPowerLinearMap p K (dworkEvenCoeffExtend p b) = x.1
