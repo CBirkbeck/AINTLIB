@@ -1,1 +1,1 @@
-FOCUS: completeness — dualCharSum_eq_zero_of_sep DONE. Next: separation (MulChar bridge) + card(H→*𝒪ˣ)=card H + isotypicIdempotent_sum_eq_one.
+FOCUS: isotypicIdempotent_sum_eq_one (general completeness ∑e_ω=1) DONE. Next: instantiate for Δ (HasEnoughRootsOfUnity ℤ_[p] (exponent Δ) via divisor of p-1) to fully discharge the char-ideal half hcomplete.
