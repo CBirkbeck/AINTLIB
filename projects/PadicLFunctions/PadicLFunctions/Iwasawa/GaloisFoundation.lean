@@ -3,6 +3,8 @@ import Mathlib.NumberTheory.NumberField.CMField
 import Mathlib.NumberTheory.Cyclotomic.Gal
 import Mathlib.NumberTheory.RamificationInertia.Unramified
 import Mathlib.FieldTheory.Galois.Profinite
+import Mathlib.FieldTheory.Galois.Infinite
+import Mathlib.FieldTheory.Perfect
 import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
 import Mathlib.RingTheory.Algebraic.Integral
 
@@ -154,5 +156,35 @@ def Finf : IntermediateField ℚ Om := ⨆ n, F p n
 
 /-- Every layer embeds in `F∞`. -/
 theorem F_le_Finf (n : ℕ) : F p n ≤ Finf p := le_iSup (F p) n
+
+/-! ### Brick 4 — the Galois group `Γ = Gal(F∞/ℚ)` of the cyclotomic tower
+
+`F∞/ℚ` is Galois: it is the compositum `⨆ₙ Fₙ` of the Galois layers `Fₙ` (`normal_iSup`), and is
+separable since `ℚ` is perfect. The Galois group `Γ` then carries the profinite Krull topology
+(`IsGalois` + `FieldTheory/Galois/Infinite`). Abstractly `Γ ≅ ℤ_p^×`; that identification, and the
+`ℤ_p`-quotient `Γ⁺ = Gal(F∞⁺/ℚ)`, are the next bricks. -/
+
+/-- Each layer `Fₙ/ℚ` is Galois (cyclotomic extension). -/
+instance instIsGaloisF (n : ℕ) : IsGalois ℚ (F p n) :=
+  IsCyclotomicExtension.isGalois {p ^ n} ℚ (F p n)
+
+/-- Each layer `Fₙ/ℚ` is normal (direct indexed instance, so the `⨆`-normality below synthesises). -/
+instance instNormalF (n : ℕ) : Normal ℚ (F p n) := inferInstance
+
+/-- `F∞` is algebraic over `ℚ` (it sits inside the algebraic `Ω`). -/
+instance instIsAlgebraicFinf : Algebra.IsAlgebraic ℚ (Finf p) :=
+  Algebra.IsAlgebraic.tower_bot ℚ (Finf p) Om
+
+/-- `F∞/ℚ` is normal — a compositum of the normal layers `Fₙ`. -/
+instance instNormalFinf : Normal ℚ (Finf p) := by
+  rw [Finf]
+  exact IntermediateField.normal_iSup (t := fun n => F p n) (h := fun i => instNormalF p i)
+
+/-- `F∞/ℚ` is Galois (normal + separable, the latter since `ℚ` is perfect). -/
+instance instIsGaloisFinf : IsGalois ℚ (Finf p) := ⟨⟩
+
+/-- `Γ = Gal(F∞/ℚ)`, the Galois group of the cyclotomic `ℤ_p`-tower. Via `IsGalois` it carries the
+profinite (Krull) topology. A genuine group of field automorphisms — no placeholder. -/
+abbrev Gamma : Type := Finf p ≃ₐ[ℚ] Finf p
 
 end Iwasawa.GaloisFoundation
