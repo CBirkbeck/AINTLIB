@@ -52,10 +52,8 @@ omit [IsCyclotomicExtension {37} ℚ K] in
 theorem caseII_ringOfIntegersComplexConj_root_of_unity
     {η : 𝓞 K} (hη : η ^ 37 = 1) :
     NumberField.IsCMField.ringOfIntegersComplexConj K η = η ^ 36 := by
-  have h36 : η * η ^ 36 = 1 := by
-    have : η * η ^ 36 = η ^ 37 := by ring
-    rw [this]; exact hη
-  set u : (𝓞 K)ˣ := ⟨η, η ^ 36, h36, by rw [mul_comm]; exact h36⟩ with hu
+  have h36 : η * η ^ 36 = 1 := by linear_combination hη
+  set u : (𝓞 K)ˣ := ⟨η, η ^ 36, h36, by rw [mul_comm]; exact h36⟩
   have htor : u ∈ NumberField.Units.torsion K := by
     refine (CommGroup.mem_torsion _).2 (isOfFinOrder_iff_pow_eq_one.2 ⟨37, by norm_num, ?_⟩)
     apply Units.ext
@@ -78,8 +76,7 @@ theorem caseII_map_span_x_add_y_eta
   have hfe : (ringOfIntegersComplexConj K).toRingEquiv.toRingHom
       (x + y * η) = x + y * η ^ 36 := by
     have h := caseII_ringOfIntegersComplexConj_x_add_y_mul (K := K) hx hy η
-    rw [caseII_ringOfIntegersComplexConj_root_of_unity hη] at h
-    exact h
+    rwa [caseII_ringOfIntegersComplexConj_root_of_unity hη] at h
   rw [Ideal.map_span, Set.image_singleton, hfe]
 
 omit [IsCyclotomicExtension {37} ℚ K] in
@@ -88,9 +85,8 @@ theorem caseII_map_span_singleton_real {w : 𝓞 K}
     (hw : NumberField.IsCMField.ringOfIntegersComplexConj K w = w) :
     (Ideal.span ({w} : Set (𝓞 K))).map (ringOfIntegersComplexConj K).toRingEquiv.toRingHom =
       Ideal.span ({w} : Set (𝓞 K)) := by
-  rw [Ideal.map_span, Set.image_singleton]
-  have hfw : (ringOfIntegersComplexConj K).toRingEquiv.toRingHom w = w := hw
-  rw [hfw]
+  rw [Ideal.map_span, Set.image_singleton,
+    show (ringOfIntegersComplexConj K).toRingEquiv.toRingHom w = w from hw]
 
 omit [IsCyclotomicExtension {37} ℚ K] in
 /-- **`σ(𝔪) = 𝔪`.** For real `x, y`, complex conjugation fixes `𝔪 = gcd((x),(y))`. -/
@@ -109,12 +105,10 @@ an associate of `ζ-1`. -/
 theorem caseII_map_zetaSubOne_span {ζ : 𝓞 K} (hζ37 : ζ ^ 37 = 1) :
     (Ideal.span ({ζ - 1} : Set (𝓞 K))).map (ringOfIntegersComplexConj K).toRingEquiv.toRingHom =
       Ideal.span ({ζ - 1} : Set (𝓞 K)) := by
-  have hfe : (ringOfIntegersComplexConj K).toRingEquiv.toRingHom (ζ - 1) = ζ ^ 36 - 1 := by
-    have h : NumberField.IsCMField.ringOfIntegersComplexConj K (ζ - 1) = ζ ^ 36 - 1 := by
+  have hfe : (ringOfIntegersComplexConj K).toRingEquiv.toRingHom (ζ - 1) = ζ ^ 36 - 1 :=
+    show NumberField.IsCMField.ringOfIntegersComplexConj K (ζ - 1) = ζ ^ 36 - 1 by
       rw [map_sub, map_one, caseII_ringOfIntegersComplexConj_root_of_unity hζ37]
-    exact h
-  rw [Ideal.map_span, Set.image_singleton, hfe]
-  rw [Ideal.span_singleton_eq_span_singleton]
+  rw [Ideal.map_span, Set.image_singleton, hfe, Ideal.span_singleton_eq_span_singleton]
   -- Associated (ζ^36 - 1) (ζ - 1): the unit u = -ζ gives (ζ^36-1)·(-ζ) = ζ - ζ^37 = ζ - 1.
   exact ⟨⟨-ζ, -(ζ ^ 36), by linear_combination hζ37, by linear_combination hζ37⟩,
     by linear_combination -hζ37⟩
@@ -142,8 +136,7 @@ theorem caseII_map_c {m : ℕ} (D : CaseIIData37 K m) (hp : (37 : ℕ) ≠ 2)
     (divZetaSubOneDvdGcd hp D.hζ D.equation D.hy η).map
         (ringOfIntegersComplexConj K).toRingEquiv.toRingHom =
       divZetaSubOneDvdGcd hp D.hζ D.equation D.hy (caseII_etaInv η) := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  haveI : NeZero 37 := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   have h37z : (D.hζ.toInteger) ^ 37 = 1 :=
     D.hζ.toInteger_isPrimitiveRoot.pow_eq_one
   have h37e : (η : 𝓞 K) ^ 37 = 1 := (mem_nthRootsFinset (by norm_num) _).mp η.2
@@ -174,16 +167,14 @@ theorem caseII_map_rootIdeal {m : ℕ} (D : CaseIIData37 K m) (hp : (37 : ℕ) �
     (rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy η).map
         (ringOfIntegersComplexConj K).toRingEquiv.toRingHom =
       rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy (caseII_etaInv η) := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   have hspec := root_div_zeta_sub_one_dvd_gcd_spec hp D.hζ D.equation D.hy η
   have hspecinv :=
     root_div_zeta_sub_one_dvd_gcd_spec hp D.hζ D.equation D.hy (caseII_etaInv η)
   have h1 : ((rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy η).map
         (ringOfIntegersComplexConj K).toRingEquiv.toRingHom) ^ 37 =
       (rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy (caseII_etaInv η)) ^ 37 := by
-    rw [← Ideal.map_pow]
-    rw [hspec]
-    rw [caseII_map_c D hp hx hy η]
+    rw [← Ideal.map_pow, hspec, caseII_map_c D hp hx hy η]
     exact hspecinv.symm
   have hAB := (UniqueFactorizationMonoid.pow_dvd_pow_iff_dvd (n := 37) (by norm_num)).mp h1.dvd
   have hBA := (UniqueFactorizationMonoid.pow_dvd_pow_iff_dvd (n := 37) (by norm_num)).mp h1.symm.dvd
@@ -304,9 +295,7 @@ theorem caseII_classGroup_mul_conj_eq_one
         (NumberField.IsCMField.ringOfIntegersComplexConj K).toRingEquiv c = 1 := by
   obtain ⟨I, rfl⟩ := ClassGroup.mk0_surjective c
   have h𝔞_nz : (I : Ideal (𝓞 K)) ≠ ⊥ := by
-    have := I.2
-    rw [mem_nonZeroDivisors_iff_ne_zero] at this
-    simpa using this
+    simpa [Ideal.zero_eq_bot] using mem_nonZeroDivisors_iff_ne_zero.mp I.2
   -- `𝔞³⁷` is principal, from `(mk0 I)³⁷ = 1`.
   have hpow_one : ClassGroup.mk0 (I ^ 37) = 1 := by rw [map_pow]; exact hc
   have hmem : ((I : Ideal (𝓞 K)) ^ 37) ∈ (Ideal (𝓞 K))⁰ :=
@@ -339,7 +328,7 @@ theorem caseII_classGroup_mul_conj_eq_one
 theorem caseII_c_ne_bot {m : ℕ} (D : CaseIIData37 K m) (hp : (37 : ℕ) ≠ 2)
     (η : nthRootsFinset 37 (1 : 𝓞 K)) :
     divZetaSubOneDvdGcd hp D.hζ D.equation D.hy η ≠ ⊥ := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   intro hc
   have hmcp := m_mul_c_mul_p hp D.hζ D.equation D.hy η
   simp only [hc, Ideal.mul_bot, Ideal.bot_mul] at hmcp
@@ -351,7 +340,7 @@ theorem caseII_c_ne_bot {m : ℕ} (D : CaseIIData37 K m) (hp : (37 : ℕ) ≠ 2)
 theorem caseII_rootIdeal_ne_bot {m : ℕ} (D : CaseIIData37 K m) (hp : (37 : ℕ) ≠ 2)
     (η : nthRootsFinset 37 (1 : 𝓞 K)) :
     rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy η ≠ ⊥ := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   intro hbot
   refine caseII_c_ne_bot D hp η ?_
   have hspec := root_div_zeta_sub_one_dvd_gcd_spec hp D.hζ D.equation D.hy η
@@ -369,7 +358,7 @@ theorem caseII_mk0_c_eq {m : ℕ} (D : CaseIIData37 K m) (hp : (37 : ℕ) ≠ 2)
       ClassGroup.mk0 ⟨divZetaSubOneDvdGcd hp D.hζ D.equation D.hy η₂,
         mem_nonZeroDivisors_iff_ne_zero.mpr
           (by rw [Ideal.zero_eq_bot]; exact caseII_c_ne_bot D hp η₂)⟩ := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   have key : ∀ η : nthRootsFinset 37 (1 : 𝓞 K),
       ClassGroup.mk0 ⟨gcd (Ideal.span {D.x}) (Ideal.span {D.y}),
           mem_nonZeroDivisors_iff_ne_zero.mpr (m_ne_zero D.hζ D.hy)⟩ *
@@ -397,7 +386,7 @@ theorem caseII_anchored_class_pow_eq_one {m : ℕ} (D : CaseIIData37 K m) (hp : 
         mem_nonZeroDivisors_iff_ne_zero.mpr
           (by rw [Ideal.zero_eq_bot]; exact caseII_rootIdeal_ne_bot D hp D.etaZero)⟩)⁻¹) ^ 37
       = 1 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   have ha : ∀ η : nthRootsFinset 37 (1 : 𝓞 K),
       ClassGroup.mk0 ⟨rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy η,
         mem_nonZeroDivisors_iff_ne_zero.mpr
@@ -473,7 +462,7 @@ theorem caseII_anchored_mul_conj_mk0_eq {m : ℕ} (D : RealCaseIIData37 K m) (hp
         mem_nonZeroDivisors_iff_ne_zero.mpr
           (by rw [Ideal.zero_eq_bot]
               exact caseII_rootIdeal_ne_bot D.toCaseIIData37 hp (caseII_etaInv D.etaZero))⟩ := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   have hcc := caseII_anchored_classGroup_mul_conj_eq_one D.toCaseIIData37 hp h_VC η
   rw [map_mul, map_inv, caseII_classGroup_conj_mk0, caseII_classGroup_conj_mk0] at hcc
   · simp only [RealCaseIIData37.map_rootIdeal D hp η,
