@@ -201,7 +201,9 @@ ideal of A_a lying over q", huber2.txt:641); HU-d supplies `q'` from its minimal
 theorem exists_valuation_extension_of_prime_over
     {R : Type*} {S : Type uS} [CommRing R] [CommRing S] [Algebra R S]
     {Γ : Type*} [LinearOrderedCommGroupWithZero Γ] (s : Valuation R Γ)
-    (q' : Ideal S) [q'.IsPrime] (hq' : Ideal.comap (algebraMap R S) q' = s.supp) :
+    (q' : Ideal S) [q'.IsPrime] (hq' : Ideal.comap (algebraMap R S) q' = s.supp)
+    (F : Type*) [Field F] [Algebra (R ⧸ s.supp) F] [IsFractionRing (R ⧸ s.supp) F]
+    (L : Type uS) [Field L] [Algebra (S ⧸ q') L] [IsFractionRing (S ⧸ q') L] :
     ∃ (Γ' : Type uS) (_ : LinearOrderedCommGroupWithZero Γ') (t : Valuation S Γ'),
       s.IsEquiv (Valuation.comap (algebraMap R S) t) := by
   -- Step 1: `s` descends to a valuation on the domain `R ⧸ supp s` (Chevalley, ring case).
@@ -216,13 +218,11 @@ theorem exists_valuation_extension_of_prime_over
     intro hxsupp
     rw [hsupp] at hxsupp
     exact mem_nonZeroDivisors_iff_ne_zero.mp hx (Ideal.mem_bot.mp hxsupp)
-  let F := FractionRing (R ⧸ s.supp)
   let sF : Valuation F Γ := sQuot.extendToLocalization hS F
   -- Step 3: embed `F ↪ L = Frac(S⧸q')` via the injective `R⧸supp ↪ S⧸q'` (from `hq'`).
   haveI : IsDomain (S ⧸ q') := Ideal.Quotient.isDomain q'
   let φRS : (R ⧸ s.supp) →+* (S ⧸ q') := Ideal.quotientMap q' (algebraMap R S) (le_of_eq hq'.symm)
   have hφRS_inj : Function.Injective φRS := Ideal.quotientMap_injective' (le_of_eq hq')
-  let L := FractionRing (S ⧸ q')
   have hgRL_inj : Function.Injective ((algebraMap (S ⧸ q') L).comp φRS) :=
     (IsFractionRing.injective (S ⧸ q') L).comp hφRS_inj
   let ι : F →+* L := IsFractionRing.lift hgRL_inj
@@ -231,14 +231,32 @@ theorem exists_valuation_extension_of_prime_over
   obtain ⟨Γ', _, w, hw⟩ := exists_comap_isEquiv_of_field_hom ι sF
   refine ⟨Γ', ‹LinearOrderedCommGroupWithZero Γ'›,
     Valuation.comap ((algebraMap (S ⧸ q') L).comp (Ideal.Quotient.mk q')) w, ?_⟩
-  -- IsEquiv chase: `s ≈ comap (R→S) (comap (S→L) w)` — mechanically complete (full proof on the
-  -- T-L4-EXT-CHASE ticket): the ring-hom square `R→S→L = R→R⧸supp→F→L` (`Ideal.quotientMap_comp_mk`
-  -- + `IsFractionRing.lift_algebraMap` + `comap_comp`) reshapes the goal; then `sF.comap(algebraMap)
-  -- = sQuot` (`extendToLocalization_apply_map_apply`), `sQuot.comap(mk) = s` (`onQuot`, `rfl`), and
-  -- `hw` close it. ⚠ The `he2` step (`extendToLocalization` on the heavy `FractionRing F`) blows the
-  -- whnf heartbeat limit even with `clear_value`; needs step 2 reformulated to a lighter `F`
-  -- construction (e.g. `IsFractionRing`-generic `F` as a hypothesis, not `FractionRing`).
-  sorry
+  -- IsEquiv chase: `s ≈ comap (R→S) (comap (S→L) w)` via the commuting square + the `onQuot`/
+  -- `extendToLocalization` equivalences and `hw` (light now that `F` is an `IsFractionRing` param).
+  have h2 : ι.comp (algebraMap (R ⧸ s.supp) F) = (algebraMap (S ⧸ q') L).comp φRS := by
+    ext x; exact IsFractionRing.lift_algebraMap hgRL_inj x
+  have hsq : ((algebraMap (S ⧸ q') L).comp (Ideal.Quotient.mk q')).comp (algebraMap R S)
+      = (ι.comp (algebraMap (R ⧸ s.supp) F)).comp (Ideal.Quotient.mk s.supp) :=
+    calc ((algebraMap (S ⧸ q') L).comp (Ideal.Quotient.mk q')).comp (algebraMap R S)
+        = (algebraMap (S ⧸ q') L).comp ((Ideal.Quotient.mk q').comp (algebraMap R S)) :=
+          RingHom.comp_assoc _ _ _
+      _ = (algebraMap (S ⧸ q') L).comp (φRS.comp (Ideal.Quotient.mk s.supp)) := by
+          rw [(Ideal.quotientMap_comp_mk (le_of_eq hq'.symm)).symm]
+      _ = ((algebraMap (S ⧸ q') L).comp φRS).comp (Ideal.Quotient.mk s.supp) :=
+          (RingHom.comp_assoc _ _ _).symm
+      _ = (ι.comp (algebraMap (R ⧸ s.supp) F)).comp (Ideal.Quotient.mk s.supp) := by rw [← h2]
+  have hcomm : (Valuation.comap ((algebraMap (S ⧸ q') L).comp (Ideal.Quotient.mk q')) w).comap
+        (algebraMap R S)
+      = ((Valuation.comap ι w).comap (algebraMap (R ⧸ s.supp) F)).comap (Ideal.Quotient.mk s.supp) := by
+    rw [← Valuation.comap_comp, ← Valuation.comap_comp, ← Valuation.comap_comp, hsq,
+      RingHom.comp_assoc]
+  have he2 : sF.comap (algebraMap (R ⧸ s.supp) F) = sQuot :=
+    Valuation.ext fun y => Valuation.extendToLocalization_apply_map_apply sQuot hS F y
+  have he1 : sQuot.comap (Ideal.Quotient.mk s.supp) = s := Valuation.ext fun _ => rfl
+  clear_value ι sF sQuot
+  have hchain := (hw.comap (algebraMap (R ⧸ s.supp) F)).comap (Ideal.Quotient.mk s.supp)
+  rw [he2, he1] at hchain
+  rw [hcomm]; exact hchain
 
 set_option linter.unusedSectionVars false in
 /-- **Integral / power-bounded criterion (Wedhorn 7.52(1) = Prop 7.18(1) = [Hu2] Lemma 3.3).**
