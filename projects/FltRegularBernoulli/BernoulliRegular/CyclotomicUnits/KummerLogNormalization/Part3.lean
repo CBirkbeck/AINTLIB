@@ -20,9 +20,6 @@ variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 variable [NumberField.IsCMField K]
 
 set_option linter.style.longLine false in
-set_option maxHeartbeats 800000 in
--- The quotient-sum comparison expands mapped polynomial powers and the
--- factorial-weighted formal source at the same time.
 omit [NumberField.IsCMField K] in
 theorem quotient_mk_samePrimeFiniteArtinHasseNormalizedLogHomogeneousNumerator_factorial_weighted_sum_eq_formal
     (N d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
@@ -265,8 +262,8 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_pow_coeff_sub_coeff_mem_lam
         samePrimeFiniteArtinHasseNormalizedCoordPoly (p := p) (K := K) N x
       let PM : Polynomial (ValuedIntegerRing p K) :=
         samePrimeFiniteArtinHasseNormalizedCoordPoly (p := p) (K := K) M x
-      rw [pow_succ, pow_succ, Polynomial.coeff_mul, Polynomial.coeff_mul]
-      rw [← Finset.sum_sub_distrib]
+      rw [pow_succ, pow_succ, Polynomial.coeff_mul, Polynomial.coeff_mul,
+        ← Finset.sum_sub_distrib]
       refine Ideal.sum_mem _ ?_
       intro a ha
       have hsum : a.1 + a.2 = d := by
@@ -485,12 +482,11 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum_eq_eval_
           (a.1 + 1)) := by
     simp
   rw [samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm_eq_signed_eval
-    (p := p) (K := K) N a.1 d hx han had]
-  rw [← hmk]
-  rw [← samePrimeNatDivEvalAtDegree_mul_left (p := p) (K := K) han
-    ((-1 : ValuedIntegerRing p K) ^ (a.1 + 1)) hcoeff hsign hden]
-  rw [samePrimeNatDivEvalAtDegree_eq_samePrimeNatDivEval (p := p) (K := K)
-    han hsign hden hnum0]
+    (p := p) (K := K) N a.1 d hx han had, ← hmk,
+    ← samePrimeNatDivEvalAtDegree_mul_left (p := p) (K := K) han
+      ((-1 : ValuedIntegerRing p K) ^ (a.1 + 1)) hcoeff hsign hden,
+    samePrimeNatDivEvalAtDegree_eq_samePrimeNatDivEval (p := p) (K := K)
+      han hsign hden hnum0]
   exact samePrimeNatDivEval_eq_of_eq (p := p) (K := K) han
     (by simp [samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousNumerator])
     hnum0 _
@@ -546,8 +542,6 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum_eq_zero_
     _ = 0 := htransport
 
 set_option linter.style.longLine false in
-set_option maxHeartbeats 800000 in
--- The proof expands quotient sums and same-prime denominator transport termwise.
 omit [NumberField.IsCMField K] in
 /-- Multiplying a normalized homogeneous finite-log degree slice by `d!`
 clears the same-prime denominators and gives the factorial-weighted numerator
@@ -659,9 +653,6 @@ theorem natCast_factorial_mul_samePrimeFiniteArtinHasseNormalizedCoordLogHomogen
               q (((d.factorial / n : ℕ) : ValuedIntegerRing p K) * z n)))
 
 set_option linter.style.longLine false in
-set_option maxHeartbeats 800000 in
--- This is the exact source bridge used by the coefficient-level evaluator:
--- it combines denominator clearing with the formal normalized log coefficient.
 omit [NumberField.IsCMField K] in
 /-- Factorial-cleared normalized homogeneous degree slice, expressed through
 the formal normalized Artin-Hasse logarithm coefficient. -/
@@ -780,10 +771,6 @@ theorem samePrimeFiniteArtinHasseNormalizedLogHomogeneousNumerator_factorial_wei
     (Nat.le_add_right N (d.factorial.factorization p * (p - 1))) hn1 hnd
 
 set_option linter.style.longLine false in
-set_option maxHeartbeats 800000 in
--- This repeats the Part5 factorial-cleared comparison with the normalized
--- formal source.  The formal hypothesis is a concrete coefficient equality,
--- not a bundled finite-log assumption.
 omit [NumberField.IsCMField K] in
 theorem samePrimeFiniteArtinHasseNormalizedLogHomogeneousNumerator_factorial_weighted_sum_mem_lambdaIdeal_pow_of_coeff_log_eq_zero
     (N d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
@@ -941,8 +928,7 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm_eq_zero_of_no
                   hcoeff_zero hcoeff_s hzero_s
         _ = 0 := samePrimeNatDivEval_zero (p := p) (K := K) hn hzero_s
     rw [samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm_eq_signed_eval
-      (p := p) (K := K) N n d hx hn hnd]
-    rw [heval_zero]
+      (p := p) (K := K) N n d hx hn hnd, heval_zero]
     simp
   · simp [samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm,
       samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousCore, hn, hnd]
