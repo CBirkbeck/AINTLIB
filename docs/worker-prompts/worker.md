@@ -32,14 +32,19 @@ Loop until the queue is empty or a freeze is active:
      over *every* declaration: mathlib-**style audit**, best-**mathlib-API** check, **naming** conventions,
      **dedup**, `simp`/instance hygiene, **and then** golfing. **Do NOT shortcut to the proof-golfer agent** —
      golfing is only the *last* step of `/cleanup`, not the whole job. Skipping the audit/API/naming work is the
-     failure mode we're correcting.
+     failure mode we're correcting. **Preserve docstrings and math-explanatory comments — deleting
+     documentation is NOT cleanup** (only remove genuinely dead/redundant comments, never the docstrings
+     that explain a decl's meaning).
    - **`lane:decompose`** → run **`/decompose-proof`** on the target proof — extract helpers; statement unchanged.
    - **`lane:generalise`** → run **`/generalise`** on the target file — generalise the over-specific lemmas.
 
    In every lane, **skip any declaration whose proof contains a `sorry`** (it's the producer's WIP, never
    fleet work). If the whole target is WIP with nothing to do, comment + relabel back to `state:todo`,
    unassign, move on.
-4. **Verify (hard bar — do not proceed otherwise):** `lake build <lib>` green (the lib is in the issue body);
+4. **Verify (hard bar — do not proceed otherwise):** `lake build <lib>` green (the lib is in the issue body)
+   **AND `lake build <Lib>.<Module>` — your target file by module name**, because orphan files aren't reachable
+   from a lib root and `lake build <lib>` silently skips them (a broken orphan that passed the lib gate is how a
+   cleanup regression reached `main` — #2299; for `«Adic spaces»` use guillemets, `lake build "«Adic spaces».Foo"`);
    **zero new `sorry`**; `#print axioms` on touched decls shows only `propext`/`Classical.choice`/`Quot.sound`.
    Plus, by lane: **decompose** → the top-level statement is byte-for-byte unchanged; **generalise** → every
    prior consumer of the lemma still compiles (the old statement follows from the new one). If you can't meet

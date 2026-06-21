@@ -27,7 +27,10 @@ Loop until your lane is empty or a freeze is active:
 3. **Work.**
    - **If this is a change-request (2a):** the reviewer told you exactly what to fix — read it: `gh issue view <n> --repo CBirkbeck/AINTLIB --comments` (and the PR thread, `gh pr view <its PR> --comments`). Then **reuse the EXISTING branch** (do NOT start fresh): `git fetch origin generalise/<n> && LEAN4_GUARDRAILS_BYPASS=1 git checkout generalise/<n>`; rebase onto `origin/main` if it moved; address exactly what was requested.
    - **If this is new work (2b):** `git fetch origin main`; branch `generalise/<n>` off `origin/main`; read the issue body for the target. Run **`/generalise`** on it. **If the target's proof contains a `sorry`, skip it** — comment, relabel back to `state:todo`, unassign — `sorry`s are the owning producer's WIP, never fleet work.
-4. **Verify (hard bar):** `lake build <lib>` green; **zero new `sorry`**; `#print axioms` unchanged
+4. **Verify (hard bar):** `lake build <lib>` green **AND `lake build <Lib>.<Module>` (your target by module
+   name)** — orphan files/consumers aren't reachable from a lib root, so `lake build <lib>` silently skips
+   them (a broken orphan that passed the lib gate is how a regression reached `main` — #2299); **zero new
+   `sorry`**; `#print axioms` unchanged
    (only `propext` / `Classical.choice` / `Quot.sound`); **every prior consumer of the declaration still
    compiles** (you generalised, so the old statement must follow from the new one). If a consumer breaks,
    **FIX it** — the old statement follows from the new one, so each call site still type-checks after light

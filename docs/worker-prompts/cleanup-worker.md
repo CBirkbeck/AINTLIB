@@ -23,10 +23,17 @@ Loop until your lane is empty or a freeze is active:
    then comment "claimed". If the edit shows it's already assigned, re-query (someone beat you).
 3. **Work.** `git fetch origin main`; create branch `cleanup/<n>` off `origin/main`. The issue targets a
    whole **file**. Run **`/cleanup` on that file** — it golfs *every* declaration in it, so you clean many
-   lemmas in one ticket. **Skip any individual declaration whose proof contains a `sorry`** (leave it
+   lemmas in one ticket. **Preserve docstrings and math-explanatory comments — deleting documentation is
+   NOT cleanup** (`/cleanup` is style/API/naming/dedup/golf on the *code*; only remove genuinely dead or
+   redundant comments, never the docstrings that explain what a decl means). **Skip any individual
+   declaration whose proof contains a `sorry`** (leave it
    untouched — it's the producer's WIP); clean all the sorry-free ones. If the whole file is WIP/`sorry`
    with nothing to clean, comment + relabel `state:in-progress`→`state:todo`, unassign, move on.
-4. **Verify (hard bar — do not merge otherwise):** `lake build <lib>` green; **zero new `sorry`**;
+4. **Verify (hard bar — do not merge otherwise):** `lake build <lib>` green **AND `lake build <Lib>.<Module>`
+   (your target file by module name)** — orphan files aren't reachable from a lib root, so `lake build <lib>`
+   silently *skips* them; building by name compiles the file you actually touched. (A broken orphan that
+   passed the lib gate is exactly how a cleanup regression reached `main` — #2299. For `«Adic spaces»`
+   modules use guillemets: `lake build "«Adic spaces».Foo"`.) **Zero new `sorry`**;
    `#print axioms` on the touched declarations shows only `propext` / `Classical.choice` / `Quot.sound`.
    If you can't meet the bar, comment why, relabel `state:in-progress`→`state:todo`, unassign, move on.
 5. **Merge (auto — cleanup never changes a statement).** Re-check freeze. `git fetch origin main`; if
