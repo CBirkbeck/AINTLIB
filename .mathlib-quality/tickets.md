@@ -624,7 +624,12 @@ FaithfulLocLift. **First /beastmode step**: state HU-a…e as `:= by sorry` and 
 ---
 
 ### [T-L4-EXT] Constructive valuation extension along a ring inclusion (Chevalley for rings) — sub-ticket of T-L4 (HU-d)
-- **Status**: 🔵 OPEN — **Parent**: T-L4. Spawned 2026-06-21 (/beastmode Tier-A); the gap was
+- **Status**: ✅ **DONE** (2026-06-21) — `exists_valuation_extension_of_prime_over` PROVEN axiom-clean
+  (lean_verify, no sorryAx). Steps 1-4 (onQuot → extendToLocalization → Ideal.quotientMap field embed
+  → T-L4-EXT-FIELD place extension → Spv.comap) + the IsEquiv chase all landed. KEY: `F`,`L` are
+  `IsFractionRing`-generic PARAMETERS (caller passes `FractionRing`), keeping `extendToLocalization`
+  light (avoids the whnf-timeout that the `let FractionRing` form hit). Depends on T-L4-EXT-FIELD ✅.
+- **Status (was)**: 🔵 OPEN — **Parent**: T-L4. Spawned 2026-06-21 (/beastmode Tier-A); the gap was
   confirmed by 3 searches (leansearch + 2× loogle): mathlib's `Valuation.HasExtension` is only a
   PREDICATE + accessors (`val_map_le_one_iff` etc.) and the constructors (`mk`, `ofComapInteger`)
   require an already-existing extension `vA`; there is **no constructive `exists_extension`** that
