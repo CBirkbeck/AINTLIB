@@ -5765,7 +5765,18 @@ The literal argument is normal-form `±ξ^d ∏(ξ^a−1)^{e_a}` ⟹ `Σe_a=0` (
   PadicLFunctions` green (3842 jobs, exit 0); `#print axioms` → `zetaIdeal_le_col_image`,
   `mem_cycloTower1_of_col_mem_zetaIdeal`, `isClosed_col_image` = {propext,Classical.choice,Quot.sound};
   `col_image_cycloTower1_eq_zetaIdeal`/`iwasawa_theorem`/`iwasawa_exact_sequence` = +sorryAx.
-  **REMAINING (the SOLE sorry, Main:295): only the `⊆` half** `Col '' 𝒞_{∞,1} ⊆ I(𝒢)ζ_p`
+- **★ SUPERSEDED & CLOSED (2026-06-21, orchestrator-verified) ★**: the `⊆` half was closed via the
+  **faithful plus/minus Route-P** (now in Main.lean, NOT the density route): `col_mem_zetaIdeal_of_mem_cycloTower1`
+  splits `Col u` into `c`-plus (`col_mem_zetaIdeal_of_mem_cycloTower1Plus`, proved) + `c`-minus
+  (`mem_ZpOne_of_mem_cycloTower1_cAnti` ⟹ `Col=0`), then `2·Col u ∈ I(𝒢)ζ_p` with `2` a unit (p odd).
+  **`col_image_cycloTower1_eq_zetaIdeal`, `iwasawa_theorem` (𝒰⁺/𝒞⁺ ≃+ Λ(𝒢⁺)/zetaIdealPlus), and
+  `iwasawa_exact_sequence` are ALL now PROVED and AXIOM-CLEAN** (`#print axioms` =
+  {propext, Classical.choice, Quot.sound}, no sorryAx — verified 2026-06-21; `lake build` green, 3801 jobs).
+  Main.lean is **sorry-free** (the 3 grep hits are docstring prose). ⟹ **the §12 input to the §13 capstone
+  is DONE**. The entire density chain **[T1220–T1225] is SUPERSEDED** (the `_of_density` route was unsound at
+  the free level-0 coordinate — see T1220 B2 — and is not used; Route-P replaced it). The only wiring left to
+  feed the capstone's abstract `h12` is additive→`Λ(𝒢⁺)`-linear + concrete-`cd` (bookkeeping, not new math).
+  Former (now-closed) REMAINING note: only the `⊆` half `Col '' 𝒞_{∞,1} ⊆ I(𝒢)ζ_p`
   (descent well-definedness) = the cyclic-module density `𝒞_{∞,1} = closure(Λ(𝒢)·wγ(a₀))` (RJW
   LemmaGeneratorCinfty1, TeX 3573–3578). Agent PROVED (not just asserted) this is a **tower-level
   ALGEBRAIC density, NOT a continuity gap**: the continuity layer makes `Col '' 𝒞_{∞,1}` closed but
@@ -6153,7 +6164,7 @@ in `closure(elems_n '' S)`. (⟸) the content: a basic nhd of `u` constrains fin
   induced topology's basic opens reduce to n≥1, else add an `n=0` triviality leaf).
 
 ### [T1221] Level-n image of the Galois-orbit subgroup (TOP)
-- **Status**: in_progress (dispatched 2026-06-21) | **File**: IwasawaProof/TowerDensity.lean | **Depends on**: T1220 | **Type**: theorem
+- **Status**: DONE (2026-06-21, axiom-clean) — banked (`elems_image_cycloGenSubgroupPlus`, TowerDensity.lean) but SUPERSEDED for h12 (density route unused; Route-P closed §12) | **File**: IwasawaProof/TowerDensity.lean | **Depends on**: T1220 | **Type**: theorem
 #### Statement
 ```lean
 -- elems_n is a MonoidHom NormCompatUnits →* ℂ_[p]ˣ; the level-n image of the wγ-orbit subgroup
@@ -6205,7 +6216,7 @@ theorem cycloClosureOnePlus_le_closure_translate (hp2 : p ≠ 2) {n : ℕ} (hn :
   source does this in lem:global generators 2; mirror it.
 
 ### [T1223] Tower PLUS density cycloTower1Plus ⊆ closure(M⁺) (LemmaGeneratorCinfty1(ii))
-- **Status**: open | **File**: IwasawaProof/TowerDensity.lean | **Depends on**: T1220,T1221,T1222 |
+- **Status**: SUPERSEDED (2026-06-21) — density route unused; Route-P (plus/minus split + ker Col) closed §12 directly. NOT needed | **File**: IwasawaProof/TowerDensity.lean | **Depends on**: T1220,T1221,T1222 |
   **Type**: theorem
 #### Statement
 ```lean
@@ -6220,7 +6231,7 @@ That is T1222. Done.
 - **Depends**: T1220 (char), T1221 (image), T1222 (level density).
 
 ### [T1224] The plus/minus split cycloTower1 ⊆ cycloTower1Plus · ZpOne (structural)
-- **Status**: in_progress (dispatched 2026-06-21, parallel to T1221; file Iwasawa/PlusMinusTower.lean — the hard c-eigen-split, partly-absent infra) | **File**: IwasawaProof/TowerDensity.lean (or Iwasawa/PlusMinusTower.lean) |
+- **Status**: SUPERSEDED (2026-06-21) — Route-P uses the proved `mem_ZpOne_of_mem_cycloTower1_cAnti` (Main.lean:836, the c-anti⟹ZpOne direction), NOT the full split; dispatched worker stopped. h12 done without it | **File**: IwasawaProof/TowerDensity.lean (or Iwasawa/PlusMinusTower.lean) |
   **Depends on**: ZpOne (banked), the c-action galNCU(−1) | **Type**: theorem
 #### Statement
 ```lean
@@ -6245,7 +6256,7 @@ the `ξ^{a_n}` to `z∈ZpOne` (single `a∈ℤ_p` by norm-compat of the minus, `
 - **Status**: open | **Depends on**: T1224 | **Type**: cleanup
 
 ### [T1225] col_image ⊆ : Col '' cycloTower1 ⊆ zetaIdeal (closes Main:433)
-- **Status**: open | **File**: IwasawaProof/Main.lean | **Depends on**: T1223,T1224 | **Type**: theorem
+- **Status**: SUPERSEDED+DONE (2026-06-21) — the ⊆ half is closed in Main.lean by Route-P (`col_mem_zetaIdeal_of_mem_cycloTower1`, axiom-clean), not this density-based statement | **File**: IwasawaProof/Main.lean | **Depends on**: T1223,T1224 | **Type**: theorem
   (REPLANS `col_image_cycloTower1_le_zetaIdeal_of_density` → split-based, no non-plus density needed)
 #### Statement
 ```lean

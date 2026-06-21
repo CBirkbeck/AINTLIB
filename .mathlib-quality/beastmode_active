@@ -1,1 +1,1 @@
-FOCUS: §12 chain advancing via 2 parallel workers — T1221 (TowerDensity.lean) + T1224 (PlusMinusTower.lean). On completion: T1223 (combines T1220+T1221+T1222) → T1225 (col_image⊆) → h12 (col_image_cycloTower1_eq_zetaIdeal). Then h12 discharges the capstone §12 input.
+FOCUS: §12 milestone iwasawa_theorem PROVED+axiom-clean (verified; board was stale). Density chain T1220-T1225 SUPERSEDED by Route-P. §13 capstone reduced to CFT-only (bundled-by-necessity); h12 provided by iwasawa_theorem modulo additive→Λ-linear wiring.
