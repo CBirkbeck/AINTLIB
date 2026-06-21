@@ -12929,13 +12929,20 @@ noetherian Tate ring then `𝒪_X` is a sheaf of complete topological rings on
 per Def-7.29 rational cover. -/
 theorem isSheafy_of_stronglyNoetherian_828b
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
-    [NonarchimedeanRing A] [HasLocLiftPowerBounded A] [CompatiblePlusSubring A]
+    [NonarchimedeanRing A] [CompatiblePlusSubring A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
-      CompleteSpace A] : IsSheafy A where
-  -- Embedding via the equalizer + σ-compact-free OMT route (expert-review 2026-06-20, Q1):
-  -- inducing from the closed `sectionEqualizer` range, NOT the Prop-6.18 module-topology leaf.
-  embedding C hC := ⟨productRestrictionSub_isInducing_via_equalizer C hC,
-    cor_8_32_productRestrictionSub_injective C hC⟩
-  gluing C hC f hcompat := lemma_8_34_gluing C hC f hcompat
+      CompleteSpace A] :
+    -- `HasLocLiftPowerBounded A` is NOT assumed: Wedhorn *proves* the restriction maps are
+    -- well-defined (s a unit (7.52(2)/7.51) + t/s power-bounded (7.41)). We DERIVE it here from
+    -- the same hypotheses via `hasLocLiftPowerBounded_faithful`, so its two source-justified leaves
+    -- (Prop 7.51(2) + [Hu2] 3.3) are exposed on the headline rather than hidden behind a binder.
+    letI := hasLocLiftPowerBounded_faithful (A := A); IsSheafy A := by
+  letI := hasLocLiftPowerBounded_faithful (A := A)
+  exact
+    -- Embedding via the equalizer + σ-compact-free OMT route (expert-review 2026-06-20, Q1):
+    -- inducing from the closed `sectionEqualizer` range, NOT the Prop-6.18 module-topology leaf.
+    { embedding := fun C hC => ⟨productRestrictionSub_isInducing_via_equalizer C hC,
+        cor_8_32_productRestrictionSub_injective C hC⟩
+      gluing := fun C hC f hcompat => lemma_8_34_gluing C hC f hcompat }
 
 end ValuationSpectrum
