@@ -3,7 +3,6 @@ import BernoulliRegular.FLT37.LehmerVandiver.CaseI.Stage2Interface
 import BernoulliRegular.FLT37.KummerUnits
 import FltRegular.NumberTheory.KummersLemma.KummersLemma
 
-
 /-!
 # Real Kummer's lemma (the concrete Stage 2 target)
 
