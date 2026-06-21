@@ -52,7 +52,7 @@ theorem rationalToLambdaCompletionRingHom_le_one_iff
             Valued.v.restrict x ≤ 1} :=
         Valued.isClopen_closedBall
           (R := (lambdaRationalHeightOneSpectrum p).adicCompletion ℚ)
-          (r := 1) (by exact one_ne_zero)
+          (r := 1) one_ne_zero
       have hA : IsClopen A := by
         convert hA' using 1
         ext x
@@ -62,7 +62,7 @@ theorem rationalToLambdaCompletionRingHom_le_one_iff
             Valued.v.restrict (f x) ≤ 1} :=
         (Valued.isClopen_closedBall
           (R := LambdaValuedCompletion p K) (r := 1)
-          (by exact one_ne_zero)).preimage
+          one_ne_zero).preimage
           (continuous_algebraMap_rationalCompletionToLambdaAlgebra (p := p) (K := K))
       have hB : IsClopen B := by
         convert hB' using 1
@@ -201,8 +201,7 @@ theorem dworkParameterPowerLinearMap_single (i : Fin (p - 1)) :
         (Pi.single i (1 : RationalPadicIntegerRing p)) =
       dworkParameter p K ^ (i : ℕ) := by
   classical
-  rw [dworkParameterPowerLinearMap_apply]
-  rw [Finset.sum_eq_single i]
+  rw [dworkParameterPowerLinearMap_apply, Finset.sum_eq_single i]
   · simp
   · intro j _hj hji
     simp [Pi.single_eq_of_ne hji]
@@ -216,8 +215,7 @@ theorem dworkParameterPowerLinearMap_single_coeff
       algebraMap (RationalPadicIntegerRing p) (DworkCompleteIntegerRing p K) c *
         dworkParameter p K ^ (i : ℕ) := by
   classical
-  rw [dworkParameterPowerLinearMap_apply]
-  rw [Finset.sum_eq_single i]
+  rw [dworkParameterPowerLinearMap_apply, Finset.sum_eq_single i]
   · simp
   · intro j _hj hji
     simp [Pi.single_eq_of_ne hji]
@@ -259,9 +257,6 @@ theorem dworkParameterPowerBasisOfBijective_apply
       dworkParameter p K ^ (i : ℕ) := by
   classical
   rw [dworkParameterPowerBasisOfBijective, Module.Basis.map_apply, Pi.basisFun_apply]
-  change dworkParameterPowerLinearMap p K
-      (Pi.single i (1 : RationalPadicIntegerRing p)) =
-    dworkParameter p K ^ (i : ℕ)
   exact dworkParameterPowerLinearMap_single (p := p) (K := K) i
 
 theorem pow_sub_pow_mem_dworkParameterIdeal_pow_add {N n : ℕ} (hn : n ≠ 0)
@@ -320,7 +315,7 @@ theorem dworkCompleteLambda_pow_sub_dworkParameter_pow_mem_parameterIdeal_pow_su
       have h := pow_sub_pow_mem_dworkParameterIdeal_pow_add
         (p := p) (K := K) (N := 1) (n := n + 1)
         (by omega) hLam hVarpi hsub
-      simpa [Nat.add_comm, Nat.add_left_comm, Nat.add_assoc] using h
+      rwa [Nat.add_comm 1 (n + 1)] at h
 
 theorem dworkParameter_pow_sub_dworkCompleteLambda_pow_mem_parameterIdeal_pow_succ
     (n : ℕ) :
@@ -330,7 +325,7 @@ theorem dworkParameter_pow_sub_dworkCompleteLambda_pow_mem_parameterIdeal_pow_su
     ((dworkParameterIdeal p K) ^ (n + 1)).neg_mem
       (dworkCompleteLambda_pow_sub_dworkParameter_pow_mem_parameterIdeal_pow_succ
         (p := p) (K := K) n)
-  simpa [sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using h
+  simpa [neg_sub] using h
 
 /-- Dwork-side parameter-ideal denominator bookkeeping:
 `(varpi)^(m(p-1)+s) = (p^m) (varpi)^s`. -/
@@ -416,8 +411,8 @@ theorem mem_lambdaIdeal_iff_valuation_le_exp_neg_one
   rw [mem_lambdaIdeal_iff_valuation_le_lambda (p := p) (K := K)]
   have hlam :
       Valued.v (valuedCyclotomicLambdaInteger p K : ValuedCompletion p K) =
-        WithZero.exp (-1 : ℤ) := by
-    exact valuedCyclotomicLambda_valuation (p := p) (K := K)
+        WithZero.exp (-1 : ℤ) :=
+    valuedCyclotomicLambda_valuation (p := p) (K := K)
   rw [hlam]
 
 /-- The global lambda residue field is represented by the rational classes
@@ -463,27 +458,12 @@ theorem globalCyclotomicResidue_natCast_fin_surjective :
         ((i : ℤ) - (j : ℤ))).mpr hmem
     rw [Furtwaengler.KummerArtinHasse.lambdaRationalPrimeIdeal,
       Ideal.mem_span_singleton] at hmemZ
-    rcases hmemZ with ⟨c, hc⟩
-    have hdiff : (i : ℤ) - (j : ℤ) = (p : ℤ) * c := by
-      simpa [mul_comm] using hc
     have hi_lt : (i : ℤ) < p := by exact_mod_cast i.isLt
     have hj_lt : (j : ℤ) < p := by exact_mod_cast j.isLt
     have hp_pos : (0 : ℤ) < p := by
       exact_mod_cast (Fact.out : Nat.Prime p).pos
-    have hdiff_lt : (i : ℤ) - (j : ℤ) < p := by omega
-    have hdiff_gt : -(p : ℤ) < (i : ℤ) - (j : ℤ) := by omega
-    have hc_zero : c = 0 := by
-      by_cases hc_nonneg : 0 ≤ c
-      · by_cases hc0 : c = 0
-        · exact hc0
-        · have hc_one : 1 ≤ c := by omega
-          have hp_le : (p : ℤ) ≤ (p : ℤ) * c := by nlinarith
-          omega
-      · have hc_le : c ≤ -1 := by omega
-        have hle_neg : (p : ℤ) * c ≤ -(p : ℤ) := by nlinarith
-        omega
-    have hdiff_zero : (i : ℤ) - (j : ℤ) = 0 := by
-      simpa [hc_zero] using hdiff
+    have hdiff_zero : (i : ℤ) - (j : ℤ) = 0 :=
+      Int.eq_zero_of_abs_lt_dvd hmemZ (by rw [abs_lt]; omega)
     apply Fin.ext
     omega
   have hcard : Nat.card (Fin p) = Nat.card Q := by
@@ -545,8 +525,7 @@ theorem exists_global_fin_valuation_sub_le_exp_neg_one_of_valuation_le_one
       (x - (i : ℤ)) * algebraMap (𝓞 K) K (d : 𝓞 K) =
         algebraMap (𝓞 K) K
           (n - algebraMap ℤ (𝓞 K) (i : ℤ) * d) := by
-    rw [map_sub, map_mul]
-    rw [sub_mul, hxd]
+    rw [map_sub, map_mul, sub_mul, hxd]
     simp [sub_eq_add_neg]
   have hmulval :
       v.valuation K ((x - (i : ℤ)) * algebraMap (𝓞 K) K (d : 𝓞 K)) ≤
@@ -566,11 +545,11 @@ theorem exists_completion_fin_valuation_sub_le_exp_neg_one_of_valuation_le_one
     ⋃ i : Fin p, {x | Valued.v (x - (i : ℤ)) ≤ WithZero.exp (-1 : ℤ)}
   have hlam :
       Valued.v (valuedCyclotomicLambdaInteger p K : ValuedCompletion p K) =
-        WithZero.exp (-1 : ℤ) := by
-    exact valuedCyclotomicLambda_valuation (p := p) (K := K)
+        WithZero.exp (-1 : ℤ) :=
+    valuedCyclotomicLambda_valuation (p := p) (K := K)
   have hA' : IsClopen {x : ValuedCompletion p K | Valued.v.restrict x ≤ 1} :=
     Valued.isClopen_closedBall
-      (R := ValuedCompletion p K) (r := 1) (by exact one_ne_zero)
+      (R := ValuedCompletion p K) (r := 1) one_ne_zero
   have hA : IsClopen A := by
     convert hA' using 1
     ext x
@@ -676,9 +655,8 @@ theorem rationalPadicIntegerToValuedInteger_algebraMap_int_coe (z : ℤ) :
           RationalPadicIntegerRing p) :
           (lambdaRationalHeightOneSpectrum p).adicCompletion ℚ) =
         algebraMap ℚ ((lambdaRationalHeightOneSpectrum p).adicCompletion ℚ)
-          (z : ℚ) by
-    rfl]
-  rw [rationalToLambdaCompletionRingHom_algebraMap]
+          (z : ℚ) from rfl,
+    rationalToLambdaCompletionRingHom_algebraMap]
   simp
 
 theorem valuedInteger_residue_lift_rationalPadicInteger
@@ -742,9 +720,6 @@ theorem dworkComplete_residue_lift_of_valuedInteger_residue_lift
     (p := p) (K := K)] using hmem
 
 set_option maxHeartbeats 800000 in
--- The induction repeatedly rewrites through the completed Dwork algebra
--- structure and the coefficient algebra map; the higher limit keeps the final
--- normalization steps stable.
 /-- This induction repeatedly rewrites through the completed Dwork algebra
 structure and the coefficient algebra map; the higher heartbeat limit keeps
 the final normalization steps stable. -/
@@ -801,12 +776,8 @@ theorem dworkParameterPowerLinearMap_approx_of_residue_lift
             dsimp [I, varpi, dworkParameterIdeal]
             exact Ideal.mem_span_singleton_self (dworkParameter p K)) s
       have hdiff_mul : (y - algebraMap R₀ S b) * varpi ^ s ∈ I ^ (s + 1) := by
-        have hmul : (y - algebraMap R₀ S b) * varpi ^ s ∈ I * I ^ s :=
-          Ideal.mul_mem_mul hb hvarpi_pow
-        have hmul1 : (y - algebraMap R₀ S b) * varpi ^ s ∈ I ^ 1 * I ^ s := by
-          simpa using hmul
-        rw [← pow_add] at hmul1
-        simpa [Nat.add_comm, Nat.add_left_comm, Nat.add_assoc] using hmul1
+        rw [pow_succ']
+        exact Ideal.mul_mem_mul hb hvarpi_pow
       have hz_sub : z - algebraMap R₀ S b * varpi ^ s ∈ I ^ (s + 1) := by
         have hcalc : z - algebraMap R₀ S b * varpi ^ s =
             (y - algebraMap R₀ S b) * varpi ^ s := by
@@ -893,7 +864,7 @@ theorem dworkParameterPowerLinearMap_quotient_surjective (N : ℕ) :
       -(y - dworkParameterPowerLinearMap p K a) ∈
         (dworkParameterIdeal p K) ^ N :=
     neg_mem ha
-  simpa [sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using hneg
+  simpa [neg_sub] using hneg
 
 end DworkParameter
 end PadicLogSetup
