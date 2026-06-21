@@ -140,7 +140,7 @@ If the cyclotomic local logarithm `∑_a e_a • kummerLogCompletedColumn a` van
 all `N ≤ 36` (the `LeadingExponentEx811Core37` hypothesis) — then the Kummer-log matrix
 annihilates the mod-`37` exponent vector:
 
-  `concreteKummerLogMatrix.mulVec (fun a => (e a : ZMod 37)) = 0`.
+  `concreteKummerLogMatrix.mulVec (fun a ↦ (e a : ZMod 37)) = 0`.
 
 Proof: by `concreteKummerLogMatrix_mulVec_exponents_eq_coeff`, the row `j` is the mod-`37`
 even-power-`2(j+1)` Dwork coefficient of `S = ∑_a e_a • concreteKummerLogVector a`; by §1 this
@@ -158,7 +158,7 @@ theorem caseIIEx811Core_mulVec_eq_zero_of_evalₐ_eq_zero
               (by decide) a) = 0) :
     Matrix.mulVec
         (concreteKummerLogMatrix (p := 37) (K := CyclotomicField 37 ℚ) (by norm_num) (by norm_num))
-        (fun a : Fin (kummerLogRank 37) => (e a : ZMod 37)) = 0 := by
+        (fun a : Fin (kummerLogRank 37) ↦ (e a : ZMod 37)) = 0 := by
   classical
   -- The coerced fixed-subalgebra sum equals the completed-log column sum.
   set S : dworkFixedSubalgebra 37 (CyclotomicField 37 ℚ) :=
@@ -178,7 +178,7 @@ theorem caseIIEx811Core_mulVec_eq_zero_of_evalₐ_eq_zero
             e a • concreteKummerLogVector (p := 37) (K := CyclotomicField 37 ℚ) (by norm_num) a)
         from rfl]
     rw [map_sum]
-    refine Finset.sum_congr rfl (fun a _ => ?_)
+    refine Finset.sum_congr rfl (fun a _ ↦ ?_)
     rw [map_zsmul]
     rfl
   have hevalS :
@@ -226,7 +226,7 @@ theorem caseIIEx811Core_rowFactor_ne_zero
 Under the `λ`-level-`36` vanishing hypothesis, the half-range Teichmüller Vandermonde matrix
 annihilates the mod-`37` exponent vector at every regular row `j` (`(j : ℕ) ≠ 15`):
 
-  `(vandermondeTeichmullerEvenSubOneMatrix.mulVec (fun a => (e a : ZMod 37))) j = 0`.
+  `(vandermondeTeichmullerEvenSubOneMatrix.mulVec (fun a ↦ (e a : ZMod 37))) j = 0`.
 
 Proof: bridge (i) gives `concreteKummerLogMatrix.mulVec ē = 0`; the proven factorization
 `concreteKummerLogMatrix.mulVec ē j = kummerLogDetRowFactor j · (V·ē) j` and the nonzero row
@@ -242,11 +242,11 @@ theorem caseIIEx811Core_vandermonde_mulVec_regular_eq_zero
               (by decide) a) = 0)
     (j : Fin (kummerLogRank 37)) (hj : (j : ℕ) ≠ 15) :
     (vandermondeTeichmullerEvenSubOneMatrix (p := 37) (by norm_num)).mulVec
-        (fun a : Fin (kummerLogRank 37) => (e a : ZMod 37)) j = 0 := by
+        (fun a : Fin (kummerLogRank 37) ↦ (e a : ZMod 37)) j = 0 := by
   have hker := caseIIEx811Core_mulVec_eq_zero_of_evalₐ_eq_zero e hvan
   have hrow := congrFun hker j
   rw [Pi.zero_apply, concreteKummerLogMatrix_mulVec_apply
-    (K := CyclotomicField 37 ℚ) (fun a => (e a : ZMod 37)) j] at hrow
+    (K := CyclotomicField 37 ℚ) (fun a ↦ (e a : ZMod 37)) j] at hrow
   exact (mul_eq_zero.mp hrow).resolve_left (caseIIEx811Core_rowFactor_ne_zero j hj)
 
 /-! ## 4. The remaining residual: the eigenbasis coordinate ↔ Dwork-log Vandermonde row
@@ -295,7 +295,7 @@ def CaseIIEx811EigenVandermonde37
   ∀ e : Fin (kummerLogRank 37) → ℤ,
     (∀ j : Fin (kummerLogRank 37), (j : ℕ) ≠ 15 →
       (vandermondeTeichmullerEvenSubOneMatrix (p := 37) (by norm_num)).mulVec
-          (fun a : Fin (kummerLogRank 37) => (e a : ZMod 37)) j = 0) →
+          (fun a : Fin (kummerLogRank 37) ↦ (e a : ZMod 37)) j = 0) →
     ∀ j : Fin 18, j ≠ 15 →
       caseIIResidueProvenance_decomp
         (∑ a : Fin (kummerLogRank 37),
@@ -314,9 +314,9 @@ theorem caseIIEx811EigenVandermonde37_antecedent_inhabited
     ∃ e : Fin (kummerLogRank 37) → ℤ,
       ∀ j : Fin (kummerLogRank 37), (j : ℕ) ≠ 15 →
         (vandermondeTeichmullerEvenSubOneMatrix (p := 37) (by norm_num)).mulVec
-            (fun a : Fin (kummerLogRank 37) => (e a : ZMod 37)) j = 0 := by
-  refine ⟨0, fun j _hj => ?_⟩
-  rw [show (fun a : Fin (kummerLogRank 37) => ((0 : Fin (kummerLogRank 37) → ℤ) a : ZMod 37)) =
+            (fun a : Fin (kummerLogRank 37) ↦ (e a : ZMod 37)) j = 0 := by
+  refine ⟨0, fun j _hj ↦ ?_⟩
+  rw [show (fun a : Fin (kummerLogRank 37) ↦ ((0 : Fin (kummerLogRank 37) → ℤ) a : ZMod 37)) =
       (0 : Fin (kummerLogRank 37) → ZMod 37) from by funext a; simp]
   rw [Matrix.mulVec_zero, Pi.zero_apply]
 
@@ -343,8 +343,8 @@ theorem leadingExponentEx811Core37_of_eigenVandermonde
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
     (hEig : CaseIIEx811EigenVandermonde37) :
     LeadingExponentEx811Core37 :=
-  fun e hvan j hj =>
-    hEig e (fun k hk => caseIIEx811Core_vandermonde_mulVec_regular_eq_zero e hvan k hk) j hj
+  fun e hvan j hj ↦
+    hEig e (fun k hk ↦ caseIIEx811Core_vandermonde_mulVec_regular_eq_zero e hvan k hk) j hj
 
 /-- **`LeadingExponentEigenCollapse37` from the eigenbasis ↔ Vandermonde identification** (proven,
 axiom-clean given `CaseIIEx811EigenVandermonde37`): chaining
