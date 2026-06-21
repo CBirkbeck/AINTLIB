@@ -151,8 +151,34 @@ theorem exists_comap_isEquiv_of_field_hom
     rw [LocalSubring.le_def]
     refine ⟨hsubF, ?_⟩
     -- Domination transfer: a unit of `V.comap ι` lying in `O` is a unit of `O`, pulled back from
-    -- `hV`'s `IsLocalHom (ι(O) ↪ V)` via the iso `O ≃ ι(O)` and `x unit in V.comap ι ↔ ι x unit in V`.
-    sorry
+    -- `hV`'s `IsLocalHom (ι(O) ↪ V)`.
+    obtain ⟨hsub_L, hlocal_L⟩ := LocalSubring.le_def.mp hV
+    refine ⟨fun a ha => ?_⟩
+    -- `(↑a)⁻¹ = ↑b ∈ V.comap ι` from `ha`.
+    obtain ⟨b, hb⟩ := ha.exists_right_inv
+    have hab : (a : F) * (b : F) = 1 := by
+      have := congrArg (Subring.subtype (V.comap ι).toLocalSubring.toSubring) hb
+      simpa using this
+    have hιab : ι (a : F) * ι (b : F) = 1 := by rw [← map_mul, hab, map_one]
+    have hιbV : ι (b : F) ∈ V := ValuationSubring.mem_comap.mp b.2
+    have hmem_map : ι (a : F) ∈ (LocalSubring.map ι v.valuationSubring.toLocalSubring).toSubring := by
+      rw [LocalSubring.map_toSubring]; exact Subring.mem_map.mpr ⟨a, a.2, rfl⟩
+    -- `⟨ι ↑a, _⟩ : ι(O)` maps to a unit of `V`; `hlocal_L` ⟹ it is a unit of `ι(O)`.
+    have haunit_L : IsUnit (Subring.inclusion hsub_L ⟨ι (a : F), hmem_map⟩) :=
+      isUnit_iff_exists_inv.mpr ⟨⟨ι (b : F), hιbV⟩, Subtype.ext hιab⟩
+    obtain ⟨c, hc⟩ := (hlocal_L.1 _ haunit_L).exists_right_inv
+    have hιc : ι (a : F) * (c : L) = 1 := by
+      have := congrArg (Subring.subtype _) hc
+      simpa using this
+    have hc_eq : (c : L) = ι (b : F) :=
+      mul_left_cancel₀ (left_ne_zero_of_mul_eq_one hιc) (hιc.trans hιab.symm)
+    -- `ι (↑b) = ↑c ∈ ι(O)`, so `↑b ∈ O` (ι injective), hence `a` is a unit of `O`.
+    have hb_mem_O : (b : F) ∈ v.valuationSubring := by
+      have hcmem : (c : L) ∈ (LocalSubring.map ι v.valuationSubring.toLocalSubring).toSubring := c.2
+      rw [hc_eq, LocalSubring.map_toSubring, Subring.mem_map] at hcmem
+      obtain ⟨y, hy, hyeq⟩ := hcmem
+      rwa [ι.injective hyeq] at hy
+    exact isUnit_iff_exists_inv.mpr ⟨⟨(b : F), hb_mem_O⟩, Subtype.ext hab⟩
   exact ValuationSubring.toLocalSubring_injective
     (le_antisymm hle (ValuationSubring.isMax_toLocalSubring v.valuationSubring hle))
 
