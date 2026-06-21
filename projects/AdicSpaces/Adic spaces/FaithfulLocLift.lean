@@ -107,12 +107,18 @@ theorem mem_plus_of_forall_spa_vle_one
   obtain ⟨w, hw_spa, hw⟩ :
       ∃ w : Spv (presheafValue D'),
         w ∈ Spa (presheafValue D') (presheafValue D')⁺ ∧ ¬ w.vle x 1 := by
-    -- HU-a..e (huber2.txt:633-658): `B⁺[x⁻¹]` has `x⁻¹` a non-unit (else `x` integral over the
-    -- integrally-closed `B⁺` ⟹ `x ∈ B⁺`); a minimal prime + a dominating valuation
-    -- (`IsLocalRing.exists_factor_valuationRing`) + a lift to `Spv B` (`Spv.localizationLift`/
-    -- `Spv.comap`) give `v ∈ Spv(B, B°°·B)` with `v(x) > 1`, `v ≤ 1` on `B⁺` and on `B°°`;
-    -- continuity via `Spv.isContinuous_of_isInSpvAI_of_lt_one` (Wedhorn 7.10 reverse) places
-    -- `v ∈ Spa(B, B⁺)`.
+    -- HU-a (huber2.txt:635-637): `x ∉ B⁺` ⟹ `x` is NOT integral over `B⁺` (contrapositive of
+    -- `B⁺` integrally closed). This is what makes `x⁻¹` a non-unit of `B⁺[x⁻¹]`, opening Huber's
+    -- localization argument.
+    have hx_not_integral : ¬ IsIntegral ((presheafValue D')⁺) x := fun hint =>
+      hxnot (IsRingOfIntegralElements.isIntegrallyClosed (B := (presheafValue D')⁺) x hint)
+    -- HU-b..e (huber2.txt:637-658): from `hx_not_integral`, `x⁻¹` is a non-unit of `B⁺[x⁻¹]`
+    -- (else `x` integral); a minimal prime + a dominating valuation
+    -- (`IsLocalRing.exists_factor_valuationRing` after reducing to the fraction field of a
+    -- minimal-prime quotient) + a lift to `Spv B` (`Spv.comap`) give `v ∈ Spv(B, B°°·B)` with
+    -- `v(x) > 1`, `v ≤ 1` on `B⁺` and on `B°°` (the latter via
+    -- `topologicallyNilpotent_mem_of_isOpen_integrallyClosed`); continuity via
+    -- `Spv.isContinuous_of_isInSpvAI_of_lt_one` (Wedhorn 7.10 reverse) places `v ∈ Spa(B, B⁺)`.
     sorry
   exact hw (hx w hw_spa)
 
