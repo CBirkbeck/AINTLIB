@@ -233,7 +233,7 @@ theorem caseIICor823Level71SecondOrderPartValue37_of_deg68Scalar
     (hScalar : CaseIICor823Level71Deg68Scalar37) :
     CaseIICor823Level71SecondOrderPartValue37 := by
   obtain ⟨ρ, hρ_ne, hScalar⟩ := hScalar
-  refine ⟨ρ, hρ_ne, fun a => ?_⟩
+  refine ⟨ρ, hρ_ne, fun a ↦ ?_⟩
   rw [hScalar a, vandermondeFactorDeg68ModP37_eq a]
 
 /-! ## 5. R4 and the FLT37 endpoint, from the degree-`68` homogeneous-coefficient residual -/
