@@ -79,7 +79,7 @@ free part `(E_K free)/37`,
   `2 • [pollaczekUnit i] = ∑_a ((a+2)^{36-i} : ℤ) • φ(CPlusGenerator a)`,
 
 read off the proven product expansion `pollaczekUnitPlusKplus i = CPlusExponentProduct 0
-(fun a => (a+2)^{36-i})` (`pollaczekUnitPlusKplus_eq_CPlusExponentProduct`) together with
+(fun a ↦ (a+2)^{36-i})` (`pollaczekUnitPlusKplus_eq_CPlusExponentProduct`) together with
 `realUnitToFreePartModP_pollaczekUnitPlusKplus` (the factor `2` from the σ-symmetrisation) and
 the linearity `realUnitToFreePartModP_CPlusExponentProduct`. -/
 theorem caseIIEx811Eigen_two_smul_pollaczek_eq
@@ -140,7 +140,7 @@ theorem caseIIEx811Eigen_eigenvector_eq_smul_genImg
           (Additive.ofMul (FLT37.pollaczekUnit 37 (CyclotomicField 37 ℚ)
             (2 * ((j' : ℕ) + 1)))) from rfl]
     rw [hstar]
-    refine Finset.sum_congr rfl (fun a _ => ?_)
+    refine Finset.sum_congr rfl (fun a _ ↦ ?_)
     rw [← Int.cast_smul_eq_zsmul (ZMod 37)]
     congr 1
     push_cast
@@ -154,7 +154,7 @@ theorem caseIIEx811Eigen_eigenvector_eq_smul_genImg
     _ = ∑ a : Fin ((37 - 3) / 2),
           ((2 : ZMod 37)⁻¹ * (((a : ℕ) + 2 : ℕ) : ZMod 37) ^ (34 - 2 * (j' : ℕ))) • genImg a := by
         rw [Finset.smul_sum]
-        exact Finset.sum_congr rfl (fun a _ => by rw [smul_smul])
+        exact Finset.sum_congr rfl (fun a _ ↦ by rw [smul_smul])
 
 /-! ## 2. The linear independence of the generator images and the inversion (♦)
 
@@ -169,7 +169,7 @@ change of basis: the `ZMod 37`-reduced exponent of `x = ∑_a e_a g_a` is the ei
 theorem caseIIEx811Eigen_genImg_linearIndependent
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)] :
-    LinearIndependent (ZMod 37) (fun a : Fin ((37 - 3) / 2) => genImg a) :=
+    LinearIndependent (ZMod 37) (fun a : Fin ((37 - 3) / 2) ↦ genImg a) :=
   FLT37.CPlusGenerator_image_linearIndependent (K := CyclotomicField 37 ℚ)
     caseIIGaloisEigen_pollaczekClasses_ne_zero
 
@@ -198,7 +198,7 @@ theorem caseIIEx811Eigen_exponent_eq
   -- x = ∑_a (e_a : ZMod 37) • g_a.
   have hx1 : x = ∑ b : Fin ((37 - 3) / 2), ((e b : ℤ) : ZMod 37) • genImg b := by
     rw [hx]
-    exact Finset.sum_congr rfl (fun b _ => (Int.cast_smul_eq_zsmul (ZMod 37) (e b) _).symm)
+    exact Finset.sum_congr rfl (fun b _ ↦ (Int.cast_smul_eq_zsmul (ZMod 37) (e b) _).symm)
   -- x = ∑_a (∑_{j'} c_{j'} 2⁻¹(a+2)^{34-2j'}) • g_a, via the decomp spec + (★′).
   have hx2 : x = ∑ b : Fin ((37 - 3) / 2),
       (∑ j' : Fin 18, c j' * ((2 : ZMod 37)⁻¹ *
@@ -211,7 +211,7 @@ theorem caseIIEx811Eigen_exponent_eq
         ∑ b : Fin ((37 - 3) / 2),
           ((2 : ZMod 37)⁻¹ * (((b : ℕ) + 2 : ℕ) : ZMod 37) ^ (34 - 2 * (j' : ℕ))) • genImg b := by
       rw [hspec]
-      refine Finset.sum_congr rfl (fun j' _ => ?_)
+      refine Finset.sum_congr rfl (fun j' _ ↦ ?_)
       simp only [caseIIEx811Eigen_eigenvector_eq_smul_genImg]
     rw [hstep]
     -- Distribute c j' • into the inner sum, then swap the order of summation.
@@ -221,16 +221,16 @@ theorem caseIIEx811Eigen_exponent_eq
         ∑ j' : Fin 18, ∑ b : Fin ((37 - 3) / 2),
           (c j' * ((2 : ZMod 37)⁻¹ * (((b : ℕ) + 2 : ℕ) : ZMod 37) ^ (34 - 2 * (j' : ℕ)))) •
             genImg b
-        from Finset.sum_congr rfl (fun j' _ => by
+        from Finset.sum_congr rfl (fun j' _ ↦ by
           rw [Finset.smul_sum]
-          exact Finset.sum_congr rfl (fun b _ => by rw [smul_smul]))]
+          exact Finset.sum_congr rfl (fun b _ ↦ by rw [smul_smul]))]
     rw [Finset.sum_comm]
-    refine Finset.sum_congr rfl (fun b _ => ?_)
+    refine Finset.sum_congr rfl (fun b _ ↦ ?_)
     rw [Finset.sum_smul]
   -- Match coefficients by linear independence: ∑ (f_b - h_b) • g_b = 0 ⟹ f_b = h_b.
   have hli := caseIIEx811Eigen_genImg_linearIndependent
-  set f : Fin ((37 - 3) / 2) → ZMod 37 := fun b => ((e b : ℤ) : ZMod 37) with hf
-  set h : Fin ((37 - 3) / 2) → ZMod 37 := fun b =>
+  set f : Fin ((37 - 3) / 2) → ZMod 37 := fun b ↦ ((e b : ℤ) : ZMod 37) with hf
+  set h : Fin ((37 - 3) / 2) → ZMod 37 := fun b ↦
     ∑ j' : Fin 18, c j' * ((2 : ZMod 37)⁻¹ *
       (((b : ℕ) + 2 : ℕ) : ZMod 37) ^ (34 - 2 * (j' : ℕ))) with hh
   have heq0 : ∑ b : Fin ((37 - 3) / 2), (f b - h b) • genImg b = 0 := by
@@ -238,9 +238,9 @@ theorem caseIIEx811Eigen_exponent_eq
         (∑ b : Fin ((37 - 3) / 2), f b • genImg b) -
           ∑ b : Fin ((37 - 3) / 2), h b • genImg b from by
       rw [← Finset.sum_sub_distrib]
-      exact Finset.sum_congr rfl (fun b _ => sub_smul (f b) (h b) (genImg b))]
+      exact Finset.sum_congr rfl (fun b _ ↦ sub_smul (f b) (h b) (genImg b))]
     rw [← hx1, ← hx2, sub_self]
-  have hzero := Fintype.linearIndependent_iff.mp hli (fun b => f b - h b) heq0 a
+  have hzero := Fintype.linearIndependent_iff.mp hli (fun b ↦ f b - h b) heq0 a
   have hfa : f a = h a := sub_eq_zero.mp hzero
   rw [hf, hh] at hfa
   exact hfa
@@ -299,7 +299,7 @@ theorem caseIIEx811Eigen_matrix_diagonal :
           (((((a : ℕ) + 2 : ℕ) : ZMod 37) ^ 2) ^ ((m : ℕ) + 1) - 1) *
             ((((a : ℕ) + 2 : ℕ) : ZMod 37) ^ (34 - 2 * (m' : ℕ))) := by
     rw [Finset.mul_sum]
-    exact Finset.sum_congr rfl (fun a _ => by ring)
+    exact Finset.sum_congr rfl (fun a _ ↦ by ring)
   rw [hfactor, caseIIEx811Eigen_matrix_diagonal_two_smul m m']
   -- `2⁻¹ · 18 = 9` and `2⁻¹ · 0 = 0` in `𝔽₃₇`; pulling `18 = 2 · 9` clears the inverse.
   have h2 : (2 : ZMod 37) ≠ 0 := by decide
@@ -324,7 +324,7 @@ theorem caseIIEx811Eigen_vandermonde_eq_nine_smul
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
     (e : Fin ((37 - 3) / 2) → ℤ) (j : Fin (kummerLogRank 37)) :
     (vandermondeTeichmullerEvenSubOneMatrix (p := 37) (by norm_num)).mulVec
-        (fun a : Fin ((37 - 3) / 2) => (e a : ZMod 37)) j =
+        (fun a : Fin ((37 - 3) / 2) ↦ (e a : ZMod 37)) j =
       (9 : ZMod 37) *
         caseIIResidueProvenance_decomp
           (∑ b : Fin ((37 - 3) / 2), e b • genImg b)
@@ -332,7 +332,7 @@ theorem caseIIEx811Eigen_vandermonde_eq_nine_smul
   set c := caseIIResidueProvenance_decomp (∑ b : Fin ((37 - 3) / 2), e b • genImg b) with hc
   -- Step 1: unfold the Vandermonde row to an explicit sum.
   rw [show (vandermondeTeichmullerEvenSubOneMatrix (p := 37) (by norm_num)).mulVec
-        (fun a : Fin ((37 - 3) / 2) => (e a : ZMod 37)) j =
+        (fun a : Fin ((37 - 3) / 2) ↦ (e a : ZMod 37)) j =
       ∑ a : Fin ((37 - 3) / 2),
         (((((a : ℕ) + 2 : ℕ) : ZMod 37) ^ 2) ^ ((j : ℕ) + 1) - 1) * ((e a : ℤ) : ZMod 37)
       from by
@@ -346,7 +346,7 @@ theorem caseIIEx811Eigen_vandermonde_eq_nine_smul
         (((((a : ℕ) + 2 : ℕ) : ZMod 37) ^ 2) ^ ((j : ℕ) + 1) - 1) *
           ∑ j' : Fin 18, c j' *
             ((2 : ZMod 37)⁻¹ * (((a : ℕ) + 2 : ℕ) : ZMod 37) ^ (34 - 2 * (j' : ℕ)))
-      from Finset.sum_congr rfl (fun a _ => by rw [caseIIEx811Eigen_exponent_eq e a, ← hc])]
+      from Finset.sum_congr rfl (fun a _ ↦ by rw [caseIIEx811Eigen_exponent_eq e a, ← hc])]
   -- Step 3: distribute and swap sums to ∑_{j'} c_{j'} M(j,j').
   rw [show (∑ a : Fin ((37 - 3) / 2),
         (((((a : ℕ) + 2 : ℕ) : ZMod 37) ^ 2) ^ ((j : ℕ) + 1) - 1) *
@@ -364,11 +364,11 @@ theorem caseIIEx811Eigen_vandermonde_eq_nine_smul
             ∑ a : Fin ((37 - 3) / 2), ∑ j' : Fin 18,
               c j' * ((((((a : ℕ) + 2 : ℕ) : ZMod 37) ^ 2) ^ ((j : ℕ) + 1) - 1) *
                 ((2 : ZMod 37)⁻¹ * (((a : ℕ) + 2 : ℕ) : ZMod 37) ^ (34 - 2 * (j' : ℕ))))
-            from Finset.sum_congr rfl (fun a _ => by
+            from Finset.sum_congr rfl (fun a _ ↦ by
               rw [Finset.mul_sum]
-              exact Finset.sum_congr rfl (fun j' _ => by ring))]
+              exact Finset.sum_congr rfl (fun j' _ ↦ by ring))]
         rw [Finset.sum_comm]
-        refine Finset.sum_congr rfl (fun j' _ => ?_)
+        refine Finset.sum_congr rfl (fun j' _ ↦ ?_)
         rw [Finset.mul_sum]]
   -- Step 4: split off the j' = 17 term (killed by c 17 = 0) and apply the diagonal identity.
   have hj17 : (j : ℕ) < 17 := j.isLt
@@ -387,7 +387,7 @@ theorem caseIIEx811Eigen_vandermonde_eq_nine_smul
               (((a : ℕ) + 2 : ℕ) : ZMod 37) ^ (34 - 2 * ((Fin.castSucc k : Fin 18) : ℕ))))) =
       ∑ k : Fin 17, c (Fin.castSucc k) *
         (if ((⟨(j : ℕ), hj17⟩ : Fin 17) : ℕ) = (k : ℕ) then (9 : ZMod 37) else 0)
-      from Finset.sum_congr rfl (fun k _ => by
+      from Finset.sum_congr rfl (fun k _ ↦ by
         rw [show ((Fin.castSucc k : Fin 18) : ℕ) = (k : ℕ) from Fin.val_castSucc k]
         rw [caseIIEx811Eigen_matrix_diagonal ⟨(j : ℕ), hj17⟩ k])]
   -- Only the k with (k:ℕ) = (j:ℕ) survives; that is k = ⟨j, _⟩, contributing 9 c_j.
