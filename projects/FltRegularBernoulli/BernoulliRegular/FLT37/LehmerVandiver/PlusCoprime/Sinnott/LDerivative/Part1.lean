@@ -8,7 +8,6 @@ import BernoulliRegular.UnitQuotient.FreeLatticeComparison.ConjugationTrace
 import Mathlib.NumberTheory.LSeries.DirichletContinuation
 import Mathlib.RingTheory.RootsOfUnity.Lemmas
 
-
 /-!
 # LV-SIN-C: `L'(0, χ)` formula via cyclotomic-unit logs
 
@@ -102,7 +101,7 @@ theorem DirichletLogSum_eq_zero_of_odd (hp_odd : p ≠ 2)
   have hp_pos : 0 < p := hp_prime.pos
   have hp_ne_zero : (p : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hp_pos.ne'
   have hp_odd_nat : Odd p := hp_prime.odd_of_ne_two hp_odd
-  refine Finset.sum_involution (fun a _ => p - a) ?_ ?_ ?_ ?_
+  refine Finset.sum_involution (fun a _ ↦ p - a) ?_ ?_ ?_ ?_
   · -- f(a) + f(p - a) = 0
     intro a ha
     obtain ⟨ha1, ha2⟩ := Finset.mem_Ico.mp ha
@@ -185,9 +184,9 @@ for PF-1's matrix-restriction. -/
 noncomputable def convolutionLogNormDescended :
     BernoulliRegular.CyclotomicEvenDelta p → ℂ :=
   BernoulliRegular.evenFunctionDescend (p := p)
-    (fun a : BernoulliRegular.CyclotomicUnitDelta p =>
+    (fun a : BernoulliRegular.CyclotomicUnitDelta p ↦
       ((Real.log ‖(1 : ℂ) - ZMod.stdAddChar (N := p) ((a : ZMod p))‖ : ℝ) : ℂ))
-    (fun a => by
+    (fun a ↦ by
       have h := log_norm_one_sub_stdAddChar_unit_neg (p := p) a
       exact_mod_cast h)
 
@@ -208,7 +207,7 @@ the pullback bijection are exactly the **even Dirichlet characters** of
 noncomputable def convolutionMatrixLogNormEven :
     Matrix (BernoulliRegular.CyclotomicEvenDelta p)
            (BernoulliRegular.CyclotomicEvenDelta p) ℂ :=
-  Matrix.of fun a b => convolutionLogNormDescended p (a * b)
+  Matrix.of fun a b ↦ convolutionLogNormDescended p (a * b)
 
 /-- **Generic convolution matrix on `CyclotomicEvenDelta p`**: for a function
 `f : CyclotomicEvenDelta p → ℂ`, the multiplication-convolution matrix with
@@ -218,7 +217,7 @@ noncomputable def convolutionMatrixOnEven
     (f : BernoulliRegular.CyclotomicEvenDelta p → ℂ) :
     Matrix (BernoulliRegular.CyclotomicEvenDelta p)
            (BernoulliRegular.CyclotomicEvenDelta p) ℂ :=
-  Matrix.of fun a b => f (a * b)
+  Matrix.of fun a b ↦ f (a * b)
 
 /-- **`convolutionMatrixLogNormEven` is `convolutionMatrixOnEven` applied to
 the descended log-norm**: the specific quotient log-norm matrix is just the
@@ -235,14 +234,14 @@ quotient, the analog of `characterMatrix` for the full group. -/
 noncomputable def characterMatrixOnEven :
     Matrix (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ)
            (BernoulliRegular.CyclotomicEvenDelta p) ℂ :=
-  Matrix.of fun ξ a => ξ a
+  Matrix.of fun ξ a ↦ ξ a
 
 /-- **Inverse character matrix on `CyclotomicEvenDelta p`**: with entries
 `F'[ξ, b] = ξ(b⁻¹)`. The analog of `inverseCharacterMatrix` for the quotient. -/
 noncomputable def inverseCharacterMatrixOnEven :
     Matrix (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ)
            (BernoulliRegular.CyclotomicEvenDelta p) ℂ :=
-  Matrix.of fun ξ b => ξ (b⁻¹)
+  Matrix.of fun ξ b ↦ ξ (b⁻¹)
 
 /-- **Pontryagin cardinality on the quotient**:
 `#{MulChar (CyclotomicEvenDelta p) ℂ} = #(CyclotomicEvenDelta p)`.
@@ -303,13 +302,13 @@ theorem characterMatrixOnEven_mul_convolutionMatrixOnEven_apply
     intro a
     rw [map_mul]
     ring
-  rw [Finset.sum_congr rfl (fun a _ => h_factor a)]
+  rw [Finset.sum_congr rfl (fun a _ ↦ h_factor a)]
   rw [← Finset.mul_sum]
 
 /-- **Matrix factorisation on the quotient** `F · M = D · F'`:
 
   characterMatrixOnEven · convolutionMatrixOnEven f =
-    Matrix.diagonal (fun ξ => ∑ a, ξ a · f a) · inverseCharacterMatrixOnEven.
+    Matrix.diagonal (fun ξ ↦ ∑ a, ξ a · f a) · inverseCharacterMatrixOnEven.
 
 Parallel of `characterMatrix_mul_convolutionMatrix_eq_diag_mul_inverseCharacterMatrix`. -/
 theorem characterMatrixOnEven_mul_convolutionMatrixOnEven_eq_diag_mul_inverse
@@ -319,7 +318,7 @@ theorem characterMatrixOnEven_mul_convolutionMatrixOnEven_eq_diag_mul_inverse
     haveI : Fintype (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) :=
       Fintype.ofFinite _
     characterMatrixOnEven p * convolutionMatrixOnEven p f =
-      (Matrix.diagonal (fun ξ : MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ =>
+      (Matrix.diagonal (fun ξ : MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ ↦
         ∑ a : BernoulliRegular.CyclotomicEvenDelta p, ξ a * f a)) *
       inverseCharacterMatrixOnEven p := by
   letI : DecidableEq (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) :=
@@ -332,7 +331,7 @@ theorem characterMatrixOnEven_mul_convolutionMatrixOnEven_eq_diag_mul_inverse
   change ξ b⁻¹ *
       ∑ a : BernoulliRegular.CyclotomicEvenDelta p, ξ a * f a =
     ∑ ψ : MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ,
-      Matrix.diagonal (fun ξ' : MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ =>
+      Matrix.diagonal (fun ξ' : MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ ↦
         ∑ a : BernoulliRegular.CyclotomicEvenDelta p, ξ' a * f a) ξ ψ *
         inverseCharacterMatrixOnEven p ψ b
   simp only [inverseCharacterMatrixOnEven, Matrix.of_apply]
@@ -351,14 +350,14 @@ corresponding to `k` under the Pontryagin equivalence. Square form of
 noncomputable def characterMatrixSquareOnEven :
     Matrix (BernoulliRegular.CyclotomicEvenDelta p)
            (BernoulliRegular.CyclotomicEvenDelta p) ℂ :=
-  Matrix.of fun k a => ((quotCharEquivQuot p).symm k) a
+  Matrix.of fun k a ↦ ((quotCharEquivQuot p).symm k) a
 
 /-- **Square inverse character matrix on `CyclotomicEvenDelta p`**:
 `F'[k, b] = (quotCharEquivQuot.symm k)(b⁻¹)`. -/
 noncomputable def inverseCharacterMatrixSquareOnEven :
     Matrix (BernoulliRegular.CyclotomicEvenDelta p)
            (BernoulliRegular.CyclotomicEvenDelta p) ℂ :=
-  Matrix.of fun k b => ((quotCharEquivQuot p).symm k) b⁻¹
+  Matrix.of fun k b ↦ ((quotCharEquivQuot p).symm k) b⁻¹
 
 /-- **Square eigenvalue formula on the quotient**:
 `(characterMatrixSquareOnEven · convolutionMatrixOnEven f)[k, b]
@@ -378,7 +377,7 @@ theorem characterMatrixSquareOnEven_mul_convolutionMatrixOnEven_apply
 theorem characterMatrixSquareOnEven_mul_convolutionMatrixOnEven_eq_diag_mul_inv
     (f : BernoulliRegular.CyclotomicEvenDelta p → ℂ) :
     characterMatrixSquareOnEven p * convolutionMatrixOnEven p f =
-      Matrix.diagonal (fun k : BernoulliRegular.CyclotomicEvenDelta p =>
+      Matrix.diagonal (fun k : BernoulliRegular.CyclotomicEvenDelta p ↦
         ∑ a : BernoulliRegular.CyclotomicEvenDelta p,
           ((quotCharEquivQuot p).symm k) a * f a) *
       inverseCharacterMatrixSquareOnEven p := by
@@ -387,7 +386,7 @@ theorem characterMatrixSquareOnEven_mul_convolutionMatrixOnEven_eq_diag_mul_inv
   rw [characterMatrixSquareOnEven_mul_convolutionMatrixOnEven_apply]
   rw [Matrix.mul_apply]
   have h_rhs : ∑ j : BernoulliRegular.CyclotomicEvenDelta p,
-      Matrix.diagonal (fun k' : BernoulliRegular.CyclotomicEvenDelta p =>
+      Matrix.diagonal (fun k' : BernoulliRegular.CyclotomicEvenDelta p ↦
         ∑ a : BernoulliRegular.CyclotomicEvenDelta p,
           ((quotCharEquivQuot p).symm k') a * f a) k j *
         inverseCharacterMatrixSquareOnEven p j b =
@@ -512,7 +511,7 @@ theorem characterMatrixSquareOnEven_mul_inverseCharacterMatrixSquareOnEven_trans
     intro a
     rw [MulChar.mul_apply, MulChar.inv_apply_eq_inv']
     rw [map_inv]
-  rw [Finset.sum_congr rfl (fun a _ => h_inv a)]
+  rw [Finset.sum_congr rfl (fun a _ ↦ h_inv a)]
   by_cases hkk : k = k'
   · subst hkk
     rw [if_pos rfl, mul_one]
@@ -645,7 +644,7 @@ theorem prod_lambda_eq_prod_quotientEigenvalue :
         ((quotCharEquivQuot p).symm k) a * convolutionLogNormDescended p a) =
     ∏ k : BernoulliRegular.CyclotomicEvenDelta p,
       quotientEigenvalue p ((quotCharEquivQuot p).symm k) := by
-  refine Finset.prod_congr rfl (fun k _ => ?_)
+  refine Finset.prod_congr rfl (fun k _ ↦ ?_)
   rfl
 
 /-- **Squared det of `convolutionMatrixLogNormEven` in eigenvalue product form**:
@@ -673,9 +672,9 @@ theorem prod_quot_eq_prod_mulChar
   letI : Fintype (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) :=
     Fintype.ofFinite _
   exact (Fintype.prod_equiv (quotCharEquivQuot p)
-    (fun ξ => f ξ)
-    (fun k => f ((quotCharEquivQuot p).symm k))
-    (fun ξ => by simp only [Equiv.symm_apply_apply])).symm
+    (fun ξ ↦ f ξ)
+    (fun k ↦ f ((quotCharEquivQuot p).symm k))
+    (fun ξ ↦ by simp only [Equiv.symm_apply_apply])).symm
 
 
 /-- **Half-sum identity**: for any even function `f : (ZMod p)ˣ → ℂ`
@@ -716,7 +715,7 @@ theorem sum_full_eq_two_mul_sum_descended (f : BernoulliRegular.CyclotomicUnitDe
   rw [h_image]
   -- Step 4: each fiber has cardinality 2
   rw [Finset.mul_sum]
-  refine Finset.sum_congr rfl (fun b _ => ?_)
+  refine Finset.sum_congr rfl (fun b _ ↦ ?_)
   have h_card : ({a ∈ (Finset.univ : Finset (BernoulliRegular.CyclotomicUnitDelta p)) |
       BernoulliRegular.cyclotomicEvenDeltaQuotient p a = b}).card = 2 := by
     -- The fiber over b is in bijection with the subgroup ⟨-1⟩ of size 2.
@@ -755,7 +754,7 @@ theorem two_mul_quotientEigenvalue_eq_sum_full
       ∑ a : BernoulliRegular.CyclotomicUnitDelta p,
         BernoulliRegular.evenDeltaCharacterPullback (p := p) ξ a *
           ((Real.log ‖(1 : ℂ) - ZMod.stdAddChar (N := p) ((a : ZMod p))‖ : ℝ) : ℂ) := by
-  set f : BernoulliRegular.CyclotomicUnitDelta p → ℂ := fun a =>
+  set f : BernoulliRegular.CyclotomicUnitDelta p → ℂ := fun a ↦
     BernoulliRegular.evenDeltaCharacterPullback (p := p) ξ a *
       ((Real.log ‖(1 : ℂ) - ZMod.stdAddChar (N := p) ((a : ZMod p))‖ : ℝ) : ℂ) with hf_def
   have hf_even : ∀ a : BernoulliRegular.CyclotomicUnitDelta p, f (-a) = f a := by
@@ -773,7 +772,7 @@ theorem two_mul_quotientEigenvalue_eq_sum_full
       ∑ b : BernoulliRegular.CyclotomicEvenDelta p,
         BernoulliRegular.evenFunctionDescend (p := p) f hf_even b := by
     unfold quotientEigenvalue
-    refine Finset.sum_congr rfl (fun b _ => ?_)
+    refine Finset.sum_congr rfl (fun b _ ↦ ?_)
     obtain ⟨a, rfl⟩ : ∃ a : BernoulliRegular.CyclotomicUnitDelta p,
         BernoulliRegular.cyclotomicEvenDeltaQuotient p a = b :=
       ⟨Quotient.out b,
@@ -796,8 +795,8 @@ bijection `a ↦ a.val`. Standard reindexing for prime `p`. -/
 theorem sum_units_val_eq_sum_Ico (F : ℕ → ℂ) :
     ∑ a : (ZMod p)ˣ, F ((a : ZMod p).val) = ∑ n ∈ Finset.Ico 1 p, F n := by
   have hp_pos : 0 < p := hp.out.pos
-  refine Finset.sum_bij (fun (a : (ZMod p)ˣ) _ => (a : ZMod p).val)
-    (fun a _ => ?_) (fun a _ b _ heq => ?_) (fun n hn => ?_) (fun _ _ => rfl)
+  refine Finset.sum_bij (fun (a : (ZMod p)ˣ) _ ↦ (a : ZMod p).val)
+    (fun a _ ↦ ?_) (fun a _ b _ heq ↦ ?_) (fun n hn ↦ ?_) (fun _ _ ↦ rfl)
   · rw [Finset.mem_Ico]
     refine ⟨?_, ZMod.val_lt _⟩
     have h_ne : (a : ZMod p).val ≠ 0 := by
@@ -825,7 +824,7 @@ theorem two_mul_quotientEigenvalue_trivial_eq_sum_logNorm (hp_two : 2 < p) :
       ∑ a : BernoulliRegular.CyclotomicUnitDelta p,
         ((Real.log ‖(1 : ℂ) - ZMod.stdAddChar (N := p) ((a : ZMod p))‖ : ℝ) : ℂ) := by
   rw [two_mul_quotientEigenvalue_eq_sum_full p 1 hp_two]
-  refine Finset.sum_congr rfl (fun a _ => ?_)
+  refine Finset.sum_congr rfl (fun a _ ↦ ?_)
   have h_unit : IsUnit
       (BernoulliRegular.cyclotomicEvenDeltaQuotient p a) := Group.isUnit _
   change (1 : MulChar _ _) (BernoulliRegular.cyclotomicEvenDeltaQuotient p a) *
