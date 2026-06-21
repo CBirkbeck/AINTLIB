@@ -19,7 +19,7 @@ variable (p : ℕ) [hp : Fact p.Prime]
 with the cyclotomic-unit log-norm function `f(a) = log‖1 - stdAddChar(↑a)‖`. -/
 noncomputable def convolutionMatrixLogNorm :
     Matrix ((ZMod p)ˣ) ((ZMod p)ˣ) ℂ :=
-  convolutionMatrix p (fun a =>
+  convolutionMatrix p (fun a ↦
     ((Real.log ‖(1 : ℂ) - ZMod.stdAddChar (N := p) ((a : ZMod p))‖ : ℝ) : ℂ))
 
 /-- **Transfer lemma**: the quotient convolution matrix on `CyclotomicEvenDelta p`
@@ -69,25 +69,25 @@ theorem det_convolutionMatrixLogNorm_sq_eq_prod_DirichletLogSum_sq
       ∑ a : (ZMod p)ˣ, ((dirichletCharEquivUnits p).symm k) ((a : ZMod p)) *
           ((Real.log ‖(1 : ℂ) -
             ZMod.stdAddChar (N := p) ((a : ZMod p))‖ : ℝ) : ℂ) =
-        -DirichletLogSum p ((dirichletCharEquivUnits p).symm k) := fun k =>
+        -DirichletLogSum p ((dirichletCharEquivUnits p).symm k) := fun k ↦
     frobenius_eigenvalue_eq_neg_DirichletLogSum p
       ((dirichletCharEquivUnits p).symm k)
-  rw [Finset.prod_congr rfl (fun k _ => h_eigen k)]
+  rw [Finset.prod_congr rfl (fun k _ ↦ h_eigen k)]
   -- Goal: (∏ k, -DirichletLogSum p (e.symm k))² = (∏ χ, DirichletLogSum p χ)²
   -- Reindex k ↔ χ via e.symm.
   have h_reindex : ∏ k : (ZMod p)ˣ,
         -DirichletLogSum p ((dirichletCharEquivUnits p).symm k) =
       ∏ χ : DirichletCharacter ℂ p, -DirichletLogSum p χ := by
     apply Fintype.prod_equiv (dirichletCharEquivUnits p).symm.toEquiv
-      (fun k : (ZMod p)ˣ => -DirichletLogSum p ((dirichletCharEquivUnits p).symm k))
-      (fun χ : DirichletCharacter ℂ p => -DirichletLogSum p χ)
+      (fun k : (ZMod p)ˣ ↦ -DirichletLogSum p ((dirichletCharEquivUnits p).symm k))
+      (fun χ : DirichletCharacter ℂ p ↦ -DirichletLogSum p χ)
     intro k
     rfl
   rw [h_reindex]
   -- (∏ χ, -X χ)² = (∏ χ, X χ)² (sign squares away).
   have h_sign : ∀ χ : DirichletCharacter ℂ p,
-      -DirichletLogSum p χ = (-1) * DirichletLogSum p χ := fun _ => by ring
-  rw [Finset.prod_congr rfl (fun χ _ => h_sign χ)]
+      -DirichletLogSum p χ = (-1) * DirichletLogSum p χ := fun _ ↦ by ring
+  rw [Finset.prod_congr rfl (fun χ _ ↦ h_sign χ)]
   rw [Finset.prod_mul_distrib, Finset.prod_const, mul_pow]
   have h_sign_sq : ((-1 : ℂ) ^ Finset.card
       (Finset.univ : Finset (DirichletCharacter ℂ p))) ^ 2 = 1 := by
@@ -232,11 +232,11 @@ theorem prod_evenNontriv_eq_prod_evenNontriv_inv
     ∏ χ ∈ BernoulliRegular.evenNontrivialCharacters p, f χ =
       ∏ χ ∈ BernoulliRegular.evenNontrivialCharacters p, f χ⁻¹ := by
   classical
-  refine (Finset.prod_bij (fun χ _ => χ⁻¹) ?_ ?_ ?_ ?_).symm
+  refine (Finset.prod_bij (fun χ _ ↦ χ⁻¹) ?_ ?_ ?_ ?_).symm
   · intro χ hχ
     exact inv_mem_evenNontrivialCharacters (p := p) hχ
   · intro χ₁ _ χ₂ _ heq
-    have := congrArg (fun ψ => ψ⁻¹) heq
+    have := congrArg (fun ψ ↦ ψ⁻¹) heq
     simpa using this
   · intro χ hχ
     refine ⟨χ⁻¹, inv_mem_evenNontrivialCharacters (p := p) hχ, ?_⟩
@@ -343,7 +343,7 @@ theorem quotientCharBijectionToEvenNontriv_proof (hp_two : 2 < p) :
     rw [Nat.card_eq_fintype_card]
     exact BernoulliRegular.cyclotomicEvenDelta_card (p := p) hp_two
   have h_p_odd : Odd p := hp.out.odd_of_ne_two (by omega)
-  refine Finset.prod_bij (fun ξ _ => dirichletOfQuotientChar p ξ) ?_ ?_ ?_ ?_
+  refine Finset.prod_bij (fun ξ _ ↦ dirichletOfQuotientChar p ξ) ?_ ?_ ?_ ?_
   · intro ξ hξ
     rw [Finset.mem_erase] at hξ
     obtain ⟨hξ_ne, _⟩ := hξ
@@ -384,9 +384,9 @@ theorem quotientCharBijectionToEvenNontriv_proof (hp_two : 2 < p) :
           exact h_one
         exact dirichletOfQuotientChar_injective p h_eq
     have h_surj := Finset.surj_on_of_inj_on_of_card_le
-      (fun ξ (_ : ξ ∈ _) => dirichletOfQuotientChar p ξ)
-      (fun ξ hξ => h_in ξ hξ)
-      (fun ξ₁ ξ₂ _ _ h => dirichletOfQuotientChar_injective p h)
+      (fun ξ (_ : ξ ∈ _) ↦ dirichletOfQuotientChar p ξ)
+      (fun ξ hξ ↦ h_in ξ hξ)
+      (fun ξ₁ ξ₂ _ _ h ↦ dirichletOfQuotientChar_injective p h)
       h_card_eq.le χ hχ
     obtain ⟨a, ha_mem, ha_eq⟩ := h_surj
     exact ⟨a, ha_mem, ha_eq.symm⟩
@@ -588,7 +588,7 @@ noncomputable def InfinitePlaceEquivGalQuotStabilizer
     galois_isPretransitive_infinitePlace K
   have h_orbit_eq : (MulAction.orbit Gal(K/ℚ) w₀ : Set _) = Set.univ := by
     ext w
-    refine ⟨fun _ => trivial, fun _ => ?_⟩
+    refine ⟨fun _ ↦ trivial, fun _ ↦ ?_⟩
     obtain ⟨σ, hσ⟩ := MulAction.IsPretransitive.exists_smul_eq (M := Gal(K/ℚ)) w₀ w
     exact ⟨σ, hσ⟩
   refine ((Equiv.Set.univ _).symm.trans ?_)
@@ -727,7 +727,7 @@ noncomputable def sinnottMatrixA
       {w : NumberField.InfinitePlace
         (NumberField.maximalRealSubfield K) //
         w ≠ NumberField.Units.dirichletUnitTheorem.w₀} ℝ :=
-  Matrix.of fun i w =>
+  Matrix.of fun i w ↦
     Real.log
       (((NumberField.IsCMField.equivInfinitePlace K).symm w.val)
         ((((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger :
@@ -874,7 +874,7 @@ theorem det_convolutionMatrixLogNormEven_sq_eq_qe_one_sq_mul_prod_nontrivial_qe_
     Classical.decEq _
   rw [det_convolutionMatrixLogNormEven_sq_eq_prod_quotientEigenvalue_sq p hp_two]
   rw [← Finset.prod_pow]
-  rw [prod_quot_eq_prod_mulChar p (fun ξ => (quotientEigenvalue p ξ) ^ 2)]
+  rw [prod_quot_eq_prod_mulChar p (fun ξ ↦ (quotientEigenvalue p ξ) ^ 2)]
   rw [Finset.prod_pow]
   rw [← Finset.prod_erase_mul _ _ (Finset.mem_univ
     (1 : MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ))]
