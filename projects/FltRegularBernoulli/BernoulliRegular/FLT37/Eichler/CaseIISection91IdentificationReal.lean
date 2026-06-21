@@ -74,31 +74,11 @@ namespace BernoulliRegular.FLT37.Eichler
 
 open FLT37 FLT37.LehmerVandiver.CaseII BernoulliRegular
 
-/-! ## 1. The sound real-data §9.1 residue identification (R4(i) over real data)
+/-- The sound real-data form of the §9.1 residue identification.
 
-`CaseIISection91DescentUnitIdentification37` is unsound over abstract free units (STEP 0).  Its
-**sound** real-data form fixes the descent unit to be the §9.1 producer `δ` (the genuine descent
-object) and carries `ℓ ∣ z` (Washington Lemma 9.7) as the genuine hypothesis.  Under it the
-identification `δ ≡ δ (mod lv149)` is reflexive, the genuine analytic content `x + y ∈ lv149`
-(Lemma 9.8 `j = 0`) is proven over real data, and `δ` is a `37`-th power mod `lv149`. -/
-
-/-- **The §9.1 residue identification over genuine real descent data** (a `def … : Prop`, **not** an
-axiom) — the **sound** form of R4(i).
-
-For every real Case-II descent datum `D : RealCaseIIData37 (CyclotomicField 37 ℚ) m` with the
-genuine `ℓ ∣ z` (`D.z ∈ lv149`, Washington Lemma 9.7), Lemma 9.6 (`D.x, D.y ∉ lv149`), an adjacent
-root `η`, a σ-stable anchored generator record `G`, and the Fermat-data coprimalities
-(`X = algebraMap G.xPlus ∉ lv149`, `Q_η₀ ∉ lv149`):
-
-* the §9.1 producer descent unit `δ = caseIISection91_descentUnit D η G lv149` (Washington's
-  explicit `η_a`, residue form `(Y·X⁻¹)^37`) satisfies the residue identification
-  `δ ≡ δ (mod lv149)` (reflexive — it **is** the §9.1 descent object); **and**
-* the **Lemma-9.8 opening** `D.x + D.y ∈ lv149` (`ℓ ∣ ω+θ`, Washington's `j = 0`) holds; **and**
-* `δ` is a `37`-th power mod `lv149` (`IsPthPowerModPrime 37 lv149 δ`).
-
-Unlike the abstract `CaseIISection91DescentUnitIdentification37` (over a free `ε₁/ε₂`, unsound),
-here the descent unit **is** the producer `δ`, so the identification is genuine and the Lemma-9.8
-opening is the real analytic content — both discharged below from the proven Mirimanoff core. -/
+For a genuine real Case-II datum with `D.z ∈ lv149`, the producer descent unit is congruent to
+itself modulo `lv149`, the Lemma-9.8 opening `D.x + D.y ∈ lv149` holds, and the producer is a
+`37`-th power modulo `lv149`. -/
 def CaseIISection91DescentUnitIdentificationReal37
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)] : Prop :=
@@ -117,51 +97,20 @@ def CaseIISection91DescentUnitIdentificationReal37
       BernoulliRegular.IsPthPowerModPrime 37 lv149 (caseIISection91_descentUnit D η G lv149)
 
 open FLT37.LehmerVandiver.CaseII in
-/-- **The real-data §9.1 residue identification is PROVEN** (axiom-clean — discharges R4(i) over the
-genuine real descent datum, via the proven Mirimanoff core + the proven §9.1 producer).
-
-Each conjunct is discharged:
-
-* `δ ≡ δ (mod lv149)`: reflexive (`sub_self`, `Ideal.zero_mem`) — the descent unit **is** the
-  producer `δ` (the genuine §9.1 descent object), so the identification holds on the nose;
-* `D.x + D.y ∈ lv149` (Lemma 9.8, `ℓ ∣ ω+θ`, `j = 0`): the **proven**
-  `caseII_real_x_add_y_mem_of_dvd_z` — from `ℓ ∣ z` + Lemma 9.6, the proven `Q₃₂⁴ ≢ 1` Mirimanoff
-  core forces `j = 0`;
-* `IsPthPowerModPrime 37 lv149 δ`: the **proven** `caseIISection91_lv149_localPower` (δ a `37`-th
-  power mod `lv149` by construction, `δ = (Y·X⁻¹)^37`).
-
-This is the genuine real-data discharge of Washington Lemma 9.8's opening — the abstract residual
-could only be *named* (over free `ε₁/ε₂` it is unsound); over real data, with the descent unit the
-producer `δ`, it is **proven**. -/
+/-- The real-data §9.1 residue identification follows from the Mirimanoff core and the local-power
+construction. -/
 theorem caseIISection91DescentUnitIdentificationReal37_proven
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)] :
     CaseIISection91DescentUnitIdentificationReal37 := by
   intro hSO m D η G hz hxl hyl hX hQ0
-  refine ⟨?_, ?_, ?_⟩
-  · -- `δ ≡ δ (mod lv149)`: reflexive.
-    rw [sub_self]; exact Ideal.zero_mem lv149
-  · -- Lemma 9.8 (`ℓ ∣ ω+θ`, `j = 0`) over real data, from the proven Mirimanoff core.
-    exact caseII_real_x_add_y_mem_of_dvd_z hSO D hz hxl hyl
-  · -- The producer local power, proven by construction.
-    exact caseIISection91_lv149_localPower D η G hX hQ0
-
-/-! ## 2. The producer descent unit local power, with the Lemma-9.8 opening it rests on
-
-We package the producer local power `IsPthPowerModPrime 37 lv149 δ` **together with** the genuine
-Lemma-9.8 opening `x + y ∈ lv149` it derives from over real data.  This makes the local power's
-provenance explicit: it is the mod-`𝔩` half of Washington Lemma 9.8 / the opening of Lemma 9.9
-(`η_a/η_b ≡ (ρ_b/ρ_a)^p (mod 𝔩)`), resting on `ℓ ∣ z ⟹ ℓ ∣ (ω+θ)` (`j = 0`). -/
+  exact ⟨by simp,
+    caseII_real_x_add_y_mem_of_dvd_z hSO D hz hxl hyl,
+    caseIISection91_lv149_localPower D η G hX hQ0⟩
 
 open FLT37.LehmerVandiver.CaseII in
-/-- **The producer descent unit `δ` is a `37`-th power mod `lv149`, with its Lemma-9.8 provenance**
-(proven, axiom-clean — through the proven Mirimanoff core + the proven σ-stable producer).
-
-For a real datum `D` with `ℓ ∣ z`, Lemma 9.6, and the Fermat-data coprimalities: the Lemma-9.8
-opening `D.x + D.y ∈ lv149` (`ℓ ∣ ω+θ`, `j = 0`) holds (proven `caseII_real_x_add_y_mem_of_dvd_z`),
-and the §9.1 producer descent unit `δ = caseIISection91_descentUnit D η G lv149` is a `37`-th power
-mod `lv149` (proven `caseIISection91_lv149_localPower`).  This is the genuine Washington Lemma-9.8
-mod-`𝔩` half over real data, with its `j = 0` provenance attached. -/
+/-- Packages the Lemma-9.8 opening `D.x + D.y ∈ lv149` with the local-power property of the producer
+descent unit. -/
 theorem caseIISection91_real_localPower_of_dvd_z
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
@@ -179,24 +128,9 @@ theorem caseIISection91_real_localPower_of_dvd_z
   ⟨caseII_real_x_add_y_mem_of_dvd_z hSO D hz hxl hyl,
     caseIISection91_lv149_localPower D η G hX hQ0⟩
 
-/-! ## 3. Non-vacuity: the real-data §9.1-id fires at the rational base (`ℓ ∣ z` PROVEN)
-
-The corrected real-data §9.1-id is genuinely non-vacuous: at the rational base of the descent, where
-the integer origin `a, b, c ∈ ℤ` lives, `ℓ ∣ z` is **proven** by the Furtwängler residue condition
-`furtwangler_37_149` (`exists_realCaseIIData37_with_dvd_z_of_caseII_int_solution_z`).  So all the
-hypotheses of `CaseIISection91DescentUnitIdentificationReal37` are dischargeable from genuine
-arithmetic data, modulo only Lemma 9.6 (`149 ∤ a, b`) and the residue coprimalities. -/
-
 open FLT37.LehmerVandiver.CaseII in
-/-- **The real-data §9.1-id fires at the rational base** (proven, axiom-clean given the carried
-second-order Bernoulli input) — genuine non-vacuity.
-
-From a Case-II integer FLT solution `a³⁷ + b³⁷ = c³⁷` with `37 ∣ c`, `37 ∤ a`, `c ≠ 0`, and
-Lemma 9.6 (`149 ∤ a`, `149 ∤ b`), the base producer yields a **real** datum `D` with `D.z ∈ lv149`
-(`ℓ ∣ z`, **proven** via `furtwangler_37_149`), at which the Lemma-9.8 opening `D.x + D.y ∈ lv149`
-holds (proven Mirimanoff core).  So the `ℓ ∣ z` hypothesis of the real-data §9.1-id is *not* an
-unprovable carry at the base — it is discharged by the Furtwängler residue computation — and the
-whole identification fires genuinely there. -/
+/-- The real-data §9.1 endpoint is non-vacuous at the rational base supplied by
+`exists_realCaseIIData37_with_dvd_z_of_caseII_int_solution_z`. -/
 theorem caseIISection91_real_identification_at_base
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
