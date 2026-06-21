@@ -111,10 +111,9 @@ theorem caseII_x_add_y_dvd_pow_add_pow {ζ : CyclotomicField 37 ℚ}
     (x + y) ∣ x ^ 37 + y ^ 37 := by
   rw [hζ.toInteger_isPrimitiveRoot.pow_add_pow_eq_prod_add_mul x y (by decide)]
   have h1 : (1 : 𝓞 (CyclotomicField 37 ℚ)) ∈
-      nthRootsFinset 37 (1 : 𝓞 (CyclotomicField 37 ℚ)) := by
-    rw [mem_nthRootsFinset (by decide : 0 < 37)]; simp
-  have := Finset.dvd_prod_of_mem (fun η => x + η * y) h1
-  simpa using this
+      nthRootsFinset 37 (1 : 𝓞 (CyclotomicField 37 ℚ)) :=
+    one_mem_nthRootsFinset (by decide)
+  simpa using Finset.dvd_prod_of_mem (fun η => x + η * y) h1
 
 /-- **`ℓ ∣ (x + y) ⟹ ℓ ∣ z`** (proven, axiom-clean) — the **sound** replacement for the
 equality-consuming `caseII_dvd_z_of_factorization`.
@@ -139,16 +138,14 @@ theorem caseII_dvd_z_of_equation
     rw [hw]; exact Ideal.mul_mem_right _ _ hsum
   -- Rewrite via the single-unit equation and peel `ε`, the `37`-th power, the `(ζ-1)`-power.
   rw [D.equation] at hmem
-  have h2 : ((D.hζ.toInteger - 1) ^ (m + 1) * D.z) ^ 37 ∈ lv149 := by
-    rcases Ideal.IsPrime.mem_or_mem ‹lv149.IsPrime› hmem with hε | hrest
-    · exact absurd hε (caseII_unit_notMem_lv149 D.ε)
-    · exact hrest
+  have h2 : ((D.hζ.toInteger - 1) ^ (m + 1) * D.z) ^ 37 ∈ lv149 :=
+    (Ideal.IsPrime.mem_or_mem ‹lv149.IsPrime› hmem).resolve_left
+      (caseII_unit_notMem_lv149 D.ε)
   have h3 : (D.hζ.toInteger - 1) ^ (m + 1) * D.z ∈ lv149 :=
     Ideal.IsPrime.mem_of_pow_mem ‹lv149.IsPrime› 37 h2
-  rcases Ideal.IsPrime.mem_or_mem ‹lv149.IsPrime› h3 with hpow | hz
-  · exact absurd (Ideal.IsPrime.mem_of_pow_mem ‹lv149.IsPrime› (m + 1) hpow)
-      (caseII_zeta_sub_one_notMem_lv149 D.hζ)
-  · exact hz
+  refine (Ideal.IsPrime.mem_or_mem ‹lv149.IsPrime› h3).resolve_left (fun hpow => ?_)
+  exact caseII_zeta_sub_one_notMem_lv149 D.hζ
+    (Ideal.IsPrime.mem_of_pow_mem ‹lv149.IsPrime› (m + 1) hpow)
 
 /-! ## 1. The all-conjugate product `∏(ω + ζⁱθ) ≡ 0 mod 𝔩` under the standing `ℓ ∣ z`
 
@@ -203,7 +200,6 @@ It is **non-vacuous**: its conclusion (`E₃₂` is a `37`-th power mod `lv149`)
 (`caseIIThm95_engine_runs`), so the residual genuinely asserts that a nontrivial factor
 `x + ζʲy ∈ lv149` with `j ≠ 0` cannot occur — Washington's `j = 0`. -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **Washington Lemma 9.8's Kummer–Mirimanoff residual for `p = 37`** (a `def … : Prop`, **not** an
 axiom) — the smallest genuine core of the second-case `ℓ ∣ z` argument.
 
@@ -239,7 +235,6 @@ def Lemma98MirimanoffPthPower37
 
 /-! ## 3. The genuine Lemma 9.8: `ℓ ∣ z ⟹ ℓ ∣ (x + y)` (`j = 0`) -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **Washington Lemma 9.8 for `p = 37`** (proven from the Mirimanoff residual, axiom-clean).
 
 With the standing `ℓ ∣ z` (Washington Lemma 9.7) and Lemma 9.6 (`ℓ ∤ x`, `ℓ ∤ y`), the special
@@ -272,7 +267,6 @@ the single-unit form (it speaks of a `CaseIIData37`'s own `D.x, D.y, D.z, D.ε`,
 as hypotheses, and the **membership-only** conclusion `x + y ∈ lv149` (Washington's `ℓ ∣ (ω + θ)`),
 dropping the false equality. -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **Washington Lemma 9.8 over the Case-II descent, corrected (R4-LEMMA98)** (a `def … : Prop`,
 **not** an axiom).
 
@@ -292,7 +286,6 @@ def CaseIILemma98DescentSumMemStrict37
     D.z ∈ lv149 → D.x ∉ lv149 → D.y ∉ lv149 →
     D.x + D.y ∈ lv149
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **The corrected Lemma 9.8 is genuinely true given the Mirimanoff residual** (proven,
 axiom-clean).
 
@@ -317,7 +310,6 @@ step now via
 `caseII_dvd_z_of_equation`, not the false equality), confirming the membership form is internally
 consistent and the genuine analytic content (the Mirimanoff residual) is isolated. -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **The sound Lemma-9.8 round trip** (proven from the residual, axiom-clean): with the standing
 `ℓ ∣ z` and Lemma 9.6, the genuine Lemma 9.8 gives `x + y ∈ lv149`
 (`caseII_lemma98_x_add_y_mem_of_dvd_z`), and `caseII_dvd_z_of_equation` recovers `z ∈ lv149` —
