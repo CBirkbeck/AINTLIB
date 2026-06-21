@@ -66,6 +66,7 @@ import PadicLFunctions.IwasawaProof.Equivariance
 import PadicLFunctions.IwasawaProof.FundamentalSequence
 import PadicLFunctions.IwasawaProof.Generators
 import PadicLFunctions.IwasawaProof.Main
+import PadicLFunctions.IwasawaProof.TowerDensity
 import PadicLFunctions.IwasawaProof.Galois.ClassFieldTheory
 import PadicLFunctions.IwasawaProof.Galois.Modules
 import PadicLFunctions.IwasawaProof.Galois.Coinvariants
