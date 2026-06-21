@@ -46,17 +46,15 @@ theorem pollaczekUnit_mem_cyclotomicUnitsSubgroup (hp_two : 2 ≤ p) (i : ℕ) :
   unfold FLT37.pollaczekUnit
   apply Subgroup.prod_mem
   rintro ⟨b, hb⟩ _
-  -- Extract b ∈ Finset.Ico 1 ((p-1)/2 + 1), i.e., 1 ≤ b ≤ (p-1)/2.
   rw [FLT37.mem_pollaczek_range_iff] at hb
   obtain ⟨hb_pos, hb_le⟩ := hb
-  have hb_lt : b < p := FLT37.pollaczek_lt_of_le_half p hb_le
   apply Subgroup.pow_mem
   unfold FLT37.pollaczekFactor
-  exact cyclotomicUnitUnit_mem_cyclotomicUnitsSubgroup p K _ hb_pos hb_lt hp_two
+  exact cyclotomicUnitUnit_mem_cyclotomicUnitsSubgroup p K _ hb_pos
+    (FLT37.pollaczek_lt_of_le_half p hb_le) hp_two
 
 variable [IsCMField K]
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **`pollaczekUnitPlus ∈ cyclotomicUnitsSubgroup`.** The σ-symmetrised
 Pollaczek unit `pollaczekUnitPlus = pollaczekUnit · σ(pollaczekUnit)`
 lies in `C` because:
