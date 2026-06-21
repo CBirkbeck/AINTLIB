@@ -133,8 +133,8 @@ theorem caseII_rootIdeal_mul_span_eq_of_unitPthPower {m : ℕ} (D : RealCaseIIDa
   -- Reshape into `𝔪 · ((𝔞(η)·(b))^37 · 𝔭) = 𝔪 · ((𝔞(η⁻¹)·(a))^37 · 𝔭)` for cancellation.
   set 𝔪 := gcd (Ideal.span ({D.x} : Set (𝓞 K))) (Ideal.span ({D.y} : Set (𝓞 K))) with h𝔪
   set 𝔭 := Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) with h𝔭
-  set X := rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy η with hX
-  set Y := rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy (caseII_etaInv η) with hY
+  set X := rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy η
+  set Y := rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy (caseII_etaInv η)
   have hreshape : 𝔪 * ((X * Ideal.span {b}) ^ 37 * 𝔭) =
       𝔪 * ((Y * Ideal.span {a}) ^ 37 * 𝔭) := by
     rw [mul_pow, mul_pow]
@@ -273,8 +273,8 @@ theorem caseII_rootClassConjFixed_of_idealPthPower {m : ℕ} (D : RealCaseIIData
   rw [← hkey, ← hkeyinv, hspecη, hspecinv] at hab
   set 𝔪 := gcd (Ideal.span ({D.x} : Set (𝓞 K))) (Ideal.span ({D.y} : Set (𝓞 K))) with h𝔪
   set 𝔭 := Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) with h𝔭
-  set X := rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy η with hX
-  set Y := rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy (caseII_etaInv η) with hY
+  set X := rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy η
+  set Y := rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy (caseII_etaInv η)
   have hreshape : 𝔪 * ((X * Ideal.span {b}) ^ 37 * 𝔭) =
       𝔪 * ((Y * Ideal.span {a}) ^ 37 * 𝔭) := by
     rw [mul_pow, mul_pow]
@@ -377,8 +377,7 @@ theorem caseIIRootRatioUnitPthPower37_of_rootRatioPthPower37
   intro m D η hη
   obtain ⟨a, b, ha, hb, hab⟩ := h_false D η hη
   refine ⟨1, a, b, ha, hb, ?_⟩
-  rw [Units.val_one, one_mul]
-  exact hab
+  simpa only [Units.val_one, one_mul] using hab
 
 set_option maxRecDepth 4000 in
 /-- **Absolute non-vacuity: the class equality `[𝔞(η)] = [𝔞(η⁻¹)]` is EQUIVALENT to the
@@ -453,27 +452,23 @@ theorem caseII_unitPthPower_of_rootClassConjFixed {m : ℕ} (D : RealCaseIIData3
     -- Both sides: `(a)^37 · (𝔪·𝔠(η)·𝔭)` vs `(b)^37 · (𝔪·𝔠(η⁻¹)·𝔭)`.  Reorder and use `hpow`.
     set 𝔪 := gcd (Ideal.span ({D.x} : Set (𝓞 K))) (Ideal.span ({D.y} : Set (𝓞 K))) with h𝔪
     set 𝔭 := Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) with h𝔭
-    set Cη := divZetaSubOneDvdGcd hp D.hζ D.equation D.hy η with hCη
-    set Ci := divZetaSubOneDvdGcd hp D.hζ D.equation D.hy (caseII_etaInv η) with hCi
+    set Cη := divZetaSubOneDvdGcd hp D.hζ D.equation D.hy η
+    set Ci := divZetaSubOneDvdGcd hp D.hζ D.equation D.hy (caseII_etaInv η)
     calc Ideal.span ({a} : Set (𝓞 K)) ^ 37 * (𝔪 * Cη * 𝔭)
         = 𝔪 * 𝔭 * (Ideal.span ({a} : Set (𝓞 K)) ^ 37 * Cη) := by ring
       _ = 𝔪 * 𝔭 * (Ideal.span ({b} : Set (𝓞 K)) ^ 37 * Ci) := by rw [hpow]
       _ = Ideal.span ({b} : Set (𝓞 K)) ^ 37 * (𝔪 * Ci * 𝔭) := by ring
-  -- The principal-ideal equality gives an associating unit `u`: `a^37·(x+yη)·u = b^37·(x+yη⁻¹)`.
+  -- The principal-ideal equality supplies an associating unit `u : a^37·(x+yη)·u = b^37·(x+yη⁻¹)`;
+  -- reorient it into the residual witness `⟨u⁻¹, b, a⟩`.
   rw [Ideal.span_singleton_eq_span_singleton] at hprincipal
   obtain ⟨u, hu⟩ := hprincipal
-  -- `hu : (a^37·(x+yη))·u = b^37·(x+yη⁻¹)`.  Reorient and produce the residual witness with the
-  -- η-coefficient power `b` ↦ our `a`, the η⁻¹-coefficient power `a` ↦ our `b`, unit `u⁻¹`.
   have hu' : (D.x + D.y * (η : 𝓞 K)) * a ^ 37 * (u : 𝓞 K) =
       (D.x + D.y * ((η : 𝓞 K) ^ 36)) * b ^ 37 := by
     linear_combination hu
-  have hval : ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) * (u : 𝓞 K) = 1 := by
-    rw [← Units.val_mul, inv_mul_cancel, Units.val_one]
   refine ⟨u⁻¹, b, a, hb, ha, ?_⟩
-  -- Goal: `(x+yη)·a^37 = u⁻¹·((x+yη⁻¹)·b^37)`.
   calc (D.x + D.y * (η : 𝓞 K)) * a ^ 37
       = ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) * (u : 𝓞 K) * ((D.x + D.y * (η : 𝓞 K)) * a ^ 37) := by
-        rw [hval, one_mul]
+        rw [u.inv_mul, one_mul]
     _ = ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) *
           ((D.x + D.y * (η : 𝓞 K)) * a ^ 37 * (u : 𝓞 K)) := by ring
     _ = ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) *
@@ -536,8 +531,7 @@ theorem caseII_anchored_class_sq_eq_one_of_classEq {m : ℕ} (D : RealCaseIIData
               exact caseII_rootIdeal_ne_bot D.toCaseIIData37 hp D.etaZero)⟩ :=
     congrArg ClassGroup.mk0 (Subtype.ext hroot0)
   -- Rewrite `Ainv → A` and `A0inv → A0` in `hmul` to get `A·A = A0·A0`.
-  rw [← hAeq, hclass0] at hmul
-  rw [← sq, ← sq] at hmul
+  rw [← hAeq, hclass0, ← sq, ← sq] at hmul
   rw [mul_pow, inv_pow, mul_inv_eq_one]
   exact hmul
 
