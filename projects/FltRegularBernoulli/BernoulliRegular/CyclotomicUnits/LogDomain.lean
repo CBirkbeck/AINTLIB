@@ -184,15 +184,15 @@ theorem principalUnitPowCoord_eq_finsetProductCoord
     (x : ValuedIntegerRing p K) (n : ℕ) :
     principalUnitPowCoord (p := p) (K := K) x n =
       Conjugation.samePrimeFiniteLogFinsetProductCoord (p := p) (K := K)
-        (Finset.univ : Finset (Fin n)) (fun _ => x) := by
+        (Finset.univ : Finset (Fin n)) (fun _ ↦ x) := by
   simp [principalUnitPowCoord, Conjugation.samePrimeFiniteLogFinsetProductCoord]
 
 omit [NumberField.IsCMField K] in
 theorem principalUnitPowCoord_mem_lambdaIdeal
     {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) (n : ℕ) :
     principalUnitPowCoord (p := p) (K := K) x n ∈ lambdaIdeal p K := by
-  let f : Fin n → ValuedIntegerRing p K := fun _ => x
-  have hf : ∀ i ∈ (Finset.univ : Finset (Fin n)), f i ∈ lambdaIdeal p K := fun i _hi =>
+  let f : Fin n → ValuedIntegerRing p K := fun _ ↦ x
+  have hf : ∀ i ∈ (Finset.univ : Finset (Fin n)), f i ∈ lambdaIdeal p K := fun i _hi ↦
     hx
   have hmem :=
     Conjugation.samePrimeFiniteLogFinsetProductCoord_mem_lambdaIdeal
@@ -207,8 +207,8 @@ theorem samePrimeFiniteLog_principalUnitPowCoord_eq_nsmul
         (principalUnitPowCoord (p := p) (K := K) x p)
         (principalUnitPowCoord_mem_lambdaIdeal (p := p) (K := K) hx p) =
       p • samePrimeFiniteLog (p := p) (K := K) N x hx := by
-  let f : Fin p → ValuedIntegerRing p K := fun _ => x
-  have hf : ∀ i ∈ (Finset.univ : Finset (Fin p)), f i ∈ lambdaIdeal p K := fun i _hi =>
+  let f : Fin p → ValuedIntegerRing p K := fun _ ↦ x
+  have hf : ∀ i ∈ (Finset.univ : Finset (Fin p)), f i ∈ lambdaIdeal p K := fun i _hi ↦
     hx
   have hcoord :
       principalUnitPowCoord (p := p) (K := K) x p =
@@ -308,7 +308,7 @@ noncomputable def completedLog
     DworkCompleteIntegerRing p K :=
   let R : Type _ := ValuedIntegerRing p K
   let I : Ideal R := lambdaIdeal p K
-  ⟨fun N =>
+  ⟨fun N ↦
       (Ideal.quotientEquivAlgOfEq R (by
         ext y
         simp : (I ^ N • ⊤ : Ideal R) = I ^ N)).symm
@@ -400,8 +400,8 @@ theorem completedLog_pow_p_eq_p_smul
       rw [map_nsmul, completedLog_evalₐ, completedLog_evalₐ]
       simp
   | succ N =>
-      rw [map_nsmul, completedLog_evalₐ_succ, completedLog_evalₐ_succ]
-      rw [samePrimeFiniteLog_eq_of_eq (p := p) (K := K) (N := N)
+      rw [map_nsmul, completedLog_evalₐ_succ, completedLog_evalₐ_succ,
+        samePrimeFiniteLog_eq_of_eq (p := p) (K := K) (N := N)
         (completedLogArg_pow (p := p) (K := K) u p)
         (completedLogArg_mem (p := p) (K := K) (u ^ p))
         (principalUnitPowCoord_mem_lambdaIdeal
@@ -489,6 +489,7 @@ theorem completedLog_one :
         _ = 0 := samePrimeFiniteLog_arg_zero (p := p) (K := K) N
 
 omit [NumberField.IsCMField K] in
+/-- The completed logarithm sends an `n`th power to an `n`-multiple. -/
 theorem completedLog_pow
     (u : completedLogDomain (p := p) (K := K)) (n : ℕ) :
     completedLog (p := p) (K := K) (u ^ n) =
@@ -501,20 +502,16 @@ theorem completedLog_pow
       ring
 
 omit [NumberField.IsCMField K] in
+/-- The completed logarithm sends an inverse to a negation. -/
 theorem completedLog_inv
     (u : completedLogDomain (p := p) (K := K)) :
     completedLog (p := p) (K := K) u⁻¹ =
       -completedLog (p := p) (K := K) u := by
   have hmul := completedLog_mul (p := p) (K := K) u⁻¹ u
-  have hzero :
-      completedLog (p := p) (K := K) u⁻¹ +
-          completedLog (p := p) (K := K) u = 0 := by
-    simpa using hmul.symm
-  have hsub := congrArg
-    (fun z => z - completedLog (p := p) (K := K) u) hzero
-  simpa using hsub
+  exact eq_neg_of_add_eq_zero_left (by simpa using hmul.symm)
 
 omit [NumberField.IsCMField K] in
+/-- The completed logarithm sends an integer power to an integer multiple. -/
 theorem completedLog_zpow
     (u : completedLogDomain (p := p) (K := K)) (n : ℤ) :
     completedLog (p := p) (K := K) (u ^ n) =
@@ -536,6 +533,7 @@ theorem completedLog_zpow
                 (completedLog (p := p) (K := K) u) n).symm
 
 omit [NumberField.IsCMField K] in
+/-- The completed logarithm sends a finite product to a finite sum. -/
 theorem completedLog_finset_prod {ι : Type*}
     (s : Finset ι) (u : ι → completedLogDomain (p := p) (K := K)) :
     completedLog (p := p) (K := K) (∏ i ∈ s, u i) =
@@ -567,6 +565,7 @@ theorem EPlus_completedLogDomainPowPred_coe (u : (𝓞 K⁺)ˣ) :
   rfl
 
 omit [NumberField.IsCMField K] in
+/-- The real-unit `(p - 1)`-power log-domain witness is multiplicative. -/
 theorem EPlus_completedLogDomainPowPred_mul (u v : (𝓞 K⁺)ˣ) :
     EPlus_completedLogDomainPowPred (p := p) (K := K) (u * v) =
       EPlus_completedLogDomainPowPred (p := p) (K := K) u *
@@ -585,6 +584,7 @@ theorem EPlus_completedLogDomainPowPred_one :
   simp [EPlus_completedLogDomainPowPred, EPlus_valuedLocalImage]
 
 omit [NumberField.IsCMField K] in
+/-- The real-unit `(p - 1)`-power log-domain witness sends powers to powers. -/
 theorem EPlus_completedLogDomainPowPred_pow (u : (𝓞 K⁺)ˣ) (n : ℕ) :
     EPlus_completedLogDomainPowPred (p := p) (K := K) (u ^ n) =
       (EPlus_completedLogDomainPowPred (p := p) (K := K) u) ^ n := by
@@ -595,6 +595,7 @@ theorem EPlus_completedLogDomainPowPred_pow (u : (𝓞 K⁺)ˣ) (n : ℕ) :
   rw [← pow_mul, ← pow_mul, Nat.mul_comm]
 
 omit [NumberField.IsCMField K] in
+/-- The real-unit `(p - 1)`-power log-domain witness sends inverses to inverses. -/
 theorem EPlus_completedLogDomainPowPred_inv (u : (𝓞 K⁺)ˣ) :
     EPlus_completedLogDomainPowPred (p := p) (K := K) u⁻¹ =
       (EPlus_completedLogDomainPowPred (p := p) (K := K) u)⁻¹ := by
@@ -603,6 +604,7 @@ theorem EPlus_completedLogDomainPowPred_inv (u : (𝓞 K⁺)ˣ) :
   simp [EPlus_completedLogDomainPowPred, EPlus_valuedLocalImage]
 
 omit [NumberField.IsCMField K] in
+/-- The real-unit `(p - 1)`-power log-domain witness sends integer powers to integer powers. -/
 theorem EPlus_completedLogDomainPowPred_zpow (u : (𝓞 K⁺)ˣ) (n : ℤ) :
     EPlus_completedLogDomainPowPred (p := p) (K := K) (u ^ n) =
       (EPlus_completedLogDomainPowPred (p := p) (K := K) u) ^ n := by
@@ -614,6 +616,7 @@ theorem EPlus_completedLogDomainPowPred_zpow (u : (𝓞 K⁺)ˣ) (n : ℤ) :
         EPlus_completedLogDomainPowPred_pow]
 
 omit [NumberField.IsCMField K] in
+/-- The real-unit `(p - 1)`-power log-domain witness sends finite products to finite products. -/
 theorem EPlus_completedLogDomainPowPred_finset_prod {ι : Type*}
     (s : Finset ι) (u : ι → (𝓞 K⁺)ˣ) :
     EPlus_completedLogDomainPowPred (p := p) (K := K) (∏ i ∈ s, u i) =
@@ -627,6 +630,7 @@ theorem EPlus_completedLogDomainPowPred_finset_prod {ι : Type*}
         EPlus_completedLogDomainPowPred_mul, ih]
 
 omit [NumberField.IsCMField K] in
+/-- For odd `p`, the log-domain witness of any power of `-1` is trivial. -/
 theorem EPlus_completedLogDomainPowPred_neg_one_zpow
     (hp_odd : p ≠ 2) (s : ℤ) :
     EPlus_completedLogDomainPowPred (p := p) (K := K)
@@ -643,7 +647,7 @@ theorem EPlus_completedLogDomainPowPred_neg_one_zpow
     apply Units.ext
     simpa [y, EPlus_valuedLocalImage] using
       congrArg
-        (fun z : (𝓞 K⁺)ˣ =>
+        (fun z : (𝓞 K⁺)ˣ ↦
           ((EPlus_valuedLocalImage (p := p) (K := K) z : (ValuedIntegerRing p K)ˣ) :
             ValuedIntegerRing p K))
         hsq_real
@@ -838,7 +842,7 @@ theorem concreteKummerLogMatrix_mulVec_exponents_eq_coeff
     (hp_three : 3 ≤ p) (hp_five : 5 ≤ p)
     (e : Fin (kummerLogRank p) → ℤ) (j : Fin (kummerLogRank p)) :
     (Matrix.mulVec (concreteKummerLogMatrix (p := p) (K := K) hp_three hp_five)
-        (fun a : Fin (kummerLogRank p) => (e a : ZMod p))) j =
+        (fun a : Fin (kummerLogRank p) ↦ (e a : ZMod p))) j =
       rationalPadicIntegerToZMod p
         ((dworkFixedEvenPowerBasis (p := p) (K := K) (by omega : 2 < p)).repr
           (∑ a : Fin (kummerLogRank p),
@@ -858,9 +862,9 @@ theorem concreteKummerLogMatrix_mulVec_exponents_eq_coeff
     have hsum :
         f (∑ a : Fin (kummerLogRank p), e a • v a) =
           ∑ a : Fin (kummerLogRank p), f (e a • v a) :=
-      map_sum f (fun a : Fin (kummerLogRank p) => e a • v a) Finset.univ
+      map_sum f (fun a : Fin (kummerLogRank p) ↦ e a • v a) Finset.univ
     have hterm :
-        ∀ a : Fin (kummerLogRank p), f (e a • v a) = e a • f (v a) := fun a =>
+        ∀ a : Fin (kummerLogRank p), f (e a • v a) = e a • f (v a) := fun a ↦
       f.toAddMonoidHom.map_zsmul (e a) (v a)
     calc
       (b.repr (∑ a : Fin (kummerLogRank p), e a • v a)) i =
@@ -868,7 +872,7 @@ theorem concreteKummerLogMatrix_mulVec_exponents_eq_coeff
       _ = (∑ a : Fin (kummerLogRank p), f (e a • v a)) i := by
           rw [hsum]
       _ = (∑ a : Fin (kummerLogRank p), e a • f (v a)) i := by
-          rw [Finset.sum_congr rfl fun a _ha => hterm a]
+          rw [Finset.sum_congr rfl fun a _ha ↦ hterm a]
       _ = ∑ a : Fin (kummerLogRank p), e a • ((b.repr (v a)) i) := by
           simp [f]
   have hright :
@@ -891,13 +895,13 @@ theorem concreteKummerLogMatrix_mulVec_exponents_eq_coeff
     simp [zsmul_eq_mul]
   have hleft :
       (Matrix.mulVec (concreteKummerLogMatrix (p := p) (K := K) hp_three hp_five)
-          (fun a : Fin (kummerLogRank p) => (e a : ZMod p))) j =
+          (fun a : Fin (kummerLogRank p) ↦ (e a : ZMod p))) j =
         ∑ a : Fin (kummerLogRank p),
           rationalPadicIntegerToZMod p ((b.repr (v a)) i) * (e a : ZMod p) := by
     simp [Matrix.mulVec, dotProduct, concreteKummerLogMatrix_apply,
       concreteKummerLogCoeff_eq, b, i, v]
   rw [hleft, hright]
-  exact Finset.sum_congr rfl fun a _ha =>
+  exact Finset.sum_congr rfl fun a _ha ↦
     mul_comm (rationalPadicIntegerToZMod p ((b.repr (v a)) i)) (e a : ZMod p)
 
 /-- CU-14c: extracting Kummer coordinates from a `p`-divisible completed-log
@@ -911,7 +915,7 @@ theorem concreteKummerLogMatrix_mulVec_exponents_eq_zero
           e a • concreteKummerLogVector (p := p) (K := K) hp_three a) :
     Matrix.mulVec
         (concreteKummerLogMatrix (p := p) (K := K) hp_three hp_five)
-        (fun a : Fin (kummerLogRank p) => (e a : ZMod p)) =
+        (fun a : Fin (kummerLogRank p) ↦ (e a : ZMod p)) =
       0 := by
   classical
   rcases hlog with ⟨y, hy⟩
