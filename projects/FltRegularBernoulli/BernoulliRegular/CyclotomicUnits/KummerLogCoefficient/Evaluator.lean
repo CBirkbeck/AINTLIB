@@ -32,14 +32,14 @@ theorem dworkParameterPowerLinearMap_of_polynomial_eval₂
         (algebraMap (RationalPadicIntegerRing p) (DworkCompleteIntegerRing p K))
         (dworkParameter p K) P =
       dworkParameterPowerLinearMap p K
-        (fun i : Fin (p - 1) => P.coeff (i : ℕ)) := by
+        (fun i : Fin (p - 1) ↦ P.coeff (i : ℕ)) := by
   rw [Polynomial.eval₂_eq_sum_range'
     (f := algebraMap (RationalPadicIntegerRing p)
       (DworkCompleteIntegerRing p K))
     (p := P) hdeg (x := dworkParameter p K)]
   rw [dworkParameterPowerLinearMap_apply]
   exact (Fin.sum_univ_eq_sum_range
-    (fun i : ℕ =>
+    (fun i : ℕ ↦
       algebraMap (RationalPadicIntegerRing p) (DworkCompleteIntegerRing p K)
           (P.coeff i) *
         dworkParameter p K ^ i) (p - 1)).symm
@@ -94,7 +94,7 @@ theorem dworkParameterPowerBasis_repr_dworkCompleteCyclotomicEquiv_toZMod
   have haction :
       Conjugation.dworkCompleteCyclotomicEquiv (p := p) K a x =
         dworkParameterPowerLinearMap p K
-          (fun i : Fin (p - 1) =>
+          (fun i : Fin (p - 1) ↦
             rationalPadicTeichmuller p (a : ZMod p) ^ (i : ℕ) * c i) := by
     rw [← hx]
     exact Conjugation.dworkCompleteCyclotomicEquiv_powerLinearMap
@@ -107,7 +107,7 @@ theorem dworkParameterPowerBasis_repr_dworkCompleteCyclotomicEquiv_toZMod
       congrFun
         (dworkParameterPowerBasis_repr_powerLinearMap
           (p := p) (K := K)
-          (fun i : Fin (p - 1) =>
+          (fun i : Fin (p - 1) ↦
             rationalPadicTeichmuller p (a : ZMod p) ^ (i : ℕ) * c i)) i
     rw [haction]
     simpa using hrepr
