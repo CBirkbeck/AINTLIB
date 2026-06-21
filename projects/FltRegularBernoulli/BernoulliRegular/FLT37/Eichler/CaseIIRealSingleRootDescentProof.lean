@@ -105,16 +105,11 @@ theorem washington_theta_real_field
     NumberField.IsCMField.complexConj K ((α - ζ ^ a * β) / (1 - ζ ^ a)) =
       (α - ζ ^ a * β) / (1 - ζ ^ a) := by
   have hσβ : NumberField.IsCMField.complexConj K β = α := by
-    rw [← hαβ]; exact NumberField.IsCMField.complexConj_apply_apply K α
+    rw [← hαβ]; exact complexConj_apply_apply K α
   have hσζpow : NumberField.IsCMField.complexConj K (ζ ^ a) = (ζ ^ a)⁻¹ := by
     rw [map_pow, hζ, ← inv_pow]
-  have hζa : ζ ^ a ≠ 0 := pow_ne_zero a hζ0
-  have hdenInv : (1 : K) - (ζ ^ a)⁻¹ ≠ 0 := by
-    intro h
-    apply hden
-    have hinv1 : (ζ ^ a)⁻¹ = 1 := (sub_eq_zero.mp h).symm
-    rw [inv_eq_one] at hinv1
-    rw [hinv1, sub_self]
+  have hdenInv : (1 : K) - (ζ ^ a)⁻¹ ≠ 0 :=
+    sub_ne_zero.mpr fun h => hden (sub_eq_zero.mpr (inv_eq_one.mp h.symm).symm)
   rw [map_div₀, map_sub, map_mul, hαβ, hσβ, hσζpow, map_sub, map_one, hσζpow,
     div_eq_div_iff hdenInv hden]
   field_simp
