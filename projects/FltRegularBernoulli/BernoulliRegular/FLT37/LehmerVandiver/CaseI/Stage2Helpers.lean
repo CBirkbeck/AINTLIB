@@ -1,7 +1,6 @@
 import BernoulliRegular.FLT37.LehmerVandiver.CaseI.PrimaryNormalization
 import Mathlib.NumberTheory.NumberField.CMField
 
-
 /-!
 # LV010 Stage 2 helpers: regularity-free local consequences of weak primary
 
