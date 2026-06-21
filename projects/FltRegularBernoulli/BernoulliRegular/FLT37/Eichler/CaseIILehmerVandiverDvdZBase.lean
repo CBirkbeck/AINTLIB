@@ -85,11 +85,11 @@ origin is available exactly at the base producer (the FLT37 endpoint starts from
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Finset Polynomial NumberField.IsCMField
+open NumberField
 
 namespace BernoulliRegular.FLT37.Eichler
 
-open FLT37 FLT37.LehmerVandiver.CaseII BernoulliRegular
+open FLT37 FLT37.LehmerVandiver.CaseII
 
 /-! ## 1. The `decide`-able residue heart of Lemma 9.7 for `(37, 149)`
 
@@ -110,9 +110,9 @@ theorem caseII_pow37_values_149 (a : ZMod 149) :
   decide +revert
 
 /-- **`a³⁷ = 0 ↔ a = 0` in `ZMod 149`** (`149` prime ⟹ field, no nilpotents). -/
-theorem caseII_pow37_eq_zero_iff_149 (a : ZMod 149) : a ^ 37 = 0 ↔ a = 0 := by
+theorem caseII_pow37_eq_zero_iff_149 (a : ZMod 149) : a ^ 37 = 0 ↔ a = 0 :=
   haveI : Fact (Nat.Prime 149) := ⟨by decide⟩
-  exact pow_eq_zero_iff (by decide : 37 ≠ 0)
+  pow_eq_zero_iff (by decide : 37 ≠ 0)
 
 set_option maxHeartbeats 1000000 in
 -- The `4 × 4 × 4` residue `decide` over `ZMod 149` needs more than the default heartbeat budget.
@@ -128,11 +128,11 @@ equation forces the `37`-divisible (Fermat-`z`) variable into the prime `𝔩` o
 theorem furtwangler_37_149 (a b c : ZMod 149)
     (h : a ^ 37 + b ^ 37 = c ^ 37) : a = 0 ∨ b = 0 ∨ c = 0 := by
   by_contra hcon
-  rw [not_or, not_or] at hcon
+  simp only [not_or] at hcon
   obtain ⟨ha, hb, hc⟩ := hcon
-  have ha' : a ^ 37 ≠ 0 := fun hz => ha ((caseII_pow37_eq_zero_iff_149 a).mp hz)
-  have hb' : b ^ 37 ≠ 0 := fun hz => hb ((caseII_pow37_eq_zero_iff_149 b).mp hz)
-  have hc' : c ^ 37 ≠ 0 := fun hz => hc ((caseII_pow37_eq_zero_iff_149 c).mp hz)
+  have ha' : a ^ 37 ≠ 0 := mt (caseII_pow37_eq_zero_iff_149 a).mp ha
+  have hb' : b ^ 37 ≠ 0 := mt (caseII_pow37_eq_zero_iff_149 b).mp hb
+  have hc' : c ^ 37 ≠ 0 := mt (caseII_pow37_eq_zero_iff_149 c).mp hc
   rcases caseII_pow37_values_149 a with h1 | h1 | h1 | h1 | h1 <;>
   rcases caseII_pow37_values_149 b with h2 | h2 | h2 | h2 | h2 <;>
   rcases caseII_pow37_values_149 c with h3 | h3 | h3 | h3 | h3 <;>
@@ -155,8 +155,6 @@ The residue map `𝓞 K → 𝓞 K / lv149 ≃+* ZMod 149` carries the integer c
 exactly `(n : ZMod 149) = 0`, i.e. `149 ∣ n`. -/
 theorem caseII_intCast_mem_lv149_iff (n : ℤ) :
     (n : 𝓞 (CyclotomicField 37 ℚ)) ∈ lv149 ↔ (n : ZMod 149) = 0 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  haveI : Fact (Nat.Prime 149) := ⟨by decide⟩
   unfold lv149 lehmerVandiverPrime
   rw [Ideal.mem_comap, RingEquiv.toRingHom_eq_coe, RingHom.coe_coe, RingHom.mem_ker,
     map_intCast, map_intCast]
@@ -188,15 +186,14 @@ theorem exists_realCaseIIData37_zRel_of_Int_solution
       (D.x = (x : 𝓞 (CyclotomicField 37 ℚ))) ∧ (D.y = (y : 𝓞 (CyclotomicField 37 ℚ))) ∧
       (z : 𝓞 (CyclotomicField 37 ℚ)) = (D.hζ.toInteger - 1) ^ (m + 1) * D.z := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  haveI : NeZero 37 := ⟨by decide⟩
   haveI := CyclotomicField.isCyclotomicExtension 37 ℚ
   obtain ⟨ζ, hζ⟩ := IsCyclotomicExtension.exists_isPrimitiveRoot
     ℚ (B := (CyclotomicField 37 ℚ)) (Set.mem_singleton 37)
     (by decide : (37 : ℕ) ≠ 0)
   have h_dvd_iff := fun n ↦
     zeta_sub_one_dvd_Int_iff (K := CyclotomicField 37 ℚ) hζ (n := n)
-  have hy : ¬ (hζ.toInteger - 1) ∣ (y : 𝓞 (CyclotomicField 37 ℚ)) := fun hdiv =>
-    hy_int ((h_dvd_iff y).mp hdiv)
+  have hy : ¬ (hζ.toInteger - 1) ∣ (y : 𝓞 (CyclotomicField 37 ℚ)) :=
+    mt (h_dvd_iff y).mp hy_int
   have hz : (hζ.toInteger - 1) ∣ (z : 𝓞 (CyclotomicField 37 ℚ)) := (h_dvd_iff z).mpr hz_int
   have hz_ne_OK : (z : 𝓞 (CyclotomicField 37 ℚ)) ≠ 0 := by rwa [ne_eq, Int.cast_eq_zero]
   have eOK :
@@ -295,8 +292,8 @@ theorem caseII_int_dvd_z_of_lemma96 {x y z : ℤ}
     (e : x ^ 37 + y ^ 37 = z ^ 37)
     (hx_lv : ¬ (149 : ℤ) ∣ x) (hy_lv : ¬ (149 : ℤ) ∣ y) :
     (149 : ℤ) ∣ z := by
-  have hx' : ¬ (x : ZMod 149) = 0 := fun h => hx_lv ((ZMod.intCast_zmod_eq_zero_iff_dvd x 149).mp h)
-  have hy' : ¬ (y : ZMod 149) = 0 := fun h => hy_lv ((ZMod.intCast_zmod_eq_zero_iff_dvd y 149).mp h)
+  have hx' : ¬ (x : ZMod 149) = 0 := mt (ZMod.intCast_zmod_eq_zero_iff_dvd x 149).mp hx_lv
+  have hy' : ¬ (y : ZMod 149) = 0 := mt (ZMod.intCast_zmod_eq_zero_iff_dvd y 149).mp hy_lv
   refine (ZMod.intCast_zmod_eq_zero_iff_dvd z 149).mp ?_
   have he : (x : ZMod 149) ^ 37 + (y : ZMod 149) ^ 37 = (z : ZMod 149) ^ 37 := by
     exact_mod_cast congrArg (Int.cast : ℤ → ZMod 149) e
@@ -328,16 +325,14 @@ theorem exists_realCaseIIData37_with_dvd_z_of_caseII_int_solution_z
   -- `37 ∤ b` (else `37 ∣ a` from the equation), so `b` is a non-`37`-divisible variable.
   have hb_int : ¬ (37 : ℤ) ∣ b := by
     intro hb
-    refine ha_int ?_
-    have h37prime := (Nat.prime_iff_prime_int.mp (by decide : Nat.Prime 37))
     have h_dvd : (37 : ℤ) ∣ a ^ 37 := by
       have := dvd_sub (dvd_pow hc_int (by decide : (37 : ℕ) ≠ 0))
         (dvd_pow hb (by decide : (37 : ℕ) ≠ 0))
       rwa [← e, add_sub_cancel_right] at this
-    exact h37prime.dvd_of_dvd_pow h_dvd
-  refine exists_realCaseIIData37_with_dvd_z_of_Int_solution hb_int hc_int hc_ne e ?_ ?_
-  · exact fun h => ha_lv ((ZMod.intCast_zmod_eq_zero_iff_dvd a 149).mp h)
-  · exact fun h => hb_lv ((ZMod.intCast_zmod_eq_zero_iff_dvd b 149).mp h)
+    exact ha_int <| (Nat.prime_iff_prime_int.mp (by decide : Nat.Prime 37)).dvd_of_dvd_pow h_dvd
+  refine exists_realCaseIIData37_with_dvd_z_of_Int_solution hb_int hc_int hc_ne e
+    (mt (ZMod.intCast_zmod_eq_zero_iff_dvd a 149).mp ha_lv)
+    (mt (ZMod.intCast_zmod_eq_zero_iff_dvd b 149).mp hb_lv)
 
 /-! ## 6. The full Lemma-9.7 → Lemma-9.8 chain runs at the base
 
