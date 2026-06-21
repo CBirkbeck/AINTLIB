@@ -96,9 +96,8 @@ theorem caseII_raw_ratio_numerator_congr (D : RealCaseIIData37 K m) (hp : (37 : 
     (η : nthRootsFinset 37 (1 : 𝓞 K)) :
     (D.hζ.toInteger - 1 : 𝓞 K) ^ (37 * m + 1) ∣
       (D.x + D.y * (η : 𝓞 K)) - (-(η : 𝓞 K)) * (D.x + D.y * (η : 𝓞 K) ^ 36) := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   rw [caseII_raw_ratio_numerator_identity D.x D.y η]
-  exact Dvd.dvd.mul_right (caseII_K_zeta_sub_one_pow_dvd_x_add_y D hp) _
+  exact (caseII_K_zeta_sub_one_pow_dvd_x_add_y D hp).mul_right _
 
 /-! ## 2. Frobenius primarity: `γ ≡ 1 mod (ζ-1)` lifts to `γ^{37} ≡ 1 mod (ζ-1)^{37}`
 
@@ -113,10 +112,7 @@ omit [NumberField K] [IsCyclotomicExtension {37} ℚ K] [NumberField.IsCMField K
 /-- `(ζ-1)^{36} ∣ 37` in `𝓞 K` (from `associated_zeta_sub_one_pow_prime`, `p-1 = 36`). -/
 theorem caseII_zeta_sub_one_pow36_dvd_p (hζ : IsPrimitiveRoot (ζ : K) 37) :
     (hζ.toInteger - 1 : 𝓞 K) ^ 36 ∣ (37 : 𝓞 K) := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  have h := (associated_zeta_sub_one_pow_prime (p := 37) hζ).dvd
-  norm_num at h
-  exact h
+  simpa using (associated_zeta_sub_one_pow_prime (p := 37) hζ).dvd
 
 /-- **Frobenius primarity lift.** If `(ζ-1) ∣ γ - 1` then `(ζ-1)^{37} ∣ γ^{37} - 1`.
 
@@ -127,7 +123,6 @@ Proof via `Nat.Prime.dvd_add_pow_sub_pow_of_dvd` with `x = γ-1`, `y = 1`, `r = 
 theorem caseII_gamma_pow37_congr_one (hζ : IsPrimitiveRoot (ζ : K) 37) {γ : 𝓞 K}
     (hγ : (hζ.toInteger - 1 : 𝓞 K) ∣ γ - 1) :
     (hζ.toInteger - 1 : 𝓞 K) ^ 37 ∣ γ ^ 37 - 1 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   have h₂ : (hζ.toInteger - 1 : 𝓞 K) ^ 37 ∣ (37 : 𝓞 K) * (γ - 1) := by
     have : (hζ.toInteger - 1 : 𝓞 K) ^ 37 =
         (hζ.toInteger - 1 : 𝓞 K) ^ 36 * (hζ.toInteger - 1 : 𝓞 K) := by rw [← pow_succ]
@@ -167,7 +162,6 @@ divisibility:
 theorem caseII_etaInv_ne_etaZero (D : RealCaseIIData37 K m) (hp : (37 : ℕ) ≠ 2)
     (η : nthRootsFinset 37 (1 : 𝓞 K)) (hη : η ≠ D.etaZero) :
     caseII_etaInv η ≠ D.etaZero := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   intro heq
   exact hη (by
     have := congrArg caseII_etaInv heq
@@ -181,7 +175,6 @@ theorem caseII_etaInv_denom_factor (D : RealCaseIIData37 K m) (hp : (37 : ℕ) �
     (η : nthRootsFinset 37 (1 : 𝓞 K)) (hη : η ≠ D.etaZero) :
     ∃ c : 𝓞 K, D.x + D.y * (η : 𝓞 K) ^ 36 = (D.hζ.toInteger - 1 : 𝓞 K) * c ∧
       ¬ (D.hζ.toInteger - 1 : 𝓞 K) ∣ c := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   obtain ⟨c, hc⟩ : (D.hζ.toInteger - 1 : 𝓞 K) ∣ D.x + D.y * (η : 𝓞 K) ^ 36 := by
     have := caseII_K_zeta_sub_one_dvd_x_add_y_times_root D hp (caseII_etaInv η)
     rwa [caseII_etaInv_coe] at this
@@ -197,42 +190,35 @@ theorem caseII_corrected_unit_primary (D : RealCaseIIData37 K m) (hp : (37 : ℕ
     (h_unit_form : D.x + D.y * (η : 𝓞 K) =
       (-(η : 𝓞 K)) * (u : 𝓞 K) * (γ : 𝓞 K) ^ 37 * (D.x + D.y * (η : 𝓞 K) ^ 36)) :
     (D.hζ.toInteger - 1 : 𝓞 K) ^ 37 ∣ (u : 𝓞 K) - 1 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   set π : 𝓞 K := (D.hζ.toInteger - 1 : 𝓞 K)
   have hπ_prime : Prime π := D.hζ.zeta_sub_one_prime'
   have hπ_ne : π ≠ 0 := hπ_prime.ne_zero
   have h37 : (η : 𝓞 K) ^ 37 = 1 := (mem_nthRootsFinset (by norm_num) _).mp η.2
   have hη_unit : IsUnit (η : 𝓞 K) :=
     IsUnit.of_mul_eq_one ((η : 𝓞 K) ^ 36) (by rw [← pow_succ']; exact h37)
-  -- Step 1: substitute the unit form into the exact identity to isolate `(u·γ^37 - 1)`.
   have h_iso : (-(η : 𝓞 K)) * (D.x + D.y * (η : 𝓞 K) ^ 36) * ((u : 𝓞 K) * (γ : 𝓞 K) ^ 37 - 1) =
       (D.x + D.y) * (1 + (η : 𝓞 K)) := by
     rw [← caseII_raw_ratio_numerator_identity (K := K) D.x D.y η, h_unit_form]; ring
-  -- Step 2: `(ζ-1)^{37m+1} ∣ RHS`, hence ∣ LHS; drop the unit `-η`.
   have hdvd_no_unit : π ^ (37 * m + 1) ∣
       (D.x + D.y * (η : 𝓞 K) ^ 36) * ((u : 𝓞 K) * (γ : 𝓞 K) ^ 37 - 1) := by
     have hdvd_rhs : π ^ (37 * m + 1) ∣
         (-(η : 𝓞 K)) * ((D.x + D.y * (η : 𝓞 K) ^ 36) * ((u : 𝓞 K) * (γ : 𝓞 K) ^ 37 - 1)) := by
       rw [← mul_assoc, h_iso]
-      exact Dvd.dvd.mul_right (caseII_K_zeta_sub_one_pow_dvd_x_add_y D hp) _
+      exact (caseII_K_zeta_sub_one_pow_dvd_x_add_y D hp).mul_right _
     exact (IsUnit.dvd_mul_left hη_unit.neg).mp hdvd_rhs
-  -- Step 3: `x+yη^36 = π·c` with `¬π ∣ c` (v_𝔭 = 1 exactly); cancel one π, then drop `c`.
   obtain ⟨c, hc, hπ_not_dvd_c⟩ := caseII_etaInv_denom_factor D hp η hη
   have hdvd_cK : π ^ (37 * m) ∣ c * ((u : 𝓞 K) * (γ : 𝓞 K) ^ 37 - 1) := by
     rw [hc, mul_assoc, pow_succ, mul_comm (π ^ (37 * m)) π] at hdvd_no_unit
     exact (mul_dvd_mul_iff_left hπ_ne).mp hdvd_no_unit
   have hdvd_K : π ^ (37 * m) ∣ (u : 𝓞 K) * (γ : 𝓞 K) ^ 37 - 1 :=
     hπ_prime.pow_dvd_of_dvd_mul_left (37 * m) hπ_not_dvd_c hdvd_cK
-  -- Step 4: m ≥ 1 ⟹ π^37 ∣ u·γ^37 - 1.
   have hdvd_uγ : π ^ 37 ∣ (u : 𝓞 K) * (γ : 𝓞 K) ^ 37 - 1 :=
     (pow_dvd_pow π (Nat.le_mul_of_pos_right 37 D.toCaseIIData37.one_le_m)).trans hdvd_K
-  -- Step 5: π^37 ∣ γ^37 - 1, so π^37 ∣ u·γ^37 - u; subtract.
   have hγ37 : π ^ 37 ∣ (γ : 𝓞 K) ^ 37 - 1 := caseII_gamma_pow37_congr_one D.hζ hγ
   have hdvd_uγ_minus_u : π ^ 37 ∣ (u : 𝓞 K) * (γ : 𝓞 K) ^ 37 - (u : 𝓞 K) := by
     have : (u : 𝓞 K) * (γ : 𝓞 K) ^ 37 - (u : 𝓞 K) = (u : 𝓞 K) * ((γ : 𝓞 K) ^ 37 - 1) := by ring
-    rw [this]; exact Dvd.dvd.mul_left hγ37 _
-  have hfinal : π ^ 37 ∣ ((u : 𝓞 K) * (γ : 𝓞 K) ^ 37 - 1) -
-      ((u : 𝓞 K) * (γ : 𝓞 K) ^ 37 - (u : 𝓞 K)) := dvd_sub hdvd_uγ hdvd_uγ_minus_u
+    rw [this]; exact hγ37.mul_left _
+  have hfinal := dvd_sub hdvd_uγ hdvd_uγ_minus_u
   have hsimp : ((u : 𝓞 K) * (γ : 𝓞 K) ^ 37 - 1) -
       ((u : 𝓞 K) * (γ : 𝓞 K) ^ 37 - (u : 𝓞 K)) = (u : 𝓞 K) - 1 := by ring
   rwa [hsimp] at hfinal
@@ -271,7 +257,6 @@ omit [NumberField K] [IsCyclotomicExtension {37} ℚ K] [NumberField.IsCMField K
 theorem caseII_correctionUnit_inv_val (η : nthRootsFinset 37 (1 : 𝓞 K)) :
     (((caseII_correctionUnit η)⁻¹ : (𝓞 K)ˣ) : 𝓞 K) = -((η : 𝓞 K) ^ 36) := by
   have h37 : (η : 𝓞 K) ^ 37 = 1 := (mem_nthRootsFinset (by norm_num) _).mp η.2
-  -- value-of-inverse cancellation: `↑u · ↑u⁻¹ = 1`, and `-η · -(η^36) = 1`.
   have hmul : (caseII_correctionUnit η : 𝓞 K) * (((caseII_correctionUnit η)⁻¹ : (𝓞 K)ˣ) : 𝓞 K)
       = 1 := by rw [← Units.val_mul, mul_inv_cancel, Units.val_one]
   rw [caseII_correctionUnit_val] at hmul
@@ -289,9 +274,7 @@ theorem caseII_correctionUnit_anti
     (η : nthRootsFinset 37 (1 : 𝓞 K)) :
     NumberField.IsCMField.ringOfIntegersComplexConj K (caseII_correctionUnit η : 𝓞 K) =
       (((caseII_correctionUnit η)⁻¹ : (𝓞 K)ˣ) : 𝓞 K) := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   have h37 : (η : 𝓞 K) ^ 37 = 1 := (mem_nthRootsFinset (by norm_num) _).mp η.2
-  -- σ(η) = η^{36} (the inverse-root conjugation, `caseII_ringOfIntegersComplexConj_root_of_unity`).
   have hση : NumberField.IsCMField.ringOfIntegersComplexConj K (η : 𝓞 K) = (η : 𝓞 K) ^ 36 :=
     caseII_ringOfIntegersComplexConj_root_of_unity h37
   rw [caseII_correctionUnit_val, map_neg, hση, caseII_correctionUnit_inv_val]
@@ -312,21 +295,17 @@ theorem caseII_correctedRadical_unitForm_of_integer (D : RealCaseIIData37 K m)
       (-(η : 𝓞 K)) * (u : 𝓞 K) * (γ : 𝓞 K) ^ 37 * (D.x + D.y * (η : 𝓞 K) ^ 36)) :
     caseII_correctedRadical D η (caseII_correctionUnit η) =
       algebraMap (𝓞 K) K (u : 𝓞 K) * (algebraMap (𝓞 K) K (γ : 𝓞 K)) ^ 37 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   have hden_ne := caseII_algebraMap_x_add_y_etaInv_ne_zero D hp η
   have hη_ne : algebraMap (𝓞 K) K (η : 𝓞 K) ≠ 0 := by
     rw [Ne, map_eq_zero_iff _ (FaithfulSMul.algebraMap_injective (𝓞 K) K)]
     exact (caseII_rootUnit η).ne_zero
-  -- Map the integer unit form into K.
   have hK := congrArg (algebraMap (𝓞 K) K) h_unit_form
   rw [map_mul, map_mul, map_mul, map_pow, map_neg] at hK
-  -- Step A: `R_a = algebraMap(-η) · algebraMap u · (algebraMap γ)^37`.
   have hRa : caseII_rootRatioK D η =
       (-algebraMap (𝓞 K) K (η : 𝓞 K)) * algebraMap (𝓞 K) K (u : 𝓞 K) *
         (algebraMap (𝓞 K) K (γ : 𝓞 K)) ^ 37 := by
     rw [caseII_rootRatioK, div_eq_iff hden_ne]
     linear_combination hK
-  -- Step B: undo the `(algebraMap u₀)⁻¹` correction.
   rw [caseII_correctedRadical, caseII_correctionUnit_val, map_neg, hRa]
   field_simp
 
@@ -363,17 +342,13 @@ theorem caseII_correctedRadicalUnramified37_of_R1
     CaseIICorrectedRadicalUnramified37 := by
   intro m D η hη
   obtain ⟨u, γ, hγ, h_unit_form, h_irr, hu_no_root⟩ := h_data D η hη
-  -- The correction unit `u₀ = -η`, anti-fixed.
   refine ⟨caseII_correctionUnit η, caseII_correctionUnit_anti η, ?_⟩
-  -- R1: the corrected unit `u` is primary, `(ζ-1)^{37} ∣ u - 1`.
   have hcong : (D.hζ.toInteger - 1 : 𝓞 (CyclotomicField 37 ℚ)) ^ 37 ∣ (u : 𝓞 _) - 1 :=
     caseII_corrected_unit_primary D (by decide : (37 : ℕ) ≠ 2) η hη u γ hγ h_unit_form
-  -- The field unit form for the corrected radical.
   have hUF : caseII_correctedRadical D η (caseII_correctionUnit η) =
       algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (u : 𝓞 _) *
         (algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (γ : 𝓞 _)) ^ 37 :=
     caseII_correctedRadical_unitForm_of_integer D (by decide : (37 : ℕ) ≠ 2) η u γ h_unit_form
-  -- Apply the generic unramifiedness producer (flt-regular's `KummersLemma.isUnramified`).
   exact flt37_antiKummerLift_isUnramified_of_primaryUnitForm
     (K := CyclotomicField 37 ℚ)
     (caseII_correctedRadical_ne_zero D (by decide : (37 : ℕ) ≠ 2) η (caseII_correctionUnit η))
