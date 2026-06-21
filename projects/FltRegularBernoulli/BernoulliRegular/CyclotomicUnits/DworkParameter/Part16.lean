@@ -68,12 +68,12 @@ noncomputable def padicIntToRationalPadicIntegerRingEquiv :
     Rat.HeightOneSpectrum.adicCompletionIntegers.padicIntEquiv
       (lambdaRationalHeightOneSpectrum p)
   exact
-    { toFun := fun x => e.symm x
-      invFun := fun x => e x
-      left_inv := fun x => e.apply_symm_apply x
-      right_inv := fun x => e.symm_apply_apply x
-      map_mul' := fun x y => e.symm.map_mul x y
-      map_add' := fun x y => e.symm.map_add x y }
+    { toFun := fun x ↦ e.symm x
+      invFun := fun x ↦ e x
+      left_inv := fun x ↦ e.apply_symm_apply x
+      right_inv := fun x ↦ e.symm_apply_apply x
+      map_mul' := fun x y ↦ e.symm.map_mul x y
+      map_add' := fun x y ↦ e.symm.map_add x y }
 
 /-- The Teichmüller lift in the rational completed integer coefficient ring
 selected for the Dwork parameter. -/
@@ -543,7 +543,7 @@ theorem samePrimeFiniteLog_eq_sum_Icc_add_p_term_pow_pred
   let N : ℕ := p - 2
   let C : ℕ := samePrimeFiniteLogCutoff (p := p) N
   let f : ℕ → ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1) :=
-    fun n => samePrimeFiniteLogTerm (p := p) (K := K) N n x hx
+    fun n ↦ samePrimeFiniteLogTerm (p := p) (K := K) N n x hx
   have hcut : p + 1 ≤ C := by
     have htwo : 2 ≤ N + 1 := by
       dsimp [N]
