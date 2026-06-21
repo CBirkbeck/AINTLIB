@@ -283,7 +283,7 @@ noncomputable def washingtonCaseIIAdjacentFixedGenerators37Source_of_realIdealDe
     (h_not_dvd : ¬ (37 : ℕ) ∣ hPlus (CyclotomicField 37 ℚ))
     (models : CaseIIRealIdealDescent37) :
     WashingtonCaseIIAdjacentFixedGenerators37Source :=
-  fun _hV _hSO {_m} D =>
+  fun _hV _hSO {_m} D ↦
     { atEtaOne :=
         D.fixedIntegralGenerator_of_realIdealModel h_not_dvd D.etaOne D.etaOne_ne_etaZero
           (J := (models D D.etaOne D.etaOne_ne_etaZero).1)
