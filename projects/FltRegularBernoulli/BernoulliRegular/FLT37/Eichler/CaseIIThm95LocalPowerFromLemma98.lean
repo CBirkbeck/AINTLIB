@@ -160,7 +160,7 @@ theorem caseII_gammaA_residue_eq_x
   have h1za_notMem : (1 - zetaPow 37 (CyclotomicField 37 ℚ) a) ∉ lv149 :=
     caseII_one_sub_zetaPow_notMem_lv149 ha
   have h1za0 : Q (1 - zetaPow 37 (CyclotomicField 37 ℚ) a) ≠ 0 :=
-    fun h => h1za_notMem ((Ideal.Quotient.eq_zero_iff_mem).mp h)
+    fun h ↦ h1za_notMem ((Ideal.Quotient.eq_zero_iff_mem).mp h)
   -- Push `Q` through `(1 - ζ^a)·γ_a = x + ζ^a·y`.
   have hspec : Q (1 - zetaPow 37 (CyclotomicField 37 ℚ) a) * Q (caseII_gammaA D ha) =
       Q (D.x + zetaPow 37 (CyclotomicField 37 ℚ) a * D.y) := by
@@ -196,7 +196,7 @@ theorem caseII_gammaRatio_residue_eq_one
     Ideal.Quotient.mk lv149 (caseII_gammaA D ha) *
         (Ideal.Quotient.mk lv149 (caseII_gammaA D hb))⁻¹ = 1 := by
   set Q := Ideal.Quotient.mk lv149 with hQ
-  have hx0 : Q D.x ≠ 0 := fun h => hxl ((Ideal.Quotient.eq_zero_iff_mem).mp h)
+  have hx0 : Q D.x ≠ 0 := fun h ↦ hxl ((Ideal.Quotient.eq_zero_iff_mem).mp h)
   rw [caseII_gammaA_residue_eq_x D hxy ha, caseII_gammaA_residue_eq_x D hxy hb]
   exact mul_inv_cancel₀ hx0
 
@@ -318,8 +318,8 @@ theorem caseII_lemma98LocalPower37_directResidue
     have hz0 := (Ideal.Quotient.eq_zero_iff_mem).mpr hlhs
     rw [map_add, map_mul, map_mul, map_pow, map_pow] at hz0
     linear_combination hz0
-  have hx0 : Q x' ≠ 0 := fun h => hxl ((Ideal.Quotient.eq_zero_iff_mem).mp h)
-  have hε20 : Q (ε₂ : 𝓞 (CyclotomicField 37 ℚ)) ≠ 0 := fun h =>
+  have hx0 : Q x' ≠ 0 := fun h ↦ hxl ((Ideal.Quotient.eq_zero_iff_mem).mp h)
+  have hε20 : Q (ε₂ : 𝓞 (CyclotomicField 37 ℚ)) ≠ 0 := fun h ↦
     caseII_unit_notMem_lv149 ε₂ ((Ideal.Quotient.eq_zero_iff_mem).mp h)
   -- `Q(ε₁/ε₂) · Q(ε₂) = Q(ε₁)` (from the unit identity `(ε₁/ε₂)·ε₂ = ε₁`).
   have hunit : (ε₁ / ε₂ : (𝓞 (CyclotomicField 37 ℚ))ˣ) * ε₂ = ε₁ := by
