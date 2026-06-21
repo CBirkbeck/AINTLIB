@@ -111,8 +111,8 @@ bridge composes mechanically:
 
 ```
 NoFinitePolesBridge of_valuation_id : ∀ f ≠ 0,
-    (∀ P, ord_P f ≥ 0) → ∃ u : CR, algMap u = f := fun f hf hord =>
-  mem_coordinateRing_of_valuation_le_one f fun v => by
+    (∀ P, ord_P f ≥ 0) → ∃ u : CR, algMap u = f := fun f hf hord ↦
+  mem_coordinateRing_of_valuation_le_one f fun v ↦ by
     obtain ⟨P, hP⟩ := smoothPointToHeightOne_surjective W v
     rw [← hP, ← pointValuation_eq_heightOneValuation]
     exact (project's pointValuation_le_one_iff_ord_nonneg).mpr (hord P)
