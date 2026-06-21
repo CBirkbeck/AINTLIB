@@ -63,17 +63,14 @@ theorem caseI_factor_class_pow_eq_one {p : ℕ} [Fact p.Prime] (hp5 : 5 ≤ p)
         (b : 𝓞 (CyclotomicField p ℚ))} :
           Set (𝓞 (CyclotomicField p ℚ))) = I ^ p ∧
       ClassGroup.mk0 ⟨I, hI⟩ ^ p = 1 := by
-  -- The factor ideal is a `p`-th power.
   obtain ⟨I, hI_eq⟩ :=
     LehmerVandiver.CaseI.caseI_factor_idealSpan_eq_pow hp5 heq hgcd hcaseI hζ
-  -- `p` is odd (prime `≥ 5`), so `c ≠ 0` and the factor is nonzero.
   haveI : NeZero p := ⟨(Fact.out (p := p.Prime)).ne_zero⟩
   have hp2 : p ≠ 2 := by omega
   have hpodd : Odd p := (Fact.out (p := p.Prime)).eq_two_or_odd'.resolve_left hp2
   have hc0 : c ≠ 0 := by
     rintro rfl
     exact hcaseI (by simp)
-  -- The factor `a + ζ * b` is nonzero, via the product factorisation.
   have hfac_ne : (a : 𝓞 (CyclotomicField p ℚ)) + ζ * (b : 𝓞 (CyclotomicField p ℚ)) ≠ 0 := by
     intro hfac0
     have hμ : IsPrimitiveRoot
@@ -92,16 +89,14 @@ theorem caseI_factor_class_pow_eq_one {p : ℕ} [Fact p.Prime] (hp5 : 5 ≤ p)
     have : (c : 𝓞 (CyclotomicField p ℚ)) = 0 := by
       simpa using pow_eq_zero_iff (Fact.out (p := p.Prime)).pos.ne' |>.mp hcp0
     exact hc0 (by exact_mod_cast this)
-  -- Therefore `span {a + ζ b} ≠ ⊥`, hence `I ≠ ⊥`, hence `I ∈ (Ideal _)⁰`.
   have hspan_ne : Ideal.span ({(a : 𝓞 (CyclotomicField p ℚ)) + ζ *
       (b : 𝓞 (CyclotomicField p ℚ))} : Set (𝓞 (CyclotomicField p ℚ))) ≠ ⊥ := by
     simpa [Ideal.span_singleton_eq_bot] using hfac_ne
   have hIp_ne : I ^ p ≠ ⊥ := hI_eq ▸ hspan_ne
-  have hI_ne : I ≠ ⊥ := fun h => hIp_ne (by rw [h, Ideal.bot_pow (Fact.out (p := p.Prime)).ne_zero])
+  have hI_ne : I ≠ ⊥ := fun h ↦ hIp_ne (by rw [h, Ideal.bot_pow (Fact.out (p := p.Prime)).ne_zero])
   have hI_mem : I ∈ (Ideal (𝓞 (CyclotomicField p ℚ)))⁰ :=
     mem_nonZeroDivisors_iff_ne_zero.mpr hI_ne
   refine ⟨I, hI_mem, hI_eq, ?_⟩
-  -- `[I] ^ p = [I ^ p] = [span {a + ζ b}] = 1`.
   have hIp_mem : I ^ p ∈ (Ideal (𝓞 (CyclotomicField p ℚ)))⁰ :=
     mem_nonZeroDivisors_iff_ne_zero.mpr hIp_ne
   have hcoe : (⟨I, hI_mem⟩ : (Ideal (𝓞 (CyclotomicField p ℚ)))⁰) ^ p
@@ -112,17 +107,12 @@ theorem caseI_factor_class_pow_eq_one {p : ℕ} [Fact p.Prime] (hp5 : 5 ≤ p)
       = ClassGroup.mk0 (⟨I, hI_mem⟩ ^ p) := by rw [map_pow]
     _ = ClassGroup.mk0 ⟨I ^ p, hIp_mem⟩ := by rw [hcoe]
     _ = 1 := by
-        rw [ClassGroup.mk0_eq_one_iff]
-        rw [← hI_eq]
+        rw [ClassGroup.mk0_eq_one_iff, ← hI_eq]
         exact ⟨_, rfl⟩
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **`p`-th-root ideal uniqueness.** In the Dedekind domain
 `𝓞 (CyclotomicField p ℚ)`, taking `n`-th powers of ideals is injective
-for `n ≠ 0`: `I ^ n = J ^ n → I = J`. This is unique factorisation of
-ideals: from `I ^ n = J ^ n` we get `I ^ n ∣ J ^ n` and `J ^ n ∣ I ^ n`,
-hence `I ∣ J` and `J ∣ I` via `UniqueFactorizationMonoid.pow_dvd_pow_iff_dvd`,
-hence `I = J` by `dvd_antisymm`. -/
+for `n ≠ 0`: `I ^ n = J ^ n → I = J`. -/
 theorem ideal_pow_right_injective_ordIntegers {p : ℕ} [Fact p.Prime] {n : ℕ}
     (hn : n ≠ 0) {I J : Ideal (𝓞 (CyclotomicField p ℚ))} (h : I ^ n = J ^ n) :
     I = J := by
@@ -142,16 +132,7 @@ Here `σ_g ζ` is `cyclotomicRingOfIntegersEquiv (CyclotomicField p ℚ) g ζ`,
 the image of `ζ` under the ring-of-integers automorphism induced by `σ_g`.
 Both `I` and `J` arise from
 `BernoulliRegular.FLT37.LehmerVandiver.CaseI.caseI_factor_idealSpan_eq_pow`
-(at the roots `ζ` and `σ_g ζ` respectively).
-
-The proof:
-1. `(σ_g I) ^ p = σ_g (I ^ p) = σ_g (span {a + ζ b}) = span {a + (σ_g ζ) b} = J ^ p`,
-   using `cyclotomicGaloisConjugate_pow_ideal`, `Ideal.map_span`, the
-   ring-hom identities `map_add`/`map_mul`, and `map_intCast` (so `σ_g`
-   fixes the rational integers `a, b`).
-2. Hence `σ_g I = J` by `ideal_pow_right_injective_ordIntegers`.
-3. Therefore the action, which sends `[I]` to `[σ_g I]` via
-   `cyclotomicGalActionOnClassGroup_mk0`, sends `[I]` to `[J]`. -/
+(at the roots `ζ` and `σ_g ζ` respectively). -/
 theorem caseI_factor_class_galAction_eq {p : ℕ} [Fact p.Prime]
     {a b : ℤ}
     (g : CyclotomicUnitDelta p)
@@ -167,17 +148,14 @@ theorem caseI_factor_class_galAction_eq {p : ℕ} [Fact p.Prime]
     cyclotomicGalActionOnClassGroup g (ClassGroup.mk0 ⟨I, hI_ne⟩) =
       ClassGroup.mk0 ⟨J, hJ_ne⟩ := by
   haveI : NeZero p := ⟨(Fact.out (p := p.Prime)).ne_zero⟩
-  -- Step A: `(σ_g I) ^ p = span {a + (σ_g ζ) b} = J ^ p`, hence `σ_g I = J`.
   have hmap : Furtwaengler.cyclotomicGaloisConjugate (p := p)
       (K := CyclotomicField p ℚ) g I = J := by
     apply ideal_pow_right_injective_ordIntegers (Fact.out (p := p.Prime)).ne_zero
     rw [← Furtwaengler.cyclotomicGaloisConjugate_pow_ideal, ← hI, ← hJ]
-    -- `σ_g (span {a + ζ b}) = span {a + (σ_g ζ) b}`.
     unfold Furtwaengler.cyclotomicGaloisConjugate
     rw [Ideal.map_span, Set.image_singleton]
     congr 2
     rw [map_add, map_mul, map_intCast, map_intCast]
-  -- Step B: rewrite the action to `[σ_g I]` and conclude.
   rw [cyclotomicGalActionOnClassGroup_mk0]
   unfold cyclotomicGaloisShiftedClass cyclotomicGaloisConjugateNonZeroDivisors
   apply congrArg ClassGroup.mk0
