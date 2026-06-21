@@ -128,8 +128,16 @@ theorem exists_comap_isEquiv_of_field_hom
   obtain ⟨V, hV⟩ :=
     LocalSubring.exists_le_valuationSubring (LocalSubring.map ι v.valuationSubring.toLocalSubring)
   refine ⟨V.ValueGroup, inferInstance, V.valuation, ?_⟩
-  -- `v ≈ comap ι V.valuation` because both have valuation subring `O`: `V.comap ι = v.valuationSubring`
-  -- (the domination `hV` makes the contraction equal the maximal valuation subring `O`).
+  rw [Valuation.isEquiv_iff_valuationSubring]
+  -- `(comap ι V.valuation).valuationSubring = V.comap ι`.
+  have hVeq : V.valuation.valuationSubring = V := ValuationSubring.valuationSubring_valuation V
+  have h1 : (Valuation.comap ι V.valuation).valuationSubring = V.comap ι := by
+    ext x
+    rw [Valuation.mem_valuationSubring_iff, Valuation.comap_apply,
+      ← Valuation.mem_valuationSubring_iff, hVeq, ValuationSubring.mem_comap]
+  rw [h1]
+  -- Contraction `v.valuationSubring = V.comap ι`: `⊆` from `hV` (`ι(O) ⊆ V`); `⊇` from `O` being a
+  -- maximal valuation subring (`isMax_toLocalSubring`) dominated by `V` (`hV`).
   sorry
 
 universe uS in
