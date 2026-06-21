@@ -15,7 +15,6 @@ namespace Sinnott
 
 variable (p : ℕ) [hp : Fact p.Prime]
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **`LValueAtZeroFormula` is PROVEN**: for nontrivial even χ mod p (with
 p > 1), `LFunction χ 0 = 0`. Direct from mathlib's
 `ZMod.LFunction_apply_zero_of_even` since `χ 0 = 0` for nontrivial χ. -/
@@ -49,7 +48,7 @@ number cast lets us drop the `a = 0` summand on the left. -/
 private theorem sum_zmod_eq_sum_Ico_of_zero
     {f : ZMod p → ℂ} (h_zero : f (0 : ZMod p) = 0) :
     ∑ a : ZMod p, f a = ∑ a ∈ Finset.Ico 1 p, f ((a : ℕ) : ZMod p) := by
-  haveI : NeZero p := ⟨hp.out.ne_zero⟩
+  have : NeZero p := ⟨hp.out.ne_zero⟩
   have hp_pos : 0 < p := hp.out.pos
   rw [← Finset.sum_erase_add Finset.univ f (Finset.mem_univ (0 : ZMod p)),
     h_zero, add_zero]
@@ -98,7 +97,7 @@ This bridges the matrix-eigenvalue side of Sinnott's diagonalisation
 theorem evenLValueLogSum_eq_neg_DirichletLogSum_inv
     (χ : DirichletCharacter ℂ p) :
     BernoulliRegular.evenLValueLogSum p χ = -DirichletLogSum p χ⁻¹ := by
-  haveI : NeZero p := ⟨hp.out.ne_zero⟩
+  have : NeZero p := ⟨hp.out.ne_zero⟩
   have hp_pos : 0 < p := hp.out.pos
   unfold BernoulliRegular.evenLValueLogSum DirichletLogSum
   rw [neg_neg]
@@ -142,7 +141,7 @@ primitive `p`-th roots of unity in `ℂ`; mathlib's
 private theorem prod_one_sub_stdAddChar_eq_p :
     ∏ a ∈ Finset.Ico 1 p, ((1 : ℂ) - ZMod.stdAddChar (N := p) ((a : ℕ) : ZMod p)) =
       (p : ℂ) := by
-  haveI : NeZero p := ⟨hp.out.ne_zero⟩
+  have : NeZero p := ⟨hp.out.ne_zero⟩
   have hp_pos : 0 < p := hp.out.pos
   set ζ : ℂ := Complex.exp (2 * Real.pi * Complex.I / p) with hζ_def
   have hζ : IsPrimitiveRoot ζ p := Complex.isPrimitiveRoot_exp p hp.out.ne_zero
@@ -188,7 +187,7 @@ to `-log p` via the classical cyclotomic-product identity
 `∏_{a=1}^{p-1} 2|sin(πa/p)| = p`. -/
 theorem DirichletLogSum_principal_eq_neg_log :
     DirichletLogSum p (1 : DirichletCharacter ℂ p) = -((Real.log p : ℝ) : ℂ) := by
-  haveI : NeZero p := ⟨hp.out.ne_zero⟩
+  have : NeZero p := ⟨hp.out.ne_zero⟩
   have hp_pos : 0 < p := hp.out.pos
   unfold DirichletLogSum
   -- Step 1: replace (1 : DirichletCharacter) a with 1 for a ∈ Ico 1 p.
@@ -431,7 +430,7 @@ theorem gaussSum_mul_gaussSum_inv_eq_p
     gaussSum χ (ZMod.stdAddChar (N := p)) *
         gaussSum χ⁻¹ (ZMod.stdAddChar (N := p)) =
       (p : ℂ) := by
-  haveI : NeZero p := ⟨hp.out.ne_zero⟩
+  have : NeZero p := ⟨hp.out.ne_zero⟩
   have h_primitive : (ZMod.stdAddChar (N := p)).IsPrimitive :=
     ZMod.isPrimitive_stdAddChar p
   have h_card := gaussSum_mul_gaussSum_eq_card hχ_ne h_primitive
