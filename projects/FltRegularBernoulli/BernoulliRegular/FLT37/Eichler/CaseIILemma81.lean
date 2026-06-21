@@ -190,10 +190,7 @@ omit [NeZero p] in
 theorem two_mul_inv2_int (hp_odd : p ≠ 2) :
     (2 : ℤ) * ((p + 1) / 2 : ℕ) = (p : ℤ) + 1 := by
   have hnat := two_mul_succ_div_two (p := p) hp_odd
-  calc (2 : ℤ) * ((p + 1) / 2 : ℕ)
-      = ((2 * ((p + 1) / 2) : ℕ) : ℤ) := by push_cast; ring
-    _ = ((p + 1 : ℕ) : ℤ) := by rw [hnat]
-    _ = (p : ℤ) + 1 := by push_cast; ring
+  omega
 
 omit [NeZero p] in
 /-- The half-power exponent shift `halfExp d ≡ halfExp s + j (mod p)` whenever `s - d ≡ 2j (mod p)`.
