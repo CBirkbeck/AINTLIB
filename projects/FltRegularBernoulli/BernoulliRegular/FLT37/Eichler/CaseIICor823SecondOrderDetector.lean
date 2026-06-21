@@ -132,7 +132,7 @@ theorem samePrimeFiniteLogTerm_eq_zero_of_mem_pow_high_level
         subst hn2
         have hv0 : (2 : ℕ).factorization p = 0 := by
           rw [Nat.factorization_eq_zero_iff]
-          exact Or.inr (Or.inl (fun hdvd => by
+          exact Or.inr (Or.inl (fun hdvd ↦ by
             have := Nat.le_of_dvd (by norm_num) hdvd; omega))
         rw [hv0]; omega
       · -- `n ≥ 3`: `2m + (n-1) ≤ n*m`, and `v(n)(p-1) ≤ n-1`.
@@ -194,10 +194,10 @@ theorem valuedLambdaQuotientDworkCoeffModSq_mk_intCast_eq_zero
         dworkParameterPowerLinearMap p K
           (Pi.single (⟨0, hzero_idx⟩ : Fin (p - 1)) c') := by
     rw [dworkParameterPowerLinearMap_single_coeff]
-    simp only [Fin.val_mk, pow_zero, mul_one]
+    simp only [pow_zero, mul_one]
     rw [hc', map_intCast, map_intCast]
   rw [hsingle, dworkParameterPowerBasis_repr_powerLinearMap]
-  rw [Pi.single_eq_of_ne (fun hcontra => hk (by rw [hcontra]))]
+  rw [Pi.single_eq_of_ne (fun hcontra ↦ hk (by rw [hcontra]))]
   rw [map_zero]
 
 /-- The mod-`p²` `varpi^k` Dwork coordinate of a `λ^{2(p-1)}`-element vanishes (its coordinate
