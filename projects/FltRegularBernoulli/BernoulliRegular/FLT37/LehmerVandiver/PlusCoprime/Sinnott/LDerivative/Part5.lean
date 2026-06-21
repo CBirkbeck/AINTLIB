@@ -4,7 +4,6 @@ import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative.Par
 
 noncomputable section
 
-open Real Complex
 open scoped NumberField
 
 namespace BernoulliRegular
@@ -155,7 +154,6 @@ theorem exists_embedding_index
   -- Goal: exp(2πI · (a/p)) = stdAddChar (↑(unitOfCoprime a ha_cop) : ZMod p)
   rw [ZMod.coe_unitOfCoprime]
   -- Now: exp(2πI · (a/p)) = stdAddChar (a : ZMod p).
-  have h_coe : ((a : ZMod p) : ZMod p) = ((a : ℤ) : ZMod p) := by push_cast; rfl
   rw [show ((a : ℕ) : ZMod p) = ((a : ℤ) : ZMod p) from by push_cast; rfl]
   rw [ZMod.stdAddChar_coe (a : ℤ)]
   push_cast
@@ -244,7 +242,7 @@ theorem sinnottMatrixA_apply_eq_log_stdAddChar
   rw [Matrix.of_apply]
   -- The K-place corresponding to w.
   set w_K : NumberField.InfinitePlace K :=
-    (NumberField.IsCMField.equivInfinitePlace K).symm w.val with hw_K_def
+    (NumberField.IsCMField.equivInfinitePlace K).symm w.val
   -- Identify zeta_spec.toInteger with cyclotomicZetaInteger at the K-element level.
   have h_zeta_eq : ((((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K)) : K) =
       ((BernoulliRegular.cyclotomicZetaInteger (p := p) K : 𝓞 K) : K) := rfl
@@ -287,7 +285,7 @@ theorem sinnottMatrixB_apply_eq_log_stdAddChar
   unfold sinnottMatrixB
   rw [Matrix.of_apply]
   set w_K : NumberField.InfinitePlace K :=
-    (NumberField.IsCMField.equivInfinitePlace K).symm w.val with hw_K_def
+    (NumberField.IsCMField.equivInfinitePlace K).symm w.val
   -- Identify zeta_spec.toInteger with cyclotomicZetaInteger at the K-element level.
   have h_zeta_eq : ((((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K)) : K) =
       ((BernoulliRegular.cyclotomicZetaInteger (p := p) K : 𝓞 K) : K) := rfl
@@ -336,7 +334,7 @@ noncomputable def familyIndexAsUnit
       ((NumberField.IsCMField.units_rank_eq_units_rank
           (K := K)).trans
         (BernoulliRegular.units_rank_eq_prime_sub_three_div_two
-          (p := p) (K := K)))) with hj_def
+          (p := p) (K := K))))
   refine ZMod.unitOfCoprime (j + 2 : ℕ) ?_
   have h_p_prime : Nat.Prime p := hp.out
   have h_fin_lt : j.val < (p - 3) / 2 := Fin.isLt _
@@ -457,9 +455,7 @@ theorem sinnottMatrixB_apply_eq_convolutionMatrixLogNormEven
         (kplusEmbeddingIndexQuotient (p := p) K w.val) 1 := by
   rw [sinnottMatrixB_apply_eq_log_stdAddChar p K i w]
   unfold convolutionMatrixLogNormEven kplusEmbeddingIndexQuotient
-  rw [Matrix.of_apply]
-  rw [mul_one]
-  rw [convolutionLogNormDescended_apply_quotient]
+  rw [Matrix.of_apply, mul_one, convolutionLogNormDescended_apply_quotient]
 
 /-- **Sinnott (A - B)-matrix entries as differences of convolution-matrix
 entries**: the per-entry identification
@@ -816,7 +812,7 @@ theorem familyIndexAsUnit_val_in_range
       ((NumberField.IsCMField.units_rank_eq_units_rank
           (K := K)).trans
         (BernoulliRegular.units_rank_eq_prime_sub_three_div_two
-          (p := p) (K := K)))) with hj_def
+          (p := p) (K := K))))
   have h_fin_lt : j.val < (p - 3) / 2 := Fin.isLt _
   have h_p_prime : Nat.Prime p := hp.out
   have h_p_odd : Odd p := h_p_prime.odd_of_ne_two hp_odd
@@ -870,11 +866,7 @@ theorem familyIndexAsUnit_ne_one_and_neg_one
     have h_neg_one : ((-1 : (ZMod p)ˣ) : ZMod p).val = p - 1 := by
       change ((-1 : ZMod p)).val = p - 1
       haveI : NeZero p := ⟨h_p_prime.ne_zero⟩
-      haveI : NeZero (1 : ZMod p) := by
-        refine ⟨?_⟩
-        intro h_one
-        have : (1 : ZMod p) ≠ 0 := one_ne_zero
-        exact this h_one
+      haveI : NeZero (1 : ZMod p) := ⟨one_ne_zero⟩
       have h_v := ZMod.val_neg_of_ne_zero (a := (1 : ZMod p))
       have h_one_val : (1 : ZMod p).val = 1 := by
         rw [ZMod.val_one_eq_one_mod]
