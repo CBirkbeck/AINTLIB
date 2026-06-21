@@ -184,8 +184,8 @@ theorem exists_realCaseIIDvdZData37_of_Int_solution
   obtain ⟨m, D, hDx, hDy, hz_eq⟩ :=
     exists_realCaseIIData37_zRel_of_Int_solution hy_int hz_int hz_ne e
   -- `149 ∤ x, y` as `ZMod 149` non-vanishing.
-  have hx' : ¬ (x : ZMod 149) = 0 := fun h => hx_lv ((ZMod.intCast_zmod_eq_zero_iff_dvd x 149).mp h)
-  have hy' : ¬ (y : ZMod 149) = 0 := fun h => hy_lv ((ZMod.intCast_zmod_eq_zero_iff_dvd y 149).mp h)
+  have hx' : ¬ (x : ZMod 149) = 0 := fun h ↦ hx_lv ((ZMod.intCast_zmod_eq_zero_iff_dvd x 149).mp h)
+  have hy' : ¬ (y : ZMod 149) = 0 := fun h ↦ hy_lv ((ZMod.intCast_zmod_eq_zero_iff_dvd y 149).mp h)
   -- Lemma 9.7 at the base: `149 ∣ z` (the Furtwängler residue obstruction).
   have hz_lv_int : (z : ZMod 149) = 0 := by
     have he : (x : ZMod 149) ^ 37 + (y : ZMod 149) ^ 37 = (z : ZMod 149) ^ 37 := by
@@ -205,9 +205,9 @@ theorem exists_realCaseIIDvdZData37_of_Int_solution
     · exact hz'
   -- `D.x = (x : 𝓞 K) ∉ lv149`, `D.y = (y : 𝓞 K) ∉ lv149` (Lemma 9.6).
   have hDx_notMem : D.x ∉ lv149 := by
-    rw [hDx]; exact fun h => hx' ((caseII_intCast_mem_lv149_iff x).mp h)
+    rw [hDx]; exact fun h ↦ hx' ((caseII_intCast_mem_lv149_iff x).mp h)
   have hDy_notMem : D.y ∉ lv149 := by
-    rw [hDy]; exact fun h => hy' ((caseII_intCast_mem_lv149_iff y).mp h)
+    rw [hDy]; exact fun h ↦ hy' ((caseII_intCast_mem_lv149_iff y).mp h)
   exact ⟨m, ⟨{ toRealCaseIIData37 := D
                z_mem := hDz_mem
                x_notMem := hDx_notMem
@@ -358,7 +358,7 @@ theorem no_realCaseIIDvdZData37_of_dvdZDescentStep
     ¬ ∃ m : ℕ, Nonempty (RealCaseIIDvdZData37 m) := by
   classical
   rintro ⟨m, D⟩
-  let P : ℕ → Prop := fun n => Nonempty (RealCaseIIDvdZData37 n)
+  let P : ℕ → Prop := fun n ↦ Nonempty (RealCaseIIDvdZData37 n)
   have hP : ∃ n, P n := ⟨m, D⟩
   let n := Nat.find hP
   have hn : P n := Nat.find_spec hP
@@ -437,8 +437,8 @@ theorem exists_realCaseIIDvdZData37_of_caseII_int_solution
     · -- `37 ∣ a`: normal form `(b, -c, -a)`; non-`37` slots are `b, c`.
       have he' : b ^ 37 + (-c) ^ 37 = (-a) ^ 37 := by
         rw [hodd'.neg_pow, hodd'.neg_pow]; linarith [e]
-      have hb37 : ¬ (37 : ℤ) ∣ b := fun hb => h37c ha hb
-      have hc37 : ¬ (37 : ℤ) ∣ c := fun hc => h37ac ha hc
+      have hb37 : ¬ (37 : ℤ) ∣ b := fun hb ↦ h37c ha hb
+      have hc37 : ¬ (37 : ℤ) ∣ c := fun hc ↦ h37ac ha hc
       have hb_lv : ¬ (149 : ℤ) ∣ b := h_lemma96 b hb37 (Or.inr (Or.inl rfl))
       have hc_lv : ¬ (149 : ℤ) ∣ c := h_lemma96 c hc37 (Or.inr (Or.inr rfl))
       exact exists_realCaseIIDvdZData37_of_caseII_int_solution_lemma96
@@ -447,16 +447,16 @@ theorem exists_realCaseIIDvdZData37_of_caseII_int_solution
     · -- `37 ∣ b`: normal form `(-c, a, -b)`; non-`37` slots are `c, a`.
       have he' : (-c) ^ 37 + a ^ 37 = (-b) ^ 37 := by
         rw [hodd'.neg_pow, hodd'.neg_pow]; linarith [e]
-      have ha37 : ¬ (37 : ℤ) ∣ a := fun ha => h37c ha hb
-      have hc37 : ¬ (37 : ℤ) ∣ c := fun hc => h37bc hb hc
+      have ha37 : ¬ (37 : ℤ) ∣ a := fun ha ↦ h37c ha hb
+      have hc37 : ¬ (37 : ℤ) ∣ c := fun hc ↦ h37bc hb hc
       have ha_lv : ¬ (149 : ℤ) ∣ a := h_lemma96 a ha37 (Or.inl rfl)
       have hc_lv : ¬ (149 : ℤ) ∣ c := h_lemma96 c hc37 (Or.inr (Or.inr rfl))
       exact exists_realCaseIIDvdZData37_of_caseII_int_solution_lemma96
         (a := -c) (b := a) (c := -b) (by rwa [dvd_neg]) (by rwa [dvd_neg]) (by rwa [neg_ne_zero])
         he' (caseII_not_dvd_149_neg hc_lv) ha_lv
   · -- `37 ∣ c`: the producer's own normal form `(a, b, c)`; non-`37` slots are `a, b`.
-    have ha37 : ¬ (37 : ℤ) ∣ a := fun ha => h37ac ha hc
-    have hb37 : ¬ (37 : ℤ) ∣ b := fun hb => h37bc hb hc
+    have ha37 : ¬ (37 : ℤ) ∣ a := fun ha ↦ h37ac ha hc
+    have hb37 : ¬ (37 : ℤ) ∣ b := fun hb ↦ h37bc hb hc
     have ha_lv : ¬ (149 : ℤ) ∣ a := h_lemma96 a ha37 (Or.inl rfl)
     have hb_lv : ¬ (149 : ℤ) ∣ b := h_lemma96 b hb37 (Or.inr (Or.inl rfl))
     exact exists_realCaseIIDvdZData37_of_caseII_int_solution_lemma96 ha37 hc hc0 e ha_lv hb_lv
