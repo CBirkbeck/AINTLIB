@@ -29,7 +29,7 @@ theorem dworkParameterPowerLinearMap_coeff_mem_primeIdeal_of_eq_zero
   let I : Ideal S := dworkParameterIdeal p K
   let varpi : S := dworkParameter p K
   let term : Fin (p - 1) → S :=
-    fun j => algebraMap R₀ S (a j) * varpi ^ (j : ℕ)
+    fun j ↦ algebraMap R₀ S (a j) * varpi ^ (j : ℕ)
   have hsum_zero : ∑ j : Fin (p - 1), term j = 0 := by
     simpa [term, R₀, S, varpi, dworkParameterPowerLinearMap_apply] using ha
   have hmem_varpi : varpi ∈ I := by
@@ -51,7 +51,7 @@ theorem dworkParameterPowerLinearMap_coeff_mem_primeIdeal_of_eq_zero
           refine Ideal.sum_mem _ ?_
           intro j hj
           have hji : j ≠ i := (Finset.mem_erase.mp hj).1
-          have hne_nat : (j : ℕ) ≠ (i : ℕ) := fun hnat =>
+          have hne_nat : (j : ℕ) ≠ (i : ℕ) := fun hnat ↦
             hji (Fin.ext hnat)
           have hlt_or_gt : (j : ℕ) < (i : ℕ) ∨ (i : ℕ) < (j : ℕ) := by
             omega
@@ -134,7 +134,7 @@ theorem dworkParameterPowerLinearMap_mem_primeIdeal_smul_top_of_eq_zero
       (⊤ : Submodule (RationalPadicIntegerRing p)
         (Fin (p - 1) → RationalPadicIntegerRing p)) :=
   pi_mem_ideal_smul_top_of_forall_mem (rationalPadicPrimeIdeal p)
-    (fun i => dworkParameterPowerLinearMap_coeff_mem_primeIdeal_of_eq_zero
+    (fun i ↦ dworkParameterPowerLinearMap_coeff_mem_primeIdeal_of_eq_zero
       (p := p) (K := K) ha i)
 
 theorem exists_natCast_prime_smul_eq_of_mem_primeIdeal_smul_top
@@ -146,7 +146,7 @@ theorem exists_natCast_prime_smul_eq_of_mem_primeIdeal_smul_top
       (p : RationalPadicIntegerRing p) • b = a := by
   classical
   have hcoord : ∀ i, a i ∈ rationalPadicPrimeIdeal p :=
-    fun i => pi_apply_mem_of_mem_ideal_smul_top (rationalPadicPrimeIdeal p) ha i
+    fun i ↦ pi_apply_mem_of_mem_ideal_smul_top (rationalPadicPrimeIdeal p) ha i
   have hdiv : ∀ i, ∃ b : RationalPadicIntegerRing p,
       (p : RationalPadicIntegerRing p) * b = a i := by
     intro i
