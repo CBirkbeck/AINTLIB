@@ -549,10 +549,21 @@ isometry).  Feeding these through `carrierBridge` gives `carrierBridgeFull`, and
 capstone yields `iwasawa_main_conjecture_full_concrete` (`IwasawaProof/CapstoneConcrete.lean`,
 axiom-clean): both halves of {bpref "imc-vandiver"}[] with `Φ` discharged.
 
-The inputs that remain bundled are therefore exactly the *classical/analytic* ones: the class field
-theory (`CFTUnitsData`, below), the §12 analytic identification (`h12`), and — for the
-characteristic-ideal half only — the isotypic completeness $`\sum_\omega e_\omega = 1` over $`\Delta`
-(Fourier orthogonality over $`\Zp`, valid since $`\mu_{(p-1)/2}\subseteq\Zp` via Teichmüller).
+The isotypic completeness $`\sum_\omega e_\omega = 1` over $`\Delta` is likewise now **proved**
+(`isotypicIdempotent_sum_eq_one`, `Iwasawa/StructureTheory/Completeness.lean`): the "extend $`L`"
+assumption is discharged from `HasEnoughRootsOfUnity ℤ_p (exponent Δ)`, itself supplied by the
+Teichmüller roots $`\mu_{p-1}\subseteq\Zp` (the dual character orthogonality
+$`\sum_\omega \omega(a) = |\Delta|\,\delta_{a,1}` via `MulChar` duality and a reindexing argument).
+The remaining $`\Delta` typeclass instances (finiteness of the character group, and invertibility of
+$`|\Delta|` in $`\Zp` — using $`|\Delta| \mid p-1`) are derived too.
+
+Consequently the fully-reduced capstone `iwasawa_main_conjecture_full_concrete`
+(`IwasawaProof/CapstoneConcrete.lean`, axiom-clean) carries **no hypotheses beyond the genuinely
+classical/analytic inputs the project bundles by design**: the Galois data, the class field theory
+`CFTUnitsData`, the Vandiver vanishing, and the §12 analytic identification `h12`.  Everything else —
+the entire $`\Lam`-module structure theory, the Vandiver vanishing via Nakayama, the four-term
+collapse, the equivariant characteristic-ideal computation, the carrier bridge, and the isotypic
+completeness — is now proved.
 
 **Class field theory as a bundled input.** Global class field theory is not yet in Mathlib.
 Mirroring the source's own practice of citing {Informal.citet "washington"}[] for these classical
