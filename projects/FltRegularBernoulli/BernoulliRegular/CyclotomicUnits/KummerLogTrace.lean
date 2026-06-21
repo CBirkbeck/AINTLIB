@@ -66,7 +66,7 @@ theorem prod_valuedIntegerCyclotomicEquiv_kummerLogValuedCyclotomicUnit
             cyclotomicRingOfIntegersEquiv (p := p) K σ
               (FLT37.realCyclotomicUnit p K k)) :=
           (map_prod (algebraMap (𝓞 K) (ValuedIntegerRing p K))
-            (fun σ : CyclotomicUnitDelta p =>
+            (fun σ : CyclotomicUnitDelta p ↦
               cyclotomicRingOfIntegersEquiv (p := p) K σ
                 (FLT37.realCyclotomicUnit p K k))
             Finset.univ).symm
@@ -85,7 +85,7 @@ theorem prod_one_add_cyclotomic_kummerLogColumnFiniteLogArg
           Conjugation.valuedIntegerCyclotomicEquiv (p := p) K σ
             (kummerLogColumnFiniteLogArg (p := p) (K := K) hp_three a))) = 1 := by
   classical
-  let u : CyclotomicUnitDelta p → ValuedIntegerRing p K := fun σ =>
+  let u : CyclotomicUnitDelta p → ValuedIntegerRing p K := fun σ ↦
     Conjugation.valuedIntegerCyclotomicEquiv (p := p) K σ
       (kummerLogValuedCyclotomicUnit (p := p) (K := K) hp_three a :
         ValuedIntegerRing p K)
@@ -112,7 +112,7 @@ theorem samePrimeFiniteLogFinsetProductCoord_cyclotomic_kummerLogColumn_eq_zero
     (hp_three : 3 ≤ p) (a : Fin (kummerLogRank p)) :
     Conjugation.samePrimeFiniteLogFinsetProductCoord (p := p) (K := K)
         (Finset.univ : Finset (CyclotomicUnitDelta p))
-        (fun σ =>
+        (fun σ ↦
           Conjugation.valuedIntegerCyclotomicEquiv (p := p) K σ
             (kummerLogColumnFiniteLogArg (p := p) (K := K) hp_three a)) = 0 := by
   unfold Conjugation.samePrimeFiniteLogFinsetProductCoord
@@ -131,11 +131,11 @@ theorem sum_samePrimeFiniteLog_cyclotomic_kummerLogColumn_eq_zero
             (kummerLogColumnFiniteLogArg_mem_lambdaIdeal
               (p := p) (K := K) hp_three a))) = 0 := by
   classical
-  let x : CyclotomicUnitDelta p → ValuedIntegerRing p K := fun σ =>
+  let x : CyclotomicUnitDelta p → ValuedIntegerRing p K := fun σ ↦
     Conjugation.valuedIntegerCyclotomicEquiv (p := p) K σ
       (kummerLogColumnFiniteLogArg (p := p) (K := K) hp_three a)
   have hx : ∀ σ ∈ (Finset.univ : Finset (CyclotomicUnitDelta p)),
-      x σ ∈ lambdaIdeal p K := fun σ _hσ =>
+      x σ ∈ lambdaIdeal p K := fun σ _hσ ↦
     Conjugation.valuedIntegerCyclotomicEquiv_mem_lambdaIdeal
       (p := p) (K := K) σ
       (kummerLogColumnFiniteLogArg_mem_lambdaIdeal (p := p) (K := K) hp_three a)
@@ -225,7 +225,7 @@ theorem dworkParameterPowerLinearMap_repr
     dworkParameterPowerLinearMap p K ((dworkParameterPowerBasis p K).repr x) = x := by
   rw [dworkParameterPowerLinearMap_apply]
   conv_rhs => rw [← (dworkParameterPowerBasis p K).sum_repr x]
-  refine Finset.sum_congr rfl fun i _ => ?_
+  refine Finset.sum_congr rfl fun i _ ↦ ?_
   rw [dworkParameterPowerBasis_apply]
   exact (Algebra.smul_def _ _).symm
 
@@ -280,25 +280,25 @@ theorem dworkParameterPowerBasis_repr_cyclotomic_zero
       (dworkParameterPowerBasis p K).repr x (dworkEvenPowerIndexZero (p := p)).1 := by
   classical
   let c : Fin (p - 1) → RationalPadicIntegerRing p :=
-    fun i => (dworkParameterPowerBasis p K).repr x i
+    fun i ↦ (dworkParameterPowerBasis p K).repr x i
   have hx : dworkParameterPowerLinearMap p K c = x :=
     by simpa [c] using dworkParameterPowerLinearMap_repr (p := p) (K := K) x
   have haction :
       Conjugation.dworkCompleteCyclotomicEquiv (p := p) K σ x =
         dworkParameterPowerLinearMap p K
-          (fun i => rationalPadicTeichmuller p (σ : ZMod p) ^ (i : ℕ) * c i) := by
+          (fun i ↦ rationalPadicTeichmuller p (σ : ZMod p) ^ (i : ℕ) * c i) := by
     rw [← hx]
     exact Conjugation.dworkCompleteCyclotomicEquiv_powerLinearMap
       (p := p) (K := K) σ c
   have hcoeff :
-      (fun i : Fin (p - 1) =>
+      (fun i : Fin (p - 1) ↦
         (dworkParameterPowerBasis p K).repr
           (Conjugation.dworkCompleteCyclotomicEquiv (p := p) K σ x) i) =
-        (fun i : Fin (p - 1) =>
+        (fun i : Fin (p - 1) ↦
           rationalPadicTeichmuller p (σ : ZMod p) ^ (i : ℕ) * c i) := by
     apply dworkParameterPowerLinearMap_injective (p := p) (K := K)
     rw [show dworkParameterPowerLinearMap p K
-          (fun i : Fin (p - 1) =>
+          (fun i : Fin (p - 1) ↦
             (dworkParameterPowerBasis p K).repr
               (Conjugation.dworkCompleteCyclotomicEquiv (p := p) K σ x) i) =
         Conjugation.dworkCompleteCyclotomicEquiv (p := p) K σ x by
@@ -342,7 +342,7 @@ theorem kummerLogFixedColumn_constantCoeff_eq_zero
   have hcard_mul :
       (Fintype.card (CyclotomicUnitDelta p) : RationalPadicIntegerRing p) * c0 = 0 := by
     have hcoord := congrArg
-      (fun y : DworkCompleteIntegerRing p K =>
+      (fun y : DworkCompleteIntegerRing p K ↦
         (dworkParameterPowerBasis p K).repr y (dworkEvenPowerIndexZero (p := p)).1)
       htrace
     change (dworkParameterPowerBasis p K).repr
@@ -389,7 +389,7 @@ units by the same-prime finite logarithm construction in the Dwork completion. -
 noncomputable def concreteKummerLogVector
     [NumberField.IsCMField K] (hp_three : 3 ≤ p) :
     KummerLogVector (p := p) (K := K) :=
-  fun a => kummerLogFixedColumn (p := p) (K := K) hp_three a
+  fun a ↦ kummerLogFixedColumn (p := p) (K := K) hp_three a
 
 @[simp]
 theorem concreteKummerLogVector_apply
