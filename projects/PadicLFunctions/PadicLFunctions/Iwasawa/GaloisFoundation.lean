@@ -357,4 +357,32 @@ abbrev XinfPlus : Type := MinfPlus p ≃ₐ[FinfPlus p] MinfPlus p
 prime (Cor 13.16(i)). A genuine relative Galois group. -/
 abbrev YinfPlus : Type := LinfPlus p ≃ₐ[FinfPlus p] LinfPlus p
 
+/-! #### `L⁺ ⊆ M⁺` — the containment underlying the Galois SES `0→Gal(M⁺_∞/L⁺_∞)→X⁺_∞→Y⁺_∞→0`
+
+An unramified-everywhere layer is in particular unramified outside `p`, so every admissible-`L` layer
+is an admissible-`M` layer (reusing mathlib's `Algebra.formallyUnramified_iff_forall`: global
+unramified ⟺ unramified at every prime). Hence `L⁺ₙ ⊆ M⁺ₙ` and `L⁺_∞ ⊆ M⁺_∞`. -/
+
+open NumberField in
+/-- Unramified everywhere ⟹ unramified outside `p`: every `L⁺`-layer is an `M⁺`-layer. -/
+theorem isAdmissibleM_of_isAdmissibleL (n : ℕ) (L : IntermediateField (FPlus p n) Om)
+    (hL : IsAdmissibleL p n L) : IsAdmissibleM p n L := by
+  obtain ⟨hfin, hgal, hab, hpp, hunr⟩ := hL
+  refine ⟨hfin, hgal, hab, hpp, ?_⟩
+  intro P _ _
+  haveI := numberField_of_finite_layer p n L
+  haveI : Algebra.FormallyUnramified (𝓞 (FPlus p n)) (𝓞 L) := hunr.formallyUnramified
+  exact Algebra.formallyUnramified_iff_forall.mp ‹_› ⟨P, ‹_›⟩
+
+/-- `L⁺ₙ ⊆ M⁺ₙ`. -/
+theorem LPlusN_le_MPlusN (n : ℕ) : LPlusN p n ≤ MPlusN p n :=
+  iSup₂_le fun L hL => le_iSup₂_of_le L (isAdmissibleM_of_isAdmissibleL p n L hL) le_rfl
+
+/-- `L⁺_∞ ⊆ M⁺_∞`. -/
+theorem LinfPlus_le_MinfPlus : LinfPlus p ≤ MinfPlus p := by
+  rw [LinfPlus, MinfPlus, IntermediateField.adjoin_le_iff]
+  refine Set.iUnion_subset fun n => (SetLike.coe_subset_coe.mpr (LPlusN_le_MPlusN p n)).trans ?_
+  exact (Set.subset_iUnion (fun n => (↑(MPlusN p n) : Set Om)) n).trans
+    (IntermediateField.subset_adjoin _ _)
+
 end Iwasawa.GaloisFoundation
