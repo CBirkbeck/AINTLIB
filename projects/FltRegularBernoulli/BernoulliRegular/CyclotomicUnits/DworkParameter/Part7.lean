@@ -2,6 +2,22 @@ module
 
 public import BernoulliRegular.CyclotomicUnits.DworkParameter.Part6
 
+/-!
+# The corrected Dwork parameter: same-prime finite Artin--Hasse logarithm
+
+This file assembles the finite same-prime Artin--Hasse logarithm
+`samePrimeFiniteArtinHasseLog` and identifies it with the homogeneous
+degree-sum expansion built from the Artin--Hasse exponential coordinates,
+culminating in `samePrimeFiniteLog_finiteArtinHasseExpCoord_eq_finiteArtinHasseLog`.
+
+It then specialises this machinery to the Dwork inverse-parameter approximants
+`dworkParameterApprox`, and develops the evaluation of integral-coefficient
+power series at lambda-adically small completed elements
+(`evalIntegralPowerSeriesMod`, `evalIntegralPowerSeries`), together with the
+compatibility of the truncation approximations modulo powers of the principal
+`lambda`-ideal.
+-/
+
 @[expose] public section
 
 noncomputable section
@@ -43,7 +59,6 @@ theorem samePrimeFiniteArtinHasseLog_eq_sum_range_of_le {N M : ℕ} (hNM : N ≤
   exact samePrimeFiniteArtinHasseLogTerm_eq_zero_of_succ_le_index
     (p := p) (K := K) hx hNr
 
-set_option linter.style.longLine false in
 theorem samePrimeFiniteLog_finiteArtinHasseExpCoord_eq_homogeneous_support_sum
     (N : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     samePrimeFiniteLog (p := p) (K := K) N
@@ -111,8 +126,7 @@ theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousTerm_eq_zero_of_not_mem_s
                   hcoeff_zero hcoeff_s hzero_s
         _ = 0 := samePrimeNatDivEval_zero (p := p) (K := K) hn hzero_s
     rw [samePrimeFiniteArtinHasseExpCoordLogHomogeneousTerm_eq_signed_eval
-      (p := p) (K := K) N n d hx hn hnd]
-    rw [heval_zero]
+      (p := p) (K := K) N n d hx hn hnd, heval_zero]
     simp
   · simp [samePrimeFiniteArtinHasseExpCoordLogHomogeneousTerm,
       samePrimeFiniteArtinHasseExpCoordLogHomogeneousCore, hn, hnd]
@@ -136,9 +150,9 @@ theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousTerm_eq_zero_of_cutoff_le
     have hden : n.factorization p * (p - 1) ≤ d :=
       samePrimeFiniteArtinHasse_den_exponent_le (p := p) hn hnd
     rw [samePrimeFiniteArtinHasseExpCoordLogHomogeneousTerm_eq_signed_eval
-      (p := p) (K := K) N n d hx hn hnd]
-    rw [samePrimeNatDivEvalAtDegree_eq_zero_of_cutoff_le
-      (p := p) (K := K) (N := N) (n := n) (d := d) hn hnd hcut hcoeff hden]
+      (p := p) (K := K) N n d hx hn hnd,
+      samePrimeNatDivEvalAtDegree_eq_zero_of_cutoff_le
+        (p := p) (K := K) (N := N) (n := n) (d := d) hn hnd hcut hcoeff hden]
     simp
   · simp [samePrimeFiniteArtinHasseExpCoordLogHomogeneousTerm,
       samePrimeFiniteArtinHasseExpCoordLogHomogeneousCore, hn, hnd]
@@ -179,7 +193,6 @@ theorem samePrimeFiniteArtinHasseLogTerm_eq_zero_of_cutoff_le_pow
   exact samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_zero_of_cutoff_le
     (p := p) (K := K) N (p ^ r) hx hcut
 
-set_option linter.style.longLine false in
 theorem samePrimeFiniteLogTerm_finiteArtinHasseExpCoord_eq_homogeneous_cutoff_sum
     (N n : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     samePrimeFiniteLogTerm (p := p) (K := K) N n
@@ -232,7 +245,6 @@ theorem samePrimeFiniteLogTerm_finiteArtinHasseExpCoord_eq_homogeneous_cutoff_su
     _ = ∑ d ∈ (P ^ n).support ∪ Finset.range C, f d := hsupport_union
     _ = ∑ d ∈ Finset.range C, f d := hrange_union.symm
 
-set_option linter.style.longLine false in
 theorem samePrimeFiniteLog_finiteArtinHasseExpCoord_eq_homogeneous_degree_sum_range
     (N : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     samePrimeFiniteLog (p := p) (K := K) N
@@ -313,7 +325,6 @@ private theorem le_p_pow_self (r : ℕ) : r ≤ p ^ r := by
   have hpow : 2 ^ r ≤ p ^ r := Nat.pow_le_pow_left htwo r
   exact (Nat.le_of_lt r.lt_two_pow_self).trans hpow
 
-set_option linter.style.longLine false in
 theorem samePrimeFiniteArtinHasseLog_eq_homogeneous_degree_sum_range
     (N : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     samePrimeFiniteArtinHasseLog (p := p) (K := K) N x hx =
@@ -385,7 +396,6 @@ theorem samePrimeFiniteArtinHasseLog_eq_homogeneous_degree_sum_range
     _ = ∑ d ∈ powSet.image (fun r : ℕ => p ^ r), degreeTerm d := himage_sum
     _ = ∑ d ∈ Finset.range C, degreeTerm d := himage_to_range
 
-set_option linter.style.longLine false in
 theorem samePrimeFiniteLog_finiteArtinHasseExpCoord_eq_finiteArtinHasseLog
     (N : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     samePrimeFiniteLog (p := p) (K := K) N
@@ -420,8 +430,7 @@ theorem dworkParameterApprox_eq_sum_range (N : ℕ) :
 theorem integralInverseSeries_coeff_zero :
     (PowerSeries.coeff (R := ValuedIntegerRing p K) 0)
         (integralInverseSeries p K) = 0 := by
-  rw [integralInverseSeries]
-  rw [Furtwaengler.DieudonneDwork.IsRIntegralPS.coeff_mapTo]
+  rw [integralInverseSeries, Furtwaengler.DieudonneDwork.IsRIntegralPS.coeff_mapTo]
   have hcoeff0 :
       (PowerSeries.coeff (R := ℚ) 0) (FormalDwork.inverseSeries p) = 0 := by
     rw [PowerSeries.coeff_zero_eq_constantCoeff_apply]
@@ -654,8 +663,7 @@ theorem evalIntegralPowerSeriesMod_factor_eq
           (PowerSeries.map (Ideal.Quotient.mk (I ^ N)) F)).eval₂
             (RingHom.id (R ⧸ I ^ N)) (AdicCompletion.evalₐ I N x)) =
       ∑ n ∈ Finset.range N, term n
-    rw [PowerSeries.eval₂_trunc_eq_sum_range]
-    rw [map_sum]
+    rw [PowerSeries.eval₂_trunc_eq_sum_range, map_sum]
     refine Finset.sum_congr rfl ?_
     intro n _hn
     have hfactor :
