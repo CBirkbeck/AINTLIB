@@ -173,7 +173,7 @@ theorem caseIIAnchorSupportedDescent37_target_subset_z
   have h𝔞₀_dvd_z : 𝔞₀ ∣ Ideal.span ({D.z} : Set (𝓞 (CyclotomicField 37 ℚ))) :=
     caseII_a_eta_zero_dvd_z D.toCaseIIData37 (by decide)
   have h𝔞₀_ne : 𝔞₀ ≠ 0 :=
-    fun h0 => hz_ne (by rw [h0] at h𝔞₀_dvd_z; exact zero_dvd_iff.mp h𝔞₀_dvd_z)
+    fun h0 ↦ hz_ne (by rw [h0] at h𝔞₀_dvd_z; exact zero_dvd_iff.mp h𝔞₀_dvd_z)
   intro p hp_mem
   rw [Multiset.mem_toFinset] at hp_mem ⊢
   exact Multiset.subset_of_le
