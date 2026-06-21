@@ -163,8 +163,7 @@ theorem caseIILeadingExponent_completedLogArg_mem_lambdaIdeal_pow_pred
   have hpow_eq : Ideal.span ({(37 : ValuedIntegerRing 37 (CyclotomicField 37 ℚ))} :
       Set (ValuedIntegerRing 37 (CyclotomicField 37 ℚ))) = I := by
     have h := span_natCast_prime_eq_lambdaIdeal_pow_pred (p := 37) (K := CyclotomicField 37 ℚ)
-    rw [hI]
-    rw [show (37 : ValuedIntegerRing 37 (CyclotomicField 37 ℚ)) =
+    rw [hI, show (37 : ValuedIntegerRing 37 (CyclotomicField 37 ℚ)) =
         ((37 : ℕ) : ValuedIntegerRing 37 (CyclotomicField 37 ℚ)) from by norm_cast]
     convert h using 2
   -- The membership-in-`(37)` statement, used repeatedly.
@@ -190,8 +189,7 @@ theorem caseIILeadingExponent_completedLogArg_mem_lambdaIdeal_pow_pred
       rw [hKunit]; rfl
     have hcong := congrArg f hw
     rw [map_sub, map_mul] at hcong
-    rw [hXval]
-    rw [show (37 : ValuedIntegerRing 37 (CyclotomicField 37 ℚ)) =
+    rw [hXval, show (37 : ValuedIntegerRing 37 (CyclotomicField 37 ℚ)) =
         f (37 : 𝓞 (CyclotomicField 37 ℚ)) from by rw [map_ofNat],
       show ((c : ValuedIntegerRing 37 (CyclotomicField 37 ℚ))) =
         f (c : 𝓞 (CyclotomicField 37 ℚ)) from by rw [map_intCast]]
@@ -289,9 +287,9 @@ theorem caseIILeadingExponent_omega32_of_regular_components_zero
   -- The decomposition collapses to the single `j = 15` term.
   have hcollapse : x = c 15 • caseIIConjugateResidue_eigenvector 15 := by
     rw [h_decomp]
-    refine Finset.sum_eq_single (15 : Fin 18) (fun j _ hj => ?_) (fun h => ?_)
-    · rw [h_reg j hj, zero_smul]
-    · exact absurd (Finset.mem_univ _) h
+    refine Finset.sum_eq_single (15 : Fin 18) (fun j _ hj => ?_)
+      (fun h => absurd (Finset.mem_univ _) h)
+    rw [h_reg j hj, zero_smul]
   rw [hcollapse]
   exact Submodule.smul_mem _ _ caseIIConjugateResidue_eigenvector_15_mem_omega32
 
