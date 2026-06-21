@@ -1,8 +1,6 @@
 import BernoulliRegular.FLT37.Eichler.CaseIICor823Level71DworkSpecializedSound
 import BernoulliRegular.FLT37.Eichler.CaseIICor823Level71Deg68OnwardDischarge
 
-set_option linter.style.longLine false
-
 /-!
 # The deg-`≠32,68` slice-vanishing: the `varpi^{32}` Dwork power-basis fold (mod `37²`)
 
