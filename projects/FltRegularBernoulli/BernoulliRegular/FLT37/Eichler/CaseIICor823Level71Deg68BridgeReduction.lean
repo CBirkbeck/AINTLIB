@@ -1,8 +1,6 @@
 import BernoulliRegular.FLT37.Eichler.CaseIICor823CoeffCubePrecisionCompat
 import BernoulliRegular.FLT37.Eichler.CaseIICor823Level71Deg68ModCubeRelation
 
-set_option linter.style.longLine false
-
 /-!
 # The precision-bridge residual reduced to a single same-level (`72`) deg-`68` slice-coordinate
 # agreement, via the unconditional coordinate-functional precision compatibility
