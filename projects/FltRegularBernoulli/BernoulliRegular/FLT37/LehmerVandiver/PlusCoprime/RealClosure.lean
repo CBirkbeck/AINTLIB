@@ -79,7 +79,7 @@ theorem complexConj_zeta_pow_sub_one_prod_eq
       ∏ b ∈ Ico 1 ((p - 1) / 2 + 1),
         ((((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (p - 1)) ^ b - 1) ^ f b := by
   rw [map_prod]
-  refine Finset.prod_congr rfl fun b _ => ?_
+  refine Finset.prod_congr rfl fun b _ ↦ ?_
   rw [map_pow, map_sub, map_pow, map_one]
   -- Goal: σ(ζ)^b = (ζ ^ (p - 1))^b; use complexConj_apply_zeta.
   rw [complexConj_apply_zeta (p := p) (K := K)]
@@ -163,7 +163,7 @@ theorem zeta_pow_sub_one_double_prod_eq_pollaczekUnitPlus_pow_four
             ((pollaczekUnit p K i : 𝓞 K) ^ 4)) :=
     congrArg (ringOfIntegersComplexConj K) h_bare
   rw [map_mul] at h_sigma_app
-  rw [complexConj_zeta_pow_sub_one_prod_eq p K (fun b => 4 * b ^ (p - 1 - i))] at h_sigma_app
+  rw [complexConj_zeta_pow_sub_one_prod_eq p K (fun b ↦ 4 * b ^ (p - 1 - i))] at h_sigma_app
   rw [complexConj_zeta_sub_one_pow_eq p K
     (4 * ∑ b ∈ Ico 1 ((p - 1) / 2 + 1), b ^ (p - 1 - i))] at h_sigma_app
   -- Now h_sigma_app : LHS_sigma = (ζ^{p-1} - 1)^{4S} · σ(E^4)
@@ -235,7 +235,7 @@ theorem lehmerVandiverPrime_quotient_complexConj_lhs_eq_of_exp
           ((((t : ZMod ℓ) ^ k).val : ℕ) ^ ((p - 1) * b) - 1 :
             𝓞 (CyclotomicField p ℚ)) ^ f b) := by
   rw [map_prod, map_prod]
-  refine Finset.prod_congr rfl fun b _ => ?_
+  refine Finset.prod_congr rfl fun b _ ↦ ?_
   -- Rewrite (ζ^{p-1})^b to ζ^{(p-1)·b}
   rw [← pow_mul]
   rw [map_pow, map_pow]
@@ -278,9 +278,9 @@ theorem lehmerVandiverPrime_quotient_double_squared_bridge_substituted
   -- `lehmerVandiverPrime_quotient_half_range_eq_of_exp`,
   -- σ-applied via the new `lehmerVandiverPrime_quotient_complexConj_lhs_eq_of_exp`.
   have h_lhs_bare := LehmerVandiver.lehmerVandiverPrime_quotient_half_range_eq_of_exp
-    p ℓ k hℓ ht_coprime ht_ne (fun b => 4 * b ^ (p - 1 - i))
+    p ℓ k hℓ ht_coprime ht_ne (fun b ↦ 4 * b ^ (p - 1 - i))
   have h_lhs_sigma := lehmerVandiverPrime_quotient_complexConj_lhs_eq_of_exp
-    p ℓ k hℓ ht_coprime ht_ne (fun b => 4 * b ^ (p - 1 - i))
+    p ℓ k hℓ ht_coprime ht_ne (fun b ↦ 4 * b ^ (p - 1 - i))
   -- Substitute prefactor: bare via `lehmerVandiverPrime_quotient_zeta_sub_one_pow_eq`,
   -- σ-applied via `lehmerVandiverPrime_quotient_zeta_pow_sub_one_eq` at index p-1.
   have h_pre_bare := LehmerVandiver.lehmerVandiverPrime_quotient_zeta_sub_one_pow_eq
@@ -383,7 +383,7 @@ theorem flt37_double_squared_bridge_lhs_unreduced_eq_reduced :
           ((4 * b^4) % 148)) := by
   haveI : Fact (Nat.Prime 149) := ⟨by decide⟩
   -- (37-1)/2 + 1 = 19, (37-1)·b = 36·b, 37-1-32 = 4
-  refine Finset.prod_congr rfl fun b hb => ?_
+  refine Finset.prod_congr rfl fun b hb ↦ ?_
   obtain ⟨hb1, hb2⟩ := Finset.mem_Ico.mp hb
   -- Fermat reduction on the outer exponent: x^m = x^(m % 148) for x ≠ 0.
   have h_base_ne : ∀ b' ∈ Finset.Ico 1 19,
@@ -468,7 +468,7 @@ theorem flt37_phi_q_pollaczekUnitPlus_pow_four_eq_lhs_unreduced
           ((((2 : ZMod 149)^4)^b - 1) * (((2 : ZMod 149)^4)^((37 - 1) * b) - 1)) ^
             (4 * b ^ (37 - 1 - 32))) := by
     rw [← Finset.prod_mul_distrib]
-    refine Finset.prod_congr rfl fun b _ => ?_
+    refine Finset.prod_congr rfl fun b _ ↦ ?_
     rw [mul_pow]
   -- Apply: (Φ(Q(plus)))^4 = LHS_split, and identify LHS_split = combined LHS.
   rw [← h_lhs_combine, h_bridge, h_pre, one_mul]
