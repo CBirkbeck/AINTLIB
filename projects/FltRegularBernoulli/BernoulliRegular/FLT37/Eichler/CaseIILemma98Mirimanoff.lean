@@ -49,15 +49,14 @@ It is neither vacuously true (its `ρ_a`-reality conclusion is a real constraint
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Finset Polynomial
+open NumberField IsCyclotomicExtension Polynomial
 
 namespace BernoulliRegular.FLT37.Eichler
 
-open FLT37 FLT37.LehmerVandiver.CaseII BernoulliRegular
+open FLT37.LehmerVandiver.CaseII
 
 /-! ## The step-5 producer residual over the Case-II descent -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **Washington Lemma 9.8 step-5 `ρ_a`-reality producer for `p = 37`** (a `def … : Prop`,
 **not** an
 axiom) — the **smallest genuine analytic core** of the Mirimanoff congruence.
@@ -91,7 +90,6 @@ def MirimanoffRhoRealityProducer37
 
 /-! ## Discharge of `Lemma98MirimanoffPthPower37` -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **`Lemma98MirimanoffPthPower37` from the step-5 producer** (proven, axiom-clean *given*
 `MirimanoffRhoRealityProducer37`).
 
@@ -104,28 +102,21 @@ theorem caseII_lemma98Mirimanoff_of_rhoReality
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
     (h_producer : MirimanoffRhoRealityProducer37) :
     Lemma98MirimanoffPthPower37 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  haveI : NeZero (37 : ℕ) := ⟨by decide⟩
-  unfold MirimanoffRhoRealityProducer37 at h_producer
   intro hV hSO m D η hη_mem hη_ne hx hy hsum
   -- `η^37 = 1`, so `η = ζ^i` for some `i < 37`.
-  have hη_pow : η ^ 37 = 1 := by
-    rw [mem_nthRootsFinset (by decide : 0 < 37)] at hη_mem
-    exact hη_mem
+  have hη_pow : η ^ 37 = 1 := (mem_nthRootsFinset (by decide) _).mp hη_mem
   obtain ⟨i, hi_lt, hi_eq⟩ :=
     (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger_isPrimitiveRoot.eq_pow_of_pow_eq_one hη_pow
   -- `i ≠ 0` (else `η = ζ^0 = 1`), so `(i : ZMod 37) ≠ 0`.
   have hi_ne : (i : ZMod 37) ≠ 0 := by
     rw [Ne, ZMod.natCast_eq_zero_iff]
     intro hdvd
-    have : i = 0 := by omega
-    rw [this, pow_zero] at hi_eq
+    rw [show i = 0 by omega, pow_zero] at hi_eq
     exact hη_ne hi_eq.symm
-  -- The producer gives `MirimanoffRhoReality37 (i : ZMod 37)`.
-  have hρ : MirimanoffRhoReality37 (i : ZMod 37) :=
-    h_producer hV hSO D hη_mem hη_ne hx hy hsum i hi_eq
-  -- The proven telescoping + σ-collapse make `E₃₂` a `37`-th power mod `lv149`.
-  exact caseII_E32_isPthPower_of_rhoReality hρ hi_ne
+  -- The producer gives `MirimanoffRhoReality37 (i : ZMod 37)`, and the proven telescoping +
+  -- σ-collapse then make `E₃₂` a `37`-th power mod `lv149`.
+  exact caseII_E32_isPthPower_of_rhoReality
+    (h_producer hV hSO D hη_mem hη_ne hx hy hsum i hi_eq) hi_ne
 
 /-! ## Capstone: the genuine Washington Lemma 9.8 from the single producer residual
 
@@ -133,7 +124,6 @@ Combining the discharge above with the proven contradiction half `caseIIThm95_en
 (`Q₃₂⁴ ≢ 1`), the full Washington Lemma 9.8 (`ℓ ∣ z ⟹ ℓ ∣ (ω+θ)`, i.e. the special index `j = 0`)
 holds *given only* the single step-5 producer residual `MirimanoffRhoRealityProducer37`. -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **Washington Lemma 9.8 for `p = 37`, from the single step-5 residual** (proven, axiom-clean
 *given* `MirimanoffRhoRealityProducer37`).
 
