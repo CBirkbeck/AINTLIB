@@ -7,6 +7,7 @@ import PadicLFunctions.PadicExp
 import PadicLFunctions.Iwasawa.PlusPart
 import PadicLFunctions.Interpolation.Branches
 import Mathlib.Topology.Algebra.ContinuousMonoidHom
+import Mathlib.RingTheory.RootsOfUnity.EnoughRootsOfUnity
 import Mathlib.Topology.Algebra.Module.Compact
 import Mathlib.Topology.ContinuousMap.Units
 
@@ -387,6 +388,13 @@ abbrev Delta (hp2 : p ≠ 2) : Type _ :=
 /-- `Δ` is a finite type (quotient of the finite `μ_{p−1}`). -/
 noncomputable instance instFintypeDelta (hp2 : p ≠ 2) : Fintype (Delta p hp2) :=
   Fintype.ofFinite _
+
+/-- `ℤ_[p]` has enough `(p−1)`-th roots of unity (a primitive one from Teichmüller,
+`PadicInt.exists_primitiveRoot_card_sub_one`; the roots of an integral domain are cyclic).  This is
+the source of the `μ_{(p−1)/2} ⊆ ℤ_[p]` needed for the isotypic completeness `∑_ω e_ω = 1` over `Δ`. -/
+instance instHasEnoughRootsOfUnity : HasEnoughRootsOfUnity ℤ_[p] (p - 1) := by
+  haveI : NeZero (p - 1) := ⟨Nat.sub_ne_zero_of_lt hp.out.one_lt⟩
+  exact ⟨PadicInt.exists_primitiveRoot_card_sub_one p, rootsOfUnity.isCyclic ℤ_[p] (p - 1)⟩
 
 /-- Under `unitsSplitEquiv`, `-1 ↦ (negOneT, 1)` — it lives purely in the `μ_{p−1}` factor. -/
 theorem unitsSplitEquiv_neg_one (hp2 : p ≠ 2) :
