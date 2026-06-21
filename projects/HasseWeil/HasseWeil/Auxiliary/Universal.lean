@@ -44,7 +44,6 @@ open Polynomial
 
 variable {R : Type*} [CommRing R] {W' : WeierstrassCurve.Affine R}
 
-set_option backward.isDefEq.respectTransparency false in
 lemma algebraMap_poly_injective : Function.Injective (algebraMap R[X] W'.CoordinateRing) :=
   (injective_iff_map_eq_zero _).mpr fun p hp ↦ And.left <|
     smul_basis_eq_zero (W' := W') (q := 0) <| by
