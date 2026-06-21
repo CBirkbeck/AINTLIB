@@ -75,8 +75,7 @@ algebraMap(x+y) = η₀ · Λ^e · ρ₀³⁷,     Λ = (1−ζ_spec)(1−ζ_spe
 holds with `η₀ : Kˣ` a **real** unit (`complexConj K η₀ = η₀`).
 
 This produces precisely the `hanchor` and `hη0real` inputs of
-`washington_section91_descended_equation`.  STATEMENT ONLY (Step 2.5); the proof — the `Cl(K⁺)`
-Vandiver `orderOf`-coprimality argument from `Sinnott.flt37_not_dvd_hPlus` — is the leaf body. -/
+`washington_section91_descended_equation`. -/
 theorem caseII_anchor_real_rho0
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     {m : ℕ} (D : RealCaseIIData37 (CyclotomicField 37 ℚ) m)
@@ -98,7 +97,6 @@ theorem caseII_anchor_real_rho0
             ((1 - (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).unit'.1) *
               (1 - (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).unit'.1 ^ 36))) ^ e *
           algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) ρ0 ^ 37 :=
-  -- PROVEN (Washington §9.1 p.169): the real anchor via `Cl(K⁺)`-Vandiver (`37 ∤ h⁺`).
   caseII_anchor_real_rho0_impl D hcop
 
 /-! ## L2 — the real factor units `η_a` (Washington p.170–171, Lemmas 9.1 + 9.2, `37 ∤ h⁺`) -/
@@ -118,9 +116,7 @@ x + η³⁶·y  = (1 − η³⁶) · η_a · (σρ_a)³⁷.
 ```
 
 This produces precisely the `hfa_pos`/`hfa_neg` inputs of `washington_section91_descended_equation`
-(and, reused at the second root, `hfb_pos`/`hfb_neg`).  STATEMENT ONLY (Step 2.5); the proof — the
-Lemma-9.1 unramifiedness + Lemma-9.2 `37`-th-power + `(37+1)/2`-power real-unit extraction — is the
-leaf body. -/
+(and, reused at the second root, `hfb_pos`/`hfb_neg`). -/
 theorem caseII_factor_eq_real_eta
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     {m : ℕ} (D : RealCaseIIData37 (CyclotomicField 37 ℚ) m)
@@ -144,20 +140,15 @@ theorem caseII_factor_eq_real_eta
         (1 - algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) ((η : 𝓞 _) ^ 36)) *
           (η_a : CyclotomicField 37 ℚ) *
           (complexConj (CyclotomicField 37 ℚ) ρ_a) ^ 37 :=
-  -- PROVEN (Washington §9.1 pp.170–171): the proven factor producer
-  -- `caseII_section91_factorEquations` already certifies the **real** factor unit `η_a` (it is
-  -- `η'^{(37+1)/2}` with `η'` real, the `(p+1)/2`-power extraction) together with the two
-  -- cleared-denominator factor equations.  Its conclusion is verbatim this L2 statement; the only
-  -- non-proven input it needed, the product half `CaseIISection91ProductHalf37`, is discharged by
-  -- the proven `caseIISection91ProductHalf37_proven`.  So L2 is the producer at this `η`.
+  -- `caseIISection91ProductHalf37_proven` discharges the product-half input
+  -- `CaseIISection91ProductHalf37` that the factor producer otherwise leaves open.
   caseII_section91_factorEquations caseIISection91ProductHalf37_proven D η hη hcop
 
-/-! ## Composition (Step 2.5 preview removed)
+/-! ## Composition
 
 The L1 + L2 + Assumption II composition into `washington_section91_descended_equation`, and the full
 descent + FLT37 Case-II endpoint, are proven in `CaseIIWashingtonCaseIIClean.lean`
-(`fermatLastTheoremFor_thirtyseven_of_washington_caseII`, axiom-clean), which subsumes the
-former Step-2.5 wiring stub. -/
+(`fermatLastTheoremFor_thirtyseven_of_washington_caseII`, axiom-clean). -/
 
 end BernoulliRegular.FLT37.Eichler
 
