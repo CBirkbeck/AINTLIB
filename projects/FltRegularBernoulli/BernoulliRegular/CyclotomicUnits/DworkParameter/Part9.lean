@@ -353,12 +353,12 @@ theorem samePrimeFiniteArtinHasseTail_factorPow
       samePrimeFiniteArtinHasseTail (p := p) (K := K) M x hx := by
   classical
   let termN : ℕ → ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (M + 1) :=
-    fun r =>
+    fun r ↦
       Ideal.Quotient.factorPow (lambdaIdeal p K) (Nat.succ_le_succ hMN)
         (samePrimeFiniteArtinHasseTailTerm (p := p) (K := K) N r x hx)
   let termM : ℕ → ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (M + 1) :=
-    fun r => samePrimeFiniteArtinHasseTailTerm (p := p) (K := K) M r x hx
-  have hsubset : Finset.Icc 2 M ⊆ Finset.Icc 2 N := fun r hr =>
+    fun r ↦ samePrimeFiniteArtinHasseTailTerm (p := p) (K := K) M r x hx
+  have hsubset : Finset.Icc 2 M ⊆ Finset.Icc 2 N := fun r hr ↦
     Finset.mem_Icc.mpr
       ⟨(Finset.mem_Icc.mp hr).1, (Finset.mem_Icc.mp hr).2.trans hMN⟩
   have hmap :
@@ -435,7 +435,7 @@ theorem samePrimeFiniteArtinHasseLog_eq_first_two_add_tail
             samePrimeFiniteArtinHasseTail (p := p) (K := K) N x hx := by
   classical
   let terms : ℕ → ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1) :=
-    fun r => samePrimeFiniteArtinHasseLogTerm (p := p) (K := K) N r x hx
+    fun r ↦ samePrimeFiniteArtinHasseLogTerm (p := p) (K := K) N r x hx
   have hrange :
       Finset.range (N + 1) = insert 0 (insert 1 (Finset.Icc 2 N)) := by
     ext r
@@ -585,7 +585,7 @@ theorem dworkParameterFinite_corrected_factor_eq_zero
     simpa [A, xbar, term1, tail] using
       dworkParameterFiniteArtinHasse_first_two_add_tail_eq_zero
         (p := p) (K := K) hN
-  have hmul := congrArg (fun z : A => (p : A) * z) hzero
+  have hmul := congrArg (fun z : A ↦ (p : A) * z) hzero
   have hmul' :
       (p : A) * xbar + xbar ^ p + (p : A) * (xbar * tail) = 0 := by
     have hterm :
@@ -694,7 +694,7 @@ noncomputable def artinHasseTail (hp_two : 2 < p) :
     DworkCompleteIntegerRing p K :=
   let R : Type _ := ValuedIntegerRing p K
   let I : Ideal R := lambdaIdeal p K
-  ⟨fun N =>
+  ⟨fun N ↦
       (Ideal.quotientEquivAlgOfEq R (by
         ext y
         simp : (I ^ N • ⊤ : Ideal R) = I ^ N)).symm
@@ -765,7 +765,7 @@ noncomputable def artinHasseTailUnit (hp_two : 2 < p) :
     DworkCompleteIntegerRing p K :=
   let R : Type _ := ValuedIntegerRing p K
   let I : Ideal R := lambdaIdeal p K
-  ⟨fun N =>
+  ⟨fun N ↦
       (Ideal.quotientEquivAlgOfEq R (by
         ext y
         simp : (I ^ N • ⊤ : Ideal R) = I ^ N)).symm
@@ -851,7 +851,7 @@ theorem samePrimeFiniteArtinHasseTail_eq_zero_of_succ_le_sq
     samePrimeFiniteArtinHasseTail (p := p) (K := K) N x hx = 0 := by
   classical
   unfold samePrimeFiniteArtinHasseTail
-  exact Finset.sum_eq_zero fun r hr =>
+  exact Finset.sum_eq_zero fun r hr ↦
     samePrimeFiniteArtinHasseTailTerm_eq_zero_of_succ_le
       (p := p) (K := K) (N := N) hx
       (hN.trans
