@@ -1235,6 +1235,132 @@ theorem voronoi_floor_sum_sModEq_of_pred_modEq
   push_cast at hzQ
   linear_combination hzQ
 
+/-- If `n` is not a multiple of `p - 1` and `m ≡ n [MOD p - 1]`, then `m` is
+not a multiple of `p - 1` either. -/
+private theorem not_sub_one_dvd_of_modEq {p m n : ℕ}
+    (hnot : ¬ (p - 1) ∣ n) (hmn : m ≡ n [MOD p - 1]) : ¬ (p - 1) ∣ m := by
+  intro hdvd
+  have h_n_mod : n ≡ 0 [MOD p - 1] :=
+    hmn.symm.trans (Nat.modEq_zero_iff_dvd.mpr hdvd)
+  exact hnot (Nat.modEq_zero_iff_dvd.mp h_n_mod)
+
+/-- A congruence of positive exponents modulo `p - 1` descends to their
+predecessors. -/
+private theorem modEq_pred_of_modEq {p m n : ℕ} (hm_pos : 0 < m) (hn_pos : 0 < n)
+    (hmn : m ≡ n [MOD p - 1]) : (m - 1) ≡ (n - 1) [MOD p - 1] := by
+  have h1 : (m - 1) + 1 = m := Nat.succ_pred_eq_of_pos hm_pos
+  have h2 : (n - 1) + 1 = n := Nat.succ_pred_eq_of_pos hn_pos
+  have h_mod_add1 : (m - 1) + 1 ≡ (n - 1) + 1 [MOD p - 1] := by
+    rw [h1, h2]
+    exact hmn
+  exact Nat.ModEq.add_right_cancel' 1 h_mod_add1
+
+/-- For a chosen unit generator `g` of `(ZMod p)ˣ` whose value is the residue of
+`a`, the element `a ^ k - 1` is a unit in `ℤ_[p]` whenever `k` is not a multiple
+of `p - 1`. -/
+private theorem padicInt_pow_sub_one_isUnit_of_not_sub_one_dvd {p k : ℕ}
+    [Fact p.Prime] {a : ℕ} {g : (ZMod p)ˣ} (hg_order : orderOf g = p - 1)
+    (ha_cast : ((a : ℕ) : ZMod p) = (g : ZMod p)) (hk : ¬ (p - 1) ∣ k) :
+    IsUnit ((a : ℤ_[p]) ^ k - 1) := by
+  rw [PadicInt.isUnit_iff]
+  by_contra h_norm
+  have h_mem : ((a : ℤ_[p]) ^ k - 1 : ℤ_[p]) ∈ IsLocalRing.maximalIdeal ℤ_[p] :=
+    PadicInt.mem_nonunits.mpr (lt_of_le_of_ne (PadicInt.norm_le_one _) h_norm)
+  rw [← PadicInt.ker_toZMod, RingHom.mem_ker] at h_mem
+  rw [map_sub, map_one, map_pow, map_natCast, ha_cast, sub_eq_zero] at h_mem
+  have h_gk : g ^ k = 1 :=
+    Units.ext (by rw [Units.val_pow_eq_pow_val, Units.val_one]; exact h_mem)
+  exact hk (hg_order ▸ orderOf_dvd_of_pow_eq_one h_gk)
+
+/-- Powers of the residue `a` in `ZMod p` only depend on the exponent modulo
+`p - 1`, via the chosen unit generator. -/
+private theorem natCast_pow_eq_of_modEq {p k l : ℕ} [Fact p.Prime] {a : ℕ}
+    {g : (ZMod p)ˣ} (hg_order : orderOf g = p - 1)
+    (ha_cast : ((a : ℕ) : ZMod p) = (g : ZMod p)) (hkl : k ≡ l [MOD p - 1]) :
+    ((a : ℕ) : ZMod p) ^ k = ((a : ℕ) : ZMod p) ^ l := by
+  rw [ha_cast]
+  simpa [Units.val_pow_eq_pow_val] using
+    congrArg (fun u : (ZMod p)ˣ => (u : ZMod p))
+      (primitiveRoot_unit_pow_eq_of_modEq (p := p) (g := g) hg_order hkl)
+
+/-- Two `p`-adic integers with the same image in `ZMod p` differ by a multiple
+of `p`. -/
+private theorem padicInt_sub_mem_span_p_of_toZMod_eq {p : ℕ} [Fact p.Prime]
+    {x y : ℤ_[p]} (h : PadicInt.toZMod x = PadicInt.toZMod y) :
+    x - y ∈ Ideal.span ({(p : ℤ_[p])} : Set ℤ_[p]) := by
+  have h_sub : PadicInt.toZMod (x - y) = 0 := by rw [map_sub, h, sub_self]
+  have h_ker : x - y ∈ IsLocalRing.maximalIdeal ℤ_[p] := by
+    rw [← PadicInt.ker_toZMod]
+    exact h_sub
+  rwa [PadicInt.maximalIdeal_eq_span_p] at h_ker
+
+/-- A unit times the value of its inverse unit is `1`. -/
+private theorem padicInt_isUnit_mul_unitInv {p : ℕ} [Fact p.Prime] {x : ℤ_[p]}
+    (hx : IsUnit x) : x * (hx.unit⁻¹ : (ℤ_[p])ˣ).val = 1 := by
+  change ((hx.unit * hx.unit⁻¹ : (ℤ_[p])ˣ).val : ℤ_[p]) = 1
+  simp
+
+/-- If two `p`-adic integers differ by `p * d`, their images in `ℚ_[p]` satisfy
+`(y : ℚ_[p]) = (x : ℚ_[p]) - p * d`. -/
+private theorem qp_eq_sub_p_mul_of_padicInt_eq {p : ℕ} [Fact p.Prime]
+    {x y d : ℤ_[p]} (hd : x - y = (p : ℤ_[p]) * d) :
+    (y : ℚ_[p]) = (x : ℚ_[p]) - (p : ℚ_[p]) * (d : ℚ_[p]) := by
+  have hdQ := congrArg (fun z : ℤ_[p] => (z : ℚ_[p])) hd
+  push_cast at hdQ ⊢
+  linear_combination -hdQ
+
+/-- The `ℚ_[p]`-valued Voronoi floor sum is the image of its `ℤ_[p]`-valued
+counterpart. -/
+private theorem voronoi_floorSum_qp_eq_padicInt_coe {p : ℕ} [Fact p.Prime]
+    (e a : ℕ) :
+    (∑ x ∈ Finset.range p, (x : ℚ_[p]) ^ e * ((x * a / p : ℕ) : ℚ_[p])) =
+      ((∑ x ∈ Finset.range p,
+        ((x : ℕ) : ℤ_[p]) ^ e * (((x * a / p : ℕ) : ℤ_[p])) : ℤ_[p]) : ℚ_[p]) := by
+  simp [PadicInt.coe_sum]
+
+/-- An inverse identity in `ℤ_[p]` transports to `ℚ_[p]`. -/
+private theorem qp_mul_eq_one_of_padicInt_mul_eq_one {p : ℕ} [Fact p.Prime]
+    {w v : ℤ_[p]} (h : w * v = 1) : (w : ℚ_[p]) * (v : ℚ_[p]) = 1 := by
+  simpa using congrArg (fun z : ℤ_[p] => (z : ℚ_[p])) h
+
+/-- Final algebraic cancellation of the Kummer congruence over `ℚ_[p]`.
+
+Given the two single-exponent Voronoi expansions `(A - 1) * B = A₁ * S + p * z`,
+the combined floor-sum identity packaged in `E`, and the two unit inverses of
+`Aₘ - 1` and `Aₙ - 1`, the divided-Bernoulli difference is `p` times the
+explicit witness. -/
+private theorem bernoulli_div_sub_eq_p_mul_of_expansions {p : ℕ} [Fact p.Prime]
+    {Am Bm Am1 Sm zm AmInv An Bn An1 Sn zn AnInv E : ℚ_[p]}
+    (hBm : (Am - 1) * Bm = Am1 * Sm + (p : ℚ_[p]) * zm)
+    (hBn : (An - 1) * Bn = An1 * Sn + (p : ℚ_[p]) * zn)
+    (hE : (An - 1) * Am1 * Sm - (Am - 1) * An1 * Sn = (p : ℚ_[p]) * E)
+    (hAmInv : (Am - 1) * AmInv = 1) (hAnInv : (An - 1) * AnInv = 1) :
+    Bm - Bn = (p : ℚ_[p]) * (AmInv * AnInv * E + AmInv * zm - AnInv * zn) := by
+  have h_Am_ne : Am - 1 ≠ 0 := fun h0 => one_ne_zero <| by
+    rw [← hAmInv, h0, zero_mul]
+  have h_An_ne : An - 1 ≠ 0 := fun h0 => one_ne_zero <| by
+    rw [← hAnInv, h0, zero_mul]
+  have h_key :
+      (Am - 1) * (An - 1) * (Bm - Bn) =
+        (Am - 1) * (An - 1) * ((p : ℚ_[p]) *
+          (AmInv * AnInv * E + AmInv * zm - AnInv * zn)) := by
+    have h_lhs :
+        (Am - 1) * (An - 1) * (Bm - Bn) =
+          (An - 1) * ((Am - 1) * Bm) - (Am - 1) * ((An - 1) * Bn) := by ring
+    rw [h_lhs, hBm, hBn]
+    rw [show (An - 1) * (Am1 * Sm + (p : ℚ_[p]) * zm) -
+          (Am - 1) * (An1 * Sn + (p : ℚ_[p]) * zn) =
+        ((An - 1) * Am1 * Sm - (Am - 1) * An1 * Sn) +
+          (p : ℚ_[p]) * ((An - 1) * zm - (Am - 1) * zn) from by ring, hE]
+    rw [show (Am - 1) * (An - 1) * ((p : ℚ_[p]) *
+          (AmInv * AnInv * E + AmInv * zm - AnInv * zn)) =
+        (p : ℚ_[p]) * (((Am - 1) * AmInv) * ((An - 1) * AnInv) * E) +
+          (p : ℚ_[p]) * (((Am - 1) * AmInv) * (An - 1) * zm) -
+          (p : ℚ_[p]) * (((An - 1) * AnInv) * (Am - 1) * zn) from by ring,
+      hAmInv, hAnInv]
+    ring
+  exact mul_left_cancel₀ (mul_ne_zero h_Am_ne h_An_ne) h_key
+
 /-- Full divided-Bernoulli Kummer congruence for primes `p ≥ 5`, proved from
 the side-condition-free Voronoi congruence. -/
 theorem bernoulli_div_sModEq_of_modEq_full_geFive
@@ -1250,18 +1376,9 @@ theorem bernoulli_div_sModEq_of_modEq_full_geFive
   have hp : Nat.Prime p := Fact.out
   haveI : NeZero p := ⟨hp.ne_zero⟩
   haveI : Fact (1 < p) := ⟨hp.one_lt⟩
-  have hnot_m : ¬ (p - 1) ∣ m := by
-    intro hdvd
-    have h_n_mod : n ≡ 0 [MOD p - 1] :=
-      hmn.symm.trans (Nat.modEq_zero_iff_dvd.mpr hdvd)
-    exact hnot (Nat.modEq_zero_iff_dvd.mp h_n_mod)
-  have hmn_pred : (m - 1) ≡ (n - 1) [MOD p - 1] := by
-    have h1 : (m - 1) + 1 = m := Nat.succ_pred_eq_of_pos hm_pos
-    have h2 : (n - 1) + 1 = n := Nat.succ_pred_eq_of_pos hn_pos
-    have h_mod_add1 : (m - 1) + 1 ≡ (n - 1) + 1 [MOD p - 1] := by
-      rw [h1, h2]
-      exact hmn
-    exact Nat.ModEq.add_right_cancel' 1 h_mod_add1
+  have hnot_m : ¬ (p - 1) ∣ m := not_sub_one_dvd_of_modEq hnot hmn
+  have hmn_pred : (m - 1) ≡ (n - 1) [MOD p - 1] :=
+    modEq_pred_of_modEq hm_pos hn_pos hmn
   obtain ⟨g, hg_gen⟩ := IsCyclic.exists_generator (α := (ZMod p)ˣ)
   set a : ℕ := (g : ZMod p).val with ha_def
   have ha_coprimeZ : Nat.Coprime a p := ZMod.val_coe_unit_coprime g
@@ -1274,19 +1391,11 @@ theorem bernoulli_div_sModEq_of_modEq_full_geFive
   have hg_order : orderOf g = p - 1 := by
     rw [orderOf_eq_card_of_forall_mem_zpowers hg_gen, Nat.card_eq_fintype_card,
       ZMod.card_units]
-  have h_gmn_eq : g ^ m = g ^ n :=
-    primitiveRoot_unit_pow_eq_of_modEq (p := p) (g := g) hg_order hmn
-  have h_gmn1_eq : g ^ (m - 1) = g ^ (n - 1) :=
-    primitiveRoot_unit_pow_eq_of_modEq (p := p) (g := g) hg_order hmn_pred
-  have h_mn_ZMod : ((a : ℕ) : ZMod p) ^ m = ((a : ℕ) : ZMod p) ^ n := by
-    rw [ha_cast]
-    simpa [Units.val_pow_eq_pow_val] using
-      congrArg (fun u : (ZMod p)ˣ => (u : ZMod p)) h_gmn_eq
+  have h_mn_ZMod : ((a : ℕ) : ZMod p) ^ m = ((a : ℕ) : ZMod p) ^ n :=
+    natCast_pow_eq_of_modEq hg_order ha_cast hmn
   have h_mn1_ZMod : ((a : ℕ) : ZMod p) ^ (m - 1) =
-      ((a : ℕ) : ZMod p) ^ (n - 1) := by
-    rw [ha_cast]
-    simpa [Units.val_pow_eq_pow_val] using
-      congrArg (fun u : (ZMod p)ˣ => (u : ZMod p)) h_gmn1_eq
+      ((a : ℕ) : ZMod p) ^ (n - 1) :=
+    natCast_pow_eq_of_modEq hg_order ha_cast hmn_pred
   obtain ⟨z_m, hz_m⟩ := voronoi_congruence_mod_p_strong
     (p := p) (a := a) (h := m) hp_ge_five ha_coprime hm_pos hm_even hnot_m
   obtain ⟨z_n, hz_n⟩ := voronoi_congruence_mod_p_strong
@@ -1299,52 +1408,33 @@ theorem bernoulli_div_sModEq_of_modEq_full_geFive
     ((x : ℕ) : ℤ_[p]) ^ (m - 1) * (((x * a / p : ℕ) : ℤ_[p])) with hSmZ_def
   set SnZ : ℤ_[p] := ∑ x ∈ Finset.range p,
     ((x : ℕ) : ℤ_[p]) ^ (n - 1) * (((x * a / p : ℕ) : ℤ_[p])) with hSnZ_def
-  have h_mk_eq_zmod : ∀ {x y : ℤ_[p]}, PadicInt.toZMod x = PadicInt.toZMod y →
-      x - y ∈ Ideal.span ({(p : ℤ_[p])} : Set ℤ_[p]) := fun {x y} h => by
-    have h_sub : PadicInt.toZMod (x - y) = 0 := by rw [map_sub, h, sub_self]
-    have h_ker : x - y ∈ IsLocalRing.maximalIdeal ℤ_[p] := by
-      rw [← PadicInt.ker_toZMod]
-      exact h_sub
-    rwa [PadicInt.maximalIdeal_eq_span_p] at h_ker
   have h_toZMod_a : PadicInt.toZMod (a : ℤ_[p]) = ((a : ℕ) : ZMod p) := by
     rw [map_natCast]
   have h_Am_An_toZMod : PadicInt.toZMod Am = PadicInt.toZMod An := by
     rw [hAm_def, hAn_def, map_pow, map_pow, h_toZMod_a]
     exact h_mn_ZMod
-  obtain ⟨d_A, hd_A⟩ := Ideal.mem_span_singleton.mp (h_mk_eq_zmod h_Am_An_toZMod)
+  obtain ⟨d_A, hd_A⟩ :=
+    Ideal.mem_span_singleton.mp (padicInt_sub_mem_span_p_of_toZMod_eq h_Am_An_toZMod)
   have h_Am1_An1_toZMod : PadicInt.toZMod Am1 = PadicInt.toZMod An1 := by
     rw [hAm1_def, hAn1_def, map_pow, map_pow, h_toZMod_a]
     exact h_mn1_ZMod
   obtain ⟨d_A1, hd_A1⟩ :=
-    Ideal.mem_span_singleton.mp (h_mk_eq_zmod h_Am1_An1_toZMod)
+    Ideal.mem_span_singleton.mp
+      (padicInt_sub_mem_span_p_of_toZMod_eq h_Am1_An1_toZMod)
   obtain ⟨d_S, hd_S⟩ := voronoi_floor_sum_sModEq_of_pred_modEq
     (p := p) (a := a) (m := m) (n := n) hm_pos hn_pos hmn_pred
-  have h_ax_sub_one_unit : ∀ {k : ℕ}, ¬ (p - 1) ∣ k →
-      IsUnit ((a : ℤ_[p]) ^ k - 1) := fun {k} hk => by
-    rw [PadicInt.isUnit_iff]
-    by_contra h_norm
-    have h_mem : ((a : ℤ_[p]) ^ k - 1 : ℤ_[p]) ∈ IsLocalRing.maximalIdeal ℤ_[p] :=
-      PadicInt.mem_nonunits.mpr (lt_of_le_of_ne (PadicInt.norm_le_one _) h_norm)
-    rw [← PadicInt.ker_toZMod, RingHom.mem_ker] at h_mem
-    rw [map_sub, map_one, map_pow, map_natCast, ha_cast, sub_eq_zero] at h_mem
-    have h_gk : g ^ k = 1 :=
-      Units.ext (by rw [Units.val_pow_eq_pow_val, Units.val_one]; exact h_mem)
-    exact hk (hg_order ▸ orderOf_dvd_of_pow_eq_one h_gk)
   have h_Am_sub_one_unit : IsUnit (Am - 1) := by
     rw [hAm_def]
-    exact h_ax_sub_one_unit hnot_m
+    exact padicInt_pow_sub_one_isUnit_of_not_sub_one_dvd hg_order ha_cast hnot_m
   have h_An_sub_one_unit : IsUnit (An - 1) := by
     rw [hAn_def]
-    exact h_ax_sub_one_unit hnot
-  have hunit_inv : ∀ {x : ℤ_[p]} (hx : IsUnit x),
-      x * (hx.unit⁻¹ : (ℤ_[p])ˣ).val = 1 := by
-    intro x hx
-    change ((hx.unit * hx.unit⁻¹ : (ℤ_[p])ˣ).val : ℤ_[p]) = 1
-    simp
+    exact padicInt_pow_sub_one_isUnit_of_not_sub_one_dvd hg_order ha_cast hnot
   set AmInv : ℤ_[p] := (h_Am_sub_one_unit.unit⁻¹ : (ℤ_[p])ˣ).val with hAmInv_def
-  have hAmInv_mul : (Am - 1) * AmInv = 1 := hunit_inv h_Am_sub_one_unit
+  have hAmInv_mul : (Am - 1) * AmInv = 1 :=
+    padicInt_isUnit_mul_unitInv h_Am_sub_one_unit
   set AnInv : ℤ_[p] := (h_An_sub_one_unit.unit⁻¹ : (ℤ_[p])ˣ).val with hAnInv_def
-  have hAnInv_mul : (An - 1) * AnInv = 1 := hunit_inv h_An_sub_one_unit
+  have hAnInv_mul : (An - 1) * AnInv = 1 :=
+    padicInt_isUnit_mul_unitInv h_An_sub_one_unit
   set E : ℤ_[p] := (Am - 1) * (d_A1 * SmZ + An1 * d_S) - d_A * Am1 * SmZ
     with hE_def
   refine ⟨AmInv * AnInv * E + AmInv * z_m - AnInv * z_n, ?_⟩
@@ -1360,14 +1450,12 @@ theorem bernoulli_div_sModEq_of_modEq_full_geFive
     with hBn_div_def
   have hSm_cast :
       (∑ x ∈ Finset.range p,
-        (x : ℚ_[p]) ^ (m - 1) * ((x * a / p : ℕ) : ℚ_[p])) = Sm_Q := by
-    rw [hSm_Q_def, hSmZ_def]
-    simp [PadicInt.coe_sum]
+        (x : ℚ_[p]) ^ (m - 1) * ((x * a / p : ℕ) : ℚ_[p])) = Sm_Q :=
+    voronoi_floorSum_qp_eq_padicInt_coe (m - 1) a
   have hSn_cast :
       (∑ x ∈ Finset.range p,
-        (x : ℚ_[p]) ^ (n - 1) * ((x * a / p : ℕ) : ℚ_[p])) = Sn_Q := by
-    rw [hSn_Q_def, hSnZ_def]
-    simp [PadicInt.coe_sum]
+        (x : ℚ_[p]) ^ (n - 1) * ((x * a / p : ℕ) : ℚ_[p])) = Sn_Q :=
+    voronoi_floorSum_qp_eq_padicInt_coe (n - 1) a
   have hz_m_Q :
       (Am_Q - 1) * Bm_div - Am1_Q * Sm_Q = (p : ℚ_[p]) * (z_m : ℚ_[p]) := by
     rw [hAm_Q_def, hAm1_Q_def, hAm_def, hAm1_def, hBm_div_def]
@@ -1381,16 +1469,10 @@ theorem bernoulli_div_sModEq_of_modEq_full_geFive
   have hS_Q : Sm_Q - Sn_Q = (p : ℚ_[p]) * (d_S : ℚ_[p]) := by
     rw [hSm_cast, hSn_cast] at hd_S
     exact hd_S
-  have h_An_eq_Q : An_Q = Am_Q - (p : ℚ_[p]) * (d_A : ℚ_[p]) := by
-    have hdAQ := congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hd_A
-    rw [hAm_Q_def, hAn_Q_def]
-    push_cast at hdAQ ⊢
-    linear_combination -hdAQ
-  have h_An1_eq_Q : An1_Q = Am1_Q - (p : ℚ_[p]) * (d_A1 : ℚ_[p]) := by
-    have hdA1Q := congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hd_A1
-    rw [hAm1_Q_def, hAn1_Q_def]
-    push_cast at hdA1Q ⊢
-    linear_combination -hdA1Q
+  have h_An_eq_Q : An_Q = Am_Q - (p : ℚ_[p]) * (d_A : ℚ_[p]) :=
+    qp_eq_sub_p_mul_of_padicInt_eq hd_A
+  have h_An1_eq_Q : An1_Q = Am1_Q - (p : ℚ_[p]) * (d_A1 : ℚ_[p]) :=
+    qp_eq_sub_p_mul_of_padicInt_eq hd_A1
   have h_Sn_eq_Q : Sn_Q = Sm_Q - (p : ℚ_[p]) * (d_S : ℚ_[p]) := by
     linear_combination -hS_Q
   have hE_eq_Q :
@@ -1407,17 +1489,15 @@ theorem bernoulli_div_sModEq_of_modEq_full_geFive
   set z_n_Q : ℚ_[p] := ((z_n : ℤ_[p]) : ℚ_[p]) with hz_n_Q_def
   set E_Q : ℚ_[p] := ((E : ℤ_[p]) : ℚ_[p]) with hE_Q_def
   have h_Am_AmInv : (Am_Q - 1) * AmInv_Q = 1 := by
-    rw [hAmInv_Q_def]
-    have := congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hAmInv_mul
-    rw [hAm_Q_def]
-    push_cast at this
-    exact this
+    have h := qp_mul_eq_one_of_padicInt_mul_eq_one hAmInv_mul
+    rw [hAm_Q_def, hAmInv_Q_def]
+    push_cast at h
+    linear_combination h
   have h_An_AnInv : (An_Q - 1) * AnInv_Q = 1 := by
-    rw [hAnInv_Q_def]
-    have := congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hAnInv_mul
-    rw [hAn_Q_def]
-    push_cast at this
-    exact this
+    have h := qp_mul_eq_one_of_padicInt_mul_eq_one hAnInv_mul
+    rw [hAn_Q_def, hAnInv_Q_def]
+    push_cast at h
+    linear_combination h
   have h_witness_eq :
       (((AmInv * AnInv * E + AmInv * z_m - AnInv * z_n : ℤ_[p]) : ℚ_[p])) =
         AmInv_Q * AnInv_Q * E_Q + AmInv_Q * z_m_Q - AnInv_Q * z_n_Q := by
@@ -1425,49 +1505,16 @@ theorem bernoulli_div_sModEq_of_modEq_full_geFive
     push_cast
     ring
   rw [h_witness_eq]
-  have h_Am_sub_one_ne : Am_Q - 1 ≠ 0 := fun h0 => one_ne_zero <| by
-    rw [← h_Am_AmInv, h0, zero_mul]
-  have h_An_sub_one_ne : An_Q - 1 ≠ 0 := fun h0 => one_ne_zero <| by
-    rw [← h_An_AnInv, h0, zero_mul]
-  have h_key :
-      (Am_Q - 1) * (An_Q - 1) * (Bm_div - Bn_div) =
-        (Am_Q - 1) * (An_Q - 1) * ((p : ℚ_[p]) *
-          (AmInv_Q * AnInv_Q * E_Q + AmInv_Q * z_m_Q - AnInv_Q * z_n_Q)) := by
-    have h_lhs :
-        (Am_Q - 1) * (An_Q - 1) * (Bm_div - Bn_div) =
-          (An_Q - 1) * ((Am_Q - 1) * Bm_div) -
-            (Am_Q - 1) * ((An_Q - 1) * Bn_div) := by ring
-    rw [h_lhs]
-    have h_Bm_expand :
-        (Am_Q - 1) * Bm_div = Am1_Q * Sm_Q + (p : ℚ_[p]) * z_m_Q := by
-      rw [hz_m_Q_def]
-      linear_combination hz_m_Q
-    have h_Bn_expand :
-        (An_Q - 1) * Bn_div = An1_Q * Sn_Q + (p : ℚ_[p]) * z_n_Q := by
-      rw [hz_n_Q_def]
-      linear_combination hz_n_Q
-    rw [h_Bm_expand, h_Bn_expand]
-    rw [show (An_Q - 1) * (Am1_Q * Sm_Q + (p : ℚ_[p]) * z_m_Q) -
-          (Am_Q - 1) * (An1_Q * Sn_Q + (p : ℚ_[p]) * z_n_Q) =
-        ((An_Q - 1) * Am1_Q * Sm_Q - (Am_Q - 1) * An1_Q * Sn_Q) +
-          (p : ℚ_[p]) * ((An_Q - 1) * z_m_Q - (Am_Q - 1) * z_n_Q) from by ring,
-      hE_eq_Q]
-    have h_rhs_goal :
-        (Am_Q - 1) * (An_Q - 1) * ((p : ℚ_[p]) *
-          (AmInv_Q * AnInv_Q * E_Q + AmInv_Q * z_m_Q - AnInv_Q * z_n_Q)) =
-        (p : ℚ_[p]) * E_Q +
-          (p : ℚ_[p]) * ((An_Q - 1) * z_m_Q - (Am_Q - 1) * z_n_Q) := by
-      rw [show (Am_Q - 1) * (An_Q - 1) * ((p : ℚ_[p]) *
-          (AmInv_Q * AnInv_Q * E_Q + AmInv_Q * z_m_Q - AnInv_Q * z_n_Q)) =
-        (p : ℚ_[p]) * (((Am_Q - 1) * AmInv_Q) * ((An_Q - 1) * AnInv_Q) * E_Q) +
-          (p : ℚ_[p]) * (((Am_Q - 1) * AmInv_Q) * (An_Q - 1) * z_m_Q) -
-          (p : ℚ_[p]) * (((An_Q - 1) * AnInv_Q) * (Am_Q - 1) * z_n_Q) from by ring]
-      rw [h_Am_AmInv, h_An_AnInv]
-      ring
-    rw [h_rhs_goal]
-  have h_cancel_ne : (Am_Q - 1) * (An_Q - 1) ≠ 0 :=
-    mul_ne_zero h_Am_sub_one_ne h_An_sub_one_ne
-  exact mul_left_cancel₀ h_cancel_ne h_key
+  have h_Bm_expand :
+      (Am_Q - 1) * Bm_div = Am1_Q * Sm_Q + (p : ℚ_[p]) * z_m_Q := by
+    rw [hz_m_Q_def]
+    linear_combination hz_m_Q
+  have h_Bn_expand :
+      (An_Q - 1) * Bn_div = An1_Q * Sn_Q + (p : ℚ_[p]) * z_n_Q := by
+    rw [hz_n_Q_def]
+    linear_combination hz_n_Q
+  exact bernoulli_div_sub_eq_p_mul_of_expansions h_Bm_expand h_Bn_expand hE_eq_Q
+    h_Am_AmInv h_An_AnInv
 
 /-- The p-unit case of divided Bernoulli integrality.  The remaining Adams
 work is exactly the case where `p ∣ k`, so the denominator has a nontrivial
