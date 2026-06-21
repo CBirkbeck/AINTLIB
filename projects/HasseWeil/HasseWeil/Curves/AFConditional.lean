@@ -83,6 +83,7 @@ theorem h_inj_of_divZeroReduce
 
 /-! ### Witness 2: `h_van` from divisor reduction + point_minus_O -/
 
+omit [W.IsElliptic] in
 /-- The h_van witness for `AddHomProperty_of_picZero_witnesses`, derived
 from the divisor reduction + the unconditional point_minus_O.
 
@@ -95,12 +96,10 @@ theorem h_van_degZero_of_divZeroReduce_and_pointMinusO
     (D : ProjectiveDivisor.degZero (⟨W⟩ : SmoothPlaneCurve F))
     (hD : D.val ∈ (⟨W⟩ : SmoothPlaneCurve F).projPrincipalSubgroup) :
     projectiveDivisorSum W D.val = 0 := by
-  -- D ~ (σD) − (O) from h_reduce.
-  have h_lin := h_reduce D
-  -- ProjLinearlyEquiv = principalness of difference.
+  -- D ~ (σD) − (O) from h_reduce; ProjLinearlyEquiv = principalness of difference.
   have h_diff_principal :
       D.val - kappaDivisor W (projectiveDivisorSum W D.val) ∈
-        (⟨W⟩ : SmoothPlaneCurve F).projPrincipalSubgroup := h_lin
+        (⟨W⟩ : SmoothPlaneCurve F).projPrincipalSubgroup := h_reduce D
   -- kappaDivisor (σD.val) = D.val − (D.val − kappaDivisor (σD.val))
   -- both summands principal (the second by negation of h_diff_principal).
   have h_kappa_principal :
@@ -185,8 +184,7 @@ theorem pointMinusO_of_bridge
   · rw [if_neg h_eq_pt] at h_eq
     cases h_top : (⟨W⟩ : SmoothPlaneCurve F).ord_P Q f with
     | top =>
-      exfalso; apply hf_ne
-      exact ((⟨W⟩ : SmoothPlaneCurve F).ord_P_eq_top_iff (P := Q) f).mp h_top
+      exact absurd (((⟨W⟩ : SmoothPlaneCurve F).ord_P_eq_top_iff (P := Q) f).mp h_top) hf_ne
     | coe n =>
       rw [h_top, WithTop.untopD_coe] at h_eq
       have hn : n = 0 := h_eq.symm
@@ -256,11 +254,9 @@ theorem h_van {W : Affine F} [W.IsElliptic] (a : AFInputs W)
     (h_pdz : PrincipalImpliesDegZero W)
     (D : ProjectiveDivisor (⟨W⟩ : SmoothPlaneCurve F))
     (hD : D ∈ (⟨W⟩ : SmoothPlaneCurve F).projPrincipalSubgroup) :
-    projectiveDivisorSum W D = 0 := by
-  have h_dz := h_pdz D hD
-  -- Construct the degZero subtype element
-  have := a.h_van_degZero ⟨D, h_dz⟩ hD
-  exact this
+    projectiveDivisorSum W D = 0 :=
+  -- Construct the degZero subtype element from the principal-implies-degZero bridge.
+  a.h_van_degZero ⟨D, h_pdz D hD⟩ hD
 
 end AFInputs
 
