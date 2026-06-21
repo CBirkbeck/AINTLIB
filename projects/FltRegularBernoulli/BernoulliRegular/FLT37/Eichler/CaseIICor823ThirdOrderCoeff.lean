@@ -1,7 +1,5 @@
 import BernoulliRegular.FLT37.Eichler.CaseIICor823SecondOrderCoeff
 
-set_option linter.style.longLine false
-
 /-!
 # The third-order (mod `p³`) Dwork-coordinate coefficient machinery
 
@@ -142,7 +140,7 @@ theorem castHom_rationalPadicIntegerToZModCube (x : RationalPadicIntegerRing p) 
       congr 1]
   have := PadicInt.zmod_cast_comp_toZModPow (p := lambdaPadicPrime p)
     2 3 (by norm_num)
-  exact congrArg (fun f => f ((padicIntToRationalPadicIntegerRingEquiv (p := p)).symm x)) this
+  exact congrArg (fun f ↦ f ((padicIntToRationalPadicIntegerRingEquiv (p := p)).symm x)) this
 
 /-! ## 1. The mod-`p³` Dwork power-basis coordinate congruence
 
@@ -267,9 +265,9 @@ noncomputable def dworkParameterQuotientCoeffModCube
     (i : Fin (p - 1)) :
     DworkCompleteIntegerRing p K ⧸ (dworkParameterIdeal p K) ^ (3 * (p - 1)) →
       ZMod (p ^ 3) :=
-  fun q =>
+  fun q ↦
     Quotient.liftOn' q
-      (fun x : DworkCompleteIntegerRing p K =>
+      (fun x : DworkCompleteIntegerRing p K ↦
         rationalPadicIntegerToZModCube p
           ((dworkParameterPowerBasis p K).repr x i))
       (by
@@ -312,7 +310,7 @@ after mapping the representative into the completed Dwork ring.  Third-order ana
 noncomputable def valuedLambdaQuotientDworkCoeffModCube
     (i : Fin (p - 1)) :
     ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (3 * (p - 1)) → ZMod (p ^ 3) :=
-  fun q =>
+  fun q ↦
     dworkParameterQuotientCoeffModCube (p := p) (K := K) i
       (Ideal.quotientMap ((dworkParameterIdeal p K) ^ (3 * (p - 1)))
         (algebraMap (ValuedIntegerRing p K) (DworkCompleteIntegerRing p K))
@@ -402,7 +400,7 @@ theorem dworkParameterQuotientCoeffModCube_mk_add
       (dworkParameterPowerBasis p K).repr (x + y) i =
         ((dworkParameterPowerBasis p K).repr x +
           (dworkParameterPowerBasis p K).repr y) i :=
-    congrArg (fun f => f i) ((dworkParameterPowerBasis p K).repr.map_add x y)
+    congrArg (fun f ↦ f i) ((dworkParameterPowerBasis p K).repr.map_add x y)
   rw [hrepr]
   change rationalPadicIntegerToZModCube p
       ((dworkParameterPowerBasis p K).repr x i +
@@ -427,7 +425,7 @@ theorem dworkParameterQuotientCoeffModCube_mk_neg
   have hrepr :
       (dworkParameterPowerBasis p K).repr (-x) i =
         (-(dworkParameterPowerBasis p K).repr x) i :=
-    congrArg (fun f => f i) ((dworkParameterPowerBasis p K).repr.map_neg x)
+    congrArg (fun f ↦ f i) ((dworkParameterPowerBasis p K).repr.map_neg x)
   rw [hrepr]
   change rationalPadicIntegerToZModCube p
       (-(dworkParameterPowerBasis p K).repr x i) =
