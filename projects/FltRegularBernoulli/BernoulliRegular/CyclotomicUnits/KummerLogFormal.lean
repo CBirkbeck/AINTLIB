@@ -40,7 +40,7 @@ abbrev kummerLogScalarX : KummerLogCoeffRing :=
 shifting the coefficients of `E_p(T)-1`. -/
 def formalArtinHasseNormalizedExpMinusOne (p : ℕ) [Fact p.Prime] :
     PowerSeries KummerLogCoeffRing :=
-  PowerSeries.mk fun n =>
+  PowerSeries.mk fun n ↦
     Polynomial.C
       ((PowerSeries.coeff (R := ℚ) (n + 1))
         (PadicLogSetup.FormalDwork.expMinusOneSeries p))
@@ -127,7 +127,7 @@ theorem formalKummerQuotientUnit_mul_scaled_eq_normalized (p : ℕ)
 /-- The ordinary formal exponential numerator `(exp(T)-1)/T`.  This is used
 as the low-degree model for the Artin-Hasse normalized numerator. -/
 def formalExpNormalizedMinusOne : PowerSeries ℚ :=
-  PowerSeries.mk fun n =>
+  PowerSeries.mk fun n ↦
     (PowerSeries.coeff (R := ℚ) (n + 1)) (PowerSeries.exp ℚ)
 
 @[simp]
@@ -316,7 +316,7 @@ theorem coeff_pow_eq_of_coeff_eq_le
       change PowerSeries.coeff i (F ^ m) * PowerSeries.coeff k F =
         PowerSeries.coeff i (G ^ m) * PowerSeries.coeff k G
       rw [coeff_pow_eq_of_coeff_eq_le (m := m) (d := i)
-          (fun t ht => h t (ht.trans hi)),
+          (fun t ht ↦ h t (ht.trans hi)),
         h k hk]
 
 theorem coeff_logOf_eq_of_coeff_eq_le
@@ -336,7 +336,7 @@ theorem coeff_logOf_eq_of_coeff_eq_le
   refine Finset.sum_congr rfl ?_
   intro m hm
   congr 1
-  exact coeff_pow_eq_of_coeff_eq_le (m := m) (d := d) fun k hk => by
+  exact coeff_pow_eq_of_coeff_eq_le (m := m) (d := d) fun k hk ↦ by
     simp [hcoeff k hk]
 
 theorem map_logOf_of_constantCoeff_eq_one
@@ -644,7 +644,7 @@ theorem prime_not_dvd_bernoulli_den_two_mul {p j : ℕ} [Fact p.Prime]
 modulo `p`. -/
 theorem bernoulli_den_zmod_ne_zero {p j : ℕ} [Fact p.Prime]
     (hj : 1 ≤ j) (hjp : 2 * j ≤ p - 3) :
-    (((_root_.bernoulli (2 * j)).den : ℕ) : ZMod p) ≠ 0 := fun hzero =>
+    (((_root_.bernoulli (2 * j)).den : ℕ) : ZMod p) ≠ 0 := fun hzero ↦
   prime_not_dvd_bernoulli_den_two_mul hj hjp
     ((ZMod.natCast_eq_zero_iff ((_root_.bernoulli (2 * j)).den) p).mp hzero)
 
