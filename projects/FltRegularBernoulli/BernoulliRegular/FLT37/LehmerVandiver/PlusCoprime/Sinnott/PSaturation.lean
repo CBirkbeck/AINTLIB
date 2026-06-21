@@ -1,6 +1,5 @@
 import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.IndexFormula
 
-
 /-!
 # p-saturation lemma for the Sinnott bridge
 
@@ -130,7 +129,7 @@ theorem isPthPower_iff_isPthPower_of_sinnott
         -- imply ¬ 2 ∣ hPlus K, but hPlus K ≥ 1 means we have a constraint).
         -- Actually we use hp_odd which is in scope.
         exact absurd h hp_odd
-      · exact (Nat.coprime_primes Nat.prime_two h_hp_prime).mpr fun h2 => by omega
+      · exact (Nat.coprime_primes Nat.prime_two h_hp_prime).mpr fun h2 ↦ by omega
     have h_pow_cop : Nat.Coprime (2 ^ ((p - 3) / 2)) p := h_two_cop.pow_left _
     have h_hPlus_cop : Nat.Coprime (hPlus K) p :=
       (h_hp_prime.coprime_iff_not_dvd.mpr h_not_dvd).symm
