@@ -1,7 +1,5 @@
 import BernoulliRegular.CyclotomicUnits.KummerLogNormalization.Part3
 
-set_option linter.style.longLine false
-
 /-!
 # Homogeneity of the Artin-Hasse normalized coordinate polynomial powers
 
