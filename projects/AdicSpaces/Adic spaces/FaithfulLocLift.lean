@@ -142,9 +142,18 @@ theorem exists_valuation_extension_of_prime_over
     exact mem_nonZeroDivisors_iff_ne_zero.mp hx (Ideal.mem_bot.mp hxsupp)
   let F := FractionRing (R ⧸ s.supp)
   let sF : Valuation F Γ := sQuot.extendToLocalization hS F
-  -- Steps 3-4 (T-L4-EXT): embed `F ↪ L = Frac(S⧸q')` (via `R⧸supp ↪ S⧸q'` from `hq'`), extend
-  -- `sF`'s valuation ring across `F ↪ L` (`LocalSubring.exists_le_valuationSubring`), and `comap`
-  -- the resulting valuation of `S` back; `hq'` makes the square commute.
+  -- Step 3: embed `F ↪ L = Frac(S⧸q')` via the injective `R⧸supp ↪ S⧸q'` (from `hq'`).
+  haveI : IsDomain (S ⧸ q') := Ideal.Quotient.isDomain q'
+  let φRS : (R ⧸ s.supp) →+* (S ⧸ q') := Ideal.quotientMap q' (algebraMap R S) (le_of_eq hq'.symm)
+  have hφRS_inj : Function.Injective φRS := Ideal.quotientMap_injective' (le_of_eq hq')
+  let L := FractionRing (S ⧸ q')
+  have hgRL_inj : Function.Injective ((algebraMap (S ⧸ q') L).comp φRS) :=
+    (IsFractionRing.injective (S ⧸ q') L).comp hφRS_inj
+  let ι : F →+* L := IsFractionRing.lift hgRL_inj
+  -- Step 4 (T-L4-EXT): extend `sF`'s valuation subring across `ι : F ↪ L`
+  -- (`LocalSubring.exists_le_valuationSubring`; `V ∩ F = sF.valuationSubring` since the latter is a
+  -- valuation subring = maximal local subring of `F`), take `V.valuation`, and `comap` it through
+  -- `S → S⧸q' → L`; the `IsEquiv` follows from `extendToLocalization`/`onQuot` + the subring equality.
   sorry
 
 set_option linter.unusedSectionVars false in
