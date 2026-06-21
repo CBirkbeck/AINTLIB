@@ -2,8 +2,6 @@ import BernoulliRegular.FLT37.Eichler.CaseIICor823Level71Deg68BridgeReduction
 import BernoulliRegular.FLT37.Eichler.CaseIICor823Level71Deg68OnwardDischarge
 import BernoulliRegular.FLT37.Eichler.CaseIICor823Deg68SliceLevelAgreement
 
-set_option linter.style.longLine false
-
 /-!
 # FLT37 II2 (route B), with the mod-`37³` precision bridge replaced by the clean same-level deg-`68`
 # slice-coordinate agreement
