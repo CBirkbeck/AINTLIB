@@ -136,9 +136,25 @@ theorem exists_comap_isEquiv_of_field_hom
     rw [Valuation.mem_valuationSubring_iff, Valuation.comap_apply,
       ← Valuation.mem_valuationSubring_iff, hVeq, ValuationSubring.mem_comap]
   rw [h1]
-  -- Contraction `v.valuationSubring = V.comap ι`: `⊆` from `hV` (`ι(O) ⊆ V`); `⊇` from `O` being a
-  -- maximal valuation subring (`isMax_toLocalSubring`) dominated by `V` (`hV`).
-  sorry
+  -- Contraction `v.valuationSubring = V.comap ι`: `O := v.valuationSubring` maps into `V` (`hV`),
+  -- and `O.toLocalSubring` is a maximal local subring (`isMax_toLocalSubring`); `V.comap ι` dominates
+  -- `O`, so by maximality they are equal.
+  have hsubF : v.valuationSubring.toLocalSubring.toSubring ≤ (V.comap ι).toLocalSubring.toSubring := by
+    intro x hx
+    have hιx : ι x ∈ V := by
+      obtain ⟨hsub, -⟩ := LocalSubring.le_def.mp hV
+      apply hsub
+      rw [LocalSubring.map_toSubring]
+      exact Subring.mem_map.mpr ⟨x, hx, rfl⟩
+    exact ValuationSubring.mem_comap.mpr hιx
+  have hle : v.valuationSubring.toLocalSubring ≤ (V.comap ι).toLocalSubring := by
+    rw [LocalSubring.le_def]
+    refine ⟨hsubF, ?_⟩
+    -- Domination transfer: a unit of `V.comap ι` lying in `O` is a unit of `O`, pulled back from
+    -- `hV`'s `IsLocalHom (ι(O) ↪ V)` via the iso `O ≃ ι(O)` and `x unit in V.comap ι ↔ ι x unit in V`.
+    sorry
+  exact ValuationSubring.toLocalSubring_injective
+    (le_antisymm hle (ValuationSubring.isMax_toLocalSubring v.valuationSubring hle))
 
 universe uS in
 /-- **HU-d infrastructure (T-L4-EXT): Chevalley valuation extension along a ring inclusion.**
