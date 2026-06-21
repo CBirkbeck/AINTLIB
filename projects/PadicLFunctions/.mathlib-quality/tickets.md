@@ -6153,7 +6153,7 @@ in `closure(elems_n '' S)`. (⟸) the content: a basic nhd of `u` constrains fin
   induced topology's basic opens reduce to n≥1, else add an `n=0` triviality leaf).
 
 ### [T1221] Level-n image of the Galois-orbit subgroup (TOP)
-- **Status**: open | **File**: IwasawaProof/TowerDensity.lean | **Depends on**: T1220 | **Type**: theorem
+- **Status**: in_progress (dispatched 2026-06-21) | **File**: IwasawaProof/TowerDensity.lean | **Depends on**: T1220 | **Type**: theorem
 #### Statement
 ```lean
 -- elems_n is a MonoidHom NormCompatUnits →* ℂ_[p]ˣ; the level-n image of the wγ-orbit subgroup
@@ -6220,7 +6220,7 @@ That is T1222. Done.
 - **Depends**: T1220 (char), T1221 (image), T1222 (level density).
 
 ### [T1224] The plus/minus split cycloTower1 ⊆ cycloTower1Plus · ZpOne (structural)
-- **Status**: open | **File**: IwasawaProof/TowerDensity.lean (or Iwasawa/PlusMinusTower.lean) |
+- **Status**: in_progress (dispatched 2026-06-21, parallel to T1221; file Iwasawa/PlusMinusTower.lean — the hard c-eigen-split, partly-absent infra) | **File**: IwasawaProof/TowerDensity.lean (or Iwasawa/PlusMinusTower.lean) |
   **Depends on**: ZpOne (banked), the c-action galNCU(−1) | **Type**: theorem
 #### Statement
 ```lean
