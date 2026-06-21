@@ -1,1 +1,1 @@
-FOCUS: §13 Stage-G capstone COMPLETE (axiom-clean, reduced to CFT+§12). CFT bundled-by-necessity (no mathlib global CFT). §12 (h12) delegated to running worker (T1220). Awaiting worker; integrate on completion.
+FOCUS: T1220 DONE (B2-corrected, verified). Dispatch T1221 (level-n image of wγ-orbit subgroup) next in the §12 density chain toward h12.

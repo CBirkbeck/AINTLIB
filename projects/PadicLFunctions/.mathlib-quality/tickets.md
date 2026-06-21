@@ -6120,8 +6120,17 @@ SES (i) by ⟨c⟩-invariants: `ℤ_p(1)^⟨c⟩=0` (c acts by −1, p odd).
 `Subgroup.topologicalClosure_coe`.
 
 ### [T1220] Inverse-limit closure characterization (TOP)
-- **Status**: open | **File**: Coleman/ColContinuity.lean (or IwasawaProof/TowerDensity.lean new) |
-  **Depends on**: ST1, ST3a (banked) | **Type**: theorem
+- **Status**: DONE (2026-06-21, axiom-clean) — **statement corrected (B2-logged)** | **File**: Coleman/ColContinuity.lean:559,579
+- **Outcome**: the bare iff is **mathematically FALSE** (the induced inverse-limit topology indexes
+  `elemsCoe` over ALL `n` incl. level 0, where `K p 0 = ℚ_p`; `compat` only constrains `n≥1`, so the
+  level-0 coordinate is free and the RHS — quantified over `n≥1` — cannot control `closure S`). B2-logged.
+  PROVEN instead (both axiom-clean, verified independently): `mem_closure_normCompat_forward` — the
+  genuinely-new (⟹) direction, unconditional, via `mem_closure_image (continuous_elems p n).continuousAt`;
+  and `mem_closure_normCompat_iff` WITH the minimal hypothesis `h0 : ∀ s ∈ S, s.elems 0 = u.elems 0`
+  ((⟸) = banked `mem_closure_of_levelwise`). **Downstream (T1223)**: cannot supply `h0` directly (level-0
+  free both sides) — must normalise via `Col_eq_of_elems_eq` (ColContinuity:465, "Col ignores level 0"),
+  exactly as the RJW image computation works modulo level 0. ST1=`instTopologicalSpace`(:419),
+  ST3a=`continuous_levelNorm`(:375).  ORIGINAL (false) statement:
 #### Statement
 ```lean
 theorem mem_closure_normCompat_iff {S : Subgroup (NormCompatUnits p)} {u : NormCompatUnits p} :

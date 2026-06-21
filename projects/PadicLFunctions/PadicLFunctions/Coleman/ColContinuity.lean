@@ -553,6 +553,36 @@ theorem mem_closure_of_levelwise {S : Subgroup (NormCompatUnits p)} {u : NormCom
       rw [dist_eq_norm]
       exact lt_of_lt_of_le hclose hεle
 
+/-- **T1220 forward direction** (unconditional): if `u ∈ closure S` then every level-`n`
+coordinate (`n ≥ 1`) of `u` lies in the closure of the level-`n` image of `S`. This is just
+continuity of the level coordinate (`continuous_elems`) pushed through `closure`. -/
+theorem mem_closure_normCompat_forward {S : Subgroup (NormCompatUnits p)} {u : NormCompatUnits p}
+    (hu : u ∈ closure (S : Set (NormCompatUnits p))) (n : ℕ) (_hn : 1 ≤ n) :
+    (u.elems n : ℂ_[p]) ∈
+      closure ((fun s : NormCompatUnits p => (s.elems n : ℂ_[p])) '' S) := by
+  have hcont : Continuous (fun v : NormCompatUnits p => ((v.elems n : ℂ_[p]ˣ) : ℂ_[p])) :=
+    continuous_elems p n
+  exact mem_closure_image hcont.continuousAt hu
+
+/-- **T1220 — the inverse-limit closure characterisation** (level-0 hypothesis form): for a
+subgroup `S` all of whose members share `u`'s (otherwise free) level-`0` coordinate, `u` lies in
+`closure S` iff every level-`n` (`n ≥ 1`) coordinate of `u` lies in the closure of the level-`n`
+image of `S`. The forward direction is `continuous_elems`; the reverse is `mem_closure_of_levelwise`
+(`exists_delta_descent` propagates a top-level approximation down the norm-compatible tower).
+
+The `h0` hypothesis is genuinely necessary: the inverse-limit topology is `induced` along
+`elemsCoe`, which *includes* the level-`0` coordinate (`K_0 = ℚ_p`, so `elems 0 ∈ ℤ_p^×` is a
+non-trivial free coordinate, unconstrained by `compat`, which only relates levels `≥ 1`). Without
+`h0` the bare iff fails: the right-hand side says nothing about level `0`, yet `closure S` sees it.
+The consumers (`cycloTower1Plus ⊆ closure …`) normalise the free level-`0` coordinate via
+`Col_eq_of_elems_eq` before invoking this. -/
+theorem mem_closure_normCompat_iff {S : Subgroup (NormCompatUnits p)} {u : NormCompatUnits p}
+    (h0 : ∀ s ∈ S, (s.elems 0 : ℂ_[p]) = (u.elems 0 : ℂ_[p])) :
+    u ∈ closure (S : Set (NormCompatUnits p)) ↔
+      ∀ n, 1 ≤ n → (u.elems n : ℂ_[p]) ∈
+        closure ((fun s : NormCompatUnits p => (s.elems n : ℂ_[p])) '' S) :=
+  ⟨fun hu n hn => mem_closure_normCompat_forward p hu n hn, mem_closure_of_levelwise p h0⟩
+
 /-! ## Continuity of the measure-side pipeline `ofPowerSeries`/`Col` -/
 
 /-- **`g ↦ (μ_g)(ψ)` is coefficientwise-continuous** for a fixed test function `ψ`:
