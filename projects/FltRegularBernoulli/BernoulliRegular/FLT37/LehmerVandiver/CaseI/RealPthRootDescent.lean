@@ -70,8 +70,7 @@ theorem exists_pow_zeta_eq_of_pth_root_of_unity {x : K} (hx : x ^ p = 1) :
   have hζ : IsPrimitiveRoot
       (((zeta_spec p ℚ K).toInteger : 𝓞 K) : K) p := zeta_spec p ℚ K
   obtain ⟨k, hk_lt, hk_eq⟩ := hζ.eq_pow_of_pow_eq_one hx
-  refine ⟨k, hk_lt, ?_⟩
-  exact hk_eq.symm
+  exact ⟨k, hk_lt, hk_eq.symm⟩
 
 /-- **Combined**: for `α ∈ K^×` with `α^p` real, there exist `k < p`
 such that `(σα)/α = ζ^k`. This is the explicit form of the
@@ -94,7 +93,7 @@ theorem complexConj_zeta_eq_inv :
       (((zeta_spec p ℚ K).toInteger : 𝓞 K) : K)⁻¹ := by
   have hp_prime : p.Prime := Fact.out
   set ζU : (𝓞 K)ˣ :=
-    ((zeta_spec p ℚ K).toInteger_isPrimitiveRoot.isUnit hp_prime.ne_zero).unit with hζU_def
+    ((zeta_spec p ℚ K).toInteger_isPrimitiveRoot.isUnit hp_prime.ne_zero).unit
   have hζU_val : ((ζU : (𝓞 K)ˣ) : 𝓞 K) = (zeta_spec p ℚ K).toInteger :=
     ((zeta_spec p ℚ K).toInteger_isPrimitiveRoot.isUnit hp_prime.ne_zero).unit_spec
   have hζU_pow : ζU ^ p = 1 := by
@@ -144,17 +143,14 @@ theorem exists_complexConj_fixed_pow_eq_pow_of_pow_real
   obtain ⟨k, _hk_lt, hk_eq⟩ :=
     exists_pow_zeta_eq_complexConj_div_self_of_pow_real (p := p) (K := K)
       hα h_pow_real
-  set ζ : K := (((zeta_spec p ℚ K).toInteger : 𝓞 K) : K) with hζ_def
+  set ζ : K := (((zeta_spec p ℚ K).toInteger : 𝓞 K) : K)
   have hk_mul : NumberField.IsCMField.complexConj K α = ζ ^ k * α := by
-    have h := hk_eq
-    field_simp at h
-    rw [h]; ring
+    field_simp at hk_eq
+    rw [hk_eq]; ring
   have hζ_pow_p : ζ ^ p = 1 := zeta_pow_p_eq_one (p := p) (K := K)
-  have hζ_ne_zero : ζ ≠ 0 := by
-    intro hζ_zero
-    have : ζ ^ p = 0 := by rw [hζ_zero]; exact zero_pow (Fact.out : p.Prime).pos.ne'
-    rw [this] at hζ_pow_p
-    exact zero_ne_one hζ_pow_p
+  have hζ_ne_zero : ζ ≠ 0 := fun hζ_zero =>
+    zero_ne_one (α := K) <| by
+      rw [← hζ_pow_p, hζ_zero, zero_pow (Fact.out : p.Prime).pos.ne']
   have hσζ : NumberField.IsCMField.complexConj K ζ = ζ⁻¹ :=
     complexConj_zeta_eq_inv (p := p) (K := K)
   -- Step 2: choose j := k * (p+1) / 2. For p odd, p+1 even, so exact natural division.
@@ -213,19 +209,18 @@ theorem exists_real_unit_pow_eq_of_K_root
       rfl
     rw [h_uK]
     exact NumberField.RingOfIntegers.isIntegral_coe _
-  -- Step 2: define v_OK ∈ 𝓞 K' via integrality witness.
+  -- Step 2: define v_OK ∈ 𝓞 K' via integrality witness; its p'-th power is `u`.
   let v_OK : 𝓞 K' := ⟨v, hv_int⟩
+  have h_pow_eq :
+      v_OK ^ p' =
+        algebraMap (𝓞 (NumberField.maximalRealSubfield K')) (𝓞 K') u := by
+    apply Subtype.ext
+    change v ^ p' = _
+    rw [hv]
+    rfl
   -- Step 3: v_OK is a unit.
   have hv_OK_unit : IsUnit v_OK := by
-    rw [← isUnit_pow_iff hp_pos.ne']
-    have h_pow_eq :
-        v_OK ^ p' =
-          algebraMap (𝓞 (NumberField.maximalRealSubfield K')) (𝓞 K') u := by
-      apply Subtype.ext
-      change v ^ p' = _
-      rw [hv]
-      rfl
-    rw [h_pow_eq]
+    rw [← isUnit_pow_iff hp_pos.ne', h_pow_eq]
     exact (Units.map (algebraMap (𝓞 (NumberField.maximalRealSubfield K'))
       (𝓞 K')).toMonoidHom u).isUnit
   -- Step 4: lift to (𝓞 K')ˣ and apply the existing extract.
@@ -233,10 +228,7 @@ theorem exists_real_unit_pow_eq_of_K_root
   have hv_unit_val_pow :
       (v_unit : 𝓞 K') ^ p' =
       algebraMap (𝓞 (NumberField.maximalRealSubfield K')) (𝓞 K') u := by
-    apply Subtype.ext
-    change v ^ p' = _
-    rw [hv]
-    rfl
+    rw [hv_OK_unit.unit_spec]; exact h_pow_eq
   exact realKummerExtract_unconditional p' K' hp_two u v_unit hv_unit_val_pow
 
 /-- **K-side certificate ⟹ K^+-side certificate** (contrapositive form).
@@ -302,11 +294,9 @@ theorem flt37_pollaczekUnitPlusKplus_not_isPthPower
       Sinnott.pollaczekUnitPlusKplus 37 (CyclotomicField 37 ℚ) 32
         (by decide : (37 : ℕ) ≠ 2) hp_three ≠ β ^ 37 := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  -- Apply the bridge directly with v := pollaczekUnitPlusKplus.
   have h_alg_eq :=
     Sinnott.algebraMapPollaczekUnitPlusKplus_eq 37 (CyclotomicField 37 ℚ) 32
       (by decide : (37 : ℕ) ≠ 2) hp_three
-  -- algebraMapPollaczekUnitPlusKplus_eq is the predicate; unfold it.
   unfold Sinnott.AlgebraMapPollaczekUnitPlusKplus_eq at h_alg_eq
   exact not_isPthPower_Kplus_of_not_isPthPower_K (p' := 37)
     (K' := CyclotomicField 37 ℚ) 32 FLT37.flt37_realLocalCert_global
@@ -331,22 +321,18 @@ theorem flt37_not_dvd_hPlus_of_pollaczekForward
     ¬ (37 : ℕ) ∣ hPlus (CyclotomicField 37 ℚ) := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   intro h_dvd
-  -- Apply PollaczekForward directly with v := pollaczekUnitPlusKplus.
   set v_K_plus :=
     Sinnott.pollaczekUnitPlusKplus 37 (CyclotomicField 37 ℚ) 32
-      (by decide : (37 : ℕ) ≠ 2) hp_three with hv_def
-  -- algebraMap eq: from algebraMapPollaczekUnitPlusKplus_eq.
+      (by decide : (37 : ℕ) ≠ 2) hp_three
   have h_alg_eq :=
     Sinnott.algebraMapPollaczekUnitPlusKplus_eq 37 (CyclotomicField 37 ℚ) 32
       (by decide : (37 : ℕ) ≠ 2) hp_three
   unfold Sinnott.AlgebraMapPollaczekUnitPlusKplus_eq at h_alg_eq
-  -- family-membership: from pollaczekUnitPlusKplus_mem.
   have h_mem :=
     Sinnott.pollaczekUnitPlusKplus_mem 37 (CyclotomicField 37 ℚ) 32
       (by decide : (37 : ℕ) ≠ 2) hp_three
-  -- PollaczekForward gives β with β^37 = v_K_plus.
+  -- `PollaczekForward` gives `β` with `β ^ 37 = v_K_plus`, refuted by the cert.
   obtain ⟨β, hβ⟩ := h_forward h_dvd v_K_plus h_alg_eq h_mem
-  -- K^+-side cert refutes β^37 = v_K_plus.
   exact flt37_pollaczekUnitPlusKplus_not_isPthPower hp_three β hβ.symm
 
 /-- **Injectivity of `Units.map` (algebraMap K^+ K) on units**.
@@ -361,11 +347,8 @@ theorem units_algebraMap_injective_Kplus_K
         (algebraMap (𝓞 (NumberField.maximalRealSubfield K')) (𝓞 K')).toMonoidHom) := by
   intro u v h
   apply Units.ext
-  have h_val : ((Units.map (algebraMap _ _).toMonoidHom u : (𝓞 K')ˣ) : 𝓞 K') =
-      ((Units.map (algebraMap _ _).toMonoidHom v : (𝓞 K')ˣ) : 𝓞 K') := by
-    rw [h]
   exact FaithfulSMul.algebraMap_injective
-    (𝓞 (NumberField.maximalRealSubfield K')) (𝓞 K') h_val
+    (𝓞 (NumberField.maximalRealSubfield K')) (𝓞 K') (congrArg Units.val h)
 
 /-- **Uniqueness of K^+-side preimage** under the algebra-map embedding.
 For `pollaczekUnitPlus p K i ∈ (𝓞 K)ˣ`, any two K^+-side units `v₁, v₂`
@@ -387,13 +370,7 @@ theorem unique_Kplus_preimage_of_pollaczekUnitPlus
   apply Units.ext
   change (algebraMap (𝓞 (NumberField.maximalRealSubfield K')) (𝓞 K') (v₁ : 𝓞 _)) =
     (algebraMap (𝓞 (NumberField.maximalRealSubfield K')) (𝓞 K') (v₂ : 𝓞 _))
-  -- Use the algebraMap-equations.
-  have h_K_eq : (algebraMap (𝓞 (NumberField.maximalRealSubfield K')) (𝓞 K') (v₁ : 𝓞 _) : 𝓞 K') =
-      (algebraMap (𝓞 (NumberField.maximalRealSubfield K')) (𝓞 K') (v₂ : 𝓞 _) : 𝓞 K') := by
-    rw [h₁, h₂]
-  -- Both sides as 𝓞 K' values agree, hence as 𝓞 K' elements they agree.
-  -- The `show` form gave us 𝓞 K'-level equality directly.
-  exact h_K_eq
+  rw [h₁, h₂]
 
 /-- **Canonical K⁺ Pollaczek root from `PollaczekForward`.**
 
