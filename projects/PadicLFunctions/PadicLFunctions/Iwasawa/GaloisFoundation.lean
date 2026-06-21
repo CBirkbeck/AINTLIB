@@ -1,5 +1,6 @@
 import Mathlib.NumberTheory.Cyclotomic.Basic
 import Mathlib.NumberTheory.NumberField.CMField
+import Mathlib.NumberTheory.Cyclotomic.Gal
 import Mathlib.NumberTheory.RamificationInertia.Unramified
 import Mathlib.FieldTheory.Galois.Profinite
 
@@ -38,9 +39,13 @@ groups `Xₙ = Gal(Mₙ/Fₙ)` must be built as quotients of the absolute Galois
 This is a substantial, mathlib-PR-scale development. It is built here bottom-up; nothing downstream may
 assume `Xₙ`/`X∞` until they are genuinely constructed.
 
-## Brick 1 (this file): the base cyclotomic tower
+## Bricks 1–2 (this file)
 
-The actual fields `Fₙ = ℚ(μ_{pⁿ})`, the bottom of the tower. Real objects, no placeholders.
+* **Brick 1** — the actual fields `Fₙ = ℚ(μ_{pⁿ})`, the layers of the tower.
+* **Brick 2** — the real subfield `Fₙ⁺ = maximalRealSubfield Fₙ` (RJW: the maximal totally real
+  subfield, i.e. the fixed field of complex conjugation), the CM structure of `Fₙ` (giving
+  `[Fₙ : Fₙ⁺] = 2`), and the finite-level Galois group `Gal(Fₙ/ℚ) ≅ (ℤ/pⁿ)ˣ` (RJW §13.2 / the
+  cyclotomic character at finite level). All real objects, no placeholders.
 -/
 
 noncomputable section
@@ -57,8 +62,39 @@ instance instIsCyclotomic (n : ℕ) :
     IsCyclotomicExtension {p ^ n} ℚ (Fcyc p n) :=
   CyclotomicField.isCyclotomicExtension (p ^ n) ℚ
 
+/-- The conductor `pⁿ` is nonzero (so the cyclotomic API for `Fₙ` is available unconditionally). -/
+instance instNeZeroPow (n : ℕ) : NeZero (p ^ n) :=
+  ⟨pow_ne_zero n (Fact.out (p := p.Prime)).pos.ne'⟩
+
 /-- `Fₙ` is a number field. -/
-instance instNumberField (n : ℕ) [NeZero (p ^ n)] : NumberField (Fcyc p n) :=
+instance instNumberField (n : ℕ) : NumberField (Fcyc p n) :=
   inferInstanceAs (NumberField (CyclotomicField (p ^ n) ℚ))
+
+open NumberField in
+/-- `Fₙ⁺`, the maximal real subfield of `Fₙ = ℚ(μ_{pⁿ})` (RJW §13.2): the fixed field of complex
+conjugation, i.e. the maximal totally real subfield. This is the base of the *real* tower `F∞⁺`.
+A genuine `Subfield (Fcyc p n)`, defined unconditionally (no CM hypothesis needed to *define* it). -/
+def FcycPlus (n : ℕ) : Subfield (Fcyc p n) :=
+  maximalRealSubfield (Fcyc p n)
+
+open NumberField in
+/-- For odd `p` and `n ≥ 1` we have `2 < pⁿ`. -/
+theorem two_lt_pow (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n) : 2 < p ^ n :=
+  calc 2 < 3 := by norm_num
+    _ ≤ p := (Fact.out (p := p.Prime)).two_le.lt_of_ne (Ne.symm hp2)
+    _ = p ^ 1 := (pow_one p).symm
+    _ ≤ p ^ n := Nat.pow_le_pow_right (Fact.out (p := p.Prime)).pos hn
+
+open NumberField in
+/-- `Fₙ = ℚ(μ_{pⁿ})` is a CM field whenever `2 < pⁿ` (in particular for odd `p`, `n ≥ 1`); this is
+where `Fₙ⁺ = maximalRealSubfield Fₙ` becomes a genuine quadratic subextension, `[Fₙ : Fₙ⁺] = 2`. -/
+theorem isCMField_Fcyc {n : ℕ} (h : 2 < p ^ n) : IsCMField (Fcyc p n) :=
+  IsCyclotomicExtension.Rat.isCMField (Fcyc p n) (S := {p ^ n}) ⟨p ^ n, rfl, h⟩
+
+/-- The finite-level Galois group `Gal(Fₙ/ℚ) ≅ (ℤ/pⁿ)ˣ` (RJW §13.2; the source of `Γ` and of the
+cyclotomic character at finite level). A genuine multiplicative equivalence. -/
+def galEquiv (n : ℕ) : (Fcyc p n ≃ₐ[ℚ] Fcyc p n) ≃* (ZMod (p ^ n))ˣ :=
+  IsCyclotomicExtension.autEquivPow (Fcyc p n)
+    (Polynomial.cyclotomic.irreducible_rat (NeZero.pos _))
 
 end Iwasawa.GaloisFoundation
