@@ -1,8 +1,6 @@
 import BernoulliRegular.FLT37.Eichler.CaseIICor823Level107Deg68ModCubeValue
 import BernoulliRegular.FLT37.Eichler.CaseIICor823Level71DworkSpecializedSound
 
-set_option linter.style.longLine false
-
 /-!
 # The deg-`68` slice value `unscaled32SliceCoord 68 = 37·4`, from the proven mod-`37³` relation and
 # the single precision-bridge residual; and the deg-`68` second digit `c₆₈ = 4` GROUNDED
