@@ -189,7 +189,7 @@ theorem formalSum68ResidueModSq37_of_ratValue (hRat : FormalSum68RatValue) :
       norm_num,
     show ((-462074109491757258568843974992223061646211876969162959102801473214373353 : ℚ) /
         120).den = 120 from by norm_num]
-  decide
+  native_decide
 
 /-! ## 2. The first `37`-digit of `formalSum68Residue` is `0` — proven *unconditionally*
 

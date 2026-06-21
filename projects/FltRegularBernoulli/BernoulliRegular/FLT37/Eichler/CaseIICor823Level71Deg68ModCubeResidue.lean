@@ -111,7 +111,7 @@ theorem formalSum68ResidueCube_eq : formalSum68ResidueCube = 14467 := by
       norm_num,
     show ((-462074109491757258568843974992223061646211876969162959102801473214373353 : ℚ) /
         120).den = 120 from by norm_num]
-  decide
+  native_decide
 
 /-- **`14467 = 37·391` in `ZMod 37³`** (proven by `decide`): exhibits the first `37`-digit of
 `formalSum68ResidueCube` as `0` (it is `37·391`), so `formalSum68ResidueCube = 37·391` for the unit

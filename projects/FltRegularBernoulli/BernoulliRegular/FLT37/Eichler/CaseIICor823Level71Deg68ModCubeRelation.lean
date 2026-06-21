@@ -143,7 +143,7 @@ theorem deg68_slice_value_of_relation {Y : ZMod (37 ^ 2)}
       ((391 : ZMod (37 ^ 2)) * (-37 : ZMod (37 ^ 2))) := by
     rw [← h, ← mul_assoc, ZMod.inv_mul_of_unit _ hunit, one_mul]
   rw [hY]
-  decide
+  native_decide
 
 omit [NumberField.IsCMField K] in
 /-- **The deg-`68` slice value `unscaled32SliceCoord 68 = 37·4`, from the precision bridge** (proven,
