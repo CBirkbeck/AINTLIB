@@ -32,17 +32,9 @@ open NumberField
 
 namespace BernoulliRegular
 
-/-- **FLT37 from four parametric inputs (LV010-D form).** Replaces the
-existing `fermatLastTheoremFor_thirtyseven_of_remaining`'s `caseI`
-field with the parametric `caseIBridge_of_classEqDischarge`, exposing
-the class-equality input directly.
-
-This is the "shipping shape" of the LV-route: FLT37 is derivable
-unconditionally from
-- Sinnott's index formula (cor8_19 bridge),
-- The Vandiver class-equality discharge (Stages 1+2),
-- The second-order Bernoulli condition (Kellner / `bernoulli_decide`),
-- Washington's case-II argument (caseII bridge). -/
+/-- **FLT37 from four parametric inputs (LV010-D form).** `FermatLastTheoremFor 37` holds given
+Sinnott's index formula, the Vandiver class-equality discharge, the second-order Bernoulli
+condition, and Washington's case-II bridge. -/
 theorem fermatLastTheoremFor_thirtyseven_of_classEqDischarge
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
     (cor8_19 : Cor8_19Bridge 37 (CyclotomicField 37 ℚ) 32)
@@ -58,13 +50,8 @@ theorem fermatLastTheoremFor_thirtyseven_of_classEqDischarge
     noSecondOrderIrregular
     caseII
 
-/-- **FLT37 from Stage 2 + three other inputs.** Variant that takes
-Stage 2 (the Kummer ratio Prop) directly, composing
-`caseIClassEqDischarge_of_stage2` to discharge the class equality.
-
-Stage 1 is shipped (regularity-free, in
-`PrimaryNormalization.lean`); Stage 2 is the substantive Kummer's
-lemma adaptation (Hilbert 90 / 92 / 94 descent). -/
+/-- **FLT37 from Stage 2 + three other inputs.** Variant taking the Stage 2 Kummer ratio Prop
+directly in place of the class-equality discharge. -/
 theorem fermatLastTheoremFor_thirtyseven_of_stage2
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
     (cor8_19 : Cor8_19Bridge 37 (CyclotomicField 37 ℚ) 32)
@@ -79,14 +66,9 @@ theorem fermatLastTheoremFor_thirtyseven_of_stage2
     noSecondOrderIrregular
     caseII
 
-/-- **FLT37 from all five "axiom-like" discharges.** Maximal parametric
-form: takes Stage 2 + AdaptedKummersLemma + CaseIIPrincipalDischarge as
-the deep CFT inputs, plus Cor8_19Bridge (Sinnott) and the Bernoulli
-condition.
-
-This is the cleanest possible "shipping shape" of FLT37 via the
-LV-route: every regularity-using piece in the original flt-regular
-proof has been replaced by an explicit parametric Prop predicate. -/
+/-- **FLT37 from all five "axiom-like" discharges.** Maximal parametric form taking Stage 2,
+`AdaptedKummersLemma`, and `CaseIIPrincipalDischarge` as the deep CFT inputs, plus the Sinnott
+index formula and the Bernoulli condition. -/
 theorem fermatLastTheoremFor_thirtyseven_of_all_discharges
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
     (cor8_19 : Cor8_19Bridge 37 (CyclotomicField 37 ℚ) 32)
@@ -107,13 +89,8 @@ theorem fermatLastTheoremFor_thirtyseven_of_all_discharges
     (FLT37.LehmerVandiver.CaseII.caseIIBridge_of_discharges
       (by decide : (37 : ℕ) ≠ 2) 32 caseII_principal caseII_kummer)
 
-/-- **FLT37 from ¬p ∣ h⁺ + 4 other discharges.** Variant that takes
-`¬ 37 ∣ h⁺(K_37)` directly (instead of via `Cor8_19Bridge`), using
-the trivial `cor8_19Bridge_of_not_dvd_hPlus` constructor.
-
-Useful when `¬ p ∣ h⁺` is established by other means (numerical
-verification, regularity, etc.) without needing Sinnott's index
-formula. -/
+/-- **FLT37 from ¬ 37 ∣ h⁺ + four other discharges.** Variant taking `¬ 37 ∣ hPlus K` directly in
+place of the `Cor8_19Bridge` input. -/
 theorem fermatLastTheoremFor_thirtyseven_of_not_dvd_hPlus
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
     (h_not_dvd_hPlus : ¬ (37 : ℕ) ∣ hPlus (CyclotomicField 37 ℚ))
