@@ -37,7 +37,7 @@ different ideal `differentIdeal (𝓞 K) (𝓞 L)`" via the mathlib bridges
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Polynomial NumberField.IsCMField
+open NumberField
 open scoped nonZeroDivisors
 
 namespace BernoulliRegular.FLT37.Eichler
@@ -57,6 +57,7 @@ variable {L : Type*} [Field L] [NumberField L] [Algebra K L] [FiniteDimensional 
   [Module.Finite (𝓞 K) (𝓞 L)] [Algebra.IsIntegral (𝓞 K) (𝓞 L)]
   [FaithfulSMul (𝓞 K) (𝓞 L)]
 
+omit [Module.Finite (𝓞 K) (𝓞 L)] [Algebra.IsIntegral (𝓞 K) (𝓞 L)] in
 /-- `FractionRing (𝓞 K) / FractionRing (𝓞 L)` is separable, transported from the (char-0, hence
 separable) number-field extension `L / K` along the canonical fraction-ring isomorphisms.  This is
 the `Algebra.IsSeparable` hypothesis required by `not_dvd_differentIdeal_iff`. -/
@@ -77,6 +78,8 @@ theorem isSeparable_fractionRing_ringOfIntegers
     (FractionRing.algEquiv (𝓞 K) K).symm.toRingEquiv
     (FractionRing.algEquiv (𝓞 L) L).symm.toRingEquiv H
 
+omit [NumberField L] [Algebra K L] [FiniteDimensional K L] [IsScalarTower (𝓞 K) (𝓞 L) L]
+  [IsScalarTower (𝓞 K) K L] in
 /-- **The per-prime unramifiedness bridge.**  If every nonzero prime `P` of `𝓞 L` is unramified
 over `𝓞 K` (in the commutative-algebra sense `Algebra.IsUnramifiedAt`), then `L / K` is unramified
 (`Algebra.Unramified (𝓞 K) (𝓞 L)`).
@@ -113,9 +116,10 @@ theorem isUnramified_of_differentIdeal_eq_top
     isSeparable_fractionRing_ringOfIntegers (K := K) (L := L)
   refine isUnramified_of_forall_isUnramifiedAt (fun P _ _ => ?_)
   rw [← not_dvd_differentIdeal_iff, h]
-  intro hdvd
-  exact ‹P.IsPrime›.ne_top (top_le_iff.mp (Ideal.dvd_iff_le.mp hdvd))
+  exact fun hdvd => ‹P.IsPrime›.ne_top (top_le_iff.mp (Ideal.dvd_iff_le.mp hdvd))
 
+omit [Algebra K L] [FiniteDimensional K L] [IsScalarTower (𝓞 K) (𝓞 L) L]
+  [IsScalarTower (𝓞 K) K L] [FaithfulSMul (𝓞 K) (𝓞 L)] in
 /-- **"`q`-unramified" ⟹ mathlib `Algebra.IsUnramifiedAt (𝓞 K) P`** for a prime `P` of `𝓞 L` over
 `q = P.under (𝓞 K)`.  The hypothesis is the unfolded meaning of the (now-removed) flt-regular
 `IsUnramifiedAt (𝓞 L) q`: every prime of `𝓞 L` over `q` has ramification index `1`.  In particular
@@ -128,8 +132,8 @@ theorem algebra_isUnramifiedAt_of_isUnramifiedAt
         Ideal.ramificationIdx (P.under (𝓞 K)) Q = 1) :
     Algebra.IsUnramifiedAt (𝓞 K) P := by
   haveI : P.LiesOver (P.under (𝓞 K)) := ⟨rfl⟩
-  refine (Algebra.isUnramifiedAt_iff_of_isDedekindDomain hP_bot).mpr ?_
-  exact h P ⟨inferInstance, inferInstance⟩
+  exact (Algebra.isUnramifiedAt_iff_of_isDedekindDomain hP_bot).mpr
+    (h P ⟨inferInstance, inferInstance⟩)
 
 end Bridge
 
@@ -241,6 +245,7 @@ def CaseIIKummerUnramifiedAt37 : Prop :=
       (37 : 𝓞 (antiKummerLift (p := 37) (CyclotomicField 37 ℚ) α hα)) ∈ P →
       Algebra.IsUnramifiedAt (𝓞 (CyclotomicField 37 ℚ)) P
 
+omit [IsCMField (CyclotomicField 37 ℚ)] in
 /-- **`CaseIIKummerDifferentTrivial37` from the two local halves.**
 
 Combining the away-from-37 and at-37 unramifiedness (per prime `P` of `𝓞 L`), every prime is
@@ -250,7 +255,7 @@ theorem caseIIKummerDifferentTrivial37_of_halves
     (h_away : CaseIIKummerUnramifiedAway37) (h_at : CaseIIKummerUnramifiedAt37) :
     CaseIIKummerDifferentTrivial37 := by
   intro α hα h_primary h_ideal
-  set L := antiKummerLift (p := 37) (CyclotomicField 37 ℚ) α hα with hL
+  set L := antiKummerLift (p := 37) (CyclotomicField 37 ℚ) α hα
   haveI : IsScalarTower (𝓞 (CyclotomicField 37 ℚ)) (𝓞 L) L :=
     IsScalarTower.of_algebraMap_eq' rfl
   haveI : Algebra.IsSeparable (FractionRing (𝓞 (CyclotomicField 37 ℚ))) (FractionRing (𝓞 L)) :=
