@@ -372,7 +372,7 @@ instance primeOfConvexSubgroup_isPrime (A : ValuationSubring K)
     exact C.toSubgroup.one_mem
   mem_or_mem' := by
     intro a b hab
-    by_contra hc; push_neg at hc; obtain ⟨hna, hnb⟩ := hc
+    by_contra hc; push Not at hc; obtain ⟨hna, hnb⟩ := hc
     rw [not_mem_primeOfConvexSubgroup_iff] at hna hnb
     obtain ⟨hva, hua⟩ := hna
     obtain ⟨hvb, hub⟩ := hnb
@@ -431,7 +431,7 @@ theorem primeOfConvexSubgroup_lt_of_lt (A : ValuationSubring K)
   have hg'_le1 : (if g ≤ 1 then g else g⁻¹) ≤ 1 := by
     split_ifs with h
     · exact h
-    · push_neg at h; exact (inv_le_one_of_one_le h.le)
+    · push Not at h; exact (inv_le_one_of_one_le h.le)
   set g' := if g ≤ 1 then g else g⁻¹ with hg'_def
   rw [mem_convexSubgroupOfPrime] at hg'H
   obtain ⟨x, hx⟩ := A.valuation_surjective (g' : A.ValueGroup)

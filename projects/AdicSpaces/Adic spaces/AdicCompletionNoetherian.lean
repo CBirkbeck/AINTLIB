@@ -452,7 +452,7 @@ private lemma _mvPowerSeriesEval_partial_compat_support_high {n : ℕ}
           eq_of_le_of_not_lt hα_le h_lt_m
         refine ⟨⟨0, hn⟩, ?_⟩
         rw [heq]; simp [Finsupp.equivFunOnFinite]
-      · push_neg at h_le_m
+      · push Not at h_le_m
         obtain ⟨i, hi⟩ := h_le_m
         exact ⟨i, by omega⟩
 
@@ -571,7 +571,7 @@ private lemma _mvPowerSeriesEval_partial_map_mul_support_high {n : ℕ}
     ∃ j : Fin n, α j ≥ k + 1 := by
   classical
   by_contra hcontra
-  push_neg at hcontra
+  push Not at hcontra
   rw [MvPolynomial.mem_support_iff] at hα
   apply hα
   set n_k : Fin n →₀ ℕ := Finsupp.equivFunOnFinite.symm fun _ : Fin n => k + 1

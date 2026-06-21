@@ -1081,7 +1081,7 @@ private theorem exists_ideal_pow_generators_dominated_for_half_space
       not_vle_one_of_mem_spa_of_topologicallyNilpotent hv_spa hc_topnilp
     -- Translate.
     by_contra h_gt
-    push_neg at h_gt
+    push Not at h_gt
     apply h_not
     refine (Valuation.Compatible.vle_iff_le (v := wv) _ _).mpr ?_
     rw [map_one]

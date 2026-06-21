@@ -210,7 +210,7 @@ theorem vUnit_mem_cGammaIdeal_of_mem_ideal {v : Valuation A Γ₀}
   · -- Case 1: v(a) ≥ 1. Use the cΓ_v generator clause.
     exact vUnit_mem_cGammaIdeal h_ge hva
   · -- Case 2: v(a) < 1, hence v(a) ≤ 1. Use the ideal generator clause.
-    push_neg at h_ge
+    push Not at h_ge
     have h_le : Units.mk0 (v a) hva ≤ 1 := by
       rw [← Units.val_le_val]
       exact h_ge.le

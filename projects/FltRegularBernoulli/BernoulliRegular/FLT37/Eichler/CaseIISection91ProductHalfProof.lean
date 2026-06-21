@@ -196,7 +196,7 @@ theorem caseII_productHalf_C_pow_isPrincipal
   have hCpow_ne : C ^ 37 ≠ ⊥ := pow_ne_zero 37 hC_ne
   have hDen_ne : Den ≠ ⊥ := by
     rw [hDen_def, Ne, Ideal.mul_eq_bot]
-    push_neg
+    push Not
     constructor
     · rw [Ne, Ideal.span_singleton_eq_bot]
       have hη1 : (η : 𝓞 (CyclotomicField 37 ℚ)) ≠ 1 := caseII_section91_eta_ne_one D η hη

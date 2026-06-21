@@ -648,7 +648,7 @@ theorem mvTate_t2Space [IsTateRing A] [T2Space A] (n : ℕ) :
     obtain ⟨b, hb_mem, hb_eq⟩ := mvTateAlgNhd_coeff_mem n P k hy_mem l
     exact hk ⟨b, hb_mem, hb_eq⟩
   by_contra hall
-  push_neg at hall
+  push Not at hall
   obtain ⟨b, _, hb_eq⟩ := hall 0
   have hb_all : ∀ k : ℕ, b ∈ P.I ^ k := by
     intro k
@@ -1030,7 +1030,7 @@ private theorem mvIsRestricted_of_eventually_zero (m : ℕ)
   have hbox : ∀ i, s i < N := by
     intro i
     by_contra h_ge
-    push_neg at h_ge
+    push Not at h_ge
     exact hs (by rw [hh s ⟨i, h_ge⟩]; exact h0U)
   refine ⟨fun i => ⟨s i, hbox i⟩, ?_⟩
   ext i
@@ -1276,7 +1276,7 @@ theorem mvPolynomialToTate_denseRange [IsTateRing A] (m : ℕ) :
     have hbox : ∀ i, l i < N := by
       intro i
       by_contra hge
-      push_neg at hge
+      push Not at hge
       exact hne ((hN l ⟨i, hge⟩).symm)
     refine Finset.mem_image.mpr ⟨fun i => ⟨l i, hbox i⟩, Finset.mem_univ _, ?_⟩
     have : (fun i => ((⟨l i, hbox i⟩ : Fin N) : ℕ)) = ⇑l := by funext i; rfl

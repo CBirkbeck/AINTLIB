@@ -3249,7 +3249,7 @@ theorem tateAlgebra_polynomial_decomp
       exact this.symm
     · intro h
       exfalso; exact h (Finset.mem_range.mpr hl)
-  · push_neg at hl
+  · push Not at hl
     have hN_apply : g.val l = 0 := hN l hl
     rw [hN_apply]
     symm
