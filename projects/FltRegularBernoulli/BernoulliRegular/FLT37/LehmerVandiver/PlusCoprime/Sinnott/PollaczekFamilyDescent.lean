@@ -1,7 +1,6 @@
 import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.IndexFormula
 import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.CyclotomicUnitFamily
 
-
 /-!
 # `PollaczekInFamily` — Pollaczek descent to the family subgroup
 
@@ -174,7 +173,7 @@ theorem pollaczekUnitPlus_val_eq_prod_realCyclotomicUnit (i : ℕ) :
           (𝓞 K)ˣ).val from rfl]
   rw [Units.coe_prod, map_prod]
   rw [← Finset.prod_mul_distrib]
-  refine Finset.prod_congr rfl fun b _ => ?_
+  refine Finset.prod_congr rfl fun b _ ↦ ?_
   -- Each factor combines into
   -- `(pollaczekFactor b · σ(pollaczekFactor b)) ^ ...`.
   --             = realCyclotomicUnit b ^ ...
@@ -191,7 +190,7 @@ theorem pollaczekUnitPlus_val_eq_prod_Ico_two (i : ℕ) (hp_three : 3 ≤ p) :
         FLT37.realCyclotomicUnit p K b ^ (b ^ (p - 1 - i)) := by
   rw [pollaczekUnitPlus_val_eq_prod_realCyclotomicUnit]
   rw [Finset.prod_attach (Finset.Ico 1 ((p - 1) / 2 + 1))
-        (fun b => FLT37.realCyclotomicUnit p K b ^ (b ^ (p - 1 - i)))]
+        (fun b ↦ FLT37.realCyclotomicUnit p K b ^ (b ^ (p - 1 - i)))]
   have h_half : 1 ≤ (p - 1) / 2 := by omega
   have h_split : Finset.Ico 1 ((p - 1) / 2 + 1) =
       insert 1 (Finset.Ico 2 ((p - 1) / 2 + 1)) := by
@@ -220,13 +219,13 @@ theorem prod_Fin_eq_prod_Ico_two
   --         = ∏ b ∈ Finset.Ico 2 (n + 2), f b.
   rw [show ∏ j : Fin ((p - 3) / 2), f ((j : ℕ) + 2) =
         ∏ j ∈ Finset.range ((p - 3) / 2), f (j + 2) from
-        (Finset.prod_range fun j => f (j + 2)).symm]
+        (Finset.prod_range fun j ↦ f (j + 2)).symm]
   rw [show Finset.Ico 2 ((p - 1) / 2 + 1) = Finset.Ico (0 + 2) ((p - 3) / 2 + 2) by
         congr 1
         omega]
   rw [Finset.prod_Ico_eq_prod_range]
   simp only [zero_add]
-  refine Finset.prod_congr rfl fun j _ => ?_
+  refine Finset.prod_congr rfl fun j _ ↦ ?_
   congr 1
   omega
 
@@ -258,7 +257,7 @@ theorem algebraMapPollaczekUnitPlusKplus_eq (i_irreg : ℕ)
           FLT37.realCyclotomicUnit p K ((j : ℕ) + 2) ^
             (((j : ℕ) + 2) ^ (p - 1 - i_irreg)) from
         (prod_Fin_eq_prod_Ico_two (p := p) hp_three
-          (fun b => FLT37.realCyclotomicUnit p K b ^ (b ^ (p - 1 - i_irreg)))).symm]
+          (fun b ↦ FLT37.realCyclotomicUnit p K b ^ (b ^ (p - 1 - i_irreg)))).symm]
   -- Now both sides indexed by Fin; match term-wise.
   -- LHS: ∏ x : Fin (rank K⁺), algebraMap (family(x) ^ ((x+2)^...)).val.
   -- RHS: ∏ j : Fin ((p-3)/2), realCyclotomicUnit (j+2) ^ ((j+2)^...).
@@ -269,12 +268,12 @@ theorem algebraMapPollaczekUnitPlusKplus_eq (i_irreg : ℕ)
     (NumberField.IsCMField.units_rank_eq_units_rank (K := K)).trans
       (BernoulliRegular.units_rank_eq_prime_sub_three_div_two (p := p) (K := K))
   rw [Fintype.prod_equiv (finCongr h_rank_eq)
-        (fun x => algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)
+        (fun x ↦ algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)
           ((cyclotomicUnitFamilyKplusFinRank p K hp_odd hp_three x ^
               (((x : ℕ) + 2) ^ (p - 1 - i_irreg)) :
               (𝓞 (NumberField.maximalRealSubfield K))ˣ) :
               𝓞 (NumberField.maximalRealSubfield K)))
-        (fun j => FLT37.realCyclotomicUnit p K ((j : ℕ) + 2) ^
+        (fun j ↦ FLT37.realCyclotomicUnit p K ((j : ℕ) + 2) ^
           (((j : ℕ) + 2) ^ (p - 1 - i_irreg)))]
   intro x
   -- Term-wise: algebraMap (family(x) ^ ((x+2)^...)) = realCyclotomicUnit (x+2)^((x+2)^...).
