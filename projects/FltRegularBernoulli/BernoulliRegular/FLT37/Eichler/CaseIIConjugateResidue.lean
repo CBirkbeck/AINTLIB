@@ -143,7 +143,7 @@ Lemma-9.9 coefficient `d_i · ind_l E_i` for the regular indices; the irregular
 index is separated out (it is the surviving `ω^{32}`-component, handled by the
 proven single-index `residueInd37` collapse). -/
 def caseIIConjugateResidue_regularPart (c : Fin 18 → ZMod 37) : Fin 18 → ZMod 37 :=
-  fun j => if j = 15 then 0 else c j
+  fun j ↦ if j = 15 then 0 else c j
 
 /-- **The all-conjugate residue collapse** (proven, axiom-clean): if the regular
 eigencomponent vector satisfies the half-range Vandermonde residue equations of
@@ -214,7 +214,7 @@ theorem caseIIConjugateResidue_mem_omega32_eigenspace
   -- Hence the decomposition collapses to the single `j = 15` term.
   have hcollapse : x = c 15 • caseIIConjugateResidue_eigenvector 15 := by
     rw [h_decomp]
-    refine Finset.sum_eq_single (15 : Fin 18) (fun j _ hj => ?_) (fun h => ?_)
+    refine Finset.sum_eq_single (15 : Fin 18) (fun j _ hj ↦ ?_) (fun h ↦ ?_)
     · rw [hreg j hj, zero_smul]
     · exact absurd (Finset.mem_univ _) h
   -- The single surviving term is a scalar multiple of the `ω^{32}`-eigenvector.
