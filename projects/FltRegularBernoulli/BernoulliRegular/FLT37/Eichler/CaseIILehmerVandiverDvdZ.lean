@@ -138,15 +138,9 @@ theorem caseII_zeta_sub_one_notMem_lv149 {ζ : CyclotomicField 37 ℚ}
   -- `∑_{i<37} ζ_int^i = 0` in `𝓞 K`.
   have hgeom : ∑ i ∈ range 37, (hζ.toInteger) ^ i = 0 :=
     hζ.toInteger_isPrimitiveRoot.geom_sum_eq_zero (by decide)
-  -- Each `ζ_int^i ≡ 1 (mod lv149)`, since `ζ_int - 1 ∈ lv149`.
-  have hpow_sub : ∀ i, (hζ.toInteger) ^ i - 1 ∈ lv149 := by
-    intro i
-    have : (hζ.toInteger) ^ i - 1 ^ i =
-        (hζ.toInteger - 1) * (∑ j ∈ range i, (hζ.toInteger) ^ j) := by
-      rw [one_pow, ← geom_sum_mul, mul_comm]
-    rw [one_pow] at this
-    rw [this]
-    exact Ideal.mul_mem_right _ _ hmem
+  -- Each `ζ_int^i ≡ 1 (mod lv149)`, since `ζ_int - 1 ∈ lv149` divides `ζ_int^i - 1`.
+  have hpow_sub : ∀ i, (hζ.toInteger) ^ i - 1 ∈ lv149 := fun i =>
+    lv149.mem_of_dvd (sub_one_dvd_pow_sub_one _ i) hmem
   -- Sum the congruences: `0 = ∑ ζ_int^i ≡ ∑ 1 = 37 (mod lv149)`, so `37 ∈ lv149`.
   have hsum_sub :
       (∑ i ∈ range 37, (hζ.toInteger) ^ i) -
@@ -186,14 +180,13 @@ theorem caseII_dvd_z_of_factorization {ζ : CyclotomicField 37 ℚ}
     (hfact : x' + y' = (hζ.toInteger - 1) ^ a * (u : 𝓞 (CyclotomicField 37 ℚ)) * z')
     (hsum : x' + y' ∈ lv149) :
     z' ∈ lv149 := by
-  haveI : lv149.IsPrime := lv149_isMaximal.isPrime
+  haveI hp : lv149.IsPrime := lv149_isMaximal.isPrime
   rw [hfact] at hsum
   -- `(ζ-1)^a * u ∉ lv149`, so the prime forces `z' ∈ lv149`.
-  rcases (Ideal.IsPrime.mem_or_mem ‹lv149.IsPrime› hsum) with hmul | hz
+  rcases hp.mem_or_mem hsum with hmul | hz
   · exfalso
-    rcases (Ideal.IsPrime.mem_or_mem ‹lv149.IsPrime› hmul) with hpow | hu
-    · exact caseII_zeta_sub_one_notMem_lv149 hζ
-        (Ideal.IsPrime.mem_of_pow_mem ‹lv149.IsPrime› a hpow)
+    rcases hp.mem_or_mem hmul with hpow | hu
+    · exact caseII_zeta_sub_one_notMem_lv149 hζ (hp.mem_of_pow_mem a hpow)
     · exact caseII_unit_notMem_lv149 u hu
   · exact hz
 
