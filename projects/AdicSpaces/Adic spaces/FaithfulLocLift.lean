@@ -258,6 +258,56 @@ theorem exists_valuation_extension_of_prime_over
   rw [he2, he1] at hchain
   rw [hcomm]; exact hchain
 
+universe uR in
+/-- **Dominating valuation from a minimal prime below a prime** (Huber [Hu2] 3.3(i),
+`huber2.txt:644-646`: "Choosing a valuation ring of `Frac(G[a⁻¹]/q)` which dominates the local ring
+`(G[a⁻¹]/q)_{p/q}` we obtain a valuation `s` of `G[a⁻¹]` with `q = supp(s)`, `s(g) ≤ 1` for all
+`g`, and `s(x) < 1` for all `x ∈ p`"). For a commutative ring `R`, a prime `p`, and a minimal prime
+`q ≤ p`, there is a valuation `s` on `R` with support `q`, with `s ≤ 1` everywhere (the dominating
+valuation of the local ring `(R/q)_{p/q}` has `R/q` inside its valuation ring), and `s < 1` on `p`.
+-- INFRASTRUCTURE (general valuation/localization fact; mirrors Huber's domination step). -/
+theorem exists_dominating_valuation_of_minimalPrime_le {R : Type uR} [CommRing R]
+    {p : Ideal R} [hp : p.IsPrime] {q : Ideal R} (hq : q ∈ minimalPrimes R) (hqp : q ≤ p) :
+    ∃ (Γ : Type uR) (_ : LinearOrderedCommGroupWithZero Γ) (s : Valuation R Γ),
+      s.supp = q ∧ (∀ r, s r ≤ 1) ∧ (∀ y ∈ p, s y < 1) := by
+  haveI : q.IsPrime := hq.1.1
+  haveI : IsDomain (R ⧸ q) := Ideal.Quotient.isDomain q
+  haveI hp'prime : (p.map (Ideal.Quotient.mk q)).IsPrime :=
+    Ideal.map_isPrime_of_surjective Ideal.Quotient.mk_surjective (by rw [Ideal.mk_ker]; exact hqp)
+  -- Localize the domain `R/q` at the prime `p/q` (a local ring); dominate it by a valuation
+  -- subring `V` of its fraction field `K`.
+  set Dp := Localization.AtPrime (p.map (Ideal.Quotient.mk q)) with hDp
+  obtain ⟨V, hVle, hVloc⟩ :=
+    IsLocalRing.exists_factor_valuationRing (algebraMap Dp (FractionRing Dp))
+  -- The composite `R → R/q → Dp → K` and the pulled-back valuation `s := V.valuation.comap f_R`.
+  set f_R : R →+* FractionRing Dp :=
+    (algebraMap Dp (FractionRing Dp)).comp ((algebraMap (R ⧸ q) Dp).comp (Ideal.Quotient.mk q))
+    with hf_R
+  refine ⟨_, _, V.valuation.comap f_R, ?_, ?_, ?_⟩
+  · -- supp: `s r = 0 ↔ f_R r = 0 ↔ r ∈ q` (the composite `R/q → Dp → K` is injective on the domain)
+    ext r
+    rw [Valuation.comap_supp, Ideal.mem_comap, Valuation.mem_supp_iff, V.valuation.zero_iff, hf_R]
+    have hinj1 : Function.Injective (algebraMap (R ⧸ q) Dp) :=
+      IsLocalization.injective Dp (Ideal.primeCompl_le_nonZeroDivisors (Ideal.map (Ideal.Quotient.mk q) p))
+    have hinj2 : Function.Injective (algebraMap Dp (FractionRing Dp)) :=
+      IsFractionRing.injective Dp (FractionRing Dp)
+    simp only [RingHom.comp_apply, map_eq_zero_iff _ hinj2, map_eq_zero_iff _ hinj1,
+      Ideal.Quotient.eq_zero_iff_mem]
+  · -- `s r ≤ 1`: `f_R r = algebraMap Dp K d` lies in `V` by `hVle`
+    intro r
+    exact (V.valuation_le_one_iff _).mpr (hVle _)
+  · -- `s y < 1` for `y ∈ p`: `d = image of y` lies in the maximal ideal of `Dp`, dominated into `V`
+    intro y hy
+    rw [Valuation.comap_apply, hf_R]
+    simp only [RingHom.comp_apply]
+    have hd_max : (algebraMap (R ⧸ q) Dp) (Ideal.Quotient.mk q y) ∈ IsLocalRing.maximalIdeal Dp := by
+      rw [IsLocalization.AtPrime.to_map_mem_maximal_iff Dp (Ideal.map (Ideal.Quotient.mk q) p)]
+      exact Ideal.mem_map_of_mem _ hy
+    have hc_nu : ¬ IsUnit (((algebraMap Dp (FractionRing Dp)).codRestrict V.toSubring hVle)
+        ((algebraMap (R ⧸ q) Dp) (Ideal.Quotient.mk q y))) :=
+      fun h => ((IsLocalRing.mem_maximalIdeal _).mp hd_max) (hVloc.map_nonunit _ h)
+    exact (V.valuation_lt_one_iff _).mp ((IsLocalRing.mem_maximalIdeal _).mpr hc_nu)
+
 set_option linter.unusedSectionVars false in
 /-- **Integral / power-bounded criterion (Wedhorn 7.52(1) = Prop 7.18(1) = [Hu2] Lemma 3.3).**
 In the complete affinoid ring `B = presheafValue D'`, an element `x` with `v(x) ≤ 1` at every
@@ -301,14 +351,41 @@ theorem mem_plus_of_forall_spa_vle_one
     -- localization argument.
     have hx_not_integral : ¬ IsIntegral ((presheafValue D')⁺) x := fun hint =>
       hxnot (IsRingOfIntegralElements.isIntegrallyClosed (B := (presheafValue D')⁺) x hint)
-    -- HU-b..e (huber2.txt:637-658): from `hx_not_integral`, `x⁻¹` is a non-unit of `B⁺[x⁻¹]`
-    -- (else `x` integral); a minimal prime + a dominating valuation
-    -- (`IsLocalRing.exists_factor_valuationRing` after reducing to the fraction field of a
-    -- minimal-prime quotient) + a lift to `Spv B` (`Spv.comap`) give `v ∈ Spv(B, B°°·B)` with
-    -- `v(x) > 1`, `v ≤ 1` on `B⁺` and on `B°°` (the latter via
-    -- `topologicallyNilpotent_mem_of_isOpen_integrallyClosed`); continuity via
-    -- `Spv.isContinuous_of_isInSpvAI_of_lt_one` (Wedhorn 7.10 reverse) places `v ∈ Spa(B, B⁺)`.
-    sorry
+    -- HU-b: `x⁻¹` is a non-unit of `B⁺[x⁻¹] := adjoin B⁺ {x⁻¹} ⊆ B_x := Localization.Away x`.
+    letI : Algebra ↥(presheafValue D')⁺ (presheafValue D') := (presheafValue D')⁺.subtype.toAlgebra
+    have hnonunit := not_isUnit_invSelf_of_not_isIntegral (Bx := Localization.Away x) x hx_not_integral
+    -- HU-b': a maximal ideal `𝔪` of `B⁺[x⁻¹]` containing `x⁻¹` (proper since `x⁻¹` is a non-unit).
+    obtain ⟨𝔪, h𝔪max, h𝔪ge⟩ := Ideal.exists_le_maximal _ (Ideal.span_singleton_ne_top hnonunit)
+    have hxinv𝔪 : (⟨IsLocalization.Away.invSelf x, Algebra.subset_adjoin (Set.mem_singleton _)⟩ :
+        Algebra.adjoin ↥(presheafValue D')⁺ {(IsLocalization.Away.invSelf x : Localization.Away x)})
+        ∈ 𝔪 := h𝔪ge (Ideal.mem_span_singleton_self _)
+    -- HU-c (huber2.txt:644-646): a minimal prime `q ⊆ 𝔪`; the dominating valuation `s` of
+    -- `R := B⁺[x⁻¹]` with `supp s = q`, `s ≤ 1` on `R` (so on `B⁺` and at `x⁻¹`), `s < 1` on `𝔪`
+    -- (so `s(x⁻¹) < 1`, since `x⁻¹ ∈ 𝔪`).
+    haveI : 𝔪.IsPrime := h𝔪max.isPrime
+    obtain ⟨q, hq_min, hq_le⟩ := Ideal.exists_minimalPrimes_le (J := 𝔪) bot_le
+    obtain ⟨Γs, _, s, hs_supp, hs_le, hs_lt⟩ :=
+      exists_dominating_valuation_of_minimalPrime_le hq_min hq_le
+    -- HU-d (huber2.txt:646-648): a prime `q'` of `B_x` lying over `q = supp s` (Stacks 00FK, minimal
+    -- prime under the injective inclusion `R := B⁺[x⁻¹] ↪ B_x`); extend `s` to a valuation `t` of
+    -- `B_x` (`exists_valuation_extension_of_prime_over`); set `v := comap (B → B_x) (ofValuation t)`.
+    set Radj := Algebra.adjoin ↑(presheafValue D')⁺ {(IsLocalization.Away.invSelf x : Localization.Away x)}
+      with hRadj
+    letI : Algebra ↑Radj (Localization.Away x) := Radj.val.toRingHom.toAlgebra
+    have hinj : Function.Injective (algebraMap ↑Radj (Localization.Away x)) := Subtype.val_injective
+    obtain ⟨q', hq'prime, hq'eq⟩ :=
+      Ideal.exists_comap_eq_of_mem_minimalPrimes_of_injective hinj q hq_min
+    haveI := hq'prime
+    obtain ⟨Γt, _, t, ht_equiv⟩ := exists_valuation_extension_of_prime_over s q'
+      (hq'eq.trans hs_supp.symm) (FractionRing (↑Radj ⧸ s.supp)) (FractionRing (Localization.Away x ⧸ q'))
+    refine ⟨ValuationSpectrum.comap (algebraMap (presheafValue D') (Localization.Away x))
+      (ValuationSpectrum.ofValuation t), ?_, ?_⟩
+    · -- HU-e(1): `v ∈ Spa(B, B⁺)`: `v ≤ 1` on `B⁺` (from `s ≤ 1`), `v ≤ 1` on `B°°` (`G` open:
+      -- `xⁿ·x⁻¹ ∈ G`, `xⁿ ∈ p ⟹ s(xⁿ) ≤ 1`), `v ∈ Spv(B, B°°·B)`; continuity via
+      -- `Spv.isContinuous_of_isInSpvAI_of_lt_one` (Wedhorn 7.10 reverse, huber2.txt:654-657).
+      sorry
+    · -- HU-e(2): `¬ v.vle x 1`, i.e. `v(x) > 1`: from `s(x⁻¹) < 1` and `x⁻¹ · x = 1` in `B_x`.
+      sorry
   exact hw (hx w hw_spa)
 
 set_option linter.unusedSectionVars false in

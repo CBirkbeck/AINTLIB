@@ -1,0 +1,1 @@
+FOCUS: T-L4 HU-e. HU-c domination lemma + HU-d assembly (minimal prime + lying-over Stacks-00FK + exists_valuation_extension_of_prime_over + v=comap) ALL COMPILE. 2 sorries left: HU-e(1) v∈Spa (line 386: v≤1 on B⁺ via hs_le+IsEquiv; v≤1 on B°° via G-open; continuity Spv.isContinuous_of_isInSpvAI_of_lt_one), HU-e(2) ¬v.vle x 1 (line 388: s(x⁻¹)<1 + x⁻¹·x=1). Doing HU-e(2) first.
