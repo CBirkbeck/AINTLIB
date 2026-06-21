@@ -113,7 +113,6 @@ above (`caseII_lv149_one_mod_37`, `caseII_lv149_lt_p_sq_sub_p`): for the actual 
 integer `z` (the `p`-divisible Fermat variable) Lemma 9.7 forces `ℓ ∣ z` for every prime
 `ℓ ≡ 1 (mod p)`, `ℓ < p² - p`, and `149` is such a prime. -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **Washington Lemma 9.7 over the Case-II descent telescope** (a `def … : Prop`, **not** an
 axiom): for every Case-II descent instance, the descent integer `z'` is divisible by the
 Lehmer–Vandiver auxiliary prime `lv149`.
@@ -146,7 +145,6 @@ def CaseIILehmerVandiverDvdZ37
 it is a sound
 named target (unlike the over-stated `Lemma98LocalPower37`). -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **Washington Lemma 9.8, corrected single-index local power (R4)** (a `def … : Prop`, **not** an
 axiom).
 
@@ -191,7 +189,6 @@ We name this congruence (the genuine Lemma-9.8-opening residual, which **uses** 
 `def … : Prop`.  It is **not** the conclusion: it is a congruence of the abstract `ε₁/ε₂` to a
 *specific named* unit `δ` that is **separately, provably** a `37`-th power mod `lv149`. -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **The §9.1 residue identification of the abstract descent unit with the proven producer unit**
 (a `def … : Prop`, **not** an axiom — Washington Lemma 9.8's `η_a ≡ ω ρ_a^{-37} (mod 𝔩)` opening,
 read for the abstract data; **uses** `lv149 ∣ z'`).
@@ -242,7 +239,6 @@ unit `δ` is a `37`-th power mod `lv149` (the **proven** `caseIISection91_lv149_
 `ε₁/ε₂ ≡ δ (mod lv149)`, so `IsPthPowerModPrime.congr` transports the property to `ε₁/ε₂`.  This is
 the actual discharge of R4 — **routed through the proven producer**, never Assumption II. -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **The corrected local power, discharged from `ℓ ∣ z` + the §9.1 producer** (proven, axiom-clean
 *given* the §9.1 residue identification — uses the **proven** producer, **not** Assumption II).
 
@@ -258,14 +254,11 @@ theorem caseII_localPower_of_dvd_z
     (h_ident : CaseIISection91DescentUnitIdentification37) :
     Lemma98LocalPower37Strict := by
   intro hV hSO m D x' y' z' ε₁ ε₂ ε₃ hx hy hz hℓz heq
-  -- The §9.1 identification supplies the producer datum and the residue congruence.
   obtain ⟨m', D_real, η, G, hX, hQ0, hcong⟩ :=
     h_ident hV hSO D hx hy hz hℓz heq
-  -- The producer unit `δ` is a `37`-th power mod `lv149` (proven, by construction).
   have hδ : BernoulliRegular.IsPthPowerModPrime 37 lv149
       (caseIISection91_descentUnit D_real η G lv149) :=
     caseIISection91_lv149_localPower D_real η G hX hQ0
-  -- Transport along `ε₁/ε₂ ≡ δ (mod lv149)`.
   exact (BernoulliRegular.IsPthPowerModPrime.congr hcong).mpr hδ
 
 /-! ## 5. Recovering `Lemma98LocalPower37` from the strict form + the `ℓ ∣ z` datum
@@ -275,7 +268,6 @@ receives.  So the over-stated `Lemma98LocalPower37` is recovered from `Lemma98Lo
 by supplying the missing `z' ∈ lv149` from the genuine-data property `CaseIILehmerVandiverDvdZ37`.
 This makes the existing chain consume a genuinely-non-vacuous local-power input. -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **`Lemma98LocalPower37` from the strict form + the genuine `ℓ ∣ z` datum** (proven,
 axiom-clean).
 
@@ -301,7 +293,6 @@ here taking the *corrected* pair `(Lemma98LocalPower37Strict, CaseIILehmerVandiv
 Each recovers `Lemma98LocalPower37` internally via `lemma98LocalPower37_of_strict`, so the
 downstream collapse is unchanged but the local-power input is now genuinely non-vacuous. -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **Assumption II from the single-index expansion + the corrected local power** (proven,
 axiom-clean).
 
@@ -320,7 +311,6 @@ theorem caseIIThm95_assumptionII_of_corollary815_lemmaStrict
   caseIIThm95_assumptionII_of_corollary815_lemma98 h_expand
     (lemma98LocalPower37_of_strict h_localPowStrict h_dvd)
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **Assumption II from ω³²-membership + the corrected local power** (proven, axiom-clean).
 
 `caseIIOmega32_assumptionII_of_membership_localPower`, re-wired to take the **corrected**
@@ -345,7 +335,6 @@ over-stated `Lemma98LocalPower37` as residual 4.  Here is the version taking the
 `Lemma98LocalPower37Strict` + the genuine `ℓ ∣ z` datum `CaseIILehmerVandiverDvdZ37`, so the
 local-power residual is now genuinely non-vacuous (no false universal over abstract data). -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **FLT37 from the four genuine residuals, with the corrected (genuine-data) local power**
 (proven, axiom-clean given the four named inputs + the carried second-order Bernoulli Prop).
 
@@ -378,7 +367,6 @@ identification `CaseIISection91DescentUnitIdentification37` (the Lemma-9.8 openi
 residual that uses `ℓ ∣ z`).  This is the cleanest endpoint: R4 reduces to the §9.1 identification
 plus the genuine `ℓ ∣ z` datum, with the local-power discharge proven via the producer. -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **FLT37 from the §9.1 identification + the genuine `ℓ ∣ z` datum** (proven, axiom-clean given
 the named inputs + the carried second-order Bernoulli Prop).
 
