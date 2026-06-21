@@ -165,7 +165,7 @@ theorem caseIICor823SecondOrder_detector_eq_zero_of_evalₐ_eq_zero
             e a • concreteKummerLogVector (p := 37) (K := CyclotomicField 37 ℚ) (by norm_num) a)
         from rfl]
     rw [map_sum]
-    refine Finset.sum_congr rfl (fun a _ => ?_)
+    refine Finset.sum_congr rfl (fun a _ ↦ ?_)
     rw [map_zsmul]
     rfl
   have hevalS :
@@ -301,7 +301,7 @@ theorem prop812SecondOrderCoeff37_inhabited
   have hlhs : (∑ a : Fin (kummerLogRank 37),
         (0 : Fin (kummerLogRank 37) → ℤ) a •
           concreteKummerLogVector (p := 37) (K := CyclotomicField 37 ℚ) (by norm_num) a) = 0 := by
-    refine Finset.sum_eq_zero (fun a _ => ?_)
+    refine Finset.sum_eq_zero (fun a _ ↦ ?_)
     simp
   rw [hlhs]
   rw [show ((dworkFixedEvenPowerBasis (p := 37) (K := CyclotomicField 37 ℚ)
@@ -314,7 +314,7 @@ theorem prop812SecondOrderCoeff37_inhabited
   rw [show (∑ a : Fin (kummerLogRank 37),
         (((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 2) ^ ((15 : ℕ) + 1) - 1) *
           (((0 : Fin (kummerLogRank 37) → ℤ) a : ℤ) : ZMod (37 ^ 2))) = 0
-      from Finset.sum_eq_zero (fun a _ => by simp)]
+      from Finset.sum_eq_zero (fun a _ ↦ by simp)]
   rw [mul_zero]
 
 end BernoulliRegular.FLT37.Eichler
