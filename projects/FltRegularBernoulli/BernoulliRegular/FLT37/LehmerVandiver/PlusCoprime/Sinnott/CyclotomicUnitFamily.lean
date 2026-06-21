@@ -3,7 +3,6 @@ import BernoulliRegular.FLT37.CyclotomicUnitsKplus
 import BernoulliRegular.HMinus.ClassNumberFormula
 import Mathlib.NumberTheory.NumberField.Units.Regulator
 
-
 /-!
 # Max-rank family of real cyclotomic units
 
@@ -133,7 +132,7 @@ theorem cyclotomicRealUnitIndexSet_coprime (hp_two : 2 < p)
   obtain ⟨ha_pos, ha_lt⟩ := cyclotomicRealUnitIndexSet_bounds p hp_two ha
   -- p prime + 1 ≤ a < p ⟹ ¬p ∣ a ⟹ p.Coprime a ⟹ a.Coprime p.
   have hp_prime : Nat.Prime p := Fact.out
-  have h_not_dvd : ¬ p ∣ a := fun h => by
+  have h_not_dvd : ¬ p ∣ a := fun h ↦ by
     have := Nat.le_of_dvd ha_pos h
     omega
   exact (hp_prime.coprime_iff_not_dvd.mpr h_not_dvd).symm
@@ -221,7 +220,7 @@ theorem cyclotomicUnitFamily_index_coprime (hp_three : 3 ≤ p)
     omega
   have h_pos : 1 ≤ (i : ℕ) + 2 := by omega
   -- p prime + 1 ≤ a < p ⟹ ¬p ∣ a ⟹ a.Coprime p.
-  have h_not_dvd : ¬ p ∣ ((i : ℕ) + 2) := fun h => by
+  have h_not_dvd : ¬ p ∣ ((i : ℕ) + 2) := fun h ↦ by
     have := Nat.le_of_dvd h_pos h
     omega
   exact (hp_prime.coprime_iff_not_dvd.mpr h_not_dvd).symm
@@ -262,7 +261,7 @@ noncomputable def cyclotomicUnitFamilyKplusFinRank (_hp_odd : p ≠ 2)
     (hp_three : 3 ≤ p) :
     Fin (NumberField.Units.rank (NumberField.maximalRealSubfield K)) →
       (𝓞 (NumberField.maximalRealSubfield K))ˣ :=
-  fun i =>
+  fun i ↦
     cyclotomicUnitFamilyKplus p K hp_three
       (i.cast ((NumberField.IsCMField.units_rank_eq_units_rank (K := K)).trans
         (BernoulliRegular.units_rank_eq_prime_sub_three_div_two (p := p) (K := K))))
