@@ -69,6 +69,44 @@ theorem isUnit_canonicalMap_s_faithful
   have hmem := comap_canonicalMap_mem_rationalOpen D' (canonicalMap_continuous D') hw
   exact (h hmem).2.2 (by simpa only [comap_vle, map_zero] using hvle)
 
+/-- **Huber [Hu2] 3.3(i) localization step (huber2.txt:635-637).** If `x` is not integral over the
+base `R` of an `R`-algebra `B`, then in a localization `Bx` of `B` away from `x` the canonical
+inverse `IsLocalization.Away.invSelf x` is not a unit of the subalgebra
+`R[x⁻¹] = Algebra.adjoin R {x⁻¹}`. *Proof.* If `invSelf x` were a unit of the subalgebra, its
+inverse — which (by `x · invSelf x = 1` and uniqueness of inverses in `Bx`) is the image of `x` —
+would lie in `adjoin R {invSelf x}`; then `isIntegral_of_isIntegral_adjoin_of_mul_eq_one` gives
+`IsIntegral R (algebraMap B Bx x)`, and `IsLocalization.Away.isIntegral_of_isIntegral_map` descends
+it to `IsIntegral R x`, contradicting the hypothesis. -/
+theorem not_isUnit_invSelf_of_not_isIntegral
+    {R B : Type*} [CommRing R] [CommRing B] [Algebra R B] (x : B)
+    {Bx : Type*} [CommRing Bx] [Algebra B Bx] [IsLocalization.Away x Bx]
+    [Algebra R Bx] [IsScalarTower R B Bx]
+    (hx : ¬ IsIntegral R x) :
+    ¬ IsUnit (⟨(IsLocalization.Away.invSelf x : Bx),
+        Algebra.subset_adjoin (Set.mem_singleton _)⟩ :
+      Algebra.adjoin R {(IsLocalization.Away.invSelf x : Bx)}) := by
+  intro hunit
+  have hmul : IsLocalization.Away.invSelf x * algebraMap B Bx x = 1 := by
+    rw [mul_comm]; exact IsLocalization.Away.mul_invSelf x
+  -- `algebraMap B Bx x` lies in the subalgebra (it is the unique inverse of the unit `invSelf x`).
+  have hx_mem : algebraMap B Bx x ∈ Algebra.adjoin R {(IsLocalization.Away.invSelf x : Bx)} := by
+    obtain ⟨w, hw⟩ := hunit.exists_right_inv
+    have hcoe : IsLocalization.Away.invSelf x * (w : Bx) = 1 := by
+      have h := congrArg
+        (fun z : Algebra.adjoin R {(IsLocalization.Away.invSelf x : Bx)} => (z : Bx)) hw
+      simpa [Subalgebra.coe_mul, Subalgebra.coe_one] using h
+    have hval : (w : Bx) = algebraMap B Bx x :=
+      left_inv_eq_right_inv (by rw [mul_comm]; exact hcoe) hmul
+    exact hval ▸ w.2
+  have hint_adjoin : IsIntegral (Algebra.adjoin R {(IsLocalization.Away.invSelf x : Bx)})
+      (algebraMap B Bx x) := by
+    have : (algebraMap (Algebra.adjoin R {(IsLocalization.Away.invSelf x : Bx)}) Bx)
+        ⟨algebraMap B Bx x, hx_mem⟩ = algebraMap B Bx x := rfl
+    exact this ▸ isIntegral_algebraMap
+  exact hx (IsLocalization.Away.isIntegral_of_isIntegral_map x
+    (isIntegral_of_isIntegral_adjoin_of_mul_eq_one (algebraMap B Bx x)
+      (IsLocalization.Away.invSelf x) hmul hint_adjoin))
+
 set_option linter.unusedSectionVars false in
 /-- **Integral / power-bounded criterion (Wedhorn 7.52(1) = Prop 7.18(1) = [Hu2] Lemma 3.3).**
 In the complete affinoid ring `B = presheafValue D'`, an element `x` with `v(x) ≤ 1` at every
