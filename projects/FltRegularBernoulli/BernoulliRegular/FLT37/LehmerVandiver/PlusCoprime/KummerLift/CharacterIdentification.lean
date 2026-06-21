@@ -75,7 +75,7 @@ theorem pollaczekUnit_val_eq_prod (i : ℕ) :
     intro b _
     rw [Units.val_pow_eq_pow_val, pollaczekFactor_val]]
   rw [Finset.prod_attach (Finset.Ico 1 ((p - 1) / 2 + 1))
-    (fun b => cyclotomicUnit p K b ^ (b ^ (p - 1 - i)))]
+    (fun b ↦ cyclotomicUnit p K b ^ (b ^ (p - 1 - i)))]
 
 /-- **Aggregate σ_a-twist for `pollaczekUnit` (substitution form)**:
 applying σ_a to the Pollaczek product, multiplied by the ζ-prefactor
@@ -274,7 +274,7 @@ theorem cyclotomicSigmaOfUnit_smul_pollaczekUnit_swap_uniform
         ∏ b ∈ Finset.Ico 1 ((p - 1) / 2 + 1),
           cyclotomicUnit p K (p - ((a : ZMod p) * b).val) ^ (b ^ (p - 1 - i)) := by
   -- For each b, ((a · b).val) < p, so ≤ p as required by per-term lemma.
-  have h_le : ∀ b : ℕ, ((a : ZMod p) * b).val ≤ p := fun b =>
+  have h_le : ∀ b : ℕ, ((a : ZMod p) * b).val ≤ p := fun b ↦
     Nat.le_of_lt ((((a : ZMod p) * b)).val_lt)
   -- Apply the per-term swap to each factor, then aggregate.
   rw [show ∏ b ∈ Finset.Ico 1 ((p - 1) / 2 + 1),
@@ -283,7 +283,7 @@ theorem cyclotomicSigmaOfUnit_smul_pollaczekUnit_swap_uniform
         (-1) ^ (b ^ (p - 1 - i)) *
           (((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (((a : ZMod p) * b).val) *
             cyclotomicUnit p K (p - ((a : ZMod p) * b).val)) ^ (b ^ (p - 1 - i))
-      from Finset.prod_congr rfl fun b _ => by
+      from Finset.prod_congr rfl fun b _ ↦ by
         exact cyclotomicUnit_pow_eq_neg_zeta_pow_mul_cyclotomicUnit_p_sub_pow
           p K a b (p - 1 - i) (h_le b)]
   -- Now distribute the product over (-1)^{...} · (ζ^{...} · cycU(p - ...))^{...}.
@@ -293,7 +293,7 @@ theorem cyclotomicSigmaOfUnit_smul_pollaczekUnit_swap_uniform
       (-1) ^ (∑ b ∈ Finset.Ico 1 ((p - 1) / 2 + 1), b ^ (p - 1 - i))
       from Finset.prod_pow_eq_pow_sum
         (Finset.Ico 1 ((p - 1) / 2 + 1))
-        (fun b => b ^ (p - 1 - i)) (-1)]
+        (fun b ↦ b ^ (p - 1 - i)) (-1)]
   -- Distribute (ζ^{...} · cycU)^{exp} = ζ^{... · exp} · cycU^{exp}.
   rw [show ∏ b ∈ Finset.Ico 1 ((p - 1) / 2 + 1),
         (((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (((a : ZMod p) * b).val) *
@@ -305,7 +305,7 @@ theorem cyclotomicSigmaOfUnit_smul_pollaczekUnit_swap_uniform
           cyclotomicUnit p K (p - ((a : ZMod p) * b).val) ^ (b ^ (p - 1 - i))
       from by
         rw [← Finset.prod_mul_distrib]
-        refine Finset.prod_congr rfl fun b _ => ?_
+        refine Finset.prod_congr rfl fun b _ ↦ ?_
         rw [mul_pow, ← pow_mul]]
   ring
 
@@ -387,7 +387,7 @@ theorem halfReduce_round_trip (hp_odd : p ≠ 2) (a : (ZMod p)ˣ) {b : ℕ}
     omega
   have hb_val : ((b : ℕ) : ZMod p).val = b := by
     rw [ZMod.val_natCast, Nat.mod_eq_of_lt hb_lt_p]
-  have h_ab_ne : (a : ZMod p) * (b : ZMod p) ≠ 0 := fun h => by
+  have h_ab_ne : (a : ZMod p) * (b : ZMod p) ≠ 0 := fun h ↦ by
     rcases mul_eq_zero.mp h with h' | h'
     · exact a.ne_zero h'
     · exact hb_zmod_ne_zero h'
@@ -459,8 +459,8 @@ theorem halfReduce_prod_reindex (hp_odd : p ≠ 2) (a : (ZMod p)ˣ)
     ∏ b ∈ Finset.Ico 1 ((p - 1) / 2 + 1), f b (halfReduce p a b) =
       ∏ b' ∈ Finset.Ico 1 ((p - 1) / 2 + 1), f (halfReduce p a⁻¹ b') b' := by
   refine Finset.prod_nbij'
-    (fun b => halfReduce p a b)
-    (fun b' => halfReduce p a⁻¹ b')
+    (fun b ↦ halfReduce p a b)
+    (fun b' ↦ halfReduce p a⁻¹ b')
     ?_ ?_ ?_ ?_ ?_
   · intro b hb; exact halfReduce_mem_half_range p hp_odd a hb
   · intro b' hb'; exact halfReduce_mem_half_range p hp_odd a⁻¹ hb'
@@ -547,7 +547,7 @@ theorem cyclotomicSigmaOfUnit_smul_pollaczekUnit_half_range_reindex
           else -((zeta_spec p ℚ K).toInteger : 𝓞 K) ^
                 (((a : ZMod p) * (b : ZMod p)).val)) *
           cyclotomicUnit p K (halfReduce p a b)) ^ (b ^ (p - 1 - i))
-      from Finset.prod_congr rfl fun b _ => by
+      from Finset.prod_congr rfl fun b _ ↦ by
         rw [cyclotomicUnit_eq_if_upper_pair_up]]
   -- Note: `((a : ZMod p) * b).val` (with `b : ℕ`) equals `((a : ZMod p) * (b : ZMod p)).val`
   -- after the natCast — the identity holds because `(↑b : ZMod p) = (b : ZMod p)` on naturals.
@@ -565,7 +565,7 @@ theorem cyclotomicSigmaOfUnit_smul_pollaczekUnit_half_range_reindex
           cyclotomicUnit p K (halfReduce p a b) ^ (b ^ (p - 1 - i)))
       from by
         rw [← Finset.prod_mul_distrib]
-        refine Finset.prod_congr rfl fun b _ => ?_
+        refine Finset.prod_congr rfl fun b _ ↦ ?_
         rw [mul_pow]]
   -- Now reindex the cyclotomicUnit-product via halfReduce bijection.
   congr 1
@@ -574,7 +574,7 @@ theorem cyclotomicSigmaOfUnit_smul_pollaczekUnit_half_range_reindex
   -- `((a : ZMod p) * (b : ZMod p))`.
   -- Use halfReduce_prod_reindex with f(b, b') := cyclotomicUnit p K b' ^ (b ^ E).
   exact halfReduce_prod_reindex (p := p) (K := K) hp_odd a
-    (fun b b' => cyclotomicUnit p K b' ^ (b ^ (p - 1 - i)))
+    (fun b b' ↦ cyclotomicUnit p K b' ^ (b ^ (p - 1 - i)))
 
 end StageFive
 
@@ -760,7 +760,7 @@ theorem cyclotomicUnit_pow_halfReduce_aggregate
           ((γ : 𝓞 K)) ^ p := by
   classical
   -- For each b' ∈ half-range, choose a witness γ_b' from 6d.
-  let γ_fn : ℕ → (𝓞 K)ˣ := fun b' =>
+  let γ_fn : ℕ → (𝓞 K)ˣ := fun b' ↦
     if h : b' ∈ Finset.Ico 1 ((p - 1) / 2 + 1) then
       Classical.choose
         (cyclotomicUnit_pow_halfReduce_per_term p K a b' i h hp_odd hi hi_even)
@@ -773,7 +773,7 @@ theorem cyclotomicUnit_pow_halfReduce_aggregate
         (cyclotomicUnit p K b' ^
             (((a^i : (ZMod p)ˣ) : ZMod p).val * b' ^ (p - 1 - i)) *
           ((γ_fn b' : 𝓞 K)) ^ p) from
-      Finset.prod_congr rfl fun b' hb' => by
+      Finset.prod_congr rfl fun b' hb' ↦ by
         simp only [γ_fn, hb', dif_pos]
         exact Classical.choose_spec
           (cyclotomicUnit_pow_halfReduce_per_term p K a b' i hb' hp_odd hi hi_even)]
@@ -793,7 +793,7 @@ theorem prod_cyclotomicUnit_pow_mul_eq_pollaczekUnit_pow
   rw [pollaczekUnit_val_eq_prod]
   -- Goal: ∏ cyclotomicUnit b' ^ (N * b'^E) = (∏ cyclotomicUnit b' ^ b'^E)^N.
   rw [← Finset.prod_pow]
-  refine Finset.prod_congr rfl fun b' _ => ?_
+  refine Finset.prod_congr rfl fun b' _ ↦ ?_
   rw [← pow_mul, mul_comm]
 
 /-- **LV005c1b main theorem (almost-eigenvalue form)**: the σ_a-twist of
