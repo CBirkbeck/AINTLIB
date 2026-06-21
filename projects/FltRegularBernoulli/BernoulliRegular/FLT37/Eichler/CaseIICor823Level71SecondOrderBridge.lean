@@ -229,7 +229,7 @@ theorem factorial_thirtytwo_isUnit_modSq : IsUnit ((Nat.factorial 32 : ℕ) : ZM
   have hcop : (Nat.factorial 32).Coprime 37 := by
     rw [Nat.coprime_comm]
     exact (Nat.Prime.coprime_iff_not_dvd (by norm_num)).mpr
-      (fun hdvd => absurd ((Nat.Prime.dvd_factorial (by norm_num)).mp hdvd) (by norm_num))
+      (fun hdvd ↦ absurd ((Nat.Prime.dvd_factorial (by norm_num)).mp hdvd) (by norm_num))
   exact hcop.pow_right 2
 
 omit [NumberField.IsCMField K] in
@@ -453,7 +453,7 @@ theorem deg32_slice_castHom_eq_zero
     refine (ZMod.isUnit_iff_coprime _ _).mpr ?_
     rw [Nat.coprime_comm]
     exact (Nat.Prime.coprime_iff_not_dvd (by norm_num)).mpr
-      (fun hdvd => absurd ((Nat.Prime.dvd_factorial (by norm_num)).mp hdvd) (by norm_num))
+      (fun hdvd ↦ absurd ((Nat.Prime.dvd_factorial (by norm_num)).mp hdvd) (by norm_num))
   exact (hfac_unit.mul_right_eq_zero).mp hcasteq
 
 omit [NumberField.IsCMField K] in
@@ -463,7 +463,7 @@ theorem factorial_thirtytwo_isUnit_modP : IsUnit ((Nat.factorial 32 : ℕ) : ZMo
   refine (ZMod.isUnit_iff_coprime _ _).mpr ?_
   rw [Nat.coprime_comm]
   exact (Nat.Prime.coprime_iff_not_dvd (by norm_num)).mpr
-    (fun hdvd => absurd ((Nat.Prime.dvd_factorial (by norm_num)).mp hdvd) (by norm_num))
+    (fun hdvd ↦ absurd ((Nat.Prime.dvd_factorial (by norm_num)).mp hdvd) (by norm_num))
 
 /-! ### The deg-`32` slice second digit is `37·1` exactly: the explicit `α₀` value mod `37²`
 
@@ -531,7 +531,7 @@ theorem formalSum32_residue_modSq_eq_thirtyseven :
   -- Cast `hcross` to `ZMod 37²`.
   have hcrossZ : ((s.num : ℤ) : ZMod (37 ^ 2)) * ((16320 : ℕ) : ZMod (37 ^ 2)) =
       ((-7709321041217 : ℤ) : ZMod (37 ^ 2)) * (((s.den : ℕ)) : ZMod (37 ^ 2)) := by
-    have hZ := congrArg (fun z : ℤ => (z : ZMod (37 ^ 2))) hcross
+    have hZ := congrArg (fun z : ℤ ↦ (z : ZMod (37 ^ 2))) hcross
     push_cast at hZ ⊢
     convert hZ using 2
   -- Multiply both sides by `16320⁻¹·s.den⁻¹` and evaluate the constant.
