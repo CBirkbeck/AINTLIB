@@ -153,7 +153,7 @@ theorem caseII_span_lambda_eq_p_sq {ζ ζ' : K} (hζ : IsPrimitiveRoot ζ 37)
   -- `1 − ζ'` and `1 − ζ'³⁶` are associates of `ζ − 1`.
   have h1 : Associated (hζ.toInteger - 1 : 𝓞 K) (1 - hζ'.toInteger) := by
     have hne : (1 : 𝓞 K) ≠ hζ'.toInteger :=
-      fun h => hζ'.toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37) h.symm
+      fun h ↦ hζ'.toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37) h.symm
     exact hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
       (by decide : Nat.Prime 37) hmem1 hmemζ' hne
   have h2 : Associated (hζ.toInteger - 1 : 𝓞 K) (1 - hζ'.toInteger ^ 36) := by
