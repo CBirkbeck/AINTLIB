@@ -318,7 +318,7 @@ theorem caseIICor823Level72LeadingCoeff37_of_normalizedUnitCoeff
     (hNorm : CaseIICor823Level71NormalizedUnitCoeff37) :
     CaseIICor823Level72LeadingCoeff37 := by
   obtain ⟨ρ, hρ_ne, hnorm⟩ := hNorm
-  refine ⟨2 * ρ, ?_, fun a => ?_⟩
+  refine ⟨2 * ρ, ?_, fun a ↦ ?_⟩
   · -- `2·ρ ≠ 0` in the field `ZMod 37` (`2 ≠ 0`, `ρ ≠ 0`).
     exact mul_ne_zero (by decide) hρ_ne
   · -- `genericColumnCoordLHS37 a = 2·W(a) = 2·(37·ρ.val·V) = 37·(2·ρ.val)·V`.
