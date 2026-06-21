@@ -126,11 +126,10 @@ theorem caseIIResidueProvenance_exists_decomp
     (x : CyclotomicUnitFreePartModP (p := 37) (CyclotomicField 37 ℚ)) :
     ∃ c : Fin 18 → ZMod 37,
       x = ∑ j : Fin 18, c j • caseIIConjugateResidue_eigenvector j ∧ c 17 = 0 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  -- The seventeen bare classes span `⊤`.
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
+  -- The seventeen bare classes span `⊤`, so `x` is a `Fin 17`-combination of them.
   have hspan := pollaczekUnit_image_span_eq_top (K := CyclotomicField 37 ℚ)
     caseIIGaloisEigen_pollaczekClasses_ne_zero
-  -- `x` is a `Fin 17`-combination of the spanning family.
   have hx : x ∈ Submodule.span (ZMod 37) (Set.range (fun k : Fin 17 ↦
       cyclotomicUnitFreePartModPClass (p := 37) (CyclotomicField 37 ℚ)
         (Additive.ofMul (cyclotomicUnitFreeClass (CyclotomicField 37 ℚ)
@@ -147,16 +146,13 @@ theorem caseIIResidueProvenance_exists_decomp
           else (0 : ZMod 37)) • caseIIConjugateResidue_eigenvector (Fin.last 17) = 0 := by
       rw [dif_neg (by rw [Fin.val_last]; exact lt_irrefl 17), zero_smul]
     rw [hlast, add_zero, ← hc17]
-    -- The first seventeen block terms match the span-family combination.
+    -- The first seventeen block terms match the span-family combination, term by term.
     refine Finset.sum_congr rfl (fun k _ ↦ ?_)
     beta_reduce
-    have hcoe : ((Fin.castSucc k : Fin 18) : ℕ) = (k : ℕ) := Fin.val_castSucc k
-    -- The dite coefficient at `castSucc k` is `c17 k`.
     have hcoeff : (if h : ((Fin.castSucc k : Fin 18) : ℕ) < 17 then
           c17 ⟨Fin.castSucc k, h⟩ else (0 : ZMod 37)) = c17 k := by
-      rw [dif_pos (by rw [hcoe]; exact k.2)]
+      rw [dif_pos (by rw [Fin.val_castSucc]; exact k.2)]
       congr 1
-    -- The eigenvector at `castSucc k` is the `k`-th spanning-family class.
     have heig : caseIIConjugateResidue_eigenvector (Fin.castSucc k) =
         cyclotomicUnitFreePartModPClass (p := 37) (CyclotomicField 37 ℚ)
           (Additive.ofMul (cyclotomicUnitFreeClass (CyclotomicField 37 ℚ)
@@ -264,7 +260,6 @@ def Cor815RealDescentResidueDataProvenance37
       Units.map (algebraMap (𝓞 (NumberField.maximalRealSubfield (CyclotomicField 37 ℚ)))
           (𝓞 (CyclotomicField 37 ℚ))).toMonoidHom w = ε₁ / ε₂
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **`Cor815RealDescentResidueProvenance37` from the reduced residue-data provenance** (proven,
 axiom-clean).
 
@@ -290,7 +285,6 @@ theorem caseIIResidueProvenance_provenance_of_residueData
       caseIIResidueProvenance_decomp_spec _, hc_residue⟩,
     hw_eq⟩
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **Assumption II from the reduced residue-data provenance + Lemma 9.8** (proven, axiom-clean).
 
 Composing `caseIIResidueProvenance_provenance_of_residueData` (this file's automatic-decomposition
