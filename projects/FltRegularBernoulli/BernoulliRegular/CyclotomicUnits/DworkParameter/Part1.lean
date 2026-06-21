@@ -49,7 +49,7 @@ theorem rIntegralRat_den_not_mem_lambdaRationalPrimeIdeal
     (Nat.Prime.coprime_iff_not_dvd (Fact.out : Nat.Prime p)).mp
       (show Nat.Coprime p (q : ℚ).den from q.property.symm)
   intro hmem
-  have hnot_dvd_int : ¬ (p : ℤ) ∣ ((q : ℚ).den : ℤ) := fun h =>
+  have hnot_dvd_int : ¬ (p : ℤ) ∣ ((q : ℚ).den : ℤ) := fun h ↦
     hnot_dvd_nat (Int.natCast_dvd_natCast.mp h)
   exact hnot_dvd_int (by
     simpa [Furtwaengler.KummerArtinHasse.lambdaRationalPrimeIdeal,
@@ -134,7 +134,7 @@ integer ring. -/
 def integralExpSeries : PowerSeries (ValuedIntegerRing p K) :=
   (show Furtwaengler.DieudonneDwork.IsRIntegralPS p
       (FormalDwork.expSeries p) from
-    fun n => Furtwaengler.artinHasseExpSeries_coeff_isRIntegral p n).mapTo
+    fun n ↦ Furtwaengler.artinHasseExpSeries_coeff_isRIntegral p n).mapTo
       (rIntegralRatToValuedInteger p K)
 
 /-- The inverse series `G_p = (E_p - 1)^(-1)` as a power series over the chosen
@@ -153,7 +153,7 @@ theorem integralExpMinusOneSeries_eq :
   let φ := rIntegralRatToValuedInteger p K
   let hE : Furtwaengler.DieudonneDwork.IsRIntegralPS p
       (FormalDwork.expSeries p) :=
-    fun n => Furtwaengler.artinHasseExpSeries_coeff_isRIntegral p n
+    fun n ↦ Furtwaengler.artinHasseExpSeries_coeff_isRIntegral p n
   let hOne : Furtwaengler.DieudonneDwork.IsRIntegralPS p
       (1 : PowerSeries ℚ) :=
     Furtwaengler.DieudonneDwork.IsRIntegralPS.one p
@@ -417,7 +417,7 @@ theorem natCast_prime_ne_zero_valuedInteger :
     have hpK : (p : K) ≠ 0 := by
       exact_mod_cast (Fact.out : Nat.Prime p).ne_zero
     let vK := (Furtwaengler.KummerArtinHasse.lambdaHeightOneSpectrum p K).valuation K
-    have hpWithVal : (WithVal.equiv vK).symm (p : K) ≠ 0 := fun h =>
+    have hpWithVal : (WithVal.equiv vK).symm (p : K) ≠ 0 := fun h ↦
       hpK (by simpa [vK] using congrArg (WithVal.equiv vK) h)
     exact (Valuation.ne_zero_iff _).2 hpWithVal
   have hp_val_zero :
@@ -711,7 +711,7 @@ theorem natCast_mem_lambdaIdeal_pow_factorization_mul_pred (c : ℕ) :
     have hcast :
         (c : ValuedIntegerRing p K) =
           ((p ^ c.factorization p * q : ℕ) : ValuedIntegerRing p K) :=
-      congrArg (fun n : ℕ => (n : ValuedIntegerRing p K)) hq
+      congrArg (fun n : ℕ ↦ (n : ValuedIntegerRing p K)) hq
     rw [hcast]
     exact hmem
 
