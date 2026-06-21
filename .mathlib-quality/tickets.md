@@ -526,21 +526,29 @@ Wedhorn Prop 7.41 (p.66, `wedhorn.txt:3438`); "height 1" ⟺ `MulArchimedean` va
     `(L : Type uS) [Field L] [Algebra (S ⧸ q') L] [IsFractionRing (S ⧸ q') L]` — drop the `let
     F`/`let L`; with `F` opaque, `extendToLocalization`/`he2` stay light and the (already-written)
     chase compiles. Caller (HU-d) provides `F := FractionRing (R ⧸ s.supp)`, `L := FractionRing (S ⧸ q')`.
-  - ⏳ REMAINING construction (HU-c/d/e), exact next steps:
-    1. Concrete scaffold in mem_plus: `letI : Algebra ↥B⁺ B := B⁺.toAlgebra`; `Bx := Localization.Away x`;
-       `letI : Algebra ↥B⁺ Bx`, `[IsScalarTower ↥B⁺ B Bx]`; apply HU-b → `invSelf x` non-unit in `adjoin ↥B⁺ {x⁻¹}`.
-    2. HU-c: `Ideal.exists_le_maximal (span {x⁻¹})` (proper, x⁻¹ non-unit) → max `𝔪 ∋ x⁻¹` in `R[x⁻¹]`;
-       dominate the local ring `(R[x⁻¹])_𝔪` (→ field `K` via a minimal prime quotient + Frac) by
-       `IsLocalRing.exists_factor_valuationRing` → valuation `w` on `K`, `w≤1` on `R[x⁻¹]`, `w(x⁻¹)<1`
-       (x⁻¹∈𝔪→𝔪_V; x⁻¹∉supp since x a unit in Bx ⟹ w(x)>1).
-    3. HU-d (HARDEST): extend `w` from the subring `R[x⁻¹]` to `Bx` (valuation extension subring→overring),
-       then `Spv.comap (algebraMap B Bx)` → `v : Spv B`. Properties: (a) v(x)>1; (b) v≤1 on B⁺
-       (R⊆R[x⁻¹], w≤1); (c) v≤1 on B°° (y∈B°°, B⁺ open+int-closed ⟹ y∈B⁺ via
-       `topologicallyNilpotent_mem_of_isOpen_integrallyClosed`, then yⁿ=g·x⁻¹∈𝔪 ⟹ w(yⁿ)≤1); (d)
-       v∈Spv(B,B°°·B). [valuation-extension-subring→overring is the one possibly-missing piece —
-       search `Valuation.exists_extension`/ValuationSubring; else build via the dominating V's pullback.]
-    4. HU-e: `Spv.isContinuous_of_isInSpvAI_of_lt_one` (axiom-clean) from (c)+(d) ⟹ v continuous;
-       (b) ⟹ v∈Spa(B,B⁺); (a) ⟹ ¬v.vle x 1.
+  - ✅ **HU-c/d/e LANDED 2026-06-21 (this session) — mem_plus reduced to ONE leaf (continuity).**
+    - ✅ Scaffold: localization `Bx := Localization.Away x`, `letI : Algebra ↥B⁺ Bx` (canonical
+      OreLocalization instances — do NOT add a second `Algebra ↥B⁺ Bx` letI, it diamonds with
+      `OreLocalization.instSMulOfIsScalarTower`), HU-b non-unit, maximal `𝔪 ∋ x⁻¹`.
+    - ✅ **HU-c DOMINATION lemma `exists_dominating_valuation_of_minimalPrime_le` PROVEN axiom-clean**
+      (general: prime `p`, minimal prime `q ≤ p` → valuation `s` with `supp s = q`, `s ≤ 1` on `R`,
+      `s < 1` on `p`; via `Localization.AtPrime (p/q)` + `IsLocalRing.exists_factor_valuationRing` +
+      `to_map_mem_maximal_iff` + local-hom). The lying-over was the feared-hard step but is a mathlib
+      one-liner: `Ideal.exists_comap_eq_of_mem_minimalPrimes_of_injective` (Stacks 00FK).
+    - ✅ HU-d assembly: minimal prime `q ⊆ 𝔪` (`Ideal.exists_minimalPrimes_le`), lying-over `q'` of
+      `Bx` (Stacks 00FK), `exists_valuation_extension_of_prime_over` → `t`, `v := comap(B→Bx)(ofValuation t)`.
+    - ✅ HU-e(2): `¬ v.vle x 1` (v(x)>1) — bridge `v.vle ↔ t∘(B→Bx)` via `Valuation.Compatible.vle_iff_le`,
+      `t(x⁻¹)<1` (from `s(x⁻¹)<1` + `ht_equiv`), `x⁻¹·x=1` (`mul_invSelf`) ⟹ `t(x)>1`.
+    - ✅ HU-e(1b): `v ≤ 1` on `B⁺` — `f∈B⁺ ⊆ R`, `s f ≤ 1` (`hs_le`) transported by `ht_equiv`.
+    - ⏳ **ONE leaf left = HU-e(1a) continuity** (`v.IsContinuous`). The criterion IS proven sorry-free
+      (`Spv.isContinuous_of_isInSpvAI_of_lt_one`, SpvAI.lean:294, axiom-clean). Applying it needs
+      `P:PairOfDefinition` (have: `IsHuberRing.exists_pairOfDefinition` / `presheafValue_pairOfDefinition_concrete`),
+      `h_in:IsInSpvAI` (Huber d), `h_lt_one:v<1 on I` (Huber c, G-open argument), `h_le_one:v≤1 on A₀`.
+      ⚠ **FAITHFULNESS FLAG (A₀ vs A°°):** the in-repo criterion's `h_le_one` is over the ring of
+      definition `A₀`, but Huber's (3.1) uses `A°°` (weaker); since `A⁺ ⊆ A₀` (Presheaf:236) the proven
+      `v≤1 on A⁺` does NOT give `v≤1 on A₀`. Resolve by proving an `A°°`-form criterion (Huber-faithful)
+      OR choosing `P` with `A₀ ⊆ {v≤1}`. Faithful cited-external leaf (Huber's own (3.1)). Documented
+      in the `mem_plus` continuity `sorry`.
 
 #### Statement
 ```lean
