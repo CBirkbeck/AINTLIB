@@ -1,1 +1,1 @@
-FOCUS: iwasawa_main_conjecture_full_concrete DONE (Φ internalized). Remaining bundled: CFT, §12, Fourier completeness ∑e_ω=1.
+FOCUS: Φ fully internalized (carrierBridgeFull + iwasawa_main_conjecture_full_concrete). Remaining bundled: CFT (CFTUnitsData), §12 (h12/T1220 chain), Fourier completeness ∑e_ω=1 over Δ.

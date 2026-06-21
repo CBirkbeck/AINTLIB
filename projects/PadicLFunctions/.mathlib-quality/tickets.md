@@ -6828,7 +6828,7 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
   + `charIdealGroup_quotient`; and discharging h12 is §12's own deferred milestone.
 
 ##### [G-CHARIDEAL] Char-ideal conjunct of thm:vandiver (part ii): `charIdealGroup 𝒳⁺ = I(𝒢⁺)ζ_p`
-- **Status**: ABSTRACT FORM DONE (axiom-clean) — only CARRIER-BRIDGE remains | **File**: CharIdeal.lean, CharIdealQuotient.lean, CharIdealGroupQuotient.lean | **Depends on**: G-IMC (iso, DONE), CARRIER-BRIDGE | **Type**: theorem
+- **Status**: CARRIER BRIDGE NOW INTERNALIZED (carrierBridgeFull axiom-clean) — remaining bundled = CFT + §12 + Fourier completeness | **File**: CharIdeal.lean, CharIdealQuotient.lean, CharIdealGroupQuotient.lean | **Depends on**: G-IMC (iso, DONE), CARRIER-BRIDGE | **Type**: theorem
 - **Progress (2026-06-19)** — **5 structure-theory lemmas DONE (all axiom-clean)**:
   (1) `charIdeal_eq_of_linearEquiv` (CharIdeal.lean) — base char-ideal is a linear-iso invariant.
   (2) `charIdeal_quotient` (CharIdealQuotient.lean) — `charIdeal(Λ ⧸ (f)) = (f)` (see [CHARIDEAL-QUOT]).

@@ -537,13 +537,22 @@ the unified capstone `iwasawa_main_conjecture_full` (`IwasawaProof/Capstone.lean
 from the bundled Galois/CFT/Vandiver data, the §12 identification, and the carrier bridge `Φ`, it
 delivers simultaneously $`\sX_\infty^+\cong\Lam(\GG^+)/(g)` and $`\Ch_{\Lam(\GG^+)}(\sX_\infty^+)=(\Phi\,g)`.
 
-The one input still bundled rather than internalised is `Φ` itself, equivalently the p-adic group
-decomposition $`\GG^+ = \Zpx/\{\pm1\} \cong \Delta\times\Gamma` (Teichmüller, $`\Delta=\mu_{p-1}/\{\pm1\}`)
-together with the logarithm isomorphism $`\Gamma = 1+p\Zp \cong (\Zp,+)`.  Its analytic heart is
-already formalised (`Iwasawa/GPlusDecomp.lean`, axiom-clean): the homomorphism and inverse laws
-`pZpLog_mul`, `pZpExp_add`, `pZpExp_pZpLog`, `pZpLog_pZpExp`, and the logarithm isometry
-$`\lVert\log x\rVert = \lVert x-1\rVert` (`norm_pZpLog`); what remains is to package these as the
-continuous group isomorphisms feeding `carrierBridge` — classical p-adic structure theory.
+The carrier bridge `Φ` is now itself **fully assembled** (`carrierBridgeFull` in
+`Iwasawa/CarrierBridgeConcrete.lean`, axiom-clean) — no longer a bundled hypothesis.  The p-adic group
+decomposition $`\GG^+ = \Zpx/\{\pm1\} \cong \Delta\times\Gamma` (Teichmüller, $`\Delta=\mu_{p-1}/\{\pm1\}`,
+$`\Gamma = 1+p\Zp`) is formalised as `gplusMulEquiv` and promoted to a homeomorphism `gplusHomeo`
+(a continuous bijection from the *compact* $`\GG^+` to the *Hausdorff* $`\Delta\times\Gamma`); the
+logarithm isomorphism $`\Gamma \cong (\Zp,+)` is `logCM`/`expCM` with homomorphism and inverse laws
+`logCM_mul`/`logCM_one`/`expCM_logCM`/`logCM_expCM` (continuity of `logCM` from the logarithm isometry
+$`\lVert\log x - \log y\rVert = \lVert x-y\rVert`, `norm_pZpLog_sub`; of `expCM` from the exponential
+isometry).  Feeding these through `carrierBridge` gives `carrierBridgeFull`, and instantiating the
+capstone yields `iwasawa_main_conjecture_full_concrete` (`IwasawaProof/CapstoneConcrete.lean`,
+axiom-clean): both halves of {bpref "imc-vandiver"}[] with `Φ` discharged.
+
+The inputs that remain bundled are therefore exactly the *classical/analytic* ones: the class field
+theory (`CFTUnitsData`, below), the §12 analytic identification (`h12`), and — for the
+characteristic-ideal half only — the isotypic completeness $`\sum_\omega e_\omega = 1` over $`\Delta`
+(Fourier orthogonality over $`\Zp`, valid since $`\mu_{(p-1)/2}\subseteq\Zp` via Teichmüller).
 
 **Class field theory as a bundled input.** Global class field theory is not yet in Mathlib.
 Mirroring the source's own practice of citing {Informal.citet "washington"}[] for these classical
