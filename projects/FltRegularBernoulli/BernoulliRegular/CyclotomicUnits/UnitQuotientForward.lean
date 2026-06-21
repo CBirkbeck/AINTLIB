@@ -34,11 +34,7 @@ variable {K : Type} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 local notation3 "K⁺" => NumberField.maximalRealSubfield K
 
 /-- **WF-814a.** If `p ∣ h⁺` (and `5 ≤ p`), the finite quotient `(𝓞 K⁺)ˣ / C⁺`
-has an element of order `p`.
-
-Proof: Sinnott's index formula gives `[(𝓞 K⁺)ˣ : C⁺] = 2^((p-3)/2)·h⁺`, so
-`p ∣ h⁺ ⟹ p ∣` index (the `2`-power factor is coprime to the odd prime `p`);
-Cauchy's theorem on the finite quotient yields the order-`p` class. -/
+has an element of order `p`. -/
 theorem exists_orderOf_eq_prime_unitQuotient_CPlus_of_dvd_hPlus
     (hp_three : 3 ≤ p) (hp_five : 5 ≤ p) (h : p ∣ hPlus K) :
     ∃ q : (𝓞 K⁺)ˣ ⧸ CPlus (p := p) (K := K) hp_three, orderOf q = p := by
@@ -56,7 +52,7 @@ theorem exists_orderOf_eq_prime_unitQuotient_CPlus_of_dvd_hPlus
       hiff.mpr h
     rwa [cyclotomicUnitIndexSubgroup_eq_CPlus (p := p) (K := K) hp_odd hp_three]
       at hsub
-  haveI : (CPlus (p := p) (K := K) hp_three).FiniteIndex :=
+  have : (CPlus (p := p) (K := K) hp_three).FiniteIndex :=
     ⟨CPlus_index_ne_zero (p := p) (K := K) hp_three⟩
   have hcard : p ∣ Nat.card ((𝓞 K⁺)ˣ ⧸ CPlus (p := p) (K := K) hp_three) := by
     simpa [Subgroup.index_eq_card] using hidx
