@@ -60,12 +60,10 @@ theorem exists_finite_ramified_locus_coordHom [IsAlgClosed F]
             P.under C₂.CoordinateRing = q) →
           letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
           Ideal.ramificationIdx q P = 1 := by
-  have hfin : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _
-      cd.toAlgebra.toModule := by
-    exact cd.module_finite
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
   letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
-  haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR := hfin
+  haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    cd.module_finite
   letI algFF : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
   -- the `A → B → L` tower is the OreLocalization-derived one (as in `PushforwardDivisor`)
   haveI tower2 : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField :=
@@ -81,8 +79,7 @@ theorem exists_finite_ramified_locus_coordHom [IsAlgClosed F]
   haveI hint : Algebra.IsIntegral C₂.CoordinateRing C₁.CoordinateRing :=
     Algebra.IsIntegral.of_finite C₂.CoordinateRing C₁.CoordinateRing
   haveI hicl : IsIntegralClosure C₁.CoordinateRing C₂.CoordinateRing C₁.FunctionField :=
-    IsIntegralClosure.of_isIntegrallyClosed C₁.CoordinateRing C₂.CoordinateRing
-      C₁.FunctionField
+    IsIntegralClosure.of_isIntegrallyClosed C₁.CoordinateRing C₂.CoordinateRing _
   haveI hfd : FiniteDimensional C₂.FunctionField C₁.FunctionField :=
     finiteDimensional_functionField φ cd
   haveI := hsepAlg
@@ -111,8 +108,6 @@ theorem inertiaDeg_eq_one_of_mem_primesOver [IsAlgClosed F]
     isTorsionFree_coordHom φ cd
   intro P' hP'
   obtain ⟨hP'prime, hP'lies⟩ := hP'
-  haveI : P'.IsPrime := hP'prime
-  haveI : P'.LiesOver (C₂.maximalIdealAt Q) := hP'lies
   have hQ0 : C₂.maximalIdealAt Q ≠ ⊥ := C₂.maximalIdealAt_ne_bot Q
   have hP'_ne_bot : P' ≠ ⊥ := by
     intro h
@@ -128,8 +123,7 @@ theorem inertiaDeg_eq_one_of_mem_primesOver [IsAlgClosed F]
     h1.trans hP'lies.over.symm
   have hid : Ideal.inertiaDeg (C₂.maximalIdealAt (toPointMap cd P''))
       (C₁.maximalIdealAt P'') = 1 := inertiaDeg_maximalIdealAt_toPointMap φ cd P''
-  rw [hpeq, hP''] at hid
-  exact hid
+  rwa [hpeq, hP''] at hid
 
 set_option synthInstance.maxHeartbeats 100000 in
 -- Same instance-synthesis bumps as `exists_finite_ramified_locus_coordHom` above: the
@@ -170,8 +164,6 @@ theorem nat_card_toPointMap_fiber_eq_card_primesOverFinset [IsAlgClosed F]
       exact Subtype.ext (C₁.maximalIdealAt_injective (congrArg Subtype.val h))
     · -- surjectivity: a prime over `m_Q` is maximal, hence `m_{P''}`, with `P''` in the fibre
       rintro ⟨M, hMprime, hMlies⟩
-      haveI := hMprime
-      haveI := hMlies
       have hM_ne_bot : M ≠ ⊥ := by
         intro h
         apply hQ0
@@ -185,11 +177,8 @@ theorem nat_card_toPointMap_fiber_eq_card_primesOverFinset [IsAlgClosed F]
       exact ⟨⟨P'', C₂.maximalIdealAt_injective (h1.trans hMlies.over.symm)⟩,
         Subtype.ext hP''⟩
   -- convert the set count to the Finset count
-  have hcoe : ((IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q) C₁.CoordinateRing : Finset _) :
-      Set (Ideal C₁.CoordinateRing)) =
-      (C₂.maximalIdealAt Q).primesOver C₁.CoordinateRing :=
-    IsDedekindDomain.coe_primesOverFinset hQ0 C₁.CoordinateRing
-  rw [key, ← hcoe, Nat.card_coe_set_eq, Set.ncard_coe_finset]
+  rw [key, ← IsDedekindDomain.coe_primesOverFinset hQ0 C₁.CoordinateRing,
+    Nat.card_coe_set_eq, Set.ncard_coe_finset]
 
 /-- **The good fibre (Silverman II.2.6(b) over `K̄`)**: for a curve map with a
 coordinate-ring witness, module-finite coordinate extension and separable
