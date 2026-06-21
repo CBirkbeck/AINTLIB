@@ -1,15 +1,33 @@
 # Development Plan: §13 Stage G — Galois Λ-modules + the Vandiver IMC
 
-## ACHIEVEMENT STATUS (2026-06-21) — capstone reduced to CFT + §12
+## STATUS (audited & corrected 2026-06-21) — §13 CAPSTONE RETRACTED; foundation rebuild started
 
-The Vandiver IMC capstone is **formalised and axiom-clean**, reduced to exactly two bundled
-classical/analytic inputs. `Iwasawa.Galois.iwasawa_main_conjecture_full_concrete`
-(`IwasawaProof/CapstoneConcrete.lean`, axioms = `propext, Classical.choice, Quot.sound`) delivers
-**both halves** of `thm:vandiver` — `𝒳⁺_∞ ≅ Λ(𝒢⁺)/(g)` and `charIdealGroup 𝒳⁺_∞ = (Φ g)` — with **no
-hypotheses beyond**: the Galois data, the Vandiver vanishing, the class-field-theory data
-`CFTUnitsData`, and the §12 analytic identification `h12`.
+**The earlier "capstone" was NOT a faithful proof of RJW Thm 13.11 and has been removed.** It
+quantified over abstract `Type*` variables `X⁺_∞, Y⁺_∞, U⁺` (never constructed — the real objects are
+`Gal(𝓜⁺_∞/F⁺_∞)` etc.) and bundled the connecting maps/isos (the Galois SES, the CFT iso, `𝓔⁺=𝓒⁺`,
+Thm 11.9 in Λ-linear form) as `structure`/hypothesis fields (`IwasawaGaloisData`, `CFTUnitsData`,
+`VandiverData`) — i.e. it assumed essentially the whole theorem. `#print axioms` cleanliness is
+irrelevant: `(h:P)→Q` is axiom-clean whatever `P` assumes. Deleted: the three structures + the capstone
+files (`MainConjecture`, `Capstone`, `CapstoneConcrete`, `CharIdealConjunct`, `Galois/{Modules,Sequence,
+Coinvariants,ClassFieldTheory}`). PR #2361 retracted.
 
-INTERNALIZED (all proved, axiom-clean) this development:
+**Project audit verdict**: the bundling was ISOLATED to the §13 capstone. The rest is genuine — only
+`structure` left is the real `NormCompatUnits`; no `axiom`s; the headline kept theorems
+(`iwasawa_theorem`, `iwasawa_exact_sequence`, `col_image_cycloTower1_eq_zetaIdeal`, `charIdeal_quotient`,
+`charIdealGroup_quotient`, `isotypicIdempotent_sum_eq_one`, `carrierBridgeFull`) are all axiom-clean and
+about genuinely-constructed objects; the only `sorry`s are confined to the deliberately-bypassed
+structure theorem (`fg_pseudoIso_canonical`), one `PseudoIso` lemma, and the openly-flagged
+`GaloisAction` bodies — none taint a headline result. Caveat: `iwasawa_theorem` is the *additive* iso
+(Λ-linear refinement open; docstring discloses).
+
+**Foundation rebuild (chosen direction)**: construct the real Galois objects of §13.2 ground-up
+(`Iwasawa/GaloisFoundation.lean`). The wall: mathlib has infinite Galois + finite-extension ramification
+(`IsUnramifiedAt`) + `maximalRealSubfield`, but NO "maximal abelian extension unramified outside `S`".
+So `Mₙ/Lₙ` and `Xₙ=Gal(Mₙ/Fₙ)` must be built as quotients of the absolute Galois group (max pro-`p`
+abelian, killed by inertia at primes ∤ `pₙ`), then `X∞=lim Xₙ` with the Remark-13.7 `Λ(Γ)`-action — a
+substantial mathlib-PR-scale build. Brick 1 (DONE, axiom-clean): the base tower `Fₙ=ℚ(μ_{pⁿ})`.
+
+KEPT, real, axiom-clean (orphaned from the deleted capstone; reusable):
 - **Structure theory**: `charIdeal` (length-theoretic), `charIdeal_quotient` (`Ch(Λ/(f))=(f)` via
   `Ring.ord`/`ord_eq_addVal` + UFD), isotypic decomposition, `charIdealGroup_quotient`,
   `charIdealGroup_of_quotientEquiv`, both `charIdeal`/`charIdealGroup` iso-invariances.

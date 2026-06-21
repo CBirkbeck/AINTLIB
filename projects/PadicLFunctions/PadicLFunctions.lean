@@ -10,6 +10,7 @@ import PadicLFunctions.Measure.Functoriality
 import PadicLFunctions.Iwasawa.CarrierBridge
 import PadicLFunctions.Iwasawa.CarrierBridgeConcrete
 import PadicLFunctions.Iwasawa.GPlusDecomp
+import PadicLFunctions.Iwasawa.GaloisFoundation
 import PadicLFunctions.Measure.FiniteProduct
 import PadicLFunctions.KubotaLeopoldt.ZetaValues
 import PadicLFunctions.KubotaLeopoldt.ZetaValuesComplex
