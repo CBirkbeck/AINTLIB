@@ -102,7 +102,6 @@ variable {C : SmoothPlaneCurve F}
 when `f = 0`. Reference: Silverman II.3 (definition). -/
 noncomputable def divisorOf (C : SmoothPlaneCurve F) (f : C.FunctionField) :
     Divisor C := by
-  classical
   refine Finsupp.ofSupportFinite (fun P ↦ (C.ord_P P f).untopD 0) ?_
   by_cases hf : f = 0
   · subst hf
@@ -250,12 +249,8 @@ theorem ord_P_algebraMap_F_of_ne_zero (C : SmoothPlaneCurve F) {c : F}
     C.ord_P P (algebraMap F C.FunctionField c) = 0 := by
   -- Factor algebraMap F → F(C) = (algebraMap F[C] → F(C)) ∘ (algebraMap F → F[C]).
   let u : C.CoordinateRing := algebraMap F C.CoordinateRing c
-  have hu_ne : u ≠ 0 := by
-    intro h
-    apply hc
-    have h' : (algebraMap F C.CoordinateRing) c =
-        (algebraMap F C.CoordinateRing) 0 := by rw [map_zero]; exact h
-    exact FaithfulSMul.algebraMap_injective F C.CoordinateRing h'
+  have hu_ne : u ≠ 0 := fun h ↦
+    hc (FaithfulSMul.algebraMap_injective F C.CoordinateRing (h.trans (map_zero _).symm))
   -- Rewrite u as (C c) • 1 + 0 • Y to apply the public membership lemma.
   have hu_eq : u = (Polynomial.C c) • (1 : C.CoordinateRing) +
       (0 : Polynomial F) •
