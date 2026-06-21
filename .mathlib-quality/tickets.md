@@ -678,6 +678,30 @@ prime of `R[x⁻¹]`) — a further sub-step (going-up/structure of the localiza
 
 ---
 
+### [T-L4-EXT-FIELD] Field-case place extension (sub-ticket of T-L4-EXT)
+- **Status**: 🔵 OPEN — **Parent**: T-L4-EXT. Spawned 2026-06-21 (/beastmode Tier-A). The classical
+  place-extension theorem (a valuation on a field extends along a field homomorphism). mathlib has
+  the `Valuation.HasExtension` predicate but no constructive existence (confirmed via leansearch).
+- **File**: FaithfulLocLift.lean. **Type**: theorem.
+- **Statement** (`exists_comap_isEquiv_of_field_hom`, stated + wired into T-L4-EXT):
+  ```lean
+  theorem exists_comap_isEquiv_of_field_hom {F L : Type*} [Field F] [Field L] (ι : F →+* L)
+      {Γ : Type*} [LinearOrderedCommGroupWithZero Γ] (v : Valuation F Γ) :
+      ∃ (Γ' : Type*) (_ : LinearOrderedCommGroupWithZero Γ') (w : Valuation L Γ'),
+        v.IsEquiv (Valuation.comap ι w) := by sorry
+  ```
+- **Proof sketch**: `O := v.valuationSubring` is a `ValuationSubring F`. `ι` injective (field hom)
+  ⟹ `ι(O)` is a `LocalSubring L`. `LocalSubring.exists_le_valuationSubring` gives `V : ValuationSubring L`
+  dominating `ι(O)`. Take `w := V.valuation`. `ι⁻¹(V) = O`: ⊇ since `ι(O) ⊆ V`; ⊆ since for `f ∉ O`,
+  `f⁻¹ ∈ 𝔪_O` ⟹ `ι(f⁻¹) ∈ 𝔪_V` (domination) ⟹ `ι(f) ∉ V`. So `(comap ι w).valuationSubring = O =
+  v.valuationSubring`, hence `v ≈ comap ι w` (same valuation subring ⟹ equiv).
+- **Mathlib lemmas**: `Valuation.valuationSubring`, `LocalSubring.exists_le_valuationSubring`,
+  `ValuationSubring.valuation`, `ValuationSubring.integer_valuation`, the `LocalSubring ≤`=domination
+  order, `Valuation.isEquiv_iff` via valuation subring equality (`ValuationSubring.valuation` IsEquiv).
+- **Generality**: stated for general fields `F`, `L` (reusable).
+
+---
+
 ### [T-L5] Spa-quasicompactness keystone `isClosed_image_spa_ιSpv_bool_noHArch` (gluing-leaf bottom)
 - **Status**: 🔵 OPEN — tracked here for the first time (was the untracked bottom of "Leaf C gluing").
   After the γ-route 7.54 (`exists_finite_normalized_rational_refinement`, WCA:11886), the gluing leaf

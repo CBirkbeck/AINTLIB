@@ -107,6 +107,23 @@ theorem not_isUnit_invSelf_of_not_isIntegral
     (isIntegral_of_isIntegral_adjoin_of_mul_eq_one (algebraMap B Bx x)
       (IsLocalization.Away.invSelf x) hmul hint_adjoin))
 
+/-- **Field-case place extension (sub-ticket T-L4-EXT-FIELD).** A valuation `v` on a field `F`
+extends along any field homomorphism `ι : F → L` to a valuation `w` on `L` with `v ≈ comap ι w`.
+*Proof.* `v`'s valuation subring `O ⊆ F` maps (via the injective `ι`) to a local subring of `L`;
+extend it to a valuation subring `V ⊆ L` dominating it (`LocalSubring.exists_le_valuationSubring`);
+since `V` dominates the valuation ring `ι(O)` of the subfield `ι(F)`, `ι⁻¹(V) = O`, so
+`comap ι V.valuation` has integer ring `O = v.valuationSubring`, hence is equivalent to `v`.
+
+**Status: `sorry`** (T-L4-EXT-FIELD, parent T-L4-EXT). The classical place-extension theorem;
+mathlib has the ingredients (`LocalSubring.exists_le_valuationSubring`, `ValuationSubring.valuation`)
+but not the assembled existence. -/
+theorem exists_comap_isEquiv_of_field_hom
+    {F L : Type*} [Field F] [Field L] (ι : F →+* L)
+    {Γ : Type*} [LinearOrderedCommGroupWithZero Γ] (v : Valuation F Γ) :
+    ∃ (Γ' : Type*) (_ : LinearOrderedCommGroupWithZero Γ') (w : Valuation L Γ'),
+      v.IsEquiv (Valuation.comap ι w) :=
+  sorry
+
 /-- **HU-d infrastructure (T-L4-EXT): Chevalley valuation extension along a ring inclusion.**
 Given an `R`-algebra `S` with injective structure map and a valuation `s` on `R`, there is a
 valuation `t` on `S` extending `s` (`s ≈ comap (algebraMap R S) t`). Huber [Hu2] 3.3(i)
@@ -150,10 +167,14 @@ theorem exists_valuation_extension_of_prime_over
   have hgRL_inj : Function.Injective ((algebraMap (S ⧸ q') L).comp φRS) :=
     (IsFractionRing.injective (S ⧸ q') L).comp hφRS_inj
   let ι : F →+* L := IsFractionRing.lift hgRL_inj
-  -- Step 4 (T-L4-EXT): extend `sF`'s valuation subring across `ι : F ↪ L`
-  -- (`LocalSubring.exists_le_valuationSubring`; `V ∩ F = sF.valuationSubring` since the latter is a
-  -- valuation subring = maximal local subring of `F`), take `V.valuation`, and `comap` it through
-  -- `S → S⧸q' → L`; the `IsEquiv` follows from `extendToLocalization`/`onQuot` + the subring equality.
+  -- Step 4: extend `sF` across the field hom `ι` (place extension, T-L4-EXT-FIELD), then `comap`
+  -- the resulting valuation of `L` down to `S` via `S → S⧸q' → L`.
+  obtain ⟨Γ', _, w, hw⟩ := exists_comap_isEquiv_of_field_hom ι sF
+  refine ⟨Γ', ‹LinearOrderedCommGroupWithZero Γ'›,
+    Valuation.comap ((algebraMap (S ⧸ q') L).comp (Ideal.Quotient.mk q')) w, ?_⟩
+  -- IsEquiv chase: `s ≈ comap (R→S) (comap (S→L) w)`. The square `R→S→L = R→R⧸supp→F→L` commutes
+  -- (`Ideal.quotientMap` + `IsFractionRing.lift_algebraMap`); chaining `s ≈ comap(mk) sQuot`
+  -- (`onQuot`), `sQuot ≈ comap(algebraMap) sF` (`extendToLocalization`), and `hw : sF ≈ comap ι w`.
   sorry
 
 set_option linter.unusedSectionVars false in
