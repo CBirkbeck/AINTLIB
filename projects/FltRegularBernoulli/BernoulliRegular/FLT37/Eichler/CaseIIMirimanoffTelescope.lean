@@ -287,7 +287,7 @@ theorem caseII_telescope_const {t : ZMod 37} (ht : t ≠ 0) (g : ZMod 37 → ZMo
 theorem caseII_val_coprime {c : ZMod 37} (hc : c ≠ 0) : c.val.Coprime 37 := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   have h1 : c.val < 37 := c.val_lt
-  have h2 : c.val ≠ 0 := fun h => hc (by rw [← ZMod.natCast_zmod_val c, h]; simp)
+  have h2 : c.val ≠ 0 := fun h ↦ hc (by rw [← ZMod.natCast_zmod_val c, h]; simp)
   exact (Nat.coprime_of_lt_prime h2 h1 (by decide)).symm
 
 /-- The `ξ` unit indexed by a *nonzero* `c : ZMod 37` (its `.val` representative), packaged with the
@@ -379,7 +379,7 @@ theorem caseII_xiIndZMod_eq_zero {j : ZMod 37} (hρ : MirimanoffRhoReality37 j) 
     · exact h'
   -- The orbit constancy on nonzero multiples of `t`.
   have hconst : ∀ d : ZMod 37, d ≠ 0 → xiIndZMod (d * (2 * j)) = xiIndZMod (1 * (2 * j)) :=
-    caseII_telescope_const ht xiIndZMod (fun e he1 he2 => by
+    caseII_telescope_const ht xiIndZMod (fun e he1 he2 ↦ by
       -- `Hstep e : xiIndZMod ((e+1)·t) = xiIndZMod (e·t)`; from the step lemma at `b = e·t`.
       have hbe : e * (2 * j) + 2 * j = (e + 1) * (2 * j) := by ring
       rw [← hbe]
