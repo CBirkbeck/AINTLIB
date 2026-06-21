@@ -81,15 +81,9 @@ eigencomponents to be *equal*, not zero.
 
 noncomputable section
 
-set_option maxRecDepth 4000
-
-open NumberField
-
 namespace BernoulliRegular.FLT37.Eichler
 
 open BernoulliRegular.CyclotomicUnits
-open BernoulliRegular.CyclotomicUnits.PadicLogSetup
-open BernoulliRegular.CyclotomicUnits.PadicLogSetup.DworkParameter
 
 set_option maxHeartbeats 1000000 in
 -- The `convert … using 2` structural-congruence step and the §0 finite-log application over the
