@@ -112,7 +112,7 @@ theorem caseII_root_of_unity_sub_one_notMem_lv149
   have hsum_sub : (∑ i ∈ Finset.range 37, w ^ i) -
       (∑ _i ∈ Finset.range 37, (1 : 𝓞 (CyclotomicField 37 ℚ))) ∈ lv149 := by
     rw [← Finset.sum_sub_distrib]
-    exact Ideal.sum_mem _ fun i _ => hpow_sub i
+    exact Ideal.sum_mem _ fun i _ ↦ hpow_sub i
   rw [hgeom, Finset.sum_const, Finset.card_range, nsmul_eq_mul, mul_one, zero_sub,
     neg_mem_iff] at hsum_sub
   exact caseII_thirtyseven_notMem_lv149 (by exact_mod_cast hsum_sub)
@@ -123,10 +123,8 @@ omit [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
 `(1 − ζ^k)` factors of the §9.1 factor and anchor equations. -/
 theorem caseII_one_sub_root_of_unity_notMem_lv149
     {w : 𝓞 (CyclotomicField 37 ℚ)} (hw37 : w ^ 37 = 1) (hw1 : w ≠ 1) :
-    1 - w ∉ lv149 := fun hmem =>
-  caseII_root_of_unity_sub_one_notMem_lv149 hw37 hw1 (by
-    rw [show w - 1 = -(1 - w) from by ring]
-    exact neg_mem hmem)
+    1 - w ∉ lv149 := fun hmem ↦
+  caseII_root_of_unity_sub_one_notMem_lv149 hw37 hw1 (neg_sub 1 w ▸ neg_mem hmem)
 
 /-! ## 2. The Lemma-9.8 membership and the conjugate-factor exclusion over `ℓ ∣ z` data
 
@@ -149,7 +147,7 @@ theorem caseII_dvdZ_x_add_y_mul_root_notMem_lv149 {m : ℕ} (D : RealCaseIIDvdZD
   intro hmem
   have hsub : D.y * (w - 1) ∈ lv149 := by
     have h := Ideal.sub_mem lv149 hmem hsum
-    rwa [show D.x + D.y * w - (D.x + D.y) = D.y * (w - 1) from by ring] at h
+    rwa [show D.x + D.y * w - (D.x + D.y) = D.y * (w - 1) by ring] at h
   rcases Ideal.IsPrime.mem_or_mem ‹lv149.IsPrime› hsub with hy | hwm
   · exact D.y_notMem hy
   · exact caseII_root_of_unity_sub_one_notMem_lv149 hw37 hw1 hwm
@@ -166,10 +164,7 @@ theorem caseII_dvdZ_factorGenerator_notMem_lv149 {m : ℕ} (D : RealCaseIIDvdZDa
   intro hr
   refine caseII_dvdZ_x_add_y_mul_root_notMem_lv149 D hSO hw37 hw1 ?_
   rw [heq]
-  have h37 : r ^ 37 ∈ lv149 := by
-    rw [show r ^ 37 = r ^ 36 * r from by ring]
-    exact Ideal.mul_mem_left _ _ hr
-  exact Ideal.mul_mem_left _ _ h37
+  exact Ideal.mul_mem_left _ _ (Ideal.pow_mem_of_mem _ hr 37 (by norm_num))
 
 /-! ## 3. Conjunct (a): `ρ₀² ∈ 𝔩` — the anchor generator inherits the `ℓ`-divisibility
 
@@ -203,8 +198,8 @@ theorem caseII_dvdZ_rho0_sq_mem_lv149 {m : ℕ} (D : RealCaseIIDvdZData37 m)
   have hζs1 : ζs ≠ 1 :=
     (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37)
   have hζs36_37 : (ζs ^ 36) ^ 37 = 1 := by
-    rw [← pow_mul, mul_comm, pow_mul, hζs37, one_pow]
-  have hζs36_ne1 : ζs ^ 36 ≠ 1 := fun h =>
+    rw [pow_right_comm, hζs37, one_pow]
+  have hζs36_ne1 : ζs ^ 36 ≠ 1 := fun h ↦
     (by decide : ¬ (37 : ℕ) ∣ 36)
       (((zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger_isPrimitiveRoot.pow_eq_one_iff_dvd
         36).mp h)
@@ -227,9 +222,8 @@ theorem caseII_dvdZ_rho0_sq_mem_lv149 {m : ℕ} (D : RealCaseIIDvdZData37 m)
       rcases Ideal.IsPrime.mem_or_mem ‹lv149.IsPrime› hΛ with h1ζ | h1ζ36
       · exact caseII_one_sub_root_of_unity_notMem_lv149 hζs37 hζs1 h1ζ
       · exact caseII_one_sub_root_of_unity_notMem_lv149 hζs36_37 hζs36_ne1 h1ζ36
-  · have hρ : ρ0 ∈ lv149 := Ideal.IsPrime.mem_of_pow_mem ‹lv149.IsPrime› 37 hρ37
-    rw [pow_two]
-    exact Ideal.mul_mem_left _ _ hρ
+  · exact Ideal.pow_mem_of_mem _
+      (Ideal.IsPrime.mem_of_pow_mem ‹lv149.IsPrime› 37 hρ37) 2 (by norm_num)
 
 /-! ## 4. Conjunct (b): the `ω`-witnesses of `v²·ρ_a·σρ_a` avoid `𝔩`
 
@@ -271,8 +265,8 @@ theorem caseII_dvdZ_omega_witness_notMem_lv149 {m : ℕ} (D : RealCaseIIDvdZData
   have hζ37 : ζ ^ 37 = 1 := D.hζ.toInteger_isPrimitiveRoot.pow_eq_one
   have hζ1 : ζ ≠ 1 := D.hζ.toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37)
   have hζ36_37 : (ζ ^ 36) ^ 37 = 1 := by
-    rw [← pow_mul, mul_comm, pow_mul, hζ37, one_pow]
-  have hζ36_ne1 : ζ ^ 36 ≠ 1 := fun h =>
+    rw [pow_right_comm, hζ37, one_pow]
+  have hζ36_ne1 : ζ ^ 36 ≠ 1 := fun h ↦
     (by decide : ¬ (37 : ℕ) ∣ 36) ((D.hζ.toInteger_isPrimitiveRoot.pow_eq_one_iff_dvd 36).mp h)
   -- `ρ_a` is integral (factor unit integral).
   have hηmem : ζ ∈ nthRootsFinset 37 (1 : 𝓞 (CyclotomicField 37 ℚ)) :=
@@ -282,7 +276,9 @@ theorem caseII_dvdZ_omega_witness_notMem_lv149 {m : ℕ} (D : RealCaseIIDvdZData
   have hηne : (⟨ζ, hηmem⟩ : nthRootsFinset 37 (1 : 𝓞 (CyclotomicField 37 ℚ))) ≠
       D.etaZero := by
     intro h
-    exact hζ1 (by have := Subtype.ext_iff.mp h; rw [hetaZero] at this; exact this)
+    refine hζ1 ?_
+    have := Subtype.ext_iff.mp h
+    rwa [hetaZero] at this
   obtain ⟨ra, hra⟩ := caseII_factorGenerator_integral_of_unitInt D.toRealCaseIIData37
     ⟨ζ, hηmem⟩ hηne ηa ρa ua hua (by
       rw [show ((⟨ζ, hηmem⟩ : nthRootsFinset 37 (1 : 𝓞 (CyclotomicField 37 ℚ))) :
@@ -380,12 +376,12 @@ theorem caseII_dvdZ_theta_witness_notMem_lv149 {m : ℕ} (D : RealCaseIIDvdZData
   set ζ : 𝓞 (CyclotomicField 37 ℚ) := D.hζ.toInteger with hζ_def
   have hζ37 : ζ ^ 37 = 1 := D.hζ.toInteger_isPrimitiveRoot.pow_eq_one
   have hζ2_37 : (ζ ^ 2) ^ 37 = 1 := by
-    rw [← pow_mul, mul_comm, pow_mul, hζ37, one_pow]
-  have hζ2_1 : ζ ^ 2 ≠ 1 := fun h =>
+    rw [pow_right_comm, hζ37, one_pow]
+  have hζ2_1 : ζ ^ 2 ≠ 1 := fun h ↦
     (by decide : ¬ (37 : ℕ) ∣ 2) ((D.hζ.toInteger_isPrimitiveRoot.pow_eq_one_iff_dvd 2).mp h)
   have hζ2_36_37 : ((ζ ^ 2) ^ 36) ^ 37 = 1 := by
-    rw [← pow_mul, mul_comm, pow_mul, hζ2_37, one_pow]
-  have hζ2_36_ne1 : (ζ ^ 2) ^ 36 ≠ 1 := fun h => by
+    rw [pow_right_comm, hζ2_37, one_pow]
+  have hζ2_36_ne1 : (ζ ^ 2) ^ 36 ≠ 1 := fun h ↦ by
     rw [← pow_mul] at h
     exact (by decide : ¬ (37 : ℕ) ∣ 2 * 36)
       ((D.hζ.toInteger_isPrimitiveRoot.pow_eq_one_iff_dvd (2 * 36)).mp h)
@@ -397,7 +393,9 @@ theorem caseII_dvdZ_theta_witness_notMem_lv149 {m : ℕ} (D : RealCaseIIDvdZData
   have hηne2 : (⟨ζ ^ 2, hηmem2⟩ : nthRootsFinset 37 (1 : 𝓞 (CyclotomicField 37 ℚ))) ≠
       D.etaZero := by
     intro h
-    exact hζ2_1 (by have := Subtype.ext_iff.mp h; rw [hetaZero] at this; exact this)
+    refine hζ2_1 ?_
+    have := Subtype.ext_iff.mp h
+    rwa [hetaZero] at this
   obtain ⟨rb, hrb⟩ := caseII_factorGenerator_integral_of_unitInt D.toRealCaseIIData37
     ⟨ζ ^ 2, hηmem2⟩ hηne2 ηb ρb ub hub (by
       rw [show ((⟨ζ ^ 2, hηmem2⟩ : nthRootsFinset 37 (1 : 𝓞 (CyclotomicField 37 ℚ))) :
