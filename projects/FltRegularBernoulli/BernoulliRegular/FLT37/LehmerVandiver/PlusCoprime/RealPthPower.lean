@@ -1,7 +1,6 @@
 import Mathlib.NumberTheory.NumberField.CMField
 import Mathlib.NumberTheory.Cyclotomic.Basic
 
-
 /-!
 # T-PIVOT-2: Real-unit-side `p`-th-power equivalence
 
@@ -74,7 +73,7 @@ power in `(𝓞 K⁺)ˣ`. -/
 theorem isPthPower_image_iff (hp_odd : p ≠ 2) (u : (𝓞 (NumberField.maximalRealSubfield K))ˣ) :
     (∃ α : (𝓞 K)ˣ, algReal u = α ^ p) ↔
       ∃ β : (𝓞 (NumberField.maximalRealSubfield K))ˣ, u = β ^ p := by
-  refine ⟨?_, fun ⟨β, hβ⟩ => ⟨algReal β, by rw [hβ, map_pow]⟩⟩
+  refine ⟨?_, fun ⟨β, hβ⟩ ↦ ⟨algReal β, by rw [hβ, map_pow]⟩⟩
   rintro ⟨α, hα⟩
   -- algReal u ∈ realUnits K (definition).
   have h_alg_in_real : algReal u ∈ NumberField.IsCMField.realUnits K := by
