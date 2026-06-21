@@ -376,7 +376,7 @@ theorem freeContentCaseIIData37_pContent_descend_of_anchorExtractionData
         ((1 - η) * (1 - η ^ 36)) ≠ 0 := by
     intro η hη37 hη1
     rw [Ne, map_eq_zero_iff _ (FaithfulSMul.algebraMap_injective _ _)]
-    refine mul_ne_zero (fun h0 => hη1 (by linear_combination -h0)) (fun h0 => ?_)
+    refine mul_ne_zero (fun h0 ↦ hη1 (by linear_combination -h0)) (fun h0 ↦ ?_)
     -- `1 - η³⁶ = 0 ⟹ η³⁶ = 1 ⟹ η = η³⁷·(η³⁶)⁻¹ = 1·... `; use `η^36 = 1` and `η^37 = 1`.
     have h36 : η ^ 36 = 1 := by linear_combination -h0
     have : η = 1 := by
