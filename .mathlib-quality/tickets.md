@@ -510,6 +510,29 @@ Wedhorn Prop 7.41 (p.66, `wedhorn.txt:3438`); "height 1" ⟺ `MulArchimedean` va
 - **Depends on**: none
 - **Parallel**: yes
 - **Type**: theorem
+- **Progress** (2026-06-21 /beastmode):
+  - ✅ Reduction PROVEN (commit ab0c53a): `isPowerBounded_of_forall_vle_one_spa_of_complete` =
+    `mem_plus_of_forall_spa_vle_one` + `IsRingOfIntegralElements.subset_powerBounded`. mem_plus =
+    by_contra → ONE construction sorry `x∉B⁺ ⟹ ∃w∈Spa(B,B⁺), ¬w.vle x 1`.
+  - ✅ HU-a foothold (commit e3a4261): `x∉B⁺ ⟹ ¬IsIntegral B⁺ x` via `IsRingOfIntegralElements.isIntegrallyClosed`.
+  - ✅ HU-b LANDED axiom-clean (commit 6a187cf): general lemma `not_isUnit_invSelf_of_not_isIntegral`
+    — x not integral over R ⟹ `IsLocalization.Away.invSelf x` non-unit in `adjoin R {x⁻¹}` (via
+    `isIntegral_of_isIntegral_adjoin_of_mul_eq_one` + `IsLocalization.Away.isIntegral_of_isIntegral_map`).
+  - ⏳ REMAINING construction (HU-c/d/e), exact next steps:
+    1. Concrete scaffold in mem_plus: `letI : Algebra ↥B⁺ B := B⁺.toAlgebra`; `Bx := Localization.Away x`;
+       `letI : Algebra ↥B⁺ Bx`, `[IsScalarTower ↥B⁺ B Bx]`; apply HU-b → `invSelf x` non-unit in `adjoin ↥B⁺ {x⁻¹}`.
+    2. HU-c: `Ideal.exists_le_maximal (span {x⁻¹})` (proper, x⁻¹ non-unit) → max `𝔪 ∋ x⁻¹` in `R[x⁻¹]`;
+       dominate the local ring `(R[x⁻¹])_𝔪` (→ field `K` via a minimal prime quotient + Frac) by
+       `IsLocalRing.exists_factor_valuationRing` → valuation `w` on `K`, `w≤1` on `R[x⁻¹]`, `w(x⁻¹)<1`
+       (x⁻¹∈𝔪→𝔪_V; x⁻¹∉supp since x a unit in Bx ⟹ w(x)>1).
+    3. HU-d (HARDEST): extend `w` from the subring `R[x⁻¹]` to `Bx` (valuation extension subring→overring),
+       then `Spv.comap (algebraMap B Bx)` → `v : Spv B`. Properties: (a) v(x)>1; (b) v≤1 on B⁺
+       (R⊆R[x⁻¹], w≤1); (c) v≤1 on B°° (y∈B°°, B⁺ open+int-closed ⟹ y∈B⁺ via
+       `topologicallyNilpotent_mem_of_isOpen_integrallyClosed`, then yⁿ=g·x⁻¹∈𝔪 ⟹ w(yⁿ)≤1); (d)
+       v∈Spv(B,B°°·B). [valuation-extension-subring→overring is the one possibly-missing piece —
+       search `Valuation.exists_extension`/ValuationSubring; else build via the dominating V's pullback.]
+    4. HU-e: `Spv.isContinuous_of_isInSpvAI_of_lt_one` (axiom-clean) from (c)+(d) ⟹ v continuous;
+       (b) ⟹ v∈Spa(B,B⁺); (a) ⟹ ¬v.vle x 1.
 
 #### Statement
 ```lean
@@ -589,6 +612,53 @@ noeth/domain/Tate beyond what `Spv.isContinuous_of_isInSpvAI_of_lt_one` already 
 `B=presheafValue D'`. **File**: new `HuberLemma33.lean` (imports SpvAI + the ROIE interface), or extend
 FaithfulLocLift. **First /beastmode step**: state HU-a…e as `:= by sorry` and confirm `lake build`
 (skeleton), THEN fill HU-c (crux) and HU-e (continuity) first since their discharges are verified.
+
+---
+
+### [T-L4-EXT] Constructive valuation extension along a ring inclusion (Chevalley for rings) — sub-ticket of T-L4 (HU-d)
+- **Status**: 🔵 OPEN — **Parent**: T-L4. Spawned 2026-06-21 (/beastmode Tier-A); the gap was
+  confirmed by 3 searches (leansearch + 2× loogle): mathlib's `Valuation.HasExtension` is only a
+  PREDICATE + accessors (`val_map_le_one_iff` etc.) and the constructors (`mk`, `ofComapInteger`)
+  require an already-existing extension `vA`; there is **no constructive `exists_extension`** that
+  builds a valuation on the overring from one on the subring.
+- **File**: FaithfulLocLift.lean (or a new `ValuationExtension.lean`).
+- **Type**: theorem (infrastructure).
+- **Why needed (Huber 3.3(i) HU-d, huber2.txt:641-643):** *"Since there exists a prime ideal of
+  A_a lying over q, there exists a valuation t of A_a lying over s."* — `s` is the dominating
+  valuation on the subring `R[x⁻¹] ⊆ Bx`; HU-d needs `t` on `Bx` extending `s`, then
+  `Spv.comap (algebraMap B Bx)` gives `v : Spv B`.
+
+#### Statement (Chevalley extension, the form HU-d consumes)
+```lean
+theorem Valuation.exists_extension_of_injective
+    {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
+    (hinj : Function.Injective (algebraMap R S))   -- or the relevant flatness/lying-over hyp
+    {Γ : Type*} [LinearOrderedCommGroupWithZero Γ] (s : Valuation R Γ) :
+    ∃ (Γ' : Type*) (_ : LinearOrderedCommGroupWithZero Γ') (t : Valuation S Γ'),
+      s.IsEquiv (Valuation.comap (algebraMap R S) t) := by sorry
+```
+
+#### Proof sketch (Chevalley/Zorn, ring case)
+1. Let `q = supp(s)`; `s` factors through `R/q ↪ Frac(R/q) = F` as a valuation `s̄` with valuation
+   ring `O_s̄ ⊆ F`. (mathlib: `Valuation` support, `Valuation.IsEquiv` to the induced field valuation.)
+2. Choose a prime `q'` of `S` lying over `q` (Huber's "prime of A_a lying over q"; for the HU-d
+   instance `q` is a minimal prime, and `R[x⁻¹] ⊆ Bx` has a prime over it). `S/q' ↪ Frac(S/q') = L`,
+   and `F ↪ L` compatibly (since `R/q ↪ S/q'`).
+3. Extend the valuation ring `O_s̄ ⊆ F` to a valuation ring `O ⊆ L` (Chevalley: mathlib
+   `ValuationSubring`/`LocalSubring.exists_le_valuationSubring`, or `IsLocalRing.exists_factor_valuationRing`
+   applied to `(O_s̄-localized-in-L)`-style). The valuation `t̄` of `L` with ring `O` restricts to
+   `s̄` on `F`.
+4. `t := Valuation.comap (S → S/q' → L) t̄`. Then `s.IsEquiv (comap (algebraMap R S) t)` by chasing
+   the diagram `R → S → L` vs `R → F → L`.
+- ⚠ This is genuine commutative-algebra infrastructure (Chevalley's valuation-extension theorem for
+  rings). mathlib has the FIELD case ingredients (`LocalSubring.exists_le_valuationSubring`,
+  `Subring.exists_le_valuationSubring_of_isIntegrallyClosedIn`) + the `HasExtension` predicate; the
+  ring-case constructor must be assembled. Moderate (standard, in mathlib's scope) — NOT research-scale.
+
+#### Mathlib lemmas needed
+`LocalSubring.exists_le_valuationSubring`, `IsLocalRing.exists_factor_valuationRing`,
+`Valuation.comap`, `Valuation.IsEquiv`, support/`Frac` API, `Ideal.exists_minimalPrimes_le` /
+lying-over (`PrimeSpectrum.comap` surjectivity for the relevant inclusion).
 
 ---
 

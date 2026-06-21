@@ -107,6 +107,24 @@ theorem not_isUnit_invSelf_of_not_isIntegral
     (isIntegral_of_isIntegral_adjoin_of_mul_eq_one (algebraMap B Bx x)
       (IsLocalization.Away.invSelf x) hmul hint_adjoin))
 
+/-- **HU-d infrastructure (T-L4-EXT): Chevalley valuation extension along a ring inclusion.**
+Given an `R`-algebra `S` with injective structure map and a valuation `s` on `R`, there is a
+valuation `t` on `S` extending `s` (`s ≈ comap (algebraMap R S) t`). Huber [Hu2] 3.3(i)
+(huber2.txt:641-643) uses this to extend the dominating valuation from the subring `R[x⁻¹]` to the
+localization `Bx`. mathlib has the field-case ingredients (`LocalSubring.exists_le_valuationSubring`,
+`IsLocalRing.exists_factor_valuationRing`) + the `Valuation.HasExtension` predicate, but no
+constructive ring-case extension; assembled here via the support→fraction-field→Chevalley route.
+
+**Status: `sorry`** (sub-ticket T-L4-EXT, parent T-L4 / Huber 3.3(i) HU-d). Standard commutative
+algebra (Chevalley's extension theorem for rings), in mathlib's scope. -/
+theorem exists_valuation_extension_of_injective
+    {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
+    (hinj : Function.Injective (algebraMap R S))
+    {Γ : Type*} [LinearOrderedCommGroupWithZero Γ] (s : Valuation R Γ) :
+    ∃ (Γ' : Type*) (_ : LinearOrderedCommGroupWithZero Γ') (t : Valuation S Γ'),
+      s.IsEquiv (Valuation.comap (algebraMap R S) t) :=
+  sorry
+
 set_option linter.unusedSectionVars false in
 /-- **Integral / power-bounded criterion (Wedhorn 7.52(1) = Prop 7.18(1) = [Hu2] Lemma 3.3).**
 In the complete affinoid ring `B = presheafValue D'`, an element `x` with `v(x) ≤ 1` at every
