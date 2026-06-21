@@ -1,7 +1,5 @@
 import BernoulliRegular.FLT37.Eichler.CaseIICor823CoordPolyHomogeneity
 
-set_option linter.style.longLine false
-
 /-!
 # The level-`107` ↔ level-`71` deg-`68` Artin-Hasse numerator difference lies in `(λ)^{108}`
 
