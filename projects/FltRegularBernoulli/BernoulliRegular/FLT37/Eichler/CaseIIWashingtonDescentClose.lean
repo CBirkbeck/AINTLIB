@@ -1,5 +1,5 @@
-import BernoulliRegular.FLT37.Eichler.CaseIISection91ExtractionProducer
 import BernoulliRegular.FLT37.Eichler.CaseIIAnchorRealRho0
+import BernoulliRegular.FLT37.Eichler.CaseIISection91ExtractionProducer
 import BernoulliRegular.FLT37.Eichler.CaseIIWashingtonLemma96SharpInvariants
 
 /-!
@@ -72,7 +72,7 @@ inside the witness residual (keyed to the factor-equation outputs), the form thi
   per-datum coprimality, and Lemma 9.6 are **carried** (the genuine remaining §9.1/Furtwängler
   content); the **universal** coprimality is provably false, so it is threaded, never asserted.
 
-It imports only; it does **not** modify any existing file.  No `sorry`, no `axiom`.
+It imports only and does **not** modify any existing file.
 
 ## References
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83, §9.1 (Theorem 9.4), pp. 169–173;
@@ -92,25 +92,6 @@ open FLT37.LehmerVandiver.CaseII
 
 variable [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
   [NumberField.IsCMField (CyclotomicField 37 ℚ)]
-
-/-! ## 1. The minimal §9.1 witness residual (anchor L1 + factor eqns L2 discharged)
-
-The carried residual `CaseIISection91DvdZGenuineUnitExtractionData37` (`CaseIIModuloKellner.lean`)
-bundles, for a real `ℓ ∣ z` datum + coprimality + the factor-equation outputs `(η_a, η_b, ρ_a, ρ_b)`
-the **entire** §9.1 construction.  We split off the two pieces the proven leaves L1 + L2 supply:
-
-* the **anchor equation** + genuine-integral-unit anchor + `ρ₀` (L1,
-  `caseII_anchor_real_rho0_impl`), together with the anchor-support `(ρ₀) = B₀` (hence `z' = ρ₀²`,
-  `(z') = B₀²`, `k = 2`, `𝔭 ∤ z'`);
-* the **factor equations** themselves (L2, the `∀ η_a η_b …` hypotheses), which the residual takes
-  as *inputs* — these are already discharged by `caseII_section91_factorEquations_etaOne_etaTwo` at
-  the call site.
-
-What remains — `CaseIIWashingtonSection91Witnesses37` — is **only** the genuine §9.1/Furtwängler
-content keyed to the *proven* anchor generator `ρ₀` and the factor-equation outputs:
-**Assumption II** `η_a = u³⁷·η_b`, the **integer witnesses** `ω, θ` for `u²ρ_aσρ_a`, `−ρ_bσρ_b`, the
-σ-fixed-unit witness `δ'`, the two sharp invariants `hxy'`/`hdenom'`, and the Lemma-9.6/9.7
-`ℓ`-propagation `ω, θ ∉ 𝔩`, `ρ₀² ∈ 𝔩`. -/
 
 open scoped Classical in
 /-- **[FLT37-CASEII-§9.1-WITNESS-RESIDUAL] The §9.1 witness data, anchor + factor eqns discharged**
@@ -188,18 +169,6 @@ def CaseIIWashingtonSection91Witnesses37 : Prop :=
             ¬ ((zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger - 1) ∣ c) ∧
         ρ0 ^ 2 ∈ lv149 ∧ ω ∉ lv149 ∧ θ ∉ lv149
 
-/-! ## 2. L1 with the **genuine integral unit** `u₀` exposed
-
-`caseII_anchor_real_rho0_impl` (L1) returns the anchor unit as `η₀ : Kˣ`; internally it is
-`Units.map (algebraMap (𝓞 K) K) u⁻¹` for an integral unit `u`.  The genuine-integral-unit residual
-`CaseIISection91DvdZGenuineUnitExtractionData37` wants the integral unit `u₀ : (𝓞 K)ˣ` directly.  We
-re-run L1's underlying construction `caseII_anchor_real_rho0_of_VC` and read off the integral
-preimage of its anchor unit.  Since `caseII_anchor_real_rho0_of_VC` produces `η₀` *as*
-`Units.map (algebraMap) u⁻¹`, the integral unit is recovered by `(IsUnit.map …).unit` of the
-generator — but the cleanest route is to note that the field anchor unit `η₀`, being a real unit
-satisfying `x+y = η₀·Λ^e·ρ₀³⁷` with `x+y, Λ, ρ₀` integral, is the *associate ratio* of integers
-`(x+y)/(Λ^e·ρ₀³⁷)`, hence `algebraMap` of an integral unit. -/
-
 /-- **[L1 — genuine integral unit] The real anchor with the integral anchor unit `u₀` exposed.**
 
 For a real Case-II datum `D` over `CyclotomicField 37 ℚ` with coprime Fermat variables, there are
@@ -233,20 +202,16 @@ theorem caseII_anchor_real_rho0_genuineUnit
   set 𝔞₀ := aEtaZeroDvdPPow hp D.hζ D.equation D.hy with h𝔞₀_def
   set Λi : 𝓞 K := (1 - (zeta_spec 37 ℚ K).toInteger) * (1 - (zeta_spec 37 ℚ K).toInteger ^ 36)
     with hΛi_def
-  -- L1 step 4: the real anchor generator `ρ₀`.
   have h_VC : (37 : ℕ).Coprime
       (Fintype.card (ClassGroup (𝓞 (NumberField.maximalRealSubfield K)))) :=
     (Nat.Prime.coprime_iff_not_dvd (by decide : Nat.Prime 37)).mpr Sinnott.flt37_not_dvd_hPlus
   obtain ⟨ρ0, hρ0_real, hρ0_span⟩ := caseII_anchor_B0_real_generator D hp h_VC hcop
-  -- `m` odd ⟹ `37m+1 = 2e`, `e = 37k+19 ≥ 1`.
   obtain ⟨k, hk⟩ := realCaseIIData37_odd_m D
   set e : ℕ := 37 * k + 19 with he_def
   have h2e : 37 * m + 1 = 2 * e := by rw [hk, he_def]; ring
   set 𝔭 : Ideal (𝓞 K) := Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) with h𝔭_def
-  -- Anchor-cube: `span(x+y) = 𝔭^{37m+1}·B₀³⁷`.
   have hcube : Ideal.span ({D.x + D.y} : Set (𝓞 K)) = 𝔭 ^ (37 * m + 1) * 𝔞₀ ^ 37 :=
     caseII_span_x_add_y_eq_anchorCube D hp hcop
-  -- `span(Λi) = 𝔭²`.
   have hΛspan : Ideal.span ({Λi} : Set (𝓞 K)) = 𝔭 ^ 2 :=
     caseII_span_lambda_eq_p_sq D.hζ (zeta_spec 37 ℚ K)
   have hp_pow : 𝔭 ^ (37 * m + 1) = Ideal.span ({Λi ^ e} : Set (𝓞 K)) := by
@@ -256,15 +221,12 @@ theorem caseII_anchor_real_rho0_genuineUnit
   have hspan_eq : Ideal.span ({D.x + D.y} : Set (𝓞 K)) =
       Ideal.span ({Λi ^ e * ρ0 ^ 37} : Set (𝓞 K)) := by
     rw [hcube, hp_pow, hρ0_pow, Ideal.span_singleton_mul_span_singleton]
-  -- `(x+y)·u = Λi^e·ρ0^37` for a unit `u`.
   obtain ⟨u, hu_eq⟩ := Ideal.span_singleton_eq_span_singleton.mp hspan_eq
-  -- `x+y = u⁻¹·(Λi^e·ρ0^37)`.
   have hxy_int : D.x + D.y = (u⁻¹ : (𝓞 K)ˣ) * (Λi ^ e * ρ0 ^ 37) := by
     have h1 : (D.x + D.y) * (u : 𝓞 K) = Λi ^ e * ρ0 ^ 37 := hu_eq
     have h2 : D.x + D.y = (Λi ^ e * ρ0 ^ 37) * ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) := by
       rw [← h1, mul_assoc, Units.mul_inv, mul_one]
     rw [h2, mul_comm]
-  -- `Λi ≠ 0`, `ρ0 ≠ 0`.
   have hΛi_ne : Λi ≠ 0 := by
     rw [hΛi_def]
     refine mul_ne_zero ?_ ?_
@@ -290,7 +252,6 @@ theorem caseII_anchor_real_rho0_genuineUnit
     rw [hbot] at h𝔞₀_dvd_z
     exact hz_ne (zero_dvd_iff.mp h𝔞₀_dvd_z)
   have hΛρ_ne : Λi ^ e * ρ0 ^ 37 ≠ 0 := mul_ne_zero (pow_ne_zero _ hΛi_ne) (pow_ne_zero _ hρ0_ne)
-  -- `u⁻¹` is REAL (`σ`-fixed), from applying `σ` to `x+y = u⁻¹·(Λi^e·ρ0^37)`.
   have hΛi_real : σ Λi = Λi := caseII_lambda_int_real
   have hxy_real : σ (D.x + D.y) = D.x + D.y := by rw [hσ_def, map_add, D.x_real, D.y_real]
   have hΛρ_real : σ (Λi ^ e * ρ0 ^ 37) = Λi ^ e * ρ0 ^ 37 := by
@@ -303,15 +264,11 @@ theorem caseII_anchor_real_rho0_genuineUnit
         _ = σ ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) * (Λi ^ e * ρ0 ^ 37) := by rw [hΛρ_real]
     have := hxy_int.symm.trans hσxy
     exact (mul_right_cancel₀ hΛρ_ne this).symm
-  -- Assemble: `u₀ = u⁻¹`.
-  refine ⟨e, u⁻¹, ρ0, by omega, hρ0_real, hρ0_span, huinv_real, ?_⟩
-  -- The anchor equation in `K`.
+  refine ⟨e, u⁻¹, ρ0, by lia, hρ0_real, hρ0_span, huinv_real, ?_⟩
   have hmapxy := congrArg (algebraMap (𝓞 K) K) hxy_int
   rw [map_mul, map_mul, map_pow, map_pow] at hmapxy
   rw [hmapxy, hΛi_def]
   ring
-
-/-! ## 3. The reduction `witnesses → genuine-integral-unit extraction data` (anchor L1 supplied) -/
 
 /-- **[FLT37-CASEII-R2-REDUCTION] The §9.1 witness residual implies the genuine-integral-unit
 extraction data** (proven, axiom-clean): `CaseIIWashingtonSection91Witnesses37 →
@@ -330,33 +287,19 @@ theorem caseIISection91DvdZGenuineUnitExtractionData37_of_washingtonWitnesses
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   intro m D hcop ηa ηb ρa ρb hηa hηb hfa hfb
   have hp : (37 : ℕ) ≠ 2 := by decide
-  -- L1 (genuine integral unit): the anchor, `(ρ₀) = B₀`, `u₀` real.
   obtain ⟨e, u0, ρ0, he, hρ0_real, hρ0_span, hu0_real, hanchor⟩ :=
     caseII_anchor_real_rho0_genuineUnit D.toRealCaseIIData37 hcop
-  -- The witness residual, fed L1's anchor data and L2's factor equations.
   obtain ⟨u, ω, θ, δ', hII, hω, hθ, hδ', hω_real, hθ_real, hθ_cop, hxy', hdenom',
       hz'_mem, hω_notMem, hθ_notMem⟩ :=
     h_wit D hcop e u0 ρ0 he hanchor ηa ηb ρa ρb hηa hηb hfa hfb
-  -- `z' := ρ₀²` (integer); `(z') = B₀²`, `k = 2`.  The anchor equation, `z' = (algebraMap ρ₀)²`,
-  -- the σ-fixed-unit witness, and `z' ∈ 𝔩` are supplied directly; reality of `algebraMap u₀` and
-  -- the anchor-support `(z') = B₀²` need a short rewrite.
   refine ⟨e, 2, u0, u, algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) ρ0, ω, θ,
     ρ0 ^ 2, δ', he, by norm_num,
     hanchor, hII, ?_, hω, hθ, map_pow _ _ _, hδ', hω_real, hθ_real, hθ_cop, hxy', hdenom', ?_,
     hz'_mem, hω_notMem, hθ_notMem⟩
-  · -- reality of the integral anchor unit `algebraMap u₀`.
+  ·
     rw [← coe_ringOfIntegersComplexConj, hu0_real]
-  · -- anchor-support `span(z') = B₀²` (`k = 2`).
+  ·
     rw [← Ideal.span_singleton_pow, hρ0_span]
-
-/-! ## 4. The descent-step producer (the intermediate of `T-R2-L5`)
-
-The factor-count descent step phrased on the §9.1 witness residual: from a `p`-content `ℓ ∣ z`
-free-content datum in the non-terminal regime + coprimality, a free-content `ℓ ∣ z` datum with
-**strictly fewer** distinct prime factors of its Fermat variable.  This is Washington's
-conjugate-norm reassembly (GTM 83 p.172) `ω₁³⁷ + θ₁³⁷ = δ·Λ^{2e−1}·ξ₁³⁷` (`ξ₁ = ρ₀σρ₀` via the
-ξ-reconciliation `(ρ₀²)³⁷ = (ρ₀σρ₀)³⁷`), packaged at the proven `p`-content output, with the anchor
-(L1) and factor equations (L2) supplied internally. -/
 
 /-- **[FLT37-CASEII-R2 DESCENT STEP] The §9.1 factor-count descent step from the witness residual**
 (proven, axiom-clean): for a `p`-content `ℓ ∣ z` free-content datum `D` in the non-terminal regime
@@ -385,9 +328,6 @@ theorem caseII_washington_descent_step
     (caseIISection91PContentExtractionData37_of_dvdZGenuineUnit
       (caseIISection91DvdZGenuineUnitExtractionData37_of_washingtonWitnesses h_wit))
     D hcop hnonterm
-
-/-! ## 5. The FLT37 Case-II endpoint, on the minimal witness residual (anchor L1 + factor eqns L2
-discharged) -/
 
 /-- **The public Case-II bridge, from the §9.1 witness residual** (proven, axiom-clean *given* the
 named inputs + Washington Lemma 9.6) — anchor (L1) and factor equations (L2) discharged.
@@ -456,8 +396,6 @@ theorem fermatLastTheoremFor_thirtyseven_of_washingtonDescent
     (caseIISection91DvdZGenuineUnitExtractionData37_of_washingtonWitnesses h_wit)
     h_cop h_lemma96 noSecondOrderIrregular
 
-/-! ## 6. Non-vacuity of the witness residual (the antecedent is genuinely inhabited) -/
-
 /-- **Non-vacuity of `CaseIIWashingtonSection91Witnesses37` (antecedent inhabited).**
 
 The witness residual's antecedent — for a real `ℓ ∣ z` datum `D` with coprime Fermat variables, the
@@ -472,7 +410,6 @@ theorem caseIIWashingtonSection91Witnesses37_antecedent_inhabited
     {m : ℕ} (D : RealCaseIIDvdZData37 m)
     (hcop : IsCoprime (Ideal.span ({D.x} : Set (𝓞 (CyclotomicField 37 ℚ))))
       (Ideal.span ({D.y} : Set (𝓞 (CyclotomicField 37 ℚ))))) :
-    -- L1 anchor data:
     (∃ (e : ℕ) (u0 : (𝓞 (CyclotomicField 37 ℚ))ˣ) (ρ0 : 𝓞 (CyclotomicField 37 ℚ)),
       1 ≤ e ∧
       algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.x + D.y) =
@@ -481,7 +418,6 @@ theorem caseIIWashingtonSection91Witnesses37_antecedent_inhabited
             ((1 - (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger) *
               (1 - (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger ^ 36))) ^ e *
           algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) ρ0 ^ 37) ∧
-    -- L2 factor-equation outputs at `ζ`, `ζ²`:
     (∃ (ηa ηb : (CyclotomicField 37 ℚ)ˣ) (ρa ρb : CyclotomicField 37 ℚ),
       complexConj (CyclotomicField 37 ℚ) (ηa : CyclotomicField 37 ℚ) =
           (ηa : CyclotomicField 37 ℚ) ∧
@@ -504,38 +440,6 @@ theorem caseIIWashingtonSection91Witnesses37_antecedent_inhabited
   · obtain ⟨ηa, ηb, ρa, ρb, hηa, hηb, hfa, _, hfb, _⟩ :=
       caseII_section91_factorEquations_etaOne_etaTwo D.toRealCaseIIData37 hcop
     exact ⟨ηa, ηb, ρa, ρb, hηa, hηb, hfa, hfb⟩
-
-/-! ## 7. [T-R2-L5a] The integer-witness packaging from **real** Assumption II + Lemma 9.6/9.7
-
-We reduce the witness residual `CaseIIWashingtonSection91Witnesses37` to **two strictly smaller**
-inputs, deriving the parts of the witness bundle that are *not* extra content:
-
-* **Real Assumption II** (`CaseIIWashingtonAssumptionIIReal37`): Washington's actual Assumption II
-  (GTM 83 p.172) — `η_a/η_b` is a `37`-th power **of a unit of `ℚ(ζ)⁺`**, i.e. `η_a = v³⁷·η_b` with
-  `v : Kˣ` **real** (`complexConj v = v`).  Cor 8.15 (`caseII_corollary815_singleIndexExpansion37`)
-  places `η_a/η_b ∈ E⁺`, so the `37`-th root is real — this is the genuine real form.
-
-* **Lemma 9.6/9.7 + descent witnesses** (`CaseIIWashingtonLemma96Witnesses37`): the *carried*
-  §9.1/Furtwängler content keyed to the real `v` — the integer witnesses `ω, θ` for the
-  conjugate-norm blocks `v²ρ_aσρ_a`, `−ρ_bσρ_b`, the σ-fixed descent unit `δ'`, the sharp
-  `𝔭`-valuation invariants (`𝔭 ∤ θ`, `(ζ−1)³ ∣ ω+θ`, `v_𝔭(ω+θζ³⁶) = 1`), and the Lemma-9.6/9.7
-  `ℓ`-propagation `ω, θ ∉ 𝔩`, `ρ₀² ∈ 𝔩`.  This **omits** the reality of `ω, θ` and the
-  Assumption-II conjunct — those are the *derivable* parts.
-
-The reduction `caseIIWashingtonSection91Witnesses37_of_assumptionIIReal_lemma96` then:
-
-* takes `u := v` (real), giving the Assumption-II conjunct `η_a = u³⁷·η_b` **directly** from real
-  Assumption II;
-* **derives** the reality of `ω, θ`: `ω = v²·ρ_aσρ_a` is σ-fixed because `v` is real (so `v²` is
-  real) and `ρ_aσρ_a` is a conjugate norm (`washington_omega_real`) — **this is the crux: a general
-  `u` would make `u²` non-real (a `ζ`-twist), breaking reality; the real `v` kills the twist**; and
-  `θ = −ρ_bσρ_b` is σ-fixed for free (conjugate norm, `washington_section91_theta_real`);
-* reads off the integer witnesses, `δ'`, the sharp invariants, and the `ℓ`-membership from the
-  Lemma-9.6/9.7 datum.
-
-So the integer-witness *packaging* (reality + the Assumption-II shape) is **not** extra residual
-content; only the integer witnesses themselves, the σ-fixed unit, the sharp invariants, and the
-aux-prime `ℓ`-propagation are carried (Lemma 9.6/9.7), exactly Washington's §9.1 inputs. -/
 
 open scoped Classical in
 /-- **[FLT37-CASEII-§9.1 REAL ASSUMPTION II] Washington's Assumption II in its real-`37`-th-power
@@ -670,67 +574,23 @@ theorem caseIIWashingtonSection91Witnesses37_of_assumptionIIReal_lemma96
     (h_lemma96 : CaseIIWashingtonLemma96Witnesses37) :
     CaseIIWashingtonSection91Witnesses37 := by
   intro m D hcop e u0 ρ0 he hanchor ηa ηb ρa ρb hηa hηb hfa hfb
-  -- Real Assumption II: the real unit `v` with `η_a = v³⁷·η_b`.
   obtain ⟨v, hv_real, hII⟩ := h_assumptionII D hcop ηa ηb ρa ρb hηa hηb hfa hfb
-  -- Lemma 9.6/9.7 + descent witnesses, keyed to the real `v`.
   obtain ⟨ω, θ, δ', hω, hθ, hδ', hθ_cop, hxy', hdenom', hz'_mem, hω_notMem, hθ_notMem⟩ :=
     h_lemma96 D hcop e u0 ρ0 he hanchor ηa ηb ρa ρb hηa hηb hfa hfb v hv_real hII
-  -- Choose `u := v`; assemble the witness bundle, deriving reality.
   refine ⟨v, ω, θ, δ', hII, hω, hθ, hδ', ?_, ?_, hθ_cop, hxy', hdenom', hz'_mem, hω_notMem,
     hθ_notMem⟩
-  · -- reality of `ω`: `σω = ω` from `algebraMap ω = v²ρ_aσρ_a` (real: `v` real) + injectivity.
+  ·
     apply RingOfIntegers.ext
     rw [coe_ringOfIntegersComplexConj,
       show ((ω : 𝓞 (CyclotomicField 37 ℚ)) : CyclotomicField 37 ℚ) =
         algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) ω from rfl, hω]
     exact washington_omega_real (u := (v : CyclotomicField 37 ℚ)) hv_real
-  · -- reality of `θ`: `σθ = θ` from `algebraMap θ = -(ρ_bσρ_b)` (conjugate norm) + injectivity.
+  ·
     apply RingOfIntegers.ext
     rw [coe_ringOfIntegersComplexConj,
       show ((θ : 𝓞 (CyclotomicField 37 ℚ)) : CyclotomicField 37 ℚ) =
         algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) θ from rfl, hθ]
     exact washington_section91_theta_real ρb
-
-/-! ## 7'. [T-R2-L5b] The **sharp `𝔭`-invariants are derivable**: drop `hxy'`/`hdenom'` from the
-carried content
-
-The Lemma-9.6/9.7 witness residual `CaseIIWashingtonLemma96Witnesses37` carried, among the §9.1
-descent data, the **two sharp `𝔭`-valuation invariants**
-```
-hxy'   : (ζ−1)³ ∣ ω + θ,
-hdenom' : v_𝔭(ω + θ·ζ³⁶) = 1   (∃ c, ω + θ·ζ³⁶ = (ζ−1)·c ∧ ¬(ζ−1) ∣ c).
-```
-The project's prior assessment (`CaseIIFreeContentDatumPackaging.lean §4`,
-`CaseIIFreeContentAssembly.lean:444`) was that these are "**not** derivable from the descended
-equation" — a sharp fact about the conjugate-norm building blocks, carried as datum fields.
-
-That assessment is now **overturned** (`caseII_descended_hxy_hdenom`,
-`CaseIIWashingtonLemma96SharpInvariants.lean`).  The L1 anchor exponent identity `2e = 37m+1`
-(`caseII_anchor_exponent_eq`, proven from the anchor equation + `(ζ−1) ∤ ρ₀`) makes the descended
-`(ζ−1)`-content `2(2e−1) = 37·(2m)` a **multiple of `37`**, so the integer descended Fermat equation
-```
-ω³⁷ + θ³⁷ = (δ' : 𝓞 K) · Λ^{2e−1} · (ρ₀²)³⁷,     Λ = (1−ζ)(1−ζ³⁶),
-```
-is a genuine `RealCaseIIData37 (2m−1)` (Λ outside the power = `(ζ−1)^{37·2m}`).  The inside-frame
-sharp lemmas (`caseII_K_zeta_sub_one_pow_dvd_x_add_y`, `caseII_etaInv_denom_factor`) then **prove**
-`hxy'` and `hdenom'` — exactly as the proven embedding `FreeContentCaseIIData37.ofRealCaseIIData37`
-proves its `hxy`/`hdenom`.
-
-So `hxy'`/`hdenom'` are **not** independent carried content.  We therefore split off the strictly
-smaller residual `CaseIIWashingtonLemma96PropagationData37`, which carries — keyed to the **same**
-L1 anchor data and L2 factor outputs — only the genuine §9.1/Furtwängler content that is *not* the
-sharp `𝔭`-geometry:
-
-* the **integer witnesses** `ω, θ` for the conjugate-norm blocks (with their `algebraMap` specs),
-  their reality, and the σ-fixed descent unit `δ'`;
-* the **integer descended Fermat equation** (Λ-form, the genuine §9.1 descent output of
-  `washington_section91_integer_descended_equation_conjNorm`) together with `(ζ−1) ∤ θ` and the
-  descended-variable `𝔭`-coprimality `(ζ−1) ∤ ρ₀²`;
-* the aux-prime **Lemma-9.6/9.7 `ℓ`-propagation** `ω, θ ∉ 𝔩`, `ρ₀² ∈ 𝔩`.
-
-The reduction `caseIIWashingtonLemma96Witnesses37_of_lemma96Propagation` then **derives** `hxy'` and
-`hdenom'` from the integer descended equation + the proven anchor-exponent identity, retiring the
-sharp-`𝔭`-geometry half of the carried content. -/
 
 open scoped Classical in
 /-- **[FLT37-CASEII-§9.1 LEMMA 9.6/9.7 PROPAGATION DATA] The *carried* §9.1 content with the sharp
@@ -789,7 +649,6 @@ def CaseIIWashingtonLemma96PropagationData37 : Prop :=
           (v : CyclotomicField 37 ℚ) ^ 2 * (ρa * complexConj (CyclotomicField 37 ℚ) ρa) ∧
         algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) θ =
           -(ρb * complexConj (CyclotomicField 37 ℚ) ρb) ∧
-        -- the σ-fixed descent unit `δ'` (its characterising clause, unchanged):
         (∀ δ : (CyclotomicField 37 ℚ)ˣ,
           complexConj (CyclotomicField 37 ℚ) (δ : CyclotomicField 37 ℚ) =
               (δ : CyclotomicField 37 ℚ) →
@@ -804,16 +663,12 @@ def CaseIIWashingtonLemma96PropagationData37 : Prop :=
           (δ : CyclotomicField 37 ℚ) =
             algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (δ' : 𝓞 _)) ∧
         ¬ (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger - 1 ∣ θ ∧
-        -- [NEW carried, REPLACING the sharp `hxy'`/`hdenom'`] the integer descended Fermat equation
-        -- (Λ-form, `washington_section91_integer_descended_equation_conjNorm`):
         ω ^ 37 + θ ^ 37 =
           (δ' : 𝓞 (CyclotomicField 37 ℚ)) *
             ((1 - (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger) *
               (1 - (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger ^ 36)) ^ (2 * e - 1) *
             (ρ0 ^ 2) ^ 37 ∧
-        -- the descended-variable `𝔭`-coprimality `(ζ−1) ∤ ρ₀²` (L1 anchor `𝔭`-free generator):
         ¬ (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger - 1 ∣ ρ0 ^ 2 ∧
-        -- the reality of the conjugate-norm blocks (real `v` + conjugate norm):
         NumberField.IsCMField.ringOfIntegersComplexConj (CyclotomicField 37 ℚ) ω = ω ∧
         NumberField.IsCMField.ringOfIntegersComplexConj (CyclotomicField 37 ℚ) θ = θ ∧
         ρ0 ^ 2 ∈ lv149 ∧ ω ∉ lv149 ∧ θ ∉ lv149
@@ -840,11 +695,9 @@ theorem caseIIWashingtonLemma96Witnesses37_of_lemma96Propagation
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   intro m D hcop e u0 ρ0 he hanchor ηa ηb ρa ρb hηa hηb hfa hfb v hv_real hII
   have hp : (37 : ℕ) ≠ 2 := by decide
-  -- The propagation data, fed the same anchor + factor + Assumption-II inputs.
   obtain ⟨ω, θ, δ', hω, hθ, hδ', hθ_cop, hint_eq, hz'_cop, hω_real, hθ_real,
       hz'_mem, hω_notMem, hθ_notMem⟩ :=
     h_prop D hcop e u0 ρ0 he hanchor ηa ηb ρa ρb hηa hηb hfa hfb v hv_real hII
-  -- Associatedness bridge `D.hζ.toInteger − 1 ~ zeta_spec.toInteger − 1` (both `𝔭`-uniformisers).
   have hassoc : Associated (D.hζ.toInteger - 1 : 𝓞 (CyclotomicField 37 ℚ))
       ((zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger - 1) := by
     have hmem_zs : (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger ∈
@@ -854,7 +707,6 @@ theorem caseIIWashingtonLemma96Witnesses37_of_lemma96Propagation
     have hmem_one : (1 : 𝓞 (CyclotomicField 37 ℚ)) ∈
         nthRootsFinset 37 (1 : 𝓞 (CyclotomicField 37 ℚ)) := by
       rw [mem_nthRootsFinset (by norm_num)]; ring
-    -- if `zeta_spec`'s root is `1` (impossible) trivial; else pairwise associatedness.
     by_cases heq : (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger =
         (1 : 𝓞 (CyclotomicField 37 ℚ))
     · exact absurd heq ((zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger_isPrimitiveRoot.ne_one
@@ -863,21 +715,15 @@ theorem caseIIWashingtonLemma96Witnesses37_of_lemma96Propagation
         D.hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
           (by decide : Nat.Prime 37) hmem_zs hmem_one heq
       simpa using hpair
-  -- `(ζ−1) ∤ ρ₀²` in `D.hζ`-terms (from the `zeta_spec`-form via the bridge).
   have hz'_cop_dζ : ¬ (D.hζ.toInteger - 1 : 𝓞 (CyclotomicField 37 ℚ)) ∣ ρ0 ^ 2 := by
     intro hd; exact hz'_cop ((hassoc.dvd_iff_dvd_left).mp hd)
-  -- The anchor-exponent identity `2e = 37m+1` from the supplied anchor equation + `(ζ−1) ∤ ρ₀²`.
   have h2e : 2 * e = 37 * m + 1 :=
     caseII_anchor_exponent_eq D.toRealCaseIIData37 hp
       (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)) hanchor (map_pow _ _ _) hz'_cop_dζ
-  -- The sharp invariants `hxy'`, `hdenom'`, DERIVED from the integer descended equation.
   obtain ⟨hxy', hdenom'⟩ :=
     caseII_descended_hxy_hdenom (m := m) (D.toCaseIIData37.one_le_m) h2e hint_eq hω_real hθ_real
       hθ_cop hz'_cop
   exact ⟨ω, θ, δ', hω, hθ, hδ', hθ_cop, hxy', hdenom', hz'_mem, hω_notMem, hθ_notMem⟩
-
-/-! ## 8. [T-R2-L5a] The FLT37 Case-II endpoint on the **reduced** inputs (real Assumption II +
-Lemma 9.6/9.7), the integer-witness packaging now proven -/
 
 /-- **The Case-II descent step from real Assumption II + Lemma 9.6/9.7** (proven, axiom-clean): the
 §9.1 factor-count descent step, with the witness residual replaced by its two strictly smaller parts
@@ -976,8 +822,6 @@ theorem fermatLastTheoremFor_thirtyseven_of_washingtonDescent_lemma96Propagation
     (caseIIWashingtonLemma96Witnesses37_of_lemma96Propagation h_propagation)
     h_cop h_lemma96 noSecondOrderIrregular
 
-/-! ## 9. [T-R2-L5a] Non-vacuity of the reduced inputs (the antecedents are genuinely inhabited) -/
-
 /-- **Non-vacuity of `CaseIIWashingtonLemma96Witnesses37`'s antecedent**, given real Assumption II.
 
 The antecedent of the Lemma-9.6/9.7 descent-witness residual — a real `ℓ ∣ z` datum `D` with
@@ -993,7 +837,6 @@ theorem caseIIWashingtonLemma96Witnesses37_antecedent_inhabited
     {m : ℕ} (D : RealCaseIIDvdZData37 m)
     (hcop : IsCoprime (Ideal.span ({D.x} : Set (𝓞 (CyclotomicField 37 ℚ))))
       (Ideal.span ({D.y} : Set (𝓞 (CyclotomicField 37 ℚ))))) :
-    -- L1 anchor data, L2 factor-equation outputs, and a real `v` with `η_a = v³⁷·η_b`:
     (∃ (e : ℕ) (u0 : (𝓞 (CyclotomicField 37 ℚ))ˣ) (ρ0 : 𝓞 (CyclotomicField 37 ℚ)),
       1 ≤ e ∧
       algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.x + D.y) =
