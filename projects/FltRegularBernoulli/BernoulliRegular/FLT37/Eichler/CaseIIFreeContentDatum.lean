@@ -131,7 +131,7 @@ namespace FreeContentCaseIIData37
 variable {n : ℕ} (D : FreeContentCaseIIData37 K n)
 
 /-- `D.z ≠ 0` (it is not divisible by `ζ − 1`). -/
-theorem caseIIFree_z_ne_zero : D.z ≠ 0 := fun h => D.hz (h ▸ dvd_zero _)
+theorem caseIIFree_z_ne_zero : D.z ≠ 0 := fun h ↦ D.hz (h ▸ dvd_zero _)
 
 /-- `span {D.z} ≠ ⊥`. -/
 theorem caseIIFree_span_z_ne_bot : Ideal.span ({D.z} : Set (𝓞 K)) ≠ ⊥ := by
@@ -459,7 +459,7 @@ theorem caseIIFreeFirstLayer_false
   have hα_conj := D.caseIIFree_correctedRadical_complexConj hp
   have hαU_anti : ringOfIntegersComplexConj K (αU : 𝓞 K) = ((αU⁻¹ : (𝓞 K)ˣ) : 𝓞 K) := by
     rw [RingOfIntegers.ext_iff, NumberField.IsCMField.coe_ringOfIntegersComplexConj]
-    have hcoe : ∀ u : (𝓞 K)ˣ, ((u : 𝓞 K) : K) = algebraMap (𝓞 K) K (u : 𝓞 K) := fun _ => rfl
+    have hcoe : ∀ u : (𝓞 K)ˣ, ((u : 𝓞 K) : K) = algebraMap (𝓞 K) K (u : 𝓞 K) := fun _ ↦ rfl
     rw [hcoe, hcoe, ← hαU, hα_conj, hαU, map_units_inv (algebraMap (𝓞 K) K) αU]
   have hαU_unitsConj : unitsComplexConj K αU = αU⁻¹ := by
     apply Units.ext
@@ -474,7 +474,7 @@ theorem caseIIFreeFirstLayer_false
         D.hζ.toInteger_isPrimitiveRoot.mem_nthRootsFinset (by decide : 0 < 37)
       have hmem_one : (1 : 𝓞 K) ∈ nthRootsFinset 37 (1 : 𝓞 K) := by
         rw [mem_nthRootsFinset (by norm_num)]; ring
-      have hne : D.hζ.toInteger ≠ (1 : 𝓞 K) := fun h =>
+      have hne : D.hζ.toInteger ≠ (1 : 𝓞 K) := fun h ↦
         D.hζ.toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37) h
       have hpair := (zeta_spec 37 ℚ K).toInteger_isPrimitiveRoot
         |>.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
@@ -596,7 +596,7 @@ theorem no_freeContentCaseIIData37
   classical
   rintro ⟨n, ⟨D⟩⟩
   -- "factor count `k` is achieved by some free-content datum".
-  let P : ℕ → Prop := fun k =>
+  let P : ℕ → Prop := fun k ↦
     ∃ (j : ℕ) (E : FreeContentCaseIIData37 (CyclotomicField 37 ℚ) j), caseIIFreeFactorCount E = k
   have hP : ∃ k, P k := ⟨_, n, D, rfl⟩
   obtain ⟨j, Dmin, hk⟩ := Nat.find_spec hP
@@ -649,7 +649,7 @@ theorem freeContentCaseIIDescentStep37_nonvacuous_regime
       D.caseIIFree_correctedRadical =
         algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ)
           (αU : 𝓞 (CyclotomicField 37 ℚ))) → False :=
-  fun ⟨αU, hαU⟩ => caseIIFreeFirstLayer_false D αU hαU
+  fun ⟨αU, hαU⟩ ↦ caseIIFreeFirstLayer_false D αU hαU
 
 /-- **Non-vacuity (the descent target is achievable on the embedded data).**  For a real Case-II
 datum `D` in the non-terminal regime, Washington's conjugate norm `ξ₁ = ρ₀σρ₀`
