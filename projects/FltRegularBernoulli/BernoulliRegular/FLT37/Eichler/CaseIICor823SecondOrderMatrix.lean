@@ -219,13 +219,24 @@ theorem caseIICor823SecondOrderBernoulliFactorModSq_eq_thirtyseven_mul :
     have h32 : (ZMod.castHom (by norm_num : (37 : ℕ) ∣ 37 ^ 2) (ZMod 37))
         ((32 : ZMod (37 ^ 2))⁻¹) = ((32 : ZMod 37))⁻¹ := by
       -- `32 · 32⁻¹ = 1` in `ZMod 37²` (32 is a unit), so apply the ring hom and cancel.
-      have h1 : (32 : ZMod (37 ^ 2)) * ((32 : ZMod (37 ^ 2))⁻¹) = 1 := by decide
+      have hu : IsUnit (32 : ZMod (37 ^ 2)) := by
+        rw [show (32 : ZMod (37 ^ 2)) = ((32 : ℕ) : ZMod (37 ^ 2)) by norm_cast]
+        exact (ZMod.isUnit_iff_coprime 32 (37 ^ 2)).2 (by norm_num)
+      have h1 : (32 : ZMod (37 ^ 2)) * ((32 : ZMod (37 ^ 2))⁻¹) = 1 := ZMod.mul_inv_of_unit _ hu
       have h2 := congrArg (ZMod.castHom (by norm_num : (37 : ℕ) ∣ 37 ^ 2) (ZMod 37)) h1
       rw [map_mul, map_one, map_ofNat] at h2
       -- `(32 : ZMod 37) * castHom (32⁻¹) = 1`; uniqueness of inverse in the field `ZMod 37`.
       exact eq_inv_of_mul_eq_one_left (by rw [mul_comm]; exact h2)
     rw [h32]
-    decide
+    -- `3 · 32⁻¹ ≠ 0` in the field `ZMod 37`: both factors are nonzero.
+    haveI : Fact (Nat.Prime 37) := ⟨by norm_num⟩
+    refine mul_ne_zero ?_ (inv_ne_zero ?_)
+    · rw [show (3 : ZMod 37) = ((3 : ℕ) : ZMod 37) by norm_cast, Ne,
+        ZMod.natCast_eq_zero_iff]
+      decide
+    · rw [show (32 : ZMod 37) = ((32 : ℕ) : ZMod 37) by norm_cast, Ne,
+        ZMod.natCast_eq_zero_iff]
+      decide
 
 open BernoulliRegular (CPlusGenerator) in
 /-- **The genuine second-order leading-coefficient residual: Proposition 8.12 at `i = 32`** (a
