@@ -146,7 +146,7 @@ with rows indexed by Dirichlet characters and columns by units, with entries
 multiplicative-character diagonalisation. -/
 noncomputable def characterMatrix :
     Matrix (DirichletCharacter ℂ p) ((ZMod p)ˣ) ℂ :=
-  Matrix.of fun χ a => χ ((a : ZMod p))
+  Matrix.of fun χ a ↦ χ ((a : ZMod p))
 
 /-- **Convolution matrix** for a function `f : (ZMod p)ˣ → ℂ`: the matrix
 indexed by `(ZMod p)ˣ × (ZMod p)ˣ` with entries `M[a, b] = f(a · b)`. The
@@ -154,7 +154,7 @@ DFT-diagonalisation lifts this to a "diagonal" form via the character
 matrix. -/
 noncomputable def convolutionMatrix (f : (ZMod p)ˣ → ℂ) :
     Matrix ((ZMod p)ˣ) ((ZMod p)ˣ) ℂ :=
-  Matrix.of fun a b => f (a * b)
+  Matrix.of fun a b ↦ f (a * b)
 
 /-- **Matrix-level eigenvalue formula for the multiplicative convolution
 matrix**: `(characterMatrix · convolutionMatrix f)[χ, b] = χ(b)⁻¹ · (∑_a χ(a) · f(a))`.
@@ -183,7 +183,7 @@ theorem characterMatrix_mul_convolutionMatrix_apply
     intro a
     rw [Units.val_mul, map_mul]
     ring
-  rw [Finset.sum_congr rfl (fun a _ => h_factor a)]
+  rw [Finset.sum_congr rfl (fun a _ ↦ h_factor a)]
   rw [← Finset.mul_sum]
 
 /-- **Inverse character matrix**: the `(p-1) × (p-1)` matrix with rows
@@ -191,13 +191,13 @@ indexed by Dirichlet characters and columns by units, with entries
 `F'[χ, b] = χ(b⁻¹)`. This is essentially `(p-1) · characterMatrix⁻¹`. -/
 noncomputable def inverseCharacterMatrix :
     Matrix (DirichletCharacter ℂ p) ((ZMod p)ˣ) ℂ :=
-  Matrix.of fun χ b => χ ((b⁻¹ : (ZMod p)ˣ) : ZMod p)
+  Matrix.of fun χ b ↦ χ ((b⁻¹ : (ZMod p)ˣ) : ZMod p)
 
 /-- **Matrix factorisation `F · M = D · F'`**: the convolution matrix `M`
 satisfies the matrix equation
 
   characterMatrix · convolutionMatrix f =
-    (Matrix.diagonal (fun χ => λ_χ)) · inverseCharacterMatrix
+    (Matrix.diagonal (fun χ ↦ λ_χ)) · inverseCharacterMatrix
 
 where `λ_χ = ∑_a χ(a) · f(a)`. This is the structural "diagonalisation"
 step in the Frobenius determinant formula: the convolution matrix
@@ -206,7 +206,7 @@ theorem characterMatrix_mul_convolutionMatrix_eq_diag_mul_inverseCharacterMatrix
     (f : (ZMod p)ˣ → ℂ) :
     haveI : DecidableEq (DirichletCharacter ℂ p) := Classical.decEq _
     characterMatrix p * convolutionMatrix p f =
-      (Matrix.diagonal (fun χ : DirichletCharacter ℂ p =>
+      (Matrix.diagonal (fun χ : DirichletCharacter ℂ p ↦
         ∑ a : (ZMod p)ˣ, χ ((a : ZMod p)) * f a)) *
       inverseCharacterMatrix p := by
   letI : DecidableEq (DirichletCharacter ℂ p) := Classical.decEq _
@@ -216,7 +216,7 @@ theorem characterMatrix_mul_convolutionMatrix_eq_diag_mul_inverseCharacterMatrix
   change χ ((b⁻¹ : (ZMod p)ˣ) : ZMod p) *
       ∑ a : (ZMod p)ˣ, χ ((a : ZMod p)) * f a =
     ∑ ψ : DirichletCharacter ℂ p,
-      Matrix.diagonal (fun χ' : DirichletCharacter ℂ p =>
+      Matrix.diagonal (fun χ' : DirichletCharacter ℂ p ↦
         ∑ a : (ZMod p)ˣ, χ' ((a : ZMod p)) * f a) χ ψ *
         ψ ((b⁻¹ : (ZMod p)ˣ) : ZMod p)
   rw [Finset.sum_eq_single χ]
@@ -241,13 +241,13 @@ Pontryagin equivalence. This is `characterMatrix p` reindexed via the
 equivalence on rows. -/
 noncomputable def characterMatrixSquare :
     Matrix ((ZMod p)ˣ) ((ZMod p)ˣ) ℂ :=
-  Matrix.of fun k a => ((dirichletCharEquivUnits p).symm k) ((a : ZMod p))
+  Matrix.of fun k a ↦ ((dirichletCharEquivUnits p).symm k) ((a : ZMod p))
 
 /-- **Square inverse character matrix**: the `(p-1) × (p-1)` matrix
 `F'[k, b] = ((dirichletCharEquivUnits p).symm k) (b⁻¹)`. -/
 noncomputable def inverseCharacterMatrixSquare :
     Matrix ((ZMod p)ˣ) ((ZMod p)ˣ) ℂ :=
-  Matrix.of fun k b => ((dirichletCharEquivUnits p).symm k) ((b⁻¹ : (ZMod p)ˣ) : ZMod p)
+  Matrix.of fun k b ↦ ((dirichletCharEquivUnits p).symm k) ((b⁻¹ : (ZMod p)ˣ) : ZMod p)
 
 /-- **Square eigenvalue formula**: `(characterMatrixSquare · convolutionMatrix f)[k, b]
 = ((dirichletCharEquivUnits p).symm k)(b⁻¹) · (∑_a (e.symm k)(a) · f(a))`. -/
@@ -264,13 +264,13 @@ theorem characterMatrixSquare_mul_convolutionMatrix_apply
 /-- **Square matrix factorisation** `F_square · M = D · F'_square`:
 
   characterMatrixSquare · convolutionMatrix f =
-    Matrix.diagonal (fun k => λ_{e.symm k}) · inverseCharacterMatrixSquare
+    Matrix.diagonal (fun k ↦ λ_{e.symm k}) · inverseCharacterMatrixSquare
 
 where `λ_χ = ∑_a χ(a) · f(a)`. -/
 theorem characterMatrixSquare_mul_convolutionMatrix_eq_diag_mul_inverseCharacterMatrixSquare
     (f : (ZMod p)ˣ → ℂ) :
     characterMatrixSquare p * convolutionMatrix p f =
-      Matrix.diagonal (fun k : (ZMod p)ˣ =>
+      Matrix.diagonal (fun k : (ZMod p)ˣ ↦
         ∑ a : (ZMod p)ˣ,
           ((dirichletCharEquivUnits p).symm k) ((a : ZMod p)) * f a) *
       inverseCharacterMatrixSquare p := by
@@ -282,7 +282,7 @@ theorem characterMatrixSquare_mul_convolutionMatrix_eq_diag_mul_inverseCharacter
   -- The RHS sum has support only at j = k due to the diagonal.
   have h_rhs : ∑ j : (ZMod p)ˣ,
       Matrix.diagonal
-          (fun k' : (ZMod p)ˣ => ∑ a : (ZMod p)ˣ,
+          (fun k' : (ZMod p)ˣ ↦ ∑ a : (ZMod p)ˣ,
             ((dirichletCharEquivUnits p).symm k') ((a : ZMod p)) * f a) k j *
         ((dirichletCharEquivUnits p).symm j) ((b⁻¹ : (ZMod p)ˣ) : ZMod p) =
       (∑ a : (ZMod p)ˣ,
@@ -398,7 +398,7 @@ private theorem mulChar_sum_units_eq_sum_all (ψ : DirichletCharacter ℂ p) :
   rw [← Finset.sum_erase_add _ _ (Finset.mem_univ (0 : ZMod p))]
   rw [ψ.map_zero, add_zero]
   -- Goal: ∑ a : (ZMod p)ˣ, ψ ((a : ZMod p)) = ∑ a ∈ Finset.univ.erase 0, ψ a
-  refine Finset.sum_bij (fun (a : (ZMod p)ˣ) _ => (a : ZMod p)) ?_ ?_ ?_ ?_
+  refine Finset.sum_bij (fun (a : (ZMod p)ˣ) _ ↦ (a : ZMod p)) ?_ ?_ ?_ ?_
   · -- mem: a unit, (a : ZMod p) ≠ 0
     intro a _
     rw [Finset.mem_erase]
@@ -410,7 +410,7 @@ private theorem mulChar_sum_units_eq_sum_all (ψ : DirichletCharacter ℂ p) :
     intro b hb
     rw [Finset.mem_erase] at hb
     obtain ⟨hb_ne, _⟩ := hb
-    have h_b_val_ne : b.val ≠ 0 := fun h_val =>
+    have h_b_val_ne : b.val ≠ 0 := fun h_val ↦
       hb_ne <| (ZMod.val_eq_zero b).mp h_val
     have h_b_val_lt : b.val < p := ZMod.val_lt b
     have hp_prime : Nat.Prime p := hp.out
@@ -453,7 +453,7 @@ theorem characterMatrixSquare_mul_inverseCharacterMatrixSquare_transpose :
           ((dirichletCharEquivUnits p).symm k')⁻¹) ((a : ZMod p)) := by
     intro a
     rw [h_inv a, MulChar.mul_apply, MulChar.inv_apply_eq_inv']
-  rw [Finset.sum_congr rfl (fun a _ => h_factor a)]
+  rw [Finset.sum_congr rfl (fun a _ ↦ h_factor a)]
   -- Now use the sum-units-eq-sum-all helper.
   rw [mulChar_sum_units_eq_sum_all]
   by_cases hkk : k = k'
@@ -569,7 +569,7 @@ theorem sum_units_logNorm_eq_log_p :
     rw [log_norm_one_sub_stdAddChar_unit p a]
   simp_rw [h_summand]
   rw [sum_units_val_eq_sum_Ico (p := p)
-      (fun n => ((Real.log (2 * |Real.sin (Real.pi * n / p)|) : ℝ) : ℂ))]
+      (fun n ↦ ((Real.log (2 * |Real.sin (Real.pi * n / p)|) : ℝ) : ℂ))]
   have h_dls := DirichletLogSum_principal_eq_neg_log p
   unfold DirichletLogSum at h_dls
   have h_eval : ∀ n ∈ Finset.Ico 1 p,
@@ -590,7 +590,7 @@ theorem sum_units_logNorm_eq_log_p :
       ∑ n ∈ Finset.Ico 1 p,
         (1 : DirichletCharacter ℂ p) ((n : ℕ) : ZMod p) *
           ((Real.log (2 * |Real.sin (Real.pi * n / p)|) : ℝ) : ℂ) := by
-    refine Finset.sum_congr rfl (fun n hn => (h_eval n hn).symm)
+    refine Finset.sum_congr rfl (fun n hn ↦ (h_eval n hn).symm)
   rw [h_sum_eq]
   -- LHS: ∑ n, (1)(↑n) · log(2|sin|). RHS: log p.
   -- h_dls : -∑ n, (1)(↑n) · log(2|sin|) = -log p
@@ -752,7 +752,7 @@ theorem frobenius_eigenvalue_eq_neg_DirichletLogSum
     -- a = 0 term: χ(0) · log‖1 - stdAddChar 0‖ = 0 · log 0 = 0
     rw [χ.map_zero, zero_mul, add_zero]
     -- Sum over (ZMod p)ˣ = sum over univ.erase 0 (ZMod p). Bij a ↦ (a : ZMod p).
-    refine Finset.sum_bij (fun (a : (ZMod p)ˣ) _ => (a : ZMod p)) ?_ ?_ ?_ ?_
+    refine Finset.sum_bij (fun (a : (ZMod p)ˣ) _ ↦ (a : ZMod p)) ?_ ?_ ?_ ?_
     · intro a _
       rw [Finset.mem_erase]
       exact ⟨a.isUnit.ne_zero, Finset.mem_univ _⟩
@@ -761,7 +761,7 @@ theorem frobenius_eigenvalue_eq_neg_DirichletLogSum
     · intro b hb
       rw [Finset.mem_erase] at hb
       obtain ⟨hb_ne, _⟩ := hb
-      have h_b_val_ne : b.val ≠ 0 := fun h_val =>
+      have h_b_val_ne : b.val ≠ 0 := fun h_val ↦
         hb_ne ((ZMod.val_eq_zero b).mp h_val)
       have h_b_val_lt : b.val < p := ZMod.val_lt b
       have hp_prime : Nat.Prime p := hp.out
@@ -813,7 +813,7 @@ theorem two_mul_quotientEigenvalue_eq_neg_DLS
       -DirichletLogSum p (dirichletOfQuotientChar p ξ) := by
   rw [two_mul_quotientEigenvalue_eq_sum_full p ξ hp_two]
   rw [← frobenius_eigenvalue_eq_neg_DirichletLogSum p (dirichletOfQuotientChar p ξ)]
-  refine Finset.sum_congr rfl (fun a _ => ?_)
+  refine Finset.sum_congr rfl (fun a _ ↦ ?_)
   congr 1
   rw [dirichletOfQuotientChar_apply_unit]
   rfl
@@ -855,12 +855,12 @@ theorem det_convolutionMatrixLogNormEven_sq_eq_prod_DLS_sq_div_four_pow
     Fintype.ofFinite _
   rw [det_convolutionMatrixLogNormEven_sq_eq_prod_quotientEigenvalue_sq p hp_two]
   rw [← Finset.prod_pow]
-  rw [prod_quot_eq_prod_mulChar p (fun ξ => (quotientEigenvalue p ξ) ^ 2)]
+  rw [prod_quot_eq_prod_mulChar p (fun ξ ↦ (quotientEigenvalue p ξ) ^ 2)]
   have h_eigen_sq : ∀ ξ : MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ,
       (quotientEigenvalue p ξ) ^ 2 =
-        (DirichletLogSum p (dirichletOfQuotientChar p ξ)) ^ 2 / 4 := fun ξ =>
+        (DirichletLogSum p (dirichletOfQuotientChar p ξ)) ^ 2 / 4 := fun ξ ↦
     quotientEigenvalue_sq_eq_DLS_sq_div_four p ξ hp_two
-  rw [Finset.prod_congr rfl (fun ξ _ => h_eigen_sq ξ)]
+  rw [Finset.prod_congr rfl (fun ξ _ ↦ h_eigen_sq ξ)]
   rw [Finset.prod_div_distrib]
   rw [Finset.prod_const, Finset.card_univ]
 
