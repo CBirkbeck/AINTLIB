@@ -210,7 +210,7 @@ theorem caseIIDescentReduction_firstOrder_coeff15_eq_zero
             e a • concreteKummerLogVector (p := 37) (K := CyclotomicField 37 ℚ) (by norm_num) a)
         from rfl]
     rw [map_sum]
-    refine Finset.sum_congr rfl (fun a _ => ?_)
+    refine Finset.sum_congr rfl (fun a _ ↦ ?_)
     rw [map_zsmul]
     rfl
   -- `evalₐ 36 (completedLog(w^36)) = evalₐ 36 (∑ e_a column_a)` (the `37`-th-power correction
@@ -247,7 +247,7 @@ theorem caseIIDescentReduction_firstOrder_coeff15_eq_zero
     (by norm_num) (by norm_num) e (15 : Fin (kummerLogRank 37))]
   -- `mulVec ē 15 = rowFactor 15 · (V·ē)_15 = 0`.
   rw [concreteKummerLogMatrix_mulVec_apply (K := CyclotomicField 37 ℚ)
-    (fun a => (e a : ZMod 37)) (15 : Fin (kummerLogRank 37))]
+    (fun a ↦ (e a : ZMod 37)) (15 : Fin (kummerLogRank 37))]
   rw [caseIICor823_rowFactor_fifteen_eq_zero, zero_mul]
 
 /-! ## 2. The descent detector splits as `D_vC + 37 · coeff_Y` under `p`-saturation
@@ -443,7 +443,7 @@ theorem cor823Omega32SecondOrderCollapse37_of_secondOrderCoeff
             e a • concreteKummerLogVector (p := 37) (K := CyclotomicField 37 ℚ) (by norm_num) a)
         from rfl]
     rw [map_sum]
-    refine Finset.sum_congr rfl (fun a _ => ?_)
+    refine Finset.sum_congr rfl (fun a _ ↦ ?_)
     rw [map_zsmul]
     rfl
   have hcompletedLog_eq :
@@ -505,7 +505,7 @@ theorem cor823Omega32SecondOrderCollapse37_of_secondOrderCoeff
   have h15val : ((15 : Fin (kummerLogRank 37)) : ℕ) = 15 := rfl
   have hmulVec_eq :
       (vandermondeTeichmullerEvenSubOneMatrix (p := 37) (by norm_num)).mulVec
-          (fun a : Fin (kummerLogRank 37) => (e a : ZMod 37)) (15 : Fin (kummerLogRank 37)) =
+          (fun a : Fin (kummerLogRank 37) ↦ (e a : ZMod 37)) (15 : Fin (kummerLogRank 37)) =
         ∑ a : Fin (kummerLogRank 37),
           (((((a : ℕ) + 2 : ℕ) : ZMod 37) ^ 2) ^ ((15 : ℕ) + 1) - 1) * ((e a : ℤ) : ZMod 37) := by
     rw [Matrix.mulVec]
@@ -513,9 +513,9 @@ theorem cor823Omega32SecondOrderCollapse37_of_secondOrderCoeff
       kummerLogColumnIndex, BernoulliRegular.CPlusGeneratorIndex, h15val]
   have hV₁₅cast : (ZMod.castHom (by norm_num : (37 : ℕ) ∣ 37 ^ 2) (ZMod 37)) V₁₅ =
       (vandermondeTeichmullerEvenSubOneMatrix (p := 37) (by norm_num)).mulVec
-        (fun a : Fin (kummerLogRank 37) => (e a : ZMod 37)) (15 : Fin (kummerLogRank 37)) := by
+        (fun a : Fin (kummerLogRank 37) ↦ (e a : ZMod 37)) (15 : Fin (kummerLogRank 37)) := by
     rw [hmulVec_eq, hV₁₅, map_sum]
-    refine Finset.sum_congr rfl (fun a _ => ?_)
+    refine Finset.sum_congr rfl (fun a _ ↦ ?_)
     rw [map_mul, map_sub, map_one, map_pow, map_pow, map_natCast, map_intCast]
   rw [hV₁₅cast] at hcast0
   -- (11) `(V·ē)_15 = 9 · decomp (∑ e_a g_a) 15`, `9 ≠ 0`.
