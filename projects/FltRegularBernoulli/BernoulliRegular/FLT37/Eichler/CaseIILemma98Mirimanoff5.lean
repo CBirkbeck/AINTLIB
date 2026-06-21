@@ -79,18 +79,20 @@ under negation, so the negative is also outside. -/
 theorem caseII_one_sub_zetaPow_notMem_lv149 {s : ℤ} (hs : ¬ (37 : ℤ) ∣ s) :
     (1 - zetaPow 37 (CyclotomicField 37 ℚ) s) ∉ lv149 := by
   intro hmem
-  have hneg : (zetaPow 37 (CyclotomicField 37 ℚ) s - 1) ∈ lv149 := by
-    have : (zetaPow 37 (CyclotomicField 37 ℚ) s - 1) =
-        -(1 - zetaPow 37 (CyclotomicField 37 ℚ) s) := by ring
-    rw [this]; exact neg_mem hmem
-  exact caseII_zetaPow_sub_one_notMem hs hneg
+  refine caseII_zetaPow_sub_one_notMem hs ?_
+  rw [show zetaPow 37 (CyclotomicField 37 ℚ) s - 1 =
+    -(1 - zetaPow 37 (CyclotomicField 37 ℚ) s) by ring]
+  exact neg_mem hmem
 
 /-- **`residueInd37 u⁻¹ = - residueInd37 u`** (additivity of the discrete log).  From
 `residueInd37 (u·u⁻¹) = residueInd37 1 = 0` and `residueInd37_mul`. -/
 theorem caseII_residueInd37_inv (u : (𝓞 (CyclotomicField 37 ℚ))ˣ) :
     residueInd37 u⁻¹ = - residueInd37 u := by
-  have h1 : residueInd37 (u * u⁻¹) = 0 := by rw [mul_inv_cancel]; exact caseII_residueInd37_one
-  rw [residueInd37_mul] at h1; linear_combination h1
+  have h1 : residueInd37 (u * u⁻¹) = 0 := by
+    rw [mul_inv_cancel]
+    exact caseII_residueInd37_one
+  rw [residueInd37_mul] at h1
+  linear_combination h1
 
 /-! ## 1. The cyclic-group `p`-th-power criterion at `lv149`: `u⁴ = 1 ⟹ u` a `37`-th power
 
@@ -113,9 +115,9 @@ theorem caseII_unit_isPthPow_of_fourthPow_one
     (u : (𝓞 (CyclotomicField 37 ℚ) ⧸ lv149)ˣ) (hu : u ^ 4 = 1) :
     ∃ v : (𝓞 (CyclotomicField 37 ℚ) ⧸ lv149)ˣ, u = v ^ 37 := by
   have hp_dvd : (37 : ℕ) ∣ Nat.card (𝓞 (CyclotomicField 37 ℚ) ⧸ lv149)ˣ := by
-    rw [lv149_unit_card]; decide
-  rw [isPthPower_iff_pow_card_div_eq_one hp_dvd u, caseII_lv149_unit_card_div]
-  exact hu
+    rw [lv149_unit_card]
+    decide
+  rwa [isPthPower_iff_pow_card_div_eq_one hp_dvd u, caseII_lv149_unit_card_div]
 
 /-! ## 2. The field ratio engine (Washington steps 8–9): a `4`-th-power-trivial ratio is a `37`-th
 power
@@ -137,26 +139,21 @@ theorem caseII_ratio_isPthPow_field {p q : 𝓞 (CyclotomicField 37 ℚ)}
     (hp : p ∉ lv149) (hq : q ∉ lv149)
     (h4 : (Ideal.Quotient.mk lv149 p) ^ 4 = (Ideal.Quotient.mk lv149 q) ^ 4) :
     ∃ w : F37, (Ideal.Quotient.mk lv149 p) * (Ideal.Quotient.mk lv149 q)⁻¹ = w ^ 37 := by
-  set Qp := Ideal.Quotient.mk lv149 p with hQp
-  set Qq := Ideal.Quotient.mk lv149 q with hQq
+  set Qp := Ideal.Quotient.mk lv149 p
+  set Qq := Ideal.Quotient.mk lv149 q
   have hp0 : Qp ≠ 0 := fun h => hp ((Ideal.Quotient.eq_zero_iff_mem).mp h)
   have hq0 : Qq ≠ 0 := fun h => hq ((Ideal.Quotient.eq_zero_iff_mem).mp h)
-  -- The unit ratio `u = Qp / Qq`, with underlying value `Qp · Qq⁻¹`.
   set u : (F37)ˣ := Units.mk0 Qp hp0 * (Units.mk0 Qq hq0)⁻¹ with hu_def
   have huval : (u : F37) = Qp * Qq⁻¹ := by
     rw [hu_def, Units.val_mul, Units.val_inv_eq_inv_val, Units.val_mk0, Units.val_mk0]
-  -- Its fourth power is `1`: `(Qp · Qq⁻¹)^4 = Qp^4 · (Qq^4)⁻¹ = Qq^4 · (Qq^4)⁻¹ = 1`.
   have hu4 : u ^ 4 = 1 := by
     apply Units.ext
     rw [Units.val_pow_eq_pow_val, huval, Units.val_one, mul_pow, inv_pow, h4]
     exact mul_inv_cancel₀ (pow_ne_zero 4 hq0)
   obtain ⟨v, hv⟩ := caseII_unit_isPthPow_of_fourthPow_one u hu4
   refine ⟨(v : F37), ?_⟩
-  -- `Qp · Qq⁻¹ = (u : F) = (v^37 : F) = (v : F)^37`.
-  have hval37 : (u : F37) = (v : F37) ^ 37 := by
-    rw [show (u : F37) = ((v ^ 37 : (F37)ˣ) : F37) from congrArg Units.val hv,
-      Units.val_pow_eq_pow_val]
-  rw [← huval]; exact hval37
+  rw [← huval, show (u : F37) = ((v ^ 37 : (F37)ˣ) : F37) from congrArg Units.val hv,
+    Units.val_pow_eq_pow_val]
 
 /-! ## 3. The §8.1 landing: from step 7 to `residueInd37 ξ_s = residueInd37 ξ_d`
 
@@ -195,53 +192,38 @@ theorem caseII_xiRatio_ind_of_step7 (a j : ℤ) (s d : ℕ)
         (Ideal.Quotient.mk lv149 (1 - zetaPow 37 (CyclotomicField 37 ℚ) (s : ℤ))) ^ 4) :
     residueInd37 (xiUnit 37 (CyclotomicField 37 ℚ) s hs) =
       residueInd37 (xiUnit 37 (CyclotomicField 37 ℚ) d hd) := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  -- Abbreviations and non-membership facts.
-  set zaj := zetaPow 37 (CyclotomicField 37 ℚ) a - zetaPow 37 (CyclotomicField 37 ℚ) j with hzaj
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
+  set zaj := zetaPow 37 (CyclotomicField 37 ℚ) a - zetaPow 37 (CyclotomicField 37 ℚ) j
   set zs := (1 : 𝓞 (CyclotomicField 37 ℚ)) - zetaPow 37 (CyclotomicField 37 ℚ) (s : ℤ)
-    with hzs
   have hzaj_notMem : zaj ∉ lv149 := caseII_zetaPow_sub_zetaPow_notMem haj
   have hzs_notMem : zs ∉ lv149 := caseII_one_sub_zetaPow_notMem_lv149 hsj
-  -- §2: the Washington ratio is a `37`-th power in `F`.
   obtain ⟨w, hw⟩ := caseII_ratio_isPthPow_field hzaj_notMem hzs_notMem hstep7
-  -- The §8.1 residue identity: `Q(ξ_d)·Q(zs) = Q(-1)·Q(zaj)·Q(ξ_s)`.
   have hid := caseII_xi_ratio_residue_identity a j s d hs hd hs_eq hd_eq
-  -- It suffices to show `IsPthPowerModPrime 37 lv149 (ξ_s · ξ_d⁻¹)`.
   have hgoal : BernoulliRegular.IsPthPowerModPrime 37 lv149
       ((xiUnit 37 (CyclotomicField 37 ℚ) s hs * (xiUnit 37 (CyclotomicField 37 ℚ) d hd)⁻¹ :
           (𝓞 (CyclotomicField 37 ℚ))ˣ) : 𝓞 (CyclotomicField 37 ℚ)) := by
-    -- Work in the residue field.
-    set Q := Ideal.Quotient.mk lv149 with hQ
+    set Q := Ideal.Quotient.mk lv149
     set Qξs := Q (xiUnit 37 (CyclotomicField 37 ℚ) s hs : 𝓞 (CyclotomicField 37 ℚ))
       with hQξs
     set Qξd := Q (xiUnit 37 (CyclotomicField 37 ℚ) d hd : 𝓞 (CyclotomicField 37 ℚ))
       with hQξd
-    -- Residues of the `ξ`-units are nonzero (they are global units, never in the prime `𝔩`).
-    have hξs0 : Qξs ≠ 0 := fun h => caseII_unit_notMem_lv149
-      (xiUnit 37 (CyclotomicField 37 ℚ) s hs) ((Ideal.Quotient.eq_zero_iff_mem).mp h)
     have hξd0 : Qξd ≠ 0 := fun h => caseII_unit_notMem_lv149
       (xiUnit 37 (CyclotomicField 37 ℚ) d hd) ((Ideal.Quotient.eq_zero_iff_mem).mp h)
     have hzaj0 : Q zaj ≠ 0 := fun h => hzaj_notMem ((Ideal.Quotient.eq_zero_iff_mem).mp h)
     have hzs0 : Q zs ≠ 0 := fun h => hzs_notMem ((Ideal.Quotient.eq_zero_iff_mem).mp h)
-    -- `-1` is a `37`-th power in `F`.
     obtain ⟨t, ht⟩ := caseII_negOne_residue_isPthPow
     have hneg0 : Q (-1 : 𝓞 (CyclotomicField 37 ℚ)) ≠ 0 := fun h0 =>
       caseII_unit_notMem_lv149 (-1) ((Ideal.Quotient.eq_zero_iff_mem).mp h0)
-    -- The identity in `F`: `Qξd · Q(zs) = Q(-1) · Q(zaj) · Qξs`.
     have hidQ : Qξd * Q zs = Q (-1) * Q zaj * Qξs := hid
     have hw' : Q zaj * (Q zs)⁻¹ = w ^ 37 := hw
-    -- Step A: field identity `Qξs·Qξd⁻¹ = (Q(-1))⁻¹·(Q zaj·(Q zs)⁻¹)⁻¹`, from `hidQ`.
     have hratio : Qξs * Qξd⁻¹ = (Q (-1))⁻¹ * (Q zaj * (Q zs)⁻¹)⁻¹ := by
       rw [mul_inv_rev, inv_inv]
       field_simp
       linear_combination -hidQ
-    -- Step B: substitute `Q zaj · (Q zs)⁻¹ = w^37` and `Q(-1) = t^37`.
     rw [hw', ht] at hratio
-    -- The witness `t⁻¹ · w⁻¹`; its `37`-th power matches `Qξs · Qξd⁻¹`.
     refine ⟨t⁻¹ * w⁻¹, ?_⟩
     rw [Units.val_mul, map_mul, map_units_inv, ← hQξs, ← hQξd, hratio]
     simp only [mul_pow, inv_pow]
-  -- Convert `IsPthPowerModPrime` of the ratio to the index equality.
   rw [isPthPowerModPrime_iff_residueInd37_eq_zero, residueInd37_mul,
     caseII_residueInd37_inv] at hgoal
   linear_combination hgoal
@@ -275,26 +257,24 @@ theorem caseII_step7_of_step6 (x y : 𝓞 (CyclotomicField 37 ℚ)) (a j : ℤ)
         (zetaPow 37 (CyclotomicField 37 ℚ) a - zetaPow 37 (CyclotomicField 37 ℚ) j)) ^ 4 =
       (Ideal.Quotient.mk lv149
         (1 - zetaPow 37 (CyclotomicField 37 ℚ) (a + j))) ^ 4 := by
-  set Q := Ideal.Quotient.mk lv149 with hQ
+  set Q := Ideal.Quotient.mk lv149
   have hy0 : Q y ≠ 0 := fun h => hy ((Ideal.Quotient.eq_zero_iff_mem).mp h)
-  -- `Q(x) = -Q(ζ^j)·Q(y)` from the factor hypothesis.
   have hx_eq : Q x = -(Q (zetaPow 37 (CyclotomicField 37 ℚ) j) * Q y) := by
     have hmem : Q (x + zetaPow 37 (CyclotomicField 37 ℚ) j * y) = 0 :=
       (Ideal.Quotient.eq_zero_iff_mem).mpr hfac
     rw [map_add, map_mul] at hmem
     linear_combination hmem
-  -- `Q(ζ^{a+j}) = Q(ζ^a)·Q(ζ^j)`.
   have hzadd : Q (zetaPow 37 (CyclotomicField 37 ℚ) (a + j)) =
       Q (zetaPow 37 (CyclotomicField 37 ℚ) a) * Q (zetaPow 37 (CyclotomicField 37 ℚ) j) := by
     rw [zetaPow_add, map_mul]
-  -- The two substituted residue forms.
   have hL : Q (x + zetaPow 37 (CyclotomicField 37 ℚ) a * y) =
       Q y * Q (zetaPow 37 (CyclotomicField 37 ℚ) a - zetaPow 37 (CyclotomicField 37 ℚ) j) := by
-    rw [map_add, map_mul, map_sub, hx_eq]; ring
+    rw [map_add, map_mul, map_sub, hx_eq]
+    ring
   have hR : Q (zetaPow 37 (CyclotomicField 37 ℚ) a * x + y) =
       Q y * Q (1 - zetaPow 37 (CyclotomicField 37 ℚ) (a + j)) := by
-    rw [map_add, map_mul, map_sub, map_one, hx_eq, hzadd]; ring
-  -- Step 6 in substituted form, then cancel `Q(y)^4`.
+    rw [map_add, map_mul, map_sub, map_one, hx_eq, hzadd]
+    ring
   rw [hL, hR, mul_pow, mul_pow] at hstep6
   exact mul_left_cancel₀ (pow_ne_zero 4 hy0) hstep6
 
@@ -312,7 +292,6 @@ which exist as elements only over `RealCaseIIData37` (II1 / `c = 1`,
 `caseIIRootClassConjFixed37_proven`), **not** over a bare `CaseIIData37`.  Everything around it
 (steps 7–9, the §8.1 landing) is proved above. -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **Washington Lemma 9.8 step 6 over the Case-II descent for `p = 37`** (a `def … : Prop`,
 **not** an axiom) — the smallest irreducible reality core.
 
@@ -352,9 +331,8 @@ exponent congruence (`unit'_zpow_congr`). -/
 theorem caseII_zetaU_zpow_val_eq {c : ZMod 37} {e : ℤ} (he : (e : ZMod 37) = c) :
     zetaU 37 (CyclotomicField 37 ℚ) ^ e =
       zetaU 37 (CyclotomicField 37 ℚ) ^ ((c.val : ℕ) : ℤ) := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   apply unit'_zpow_congr
-  -- `37 ∣ e - c.val` since `(e : ZMod 37) = c = (c.val : ZMod 37)`.
   have h1 : ((e - (c.val : ℕ) : ℤ) : ZMod 37) = 0 := by
     push_cast
     rw [he, ZMod.natCast_val, ZMod.cast_id, sub_self]
@@ -375,7 +353,6 @@ theorem caseII_xiUnitZMod_eq_xiUnit {c : ZMod 37} (hc : c ≠ 0) (h : c.val.Copr
 
 /-! ## 6. The producer, discharged from the step-6 reality core -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **`MirimanoffRhoRealityProducer37` from the step-6 reality core** (proven, axiom-clean *given*
 `CaseIIMirimanoffStep6Cong37`).
 
@@ -396,40 +373,35 @@ theorem caseII_mirimanoffRhoRealityProducer37_of_step6
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
     (h_step6 : CaseIIMirimanoffStep6Cong37) :
     MirimanoffRhoRealityProducer37 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   intro hV hSO m D η hη_mem hη_ne hx hy hsum i hi
-  -- The step-6 hypotheses, specialised once to `j = (i : ℤ)`.
-  -- `zetaPow (i : ℤ) = η`.
   have hzη : zetaPow 37 (CyclotomicField 37 ℚ) ((i : ℕ) : ℤ) = η := by
-    rw [zetaPow_natCast]; exact hi
+    rw [zetaPow_natCast]
+    exact hi
   set iZ : ZMod 37 := (i : ZMod 37) with hiZ
-  -- Goal: `MirimanoffRhoReality37 iZ`.
   intro b hb hb2
-  -- Washington's exponent `aZ = b + iZ`; integer representative `a = aZ.val`.
   set aZ : ZMod 37 := b + iZ with haZ
   set a : ℤ := ((aZ.val : ℕ) : ℤ) with ha
-  -- `s = (b + 2iZ).val`, `d = b.val`, and their coprimality.
   have hs_cop : ((b + 2 * iZ).val).Coprime 37 := caseII_val_coprime hb2
   have hd_cop : (b.val).Coprime 37 := caseII_val_coprime hb
-  -- The `ZMod 37` images of `a ± j`.
   have ha_im : ((a : ℤ) : ZMod 37) = aZ := by
-    rw [ha]; push_cast; rw [ZMod.natCast_val, ZMod.cast_id]
+    rw [ha]
+    push_cast
+    rw [ZMod.natCast_val, ZMod.cast_id]
   have hai_im : ((a + (i : ℤ) : ℤ) : ZMod 37) = b + 2 * iZ := by
     rw [show ((a + (i : ℤ) : ℤ) : ZMod 37)
-        = ((a : ℤ) : ZMod 37) + ((i : ℕ) : ZMod 37) from by push_cast; ring, ha_im, haZ, hiZ]
+        = ((a : ℤ) : ZMod 37) + ((i : ℕ) : ZMod 37) by push_cast; ring, ha_im, haZ, hiZ]
     ring
   have hami_im : ((a - (i : ℤ) : ℤ) : ZMod 37) = b := by
     rw [show ((a - (i : ℤ) : ℤ) : ZMod 37)
-        = ((a : ℤ) : ZMod 37) - ((i : ℕ) : ZMod 37) from by push_cast; ring, ha_im, haZ, hiZ]
+        = ((a : ℤ) : ZMod 37) - ((i : ℕ) : ZMod 37) by push_cast; ring, ha_im, haZ, hiZ]
     ring
-  -- Exponent congruences for `xi_ratio_identity` (`s ≡ a+i`, `d ≡ a-i`).
   have hs_eq : zetaU 37 (CyclotomicField 37 ℚ) ^ (a + (i : ℤ)) =
       zetaU 37 (CyclotomicField 37 ℚ) ^ (((b + 2 * iZ).val : ℕ) : ℤ) :=
     caseII_zetaU_zpow_val_eq hai_im
   have hd_eq : zetaU 37 (CyclotomicField 37 ℚ) ^ (a - (i : ℤ)) =
       zetaU 37 (CyclotomicField 37 ℚ) ^ ((b.val : ℕ) : ℤ) :=
     caseII_zetaU_zpow_val_eq hami_im
-  -- `a - i ≢ 0` and `a + i ≢ 0` (i.e. `s ≢ 0`).
   have haj : ¬ (37 : ℤ) ∣ (a - (i : ℤ)) :=
     caseII_not_dvd_of_zmod_ne_zero (by rw [hami_im]; exact hb)
   have haj' : ¬ (37 : ℤ) ∣ (a + (i : ℤ)) :=
@@ -439,28 +411,22 @@ theorem caseII_mirimanoffRhoRealityProducer37_of_step6
     push_cast
     rw [ZMod.natCast_val, ZMod.cast_id]
     exact hb2
-  -- Step 6 (the residual) at `j = (i : ℤ)`, `a`.
   have hstep6 := h_step6 hV hSO D hη_mem hη_ne hx hy hsum ((i : ℕ) : ℤ) hzη a haj haj'
-  -- Step 7 from step 6 + the factor hypothesis.
   have hfac : D.x + zetaPow 37 (CyclotomicField 37 ℚ) ((i : ℕ) : ℤ) * D.y ∈ lv149 := by
     rwa [hzη]
   have hstep7 := caseII_step7_of_step6 D.x D.y a ((i : ℕ) : ℤ) hfac hy hstep6
-  -- Bridge `ζ^{a+i} = ζ^{(b+2i).val}` (`a + i ≡ b + 2i (mod 37)`) so step 7 matches the engine.
   have hzbridge : zetaPow 37 (CyclotomicField 37 ℚ) (a + ((i : ℕ) : ℤ)) =
       zetaPow 37 (CyclotomicField 37 ℚ) (((b + 2 * iZ).val : ℕ) : ℤ) := by
     apply zetaPow_congr
     have h0 : ((a + ((i : ℕ) : ℤ) - (((b + 2 * iZ).val : ℕ) : ℤ) : ℤ) : ZMod 37) = 0 := by
       rw [Int.cast_sub, hai_im,
-        show ((((b + 2 * iZ).val : ℕ) : ℤ) : ZMod 37) = ((b + 2 * iZ).val : ZMod 37) from by
+        show ((((b + 2 * iZ).val : ℕ) : ℤ) : ZMod 37) = ((b + 2 * iZ).val : ZMod 37) by
           push_cast; ring,
         ZMod.natCast_val, ZMod.cast_id, sub_self]
     rwa [ZMod.intCast_zmod_eq_zero_iff_dvd] at h0
   rw [hzbridge] at hstep7
-  -- Apply Washington steps 8–9 + §8.1.
   have hind := caseII_xiRatio_ind_of_step7 a ((i : ℕ) : ℤ) (b + 2 * iZ).val b.val hs_cop hd_cop
     hs_eq hd_eq haj hsj hstep7
-  -- Convert the index equality to the `IsPthPowerModPrime` ratio of `MirimanoffRhoReality37`,
-  -- writing `ξ_{(b+2i).val}·ξ_{b.val}⁻¹` via `xiUnitZMod`.
   rw [caseII_xiUnitZMod_eq_xiUnit (c := b + 2 * iZ) hb2 hs_cop,
     caseII_xiUnitZMod_eq_xiUnit (c := b) hb hd_cop,
     isPthPowerModPrime_iff_residueInd37_eq_zero, residueInd37_mul, caseII_residueInd37_inv]
@@ -473,7 +439,6 @@ Given the step-6 reality core, the producer is proved (§6), which through the p
 through `caseII_lemma98_x_add_y_mem_of_dvd_z` (+ the proven `caseIIThm95_engine_runs`) gives the
 full Washington Lemma 9.8 `ℓ ∣ (ω + θ)` (`j = 0`). -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **`Lemma98MirimanoffPthPower37` from the step-6 reality core** (proven, axiom-clean *given*
 `CaseIIMirimanoffStep6Cong37`).  Composes the producer discharge (§6) with the proven step-7
 telescoping + step-8 σ-collapse (`caseII_lemma98Mirimanoff_of_rhoReality`). -/
@@ -485,7 +450,6 @@ theorem caseII_lemma98Mirimanoff_of_step6
   caseII_lemma98Mirimanoff_of_rhoReality
     (caseII_mirimanoffRhoRealityProducer37_of_step6 h_step6)
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **Washington Lemma 9.8 for `p = 37` from the single step-6 reality core** (proven, axiom-clean
 *given* `CaseIIMirimanoffStep6Cong37`).
 
@@ -516,7 +480,6 @@ congruence genuinely constrains the descent (it asserts no nontrivial conjugate 
 `D.x + η·D.y ∈ lv149` with `η ≠ 1` can occur).  We make this explicit: under the step-6 core,
 **no** nontrivial conjugate factor can occur. -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **Non-vacuity, made explicit.**  Under `CaseIIMirimanoffStep6Cong37`, for every Case-II descent
 no *nontrivial* conjugate factor `D.x + η·D.y ∈ lv149` (`η ≠ 1`, `ℓ ∤ x, y`) can occur.
 
@@ -538,12 +501,11 @@ theorem caseII_step6_no_nontrivial_factor
     (hη_mem : η ∈ nthRootsFinset 37 (1 : 𝓞 (CyclotomicField 37 ℚ)))
     (hη_ne : η ≠ 1) (hx : D.x ∉ lv149) (hy : D.y ∉ lv149) :
     D.x + η * D.y ∉ lv149 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  haveI : NeZero (37 : ℕ) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : NeZero (37 : ℕ) := ⟨by decide⟩
   intro hsum
-  -- `η = ζ^i` with `i ≠ 0`.
   have hη_pow : η ^ 37 = 1 := by
-    rw [mem_nthRootsFinset (by decide : 0 < 37)] at hη_mem; exact hη_mem
+    rwa [mem_nthRootsFinset (by decide : 0 < 37)] at hη_mem
   obtain ⟨i, _hi_lt, hi_eq⟩ :=
     (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger_isPrimitiveRoot.eq_pow_of_pow_eq_one hη_pow
   have hi_ne : (i : ZMod 37) ≠ 0 := by
@@ -552,7 +514,6 @@ theorem caseII_step6_no_nontrivial_factor
     have : i = 0 := by omega
     rw [this, pow_zero] at hi_eq
     exact hη_ne hi_eq.symm
-  -- The producer gives the (false-for-`i ≠ 0`) reality, contradicting `Q₃₂⁴ ≢ 1`.
   exact caseII_not_rhoReality_of_ne_zero hi_ne
     (caseII_mirimanoffRhoRealityProducer37_of_step6
       h_step6 hV hSO D hη_mem hη_ne hx hy hsum i hi_eq)
