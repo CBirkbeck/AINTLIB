@@ -84,7 +84,7 @@ cyclotomic level `m = p` and residue prime `ℓ`, using `ℓ ∤ p` (both prime,
 theorem ramificationIdx_eq_one_of_ne
     (hne : ℓ ≠ p) (𝔮 : Ideal (𝓞 K)) [𝔮.IsPrime] [𝔮.LiesOver 𝓵] :
     Ideal.ramificationIdx 𝓵 𝔮 = 1 := by
-  have hndvd : ¬ ℓ ∣ p := fun h =>
+  have hndvd : ¬ ℓ ∣ p := fun h ↦
     hne ((Nat.prime_dvd_prime_iff_eq hℓ.out hp.out).mp h)
   haveI : NeZero p := ⟨hp.out.ne_zero⟩
   have h𝓵ne : 𝓵 ≠ ⊥ := by simpa using hℓ.out.ne_zero
@@ -101,7 +101,7 @@ level `m = p` and residue prime `ℓ`. -/
 theorem inertiaDeg_eq_orderOf
     (hne : ℓ ≠ p) (𝔮 : Ideal (𝓞 K)) [𝔮.IsPrime] [𝔮.LiesOver 𝓵] :
     Ideal.inertiaDeg 𝓵 𝔮 = orderOf (ℓ : ZMod p) := by
-  have hndvd : ¬ ℓ ∣ p := fun h =>
+  have hndvd : ¬ ℓ ∣ p := fun h ↦
     hne ((Nat.prime_dvd_prime_iff_eq hℓ.out hp.out).mp h)
   haveI : NeZero p := ⟨hp.out.ne_zero⟩
   have h𝓵ne' : 𝓵 ≠ ⊥ := by simpa using hℓ.out.ne_zero
@@ -153,7 +153,7 @@ theorem ncard_primesOver_eq_sub_one_of_natCast_eq_one
     (hℓ1 : (ℓ : ZMod p) = 1) :
     (Ideal.primesOver 𝓵 (𝓞 K)).ncard = p - 1 := by
   have hne : ℓ ≠ p := ne_of_natCast_eq_one_mod hℓ1
-  have hndvd : ¬ ℓ ∣ p := fun h =>
+  have hndvd : ¬ ℓ ∣ p := fun h ↦
     hne ((Nat.prime_dvd_prime_iff_eq hℓ.out hp.out).mp h)
   haveI : NeZero p := ⟨hp.out.ne_zero⟩
   haveI : IsGalois ℚ K := IsCyclotomicExtension.isGalois {p} ℚ K
@@ -211,6 +211,7 @@ local instance : NeZero (p * ℓ) := ⟨Nat.mul_ne_zero hp.out.ne_zero hℓ.out.
 noncomputable def zetaPL : 𝓞 L :=
   (IsCyclotomicExtension.zeta_spec (p * ℓ) ℚ L).toInteger
 
+/-- `zetaPL` is a primitive `(p ℓ)`-th root of unity in `𝓞 L`. -/
 lemma zetaPL_isPrimitiveRoot :
     IsPrimitiveRoot (zetaPL (p := p) (ℓ := ℓ) (L := L)) (p * ℓ) := by
   simpa [zetaPL] using
@@ -265,6 +266,7 @@ lemma addCharL_isPrimitive :
   AddChar.zmodChar_primitive_of_primitive_root ℓ
     (zetaL_isPrimitiveRoot (p := p) (ℓ := ℓ) (L := L))
 
+/-- The additive character `ψ = addCharL` is nontrivial. -/
 lemma addCharL_ne_one :
     addCharL (p := p) (ℓ := ℓ) (L := L) ≠ 1 := by
   have hprim := addCharL_isPrimitive (p := p) (ℓ := ℓ) (L := L)
@@ -286,7 +288,8 @@ lemma p_dvd_card_sub_one (hℓ1 : (ℓ : ZMod p) = 1) :
   have hle : 1 ≤ ℓ := hℓ.out.one_le
   have : ((ℓ - 1 : ℕ) : ZMod p) = 0 := by
     push_cast [hle]
-    rw [hℓ1]; ring
+    rw [hℓ1]
+    ring
   exact (ZMod.natCast_eq_zero_iff _ _).mp this
 
 /-- **(ii) existence of the order-`p` character.** When `ℓ ≡ 1 (mod p)` there is
@@ -464,7 +467,7 @@ lemma gaussSumL_mem_prime_of_liesOver_ell (𝔓 : Ideal (𝓞 L)) [𝔓.IsPrime]
         Ideal.Quotient.mk 𝔓 (χ a) := by
     intro a
     rw [addCharL_apply, map_mul, map_pow, hζ1, one_pow, mul_one]
-  rw [Finset.sum_congr rfl (fun a _ => hterm a), ← map_sum,
+  rw [Finset.sum_congr rfl (fun a _ ↦ hterm a), ← map_sum,
     MulChar.sum_eq_zero_of_ne_one hχ1, map_zero]
 
 include hχord in
@@ -482,8 +485,8 @@ lemma gaussSumL_ne_zero_and_inv :
           gaussSum χ⁻¹ (addCharL (p := p) (ℓ := ℓ) (L := L)) ≠ 0 := by
     rw [hmul]
     exact mul_ne_zero u.ne_zero (show (ℓ : 𝓞 L) ≠ 0 by exact_mod_cast hℓ.out.ne_zero)
-  exact ⟨fun h => hprod_ne (by rw [h, zero_mul]),
-    fun h => hprod_ne (by rw [h, mul_zero])⟩
+  exact ⟨fun h ↦ hprod_ne (by rw [h, zero_mul]),
+    fun h ↦ hprod_ne (by rw [h, mul_zero])⟩
 
 include hχord in
 /-- The principal ideal of `g(χ)` is nonzero. -/
@@ -817,11 +820,11 @@ lemma gaussSumL_count_pow_telescope {n : ℕ} (hn1 : 1 ≤ n) (hnp : n < p)
         (Ideal.span ({gaussSum χ (addCharL (p := p) (ℓ := ℓ) (L := L))} :
           Set (𝓞 L)))).count 𝔓₀ := by
   -- `gcount m := v_{𝔓₀}(g(χ^m))`, `Jcount i := v_{𝔓₀}(J(χ,χ^i))`.
-  let gcount : ℕ → ℕ := fun m =>
+  let gcount : ℕ → ℕ := fun m ↦
     (UniqueFactorizationMonoid.normalizedFactors
       (Ideal.span ({gaussSum (χ ^ m) (addCharL (p := p) (ℓ := ℓ) (L := L))} :
         Set (𝓞 L)))).count 𝔓₀
-  let Jcount : ℕ → ℕ := fun i =>
+  let Jcount : ℕ → ℕ := fun i ↦
     (UniqueFactorizationMonoid.normalizedFactors
       (Ideal.span ({jacobiSum χ (χ ^ i)} : Set (𝓞 L)))).count 𝔓₀
   -- `gcount 1 = v_{𝔓₀}(g(χ))` (rewriting `χ^1 = χ`).
