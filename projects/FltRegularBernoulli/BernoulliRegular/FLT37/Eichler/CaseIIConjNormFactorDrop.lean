@@ -134,7 +134,7 @@ theorem caseII_conjNorm_factorCount_strict_nonvacuous
       caseII_correctedRadical D D.etaOne (caseII_correctionUnit D.etaOne) =
         algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ)
           (αU : 𝓞 (CyclotomicField 37 ℚ))) → False :=
-  fun ⟨αU, hαU⟩ => caseIIFirstLayer_false D αU hαU
+  fun ⟨αU, hαU⟩ ↦ caseIIFirstLayer_false D αU hαU
 
 end BernoulliRegular.FLT37.Eichler
 
