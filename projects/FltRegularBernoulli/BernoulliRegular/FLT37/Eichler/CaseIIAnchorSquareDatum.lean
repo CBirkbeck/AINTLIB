@@ -76,7 +76,7 @@ It imports only; it does **not** modify any existing file.
 
 noncomputable section
 
-open NumberField NumberField.IsCMField IsCyclotomicExtension UniqueFactorizationMonoid Polynomial
+open NumberField NumberField.IsCMField IsCyclotomicExtension
 open scoped nonZeroDivisors
 
 namespace BernoulliRegular.FLT37.Eichler
@@ -119,7 +119,7 @@ theorem caseII_anchorPow_conjNorm_real_span
       Ideal.span ({w} : Set (𝓞 (CyclotomicField 37 ℚ))) =
         aEtaZeroDvdPPow (by decide : (37 : ℕ) ≠ 2) D.hζ D.equation D.hy ^ k := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  set 𝔞₀ := aEtaZeroDvdPPow (by decide : (37 : ℕ) ≠ 2) D.hζ D.equation D.hy with h𝔞₀_def
+  set 𝔞₀ := aEtaZeroDvdPPow (by decide : (37 : ℕ) ≠ 2) D.hζ D.equation D.hy
   -- The principal anchor power `𝔞₀^{k'}` with generator `ρ₀`.
   obtain ⟨k', hk', hprinc⟩ := caseII_exists_anchor_pow_isPrincipal D
   obtain ⟨ρ₀, hρ₀⟩ := hprinc.principal
@@ -131,7 +131,7 @@ theorem caseII_anchorPow_conjNorm_real_span
       caseII_map_a_eta_zero D (by decide : (37 : ℕ) ≠ 2)]
   -- `span {ρ₀·σρ₀} = span {ρ₀}·span {σρ₀} = 𝔞₀^{k'}·𝔞₀^{k'} = 𝔞₀^{2k'}`.
   have hspan : Ideal.span ({ρ₀ * σ ρ₀} : Set (𝓞 (CyclotomicField 37 ℚ))) = 𝔞₀ ^ (2 * k') := by
-    rw [← Ideal.span_singleton_mul_span_singleton, ← hρ₀', hσspan, ← pow_add]; ring_nf
+    rw [← Ideal.span_singleton_mul_span_singleton, ← hρ₀', hσspan, ← pow_add, two_mul]
   refine ⟨ρ₀ * σ ρ₀, 2 * k', by omega, ?_, ?_, hspan⟩
   · -- reality: σ(ρ₀·σρ₀) = σρ₀·ρ₀ = ρ₀·σρ₀
     rw [map_mul, ringOfIntegersComplexConj_apply_apply, mul_comm]
