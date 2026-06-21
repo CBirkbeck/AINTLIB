@@ -65,7 +65,7 @@ theorem fltCaseI_factor_decomposition_of_regular
         (algebraMap (𝓞 (K⁺)) (𝓞 K) v_plus) * γ ^ p :=
   fltCaseI_factor_eq_zeta_pow_mul_real_unit_mul_pow_of_regular
     hp_two hp_odd h_reg heq hc hab
-    (fun _j hj => fltCaseI_factor_ne_zero (K := K) hp_odd heq hc hab hj) hk
+    (fun _j hj ↦ fltCaseI_factor_ne_zero (K := K) hp_odd heq hc hab hj) hk
 
 /-- **Order-2 Taylor of the σ-conjugate factor.** For `k ≤ p` and `p ≥ 3`,
 `a + ζ^{p-k} b ≡ (a+b) - b·k·(ζ-1) (mod (ζ-1)^2)`. The `b·(p-k)` linear
