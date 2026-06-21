@@ -10,9 +10,6 @@ import PadicLFunctions.Measure.Functoriality
 import PadicLFunctions.Iwasawa.CarrierBridge
 import PadicLFunctions.Iwasawa.CarrierBridgeConcrete
 import PadicLFunctions.Iwasawa.GPlusDecomp
-import PadicLFunctions.IwasawaProof.CharIdealConjunct
-import PadicLFunctions.IwasawaProof.Capstone
-import PadicLFunctions.IwasawaProof.CapstoneConcrete
 import PadicLFunctions.Measure.FiniteProduct
 import PadicLFunctions.KubotaLeopoldt.ZetaValues
 import PadicLFunctions.KubotaLeopoldt.ZetaValuesComplex
@@ -67,12 +64,7 @@ import PadicLFunctions.IwasawaProof.FundamentalSequence
 import PadicLFunctions.IwasawaProof.Generators
 import PadicLFunctions.IwasawaProof.Main
 import PadicLFunctions.IwasawaProof.TowerDensity
-import PadicLFunctions.IwasawaProof.Galois.ClassFieldTheory
-import PadicLFunctions.IwasawaProof.Galois.Modules
-import PadicLFunctions.IwasawaProof.Galois.Coinvariants
 import PadicLFunctions.IwasawaProof.Galois.Bridge
-import PadicLFunctions.IwasawaProof.Galois.Sequence
-import PadicLFunctions.IwasawaProof.MainConjecture
 
 /-!
 # p-adic L-functions
