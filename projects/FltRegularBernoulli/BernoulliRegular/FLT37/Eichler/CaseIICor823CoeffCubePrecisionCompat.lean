@@ -1,7 +1,5 @@
 import BernoulliRegular.FLT37.Eichler.CaseIICor823ThirdOrderCoeff
 
-set_option linter.style.longLine false
-
 /-!
 # Precision compatibility of the mod-`p³` and mod-`p²` Dwork-coordinate functionals
 
