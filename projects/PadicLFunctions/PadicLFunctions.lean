@@ -58,6 +58,7 @@ import PadicLFunctions.Iwasawa.StructureTheory.StructureTheorem
 import PadicLFunctions.Iwasawa.StructureTheory.CharIdeal
 import PadicLFunctions.Iwasawa.StructureTheory.CharIdealQuotient
 import PadicLFunctions.Iwasawa.StructureTheory.CharIdealGroupQuotient
+import PadicLFunctions.Iwasawa.StructureTheory.Completeness
 import PadicLFunctions.Iwasawa.StructureTheory.Isotypic
 import PadicLFunctions.IwasawaProof.GaloisAction
 import PadicLFunctions.IwasawaProof.LogDerivative
