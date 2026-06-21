@@ -127,7 +127,13 @@ theorem exists_valuation_extension_of_prime_over
     {Γ : Type*} [LinearOrderedCommGroupWithZero Γ] (s : Valuation R Γ)
     (q' : Ideal S) [q'.IsPrime] (hq' : Ideal.comap (algebraMap R S) q' = s.supp) :
     ∃ (Γ' : Type*) (_ : LinearOrderedCommGroupWithZero Γ') (t : Valuation S Γ'),
-      s.IsEquiv (Valuation.comap (algebraMap R S) t) :=
+      s.IsEquiv (Valuation.comap (algebraMap R S) t) := by
+  -- Step 1: `s` descends to a valuation on the domain `R ⧸ supp s` (Chevalley, ring case).
+  haveI : (s.supp).IsPrime := inferInstance
+  let sQuot : Valuation (R ⧸ s.supp) Γ := s.onQuot le_rfl
+  -- Steps 2-4 (T-L4-EXT): embed `R⧸supp ↪ Frac` and `S⧸q' ↪ Frac` compatibly (via `hq'`), extend
+  -- `sQuot`'s valuation ring across the field extension (`LocalSubring.exists_le_valuationSubring`),
+  -- and `comap` the resulting valuation of `S` back; `hq'` makes the square commute.
   sorry
 
 set_option linter.unusedSectionVars false in
