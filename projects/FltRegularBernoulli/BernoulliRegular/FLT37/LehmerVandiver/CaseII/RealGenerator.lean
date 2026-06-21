@@ -182,7 +182,7 @@ theorem caseII_isCoprime_comap_int37 {m : ℕ} (D : RealCaseIIData37 K m) (hp : 
   set I := rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy η *
     rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy (caseII_etaInv η) with hI
   have hI_stable : I.map σ = I := D.map_rootIdeal_mul_conj hp η
-  have hinv : ∀ x : 𝓞 K, σ (σ x) = x := fun x => by
+  have hinv : ∀ x : 𝓞 K, σ (σ x) = x := fun x ↦ by
     apply RingOfIntegers.ext
     simp only [hσ, RingEquiv.toRingHom_eq_coe, RingHom.coe_coe, AlgEquiv.coe_ringEquiv,
       NumberField.IsCMField.coe_ringOfIntegersComplexConj,
@@ -373,7 +373,7 @@ theorem caseII_sigma_stable_anchored_real_frac_mul {m : ℕ} (D : RealCaseIIData
             rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy (caseII_etaInv D.etaZero) :
           Ideal (𝓞 K)) : FractionalIdeal (𝓞 K)⁰ K) := by
   have hint := caseII_sigma_stable_anchored_real_identity D hp η hJ hJ0 hxy
-  have h := congrArg (fun I : Ideal (𝓞 K) => (↑I : FractionalIdeal (𝓞 K)⁰ K)) hint
+  have h := congrArg (fun I : Ideal (𝓞 K) ↦ (↑I : FractionalIdeal (𝓞 K)⁰ K)) hint
   simpa only [FractionalIdeal.coeIdeal_mul, FractionalIdeal.coeIdeal_span_singleton] using h
 
 end BernoulliRegular.FLT37.LehmerVandiver.CaseII
