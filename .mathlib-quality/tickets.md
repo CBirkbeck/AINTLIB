@@ -518,6 +518,14 @@ Wedhorn Prop 7.41 (p.66, `wedhorn.txt:3438`); "height 1" ⟺ `MulArchimedean` va
   - ✅ HU-b LANDED axiom-clean (commit 6a187cf): general lemma `not_isUnit_invSelf_of_not_isIntegral`
     — x not integral over R ⟹ `IsLocalization.Away.invSelf x` non-unit in `adjoin R {x⁻¹}` (via
     `isIntegral_of_isIntegral_adjoin_of_mul_eq_one` + `IsLocalization.Away.isIntegral_of_isIntegral_map`).
+  - ✅ **T-L4-EXT (Chevalley ring extension) steps 1-4 WIRED + T-L4-EXT-FIELD place extension PROVEN
+    axiom-clean** (2026-06-21). T-L4-EXT = 1 sorry: the IsEquiv chase, **perf-blocked** at `he2`
+    (`extendToLocalization` on the heavy `FractionRing F`). **FIX (turnkey, safe — nothing calls
+    T-L4-EXT yet)**: reformulate T-L4-EXT to take `F`, `L` as `IsFractionRing`-generic PARAMETERS —
+    `(F : Type*) [Field F] [Algebra (R ⧸ s.supp) F] [IsFractionRing (R ⧸ s.supp) F]`,
+    `(L : Type uS) [Field L] [Algebra (S ⧸ q') L] [IsFractionRing (S ⧸ q') L]` — drop the `let
+    F`/`let L`; with `F` opaque, `extendToLocalization`/`he2` stay light and the (already-written)
+    chase compiles. Caller (HU-d) provides `F := FractionRing (R ⧸ s.supp)`, `L := FractionRing (S ⧸ q')`.
   - ⏳ REMAINING construction (HU-c/d/e), exact next steps:
     1. Concrete scaffold in mem_plus: `letI : Algebra ↥B⁺ B := B⁺.toAlgebra`; `Bx := Localization.Away x`;
        `letI : Algebra ↥B⁺ Bx`, `[IsScalarTower ↥B⁺ B Bx]`; apply HU-b → `invSelf x` non-unit in `adjoin ↥B⁺ {x⁻¹}`.
@@ -679,7 +687,15 @@ prime of `R[x⁻¹]`) — a further sub-step (going-up/structure of the localiza
 ---
 
 ### [T-L4-EXT-FIELD] Field-case place extension (sub-ticket of T-L4-EXT)
-- **Status**: 🔵 OPEN — **Parent**: T-L4-EXT. Spawned 2026-06-21 (/beastmode Tier-A). The classical
+- **Status**: ✅ **DONE** (2026-06-21) — `exists_comap_isEquiv_of_field_hom` PROVEN axiom-clean
+  (lean_verify: [propext, Classical.choice, Quot.sound], no sorryAx). Construction:
+  `LocalSubring.map ι v.valuationSubring.toLocalSubring` → `LocalSubring.exists_le_valuationSubring` →
+  `V`, `w := V.valuation`; IsEquiv via `isEquiv_iff_valuationSubring` + `(comap ι w).valuationSubring
+  = V.comap ι` + the contraction `V.comap ι = v.valuationSubring` (`le_antisymm` via
+  `isMax_toLocalSubring` + `LocalSubring.le_def`; the IsLocalHom domination transfer via
+  `isUnit_iff_exists_inv` + `mul_left_cancel₀` + ι-injective pullback from `hV`). A genuine
+  formalization of Chevalley's place-extension theorem for fields (not constructively in mathlib).
+- **Status (was)**: 🔵 OPEN — **Parent**: T-L4-EXT. Spawned 2026-06-21 (/beastmode Tier-A). The classical
   place-extension theorem (a valuation on a field extends along a field homomorphism). mathlib has
   the `Valuation.HasExtension` predicate but no constructive existence (confirmed via leansearch).
 - **File**: FaithfulLocLift.lean. **Type**: theorem.
@@ -699,6 +715,16 @@ prime of `R[x⁻¹]`) — a further sub-step (going-up/structure of the localiza
   `ValuationSubring.valuation`, `ValuationSubring.integer_valuation`, the `LocalSubring ≤`=domination
   order, `Valuation.isEquiv_iff` via valuation subring equality (`ValuationSubring.valuation` IsEquiv).
 - **Generality**: stated for general fields `F`, `L` (reusable).
+- **Progress** (2026-06-21 /beastmode): construction + IsEquiv reduction LANDED (commits up to the
+  contraction). `exists_comap_isEquiv_of_field_hom` now bottoms at **ONE sorry**: the IsLocalHom
+  (domination) goal `IsLocalHom (Subring.inclusion hsubF)` (`hsubF : O.toSubring ≤ (V.comap ι).toSubring`,
+  `O := v.valuationSubring.toLocalSubring`). **Turnkey argument** (from `hV` via
+  `LocalSubring.le_def.mp hV = ⟨hsub_L, hlocal_L⟩`, `hlocal_L : IsLocalHom (incl_L : ι(O) ↪ V)`):
+  `refine ⟨fun a ha => ?_⟩`; from `ha : IsUnit (incl a)` get `(↑a)⁻¹ ∈ V.comap ι` ⟹ `(ι ↑a)⁻¹ = ι((↑a)⁻¹) ∈ V`;
+  with `ι ↑a ∈ ι(O) ⊆ V` (`hsub_L`) ⟹ `ι ↑a` is a unit in `V`; the element `⟨ι ↑a, _⟩ : ↥ι(O)` maps
+  to it, so `hlocal_L` ⟹ `ι ↑a` unit in `ι(O)` ⟹ `(ι ↑a)⁻¹ = ι((↑a)⁻¹) ∈ ι(O)` ⟹ `(↑a)⁻¹ ∈ O`
+  (ι injective) ⟹ `IsUnit a`. ⚠ ~35 lines of subring-coercion unit-chasing (`Subring.equivMapOfInjective`,
+  `Units`, `LocalSubring.map_toSubring`); the only remaining FaithfulLocLift field-lemma piece.
 
 ---
 
