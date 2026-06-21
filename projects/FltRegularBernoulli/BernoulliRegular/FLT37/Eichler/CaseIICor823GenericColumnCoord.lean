@@ -236,7 +236,7 @@ theorem genericColumnSumReprValue
             e a • concreteKummerLogVector (p := 37) (K := CyclotomicField 37 ℚ) (by norm_num) a)
         from rfl]
     rw [map_sum]
-    refine Finset.sum_congr rfl (fun a _ => ?_)
+    refine Finset.sum_congr rfl (fun a _ ↦ ?_)
     rw [map_zsmul]
     rfl
   -- (1) `repr S idx` → `λ`-adic `evalₐ` coordinate (the proven `ϖ ↔ λ` bridge on `S`, then `hScoe`).
@@ -245,7 +245,7 @@ theorem genericColumnSumReprValue
   rw [map_sum, valuedLambdaQuotientDworkCoeffModSq_sum]
   -- (3) Factor the common `F` out of the sum, rewriting each per-column coordinate by `hCol`.
   rw [Finset.mul_sum]
-  refine Finset.sum_congr rfl (fun a _ha => ?_)
+  refine Finset.sum_congr rfl (fun a _ha ↦ ?_)
   rw [map_zsmul]
   rw [show (e a • AdicCompletion.evalₐ (lambdaIdeal 37 (CyclotomicField 37 ℚ)) (2 * (37 - 1))
         (kummerLogCompletedColumn (p := 37) (K := CyclotomicField 37 ℚ) (by decide) a)) =
@@ -337,7 +337,7 @@ theorem cor823Omega32SecondOrderCollapse37_of_genericReprSum
             e a • concreteKummerLogVector (p := 37) (K := CyclotomicField 37 ℚ) (by norm_num) a)
         from rfl]
     rw [map_sum]
-    refine Finset.sum_congr rfl (fun a _ => ?_)
+    refine Finset.sum_congr rfl (fun a _ ↦ ?_)
     rw [map_zsmul]
     rfl
   have hcompletedLog_eq :
@@ -393,7 +393,7 @@ theorem cor823Omega32SecondOrderCollapse37_of_genericReprSum
   have h15val : ((15 : Fin (kummerLogRank 37)) : ℕ) = 15 := rfl
   have hmulVec_eq :
       (vandermondeTeichmullerEvenSubOneMatrix (p := 37) (by norm_num)).mulVec
-          (fun a : Fin (kummerLogRank 37) => (e a : ZMod 37)) (15 : Fin (kummerLogRank 37)) =
+          (fun a : Fin (kummerLogRank 37) ↦ (e a : ZMod 37)) (15 : Fin (kummerLogRank 37)) =
         ∑ a : Fin (kummerLogRank 37),
           (((((a : ℕ) + 2 : ℕ) : ZMod 37) ^ 2) ^ ((15 : ℕ) + 1) - 1) * ((e a : ℤ) : ZMod 37) := by
     rw [Matrix.mulVec]
@@ -401,9 +401,9 @@ theorem cor823Omega32SecondOrderCollapse37_of_genericReprSum
       kummerLogColumnIndex, BernoulliRegular.CPlusGeneratorIndex, h15val]
   have hV₁₅cast : (ZMod.castHom (by norm_num : (37 : ℕ) ∣ 37 ^ 2) (ZMod 37)) V₁₅ =
       (vandermondeTeichmullerEvenSubOneMatrix (p := 37) (by norm_num)).mulVec
-        (fun a : Fin (kummerLogRank 37) => (e a : ZMod 37)) (15 : Fin (kummerLogRank 37)) := by
+        (fun a : Fin (kummerLogRank 37) ↦ (e a : ZMod 37)) (15 : Fin (kummerLogRank 37)) := by
     rw [hmulVec_eq, hV₁₅, map_sum]
-    refine Finset.sum_congr rfl (fun a _ => ?_)
+    refine Finset.sum_congr rfl (fun a _ ↦ ?_)
     rw [map_mul, map_sub, map_one, map_pow, map_pow, map_natCast, map_intCast]
   rw [hV₁₅cast] at hcast0
   -- (10) `(V·ē)_15 = 9 · decomp (∑ e_a g_a) 15`, `9 ≠ 0`.
