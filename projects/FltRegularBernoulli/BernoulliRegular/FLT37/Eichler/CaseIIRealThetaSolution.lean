@@ -194,14 +194,14 @@ theorem caseII_etaInv_etaOne_notMem_pair
         D.hζ.unit'.1 * (D.hζ.unit'.1 ^ 35 - 1) from by ring]
     refine mul_ne_zero (hprim.ne_zero (by decide)) ?_
     rw [sub_ne_zero]
-    exact fun h => hprim.pow_ne_one_of_pos_of_lt (by decide) (by decide) h
+    exact fun h ↦ hprim.pow_ne_one_of_pos_of_lt (by decide) (by decide) h
   · -- ζ^36 ≠ ζ²: else ζ^34 = 1, contradicting order 37.
     rw [← Subtype.coe_injective.ne_iff, h_inv, h_two, Ne, ← sub_eq_zero,
       show (D.hζ.unit'.1 : 𝓞 K) ^ 36 - D.hζ.unit'.1 ^ 2 =
         D.hζ.unit'.1 ^ 2 * (D.hζ.unit'.1 ^ 34 - 1) from by ring]
     refine mul_ne_zero (pow_ne_zero _ (hprim.ne_zero (by decide))) ?_
     rw [sub_ne_zero]
-    exact fun h => hprim.pow_ne_one_of_pos_of_lt (by decide) (by decide) h
+    exact fun h ↦ hprim.pow_ne_one_of_pos_of_lt (by decide) (by decide) h
 
 /-! ### 2′. The σ-swap structure at the inversion-symmetric root pair (the genuine obstruction)
 
