@@ -307,6 +307,131 @@ private theorem isPowerBounded_of_tendsto_of_powerBounded
   · -- (L^k - (f N)^k) * v ∈ J' ⊆ J
     exact hJ'J (J'.mul_mem_right _ (hLk k))
 
+/-- `(p : A) ^ m` is power-bounded, using the perfectoid factorization `p = c · ϖ^p`
+with `c` and `ϖ` power-bounded. -/
+private theorem isPowerBounded_p_pow {p : ℕ}
+    (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
+    [IsLinearTopology A A] {ϖ c : A} (hϖ_pb : IsPowerBounded ϖ) (hc_pb : IsPowerBounded c)
+    (hpc : (p : A) = c * ϖ ^ p) (m : ℕ) : IsPowerBounded ((p : A) ^ m) := by
+  rw [hpc, mul_pow]
+  exact isPowerBounded_mul ((powerBoundedSubring.toSubring A).pow_mem hc_pb m)
+    ((powerBoundedSubring.toSubring A).pow_mem
+      ((powerBoundedSubring.toSubring A).pow_mem hϖ_pb p) m)
+
+/-- **Smallness of `p`-power multiples.** In a uniform ring with linear topology, if `ϖ`
+is a topologically nilpotent power-bounded element with `p = c · ϖ^p` (`c` power-bounded),
+then for every neighborhood `W` of `0` there is a threshold `M` past which `(p : A) ^ j` times
+*any* power-bounded element lands in `W`. This is the common engine behind the Cauchy estimates
+for both the original sequence and its telescoping partial sums. -/
+private theorem mul_p_pow_eventually_mem_nhds {p : ℕ} (hp_pos : 0 < p)
+    (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
+    [UniformSpace A] [IsLinearTopology A A] [IsUniform A] {ϖ c : A}
+    (hϖ_tn : IsTopologicallyNilpotent ϖ) (hc_pb : IsPowerBounded c)
+    (hpc : (p : A) = c * ϖ ^ p) {W : Set A} (hW : W ∈ nhds (0 : A)) :
+    ∃ M, ∀ a : A, IsPowerBounded a → ∀ j, M ≤ j → (p : A) ^ j * a ∈ W := by
+  obtain ⟨V, hV, hAV⟩ := IsUniform.isBounded_powerBounded (A := A) W hW
+  obtain ⟨J, hJopen, hJV⟩ :=
+    (IsLinearTopology.hasBasis_open_ideal (R := A)).mem_iff.mp hV
+  obtain ⟨M, hM⟩ :=
+    (isTopologicallyNilpotent_pow hϖ_tn hp_pos).exists_pow_mem_of_mem_nhds
+      (hJopen.mem_nhds J.zero_mem)
+  refine ⟨M, fun a ha j hj ↦ ?_⟩
+  have hϖpj : (ϖ ^ p) ^ j ∈ V := by
+    apply hJV
+    rw [show (ϖ ^ p) ^ j = (ϖ ^ p) ^ (j - M) * (ϖ ^ p) ^ M by
+      rw [← pow_add, Nat.sub_add_cancel hj]]
+    exact J.mul_mem_left _ hM
+  have hcj_pb : IsPowerBounded (c ^ j * a) :=
+    isPowerBounded_mul ((powerBoundedSubring.toSubring A).pow_mem hc_pb j) ha
+  rw [show (p : A) ^ j * a = c ^ j * a * (ϖ ^ p) ^ j by rw [hpc]; ring]
+  exact hAV (Set.mul_mem_mul hcj_pb hϖpj)
+
+/-- **Cauchy from eventually-small symmetric differences.** A sequence `g` whose differences
+`g m - g n` lie in any neighborhood of `0` once both indices pass a threshold (uniformly) is
+Cauchy in the uniform-space structure on `A`. The smallness is phrased in the given ring
+topology and transported across `htop`. -/
+private theorem cauchySeq_of_sub_eventually_mem_nhds
+    (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
+    [UniformSpace A] [IsLinearTopology A A] [IsUniformAddGroup A] {g : ℕ → A}
+    (htop : ‹UniformSpace A›.toTopologicalSpace = ‹TopologicalSpace A›)
+    (hsym : ∀ W ∈ nhds (0 : A), ∃ N, ∀ m n, N ≤ m → N ≤ n → g m - g n ∈ W) :
+    CauchySeq g := by
+  rw [CauchySeq, IsUniformAddGroup.cauchy_map_iff_tendsto_swapped]
+  refine ⟨Filter.atTop_neBot, ?_⟩
+  rw [Filter.Tendsto, Filter.map_le_iff_le_comap]
+  intro U hU
+  obtain ⟨W, hW, hWU⟩ := Filter.mem_comap.mp hU
+  rw [htop] at hW
+  obtain ⟨N, hN⟩ := hsym W hW
+  rw [Filter.prod_atTop_atTop_eq, Filter.mem_atTop_sets]
+  exact ⟨(N, N), fun ⟨m, n⟩ ⟨hm, hn⟩ ↦ hWU (hN n m hn hm)⟩
+
+/-- **Cauchyness of partial sums with eventually-small terms.** Let `S n N = ∑_{j < N} t n j`
+be the partial sums of a doubly-indexed family `t`. If every term `t n j` lies in any
+neighborhood of `0` once `j` is large enough (uniformly in `n`), then for each `n` the
+sequence `N ↦ S n N` is Cauchy. A difference of partial sums is a sum over an `Finset.Ico`
+interval whose indices all exceed the smallness threshold, hence lands in an open ideal
+`⊆ W` (open ideals being closed under finite sums and negation); the result then follows from
+`cauchySeq_of_sub_eventually_mem_nhds`. -/
+private theorem cauchySeq_partialSum_of_term_eventually_mem_nhds
+    (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
+    [UniformSpace A] [IsLinearTopology A A] [IsUniformAddGroup A]
+    {S : ℕ → ℕ → A} {t : ℕ → ℕ → A}
+    (hS : ∀ n N, S n N = ∑ j ∈ Finset.range N, t n j)
+    (htop : ‹UniformSpace A›.toTopologicalSpace = ‹TopologicalSpace A›)
+    (hsmall : ∀ W ∈ nhds (0 : A), ∃ M, ∀ n j, M ≤ j → t n j ∈ W) (n : ℕ) :
+    CauchySeq (S n) := by
+  refine cauchySeq_of_sub_eventually_mem_nhds A htop (fun W hW ↦ ?_)
+  -- Pick an open ideal K ⊆ W (K is closed under finite sums and negation).
+  obtain ⟨K, hKopen, hKW⟩ :=
+    (IsLinearTopology.hasBasis_open_ideal (R := A)).mem_iff.mp hW
+  obtain ⟨M, hM⟩ := hsmall (K : Set A) (hKopen.mem_nhds K.zero_mem)
+  -- Every `Finset.Ico` sum above the threshold lands in `K ⊆ W`.
+  have hsub : ∀ a b, M ≤ a → a ≤ b → ∑ j ∈ Finset.Ico a b, t n j ∈ (K : Set A) :=
+    fun a b ha _ ↦ Submodule.sum_mem _ fun j hj ↦ hM n j (le_trans ha (Finset.mem_Ico.mp hj).1)
+  refine ⟨M, fun N₂ N₁ hN₂ hN₁ ↦ ?_⟩
+  rcases le_total N₂ N₁ with h | h
+  · -- S n N₂ - S n N₁ = -(Σ Ico N₂ N₁)
+    have heq := Finset.sum_range_add_sum_Ico (fun j ↦ t n j) h
+    have hS_diff : S n N₁ - S n N₂ = ∑ j ∈ Finset.Ico N₂ N₁, t n j := by
+      simp only [hS]; rw [← heq]; ring
+    rw [show S n N₂ - S n N₁ = -(S n N₁ - S n N₂) from by ring, hS_diff]
+    exact hKW (K.neg_mem (hsub N₂ N₁ hN₂ h))
+  · -- S n N₂ - S n N₁ = Σ Ico N₁ N₂
+    have heq := Finset.sum_range_add_sum_Ico (fun j ↦ t n j) h
+    have hS_diff : S n N₂ - S n N₁ = ∑ j ∈ Finset.Ico N₁ N₂, t n j := by
+      simp only [hS]; rw [← heq]; ring
+    rw [hS_diff]; exact hKW (hsub N₁ N₂ hN₁ h)
+
+/-- **Telescoping identity.** If consecutive differences of `a` factor as
+`a k - a (k+1) = (p : A)^k · b k`, then `(p : A)^n` times the partial sum
+`∑_{j < N} (p : A)^j · b (n+j)` collapses to `a n - a (n+N)`. -/
+private theorem p_pow_mul_partialSum_eq_sub {p : ℕ}
+    {A : Type u} [CommRing A] {a b : ℕ → A}
+    (hab : ∀ k, a k - a (k + 1) = (p : A) ^ k * b k) (n N : ℕ) :
+    (p : A) ^ n * ∑ j ∈ Finset.range N, (p : A) ^ j * b (n + j) = a n - a (n + N) := by
+  induction N with
+  | zero => simp
+  | succ N ih =>
+    rw [Finset.sum_range_succ, mul_add, ih]
+    have h2 : (p : A) ^ n * ((p : A) ^ N * b (n + N)) = (p : A) ^ (n + N) * b (n + N) := by
+      rw [pow_add]; ring
+    rw [h2, ← hab (n + N), show n + (N + 1) = n + N + 1 from by omega]; ring
+
+/-- **Passing the telescoping identity to the limit.** Fix `c, x : A`. If the partial sums
+`s N` converge to `ls`, the tails `r N` converge to `lr`, and `c · s N = x - r N` for all `N`,
+then `c · ls = x - lr`. This is limit-uniqueness for `N ↦ c · s N`, continuous in `s`. -/
+private theorem mul_lim_eq_sub_of_telescope
+    {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A] [T2Space A]
+    {s r : ℕ → A} {ls lr c x : A} (hs : Filter.Tendsto s Filter.atTop (nhds ls))
+    (hr : Filter.Tendsto r Filter.atTop (nhds lr)) (htel : ∀ N, c * s N = x - r N) :
+    c * ls = x - lr := by
+  have hlhs : Filter.Tendsto (fun N ↦ c * s N) Filter.atTop (nhds (c * ls)) :=
+    (continuous_const.mul continuous_id).continuousAt.tendsto.comp hs
+  have hrhs : Filter.Tendsto (fun N ↦ x - r N) Filter.atTop (nhds (x - lr)) := hr.const_sub x
+  rw [show (fun N ↦ c * s N) = fun N ↦ x - r N from funext htel] at hlhs
+  exact tendsto_nhds_unique hlhs hrhs
+
 /-- **IsPrecomplete**: `p`-adic Cauchy sequences in `A°` converge.
 
 The proof proceeds in four steps:
@@ -340,53 +465,25 @@ private theorem isPrecomplete_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
     intro m n hmn
     obtain ⟨y, hy⟩ := hf_div m n hmn
     exact ⟨y, by have := congr_arg (Subtype.val) hy; push_cast at this ⊢; exact this.symm⟩
-  -- Step 2: Show (f n : A) is Cauchy in A
-  -- For any U ∈ 𝓤 A, we need: ∃ N, ∀ m n ≥ N, (f m, f n) ∈ U
-  -- We use: (f n : A) - (f m : A) = p^m * y = (c * ϖ^p)^m * y = (c^m * y) * ϖ^{mp}
-  -- For large m, this is small since A° is bounded and ϖ^{mp} → 0.
-  -- Key: show the difference is in any nhds 0 for large m
+  -- Step 2: Show (f n : A) is Cauchy in A.
+  -- Since `(f m : A) - (f n : A) = p^m * y` for power-bounded `y` (Step 1b), the smallness
+  -- engine `mul_p_pow_eventually_mem_nhds` puts the difference in any nhds of 0 for large `m`.
   have hf_small : ∀ W ∈ nhds (0 : A), ∃ N, ∀ m n, N ≤ m → m ≤ n →
       (f m : A) - (f n : A) ∈ W := by
     intro W hW
-    obtain ⟨V, hV, hAV⟩ :=
-      IsUniform.isBounded_powerBounded (A := A) W hW
-    have hϖp_tn : IsTopologicallyNilpotent ((ϖ.val : A) ^ p) := by
-      rw [IsTopologicallyNilpotent]; simp_rw [← pow_mul]
-      exact ϖ.property.comp
-        (Filter.tendsto_atTop_atTop_of_monotone (fun _ _ h ↦ Nat.mul_le_mul_left p h)
-          fun b ↦ ⟨b, Nat.le_mul_of_pos_left _ hp_pos⟩)
-    have hcn_pb : ∀ m : ℕ, IsPowerBounded (c ^ m) := by
-      intro m; induction m with
-      | zero => simpa using isPowerBounded_one
-      | succ k ih => simpa [pow_succ] using isPowerBounded_mul ih hc_pb
-    -- Pick open ideal J ⊆ V with (ϖ^p)^N ∈ J
-    obtain ⟨J, hJopen, hJV⟩ :=
-      (IsLinearTopology.hasBasis_open_ideal (R := A)).mem_iff.mp hV
-    obtain ⟨N, hN⟩ := hϖp_tn.exists_pow_mem_of_mem_nhds (hJopen.mem_nhds J.zero_mem)
+    obtain ⟨N, hN⟩ :=
+      mul_p_pow_eventually_mem_nhds hp_pos A ϖ.isTopologicallyNilpotent hc_pb hpc hW
     refine ⟨N, fun m n hNm hmn ↦ ?_⟩
     obtain ⟨y, hy⟩ := hf_divA m n hmn
-    have hcy_pb : IsPowerBounded (c ^ m * (y : A)) :=
-      isPowerBounded_mul (hcn_pb m) y.property
-    have hϖm : ((ϖ.val : A) ^ p) ^ m ∈ V := by
-      apply hJV
-      rw [show ((ϖ.val : A) ^ p) ^ m = ((ϖ.val : A) ^ p) ^ (m - N) * ((ϖ.val : A) ^ p) ^ N by
-        rw [← pow_add, Nat.sub_add_cancel hNm]]
-      exact J.mul_mem_left _ hN
-    have : (f m : A) - (f n : A) = c ^ m * (y : A) * ((ϖ.val : A) ^ p) ^ m := by
-      rw [← hy, hpc]; ring
-    rw [this]; exact hAV (Set.mul_mem_mul hcy_pb hϖm)
-  -- Step 3: Show CauchySeq and get limit
+    rw [← hy]; exact hN (y : A) y.property m hNm
+  -- Step 3: Show CauchySeq and get limit.
   haveI : IsUniformAddGroup A := IsPerfectoidRing.uniformAddGroup (p := p) (A := A)
   have htop := IsPerfectoidRing.topologyEq (p := p) (A := A)
-  -- Convert hf_small to use uniform-space nhds (needed for CauchySeq)
-  have hf_unif : ∀ W ∈ @nhds A ‹UniformSpace A›.toTopologicalSpace 0,
-      ∃ N, ∀ m n, N ≤ m → m ≤ n → (f m : A) - (f n : A) ∈ W := by
-    intro W hW; rw [htop] at hW; exact hf_small W hW
-  -- Symmetric version
-  have hf_sym : ∀ W ∈ @nhds A ‹UniformSpace A›.toTopologicalSpace 0,
-      ∃ N, ∀ m n, N ≤ m → N ≤ n → (f m : A) - (f n : A) ∈ W := by
+  -- Symmetrize `hf_small`: an open ideal is closed under negation, so the one-sided estimate
+  -- extends to all `m, n ≥ N`.
+  have hf_sym : ∀ W ∈ nhds (0 : A), ∃ N, ∀ m n, N ≤ m → N ≤ n →
+      (f m : A) - (f n : A) ∈ W := by
     intro W hW
-    rw [htop] at hW
     obtain ⟨J, hJopen, hJW⟩ :=
       (IsLinearTopology.hasBasis_open_ideal (R := A)).mem_iff.mp hW
     obtain ⟨N, hN⟩ := hf_small (J : Set A) (hJopen.mem_nhds J.zero_mem)
@@ -395,16 +492,9 @@ private theorem isPrecomplete_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
       · exact hJW (hN m n hm hmn)
       · rw [show (f m : A) - (f n : A) = -((f n : A) - (f m : A)) from by ring]
         exact hJW (J.neg_mem (hN n m hn hmn))⟩
-  -- CauchySeq
-  have hCauchy : CauchySeq (fun n ↦ (f n : A)) := by
-    rw [CauchySeq, IsUniformAddGroup.cauchy_map_iff_tendsto_swapped]
-    refine ⟨Filter.atTop_neBot, ?_⟩
-    rw [Filter.Tendsto, Filter.map_le_iff_le_comap]
-    intro U hU
-    obtain ⟨W, hW, hWU⟩ := Filter.mem_comap.mp hU
-    obtain ⟨N, hN⟩ := hf_sym W hW
-    rw [Filter.prod_atTop_atTop_eq, Filter.mem_atTop_sets]
-    exact ⟨(N, N), fun ⟨m, n⟩ ⟨hm, hn⟩ ↦ hWU (hN n m hn hm)⟩
+  -- The coerced sequence is Cauchy in A.
+  have hCauchy : CauchySeq (fun n ↦ (f n : A)) :=
+    cauchySeq_of_sub_eventually_mem_nhds A htop hf_sym
   -- Get limit from CompleteSpace
   obtain ⟨L, hL⟩ := cauchySeq_tendsto_of_complete hCauchy
   -- Convert hL to use the given topology
@@ -421,108 +511,32 @@ private theorem isPrecomplete_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
   -- Define partial sums in A: S(n, N) = Σ_{j<N} p^j * d(n+j)
   let S : ℕ → ℕ → A := fun n N ↦
     ∑ j ∈ Finset.range N, (p : A) ^ j * (d (n + j) : A)
-  -- Telescoping identity: p^n * S(n, N) = (f n : A) - (f(n+N) : A)
-  -- Coercion of hd to A
+  -- Telescoping identity p^n * S(n, N) = (f n : A) - (f(n+N) : A), from the coerced differences.
   have hd_val : ∀ k, (f k : A) - (f (k + 1) : A) = (p : A) ^ k * (d k : A) := by
     intro k; exact_mod_cast congr_arg (Subtype.val) (hd k)
-  have htelescope : ∀ n N, (p : A) ^ n * S n N = (f n : A) - (f (n + N) : A) := by
-    intro n N; induction N with
-    | zero => simp [S]
-    | succ N ih =>
-      -- S n (N+1) = S n N + p^N * d(n+N)
-      have hS_succ : S n (N + 1) = S n N + (p : A) ^ N * (d (n + N) : A) := by
-        simp [S, Finset.sum_range_succ]
-      rw [hS_succ, mul_add, ih]
-      have h1 := hd_val (n + N)
-      have h2 : (p : A) ^ n * ((p : A) ^ N * (d (n + N) : A)) =
-          (p : A) ^ (n + N) * (d (n + N) : A) := by rw [pow_add]; ring
-      rw [h2, ← h1, show n + (N + 1) = n + N + 1 from by omega]; ring
-  -- p^m is power-bounded for all m (since p = c * ϖ^p and c, ϖ are PB)
-  have hcn_pb' : ∀ m : ℕ, IsPowerBounded (c ^ m) := by
-    intro m; induction m with
-    | zero => simpa using isPowerBounded_one
-    | succ k ih => simpa [pow_succ] using isPowerBounded_mul ih hc_pb
-  have hpn_pb : ∀ m : ℕ, IsPowerBounded ((p : A) ^ m) := by
-    intro m; rw [show (p : A) = c * ((ϖ.val : A) ^ p) from hpc, mul_pow]
-    exact isPowerBounded_mul (hcn_pb' m)
-      ((powerBoundedSubring.toSubring A).pow_mem
-        ((powerBoundedSubring.toSubring A).pow_mem hϖ_pb p) m)
-  -- Each partial sum S(n, N) is power-bounded
+  have htelescope : ∀ n N, (p : A) ^ n * S n N = (f n : A) - (f (n + N) : A) :=
+    fun n N ↦ p_pow_mul_partialSum_eq_sub hd_val n N
+  -- Each partial sum S(n, N) is power-bounded.
   have hS_pb : ∀ n N, IsPowerBounded (S n N) := by
     intro n N; induction N with
     | zero => simp only [S, Finset.sum_range_zero]; exact isPowerBounded_zero
     | succ N ih =>
       simp only [S, Finset.sum_range_succ]
-      exact isPowerBounded_add ih (isPowerBounded_mul (hpn_pb N) (d (n + N)).property)
-  -- ϖ^p is topologically nilpotent
-  have hϖp_tn : IsTopologicallyNilpotent ((ϖ.val : A) ^ p) := by
-    rw [IsTopologicallyNilpotent]; simp_rw [← pow_mul]
-    exact ϖ.property.comp
-      (Filter.tendsto_atTop_atTop_of_monotone (fun _ _ h ↦ Nat.mul_le_mul_left p h)
-        fun b ↦ ⟨b, Nat.le_mul_of_pos_left _ hp_pos⟩)
-  -- Key lemma: each term p^j * d(n+j) is in any open ideal for large j.
-  -- p^j * d(n+j) = (c^j * d(n+j)) * (ϖ^p)^j ∈ A° * {small} ⊆ any nhd of 0.
+      exact isPowerBounded_add ih
+        (isPowerBounded_mul (isPowerBounded_p_pow A hϖ_pb hc_pb hpc N) (d (n + N)).property)
+  -- Each term `p^j * d(n+j)` is in any neighborhood of 0 for large `j` (smallness engine).
   have hterm_small : ∀ W ∈ nhds (0 : A), ∃ M, ∀ n j, M ≤ j →
       (p : A) ^ j * (d (n + j) : A) ∈ W := by
     intro W hW
-    obtain ⟨V, hV, hAV⟩ := IsUniform.isBounded_powerBounded (A := A) W hW
-    obtain ⟨J, hJopen, hJV⟩ :=
-      (IsLinearTopology.hasBasis_open_ideal (R := A)).mem_iff.mp hV
-    obtain ⟨M, hM⟩ := hϖp_tn.exists_pow_mem_of_mem_nhds (hJopen.mem_nhds J.zero_mem)
-    exact ⟨M, fun n j hj ↦ by
-      have hϖpj : ((ϖ.val : A) ^ p) ^ j ∈ V := by
-        apply hJV
-        rw [show ((ϖ.val : A) ^ p) ^ j =
-          ((ϖ.val : A) ^ p) ^ (j - M) * ((ϖ.val : A) ^ p) ^ M by
-          rw [← pow_add, Nat.sub_add_cancel hj]]
-        exact J.mul_mem_left _ hM
-      have : (p : A) ^ j * (d (n + j) : A) =
-          (c ^ j * (d (n + j) : A)) * ((ϖ.val : A) ^ p) ^ j := by rw [hpc]; ring
-      rw [this]
-      exact hAV (Set.mul_mem_mul (isPowerBounded_mul (hcn_pb' j) (d (n + j)).property)
-        hϖpj)⟩
-  -- S(n, ·) is Cauchy: use open ideals (closed under finite sums and negation).
+    obtain ⟨M, hM⟩ :=
+      mul_p_pow_eventually_mem_nhds hp_pos A ϖ.isTopologicallyNilpotent hc_pb hpc hW
+    exact ⟨M, fun n j hj ↦ hM (d (n + j) : A) (d (n + j)).property j hj⟩
+  -- The partial sums S(n, ·) form a Cauchy sequence.
   have hS_cauchy_unif : ∀ n, CauchySeq (S n) := by
-    intro n
     haveI : IsUniformAddGroup A := IsPerfectoidRing.uniformAddGroup (p := p) (A := A)
-    rw [CauchySeq, IsUniformAddGroup.cauchy_map_iff_tendsto_swapped]
-    refine ⟨Filter.atTop_neBot, ?_⟩
-    rw [Filter.Tendsto, Filter.map_le_iff_le_comap]
-    intro U hU
-    obtain ⟨W, hW, hWU⟩ := Filter.mem_comap.mp hU
-    rw [htop] at hW
-    -- Pick open ideal K ⊆ W (K is closed under finite sums)
-    obtain ⟨K, hKopen, hKW⟩ :=
-      (IsLinearTopology.hasBasis_open_ideal (R := A)).mem_iff.mp hW
-    obtain ⟨M, hM⟩ := hterm_small (K : Set A) (hKopen.mem_nhds K.zero_mem)
-    rw [Filter.prod_atTop_atTop_eq, Filter.mem_atTop_sets]
-    refine ⟨(M, M), fun ⟨N₂, N₁⟩ ⟨hN₂, hN₁⟩ ↦ ?_⟩
-    -- Need: (N₂, N₁) ∈ (fun p => S n p.2 - S n p.1) ⁻¹' W
-    apply hWU; change S n N₁ - S n N₂ ∈ W
-    -- Use the Ico sum and show it lands in K ⊆ W.
-    -- Helper: sum over Ico lands in K for any a ≤ b with M ≤ a.
-    suffices hsub : ∀ a b, M ≤ a → a ≤ b →
-        ∑ j ∈ Finset.Ico a b, (p : A) ^ j * (d (n + j) : A) ∈ (K : Set A) from by
-      rcases le_total N₁ N₂ with h | h
-      · -- S n N₁ - S n N₂ = -(Σ Ico N₁ N₂)
-        have heq := Finset.sum_range_add_sum_Ico
-          (fun j ↦ (p : A) ^ j * (d (n + j) : A)) h
-        have hS_diff : S n N₂ - S n N₁ =
-            ∑ j ∈ Finset.Ico N₁ N₂, (p : A) ^ j * (d (n + j) : A) := by
-          simp only [S]; rw [← heq]; ring
-        rw [show S n N₁ - S n N₂ = -(S n N₂ - S n N₁) from by ring, hS_diff]
-        exact hKW (K.neg_mem (hsub N₁ N₂ hN₁ h))
-      · -- S n N₁ - S n N₂ = Σ Ico N₂ N₁
-        have heq := Finset.sum_range_add_sum_Ico
-          (fun j ↦ (p : A) ^ j * (d (n + j) : A)) h
-        have hS_diff : S n N₁ - S n N₂ =
-            ∑ j ∈ Finset.Ico N₂ N₁, (p : A) ^ j * (d (n + j) : A) := by
-          simp only [S]; rw [← heq]; ring
-        rw [hS_diff]; exact hKW (hsub N₂ N₁ hN₂ h)
-    -- Prove the sub-result: Σ Ico a b ∈ K
-    intro a b ha hab
-    exact Submodule.sum_mem _ fun j hj ↦
-      hM n j (le_trans ha (Finset.mem_Ico.mp hj).1)
+    exact fun n ↦ cauchySeq_partialSum_of_term_eventually_mem_nhds A
+      (S := S) (t := fun n j ↦ (p : A) ^ j * (d (n + j) : A))
+      (hS := fun _ _ ↦ rfl) (htop := htop) (hsmall := hterm_small) n
   -- Get limits of S(n, ·) from CompleteSpace
   have hS_lim : ∀ n, ∃ sn : A, Filter.Tendsto (S n) Filter.atTop
       (@nhds A ‹UniformSpace A›.toTopologicalSpace sn) := by
@@ -534,22 +548,12 @@ private theorem isPrecomplete_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
   -- Each sn is power-bounded (limit of PB sequence)
   have hsn_pb : ∀ n, IsPowerBounded (sn n) := by
     intro n; exact isPowerBounded_of_tendsto_of_powerBounded (fun N ↦ hS_pb n N) (hsn' n)
-  -- p^n * sn(n) = (f n : A) - L, by continuity of multiplication by p^n
-  have hpn_sn : ∀ n, (p : A) ^ n * sn n = (f n : A) - L := by
-    intro n
-    -- p^n * S(n, N) = (f n : A) - (f(n+N) : A) and S(n,N) → sn(n), f(n+N) → L
-    have hlhs : Filter.Tendsto (fun N ↦ (p : A) ^ n * S n N) Filter.atTop
-        (@nhds A ‹TopologicalSpace A› ((p : A) ^ n * sn n)) :=
-      (continuous_const.mul continuous_id).continuousAt.tendsto.comp (hsn' n)
-    have hrhs : Filter.Tendsto (fun N ↦ (f n : A) - (f (n + N) : A)) Filter.atTop
-        (@nhds A ‹TopologicalSpace A› ((f n : A) - L)) := by
-      apply Filter.Tendsto.const_sub
-      exact hL'.comp (Filter.tendsto_atTop_atTop_of_monotone
-        (fun _ _ h ↦ Nat.add_le_add_left h n) fun b ↦ ⟨b, Nat.le_add_left b n⟩)
-    have heq : (fun N ↦ (p : A) ^ n * S n N) = fun N ↦ (f n : A) - (f (n + N) : A) := by
-      ext N; exact htelescope n N
-    rw [heq] at hlhs
-    exact tendsto_nhds_unique hlhs hrhs
+  -- p^n * sn(n) = (f n : A) - L, by passing the telescoping identity to the limit.
+  have hpn_sn : ∀ n, (p : A) ^ n * sn n = (f n : A) - L := fun n ↦
+    mul_lim_eq_sub_of_telescope (hsn' n)
+      (hL'.comp (Filter.tendsto_atTop_atTop_of_monotone
+        (fun _ _ h ↦ Nat.add_le_add_left h n) fun b ↦ ⟨b, Nat.le_add_left b n⟩))
+      (htelescope n)
   -- Construct the limit in A° and verify SModEq
   refine ⟨⟨L, hL_pb⟩, fun n ↦ ?_⟩
   rw [SModEq.sub_mem]
