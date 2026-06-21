@@ -65,29 +65,6 @@ theorem caseI_factor_idealSpan_eq_pow
           Set (𝓞 (CyclotomicField p ℚ))) = I ^ p :=
   FltRegular.exists_ideal hp5 heq hgcd hcaseI hζ
 
-/-- **Case I factor ideal class is `p`-torsion.** Corollary: the class
-`[Ideal.span {a + ζ b}] ∈ ClassGroup (𝓞 K)` has order dividing `p`. (In
-fact it is principal — trivial — but the class of the `p`-th-root ideal
-`I` from the above is non-trivial in general; that class is what
-captures the case-I obstruction.)
-
-This formulation is convenient downstream: rather than referring to the
-`p`-th-root ideal `I`, we expose the existence of an ideal `I` with
-`[I]^p = 1` in the class group, which is the input to the
-Stickelberger-eigenspace analysis. -/
-theorem caseI_factor_classGroup_p_torsion
-    {p : ℕ} [Fact p.Prime] (hp5 : 5 ≤ p)
-    {a b c : ℤ} (heq : a ^ p + b ^ p = c ^ p)
-    (hgcd : ({a, b, c} : Finset ℤ).gcd id = 1)
-    (hcaseI : ¬ (p : ℤ) ∣ a * b * c)
-    {ζ : 𝓞 (CyclotomicField p ℚ)}
-    (hζ : ζ ∈ nthRootsFinset p (1 : 𝓞 (CyclotomicField p ℚ))) :
-    ∃ I : Ideal (𝓞 (CyclotomicField p ℚ)),
-      Ideal.span ({(a : 𝓞 (CyclotomicField p ℚ)) + ζ *
-        (b : 𝓞 (CyclotomicField p ℚ))} :
-          Set (𝓞 (CyclotomicField p ℚ))) = I ^ p :=
-  caseI_factor_idealSpan_eq_pow hp5 heq hgcd hcaseI hζ
-
 end CaseI
 
 end LehmerVandiver
