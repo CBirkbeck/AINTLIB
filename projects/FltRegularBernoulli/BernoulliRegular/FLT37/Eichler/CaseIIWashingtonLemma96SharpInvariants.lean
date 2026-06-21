@@ -130,12 +130,10 @@ def caseII_descended_realData
   have hinside : ω ^ 37 + θ ^ 37 =
       (ε' : 𝓞 (CyclotomicField 37 ℚ)) *
         ((ζspec.toInteger - 1) ^ ((2 * m - 1) + 1) * z') ^ 37 := by
-    rw [hequation]
-    -- `Λ = −ζ³⁶·(ζ−1)²`, so `Λ^{2e−1} = (−ζ³⁶)^{2e−1}·(ζ−1)^{2(2e−1)}`.
-    rw [freeContentPackaging_Lambda_eq ζspec, mul_pow, ← pow_mul]
-    rw [hε'_def, Units.val_mul, Units.val_pow_eq_pow_val, hη36u_val]
-    -- `2·(2e−1) = 37·(2m)` and `(2m−1)+1 = 2m`, so `(ζ−1)^{2(2e−1)}·z'³⁷ = ((ζ−1)^{2m}·z')³⁷`.
-    rw [mul_pow, ← pow_mul]
+    -- `Λ = −ζ³⁶·(ζ−1)²` gives `Λ^{2e−1} = (−ζ³⁶)^{2e−1}·(ζ−1)^{2(2e−1)}`; and
+    -- `2·(2e−1) = 37·((2m−1)+1)`, so `(ζ−1)^{2(2e−1)}·z'³⁷ = ((ζ−1)^{2m}·z')³⁷`.
+    rw [hequation, freeContentPackaging_Lambda_eq ζspec, mul_pow, ← pow_mul, hε'_def,
+      Units.val_mul, Units.val_pow_eq_pow_val, hη36u_val, mul_pow, ← pow_mul]
     have hexp : 2 * (2 * e - 1) = 37 * (((2 * m - 1) + 1)) := by omega
     rw [hexp]
     ring
