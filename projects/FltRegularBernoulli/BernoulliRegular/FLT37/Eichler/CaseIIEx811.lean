@@ -309,7 +309,7 @@ theorem leadingExponentEigenCollapse37_of_bridge
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
     (hVan : CompletedLogVanishingThroughLevel36_37)
     (hBridge : LeadingExponentBridge37) :
-    LeadingExponentEigenCollapse37 := fun u hu j hj =>
+    LeadingExponentEigenCollapse37 := fun u hu j hj ↦
   hBridge u (hVan u hu) j hj
 
 /-- **`LeadingExponentEigenCollapse37`** (proven, modulo the two named structural inputs).
