@@ -109,10 +109,8 @@ theorem unit_notMem_lehmerVandiverPrime
     ((u : (𝓞 (CyclotomicField p ℚ))ˣ) : 𝓞 (CyclotomicField p ℚ)) ∉
       FLT37.lehmerVandiverPrime p ℓ k hℓ ht_coprime ht_ne := by
   intro hmem
-  have hunit : IsUnit ((u : (𝓞 (CyclotomicField p ℚ))ˣ) :
-      𝓞 (CyclotomicField p ℚ)) := u.isUnit
   have htop := (FLT37.lehmerVandiverPrime p ℓ k hℓ ht_coprime ht_ne).eq_top_of_isUnit_mem
-    hmem hunit
+    hmem u.isUnit
   exact (FLT37.lehmerVandiverPrime_isPrime p ℓ k hℓ ht_coprime ht_ne).ne_top htop
 
 /-! ## 2. The reusable Thm-9.5 detection criterion (element-agnostic) -/
