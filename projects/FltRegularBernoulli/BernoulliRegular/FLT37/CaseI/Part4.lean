@@ -382,9 +382,6 @@ theorem fltCaseI_taylor_coefficient_match_of_regular
         (v_plus : 𝓞 (NumberField.maximalRealSubfield K))) =
       (algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K))
         (v_plus : 𝓞 (NumberField.maximalRealSubfield K)) := by
-    change ringOfIntegersComplexConj K
-        ((algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K))
-          (v_plus : 𝓞 (NumberField.maximalRealSubfield K))) = _
     rw [IsScalarTower.algebraMap_apply
       (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K),
       AlgEquiv.commutes]
@@ -429,11 +426,8 @@ theorem fltCaseI_taylor_coefficient_match_of_regular
   -- Need: ζ^m · V · γ^p - (RHS) = z³ · (α·V·γ^p + (...)·β)
   have h_zeta_m_eq : ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ m =
       1 + (m : 𝓞 K) * z + (m.choose 2 : 𝓞 K) * z^2 + z^3 * α := by
-    show ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ m =
-      1 + (m : 𝓞 K) * z + (m.choose 2 : 𝓞 K) * z^2 + z^3 * α
     linear_combination hα
   have h_v_gamma_eq : V * γ ^ p = (V₀ : 𝓞 K) * (M : 𝓞 K) + z^2 * w' + z^3 * β := by
-    show V * γ ^ p = (V₀ : 𝓞 K) * (M : 𝓞 K) + z^2 * w' + z^3 * β
     linear_combination hβ
   rw [show
     ((ζcu ^ m : (𝓞 K)ˣ) : 𝓞 K) * V * γ^p =
