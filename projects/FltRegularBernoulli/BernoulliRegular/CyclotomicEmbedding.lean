@@ -308,7 +308,7 @@ theorem gaussSum_ideal_mul_inv_eq_span_p
   -- Helper: equality in 𝒪_L reduces to equality on underlying L-values,
   -- and multiplication/negation distribute through the subring coercion.
   have embed_val : ∀ x : NumberField.RingOfIntegers L,
-      stickelbergerEmbedding p L (x : L) = (stickelbergerEmbedding p L).toRingHom x := fun _ => rfl
+      stickelbergerEmbedding p L (x : L) = (stickelbergerEmbedding p L).toRingHom x := fun _ ↦ rfl
   -- Compute `emb((p : 𝒪_L) : L) = (p : ℂ)`.
   have h_emb_p : stickelbergerEmbedding p L ((pL : NumberField.RingOfIntegers L) : L) =
       (p : ℂ) := by
