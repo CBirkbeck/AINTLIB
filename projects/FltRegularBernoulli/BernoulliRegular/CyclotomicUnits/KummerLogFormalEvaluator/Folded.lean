@@ -63,7 +63,7 @@ theorem quotient_mk_valuedIntegerCyclotomicEquiv_dworkParameterNormalizedCoordAp
       ← quotient_mk_scaledDworkParameterNormalizedApprox_eq_evalIntegralPowerSeriesMod
         (p := p) (K := K) (a : ZMod p) N] at h
     simpa [I, e] using h
-  have hcoord := congrArg (fun z =>
+  have hcoord := congrArg (fun z ↦
       z - (1 : ValuedIntegerRing p K ⧸ I ^ (N + 1))) hnormalized
   simpa [I, e, dworkParameterNormalizedCoordApprox,
     scaledDworkParameterNormalizedCoordApprox, map_sub] using hcoord
