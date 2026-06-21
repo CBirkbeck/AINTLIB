@@ -236,7 +236,7 @@ theorem prop812SecondOrderCoeff37_of_columnCoeff
             e a • concreteKummerLogVector (p := 37) (K := CyclotomicField 37 ℚ) (by norm_num) a)
         from rfl]
     rw [map_sum]
-    refine Finset.sum_congr rfl (fun a _ => ?_)
+    refine Finset.sum_congr rfl (fun a _ ↦ ?_)
     rw [map_zsmul]
     rfl
   -- (1) Goal left side `repr S idx` → `λ`-adic `evalₐ` coordinate (the proven `ϖ ↔ λ` bridge on
@@ -249,7 +249,7 @@ theorem prop812SecondOrderCoeff37_of_columnCoeff
   -- (3) Factor the common Bernoulli factor out of the sum, identifying each per-column `evalₐ`
   --     coordinate — via the single-column bridge — with the `repr` coordinate `hCol` controls.
   rw [Finset.mul_sum]
-  refine Finset.sum_congr rfl (fun a _ha => ?_)
+  refine Finset.sum_congr rfl (fun a _ha ↦ ?_)
   rw [map_zsmul]
   rw [show (e a • AdicCompletion.evalₐ (lambdaIdeal 37 (CyclotomicField 37 ℚ)) (2 * (37 - 1))
         (kummerLogCompletedColumn (p := 37) (K := CyclotomicField 37 ℚ) (by decide) a)) =
