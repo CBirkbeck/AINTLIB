@@ -404,11 +404,16 @@ theorem caseIICor823_exists_real_eq_of_dvd
     ∃ v : (𝓞 (NumberField.maximalRealSubfield (CyclotomicField 37 ℚ)))ˣ,
       η = Units.map (algebraMap (𝓞 (NumberField.maximalRealSubfield (CyclotomicField 37 ℚ)))
         (𝓞 (CyclotomicField 37 ℚ))).toMonoidHom v := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  haveI hp : Fact (Nat.Prime 37) := ⟨by decide⟩
   -- Prop 1.5: `η = ζU^m · map v`, `v` real.
   obtain ⟨m, v, hmv⟩ :=
     FLT37.exists_zeta_pow_mul_real_eq_unit (p := 37) (K := CyclotomicField 37 ℚ) (by norm_num) η
-  set ζU : (𝓞 (CyclotomicField 37 ℚ))ˣ := (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).unit' with hζU
+  -- Bind `ζU` to the *exact* unfolded form `hmv` uses (the `.unit` of the `IsUnit`
+  -- of `ζ`, with the same `hp.1.ne_zero` argument as `exists_zeta_pow_mul_real_eq_unit`),
+  -- so that `set` folds `hmv` and the later `rw [hmv]` rewrites land.
+  set ζU : (𝓞 (CyclotomicField 37 ℚ))ˣ :=
+    ((zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger_isPrimitiveRoot.isUnit
+      hp.1.ne_zero).unit with hζU
   set mapv : (𝓞 (CyclotomicField 37 ℚ))ˣ :=
     Units.map (algebraMap (𝓞 (NumberField.maximalRealSubfield (CyclotomicField 37 ℚ)))
       (𝓞 (CyclotomicField 37 ℚ))).toMonoidHom v with hmapv
@@ -418,8 +423,9 @@ theorem caseIICor823_exists_real_eq_of_dvd
       ⟨v, rfl⟩
   -- `σ(ζU) = ζU⁻¹`.
   have hζtor : ζU ∈ NumberField.Units.torsion (CyclotomicField 37 ℚ) :=
-    (CommGroup.mem_torsion _ _).2 (isOfFinOrder_iff_pow_eq_one.2
-      ⟨37, by norm_num, (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).unit'_pow⟩)
+    (CommGroup.mem_torsion _).2 (isOfFinOrder_iff_pow_eq_one.2
+      ⟨37, by norm_num, ((zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger_isPrimitiveRoot.isUnit_unit
+        hp.1.ne_zero).pow_eq_one⟩)
   have hσζ : NumberField.IsCMField.unitsComplexConj (CyclotomicField 37 ℚ) ζU = ζU⁻¹ :=
     NumberField.IsCMField.unitsComplexConj_torsion (K := CyclotomicField 37 ℚ) ⟨ζU, hζtor⟩
   -- `σ(η) = ζU⁻ᵐ · mapv`, so `η · σ(η)⁻¹ = ζU^{2m}`.
@@ -493,7 +499,8 @@ theorem caseIICor823_exists_real_eq_of_dvd
     set y : (𝓞 (CyclotomicField 37 ℚ))ˣ := ζU ^ m with hy
     have h37 : y ^ 37 = 1 := by
       rw [hy, ← pow_mul, mul_comm, pow_mul, hζU,
-        (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).unit'_pow, one_pow]
+        ((zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger_isPrimitiveRoot.isUnit_unit
+          hp.1.ne_zero).pow_eq_one, one_pow]
     have hsplit : y = y ^ 37 * ((y ^ 2) ^ 18)⁻¹ := by
       rw [eq_mul_inv_iff_mul_eq, ← pow_mul]
       nth_rewrite 1 [← pow_one y]
