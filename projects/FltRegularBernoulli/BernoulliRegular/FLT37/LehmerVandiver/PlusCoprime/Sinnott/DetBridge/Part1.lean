@@ -56,7 +56,6 @@ theorem card_kplus_ne_w₀_eq
   rw [h_eq, h_card_compl]
   omega
 
-set_option backward.isDefEq.respectTransparency false in
 open Classical in
 /-- **`regOfFamily² = 2^(p-3) · det(A-B)²` in ℝ**. -/
 theorem regOfFamily_sq_eq_two_pow_mul_det_A_sub_B_sq
@@ -91,7 +90,6 @@ theorem regOfFamily_sq_eq_two_pow_mul_det_A_sub_B_sq
   rcases h_p_odd with ⟨k, hk⟩
   omega
 
-set_option backward.isDefEq.respectTransparency false in
 open Classical in
 /-- **`RegOfFamilySqEqProdNontrivialQeSq` from `DetASubBSqEqProdNontrivialQeSq`**:
 the corrected squared form follows from the substantive matrix-level
@@ -125,7 +123,6 @@ shifted-convolution submatrix `U = sinnottShiftedConvolutionMatrix`.
 Apply mathlib's `Matrix.det_add_replicateCol_mul_replicateRow` under
 `SinnottConvolutionMatrixDetUnit` (i.e., `IsUnit (U.det)`). -/
 
-set_option backward.isDefEq.respectTransparency false in
 open Classical in
 /-- **Matrix-level rank-1 form of `(A - B)`**: cast to ℂ, the matrix
 `(A - B)` equals `U + replicateCol PUnit.{1} (-1) * replicateRow PUnit.{1} v`
@@ -153,11 +150,9 @@ theorem sinnottMatrix_A_sub_B_as_replicateCol_replicateRow_perturbation
     (sinnottMatrix_A_sub_B_eq_U_sub_rank_one (p := p) K hp_odd hp_three) i) w
   simp only [Matrix.of_apply, Matrix.add_apply, Matrix.mul_apply,
     Matrix.replicateCol_apply, Matrix.replicateRow_apply]
-  rw [h_app]
-  rw [Fintype.sum_unique]
+  rw [h_app, Fintype.sum_unique]
   ring
 
-set_option backward.isDefEq.respectTransparency false in
 open Classical in
 /-- **Matrix determinant lemma for `(A − B)`**: under
 `SinnottConvolutionMatrixDetUnit`, the determinant of `(A − B)` (cast
@@ -239,7 +234,6 @@ def DetUMulScalarSqEqProdNontrivialQeSq
       (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ)).erase 1,
     quotientEigenvalue p ξ) ^ 2
 
-set_option backward.isDefEq.respectTransparency false in
 open Classical in
 /-- **`DetASubBSqEqProdNontrivialQeSq` from `DetUMulScalarSqEqProdNontrivialQeSq`**:
 under `SinnottConvolutionMatrixDetUnit` (the IsUnit hypothesis allowing
@@ -272,7 +266,6 @@ theorem detASubBSqEqProdNontrivialQeSq_of_detUMulScalar_named
     (p := p) K hp_odd hp_three hU
   -- Goal: (((det(A - B) : ℝ)) : ℂ)² = (∏ qe)²
   -- h_det: det((A - B) cast to ℂ as 2D matrix) = det(U) · scalar
-  -- Use Complex.ofRealHom.det_map to cast.
   have h_cast_det : (((sinnottMatrixA p K - sinnottMatrixB p K).det : ℝ) : ℂ) =
       (Matrix.of fun (i : {w : NumberField.InfinitePlace
             (NumberField.maximalRealSubfield K) //
@@ -282,8 +275,8 @@ theorem detASubBSqEqProdNontrivialQeSq_of_detUMulScalar_named
             w ≠ NumberField.Units.dirichletUnitTheorem.w₀}) =>
         (((sinnottMatrixA p K - sinnottMatrixB p K) i w : ℝ) : ℂ)).det := by
     rw [show (((sinnottMatrixA p K - sinnottMatrixB p K).det : ℝ) : ℂ) =
-        Complex.ofRealHom (sinnottMatrixA p K - sinnottMatrixB p K).det from rfl]
-    rw [Complex.ofRealHom.map_det]
+        Complex.ofRealHom (sinnottMatrixA p K - sinnottMatrixB p K).det from rfl,
+      Complex.ofRealHom.map_det]
     rfl
   rw [h_cast_det, h_det, h]
 
@@ -322,7 +315,6 @@ theorem rank_one_scalar_correction_explicit
   rw [Finset.sum_comm]
   ring
 
-set_option backward.isDefEq.respectTransparency false in
 open Classical in
 /-- **`det(A - B)` in explicit Frobenius-style form** (combining the
 matrix det lemma application with the scalar simplification):
@@ -361,8 +353,8 @@ theorem det_sinnottMatrix_A_sub_B_explicit
               w ≠ NumberField.Units.dirichletUnitTheorem.w₀},
             sinnottRankOnePerturbationVec p K w *
               (sinnottShiftedConvolutionMatrix p K hp_odd hp_three)⁻¹ w w') := by
-  rw [det_sinnottMatrix_A_sub_B_via_rank_one (p := p) K hp_odd hp_three hU]
-  rw [rank_one_scalar_correction_explicit (p := p) K hp_odd hp_three]
+  rw [det_sinnottMatrix_A_sub_B_via_rank_one (p := p) K hp_odd hp_three hU,
+    rank_one_scalar_correction_explicit (p := p) K hp_odd hp_three]
 
 /-! ## Reduction of squared content to linear form
 
@@ -441,9 +433,6 @@ substantive identity can be proven directly without going through U.
 Hence `SinnottConvolutionMatrixDetUnit` may not be needed in the discharge
 of `DetASubBEqProdNontrivialQe`. -/
 
-set_option maxHeartbeats 6400000 in
--- The determinant bridge expands several matrix identities and exceeds the default heartbeat budget.
-set_option backward.isDefEq.respectTransparency false in
 open Classical in
 /-- **PF-1 (`KummerDirichletDeterminant`) from substantive Sinnott identity**:
 the complete chain `DetASubBEqProdNontrivialQe → KummerDirichletDeterminant`
@@ -486,7 +475,6 @@ noncomputable def charMatrix_K_plus
         w ≠ NumberField.Units.dirichletUnitTheorem.w₀} ℂ :=
   Matrix.of fun ξ w => ξ (kplusEmbeddingIndexQuotient (p := p) K w.val)
 
-set_option backward.isDefEq.respectTransparency false in
 open Classical in
 /-- **Character action on `(A − B)` matrix-level identity** (eigenvalue form):
 the matrix product `charMatrix_K_plus · ((A − B) cast to ℂ)^T` has explicit
@@ -554,7 +542,6 @@ where:
 - `row(i) = corr(i) = M_even[k(w₀), q(famIdx i)] - M_even[k(w₀), 1]`.
 
 This is a clean rank-1 perturbation structure, suitable for matrix det
-open Classical in
 lemma application restricted to ξ ≠ 1. -/
 
 open Classical in
@@ -618,7 +605,6 @@ noncomputable def sinnottCorrectionRowVec
       (kplusEmbeddingIndexQuotient (p := p) K
         NumberField.Units.dirichletUnitTheorem.w₀) 1
 
-set_option backward.isDefEq.respectTransparency false in
 open Classical in
 /-- **Rank-1 decomposition of `charMatrix · (A − B)^T`**:
 
@@ -689,7 +675,6 @@ noncomputable def sinnottDiagonalEigenvalueMatrix_nontriv
         (familyIndexAsUnit p K hp_odd hp_three i))⁻¹ - 1) *
       quotientEigenvalue p ξ.val
 
-set_option backward.isDefEq.respectTransparency false in
 open Classical in
 /-- **Rank-1 decomposition restricted to ξ ≠ 1**:
 
@@ -799,7 +784,6 @@ noncomputable def equivNontrivCharKplusNeW₀
         w ≠ NumberField.Units.dirichletUnitTheorem.w₀} := by
   refine Fintype.equivOfCardEq ?_
   classical
-  -- Use card_nontriv_mulChar_eq with the right instance.
   have h := card_nontriv_mulChar_eq_card_kplus_ne_w₀ p K hp_two
   convert h
 
@@ -841,7 +825,6 @@ noncomputable def sinnottDiagonalEigenvalueMatrix_nontriv_sq
   (sinnottDiagonalEigenvalueMatrix_nontriv p K hp_odd hp_three).submatrix
     (equivNontrivCharKplusNeW₀ p K hp_two).symm id
 
-set_option backward.isDefEq.respectTransparency false in
 open Classical in
 /-- **Reindexed rank-1 decomposition**:
 
@@ -887,7 +870,6 @@ theorem charMatrix_nontriv_sq_mul_A_sub_B_transpose_eq_D_nontriv_sq_sub_rank_one
     sinnottDiagonalEigenvalueMatrix_nontriv, sinnottCorrectionColVec,
     sinnottCorrectionRowVec]
   -- Goal: ∑_x (xi.val(k(x.val)) * (A-B)[i, x]) = D[xi, i] - col*row
-  -- This matches sum_char_sinnottMatrix_A_sub_B_eigenvalue.
   exact sum_char_sinnottMatrix_A_sub_B_eigenvalue (p := p) K hp_odd hp_three
     hp_two ((equivNontrivCharKplusNeW₀ p K hp_two).symm w).val i
 
