@@ -244,7 +244,7 @@ theorem caseII_gammaA_ratio_eq_correctedRadical
     rw [Ne, map_eq_zero_iff _ hinj]; intro h; exact hγ (h ▸ lv149.zero_mem)
   have hσγ0 : AM σγ ≠ 0 := by
     rw [Ne, map_eq_zero_iff _ hinj]; intro h; exact hσγ (h ▸ lv149.zero_mem)
-  have hmaj : ¬ (37 : ℤ) ∣ (-a) := fun hd => ha (by simpa using (dvd_neg.mpr hd))
+  have hmaj : ¬ (37 : ℤ) ∣ (-a) := fun hd ↦ ha (by simpa using (dvd_neg.mpr hd))
   -- Map the integer specs into `K` (with `D.y * ζ` commuted to `ζ * D.y`).
   have hγK : AM (D.x + D.y * zetaPow 37 (CyclotomicField 37 ℚ) a) =
       AM (1 - zetaPow 37 (CyclotomicField 37 ℚ) a) * AM γ := by
@@ -401,7 +401,7 @@ theorem caseII_gammaA_ratio_isPthPower
     apply hinj; rw [map_pow, hδ, hδK37]
   -- Mod `lv149`: `Q(δ)^{37} = Q(γ)·Q(σγ)^{36}`.
   set Q := Ideal.Quotient.mk lv149 with hQ
-  have hQσγ0 : Q σγ ≠ 0 := fun h => hσγ ((Ideal.Quotient.eq_zero_iff_mem).mp h)
+  have hQσγ0 : Q σγ ≠ 0 := fun h ↦ hσγ ((Ideal.Quotient.eq_zero_iff_mem).mp h)
   refine ⟨Q δ * (Q σγ)⁻¹, ?_⟩
   have hQδ37 : (Q δ) ^ 37 = Q γ * (Q σγ) ^ 36 := by
     rw [← map_pow, hδ37, map_mul, map_pow]
