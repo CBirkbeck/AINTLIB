@@ -42,8 +42,6 @@ theorem isUnramifiedAt_of_not_over_37
   have hP_ne : P ≠ ⊥ := by
     intro h
     exact hp_ne (by rw [hP_lies.over, h, Ideal.under_bot])
-  -- `K = ℚ(ζ₃₇)` is unramified over `ℚ` at the rational prime under `P` (which is `≠ 37`,
-  -- since `37 ∉ p` ⟹ `P` does not lie over `37`, and `discr K` is a power of `37`).
   -- [II1-C-DISCR]: `K = ℚ(ζ₃₇)` is unramified over `ℚ` at the rational prime under `P`. The prime
   -- is `≠ 37` (since `37 ∉ p` ⟹ `P` does not lie over `37`) and `discr K = ± 37^{35}`, so the prime
   -- does not divide `discr K`; conclude via `NumberField.not_dvd_discr_iff_forall_mem`.
