@@ -1,1 +1,1 @@
-FOCUS: isotypicIdempotent_sum_eq_one (general completeness ∑e_ω=1) DONE. Next: instantiate for Δ (HasEnoughRootsOfUnity ℤ_[p] (exponent Δ) via divisor of p-1) to fully discharge the char-ideal half hcomplete.
+FOCUS: completeness discharged in capstone_concrete (hcomplete removed). Remaining bundled: CFT + §12 only (+ 2 dischargeable instance hyps). Major milestone.

@@ -396,6 +396,29 @@ instance instHasEnoughRootsOfUnity : HasEnoughRootsOfUnity ℤ_[p] (p - 1) := by
   haveI : NeZero (p - 1) := ⟨Nat.sub_ne_zero_of_lt hp.out.one_lt⟩
   exact ⟨PadicInt.exists_primitiveRoot_card_sub_one p, rootsOfUnity.isCyclic ℤ_[p] (p - 1)⟩
 
+/-- The exponent of `Δ` divides `p − 1`: every element `[t]` of `Δ = μ_{p−1}/⟨-1⟩` satisfies
+`[t]^{p−1} = [t^{p−1}] = [1] = 1`, since `t ∈ μ_{p−1}` (`teichmullerFun_pow_card_sub_one`). -/
+theorem exponent_Delta_dvd (hp2 : p ≠ 2) : Monoid.exponent (Delta p hp2) ∣ (p - 1) := by
+  apply Monoid.exponent_dvd_of_forall_pow_eq_one
+  intro x
+  induction x using QuotientGroup.induction_on with
+  | _ t =>
+    rw [← QuotientGroup.mk_pow, QuotientGroup.eq_one_iff]
+    have ht : t ^ (p - 1) = 1 := by
+      apply Subtype.ext; apply Units.ext
+      rw [SubmonoidClass.coe_pow, Subgroup.coe_one, Units.val_one, Units.val_pow_eq_pow_val]
+      obtain ⟨u, hu⟩ := t.2
+      rw [← hu, teichmuller_coe]
+      exact teichmullerFun_pow_card_sub_one p u
+    rw [ht]; exact one_mem _
+
+/-- `ℤ_[p]` has enough roots of unity of order `exponent Δ` (divisor of `p − 1`,
+`exponent_Delta_dvd`), the precise hypothesis of the isotypic completeness `∑_ω e_ω = 1` over `Δ`. -/
+instance instHasEnoughRootsOfUnityExponentDelta (hp2 : p ≠ 2) :
+    HasEnoughRootsOfUnity ℤ_[p] (Monoid.exponent (Delta p hp2)) := by
+  haveI : NeZero (p - 1) := ⟨Nat.sub_ne_zero_of_lt hp.out.one_lt⟩
+  exact HasEnoughRootsOfUnity.of_dvd ℤ_[p] (exponent_Delta_dvd p hp2)
+
 /-- Under `unitsSplitEquiv`, `-1 ↦ (negOneT, 1)` — it lives purely in the `μ_{p−1}` factor. -/
 theorem unitsSplitEquiv_neg_one (hp2 : p ≠ 2) :
     unitsSplitEquiv p (-1) = (negOneT p hp2, 1) := by
