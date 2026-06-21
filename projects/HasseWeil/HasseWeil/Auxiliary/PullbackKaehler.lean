@@ -148,7 +148,7 @@ noncomputable def pullbackKaehler (f : S →ₐ[R] S) :
   let lift : Ω[S⁄R] →ₗ[S] TwistedKaehler f := f.derivationCompHom.liftKaehlerDifferential
   { toFun := fun ω ↦ (lift ω).out
     map_zero' := by change (lift 0).out = 0; rw [map_zero]; rfl
-    map_add' := fun x y => by change (lift (x + y)).out = (lift x).out + (lift y).out
+    map_add' := fun x y ↦ by change (lift (x + y)).out = (lift x).out + (lift y).out
                               rw [map_add]; rfl }
 
 /-- The pullback of `D x` is `D (f x)`. -/
