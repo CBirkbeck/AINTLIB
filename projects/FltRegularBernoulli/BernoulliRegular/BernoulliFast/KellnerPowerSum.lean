@@ -56,22 +56,16 @@ prime to `37`. -/
 theorem thirtyseven_nat_prime : Nat.Prime 37 := by norm_num
 
 theorem den_add_not_dvd_thirtyseven {x y : ℚ} (hx : ¬ 37 ∣ x.den) (hy : ¬ 37 ∣ y.den) :
-    ¬ 37 ∣ (x + y).den := by
-  intro h
-  rcases (Nat.Prime.dvd_mul thirtyseven_nat_prime).mp (h.trans (Rat.add_den_dvd x y)) with h' | h'
-  exacts [hx h', hy h']
+    ¬ 37 ∣ (x + y).den := fun h =>
+  thirtyseven_nat_prime.not_dvd_mul hx hy (h.trans (Rat.add_den_dvd x y))
 
 theorem den_sub_not_dvd_thirtyseven {x y : ℚ} (hx : ¬ 37 ∣ x.den) (hy : ¬ 37 ∣ y.den) :
-    ¬ 37 ∣ (x - y).den := by
-  intro h
-  rcases (Nat.Prime.dvd_mul thirtyseven_nat_prime).mp (h.trans (Rat.sub_den_dvd x y)) with h' | h'
-  exacts [hx h', hy h']
+    ¬ 37 ∣ (x - y).den := fun h =>
+  thirtyseven_nat_prime.not_dvd_mul hx hy (h.trans (Rat.sub_den_dvd x y))
 
 theorem den_mul_not_dvd_thirtyseven {x y : ℚ} (hx : ¬ 37 ∣ x.den) (hy : ¬ 37 ∣ y.den) :
-    ¬ 37 ∣ (x * y).den := by
-  intro h
-  rcases (Nat.Prime.dvd_mul thirtyseven_nat_prime).mp (h.trans (Rat.mul_den_dvd x y)) with h' | h'
-  exacts [hx h', hy h']
+    ¬ 37 ∣ (x * y).den := fun h =>
+  thirtyseven_nat_prime.not_dvd_mul hx hy (h.trans (Rat.mul_den_dvd x y))
 
 theorem den_sum_not_dvd_thirtyseven {ι : Type*} {s : Finset ι} {f : ι → ℚ}
     (h : ∀ i ∈ s, ¬ 37 ∣ (f i).den) : ¬ 37 ∣ (∑ i ∈ s, f i).den := by
@@ -80,12 +74,12 @@ theorem den_sum_not_dvd_thirtyseven {ι : Type*} {s : Finset ι} {f : ι → ℚ
     (fun i => (f i).den)).mp (hdvd.trans (Finset.Rat.den_sum_dvd_prod_den s f))
   exact h i hi hd
 
+theorem den_intCast_div_natCast_dvd (a : ℤ) (n : ℕ) : ((a : ℚ) / (n : ℚ)).den ∣ n := by
+  rw [show (n : ℚ) = ((n : ℤ) : ℚ) by push_cast; ring, Rat.intCast_div_eq_divInt]
+  exact_mod_cast Rat.den_dvd a (n : ℤ)
+
 theorem den_one_div_natCast_dvd (n : ℕ) : ((1 : ℚ) / (n : ℚ)).den ∣ n := by
-  have h : (1 : ℚ) / (n : ℚ) = Rat.divInt 1 (n : ℤ) := by
-    rw [Rat.divInt_eq_div]
-    norm_num
-  rw [h]
-  exact_mod_cast Rat.den_dvd 1 (n : ℤ)
+  simpa using den_intCast_div_natCast_dvd 1 n
 
 theorem den_thirtyseven_eq_one : (37 : ℚ).den = 1 := by
   rw [show (37 : ℚ) = ((37 : ℕ) : ℚ) by norm_num, Rat.den_natCast]
@@ -129,27 +123,22 @@ theorem den_thirtyseven_mul_bernoulli_not_dvd (i : ℕ) :
         rcases eq_or_ne q 37 with rfl | hne
         · rw [show (37 : ℚ) * ((1 : ℚ) / ((37 : ℕ) : ℚ)) = 1 by norm_num]
           norm_num
-        · intro hd
-          have h2 := Rat.mul_den_dvd (37 : ℚ) ((1 : ℚ) / (q : ℚ))
-          rw [den_thirtyseven_eq_one, one_mul] at h2
-          have h3 : 37 ∣ q := hd.trans (h2.trans (den_one_div_natCast_dvd q))
-          exact hne (((Nat.prime_dvd_prime_iff_eq thirtyseven_nat_prime hq').mp h3).symm)
+        · refine den_mul_not_dvd_thirtyseven (by rw [den_thirtyseven_eq_one]; norm_num) fun hd => ?_
+          exact hne ((Nat.prime_dvd_prime_iff_eq thirtyseven_nat_prime hq').mp
+            (hd.trans (den_one_div_natCast_dvd q))).symm
   · rcases eq_or_ne i 1 with rfl | hne
     · rw [bernoulli_one]
-      intro hd
-      have h2 := Rat.mul_den_dvd (37 : ℚ) (-1 / 2 : ℚ)
-      rw [den_thirtyseven_eq_one, one_mul] at h2
+      refine den_mul_not_dvd_thirtyseven (by rw [den_thirtyseven_eq_one]; norm_num) fun hd => ?_
       have hhalf : ((-1 / 2 : ℚ)).den ∣ 2 := by
-        have h : (-1 / 2 : ℚ) = ((-1 : ℤ) : ℚ) / (((2 : ℕ) : ℤ) : ℚ) := by push_cast; ring
-        rw [h, Rat.intCast_div_eq_divInt]
-        exact_mod_cast Rat.den_dvd (-1) ((2 : ℕ) : ℤ)
-      have h3 : (37 : ℕ) ∣ 2 := hd.trans (h2.trans hhalf)
+        rw [show (-1 / 2 : ℚ) = ((-1 : ℤ) : ℚ) / ((2 : ℕ) : ℚ) by push_cast; ring]
+        exact den_intCast_div_natCast_dvd (-1) 2
+      have h3 : (37 : ℕ) ∣ 2 := hd.trans hhalf
       omega
     · have h1 : 1 < i := by
         rcases ho with ⟨k, hk⟩
         omega
       rw [bernoulli_eq_zero_of_odd ho h1, mul_zero]
-      decide
+      norm_num
 
 theorem den_bernoulli_1184_not_dvd : ¬ 37 ∣ (bernoulli 1184).den := by
   obtain ⟨T, hT⟩ := bernoulli_add_vonStaudtCorrection_mem_int (n := 1184) (by norm_num)
@@ -196,15 +185,13 @@ theorem exists_faulhaber_decomposition_1184 :
         omega
       rw [hexp]
       ring
-    rw [sum_range_pow]
-    rw [Finset.sum_range_succ]
-    rw [show Finset.range 1184 = Finset.range (1183 + 1) from rfl, Finset.sum_range_succ]
-    rw [Finset.sum_congr rfl hterm, ← Finset.mul_sum]
-    rw [show bernoulli 1183 = 0 from bernoulli_eq_zero_of_odd (by norm_num) (by norm_num)]
-    rw [show ((1184 : ℕ) + 1 - 1183) = 2 from rfl, show ((1184 : ℕ) + 1 - 1184) = 1 from rfl]
-    rw [Nat.choose_succ_self_right]
-    rw [show ((1184 : ℕ) + 1) = 1185 from rfl]
-    rw [show ((1369 : ℕ) : ℚ) = (37 : ℚ) ^ 2 by norm_num,
+    rw [sum_range_pow, Finset.sum_range_succ,
+      show Finset.range 1184 = Finset.range (1183 + 1) from rfl, Finset.sum_range_succ,
+      Finset.sum_congr rfl hterm, ← Finset.mul_sum,
+      show bernoulli 1183 = 0 from bernoulli_eq_zero_of_odd (by norm_num) (by norm_num),
+      show ((1184 : ℕ) + 1 - 1183) = 2 from rfl, show ((1184 : ℕ) + 1 - 1184) = 1 from rfl,
+      Nat.choose_succ_self_right, show ((1184 : ℕ) + 1) = 1185 from rfl,
+      show ((1369 : ℕ) : ℚ) = (37 : ℚ) ^ 2 by norm_num,
       show (((1184 : ℕ) : ℚ) + 1) = (1185 : ℚ) by norm_num,
       show ((1185 : ℕ) : ℚ) = (1185 : ℚ) by norm_num]
     ring
@@ -233,9 +220,8 @@ theorem exists_bernoulli_1184_decomposition :
 
 theorem thirtyseven_dvd_den_two_div_thirtyseven : 37 ∣ ((2 : ℚ) / 37).den := by
   have hdvd : ((2 : ℚ) / 37).den ∣ 37 := by
-    have h : (2 : ℚ) / 37 = ((2 : ℤ) : ℚ) / (((37 : ℕ) : ℤ) : ℚ) := by push_cast; ring
-    rw [h, Rat.intCast_div_eq_divInt]
-    exact_mod_cast Rat.den_dvd 2 ((37 : ℕ) : ℤ)
+    rw [show (2 : ℚ) / 37 = ((2 : ℤ) : ℚ) / ((37 : ℕ) : ℚ) by push_cast; ring]
+    exact den_intCast_div_natCast_dvd 2 37
   rcases (Nat.dvd_prime thirtyseven_nat_prime).mp hdvd with h1 | h37
   · exfalso
     have hint : ((((2 : ℚ) / 37).num : ℤ) : ℚ) = (2 : ℚ) / 37 :=
@@ -259,10 +245,7 @@ theorem den_div_thirtyseven_pow_three_dvd {x : ℚ} (h : (37 : ℤ) ^ 3 ∣ x.nu
     conv_lhs => rw [h0]
     exact mul_div_cancel_left₀ _ (by norm_num)
   rw [hxc]
-  have h1 : (c : ℚ) / (x.den : ℚ) = (c : ℚ) / (((x.den : ℕ) : ℤ) : ℚ) := by
-    norm_cast
-  rw [h1, Rat.intCast_div_eq_divInt]
-  exact_mod_cast Rat.den_dvd c ((x.den : ℕ) : ℤ)
+  exact den_intCast_div_natCast_dvd c x.den
 
 /-- **The Kellner second-order target, proven**: `37³ ∤ B₁₁₈₄.num`
 (`1184 = 32 · 37`), by the Faulhaber power-sum method. -/
