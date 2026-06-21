@@ -1211,6 +1211,218 @@ private theorem exists_ideal_pow_generators_dominated_for_half_space
     -- f ⟨0, hN₀_pos⟩ : ↥S, but ↥S is empty when S = ∅.
     exact (Finset.eq_empty_iff_forall_notMem.mp hS_ne) _ (f ⟨0, hN₀_pos⟩).2
 
+/-- **(Decomposition helper for `exists_absolute_ratio_rationalLocData_aux`.)**
+The `hopen` content for the denominator-cleared datum, consolidated across the
+symmetric plus/minus cases. If a finite set `B ⊆ P.A₀` spans `P.I ^ N` and every
+`(b : A)` for `b ∈ B` already lies in `T`, then `(b : A)/s ∈ locSubring P T s`
+for every `b ∈ P.I ^ N`.
+
+Proof: `b ∈ P.I^N = span B`, so `Submodule.span_induction` reduces to:
+generators `b ∈ B` (`divByS (b:A) s ∈ locSubring` since `(b:A) ∈ T`), zero,
+additivity of `divByS`, and `A₀`-smul (which becomes multiplication by an
+`algebraMap`-image, also in `locSubring`). -/
+private theorem divByS_mem_locSubring_of_span_ideal_pow
+    {A : Type*} [CommRing A] [TopologicalSpace A]
+    (P : PairOfDefinition A) (T : Finset A) (s : A) {N : ℕ} {B : Finset P.A₀}
+    (hB_span : Ideal.span ((B : Finset P.A₀) : Set P.A₀) = P.I ^ N)
+    (hB_sub : ∀ b ∈ B, (P.A₀.subtype b : A) ∈ T) :
+    ∀ b : P.A₀, b ∈ P.I ^ N → divByS (↑b : A) s ∈ locSubring P T s := by
+  -- For `b ∈ P.I^N`, `b` is in the span of `B`. So `b = ∑ cᵢ · bᵢ` in `P.A₀`
+  -- for `cᵢ ∈ P.A₀`, `bᵢ ∈ B`. Hence `(b:A)/s = ∑ (cᵢ:A) · (bᵢ:A)/s`. Each
+  -- `(bᵢ:A)` is in `T`, so `divByS (bᵢ:A) s ∈ locSubring`; each `algebraMap (cᵢ:A)`
+  -- is in `locSubring` (`cᵢ ∈ P.A₀`). Closure under add+mul gives the conclusion.
+  intro b hb
+  rw [← hB_span] at hb
+  refine Submodule.span_induction (M := P.A₀) (R := P.A₀)
+    (s := (B : Set P.A₀))
+    (p := fun x _ => divByS ((↑x : A)) s ∈ locSubring P T s)
+    ?_ ?_ ?_ ?_ hb
+  · -- generators b ∈ B: `(b : A) ∈ T`, so `divByS (b:A) s ∈ locSubring`.
+    intro x hx
+    exact divByS_mem_locSubring P T s (hB_sub x hx)
+  · -- zero
+    change divByS ((0 : P.A₀) : A) s ∈ _
+    change divByS (0 : A) s ∈ _
+    have h0 : divByS (0 : A) s = 0 := by
+      unfold divByS
+      exact (IsLocalization.mk'_zero _).trans rfl
+    rw [h0]; exact (locSubring P T s).zero_mem
+  · -- additive: divByS (x + y) s = divByS x s + divByS y s
+    intro x y _ _ hx hy
+    change divByS ((↑(x + y) : A)) s ∈ _
+    rw [show ((x + y : P.A₀) : A) = (↑x : A) + (↑y : A) from rfl]
+    have hadd : divByS ((↑x : A) + (↑y : A)) s =
+        divByS (↑x : A) s + divByS (↑y : A) s := by
+      unfold divByS
+      rw [← IsLocalization.mk'_add]
+      exact IsLocalization.mk'_eq_of_eq (by simp [Submonoid.coe_mul]; ring)
+    rw [hadd]
+    exact (locSubring P T s).add_mem hx hy
+  · -- smul by c ∈ P.A₀: divByS (c·b) s = algebraMap c · divByS b s
+    intro c x _ hx
+    change divByS ((↑(c • x) : A)) s ∈ _
+    rw [show ((c • x : P.A₀) : A) = (↑c : A) * (↑x : A) from rfl]
+    have hmul : divByS ((↑c : A) * (↑x : A)) s =
+        algebraMap A (Localization.Away s) (↑c : A) * divByS (↑x : A) s := by
+      unfold divByS
+      rw [← IsLocalization.mk'_one
+            (M := Submonoid.powers s)
+            (S := Localization.Away s) ((↑c : A)),
+          ← IsLocalization.mk'_mul]
+      refine IsLocalization.mk'_eq_of_eq ?_
+      simp only [one_mul]
+    rw [hmul]
+    exact (locSubring P T s).mul_mem
+      (algebraMap_mem_locSubring P T s c.2) hx
+
+/-- Forward inclusion of `rationalOpen_augmented_eq_inter_vle`: a point of the
+rational open of the augmented numerator set with denominator `L.s * y` lies in
+`R(L)` and satisfies `v.vle x y`. Non-archimedean valuation cancellation by the
+common factors `y` (for `L.T` numerators) and `L.s` (for the `L.s * x` generator). -/
+private theorem mem_inter_vle_of_mem_rationalOpen_augmented
+    {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
+    [IsTopologicalRing A] [DecidableEq A]
+    (L : RationalLocData A) (x y : A) (B : Finset L.P.A₀) {v : Spv A}
+    (hv : v ∈ rationalOpen
+        (L.T.image (· * y) ∪ {L.s * x, L.s * y} ∪ B.image L.P.A₀.subtype)
+        (L.s * y)) :
+    v ∈ rationalOpen L.T L.s ∧ v.vle x y := by
+  obtain ⟨hv_spa, hvT, hvs⟩ := hv
+  -- v ∈ Spa A A⁺, v(t) ≤ v(L.s*y) for all t ∈ T, v(L.s*y) ≠ 0.
+  letI : ValuativeRel A := v.toValuativeRel
+  -- Extract v(L.s) ≠ 0 and v(y) ≠ 0 from v(L.s*y) ≠ 0.
+  have hvLs : ¬ v.vle L.s 0 := ValuationSpectrum.not_vle_zero_left_of_mul hvs
+  have hvy : ¬ v.vle y 0 := ValuationSpectrum.not_vle_zero_right_of_mul hvs
+  -- v ∈ R(L): need v(t) ≤ v(L.s) for t ∈ L.T.
+  have hvL_mem : v ∈ rationalOpen L.T L.s := by
+    refine ⟨hv_spa, ?_, hvLs⟩
+    intro t ht
+    have htmem := hvT (t * y) (Finset.mem_union_left _ (Finset.mem_union_left _
+      (Finset.mem_image.mpr ⟨t, ht, rfl⟩)))
+    change v.vle (t * y) (L.s * y) at htmem
+    rwa [ValuativeRel.mul_vle_mul_iff_left hvy] at htmem
+  have hvxy : v.vle x y := by
+    have hle := hvT (L.s * x) (Finset.mem_union_left _ (Finset.mem_union_right _
+      (Finset.mem_insert_self _ _)))
+    change v.vle (L.s * x) (L.s * y) at hle
+    rw [mul_comm L.s x, mul_comm L.s y] at hle
+    rwa [ValuativeRel.mul_vle_mul_iff_left hvLs] at hle
+  exact ⟨hvL_mem, hvxy⟩
+
+/-- Backward inclusion of `rationalOpen_augmented_eq_inter_vle`: a point of
+`R(L) ∩ {v.vle x y}` lies in the rational open of the augmented numerator set.
+The `L.T`-image numerators reduce by cancelling `y`; the `{L.s * x, L.s * y}`
+generators by cancelling `L.s` (resp. reflexivity); the `B`-image generators by
+the half-space domination hypothesis `hB_dom`. -/
+private theorem mem_rationalOpen_augmented_of_mem_inter_vle
+    {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
+    [IsTopologicalRing A] [DecidableEq A]
+    (L : RationalLocData A) (x y : A)
+    (hy_ne : ∀ v ∈ rationalOpen L.T L.s, ¬ v.vle y 0)
+    (B : Finset L.P.A₀)
+    (hB_dom : ∀ v ∈ rationalOpen L.T L.s ∩ {v | v.vle x y},
+      ∀ b ∈ B, v.vle (L.P.A₀.subtype b) (L.s * y))
+    {v : Spv A} (hvL_mem : v ∈ rationalOpen L.T L.s) (hvxy : v.vle x y) :
+    v ∈ rationalOpen
+        (L.T.image (· * y) ∪ {L.s * x, L.s * y} ∪ B.image L.P.A₀.subtype)
+        (L.s * y) := by
+  letI : ValuativeRel A := v.toValuativeRel
+  obtain ⟨hv_spa, hvT_L, hvLs⟩ := hvL_mem
+  have hvy : ¬ v.vle y 0 := hy_ne v ⟨hv_spa, hvT_L, hvLs⟩
+  have hvLsy : ¬ v.vle (L.s * y) 0 := ValuativeRel.zero_vlt_mul hvLs hvy
+  refine ⟨hv_spa, ?_, hvLsy⟩
+  intro t ht
+  rcases Finset.mem_union.mp ht with htAB | htB
+  · rcases Finset.mem_union.mp htAB with htA | htBset
+    · -- t ∈ L.T.image (·*y)
+      obtain ⟨t', ht', rfl⟩ := Finset.mem_image.mp htA
+      change v.vle (t' * y) (L.s * y)
+      rw [ValuativeRel.mul_vle_mul_iff_left hvy]
+      exact hvT_L t' ht'
+    · -- t ∈ {L.s*x, L.s*y}
+      rcases Finset.mem_insert.mp htBset with rfl | hh'
+      · -- t = L.s * x
+        change v.vle (L.s * x) (L.s * y)
+        rw [mul_comm L.s x, mul_comm L.s y]
+        rw [ValuativeRel.mul_vle_mul_iff_left hvLs]
+        exact hvxy
+      · -- t = L.s * y
+        rcases Finset.mem_singleton.mp hh' with rfl
+        change v.vle (L.s * y) (L.s * y)
+        exact v.vle_refl _
+  · -- t ∈ B.image L.P.A₀.subtype
+    obtain ⟨b, hb, rfl⟩ := Finset.mem_image.mp htB
+    change v.vle ((L.P.A₀.subtype b : A)) (L.s * y)
+    exact hB_dom v ⟨⟨hv_spa, hvT_L, hvLs⟩, hvxy⟩ b hb
+
+/-- **(Decomposition helper for `exists_absolute_ratio_rationalLocData_aux`.)**
+The `rationalOpen` set-equality for the denominator-cleared datum, consolidated
+across the symmetric plus/minus cases, assembled from the two inclusions
+`mem_inter_vle_of_mem_rationalOpen_augmented` and
+`mem_rationalOpen_augmented_of_mem_inter_vle`. -/
+private theorem rationalOpen_augmented_eq_inter_vle
+    {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
+    [IsTopologicalRing A] [DecidableEq A]
+    (L : RationalLocData A) (x y : A)
+    (hy_ne : ∀ v ∈ rationalOpen L.T L.s, ¬ v.vle y 0)
+    (B : Finset L.P.A₀)
+    (hB_dom : ∀ v ∈ rationalOpen L.T L.s ∩ {v | v.vle x y},
+      ∀ b ∈ B, v.vle (L.P.A₀.subtype b) (L.s * y)) :
+    rationalOpen
+        (L.T.image (· * y) ∪ {L.s * x, L.s * y} ∪ B.image L.P.A₀.subtype)
+        (L.s * y) =
+      {v ∈ rationalOpen L.T L.s | v.vle x y} := by
+  ext v
+  exact ⟨mem_inter_vle_of_mem_rationalOpen_augmented L x y B,
+    fun hv => mem_rationalOpen_augmented_of_mem_inter_vle L x y hy_ne B hB_dom
+      hv.1 hv.2⟩
+
+/-- **(Decomposition helper for `exists_absolute_ratio_rationalLocData_aux`.)**
+The single-orientation absolute ratio datum, consolidating the symmetric
+plus/minus halves into one builder. Given `x y : A` with `y` nonvanishing on
+`R(L)`, there is a `RationalLocData A` whose rational open is exactly the
+half-space `R(L) ∩ {v.vle x y}`.
+
+The datum is `{ P := L.P, T := L.T.image (· * y) ∪ {L.s * x, L.s * y} ∪
+B.image P.A₀.subtype, s := L.s * y }`, where `B` is the ideal-power generating
+set supplied by `exists_ideal_pow_generators_dominated_for_half_space` (its
+domination is what makes the augmented numerators valuation-bounded). The
+`hopen` field is `divByS_mem_locSubring_of_span_ideal_pow`; the rationalOpen
+equality is `rationalOpen_augmented_eq_inter_vle`.
+
+Specialising at `(x, y) = (g, h)` gives plus, at `(x, y) = (h, g)` minus. -/
+private theorem exists_rationalLocData_rationalOpen_eq_half_space
+    {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
+    [IsTopologicalRing A] [IsHuberRing A]
+    [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [DecidableEq A]
+    (L : RationalLocData A) (x y : A)
+    (hy_ne : ∀ v ∈ rationalOpen L.T L.s, ¬ v.vle y 0) :
+    ∃ D : RationalLocData A,
+      rationalOpen D.T D.s = {v ∈ rationalOpen L.T L.s | v.vle x y} := by
+  classical
+  -- Nonvanishing of `s = L.s * y` on the half-space `R(L) ∩ {v.vle x y}`.
+  have hs_ne : ∀ v ∈ rationalOpen L.T L.s ∩ {v | v.vle x y},
+      ¬ v.vle (L.s * y) 0 := by
+    intro v hv
+    have hvL : v ∈ rationalOpen L.T L.s := hv.1
+    letI : ValuativeRel A := v.toValuativeRel
+    exact ValuativeRel.zero_vlt_mul hvL.2.2 (hy_ne v hvL)
+  -- Half-space domination lemma supplies the ideal-power generators `B`.
+  obtain ⟨N, B, hB_span, hB_dom⟩ :=
+    exists_ideal_pow_generators_dominated_for_half_space L x y (L.s * y) hs_ne
+  -- Assemble the augmented numerator set and the datum.
+  set T : Finset A :=
+    L.T.image (· * y) ∪ {L.s * x, L.s * y} ∪ B.image L.P.A₀.subtype with hT
+  have hopen : ∃ M : ℕ, ∀ b : L.P.A₀, b ∈ L.P.I ^ M →
+      divByS (↑b : A) (L.s * y) ∈ locSubring L.P T (L.s * y) :=
+    ⟨N, divByS_mem_locSubring_of_span_ideal_pow L.P T (L.s * y)
+      hB_span (fun b hb => by
+        simp only [hT, Finset.mem_union, Finset.mem_image]
+        exact Or.inr ⟨b, hb, rfl⟩)⟩
+  let D : RationalLocData A := { P := L.P, T := T, s := L.s * y, hopen := hopen }
+  exact ⟨D, rationalOpen_augmented_eq_inter_vle L x y hy_ne B hB_dom⟩
+
 private theorem exists_absolute_ratio_rationalLocData_aux
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [IsHuberRing A] [HasLocLiftPowerBounded A]
@@ -1231,7 +1443,9 @@ private theorem exists_absolute_ratio_rationalLocData_aux
   -- Round-20 reviewer (ChatGPT Pro) plan: construct plus/minus by adding
   -- ideal-power generators B_N to the numerator set. The domination lemma
   -- supplies the finite generating set whose valuation inequalities are
-  -- automatic on the target subset.
+  -- automatic on the target subset. Both halves are produced by the single
+  -- consolidated builder `exists_rationalLocData_rationalOpen_eq_half_space`,
+  -- one at `(x,y) = (g,h)` (plus) and one at `(x,y) = (h,g)` (minus).
   classical
   -- Step 1: extract A-side units on g and h from completion-side hypotheses.
   have hg_canonical : IsUnit (L.canonicalMap g) := by
@@ -1253,251 +1467,13 @@ private theorem exists_absolute_ratio_rationalLocData_aux
   have hh_ne : ∀ v ∈ rationalOpen L.T L.s, ¬ v.vle h 0 :=
     fun v hv => comap_canonicalMap_not_vle_zero_of_isUnit_via_locLift L hA₀_le h
       hh_canonical hv
-  -- Step 3: nonvanishing of plus.s = L.s * h on the plus half-space.
-  have hsplus_ne : ∀ v ∈ rationalOpen L.T L.s ∩ {v | v.vle g h},
-      ¬ v.vle (L.s * h) 0 := by
-    intro v hv
-    have hvL : v ∈ rationalOpen L.T L.s := hv.1
-    have hvLs : ¬ v.vle L.s 0 := hvL.2.2
-    have hvh : ¬ v.vle h 0 := hh_ne v hvL
-    letI : ValuativeRel A := v.toValuativeRel
-    exact ValuativeRel.zero_vlt_mul hvLs hvh
-  -- Step 4: half-space domination lemma supplies B⁺.
-  obtain ⟨Nplus, Bplus, hBplus_span, hBplus_dom⟩ :=
-    exists_ideal_pow_generators_dominated_for_half_space L g h (L.s * h) hsplus_ne
-  -- Step 5: symmetric for minus (s_minus = L.s * g, half-space {v.vle h g}).
-  have hsminus_ne : ∀ v ∈ rationalOpen L.T L.s ∩ {v | v.vle h g},
-      ¬ v.vle (L.s * g) 0 := by
-    intro v hv
-    have hvL : v ∈ rationalOpen L.T L.s := hv.1
-    have hvLs : ¬ v.vle L.s 0 := hvL.2.2
-    have hvg : ¬ v.vle g 0 := hg_ne v hvL
-    letI : ValuativeRel A := v.toValuativeRel
-    exact ValuativeRel.zero_vlt_mul hvLs hvg
-  obtain ⟨Nminus, Bminus, hBminus_span, hBminus_dom⟩ :=
-    exists_ideal_pow_generators_dominated_for_half_space L h g (L.s * g) hsminus_ne
-  -- Step 7: assemble plus and minus.
-  let Tplus : Finset A :=
-    L.T.image (· * h) ∪ {L.s * g, L.s * h} ∪ Bplus.image L.P.A₀.subtype
-  let Tminus : Finset A :=
-    L.T.image (· * g) ∪ {L.s * h, L.s * g} ∪ Bminus.image L.P.A₀.subtype
-  have hopen_plus : ∃ N : ℕ, ∀ b : L.P.A₀, b ∈ L.P.I ^ N →
-      divByS (↑b : A) (L.s * h) ∈ locSubring L.P Tplus (L.s * h) := by
-    -- N = Nplus from the domination lemma. For b ∈ P.I^N, b is in the ideal
-    -- generated by Bplus (which spans P.I^N). So b = ∑ cᵢ · bᵢ in P.A₀ for
-    -- cᵢ ∈ P.A₀, bᵢ ∈ Bplus. Hence (b : A)/(L.s*h) = ∑ (cᵢ : A) · (bᵢ : A)/(L.s*h).
-    -- Each (bᵢ : A) is in Tplus (via the Bplus.image P.A₀.subtype piece), so
-    -- divByS (bᵢ : A) (L.s*h) is in locSubring. Each algebraMap (cᵢ : A) is in
-    -- locSubring (cᵢ ∈ P.A₀). Closure under add+mul gives the conclusion.
-    refine ⟨Nplus, fun b hb => ?_⟩
-    rw [← hBplus_span] at hb
-    refine Submodule.span_induction (M := L.P.A₀) (R := L.P.A₀)
-      (s := (Bplus : Set L.P.A₀))
-      (p := fun x _ => divByS ((↑x : A)) (L.s * h) ∈ locSubring L.P Tplus (L.s * h))
-      ?_ ?_ ?_ ?_ hb
-    · -- generators b ∈ Bplus: divByS (b : A) (L.s*h) ∈ locSubring since
-      -- (P.A₀.subtype b) ∈ Bplus.image P.A₀.subtype ⊆ Tplus.
-      intro x hx
-      apply divByS_mem_locSubring L.P Tplus (L.s * h)
-      show (↑x : A) ∈ Tplus
-      simp only [Tplus, Finset.mem_union, Finset.mem_image]
-      refine Or.inr ⟨x, hx, rfl⟩
-    · -- zero
-      change divByS ((0 : L.P.A₀) : A) (L.s * h) ∈ locSubring L.P Tplus (L.s * h)
-      change divByS (0 : A) (L.s * h) ∈ _
-      have h0 : divByS (0 : A) (L.s * h) = 0 := by
-        unfold divByS
-        exact (IsLocalization.mk'_zero _).trans rfl
-      rw [h0]; exact (locSubring L.P Tplus (L.s * h)).zero_mem
-    · -- additive: divByS (x + y) s = divByS x s + divByS y s
-      intro x y _ _ hx hy
-      change divByS ((↑(x + y) : A)) (L.s * h) ∈ _
-      rw [show ((x + y : L.P.A₀) : A) = (↑x : A) + (↑y : A) from rfl]
-      have hadd : divByS ((↑x : A) + (↑y : A)) (L.s * h) =
-          divByS (↑x : A) (L.s * h) + divByS (↑y : A) (L.s * h) := by
-        unfold divByS
-        rw [← IsLocalization.mk'_add]
-        exact IsLocalization.mk'_eq_of_eq (by simp [Submonoid.coe_mul]; ring)
-      rw [hadd]
-      exact (locSubring L.P Tplus (L.s * h)).add_mem hx hy
-    · -- smul by c ∈ P.A₀: divByS (c·b) s = algebraMap c · divByS b s
-      intro c x _ hx
-      change divByS ((↑(c • x) : A)) (L.s * h) ∈ _
-      rw [show ((c • x : L.P.A₀) : A) = (↑c : A) * (↑x : A) from rfl]
-      have hmul : divByS ((↑c : A) * (↑x : A)) (L.s * h) =
-          algebraMap A (Localization.Away (L.s * h)) (↑c : A) *
-          divByS (↑x : A) (L.s * h) := by
-        unfold divByS
-        rw [← IsLocalization.mk'_one
-              (M := Submonoid.powers (L.s * h))
-              (S := Localization.Away (L.s * h)) ((↑c : A)),
-            ← IsLocalization.mk'_mul]
-        refine IsLocalization.mk'_eq_of_eq ?_
-        simp only [one_mul]
-      rw [hmul]
-      exact (locSubring L.P Tplus (L.s * h)).mul_mem
-        (algebraMap_mem_locSubring L.P Tplus (L.s * h) c.2) hx
-  have hopen_minus : ∃ N : ℕ, ∀ b : L.P.A₀, b ∈ L.P.I ^ N →
-      divByS (↑b : A) (L.s * g) ∈ locSubring L.P Tminus (L.s * g) := by
-    refine ⟨Nminus, fun b hb => ?_⟩
-    rw [← hBminus_span] at hb
-    refine Submodule.span_induction (M := L.P.A₀) (R := L.P.A₀)
-      (s := (Bminus : Set L.P.A₀))
-      (p := fun x _ => divByS ((↑x : A)) (L.s * g) ∈ locSubring L.P Tminus (L.s * g))
-      ?_ ?_ ?_ ?_ hb
-    · intro x hx
-      apply divByS_mem_locSubring L.P Tminus (L.s * g)
-      show (↑x : A) ∈ Tminus
-      simp only [Tminus, Finset.mem_union, Finset.mem_image]
-      refine Or.inr ⟨x, hx, rfl⟩
-    · change divByS ((0 : L.P.A₀) : A) (L.s * g) ∈ _
-      change divByS (0 : A) (L.s * g) ∈ _
-      have h0 : divByS (0 : A) (L.s * g) = 0 := by
-        unfold divByS
-        exact (IsLocalization.mk'_zero _).trans rfl
-      rw [h0]; exact (locSubring L.P Tminus (L.s * g)).zero_mem
-    · intro x y _ _ hx hy
-      change divByS ((↑(x + y) : A)) (L.s * g) ∈ _
-      rw [show ((x + y : L.P.A₀) : A) = (↑x : A) + (↑y : A) from rfl]
-      have hadd : divByS ((↑x : A) + (↑y : A)) (L.s * g) =
-          divByS (↑x : A) (L.s * g) + divByS (↑y : A) (L.s * g) := by
-        unfold divByS
-        rw [← IsLocalization.mk'_add]
-        exact IsLocalization.mk'_eq_of_eq (by simp [Submonoid.coe_mul]; ring)
-      rw [hadd]
-      exact (locSubring L.P Tminus (L.s * g)).add_mem hx hy
-    · intro c x _ hx
-      change divByS ((↑(c • x) : A)) (L.s * g) ∈ _
-      rw [show ((c • x : L.P.A₀) : A) = (↑c : A) * (↑x : A) from rfl]
-      have hmul : divByS ((↑c : A) * (↑x : A)) (L.s * g) =
-          algebraMap A (Localization.Away (L.s * g)) (↑c : A) *
-          divByS (↑x : A) (L.s * g) := by
-        unfold divByS
-        rw [← IsLocalization.mk'_one
-              (M := Submonoid.powers (L.s * g))
-              (S := Localization.Away (L.s * g)) ((↑c : A)),
-            ← IsLocalization.mk'_mul]
-        refine IsLocalization.mk'_eq_of_eq ?_
-        simp only [one_mul]
-      rw [hmul]
-      exact (locSubring L.P Tminus (L.s * g)).mul_mem
-        (algebraMap_mem_locSubring L.P Tminus (L.s * g) c.2) hx
-  let plus : RationalLocData A :=
-    { P := L.P, T := Tplus, s := L.s * h, hopen := hopen_plus }
-  let minus : RationalLocData A :=
-    { P := L.P, T := Tminus, s := L.s * g, hopen := hopen_minus }
-  refine ⟨plus, minus, ?_, ?_⟩
-  · -- rationalOpen plus = R(L) ∩ {v.vle g h}.
-    -- Direct extensionality, using non-arch valuation cancellation + domination.
-    ext v
-    constructor
-    · rintro ⟨hv_spa, hvT, hvs⟩
-      -- v ∈ Spa A A⁺, v(t) ≤ v(L.s*h) for all t ∈ plus.T, v(L.s*h) ≠ 0.
-      letI : ValuativeRel A := v.toValuativeRel
-      -- Extract v(L.s) ≠ 0 and v(h) ≠ 0 from v(L.s*h) ≠ 0.
-      have hvLs : ¬ v.vle L.s 0 :=
-        ValuationSpectrum.not_vle_zero_left_of_mul hvs
-      have hvh : ¬ v.vle h 0 :=
-        ValuationSpectrum.not_vle_zero_right_of_mul hvs
-      -- v ∈ R(L): need v(t) ≤ v(L.s) for t ∈ L.T.
-      have hvL_mem : v ∈ rationalOpen L.T L.s := by
-        refine ⟨hv_spa, ?_, hvLs⟩
-        intro t ht
-        have htmem : t * h ∈ plus.T :=
-          Finset.mem_union_left _ (Finset.mem_union_left _
-            (Finset.mem_image.mpr ⟨t, ht, rfl⟩))
-        have := hvT (t * h) htmem
-        change v.vle (t * h) (L.s * h) at this
-        rwa [ValuativeRel.mul_vle_mul_iff_left hvh] at this
-      have hvgh : v.vle g h := by
-        have hLsg_mem : L.s * g ∈ plus.T :=
-          Finset.mem_union_left _ (Finset.mem_union_right _
-            (Finset.mem_insert_self _ _))
-        have hle := hvT (L.s * g) hLsg_mem
-        change v.vle (L.s * g) (L.s * h) at hle
-        rw [mul_comm L.s g, mul_comm L.s h] at hle
-        rwa [ValuativeRel.mul_vle_mul_iff_left hvLs] at hle
-      exact ⟨hvL_mem, hvgh⟩
-    · rintro ⟨hvL_mem, hvgh⟩
-      letI : ValuativeRel A := v.toValuativeRel
-      obtain ⟨hv_spa, hvT_L, hvLs⟩ := hvL_mem
-      have hvh : ¬ v.vle h 0 := hh_ne v ⟨hv_spa, hvT_L, hvLs⟩
-      have hvLsh : ¬ v.vle (L.s * h) 0 := ValuativeRel.zero_vlt_mul hvLs hvh
-      refine ⟨hv_spa, ?_, hvLsh⟩
-      intro t ht
-      rcases Finset.mem_union.mp ht with htAB | htB
-      · rcases Finset.mem_union.mp htAB with htA | htBset
-        · -- t ∈ L.T.image (·*h)
-          obtain ⟨t', ht', rfl⟩ := Finset.mem_image.mp htA
-          change v.vle (t' * h) (L.s * h)
-          rw [ValuativeRel.mul_vle_mul_iff_left hvh]
-          exact hvT_L t' ht'
-        · -- t ∈ {L.s*g, L.s*h}
-          rcases Finset.mem_insert.mp htBset with rfl | hh'
-          · -- t = L.s * g
-            change v.vle (L.s * g) (L.s * h)
-            rw [mul_comm L.s g, mul_comm L.s h]
-            rw [ValuativeRel.mul_vle_mul_iff_left hvLs]
-            exact hvgh
-          · -- t = L.s * h
-            rcases Finset.mem_singleton.mp hh' with rfl
-            change v.vle (L.s * h) (L.s * h)
-            exact v.vle_refl _
-      · -- t ∈ Bplus.image L.P.A₀.subtype
-        obtain ⟨b, hb, rfl⟩ := Finset.mem_image.mp htB
-        change v.vle ((L.P.A₀.subtype b : A)) (L.s * h)
-        exact hBplus_dom v ⟨⟨hv_spa, hvT_L, hvLs⟩, hvgh⟩ b hb
-  · -- rationalOpen minus = R(L) ∩ {v.vle h g}.
-    ext v
-    constructor
-    · rintro ⟨hv_spa, hvT, hvs⟩
-      letI : ValuativeRel A := v.toValuativeRel
-      have hvLs : ¬ v.vle L.s 0 :=
-        ValuationSpectrum.not_vle_zero_left_of_mul hvs
-      have hvg : ¬ v.vle g 0 :=
-        ValuationSpectrum.not_vle_zero_right_of_mul hvs
-      have hvL_mem : v ∈ rationalOpen L.T L.s := by
-        refine ⟨hv_spa, ?_, hvLs⟩
-        intro t ht
-        have htmem : t * g ∈ minus.T :=
-          Finset.mem_union_left _ (Finset.mem_union_left _
-            (Finset.mem_image.mpr ⟨t, ht, rfl⟩))
-        have := hvT (t * g) htmem
-        change v.vle (t * g) (L.s * g) at this
-        rwa [ValuativeRel.mul_vle_mul_iff_left hvg] at this
-      have hvhg : v.vle h g := by
-        have hLsh_mem : L.s * h ∈ minus.T :=
-          Finset.mem_union_left _ (Finset.mem_union_right _
-            (Finset.mem_insert_self _ _))
-        have hle := hvT (L.s * h) hLsh_mem
-        change v.vle (L.s * h) (L.s * g) at hle
-        rw [mul_comm L.s h, mul_comm L.s g] at hle
-        rwa [ValuativeRel.mul_vle_mul_iff_left hvLs] at hle
-      exact ⟨hvL_mem, hvhg⟩
-    · rintro ⟨hvL_mem, hvhg⟩
-      letI : ValuativeRel A := v.toValuativeRel
-      obtain ⟨hv_spa, hvT_L, hvLs⟩ := hvL_mem
-      have hvg : ¬ v.vle g 0 := hg_ne v ⟨hv_spa, hvT_L, hvLs⟩
-      have hvLsg : ¬ v.vle (L.s * g) 0 := ValuativeRel.zero_vlt_mul hvLs hvg
-      refine ⟨hv_spa, ?_, hvLsg⟩
-      intro t ht
-      rcases Finset.mem_union.mp ht with htAB | htB
-      · rcases Finset.mem_union.mp htAB with htA | htBset
-        · obtain ⟨t', ht', rfl⟩ := Finset.mem_image.mp htA
-          change v.vle (t' * g) (L.s * g)
-          rw [ValuativeRel.mul_vle_mul_iff_left hvg]
-          exact hvT_L t' ht'
-        · rcases Finset.mem_insert.mp htBset with rfl | hh'
-          · change v.vle (L.s * h) (L.s * g)
-            rw [mul_comm L.s h, mul_comm L.s g]
-            rw [ValuativeRel.mul_vle_mul_iff_left hvLs]
-            exact hvhg
-          · rcases Finset.mem_singleton.mp hh' with rfl
-            change v.vle (L.s * g) (L.s * g)
-            exact v.vle_refl _
-      · obtain ⟨b, hb, rfl⟩ := Finset.mem_image.mp htB
-        change v.vle ((L.P.A₀.subtype b : A)) (L.s * g)
-        exact hBminus_dom v ⟨⟨hv_spa, hvT_L, hvLs⟩, hvhg⟩ b hb
+  -- Steps 3–7: build plus (denom `L.s * h`) and minus (denom `L.s * g`) via the
+  -- consolidated builder; its `rationalOpen` output is the required half-space.
+  obtain ⟨plus, hplus⟩ :=
+    exists_rationalLocData_rationalOpen_eq_half_space L g h hh_ne
+  obtain ⟨minus, hminus⟩ :=
+    exists_rationalLocData_rationalOpen_eq_half_space L h g hg_ne
+  exact ⟨plus, minus, hplus, hminus⟩
 
 /-- **(Round-17 reviewer-mandated reframe; key transport lemma.)**
 The relative Laurent split at `u_g · u_h⁻¹` over `𝒪(L)` transports
