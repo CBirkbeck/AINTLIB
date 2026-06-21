@@ -165,7 +165,7 @@ theorem no_twistedConjPairData37_of_descentSolution
     ¬ ∃ m : ℕ, Nonempty (TwistedConjPairData37 (CyclotomicField 37 ℚ) m) := by
   classical
   rintro ⟨m, D⟩
-  let P : ℕ → Prop := fun n => Nonempty (TwistedConjPairData37 (CyclotomicField 37 ℚ) n)
+  let P : ℕ → Prop := fun n ↦ Nonempty (TwistedConjPairData37 (CyclotomicField 37 ℚ) n)
   have hP : ∃ n, P n := ⟨m, D⟩
   let n := Nat.find hP
   have hn : P n := Nat.find_spec hP
