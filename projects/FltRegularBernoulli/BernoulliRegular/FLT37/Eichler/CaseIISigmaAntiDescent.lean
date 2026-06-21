@@ -96,7 +96,7 @@ piece (i) from it together with the unconditional realness proved here.
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension
+open NumberField
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -111,7 +111,6 @@ flt-regular Kummer-congruence chain. -/
 variable {K : Type} [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K]
   [NumberField.IsCMField K]
 
-set_option maxRecDepth 4000 in
 omit [NumberField.IsCMField K] in
 /-- **Case-II primarity is FREE** (the key §9.1 insight, proven, axiom-clean).
 
@@ -131,13 +130,8 @@ theorem caseIISigmaAntiDescent_quotient_int_congr
     (heq : (ε₁ : 𝓞 K) * x' ^ 37 + (ε₂ : 𝓞 K) * y' ^ 37 =
       (ε₃ : 𝓞 K) * ((hζ.toInteger - 1) ^ m * z') ^ 37) :
     ∃ n : ℤ, (37 : 𝓞 K) ∣ ((ε₁ / ε₂ : (𝓞 K)ˣ) : 𝓞 K) - (n : 𝓞 K) := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  haveI : NeZero 37 := ⟨by decide⟩
   -- `(ζ-1)^{37-1}` divides the right-hand side because `37·m ≥ 37 - 1`.
-  have hp_le : 37 - 1 ≤ m * 37 := by
-    refine (Nat.sub_le _ _).trans ?_
-    calc 37 = 1 * 37 := (one_mul _).symm
-      _ ≤ m * 37 := Nat.mul_le_mul_right 37 hm
+  have hp_le : 37 - 1 ≤ m * 37 := by omega
   -- Rewrite the RHS to expose the `(ζ-1)^{37-1}` factor.
   have hmod := heq
   rw [mul_pow, ← pow_mul, mul_comm (ε₃ : 𝓞 K), mul_assoc,
@@ -182,8 +176,6 @@ theorem caseIISigmaAntiDescent_quotient_real
     ∃ u : (𝓞 (NumberField.maximalRealSubfield K))ˣ,
       algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)
         (u : 𝓞 (NumberField.maximalRealSubfield K)) = ((ε₁ / ε₂ : (𝓞 K)ˣ) : 𝓞 K) := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  haveI : NeZero 37 := ⟨by decide⟩
   -- The descent-equation form consumed by `caseII_discharge_unit_is_real`
   -- (it only uses the integer congruence; the equation argument is along for typing).
   have h_descent :
@@ -248,18 +240,11 @@ theorem caseIISigmaAntiDescent_freePart_pow37
     [Fact (Nat.Prime 37)] (v : (𝓞 K)ˣ) :
     BernoulliRegular.cyclotomicUnitToFreePartModPAdd (p := 37) K
         (Additive.ofMul (v ^ 37)) = 0 := by
-  -- The multiplicative form kills `37`-th powers (`cyclotomicUnitToFreePartModPMul_pow_eq_one`).
-  have h := BernoulliRegular.cyclotomicUnitToFreePartModPMul_pow_eq_one (p := 37) (K := K) v
-  -- Transport to the additive form via `toMultiplicativeRight`.
-  have he : Multiplicative.ofAdd
-      (BernoulliRegular.cyclotomicUnitToFreePartModPAdd (p := 37) K (Additive.ofMul (v ^ 37))) =
-        Multiplicative.ofAdd
-          (0 : BernoulliRegular.CyclotomicUnitFreePartModP (p := 37) K) := by
-    rw [ofAdd_zero]
-    exact h
-  exact Multiplicative.ofAdd.injective he
+  -- The multiplicative form kills `37`-th powers; transport it to the additive form.
+  refine Multiplicative.ofAdd.injective ?_
+  rw [ofAdd_zero]
+  exact BernoulliRegular.cyclotomicUnitToFreePartModPMul_pow_eq_one (p := 37) (K := K) v
 
-set_option maxRecDepth 4000 in
 open FLT37.LehmerVandiver.CaseII in
 /-- **The descent unit's mod-`37` free part vanishes** (proven, axiom-clean — Lemma 9.2 endpoint).
 
@@ -290,7 +275,6 @@ theorem caseIISigmaAntiDescent_descentUnit_freePart_zero
     (hu : Units.map (algebraMap (𝓞 (NumberField.maximalRealSubfield (CyclotomicField 37 ℚ)))
         (𝓞 (CyclotomicField 37 ℚ))).toMonoidHom u = ε₁ / ε₂) :
     FLT37.realUnitToFreePartModP (K := CyclotomicField 37 ℚ) (Additive.ofMul u) = 0 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   -- Lemma 9.2 (realised): `ε₁/ε₂ = ε'^37`.
   obtain ⟨ε', hε'⟩ := h_exactUnit hV hSO D hx' hy' hz' heq
   -- `realUnitToFreePartModP u` factors through `Units.map u = ε₁/ε₂ = ε'^37`.
@@ -342,7 +326,6 @@ def caseIISigmaAntiDescent_quotient_in_CPlus
         (𝓞 (CyclotomicField 37 ℚ))).toMonoidHom u = ε₁ / ε₂),
     u ∈ caseIICPlus37
 
-set_option maxRecDepth 4000 in
 open FLT37.LehmerVandiver.CaseII in
 /-- **Realness + membership of `η_a/η_b` from the cyclotomic-unit membership** (proven,
 axiom-clean).
@@ -440,7 +423,6 @@ theorem caseIISigmaAntiDescent_decomp_zero
     [NumberField.IsCMField (CyclotomicField 37 ℚ)] :
     caseIIResidueProvenance_decomp
         (0 : CyclotomicUnitFreePartModP (p := 37) (CyclotomicField 37 ℚ)) = 0 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   set c := caseIIResidueProvenance_decomp
     (0 : CyclotomicUnitFreePartModP (p := 37) (CyclotomicField 37 ℚ)) with hc
   -- The decomposition reproduces `0` and has vanishing principal coefficient.
@@ -455,7 +437,7 @@ theorem caseIISigmaAntiDescent_decomp_zero
   -- Split the `Fin 18` sum at the last index; the last term vanishes (`c 17 = 0`).
   rw [Fin.sum_univ_castSucc] at hspec
   have hlast : c (Fin.last 17) • caseIIConjugateResidue_eigenvector (Fin.last 17) = 0 := by
-    rw [show c (Fin.last 17) = c 17 from by congr 1, hprin, zero_smul]
+    rw [show c (Fin.last 17) = c 17 from rfl, hprin, zero_smul]
   rw [hlast, add_zero] at hspec
   -- The block sum over `Fin 17` is `∑ k, c (castSucc k) • familyMember k`.
   have hblock : ∑ k : Fin 17, c (Fin.castSucc k) •
@@ -469,9 +451,8 @@ theorem caseIISigmaAntiDescent_decomp_zero
             (FLT37.pollaczekUnit 37 (CyclotomicField 37 ℚ) (2 * (k : ℕ) + 2)))) from by
       unfold caseIIConjugateResidue_eigenvector; congr 2]
   -- Linear independence forces every block coefficient to vanish.
-  have hzero_block : ∀ k : Fin 17, c (Fin.castSucc k) = 0 := by
-    have := (Fintype.linearIndependent_iff.mp hli) (fun k => c (Fin.castSucc k)) hblock
-    exact this
+  have hzero_block : ∀ k : Fin 17, c (Fin.castSucc k) = 0 :=
+    (Fintype.linearIndependent_iff.mp hli) (fun k => c (Fin.castSucc k)) hblock
   -- Conclude `c = 0` on all of `Fin 18`.
   funext j
   rw [Pi.zero_apply]
