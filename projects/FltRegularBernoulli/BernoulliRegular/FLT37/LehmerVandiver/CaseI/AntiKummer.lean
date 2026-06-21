@@ -1503,7 +1503,7 @@ theorem K_adjoin_alpha_eq_top
   -- Step 3: minpoly K⁺ α₀ has degree ≥ 2 (since α₀ ∉ K⁺).
   have h_minpoly_deg : 2 ≤ (minpoly (NumberField.maximalRealSubfield K) α₀).natDegree := by
     by_contra h_lt
-    push_neg at h_lt
+    push Not at h_lt
     -- minpoly degree < 2 forces α₀ ∈ K⁺ (degree 0 ⟹ α₀ = 0 but α₀ ≠ 0; degree 1 ⟹ α₀ ∈ K⁺).
     have h_eq_one : (minpoly (NumberField.maximalRealSubfield K) α₀).natDegree = 1 := by
       have h_pos : 0 < (minpoly (NumberField.maximalRealSubfield K) α₀).natDegree :=

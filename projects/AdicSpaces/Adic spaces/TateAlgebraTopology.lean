@@ -1003,7 +1003,7 @@ noncomputable def instT2SpaceTateAlgebra [IsTateRing A] [T2Space A] :
     exact hn ⟨b, hb_mem, hb_eq⟩
   -- Suppose for contradiction that coeff l y.val ∈ image P.I^n for all n.
   by_contra hall
-  push_neg at hall
+  push Not at hall
   -- Extract a common witness b ∈ ⋂ n, P.I^n from the injectivity of Subtype.val.
   obtain ⟨b, _, hb_eq⟩ := hall 0
   have hb_all : ∀ n : ℕ, b ∈ P.I ^ n := by
@@ -2328,7 +2328,7 @@ noncomputable def instT2SpaceTateAlgebra₂ [IsTateRing A] [T2Space A] :
     obtain ⟨b, hb_mem, hb_eq⟩ := tateAlgNhd₂_coeff_mem P n hy_mem l
     exact hn ⟨b, hb_mem, hb_eq⟩
   by_contra hall
-  push_neg at hall
+  push Not at hall
   obtain ⟨b, _, hb_eq⟩ := hall 0
   have hb_all : ∀ n : ℕ, b ∈ P.I ^ n := by
     intro n
@@ -2966,7 +2966,7 @@ private theorem isRestricted₂_of_eventually_zero
     exact ⟨s 0, s 1, ⟨h0, h1⟩, hs_eq⟩
   · -- Otherwise `N ≤ s 0 ∨ N ≤ s 1`, so `h s = 0 ∈ U` contradicts `hs`.
     exfalso
-    push_neg at h_in_box
+    push Not at h_in_box
     have h_ge : N ≤ s 0 ∨ N ≤ s 1 := by omega
     exact hs (by rw [hh s h_ge]; exact h0U)
 
@@ -3036,7 +3036,7 @@ theorem tateAlgebra₂_polynomials_dense_canonical [IsTateRing A] :
           Finset.le_sup (f := id) (Finset.mem_image_of_mem (· 0) hl_fin)
         have h1 : l 1 ≤ (hS_fin.toFinset.image (· 1)).sup id :=
           Finset.le_sup (f := id) (Finset.mem_image_of_mem (· 1) hl_fin)
-        push_neg at hlt
+        push Not at hlt
         have hge := hlt (by omega : l 0 < N)
         omega
       rw [hS_def, Set.mem_setOf_eq, not_not] at hl_not_bad
@@ -3058,7 +3058,7 @@ theorem tateAlgebra₂_polynomials_dense_canonical [IsTateRing A] :
           Finset.le_sup (f := id) (Finset.mem_image_of_mem (· 0) hl_fin)
         have h1 : l 1 ≤ (hS_fin.toFinset.image (· 1)).sup id :=
           Finset.le_sup (f := id) (Finset.mem_image_of_mem (· 1) hl_fin)
-        push_neg at hlt
+        push Not at hlt
         have hge := hlt (by omega : l 0 < N)
         omega
       rw [hS_def, Set.mem_setOf_eq, not_not] at hl_not_bad
@@ -3216,7 +3216,7 @@ theorem tateAlgebra₂_polynomial_decomp (g : ↥(TateAlgebra₂ A)) (N : ℕ)
       exact this.symm
     · intro h
       exfalso; exact h (Finset.mem_range.mpr h0)
-  · push_neg at hl
+  · push Not at hl
     have hN_apply : g.val l = 0 := hN l (by omega)
     rw [hN_apply]
     symm

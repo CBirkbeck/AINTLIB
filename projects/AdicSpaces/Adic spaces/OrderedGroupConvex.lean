@@ -132,13 +132,13 @@ omit [IsOrderedMonoid Γ] in
 /-- If `γ ∉ H` and `γ < 1`, then `γ < h` for every `h ∈ H`. -/
 theorem lt_of_not_mem_of_lt_one (H : ConvexSubgroup Γ) {γ : Γ} (hγ : γ ∉ H) (hγ1 : γ < 1)
     {h : Γ} (hh : h ∈ H) : γ < h := by
-  by_contra hle; push_neg at hle; exact hγ (H.convex' hh (one_mem H) hle hγ1.le)
+  by_contra hle; push Not at hle; exact hγ (H.convex' hh (one_mem H) hle hγ1.le)
 
 omit [IsOrderedMonoid Γ] in
 /-- If `γ ∉ H` and `1 < γ`, then `h < γ` for every `h ∈ H`. -/
 theorem lt_of_not_mem_of_one_lt (H : ConvexSubgroup Γ) {γ : Γ} (hγ : γ ∉ H) (hγ1 : 1 < γ)
     {h : Γ} (hh : h ∈ H) : h < γ := by
-  by_contra hle; push_neg at hle; exact hγ (H.convex' (one_mem H) hh hγ1.le hle)
+  by_contra hle; push Not at hle; exact hγ (H.convex' (one_mem H) hh hγ1.le hle)
 
 /-! ### Quotient linear order on `Γ ⧸ H.toSubgroup` -/
 
@@ -154,7 +154,7 @@ private theorem quotientLE_aux (H : ConvexSubgroup Γ) (c k : Γ) (hk : k ∈ H.
       show ¬(c * k ∈ H.toSubgroup) from hck, or_false]
     exact ⟨fun h1 ↦ le_of_lt (lt_inv_iff_mul_lt_one.mp (H.lt_of_not_mem_of_lt_one hc
         (lt_of_le_of_ne h1 (fun h ↦ hc (h ▸ H.toSubgroup.one_mem))) (inv_mem hk))),
-      fun h1 ↦ by by_contra hc1; push_neg at hc1; exact absurd h1 (not_le.mpr
+      fun h1 ↦ by by_contra hc1; push Not at hc1; exact absurd h1 (not_le.mpr
         (inv_lt_iff_one_lt_mul.mp (H.lt_of_not_mem_of_one_lt hc hc1 (inv_mem hk))))⟩
 
 /-- `[a] ≤ [b]` iff `b⁻¹ * a ≤ 1` or `b⁻¹ * a ∈ H`. -/
@@ -252,7 +252,7 @@ instance quotientIsOrderedMonoid (H : ConvexSubgroup Γ) :
 /-- Convex subgroups of a linearly ordered commutative group are totally ordered. -/
 theorem le_total_of_convex (H₁ H₂ : ConvexSubgroup Γ) : H₁ ≤ H₂ ∨ H₂ ≤ H₁ := by
   by_contra h
-  push_neg at h
+  push Not at h
   obtain ⟨hne₁, hne₂⟩ := h
   obtain ⟨a, haH₁, haH₂⟩ := Set.not_subset.mp (show ¬(H₁ : Set Γ) ⊆ H₂ from hne₁)
   have ha1 : a ≠ 1 := fun h ↦ haH₂ (h ▸ one_mem H₂)
@@ -388,17 +388,17 @@ theorem maxAvoid_mem_of_nontrivial {γ : Γ} (hγ : γ ≠ 1)
 /-- In a `MulArchimedean` linearly ordered group, every convex subgroup is `⊥` or `⊤`. -/
 theorem eq_bot_or_eq_top_of_mulArchimedean [MulArchimedean Γ]
     (H : ConvexSubgroup Γ) : H = ⊥ ∨ H = ⊤ := by
-  by_contra hH; push_neg at hH; obtain ⟨hbot, htop⟩ := hH
+  by_contra hH; push Not at hH; obtain ⟨hbot, htop⟩ := hH
   obtain ⟨y, hy, hy1⟩ : ∃ y ∈ H, 1 < y := by
     obtain ⟨y, hy, hy1⟩ : ∃ y ∈ H, y ≠ 1 := by
-      by_contra h; push_neg at h; exact hbot (ext fun x ↦
+      by_contra h; push Not at h; exact hbot (ext fun x ↦
         ⟨fun hx ↦ mem_bot.mpr (h x hx), fun hx ↦ mem_bot.mp hx ▸ one_mem H⟩)
     rcases lt_or_gt_of_ne hy1 with h | h
     · exact ⟨y⁻¹, inv_mem hy, one_lt_inv_of_inv h⟩
     · exact ⟨y, hy, h⟩
   obtain ⟨x, hx, hx1⟩ : ∃ x, x ∉ H ∧ 1 < x := by
     obtain ⟨x, hxH⟩ : ∃ x, x ∉ H := by
-      by_contra h; push_neg at h; exact htop (ext fun x ↦
+      by_contra h; push Not at h; exact htop (ext fun x ↦
         ⟨fun _ ↦ mem_top, fun _ ↦ h x⟩)
     rcases lt_or_gt_of_ne (show x ≠ 1 from fun h ↦ hxH (h ▸ one_mem H)) with h | h
     · exact ⟨x⁻¹, inv_mem_iff_mem.not.mpr hxH, one_lt_inv_of_inv h⟩
@@ -495,7 +495,7 @@ theorem exists_inv_pow_lt_of_mem_convexGenerated {y : Γ} (hy : 1 < y) {h : Γ}
 theorem mulArchimedean_of_no_proper_nontrivial
     (h : ∀ H : ConvexSubgroup Γ, H = ⊥ ∨ H = ⊤) : MulArchimedean Γ where
   arch x {y} hy := by
-    by_contra hna; push_neg at hna
+    by_contra hna; push Not at hna
     let G := convexGenerated hy
     have hy_mem : y ∈ G := self_mem_convexGenerated hy
     have hx_nmem : x ∉ G := fun ⟨n, _, hle⟩ ↦ not_le.mpr (hna n) hle

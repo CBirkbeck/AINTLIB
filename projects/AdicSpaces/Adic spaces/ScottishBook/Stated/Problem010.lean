@@ -70,7 +70,7 @@ theorem IsTrivialValuation.vle_iff {v : Spv A} (hv : IsTrivialValuation v)
   constructor
   · intro hab
     by_contra h
-    push_neg at h
+    push Not at h
     obtain ⟨ha, hb⟩ := h
     rw [v.mem_supp_iff] at ha
     exact ha (ValuativeRel.vle_trans hab ((v.mem_supp_iff b).mp hb))

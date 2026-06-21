@@ -1726,7 +1726,7 @@ theorem kaehlerD_pth_power_mul (p : ℕ) [CharP F p] (g h : KE) :
 `span_range_derivation` (Ω = span of `range D`). Gives `ker D ⊊ K(E)` for SK-KERD-FIELD-ARG. -/
 theorem kaehlerD_ne_zero : ∃ w : KE, KaehlerDifferential.D F KE w ≠ 0 := by
   by_contra h
-  push_neg at h
+  push Not at h
   have hbot : (⊤ : Submodule KE (KaehlerDifferential F KE)) = ⊥ := by
     rw [← KaehlerDifferential.span_range_derivation F KE]
     apply le_antisymm _ bot_le
@@ -1809,7 +1809,7 @@ theorem minpoly_x_gen_frobeniusRange_natDegree (p : ℕ) [Fact p.Prime] [CharP F
     exact ⟨w, by rw [hw]; exact hax.symm⟩
   have hn1 : n ≤ 1 := by
     by_contra h
-    push_neg at h
+    push Not at h
     have : p ^ 2 ≤ p ^ n := Nat.pow_le_pow_right (le_of_lt hp1) h
     nlinarith [this, hub]
   rw [hdeg, show n = 1 by omega, pow_one]
