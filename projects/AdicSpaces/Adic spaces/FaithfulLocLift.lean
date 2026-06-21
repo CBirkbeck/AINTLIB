@@ -130,10 +130,21 @@ theorem exists_valuation_extension_of_prime_over
       s.IsEquiv (Valuation.comap (algebraMap R S) t) := by
   -- Step 1: `s` descends to a valuation on the domain `R ⧸ supp s` (Chevalley, ring case).
   haveI : (s.supp).IsPrime := inferInstance
+  haveI : IsDomain (R ⧸ s.supp) := Ideal.Quotient.isDomain s.supp
   let sQuot : Valuation (R ⧸ s.supp) Γ := s.onQuot le_rfl
-  -- Steps 2-4 (T-L4-EXT): embed `R⧸supp ↪ Frac` and `S⧸q' ↪ Frac` compatibly (via `hq'`), extend
-  -- `sQuot`'s valuation ring across the field extension (`LocalSubring.exists_le_valuationSubring`),
-  -- and `comap` the resulting valuation of `S` back; `hq'` makes the square commute.
+  -- Step 2: `sQuot` (support `0`) extends to the fraction field `F = Frac(R⧸supp s)`.
+  have hsupp : sQuot.supp = ⊥ := s.supp_quot_supp
+  have hS : nonZeroDivisors (R ⧸ s.supp) ≤ sQuot.supp.primeCompl := by
+    intro x hx
+    show x ∉ sQuot.supp
+    intro hxsupp
+    rw [hsupp] at hxsupp
+    exact mem_nonZeroDivisors_iff_ne_zero.mp hx (Ideal.mem_bot.mp hxsupp)
+  let F := FractionRing (R ⧸ s.supp)
+  let sF : Valuation F Γ := sQuot.extendToLocalization hS F
+  -- Steps 3-4 (T-L4-EXT): embed `F ↪ L = Frac(S⧸q')` (via `R⧸supp ↪ S⧸q'` from `hq'`), extend
+  -- `sF`'s valuation ring across `F ↪ L` (`LocalSubring.exists_le_valuationSubring`), and `comap`
+  -- the resulting valuation of `S` back; `hq'` makes the square commute.
   sorry
 
 set_option linter.unusedSectionVars false in
