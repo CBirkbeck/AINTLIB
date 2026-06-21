@@ -38,7 +38,7 @@ the rest of the chain to compose parametrically.
 
 noncomputable section
 
-open NumberField NumberField.IsCMField
+open NumberField
 
 namespace BernoulliRegular
 
@@ -71,7 +71,6 @@ def SinnottIndexFormula (hp_odd : p ≠ 2) (hp_three : 3 ≤ p) : Prop :=
     NumberField.Units.torsion (NumberField.maximalRealSubfield K)).index =
   2 ^ ((p - 3) / 2) * hPlus K
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Sinnott formula in regulator form**: equivalent statement asserting
 `regOfFamily(family) = 2^((p-3)/2) · h⁺ · regulator(K⁺)` directly.
 The factor `2^((p-3)/2)` reflects the index of the squared cyclotomic
@@ -85,7 +84,6 @@ def SinnottRegulatorIdentity (hp_odd : p ≠ 2) (hp_three : 3 ≤ p) : Prop :=
     (2 : ℝ) ^ ((p - 3) / 2) * (hPlus K : ℝ) *
       NumberField.Units.regulator (NumberField.maximalRealSubfield K)
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Equivalence of Sinnott formula formulations**: the index version
 follows from the regulator version (both encode the same content via
 `regOfFamily_div_regulator`). -/
@@ -94,24 +92,20 @@ theorem sinnottIndexFormula_of_regulatorIdentity
     (h : SinnottRegulatorIdentity p K hp_odd hp_three) :
     SinnottIndexFormula p K hp_odd hp_three := by
   unfold SinnottIndexFormula SinnottRegulatorIdentity at *
-  -- regOfFamily(family) / regulator(K⁺) = [E⁺ : ⟨family⟩ ⊔ torsion] (mathlib).
+  -- `regOfFamily family / regulator K⁺ = [E⁺ : ⟨family⟩ ⊔ torsion]`.
   have h_div := regOfFamily_cyclotomicUnitFamilyKplus_div_regulator
     p K hp_odd hp_three
-  -- regulator K⁺ ≠ 0 (positive).
   have h_reg_pos : 0 < NumberField.Units.regulator
       (NumberField.maximalRealSubfield K) :=
     NumberField.Units.regulator_pos _
   rw [h] at h_div
-  -- h_div : 2^((p-3)/2) · h⁺ · R / R = (index : ℝ)
   rw [show (2 : ℝ) ^ ((p - 3) / 2) * (hPlus K : ℝ) *
         NumberField.Units.regulator (NumberField.maximalRealSubfield K) /
         NumberField.Units.regulator (NumberField.maximalRealSubfield K) =
       2 ^ ((p - 3) / 2) * (hPlus K : ℝ) from by
     field_simp] at h_div
-  -- h_div : 2^((p-3)/2) · h⁺ = (index : ℝ)
   exact_mod_cast h_div.symm
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Converse**: the regulator identity follows from the index formula.
 Both Props are equivalent under `regOfFamily_div_regulator`. -/
 theorem sinnottRegulatorIdentity_of_indexFormula
@@ -121,19 +115,14 @@ theorem sinnottRegulatorIdentity_of_indexFormula
   unfold SinnottIndexFormula SinnottRegulatorIdentity at *
   have h_div := regOfFamily_cyclotomicUnitFamilyKplus_div_regulator
     p K hp_odd hp_three
-  -- h_div : regOfFamily / regulator = (index : ℝ)
-  -- h : index = 2^((p-3)/2) · hPlus K
   rw [h] at h_div
-  -- h_div : regOfFamily / regulator = (2^((p-3)/2) · hPlus K : ℝ)
   have h_reg_pos : 0 < NumberField.Units.regulator
       (NumberField.maximalRealSubfield K) :=
     NumberField.Units.regulator_pos _
-  -- regOfFamily = 2^((p-3)/2) · hPlus K · regulator.
   field_simp [h_reg_pos.ne'] at h_div
   push_cast at h_div
   linarith
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Equivalence (full)**: the index and regulator formulations of
 Sinnott's identity are equivalent. -/
 theorem sinnottIndexFormula_iff_regulatorIdentity
@@ -157,7 +146,6 @@ analytic) claim that `regOfFamily(family)` equals this same expression.
 This isolates the substantive analytic content as a comparison with
 the analytic CNF. -/
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Sinnott as analytic identity**: `regOfFamily(family)` equals
 `2^((p-3)/2)` times the analytic expression that the analytic CNF
 identifies with `h⁺ · regulator K⁺`.
@@ -180,7 +168,6 @@ def SinnottAnalyticIdentity (hp_odd : p ≠ 2) (hp_three : 3 ≤ p) : Prop :=
             (2 * Real.pi) ^ NumberField.InfinitePlace.nrComplexPlaces
               (NumberField.maximalRealSubfield K)))
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Analytic identity → regulator identity**: combining
 `SinnottAnalyticIdentity` with the analytic CNF (`hPlus_formula`)
 gives `SinnottRegulatorIdentity`. -/
@@ -189,13 +176,12 @@ theorem sinnottRegulatorIdentity_of_analyticIdentity
     (h : SinnottAnalyticIdentity p K hp_odd hp_three) :
     SinnottRegulatorIdentity p K hp_odd hp_three := by
   unfold SinnottAnalyticIdentity SinnottRegulatorIdentity at *
-  -- analytic CNF: (hPlus K : ℝ) = (analytic factor) / (... · regulator K⁺).
+  -- Analytic CNF: `(hPlus K : ℝ) = (analytic factor) / (… · regulator K⁺)`.
   have h_cnf := hPlus_formula K
-  -- regulator K⁺ ≠ 0 (positive).
   have h_reg_pos : 0 < NumberField.Units.regulator
       (NumberField.maximalRealSubfield K) :=
     NumberField.Units.regulator_pos _
-  -- Other denominator factors are positive.
+  -- The remaining denominator factor `2^r · (2π)^c` is positive (feeds `field_simp`).
   have h_two_pow_pos : (0 : ℝ) <
       2 ^ NumberField.InfinitePlace.nrRealPlaces
           (NumberField.maximalRealSubfield K) *
@@ -204,11 +190,9 @@ theorem sinnottRegulatorIdentity_of_analyticIdentity
     refine mul_pos (pow_pos (by positivity) _) (pow_pos ?_ _)
     positivity
   rw [h]
-  -- h_cnf : (hPlus K : ℝ) = ... ; goal RHS has ↑(hPlus K)
   conv_rhs => rw [show ((hPlus K : ℕ) : ℝ) = _ from h_cnf]
   field_simp
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Regulator identity → analytic identity**: the converse, using
 `dedekindZeta_residue_def` to unfold the residue. -/
 theorem sinnottAnalyticIdentity_of_regulatorIdentity
@@ -221,11 +205,9 @@ theorem sinnottAnalyticIdentity_of_regulatorIdentity
       (NumberField.maximalRealSubfield K) :=
     NumberField.Units.regulator_pos _
   rw [h]
-  -- (hPlus : ℝ) · regulator = residue · (torsion · √|disc|) / (2^r · (2π)^c).
   conv_lhs => rw [show ((hPlus K : ℕ) : ℝ) = _ from h_cnf]
   field_simp
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Equivalence of analytic and regulator forms**: both are
 equivalent statements of Sinnott's identity. -/
 theorem sinnottAnalyticIdentity_iff_regulatorIdentity
@@ -255,7 +237,6 @@ which strengthens `pollaczekUnitPlus ∈ cyclotomicUnitsPlus` to
 membership in the FAMILY-GENERATED subgroup (mathematically the same
 under Sinnott's full theorem, but a separate step in the formal chain). -/
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Sinnott formula bridge target**: under `SinnottIndexFormula` (step C/D),
 the index identity gives `[E⁺ : ⟨family⟩ ⊔ torsion] = 2^((p-3)/2) · h⁺`
 directly. The factor `2^((p-3)/2)` reflects the gap between the project's
@@ -279,7 +260,6 @@ generates `C⁺ ⊔ torsion`.
 
 We package this as a separate Prop. -/
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Pollaczek descent to family**: `pollaczekUnitPlus` lies in the
 family-generated subgroup. Mathematically follows from
 `pollaczekUnitPlus_mem_cyclotomicUnitsPlus` + Sinnott (the family
@@ -306,7 +286,6 @@ argument gives `Cor8_19Bridge`:
 
 This is the structural form of the Cor 8.19 contrapositive engine. -/
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Cor 8.19 bridge from Sinnott + Pollaczek-in-family** (contrapositive
 form, structural). Reduces `Cor8_19Bridge` to the two analytic Props
 plus a "Pollaczek forward" argument.
@@ -320,7 +299,6 @@ def Cor8_19BridgeStructural (i : ℕ) (hp_odd : p ≠ 2) (hp_three : 3 ≤ p) : 
   PollaczekInFamily p K i hp_odd hp_three →
   Cor8_19Bridge p K i
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Pollaczek forward**: under `p ∣ h⁺`, `pollaczekUnitPlus` IS a
 p-th power in the family subgroup of `(𝓞 K⁺)ˣ`.
 
@@ -343,7 +321,6 @@ def PollaczekForward (i : ℕ) (hp_odd : p ≠ 2) (hp_three : 3 ≤ p) : Prop :=
     ∃ β : (𝓞 (NumberField.maximalRealSubfield K))ˣ,
       β ^ p = v
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Cor8_19Bridge from forward Pollaczek**: PROVEN. Under
 `PollaczekForward`, `PollaczekInFamily`, and the `algebraMap` lift
 of any K⁺-side p-th-root to the K-side, we get the contrapositive
@@ -355,26 +332,17 @@ theorem cor8_19Bridge_of_pollaczekForward (i : ℕ)
     Cor8_19Bridge p K i where
   not_dvd_hPlus_of_not_isPthPower := by
     intro h_no_pth h_dvd
-    -- p∣h⁺ → ∃β ∈ K⁺ with β^p = (K⁺-preimage of pollaczekUnitPlus).
+    -- From `p ∣ h⁺`, get a K⁺-side `p`-th root `β` of the preimage `v` of
+    -- `pollaczekUnitPlus`, then lift it to `(𝓞 K)ˣ` along `algebraMap`.
     obtain ⟨v, hv_eq, hv_mem⟩ := h_pollaczek
     obtain ⟨β, hβ⟩ := h_forward h_dvd v hv_eq hv_mem
-    -- Lift β to (𝓞 K)ˣ via Units.map (algebraMap (𝓞 K⁺) (𝓞 K)).toMonoidHom.
     set β_K := Units.map
         (algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)).toMonoidHom β
-    -- β_K^p has underlying element = algebraMap(β^p) = algebraMap(v) = pollaczekUnitPlus.
+    -- `(β_K)^p = algebraMap (β^p) = algebraMap v = pollaczekUnitPlus`.
     apply h_no_pth β_K
-    rw [← hv_eq]
-    -- algebraMap v = (algebraMap (β^p) : 𝓞 K) = (algebraMap β : 𝓞 K)^p = (β_K : 𝓞 K)^p.
-    have h_v_pow : v = β ^ p := hβ.symm
-    rw [h_v_pow]
-    change (algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)
-        ((β ^ p : (𝓞 (NumberField.maximalRealSubfield K))ˣ) :
-          𝓞 (NumberField.maximalRealSubfield K)) : 𝓞 K) =
-      ((β_K : (𝓞 K)ˣ) : 𝓞 K) ^ p
-    rw [Units.val_pow_eq_pow_val, map_pow]
+    rw [← hv_eq, ← hβ, Units.val_pow_eq_pow_val, map_pow]
     rfl
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **`Cor8_19BridgeStructural` proof under `PollaczekForward`**:
 combining the structural decomposition with the forward Pollaczek
 property gives the bridge. -/
