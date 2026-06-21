@@ -149,7 +149,7 @@ theorem caseII_correctedRadical_primary_witness (D : RealCaseIIData37 K m) (hp :
   have hπK_ne : algebraMap (𝓞 K) K π ≠ 0 := by
     rw [Ne, map_eq_zero_iff _ (FaithfulSMul.algebraMap_injective (𝓞 K) K)]; exact hπ_ne
   have hpow : (37 : ℕ) * m + 1 = 37 + (37 * (m - 1) + 1) := by
-    rw [Nat.mul_sub_one]; omega
+    omega
   -- Prove the `·algebraMap π`-multiplied equation (it equals `hfield` after `x+yη^{36} = π·c`),
   -- then cancel the nonzero `algebraMap π`.
   apply mul_right_cancel₀ hπK_ne
@@ -301,22 +301,23 @@ theorem caseII_correctedRadicalUnramified37_of_idealKummer
     (h_ideal : CaseIIIdealKummerUnramified37) :
     CaseIICorrectedRadicalUnramified37 := by
   intro m D η hη
+  have hp : (37 : ℕ) ≠ 2 := by decide
   -- the correction unit `u₀ = -η`, anti-fixed.
   refine ⟨caseII_correctionUnit η, caseII_correctionUnit_anti η, ?_⟩
   set α := caseII_correctedRadical D η (caseII_correctionUnit η)
   have hα_ne : α ≠ 0 :=
-    caseII_correctedRadical_ne_zero D (by decide : (37 : ℕ) ≠ 2) η (caseII_correctionUnit η)
+    caseII_correctedRadical_ne_zero D hp η (caseII_correctionUnit η)
   -- Fact 1: the unconditional primarity witness.
   obtain ⟨N, c, hc_not_dvd, hc_eq⟩ :=
-    caseII_correctedRadical_primary_witness D (by decide : (37 : ℕ) ≠ 2) η hη
+    caseII_correctedRadical_primary_witness D hp η hη
   -- Fact 2: the unconditional ideal-`37`-th-power structure.
   have hideal : FractionalIdeal.spanSingleton (𝓞 (CyclotomicField 37 ℚ))⁰ α =
-      ((rootDivZetaSubOneDvdGcd (by decide : (37 : ℕ) ≠ 2) D.hζ D.equation D.hy η :
+      ((rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy η :
           FractionalIdeal (𝓞 (CyclotomicField 37 ℚ))⁰ (CyclotomicField 37 ℚ)) /
-        (rootDivZetaSubOneDvdGcd (by decide : (37 : ℕ) ≠ 2) D.hζ D.equation D.hy
+        (rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy
             (caseII_etaInv η) :
           FractionalIdeal (𝓞 (CyclotomicField 37 ℚ))⁰ (CyclotomicField 37 ℚ))) ^ 37 :=
-    caseII_correctedRadical_fractionalIdeal_eq D (by decide : (37 : ℕ) ≠ 2) η
+    caseII_correctedRadical_fractionalIdeal_eq D hp η
   -- Apply the ideal-theoretic Lemma 9.1.
   exact h_ideal α hα_ne
     ⟨D.ζ, D.hζ, N, c, hc_not_dvd, hc_eq⟩
