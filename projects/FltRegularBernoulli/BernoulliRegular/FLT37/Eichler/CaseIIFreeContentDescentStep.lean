@@ -223,7 +223,7 @@ theorem freeContentCaseIIData37_even_content
     have hmem_one : (1 : 𝓞 K) ∈ nthRootsFinset 37 (1 : 𝓞 K) := by
       rw [mem_nthRootsFinset (by norm_num)]; ring
     have hne : D.hζ.toInteger ≠ (1 : 𝓞 K) :=
-      fun h => D.hζ.toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37) h
+      fun h ↦ D.hζ.toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37) h
     have hpair := (zeta_spec 37 ℚ K).toInteger_isPrimitiveRoot
       |>.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
         (by decide : Nat.Prime 37) hmem_dζ hmem_one hne
