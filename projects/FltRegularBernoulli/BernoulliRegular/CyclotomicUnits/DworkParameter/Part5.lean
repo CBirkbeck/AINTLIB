@@ -243,7 +243,7 @@ theorem samePrime_rIntegralRatToQuotient_factorialWeightedLogCoeff
     samePrimeRIntegralRatToQuotient (p := p) (K := K) N
   let hE : Furtwaengler.DieudonneDwork.IsRIntegralPS p
       (Furtwaengler.artinHasseExpSeries p) :=
-    fun m => Furtwaengler.artinHasseExpSeries_coeff_isRIntegral p m
+    fun m ↦ Furtwaengler.artinHasseExpSeries_coeff_isRIntegral p m
   let hA : Furtwaengler.DieudonneDwork.IsRIntegralPS p
       (Furtwaengler.artinHasseExpSeries p - 1) :=
     hE.sub (Furtwaengler.DieudonneDwork.IsRIntegralPS.one p)
@@ -313,7 +313,7 @@ theorem samePrime_rIntegralRatToQuotient_factorialWeightedLogCoeff
           (PowerSeries.coeff
             (R := ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1)) d)
             ((PowerSeries.map q (integralExpMinusOneSeries p K)) ^ n) :=
-        congrArg (fun y =>
+        congrArg (fun y ↦
           ((d.factorial / n : ℕ) :
               ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1)) *
             ((-1 :
@@ -443,7 +443,7 @@ theorem quotient_mk_samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_w
         ∑ n ∈ Finset.Icc 1 d,
           φ (Furtwaengler.FiniteArtinHasseFormal.factorialWeightedLogCoeff p d n) :=
         (Finset.mul_sum (s := Finset.Icc 1 d)
-          (f := fun n => φ
+          (f := fun n ↦ φ
             (Furtwaengler.FiniteArtinHasseFormal.factorialWeightedLogCoeff p d n))
           xbar_d).symm
     _ =
@@ -456,7 +456,7 @@ theorem quotient_mk_samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_w
               φ (∑ n ∈ Finset.Icc 1 d,
                 Furtwaengler.FiniteArtinHasseFormal.factorialWeightedLogCoeff p d n) :=
           (map_sum φ
-            (fun n =>
+            (fun n ↦
               Furtwaengler.FiniteArtinHasseFormal.factorialWeightedLogCoeff p d n)
             (Finset.Icc 1 d)).symm
         rw [hmapsum]
@@ -529,7 +529,7 @@ theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_
   have hfac :
       d.factorial.factorization p =
         (d.factorial / n).factorization p + n.factorization p := by
-    have h := congrArg (fun f : ℕ →₀ ℕ => f p)
+    have h := congrArg (fun f : ℕ →₀ ℕ ↦ f p)
       (Nat.factorization_mul hdiv_ne hn0)
     simpa [hmul_div] using h
   have htarget :
@@ -654,7 +654,7 @@ theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_
   let D : ℕ := d.factorial.factorization p * (p - 1)
   let M : ℕ := D + N
   let I : Ideal (ValuedIntegerRing p K) := (lambdaIdeal p K) ^ (D + (N + 1))
-  let target : ℕ → ValuedIntegerRing p K := fun n => if n = d then x ^ d else 0
+  let target : ℕ → ValuedIntegerRing p K := fun n ↦ if n = d then x ^ d else 0
   have hd_ne : d ≠ 0 := pow_ne_zero r (Fact.out : Nat.Prime p).ne_zero
   have hd_mem : d ∈ Finset.Icc 1 d :=
     Finset.mem_Icc.mpr ⟨Nat.succ_le_of_lt (Nat.pos_of_ne_zero hd_ne), le_rfl⟩
@@ -699,11 +699,11 @@ theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_
           =
         ((d.factorial / d : ℕ) : ValuedIntegerRing p K) * target d := by
           refine Finset.sum_eq_single (s := Finset.Icc 1 d) (a := d)
-            (f := fun n =>
+            (f := fun n ↦
               ((d.factorial / n : ℕ) : ValuedIntegerRing p K) * target n)
             ?main ?not_mem
           · intro n hn hne
-            have hne' : n ≠ d := fun h =>
+            have hne' : n ≠ d := fun h ↦
               hne h
             simp [target, hne']
           · intro hd_not
