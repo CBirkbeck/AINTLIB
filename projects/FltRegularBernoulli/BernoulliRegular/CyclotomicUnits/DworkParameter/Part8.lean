@@ -119,7 +119,7 @@ theorem dworkParameter_mul_eq_zero
   have hux : (u : DworkCompleteIntegerRing p K) * x = 0 := by
     apply dworkCompleteLambda_mul_eq_zero (p := p) (K := K)
     simpa [hu, mul_assoc] using hx
-  have hcancel := congrArg (fun y : DworkCompleteIntegerRing p K =>
+  have hcancel := congrArg (fun y : DworkCompleteIntegerRing p K ↦
       ((↑u⁻¹ : DworkCompleteIntegerRing p K) * y)) hux
   simpa [mul_assoc] using hcancel
 
@@ -489,7 +489,7 @@ theorem evalIntegralPowerSeriesMod_expMinusOne_neg_dworkParameter_eq_conjugateLa
         FormalDwork.expMinusOneSeries_mapTo_subst_neg_inverse_mul_one_add_X_eq_neg_X
           (p := p) φ hp_two
       have hevalSeries := congrArg
-        (fun S : PowerSeries A =>
+        (fun S : PowerSeries A ↦
           (PowerSeries.trunc (M + 1) S).eval₂ (RingHom.id A) lambdabar)
         hseries
       have hHmul :
@@ -742,14 +742,14 @@ theorem dworkConjugateParameter_eq_neg_dworkParameter (hp_two : 2 < p) :
                 (RingHom.id A) lambdabar) := h
           _ = (PowerSeries.trunc (M + 1) G).eval₂ (RingHom.id A) cbar :=
             congrArg
-              (fun x : A => (PowerSeries.trunc (M + 1) G).eval₂ (RingHom.id A) x)
+              (fun x : A ↦ (PowerSeries.trunc (M + 1) G).eval₂ (RingHom.id A) x)
               hInnerEval
       have hseriesInv :
           PowerSeries.subst (PowerSeries.subst (-G) H) G = -G :=
         FormalDwork.inverseSeries_mapTo_subst_expMinusOneSeries_subst_neg_inverse
           (p := p) φ
       have hevalInv := congrArg
-        (fun S : PowerSeries A =>
+        (fun S : PowerSeries A ↦
           (PowerSeries.trunc (M + 1) S).eval₂ (RingHom.id A) lambdabar)
         hseriesInv
       have hG_cbar :
