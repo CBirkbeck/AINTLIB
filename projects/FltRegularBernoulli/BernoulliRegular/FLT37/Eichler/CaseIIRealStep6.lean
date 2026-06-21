@@ -82,7 +82,7 @@ theorem caseII_pow37_pow4_eq_one_of_notMem {w : 𝓞 (CyclotomicField 37 ℚ)} (
     ((Ideal.Quotient.mk lv149 w) ^ 37) ^ 4 = 1 := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   set Q := Ideal.Quotient.mk lv149 with hQ
-  have hw0 : Q w ≠ 0 := fun h => hw ((Ideal.Quotient.eq_zero_iff_mem).mp h)
+  have hw0 : Q w ≠ 0 := fun h ↦ hw ((Ideal.Quotient.eq_zero_iff_mem).mp h)
   -- The residue as a unit `u = Units.mk0 (Q w)`; its order divides `Nat.card (…)ˣ = 148`.
   set u : (𝓞 (CyclotomicField 37 ℚ) ⧸ lv149)ˣ := Units.mk0 (Q w) hw0 with hu
   have hcard : u ^ Nat.card (𝓞 (CyclotomicField 37 ℚ) ⧸ lv149)ˣ = 1 := pow_card_eq_one'
@@ -184,9 +184,9 @@ theorem caseII_real_x_add_zetaPow_y_notMem {m : ℕ}
   have hzeroL : Q (D.x + zetaPow 37 (CyclotomicField 37 ℚ) a * D.y) = 0 :=
     (Ideal.Quotient.eq_zero_iff_mem).mpr hmem
   rw [hL] at hzeroL
-  have hy0 : Q D.y ≠ 0 := fun h => hy ((Ideal.Quotient.eq_zero_iff_mem).mp h)
+  have hy0 : Q D.y ≠ 0 := fun h ↦ hy ((Ideal.Quotient.eq_zero_iff_mem).mp h)
   have hz0 : Q (zetaPow 37 (CyclotomicField 37 ℚ) a -
-      zetaPow 37 (CyclotomicField 37 ℚ) j) ≠ 0 := fun h =>
+      zetaPow 37 (CyclotomicField 37 ℚ) j) ≠ 0 := fun h ↦
     caseII_zetaPow_sub_zetaPow_notMem haj ((Ideal.Quotient.eq_zero_iff_mem).mp h)
   exact (mul_ne_zero hy0 hz0) hzeroL
 
@@ -294,8 +294,8 @@ theorem caseII_pow4_eq_of_ratio_isPthPower {γ δ : 𝓞 (CyclotomicField 37 ℚ
     (Ideal.Quotient.mk lv149 γ) ^ 4 = (Ideal.Quotient.mk lv149 δ) ^ 4 := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   set Q := Ideal.Quotient.mk lv149 with hQ
-  have hγ0 : Q γ ≠ 0 := fun h => hγ ((Ideal.Quotient.eq_zero_iff_mem).mp h)
-  have hδ0 : Q δ ≠ 0 := fun h => hδ ((Ideal.Quotient.eq_zero_iff_mem).mp h)
+  have hγ0 : Q γ ≠ 0 := fun h ↦ hγ ((Ideal.Quotient.eq_zero_iff_mem).mp h)
+  have hδ0 : Q δ ≠ 0 := fun h ↦ hδ ((Ideal.Quotient.eq_zero_iff_mem).mp h)
   -- `v ≠ 0`: else `v^37 = 0 = Q γ·(Q δ)⁻¹`, but `Q γ ≠ 0` and `(Q δ)⁻¹ ≠ 0`.
   have hv0 : v ≠ 0 := by
     rintro rfl
