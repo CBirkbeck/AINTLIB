@@ -665,7 +665,7 @@ theorem valuedLambdaQuotientDworkCoeffModP_natCast_mul
       simpa using hzero
   | succ n ih =>
       rw [Nat.cast_succ, add_mul, valuedLambdaQuotientDworkCoeffModP_add, ih]
-      simp
+      push_cast
       ring
 
 omit [NumberField.IsCMField K] in
@@ -685,9 +685,8 @@ theorem valuedLambdaQuotientDworkCoeffModP_intCast_mul
       have h :=
         valuedLambdaQuotientDworkCoeffModP_natCast_mul
           (p := p) (K := K) i (n + 1) x
-      rw [Int.cast_negSucc, Int.cast_negSucc]
-      rw [neg_mul]
-      rw [valuedLambdaQuotientDworkCoeffModP_neg, h]
+      rw [Int.cast_negSucc, Int.cast_negSucc, neg_mul,
+        valuedLambdaQuotientDworkCoeffModP_neg, h]
       ring
 
 omit [NumberField.IsCMField K] in
@@ -722,8 +721,8 @@ theorem dworkParameterQuotientCoeffModP_mk_algebraMap_mul_pow_of_lt
         (((Pi.single (⟨n, hn⟩ : Fin (p - 1)) c :
           Fin (p - 1) → RationalPadicIntegerRing p) i)) := by
   rw [← dworkParameterPowerLinearMap_single_coeff
-    (p := p) (K := K) (i := (⟨n, hn⟩ : Fin (p - 1))) (c := c)]
-  rw [dworkParameterQuotientCoeffModP_mk_powerLinearMap]
+      (p := p) (K := K) (i := (⟨n, hn⟩ : Fin (p - 1))) (c := c),
+    dworkParameterQuotientCoeffModP_mk_powerLinearMap]
 
 omit [NumberField.IsCMField K] in
 theorem dworkParameterQuotientCoeffModP_mk_pow_of_lt
@@ -797,21 +796,7 @@ theorem valuedLambdaQuotientDworkCoeffModP_mk_dworkParameterApprox_pow_of_lt
           (dworkParameterApprox p K (p - 1) ^ n) =
         AdicCompletion.evalₐ (lambdaIdeal p K) (p - 1)
           (dworkParameter p K ^ n) := by
-    calc
-      Ideal.Quotient.mk ((lambdaIdeal p K) ^ (p - 1))
-          (dworkParameterApprox p K (p - 1) ^ n)
-          =
-        (Ideal.Quotient.mk ((lambdaIdeal p K) ^ (p - 1))
-          (dworkParameterApprox p K (p - 1))) ^ n := by
-          rw [map_pow]
-      _ =
-        (AdicCompletion.evalₐ (lambdaIdeal p K) (p - 1)
-          (dworkParameter p K)) ^ n := by
-          rw [dworkParameter_evalₐ]
-      _ =
-        AdicCompletion.evalₐ (lambdaIdeal p K) (p - 1)
-          (dworkParameter p K ^ n) := by
-          rw [map_pow]
+    rw [map_pow, map_pow, dworkParameter_evalₐ]
   rw [hpow]
   have hsingle :
       dworkParameter p K ^ n =
@@ -819,8 +804,7 @@ theorem valuedLambdaQuotientDworkCoeffModP_mk_dworkParameterApprox_pow_of_lt
           (Pi.single (⟨n, hn⟩ : Fin (p - 1))
             (1 : RationalPadicIntegerRing p)) := by
     rw [dworkParameterPowerLinearMap_single]
-  rw [hsingle]
-  rw [valuedLambdaQuotientDworkCoeffModP_evalₐ_powerLinearMap]
+  rw [hsingle, valuedLambdaQuotientDworkCoeffModP_evalₐ_powerLinearMap]
 
 omit [NumberField.IsCMField K] in
 theorem valuedLambdaQuotientDworkCoeffModP_mk_intCast_mul_dworkParameterApprox_pow_of_lt
@@ -841,9 +825,9 @@ theorem valuedLambdaQuotientDworkCoeffModP_mk_intCast_mul_dworkParameterApprox_p
         Ideal.Quotient.mk ((lambdaIdeal p K) ^ (p - 1))
           (dworkParameterApprox p K (p - 1) ^ n)) by
         simp]
-  rw [valuedLambdaQuotientDworkCoeffModP_intCast_mul]
-  rw [valuedLambdaQuotientDworkCoeffModP_mk_dworkParameterApprox_pow_of_lt
-    (p := p) (K := K) i hn]
+  rw [valuedLambdaQuotientDworkCoeffModP_intCast_mul,
+    valuedLambdaQuotientDworkCoeffModP_mk_dworkParameterApprox_pow_of_lt
+      (p := p) (K := K) i hn]
 
 omit [NumberField.IsCMField K] in
 theorem valuedLambdaQuotientDworkCoeffModP_mk_rIntegralRat_mul_dworkParameterApprox_pow_of_lt
