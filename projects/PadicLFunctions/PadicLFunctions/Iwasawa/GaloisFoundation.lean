@@ -240,4 +240,40 @@ def FinfPlus : IntermediateField ℚ Om := ⨆ n, FPlus p n
 group of field automorphisms. -/
 abbrev GammaPlus : Type := FinfPlus p ≃ₐ[ℚ] FinfPlus p
 
+/-! ### Brick 5 — toward `X⁺_∞`: number-field structure and the absolute Galois groups
+
+`X⁺_∞ = Gal(M⁺_∞/F⁺_∞)`, where `M⁺_∞` is the maximal abelian pro-`p` extension of `F∞⁺` unramified
+outside `p` (RJW §13.2). The faithful route (chosen): build `M⁺_∞` through its **finite layers**, each
+finite over a **number field** `Fₙ⁺` — where mathlib's finite-extension ramification (`IsUnramifiedAt`,
+rings of integers, `LiesOver`) applies — then take the compositum inside `Ω` and `X⁺_∞ = Gal`. This
+brick lays the two prerequisites: (i) `Fₙ`, `Fₙ⁺` are genuinely number fields (finite over `ℚ`), so
+they have rings of integers and primes; (ii) the absolute Galois groups, the ambient for `M⁺_∞ ⊆ Ω`. -/
+
+/-- `Fₙ = ℚ(μ_{pⁿ})` is finite-dimensional over `ℚ` (cyclotomic). -/
+instance instFiniteDimensionalF (n : ℕ) : FiniteDimensional ℚ (F p n) :=
+  IsCyclotomicExtension.finiteDimensional {p ^ n} ℚ (F p n)
+
+/-- `Fₙ` is a number field — so it has a ring of integers `𝓞_{Fₙ}` and primes. -/
+instance instNumberFieldF (n : ℕ) : NumberField (F p n) where
+  to_charZero := inferInstance
+  to_finiteDimensional := instFiniteDimensionalF p n
+
+/-- `Fₙ⁺ = ℚ(ζₙ+ζₙ⁻¹)` is finite-dimensional over `ℚ` (a single algebraic generator). -/
+instance instFiniteDimensionalFPlus (n : ℕ) : FiniteDimensional ℚ (FPlus p n) := by
+  rw [FPlus]
+  exact IntermediateField.adjoin.finiteDimensional (Algebra.IsIntegral.isIntegral _)
+
+/-- `Fₙ⁺` is a number field — so it has a ring of integers `𝓞_{Fₙ⁺}` and primes. -/
+instance instNumberFieldFPlus (n : ℕ) : NumberField (FPlus p n) where
+  to_charZero := inferInstance
+  to_finiteDimensional := instFiniteDimensionalFPlus p n
+
+/-- The absolute Galois group `G_{Fₙ⁺} = Gal(ℚ̄/Fₙ⁺)` (`Ω` is an algebraic closure of `Fₙ⁺`).
+`Mₙ⁺` will be cut out inside `Ω` as a subextension fixed by an appropriate closed subgroup. -/
+abbrev AbsGalFPlus (n : ℕ) : Type := Om ≃ₐ[FPlus p n] Om
+
+/-- The absolute Galois group `G_{F∞⁺} = Gal(ℚ̄/F∞⁺)`. `X⁺_∞` is a quotient of (the abelianisation
+of) this group; `M⁺_∞ ⊆ Ω` is the corresponding fixed field. -/
+abbrev AbsGalFinfPlus : Type := Om ≃ₐ[FinfPlus p] Om
+
 end Iwasawa.GaloisFoundation
