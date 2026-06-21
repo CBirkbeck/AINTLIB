@@ -4,6 +4,7 @@ import Mathlib.NumberTheory.Cyclotomic.Gal
 import Mathlib.NumberTheory.RamificationInertia.Unramified
 import Mathlib.FieldTheory.Galois.Profinite
 import Mathlib.FieldTheory.Galois.Infinite
+import Mathlib.FieldTheory.Galois.Abelian
 import Mathlib.FieldTheory.Perfect
 import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
 import Mathlib.RingTheory.Algebraic.Integral
@@ -53,6 +54,60 @@ assume `Xₙ`/`X∞` until they are genuinely constructed.
 -/
 
 noncomputable section
+
+/-! ### General infrastructure: compositum of abelian extensions is abelian
+
+`Gal(⨆ᵢ Eᵢ / F)` is commutative when each `Eᵢ/F` is abelian Galois. This is mathlib-missing (only
+`normal_iSup` exists for the *normal* analogue, nothing for *abelian*), and is the keystone for the
+`Λ(Γ⁺)`-module structure on `X⁺_∞`. Stated generally; a candidate for `Common/`/mathlib. -/
+
+open IntermediateField in
+/-- `Kᵢ`, viewed inside `↥(⨆ⱼ Kⱼ)` via `comap`, maps back to `Kᵢ` — used to transfer `IsAbelianGalois`. -/
+noncomputable def restrAlgHom {F E : Type*} [Field F] [Field E] [Algebra F E] {ι : Type*}
+    (K : ι → IntermediateField F E) (i : ι) :
+    ↥(IntermediateField.comap (⨆ j, K j).val (K i)) →ₐ[F] ↥(K i) :=
+  AlgHom.codRestrict (((⨆ j, K j).val).comp (IntermediateField.comap (⨆ j, K j).val (K i)).val)
+    (K i).toSubalgebra (fun y => y.2)
+
+open IntermediateField in
+/-- **Compositum of abelian Galois extensions is abelian.** If each `Kᵢ/F` is abelian Galois, then the
+Galois group of the compositum `⨆ᵢ Kᵢ` over `F` is commutative. -/
+theorem isMulCommutative_iSup {F E : Type*} [Field F] [Field E] [Algebra F E]
+    {ι : Type*} (K : ι → IntermediateField F E) [∀ i, IsAbelianGalois F (K i)] :
+    IsMulCommutative (↥(⨆ i, K i) ≃ₐ[F] ↥(⨆ i, K i)) := by
+  haveI inst : ∀ i, IsAbelianGalois F ↥(comap (⨆ j, K j).val (K i)) :=
+    fun i => IsAbelianGalois.of_algHom (restrAlgHom K i)
+  have hsup : ⨆ i, comap (⨆ j, K j).val (K i) = ⊤ := by
+    have hmap : map (⨆ j, K j).val (⨆ i, comap (⨆ j, K j).val (K i)) = ⨆ j, K j := by
+      rw [IntermediateField.map_iSup]
+      refine le_antisymm (iSup_le fun i => ?_) (iSup_le fun i => ?_)
+      · rw [map_comap_eq]; exact inf_le_left.trans (le_iSup K i)
+      · refine le_trans ?_ (le_iSup _ i)
+        rw [map_comap_eq, inf_eq_left.mpr (by rw [IntermediateField.fieldRange_val]; exact le_iSup K i)]
+    have htop : map (⨆ j, K j).val (⊤ : IntermediateField F ↥(⨆ j, K j)) = ⨆ j, K j := by
+      apply SetLike.coe_injective; simp [IntermediateField.coe_map]
+    exact (map_injective (⨆ j, K j).val) (hmap.trans htop.symm)
+  rw [isMulCommutative_iff]; intro σ τ
+  have key : ∀ i, ∀ x ∈ comap (⨆ j, K j).val (K i), (σ * τ) x = (τ * σ) x := by
+    intro i x hx
+    haveI := (inst i).toIsMulCommutative
+    have hh : AlgEquiv.restrictNormalHom (comap (⨆ j, K j).val (K i)) (σ * τ)
+            = AlgEquiv.restrictNormalHom (comap (⨆ j, K j).val (K i)) (τ * σ) := by
+      rw [map_mul, map_mul]
+      exact isMulCommutative_iff.mp (inst i).toIsMulCommutative _ _
+    apply Subtype.val_injective
+    rw [← AlgEquiv.restrictNormalHom_apply (comap (⨆ j, K j).val (K i)) (σ * τ) ⟨x, hx⟩,
+        ← AlgEquiv.restrictNormalHom_apply (comap (⨆ j, K j).val (K i)) (τ * σ) ⟨x, hx⟩,
+        congrArg (fun g => (g ⟨x, hx⟩ : ↥(comap (⨆ j, K j).val (K i)))) hh]
+  refine AlgEquiv.ext fun y => ?_
+  have hy : y ∈ adjoin F (⋃ i, (comap (⨆ j, K j).val (K i) : Set ↥(⨆ j, K j))) := by
+    rw [← IntermediateField.iSup_eq_adjoin, hsup]; trivial
+  induction hy using IntermediateField.adjoin_induction with
+  | mem x hx => obtain ⟨i, hxi⟩ := Set.mem_iUnion.mp hx; exact key i x hxi
+  | algebraMap x => simp
+  | add a b _ _ ha hb => rw [map_add, map_add, ha, hb]
+  | mul a b _ _ ha hb => rw [map_mul, map_mul, ha, hb]
+  | inv a _ ha => rw [map_inv₀, map_inv₀, ha]
 
 namespace Iwasawa.GaloisFoundation
 
@@ -384,5 +439,48 @@ theorem LinfPlus_le_MinfPlus : LinfPlus p ≤ MinfPlus p := by
   refine Set.iUnion_subset fun n => (SetLike.coe_subset_coe.mpr (LPlusN_le_MPlusN p n)).trans ?_
   exact (Set.subset_iUnion (fun n => (↑(MPlusN p n) : Set Om)) n).trans
     (IntermediateField.subset_adjoin _ _)
+
+/-! #### `Mₙ⁺/Fₙ⁺` and `M∞⁺/F∞⁺` are abelian — toward the `Λ(Γ⁺)`-action and the SES
+
+Each admissible layer is abelian Galois (the `IsAdmissibleM` predicate's fields), so the compositum
+`Mₙ⁺` is abelian by `isMulCommutative_iSup`. -/
+
+/-- An admissible layer is an abelian Galois extension of `Fₙ⁺`. -/
+theorem isAbelianGalois_of_isAdmissibleM {n : ℕ} {L : IntermediateField (FPlus p n) Om}
+    (h : IsAdmissibleM p n L) : IsAbelianGalois (FPlus p n) L :=
+  haveI : IsGalois (FPlus p n) L := h.2.1
+  haveI : IsMulCommutative (L ≃ₐ[FPlus p n] L) := ⟨⟨h.2.2.1⟩⟩
+  ⟨⟩
+
+/-- The `IsAdmissibleM`-collapsed layer `⨆ (_ : IsAdmissibleM L), L` (which is `L` or `⊥`) is always
+abelian Galois — so the keystone `isMulCommutative_iSup` applies to `M⁺ₙ = ⨆ L, ⨆ (_:adm), L`. -/
+instance isAbelianGalois_admissibleSummand (n : ℕ) (L : IntermediateField (FPlus p n) Om) :
+    IsAbelianGalois (FPlus p n) ↥(⨆ _ : IsAdmissibleM p n L, L) := by
+  by_cases h : IsAdmissibleM p n L
+  · rw [iSup_pos h]; exact isAbelianGalois_of_isAdmissibleM p h
+  · rw [iSup_neg h]; infer_instance
+
+/-- `Gal(Mₙ⁺/Fₙ⁺)` is commutative (compositum of abelian layers). -/
+theorem isMulCommutative_galMPlusN (n : ℕ) :
+    IsMulCommutative (↥(MPlusN p n) ≃ₐ[FPlus p n] ↥(MPlusN p n)) :=
+  isMulCommutative_iSup (fun L : IntermediateField (FPlus p n) Om => ⨆ _ : IsAdmissibleM p n L, L)
+
+/-- An admissible-`L` layer is an abelian Galois extension of `Fₙ⁺`. -/
+theorem isAbelianGalois_of_isAdmissibleL {n : ℕ} {L : IntermediateField (FPlus p n) Om}
+    (h : IsAdmissibleL p n L) : IsAbelianGalois (FPlus p n) L :=
+  haveI : IsGalois (FPlus p n) L := h.2.1
+  haveI : IsMulCommutative (L ≃ₐ[FPlus p n] L) := ⟨⟨h.2.2.1⟩⟩
+  ⟨⟩
+
+instance isAbelianGalois_admissibleLSummand (n : ℕ) (L : IntermediateField (FPlus p n) Om) :
+    IsAbelianGalois (FPlus p n) ↥(⨆ _ : IsAdmissibleL p n L, L) := by
+  by_cases h : IsAdmissibleL p n L
+  · rw [iSup_pos h]; exact isAbelianGalois_of_isAdmissibleL p h
+  · rw [iSup_neg h]; infer_instance
+
+/-- `Gal(Lₙ⁺/Fₙ⁺)` is commutative (compositum of unramified abelian layers). -/
+theorem isMulCommutative_galLPlusN (n : ℕ) :
+    IsMulCommutative (↥(LPlusN p n) ≃ₐ[FPlus p n] ↥(LPlusN p n)) :=
+  isMulCommutative_iSup (fun L : IntermediateField (FPlus p n) Om => ⨆ _ : IsAdmissibleL p n L, L)
 
 end Iwasawa.GaloisFoundation

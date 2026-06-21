@@ -7053,3 +7053,33 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
 - For the **Vandiver IMC**: M is absorbed into `[G-IMC]` (reuses §12 `iwasawa_theorem`). For the **full IMC** (route
   (b)): M1 analytic class-number-formula / cyclotomic-unit index = class number (reverse divisibility; REUSE FRB +
   our §11); M2 combine E + M1 + S4-multiplicativity + Kummer duality → `Ch(𝒳⁺_∞)=I(𝒢⁺)ζ_p`; M3 f.g.-torsion-ness.
+
+---
+## Beastmode sub-tickets (2026-06-22) — X∞⁺ abelian → Γ⁺-action (RJW §13.2, Rmk 13.7)
+
+### [TG-ABEL-1] compositum of abelian Galois extensions is abelian
+- **Status**: in_progress
+- **File**: Iwasawa/GaloisFoundation.lean
+- **Parent**: TG (Γ⁺-action)
+- **Type**: theorem
+- **Statement**: `{F E} [Field F] [Field E] [Algebra F E] {ι} (K : ι → IntermediateField F E) [∀ i, IsGalois F (K i)] [∀ i, IsMulCommutative (K i ≃ₐ[F] K i)] : IsMulCommutative ((⨆ i, K i) ≃ₐ[F] (⨆ i, K i))`
+- **Proof sketch**: σ,τ ∈ Gal(⨆Kᵢ/F). View each Kᵢ inside ↥(⨆Kᵢ) via `IntermediateField.comap (⨆Kᵢ).val Kᵢ`. `restrictNormalHom` to Gal(Kᵢ/F) (abelian) ⟹ σ*τ and τ*σ agree on each Kᵢ. ⨆Kᵢ'=⊤ so ⋃Kᵢ generates; `AlgHom.ext_of_adjoin_eq_top` ⟹ σ*τ=τ*σ.
+- **Mathlib**: AlgEquiv.restrictNormalHom, restrictNormal_apply, IntermediateField.comap, AlgHom.ext_of_adjoin_eq_top, IsMulCommutative.
+- **Sources**: standard Galois theory (Washington Ch.; RJW §13.2 uses implicitly).
+
+### [TG-ABEL-2] Gal(Mₙ⁺/Fₙ⁺) abelian
+- **Status**: open
+- **Parent**: TG. **Depends on**: TG-ABEL-1.
+- **Statement**: `IsMulCommutative (MPlusN p n ≃ₐ[FPlus p n] MPlusN p n)` (and the L-version).
+- **Proof sketch**: MPlusN = ⨆ admissible layers; each IsAdmissibleM layer is IsGalois + abelian (the predicate's fields); apply TG-ABEL-1 over the subtype.
+
+### [TG-ABEL-3] X∞⁺ abelian
+- **Status**: open
+- **Parent**: TG. **Depends on**: TG-ABEL-2.
+- **Statement**: `IsMulCommutative (XinfPlus p)` (and Y∞⁺).
+- **Proof sketch**: σ ∈ Gal(M∞⁺/F∞⁺) preserves each Mₙ⁺ (characteristic: image of admissible is admissible ⟹ ⊆ Mₙ⁺); σ|Mₙ⁺ ∈ Gal(Mₙ⁺/Fₙ⁺) abelian (TG-ABEL-2); σ,τ commute on M∞⁺ generators ⟹ commute (ext_of_adjoin_eq_top).
+
+### [TG] Γ⁺-action on X∞⁺ (Remark 13.7) — Λ(Γ⁺)-module structure
+- **Status**: open. **Depends on**: TG-ABEL-3.
+- **Statement**: a `MulDistribMulAction` / `DistribMulAction (Γ⁺) (Additive X∞⁺)` via σ·x = σ̃xσ̃⁻¹ (lift σ̃ via restrictNormalHom Gal(M∞⁺/ℚ)↠Γ⁺), well-defined by X∞⁺ abelian.
+- **Sources**: RJW §13.2 Remark 13.7 (refs/PadicLFunctions/RJW.txt:6726).
