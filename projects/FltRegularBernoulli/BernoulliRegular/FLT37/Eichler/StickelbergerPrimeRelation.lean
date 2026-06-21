@@ -78,19 +78,10 @@ universe u
 variable {p : ℕ} [hp : Fact p.Prime]
 variable {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 
-/-! ### The cyclotomic Galois conjugates commute
-
-The cyclotomic Galois group `Gal(K/ℚ)` is canonically isomorphic to the abelian
-group `(ZMod p)ˣ`, so the conjugation operators `σ_a` commute. This is the
-arithmetic content that makes the Galois-orbit reduction of leaf 4 work. -/
-
 /-- **Commutativity of the cyclotomic Galois conjugates.** For any two indices
 `a b : (ZMod p)ˣ` and any ideal `q`,
 
-  `σ_a (σ_b q) = σ_b (σ_a q)`.
-
-Both sides equal `σ_{a*b} q = σ_{b*a} q`, using multiplicativity of the
-conjugation (`cyclotomicGaloisConjugate_mul`) and commutativity of `(ZMod p)ˣ`. -/
+  `σ_a (σ_b q) = σ_b (σ_a q)`. -/
 theorem cyclotomicGaloisConjugate_comm (a b : CyclotomicUnitDelta p) (q : Ideal (𝓞 K)) :
     Furtwaengler.cyclotomicGaloisConjugate (p := p) (K := K) a
         (Furtwaengler.cyclotomicGaloisConjugate (p := p) (K := K) b q) =
@@ -98,8 +89,6 @@ theorem cyclotomicGaloisConjugate_comm (a b : CyclotomicUnitDelta p) (q : Ideal 
         (Furtwaengler.cyclotomicGaloisConjugate (p := p) (K := K) a q) := by
   rw [← Furtwaengler.cyclotomicGaloisConjugate_mul,
     ← Furtwaengler.cyclotomicGaloisConjugate_mul, mul_comm]
-
-/-! ### The Stickelberger orbit ideal and its Galois-conjugacy invariance -/
 
 open scoped Classical in
 /-- The **Stickelberger orbit ideal** of a prime `q` for a nonnegative exponent
@@ -119,11 +108,7 @@ open scoped Classical in
 /-- The Galois conjugate of the Stickelberger orbit ideal of `q` is the
 Stickelberger orbit ideal of the Galois conjugate of `q`:
 
-  `σ_b (∏_a (σ_a q)^{e a}) = ∏_a (σ_a (σ_b q))^{e a}`.
-
-The proof pushes `σ_b` through the finite product (`Ideal.map` is a monoid hom
-on ideals, via `cyclotomicGaloisConjugate_mul_ideal` / `_pow_ideal`), then uses
-commutativity of the conjugates (`cyclotomicGaloisConjugate_comm`). -/
+  `σ_b (∏_a (σ_a q)^{e a}) = ∏_a (σ_a (σ_b q))^{e a}`. -/
 theorem stickelbergerOrbitIdeal_galAction (e : CyclotomicUnitDelta p → ℕ)
     (b : CyclotomicUnitDelta p) (q : Ideal (𝓞 K)) :
     Furtwaengler.cyclotomicGaloisConjugate (p := p) (K := K) b
@@ -132,23 +117,10 @@ theorem stickelbergerOrbitIdeal_galAction (e : CyclotomicUnitDelta p → ℕ)
         (Furtwaengler.cyclotomicGaloisConjugate (p := p) (K := K) b q) := by
   classical
   unfold stickelbergerOrbitIdeal
-  -- Push `σ_b` through the finite product (via the bundled ring hom
-  -- `Ideal.mapHom` on the underlying `Ideal.map`).
-  rw [show Furtwaengler.cyclotomicGaloisConjugate (p := p) (K := K) b
-        (∏ a : CyclotomicUnitDelta p,
-          Furtwaengler.cyclotomicGaloisConjugate (p := p) (K := K) a q ^ e a) =
-      Ideal.mapHom (cyclotomicRingOfIntegersEquiv (p := p) K b)
-        (∏ a : CyclotomicUnitDelta p,
-          Furtwaengler.cyclotomicGaloisConjugate (p := p) (K := K) a q ^ e a) from rfl,
-    map_prod]
+  rw [Furtwaengler.cyclotomicGaloisConjugate, Ideal.map_prod]
   refine Finset.prod_congr rfl fun a _ => ?_
-  -- Termwise: `σ_b ((σ_a q)^{e a}) = (σ_a (σ_b q))^{e a}`. Refold the bundled hom
-  -- application to `σ_b`, distribute over the power, then apply commutativity.
-  rw [show (Ideal.mapHom (cyclotomicRingOfIntegersEquiv (p := p) K b))
-        (Furtwaengler.cyclotomicGaloisConjugate (p := p) (K := K) a q ^ e a) =
-      Furtwaengler.cyclotomicGaloisConjugate (p := p) (K := K) b
-        (Furtwaengler.cyclotomicGaloisConjugate (p := p) (K := K) a q ^ e a) from rfl,
-    Furtwaengler.cyclotomicGaloisConjugate_pow_ideal, cyclotomicGaloisConjugate_comm]
+  rw [← Furtwaengler.cyclotomicGaloisConjugate, Furtwaengler.cyclotomicGaloisConjugate_pow_ideal,
+    cyclotomicGaloisConjugate_comm]
 
 open scoped Classical in
 /-- **Foundational reduction (Galois-orbit reduction of leaf 4).** If the
@@ -159,18 +131,14 @@ This is the precise statement that reduces the per-prime Stickelberger relation
 to a single representative per rational prime `ℓ`: since the cyclotomic Galois
 group acts transitively on the primes above `ℓ`, every such prime is `σ_b q₀`
 for some `b`, and this lemma propagates principality of the orbit ideal across
-the orbit. The proof: `orbitIdeal (σ_b q₀) = σ_b (orbitIdeal q₀)`
-(`stickelbergerOrbitIdeal_galAction`), and the Galois conjugate of a principal
-ideal `Ideal.span {γ}` is the principal ideal `Ideal.span {σ_b γ}`. -/
+the orbit. -/
 theorem stickelbergerOrbitIdeal_isPrincipal_of_conj (e : CyclotomicUnitDelta p → ℕ)
     (b : CyclotomicUnitDelta p) (q₀ : Ideal (𝓞 K))
     (h : (stickelbergerOrbitIdeal (p := p) (K := K) e q₀).IsPrincipal) :
     (stickelbergerOrbitIdeal (p := p) (K := K) e
         (Furtwaengler.cyclotomicGaloisConjugate (p := p) (K := K) b q₀)).IsPrincipal := by
   classical
-  -- Reduce to: `σ_b (orbitIdeal q₀)` is principal.
   rw [← stickelbergerOrbitIdeal_galAction]
-  -- `orbitIdeal q₀ = span {γ}`, so `σ_b (span {γ}) = span {σ_b γ}`.
   obtain ⟨γ, hγ⟩ := h
   refine ⟨⟨cyclotomicRingOfIntegersEquiv (p := p) K b γ, ?_⟩⟩
   rw [hγ, Ideal.submodule_span_eq, Ideal.submodule_span_eq,
@@ -195,8 +163,6 @@ theorem stickelbergerOrbitIdeal_isPrincipal_of_under_eq (e : CyclotomicUnitDelta
     (hunder : q.under ℤ = q₀.under ℤ)
     (h : (stickelbergerOrbitIdeal (p := p) (K := K) e q₀).IsPrincipal) :
     (stickelbergerOrbitIdeal (p := p) (K := K) e q).IsPrincipal := by
-  -- `q` lies above the same rational prime as `q₀`, so by Galois transitivity it
-  -- is a cyclotomic conjugate `σ_b q₀`, and the orbit ideal stays principal.
   obtain ⟨b, hb⟩ :=
     (Furtwaengler.mem_cyclotomicConjugates_iff (p := p) (K := K) q₀ q).mp
       (Furtwaengler.exists_mem_cyclotomicConjugates_of_under_eq (p := p) (K := K)
