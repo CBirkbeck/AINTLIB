@@ -135,7 +135,7 @@ theorem samePrime_rIntegralRatToQuotient_normalizedFactorialWeightedLogCoeff
             (R := ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1)) d)
             ((PowerSeries.map q
               (integralArtinHasseNormalizedExpMinusOneSeries p K - 1)) ^ n) :=
-        congrArg (fun y =>
+        congrArg (fun y ↦
           ((d.factorial / n : ℕ) :
               ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1)) *
             ((-1 :
@@ -602,7 +602,7 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_coeff_eq_zero_of_lt
         (p := p) (K := K) N x).coeff d = 0 := by
   classical
   rw [samePrimeFiniteArtinHasseNormalizedCoordPoly, Polynomial.finsetSum_coeff]
-  exact Finset.sum_eq_zero fun n hn =>
+  exact Finset.sum_eq_zero fun n hn ↦
     by
       have hnlt : n < N := Finset.mem_range.mp hn
       have hne : n + 1 ≠ d := by omega
