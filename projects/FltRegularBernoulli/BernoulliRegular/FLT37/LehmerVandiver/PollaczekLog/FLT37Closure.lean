@@ -41,7 +41,8 @@ tuple `(p, i, ℓ, t, k) = (37, 32, 149, 2, 4)`.
 
 ## Main result
 
-* `not_isPthPowerModPrime_pollaczekUnit_thirtyseven`:
+* `flt37_not_isPthPowerModPrime_pollaczekUnit` (and its fully-instantiated
+  form `flt37_not_isPthPowerModPrime_pollaczekUnit_concrete`):
   `¬IsPthPowerModPrime 37 (lehmerVandiverPrime 37 149 4 …)
     (pollaczekUnit 37 (CyclotomicField 37 ℚ) 32 : 𝓞 _)`.
 
@@ -90,10 +91,6 @@ theorem pollaczekUnit_notMem_lehmerVandiverPrime
 
 end FLT37Closure
 
-set_option maxRecDepth 4000000
-set_option linter.style.setOption false in
-set_option maxHeartbeats 4000000
-
 /-- **Squared LV004g-1 bridge: `∏_b (ζ^b - 1)^{4 b^E} = (ζ-1)^{4S} ·
 pollaczekUnit⁴`** in `𝓞 K`. Direct square of
 `zeta_pow_sub_one_prod_eq_pollaczekUnit_sq_mul_zeta_sub_one_pow`. -/
@@ -108,7 +105,6 @@ theorem zeta_pow_sub_one_prod_eq_pollaczekUnit_pow_four_mul_zeta_sub_one_pow
   -- Square the LV004g-1 bridge: (∏ x^{2 e})² = ∏ x^{4 e} = ((ζ-1)^{2S})² · (E²)²
   have h := zeta_pow_sub_one_prod_eq_pollaczekUnit_sq_mul_zeta_sub_one_pow
     p K hp_odd i
-  -- Square both sides.
   have hsq : _ ^ 2 = _ ^ 2 := congrArg (· ^ 2) h
   -- LHS²: ∏ x^{2e})² = ∏ x^{4e}
   rw [show ((∏ b ∈ Ico 1 ((p - 1) / 2 + 1),
@@ -200,10 +196,9 @@ theorem lehmerVandiverPrime_quotient_zeta_sub_one_pow_eq
         (((((t : ZMod ℓ) ^ k).val : ℕ) - 1 : 𝓞 (CyclotomicField p ℚ)) ^ n) := by
   rw [map_pow, map_pow]
   congr 1
-  -- Use the a=1 case of `lehmerVandiverPrime_quotient_zeta_pow_sub_one_eq`.
-  have h := lehmerVandiverPrime_quotient_zeta_pow_sub_one_eq
-    (p := p) ℓ k hℓ ht_coprime ht_ne 1
-  simpa using h
+  -- The `a = 1` case of `lehmerVandiverPrime_quotient_zeta_pow_sub_one_eq`.
+  simpa using
+    lehmerVandiverPrime_quotient_zeta_pow_sub_one_eq (p := p) ℓ k hℓ ht_coprime ht_ne 1
 
 set_option backward.isDefEq.respectTransparency false in
 /-- **Residue-substituted squared bridge.** Combines
@@ -253,7 +248,7 @@ theorem lehmerVandiverPrime_quotientEquiv_apply_natCast_tk
           𝓞 (CyclotomicField p ℚ) ⧸ lehmerVandiverPrime p ℓ k hℓ
             ht_coprime ht_ne))) =
       (t : ZMod ℓ) ^ k := by
-  haveI : NeZero ℓ := ⟨(Fact.out (p := ℓ.Prime)).ne_zero⟩
+  have : NeZero ℓ := ⟨(Fact.out (p := ℓ.Prime)).ne_zero⟩
   exact ((map_natCast (lehmerVandiverPrime_quotientEquiv (p := p) ℓ k hℓ
     ht_coprime ht_ne) _).trans (ZMod.natCast_val _)).trans (ZMod.cast_id _ _)
 
@@ -271,7 +266,7 @@ theorem lehmerVandiverPrime_quotientEquiv_quotient_apply_natCast_tk
         (Ideal.Quotient.mk (lehmerVandiverPrime p ℓ k hℓ ht_coprime ht_ne)
           (((((t : ZMod ℓ) ^ k).val : ℕ) : 𝓞 (CyclotomicField p ℚ))))) =
       (t : ZMod ℓ) ^ k := by
-  haveI : NeZero ℓ := ⟨(Fact.out (p := ℓ.Prime)).ne_zero⟩
+  have : NeZero ℓ := ⟨(Fact.out (p := ℓ.Prime)).ne_zero⟩
   rw [show (Ideal.Quotient.mk (lehmerVandiverPrime p ℓ k hℓ ht_coprime ht_ne)
       (((((t : ZMod ℓ) ^ k).val : ℕ) : 𝓞 (CyclotomicField p ℚ))) =
       (((((t : ZMod ℓ) ^ k).val : ℕ)) :
@@ -313,10 +308,6 @@ theorem lehmerVandiverPrime_squared_bridge_zmod
 
 section FLT37Closure
 
-set_option maxRecDepth 4000000
-set_option linter.style.setOption false in
-set_option maxHeartbeats 4000000
-
 /-- **Fermat exponent reduction for `ZMod p`.** For `x : ZMod p` with
 `x ≠ 0` and `m : ℕ`, `x^m = x^(m % (p - 1))`. Standard Fermat trick. -/
 private theorem ZMod.pow_eq_pow_mod_card_sub_one
@@ -336,7 +327,7 @@ theorem flt37_squared_bridge_lhs_eq_lehmerVandiverProduct :
     (∏ b ∈ Ico 1 ((37 - 1) / 2 + 1),
         (((2 : ZMod 149) ^ 4) ^ b - 1) ^ (4 * b ^ (37 - 1 - 32))) =
       lehmerVandiverProduct 37 32 149 2 4 := by
-  haveI : Fact (Nat.Prime 149) := ⟨by decide⟩
+  have : Fact (Nat.Prime 149) := ⟨by decide⟩
   unfold lehmerVandiverProduct
   refine Finset.prod_congr rfl fun b hb => ?_
   obtain ⟨hb1, hb2⟩ := Finset.mem_Ico.mp hb
@@ -396,11 +387,10 @@ theorem flt37_pollaczekUnit_residue_pow_four_eq_lehmerVandiverProduct
     have h_even : Even (4 * 432345) := ⟨2 * 432345, by ring⟩
     rw [hflip, h_even.neg_pow, h_lv6]
   -- The squared-bridge LHS uses `↑(2 : ℕ)` (natCast), while `h_lhs` uses
-  -- the OfNat literal `2 : ZMod 149`; norm_cast unifies them.
-  have h_bridge_norm := h_bridge
-  push_cast at h_bridge_norm
-  rw [h_lhs] at h_bridge_norm
-  rw [h_bridge_norm, h_pre, one_mul]
+  -- the OfNat literal `2 : ZMod 149`; `push_cast` unifies them.
+  push_cast at h_bridge
+  rw [h_lhs] at h_bridge
+  rw [h_bridge, h_pre, one_mul]
 
 set_option backward.isDefEq.respectTransparency false in
 /-- **FLT37 main closure: `¬IsPthPowerModPrime pollaczekUnit` for the
