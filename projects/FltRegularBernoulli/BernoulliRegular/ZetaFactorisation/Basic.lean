@@ -995,3 +995,25 @@ lemma dedekindLocalFactor_at_p {s : ℂ} :
 end ZetaFactorisation
 
 end BernoulliRegular
+
+namespace IsPrimitiveRoot
+
+/-- Compatibility shim restoring the removed mathlib `IsPrimitiveRoot.unit'`.
+
+For a primitive `n`-th root of unity `ζ` in a number field `K`, this packages the
+corresponding algebraic integer `ζ ∈ 𝓞 K` as a unit of `(𝓞 K)ˣ`.  It is definitionally
+`((h.toInteger_isPrimitiveRoot).isUnit (NeZero.ne n)).unit`, so `↑h.unit' = h.toInteger`
+holds by `IsUnit.unit_spec`, exactly reproducing the old behaviour at every call site. -/
+noncomputable def unit' {K : Type*} [Field K] {ζ : K} {n : ℕ} [NeZero n]
+    (h : IsPrimitiveRoot ζ n) : (NumberField.RingOfIntegers K)ˣ :=
+  (h.toInteger_isPrimitiveRoot.isUnit (NeZero.ne n)).unit
+
+/-- Compatibility shim restoring the removed mathlib `IsPrimitiveRoot.unit'_pow`:
+the `unit'` of a primitive `n`-th root of unity is itself an `n`-th root of unity. -/
+theorem unit'_pow {K : Type*} [Field K] {ζ : K} {n : ℕ} [NeZero n]
+    (h : IsPrimitiveRoot ζ n) : h.unit' ^ n = 1 := by
+  apply Units.ext
+  rw [Units.val_pow_eq_pow_val, Units.val_one, unit', IsUnit.unit_spec]
+  exact h.toInteger_isPrimitiveRoot.pow_eq_one
+
+end IsPrimitiveRoot
