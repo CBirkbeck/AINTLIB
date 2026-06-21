@@ -119,7 +119,11 @@ The `26`-derivation's `c₆₈ = 13` came from the wrong source `r₆₈ = 22`. 
 def deg68SecondDigit37Corrected : ZMod 37 := -uSixtyeight37⁻¹ * formalSum68SecondDigit37Corrected
 
 theorem deg68SecondDigit37Corrected_eq : deg68SecondDigit37Corrected = 4 := by
-  rw [deg68SecondDigit37Corrected, uSixtyeight37_eq, formalSum68SecondDigit37Corrected]; decide
+  rw [deg68SecondDigit37Corrected, uSixtyeight37_eq, formalSum68SecondDigit37Corrected]
+  -- After unfolding, the goal is `-(4 : ZMod 37)⁻¹ * 21 = 4`; finish with `native_decide`
+  -- (same approach as `deg68SecondDigit37_eq` in CaseIICor823Level71Deg68SecondDigit.lean;
+  -- `Lean.ofReduceBool` axiom is acceptable — the sibling file already uses it).
+  native_decide
 
 /-- **The genuine unscaled-coordinate second digit `ρ₀ = (32!)⁻¹ + c₆₈ ≡ 17 (mod 37)`** (proven by
 `decide`): the sum of the unchanged deg-`32` slice second digit `(32!)⁻¹ = 13` and the corrected
@@ -241,7 +245,7 @@ theorem thirtyseven_mul_factorialThirtytwoInv_eq_thirtyseven_mul_thirteen :
       (37 : ZMod (37 ^ 2)) * (13 : ZMod (37 ^ 2)) := by
   apply thirtyseven_mul_eq_of_castHom_eq
   rw [show (ZMod.castHom (by norm_num : (37 : ℕ) ∣ 37 ^ 2) (ZMod 37))
-      (((Nat.factorial 32 : ℕ) : ZMod (37 ^ 2))⁻¹) = (13 : ZMod 37) from by decide]
+      (((Nat.factorial 32 : ℕ) : ZMod (37 ^ 2))⁻¹) = (13 : ZMod 37) from by native_decide]
   decide
 
 open BernoulliRegular (CPlusGenerator) in
