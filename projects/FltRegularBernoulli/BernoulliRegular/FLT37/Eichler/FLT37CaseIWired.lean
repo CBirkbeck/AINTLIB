@@ -67,15 +67,14 @@ used*: `fltCaseI_thirtyseven` proves the first case of FLT for `37`
 unconditionally, so the bridge's content is discharged with no class-number
 input. The three single-prime non-divisibilities are extracted from
 `¬ (37:ℤ) ∣ a * b * c` via primality of `37`. -/
-def caseIBridge_thirtyseven_eichler :
+theorem caseIBridge_thirtyseven_eichler :
     BernoulliRegular.CaseIBridge 37 (CyclotomicField 37 ℚ) where
-  no_caseI_solution := fun _hPlus a b c hcaseI heq => by
-    have hp37 : Prime (37 : ℤ) := by rw [Int.prime_iff_natAbs_prime]; norm_num
-    have hx : ¬ (37 : ℤ) ∣ a := fun h =>
+  no_caseI_solution := fun _hPlus a b c hcaseI heq ↦ by
+    have hx : ¬ (37 : ℤ) ∣ a := fun h ↦
       hcaseI ((h.mul_right b).mul_right c)
-    have hy : ¬ (37 : ℤ) ∣ b := fun h =>
+    have hy : ¬ (37 : ℤ) ∣ b := fun h ↦
       hcaseI ((h.mul_left a).mul_right c)
-    have hz : ¬ (37 : ℤ) ∣ c := fun h =>
+    have hz : ¬ (37 : ℤ) ∣ c := fun h ↦
       hcaseI (h.mul_left (a * b))
     exact fltCaseI_thirtyseven a b c hx hy hz heq
 
@@ -102,22 +101,16 @@ theorem fermatLastTheoremFor_thirtyseven_of_caseII
       FLT37.LehmerVandiver.CaseII.WashingtonCaseIIExactQuotientUnitPower37Source)
     (noSecondOrderIrregular : NoSecondOrderIrregularPair 37 32) :
     FermatLastTheoremFor 37 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  haveI : NeZero 37 := ⟨by decide⟩
-  -- Case II: assemble the public Case-II bridge from the real-ideal descent +
-  -- exact quotient-unit-power inputs, exactly as the source-faithful endpoint
-  -- in `VandiverProven.lean`, with `¬ 37 ∣ h⁺` discharged by the proven
-  -- `Sinnott.flt37_not_dvd_hPlus`.
-  have caseII : CaseIIBridge 37 (CyclotomicField 37 ℚ) 32 := by
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : NeZero 37 := ⟨by decide⟩
+  have caseII : CaseIIBridge 37 (CyclotomicField 37 ℚ) 32 :=
     open FLT37.LehmerVandiver.CaseII in
-    exact caseIIBridge_thirtyseven_of_descent_step
-      (fun hV hSO {_m} D =>
+    caseIIBridge_thirtyseven_of_descent_step
+      (fun hV hSO {_m} D ↦
         caseII_descent_step_under_vandiver37
           (washingtonCaseIIAdjacentFixedGenerators37Source_of_realIdealDescent
             Sinnott.flt37_not_dvd_hPlus caseII_realDescent)
           caseII_exactUnit hV hSO D)
-  -- Final assembly via the LV-route, with the Case-I bridge filled by the
-  -- proven Eichler first case and `cor8_19` filled trivially from `37 ∤ h⁺`.
   exact fermatLastTheoremFor_thirtyseven_of_remaining
     (cor8_19Bridge_of_not_dvd_hPlus 37 (CyclotomicField 37 ℚ)
       Sinnott.flt37_not_dvd_hPlus)
