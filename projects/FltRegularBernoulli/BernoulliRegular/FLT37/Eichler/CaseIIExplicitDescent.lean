@@ -147,7 +147,7 @@ theorem caseIIExplicitDescent_isPow37_of_realUnitToFreePartModP_eq_zero
   obtain ⟨α, hα⟩ := hone
   -- `hα : (powMonoidHom 37) α = V`, i.e. `α^37 = V`.
   have hαV : (α : 𝓞 K) ^ 37 = (V : 𝓞 K) := by
-    have := congrArg (fun u : (𝓞 K)ˣ => (u : 𝓞 K)) hα
+    have := congrArg (fun u : (𝓞 K)ˣ ↦ (u : 𝓞 K)) hα
     simpa [powMonoidHom] using this
   -- Step 4: descend the `37`-th root to `(𝓞 K⁺)ˣ`.
   obtain ⟨β, hβ⟩ := FLT37.LehmerVandiver.CaseI.exists_real_unit_pow_eq_of_K_root
