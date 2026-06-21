@@ -62,52 +62,63 @@ complete local ring, this is the corrected Dwork parameter from CU-09. -/
 abbrev inverseSeries : PowerSeries ℚ :=
   Furtwaengler.artinHasseExpInverseSeries p
 
+/-- The Artin-Hasse logarithm series has zero constant term. -/
 @[simp]
 theorem logSeries_constantCoeff :
     PowerSeries.constantCoeff (logSeries p) = 0 :=
   Furtwaengler.artinHasseLogSeries_constantCoeff p
 
+/-- The Artin-Hasse logarithm series is substitutable. -/
 theorem logSeries_hasSubst :
     PowerSeries.HasSubst (logSeries p) :=
   Furtwaengler.artinHasseLogSeries_hasSubst p
 
+/-- The Artin-Hasse exponential series has constant term `1`. -/
 @[simp]
 theorem expSeries_constantCoeff :
     PowerSeries.constantCoeff (expSeries p) = 1 :=
   Furtwaengler.artinHasseExpSeries_constantCoeff p
 
+/-- The series `E_p(T) - 1` has zero constant term. -/
 @[simp]
 theorem expMinusOneSeries_constantCoeff :
     PowerSeries.constantCoeff (expMinusOneSeries p) = 0 :=
   Furtwaengler.artinHasseExpMinusOneSeries_constantCoeff p
 
+/-- The series `E_p(T) - 1` has linear coefficient `1`. -/
 @[simp]
 theorem expMinusOneSeries_coeff_one :
     (PowerSeries.coeff (R := ℚ) 1) (expMinusOneSeries p) = 1 :=
   Furtwaengler.artinHasseExpMinusOneSeries_coeff_one p
 
+/-- The formal inverse of `E_p(T) - 1` has zero constant term. -/
 @[simp]
 theorem inverseSeries_constantCoeff :
     PowerSeries.constantCoeff (inverseSeries p) = 0 :=
   Furtwaengler.artinHasseExpInverseSeries_constantCoeff p
 
+/-- The formal inverse of `E_p(T) - 1` has linear coefficient `1`. -/
 @[simp]
 theorem inverseSeries_coeff_one :
     (PowerSeries.coeff (R := ℚ) 1) (inverseSeries p) = 1 :=
   Furtwaengler.artinHasseExpInverseSeries_coeff_one p
 
+/-- For odd `p`, the formal inverse of `E_p(T) - 1` has quadratic coefficient `-1/2`. -/
 theorem inverseSeries_coeff_two_of_two_lt (hp_two : 2 < p) :
     (PowerSeries.coeff (R := ℚ) 2) (inverseSeries p) = -(1 / 2 : ℚ) :=
   Furtwaengler.artinHasseExpInverseSeries_coeff_two_of_two_lt p hp_two
 
+/-- The formal inverse of `E_p(T) - 1` is substitutable. -/
 theorem inverseSeries_hasSubst :
     PowerSeries.HasSubst (inverseSeries p) :=
   PowerSeries.HasSubst.of_constantCoeff_zero' (inverseSeries_constantCoeff p)
 
+/-- The series `E_p(T) - 1` has `p`-integral coefficients. -/
 theorem expMinusOneSeries_isPIntegral :
     Furtwaengler.DieudonneDwork.IsRIntegralPS p (expMinusOneSeries p) :=
   Furtwaengler.artinHasseExpMinusOneSeries_isRIntegral p
 
+/-- The formal inverse of `E_p(T) - 1` has `p`-integral coefficients. -/
 theorem inverseSeries_isPIntegral :
     Furtwaengler.DieudonneDwork.IsRIntegralPS p (inverseSeries p) :=
   Furtwaengler.artinHasseExpInverseSeries_isRIntegral p
@@ -157,8 +168,7 @@ theorem logOf_expSeries_eq_logSeries :
         E * (PowerSeries.derivative ℚ) L := by
     simp only [E, L, expSeries]
     unfold Furtwaengler.artinHasseExpSeries
-    rw [PowerSeries.derivative_subst ℚ (logSeries_hasSubst p)]
-    rw [PowerSeries.derivative_exp]
+    rw [PowerSeries.derivative_subst ℚ (logSeries_hasSubst p), PowerSeries.derivative_exp]
   have hgeom :
       PowerSeries.subst (E - 1) ((PowerSeries.derivative ℚ) (PowerSeries.log ℚ)) *
           E = 1 := by
@@ -166,7 +176,7 @@ theorem logOf_expSeries_eq_logSeries :
         (PowerSeries.derivative ℚ) (PowerSeries.log ℚ) *
             (1 + (PowerSeries.X : PowerSeries ℚ)) = 1 := by
       rw [PowerSeries.deriv_log]
-      let G : PowerSeries ℚ := PowerSeries.mk fun n => ((-1 : ℚ) ^ n)
+      let G : PowerSeries ℚ := PowerSeries.mk fun n ↦ ((-1 : ℚ) ^ n)
       change G * (1 + PowerSeries.X) = 1
       rw [mul_add, mul_one]
       ext n
@@ -182,9 +192,8 @@ theorem logOf_expSeries_eq_logSeries :
               (1 + (PowerSeries.X : PowerSeries ℚ))) =
           PowerSeries.subst (E - 1) (1 : PowerSeries ℚ) := by
       rw [hbase]
-    rw [PowerSeries.subst_mul hE_subst] at hsubst
-    rw [PowerSeries.subst_add hE_subst] at hsubst
-    rw [PowerSeries.subst_X hE_subst] at hsubst
+    rw [PowerSeries.subst_mul hE_subst, PowerSeries.subst_add hE_subst,
+      PowerSeries.subst_X hE_subst] at hsubst
     have hsubst_one :
         PowerSeries.subst (E - 1) (1 : PowerSeries ℚ) = 1 := by
       simpa using
@@ -192,11 +201,8 @@ theorem logOf_expSeries_eq_logSeries :
     rw [hsubst_one] at hsubst
     simpa [hE_sub_const, sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using hsubst
   apply PowerSeries.derivative.ext
-  · rw [PowerSeries.logOf_eq]
-    rw [PowerSeries.derivative_subst ℚ hE_subst]
-    rw [map_sub]
-    rw [Derivation.map_one_eq_zero, sub_zero]
-    rw [hE_deriv]
+  · rw [PowerSeries.logOf_eq, PowerSeries.derivative_subst ℚ hE_subst, map_sub,
+      Derivation.map_one_eq_zero, sub_zero, hE_deriv]
     calc
       PowerSeries.subst (E - 1) ((PowerSeries.derivative ℚ) (PowerSeries.log ℚ)) *
           (E * (PowerSeries.derivative ℚ) L)
@@ -253,7 +259,7 @@ theorem expSeries_mapTo_subst_inverse
         ((inverseSeries_isPIntegral p).mapTo φ)
         ((show Furtwaengler.DieudonneDwork.IsRIntegralPS p
             (Furtwaengler.artinHasseExpSeries p) from
-          fun n => Furtwaengler.artinHasseExpSeries_coeff_isRIntegral p n).mapTo φ) =
+          Furtwaengler.artinHasseExpSeries_coeff_isRIntegral p).mapTo φ) =
       1 + (PowerSeries.X : PowerSeries A) :=
   Furtwaengler.artinHasseExpSeries_mapTo_subst_inverse p φ
 
@@ -286,8 +292,7 @@ theorem logSeries_rescale_neg (hp_two : 2 < p) :
     · omega
     · exact Nat.odd_iff.mpr h
   ext n
-  rw [PowerSeries.coeff_rescale, map_neg]
-  rw [Furtwaengler.artinHasseLogSeries_coeff]
+  rw [PowerSeries.coeff_rescale, map_neg, Furtwaengler.artinHasseLogSeries_coeff]
   by_cases hpow : p ^ Nat.log p n = n ∧ n ≠ 0
   · rw [if_pos hpow]
     have hn_odd : Odd n := by
@@ -298,32 +303,31 @@ theorem logSeries_rescale_neg (hp_two : 2 < p) :
   · rw [if_neg hpow]
     ring
 
+/-- Substituting `L_p(T)` into `exp(-T)` agrees with substituting `-L_p(T)` into `exp`. -/
 theorem subst_logSeries_evalNeg_exp :
     PowerSeries.subst (logSeries p) (PowerSeries.evalNegHom (PowerSeries.exp ℚ)) =
       PowerSeries.subst (-(logSeries p)) (PowerSeries.exp ℚ) := by
-  rw [PowerSeries.evalNegHom, PowerSeries.rescale_eq_subst]
-  rw [PowerSeries.subst_comp_subst_apply]
+  rw [PowerSeries.evalNegHom, PowerSeries.rescale_eq_subst, PowerSeries.subst_comp_subst_apply]
   · have hLX :
         PowerSeries.subst (logSeries p) ((-1 : ℚ) • (PowerSeries.X : PowerSeries ℚ)) =
           -logSeries p := by
-      rw [PowerSeries.subst_smul (logSeries_hasSubst p)]
-      rw [PowerSeries.subst_X (logSeries_hasSubst p)]
+      rw [PowerSeries.subst_smul (logSeries_hasSubst p), PowerSeries.subst_X (logSeries_hasSubst p)]
       simp
     rw [hLX]
   · exact PowerSeries.HasSubst.smul_X (-1 : ℚ) ()
   · exact logSeries_hasSubst p
 
+/-- The series `exp(-L_p(T))` is a right inverse of `E_p(T)`. -/
 theorem subst_neg_log_exp_mul_expSeries :
     PowerSeries.subst (-(logSeries p)) (PowerSeries.exp ℚ) * expSeries p = 1 := by
   have h0 := congrArg
-    (fun F : PowerSeries ℚ => PowerSeries.subst (logSeries p) F)
+    (fun F : PowerSeries ℚ ↦ PowerSeries.subst (logSeries p) F)
     (PowerSeries.exp_mul_exp_neg_eq_one (A := ℚ))
   have h :
       PowerSeries.subst (logSeries p)
           (PowerSeries.exp ℚ * PowerSeries.evalNegHom (PowerSeries.exp ℚ)) =
         PowerSeries.subst (logSeries p) (1 : PowerSeries ℚ) := h0
-  rw [PowerSeries.subst_mul (logSeries_hasSubst p)] at h
-  rw [subst_logSeries_evalNeg_exp] at h
+  rw [PowerSeries.subst_mul (logSeries_hasSubst p), subst_logSeries_evalNeg_exp] at h
   have h1 : PowerSeries.subst (logSeries p) (1 : PowerSeries ℚ) = 1 := by
     simpa using
       (PowerSeries.subst_C (a := logSeries p) (r := (1 : ℚ)))
@@ -341,12 +345,11 @@ theorem expSeries_rescale_neg_mul_self (hp_two : 2 < p) :
     change PowerSeries.rescale (-1 : ℚ) (Furtwaengler.artinHasseExpSeries p) =
       PowerSeries.subst (-(logSeries p)) (PowerSeries.exp ℚ)
     unfold Furtwaengler.artinHasseExpSeries
-    rw [PowerSeries.rescale_eq_subst]
-    rw [PowerSeries.subst_comp_subst_apply]
+    rw [PowerSeries.rescale_eq_subst, PowerSeries.subst_comp_subst_apply]
     · have h := logSeries_rescale_neg p hp_two
       rw [PowerSeries.rescale_eq_subst] at h
       simpa using
-        congrArg (fun L => PowerSeries.subst L (PowerSeries.exp ℚ)) h
+        congrArg (fun L ↦ PowerSeries.subst L (PowerSeries.exp ℚ)) h
     · exact logSeries_hasSubst p
     · exact PowerSeries.HasSubst.smul_X (-1 : ℚ) ()
   rw [hneg]
@@ -376,7 +379,7 @@ theorem expMinusOneSeries_subst_neg_inverse_mul_one_add_X_eq_neg_X
   have hnegG : PowerSeries.HasSubst (-G) := by
     simpa using hG.smul' (-1 : ℚ)
   have hsubst := congrArg
-    (fun F : PowerSeries ℚ => PowerSeries.subst G F)
+    (fun F : PowerSeries ℚ ↦ PowerSeries.subst G F)
     (one_add_rescale_neg_expMinusOneSeries_mul_self p hp_two)
   change PowerSeries.subst G
       ((1 + PowerSeries.rescale (-1 : ℚ) (expMinusOneSeries p)) *
@@ -609,12 +612,9 @@ theorem correctedPowEquation_of_logTail_eq_zero
   have hpow : varpi ^ p = varpi ^ (p - 1) * varpi := by
     rw [← pow_succ, Nat.sub_one_add_one (Nat.ne_of_gt hp_pos)]
   rw [hpow] at hmul
-  exact mul_right_cancel₀ hvarpi (by
-    calc
-      varpi ^ (p - 1) * varpi = (-(p : A) * (1 + tail)) * varpi := by
-        rw [hmul]
-        ring
-      _ = (-(p : A) * (1 + tail)) * varpi := rfl)
+  refine mul_right_cancel₀ hvarpi ?_
+  rw [hmul]
+  ring
 
 /-- Guard lemma for the false exact normalization: under the same logarithmic
 equation, `varpi^(p-1) = -p` can hold only if the higher Artin-Hasse tail is
@@ -671,6 +671,7 @@ theorem artinHasseTailFinite_eq_zero_of_logTailFinite_eq_zero_of_pow_eq_neg
     (p := p) hpA hvarpi hlog hpow
 
 omit [Fact p.Prime] in
+/-- The precision-two finite Artin-Hasse tail has a single term. -/
 @[simp]
 theorem artinHasseTailFinite_two
     {A : Type*} [Field A] (varpi : A) :
@@ -719,12 +720,14 @@ def artinHasseTailValuationIndex (n : ℕ) : ℤ :=
   (p : ℤ) ^ n - 1 - (n : ℤ) * ((p : ℤ) - 1)
 
 omit [Fact p.Prime] in
+/-- The predicted valuation of the second tail term is `(p - 1)^2`. -/
 theorem artinHasseTailValuationIndex_two :
     artinHasseTailValuationIndex p 2 = ((p : ℤ) - 1) ^ 2 := by
   unfold artinHasseTailValuationIndex
   ring
 
 omit [Fact p.Prime] in
+/-- Successive predicted tail valuations differ by `(p - 1)(p^n - 1)`. -/
 theorem artinHasseTailValuationIndex_succ_sub (n : ℕ) :
     artinHasseTailValuationIndex p (n + 1) -
         artinHasseTailValuationIndex p n =
@@ -747,6 +750,7 @@ theorem artinHasseTailValuationIndex_lt_succ {n : ℕ} (hn : 1 ≤ n) :
     nlinarith
   nlinarith
 
+/-- From the second term on, the predicted tail valuations are at least the second one. -/
 theorem artinHasseTailValuationIndex_ge_two {n : ℕ} (hn : 2 ≤ n) :
     artinHasseTailValuationIndex p 2 ≤
       artinHasseTailValuationIndex p n := by
@@ -796,29 +800,36 @@ def cyclotomicLambda : LocalIntegerRing p K :=
 def cyclotomicZetaUnit : LocalUnitGroup p K :=
   Furtwaengler.KummerArtinHasse.lambdaZetaUnit p K
 
+/-- The local uniformizer `lambda = zeta_p - 1` is nonzero. -/
 @[simp]
 theorem cyclotomicLambda_ne_zero :
     cyclotomicLambda p K ≠ 0 :=
   Furtwaengler.KummerArtinHasse.lambdaPi_ne_zero (p := p) (K := K)
 
+/-- The completed maximal ideal is generated by `lambda = zeta_p - 1`. -/
 theorem localMaximalIdeal_eq_span_lambda :
     LocalMaximalIdeal p K =
       Ideal.span ({cyclotomicLambda p K} : Set (LocalIntegerRing p K)) :=
   Furtwaengler.KummerArtinHasse.lambdaMaximalIdeal_eq_span_pi (p := p) (K := K)
 
+/-- The completed maximal ideal at `lambda` is principal. -/
 theorem localMaximalIdeal_isPrincipal :
     Submodule.IsPrincipal (LocalMaximalIdeal p K) :=
   Furtwaengler.KummerArtinHasse.lambdaMaximalIdeal_isPrincipal (p := p) (K := K)
 
+/-- The distinguished local root of unity is a `p`-th root of unity. -/
 theorem cyclotomicZetaUnit_pow_eq_one :
     cyclotomicZetaUnit p K ^ p = 1 :=
   Furtwaengler.KummerArtinHasse.lambdaZetaUnit_pow_eq_one p K
 
+/-- The distinguished local root of unity lies in the first principal-unit subgroup. -/
 theorem cyclotomicZetaUnit_mem_principalUnits_one :
     cyclotomicZetaUnit p K ∈ PrincipalUnitSubgroup p K 1 :=
   Furtwaengler.KummerArtinHasse.lambdaZetaUnit_mem_principalUnits_one
     (p := p) (K := K)
 
+/-- The distinguished local root of unity does not lie in the second principal-unit
+subgroup. -/
 theorem cyclotomicZetaUnit_not_mem_principalUnits_two :
     cyclotomicZetaUnit p K ∉ PrincipalUnitSubgroup p K 2 :=
   Furtwaengler.KummerArtinHasse.lambdaZetaUnit_not_mem_principalUnits_two
@@ -848,6 +859,7 @@ def valuedCyclotomicZetaInteger : ValuedIntegerRing p K :=
 def valuedCyclotomicZeta : ValuedCompletion p K :=
   Furtwaengler.KummerArtinHasse.lambdaValuedZeta p K
 
+/-- In the valuation completion, `zeta_p = 1 + lambda`. -/
 @[simp]
 theorem valuedCyclotomicZeta_eq_one_add_lambda :
     valuedCyclotomicZeta p K = 1 + valuedCyclotomicLambda p K := by
@@ -857,6 +869,7 @@ theorem valuedCyclotomicZeta_eq_one_add_lambda :
     Furtwaengler.KummerArtinHasse.lambdaValuedZetaInteger,
     Furtwaengler.KummerArtinHasse.lambdaValuedPiInteger, map_sub]
 
+/-- In the valuation completion, `zeta_p` is a `p`-th root of unity. -/
 @[simp]
 theorem valuedCyclotomicZeta_pow_eq_one :
     valuedCyclotomicZeta p K ^ p = 1 := by
@@ -881,6 +894,7 @@ def valuedCorrectedTraceArgument
 def globalCyclotomicLambdaInteger : 𝓞 K :=
   Furtwaengler.KummerArtinHasse.lambdaPiIntegral p K
 
+/-- The global integral element `zeta_p - 1` is nonzero. -/
 @[simp]
 theorem globalCyclotomicLambdaInteger_ne_zero :
     globalCyclotomicLambdaInteger p K ≠ 0 :=
@@ -890,12 +904,14 @@ theorem globalCyclotomicLambdaInteger_ne_zero :
 def globalCyclotomicLambdaFieldUnit : Kˣ :=
   Furtwaengler.KummerArtinHasse.lambdaPiFieldUnit p K
 
+/-- The global field unit `zeta_p - 1` coerces to its integral representative in `K`. -/
 @[simp]
 theorem globalCyclotomicLambdaFieldUnit_val :
     (globalCyclotomicLambdaFieldUnit p K : K) =
       algebraMap (𝓞 K) K (globalCyclotomicLambdaInteger p K) :=
   Furtwaengler.KummerArtinHasse.lambdaPiFieldUnit_val (p := p) (K := K)
 
+/-- The global field unit `zeta_p - 1` has `lambda`-valuation `exp (-1)`. -/
 theorem globalCyclotomicLambdaFieldUnit_valuation :
     (Furtwaengler.KummerArtinHasse.lambdaHeightOne p K).valuation K
         (globalCyclotomicLambdaFieldUnit p K : K) =
