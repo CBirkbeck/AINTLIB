@@ -1,7 +1,6 @@
 import BernoulliRegular.FLT37.LehmerVandiver.CaseI.Main
 import BernoulliRegular.FLT37.Hilbert90
 
-
 /-!
 # LV010-A: caseI ideal-principalization under `¬ p ∣ h⁺`
 
