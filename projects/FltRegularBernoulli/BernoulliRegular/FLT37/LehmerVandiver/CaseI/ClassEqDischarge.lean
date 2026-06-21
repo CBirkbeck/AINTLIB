@@ -60,7 +60,6 @@ def CaseIClassEqDischarge (p : ℕ) [Fact p.Prime] (K : Type*)
           (⟨I, mem_nonZeroDivisors_iff_ne_zero.mpr hI_nz⟩
             : nonZeroDivisors (Ideal (𝓞 K)))
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Regular-prime fill of `CaseIClassEqDischarge`.** Under regularity
 (p coprime to |Cl(K)|), the case-I factor ideal `I` is principal,
 hence `[σI] = [I] = 1` trivially. Direct repackaging via
@@ -90,8 +89,9 @@ theorem caseIClassEqDischarge_of_regular {p : ℕ} [Fact p.Prime]
     have h_map_span : (Ideal.span ({a} : Set (𝓞 K))).map
         (ringOfIntegersComplexConj K).toRingEquiv.toRingHom =
       Ideal.span ({ringOfIntegersComplexConj K a} : Set (𝓞 K)) := by
-      rw [Ideal.map_span]; simp
-    rw [show I = Ideal.span ({a} : Set (𝓞 K)) from ha, h_map_span]
+      rw [Ideal.map_span]
+      simp
+    rw [ha, h_map_span]
   have h_class_σI :
       ClassGroup.mk0
         (⟨I.map (ringOfIntegersComplexConj K).toRingEquiv.toRingHom,
