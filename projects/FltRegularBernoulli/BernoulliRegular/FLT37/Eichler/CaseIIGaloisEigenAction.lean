@@ -398,9 +398,6 @@ theorem caseIIGaloisEigen_eigenCollapse_of_E32_monomial_residue
         (Additive.ofMul (FLT37.pollaczekUnit 37 (CyclotomicField 37 ℚ) 32))) :
     Cor815EigenCollapseAt w := by
   classical
-  -- Work inside CPlus.
-  have hwC : w ∈ BernoulliRegular.CPlus (p := 37) (K := CyclotomicField 37 ℚ) (by decide) :=
-    caseIIGaloisEigen_caseIICPlus37_eq_CPlus ▸ hw
   -- Set the bare irregular eigenvector class E := [pollaczekUnit 32].
   set E := cyclotomicUnitToFreePartModPAdd (p := 37) (CyclotomicField 37 ℚ)
     (Additive.ofMul (FLT37.pollaczekUnit 37 (CyclotomicField 37 ℚ) 32)) with hE
@@ -463,7 +460,7 @@ theorem caseIIGaloisEigen_E32_monomial_of_mem_omega32_eigenspace
     convert NumberField.Units.dirichletUnitTheorem.unitLattice_span_eq_top (CyclotomicField 37 ℚ)
   -- The eigenspace is 1-dimensional.
   set Eig := cyclotomicUnitFreePartModPDeltaCharacterEigenspace (p := 37)
-    (CyclotomicField 37 ℚ) (cyclotomicOmegaChar (p := 37) 32) with hEig
+    (CyclotomicField 37 ℚ) (cyclotomicOmegaChar (p := 37) 32)
   -- [E₃₂] as a member of the eigenspace, nonzero.
   have hE32_mem : cyclotomicUnitFreePartModPClass (p := 37) (CyclotomicField 37 ℚ)
       (Additive.ofMul (cyclotomicUnitFreeClass (CyclotomicField 37 ℚ)
