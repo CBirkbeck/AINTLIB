@@ -55,9 +55,9 @@ theorem samePrimeFiniteLogProductHomogeneousGrid_degree_sub_eq_zero (N d : ℕ)
   classical
   let C : ℕ := samePrimeFiniteLogCutoff (p := p) N
   have hdC : d < C := by simpa [C] using hd
-  have hsubset : Finset.Icc 1 d ⊆ Finset.range C := fun n hnI =>
+  have hsubset : Finset.Icc 1 d ⊆ Finset.range C := fun n hnI ↦
     Finset.mem_range.mpr (lt_of_le_of_lt (Finset.mem_Icc.mp hnI).2 hdC)
-  let f : ℕ → ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1) := fun n =>
+  let f : ℕ → ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1) := fun n ↦
       (if hn : n = 0 then 0 else
         ((-1 : ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1)) ^ (n + 1)) *
           (if hnd : n ≤ d then
@@ -179,7 +179,7 @@ theorem samePrimeFiniteLogProductHomogeneousGrid_add (N : ℕ)
           (p := p) (K := K) N hy (zero_mem (lambdaIdeal p K))]
         simp only [Finset.sum_sub_distrib]
     _ = 0 :=
-        Finset.sum_eq_zero fun d hd =>
+        Finset.sum_eq_zero fun d hd ↦
           samePrimeFiniteLogProductHomogeneousGrid_degree_sub_eq_zero
             (p := p) (K := K) N d hd hx hy
 
@@ -249,12 +249,12 @@ theorem samePrimeFiniteLogProductHomogeneousGrid_term_eq (N n : ℕ) (hn : n ≠
   have hsum_mem_n :
       (∑ d ∈ Finset.range (P.natDegree + 1), if n ≤ d then P.coeff d else 0) ∈
         (lambdaIdeal p K) ^ n :=
-    Ideal.sum_mem _ fun d _hd => hcoeff_mem_n d
+    Ideal.sum_mem _ fun d _hd ↦ hcoeff_mem_n d
   have hsum_mem_s :
       (∑ d ∈ Finset.range (P.natDegree + 1), if n ≤ d then P.coeff d else 0) ∈
         (lambdaIdeal p K) ^ (den + s) := by
     simpa [s, Nat.add_sub_of_le hdenn] using hsum_mem_n
-  let g : ℕ → ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1) := fun d =>
+  let g : ℕ → ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1) := fun d ↦
     if hnd : n ≤ d then
       samePrimeNatDivEvalAtDegree (p := p) (K := K) N n d hn (P.coeff d)
         (by
@@ -303,7 +303,7 @@ theorem samePrimeFiniteLogProductHomogeneousGrid_term_eq (N n : ℕ) (hn : n ≠
             (if n ≤ d then P.coeff d else 0) (hcoeff_mem_s d) := by
         rw [samePrimeNatDivEval_sum (p := p) (K := K) (N := N) (n := n) (s := s)
           hn (Finset.range (P.natDegree + 1))
-          (fun d => if n ≤ d then P.coeff d else 0) hcoeff_mem_s hsum_mem_s]
+          (fun d ↦ if n ≤ d then P.coeff d else 0) hcoeff_mem_s hsum_mem_s]
       _ = ∑ d ∈ Finset.range (P.natDegree + 1), g d := by
         refine Finset.sum_congr rfl ?_
         intro d _hd
@@ -326,10 +326,10 @@ theorem samePrimeFiniteLogProductHomogeneousGrid_term_eq (N n : ℕ) (hn : n ≠
             samePrimeNatDivEval_zero (p := p) (K := K)
               (N := N) (n := n) (s := s) hn hzero_s]
   let M : ℕ := max (P.natDegree + 1) C
-  have hPsubset : Finset.range (P.natDegree + 1) ⊆ Finset.range M := fun d hd =>
+  have hPsubset : Finset.range (P.natDegree + 1) ⊆ Finset.range M := fun d hd ↦
     Finset.mem_range.mpr
       (lt_of_lt_of_le (Finset.mem_range.mp hd) (Nat.le_max_left _ _))
-  have hCsubset : Finset.range C ⊆ Finset.range M := fun d hd =>
+  have hCsubset : Finset.range C ⊆ Finset.range M := fun d hd ↦
     Finset.mem_range.mpr
       (lt_of_lt_of_le (Finset.mem_range.mp hd) (Nat.le_max_right _ _))
   have hP_to_M :
@@ -339,7 +339,7 @@ theorem samePrimeFiniteLogProductHomogeneousGrid_term_eq (N n : ℕ) (hn : n ≠
       intro d _hdM hdP
       by_cases hnd : n ≤ d
       · have hd_gt : P.natDegree < d := by
-          have hd_not_lt : ¬ d < P.natDegree + 1 := fun hdlt =>
+          have hd_not_lt : ¬ d < P.natDegree + 1 := fun hdlt ↦
             hdP (Finset.mem_range.mpr hdlt)
           have hle : P.natDegree + 1 ≤ d := Nat.le_of_not_gt hd_not_lt
           omega
@@ -568,7 +568,7 @@ theorem samePrimeFiniteArtinHasseExpCoordPoly_coeff_eq_zero_of_lt
     (samePrimeFiniteArtinHasseExpCoordPoly (p := p) (K := K) N x).coeff d = 0 := by
   classical
   rw [samePrimeFiniteArtinHasseExpCoordPoly, Polynomial.finsetSum_coeff]
-  exact Finset.sum_eq_zero fun n hn =>
+  exact Finset.sum_eq_zero fun n hn ↦
     by
       have hnlt : n < N := Finset.mem_range.mp hn
       have hne : n + 1 ≠ d := by omega
