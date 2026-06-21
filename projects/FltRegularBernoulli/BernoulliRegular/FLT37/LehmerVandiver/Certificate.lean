@@ -35,7 +35,7 @@ This file provides:
   `lehmerVandiverPrefactor ≠ lehmerVandiverProduct`, equivalent to
   `Q_i^k ≢ 1 (mod ℓ)`.
 * `lehmerVandiverNonTrivial_thirtyseven` — the central numerical fact for
-  `(p, i, ℓ, t, k) = (37, 32, 149, 2, 4)`, proved by `native_decide`.
+  `(p, i, ℓ, t, k) = (37, 32, 149, 2, 4)`, proved by `decide`.
 * `two_pow_four_ne_one_mod_one_hundred_forty_nine` — admissibility of
   `t = 2`: `2^4 ≢ 1 (mod 149)`.
 
