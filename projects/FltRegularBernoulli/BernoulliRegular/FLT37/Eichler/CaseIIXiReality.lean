@@ -66,7 +66,9 @@ theorem caseII_unitsComplexConj_zetaU_zpow (e : ℤ) :
     (a := zetaU 37 (CyclotomicField 37 ℚ)) (n := 36), ← zpow_mul]
   apply unit'_zpow_congr
   -- `36·e - (-e) = 37·e`.
-  refine ⟨e, ?_⟩; push_cast; ring
+  refine ⟨e, ?_⟩
+  push_cast
+  ring
 
 /-- `σ(ζ^e) = ζ^{-e}` at the element level (`ringOfIntegersComplexConj`). -/
 theorem caseII_complexConj_zetaPow (e : ℤ) :
@@ -82,7 +84,7 @@ theorem caseII_cyclotomicUnit_eq_sum_zetaPow (b : ℕ) :
     cyclotomicUnit 37 (CyclotomicField 37 ℚ) b =
       ∑ j ∈ range b, zetaPow 37 (CyclotomicField 37 ℚ) (j : ℤ) := by
   rw [cyclotomicUnit]
-  refine Finset.sum_congr rfl fun j _ => ?_
+  refine Finset.sum_congr rfl fun j _ ↦ ?_
   rw [zetaPow_natCast, IsUnit.unit_spec]
 
 /-- **`σ((1-ζ^b)/(1-ζ)) = ζ^{1-b}·(1-ζ^b)/(1-ζ)`** (the σ-twist of the cyclotomic unit).
@@ -98,19 +100,19 @@ theorem caseII_complexConj_cyclotomicUnit (b : ℕ) :
   -- `σ(∑ ζ^j) = ∑ ζ^{-j}`.
   have hlhs : ∀ j ∈ range b, ringOfIntegersComplexConj (CyclotomicField 37 ℚ)
       (zetaPow 37 (CyclotomicField 37 ℚ) (j : ℤ)) =
-      zetaPow 37 (CyclotomicField 37 ℚ) (-(j : ℤ)) := fun j _ => caseII_complexConj_zetaPow _
+      zetaPow 37 (CyclotomicField 37 ℚ) (-(j : ℤ)) := fun j _ ↦ caseII_complexConj_zetaPow _
   rw [Finset.sum_congr rfl hlhs]
   -- RHS: `ζ^{1-b}·∑ ζ^j = ∑ ζ^{1-b+j}`.
   rw [Finset.mul_sum]
   have hrhs : ∀ j ∈ range b,
       zetaPow 37 (CyclotomicField 37 ℚ) (1 - (b : ℤ)) * zetaPow 37 (CyclotomicField 37 ℚ) (j : ℤ) =
-      zetaPow 37 (CyclotomicField 37 ℚ) (1 - (b : ℤ) + (j : ℤ)) := fun j _ =>
+      zetaPow 37 (CyclotomicField 37 ℚ) (1 - (b : ℤ) + (j : ℤ)) := fun j _ ↦
     (zetaPow_add 37 (CyclotomicField 37 ℚ) _ _).symm
   rw [Finset.sum_congr rfl hrhs]
   -- Reindex `j ↦ b-1-j`: `∑_{j<b} ζ^{1-b+(b-1-j)} = ∑_{j<b} ζ^{-j}`.
   rw [← Finset.sum_range_reflect
-    (fun j => zetaPow 37 (CyclotomicField 37 ℚ) (1 - (b : ℤ) + (j : ℤ))) b]
-  refine Finset.sum_congr rfl fun j hj => ?_
+    (fun j ↦ zetaPow 37 (CyclotomicField 37 ℚ) (1 - (b : ℤ) + (j : ℤ))) b]
+  refine Finset.sum_congr rfl fun j hj ↦ ?_
   rw [Finset.mem_range] at hj
   congr 1
   -- `1 - b + (b - 1 - j) = -j` (as integers, with `j < b`).
@@ -118,7 +120,8 @@ theorem caseII_complexConj_cyclotomicUnit (b : ℕ) :
     have h1 : 1 ≤ b := by omega
     push_cast [Nat.sub_sub]
     omega
-  rw [this]; ring
+  rw [this]
+  ring
 
 /-- **`σ(ξ_b) = ξ_b` — reality of Washington's Lemma 8.1 unit** (proven, axiom-clean).
 
@@ -201,7 +204,7 @@ theorem caseII_pollaczekUnitPlus_eq_xiProd_sq :
   rw [map_prod, ← Finset.prod_mul_distrib]
   -- Termwise: `(cyc^{e})·(σ cyc)^{e} = (cyc·σcyc)^e = (ξ²)^e`; and `(∏ ξ^e)² = ∏ (ξ²)^e`.
   rw [← Finset.prod_pow]
-  refine Finset.prod_congr rfl fun b _ => ?_
+  refine Finset.prod_congr rfl fun b _ ↦ ?_
   -- `pollaczekFactor b.2 ^ e * σ(pollaczekFactor b.2 ^ e) = (ξ_{b.1} ^ e)^2`.
   rw [map_pow, ← mul_pow]
   -- `pollaczekFactor = cyclotomicUnitUnit`.
@@ -217,7 +220,8 @@ theorem caseII_pollaczekUnitPlus_eq_xiProd_sq :
 /-- `residueInd37 1 = 0`. -/
 theorem caseII_residueInd37_one : residueInd37 (1 : (𝓞 (CyclotomicField 37 ℚ))ˣ) = 0 := by
   have := residueInd37_mul (1 : (𝓞 (CyclotomicField 37 ℚ))ˣ) 1
-  rw [mul_one] at this; linear_combination -this
+  rw [mul_one] at this
+  linear_combination -this
 
 /-- `residueInd37 (∏ x_i) = ∑ residueInd37 x_i` over a `Finset` (additivity of `ind₃₇`). -/
 theorem caseII_residueInd37_prod {ι : Type*} (s : Finset ι)
@@ -235,7 +239,8 @@ theorem caseII_xiUnit_congr (K : Type*) [Field K] [NumberField K]
     [IsCyclotomicExtension {37} ℚ K] {m n : ℕ} (hmn : m = n) (h₁ : m.Coprime 37)
     (h₂ : n.Coprime 37) :
     xiUnit 37 K m h₁ = xiUnit 37 K n h₂ := by
-  subst hmn; rfl
+  subst hmn
+  rfl
 
 /-- **Bridge:** for `b` coprime to `37` with `b < 37`, `residueInd37 ξ_b = xiIndZMod (b : ZMod 37)`.
 (`(b : ZMod 37).val = b`, and `xiUnit` depends on the index only up to the proof-irrelevant
@@ -244,7 +249,8 @@ theorem caseII_residueInd37_xiUnit_eq_xiIndZMod {b : ℕ} (hb : b.Coprime 37) (h
     (hb_pos : 0 < b) :
     residueInd37 (xiUnit 37 (CyclotomicField 37 ℚ) b hb) = xiIndZMod ((b : ℕ) : ZMod 37) := by
   have hb_ne : ((b : ℕ) : ZMod 37) ≠ 0 := by
-    rw [Ne, ZMod.natCast_eq_zero_iff]; omega
+    rw [Ne, ZMod.natCast_eq_zero_iff]
+    omega
   rw [xiIndZMod_of_ne hb_ne]
   -- `(↑b).val = b`, so the two `xiUnit` indices coincide.
   have hval : (((b : ℕ) : ZMod 37)).val = b := by
@@ -276,7 +282,9 @@ theorem caseII_E32_isPthPower_of_xiIndZero
     -- `ind₃₇ ξ_{b.1} = xiIndZMod (b.1 : ZMod 37) = 0` (telescoping); `b.1 ∈ [1,18]`.
     have hmem := b.2
     rw [Finset.mem_Ico] at hmem
-    have hb_ne : ((b.1 : ℕ) : ZMod 37) ≠ 0 := by rw [Ne, ZMod.natCast_eq_zero_iff]; omega
+    have hb_ne : ((b.1 : ℕ) : ZMod 37) ≠ 0 := by
+      rw [Ne, ZMod.natCast_eq_zero_iff]
+      omega
     rw [caseII_residueInd37_xiUnit_eq_xiIndZMod (caseII_pollaczek_index_coprime b.2)
         (by omega) (by omega), hξ _ hb_ne, mul_zero]
   rw [Finset.sum_congr rfl hterm, Finset.sum_const_zero, mul_zero]
@@ -294,7 +302,7 @@ theorem caseII_E32_isPthPower_of_rhoReality {j : ZMod 37}
     BernoulliRegular.IsPthPowerModPrime 37 lv149
       ((FLT37.pollaczekUnitPlus 37 (CyclotomicField 37 ℚ) 32 :
         (𝓞 (CyclotomicField 37 ℚ))ˣ) : 𝓞 (CyclotomicField 37 ℚ)) :=
-  caseII_E32_isPthPower_of_xiIndZero (fun _ hc => caseII_xiIndZMod_eq_zero hρ hj hc)
+  caseII_E32_isPthPower_of_xiIndZero (fun _ hc ↦ caseII_xiIndZMod_eq_zero hρ hj hc)
 
 end BernoulliRegular.FLT37.Eichler
 
