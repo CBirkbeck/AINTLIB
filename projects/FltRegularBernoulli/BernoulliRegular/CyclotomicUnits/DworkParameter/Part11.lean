@@ -89,7 +89,7 @@ theorem span_natCast_prime_dworkComplete_eq_lambdaIdeal_pow_pred :
   let R : Type _ := ValuedIntegerRing p K
   let S : Type _ := DworkCompleteIntegerRing p K
   let f : R →+* S := algebraMap R S
-  have h := congrArg (fun I : Ideal R => Ideal.map f I)
+  have h := congrArg (fun I : Ideal R ↦ Ideal.map f I)
     (span_natCast_prime_eq_lambdaIdeal_pow_pred (p := p) (K := K))
   change Ideal.map f (Ideal.span ({(p : R)} : Set R)) =
     Ideal.map f ((lambdaIdeal p K) ^ (p - 1)) at h
@@ -238,7 +238,7 @@ theorem pow_sub_pow_mem_ideal_of_sub_mem {R : Type*} [CommRing R]
     exact hxy
   have hpow :
       Ideal.Quotient.mk I (x ^ n) = Ideal.Quotient.mk I (y ^ n) := by
-    simpa [map_pow] using congrArg (fun z : R ⧸ I => z ^ n) hq
+    simpa [map_pow] using congrArg (fun z : R ⧸ I ↦ z ^ n) hq
   exact Ideal.Quotient.eq.mp hpow
 
 omit [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K] in
@@ -292,7 +292,6 @@ theorem dwork_pow_prime_sub_pow_mem_parameterIdeal_pow_pred_of_sub_mem
   have hpI :
       (p : DworkCompleteIntegerRing p K) ∈
         (dworkParameterIdeal p K) ^ (p - 1) := by
-    change (p : DworkCompleteIntegerRing p K) ∈ (dworkParameterIdeal p K) ^ (p - 1)
     rw [← span_natCast_prime_dworkComplete_eq_parameterIdeal_pow_pred
       (p := p) (K := K)]
     exact Ideal.mem_span_singleton_self (p : DworkCompleteIntegerRing p K)
@@ -405,7 +404,7 @@ theorem dworkRamificationCorrection_sub_linear_mem_parameterIdeal_pow_pred
 completion. -/
 theorem dworkParameter_regular :
     ∀ {x : DworkCompleteIntegerRing p K}, dworkParameter p K * x = 0 → x = 0 :=
-  fun hx => dworkParameter_mul_eq_zero (p := p) (K := K) hx
+  fun hx ↦ dworkParameter_mul_eq_zero (p := p) (K := K) hx
 
 theorem dworkParameter_pow_regular (n : ℕ)
     {x : DworkCompleteIntegerRing p K}
