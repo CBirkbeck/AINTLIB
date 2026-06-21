@@ -137,7 +137,7 @@ theorem caseII_intCast_span_isCoprime {x y : ℤ} (h : IsCoprime x y) :
   rw [Ideal.isCoprime_span_singleton_iff]
   obtain ⟨u, v, huv⟩ := h
   exact ⟨(u : 𝓞 (CyclotomicField 37 ℚ)), (v : 𝓞 (CyclotomicField 37 ℚ)), by
-    exact_mod_cast congrArg (fun t : ℤ => (t : 𝓞 (CyclotomicField 37 ℚ))) huv⟩
+    exact_mod_cast congrArg (fun t : ℤ ↦ (t : 𝓞 (CyclotomicField 37 ℚ))) huv⟩
 
 /-! ## 2. The two-root-factor forcing (the kernel of Washington's "pairwise relatively prime")
 
@@ -181,7 +181,7 @@ theorem caseII_coprime_two_root_factor_mem_forces_p
       (mem_nthRootsFinset (by norm_num) _).mpr (by
         rw [← pow_mul, mul_comm, pow_mul, hζ37, one_pow])
     have hne : (ζ ^ j : 𝓞 (CyclotomicField 37 ℚ)) ≠ ζ ^ k :=
-      fun h => hjk (D.hζ.toInteger_isPrimitiveRoot.pow_inj hj hk h)
+      fun h ↦ hjk (D.hζ.toInteger_isPrimitiveRoot.pow_inj hj hk h)
     have hassoc : Associated (ζ - 1) (ζ ^ j - ζ ^ k) :=
       D.hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
         (by decide : Nat.Prime 37) hmem_j' hmem_k' hne
@@ -270,16 +270,16 @@ theorem caseII_descended_blocks_span_isCoprime
   have hs_mem : ra * σR ra ∈ 𝔪 := hle (Ideal.mem_sup_left (Ideal.mem_span_singleton_self _))
   have ht_mem : rb * σR rb ∈ 𝔪 := hle (Ideal.mem_sup_right (Ideal.mem_span_singleton_self _))
   -- the four root-factor memberships, from the (conjugated) factor equations.
-  have hmem_ra : ra ∈ 𝔪 → D.x + ζ ^ 1 * D.y ∈ 𝔪 := fun h => by
+  have hmem_ra : ra ∈ 𝔪 → D.x + ζ ^ 1 * D.y ∈ 𝔪 := fun h ↦ by
     rw [pow_one, hFa]
     exact 𝔪.mul_mem_left _ (Ideal.pow_mem_of_mem 𝔪 h 37 (by norm_num))
-  have hmem_σra : σR ra ∈ 𝔪 → D.x + ζ ^ 36 * D.y ∈ 𝔪 := fun h => by
+  have hmem_σra : σR ra ∈ 𝔪 → D.x + ζ ^ 36 * D.y ∈ 𝔪 := fun h ↦ by
     rw [hFa_conj]
     exact 𝔪.mul_mem_left _ (Ideal.pow_mem_of_mem 𝔪 h 37 (by norm_num))
-  have hmem_rb : rb ∈ 𝔪 → D.x + ζ ^ 2 * D.y ∈ 𝔪 := fun h => by
+  have hmem_rb : rb ∈ 𝔪 → D.x + ζ ^ 2 * D.y ∈ 𝔪 := fun h ↦ by
     rw [hFb]
     exact 𝔪.mul_mem_left _ (Ideal.pow_mem_of_mem 𝔪 h 37 (by norm_num))
-  have hmem_σrb : σR rb ∈ 𝔪 → D.x + ζ ^ 35 * D.y ∈ 𝔪 := fun h => by
+  have hmem_σrb : σR rb ∈ 𝔪 → D.x + ζ ^ 35 * D.y ∈ 𝔪 := fun h ↦ by
     rw [hFb_conj]
     exact 𝔪.mul_mem_left _ (Ideal.pow_mem_of_mem 𝔪 h 37 (by norm_num))
   -- the finisher: a block factor in `𝔪` together with `ζ − 1 ∈ 𝔪` forces `𝔪 = 𝔭`, contradicting
@@ -360,8 +360,8 @@ theorem exists_coprimeFreeContentCaseIIDvdZData37_of_Int_solution
   obtain ⟨m, D, hDx, hDy, hz_eq⟩ :=
     exists_realCaseIIData37_zRel_of_Int_solution hy_int hz_int hz_ne e
   -- `149 ∤ x, y` as `ZMod 149` non-vanishing.
-  have hx' : ¬ (x : ZMod 149) = 0 := fun h => hx_lv ((ZMod.intCast_zmod_eq_zero_iff_dvd x 149).mp h)
-  have hy' : ¬ (y : ZMod 149) = 0 := fun h => hy_lv ((ZMod.intCast_zmod_eq_zero_iff_dvd y 149).mp h)
+  have hx' : ¬ (x : ZMod 149) = 0 := fun h ↦ hx_lv ((ZMod.intCast_zmod_eq_zero_iff_dvd x 149).mp h)
+  have hy' : ¬ (y : ZMod 149) = 0 := fun h ↦ hy_lv ((ZMod.intCast_zmod_eq_zero_iff_dvd y 149).mp h)
   -- Lemma 9.7 at the base: `149 ∣ z` (the Furtwängler residue obstruction).
   have hz_lv_int : (z : ZMod 149) = 0 := by
     have he : (x : ZMod 149) ^ 37 + (y : ZMod 149) ^ 37 = (z : ZMod 149) ^ 37 := by
@@ -379,9 +379,9 @@ theorem exists_coprimeFreeContentCaseIIDvdZData37_of_Int_solution
         (caseII_zeta_sub_one_notMem_lv149 D.hζ)
     · exact hz'
   have hDx_notMem : D.x ∉ lv149 := by
-    rw [hDx]; exact fun h => hx' ((caseII_intCast_mem_lv149_iff x).mp h)
+    rw [hDx]; exact fun h ↦ hx' ((caseII_intCast_mem_lv149_iff x).mp h)
   have hDy_notMem : D.y ∉ lv149 := by
-    rw [hDy]; exact fun h => hy' ((caseII_intCast_mem_lv149_iff y).mp h)
+    rw [hDy]; exact fun h ↦ hy' ((caseII_intCast_mem_lv149_iff y).mp h)
   -- the threaded span coprimality at the seed.
   have hcopD : IsCoprime (Ideal.span ({D.x} : Set (𝓞 (CyclotomicField 37 ℚ))))
       (Ideal.span ({D.y} : Set (𝓞 (CyclotomicField 37 ℚ)))) := by
@@ -468,27 +468,27 @@ theorem exists_coprimeFreeContentCaseIIDvdZData37_of_caseII_int_solution
     · -- `37 ∣ a`: normal form `(b, -c, -a)`; the pair is `(b, -c)`.
       have he' : b ^ 37 + (-c) ^ 37 = (-a) ^ 37 := by
         rw [hodd'.neg_pow, hodd'.neg_pow]; linarith [e]
-      have hb37 : ¬ (37 : ℤ) ∣ b := fun hb => h37c ha hb
-      have hc37 : ¬ (37 : ℤ) ∣ c := fun hc => h37ac ha hc
+      have hb37 : ¬ (37 : ℤ) ∣ b := fun hb ↦ h37c ha hb
+      have hc37 : ¬ (37 : ℤ) ∣ c := fun hc ↦ h37ac ha hc
       have hb_lv : ¬ (149 : ℤ) ∣ b := h_lemma96 b hb37 (Or.inr (Or.inl rfl))
       have hc_lv : ¬ (149 : ℤ) ∣ c := h_lemma96 c hc37 (Or.inr (Or.inr rfl))
       exact exists_coprimeFreeContentCaseIIDvdZData37_of_lemma96
         (a := b) (b := -c) (c := -a) hb37 (by rwa [dvd_neg]) (by rwa [neg_ne_zero])
-        he' hb_lv (fun h => hc_lv (dvd_neg.mp h)) hbc_cop.neg_right
+        he' hb_lv (fun h ↦ hc_lv (dvd_neg.mp h)) hbc_cop.neg_right
     · -- `37 ∣ b`: normal form `(-c, a, -b)`; the pair is `(-c, a)`.
       have he' : (-c) ^ 37 + a ^ 37 = (-b) ^ 37 := by
         rw [hodd'.neg_pow, hodd'.neg_pow]; linarith [e]
-      have ha37 : ¬ (37 : ℤ) ∣ a := fun ha => h37c ha hb
-      have hc37 : ¬ (37 : ℤ) ∣ c := fun hc => h37bc hb hc
+      have ha37 : ¬ (37 : ℤ) ∣ a := fun ha ↦ h37c ha hb
+      have hc37 : ¬ (37 : ℤ) ∣ c := fun hc ↦ h37bc hb hc
       have ha_lv : ¬ (149 : ℤ) ∣ a := h_lemma96 a ha37 (Or.inl rfl)
       have hc_lv : ¬ (149 : ℤ) ∣ c := h_lemma96 c hc37 (Or.inr (Or.inr rfl))
       exact exists_coprimeFreeContentCaseIIDvdZData37_of_lemma96
         (a := -c) (b := a) (c := -b) (by rwa [dvd_neg]) (by rwa [dvd_neg])
-        (by rwa [neg_ne_zero]) he' (fun h => hc_lv (dvd_neg.mp h)) ha_lv
+        (by rwa [neg_ne_zero]) he' (fun h ↦ hc_lv (dvd_neg.mp h)) ha_lv
         hac_cop.symm.neg_left
   · -- `37 ∣ c`: the producer's own normal form `(a, b, c)`; the pair is `(a, b)`.
-    have ha37 : ¬ (37 : ℤ) ∣ a := fun ha => h37ac ha hc
-    have hb37 : ¬ (37 : ℤ) ∣ b := fun hb => h37bc hb hc
+    have ha37 : ¬ (37 : ℤ) ∣ a := fun ha ↦ h37ac ha hc
+    have hb37 : ¬ (37 : ℤ) ∣ b := fun hb ↦ h37bc hb hc
     have ha_lv : ¬ (149 : ℤ) ∣ a := h_lemma96 a ha37 (Or.inl rfl)
     have hb_lv : ¬ (149 : ℤ) ∣ b := h_lemma96 b hb37 (Or.inr (Or.inl rfl))
     exact exists_coprimeFreeContentCaseIIDvdZData37_of_lemma96 ha37 hc hc0 e ha_lv hb_lv hab_cop
@@ -620,7 +620,7 @@ theorem coprimeFreeContentCaseIIDvdZData37_pContent_descend_withUnits
   have hσRcoe : ∀ w : 𝓞 (CyclotomicField 37 ℚ),
       algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (σR w) =
         complexConj (CyclotomicField 37 ℚ)
-          (algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) w) := fun w => by
+          (algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) w) := fun w ↦ by
     rw [hσRdef, ← coe_ringOfIntegersComplexConj]
   have hω_int : ω = (vU : 𝓞 (CyclotomicField 37 ℚ)) ^ 2 * (ra * σR ra) := by
     apply hinj
@@ -676,7 +676,7 @@ theorem no_coprimeFreeContentCaseIIDvdZData37_withUnits
     ¬ ∃ m : ℕ, Nonempty (CoprimeFreeContentCaseIIDvdZData37 (37 * (m + 1))) := by
   classical
   rintro ⟨m₀, ⟨D₀⟩⟩
-  let P : ℕ → Prop := fun j =>
+  let P : ℕ → Prop := fun j ↦
     ∃ (m : ℕ) (E : CoprimeFreeContentCaseIIDvdZData37 (37 * (m + 1))),
       caseIIFreeDvdZFactorCount E.toFreeContentCaseIIDvdZData37 = j
   have hP : ∃ j, P j := ⟨_, m₀, D₀, rfl⟩
