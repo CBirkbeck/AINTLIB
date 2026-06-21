@@ -827,7 +827,7 @@ theorem fltCaseI_intNorm_eq_realUnit_sq_mul_pow_of_regular
   haveI : IsCMField K := IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_two⟩
   obtain ⟨m, v_plus, γ, h_decomp⟩ := fltCaseI_factor_eq_zeta_pow_mul_real_unit_mul_pow_of_regular
     hp_two hp_odd h_reg heq hc hab
-    (fun j hj => fltCaseI_factor_ne_zero (K := K) hp_odd heq hc hab hj) hk
+    (fun j hj ↦ fltCaseI_factor_ne_zero (K := K) hp_odd heq hc hab hj) hk
   exact ⟨v_plus, γ, fltCaseI_intNorm_decomposition (K := K) a b v_plus γ h_decomp⟩
 
 end FLT37
