@@ -2,7 +2,7 @@ module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.TraceBinomial
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.TraceMultinomial
-public import Mathlib.Data.Fintype.Units
+public import Mathlib.Algebra.GroupWithZero.Units.Fintype
 public import Mathlib.FieldTheory.Finite.GaloisField
 
 /-!
@@ -110,7 +110,6 @@ theorem unitSum_scaled_trace_pow_eq_sum_multinomial
         ((Nat.multinomial (Finset.range S.f) ks : k) *
           (S.traceScale : k) ^ traceMultiIndexExponent ℓ S.f ks) *
           ∑ x : kˣ, (x : k) ^ (A + traceMultiIndexExponent ℓ S.f ks) := by
-  classical
   calc
     (∑ x : kˣ,
         (x : k) ^ A *
@@ -163,20 +162,14 @@ theorem traceCharacterChooseSumRec_mul_factorial_eq_descFactorialSum
       ∑ x : k, (S.residueCharInt ^ (p - a)) x *
         (Nat.descFactorial
           (Algebra.trace (ZMod ℓ) k ((S.traceScale : k) * x)).val n : 𝓞 R') := by
-  classical
   unfold traceCharacterChooseSumRec traceCharacterChooseSum
   rw [Finset.sum_mul]
   refine Finset.sum_congr rfl fun x _ => ?_
   rw [mul_assoc]
   congr 1
   rw [← Nat.cast_mul]
-  have hnat :
-      Nat.choose (Algebra.trace (ZMod ℓ) k ((S.traceScale : k) * x)).val n *
-          Nat.factorial n =
-        Nat.descFactorial
-          (Algebra.trace (ZMod ℓ) k ((S.traceScale : k) * x)).val n := by
-    rw [mul_comm, ← Nat.descFactorial_eq_factorial_mul_choose]
-  rw [hnat]
+  congr 1
+  rw [mul_comm, ← Nat.descFactorial_eq_factorial_mul_choose]
 
 end TraceFormStickelbergerSetup
 
