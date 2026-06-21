@@ -6906,10 +6906,16 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
     **REMAINING bundled inputs (all classical/analytic, project-designated bundleable):**
     (1) CFT (`CFTUnitsData`); (2) §12 analytic `h12` (the T1220+ density chain);
     (3) for the char-ideal half's application: `[Invertible ((p-1)/2 : ℤ_[p])]` (prime-to-p) + the
-    **isotypic completeness `∑_ω e_ω = 1`** over Δ. SCOPED: reachable via mathlib `HasEnoughRootsOfUnity R n`
-    + `DirichletCharacter.sum_char_inv_mul_char_eq` / `Mathlib.Analysis.Fourier.FiniteAbelian` (Pontryagin
-    duality), once `HasEnoughRootsOfUnity ℤ_[p] ((p-1)/2)` is established from the Teichmüller roots
-    μ_{p-1}⊆ℤ_[p] (bounded sub-development); then `∑_ω e_ω = (1/|Δ|)∑_h(∑_ω ω(h)⁻¹)[h] = 1` by orthogonality.
+    **isotypic completeness `∑_ω e_ω = 1`** over Δ. **FULLY SCOPED to mathlib lemmas (2026-06-21)**:
+    `instHasEnoughRootsOfUnity : HasEnoughRootsOfUnity ℤ_[p] (p-1)` is **DONE** (GPlusDecomp, axiom-clean,
+    from `PadicInt.exists_primitiveRoot_card_sub_one` + `rootsOfUnity.isCyclic`). Path to `∑_ω e_ω = 1`:
+    (a) `HasEnoughRootsOfUnity ℤ_[p] (Monoid.exponent Δ)` — from the (p-1) instance via divisor-closure
+    (`exponent Δ | card Δ | (p-1)`); (b) the dual is complete:
+    `CommGroup.monoidHom_mulEquiv_of_hasEnoughRootsOfUnity : Nonempty ((Δ →* ℤ_[p]ˣ) ≃* Δ)` ⟹
+    `card (Δ →* ℤ_[p]ˣ) = card Δ`; (c) character orthogonality `∑_ω ω(h)⁻¹ = card Δ · δ_{h,1}`
+    (`MulChar.Duality`/`DirichletCharacter.sum_char_inv_mul_char_eq` adapted to `Δ →* ℤ_[p]ˣ`); (d)
+    `∑_ω e_ω = (card Δ)⁻¹ ∑_h (∑_ω ω(h)⁻¹)[h] = (card Δ)⁻¹·(card Δ)·[1] = 1`. A bounded assembly (~6-8
+    lemmas) over existing mathlib duality; no longer an open-ended sub-development.
     OLD: `gplusEquiv` — `GPlus ≅ Δ×Γ` via Teichmüller + the `/±1` quotient (`Δ = μ_{p-1}/{±1}`).
     **Scoped infrastructure (2026-06-20)**: `CompactSpace ℤ_[p]ˣ` is an AUTOMATIC instance
     (`Units.instCompactSpaceOfT1SpaceOfContinuousMul`, mathlib) — no gap. The Teichmüller MonoidHom

@@ -1,1 +1,1 @@
-FOCUS: Φ fully internalized (carrierBridgeFull + iwasawa_main_conjecture_full_concrete). Remaining bundled: CFT (CFTUnitsData), §12 (h12/T1220 chain), Fourier completeness ∑e_ω=1 over Δ.
+FOCUS: completeness ∑e_ω=1 scoped to mathlib duality (CommGroup.monoidHom_mulEquiv_of_hasEnoughRootsOfUnity + orthogonality). HasEnoughRootsOfUnity ℤ_[p](p-1) DONE. Next: build the ∑e_ω=1 assembly.
