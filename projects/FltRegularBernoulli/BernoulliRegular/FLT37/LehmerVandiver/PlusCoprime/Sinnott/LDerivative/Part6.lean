@@ -214,9 +214,9 @@ noncomputable def familyIndexEquivNonTrivialCE
   -- LHS = # InfinitePlace K⁺ - 1
   -- RHS = # CyclotomicEvenDelta p - 1
   -- Equal because both ambient cardinalities are equal via h_bij.
-  rw [Fintype.card_subtype_compl (p := fun w =>
+  rw [Fintype.card_subtype_compl (p := fun w ↦
     w = NumberField.Units.dirichletUnitTheorem.w₀)]
-  rw [Fintype.card_subtype_compl (p := fun c => c = 1)]
+  rw [Fintype.card_subtype_compl (p := fun c ↦ c = 1)]
   rw [Fintype.card_congr h_bij]
   rfl
 
@@ -305,7 +305,7 @@ theorem fintype_card_nonTrivialCE_eq (hp_two : 2 < p) :
     Fintype.card {c : BernoulliRegular.CyclotomicEvenDelta p // c ≠ 1} =
       (p - 1) / 2 - 1 := by
   classical
-  rw [Fintype.card_subtype_compl (p := fun c => c = 1)]
+  rw [Fintype.card_subtype_compl (p := fun c ↦ c = 1)]
   rw [BernoulliRegular.cyclotomicEvenDelta_card (p := p) hp_two]
   rw [Fintype.card_subtype_eq]
 
@@ -350,7 +350,7 @@ theorem kplusEmbeddingIndexQuotientShifted_bijective
     (kplusEmbeddingIndexQuotient (p := p) K
       NumberField.Units.dirichletUnitTheorem.w₀)⁻¹ with h_kw₀_inv
   have h_mul_bij : Function.Bijective
-      (fun c : BernoulliRegular.CyclotomicEvenDelta p => c * kw₀_inv) :=
+      (fun c : BernoulliRegular.CyclotomicEvenDelta p ↦ c * kw₀_inv) :=
     Group.mulRight_bijective kw₀_inv
   exact h_mul_bij.comp (kplusEmbeddingIndexQuotient_bijective (p := p) K hp_two)
 
@@ -428,7 +428,7 @@ theorem sum_kplus_ne_w₀_shifted_eq_sum_CE_ne_one
     KplusInfinitePlaceEquivCyclotomicEvenDelta_shifted_apply_w₀ (p := p) K hp_two
   let e_sub : {w // w ≠ NumberField.Units.dirichletUnitTheorem.w₀} ≃
       {c : BernoulliRegular.CyclotomicEvenDelta p // c ≠ 1} :=
-    e.subtypeEquiv (fun v => by
+    e.subtypeEquiv (fun v ↦ by
       constructor
       · intro h h_eq
         apply h
@@ -437,7 +437,7 @@ theorem sum_kplus_ne_w₀_shifted_eq_sum_CE_ne_one
       · intro h h_eq
         apply h
         rw [h_eq, h_w₀_eq])
-  rw [← Equiv.sum_comp e_sub (fun c => f c.val)]
+  rw [← Equiv.sum_comp e_sub (fun c ↦ f c.val)]
   rfl
 
 /-- **Character-weighted column sum of `convolutionMatrixLogNormEven`**:
@@ -459,9 +459,9 @@ theorem sum_char_convolutionMatrixLogNormEven_col
   -- Use the bijection `c ↦ c·b⁻¹` in reverse.
   -- Apply Equiv.sum_comp with `Equiv.mulRight b` to rewrite LHS sum.
   rw [show (∑ c : BernoulliRegular.CyclotomicEvenDelta p,
-        ξ c * (Matrix.of fun a b => convolutionLogNormDescended p (a * b)) c b) =
+        ξ c * (Matrix.of fun a b ↦ convolutionLogNormDescended p (a * b)) c b) =
       ∑ c : BernoulliRegular.CyclotomicEvenDelta p,
-        ξ (c * b⁻¹) * (Matrix.of fun a b' => convolutionLogNormDescended p (a * b'))
+        ξ (c * b⁻¹) * (Matrix.of fun a b' ↦ convolutionLogNormDescended p (a * b'))
           (c * b⁻¹) b from
     (Equiv.sum_comp (Equiv.mulRight b⁻¹) _).symm]
   refine Finset.sum_congr rfl ?_
@@ -492,7 +492,7 @@ theorem sum_char_convolutionMatrixLogNormEven_col_diff
       ξ c * convolutionMatrixLogNormEven p c b -
         ξ c * convolutionMatrixLogNormEven p c 1 := by
     intro c; ring
-  rw [Finset.sum_congr rfl (fun c _ => h_sub c)]
+  rw [Finset.sum_congr rfl (fun c _ ↦ h_sub c)]
   rw [Finset.sum_sub_distrib]
   rw [sum_char_convolutionMatrixLogNormEven_col, sum_char_convolutionMatrixLogNormEven_col]
   rw [inv_one, MulChar.map_one]
@@ -528,7 +528,7 @@ theorem sum_convolutionMatrixLogNormEven_col_diff_eq_zero
     intro c
     rw [MulChar.one_apply (Group.isUnit c)]
     ring
-  rw [Finset.sum_congr rfl (fun c _ => h_one c)] at h
+  rw [Finset.sum_congr rfl (fun c _ ↦ h_one c)] at h
   rw [h]
   rw [show ((1 : MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) b⁻¹ - 1) = 0 from by
     rw [MulChar.one_apply (Group.isUnit _)]; ring]
@@ -643,7 +643,7 @@ noncomputable def KplusInfinitePlaceNotW₀Equiv
   let e : NumberField.InfinitePlace (NumberField.maximalRealSubfield K) ≃
       BernoulliRegular.CyclotomicEvenDelta p :=
     KplusInfinitePlaceEquivCyclotomicEvenDelta_canonical (p := p) K hp_two
-  refine e.subtypeEquiv (fun v => ?_)
+  refine e.subtypeEquiv (fun v ↦ ?_)
   constructor
   · intro h h_eq
     exact h <| e.injective h_eq
@@ -673,7 +673,7 @@ theorem sum_kplus_not_w₀_eq_sum_CE_not_kw₀
       f c.val := by
   classical
   rw [← Equiv.sum_comp
-    (KplusInfinitePlaceNotW₀Equiv (p := p) K hp_two) (fun c => f c.val)]
+    (KplusInfinitePlaceNotW₀Equiv (p := p) K hp_two) (fun c ↦ f c.val)]
   rfl
 
 /-- **Character-weighted sum of `(A - B)` rows in CE-subtype form**:
@@ -711,7 +711,7 @@ theorem sum_kplus_not_w₀_char_sinnottMatrix_A_sub_B
             (familyIndexAsUnit p K hp_odd hp_three i)) -
         convolutionMatrixLogNormEven p c.val 1) := by
   rw [sum_char_sinnottMatrix_A_sub_B (p := p) K hp_odd hp_three hp_two ξ i]
-  exact sum_kplus_not_w₀_eq_sum_CE_not_kw₀ (p := p) K hp_two (fun c => ξ c *
+  exact sum_kplus_not_w₀_eq_sum_CE_not_kw₀ (p := p) K hp_two (fun c ↦ ξ c *
       (convolutionMatrixLogNormEven p c
           (BernoulliRegular.cyclotomicEvenDeltaQuotient p
             (familyIndexAsUnit p K hp_odd hp_three i)) -
