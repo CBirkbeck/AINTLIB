@@ -31,7 +31,7 @@ number) reduced mod `p`.
   on `single a 1`.
 * `classGroupModPGroupRingAction_apply_eigenvector`: the abstract eigenvalue
   lemma — if `v` is a `ψ`-eigenvector (`ρ a v = ψ a • v` for all `a`), then any
-  group-ring element `x` acts as the scalar `x.sum fun a b => b * ψ a`.
+  group-ring element `x` acts as the scalar `x.sum fun a b ↦ b * ψ a`.
 * `stickelbergerCorrectedInt_action_eigenvector`: the integral Stickelberger
   element `stickelbergerCorrectedInt c` (mapped `ℤ → ZMod p`) acts on a
   `ψ`-eigenvector by the explicit Stickelberger scalar.
@@ -70,9 +70,6 @@ abbrev ClassGroupModPMod (p : ℕ) [Fact p.Prime] (K : Type u) [Field K]
     [NumberField K] : Type u :=
   Additive (ClassGroupModP K p)
 
-/-! ### Step 1: the group-ring action -/
-
-set_option backward.isDefEq.respectTransparency false in
 /-- **Group-ring action.** A multiplicative `(ZMod p)ˣ`-action on
 `V = Additive (ClassGroupModP K p)` (i.e. a `CyclotomicGalAction p K`, a monoid
 hom into `Module.End (ZMod p) V`) extends, by the universal property of the
@@ -88,7 +85,6 @@ def classGroupModPGroupRingAction (ρ : CyclotomicGalAction p K) :
   MonoidAlgebra.lift (ZMod p) (Module.End (ZMod p) (ClassGroupModPMod p K))
     (CyclotomicUnitDelta p) ρ
 
-set_option backward.isDefEq.respectTransparency false in
 omit [IsCyclotomicExtension {p} ℚ K] in
 /-- The group-ring action agrees with the `G`-action on `single a 1`. -/
 @[simp]
@@ -98,7 +94,6 @@ theorem classGroupModPGroupRingAction_single (ρ : CyclotomicGalAction p K)
       ρ a := by
   rw [classGroupModPGroupRingAction, MonoidAlgebra.lift_single, one_smul]
 
-set_option backward.isDefEq.respectTransparency false in
 /-- The group-ring action via the canonical cyclotomic action instance agrees
 with `cyclotomicGalActionLinearModP` on `single a 1`. -/
 @[simp]
@@ -111,29 +106,23 @@ theorem classGroupModPGroupRingAction_instance_single
   rw [classGroupModPGroupRingAction_single]
   rfl
 
-/-! ### Step 2: the eigenvalue action -/
-
-set_option backward.isDefEq.respectTransparency false in
 omit [IsCyclotomicExtension {p} ℚ K] in
 /-- **Abstract eigenvalue lemma.** Let `v` be a `ψ`-eigenvector for the
 `G`-action `ρ`, i.e. `ρ a v = ψ a • v` for every `a` (where
 `ψ : (ZMod p)ˣ → ZMod p` is multiplicative — typically a `ZMod p`-valued
 character of `(ZMod p)ˣ`). Then any group-ring element `x` acts on `v` as the
-scalar `∑ over the support of x, x(a) · ψ(a)`. This is `MonoidAlgebra.lift`'s
-`lift_apply` together with `Finsupp`-linearity of evaluation. -/
+scalar `∑ over the support of x, x(a) · ψ(a)`. -/
 theorem classGroupModPGroupRingAction_apply_eigenvector
     (ρ : CyclotomicGalAction p K) {ψ : CyclotomicUnitDelta p → ZMod p}
     {v : ClassGroupModPMod p K} (hv : ∀ a, ρ a v = ψ a • v)
     (x : MonoidAlgebra (ZMod p) (CyclotomicUnitDelta p)) :
     classGroupModPGroupRingAction (p := p) (K := K) ρ x v =
-      (x.sum fun a b => b * ψ a) • v := by
-  rw [classGroupModPGroupRingAction, MonoidAlgebra.lift_apply]
-  rw [LinearMap.finsupp_sum_apply]
-  rw [Finsupp.sum, Finsupp.sum, Finset.sum_smul]
-  refine Finset.sum_congr rfl fun a _ => ?_
+      (x.sum fun a b ↦ b * ψ a) • v := by
+  rw [classGroupModPGroupRingAction, MonoidAlgebra.lift_apply, LinearMap.finsupp_sum_apply,
+    Finsupp.sum, Finsupp.sum, Finset.sum_smul]
+  refine Finset.sum_congr rfl fun a _ ↦ ?_
   rw [LinearMap.smul_apply, hv a, smul_smul]
 
-set_option backward.isDefEq.respectTransparency false in
 omit [IsCyclotomicExtension {p} ℚ K] in
 /-- **Eigenvalue action of the integral Stickelberger element.** For a unit
 `c : (ZMod p)ˣ` and a `ψ`-eigenvector `v`, the integral corrected Stickelberger
@@ -153,16 +142,11 @@ theorem stickelbergerCorrectedInt_action_eigenvector
           (stickelbergerCorrectedInt p c)) v =
       (∑ b : (ZMod p)ˣ,
         ((stickelbergerCorrectedCoeff p c b : ℤ) : ZMod p) * ψ b⁻¹) • v := by
-  -- Expand `mapRingHom (corrInt c)` into an explicit `ZMod p`-coefficient sum of
-  -- `single`s, then apply the (additive, linear) action term by term.
   rw [stickelbergerCorrectedInt, map_sum, map_sum, LinearMap.sum_apply, Finset.sum_smul]
-  refine Finset.sum_congr rfl fun b _ => ?_
+  refine Finset.sum_congr rfl fun b _ ↦ ?_
   rw [map_zsmul, MonoidAlgebra.mapRingHom_single, map_one, map_zsmul,
-    classGroupModPGroupRingAction_single, LinearMap.smul_apply, hv b⁻¹]
-  -- `(corrCoeff c b : ℤ) • (ψ b⁻¹ • v) = ((corrCoeff c b : ZMod p) * ψ b⁻¹) • v`.
-  rw [mul_smul, Int.cast_smul_eq_zsmul]
-
-/-! ### Step 2: the Stickelberger eigenvalue is `B_{1,χ⁻¹}` -/
+    classGroupModPGroupRingAction_single, LinearMap.smul_apply, hv b⁻¹, mul_smul,
+    Int.cast_smul_eq_zsmul]
 
 /-- The `χ`-eigenvalue scalar of the corrected Stickelberger element
 `(c.val - σ_c) θ_p`, written with `ℚ`-valued coefficients:
@@ -177,50 +161,40 @@ def stickelbergerCorrectedScalar (χ : MulChar (ZMod p)ˣ ℚ) (c : (ZMod p)ˣ) 
 
 /-- **Eigenvalue of the corrected Stickelberger element.** The `χ`-eigenvalue of
 `(c.val - σ_c) θ_p` is `(c.val - χ c) · (eigenvalue of θ_p)`, where the
-eigenvalue of `θ_p` is `stickelbergerEigenvalue p χ`. The proof clears the `1/p`
-denominator using `p · corrCoeff c b = c.val·b.val - (c·b).val`
-(`rat_stickelbergerCorrectedCoeff`) and reindexes the second sum by `b ↦ c · b`
-(so `(c·b).val ↦ a.val` and `χ((c·b)⁻¹) ↦ χ c · χ(b⁻¹)`). -/
+eigenvalue of `θ_p` is `stickelbergerEigenvalue p χ`. -/
 theorem stickelbergerCorrectedScalar_eq (χ : MulChar (ZMod p)ˣ ℚ) (c : (ZMod p)ˣ) :
     stickelbergerCorrectedScalar (p := p) χ c =
       (((c : ZMod p).val : ℚ) - χ c) * stickelbergerEigenvalue p χ := by
   have hp_ne : (p : ℚ) ≠ 0 := Nat.cast_ne_zero.mpr hp.out.ne_zero
-  -- Clear the `1/p` on both sides and compare.
   apply mul_left_cancel₀ hp_ne
   rw [stickelbergerCorrectedScalar, Finset.mul_sum, stickelbergerEigenvalue_def]
-  -- RHS: `p · ((c.val - χ c) · (1/p) · Σ) = (c.val - χ c) · Σ_a a.val·χ(a⁻¹)`.
   rw [show (p : ℚ) * ((((c : ZMod p).val : ℚ) - χ c) *
         ((p : ℚ)⁻¹ * ∑ a : (ZMod p)ˣ, ((a : ZMod p).val : ℚ) * χ a⁻¹)) =
       (((c : ZMod p).val : ℚ) - χ c) *
         ((p : ℚ) * (p : ℚ)⁻¹ * ∑ a : (ZMod p)ˣ, ((a : ZMod p).val : ℚ) * χ a⁻¹) from by
       ring]
   rw [mul_inv_cancel₀ hp_ne, one_mul]
-  -- LHS: `Σ_b (p · corrCoeff c b) · χ(b⁻¹) = Σ_b (c.val·b.val - (cb).val)·χ(b⁻¹)`.
   rw [show (∑ b : (ZMod p)ˣ, (p : ℚ) * (((stickelbergerCorrectedCoeff p c b : ℤ) : ℚ) * χ b⁻¹))
         = ∑ b : (ZMod p)ˣ, ((p : ℚ) * ((stickelbergerCorrectedCoeff p c b : ℤ) : ℚ)) * χ b⁻¹ from
-      Finset.sum_congr rfl fun b _ => by ring]
+      Finset.sum_congr rfl fun b _ ↦ by ring]
   simp_rw [show ∀ b : (ZMod p)ˣ, (p : ℚ) * ((stickelbergerCorrectedCoeff p c b : ℤ) : ℚ) =
       ((c : ZMod p).val * (b : ZMod p).val : ℚ) - (((c * b : (ZMod p)ˣ) : ZMod p).val : ℚ) from
-    fun b => by rw [rat_stickelbergerCorrectedCoeff p c b]]
-  -- Split into the two sums and reindex the second.
+    fun b ↦ by rw [rat_stickelbergerCorrectedCoeff p c b]]
   rw [show (∑ b : (ZMod p)ˣ, (((c : ZMod p).val * (b : ZMod p).val : ℚ) -
         (((c * b : (ZMod p)ˣ) : ZMod p).val : ℚ)) * χ b⁻¹)
       = (∑ b : (ZMod p)ˣ, ((c : ZMod p).val : ℚ) * (((b : ZMod p).val : ℚ) * χ b⁻¹))
         - ∑ b : (ZMod p)ˣ, (((c * b : (ZMod p)ˣ) : ZMod p).val : ℚ) * χ b⁻¹ from by
-      rw [← Finset.sum_sub_distrib]; exact Finset.sum_congr rfl fun b _ => by push_cast; ring]
-  rw [← Finset.mul_sum]
-  -- RHS expand: `(c.val - χ c)·Σ = c.val·Σ - χ c·Σ`.
-  rw [sub_mul]
+      rw [← Finset.sum_sub_distrib]
+      exact Finset.sum_congr rfl fun b _ ↦ by push_cast; ring]
+  rw [← Finset.mul_sum, sub_mul]
   congr 1
-  -- Second sum: write `χ c · Σ_a a.val·χ(a⁻¹) = Σ_a g a` with `g a := a.val·(χ c · χ a⁻¹)`,
-  -- then reindex the left sum `b ↦ c · b` via `g (c·b) = (c·b).val · χ(b⁻¹)`.
   rw [show (χ c * ∑ a : (ZMod p)ˣ, ((a : ZMod p).val : ℚ) * χ a⁻¹)
       = ∑ a : (ZMod p)ˣ, ((a : ZMod p).val : ℚ) * (χ c * χ a⁻¹) from by
-    rw [Finset.mul_sum]; exact Finset.sum_congr rfl fun a _ => by ring]
+    rw [Finset.mul_sum]
+    exact Finset.sum_congr rfl fun a _ ↦ by ring]
   rw [← (Group.mulLeft_bijective c).sum_comp
-    (fun a : (ZMod p)ˣ => (((a : (ZMod p)ˣ) : ZMod p).val : ℚ) * (χ c * χ a⁻¹))]
-  refine Finset.sum_congr rfl fun b _ => ?_
-  -- `(c·b).val · (χ c · χ((c·b)⁻¹)) = (c·b).val · χ(b⁻¹)`, since `χ c · χ c⁻¹ = 1`.
+    (fun a : (ZMod p)ˣ ↦ (((a : (ZMod p)ˣ) : ZMod p).val : ℚ) * (χ c * χ a⁻¹))]
+  refine Finset.sum_congr rfl fun b _ ↦ ?_
   congr 1
   rw [show ((c * b : (ZMod p)ˣ))⁻¹ = b⁻¹ * c⁻¹ from by rw [mul_inv_rev], map_mul]
   rw [show χ c * (χ b⁻¹ * χ c⁻¹) = (χ c * χ c⁻¹) * χ b⁻¹ from by ring,
@@ -228,9 +202,7 @@ theorem stickelbergerCorrectedScalar_eq (χ : MulChar (ZMod p)ˣ ℚ) (c : (ZMod
 
 /-- **The Stickelberger eigenvalue is the generalized Bernoulli number.** For a
 nontrivial character `χ`, the `χ`-eigenvalue of the corrected Stickelberger
-element `(c.val - σ_c) θ_p` equals `(c.val - χ c) · B_{1,χ⁻¹}`. This is the
-eigenvalue-`=`-`B_{1,ω^{-i}}` identity at the rational level; reducing mod `p`
-(when the relevant quantities are `p`-integral) yields the action eigenvalue. -/
+element `(c.val - σ_c) θ_p` equals `(c.val - χ c) · B_{1,χ⁻¹}`. -/
 theorem stickelbergerCorrectedScalar_eq_BernoulliGen {χ : MulChar (ZMod p)ˣ ℚ}
     (hχ : χ ≠ 1) (c : (ZMod p)ˣ) :
     stickelbergerCorrectedScalar (p := p) χ c =
