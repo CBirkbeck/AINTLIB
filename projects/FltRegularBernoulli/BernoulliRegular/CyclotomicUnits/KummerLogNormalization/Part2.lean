@@ -19,10 +19,9 @@ variable (p : ℕ) [Fact p.Prime]
 variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 variable [NumberField.IsCMField K]
 
-set_option maxHeartbeats 800000 in
--- Mapping the factorial-weighted normalized source through two power-series
--- coefficient layers is elaboration-heavy, especially around `mapTo_sub`.
 omit [NumberField.IsCMField K] in
+/-- Image in the level-`N + 1` quotient of the rational normalized factorial-weighted log
+coefficient, as a signed factorial-weighted coefficient of the mapped Artin-Hasse series. -/
 theorem samePrime_rIntegralRatToQuotient_normalizedFactorialWeightedLogCoeff
     (N d n : ℕ) :
     samePrimeRIntegralRatToQuotient (p := p) (K := K) N
@@ -156,10 +155,9 @@ omit [NumberField.IsCMField K] in
 theorem integralArtinHasseNormalizedExpMinusOneSeries_constantCoeff :
     PowerSeries.constantCoeff
         (integralArtinHasseNormalizedExpMinusOneSeries p K) = 1 := by
-  rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply]
-  rw [integralArtinHasseNormalizedExpMinusOneSeries_coeff]
-  rw [integralExpMinusOneSeries]
-  rw [Furtwaengler.DieudonneDwork.IsRIntegralPS.coeff_mapTo]
+  rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply,
+    integralArtinHasseNormalizedExpMinusOneSeries_coeff, integralExpMinusOneSeries,
+    Furtwaengler.DieudonneDwork.IsRIntegralPS.coeff_mapTo]
   have hsub :
       (⟨(PowerSeries.coeff (R := ℚ) 1)
           (PadicLogSetup.FormalDwork.expMinusOneSeries p),
@@ -180,10 +178,8 @@ theorem integralArtinHasseNormalizedExpMinusOneSeries_map_valuedIntegerCyclotomi
         (integralArtinHasseNormalizedExpMinusOneSeries p K) =
       integralArtinHasseNormalizedExpMinusOneSeries p K := by
   ext n
-  rw [PowerSeries.coeff_map]
-  rw [integralArtinHasseNormalizedExpMinusOneSeries_coeff]
-  rw [integralExpMinusOneSeries]
-  rw [Furtwaengler.DieudonneDwork.IsRIntegralPS.coeff_mapTo]
+  rw [PowerSeries.coeff_map, integralArtinHasseNormalizedExpMinusOneSeries_coeff,
+    integralExpMinusOneSeries, Furtwaengler.DieudonneDwork.IsRIntegralPS.coeff_mapTo]
   exact congrArg Subtype.val
     (Conjugation.valuedIntegerCyclotomicEquiv_rIntegralRatToValuedInteger
     (p := p) (K := K) a
@@ -198,9 +194,8 @@ theorem integralExpMinusOneSeries_eq_X_mul_normalized :
       PowerSeries.X *
         integralArtinHasseNormalizedExpMinusOneSeries p K := by
   have hconst : PowerSeries.constantCoeff (integralExpMinusOneSeries p K) = 0 := by
-    rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply]
-    rw [integralExpMinusOneSeries]
-    rw [Furtwaengler.DieudonneDwork.IsRIntegralPS.coeff_mapTo]
+    rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply, integralExpMinusOneSeries,
+      Furtwaengler.DieudonneDwork.IsRIntegralPS.coeff_mapTo]
     have hsub :
         (⟨(PowerSeries.coeff (R := ℚ) 0)
             (PadicLogSetup.FormalDwork.expMinusOneSeries p),
@@ -305,8 +300,8 @@ theorem artinHasseExp_eval_sub_one_eq_mul_normalized
     (hx : AdicCompletion.evalₐ (lambdaIdeal p K) 1 x = 0) :
     evalIntegralPowerSeries p K (integralExpSeries p K) x hx - 1 =
       x * artinHasseNormalizedExpMinusOneEval p K x hx := by
-  rw [← evalIntegralPowerSeries_expMinusOne_eq_exp_sub_one (p := p) (K := K) hx]
-  rw [integralExpMinusOneSeries_eq_X_mul_normalized]
+  rw [← evalIntegralPowerSeries_expMinusOne_eq_exp_sub_one (p := p) (K := K) hx,
+    integralExpMinusOneSeries_eq_X_mul_normalized]
   exact evalIntegralPowerSeries_X_mul (p := p) (K := K)
     (integralArtinHasseNormalizedExpMinusOneSeries p K) hx
 
@@ -390,10 +385,8 @@ theorem quotient_mk_dworkParameterNormalizedApprox_eq_evalIntegralPowerSeriesMod
             (integralArtinHasseNormalizedExpMinusOneSeries p K))).eval₂
         (RingHom.id (R ⧸ I ^ (N + 1)))
         (AdicCompletion.evalₐ I (N + 1) (dworkParameter p K))
-  rw [dworkParameter_evalₐ]
-  rw [PowerSeries.eval₂_trunc_eq_sum_range]
-  rw [map_sum]
-  rw [PowerSeries.eval₂_trunc_eq_sum_range]
+  rw [dworkParameter_evalₐ, PowerSeries.eval₂_trunc_eq_sum_range, map_sum,
+    PowerSeries.eval₂_trunc_eq_sum_range]
   refine Finset.sum_congr rfl ?_
   intro n _hn
   simp [q, I, map_pow]
@@ -419,10 +412,8 @@ theorem quotient_mk_scaledDworkParameterNormalizedApprox_eq_evalIntegralPowerSer
             (integralArtinHasseNormalizedExpMinusOneSeries p K))).eval₂
         (RingHom.id (R ⧸ I ^ (N + 1)))
         (AdicCompletion.evalₐ I (N + 1) (scaledDworkParameter p K a))
-  rw [scaledDworkParameter_evalₐ]
-  rw [PowerSeries.eval₂_trunc_eq_sum_range]
-  rw [map_sum]
-  rw [PowerSeries.eval₂_trunc_eq_sum_range]
+  rw [scaledDworkParameter_evalₐ, PowerSeries.eval₂_trunc_eq_sum_range, map_sum,
+    PowerSeries.eval₂_trunc_eq_sum_range]
   refine Finset.sum_congr rfl ?_
   intro n _hn
   simp [q, I, map_pow]
@@ -468,9 +459,8 @@ theorem samePrimeFiniteArtinHasseNormalizedCoord_eq_positive_sum
         (PowerSeries.coeff (R := ValuedIntegerRing p K) (n + 1))
             (integralArtinHasseNormalizedExpMinusOneSeries p K) *
           x ^ (n + 1) := by
-  rw [samePrimeFiniteArtinHasseNormalizedCoord,
-    samePrimeFiniteArtinHasseNormalized]
-  rw [PowerSeries.eval₂_trunc_eq_sum_range, Finset.sum_range_succ']
+  rw [samePrimeFiniteArtinHasseNormalizedCoord, samePrimeFiniteArtinHasseNormalized,
+    PowerSeries.eval₂_trunc_eq_sum_range, Finset.sum_range_succ']
   have hcoeff0 :
       (PowerSeries.coeff (R := ValuedIntegerRing p K) 0)
           (integralArtinHasseNormalizedExpMinusOneSeries p K) = 1 := by
@@ -619,8 +609,6 @@ def samePrimeFiniteArtinHasseNormalizedCoordQuotientSeries
     (PowerSeries.map (Ideal.Quotient.mk ((lambdaIdeal p K) ^ (N + 1)))
       (integralArtinHasseNormalizedExpMinusOneSeries p K - 1))
 
-set_option maxHeartbeats 800000 in
--- The quotient-series coefficient comparison unfolds mapped power-series coefficients.
 omit [NumberField.IsCMField K] in
 theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_map_eq_quotientSeries
     (N : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
@@ -635,8 +623,8 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_map_eq_quotientSeries
   let q : ValuedIntegerRing p K →+* A :=
     Ideal.Quotient.mk ((lambdaIdeal p K) ^ (N + 1))
   ext d
-  rw [Polynomial.coeff_coe, Polynomial.coeff_map]
-  rw [samePrimeFiniteArtinHasseNormalizedCoordQuotientSeries, PowerSeries.coeff_rescale,
+  rw [Polynomial.coeff_coe, Polynomial.coeff_map,
+    samePrimeFiniteArtinHasseNormalizedCoordQuotientSeries, PowerSeries.coeff_rescale,
     PowerSeries.coeff_map]
   by_cases hd0 : d = 0
   · subst d
@@ -657,8 +645,7 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_map_eq_quotientSeries
             (PowerSeries.coeff (R := ValuedIntegerRing p K) d)
               (integralArtinHasseNormalizedExpMinusOneSeries p K) := by
         simp [hd0]
-      rw [hpoly, hcoeff_sub]
-      rw [map_mul, map_pow]
+      rw [hpoly, hcoeff_sub, map_mul, map_pow]
       ring
     · have hdNlt : N < d := Nat.lt_of_not_ge hdN
       have hpoly :=
@@ -669,8 +656,7 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_map_eq_quotientSeries
         Ideal.pow_le_pow_right hle (Ideal.pow_mem_pow hx d)
       have hxzero : q (x ^ d) = 0 := Ideal.Quotient.eq_zero_iff_mem.mpr hxpow
       have hpowmap : (q x) ^ d = q (x ^ d) := (map_pow q x d).symm
-      rw [hpoly, map_zero]
-      rw [hpowmap, hxzero, zero_mul]
+      rw [hpoly, map_zero, hpowmap, hxzero, zero_mul]
 
 omit [NumberField.IsCMField K] in
 theorem quotient_mk_samePrimeFiniteArtinHasseNormalizedCoordPoly_pow_coeff_eq
