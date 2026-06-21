@@ -197,10 +197,10 @@ theorem caseII_eigenunitDetector_eq_column_sum
   -- `completedLog(E_i^36) = ∑_a e_a • kummerLogCompletedColumn a`.
   rw [completedLog_EPlus_CPlusExponentProduct_powPred_eq_sum
     (p := 37) (K := CyclotomicField 37 ℚ) (by decide) (by decide) 0
-    (fun a : Fin (kummerLogRank 37) => ((((a : ℕ) + 2) ^ (37 - 1 - i) : ℕ) : ℤ))]
+    (fun a : Fin (kummerLogRank 37) ↦ ((((a : ℕ) + 2) ^ (37 - 1 - i) : ℕ) : ℤ))]
   -- Push the detector through the sum and each `zsmul`, identifying the per-column value.
   rw [caseIICor823DetSqLog_finsetSum]
-  refine Finset.sum_congr rfl (fun a _ => ?_)
+  refine Finset.sum_congr rfl (fun a _ ↦ ?_)
   rw [caseIICor823DetSqLog_zsmul, caseIICor823DetSqLog_kummerLogCompletedColumn]
 
 /-! ## 2. The single eigenunit valuation residual (`v_π(log E₃₂) = 68`)
@@ -336,7 +336,7 @@ theorem caseII_eigenunit_columnSum_castHom (m : Fin 17) :
             (((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 2) ^ ((15 : ℕ) + 1) - 1)) =
       (if (m : ℕ) = 15 then (18 : ZMod 37) else 0) := by
   rw [map_sum, ← caseII_eigenunit_columnSum_mod37 m]
-  refine Finset.sum_congr rfl (fun a _ => ?_)
+  refine Finset.sum_congr rfl (fun a _ ↦ ?_)
   rw [map_mul, map_sub, map_pow, map_pow, map_one, map_intCast, map_natCast]
   push_cast
   ring
@@ -377,12 +377,12 @@ theorem caseII_eigenunitDetector_even_of_shape
           ((((((a : ℕ) + 2) ^ (37 - 1 - (2 * ((m : ℕ) + 1))) : ℕ) : ℤ)) : ZMod (37 ^ 2)) *
             (((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 2) ^ ((15 : ℕ) + 1) - 1)) := by
     rw [Finset.mul_sum, Finset.mul_sum]
-    refine Finset.sum_congr rfl (fun a _ => ?_)
+    refine Finset.sum_congr rfl (fun a _ ↦ ?_)
     rw [hShape a]
     ring
   rw [hfac, thirtyseven_mul_eq_castHom_val]
   -- Peel the `37·`; reduce to `(castHom (ρ.val · S)).val = (ρ · 18·[m = 15]).val`.
-  refine congrArg (fun t : ℕ => (37 : ZMod (37 ^ 2)) * ((t : ℕ) : ZMod (37 ^ 2))) ?_
+  refine congrArg (fun t : ℕ ↦ (37 : ZMod (37 ^ 2)) * ((t : ℕ) : ZMod (37 ^ 2))) ?_
   refine congrArg ZMod.val ?_
   -- `castHom (ρ.val · S) = castHom (ρ.val) · castHom S = ρ · 18·[m = 15]`.
   rw [map_mul, caseII_eigenunit_columnSum_castHom m, map_natCast, ZMod.natCast_val, ZMod.cast_id]
@@ -436,9 +436,9 @@ theorem caseII_regularEigenunitVanish_of_shape
   have hk17 : k ≤ 17 := by omega
   have hk15 : k ≠ 16 := by omega
   set m : Fin 17 := ⟨k - 1, by omega⟩ with hm
-  have hi_eq : i = 2 * ((m : ℕ) + 1) := by rw [hm]; simp only [Fin.val_mk]; omega
+  have hi_eq : i = 2 * ((m : ℕ) + 1) := by rw [hm]; simp only []; omega
   rw [hi_eq, caseII_eigenunitDetector_even_of_shape hcol m]
-  have hm_ne : (m : ℕ) ≠ 15 := by rw [hm]; simp only [Fin.val_mk]; omega
+  have hm_ne : (m : ℕ) ≠ 15 := by rw [hm]; simp only []; omega
   rw [if_neg hm_ne, mul_zero]
   simp
 
@@ -500,7 +500,7 @@ theorem level72ColumnNonVanish37_of_eigenunitPiVal
   -- Then the eigenunit detector at `32` vanishes — contradicting `= 37·ρ.val ≠ 0`.
   have hzero : caseII_E32EigenunitDetector 32 = 0 := by
     rw [caseII_eigenunitDetector_eq_column_sum]
-    refine Finset.sum_eq_zero (fun a _ => ?_)
+    refine Finset.sum_eq_zero (fun a _ ↦ ?_)
     rw [hall a, mul_zero]
   rw [hzero] at hdet
   exact (thirtyseven_mul_val_ne_zero hρ_ne) hdet.symm
