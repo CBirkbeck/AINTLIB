@@ -99,7 +99,7 @@ theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_zero_of_fact
     samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum
         (p := p) (K := K) N d x hx = 0 := by
   classical
-  let z : ℕ → ValuedIntegerRing p K := fun n =>
+  let z : ℕ → ValuedIntegerRing p K := fun n ↦
     samePrimeFiniteArtinHasseExpCoordLogHomogeneousNumerator
       (p := p) (K := K) N n d x
   have hz0 : ∀ n ∈ Finset.Icc 1 d,
@@ -234,7 +234,7 @@ theorem samePrimeFiniteLogTermCore_finiteArtinHasseExpCoord_eq_homogeneous_suppo
         samePrimeNatDivEval (p := p) (K := K) N n s hn ((P ^ n).coeff d)
           (hcoeff_order d) := by
         rw [samePrimeNatDivEval_sum (p := p) (K := K) hn (P ^ n).support
-          (fun d => (P ^ n).coeff d) hcoeff_order hsum_order]
+          (fun d ↦ (P ^ n).coeff d) hcoeff_order hsum_order]
     _ =
       ∑ d ∈ (P ^ n).support,
         samePrimeFiniteArtinHasseExpCoordLogHomogeneousCore (p := p) (K := K) N n d x hx := by
@@ -443,11 +443,11 @@ theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_logTerm_of_f
       samePrimeFiniteArtinHasseLogTerm (p := p) (K := K) N r x hx := by
   classical
   let d : ℕ := p ^ r
-  let num : ℕ → ValuedIntegerRing p K := fun n =>
+  let num : ℕ → ValuedIntegerRing p K := fun n ↦
     samePrimeFiniteArtinHasseExpCoordLogHomogeneousNumerator
       (p := p) (K := K) N n d x
-  let target : ℕ → ValuedIntegerRing p K := fun n => if n = d then x ^ d else 0
-  let z : ℕ → ValuedIntegerRing p K := fun n => num n - target n
+  let target : ℕ → ValuedIntegerRing p K := fun n ↦ if n = d then x ^ d else 0
+  let z : ℕ → ValuedIntegerRing p K := fun n ↦ num n - target n
   have hd_ne : d ≠ 0 := pow_ne_zero r (Fact.out : Nat.Prime p).ne_zero
   have hxd : x ^ d ∈ (lambdaIdeal p K) ^ d := Ideal.pow_mem_pow hx d
   have hz0 : ∀ n ∈ Finset.Icc 1 d,
@@ -577,7 +577,7 @@ theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_logTerm_of_f
       have hdpos : 0 < d := Nat.pos_of_ne_zero hd_ne
       exact Nat.succ_le_of_lt hdpos, le_rfl⟩⟩
     let targetEval : {n // n ∈ Finset.Icc 1 d} →
-        ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1) := fun a =>
+        ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1) := fun a ↦
       samePrimeNatDivEval (p := p) (K := K) N a.1 0
         (by
           have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp a.2).1
@@ -594,7 +594,7 @@ theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_logTerm_of_f
           have han : a.1 ≠ 0 := by
             have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp a.2).1
             exact Nat.ne_zero_of_lt ha1
-          have ha_ne : a.1 ≠ d := fun ha =>
+          have ha_ne : a.1 ≠ d := fun ha ↦
             hne (Subtype.ext ha)
           have htarget_zero : target a.1 = 0 := by
             simp [target, ha_ne]
