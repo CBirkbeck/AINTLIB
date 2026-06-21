@@ -132,7 +132,7 @@ theorem exists_intCast_residue_unit_mod_zeta_sub_one
   set B := hζ_K.integralPowerBasis with hB_def
   have h_gen_eq : B.gen = ζ := by
     rw [hB_def, IsPrimitiveRoot.integralPowerBasis_gen, h_toInt_eq]
-  set a : Fin B.dim → ℤ := fun i => B.basis.repr (u : 𝓞 K) i with ha_def
+  set a : Fin B.dim → ℤ := fun i ↦ B.basis.repr (u : 𝓞 K) i with ha_def
   have h_repr : ∑ i : Fin B.dim, a i • ζ ^ (i : ℕ) = (u : 𝓞 K) := by
     have hsum := B.basis.sum_repr (u : 𝓞 K)
     simp_rw [PowerBasis.basis_eq_pow, h_gen_eq] at hsum
@@ -146,7 +146,7 @@ theorem exists_intCast_residue_unit_mod_zeta_sub_one
       push_cast
       rfl
     rw [h_n_eq, ← Finset.sum_sub_distrib]
-    refine Finset.dvd_sum (fun i _ => ?_)
+    refine Finset.dvd_sum (fun i _ ↦ ?_)
     rw [zsmul_eq_mul]
     rw [show (a i : 𝓞 K) * ζ ^ (i : ℕ) - (a i : 𝓞 K) =
         (a i : 𝓞 K) * (ζ ^ (i : ℕ) - 1) by ring]
@@ -250,7 +250,7 @@ theorem p_dvd_zeta_pow_sub_one_implies_eq_one
     · exact hj
   have hcoprime : Nat.Coprime j p :=
     (hp_prime.coprime_iff_not_dvd).mpr
-      (fun h => Nat.not_lt.mpr (Nat.le_of_dvd hj_pos h) hj_lt) |>.symm
+      (fun h ↦ Nat.not_lt.mpr (Nat.le_of_dvd hj_pos h) hj_lt) |>.symm
   have h_assoc : Associated ((ζ : 𝓞 K) - 1) (ζ ^ j - 1) :=
     hζ.associated_sub_one_pow_sub_one_of_coprime hcoprime
   have h_p_assoc : Associated ((p : ℕ) : 𝓞 K) ((ζ - 1) ^ (p - 1)) :=
@@ -390,7 +390,7 @@ theorem vπ_algMap_Kplus
     FiniteMultiplicity.of_prime_left hπ_prime hδ
   obtain ⟨m, hm⟩ := h_even
   have h_2m : multiplicity (1 - ζ : 𝓞 K) δ = 2 * m := by rw [hm]; ring
-  have h_pow_2 : ∀ k : ℕ, ((1 - ζ : 𝓞 K)^2)^k = (1 - ζ : 𝓞 K)^(2*k) := fun k => by
+  have h_pow_2 : ∀ k : ℕ, ((1 - ζ : 𝓞 K)^2)^k = (1 - ζ : 𝓞 K)^(2*k) := fun k ↦ by
     rw [← pow_mul]
   have h_fin_sq : FiniteMultiplicity ((1 - ζ : 𝓞 K)^2) δ := by
     refine ⟨m + 1, ?_⟩
@@ -512,7 +512,7 @@ theorem caseI_sigmaAntiClass_trivial_from_p_and_sq_torsion
   have hp_prime : Nat.Prime p := Fact.out
   have h_cop : Nat.Coprime p 2 := by
     rw [Nat.coprime_comm, Nat.coprime_primes Nat.prime_two hp_prime]
-    exact fun h => hp_odd h.symm
+    exact fun h ↦ hp_odd h.symm
   have h_ord_one : orderOf x = 1 := by
     have h_gcd : orderOf x ∣ Nat.gcd p 2 := Nat.dvd_gcd h_ord_p h_ord_2
     rw [h_cop] at h_gcd
