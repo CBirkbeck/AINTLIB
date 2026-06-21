@@ -338,4 +338,23 @@ field of `F⁺ₙ`), as the compositum inside `Ω` of its finite admissible laye
 def LPlusN (n : ℕ) : IntermediateField (FPlus p n) Om :=
   ⨆ (L : IntermediateField (FPlus p n) Om) (_ : IsAdmissibleL p n L), L
 
+/-- `M⁺_∞ = ⋃ₙ M⁺ₙ` (RJW §13.2): the maximal abelian pro-`p` extension of `F⁺_∞` unramified outside
+`p`, realised as the `F⁺_∞`-compositum inside `Ω` of the finite-level `M⁺ₙ`. An `IntermediateField`
+over `F⁺_∞`, so its relative Galois group is immediate. -/
+def MinfPlus : IntermediateField (FinfPlus p) Om :=
+  IntermediateField.adjoin (FinfPlus p) (⋃ n, (↑(MPlusN p n) : Set Om))
+
+/-- `L⁺_∞ = ⋃ₙ L⁺ₙ` (RJW §13.2): the maximal unramified abelian pro-`p` extension of `F⁺_∞`. -/
+def LinfPlus : IntermediateField (FinfPlus p) Om :=
+  IntermediateField.adjoin (FinfPlus p) (⋃ n, (↑(LPlusN p n) : Set Om))
+
+/-- `X⁺_∞ = Gal(M⁺_∞/F⁺_∞)` (RJW §13.2) — **the central Galois module of the Iwasawa Main Conjecture**
+(Thm 13.11: `X⁺_∞ ≅ Λ(Γ⁺)/I(Γ⁺)ζp`). A genuine relative Galois group of the constructed fields, which
+carries the `Λ(Γ⁺)`-action of Remark 13.7. No `Type*` stand-in, no bundled isomorphism. -/
+abbrev XinfPlus : Type := MinfPlus p ≃ₐ[FinfPlus p] MinfPlus p
+
+/-- `Y⁺_∞ = Gal(L⁺_∞/F⁺_∞)` (RJW §13.2); classically `≅ lim Cl(F⁺ₙ)⊗ℤp`, and `= 0` for a Vandiver
+prime (Cor 13.16(i)). A genuine relative Galois group. -/
+abbrev YinfPlus : Type := LinfPlus p ≃ₐ[FinfPlus p] LinfPlus p
+
 end Iwasawa.GaloisFoundation
