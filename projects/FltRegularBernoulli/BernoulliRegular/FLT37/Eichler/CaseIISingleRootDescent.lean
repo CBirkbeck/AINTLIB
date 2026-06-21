@@ -165,7 +165,7 @@ theorem caseII_rootQuotientPrincipal_of_classEq
     FractionalIdeal.spanSingleton_ne_zero_iff.mpr haK
   -- Coerce (a)·𝔞(η) = (b)·𝔞(η₀) to fractional ideals.
   have hcoe := congrArg
-    (fun (I : Ideal (𝓞 K)) => (I : FractionalIdeal (𝓞 K)⁰ K)) hab
+    (fun (I : Ideal (𝓞 K)) ↦ (I : FractionalIdeal (𝓞 K)⁰ K)) hab
   simp only [FractionalIdeal.coeIdeal_mul, FractionalIdeal.coeIdeal_span_singleton] at hcoe
   -- 𝔞(η) = spanSingleton(b/a) · 𝔞(η₀): cancel spanSingleton(a) from `hcoe`.
   have hkey : (D.rootIdeal η : FractionalIdeal (𝓞 K)⁰ K) =
@@ -361,8 +361,8 @@ theorem caseII_descent_step_of_singleRootPrincipal
       Nonempty (CaseIIData37 (CyclotomicField 37 ℚ) m') :=
   caseII_descent_step_of_adjacent_etaZeroSpanSingletons_and_unitPower
     (K := CyclotomicField 37 ℚ)
-    (fun {_m} D => h_single D)
-    (fun {_m} D => caseII_exact_quotient_unitPower37 h_exactUnit hV hSO D)
+    (fun {_m} D ↦ h_single D)
+    (fun {_m} D ↦ caseII_exact_quotient_unitPower37 h_exactUnit hV hSO D)
     D
 
 /-- **The public Case-II bridge from the single-root residual + Assumption II** — with
@@ -374,7 +374,7 @@ theorem caseIIBridge_thirtyseven_of_singleRootPrincipal
     (h_exactUnit : WashingtonCaseIIExactQuotientUnitPower37Source) :
     BernoulliRegular.CaseIIBridge 37 (CyclotomicField 37 ℚ) 32 :=
   caseIIBridge_thirtyseven_of_descent_step
-    (fun hV hSO {_m} D =>
+    (fun hV hSO {_m} D ↦
       caseII_descent_step_of_singleRootPrincipal h_single h_exactUnit hV hSO D)
 
 /-- **Fermat's Last Theorem for `37`, rerouted off the vacuous `CaseIIRealIdealDescent37`.**
