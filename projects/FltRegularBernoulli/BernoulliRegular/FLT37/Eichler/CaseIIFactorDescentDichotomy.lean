@@ -152,7 +152,7 @@ theorem caseIIFirstLayer_false
     -- reduce to an equation in `K` via the coercion; then `coe_ringOfIntegersComplexConj` applies.
     rw [RingOfIntegers.ext_iff, NumberField.IsCMField.coe_ringOfIntegersComplexConj]
     -- goal: complexConj K (↑αU) = ↑(αU⁻¹), with ↑ the 𝓞K→K coercion (= algebraMap).
-    have hcoe : ∀ u : (𝓞 K)ˣ, ((u : 𝓞 K) : K) = algebraMap (𝓞 K) K (u : 𝓞 K) := fun _ => rfl
+    have hcoe : ∀ u : (𝓞 K)ˣ, ((u : 𝓞 K) : K) = algebraMap (𝓞 K) K (u : 𝓞 K) := fun _ ↦ rfl
     rw [hcoe, hcoe, ← hαU, hα_conj, hαU, map_units_inv (algebraMap (𝓞 K) K) αU]
   have hαU_unitsConj : unitsComplexConj K αU = αU⁻¹ := by
     apply Units.ext
@@ -381,7 +381,7 @@ theorem caseIIFactorDescentStep37_nonvacuous
       caseII_correctedRadical D D.etaOne (caseII_correctionUnit D.etaOne) =
         algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ)
           (αU : 𝓞 (CyclotomicField 37 ℚ))) → False :=
-  fun ⟨αU, hαU⟩ => caseIIFirstLayer_false D αU hαU
+  fun ⟨αU, hαU⟩ ↦ caseIIFirstLayer_false D αU hαU
 
 /-! ## 3. The dichotomy from the descent step + the proven terminal half
 
