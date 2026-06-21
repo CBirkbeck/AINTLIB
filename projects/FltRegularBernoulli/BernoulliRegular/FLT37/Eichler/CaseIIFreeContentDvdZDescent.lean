@@ -250,7 +250,7 @@ theorem no_freeContentCaseIIDvdZData37
   classical
   rintro ⟨n, ⟨D⟩⟩
   -- "factor count `k` is achieved by some combined datum".
-  let P : ℕ → Prop := fun k =>
+  let P : ℕ → Prop := fun k ↦
     ∃ (j : ℕ) (E : FreeContentCaseIIDvdZData37 j), caseIIFreeDvdZFactorCount E = k
   have hP : ∃ k, P k := ⟨_, n, D, rfl⟩
   obtain ⟨j, Dmin, hk⟩ := Nat.find_spec hP
@@ -560,7 +560,7 @@ theorem freeContentCaseIIDvdZData37_pContent_descend_of_dvdZExtractionData
         ((1 - η) * (1 - η ^ 36)) ≠ 0 := by
     intro η hη37 hη1
     rw [Ne, map_eq_zero_iff _ (FaithfulSMul.algebraMap_injective _ _)]
-    refine mul_ne_zero (fun h0 => hη1 (by linear_combination -h0)) (fun h0 => ?_)
+    refine mul_ne_zero (fun h0 ↦ hη1 (by linear_combination -h0)) (fun h0 ↦ ?_)
     have h36 : η ^ 36 = 1 := by linear_combination -h0
     have : η = 1 := by
       have hsucc : η ^ 37 = η ^ 36 * η := by rw [pow_succ]
