@@ -119,9 +119,7 @@ theorem degree_comp (ψ : CurveMap C₂ C₃) (φ : CurveMap C₁ C₂) :
   letI inst₂ : Algebra C₃.FunctionField C₂.FunctionField := ψ.toAlgebra
   letI inst₃ : Algebra C₃.FunctionField C₁.FunctionField := (ψ.comp φ).toAlgebra
   haveI : IsScalarTower C₃.FunctionField C₂.FunctionField C₁.FunctionField :=
-    IsScalarTower.of_algebraMap_eq fun x ↦ by
-      change (ψ.comp φ).pullback x = φ.pullback (ψ.pullback x)
-      rfl
+    IsScalarTower.of_algebraMap_eq fun _ ↦ rfl
   haveI : Module.Free C₂.FunctionField C₁.FunctionField :=
     Module.Free.of_divisionRing _ _
   rw [mul_comm]
@@ -296,8 +294,7 @@ theorem _root_.Finset.sum_eq_card_iff_forall_eq_one_of_one_le
     {α : Type*} {S : Finset α} {e : α → ℤ}
     (hle : ∀ P ∈ S, 1 ≤ e P) :
     ∑ P ∈ S, e P = (S.card : ℤ) ↔ ∀ P ∈ S, e P = 1 := by
-  have hconst : ∑ _ ∈ S, (1 : ℤ) = (S.card : ℤ) := by
-    rw [Finset.sum_const]; simp
+  have hconst : ∑ _ ∈ S, (1 : ℤ) = (S.card : ℤ) := by simp
   refine ⟨fun hsum P hP ↦ ?_, fun h ↦ ?_⟩
   · have hsub : ∑ P ∈ S, (e P - 1) = 0 := by
       rw [Finset.sum_sub_distrib, hconst, hsum, sub_self]
@@ -305,9 +302,7 @@ theorem _root_.Finset.sum_eq_card_iff_forall_eq_one_of_one_le
       (fun P hP ↦ by linarith [hle P hP])] at hsub
     have := hsub P hP
     linarith
-  · calc ∑ P ∈ S, e P
-        = ∑ _ ∈ S, (1 : ℤ) := Finset.sum_congr rfl h
-      _ = (S.card : ℤ) := hconst
+  · exact (Finset.sum_congr rfl h).trans hconst
 
 /-- **Witness-parametric Silverman II.2.7** (T-II-2-011): given a finite
 fiber `S` with ramification indices ≥ 1 summing to `deg(φ)`, the fiber
@@ -349,9 +344,6 @@ theorem pullback_surjective_of_degree_one (φ : CurveMap C₁ C₂)
   obtain ⟨c₀, hc₀v⟩ := hv (1 : C₁.FunctionField)
   have hc₀_am : algebraMap C₂.FunctionField C₁.FunctionField c₀ * v = 1 := by
     rw [← Algebra.smul_def]; exact hc₀v
-  have hc₀_ne : algebraMap C₂.FunctionField C₁.FunctionField c₀ ≠ 0 := fun h' ↦ by
-    rw [h', zero_mul] at hc₀_am; exact one_ne_zero hc₀_am.symm
-  have hc₀F : c₀ ≠ 0 := fun h' ↦ hc₀_ne (by rw [h', map_zero])
   refine ⟨c / c₀, ?_⟩
   have hv_eq : v = (algebraMap C₂.FunctionField C₁.FunctionField c₀)⁻¹ :=
     eq_inv_of_mul_eq_one_right hc₀_am
@@ -430,8 +422,7 @@ theorem sum_ramificationIdx_mul_inertiaDeg_eq_degree
     rw [Algebra.smul_def]
     show φ.pullback ((algebraMap C₂.CoordinateRing C₂.FunctionField) r) * x =
       r • x
-    rw [coordHom.compat r]
-    rw [← IsScalarTower.algebraMap_smul C₁.CoordinateRing r x,
+    rw [coordHom.compat r, ← IsScalarTower.algebraMap_smul C₁.CoordinateRing r x,
       ← Algebra.smul_def]
     rfl
   haveI hpMax' : p.IsMaximal := hpMax
@@ -444,3 +435,4 @@ theorem sum_ramificationIdx_mul_inertiaDeg_eq_degree
 end CurveMap
 
 end HasseWeil.Curves
+
