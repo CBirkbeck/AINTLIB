@@ -27,18 +27,9 @@ theorem regulator_subgroup_eq_index_mul_regulator
     (u : Fin (NumberField.Units.rank F) → (𝓞 F)ˣ) :
     NumberField.Units.regOfFamily u =
       ((Subgroup.closure (Set.range u) ⊔ NumberField.Units.torsion F).index : ℝ) *
-        NumberField.Units.regulator F := by
-  have h := NumberField.Units.regOfFamily_div_regulator u
-  have hreg_ne : NumberField.Units.regulator F ≠ 0 :=
-    (NumberField.Units.regulator_pos F).ne'
-  calc
-    NumberField.Units.regOfFamily u =
-        NumberField.Units.regOfFamily u / NumberField.Units.regulator F *
-          NumberField.Units.regulator F := by
-      field_simp [hreg_ne]
-    _ = ((Subgroup.closure (Set.range u) ⊔ NumberField.Units.torsion F).index : ℝ) *
-          NumberField.Units.regulator F := by
-      rw [h]
+        NumberField.Units.regulator F :=
+  (div_eq_iff (NumberField.Units.regulator_pos F).ne').mp
+    (NumberField.Units.regOfFamily_div_regulator u)
 
 end BernoulliRegular
 
