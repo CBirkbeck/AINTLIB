@@ -207,7 +207,7 @@ theorem caseII_lambda_emultiplicity {ζ ζ' : K} (hζ : IsPrimitiveRoot ζ 37)
   -- `1 − ζ'`: associate of `ζ − 1` (members `1`, `ζ'` of `nthRootsFinset`, base `ζ`).
   have h1 : Associated (hζ.toInteger - 1 : 𝓞 K) (1 - hζ'.toInteger) := by
     have hne : (1 : 𝓞 K) ≠ hζ'.toInteger :=
-      fun h => hζ'.toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37) h.symm
+      fun h ↦ hζ'.toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37) h.symm
     exact hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
       (by decide : Nat.Prime 37) hmem1 hmemζ' hne
   -- `1 − ζ'³⁶`: associate of `ζ − 1` (members `1`, `ζ'³⁶`, base `ζ`).
@@ -297,7 +297,7 @@ theorem caseII_anchor_exponent_eq (D : RealCaseIIData37 K m) (hp : (37 : ℕ) �
     push_cast; ring
   have hu0 : emultiplicity π ((u0 : 𝓞 K) ^ 2) = 0 := by
     rw [emultiplicity_pow hπ_prime]
-    rw [emultiplicity_eq_zero.mpr (fun h => hπ_prime.not_unit (isUnit_of_dvd_unit h u0.isUnit))]
+    rw [emultiplicity_eq_zero.mpr (fun h ↦ hπ_prime.not_unit (isUnit_of_dvd_unit h u0.isUnit))]
     simp
   -- `v_𝔭(λ) = 2` with `𝔭 = D.hζ−1` and lambda root `ζ'` (the two-root lambda lemma).
   have hlam : emultiplicity π (((1 - hζ'.toInteger) * (1 - hζ'.toInteger ^ 36)) ^ (2 * e)) =
@@ -567,7 +567,7 @@ theorem freeContentCaseIIDvdZData37_pContent_descend_pContentOutput
         ((1 - η) * (1 - η ^ 36)) ≠ 0 := by
     intro η hη37 hη1
     rw [Ne, map_eq_zero_iff _ (FaithfulSMul.algebraMap_injective _ _)]
-    refine mul_ne_zero (fun h0 => hη1 (by linear_combination -h0)) (fun h0 => ?_)
+    refine mul_ne_zero (fun h0 ↦ hη1 (by linear_combination -h0)) (fun h0 ↦ ?_)
     have h36 : η ^ 36 = 1 := by linear_combination -h0
     have : η = 1 := by
       have hsucc : η ^ 37 = η ^ 36 * η := by rw [pow_succ]
@@ -652,7 +652,7 @@ theorem no_pContent_freeContentCaseIIDvdZData37
   classical
   rintro ⟨m₀, ⟨D₀⟩⟩
   -- "factor count `k` is achieved by some `p`-content combined datum".
-  let P : ℕ → Prop := fun k =>
+  let P : ℕ → Prop := fun k ↦
     ∃ (m : ℕ) (E : FreeContentCaseIIDvdZData37 (37 * (m + 1))), caseIIFreeDvdZFactorCount E = k
   have hP : ∃ k, P k := ⟨_, m₀, D₀, rfl⟩
   obtain ⟨mmin, Dmin, hk⟩ := Nat.find_spec hP
