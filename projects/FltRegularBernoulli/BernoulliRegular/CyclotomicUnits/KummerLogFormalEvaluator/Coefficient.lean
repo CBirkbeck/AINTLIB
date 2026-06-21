@@ -194,8 +194,7 @@ theorem normalizedFiniteLogApprox_evenCoeff_eq_lowHomogeneousDegreeSums
           (Ideal.Quotient.factorPow (lambdaIdeal p K) hle
             (samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum
               (p := p) (K := K) (p - 2) d x hx))
-  rw [map_sum]
-  rw [valuedLambdaQuotientDworkCoeffModP_sum]
+  rw [map_sum, valuedLambdaQuotientDworkCoeffModP_sum]
   calc
     ∑ n ∈ Finset.Icc 1 (p - 1),
         valuedLambdaQuotientDworkCoeffModP (p := p) (K := K) i
@@ -271,16 +270,10 @@ theorem normalizedFiniteLogApprox_evenCoeff_eq_lowHomogeneousDegreeSums
             (p := p) (K := K) i
             (0 : ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (p - 1)) 0
           simpa using hzero
-        rw [← hsum]
-        rw [← valuedLambdaQuotientDworkCoeffModP_sum]
-        rw [← map_sum]
+        rw [← hsum, ← valuedLambdaQuotientDworkCoeffModP_sum, ← map_sum]
         rw [samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum_eq_sum_Icc
           (p := p) (K := K) (N := p - 2) (d := d) hx]
 
-set_option linter.style.longLine false in
-set_option maxHeartbeats 800000 in
--- The proof first unfolds the same-prime finite logarithm to ordinary
--- homogeneous slices, then collapses the Dwork coordinate sum to one degree.
 omit [NumberField.IsCMField K] in
 /-- CU-11f2b2c4 source theorem: the unscaled normalized finite-log coefficient
 on an even Kummer row is the formal Bernoulli coefficient. -/
@@ -328,8 +321,7 @@ theorem valuedLambdaQuotientDworkCoeffModP_unscaledNormalizedFiniteLog_even_eq_f
           (j := kummerLogRowIndex (p := p) j)
           (kummerLogRowIndex_one_le (p := p) j)
           (two_mul_kummerLogRowIndex_le_sub_three (p := p) j)
-    rw [hred]
-    rw [heq]
+    rw [hred, heq]
     simp [kummerLogUnitFactor]
   · intro d hd hde
     have hdlt : d < p - 1 := Finset.mem_range.mp hd
@@ -403,12 +395,9 @@ theorem kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP_eq_formal_of_unsca
         (formalKummerLogCoeffModP p (kummerLogRowIndex (p := p) j)) := by
   rw [kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP_eq_one_sub_pow_mul_unscaled
     (p := p) (K := K) hp_three hp_five j a]
-  rw [hunscaled]
-  rw [formalKummerLogCoeffModP_eval]
-  rw [kummerLogEvenPowerIndex_val]
+  rw [hunscaled, formalKummerLogCoeffModP_eval, kummerLogEvenPowerIndex_val]
   rw [show 2 * ((j : ℕ) + 1) = kummerLogRowIndex (p := p) j * 2 by
-    simp [kummerLogRowIndex]
-    omega]
+    rw [kummerLogRowIndex, Nat.mul_comm]]
   ring
 
 omit [NumberField.IsCMField K] in
@@ -482,8 +471,8 @@ theorem concreteKummerLogMatrix_eq_two_mul_specializedFiniteLogCoeffModP
         (p := p) (K := K) (by omega : 2 < p)
         (concreteKummerLogVector (p := p) (K := K) hp_three a)
         (kummerLogEvenPowerIndex (p := p) hp_five j)
-    rw [concreteKummerLogMatrix_apply, concreteKummerLogCoeff_eq]
-    rw [valuedLambdaQuotientDworkCoeffModP_evalₐ]
+    rw [concreteKummerLogMatrix_apply, concreteKummerLogCoeff_eq,
+      valuedLambdaQuotientDworkCoeffModP_evalₐ]
     simpa [i, concreteKummerLogVector] using
       congrArg (rationalPadicIntegerToZMod p) hrepr
   have hvec :=
