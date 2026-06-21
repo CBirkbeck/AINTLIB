@@ -126,11 +126,11 @@ lemma isUnit_teichmuller {a : ZMod p} (ha : a ≠ 0) : IsUnit (teichmuller p a) 
 /-- `ω(a) = 0` iff `a = 0`. -/
 @[simp]
 lemma teichmuller_eq_zero_iff {a : ZMod p} : teichmuller p a = 0 ↔ a = 0 :=
-  ⟨fun h => not_imp_not.mp (fun ha => (isUnit_teichmuller ha).ne_zero) h,
-    fun h => h ▸ teichmuller_zero⟩
+  ⟨fun h ↦ not_imp_not.mp (fun ha ↦ (isUnit_teichmuller ha).ne_zero) h,
+    fun h ↦ h ▸ teichmuller_zero⟩
 
 /-- `ω` is injective on `ZMod p` (follows from `toZMod ∘ ω = id`). -/
-lemma teichmuller_injective : Function.Injective (teichmuller p) := fun _ _ hab => by
+lemma teichmuller_injective : Function.Injective (teichmuller p) := fun _ _ hab ↦ by
   simpa using congrArg PadicInt.toZMod hab
 
 /-- Fixed point of Frobenius: `ω(a)^p = ω(a)` for any `a : ZMod p`.
@@ -173,8 +173,8 @@ noncomputable def teichmullerChar (p : ℕ) [Fact p.Prime] : DirichletCharacter 
   toFun := teichmuller p
   map_one' := map_one _
   map_mul' := map_mul _
-  map_nonunit' := fun a ha => by
-    rw [show a = 0 from by_contra fun hne => ha (isUnit_iff_ne_zero.mpr hne), teichmuller_zero]
+  map_nonunit' := fun a ha ↦ by
+    rw [show a = 0 from by_contra fun hne ↦ ha (isUnit_iff_ne_zero.mpr hne), teichmuller_zero]
 
 @[simp]
 lemma teichmullerChar_apply (a : ZMod p) : teichmullerChar p a = teichmuller p a := rfl
@@ -188,7 +188,7 @@ unity in `ℤ_[p]`. -/
 lemma teichmuller_isPrimitiveRoot_of_generator {g : (ZMod p)ˣ}
     (hg_gen : ∀ x : (ZMod p)ˣ, x ∈ Subgroup.zpowers g) :
     IsPrimitiveRoot (teichmuller p (g : ZMod p)) (p - 1) := by
-  refine ⟨?_, fun l hl => ?_⟩
+  refine ⟨?_, fun l hl ↦ ?_⟩
   · -- `ω(g)^(p-1) = ω(g^(p-1)) = ω(1) = 1` (Fermat in `(ZMod p)ˣ`).
     rw [← map_pow, ← Units.val_pow_eq_pow_val, ZMod.units_pow_card_sub_one_eq_one,
       Units.val_one, map_one]
@@ -253,7 +253,7 @@ lemma orderOf_teichmullerChar : orderOf (teichmullerChar p) = p - 1 := by
   -- `(teichmuller g)^(orderOf ω) = 1`. Since `teichmuller g` is a
   -- primitive `(p-1)`-th root of unity, `(p-1) ∣ orderOf ω`.
   obtain ⟨g, hg_gen⟩ := IsCyclic.exists_generator (α := (ZMod p)ˣ)
-  have h_apply := congrArg (fun χ : DirichletCharacter ℤ_[p] p => χ (g : ZMod p))
+  have h_apply := congrArg (fun χ : DirichletCharacter ℤ_[p] p ↦ χ (g : ZMod p))
     (pow_orderOf_eq_one (teichmullerChar p))
   simp only [MulChar.pow_apply_coe, teichmullerChar_apply, MulChar.one_apply_coe] at h_apply
   exact (teichmuller_isPrimitiveRoot_of_generator hg_gen).2 _ h_apply
@@ -261,7 +261,7 @@ lemma orderOf_teichmullerChar : orderOf (teichmullerChar p) = p - 1 := by
 /-- A power of the Teichmueller character is trivial exactly when the
 exponent is a multiple of `p - 1`. -/
 lemma teichmullerChar_pow_eq_one_iff (n : ℕ) : (teichmullerChar p) ^ n = 1 ↔ (p - 1) ∣ n := by
-  refine ⟨fun hpow => ?_, ?_⟩
+  refine ⟨fun hpow ↦ ?_, ?_⟩
   · simpa [orderOf_teichmullerChar (p := p)] using orderOf_dvd_of_pow_eq_one hpow
   · rintro ⟨m, rfl⟩
     rw [← orderOf_teichmullerChar (p := p), pow_mul, pow_orderOf_eq_one, one_pow]
@@ -307,7 +307,7 @@ lemma teichmullerChar_odd (hp_odd : p ≠ 2) : (teichmullerChar p).Odd :=
   show teichmullerChar p (-1) = -1 by rw [teichmullerChar_apply]; exact teichmuller_neg_one hp_odd
 
 /-- `(-1 : ℤ_[p]) ≠ 1`. -/
-lemma padicInt_neg_one_ne_one : (-1 : ℤ_[p]) ≠ 1 := fun h => by
+lemma padicInt_neg_one_ne_one : (-1 : ℤ_[p]) ≠ 1 := fun h ↦ by
   have : (2 : ℤ) = 0 := by exact_mod_cast (by linear_combination -h : (2 : ℤ_[p]) = 0)
   norm_num at this
 
