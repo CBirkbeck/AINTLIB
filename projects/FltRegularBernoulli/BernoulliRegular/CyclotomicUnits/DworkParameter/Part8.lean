@@ -570,6 +570,39 @@ theorem evalIntegralPowerSeriesMod_expMinusOne_neg_dworkParameter_eq_conjugateLa
         _ = Ideal.Quotient.mk ((lambdaIdeal p K) ^ (M + 1))
             (valuedCyclotomicConjugateLambdaInteger p K) := rfl
 
+/-- The coefficientwise map of an `r`-integral series with zero constant term
+again has zero constant term. -/
+private theorem isRIntegralPS_constantCoeff_mapTo_eq_zero
+    {r : ℕ} {A : Type*} [CommSemiring A]
+    (φ : Furtwaengler.DieudonneDwork.rIntegralRatSubring r →+* A)
+    {F : PowerSeries ℚ} (hF : Furtwaengler.DieudonneDwork.IsRIntegralPS r F)
+    (hF0 : PowerSeries.constantCoeff F = 0) :
+    PowerSeries.constantCoeff (hF.mapTo φ) = 0 := by
+  rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply,
+    Furtwaengler.DieudonneDwork.IsRIntegralPS.coeff_mapTo]
+  have hcoeff0 : (PowerSeries.coeff (R := ℚ) 0) F = 0 := by
+    rw [PowerSeries.coeff_zero_eq_constantCoeff_apply]; exact hF0
+  have hsubzero :
+      (⟨(PowerSeries.coeff (R := ℚ) 0) F, hF 0⟩ :
+        Furtwaengler.DieudonneDwork.rIntegralRatSubring r) = 0 := by
+    ext; exact hcoeff0
+  rw [hsubzero]; exact map_zero φ
+
+/-- Evaluating a truncated substitution `subst G F` reduces to evaluating the
+truncation of `F` at the (already-known) value of the truncation of `G`, in a
+nilpotent quotient where `a ^ (N + 1) = 0`. -/
+private theorem powerSeries_trunc_eval₂_subst_eq_eval₂_of_eval₂_eq
+    {A : Type*} [CommRing A] (a : A) (N : ℕ) (ha : a ^ (N + 1) = 0)
+    {G : PowerSeries A} (hG0 : PowerSeries.constantCoeff G = 0)
+    {v : A} (hv : (PowerSeries.trunc (N + 1) G).eval₂ (RingHom.id A) a = v)
+    (hvNil : v ^ (N + 1) = 0) (F : PowerSeries A) :
+    (PowerSeries.trunc (N + 1) (PowerSeries.subst G F)).eval₂ (RingHom.id A) a =
+      (PowerSeries.trunc (N + 1) F).eval₂ (RingHom.id A) v := by
+  have hEvalNil :
+      ((PowerSeries.trunc (N + 1) G).eval₂ (RingHom.id A) a) ^ (N + 1) = 0 := by
+    rw [hv]; exact hvNil
+  rw [powerSeries_trunc_eval₂_subst_of_pow_succ_eq_zero a N ha hG0 hEvalNil F, hv]
+
 set_option maxHeartbeats 1000000 in
 -- The completed sign theorem reuses the same finite quotient comparison data.
 theorem dworkConjugateParameter_eq_neg_dworkParameter (hp_two : 2 < p) :
@@ -651,38 +684,16 @@ theorem dworkConjugateParameter_eq_neg_dworkParameter (hp_two : 2 < p) :
         exact Ideal.pow_mem_pow
           (valuedCyclotomicConjugateLambdaInteger_mem_lambdaIdeal (p := p) (K := K))
           (M + 1)
-      have hG0 : PowerSeries.constantCoeff G = 0 := by
-        rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply]
-        rw [Furtwaengler.DieudonneDwork.IsRIntegralPS.coeff_mapTo]
-        have hcoeff0 :
-            (PowerSeries.coeff (R := ℚ) 0) (FormalDwork.inverseSeries p) = 0 := by
-          rw [PowerSeries.coeff_zero_eq_constantCoeff_apply]
-          exact FormalDwork.inverseSeries_constantCoeff p
-        have hsubzero :
-            (⟨(PowerSeries.coeff (R := ℚ) 0) (FormalDwork.inverseSeries p),
-                FormalDwork.inverseSeries_isPIntegral p 0⟩ :
-              Furtwaengler.DieudonneDwork.rIntegralRatSubring p) = 0 := by
-          ext
-          exact hcoeff0
-        rw [hsubzero]
-        exact map_zero φ
+      have hG0 : PowerSeries.constantCoeff G = 0 :=
+        isRIntegralPS_constantCoeff_mapTo_eq_zero φ
+          (FormalDwork.inverseSeries_isPIntegral p)
+          (FormalDwork.inverseSeries_constantCoeff p)
       have hNegG0 : PowerSeries.constantCoeff (-G) = 0 := by
         simp [hG0]
-      have hH0 : PowerSeries.constantCoeff H = 0 := by
-        rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply]
-        rw [Furtwaengler.DieudonneDwork.IsRIntegralPS.coeff_mapTo]
-        have hcoeff0 :
-            (PowerSeries.coeff (R := ℚ) 0) (FormalDwork.expMinusOneSeries p) = 0 := by
-          rw [PowerSeries.coeff_zero_eq_constantCoeff_apply]
-          exact FormalDwork.expMinusOneSeries_constantCoeff p
-        have hsubzero :
-            (⟨(PowerSeries.coeff (R := ℚ) 0) (FormalDwork.expMinusOneSeries p),
-                FormalDwork.expMinusOneSeries_isPIntegral p 0⟩ :
-              Furtwaengler.DieudonneDwork.rIntegralRatSubring p) = 0 := by
-          ext
-          exact hcoeff0
-        rw [hsubzero]
-        exact map_zero φ
+      have hH0 : PowerSeries.constantCoeff H = 0 :=
+        isRIntegralPS_constantCoeff_mapTo_eq_zero φ
+          (FormalDwork.expMinusOneSeries_isPIntegral p)
+          (FormalDwork.expMinusOneSeries_constantCoeff p)
       have hInner0 :
           PowerSeries.constantCoeff (PowerSeries.subst (-G) H) = 0 :=
         PowerSeries.constantCoeff_subst_eq_zero hNegG0 H hH0
@@ -690,60 +701,24 @@ theorem dworkConjugateParameter_eq_neg_dworkParameter (hp_two : 2 < p) :
           (PowerSeries.trunc (M + 1) (-G)).eval₂ (RingHom.id A) lambdabar =
             -gamma := by
         simp [gamma]
+      have hgammaNil : gamma ^ (M + 1) = 0 := by
+        rw [← hgamma_eval]
+        exact evalₐ_pow_eq_zero_of_evalₐ_one_eq_zero
+          (p := p) (K := K) (dworkParameter_evalₐ_one (p := p) (K := K)) (M + 1)
+      have hnegGammaNil : (-gamma) ^ (M + 1) = 0 :=
+        neg_pow_eq_zero_of_pow_eq_zero hgammaNil
       have hInnerEval :
           (PowerSeries.trunc (M + 1) (PowerSeries.subst (-G) H)).eval₂
-              (RingHom.id A) lambdabar = cbar := by
-        have hgammaNil : gamma ^ (M + 1) = 0 := by
-          rw [← hgamma_eval]
-          exact evalₐ_pow_eq_zero_of_evalₐ_one_eq_zero
-            (p := p) (K := K) (dworkParameter_evalₐ_one (p := p) (K := K)) (M + 1)
-        have hnegGammaNil : (-gamma) ^ (M + 1) = 0 :=
-          neg_pow_eq_zero_of_pow_eq_zero hgammaNil
-        have hNegEvalNil :
-            ((PowerSeries.trunc (M + 1) (-G)).eval₂ (RingHom.id A) lambdabar) ^
-                (M + 1) = 0 := by
-          rw [hNegEval]
-          exact hnegGammaNil
-        have hcomp :
-            (PowerSeries.trunc (M + 1) (PowerSeries.subst (-G) H)).eval₂
-                (RingHom.id A) lambdabar =
-              (PowerSeries.trunc (M + 1) H).eval₂ (RingHom.id A) (-gamma) := by
-          have h := powerSeries_trunc_eval₂_subst_of_pow_succ_eq_zero
-            (a := lambdabar) (N := M) hlambdaNil
-            (G := -G) hNegG0 hNegEvalNil H
-          calc
-            (PowerSeries.trunc (M + 1) (PowerSeries.subst (-G) H)).eval₂
-                (RingHom.id A) lambdabar =
-              (PowerSeries.trunc (M + 1) H).eval₂ (RingHom.id A)
-                ((PowerSeries.trunc (M + 1) (-G)).eval₂ (RingHom.id A) lambdabar) := h
-            _ = (PowerSeries.trunc (M + 1) H).eval₂ (RingHom.id A) (-gamma) := by
-              rw [hNegEval]
-        rw [hcomp]
-        exact hExpConj
-      have hInnerEvalNil :
-          ((PowerSeries.trunc (M + 1) (PowerSeries.subst (-G) H)).eval₂
-              (RingHom.id A) lambdabar) ^ (M + 1) = 0 := by
-        rw [hInnerEval]
-        exact hcbarNil
+              (RingHom.id A) lambdabar = cbar :=
+        (powerSeries_trunc_eval₂_subst_eq_eval₂_of_eval₂_eq lambdabar M hlambdaNil
+          hNegG0 hNegEval hnegGammaNil H).trans hExpConj
       have hcompInv :
           (PowerSeries.trunc (M + 1)
               (PowerSeries.subst (PowerSeries.subst (-G) H) G)).eval₂
               (RingHom.id A) lambdabar =
-            (PowerSeries.trunc (M + 1) G).eval₂ (RingHom.id A) cbar := by
-        have h := powerSeries_trunc_eval₂_subst_of_pow_succ_eq_zero
-          (a := lambdabar) (N := M) hlambdaNil
-          (G := PowerSeries.subst (-G) H) hInner0 hInnerEvalNil G
-        calc
-          (PowerSeries.trunc (M + 1)
-              (PowerSeries.subst (PowerSeries.subst (-G) H) G)).eval₂
-              (RingHom.id A) lambdabar =
-            (PowerSeries.trunc (M + 1) G).eval₂ (RingHom.id A)
-              ((PowerSeries.trunc (M + 1) (PowerSeries.subst (-G) H)).eval₂
-                (RingHom.id A) lambdabar) := h
-          _ = (PowerSeries.trunc (M + 1) G).eval₂ (RingHom.id A) cbar :=
-            congrArg
-              (fun x : A ↦ (PowerSeries.trunc (M + 1) G).eval₂ (RingHom.id A) x)
-              hInnerEval
+            (PowerSeries.trunc (M + 1) G).eval₂ (RingHom.id A) cbar :=
+        powerSeries_trunc_eval₂_subst_eq_eval₂_of_eval₂_eq lambdabar M hlambdaNil
+          hInner0 hInnerEval hcbarNil G
       have hseriesInv :
           PowerSeries.subst (PowerSeries.subst (-G) H) G = -G :=
         FormalDwork.inverseSeries_mapTo_subst_expMinusOneSeries_subst_neg_inverse
