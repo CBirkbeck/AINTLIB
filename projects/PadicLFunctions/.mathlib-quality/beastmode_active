@@ -1,1 +1,1 @@
-FOCUS: capstone_concrete fully reduced to CFT + §12 (Φ, completeness, all instances internalized). MAJOR milestone. Remaining: §12 (h12/T1220 chain) + CFT — both bundled by design.
+FOCUS: §13 Stage-G capstone COMPLETE (axiom-clean, reduced to CFT+§12). CFT bundled-by-necessity (no mathlib global CFT). §12 (h12) delegated to running worker (T1220). Awaiting worker; integrate on completion.

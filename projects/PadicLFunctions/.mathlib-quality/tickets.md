@@ -6777,7 +6777,15 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
   algebra, **no CFT**. Exactness by the standard diagram chase. **Generality**: arbitrary `K`, `𝔪`.
 
 ###### [G2-DEDUCE] CFTunits1 `0 → 𝓔⁺_{n,1} → 𝒰⁺_{n,1} → Gal(𝓜⁺_n/𝓛⁺_n) → 0` — **PROVEN from G2-CFT**
-- **Status**: open | **File**: IwasawaProof/Galois/Modules.lean | **Depends on**: G2-CFT, G2-RAYSEQ, G1 | **Type**: theorem
+- **Status**: BUNDLED-BY-NECESSITY (confirmed 2026-06-21) | **File**: IwasawaProof/Galois/Modules.lean | **Depends on**: G2-CFT, G2-RAYSEQ, G1 | **Type**: theorem
+- **Boundary confirmation (2026-06-21)**: discharging this needs concretizing `Gal(𝓜⁺_n/𝓛⁺_n)` as a real
+  abelian extension's Galois group + the Artin reciprocity identification — i.e. **global class field
+  theory**, which mathlib does NOT have (verified: no `RayClassGroup`, no Artin reciprocity / ray class
+  field in mathlib; only generic `galRestrict` machinery). Per plan-G `Scope decision` + the 2026-06-18
+  expert review, the `ClassFieldTheory` interface is therefore bundled *by necessity* (to await mathlib's
+  future global CFT, then discharge by instantiation), NOT a dispatchable producer ticket. The capstone
+  `iwasawa_main_conjecture_full_concrete` bundles it as `CFTUnitsData`. Building global CFT from scratch
+  is a multi-week+ paper-scale development outside this stage's scope (B3-boundary).
 - **Proof sketch**: apply the `ClassFieldTheory` interface to `K = F_n^+`, `S = {𝔭, ∞}` (max abelian p-extension
   unramified outside p); combine Artin reciprocity + existence with G2-RAYSEQ and the local principal units
   `localUnitsOnePlus` to identify `Gal(𝓜⁺_n/𝓛⁺_n)` with `𝒰⁺_{n,1}/closure(𝓔⁺_{n,1})`. This is the Washington
