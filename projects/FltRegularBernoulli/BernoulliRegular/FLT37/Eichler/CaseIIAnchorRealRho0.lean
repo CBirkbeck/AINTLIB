@@ -84,7 +84,7 @@ theorem caseII_anchor_B0_isPrincipal {m : ℕ} (D : RealCaseIIData37 K m) (hp : 
       caseIIData37_span_z_ne_bot D.toCaseIIData37
     have h𝔞₀_dvd_z : 𝔞₀ ∣ Ideal.span ({D.z} : Set (𝓞 K)) :=
       caseII_a_eta_zero_dvd_z D.toCaseIIData37 hp
-    exact fun h0 => hz_ne (by rw [h0] at h𝔞₀_dvd_z; exact zero_dvd_iff.mp h𝔞₀_dvd_z)
+    exact fun h0 ↦ hz_ne (by rw [h0] at h𝔞₀_dvd_z; exact zero_dvd_iff.mp h𝔞₀_dvd_z)
   have h𝔞₀_ne : 𝔞₀ ≠ ⊥ := by rwa [Ideal.zero_eq_bot] at h𝔞₀_ne0
   -- `x + y ≠ 0` (else `x = -y` ⟹ `x³⁷+y³⁷ = 0` ⟹ `z = 0`, contradicting `hz`).
   have hxy_ne : D.x + D.y ≠ 0 := by
@@ -139,7 +139,7 @@ theorem caseII_isCoprime_comap_int37_of_stable
     IsCoprime (I.comap (algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)))
       (Ideal.span {(37 : 𝓞 (NumberField.maximalRealSubfield K))}) := by
   set σ := (NumberField.IsCMField.ringOfIntegersComplexConj K).toRingEquiv.toRingHom with hσ
-  have hinv : ∀ x : 𝓞 K, σ (σ x) = x := fun x => by
+  have hinv : ∀ x : 𝓞 K, σ (σ x) = x := fun x ↦ by
     apply RingOfIntegers.ext
     simp only [hσ, RingEquiv.toRingHom_eq_coe, RingHom.coe_coe, AlgEquiv.coe_ringEquiv,
       NumberField.IsCMField.coe_ringOfIntegersComplexConj,
@@ -292,7 +292,7 @@ theorem caseII_anchor_B0_real_generator {m : ℕ} (D : RealCaseIIData37 K m) (hp
     have h𝔞₀_dvd_z : 𝔞₀ ∣ Ideal.span ({D.z} : Set (𝓞 K)) :=
       caseII_a_eta_zero_dvd_z D.toCaseIIData37 hp
     rw [Ideal.zero_eq_bot] at hz_ne
-    exact fun h0 => hz_ne (by rw [h0] at h𝔞₀_dvd_z; exact zero_dvd_iff.mp h𝔞₀_dvd_z)
+    exact fun h0 ↦ hz_ne (by rw [h0] at h𝔞₀_dvd_z; exact zero_dvd_iff.mp h𝔞₀_dvd_z)
   have hρ_ne : ρ ≠ 0 := by
     intro h0
     apply h𝔞₀_ne
@@ -416,7 +416,7 @@ theorem caseII_anchor_real_rho0_of_VC
     refine mul_ne_zero ?_ ?_
     · have : (zeta_spec 37 ℚ K).toInteger ≠ 1 :=
         (zeta_spec 37 ℚ K).toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37)
-      exact fun h => this (by linear_combination -h)
+      exact fun h ↦ this (by linear_combination -h)
     · have hne : (zeta_spec 37 ℚ K).toInteger ^ 36 ≠ 1 := by
         intro h
         have h37 : (zeta_spec 37 ℚ K).toInteger ^ 37 = 1 :=
@@ -426,7 +426,7 @@ theorem caseII_anchor_real_rho0_of_VC
               (zeta_spec 37 ℚ K).toInteger ^ 36 * (zeta_spec 37 ℚ K).toInteger := pow_succ _ _
           rw [h37, h, one_mul] at hps; exact hps.symm
         exact (zeta_spec 37 ℚ K).toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37) this
-      exact fun h => hne (by linear_combination -h)
+      exact fun h ↦ hne (by linear_combination -h)
   have hρ0_ne : ρ0 ≠ 0 := by
     intro h0
     have hbot : aEtaZeroDvdPPow hp D.hζ D.equation D.hy = ⊥ := by
