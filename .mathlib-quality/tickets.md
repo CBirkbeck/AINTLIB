@@ -1,5 +1,18 @@
 # Ticket Board — Thm 8.28(b) sheafiness, revised 4-leaf plan (post /expert-review 2026-06-19)
 
+## ★ UPDATE 2026-06-21 (/develop resume audit, lean_verify'd + full build 9825 green)
+- **Leaf #1 (inducing / Prop 6.18) ELIMINATED** — T-L1a/b/c ✅DONE (commit b3749e9). The headline
+  `embedding` field was rewired to ⟨`productRestrictionSub_isInducing_via_equalizer`, injective⟩ via
+  the new axiom-clean `isInducing_of_closedRange_of_topNilpUnit` (WedhornBanachTheorem). The
+  StructureSheaf 6.18 sorry `productRestrictionSub_isInducing_tate` is OFF the faithful headline path.
+- **Remaining headline leaves (~4): T-L2 (ROIE), T-L3 (height-1 analytic), T-L4 ([Hu2] 3.3(i)),
+  T-L5 (Spa-QC / Wedhorn 7.35(1))** — the injective half goes via the FLATNESS route and both halves
+  transitively use T-L2/T-L3 (corrects an earlier "2 leaves" undercount).
+- **NEXT PUSH = T-L4 (Huber 3.3(i))** — UN-PARKED; all deep discharges verified present
+  (`IsLocalRing.exists_factor_valuationRing` + `Spv.isContinuous_of_isInSpvAI_of_lt_one` axiom-clean +
+  `IsRingOfIntegralElements.subset_powerBounded`). Faithful HU-a…e decomposition under T-L4 below.
+- **T-L5 (Spa-QC)** newly TRACKED (was untracked); deepest, deferred to its own decompose pass.
+
 ## Summary
 - **Foundation DONE** (commits 489fe72 / b5c20a9 / a42bdc9): the `A⁺ ⊆ A°` ring-of-integral-elements
   interface migration (T-ROIE-1/2). Full `lake build` GREEN (3190 jobs). The false `B⁺ ⊆ B₀` route is
@@ -138,7 +151,13 @@ product (the OMT needs an additive/`A`-module structure on the target, not a rin
 ---
 
 ### [T-L1b] `sectionEqualizer` is a complete, countably-based A-module; `ρ̃ : R → E` continuous bijection
-- **Status**: in_progress (beastmode 2026-06-20) — 3 foundational pieces DONE; OMT-assembly core remains.
+- **Status**: ✅ DONE (2026-06-21, subsumed by T-L1c landing) — the foundational pieces
+  (`sectionEqualizer_completeSpace`, `presheafValue_uniformity_isCountablyGenerated`,
+  `sectionEqualizer_isCountablyGenerated`, `productRestrictionSub_mem_sectionEqualizer`) +
+  the OMT-assembly were all consumed by `productRestrictionSub_isInducing_via_equalizer` (the
+  OMT-assembly went via the general WBT helper `isInducing_of_closedRange_of_topNilpUnit`, which
+  handles the range-subtype instances internally). Full build green.
+- **Status (orig)**: in_progress (beastmode 2026-06-20) — 3 foundational pieces DONE; OMT-assembly core remains.
 - **Progress**:
   - 2026-06-20 LANDED (StructureSheaf.lean, all green 2787 jobs): `sectionEqualizer_isClosed` (T-L1a),
     `productRestrictionSub_mem_sectionEqualizer` (image ⊆ E, via `restrictionMap_comp`, no gluing),
@@ -210,7 +229,18 @@ such spaces … separation+gluing give a continuous bijection ρ̃ : R → E." G
 ---
 
 ### [T-L1c] `productRestrictionSub_isInducing_tate` via the σ-compact-free OMT
-- **Status**: open — ⚠ ARCHITECTURE: prove in WedhornCechAcyclicity, NOT StructureSheaf.
+- **Status**: ✅ DONE (2026-06-21, commit b3749e9, full build 9825 green). Route: NOT the
+  StructureSheaf `productRestrictionSub_isInducing_tate` plan — instead a clean general lemma
+  `isInducing_of_closedRange_of_topNilpUnit` (WedhornBanachTheorem, axiom-clean: cont+inj A-linear
+  with closed range over a ring with a top-nilp unit ⇒ IsInducing, via corestrict-to-range + OMT +
+  `Equiv.toHomeomorphOfContinuousOpen` + closed-subtype-inclusion compose) applied in
+  `productRestrictionSub_isInducing_via_equalizer` (WedhornCechAcyclicity) at ρ̃ with range =
+  closed `sectionEqualizer`. Headline `embedding` field rewired to ⟨via_equalizer, injective⟩;
+  the StructureSheaf Prop-6.18 sorry `productRestrictionSub_isInducing_tate` is OFF the faithful
+  headline path (still used only by deprecated `_clean`/RPK wrappers). ⚠GOTCHA: the two
+  non-canonical `presheafValue` module instances must be passed EXPLICITLY via `@` (FlatnessResults
+  pattern) — not synthesised inside the OMT's instance bundle. **Leaf #1 (inducing/6.18) ELIMINATED.**
+- **Status (orig)**: open — ⚠ ARCHITECTURE: prove in WedhornCechAcyclicity, NOT StructureSheaf.
 - **Progress**:
   - 2026-06-20 (beastmode) cg-uniformity diamond CRACKED + 5 topological foundations landed in
     StructureSheaf (sectionEqualizer_isClosed/_completeSpace/_isCountablyGenerated,
@@ -457,7 +487,16 @@ Wedhorn Prop 7.41 (p.66, `wedhorn.txt:3438`); "height 1" ⟺ `MulArchimedean` va
 ---
 
 ### [T-L4] `isPowerBounded_of_forall_vle_one_spa_of_complete` via 7.52(1) = 7.18(1) (former leaf #4)
-- **Status**: PARKED — cited external leaf **[Hu2] Lemma 3.3(i)**, now SOURCED (user chose (c)).
+- **Status**: 🔵 OPEN — UN-PARKED 2026-06-21 (user chose in-repo discharge). ⭐**FEASIBILITY
+  VERIFIED**: all deep discharges of Huber's hypothesis-free 3.3(i) proof exist in-repo/mathlib:
+  (HU-c dominating valuation) mathlib `IsLocalRing.exists_factor_valuationRing`
+  (`Mathlib.RingTheory.Valuation.LocalSubring`); (HU-e continuity) project
+  `Spv.isContinuous_of_isInSpvAI_of_lt_one` (SpvAI.lean:294, **lean_verify'd axiom-clean** = the
+  Wedhorn 7.10 reverse direction); (HU-d restriction) mathlib `Valuation.comap`; (L-714 B⁺⊆B°)
+  project `IsRingOfIntegralElements.subset_powerBounded`. Remaining = connective tissue
+  (integral-closure HU-a, minimal-prime HU-b, valuation-lift bookkeeping HU-d) in the project's
+  Spv encoding. See the faithful Huber-3.3(i) sub-decomposition (HU-a…e) below + `decomposition.md`.
+- **Status (was)**: PARKED — cited external leaf **[Hu2] Lemma 3.3(i)**, now SOURCED (user chose (c)).
   ⚠ Adversarial round-2 finding (`decomposition.md`): the reviewer's "trivial via 7.52(1)" does
   NOT survive contact with the code — in-repo 7.18 (`isIntegral_of_forall_continuous_valuation_le_one`,
   Presheaf:1639) is `[IsDomain]`-gated (artifact of FractionRing route, FALSE for case-(b) non-domain
@@ -510,6 +549,70 @@ Wedhorn Prop 7.52(1) (p.74, `wedhorn.txt:3619`: "|f(x)|≤1 ∀x∈Spa A iff f�
 #### Generality decision
 State the 7.52(1) leaf for a general affinoid ring `(B, B⁺)` (no Tate/complete/noetherian) for reuse;
 apply at `B = presheafValue D'`.
+
+#### FAITHFUL Huber-3.3(i) sub-decomposition (un-park 2026-06-21; transcribed from huber2.txt:633-658)
+The substantive direction is **τ(σ(B⁺)) ⊆ B⁺** (`mem_plus_iff_forall_spa_vle_one` ←). Huber's proof
+(p.466) is a contradiction: assume `a ∈ τ(σ(B⁺)) \ B⁺` and build `v ∈ σ(B⁺)=Spa(B,B⁺)` with `v(a)>1`,
+contradicting `a ∈ τ(σ(B⁺))`. Set `G := B⁺` (open, integrally closed in `B`). Sub-lemmas, in order:
+
+- **HU-a** `not_isUnit_inv_of_not_mem` (leaf, integral-closure): for `a ∉ G`, `a⁻¹` is NOT a unit of
+  the subring `G[a⁻¹] ⊆ B_a`. Source (huber2.txt:635-637, verbatim): *"The element a⁻¹∈G[a⁻¹] is not
+  a unit of G[a⁻¹] (since otherwise a∈G[a⁻¹] which implies that a is integral over G and hence a∈G)."*
+  Discharge: `RingHom`/`IsIntegral` + `G` integrally closed (`IsIntegrallyClosed`-style for the ROIE
+  `G=B⁺`). mathlib `isIntegral_of_mem_closure`/`Algebra.IsIntegral`. ≈ Huber 3 lines → ~40 LOC.
+- **HU-b** `exists_minimalPrime_le_prime_containing_inv` (leaf, mathlib): from HU-a, `∃` prime `p ∋ a⁻¹`;
+  take a minimal prime `q ⊆ p`. Source (637-639): *"there exists a prime ideal p of G[a⁻¹] with a⁻¹∈p.
+  Let q be a minimal prime ideal of G[a⁻¹] with q⊆p."* Discharge: `Ideal.exists_le_maximal` /
+  `Ideal.exists_minimalPrimes_le` (mathlib `Ideal.exists_minimalPrimes_le` : prime ⊇ a minimal prime).
+- **HU-c** `exists_dominating_valuation` (leaf, ⭐mathlib crux): valuation ring of `Frac(G[a⁻¹]/q)`
+  dominating the local ring `(G[a⁻¹]/q)_{p/q}` ⟹ valuation `s` of `G[a⁻¹]` with `q=supp(s)`, `s(g)≤1
+  ∀g∈G`, `s(x)≤1 ∀x∈p` (so `s(a⁻¹)≤1`). Source (639-641). Discharge: **`IsLocalRing.exists_factor_valuationRing`**
+  (`Mathlib.RingTheory.Valuation.LocalSubring`: `(f : R →+* K) → ∃ A, (∀ x, f x ∈ A) ∧ IsLocalHom …`)
+  at `R := (G[a⁻¹]/q)_{p/q}`, `K := Frac(G[a⁻¹]/q)`. The local-hom property gives `s ≤ 1` on the ring
+  and `< 1` (i.e. into 𝔪) on `p/q`.
+- **HU-d** `exists_lifted_spv_valuation` (leaf, valuation-lift bookkeeping): lift `s` to a valuation
+  `v` of `B` (via a prime of `B_a` over `q`, a valuation `t` of `B_a` over `s`, `u := t∘(B→B_a)`,
+  `v := u|cΓ`) with **(a)** `v(a)>1`, **(b)** `v(g)≤1 ∀g∈G`, **(c)** `v(y)≤1 ∀y∈B°°`, **(d)**
+  `v ∈ Spv(B, B°°·B)`. Source (641-655, incl. the (c) sub-argument: `y∈B°°`, `G` open ⟹ `∃n, yⁿa∈G`,
+  `y∈G`, so `yⁿ=g·a⁻¹∈p` ⟹ `s(yⁿ)≤1`). Discharge: mathlib `Valuation.comap` (restriction) +
+  valuation extension along `G[a⁻¹]→B_a` (`Valuation` on `Frac`); the project's `Spv`/`vle` API.
+  Hardest bookkeeping leaf; may sub-split (a)/(b)/(c)/(d).
+- **HU-e** `mem_spa_of_lifted` + contradiction (composition): from (c)+(d) and the **axiom-clean**
+  `Spv.isContinuous_of_isInSpvAI_of_lt_one` (SpvAI:294 = Wedhorn 7.10 reverse), `v` is continuous;
+  with (b), `v ∈ Spa(B,B⁺)=σ(G)`. Then `hx`/`a∈τ(σ(B⁺))` gives `v(a)≤1`, contradicting (a) `v(a)>1`.
+  Source (656-658). Discharge: composition + `Spv.isContinuous_of_isInSpvAI_of_lt_one`.
+- **L-714** (leaf, project, ALREADY available): `B⁺ ⊆ B°` = `IsRingOfIntegralElements.subset_powerBounded`
+  (used at Cor832:1626). Final step `x∈B⁺ ⟹ IsPowerBounded x`.
+
+**Generality:** prove HU-a…e for a general complete affinoid `(B,B⁺)` (Huber's proof needs no
+noeth/domain/Tate beyond what `Spv.isContinuous_of_isInSpvAI_of_lt_one` already assumes); apply at
+`B=presheafValue D'`. **File**: new `HuberLemma33.lean` (imports SpvAI + the ROIE interface), or extend
+FaithfulLocLift. **First /beastmode step**: state HU-a…e as `:= by sorry` and confirm `lake build`
+(skeleton), THEN fill HU-c (crux) and HU-e (continuity) first since their discharges are verified.
+
+---
+
+### [T-L5] Spa-quasicompactness keystone `isClosed_image_spa_ιSpv_bool_noHArch` (gluing-leaf bottom)
+- **Status**: 🔵 OPEN — tracked here for the first time (was the untracked bottom of "Leaf C gluing").
+  After the γ-route 7.54 (`exists_finite_normalized_rational_refinement`, WCA:11886), the gluing leaf
+  (`lemma_8_34_gluing`) bottoms at this: `isClosed_image_spa_ιSpv_bool_noHArch` (SpaCompactNoHArch.lean:310,
+  bare `sorry`). = **Wedhorn 7.35(1)**: Spa A is a spectral space (hence Spa-QC), via Spv(A,I)
+  pro-constructibility. ⚠DEEPEST leaf — the SpvAITopology spectral-spaces track; support lemmas
+  (`cont_isClosed_in_SpvAI`, `isClosed_setOf_vle`) themselves carry `sorryAx`. Defer to its own
+  `/develop --decompose` (read wedhorn.txt:3346-3370 + Lemma 7.5 + Cor 7.12 first). NOT this push.
+- **Depends on**: SpvAI spectral infrastructure (separate track).
+- **Type**: theorem (deep).
+
+#### Statement
+```lean
+lemma isClosed_image_spa_ιSpv_bool_noHArch :
+    IsClosed ((ιSpv_bool : Spv A → (A × A → Bool)) '' (Spa A A⁺)) := by sorry
+```
+#### Source
+Wedhorn 7.35(1) (wedhorn.txt:3346-3370, verbatim): *"Spa A = Cont(A) ∩ ⋂_{a∈A⁺} Spv(A,I)(a/1) is a
+pro-constructible subset of the spectral space Spv(A,I). … In particular it is a spectral space."*
+(I = ideal generated by A°°.) Needs: Spv(A,I) spectral (Lemma 7.5/Cor 7.12), Cont closed in Spv(A,I)
+(Huber Cor 3.2), pro-constructible ⟹ spectral.
 
 ---
 

@@ -418,3 +418,95 @@ The decomposition is **source-grounded and feasible to plan**, with these honest
 **NOT done (this is decompose-pass-1):** the full 5-attack-per-sub-leaf treatment, the Lean
 skeleton refinement, and the per-leaf provability `lean_verify`s — to be completed per leaf
 before ticketing, and after `/expert-review` settles leaf #4.
+
+---
+
+# T-L4 — Huber [Hu2] Lemma 3.3(i): `isPowerBounded_of_forall_vle_one_spa_of_complete`
+
+*(decompose pass 2026-06-21, un-park; sources read verbatim: huber2.txt:585-617 (Thm 3.1) +
+:624-658 (Lemma 3.3). All deep discharges `lean_verify`'d present — see Step-4 block.)*
+
+## Goal (Lean, canonical)
+`isPowerBounded_of_forall_vle_one_spa_of_complete` (FaithfulLocLift.lean:97): for `B := presheafValue D'`,
+`(∀ w ∈ Spa B B⁺, w.vle x 1) → IsPowerBounded x`.
+
+## Step 1 — prose proof (transcribed from Huber, A := B = presheafValue D', G := B⁺)
+Spa(B,B⁺) = σ(B⁺) = {v ∈ Cont B | v(b)≤1 ∀b∈B⁺}. The hypothesis says x ∈ τ(σ(B⁺)) :=
+{a | v(a)≤1 ∀v∈σ(B⁺)}. By Huber 3.3(i), τ(σ(G))=G for every open integrally-closed G, so x ∈ B⁺;
+and B⁺ ⊆ B° (Def 7.14), so x is power-bounded. The substantive content is **τ(σ(G)) ⊆ G**, by
+contradiction: if a ∈ τ(σ(G))\G, build v ∈ σ(G) with v(a)>1, contradicting a ∈ τ(σ(G)).
+
+## Step 2/2.5 — sub-lemmas (mirror Huber's proof; Lean skeleton = first /beastmode step)
+
+- **HU-a** `not_isUnit_inv_of_not_mem` (leaf, integral-closure)
+  - Source (huber2.txt:635-637, verbatim):
+    > "The element a⁻¹∈G[a⁻¹] is not a unit of G[a⁻¹] (since otherwise a∈G[a⁻¹] which implies that
+    > a is integral over G and hence a∈G)."
+  - Lean↔source: `a ∉ G → ¬ IsUnit (⟨a⁻¹⟩ : G[a⁻¹])`. G=B⁺ integrally closed in B (ROIE).
+  - Discharge: `IsIntegral` + integral-closure of `B⁺`. mathlib `isIntegral_of_…`; ROIE closedness.
+
+- **HU-b** `exists_minimalPrimes_le_containing_inv` (leaf, mathlib)
+  - Source (637-639): > "there exists a prime ideal p of G[a⁻¹] with a⁻¹∈p. Let q be a minimal
+    prime ideal of G[a⁻¹] with q⊆p."
+  - Discharge: `Ideal.exists_le_maximal` (a⁻¹ non-unit ⟹ in a maximal p) + `Ideal.exists_minimalPrimes_le`.
+
+- **HU-c** `exists_dominating_valuation` (leaf, ⭐MATHLIB CRUX — verified)
+  - Source (639-641): > "Choosing a valuation ring of qf(G[a⁻¹]/q) which dominates the local ring
+    (G[a⁻¹]/q)_{p/q} we obtain a valuation s of G[a⁻¹] with q=supp(s), s(g)≤1 for all g∈G, and
+    s(x)≤1 for all x∈p, in particular s(a⁻¹)≤1."
+  - Discharge (verified): `IsLocalRing.exists_factor_valuationRing` (Mathlib.RingTheory.Valuation.
+    LocalSubring) — `(f : R →+* K)→∃ A, (∀x, f x∈A) ∧ IsLocalHom (f.codRestrict …)`, at
+    `R=(G[a⁻¹]/q)_{p/q}`, `K=Frac(G[a⁻¹]/q)`. Local-hom ⟹ s≤1 on the ring, <1 (into 𝔪) on p/q.
+
+- **HU-d** `exists_lifted_spv_valuation` (leaf, valuation-lift bookkeeping — hardest)
+  - Source (641-655, incl. the (c) argument):
+    > "Since there exists a prime ideal of A_a lying over q, there exists a valuation t of A_a lying
+    > over s. Put u=t|A∈Spv A and v=u|cΓ∈Spv A. Then (a) v(a)>1 (b) v(g)≤1 ∀g∈G (c) v(x)≤1 ∀x∈A°°
+    > (d) v∈Spv(A,A°°A). … Let x∈A°°. Since G is open, ∃ n∈ℕ with xⁿa∈G. … x∈G (G open and integrally
+    > closed). Hence in G[a⁻¹] we have xⁿ=g·a⁻¹ with some g∈G. Since a⁻¹∈p, xⁿ∈p, hence s(xⁿ)≤1 which
+    > implies v(x)≤1."
+  - Discharge: mathlib `Valuation.comap` (restriction along `B→B_a`, `A→A_a`) + valuation extension
+    along `G[a⁻¹]→B_a` (`Valuation` on `Frac`); project `Spv`/`vle` API. May sub-split (a)/(b)/(c)/(d).
+
+- **HU-e** `mem_spa_of_lifted` + contradiction (composition)
+  - Source (656-658): > "We conclude from (3.1) and (c),(d) that v is a continuous valuation, and
+    with (b) we obtain v∈σ(G). Now (a) implies a∉τ(σ(G)) which is a contradiction."
+  - (3.1) = Huber Thm 3.1 (585-588, verbatim): > "Cont A = {v∈Spv(A,A°°A) | v(a)≤1 for every a∈A°°}."
+    = Wedhorn 7.10 reverse.
+  - Discharge (verified): project `Spv.isContinuous_of_isInSpvAI_of_lt_one` (SpvAI.lean:294,
+    **lean_verify'd axiom-clean** [propext, Classical.choice, Quot.sound]) gives continuity from
+    (c)+(d); compose with (b) for v∈Spa; (a) contradicts the hypothesis.
+
+- **L-714** (leaf, project, ALREADY available): `B⁺ ⊆ B°` = `IsRingOfIntegralElements.subset_powerBounded`
+  (used Cor832:1626). Closes `x∈B⁺ ⟹ IsPowerBounded x`.
+
+## Step 4 — provability check (all leaves discharged from existing infra)
+| leaf | discharge | status |
+|------|-----------|--------|
+| HU-a | integral-closure of B⁺ (ROIE) + `IsIntegral` | project+mathlib |
+| HU-b | `Ideal.exists_le_maximal`, `Ideal.exists_minimalPrimes_le` | mathlib |
+| HU-c | `IsLocalRing.exists_factor_valuationRing` | mathlib ✓verified-exists |
+| HU-d | `Valuation.comap` + extension; project Spv API | mathlib+project |
+| HU-e | `Spv.isContinuous_of_isInSpvAI_of_lt_one` | project ✓lean_verify'd-axiom-clean |
+| L-714 | `IsRingOfIntegralElements.subset_powerBounded` | project ✓in-use |
+
+## Step 4.5 — adversarial (key leaves)
+- HU-a Attack (hyp-strength): does it need `G` integrally closed? YES — a⁻¹ unit ⟹ a integral over G;
+  conclusion `a∈G` needs G=its own integral closure in B. B⁺ IS integrally closed (ROIE def). No drift.
+- HU-c Attack (discharge): `IsLocalRing.exists_factor_valuationRing` requires the SOURCE a local ring
+  + a map to a FIELD. We have `(G[a⁻¹]/q)_{p/q}` local (localization at p/q) and `Frac(G[a⁻¹]/q)` a field
+  (q minimal ⟹ G[a⁻¹]/q a domain). Both hold. ✓
+- HU-e Attack (source-drift on 3.1): is `Spv.isContinuous_of_isInSpvAI_of_lt_one` the SAME criterion
+  as Huber 3.1? Huber: v∈Spv(A,A°°A) ∧ v(a)≤1 ∀a∈A°° ⟹ continuous. Project lemma name + the SpvAI
+  docstrings ("Wedhorn 7.10 reverse, cofinality disjunct") match. ✓ (verify exact hyp shape at ticket time).
+- Whole-composition Attack (could HU-a..e be true and τ(σ(G))⊆G false?): no — the contradiction is
+  Huber's; HU-d (d) `v∈Spv(B,B°°B)` + (c) feed HU-e's continuity criterion EXACTLY; (a)+(b) give the
+  σ(G)-membership-with-v(a)>1 contradiction. Composition faithful to huber2.txt:656-658.
+
+## Feasibility verdict
+**FEASIBLE in-repo.** The two pieces that made this look "external/deep" — the dominating valuation
+(HU-c) and the continuity criterion (HU-e) — are BOTH discharged (mathlib crux + axiom-clean project
+7.10-reverse). Remaining work is connective tissue (HU-a integral-closure, HU-b minimal prime, HU-d
+valuation-lift bookkeeping) in the project's Spv encoding; HU-d is the bookkeeping-heavy leaf. No
+published-paper-scale gap. First /beastmode step: state HU-a…e `:= by sorry`, `lake build`, then fill
+HU-c + HU-e (verified discharges) before HU-d.

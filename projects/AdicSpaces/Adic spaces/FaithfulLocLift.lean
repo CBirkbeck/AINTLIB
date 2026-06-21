@@ -94,6 +94,34 @@ This is a genuine **cited external leaf** ([Hu2] 3.3(i) — not reproved in Wedh
 artifact of its FractionRing route, false for case-(b) non-domain `presheafValue D'`) + carries a
 7.22 continuity sorry, so it does NOT discharge this. Should a faithful in-repo discharge be wanted
 later, formalise Huber's hypothesis-free 3.3(i) proof directly (≈25 lines + his (3.1) continuity). -/
+theorem mem_plus_of_forall_spa_vle_one
+    [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    (D' : RationalLocData A) (x : presheafValue D')
+    (hx : ∀ w : Spv (presheafValue D'),
+      w ∈ Spa (presheafValue D') (presheafValue D')⁺ → w.vle x 1) :
+    x ∈ (presheafValue D')⁺ := by
+  -- Huber [Hu2] 3.3(i) contradiction: if `x ∉ B⁺`, construct a Spa point `w` with `w(x) > 1`,
+  -- contradicting `hx`.
+  by_contra hxnot
+  obtain ⟨w, hw_spa, hw⟩ :
+      ∃ w : Spv (presheafValue D'),
+        w ∈ Spa (presheafValue D') (presheafValue D')⁺ ∧ ¬ w.vle x 1 := by
+    -- HU-a..e (huber2.txt:633-658): `B⁺[x⁻¹]` has `x⁻¹` a non-unit (else `x` integral over the
+    -- integrally-closed `B⁺` ⟹ `x ∈ B⁺`); a minimal prime + a dominating valuation
+    -- (`IsLocalRing.exists_factor_valuationRing`) + a lift to `Spv B` (`Spv.localizationLift`/
+    -- `Spv.comap`) give `v ∈ Spv(B, B°°·B)` with `v(x) > 1`, `v ≤ 1` on `B⁺` and on `B°°`;
+    -- continuity via `Spv.isContinuous_of_isInSpvAI_of_lt_one` (Wedhorn 7.10 reverse) places
+    -- `v ∈ Spa(B, B⁺)`.
+    sorry
+  exact hw (hx w hw_spa)
+
+set_option linter.unusedSectionVars false in
+/-- **Power-bounded from Spa-boundedness (Wedhorn 7.18(1) + Def 7.14(1)).** If every continuous
+valuation `w ∈ Spa(B, B⁺)` of `B = presheafValue D'` satisfies `w(x) ≤ 1`, then `x` is power-bounded.
+*Proof.* By `mem_plus_of_forall_spa_vle_one` (the substantive direction of Huber [Hu2] 3.3(i) =
+Wedhorn 7.18(1)), `x ∈ B⁺`; and `B⁺ ⊆ B°` (`IsRingOfIntegralElements.subset_powerBounded`,
+Def 7.14(1)), so `x ∈ B° = {power-bounded}`. -/
 theorem isPowerBounded_of_forall_vle_one_spa_of_complete
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
@@ -101,7 +129,7 @@ theorem isPowerBounded_of_forall_vle_one_spa_of_complete
     (hx : ∀ w : Spv (presheafValue D'),
       w ∈ Spa (presheafValue D') (presheafValue D')⁺ → w.vle x 1) :
     @TopologicalRing.IsPowerBounded (presheafValue D') _ inferInstance x :=
-  sorry
+  IsRingOfIntegralElements.subset_powerBounded (mem_plus_of_forall_spa_vle_one D' x hx)
 
 set_option linter.unusedSectionVars false in
 /-- **Faithful (LL-bdd), Wedhorn 7.52(1)/7.18 + Prop 8.2.** For `R(D'.T/D'.s) ⊆ R(D.T/D.s)`,
