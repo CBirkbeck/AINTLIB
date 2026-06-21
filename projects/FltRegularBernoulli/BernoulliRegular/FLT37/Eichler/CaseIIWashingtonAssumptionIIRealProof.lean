@@ -259,7 +259,7 @@ theorem caseII_washington_factorRatio_localPower
     have h0 : Q (D.x + D.y) = 0 := Ideal.Quotient.eq_zero_iff_mem.mpr hxy
     rw [map_add] at h0
     linear_combination h0
-  have hQx : Q D.x ≠ 0 := fun h => D.x_notMem (Ideal.Quotient.eq_zero_iff_mem.mp h)
+  have hQx : Q D.x ≠ 0 := fun h ↦ D.x_notMem (Ideal.Quotient.eq_zero_iff_mem.mp h)
   -- `1 − Q(ζ) ≠ 0` and `1 − Q(ζ)² ≠ 0` (`𝔩` is unramified, `1+ζ` is a unit).
   have hQζ1 : (1 : 𝓞 (CyclotomicField 37 ℚ) ⧸ lv149) - Q D.hζ.toInteger ≠ 0 := by
     intro h0
@@ -294,7 +294,7 @@ theorem caseII_washington_factorRatio_localPower
     rw [h, zero_pow (by decide : (37 : ℕ) ≠ 0), mul_zero] at hE1
     exact hQx hE1.symm
   have hQε₂ : Q ((-(εp * ub) : (𝓞 (CyclotomicField 37 ℚ))ˣ) : 𝓞 (CyclotomicField 37 ℚ)) ≠ 0 :=
-    fun h => caseII_unit_notMem_lv149 (-(εp * ub)) (Ideal.Quotient.eq_zero_iff_mem.mp h)
+    fun h ↦ caseII_unit_notMem_lv149 (-(εp * ub)) (Ideal.Quotient.eq_zero_iff_mem.mp h)
   -- The division identity `Q(ε₁/ε₂)·Q(ε₂) = Q(ε₁)`.
   have hunit : ((εp * ua) / (-(εp * ub)) : (𝓞 (CyclotomicField 37 ℚ))ˣ) * (-(εp * ub)) =
       εp * ua := by
@@ -396,10 +396,10 @@ private theorem caseII_washington_etaZero_descent
     have hnot : ¬ Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 (CyclotomicField 37 ℚ))} : Set _) ∣
         Ideal.span ({ρ0} : Set (𝓞 (CyclotomicField 37 ℚ))) := by
       rw [hρ0_span]
-      exact fun hdvd => not_p_div_a_zero hp D.hζ D.equation D.hy D.hz hdvd
+      exact fun hdvd ↦ not_p_div_a_zero hp D.hζ D.equation D.hy D.hz hdvd
     rwa [Ideal.dvd_span_singleton, Ideal.mem_span_singleton] at hnot
   have hρ0sq_p : ¬ (D.hζ.toInteger - 1 : 𝓞 (CyclotomicField 37 ℚ)) ∣ ρ0 ^ 2 :=
-    fun h => hρ0_p (D.hζ.zeta_sub_one_prime'.dvd_of_dvd_pow h)
+    fun h ↦ hρ0_p (D.hζ.zeta_sub_one_prime'.dvd_of_dvd_pow h)
   have hz'_spec : algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (ρ0 ^ 2) =
       algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) ρ0 ^ 2 := map_pow _ _ _
   have h2e : 2 * e = 37 * m + 1 :=
@@ -426,7 +426,7 @@ private theorem caseII_washington_etaZero_descent
   have hdivmul : ((εp * ua) / (-(εp * ub)) : (𝓞 (CyclotomicField 37 ℚ))ˣ) * (-(εp * ub)) =
       εp * ua := by
     rw [div_eq_mul_inv, mul_assoc, inv_mul_cancel, mul_one]
-  have hKval := congrArg (fun z : (𝓞 (CyclotomicField 37 ℚ))ˣ =>
+  have hKval := congrArg (fun z : (𝓞 (CyclotomicField 37 ℚ))ˣ ↦
     algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (z : 𝓞 (CyclotomicField 37 ℚ)))
     hdivmul
   rw [hε'] at hKval
@@ -518,7 +518,7 @@ private theorem caseII_washington_realRoot_of_factorRatio
   refine ⟨v, hv_real, ?_⟩
   -- Conclude `η_a = v³⁷·η_b` (unit equality via values).
   have hv37_val : ((v : CyclotomicField 37 ℚ)) ^ 37 = T ^ 37 := by
-    have := congrArg (fun z : (CyclotomicField 37 ℚ)ˣ => (z : CyclotomicField 37 ℚ)) hv37
+    have := congrArg (fun z : (CyclotomicField 37 ℚ)ˣ ↦ (z : CyclotomicField 37 ℚ)) hv37
     simpa [Units.val_pow_eq_pow_val] using this
   ext
   rw [Units.val_mul, Units.val_pow_eq_pow_val, hv37_val]
@@ -584,22 +584,22 @@ theorem caseII_washington_assumptionII_real_of_dvdZ
         algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.y ≠ 0 := by
     have h := caseII_algebraMap_x_add_y_eta_ne_zero D.toRealCaseIIData37 hp D.etaOne
     rw [hηOne] at h
-    refine fun h0 => h ?_
+    refine fun h0 ↦ h ?_
     rw [map_add, map_mul]; linear_combination h0
   have hnum_b : algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.x +
       algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger ^ 2) *
         algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) D.y ≠ 0 := by
     have h := caseII_algebraMap_x_add_y_eta_ne_zero D.toRealCaseIIData37 hp D.etaTwo
     rw [hηTwo] at h
-    refine fun h0 => h ?_
+    refine fun h0 ↦ h ?_
     rw [map_add, map_mul]; linear_combination h0
   have h1ζK_ne : (1 : CyclotomicField 37 ℚ) -
       algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger) ≠ 0 :=
-    fun h0 => D.hζ.toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37)
+    fun h0 ↦ D.hζ.toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37)
       (hinj (by rw [map_one]; linear_combination -h0))
   have h1ζ2K_ne : (1 : CyclotomicField 37 ℚ) -
       algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger ^ 2) ≠ 0 :=
-    fun h0 => D.hζ.toInteger_isPrimitiveRoot.pow_ne_one_of_pos_of_lt (by omega) (by decide : 2 < 37)
+    fun h0 ↦ D.hζ.toInteger_isPrimitiveRoot.pow_ne_one_of_pos_of_lt (by omega) (by decide : 2 < 37)
       (hinj (by rw [map_one]; linear_combination -h0))
   obtain ⟨hρa_ne, _, heqa⟩ :=
     caseII_washington_factorRepresentation_pow_eq h1ζK_ne hnum_a hfa.symm hfa₀.symm
@@ -614,7 +614,7 @@ Case-II residual `CaseIIWashingtonCaseII37` is no longer open content. -/
 theorem caseIIWashingtonAssumptionIIReal37_of_noSecondOrder
     (hSO : NoSecondOrderIrregularPair 37 32) :
     CaseIIWashingtonAssumptionIIReal37 :=
-  fun D hcop ηa ηb ρa ρb hηa hηb hfa hfb =>
+  fun D hcop ηa ηb ρa ρb hηa hηb hfa hfb ↦
     caseII_washington_assumptionII_real_of_dvdZ hSO D hcop ηa ηb ρa ρb hηa hηb hfa hfb
 
 /-! ## 6. Bonus: the `ρ₀² ∈ 𝔩` conjunct of the clean residual is ALSO proven (Lemma 9.7 descended)
@@ -810,7 +810,7 @@ theorem caseIISection91PContentExtractionDataWithUnits37_proven
           (1 - (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger ^ 36))) ^ (2 * e - 1) ≠ 0 := by
       refine pow_ne_zero _ ?_
       rw [Ne, map_eq_zero_iff _ hinj]
-      refine mul_ne_zero (sub_ne_zero.mpr fun h => ?_) (sub_ne_zero.mpr fun h => ?_)
+      refine mul_ne_zero (sub_ne_zero.mpr fun h ↦ ?_) (sub_ne_zero.mpr fun h ↦ ?_)
       · exact (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger_isPrimitiveRoot.ne_one
           (by decide : 1 < 37) h.symm
       · have hp37 : (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger ^ 37 = 1 :=
