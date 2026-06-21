@@ -314,7 +314,7 @@ theorem caseIICor823Level71NormalizedUnitCoeff37_of_secondOrderPartValue
     (hVal : CaseIICor823Level71SecondOrderPartValue37) :
     CaseIICor823Level71NormalizedUnitCoeff37 := by
   obtain ⟨ρ, hρ_ne, hVal⟩ := hVal
-  refine ⟨ρ, hρ_ne, fun a => ?_⟩
+  refine ⟨ρ, hρ_ne, fun a ↦ ?_⟩
   -- LHS of the target is `W(a)` (the `normalizedUnitCoeff37 a` def, up to `rfl`).
   change normalizedUnitCoeff37 a =
     (37 : ZMod (37 ^ 2)) * ((ρ.val : ℕ) : ZMod (37 ^ 2)) *
