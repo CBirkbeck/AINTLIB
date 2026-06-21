@@ -424,6 +424,20 @@ noncomputable def gplusMulEquiv (hp2 : p ≠ 2) :
     ((QuotientGroup.prodMulEquiv (Subgroup.zpowers (negOneT p hp2)) ⊥).trans
       (MulEquiv.prodCongr (MulEquiv.refl _) (QuotientGroup.quotientBot)))
 
+instance instDiscreteTopologyTeichRange : DiscreteTopology ((teichmuller p).range) :=
+  Finite.instDiscreteTopology
+
+instance instDiscreteTopologyDelta (hp2 : p ≠ 2) : DiscreteTopology (Delta p hp2) :=
+  QuotientGroup.discreteTopology (isOpen_discrete _)
+
+/-- **`gplusMulEquiv` is continuous** (forward).  `GPlus` carries the quotient topology, so it
+suffices that `gplusMulEquiv ∘ mk = (u ↦ (Δ-class of ω(u), u·ω(u)⁻¹))` is continuous: the `Δ`-part is
+`mk' ∘ (continuous ω into the range)` and the `Γ`-part is `gammaProj` (`continuous_gammaProj`). -/
+theorem continuous_gplusMulEquiv (hp2 : p ≠ 2) : Continuous (gplusMulEquiv p hp2) := by
+  apply continuous_coinduced_dom.mpr
+  refine Continuous.prodMk ?_ (continuous_gammaProj p)
+  exact continuous_quot_mk.comp (continuous_induced_rng.2 (continuous_teichmuller p))
+
 /-! ## The logarithm isomorphism `Γ ≅ (ℤ_p, +)` as continuous maps -/
 
 /-- **The p-adic exponential is a difference-isometry on `pℤ_p`**: `‖pZpExp x − pZpExp y‖ = ‖x − y‖`
