@@ -131,7 +131,7 @@ theorem caseIICor823Level71DworkSpecializedFiniteLog37_consequent_inhabited
   have hunit : IsUnit ((Nat.factorial 32 : ℕ) : ZMod (37 ^ 2)) := factorial_thirtytwo_isUnit_modSq
   intro hzero
   have h37 : (37 : ZMod (37 ^ 2)) = 0 := by
-    have hmul := congrArg (fun z => ((Nat.factorial 32 : ℕ) : ZMod (37 ^ 2)) * z) hzero
+    have hmul := congrArg (fun z ↦ ((Nat.factorial 32 : ℕ) : ZMod (37 ^ 2)) * z) hzero
     simp only [mul_zero] at hmul
     rw [show ((Nat.factorial 32 : ℕ) : ZMod (37 ^ 2)) *
           ((37 : ZMod (37 ^ 2)) * (((Nat.factorial 32 : ℕ) : ZMod (37 ^ 2))⁻¹)) =
@@ -236,7 +236,7 @@ theorem caseIICor823Level71UnitDworkCoordBridge37_of_dworkSpecialized
     (hRes : CaseIICor823Level71DworkSpecializedFiniteLog37) :
     CaseIICor823Level71UnitDworkCoordBridge37 :=
   caseIICor823Level71UnitDworkCoordBridge37_of_coordIdentity
-    (fun a => caseIICor823Level71DworkSpecializedFiniteLog37_coordIdentity hRes a)
+    (fun a ↦ caseIICor823Level71DworkSpecializedFiniteLog37_coordIdentity hRes a)
 
 open FLT37.LehmerVandiver.CaseII in
 /-- **Fermat's Last Theorem for `37`, with `R4` reduced to the level-`71` Dwork-specialized finite-log
