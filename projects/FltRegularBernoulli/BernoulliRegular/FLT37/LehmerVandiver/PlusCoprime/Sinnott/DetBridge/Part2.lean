@@ -80,7 +80,7 @@ noncomputable def sinnottShiftedCharMatrix_nontriv
       {w : NumberField.InfinitePlace
         (NumberField.maximalRealSubfield K) //
         w ≠ NumberField.Units.dirichletUnitTheorem.w₀} ℂ :=
-  Matrix.of fun ξ i =>
+  Matrix.of fun ξ i ↦
     ξ.val (BernoulliRegular.cyclotomicEvenDeltaQuotient p
         (familyIndexAsUnit p K hp_odd hp_three i))⁻¹ - 1
 
@@ -106,7 +106,7 @@ open Classical in
 /-- **D_nontriv_sq factors as `diag(qe) · D'_nontriv_sq`**:
 
   `sinnottDiagonalEigenvalueMatrix_nontriv_sq =
-   Matrix.diagonal (fun w => qe(...) · ξ-factor) · sinnottShiftedCharMatrix_nontriv_sq`
+   Matrix.diagonal (fun w ↦ qe(...) · ξ-factor) · sinnottShiftedCharMatrix_nontriv_sq`
 
 The diagonal factor is `qe(ξ)` (after reindexing w → ξ via equiv). -/
 theorem sinnottDiagonalEigenvalueMatrix_nontriv_sq_eq_diag_mul_shifted
@@ -118,7 +118,7 @@ theorem sinnottDiagonalEigenvalueMatrix_nontriv_sq_eq_diag_mul_shifted
         (NumberField.maximalRealSubfield K) //
         w ≠ NumberField.Units.dirichletUnitTheorem.w₀}] :
     sinnottDiagonalEigenvalueMatrix_nontriv_sq p K hp_odd hp_three hp_two =
-      Matrix.diagonal (fun w => quotientEigenvalue p
+      Matrix.diagonal (fun w ↦ quotientEigenvalue p
           ((equivNontrivCharKplusNeW₀ p K hp_two).symm w).val) *
         sinnottShiftedCharMatrix_nontriv_sq p K hp_odd hp_three hp_two := by
   ext w i
@@ -163,7 +163,7 @@ theorem det_sinnottDiagonalEigenvalueMatrix_nontriv_sq
   -- ∏ w : T_w, qe((equiv.symm w).val) = ∏ ξ ∈ univ.erase 1, qe ξ
   -- Use Equiv.prod_comp directly: ∏ w, f w = ∏ ξ, f (equiv ξ) for any equiv.
   rw [← Equiv.prod_comp (equivNontrivCharKplusNeW₀ p K hp_two)
-    (fun w => quotientEigenvalue p
+    (fun w ↦ quotientEigenvalue p
       ((equivNontrivCharKplusNeW₀ p K hp_two).symm w).val)]
   -- Goal: ∏ ξ : {ξ // ξ ≠ 1}, qe(((equiv.symm) (equiv ξ)).val) = ∏ ...erase 1, qe
   simp only [Equiv.symm_apply_apply]
@@ -172,7 +172,7 @@ theorem det_sinnottDiagonalEigenvalueMatrix_nontriv_sq
       (BernoulliRegular.CyclotomicEvenDelta p) ℂ => ξ ≠ 1)
     (s := Finset.univ.erase (1 : MulChar
       (BernoulliRegular.CyclotomicEvenDelta p) ℂ))
-    (fun ξ => by simp [Finset.mem_erase])]
+    (fun ξ ↦ by simp [Finset.mem_erase])]
 
 /-! ## Substantive sub-named-hypothesis: pure character-algebra identity
 
@@ -309,13 +309,13 @@ theorem det_D_nontriv_sq_sub_rank_one_via_matrix_det_lemma
 
 set_option backward.isDefEq.respectTransparency false in
 open Classical in
-/-- **Bridge between `Matrix.of (fun w i => f w · g i)` and
+/-- **Bridge between `Matrix.of (fun w i ↦ f w · g i)` and
 `replicateCol PUnit f * replicateRow PUnit g`**: the (outer product)
 rank-1 matrix in two equivalent forms. -/
 theorem matrix_of_col_row_eq_replicate
     {α : Type*} [NonUnitalNonAssocSemiring α] {m n : Type*}
     (f : m → α) (g : n → α) :
-    (Matrix.of (fun (w : m) (i : n) => f w * g i)) =
+    (Matrix.of (fun (w : m) (i : n) ↦ f w * g i)) =
       Matrix.replicateCol PUnit.{1} f * Matrix.replicateRow PUnit.{1} g := by
   ext w i
   simp [Matrix.mul_apply, Matrix.replicateCol_apply, Matrix.replicateRow_apply]
