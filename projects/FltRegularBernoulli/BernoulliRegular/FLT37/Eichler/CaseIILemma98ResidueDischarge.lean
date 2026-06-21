@@ -133,7 +133,7 @@ theorem caseIISigmaAntiDescent_residueEqns_proven
         (𝓞 (CyclotomicField 37 ℚ))).toMonoidHom u : (𝓞 (CyclotomicField 37 ℚ))ˣ) :
         𝓞 (CyclotomicField 37 ℚ)) =
       ((ε₁ / ε₂ : (𝓞 (CyclotomicField 37 ℚ))ˣ) : 𝓞 (CyclotomicField 37 ℚ)) :=
-    congrArg (fun v : (𝓞 (CyclotomicField 37 ℚ))ˣ => (v : 𝓞 (CyclotomicField 37 ℚ))) hu
+    congrArg (fun v : (𝓞 (CyclotomicField 37 ℚ))ˣ ↦ (v : 𝓞 (CyclotomicField 37 ℚ))) hu
   have hc : (37 : 𝓞 (CyclotomicField 37 ℚ)) ∣
       ((Units.map (algebraMap (𝓞 (NumberField.maximalRealSubfield (CyclotomicField 37 ℚ)))
           (𝓞 (CyclotomicField 37 ℚ))).toMonoidHom u : (𝓞 (CyclotomicField 37 ℚ))ˣ) -
