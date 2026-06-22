@@ -83,9 +83,6 @@ namespace HasseWeil.WeilPairing
 
 open HasseWeil
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-
 variable {F : Type*} [Field F] [DecidableEq F]
 variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
 
@@ -96,6 +93,7 @@ local notation "KE" => W.toAffine.FunctionField
 The infinite-agreement variant of `eq_of_evaluatesTo_cofinite`: here the *agreement set*
 carries the infinitude, so no algebraic closure is needed. -/
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Infinite-agreement separation** (Silverman II.1.2): two rational functions sharing a
 value at every point of an *infinite* set are equal.  A nonzero difference would vanish at
 every agreement point, but it has only finitely many zeros
@@ -115,22 +113,15 @@ theorem eq_of_evaluatesTo_infinite {f g : KE}
       exact lt_of_le_of_lt (Valuation.map_sub _ _ _) (max_lt hf hg)
     have h1 : (1 : WithTop ℤ) ≤ (W_smooth W).ord_P P (f - g) :=
       (Curves.SmoothPlaneCurve.one_le_ord_P_iff_pointValuation_lt_one (P := P) hD).mpr hval
-    intro h0
-    rw [h0] at h1
-    have h1' : ((1 : ℤ) : WithTop ℤ) ≤ ((0 : ℤ) : WithTop ℤ) := by exact_mod_cast h1
-    exact absurd (WithTop.coe_le_coe.mp h1') (by norm_num)
+    exact (lt_of_lt_of_le zero_lt_one h1).ne'
   -- so the infinite agreement set sits inside the finite zero set
-  exact ((W_smooth W).finite_setOf_ord_P_nonzero hD).not_infinite
-    (hS.mono fun P hP ↦ hzero P hP)
+  exact ((W_smooth W).finite_setOf_ord_P_nonzero hD).not_infinite (hS.mono hzero)
 
 end HasseWeil.WeilPairing
 
 namespace HasseWeil
 
 open WeilPairing
-
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
 
 variable {F : Type*} [Field F] [DecidableEq F]
 
@@ -231,8 +222,8 @@ theorem Isogeny.ext_of_pointMap_eq [IsAlgClosed F]
     (hwα : PullbackEvaluation W α badα) (hwβ : PullbackEvaluation W β badβ)
     (h : ∀ P : W.toAffine.Point, α.toAddMonoidHom P = β.toAddMonoidHom P) :
     α = β := by
-  haveI hEll : (W_smooth W).toAffine.IsElliptic := ‹W.toAffine.IsElliptic›
-  haveI : Infinite (W_smooth W).SmoothPoint := (W_smooth W).smoothPoint_infinite
+  have : (W_smooth W).toAffine.IsElliptic := ‹W.toAffine.IsElliptic›
+  have : Infinite (W_smooth W).SmoothPoint := (W_smooth W).smoothPoint_infinite
   refine Isogeny.ext ?_ (AddMonoidHom.ext h)
   exact Isogeny.pullback_eq_of_pointMap_eqOn_infinite hbadα hbadβ hwα hwβ
     Set.infinite_univ fun P _ ↦ h P.toAffinePoint
@@ -254,7 +245,7 @@ theorem exists_torsion_ne_zero [IsAlgClosed F] (ℓ : ℤ) (hℓ : (ℓ : F) ≠
   have hbot : W.toAffine[ℓ] = ⊥ := by
     ext P
     simp only [mem_torsionSubgroup, AddSubgroup.mem_bot]
-    exact ⟨fun hP ↦ hno P hP, fun hP ↦ by rw [hP, smul_zero]⟩
+    exact ⟨hno P, fun hP ↦ by rw [hP, smul_zero]⟩
   rw [hbot, AddSubgroup.card_bot] at hcard
   exact absurd hcard.symm (Nat.one_lt_pow two_ne_zero hℓ1).ne'
 
@@ -263,6 +254,7 @@ dual-additivity argument. -/
 def torsionUnionSet (L : Set ℕ) : Set W.toAffine.Point :=
   {P : W.toAffine.Point | ∃ ℓ ∈ L, ((ℓ : ℤ)) • P = 0}
 
+omit [W.toAffine.IsElliptic] in
 @[simp] theorem mem_torsionUnionSet {L : Set ℕ} {P : W.toAffine.Point} :
     P ∈ torsionUnionSet W L ↔ ∃ ℓ ∈ L, ((ℓ : ℤ)) • P = 0 := Iff.rfl
 
@@ -274,7 +266,7 @@ theorem torsionUnionSet_infinite [IsAlgClosed F] {L : Set ℕ}
     (hL : L.Infinite) (hLp : ∀ ℓ ∈ L, Nat.Prime ℓ)
     (hLchar : ∀ ℓ ∈ L, ((ℓ : ℤ) : F) ≠ 0) :
     (torsionUnionSet W L).Infinite := by
-  haveI : Infinite ↥L := hL.to_subtype
+  have : Infinite ↥L := hL.to_subtype
   -- choose a nonzero `ℓ`-torsion point for each `ℓ ∈ L`
   have hchoice : ∀ ℓ : ↥L,
       ∃ P : W.toAffine.Point, ((ℓ : ℕ) : ℤ) • P = 0 ∧ P ≠ 0 := by
@@ -282,7 +274,7 @@ theorem torsionUnionSet_infinite [IsAlgClosed F] {L : Set ℕ}
     refine exists_torsion_ne_zero W ((ℓ : ℕ) : ℤ) (hLchar ℓ hℓ) ?_
     rw [Int.natAbs_natCast]
     exact (hLp ℓ hℓ).one_lt
-  set f : ↥L → W.toAffine.Point := fun ℓ ↦ (hchoice ℓ).choose with hf
+  set f : ↥L → W.toAffine.Point := fun ℓ ↦ (hchoice ℓ).choose
   have hf_spec : ∀ ℓ : ↥L, ((ℓ : ℕ) : ℤ) • f ℓ = 0 ∧ f ℓ ≠ 0 :=
     fun ℓ ↦ (hchoice ℓ).choose_spec
   -- distinct primes give distinct points: nonzero torsion at coprime orders is disjoint
@@ -312,9 +304,6 @@ end HasseWeil
 namespace HasseWeil.WeilPairing
 
 open HasseWeil
-
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
 
 variable {F : Type*} [Field F] [DecidableEq F]
 variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
@@ -395,9 +384,6 @@ end HasseWeil.WeilPairing
 namespace HasseWeil.EC
 
 open HasseWeil HasseWeil.WeilPairing HasseWeil.Curves
-
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
 
 variable {F : Type*} [Field F] [DecidableEq F]
 variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
