@@ -716,13 +716,17 @@ theorem tensorFunctionFieldStructureHom_injective (L : Type*) [Field L] [Algebra
   rw [hfun]
   exact hlin
 
-/-- `L ⊗[F] C.FunctionField` is a field, for any algebraic extension `L/F`. This is the
-geometric-integrality content: the scalar extension of the function field stays a field.
-Stated as `IsField` (w.r.t. the pinned `CommRing`) to avoid a `Field`-instance diamond
-when consumed by `tensor_functionField_isFractionRing`. -/
-theorem tensor_functionField_isField (L : Type*) [Field L] [Algebra F L]
-    [Algebra.IsAlgebraic F L] :
-    IsField (L ⊗[F] C.toAffine.FunctionField) := by
+/-- The base-changed function field `C.FunctionField ⊗[F] L` is a domain, for any extension
+`L/F` (no algebraicity needed). It is the localization of the domain
+`C.CoordinateRing ⊗[F] L` at the image of the nonzerodivisors of `C.CoordinateRing`, and
+that image lands inside the nonzerodivisors (via flatness of `C.CoordinateRing` over `F`),
+so the localization stays a domain.
+
+This is the domain half of `tensor_functionField_isField`; kept separate so that
+`isField_of_isAlgebraic` can pick it up as the required `IsDomain` instance. Phrased with
+the function field on the **left** (`FunctionField ⊗[F] L`) to match that consumer. -/
+private theorem tensorFunctionField_isDomain (L : Type*) [Field L] [Algebra F L] :
+    IsDomain (C.toAffine.FunctionField ⊗[F] L) := by
   letI := C.isDomain_tensorCoordRing L
   haveI hfreeCR : Module.Free F C.toAffine.CoordinateRing :=
     Module.Free.of_divisionRing F C.toAffine.CoordinateRing
@@ -758,22 +762,30 @@ theorem tensor_functionField_isField (L : Type*) [Field L] [Algebra F L]
             (AlgHom.id F L)) (1 ⊗ₜ x) = 1 ⊗ₜ x
           rw [Algebra.TensorProduct.map_tmul]
           simp)
-  haveI hdomFF : IsDomain (C.toAffine.FunctionField ⊗[F] L) := by
-    haveI : Module.Flat F C.toAffine.CoordinateRing := hflatCR
-    have hinjL : Function.Injective
-        (Algebra.TensorProduct.includeLeft :
-          C.toAffine.CoordinateRing →ₐ[F] C.toAffine.CoordinateRing ⊗[F] L) :=
-      @Algebra.TensorProduct.includeLeft_injective F F C.toAffine.CoordinateRing L
-        _ _ _ _ _ _ _ _ hflatCR
-        (RingHom.injective (algebraMap F L))
-    have hle : Algebra.algebraMapSubmonoid (C.toAffine.CoordinateRing ⊗[F] L)
-        (nonZeroDivisors C.toAffine.CoordinateRing) ≤
-        nonZeroDivisors (C.toAffine.CoordinateRing ⊗[F] L) :=
-      map_le_nonZeroDivisors_of_injective
-        (M₀' := C.toAffine.CoordinateRing ⊗[F] L)
-        (algebraMap C.toAffine.CoordinateRing (C.toAffine.CoordinateRing ⊗[F] L))
-        hinjL le_rfl
-    exact IsLocalization.isDomain_of_le_nonZeroDivisors (C.toAffine.FunctionField ⊗[F] L) hle
+  haveI : Module.Flat F C.toAffine.CoordinateRing := hflatCR
+  have hinjL : Function.Injective
+      (Algebra.TensorProduct.includeLeft :
+        C.toAffine.CoordinateRing →ₐ[F] C.toAffine.CoordinateRing ⊗[F] L) :=
+    @Algebra.TensorProduct.includeLeft_injective F F C.toAffine.CoordinateRing L
+      _ _ _ _ _ _ _ _ hflatCR
+      (RingHom.injective (algebraMap F L))
+  have hle : Algebra.algebraMapSubmonoid (C.toAffine.CoordinateRing ⊗[F] L)
+      (nonZeroDivisors C.toAffine.CoordinateRing) ≤
+      nonZeroDivisors (C.toAffine.CoordinateRing ⊗[F] L) :=
+    map_le_nonZeroDivisors_of_injective
+      (M₀' := C.toAffine.CoordinateRing ⊗[F] L)
+      (algebraMap C.toAffine.CoordinateRing (C.toAffine.CoordinateRing ⊗[F] L))
+      hinjL le_rfl
+  exact IsLocalization.isDomain_of_le_nonZeroDivisors (C.toAffine.FunctionField ⊗[F] L) hle
+
+/-- `L ⊗[F] C.FunctionField` is a field, for any algebraic extension `L/F`. This is the
+geometric-integrality content: the scalar extension of the function field stays a field.
+Stated as `IsField` (w.r.t. the pinned `CommRing`) to avoid a `Field`-instance diamond
+when consumed by `tensor_functionField_isFractionRing`. -/
+theorem tensor_functionField_isField (L : Type*) [Field L] [Algebra F L]
+    [Algebra.IsAlgebraic F L] :
+    IsField (L ⊗[F] C.toAffine.FunctionField) := by
+  haveI := C.tensorFunctionField_isDomain L
   have hF : IsField (C.toAffine.FunctionField ⊗[F] L) :=
     Algebra.TensorProduct.isField_of_isAlgebraic F C.toAffine.FunctionField L
       (Or.inr (inferInstance : Algebra.IsAlgebraic F L))
