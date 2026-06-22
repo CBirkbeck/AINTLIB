@@ -23,6 +23,29 @@ variable (p : ℕ) [hp : Fact p.Prime]
 local notation "𝔭" => (Ideal.span ({(p : ℤ)} : Set ℤ))
 local instance : NeZero (p - 1) := ⟨Nat.sub_ne_zero_of_lt hp.out.one_lt⟩
 
+private lemma additiveZetaPrime_mem_primesOver :
+    additiveZetaPrime (L := L) (p := p) ∈
+      Ideal.primesOver 𝔭 (𝓞 (additiveSubfield (L := L) (p := p))) := by
+  have hmem :
+      (distinguishedPrimeAboveP p L).under
+          (𝓞 (additiveSubfield (L := L) (p := p))) ∈
+        Ideal.primesOver 𝔭 (𝓞 (additiveSubfield (L := L) (p := p))) := by
+    let P : Ideal (𝓞 (additiveSubfield (L := L) (p := p))) :=
+      (distinguishedPrimeAboveP p L).under
+        (𝓞 (additiveSubfield (L := L) (p := p)))
+    haveI : P.IsPrime := inferInstance
+    haveI : P.LiesOver 𝔭 := by
+      dsimp [P]
+      infer_instance
+    exact ⟨inferInstance, inferInstance⟩
+  simpa [distinguishedPrimeAboveP_under_additiveSubfield_eq_additiveZetaPrime
+    (p := p) (L := L)] using hmem
+
+private lemma normalizedBoundaryPrime_mem_primesAboveP :
+    normalizedBoundaryPrime (p := p) (L := L) ∈ primesAboveP p L := by
+  rw [← characterSidePrimeOrbit_eq_primesAboveP (p := p) (L := L)]
+  exact normalizedBoundaryPrime_mem_characterSidePrimeOrbit (p := p) (L := L)
+
 lemma gaussSumLiftAdditiveRoot_sub_one_mem_primeAboveP
     {P : Ideal (𝓞 L)} (hP : P ∈ primesAboveP p L) :
     gaussSumLiftAdditiveRoot (p := p) L - 1 ∈ P := by
@@ -89,8 +112,7 @@ lemma gaussSumLiftAdditiveRoot_pow_sub_one_sub_mul_mem_primeAboveP_sq
           ζ ^ (n + 1) - 1 - ((n + 1 : ℕ) : 𝓞 L) * (ζ - 1) =
             ζ * (ζ ^ n - 1 - (n : 𝓞 L) * (ζ - 1)) +
               (n : 𝓞 L) * (ζ - 1) ^ 2 := by
-        rw [pow_succ]
-        rw [Nat.cast_add, Nat.cast_one]
+        rw [pow_succ, Nat.cast_add, Nat.cast_one]
         ring_nf
       rw [hrewrite]
       exact Ideal.add_mem (P ^ 2)
@@ -99,23 +121,17 @@ lemma gaussSumLiftAdditiveRoot_pow_sub_one_sub_mul_mem_primeAboveP_sq
 
 lemma gaussSumLiftAdditiveRoot_sub_one_mem_normalizedBoundaryPrime :
     gaussSumLiftAdditiveRoot (p := p) L - 1 ∈
-      normalizedBoundaryPrime (p := p) (L := L) := by
-  have hnorm : normalizedBoundaryPrime (p := p) (L := L) ∈ primesAboveP p L := by
-    rw [← characterSidePrimeOrbit_eq_primesAboveP (p := p) (L := L)]
-    exact normalizedBoundaryPrime_mem_characterSidePrimeOrbit (p := p) (L := L)
-  exact gaussSumLiftAdditiveRoot_sub_one_mem_primeAboveP (p := p) (L := L)
-    hnorm
+      normalizedBoundaryPrime (p := p) (L := L) :=
+  gaussSumLiftAdditiveRoot_sub_one_mem_primeAboveP (p := p) (L := L)
+    (normalizedBoundaryPrime_mem_primesAboveP p L)
 
 lemma gaussSumLiftAdditiveRoot_pow_sub_one_sub_mul_mem_normalizedBoundaryPrime_sq
     (n : ℕ) :
     gaussSumLiftAdditiveRoot (p := p) L ^ n - 1 -
         (n : 𝓞 L) * (gaussSumLiftAdditiveRoot (p := p) L - 1) ∈
-      normalizedBoundaryPrime (p := p) (L := L) ^ 2 := by
-  have hnorm : normalizedBoundaryPrime (p := p) (L := L) ∈ primesAboveP p L := by
-    rw [← characterSidePrimeOrbit_eq_primesAboveP (p := p) (L := L)]
-    exact normalizedBoundaryPrime_mem_characterSidePrimeOrbit (p := p) (L := L)
-  exact gaussSumLiftAdditiveRoot_pow_sub_one_sub_mul_mem_primeAboveP_sq
-    (p := p) (L := L) hnorm n
+      normalizedBoundaryPrime (p := p) (L := L) ^ 2 :=
+  gaussSumLiftAdditiveRoot_pow_sub_one_sub_mul_mem_primeAboveP_sq
+    (p := p) (L := L) (normalizedBoundaryPrime_mem_primesAboveP p L) n
 
 /-- The additive `p`-th root, repackaged as an algebraic integer in the
 additive cyclotomic subfield. -/
@@ -170,25 +186,10 @@ lemma additiveRootAdditiveSubfieldPrime_eq_additiveZetaPrime :
         gaussSumLiftAdditiveRootAdditiveSubfieldInteger (p := p) (L := L) := by
     ext
     rfl
-  have hPadd_mem :
-      additiveZetaPrime (L := L) (p := p) ∈
-        Ideal.primesOver 𝔭 (𝓞 (additiveSubfield (L := L) (p := p))) := by
-    have hmem :
-        (distinguishedPrimeAboveP p L).under
-            (𝓞 (additiveSubfield (L := L) (p := p))) ∈
-          Ideal.primesOver 𝔭 (𝓞 (additiveSubfield (L := L) (p := p))) := by
-      let P : Ideal (𝓞 (additiveSubfield (L := L) (p := p))) :=
-        (distinguishedPrimeAboveP p L).under
-          (𝓞 (additiveSubfield (L := L) (p := p)))
-      haveI : P.IsPrime := inferInstance
-      haveI : P.LiesOver 𝔭 := by
-        dsimp [P]
-        infer_instance
-      exact ⟨inferInstance, inferInstance⟩
-    simpa [distinguishedPrimeAboveP_under_additiveSubfield_eq_additiveZetaPrime
-      (p := p) (L := L)] using hmem
-  haveI : (additiveZetaPrime (L := L) (p := p)).IsPrime := hPadd_mem.1
-  haveI : (additiveZetaPrime (L := L) (p := p)).LiesOver 𝔭 := hPadd_mem.2
+  haveI : (additiveZetaPrime (L := L) (p := p)).IsPrime :=
+    (additiveZetaPrime_mem_primesOver p L).1
+  haveI : (additiveZetaPrime (L := L) (p := p)).LiesOver 𝔭 :=
+    (additiveZetaPrime_mem_primesOver p L).2
   have hEq :
       additiveZetaPrime (L := L) (p := p) =
         Ideal.span ({hζF.toInteger - 1} :
@@ -224,21 +225,8 @@ lemma normalizedBoundaryPrime_ramificationIdx_over_additiveSubfield :
         (normalizedBoundaryPrime (p := p) (L := L)) = 1 := by
   let Padd := additiveZetaPrime (L := L) (p := p)
   have hPadd_mem :
-      Padd ∈ Ideal.primesOver 𝔭 (𝓞 (additiveSubfield (L := L) (p := p))) := by
-    have hmem :
-        (distinguishedPrimeAboveP p L).under
-            (𝓞 (additiveSubfield (L := L) (p := p))) ∈
-          Ideal.primesOver 𝔭 (𝓞 (additiveSubfield (L := L) (p := p))) := by
-      let P : Ideal (𝓞 (additiveSubfield (L := L) (p := p))) :=
-        (distinguishedPrimeAboveP p L).under
-          (𝓞 (additiveSubfield (L := L) (p := p)))
-      haveI : P.IsPrime := inferInstance
-      haveI : P.LiesOver 𝔭 := by
-        dsimp [P]
-        infer_instance
-      exact ⟨inferInstance, inferInstance⟩
-    simpa [Padd, distinguishedPrimeAboveP_under_additiveSubfield_eq_additiveZetaPrime
-      (p := p) (L := L)] using hmem
+      Padd ∈ Ideal.primesOver 𝔭 (𝓞 (additiveSubfield (L := L) (p := p))) :=
+    additiveZetaPrime_mem_primesOver p L
   haveI : Padd.IsPrime := hPadd_mem.1
   haveI : Padd.IsMaximal := Ideal.isMaximal_of_mem_primesOver hPadd_mem
   haveI : Padd.LiesOver 𝔭 := hPadd_mem.2
@@ -310,27 +298,13 @@ lemma normalizedBoundaryPrime_count_span_additiveRoot_sub_one :
   let IL : Ideal (𝓞 L) :=
     Ideal.span ({gaussSumLiftAdditiveRoot (p := p) L - 1} : Set (𝓞 L))
   have hPadd_mem :
-      Padd ∈ Ideal.primesOver 𝔭 (𝓞 (additiveSubfield (L := L) (p := p))) := by
-    have hmem :
-        (distinguishedPrimeAboveP p L).under
-            (𝓞 (additiveSubfield (L := L) (p := p))) ∈
-          Ideal.primesOver 𝔭 (𝓞 (additiveSubfield (L := L) (p := p))) := by
-      let P' : Ideal (𝓞 (additiveSubfield (L := L) (p := p))) :=
-        (distinguishedPrimeAboveP p L).under
-          (𝓞 (additiveSubfield (L := L) (p := p)))
-      haveI : P'.IsPrime := inferInstance
-      haveI : P'.LiesOver 𝔭 := by
-        dsimp [P']
-        infer_instance
-      exact ⟨inferInstance, inferInstance⟩
-    simpa [Padd, distinguishedPrimeAboveP_under_additiveSubfield_eq_additiveZetaPrime
-      (p := p) (L := L)] using hmem
+      Padd ∈ Ideal.primesOver 𝔭 (𝓞 (additiveSubfield (L := L) (p := p))) :=
+    additiveZetaPrime_mem_primesOver p L
   haveI : Padd.IsPrime := hPadd_mem.1
   haveI : Padd.LiesOver 𝔭 := hPadd_mem.2
   haveI : Padd.IsMaximal := Ideal.isMaximal_of_mem_primesOver hPadd_mem
-  have hP_mem : P ∈ primesAboveP p L := by
-    rw [← characterSidePrimeOrbit_eq_primesAboveP (p := p) (L := L)]
-    exact normalizedBoundaryPrime_mem_characterSidePrimeOrbit (p := p) (L := L)
+  have hP_mem : P ∈ primesAboveP p L :=
+    normalizedBoundaryPrime_mem_primesAboveP p L
   haveI : P.IsPrime := ((mem_primesAboveP_iff (p := p) (L := L)).1 hP_mem).1
   haveI : P.LiesOver 𝔭 := ((mem_primesAboveP_iff (p := p) (L := L)).1 hP_mem).2
   haveI : P.LiesOver Padd := by
@@ -389,9 +363,8 @@ lemma gaussSumLiftAdditiveRoot_sub_one_not_mem_normalizedBoundaryPrime_sq :
       ((gaussSumLiftAdditiveRoot_isPrimitiveRoot (p := p) (L := L)).ne_one hp.out.one_lt)
   have hI_ne : I ≠ ⊥ :=
     Ideal.span_singleton_eq_bot.not.mpr hroot_ne
-  have hP_mem : P ∈ primesAboveP p L := by
-    rw [← characterSidePrimeOrbit_eq_primesAboveP (p := p) (L := L)]
-    exact normalizedBoundaryPrime_mem_characterSidePrimeOrbit (p := p) (L := L)
+  have hP_mem : P ∈ primesAboveP p L :=
+    normalizedBoundaryPrime_mem_primesAboveP p L
   haveI : P.IsPrime := ((mem_primesAboveP_iff (p := p) (L := L)).1 hP_mem).1
   have hP_ne : P ≠ ⊥ := by
     haveI : P.LiesOver 𝔭 := ((mem_primesAboveP_iff (p := p) (L := L)).1 hP_mem).2
