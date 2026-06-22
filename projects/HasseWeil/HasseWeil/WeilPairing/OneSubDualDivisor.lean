@@ -79,11 +79,6 @@ namespace HasseWeil.WeilPairing
 
 open HasseWeil HasseWeil.WeilPairing.DivisorPullback HasseWeil.WeilPairing.TorsionGeometric
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.unusedFintypeInType false
-set_option linter.style.longLine false
-
 /-! ### Step 0 — the `mk`-computation of `picZeroIsoE_allChar`
 
 `picZeroIsoE_allChar` is the Abel–Jacobi iso `κ : Pic⁰(E) ≅ E`; its forward map is the descended
@@ -113,6 +108,7 @@ variable {F : Type*} [Field F] [DecidableEq F]
 variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
   [IsIntegrallyClosed (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing]
 
+omit [IsIntegrallyClosed (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing] in
 /-- **The degree of `pullbackDivisor f` on a `single`**: `deg(φ^*((v))) = #ker f · n`, for a
 surjective point map `f` (so the place `v` has a preimage). The single-place fibre `φ^*((v))` has
 degree `#ker f` by `degree_pullbackDiv`. -/
@@ -126,9 +122,10 @@ theorem degree_pullbackDivisor_single (f : W.toAffine.Point →+ W.toAffine.Poin
     Curves.ProjectiveDivisor.degreeHom_apply, degree_pullbackDiv (W := W.toAffine) f hf hP₀,
     smul_eq_mul, mul_comm]
 
+omit [IsIntegrallyClosed (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing] in
 /-- **The degree formula `deg(φ^*D) = #ker(f) · deg D`** (multiplicity-free pullback), for a
 surjective point map `f` over `K̄`. Each place pulls back to a fibre of size `#ker f`, so the degree
-is multiplied by `#ker f`. Proved by `Finsupp` induction on `D` from the `single` case. -/
+is multiplied by `#ker f`. -/
 theorem degree_pullbackDivisor (f : W.toAffine.Point →+ W.toAffine.Point) (hf : Finite f.ker)
     (hsurj : Function.Surjective f) (D : ProjectiveDivisor (⟨W.toAffine⟩ : SmoothPlaneCurve F)) :
     (pullbackDivisor (W := W.toAffine) f hf D).degree = (Nat.card f.ker : ℤ) * D.degree := by
@@ -157,6 +154,7 @@ noncomputable def pullbackDegZero (f : W.toAffine.Point →+ W.toAffine.Point) (
         degree_pullbackDivisor W f hf hsurj,
         Curves.ProjectiveDivisor.mem_degZero.mp D.property, mul_zero])
 
+omit [IsIntegrallyClosed (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing] in
 @[simp] theorem pullbackDegZero_coe (f : W.toAffine.Point →+ W.toAffine.Point) (hf : Finite f.ker)
     (hsurj : Function.Surjective f)
     (D : ProjectiveDivisor.degZero (⟨W.toAffine⟩ : SmoothPlaneCurve F)) :
@@ -181,6 +179,7 @@ variable {F : Type*} [Field F] [DecidableEq F]
 variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
   [IsIntegrallyClosed (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing]
 
+omit [IsIntegrallyClosed (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing] in
 /-- **`φ^*` preserves principal divisors** (Silverman, divisor-pullback functoriality).  For an
 isogeny `φ` with finite kernel and `hproj : ProjOrdTransport φ`, the fibre-pullback of a principal
 projective divisor is principal: `φ^*(div h) = div(φ^* h)`. -/
@@ -234,6 +233,7 @@ noncomputable def pullbackPicZero (φ : Isogeny W.toAffine W.toAffine) [Finite �
       rw [pullbackDegZero_coe]
       exact pullbackDivisor_mem_projPrincipal W φ hproj hD)
 
+omit [IsIntegrallyClosed (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing] in
 @[simp] theorem pullbackPicZero_mk (φ : Isogeny W.toAffine W.toAffine) [Finite φ.toAddMonoidHom.ker]
     (hproj : ProjOrdTransport φ) (hsurj : Function.Surjective φ.toAddMonoidHom)
     (D : ProjectiveDivisor.degZero (⟨W.toAffine⟩ : SmoothPlaneCurve F)) :
