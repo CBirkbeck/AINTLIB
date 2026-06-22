@@ -205,21 +205,10 @@ theorem tos_pullback_principal_of_dual_additive_at
     Curves.SmoothPlaneCurve.ProjIsPrincipal (⟨E⟩ : Curves.SmoothPlaneCurve F)
       (tosPullDivisor ch hinj hfin ch₁ hinj₁ hfin₁ ch₂ hinj₂ hfin₂ Q) := by
   unfold tosPullDivisor
-  -- `κ(ŵ(α₁⊞α₂) Q) ∼ κ(α̂₁ Q) + κ(α̂₂ Q)` (Abel, after `hQ`); regroup the difference (`abel`).
-  have key : Curves.SmoothPlaneCurve.ProjLinearlyEquiv (⟨E⟩ : Curves.SmoothPlaneCurve F)
-      (Curves.kappaDivisor E (α.picDual ch hinj hfin Q))
-      (Curves.kappaDivisor E (α₁.picDual ch₁ hinj₁ hfin₁ Q) +
-        Curves.kappaDivisor E (α₂.picDual ch₂ hinj₂ hfin₂ Q)) := by
-    rw [hQ]
-    exact HasseWeil.Pic0.RouteCTheoremOfSquareDiv.kappaDivisor_add_linEquiv E _ _
-  have hrw : Curves.kappaDivisor E (α.picDual ch hinj hfin Q) -
-      Curves.kappaDivisor E (α₁.picDual ch₁ hinj₁ hfin₁ Q) -
-      Curves.kappaDivisor E (α₂.picDual ch₂ hinj₂ hfin₂ Q) =
-      Curves.kappaDivisor E (α.picDual ch hinj hfin Q) -
-        (Curves.kappaDivisor E (α₁.picDual ch₁ hinj₁ hfin₁ Q) +
-          Curves.kappaDivisor E (α₂.picDual ch₂ hinj₂ hfin₂ Q)) := by abel
-  rw [hrw]
-  exact key
+  -- Regroup `κ(ŵ Q) − κ(α̂₁ Q) − κ(α̂₂ Q)` as `κ(ŵ Q) − (κ(α̂₁ Q) + κ(α̂₂ Q))` (`sub_sub`),
+  -- rewrite `ŵ(α₁⊞α₂)(Q) = α̂₁(Q) + α̂₂(Q)` (`hQ`), then close with Abel's `κ`-additivity.
+  rw [sub_sub, hQ]
+  exact HasseWeil.Pic0.RouteCTheoremOfSquareDiv.kappaDivisor_add_linEquiv E _ _
 
 /-- **The pulled-back theorem of the square ⟸ `σ(Δ_Q) = O`** (the reviewer's Q2 equivalence form).
 
@@ -242,13 +231,8 @@ theorem tos_pullback_principal_of_sigma_eq_zero
       (tosPullDivisor ch hinj hfin ch₁ hinj₁ hfin₁ ch₂ hinj₂ hfin₂ Q) := by
   refine tos_pullback_principal_of_dual_additive_at ch hinj hfin ch₁ hinj₁ hfin₁
     ch₂ hinj₂ hfin₂ Q ?_
-  -- `σ(Δ_Q) = ŵ Q − α̂₁ Q − α̂₂ Q = 0` ⟹ `ŵ Q = α̂₁ Q + α̂₂ Q`.
-  rw [sigma_tosPullDivisor] at hσ
-  have : α.picDual ch hinj hfin Q - α₁.picDual ch₁ hinj₁ hfin₁ Q -
-      α₂.picDual ch₂ hinj₂ hfin₂ Q +
-      (α₁.picDual ch₁ hinj₁ hfin₁ Q + α₂.picDual ch₂ hinj₂ hfin₂ Q) =
-      0 + (α₁.picDual ch₁ hinj₁ hfin₁ Q + α₂.picDual ch₂ hinj₂ hfin₂ Q) := by rw [hσ]
-  simpa [sub_sub, sub_add_cancel, zero_add] using this
+  -- `σ(Δ_Q) = ŵ Q − α̂₁ Q − α̂₂ Q = 0` ⟹ `ŵ Q = α̂₁ Q + α̂₂ Q` (`sub_sub` then `sub_eq_zero`).
+  rwa [sigma_tosPullDivisor, sub_sub, sub_eq_zero] at hσ
 
 /-! ### Part B — the precise residual `DualAddMulByIntResidual` and the consumer's `hadd`
 
@@ -292,15 +276,8 @@ theorem dualAddResidual_iff_sigma_vanishes
         (tosPullDivisor ch hinj hfin ch₁ hinj₁ hfin₁ ch₂ hinj₂ hfin₂ Q) = 0) := by
   unfold DualAddMulByIntResidual
   refine forall_congr' (fun Q ↦ ?_)
-  rw [sigma_tosPullDivisor]
-  constructor
-  · intro hadd; rw [hadd]; abel
-  · intro hz
-    have : α.picDual ch hinj hfin Q - α₁.picDual ch₁ hinj₁ hfin₁ Q -
-        α₂.picDual ch₂ hinj₂ hfin₂ Q +
-        (α₁.picDual ch₁ hinj₁ hfin₁ Q + α₂.picDual ch₂ hinj₂ hfin₂ Q) =
-        0 + (α₁.picDual ch₁ hinj₁ hfin₁ Q + α₂.picDual ch₂ hinj₂ hfin₂ Q) := by rw [hz]
-    simpa [sub_sub, sub_add_cancel, zero_add] using this
+  -- `ŵ Q = α̂₁ Q + α̂₂ Q ↔ σ(Δ_Q) = ŵ Q − α̂₁ Q − α̂₂ Q = 0` (`sub_sub` then `sub_eq_zero`).
+  rw [sigma_tosPullDivisor, sub_sub, sub_eq_zero]
 
 /-- **`hadd` from the residual** (the consumer hand-off).
 
