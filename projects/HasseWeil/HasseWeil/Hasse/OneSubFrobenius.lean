@@ -28,8 +28,6 @@ constructing a `HasseWitnesses W hq` is a one-line wiring of the witnesses
 through these helpers into the bound consumer in `Hasse/Final.lean`.
 -/
 
-open WeierstrassCurve
-
 namespace HasseWeil
 
 variable {K : Type*} [Field K] [Fintype K] [DecidableEq K]
