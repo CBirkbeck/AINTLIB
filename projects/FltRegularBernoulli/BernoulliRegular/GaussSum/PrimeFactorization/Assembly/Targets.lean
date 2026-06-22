@@ -34,7 +34,6 @@ noncomputable def characterSideCoefficientGroupRing
 @[simp] lemma characterSideCoefficientGroupRing_apply_inv
     (v : (ZMod (p - 1))ˣ → ℕ) (b : (ZMod (p - 1))ˣ) :
     characterSideCoefficientGroupRing (p := p) v b⁻¹ = (v b : ℤ) := by
-  classical
   rw [characterSideCoefficientGroupRing]
   calc
     (∑ c : (ZMod (p - 1))ˣ, MonoidAlgebra.single c⁻¹ (v c : ℤ)) b⁻¹ =
