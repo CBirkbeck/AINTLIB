@@ -21,8 +21,6 @@ namespace HasseWeil.WeilPairing
 
 open Curves
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
 set_option linter.style.longLine false
 
 variable {F : Type*} [Field F] [DecidableEq F] {W : WeierstrassCurve.Affine F}
@@ -34,7 +32,6 @@ unconditional over an algebraically closed field. If `projectiveDivisorOf f = 0`
 including at infinity), then `f = algebraMap F _ c` for some `c : F`. -/
 theorem const_of_projectiveDivisorOf_eq_zero [IsAlgClosed F] [W.IsElliptic]
     [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
     (f : (⟨W⟩ : SmoothPlaneCurve F).FunctionField) (hf : f ≠ 0)
     (hdiv : (⟨W⟩ : SmoothPlaneCurve F).projectiveDivisorOf f = 0) :
     ∃ c : F, f = algebraMap F (⟨W⟩ : SmoothPlaneCurve F).FunctionField c := by
@@ -71,7 +68,6 @@ trivial divisor and is nonzero, hence equals `algebraMap F _ c` for a **nonzero*
 landing in `μ_ℓ` once `(·)^ℓ = 1` is established. -/
 theorem const_unit_of_projectiveDivisorOf_eq_zero [IsAlgClosed F] [W.IsElliptic]
     [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
     (f : (⟨W⟩ : SmoothPlaneCurve F).FunctionField) (hf : f ≠ 0)
     (hdiv : (⟨W⟩ : SmoothPlaneCurve F).projectiveDivisorOf f = 0) :
     ∃ c : F, c ≠ 0 ∧ f = algebraMap F (⟨W⟩ : SmoothPlaneCurve F).FunctionField c := by
@@ -88,7 +84,6 @@ which holds for `S ∈ E[ℓ]` by the fibre-shift), then `τg = c · g` for a **
 This `c` is the pairing value `e_ℓ(S,T)`; once `c^ℓ = 1` (from `g^ℓ = f_T∘[ℓ]`) it lands in `μ_ℓ`. -/
 theorem pairing_const_of_transport [IsAlgClosed F] [W.IsElliptic]
     [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
     (τ : (⟨W⟩ : SmoothPlaneCurve F).FunctionField ≃+*
       (⟨W⟩ : SmoothPlaneCurve F).FunctionField)
     (g : (⟨W⟩ : SmoothPlaneCurve F).FunctionField) (hg : g ≠ 0)
@@ -99,6 +94,7 @@ theorem pairing_const_of_transport [IsAlgClosed F] [W.IsElliptic]
     const_unit_of_projectiveDivisorOf_eq_zero (τ g / g) (div_ne_zero hτg hg) htransport
   exact ⟨c, hc0, (div_eq_iff hg).mp hc⟩
 
+omit [DecidableEq F] in
 /-- **The pairing value is an `ℓ`-th root of unity** (pairing step 7d, `μ_ℓ`-membership). Given the
 pairing relation `τg = c·g` and that `τ` **fixes** `g^ℓ` (which holds because `g^ℓ = f_T∘[ℓ]` and
 `[ℓ](·+S) = [ℓ](·)` for `S ∈ E[ℓ]`, so `τ_S(f_T∘[ℓ]) = f_T∘[ℓ]`), the scalar `c` satisfies
@@ -118,11 +114,10 @@ theorem pairing_const_pow_eq_one
       algebraMap F (⟨W⟩ : SmoothPlaneCurve F).FunctionField (c ^ ℓ) * g ^ ℓ := by
     rw [one_mul]; exact h1
   have h3 := mul_right_cancel₀ (pow_ne_zero ℓ hg) h2
-  have h4 : algebraMap F (⟨W⟩ : SmoothPlaneCurve F).FunctionField (1 : F) =
-      algebraMap F (⟨W⟩ : SmoothPlaneCurve F).FunctionField (c ^ ℓ) := by
-    rw [map_one]; exact h3
-  exact ((algebraMap F (⟨W⟩ : SmoothPlaneCurve F).FunctionField).injective h4).symm
+  exact ((algebraMap F (⟨W⟩ : SmoothPlaneCurve F).FunctionField).injective
+    (by rw [map_one]; exact h3)).symm
 
+omit [DecidableEq F] in
 /-- **Bilinearity of the Weil pairing in the first slot** (pairing step 8, Prop 8.1). If the
 translations compose (`τ_{S₁+S₂} = τ_{S₁} ∘ τ_{S₂}`, a group action of `E` on `K(E)`) and `τ_{S₁}`
 fixes the base field `F`, then the pairing values multiply: `e_ℓ(S₁+S₂, T) = e_ℓ(S₁,T)·e_ℓ(S₂,T)`,
@@ -142,9 +137,10 @@ theorem pairing_const_mul
       algebraMap F (⟨W⟩ : SmoothPlaneCurve F).FunctionField (c₁ * c₂) * g := by
     rw [hcomp, hc₂, map_mul, hτ₁F, hc₁, map_mul]; ring
   rw [hc₁₂] at hval
-  have h3 := mul_right_cancel₀ hg hval
-  exact (algebraMap F (⟨W⟩ : SmoothPlaneCurve F).FunctionField).injective h3
+  exact (algebraMap F (⟨W⟩ : SmoothPlaneCurve F).FunctionField).injective
+    (mul_right_cancel₀ hg hval)
 
+omit [DecidableEq F] in
 /-- **Value-multiplicativity across DIFFERENT functions related by an invariant factor**
 (pairing step 8, Prop 8.1**b** — bilinearity in the *second* slot). This is the engine for
 `weilPairing_mul_right`: the three Weil functions `g₁ = g_{T₁}`, `g₂ = g_{T₂}`, `g₁₂ = g_{T₁+T₂}`
@@ -174,9 +170,10 @@ theorem pairing_const_mul_invariant_factor
     rw [map_mul, hfact]
     ring
   rw [hc₁₂] at hval
-  have h3 := mul_right_cancel₀ hg₁₂ hval
-  exact (algebraMap F (⟨W⟩ : SmoothPlaneCurve F).FunctionField).injective h3
+  exact (algebraMap F (⟨W⟩ : SmoothPlaneCurve F).FunctionField).injective
+    (mul_right_cancel₀ hg₁₂ hval)
 
+omit [DecidableEq F] in
 /-- **The Weil pairing is trivial on `O`** (pairing step 8, Prop 8.1): `e_ℓ(O,T) = 1`. The
 translation by `O` is the identity (`translateAlgEquivOfPoint W 0 = AlgEquiv.refl`), so `τg = g`
 forces the pairing value `c = 1`. -/
