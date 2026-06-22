@@ -3,14 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.SMOObligations.SquarefreeDecomp
+import LeanModularForms.StrongMultiplicityOne.SquarefreeDecomp
 
 /-!
 # Strong Multiplicity One via Miyake §4.6 — Lemma 4.6.14
 
 The `δ`-slash-sum coefficient vanishing (`miyake_4_6_14_delta_slash_sum_coeff_zero`)
 and the descent-witness apparatus for the `l' > 1` case. Part of a multi-file
-split of `SMOObligations.lean`.
+split of `StrongMultiplicityOne.lean`.
 
 ## Main definitions
 

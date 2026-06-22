@@ -3,16 +3,16 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.SMOObligations.Lemma4_6_8
+import LeanModularForms.StrongMultiplicityOne.InductiveStep
 
 /-!
 # Strong Multiplicity One via Miyake §4.6
 
-This file assembles an axiom-clean proof of `strongMultiplicityOne_axiom_clean`
+This file assembles an axiom-clean proof of `strongMultiplicityOne`
 (Miyake Theorem 4.6.12 / Diamond–Shurman Theorem 5.8.2) by following
 Miyake's algebraic descent in §4.6 of *Modular Forms* (2006).
 
-The supporting development is split across the `SMOObligations/` modules;
+The supporting development is split across the `StrongMultiplicityOne/` modules;
 this file holds the route-B finale.
 
 ## Main results
@@ -20,7 +20,7 @@ this file holds the route-B finale.
 * `miyake_4_6_8_main_lemma_cuspForm`: Miyake's Main Lemma (Theorem 4.6.8).
 * `mainLemma_charSpace_routeB`: per-character Main Lemma.
 * `newform_unique_routeB`: uniqueness of newforms.
-* `strongMultiplicityOne_axiom_clean`: Strong Multiplicity One.
+* `strongMultiplicityOne`: Strong Multiplicity One.
 
 ## References
 

@@ -3,14 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.SMOObligations.MiyakeDescend
+import LeanModularForms.StrongMultiplicityOne.HeckeDescent
 
 /-!
 # Strong Multiplicity One via Miyake §4.6 — level commutation (4.6.6)
 
 Coset agreement across levels, slash-sum commutation, and Miyake Lemma 4.6.6
 (`miyake_4_6_6_level_commute` and its `δ_l` variant). Part of a multi-file
-split of `SMOObligations.lean`.
+split of `StrongMultiplicityOne.lean`.
 -/
 
 open CongruenceSubgroup Matrix.SpecialLinearGroup

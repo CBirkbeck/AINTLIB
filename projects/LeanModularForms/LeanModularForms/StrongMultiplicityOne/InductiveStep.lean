@@ -3,13 +3,13 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.SMOObligations.Lemma4_6_14
+import LeanModularForms.StrongMultiplicityOne.DescentCharSpace
 
 /-!
 # Strong Multiplicity One via Miyake §4.6 — Main Lemma (4.6.8)
 
 The descent witness, the inductive step, and the subset-indexed helper for
-Miyake Theorem 4.6.8. Part of a multi-file split of `SMOObligations.lean`.
+Miyake Theorem 4.6.8. Part of a multi-file split of `StrongMultiplicityOne.lean`.
 -/
 
 open CongruenceSubgroup Matrix.SpecialLinearGroup

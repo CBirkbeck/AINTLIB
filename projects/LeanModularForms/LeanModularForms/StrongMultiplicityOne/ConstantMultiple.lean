@@ -3,7 +3,7 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.SMOObligations
+import LeanModularForms.StrongMultiplicityOne
 import LeanModularForms.HeckeRIngs.GL2.Unified.EigenformFromRing
 
 /-!
@@ -21,7 +21,7 @@ Neither `f` nor `g` is assumed normalised; the conclusion is `g = c • f` for s
 `c ∈ ℂ`.
 
 This **builds on** the same-level normalised-newform uniqueness theorem
-`HeckeRing.GL2.strongMultiplicityOne_axiom_clean` (Miyake Theorem 4.6.8 +
+`HeckeRing.GL2.strongMultiplicityOne` (Miyake Theorem 4.6.8 +
 Atkin–Lehner uniqueness, route B) and **never modifies it**.
 
 ## Proof outline (Miyake pp. 163–164)
@@ -1276,7 +1276,7 @@ finite set `S` are equal.
 
 Corollary of `strongMultiplicityOne_constMul` (T014): the constant multiple it returns is forced
 to be `1` since both newforms are normalised (`a₁ = 1`). -/
-theorem strongMultiplicityOne_axiom_clean
+theorem strongMultiplicityOne
     (f g : Newform N k) (χ : (ZMod N)ˣ →* ℂˣ)
     (hfχ : f.toCuspForm.toModularForm' ∈ modFormCharSpace k χ)
     (hgχ : g.toCuspForm.toModularForm' ∈ modFormCharSpace k χ)
