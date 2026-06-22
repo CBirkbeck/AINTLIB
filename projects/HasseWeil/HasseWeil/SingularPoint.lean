@@ -92,10 +92,7 @@ the point `(x₀, y₀)` is singular on the curve.
 Reference: Silverman III.1.4. -/
 theorem exists_singular_of_Δ_eq_zero (h2 : (2 : F) ≠ 0) (hΔ : W.Δ = 0) :
     ∃ x y, W.Singular x y := by
-  have h4 : (4 : F) ≠ 0 := by
-    intro h; apply h2
-    have h22 : (4 : F) = 2 * 2 := by ring
-    rw [h22] at h; exact mul_self_eq_zero.mp h
+  have h4 : (4 : F) ≠ 0 := fun h => h2 (mul_self_eq_zero.mp (by linear_combination h))
   have ha : W.twoTorsionPolynomial.a ≠ (0 : F) := h4
   have hdisc : W.twoTorsionPolynomial.discr = 0 := by
     rw [twoTorsionPolynomial_discr, hΔ, mul_zero]
