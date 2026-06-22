@@ -43,7 +43,7 @@ roots. -/
 theorem normalizedFactors_toFinset_eq_roots_image_of_splits
     {f : F[X]} (hf0 : f ≠ 0) (hsplit : f.Splits) :
     (normalizedFactors f).toFinset =
-      f.roots.toFinset.image (fun a : F => X - C a) := by
+      f.roots.toFinset.image (fun a : F ↦ X - C a) := by
   classical
   ext g
   rw [Finset.mem_image]
@@ -59,13 +59,11 @@ theorem normalizedFactors_toFinset_eq_roots_image_of_splits
       rw [hgmonic.eq_X_add_C hgdeg]
       simp [a, sub_eq_add_neg]
     refine ⟨a, ?_, ?_⟩
-    · rw [Multiset.mem_toFinset, mem_roots hf0]
-      rw [← dvd_iff_isRoot]
+    · rw [Multiset.mem_toFinset, mem_roots hf0, ← dvd_iff_isRoot]
       simpa [← hg_eq] using hgdvd
     · exact hg_eq.symm
   · rintro ⟨a, ha, rfl⟩
-    rw [Multiset.mem_toFinset]
-    rw [Polynomial.mem_normalizedFactors_iff (q := f) hf0]
+    rw [Multiset.mem_toFinset, Polynomial.mem_normalizedFactors_iff (q := f) hf0]
     refine ⟨irreducible_X_sub_C a, monic_X_sub_C a, ?_⟩
     rw [dvd_iff_isRoot]
     exact (mem_roots hf0).mp (Multiset.mem_toFinset.mp ha)
@@ -78,11 +76,10 @@ theorem normalizedFactors_toFinset_card_eq_natDegree_of_monic_splits_separable
     (normalizedFactors f).toFinset.card = f.natDegree := by
   classical
   rw [normalizedFactors_toFinset_eq_roots_image_of_splits hf0 hsplit]
-  have hinj : Set.InjOn (fun a : F => X - C a) (f.roots.toFinset : Set F) := by
+  have hinj : Set.InjOn (fun a : F ↦ X - C a) (f.roots.toFinset : Set F) := by
     intro a _ b _ h
-    simpa using congrArg (fun g : F[X] => -g.coeff 0) h
-  rw [Finset.card_image_iff.mpr hinj]
-  rw [Multiset.toFinset_card_of_nodup (nodup_roots hsep)]
+    simpa using congrArg (fun g : F[X] ↦ -g.coeff 0) h
+  rw [Finset.card_image_iff.mpr hinj, Multiset.toFinset_card_of_nodup (nodup_roots hsep)]
   exact hsplit.natDegree_eq_card_roots.symm
 
 /-- The factor-count form needed by the Kummer-Dedekind bridge for
@@ -134,7 +131,7 @@ theorem exists_nonZero_smul_aeval_mem_adjoin
   rw [Polynomial.as_sum_support_C_mul_X_pow f]
   simp only [map_sum, map_mul, map_pow, aeval_C, aeval_X]
   rw [Finset.mul_sum]
-  refine Subalgebra.sum_mem _ fun i hi => ?_
+  refine Subalgebra.sum_mem _ fun i hi ↦ ?_
   rcases hr i hi with ⟨c, hc⟩
   have hcL :
       algebraMap R L c =
@@ -298,8 +295,7 @@ theorem primesOverFinset_card_eq_reduced_minpoly_factor_card
     normalizedFactors_ideal_map_eq_normalizedFactors_min_poly_mk_map
       (R := R) (S := S) (x := x) (I := I) inferInstance hI0 hxcond hxint
   unfold IsDedekindDomain.primesOverFinset
-  rw [factors_eq_normalizedFactors, hKD]
-  rw [Multiset.toFinset_map]
+  rw [factors_eq_normalizedFactors, hKD, Multiset.toFinset_map]
   have h_image :
       (Finset.image
           (fun f : {d : (R ⧸ I)[X] |
@@ -310,7 +306,7 @@ theorem primesOverFinset_card_eq_reduced_minpoly_factor_card
               Ideal S))
           (normalizedFactors ((minpoly R x).map (Ideal.Quotient.mk I))).attach.toFinset).card =
         (normalizedFactors ((minpoly R x).map (Ideal.Quotient.mk I))).attach.toFinset.card :=
-    Finset.card_image_iff.mpr fun a _ b _ h =>
+    Finset.card_image_iff.mpr fun a _ b _ h ↦
       (normalizedFactorsMapEquivNormalizedFactorsMinPolyMk
         (R := R) (S := S) (x := x) (I := I) inferInstance hI0 hxcond hxint).symm.injective
           (Subtype.ext h)
@@ -318,9 +314,9 @@ theorem primesOverFinset_card_eq_reduced_minpoly_factor_card
     normalizedFactors ((minpoly R x).map (Ideal.Quotient.mk I))
   have h_attach : m.attach.toFinset.card = m.toFinset.card := by
     have h_val :
-        (Finset.image (fun f : {g // g ∈ m} => (f : (R ⧸ I)[X]))
+        (Finset.image (fun f : {g // g ∈ m} ↦ (f : (R ⧸ I)[X]))
           m.attach.toFinset).card = m.attach.toFinset.card :=
-      Finset.card_image_iff.mpr fun a _ b _ h => Subtype.ext h
+      Finset.card_image_iff.mpr fun a _ b _ h ↦ Subtype.ext h
     rw [← h_val, ← Multiset.toFinset_map, Multiset.attach_map_val]
   exact h_image.trans h_attach
 
