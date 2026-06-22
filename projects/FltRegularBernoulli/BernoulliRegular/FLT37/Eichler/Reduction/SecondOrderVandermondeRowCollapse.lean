@@ -1,6 +1,6 @@
 import BernoulliRegular.FLT37.Eichler.Reduction.IrregularUnitPthPowerOfRationalModSq
-import BernoulliRegular.FLT37.Eichler.CaseIIEx811EigenVandermonde
-import BernoulliRegular.FLT37.Eichler.CaseIILeadingExponent
+import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.EigenbasisVandermondeCompatibility
+import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.LambdaExponentCollapseToOmega32
 import BernoulliRegular.BernoulliFast.KellnerSecondOrder
 
 /-!

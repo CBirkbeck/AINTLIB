@@ -1,6 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.CaseIITwistedConjPairDescent
-import BernoulliRegular.FLT37.Eichler.CaseIIRealRootClassConjFixed
-import BernoulliRegular.FLT37.Eichler.CaseIIRealDataProducer
+import BernoulliRegular.FLT37.Eichler.CaseII.ConjugatePair.PairedUnitsDescentStep
+import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.RootClassConjugateFixed
+import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.IntSolutionToRealDatum
 
 /-!
 # [FLT37-CASEII-R2] The paired-units endpoint: entry producer, `CaseIIBridge`, FLT37

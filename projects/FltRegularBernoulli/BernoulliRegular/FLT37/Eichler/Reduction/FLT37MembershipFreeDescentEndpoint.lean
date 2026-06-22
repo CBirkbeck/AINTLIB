@@ -1,5 +1,5 @@
 import BernoulliRegular.FLT37.VandiverProven
-import BernoulliRegular.FLT37.Eichler.CaseIIExplicitDescent
+import BernoulliRegular.FLT37.Eichler.CaseII.Section91.MembershipFreeDescentReduction
 
 /-!
 # FLT37 endpoint with the membership-free Case-II descent-unit input

@@ -1,4 +1,4 @@
-import BernoulliRegular.FLT37.Eichler.CaseIILemma98Residue
+import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.KummerCongruenceResidue
 
 /-!
 # Washington Corollary 8.15 single-index expansion for `p = 37`, discharged at the

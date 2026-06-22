@@ -1,5 +1,5 @@
 import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.SquarePowerKernelAndAssumedII
-import BernoulliRegular.FLT37.Eichler.CaseIIRealRootClassConjFixed
+import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.RootClassConjugateFixed
 
 /-!
 # Fermat's Last Theorem for `p = 37` via the **Theorem-9.4 / Corollary-8.23** Case-II route

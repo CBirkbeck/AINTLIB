@@ -1,4 +1,4 @@
-import BernoulliRegular.FLT37.Eichler.CaseIIAssumptionII
+import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.DiscreteLogIndexCollapse
 import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.PSaturation
 import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.PollaczekFamilyDescent
 
