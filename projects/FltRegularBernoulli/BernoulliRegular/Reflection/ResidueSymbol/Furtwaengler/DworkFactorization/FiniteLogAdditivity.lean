@@ -280,7 +280,7 @@ theorem finiteLogAdditivity_degree_sum_eq_zero (N d : ℕ)
           exact finiteLogAdditivity_den_exponent_le (ℓ := ℓ)
             (Nat.ne_zero_of_lt ha1) had)) = 0 := by
   classical
-  let z : ℕ → 𝓞 R' := fun n => finiteLogAdditivityNumerator x y d n
+  let z : ℕ → 𝓞 R' := fun n ↦ finiteLogAdditivityNumerator x y d n
   have hz0 : ∀ n ∈ Finset.Icc 1 d,
       z n ∈ F.Q ^ (n.factorization ℓ * (ℓ - 1) + 0) := by
     intro n hnI
@@ -497,9 +497,9 @@ theorem finiteLogProductHomogeneousGrid_degree_sub_eq_zero (N d : ℕ)
   classical
   let C : ℕ := finiteLogCutoff (ℓ := ℓ) N
   have hdC : d < C := by simpa [C] using hd
-  have hsubset : Finset.Icc 1 d ⊆ Finset.range C := fun n hnI =>
+  have hsubset : Finset.Icc 1 d ⊆ Finset.range C := fun n hnI ↦
     Finset.mem_range.mpr (lt_of_le_of_lt (Finset.mem_Icc.mp hnI).2 hdC)
-  let f : ℕ → 𝓞 R' ⧸ F.Q ^ (N + 1) := fun n =>
+  let f : ℕ → 𝓞 R' ⧸ F.Q ^ (N + 1) := fun n ↦
       (if hn : n = 0 then 0 else
         ((-1 : 𝓞 R' ⧸ F.Q ^ (N + 1)) ^ (n + 1)) *
           (if hnd : n ≤ d then
@@ -604,7 +604,7 @@ theorem finiteLogProductHomogeneousGrid_add (N : ℕ)
         rw [finiteLogProductHomogeneousGrid_eq_degree_sum (F := F) N hy (zero_mem F.Q)]
         simp [Finset.sum_sub_distrib]
     _ = 0 :=
-        Finset.sum_eq_zero fun d hd =>
+        Finset.sum_eq_zero fun d hd ↦
           finiteLogProductHomogeneousGrid_degree_sub_eq_zero (F := F) N d hd hx hy
 
 theorem finiteLogProductHomogeneousGrid_term_eq (N n : ℕ) (hn : n ≠ 0)
@@ -662,12 +662,12 @@ theorem finiteLogProductHomogeneousGrid_term_eq (N n : ℕ) (hn : n ≠ 0)
   have hsum_mem_n :
       (∑ d ∈ Finset.range (P.natDegree + 1), if n ≤ d then P.coeff d else 0) ∈
         F.Q ^ n :=
-    Ideal.sum_mem _ fun d _hd => hcoeff_mem_n d
+    Ideal.sum_mem _ fun d _hd ↦ hcoeff_mem_n d
   have hsum_mem_s :
       (∑ d ∈ Finset.range (P.natDegree + 1), if n ≤ d then P.coeff d else 0) ∈
         F.Q ^ (den + s) := by
     simpa [s, Nat.add_sub_of_le hdenn] using hsum_mem_n
-  let g : ℕ → 𝓞 R' ⧸ F.Q ^ (N + 1) := fun d =>
+  let g : ℕ → 𝓞 R' ⧸ F.Q ^ (N + 1) := fun d ↦
     if hnd : n ≤ d then
       F.finiteLogNatDivEvalAtDegree N n d hn (P.coeff d)
         (by
@@ -705,7 +705,7 @@ theorem finiteLogProductHomogeneousGrid_term_eq (N n : ℕ) (hn : n ≠ 0)
           F.finiteLogNatDivEval N n s hn (if n ≤ d then P.coeff d else 0)
             (hcoeff_mem_s d) := by
         rw [F.finiteLogNatDivEval_sum (N := N) (n := n) (s := s) hn
-          (Finset.range (P.natDegree + 1)) (fun d => if n ≤ d then P.coeff d else 0)
+          (Finset.range (P.natDegree + 1)) (fun d ↦ if n ≤ d then P.coeff d else 0)
           hcoeff_mem_s hsum_mem_s]
       _ = ∑ d ∈ Finset.range (P.natDegree + 1), g d := by
         refine Finset.sum_congr rfl ?_
@@ -723,10 +723,10 @@ theorem finiteLogProductHomogeneousGrid_term_eq (N n : ℕ) (hn : n ≠ 0)
         · have hzero_s : (0 : 𝓞 R') ∈ F.Q ^ (den + s) := zero_mem _
           simp [g, hnd, F.finiteLogNatDivEval_zero (N := N) (n := n) (s := s) hn hzero_s]
   let M : ℕ := max (P.natDegree + 1) C
-  have hPsubset : Finset.range (P.natDegree + 1) ⊆ Finset.range M := fun d hd =>
+  have hPsubset : Finset.range (P.natDegree + 1) ⊆ Finset.range M := fun d hd ↦
     Finset.mem_range.mpr
       (lt_of_lt_of_le (Finset.mem_range.mp hd) (Nat.le_max_left _ _))
-  have hCsubset : Finset.range C ⊆ Finset.range M := fun d hd =>
+  have hCsubset : Finset.range C ⊆ Finset.range M := fun d hd ↦
     Finset.mem_range.mpr
       (lt_of_lt_of_le (Finset.mem_range.mp hd) (Nat.le_max_right _ _))
   have hP_to_M :
@@ -736,7 +736,7 @@ theorem finiteLogProductHomogeneousGrid_term_eq (N n : ℕ) (hn : n ≠ 0)
       intro d _hdM hdP
       by_cases hnd : n ≤ d
       · have hd_gt : P.natDegree < d := by
-          have hd_not_lt : ¬ d < P.natDegree + 1 := fun hdlt =>
+          have hd_not_lt : ¬ d < P.natDegree + 1 := fun hdlt ↦
             hdP (Finset.mem_range.mpr hdlt)
           have hle : P.natDegree + 1 ≤ d := Nat.le_of_not_gt hd_not_lt
           omega
