@@ -829,6 +829,26 @@ theorem restrictIdealSingle_one_lt {w : Valuation A Γ₀} {g : A} (hg : w g ≠
     ← WithZero.coe_one, WithZero.coe_lt_coe, ← Subtype.coe_lt_coe]
   exact_mod_cast Units.val_lt_val.mp h
 
+/-- `restrictIdealSingle` preserves `< 1` (a value `< 1` maps to `< 1`, or to `0 < 1`). -/
+theorem restrictIdealSingle_lt_one {w : Valuation A Γ₀} {g : A} (hg : w g ≠ 0) {a : A}
+    (h : w a < 1) : w.restrictIdealSingle g hg a < 1 := by
+  by_cases hva : w a = 0
+  · rw [Valuation.restrictIdealSingle, Valuation.restrictToConvexBounded_apply_zero _ _ _ hva]
+    exact zero_lt_one
+  · by_cases hm : Units.mk0 (w a) hva ∈ Valuation.cGammaSingle w g hg
+    · rw [Valuation.restrictIdealSingle, Valuation.restrictToConvexBounded_apply_mem _ _ _ hva hm,
+        ← WithZero.coe_one, WithZero.coe_lt_coe, ← Subtype.coe_lt_coe]
+      exact_mod_cast Units.val_lt_val.mp h
+    · rw [Valuation.restrictIdealSingle, Valuation.restrictToConvexBounded_apply_not_mem _ _ _ hva hm]
+      exact zero_lt_one
+
+/-- **`IsInSpvAI` for a valuation that vanishes on `I`** (the degenerate `supp`-case): if `w a = 0`
+for all `a ∈ I`, then `ofValuation w ∈ Spv(A, I)` via the trivial cofinal disjunct. -/
+theorem ofValuation_isInSpvAI_of_eq_zero_on (w : Valuation A Γ₀) (I : Ideal A)
+    (h : ∀ a ∈ I, w a = 0) : Spv.IsInSpvAI (ofValuation w) I :=
+  Or.inl fun a ha => cofinalValue_canon_of_restricted w
+    (fun γ hγ => ⟨1, by rw [pow_one, h a ha]; exact hγ⟩)
+
 /-- **General sub-lemma (value-equivalence from `cGammaIdeal` containing every
 value-unit).** If every nonzero value-unit `Units.mk0 (v a) ha` of `v` lies
 in `cGammaIdeal v I`, then the restriction `v.restrictIdeal I` is

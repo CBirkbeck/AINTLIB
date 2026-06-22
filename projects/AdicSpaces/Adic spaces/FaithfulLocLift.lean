@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».Cor832
 import «Adic spaces».PresheafTateStructure
+import «Adic spaces».SpvAITopology
 
 /-!
 # Faithful `HasLocLiftPowerBounded` (Wedhorn 7.52, source-justified)
@@ -378,115 +379,60 @@ theorem mem_plus_of_forall_spa_vle_one
     haveI := hq'prime
     obtain ⟨Γt, _, t, ht_equiv⟩ := exists_valuation_extension_of_prime_over s q'
       (hq'eq.trans hs_supp.symm) (FractionRing (↑Radj ⧸ s.supp)) (FractionRing (Localization.Away x ⧸ q'))
-    refine ⟨ValuationSpectrum.comap (algebraMap (presheafValue D') (Localization.Away x))
-      (ValuationSpectrum.ofValuation t), ?_, ?_⟩
-    · -- HU-e(1): `v ∈ Spa(B, B⁺)` = `v.IsContinuous ∧ ∀ f ∈ B⁺, v.vle f 1` (`mem_spa_iff`).
-      rw [mem_spa_iff]
-      refine ⟨?_, ?_⟩
-      · -- Continuity of `v` (Huber [Hu2] (3.1) = Wedhorn Thm 7.10 reverse, huber2.txt:654-657).
-        -- Huber: "(c) for `a ∈ A°°`: `G` open ⟹ `∃n, xⁿa ∈ G` and `a ∈ G`, so in `G[x⁻¹]`,
-        -- `aⁿ = g·x⁻¹` with `x⁻¹ ∈ p`, giving `s(aⁿ) ≤ 1` hence `v(a) ≤ 1`; (d) `v ∈ Spv(A, A°°·A)` by
-        -- construction. We conclude from (3.1) and (c),(d) that `v` is continuous."
-        -- SOURCE-VERIFIED faithful route (Huber Thm 3.1, huber2.txt:585):
-        --   `Cont A = {v ∈ Spv(A, A°°·A) | v(a) ≤ 1 ∀ a ∈ A°°}`  (A°° = topologically nilpotent set).
-        -- So the FAITHFUL continuity criterion is the **A°°-form**: `v ∈ Spv(B, B°°·B)` (property (d)) and
-        -- `v(a) ≤ 1 ∀ a ∈ B°°` (property (c)) ⟹ `v` continuous. Huber's reverse-direction proof
-        -- (huber2.txt:589-602): (1) `v(a)` cofinal in `Γv` for `a ∈ A°°` (microbial via (2.5), else the
-        -- `t·aⁿ ∈ A°°` cofinality trick); then for a nbhd basis `{Uⁿ}` with `T·U ⊆ U` finite `T`, pick
-        -- `n` with `(max_{t∈T} v(t))ⁿ < γ`, giving `v < γ` on `U^{n+1}` ⟹ continuous.
-        -- ✅ The faithful **A°°-form criterion is now BUILT, sorry-free** (this session):
-        -- `Spv.isContinuous_of_isInSpvAI_of_lt_one_principal` (SpvAI.lean) — for a PRINCIPAL pair
-        -- (`P.I = (π)`, available via `IsTateRing.principalPair B`), with the boundedness hypothesis on
-        -- `A°°` (Huber's, not the over-strong `A₀`-form), using the new `cofinalValue_principal_pow_lt`
-        -- (the faithful `I^n` decay `a = π^(n-1)·(πb)`, `πb ∈ A°°`). Remaining to wire it in:
-        --   • P := `IsTateRing.principalPair (presheafValue D')`; witness ⤳ `restrictIdeal v (J)` with
-        --     `J = Ideal.map P.A₀.subtype P.I` (Huber's `u|cΓ`; `restrictIdeal` preserves `v(x) > 1`
-        --     since `v(x) ≥ 1 ∈ cΓ`, and keeps `v ≤ 1 on B⁺` as `≤ 1`/`0` — so HU-e(2)/(1b) transfer);
-        --   • (c) `v ≤ 1 on A°°`: `B°° ⊆ B⁺` (open + integrally closed) + the proven `v ≤ 1 on B⁺`;
-        --   • (d) `IsInSpvAI (restrictIdealSingle v π) (π)`: ✅ **NOW AVAILABLE axiom-clean** as
-        --     `ofValuation_restrictIdealSingle_isInSpvAI` (SpvAITopology). The old general
-        --     `ofValuation_restrictIdeal_isInSpvAI` was FALSE (B2, 2026-06-22: `cGammaIdeal ≠`
-        --     Wedhorn Def 7.3); the faithful PRINCIPAL replacement is proven via Prop 1.20 + the
-        --     cofinal/microbial sub-lemmas (T-SPVAI-1/2/3, all axiom-clean).
-        -- WIRING RECIPE (T-SPVAI-4, all prerequisites confirmed available faithfully):
-        --   1. `haveI : IsTateRing (presheafValue D')` — reconstruct inline from
-        --      `presheafValue_{ringOfDef,idealOfDef,ringOfDef_isOpen,idealOfDef_fg,isAdic,topNilUnit}`
-        --      (all in PresheafTateStructure, upstream; NO noeth-`A₀`; the Wedhorn828
-        --      `presheafValue_isTateRing_faithful` is downstream so can't be imported).
-        --   2. `P := IsTateRing.principalPair (presheafValue D')`, `π := P.π`, `hπ := P.I_eq_span`.
-        --   3. by_cases `v(subtype π) = 0`: if `0`, `v` itself is in `Spv(A,(π))` (trivial cofinal
-        --      disjunct, `v(cπ)=0`) — `v` continuous directly via the criterion; else witness
-        --      `v' := ofValuation (restrictIdealSingle (valuation under v.tVR) (subtype π) hg)`.
-        --   4. continuity (CLEAN route — NO strict `<1` needed): `Spv.IsContinuous v'` unfolds
-        --      definitionally to `(valuation under v'.tVR).IsContinuous`, proved by
-        --        `Valuation.isContinuous_of_ideal_pow_lt P (valuation) (fun γ hγ =>
-        --           cofinalValue_principal_pow_lt P hπ h_le_AOO h_cof_π γ hγ)`
-        --      where `h_le_AOO : ∀ a, IsTopologicallyNilpotent a → v'(a) ≤ 1` (via `topNilp ⊆ B⁺`
-        --      [provable: `aⁿ ∈ B⁺` eventually + `a ∈ B°` ⟹ `a` integral over `B⁺` ⟹ `a ∈ B⁺`] +
-        --      `restrictIdealSingle_le_one`), and `h_cof_π : CofinalValue v' (subtype π)`.
-        --      `cofinalValue_principal_pow_lt` needs only `h_le_AOO` + `h_cof_π` — the wrapper
-        --      `isContinuous_of_isInSpvAI_of_lt_one_principal`'s `h_lt_one` was a RED HERRING (only
-        --      used to DERIVE `h_cof` in its microbial branch).
-        --   5. goals (1b) `v' ≤ 1 on B⁺` and (2) `v'(x) > 1`: the existing `v`-proofs (below) give
-        --      `v ≤ 1 on B⁺` / `v(x) > 1`; lift to `v'` via `restrictIdealSingle_le_one` /
-        --      `restrictIdealSingle_one_lt` through the `ofValuation` / `Compatible.vle_iff_le` bridge.
-        -- REMAINING FRONTIER (focused sub-development): `h_cof_π : CofinalValue v' (subtype π)`.
-        --   `restrictIdealSingle_cofinal_of_not_mem` (T-SPVAI-2) gives it WHEN `v'` is in the cofinal
-        --   branch (`v(π)⁻¹ ∉ cΓ_v`), equivalently `v(subtype π) < 1`. And `v(subtype π) < 1` DOES
-        --   hold — it is exactly Huber's continuity argument (c) (lines 387-389): for `a ∈ A°°`,
-        --   `aⁿ = g·x⁻¹` in `R = B⁺[x⁻¹]` with `g ∈ R` and `x⁻¹ ∈ 𝔪`, so
-        --   `s(aⁿ) = s(g)·s(x⁻¹) ≤ s(x⁻¹) < 1` (`hs_lt`), hence `v(aⁿ) < 1` (via `ht_equiv`), hence
-        --   `v(a) < 1`. So `v'` IS in the cofinal branch and `h_cof_π` follows from T-SPVAI-2.
-        --   ⟹ the principal-`(π)` restriction is correct (no need for Huber's full `A°°·A` ideal).
-        -- The remaining work to discharge this sorry is therefore: (i) formalise Huber (c) — the
-        --   `a ∈ A°° ⟹ aⁿ = g·x⁻¹` divisibility (topology of `R` + `x⁻¹ ∈ 𝔪`), giving `v < 1` on `A°°`
-        --   (this also supplies `h_le_AOO`); (ii) `topNilp ⊆ B⁺`; (iii) the witness restructure
-        --   (case split `v(subtype π) = 0` for the degenerate `supp` case, then the clean continuity
-        --   route + the apply-lemma goal-lifting in step 5). All criteria/lemmas are in place;
-        --   Huber (c) [step (i)] is the one substantive piece.
-        sorry
-      · -- `v ≤ 1` on `B⁺` (Huber property (b)): `f ∈ B⁺ ⊆ R := B⁺[x⁻¹]`, so `s f ≤ 1` (`hs_le`),
-        -- transported to `v` by the extension equivalence `s ≈ t ∘ (R ↪ B_x)` (`ht_equiv`).
-        intro f hf
-        rw [comap_vle]
-        letI : ValuativeRel (Localization.Away x) := (ValuationSpectrum.ofValuation t).toValuativeRel
-        haveI : t.Compatible := Valuation.Compatible.ofValuation t
-        refine (Valuation.Compatible.vle_iff_le (v := t) _ _).mpr ?_
-        rw [map_one, map_one]
-        have hg_mem : algebraMap (presheafValue D') (Localization.Away x) f ∈ Radj := by
-          rw [hRadj]
-          exact (Algebra.adjoin (↥(presheafValue D')⁺)
-            {(IsLocalization.Away.invSelf x : Localization.Away x)}).algebraMap_mem ⟨f, hf⟩
-        have hkey := (ht_equiv
-          (⟨algebraMap (presheafValue D') (Localization.Away x) f, hg_mem⟩ : ↥Radj) 1).mp
-          (by rw [map_one]; exact hs_le _)
-        rw [Valuation.comap_apply, Valuation.comap_apply, map_one, map_one] at hkey
-        exact hkey
-    · -- HU-e(2): `¬ v.vle x 1`, i.e. `v(x) > 1`: from `s(x⁻¹) < 1` and `x⁻¹ · x = 1` in `B_x`.
-      have hbridge : ∀ a b : presheafValue D',
-          (ValuationSpectrum.comap (algebraMap (presheafValue D') (Localization.Away x))
-            (ValuationSpectrum.ofValuation t)).vle a b ↔
-          t (algebraMap (presheafValue D') (Localization.Away x) a) ≤
-            t (algebraMap (presheafValue D') (Localization.Away x) b) := by
-        intro a b
-        rw [comap_vle]
-        letI : ValuativeRel (Localization.Away x) := (ValuationSpectrum.ofValuation t).toValuativeRel
-        haveI : t.Compatible := Valuation.Compatible.ofValuation t
-        exact Valuation.Compatible.vle_iff_le _ _
-      intro hvle
-      rw [hbridge, map_one, map_one] at hvle
-      -- `t(x⁻¹) < 1` (from `s(x⁻¹) < 1` via the equivalence `s ≈ t ∘ (R ↪ B_x)`).
-      have ht_inv : t (IsLocalization.Away.invSelf x) < 1 := by
-        rw [← not_le]
-        intro hge
-        have h2 : s (1 : ↑Radj) ≤
-            s ⟨IsLocalization.Away.invSelf x, Algebra.subset_adjoin (Set.mem_singleton _)⟩ := by
-          refine (ht_equiv 1 _).mpr ?_
-          simp only [Valuation.comap_apply, map_one]
-          exact hge
-        rw [map_one] at h2
-        exact absurd h2 (not_le.mpr (hs_lt _ hxinv𝔪))
-      -- `t(x) · t(x⁻¹) = 1`, so `t(x) ≤ 1` would force `t(x⁻¹) ≥ 1`, contradicting `ht_inv`.
+    -- ▸ Pre-extracted facts about the comap valuation `W a := t(algebraMap a)` (Huber's properties
+    --   (b)(c)(d)), for the restricted-witness continuity wiring (T-SPVAI-4).
+    have hW_le : ∀ f : presheafValue D', f ∈ (presheafValue D')⁺ →
+        t (algebraMap (presheafValue D') (Localization.Away x) f) ≤ 1 := by
+      intro f hf
+      have hg_mem : algebraMap (presheafValue D') (Localization.Away x) f ∈ Radj := by
+        rw [hRadj]
+        exact (Algebra.adjoin (↥(presheafValue D')⁺)
+          {(IsLocalization.Away.invSelf x : Localization.Away x)}).algebraMap_mem ⟨f, hf⟩
+      have hkey := (ht_equiv
+        (⟨algebraMap (presheafValue D') (Localization.Away x) f, hg_mem⟩ : ↥Radj) 1).mp
+        (by rw [map_one]; exact hs_le _)
+      rw [Valuation.comap_apply, Valuation.comap_apply, map_one, map_one] at hkey
+      exact hkey
+    have ht_inv : t (IsLocalization.Away.invSelf x) < 1 := by
+      rw [← not_le]
+      intro hge
+      have h2 : s (1 : ↑Radj) ≤
+          s ⟨IsLocalization.Away.invSelf x, Algebra.subset_adjoin (Set.mem_singleton _)⟩ := by
+        refine (ht_equiv 1 _).mpr ?_
+        simp only [Valuation.comap_apply, map_one]
+        exact hge
+      rw [map_one] at h2
+      exact absurd h2 (not_le.mpr (hs_lt _ hxinv𝔪))
+    -- Huber's continuity argument (c): `v < 1` on topologically nilpotent elements.
+    have hW_lt_AOO : ∀ a : presheafValue D', IsTopologicallyNilpotent a →
+        t (algebraMap (presheafValue D') (Localization.Away x) a) < 1 := by
+      intro a ha
+      obtain ⟨n, hn, hn1⟩ : ∃ n : ℕ, a ^ n * x ∈ (presheafValue D')⁺ ∧ 1 ≤ n := by
+        have htend : Filter.Tendsto (fun n : ℕ => a ^ n * x) Filter.atTop (nhds 0) := by
+          simpa using ha.mul_const x
+        have hopen : IsOpen ((presheafValue D')⁺ : Set (presheafValue D')) :=
+          IsRingOfIntegralElements.isOpen
+        have hev := (htend.eventually (hopen.mem_nhds (Subring.zero_mem _))).and
+          (Filter.eventually_ge_atTop 1)
+        exact hev.exists
+      have halg : algebraMap (presheafValue D') (Localization.Away x) (a ^ n) =
+          algebraMap (presheafValue D') (Localization.Away x) (a ^ n * x) *
+            IsLocalization.Away.invSelf x := by
+        rw [map_mul, mul_assoc, IsLocalization.Away.mul_invSelf, mul_one]
+      have ht2 : t (algebraMap (presheafValue D') (Localization.Away x) (a ^ n)) < 1 := by
+        rw [halg, map_mul]
+        calc t (algebraMap (presheafValue D') (Localization.Away x) (a ^ n * x)) *
+              t (IsLocalization.Away.invSelf x)
+            ≤ 1 * t (IsLocalization.Away.invSelf x) := by gcongr; exact hW_le _ hn
+          _ = t (IsLocalization.Away.invSelf x) := one_mul _
+          _ < 1 := ht_inv
+      rw [map_pow, map_pow] at ht2
+      by_contra hge
+      rw [not_lt] at hge
+      exact absurd ht2 (not_lt.mpr (one_le_pow₀ hge))
+    have hW_x : 1 < t (algebraMap (presheafValue D') (Localization.Away x) x) := by
+      by_contra hle
+      rw [not_lt] at hle
       have hprod : t (algebraMap (presheafValue D') (Localization.Away x) x) *
           t (IsLocalization.Away.invSelf x) = 1 := by
         rw [← map_mul, IsLocalization.Away.mul_invSelf, map_one]
@@ -497,8 +443,98 @@ theorem mem_plus_of_forall_spa_vle_one
             ≤ 1 * t (IsLocalization.Away.invSelf x) := by gcongr
           _ = t (IsLocalization.Away.invSelf x) := one_mul _
           _ < 1 := ht_inv
-      rw [hprod] at hlt
-      exact lt_irrefl 1 hlt
+      rw [hprod] at hlt; exact lt_irrefl 1 hlt
+    -- ▸ T-SPVAI-4: the continuous Spa witness is the RESTRICTION `W | cΓ_W((π))` of
+    --   `W := t.comap(algebraMap)` by the principal generator `π` (Huber's `u | cΓ`). The facts
+    --   `hW_lt_AOO`/`hW_le`/`hW_x` above are Huber's properties (c)/(b)/(witness `W(x) > 1`).
+    haveI hTate : IsTateRing (presheafValue D') :=
+      { exists_pairOfDefinition :=
+          ⟨{ A₀ := presheafValue_ringOfDef D'
+             I := presheafValue_idealOfDef D'
+             isOpen := presheafValue_ringOfDef_isOpen D'
+             fg := presheafValue_idealOfDef_fg D'
+             isAdic := presheafValue_isAdic D' }⟩
+        exists_topologicallyNilpotent_unit := presheafValue_topNilUnit D' }
+    set P := IsTateRing.principalPair (presheafValue D') with hP_def
+    set algB := algebraMap (presheafValue D') (Localization.Away x) with halgB_def
+    set g : presheafValue D' := P.toPairOfDefinition.A₀.subtype P.π with hg_def
+    -- `π` is a unit (`P.π_isUnit`), so `W g = t(algB g) ≠ 0`.
+    have hWg : t (algB g) ≠ 0 := by
+      have hgu : IsUnit (algB g) := (P.π_isUnit).map algB
+      intro h0
+      obtain ⟨u, hu⟩ := hgu
+      have : (1 : _) = t (algB g) * t (↑u⁻¹) := by
+        rw [← map_mul, ← hu, ← Units.val_mul, mul_inv_cancel, Units.val_one, map_one]
+      rw [h0, zero_mul] at this
+      exact one_ne_zero this
+    -- `W := t.comap algB`; the restricted witness `w' := ofValuation (W.restrictIdealSingle g hWg)`.
+    have hWg' : (t.comap algB) g ≠ 0 := hWg
+    set rs := (t.comap algB).restrictIdealSingle g hWg' with hrs_def
+    -- Bridge: `(ofValuation rs).vle a b ↔ rs a ≤ rs b`.
+    have hbr : ∀ a b : presheafValue D', (ValuationSpectrum.ofValuation rs).vle a b ↔ rs a ≤ rs b := by
+      intro a b
+      letI : ValuativeRel (presheafValue D') := (ValuationSpectrum.ofValuation rs).toValuativeRel
+      haveI : rs.Compatible := Valuation.Compatible.ofValuation rs
+      exact Valuation.Compatible.vle_iff_le (v := rs) a b
+    -- `W a = t(algB a)` definitionally, so the `hW_*` facts are facts about `W = t.comap algB`.
+    refine ⟨ValuationSpectrum.ofValuation rs, ?_, ?_⟩
+    · -- HU-e(1): `w' ∈ Spa(B, B⁺)` = `w'.IsContinuous ∧ ∀ f ∈ B⁺, w'.vle f 1` (`mem_spa_iff`).
+      rw [mem_spa_iff]
+      refine ⟨?_, ?_⟩
+      · -- **Continuity of `w' = ofValuation rs`** (Huber [Hu2] Thm 3.1 = Wedhorn Thm 7.10 reverse,
+        -- huber2.txt:585: `Cont A = {v ∈ Spv(A, A°°·A) | v(a) ≤ 1 ∀ a ∈ A°°}`). Discharged by the
+        -- **faithful A°°-form, principal-pair** criterion `Spv.isContinuous_of_isInSpvAI_of_lt_one_principal`
+        -- (SpvAI, axiom-clean), instantiated at `P := IsTateRing.principalPair (presheafValue D')`:
+        --   • `h_in`  (Huber (d), `w' ∈ Spv(B,(π))`): `ofValuation_restrictIdealSingle_isInSpvAI`
+        --     (the faithful Wedhorn Def 7.3 replacement for the FALSE `ofValuation_restrictIdeal_…`,
+        --     B2 2026-06-22; T-SPVAI-1/2/3, axiom-clean);
+        --   • `h_le_AOO` (Huber (c), `w' ≤ 1` on `A°°`): `hW_lt_AOO` above [Huber's `aⁿ·x ∈ B⁺` step]
+        --     + `restrictIdealSingle_le_one`, through the `Compatible.IsEquiv` bridge `hequiv`;
+        --   • `h_lt_one` (`w'(subtype a) < 1` for `a ∈ P.I`): `a ∈` ideal-of-def ⟹ `subtype a ∈ A°°`
+        --     (`isTopologicallyNilpotent_of_mem`) ⟹ `hW_lt_AOO` + `restrictIdealSingle_lt_one`.
+        -- The engine reduces `I^n`-decay faithfully via `a = π^(n-1)·(πb)`, `πb ∈ A°°`
+        -- (`cofinalValue_principal_pow_lt`) — needing only the `A°°` bound, NOT the over-strong `A₀`-form.
+        have h_in : Spv.IsInSpvAI (ValuationSpectrum.ofValuation rs)
+            (Ideal.map P.toPairOfDefinition.A₀.subtype P.toPairOfDefinition.I) := by
+          rw [P.I_eq_span, Ideal.map_span, Set.image_singleton]
+          exact ofValuation_restrictIdealSingle_isInSpvAI (t.comap algB) g hWg'
+        letI : ValuativeRel (presheafValue D') := (ValuationSpectrum.ofValuation rs).toValuativeRel
+        haveI hrsC : rs.Compatible := Valuation.Compatible.ofValuation rs
+        have hequiv : (ValuativeRel.valuation (presheafValue D')).IsEquiv rs := fun a b =>
+          (Valuation.Compatible.vle_iff_le
+              (v := ValuativeRel.valuation (presheafValue D')) a b).symm.trans
+            (Valuation.Compatible.vle_iff_le (v := rs) a b)
+        have hlt : ∀ p q : presheafValue D',
+            ((ValuativeRel.valuation (presheafValue D')) p < (ValuativeRel.valuation (presheafValue D')) q
+              ↔ rs p < rs q) := fun p q => le_iff_le_iff_lt_iff_lt.mp (hequiv q p)
+        have h_le_AOO : ∀ a : presheafValue D', IsTopologicallyNilpotent a →
+            (ValuativeRel.valuation (presheafValue D')) a ≤ 1 := by
+          intro a ha
+          have hrs_le : rs a ≤ 1 := restrictIdealSingle_le_one hWg' (le_of_lt (hW_lt_AOO a ha))
+          have hkey := (hequiv a 1).mpr (by rw [map_one]; exact hrs_le)
+          rwa [map_one] at hkey
+        have h_lt_one : ∀ a ∈ P.toPairOfDefinition.I,
+            (ValuativeRel.valuation (presheafValue D')) (P.toPairOfDefinition.A₀.subtype a) < 1 := by
+          intro a ha
+          have hnilp : IsTopologicallyNilpotent (P.toPairOfDefinition.A₀.subtype a) :=
+            P.toPairOfDefinition.isTopologicallyNilpotent_of_mem ha
+          have hrs_lt : rs (P.toPairOfDefinition.A₀.subtype a) < 1 :=
+            restrictIdealSingle_lt_one hWg' (hW_lt_AOO _ hnilp)
+          have hkey := (hlt (P.toPairOfDefinition.A₀.subtype a) 1).mpr (by rw [map_one]; exact hrs_lt)
+          rwa [map_one] at hkey
+        exact Spv.isContinuous_of_isInSpvAI_of_lt_one_principal P.toPairOfDefinition P.I_eq_span
+          (ValuationSpectrum.ofValuation rs) h_in h_le_AOO h_lt_one
+      · -- `w' ≤ 1` on `B⁺` (Huber property (b)): `f ∈ B⁺` ⟹ `W f = t(algB f) ≤ 1` (`hW_le`),
+        -- lifted to `rs` by `restrictIdealSingle_le_one`, then to `w'.vle` by `hbr`.
+        intro f hf
+        rw [hbr, map_one]
+        exact restrictIdealSingle_le_one hWg' (hW_le f hf)
+    · -- HU-e(2): `¬ w'.vle x 1`, i.e. `w'(x) > 1`: `1 < W x = t(algB x)` (`hW_x`, the Huber
+      -- witness `s(x⁻¹) < 1` + `x⁻¹·x = 1`), lifted to `rs` by `restrictIdealSingle_one_lt`,
+      -- then to `w'.vle` by `hbr`.
+      intro hvle
+      rw [hbr, map_one] at hvle
+      exact absurd hvle (not_le.mpr (restrictIdealSingle_one_lt hWg' hW_x))
   exact hw (hx w hw_spa)
 
 set_option linter.unusedSectionVars false in
