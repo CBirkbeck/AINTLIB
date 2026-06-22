@@ -137,6 +137,76 @@ theorem isTorsionFree_coordHom :
       (CurveMap.coordHom_injective φ cd)
   infer_instance
 
+/-- **Residue-field scalar tower at a smooth point**: `F → F[C₂]/m_{φP} → F[C₁]/m_P`
+is an `IsScalarTower`.  Both `F`-algebra structures factor through the residue map
+`F[C₂]/m_{φP} → F[C₁]/m_P` because the comorphism `cd : F[C₂] → F[C₁]` is an
+`F`-algebra hom, so `algebraMap F (F[C₁]/m_P)` equals the composite, which is exactly
+`IsScalarTower.of_algebraMap_eq`. -/
+private theorem isScalarTower_residueField_maximalIdealAt (P : C₁.SmoothPoint) :
+    letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    haveI : (C₁.maximalIdealAt P).LiesOver (C₂.maximalIdealAt (toPointMap cd P)) :=
+      ⟨maximalIdealAt_toPointMap cd P⟩
+    IsScalarTower F (C₂.CoordinateRing ⧸ C₂.maximalIdealAt (toPointMap cd P))
+      (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) := by
+  letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+  haveI : (C₁.maximalIdealAt P).LiesOver (C₂.maximalIdealAt (toPointMap cd P)) :=
+    ⟨maximalIdealAt_toPointMap cd P⟩
+  set Q := toPointMap cd P with hQ
+  refine IsScalarTower.of_algebraMap_eq fun c ↦ ?_
+  have hlhs : (algebraMap F (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P)) c =
+      Ideal.Quotient.mk (C₁.maximalIdealAt P) (algebraMap F C₁.CoordinateRing c) :=
+    IsScalarTower.algebraMap_apply F C₁.CoordinateRing
+      (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) c
+  have hrhs : (algebraMap (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q)
+        (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P))
+        ((algebraMap F (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q)) c) =
+      Ideal.Quotient.mk (C₁.maximalIdealAt P)
+        (algebraMap C₂.CoordinateRing C₁.CoordinateRing (algebraMap F C₂.CoordinateRing c)) := by
+    rw [IsScalarTower.algebraMap_apply F C₂.CoordinateRing
+      (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q) c]
+    rfl
+  rw [hlhs, hrhs, ← IsScalarTower.algebraMap_apply F C₂.CoordinateRing C₁.CoordinateRing c]
+
+/-- **Residue degree `≤ 1` at a smooth point**: the residue extension
+`F[C₂]/m_{φP} → F[C₁]/m_P` has `F[C₂]/m_{φP}`-rank `≤ 1`.  Over `[IsAlgClosed F]` the
+map `algebraMap F (F[C₁]/m_P)` is surjective (`algebraMap_bijective_quotient_of_maximal`),
+so every `w` is `(algebraMap F _ c) • 1`; rewriting that scalar action through the
+residue-field scalar tower exhibits `w` as a `(F[C₂]/m_{φP})`-multiple of `1`, whence
+`finrank_le_one`. -/
+private theorem finrank_residueField_maximalIdealAt_le_one (P : C₁.SmoothPoint) :
+    letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    haveI : (C₁.maximalIdealAt P).LiesOver (C₂.maximalIdealAt (toPointMap cd P)) :=
+      ⟨maximalIdealAt_toPointMap cd P⟩
+    Module.finrank (C₂.CoordinateRing ⧸ C₂.maximalIdealAt (toPointMap cd P))
+      (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) ≤ 1 := by
+  letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+  haveI : (C₁.maximalIdealAt P).LiesOver (C₂.maximalIdealAt (toPointMap cd P)) :=
+    ⟨maximalIdealAt_toPointMap cd P⟩
+  set Q := toPointMap cd P with hQ
+  haveI hQmax : (C₂.maximalIdealAt Q).IsMaximal := C₂.maximalIdealAt_isMaximal Q
+  haveI hPmax : (C₁.maximalIdealAt P).IsMaximal := C₁.maximalIdealAt_isMaximal P
+  haveI : Field (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q) := Ideal.Quotient.field _
+  haveI : Field (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) := Ideal.Quotient.field _
+  haveI htower := isScalarTower_residueField_maximalIdealAt φ cd P
+  have hbijSP := C₁.algebraMap_bijective_quotient_of_maximal hPmax
+  refine finrank_le_one (1 : C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) fun w ↦ ?_
+  obtain ⟨c, hc⟩ := hbijSP.2 w
+  refine ⟨algebraMap F (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q) c, ?_⟩
+  have key : (algebraMap F (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q) c) •
+      (1 : C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) =
+      algebraMap F (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) c := by
+    rw [Algebra.smul_def]
+    rw [show (algebraMap (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q)
+        (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P))
+        ((algebraMap F (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q)) c) *
+        (1 : C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) =
+        (algebraMap (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q)
+        (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P))
+        ((algebraMap F (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q)) c) from mul_one _]
+    rw [← IsScalarTower.algebraMap_apply F (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q)
+        (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) c]
+  rw [key]; exact hc
+
 /-- **Inertia degree 1** for the coordinate-ring extension at a smooth point.
 Over `[IsAlgClosed F]` both residue fields `F[C₁]/m_P` and `F[C₂]/m_{φP}` are
 `F`, so the residue extension `F[C₂]/m_{φP} → F[C₁]/m_P` has `F`-rank 1. -/
@@ -149,59 +219,18 @@ theorem inertiaDeg_maximalIdealAt_toPointMap (P : C₁.SmoothPoint) :
   haveI hLies : (C₁.maximalIdealAt P).LiesOver (C₂.maximalIdealAt (toPointMap cd P)) :=
     ⟨maximalIdealAt_toPointMap cd P⟩
   set Q := toPointMap cd P with hQ
-  haveI hQmax : (C₂.maximalIdealAt Q).IsMaximal := C₂.maximalIdealAt_isMaximal Q
   haveI hPmax : (C₁.maximalIdealAt P).IsMaximal := C₁.maximalIdealAt_isMaximal P
   rw [Ideal.inertiaDeg_algebraMap]
-  -- Both residue fields are `F` (alg-closed); the residue map `F[C₂]/m_Q → F[C₁]/m_P`
-  -- is an `F`-algebra map between two copies of `F`, hence `F`-rank 1.
-  haveI : Field (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q) :=
-    Ideal.Quotient.field _
-  haveI : Field (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) :=
-    Ideal.Quotient.field _
-  -- `F → F[C₂]/m_Q → F[C₁]/m_P` is a scalar tower (both `F`-algebra structures
-  -- agree with the residue map because `cd` is an `F`-algebra hom).
-  haveI htower : IsScalarTower F (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q)
-      (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) := by
-    refine IsScalarTower.of_algebraMap_eq fun c ↦ ?_
-    have hlhs : (algebraMap F (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P)) c =
-        Ideal.Quotient.mk (C₁.maximalIdealAt P) (algebraMap F C₁.CoordinateRing c) :=
-      IsScalarTower.algebraMap_apply F C₁.CoordinateRing
-        (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) c
-    have hrhs : (algebraMap (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q)
-          (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P))
-          ((algebraMap F (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q)) c) =
-        Ideal.Quotient.mk (C₁.maximalIdealAt P)
-          (algebraMap C₂.CoordinateRing C₁.CoordinateRing (algebraMap F C₂.CoordinateRing c)) := by
-      rw [IsScalarTower.algebraMap_apply F C₂.CoordinateRing
-        (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q) c]
-      rfl
-    rw [hlhs, hrhs, ← IsScalarTower.algebraMap_apply F C₂.CoordinateRing C₁.CoordinateRing c]
-  -- The residue map `F[C₂]/m_Q → F[C₁]/m_P` is surjective (`algebraMap F (S/P)` is
-  -- onto over `[IsAlgClosed F]`), so `finrank ≤ 1`; with nontriviality, `finrank = 1`.
+  -- The residue field `F[C₁]/m_P` is `F` (alg-closed), hence nontrivial.
+  haveI : Field (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) := Ideal.Quotient.field _
   haveI : Nontrivial (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) :=
     (Ideal.Quotient.nontrivial_iff).mpr hPmax.ne_top
+  -- Squeeze the residue rank between `1` (`finrank_pos`) and `1` (alg-closed surjectivity).
   have hSP : Module.finrank F (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) = 1 :=
     C₁.finrank_quotientMaximalIdealAt P
-  have hbijSP := C₁.algebraMap_bijective_quotient_of_maximal hPmax
   have h_le : Module.finrank (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q)
       (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) ≤ 1 :=
-    finrank_le_one (1 : C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) fun w ↦ by
-      obtain ⟨c, hc⟩ := hbijSP.2 w
-      refine ⟨algebraMap F (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q) c, ?_⟩
-      have key : (algebraMap F (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q) c) •
-          (1 : C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) =
-          algebraMap F (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) c := by
-        rw [Algebra.smul_def]
-        rw [show (algebraMap (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q)
-            (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P))
-            ((algebraMap F (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q)) c) *
-            (1 : C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) =
-            (algebraMap (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q)
-            (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P))
-            ((algebraMap F (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q)) c) from mul_one _]
-        rw [← IsScalarTower.algebraMap_apply F (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q)
-            (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) c]
-      rw [key]; exact hc
+    finrank_residueField_maximalIdealAt_le_one φ cd P
   haveI : Module.Finite F (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) :=
     Module.finite_of_finrank_pos (by rw [hSP]; norm_num)
   haveI : Module.Finite (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q)
