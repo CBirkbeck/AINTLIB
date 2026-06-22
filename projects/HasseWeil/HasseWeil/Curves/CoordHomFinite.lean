@@ -194,6 +194,92 @@ private theorem isIntegralElem_aux (ψ : C₂.CoordinateRing →ₐ[F] C₁.Coor
       inv_mul_cancel₀ (Polynomial.leadingCoeff_ne_zero.mpr hn0), map_one]
   · rw [Polynomial.eval₂_mul, Polynomial.eval₂_C, hroot, mul_zero]
 
+/-- Auxiliary (pure degree arithmetic over `F[X]`): the **parity trick**.  For
+the conjugate-pair trace `t = 2p − qs` (with `deg s ≤ 1`) and a norm `n`
+whose degree is `max (2 deg p) (2 deg q + 3)`, the even/odd parity of the two
+candidate leading degrees forces `0 < deg n` and `deg t < deg n` whenever
+`q ≠ 0`. -/
+private theorem degree_trace_lt_degree_norm {p q s n : Polynomial F}
+    (hsle : s.degree ≤ 1) (hq : q ≠ 0)
+    (hndeg : n.degree = max (2 • p.degree) (2 • q.degree + 3)) :
+    0 < n.degree ∧ (2 * p - q * s).degree < n.degree := by
+  have htle : (2 * p - q * s).degree ≤ max p.degree (q.degree + 1) := by
+    refine (Polynomial.degree_sub_le _ _).trans (max_le_max ?_ ?_)
+    · refine (Polynomial.degree_mul_le _ _).trans ?_
+      have h2le : ((2 : Polynomial F)).degree ≤ 0 := by
+        rw [← map_ofNat (Polynomial.C : F →+* Polynomial F) 2]
+        exact Polynomial.degree_C_le
+      calc (2 : Polynomial F).degree + p.degree ≤ 0 + p.degree := by gcongr
+        _ = p.degree := zero_add _
+    · refine (Polynomial.degree_mul_le _ _).trans ?_
+      gcongr
+  obtain ⟨b, hqd⟩ : ∃ b : ℕ, q.degree = (b : WithBot ℕ) :=
+    ⟨q.natDegree, Polynomial.degree_eq_natDegree hq⟩
+  rw [hqd] at htle hndeg
+  refine ⟨?_, ?_⟩
+  · rw [hndeg]
+    refine lt_max_of_lt_right ?_
+    rw [two_nsmul]
+    exact_mod_cast (by omega : 0 < b + b + 3)
+  · refine lt_of_le_of_lt htle (max_lt ?_ ?_)
+    · -- `p.degree < deg n`
+      rw [hndeg]
+      rcases eq_or_ne p 0 with hp0 | hp0
+      · -- `p = 0`: `⊥ <` anything finite
+        rw [hp0, Polynomial.degree_zero]
+        refine lt_max_of_lt_right ?_
+        rw [two_nsmul]
+        exact lt_of_lt_of_le (WithBot.bot_lt_coe 0)
+          (by exact_mod_cast (by omega : 0 ≤ b + b + 3))
+      · obtain ⟨a, hpd⟩ : ∃ a : ℕ, p.degree = (a : WithBot ℕ) :=
+          ⟨p.natDegree, Polynomial.degree_eq_natDegree hp0⟩
+        rw [hpd]
+        rcases le_or_gt a (b + 1) with hab | hab
+        · refine lt_max_of_lt_right ?_
+          rw [two_nsmul]
+          exact_mod_cast (by omega : a < b + b + 3)
+        · refine lt_max_of_lt_left ?_
+          rw [two_nsmul]
+          exact_mod_cast (by omega : a < a + a)
+    · -- `q.degree + 1 < deg n`
+      rw [hndeg]
+      refine lt_max_of_lt_right ?_
+      rw [two_nsmul]
+      exact_mod_cast (by omega : b + 1 < b + b + 3)
+
+set_option synthInstance.maxHeartbeats 200000 in
+set_option maxHeartbeats 1600000 in
+-- Instance synthesis and unification at curve-indexed coordinate-ring types
+-- (`AdjoinRoot`-quotients) need a higher budget; same settings as
+-- `CurveMap.sum_ramificationIdx_mul_inertiaDeg_eq_degree`.
+/-- Auxiliary: along an *injective* `F`-algebra hom `ψ : F[C₂] →ₐ[F] F[C₁]`,
+the image `ψ(x₂) = p•1 + q•Y` of the coordinate generator cannot be a scalar,
+i.e. the degenerate case `q = 0 ∧ deg p ≤ 0` is excluded (it would force
+`x₂ ∈ F·1`, contradicting injectivity since `x₂ = X mod W₂` is non-constant). -/
+private theorem nondegenerate_smul_basis_of_injective
+    (ψ : C₂.CoordinateRing →ₐ[F] C₁.CoordinateRing) (hψ : Function.Injective ψ)
+    {p q : Polynomial F}
+    (hu : p • (1 : C₁.CoordinateRing) + q • CoordinateRing.mk C₁.toAffine Y =
+      ψ (algebraMap (Polynomial F) C₂.CoordinateRing Polynomial.X)) :
+    q ≠ 0 ∨ 0 < p.degree := by
+  by_contra hcon
+  push Not at hcon
+  obtain ⟨hq0, hp0⟩ := hcon
+  have hpC : p = Polynomial.C (p.coeff 0) := Polynomial.eq_C_of_degree_le_zero hp0
+  have hu' : ψ (algebraMap (Polynomial F) C₂.CoordinateRing Polynomial.X) =
+      algebraMap F C₁.CoordinateRing (p.coeff 0) := by
+    rw [← hu, hq0, zero_smul, add_zero, hpC, Algebra.smul_def, mul_one,
+      IsScalarTower.algebraMap_apply F (Polynomial F) C₁.CoordinateRing,
+      Polynomial.algebraMap_eq, Polynomial.coeff_C_zero]
+  have hX : algebraMap (Polynomial F) C₂.CoordinateRing Polynomial.X =
+      algebraMap (Polynomial F) C₂.CoordinateRing (Polynomial.C (p.coeff 0)) := by
+    apply hψ
+    rw [hu', ← ψ.commutes (p.coeff 0),
+      IsScalarTower.algebraMap_apply F (Polynomial F) C₂.CoordinateRing,
+      Polynomial.algebraMap_eq]
+  exact Polynomial.X_ne_C _
+    (FaithfulSMul.algebraMap_injective (Polynomial F) C₂.CoordinateRing hX)
+
 set_option synthInstance.maxHeartbeats 200000 in
 set_option maxHeartbeats 1600000 in
 -- Instance synthesis and unification at curve-indexed coordinate-ring types
@@ -216,24 +302,8 @@ theorem algHom_coordinateRing_isIntegralElem_X
   obtain ⟨p, q, hu⟩ := CoordinateRing.exists_smul_basis_eq
     (W' := C₁.toAffine) (ψ (algebraMap (Polynomial F) C₂.CoordinateRing Polynomial.X))
   -- the degenerate case `u ∈ F·1` contradicts injectivity of `ψ`
-  have hnondeg : q ≠ 0 ∨ 0 < p.degree := by
-    by_contra hcon
-    push Not at hcon
-    obtain ⟨hq0, hp0⟩ := hcon
-    have hpC : p = Polynomial.C (p.coeff 0) := Polynomial.eq_C_of_degree_le_zero hp0
-    have hu' : ψ (algebraMap (Polynomial F) C₂.CoordinateRing Polynomial.X) =
-        algebraMap F C₁.CoordinateRing (p.coeff 0) := by
-      rw [← hu, hq0, zero_smul, add_zero, hpC, Algebra.smul_def, mul_one,
-        IsScalarTower.algebraMap_apply F (Polynomial F) C₁.CoordinateRing,
-        Polynomial.algebraMap_eq, Polynomial.coeff_C_zero]
-    have hX : algebraMap (Polynomial F) C₂.CoordinateRing Polynomial.X =
-        algebraMap (Polynomial F) C₂.CoordinateRing (Polynomial.C (p.coeff 0)) := by
-      apply hψ
-      rw [hu', ← ψ.commutes (p.coeff 0),
-        IsScalarTower.algebraMap_apply F (Polynomial F) C₂.CoordinateRing,
-        Polynomial.algebraMap_eq]
-    exact Polynomial.X_ne_C _
-      (FaithfulSMul.algebraMap_injective (Polynomial F) C₂.CoordinateRing hX)
+  have hnondeg : q ≠ 0 ∨ 0 < p.degree :=
+    nondegenerate_smul_basis_of_injective ψ hψ hu
   by_cases hq : q = 0
   · -- linear case: `u = p(x₁)` with `p` nonconstant; witness `p(T) − x₂`
     subst hq
@@ -263,52 +333,9 @@ theorem algHom_coordinateRing_isIntegralElem_X
       Polynomial.C C₁.toAffine.a₄ * Polynomial.X + Polynomial.C C₁.toAffine.a₆ with hf
     set t : Polynomial F := 2 * p - q * s with ht
     set n : Polynomial F := p ^ 2 - p * q * s - q ^ 2 * f with hn
-    -- degree bookkeeping: `deg t < deg n` and `0 < deg n`
-    have h2le : ((2 : Polynomial F)).degree ≤ 0 := by
-      rw [← map_ofNat (Polynomial.C : F →+* Polynomial F) 2]
-      exact Polynomial.degree_C_le
+    -- degree bookkeeping: `0 < deg n` and `deg t < deg n` (the parity trick)
     have hsle : s.degree ≤ 1 := Polynomial.degree_linear_le
-    have htle : t.degree ≤ max p.degree (q.degree + 1) := by
-      refine (Polynomial.degree_sub_le _ _).trans (max_le_max ?_ ?_)
-      · refine (Polynomial.degree_mul_le _ _).trans ?_
-        calc (2 : Polynomial F).degree + p.degree ≤ 0 + p.degree := by gcongr
-          _ = p.degree := zero_add _
-      · refine (Polynomial.degree_mul_le _ _).trans ?_
-        gcongr
-    obtain ⟨b, hqd⟩ : ∃ b : ℕ, q.degree = (b : WithBot ℕ) :=
-      ⟨q.natDegree, Polynomial.degree_eq_natDegree hq⟩
-    rw [hqd] at htle hnorm
-    have h0n : 0 < n.degree := by
-      rw [hnorm]
-      refine lt_max_of_lt_right ?_
-      rw [two_nsmul]
-      exact_mod_cast (by omega : 0 < b + b + 3)
-    have htn : t.degree < n.degree := by
-      refine lt_of_le_of_lt htle (max_lt ?_ ?_)
-      · -- `p.degree < deg n`
-        rw [hnorm]
-        rcases eq_or_ne p 0 with hp0 | hp0
-        · -- `p = 0`: `⊥ <` anything finite
-          rw [hp0, Polynomial.degree_zero]
-          refine lt_max_of_lt_right ?_
-          rw [two_nsmul]
-          exact lt_of_lt_of_le (WithBot.bot_lt_coe 0)
-            (by exact_mod_cast (by omega : 0 ≤ b + b + 3))
-        · obtain ⟨a, hpd⟩ : ∃ a : ℕ, p.degree = (a : WithBot ℕ) :=
-            ⟨p.natDegree, Polynomial.degree_eq_natDegree hp0⟩
-          rw [hpd]
-          rcases le_or_gt a (b + 1) with hab | hab
-          · refine lt_max_of_lt_right ?_
-            rw [two_nsmul]
-            exact_mod_cast (by omega : a < b + b + 3)
-          · refine lt_max_of_lt_left ?_
-            rw [two_nsmul]
-            exact_mod_cast (by omega : a < a + a)
-      · -- `q.degree + 1 < deg n`
-        rw [hnorm]
-        refine lt_max_of_lt_right ?_
-        rw [two_nsmul]
-        exact_mod_cast (by omega : b + 1 < b + b + 3)
+    obtain ⟨h0n, htn⟩ := degree_trace_lt_degree_norm hsle hq hnorm
     -- assemble the integrality witness
     refine isIntegralElem_aux ψ (n := n)
       (r := Polynomial.C ((algebraMap (Polynomial F) C₂.CoordinateRing Polynomial.X) ^ 2) -
