@@ -36,30 +36,29 @@ theorem monic_Φ_sub_smul_ΨSq
       _ < n.natAbs ^ 2 := Nat.pred_lt (pow_ne_zero 2 (Int.natAbs_ne_zero.mpr hn0))
       _ = (W.Φ n).natDegree := (natDegree_Φ _ n).symm
 
-omit [IsDomain R] [IsIntegrallyClosed R] [IsFractionRing R K] in
-/-- The x-coordinate of `n • P` satisfies `x' · ΨSq_n(x) = Φ_n(x)`. -/
-theorem x_coord_nsmul_eq
-    {x y : K} (hns : (curveK R K W).toAffine.Nonsingular x y)
+/-- The x-coordinate of `n • P` satisfies `x' · ΨSq_n(x) = Φ_n(x)`, for a Weierstrass curve
+over a field. -/
+theorem x_coord_nsmul_eq {F : Type*} [Field F] [DecidableEq F] (E : WeierstrassCurve F)
+    {x y : F} (hns : E.toAffine.Nonsingular x y)
     {n : ℤ} (_hn : n ≠ 0)
-    {x' y' : K} (hns' : (curveK R K W).toAffine.Nonsingular x' y')
+    {x' y' : F} (hns' : E.toAffine.Nonsingular x' y')
     (hnP : n • (Affine.Point.some _ _ hns) = Affine.Point.some _ _ hns') :
-    x' * ((curveK R K W).ΨSq n).eval x = ((curveK R K W).Φ n).eval x := by
+    x' * (E.ΨSq n).eval x = (E.Φ n).eval x := by
   have hJac : n • Jacobian.Point.fromAffine (Affine.Point.some _ _ hns) =
       Jacobian.Point.fromAffine (Affine.Point.some _ _ hns') := by
-    have h := congrArg (Jacobian.Point.toAffineAddEquiv (curveK R K W)).symm hnP
+    have h := congrArg (Jacobian.Point.toAffineAddEquiv E).symm hnP
     rw [map_zsmul] at h
     simpa using h
-  have hsmul := zsmul_eq_smulEval (curveK R K W) hns n
+  have hsmul := zsmul_eq_smulEval E hns n
   open Jacobian in
-  have hX := X_eq_of_equiv (show smulEval (curveK R K W) x y n ≈ ![x', y', 1] by
+  have hX := X_eq_of_equiv (show smulEval E x y n ≈ ![x', y', 1] by
     rw [Jacobian.Point.ext_iff, hsmul] at hJac; exact Quotient.exact hJac)
   simp only [smulEval, Function.comp, Matrix.cons_val_zero, Matrix.cons_val_two,
     Matrix.head_cons, Matrix.tail_cons] at hX
   norm_num at hX
-  simp only [← WeierstrassCurve.map_φ, ← WeierstrassCurve.map_ψ] at hX
-  rw [evalEval_φ_eq_eval_Φ (curveK R K W) hns.left n] at hX
-  have hΨSq := evalEval_Ψ_sq_eq_eval_ΨSq (curveK R K W) hns.left n
-  rw [← evalEval_ψ_eq_evalEval_Ψ (curveK R K W) hns.left n] at hΨSq
+  rw [evalEval_φ_eq_eval_Φ E hns.left n] at hX
+  have hΨSq := evalEval_Ψ_sq_eq_eval_ΨSq E hns.left n
+  rw [← evalEval_ψ_eq_evalEval_Ψ E hns.left n] at hΨSq
   rw [hΨSq] at hX
   exact hX.symm
 
@@ -71,7 +70,7 @@ theorem x_isInteger_of_nsmul_x_isInteger
     (hnP : n • (Affine.Point.some _ _ hns) = Affine.Point.some _ _ hns')
     {c : R} (hc : algebraMap R K c = x') :
     IsLocalization.IsInteger R x := by
-  have hcoord := x_coord_nsmul_eq W hns hn hns' hnP
+  have hcoord := x_coord_nsmul_eq (curveK R K W) hns hn hns' hnP
   have hroot : aeval x (W.Φ n - C c * W.ΨSq n) = 0 := by
     simp only [← hc, curveK, map_Φ, map_ΨSq, aeval_def, eval₂_eq_eval_map, Polynomial.map_sub,
       Polynomial.map_mul, Polynomial.map_C, eval_sub, eval_mul, eval_C] at hcoord ⊢

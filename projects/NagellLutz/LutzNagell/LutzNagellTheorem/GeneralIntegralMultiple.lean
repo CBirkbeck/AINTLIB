@@ -46,7 +46,7 @@ theorem x_coord_nsmul_eq_general
     {x' y' : ℚ} (hns' : (curveQ W).toAffine.Nonsingular x' y')
     (hnP : n • (Affine.Point.some _ _ hns) = Affine.Point.some _ _ hns') :
     x' * ((curveQ W).ΨSq n).eval x = ((curveQ W).Φ n).eval x :=
-  PID.x_coord_nsmul_eq W hns hn hns' hnP
+  PID.x_coord_nsmul_eq (curveQ W) hns hn hns' hnP
 
 /-! ### Monic polynomial from the coordinate formula -/
 
