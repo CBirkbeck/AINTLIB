@@ -731,6 +731,111 @@ theorem divisorOf_coordY_sub_algMap_linePolynomial_apply
   rw [C.coordY_sub_algMap_linePolynomial_eq_algMap_YClass x y slope,
     C.divisorOf_algebraMap_apply_eq_count Q' hu_ne]
 
+/-- **LHS count split** of the chord-line structural identity: the count of
+`M_{Q'}` in the product `span{XClass SR.x} · (M_{SP} · M_{SQ})` factors as the
+sum of the three individual counts. Pure `Associates.count_mul` bookkeeping for
+the left-hand side of `span_XClass_addSmoothPoint_mul_eq`. -/
+private theorem count_span_XClass_addSmoothPoint_mul_split
+    [IsIntegrallyClosed C.CoordinateRing] [DecidableEq F]
+    (SP SQ : C.SmoothPoint)
+    (hxy : ¬(SP.x = SQ.x ∧ SP.y = C.toAffine.negY SQ.x SQ.y))
+    (Q' : C.SmoothPoint) :
+    (Associates.mk (C.maximalIdealAt Q')).count
+        (Associates.mk (Ideal.span
+          ({WeierstrassCurve.Affine.CoordinateRing.XClass C.toAffine
+            (C.addSmoothPoint SP SQ hxy).x} : Set C.CoordinateRing) *
+          (C.maximalIdealAt SP * C.maximalIdealAt SQ))).factors =
+      (Associates.mk (C.maximalIdealAt Q')).count
+        (Associates.mk (Ideal.span
+          ({WeierstrassCurve.Affine.CoordinateRing.XClass C.toAffine
+            (C.addSmoothPoint SP SQ hxy).x} : Set C.CoordinateRing))).factors +
+      ((Associates.mk (C.maximalIdealAt Q')).count
+        (Associates.mk (C.maximalIdealAt SP)).factors +
+       (Associates.mk (C.maximalIdealAt Q')).count
+        (Associates.mk (C.maximalIdealAt SQ)).factors) := by
+  have hMSP_ne : (Associates.mk (C.maximalIdealAt SP) :
+      Associates (Ideal C.CoordinateRing)) ≠ 0 :=
+    Associates.mk_ne_zero.mpr (C.maximalIdealAt_ne_bot SP)
+  have hMSQ_ne : (Associates.mk (C.maximalIdealAt SQ) :
+      Associates (Ideal C.CoordinateRing)) ≠ 0 :=
+    Associates.mk_ne_zero.mpr (C.maximalIdealAt_ne_bot SQ)
+  have h_XClass_ne : (Associates.mk (Ideal.span
+      ({WeierstrassCurve.Affine.CoordinateRing.XClass C.toAffine
+        (C.addSmoothPoint SP SQ hxy).x} : Set C.CoordinateRing)) :
+      Associates (Ideal C.CoordinateRing)) ≠ 0 := by
+    rw [Associates.mk_ne_zero, Ne, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]
+    exact WeierstrassCurve.Affine.CoordinateRing.XClass_ne_zero
+      (W' := C.toAffine) _
+  let vQ' : IsDedekindDomain.HeightOneSpectrum C.CoordinateRing :=
+    ⟨_, (C.maximalIdealAt_isMaximal Q').isPrime, C.maximalIdealAt_ne_bot Q'⟩
+  rw [show (Associates.mk (Ideal.span
+        ({WeierstrassCurve.Affine.CoordinateRing.XClass C.toAffine
+          (C.addSmoothPoint SP SQ hxy).x} : Set C.CoordinateRing) *
+        (C.maximalIdealAt SP * C.maximalIdealAt SQ)) :
+        Associates (Ideal C.CoordinateRing)) =
+      Associates.mk (Ideal.span
+        ({WeierstrassCurve.Affine.CoordinateRing.XClass C.toAffine
+          (C.addSmoothPoint SP SQ hxy).x} : Set C.CoordinateRing)) *
+      Associates.mk (C.maximalIdealAt SP * C.maximalIdealAt SQ)
+      from Associates.mk_mul_mk]
+  rw [show (Associates.mk (C.maximalIdealAt SP * C.maximalIdealAt SQ) :
+      Associates (Ideal C.CoordinateRing)) =
+    Associates.mk (C.maximalIdealAt SP) *
+      Associates.mk (C.maximalIdealAt SQ) from Associates.mk_mul_mk]
+  rw [Associates.count_mul h_XClass_ne (mul_ne_zero hMSP_ne hMSQ_ne)
+    vQ'.associates_irreducible,
+    Associates.count_mul hMSP_ne hMSQ_ne vQ'.associates_irreducible]
+
+/-- **RHS count split** of the chord-line structural identity: the count of
+`M_{Q'}` in the product `span{YClass linePoly} · M_{SR}` factors as the sum of
+the two individual counts. Pure `Associates.count_mul` bookkeeping for the
+right-hand side of `span_XClass_addSmoothPoint_mul_eq`. -/
+private theorem count_span_YClass_maximalIdealAt_addSmoothPoint_split
+    [IsIntegrallyClosed C.CoordinateRing] [DecidableEq F]
+    (SP SQ : C.SmoothPoint)
+    (hxy : ¬(SP.x = SQ.x ∧ SP.y = C.toAffine.negY SQ.x SQ.y))
+    (Q' : C.SmoothPoint) :
+    (Associates.mk (C.maximalIdealAt Q')).count
+        (Associates.mk (Ideal.span
+          ({WeierstrassCurve.Affine.CoordinateRing.YClass C.toAffine
+            (WeierstrassCurve.Affine.linePolynomial SP.x SP.y
+              (C.toAffine.slope SP.x SQ.x SP.y SQ.y))} : Set C.CoordinateRing) *
+          C.maximalIdealAt (C.addSmoothPoint SP SQ hxy))).factors =
+      (Associates.mk (C.maximalIdealAt Q')).count
+        (Associates.mk (Ideal.span
+          ({WeierstrassCurve.Affine.CoordinateRing.YClass C.toAffine
+            (WeierstrassCurve.Affine.linePolynomial SP.x SP.y
+              (C.toAffine.slope SP.x SQ.x SP.y SQ.y))} :
+              Set C.CoordinateRing))).factors +
+      (Associates.mk (C.maximalIdealAt Q')).count
+        (Associates.mk (C.maximalIdealAt (C.addSmoothPoint SP SQ hxy))).factors := by
+  have hMSR_ne : (Associates.mk (C.maximalIdealAt (C.addSmoothPoint SP SQ hxy)) :
+      Associates (Ideal C.CoordinateRing)) ≠ 0 :=
+    Associates.mk_ne_zero.mpr (C.maximalIdealAt_ne_bot (C.addSmoothPoint SP SQ hxy))
+  have h_YClass_ne : (Associates.mk (Ideal.span
+      ({WeierstrassCurve.Affine.CoordinateRing.YClass C.toAffine
+        (WeierstrassCurve.Affine.linePolynomial SP.x SP.y
+          (C.toAffine.slope SP.x SQ.x SP.y SQ.y))} : Set C.CoordinateRing)) :
+      Associates (Ideal C.CoordinateRing)) ≠ 0 := by
+    rw [Associates.mk_ne_zero, Ne, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]
+    exact WeierstrassCurve.Affine.CoordinateRing.YClass_ne_zero
+      (W' := C.toAffine) _
+  let vQ' : IsDedekindDomain.HeightOneSpectrum C.CoordinateRing :=
+    ⟨_, (C.maximalIdealAt_isMaximal Q').isPrime, C.maximalIdealAt_ne_bot Q'⟩
+  rw [show (Associates.mk (Ideal.span
+        ({WeierstrassCurve.Affine.CoordinateRing.YClass C.toAffine
+          (WeierstrassCurve.Affine.linePolynomial SP.x SP.y
+            (C.toAffine.slope SP.x SQ.x SP.y SQ.y))} : Set C.CoordinateRing) *
+        C.maximalIdealAt (C.addSmoothPoint SP SQ hxy)) :
+        Associates (Ideal C.CoordinateRing)) =
+      Associates.mk (Ideal.span
+        ({WeierstrassCurve.Affine.CoordinateRing.YClass C.toAffine
+          (WeierstrassCurve.Affine.linePolynomial SP.x SP.y
+            (C.toAffine.slope SP.x SQ.x SP.y SQ.y))} : Set C.CoordinateRing)) *
+      Associates.mk (C.maximalIdealAt (C.addSmoothPoint SP SQ hxy))
+    from Associates.mk_mul_mk]
+  rw [Associates.count_mul h_YClass_ne hMSR_ne vQ'.associates_irreducible]
+
 /-- **Chord-affine divisor (count expansion via structural identity)**: for
 non-degenerate `SP, SQ` on E, the count of `M_{Q'}` in `span{YClass linePoly}`
 equals `(divisorOf (coordX − SR.x) Q' + δ_{Q' = SP} + δ_{Q' = SQ} − δ_{Q' = SR})`
@@ -764,105 +869,22 @@ theorem count_YClass_linePolynomial_eq
     show ∀ (a b c : ℕ), (a : ℤ) + (b : ℤ) + (c : ℤ) = ((a + b + c : ℕ) : ℤ) from
     fun a b c ↦ by push_cast; ring]
   congr 1
-  have hMSP_ne : (Associates.mk (C.maximalIdealAt SP) :
-      Associates (Ideal C.CoordinateRing)) ≠ 0 :=
-    Associates.mk_ne_zero.mpr (C.maximalIdealAt_ne_bot SP)
-  have hMSQ_ne : (Associates.mk (C.maximalIdealAt SQ) :
-      Associates (Ideal C.CoordinateRing)) ≠ 0 :=
-    Associates.mk_ne_zero.mpr (C.maximalIdealAt_ne_bot SQ)
-  have hMSR_ne : (Associates.mk (C.maximalIdealAt (C.addSmoothPoint SP SQ hxy)) :
-      Associates (Ideal C.CoordinateRing)) ≠ 0 :=
-    Associates.mk_ne_zero.mpr (C.maximalIdealAt_ne_bot (C.addSmoothPoint SP SQ hxy))
-  have h_XClass_ne : (Associates.mk (Ideal.span
-      ({WeierstrassCurve.Affine.CoordinateRing.XClass C.toAffine
-        (C.addSmoothPoint SP SQ hxy).x} : Set C.CoordinateRing)) :
-      Associates (Ideal C.CoordinateRing)) ≠ 0 := by
-    rw [Associates.mk_ne_zero, Ne, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]
-    exact WeierstrassCurve.Affine.CoordinateRing.XClass_ne_zero
-      (W' := C.toAffine) _
-  have h_YClass_ne : (Associates.mk (Ideal.span
-      ({WeierstrassCurve.Affine.CoordinateRing.YClass C.toAffine
-        (WeierstrassCurve.Affine.linePolynomial SP.x SP.y
-          (C.toAffine.slope SP.x SQ.x SP.y SQ.y))} : Set C.CoordinateRing)) :
-      Associates (Ideal C.CoordinateRing)) ≠ 0 := by
-    rw [Associates.mk_ne_zero, Ne, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]
-    exact WeierstrassCurve.Affine.CoordinateRing.YClass_ne_zero
-      (W' := C.toAffine) _
-  let vQ' : IsDedekindDomain.HeightOneSpectrum C.CoordinateRing :=
-    ⟨_, (C.maximalIdealAt_isMaximal Q').isPrime, C.maximalIdealAt_ne_bot Q'⟩
-  have h_struct := C.span_XClass_addSmoothPoint_mul_eq SP SQ hxy
-  have h_count_LHS_split :
-      (Associates.mk vQ'.asIdeal).count
-        (Associates.mk (Ideal.span
-          ({WeierstrassCurve.Affine.CoordinateRing.XClass C.toAffine
-            (C.addSmoothPoint SP SQ hxy).x} : Set C.CoordinateRing) *
-          (C.maximalIdealAt SP * C.maximalIdealAt SQ))).factors =
-      (Associates.mk vQ'.asIdeal).count
-        (Associates.mk (Ideal.span
-          ({WeierstrassCurve.Affine.CoordinateRing.XClass C.toAffine
-            (C.addSmoothPoint SP SQ hxy).x} : Set C.CoordinateRing))).factors +
-      ((Associates.mk vQ'.asIdeal).count
-        (Associates.mk (C.maximalIdealAt SP)).factors +
-       (Associates.mk vQ'.asIdeal).count
-        (Associates.mk (C.maximalIdealAt SQ)).factors) := by
-    rw [show (Associates.mk (Ideal.span
-          ({WeierstrassCurve.Affine.CoordinateRing.XClass C.toAffine
-            (C.addSmoothPoint SP SQ hxy).x} : Set C.CoordinateRing) *
-          (C.maximalIdealAt SP * C.maximalIdealAt SQ)) :
-          Associates (Ideal C.CoordinateRing)) =
-        Associates.mk (Ideal.span
-          ({WeierstrassCurve.Affine.CoordinateRing.XClass C.toAffine
-            (C.addSmoothPoint SP SQ hxy).x} : Set C.CoordinateRing)) *
-        Associates.mk (C.maximalIdealAt SP * C.maximalIdealAt SQ)
-        from Associates.mk_mul_mk]
-    rw [show (Associates.mk (C.maximalIdealAt SP * C.maximalIdealAt SQ) :
-        Associates (Ideal C.CoordinateRing)) =
-      Associates.mk (C.maximalIdealAt SP) *
-        Associates.mk (C.maximalIdealAt SQ) from Associates.mk_mul_mk]
-    rw [Associates.count_mul h_XClass_ne (mul_ne_zero hMSP_ne hMSQ_ne)
-      vQ'.associates_irreducible,
-      Associates.count_mul hMSP_ne hMSQ_ne vQ'.associates_irreducible]
-  have h_count_RHS_split :
-      (Associates.mk vQ'.asIdeal).count
-        (Associates.mk (Ideal.span
-          ({WeierstrassCurve.Affine.CoordinateRing.YClass C.toAffine
-            (WeierstrassCurve.Affine.linePolynomial SP.x SP.y
-              (C.toAffine.slope SP.x SQ.x SP.y SQ.y))} : Set C.CoordinateRing) *
-          C.maximalIdealAt (C.addSmoothPoint SP SQ hxy))).factors =
-      (Associates.mk vQ'.asIdeal).count
-        (Associates.mk (Ideal.span
-          ({WeierstrassCurve.Affine.CoordinateRing.YClass C.toAffine
-            (WeierstrassCurve.Affine.linePolynomial SP.x SP.y
-              (C.toAffine.slope SP.x SQ.x SP.y SQ.y))} :
-              Set C.CoordinateRing))).factors +
-      (Associates.mk vQ'.asIdeal).count
-        (Associates.mk (C.maximalIdealAt (C.addSmoothPoint SP SQ hxy))).factors := by
-    rw [show (Associates.mk (Ideal.span
-          ({WeierstrassCurve.Affine.CoordinateRing.YClass C.toAffine
-            (WeierstrassCurve.Affine.linePolynomial SP.x SP.y
-              (C.toAffine.slope SP.x SQ.x SP.y SQ.y))} : Set C.CoordinateRing) *
-          C.maximalIdealAt (C.addSmoothPoint SP SQ hxy)) :
-          Associates (Ideal C.CoordinateRing)) =
-        Associates.mk (Ideal.span
-          ({WeierstrassCurve.Affine.CoordinateRing.YClass C.toAffine
-            (WeierstrassCurve.Affine.linePolynomial SP.x SP.y
-              (C.toAffine.slope SP.x SQ.x SP.y SQ.y))} : Set C.CoordinateRing)) *
-        Associates.mk (C.maximalIdealAt (C.addSmoothPoint SP SQ hxy))
-      from Associates.mk_mul_mk]
-    rw [Associates.count_mul h_YClass_ne hMSR_ne vQ'.associates_irreducible]
+  have h_count_LHS_split := C.count_span_XClass_addSmoothPoint_mul_split SP SQ hxy Q'
+  have h_count_RHS_split :=
+    C.count_span_YClass_maximalIdealAt_addSmoothPoint_split SP SQ hxy Q'
   have h_struct_count :
-      (Associates.mk vQ'.asIdeal).count
+      (Associates.mk (C.maximalIdealAt Q')).count
         (Associates.mk (Ideal.span
           ({WeierstrassCurve.Affine.CoordinateRing.XClass C.toAffine
             (C.addSmoothPoint SP SQ hxy).x} : Set C.CoordinateRing) *
           (C.maximalIdealAt SP * C.maximalIdealAt SQ))).factors =
-      (Associates.mk vQ'.asIdeal).count
+      (Associates.mk (C.maximalIdealAt Q')).count
         (Associates.mk (Ideal.span
           ({WeierstrassCurve.Affine.CoordinateRing.YClass C.toAffine
             (WeierstrassCurve.Affine.linePolynomial SP.x SP.y
               (C.toAffine.slope SP.x SQ.x SP.y SQ.y))} : Set C.CoordinateRing) *
           C.maximalIdealAt (C.addSmoothPoint SP SQ hxy))).factors := by
-    rw [h_struct]
+    rw [C.span_XClass_addSmoothPoint_mul_eq SP SQ hxy]
   linarith [h_count_LHS_split, h_count_RHS_split, h_struct_count]
 
 /-- **Count of `maximalIdealAt X` at `Q'` in Finsupp form**: the count
