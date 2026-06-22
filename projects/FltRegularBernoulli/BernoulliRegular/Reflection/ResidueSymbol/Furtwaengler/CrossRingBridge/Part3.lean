@@ -147,9 +147,8 @@ theorem descent_atom_of_cross_ring
       ((canonicalResidueZetaP (p := p) (K := K) P' : 𝓞 K ⧸ P')) ^
         (- BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical
           (p := p) (K := K) (((Fintype.card (𝓞 K ⧸ P') : ℤ) : 𝓞 K)) P).val := by
-  haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   -- Apply embedding e and use injectivity to lift.
-  apply (residueFieldEmbedding_injective h_over)
+  apply residueFieldEmbedding_injective h_over
   -- e (LHS) = e ((Quotient.mk P' phi)^((NP'-1)/p))
   --        = (e (Quotient.mk P' phi))^((NP'-1)/p)  [map_pow]
   --        = (Quotient.mk 𝔭 (algebraMap phi))^((NP'-1)/p)  [residueFieldEmbedding_mk]
@@ -270,13 +269,11 @@ theorem cross_ring_identity_from_K2_1_K2_2c
         𝓞 R' ⧸ 𝔭) ^
         (- BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical
           (p := p) (K := K) (((Fintype.card (𝓞 K ⧸ P') : ℤ) : 𝓞 K)) P).val := by
-  haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   -- K2-1 cross-ring: χ' unit_a · (gaussSumInt mod 𝔭)^p^((N𝔭-1)/p) = 1.
   have h_K21 := ideal_quotient_mk_gaussSumInt_pow_pow_div_apply_smul_eq_one S a hp h_χp_eq_one
     hf hN_mod_p unit_a h_unit hg_ne
   -- Substitute (ℓ' ^ f - 1)/p = (NP' - 1)/p via hN_eq.
   rw [← hN_eq]
-  have h := h_K21
   rw [← mul_one ((((Ideal.Quotient.mk 𝔭) (S.gaussSumInt a)) ^ p) ^ ((ℓ' ^ f - 1) / p))]
   rw [← h_χ_value]
   rw [show ((((Ideal.Quotient.mk 𝔭) (S.gaussSumInt a)) ^ p) ^ ((ℓ' ^ f - 1) / p)) *
@@ -293,7 +290,7 @@ theorem cross_ring_identity_from_K2_1_K2_2c
           𝓞 R' ⧸ 𝔭) ^
           (- BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical
             (p := p) (K := K) (((Fintype.card (𝓞 K ⧸ P') : ℤ) : 𝓞 K)) P).val by ring]
-  rw [h, one_mul, hN_eq]
+  rw [h_K21, one_mul, hN_eq]
 
 /-! ### K2-2c with character pow
 
@@ -408,8 +405,7 @@ theorem descent_atom_of_cross_ring_general
     ((Ideal.Quotient.mk P' (phiPrimeGenDescent S ha₁ ha₂ h_ne_zero) :
         𝓞 K ⧸ P')) ^ ((Fintype.card (𝓞 K ⧸ P') - 1) / p) =
       ((canonicalResidueZetaP (p := p) (K := K) P' : 𝓞 K ⧸ P')) ^ t.val := by
-  haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
-  apply (residueFieldEmbedding_injective h_over)
+  apply residueFieldEmbedding_injective h_over
   rw [map_pow, residueFieldEmbedding_mk h_over,
       algebraMap_phiPrimeGenDescent S ha₁ ha₂ h_ne_zero, map_pow]
   rw [map_pow,
@@ -496,11 +492,9 @@ theorem cross_ring_identity_from_K2_1_K2_2c_general
       ((Ideal.Quotient.mk 𝔭
           (S.zeta_p_int)) :
         𝓞 R' ⧸ 𝔭) ^ t.val := by
-  haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   have h_K21 := ideal_quotient_mk_gaussSumInt_pow_pow_div_apply_smul_eq_one S a hp h_χp_eq_one
     hf hN_mod_p unit_a h_unit hg_ne
   rw [← hN_eq]
-  have h := h_K21
   rw [← mul_one ((((Ideal.Quotient.mk 𝔭) (S.gaussSumInt a)) ^ p) ^ ((ℓ' ^ f - 1) / p))]
   rw [← h_χ_value]
   rw [show ((((Ideal.Quotient.mk 𝔭) (S.gaussSumInt a)) ^ p) ^ ((ℓ' ^ f - 1) / p)) *
@@ -513,7 +507,7 @@ theorem cross_ring_identity_from_K2_1_K2_2c_general
         (((Ideal.Quotient.mk 𝔭) (S.gaussSumInt a)) ^ p) ^ ((ℓ' ^ f - 1) / p)) *
       (((Ideal.Quotient.mk 𝔭) S.zeta_p_int) :
           𝓞 R' ⧸ 𝔭) ^ t.val by ring]
-  rw [h, one_mul]
+  rw [h_K21, one_mul]
 
 /-! ### Full K2-2 path (a) per-index theorem
 
@@ -568,7 +562,6 @@ theorem K2_2_path_a_pthSymbol
           𝓞 R' ⧸ 𝔭) ^ t.val = 1) :
     BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical
         (p := p) (K := K) (phiPrimeGenDescent S ha₁ ha₂ h_ne_zero) P' = t := by
-  haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   -- Step 1: cross-ring identity from K2-1 + h_χ_value.
   have h_cross_ring := cross_ring_identity_from_K2_1_K2_2c_general
     S a hp h_χp_eq_one hf hN_eq hN_mod_p unit_a h_unit hg_ne t h_χ_value
@@ -636,7 +629,6 @@ theorem K2_2_path_a_pthSymbol_of_single_power
           𝓞 R' ⧸ 𝔭) ^ s'.val) :
     BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical
         (p := p) (K := K) (phiPrimeGenDescent S ha₁ ha₂ h_ne_zero) P' = -s' := by
-  haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   -- Derive h_χ_value from h_χ_eval + h_zeta_pow_p via h_chi_value_of_single_power.
   have h_χ_value := h_chi_value_of_single_power (s := s') h_χ_eval h_zeta_pow_p
   -- Set t = -s' and apply K2_2_path_a_pthSymbol.
@@ -655,7 +647,7 @@ theorem pow_eq_pow_mod_p_of_order_dvd
     x ^ n = x ^ (n % p) := by
   rcases Nat.eq_zero_or_pos p with h_p_zero | h_p_pos
   · subst h_p_zero
-    simp [Nat.mod_zero]
+    simp
   · conv_lhs => rw [show n = p * (n / p) + n % p from (Nat.div_add_mod _ _).symm]
     rw [pow_add, pow_mul, hx, one_pow, one_mul]
 
@@ -735,7 +727,6 @@ theorem K2_2_path_a_pthSymbol_of_K2_2c_pow
     BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical
         (p := p) (K := K) (phiPrimeGenDescent S ha₁ ha₂ h_ne_zero) P' =
       -((a : ZMod p) * s) := by
-  haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   -- Convert h_χ_eval_pow from "Nat × Nat-val" form to single-power form via
   -- pow_natVal_mul_eq_pow_zmod_mul.
   have h_χ_eval_single : ((S.residueCharInt ^ a).ringHomComp
