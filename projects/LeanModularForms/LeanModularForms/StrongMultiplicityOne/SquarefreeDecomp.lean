@@ -3,7 +3,7 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.SMOObligations.LevelCommute
+import LeanModularForms.StrongMultiplicityOne.LevelCommute
 
 /-!
 # Strong Multiplicity One via Miyake §4.6 — squarefree decomposition (4.6.7)
@@ -11,7 +11,7 @@ import LeanModularForms.SMOObligations.LevelCommute
 The `m7_*` helpers, Miyake Lemma 4.6.7 (squarefree decomposition), the `V_p`
 descent identity, and the per-`q` slash-sum machinery up to
 `function_identity_Δ_eq_sum_V_q_F`. Part of a multi-file split of
-`SMOObligations.lean`.
+`StrongMultiplicityOne.lean`.
 -/
 
 open CongruenceSubgroup Matrix.SpecialLinearGroup UpperHalfPlane

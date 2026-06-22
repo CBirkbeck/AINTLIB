@@ -3,14 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.SMOObligations.DescentCosets
+import LeanModularForms.StrongMultiplicityOne.DescentCosets
 
 /-!
 # Strong Multiplicity One via Miyake §4.6 — Hecke descent map
 
 The `multipass_*` slash-sum machinery and the Hecke descent linear map
 `miyake_hecke_descend` together with its q-expansion/character properties.
-Part of a multi-file split of `SMOObligations.lean`.
+Part of a multi-file split of `StrongMultiplicityOne.lean`.
 -/
 
 open CongruenceSubgroup Matrix.SpecialLinearGroup

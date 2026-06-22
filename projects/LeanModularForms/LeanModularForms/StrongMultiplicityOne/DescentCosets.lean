@@ -3,7 +3,7 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import LeanModularForms.SMOObligations.Miyake465
+import LeanModularForms.StrongMultiplicityOne.LevelChangeCharSpace
 
 /-!
 # Strong Multiplicity One via Miyake §4.6 — descent coset list
