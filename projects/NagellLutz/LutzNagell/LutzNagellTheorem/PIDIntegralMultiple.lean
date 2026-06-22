@@ -4,12 +4,14 @@ import LutzNagell.ZSMul
 import Mathlib.RingTheory.Polynomial.RationalRoot
 
 /-!
-# Integral multiple implies integral point (over UFDs)
+# Integral multiple implies integral point (over integrally closed domains)
 
 If `n • P` has integral affine coordinates on a Weierstrass curve over `K = Frac(R)`,
 then `P` already has integral affine coordinates.
 
-Generalization of `GeneralIntegralMultiple.lean` from `ℤ/ℚ` to a UFD `R`.
+Generalization of `GeneralIntegralMultiple.lean` from `ℤ/ℚ` to an integrally closed
+domain `R`. The integral-root step uses `IsIntegrallyClosed.isIntegral_iff` rather than
+the unique-factorization integral-root theorem, so a UFD hypothesis is not needed.
 -/
 
 namespace LutzNagell
@@ -17,11 +19,11 @@ namespace PID
 
 open WeierstrassCurve Polynomial IsFractionRing
 
-variable {R : Type*} [CommRing R] [IsDomain R] [UniqueFactorizationMonoid R]
+variable {R : Type*} [CommRing R] [IsDomain R] [IsIntegrallyClosed R]
 variable {K : Type*} [Field K] [DecidableEq K] [Algebra R K] [IsFractionRing R K]
 variable (W : WeierstrassCurve R)
 
-omit [UniqueFactorizationMonoid R] in
+omit [IsIntegrallyClosed R] in
 /-- `Φ_n - C c * ΨSq_n` is monic over `R` for any `c : R` and `n ≠ 0` (in `R`). -/
 theorem monic_Φ_sub_smul_ΨSq
     {n : ℤ} (hn : (n : R) ≠ 0) (c : R) :
@@ -34,7 +36,7 @@ theorem monic_Φ_sub_smul_ΨSq
       _ < n.natAbs ^ 2 := Nat.pred_lt (pow_ne_zero 2 (Int.natAbs_ne_zero.mpr hn0))
       _ = (W.Φ n).natDegree := (natDegree_Φ _ n).symm
 
-omit [IsDomain R] [UniqueFactorizationMonoid R] [IsFractionRing R K] in
+omit [IsDomain R] [IsIntegrallyClosed R] [IsFractionRing R K] in
 /-- The x-coordinate of `n • P` satisfies `x' · ΨSq_n(x) = Φ_n(x)`. -/
 theorem x_coord_nsmul_eq
     {x y : K} (hns : (curveK R K W).toAffine.Nonsingular x y)
@@ -74,10 +76,15 @@ theorem x_isInteger_of_nsmul_x_isInteger
     simp only [← hc, curveK, map_Φ, map_ΨSq, aeval_def, eval₂_eq_eval_map, Polynomial.map_sub,
       Polynomial.map_mul, Polynomial.map_C, eval_sub, eval_mul, eval_C] at hcoord ⊢
     linear_combination -hcoord
-  exact isInteger_of_is_root_of_monic (monic_Φ_sub_smul_ΨSq W hn_R c) hroot
+  have hint : IsIntegral R x := ⟨_, monic_Φ_sub_smul_ΨSq W hn_R c, hroot⟩
+  exact RingHom.mem_rangeS.mpr (IsIntegrallyClosed.isIntegral_iff.mp hint)
 
-/-- If `n • P` has integral coordinates, then `P` has integral coordinates. -/
-theorem isInteger_of_nsmul_isInteger
+/-- If `n • P` has integral coordinates, then `P` has integral coordinates.
+
+The `y`-coordinate step (`y_isInteger_of_x_isInteger_on_curve`) still goes through the
+unique-factorization integral-root theorem, so this result keeps the `UniqueFactorizationMonoid`
+hypothesis; the `x`-coordinate step only needs `IsIntegrallyClosed`. -/
+theorem isInteger_of_nsmul_isInteger [UniqueFactorizationMonoid R]
     {x y : K} (hns : (curveK R K W).toAffine.Nonsingular x y)
     {n : ℤ} (hn : n ≠ 0) (hn_R : (n : R) ≠ 0)
     {x' y' : K} (hns' : (curveK R K W).toAffine.Nonsingular x' y')
