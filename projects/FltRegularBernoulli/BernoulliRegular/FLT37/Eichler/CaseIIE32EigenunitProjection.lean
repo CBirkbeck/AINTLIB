@@ -1,4 +1,4 @@
-import BernoulliRegular.FLT37.Eichler.CaseIICor823Level72Valuation
+import BernoulliRegular.FLT37.Eichler.DworkCoordinate.DworkCoordValuationNonDegeneracy
 import BernoulliRegular.FLT37.Eichler.CaseIIEx811EigenVandermonde
 
 /-!

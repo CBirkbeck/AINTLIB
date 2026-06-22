@@ -1,5 +1,5 @@
 import BernoulliRegular.FLT37.Eichler.CaseIILehmerVandiverDvdZ
-import BernoulliRegular.FLT37.Eichler.CaseIIThm95Discharge
+import BernoulliRegular.FLT37.Eichler.Reduction.VandermondeCollapseAndLemma99Bridge
 
 /-!
 # [FLT37-CASEII-R4-LEMMA98] Washington Lemma 9.8 `ℓ ∣ (ω + θ)` over the Case-II descent, corrected

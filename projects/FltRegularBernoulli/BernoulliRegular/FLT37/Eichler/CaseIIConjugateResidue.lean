@@ -1,5 +1,5 @@
 import BernoulliRegular.FLT37.Eichler.CaseIIGaloisEigenAction
-import BernoulliRegular.FLT37.Eichler.CaseIIThm95Discharge
+import BernoulliRegular.FLT37.Eichler.Reduction.VandermondeCollapseAndLemma99Bridge
 
 /-!
 # Washington Lemma 9.9 for `p = 37`: the all-conjugate residue system and the

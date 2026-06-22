@@ -1,4 +1,4 @@
-import BernoulliRegular.FLT37.Eichler.FLT37CaseIIEndpointClosed
+import BernoulliRegular.FLT37.Eichler.Reduction.FLT37PostII1Reduction
 import BernoulliRegular.FLT37.Eichler.CaseIIEx811EigenVandermonde
 
 /-!

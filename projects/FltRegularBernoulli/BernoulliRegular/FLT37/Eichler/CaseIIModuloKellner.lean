@@ -1,7 +1,7 @@
 import BernoulliRegular.FLT37.Eichler.CaseIIFreeContentNonPContent
-import BernoulliRegular.FLT37.Eichler.CaseIILemma98ResidueDischarge
+import BernoulliRegular.FLT37.Eichler.Reduction.ConjugateResidueEqnsFromR3
 import BernoulliRegular.FLT37.Eichler.CaseIIThm95LocalPowerFromLemma98
-import BernoulliRegular.FLT37.Eichler.CaseIICor815SingleIndexDischarge
+import BernoulliRegular.FLT37.Eichler.Saturation.SingleIndexExpansionFromResidueEqns
 
 /-!
 # [FLT37-CASEII-MODULO-KELLNER] The cleanest FLT37 Case-II endpoint and the minimal residual
