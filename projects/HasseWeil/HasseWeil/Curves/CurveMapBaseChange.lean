@@ -780,6 +780,42 @@ theorem tensor_functionField_isField (L : Type*) [Field L] [Algebra F L]
   exact MulEquiv.isField hF
     (Algebra.TensorProduct.comm F L C.toAffine.FunctionField).toRingEquiv.toMulEquiv
 
+/-- For a flat (here: free) extension `L/F`, the right-tensor inclusion
+`c ↦ (1 ⊗ₜ c : L ⊗[F] C.CoordinateRing)` is injective. It is the composite of the
+inverse left-unitor with the injective `rTensor` of `Algebra.linearMap F L`, which is
+injective because `C.CoordinateRing` is flat over `F`. -/
+private theorem oneTmulRight_injective (L : Type*) [Field L] [Algebra F L]
+    [Module.Flat F L] :
+    Function.Injective
+      (fun c : C.toAffine.CoordinateRing ↦ (1 ⊗ₜ c : L ⊗[F] C.toAffine.CoordinateRing)) := by
+  have hrt : Function.Injective
+      (LinearMap.rTensor C.toAffine.CoordinateRing (Algebra.linearMap F L)) :=
+    Module.Flat.rTensor_preserves_injective_linearMap (M := C.toAffine.CoordinateRing)
+      (Algebra.linearMap F L) (RingHom.injective (algebraMap F L))
+  have hcomp := hrt.comp (TensorProduct.lid F C.toAffine.CoordinateRing).symm.injective
+  have heq : (fun c : C.toAffine.CoordinateRing ↦ (1 ⊗ₜ c : L ⊗[F] C.toAffine.CoordinateRing))
+      = (LinearMap.rTensor C.toAffine.CoordinateRing (Algebra.linearMap F L))
+          ∘ (TensorProduct.lid F C.toAffine.CoordinateRing).symm := by
+    funext c
+    simp only [Function.comp_apply, TensorProduct.lid_symm_apply,
+      LinearMap.rTensor_tmul, Algebra.linearMap_apply, map_one]
+  rw [heq]
+  exact hcomp
+
+/-- For a flat (here: free) extension `L/F`, a nonzero divisor `b` of `C.CoordinateRing`
+stays a nonzero divisor after base change: `1 ⊗ₜ b` is a nonzero divisor of
+`L ⊗[F] C.CoordinateRing`. Reduces to nonvanishing via `oneTmulRight_injective`. -/
+private theorem oneTmul_mem_nonZeroDivisors (L : Type*) [Field L] [Algebra F L]
+    [Module.Flat F L] (b : C.toAffine.CoordinateRing)
+    (hb : b ∈ nonZeroDivisors C.toAffine.CoordinateRing) :
+    (1 ⊗ₜ b : L ⊗[F] C.toAffine.CoordinateRing)
+      ∈ nonZeroDivisors (L ⊗[F] C.toAffine.CoordinateRing) := by
+  letI := C.isDomain_tensorCoordRing L
+  rw [mem_nonZeroDivisors_iff_ne_zero]
+  have hb0 : b ≠ 0 := mem_nonZeroDivisors_iff_ne_zero.mp hb
+  intro hc
+  exact hb0 (C.oneTmulRight_injective L (hc.trans (TensorProduct.tmul_zero _ _).symm))
+
 /-- Surjectivity onto fractions: every element of `L ⊗[F] C.FF` is expressible as
 `algebraMap a / algebraMap b` with `a : L ⊗ C.CR` and `b` a nonzero divisor, phrased
 localization-style as `z * algebraMap b = algebraMap a`. Stated w.r.t. the pinned
@@ -800,36 +836,13 @@ theorem tensor_functionField_surj (L : Type*) [Field L] [Algebra F L] :
       algebraMap (L ⊗[F] C.toAffine.CoordinateRing) (L ⊗[F] C.toAffine.FunctionField) (l ⊗ₜ u)
         = l ⊗ₜ algebraMap C.toAffine.CoordinateRing C.toAffine.FunctionField u :=
     fun l u ↦ rfl
-  have hden : ∀ (b : C.toAffine.CoordinateRing), b ∈ nonZeroDivisors C.toAffine.CoordinateRing →
-      (1 ⊗ₜ b : L ⊗[F] C.toAffine.CoordinateRing)
-        ∈ nonZeroDivisors (L ⊗[F] C.toAffine.CoordinateRing) := by
-    intro b hb
-    rw [mem_nonZeroDivisors_iff_ne_zero]
-    have hb0 : b ≠ 0 := mem_nonZeroDivisors_iff_ne_zero.mp hb
-    have hrt : Function.Injective
-        (LinearMap.rTensor C.toAffine.CoordinateRing (Algebra.linearMap F L)) :=
-      Module.Flat.rTensor_preserves_injective_linearMap (M := C.toAffine.CoordinateRing)
-        (Algebra.linearMap F L) (RingHom.injective (algebraMap F L))
-    have hinj : Function.Injective
-        (fun c : C.toAffine.CoordinateRing ↦ (1 ⊗ₜ c : L ⊗[F] C.toAffine.CoordinateRing)) := by
-      have hcomp := hrt.comp (TensorProduct.lid F C.toAffine.CoordinateRing).symm.injective
-      have heq : (fun c : C.toAffine.CoordinateRing ↦ (1 ⊗ₜ c : L ⊗[F] C.toAffine.CoordinateRing))
-          = (LinearMap.rTensor C.toAffine.CoordinateRing (Algebra.linearMap F L))
-              ∘ (TensorProduct.lid F C.toAffine.CoordinateRing).symm := by
-        funext c
-        simp only [Function.comp_apply, TensorProduct.lid_symm_apply,
-          LinearMap.rTensor_tmul, Algebra.linearMap_apply, map_one]
-      rw [heq]
-      exact hcomp
-    intro hc
-    exact hb0 (hinj (hc.trans (TensorProduct.tmul_zero _ _).symm))
   refine fun z ↦ ?_
   induction z using TensorProduct.induction_on with
   | zero =>
       exact ⟨(0, 1), by rw [zero_mul, map_zero]⟩
   | tmul l f =>
       obtain ⟨a, b, hbmem, hab⟩ := IsFractionRing.div_surjective (A := C.toAffine.CoordinateRing) f
-      refine ⟨(l ⊗ₜ a, ⟨1 ⊗ₜ b, hden b hbmem⟩), ?_⟩
+      refine ⟨(l ⊗ₜ a, ⟨1 ⊗ₜ b, C.oneTmul_mem_nonZeroDivisors L b hbmem⟩), ?_⟩
       rw [halg, halg, Algebra.TensorProduct.tmul_mul_tmul, mul_one]
       have hb0 : algebraMap C.toAffine.CoordinateRing C.toAffine.FunctionField b ≠ 0 :=
         IsFractionRing.to_map_ne_zero_of_mem_nonZeroDivisors hbmem
