@@ -55,7 +55,7 @@ theorem artinHasseExpSeries_pow_mapTo_eq_rescale_exp_mul_subst_X_pow_mapTo
     (r : ℕ) [Fact (Nat.Prime r)] {A : Type*} [CommRing A]
     (φ : DieudonneDwork.rIntegralRatSubring r →+* A) :
     let hE : DieudonneDwork.IsRIntegralPS r (artinHasseExpSeries r) :=
-      fun n => artinHasseExpSeries_coeff_isRIntegral r n
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral r n
     let hRes : DieudonneDwork.IsRIntegralPS r
         (PowerSeries.rescale (r : ℚ) (PowerSeries.exp ℚ)) :=
       rescale_exp_isRIntegral r
@@ -65,7 +65,7 @@ theorem artinHasseExpSeries_pow_mapTo_eq_rescale_exp_mul_subst_X_pow_mapTo
   classical
   dsimp only
   let hE : DieudonneDwork.IsRIntegralPS r (artinHasseExpSeries r) :=
-    fun n => artinHasseExpSeries_coeff_isRIntegral r n
+    fun n ↦ artinHasseExpSeries_coeff_isRIntegral r n
   let hRes : DieudonneDwork.IsRIntegralPS r
       (PowerSeries.rescale (r : ℚ) (PowerSeries.exp ℚ)) :=
     rescale_exp_isRIntegral r
@@ -113,7 +113,7 @@ theorem artinHasseExpMinusOneSeries_isRIntegral
     (r : ℕ) [Fact (Nat.Prime r)] :
     DieudonneDwork.IsRIntegralPS r (artinHasseExpMinusOneSeries r) := by
   have hE : DieudonneDwork.IsRIntegralPS r (artinHasseExpSeries r) :=
-    fun n => artinHasseExpSeries_coeff_isRIntegral r n
+    fun n ↦ artinHasseExpSeries_coeff_isRIntegral r n
   exact hE.sub (DieudonneDwork.IsRIntegralPS.one r)
 
 theorem artinHasseExpSeries_coeff_den_coprime
@@ -158,10 +158,10 @@ theorem artinHasseExpSeries_mapTo_subst_inverse
     PowerSeries.subst
         ((artinHasseExpInverseSeries_isRIntegral r).mapTo φ)
         ((show DieudonneDwork.IsRIntegralPS r (artinHasseExpSeries r) from
-          fun n => artinHasseExpSeries_coeff_isRIntegral r n).mapTo φ) =
+          fun n ↦ artinHasseExpSeries_coeff_isRIntegral r n).mapTo φ) =
       1 + (PowerSeries.X : PowerSeries A) := by
   let hE : DieudonneDwork.IsRIntegralPS r (artinHasseExpSeries r) :=
-    fun n => artinHasseExpSeries_coeff_isRIntegral r n
+    fun n ↦ artinHasseExpSeries_coeff_isRIntegral r n
   let hInv : DieudonneDwork.IsRIntegralPS r (artinHasseExpInverseSeries r) :=
     artinHasseExpInverseSeries_isRIntegral r
   have hInv0 : PowerSeries.constantCoeff (artinHasseExpInverseSeries r) = 0 :=
@@ -295,7 +295,7 @@ noncomputable def rIntegralRatToQuotient (N : ℕ) :
   map_add' q₁ q₂ := by
     let QN : Ideal (𝓞 R') := S.Q ^ (N + 1)
     let val : DieudonneDwork.rIntegralRatSubring ℓ → 𝓞 R' ⧸ QN :=
-      fun q => S.rIntegralRatToQuotientVal N q
+      fun q ↦ S.rIntegralRatToQuotientVal N q
     let d₁ : 𝓞 R' ⧸ QN :=
       Ideal.Quotient.mk QN ((((q₁ : ℚ).den : ℕ) : 𝓞 R'))
     let d₂ : 𝓞 R' ⧸ QN :=
@@ -321,7 +321,7 @@ noncomputable def rIntegralRatToQuotient (N : ℕ) :
       simpa [QN, d₁, d₂, D, n₁, n₂, Num, map_mul, map_add, Int.cast_natCast,
         mul_assoc] using
         congrArg
-          (fun z : ℤ => Ideal.Quotient.mk QN ((z : ℤ) : 𝓞 R'))
+          (fun z : ℤ ↦ Ideal.Quotient.mk QN ((z : ℤ) : 𝓞 R'))
           (Rat.add_num_den' (q₁ : ℚ) (q₂ : ℚ))
     have hunit : IsUnit (d₁ * d₂) :=
       (S.rIntegralRat_den_isUnit_mod_Q_pow N q₁).mul
@@ -340,7 +340,7 @@ noncomputable def rIntegralRatToQuotient (N : ℕ) :
   map_mul' q₁ q₂ := by
     let QN : Ideal (𝓞 R') := S.Q ^ (N + 1)
     let val : DieudonneDwork.rIntegralRatSubring ℓ → 𝓞 R' ⧸ QN :=
-      fun q => S.rIntegralRatToQuotientVal N q
+      fun q ↦ S.rIntegralRatToQuotientVal N q
     let d₁ : 𝓞 R' ⧸ QN :=
       Ideal.Quotient.mk QN ((((q₁ : ℚ).den : ℕ) : 𝓞 R'))
     let d₂ : 𝓞 R' ⧸ QN :=
@@ -366,7 +366,7 @@ noncomputable def rIntegralRatToQuotient (N : ℕ) :
       simpa [QN, d₁, d₂, D, n₁, n₂, Num, map_mul, Int.cast_natCast,
         mul_assoc] using
         congrArg
-          (fun z : ℤ => Ideal.Quotient.mk QN ((z : ℤ) : 𝓞 R'))
+          (fun z : ℤ ↦ Ideal.Quotient.mk QN ((z : ℤ) : 𝓞 R'))
           (Rat.mul_num_den' (q₁ : ℚ) (q₂ : ℚ))
     have hunit : IsUnit (d₁ * d₂) :=
       (S.rIntegralRat_den_isUnit_mod_Q_pow N q₁).mul
@@ -472,7 +472,7 @@ theorem isRIntegralPS_trunc_eval₂_factor_eq
       ∀ n : ℕ, φ ((PowerSeries.coeff (R := 𝓞 R' ⧸ S.Q ^ (N + 1)) n) FN) =
         (PowerSeries.coeff (R := 𝓞 R' ⧸ S.Q ^ (M + 1)) n) FM := by
     intro n
-    have h := congrArg (fun G : PowerSeries (𝓞 R' ⧸ S.Q ^ (M + 1)) =>
+    have h := congrArg (fun G : PowerSeries (𝓞 R' ⧸ S.Q ^ (M + 1)) ↦
         (PowerSeries.coeff (R := 𝓞 R' ⧸ S.Q ^ (M + 1)) n) G) hmap
     simpa using h
   have hleft :
