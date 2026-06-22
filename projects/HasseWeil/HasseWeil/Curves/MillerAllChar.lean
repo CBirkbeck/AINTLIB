@@ -78,27 +78,10 @@ theorem divisorOf_coordX_sub_const_apply_eq_finsupp_allChar
     rw [C.span_XClass_eq_maximalIdealAt_neg_mul P, ← Associates.mk_mul_mk]
     exact Associates.count_mul (Associates.mk_ne_zero.mpr (C.maximalIdealAt_ne_bot P.neg))
       (Associates.mk_ne_zero.mpr (C.maximalIdealAt_ne_bot P)) vQ.associates_irreducible
-  rw [Finsupp.add_apply, Finsupp.single_apply, Finsupp.single_apply,
-    C.divisorOf_coordX_sub_const_apply P.x Q, h_count_expand]
-  have h_count_Pneg :
-      (Associates.mk (C.maximalIdealAt Q)).count
-          (Associates.mk (C.maximalIdealAt P.neg)).factors =
-        (if P.neg = Q then 1 else 0) := by
-    by_cases h : Q = P.neg
-    · rw [if_pos h.symm, h, C.count_maximalIdealAt_self P.neg]
-    · rw [if_neg fun he ↦ h he.symm,
-        C.count_maximalIdealAt_eq_zero_of_ne Q P.neg h]
-  have h_count_P :
-      (Associates.mk (C.maximalIdealAt Q)).count
-          (Associates.mk (C.maximalIdealAt P)).factors =
-        (if P = Q then 1 else 0) := by
-    by_cases h : Q = P
-    · rw [if_pos h.symm, h, C.count_maximalIdealAt_self P]
-    · rw [if_neg fun he ↦ h he.symm,
-        C.count_maximalIdealAt_eq_zero_of_ne Q P h]
-  rw [h_count_Pneg, h_count_P]
+  rw [C.divisorOf_coordX_sub_const_apply P.x Q, h_count_expand, Finsupp.add_apply,
+    ← C.count_maximalIdealAt_eq_single P Q, ← C.count_maximalIdealAt_eq_single P.neg Q]
   push_cast
-  split_ifs <;> ring
+  ring
 
 /-- **Vertical-line affine divisor (Finsupp form, all char)**. -/
 theorem divisorOf_coordX_sub_const_allChar
@@ -633,7 +616,7 @@ noncomputable def picZeroIsoE_of_AFInputs_allChar
 
 /-- **`AFInputs W` (all char)**: bundles `miller_hypothesis_holds_allChar`,
 `divZeroReduce_holds_allChar`, and `noFinitePolesBridge_unconditional`. -/
-noncomputable def afInputs_allChar
+theorem afInputs_allChar
     [IsAlgClosed F] [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
     [IsIntegrallyClosed (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing] : AFInputs W where
   miller := miller_hypothesis_holds_allChar W
