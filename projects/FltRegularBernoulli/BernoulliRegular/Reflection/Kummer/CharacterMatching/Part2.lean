@@ -358,7 +358,7 @@ theorem perturbByPthRootUnity_witness (W : P.KummerMatchingWitnessBundle)
 /-- **Trivial perturbation by the constant-`1` function.** Perturbing by
 `e = 1` returns the same witness function. -/
 theorem perturbByPthRootUnity_one (W : P.KummerMatchingWitnessBundle) :
-    perturbByPthRootUnity (P := P) W (fun _ => 1) (fun _ => one_pow _) = W := by
+    perturbByPthRootUnity (P := P) W (fun _ ↦ 1) (fun _ ↦ one_pow _) = W := by
   cases W with
   | mk w heq =>
     simp only [perturbByPthRootUnity, mul_one]
