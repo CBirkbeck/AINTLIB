@@ -537,24 +537,22 @@ section fieldBridge
 
 open PowerSeries
 
-/-- `∂ = (1+t)·d/dt` over the coefficient field `K` (the `delQ`-analogue;
-to be merged with `MeasureR.del`/`PadicMeasure.delQ` at cleanup). -/
+/-- `∂ = (1+t)·d/dt` over the coefficient field `K`: the `K`-specialisation of the
+generic `PadicLFunctions.del`. -/
 noncomputable def delField (G : PowerSeries K) : PowerSeries K :=
-  (1 + X) * PowerSeries.derivativeFun G
+  PadicLFunctions.del G
 
 omit [CompleteSpace K] [CharZero K] in
 lemma map_subtype_derivativeFun (F : PowerSeries (integerRing K)) :
     PowerSeries.map (integerRing K).subtype (PowerSeries.derivativeFun F)
-      = PowerSeries.derivativeFun (PowerSeries.map (integerRing K).subtype F) := by
-  ext n
-  simp [coeff_derivativeFun]
+      = PowerSeries.derivativeFun (PowerSeries.map (integerRing K).subtype F) :=
+  PadicLFunctions.map_derivativeFun (integerRing K).subtype F
 
 omit [CompleteSpace K] [CharZero K] in
 lemma map_subtype_del (F : PowerSeries (integerRing K)) :
     PowerSeries.map (integerRing K).subtype (del K F)
-      = delField (PowerSeries.map (integerRing K).subtype F) := by
-  rw [del, delField, map_mul, map_add, map_one, PowerSeries.map_X,
-    map_subtype_derivativeFun]
+      = delField (PowerSeries.map (integerRing K).subtype F) :=
+  PadicLFunctions.map_del (integerRing K).subtype F
 
 omit [CompleteSpace K] [CharZero K] in
 lemma map_subtype_del_iterate (j : ℕ) (F : PowerSeries (integerRing K)) :
@@ -585,7 +583,7 @@ lemma derivativeFun_subst_exp_K (F : PowerSeries K) :
     _ = (d⁄dX K F).subst (exp K - 1) * d⁄dX K (exp K - 1) :=
         derivative_subst K hg
     _ = (delField F).subst (exp K - 1) := by
-        rw [hder, delField, subst_mul hg, subst_add hg, subst_X hg, hone]
+        rw [hder, delField, PadicLFunctions.del_def, subst_mul hg, subst_add hg, subst_X hg, hone]
         ring_nf
         rfl
 

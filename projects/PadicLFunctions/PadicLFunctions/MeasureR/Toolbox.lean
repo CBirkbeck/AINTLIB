@@ -46,9 +46,10 @@ lemma cmul_apply (g f : C(ℤ_[p], integerRing K)) (μ : MeasureR K ℤ_[p]) :
 
 variable (p K)
 
-/-- The operator `∂ = (1+T)d/dT` on `R⟦T⟧` (RJW Lem 3.24). -/
+/-- The operator `∂ = (1+T)d/dT` on `R⟦T⟧` (RJW Lem 3.24), over `integerRing K`.
+This is the `integerRing K`-specialisation of the generic `PadicLFunctions.del`. -/
 def del (F : PowerSeries (integerRing K)) : PowerSeries (integerRing K) :=
-  (1 + PowerSeries.X) * F.derivativeFun
+  PadicLFunctions.del F
 
 variable {p K}
 
@@ -57,15 +58,8 @@ omit [CompleteSpace K] in
 private lemma coeff_del (F : PowerSeries (integerRing K)) (n : ℕ) :
     PowerSeries.coeff n (del K F)
       = (n + 1 : integerRing K) * PowerSeries.coeff (n + 1) F
-        + (n : integerRing K) * PowerSeries.coeff n F := by
-  rw [del, one_add_mul, map_add, coeff_derivativeFun]
-  rcases n with - | m
-  · rw [coeff_zero_X_mul]
-    push_cast
-    ring
-  · rw [coeff_succ_X_mul, coeff_derivativeFun]
-    push_cast
-    ring
+        + (n : integerRing K) * PowerSeries.coeff n F :=
+  PadicLFunctions.coeff_del F n
 
 omit [CompleteSpace K] in
 /-- Multiplication by `x` corresponds to `∂` on Mahler transforms

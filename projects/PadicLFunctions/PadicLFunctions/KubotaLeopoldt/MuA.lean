@@ -168,21 +168,20 @@ realised by `PowerSeries.subst (exp ℚ_p − 1)`; the value `f_a^{(k)}(0)` is t
 off from the Bernoulli generating function `B(t)·(e^t−1) = t` via
 `t·f_a(t) = B(t) − B(at)`. -/
 
-/-- `∂ = (1+T) d/dT` over `ℚ_p`. (To be merged with `PadicMeasure.del` when the
-latter is generalised to arbitrary commutative rings — cleanup note in tickets.) -/
+/-- `∂ = (1+T) d/dT` over `ℚ_p`: the `ℚ_p`-specialisation of the generic
+`PadicLFunctions.del`. -/
 def delQ (G : PowerSeries ℚ_[p]) : PowerSeries ℚ_[p] :=
-  (1 + X) * PowerSeries.derivativeFun G
+  PadicLFunctions.del G
 
 lemma map_derivativeFun (F : PowerSeries ℤ_[p]) :
     PowerSeries.map PadicInt.Coe.ringHom (PowerSeries.derivativeFun F)
-      = PowerSeries.derivativeFun (PowerSeries.map PadicInt.Coe.ringHom F) := by
-  ext n
-  simp [coeff_derivativeFun]
+      = PowerSeries.derivativeFun (PowerSeries.map PadicInt.Coe.ringHom F) :=
+  PadicLFunctions.map_derivativeFun PadicInt.Coe.ringHom F
 
 lemma map_del (F : PowerSeries ℤ_[p]) :
     PowerSeries.map PadicInt.Coe.ringHom (del p F)
-      = delQ p (PowerSeries.map PadicInt.Coe.ringHom F) := by
-  rw [del, delQ, map_mul, map_add, map_one, PowerSeries.map_X, map_derivativeFun]
+      = delQ p (PowerSeries.map PadicInt.Coe.ringHom F) :=
+  PadicLFunctions.map_del PadicInt.Coe.ringHom F
 
 lemma hasSubst_exp_sub_one : HasSubst (exp ℚ_[p] - 1) :=
   HasSubst.of_constantCoeff_zero' (by simp)
@@ -202,7 +201,7 @@ lemma derivativeFun_subst_exp (F : PowerSeries ℚ_[p]) :
     _ = (d⁄dX ℚ_[p] F).subst (exp ℚ_[p] - 1) * d⁄dX ℚ_[p] (exp ℚ_[p] - 1) :=
         derivative_subst ℚ_[p] hg
     _ = (delQ p F).subst (exp ℚ_[p] - 1) := by
-        rw [hder, delQ, subst_mul hg, subst_add hg, subst_X hg, hone]
+        rw [hder, delQ, PadicLFunctions.del_def, subst_mul hg, subst_add hg, subst_X hg, hone]
         ring_nf
         rfl
 

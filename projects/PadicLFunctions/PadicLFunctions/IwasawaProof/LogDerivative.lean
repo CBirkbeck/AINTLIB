@@ -101,7 +101,7 @@ definitions") — the engine of `lem:log der 1`. Stated for the additive `del = 
 theorem del_phiHom (f : PowerSeries ℤ_[p]) :
     PadicMeasure.del p (phiHom p f)
       = (p : PowerSeries ℤ_[p]) * phiHom p (PadicMeasure.del p f) := by
-  rw [phiHom_apply, PadicMeasure.del, PadicMeasure.del,
+  rw [phiHom_apply, PadicMeasure.del_def, PadicMeasure.del_def,
     one_add_mul_derivative_phiSeries, phiHom_apply, PowerSeries.smul_eq_C_mul,
     map_natCast]
 
@@ -198,7 +198,7 @@ On the diagonal this is `p·Δ(M_{ii})`, the formal shadow of the chain-rule ste
 /-- Leibniz rule for `Δ = del`: `Δ(ab) = (Δa)·b + a·(Δb)`. -/
 private theorem del_mul (a b : PowerSeries ℤ_[p]) :
     PadicMeasure.del p (a * b) = PadicMeasure.del p a * b + a * PadicMeasure.del p b := by
-  rw [PadicMeasure.del, PadicMeasure.del, PadicMeasure.del, derivativeFun_mul,
+  rw [PadicMeasure.del_def, PadicMeasure.del_def, PadicMeasure.del_def, derivativeFun_mul,
     smul_eq_mul, smul_eq_mul]; ring
 
 /-- `Δ((1+T)^j) = j·(1+T)^j`. -/
@@ -207,7 +207,7 @@ private theorem del_one_add_X_pow (j : ℕ) :
       = (j : PowerSeries ℤ_[p]) * (1 + PowerSeries.X) ^ j := by
   have hDoneX : derivativeFun (1 + PowerSeries.X : PowerSeries ℤ_[p]) = 1 := by
     rw [derivativeFun_add, derivativeFun_one, zero_add]; exact derivative_X
-  rw [PadicMeasure.del,
+  rw [PadicMeasure.del_def,
     show derivativeFun ((1 + PowerSeries.X : PowerSeries ℤ_[p]) ^ j)
       = d⁄dX ℤ_[p] ((1 + PowerSeries.X) ^ j) from rfl, derivative_pow,
     show d⁄dX ℤ_[p] (1 + PowerSeries.X : PowerSeries ℤ_[p]) = derivativeFun (1 + PowerSeries.X)
@@ -220,13 +220,13 @@ private theorem del_one_add_X_pow (j : ℕ) :
 private theorem del_phiSeries (g : PowerSeries ℤ_[p]) :
     PadicMeasure.del p (phiSeries p g)
       = (p : PowerSeries ℤ_[p]) * phiSeries p (PadicMeasure.del p g) := by
-  rw [PadicMeasure.del, PadicMeasure.del, one_add_mul_derivative_phiSeries, smul_eq_C_mul,
+  rw [PadicMeasure.del_def, PadicMeasure.del_def, one_add_mul_derivative_phiSeries, smul_eq_C_mul,
     map_natCast]
 
 /-- `Δ` commutes with finite sums. -/
 private theorem del_sum {ι : Type*} (s : Finset ι) (g : ι → PowerSeries ℤ_[p]) :
     PadicMeasure.del p (∑ i ∈ s, g i) = ∑ i ∈ s, PadicMeasure.del p (g i) := by
-  rw [PadicMeasure.del,
+  rw [PadicMeasure.del_def,
     show (∑ i ∈ s, g i).derivativeFun = ∑ i ∈ s, (g i).derivativeFun from
       map_sum (PowerSeries.derivative ℤ_[p]) g s, Finset.mul_sum]
   rfl
@@ -333,7 +333,7 @@ private theorem del_det_eq_smul_trace {n : ℕ}
     (M N : Matrix (Fin n) (Fin n) (PowerSeries ℤ_[p])) (hNM : N * M = 1) :
     PadicMeasure.del p (M.det)
       = M.det • Matrix.trace ((M.map (PadicMeasure.del p)) * N) := by
-  rw [PadicMeasure.del,
+  rw [PadicMeasure.del_def,
     show M.det.derivativeFun = (PowerSeries.derivative ℤ_[p]) M.det from rfl,
     derivation_det (PowerSeries.derivative ℤ_[p]) M, Finset.mul_sum,
     Finset.sum_congr rfl (fun i _ => del_row_smul p M i),
@@ -405,7 +405,7 @@ theorem dlog_mem_psiIdSeries {f : PowerSeries ℤ_[p]} (hf : IsUnit f) (hN : nor
   have hMN : M * N = 1 := by
     rw [hM, hN', ← digitMatrix_mul, Ring.mul_inverse_cancel _ hf, digitMatrix_one]
   have hfdet : f = M.det := by rw [hM, ← normOp_eq_det, hN]
-  have hdlog : dlog p f = PadicMeasure.del p f * Ring.inverse f := by rw [dlog, PadicMeasure.del]
+  have hdlog : dlog p f = PadicMeasure.del p f * Ring.inverse f := by rw [dlog, PadicMeasure.del_def]
   have hdm : digitMatrix (dlog p f) = digitMatrix (PadicMeasure.del p f) * N := by
     rw [hdlog, digitMatrix_mul, hN']
   have htr := trace_digitMatrix (dlog p f)
@@ -1593,7 +1593,7 @@ the constant coefficient (`[T¹]f = [T⁰](∂f)`). -/
 private theorem coeff_one_one_add_X_pow :
     PowerSeries.coeff 1 ((1 + PowerSeries.X : PowerSeries ℤ_[p]) ^ p) = (p : ℤ_[p]) := by
   have h0 := congrArg (PowerSeries.coeff 0) (del_one_add_X_pow p p)
-  rw [PadicMeasure.del] at h0
+  rw [PadicMeasure.del_def] at h0
   rw [show (1 + PowerSeries.X : PowerSeries ℤ_[p]) * derivativeFun ((1 + PowerSeries.X) ^ p)
       = derivativeFun ((1 + PowerSeries.X) ^ p)
         + PowerSeries.X * derivativeFun ((1 + PowerSeries.X) ^ p) from by ring,

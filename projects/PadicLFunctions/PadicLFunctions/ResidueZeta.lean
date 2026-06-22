@@ -659,18 +659,15 @@ ValuesAtOne version is private). -/
 private theorem map_derivativeFun' {R S : Type*} [CommRing R] [CommRing S]
     (f : R →+* S) (F : PowerSeries R) :
     PowerSeries.map f (PowerSeries.derivativeFun F)
-      = PowerSeries.derivativeFun (PowerSeries.map f F) := by
-  ext n
-  rw [PowerSeries.coeff_map, PowerSeries.coeff_derivativeFun,
-    PowerSeries.coeff_derivativeFun, PowerSeries.coeff_map, map_mul, map_add,
-    map_natCast, map_one]
+      = PowerSeries.derivativeFun (PowerSeries.map f F) :=
+  PadicLFunctions.map_derivativeFun f F
 
 /-- `PowerSeries.map` commutes with `∂ = (1+T)d/dT` (re-proved locally). -/
 private theorem map_one_add_mul_derivativeFun' {R S : Type*} [CommRing R]
     [CommRing S] (f : R →+* S) (F : PowerSeries R) :
     PowerSeries.map f ((1 + PowerSeries.X) * PowerSeries.derivativeFun F)
-      = (1 + PowerSeries.X) * PowerSeries.derivativeFun (PowerSeries.map f F) := by
-  rw [map_mul, map_add, map_one, PowerSeries.map_X, map_derivativeFun']
+      = (1 + PowerSeries.X) * PowerSeries.derivativeFun (PowerSeries.map f F) :=
+  PadicLFunctions.map_del f F
 
 /-- The `ℤ_p`-level multiplication-by-`x` identity: the `x⁻¹` in `zetaNum`
 cancels against the `x`-monomial on the units, so
