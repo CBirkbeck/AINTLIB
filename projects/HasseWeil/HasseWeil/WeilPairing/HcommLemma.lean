@@ -55,8 +55,6 @@ variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
 
 local notation "KE" => W.toAffine.FunctionField
 
-set_option linter.unusedSectionVars false
-
 /-- **The genuine bridge**: for an isogeny `φ` genuine with geometric action `g`, the function-field
 pullback `Point.map φ*` agrees with `g` *at the generic point*. By definition `IsGenuineWith` gives
 `g (P_gen) = some (φ* x_gen) (φ* y_gen)`, and `Point.map φ* (P_gen) = some (φ* x_gen) (φ* y_gen)` by
