@@ -35,6 +35,11 @@ open BernoulliRegular.Furtwaengler
 variable {p : ℕ} [Fact p.Prime]
 variable {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 
+private theorem nonempty_primitiveRoots : (primitiveRoots p K).Nonempty := by
+  refine ⟨IsCyclotomicExtension.zeta p ℚ K, ?_⟩
+  rw [mem_primitiveRoots (Fact.out : p.Prime).pos]
+  exact IsCyclotomicExtension.zeta_spec p ℚ K
+
 omit [Fact p.Prime] [IsCyclotomicExtension {p} ℚ K] in
 /-- The splitting field of a polynomial over a number field is again a number
 field.  This localizes the routine typeclass bridge used by the Kummer
@@ -145,10 +150,7 @@ theorem splittingFieldRootConductorComap_ne_bot
   let x : 𝓞 L :=
     BernoulliRegular.Kummer.integralRootOfSplitsXPowSubC
       (K := K) (p := p) η L
-  have hζ : (primitiveRoots p K).Nonempty := by
-    refine ⟨IsCyclotomicExtension.zeta p ℚ K, ?_⟩
-    rw [mem_primitiveRoots (Fact.out : p.Prime).pos]
-    exact IsCyclotomicExtension.zeta_spec p ℚ K
+  have hζ : (primitiveRoots p K).Nonempty := nonempty_primitiveRoots
   have Hirred : Irreducible (X ^ p - C (η : K)) := by
     rw [show p = p ^ 1 from (pow_one p).symm]
     refine (X_pow_sub_C_irreducible_iff_of_prime_pow
@@ -156,7 +158,7 @@ theorem splittingFieldRootConductorComap_ne_bot
     intro β hβ
     exact hη_not_pow ⟨β, hβ⟩
   have hroot :
-      ((x : L) ^ p) = algebraMap K L (η : K) := by
+      (x : L) ^ p = algebraMap K L (η : K) := by
     simpa [x, L, BernoulliRegular.Kummer.integralRootOfSplitsXPowSubC_coe]
       using rootOfSplitsXPowSubC_pow (n := p) (a := (η : K)) L
   have h_adjoin :
@@ -198,8 +200,7 @@ theorem kummerCharacterBadSet_isPrime
   intro P hP
   have hη_span : Ideal.span ({η} : Set (𝓞 K)) ≠ ⊥ := by
     simpa [Ideal.span_singleton_eq_bot] using hη_ne
-  have hp_ne : (p : 𝓞 K) ≠ 0 := by
-    exact_mod_cast (Fact.out : p.Prime).ne_zero
+  have hp_ne : (p : 𝓞 K) ≠ 0 := mod_cast (Fact.out : p.Prime).ne_zero
   have hp_span : Ideal.span ({(p : 𝓞 K)} : Set (𝓞 K)) ≠ ⊥ := by
     simpa [Ideal.span_singleton_eq_bot] using hp_ne
   rw [kummerCharacterBadSet, Finset.mem_union] at hP
@@ -220,8 +221,7 @@ theorem kummerCharacterBadSet_ne_bot
   intro P hP
   have hη_span : Ideal.span ({η} : Set (𝓞 K)) ≠ ⊥ := by
     simpa [Ideal.span_singleton_eq_bot] using hη_ne
-  have hp_ne : (p : 𝓞 K) ≠ 0 := by
-    exact_mod_cast (Fact.out : p.Prime).ne_zero
+  have hp_ne : (p : 𝓞 K) ≠ 0 := mod_cast (Fact.out : p.Prime).ne_zero
   have hp_span : Ideal.span ({(p : 𝓞 K)} : Set (𝓞 K)) ≠ ⊥ := by
     simpa [Ideal.span_singleton_eq_bot] using hp_ne
   rw [kummerCharacterBadSet, Finset.mem_union] at hP
@@ -262,8 +262,7 @@ theorem not_mem_p_of_not_mem_kummerCharacterBadSet
     (hP_not_mem : P ∉ kummerCharacterBadSet (p := p) (K := K) η) :
     (p : 𝓞 K) ∉ P := by
   intro hpP
-  have hp_ne : (p : 𝓞 K) ≠ 0 := by
-    exact_mod_cast (Fact.out : p.Prime).ne_zero
+  have hp_ne : (p : 𝓞 K) ≠ 0 := mod_cast (Fact.out : p.Prime).ne_zero
   have hp_span : Ideal.span ({(p : 𝓞 K)} : Set (𝓞 K)) ≠ ⊥ := by
     simpa [Ideal.span_singleton_eq_bot] using hp_ne
   have hle : Ideal.span ({(p : 𝓞 K)} : Set (𝓞 K)) ≤ P := by
@@ -318,7 +317,7 @@ theorem prime_coprime_finset_of_not_mem
   rw [Ideal.isCoprime_iff_sup_eq]
   have hqmax : q.IsMaximal := Ideal.IsPrime.isMaximal hqprime hq_ne
   have hQmax : Q.IsMaximal := Ideal.IsPrime.isMaximal (hSprime Q hQ) (hS_ne Q hQ)
-  exact Ideal.IsMaximal.coprime_of_ne hqmax hQmax (fun hqQ => hq_not_mem (hqQ ▸ hQ))
+  exact Ideal.IsMaximal.coprime_of_ne hqmax hQmax (fun hqQ ↦ hq_not_mem (hqQ ▸ hQ))
 
 /-- Triviality of the canonical bad-set-coprime class character forces
 `X^p - eta` to split over the residue field at every admissible prime.
@@ -543,10 +542,7 @@ theorem splitsCompletely_splittingField_of_trivial_coprimeCanonicalCharacter
     BernoulliRegular.Ideal.SplitsCompletely
       (𝓞 (SplittingField (X ^ p - C (η : K)))) q := by
   haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
-  have hζ : (primitiveRoots p K).Nonempty := by
-    refine ⟨IsCyclotomicExtension.zeta p ℚ K, ?_⟩
-    rw [mem_primitiveRoots (Fact.out : p.Prime).pos]
-    exact IsCyclotomicExtension.zeta_spec p ℚ K
+  have hζ : (primitiveRoots p K).Nonempty := nonempty_primitiveRoots
   exact
     splitsCompletely_of_trivial_coprimeCanonicalCharacter_of_minpoly
       (p := p) (K := K) η S hSprime hS_ne hclass htriv
@@ -597,7 +593,7 @@ theorem splitsCompletely_splittingField_of_trivial_coprimeCanonicalCharacter_of_
   have hq_not_cond :
       q ∉ (normalizedFactors
         (splittingFieldRootConductorComap (p := p) (K := K) η)).toFinset :=
-    fun hqmem => hq_not_mem (hcond_subset hqmem)
+    fun hqmem ↦ hq_not_mem (hcond_subset hqmem)
   have hxcond :
       splittingFieldRootConductorComap (p := p) (K := K) η ⊔ q = ⊤ :=
     sup_eq_top_of_isPrime_not_mem_normalizedFactors
@@ -690,10 +686,7 @@ theorem coprimeCanonicalClassGroupModPHom_ne_one_of_not_isPow
     Furtwaengler.coprimeCanonicalClassGroupModPHom
         (p := p) (K := K) η S hSprime hS_ne hclass ≠ 1 := by
   intro htriv
-  have hζ : (primitiveRoots p K).Nonempty := by
-    refine ⟨IsCyclotomicExtension.zeta p ℚ K, ?_⟩
-    rw [mem_primitiveRoots (Fact.out : p.Prime).pos]
-    exact IsCyclotomicExtension.zeta_spec p ℚ K
+  have hζ : (primitiveRoots p K).Nonempty := nonempty_primitiveRoots
   have hsplits :
       ∀ q : ℕ, q.Prime →
         ∀ P ∈ (IsDedekindDomain.primesOverFinset (Ideal.span ({(q : ℤ)} : Set ℤ))
@@ -748,10 +741,10 @@ theorem coprimeCanonicalClassGroupModPHom_ne_one_of_not_isPow_badSet
       (kummerCharacterBadSet (p := p) (K := K) η)
       (kummerCharacterBadSet_isPrime (p := p) (K := K) η hη_ne hcond_ne)
       (kummerCharacterBadSet_ne_bot (p := p) (K := K) η hη_ne hcond_ne)
-      (fun hP_ne hP_not_mem =>
+      (fun hP_ne hP_not_mem ↦
         not_mem_eta_of_not_mem_kummerCharacterBadSet
           (p := p) (K := K) η hη_ne hP_ne hP_not_mem)
-      (fun hP_ne hP_not_mem =>
+      (fun hP_ne hP_not_mem ↦
         not_mem_p_of_not_mem_kummerCharacterBadSet
           (p := p) (K := K) η hP_ne hP_not_mem)
       hclass hcond_ne
@@ -793,14 +786,14 @@ theorem coprimeCanonicalClassGroupModPHom_ne_one_of_not_isPow_badSet_of_principa
         (kummerCharacterBadSet_ne_bot (p := p) (K := K) η hη_ne
           (splittingFieldRootConductorComap_ne_bot
             (p := p) (K := K) hp_ne_two η hη_not_pow))
-        (fun {_ _} hI hJ hmk =>
+        (fun {_ _} hI hJ hmk ↦
           Furtwaengler.pthSymbolAtIdeal_canonical_eq_of_mk0_eq_of_coprime_principal_balance
             (p := p) (K := K) η
             (kummerCharacterBadSet (p := p) (K := K) η)
             hprincipal hI hJ hmk) ≠ 1 :=
   coprimeCanonicalClassGroupModPHom_ne_one_of_not_isPow_badSet
       (p := p) (K := K) hp_ne_two η hη_ne hη_not_pow
-      (fun {_ _} hI hJ hmk =>
+      (fun {_ _} hI hJ hmk ↦
         Furtwaengler.pthSymbolAtIdeal_canonical_eq_of_mk0_eq_of_coprime_principal_balance
           (p := p) (K := K) η
           (kummerCharacterBadSet (p := p) (K := K) η)
@@ -833,7 +826,7 @@ theorem coprimeCanonicalClassGroupModPHom_ne_one_of_not_isPow_badSet_of_coprime_
         (kummerCharacterBadSet_ne_bot (p := p) (K := K) η hη_ne
           (splittingFieldRootConductorComap_ne_bot
             (p := p) (K := K) hp_ne_two η hη_not_pow))
-        (fun {_ _} hI hJ hmk =>
+        (fun {_ _} hI hJ hmk ↦
           Furtwaengler.pthSymbolAtIdeal_canonical_eq_of_mk0_eq_of_coprime_vanishing
             (p := p) (K := K) η
             (kummerCharacterBadSet (p := p) (K := K) η)
@@ -846,7 +839,7 @@ theorem coprimeCanonicalClassGroupModPHom_ne_one_of_not_isPow_badSet_of_coprime_
             hvanish hI hJ hmk) ≠ 1 :=
   coprimeCanonicalClassGroupModPHom_ne_one_of_not_isPow_badSet
       (p := p) (K := K) hp_ne_two η hη_ne hη_not_pow
-      (fun {_ _} hI hJ hmk =>
+      (fun {_ _} hI hJ hmk ↦
         Furtwaengler.pthSymbolAtIdeal_canonical_eq_of_mk0_eq_of_coprime_vanishing
           (p := p) (K := K) η
           (kummerCharacterBadSet (p := p) (K := K) η)
@@ -888,7 +881,7 @@ theorem coprimeCanonicalClassGroupModPHom_ne_one_of_not_isPow_badSet_of_locallyP
         (kummerCharacterBadSet_ne_bot (p := p) (K := K) η hη_ne
           (splittingFieldRootConductorComap_ne_bot
             (p := p) (K := K) hp_ne_two η hη_not_pow))
-        (fun {_ _} hI hJ hmk =>
+        (fun {_ _} hI hJ hmk ↦
           Furtwaengler.pthSymbolAtIdeal_canonical_eq_of_mk0_eq_of_coprime_vanishing
             (p := p) (K := K) η
             (kummerCharacterBadSet (p := p) (K := K) η)
@@ -898,7 +891,7 @@ theorem coprimeCanonicalClassGroupModPHom_ne_one_of_not_isPow_badSet_of_locallyP
             (kummerCharacterBadSet_ne_bot (p := p) (K := K) η hη_ne
               (splittingFieldRootConductorComap_ne_bot
                 (p := p) (K := K) hp_ne_two η hη_not_pow))
-            (fun z hz hzcop =>
+            (fun z hz hzcop ↦
               locallyPrimaryPseudoUnit_principalSymbol_eq_zero_canonical_of_coprime_badSet
                 p hp_odd K B (kummerCharacterBadSet (p := p) (K := K) η)
                 hη_ne hz hη_prime_to_p hη_local hsing
@@ -908,7 +901,7 @@ theorem coprimeCanonicalClassGroupModPHom_ne_one_of_not_isPow_badSet_of_locallyP
             hI hJ hmk) ≠ 1 :=
   coprimeCanonicalClassGroupModPHom_ne_one_of_not_isPow_badSet_of_coprime_vanishing
       (p := p) (K := K) hp_ne_two η hη_ne hη_not_pow
-      (fun z hz hzcop =>
+      (fun z hz hzcop ↦
         locallyPrimaryPseudoUnit_principalSymbol_eq_zero_canonical_of_coprime_badSet
           p hp_odd K B (kummerCharacterBadSet (p := p) (K := K) η)
           hη_ne hz hη_prime_to_p hη_local hsing
