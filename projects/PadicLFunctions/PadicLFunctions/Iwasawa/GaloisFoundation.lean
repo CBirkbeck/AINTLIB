@@ -109,6 +109,17 @@ theorem isMulCommutative_iSup {F E : Type*} [Field F] [Field E] [Algebra F E]
   | mul a b _ _ ha hb => rw [map_mul, map_mul, ha, hb]
   | inv a _ ha => rw [map_inv₀, map_inv₀, ha]
 
+/-- Restriction-commute: for `B ⊆ F ⊆ M`, two `F`-automorphisms of `M` commute on any `B`-abelian
+normal subfield `E` (restrict to the abelian `Gal(E/B)`). The base-change engine for `X⁺_∞` abelian:
+an `F∞⁺`-automorphism, restricted to `Fₙ⁺`, lands in the abelian `Gal(Mₙ⁺/Fₙ⁺)`. -/
+theorem commute_restrict {B F M : Type*} [Field B] [Field F] [Field M] [Algebra B F]
+    [Algebra F M] [Algebra B M] [IsScalarTower B F M] (E : IntermediateField B M) [Normal B E]
+    [IsMulCommutative (↥E ≃ₐ[B] ↥E)] (σ τ : M ≃ₐ[F] M) (x : ↥E) : σ (τ x) = τ (σ x) := by
+  have h := isMulCommutative_iff.mp ‹IsMulCommutative (↥E ≃ₐ[B] ↥E)›
+    ((τ.restrictScalars B).restrictNormal E) ((σ.restrictScalars B).restrictNormal E)
+  have e := congrArg (fun g : ↥E ≃ₐ[B] ↥E => (algebraMap E M) (g x)) h
+  simpa [AlgEquiv.restrictNormal_commutes, AlgEquiv.restrictScalars_apply] using e.symm
+
 namespace Iwasawa.GaloisFoundation
 
 variable (p : ℕ) [Fact p.Prime]
@@ -482,5 +493,21 @@ instance isAbelianGalois_admissibleLSummand (n : ℕ) (L : IntermediateField (FP
 theorem isMulCommutative_galLPlusN (n : ℕ) :
     IsMulCommutative (↥(LPlusN p n) ≃ₐ[FPlus p n] ↥(LPlusN p n)) :=
   isMulCommutative_iSup (fun L : IntermediateField (FPlus p n) Om => ⨆ _ : IsAdmissibleL p n L, L)
+
+/-- `Mₙ⁺/Fₙ⁺` is normal (compositum of normal admissible layers). -/
+instance instNormalMPlusN (n : ℕ) : Normal (FPlus p n) (MPlusN p n) := by
+  rw [MPlusN]
+  refine IntermediateField.normal_iSup (t := fun L => ⨆ _ : IsAdmissibleM p n L, L) (h := fun L => ?_)
+  by_cases h : IsAdmissibleM p n L
+  · rw [iSup_pos h]; haveI := isAbelianGalois_of_isAdmissibleM p h; infer_instance
+  · rw [iSup_neg h]; infer_instance
+
+/- NOTE (perf): the base case for `X⁺_∞` abelian — that two elements of `Gal(M∞⁺/F∞⁺)` commute on a
+point coming from `Mₙ⁺` — is mathematically `commute_restrict` with `E = Mₙ⁺` viewed inside `M∞⁺`
+over `Fₙ⁺`. The direct `comap`/`AlgEquiv.ofBijective`/`restrictNormal` encoding over the
+`⨆`-over-all-intermediate-fields definition of `MPlusN` is computationally pathological (compile
+times out). `commute_restrict` (the base-change engine) and `instNormalMPlusN` below are the
+verified, fast ingredients; assembling `X⁺_∞` abelian needs a lighter encoding (e.g. a `LinearDisjoint`
+base-change lemma, or a lighter index for `MPlusN`). Tracked as a follow-up. -/
 
 end Iwasawa.GaloisFoundation
