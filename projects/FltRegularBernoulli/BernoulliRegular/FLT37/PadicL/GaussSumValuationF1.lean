@@ -75,15 +75,15 @@ theorem sum_eval_eq_zero_of_natDegree_lt {P : Polynomial (ZMod p)}
   calc
     ∑ x : ZMod p, P.eval x
         = ∑ x : ZMod p, ∑ k ∈ Finset.range (P.natDegree + 1), P.coeff k * x ^ k := by
-          refine Finset.sum_congr rfl fun x _ => ?_
+          refine Finset.sum_congr rfl fun x _ ↦ ?_
           rw [Polynomial.eval_eq_sum_range' hn x]
     _ = ∑ k ∈ Finset.range (P.natDegree + 1), ∑ x : ZMod p, P.coeff k * x ^ k :=
           Finset.sum_comm
     _ = ∑ k ∈ Finset.range (P.natDegree + 1), P.coeff k * ∑ x : ZMod p, x ^ k := by
-          refine Finset.sum_congr rfl fun k _ => ?_
+          refine Finset.sum_congr rfl fun k _ ↦ ?_
           rw [Finset.mul_sum]
     _ = 0 := by
-          refine Finset.sum_eq_zero fun k hk => ?_
+          refine Finset.sum_eq_zero fun k hk ↦ ?_
           rw [Finset.mem_range] at hk
           have hkd : k ≤ P.natDegree := by omega
           rcases Nat.eq_zero_or_pos k with hk0 | hkpos
@@ -106,7 +106,7 @@ theorem leadingPoly_eval (i : ℕ) (b : ZMod p) :
     (leadingPoly (p := p) i).eval b = ∏ t ∈ Finset.range i, (1 - (t : ZMod p) * b) := by
   unfold leadingPoly
   rw [Polynomial.eval_prod]
-  refine Finset.prod_congr rfl fun t _ => ?_
+  refine Finset.prod_congr rfl fun t _ ↦ ?_
   simp [Polynomial.eval_sub, Polynomial.eval_mul]
 
 theorem leadingPoly_natDegree_le (i : ℕ) : (leadingPoly (p := p) i).natDegree ≤ i := by
@@ -116,7 +116,7 @@ theorem leadingPoly_natDegree_le (i : ℕ) : (leadingPoly (p := p) i).natDegree 
     ∑ t ∈ Finset.range i,
         (Polynomial.C 1 - Polynomial.C (t : ZMod p) * Polynomial.X).natDegree
         ≤ ∑ _t ∈ Finset.range i, 1 := by
-          refine Finset.sum_le_sum fun t _ => ?_
+          refine Finset.sum_le_sum fun t _ ↦ ?_
           refine (Polynomial.natDegree_sub_le _ _).trans ?_
           rw [Polynomial.natDegree_C]
           exact max_le (by norm_num)
@@ -138,10 +138,10 @@ theorem sum_units_leadingProd_eq_neg_one {i : ℕ} (hip : i < p - 1) :
     have := sum_eval_eq_zero_of_natDegree_lt
       (P := leadingPoly (p := p) i) (lt_of_le_of_lt (leadingPoly_natDegree_le i) hip)
     rw [← this]
-    exact (Finset.sum_congr rfl fun b _ => (leadingPoly_eval i b).symm)
+    exact (Finset.sum_congr rfl fun b _ ↦ (leadingPoly_eval i b).symm)
   -- Split off b = 0: sum over 𝔽_p = (b=0 term) + sum over units.
   set f : ZMod p → ZMod p :=
-    fun b => ∏ t ∈ Finset.range i, (1 - (t : ZMod p) * b) with hf
+    fun b ↦ ∏ t ∈ Finset.range i, (1 - (t : ZMod p) * b) with hf
   have hunits : ∑ b : (ZMod p)ˣ, f (b : ZMod p) = ∑ x ∈ Finset.univ \ {(0 : ZMod p)}, f x := by
     let φ : (ZMod p)ˣ ↪ ZMod p := ⟨fun x ↦ x, Units.val_injective⟩
     have hmap : (Finset.univ : Finset (ZMod p)ˣ).map φ = Finset.univ \ {0} := by
@@ -202,17 +202,17 @@ theorem leadingFiniteFieldSum_mul_factorial {i : ℕ} (hip : i < p - 1) :
         mul_inv_cancel₀ ha0, mul_one]
     have hprod : ∏ t ∈ Finset.range i, ((a : ZMod p) - (t : ZMod p)) =
         (a : ZMod p) ^ i * ∏ t ∈ Finset.range i, (1 - (t : ZMod p) * ((a : ZMod p)⁻¹)) := by
-      rw [Finset.prod_congr rfl (fun t _ => hfactor t), Finset.prod_mul_distrib,
+      rw [Finset.prod_congr rfl (fun t _ ↦ hfactor t), Finset.prod_mul_distrib,
         Finset.prod_const, Finset.card_range]
     rw [hprod, ← mul_assoc, ← mul_pow, inv_mul_cancel₀ ha0, one_pow, one_mul]
   -- Assemble: ∑_a (per-term) = ∑_a ∏_{t<i}(1 - t·a⁻¹) = ∑_b ∏_{t<i}(1 - t·b) = -1.
-  rw [Finset.sum_congr rfl (fun a _ => hterm a)]
+  rw [Finset.sum_congr rfl (fun a _ ↦ hterm a)]
   -- Reindex a ↦ a⁻¹ (bijection of units): ∑_a ∏(1 - t·a⁻¹) = ∑_b ∏(1 - t·b).
   rw [show (∑ a : (ZMod p)ˣ, ∏ t ∈ Finset.range i, (1 - (t : ZMod p) * ((a : ZMod p)⁻¹))) =
       ∑ b : (ZMod p)ˣ, ∏ t ∈ Finset.range i, (1 - (t : ZMod p) * ((b : ZMod p))) from
-    Fintype.sum_equiv (Equiv.inv (ZMod p)ˣ) _ _ (fun a => by
+    Fintype.sum_equiv (Equiv.inv (ZMod p)ˣ) _ _ (fun a ↦ by
       simp only [Equiv.inv_apply]
-      refine Finset.prod_congr rfl fun t _ => ?_
+      refine Finset.prod_congr rfl fun t _ ↦ ?_
       rw [Units.val_inv_eq_inv_val])]
   exact sum_units_leadingProd_eq_neg_one hip
 
@@ -319,7 +319,7 @@ theorem gaussSum_eq_sum_pi_pow_coeff (i : ℕ) :
     have hstep : ∑ m ∈ Finset.range (teichRep a + 1),
           S.π ^ m * (1 : S.O) ^ (teichRep a - m) * ((teichRep a).choose m : S.O) =
         ∑ m ∈ Finset.range (teichRep a + 1), S.π ^ m * ((teichRep a).choose m : S.O) := by
-      refine Finset.sum_congr rfl fun m _ => ?_
+      refine Finset.sum_congr rfl fun m _ ↦ ?_
       rw [one_pow, mul_one]
     rw [hstep]
     -- Extend `range (rep a + 1)` to `range p`: the added terms have C(rep a, m) = 0.
@@ -333,16 +333,16 @@ theorem gaussSum_eq_sum_pi_pow_coeff (i : ℕ) :
     ∑ a : (ZMod p)ˣ, (((S.ω a)⁻¹ ^ i : S.Oˣ) : S.O) * (1 + S.π) ^ teichRep a
         = ∑ a : (ZMod p)ˣ, ∑ j ∈ Finset.range p,
             (((S.ω a)⁻¹ ^ i : S.Oˣ) : S.O) * (S.π ^ j * ((teichRep a).choose j : S.O)) := by
-          refine Finset.sum_congr rfl fun a _ => ?_
+          refine Finset.sum_congr rfl fun a _ ↦ ?_
           rw [hbin a, Finset.mul_sum]
     _ = ∑ j ∈ Finset.range p, ∑ a : (ZMod p)ˣ,
             (((S.ω a)⁻¹ ^ i : S.Oˣ) : S.O) * (S.π ^ j * ((teichRep a).choose j : S.O)) :=
           Finset.sum_comm
     _ = ∑ j ∈ Finset.range p, S.π ^ j *
             ∑ a : (ZMod p)ˣ, (((S.ω a)⁻¹ ^ i : S.Oˣ) : S.O) * ((teichRep a).choose j : S.O) := by
-          refine Finset.sum_congr rfl fun j _ => ?_
+          refine Finset.sum_congr rfl fun j _ ↦ ?_
           rw [Finset.mul_sum]
-          refine Finset.sum_congr rfl fun a _ => ?_
+          refine Finset.sum_congr rfl fun a _ ↦ ?_
           ring
 
 /-- `(n : ℕ∞) ≤ addVal x ↔ π^n ∣ x`: the `𝔓`-adic order is `≥ n` exactly when
@@ -417,7 +417,7 @@ theorem residue_gaussSumCoeff_self (i : ℕ) :
     S.residue (S.gaussSumCoeff i i) = leadingFiniteFieldSum i := by
   unfold gaussSumCoeff leadingFiniteFieldSum
   rw [map_sum]
-  refine Finset.sum_congr rfl fun a _ => ?_
+  refine Finset.sum_congr rfl fun a _ ↦ ?_
   rw [Units.val_pow_eq_pow_val, map_mul, map_pow]
   congr 1
   · -- residue((ω a)⁻¹ : O) = (residue (ω a : O))⁻¹ = (a : ZMod p)⁻¹.
@@ -477,7 +477,7 @@ theorem gaussSumCoeff_zero_eq_zero {i : ℕ} (hi0 : 0 < i) (hip : i < p - 1) :
   -- c i 0 = ∑_a (ω a)⁻¹^i (since C(a,0)=1).
   have hc0 : S.gaussSumCoeff i 0 = ∑ a : (ZMod p)ˣ, (((S.ω a)⁻¹ ^ i : S.Oˣ) : S.O) := by
     unfold gaussSumCoeff
-    refine Finset.sum_congr rfl fun a _ => ?_
+    refine Finset.sum_congr rfl fun a _ ↦ ?_
     rw [Nat.choose_zero_right, Nat.cast_one, mul_one]
   rw [hc0]
   -- Orthogonality: pick b with χ(b) ≠ 1; then χ(b)·S = S, so (χ(b)-1)·S = 0, S = 0.
@@ -486,13 +486,13 @@ theorem gaussSumCoeff_zero_eq_zero {i : ℕ} (hi0 : 0 < i) (hip : i < p - 1) :
   -- Reindex a ↦ b * a:  χ(b)·∑_a χ(a) = ∑_a χ(b*a) = ∑_{a'} χ(a') = S₀.
   have hreindex : S₀ = (((S.ω b)⁻¹ ^ i : S.Oˣ) : S.O) * S₀ := by
     have hcomp := Equiv.sum_comp (Equiv.mulLeft b)
-      (fun a : (ZMod p)ˣ => (((S.ω a)⁻¹ ^ i : S.Oˣ) : S.O))
+      (fun a : (ZMod p)ˣ ↦ (((S.ω a)⁻¹ ^ i : S.Oˣ) : S.O))
     calc
       S₀ = ∑ a : (ZMod p)ˣ, (((S.ω ((Equiv.mulLeft b) a))⁻¹ ^ i : S.Oˣ) : S.O) := by
             rw [hS₀, hcomp]
       _ = ∑ a : (ZMod p)ˣ,
             (((S.ω b)⁻¹ ^ i : S.Oˣ) : S.O) * (((S.ω a)⁻¹ ^ i : S.Oˣ) : S.O) := by
-            refine Finset.sum_congr rfl fun a _ => ?_
+            refine Finset.sum_congr rfl fun a _ ↦ ?_
             rw [Equiv.coe_mulLeft, S.ω_mul, mul_inv, mul_pow, Units.val_mul]
       _ = (((S.ω b)⁻¹ ^ i : S.Oˣ) : S.O) * S₀ := by rw [hS₀, Finset.mul_sum]
   -- (1 - χ(b))·S₀ = 0, and 1 - χ(b) ≠ 0 (a unit difference), so S₀ = 0.
@@ -519,7 +519,7 @@ theorem pi_pow_succ_dvd_gaussSum_sub_leading {i : ℕ} (hip : i < p)
   have hi_mem : i ∈ Finset.range p := Finset.mem_range.mpr hip
   rw [← Finset.sum_erase_add _ _ hi_mem, add_sub_cancel_right]
   -- Remaining: π^{i+1} ∣ ∑_{j ∈ range p \ {i}} π^j c_j.
-  refine Finset.dvd_sum fun j hj => ?_
+  refine Finset.dvd_sum fun j hj ↦ ?_
   rw [Finset.mem_erase, Finset.mem_range] at hj
   obtain ⟨hji, hjp⟩ := hj
   rcases lt_or_gt_of_ne hji with hlt | hgt
@@ -544,7 +544,7 @@ theorem addVal_gaussSum_eq {i : ℕ} (_hi1 : 1 ≤ i) (hip : i < p)
     rw [addVal_eq_zero_iff]
     -- π ∤ c ⟹ addVal c < 1 ⟹ addVal c = 0 ⟹ IsUnit c.
     by_contra hnu
-    have hne : addVal S.O (S.gaussSumCoeff i i) ≠ 0 := fun hz =>
+    have hne : addVal S.O (S.gaussSumCoeff i i) ≠ 0 := fun hz ↦
       hnu ((addVal_eq_zero_iff).mp hz)
     have h1 : (1 : ℕ∞) ≤ addVal S.O (S.gaussSumCoeff i i) :=
       Order.one_le_iff_ne_zero.mpr hne
@@ -588,7 +588,7 @@ Dwork higher-order vanishing `c i j ∈ 𝔓^{i+1-j}`). -/
 theorem integralStickelbergerValuationF1_of_higherCongruence
     (hhc : ∀ i, 2 ≤ i → i ≤ p - 3 → Even i → S.GaussSumHigherCongruence i) :
     S.IntegralStickelbergerValuationF1 := by
-  refine S.integralStickelbergerValuationF1_of_leaves hhc fun i _ h2 _ => ?_
+  refine S.integralStickelbergerValuationF1_of_leaves hhc fun i _ h2 _ ↦ ?_
   exact S.gaussSumLeadingUnit_proven (by have := hp.out.two_le; omega)
 
 /-- **B-C1.2 discharged from the integral leaf.**  Given the genuine integral
