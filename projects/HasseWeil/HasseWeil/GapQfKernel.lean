@@ -590,7 +590,8 @@ noncomputable def localExpandDeriv : Derivation F KE (LExp W) where
     refine LExp.ext ?_
     show LaurentSeries.derivative F (localExpand W 1) = 0
     rw [map_one, LaurentSeries.derivative_apply,
-      show (1 : LaurentSeries F) = HahnSeries.single (0 : ℤ) 1 from (HahnSeries.single_zero_one).symm,
+      show (1 : LaurentSeries F) = HahnSeries.single (0 : ℤ) 1 from
+        HahnSeries.single_zero_one.symm,
       LaurentSeries.hasseDeriv_single]
     simp
   leibniz' x y := by
@@ -1343,6 +1344,7 @@ private lemma pullback_diff_rearrange {A : Type*} [CommRing A] (a₁ a₂ a₃ a
     - ((1 - (a₁ * f + a₂ * f ^ 2 + 2 * (a₃ * v) + 2 * (a₄ * (f * v)) + 3 * (a₆ * v ^ 2))) * f)
       * hchain
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **The (P) core, chart-level form**: for a power series `f` with zero constant term and
 Laurent series `xL` (the `x`-expansion) and `U` (the `u`-expansion) satisfying the two cleared
 chart relations `xL·T = S` and `U·T = a₁·S + a₃·T − 2` (`S := ofPS f`, `T := ofPS (w∘f)` —
@@ -1620,8 +1622,9 @@ theorem omegaPullbackCoeff_F_value_eq_coeff_one
     c = PowerSeries.coeff 1 (formalIsogenySeries W α) := by
   rw [formalIsogenySeries_coeff, Nat.cast_one]
   have hspec := omegaPullbackCoeff_spec W α
-  rw [show (algebraMap W.toAffine.CoordinateRing KE
-        (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X)) = x_gen W from rfl] at hspec
+  rw [show algebraMap W.toAffine.CoordinateRing KE
+        (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X) = x_gen W from
+      rfl] at hspec
   have hKI := congrArg (fun ω ↦ (localExpandKaehlerLift W ω).out) hspec
   simp only [localExpandKaehlerLift_smul] at hKI
   have hω : (localExpandKaehlerLift W (invariantDifferential W.toAffine)).out =
@@ -1707,6 +1710,7 @@ theorem D_mulByInt_p_pullback_x_gen_eq_zero [Fintype F] (p : ℕ) [CharP F p] [F
       ((mulByInt W.toAffine (p : ℤ)).pullback_injective (by rw [h, map_zero]))
   exact (smul_eq_zero.mp hspec.symm).resolve_left (inv_ne_zero hu)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- `D(gᵖ) = 0` in char `p` (`Derivation.leibniz_pow` + `p • · = 0`). -/
 theorem kaehlerD_pth_power_eq_zero (p : ℕ) [CharP F p] (g : KE) :
     KaehlerDifferential.D F KE (g ^ p) = 0 := by
@@ -1716,6 +1720,7 @@ theorem kaehlerD_pth_power_eq_zero (p : ℕ) [CharP F p] (g : KE) :
         ((p : ℕ) : KE) • (g ^ (p - 1) • KaehlerDifferential.D F KE g) from by
       rw [Nat.cast_smul_eq_nsmul], CharP.cast_eq_zero, zero_smul]
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- `D` is `K(E)ᵖ`-semilinear: `D(gᵖ·h) = gᵖ·D h` (Leibniz + `D(gᵖ)=0`). This makes `ker D`
 a `K(E)ᵖ`-submodule, the key to `ker D = K(E)ᵖ`. -/
 theorem kaehlerD_pth_power_mul (p : ℕ) [CharP F p] (g h : KE) :
@@ -1750,6 +1755,7 @@ theorem x_gen_not_pth_power (p : ℕ) [CharP F p] :
   rw [hw] at hzero
   exact D_x_ne_zero W.toAffine hzero
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- `K(E) / K(E)ᵖ` is purely inseparable: every `x` has `xᵖ = frobenius x ∈ K(E)ᵖ`. Foundation
 for SK-KERD-FINRANK-P. -/
 theorem isPurelyInseparable_frobeniusRange_p (p : ℕ) [Fact p.Prime] [CharP F p] :
@@ -1815,6 +1821,7 @@ theorem minpoly_x_gen_frobeniusRange_natDegree (p : ℕ) [Fact p.Prime] [CharP F
   rw [hdeg, show n = 1 by omega, pow_one]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **SK-FINRANK-P-2 separable input**: `KE / K(E)ᵖ(x_gen)` is separable. From `KE / K(x)` separable
 (`K(x) = FractionRing (Polynomial F)`, via `functionField_isSeparable` passed in as `hsep0`) by
 tower-top, since `K(x) ⊆ L`. The FractionRing `Algebra`/`IsSeparable` instances are passed *explicitly*
