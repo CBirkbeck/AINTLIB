@@ -37,7 +37,9 @@ Loop until the queue is empty or a freeze is active:
      golfing is only the *last* step of `/cleanup`, not the whole job. Skipping the audit/API/naming work is the
      failure mode we're correcting. **Preserve docstrings and math-explanatory comments — deleting
      documentation is NOT cleanup** (only remove genuinely dead/redundant comments, never the docstrings
-     that explain a decl's meaning).
+     that explain a decl's meaning). **But DO remove stale historical/changelog comments** — dated notes
+     (`[2026-…]`), "previously lived here", "retired"/"deleted"/"placeholder removal", narration of absent
+     code — those are dead documentation, not docstrings.
    - **`lane:decompose`** → run **`/decompose-proof`** on the target proof — extract helpers; statement unchanged.
    - **`lane:generalise`** → run **`/generalise`** on the target file — generalise the over-specific lemmas.
 

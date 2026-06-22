@@ -28,7 +28,11 @@ Loop until your lane is empty or a freeze is active:
    whole **file**. Run **`/cleanup` on that file** — it golfs *every* declaration in it, so you clean many
    lemmas in one ticket. **Preserve docstrings and math-explanatory comments — deleting documentation is
    NOT cleanup** (`/cleanup` is style/API/naming/dedup/golf on the *code*; only remove genuinely dead or
-   redundant comments, never the docstrings that explain what a decl means). **Skip any individual
+   redundant comments, never the docstrings that explain what a decl means). **DO remove stale
+   historical/changelog comments**, though — dated process notes (`[2026-…]`), "previously lived here",
+   "retired"/"deleted"/"placeholder removal", and narration of code that no longer exists are dead
+   documentation, NOT decl docstrings; delete them (condense to a one-line pointer if it aids navigation).
+   **Skip any individual
    declaration whose proof contains a `sorry`** (leave it
    untouched — it's the producer's WIP); clean all the sorry-free ones. If the whole file is WIP/`sorry`
    with nothing to clean, comment + relabel `state:in-progress`→`state:todo`, unassign, move on.
