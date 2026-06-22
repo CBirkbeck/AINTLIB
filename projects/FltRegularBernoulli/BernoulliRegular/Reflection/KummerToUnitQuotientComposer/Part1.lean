@@ -316,7 +316,7 @@ theorem KummerCharacterUnitLift.HomPromotion.ofKummerComponentSubsingleton
     {S : CyclotomicUnitModPStructure (p := p) K}
     {χ : MulChar (ZMod p)ˣ ℚ}
     [Subsingleton (R.kummerComponent χ : Type _)] :
-    KummerCharacterUnitLift.HomPromotion.{u, v} (p := p) (K := K) R S χ := fun _ _ _ _ =>
+    KummerCharacterUnitLift.HomPromotion.{u, v} (p := p) (K := K) R S χ := fun _ _ _ _ ↦
   ⟨KummerCharacterUnitLift.ofKummerComponentSubsingleton
     (p := p) (K := K) (R := R) (S := S) (χ := χ)⟩
 
@@ -356,7 +356,7 @@ theorem KummerCharacterUnitLift.HomPromotion.ofPerExtensionUnitLift
     (recipe : KummerCharacterUnitLift.HomPromotion.PerExtensionUnitLift.{u, v}
       (p := p) (K := K) R S χ) :
     KummerCharacterUnitLift.HomPromotion.{u, v} (p := p) (K := K) R S χ :=
-  fun C hCχ Ext data => recipe C hCχ Ext data
+  fun C hCχ Ext data ↦ recipe C hCχ Ext data
 
 /-- **Equivalence of `HomPromotion` with `PerExtensionUnitLift`.**
 
@@ -372,7 +372,7 @@ theorem KummerCharacterUnitLift.HomPromotion.toPerExtensionUnitLift
     (h : KummerCharacterUnitLift.HomPromotion.{u, v} (p := p) (K := K) R S χ) :
     KummerCharacterUnitLift.HomPromotion.PerExtensionUnitLift.{u, v}
       (p := p) (K := K) R S χ :=
-  fun C hCχ Ext data => h C hCχ Ext data
+  fun C hCχ Ext data ↦ h C hCχ Ext data
 
 /-! ### Family-level discharge of `HomPromotionFamily`
 
@@ -431,7 +431,7 @@ theorem KummerCharacterUnitLift.HomPromotionFamily.ofAllTrivial
     KummerCharacterUnitLift.HomPromotionFamily.{u, v} (p := p) (K := K) R S :=
   KummerCharacterUnitLift.HomPromotionFamily.ofPartition
     (p := p) (K := K) (R := R) (S := S)
-    (fun χ habs => absurd (h χ) habs)
+    (fun χ habs ↦ absurd (h χ) habs)
 
 /-! ### Sub-atomic refinement of `KummerCharacterUnitLift`
 
@@ -546,7 +546,7 @@ on every input. -/
 theorem ext_iff_pointwise {χ : MulChar (ZMod p)ˣ ℚ}
     {Rec Rec' : KummerCharacterUnitLiftRecipe (p := p) (K := K) R S χ} :
     Rec = Rec' ↔ ∀ x, Rec.toFun x = Rec'.toFun x :=
-  ⟨fun h _ => by rw [h], fun h => ext (funext h)⟩
+  ⟨fun h _ ↦ by rw [h], fun h ↦ ext (funext h)⟩
 
 end KummerCharacterUnitLiftRecipe
 
@@ -591,7 +591,7 @@ theorem KummerCharacterUnitLift.HomPromotion.ofPerExtensionRecipe
       KummerCharacterUnitLift.HomPromotion.PerExtensionRecipe.{u, v}
         (p := p) (K := K) R S χ) :
     KummerCharacterUnitLift.HomPromotion.{u, v} (p := p) (K := K) R S χ :=
-  fun C hCχ Ext data =>
+  fun C hCχ Ext data ↦
     let ⟨Rec⟩ := recipe C hCχ Ext data
     ⟨KummerCharacterUnitLift.ofRecipe (p := p) (K := K) (R := R) (S := S)
       (χ := χ) Rec⟩
@@ -632,9 +632,9 @@ input feeding the trivial-case discharge of `PerExtensionRecipe`. -/
 def trivial {χ : MulChar (ZMod p)ˣ ℚ}
     [Subsingleton (R.kummerComponent χ : Type _)] :
     KummerCharacterUnitLiftRecipe (p := p) (K := K) R S χ where
-  toFun := fun _ => 1
+  toFun := fun _ ↦ 1
   map_one := rfl
-  map_mul := fun _ _ => by simp
+  map_mul := fun _ _ ↦ by simp
   injective := Function.injective_of_subsingleton _
 
 /-- **Free direction**: a pre-built injective `MonoidHom` packages directly
@@ -793,7 +793,7 @@ def ofMonoidHomEquiv {χ : MulChar (ZMod p)ˣ ℚ}
   toFun := f
   map_one := f.map_one
   map_mul := f.map_mul
-  injective := fun x y hxy => e.injective (by
+  injective := fun x y hxy ↦ e.injective (by
     rw [← hAgree x, ← hAgree y]; exact hxy)
 
 /-- **Source-congruence**: replace the source via a `MulEquiv`
@@ -807,10 +807,10 @@ def congrSource {χ : MulChar (ZMod p)ˣ ℚ}
     (Rec : KummerCharacterUnitLiftRecipe (p := p) (K := K) R S χ)
     (e : R'.kummerComponent χ ≃* R.kummerComponent χ) :
     KummerCharacterUnitLiftRecipe (p := p) (K := K) R' S χ where
-  toFun := fun x => Rec.toFun (e x)
+  toFun := fun x ↦ Rec.toFun (e x)
   map_one := by simp [Rec.map_one]
-  map_mul := fun x y => by simp [Rec.map_mul]
-  injective := fun x y h => e.injective (Rec.injective h)
+  map_mul := fun x y ↦ by simp [Rec.map_mul]
+  injective := fun x y h ↦ e.injective (Rec.injective h)
 
 /-- **Target-congruence**: replace the target via a `MulEquiv`
 `e : (S.components.component χ).Carrier ≃* (S'.components.component χ).Carrier`.
@@ -823,10 +823,10 @@ def congrTarget {χ : MulChar (ZMod p)ˣ ℚ}
     (e : (S.components.component χ).Carrier ≃*
       (S'.components.component χ).Carrier) :
     KummerCharacterUnitLiftRecipe (p := p) (K := K) R S' χ where
-  toFun := fun x => e (Rec.toFun x)
+  toFun := fun x ↦ e (Rec.toFun x)
   map_one := by simp [Rec.map_one]
-  map_mul := fun x y => by simp [Rec.map_mul]
-  injective := fun x y h => Rec.injective (e.injective h)
+  map_mul := fun x y ↦ by simp [Rec.map_mul]
+  injective := fun x y h ↦ Rec.injective (e.injective h)
 
 /-- **Bilateral congruence**: simultaneously change source and target via
 `MulEquiv`s. This is the composite of `congrSource` and `congrTarget`. -/
