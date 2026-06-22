@@ -390,9 +390,11 @@ noncomputable def isogenyIterate (φ : Isogeny W.toAffine W.toAffine)
     (k : ℕ) : Isogeny W.toAffine W.toAffine :=
   Nat.rec (Isogeny.id W.toAffine) (fun _ ih ↦ ih.comp φ) k
 
+omit [Fintype K] in
 @[simp] theorem isogenyIterate_zero (φ : Isogeny W.toAffine W.toAffine) :
     isogenyIterate W φ 0 = Isogeny.id W.toAffine := rfl
 
+omit [Fintype K] in
 @[simp] theorem isogenyIterate_succ (φ : Isogeny W.toAffine W.toAffine) (k : ℕ) :
     isogenyIterate W φ (k + 1) = (isogenyIterate W φ k).comp φ := rfl
 
