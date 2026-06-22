@@ -108,7 +108,7 @@ theorem zetaSubOne_pow_dvd_complexConj_iff [IsCMField K] (k : ℕ) (x : 𝓞 K) 
   have hxx (y : 𝓞 K) : ringOfIntegersComplexConj K (ringOfIntegersComplexConj K y) = y := by
     apply RingOfIntegers.ext
     simp
-  refine ⟨fun h => ?_, fun h => ?_⟩
+  refine ⟨fun h ↦ ?_, fun h ↦ ?_⟩
   · have h_apply : ringOfIntegersComplexConj K (zetaSubOne p K ^ k) ∣
         ringOfIntegersComplexConj K (ringOfIntegersComplexConj K x) :=
       map_dvd (ringOfIntegersComplexConj K).toRingEquiv.toRingHom h
@@ -147,7 +147,7 @@ theorem IsPrimary.complexConj_iff
     [IsCyclotomicExtension {p} ℚ K] [IsCMField K]
     {α : 𝓞 K} :
     IsPrimary p (K := K) (ringOfIntegersComplexConj K α) ↔ IsPrimary p α := by
-  refine ⟨fun h => ?_, IsPrimary.complexConj⟩
+  refine ⟨fun h ↦ ?_, IsPrimary.complexConj⟩
   have h2 : IsPrimary p (K := K)
       (ringOfIntegersComplexConj K (ringOfIntegersComplexConj K α)) :=
     h.complexConj
@@ -242,7 +242,7 @@ theorem IsHyperprimary.complexConj_iff
     {α : 𝓞 K} :
     IsHyperprimary p (K := K) (ringOfIntegersComplexConj K α) ↔
       IsHyperprimary p α := by
-  refine ⟨fun h => ?_, IsHyperprimary.complexConj⟩
+  refine ⟨fun h ↦ ?_, IsHyperprimary.complexConj⟩
   have h2 := h.complexConj
   have heq : ringOfIntegersComplexConj K (ringOfIntegersComplexConj K α) = α := by
     apply RingOfIntegers.ext
