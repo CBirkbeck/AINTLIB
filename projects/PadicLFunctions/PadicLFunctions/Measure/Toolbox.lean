@@ -407,14 +407,6 @@ lemma isClopen_units : IsClopen {x : ℤ_[p] | IsUnit x} := by
   rw [heq]
   exact (isClopen_pZp p).compl
 
-/-- `Res_{ℤ_p^×} = 1 − φ∘ψ` — Eq. (3.10) (`res to Zp`).
-
-Source: RJW TeX lines 1152–1154. -/
-lemma setOf_isUnit_eq : {x : ℤ_[p] | IsUnit x} = {x : ℤ_[p] | ‖x‖ < 1}ᶜ := by
-  ext x
-  simp only [Set.mem_compl_iff, Set.mem_setOf_eq, PadicInt.isUnit_iff, not_lt]
-  exact ⟨fun h => h.ge, fun h => le_antisymm (PadicInt.norm_le_one x) h⟩
-
 theorem res_units_eq (μ : PadicMeasure p ℤ_[p]) :
     res p (isClopen_units p) μ = μ - phi p (psi p μ) := by
   rw [phi_psi]
