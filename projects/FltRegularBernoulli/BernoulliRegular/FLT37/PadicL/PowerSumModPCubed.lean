@@ -308,35 +308,22 @@ theorem valuation_secondOrderFaulhaberTerm_thirtytwo :
   -- `B₃₀ = 8615841276005 / 14322`, a 37-unit; `C(32,2) = 496`; `3` a 37-unit.
   have hnum30 : (bernoulli 30).num = 8615841276005 := by bernoulli_decide
   have hden30 : (bernoulli 30).den = 14322 := by bernoulli_decide
-  have hB30_ne' : (bernoulli 30 : ℚ) ≠ 0 := by
-    intro h
-    have : (bernoulli 30).num = 0 := by rw [h]; rfl
-    rw [hnum30] at this; norm_num at this
+  have hB30_ne' : (bernoulli 30 : ℚ) ≠ 0 := Rat.num_ne_zero.mp (by rw [hnum30]; decide)
   have hv_B30 : Padic.valuation (((bernoulli 30 : ℚ) : ℚ_[37])) = 0 := by
     rw [Padic.valuation_ratCast, padicValRat_def, hnum30, hden30]
     have h1 : padicValInt 37 8615841276005 = 0 := by
-      rw [padicValInt, padicValNat.eq_zero_iff]; right; right; decide
-    have h2 : padicValNat 37 14322 = 0 := by
-      rw [padicValNat.eq_zero_iff]; right; right; decide
+      rw [padicValInt]; exact padicValNat.eq_zero_of_not_dvd (by decide)
+    have h2 : padicValNat 37 14322 = 0 := padicValNat.eq_zero_of_not_dvd (by decide)
     rw [h1, h2]; norm_num
   have hv_choose : Padic.valuation ((Nat.choose 32 2 : ℕ) : ℚ_[37]) = 0 := by
-    rw [show (Nat.choose 32 2 : ℕ) = 496 from rfl]
-    rw [Padic.valuation_natCast]
-    have : padicValNat 37 496 = 0 := by
-      rw [padicValNat.eq_zero_iff]; right; right; decide
-    rw [this]; rfl
+    rw [show (Nat.choose 32 2 : ℕ) = 496 from rfl, Padic.valuation_natCast,
+      padicValNat.eq_zero_of_not_dvd (by decide : ¬(37 : ℕ) ∣ 496)]; rfl
   have hv_three : Padic.valuation ((3 : ℕ) : ℚ_[37]) = 0 := by
-    rw [Padic.valuation_natCast]
-    have : padicValNat 37 3 = 0 := by
-      rw [padicValNat.eq_zero_iff]; right; right; decide
-    rw [this]; rfl
+    rw [Padic.valuation_natCast, padicValNat.eq_zero_of_not_dvd (by decide : ¬(37 : ℕ) ∣ 3)]; rfl
   have hv_pow : Padic.valuation ((37 : ℚ_[37]) ^ 3) = 3 := by
     rw [Padic.valuation_pow]
     have hvp : Padic.valuation (37 : ℚ_[37]) = 1 := by
-      rw [show (37 : ℚ_[37]) = ((37 : ℕ) : ℚ_[37]) from by norm_num, Padic.valuation_natCast]
-      rw [show padicValNat 37 37 = 1 from by
-        rw [padicValNat_self]]
-      rfl
+      rw [show (37 : ℚ_[37]) = ((37 : ℕ) : ℚ_[37]) from by norm_num, Padic.valuation_p]
     rw [hvp]; ring
   have hB30_ne : (((bernoulli 30 : ℚ) : ℚ_[37])) ≠ 0 := Rat.cast_ne_zero.mpr hB30_ne'
   have hchoose_ne : ((Nat.choose 32 2 : ℕ) : ℚ_[37]) ≠ 0 := by
@@ -372,17 +359,13 @@ theorem power_sum_valuation_thirtytwo :
   haveI : Fact (Nat.Prime 37) := ⟨by norm_num⟩
   -- `v(37·B₃₂) = 2`.
   have hvp : Padic.valuation (37 : ℚ_[37]) = 1 := by
-    rw [show (37 : ℚ_[37]) = ((37 : ℕ) : ℚ_[37]) from by norm_num, Padic.valuation_natCast]
-    rw [show padicValNat 37 37 = 1 from by rw [padicValNat_self]]
-    rfl
+    rw [show (37 : ℚ_[37]) = ((37 : ℕ) : ℚ_[37]) from by norm_num, Padic.valuation_p]
   have hvB : Padic.valuation (((bernoulli 32 : ℚ) : ℚ_[37])) = 1 := by
     rw [Padic.valuation_ratCast]
     exact padicValRat_bernoulli_thirtytwo
   have hpQ_ne : (37 : ℚ_[37]) ≠ 0 := by norm_num
-  have hBcast_ne : (((bernoulli 32 : ℚ) : ℚ_[37])) ≠ 0 := by
-    have hnum : (bernoulli 32).num = -7709321041217 := bernoulli_thirtytwo_num_eq
-    rw [Rat.cast_ne_zero]
-    intro h; rw [h] at hnum; simp at hnum
+  have hBcast_ne : (((bernoulli 32 : ℚ) : ℚ_[37])) ≠ 0 :=
+    Rat.cast_ne_zero.mpr (Rat.num_ne_zero.mp (by rw [bernoulli_thirtytwo_num_eq]; decide))
   set y : ℚ_[37] := (37 : ℚ_[37]) * ((bernoulli 32 : ℚ) : ℚ_[37]) with hy
   set x : ℚ_[37] := ∑ k ∈ Finset.range 37, (k : ℚ_[37]) ^ 32 with hx
   have hy0 : y ≠ 0 := mul_ne_zero hpQ_ne hBcast_ne
@@ -403,9 +386,8 @@ theorem power_sum_valuation_thirtytwo :
       rw [Padic.valuation_mul (mul_ne_zero h32_ne hp3_ne) hWW,
         Padic.valuation_mul h32_ne hp3_ne]
       have hv32 : Padic.valuation (32 : ℚ_[37]) = 0 := by
-        rw [show (32 : ℚ_[37]) = ((32 : ℕ) : ℚ_[37]) from by norm_num, Padic.valuation_natCast]
-        rw [show padicValNat 37 32 = 0 from by
-          rw [padicValNat.eq_zero_iff]; right; right; decide]; rfl
+        rw [show (32 : ℚ_[37]) = ((32 : ℕ) : ℚ_[37]) from by norm_num, Padic.valuation_natCast,
+          padicValNat.eq_zero_of_not_dvd (by decide : ¬(37 : ℕ) ∣ 32)]; rfl
       have hvp3 : Padic.valuation ((37 : ℚ_[37]) ^ 3) = 3 := by
         rw [Padic.valuation_pow, hvp]; ring
       have hvW : (0 : ℤ) ≤ (W : ℚ_[37]).valuation := PadicInt.valuation_coe_nonneg
