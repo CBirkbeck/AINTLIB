@@ -311,29 +311,16 @@ private theorem coeff_add_monomial_pow_stable
   rw [map_sum]
   -- Split sum: m = 0 term = h^0 * g^d * 1 = g^d; m ≥ 1 terms vanish at coeff k.
   rw [Finset.sum_eq_single 0]
-  · -- Goal: coeff k (h^0 * g^(d-0) * (choose(d,0) : PS)) = coeff k (g^d).
+  · -- The `m = 0` term is `h^0 * g^d * (choose d 0) = g^d`.
     rw [pow_zero, Nat.sub_zero, Nat.choose_zero_right]
-    -- Goal: coeff k (1 * g^d * ↑1) = coeff k (g^d).
-    congr 1
-    -- Goal: 1 * g ^ d * ↑1 = g ^ d.
-    -- Try `simp` first since rewriting is finicky.
-    push_cast
-    -- After push_cast: 1 * g^d * 1 = g^d.
-    exact (mul_one _).trans (one_mul _)
+    simp
   · intro m _ hm0
     have hm_pos : 0 < m := Nat.pos_of_ne_zero hm0
     -- Goal: coeff k (h^m * g^(d-m) * choose(d,m)) = 0.
     rw [hdef, monomial_pow_eq]
     -- h^m = C (c^m) * X^(m*(n+1)).
-    have hnatCast : ((d.choose m : ℕ) : PowerSeries R) = PowerSeries.C ((d.choose m : ℕ) : R) := by
-      induction (d.choose m) with
-      | zero => push_cast; exact (map_zero _).symm
-      | succ k ih =>
-        rw [show ((k + 1 : ℕ) : PowerSeries R) = ((k : ℕ) : PowerSeries R) + 1 from by
-              push_cast; rfl]
-        rw [ih]
-        rw [show ((k + 1 : ℕ) : R) = ((k : ℕ) : R) + 1 from by push_cast; rfl]
-        rw [map_add, map_one]
+    have hnatCast : ((d.choose m : ℕ) : PowerSeries R) = PowerSeries.C ((d.choose m : ℕ) : R) :=
+      (map_natCast PowerSeries.C (d.choose m)).symm
     rw [hnatCast]
     -- Goal: coeff k (C (c^m) * X^(m*(n+1)) * g^(d-m) * C ↑choose) = 0
     -- Rearrange using explicit term-level rewriting via congruence.
