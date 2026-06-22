@@ -55,6 +55,7 @@ noncomputable def u_gen : KE :=
   algebraMap F KE W.a₁ * algebraMap R KE (algebraMap (Polynomial F) R Polynomial.X) +
   algebraMap F KE W.a₃
 
+omit [DecidableEq F] in
 theorem u_gen_ne_zero : u_gen W ≠ 0 := denom_ne_zero W.toAffine
 
 /-- `α*(u)` where `u = 2y + a₁x + a₃`. Since α* is an F-algebra hom,
@@ -169,6 +170,7 @@ theorem alpha_star_u_mulByInt (n : ℤ) (hn : n ≠ 0) :
 -- modulo the Weierstrass relation, combined with the ω_spec identity for alpha_star_u.
 -- Reference: Silverman Exercise III.3.7, with the invariant differential computation from III.5.3.
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- ψ_ff squared equals ΨSq_ff. -/
 private lemma ψ_ff_sq_eq (n : ℤ) :
     (algebraMap R KE (Affine.CoordinateRing.mk W.toAffine (W.ψ n))) ^ 2 =
@@ -177,6 +179,7 @@ private lemma ψ_ff_sq_eq (n : ℤ) :
   rw [Affine.CoordinateRing.mk_ψ (W := W.toAffine) n]
   exact Affine.CoordinateRing.mk_Ψ_sq (W := W.toAffine) n
 
+omit [DecidableEq F] in
 /-- ΨSq_ff is nonzero for n ≠ 0. -/
 private lemma ΨSq_ff_ne_zero' {n : ℤ} (hn : n ≠ 0) : ΨSq_ff W n ≠ 0 := by
   rw [ΨSq_ff]; intro h
@@ -185,6 +188,7 @@ private lemma ΨSq_ff_ne_zero' {n : ℤ} (hn : n ≠ 0) : ΨSq_ff W n ≠ 0 := b
       Affine.CoordinateRing.algebraMap_poly_injective)
     (by simp only [Function.comp, map_zero]; exact h))
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- The image of φ in K(E) equals Φ_ff. -/
 private lemma φ_ff_eq (n : ℤ) :
     algebraMap R KE (Affine.CoordinateRing.mk W.toAffine (W.φ n)) =
@@ -192,6 +196,7 @@ private lemma φ_ff_eq (n : ℤ) :
   simp only [Φ_ff]; congr 1
   exact Affine.CoordinateRing.mk_φ (W := W.toAffine) n
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- CC a maps to algebraMap F KE a via the coordinate ring. -/
 private lemma CC_eq_algebraMap (a : F) :
     algebraMap R KE (Affine.CoordinateRing.mk W.toAffine
@@ -200,6 +205,7 @@ private lemma CC_eq_algebraMap (a : F) :
     algebraMap F R a from rfl]
   exact (IsScalarTower.algebraMap_apply F R KE a).symm
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- The ω_spec identity in K(E):
     2 * ω_ff + a₁ * Φ_ff * ψ_ff + a₃ * ψ_ff ^ 3 = ψc_ff -/
 private lemma ω_spec_ff (n : ℤ) :
@@ -213,6 +219,7 @@ private lemma ω_spec_ff (n : ℤ) :
   simp only [Function.comp, map_add, map_mul, map_pow, map_ofNat] at h
   rwa [φ_ff_eq W n, CC_eq_algebraMap, CC_eq_algebraMap] at h
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- The ψc_spec identity in K(E): ψ_ff * ψc_ff = ψ_ff(2n) -/
 private lemma ψc_spec_ff (n : ℤ) :
     (algebraMap R KE (Affine.CoordinateRing.mk W.toAffine (W.ψ n))) *
@@ -221,6 +228,7 @@ private lemma ψc_spec_ff (n : ℤ) :
   have h := congr_arg (algebraMap R KE ∘ Affine.CoordinateRing.mk W.toAffine) (W.ψc_spec n)
   simpa only [Function.comp, map_mul] using h
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- The image of `polynomialY` (= ψ₂) in K(E) equals `u_gen W = 2y + a₁x + a₃`. -/
 private lemma mk_polynomialY_eq_u_gen :
     algebraMap R KE (Affine.CoordinateRing.mk W.toAffine W.toAffine.polynomialY) =
@@ -502,11 +510,13 @@ theorem wronskian_Φ_ΨSq (n : ℤ) :
     subst hm_eq
     exact wronskian_Φ_ΨSq_nat W m
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- `Φ_ff` and `ΨSq_ff` factor through `algebraMap (Polynomial F) KE`. -/
 private lemma Φ_ff_eq_algebraMap_poly (n : ℤ) :
     Φ_ff W n = algebraMap (Polynomial F) KE (W.Φ n) :=
   (IsScalarTower.algebraMap_apply (Polynomial F) R KE _).symm
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 private lemma ΨSq_ff_eq_algebraMap_poly (n : ℤ) :
     ΨSq_ff W n = algebraMap (Polynomial F) KE (W.ΨSq n) :=
   (IsScalarTower.algebraMap_apply (Polynomial F) R KE _).symm
