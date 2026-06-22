@@ -66,7 +66,7 @@ theorem zeta_pow_finiteFieldExponent_val [NeZero p]
     (Additive.ofMul
       (⟨finiteFieldUnit hdiv x, finiteFieldUnit_mem_zpowers hzeta hdiv x⟩ :
         Subgroup.zpowers zeta))
-  have happ := congrArg (fun y : Additive (Subgroup.zpowers zeta) =>
+  have happ := congrArg (fun y : Additive (Subgroup.zpowers zeta) ↦
     ((Additive.toMul y : Subgroup.zpowers zeta) : kˣ)) h
   change ((Additive.toMul
       (hzeta.zmodEquivZPowers (finiteFieldExponent zeta hzeta hdiv x)) :
@@ -99,7 +99,7 @@ theorem finiteFieldExponent_mul [NeZero p] (zeta : kˣ) (hzeta : IsPrimitiveRoot
   rw [map_add]
   simp only [finiteFieldExponent, AddEquiv.apply_symm_apply]
   ext
-  exact congrArg (fun u : kˣ => (u : k)) (finiteFieldUnit_mul hdiv x y)
+  exact congrArg (fun u : kˣ ↦ (u : k)) (finiteFieldUnit_mul hdiv x y)
 
 theorem finiteFieldExponent_one [NeZero p] (zeta : kˣ) (hzeta : IsPrimitiveRoot zeta p)
     (hdiv : p ∣ Fintype.card k - 1) :
@@ -128,10 +128,7 @@ theorem finiteFieldExponent_eq_zero_of_isPow [NeZero p]
     (h_pow : ∃ y : kˣ, x = y ^ p) :
     finiteFieldExponent zeta hzeta hdiv x = 0 := by
   obtain ⟨y, rfl⟩ := h_pow
-  rw [finiteFieldExponent_pow]
-  -- (p : ZMod p) = 0.
-  rw [show ((p : ZMod p) : ZMod p) = 0 from by exact_mod_cast ZMod.natCast_self p,
-    zero_mul]
+  rw [finiteFieldExponent_pow, ZMod.natCast_self, zero_mul]
 
 /-- Cyclic-group `p`-th-power criterion.  In a finite cyclic commutative group
 `G`, when `p` divides the group order, an element is a `p`-th power iff its
@@ -140,11 +137,10 @@ theorem isPow_iff_pow_card_div_eq_one {G : Type*} [CommGroup G]
     [Finite G] [IsCyclic G] {p : ℕ} (hp : p ∣ Nat.card G) (u : G) :
     (∃ v : G, u = v ^ p) ↔ u ^ (Nat.card G / p) = 1 := by
   have hrange : (∃ v : G, u = v ^ p) ↔ u ∈ (powMonoidHom p : G →* G).range := by
-    refine ⟨fun ⟨v, hv⟩ => ⟨v, hv.symm⟩, ?_⟩
+    refine ⟨fun ⟨v, hv⟩ ↦ ⟨v, hv.symm⟩, ?_⟩
     rintro ⟨v, hv⟩
     exact ⟨v, hv.symm⟩
-  rw [hrange]
-  rw [show u ^ (Nat.card G / p) = (powMonoidHom (Nat.card G / p) : G →* G) u from rfl,
+  rw [hrange, show u ^ (Nat.card G / p) = (powMonoidHom (Nat.card G / p) : G →* G) u from rfl,
     ← MonoidHom.mem_ker]
   have hcardR : Nat.card (powMonoidHom p : G →* G).range = Nat.card G / p := by
     rw [IsCyclic.card_powMonoidHom_range, Nat.gcd_eq_right hp]
@@ -223,8 +219,7 @@ theorem finiteFieldExponent_zeta_pow [Fact p.Prime] [NeZero p]
   rw [← hzeta.eq_orderOf] at h_eq
   have h_zmod := (ZMod.natCast_eq_natCast_iff _ _ _).mpr h_eq
   push_cast at h_zmod
-  rw [ZMod.natCast_val, ZMod.cast_id] at h_zmod
-  rw [ZMod.natCast_val, ZMod.cast_id] at h_zmod
+  simp only [ZMod.natCast_val, ZMod.cast_id] at h_zmod
   exact h_zmod
 
 section PrimeIdeal
@@ -264,8 +259,7 @@ theorem primeExponent_mul {p : ℕ} [NeZero p] [Fintype (R ⧸ q)] (zeta_q : (R 
       primeExponent q zeta_q hzeta_q hdiv x hx +
         primeExponent q zeta_q hzeta_q hdiv y hy := by
   letI : Field (R ⧸ q) := Ideal.Quotient.field q
-  rw [primeExponent, primeExponent, primeExponent]
-  rw [← finiteFieldExponent_mul]
+  rw [primeExponent, primeExponent, primeExponent, ← finiteFieldExponent_mul]
   congr
   exact quotientUnitOfNotMem_mul q hx hy hxy
 
@@ -280,8 +274,8 @@ theorem primeExponent_one {p : ℕ} [NeZero p] [Fintype (R ⧸ q)] (zeta_q : (R 
     (hdiv : p ∣ Fintype.card (R ⧸ q) - 1) (h1 : (1 : R) ∉ q) :
     primeExponent q zeta_q hzeta_q hdiv (1 : R) h1 = 0 := by
   letI : Field (R ⧸ q) := Ideal.Quotient.field q
-  rw [primeExponent]
-  rw [show quotientUnitOfNotMem q (1 : R) h1 = 1 from quotientUnitOfNotMem_one q]
+  rw [primeExponent,
+    show quotientUnitOfNotMem q (1 : R) h1 = 1 from quotientUnitOfNotMem_one q]
   exact finiteFieldExponent_one zeta_q hzeta_q hdiv
 
 theorem quotientUnitOfNotMem_pow {x : R} (hx : x ∉ q) (n : ℕ)
@@ -289,7 +283,7 @@ theorem quotientUnitOfNotMem_pow {x : R} (hx : x ∉ q) (n : ℕ)
     quotientUnitOfNotMem q (x ^ n) hxn = (quotientUnitOfNotMem q x hx) ^ n := by
   letI : Field (R ⧸ q) := Ideal.Quotient.field q
   ext
-  simp [quotientUnitOfNotMem, map_pow]
+  simp [quotientUnitOfNotMem]
 
 theorem primeExponent_pow {p : ℕ} [NeZero p] [Fintype (R ⧸ q)] (zeta_q : (R ⧸ q)ˣ)
     (hzeta_q : IsPrimitiveRoot zeta_q p)
@@ -298,8 +292,7 @@ theorem primeExponent_pow {p : ℕ} [NeZero p] [Fintype (R ⧸ q)] (zeta_q : (R 
     primeExponent q zeta_q hzeta_q hdiv (x ^ n) hxn =
       n * primeExponent q zeta_q hzeta_q hdiv x hx := by
   letI : Field (R ⧸ q) := Ideal.Quotient.field q
-  rw [primeExponent, primeExponent]
-  rw [quotientUnitOfNotMem_pow q hx n hxn]
+  rw [primeExponent, primeExponent, quotientUnitOfNotMem_pow q hx n hxn]
   exact finiteFieldExponent_pow zeta_q hzeta_q hdiv _ n
 
 /-- **Change of primitive root in `primeExponent`.** Direct consequence
@@ -361,13 +354,13 @@ theorem idealExponent_mul (chi : Ideal R → ZMod p)
       idealExponent chi I + idealExponent chi J := by
   unfold idealExponent
   rw [normalizedFactors_mul hI hJ]
-  simp [Multiset.map_add, Multiset.sum_add]
+  simp
 
 /-- Convenience wrapper for local data supplied only on prime ideals. -/
 def idealExponentOfPrimeSymbols (chi : (q : Ideal R) → Prime q → ZMod p)
     (I : Ideal R) : ZMod p := by
   classical
-  exact idealExponent (fun q => if hq : Prime q then chi q hq else 0) I
+  exact idealExponent (fun q ↦ if hq : Prime q then chi q hq else 0) I
 
 theorem idealExponentOfPrimeSymbols_mul (chi : (q : Ideal R) → Prime q → ZMod p)
     {I J : Ideal R} (hI : I ≠ 0) (hJ : J ≠ 0) :
@@ -375,7 +368,7 @@ theorem idealExponentOfPrimeSymbols_mul (chi : (q : Ideal R) → Prime q → ZMo
       idealExponentOfPrimeSymbols chi I + idealExponentOfPrimeSymbols chi J := by
   classical
   unfold idealExponentOfPrimeSymbols
-  exact idealExponent_mul (fun q => if hq : Prime q then chi q hq else 0) hI hJ
+  exact idealExponent_mul (fun q ↦ if hq : Prime q then chi q hq else 0) hI hJ
 
 end IdealFactorization
 
@@ -386,3 +379,4 @@ end PowerResidue
 end ResidueSymbol
 end Reflection
 end BernoulliRegular
+
