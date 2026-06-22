@@ -90,7 +90,7 @@ theorem alternating_sum_choose_mul_pow_eq_zero {i m : ℕ} (hmi : m < i) :
     rw [← hsum]; ring
   rw [Finset.mul_sum] at hmul
   rw [← hmul]
-  refine Finset.sum_congr rfl fun k hk => ?_
+  refine Finset.sum_congr rfl fun k hk ↦ ?_
   rw [Finset.mem_range, Nat.lt_succ_iff] at hk
   -- `(-1)^i · (-1)^{i-k} = (-1)^{2i - k} = (-1)^{-k} = (-1)^k`.
   have hpow : (-1 : R) ^ i * (-1 : R) ^ (i - k) = (-1 : R) ^ k := by
@@ -208,7 +208,7 @@ theorem gaussSumTwist_eq_mathlib (i : ℕ) (j : (ZMod p)ˣ) :
       ∑ a ∈ Finset.univ \ {(0 : ZMod p)},
         S.teichCharPow i a * AddChar.mulShift S.addCharPi (j : ZMod p) a := by
     have hsplit := (Finset.sum_erase_add Finset.univ
-      (fun a : ZMod p => S.teichCharPow i a * AddChar.mulShift S.addCharPi (j : ZMod p) a)
+      (fun a : ZMod p ↦ S.teichCharPow i a * AddChar.mulShift S.addCharPi (j : ZMod p) a)
       (Finset.mem_univ (0 : ZMod p))).symm
     rw [Finset.erase_eq] at hsplit
     rw [MulChar.map_zero, zero_mul, add_zero] at hsplit
@@ -222,7 +222,7 @@ theorem gaussSumTwist_eq_mathlib (i : ℕ) (j : (ZMod p)ˣ) :
     exact isUnit_iff_ne_zero
   rw [← hmap, Finset.sum_map]
   unfold StickelbergerF1Setup.gaussSumTwist
-  refine Finset.sum_congr rfl fun a _ => ?_
+  refine Finset.sum_congr rfl fun a _ ↦ ?_
   rw [Function.Embedding.coeFn_mk, teichCharPow_apply_unit]
   -- `mulShift ψ j (a) = ψ (j·a) = (1+π)^{(j·a).rep}` (and `(j·a).rep = ((j*a : ℤ/p)).val`).
   rw [AddChar.mulShift_apply,
@@ -276,7 +276,7 @@ theorem gaussSumTwist_trivial_eq_zero {i : ℕ} (hi0 : 0 < i) (hip : i < p - 1) 
   have hc0 := S.gaussSumCoeff_zero_eq_zero hi0 hip
   unfold StickelbergerF1Setup.gaussSumCoeff at hc0
   rw [← hc0]
-  refine Finset.sum_congr rfl fun a _ => ?_
+  refine Finset.sum_congr rfl fun a _ ↦ ?_
   rw [Nat.choose_zero_right, Nat.cast_one, mul_one]
 
 /-! ### The resummation factoring `logSum i = τ(ω^{-i}) · Λ(i)`
@@ -328,7 +328,7 @@ theorem logSumViaSeries_eq (c : (ZMod p)ˣ → S.O) (i : ℕ) :
     S.logSumViaSeries c i = S.logCoeffSum c i * S.gaussSum i := by
   unfold logSumViaSeries logCoeffSum
   rw [Finset.sum_mul]
-  refine Finset.sum_congr rfl fun j _ => ?_
+  refine Finset.sum_congr rfl fun j _ ↦ ?_
   rw [S.gaussSumTwist_collapse i j, mul_assoc]
 
 /-- **The precise remaining analytic residual**, isolated to the twisted
