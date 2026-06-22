@@ -829,8 +829,18 @@ theorem isGalois_sigmaL (n : ℕ) (σ : Om →ₐ[ℚ] Om) {L : IntermediateFiel
     rw [AlgEquiv.apply_symm_apply, omAut_apply]
   exact ⟨⟩
 
-/-- **[b] abelian transport**: `Gal(σL/F⁺ₙ)` is commutative (conjugation iso to the abelian
-`Gal(L/F⁺ₙ)`). -/
+/-- Upgrade a `ℚ`-algebra automorphism of a field `E ⊇ F⁺ₙ` that fixes `F⁺ₙ` to an `F⁺ₙ`-automorphism. -/
+def algEquivFixingFPlus (n : ℕ) {E : Type*} [Field E] [Algebra ℚ E] [Algebra ↥(FPlus p n) E]
+    [IsScalarTower ℚ ↥(FPlus p n) E] (f : E ≃ₐ[ℚ] E)
+    (hf : ∀ c : ↥(FPlus p n), f (algebraMap ↥(FPlus p n) E c) = algebraMap ↥(FPlus p n) E c) :
+    E ≃ₐ[↥(FPlus p n)] E :=
+  { f with commutes' := hf }
+
+/-- **[b] abelian transport**: `Gal(σL/F⁺ₙ)` is commutative. The `ℚ`-iso `ι : L ≅ σ(L)` (which is
+`β`-semilinear, `β = σ|F⁺ₙ`) conjugates each `F⁺ₙ`-auto `φ` of `σ(L)` to an `F⁺ₙ`-auto `φ_L := ι⁻¹ φ ι`
+of `L`: `φ_L` fixes `F⁺ₙ` because for `c ∈ F⁺ₙ`, `ι(c) = β(c) ∈ F⁺ₙ` is fixed by `φ`, and `ι⁻¹` undoes
+`ι` (the `β`-twist cancels). Commutativity of `Gal(L/F⁺ₙ)` (`hab`) then transports back along `ι` via
+`algEquivFixingFPlus`. (TODO: the conjugation `φ ↦ φ_L` as an injective hom + the transport.) -/
 theorem mulComm_sigmaL (n : ℕ) (σ : Om →ₐ[ℚ] Om) {L : IntermediateField (FPlus p n) Om}
     (hL : IsAdmissibleM p n L)
     (hFle : FPlus p n ≤ IntermediateField.map σ (L.restrictScalars ℚ)) :
