@@ -2,6 +2,7 @@ import Mathlib.NumberTheory.Cyclotomic.Basic
 import Mathlib.NumberTheory.NumberField.CMField
 import Mathlib.NumberTheory.Cyclotomic.Gal
 import Mathlib.NumberTheory.RamificationInertia.Unramified
+import Mathlib.NumberTheory.RamificationInertia.Galois
 import Mathlib.FieldTheory.Galois.Profinite
 import Mathlib.FieldTheory.Galois.Infinite
 import Mathlib.FieldTheory.Galois.Abelian
@@ -952,22 +953,37 @@ theorem isUnramifiedOutsideP_sigmaL (n : ℕ) (σ : Om →ₐ[ℚ] Om) {L : Inte
   have hQ1 := (Algebra.isUnramifiedAt_iff_of_isDedekindDomain (R := 𝓞 (FPlus p n)) hQ0).mp hQunr
   -- **The β-twist core**: `e(P | 𝓞 F⁺ₙ) = e(Q | 𝓞 F⁺ₙ)` via the ℤ-tower (`eOI` is `ℤ`-linear, so
   -- `e(·|ℤ)` is `eOI`-invariant; `β = eOI|𝓞F⁺ₙ` relabels primes of `𝓞F⁺ₙ` preserving `e(·|ℤ)`).
+  haveI : Algebra.IsSeparable ℚ ↥(FPlus p n) := Algebra.IsAlgebraic.isSeparable_of_perfectField
+  haveI : IsGalois ℚ ↥(FPlus p n) := haveI := normal_FPlus p n; ⟨⟩
+  -- `eOI` as a `ℤ`-algebra equivalence (ring equivs are `ℤ`-linear).
+  let eOIz : 𝓞 ↥(IntermediateField.extendScalars hFle) ≃ₐ[ℤ] 𝓞 ↥L :=
+    { eOI with commutes' := fun r => by simp }
   have hPQ : (Ideal.under (𝓞 (FPlus p n)) P).ramificationIdx P
       = (Ideal.under (𝓞 (FPlus p n)) Q).ramificationIdx Q := by
-    -- ℤ-tower multiplicativity (instances all resolve): e(·|ℤ) = e(under|ℤ) · e(·|𝓞F⁺ₙ).
-    have e1 := Ideal.ramificationIdx_algebra_tower' (R := ℤ)
-      ((Ideal.under (𝓞 (FPlus p n)) P).under ℤ) (Ideal.under (𝓞 (FPlus p n)) P) P
-    have e2 := Ideal.ramificationIdx_algebra_tower' (R := ℤ)
-      ((Ideal.under (𝓞 (FPlus p n)) Q).under ℤ) (Ideal.under (𝓞 (FPlus p n)) Q) Q
-    -- Remaining (the genuine β-twist core), all mathlib-tooled:
-    --  hℓ : (P.under𝓞F⁺ₙ).under ℤ = (Q.under𝓞F⁺ₙ).under ℤ  (= P.under ℤ = Q.under ℤ, eOI is ℤ-linear)
-    --  hz : e(P|ℤ) = e(Q|ℤ)        via `ramificationIdx_map_eq` (eOI a ℤ-AlgEquiv; Q = map eOI P)
-    --  hb : e(P.under𝓞F⁺ₙ|ℤ) = e(Q.under𝓞F⁺ₙ|ℤ)  — `𝓞F⁺ₙ/ℤ` Galois (F⁺ₙ/ℚ Galois), the two primes
-    --       lie over the same ℓ, so `ramificationIdx_eq_of_isGaloisGroup` (or β = mapRingEquiv of
-    --       (omAut σ).restrictNormal F⁺ₙ + `ramificationIdx_map_eq`); needs the Gal-action on 𝓞F⁺ₙ.
-    --  hne : e(P.under𝓞F⁺ₙ|ℤ) ≠ 0  (ram-idx pos for a prime over a nonzero base prime)
-    --  then `Nat.eq_of_mul_eq_mul_left hne` on e1/e2/hz/hb gives the goal.
-    sorry
+    set 𝔭 := Ideal.under (𝓞 (FPlus p n)) P with h𝔭
+    set 𝔮 := Ideal.under (𝓞 (FPlus p n)) Q with h𝔮
+    -- the two `𝓞F⁺ₙ`-primes lie over the same rational prime `ℓ := 𝔭.under ℤ`
+    have hℓ : 𝔮.under ℤ = 𝔭.under ℤ := by
+      rw [h𝔭, h𝔮, Ideal.under_under, Ideal.under_under, hQdef, Ideal.under, Ideal.under,
+        Ideal.comap_comap]
+      congr 1
+      exact Subsingleton.elim _ _
+    haveI : 𝔮.LiesOver (𝔭.under ℤ) := ⟨hℓ.symm⟩
+    -- ℤ-tower multiplicativity for both towers (bottom prime `𝔭.under ℤ`)
+    have e1 := Ideal.ramificationIdx_algebra_tower' (R := ℤ) (𝔭.under ℤ) 𝔭 P
+    have e2 := Ideal.ramificationIdx_algebra_tower' (R := ℤ) (𝔭.under ℤ) 𝔮 Q
+    -- `e(P|ℤ) = e(Q|ℤ)` since `eOIz` is a `ℤ`-AlgEquiv carrying `P` to `Q`
+    have hz : (𝔭.under ℤ).ramificationIdx P = (𝔭.under ℤ).ramificationIdx Q :=
+      (Ideal.ramificationIdx_comap_eq (𝔭.under ℤ) eOIz.symm P).symm
+    -- `e(𝔭|ℤ) = e(𝔮|ℤ)`: `𝔭, 𝔮` lie over the same `ℓ` in the Galois extension `F⁺ₙ/ℚ`
+    have hb : (𝔭.under ℤ).ramificationIdx 𝔭 = (𝔭.under ℤ).ramificationIdx 𝔮 :=
+      Ideal.ramificationIdx_eq_of_isGaloisGroup (𝔭.under ℤ) 𝔭 𝔮
+        (↥(FPlus p n) ≃ₐ[ℚ] ↥(FPlus p n))
+    have h𝔭ne : 𝔭 ≠ ⊥ := Ideal.under_ne_bot (A := 𝓞 (FPlus p n)) hP0
+    have hne : (𝔭.under ℤ).ramificationIdx 𝔭 ≠ 0 :=
+      Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver 𝔭 (Ideal.under_ne_bot (A := ℤ) h𝔭ne)
+    refine Nat.eq_of_mul_eq_mul_left (Nat.pos_of_ne_zero hne) ?_
+    rw [← e1, hz, e2, hb]
   rw [hPQ]; exact hQ1
 
 /-- **Admissibility is `σ`-invariant** (the analytic heart of normality): if `L` is an admissible-`M`

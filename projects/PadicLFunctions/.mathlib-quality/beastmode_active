@@ -1,1 +1,1 @@
-FOCUS: isUnramifiedOutsideP_sigmaL — JUST DO IT (no deferring). Two pieces: (a) P=⊥ generic fibre unramified; (b) β-twist e(P|𝓞Fₙ⁺)=1 via σ̃=mapRingEquiv + ram-idx invariance. Building now.
+FOCUS: hPQ hb piece — e_ℤ(𝔭)=e_ℤ(𝔮) for two primes of 𝓞Fₙ⁺ over same ℓ (Fₙ⁺/ℚ Galois). Surveying mathlib+AINTLIB(Chebotarev) for: MulSemiringAction(Gal)(𝓞), ramificationIdx_eq_of_isGaloisGroup setup, or a direct number-field equal-ram lemma. Then finish hPQ.
