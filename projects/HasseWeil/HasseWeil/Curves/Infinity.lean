@@ -780,6 +780,33 @@ theorem ordAtInfty_algebraMap_fracPolyX_add_ge_min (p q : FractionRing (Polynomi
                   linarith
         exact_mod_cast h_int
 
+/-- `min` is translation-invariant in `WithTop ℤ`: `min (a + c) (b + c) = min a b + c`.
+
+`WithTop ℤ` is not cancellative (it carries `⊤`), so this is proved by a case split
+on `a ≤ b` rather than by a generic group lemma. Used to push the fixed shift
+`ord_∞(coordY)` out of a `min` in the non-archimedean argument. -/
+private theorem min_add_add_right_withTop (a b c : WithTop ℤ) :
+    min (a + c) (b + c) = min a b + c := by
+  rcases le_total a b with h | h
+  · rw [min_eq_left (add_le_add_left h _), min_eq_left h]
+  · rw [min_eq_right (add_le_add_left h _), min_eq_right h]
+
+/-- The `coordY`-component estimate feeding the non-archimedean inequality:
+the order of the sum of the two `coordY`-coefficients, shifted by `ord_∞(coordY)`,
+dominates the `min` of the individually-shifted orders. Combines the `F(X)`-level
+non-archimedean inequality (`ordAtInfty_algebraMap_fracPolyX_add_ge_min`) with the
+translation-invariance of `min` (`min_add_add_right_withTop`). -/
+private theorem ordAtInfty_smul_coordY_add_ge_min (q₁ q₂ : FractionRing (Polynomial F)) :
+    min (C.ordAtInfty (algebraMap (FractionRing (Polynomial F)) C.FunctionField q₁) +
+            C.ordAtInfty C.coordYInFunctionField)
+        (C.ordAtInfty (algebraMap (FractionRing (Polynomial F)) C.FunctionField q₂) +
+            C.ordAtInfty C.coordYInFunctionField) ≤
+      C.ordAtInfty (algebraMap (FractionRing (Polynomial F)) C.FunctionField q₁ +
+            algebraMap (FractionRing (Polynomial F)) C.FunctionField q₂) +
+        C.ordAtInfty C.coordYInFunctionField := by
+  rw [min_add_add_right_withTop]
+  exact add_le_add_left (C.ordAtInfty_algebraMap_fracPolyX_add_ge_min q₁ q₂) _
+
 /-- **Non-archimedean inequality for `ordAtInfty`** (T-ORD-ARITH-12):
 for any `f, g ∈ F(C)`, `min(ord f, ord g) ≤ ord(f + g)`.
 
@@ -822,28 +849,10 @@ theorem ordAtInfty_add_ge_min (f g : C.FunctionField) :
   rw [h_ord_f, h_ord_g, h_ord_sum]
   have h_α : min (C.ordAtInfty α₁) (C.ordAtInfty α₂) ≤ C.ordAtInfty (α₁ + α₂) :=
     C.ordAtInfty_algebraMap_fracPolyX_add_ge_min p₁ p₂
-  have h_β : min (C.ordAtInfty β₁) (C.ordAtInfty β₂) ≤ C.ordAtInfty (β₁ + β₂) :=
-    C.ordAtInfty_algebraMap_fracPolyX_add_ge_min q₁ q₂
   have h_β' : min (C.ordAtInfty β₁ + C.ordAtInfty C.coordYInFunctionField)
                   (C.ordAtInfty β₂ + C.ordAtInfty C.coordYInFunctionField) ≤
-      C.ordAtInfty (β₁ + β₂) + C.ordAtInfty C.coordYInFunctionField := by
-    have h_min_add : min (C.ordAtInfty β₁ + C.ordAtInfty C.coordYInFunctionField)
-                        (C.ordAtInfty β₂ + C.ordAtInfty C.coordYInFunctionField) =
-        min (C.ordAtInfty β₁) (C.ordAtInfty β₂) +
-        C.ordAtInfty C.coordYInFunctionField := by
-      rcases le_total (C.ordAtInfty β₁) (C.ordAtInfty β₂) with h | h
-      · have h1 : min (C.ordAtInfty β₁ + C.ordAtInfty C.coordYInFunctionField)
-            (C.ordAtInfty β₂ + C.ordAtInfty C.coordYInFunctionField) =
-            C.ordAtInfty β₁ + C.ordAtInfty C.coordYInFunctionField :=
-          min_eq_left (add_le_add_left h _)
-        rw [h1, min_eq_left h]
-      · have h2 : min (C.ordAtInfty β₁ + C.ordAtInfty C.coordYInFunctionField)
-            (C.ordAtInfty β₂ + C.ordAtInfty C.coordYInFunctionField) =
-            C.ordAtInfty β₂ + C.ordAtInfty C.coordYInFunctionField :=
-          min_eq_right (add_le_add_left h _)
-        rw [h2, min_eq_right h]
-    rw [h_min_add]
-    exact add_le_add_left h_β _
+      C.ordAtInfty (β₁ + β₂) + C.ordAtInfty C.coordYInFunctionField :=
+    C.ordAtInfty_smul_coordY_add_ge_min q₁ q₂
   refine le_min ?_ ?_
   · calc min (min (C.ordAtInfty α₁) _) (min (C.ordAtInfty α₂) _)
         ≤ min (C.ordAtInfty α₁) (C.ordAtInfty α₂) :=
