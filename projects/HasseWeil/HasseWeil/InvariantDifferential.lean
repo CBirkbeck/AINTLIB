@@ -22,6 +22,7 @@ variable {F : Type*} [Field F] [DecidableEq F]
 
 /-! ### Helper lemmas for the invariant differential -/
 
+omit [DecidableEq F] in
 /-- The partial derivative `polynomialY = 2Y + a₁X + a₃` of the Weierstrass polynomial with
 respect to `Y` is nonzero for elliptic curves. In characteristic 2, this uses `Δ ≠ 0`. -/
 private lemma polynomialY_ne_zero (E : Affine F) [E.IsElliptic] : E.polynomialY ≠ 0 := by
@@ -42,6 +43,48 @@ private lemma polynomialY_ne_zero (E : Affine F) [E.IsElliptic] : E.polynomialY 
       simp only [WeierstrassCurve.b₆, ha3]; linear_combination 2 * E.a₆ * h1]; ring) ▸ E.isUnit_Δ)
     not_isUnit_zero
 
+omit [DecidableEq F] in
+/-- The denominator `2y + a₁x + a₃` of the invariant differential is nonzero in `K(E)`: it is the
+image of `polynomialY` under the canonical map to the function field, and that map is injective on
+the coordinate ring while `polynomialY ≠ 0` has degree `< deg W`. -/
+private lemma two_root_add_ne_zero (E : Affine F) [E.IsElliptic] :
+    2 * algebraMap E.CoordinateRing E.FunctionField (AdjoinRoot.root E.polynomial) +
+      algebraMap (Polynomial F) E.FunctionField
+        (Polynomial.C E.a₁ * Polynomial.X + Polynomial.C E.a₃) ≠ 0 := by
+  have hmk_ne : Affine.CoordinateRing.mk E E.polynomialY ≠ 0 :=
+    AdjoinRoot.mk_ne_zero_of_natDegree_lt (Affine.monic_polynomial)
+      (polynomialY_ne_zero E) (by
+        rw [Affine.natDegree_polynomial, Affine.polynomialY]
+        have : (Polynomial.C (Polynomial.C (2 : F)) * (Y : F[X][Y])).natDegree ≤ 1 :=
+          Polynomial.natDegree_mul_le.trans
+            (by simp [Polynomial.natDegree_C, Polynomial.natDegree_X])
+        exact Nat.lt_of_le_of_lt (Polynomial.natDegree_add_le _ _)
+          (by rw [Polynomial.natDegree_C]; omega))
+  have hmk_eq : algebraMap E.CoordinateRing E.FunctionField
+      (Affine.CoordinateRing.mk E E.polynomialY) =
+      2 * algebraMap E.CoordinateRing E.FunctionField (AdjoinRoot.root E.polynomial) +
+      algebraMap (Polynomial F) E.FunctionField
+        (Polynomial.C E.a₁ * Polynomial.X + Polynomial.C E.a₃) := by
+    have hmk : (Affine.CoordinateRing.mk E E.polynomialY : E.CoordinateRing) =
+      algebraMap (Polynomial F) E.CoordinateRing (Polynomial.C 2) *
+        AdjoinRoot.root E.polynomial +
+      algebraMap (Polynomial F) E.CoordinateRing
+        (Polynomial.C E.a₁ * Polynomial.X + Polynomial.C E.a₃) := by
+      change AdjoinRoot.mk E.polynomial E.polynomialY = _
+      rw [Affine.polynomialY, map_add, map_mul, AdjoinRoot.mk_X]; rfl
+    rw [hmk, map_add, map_mul,
+      ← IsScalarTower.algebraMap_apply (Polynomial F) E.CoordinateRing E.FunctionField,
+      ← IsScalarTower.algebraMap_apply (Polynomial F) E.CoordinateRing E.FunctionField]
+    congr 1; congr 1
+    rw [show (Polynomial.C (2 : F) : Polynomial F) = algebraMap F (Polynomial F) 2
+          from rfl,
+      ← IsScalarTower.algebraMap_apply F (Polynomial F) E.FunctionField,
+      show algebraMap F E.FunctionField (2 : F) = (2 : E.FunctionField)
+        from by simp [map_ofNat]]
+  rw [← hmk_eq]; intro h
+  exact hmk_ne ((IsFractionRing.injective E.CoordinateRing E.FunctionField).eq_iff.mp
+    (h.trans (map_zero _).symm))
+
 /-- The algebra map `F[X] → K(E)` is injective since `x` is transcendental over `F`. -/
 private lemma algebraMap_polynomial_injective (E : Affine F) [E.IsElliptic] :
     Function.Injective (algebraMap (Polynomial F) E.FunctionField) := by
@@ -57,6 +100,7 @@ private lemma algebraMap_polynomial_injective (E : Affine F) [E.IsElliptic] :
     Polynomial.natDegree_C _
   rw [Affine.natDegree_polynomial] at hle; omega
 
+omit [DecidableEq F] in
 /-- Evaluating a polynomial at `x = algebraMap X` in `K(E)` equals applying `algebraMap`. -/
 private lemma aeval_x_eq_algebraMap' (E : Affine F) (p : Polynomial F) :
     Polynomial.aeval (algebraMap (Polynomial F) E.FunctionField Polynomial.X) p =
@@ -102,15 +146,8 @@ lemma D_x_ne_zero (E : Affine F) [E.IsElliptic] :
         | succ n ih =>
           rw [pow_succ, Derivation.leibniz, ih, smul_zero, hDx, smul_zero, add_zero]
       have haeval : ∀ q : Polynomial F,
-          Polynomial.aeval x q = algebraMap (Polynomial F) E.FunctionField q := by
-        intro q; induction q using Polynomial.induction_on' with
-        | add _ _ hp hq => simp [hp, hq]
-        | monomial n a =>
-          simp only [Polynomial.aeval_monomial]
-          show algebraMap (Polynomial F) E.FunctionField (Polynomial.C a) *
-            (algebraMap (Polynomial F) E.FunctionField Polynomial.X) ^ n =
-            algebraMap (Polynomial F) E.FunctionField (Polynomial.monomial n a)
-          rw [← map_pow, ← map_mul, Polynomial.C_mul_X_pow_eq_monomial]
+          Polynomial.aeval x q = algebraMap (Polynomial F) E.FunctionField q :=
+        fun q ↦ aeval_x_eq_algebraMap' E q
       rw [← haeval]; induction p using Polynomial.induction_on' with
       | add _ _ hp hq => rw [map_add, map_add, hp, hq, add_zero]
       | monomial n a =>
@@ -148,37 +185,7 @@ lemma D_x_ne_zero (E : Affine F) [E.IsElliptic] :
           rw [map_add, sq, Derivation.leibniz, Derivation.leibniz,
             show D c = 0 from hDpoly _, smul_zero, add_zero, add_smul, two_mul, add_smul]
         rw [← hD_lhs, hW_FF]; exact hDpoly _
-      have hne : 2 * y + c ≠ 0 := by
-        have hmk_ne : Affine.CoordinateRing.mk E E.polynomialY ≠ 0 :=
-          AdjoinRoot.mk_ne_zero_of_natDegree_lt (Affine.monic_polynomial)
-            (polynomialY_ne_zero E) (by
-              rw [Affine.natDegree_polynomial, Affine.polynomialY]
-              have : (Polynomial.C (Polynomial.C (2 : F)) * (Y : F[X][Y])).natDegree ≤ 1 :=
-                Polynomial.natDegree_mul_le.trans
-                  (by simp [Polynomial.natDegree_C, Polynomial.natDegree_X])
-              exact Nat.lt_of_le_of_lt (Polynomial.natDegree_add_le _ _)
-                (by rw [Polynomial.natDegree_C]; omega))
-        have hmk_eq : algebraMap E.CoordinateRing E.FunctionField
-            (Affine.CoordinateRing.mk E E.polynomialY) = 2 * y + c := by
-          have hmk : (Affine.CoordinateRing.mk E E.polynomialY : E.CoordinateRing) =
-            algebraMap (Polynomial F) E.CoordinateRing (Polynomial.C 2) *
-              AdjoinRoot.root E.polynomial +
-            algebraMap (Polynomial F) E.CoordinateRing
-              (Polynomial.C E.a₁ * Polynomial.X + Polynomial.C E.a₃) := by
-            show AdjoinRoot.mk E.polynomial E.polynomialY = _
-            rw [Affine.polynomialY, map_add, map_mul, AdjoinRoot.mk_X]; rfl
-          rw [hmk, map_add, map_mul,
-            ← IsScalarTower.algebraMap_apply (Polynomial F) E.CoordinateRing E.FunctionField,
-            ← IsScalarTower.algebraMap_apply (Polynomial F) E.CoordinateRing E.FunctionField]
-          congr 1; congr 1
-          rw [show (Polynomial.C (2 : F) : Polynomial F) = algebraMap F (Polynomial F) 2
-                from rfl,
-            ← IsScalarTower.algebraMap_apply F (Polynomial F) E.FunctionField,
-            show algebraMap F E.FunctionField (2 : F) = (2 : E.FunctionField)
-              from by simp [map_ofNat]]
-        rw [← hmk_eq]; intro h
-        exact hmk_ne ((IsFractionRing.injective E.CoordinateRing E.FunctionField).eq_iff.mp
-          (h.trans (map_zero _).symm))
+      have hne : 2 * y + c ≠ 0 := two_root_add_ne_zero E
       calc D y = (1 : E.FunctionField) • D y := (one_smul _ _).symm
         _ = ((2 * y + c)⁻¹ * (2 * y + c)) • D y := by rw [inv_mul_cancel₀ hne]
         _ = (2 * y + c)⁻¹ • ((2 * y + c) • D y) := (smul_smul _ _ _).symm
@@ -230,6 +237,7 @@ section InvariantDifferential
 
 variable (E : Affine F) [E.IsElliptic]
 
+omit [DecidableEq F] in
 /-- The denominator `2y + a₁x + a₃` of the invariant differential is nonzero in `K(E)`.
     This is the image of `polynomialY` under the canonical map to the function field,
     and it is nonzero because `polynomialY ≠ 0` as a polynomial of degree < deg(W),
@@ -263,36 +271,7 @@ lemma denom_ne_zero :
       algebraMap F E.FunctionField E.a₃ = 2 * y +
       (algebraMap F E.FunctionField E.a₁ * x + algebraMap F E.FunctionField E.a₃) from by ring,
     hc_eq]
-  have hmk_ne : Affine.CoordinateRing.mk E E.polynomialY ≠ 0 :=
-    AdjoinRoot.mk_ne_zero_of_natDegree_lt (Affine.monic_polynomial)
-      (polynomialY_ne_zero E) (by
-        rw [Affine.natDegree_polynomial, Affine.polynomialY]
-        have : (Polynomial.C (Polynomial.C (2 : F)) * (Y : F[X][Y])).natDegree ≤ 1 :=
-          Polynomial.natDegree_mul_le.trans
-            (by simp [Polynomial.natDegree_C, Polynomial.natDegree_X])
-        exact Nat.lt_of_le_of_lt (Polynomial.natDegree_add_le _ _)
-          (by rw [Polynomial.natDegree_C]; omega))
-  have hmk_eq : algebraMap E.CoordinateRing E.FunctionField
-      (Affine.CoordinateRing.mk E E.polynomialY) = 2 * y + c := by
-    have hmk : (Affine.CoordinateRing.mk E E.polynomialY : E.CoordinateRing) =
-      algebraMap (Polynomial F) E.CoordinateRing (Polynomial.C 2) *
-        AdjoinRoot.root E.polynomial +
-      algebraMap (Polynomial F) E.CoordinateRing
-        (Polynomial.C E.a₁ * Polynomial.X + Polynomial.C E.a₃) := by
-      change AdjoinRoot.mk E.polynomial E.polynomialY = _
-      rw [Affine.polynomialY, map_add, map_mul, AdjoinRoot.mk_X]; rfl
-    rw [hmk, map_add, map_mul,
-      ← IsScalarTower.algebraMap_apply (Polynomial F) E.CoordinateRing E.FunctionField,
-      ← IsScalarTower.algebraMap_apply (Polynomial F) E.CoordinateRing E.FunctionField]
-    congr 1; congr 1
-    rw [show (Polynomial.C (2 : F) : Polynomial F) = algebraMap F (Polynomial F) 2
-          from rfl,
-      ← IsScalarTower.algebraMap_apply F (Polynomial F) E.FunctionField,
-      show algebraMap F E.FunctionField (2 : F) = (2 : E.FunctionField)
-        from by simp [map_ofNat]]
-  rw [← hmk_eq]; intro h
-  exact hmk_ne ((IsFractionRing.injective E.CoordinateRing E.FunctionField).eq_iff.mp
-    (h.trans (map_zero _).symm))
+  exact two_root_add_ne_zero E
 
 /-- The invariant differential ω = dx/(2y + a₁x + a₃) on E, concretely
     constructed in the Kähler differential module Ω[K(E)/F]. -/
@@ -306,7 +285,6 @@ noncomputable def invariantDifferential : KaehlerDifferential F E.FunctionField 
   let a₃ : E.FunctionField := algebraMap F E.FunctionField E.a₃
   (2 * y + a₁ * x + a₃)⁻¹ • (KaehlerDifferential.D F E.FunctionField x)
 
-set_option linter.unusedDecidableInType false in
 /-- The invariant differential is nonzero (equivalently, div(ω) = 0).
     Reference: Silverman, Proposition III.1.5. -/
 theorem invariantDifferential_ne_zero :
