@@ -333,7 +333,7 @@ theorem CurveMap.exists_heightOneSpectrum_fiber_card_eq_sepDegree_unconditional
     push Not at h
     apply hinf_C2
     have hsub : ({P : IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing | True} : Set _)
-        ⊆ (fun P : IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing => P.under C₂.CoordinateRing)
+        ⊆ (fun P : IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing ↦ P.under C₂.CoordinateRing)
           '' {P | P.asIdeal ∣ differentIdeal C₂.CoordinateRing C₁.CoordinateRing} := by
       intro Q _
       obtain ⟨P, hPdvd, hPeq⟩ := h Q
@@ -360,7 +360,7 @@ theorem CurveMap.exists_heightOneSpectrum_fiber_card_eq_sepDegree_unconditional
     show P.under C₂.CoordinateRing = Q.asIdeal
     exact (Ideal.over_def P Q.asIdeal).symm
   have hP'_nd : ¬ P'.asIdeal ∣ differentIdeal C₂.CoordinateRing C₁.CoordinateRing :=
-    fun hdvd => hQ_good P' hdvd hP'_under_eq
+    fun hdvd ↦ hQ_good P' hdvd hP'_under_eq
   -- Pieces 2 + 3 ⇒ ramificationIdx = 1.
   haveI hUnram : Algebra.IsUnramifiedAt C₂.CoordinateRing P :=
     IsDedekindDomain.isUnramifiedAt_of_not_dvd_differentIdeal hsepFF hP'_nd
