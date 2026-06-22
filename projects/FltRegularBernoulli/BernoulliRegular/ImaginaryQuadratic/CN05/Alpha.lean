@@ -261,7 +261,7 @@ theorem exponent_alphaInOK_eq_one (hp3 : p % 4 = 3) :
 theorem not_dvd_exponent_alphaInOK (hp3 : p % 4 = 3) (q : ℕ) [hq : Fact q.Prime] :
     ¬ q ∣ RingOfIntegers.exponent (alphaInOK p hp3) := by
   rw [exponent_alphaInOK_eq_one p hp3]
-  exact fun h => hq.out.one_lt.ne' (Nat.dvd_one.mp h)
+  exact fun h ↦ hq.out.one_lt.ne' (Nat.dvd_one.mp h)
 
 /-- The minimal polynomial of `alphaInOK p hp3` over `ℤ` is `X² - X + C((p+1)/4)`. -/
 theorem alphaInOK_minpoly_int (hp3 : p % 4 = 3) :
@@ -620,13 +620,13 @@ theorem inertiaDeg_at_q_inert (hp3 : p % 4 = 3) (q : ℕ)
       have h_card := ncard_primesOver_at_q_inert p hp3 q hq_odd hqp h_not_sq
       rw [Set.ncard_eq_one] at h_card
       obtain ⟨x, hx⟩ := h_card
-      refine ⟨fun ⟨a, ha⟩ ⟨b, hb⟩ => ?_⟩
+      refine ⟨fun ⟨a, ha⟩ ⟨b, hb⟩ ↦ ?_⟩
       have ha_eq : a = x := by rw [hx] at ha; exact ha
       have hb_eq : b = x := by rw [hx] at hb; exact hb
       subst ha_eq; subst hb_eq; rfl
     have hP_set : (⟨P, hP⟩ : ↥(Ideal.primesOver (Ideal.span {(q : ℤ)}) (𝓞 (Kminus p)))) =
                   e.symm ⟨Qfactor, hQ_mem⟩ := h_sub.elim _ _
-    exact congrArg (fun (x : ↥(Ideal.primesOver (Ideal.span {(q : ℤ)}) (𝓞 (Kminus p)))) =>
+    exact congrArg (fun (x : ↥(Ideal.primesOver (Ideal.span {(q : ℤ)}) (𝓞 (Kminus p)))) ↦
       (x : Ideal (𝓞 (Kminus p)))) hP_set
   rw [hP_eq]
   rw [NumberField.Ideal.inertiaDeg_primesOverSpanEquivMonicFactorsMod_symm_apply'
