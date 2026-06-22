@@ -40,6 +40,10 @@ open scoped Real Interval
 
 noncomputable section
 
+/-- The constant `2πi` is nonzero; used throughout the residue/winding formulas. -/
+private lemma two_pi_mul_I_ne_zero : (2 * Real.pi * I : ℂ) ≠ 0 := by
+  norm_num [Real.pi_ne_zero, Complex.I_ne_zero]
+
 /-- The multi-point Cauchy principal value exists with value `L`: the ε-truncated
 integral along `γ` over `[a, b]` tends to `L` as `ε → 0⁺`. **Primary API predicate**
 (Tendsto-based). -/
@@ -268,9 +272,7 @@ lemma integral_singular_term_eq_winding_times_coeff
     (h_avoids : ∀ t ∈ Icc γ.a γ.b, γ.toFun t ≠ s) :
     ∫ t in γ.a..γ.b, c / (γ.toFun t - s) * deriv γ.toFun t =
       2 * Real.pi * I * generalizedWindingNumber' γ.toFun γ.a γ.b s * c := by
-  have h_ne : (2 * Real.pi * I : ℂ) ≠ 0 := by
-    simp only [ne_eq, mul_eq_zero, not_or]
-    exact ⟨⟨two_ne_zero, by exact_mod_cast Real.pi_ne_zero⟩, Complex.I_ne_zero⟩
+  have h_ne : (2 * Real.pi * I : ℂ) ≠ 0 := two_pi_mul_I_ne_zero
   have h_integral : ∫ t in γ.a..γ.b, (γ.toFun t - s)⁻¹ * deriv γ.toFun t =
       2 * Real.pi * I * generalizedWindingNumber' γ.toFun γ.a γ.b s := by
     rw [generalizedWindingNumber_eq_classical_away γ s h_avoids]
@@ -513,7 +515,7 @@ theorem pv_integral_inverse
     cauchyPrincipalValue' (·⁻¹) (fun t ↦ γ.toFun t - z₀) γ.a γ.b 0 =
       2 * Real.pi * I * generalizedWindingNumber' γ.toFun γ.a γ.b z₀ := by
   unfold generalizedWindingNumber'
-  have h_ne : (2 * Real.pi * I : ℂ) ≠ 0 := by norm_num [Real.pi_ne_zero, Complex.I_ne_zero]
+  have h_ne : (2 * Real.pi * I : ℂ) ≠ 0 := two_pi_mul_I_ne_zero
   field_simp [h_ne]
 
 /-- Single-point PV formula for simple pole. -/
