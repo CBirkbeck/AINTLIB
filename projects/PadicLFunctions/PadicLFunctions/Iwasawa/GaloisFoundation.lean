@@ -8,6 +8,7 @@ import Mathlib.FieldTheory.Galois.Abelian
 import Mathlib.FieldTheory.Perfect
 import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
 import Mathlib.RingTheory.Algebraic.Integral
+import Mathlib.RingTheory.Unramified.Field
 
 /-!
 # The Galois foundation for the Iwasawa Main Conjecture  (RJW §13.2) — ground-up construction
@@ -128,6 +129,30 @@ theorem commute_restrict_AG {B F M : Type*} [Field B] [Field F] [Field M] [Algeb
   haveI : Normal B ↥E := (‹IsAbelianGalois B ↥E›).toIsGalois.to_normal
   haveI : IsMulCommutative (↥E ≃ₐ[B] ↥E) := (‹IsAbelianGalois B ↥E›).toIsMulCommutative
   exact commute_restrict E σ τ x
+
+/-- **Vendored from mathlib PR #40886** (`feat: add Algebra.IsUnramifiedIn`; open at time of writing —
+remove when the daily bump brings it in). In characteristic zero the generic point is unramified: if
+`S` is a domain integral over a characteristic-zero domain `R` with `R → S` injective, then `S` is
+unramified at the zero ideal. -/
+theorem isUnramifiedAt_bot_charZero {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
+    [IsDomain R] [IsDomain S] [Module.IsTorsionFree R S] [CharZero R] [Algebra.IsIntegral R S] :
+    Algebra.IsUnramifiedAt R (⊥ : Ideal S) := by
+  have : IsFractionRing S (Localization.AtPrime (⊥ : Ideal S)) := by
+    simpa [Ideal.primeCompl_bot] using Localization.isLocalization (M := (⊥ : Ideal S).primeCompl)
+  let : Field (Localization.AtPrime (⊥ : Ideal S)) := IsFractionRing.toField S
+  have : FaithfulSMul R (Localization.AtPrime (⊥ : Ideal S)) := by
+    rw [faithfulSMul_iff_algebraMap_injective,
+      IsScalarTower.algebraMap_eq R S (Localization.AtPrime ⊥)]
+    exact (IsFractionRing.injective S _).comp (FaithfulSMul.algebraMap_injective R S)
+  let := FractionRing.liftAlgebra R (Localization.AtPrime (⊥ : Ideal S))
+  haveI : Algebra.IsAlgebraic R S := Algebra.IsIntegral.isAlgebraic (R := R) (A := S)
+  have : Algebra.IsAlgebraic (FractionRing R) (Localization.AtPrime ⊥) :=
+    isAlgebraic_of_isFractionRing (R := R) (S := S) (FractionRing R) (Localization.AtPrime (⊥ : Ideal S))
+  haveI : Algebra.IsSeparable (FractionRing R) (Localization.AtPrime (⊥ : Ideal S)) :=
+    Algebra.IsAlgebraic.isSeparable_of_perfectField
+  have : Algebra.FormallyUnramified (FractionRing R) (Localization.AtPrime (⊥ : Ideal S)) :=
+    Algebra.FormallyUnramified.of_isSeparable _ _
+  exact Algebra.FormallyUnramified.comp R (FractionRing R) (Localization.AtPrime ⊥)
 
 namespace Iwasawa.GaloisFoundation
 
@@ -900,7 +925,7 @@ theorem isUnramifiedOutsideP_sigmaL (n : ℕ) (σ : Om →ₐ[ℚ] Om) {L : Inte
   by_cases hP0 : P = ⊥
   · -- `P = ⊥`: the generic fibre — unramified (the residue extension is separable, char `0`).
     subst hP0
-    sorry
+    exact isUnramifiedAt_bot_charZero
   -- **Reduction** (all `IsDedekindDomain`/`EssFiniteType`/`CharZero`/`IsIntegral` instances on the
   -- rings of integers resolve via the `NumberField` instance): reduce to `e(P | 𝓞 F⁺ₙ) = 1`.
   rw [Algebra.isUnramifiedAt_iff_of_isDedekindDomain hP0]
