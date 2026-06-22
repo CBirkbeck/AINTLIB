@@ -153,6 +153,36 @@ A clean structural witness rules out the only edge case where the basic
 chain fails: `ord(L² - π·x) ≠ -q`. Then strict non-arch on the regrouped
 sum gives `ord ≤ -2`. -/
 
+/-- `ord_∞(a₁ · L) = -q` where `L = addSlope` (Frobenius), `a₁ ≠ 0`. -/
+private lemma ordAtInfty_a1_mul_addSlope_frobenius (ha1 : W.toAffine.a₁ ≠ 0) :
+    (W_smooth W).ordAtInfty
+        (algebraMap K KE W.toAffine.a₁ * addSlope W (frobeniusIsog W)) =
+      ((-(Fintype.card K : ℤ)) : WithTop ℤ) := by
+  have h_a1_alg_ne : algebraMap K KE W.toAffine.a₁ ≠ 0 := by
+    rw [Ne, ← map_zero (algebraMap K KE)]
+    exact fun h ↦ ha1 (FaithfulSMul.algebraMap_injective _ _ h)
+  have h_ord_a1 : (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₁) = 0 :=
+    ordAtInfty_algebraMap_F_nonzero W ha1
+  have h_mul := (W_smooth W).ordAtInfty_mul h_a1_alg_ne (addSlope_frobenius_ne_zero W)
+  rw [h_ord_a1, ordAtInfty_addSlope_frobenius] at h_mul
+  refine h_mul.trans ?_
+  show (0 : WithTop ℤ) + ((-(Fintype.card K : ℤ)) : WithTop ℤ) =
+    ((-(Fintype.card K : ℤ)) : WithTop ℤ)
+  rw [zero_add]
+
+/-- `ord_∞(a₁L - a₂) = -q` (strict non-arch: `ord(a₁L) = -q < 0 = ord(a₂)`). -/
+private lemma ordAtInfty_a1L_minus_a2_frobenius (ha1 : W.toAffine.a₁ ≠ 0)
+    (ha2 : W.toAffine.a₂ ≠ 0) (hq : 1 < Fintype.card K) :
+    (W_smooth W).ordAtInfty
+        (algebraMap K KE W.toAffine.a₁ * addSlope W (frobeniusIsog W) -
+          algebraMap K KE W.toAffine.a₂) =
+      ((-(Fintype.card K : ℤ)) : WithTop ℤ) := by
+  have h_neg_q_lt_0 : (-(Fintype.card K : ℤ)) < 0 := by
+    have : (1 : ℤ) < (Fintype.card K : ℤ) := by exact_mod_cast hq
+    linarith
+  exact (W_smooth W).ord_sub_lt_concrete (-(Fintype.card K : ℤ)) 0 h_neg_q_lt_0
+    (ordAtInfty_a1_mul_addSlope_frobenius W ha1) (ordAtInfty_algebraMap_F_nonzero W ha2)
+
 /-- `ord_∞(a₁L - a₂ - x_gen) = -q` for q ≥ 3, a₁ ≠ 0, a₂ ≠ 0. Chain of strict
 non-archimedean: `ord(a₁L) = -q`, `ord(-a₂) = 0`, `ord(-x_gen) = -2`, with
 `-q < -2 < 0` for q ≥ 3. -/
@@ -163,37 +193,8 @@ theorem ordAtInfty_a1L_minus_a2_minus_xgen_frobenius
       (algebraMap K KE W.toAffine.a₁ * addSlope W (frobeniusIsog W) -
        algebraMap K KE W.toAffine.a₂ - x_gen W) =
       ((-(Fintype.card K : ℤ)) : WithTop ℤ) := by
-  -- ord(a₁ * L)
-  have h_a1_alg_ne : algebraMap K KE W.toAffine.a₁ ≠ 0 := by
-    rw [Ne, ← map_zero (algebraMap K KE)]
-    exact fun h ↦ ha1 (FaithfulSMul.algebraMap_injective _ _ h)
-  have h_ord_a1 : (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₁) = 0 :=
-    ordAtInfty_algebraMap_F_nonzero W ha1
-  have h_ord_a1L :
-      (W_smooth W).ordAtInfty
-        (algebraMap K KE W.toAffine.a₁ * addSlope W (frobeniusIsog W)) =
-      ((-(Fintype.card K : ℤ)) : WithTop ℤ) := by
-    have h_mul := (W_smooth W).ordAtInfty_mul h_a1_alg_ne
-      (addSlope_frobenius_ne_zero W)
-    rw [h_ord_a1, ordAtInfty_addSlope_frobenius] at h_mul
-    refine h_mul.trans ?_
-    show (0 : WithTop ℤ) + ((-(Fintype.card K : ℤ)) : WithTop ℤ) =
-      ((-(Fintype.card K : ℤ)) : WithTop ℤ)
-    rw [zero_add]
-  -- ord(a₂)
-  have h_ord_a2 : (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₂) = 0 :=
-    ordAtInfty_algebraMap_F_nonzero W ha2
-  -- ord(a₁L - a₂) = -q (strict non-arch since -q < 0).
-  have hq_int : (1 : ℤ) < (Fintype.card K : ℤ) := by exact_mod_cast (by omega : 1 < Fintype.card K)
-  have h_neg_q_lt_0 : (-(Fintype.card K : ℤ)) < 0 := by linarith
-  have h_ord_a1L_minus_a2 :
-      (W_smooth W).ordAtInfty
-        (algebraMap K KE W.toAffine.a₁ * addSlope W (frobeniusIsog W) -
-          algebraMap K KE W.toAffine.a₂) =
-      ((-(Fintype.card K : ℤ)) : WithTop ℤ) :=
-    (W_smooth W).ord_sub_lt_concrete (-(Fintype.card K : ℤ)) 0 h_neg_q_lt_0
-      h_ord_a1L h_ord_a2
-  -- ord(a₁L - a₂ - x_gen) = -q (strict non-arch since -q < -2 for q ≥ 3).
+  have h_ord_a1L_minus_a2 :=
+    ordAtInfty_a1L_minus_a2_frobenius W ha1 ha2 (by omega : 1 < Fintype.card K)
   have h_q_ge_3 : (3 : ℤ) ≤ (Fintype.card K : ℤ) := by exact_mod_cast hq
   have h_neg_q_lt_neg2 : (-(Fintype.card K : ℤ)) < (-2 : ℤ) := by linarith
   have h_ord_x_gen : (W_smooth W).ordAtInfty (x_gen W) =
