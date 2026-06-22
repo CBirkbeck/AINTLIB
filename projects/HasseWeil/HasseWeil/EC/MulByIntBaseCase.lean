@@ -33,6 +33,7 @@ namespace HasseWeil
 variable {F : Type*} [Field F] [DecidableEq F]
 variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- `Φ_1 / ΨSq_1 = x_gen` in `K(E)`: the `[1]`-image of the generic x-coordinate
     is itself. Direct from `Φ_one` (= X) and `ΨSq_one` (= 1). -/
 theorem mulByInt_x_one : mulByInt_x W 1 = x_gen W := by
@@ -40,6 +41,7 @@ theorem mulByInt_x_one : mulByInt_x W 1 = x_gen W := by
   rw [WeierstrassCurve.Φ_one, WeierstrassCurve.ΨSq_one]
   simp [map_one, div_one]
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- `ω_1 / ψ_1³ = y_gen` in `K(E)`: the `[1]`-image of the generic y-coordinate
     is itself. Direct from `ω_one` (= Y) and `ψ_one` (= 1). -/
 theorem mulByInt_y_one :
@@ -178,6 +180,7 @@ once we establish that the composition `(mulByInt W m).pullback.comp
 (mulByInt W n).pullback` sends `x_gen → mulByInt_x W (m*n)` and similar for
 y, uniqueness forces it to equal `(mulByInt W (m*n)).pullback`. -/
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Substitution law for AlgHoms on K(E)**: for any F-algebra endomorphism `f`
     of `K(E)` and polynomial `p ∈ F[X]`, applying `f` to the image of `p` in
     `K(E)` equals evaluating `p` at `f(x)` where `x = algebraMap F[X] KE X`.
@@ -243,6 +246,19 @@ theorem mulByInt_pullback_unique (n : ℤ) (hn : n ≠ 0)
 
 /-! ### Pullback of `Φ_ff` and `ΨSq_ff` via substitution (T-III-4-020b prep) -/
 
+/-- The pullback along `[m]` of the polynomial generator `X` is `mulByInt_x W m`:
+    `X` maps to `x_gen W` via the scalar tower, then `mulByInt_pullback_x` applies.
+    Shared by `mulByInt_pullback_Φ_ff` and `mulByInt_pullback_ΨSq_ff`. -/
+private theorem mulByInt_pullback_algebraMap_X (m : ℤ) (hm : m ≠ 0) :
+    (mulByInt W.toAffine m).pullback
+        (algebraMap (Polynomial F) W.toAffine.FunctionField Polynomial.X) =
+      mulByInt_x W m := by
+  have h : algebraMap (Polynomial F) W.toAffine.FunctionField Polynomial.X = x_gen W := by
+    unfold x_gen
+    exact IsScalarTower.algebraMap_apply (Polynomial F) W.toAffine.CoordinateRing
+      W.toAffine.FunctionField Polynomial.X
+  rw [h]; exact mulByInt_pullback_x W m hm
+
 /-- The pullback along `[m]` of `Φ_ff W n` is `(W.Φ n).eval₂ (algebraMap F KE) (mulByInt_x W m)`.
 
     Direct application of `algHom_apply_polynomial` after normalizing `Φ_ff` to
@@ -256,16 +272,8 @@ theorem mulByInt_pullback_Φ_ff (m n : ℤ) (hm : m ≠ 0) :
     unfold Φ_ff
     exact (IsScalarTower.algebraMap_apply (Polynomial F) W.toAffine.CoordinateRing
       W.toAffine.FunctionField (W.Φ n)).symm
-  have h_xpb : (mulByInt W.toAffine m).pullback
-      (algebraMap (Polynomial F) W.toAffine.FunctionField Polynomial.X) =
-      mulByInt_x W m := by
-    have h : algebraMap (Polynomial F) W.toAffine.FunctionField Polynomial.X =
-        x_gen W := by
-      unfold x_gen
-      exact IsScalarTower.algebraMap_apply (Polynomial F) W.toAffine.CoordinateRing
-        W.toAffine.FunctionField Polynomial.X
-    rw [h]; exact mulByInt_pullback_x W m hm
-  rw [h_norm, algHom_apply_polynomial W (mulByInt W.toAffine m).pullback (W.Φ n), h_xpb]
+  rw [h_norm, algHom_apply_polynomial W (mulByInt W.toAffine m).pullback (W.Φ n),
+    mulByInt_pullback_algebraMap_X W m hm]
 
 /-- The pullback along `[m]` of `ΨSq_ff W n` is
     `(W.ΨSq n).eval₂ (algebraMap F KE) (mulByInt_x W m)`. -/
@@ -278,16 +286,8 @@ theorem mulByInt_pullback_ΨSq_ff (m n : ℤ) (hm : m ≠ 0) :
     unfold ΨSq_ff
     exact (IsScalarTower.algebraMap_apply (Polynomial F) W.toAffine.CoordinateRing
       W.toAffine.FunctionField (W.ΨSq n)).symm
-  have h_xpb : (mulByInt W.toAffine m).pullback
-      (algebraMap (Polynomial F) W.toAffine.FunctionField Polynomial.X) =
-      mulByInt_x W m := by
-    have h : algebraMap (Polynomial F) W.toAffine.FunctionField Polynomial.X =
-        x_gen W := by
-      unfold x_gen
-      exact IsScalarTower.algebraMap_apply (Polynomial F) W.toAffine.CoordinateRing
-        W.toAffine.FunctionField Polynomial.X
-    rw [h]; exact mulByInt_pullback_x W m hm
-  rw [h_norm, algHom_apply_polynomial W (mulByInt W.toAffine m).pullback (W.ΨSq n), h_xpb]
+  rw [h_norm, algHom_apply_polynomial W (mulByInt W.toAffine m).pullback (W.ΨSq n),
+    mulByInt_pullback_algebraMap_X W m hm]
 
 /-- The pullback along `[m]` of `mulByInt_x W n = Φ_ff W n / ΨSq_ff W n`. -/
 theorem mulByInt_pullback_mulByInt_x (m n : ℤ) (hm : m ≠ 0) :
