@@ -2788,6 +2788,27 @@ and `(s : K) ≠ 0`). The x-coord pullbacks are `(mulByInt_x r)^q` (LHS) and
 `ordAtInfty_pow`). For `q ≥ 2`, these are unequal, so the pullbacks are
 unequal — Silverman III.6 reflection of Frobenius pole-multiplication. -/
 
+/-- The `x_gen` pullback of `(frobeniusIsog W).zsmul r` is `(mulByInt_x W r) ^ |K|`
+(Frobenius is the `|K|`-power map on the `[r]`-pullback). -/
+private theorem zsmul_frobenius_pullback_x_gen (r : ℤ) (hr : r ≠ 0) :
+    ((frobeniusIsog W).zsmul r).pullback (x_gen W) = (mulByInt_x W r) ^ Fintype.card K := by
+  show ((mulByInt W.toAffine r).comp (frobeniusIsog W)).pullback (x_gen W) = _
+  rw [Isogeny.comp_algebraMap_eq]
+  have h_inner : (mulByInt W.toAffine r).pullback (x_gen W) = mulByInt_x W r := by
+    show (mulByInt W.toAffine r).pullback
+      (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
+        (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X)) = _
+    exact mulByInt_pullback_x W r hr
+  rw [h_inner, frobeniusIsog_pullback_apply]
+
+/-- The `x_gen` pullback of `mulByInt W (-s)` is `mulByInt_x W (-s)`. -/
+private theorem mulByInt_neg_pullback_x_gen (s : ℤ) (hs : s ≠ 0) :
+    (mulByInt W.toAffine (-s)).pullback (x_gen W) = mulByInt_x W (-s) := by
+  show (mulByInt W.toAffine (-s)).pullback
+    (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
+      (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X)) = _
+  exact mulByInt_pullback_x W (-s) (neg_ne_zero.mpr hs)
+
 /-- The pair `((frobeniusIsog W).zsmul r, mulByInt W (-s))` is non-inverse for
 `r, s ≠ 0` with `(r : K) ≠ 0`, `(s : K) ≠ 0`. The x-coord pullbacks differ at
 `ord_∞`: LHS is `-2q`, RHS is `-2`. -/
@@ -2796,22 +2817,7 @@ theorem AddNonInversePair_zsmul_frobenius_mulByInt_neg
     (hrK : (r : K) ≠ 0) (hsK : (s : K) ≠ 0) :
     AddNonInversePair ((frobeniusIsog W).zsmul r) (mulByInt W.toAffine (-s)) := by
   apply AddNonInversePair_of_x_ne
-  have h_lhs : ((frobeniusIsog W).zsmul r).pullback (x_gen W) =
-      (mulByInt_x W r) ^ Fintype.card K := by
-    show ((mulByInt W.toAffine r).comp (frobeniusIsog W)).pullback (x_gen W) = _
-    rw [Isogeny.comp_algebraMap_eq]
-    have h_inner : (mulByInt W.toAffine r).pullback (x_gen W) = mulByInt_x W r := by
-      show (mulByInt W.toAffine r).pullback
-        (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
-          (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X)) = _
-      exact mulByInt_pullback_x W r hr
-    rw [h_inner, frobeniusIsog_pullback_apply]
-  have h_rhs : (mulByInt W.toAffine (-s)).pullback (x_gen W) = mulByInt_x W (-s) := by
-    show (mulByInt W.toAffine (-s)).pullback
-      (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
-        (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X)) = _
-    exact mulByInt_pullback_x W (-s) (neg_ne_zero.mpr hs)
-  rw [h_lhs, h_rhs]
+  rw [zsmul_frobenius_pullback_x_gen W r hr, mulByInt_neg_pullback_x_gen W s hs]
   intro h_eq
   -- Apply ordAtInfty and derive contradiction.
   have h_ord := congrArg (W_smooth W).ordAtInfty h_eq
