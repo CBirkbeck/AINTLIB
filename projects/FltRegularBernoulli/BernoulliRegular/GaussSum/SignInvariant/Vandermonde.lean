@@ -83,9 +83,7 @@ theorem fourierMatrixFin_eq_fourierVandermonde :
   calc
     ZMod.stdAddChar (N := p) (-((i : ZMod p) * (j : ZMod p))) =
         ZMod.stdAddChar (N := p) ((j : ℕ) • (-(i : ZMod p))) := by
-          congr
-          rw [nsmul_eq_mul]
-          ring
+          rw [nsmul_eq_mul]; ring_nf
     _ = ZMod.stdAddChar (N := p) (-(i : ZMod p)) ^ (j : ℕ) :=
           AddChar.map_nsmul_eq_pow _ _ _
 
@@ -97,9 +95,7 @@ theorem fourierVandermondeNodes_eq_pow_fourierBaseRoot (i : Fin p) :
   calc
     ZMod.stdAddChar (N := p) (-(i : ZMod p)) =
         ZMod.stdAddChar (N := p) ((i : ℕ) • (-(1 : ZMod p))) := by
-          congr
-          rw [nsmul_eq_mul]
-          ring
+          rw [nsmul_eq_mul]; ring_nf
     _ = ZMod.stdAddChar (N := p) (-(1 : ZMod p)) ^ (i : ℕ) :=
           AddChar.map_nsmul_eq_pow _ _ _
 
@@ -127,13 +123,8 @@ theorem fourierRootPowerDiff_eq_factor (i j : Fin p) (hij : i < j) :
     Nat.le_of_lt (show (i : ℕ) < (j : ℕ) by simpa using hij)
   have hnat : (j : ℕ) = (i : ℕ) + ((j : ℕ) - (i : ℕ)) :=
     (Nat.add_sub_of_le hij').symm
-  calc
-    ζ ^ (j : ℕ) - ζ ^ (i : ℕ) = ζ ^ ((i : ℕ) + ((j : ℕ) - (i : ℕ))) - ζ ^ (i : ℕ) := by
-      conv_lhs => rw [hnat]
-    _ = ζ ^ (i : ℕ) * ζ ^ ((j : ℕ) - (i : ℕ)) - ζ ^ (i : ℕ) := by
-      rw [pow_add]
-    _ = ζ ^ (i : ℕ) * (ζ ^ ((j : ℕ) - (i : ℕ)) - 1) := by
-      ring
+  conv_lhs => rw [hnat, pow_add]
+  ring
 
 /-- First cyclotomic normalization of the Vandermonde product: isolate the
 power-of-`ζ` contribution from the genuine root-of-unity differences. -/
@@ -169,7 +160,7 @@ theorem fourierRootPowerProduct_eq_weightedRootProduct_mul_fourierCyclotomicDiff
       _ = (((fourierBaseRoot (p := p)) ^ (i : ℕ)) ^ (Finset.Ioi i).card) *
           ∏ j ∈ Finset.Ioi i,
             ((fourierBaseRoot (p := p)) ^ ((j : ℕ) - (i : ℕ)) - 1) := by
-              simp
+              rw [Finset.prod_const]
   rw [hsplit, Finset.prod_mul_distrib]
 
 /-- The Fourier Vandermonde product splits into a weighted root power and a
