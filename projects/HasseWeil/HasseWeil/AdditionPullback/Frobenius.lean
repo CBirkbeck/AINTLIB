@@ -2316,6 +2316,29 @@ theorem mulByInt_neg_one_pullback_y_gen_ne_y_gen_char_two
     rw [WeierstrassCurve.Δ_of_char_two, h_a1, h_a3]; ring
   exact W.toAffine.isUnit_Δ.ne_zero h_delta
 
+/-- The image of `C a₁ * X + C a₃` under `K[X] → KE` is `a₁ · x_gen + a₃`. -/
+private lemma algebraMap_C_a1_X_plus_C_a3 :
+    algebraMap (Polynomial K) KE
+        (Polynomial.C W.toAffine.a₁ * Polynomial.X + Polynomial.C W.toAffine.a₃) =
+      algebraMap K KE W.toAffine.a₁ * x_gen W + algebraMap K KE W.toAffine.a₃ := by
+  have h_x_alg : x_gen W = algebraMap (Polynomial K) KE Polynomial.X := by
+    show algebraMap W.toAffine.CoordinateRing KE
+      (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X) = _
+    exact (IsScalarTower.algebraMap_apply (Polynomial K) W.toAffine.CoordinateRing KE
+      Polynomial.X).symm
+  have h_C : ∀ a : K, algebraMap (Polynomial K) KE (Polynomial.C a) = algebraMap K KE a := by
+    intro a; rw [Polynomial.C_eq_algebraMap, ← IsScalarTower.algebraMap_apply]
+  rw [map_add, map_mul, ← h_x_alg, h_C, h_C]
+
+/-- Injectivity of `K → Frac(K[X])` on `2`: if `(2 : Frac(K[X])) = 0` then `(2 : K) = 0`. -/
+private lemma two_K_eq_zero_of_two_fractionRing
+    (h : (2 : FractionRing (Polynomial K)) = 0) : (2 : K) = 0 := by
+  have h_alg_inj : Function.Injective (algebraMap K (FractionRing (Polynomial K))) :=
+    FaithfulSMul.algebraMap_injective K (FractionRing (Polynomial K))
+  apply h_alg_inj
+  rw [map_zero, map_ofNat]
+  exact h
+
 /-- **σ ≠ id in characteristic ≠ 2**: in char ≠ 2, the curve-negation involution
 σ does not fix `y_gen`.
 
@@ -2329,54 +2352,26 @@ theorem mulByInt_neg_one_pullback_y_gen_ne_y_gen_char_ne_two
     (mulByInt W.toAffine (-1)).pullback (y_gen W) ≠ y_gen W := by
   intro h_eq
   rw [mulByInt_pullback_y_neg_one] at h_eq
-  -- Strategy: View `2 y_gen + (a₁·x + a₃) = 0` as a vanishing basis decomposition
-  -- `(a₁·x + a₃) • 1 + 2 • y_gen = 0` in the `Frac(K[X])`-basis `{1, y_gen}` of KE.
-  -- Then `decomp_zero_iff` yields `(2 : Frac(K[X])) = 0`, contradicting `h2`.
   have h_y_eq : (W_smooth W).coordYInFunctionField = y_gen W := by
     rw [← (W_smooth W).coordY_eq_coordYInFunctionField, coordY_W_smooth_eq_y_gen]
-  -- `x_gen` is the image of `Polynomial.X` under `K[X] → KE`.
-  have h_x_alg : x_gen W = algebraMap (Polynomial K) KE Polynomial.X := by
-    show algebraMap W.toAffine.CoordinateRing KE
-      (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X) = _
-    exact (IsScalarTower.algebraMap_apply (Polynomial K) W.toAffine.CoordinateRing KE
-      Polynomial.X).symm
-  -- Compute the image of the polynomial `C a₁ * X + C a₃` in KE.
-  set f : Polynomial K :=
-    Polynomial.C W.toAffine.a₁ * Polynomial.X + Polynomial.C W.toAffine.a₃ with hf_def
-  have h_C : ∀ a : K, algebraMap (Polynomial K) KE (Polynomial.C a) = algebraMap K KE a := by
-    intro a; rw [Polynomial.C_eq_algebraMap, ← IsScalarTower.algebraMap_apply]
-  have h_f_image : algebraMap (Polynomial K) KE f =
-      algebraMap K KE W.toAffine.a₁ * x_gen W + algebraMap K KE W.toAffine.a₃ := by
-    rw [hf_def, map_add, map_mul, ← h_x_alg, h_C, h_C]
-  -- Set up `p, q : Frac(K[X])`.
+  -- View `2 y_gen + (a₁·x + a₃) = 0` as a vanishing decomposition in the
+  -- `Frac(K[X])`-basis `{1, y_gen}` of KE; `decomp_zero_iff` then forces the
+  -- `y_gen`-coefficient `(2 : Frac(K[X]))` to vanish.
   set p : FractionRing (Polynomial K) :=
-    algebraMap (Polynomial K) (FractionRing (Polynomial K)) f with hp_def
+    algebraMap (Polynomial K) (FractionRing (Polynomial K))
+      (Polynomial.C W.toAffine.a₁ * Polynomial.X + Polynomial.C W.toAffine.a₃) with hp_def
   set q : FractionRing (Polynomial K) := (2 : FractionRing (Polynomial K)) with hq_def
-  -- Bring the equation `2 y_gen + a₁ x_gen + a₃ = 0` (from h_eq) into basis
-  -- decomposition form. All operations take place in `KE = (W_smooth W).FunctionField`.
   have h_zero_smul :
       p • (1 : (W_smooth W).FunctionField) +
         q • (W_smooth W).coordYInFunctionField = 0 := by
     show p • (1 : KE) + q • y_gen W = (0 : KE)
-    -- Unfold smul to algebraMap multiplication.
     rw [Algebra.smul_def, Algebra.smul_def, mul_one]
-    -- Compute the algebraMap applied to p and q.
     rw [hp_def, ← IsScalarTower.algebraMap_apply (Polynomial K)
-        (FractionRing (Polynomial K)) KE, h_f_image]
+        (FractionRing (Polynomial K)) KE, algebraMap_C_a1_X_plus_C_a3 W]
     rw [hq_def, map_ofNat]
     linear_combination -h_eq
-  -- Apply `decomp_zero_iff`: `q = 0` in `Frac(K[X])`.
   obtain ⟨_, hq_zero⟩ := (W_smooth W).decomp_zero_iff h_zero_smul
-  -- `hq_zero : q = 0`, i.e., `(2 : Frac(K[X])) = 0`. Inject to `K`.
-  apply h2
-  have h_alg_inj : Function.Injective
-      (algebraMap K (FractionRing (Polynomial K))) :=
-    FaithfulSMul.algebraMap_injective K (FractionRing (Polynomial K))
-  apply h_alg_inj
-  rw [map_zero]
-  have h_q_eq : algebraMap K (FractionRing (Polynomial K)) (2 : K) = q := by
-    rw [hq_def, map_ofNat]
-  rw [h_q_eq]; exact hq_zero
+  exact h2 (two_K_eq_zero_of_two_fractionRing hq_zero)
 
 /-- **σ ≠ id (unified)**: in any characteristic, the curve-negation involution
 `σ = (mulByInt W (-1)).pullback` does not fix `y_gen`.
