@@ -103,6 +103,36 @@ theorem evaluatesTo_algebraMap_evalAt (P : (W_smooth W).SmoothPoint)
   exact (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
     (C := W_smooth W) _ P).mpr hmem
 
+/-- The values at `P` of the coordinate functions pulled back through `cd` are the
+coordinates of `toPointMap cd P` (the `hvalx`/`hvaly` step of `stored_eq_toPointMap`). -/
+private theorem coordHom_evalAt_eq_toPointMap_coords
+    {β : Isogeny W.toAffine W.toAffine} (cd : (β.endCurveMap W).CoordHom)
+    (P : (W_smooth W).SmoothPoint) :
+    haveI : (W_smooth W).toAffine.IsElliptic := ‹W.toAffine.IsElliptic›
+    (W_smooth W).evalAt P
+        (cd.toAlgHom (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X)) =
+      (Curves.CurveMap.toPointMap cd P).x ∧
+    (W_smooth W).evalAt P (cd.toAlgHom (AdjoinRoot.root W.toAffine.polynomial)) =
+      (Curves.CurveMap.toPointMap cd P).y := by
+  haveI : (W_smooth W).toAffine.IsElliptic := ‹W.toAffine.IsElliptic›
+  set Q := Curves.CurveMap.toPointMap cd P
+  refine ⟨?_, ?_⟩
+  · have h1 := (Curves.CurveMap.evalAt_toPointMap cd P
+      (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X)).symm
+    rw [Curves.CurveMap.evalAtPullback_apply] at h1
+    refine h1.trans ?_
+    rw [show algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X =
+      WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine
+        (Polynomial.C Polynomial.X) from rfl]
+    exact (W_smooth W).evalAt_x Q
+  · have h1 := (Curves.CurveMap.evalAt_toPointMap cd P
+      (AdjoinRoot.root W.toAffine.polynomial)).symm
+    rw [Curves.CurveMap.evalAtPullback_apply] at h1
+    refine h1.trans ?_
+    rw [show AdjoinRoot.root W.toAffine.polynomial =
+      WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine Polynomial.X from rfl]
+    exact (W_smooth W).evalAt_y Q
+
 /-- **Stored point map = coordinate point map at good points**: given the cofinite
 pullback-evaluation witness and a coordinate-ring witness for the same pullback, the
 stored `toAddMonoidHom` agrees with `toPointMap cd` at every point outside `bad`.
@@ -118,29 +148,8 @@ theorem PullbackEvaluation.stored_eq_toPointMap {β : Isogeny W.toAffine W.toAff
       (Curves.CurveMap.toPointMap cd P).toAffinePoint := by
   haveI : (W_smooth W).toAffine.IsElliptic := ‹W.toAffine.IsElliptic›
   obtain ⟨x', y', h', heq, hx, hy⟩ := hw P hP
+  obtain ⟨hvalx, hvaly⟩ := coordHom_evalAt_eq_toPointMap_coords W cd P
   set Q := Curves.CurveMap.toPointMap cd P with hQdef
-  -- the value of the pulled-back coordinate functions at `P` is the coordinate of `Q`
-  -- (the `hvalx`/`hvaly` blocks of `pullbackEvaluation_of_coordHom`)
-  have hvalx : (W_smooth W).evalAt P
-      (cd.toAlgHom (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X)) =
-      Q.x := by
-    have h1 := (Curves.CurveMap.evalAt_toPointMap cd P
-      (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X)).symm
-    rw [Curves.CurveMap.evalAtPullback_apply] at h1
-    refine h1.trans ?_
-    rw [show algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X =
-      WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine
-        (Polynomial.C Polynomial.X) from rfl]
-    exact (W_smooth W).evalAt_x Q
-  have hvaly : (W_smooth W).evalAt P
-      (cd.toAlgHom (AdjoinRoot.root W.toAffine.polynomial)) = Q.y := by
-    have h1 := (Curves.CurveMap.evalAt_toPointMap cd P
-      (AdjoinRoot.root W.toAffine.polynomial)).symm
-    rw [Curves.CurveMap.evalAtPullback_apply] at h1
-    refine h1.trans ?_
-    rw [show AdjoinRoot.root W.toAffine.polynomial =
-      WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine Polynomial.X from rfl]
-    exact (W_smooth W).evalAt_y Q
   -- `β^*x_gen` and `β^*y_gen` are the coordinate-ring elements `cd.toAlgHom _`
   have hxgen : β.pullback (x_gen W) =
       algebraMap W.toAffine.CoordinateRing KE
