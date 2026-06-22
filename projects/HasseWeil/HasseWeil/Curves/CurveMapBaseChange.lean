@@ -445,48 +445,68 @@ theorem coordRingScalarExtFwd_surjective (L : Type*) [Field L] [Algebra F L] :
   · exact hX
   · exact hroot
 
+/-- `CoordinateRing.map` matches the two affine coordinate-ring basis elements:
+it sends the base `1`-element (`bᵢ` at `i = 0`) and the class of `X` (`bᵢ` at
+`i = 1`) to the corresponding base-changed elements. The `Xⁿ` prefactor is handled
+separately in `coordRingScalarExtFwd_tensorBasis_eq` via `map_smul`. -/
+private theorem coordRingMap_basis_eq (L : Type*) [Field L] [Algebra F L]
+    (i : Fin 2) :
+    WeierstrassCurve.Affine.CoordinateRing.map C.toAffine (algebraMap F L)
+        (WeierstrassCurve.Affine.CoordinateRing.basis C.toAffine i) =
+      WeierstrassCurve.Affine.CoordinateRing.basis (C.baseChange L).toAffine i := by
+  fin_cases i
+  · simp only [Fin.isValue, Fin.mk_zero, Affine.CoordinateRing.basis_zero, map_one]
+    rfl
+  · simp only [Fin.isValue, Fin.mk_one,
+      WeierstrassCurve.Affine.CoordinateRing.basis_one]
+    change WeierstrassCurve.Affine.CoordinateRing.map C.toAffine (algebraMap F L)
+      (AdjoinRoot.mk C.toAffine.polynomial Polynomial.X) = _
+    rw [WeierstrassCurve.Affine.CoordinateRing.map_mk, Polynomial.map_X]
+    rfl
+
+/-- The forward scalar-extension map carries the tensored monomial basis
+`bLA = (L ⊗) (X-monomials ⊗ affine basis)` of `L ⊗[F] C.CoordinateRing` to the
+monomial basis `bD` of the base-changed coordinate ring, index by index. -/
+private theorem coordRingScalarExtFwd_tensorBasis_eq (L : Type*) [Field L]
+    [Algebra F L] (ij : ℕ × Fin 2) :
+    (C.coordRingScalarExtFwd L).toLinearMap
+        (Algebra.TensorProduct.basis L
+          ((Polynomial.basisMonomials F).smulTower
+            (WeierstrassCurve.Affine.CoordinateRing.basis C.toAffine)) ij) =
+      (Polynomial.basisMonomials L).smulTower
+        (WeierstrassCurve.Affine.CoordinateRing.basis (C.baseChange L).toAffine) ij := by
+  obtain ⟨n, i⟩ := ij
+  rw [Algebra.TensorProduct.basis_apply]
+  change C.coordRingScalarExtFwd L
+    (1 ⊗ₜ (Polynomial.basisMonomials F).smulTower
+      (WeierstrassCurve.Affine.CoordinateRing.basis C.toAffine) (n, i)) = _
+  rw [coordRingScalarExtFwd_one_tmul, Module.Basis.smulTower_apply,
+    Module.Basis.smulTower_apply]
+  simp only [Polynomial.coe_basisMonomials, Polynomial.monomial_one_right_eq_X_pow]
+  show WeierstrassCurve.Affine.CoordinateRing.map C.toAffine (algebraMap F L)
+      (Polynomial.X ^ n •
+        WeierstrassCurve.Affine.CoordinateRing.basis C.toAffine i) = _
+  rw [WeierstrassCurve.Affine.CoordinateRing.map_smul, Polynomial.map_pow,
+    Polynomial.map_X]
+  congr 1
+  exact C.coordRingMap_basis_eq L i
+
 /-- The forward scalar-extension map is injective: it carries the `L`-basis
 `{Xⁿ • bᵢ}` of `L ⊗[F] C.CoordinateRing` to the corresponding basis of the
 base-changed coordinate ring. -/
 theorem coordRingScalarExtFwd_injective (L : Type*) [Field L] [Algebra F L] :
     Function.Injective (C.coordRingScalarExtFwd L) := by
   classical
-  set bA : Module.Basis (ℕ × Fin 2) F C.toAffine.CoordinateRing :=
-    (Polynomial.basisMonomials F).smulTower
-      (WeierstrassCurve.Affine.CoordinateRing.basis C.toAffine) with hbA
   set bLA : Module.Basis (ℕ × Fin 2) L (L ⊗[F] C.toAffine.CoordinateRing) :=
-    Algebra.TensorProduct.basis L bA with hbLA
+    Algebra.TensorProduct.basis L
+      ((Polynomial.basisMonomials F).smulTower
+        (WeierstrassCurve.Affine.CoordinateRing.basis C.toAffine)) with hbLA
   set bD : Module.Basis (ℕ × Fin 2) L (C.baseChange L).toAffine.CoordinateRing :=
     (Polynomial.basisMonomials L).smulTower
       (WeierstrassCurve.Affine.CoordinateRing.basis (C.baseChange L).toAffine) with hbD
-  have hbasis : ∀ ij : ℕ × Fin 2,
-      (C.coordRingScalarExtFwd L).toLinearMap (bLA ij) = bD ij := by
-    rintro ⟨n, i⟩
-    rw [hbLA, Algebra.TensorProduct.basis_apply]
-    change C.coordRingScalarExtFwd L (1 ⊗ₜ bA (n, i)) = bD (n, i)
-    rw [coordRingScalarExtFwd_one_tmul, hbA, Module.Basis.smulTower_apply,
-      hbD, Module.Basis.smulTower_apply]
-    simp only [Polynomial.coe_basisMonomials, Polynomial.monomial_one_right_eq_X_pow]
-    change WeierstrassCurve.Affine.CoordinateRing.map C.toAffine (algebraMap F L)
-        (Polynomial.X ^ n •
-          WeierstrassCurve.Affine.CoordinateRing.basis C.toAffine i) =
-        Polynomial.X ^ n •
-          WeierstrassCurve.Affine.CoordinateRing.basis (C.baseChange L).toAffine i
-    rw [WeierstrassCurve.Affine.CoordinateRing.map_smul, Polynomial.map_pow,
-      Polynomial.map_X]
-    congr 1
-    fin_cases i
-    · simp only [Fin.isValue, Fin.mk_zero, Affine.CoordinateRing.basis_zero, map_one]
-      rfl
-    · simp only [Fin.isValue, Fin.mk_one,
-        WeierstrassCurve.Affine.CoordinateRing.basis_one]
-      change WeierstrassCurve.Affine.CoordinateRing.map C.toAffine (algebraMap F L)
-        (AdjoinRoot.mk C.toAffine.polynomial Polynomial.X) = _
-      rw [WeierstrassCurve.Affine.CoordinateRing.map_mk, Polynomial.map_X]
-      rfl
   have heq : (C.coordRingScalarExtFwd L).toLinearMap =
       (bLA.equiv bD (Equiv.refl _)).toLinearMap := by
-    refine bLA.ext fun ij ↦ (hbasis ij).trans ?_
+    refine bLA.ext fun ij ↦ (C.coordRingScalarExtFwd_tensorBasis_eq L ij).trans ?_
     exact (Module.Basis.equiv_apply bLA ij bD (Equiv.refl _)).symm
   rw [show ⇑(C.coordRingScalarExtFwd L) =
       ⇑(C.coordRingScalarExtFwd L).toLinearMap from rfl, heq]
