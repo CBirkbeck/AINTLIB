@@ -171,7 +171,7 @@ theorem qpadic_natCast_div_natCast_eq_primePow_mul_of_primePow_dvd
     change ((hu_unit.unit * hu_unit.unit⁻¹ : (ℤ_[p])ˣ).val : ℤ_[p]) = 1
     simp
   have huInv_mul_Qp : ((u : ℕ) : ℚ_[p]) * ((uInv : ℤ_[p]) : ℚ_[p]) = 1 := by
-    simpa using congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) huInv_mul
+    simpa using congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) huInv_mul
   obtain ⟨c, hc⟩ := hdiv
   refine ⟨(c : ℤ_[p]) * uInv, ?_⟩
   have hq_cast :
@@ -328,7 +328,7 @@ theorem primePow_indexFactorization_add_three_mul_padicInt_eq_natCast_mul_primeS
     change ((hu_unit.unit * hu_unit.unit⁻¹ : (ℤ_[p])ˣ).val : ℤ_[p]) = 1
     simp
   have hu_mul_inv_Qp : ((u : ℕ) : ℚ_[p]) * ((uInv : ℤ_[p]) : ℚ_[p]) = 1 := by
-    simpa using congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hu_mul_inv
+    simpa using congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hu_mul_inv
   refine ⟨(p : ℕ) * z * uInv, ?_⟩
   have hh_cast :
       ((h : ℕ) : ℚ_[p]) = (p : ℚ_[p]) ^ v * ((u : ℕ) : ℚ_[p]) := by
@@ -403,7 +403,7 @@ theorem primePow_indexFactorization_add_three_mul_padicInt_eq_natCast_mul_primeC
     change ((hu_unit.unit * hu_unit.unit⁻¹ : (ℤ_[p])ˣ).val : ℤ_[p]) = 1
     simp
   have hu_mul_inv_Qp : ((u : ℕ) : ℚ_[p]) * ((uInv : ℤ_[p]) : ℚ_[p]) = 1 := by
-    simpa using congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hu_mul_inv
+    simpa using congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hu_mul_inv
   refine ⟨z * uInv, ?_⟩
   have hh_cast :
       ((h : ℕ) : ℚ_[p]) = (p : ℚ_[p]) ^ v * ((u : ℕ) : ℚ_[p]) := by
@@ -472,7 +472,7 @@ theorem p_mul_bernoulli_mem_padicInt
         change ((h2_unit.unit * h2_unit.unit⁻¹ : (ℤ_[p])ˣ).val : ℤ_[p]) = 1
         simp
       have htwo_mul_inv_Qp : (2 : ℚ_[p]) * ((twoInv : ℤ_[p]) : ℚ_[p]) = 1 := by
-        exact_mod_cast congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) htwo_mul_inv
+        exact_mod_cast congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) htwo_mul_inv
       refine ⟨-((p : ℕ) : ℤ_[p]) * twoInv, ?_⟩
       rw [bernoulli_one]
       have h2Q_ne : (2 : ℚ_[p]) ≠ 0 := by norm_num
@@ -530,7 +530,7 @@ theorem shifted_faulhaber_one_term_mem_h_p_sq
       change ((h4_unit.unit * h4_unit.unit⁻¹ : (ℤ_[p])ˣ).val : ℤ_[p]) = 1
       simp
     have hfour_mul_inv_Qp : (4 : ℚ_[p]) * ((fourInv : ℤ_[p]) : ℚ_[p]) = 1 := by
-      exact_mod_cast congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hfour_mul_inv
+      exact_mod_cast congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hfour_mul_inv
     refine ⟨-fourInv, ?_⟩
     rw [bernoulli_one, Nat.choose_one_right]
     push_cast
@@ -652,7 +652,7 @@ theorem faulhaber_remainder_sum_mem_h_p_sq
         ((bernoulli i : ℚ) : ℚ_[p]) * ((Nat.choose (h + 1) i : ℕ) : ℚ_[p]) *
           ((p : ℚ_[p]) ^ (h + 1 - i)) / ((h + 1 : ℕ) : ℚ_[p])) =
         (h : ℚ_[p]) * (p : ℚ_[p]) ^ 2 * (W : ℚ_[p]) := by
-  choose w hw using (fun (i : ℕ) (hi : i < h) =>
+  choose w hw using (fun (i : ℕ) (hi : i < h) ↦
     faulhaber_remainder_term_mem_h_p_sq (p := p) (h := h) (i := i)
       hp_ge_five hh_pos hh_even hi)
   set W : ℤ_[p] := ∑ i ∈ Finset.attach (Finset.range h),
@@ -663,7 +663,7 @@ theorem faulhaber_remainder_sum_mem_h_p_sq
       ∑ i ∈ Finset.attach (Finset.range h),
         (h : ℚ_[p]) * (p : ℚ_[p]) ^ 2 *
           ((w i.1 (Finset.mem_range.mp i.2) : ℤ_[p]) : ℚ_[p]) from ?_]
-  · refine Finset.sum_congr rfl fun i _ => ?_
+  · refine Finset.sum_congr rfl fun i _ ↦ ?_
     exact hw i.1 (Finset.mem_range.mp i.2)
   · rw [hW_def]
     simp [PadicInt.coe_sum, Finset.mul_sum]
@@ -690,7 +690,7 @@ theorem sum_range_pow_sub_p_mul_bernoulli_strong
       ∑ i ∈ Finset.range (h + 1),
         ((bernoulli i : ℚ) : ℚ_[p]) * ((Nat.choose (h + 1) i : ℕ) : ℚ_[p]) *
           ((p : ℚ_[p]) ^ (h + 1 - i)) / ((h + 1 : ℕ) : ℚ_[p]) := by
-    have := congrArg (fun q : ℚ => (q : ℚ_[p])) h_faulhaber_Q
+    have := congrArg (fun q : ℚ ↦ (q : ℚ_[p])) h_faulhaber_Q
     push_cast at this
     push_cast
     exact this
@@ -779,7 +779,7 @@ theorem primePow_indexFactorization_add_two_mul_padicInt_eq_natCast_mul_primeSq
     change ((hu_unit.unit * hu_unit.unit⁻¹ : (ℤ_[p])ˣ).val : ℤ_[p]) = 1
     simp
   have hu_mul_inv_Qp : ((u : ℕ) : ℚ_[p]) * ((uInv : ℤ_[p]) : ℚ_[p]) = 1 := by
-    simpa using congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hu_mul_inv
+    simpa using congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hu_mul_inv
   refine ⟨z * uInv, ?_⟩
   have hh_cast :
       ((h : ℕ) : ℚ_[p]) = (p : ℚ_[p]) ^ v * ((u : ℕ) : ℚ_[p]) := by
@@ -874,7 +874,7 @@ theorem voronoi_term_mod_h_p_sq
     push_cast
     ring
   · have hh_two : 2 ≤ h := by omega
-    choose w hw using (fun (m : ℕ) (hm : m < h - 1) =>
+    choose w hw using (fun (m : ℕ) (hm : m < h - 1) ↦
       binomial_high_term_mem_h_p_sq (p := p) (h := h) (nu := h - m)
         (X := X) (Y := Y) hp_ge_five hh_pos (by omega) (by omega))
     set W : ℤ_[p] := ∑ m ∈ Finset.attach (Finset.range (h - 1)),
@@ -890,7 +890,7 @@ theorem voronoi_term_mod_h_p_sq
           ∑ m ∈ Finset.attach (Finset.range (h - 1)),
             (h : ℚ_[p]) * (p : ℚ_[p]) ^ 2 *
               ((w m.1 (Finset.mem_range.mp m.2) : ℤ_[p]) : ℚ_[p]) from ?_]
-      · refine Finset.sum_congr rfl fun m _ => ?_
+      · refine Finset.sum_congr rfl fun m _ ↦ ?_
         have hm_lt : m.1 < h - 1 := Finset.mem_range.mp m.2
         have hm_le : m.1 ≤ h := by omega
         have hhm : h - (h - m.1) = m.1 := Nat.sub_sub_self hm_le
@@ -898,7 +898,7 @@ theorem voronoi_term_mod_h_p_sq
         simpa [hhm] using hwm
       · rw [hW_def]
         simp [PadicInt.coe_sum, Finset.mul_sum]
-    let term : ℕ → ℚ_[p] := fun m =>
+    let term : ℕ → ℚ_[p] := fun m ↦
       (X : ℚ_[p]) ^ m * (-(p : ℚ_[p]) * (Y : ℚ_[p])) ^ (h - m) *
         ((Nat.choose h m : ℕ) : ℚ_[p])
     have hsplit_range : (∑ m ∈ Finset.range h, term m) =
@@ -941,9 +941,9 @@ theorem voronoi_sum_mod_h_p_sq
           (∑ x ∈ Finset.range p,
             (x : ℚ_[p]) ^ (h - 1) * ((x * a / p : ℕ) : ℚ_[p])) =
       (h : ℚ_[p]) * (p : ℚ_[p]) ^ 2 * (W : ℚ_[p]) := by
-  choose w hw using (fun (j : ℕ) (_hj : j ∈ Finset.range p) =>
+  choose w hw using (fun (j : ℕ) (_hj : j ∈ Finset.range p) ↦
     voronoi_term_mod_h_p_sq (p := p) (a := a) (h := h) (j := j) hp_ge_five hh_pos)
-  set wt : ℕ → ℤ_[p] := fun j => if hj : j ∈ Finset.range p then w j hj else 0
+  set wt : ℕ → ℤ_[p] := fun j ↦ if hj : j ∈ Finset.range p then w j hj else 0
     with hwt_def
   have hwt_eq : ∀ (j : ℕ) (hj : j ∈ Finset.range p), wt j = w j hj := by
     intro j hj
@@ -957,7 +957,7 @@ theorem voronoi_sum_mod_h_p_sq
   have h_perm :
       (∑ j ∈ Finset.range p, (((j * a) % p : ℕ) : ℚ_[p]) ^ h) = S1 := by
     rw [hS1_def]
-    exact voronoi_permutation ha_coprime (fun n : ℕ => (n : ℚ_[p]) ^ h)
+    exact voronoi_permutation ha_coprime (fun n : ℕ ↦ (n : ℚ_[p]) ^ h)
   have h_sum_binom :
       (∑ j ∈ Finset.range p, (((j * a) % p : ℕ) : ℚ_[p]) ^ h) =
         ∑ j ∈ Finset.range p,
@@ -965,7 +965,7 @@ theorem voronoi_sum_mod_h_p_sq
             (h : ℚ_[p]) * ((j * a : ℕ) : ℚ_[p]) ^ (h - 1) * (p : ℚ_[p]) *
               (((j * a / p : ℕ)) : ℚ_[p]) +
             (h : ℚ_[p]) * (p : ℚ_[p]) ^ 2 * (wt j : ℚ_[p])) := by
-    refine Finset.sum_congr rfl fun j hj => ?_
+    refine Finset.sum_congr rfl fun j hj ↦ ?_
     rw [hwt_eq j hj]
     exact hw j hj
   have h_sum : S1 =
@@ -996,7 +996,7 @@ theorem voronoi_sum_mod_h_p_sq
             (h : ℚ_[p]) * (p : ℚ_[p]) * (a : ℚ_[p]) ^ (h - 1) *
               ((j : ℚ_[p]) ^ (h - 1) * (((j * a / p : ℕ)) : ℚ_[p])) +
             (h : ℚ_[p]) * (p : ℚ_[p]) ^ 2 * (wt j : ℚ_[p])) := by
-    refine Finset.sum_congr rfl fun j _ => ?_
+    refine Finset.sum_congr rfl fun j _ ↦ ?_
     rw [h_ja_pow j, h_ja_pow_sub1 j]
     ring
   rw [h_sum_rewrite] at h_sum
@@ -1133,7 +1133,7 @@ theorem bernoulli_div_self_mem_padicInt_of_not_sub_one_dvd_voronoi
     simp
   have hA_mul_inv_Qp :
       (((a : ℤ_[p]) ^ h - 1 : ℤ_[p]) : ℚ_[p]) * (AInv : ℚ_[p]) = 1 := by
-    simpa using congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hA_mul_inv
+    simpa using congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hA_mul_inv
   push_cast at hA_mul_inv_Qp
   refine ⟨AInv * (((a : ℤ_[p]) ^ (h - 1)) * Qint + (p : ℤ_[p]) * zv), ?_⟩
   have hA_B : (((a : ℚ_[p]) ^ h - 1) * Bdiv) =
@@ -1190,7 +1190,7 @@ theorem voronoi_floor_sum_sModEq_of_pred_modEq
     intro j hjp hj_ne
     have hj_coprime : Nat.Coprime j p :=
       (hp.coprime_iff_not_dvd.mpr
-        (fun hdvd => hj_ne (Nat.eq_zero_of_dvd_of_lt hdvd hjp))).symm
+        (fun hdvd ↦ hj_ne (Nat.eq_zero_of_dvd_of_lt hdvd hjp))).symm
     lift (((j : ℕ) : ZMod p)) to (ZMod p)ˣ using
       (ZMod.isUnit_iff_coprime j p).mpr hj_coprime
       with u hu
@@ -1204,7 +1204,7 @@ theorem voronoi_floor_sum_sModEq_of_pred_modEq
   have h_sum_toZMod : PadicInt.toZMod SmZ = PadicInt.toZMod SnZ := by
     rw [hSmZ_def, hSnZ_def]
     simp only [map_sum, map_mul, map_pow, map_natCast]
-    refine Finset.sum_congr rfl fun j hj => ?_
+    refine Finset.sum_congr rfl fun j hj ↦ ?_
     rw [Finset.mem_range] at hj
     by_cases hj_ne : j = 0
     · subst j
@@ -1231,7 +1231,7 @@ theorem voronoi_floor_sum_sModEq_of_pred_modEq
     rw [hSnZ_def]
     simp [PadicInt.coe_sum]
   rw [hSm_cast, hSn_cast]
-  have hzQ := congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hz
+  have hzQ := congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hz
   push_cast at hzQ
   linear_combination hzQ
 
@@ -1280,7 +1280,7 @@ private theorem natCast_pow_eq_of_modEq {p k l : ℕ} [Fact p.Prime] {a : ℕ}
     ((a : ℕ) : ZMod p) ^ k = ((a : ℕ) : ZMod p) ^ l := by
   rw [ha_cast]
   simpa [Units.val_pow_eq_pow_val] using
-    congrArg (fun u : (ZMod p)ˣ => (u : ZMod p))
+    congrArg (fun u : (ZMod p)ˣ ↦ (u : ZMod p))
       (primitiveRoot_unit_pow_eq_of_modEq (p := p) (g := g) hg_order hkl)
 
 /-- Two `p`-adic integers with the same image in `ZMod p` differ by a multiple
@@ -1305,7 +1305,7 @@ private theorem padicInt_isUnit_mul_unitInv {p : ℕ} [Fact p.Prime] {x : ℤ_[p
 private theorem qp_eq_sub_p_mul_of_padicInt_eq {p : ℕ} [Fact p.Prime]
     {x y d : ℤ_[p]} (hd : x - y = (p : ℤ_[p]) * d) :
     (y : ℚ_[p]) = (x : ℚ_[p]) - (p : ℚ_[p]) * (d : ℚ_[p]) := by
-  have hdQ := congrArg (fun z : ℤ_[p] => (z : ℚ_[p])) hd
+  have hdQ := congrArg (fun z : ℤ_[p] ↦ (z : ℚ_[p])) hd
   push_cast at hdQ ⊢
   linear_combination -hdQ
 
@@ -1321,7 +1321,7 @@ private theorem voronoi_floorSum_qp_eq_padicInt_coe {p : ℕ} [Fact p.Prime]
 /-- An inverse identity in `ℤ_[p]` transports to `ℚ_[p]`. -/
 private theorem qp_mul_eq_one_of_padicInt_mul_eq_one {p : ℕ} [Fact p.Prime]
     {w v : ℤ_[p]} (h : w * v = 1) : (w : ℚ_[p]) * (v : ℚ_[p]) = 1 := by
-  simpa using congrArg (fun z : ℤ_[p] => (z : ℚ_[p])) h
+  simpa using congrArg (fun z : ℤ_[p] ↦ (z : ℚ_[p])) h
 
 /-- Final algebraic cancellation of the Kummer congruence over `ℚ_[p]`.
 
@@ -1336,9 +1336,9 @@ private theorem bernoulli_div_sub_eq_p_mul_of_expansions {p : ℕ} [Fact p.Prime
     (hE : (An - 1) * Am1 * Sm - (Am - 1) * An1 * Sn = (p : ℚ_[p]) * E)
     (hAmInv : (Am - 1) * AmInv = 1) (hAnInv : (An - 1) * AnInv = 1) :
     Bm - Bn = (p : ℚ_[p]) * (AmInv * AnInv * E + AmInv * zm - AnInv * zn) := by
-  have h_Am_ne : Am - 1 ≠ 0 := fun h0 => one_ne_zero <| by
+  have h_Am_ne : Am - 1 ≠ 0 := fun h0 ↦ one_ne_zero <| by
     rw [← hAmInv, h0, zero_mul]
-  have h_An_ne : An - 1 ≠ 0 := fun h0 => one_ne_zero <| by
+  have h_An_ne : An - 1 ≠ 0 := fun h0 ↦ one_ne_zero <| by
     rw [← hAnInv, h0, zero_mul]
   have h_key :
       (Am - 1) * (An - 1) * (Bm - Bn) =
@@ -1535,7 +1535,7 @@ theorem bernoulli_div_self_mem_padicInt_of_not_sub_one_dvd_of_not_dvd
     change ((hk_unit.unit * hk_unit.unit⁻¹ : (ℤ_[p])ˣ).val : ℤ_[p]) = 1
     simp
   have hkInv_mul_Qp : ((k : ℕ) : ℚ_[p]) * ((kInv : ℤ_[p]) : ℚ_[p]) = 1 := by
-    simpa using congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hkInv_mul
+    simpa using congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hkInv_mul
   refine ⟨kInv * b, ?_⟩
   have h_div :
       (((bernoulli k : ℚ) / (k : ℕ) : ℚ) : ℚ_[p]) =
@@ -1571,7 +1571,7 @@ theorem bernoulli_div_self_mem_padicInt_of_not_sub_one_dvd_of_adams_exact
     change ((hu_unit.unit * hu_unit.unit⁻¹ : (ℤ_[p])ˣ).val : ℤ_[p]) = 1
     simp
   have huInv_mul_Qp : ((u : ℕ) : ℚ_[p]) * ((uInv : ℤ_[p]) : ℚ_[p]) = 1 := by
-    simpa using congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) huInv_mul
+    simpa using congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) huInv_mul
   obtain ⟨b, hb⟩ := h_adams
   refine ⟨uInv * b, ?_⟩
   have hk_cast :
@@ -1661,7 +1661,7 @@ theorem bernoulli_div_self_mem_padicInt_of_not_sub_one_dvd
     rw [ha]
     exact ⟨a, by omega⟩
   let k' : ℕ := k % (p - 1)
-  have hk'_ne_zero : k' ≠ 0 := fun hzero =>
+  have hk'_ne_zero : k' ≠ 0 := fun hzero ↦
     hnot (Nat.dvd_iff_mod_eq_zero.mpr hzero)
   have hk'_pos : 0 < k' := Nat.pos_of_ne_zero hk'_ne_zero
   have hk'_lt : k' < p - 1 := by
@@ -1673,7 +1673,7 @@ theorem bernoulli_div_self_mem_padicInt_of_not_sub_one_dvd
   have hmod : k ≡ k' [MOD p - 1] := by
     dsimp [k']
     exact (Nat.mod_modEq k (p - 1)).symm
-  have hnot_k' : ¬ (p - 1) ∣ k' := fun hdvd =>
+  have hnot_k' : ¬ (p - 1) ∣ k' := fun hdvd ↦
     not_lt_of_ge (Nat.le_of_dvd hk'_pos hdvd) hk'_lt
   obtain ⟨z, hz⟩ :=
     bernoulli_div_sModEq_of_modEq_full (p := p) hp_odd hk_pos hk'_pos
@@ -1841,7 +1841,7 @@ theorem bernoulliGen_teichmuller_pow_sModEq_bernoulli_lift
       change (∑ a : ZMod p, (teichmuller p a) ^ n * (a.val : ℤ_[p])) -
           (∑ a : ZMod p, (a.val : ℤ_[p]) ^ t) ∈ _
       rw [← Finset.sum_sub_distrib]
-      exact Ideal.sum_mem _ fun a _ => hterm_mem a
+      exact Ideal.sum_mem _ fun a _ ↦ hterm_mem a
     rw [PadicInt.maximalIdeal_eq_span_p, Ideal.span_singleton_pow,
       Ideal.mem_span_singleton] at hST_mem
     obtain ⟨w, hw⟩ := hST_mem
@@ -1851,7 +1851,7 @@ theorem bernoulliGen_teichmuller_pow_sModEq_bernoulli_lift
       change ((∑ a : ZMod p, (teichmuller p a) ^ n * (a.val : ℤ_[p]) : ℤ_[p]) :
         ℚ_[p]) = _
       rw [PadicInt.coe_sum]
-      refine Finset.sum_congr rfl fun a _ => ?_
+      refine Finset.sum_congr rfl fun a _ ↦ ?_
       rw [PadicInt.coe_mul, PadicInt.coe_pow, PadicInt.coe_natCast]
       congr 1
       rw [teichmullerCharQp_pow_eq_ringHomComp (p := p) (n := n),
@@ -1864,8 +1864,8 @@ theorem bernoulliGen_teichmuller_pow_sModEq_bernoulli_lift
       rw [PadicInt.coe_sum]
       simp_rw [show ∀ a : ZMod p,
           (((a.val : ℤ_[p]) ^ t : ℤ_[p]) : ℚ_[p]) = ((a.val : ℚ_[p]) ^ t) from
-        fun a => by rw [PadicInt.coe_pow, PadicInt.coe_natCast]]
-      refine Finset.sum_nbij (fun a => a.val) ?_ ?_ ?_ ?_
+        fun a ↦ by rw [PadicInt.coe_pow, PadicInt.coe_natCast]]
+      refine Finset.sum_nbij (fun a ↦ a.val) ?_ ?_ ?_ ?_
       · intro a _
         simp only [Finset.mem_range]
         exact ZMod.val_lt a
@@ -2062,7 +2062,7 @@ theorem bernoulli_pr_plus_one_sModEq_div_of_kummerCongruence
     simp
   have hmInv_mul_Qp :
       ((p * r + 1 : ℕ) : ℚ_[p]) * ((mInv : ℤ_[p]) : ℚ_[p]) = 1 := by
-    simpa using congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hmInv_mul
+    simpa using congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hmInv_mul
   have hBm_div :
       (((bernoulli (p * r + 1) : ℚ) / (p * r + 1 : ℕ) : ℚ) : ℚ_[p]) =
         (bm : ℚ_[p]) * (mInv : ℚ_[p]) := by
@@ -2163,7 +2163,7 @@ theorem bernoulli_pr_plus_one_sModEq_div_clean
     simp
   have hmInv_mul_Qp :
       ((p * r + 1 : ℕ) : ℚ_[p]) * ((mInv : ℤ_[p]) : ℚ_[p]) = 1 := by
-    simpa using congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hmInv_mul
+    simpa using congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hmInv_mul
   have hBm_div :
       (((bernoulli (p * r + 1) : ℚ) / (p * r + 1 : ℕ) : ℚ) : ℚ_[p]) =
         (bm : ℚ_[p]) * (mInv : ℚ_[p]) := by
@@ -2234,7 +2234,7 @@ theorem voronoi_congruence_mod_p_vonStaudt
   have hpQ_ne : (p : ℚ_[p]) ≠ 0 := by exact_mod_cast hp.ne_zero
   obtain ⟨W, hW⟩ := voronoi_sum_mod_p_sq ha_coprime hk_pos
   obtain ⟨W', hW'⟩ := sum_range_pow_sub_p_mul_bernoulli_weighted hp_odd hk_two hk_even
-    (fun _j _hj _hj_two hj_even =>
+    (fun _j _hj _hj_two hj_even ↦
       p_mul_bernoulli_mem_padicInt_vonStaudt (p := p) hj_even)
   have hkp1_unit : IsUnit ((k + 1 : ℕ) : ℤ_[p]) := by
     rw [PadicInt.isUnit_iff, PadicInt.norm_natCast_eq_one_iff]
@@ -2244,7 +2244,7 @@ theorem voronoi_congruence_mod_p_vonStaudt
     change ((hkp1_unit.unit * hkp1_unit.unit⁻¹ : (ℤ_[p])ˣ).val : ℤ_[p]) = 1
     simp
   have hu_mul_Qp : ((k + 1 : ℕ) : ℚ_[p]) * ((u : ℤ_[p]) : ℚ_[p]) = 1 := by
-    simpa using congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hu_mul
+    simpa using congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hu_mul
   refine ⟨W - ((a : ℤ_[p]) ^ k - 1) * u * W', ?_⟩
   set S1 : ℚ_[p] := ∑ j ∈ Finset.range p, (j : ℚ_[p]) ^ k with hS1_def
   set S2 : ℚ_[p] :=
@@ -2252,7 +2252,7 @@ theorem voronoi_congruence_mod_p_vonStaudt
   have hW_Q : ((a : ℚ_[p]) ^ k - 1) * S1 -
       (k : ℚ_[p]) * (a : ℚ_[p]) ^ (k - 1) * (p : ℚ_[p]) * S2 =
       (p : ℚ_[p]) ^ 2 * ((W : ℤ_[p]) : ℚ_[p]) := by
-    have := congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hW
+    have := congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hW
     simp only [PadicInt.coe_sub, PadicInt.coe_mul, PadicInt.coe_pow,
       PadicInt.coe_natCast, PadicInt.coe_one] at this
     rw [hS1_def, hS2_def]
@@ -2298,7 +2298,7 @@ private theorem natCast_floorSum_pred_eq_zmod {p a m n : ℕ} [Fact p.Prime]
     intro j hjp hj_ne
     have hj_coprime : Nat.Coprime j p :=
       (hp.coprime_iff_not_dvd.mpr
-        (fun hdvd => hj_ne (Nat.eq_zero_of_dvd_of_lt hdvd hjp))).symm
+        (fun hdvd ↦ hj_ne (Nat.eq_zero_of_dvd_of_lt hdvd hjp))).symm
     lift (((j : ℕ) : ZMod p)) to (ZMod p)ˣ using
       (ZMod.isUnit_iff_coprime j p).mpr hj_coprime
       with u hu
@@ -2310,7 +2310,7 @@ private theorem natCast_floorSum_pred_eq_zmod {p a m n : ℕ} [Fact p.Prime]
       exact orderOf_dvd_natCard u
     exact hmn.of_dvd h_ord_dvd
   push_cast
-  refine Finset.sum_congr rfl fun j hj => ?_
+  refine Finset.sum_congr rfl fun j hj ↦ ?_
   rw [Finset.mem_range] at hj
   by_cases hj_ne : j = 0
   · simp [hj_ne]
@@ -2332,12 +2332,12 @@ private theorem bernoulli_div_sub_eq_p_mul_of_vonStaudt_expansions {p : ℕ}
     (hmInv : mQ * mInv = 1) (hnInv : nQ * nInv = 1) :
     Bmdiv - Bndiv =
       (p : ℚ_[p]) * (AmInv * AnInv * E + AmInv * mInv * zm - AnInv * nInv * zn) := by
-  have h_Am_ne : Am - 1 ≠ 0 := fun h0 => one_ne_zero <| by
+  have h_Am_ne : Am - 1 ≠ 0 := fun h0 ↦ one_ne_zero <| by
     rw [← hAmInv, h0, zero_mul]
-  have h_An_ne : An - 1 ≠ 0 := fun h0 => one_ne_zero <| by
+  have h_An_ne : An - 1 ≠ 0 := fun h0 ↦ one_ne_zero <| by
     rw [← hAnInv, h0, zero_mul]
-  have hmQ_ne : mQ ≠ 0 := fun h0 => one_ne_zero <| by rw [← hmInv, h0, zero_mul]
-  have hnQ_ne : nQ ≠ 0 := fun h0 => one_ne_zero <| by rw [← hnInv, h0, zero_mul]
+  have hmQ_ne : mQ ≠ 0 := fun h0 ↦ one_ne_zero <| by rw [← hmInv, h0, zero_mul]
+  have hnQ_ne : nQ ≠ 0 := fun h0 ↦ one_ne_zero <| by rw [← hnInv, h0, zero_mul]
   have h_key :
       (Am - 1) * (An - 1) * mQ * nQ * (Bmdiv - Bndiv) =
         (Am - 1) * (An - 1) * mQ * nQ * ((p : ℚ_[p]) *
@@ -2518,7 +2518,7 @@ theorem bernoulli_div_sModEq_of_modEq_voronoiNoBound
   have hE_eq_Q :
       (An_Q - 1) * Am1_Q * Sm_Q - (Am_Q - 1) * An1_Q * Sn_Q =
         (p : ℚ_[p]) * E_Q := by
-    have := congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hE_eq
+    have := congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hE_eq
     rw [hAm_Q_def, hAn_Q_def, hAm1_Q_def, hAn1_Q_def, hSm_Q_def, hSn_Q_def, hE_Q_def]
     push_cast at this ⊢
     linear_combination this
@@ -2583,11 +2583,11 @@ theorem bernoulliGen_teichmuller_pow_sModEq_div_voronoiNoBound
         omega
       unfold Nat.ModEq
       rw [h_eq, Nat.add_mul_mod_self_left]
-    have ht_coprime : ¬ (p : ℕ) ∣ t := fun h => by
+    have ht_coprime : ¬ (p : ℕ) ∣ t := fun h ↦ by
       have h_pn : p ∣ p * n := ⟨n, rfl⟩
       rw [(ht_def : t = p * n + 1)] at h
       exact absurd (Nat.le_of_dvd (by omega) ((Nat.dvd_add_right h_pn).mp h)) (by omega)
-    have ht_p_plus : ¬ (p : ℕ) ∣ (t + 1) := fun h => by
+    have ht_p_plus : ¬ (p : ℕ) ∣ (t + 1) := fun h ↦ by
       have h_pn : p ∣ p * n := ⟨n, rfl⟩
       have h_eq_t1 : t + 1 = p * n + 2 := by simp [ht_def]
       rw [h_eq_t1] at h
@@ -2606,7 +2606,7 @@ theorem bernoulliGen_teichmuller_pow_sModEq_div_voronoiNoBound
       change ((hn1_unit.unit * hn1_unit.unit⁻¹ : (ℤ_[p])ˣ).val : ℤ_[p]) = 1
       simp
     have hn1Inv_mul_Qp : ((n + 1 : ℕ) : ℚ_[p]) * ((n1Inv : ℤ_[p]) : ℚ_[p]) = 1 := by
-      simpa using congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hn1Inv_mul
+      simpa using congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hn1Inv_mul
     set b : ℤ_[p] := bn1 * n1Inv with hb_def
     have hb : (((bernoulli (n + 1) : ℚ) / (n + 1 : ℕ) : ℚ) : ℚ_[p]) =
         ((b : ℤ_[p]) : ℚ_[p]) := by
