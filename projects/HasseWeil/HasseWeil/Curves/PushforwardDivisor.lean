@@ -293,9 +293,266 @@ theorem finiteDimensional_functionField :
     (nonZeroDivisors C₂.CoordinateRing)
 
 set_option synthInstance.maxHeartbeats 100000 in
--- The proof computes the `finrank`-over-`liftAlgebra` coherence `hcoh` inline; the
--- `FractionRing.liftAlgebra` / `Module.finrank` defeq there (identifying
+-- The `FractionRing.liftAlgebra` / `Module.finrank` defeq here (identifying
 -- `FractionRing C₂.CR` with `C₂.FunctionField`) is heartbeat-heavy, hence the bumps.
+set_option maxHeartbeats 600000 in
+include φ cd in
+/-- **The fraction-field degree equals `φ.degree`**: the `K(C₂)`-rank of `K(C₁)`,
+computed through `FractionRing.liftAlgebra C₂.CR C₁.FF`, is `φ.degree`.  The key step
+identifies that lift-algebra with `φ.toAlgebra` via `IsFractionRing.lift_unique`
+(both restrict to `cd` on `F[C₂]`, by `cd.compat`), after which the rank is `φ.degree`
+by `rfl`.  This supplies the global balance `relNorm(m_Q·F[C₁]) = m_Q^{φ.degree}`. -/
+private theorem finrank_functionField_eq_degree :
+    letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    haveI faith : FaithfulSMul C₂.CoordinateRing C₁.FunctionField :=
+      (faithfulSMul_iff_algebraMap_injective C₂.CoordinateRing C₁.FunctionField).mpr
+        ((IsScalarTower.algebraMap_eq C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField).symm ▸
+          (IsFractionRing.injective C₁.CoordinateRing C₁.FunctionField).comp
+            (CurveMap.coordHom_injective φ cd))
+    @Module.finrank C₂.FunctionField C₁.FunctionField _ _
+      (FractionRing.liftAlgebra C₂.CoordinateRing C₁.FunctionField).toModule = φ.degree := by
+  letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+  haveI tower2 : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField :=
+    inferInstance
+  haveI faith : FaithfulSMul C₂.CoordinateRing C₁.FunctionField := by
+    rw [faithfulSMul_iff_algebraMap_injective,
+      IsScalarTower.algebraMap_eq C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField]
+    exact (IsFractionRing.injective C₁.CoordinateRing C₁.FunctionField).comp
+      (CurveMap.coordHom_injective φ cd)
+  have halgmap :
+      IsFractionRing.lift (A := C₂.CoordinateRing) (K := C₂.FunctionField)
+        (FaithfulSMul.algebraMap_injective C₂.CoordinateRing C₁.FunctionField) =
+      φ.pullback.toRingHom := by
+    apply IsFractionRing.lift_unique
+      (FaithfulSMul.algebraMap_injective C₂.CoordinateRing C₁.FunctionField)
+    intro u
+    show φ.pullback (algebraMap C₂.CoordinateRing C₂.FunctionField u) =
+      algebraMap C₂.CoordinateRing C₁.FunctionField u
+    rw [cd.compat u, IsScalarTower.algebraMap_apply C₂.CoordinateRing
+      C₁.CoordinateRing C₁.FunctionField u]
+    rfl
+  have halg : FractionRing.liftAlgebra C₂.CoordinateRing C₁.FunctionField = φ.toAlgebra := by
+    show RingHom.toAlgebra _ = RingHom.toAlgebra _
+    rw [halgmap]
+  rw [halg]; rfl
+
+include φ cd in
+/-- **A relative-norm exponent over a maximal ideal is positive**: if a prime `P'`
+of `F[C₁]` lies over a maximal ideal `q` of `F[C₂]` and `relNorm(P') = q ^ t`, then
+`1 ≤ t`.  Were `t = 0` the bound `relNorm(P') ≤ comap P' = q` would force `q = ⊤`,
+contradicting maximality.  (`relNorm_le_comap` + `LiesOver`.) -/
+private theorem one_le_of_relNorm_eq_pow
+    {P' : Ideal C₁.CoordinateRing} {q : Ideal C₂.CoordinateRing}
+    (hqmax : q.IsMaximal) (t : ℕ)
+    (hlies : letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+      P'.LiesOver q)
+    (ht : letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+      letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+      haveI : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+        cd.module_finite
+      haveI : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+        isTorsionFree_coordHom φ cd
+      Ideal.relNorm C₂.CoordinateRing P' = q ^ t) :
+    1 ≤ t := by
+  letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+  letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+  haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    cd.module_finite
+  haveI htf : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    isTorsionFree_coordHom φ cd
+  haveI : P'.LiesOver q := hlies
+  rcases Nat.eq_zero_or_pos t with ht0 | ht0
+  · exfalso
+    have hcomap : P'.comap (algebraMap C₂.CoordinateRing C₁.CoordinateRing) = q :=
+      (Ideal.LiesOver.over (p := q) (P := P')).symm
+    have hbound := Ideal.relNorm_le_comap (R := C₂.CoordinateRing) P'
+    rw [hcomap, ht, ht0, pow_zero, Ideal.one_eq_top, top_le_iff] at hbound
+    exact hqmax.ne_top hbound
+  · exact ht0
+
+include φ cd in
+/-- **Inertia degree 1 for any prime over a smooth point's maximal ideal**: every
+prime `P'` of `F[C₁]` lying over `m_Q` (for a smooth point `Q` of `C₂`) has inertia
+degree `1`.  Such a `P'` is itself maximal, hence `m_{P''}` for a smooth point `P''`
+of `C₁` (`exists_smoothPoint_of_isMaximal`); since `φP'' ` then lies over the same
+`m_Q`, this reduces to the per-point `inertiaDeg_maximalIdealAt_toPointMap`. -/
+private theorem inertiaDeg_eq_one_of_liesOver_maximalIdealAt (Q : C₂.SmoothPoint)
+    (P' : Ideal C₁.CoordinateRing) (hP'prime : P'.IsPrime)
+    (hP'lies : letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+      P'.LiesOver (C₂.maximalIdealAt Q)) :
+    letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+    haveI : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      cd.module_finite
+    haveI : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      isTorsionFree_coordHom φ cd
+    Ideal.inertiaDeg (C₂.maximalIdealAt Q) P' = 1 := by
+  letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+  letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+  haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    cd.module_finite
+  haveI htf : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    isTorsionFree_coordHom φ cd
+  haveI hP'prime' : P'.IsPrime := hP'prime
+  haveI hP'lies' : P'.LiesOver (C₂.maximalIdealAt Q) := hP'lies
+  haveI hQmax : (C₂.maximalIdealAt Q).IsMaximal := C₂.maximalIdealAt_isMaximal Q
+  have hQ0 : C₂.maximalIdealAt Q ≠ ⊥ := C₂.maximalIdealAt_ne_bot Q
+  have hP'_ne_bot : P' ≠ ⊥ := by
+    intro h
+    apply hQ0
+    have hh : C₂.maximalIdealAt Q = P'.under C₂.CoordinateRing := hP'lies.over
+    rw [hh, h, Ideal.under_bot]
+  haveI hP'max : P'.IsMaximal := Ideal.IsPrime.isMaximal hP'prime hP'_ne_bot
+  obtain ⟨P'', hP''⟩ := C₁.exists_smoothPoint_of_isMaximal hP'max
+  haveI hlies'' : (C₁.maximalIdealAt P'').LiesOver
+      (C₂.maximalIdealAt (toPointMap cd P'')) :=
+    maximalIdealAt_liesOver_toPointMap φ cd P''
+  have h1 : C₂.maximalIdealAt (toPointMap cd P'') =
+      (C₁.maximalIdealAt P'').under C₂.CoordinateRing := hlies''.over
+  have h2 : C₂.maximalIdealAt Q = P'.under C₂.CoordinateRing := hP'lies.over
+  rw [hP''] at h1
+  have hpeq : C₂.maximalIdealAt (toPointMap cd P'') = C₂.maximalIdealAt Q := h1.trans h2.symm
+  have hid := inertiaDeg_maximalIdealAt_toPointMap φ cd P''
+  rw [← hP'', ← hpeq]
+  exact hid
+
+include φ cd in
+/-- **Sum of ramification indices equals `φ.degree`**: over a smooth point `Q` of
+`C₂`, `Σ_{P' / m_Q} e_{P'} = φ.degree`.  Combines the fundamental identity
+`Σ e_{P'} f_{P'} = φ.degree` (`sum_ramificationIdx_mul_inertiaDeg_eq_degree`) with the
+fact that every residue degree `f_{P'}` is `1`
+(`inertiaDeg_eq_one_of_liesOver_maximalIdealAt`). -/
+private theorem sum_ramificationIdx_eq_degree (Q : C₂.SmoothPoint)
+    (hfin : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ cd.toAlgebra.toModule) :
+    letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+    haveI : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      cd.module_finite
+    haveI : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      isTorsionFree_coordHom φ cd
+    ∑ P' ∈ IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q) C₁.CoordinateRing,
+      (C₂.maximalIdealAt Q).ramificationIdx P' = φ.degree := by
+  letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+  letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+  haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR := hfin
+  haveI htf : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    isTorsionFree_coordHom φ cd
+  haveI hQmax : (C₂.maximalIdealAt Q).IsMaximal := C₂.maximalIdealAt_isMaximal Q
+  have hQ0 : C₂.maximalIdealAt Q ≠ ⊥ := C₂.maximalIdealAt_ne_bot Q
+  have hsumef := φ.sum_ramificationIdx_mul_inertiaDeg_eq_degree cd hfin hQmax hQ0
+  rw [← hsumef]
+  apply Finset.sum_congr rfl
+  intro P' hP'
+  obtain ⟨hP'prime, hP'lies⟩ :=
+    (IsDedekindDomain.mem_primesOverFinset_iff (B := C₁.CoordinateRing) hQ0).mp hP'
+  rw [inertiaDeg_eq_one_of_liesOver_maximalIdealAt φ cd Q P' hP'prime hP'lies, mul_one]
+
+set_option synthInstance.maxHeartbeats 100000 in
+-- Establishing the global balance reuses `finrank_functionField_eq_degree` and the
+-- `FractionRing.liftAlgebra` / `Module.finrank` defeq, which is heartbeat-heavy.
+set_option maxHeartbeats 600000 in
+include φ cd in
+/-- **The degree balance `φ.degree = Σ sfn(P')·e(P')`**: if, over a smooth point `Q`
+of `C₂`, the relative norm of each prime `P' / m_Q` is the corresponding power
+`relNorm(P') = m_Q ^ sfn(P')`, then `φ.degree = Σ_{P' / m_Q} sfn(P')·e_{P'}`.  Apply
+`relNorm` to the prime factorisation `m_Q·F[C₁] = ∏ P'^{e_{P'}}`: the left side is
+`m_Q ^ finrank = m_Q ^ φ.degree` (`relNorm_algebraMap` + `finrank_functionField_eq_degree`),
+the right side `m_Q ^ Σ sfn·e`, and `m_Q` not being a unit lets us cancel the bases. -/
+private theorem degree_eq_sum_relNormExp_mul_ramificationIdx (Q : C₂.SmoothPoint)
+    (hfin : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ cd.toAlgebra.toModule)
+    (sfn : Ideal C₁.CoordinateRing → ℕ)
+    (hsfn_relNorm :
+      letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+      letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+      haveI : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+        cd.module_finite
+      haveI : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+        isTorsionFree_coordHom φ cd
+      ∀ P' ∈ (C₂.maximalIdealAt Q).primesOver C₁.CoordinateRing,
+        Ideal.relNorm C₂.CoordinateRing P' = C₂.maximalIdealAt Q ^ sfn P') :
+    letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+    haveI : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      cd.module_finite
+    haveI : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      isTorsionFree_coordHom φ cd
+    haveI : (C₂.maximalIdealAt Q).IsMaximal := C₂.maximalIdealAt_isMaximal Q
+    φ.degree = ∑ P' ∈ ((C₂.maximalIdealAt Q).primesOver C₁.CoordinateRing).toFinset,
+      sfn P' * (C₂.maximalIdealAt Q).ramificationIdx P' := by
+  letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+  letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+  haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR := hfin
+  haveI htf : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    isTorsionFree_coordHom φ cd
+  haveI hQmax : (C₂.maximalIdealAt Q).IsMaximal := C₂.maximalIdealAt_isMaximal Q
+  set p : Ideal C₂.CoordinateRing := C₂.maximalIdealAt Q with hp_def
+  have hp0 : p ≠ ⊥ := C₂.maximalIdealAt_ne_bot Q
+  have hpNotUnit : ¬ IsUnit p := by rw [Ideal.isUnit_iff]; exact hQmax.ne_top
+  have hcoh : @Module.finrank C₂.FunctionField C₁.FunctionField _ _
+      (FractionRing.liftAlgebra C₂.CoordinateRing C₁.FunctionField).toModule = φ.degree :=
+    finrank_functionField_eq_degree φ cd
+  have hfact := Ideal.map_algebraMap_eq_finsetProd_pow (R := C₁.CoordinateRing)
+    (S := C₂.CoordinateRing) (p := p) hp0
+  have hrel := congr_arg (Ideal.relNorm C₂.CoordinateRing) hfact
+  rw [Ideal.relNorm_algebraMap C₁.CoordinateRing p, hcoh, map_prod] at hrel
+  have hrhs : ∏ P' ∈ (p.primesOver C₁.CoordinateRing).toFinset,
+      Ideal.relNorm C₂.CoordinateRing (P' ^ p.ramificationIdx P') =
+      p ^ (∑ P' ∈ (p.primesOver C₁.CoordinateRing).toFinset, sfn P' * p.ramificationIdx P') := by
+    rw [← Finset.prod_pow_eq_pow_sum]
+    apply Finset.prod_congr rfl
+    intro P' hP'
+    have hmem : P' ∈ p.primesOver C₁.CoordinateRing := Set.mem_toFinset.mp hP'
+    rw [map_pow, hsfn_relNorm P' hmem, ← pow_mul]
+  rw [hrhs] at hrel
+  exact (pow_inj_of_not_isUnit hpNotUnit hp0).mp hrel
+
+include φ cd in
+/-- **Ramification index positive for primes over `m_Q`**: every prime `P'` of
+`F[C₁]` lying over the maximal ideal `m_Q` has `e_{P'} ≥ 1`.  The ramification index
+of a prime over a nonzero ideal is nonzero in a Dedekind domain
+(`ramificationIdx_ne_zero_of_liesOver`). -/
+private theorem one_le_ramificationIdx_of_liesOver_maximalIdealAt (Q : C₂.SmoothPoint)
+    (P' : Ideal C₁.CoordinateRing) (hP'prime : P'.IsPrime)
+    (hP'lies : letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+      P'.LiesOver (C₂.maximalIdealAt Q)) :
+    letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+    haveI : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      cd.module_finite
+    haveI : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      isTorsionFree_coordHom φ cd
+    1 ≤ (C₂.maximalIdealAt Q).ramificationIdx P' := by
+  letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+  letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+  haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    cd.module_finite
+  haveI htf : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    isTorsionFree_coordHom φ cd
+  haveI : P'.IsPrime := hP'prime
+  haveI : P'.LiesOver (C₂.maximalIdealAt Q) := hP'lies
+  have hp0 : C₂.maximalIdealAt Q ≠ ⊥ := C₂.maximalIdealAt_ne_bot Q
+  rw [Nat.one_le_iff_ne_zero]
+  exact Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver P' hp0
+
+/-- **A `ℕ`-valued sum squeeze**: if `∑ c = ∑ a·c` over a finset `s` with every
+`a i ≥ 1` and every `c i ≥ 1`, then `a i₀ = 1` for each `i₀ ∈ s`.  Each summand
+satisfies `c i ≤ a i · c i`, so equality of the sums forces `c i = a i · c i`
+pointwise (`Finset.sum_eq_sum_iff_of_le`); cancelling the positive `c i₀` gives
+`a i₀ = 1`. -/
+private theorem eq_one_of_sum_eq_sum_mul {ι : Type*} (s : Finset ι) (a c : ι → ℕ)
+    (hsum : ∑ i ∈ s, c i = ∑ i ∈ s, a i * c i)
+    (ha : ∀ i ∈ s, 1 ≤ a i) (hc : ∀ i ∈ s, 1 ≤ c i)
+    {i₀ : ι} (hi₀ : i₀ ∈ s) : a i₀ = 1 := by
+  have hpointwise : ∀ i ∈ s, c i ≤ a i * c i := fun i hi ↦ by
+    nlinarith [ha i hi, hc i hi]
+  have heach := (Finset.sum_eq_sum_iff_of_le hpointwise).mp hsum
+  have hi := heach i₀ hi₀
+  nlinarith [hi, hc i₀ hi₀]
+
+set_option synthInstance.maxHeartbeats 100000 in
+-- Assembling the global balance still synthesises the cross-algebra instances and the
+-- `FractionRing.liftAlgebra` / `Module.finrank` defeq (via `finrank_functionField_eq_degree`),
+-- which is heartbeat-heavy, hence the scoped bumps.
 set_option maxHeartbeats 600000 in
 /-- **The `s = 1` core — Silverman II.3.6**: the relative norm of the maximal ideal
 `m_R` of `F[C₁]` is the maximal ideal `m_{φR}` of `F[C₂]`.  Proof via the global
@@ -320,57 +577,6 @@ theorem relNorm_maximalIdealAt_eq
   haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR := hfin
   haveI htf : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
     isTorsionFree_coordHom φ cd
-  haveI hint : Algebra.IsIntegral C₂.CoordinateRing C₁.CoordinateRing :=
-    Algebra.IsIntegral.of_finite C₂.CoordinateRing C₁.CoordinateRing
-  haveI tower2 : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField :=
-    inferInstance
-  haveI faith : FaithfulSMul C₂.CoordinateRing C₁.FunctionField := by
-    rw [faithfulSMul_iff_algebraMap_injective,
-      IsScalarTower.algebraMap_eq C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField]
-    exact (IsFractionRing.injective C₁.CoordinateRing C₁.FunctionField).comp
-      (CurveMap.coordHom_injective φ cd)
-  letI algFF : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
-  haveI tower1 : IsScalarTower C₂.CoordinateRing C₂.FunctionField C₁.FunctionField := by
-    refine IsScalarTower.of_algebraMap_smul fun r x ↦ ?_
-    rw [Algebra.smul_def]
-    show φ.pullback ((algebraMap C₂.CoordinateRing C₂.FunctionField) r) * x = r • x
-    rw [cd.compat r, ← IsScalarTower.algebraMap_smul C₁.CoordinateRing r x, ← Algebra.smul_def]
-    rfl
-  haveI hfd : FiniteDimensional C₂.FunctionField C₁.FunctionField := by
-    haveI hicl : IsIntegralClosure C₁.CoordinateRing C₂.CoordinateRing C₁.FunctionField :=
-      IsIntegralClosure.of_isIntegrallyClosed C₁.CoordinateRing C₂.CoordinateRing _
-    haveI hab : Algebra.IsAlgebraic C₂.CoordinateRing C₁.CoordinateRing :=
-      Algebra.IsIntegral.isAlgebraic
-    haveI halgAB : Algebra.IsAlgebraic C₂.CoordinateRing C₁.FunctionField :=
-      (IsFractionRing.isAlgebraic_iff' C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField).mp hab
-    haveI halgFF : Algebra.IsAlgebraic C₂.FunctionField C₁.FunctionField :=
-      (IsFractionRing.comap_isAlgebraic_iff (A := C₂.CoordinateRing)
-        (K := C₂.FunctionField) (C := C₁.FunctionField)).mp halgAB
-    haveI hloc : IsLocalization
-        (Algebra.algebraMapSubmonoid C₁.CoordinateRing (nonZeroDivisors C₂.CoordinateRing))
-        C₁.FunctionField :=
-      IsIntegralClosure.isLocalization C₂.CoordinateRing C₂.FunctionField C₁.FunctionField
-        C₁.CoordinateRing
-    exact Module.Finite.of_isLocalization C₂.CoordinateRing C₁.CoordinateRing
-      (nonZeroDivisors C₂.CoordinateRing)
-  have hcoh : @Module.finrank C₂.FunctionField C₁.FunctionField _ _
-      (FractionRing.liftAlgebra C₂.CoordinateRing C₁.FunctionField).toModule = φ.degree := by
-    have halgmap :
-        IsFractionRing.lift (A := C₂.CoordinateRing) (K := C₂.FunctionField)
-          (FaithfulSMul.algebraMap_injective C₂.CoordinateRing C₁.FunctionField) =
-        φ.pullback.toRingHom := by
-      apply IsFractionRing.lift_unique
-        (FaithfulSMul.algebraMap_injective C₂.CoordinateRing C₁.FunctionField)
-      intro u
-      show φ.pullback (algebraMap C₂.CoordinateRing C₂.FunctionField u) =
-        algebraMap C₂.CoordinateRing C₁.FunctionField u
-      rw [cd.compat u, IsScalarTower.algebraMap_apply C₂.CoordinateRing
-        C₁.CoordinateRing C₁.FunctionField u]
-      rfl
-    have halg : FractionRing.liftAlgebra C₂.CoordinateRing C₁.FunctionField = φ.toAlgebra := by
-      show RingHom.toAlgebra _ = RingHom.toAlgebra _
-      rw [halgmap]
-    rw [halg]; rfl
   set Q := toPointMap cd R with hQ
   haveI hLies : (C₁.maximalIdealAt R).LiesOver (C₂.maximalIdealAt Q) :=
     maximalIdealAt_liesOver_toPointMap φ cd R
@@ -381,45 +587,19 @@ theorem relNorm_maximalIdealAt_eq
   obtain ⟨s, hs⟩ := Ideal.exists_relNorm_eq_pow_of_isPrime
     (C₁.maximalIdealAt R) (C₂.maximalIdealAt Q)
   suffices hs1 : s = 1 by rw [hs, hs1, pow_one]
-  have hge1 : 1 ≤ s := by
-    rcases Nat.eq_zero_or_pos s with hs0 | hs0
-    · exfalso
-      have hcomap : (C₁.maximalIdealAt R).comap
-          (algebraMap C₂.CoordinateRing C₁.CoordinateRing) = C₂.maximalIdealAt Q :=
-        hLies.over.symm
-      have hbound := Ideal.relNorm_le_comap (R := C₂.CoordinateRing) (C₁.maximalIdealAt R)
-      rw [hcomap, hs, hs0, pow_zero, Ideal.one_eq_top, top_le_iff] at hbound
-      exact hQmax.ne_top hbound
-    · exact hs0
+  -- Lower bound: the exponent `s` is at least `1`.
+  have hge1 : 1 ≤ s := one_le_of_relNorm_eq_pow φ cd hQmax s hLies hs
   set p : Ideal C₂.CoordinateRing := C₂.maximalIdealAt Q with hp_def
+  -- Every residue degree over `m_Q` is `1`.
   have hinertia : ∀ P' ∈ p.primesOver C₁.CoordinateRing, Ideal.inertiaDeg p P' = 1 := by
     intro P' hP'
     obtain ⟨hP'prime, hP'lies⟩ := hP'
-    haveI : P'.IsPrime := hP'prime
-    haveI : P'.LiesOver p := hP'lies
-    have hP'_ne_bot : P' ≠ ⊥ := by
-      intro h
-      apply hQ0
-      have hh : p = P'.under C₂.CoordinateRing := hP'lies.over
-      rw [hp_def] at hh ⊢
-      rw [hh, h, Ideal.under_bot]
-    haveI hP'max : P'.IsMaximal := Ideal.IsPrime.isMaximal hP'prime hP'_ne_bot
-    obtain ⟨P'', hP''⟩ := C₁.exists_smoothPoint_of_isMaximal hP'max
-    haveI hlies'' : (C₁.maximalIdealAt P'').LiesOver
-        (C₂.maximalIdealAt (toPointMap cd P'')) :=
-      maximalIdealAt_liesOver_toPointMap φ cd P''
-    have h1 : C₂.maximalIdealAt (toPointMap cd P'') =
-        (C₁.maximalIdealAt P'').under C₂.CoordinateRing := hlies''.over
-    have h2 : p = P'.under C₂.CoordinateRing := hP'lies.over
-    rw [hP''] at h1
-    have hpeq : C₂.maximalIdealAt (toPointMap cd P'') = p := h1.trans h2.symm
-    have hid := inertiaDeg_maximalIdealAt_toPointMap φ cd P''
-    rw [← hP'', ← hpeq]
-    exact hid
+    exact inertiaDeg_eq_one_of_liesOver_maximalIdealAt φ cd Q P' hP'prime hP'lies
   have hp0 : p ≠ ⊥ := hQ0
   have hpNotUnit : ¬ IsUnit p := by
     rw [Ideal.isUnit_iff]; exact hQmax.ne_top
   haveI hpMax : p.IsMaximal := hQmax
+  -- Each relative norm over `m_Q` is a positive power of `m_Q`.
   have hexp : ∀ P' ∈ p.primesOver C₁.CoordinateRing,
       ∃ t : ℕ, 1 ≤ t ∧ Ideal.relNorm C₂.CoordinateRing P' = p ^ t := by
     intro P' hP'
@@ -427,15 +607,7 @@ theorem relNorm_maximalIdealAt_eq
     haveI : P'.IsPrime := hP'prime
     haveI : P'.LiesOver p := hP'lies
     obtain ⟨t, ht⟩ := Ideal.exists_relNorm_eq_pow_of_isPrime P' p
-    refine ⟨t, ?_, ht⟩
-    rcases Nat.eq_zero_or_pos t with ht0 | ht0
-    · exfalso
-      have hcomap : P'.comap (algebraMap C₂.CoordinateRing C₁.CoordinateRing) = p :=
-        hP'lies.over.symm
-      have hbound := Ideal.relNorm_le_comap (R := C₂.CoordinateRing) P'
-      rw [hcomap, ht, ht0, pow_zero, Ideal.one_eq_top, top_le_iff] at hbound
-      exact hQmax.ne_top hbound
-    · exact ht0
+    exact ⟨t, one_le_of_relNorm_eq_pow φ cd hpMax t hP'lies ht, ht⟩
   let sfn : Ideal C₁.CoordinateRing → ℕ := fun P' ↦
     if hP' : P' ∈ p.primesOver C₁.CoordinateRing then (hexp P' hP').choose else 0
   have hsfn_ge : ∀ P' ∈ p.primesOver C₁.CoordinateRing, 1 ≤ sfn P' := by
@@ -447,67 +619,38 @@ theorem relNorm_maximalIdealAt_eq
     intro P' hP'
     simp only [sfn, dif_pos hP']
     exact (hexp P' hP').choose_spec.2
-  have hfact := Ideal.map_algebraMap_eq_finsetProd_pow (R := C₁.CoordinateRing)
-    (S := C₂.CoordinateRing) (p := p) hp0
-  set ee : Ideal C₁.CoordinateRing → ℕ :=
-    fun P' ↦ p.ramificationIdx P' with hee_def
-  have hrel := congr_arg (Ideal.relNorm C₂.CoordinateRing) hfact
-  rw [Ideal.relNorm_algebraMap C₁.CoordinateRing p, hcoh, map_prod] at hrel
-  have hrhs : ∏ P' ∈ (p.primesOver C₁.CoordinateRing).toFinset,
-      Ideal.relNorm C₂.CoordinateRing (P' ^ ee P') =
-      p ^ (∑ P' ∈ (p.primesOver C₁.CoordinateRing).toFinset, sfn P' * ee P') := by
-    rw [← Finset.prod_pow_eq_pow_sum]
-    apply Finset.prod_congr rfl
-    intro P' hP'
-    have hmem : P' ∈ p.primesOver C₁.CoordinateRing := Set.mem_toFinset.mp hP'
-    rw [map_pow, hsfn_relNorm P' hmem, ← pow_mul]
-  rw [hrhs] at hrel
+  set ee : Ideal C₁.CoordinateRing → ℕ := fun P' ↦ p.ramificationIdx P'
+  -- Global balance: `φ.degree = Σ sfn(P')·e_{P'}`.
   have hdeg_eq : φ.degree = ∑ P' ∈ (p.primesOver C₁.CoordinateRing).toFinset, sfn P' * ee P' :=
-    (pow_inj_of_not_isUnit hpNotUnit hp0).mp hrel
-  have hsumef := φ.sum_ramificationIdx_mul_inertiaDeg_eq_degree cd hfin hpMax hp0
-  have hsume : ∑ P' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing, ee P' = φ.degree := by
-    rw [← hsumef]
-    apply Finset.sum_congr rfl
-    intro P' hP'
-    have hmem : P' ∈ p.primesOver C₁.CoordinateRing :=
-      (IsDedekindDomain.mem_primesOverFinset_iff (B := C₁.CoordinateRing) hp0).mp hP'
-    rw [hee_def, hinertia P' hmem, mul_one]
+    degree_eq_sum_relNormExp_mul_ramificationIdx φ cd Q hfin sfn hsfn_relNorm
+  -- Sum of ramification indices over `m_Q` is `φ.degree` (residue degrees are `1`).
+  have hsume : ∑ P' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing, ee P' = φ.degree :=
+    sum_ramificationIdx_eq_degree φ cd Q hfin
   have hfinset_eq : IsDedekindDomain.primesOverFinset p C₁.CoordinateRing =
       (p.primesOver C₁.CoordinateRing).toFinset := by
     apply Finset.coe_injective
     rw [IsDedekindDomain.coe_primesOverFinset hp0, Set.coe_toFinset]
   rw [hfinset_eq] at hsume
-  have hsum_eq : ∑ P' ∈ (p.primesOver C₁.CoordinateRing).toFinset, ee P' =
-      ∑ P' ∈ (p.primesOver C₁.CoordinateRing).toFinset, sfn P' * ee P' := by
-    rw [hsume, ← hdeg_eq]
+  -- Squeeze `Σ e = Σ sfn·e` with `sfn, e ≥ 1` to force `sfn(m_R) = 1`, whence `s = 1`.
   have hee_ge : ∀ P' ∈ (p.primesOver C₁.CoordinateRing).toFinset, 1 ≤ ee P' := by
     intro P' hP'
-    have hmem : P' ∈ p.primesOver C₁.CoordinateRing := Set.mem_toFinset.mp hP'
-    obtain ⟨hP'prime, hP'lies⟩ := hmem
-    haveI : P'.IsPrime := hP'prime
-    haveI : P'.LiesOver p := hP'lies
-    rw [hee_def, Nat.one_le_iff_ne_zero]
-    exact Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver P' hp0
-  have hpointwise : ∀ P' ∈ (p.primesOver C₁.CoordinateRing).toFinset,
-      ee P' ≤ sfn P' * ee P' := by
-    intro P' hP'
-    have hmem : P' ∈ p.primesOver C₁.CoordinateRing := Set.mem_toFinset.mp hP'
-    nlinarith [hsfn_ge P' hmem, hee_ge P' hP']
-  have heach := (Finset.sum_eq_sum_iff_of_le hpointwise).mp hsum_eq
+    obtain ⟨hP'prime, hP'lies⟩ := Set.mem_toFinset.mp hP'
+    exact one_le_ramificationIdx_of_liesOver_maximalIdealAt φ cd Q P' hP'prime hP'lies
   have hR_mem : C₁.maximalIdealAt R ∈ p.primesOver C₁.CoordinateRing :=
     ⟨hRprime, hLies⟩
   have hR_fs : C₁.maximalIdealAt R ∈ (p.primesOver C₁.CoordinateRing).toFinset :=
     Set.mem_toFinset.mpr hR_mem
-  have hR := heach (C₁.maximalIdealAt R) hR_fs
   have hsfn_R : sfn (C₁.maximalIdealAt R) = s := by
     simp only [sfn, dif_pos hR_mem]
     have h1 := (hexp (C₁.maximalIdealAt R) hR_mem).choose_spec.2
     have h2 : p ^ (hexp (C₁.maximalIdealAt R) hR_mem).choose = p ^ s := by
       rw [← h1]; exact hs
     exact (pow_inj_of_not_isUnit hpNotUnit hp0).mp h2
-  have heR : 1 ≤ ee (C₁.maximalIdealAt R) := hee_ge _ hR_fs
-  rw [hsfn_R] at hR
-  nlinarith [hR, heR, hge1]
+  have hsfn_one : sfn (C₁.maximalIdealAt R) = 1 :=
+    eq_one_of_sum_eq_sum_mul (p.primesOver C₁.CoordinateRing).toFinset sfn ee
+      (by rw [hsume, ← hdeg_eq]) (fun P' hP' ↦ hsfn_ge P' (Set.mem_toFinset.mp hP')) hee_ge hR_fs
+  rw [hsfn_R] at hsfn_one
+  exact hsfn_one
 
 /-- **The affine count identity — Silverman II.3.6, per-place**: for nonzero
 `w ∈ F[C₁]` and a smooth point `Q` of `C₂`, the multiplicity of `m_Q` in the
