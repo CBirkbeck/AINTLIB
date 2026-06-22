@@ -68,22 +68,16 @@ private instance instFact37 : Fact (Nat.Prime 37) := ⟨by norm_num⟩
 (Kellner `α₀`), and `37 ∤ B₃₂.den = 510` (von Staudt–Clausen). -/
 theorem padicValRat_bernoulli_thirtytwo :
     padicValRat 37 (bernoulli 32) = 1 := by
-  have hden : (bernoulli 32).den = 510 := bernoulli_thirtytwo_den_eq
   have hpvi : padicValInt 37 (bernoulli 32).num = 1 := by
-    have hdvd : (37 : ℤ) ∣ (bernoulli 32).num := thirtyseven_dvd_bernoulli_thirtytwo_num
-    have hnotdvd : ¬ (37 : ℤ) ^ 2 ∣ (bernoulli 32).num := kellner_at_zero_not_dvd
-    have hnum : (bernoulli 32).num = -7709321041217 := bernoulli_thirtytwo_num_eq
-    have hne : (bernoulli 32).num ≠ 0 := by rw [hnum]; norm_num
-    have h1 : 1 ≤ padicValInt 37 (bernoulli 32).num := by
-      rcases (padicValInt_dvd_iff (p := 37) 1 (bernoulli 32).num).mp (by simpa using hdvd) with
-        h | h
-      · exact absurd h hne
-      · exact h
-    have h2 : ¬ (2 ≤ padicValInt 37 (bernoulli 32).num) := fun hle =>
-      hnotdvd ((padicValInt_dvd_iff (p := 37) 2 (bernoulli 32).num).mpr (Or.inr hle))
+    have hne : (bernoulli 32).num ≠ 0 := by rw [bernoulli_thirtytwo_num_eq]; norm_num
+    have h1 : 1 ≤ padicValInt 37 (bernoulli 32).num :=
+      ((padicValInt_dvd_iff (p := 37) 1 (bernoulli 32).num).mp
+        (by simpa using thirtyseven_dvd_bernoulli_thirtytwo_num)).resolve_left hne
+    have h2 : ¬ 2 ≤ padicValInt 37 (bernoulli 32).num := fun hle =>
+      kellner_at_zero_not_dvd ((padicValInt_dvd_iff (p := 37) 2 (bernoulli 32).num).mpr (Or.inr hle))
     omega
   have hpvn : padicValNat 37 (bernoulli 32).den = 0 := by
-    rw [hden, padicValNat.eq_zero_iff]; right; right; decide
+    rw [bernoulli_thirtytwo_den_eq, padicValNat.eq_zero_iff]; right; right; decide
   rw [padicValRat_def, hpvi, hpvn]; norm_num
 
 /-- **`v₃₇(B₃₂ / 32) = 1`** (proved): the sharp first-order valuation, the
@@ -92,10 +86,8 @@ arithmetic core of `M = 1` for Corollary 8.23.  Since `37 ∤ 32`, dividing by
 theorem valuation_bernoulliFactorQp_thirtytwo :
     (bernoulliFactorQp 37 32).valuation = 1 := by
   rw [valuation_bernoulliFactorQp]
-  have hB_ne : (bernoulli 32 : ℚ) ≠ 0 := by
-    intro h
-    have hnum : (bernoulli 32).num = -7709321041217 := bernoulli_thirtytwo_num_eq
-    rw [h] at hnum; simp at hnum
+  have hB_ne : (bernoulli 32 : ℚ) ≠ 0 :=
+    Rat.num_ne_zero.mp (by rw [bernoulli_thirtytwo_num_eq]; norm_num)
   have h32 : ((32 : ℕ) : ℚ) ≠ 0 := by norm_num
   have hv32 : padicValRat 37 ((32 : ℕ) : ℚ) = 0 := by
     rw [padicValRat.of_nat, Nat.cast_eq_zero, padicValNat.eq_zero_iff]
