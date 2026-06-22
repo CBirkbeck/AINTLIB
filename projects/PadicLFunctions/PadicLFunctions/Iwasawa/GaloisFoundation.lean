@@ -894,6 +894,18 @@ theorem isUnramifiedOutsideP_sigmaL (n : ℕ) (σ : Om →ₐ[ℚ] Om) {L : Inte
     (hFle : FPlus p n ≤ IntermediateField.map σ (L.restrictScalars ℚ))
     [FiniteDimensional (FPlus p n) (IntermediateField.extendScalars hFle)] :
     @IsUnramifiedOutsideP p _ n (IntermediateField.extendScalars hFle) ‹_› := by
+  haveI := numberField_of_finite_layer p n (IntermediateField.extendScalars hFle)
+  intro P _ hPp
+  by_cases hP0 : P = ⊥
+  · -- `P = ⊥`: the generic fibre — unramified (the residue extension is separable, char `0`).
+    subst hP0
+    sorry
+  -- **Reduction works** (all `IsDedekindDomain`/`EssFiniteType`/`CharZero`/`IsIntegral` instances on
+  -- the rings of integers resolve via the `NumberField` instance): reduce to `e(P | 𝓞 F⁺ₙ) = 1`.
+  rw [Algebra.isUnramifiedAt_iff_of_isDedekindDomain hP0]
+  -- **Remaining = the β-twist core**: `σ̃ : 𝓞(σL) ≅ 𝓞 L` (`RingOfIntegers.mapRingEquiv`) carries `P` to
+  -- a prime not over `p` (σ fixes `ℤ`); `L` is unramified there (`hL`); and `ramificationIdx` is
+  -- invariant under the `β`-semilinear `σ̃` (β = σ|F⁺ₙ relabels 𝓞_{F⁺ₙ}'s primes, fixing the one over `p`).
   sorry
 
 /-- **Admissibility is `σ`-invariant** (the analytic heart of normality): if `L` is an admissible-`M`
