@@ -28,7 +28,7 @@ element, using the Stickelberger convention that the coefficient attached to
 `a` sits on the basis element `single a⁻¹ 1`. -/
 noncomputable def unitExponentVectorGroupRing (v : (ZMod p)ˣ → ℕ) :
     MonoidAlgebra ℤ (ZMod p)ˣ :=
-  stickelbergerCoefficientPackage (p := p) (fun a => (v a : ℤ))
+  stickelbergerCoefficientPackage (p := p) (fun a ↦ (v a : ℤ))
 
 /-- The coefficient at `a⁻¹` recovers the exponent indexed by `a`. -/
 @[simp] lemma unitExponentVectorGroupRing_apply_inv
@@ -49,13 +49,13 @@ lemma additiveExponentVectorGroupRing_eq_distinguishedPrimeExponent
     (χ : DirichletCharacter ℂ p) :
     additiveExponentVectorGroupRing (p := p) (L := L) χ =
       unitExponentVectorGroupRing (p := p)
-        (fun _ => distinguishedPrimeExponent (p := p) (L := L) χ) := by
+        (fun _ ↦ distinguishedPrimeExponent (p := p) (L := L) χ) := by
   simp [additiveExponentVectorGroupRing,
     additiveExponentVector_eq_distinguishedPrimeExponent]
 
 /-- The orbit map, viewed as a map onto the subtype cut out by the orbit finset. -/
 noncomputable def characterSidePrimeMapToOrbit :
-    (ZMod (p - 1))ˣ → {P // P ∈ characterSidePrimeOrbit p L} := fun b =>
+    (ZMod (p - 1))ˣ → {P // P ∈ characterSidePrimeOrbit p L} := fun b ↦
   ⟨characterSidePrimeMap (p := p) (L := L) b,
     characterSidePrimeMap_mem_characterSidePrimeOrbit (p := p) (L := L) b⟩
 
@@ -187,7 +187,7 @@ lemma pow_characterSideUnit_val_pow_inv_eq_self
   rw [← ZMod.natCast_eq_natCast_iff]
   rw [Nat.cast_mul, ZMod.natCast_val, ZMod.natCast_val]
   convert congrArg
-    (fun u : (ZMod (p - 1))ˣ => ((u : ZMod (p - 1))))
+    (fun u : (ZMod (p - 1))ˣ ↦ ((u : ZMod (p - 1))))
     (mul_inv_cancel b) using 1 <;> simp
 
 /-- A nontrivial character stays nontrivial after raising it to a unit exponent. -/
@@ -196,7 +196,7 @@ lemma pow_characterSideUnit_ne_one
     χ ^ (b : ZMod (p - 1)).val ≠ 1 := by
   intro hpow
   have hpow' := congrArg
-    (fun ψ : DirichletCharacter ℂ p =>
+    (fun ψ : DirichletCharacter ℂ p ↦
       ψ ^ (((b⁻¹ : (ZMod (p - 1))ˣ) : ZMod (p - 1)).val)) hpow
   have hχ' :
       (χ ^ (b : ZMod (p - 1)).val) ^
@@ -227,7 +227,7 @@ lemma gaussSumIdeal_eq_prod_characterSideUnits
             simpa using
               (Finset.prod_coe_sort
                 (s := characterSidePrimeOrbit p L)
-                (f := fun P : Ideal (𝓞 L) =>
+                (f := fun P : Ideal (𝓞 L) ↦
                   P ^ primeAbovePExponent (p := p) (L := L) P χ)).symm
     _ = ∏ b : (ZMod (p - 1))ˣ,
           (characterSidePrimeEquivOrbit (p := p) (L := L) b).1 ^
@@ -275,7 +275,7 @@ lemma gaussSumIdeal_eq_prod_characterSideUnits
 Gauss-sum ideal factorization of `χ`. The coefficient at `b` is the
 distinguished-prime exponent of the inverse-transformed character. -/
 noncomputable def characterSideExponentVector (χ : DirichletCharacter ℂ p) :
-    (ZMod (p - 1))ˣ → ℕ := fun b =>
+    (ZMod (p - 1))ˣ → ℕ := fun b ↦
   distinguishedPrimeExponent (p := p) (L := L)
     (χ ^ (((b⁻¹ : (ZMod (p - 1))ˣ) : ZMod (p - 1)).val))
 
