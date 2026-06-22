@@ -509,6 +509,89 @@ private theorem mulByInt_finrank_aux_top :
     exact this.symm
   · ext x; rfl
 
+-- The `FractionRing F[X]` analogue of `finrank_ratFunc_mulByInt`: transferring the latter along
+-- the canonical `FractionRing F[X] ≃+* RatFunc F` field isomorphism `e`, which carries `gen_frac`
+-- to the generator over `RatFunc F` and hence the adjunction `fracR` isomorphically onto `adjR`.
+-- This is the `[K(x) : K([n]*x)] = n²` content that lives entirely over canonical
+-- `IntermediateField` instances (unlike the outer `h_mid` step in `aux_total`).
+omit [DecidableEq F] in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 250000 in
+private theorem finrank_fractionRing_mulByInt {n : ℤ} (hn : n ≠ 0) :
+    Module.finrank
+      (IntermediateField.adjoin F
+        ({algebraMap F[X] (FractionRing F[X]) (W.Φ n) /
+          algebraMap F[X] (FractionRing F[X]) (W.ΨSq n)} : Set (FractionRing F[X])))
+      (FractionRing F[X]) = n.natAbs ^ 2 := by
+  set gen_frac := algebraMap F[X] (FractionRing F[X]) (W.Φ n) /
+    algebraMap F[X] (FractionRing F[X]) (W.ΨSq n) with hgen_frac_def
+  set fracR := IntermediateField.adjoin F ({gen_frac} : Set (FractionRing F[X]))
+  let e : FractionRing F[X] ≃+* RatFunc F :=
+    (FractionRing.algEquiv F[X] (RatFunc F)).toRingEquiv
+  set adjR := IntermediateField.adjoin F
+    ({algebraMap F[X] (RatFunc F) (W.Φ n) /
+      algebraMap F[X] (RatFunc F) (W.ΨSq n)} : Set (RatFunc F))
+  have he_gen : e gen_frac = algebraMap F[X] (RatFunc F) (W.Φ n) /
+      algebraMap F[X] (RatFunc F) (W.ΨSq n) := by
+    simp only [e, gen_frac, map_div₀]
+    congr 1 <;> exact (FractionRing.algEquiv F[X] (RatFunc F)).commutes _
+  have he_algebraMap_comm : ∀ c : F,
+      e (algebraMap F (FractionRing F[X]) c) = algebraMap F (RatFunc F) c := by
+    intro c
+    change (FractionRing.algEquiv F[X] (RatFunc F))
+      (algebraMap F (FractionRing F[X]) c) = algebraMap F (RatFunc F) c
+    rw [show algebraMap F (FractionRing F[X]) c =
+      algebraMap F[X] (FractionRing F[X]) (algebraMap F F[X] c) from
+      (IsScalarTower.algebraMap_apply F F[X] (FractionRing F[X]) c).symm,
+      (FractionRing.algEquiv F[X] (RatFunc F)).commutes,
+      IsScalarTower.algebraMap_apply F F[X] (RatFunc F)]
+  have he_mem : ∀ x : fracR, e (x : FractionRing F[X]) ∈ adjR := by
+    intro ⟨y, hy⟩
+    suffices h : ∀ z ∈ IntermediateField.adjoin F
+        ({gen_frac} : Set (FractionRing F[X])),
+        e z ∈ adjR from h y hy
+    intro z hz
+    induction hz using IntermediateField.adjoin_induction with
+    | mem x hx =>
+      rw [Set.mem_singleton_iff.mp hx, he_gen]
+      exact IntermediateField.subset_adjoin F _ (Set.mem_singleton _)
+    | algebraMap c => rw [he_algebraMap_comm]; exact adjR.algebraMap_mem c
+    | add _ _ _ _ ha hb => rw [map_add]; exact adjR.add_mem ha hb
+    | inv _ _ ha => rw [map_inv₀]; exact adjR.inv_mem ha
+    | mul _ _ _ _ ha hb => rw [map_mul]; exact adjR.mul_mem ha hb
+  have he_mem' : ∀ x : adjR, e.symm (x : RatFunc F) ∈ fracR := by
+    intro ⟨y, hy⟩
+    suffices h : ∀ z ∈ IntermediateField.adjoin F
+        ({algebraMap F[X] (RatFunc F) (W.Φ n) /
+          algebraMap F[X] (RatFunc F) (W.ΨSq n)} : Set (RatFunc F)),
+        e.symm z ∈ fracR from h y hy
+    intro z hz
+    induction hz using IntermediateField.adjoin_induction with
+    | mem x hx =>
+      rw [Set.mem_singleton_iff.mp hx, ← he_gen, RingEquiv.symm_apply_apply]
+      exact IntermediateField.subset_adjoin F _ (Set.mem_singleton _)
+    | algebraMap c =>
+      rw [show e.symm (algebraMap F (RatFunc F) c) =
+        algebraMap F (FractionRing F[X]) c by
+        apply e.injective
+        rw [RingEquiv.apply_symm_apply, he_algebraMap_comm]]
+      exact fracR.algebraMap_mem c
+    | add _ _ _ _ ha hb => rw [map_add]; exact fracR.add_mem ha hb
+    | inv _ _ ha => rw [map_inv₀]; exact fracR.inv_mem ha
+    | mul _ _ _ _ ha hb => rw [map_mul]; exact fracR.mul_mem ha hb
+  let i' : fracR ≃+* adjR := {
+    toFun := fun x ↦ ⟨e x, he_mem x⟩
+    invFun := fun x ↦ ⟨e.symm x, he_mem' x⟩
+    left_inv := fun ⟨y, _⟩ ↦ Subtype.ext (e.symm_apply_apply y)
+    right_inv := fun ⟨y, _⟩ ↦ Subtype.ext (e.apply_symm_apply y)
+    map_mul' := fun ⟨a, _⟩ ⟨b, _⟩ ↦ Subtype.ext (map_mul e a b)
+    map_add' := fun ⟨a, _⟩ ⟨b, _⟩ ↦ Subtype.ext (map_add e a b) }
+  rw [show Module.finrank fracR (FractionRing F[X]) =
+    Module.finrank adjR (RatFunc F) from
+    @Algebra.finrank_eq_of_equiv_equiv fracR (FractionRing F[X]) _ _ _
+      adjR (RatFunc F) _ _ _ i' e (by ext ⟨x, hx⟩; rfl)]
+  exact finrank_ratFunc_mulByInt W hn
+
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 250000 in
 -- The inner `[K(x) : K([n]*x)] = n²` step (`h_mid`) is stated over the non-canonical
@@ -555,71 +638,7 @@ private theorem mulByInt_finrank_aux_total {n : ℤ} (hn : n ≠ 0) :
       fracR (FractionRing F[X]) _ _ _
       (mulByIntFracRange W hn) aR _ _ _ i j ?_
     · rw [← h_transfer]
-      let e : FractionRing F[X] ≃+* RatFunc F :=
-        (FractionRing.algEquiv F[X] (RatFunc F)).toRingEquiv
-      set adjR := IntermediateField.adjoin F
-        ({algebraMap F[X] (RatFunc F) (W.Φ n) /
-          algebraMap F[X] (RatFunc F) (W.ΨSq n)} : Set (RatFunc F))
-      have he_gen : e gen_frac = algebraMap F[X] (RatFunc F) (W.Φ n) /
-          algebraMap F[X] (RatFunc F) (W.ΨSq n) := by
-        simp only [e, gen_frac, map_div₀]
-        congr 1 <;> exact (FractionRing.algEquiv F[X] (RatFunc F)).commutes _
-      have he_algebraMap_comm : ∀ c : F,
-          e (algebraMap F (FractionRing F[X]) c) = algebraMap F (RatFunc F) c := by
-        intro c
-        change (FractionRing.algEquiv F[X] (RatFunc F))
-          (algebraMap F (FractionRing F[X]) c) = algebraMap F (RatFunc F) c
-        rw [show algebraMap F (FractionRing F[X]) c =
-          algebraMap F[X] (FractionRing F[X]) (algebraMap F F[X] c) from
-          (IsScalarTower.algebraMap_apply F F[X] (FractionRing F[X]) c).symm,
-          (FractionRing.algEquiv F[X] (RatFunc F)).commutes,
-          IsScalarTower.algebraMap_apply F F[X] (RatFunc F)]
-      have he_mem : ∀ x : fracR, e (x : FractionRing F[X]) ∈ adjR := by
-        intro ⟨y, hy⟩
-        suffices h : ∀ z ∈ IntermediateField.adjoin F
-            ({gen_frac} : Set (FractionRing F[X])),
-            e z ∈ adjR from h y hy
-        intro z hz
-        induction hz using IntermediateField.adjoin_induction with
-        | mem x hx =>
-          rw [Set.mem_singleton_iff.mp hx, he_gen]
-          exact IntermediateField.subset_adjoin F _ (Set.mem_singleton _)
-        | algebraMap c => rw [he_algebraMap_comm]; exact adjR.algebraMap_mem c
-        | add _ _ _ _ ha hb => rw [map_add]; exact adjR.add_mem ha hb
-        | inv _ _ ha => rw [map_inv₀]; exact adjR.inv_mem ha
-        | mul _ _ _ _ ha hb => rw [map_mul]; exact adjR.mul_mem ha hb
-      have he_mem' : ∀ x : adjR, e.symm (x : RatFunc F) ∈ fracR := by
-        intro ⟨y, hy⟩
-        suffices h : ∀ z ∈ IntermediateField.adjoin F
-            ({algebraMap F[X] (RatFunc F) (W.Φ n) /
-              algebraMap F[X] (RatFunc F) (W.ΨSq n)} : Set (RatFunc F)),
-            e.symm z ∈ fracR from h y hy
-        intro z hz
-        induction hz using IntermediateField.adjoin_induction with
-        | mem x hx =>
-          rw [Set.mem_singleton_iff.mp hx, ← he_gen, RingEquiv.symm_apply_apply]
-          exact IntermediateField.subset_adjoin F _ (Set.mem_singleton _)
-        | algebraMap c =>
-          rw [show e.symm (algebraMap F (RatFunc F) c) =
-            algebraMap F (FractionRing F[X]) c by
-            apply e.injective
-            rw [RingEquiv.apply_symm_apply, he_algebraMap_comm]]
-          exact fracR.algebraMap_mem c
-        | add _ _ _ _ ha hb => rw [map_add]; exact fracR.add_mem ha hb
-        | inv _ _ ha => rw [map_inv₀]; exact fracR.inv_mem ha
-        | mul _ _ _ _ ha hb => rw [map_mul]; exact fracR.mul_mem ha hb
-      let i' : fracR ≃+* adjR := {
-        toFun := fun x ↦ ⟨e x, he_mem x⟩
-        invFun := fun x ↦ ⟨e.symm x, he_mem' x⟩
-        left_inv := fun ⟨y, _⟩ ↦ Subtype.ext (e.symm_apply_apply y)
-        right_inv := fun ⟨y, _⟩ ↦ Subtype.ext (e.apply_symm_apply y)
-        map_mul' := fun ⟨a, _⟩ ⟨b, _⟩ ↦ Subtype.ext (map_mul e a b)
-        map_add' := fun ⟨a, _⟩ ⟨b, _⟩ ↦ Subtype.ext (map_add e a b) }
-      rw [show Module.finrank fracR (FractionRing F[X]) =
-        Module.finrank adjR (RatFunc F) from
-        @Algebra.finrank_eq_of_equiv_equiv fracR (FractionRing F[X]) _ _ _
-          adjR (RatFunc F) _ _ _ i' e (by ext ⟨x, hx⟩; rfl)]
-      exact finrank_ratFunc_mulByInt W hn
+      exact finrank_fractionRing_mulByInt W hn
     · ext ⟨x, hx⟩; rfl
   rw [h_mid, mulByInt_finrank_aux_top W] at h2
   linarith
