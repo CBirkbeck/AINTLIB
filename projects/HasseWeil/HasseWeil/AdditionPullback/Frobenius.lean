@@ -2999,30 +2999,12 @@ proof: the x-coord pullbacks differ at `ord_∞` (`-2q` vs `-2`). Used
 directly as the `h_x_ne` argument to the generic
 `addPullback_x_pair_sigma_invariant`. -/
 
-/-- **x-coord mismatch**: `((frobeniusIsog W).zsmul r).pb x_gen ≠
-(mulByInt W (-s)).pb x_gen` for `r, s ≠ 0` with `(r : K) ≠ 0`, `(s : K) ≠ 0`
-and `q ≥ 2`. The two have `ord_∞` `-2q` and `-2` respectively. -/
-theorem zsmul_frobenius_pullback_x_ne_mulByInt_neg_pullback_x
-    (r s : ℤ) (hr : r ≠ 0) (hs : s ≠ 0)
-    (hrK : (r : K) ≠ 0) (hsK : (s : K) ≠ 0) :
-    ((frobeniusIsog W).zsmul r).pullback (x_gen W) ≠
-      (mulByInt W.toAffine (-s)).pullback (x_gen W) := by
-  have h_lhs : ((frobeniusIsog W).zsmul r).pullback (x_gen W) =
-      (mulByInt_x W r) ^ Fintype.card K := by
-    show ((mulByInt W.toAffine r).comp (frobeniusIsog W)).pullback (x_gen W) = _
-    rw [Isogeny.comp_algebraMap_eq]
-    have h_inner : (mulByInt W.toAffine r).pullback (x_gen W) = mulByInt_x W r := by
-      show (mulByInt W.toAffine r).pullback
-        (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
-          (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X)) = _
-      exact mulByInt_pullback_x W r hr
-    rw [h_inner, frobeniusIsog_pullback_apply]
-  have h_rhs : (mulByInt W.toAffine (-s)).pullback (x_gen W) = mulByInt_x W (-s) := by
-    show (mulByInt W.toAffine (-s)).pullback
-      (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
-        (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X)) = _
-    exact mulByInt_pullback_x W (-s) (neg_ne_zero.mpr hs)
-  rw [h_lhs, h_rhs]
+/-- The `ord_∞` contradiction behind the `x`-coord mismatch: `(mulByInt_x W r)^|K|`
+(order `-2q`) cannot equal `mulByInt_x W (-s)` (order `-2`), since `|K|·(-2) = -2`
+would force `|K| ≤ 1`. -/
+private lemma mulByInt_x_pow_card_ne_mulByInt_x_neg (r s : ℤ) (hr : r ≠ 0)
+    (hrK : (r : K) ≠ 0) (hs : s ≠ 0) (hsK : (s : K) ≠ 0) :
+    (mulByInt_x W r) ^ Fintype.card K ≠ mulByInt_x W (-s) := by
   intro h_eq
   have h_ord := congrArg (W_smooth W).ordAtInfty h_eq
   have h_pow_ord :
@@ -3046,6 +3028,17 @@ theorem zsmul_frobenius_pullback_x_ne_mulByInt_neg_pullback_x
   have h_ge : (2 : ℤ) ≤ Fintype.card K := by
     exact_mod_cast Fintype.one_lt_card_iff_nontrivial.mpr inferInstance
   linarith
+
+/-- **x-coord mismatch**: `((frobeniusIsog W).zsmul r).pb x_gen ≠
+(mulByInt W (-s)).pb x_gen` for `r, s ≠ 0` with `(r : K) ≠ 0`, `(s : K) ≠ 0`
+and `q ≥ 2`. The two have `ord_∞` `-2q` and `-2` respectively. -/
+theorem zsmul_frobenius_pullback_x_ne_mulByInt_neg_pullback_x
+    (r s : ℤ) (hr : r ≠ 0) (hs : s ≠ 0)
+    (hrK : (r : K) ≠ 0) (hsK : (s : K) ≠ 0) :
+    ((frobeniusIsog W).zsmul r).pullback (x_gen W) ≠
+      (mulByInt W.toAffine (-s)).pullback (x_gen W) := by
+  rw [zsmul_frobenius_pullback_x_gen W r hr, mulByInt_neg_pullback_x_gen W s hs]
+  exact mulByInt_x_pow_card_ne_mulByInt_x_neg W r s hr hrK hs hsK
 
 /-! ### D3c step 4: σ-invariance specialised + K(x) image
 
