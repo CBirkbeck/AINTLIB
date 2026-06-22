@@ -1,4 +1,4 @@
-import BernoulliRegular.FLT37.Eichler.CaseIIOmega32Membership
+import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.RegularIndexEigenspaceCollapse
 import BernoulliRegular.FLT37.Eichler.HerbrandBoundAnalytic
 import Mathlib.LinearAlgebra.SModEq.Pow
 

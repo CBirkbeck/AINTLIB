@@ -1,5 +1,5 @@
 import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.DworkCoeffModSquare
-import BernoulliRegular.FLT37.Eichler.CaseIIEx811Core
+import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.KummerMatrixKernelCollapse
 import BernoulliRegular.FLT37.Eichler.Reduction.SecondOrderVandermondeRowCollapse
 
 /-!

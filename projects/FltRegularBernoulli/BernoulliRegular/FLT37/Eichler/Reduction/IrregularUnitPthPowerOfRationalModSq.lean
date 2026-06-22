@@ -1,5 +1,5 @@
-import BernoulliRegular.FLT37.Eichler.CaseIIEx811EigenVandermonde
-import BernoulliRegular.FLT37.Eichler.CaseIIAssumptionIIAssembled
+import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.EigenbasisVandermondeCompatibility
+import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.AssumptionIIFromR3
 import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.SquarePowerKernelAndAssumedII
 import BernoulliRegular.FLT37.Eichler.Reduction.FermatLastTheoremThirtySeven
 import BernoulliRegular.FLT37.KummerUnits

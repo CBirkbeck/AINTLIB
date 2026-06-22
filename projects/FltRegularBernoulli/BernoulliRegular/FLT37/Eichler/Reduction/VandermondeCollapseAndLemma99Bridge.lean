@@ -1,4 +1,4 @@
-import BernoulliRegular.FLT37.Eichler.CaseIIRoute
+import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.Thm95ComputationalRoute
 import BernoulliRegular.FLT37.LehmerVandiver.CaseII.SpecificChain
 import BernoulliRegular.FLT37.VandiverProven
 import Mathlib.LinearAlgebra.Vandermonde

@@ -1,5 +1,5 @@
 import BernoulliRegular.IrregularPrimes.VonStaudtConsequences
-import BernoulliRegular.FLT37.Eichler.CaseIIWashingtonLemma96Proof
+import BernoulliRegular.FLT37.Eichler.CaseII.AuxPrime.AuxPrimeCoprimality
 
 /-!
 # T-KELLNER-POWERSUM: `NoSecondOrderIrregularPair 37 32`, proven, and unconditional FLT37

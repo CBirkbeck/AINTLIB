@@ -1,4 +1,4 @@
-import BernoulliRegular.FLT37.Eichler.CaseIILeadingExponent
+import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.LambdaExponentCollapseToOmega32
 import BernoulliRegular.FLT37.Eichler.FLT37CaseIWired
 
 /-!
