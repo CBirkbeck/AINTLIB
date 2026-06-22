@@ -100,14 +100,13 @@ lemma generic_equation : (W_KE W).toAffine.Equation (x_gen W) (y_gen W) := by
   rw [hinner]
   exact AdjoinRoot.eval₂_root W.toAffine.polynomial
 
-/-- The generic point is nonsingular on W_KE (follows from equation + IsElliptic).
-    (private helper; `HasseWeil.generic_nonsingular` is the public version in
-    `EC/GenericPoint.lean`). -/
+/- The generic point is nonsingular on `W_KE` (follows from equation + `IsElliptic`).
+`HasseWeil.generic_nonsingular` is the public version in `EC/GenericPoint.lean`. -/
 private lemma generic_nonsingular' : (W_KE W).toAffine.Nonsingular (x_gen W) (y_gen W) :=
   Affine.equation_iff_nonsingular.mp (generic_equation W)
 
 omit [W.toAffine.IsElliptic] in
-/-- `ψ_ff W n` squared equals `ΨSq_ff W n`. This follows from `mk_Ψ_sq` in mathlib. -/
+/-- `ψ_ff W n` squared equals `ΨSq_ff W n`. -/
 lemma ψ_ff_sq_eq_ΨSq_ff (n : ℤ) : ψ_ff W n ^ 2 = ΨSq_ff W n := by
   simp only [ψ_ff, ΨSq_ff]
   rw [← map_pow]
@@ -116,7 +115,7 @@ lemma ψ_ff_sq_eq_ΨSq_ff (n : ℤ) : ψ_ff W n ^ 2 = ΨSq_ff W n := by
   exact Affine.CoordinateRing.mk_Ψ_sq (W := W.toAffine) n
 
 omit [W.toAffine.IsElliptic] in
-/-- `φ_ff W n` equals `Φ_ff W n`. This follows from `mk_φ` in mathlib. -/
+/-- `φ_ff W n` equals `Φ_ff W n`. -/
 lemma φ_ff_eq_Φ_ff (n : ℤ) :
     algebraMap R KE (Affine.CoordinateRing.mk W.toAffine (W.φ n)) = Φ_ff W n := by
   simp only [Φ_ff]; congr 1
@@ -139,14 +138,12 @@ private lemma natDegree_Ψ_le (n : ℤ) : (W.Ψ n).natDegree ≤ 1 := by
       rw [Polynomial.natDegree_C]; exact Nat.zero_add _ ▸ natDegree_ψ₂_le W)
   · rw [mul_one, Polynomial.natDegree_C]; exact Nat.zero_le _
 
-/-- `W.ΨSq n` is nonzero for n ≠ 0 on an elliptic curve.
-This uses the coprimality `IsCoprime (Φ n) (ΨSq n)` and `Φ n` not being a unit. -/
+/-- `W.ΨSq n` is nonzero for `n ≠ 0` on an elliptic curve. -/
 lemma ΨSq_poly_ne_zero {n : ℤ} (hn : n ≠ 0) : W.ΨSq n ≠ 0 := by
   intro h
   have hcop := isCoprime_Φ_ΨSq W (W.coe_Δ' ▸ W.Δ'.ne_zero) hn
   rw [h, isCoprime_zero_right, Polynomial.isUnit_iff] at hcop
   obtain ⟨c, _, hΦ⟩ := hcop
-  -- Φ n is a nonzero constant, but natDegree(Φ n) = n² > 0 for n ≠ 0
   have hpos := natDegree_Φ_pos W hn
   rw [← hΦ, Polynomial.natDegree_C] at hpos
   exact Nat.lt_irrefl 0 hpos
@@ -165,16 +162,11 @@ private lemma Ψ_ne_zero {n : ℤ} (hn : n ≠ 0) : W.Ψ n ≠ 0 := by
           intro hpy
           have h2 : (2 : F) = 0 := by
             simpa [Affine.polynomialY] using congr_arg (fun (p : F[X][X]) ↦ p.coeff 1) hpy
-          have ha1 : W.a₁ = 0 := by
-            have h0c := congr_arg (fun (p : F[X][X]) ↦ p.coeff 0) hpy
-            simp only [Affine.polynomialY, h2, map_zero, zero_mul, map_add, map_mul, zero_add,
-              coeff_add, mul_coeff_zero, coeff_C_zero, coeff_zero] at h0c
-            simpa using congr_arg (fun (p : F[X]) ↦ p.coeff 1) h0c
-          have ha3 : W.a₃ = 0 := by
-            have h0c := congr_arg (fun (p : F[X][X]) ↦ p.coeff 0) hpy
-            simp only [Affine.polynomialY, h2, map_zero, zero_mul, map_add, map_mul, zero_add,
-              coeff_add, mul_coeff_zero, coeff_C_zero, coeff_zero] at h0c
-            simpa using congr_arg (fun (p : F[X]) ↦ p.coeff 0) h0c
+          have h0c := congr_arg (fun (p : F[X][X]) ↦ p.coeff 0) hpy
+          simp only [Affine.polynomialY, h2, map_zero, zero_mul, map_add, map_mul, zero_add,
+            coeff_add, mul_coeff_zero, coeff_C_zero, coeff_zero] at h0c
+          have ha1 : W.a₁ = 0 := by simpa using congr_arg (fun (p : F[X]) ↦ p.coeff 1) h0c
+          have ha3 : W.a₃ = 0 := by simpa using congr_arg (fun (p : F[X]) ↦ p.coeff 0) h0c
           have hΔ : W.Δ = 0 := by
             -- Every `bᵢ` carries a factor of `2`, so `Δ = 0` in char 2.
             have hb₂ : WeierstrassCurve.b₂ W = 0 := by
@@ -205,13 +197,13 @@ lemma ψ_ff_ne_zero {n : ℤ} (hn : n ≠ 0) : ψ_ff W n ≠ 0 := by
   exact mk_ψ_ne_zero W hn
     ((IsFractionRing.injective R KE) (h.trans (map_zero _).symm))
 
-/-- `ΨSq_ff W n` is nonzero for n ≠ 0 (follows from ψ_ff_ne_zero). -/
+/-- `ΨSq_ff W n` is nonzero for `n ≠ 0`. -/
 lemma ΨSq_ff_ne_zero {n : ℤ} (hn : n ≠ 0) : ΨSq_ff W n ≠ 0 := by
   rw [← ψ_ff_sq_eq_ΨSq_ff]
   exact pow_ne_zero 2 (ψ_ff_ne_zero W hn)
 
 omit [W.toAffine.IsElliptic] in
-/-- Evaluating a bivariate polynomial (mapped from `F` to `K(E)`) at the generic point
+/- Evaluating a bivariate polynomial (mapped from `F` to `K(E)`) at the generic point
 gives the image in `K(E)` via `mk` and `algebraMap`. -/
 private lemma evalEval_generic_eq_mk (p : (Polynomial F)[X]) :
     (p.map (Polynomial.mapRingHom (algebraMap F KE))).evalEval (x_gen W) (y_gen W) =
@@ -259,8 +251,8 @@ lemma smulEval_generic_Y (n : ℤ) :
   rw [map_ω, ω_ff]
   exact evalEval_generic_eq_mk W (W.ω n)
 
-/-- The Jacobian equation holds for the smulEval of the generic point.
-This follows from the fact that [n]P is a point on the curve. -/
+/- The Jacobian equation holds for the `smulEval` of the generic point, since `[n]P` is a
+point on the curve. -/
 private lemma jacobian_equation_smulEval (n : ℤ) :
     WeierstrassCurve.Jacobian.Equation (W_KE W).toJacobian
       (smulEval (W_KE W) (x_gen W) (y_gen W) n) := by
@@ -275,24 +267,15 @@ private lemma jacobian_equation_smulEval (n : ℤ) :
 
 theorem mulByInt_weierstrass (n : ℤ) (hn : n ≠ 0) :
     Polynomial.eval₂ (mulByInt_xHom W n) (mulByInt_y W n) W.toAffine.polynomial = 0 := by
-  -- Rewrite the `eval₂` as an affine `Equation` on `W_KE`.
   change Polynomial.eval₂ (Polynomial.eval₂RingHom (algebraMap F KE) (mulByInt_x W n))
     (mulByInt_y W n) W.toAffine.polynomial = 0
-  rw [Polynomial.eval₂_eval₂RingHom_apply]
-  rw [show Polynomial.map (Polynomial.mapRingHom (algebraMap F KE)) W.toAffine.polynomial =
+  rw [Polynomial.eval₂_eval₂RingHom_apply,
+    show Polynomial.map (Polynomial.mapRingHom (algebraMap F KE)) W.toAffine.polynomial =
     (W_KE W).toAffine.polynomial from (Affine.map_polynomial W.toAffine (algebraMap F KE)).symm]
-  -- `[n]P` is a nonsingular Jacobian point, so it satisfies the Jacobian equation.
-  have hns := generic_nonsingular' W
-  have hns_smul : WeierstrassCurve.Jacobian.Nonsingular (W_KE W).toJacobian
-      (smulEval (W_KE W) (x_gen W) (y_gen W) n) := by
-    rw [← WeierstrassCurve.Jacobian.nonsingularLift_iff,
-      ← zsmul_eq_smulEval (W_KE W) hns n]
-    exact (n • WeierstrassCurve.Jacobian.Point.fromAffine
-      (Affine.Point.some _ _ hns)).nonsingular
-  -- Pass to affine coordinates via `ψ ≠ 0` and match them against `mulByInt_x`, `mulByInt_y`.
   have hψ_ne : smulEval (W_KE W) (x_gen W) (y_gen W) n 2 ≠ 0 := by
     rw [smulEval_generic_Z]; exact ψ_ff_ne_zero W hn
-  have hJ := (WeierstrassCurve.Jacobian.equation_of_Z_ne_zero hψ_ne).mp hns_smul.1
+  have hJ := (WeierstrassCurve.Jacobian.equation_of_Z_ne_zero hψ_ne).mp
+    (jacobian_equation_smulEval W n)
   rw [smulEval_generic_X, smulEval_generic_Y, smulEval_generic_Z,
     show Φ_ff W n / ψ_ff W n ^ 2 = mulByInt_x W n from by
       rw [mulByInt_x, ψ_ff_sq_eq_ΨSq_ff],
@@ -320,7 +303,6 @@ lemma x_gen_transcendental : Transcendental F (x_gen W) := by
     (Polynomial.transcendental_X F)
 
 omit [W.toAffine.IsElliptic] in
-/-- The image of `Φ_n` in `KE` is transcendental over `F` for `n ≠ 0`. -/
 private lemma Φ_ff_transcendental (n : ℤ) (hn : n ≠ 0) :
     Transcendental F (Φ_ff W n) := by
   rw [Φ_ff, show algebraMap R KE (algebraMap (Polynomial F) R (W.Φ n)) =
@@ -330,10 +312,17 @@ private lemma Φ_ff_transcendental (n : ℤ) (hn : n ≠ 0) :
     (Polynomial.transcendental (W.Φ n) (by have := natDegree_Φ_pos W hn; lia)
       (by rw [leadingCoeff_Φ]; exact mem_nonZeroDivisors_of_ne_zero one_ne_zero))
 
+omit [W.toAffine.IsElliptic] in
+private lemma aeval_x_gen (p : Polynomial F) :
+    Polynomial.aeval (x_gen W) p = algebraMap R KE (algebraMap (Polynomial F) R p) := by
+  rw [x_gen, Polynomial.aeval_algebraMap_apply (A := R) (B := KE),
+    Polynomial.aeval_algebraMap_apply (A := Polynomial F) (B := R),
+    Polynomial.aeval_X_left_apply]
+
 -- The `Subalgebra F KE` scalar-tower instances and the `aeval` defeq steps below need the
 -- relaxed transparency; this is a defeq setting, not a heartbeat budget.
 set_option backward.isDefEq.respectTransparency false in
-/-- `mulByInt_x W n = Φ_n(x_gen) / ΨSq_n(x_gen)` is transcendental over `F` for `n ≠ 0`.
+/- `mulByInt_x W n = Φ_n(x_gen) / ΨSq_n(x_gen)` is transcendental over `F` for `n ≠ 0`.
 
 The proof uses the integral closure approach: if `mulByInt_x` were algebraic over `F`,
 then the subalgebra `S := F[mulByInt_x]` would be algebraic over `F`. The element
@@ -351,7 +340,6 @@ private lemma mulByInt_x_transcendental (n : ℤ) (hn : n ≠ 0) :
       (Algebra.isAlgebraic_adjoin_singleton_iff.mpr h_alg)
   have hmem : mulByInt_x W n ∈ S := Algebra.subset_adjoin (Set.mem_singleton _)
   let mxS : S := ⟨mulByInt_x W n, hmem⟩
-  -- Witness polynomial: `Φ_n(T) - mxS · ΨSq_n(T) ∈ S[T]`, monic since `deg Φ_n > deg ΨSq_n`.
   let p_wit : Polynomial S :=
     (W.Φ n).map (algebraMap F S) - Polynomial.C mxS * (W.ΨSq n).map (algebraMap F S)
   have hΦ_monic : (W.Φ n).Monic := show (W.Φ n).leadingCoeff = 1 from W.leadingCoeff_Φ n
@@ -374,29 +362,15 @@ private lemma mulByInt_x_transcendental (n : ℤ) (hn : n ≠ 0) :
       ((W.Φ n).map (algebraMap F S) -
         Polynomial.C mxS * (W.ΨSq n).map (algebraMap F S)) = 0
     rw [map_sub, map_mul, Polynomial.aeval_C,
-        Polynomial.aeval_map_algebraMap, Polynomial.aeval_map_algebraMap]
-    have hΦ_aeval : Polynomial.aeval (x_gen W) (W.Φ n) = Φ_ff W n := by
-      change Polynomial.aeval (algebraMap R KE (algebraMap (Polynomial F) R Polynomial.X))
-          (W.Φ n) = Φ_ff W n
-      rw [Polynomial.aeval_algebraMap_apply (A := R) (B := KE),
-          Polynomial.aeval_algebraMap_apply (A := Polynomial F) (B := R),
-          Polynomial.aeval_X_left_apply]
-      rfl
-    have hΨSq_aeval : Polynomial.aeval (x_gen W) (W.ΨSq n) = ΨSq_ff W n := by
-      change Polynomial.aeval (algebraMap R KE (algebraMap (Polynomial F) R Polynomial.X))
-          (W.ΨSq n) = ΨSq_ff W n
-      rw [Polynomial.aeval_algebraMap_apply (A := R) (B := KE),
-          Polynomial.aeval_algebraMap_apply (A := Polynomial F) (B := R),
-          Polynomial.aeval_X_left_apply]
-      rfl
-    rw [hΦ_aeval, hΨSq_aeval]
+        Polynomial.aeval_map_algebraMap, Polynomial.aeval_map_algebraMap,
+        show Polynomial.aeval (x_gen W) (W.Φ n) = Φ_ff W n from aeval_x_gen W (W.Φ n),
+        show Polynomial.aeval (x_gen W) (W.ΨSq n) = ΨSq_ff W n from aeval_x_gen W (W.ΨSq n)]
     change Φ_ff W n - mulByInt_x W n * ΨSq_ff W n = 0
     rw [mulByInt_x, div_mul_cancel₀ _ (ΨSq_ff_ne_zero W hn), sub_self]
   have h_int : IsIntegral S (x_gen W) := ⟨p_wit, h_pwit_monic, h_pwit_eval⟩
   have h_alg_S : IsAlgebraic S (x_gen W) := h_int.isAlgebraic
   exact h_alg_S.restrictScalars F
 
-/-- `mulByInt_xHom` is injective because `mulByInt_x` is transcendental over `F`. -/
 private lemma mulByInt_xHom_injective (n : ℤ) (hn : n ≠ 0) :
     Function.Injective (mulByInt_xHom W n) := by
   have h : (mulByInt_xHom W n : Polynomial F →+* KE) =
@@ -406,7 +380,7 @@ private lemma mulByInt_xHom_injective (n : ℤ) (hn : n ≠ 0) :
   exact transcendental_iff_injective.mp (mulByInt_x_transcendental W n hn)
 
 omit [W.toAffine.IsElliptic] in
-/-- The norm of a basis element `p • 1 + q • Y` of `R` over `F[X]` is nonzero when `q ≠ 0`:
+/- The norm of a basis element `p • 1 + q • Y` of `R` over `F[X]` is nonzero when `q ≠ 0`:
 its degree is `max (2 • deg p) (2 • deg q + 3) ≥ 3`. -/
 private lemma norm_smul_basis_ne_zero (p q : Polynomial F) (hq : q ≠ 0) :
     Algebra.norm (Polynomial F)
@@ -430,7 +404,6 @@ theorem mulByInt_coordHom_injective (n : ℤ) (hn : n ≠ 0) :
     Function.Injective (mulByInt_coordHom W n hn) := by
   rw [injective_iff_map_eq_zero]
   intro r hr
-  -- Decompose r = p • 1 + q • (mk W Y) using the basis of R over F[X]
   obtain ⟨p, q, hpq⟩ := Affine.CoordinateRing.exists_smul_basis_eq r
   have h_image : mulByInt_coordHom W n hn r =
       mulByInt_xHom W n p + mulByInt_xHom W n q * mulByInt_y W n := by
@@ -477,8 +450,7 @@ theorem mulByInt_coordHom_injective (n : ℤ) (hn : n ≠ 0) :
       rw [map_add, map_mul]
       simp [Algebra.smul_def]
     have hr'_zero : mulByInt_coordHom W n hn r' = 0 := by
-      have : r' = r := hpq
-      rw [this]; exact h_image.trans hr
+      rw [show r' = r from hpq]; exact h_image.trans hr
     have h_norm_zero : mulByInt_xHom W n (Algebra.norm (Polynomial F) r') = 0 := by
       rw [← h_alg, h_factor, map_mul, hr'_zero, zero_mul]
     have h_norm_eq : Algebra.norm (Polynomial F) r' = 0 :=
