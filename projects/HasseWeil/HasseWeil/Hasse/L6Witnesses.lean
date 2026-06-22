@@ -1347,7 +1347,7 @@ theorem Sinf_kernelPrime_ne_bot
       (algebraMap data.carrier L xc)
     simp [h_ord_xc]
   -- `xc ≠ 0`: if `xc = 0` its image has `ord_T = ⊤`, contradicting `ord_T = 2`.
-  have h_xc_ne : xc ≠ 0 := fun h0 =>
+  have h_xc_ne : xc ≠ 0 := fun h0 ↦
     WithTop.coe_ne_top <| h_ord_xc.symm.trans <| by
       rw [h0, map_zero]
       exact (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint_zero_function T.val
