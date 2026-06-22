@@ -6,7 +6,7 @@ Authors: Chris Birkbeck
 import HasseWeil.AdditionPullback.Frobenius
 import HasseWeil.DegreeQuadraticForm
 import HasseWeil.Hasse.PointFix
-import HasseWeil.HasseBound
+import HasseWeil.DiscriminantBounds
 
 /-!
 # Hasse bound from QF non-negativity in `ℤ`
