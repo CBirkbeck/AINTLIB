@@ -377,7 +377,7 @@ private lemma kappa_sq_dvd_four_Psi3_of_torsion
       Squarefree (p : R) := fun p hp hpd ↦
     hsf_all p hp (hpd.trans (by
       rw [← h2P_eq]; exact addOrderOf_dvd_of_mem_zmultiples ⟨2, rfl⟩))
-  have hcoord := x_coord_nsmul_eq W hpt (show (2 : ℤ) ≠ 0 by norm_num) hns' (by
+  have hcoord := x_coord_nsmul_eq (curveK R K W) hpt (show (2 : ℤ) ≠ 0 by norm_num) hns' (by
     rw [show (2 : ℤ) = ↑(2 : ℕ) from rfl, natCast_zsmul]; exact h2P_eq)
   rw [PsiSq_two_eval_eq, Phi2_eval_eq] at hcoord
   have hkappa_sq_K : (algebraMap R K κ₀) ^ 2 = eval x (curveK R K W).Ψ₂Sq := by
