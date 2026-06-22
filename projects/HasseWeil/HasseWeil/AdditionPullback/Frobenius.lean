@@ -496,6 +496,27 @@ theorem ordAtInfty_a2_plus_x_gen_plus_pi_x_frobenius (hq : 2 ≤ Fintype.card K)
     exact (W_smooth W).ord_add_lt_concrete (-2 * (Fintype.card K : ℤ)) (-2)
       h_neg_2q_lt_neg_2 h_ord_pi_x h_ord_a2_plus_x_gen
 
+/-- `a₂ + x_gen + π·x ≠ 0` (its `ord_∞` is `-2q ≠ ⊤`). -/
+private lemma a2_plus_x_gen_plus_pi_x_frobenius_ne_zero (hq : 2 ≤ Fintype.card K) :
+    algebraMap K KE W.toAffine.a₂ + x_gen W +
+      (frobeniusIsog W).pullback (x_gen W) ≠ 0 := by
+  intro h
+  have h_top : (W_smooth W).ordAtInfty
+      (algebraMap K KE W.toAffine.a₂ + x_gen W +
+        (frobeniusIsog W).pullback (x_gen W)) = ⊤ := by
+    rw [h]; exact (W_smooth W).ordAtInfty_zero
+  rw [ordAtInfty_a2_plus_x_gen_plus_pi_x_frobenius W hq] at h_top
+  exact WithTop.coe_ne_top h_top
+
+/-- `ord_∞((x_gen − π·x)²) = 2·(−2q) = −4q`. -/
+private lemma ordAtInfty_x_gen_sub_pi_x_sq_frobenius :
+    (W_smooth W).ordAtInfty
+        ((x_gen W - (frobeniusIsog W).pullback (x_gen W)) ^ 2) =
+      ((((2 : ℤ) * (-2 * (Fintype.card K : ℤ))) : ℤ) : WithTop ℤ) :=
+  (W_smooth W).ord_pow_concrete (x_gen_sub_frobeniusIsog_pullback_x_gen_ne_zero W)
+    (-2 * (Fintype.card K : ℤ)) 2
+    (ordAtInfty_x_gen_sub_frobeniusIsog_pullback_x_gen W)
+
 /-- **`ord_∞(T₃) = -6q`** where `T₃ = (x_gen − π·x)²·(a₂ + x_gen + π·x)`
 and `q ≥ 2`. Multiplicativity plus `ordAtInfty_a2_plus_x_gen_plus_pi_x_frobenius`. -/
 theorem ordAtInfty_T3_frobenius (hq : 2 ≤ Fintype.card K) :
@@ -504,29 +525,12 @@ theorem ordAtInfty_T3_frobenius (hq : 2 ≤ Fintype.card K) :
         (algebraMap K KE W.toAffine.a₂ + x_gen W +
           (frobeniusIsog W).pullback (x_gen W))) =
       ((-6 * (Fintype.card K : ℤ)) : WithTop ℤ) := by
-  have h_x_ne : x_gen W - (frobeniusIsog W).pullback (x_gen W) ≠ 0 :=
-    x_gen_sub_frobeniusIsog_pullback_x_gen_ne_zero W
   have h_x_sq_ne : (x_gen W - (frobeniusIsog W).pullback (x_gen W)) ^ 2 ≠ 0 :=
-    pow_ne_zero 2 h_x_ne
-  have h_sum_ne :
-      algebraMap K KE W.toAffine.a₂ + x_gen W +
-        (frobeniusIsog W).pullback (x_gen W) ≠ 0 := by
-    intro h
-    have h_top : (W_smooth W).ordAtInfty
-        (algebraMap K KE W.toAffine.a₂ + x_gen W +
-          (frobeniusIsog W).pullback (x_gen W)) = ⊤ := by
-      rw [h]; exact (W_smooth W).ordAtInfty_zero
-    rw [ordAtInfty_a2_plus_x_gen_plus_pi_x_frobenius W hq] at h_top
-    exact WithTop.coe_ne_top h_top
-  have h_pow_eq :
-      (W_smooth W).ordAtInfty
-        ((x_gen W - (frobeniusIsog W).pullback (x_gen W)) ^ 2) =
-      ((((2 : ℤ) * (-2 * (Fintype.card K : ℤ))) : ℤ) : WithTop ℤ) :=
-    (W_smooth W).ord_pow_concrete h_x_ne (-2 * (Fintype.card K : ℤ)) 2
-      (ordAtInfty_x_gen_sub_frobeniusIsog_pullback_x_gen W)
-  have h_sum_eq := ordAtInfty_a2_plus_x_gen_plus_pi_x_frobenius W hq
-  refine ((W_smooth W).ordAtInfty_mul h_x_sq_ne h_sum_ne).trans ?_
-  refine (congrArg₂ (· + ·) h_pow_eq h_sum_eq).trans ?_
+    pow_ne_zero 2 (x_gen_sub_frobeniusIsog_pullback_x_gen_ne_zero W)
+  refine ((W_smooth W).ordAtInfty_mul h_x_sq_ne
+    (a2_plus_x_gen_plus_pi_x_frobenius_ne_zero W hq)).trans ?_
+  refine (congrArg₂ (· + ·) (ordAtInfty_x_gen_sub_pi_x_sq_frobenius W)
+    (ordAtInfty_a2_plus_x_gen_plus_pi_x_frobenius W hq)).trans ?_
   change (((2 : ℤ) * (-2 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) +
          (((-2 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) =
          (((-6 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ)
