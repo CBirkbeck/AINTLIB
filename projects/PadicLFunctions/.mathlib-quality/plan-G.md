@@ -1,5 +1,10 @@
 # Development Plan: §13 Stage G — Galois Λ-modules + the Vandiver IMC
 
+> **AUTHORITATIVE REMAINING BOARD: see `tickets.md` → "§13 VANDIVER IMC — AUTHORITATIVE CONSOLIDATED
+> BOARD (2026-06-22)".** Foundation (bricks 1–6, keystone, X∞⁺ abelian, Γ⁺ prereqs) DONE; open chain
+> TG1–TG9 (critical path TG1→TG2→TG6→TG9). Prop 13.15 is PROVED (TG7b) on FltRegularBernoulli's
+> Hilbert-class-field interface (TG7a); TG5 (Prop 13.13) is the single wholesale CFT assumption.
+
 ## FOUNDATION REBUILD — source-grounded roadmap (RJW arXiv:2309.15692 §13.2; re-read, not memory)
 
 `Iwasawa/GaloisFoundation.lean` builds RJW §13.2's REAL objects bottom-up. All bricks below are
