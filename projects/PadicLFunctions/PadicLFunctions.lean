@@ -1,4 +1,5 @@
 import PadicLFunctions.Basic
+import PadicLFunctions.Common.DelOperator
 import PadicLFunctions.Measure.Basic
 import PadicLFunctions.Measure.MahlerTransform
 import PadicLFunctions.Measure.Convolution

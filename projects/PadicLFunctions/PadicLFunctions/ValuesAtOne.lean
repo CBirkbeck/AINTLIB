@@ -314,18 +314,15 @@ raise the index and scale by `n+1`, which the ring hom preserves). -/
 private theorem map_derivativeFun {R S : Type*} [CommRing R] [CommRing S]
     (f : R →+* S) (F : PowerSeries R) :
     PowerSeries.map f (PowerSeries.derivativeFun F)
-      = PowerSeries.derivativeFun (PowerSeries.map f F) := by
-  ext n
-  rw [PowerSeries.coeff_map, PowerSeries.coeff_derivativeFun,
-    PowerSeries.coeff_derivativeFun, PowerSeries.coeff_map, map_mul, map_add,
-    map_natCast, map_one]
+      = PowerSeries.derivativeFun (PowerSeries.map f F) :=
+  PadicLFunctions.map_derivativeFun f F
 
 /-- `PowerSeries.map` commutes with the operator `∂ = (1+T)d/dT`. -/
 private theorem map_one_add_mul_derivativeFun {R S : Type*} [CommRing R]
     [CommRing S] (f : R →+* S) (F : PowerSeries R) :
     PowerSeries.map f ((1 + PowerSeries.X) * PowerSeries.derivativeFun F)
-      = (1 + PowerSeries.X) * PowerSeries.derivativeFun (PowerSeries.map f F) := by
-  rw [map_mul, map_add, map_one, PowerSeries.map_X, map_derivativeFun]
+      = (1 + PowerSeries.X) * PowerSeries.derivativeFun (PowerSeries.map f F) :=
+  PadicLFunctions.map_del f F
 
 omit [CharZero K] in
 /-- P6-p5 (continued): `∂𝓐(ρ_θ) = (1−φψ)F_θ` over `K` — multiplication by

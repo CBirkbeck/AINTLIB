@@ -1,4 +1,5 @@
 import PadicLFunctions.Measure.Convolution
+import PadicLFunctions.Common.DelOperator
 import Mathlib.RingTheory.PowerSeries.Derivative
 import Mathlib.RingTheory.PowerSeries.Substitution
 
@@ -42,9 +43,12 @@ def cmul (g : C(ℤ_[p], ℤ_[p])) (μ : PadicMeasure p ℤ_[p]) : PadicMeasure 
 lemma cmul_apply (g f : C(ℤ_[p], ℤ_[p])) (μ : PadicMeasure p ℤ_[p]) :
     cmul p g μ f = μ (g * f) := rfl
 
-/-- The operator `∂ = (1+T) d/dT` on power series. Source: RJW Lem. 3.24. -/
+/-- The operator `∂ = (1+T) d/dT` on power series, over `ℤ_p`. Source: RJW Lem. 3.24.
+This is the `ℤ_p`-specialisation of the generic `PadicLFunctions.del`. -/
 noncomputable def del (F : PowerSeries ℤ_[p]) : PowerSeries ℤ_[p] :=
-  (1 + PowerSeries.X) * F.derivativeFun
+  PadicLFunctions.del F
+
+lemma del_def (F : PowerSeries ℤ_[p]) : del p F = (1 + PowerSeries.X) * F.derivativeFun := rfl
 
 /-- The binomial recurrence `x·binom(x,n) = (n+1)·binom(x,n+1) + n·binom(x,n)` over
 `ℤ_p` (RJW TeX line 1074). -/
@@ -77,15 +81,8 @@ lemma mul_choose_eq (x : ℤ_[p]) (n : ℕ) :
 private lemma coeff_del (F : PowerSeries ℤ_[p]) (n : ℕ) :
     PowerSeries.coeff n (del p F)
       = (n + 1 : ℤ_[p]) * PowerSeries.coeff (n + 1) F
-        + (n : ℤ_[p]) * PowerSeries.coeff n F := by
-  rw [del, one_add_mul, map_add, coeff_derivativeFun]
-  rcases n with - | m
-  · rw [coeff_zero_X_mul]
-    push_cast
-    ring
-  · rw [coeff_succ_X_mul, coeff_derivativeFun]
-    push_cast
-    ring
+        + (n : ℤ_[p]) * PowerSeries.coeff n F :=
+  PadicLFunctions.coeff_del F n
 
 /-- Multiplication by `x` on measures corresponds to `∂` on Mahler transforms:
 `𝓐_{xμ} = ∂ 𝓐_μ`.
