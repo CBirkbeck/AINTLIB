@@ -356,7 +356,7 @@ theorem digitColemanGrading_of_integerLogCoeffGrading37
     have hdc : (d : ℕ∞) < (37 - 1 : ℕ) := by exact_mod_cast (by omega : d < 37 - 1)
     -- from `(d:ℕ∞) + addVal(q'−q) ≥ 36` and `d ≤ 7`.
     by_contra hlt
-    rw [not_le, ENat.lt_one_iff_eq_zero] at hlt
+    rw [not_le, Order.lt_one_iff] at hlt
     rw [hlt, add_zero] at hge
     exact absurd (lt_of_lt_of_le hdc hge) (lt_irrefl _)
   have hπdvd : S.π ∣ (q' - q) := by
