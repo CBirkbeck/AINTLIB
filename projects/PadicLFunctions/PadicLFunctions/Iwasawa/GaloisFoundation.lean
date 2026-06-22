@@ -120,6 +120,15 @@ theorem commute_restrict {B F M : Type*} [Field B] [Field F] [Field M] [Algebra 
   have e := congrArg (fun g : ↥E ≃ₐ[B] ↥E => (algebraMap E M) (g x)) h
   simpa [AlgEquiv.restrictNormal_commutes, AlgEquiv.restrictScalars_apply] using e.symm
 
+/-- `commute_restrict` packaged with `IsAbelianGalois` (which bundles `Normal` + abelian) — the form
+used for base change to `X⁺_∞`. -/
+theorem commute_restrict_AG {B F M : Type*} [Field B] [Field F] [Field M] [Algebra B F]
+    [Algebra F M] [Algebra B M] [IsScalarTower B F M] (E : IntermediateField B M)
+    [IsAbelianGalois B E] (σ τ : M ≃ₐ[F] M) (x : ↥E) : σ (τ x) = τ (σ x) := by
+  haveI : Normal B ↥E := (‹IsAbelianGalois B ↥E›).toIsGalois.to_normal
+  haveI : IsMulCommutative (↥E ≃ₐ[B] ↥E) := (‹IsAbelianGalois B ↥E›).toIsMulCommutative
+  exact commute_restrict E σ τ x
+
 namespace Iwasawa.GaloisFoundation
 
 variable (p : ℕ) [Fact p.Prime]
@@ -502,12 +511,75 @@ instance instNormalMPlusN (n : ℕ) : Normal (FPlus p n) (MPlusN p n) := by
   · rw [iSup_pos h]; haveI := isAbelianGalois_of_isAdmissibleM p h; infer_instance
   · rw [iSup_neg h]; infer_instance
 
-/- NOTE (perf): the base case for `X⁺_∞` abelian — that two elements of `Gal(M∞⁺/F∞⁺)` commute on a
-point coming from `Mₙ⁺` — is mathematically `commute_restrict` with `E = Mₙ⁺` viewed inside `M∞⁺`
-over `Fₙ⁺`. The direct `comap`/`AlgEquiv.ofBijective`/`restrictNormal` encoding over the
-`⨆`-over-all-intermediate-fields definition of `MPlusN` is computationally pathological (compile
-times out). `commute_restrict` (the base-change engine) and `instNormalMPlusN` below are the
-verified, fast ingredients; assembling `X⁺_∞` abelian needs a lighter encoding (e.g. a `LinearDisjoint`
-base-change lemma, or a lighter index for `MPlusN`). Tracked as a follow-up. -/
+/-- `Mₙ⁺/Fₙ⁺` is Galois (normal + separable). -/
+instance instIsGaloisMPlusN (n : ℕ) : IsGalois (FPlus p n) (MPlusN p n) := ⟨⟩
+
+/-- `Mₙ⁺/Fₙ⁺` is abelian Galois. -/
+instance instIsAbelianGaloisMPlusN (n : ℕ) : IsAbelianGalois (FPlus p n) (MPlusN p n) :=
+  haveI := isMulCommutative_galMPlusN p n; ⟨⟩
+
+/-- `Mₙ⁺`, viewed as an `Fₙ⁺`-subfield of `M∞⁺` (via `comap`), is abelian Galois over `Fₙ⁺`. The
+algebra/tower instances are explicit hypotheses so this elaborates in a clean context (no `letI`
+interference) — the key to making `of_algHom` fast. -/
+lemma isAbelianGalois_comap_MPlusN (n : ℕ) [Algebra ↥(FPlus p n) ↥(FinfPlus p)]
+    [Algebra ↥(FPlus p n) ↥(MinfPlus p)] [IsScalarTower ↥(FPlus p n) ↥(FinfPlus p) Om]
+    [IsScalarTower ↥(FPlus p n) ↥(FinfPlus p) ↥(MinfPlus p)] :
+    IsAbelianGalois (FPlus p n)
+      ↥(IntermediateField.comap ((MinfPlus p).val.restrictScalars ↥(FPlus p n)) (MPlusN p n)) := by
+  let fEh : ↥(IntermediateField.comap ((MinfPlus p).val.restrictScalars ↥(FPlus p n)) (MPlusN p n))
+      →ₐ[FPlus p n] ↥(MPlusN p n) :=
+    AlgHom.codRestrict (((MinfPlus p).val.restrictScalars ↥(FPlus p n)).comp
+      (IntermediateField.comap ((MinfPlus p).val.restrictScalars ↥(FPlus p n)) (MPlusN p n)).val)
+      (MPlusN p n).toSubalgebra (fun w => w.2)
+  exact IsAbelianGalois.of_algHom fEh
+
+/-- **Base case for `X⁺_∞` abelian**: two `Gal(M∞⁺/F∞⁺)`-automorphisms commute on any point of `M∞⁺`
+coming from a finite layer `Mₙ⁺`. Restrict to `Fₙ⁺` (where `Mₙ⁺` is abelian) via `commute_restrict_AG`
+applied to `E = Mₙ⁺`-viewed-in-`M∞⁺`. All instances passed explicitly (no slow synthesis). -/
+theorem commute_on_MPlusN (n : ℕ) (σ τ : MinfPlus p ≃ₐ[FinfPlus p] MinfPlus p)
+    (z : ↥(MinfPlus p)) (hz : (z : Om) ∈ MPlusN p n) : σ (τ z) = τ (σ z) := by
+  have hle : FPlus p n ≤ FinfPlus p := by rw [FinfPlus]; exact le_iSup (FPlus p) n
+  letI : Algebra ↥(FPlus p n) ↥(FinfPlus p) := (IntermediateField.inclusion hle).toAlgebra
+  letI : IsScalarTower ↥(FPlus p n) ↥(FinfPlus p) Om := IsScalarTower.of_algebraMap_eq (fun _ => rfl)
+  letI : Algebra ↥(FPlus p n) ↥(MinfPlus p) :=
+    ((algebraMap ↥(FinfPlus p) ↥(MinfPlus p)).comp (IntermediateField.inclusion hle).toRingHom).toAlgebra
+  letI : IsScalarTower ↥(FPlus p n) ↥(FinfPlus p) ↥(MinfPlus p) :=
+    IsScalarTower.of_algebraMap_eq (fun _ => rfl)
+  exact @commute_restrict_AG ↥(FPlus p n) ↥(FinfPlus p) ↥(MinfPlus p) _ _ _ _ _ _ _
+    (IntermediateField.comap ((MinfPlus p).val.restrictScalars ↥(FPlus p n)) (MPlusN p n))
+    (isAbelianGalois_comap_MPlusN p n) σ τ ⟨z, hz⟩
+
+open IntermediateField in
+/-- **`X⁺_∞ = Gal(M⁺_∞/F⁺_∞)` is abelian** (Remark 13.7 / RJW §13.2): `M⁺_∞` is generated over `F⁺_∞`
+by the finite layers `M⁺ₙ`, each abelian over `F⁺ₙ`, so any two automorphisms commute on the
+generators (`commute_on_MPlusN`) and hence everywhere (`adjoin_induction`). This is the prerequisite
+for the `Λ(Γ⁺)`-module structure in which Thm 13.11 is stated. -/
+instance isMulCommutative_XinfPlus : IsMulCommutative (XinfPlus p) := by
+  rw [isMulCommutative_iff]; intro σ τ
+  refine AlgEquiv.ext fun y => ?_
+  set Sgen : Set ↥(MinfPlus p) := ⋃ n, ((MinfPlus p).val ⁻¹' (MPlusN p n)) with hS
+  have himg : (MinfPlus p).val '' Sgen = ⋃ n, (MPlusN p n : Set Om) := by
+    rw [hS, Set.image_iUnion]
+    refine Set.iUnion_congr fun n => ?_
+    rw [Set.image_preimage_eq_inter_range]
+    exact Set.inter_eq_left.mpr (fun x hx =>
+      ⟨⟨x, by rw [MinfPlus]; exact subset_adjoin _ _ (Set.mem_iUnion.mpr ⟨n, hx⟩)⟩, rfl⟩)
+  have htop : adjoin (FinfPlus p) Sgen = ⊤ := by
+    apply IntermediateField.map_injective (MinfPlus p).val
+    rw [IntermediateField.adjoin_map, himg]
+    apply SetLike.coe_injective
+    rw [IntermediateField.coe_map, IntermediateField.coe_top, Set.image_univ,
+      IntermediateField.coe_val, Subtype.range_coe_subtype]
+    rfl
+  have hy : y ∈ adjoin (FinfPlus p) Sgen := htop ▸ mem_top
+  induction hy using IntermediateField.adjoin_induction with
+  | mem w hw =>
+    obtain ⟨n, hwn⟩ := Set.mem_iUnion.mp hw
+    rw [AlgEquiv.mul_apply, AlgEquiv.mul_apply]
+    exact commute_on_MPlusN p n σ τ w hwn
+  | algebraMap r => simp
+  | add a b _ _ ha hb => rw [map_add, map_add, ha, hb]
+  | mul a b _ _ ha hb => rw [map_mul, map_mul, ha, hb]
+  | inv a _ ha => rw [map_inv₀, map_inv₀, ha]
 
 end Iwasawa.GaloisFoundation
