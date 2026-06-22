@@ -57,51 +57,35 @@ theorem even_eigenspace_nontrivial_of_dvd_hPlus
     ∃ i : ℕ, IsReflectionComponentIndex p i ∧ Even i ∧
       eigenspaceComponentNontrivial p K i := by
   classical
-  -- Local abbreviation.
   set Kplus := NumberField.maximalRealSubfield K
-  -- Step 1: Cl(K⁺)/p is non-trivial under p ∣ h⁺.
   have h_Kplus_modP_nontrivial : Nontrivial (ClassGroupModP Kplus p) := by
     rw [nontrivial_iff_exists_ne (1 : ClassGroupModP Kplus p)]
-    by_contra h_triv
-    push Not at h_triv
-    haveI h_subsing : Subsingleton (ClassGroupModP Kplus p) :=
+    by_contra! h_triv
+    have h_subsing : Subsingleton (ClassGroupModP Kplus p) :=
       ⟨fun a b => by rw [h_triv a, h_triv b]⟩
     have h_surj : Function.Surjective
         (powMonoidHom p : ClassGroup (𝓞 Kplus) →* ClassGroup (𝓞 Kplus)) := by
-      rw [← MonoidHom.range_eq_top]
-      rw [Subgroup.eq_top_iff']
-      intro x
-      have h_one : (QuotientGroup.mk x : ClassGroupModP Kplus p) = 1 :=
-        Subsingleton.elim _ _
-      exact (QuotientGroup.eq_one_iff x).mp h_one
+      rw [← MonoidHom.range_eq_top, Subgroup.eq_top_iff']
+      exact fun x => (QuotientGroup.eq_one_iff x).mp (Subsingleton.elim _ _)
     have h_inj : Function.Injective
         (powMonoidHom p : ClassGroup (𝓞 Kplus) →* ClassGroup (𝓞 Kplus)) :=
-      (Finite.injective_iff_surjective).mpr h_surj
-    have h_no_p_tors : ∀ x : ClassGroup (𝓞 Kplus), x ^ p = 1 → x = 1 := by
-      intro x hx
-      have : (powMonoidHom p) x = (powMonoidHom p) 1 := by
-        simpa [powMonoidHom] using hx
-      exact h_inj this
-    have h_card_eq : Fintype.card (ClassGroup (𝓞 Kplus)) = hPlus K := rfl
-    obtain ⟨x, hx_ord⟩ := exists_prime_orderOf_dvd_card p (h_card_eq ▸ h_dvd)
-    have hx_pow : x ^ p = 1 := orderOf_dvd_iff_pow_eq_one.mp (hx_ord ▸ dvd_refl p)
-    have hx_eq_one : x = 1 := h_no_p_tors x hx_pow
-    rw [hx_eq_one, orderOf_one] at hx_ord
+      Finite.injective_iff_surjective.mpr h_surj
+    have h_no_p_tors : ∀ x : ClassGroup (𝓞 Kplus), x ^ p = 1 → x = 1 := fun x hx =>
+      h_inj (by simpa [powMonoidHom] using hx)
+    obtain ⟨x, hx_ord⟩ := exists_prime_orderOf_dvd_card (G := ClassGroup (𝓞 Kplus)) p h_dvd
+    rw [h_no_p_tors x (orderOf_dvd_iff_pow_eq_one.mp (hx_ord ▸ dvd_refl p)), orderOf_one]
+      at hx_ord
     exact (Fact.out : Nat.Prime p).one_lt.ne hx_ord
-  -- Step 2: Pick a nonzero element of Cl(K⁺)/p.
   obtain ⟨cPlus, hcPlus_ne⟩ := exists_ne (1 : ClassGroupModP Kplus p)
   set v : Additive (ClassGroupModP K p) :=
-    Additive.ofMul (FLT37.classGroupMap_modP p K cPlus) with hv_def
-  -- Step 3: v ≠ 0 (using SP-2a unconditional).
+    Additive.ofMul (FLT37.classGroupMap_modP p K cPlus)
   have hv_ne : v ≠ 0 := by
     intro heq
     apply hcPlus_ne
-    have h_mul : FLT37.classGroupMap_modP p K cPlus = 1 := by
-      have := congrArg Additive.toMul heq
-      simpa [v] using this
+    have h_mul : FLT37.classGroupMap_modP p K cPlus = 1 :=
+      by simpa [v] using congrArg Additive.toMul heq
     exact FLT37.classGroupMap_modP_injective_unconditional p K hp_odd
       (h_mul.trans (map_one (FLT37.classGroupMap_modP p K)).symm)
-  -- Step 4: v is σ_{-1}-fixed.
   have h_fixed : cyclotomicGalActionInstance (p := p) (K := K) (-1) v = v := by
     obtain ⟨cI, rfl⟩ := QuotientGroup.mk_surjective cPlus
     simp only [v]
@@ -111,18 +95,14 @@ theorem even_eigenspace_nontrivial_of_dvd_hPlus
     rw [show FLT37.classGroupMap_modP p K (QuotientGroup.mk cI) =
         QuotientGroup.mk (classGroupMap K cI) from rfl]
     exact cyclotomicGalActionInstance_neg_one_classGroupMap hp_odd cI
-  -- Step 5: Apply the even-eigenspace nontriviality lemma.
   obtain ⟨i, hi_lt, hi_even, hi_nontrivial⟩ :=
     exists_even_eigenspaceComponentNontrivial_of_sigma_fixed_nontrivial
       p K hp_odd h_decomp h_fixed hv_ne
-  -- Step 6: Rule out i = 0 using h_V0_trivial.
   have hi_pos : 0 < i := by
-    by_contra h_not_pos
-    push Not at h_not_pos
+    by_contra! h_not_pos
     interval_cases i
     obtain ⟨v0, hv0_mem, hv0_ne⟩ := hi_nontrivial
     apply hv0_ne
-    -- hv0_mem : v0 ∈ eigenspace _ 0; h_V0_trivial : eigenspace _ 0 = ⊥ ⟹ v0 ∈ ⊥ ⟹ v0 = 0.
     rw [h_V0_trivial] at hv0_mem
     exact (Submodule.mem_bot (R := ZMod p)).mp hv0_mem
   refine ⟨i, ⟨hi_pos, ?_⟩, hi_even, hi_nontrivial⟩
