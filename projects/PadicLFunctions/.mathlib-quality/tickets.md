@@ -7083,3 +7083,26 @@ dim 1) — Λ is dim 2. The structure theorem (Bourbaki Comm.Alg. VII §4.4 Thm 
 - **Status**: open. **Depends on**: TG-ABEL-3.
 - **Statement**: a `MulDistribMulAction` / `DistribMulAction (Γ⁺) (Additive X∞⁺)` via σ·x = σ̃xσ̃⁻¹ (lift σ̃ via restrictNormalHom Gal(M∞⁺/ℚ)↠Γ⁺), well-defined by X∞⁺ abelian.
 - **Sources**: RJW §13.2 Remark 13.7 (refs/PadicLFunctions/RJW.txt:6726).
+
+---
+## Beastmode session result (2026-06-22) — keystone DONE; X∞⁺-abelian blocked on Lean perf
+
+DONE (committed, axiom-clean, fast):
+- **[TG-ABEL-1] isMulCommutative_iSup** — compositum of abelian Galois extensions is abelian
+  (Gal(⨆Eᵢ/F) commutative). The genuinely novel, reusable, mathlib-missing keystone. PROVEN.
+- **[TG-ABEL-2] isMulCommutative_galMPlusN / galLPlusN** — Gal(Mₙ⁺/Fₙ⁺), Gal(Lₙ⁺/Fₙ⁺) abelian. PROVEN.
+- **commute_restrict** — base-change engine: F-autos of M commute on a B-abelian normal subfield E.
+  PROVEN. **instNormalMPlusN** — Mₙ⁺/Fₙ⁺ normal. PROVEN.
+
+BLOCKED — [TG-ABEL-3] X∞⁺ abelian (and hence the Γ⁺-action, the SES, all downstream):
+- The base case (two Gal(M∞⁺/F∞⁺)-autos commute on an Mₙ⁺-point, via commute_restrict with
+  E = Mₙ⁺-viewed-in-M∞⁺ over Fₙ⁺) is **computationally pathological**: the comap / AlgEquiv.ofBijective
+  / Normal.of_algEquiv transfer over MPlusN's `⨆`-over-ALL-IntermediateFields definition does not
+  compile in feasible time (lake build times out > several min on the single theorem).
+- DIAGNOSIS: the composite Fₙ⁺→F∞⁺→M∞⁺ algebra is fast; the keystone over MPlusN is fast. The
+  pathology is the `comap`-based view of Mₙ⁺ inside M∞⁺ + the equiv-transfer of Normal/abelian.
+- FIX NEEDED (substantial, separate): either (a) a `LinearDisjoint`/translation base-change lemma
+  `Gal(F∞⁺·Mₙ⁺/F∞⁺) ↪ Gal(Mₙ⁺/Fₙ⁺)` proven once at the right abstraction, or (b) a lighter
+  representation of Mₙ⁺ (not `⨆` over all intermediate fields) so downstream Galois-module reasoning
+  is feasible. Both are mathlib-PR-scale. The mathematics is settled (RJW §13.2); the obstacle is Lean
+  encoding/performance.
