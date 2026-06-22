@@ -1177,6 +1177,35 @@ theorem ordAtInfty_negFrobeniusIsog_pullback_x_gen :
   rw [negFrobeniusIsog_pullback_x_gen]
   exact ordAtInfty_frobeniusIsog_pullback_x_gen W
 
+/-- `ord_∞(a₁·π·x + a₃) ≥ -2q`: `ord(a₁·π·x) ≥ -2q` (algebraMap factor doesn't
+lower order, `-2q ≤ ord(π·x)`) and `ord(a₃) ≥ -2q` (case-split on `a₃ = 0`). -/
+private lemma a1_pi_x_plus_a3_ge_neg_two_q (hq : 2 ≤ Fintype.card K) :
+    (((-2 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) ≤
+      (W_smooth W).ordAtInfty
+        (algebraMap K KE W.toAffine.a₁ *
+          (frobeniusIsog W).pullback (x_gen W) +
+         algebraMap K KE W.toAffine.a₃) := by
+  have h_q : (1 : ℤ) < (Fintype.card K : ℤ) := by exact_mod_cast hq
+  apply ord_add_ge_of_both_ge
+  · refine ord_algebraMap_mul_ge W W.toAffine.a₁ ?_
+    exact (ordAtInfty_frobeniusIsog_pullback_x_gen W).symm.le
+  · by_cases ha₃ : W.toAffine.a₃ = 0
+    · rw [ha₃, map_zero]
+      exact (W_smooth W).ordAtInfty_zero.symm ▸
+        (le_top : (((-2 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) ≤ ⊤)
+    · rw [ordAtInfty_algebraMap_F_nonzero W ha₃]
+      exact WithTop.coe_le_coe.mpr (by linarith)
+
+/-- Strict non-archimedean subtraction via integer bounds: if `ord A = m`,
+`n ≤ ord B`, and `m < n`, then `ord(A - B) = m`. -/
+private lemma ordAtInfty_sub_eq_of_coe_lt_le {A B : KE} {m n : ℤ} (hmn : m < n)
+    (hA : (W_smooth W).ordAtInfty A = (m : WithTop ℤ))
+    (hB : (n : WithTop ℤ) ≤ (W_smooth W).ordAtInfty B) :
+    (W_smooth W).ordAtInfty (A - B) = (m : WithTop ℤ) := by
+  refine ((W_smooth W).ordAtInfty_sub_eq_of_lt ?_).trans hA
+  rw [hA]
+  exact lt_of_lt_of_le (WithTop.coe_lt_coe.mpr hmn) hB
+
 /-- **`ord_∞((negFrobeniusIsog W).pullback (y_gen W)) = -3q`** for `q ≥ 2`.
 
 Regroup `(negFrobeniusIsog W).pullback (y_gen W) = -π·y − (a₁·π·x + a₃)`.
@@ -1190,48 +1219,22 @@ theorem ordAtInfty_negFrobeniusIsog_pullback_y_gen
     (W_smooth W).ordAtInfty ((negFrobeniusIsog W).pullback (y_gen W)) =
       ((-3 * (Fintype.card K : ℤ)) : WithTop ℤ) := by
   rw [negFrobeniusIsog_pullback_y_gen]
-  -- Regroup as `-π·y - (a₁·π·x + a₃)`.
   rw [show -((frobeniusIsog W).pullback (y_gen W)) -
       algebraMap K KE W.toAffine.a₁ * (frobeniusIsog W).pullback (x_gen W) -
       algebraMap K KE W.toAffine.a₃ =
       -((frobeniusIsog W).pullback (y_gen W)) -
       (algebraMap K KE W.toAffine.a₁ * (frobeniusIsog W).pullback (x_gen W) +
        algebraMap K KE W.toAffine.a₃) from by ring]
-  have h_q : (1 : ℤ) < (Fintype.card K : ℤ) := by exact_mod_cast hq
-  -- Step 1: ord(-π·y) = -3q.
   have h_neg_πy : (W_smooth W).ordAtInfty
       (-((frobeniusIsog W).pullback (y_gen W))) =
       (((-3 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) :=
     ((W_smooth W).ordAtInfty_neg _).trans
       (ordAtInfty_frobeniusIsog_pullback_y_gen W)
-  -- Step 2: ord(a₁·π·x + a₃) ≥ -2q.
-  have h_rest_ge : (((-2 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) ≤
-      (W_smooth W).ordAtInfty
-        (algebraMap K KE W.toAffine.a₁ *
-          (frobeniusIsog W).pullback (x_gen W) +
-         algebraMap K KE W.toAffine.a₃) := by
-    apply ord_add_ge_of_both_ge
-    · refine ord_algebraMap_mul_ge W W.toAffine.a₁ ?_
-      exact (ordAtInfty_frobeniusIsog_pullback_x_gen W).symm.le
-    · by_cases ha₃ : W.toAffine.a₃ = 0
-      · rw [ha₃, map_zero]
-        exact (W_smooth W).ordAtInfty_zero.symm ▸
-          (le_top : (((-2 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) ≤ ⊤)
-      · rw [ordAtInfty_algebraMap_F_nonzero W ha₃]
-        exact WithTop.coe_le_coe.mpr (by linarith)
-  -- Step 3: ord(-π·y) < ord(a₁·π·x + a₃) since -3q < -2q.
-  have h_lt : (W_smooth W).ordAtInfty
-      (-((frobeniusIsog W).pullback (y_gen W))) <
-      (W_smooth W).ordAtInfty
-        (algebraMap K KE W.toAffine.a₁ *
-          (frobeniusIsog W).pullback (x_gen W) +
-         algebraMap K KE W.toAffine.a₃) := by
-    rw [h_neg_πy]
-    refine lt_of_lt_of_le ?_ h_rest_ge
-    exact WithTop.coe_lt_coe.mpr (by linarith :
-      (-3 * (Fintype.card K : ℤ) : ℤ) < -2 * (Fintype.card K : ℤ))
-  -- Step 4: strict non-arch sub gives ord(a - b) = ord(a) when ord(a) < ord(b).
-  exact ((W_smooth W).ordAtInfty_sub_eq_of_lt h_lt).trans h_neg_πy
+  have h_lt_q : ((-3 * (Fintype.card K : ℤ)) : ℤ) < -2 * (Fintype.card K : ℤ) := by
+    have h_q : (1 : ℤ) < (Fintype.card K : ℤ) := by exact_mod_cast hq
+    linarith
+  exact ordAtInfty_sub_eq_of_coe_lt_le W h_lt_q h_neg_πy
+    (a1_pi_x_plus_a3_ge_neg_two_q W hq)
 
 /-! ### addPullbackNumerator for negFrobenius (Day 2 second half opener)
 
