@@ -1,4 +1,4 @@
-import BernoulliRegular.Thaine.PollaczekUnitPlusGaloisAction.Part2
+import BernoulliRegular.Thaine.PollaczekUnitPlusGaloisAction.EigenspaceGeneratorAndCertEquivalence
 
 /-!
 # Washington Theorem 8.14 forward step — general-index component lemmas

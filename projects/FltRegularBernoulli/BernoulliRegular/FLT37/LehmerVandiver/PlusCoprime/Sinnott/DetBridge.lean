@@ -1,1 +1,1 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.DetBridge.Part2
+import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.DetBridge.FrobeniusDetFactorizationDischarge

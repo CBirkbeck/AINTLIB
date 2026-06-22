@@ -1,4 +1,4 @@
-import BernoulliRegular.Thaine.PollaczekUnitPlusGaloisAction.Part1
+import BernoulliRegular.Thaine.PollaczekUnitPlusGaloisAction.GaloisActionDecompositionAndEigenspace
 import BernoulliRegular.Thaine.UnitsComplexConjBridge
 import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Symmetrisation
 import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.KummerLift.CharacterIdentification

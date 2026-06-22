@@ -1,5 +1,5 @@
 import BernoulliRegular.FLT37.Eichler.DworkCoordinate.VandermondeColumnFoldFermat
-import BernoulliRegular.CyclotomicUnits.KummerLogNormalization.Part3
+import BernoulliRegular.CyclotomicUnits.KummerLogNormalization.ArtinHasseFiniteLogDecomposition
 
 /-!
 # The factorial-`37` degree-`68` second-order extraction: the `68! = 37·u` cancellation mechanism

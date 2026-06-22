@@ -1,4 +1,4 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative.Part2
+import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative.DirichletLogSumGaussSumPrefactor
 
 @[expose] public section
 
