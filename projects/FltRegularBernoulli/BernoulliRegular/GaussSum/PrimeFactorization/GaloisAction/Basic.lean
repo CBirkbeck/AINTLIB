@@ -179,35 +179,28 @@ lemma stickelbergerUnitsEquivProd_unitExponentOfUnit (a : (ZMod p)ˣ) :
       (a, 1) :=
   (stickelbergerUnitsEquivProd (p := p)).apply_symm_apply (a, 1)
 
+/-- The CRT image of the exponent `(Units.mapEquiv …).symm (prodUnits.symm q)` is the
+componentwise coercion of the pair `q`. Shared core of the `cast`/`modEq` lemmas below. -/
+private lemma chineseRemainder_coe_mapEquiv_symm_prodUnits_symm
+    (q : (ZMod p)ˣ × (ZMod (p - 1))ˣ) :
+    ZMod.chineseRemainder (prime_coprime_pred (p := p))
+        (((Units.mapEquiv (ZMod.chineseRemainder (prime_coprime_pred (p := p))).toMulEquiv).symm
+            (MulEquiv.prodUnits.symm q) : (ZMod N)ˣ) : ZMod N) =
+      ((q.1 : ZMod p), (q.2 : ZMod (p - 1))) := by
+  rw [Units.mapEquiv_symm, Units.coe_mapEquiv,
+    show ((MulEquiv.prodUnits.symm q : (ZMod p × ZMod (p - 1))ˣ) : ZMod p × ZMod (p - 1)) =
+        ((q.1 : ZMod p), (q.2 : ZMod (p - 1))) from rfl]
+  exact (ZMod.chineseRemainder (prime_coprime_pred (p := p))).apply_symm_apply _
+
 lemma unitExponentOfUnit_cast_p (a : (ZMod p)ˣ) :
     (((unitExponentOfUnit (p := p) a : (ZMod N)ˣ) : ZMod N).cast : ZMod p) = a := by
-  have hpair :
-      ((MulEquiv.prodUnits.symm (a, 1) : (ZMod p × ZMod (p - 1))ˣ) :
-          ZMod p × ZMod (p - 1)) =
-        ((a : ZMod p), (1 : ZMod (p - 1))) := by
-    rfl
-  have h :
-      (ZMod.chineseRemainder (prime_coprime_pred (p := p))
-          (((unitExponentOfUnit (p := p) a : (ZMod N)ˣ) : ZMod N))) =
-        ((a : ZMod p), (1 : ZMod (p - 1))) := by
-    rw [unitExponentOfUnit, Units.mapEquiv_symm, Units.coe_mapEquiv, hpair]
-    exact (ZMod.chineseRemainder (prime_coprime_pred (p := p))).apply_symm_apply _
-  simpa [ZMod.chineseRemainder] using congrArg Prod.fst h
+  simpa [ZMod.chineseRemainder, unitExponentOfUnit] using
+    congrArg Prod.fst (chineseRemainder_coe_mapEquiv_symm_prodUnits_symm (p := p) (a, 1))
 
 lemma unitExponentOfUnit_cast_pred (a : (ZMod p)ˣ) :
     (((unitExponentOfUnit (p := p) a : (ZMod N)ˣ) : ZMod N).cast : ZMod (p - 1)) = 1 := by
-  have hpair :
-      ((MulEquiv.prodUnits.symm (a, 1) : (ZMod p × ZMod (p - 1))ˣ) :
-          ZMod p × ZMod (p - 1)) =
-        ((a : ZMod p), (1 : ZMod (p - 1))) := by
-    rfl
-  have h :
-      (ZMod.chineseRemainder (prime_coprime_pred (p := p))
-          (((unitExponentOfUnit (p := p) a : (ZMod N)ˣ) : ZMod N))) =
-        ((a : ZMod p), (1 : ZMod (p - 1))) := by
-    rw [unitExponentOfUnit, Units.mapEquiv_symm, Units.coe_mapEquiv, hpair]
-    exact (ZMod.chineseRemainder (prime_coprime_pred (p := p))).apply_symm_apply _
-  simpa [ZMod.chineseRemainder] using congrArg Prod.snd h
+  simpa [ZMod.chineseRemainder, unitExponentOfUnit] using
+    congrArg Prod.snd (chineseRemainder_coe_mapEquiv_symm_prodUnits_symm (p := p) (a, 1))
 
 lemma unitExponentOfUnit_modEq_val (a : (ZMod p)ˣ) :
     (unitExponentOfUnit (p := p) a).val.val ≡ (a : ZMod p).val [MOD p] := by
@@ -266,33 +259,13 @@ lemma stickelbergerUnitsEquivProd_characterExponentOfUnit (b : (ZMod (p - 1))ˣ)
 
 lemma characterExponentOfUnit_cast_p (b : (ZMod (p - 1))ˣ) :
     (((characterExponentOfUnit (p := p) b : (ZMod N)ˣ) : ZMod N).cast : ZMod p) = 1 := by
-  have hpair :
-      ((MulEquiv.prodUnits.symm (1, b) : (ZMod p × ZMod (p - 1))ˣ) :
-          ZMod p × ZMod (p - 1)) =
-        ((1 : ZMod p), (b : ZMod (p - 1))) := by
-    rfl
-  have h :
-      (ZMod.chineseRemainder (prime_coprime_pred (p := p))
-          (((characterExponentOfUnit (p := p) b : (ZMod N)ˣ) : ZMod N))) =
-        ((1 : ZMod p), (b : ZMod (p - 1))) := by
-    rw [characterExponentOfUnit, Units.mapEquiv_symm, Units.coe_mapEquiv, hpair]
-    exact (ZMod.chineseRemainder (prime_coprime_pred (p := p))).apply_symm_apply _
-  simpa [ZMod.chineseRemainder] using congrArg Prod.fst h
+  simpa [ZMod.chineseRemainder, characterExponentOfUnit] using
+    congrArg Prod.fst (chineseRemainder_coe_mapEquiv_symm_prodUnits_symm (p := p) (1, b))
 
 lemma characterExponentOfUnit_cast_pred (b : (ZMod (p - 1))ˣ) :
     (((characterExponentOfUnit (p := p) b : (ZMod N)ˣ) : ZMod N).cast : ZMod (p - 1)) = b := by
-  have hpair :
-      ((MulEquiv.prodUnits.symm (1, b) : (ZMod p × ZMod (p - 1))ˣ) :
-          ZMod p × ZMod (p - 1)) =
-        ((1 : ZMod p), (b : ZMod (p - 1))) := by
-    rfl
-  have h :
-      (ZMod.chineseRemainder (prime_coprime_pred (p := p))
-          (((characterExponentOfUnit (p := p) b : (ZMod N)ˣ) : ZMod N))) =
-        ((1 : ZMod p), (b : ZMod (p - 1))) := by
-    rw [characterExponentOfUnit, Units.mapEquiv_symm, Units.coe_mapEquiv, hpair]
-    exact (ZMod.chineseRemainder (prime_coprime_pred (p := p))).apply_symm_apply _
-  simpa [ZMod.chineseRemainder] using congrArg Prod.snd h
+  simpa [ZMod.chineseRemainder, characterExponentOfUnit] using
+    congrArg Prod.snd (chineseRemainder_coe_mapEquiv_symm_prodUnits_symm (p := p) (1, b))
 
 lemma characterExponentOfUnit_modEq_one (b : (ZMod (p - 1))ˣ) :
     (characterExponentOfUnit (p := p) b).val.val ≡ 1 [MOD p] := by
@@ -301,7 +274,6 @@ lemma characterExponentOfUnit_modEq_one (b : (ZMod (p - 1))ˣ) :
 
 lemma characterExponentOfUnit_modEq_val (b : (ZMod (p - 1))ˣ) :
     (characterExponentOfUnit (p := p) b).val.val ≡ (b : ZMod (p - 1)).val [MOD p - 1] := by
-  haveI : NeZero (p - 1) := ⟨Nat.sub_ne_zero_of_lt hp.out.one_lt⟩
   rw [← ZMod.natCast_eq_natCast_iff, ZMod.natCast_val, ZMod.natCast_val]
   simpa using characterExponentOfUnit_cast_pred (p := p) b
 
@@ -454,7 +426,6 @@ lemma exists_stickelbergerCharacterExponent (χ : DirichletCharacter ℂ p) :
     ∃ j < p - 1,
       stickelbergerComplexCharacterRoot (p := p) ^ j =
         χ (((characterUnitGenerator (p := p)) : (ZMod p)ˣ) : ZMod p) := by
-  haveI : NeZero (p - 1) := ⟨Nat.sub_ne_zero_of_lt hp.out.one_lt⟩
   have hpow : χ ^ (p - 1) = 1 := by
     have h := MulChar.pow_card_eq_one χ (M := ZMod p)
     rwa [ZMod.card_units_eq_totient, Nat.totient_prime hp.out] at h
