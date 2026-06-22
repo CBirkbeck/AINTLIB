@@ -1282,6 +1282,95 @@ theorem projectiveDivisorOf_pushforward_algebraMap_eq
 
 end NormConormSteps
 
+/-! ### NEW-1(ii): the `f = u/v` reduction
+
+The deep per-place arithmetic is the `algebraMap` case
+`projectiveDivisorOf_pushforward_algebraMap_eq` (in `section NormConormSteps`).
+The norm–conorm identity for a *general* `f ∈ K(C₁)` follows from it by the
+multiplicativity of both sides together with `IsFractionRing.div_surjective`.
+The next four `private` helpers package that reduction:
+* the `f = 0` base case;
+* the two multiplicativity identities (one per side of the goal);
+* the assembly turning the `algebraMap` case into the statement for all `f`. -/
+
+/-- The projective divisor of the pushforward of `0` matches the pushforward of
+the projective divisor of `0`: both sides vanish (`φ.pushforward 0 = 0` is
+`Algebra.norm_zero`, needing finiteness of `K(C₁)/φ*K(C₂)`, and
+`projectiveDivisorOf 0 = 0` on each side). -/
+private theorem projectiveDivisorOf_pushforward_zero (φ : CurveMap C₁ C₂)
+    (cd : φ.CoordHom)
+    (hfd : letI : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
+      FiniteDimensional C₂.FunctionField C₁.FunctionField) :
+    C₂.projectiveDivisorOf (φ.pushforward (0 : C₁.FunctionField)) =
+      φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf (0 : C₁.FunctionField)) := by
+  letI algFF : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
+  haveI : FiniteDimensional C₂.FunctionField C₁.FunctionField := hfd
+  rw [show φ.pushforward (0 : C₁.FunctionField) = 0 from Algebra.norm_zero,
+    C₂.projectiveDivisorOf_zero, C₁.projectiveDivisorOf_zero, map_zero]
+
+/-- **LHS multiplicativity.** The projective divisor of the pushforward of a
+product splits additively: `φ.pushforward` is a monoid hom and
+`projectiveDivisorOf` is additive on nonzero products
+(`projectiveDivisorOf_mul`). -/
+private theorem projectiveDivisorOf_pushforward_mul (φ : CurveMap C₁ C₂)
+    {g h : C₁.FunctionField} (hg : g ≠ 0) (hh : h ≠ 0) :
+    C₂.projectiveDivisorOf (φ.pushforward (g * h)) =
+      C₂.projectiveDivisorOf (φ.pushforward g) +
+        C₂.projectiveDivisorOf (φ.pushforward h) := by
+  have hpg : φ.pushforward g ≠ 0 := (IsUnit.map φ.pushforward (isUnit_iff_ne_zero.mpr hg)).ne_zero
+  have hph : φ.pushforward h ≠ 0 := (IsUnit.map φ.pushforward (isUnit_iff_ne_zero.mpr hh)).ne_zero
+  rw [map_mul, C₂.projectiveDivisorOf_mul hpg hph]
+
+/-- **RHS multiplicativity.** The pushforward of the projective divisor of a
+product splits additively: `projectiveDivisorOf` is additive on nonzero products
+(`projectiveDivisorOf_mul`) and `pushforwardDivisorVal` is an additive hom. -/
+private theorem pushforwardDivisorVal_projectiveDivisorOf_mul (φ : CurveMap C₁ C₂)
+    (cd : φ.CoordHom) {g h : C₁.FunctionField} (hg : g ≠ 0) (hh : h ≠ 0) :
+    φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf (g * h)) =
+      φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf g) +
+        φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf h) := by
+  rw [C₁.projectiveDivisorOf_mul hg hh, map_add]
+
+/-- **The `f = u/v` reduction.** Given the norm–conorm identity on the image of
+`algebraMap` (the `algebraMap` case `key`), it holds for every `f ∈ K(C₁)`.
+Writing a nonzero `f` as `au / av` with `au, av` images of nonzero coordinate-ring
+elements (`IsFractionRing.div_surjective`), `f * av = au`; multiplicativity of
+both sides (`projectiveDivisorOf_pushforward_mul`,
+`pushforwardDivisorVal_projectiveDivisorOf_mul`) reduces the goal for `f` to the
+`algebraMap` case applied to `u` and `v`. -/
+private theorem projectiveDivisorOf_pushforward_eq_of_algebraMap (φ : CurveMap C₁ C₂)
+    (cd : φ.CoordHom)
+    (hfd : letI : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
+      FiniteDimensional C₂.FunctionField C₁.FunctionField)
+    (key : ∀ w : C₁.CoordinateRing, w ≠ 0 →
+      C₂.projectiveDivisorOf (φ.pushforward (algebraMap C₁.CoordinateRing C₁.FunctionField w)) =
+        φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf
+          (algebraMap C₁.CoordinateRing C₁.FunctionField w)))
+    (f : C₁.FunctionField) :
+    C₂.projectiveDivisorOf (φ.pushforward f) =
+      φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf f) := by
+  by_cases hf : f = 0
+  · subst hf; exact projectiveDivisorOf_pushforward_zero φ cd hfd
+  · obtain ⟨u, v, hv_mem, hf_eq⟩ := IsFractionRing.div_surjective (A := C₁.CoordinateRing) f
+    have hv_ne : v ≠ 0 := nonZeroDivisors.ne_zero hv_mem
+    set au := algebraMap C₁.CoordinateRing C₁.FunctionField u with hau
+    set av := algebraMap C₁.CoordinateRing C₁.FunctionField v with hav
+    have hav_ne : av ≠ 0 := fun h ↦
+      hv_ne ((IsFractionRing.injective C₁.CoordinateRing C₁.FunctionField)
+        (h.trans (map_zero _).symm))
+    have hu_ne : u ≠ 0 := fun hu ↦ hf (by rw [← hf_eq, hau, hu, map_zero, zero_div])
+    -- `f * av = au`, so additivity of both sides reduces `f` to `u` and `v`.
+    have hf_av : f * av = au := by rw [← hf_eq, div_mul_cancel₀ _ hav_ne]
+    have hgoalL : C₂.projectiveDivisorOf (φ.pushforward f) =
+        C₂.projectiveDivisorOf (φ.pushforward au) -
+          C₂.projectiveDivisorOf (φ.pushforward av) := by
+      rw [← hf_av, projectiveDivisorOf_pushforward_mul φ hf hav_ne]; abel
+    have hgoalR : φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf f) =
+        φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf au) -
+          φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf av) := by
+      rw [← hf_av, pushforwardDivisorVal_projectiveDivisorOf_mul φ cd hf hav_ne]; abel
+    rw [hgoalL, hgoalR, hau, hav, key u hu_ne, key v hv_ne]
+
 /-- **NEW-1(ii) — Silverman II.3.6, norm–conorm identity** `div(N_φ f) = φ_∗(div f)`.
 For a curve map `φ : C₁ → C₂` with coordinate-ring witness `cd` and a function
 `f ∈ K(C₁)`, the projective divisor of the conorm `N_φ f = φ.pushforward f`
@@ -1327,79 +1416,15 @@ theorem projectiveDivisorOf_pushforward_eq_pushforwardDivisorVal [IsAlgClosed F]
     (f : C₁.FunctionField) :
     C₂.projectiveDivisorOf (φ.pushforward f) =
       φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf f) := by
-  classical
-  -- The two deep steps are delegated to the sub-lemmas above (each re-establishing
-  -- the coordinate-ring extension instances internally).  Here we only need
-  -- `φ.toAlgebra` and the finiteness of `K(C₁)/φ*K(C₂)` for the `f = 0` branch
-  -- (`Algebra.norm_zero` / `Module.Free`) of the `f = u/v` reduction.
-  letI algFF : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
-  haveI hfd : FiniteDimensional C₂.FunctionField C₁.FunctionField :=
-    finiteDimensional_functionField φ cd
-  -- **The `algebraMap` case**: prove the goal for `f = algebraMap w`, `w ≠ 0`
-  -- (affine coefficients via the count identity, infinity coefficient by degree).
-  have key : ∀ w : C₁.CoordinateRing, w ≠ 0 →
-      C₂.projectiveDivisorOf (φ.pushforward (algebraMap C₁.CoordinateRing C₁.FunctionField w)) =
-        φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf
-          (algebraMap C₁.CoordinateRing C₁.FunctionField w)) :=
-    projectiveDivisorOf_pushforward_algebraMap_eq φ cd
-  -- **Reduction**: general `f` reduces to the `algebraMap` case via `div_surjective`.
-  by_cases hf : f = 0
-  · subst hf
-    haveI : Module.Free C₂.FunctionField C₁.FunctionField := Module.Free.of_divisionRing _ _
-    rw [show φ.pushforward (0 : C₁.FunctionField) = 0 from Algebra.norm_zero,
-      C₂.projectiveDivisorOf_zero, C₁.projectiveDivisorOf_zero, map_zero]
-  · obtain ⟨u, v, hv_mem, hf_eq⟩ := IsFractionRing.div_surjective (A := C₁.CoordinateRing) f
-    have hv_ne : v ≠ 0 := nonZeroDivisors.ne_zero hv_mem
-    set au := algebraMap C₁.CoordinateRing C₁.FunctionField u with hau
-    set av := algebraMap C₁.CoordinateRing C₁.FunctionField v with hav
-    -- `hf_eq : au / av = f`.
-    have hav_ne : av ≠ 0 := by
-      rw [hau, hav] at *
-      intro h
-      exact hv_ne ((IsFractionRing.injective C₁.CoordinateRing C₁.FunctionField)
-        (h.trans (map_zero _).symm))
-    have hu_ne : u ≠ 0 := by
-      intro hu
-      apply hf
-      rw [← hf_eq, hau, hu, map_zero, zero_div]
-    have hau_ne : au ≠ 0 := by
-      rw [hau]; intro h
-      exact hu_ne ((IsFractionRing.injective C₁.CoordinateRing C₁.FunctionField)
-        (h.trans (map_zero _).symm))
-    -- `f * av = au`.
-    have hf_av : f * av = au := by
-      rw [← hf_eq, div_mul_cancel₀ _ hav_ne]
-    have hf_ne' : f ≠ 0 := hf
-    have hpf_ne : φ.pushforward f ≠ 0 :=
-      (IsUnit.map φ.pushforward (isUnit_iff_ne_zero.mpr hf_ne')).ne_zero
-    have hpav_ne : φ.pushforward av ≠ 0 :=
-      (IsUnit.map φ.pushforward (isUnit_iff_ne_zero.mpr hav_ne)).ne_zero
-    -- LHS additivity over `f * av = au`.
-    have hLHS_split : C₂.projectiveDivisorOf (φ.pushforward f) +
-        C₂.projectiveDivisorOf (φ.pushforward av) =
-        C₂.projectiveDivisorOf (φ.pushforward au) := by
-      rw [← C₂.projectiveDivisorOf_mul hpf_ne hpav_ne, ← map_mul, hf_av]
-    -- RHS additivity over `f * av = au`.
-    have hRHS_split : φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf f) +
-        φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf av) =
-        φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf au) := by
-      rw [← map_add, ← C₁.projectiveDivisorOf_mul hf_ne' hav_ne, hf_av]
-    -- Conclude via subtraction and the `algebraMap` case applied to `u` and `v`.
-    have hau_eq : C₂.projectiveDivisorOf (φ.pushforward au) =
-        φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf au) := by
-      rw [hau]; exact key u hu_ne
-    have hav_eq : C₂.projectiveDivisorOf (φ.pushforward av) =
-        φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf av) := by
-      rw [hav]; exact key v hv_ne
-    have hgoalL : C₂.projectiveDivisorOf (φ.pushforward f) =
-        C₂.projectiveDivisorOf (φ.pushforward au) -
-          C₂.projectiveDivisorOf (φ.pushforward av) := by
-      rw [← hLHS_split]; abel
-    have hgoalR : φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf f) =
-        φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf au) -
-          φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf av) := by
-      rw [← hRHS_split]; abel
-    rw [hgoalL, hgoalR, hau_eq, hav_eq]
+  -- The deep per-place arithmetic is the `algebraMap` case
+  -- `projectiveDivisorOf_pushforward_algebraMap_eq` (affine coefficients via the
+  -- count identity, infinity coefficient forced by degree).  The general `f`
+  -- follows by the `f = u/v` reduction `projectiveDivisorOf_pushforward_eq_of_algebraMap`,
+  -- which only uses multiplicativity of both sides and `div_surjective` (plus
+  -- finiteness of `K(C₁)/φ*K(C₂)` for the `f = 0` branch).
+  exact projectiveDivisorOf_pushforward_eq_of_algebraMap φ cd
+    (finiteDimensional_functionField φ cd)
+    (projectiveDivisorOf_pushforward_algebraMap_eq φ cd) f
 
 end HasseWeil.Curves.CurveMap
 
