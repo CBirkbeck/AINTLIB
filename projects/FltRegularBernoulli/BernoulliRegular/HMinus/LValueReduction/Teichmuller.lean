@@ -40,16 +40,16 @@ theorem card_oddCharacterIndex (hp_odd' : p ≠ 2) :
   have hhalf : (p - 1) / 2 = m := by
     omega
   let e : Fin m ≃ OddCharacterIndex p := {
-    toFun := fun k =>
+    toFun := fun k ↦
       ⟨⟨2 * (k : ℕ) + 1, by
           rw [hm]
           omega⟩, ⟨(k : ℕ), rfl⟩⟩
-    invFun := fun j =>
+    invFun := fun j ↦
       ⟨Classical.choose j.2, by
       have hk : (j.1 : ℕ) = 2 * Classical.choose j.2 + 1 := Classical.choose_spec j.2
       have hj_lt : (j.1 : ℕ) < p - 1 := j.1.is_lt
       omega⟩
-    left_inv := fun k => by
+    left_inv := fun k ↦ by
       apply Fin.ext
       change Classical.choose (show Odd (2 * (k : ℕ) + 1) from ⟨(k : ℕ), rfl⟩) = (k : ℕ)
       have hk :
@@ -57,7 +57,7 @@ theorem card_oddCharacterIndex (hp_odd' : p ≠ 2) :
             2 * (k : ℕ) + 1 :=
         (Classical.choose_spec (show Odd (2 * (k : ℕ) + 1) from ⟨(k : ℕ), rfl⟩)).symm
       omega
-    right_inv := fun j => by
+    right_inv := fun j ↦ by
       apply Subtype.ext
       apply Fin.ext
       change 2 * Classical.choose j.2 + 1 = (j.1 : ℕ)
@@ -125,8 +125,8 @@ noncomputable def oddBernoulliKernelPoly (j : Fin (p - 1)) : Polynomial ℚ :=
       (oddBernoulliKernelCoeff (p := p) m)
 
 theorem unitGroupGenerator_pow_bijective :
-    Function.Bijective fun m : Fin (p - 1) => unitGroupGenerator p ^ (m : ℕ) := by
-  let f : Fin (p - 1) → (ZMod p)ˣ := fun m => unitGroupGenerator p ^ (m : ℕ)
+    Function.Bijective fun m : Fin (p - 1) ↦ unitGroupGenerator p ^ (m : ℕ) := by
+  let f : Fin (p - 1) → (ZMod p)ˣ := fun m ↦ unitGroupGenerator p ^ (m : ℕ)
   refine (Fintype.bijective_iff_injective_and_card f).mpr ?_
   refine ⟨?_, ?_⟩
   · intro m n hmn
@@ -135,7 +135,7 @@ theorem unitGroupGenerator_pow_bijective :
 
 /-- The powers of `unitGroupGenerator` enumerate all units of `ZMod p`. -/
 noncomputable def unitGroupGeneratorPowEquiv : Fin (p - 1) ≃ (ZMod p)ˣ :=
-  Equiv.ofBijective (fun m : Fin (p - 1) => unitGroupGenerator p ^ (m : ℕ))
+  Equiv.ofBijective (fun m : Fin (p - 1) ↦ unitGroupGenerator p ^ (m : ℕ))
     (unitGroupGenerator_pow_bijective (p := p))
 
 theorem sum_zmod_eq_sum_unitGroupGeneratorPowers
@@ -150,17 +150,17 @@ theorem sum_zmod_eq_sum_unitGroupGeneratorPowers
         ∑ u : (ZMod p)ˣ, F (u : ZMod p) := by
     simpa using
       (Fintype.sum_equiv unitsEquivNeZero
-        (fun u : (ZMod p)ˣ => F (u : ZMod p))
-        (fun a : {a : ZMod p // a ≠ 0} => F a.1)
-        (fun u => rfl)).symm
+        (fun u : (ZMod p)ˣ ↦ F (u : ZMod p))
+        (fun a : {a : ZMod p // a ≠ 0} ↦ F a.1)
+        (fun u ↦ rfl)).symm
   have hpowers :
       ∑ u : (ZMod p)ˣ, F (u : ZMod p) =
         ∑ m : Fin (p - 1), F (((unitGroupGenerator p) ^ (m : ℕ) : (ZMod p)ˣ) : ZMod p) := by
     simpa using
       (Fintype.sum_equiv (unitGroupGeneratorPowEquiv (p := p))
-        (fun m : Fin (p - 1) => F (((unitGroupGenerator p) ^ (m : ℕ) : (ZMod p)ˣ) : ZMod p))
-        (fun u : (ZMod p)ˣ => F (u : ZMod p))
-        (fun m => rfl)).symm
+        (fun m : Fin (p - 1) ↦ F (((unitGroupGenerator p) ^ (m : ℕ) : (ZMod p)ˣ) : ZMod p))
+        (fun u : (ZMod p)ˣ ↦ F (u : ZMod p))
+        (fun m ↦ rfl)).symm
   calc
     ∑ a : ZMod p, F a = F 0 + ∑ a : {a : ZMod p // a ≠ 0}, F a.1 := hsplit
     _ = ∑ a : {a : ZMod p // a ≠ 0}, F a.1 := by rw [hF0, zero_add]
@@ -243,7 +243,7 @@ theorem complexCharacterGenerator_pow_eq_one_of_generatorRoot_pow_eq_one {l : �
 
 theorem complexGeneratorRoot_isPrimitiveRoot :
     IsPrimitiveRoot (complexGeneratorRoot p) (p - 1) := by
-  refine ⟨?_, fun l hl => ?_⟩
+  refine ⟨?_, fun l hl ↦ ?_⟩
   · calc
       complexGeneratorRoot p ^ (p - 1) =
           complexCharacterGenerator p
@@ -327,7 +327,7 @@ theorem complexCharacterGenerator_pow_odd_iff (hp_odd' : p ≠ 2) (i : ℕ) :
 noncomputable def oddComplexCharacters : Finset (DirichletCharacter ℂ p) := by
   classical
   exact (Finset.univ : Finset (OddCharacterIndex p)).image
-    (fun j => (complexCharacterGenerator p) ^ (j.1 : ℕ))
+    (fun j ↦ (complexCharacterGenerator p) ^ (j.1 : ℕ))
 
 theorem oddCharacters_eq_image_oddComplexPowers (hp_odd' : p ≠ 2) :
     oddCharacters (p := p) = oddComplexCharacters (p := p) := by
@@ -362,11 +362,11 @@ theorem prod_oddCharacters_eq_prod_oddCharacterIndex (hp_odd' : p ≠ 2)
     {α : Type*} [CommMonoid α] (F : DirichletCharacter ℂ p → α) :
     Finset.prod (oddCharacters (p := p)) F =
       Finset.prod (Finset.univ : Finset (OddCharacterIndex p))
-        (fun j => F ((complexCharacterGenerator p) ^ (j.1 : ℕ))) := by
+        (fun j ↦ F ((complexCharacterGenerator p) ^ (j.1 : ℕ))) := by
   classical
   rw [oddCharacters_eq_image_oddComplexPowers (p := p) hp_odd']
   unfold oddComplexCharacters
-  exact Finset.prod_image fun a _ b _ hab =>
+  exact Finset.prod_image fun a _ b _ hab ↦
     Subtype.ext <| Fin.ext <|
       (complexCharacterGenerator_pow_eq_iff_of_lt (p := p) a.1.is_lt b.1.is_lt).mp hab
 
@@ -383,12 +383,12 @@ theorem complexBernoulliSum_eq_eval_oddBernoulliKernelPoly (j : Fin (p - 1)) :
                 (oddBernoulliKernelCoeff (p := p) m)) := by
     simpa [oddBernoulliKernelPoly] using
       (Polynomial.eval₂_finsetSum (f := algebraMap ℚ ℂ) (s := Finset.univ)
-        (g := fun m : Fin (p - 1) =>
+        (g := fun m : Fin (p - 1) ↦
           Polynomial.monomial ((m : ℕ) * complementExponent (p := p) j)
             (oddBernoulliKernelCoeff (p := p) m))
         (x := complexGeneratorRoot p))
   rw [sum_zmod_eq_sum_unitGroupGeneratorPowers (p := p)
-    (F := fun a => ((((complexCharacterGenerator p) ^ (j : ℕ))⁻¹) a) * (a.val : ℂ))
+    (F := fun a ↦ ((((complexCharacterGenerator p) ^ (j : ℕ))⁻¹) a) * (a.val : ℂ))
     (hF0 := by simp), hEval]
   refine Finset.sum_congr rfl ?_
   intro m hm
@@ -427,7 +427,7 @@ theorem qpadic_hasEnoughRootsOfUnity_prime_sub_one :
   obtain ⟨g, hg_gen⟩ := IsCyclic.exists_generator (α := (ZMod p)ˣ)
   refine ⟨((teichmuller p (g : ZMod p) : ℤ_[p]) : ℚ_[p]), ?_⟩
   exact (teichmuller_isPrimitiveRoot_of_generator (p := p) hg_gen).map_of_injective
-    (f := PadicInt.Coe.ringHom) (hf := fun _ _ h => Subtype.coe_injective h)
+    (f := PadicInt.Coe.ringHom) (hf := fun _ _ h ↦ Subtype.coe_injective h)
 
 theorem card_dirichletCharacterQp :
     Nat.card (DirichletCharacter ℚ_[p] p) = p - 1 := by
@@ -447,7 +447,7 @@ theorem qpadicGeneratorRoot_isPrimitiveRoot :
   simpa [qpadicGeneratorRoot] using
     (teichmuller_isPrimitiveRoot_of_generator (p := p) (g := unitGroupGenerator p)
       (unitGroupGenerator_zpowers (p := p))).map_of_injective
-      (f := PadicInt.Coe.ringHom) (hf := fun _ _ h => Subtype.coe_injective h)
+      (f := PadicInt.Coe.ringHom) (hf := fun _ _ h ↦ Subtype.coe_injective h)
 
 theorem teichmullerCharQp_apply_unitGroupGeneratorPow (m : ℕ) :
     teichmullerCharQp p (((unitGroupGenerator p) ^ m : (ZMod p)ˣ) : ZMod p) =
@@ -482,8 +482,8 @@ theorem teichmullerCharQp_pow_eq_iff_of_lt {i j : ℕ}
     rfl
 
 theorem teichmullerCharQp_pow_bijective :
-    Function.Bijective fun j : Fin (p - 1) => (teichmullerCharQp p) ^ (j : ℕ) := by
-  let f : Fin (p - 1) → DirichletCharacter ℚ_[p] p := fun j => (teichmullerCharQp p) ^ (j : ℕ)
+    Function.Bijective fun j : Fin (p - 1) ↦ (teichmullerCharQp p) ^ (j : ℕ) := by
+  let f : Fin (p - 1) → DirichletCharacter ℚ_[p] p := fun j ↦ (teichmullerCharQp p) ^ (j : ℕ)
   refine (Fintype.bijective_iff_injective_and_card f).mpr ?_
   refine ⟨?_, ?_⟩
   · intro i j hij
@@ -505,15 +505,15 @@ theorem teichmullerCharQp_pow_odd_iff (hp_odd' : p ≠ 2) (i : ℕ) :
   exact neg_one_pow_eq_neg_one_iff_odd (by norm_num : (-1 : ℚ_[p]) ≠ 1)
 
 noncomputable def oddTeichmullerExponents : Finset ℕ :=
-  (Finset.range (p - 1)).filter fun j => Odd j
+  (Finset.range (p - 1)).filter fun j ↦ Odd j
 
 noncomputable def oddCharactersQp : Finset (DirichletCharacter ℚ_[p] p) := by
   classical
-  exact Finset.univ.filter fun χ => χ.Odd
+  exact Finset.univ.filter fun χ ↦ χ.Odd
 
 noncomputable def oddTeichmullerCharactersQp : Finset (DirichletCharacter ℚ_[p] p) := by
   classical
-  exact (oddTeichmullerExponents (p := p)).image fun j => (teichmullerCharQp p) ^ j
+  exact (oddTeichmullerExponents (p := p)).image fun j ↦ (teichmullerCharQp p) ^ j
 
 theorem oddCharactersQp_eq_image_oddTeichmullerPowers (hp_odd' : p ≠ 2) :
     oddCharactersQp (p := p) =
@@ -540,7 +540,7 @@ theorem oddCharactersQp_eq_image_oddTeichmullerPowers (hp_odd' : p ≠ 2) :
 noncomputable def oddQpCharacters : Finset (DirichletCharacter ℚ_[p] p) := by
   classical
   exact (Finset.univ : Finset (OddCharacterIndex p)).image
-    (fun j => (teichmullerCharQp p) ^ (j.1 : ℕ))
+    (fun j ↦ (teichmullerCharQp p) ^ (j.1 : ℕ))
 
 theorem oddCharactersQp_eq_oddQpCharacters (hp_odd' : p ≠ 2) :
     oddCharactersQp (p := p) = oddQpCharacters (p := p) := by
@@ -566,11 +566,11 @@ theorem prod_oddCharactersQp_eq_prod_oddCharacterIndex (hp_odd' : p ≠ 2)
     {α : Type*} [CommMonoid α] (F : DirichletCharacter ℚ_[p] p → α) :
     Finset.prod (oddCharactersQp (p := p)) F =
       Finset.prod (Finset.univ : Finset (OddCharacterIndex p))
-        (fun j => F ((teichmullerCharQp p) ^ (j.1 : ℕ))) := by
+        (fun j ↦ F ((teichmullerCharQp p) ^ (j.1 : ℕ))) := by
   classical
   rw [oddCharactersQp_eq_oddQpCharacters (p := p) hp_odd']
   unfold oddQpCharacters
-  exact Finset.prod_image fun a _ b _ hab =>
+  exact Finset.prod_image fun a _ b _ hab ↦
     Subtype.ext <| Fin.ext <|
       (teichmullerCharQp_pow_eq_iff_of_lt (p := p) a.1.is_lt b.1.is_lt).mp hab
 
@@ -587,12 +587,12 @@ theorem qpadicBernoulliSum_eq_eval_oddBernoulliKernelPoly (j : Fin (p - 1)) :
                 (oddBernoulliKernelCoeff (p := p) m)) := by
     simpa [oddBernoulliKernelPoly] using
       (Polynomial.eval₂_finsetSum (f := algebraMap ℚ ℚ_[p]) (s := Finset.univ)
-        (g := fun m : Fin (p - 1) =>
+        (g := fun m : Fin (p - 1) ↦
           Polynomial.monomial ((m : ℕ) * complementExponent (p := p) j)
             (oddBernoulliKernelCoeff (p := p) m))
         (x := qpadicGeneratorRoot p))
   rw [sum_zmod_eq_sum_unitGroupGeneratorPowers (p := p)
-    (F := fun a => ((((teichmullerCharQp p) ^ (j : ℕ))⁻¹) a) * (a.val : ℚ_[p]))
+    (F := fun a ↦ ((((teichmullerCharQp p) ^ (j : ℕ))⁻¹) a) * (a.val : ℚ_[p]))
     (hF0 := by simp), hEval]
   refine Finset.sum_congr rfl ?_
   intro m hm
@@ -632,16 +632,16 @@ theorem oddBernoulliFactor_eq_commonKernelEvaluations (j : OddCharacterIndex p) 
     qpadicOddBernoulliFactor_eq_eval_oddBernoulliKernelPoly (p := p) j⟩
 
 theorem oddBernoulliProduct_eq_commonKernelEvaluations :
-    ((Finset.prod (Finset.univ : Finset (OddCharacterIndex p)) fun j =>
+    ((Finset.prod (Finset.univ : Finset (OddCharacterIndex p)) fun j ↦
         (-(1 / 2 : ℂ)) * BernoulliGen (((complexCharacterGenerator p) ^ (j.1 : ℕ))⁻¹) 1) =
-      Finset.prod (Finset.univ : Finset (OddCharacterIndex p)) fun j =>
+      Finset.prod (Finset.univ : Finset (OddCharacterIndex p)) fun j ↦
         ((p : ℂ)⁻¹ * (-(1 / 2 : ℂ))) *
           Polynomial.eval₂ (algebraMap ℚ ℂ) (complexGeneratorRoot p)
             (oddBernoulliKernelPoly (p := p) j.1))
       ∧
-    ((Finset.prod (Finset.univ : Finset (OddCharacterIndex p)) fun j =>
+    ((Finset.prod (Finset.univ : Finset (OddCharacterIndex p)) fun j ↦
         (-(1 / 2 : ℚ_[p])) * BernoulliGen (((teichmullerCharQp p) ^ (j.1 : ℕ))⁻¹) 1) =
-      Finset.prod (Finset.univ : Finset (OddCharacterIndex p)) fun j =>
+      Finset.prod (Finset.univ : Finset (OddCharacterIndex p)) fun j ↦
         ((p : ℚ_[p])⁻¹ * (-(1 / 2 : ℚ_[p]))) *
           Polynomial.eval₂ (algebraMap ℚ ℚ_[p]) (qpadicGeneratorRoot p)
             (oddBernoulliKernelPoly (p := p) j.1)) := by
@@ -656,14 +656,14 @@ theorem oddBernoulliProduct_eq_commonKernelEvaluations :
 /-- The single rational polynomial whose evaluations at the chosen complex and
 `ℚ_[p]` generator roots recover the full odd Bernoulli product. -/
 noncomputable def oddBernoulliProductPoly : Polynomial ℚ :=
-  Finset.prod (Finset.univ : Finset (OddCharacterIndex p)) fun j =>
+  Finset.prod (Finset.univ : Finset (OddCharacterIndex p)) fun j ↦
     Polynomial.C (((p : ℚ)⁻¹) * (-(1 / 2 : ℚ))) *
       oddBernoulliKernelPoly (p := p) j.1
 
 theorem eval_oddBernoulliProductPoly
     {R : Type*} [Field R] [CharZero R] [Algebra ℚ R] (x : R) :
     Polynomial.eval₂ (algebraMap ℚ R) x (oddBernoulliProductPoly (p := p)) =
-      Finset.prod (Finset.univ : Finset (OddCharacterIndex p)) fun j =>
+      Finset.prod (Finset.univ : Finset (OddCharacterIndex p)) fun j ↦
         ((p : R)⁻¹ * (-(1 / 2 : R))) *
           Polynomial.eval₂ (algebraMap ℚ R) x (oddBernoulliKernelPoly (p := p) j.1) := by
   change (Polynomial.eval₂RingHom (algebraMap ℚ R) x) (oddBernoulliProductPoly (p := p)) = _
@@ -678,7 +678,7 @@ theorem eval_oddBernoulliProductPoly
   simp
 
 theorem complexOddBernoulliProduct_eq_eval_oddBernoulliProductPoly :
-    Finset.prod (Finset.univ : Finset (OddCharacterIndex p)) (fun j =>
+    Finset.prod (Finset.univ : Finset (OddCharacterIndex p)) (fun j ↦
       (-(1 / 2 : ℂ)) * BernoulliGen (((complexCharacterGenerator p) ^ (j.1 : ℕ))⁻¹) 1) =
         Polynomial.eval₂ (algebraMap ℚ ℂ) (complexGeneratorRoot p)
           (oddBernoulliProductPoly (p := p)) := by
@@ -686,7 +686,7 @@ theorem complexOddBernoulliProduct_eq_eval_oddBernoulliProductPoly :
     eval_oddBernoulliProductPoly (p := p) (R := ℂ) (x := complexGeneratorRoot p)]
 
 theorem qpadicOddBernoulliProduct_eq_eval_oddBernoulliProductPoly :
-    Finset.prod (Finset.univ : Finset (OddCharacterIndex p)) (fun j =>
+    Finset.prod (Finset.univ : Finset (OddCharacterIndex p)) (fun j ↦
       (-(1 / 2 : ℚ_[p])) * BernoulliGen (((teichmullerCharQp p) ^ (j.1 : ℕ))⁻¹) 1) =
         Polynomial.eval₂ (algebraMap ℚ ℚ_[p]) (qpadicGeneratorRoot p)
           (oddBernoulliProductPoly (p := p)) := by
@@ -722,11 +722,11 @@ index type from `T023g1a1`. -/
 theorem hMinus_formula_oddCharacterIndex (hp_odd' : p ≠ 2) :
     ((hMinus K : ℕ) : ℂ) =
       (2 * p : ℂ) *
-        Finset.prod (Finset.univ : Finset (OddCharacterIndex p)) fun j =>
+        Finset.prod (Finset.univ : Finset (OddCharacterIndex p)) fun j ↦
           (-(1 / 2 : ℂ)) * BernoulliGen (((complexCharacterGenerator p) ^ (j.1 : ℕ))⁻¹) 1 := by
   rw [hMinus_formula (p := p) (K := K) hp_odd']
   rw [prod_oddCharacters_eq_prod_oddCharacterIndex (p := p) hp_odd'
-    (fun χ => (-(1 / 2 : ℂ)) * BernoulliGen (χ⁻¹) 1)]
+    (fun χ ↦ (-(1 / 2 : ℂ)) * BernoulliGen (χ⁻¹) 1)]
 
 /-- The `ℚ_[p]` analogue of `hMinus_formula_oddCharacterIndex`, obtained by
 transporting the common rational polynomial identity across the shared
@@ -734,7 +734,7 @@ cyclotomic minimal polynomial. -/
 theorem hMinus_formula_oddCharacterIndex_qpadic (hp_odd' : p ≠ 2) :
     ((hMinus K : ℕ) : ℚ_[p]) =
       (2 * p : ℚ_[p]) *
-        Finset.prod (Finset.univ : Finset (OddCharacterIndex p)) fun j =>
+        Finset.prod (Finset.univ : Finset (OddCharacterIndex p)) fun j ↦
           (-(1 / 2 : ℚ_[p])) * BernoulliGen (((teichmullerCharQp p) ^ (j.1 : ℕ))⁻¹) 1 := by
   let Q : Polynomial ℚ :=
     Polynomial.C (2 * p : ℚ) * oddBernoulliProductPoly (p := p) -
@@ -777,7 +777,7 @@ theorem hMinus_formula_oddCharacterIndex_qpadic (hp_odd' : p ≠ 2) :
             (oddBernoulliProductPoly (p := p)) :=
           (sub_eq_zero.mp hq).symm
     _ = (2 * p : ℚ_[p]) *
-        Finset.prod (Finset.univ : Finset (OddCharacterIndex p)) (fun j =>
+        Finset.prod (Finset.univ : Finset (OddCharacterIndex p)) (fun j ↦
           (-(1 / 2 : ℚ_[p])) * BernoulliGen (((teichmullerCharQp p) ^ (j.1 : ℕ))⁻¹) 1) := by
           rw [← qpadicOddBernoulliProduct_eq_eval_oddBernoulliProductPoly (p := p)]
 
@@ -786,18 +786,18 @@ side written over the concrete character finset `oddCharactersQp`. -/
 theorem hMinus_formula_oddCharactersQp (hp_odd' : p ≠ 2) :
     ((hMinus K : ℕ) : ℚ_[p]) =
       (2 * p : ℚ_[p]) *
-        Finset.prod (oddCharactersQp (p := p)) fun χ =>
+        Finset.prod (oddCharactersQp (p := p)) fun χ ↦
           (-(1 / 2 : ℚ_[p])) * BernoulliGen χ⁻¹ 1 := by
   rw [hMinus_formula_oddCharacterIndex_qpadic (p := p) (K := K) hp_odd']
   rw [← prod_oddCharactersQp_eq_prod_oddCharacterIndex (p := p) hp_odd'
-    (fun χ => (-(1 / 2 : ℚ_[p])) * BernoulliGen χ⁻¹ 1)]
+    (fun χ ↦ (-(1 / 2 : ℚ_[p])) * BernoulliGen χ⁻¹ 1)]
 
 /-- The `ℚ_[p]` odd-character product form reindexed by odd Teichmüller
 exponents, still with inverse characters in the Bernoulli factors. -/
 theorem hMinus_formula_oddTeichmullerExponents (hp_odd' : p ≠ 2) :
     ((hMinus K : ℕ) : ℚ_[p]) =
       (2 * p : ℚ_[p]) *
-        Finset.prod (oddTeichmullerExponents (p := p)) fun j =>
+        Finset.prod (oddTeichmullerExponents (p := p)) fun j ↦
           (-(1 / 2 : ℚ_[p])) * BernoulliGen (((teichmullerCharQp p) ^ j)⁻¹) 1 := by
   classical
   rw [hMinus_formula_oddCharactersQp (p := p) (K := K) hp_odd']
@@ -816,13 +816,13 @@ of Theorem 42. -/
 theorem hMinus_formula_teichmuller (hp_odd' : p ≠ 2) :
     ((hMinus K : ℕ) : ℚ_[p]) =
       (2 * p : ℚ_[p]) *
-        Finset.prod ((Finset.range (p - 1)).filter fun j => Odd j) fun j =>
+        Finset.prod ((Finset.range (p - 1)).filter fun j ↦ Odd j) fun j ↦
           (-(1 / 2 : ℚ_[p])) * BernoulliGen ((teichmullerCharQp p) ^ j) 1 := by
   rw [hMinus_formula_oddTeichmullerExponents (p := p) (K := K) hp_odd']
   have hp_even : Even (p - 1) := hp.out.even_sub_one hp_odd'
   have hmem_complement :
-      ∀ {j : ℕ}, j ∈ (Finset.range (p - 1)).filter (fun j => Odd j) →
-        (p - 1) - j ∈ (Finset.range (p - 1)).filter (fun j => Odd j) := by
+      ∀ {j : ℕ}, j ∈ (Finset.range (p - 1)).filter (fun j ↦ Odd j) →
+        (p - 1) - j ∈ (Finset.range (p - 1)).filter (fun j ↦ Odd j) := by
     intro j hj
     rw [Finset.mem_filter, Finset.mem_range] at hj ⊢
     have hj_pos : 0 < j := by
@@ -833,15 +833,15 @@ theorem hMinus_formula_teichmuller (hp_odd' : p ≠ 2) :
     exact ⟨Nat.sub_lt (prime_sub_one_pos (p := p)) hj_pos, hcomp_odd⟩
   congr 1
   unfold oddTeichmullerExponents
-  refine Finset.prod_bij (fun j _ => (p - 1) - j) ?_ ?_ ?_ ?_
+  refine Finset.prod_bij (fun j _ ↦ (p - 1) - j) ?_ ?_ ?_ ?_
   · intro j hj
     exact hmem_complement hj
   · intro a ha b hb hab
     rw [Finset.mem_filter, Finset.mem_range] at ha hb
     simpa [Nat.sub_sub_self (Nat.le_of_lt ha.1), Nat.sub_sub_self (Nat.le_of_lt hb.1)] using
-      congrArg (fun t => (p - 1) - t) hab
+      congrArg (fun t ↦ (p - 1) - t) hab
   · intro j hj
-    have hj_mem : j ∈ (Finset.range (p - 1)).filter (fun j => Odd j) := hj
+    have hj_mem : j ∈ (Finset.range (p - 1)).filter (fun j ↦ Odd j) := hj
     rw [Finset.mem_filter, Finset.mem_range] at hj
     refine ⟨(p - 1) - j, hmem_complement hj_mem, ?_⟩
     · exact Nat.sub_sub_self (Nat.le_of_lt hj.1)
@@ -849,7 +849,7 @@ theorem hMinus_formula_teichmuller (hp_odd' : p ≠ 2) :
     rw [Finset.mem_filter, Finset.mem_range] at hj
     let j' : Fin (p - 1) := ⟨j, hj.1⟩
     simpa [j', complementExponent] using
-      congrArg (fun χ : DirichletCharacter ℚ_[p] p =>
+      congrArg (fun χ : DirichletCharacter ℚ_[p] p ↦
         (-(1 / 2 : ℚ_[p])) * BernoulliGen χ 1)
         (teichmullerCharQp_pow_inv_eq_pow_complement (p := p) j')
 
