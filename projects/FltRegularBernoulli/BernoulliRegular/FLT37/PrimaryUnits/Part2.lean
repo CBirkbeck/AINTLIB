@@ -308,7 +308,7 @@ theorem zetaSubOne_dvd_factor_iff (a b : ℤ) (k : ℕ) :
       (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) ∣ ((a + b : ℤ) : 𝓞 K) := by
   have h := zetaSubOne_dvd_factor_sub_sum p K a b k
   -- h : (ζ-1) ∣ (a + ζ^k b - (a+b))
-  refine ⟨fun hd => ?_, fun hd => ?_⟩
+  refine ⟨fun hd ↦ ?_, fun hd ↦ ?_⟩
   · -- (ζ-1) ∣ (a + ζ^k b) and (ζ-1) ∣ (a + ζ^k b - (a+b)) ⇒ (ζ-1) ∣ (a+b)
     have := dvd_sub hd h
     have heq : ((a : 𝓞 K) + ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ k * (b : 𝓞 K))
@@ -412,7 +412,7 @@ theorem cyclotomicUnit_add_mod_p (k₁ k₂ : ℕ) :
 /-- `cyclotomicUnit p K k = 0 ↔ p ∣ k`. -/
 theorem cyclotomicUnit_eq_zero_iff (k : ℕ) :
     cyclotomicUnit p K k = 0 ↔ p ∣ k := by
-  refine ⟨fun h => ?_, fun ⟨m, hm⟩ => ?_⟩
+  refine ⟨fun h ↦ ?_, fun ⟨m, hm⟩ ↦ ?_⟩
   · rw [cyclotomicUnit_mod_p p K k] at h
     rw [Nat.dvd_iff_mod_eq_zero]
     by_contra hne
@@ -431,7 +431,7 @@ theorem cyclotomicUnit_eq_zero_iff (k : ℕ) :
 /-- `IsUnit (cyclotomicUnit p K k) ↔ ¬ p ∣ k`. -/
 theorem isUnit_cyclotomicUnit_iff (k : ℕ) :
     IsUnit (cyclotomicUnit p K k) ↔ ¬ p ∣ k := by
-  refine ⟨fun h => ?_, fun h => ?_⟩
+  refine ⟨fun h ↦ ?_, fun h ↦ ?_⟩
   · intro hdvd
     rw [(cyclotomicUnit_eq_zero_iff p K k).mpr hdvd] at h
     exact not_isUnit_zero h
@@ -473,7 +473,7 @@ theorem cyclotomicUnitZMod_eq_zero_iff (k : ZMod p) :
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
   unfold cyclotomicUnitZMod
   rw [cyclotomicUnit_eq_zero_iff]
-  refine ⟨fun h => ?_, fun h => ?_⟩
+  refine ⟨fun h ↦ ?_, fun h ↦ ?_⟩
   · rw [show (0 : ZMod p) = ((0 : ℕ) : ZMod p) from by push_cast; rfl,
       ← ZMod.natCast_zmod_val k, ZMod.natCast_eq_natCast_iff]
     exact (Nat.modEq_zero_iff_dvd).mpr h
@@ -486,7 +486,7 @@ theorem isUnit_cyclotomicUnitZMod_iff (k : ZMod p) :
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
   unfold cyclotomicUnitZMod
   rw [isUnit_cyclotomicUnit_iff]
-  refine ⟨fun h hk => ?_, fun h hdvd => ?_⟩
+  refine ⟨fun h hk ↦ ?_, fun h hdvd ↦ ?_⟩
   · subst hk
     apply h
     simp
@@ -649,7 +649,7 @@ theorem realCyclotomicUnit_eq_zero_iff [IsCMField K] (k : ℕ) :
     realCyclotomicUnit p K k = 0 ↔ p ∣ k := by
   unfold realCyclotomicUnit
   rw [mul_eq_zero, cyclotomicUnit_eq_zero_iff]
-  refine ⟨?_, fun h => Or.inl h⟩
+  refine ⟨?_, fun h ↦ Or.inl h⟩
   rintro (h | h)
   · exact h
   · -- σ(cyclotomicUnit k) = 0 implies cyclotomicUnit k = 0 (σ is injective)
