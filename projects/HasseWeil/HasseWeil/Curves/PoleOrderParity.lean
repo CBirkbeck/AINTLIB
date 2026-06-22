@@ -26,6 +26,7 @@ namespace HasseWeil.Curves.SmoothPlaneCurve
 
 variable {F : Type*} [Field F] (C : SmoothPlaneCurve F) [C.toAffine.IsElliptic]
 
+omit [C.toAffine.IsElliptic] in
 /-- **Parity obstruction**: for any nonzero coordinate-ring element
 `u ∈ F[E]`, the order at infinity of its image in `F(E)` is never
 exactly `-1`. The decomposition `u = p · 1 + q · y` gives
@@ -62,14 +63,10 @@ theorem coordRingImage_ordAtInfty_ne_neg_one
       rw [C.ordAtInfty_mul hq_alg_ne C.coordYInFunctionField_ne_zero,
         ordAtInfty_coordYInFunctionField,
         C.ordAtInfty_algebraMap_polynomial_of_ne_zero hq]
-      -- LHS = ((-natDeg q) * 2 : ℤ) + ((-3 : ℤ)) : WithTop ℤ
+      -- LHS = ((-2·natDeg q : ℤ)) + ((-3 : ℤ)) : WithTop ℤ
       -- = ((-2·natDeg q - 3 : ℤ) : WithTop ℤ). Odd ≥ 3 in absolute value, never -1.
       intro h_eq
-      have : ((-2 * (q.natDegree : ℤ) + (-3) : ℤ) : WithTop ℤ) =
-          ((-1 : ℤ) : WithTop ℤ) := by
-        rw [← h_eq]; push_cast; ring
-      have h_int : (-2 * (q.natDegree : ℤ) + (-3) : ℤ) = -1 :=
-        WithTop.coe_injective this
+      rw [← WithTop.coe_add, WithTop.coe_inj] at h_eq
       omega
   · by_cases hq : q = 0
     · -- p ≠ 0, q = 0: u = p • 1. ord = -2·natDeg p (even).
@@ -92,6 +89,7 @@ theorem coordRingImage_ordAtInfty_ne_neg_one
         apply le_max_of_le_right; omega
       omega
 
+omit [C.toAffine.IsElliptic] in
 /-- Function-field version: for any `f ∈ K(E)*` lying in the image of
 the coordinate ring, `ord_∞(f) ≠ -1`. Directly from the parity lemma. -/
 theorem funcField_image_ordAtInfty_ne_neg_one
@@ -128,6 +126,7 @@ namespace HasseWeil.Curves
 variable {F : Type*} [Field F] [DecidableEq F]
   (W : WeierstrassCurve.Affine F) [W.IsElliptic]
 
+omit [W.IsElliptic] in
 /-- **Specialized Silverman III.3.3** (the version we need for the
 unified A-002/F-001 package, per reviewer Q3): if `(P) − (O)` is a
 principal divisor witnessed by `f` AND `f` lies in the coordinate-ring
