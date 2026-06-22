@@ -59,6 +59,7 @@ namespace HasseWeil.WeilPairing
 variable {K : Type*} [Field K] [Fintype K] [DecidableEq K]
 variable (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
 
+omit [Fintype W.toAffine.Point] in
 /-- **GAP-QF top leaf via the Weil pairing** (Silverman III.6.3 / V.2.3.1, the Route-2A capstone).
 
 Given the per-`ℓ` Frobenius-matrix determinant data `hres` (the output of the Weil-pairing
@@ -83,7 +84,7 @@ theorem qf_nonneg_skeleton_of_weil_det_data (hq : 2 ≤ Fintype.card K)
     ∀ r s : ℤ, 0 ≤ (Fintype.card K : ℤ) * r ^ 2 -
       isogTrace (frobeniusIsog W) (isogOneSub_negFrobenius W hq) * r * s + s ^ 2 := by
   -- `p = char K` is prime; `q = #K > 0`.
-  obtain ⟨p, hCharP, ⟨n, hn⟩, hp_prime, hcard⟩ := FiniteField.card' K
+  obtain ⟨p, hCharP, ⟨_, _⟩, hp_prime, _⟩ := FiniteField.card' K
   haveI : Fact p.Prime := ⟨hp_prime⟩
   haveI : CharP K p := hCharP
   have hpchar : ringChar K = p := by
@@ -94,6 +95,7 @@ theorem qf_nonneg_skeleton_of_weil_det_data (hq : 2 ≤ Fintype.card K)
   intro r s hps ℓ hℓ hℓne
   exact hres r s (by rwa [hpchar]) ℓ hℓ (by rwa [hpchar])
 
+omit [Fintype W.toAffine.Point] in
 /-- **GAP-QF top leaf via the Weil pairing, coprime-BOTH form** (reviewer round-23, Route B).
 
 Identical to `qf_nonneg_skeleton_of_weil_det_data` but requesting the per-`ℓ` Frobenius det data only
@@ -112,7 +114,7 @@ theorem qf_nonneg_skeleton_of_weil_det_data_both (hq : 2 ≤ Fintype.card K)
         ((r : ZMod ℓ) • M - (s : ZMod ℓ) • 1).det = (deg r s : ZMod ℓ)) :
     ∀ r s : ℤ, 0 ≤ (Fintype.card K : ℤ) * r ^ 2 -
       isogTrace (frobeniusIsog W) (isogOneSub_negFrobenius W hq) * r * s + s ^ 2 := by
-  obtain ⟨p, hCharP, ⟨n, hn⟩, hp_prime, hcard⟩ := FiniteField.card' K
+  obtain ⟨p, hCharP, ⟨_, _⟩, hp_prime, _⟩ := FiniteField.card' K
   haveI : Fact p.Prime := ⟨hp_prime⟩
   haveI : CharP K p := hCharP
   have hpchar : ringChar K = p := by rw [ringChar.eq_iff]; exact hCharP
