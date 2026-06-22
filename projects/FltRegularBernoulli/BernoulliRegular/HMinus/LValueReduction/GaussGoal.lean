@@ -28,24 +28,24 @@ variable (p : ℕ) [hp : Fact p.Prime]
 input for the final `hMinus` assembly theorem. -/
 def cyclotomicHGaussGoal : Prop :=
   cyclotomicRelativeLValueCoefficient (p := p) (K := K) *
-      Finset.prod (oddCharacters (p := p)) (fun χ =>
+      Finset.prod (oddCharacters (p := p)) (fun χ ↦
         ((((Real.pi : ℝ) : ℂ) * Complex.I) * gaussSum χ (ZMod.stdAddChar (N := p)) / (p : ℂ))) =
     (2 * p : ℂ) *
       Finset.prod (oddCharacters (p := p))
-        (fun _ : DirichletCharacter ℂ p => (-(1 / 2 : ℂ)))
+        (fun _ : DirichletCharacter ℂ p ↦ (-(1 / 2 : ℂ)))
 
 theorem cyclotomicHGaussGoal_iff_rawGaussProduct
     (hp_odd' : p ≠ 2) :
     cyclotomicHGaussGoal (p := p) K ↔
       Finset.prod (oddCharacters (p := p))
-          (fun χ => gaussSum χ (ZMod.stdAddChar (N := p))) =
+          (fun χ ↦ gaussSum χ (ZMod.stdAddChar (N := p))) =
         (Complex.I ^ ((p - 1) / 2)) *
           ((((Real.sqrt ((p : ℝ) ^ ((p - 1) / 2)) : ℝ) : ℂ))) := by
   let n : ℕ := (p - 1) / 2
   let S : ℂ := (((Real.sqrt ((p : ℝ) ^ n) : ℝ) : ℂ))
   let G : ℂ :=
     Finset.prod (oddCharacters (p := p))
-      (fun χ => gaussSum χ (ZMod.stdAddChar (N := p)))
+      (fun χ ↦ gaussSum χ (ZMod.stdAddChar (N := p)))
   have hp_pos : 0 < (p : ℝ) := by
     exact_mod_cast hp.out.pos
   have hp_ne : (p : ℂ) ≠ 0 := by
