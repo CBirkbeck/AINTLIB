@@ -364,22 +364,16 @@ private lemma lowDegFinset_mem_iff (d : Fin 2 →₀ ℕ) :
   simp [Finset.mem_insert, Finset.mem_singleton]
 
 private lemma single_zero_one_ne_zero :
-    (Finsupp.single (0 : Fin 2) 1 : Fin 2 →₀ ℕ) ≠ 0 := by
-  intro h
-  have := DFunLike.congr_fun h 0
-  simp at this
+    (Finsupp.single (0 : Fin 2) 1 : Fin 2 →₀ ℕ) ≠ 0 :=
+  Finsupp.single_ne_zero.mpr one_ne_zero
 
 private lemma single_one_one_ne_zero :
-    (Finsupp.single (1 : Fin 2) 1 : Fin 2 →₀ ℕ) ≠ 0 := by
-  intro h
-  have := DFunLike.congr_fun h 1
-  simp at this
+    (Finsupp.single (1 : Fin 2) 1 : Fin 2 →₀ ℕ) ≠ 0 :=
+  Finsupp.single_ne_zero.mpr one_ne_zero
 
 private lemma single_zero_ne_single_one :
     (Finsupp.single (0 : Fin 2) 1 : Fin 2 →₀ ℕ) ≠ Finsupp.single 1 1 := by
-  intro h
-  have := DFunLike.congr_fun h 0
-  simp at this
+  simp [Finsupp.single_eq_single_iff]
 
 /-- If `d ∉ lowDegFinset`, then `d 0 + d 1 ≥ 2`. -/
 private lemma two_le_sum_of_not_mem_lowDeg {d : Fin 2 →₀ ℕ}
@@ -590,9 +584,9 @@ theorem FormalGroup.evalGroup_powerIdeal_toQuot_range
     exact Ideal.mem_map_of_mem _ x.2
   · intro hq
     -- q ∈ Ideal.map _ M^n, so q = mk _ r for some r ∈ M^n.
-    rcases (Ideal.mem_map_iff_of_surjective _ Ideal.Quotient.mk_surjective).mp hq with ⟨r, hr, hrq⟩
-    refine ⟨⟨⟨⟨r, ((maximalIdeal R).pow_le_self (by omega) : _) hr⟩⟩, hr⟩, ?_⟩
-    exact hrq
+    obtain ⟨r, hr, hrq⟩ :=
+      (Ideal.mem_map_iff_of_surjective _ Ideal.Quotient.mk_surjective).mp hq
+    exact ⟨⟨⟨⟨r, ((maximalIdeal R).pow_le_self (by omega) : _) hr⟩⟩, hr⟩, hrq⟩
 
 /-- **The graded isomorphism, intermediate form**: applying the first isomorphism
 theorem to `evalGroup_powerIdeal_toQuot` gives
@@ -740,8 +734,8 @@ theorem FormalGroup.EvalGroup.addOrderOf_isPowOf
   have hN_pos : 0 < N := hx.addOrderOf_pos
   have hN_ne : N ≠ 0 := hN_pos.ne'
   -- Decompose N = p^k * m with m = ordCompl[p] N (coprime to p).
-  set k : ℕ := N.factorization p with hk_def
-  set m : ℕ := ordCompl[p] N with hm_def
+  set k : ℕ := N.factorization p
+  set m : ℕ := ordCompl[p] N
   have hfact : p^k * m = N := Nat.ordProj_mul_ordCompl_eq_self N p
   have hm_copr : ¬ p ∣ m := Nat.not_dvd_ordCompl hp hN_ne
   -- So (m : R) is a unit.
