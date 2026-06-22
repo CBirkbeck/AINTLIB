@@ -126,7 +126,7 @@ theorem continuousOn_dslope_prod {U : Set ℂ} (hU : Convex ℝ U) (hU_open : Is
       Metric.mem_ball.mpr (lt_of_le_of_lt (le_max_right _ _) hp)⟩
   refine (ContinuousAt.congr ?_ h_eq_nbhd.symm).continuousWithinAt
   refine continuousAt_of_dominated_interval
-    (bound := fun _ ↦ max M 0) ?_ ?_ intervalIntegral.intervalIntegrable_const ?_
+    (bound := fun _ ↦ max M 0) ?_ ?_ intervalIntegrable_const ?_
   · filter_upwards [Metric.ball_mem_nhds (c₀, w₀) hε_pos] with p hp
     rw [uIoc_of_le (zero_le_one' ℝ)]
     obtain ⟨hp_c, hp_w⟩ := hp_proj p hp
