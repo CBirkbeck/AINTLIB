@@ -266,7 +266,7 @@ private theorem padic37_valuation_p : Padic.valuation (37 : ℚ_[37]) = 1 := by
 /-- The `37`-adic valuation, `/36`-normalised (so `v(τ i) = i/36 = i/(p-1)` on the
 model Gauss sums `τ i = 37^i`), satisfies the `IsValuation` interface. -/
 private theorem isValuation37 :
-    Val.IsValuation (K := ℚ_[37]) (fun x => (Padic.valuation x : ℚ) / 36) 37 where
+    Val.IsValuation (K := ℚ_[37]) (fun x ↦ (Padic.valuation x : ℚ) / 36) 37 where
   map_mul x y hx hy := by
     change (Padic.valuation (x * y) : ℚ) / 36
       = (Padic.valuation x : ℚ) / 36 + (Padic.valuation y : ℚ) / 36
@@ -315,8 +315,8 @@ noncomputable def nonvacuous37 : LpData 37 where
     have hτ : (37 : ℚ_[37]) ^ (i : ℕ) ≠ 0 := pow_ne_zero _ h37
     have hlog : (37 : ℚ_[37]) ^ (36 * (bernoulliFactorQp 37 i).valuation + 1 - (i : ℤ)) ≠ 0 :=
       zpow_ne_zero _ h37
-    have hLp : Padic.valuation (LpValue (fun i => (37 : ℚ_[37]) ^ i)
-          (fun i => (37 : ℚ_[37]) ^ (36 * (bernoulliFactorQp 37 i).valuation + 1 - (i : ℤ)))
+    have hLp : Padic.valuation (LpValue (fun i ↦ (37 : ℚ_[37]) ^ i)
+          (fun i ↦ (37 : ℚ_[37]) ^ (36 * (bernoulliFactorQp 37 i).valuation + 1 - (i : ℤ)))
           37 i)
         = 36 * (bernoulliFactorQp 37 i).valuation := by
       have hpcast : ((37 : ℕ) : ℚ_[37]) = (37 : ℚ_[37]) := by norm_num
@@ -329,8 +329,8 @@ noncomputable def nonvacuous37 : LpData 37 where
           Padic.valuation_pow, padic37_valuation_p]; ring
       rw [hτp]; ring
     change ((Padic.valuation ((37 : ℚ_[37]) ^ (bernoulliFactorQp 37 i).valuation) : ℚ))
-      = (Padic.valuation (LpValue (fun i => (37 : ℚ_[37]) ^ i)
-          (fun i => (37 : ℚ_[37]) ^ (36 * (bernoulliFactorQp 37 i).valuation + 1 - (i : ℤ)))
+      = (Padic.valuation (LpValue (fun i ↦ (37 : ℚ_[37]) ^ i)
+          (fun i ↦ (37 : ℚ_[37]) ^ (36 * (bernoulliFactorQp 37 i).valuation + 1 - (i : ℤ)))
           37 i) : ℚ) / 36
     rw [hLp, Padic.valuation_zpow, padic37_valuation_p]; push_cast; ring
 
