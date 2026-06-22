@@ -1227,58 +1227,79 @@ private theorem pushforwardDivisorVal_projectiveDivisorOf_affine_eq_sum_fiber
 
 set_option synthInstance.maxHeartbeats 100000 in
 -- Synthesising the cross-algebra `Algebra C₂.CR C₁.FF` for the scalar towers (needed
--- by `Algebra.algebraMap_intNorm`) plus the `tower1` derivation are heartbeat-heavy,
--- hence the scoped bumps.
+-- by `Algebra.algebraMap_intNorm`) is heartbeat-heavy, hence the scoped bumps.
 set_option maxHeartbeats 500000 in
-/-- **The `algebraMap` case of the norm–conorm identity — Silverman II.3.6**: for a
-nonzero `w ∈ F[C₁]`, `div(N_φ (algebraMap w)) = φ_∗(div(algebraMap w))`.  Affine
-coefficients are matched via the count identity `count_relNorm_eq_sum_fiber` and the
-fibre bijection `{primes over m_Q} ≃ {P : φP = Q}`; the infinity coefficient is forced
-by both projective divisors having degree `0`. -/
-theorem projectiveDivisorOf_pushforward_algebraMap_eq
-    (w : C₁.CoordinateRing) (hw : w ≠ 0) :
-    C₂.projectiveDivisorOf (φ.pushforward (algebraMap C₁.CoordinateRing C₁.FunctionField w)) =
+include φ cd in
+/-- **Affine coefficients of the `algebraMap` norm–conorm identity agree**: for a
+nonzero `w ∈ F[C₁]` and any smooth point `Q` of `C₂`, the `affine Q` coefficient of
+`div(N_φ (algebraMap w))` equals that of `φ_∗(div(algebraMap w))`.  The left side is
+the ideal count `count_{m_Q}(span{N w})` (via
+`pushforward_algebraMap_eq_algebraMap_intNorm` + `ord_P_algebraMap_eq_count`); the
+right side is the fibre sum (via `pushforwardDivisorVal_projectiveDivisorOf_affine_eq_sum_fiber`);
+the two are matched by `count_relNorm_eq_sum_fiber`. -/
+private theorem projectiveDivisorOf_pushforward_algebraMap_apply_affine
+    (w : C₁.CoordinateRing) (hw : w ≠ 0) (Q : C₂.SmoothPoint) :
+    letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+    haveI : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      cd.module_finite
+    haveI : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      isTorsionFree_coordHom φ cd
+    C₂.projectiveDivisorOf (φ.pushforward (algebraMap C₁.CoordinateRing C₁.FunctionField w))
+        (ProjectiveSmoothPoint.affine Q) =
       φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf
-        (algebraMap C₁.CoordinateRing C₁.FunctionField w)) := by
+        (algebraMap C₁.CoordinateRing C₁.FunctionField w)) (ProjectiveSmoothPoint.affine Q) := by
   classical
-  -- Re-establish the `cd`-induced coordinate-ring algebra `F[C₂] → F[C₁]` (and its
-  -- finiteness/torsion-freeness) so the `Algebra.intNorm` statements typecheck.
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
   letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
   haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
     cd.module_finite
   haveI htf : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
     isTorsionFree_coordHom φ cd
-  set LHS := C₂.projectiveDivisorOf
-    (φ.pushforward (algebraMap C₁.CoordinateRing C₁.FunctionField w)) with hLHS_def
-  set RHS := φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf
-    (algebraMap C₁.CoordinateRing C₁.FunctionField w)) with hRHS_def
   have hnw : Algebra.intNorm C₂.CoordinateRing C₁.CoordinateRing w ≠ 0 :=
     intNorm_ne_zero_of_ne_zero φ cd w hw
-  -- Affine coefficients agree: both equal `count_{m_Q}(span{intNorm w})`, matched to
-  -- the fibre sum via `count_relNorm_eq_sum_fiber` and the affine fibre identity.
-  have h_aff : ∀ Q : C₂.SmoothPoint,
-      LHS (ProjectiveSmoothPoint.affine Q) = RHS (ProjectiveSmoothPoint.affine Q) := by
-    intro Q
-    have hLHS_coeff : LHS (ProjectiveSmoothPoint.affine Q) =
-        ((Associates.mk (C₂.maximalIdealAt Q)).count
-          (Associates.mk (Ideal.span
-            {Algebra.intNorm C₂.CoordinateRing C₁.CoordinateRing w})).factors : ℤ) := by
-      rw [hLHS_def, pushforward_algebraMap_eq_algebraMap_intNorm φ cd w,
-        C₂.projectiveDivisorOf_apply_affine,
-        C₂.ord_P_algebraMap_eq_count Q hnw, WithTop.untopD_coe]
-    rw [hLHS_coeff, hRHS_def,
-      pushforwardDivisorVal_projectiveDivisorOf_affine_eq_sum_fiber φ cd w hw Q]
-    exact_mod_cast count_relNorm_eq_sum_fiber φ cd w hw Q
-  -- Infinity coefficient forced by degree: both divisors have degree `0`.
+  rw [pushforward_algebraMap_eq_algebraMap_intNorm φ cd w,
+    C₂.projectiveDivisorOf_apply_affine, C₂.ord_P_algebraMap_eq_count Q hnw, WithTop.untopD_coe,
+    pushforwardDivisorVal_projectiveDivisorOf_affine_eq_sum_fiber φ cd w hw Q]
+  exact_mod_cast count_relNorm_eq_sum_fiber φ cd w hw Q
+
+include φ cd in
+/-- **Both sides of the `algebraMap` norm–conorm identity have equal degree**: for any
+`w ∈ F[C₁]`, `div(N_φ (algebraMap w))` and `φ_∗(div(algebraMap w))` both have degree
+`0` (each principal projective divisor has degree `0` by
+`projectiveDivisorOf_degree_eq_zero`, and `φ_∗` preserves degree).  This forces the
+coefficient at infinity once the affine coefficients agree. -/
+private theorem projectiveDivisorOf_pushforward_algebraMap_degree_eq
+    (w : C₁.CoordinateRing) :
+    (C₂.projectiveDivisorOf (φ.pushforward
+        (algebraMap C₁.CoordinateRing C₁.FunctionField w))).degree =
+      (φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf
+        (algebraMap C₁.CoordinateRing C₁.FunctionField w))).degree := by
+  rw [C₂.projectiveDivisorOf_degree_eq_zero, degree_pushforwardDivisorVal,
+    C₁.projectiveDivisorOf_degree_eq_zero]
+
+/-- **The `algebraMap` case of the norm–conorm identity — Silverman II.3.6**: for a
+nonzero `w ∈ F[C₁]`, `div(N_φ (algebraMap w)) = φ_∗(div(algebraMap w))`.  Two
+projective divisors agree iff their affine coefficients and their infinity coefficient
+agree (`Finsupp.ext`): the affine coefficients are handled by
+`projectiveDivisorOf_pushforward_algebraMap_apply_affine`, and the infinity coefficient
+is forced by both divisors having equal degree
+(`projectiveDivisorOf_pushforward_algebraMap_degree_eq`,
+`projDivisor_infinity_coeff_eq_of_affine_eq`). -/
+theorem projectiveDivisorOf_pushforward_algebraMap_eq
+    (w : C₁.CoordinateRing) (hw : w ≠ 0) :
+    C₂.projectiveDivisorOf (φ.pushforward (algebraMap C₁.CoordinateRing C₁.FunctionField w)) =
+      φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf
+        (algebraMap C₁.CoordinateRing C₁.FunctionField w)) := by
+  classical
   apply Finsupp.ext
   intro v
   cases v with
-  | affine Q => exact h_aff Q
+  | affine Q => exact projectiveDivisorOf_pushforward_algebraMap_apply_affine φ cd w hw Q
   | infinity =>
-    refine projDivisor_infinity_coeff_eq_of_affine_eq LHS RHS ?_ h_aff
-    rw [hLHS_def, hRHS_def, C₂.projectiveDivisorOf_degree_eq_zero,
-      degree_pushforwardDivisorVal, C₁.projectiveDivisorOf_degree_eq_zero]
+    exact projDivisor_infinity_coeff_eq_of_affine_eq _ _
+      (projectiveDivisorOf_pushforward_algebraMap_degree_eq φ cd w)
+      (fun Q ↦ projectiveDivisorOf_pushforward_algebraMap_apply_affine φ cd w hw Q)
 
 end NormConormSteps
 
