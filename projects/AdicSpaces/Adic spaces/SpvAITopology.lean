@@ -805,6 +805,30 @@ theorem ofValuation_restrictIdealSingle_isInSpvAI (w : Valuation A Γ₀) (g : A
   · exact Or.inl fun a ha =>
       cofinalValue_canon_of_restricted _ (restrictIdealSingle_cofinal_of_not_mem w g hg hmem a ha)
 
+/-- `restrictIdealSingle` preserves `≤ 1` (a value `≤ 1` maps to `≤ 1`, or to `0 ≤ 1`). -/
+theorem restrictIdealSingle_le_one {w : Valuation A Γ₀} {g : A} (hg : w g ≠ 0) {a : A}
+    (h : w a ≤ 1) : w.restrictIdealSingle g hg a ≤ 1 := by
+  by_cases hva : w a = 0
+  · rw [Valuation.restrictIdealSingle, Valuation.restrictToConvexBounded_apply_zero _ _ _ hva]
+    exact zero_le_one
+  · by_cases hm : Units.mk0 (w a) hva ∈ Valuation.cGammaSingle w g hg
+    · rw [Valuation.restrictIdealSingle, Valuation.restrictToConvexBounded_apply_mem _ _ _ hva hm,
+        ← WithZero.coe_one, WithZero.coe_le_coe, ← Subtype.coe_le_coe]
+      exact_mod_cast Units.val_le_val.mp h
+    · rw [Valuation.restrictIdealSingle, Valuation.restrictToConvexBounded_apply_not_mem _ _ _ hva hm]
+      exact zero_le_one
+
+/-- `restrictIdealSingle` preserves `1 < ·` (a value `> 1` has its unit in `cGammaSingle`,
+so it is kept by the restriction). -/
+theorem restrictIdealSingle_one_lt {w : Valuation A Γ₀} {g : A} (hg : w g ≠ 0) {a : A}
+    (h : 1 < w a) : 1 < w.restrictIdealSingle g hg a := by
+  have hva : w a ≠ 0 := ne_of_gt (lt_trans zero_lt_one h)
+  have hm : Units.mk0 (w a) hva ∈ Valuation.cGammaSingle w g hg :=
+    Valuation.vUnit_mem_cGammaSingle hg h.le hva
+  rw [Valuation.restrictIdealSingle, Valuation.restrictToConvexBounded_apply_mem _ _ _ hva hm,
+    ← WithZero.coe_one, WithZero.coe_lt_coe, ← Subtype.coe_lt_coe]
+  exact_mod_cast Units.val_lt_val.mp h
+
 /-- **General sub-lemma (value-equivalence from `cGammaIdeal` containing every
 value-unit).** If every nonzero value-unit `Units.mk0 (v a) ha` of `v` lies
 in `cGammaIdeal v I`, then the restriction `v.restrictIdeal I` is
