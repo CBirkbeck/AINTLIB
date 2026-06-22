@@ -102,19 +102,19 @@ theorem exists_integral_clear_denominators_of_singularGroup_eigen
         principalPairSubgroup (R := 𝓞 K) (K := K) p :=
     (QuotientGroup.eq).1 hmk.symm
   obtain ⟨γ, hγ⟩ := hmem
-  have hgen := congrArg (fun s : SingularPair (𝓞 K) K p => generator s) hγ
+  have hgen := congrArg (fun s : SingularPair (𝓞 K) K p ↦ generator s) hγ
   change generator (principalPair (R := 𝓞 K) (K := K) p γ) =
       generator ((t ^ n)⁻¹ * σt) at hgen
   change γ ^ p = generator ((t ^ n)⁻¹ * σt) at hgen
   have hunit :
       generator σt = generator t ^ n * γ ^ p := by
-    have htmp := congrArg (fun x : Kˣ => generator (t ^ n) * x) hgen
+    have htmp := congrArg (fun x : Kˣ ↦ generator (t ^ n) * x) hgen
     simp [SingularPair.generator] at htmp
     simpa [SingularPair.generator] using htmp.symm
   have hK :
       algebraMap (𝓞 K) K (cyclotomicRingOfIntegersEquiv (p := p) K a η) =
         algebraMap (𝓞 K) K (η ^ n) * (γ : K) ^ p := by
-    have h := congrArg (fun u : Kˣ => (u : K)) hunit
+    have h := congrArg (fun u : Kˣ ↦ (u : K)) hunit
     change
       (generator σt : K) = (generator t : K) ^ n * (γ : K) ^ p at h
     have hσ_cast :
@@ -147,7 +147,7 @@ theorem exists_integral_clear_denominators_of_singularGroup_eigen
       (γ : K) ^ p * algebraMap (𝓞 K) K w ^ p =
         algebraMap (𝓞 K) K z ^ p := by
     rw [← mul_pow]
-    exact congrArg (fun x : K => x ^ p) hzw
+    exact congrArg (fun x : K ↦ x ^ p) hzw
   refine ⟨n, z, w, hn, hn_pos, hz_ne, hw_ne, ?_⟩
   apply (FaithfulSMul.algebraMap_injective (𝓞 K) K)
   push_cast
@@ -346,7 +346,7 @@ theorem exists_ne_one_classGroupModP_of_dvd_classNumber
   by_contra hnone
   push Not at hnone
   have hsub : Subsingleton (ClassGroupModP K p) :=
-    ⟨fun x y => by rw [hnone x, hnone y]⟩
+    ⟨fun x y ↦ by rw [hnone x, hnone y]⟩
   let G := ClassGroup (𝓞 K)
   have htop : (powMonoidHom p : G →* G).range = ⊤ :=
     QuotientGroup.subgroup_eq_top_of_subsingleton
@@ -651,7 +651,7 @@ theorem not_eigenspaceComponentNontrivial_zero
       (∏ a : CyclotomicUnitDelta p,
           cyclotomicGalActionMonoidHomModP (p := p) (K := K) a x) =
         x ^ (p - 1) := by
-    rw [Finset.prod_congr rfl (fun a _ => hfixed a)]
+    rw [Finset.prod_congr rfl (fun a _ ↦ hfixed a)]
     rw [Finset.prod_const, Finset.card_univ]
     change x ^ Fintype.card (CyclotomicUnitDelta p) = x ^ (p - 1)
     rw [show Fintype.card (CyclotomicUnitDelta p) = Fintype.card (ZMod p)ˣ from rfl,
@@ -730,7 +730,7 @@ theorem weakReflection_componentNontrivial
           (n : ZMod p) = (a : ZMod p) ^ i ∧
           0 < n ∧ z ≠ 0 ∧ w ≠ 0 ∧
           cyclotomicRingOfIntegersEquiv (p := p) K a η * w ^ p =
-            η ^ n * z ^ p := fun a =>
+            η ^ n * z ^ p := fun a ↦
       exists_integral_clear_denominators_of_singularGroup_eigen
         (p := p) (K := K) (i := i) η t hη_cast ht_eigen a
     exact
