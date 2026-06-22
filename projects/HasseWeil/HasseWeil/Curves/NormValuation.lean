@@ -1714,6 +1714,44 @@ theorem count_relNorm_singleton_eq_sum_count_fiber
   · intro Q hQ
     rfl
 
+/-- **`Ideal.span {X - C a}` is maximal in `F[X]`**: the residue ring
+    `F[X] ⧸ (X - a)` is a field (via `quotientSpanXSubCAlgEquiv`), so the ideal
+    is maximal. Setup helper for `count_X_sub_C_eq_rootMultiplicity`. -/
+private theorem isMaximal_span_X_sub_C (a : F) :
+    (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F))).IsMaximal :=
+  Ideal.Quotient.maximal_of_isField _
+    ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField (Field.toIsField F))
+
+/-- **Height-one prime `(X - a)` of `F[X]`**: bundles the maximality
+    (`isMaximal_span_X_sub_C`) and nonzero-ness of `Ideal.span {X - C a}` into the
+    `HeightOneSpectrum` object used by `count_X_sub_C_eq_rootMultiplicity`. -/
+private noncomputable def heightOneSpectrumSpanXSubC (a : F) :
+    IsDedekindDomain.HeightOneSpectrum (Polynomial F) where
+  asIdeal := Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F))
+  isPrime := (isMaximal_span_X_sub_C a).isPrime
+  ne_bot := by rw [Ne, Ideal.span_singleton_eq_bot]; exact Polynomial.X_sub_C_ne_zero a
+
+/-- **`(X-a)`-count of a factor coprime to `(X - a)` vanishes**: if `q ≠ 0` and
+    `(X - C a) ∤ q`, then the `(X-a)`-adic count of `Ideal.span {q}` is `0`.
+    The vanishing half of `count_X_sub_C_eq_rootMultiplicity`. -/
+private theorem count_X_sub_C_span_singleton_eq_zero_of_not_dvd
+    {q : Polynomial F} {a : F} (hq_ne : q ≠ 0)
+    (h_not_dvd : ¬ (Polynomial.X - Polynomial.C a) ∣ q) :
+    (Associates.mk
+        (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))).count
+        (Associates.mk (Ideal.span ({q} : Set (Polynomial F)))).factors = 0 := by
+  have h_right_ne : Ideal.span ({q} : Set (Polynomial F)) ≠ 0 := by
+    rw [Ne, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]; exact hq_ne
+  by_contra h_ne
+  have h_dvd : (heightOneSpectrumSpanXSubC a).asIdeal ∣
+      Ideal.span ({q} : Set (Polynomial F)) :=
+    (Associates.count_ne_zero_iff_dvd h_right_ne
+      (heightOneSpectrumSpanXSubC a).irreducible).mp h_ne
+  apply h_not_dvd
+  rwa [show (heightOneSpectrumSpanXSubC a).asIdeal =
+      Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)) from rfl,
+    Ideal.dvd_iff_le, Ideal.span_singleton_le_iff_mem, Ideal.mem_span_singleton] at h_dvd
+
 /-- **`(X-a)`-adic count equals root multiplicity**: for a nonzero polynomial
     `p ∈ F[X]` and `a : F`, the count of `(X-a)` in the principal-ideal
     factorization of `Ideal.span {p}` equals the root multiplicity of `a` in `p`. -/
@@ -1724,16 +1762,11 @@ theorem count_X_sub_C_eq_rootMultiplicity
       (Associates.mk (Ideal.span ({p} : Set (Polynomial F)))).factors =
       p.rootMultiplicity a := by
   classical
-  haveI hp_max : (Ideal.span ({Polynomial.X - Polynomial.C a} :
-      Set (Polynomial F))).IsMaximal :=
-    Ideal.Quotient.maximal_of_isField _
-      ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField (Field.toIsField F))
-  have hp_ne_bot : (Ideal.span ({Polynomial.X - Polynomial.C a} :
-      Set (Polynomial F))) ≠ ⊥ := by
-    rw [Ne, Ideal.span_singleton_eq_bot]; exact Polynomial.X_sub_C_ne_zero a
-  let vXa : IsDedekindDomain.HeightOneSpectrum (Polynomial F) :=
-    ⟨_, hp_max.isPrime, hp_ne_bot⟩
-  have h_vXa_irr : Irreducible (Associates.mk vXa.asIdeal) := vXa.associates_irreducible
+  -- The prime `(X - a)` of `F[X]` (`.asIdeal` defeq `span {X - C a}`) is irreducible.
+  have h_vXa_irr : Irreducible (Associates.mk
+      (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))) :=
+    (heightOneSpectrumSpanXSubC a).associates_irreducible
+  -- Factor `p = (X - a)^(mult) * q` with `(X - a) ∤ q`.
   obtain ⟨q, h_eq, h_not_dvd⟩ :=
     Polynomial.exists_eq_pow_rootMultiplicity_mul_and_not_dvd p hp a
   have hq_ne : q ≠ 0 := by
@@ -1749,6 +1782,7 @@ theorem count_X_sub_C_eq_rootMultiplicity
     exact pow_ne_zero _ (Polynomial.X_sub_C_ne_zero a)
   have h_right_ne : Ideal.span ({q} : Set (Polynomial F)) ≠ 0 := by
     rw [Ne, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]; exact hq_ne
+  -- The `(X-a)^mult` factor contributes `mult`; the `q` factor contributes `0`.
   rw [h_ideal_eq, ← Associates.mk_mul_mk,
     Associates.count_mul (Associates.mk_ne_zero.mpr h_left_ne)
       (Associates.mk_ne_zero.mpr h_right_ne) h_vXa_irr,
@@ -1760,16 +1794,8 @@ theorem count_X_sub_C_eq_rootMultiplicity
     Associates.count_pow (Associates.mk_ne_zero.mpr (by
       rw [Ne, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]
       exact Polynomial.X_sub_C_ne_zero a)) h_vXa_irr,
-    Associates.count_self h_vXa_irr, Nat.mul_one]
-  have h_q_count_zero :
-      (Associates.mk vXa.asIdeal).count
-          (Associates.mk (Ideal.span ({q} : Set (Polynomial F)))).factors = 0 := by
-    by_contra h_ne
-    have h_dvd : vXa.asIdeal ∣ Ideal.span ({q} : Set (Polynomial F)) :=
-      (Associates.count_ne_zero_iff_dvd h_right_ne vXa.irreducible).mp h_ne
-    apply h_not_dvd
-    rwa [Ideal.dvd_iff_le, Ideal.span_singleton_le_iff_mem, Ideal.mem_span_singleton] at h_dvd
-  rw [h_q_count_zero, Nat.add_zero]
+    Associates.count_self h_vXa_irr, Nat.mul_one,
+    count_X_sub_C_span_singleton_eq_zero_of_not_dvd hq_ne h_not_dvd, Nat.add_zero]
 
 /-- **Sum of `(X-a)`-counts of `Ideal.span {p}` equals `natDegree p`**: under
     `[IsAlgClosed F]`, summing `count_{(X-a)} (Ideal.span {p})` over the (finite)
