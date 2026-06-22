@@ -226,6 +226,12 @@ private lemma reInner_eq_inner_real (z w : ℂ) :
   change z.re * w.re + z.im * w.im = (z * (starRingEnd ℂ) w).re
   simp only [Complex.mul_re, Complex.conj_re, Complex.conj_im]; ring
 
+/-- The factor-2 real-inner identity used by both monotonicity proofs:
+`2 * inner ℝ a b = 2 * reInner a b`. -/
+private lemma two_mul_inner_real_eq_two_mul_reInner (a b : ℂ) :
+    (2 : ℝ) * inner ℝ a b = 2 * reInner a b := by
+  rw [reInner_eq_inner_real, real_inner_comm]
+
 /-- **Strict monotonicity right side**: for some `r > 0`, the function
 `t ↦ ‖γ(t) - s‖` is strictly monotone-increasing on `[t₀, t₀+r]`.
 
@@ -267,9 +273,7 @@ theorem norm_sub_strictMonoOn_right
       rw [h_int] at ht
       have h_d_normSq :=
         ((hr_data t ⟨ht.1, le_of_lt ht.2⟩).1.hasDerivAt.sub_const s).norm_sq
-      have h_re_eq : (2 : ℝ) * inner ℝ (γ t - s) (deriv γ t) =
-          2 * reInner (γ t - s) (deriv γ t) := by
-        rw [reInner_eq_inner_real, real_inner_comm]
+      have h_re_eq := two_mul_inner_real_eq_two_mul_reInner (γ t - s) (deriv γ t)
       rw [h_re_eq] at h_d_normSq
       exact h_d_normSq.hasDerivWithinAt
     · intro t ht
@@ -364,9 +368,7 @@ theorem norm_sub_strictAntiOn_left
       rw [h_int] at ht
       have h_d_normSq :=
         ((hr_data t ⟨le_of_lt ht.1, ht.2⟩).1.hasDerivAt.sub_const s).norm_sq
-      have h_re_eq : (2 : ℝ) * inner ℝ (γ t - s) (deriv γ t) =
-          2 * reInner (γ t - s) (deriv γ t) := by
-        rw [reInner_eq_inner_real, real_inner_comm]
+      have h_re_eq := two_mul_inner_real_eq_two_mul_reInner (γ t - s) (deriv γ t)
       rw [h_re_eq] at h_d_normSq
       exact h_d_normSq.hasDerivWithinAt
     · intro t ht
