@@ -74,7 +74,7 @@ lemma mem_primesOverFinsetPlus_iff {ℓ : ℕ} [Fact ℓ.Prime] {P : Ideal (𝓞
 noncomputable def primesOverSubtypeEquivFinsetPlus (ℓ : ℕ) [Fact ℓ.Prime] :
     {P : Ideal (𝓞 (K⁺)) // P ∈ Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 (K⁺))} ≃
       {P : Ideal (𝓞 (K⁺)) // P ∈ primesOverFinsetPlus (K := K) ℓ} :=
-  Equiv.subtypeEquivProp (funext fun _ => propext
+  Equiv.subtypeEquivProp (funext fun _ ↦ propext
     (mem_primesOverFinsetPlus_iff (K := K) (ℓ := ℓ)).symm)
 
 lemma under_mem_primesOverFinsetPlus {ℓ : ℕ} [Fact ℓ.Prime] {P : Ideal (𝓞 K)}
@@ -205,13 +205,13 @@ lemma primesOverFinsetContractionToPlus_fiber_eq_singleton_or_pair {ℓ : ℕ} [
     {P : Ideal (𝓞 K)} (hP : P ∈ primesOverFinset K ℓ) :
     let Pconj := P.map (ringOfIntegersComplexConj K).toRingEquiv.toRingHom
     let fiber := (primesOverFinset K ℓ).filter
-      (fun Q => Q.under (𝓞 (K⁺)) = P.under (𝓞 (K⁺)))
+      (fun Q ↦ Q.under (𝓞 (K⁺)) = P.under (𝓞 (K⁺)))
     (Pconj = P ∧ fiber = ({P} : Finset (Ideal (𝓞 K)))) ∨
       (Pconj ≠ P ∧ fiber = {P, Pconj}) := by
   classical
   let Pconj : Ideal (𝓞 K) := P.map (ringOfIntegersComplexConj K).toRingEquiv.toRingHom
   let fiber : Finset (Ideal (𝓞 K)) := (primesOverFinset K ℓ).filter
-    (fun Q => Q.under (𝓞 (K⁺)) = P.under (𝓞 (K⁺)))
+    (fun Q ↦ Q.under (𝓞 (K⁺)) = P.under (𝓞 (K⁺)))
   have hPconj : Pconj ∈ primesOverFinset K ℓ := by
     simpa [Pconj] using map_ringOfIntegersComplexConj_mem_primesOverFinset (K := K) hP
   have hunder_conj : Pconj.under (𝓞 (K⁺)) = P.under (𝓞 (K⁺)) := by
@@ -229,7 +229,7 @@ lemma primesOverFinsetContractionToPlus_fiber_eq_singleton_or_pair {ℓ : ℕ} [
     · exact Or.inr (by simpa [Pconj] using hQconj)
   by_cases hfix : Pconj = P
   · left
-    refine ⟨hfix, Finset.ext fun Q => ?_⟩
+    refine ⟨hfix, Finset.ext fun Q ↦ ?_⟩
     constructor
     · intro hQ
       rcases hfiber_subset hQ with hQP | hQconj
@@ -242,7 +242,7 @@ lemma primesOverFinsetContractionToPlus_fiber_eq_singleton_or_pair {ℓ : ℕ} [
       subst hQP
       exact hP_fiber
   · right
-    refine ⟨hfix, Finset.ext fun Q => ?_⟩
+    refine ⟨hfix, Finset.ext fun Q ↦ ?_⟩
     constructor
     · intro hQ
       rcases hfiber_subset hQ with hQP | hQconj
@@ -262,12 +262,12 @@ lemma primesOverFinsetContractionToPlus_fiber_eq_singleton_or_pair {ℓ : ℕ} [
 lemma primesOverFinsetContractionToPlus_fiber_card_eq_one_or_two {ℓ : ℕ} [Fact ℓ.Prime]
     {P : Ideal (𝓞 K)} (hP : P ∈ primesOverFinset K ℓ) :
     let fiber := (primesOverFinset K ℓ).filter
-      (fun Q => Q.under (𝓞 (K⁺)) = P.under (𝓞 (K⁺)))
+      (fun Q ↦ Q.under (𝓞 (K⁺)) = P.under (𝓞 (K⁺)))
     fiber.card = 1 ∨ fiber.card = 2 := by
   classical
   let Pconj : Ideal (𝓞 K) := P.map (ringOfIntegersComplexConj K).toRingEquiv.toRingHom
   let fiber : Finset (Ideal (𝓞 K)) := (primesOverFinset K ℓ).filter
-    (fun Q => Q.under (𝓞 (K⁺)) = P.under (𝓞 (K⁺)))
+    (fun Q ↦ Q.under (𝓞 (K⁺)) = P.under (𝓞 (K⁺)))
   rcases primesOverFinsetContractionToPlus_fiber_eq_singleton_or_pair (K := K) hP with
     ⟨hfix, hfiber⟩ | ⟨hfix, hfiber⟩
   · left
@@ -283,7 +283,7 @@ noncomputable def complexConjRat (hp_odd : p ≠ 2) : Gal(K/ℚ) := by
   letI : IsCMField K := isCMField_of_cyclotomic (p := p) (K := K) hp_odd
   exact
     { (complexConj K).toRingEquiv with
-      commutes' := fun q => by
+      commutes' := fun q ↦ by
         exact map_ratCast ((complexConj K).toRingEquiv.toRingHom) q }
 
 @[simp] private lemma complexConjRat_apply (hp_odd : p ≠ 2) (x : K) :
@@ -317,7 +317,7 @@ lemma galEquivZMod_complexConj_eq_neg_one (hp_odd : p ≠ 2) :
   have hc :
       c (IsCyclotomicExtension.zeta p ℚ K) =
         (IsCyclotomicExtension.zeta p ℚ K) ^ (p - 1) := by
-    have hc' := congrArg (fun x : 𝓞 K => (x : K)) (complexConj_apply_zeta (p := p) (K := K))
+    have hc' := congrArg (fun x : 𝓞 K ↦ (x : K)) (complexConj_apply_zeta (p := p) (K := K))
     simpa [c, complexConjRat_apply, coe_ringOfIntegersComplexConj] using hc'
   have hpow :
       (IsCyclotomicExtension.zeta p ℚ K) ^ (IsCyclotomicExtension.Rat.galEquivZMod p K c).val.val =
@@ -469,11 +469,11 @@ lemma primesOverFinsetContractionToPlus_fiber_card_eq_ncard_primesOver {ℓ : �
     {P : Ideal (𝓞 K)} (hP : P ∈ primesOverFinset K ℓ)
     {PPlus : Ideal (𝓞 (K⁺))} (hPPlus : P.under (𝓞 (K⁺)) = PPlus) :
     let fiber := (primesOverFinset K ℓ).filter
-      (fun Q => Q.under (𝓞 (K⁺)) = PPlus)
+      (fun Q ↦ Q.under (𝓞 (K⁺)) = PPlus)
     fiber.card = (Ideal.primesOver PPlus (𝓞 K)).ncard := by
   classical
   let fiber : Finset (Ideal (𝓞 K)) := (primesOverFinset K ℓ).filter
-    (fun Q => Q.under (𝓞 (K⁺)) = PPlus)
+    (fun Q ↦ Q.under (𝓞 (K⁺)) = PPlus)
   have hPPlus_mem : PPlus ∈ primesOverFinsetPlus (K := K) ℓ := by
     simpa [hPPlus] using under_mem_primesOverFinsetPlus (K := K) hP
   have hPPlus_over : PPlus ∈ Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 (K⁺)) :=
@@ -532,7 +532,7 @@ lemma primesOver_inertiaDeg_eq_localResidueDegreePlus
   have hPPlus_eq : P.under (𝓞 (K⁺)) = PPlus :=
     ((Ideal.liesOver_iff _ _).1 (show P.LiesOver PPlus from inferInstance)).symm
   let fiber : Finset (Ideal (𝓞 K)) := (primesOverFinset K ℓ).filter
-    (fun Q => Q.under (𝓞 (K⁺)) = PPlus)
+    (fun Q ↦ Q.under (𝓞 (K⁺)) = PPlus)
   have hfiber_ncard : fiber.card = (Ideal.primesOver PPlus (𝓞 K)).ncard := by
     simpa [fiber] using primesOverFinsetContractionToPlus_fiber_card_eq_ncard_primesOver
       (K := K) hP_fin hPPlus_eq
@@ -623,7 +623,7 @@ lemma primesOver_inertiaDeg_eq_localResidueDegreePlus
     have hrel_inertia : PPlus.inertiaDeg P = 1 := by
       rw [hcard_primes] at hquad
       omega
-    have hnot_even : ¬ Even (localResidueDegree (p := p) ℓ hℓp) := fun h_even =>
+    have hnot_even : ¬ Even (localResidueDegree (p := p) ℓ hℓp) := fun h_even ↦
       hfix
         ((map_ringOfIntegersComplexConj_eq_self_iff_even_localResidueDegree
           (p := p) (K := K) hp_odd hℓp hP_fin).2 h_even)
@@ -740,7 +740,7 @@ lemma dedekindLocalFactor_eq_pow_localResidueDegreePlus (hp_odd : p ≠ 2)
     rw [primesOverFinsetPlus_card_eq_ncard (K := K) (ℓ := ℓ)]
     exact ncard_primesOverPlus_eq_localPrimeCountPlus (p := p) (K := K) hp_odd hℓp
   unfold dedekindLocalFactor
-  change Finset.prod (primesOverFinsetPlus (K := K) ℓ) (fun PPlus =>
+  change Finset.prod (primesOverFinsetPlus (K := K) ℓ) (fun PPlus ↦
       (1 - (Ideal.absNorm PPlus : ℂ) ^ (-s))) =
         (1 - (ℓ : ℂ) ^ (-(localResidueDegreePlus (p := p) ℓ hℓp : ℂ) * s)) ^
           localPrimeCountPlus (p := p) ℓ hℓp
