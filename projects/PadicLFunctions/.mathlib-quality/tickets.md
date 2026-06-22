@@ -7145,7 +7145,12 @@ commute_on_MPlusN are the reusable pieces. Next: Γ⁺-action (Rmk 13.7), Y∞�
 ## OPEN — remaining chain to Thm 13.11. Critical path: TG1→TG2→TG6→TG9.
 
 ### [TG1] Γ⁺-action on X∞⁺ (Remark 13.7) — group action by conjugation of lifts
-- **Status**: open  **Depends on**: none (prereqs done)  **Type**: instance (MulDistribMulAction)
+- **Status**: DONE-mod-sorry (2026-06-22) — `instMulDistribMulActionGammaPlusXinfPlus` built & lake-clean;
+  TG1a/b/c/d all proven. Sole remaining `sorry` = TG1-N-transport (`isAdmissibleM_map`), the over-ℚ
+  normality plumbing isolated below. (Decls: FinfPlusInMinf(Equiv), normal_FinfPlusInMinf,
+  restrToGammaPlus(_surjective), baseChangeEquiv, autCongrHom, ker_restrToGammaPlus, xinfEquivKer,
+  mul_comm_ker, conjNormal_eq_one_of_mem_ker, gammaPlusActionHom + the instance.)
+- **Depends on**: none (prereqs done)  **Type**: instance (MulDistribMulAction)
 - **Statement**: `instance : MulDistribMulAction (GammaPlus p) (XinfPlus p)` — i.e. `σ · x = σ̃ x σ̃⁻¹`
   for any lift `σ̃ ∈ Gal(M∞⁺/ℚ)`, well-defined since X∞⁺ is abelian.
 - **Sources**: RJW §13.2 Remark 13.7 (refs/PadicLFunctions/RJW.txt:6726-6735).
@@ -7210,7 +7215,10 @@ commute_on_MPlusN are the reusable pieces. Next: Γ⁺-action (Rmk 13.7), Y∞�
 - **Sources**: RJW §13.1 (Λ-modules), Thm 13.1 (structure theorem). **Generality**: match §12's Λ.
 
 ### [TG3] Y∞⁺ abelian
-- **Status**: open  **Depends on**: none  **Type**: instance
+- **Status**: DONE (2026-06-22, sorry-free) — `isMulCommutative_YinfPlus` + the L-layer instances
+  (instNormalLPlusN, instIsGaloisLPlusN, instIsAbelianGaloisLPlusN, isAbelianGalois_comap_LPlusN,
+  commute_on_LPlusN). Direct port of the X∞⁺ proof.
+- **Depends on**: none  **Type**: instance
 - **Statement**: `instance : IsMulCommutative (YinfPlus p)`.
 - **Sketch**: copy the X∞⁺ proof over L: instIsGalois/AbelianGalois LPlusN (have galLPlusN +
   normal via normal_iSup over admissibleL); isAbelianGalois_comap_LPlusN; commute_on_LPlusN;

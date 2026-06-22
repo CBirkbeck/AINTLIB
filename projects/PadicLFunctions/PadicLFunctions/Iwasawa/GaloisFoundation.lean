@@ -930,4 +930,90 @@ noncomputable instance instMulDistribMulActionGammaPlusXinfPlus :
     MulDistribMulAction (GammaPlus p) (XinfPlus p) :=
   MulDistribMulAction.compHom (XinfPlus p) (gammaPlusActionHom p)
 
+/-! ### The Galois SES `0 → Gal(M∞⁺/L∞⁺) → X∞⁺ → Y∞⁺ → 0` (TG4)
+
+`M∞⁺/F∞⁺` and `L∞⁺/F∞⁺` are normal: an `F∞⁺`-automorphism `σ` of `Ω` fixes each `F⁺ₙ`, so it
+stabilises the layers `M⁺ₙ`, `L⁺ₙ` (already Galois over `F⁺ₙ`). Restriction `X∞⁺ → Y∞⁺` is then
+surjective with kernel `Gal(M∞⁺/L∞⁺)`. (Independent of the `isAdmissibleM_map` gap, which concerned
+normality over `ℚ`.) -/
+
+instance instIsAlgClosureFPlusOm (n : ℕ) : IsAlgClosure ↥(FPlus p n) Om :=
+  ⟨inferInstance, Algebra.IsAlgebraic.tower_top (K := ℚ) ↥(FPlus p n)⟩
+
+instance instNormalFPlusOm (n : ℕ) : Normal ↥(FPlus p n) Om := IsAlgClosure.normal ↥(FPlus p n) Om
+
+instance instIsAlgClosureFinfOm : IsAlgClosure ↥(FinfPlus p) Om :=
+  ⟨inferInstance, Algebra.IsAlgebraic.tower_top (K := ℚ) ↥(FinfPlus p)⟩
+
+instance instNormalFinfOm : Normal ↥(FinfPlus p) Om := IsAlgClosure.normal ↥(FinfPlus p) Om
+
+/-- `M∞⁺/F∞⁺` is normal (each `F∞⁺`-auto of `Ω` stabilises the `F⁺ₙ`-Galois layers `M⁺ₙ`). -/
+instance instNormalMinfPlusOverFinf : Normal (FinfPlus p) (MinfPlus p) := by
+  refine (IntermediateField.normal_iff_forall_map_le).mpr fun σ => ?_
+  rw [IntermediateField.map_le_iff_le_comap]
+  nth_rewrite 1 [MinfPlus]
+  refine IntermediateField.adjoin_le_iff.mpr ?_
+  rintro w hw
+  obtain ⟨n, hwn⟩ := Set.mem_iUnion.mp hw
+  show σ w ∈ MinfPlus p
+  have hle : FPlus p n ≤ FinfPlus p := by rw [FinfPlus]; exact le_iSup (FPlus p) n
+  letI : Algebra ↥(FPlus p n) ↥(FinfPlus p) := (IntermediateField.inclusion hle).toAlgebra
+  letI : IsScalarTower ↥(FPlus p n) ↥(FinfPlus p) Om := IsScalarTower.of_algebraMap_eq (fun _ => rfl)
+  have hσn : σ w ∈ MPlusN p n :=
+    (IntermediateField.normal_iff_forall_map_le.mp (instNormalMPlusN p n)
+      (σ.restrictScalars ↥(FPlus p n))) ⟨w, hwn, rfl⟩
+  rw [MinfPlus]
+  exact IntermediateField.subset_adjoin _ _ (Set.mem_iUnion.mpr ⟨n, hσn⟩)
+
+/-- `L∞⁺/F∞⁺` is normal (same argument over the unramified tower). -/
+instance instNormalLinfPlusOverFinf : Normal (FinfPlus p) (LinfPlus p) := by
+  refine (IntermediateField.normal_iff_forall_map_le).mpr fun σ => ?_
+  rw [IntermediateField.map_le_iff_le_comap]
+  nth_rewrite 1 [LinfPlus]
+  refine IntermediateField.adjoin_le_iff.mpr ?_
+  rintro w hw
+  obtain ⟨n, hwn⟩ := Set.mem_iUnion.mp hw
+  show σ w ∈ LinfPlus p
+  have hle : FPlus p n ≤ FinfPlus p := by rw [FinfPlus]; exact le_iSup (FPlus p) n
+  letI : Algebra ↥(FPlus p n) ↥(FinfPlus p) := (IntermediateField.inclusion hle).toAlgebra
+  letI : IsScalarTower ↥(FPlus p n) ↥(FinfPlus p) Om := IsScalarTower.of_algebraMap_eq (fun _ => rfl)
+  have hσn : σ w ∈ LPlusN p n :=
+    (IntermediateField.normal_iff_forall_map_le.mp (instNormalLPlusN p n)
+      (σ.restrictScalars ↥(FPlus p n))) ⟨w, hwn, rfl⟩
+  rw [LinfPlus]
+  exact IntermediateField.subset_adjoin _ _ (Set.mem_iUnion.mpr ⟨n, hσn⟩)
+
+/-- `L∞⁺` realized as an `F∞⁺`-subfield of `M∞⁺` (the kernel-target of `X∞⁺ ↠ Y∞⁺`), via mathlib's
+`IntermediateField.restrict` of the containment `L∞⁺ ≤ M∞⁺`. -/
+def LinfPlusInMinf : IntermediateField (FinfPlus p) ↥(MinfPlus p) :=
+  IntermediateField.restrict (LinfPlus_le_MinfPlus p)
+
+/-- The carrier iso `L∞⁺-in-M∞⁺ ≃ₐ[F∞⁺] L∞⁺` (mathlib's `restrict_algEquiv`). -/
+noncomputable def LinfPlusInMinfEquiv : ↥(LinfPlusInMinf p) ≃ₐ[FinfPlus p] ↥(LinfPlus p) :=
+  (IntermediateField.restrict_algEquiv (LinfPlus_le_MinfPlus p)).symm
+
+/-- `L∞⁺-in-M∞⁺` is normal over `F∞⁺`. -/
+instance normal_LinfPlusInMinf : Normal (FinfPlus p) ↥(LinfPlusInMinf p) := by
+  haveI := instNormalLinfPlusOverFinf p
+  exact Normal.of_algEquiv (LinfPlusInMinfEquiv p).symm
+
+/-- **The Galois SES map** `X∞⁺ = Gal(M∞⁺/F∞⁺) →* Y∞⁺ = Gal(L∞⁺/F∞⁺)` (restriction to `L∞⁺`). -/
+noncomputable def restrXtoY : XinfPlus p →* YinfPlus p :=
+  (AlgEquiv.autCongr (LinfPlusInMinfEquiv p)).toMonoidHom.comp
+    (AlgEquiv.restrictNormalHom (LinfPlusInMinf p))
+
+/-- `X∞⁺ ↠ Y∞⁺` is surjective (`M∞⁺/F∞⁺` normal). -/
+theorem restrXtoY_surjective : Function.Surjective (restrXtoY p) := by
+  refine (AlgEquiv.autCongr (LinfPlusInMinfEquiv p)).surjective.comp ?_
+  exact AlgEquiv.restrictNormalHom_surjective (F := ↥(FinfPlus p)) ↥(MinfPlus p)
+
+/-- **Kernel of the SES**: `ker(X∞⁺ ↠ Y∞⁺) = Gal(M∞⁺/L∞⁺)` (the `L∞⁺`-fixing subgroup). -/
+theorem ker_restrXtoY :
+    (restrXtoY p).ker = (LinfPlusInMinf p).fixingSubgroup := by
+  rw [← @IntermediateField.restrictNormalHom_ker ↥(FinfPlus p) ↥(MinfPlus p) _ _ _
+    (LinfPlusInMinf p) (normal_LinfPlusInMinf p)]
+  ext x
+  rw [MonoidHom.mem_ker, MonoidHom.mem_ker]
+  exact map_eq_one_iff _ (AlgEquiv.autCongr (LinfPlusInMinfEquiv p)).injective
+
 end Iwasawa.GaloisFoundation

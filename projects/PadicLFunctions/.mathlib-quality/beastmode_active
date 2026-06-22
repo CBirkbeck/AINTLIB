@@ -1,1 +1,1 @@
-FOCUS: TG3 (Y∞⁺ abelian) — porting X∞⁺-abelian machinery to L: instNormalLPlusN, instIsGaloisLPlusN, instIsAbelianGaloisLPlusN, isAbelianGalois_comap_LPlusN, commute_on_LPlusN, isMulCommutative_YinfPlus. Completable sorry-free (mirrors lines 506-583).
+FOCUS: TG4 SES (restrXtoY surjective + ker = Gal(M∞⁺/L∞⁺)) COMPILES via IntermediateField.restrict (light encoding replaced heavy comap/codRestrict). Verifying lake build, then commit.
