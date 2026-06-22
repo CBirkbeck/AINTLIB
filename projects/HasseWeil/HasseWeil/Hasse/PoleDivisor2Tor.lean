@@ -344,6 +344,7 @@ theorem ord_P_translateX_xy_eq_neg_two_at_2tor (xk yk : K)
   exact h_add.trans h_sq_ord
 
 set_option linter.unusedDecidableInType false in
+omit [Fintype K] in
 /-- **Bridge at `x_gen` for 2-torsion `T`** (the y-side analogue of
 `ord_T_translateAlgEquivOfPoint_neg_x_gen_eq_neg_two` for non-2-torsion):
 at the smooth point `T` (= `−T` modulo prop-irrelevance, since 2T = 0),
@@ -384,6 +385,7 @@ theorem ord_T_translateAlgEquivOfPoint_neg_x_gen_eq_neg_two_at_2tor (xT yT : K)
   rw [← h_smoothPt_eq]
   exact h_ord
 
+omit [Fintype K] in
 /-- **Bridge at `f = x_gen` for 2-torsion `T`** (clean version): the analog of
 `bridge_at_x_gen_of_non_2_tor` for 2-torsion. Composes the 2-torsion `ord_T`
 value with the shipped `ordAtInfty_x_gen = -2`. -/
@@ -719,7 +721,7 @@ theorem ord_P_translateY_T3_coef_nonneg
         h_neg_a1sq_yd_le_one
   exact h_min_ge_zero.trans h_add
 
-omit [Fintype K] in
+omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] in
 /-- Nonnegativity of `ord_P` of the `T4` coefficient `−y + a₁·(a₂ + x + xk') − a₃`, given the basic
 order data.  Extracted from `ord_P_translateY_xy_eq_neg_three_at_2tor` to keep its per-term `ord_P`
 bound bookkeeping under the default heartbeat budget. -/
@@ -891,7 +893,7 @@ private theorem ord_P_translateY_T3_term_ge_four
           ((4 : ℤ) : WithTop ℤ) :=
         add_le_add h_T3_coef_nn (le_refl _)
 
-omit [Fintype K] in
+omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] in
 /-- The `T4` term `(-y + a₁·(a₂ + x + xk') - a₃)·xd³` has `ord_P ≥ 6` at 2-torsion: the coefficient is
 nonnegative (`ord_P_translateY_T4_coef_nonneg`) and `ord_P xd³ = 6`.  Extracted from
 `ord_P_translateY_xy_eq_neg_three_at_2tor`. -/
@@ -922,7 +924,7 @@ private theorem ord_P_translateY_T4_term_ge_six
           ((6 : ℤ) : WithTop ℤ) :=
         add_le_add h_T4_coef_nn (le_refl _)
 
-omit [Fintype K] in
+omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] in
 /-- Extract `ord_P f = -3` from `ord_P (f · g) = 3` and `ord_P g = 6`: since `f · g` has finite order,
 `f ≠ 0`, so `ord_P f` is a finite integer `k` with `k + 6 = 3`.  Extracted from
 `ord_P_translateY_xy_eq_neg_three_at_2tor` (with `g = xd³`). -/
@@ -947,17 +949,11 @@ private theorem ord_P_eq_neg_three_of_mul_eq_three
   | top => exact absurd ht_case h_f_ne_top
   | coe k =>
       rw [ht_case] at h_LHS_ord
-      have h_int_eq : k + 6 = 3 := by
-        have h_sum : ((k + 6 : ℤ) : WithTop ℤ) = ((3 : ℤ) : WithTop ℤ) := by
-          rw [show ((k + 6 : ℤ) : WithTop ℤ) =
-            ((k : ℤ) : WithTop ℤ) + ((6 : ℤ) : WithTop ℤ) from by
-              push_cast; ring]
-          exact h_LHS_ord
-        exact_mod_cast h_sum
+      have h_int_eq : k + 6 = 3 := by exact_mod_cast h_LHS_ord
       have h_k_eq : k = -3 := by omega
       exact_mod_cast h_k_eq
 
-omit [Fintype K] in
+omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] in
 /-- A four-term sum `d + (A + (B + C))` has `ord_P` equal to that of its dominant term `d` when
 `ord_P d = 3` and each of `A`, `B`, `C` has `ord_P ≥ 4`.  Extracted from
 `ord_P_translateY_xy_eq_neg_three_at_2tor`. -/
@@ -1109,6 +1105,7 @@ theorem twoTorYValueWitness_discharge (xT yT : K)
   exact ord_P_translateY_xy_eq_neg_three_at_2tor W xT (W.toAffine.negY xT yT)
     ((Affine.nonsingular_neg xT yT).mpr h_ns) h_2_tor_neg
 
+omit [Fintype K] in
 /-- **Bridge at `f = y_gen` for 2-torsion `T` (witness-parametric)**: given the
 y-side ord value `ord_P (translateY_xy) = -3` at the negated point, produces
 the bridge. Mirrors `ord_T_translateAlgEquivOfPoint_neg_y_gen_eq_neg_three` and
@@ -1205,8 +1202,8 @@ theorem bridge_at_y_gen_sub_y_gen_pow_card_of_2_tor_of_witness (xT yT : K)
         (Fintype.card K) (ordAtInfty_y_gen W)
     rw [h_pow_eq, ordAtInfty_y_gen W]
     have hq' : (2 : ℤ) ≤ (Fintype.card K : ℤ) := by exact_mod_cast hq
-    have h_lhs_neg : ((Fintype.card K : ℤ) * (-3 : ℤ) : ℤ) = -(3 * (Fintype.card K : ℤ)) := by
-      ring
+    have h_lhs_neg : ((Fintype.card K : ℤ) * (-3 : ℤ) : ℤ) =
+        -(3 * (Fintype.card K : ℤ)) := by ring
     rw [show (((Fintype.card K : ℤ) * (-3 : ℤ) : ℤ) : WithTop ℤ) =
           ((-(3 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) by rw [h_lhs_neg]]
     rw [show ((-3 : ℤ) : WithTop ℤ) = ((-(3 : ℤ) : ℤ) : WithTop ℤ) by norm_cast]
@@ -1218,6 +1215,7 @@ theorem bridge_at_y_gen_sub_y_gen_pow_card_of_2_tor_of_witness (xT yT : K)
     (bridge_at_y_gen_of_2_tor_of_witness W xT yT h_ns h_2_tor h_y_value)
     h_lt
 
+omit [Fintype K] in
 /-- **Bridge at `f = y_gen` for 2-torsion `T` (UNCONDITIONAL)**: composes the
 witness-parametric form with `twoTorYValueWitness_discharge`. The y-side base
 bridge at 2-tor is now unconditional. -/
