@@ -58,13 +58,11 @@ theorem separable_isogeny_factors_quotient
       ∃ (φ_quot : Isogeny W W'),
         α.toAddMonoidHom = (ψ.comp φ_quot).toAddMonoidHom := by
   refine ⟨W, inferInstance, Isogeny.id W, ?_, α, ?_⟩
-  · -- (Isogeny.id W).toAddMonoidHom is AddMonoidHom.id, which is bijective
-    rw [Isogeny.id_toAddMonoidHom]
-    exact Function.bijective_id
-  · -- α.toAddMonoidHom = ((Isogeny.id W).comp α).toAddMonoidHom
-    -- = (AddMonoidHom.id _).comp α.toAddMonoidHom = α.toAddMonoidHom
-    rw [Isogeny.comp_toAddMonoidHom, Isogeny.id_toAddMonoidHom,
-      AddMonoidHom.id_comp]
+  · -- `(Isogeny.id W).toAddMonoidHom = AddMonoidHom.id`, which is bijective.
+    simpa using Function.bijective_id
+  · -- `((Isogeny.id W).comp α).toAddMonoidHom = AddMonoidHom.id.comp α.toAddMonoidHom`
+    -- `= α.toAddMonoidHom`.
+    simp
 
 end HasseWeil.Isogeny
 
@@ -90,7 +88,6 @@ theorem frobeniusTwist_eq_self_of_prime_field
     (W : WeierstrassCurve K) :
     W.frobeniusTwist p = W := by
   show W.map (frobenius K p) = W
-  rw [HasseWeil.Isogeny.frobenius_eq_id_of_charP_prime p (k := K)]
-  exact W.map_id
+  rw [Isogeny.frobenius_eq_id_of_charP_prime p (k := K), W.map_id]
 
 end HasseWeil
