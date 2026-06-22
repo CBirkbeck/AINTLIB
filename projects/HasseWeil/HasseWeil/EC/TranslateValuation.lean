@@ -794,6 +794,43 @@ theorem pointValuation_translateSlope_xy_le_one_of_doubling
   rw [h_eq]
   exact pointValuation_add_le_one W P (le_of_lt h_eval) h_alg_le
 
+/-- Doubling-case slope factor bound: the product
+`(slope_K − alg slope_F) · (slope_K + alg slope_F + a₁)` has `pointValuation < 1` at `P`,
+where `slope_K = translateSlope_xy W xk yk` and `slope_F = W.slope P.x xk P.y yk`.
+Tangent counterpart of `pointValuation_slope_diff_mul_sum_lt_one_of_X_ne`. -/
+private theorem pointValuation_slope_diff_mul_sum_lt_one_of_doubling
+    (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_eq_x : P.x = xk) (h_eq_y : P.y = yk)
+    (h_not_2_tor : yk ≠ W.toAffine.negY xk yk) :
+    (W_smooth W).pointValuation P
+      ((translateSlope_xy W xk yk - algebraMap F KE (W.toAffine.slope P.x xk P.y yk)) *
+        (translateSlope_xy W xk yk + algebraMap F KE (W.toAffine.slope P.x xk P.y yk) +
+          (W_KE W).a₁)) < 1 := by
+  set slope_K : KE := translateSlope_xy W xk yk with hslope_K
+  set slope_F : F := W.toAffine.slope P.x xk P.y yk with hslope_F
+  have h_slope_diff_lt :
+      (W_smooth W).pointValuation P (slope_K - algebraMap F KE slope_F) < 1 :=
+    pointValuation_translateSlope_xy_sub_alg_slope_lt_one_of_doubling W P xk yk
+      h_eq_x h_eq_y h_not_2_tor
+  have h_slope_K_le : (W_smooth W).pointValuation P slope_K ≤ 1 :=
+    pointValuation_translateSlope_xy_le_one_of_doubling W P xk yk
+      h_eq_x h_eq_y h_not_2_tor
+  have h_alg_slope_F_le : (W_smooth W).pointValuation P (algebraMap F KE slope_F) ≤ 1 :=
+    (W_smooth W).pointValuation_algebraMap_F_le_one P slope_F
+  have h_alg_a1_le : (W_smooth W).pointValuation P ((W_KE W).a₁) ≤ 1 := by
+    change (W_smooth W).pointValuation P ((W.map (algebraMap F KE)).a₁) ≤ 1
+    exact (W_smooth W).pointValuation_algebraMap_F_le_one P W.a₁
+  have h_sum_le : (W_smooth W).pointValuation P
+      (slope_K + algebraMap F KE slope_F + (W_KE W).a₁) ≤ 1 :=
+    pointValuation_add_le_one W P
+      (pointValuation_add_le_one W P h_slope_K_le h_alg_slope_F_le)
+      h_alg_a1_le
+  have h_swap : (slope_K - algebraMap F KE slope_F) *
+      (slope_K + algebraMap F KE slope_F + (W_KE W).a₁) =
+    (slope_K + algebraMap F KE slope_F + (W_KE W).a₁) *
+      (slope_K - algebraMap F KE slope_F) := by ring
+  rw [h_swap]
+  exact pointValuation_mul_lt_one_of_le_and_lt W P h_sum_le h_slope_diff_lt
+
 /-- **Tangent (doubling) case x_gen evaluation**: at `P = (xk, yk)` with
 `yk ≠ negY xk yk`, the difference `translateX_xy − alg(W.addX P.x xk slope_F)`
 has `pointValuation < 1` at `P`. This is the geometric content
@@ -832,38 +869,8 @@ theorem pointValuation_translateX_xy_sub_alg_addX_lt_one_of_doubling
   refine lt_of_le_of_lt
     (((W_smooth W).pointValuation P).map_sub _ _) ?_
   apply max_lt
-  · have h_slope_diff_lt :
-        (W_smooth W).pointValuation P (slope_K - algebraMap F KE slope_F) < 1 :=
-      pointValuation_translateSlope_xy_sub_alg_slope_lt_one_of_doubling W P xk yk
-        h_eq_x h_eq_y h_not_2_tor
-    have h_slope_K_le : (W_smooth W).pointValuation P slope_K ≤ 1 :=
-      pointValuation_translateSlope_xy_le_one_of_doubling W P xk yk
-        h_eq_x h_eq_y h_not_2_tor
-    have h_alg_slope_F_le : (W_smooth W).pointValuation P (algebraMap F KE slope_F) ≤ 1 :=
-      (W_smooth W).pointValuation_algebraMap_F_le_one P slope_F
-    have h_alg_a1_le : (W_smooth W).pointValuation P ((W_KE W).a₁) ≤ 1 := by
-      change (W_smooth W).pointValuation P ((W.map (algebraMap F KE)).a₁) ≤ 1
-      exact (W_smooth W).pointValuation_algebraMap_F_le_one P W.a₁
-    have h_sum_le : (W_smooth W).pointValuation P
-        (slope_K + algebraMap F KE slope_F + (W_KE W).a₁) ≤ 1 :=
-      pointValuation_add_le_one W P
-        (pointValuation_add_le_one W P h_slope_K_le h_alg_slope_F_le)
-        h_alg_a1_le
-    have h_swap : (slope_K - algebraMap F KE slope_F) *
-        (slope_K + algebraMap F KE slope_F + (W_KE W).a₁) =
-      (slope_K + algebraMap F KE slope_F + (W_KE W).a₁) *
-        (slope_K - algebraMap F KE slope_F) := by ring
-    rw [h_swap]
-    exact pointValuation_mul_lt_one_of_le_and_lt W P h_sum_le h_slope_diff_lt
-  · have h_xmem : Affine.CoordinateRing.XClass W.toAffine P.x ∈
-        (W_smooth W).maximalIdealAt P :=
-      XClass_mem_maximalIdealAt W P P.x rfl
-    have h_lt :=
-      (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
-        (C := W_smooth W) (Affine.CoordinateRing.XClass W.toAffine P.x) P).mpr h_xmem
-    have h_eq := x_gen_sub_const_eq_algebraMap_XClass W P.x
-    rw [h_eq]
-    exact h_lt
+  · exact pointValuation_slope_diff_mul_sum_lt_one_of_doubling W P xk yk h_eq_x h_eq_y h_not_2_tor
+  · exact pointValuation_x_gen_sub_alg_x_self_lt_one W P
 
 /-- **Tangent (doubling) case y_gen evaluation**: at `P = (xk, yk)` with
 `yk ≠ negY xk yk`, the difference `translateY_xy − alg(W.addY P.x xk P.y slope_F)`
