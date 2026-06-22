@@ -730,6 +730,200 @@ private lemma log_div_re_im_decomp {a b : ℂ} (ha : a ≠ 0) (hb : b ≠ 0) :
       Complex.I_im, mul_one, Complex.ofReal_re, zero_add]
     rw [Complex.log_im]; ring
 
+/-- **Per-`ε` window-split equality.** For a single threshold parameter `ε`
+below the cutoff threshold, the `ε`-cutoff CPV integrand integrates over the
+whole window `[t₀ - r, t₀ + r]` to the sum of the left and right annular chord
+logarithms. The mid sub-interval `[t₀ - δ_L, t₀ + δ_R]` contributes `0` (the
+integrand is cut off there), and the two outer annuli reduce to
+`left_annular_log_diff_local` / `right_annular_log_diff_local`. -/
+private theorem cutoff_window_integral_eq_log_chords
+    (γ : ClosedPwC1Immersion x) {s : ℂ} {t₀ : ℝ}
+    (ht₀ : t₀ ∈ Set.Ioo (0 : ℝ) 1)
+    (h_at : γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t₀ = s)
+    {r : ℝ} (hr_pos : 0 < r)
+    (h_window_Icc : Set.Icc (t₀ - r) (t₀ + r) ⊆ Set.Icc (0 : ℝ) 1)
+    (h_local_unique_r : ∀ t ∈ Set.Icc (t₀ - r) (t₀ + r),
+      γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t = s → t = t₀)
+    {L_R L_L : ℂ} (hL_R_ne : L_R ≠ 0) (hL_L_ne : L_L ≠ 0)
+    (h_deriv_right : HasDerivWithinAt
+      γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend L_R (Set.Ioi t₀) t₀)
+    (h_deriv_left : HasDerivWithinAt
+      γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend L_L (Set.Iio t₀) t₀)
+    (h_slit_R : ∀ a b, t₀ < a → a ≤ b → b ≤ t₀ + r →
+      (γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend b - s) /
+        (γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend a - s) ∈
+          Complex.slitPlane)
+    (h_slit_L : ∀ a b, t₀ - r ≤ a → a ≤ b → b < t₀ →
+      (γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend b - s) /
+        (γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend a - s) ∈
+          Complex.slitPlane)
+    (D : LocalDerivedCutoffs γ s t₀ r)
+    {ε : ℝ} (hε_pos : 0 < ε) (hε_lt_thresh : ε < D.threshold)
+    (hδR_r : D.δ_right ε < r) (hδL_r : D.δ_left ε < r)
+    (hδR_pos : 0 < D.δ_right ε) (hδL_pos : 0 < D.δ_left ε) :
+    ∫ t in (t₀ - r)..(t₀ + r),
+        cpvIntegrand (fun z ↦ (z - s)⁻¹)
+          γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend s ε t =
+      Complex.log
+          ((γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend (t₀ - D.δ_left ε) - s) /
+            (γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend (t₀ - r) - s)) +
+        Complex.log
+          ((γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend (t₀ + r) - s) /
+            (γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend (t₀ + D.δ_right ε) - s)) := by
+  set γf : ℝ → ℂ :=
+    (γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend : ℝ → ℂ) with hγf_def
+  set F : ℝ → ℂ := fun t ↦
+    cpvIntegrand (fun z ↦ (z - s)⁻¹) γf s ε t with hF_def
+  set integrand : ℝ → ℂ := fun t ↦ (γf t - s)⁻¹ * deriv γf t with hI_def
+  have h_left_lt : t₀ - r < t₀ - D.δ_left ε := by linarith
+  have h_mid_lt : t₀ - D.δ_left ε < t₀ + D.δ_right ε := by linarith
+  have h_right_lt : t₀ + D.δ_right ε < t₀ + r := by linarith
+  have hF_left_ae : ∀ᵐ t ∂MeasureTheory.volume,
+      t ∈ Set.uIoc (t₀ - r) (t₀ - D.δ_left ε) → F t = integrand t := by
+    filter_upwards [MeasureTheory.compl_mem_ae_iff.mpr
+      (((Set.finite_singleton (t₀ - D.δ_left ε)).measure_zero
+        MeasureTheory.volume))] with t ht_ne ht_mem
+    rw [Set.uIoc_of_le h_left_lt.le] at ht_mem
+    have ht_lt : t < t₀ - D.δ_left ε :=
+      lt_of_le_of_ne ht_mem.2 (fun h ↦ ht_ne (Set.mem_singleton_iff.mpr h))
+    simp only [hF_def, hI_def, cpvIntegrand]
+    rw [if_pos]
+    exact D.h_far_left ε hε_pos hε_lt_thresh t ht_mem.1.le ht_lt
+  have hF_mid : ∀ t ∈ Set.uIoc (t₀ - D.δ_left ε) (t₀ + D.δ_right ε), F t = 0 := by
+    intro t ht
+    rw [Set.uIoc_of_le h_mid_lt.le] at ht
+    simp only [hF_def, cpvIntegrand]
+    rw [if_neg (not_lt.mpr _)]
+    by_cases h_t_le : t ≤ t₀
+    · refine D.h_near_left ε hε_pos hε_lt_thresh t ?_ h_t_le
+      linarith [ht.1]
+    · push Not at h_t_le
+      refine D.h_near_right ε hε_pos hε_lt_thresh t h_t_le.le ?_
+      linarith [ht.2]
+  have hF_right_ae : ∀ᵐ t ∂MeasureTheory.volume,
+      t ∈ Set.uIoc (t₀ + D.δ_right ε) (t₀ + r) → F t = integrand t := by
+    filter_upwards [MeasureTheory.compl_mem_ae_iff.mpr
+      (((Set.finite_singleton (t₀ + D.δ_right ε)).measure_zero
+        MeasureTheory.volume))] with t _ ht_mem
+    rw [Set.uIoc_of_le h_right_lt.le] at ht_mem
+    simp only [hF_def, hI_def, cpvIntegrand]
+    rw [if_pos]
+    exact D.h_far_right ε hε_pos hε_lt_thresh t ht_mem.1 ht_mem.2
+  have h_in_window_left : Set.Icc (t₀ - r) (t₀ - D.δ_left ε) ⊆
+      Set.Icc (0 : ℝ) 1 := fun u hu ↦ by
+    have := (h_window_Icc (Set.left_mem_Icc.mpr (by linarith))).1
+    exact ⟨by linarith [hu.1], by linarith [hu.2, ht₀.2]⟩
+  have h_in_window_right : Set.Icc (t₀ + D.δ_right ε) (t₀ + r) ⊆
+      Set.Icc (0 : ℝ) 1 := fun u hu ↦ by
+    have := (h_window_Icc (Set.right_mem_Icc.mpr (by linarith))).2
+    exact ⟨by linarith [hu.1, ht₀.1], by linarith [hu.2]⟩
+  have h_int_left :
+      IntervalIntegrable integrand MeasureTheory.volume (t₀ - r) (t₀ - D.δ_left ε) := by
+    have h_ne_left : ∀ t ∈ Set.Icc (t₀ - r) (t₀ - D.δ_left ε), γf t ≠ s := fun t ht h_eq ↦
+      absurd (h_local_unique_r t ⟨ht.1, by linarith [ht.2]⟩ h_eq) (by linarith [ht.2])
+    exact (inv_sub_mul_deriv_intervalIntegrable γ h_left_lt.le
+      h_in_window_left h_ne_left).congr (fun t _ ↦ by ring)
+  have h_int_right :
+      IntervalIntegrable integrand MeasureTheory.volume (t₀ + D.δ_right ε) (t₀ + r) := by
+    have h_ne_right : ∀ t ∈ Set.Icc (t₀ + D.δ_right ε) (t₀ + r), γf t ≠ s := fun t ht h_eq ↦
+      absurd (h_local_unique_r t ⟨by linarith [ht.1], ht.2⟩ h_eq) (by linarith [ht.1])
+    exact (inv_sub_mul_deriv_intervalIntegrable γ h_right_lt.le
+      h_in_window_right h_ne_right).congr (fun t _ ↦ by ring)
+  have hF_int_left : IntervalIntegrable F MeasureTheory.volume
+      (t₀ - r) (t₀ - D.δ_left ε) :=
+    h_int_left.congr_ae
+      ((MeasureTheory.ae_restrict_iff' measurableSet_uIoc).mpr
+        (hF_left_ae.mono (fun t ht hm ↦ (ht hm).symm)))
+  have hF_int_mid :
+      IntervalIntegrable F MeasureTheory.volume
+        (t₀ - D.δ_left ε) (t₀ + D.δ_right ε) :=
+    (IntervalIntegrable.zero (μ := MeasureTheory.volume)
+      (a := t₀ - D.δ_left ε) (b := t₀ + D.δ_right ε)).congr
+      (fun t ht ↦ (hF_mid t ht).symm)
+  have hF_int_right : IntervalIntegrable F MeasureTheory.volume
+      (t₀ + D.δ_right ε) (t₀ + r) :=
+    h_int_right.congr_ae
+      ((MeasureTheory.ae_restrict_iff' measurableSet_uIoc).mpr
+        (hF_right_ae.mono (fun t ht hm ↦ (ht hm).symm)))
+  have h_split : ∫ t in (t₀ - r)..(t₀ + r), F t =
+      (∫ t in (t₀ - r)..(t₀ - D.δ_left ε), F t) +
+      (∫ t in (t₀ - D.δ_left ε)..(t₀ + D.δ_right ε), F t) +
+      (∫ t in (t₀ + D.δ_right ε)..(t₀ + r), F t) := by
+    rw [← intervalIntegral.integral_add_adjacent_intervals
+          (hF_int_left.trans hF_int_mid) hF_int_right,
+        ← intervalIntegral.integral_add_adjacent_intervals hF_int_left hF_int_mid]
+  rw [h_split,
+      intervalIntegral.integral_zero_ae (MeasureTheory.ae_of_all _ hF_mid),
+      intervalIntegral.integral_congr_ae hF_left_ae,
+      intervalIntegral.integral_congr_ae hF_right_ae, add_zero]
+  have h_LL := left_annular_log_diff_local γ hL_L_ne h_deriv_left h_at
+    hδL_pos hδL_r hr_pos h_window_Icc h_slit_L h_local_unique_r
+  have h_RR := right_annular_log_diff_local γ hL_R_ne h_deriv_right h_at
+    hδR_pos hδR_r hr_pos h_window_Icc h_slit_R h_local_unique_r
+  have h_congr_L : ∫ t in (t₀ - r)..(t₀ - D.δ_left ε), integrand t =
+      ∫ t in (t₀ - r)..(t₀ - D.δ_left ε), deriv γf t / (γf t - s) :=
+    intervalIntegral.integral_congr fun t _ ↦ by
+      simp only [hI_def, hγf_def]; rw [div_eq_mul_inv, mul_comm]
+  have h_congr_R : ∫ t in (t₀ + D.δ_right ε)..(t₀ + r), integrand t =
+      ∫ t in (t₀ + D.δ_right ε)..(t₀ + r), deriv γf t / (γf t - s) :=
+    intervalIntegral.integral_congr fun t _ ↦ by
+      simp only [hI_def, hγf_def]; rw [div_eq_mul_inv, mul_comm]
+  rw [h_congr_L, h_congr_R, h_LL, h_RR]
+
+/-- **Per-`ε` chord-log real/imaginary decomposition.** At a single threshold
+parameter `ε`, the sum of the two annular chord logarithms splits into its real
+part (the log-norm difference between the window endpoints, the cancelling exit
+norms `‖γ(t₀ ± δ) - s‖ = ε` dropping out) and its imaginary part (the sum of the
+two chord-quotient arguments). Pointwise complex `log` re/im decomposition. -/
+private theorem chord_log_sum_re_im_eq
+    (γ : ClosedPwC1Immersion x) {s : ℂ} {t₀ : ℝ}
+    {r : ℝ} (hr_pos : 0 < r)
+    (h_local_unique_r : ∀ t ∈ Set.Icc (t₀ - r) (t₀ + r),
+      γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend t = s → t = t₀)
+    (D : LocalDerivedCutoffs γ s t₀ r)
+    {ε : ℝ} (hε_pos : 0 < ε) (hε_lt_thresh : ε < D.threshold) :
+    Complex.log
+        ((γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend (t₀ - D.δ_left ε) - s) /
+          (γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend (t₀ - r) - s)) +
+      Complex.log
+        ((γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend (t₀ + r) - s) /
+          (γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend (t₀ + D.δ_right ε) - s)) =
+      ((Real.log ‖γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend (t₀ + r) - s‖ -
+          Real.log ‖γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend (t₀ - r) - s‖ : ℝ) : ℂ) +
+        ((((γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend (t₀ - D.δ_left ε) - s) /
+              (γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend (t₀ - r) - s)).arg +
+            ((γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend (t₀ + r) - s) /
+              (γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend (t₀ + D.δ_right ε) - s)).arg :
+              ℝ) : ℂ) * Complex.I := by
+  set γf : ℝ → ℂ :=
+    (γ.toPwC1Immersion.toPiecewiseC1Path.toPath.extend : ℝ → ℂ) with hγf_def
+  have h_eq_R : ‖γf (t₀ + D.δ_right ε) - s‖ = ε :=
+    D.h_exit_right ε hε_pos hε_lt_thresh
+  have h_eq_L : ‖γf (t₀ - D.δ_left ε) - s‖ = ε :=
+    D.h_exit_left ε hε_pos hε_lt_thresh
+  have h_γPlus_ne : γf (t₀ + r) - s ≠ 0 := fun h_eq ↦
+    absurd (h_local_unique_r _ (Set.right_mem_Icc.mpr (by linarith))
+      (sub_eq_zero.mp h_eq)) (by linarith)
+  have h_γMinus_ne : γf (t₀ - r) - s ≠ 0 := fun h_eq ↦
+    absurd (h_local_unique_r _ (Set.left_mem_Icc.mpr (by linarith))
+      (sub_eq_zero.mp h_eq)) (by linarith)
+  have h_γR_ne : γf (t₀ + D.δ_right ε) - s ≠ 0 := by
+    rw [← norm_pos_iff, h_eq_R]; exact hε_pos
+  have h_γL_ne : γf (t₀ - D.δ_left ε) - s ≠ 0 := by
+    rw [← norm_pos_iff, h_eq_L]; exact hε_pos
+  have h_log_R_decomp :
+      Complex.log ((γf (t₀ + r) - s) / (γf (t₀ + D.δ_right ε) - s)) =
+        ((Real.log ‖γf (t₀ + r) - s‖ - Real.log ‖γf (t₀ + D.δ_right ε) - s‖ : ℝ) : ℂ) +
+        (((γf (t₀ + r) - s) / (γf (t₀ + D.δ_right ε) - s)).arg : ℂ) * Complex.I :=
+    log_div_re_im_decomp h_γPlus_ne h_γR_ne
+  have h_log_L_decomp :
+      Complex.log ((γf (t₀ - D.δ_left ε) - s) / (γf (t₀ - r) - s)) =
+        ((Real.log ‖γf (t₀ - D.δ_left ε) - s‖ - Real.log ‖γf (t₀ - r) - s‖ : ℝ) : ℂ) +
+        (((γf (t₀ - D.δ_left ε) - s) / (γf (t₀ - r) - s)).arg : ℂ) * Complex.I :=
+    log_div_re_im_decomp h_γL_ne h_γMinus_ne
+  rw [h_log_L_decomp, h_log_R_decomp, h_eq_R, h_eq_L]
+  push_cast; ring
+
 /-- **Per-window cutoff integral converges, exact-radius form** (T-BR-Y9c).
 
 Like `perCrossing_window_integral_tendsto`, but takes the window radius `r`
@@ -821,138 +1015,18 @@ theorem perCrossing_window_integral_tendsto_exact
         (fun ε ↦ Λ_L ε + Λ_R ε) := by
     filter_upwards [Ioo_mem_nhdsGT D.hthresh, hδR_lt_r, hδL_lt_r,
         hδR_pos_ev, hδL_pos_ev] with ε hε_thresh hδR_r hδL_r hδR_pos hδL_pos
-    have hε_pos : 0 < ε := hε_thresh.1
-    have hε_lt_thresh : ε < D.threshold := hε_thresh.2
-    set F : ℝ → ℂ := fun t ↦
-      cpvIntegrand (fun z ↦ (z - s)⁻¹) γf s ε t with hF_def
-    set integrand : ℝ → ℂ := fun t ↦ (γf t - s)⁻¹ * deriv γf t with hI_def
-    have h_left_lt : t₀ - r < t₀ - D.δ_left ε := by linarith
-    have h_mid_lt : t₀ - D.δ_left ε < t₀ + D.δ_right ε := by linarith
-    have h_right_lt : t₀ + D.δ_right ε < t₀ + r := by linarith
-    have hF_left_ae : ∀ᵐ t ∂MeasureTheory.volume,
-        t ∈ Set.uIoc (t₀ - r) (t₀ - D.δ_left ε) → F t = integrand t := by
-      filter_upwards [MeasureTheory.compl_mem_ae_iff.mpr
-        (((Set.finite_singleton (t₀ - D.δ_left ε)).measure_zero
-          MeasureTheory.volume))] with t ht_ne ht_mem
-      rw [Set.uIoc_of_le h_left_lt.le] at ht_mem
-      have ht_lt : t < t₀ - D.δ_left ε :=
-        lt_of_le_of_ne ht_mem.2 (fun h ↦ ht_ne (Set.mem_singleton_iff.mpr h))
-      simp only [hF_def, hI_def, cpvIntegrand]
-      rw [if_pos]
-      exact D.h_far_left ε hε_pos hε_lt_thresh t ht_mem.1.le ht_lt
-    have hF_mid : ∀ t ∈ Set.uIoc (t₀ - D.δ_left ε) (t₀ + D.δ_right ε), F t = 0 := by
-      intro t ht
-      rw [Set.uIoc_of_le h_mid_lt.le] at ht
-      simp only [hF_def, cpvIntegrand]
-      rw [if_neg (not_lt.mpr _)]
-      by_cases h_t_le : t ≤ t₀
-      · refine D.h_near_left ε hε_pos hε_lt_thresh t ?_ h_t_le
-        linarith [ht.1]
-      · push Not at h_t_le
-        refine D.h_near_right ε hε_pos hε_lt_thresh t h_t_le.le ?_
-        linarith [ht.2]
-    have hF_right_ae : ∀ᵐ t ∂MeasureTheory.volume,
-        t ∈ Set.uIoc (t₀ + D.δ_right ε) (t₀ + r) → F t = integrand t := by
-      filter_upwards [MeasureTheory.compl_mem_ae_iff.mpr
-        (((Set.finite_singleton (t₀ + D.δ_right ε)).measure_zero
-          MeasureTheory.volume))] with t _ ht_mem
-      rw [Set.uIoc_of_le h_right_lt.le] at ht_mem
-      simp only [hF_def, hI_def, cpvIntegrand]
-      rw [if_pos]
-      exact D.h_far_right ε hε_pos hε_lt_thresh t ht_mem.1 ht_mem.2
-    have h_in_window_left : Set.Icc (t₀ - r) (t₀ - D.δ_left ε) ⊆
-        Set.Icc (0 : ℝ) 1 := fun u hu ↦ by
-      have := (h_window_Icc (Set.left_mem_Icc.mpr (by linarith))).1
-      exact ⟨by linarith [hu.1], by linarith [hu.2, ht₀.2]⟩
-    have h_in_window_right : Set.Icc (t₀ + D.δ_right ε) (t₀ + r) ⊆
-        Set.Icc (0 : ℝ) 1 := fun u hu ↦ by
-      have := (h_window_Icc (Set.right_mem_Icc.mpr (by linarith))).2
-      exact ⟨by linarith [hu.1, ht₀.1], by linarith [hu.2]⟩
-    have h_int_left :
-        IntervalIntegrable integrand MeasureTheory.volume (t₀ - r) (t₀ - D.δ_left ε) := by
-      have h_ne_left : ∀ t ∈ Set.Icc (t₀ - r) (t₀ - D.δ_left ε), γf t ≠ s := fun t ht h_eq ↦
-        absurd (h_local_unique_r t ⟨ht.1, by linarith [ht.2]⟩ h_eq) (by linarith [ht.2])
-      exact (inv_sub_mul_deriv_intervalIntegrable γ h_left_lt.le
-        h_in_window_left h_ne_left).congr (fun t _ ↦ by ring)
-    have h_int_right :
-        IntervalIntegrable integrand MeasureTheory.volume (t₀ + D.δ_right ε) (t₀ + r) := by
-      have h_ne_right : ∀ t ∈ Set.Icc (t₀ + D.δ_right ε) (t₀ + r), γf t ≠ s := fun t ht h_eq ↦
-        absurd (h_local_unique_r t ⟨by linarith [ht.1], ht.2⟩ h_eq) (by linarith [ht.1])
-      exact (inv_sub_mul_deriv_intervalIntegrable γ h_right_lt.le
-        h_in_window_right h_ne_right).congr (fun t _ ↦ by ring)
-    have hF_int_left : IntervalIntegrable F MeasureTheory.volume
-        (t₀ - r) (t₀ - D.δ_left ε) :=
-      h_int_left.congr_ae
-        ((MeasureTheory.ae_restrict_iff' measurableSet_uIoc).mpr
-          (hF_left_ae.mono (fun t ht hm ↦ (ht hm).symm)))
-    have hF_int_mid :
-        IntervalIntegrable F MeasureTheory.volume
-          (t₀ - D.δ_left ε) (t₀ + D.δ_right ε) :=
-      (IntervalIntegrable.zero (μ := MeasureTheory.volume)
-        (a := t₀ - D.δ_left ε) (b := t₀ + D.δ_right ε)).congr
-        (fun t ht ↦ (hF_mid t ht).symm)
-    have hF_int_right : IntervalIntegrable F MeasureTheory.volume
-        (t₀ + D.δ_right ε) (t₀ + r) :=
-      h_int_right.congr_ae
-        ((MeasureTheory.ae_restrict_iff' measurableSet_uIoc).mpr
-          (hF_right_ae.mono (fun t ht hm ↦ (ht hm).symm)))
-    have h_split : ∫ t in (t₀ - r)..(t₀ + r), F t =
-        (∫ t in (t₀ - r)..(t₀ - D.δ_left ε), F t) +
-        (∫ t in (t₀ - D.δ_left ε)..(t₀ + D.δ_right ε), F t) +
-        (∫ t in (t₀ + D.δ_right ε)..(t₀ + r), F t) := by
-      rw [← intervalIntegral.integral_add_adjacent_intervals
-            (hF_int_left.trans hF_int_mid) hF_int_right,
-          ← intervalIntegral.integral_add_adjacent_intervals hF_int_left hF_int_mid]
-    rw [h_split,
-        intervalIntegral.integral_zero_ae (MeasureTheory.ae_of_all _ hF_mid),
-        intervalIntegral.integral_congr_ae hF_left_ae,
-        intervalIntegral.integral_congr_ae hF_right_ae, add_zero]
-    have h_LL := left_annular_log_diff_local γ hL_L_ne h_deriv_left h_at
-      hδL_pos hδL_r hr_pos h_window_Icc h_slit_L h_local_unique_r
-    have h_RR := right_annular_log_diff_local γ hL_R_ne h_deriv_right h_at
-      hδR_pos hδR_r hr_pos h_window_Icc h_slit_R h_local_unique_r
-    have h_congr_L : ∫ t in (t₀ - r)..(t₀ - D.δ_left ε), integrand t =
-        ∫ t in (t₀ - r)..(t₀ - D.δ_left ε), deriv γf t / (γf t - s) :=
-      intervalIntegral.integral_congr fun t _ ↦ by
-        simp only [hI_def, hγf_def]; rw [div_eq_mul_inv, mul_comm]
-    have h_congr_R : ∫ t in (t₀ + D.δ_right ε)..(t₀ + r), integrand t =
-        ∫ t in (t₀ + D.δ_right ε)..(t₀ + r), deriv γf t / (γf t - s) :=
-      intervalIntegral.integral_congr fun t _ ↦ by
-        simp only [hI_def, hγf_def]; rw [div_eq_mul_inv, mul_comm]
-    rw [h_congr_L, h_congr_R, h_LL, h_RR]
+    simpa only [hΛL_def, hΛR_def, hγf_def] using
+      cutoff_window_integral_eq_log_chords γ ht₀ h_at hr_pos h_window_Icc
+        h_local_unique_r hL_R_ne hL_L_ne h_deriv_right h_deriv_left h_slit_R h_slit_L
+        D hε_thresh.1 hε_thresh.2 hδR_r hδL_r hδR_pos hδL_pos
   refine Tendsto.congr' h_eventually_eq.symm ?_
   have h_decomp : ∀ᶠ ε in 𝓝[>] (0 : ℝ),
       Λ_L ε + Λ_R ε = ((logNorm_diff : ℝ) : ℂ) +
         ((((γf (t₀ - D.δ_left ε) - s) / (γf (t₀ - r) - s)).arg +
           ((γf (t₀ + r) - s) / (γf (t₀ + D.δ_right ε) - s)).arg : ℝ) : ℂ) * Complex.I := by
-    filter_upwards [Ioo_mem_nhdsGT D.hthresh, hδR_lt_r, hδL_lt_r,
-        hδR_pos_ev, hδL_pos_ev] with ε hε_thresh hδR_r hδL_r hδR_pos hδL_pos
-    have hε_pos : 0 < ε := hε_thresh.1
-    have hε_lt_thresh : ε < D.threshold := hε_thresh.2
-    have h_eq_R : ‖γf (t₀ + D.δ_right ε) - s‖ = ε :=
-      D.h_exit_right ε hε_pos hε_lt_thresh
-    have h_eq_L : ‖γf (t₀ - D.δ_left ε) - s‖ = ε :=
-      D.h_exit_left ε hε_pos hε_lt_thresh
-    have h_γPlus_ne : γf (t₀ + r) - s ≠ 0 := fun h_eq ↦
-      absurd (h_local_unique_r _ (Set.right_mem_Icc.mpr (by linarith))
-        (sub_eq_zero.mp h_eq)) (by linarith)
-    have h_γMinus_ne : γf (t₀ - r) - s ≠ 0 := fun h_eq ↦
-      absurd (h_local_unique_r _ (Set.left_mem_Icc.mpr (by linarith))
-        (sub_eq_zero.mp h_eq)) (by linarith)
-    have h_γR_ne : γf (t₀ + D.δ_right ε) - s ≠ 0 := by
-      rw [← norm_pos_iff, h_eq_R]; exact hε_pos
-    have h_γL_ne : γf (t₀ - D.δ_left ε) - s ≠ 0 := by
-      rw [← norm_pos_iff, h_eq_L]; exact hε_pos
-    have h_log_R_decomp : Λ_R ε =
-        ((Real.log ‖γf (t₀ + r) - s‖ - Real.log ‖γf (t₀ + D.δ_right ε) - s‖ : ℝ) : ℂ) +
-        (((γf (t₀ + r) - s) / (γf (t₀ + D.δ_right ε) - s)).arg : ℂ) * Complex.I :=
-      log_div_re_im_decomp h_γPlus_ne h_γR_ne
-    have h_log_L_decomp : Λ_L ε =
-        ((Real.log ‖γf (t₀ - D.δ_left ε) - s‖ - Real.log ‖γf (t₀ - r) - s‖ : ℝ) : ℂ) +
-        (((γf (t₀ - D.δ_left ε) - s) / (γf (t₀ - r) - s)).arg : ℂ) * Complex.I :=
-      log_div_re_im_decomp h_γL_ne h_γMinus_ne
-    rw [h_log_L_decomp, h_log_R_decomp, h_eq_R, h_eq_L]
-    simp only [hlogND_def]; push_cast; ring
+    filter_upwards [Ioo_mem_nhdsGT D.hthresh] with ε hε_thresh
+    simpa only [hΛL_def, hΛR_def, hlogND_def, hγf_def] using
+      chord_log_sum_re_im_eq γ hr_pos h_local_unique_r D hε_thresh.1 hε_thresh.2
   have h_decomp' : (fun ε : ℝ ↦ ((logNorm_diff : ℝ) : ℂ) +
       ((((γf (t₀ - D.δ_left ε) - s) / (γf (t₀ - r) - s)).arg +
         ((γf (t₀ + r) - s) / (γf (t₀ + D.δ_right ε) - s)).arg : ℝ) : ℂ) *
