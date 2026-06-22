@@ -254,7 +254,6 @@ lemma dedekindZeta_eq_tsum_idealNormMultiplicity {s : ℂ} (hs : 1 < s.re) :
         exact absurd hs (by norm_num)
       exact hs_ne (neg_eq_zero.mp h)), mul_zero]
   · simp only [hn.ne', ↓reduceIte]
-    have hn_ne : (n : ℂ) ≠ 0 := by exact_mod_cast hn.ne'
     rw [Complex.cpow_neg, div_eq_mul_inv]
     congr 1
     unfold idealNormMultiplicity
@@ -266,8 +265,7 @@ lemma dedekindZeta_eq_tsum_idealNormMultiplicity {s : ℂ} (hs : 1 < s.re) :
         left_inv := fun _ => rfl
         right_inv := fun _ => rfl }
       intro h
-      rw [h] at hI
-      rw [Ideal.absNorm_bot] at hI
+      rw [h, Ideal.absNorm_bot] at hI
       omega
     exact (Nat.card_congr hequiv).symm ▸ rfl
 
@@ -297,17 +295,14 @@ lemma summable_tsum_symGeometric (α : Type*) [Fintype α] [Finite α] {z : ℂ}
     constructor
     · refine (summable_choose_mul_geometric_of_norm_lt_one k hz).congr ?_
       intro n
-      rw [Sym.card_sym_eq_choose]
-      rw [hk, Nat.succ_add_sub_one]
-      rw [Nat.add_comm k n, Nat.choose_symm_add]
+      rw [Sym.card_sym_eq_choose, hk, Nat.succ_add_sub_one, Nat.add_comm k n,
+        Nat.choose_symm_add]
     · calc
         ∑' n : ℕ, (Fintype.card (Sym α n) : ℂ) * z ^ n
             = ∑' n : ℕ, ((n + k).choose k : ℂ) * z ^ n := by
-                apply tsum_congr
-                intro n
-                rw [Sym.card_sym_eq_choose]
-                rw [hk, Nat.succ_add_sub_one]
-                rw [Nat.add_comm k n, Nat.choose_symm_add]
+                refine tsum_congr fun n => ?_
+                rw [Sym.card_sym_eq_choose, hk, Nat.succ_add_sub_one, Nat.add_comm k n,
+                  Nat.choose_symm_add]
         _ = 1 / (1 - z) ^ (k + 1) := tsum_choose_mul_geometric_of_norm_lt_one k hz
         _ = ((1 - z)⁻¹) ^ (k + 1) := by simp [one_div]
         _ = ((1 - z)⁻¹) ^ Fintype.card α := by simp [hk]
@@ -318,11 +313,9 @@ lemma tsum_symGeometric (α : Type*) [Fintype α] [Finite α] {z : ℂ} (hz : �
 
 lemma summable_idealNormMultiplicity_mul_cpow_neg {s : ℂ} (hs : 1 < s.re) :
     Summable fun n : ℕ => ‖(idealNormMultiplicity L n : ℂ) * (n : ℂ) ^ (-s)‖ := by
-  classical
-  have h_finite : ∀ (b : ℕ), {I : NonzeroIdeal L | Ideal.absNorm I.1 = b}.Finite := fun b => by
-    refine Set.Finite.preimage (f := fun I : NonzeroIdeal L => I.1) ?_
+  have h_finite : ∀ (b : ℕ), {I : NonzeroIdeal L | Ideal.absNorm I.1 = b}.Finite := fun b =>
+    Set.Finite.preimage (f := fun I : NonzeroIdeal L => I.1) Subtype.coe_injective.injOn
       (Ideal.finite_setOf_absNorm_eq (S := 𝓞 L) b)
-    intro _ _ _ _; exact Subtype.ext
   have h_sum_card : ∀ n : ℕ, ∑ k ∈ Finset.Icc 1 n, idealNormMultiplicity L k =
       Nat.card {I : NonzeroIdeal L // Ideal.absNorm I.1 ≤ n} := fun n => by
     have key := Finset.card_preimage_eq_sum_card_image_eq (f := fun I : NonzeroIdeal L =>
