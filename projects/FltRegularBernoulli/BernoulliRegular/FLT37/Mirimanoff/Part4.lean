@@ -65,7 +65,7 @@ theorem partialPowerSum_p_sub_one_eq_zero (p : ℕ) [hp : Fact p.Prime]
       ∑ j ∈ Finset.range p, (j : ZMod p) ^ e := by
     unfold partialPowerSum
     have h_succ : p - 1 + 1 = p := by omega
-    rw [h_succ, Finset.sum_range_eq_add_Ico (f := fun j => (j : ZMod p) ^ e)
+    rw [h_succ, Finset.sum_range_eq_add_Ico (f := fun j ↦ (j : ZMod p) ^ e)
         (by omega : 0 < p)]
     simp [zero_pow (Nat.one_le_iff_ne_zero.mp he₁)]
   -- Step 2: rewrite `∑_{j ∈ range p}` as `∑_{x : ZMod p}` via the bijection
@@ -73,7 +73,7 @@ theorem partialPowerSum_p_sub_one_eq_zero (p : ℕ) [hp : Fact p.Prime]
   -- characteristic.
   have h_bij : (∑ j ∈ Finset.range p, (j : ZMod p) ^ e) =
       ∑ x : ZMod p, x ^ e := by
-    apply Finset.sum_bij (fun (j : ℕ) (_ : j ∈ Finset.range p) => (j : ZMod p))
+    apply Finset.sum_bij (fun (j : ℕ) (_ : j ∈ Finset.range p) ↦ (j : ZMod p))
     · intro j _; exact Finset.mem_univ _
     · intro a ha b hb hab
       rw [Finset.mem_range] at ha hb
@@ -129,7 +129,7 @@ theorem mirimanoffPolynomial_eval_eq_one_sub_t_mul_partialPowerSum_eval
   unfold partialPowerSumPolynomial
   rw [Polynomial.eval_finsetSum]
   exact Finset.sum_congr rfl
-    (fun k _ => by rw [Polynomial.eval_mul, Polynomial.eval_C, Polynomial.eval_pow,
+    (fun k _ ↦ by rw [Polynomial.eval_mul, Polynomial.eval_C, Polynomial.eval_pow,
                        Polynomial.eval_X])
 
 end PartialPowerSum
@@ -188,7 +188,7 @@ theorem mirimanoffGalAut_apply_of_mem_mirimanoffFixedSubfield
 fixed by `mirimanoffGalAut`. -/
 theorem mem_mirimanoffFixedSubfield_iff (x : K) :
     x ∈ mirimanoffFixedSubfield ℓ h_mod_4 K ↔ mirimanoffGalAut ℓ h_mod_4 K x = x := by
-  refine ⟨mirimanoffGalAut_apply_of_mem_mirimanoffFixedSubfield ℓ h_mod_4 K, fun hx => ?_⟩
+  refine ⟨mirimanoffGalAut_apply_of_mem_mirimanoffFixedSubfield ℓ h_mod_4 K, fun hx ↦ ?_⟩
   rw [mirimanoffFixedSubfield, IntermediateField.mem_fixedField_iff]
   -- The set of automorphisms fixing x is a subgroup; mirimanoffGalAut is in it,
   -- so the whole zpowers subgroup is in it.
