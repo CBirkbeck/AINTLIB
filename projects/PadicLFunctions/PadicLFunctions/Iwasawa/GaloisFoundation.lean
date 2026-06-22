@@ -582,4 +582,35 @@ instance isMulCommutative_XinfPlus : IsMulCommutative (XinfPlus p) := by
   | mul a b _ _ ha hb => rw [map_mul, map_mul, ha, hb]
   | inv a _ ha => rw [map_inv₀, map_inv₀, ha]
 
+/-! ### Toward the `Γ⁺`-action (Remark 13.7): `F⁺_∞/ℚ` is Galois
+
+`Γ⁺ = Gal(F∞⁺/ℚ)` acts on `X∞⁺` by `σ·x = σ̃xσ̃⁻¹` (conjugation by a lift `σ̃ ∈ Gal(M∞⁺/ℚ)`). The first
+ingredient is that `F∞⁺/ℚ` is normal, so `X∞⁺ = ker(Gal(M∞⁺/ℚ) ↠ Γ⁺)` is a normal subgroup. -/
+
+/-- `Gal(Fₙ/ℚ) ≅ (ℤ/pⁿ)ˣ` is commutative. -/
+theorem isMulCommutative_galF (n : ℕ) : IsMulCommutative (F p n ≃ₐ[ℚ] F p n) := by
+  have e : (F p n ≃ₐ[ℚ] F p n) ≃* (ZMod (p ^ n))ˣ :=
+    IsCyclotomicExtension.autEquivPow (F p n) (Polynomial.cyclotomic.irreducible_rat (NeZero.pos _))
+  exact ⟨⟨fun a b => e.injective (by rw [map_mul, map_mul, mul_comm])⟩⟩
+
+/-- `Fₙ⁺/ℚ` is normal (an intermediate field of the abelian Galois extension `Fₙ/ℚ`). -/
+theorem normal_FPlus (n : ℕ) : Normal ℚ (FPlus p n) := by
+  haveI := isMulCommutative_galF p n
+  set L : IntermediateField ℚ ↥(F p n) := IntermediateField.comap (F p n).val (FPlus p n)
+  haveI : L.fixingSubgroup.Normal := ⟨fun a ha g => by
+    rw [isMulCommutative_iff.mp (isMulCommutative_galF p n) g a, mul_inv_cancel_right]; exact ha⟩
+  haveI : IsGalois ℚ L := (InfiniteGalois.normal_iff_isGalois L).mp inferInstance
+  let fh : ↥L →ₐ[ℚ] ↥(FPlus p n) :=
+    AlgHom.codRestrict ((F p n).val.comp L.val) (FPlus p n).toSubalgebra (fun w => w.2)
+  have hinj : Function.Injective fh := fun a b hab => by
+    apply Subtype.ext; apply Subtype.ext; exact congrArg (fun w : ↥(FPlus p n) => (w : Om)) hab
+  have hsurj : Function.Surjective fh := fun m =>
+    ⟨⟨⟨m.1, FPlus_le_F p n m.2⟩, m.2⟩, Subtype.ext rfl⟩
+  exact Normal.of_algEquiv (AlgEquiv.ofBijective fh ⟨hinj, hsurj⟩)
+
+/-- `F∞⁺/ℚ` is normal (compositum of the normal layers `Fₙ⁺`). -/
+theorem normal_FinfPlus : Normal ℚ (FinfPlus p) := by
+  rw [FinfPlus]
+  exact IntermediateField.normal_iSup (t := fun n => FPlus p n) (h := fun n => normal_FPlus p n)
+
 end Iwasawa.GaloisFoundation
