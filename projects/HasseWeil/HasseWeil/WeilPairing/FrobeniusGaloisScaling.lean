@@ -107,10 +107,10 @@ theorem weilPairing_galois_core (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0) (q : ℕ)
     (hpow : ∀ a : F, σ (algebraMap F KE a) = algebraMap F KE (a ^ q)) :
     weilPairing W ℓ hℓ S' T' hS' hT' = weilPairing W ℓ hℓ S T hS hT ^ q := by
   -- Abbreviations.
-  set e := weilPairing W ℓ hℓ S T hS hT with he
-  set e' := weilPairing W ℓ hℓ S' T' hS' hT' with he'
-  set gT := weilFunction W ℓ hℓ T hT with hgT
-  set gT' := weilFunction W ℓ hℓ T' hT' with hgT'
+  set e := weilPairing W ℓ hℓ S T hS hT
+  set e' := weilPairing W ℓ hℓ S' T' hS' hT'
+  set gT := weilFunction W ℓ hℓ T hT
+  set gT' := weilFunction W ℓ hℓ T' hT'
   have hgT'_ne : gT' ≠ 0 := weilFunction_ne_zero W ℓ hℓ T' hT'
   have hc_ne : algebraMap F KE c ≠ 0 := by
     simpa using (map_ne_zero_iff (algebraMap F KE) (algebraMap F KE).injective).mpr hc
@@ -219,7 +219,7 @@ theorem frobeniusScaling_of_galoisData
   letI : Fact ℓ.Prime := ⟨hℓp⟩
   intro S T
   -- Torsion bookkeeping for `S, T` and their Frobenius images.
-  set π := frobeniusHomBaseChange W p r (AlgebraicClosure K) with hπ
+  set π := frobeniusHomBaseChange W p r (AlgebraicClosure K)
   have hS : ((ℓ : ℕ) : ℤ) • S.val = 0 := zsmul_eq_zero_of_mem_torsion (W.baseChange _) ℓ S
   have hT : ((ℓ : ℕ) : ℤ) • T.val = 0 := zsmul_eq_zero_of_mem_torsion (W.baseChange _) ℓ T
   have hπS : ((ℓ : ℕ) : ℤ) • π S.val = 0 := by
