@@ -83,6 +83,8 @@ variable [IsLocalRing R]
 variable [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R]
 variable [IsLinearTopology R R] [T2Space R] [CompleteSpace R]
 
+omit [IsUniformAddGroup R] [IsTopologicalRing R] [IsLinearTopology R R] [T2Space R]
+  [CompleteSpace R] in
 /-- Elements of the maximal ideal are topologically nilpotent under the
 `M`-adic topology. -/
 lemma isTopologicallyNilpotent_of_mem_maximalIdeal
@@ -120,6 +122,7 @@ noncomputable def FormalGroup.evalAdd (F : FormalGroup R)
 
 /-! ### Closure under `+_F`: `evalAdd F x y ∈ M` -/
 
+omit [IsUniformAddGroup R] [IsLinearTopology R R] [T2Space R] [CompleteSpace R] in
 /-- The maximal ideal is closed in the `M`-adic topology.
 
 `M` is open (as the basis of neighborhoods of 0 at level 1, i.e. `M^1 = M`),
@@ -259,6 +262,8 @@ private lemma finsupp_swap_apply_one (d : Fin 2 →₀ ℕ) :
     (finsupp_swap d) 1 = d 0 := by
   simp [finsupp_swap]
 
+omit [IsLocalRing R] [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R]
+  [IsLinearTopology R R] [T2Space R] [CompleteSpace R] in
 /-- The coefficient swap induced by `F.comm`: `coeff d F.toSeries =
 coeff (finsupp_swap d) F.toSeries`. This is a consequence of
 `subst ![X 1, X 0] F.toSeries = F.toSeries`. -/
@@ -385,6 +390,8 @@ These follow from the coefficient identities in `F.toSeries`:
 The first coefficient identity is essentially the contrapositive of
 `FormalGroup.coeff_10`. We prove variants we need here. -/
 
+omit [IsLocalRing R] [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R]
+  [IsLinearTopology R R] [T2Space R] [CompleteSpace R] in
 /-- For any `j ≠ 1`, `coeff (j, 0) F.toSeries = 0`. This is the coefficient-level
 statement of `F.lunit` saying `F(X, 0) = X`. -/
 theorem FormalGroup.coeff_j0_of_ne_one (F : FormalGroup R) (j : ℕ) (hj : j ≠ 1) :
@@ -516,6 +523,8 @@ theorem FormalGroup.evalAdd_zero_right
     ext d; exact hterm_eq d
   exact hsum.unique hsum_rewrite
 
+omit [IsLocalRing R] [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R]
+  [IsLinearTopology R R] [T2Space R] [CompleteSpace R] in
 /-- For any `j ≠ 1`, `coeff (0, j) F.toSeries = 0`. Analogue of `coeff_j0_of_ne_one`
 via `F.runit`. -/
 theorem FormalGroup.coeff_0j_of_ne_one (F : FormalGroup R) (j : ℕ) (hj : j ≠ 1) :
@@ -693,6 +702,8 @@ We prove that `MvPowerSeries.subst a` is continuous in the Pi topology when each
 `a s` has zero constant coefficient. This is topology-independent and valid for
 any topology on `R`. -/
 
+omit [IsLocalRing R] [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R]
+  [IsLinearTopology R R] [T2Space R] [CompleteSpace R] in
 /-- For `a : σ → MvPowerSeries τ R` with zero constant coefficient at each `s`,
 and for each multi-index `e : τ →₀ ℕ`, the set
 `{d : σ →₀ ℕ | coeff e (∏ (a s)^(d s)) ≠ 0}` is finite. -/
@@ -852,8 +863,6 @@ theorem eval₂_subst_bridge {σ τ : Type*} [Finite σ] [Finite τ]
   · exact congrFun key F
   · -- Polynomial agreement.
     intro p
-    change MvPowerSeries.eval₂ (RingHom.id R) b
-             (MvPowerSeries.subst (R := R) a (p : MvPowerSeries σ R)) = _
     rw [MvPowerSeries.subst_coe (a := a) (R := R) (τ := τ) (S := R) p,
         MvPolynomial.aeval_def]
     -- Apply MvPolynomial.eval₂_comp_left with k = eval₂Hom hcid hb.
@@ -884,6 +893,8 @@ theorem eval₂_subst_bridge {σ τ : Type*} [Finite σ] [Finite τ]
 Bridging the univariate evaluation `PowerSeries.eval₂ id x` (on `PowerSeries R`,
 viewed as `MvPowerSeries Unit R`) with `MvPowerSeries.eval₂`. -/
 
+omit [IsLocalRing R] [IsUniformAddGroup R] [IsTopologicalRing R] [IsLinearTopology R R]
+  [T2Space R] [CompleteSpace R] in
 /-- The univariate version: for `u : PowerSeries R` with zero const coeff and `x ∈ M`,
 `PowerSeries.eval₂ id x u = MvPowerSeries.eval₂ id (fun _ => x) u`. -/
 private theorem powerSeries_eval₂_eq_mvEval₂
