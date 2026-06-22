@@ -1780,6 +1780,62 @@ theorem orderTop_localExpand_addPullback_x_mul_y_negFrobenius_eq
     orderTop_localExpand_addPullback_x_negFrobenius_eq W hq, hm,
     ← WithTop.coe_add]
 
+/-- For `m ≥ -2`, `orderTop(localExpand(addPullback_y_negFrobenius)²) ≥ -4` (`= 2m ≥ -4`). -/
+private theorem orderTop_localExpand_y_sq_negFrobenius_ge (hq : 2 ≤ Fintype.card K) (m : ℤ)
+    (h_m_ge : -2 ≤ m)
+    (hm : (localExpand W (addPullback_y W (negFrobeniusIsog W))).orderTop =
+      ((m : ℤ) : WithTop ℤ)) :
+    ((-4 : ℤ) : WithTop ℤ) ≤
+      ((localExpand W (addPullback_y W (negFrobeniusIsog W)))^2 :
+          LaurentSeries K).orderTop := by
+  rw [orderTop_localExpand_addPullback_y_negFrobenius_sq_eq_two_m W hq m hm]
+  refine WithTop.coe_le_coe.mpr ?_
+  linarith
+
+/-- For `m ≥ -2`, `orderTop(a₁·X·Y) ≥ -4` (algebraMap factor doesn't lower order;
+`orderTop(X·Y) = -2 + m ≥ -4`). -/
+private theorem orderTop_a1_x_mul_y_negFrobenius_ge (hq : 2 ≤ Fintype.card K) (m : ℤ)
+    (h_m_ge : -2 ≤ m)
+    (hm : (localExpand W (addPullback_y W (negFrobeniusIsog W))).orderTop =
+      ((m : ℤ) : WithTop ℤ)) :
+    ((-4 : ℤ) : WithTop ℤ) ≤
+      (HahnSeries.C W.a₁ *
+        (localExpand W (addPullback_x W (negFrobeniusIsog W))) *
+        (localExpand W (addPullback_y W (negFrobeniusIsog W)))
+          : LaurentSeries K).orderTop := by
+  rw [show (HahnSeries.C W.a₁ *
+      (localExpand W (addPullback_x W (negFrobeniusIsog W))) *
+      (localExpand W (addPullback_y W (negFrobeniusIsog W)))) =
+    HahnSeries.C W.a₁ *
+      ((localExpand W (addPullback_x W (negFrobeniusIsog W))) *
+        (localExpand W (addPullback_y W (negFrobeniusIsog W))))
+      from by ring]
+  rw [HahnSeries.orderTop_mul]
+  have h_xy := orderTop_localExpand_addPullback_x_mul_y_negFrobenius_eq W hq m hm
+  rw [h_xy]
+  by_cases ha₁ : W.a₁ = 0
+  · rw [ha₁, map_zero, HahnSeries.orderTop_zero, top_add]; exact le_top
+  · rw [HahnSeries.C_apply, HahnSeries.orderTop_single ha₁]
+    push_cast
+    rw [zero_add]
+    refine WithTop.coe_le_coe.mpr ?_; linarith
+
+/-- For `m ≥ -2`, `orderTop(a₃·Y) ≥ -4` (`= m ≥ -2 ≥ -4`). -/
+private theorem orderTop_a3_mul_y_negFrobenius_ge (m : ℤ) (h_m_ge : -2 ≤ m)
+    (hm : (localExpand W (addPullback_y W (negFrobeniusIsog W))).orderTop =
+      ((m : ℤ) : WithTop ℤ)) :
+    ((-4 : ℤ) : WithTop ℤ) ≤
+      (HahnSeries.C W.a₃ *
+        (localExpand W (addPullback_y W (negFrobeniusIsog W)))
+          : LaurentSeries K).orderTop := by
+  rw [HahnSeries.orderTop_mul, hm]
+  by_cases ha₃ : W.a₃ = 0
+  · rw [ha₃, map_zero, HahnSeries.orderTop_zero, top_add]; exact le_top
+  · rw [HahnSeries.C_apply, HahnSeries.orderTop_single ha₃]
+    push_cast
+    rw [zero_add]
+    refine WithTop.coe_le_coe.mpr ?_; linarith
+
 /-- **Sub-helper 78** (rule out m ≥ -2): if `m ≥ -2`, then LHS orderTop ≥ -4,
 contradicting LHS orderTop = -6. -/
 theorem m_le_neg_three_orderTop_localExpand_addPullback_y_negFrobenius
@@ -1789,58 +1845,11 @@ theorem m_le_neg_three_orderTop_localExpand_addPullback_y_negFrobenius
     m ≤ -3 := by
   by_contra! h_not_le
   have h_m_ge : -2 ≤ m := by omega
-  -- Y² has orderTop = 2m ≥ -4
-  have h_y_sq_ge : ((-4 : ℤ) : WithTop ℤ) ≤
-      ((localExpand W (addPullback_y W (negFrobeniusIsog W)))^2 :
-          LaurentSeries K).orderTop := by
-    rw [orderTop_localExpand_addPullback_y_negFrobenius_sq_eq_two_m W hq m hm]
-    refine WithTop.coe_le_coe.mpr ?_
-    linarith
-  -- a₁·X·Y has orderTop ≥ -4
-  have h_a1xy_ge : ((-4 : ℤ) : WithTop ℤ) ≤
-      (HahnSeries.C W.a₁ *
-        (localExpand W (addPullback_x W (negFrobeniusIsog W))) *
-        (localExpand W (addPullback_y W (negFrobeniusIsog W)))
-          : LaurentSeries K).orderTop := by
-    rw [show (HahnSeries.C W.a₁ *
-        (localExpand W (addPullback_x W (negFrobeniusIsog W))) *
-        (localExpand W (addPullback_y W (negFrobeniusIsog W)))) =
-      HahnSeries.C W.a₁ *
-        ((localExpand W (addPullback_x W (negFrobeniusIsog W))) *
-          (localExpand W (addPullback_y W (negFrobeniusIsog W))))
-        from by ring]
-    rw [HahnSeries.orderTop_mul]
-    have h_xy := orderTop_localExpand_addPullback_x_mul_y_negFrobenius_eq W hq m hm
-    rw [h_xy]
-    by_cases ha₁ : W.a₁ = 0
-    · rw [ha₁, map_zero, HahnSeries.orderTop_zero, top_add]; exact le_top
-    · rw [HahnSeries.C_apply, HahnSeries.orderTop_single ha₁]
-      push_cast
-      rw [zero_add]
-      refine WithTop.coe_le_coe.mpr ?_; linarith
-  -- a₃·Y has orderTop ≥ -4
-  have h_a3y_ge : ((-4 : ℤ) : WithTop ℤ) ≤
-      (HahnSeries.C W.a₃ *
-        (localExpand W (addPullback_y W (negFrobeniusIsog W)))
-          : LaurentSeries K).orderTop := by
-    rw [HahnSeries.orderTop_mul, hm]
-    by_cases ha₃ : W.a₃ = 0
-    · rw [ha₃, map_zero, HahnSeries.orderTop_zero, top_add]; exact le_top
-    · rw [HahnSeries.C_apply, HahnSeries.orderTop_single ha₃]
-      push_cast
-      rw [zero_add]
-      refine WithTop.coe_le_coe.mpr ?_; linarith
-  -- LHS orderTop ≥ -4 (sum of three terms each ≥ -4)
-  have h_lhs_ge : ((-4 : ℤ) : WithTop ℤ) ≤
-      ((localExpand W (addPullback_y W (negFrobeniusIsog W)))^2 +
-        HahnSeries.C W.a₁ *
-          (localExpand W (addPullback_x W (negFrobeniusIsog W))) *
-          (localExpand W (addPullback_y W (negFrobeniusIsog W))) +
-        HahnSeries.C W.a₃ *
-          (localExpand W (addPullback_y W (negFrobeniusIsog W)))
-            : LaurentSeries K).orderTop :=
-    orderTop_add_ge_of_both_ge
-      (orderTop_add_ge_of_both_ge h_y_sq_ge h_a1xy_ge) h_a3y_ge
+  have h_lhs_ge := orderTop_add_ge_of_both_ge
+    (orderTop_add_ge_of_both_ge
+      (orderTop_localExpand_y_sq_negFrobenius_ge W hq m h_m_ge hm)
+      (orderTop_a1_x_mul_y_negFrobenius_ge W hq m h_m_ge hm))
+    (orderTop_a3_mul_y_negFrobenius_ge W m h_m_ge hm)
   rw [orderTop_localExpand_addPullback_LHS_eq W hq] at h_lhs_ge
   have h46 : (-4 : ℤ) ≤ -6 := by exact_mod_cast h_lhs_ge
   omega
