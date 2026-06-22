@@ -16,7 +16,7 @@ open Reflection.ResidueSymbol.CoprimeClassCharacter
 variable {p : ℕ} [Fact p.Prime]
 variable {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 
-noncomputable def locallyPrimaryCoprimeCanonicalIdealSymbolData
+def locallyPrimaryCoprimeCanonicalIdealSymbolData
     (hp_odd : Odd p)
     (η : 𝓞 K) (B : Ideal (𝓞 K)) (S : Finset (Ideal (𝓞 K)))
     (hSprime : ∀ P ∈ S, P.IsPrime)
@@ -36,14 +36,14 @@ noncomputable def locallyPrimaryCoprimeCanonicalIdealSymbolData
           (Ideal.span ({(p : 𝓞 K)} : Set (𝓞 K))), P ∈ S) :
     CoprimeIdealSymbolData (R := 𝓞 K) p S :=
   coprimeCanonicalIdealSymbolData (p := p) (K := K) η S hSprime hS_ne
-    (fun hI hJ hmk =>
+    (fun hI hJ hmk ↦
       pthSymbolAtIdeal_canonical_eq_of_mk0_eq_of_locallyPrimaryPseudoUnit
         (p := p) (K := K) hp_odd η B S hSprime hS_ne hη_ne
         hη_prime_to_p hη_local hη_span hS_eta hS_p hI hJ hmk)
 
 /-- The canonical bad-set-coprime character on `ClassGroupModP`, once
 bad-set-coprime class invariance has been proved. -/
-noncomputable def coprimeCanonicalClassGroupModPHom
+def coprimeCanonicalClassGroupModPHom
     (η : 𝓞 K) (S : Finset (Ideal (𝓞 K)))
     (hSprime : ∀ P ∈ S, P.IsPrime)
     (hS_ne : ∀ P ∈ S, P ≠ ⊥)
@@ -60,7 +60,7 @@ noncomputable def coprimeCanonicalClassGroupModPHom
 
 /-- The canonical bad-set-coprime character as a `ZMod p`-linear functional on
 `ClassGroupModP`. -/
-noncomputable def coprimeCanonicalClassGroupModPLinear
+def coprimeCanonicalClassGroupModPLinear
     (η : 𝓞 K) (S : Finset (Ideal (𝓞 K)))
     (hSprime : ∀ P ∈ S, P.IsPrime)
     (hS_ne : ∀ P ∈ S, P ≠ ⊥)
@@ -77,7 +77,7 @@ noncomputable def coprimeCanonicalClassGroupModPLinear
 
 /-- The canonical bad-set-coprime character on `ClassGroupModP` attached to a
 locally-primary pseudo-unit. -/
-noncomputable def locallyPrimaryCoprimeCanonicalClassGroupModPHom
+def locallyPrimaryCoprimeCanonicalClassGroupModPHom
     (hp_odd : Odd p)
     (η : 𝓞 K) (B : Ideal (𝓞 K)) (S : Finset (Ideal (𝓞 K)))
     (hSprime : ∀ P ∈ S, P.IsPrime)
@@ -103,7 +103,7 @@ noncomputable def locallyPrimaryCoprimeCanonicalClassGroupModPHom
 
 /-- The canonical bad-set-coprime character attached to a locally-primary
 pseudo-unit, as a `ZMod p`-linear functional. -/
-noncomputable def locallyPrimaryCoprimeCanonicalClassGroupModPLinear
+def locallyPrimaryCoprimeCanonicalClassGroupModPLinear
     (hp_odd : Odd p)
     (η : 𝓞 K) (B : Ideal (𝓞 K)) (S : Finset (Ideal (𝓞 K)))
     (hSprime : ∀ P ∈ S, P.IsPrime)
