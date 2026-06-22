@@ -50,6 +50,21 @@ private lemma circleIntegral_higherOrder_eq_zero
   rw [h_eq, circleIntegral.integral_const_mul,
     circleIntegral.integral_sub_zpow_of_ne (by omega) s s r, mul_zero]
 
+private lemma circleIntegrable_higherOrder_term {s : ℂ} {r : ℝ}
+    (hs_notin : s ∉ sphere s |r|) {N : ℕ} (a : Fin N → ℂ) (k : Fin N) :
+    CircleIntegrable
+      (fun z ↦ if k.val ≥ 1 then a k / (z - s) ^ (k.val + 1) else 0) s r := by
+  by_cases hk : k.val ≥ 1
+  · simp only [hk, ↓reduceIte]
+    rw [show (fun z ↦ a k / (z - s) ^ (k.val + 1)) =
+        fun z ↦ a k * (z - s) ^ (-((k.val + 1 : ℕ) : ℤ)) by
+      funext z; rw [div_eq_mul_inv, zpow_neg, zpow_natCast]]
+    refine CircleIntegrable.const_smul ?_
+    show CircleIntegrable (fun z ↦ (z - s) ^ (-((k.val + 1 : ℕ) : ℤ))) s r
+    rw [circleIntegrable_sub_zpow_iff]
+    exact Or.inr (Or.inr hs_notin)
+  · simp only [hk, ↓reduceIte]; exact circleIntegrable_const _ _ _
+
 private lemma circleIntegral_higherOrder_sum_eq_zero
     {s : ℂ} {r : ℝ} (hr : 0 < r) {N : ℕ} (a : Fin N → ℂ) :
     ∮ z in C(s, r),
@@ -59,21 +74,8 @@ private lemma circleIntegral_higherOrder_sum_eq_zero
     rw [mem_sphere, dist_self, abs_of_pos hr]
     exact hr_ne.symm
   have h_each_int : ∀ k : Fin N, CircleIntegrable
-      (fun z ↦ if k.val ≥ 1 then a k / (z - s) ^ (k.val + 1) else 0) s r := by
-    intro k
-    by_cases hk : k.val ≥ 1
-    · simp only [hk, ↓reduceIte]
-      have h_eq : (fun z ↦ a k / (z - s) ^ (k.val + 1)) =
-          fun z ↦ a k * (z - s) ^ (-((k.val + 1 : ℕ) : ℤ)) := by
-        funext z
-        rw [div_eq_mul_inv, zpow_neg, zpow_natCast]
-      rw [h_eq]
-      apply CircleIntegrable.const_smul
-      change CircleIntegrable (fun z ↦ (z - s) ^ (-((k.val + 1 : ℕ) : ℤ))) s r
-      rw [circleIntegrable_sub_zpow_iff]
-      exact Or.inr (Or.inr hs_notin)
-    · simp only [hk, ↓reduceIte]
-      exact circleIntegrable_const _ _ _
+      (fun z ↦ if k.val ≥ 1 then a k / (z - s) ^ (k.val + 1) else 0) s r :=
+    fun k ↦ circleIntegrable_higherOrder_term hs_notin a k
   rw [circleIntegral.integral_fun_sum (s := Finset.univ) (fun k _ ↦ h_each_int k)]
   refine Finset.sum_eq_zero fun k _ ↦ ?_
   by_cases hk : k.val ≥ 1
@@ -148,18 +150,8 @@ theorem residue_of_laurent_expansion {f g : ℂ → ℂ} {s : ℂ} (N : ℕ) (a 
       ((hg_ball.continuousOn.mono (closedBall_subset_ball hr_lt_rg)).mono
         sphere_subset_closedBall).circleIntegrable hr_pos.le
     have h_ci_higher_each : ∀ k : Fin N, CircleIntegrable
-        (fun z ↦ if k.val ≥ 1 then a k / (z - s) ^ (k.val + 1) else 0) s r := by
-      intro k
-      by_cases hk : k.val ≥ 1
-      · simp only [hk, ↓reduceIte]
-        rw [show (fun z ↦ a k / (z - s) ^ (k.val + 1)) =
-            fun z ↦ a k * (z - s) ^ (-((k.val + 1 : ℕ) : ℤ)) by
-          funext z; rw [div_eq_mul_inv, zpow_neg, zpow_natCast]]
-        refine CircleIntegrable.const_smul ?_
-        show CircleIntegrable (fun z ↦ (z - s) ^ (-((k.val + 1 : ℕ) : ℤ))) s r
-        rw [circleIntegrable_sub_zpow_iff]
-        exact Or.inr (Or.inr hs_notin)
-      · simp only [hk, ↓reduceIte]; exact circleIntegrable_const _ _ _
+        (fun z ↦ if k.val ≥ 1 then a k / (z - s) ^ (k.val + 1) else 0) s r :=
+      fun k ↦ circleIntegrable_higherOrder_term hs_notin a k
     have h_ci_higher_sum : CircleIntegrable
         (fun z ↦ ∑ k : Fin N, if k.val ≥ 1 then a k / (z - s) ^ (k.val + 1) else 0)
         s r := by
