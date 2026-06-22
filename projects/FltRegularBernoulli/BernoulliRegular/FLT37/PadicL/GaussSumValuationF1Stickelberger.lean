@@ -111,7 +111,7 @@ theorem gaussSum_eq_mathlib (i : ℕ) :
   have hmathlib : _root_.gaussSum (S.teichCharPow i) S.addCharPi =
       ∑ a ∈ Finset.univ \ {(0 : ZMod p)}, S.teichCharPow i a * S.addCharPi a := by
     have hsplit := (Finset.sum_erase_add Finset.univ
-      (fun a : ZMod p => S.teichCharPow i a * S.addCharPi a) (Finset.mem_univ (0 : ZMod p))).symm
+      (fun a : ZMod p ↦ S.teichCharPow i a * S.addCharPi a) (Finset.mem_univ (0 : ZMod p))).symm
     rw [Finset.erase_eq] at hsplit
     rw [MulChar.map_zero, zero_mul, add_zero] at hsplit
     exact hsplit
@@ -125,7 +125,7 @@ theorem gaussSum_eq_mathlib (i : ℕ) :
     exact isUnit_iff_ne_zero
   rw [← hmap, Finset.sum_map]
   unfold StickelbergerF1Setup.gaussSum
-  refine Finset.sum_congr rfl fun a _ => ?_
+  refine Finset.sum_congr rfl fun a _ ↦ ?_
   rw [Function.Embedding.coeFn_mk, teichCharPow_apply_unit, addCharPi_apply_unit]
 
 @[simp] theorem teichCharPow_zero : S.teichCharPow 0 = 1 := by
