@@ -80,11 +80,8 @@ open WeierstrassCurve HasseWeil.Curves
 
 namespace HasseWeil.WeilPairing
 
-open HasseWeil HasseWeil.WeilPairing.DivisorPullback HasseWeil.WeilPairing.TorsionGeometric
+open HasseWeil HasseWeil.WeilPairing.DivisorPullback
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.unusedFintypeInType false
 set_option linter.style.longLine false
 
 /- `frobeniusIsog_baseChange_charP_pow` and `frobeniusIsog_relative_iterate` carry their codomain
@@ -121,6 +118,7 @@ section Iterate
 variable {K : Type*} [Field K] [DecidableEq K]
 variable (p : ℕ) [Fact p.Prime] [ExpChar K p]
 
+omit [DecidableEq K] [Fact p.Prime] in
 /-- **Nonsingularity of `(x^{p^n}, y^{p^n})` on `E.map (iterateFrobenius K p n)`** from
 nonsingularity of `(x, y)` on `E`, via the ring-hom nonsingularity transfer (`iterateFrobenius` is
 injective) together with `iterateFrobenius K p n a = a^{p^n}`. -/
@@ -313,6 +311,7 @@ theorem oneSubFrobeniusIsogBaseChange_hkerdeg_of_degree_eq_pointCount
       (oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K) pullback_L).degree := by
   rw [oneSubFrobeniusIsogBaseChange_nat_card_ker_eq_pointCount, hdeg_eq]
 
+omit [Fintype W.toAffine.Point] in
 /-- **Witness 2 — `hsurj` from the dual composition `φ ∘ δ = [N]`** (axiom-clean reduction).  For
 any `N` with `(N : K̄) ≠ 0`, surjectivity of `[N]` on `E(K̄)`-points (`mulByInt_point_surjective`)
 turns the dual composition `φ ∘ δ = [N]` into surjectivity of `φ`.  This is the second consequence
