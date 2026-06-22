@@ -809,6 +809,129 @@ section Headline
 variable [ellC₁ : C₁.toAffine.IsElliptic] [ellC₂ : C₂.toAffine.IsElliptic]
 variable [sepKL : Algebra.IsSeparable C₂.FunctionField C₁.FunctionField]
 
+/-- **The good target point** (avoidance + genericity step of the headline).  Given the
+finite ramification locus `Sram` of `(Af, D)`, off any prescribed finite set `avoid` there
+is a smooth point `Q` of `C₂` that also avoids the zeros of `f` and the pullback of `Sram`.
+The argument is that all three loci are finite — `avoid` by hypothesis, the zeros of `f` by
+unique factorization of `F[C₂]`, and the `Sram`-pullback by injectivity of `awayIdealAt` on
+that locus — so their union has nonempty complement in the infinitely many smooth points. -/
+private theorem exists_good_target_point [IsAlgClosed F]
+    [IsIntegrallyClosed C₂.CoordinateRing] (hf : f ≠ 0)
+    {avoid : Set C₂.SmoothPoint} (havoid : avoid.Finite)
+    (Sram : Set (Ideal Af)) (hSfin : Sram.Finite) :
+    ∃ Q : C₂.SmoothPoint, Q ∉ avoid ∧ f ∉ C₂.maximalIdealAt Q ∧
+      awayIdealAt Af Q ∉ Sram := by
+  classical
+  have hfin1 : {Q' : C₂.SmoothPoint | f ∈ C₂.maximalIdealAt Q'}.Finite := by
+    haveI : Fintype {I : Ideal C₂.CoordinateRing // I ∣ Ideal.span {f}} :=
+      UniqueFactorizationMonoid.fintypeSubtypeDvd _
+        (by simpa using hf)
+    rw [← Set.finite_coe_iff]
+    refine Finite.of_injective (fun Q' ↦
+      (⟨C₂.maximalIdealAt Q'.1, Ideal.dvd_span_singleton.mpr Q'.2⟩ :
+        {I : Ideal C₂.CoordinateRing // I ∣ Ideal.span {f}})) ?_
+    intro Q₁ Q₂ h
+    exact Subtype.ext (C₂.maximalIdealAt_injective (congrArg Subtype.val h))
+  have hfin2 : {Q' : C₂.SmoothPoint |
+      f ∉ C₂.maximalIdealAt Q' ∧ awayIdealAt Af Q' ∈ Sram}.Finite := by
+    refine Set.Finite.of_finite_image (f := fun Q' ↦ awayIdealAt Af Q')
+      (hSfin.subset ?_) ?_
+    · rintro _ ⟨Q', ⟨_, hmem⟩, rfl⟩
+      exact hmem
+    · rintro Q₁ ⟨hf₁, _⟩ Q₂ ⟨hf₂, _⟩ heq
+      apply C₂.maximalIdealAt_injective
+      rw [← awayIdealAt_under f Af Q₁ hf₁, ← awayIdealAt_under f Af Q₂ hf₂]
+      exact congrArg (Ideal.under C₂.CoordinateRing) heq
+  have hbig : (avoid ∪ {Q' : C₂.SmoothPoint | f ∈ C₂.maximalIdealAt Q'} ∪
+      {Q' : C₂.SmoothPoint | f ∉ C₂.maximalIdealAt Q' ∧ awayIdealAt Af Q' ∈ Sram}).Finite :=
+    (havoid.union hfin1).union hfin2
+  haveI : Infinite C₂.SmoothPoint := C₂.smoothPoint_infinite
+  obtain ⟨Q, hQ⟩ := hbig.infinite_compl.nonempty
+  rw [Set.mem_compl_iff, Set.mem_union, Set.mem_union, not_or, not_or] at hQ
+  obtain ⟨⟨hQavoid, hQf⟩, hQram⟩ := hQ
+  exact ⟨Q, hQavoid, hQf, fun hmem ↦ hQram ⟨hQf, hmem⟩⟩
+
+/-- **The fibre count** (`Σ e·f = [K(C₁):K(C₂)]` step of the headline).  For a good target
+point `Q` — off the zeros of `f` (`hfQ`) and off the ramification locus `Sram` (`hQS`) — the
+number of primes of `D = integralClosure Af K(C₁)` over `q = awayIdealAt Af Q` equals
+`[K(C₁):K(C₂)]`.  This is mathlib's `Ideal.sum_ramification_inertia`, with ramification
+index `1` off `Sram` (`hSram`) and inertia degree `1` over an algebraically closed base
+(`inertiaDeg_eq_one_of_under_eq`), so the sum degenerates to the cardinality. -/
+private theorem card_primesOver_eq_finrank [IsAlgClosed F]
+    [IsIntegrallyClosed C₂.CoordinateRing]
+    [IsDedekindDomain (integralClosure Af C₁.FunctionField)]
+    (hf : f ≠ 0) {Q : C₂.SmoothPoint}
+    (hfQ : f ∉ C₂.maximalIdealAt Q)
+    (Sram : Set (Ideal Af))
+    (hSram : ∀ q : Ideal Af, q ∉ Sram →
+      ∀ P : Ideal (integralClosure Af C₁.FunctionField), P.IsPrime → P.under Af = q →
+        Ideal.ramificationIdx q P = 1)
+    (hQS : awayIdealAt Af Q ∉ Sram) :
+    (IsDedekindDomain.primesOverFinset (awayIdealAt Af Q)
+        (integralClosure Af C₁.FunctionField)).card =
+      Module.finrank C₂.FunctionField C₁.FunctionField := by
+  classical
+  haveI := GoodAffineLocus.isDedekindDomain_away C₂ f Af hf
+  haveI := GoodAffineLocus.isFractionRing_away C₂ f Af
+  haveI hDFR : IsFractionRing (integralClosure Af C₁.FunctionField) C₁.FunctionField :=
+    GoodAffineLocus.isFractionRing_integralClosure C₂ f Af hf
+  haveI hDMF : Module.Finite Af (integralClosure Af C₁.FunctionField) :=
+    GoodAffineLocus.module_finite_integralClosure C₂ f Af hf
+  haveI hqmax : (awayIdealAt Af Q).IsMaximal := awayIdealAt_isMaximal f Af Q hf hfQ
+  have hq0 : awayIdealAt Af Q ≠ ⊥ := awayIdealAt_ne_bot f Af Q hf
+  haveI htf : Module.IsTorsionFree Af (integralClosure Af C₁.FunctionField) :=
+    Curves.RamificationFinite.isTorsionFree Af C₂.FunctionField C₁.FunctionField _
+  have hPdata : ∀ P ∈ IsDedekindDomain.primesOverFinset (awayIdealAt Af Q)
+      (integralClosure Af C₁.FunctionField), P.IsPrime ∧ P.under Af = awayIdealAt Af Q := by
+    intro P hP
+    have hmem : P ∈ (awayIdealAt Af Q).primesOver (integralClosure Af C₁.FunctionField) :=
+      (IsDedekindDomain.mem_primesOverFinset_iff hq0 _).mp hP
+    exact ⟨hmem.1, hmem.2.over.symm⟩
+  have hsum := Ideal.sum_ramification_inertia
+    (S := integralClosure Af C₁.FunctionField) C₂.FunctionField C₁.FunctionField hq0
+  have hsum' : ∑ _P ∈ IsDedekindDomain.primesOverFinset (awayIdealAt Af Q)
+      (integralClosure Af C₁.FunctionField), (1 : ℕ) =
+      Module.finrank C₂.FunctionField C₁.FunctionField := by
+    rw [← hsum]
+    refine Finset.sum_congr rfl fun P hP ↦ ?_
+    rw [hSram _ hQS P (hPdata P hP).1 (hPdata P hP).2,
+      inertiaDeg_eq_one_of_under_eq C₂ f Af hf hfQ (hPdata P hP).1 (hPdata P hP).2]
+  rwa [Finset.sum_const, Nat.smul_one_eq_cast, Nat.cast_id] at hsum'
+
+omit finKL ellC₂ sepKL in
+/-- **Coordinate evaluation at a produced point** (the local-place step of the headline).
+For a prime `P` of `D` over `q = awayIdealAt Af Q` with trivial residue field, the
+pulled-back image of any coordinate-ring element `g : F[C₂]` evaluates at the smooth point
+`pointAt P` to its value `evalAt Q g`: the point valuation of the difference is `< 1`.  This
+is the evaluation form of the place identification (`pointValuation_sub_residueValue_lt_one`)
+together with the residue value of a pulled-back coordinate function being `evalAt Q g`
+(`residueValue_algebraMap`); it discharges both the `x`- and `y`-generator obligations. -/
+private theorem pointValuation_coordGen_sub_evalAt_lt_one [IsAlgClosed F]
+    (hX : coordXFun C₁ ∈ integralClosure Af C₁.FunctionField)
+    (hY : coordYFun C₁ ∈ integralClosure Af C₁.FunctionField)
+    {P : Ideal (integralClosure Af C₁.FunctionField)} {Q : C₂.SmoothPoint}
+    (hbij : Function.Bijective (residueClosure C₂ Af P))
+    (hPp : P.IsPrime) (hP0 : P ≠ ⊥) (hPq : P.under Af = awayIdealAt Af Q)
+    (g : C₂.CoordinateRing) :
+    C₁.pointValuation (pointAt C₂ Af hX hY hbij)
+        (algebraMap C₂.FunctionField C₁.FunctionField
+            (algebraMap C₂.CoordinateRing C₂.FunctionField g) -
+          algebraMap F C₁.FunctionField (C₂.evalAt Q g)) < 1 := by
+  have h := pointValuation_sub_residueValue_lt_one C₂ Af hX hY hbij hPp hP0
+    (⟨algebraMap Af C₁.FunctionField (algebraMap C₂.CoordinateRing Af g),
+      (integralClosure Af C₁.FunctionField).algebraMap_mem _⟩)
+  rw [residueValue_algebraMap C₂ Af hbij hPq] at h
+  have hcoe : algebraMap Af C₁.FunctionField (algebraMap C₂.CoordinateRing Af g) =
+      algebraMap C₂.FunctionField C₁.FunctionField
+        (algebraMap C₂.CoordinateRing C₂.FunctionField g) := by
+    rw [IsScalarTower.algebraMap_apply Af C₂.FunctionField C₁.FunctionField,
+      ← IsScalarTower.algebraMap_apply C₂.CoordinateRing Af C₂.FunctionField]
+  rwa [show ((⟨algebraMap Af C₁.FunctionField (algebraMap C₂.CoordinateRing Af g),
+      (integralClosure Af C₁.FunctionField).algebraMap_mem _⟩ :
+        integralClosure Af C₁.FunctionField) : C₁.FunctionField) =
+      algebraMap Af C₁.FunctionField (algebraMap C₂.CoordinateRing Af g) from rfl,
+    hcoe] at h
+
 include Af in
 /-- **The localized good fibre (W-3b headline)**.  Assume the denominator `f` swallows
 the minimal-polynomial coefficients of the coordinate functions of `C₁` over `K(C₂)`
@@ -853,37 +976,10 @@ theorem exists_good_fiber_points [IsAlgClosed F] [IsIntegrallyClosed C₂.Coordi
   -- the W-2 finite ramification bound at `(Af, D)`
   obtain ⟨Sram, hSfin, hSram⟩ :=
     GoodAffineLocus.exists_finite_ramification_locus (C₁ := C₁) C₂ f Af hf
-  -- the finite locus of `C₂`-points to avoid: `avoid`, the zeros of `f`, the ramified locus
-  have hfin1 : {Q' : C₂.SmoothPoint | f ∈ C₂.maximalIdealAt Q'}.Finite := by
-    haveI : Fintype {I : Ideal C₂.CoordinateRing // I ∣ Ideal.span {f}} :=
-      UniqueFactorizationMonoid.fintypeSubtypeDvd _
-        (by simpa using hf)
-    rw [← Set.finite_coe_iff]
-    refine Finite.of_injective (fun Q' ↦
-      (⟨C₂.maximalIdealAt Q'.1, Ideal.dvd_span_singleton.mpr Q'.2⟩ :
-        {I : Ideal C₂.CoordinateRing // I ∣ Ideal.span {f}})) ?_
-    intro Q₁ Q₂ h
-    exact Subtype.ext (C₂.maximalIdealAt_injective (congrArg Subtype.val h))
-  have hfin2 : {Q' : C₂.SmoothPoint |
-      f ∉ C₂.maximalIdealAt Q' ∧ awayIdealAt Af Q' ∈ Sram}.Finite := by
-    refine Set.Finite.of_finite_image (f := fun Q' ↦ awayIdealAt Af Q')
-      (hSfin.subset ?_) ?_
-    · rintro _ ⟨Q', ⟨_, hmem⟩, rfl⟩
-      exact hmem
-    · rintro Q₁ ⟨hf₁, _⟩ Q₂ ⟨hf₂, _⟩ heq
-      apply C₂.maximalIdealAt_injective
-      rw [← awayIdealAt_under f Af Q₁ hf₁, ← awayIdealAt_under f Af Q₂ hf₂]
-      exact congrArg (Ideal.under C₂.CoordinateRing) heq
-  have hbig : (avoid ∪ {Q' : C₂.SmoothPoint | f ∈ C₂.maximalIdealAt Q'} ∪
-      {Q' : C₂.SmoothPoint | f ∉ C₂.maximalIdealAt Q' ∧ awayIdealAt Af Q' ∈ Sram}).Finite :=
-    (havoid.union hfin1).union hfin2
-  haveI : Infinite C₂.SmoothPoint := C₂.smoothPoint_infinite
-  obtain ⟨Q, hQ⟩ := hbig.infinite_compl.nonempty
-  rw [Set.mem_compl_iff, Set.mem_union, Set.mem_union, not_or, not_or] at hQ
-  obtain ⟨⟨hQavoid, hQf⟩, hQram⟩ := hQ
-  have hfQ : f ∉ C₂.maximalIdealAt Q := hQf
-  have hQS : awayIdealAt Af Q ∉ Sram := fun hmem ↦ hQram ⟨hfQ, hmem⟩
-  -- instances for the Σ e·f count at `(Af, D)`
+  -- a target point avoiding `avoid`, the zeros of `f`, and the ramified locus
+  obtain ⟨Q, hQavoid, hfQ, hQS⟩ :=
+    exists_good_target_point C₂ f Af hf havoid Sram hSfin
+  -- instances to form the prime finset over `q` and read off prime data
   haveI := GoodAffineLocus.isDedekindDomain_away C₂ f Af hf
   haveI := GoodAffineLocus.isFractionRing_away C₂ f Af
   haveI hDDed : IsDedekindDomain (integralClosure Af C₁.FunctionField) :=
@@ -896,7 +992,8 @@ theorem exists_good_fiber_points [IsAlgClosed F] [IsIntegrallyClosed C₂.Coordi
   have hq0 : awayIdealAt Af Q ≠ ⊥ := awayIdealAt_ne_bot f Af Q hf
   haveI htf : Module.IsTorsionFree Af (integralClosure Af C₁.FunctionField) :=
     Curves.RamificationFinite.isTorsionFree Af C₂.FunctionField C₁.FunctionField _
-  -- the prime data over `q`
+  -- the count `#{P over q} = [K(C₁):K(C₂)]`
+  have hcard := card_primesOver_eq_finrank C₂ f Af hf hfQ Sram hSram hQS
   have hPdata : ∀ P ∈ IsDedekindDomain.primesOverFinset (awayIdealAt Af Q)
       (integralClosure Af C₁.FunctionField), P.IsPrime ∧ P.under Af = awayIdealAt Af Q := by
     intro P hP
@@ -907,20 +1004,6 @@ theorem exists_good_fiber_points [IsAlgClosed F] [IsIntegrallyClosed C₂.Coordi
       (integralClosure Af C₁.FunctionField), P ≠ ⊥ := by
     intro P hP hbot
     exact hq0 (by rw [← (hPdata P hP).2, hbot, Ideal.under_bot])
-  -- Σ e·f = finrank, with e = 1 (off the ramified locus) and f = 1 (residue triviality)
-  have hsum := Ideal.sum_ramification_inertia
-    (S := integralClosure Af C₁.FunctionField) C₂.FunctionField C₁.FunctionField hq0
-  have hcard : (IsDedekindDomain.primesOverFinset (awayIdealAt Af Q)
-      (integralClosure Af C₁.FunctionField)).card =
-      Module.finrank C₂.FunctionField C₁.FunctionField := by
-    have hsum' : ∑ _P ∈ IsDedekindDomain.primesOverFinset (awayIdealAt Af Q)
-        (integralClosure Af C₁.FunctionField), (1 : ℕ) =
-        Module.finrank C₂.FunctionField C₁.FunctionField := by
-      rw [← hsum]
-      refine Finset.sum_congr rfl fun P hP ↦ ?_
-      rw [hSram _ hQS P (hPdata P hP).1 (hPdata P hP).2,
-        inertiaDeg_eq_one_of_under_eq C₂ f Af hf hfQ (hPdata P hP).1 (hPdata P hP).2]
-    rwa [Finset.sum_const, Nat.smul_one_eq_cast, Nat.cast_id] at hsum'
   -- the point set: images of the primes over `q`
   refine ⟨Q, hQavoid, (IsDedekindDomain.primesOverFinset (awayIdealAt Af Q)
       (integralClosure Af C₁.FunctionField)).attach.image fun P ↦
@@ -941,58 +1024,21 @@ theorem exists_good_fiber_points [IsAlgClosed F] [IsIntegrallyClosed C₂.Coordi
       (residue_closure_bijective C₂ f Af hf hfQ hd₁.1 hd₁.2)
       (residue_closure_bijective C₂ f Af hf hfQ hd₂.1 hd₂.2)
       (hd₁.1.isMaximal h₁0) (hd₂.1.isMaximal h₂0) h₁0 h₂0 hne' heq
-  · -- the evaluation facts at each produced point
+  · -- the evaluation facts at each produced point, via the coordinate-evaluation helper
     intro pt hpt
     rw [Finset.mem_image] at hpt
     obtain ⟨⟨P, hP⟩, -, rfl⟩ := hpt
     have hd := hPdata P hP
     have hP0 : P ≠ ⊥ := hPbot P hP
-    set hbijP := residue_closure_bijective C₂ f Af hf hfQ hd.1 hd.2 with hbijP_def
-    constructor
-    · -- the `x`-generator
-      have h := pointValuation_sub_residueValue_lt_one C₂ Af hX hY hbijP hd.1 hP0
-        (⟨algebraMap Af C₁.FunctionField (algebraMap C₂.CoordinateRing Af
-            (WeierstrassCurve.Affine.CoordinateRing.mk C₂.toAffine
-              (Polynomial.C Polynomial.X))),
-          (integralClosure Af C₁.FunctionField).algebraMap_mem _⟩)
-      rw [residueValue_algebraMap C₂ Af hbijP hd.2, SmoothPlaneCurve.evalAt_x] at h
-      have hcoeX : algebraMap Af C₁.FunctionField (algebraMap C₂.CoordinateRing Af
-          (WeierstrassCurve.Affine.CoordinateRing.mk C₂.toAffine
-            (Polynomial.C Polynomial.X))) =
-          algebraMap C₂.FunctionField C₁.FunctionField
-            (algebraMap C₂.CoordinateRing C₂.FunctionField
-              (WeierstrassCurve.Affine.CoordinateRing.mk C₂.toAffine
-                (Polynomial.C Polynomial.X))) := by
-        rw [IsScalarTower.algebraMap_apply Af C₂.FunctionField C₁.FunctionField,
-          ← IsScalarTower.algebraMap_apply C₂.CoordinateRing Af C₂.FunctionField]
-      rwa [show ((⟨algebraMap Af C₁.FunctionField (algebraMap C₂.CoordinateRing Af
-          (WeierstrassCurve.Affine.CoordinateRing.mk C₂.toAffine
-            (Polynomial.C Polynomial.X))),
-          (integralClosure Af C₁.FunctionField).algebraMap_mem _⟩ :
-            integralClosure Af C₁.FunctionField) : C₁.FunctionField) =
-          algebraMap Af C₁.FunctionField (algebraMap C₂.CoordinateRing Af
-            (WeierstrassCurve.Affine.CoordinateRing.mk C₂.toAffine
-              (Polynomial.C Polynomial.X))) from rfl, hcoeX] at h
-    · -- the `y`-generator
-      have h := pointValuation_sub_residueValue_lt_one C₂ Af hX hY hbijP hd.1 hP0
-        (⟨algebraMap Af C₁.FunctionField (algebraMap C₂.CoordinateRing Af
-            (WeierstrassCurve.Affine.CoordinateRing.mk C₂.toAffine Polynomial.X)),
-          (integralClosure Af C₁.FunctionField).algebraMap_mem _⟩)
-      rw [residueValue_algebraMap C₂ Af hbijP hd.2, SmoothPlaneCurve.evalAt_y] at h
-      have hcoeY : algebraMap Af C₁.FunctionField (algebraMap C₂.CoordinateRing Af
-          (WeierstrassCurve.Affine.CoordinateRing.mk C₂.toAffine Polynomial.X)) =
-          algebraMap C₂.FunctionField C₁.FunctionField
-            (algebraMap C₂.CoordinateRing C₂.FunctionField
-              (WeierstrassCurve.Affine.CoordinateRing.mk C₂.toAffine Polynomial.X)) := by
-        rw [IsScalarTower.algebraMap_apply Af C₂.FunctionField C₁.FunctionField,
-          ← IsScalarTower.algebraMap_apply C₂.CoordinateRing Af C₂.FunctionField]
-      rwa [show ((⟨algebraMap Af C₁.FunctionField (algebraMap C₂.CoordinateRing Af
-          (WeierstrassCurve.Affine.CoordinateRing.mk C₂.toAffine Polynomial.X)),
-          (integralClosure Af C₁.FunctionField).algebraMap_mem _⟩ :
-            integralClosure Af C₁.FunctionField) : C₁.FunctionField) =
-          algebraMap Af C₁.FunctionField (algebraMap C₂.CoordinateRing Af
-            (WeierstrassCurve.Affine.CoordinateRing.mk C₂.toAffine Polynomial.X))
-          from rfl, hcoeY] at h
+    refine ⟨?_, ?_⟩
+    · have h := pointValuation_coordGen_sub_evalAt_lt_one C₂ Af hX hY
+        (residue_closure_bijective C₂ f Af hf hfQ hd.1 hd.2) hd.1 hP0 hd.2
+        (WeierstrassCurve.Affine.CoordinateRing.mk C₂.toAffine (Polynomial.C Polynomial.X))
+      rwa [SmoothPlaneCurve.evalAt_x] at h
+    · have h := pointValuation_coordGen_sub_evalAt_lt_one C₂ Af hX hY
+        (residue_closure_bijective C₂ f Af hf hfQ hd.1 hd.2) hd.1 hP0 hd.2
+        (WeierstrassCurve.Affine.CoordinateRing.mk C₂.toAffine Polynomial.X)
+      rwa [SmoothPlaneCurve.evalAt_y] at h
 
 end Headline
 
