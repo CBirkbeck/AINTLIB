@@ -3735,6 +3735,26 @@ noncomputable def addPullbackNumerator_reduced_pair_zsmul_frobenius_mulByInt_neg
         ((frobeniusIsog W).zsmul r).pullback (x_gen W) *
         (mulByInt W.toAffine (-s)).pullback (x_gen W)
 
+/-- Weierstrass relation at the pullback of an arbitrary isogeny `α`, in
+`algebraMap K KE`-coefficient form (via `pullback_equation`). -/
+private theorem weierstrass_relation_pullback (α : Isogeny W.toAffine W.toAffine) :
+    α.pullback (y_gen W) ^ 2 +
+        algebraMap K KE W.toAffine.a₁ * α.pullback (x_gen W) * α.pullback (y_gen W) +
+        algebraMap K KE W.toAffine.a₃ * α.pullback (y_gen W) -
+        (α.pullback (x_gen W) ^ 3 +
+         algebraMap K KE W.toAffine.a₂ * α.pullback (x_gen W) ^ 2 +
+         algebraMap K KE W.toAffine.a₄ * α.pullback (x_gen W) +
+         algebraMap K KE W.toAffine.a₆) = 0 := by
+  have h := pullback_equation W α
+  rw [WeierstrassCurve.Affine.equation_iff'] at h
+  have h_a1 : (W_KE W).toAffine.a₁ = algebraMap K KE W.toAffine.a₁ := rfl
+  have h_a2 : (W_KE W).toAffine.a₂ = algebraMap K KE W.toAffine.a₂ := rfl
+  have h_a3 : (W_KE W).toAffine.a₃ = algebraMap K KE W.toAffine.a₃ := rfl
+  have h_a4 : (W_KE W).toAffine.a₄ = algebraMap K KE W.toAffine.a₄ := rfl
+  have h_a6 : (W_KE W).toAffine.a₆ = algebraMap K KE W.toAffine.a₆ := rfl
+  rw [h_a1, h_a2, h_a3, h_a4, h_a6] at h
+  exact h
+
 /-- **Weierstrass reduction for the pair**:
 `addPullbackNumerator_pair = addPullbackNumerator_reduced_pair`. Mirror of
 `addPullbackNumerator_negFrobenius_eq_reduced`, with both Weierstrass
@@ -3743,50 +3763,8 @@ theorem addPullbackNumerator_pair_zsmul_frobenius_mulByInt_neg_eq_reduced
     (r s : ℤ) (hr : r ≠ 0) (hs : s ≠ 0) :
     addPullbackNumerator_pair_zsmul_frobenius_mulByInt_neg W r s =
       addPullbackNumerator_reduced_pair_zsmul_frobenius_mulByInt_neg W r s := by
-  -- Weierstrass equation for α₁(P) = ((zsmul r π)(x), (zsmul r π)(y)).
-  have h_α₁ : (((frobeniusIsog W).zsmul r).pullback (y_gen W)) ^ 2 +
-        algebraMap K KE W.toAffine.a₁ *
-          ((frobeniusIsog W).zsmul r).pullback (x_gen W) *
-          ((frobeniusIsog W).zsmul r).pullback (y_gen W) +
-        algebraMap K KE W.toAffine.a₃ *
-          ((frobeniusIsog W).zsmul r).pullback (y_gen W) -
-        ((((frobeniusIsog W).zsmul r).pullback (x_gen W)) ^ 3 +
-         algebraMap K KE W.toAffine.a₂ *
-           ((frobeniusIsog W).zsmul r).pullback (x_gen W) ^ 2 +
-         algebraMap K KE W.toAffine.a₄ *
-           ((frobeniusIsog W).zsmul r).pullback (x_gen W) +
-         algebraMap K KE W.toAffine.a₆) = 0 := by
-    have h := pullback_equation W ((frobeniusIsog W).zsmul r)
-    rw [WeierstrassCurve.Affine.equation_iff'] at h
-    have h_a1 : (W_KE W).toAffine.a₁ = algebraMap K KE W.toAffine.a₁ := rfl
-    have h_a2 : (W_KE W).toAffine.a₂ = algebraMap K KE W.toAffine.a₂ := rfl
-    have h_a3 : (W_KE W).toAffine.a₃ = algebraMap K KE W.toAffine.a₃ := rfl
-    have h_a4 : (W_KE W).toAffine.a₄ = algebraMap K KE W.toAffine.a₄ := rfl
-    have h_a6 : (W_KE W).toAffine.a₆ = algebraMap K KE W.toAffine.a₆ := rfl
-    rw [h_a1, h_a2, h_a3, h_a4, h_a6] at h
-    exact h
-  -- Weierstrass equation for α₂(P) = ((mulByInt -s)(x), (mulByInt -s)(y)).
-  have h_α₂ : ((mulByInt W.toAffine (-s)).pullback (y_gen W)) ^ 2 +
-        algebraMap K KE W.toAffine.a₁ *
-          (mulByInt W.toAffine (-s)).pullback (x_gen W) *
-          (mulByInt W.toAffine (-s)).pullback (y_gen W) +
-        algebraMap K KE W.toAffine.a₃ *
-          (mulByInt W.toAffine (-s)).pullback (y_gen W) -
-        (((mulByInt W.toAffine (-s)).pullback (x_gen W)) ^ 3 +
-         algebraMap K KE W.toAffine.a₂ *
-           (mulByInt W.toAffine (-s)).pullback (x_gen W) ^ 2 +
-         algebraMap K KE W.toAffine.a₄ *
-           (mulByInt W.toAffine (-s)).pullback (x_gen W) +
-         algebraMap K KE W.toAffine.a₆) = 0 := by
-    have h := pullback_equation W (mulByInt W.toAffine (-s))
-    rw [WeierstrassCurve.Affine.equation_iff'] at h
-    have h_a1 : (W_KE W).toAffine.a₁ = algebraMap K KE W.toAffine.a₁ := rfl
-    have h_a2 : (W_KE W).toAffine.a₂ = algebraMap K KE W.toAffine.a₂ := rfl
-    have h_a3 : (W_KE W).toAffine.a₃ = algebraMap K KE W.toAffine.a₃ := rfl
-    have h_a4 : (W_KE W).toAffine.a₄ = algebraMap K KE W.toAffine.a₄ := rfl
-    have h_a6 : (W_KE W).toAffine.a₆ = algebraMap K KE W.toAffine.a₆ := rfl
-    rw [h_a1, h_a2, h_a3, h_a4, h_a6] at h
-    exact h
+  have h_α₁ := weierstrass_relation_pullback W ((frobeniusIsog W).zsmul r)
+  have h_α₂ := weierstrass_relation_pullback W (mulByInt W.toAffine (-s))
   unfold addPullbackNumerator_pair_zsmul_frobenius_mulByInt_neg
     addPullbackNumerator_reduced_pair_zsmul_frobenius_mulByInt_neg
   linear_combination h_α₁ + h_α₂
