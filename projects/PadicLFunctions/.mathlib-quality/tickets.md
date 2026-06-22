@@ -7141,8 +7141,31 @@ commute_on_MPlusN are the reusable pieces. Next: Γ⁺-action (Rmk 13.7), Y∞�
 - Abelian: Gal(Mₙ⁺/Fₙ⁺), Gal(Lₙ⁺/Fₙ⁺), **isMulCommutative_XinfPlus** (X∞⁺ abelian). Plus the reusable
   commute_restrict / commute_restrict_AG / isAbelianGalois_comap_MPlusN / commute_on_MPlusN.
 - Γ⁺-action prereqs: isMulCommutative_galF, normal_FPlus, normal_FinfPlus.
+- **2026-06-22 /beastmode session (Galois side of §13.2 — committed, lake-clean, ~1040 lines):**
+  - normal_MinfPlus (M∞⁺/ℚ normal) reduced to ONE isolated sorry `isAdmissibleM_map` (= TG1-N-transport).
+  - **TG1 DONE-mod-sorry**: MulDistribMulAction (GammaPlus)(XinfPlus) [Remark 13.7].
+  - **TG3 DONE**: Y∞⁺ abelian. **TG4 DONE**: Galois SES (restrXtoY surj + ker=Gal(M∞⁺/L∞⁺)) + over-F∞⁺
+    normality. **TG2 first half DONE**: instCommGroupXinfPlus (ℤ[Γ⁺]-module carrier).
+  - Encoding lessons banked: ℚ-algebra diamond → refine/.mpr/explicit-instance bridges; ⨆-base heavy
+    defeq (carrier isos) → use IntermediateField.restrict/restrict_algEquiv, NOT comap+codRestrict.
 
-## OPEN — remaining chain to Thm 13.11. Critical path: TG1→TG2→TG6→TG9.
+## NEXT PHASE — §12 integration (Λ-module, CFT, Vandiver, IMC). Gateway = study §12
+The remaining tickets (TG2-Lambda, TG5–TG9) all need §12: `IwasawaAlgebra`, `Gamma`, `GPlus`,
+`gplusHomeo`, the unit towers (E∞,₁⁺/U∞,₁⁺/C∞,₁⁺), `iwasawa_theorem`. Recommended order:
+TG2-Lambda (Γ⁺≅ℤp + Λ) → TG5 (state Prop 13.13 about the real Gal(M∞⁺/L∞⁺)) → TG6 → TG7 → TG8 → TG9.
+The non-§12 remaining lemma is TG1-N-transport (isAdmissibleM_map, deep ANT, the project's one sorry).
+
+### [TG2-Lambda] Λ(Γ⁺)=ℤp[[Γ⁺]]-module on X∞⁺ + Γ⁺≅ℤp (the §12 connection)
+- **Status**: open  **Parent**: TG2  **Depends on**: TG2(first half), §12  **Type**: instance + iso
+- **Statement**: `GammaPlus p ≃* (§12) Gamma p` (≅ ℤp via the cyclotomic character at the limit), and
+  the `Λ(Γ⁺)`-module structure on `Additive (XinfPlus p)` extending instMulDistribMulActionGammaPlusXinfPlus
+  (profinite completion of the ℤ[Γ⁺]-action — connect to §12's `IwasawaAlgebra`).
+- **Sketch**: Γ⁺ = Gal(F∞⁺/ℚ) = lim Gal(F⁺ₙ/ℚ) ≅ lim (ℤ/pⁿ)ˣ⁺ ≅ ℤp (galEquiv at the limit / the §12
+  Gamma). Then `Λ(Γ⁺)` = §12 IwasawaAlgebra; the X∞⁺ action completes to a Λ-action (X∞⁺ profinite).
+- **Mathlib/project**: §12 IwasawaAlgebra, Gamma, gplusHomeo, CarrierBridgeConcrete; galEquiv;
+  IsCyclotomicExtension.autEquivPow; inverse limits. **Likely needs its own sub-tickets** (the ℤp iso
+  and the completion are each real work). **First action: read §12 to fix the exact Gamma/IwasawaAlgebra
+  API.**
 
 ### [TG1] Γ⁺-action on X∞⁺ (Remark 13.7) — group action by conjugation of lifts
 - **Status**: DONE-mod-sorry (2026-06-22) — `instMulDistribMulActionGammaPlusXinfPlus` built & lake-clean;
@@ -7205,7 +7228,12 @@ commute_on_MPlusN are the reusable pieces. Next: Γ⁺-action (Rmk 13.7), Y∞�
   (TG1b–TG9, Thm 13.11) be built on `normal_MinfPlus` as a black box.
 
 ### [TG2] Λ(Γ⁺)-module structure on X∞⁺; connect Γ⁺ to §12's GPlus
-- **Status**: open  **Depends on**: TG1  **Type**: instance + iso
+- **Status**: PARTIAL (2026-06-22) — first half DONE (sorry-free): `instCommGroupXinfPlus` (X∞⁺ a
+  CommGroup, from isMulCommutative_XinfPlus) ⟹ `Additive X∞⁺` is an AddCommGroup; with the TG1 action
+  this is the ℤ[Γ⁺]-module carrier. Remaining = **TG2-Lambda** (Λ(Γ⁺)=ℤp[[Γ⁺]] completion + Γ⁺≅ℤp via
+  §12). NB: mathlib here lacks `CommGroup.ofIsMulCommutative` and `Mathlib.RepresentationTheory` is not
+  imported — used the CommGroup constructor directly.
+- **Depends on**: TG1  **Type**: instance + iso
 - **Statement**: `Module (IwasawaAlgebra …) (Additive (XinfPlus p))` extending the TG1 action; and
   `GammaPlus p ≃* Gamma p` (§12's Gamma) connecting to GPlus ≃ Delta × Gamma (gplusHomeo).
 - **Sketch**: ℤ[Γ⁺]-action from TG1 → completion to Λ(Γ⁺); identify GammaPlus p (=Gal(F∞⁺/ℚ)) ≅ ℤp ≅
