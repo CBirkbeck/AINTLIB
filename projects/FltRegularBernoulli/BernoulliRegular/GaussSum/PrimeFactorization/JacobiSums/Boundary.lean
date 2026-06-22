@@ -100,12 +100,7 @@ lemma inverseGeneratorCoefficient_mul_val_sub_one_mem_normalizedBoundaryPrime
             ((a : ZMod p).val),
           ZMod.natCast_zmod_val]
       _ = 0 := by
-            calc
-              (((a⁻¹ : (ZMod p)ˣ) : ZMod p) * (a : ZMod p) - 1) =
-                  (1 : ZMod p) - 1 := by
-                    congr 1
-                    exact congrArg (fun u : (ZMod p)ˣ => ((u : ZMod p))) (inv_mul_cancel a)
-              _ = 0 := by simp
+            rw [← Units.val_mul, inv_mul_cancel a, Units.val_one, sub_self]
   have hxchar_mem :
       xchar ∈ normalizedCharacterPrime (p := p) (L := L) := by
     apply Ideal.Quotient.eq_zero_iff_mem.mp
@@ -131,6 +126,19 @@ lemma inverseGeneratorCoefficient_mul_val_sub_one_mem_normalizedBoundaryPrime
       normalizedBoundaryPrime (p := p) (L := L) at hxchar_mem'
   simpa [ZMod.natCast_val] using hxchar_mem'
 
+lemma stickelbergerComplexCharacterGenerator_pow_pred_ne_one (hp_odd : p ≠ 2) :
+    stickelbergerComplexCharacterGenerator (p := p) ^ (p - 2) ≠ 1 := by
+  have hp_two : 2 ≤ p := hp.out.two_le
+  let j : Fin (p - 1) := ⟨p - 2, by omega⟩
+  have hj : j ≠ 0 := by
+    intro hj0
+    have hval : p - 2 = 0 := by
+      simpa [j] using congrArg Fin.val hj0
+    omega
+  simpa [j] using
+    stickelbergerComplexCharacterGenerator_pow_ne_one_of_ne_zero
+      (p := p) (j := j) hj
+
 lemma inverseGeneratorCoefficientSum_eq_zero (hp_odd : p ≠ 2) :
     ∑ m : Fin (p - 1),
       gaussSumLiftCharacterValue (p := p) (L := L)
@@ -138,17 +146,8 @@ lemma inverseGeneratorCoefficientSum_eq_zero (hp_odd : p ≠ 2) :
         (((characterUnitGenerator (p := p)) ^ (m : ℕ) : (ZMod p)ˣ)) = 0 := by
   let χ : DirichletCharacter ℂ p :=
     stickelbergerComplexCharacterGenerator (p := p) ^ (p - 2)
-  have hp2 : 2 ≤ p := hp.out.two_le
-  let j : Fin (p - 1) := ⟨p - 2, by omega⟩
-  have hj : j ≠ 0 := by
-    intro hj0
-    have hval : p - 2 = 0 := by
-      simpa [j] using congrArg Fin.val hj0
-    omega
-  have hχ : χ ≠ 1 := by
-    simpa [χ, j] using
-      stickelbergerComplexCharacterGenerator_pow_ne_one_of_ne_zero
-        (p := p) (j := j) hj
+  have hχ : χ ≠ 1 :=
+    stickelbergerComplexCharacterGenerator_pow_pred_ne_one (p := p) hp_odd
   apply Subtype.ext
   have hsumC :
       ∑ m : Fin (p - 1),
@@ -394,19 +393,6 @@ lemma primeAbovePExponent_normalizedBoundaryPrime_inverseGenerator_eq_one
       (p := p) (L := L) hp_odd
       ((Ideal.span_singleton_le_iff_mem
         (I := normalizedBoundaryPrime (p := p) (L := L) ^ 2)).mp (by simpa using hle))
-
-lemma stickelbergerComplexCharacterGenerator_pow_pred_ne_one (hp_odd : p ≠ 2) :
-    stickelbergerComplexCharacterGenerator (p := p) ^ (p - 2) ≠ 1 := by
-  have hp_two : 2 ≤ p := hp.out.two_le
-  let j : Fin (p - 1) := ⟨p - 2, by omega⟩
-  have hj : j ≠ 0 := by
-    intro hj0
-    have hval : p - 2 = 0 := by
-      simpa [j] using congrArg Fin.val hj0
-    omega
-  simpa [j] using
-    stickelbergerComplexCharacterGenerator_pow_ne_one_of_ne_zero
-      (p := p) (j := j) hj
 
 lemma distinguishedPrimeExponent_inverseGenerator_normalizedTransport_eq_one
     (hp_odd : p ≠ 2) :
