@@ -72,8 +72,7 @@ theorem mem_oneUnitsCotangentHom_ker {u : oneUnitsSubgroup I} :
 theorem oneUnitsCotangentHom_ker :
     (oneUnitsCotangentHom I).ker = (oneUnitsSubgroup (I ^ 2)).subgroupOf (oneUnitsSubgroup I) := by
   ext u
-  rw [mem_oneUnitsCotangentHom_ker]
-  rw [Subgroup.mem_subgroupOf]
+  rw [mem_oneUnitsCotangentHom_ker, Subgroup.mem_subgroupOf]
   rfl
 
 end OneUnitsCotangent
@@ -201,12 +200,12 @@ noncomputable def principalUnitFirstGradedHom :
   let M := localCyclotomicMaximalIdeal p K
   let toOneUnits : principalUnitSubgroup p K 1 →* Ideal.oneUnitsSubgroup M :=
   {
-    toFun := fun u => ⟨(u : localCyclotomicUnitGroup p K), by
+    toFun := fun u ↦ ⟨(u : localCyclotomicUnitGroup p K), by
       have hu := (mem_principalUnitSubgroup_iff (p := p) (K := K) (n := 1)
         (u := (u : localCyclotomicUnitGroup p K))).mp u.2
       simpa [M] using hu⟩
     map_one' := rfl
-    map_mul' := fun _ _ => rfl
+    map_mul' := fun _ _ ↦ rfl
   }
   (Ideal.oneUnitsCotangentHom M).comp toOneUnits
 
@@ -324,8 +323,7 @@ theorem principalUnitSubgroup_one_le_endpointSubgroup :
     exact Subgroup.mem_top _
   rcases Subgroup.mem_zpowers_iff.mp hmem with ⟨k, hk⟩
   have hker : (z ^ k)⁻¹ * (⟨u, hu⟩ : U1) ∈ f.ker := by
-    rw [MonoidHom.mem_ker]
-    rw [map_mul, map_inv, map_zpow, hk, inv_mul_cancel]
+    rw [MonoidHom.mem_ker, map_mul, map_inv, map_zpow, hk, inv_mul_cancel]
   have hU2 : ((((z ^ k)⁻¹ * (⟨u, hu⟩ : U1)) : U1) :
       localCyclotomicUnitGroup p K) ∈ principalUnitSubgroup p K 2 :=
     (mem_principalUnitFirstGradedHom_ker (p := p) (K := K)).mp hker
