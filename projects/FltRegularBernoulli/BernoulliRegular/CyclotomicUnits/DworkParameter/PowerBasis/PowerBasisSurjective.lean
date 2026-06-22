@@ -1,6 +1,6 @@
 module
 
-public import BernoulliRegular.CyclotomicUnits.DworkParameter.Part11
+public import BernoulliRegular.CyclotomicUnits.DworkParameter.PowerBasis.RamificationUnit
 public import BernoulliRegular.Reflection.Local.Graded
 public import Mathlib.LinearAlgebra.StdBasis
 

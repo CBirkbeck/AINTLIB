@@ -1,6 +1,6 @@
 module
 
-public import BernoulliRegular.CyclotomicUnits.DworkParameter.Part1
+public import BernoulliRegular.CyclotomicUnits.DworkParameter.CompletedRing.IntegralCoefficientMap
 
 @[expose] public section
 

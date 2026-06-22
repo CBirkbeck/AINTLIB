@@ -1,6 +1,6 @@
 module
 
-public import BernoulliRegular.CyclotomicUnits.DworkParameter.Part8
+public import BernoulliRegular.CyclotomicUnits.DworkParameter.Construction.DworkParameterConstruction
 public import BernoulliRegular.Reflection.Local.DeltaAction
 public import Mathlib.Topology.Algebra.UniformRing
 

@@ -1,6 +1,6 @@
 module
 
-public import BernoulliRegular.CyclotomicUnits.DworkParameter.Part2
+public import BernoulliRegular.CyclotomicUnits.DworkParameter.SamePrimeLog.SamePrimeDivisionEval
 
 /-!
 # The same-prime finite logarithm and its additivity

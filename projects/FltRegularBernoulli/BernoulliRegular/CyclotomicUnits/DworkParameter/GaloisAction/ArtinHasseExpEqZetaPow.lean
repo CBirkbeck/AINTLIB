@@ -1,6 +1,6 @@
 module
 
-public import BernoulliRegular.CyclotomicUnits.DworkParameter.Part16
+public import BernoulliRegular.CyclotomicUnits.DworkParameter.GaloisAction.TeichmullerScaledParameter
 
 @[expose] public section
 

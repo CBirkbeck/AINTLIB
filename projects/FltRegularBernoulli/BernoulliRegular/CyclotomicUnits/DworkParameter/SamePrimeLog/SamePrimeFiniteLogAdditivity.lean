@@ -1,6 +1,6 @@
 module
 
-public import BernoulliRegular.CyclotomicUnits.DworkParameter.Part3
+public import BernoulliRegular.CyclotomicUnits.DworkParameter.SamePrimeLog.SamePrimeFiniteLog
 
 @[expose] public section
 

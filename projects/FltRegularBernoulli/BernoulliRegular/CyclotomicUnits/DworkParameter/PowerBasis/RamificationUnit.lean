@@ -1,6 +1,6 @@
 module
 
-public import BernoulliRegular.CyclotomicUnits.DworkParameter.Part10
+public import BernoulliRegular.CyclotomicUnits.DworkParameter.Construction.DworkParameterPowerIdentity
 
 @[expose] public section
 

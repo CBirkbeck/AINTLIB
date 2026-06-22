@@ -1,6 +1,6 @@
 module
 
-public import BernoulliRegular.CyclotomicUnits.DworkParameter.Part7
+public import BernoulliRegular.CyclotomicUnits.DworkParameter.SamePrimeLog.ArtinHasseLogIdentification
 
 @[expose] public section
 

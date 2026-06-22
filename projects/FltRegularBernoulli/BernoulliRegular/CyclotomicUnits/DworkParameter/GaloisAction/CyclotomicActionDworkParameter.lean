@@ -1,6 +1,6 @@
 module
 
-public import BernoulliRegular.CyclotomicUnits.DworkParameter.Part17
+public import BernoulliRegular.CyclotomicUnits.DworkParameter.GaloisAction.ArtinHasseExpEqZetaPow
 
 /-!
 # Full cyclotomic action on the Dwork completion

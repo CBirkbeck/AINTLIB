@@ -1,6 +1,6 @@
 module
 
-public import BernoulliRegular.CyclotomicUnits.DworkParameter.Part12
+public import BernoulliRegular.CyclotomicUnits.DworkParameter.PowerBasis.PowerBasisSurjective
 
 @[expose] public section
 
