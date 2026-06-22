@@ -56,7 +56,7 @@ and `n ≠ 0` (i.e., if `n` is a positive power of `r`), else `0`.
 The constant coefficient is `0` because `0` is excluded explicitly. -/
 noncomputable def artinHasseLogSeries (r : ℕ) [Fact (Nat.Prime r)] :
     PowerSeries ℚ :=
-  PowerSeries.mk fun n =>
+  PowerSeries.mk fun n ↦
     if r ^ Nat.log r n = n ∧ n ≠ 0 then
       (1 : ℚ) / (r : ℚ) ^ Nat.log r n
     else 0
@@ -77,11 +77,7 @@ noncomputable def artinHasseLogSeries (r : ℕ) [Fact (Nat.Prime r)] :
 
 @[simp] theorem artinHasseLogSeries_coeff_one (r : ℕ) [Fact (Nat.Prime r)] :
     (PowerSeries.coeff (R := ℚ) 1) (artinHasseLogSeries r) = 1 := by
-  rw [artinHasseLogSeries_coeff]
-  have hr_prime : Nat.Prime r := Fact.out
-  have hr_one_lt : 1 < r := hr_prime.one_lt
-  have h_log : Nat.log r 1 = 0 := Nat.log_one_right r
-  rw [h_log]
+  rw [artinHasseLogSeries_coeff, Nat.log_one_right r]
   simp
 
 theorem artinHasseLogSeries_hasSubst (r : ℕ) [Fact (Nat.Prime r)] :
@@ -102,8 +98,7 @@ noncomputable def artinHasseExpSeries (r : ℕ) [Fact (Nat.Prime r)] :
     (PowerSeries.constantCoeff (R := ℚ)) (artinHasseExpSeries r) = 1 := by
   rw [PowerSeries.coeff_zero_eq_constantCoeff_apply (artinHasseExpSeries r) |>.symm]
   unfold artinHasseExpSeries
-  rw [PowerSeries.coeff_subst' (artinHasseLogSeries_hasSubst r)]
-  rw [finsum_eq_single _ 0]
+  rw [PowerSeries.coeff_subst' (artinHasseLogSeries_hasSubst r), finsum_eq_single _ 0]
   · -- main term at d = 0: (coeff 0 exp) • coeff 0 (L^0) = 1 • 1 = 1
     simp
   · -- terms at d ≠ 0 vanish: coeff 0 (L^d) = 0 since L has constant coeff 0
@@ -167,7 +162,7 @@ private theorem artinHasseLogSeries_pow_coeff_eq_X_pow_of_lt
     rw [← PowerSeries.trunc_trunc_pow (artinHasseLogSeries r) r d,
       ← PowerSeries.trunc_trunc_pow (PowerSeries.X : PowerSeries ℚ) r d,
       htrunc]
-  have hcoeff := congrArg (fun P : Polynomial ℚ => P.coeff n) hpow
+  have hcoeff := congrArg (fun P : Polynomial ℚ ↦ P.coeff n) hpow
   simpa [PowerSeries.coeff_trunc, hn] using hcoeff
 
 private theorem artinHasseExpSeries_coeff_eq_exp_of_lt
@@ -291,8 +286,7 @@ theorem artinHasseExpSeries_subst_inverse
   have hsubst : PowerSeries.HasSubst (artinHasseExpInverseSeries r) :=
     PowerSeries.HasSubst.of_constantCoeff_zero'
       (artinHasseExpInverseSeries_constantCoeff r)
-  rw [artinHasseExpMinusOneSeries, PowerSeries.subst_sub hsubst] at hinv
-  rw [sub_eq_iff_eq_add] at hinv
+  rw [artinHasseExpMinusOneSeries, PowerSeries.subst_sub hsubst, sub_eq_iff_eq_add] at hinv
   have hone :
       PowerSeries.subst (artinHasseExpInverseSeries r) (1 : PowerSeries ℚ) = 1 := by
     simpa using
@@ -306,7 +300,7 @@ theorem artinHasseExpSeries_subst_inverse_coeff
     (PowerSeries.coeff (R := ℚ) n)
         ((artinHasseExpSeries r).subst (artinHasseExpInverseSeries r)) =
       if n = 0 then 1 else if n = 1 then 1 else 0 := by
-  have h := congrArg (fun F : PowerSeries ℚ => (PowerSeries.coeff (R := ℚ) n) F)
+  have h := congrArg (fun F : PowerSeries ℚ ↦ (PowerSeries.coeff (R := ℚ) n) F)
     (artinHasseExpSeries_subst_inverse r)
   by_cases hn0 : n = 0
   · simpa [PowerSeries.coeff_one, PowerSeries.coeff_X, hn0] using h
@@ -367,8 +361,8 @@ private theorem artinHasseLogSeries_smul_subst_X_pow_eq_smul_X
               exact Nat.mul_div_right (r ^ k) hr_pos
             have hXcoeff :
                 (PowerSeries.coeff (R := ℚ) (r ^ (k + 1))) PowerSeries.X = 0 := by
-              rw [PowerSeries.coeff_X]
-              rw [if_neg (Nat.ne_of_gt (Nat.one_lt_pow (Nat.succ_ne_zero k) hr_one_lt))]
+              rw [PowerSeries.coeff_X,
+                if_neg (Nat.ne_of_gt (Nat.one_lt_pow (Nat.succ_ne_zero k) hr_one_lt))]
             have hq : (r : ℚ) ≠ 0 := Nat.cast_ne_zero.mpr hr_ne_zero
             rw [if_pos hdiv, hquot, artinHasseLogSeries_coeff_eq_of_pow,
               artinHasseLogSeries_coeff_eq_of_pow, hXcoeff]
@@ -414,16 +408,15 @@ private theorem artinHasseExpSeries_derivative
     (PowerSeries.derivative ℚ) (artinHasseExpSeries r) =
       artinHasseExpSeries r * (PowerSeries.derivative ℚ) (artinHasseLogSeries r) := by
   unfold artinHasseExpSeries
-  rw [PowerSeries.derivative_subst ℚ (artinHasseLogSeries_hasSubst r)]
-  rw [PowerSeries.derivative_exp]
+  rw [PowerSeries.derivative_subst ℚ (artinHasseLogSeries_hasSubst r),
+    PowerSeries.derivative_exp]
 
 private theorem derivative_rescale_exp_rat (a : ℚ) :
     (PowerSeries.derivative ℚ) (PowerSeries.rescale a (PowerSeries.exp ℚ)) =
       a • PowerSeries.rescale a (PowerSeries.exp ℚ) := by
-  rw [PowerSeries.rescale_eq_subst]
-  rw [PowerSeries.derivative_subst ℚ (PowerSeries.HasSubst.smul_X' a)]
-  rw [PowerSeries.derivative_exp]
-  rw [← PowerSeries.rescale_eq_subst]
+  rw [PowerSeries.rescale_eq_subst,
+    PowerSeries.derivative_subst ℚ (PowerSeries.HasSubst.smul_X' a),
+    PowerSeries.derivative_exp, ← PowerSeries.rescale_eq_subst]
   simp [PowerSeries.smul_eq_C_mul, smul_eq_mul]
   ring
 
@@ -438,9 +431,9 @@ private theorem eq_rescale_exp_of_derivative_eq_smul
   ext n
   induction n with
   | zero =>
-      rw [PowerSeries.coeff_zero_eq_constantCoeff, hconst]
-      rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply]
-      rw [PowerSeries.coeff_rescale, PowerSeries.coeff_exp]
+      rw [PowerSeries.coeff_zero_eq_constantCoeff, hconst,
+        ← PowerSeries.coeff_zero_eq_constantCoeff_apply, PowerSeries.coeff_rescale,
+        PowerSeries.coeff_exp]
       simp
   | succ n ih =>
       have eqF :
@@ -493,14 +486,12 @@ theorem artinHasseExpSeries_dwork_quotient_eq_rescale_exp
       PowerSeries.subst_comp_subst_apply (artinHasseLogSeries_hasSubst r) hXr]
   have hSderiv :
       (PowerSeries.derivative ℚ) S = S * (PowerSeries.derivative ℚ) M := by
-    rw [hS_as_exp]
-    rw [PowerSeries.derivative_subst ℚ hMsubst]
-    rw [PowerSeries.derivative_exp]
+    rw [hS_as_exp, PowerSeries.derivative_subst ℚ hMsubst, PowerSeries.derivative_exp]
   have hlog_deriv :
       (r : ℚ) • (PowerSeries.derivative ℚ) L - (PowerSeries.derivative ℚ) M =
         (r : ℚ) • (1 : PowerSeries ℚ) := by
     have h :=
-      congrArg (fun F : PowerSeries ℚ => (PowerSeries.derivative ℚ) F)
+      congrArg (fun F : PowerSeries ℚ ↦ (PowerSeries.derivative ℚ) F)
         (artinHasseLogSeries_smul_subst_X_pow_eq_smul_X r)
     simpa [L, M] using h
   have hS0 : PowerSeries.constantCoeff S = 1 := by
@@ -547,8 +538,7 @@ theorem artinHasseExpSeries_dwork_quotient_eq_rescale_exp
                 ring
         _ = -(S⁻¹ * (PowerSeries.derivative ℚ) M) := by
                 rw [hcancel_inv]
-    rw [hcancel_inv_neg]
-    rw [← hEpow]
+    rw [hcancel_inv_neg, ← hEpow]
     norm_num
     ring
   have hGderiv : (PowerSeries.derivative ℚ) G = (r : ℚ) • G := by
@@ -636,8 +626,7 @@ private theorem rescale_exp_sub_one_coeff_rMultiple
           nth_rewrite 1 [hn_decomp]
           rfl
         _ = ((r : ℚ) ^ (n - 1 - v) * (r : ℚ) ^ v) * (r : ℚ) := by
-          rw [pow_succ]
-          rw [pow_add]
+          rw [pow_succ, pow_add]
         _ = (r : ℚ) * ((r : ℚ) ^ (n - 1 - v) * (r : ℚ) ^ v) := by
           ring
     rw [map_sub, PowerSeries.coeff_rescale, PowerSeries.coeff_exp]
@@ -717,8 +706,7 @@ private theorem rescale_exp_coeff_mul_eq_choose_mul_coeff
     exact_mod_cast hfact_nat
   simp only [Algebra.algebraMap_self, RingHom.id_apply]
   field_simp [hr, hi, hj, hij]
-  rw [pow_add]
-  rw [← hfact]
+  rw [pow_add, ← hfact]
   ring
 
 theorem rescale_exp_mapTo_coeff_mul_eq_choose_mul_coeff
@@ -776,8 +764,7 @@ theorem rescale_exp_mapTo_mul
   let Rps : PowerSeries A := (rescale_exp_isRIntegral r).mapTo φ
   ext n
   rw [PowerSeries.coeff_mul, PowerSeries.coeff_rescale, add_pow]
-  rw [Finset.Nat.sum_antidiagonal_eq_sum_range_succ_mk]
-  rw [Finset.sum_mul]
+  rw [Finset.Nat.sum_antidiagonal_eq_sum_range_succ_mk, Finset.sum_mul]
   refine Finset.sum_congr rfl ?_
   intro i hi
   have hin : i ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)
@@ -815,7 +802,7 @@ theorem artinHasseExpSeries_dwork_quotient_isRIntegral
         (PowerSeries.subst ((PowerSeries.X : PowerSeries ℚ) ^ r)
           (artinHasseExpSeries r))⁻¹) := by
   let hE : DieudonneDwork.IsRIntegralPS r (artinHasseExpSeries r) :=
-    fun n => artinHasseExpSeries_coeff_isRIntegral r n
+    fun n ↦ artinHasseExpSeries_coeff_isRIntegral r n
   let hSub : DieudonneDwork.IsRIntegralPS r
       (PowerSeries.subst ((PowerSeries.X : PowerSeries ℚ) ^ r) (artinHasseExpSeries r)) :=
     hE.subst_X_pow (Fact.out : Nat.Prime r).ne_zero
