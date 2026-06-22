@@ -52,7 +52,7 @@ variable {F : Type*} [Field F] [DecidableEq F]
 local notation "KE" => W.toAffine.FunctionField
 local notation "R" => W.toAffine.CoordinateRing
 
-omit [DecidableEq F] in
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- `y_gen² + a₁·x_gen·y_gen + a₃·y_gen = x_gen³ + a₂·x_gen² + a₄·x_gen + a₆` in `K(E)`
 (`weierstrass_equation_in_KE`, restated field-general from `generic_equation`). -/
 theorem weierstrassEqn_KE :
@@ -60,12 +60,11 @@ theorem weierstrassEqn_KE :
         algebraMap F KE W.a₃ * y_gen W =
       x_gen W ^ 3 + algebraMap F KE W.a₂ * x_gen W ^ 2 +
         algebraMap F KE W.a₄ * x_gen W + algebraMap F KE W.a₆ := by
-  classical
   have h_gen := generic_equation W
   rw [(W_KE W).toAffine.equation_iff] at h_gen
   exact h_gen
 
-omit [DecidableEq F] in
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- `D(y_gen² + a₁xy + a₃y) = D(x_gen³ + a₂x² + a₄x + a₆)` in `Ω[K(E)/F]`. -/
 theorem kaehlerD_weierstrassEqn :
     KaehlerDifferential.D F KE
@@ -112,13 +111,12 @@ theorem kaehlerD_weierstrass_LHS :
       ((algebraMap F KE W.a₁ * x_gen W) • KaehlerDifferential.D F KE (y_gen W) +
         y_gen W • (algebraMap F KE W.a₁ • KaehlerDifferential.D F KE (x_gen W))) +
       algebraMap F KE W.a₃ • KaehlerDifferential.D F KE (y_gen W) := by
-  rw [map_add, map_add]
-  rw [kaehlerD_y_gen_sq W]
-  rw [(KaehlerDifferential.D F KE).leibniz (algebraMap F KE W.a₁ * x_gen W) (y_gen W)]
-  rw [(KaehlerDifferential.D F KE).leibniz (algebraMap F KE W.a₁) (x_gen W)]
-  rw [(KaehlerDifferential.D F KE).leibniz (algebraMap F KE W.a₃) (y_gen W)]
-  rw [(KaehlerDifferential.D F KE).map_algebraMap W.a₁,
-      (KaehlerDifferential.D F KE).map_algebraMap W.a₃]
+  rw [map_add, map_add, kaehlerD_y_gen_sq W,
+    (KaehlerDifferential.D F KE).leibniz (algebraMap F KE W.a₁ * x_gen W) (y_gen W),
+    (KaehlerDifferential.D F KE).leibniz (algebraMap F KE W.a₁) (x_gen W),
+    (KaehlerDifferential.D F KE).leibniz (algebraMap F KE W.a₃) (y_gen W),
+    (KaehlerDifferential.D F KE).map_algebraMap W.a₁,
+    (KaehlerDifferential.D F KE).map_algebraMap W.a₃]
   simp only [smul_zero, add_zero]
 
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
@@ -134,17 +132,16 @@ theorem kaehlerD_weierstrass_RHS :
           (x_gen W • KaehlerDifferential.D F KE (x_gen W) +
             x_gen W • KaehlerDifferential.D F KE (x_gen W))) +
       algebraMap F KE W.a₄ • KaehlerDifferential.D F KE (x_gen W) := by
-  rw [map_add, map_add, map_add]
-  rw [kaehlerD_x_gen_cube W, kaehlerD_x_gen_sq W]
-  rw [(KaehlerDifferential.D F KE).leibniz (algebraMap F KE W.a₂) (x_gen W ^ 2)]
-  rw [kaehlerD_x_gen_sq W]
-  rw [(KaehlerDifferential.D F KE).leibniz (algebraMap F KE W.a₄) (x_gen W)]
-  rw [(KaehlerDifferential.D F KE).map_algebraMap W.a₂,
-      (KaehlerDifferential.D F KE).map_algebraMap W.a₄,
-      (KaehlerDifferential.D F KE).map_algebraMap W.a₆]
+  rw [map_add, map_add, map_add, kaehlerD_x_gen_cube W, kaehlerD_x_gen_sq W,
+    (KaehlerDifferential.D F KE).leibniz (algebraMap F KE W.a₂) (x_gen W ^ 2),
+    kaehlerD_x_gen_sq W,
+    (KaehlerDifferential.D F KE).leibniz (algebraMap F KE W.a₄) (x_gen W),
+    (KaehlerDifferential.D F KE).map_algebraMap W.a₂,
+    (KaehlerDifferential.D F KE).map_algebraMap W.a₄,
+    (KaehlerDifferential.D F KE).map_algebraMap W.a₆]
   simp only [smul_zero, add_zero]
 
-omit [DecidableEq F] in
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Curve-equation Kähler identity** (the substantive K(E) identity):
 `(a₃ + 2y + a₁x) • D(y) = (3x² + 2a₂x + a₄ − a₁y) • D(x)`. -/
 theorem kaehler_curve_eqn :
@@ -153,8 +150,8 @@ theorem kaehler_curve_eqn :
       ((3 : KE) * x_gen W ^ 2 + (2 : KE) * algebraMap F KE W.a₂ * x_gen W +
         algebraMap F KE W.a₄ - algebraMap F KE W.a₁ * y_gen W) •
         KaehlerDifferential.D F KE (x_gen W) := by
-  set Dx := KaehlerDifferential.D F KE (x_gen W) with hDx
-  set Dy := KaehlerDifferential.D F KE (y_gen W) with hDy
+  set Dx := KaehlerDifferential.D F KE (x_gen W)
+  set Dy := KaehlerDifferential.D F KE (y_gen W)
   have h2y : (2 : KE) * y_gen W = y_gen W + y_gen W := by ring
   have h3x2 : (3 : KE) * x_gen W ^ 2 = x_gen W ^ 2 + x_gen W ^ 2 + x_gen W ^ 2 := by ring
   have h2a2x : (2 : KE) * algebraMap F KE W.a₂ * x_gen W =
@@ -290,10 +287,8 @@ theorem kaehlerD_addPullback_x_general (α : Isogeny W.toAffine W.toAffine) :
   set ℓ := addSlope W α
   change D ((ℓ) ^ 2 + (algebraMap F KE) W.a₁ * ℓ
           - (algebraMap F KE) W.a₂ - x_gen W - α.pullback (x_gen W)) = _
-  rw [map_sub, map_sub, map_sub, map_add]
-  rw [D.leibniz ((algebraMap F KE) W.a₁) ℓ]
-  rw [D.leibniz_pow ℓ 2]
-  rw [D.map_algebraMap W.a₁, D.map_algebraMap W.a₂]
+  rw [map_sub, map_sub, map_sub, map_add, D.leibniz ((algebraMap F KE) W.a₁) ℓ,
+    D.leibniz_pow ℓ 2, D.map_algebraMap W.a₁, D.map_algebraMap W.a₂]
   simp only [smul_zero, add_zero, sub_zero]
   change (2 : ℕ) • ℓ ^ (2 - 1) • D ℓ + (algebraMap F KE) W.a₁ • D ℓ
       - D (x_gen W) - D (α.pullback (x_gen W)) =
@@ -364,11 +359,11 @@ theorem kaehlerD_addPullback_x_eq_one_add_smul_omega (α : Isogeny W.toAffine W.
     WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆,
     map_add, map_mul, map_ofNat, AlgHom.commutes] at hP hαP ⊢
   field_simp [sub_ne_zero.mpr h_ne]
-  set X := x_gen W with hX
-  set Y := y_gen W with hY
-  set PX := α.pullback X with hPX
-  set PY := α.pullback Y with hPY
-  set c1 := algebraMap F KE W.a₁ with hc1
+  set X := x_gen W
+  set Y := y_gen W
+  set PX := α.pullback X
+  set PY := α.pullback Y
+  set c1 := algebraMap F KE W.a₁
   linear_combination
     (-(2 * (Y - PY) + c1 * (X - PX)) * (1 - omegaPullbackCoeff W α)) * hP +
       ((2 * (Y - PY) + c1 * (X - PX)) * (1 - omegaPullbackCoeff W α)) * hαP
