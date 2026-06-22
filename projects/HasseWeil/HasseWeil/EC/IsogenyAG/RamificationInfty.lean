@@ -98,13 +98,6 @@ theorem exists_pos_ramificationIdx_at_infinity (φ : Isogeny W₁ W₂) :
 
 /-! ### `∞`-regularity reflection (the `hrefl`/`hramO` residual of `Dual.lean`) -/
 
-/-- The coercion `ℤ → WithTop ℤ` commutes with `nsmul`. -/
-private theorem withTop_coe_nsmul' (e : ℕ) (k : ℤ) :
-    (e • ((k : ℤ) : WithTop ℤ)) = (((e • k : ℤ)) : WithTop ℤ) := by
-  induction e with
-  | zero => simp
-  | succ n ih => rw [succ_nsmul, succ_nsmul, ih, ← WithTop.coe_add]
-
 /-- `0 ≤ e • x → 0 ≤ x` in `WithTop ℤ` for `e ≥ 1` (order-reflection of `nsmul`).
 A self-contained copy of the same mechanism used in `Dual.lean`. -/
 private theorem nonneg_of_nsmul_nonneg' {e : ℕ} (he : 1 ≤ e) {x : WithTop ℤ}
@@ -112,10 +105,9 @@ private theorem nonneg_of_nsmul_nonneg' {e : ℕ} (he : 1 ≤ e) {x : WithTop �
   induction x with
   | top => exact le_top
   | coe k =>
-    rw [withTop_coe_nsmul', ← WithTop.coe_zero, WithTop.coe_le_coe, nsmul_eq_mul] at h
-    rw [← WithTop.coe_zero, WithTop.coe_le_coe]
-    have hepos : (0 : ℤ) < e := by exact_mod_cast he
-    exact (mul_nonneg_iff_of_pos_left hepos).mp h
+    rw [← WithTop.coe_nsmul, nsmul_eq_mul] at h
+    norm_cast at h ⊢
+    exact (mul_nonneg_iff_of_pos_left (by exact_mod_cast he)).mp h
 
 /-- **`∞`-regularity reflection from an isogeny — unconditional** (Silverman
 III.4.10a, the `hrefl`/`hramO` residual of the dual-isogeny construction,
