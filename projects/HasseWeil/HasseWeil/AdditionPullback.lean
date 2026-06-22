@@ -462,6 +462,64 @@ private lemma minpoly_not_const_degree_two [NeZero (2 : F)] (c₁ c₀ : F)
       exact this
     lia
 
+/-- Image of a power-basis element `p • 1 + q • Y` under `addCoordRingHom`: it splits as
+`addBaseHom p + addBaseHom q * addPullback_y`, since the lift sends the basis generators
+to the addition-formula outputs. -/
+private theorem addCoordRingHom_smulBasis (hxy : AddNonInverse W α) (p q : Polynomial F) :
+    addCoordRingHom hxy
+        (p • (1 : R) + q • Affine.CoordinateRing.mk W.toAffine Polynomial.X) =
+      addBaseHom W α p + addBaseHom W α q * addPullback_y W α := by
+  simp only [addCoordRingHom, map_add]
+  congr 1
+  · change AdjoinRoot.lift _ _ _ (p • 1) = _
+    rw [Algebra.smul_def, mul_one]
+    exact AdjoinRoot.lift_of _
+  · change AdjoinRoot.lift _ _ _ (q • AdjoinRoot.root _) = _
+    rw [Algebra.smul_def, map_mul]
+    congr 1
+    · exact AdjoinRoot.lift_of _
+    · exact AdjoinRoot.lift_root _
+
+/-- The norm of the power-basis element `p • 1 + q • Y`, pushed into the coordinate ring,
+factors as the element times its conjugate `C p + C q * (-Y - C (a₁X + a₃))`. -/
+private theorem algebraMap_norm_smulBasis (p q : Polynomial F) :
+    algebraMap (Polynomial F) R
+        (Algebra.norm (Polynomial F)
+          (p • (1 : R) + q • Affine.CoordinateRing.mk W.toAffine Polynomial.X)) =
+      (p • (1 : R) + q • Affine.CoordinateRing.mk W.toAffine Polynomial.X) *
+        Affine.CoordinateRing.mk W.toAffine
+          (Polynomial.C p + Polynomial.C q *
+            (-Polynomial.X - Polynomial.C
+              (Polynomial.C W.a₁ * Polynomial.X + Polynomial.C W.a₃))) := by
+  change AdjoinRoot.of _ _ = _
+  rw [Affine.CoordinateRing.coe_norm_smul_basis, map_mul]
+  congr 1
+  rw [map_add, map_mul]
+  simp [Algebra.smul_def]
+
+/-- The norm of the power-basis element `p • 1 + q • Y` is nonzero whenever `q ≠ 0`:
+its degree is `max (2·deg p) (2·deg q + 3)`, and the second term is finite (`≠ ⊥`). -/
+private theorem norm_smulBasis_ne_zero_of_snd_ne_zero (p : Polynomial F) {q : Polynomial F}
+    (hq : q ≠ 0) :
+    Algebra.norm (Polynomial F)
+        (p • (1 : R) + q • Affine.CoordinateRing.mk W.toAffine Polynomial.X) ≠ 0 := by
+  intro h_norm_eq
+  have h_deg := Affine.CoordinateRing.degree_norm_smul_basis (W' := W.toAffine) p q
+  rw [h_norm_eq, Polynomial.degree_zero] at h_deg
+  have hq_deg : q.degree ≠ ⊥ := Polynomial.degree_ne_bot.mpr hq
+  have hqd : 2 • q.degree + 3 ≠ (⊥ : WithBot ℕ) := by
+    intro h
+    apply hq_deg
+    cases hd : q.degree with
+    | bot => rfl
+    | coe n =>
+        rw [hd] at h
+        exact absurd h (by
+          change ¬ (2 • (↑n : WithBot ℕ) + 3 = ⊥)
+          simp [WithBot.mul_ne_bot])
+  exact absurd (h_deg ▸ le_max_right _ _ : 2 • q.degree + 3 ≤ ⊥)
+    (not_le.mpr (WithBot.bot_lt_iff_ne_bot.mpr hqd))
+
 /-- `addCoordAlgHom hxy` is injective, given injectivity of the base hom `addBaseHom W α`.
 This witness-parametric form is consumed by the axiom-clean negFrobenius case
 (`addCoordAlgHom_injective_negFrobenius`, in `Frobenius.lean`). -/
@@ -472,20 +530,12 @@ theorem addCoordAlgHom_injective_of_baseHom_inj (hxy : AddNonInverse W α)
   rw [injective_iff_map_eq_zero]
   intro r hr
   obtain ⟨p, q, hpq⟩ := Affine.CoordinateRing.exists_smul_basis_eq r
+  -- Decompose `r = p • 1 + q • Y` and compute its image.
   have h_image : addCoordRingHom hxy r =
       addBaseHom W α p + addBaseHom W α q * addPullback_y W α := by
-    rw [← hpq]
-    simp only [addCoordRingHom, map_add]
-    congr 1
-    · change AdjoinRoot.lift _ _ _ (p • 1) = _
-      rw [Algebra.smul_def, mul_one]
-      exact AdjoinRoot.lift_of _
-    · change AdjoinRoot.lift _ _ _ (q • AdjoinRoot.root _) = _
-      rw [Algebra.smul_def, map_mul]
-      congr 1
-      · exact AdjoinRoot.lift_of _
-      · exact AdjoinRoot.lift_root _
+    rw [← hpq]; exact addCoordRingHom_smulBasis hxy p q
   rw [h_image] at hr
+  -- It suffices that both coordinates vanish.
   suffices hp : p = 0 ∧ q = 0 by
     obtain ⟨hp1, hp2⟩ := hp
     rw [← hpq, hp1, hp2]
@@ -493,50 +543,24 @@ theorem addCoordAlgHom_injective_of_baseHom_inj (hxy : AddNonInverse W α)
       Affine.CoordinateRing.mk W.toAffine Polynomial.X = 0
     rw [Algebra.smul_def, Algebra.smul_def, map_zero, zero_mul, zero_mul, add_zero]
   by_cases hq : q = 0
-  · rw [hq, map_zero, zero_mul, add_zero] at hr
+  · -- `q = 0`: vanishing of the image is exactly injectivity of `addBaseHom` on `p`.
+    rw [hq, map_zero, zero_mul, add_zero] at hr
     exact ⟨hxinj (hr.trans (map_zero _).symm), hq⟩
-  · exfalso
-    set r' := p • (1 : R) + q • Affine.CoordinateRing.mk W.toAffine Polynomial.X with hr'_def
-    have h_alg : ∀ f : Polynomial F,
-        addCoordRingHom hxy (algebraMap (Polynomial F) R f) = addBaseHom W α f := by
-      intro f
-      change AdjoinRoot.lift _ _ _ (AdjoinRoot.of _ f) = _
+  · -- `q ≠ 0`: the norm of `r` is nonzero, yet it maps to `0`, contradicting injectivity.
+    refine absurd ?_ (norm_smulBasis_ne_zero_of_snd_ne_zero (W := W) p hq)
+    -- The base hom sends the norm to `0` (the hom kills `r`, and the norm factors through `r`).
+    have hr_zero :
+        addCoordRingHom hxy (p • (1 : R) + q • Affine.CoordinateRing.mk W.toAffine Polynomial.X)
+          = 0 := (addCoordRingHom_smulBasis hxy p q).trans hr
+    refine hxinj (Eq.trans ?_ (map_zero _).symm)
+    have h_alg : addCoordRingHom hxy
+        (algebraMap (Polynomial F) R (Algebra.norm (Polynomial F)
+          (p • (1 : R) + q • Affine.CoordinateRing.mk W.toAffine Polynomial.X))) =
+        addBaseHom W α (Algebra.norm (Polynomial F)
+          (p • (1 : R) + q • Affine.CoordinateRing.mk W.toAffine Polynomial.X)) := by
+      change AdjoinRoot.lift _ _ _ (AdjoinRoot.of _ _) = _
       exact AdjoinRoot.lift_of _
-    set conj_r := Affine.CoordinateRing.mk W.toAffine
-      (Polynomial.C p + Polynomial.C q *
-        (-Polynomial.X - Polynomial.C
-          (Polynomial.C W.a₁ * Polynomial.X + Polynomial.C W.a₃))) with hconj_def
-    have h_factor : algebraMap (Polynomial F) R (Algebra.norm (Polynomial F) r') =
-        r' * conj_r := by
-      rw [hr'_def, hconj_def]
-      change AdjoinRoot.of _ _ = _
-      rw [Affine.CoordinateRing.coe_norm_smul_basis, map_mul]
-      congr 1
-      rw [map_add, map_mul]
-      simp [Algebra.smul_def]
-    have hr'_zero : addCoordRingHom hxy r' = 0 := by
-      rw [show r' = r from hpq]
-      exact h_image.trans hr
-    have h_norm_zero : addBaseHom W α (Algebra.norm (Polynomial F) r') = 0 := by
-      rw [← h_alg, h_factor, map_mul, hr'_zero, zero_mul]
-    have h_norm_eq : Algebra.norm (Polynomial F) r' = 0 :=
-      hxinj (h_norm_zero.trans (map_zero _).symm)
-    rw [hr'_def] at h_norm_eq
-    have h_deg := Affine.CoordinateRing.degree_norm_smul_basis (W' := W.toAffine) p q
-    rw [h_norm_eq, Polynomial.degree_zero] at h_deg
-    have hq_deg : q.degree ≠ ⊥ := Polynomial.degree_ne_bot.mpr hq
-    have : 2 • q.degree + 3 ≠ (⊥ : WithBot ℕ) := by
-      intro h
-      apply hq_deg
-      cases hd : q.degree with
-      | bot => rfl
-      | coe n =>
-          rw [hd] at h
-          exact absurd h (by
-            change ¬ (2 • (↑n : WithBot ℕ) + 3 = ⊥)
-            simp [WithBot.mul_ne_bot])
-    exact absurd (h_deg ▸ le_max_right _ _ : 2 • q.degree + 3 ≤ ⊥)
-      (not_le.mpr (WithBot.bot_lt_iff_ne_bot.mpr this))
+    rw [← h_alg, algebraMap_norm_smulBasis, map_mul, hr_zero, zero_mul]
 
 -- The `_pair` variants below take two isogenies and compute `α₁(P) + α₂(P)` on the
 -- generic point, generalising the single-isogeny `id + α` maps (recovered at
