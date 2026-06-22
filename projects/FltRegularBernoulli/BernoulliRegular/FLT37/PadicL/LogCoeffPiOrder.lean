@@ -104,10 +104,9 @@ theorem addVal_gaussSum_eq_self {i : ℕ} (h1 : 2 ≤ i) (h2 : i ≤ p - 3) (hev
 /-- The order of `τ(ω^{-i})²` is `2i` on the even FLT range. -/
 theorem addVal_gaussSum_sq_eq {i : ℕ} (h1 : 2 ≤ i) (h2 : i ≤ p - 3) (hev : Even i) :
     addVal S.O (S.gaussSum i ^ 2) = ((2 * i : ℕ) : ℕ∞) := by
-  rw [addVal_pow, S.addVal_gaussSum_eq_self h1 h2 hev]
-  rw [show ((2 * i : ℕ) : ℕ∞) = (2 : ℕ∞) * (i : ℕ∞) from by push_cast; ring]
-  rw [nsmul_eq_mul]
-  norm_num
+  rw [addVal_pow, S.addVal_gaussSum_eq_self h1 h2 hev, nsmul_eq_mul]
+  push_cast
+  ring
 
 /-! ## Part B — the integral product-order core and the reduction
 
@@ -343,17 +342,8 @@ theorem addVal_logCoeffSum_eq_iff {c : (ZMod p)ˣ → S.O} {i k : ℕ}
   set m : ℕ := (addVal S.O (S.logCoeffSum c i)).toNat
   have hmeq : addVal S.O (S.logCoeffSum c i) = (m : ℕ∞) := (ENat.coe_toNat hfin).symm
   rw [hmeq]
-  constructor
-  · rintro heq
-    rw [heq]
-    refine ⟨le_refl _, ?_⟩
-    rw [not_le]
-    exact_mod_cast Nat.lt_succ_self k
-  · rintro ⟨h1, h2⟩
-    rw [not_le] at h2
-    have hle : k ≤ m := by exact_mod_cast h1
-    have hlt : m < k + 1 := by exact_mod_cast h2
-    exact_mod_cast (by omega : m = k)
+  simp only [Nat.cast_le, Nat.cast_inj]
+  omega
 
 /-- **The smallest TRUE remaining `π`-graded core**, isolated as explicit base-`π`
 divisibility at the boundary index (`p = 37`):
