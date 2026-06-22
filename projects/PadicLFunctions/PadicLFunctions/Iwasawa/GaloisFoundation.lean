@@ -800,4 +800,58 @@ def baseChangeEquiv :
   right_inv g := by ext x; rfl
   map_mul' a b := by ext x; rfl
 
+/-- Transport automorphisms along a group isomorphism `e : A ≃* B`. -/
+def autCongrHom {A B : Type*} [Group A] [Group B] (e : A ≃* B) : MulAut A →* MulAut B where
+  toFun φ := e.symm.trans (φ.trans e)
+  map_one' := by ext b; simp
+  map_mul' φ ψ := by ext b; simp [MulAut.mul_apply]
+
+/-- `ker(Gal(M∞⁺/ℚ) ↠ Γ⁺) = Gal(M∞⁺/F∞⁺)` (the `F∞⁺`-in-`M∞⁺`-fixing subgroup). -/
+theorem ker_restrToGammaPlus :
+    (restrToGammaPlus p).ker = (FinfPlusInMinf p).fixingSubgroup := by
+  rw [← @IntermediateField.restrictNormalHom_ker ℚ ↥(MinfPlus p) _ _ _ (FinfPlusInMinf p)
+    (normal_FinfPlusInMinf p)]
+  ext x
+  rw [MonoidHom.mem_ker, MonoidHom.mem_ker]
+  exact map_eq_one_iff _ (AlgEquiv.autCongr (FinfPlusInMinfEquiv p)).injective
+
+/-- `X∞⁺ = Gal(M∞⁺/F∞⁺) ≃* ker(Gal(M∞⁺/ℚ) ↠ Γ⁺)` — `X∞⁺` is the kernel of the group extension. -/
+noncomputable def xinfEquivKer : XinfPlus p ≃* ↥((restrToGammaPlus p).ker) :=
+  ((baseChangeEquiv p).trans (IntermediateField.fixingSubgroupEquiv (FinfPlusInMinf p)).symm).trans
+    (MulEquiv.subgroupCongr (ker_restrToGammaPlus p).symm)
+
+/-- `X∞⁺` (≅ the kernel) is commutative — transported from `isMulCommutative_XinfPlus`. -/
+theorem mul_comm_ker (a b : ↥((restrToGammaPlus p).ker)) : a * b = b * a := by
+  apply (xinfEquivKer p).symm.injective
+  rw [map_mul, map_mul]
+  exact isMulCommutative_iff.mp (isMulCommutative_XinfPlus p) _ _
+
+/-- Conjugation by a kernel element is trivial (the kernel `X∞⁺` is abelian) — so the conjugation
+action of `Gal(M∞⁺/ℚ)` on the kernel descends to `Γ⁺`. -/
+theorem conjNormal_eq_one_of_mem_ker (x : GalMinfPlusQ p) (hx : x ∈ (restrToGammaPlus p).ker) :
+    MulAut.conjNormal x = (1 : MulAut ↥((restrToGammaPlus p).ker)) := by
+  refine MulEquiv.ext fun a => Subtype.ext ?_
+  rw [MulAut.conjNormal_apply]
+  have hcomm : x * (a : GalMinfPlusQ p) = (a : GalMinfPlusQ p) * x :=
+    congrArg (fun z : ↥((restrToGammaPlus p).ker) => (z : GalMinfPlusQ p))
+      (mul_comm_ker p ⟨x, hx⟩ a)
+  rw [hcomm, mul_inv_cancel_right]
+  rfl
+
+/-- The `Γ⁺`-action hom `Γ⁺ →* MulAut(X∞⁺)` (Remark 13.7): conjugation by lifts, descended through
+`Γ⁺ ≃ Gal(M∞⁺/ℚ)/X∞⁺` and transported to `X∞⁺` via `xinfEquivKer`. -/
+noncomputable def gammaPlusActionHom : GammaPlus p →* MulAut (XinfPlus p) :=
+  ((autCongrHom (xinfEquivKer p).symm).comp
+    (QuotientGroup.lift (restrToGammaPlus p).ker MulAut.conjNormal
+      (conjNormal_eq_one_of_mem_ker p))).comp
+    (QuotientGroup.quotientKerEquivOfSurjective (restrToGammaPlus p)
+      (restrToGammaPlus_surjective p)).symm.toMonoidHom
+
+/-- **The `Γ⁺`-action on `X⁺_∞` (Remark 13.7).** `Γ⁺ = Gal(F∞⁺/ℚ)` acts on `X∞⁺ = Gal(M∞⁺/F∞⁺)` by
+`σ · x = σ̃ x σ̃⁻¹` (conjugation by any lift `σ̃ ∈ Gal(M∞⁺/ℚ)`), well-defined since `X∞⁺` is abelian.
+This is the action making `X∞⁺` a `Λ(Γ⁺)`-module — the setting of Theorem 13.11. -/
+noncomputable instance instMulDistribMulActionGammaPlusXinfPlus :
+    MulDistribMulAction (GammaPlus p) (XinfPlus p) :=
+  MulDistribMulAction.compHom (XinfPlus p) (gammaPlusActionHom p)
+
 end Iwasawa.GaloisFoundation

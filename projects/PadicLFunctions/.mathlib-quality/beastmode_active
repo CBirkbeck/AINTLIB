@@ -1,1 +1,1 @@
-FOCUS: TG1 action. normal_MinfPlus compiles (1 isolated sorry = TG1-N-transport). Now building: TG1a (def FinfPlusInMinf + instance Normal ℚ), then TG1b φ:Gal(M∞⁺/ℚ)↠Γ⁺ surjective, TG1c XinfPlus≃ker, TG1d MulDistribMulAction (GammaPlus) (XinfPlus).
+FOCUS: TG1 — MulDistribMulAction (GammaPlus)(XinfPlus) COMPILES (Remark 13.7 done modulo 1 isolated sorry isAdmissibleM_map). Verifying lake build, then committing. Next: TG2 (Λ-module) or fill isAdmissibleM_map.
