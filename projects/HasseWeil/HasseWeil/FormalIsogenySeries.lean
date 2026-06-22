@@ -932,6 +932,7 @@ theorem ord_algebraMap_F_nonneg (c : F) :
     exact (W_smooth W).ordAtInfty_zero ▸ le_top
   · rw [ordAtInfty_algebraMap_F_nonzero W hc]
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- Multiplying by a factor `c` with `0 ≤ ord c` cannot decrease the order:
 `ord z ≤ ord (c * z)`. (Used with `c` a Weierstrass coefficient.) -/
 theorem ord_coeff_mul_ge (c z : KE) (hc : 0 ≤ (W_smooth W).ordAtInfty c) :
@@ -998,8 +999,8 @@ theorem ord_pullback_x_neg_of_localParam_pos (α : Isogeny W.toAffine W.toAffine
     have h0 : (0 : ℤ) < m - n := by exact_mod_cast h_pos
     omega
   rw [hm] at h_base ⊢
-  rw [show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl, WithTop.coe_le_coe] at h_base
-  rw [show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl, WithTop.coe_lt_coe]
+  rw [WithTop.coe_le_zero] at h_base
+  rw [WithTop.coe_lt_zero]
   rcases lt_or_eq_of_le h_base with h_lt | h_eq0
   · exact h_lt
   · -- `m = 0` ⟹ `n < 0`; the Weierstrass equation contradicts this.
@@ -1070,8 +1071,7 @@ theorem ord_pullback_x_neg_of_localParam_pos (α : Isogeny W.toAffine W.toAffine
         (X ^ 3 + (W_KE W).toAffine.a₂ * X ^ 2 + (W_KE W).toAffine.a₄ * X
           + (W_KE W).toAffine.a₆) = ((2 * n : ℤ) : WithTop ℤ) :=
       (congrArg (W_smooth W).ordAtInfty h_eq2).symm.trans hLHS
-    rw [hRHS_ord, show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl,
-      WithTop.coe_le_coe] at hRHS_ge
+    rw [hRHS_ord, WithTop.coe_nonneg] at hRHS_ge
     omega
 
 /-! ### Generic Weierstrass-point pole brick (the `x`-pole ⟹ `z` reduces direction)
@@ -1152,7 +1152,7 @@ theorem ordAtInfty_y_ne_zero_of_equation_of_ord_x_neg {X Y : KE} (hX_ne : X ≠ 
   have h3m_lt_m : ((3 * m : ℤ) : WithTop ℤ) < (m : WithTop ℤ) := by
     rw [WithTop.coe_lt_coe]; omega
   have h3m_lt_0 : ((3 * m : ℤ) : WithTop ℤ) < (0 : WithTop ℤ) := by
-    rw [show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl, WithTop.coe_lt_coe]; omega
+    rw [WithTop.coe_lt_zero]; omega
   -- Build `ord(X³ + a₂X² + a₄X + a₆) = 3m` by peeling outside-in (`X³` dominates).
   have hRHS1 : (W_smooth W).ordAtInfty (X ^ 3 + (W_KE W).toAffine.a₂ * X ^ 2)
       = ((3 * m : ℤ) : WithTop ℤ) :=
@@ -1235,7 +1235,7 @@ theorem ordAtInfty_y_lt_ordAtInfty_x_of_equation_of_ord_x_neg
   have h3m_lt_m : ((3 * m : ℤ) : WithTop ℤ) < (m : WithTop ℤ) := by
     rw [WithTop.coe_lt_coe]; omega
   have h3m_lt_0 : ((3 * m : ℤ) : WithTop ℤ) < (0 : WithTop ℤ) := by
-    rw [show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl, WithTop.coe_lt_coe]; omega
+    rw [WithTop.coe_lt_zero]; omega
   -- Build `ord(RHS) = 3m` by peeling the (left-associated) sum from the outside in,
   -- keeping the exact associativity that appears in `h_eq2` (no reassociation `rw`).
   -- `ord(X³ + a₂X²) = 3m` (X³ strictly dominates a₂X²).
@@ -1320,7 +1320,7 @@ theorem ordAtInfty_neg_div_pos_of_equation_of_ord_x_neg
     ((W_smooth W).ordAtInfty_neg _).trans hm
   have h_div : (W_smooth W).ordAtInfty (-X / Y) = (((m - n : ℤ)) : WithTop ℤ) :=
     (W_smooth W).ord_div_concrete hY_ne m n h_neg_x hn
-  rw [h_div, show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl, WithTop.coe_lt_coe]
+  rw [h_div, WithTop.coe_pos]
   omega
 
 /-- **Generic converse: `z` reduces ⟹ `x` has a pole.** For `(X, Y)` on `W_KE W`
@@ -1359,8 +1359,8 @@ theorem ordAtInfty_x_neg_of_equation_of_neg_div_pos {X Y : KE} (hX_ne : X ≠ 0)
     have h0 : (0 : ℤ) < m - n := by exact_mod_cast h_pos
     omega
   rw [hm] at h_base ⊢
-  rw [show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl, WithTop.coe_le_coe] at h_base
-  rw [show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl, WithTop.coe_lt_coe]
+  rw [WithTop.coe_le_zero] at h_base
+  rw [WithTop.coe_lt_zero]
   rcases lt_or_eq_of_le h_base with h_lt | h_eq0
   · exact h_lt
   · -- `m = 0` ⟹ `n < 0`; the Weierstrass equation contradicts this (`Y²` dominant at `2n`).
@@ -1427,8 +1427,7 @@ theorem ordAtInfty_x_neg_of_equation_of_neg_div_pos {X Y : KE} (hX_ne : X ≠ 0)
         (X ^ 3 + (W_KE W).toAffine.a₂ * X ^ 2 + (W_KE W).toAffine.a₄ * X
           + (W_KE W).toAffine.a₆) = ((2 * n : ℤ) : WithTop ℤ) :=
       (congrArg (W_smooth W).ordAtInfty h_eq2).symm.trans hLHS
-    rw [hRHS_ord, show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl,
-      WithTop.coe_le_coe] at hRHS_ge
+    rw [hRHS_ord, WithTop.coe_nonneg] at hRHS_ge
     omega
 
 /-! **[2026-05-29 B2 — false residuals deleted]** The residuals R5a
