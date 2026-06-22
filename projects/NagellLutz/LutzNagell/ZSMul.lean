@@ -107,24 +107,24 @@ lemma evalEval_ω : (W.ω n).evalEval x y =  polyEval W x y (curve.ω n) := by
 
 open WeierstrassCurve (ψ φ ω)
 
-lemma cusp_ψ₂ : cusp.ψ₂ = 2 * Y := by simp [cusp, ψ₂, Affine.polynomialY, C_ofNat]
-lemma cusp_Ψ₃ : cusp.Ψ₃ = 3 * X ^ 4 := by simp [cusp, Ψ₃, b₂, b₄, b₆, b₈]
-lemma cusp_preΨ₄ : cusp.preΨ₄ = 2 * X ^ 6 := by simp [cusp, preΨ₄, b₂, b₄, b₆, b₈]
+lemma cusp_ψ₂ : (cusp ℤ).ψ₂ = 2 * Y := by simp [cusp, ψ₂, Affine.polynomialY, C_ofNat]
+lemma cusp_Ψ₃ : (cusp ℤ).Ψ₃ = 3 * X ^ 4 := by simp [cusp, Ψ₃, b₂, b₄, b₆, b₈]
+lemma cusp_preΨ₄ : (cusp ℤ).preΨ₄ = 2 * X ^ 6 := by simp [cusp, preΨ₄, b₂, b₄, b₆, b₈]
 
-lemma polyEval_cusp_ψ : polyEval cusp 1 1 (curve.ψ n) = n := by
+lemma polyEval_cusp_ψ : polyEval (cusp ℤ) 1 1 (curve.ψ n) = n := by
   rw [ψ, map_normEDS, ← evalEval_ψ₂, ← evalEval_Ψ₃, ← evalEval_preΨ₄, cusp_ψ₂, cusp_Ψ₃, cusp_preΨ₄]
   simp [evalEval, normEDS_two_three_two]
 
-lemma polyEval_cusp_φ : polyEval cusp 1 1 (curve.φ n) = 1 := by
+lemma polyEval_cusp_φ : polyEval (cusp ℤ) 1 1 (curve.φ n) = 1 := by
   simp_rw [φ, map_sub, map_mul, map_pow, polyEval_cusp_ψ, polyEval]
   simp only [coe_eval₂RingHom, eval₂_C, eval₂_X]; ring
 
-lemma polyEval_cusp_ψc : polyEval cusp 1 1 (curve.ψc n) = 2 := by
+lemma polyEval_cusp_ψc : polyEval (cusp ℤ) 1 1 (curve.ψc n) = 2 := by
   rw [ψc, map_compl₂EDS, ← evalEval_ψ₂, ← evalEval_Ψ₃, ← evalEval_preΨ₄]
   simp [cusp_ψ₂, cusp_Ψ₃, cusp_preΨ₄, evalEval, compl₂EDS_two_three_two]
 
-lemma polyEval_cusp_ω : polyEval cusp 1 1 (curve.ω n) = 1 := by
-  have := congr(polyEval cusp 1 1 $(curve.two_mul_ω n))
+lemma polyEval_cusp_ω : polyEval (cusp ℤ) 1 1 (curve.ω n) = 1 := by
+  have := congr(polyEval (cusp ℤ) 1 1 $(curve.two_mul_ω n))
   simp_rw [map_sub, map_mul, map_ofNat, polyEval_cusp_ψc] at this
   simpa [cusp, polyEval, specialize, curve] using this
 

@@ -176,10 +176,10 @@ lemma curveField_eq : curveField = pointedCurve := rfl
 
 end Universal
 
-/-- The cusp curve $Y^2 = X^3$ over ℤ. -/
-def cusp : Affine ℤ := { a₁ := 0, a₂ := 0, a₃ := 0, a₄ := 0, a₆ := 0 }
+/-- The cusp curve $Y^2 = X^3$ over a commutative ring `R`. -/
+def cusp (R : Type*) [CommRing R] : Affine R := { a₁ := 0, a₂ := 0, a₃ := 0, a₄ := 0, a₆ := 0 }
 
-lemma cusp_equation_one_one : cusp.Equation 1 1 := by
+lemma cusp_equation_one_one : (cusp ℤ).Equation 1 1 := by
   simp [Affine.Equation, Affine.polynomial, cusp, Polynomial.evalEval]
 
 open Universal
