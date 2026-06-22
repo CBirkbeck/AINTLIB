@@ -741,6 +741,37 @@ theorem restrictScalars_iSup_le {n : ℕ} {ι : Sort*} (f : ι → IntermediateF
   · obtain ⟨i, hi⟩ := Set.mem_iUnion.mp hxU
     exact hf i hi
 
+/-- A `ℚ`-algebra endomorphism of `Ω` is an automorphism (`Ω` is algebraic over `ℚ` and algebraically
+closed, so every `ℚ`-algebra map `Ω → Ω` is bijective). -/
+noncomputable def omAut (σ : Om →ₐ[ℚ] Om) : Om ≃ₐ[ℚ] Om :=
+  AlgEquiv.ofBijective σ (Algebra.IsAlgebraic.algHom_bijective σ)
+
+@[simp] theorem omAut_apply (σ : Om →ₐ[ℚ] Om) (x : Om) : omAut σ x = σ x := rfl
+
+/-- The image of an admissible-`M` layer `L` under `σ`, as an `F⁺ₙ`-intermediate field of `Ω`.
+Equal (as a set) to `σ(L)`; its `ℚ`-restriction is `map σ (L.restrictScalars ℚ)`. -/
+private noncomputable def sigmaL (n : ℕ) (σ : Om →ₐ[ℚ] Om)
+    {L : IntermediateField (FPlus p n) Om}
+    (hFle : FPlus p n ≤ IntermediateField.map σ (L.restrictScalars ℚ)) :
+    IntermediateField (FPlus p n) Om :=
+  IntermediateField.extendScalars hFle
+
+/-- **[a] finrank transport**: `[σ(L) : F⁺ₙ] = [L : F⁺ₙ]`. Proof: the `ℚ`-iso `σ : L ≅ σ(L)` gives
+`[L:ℚ] = [σ(L):ℚ]`; divide by `[F⁺ₙ:ℚ]` via the tower formula. -/
+theorem finrank_sigmaL (n : ℕ) (σ : Om →ₐ[ℚ] Om) {L : IntermediateField (FPlus p n) Om}
+    [FiniteDimensional (FPlus p n) L]
+    (hFle : FPlus p n ≤ IntermediateField.map σ (L.restrictScalars ℚ)) :
+    Module.finrank (FPlus p n) (IntermediateField.extendScalars hFle)
+      = Module.finrank (FPlus p n) L := by
+  haveI : FiniteDimensional ℚ ↥(FPlus p n) := instFiniteDimensionalFPlus p n
+  haveI : FiniteDimensional ℚ ↥L := Module.Finite.trans ↥(FPlus p n) ↥L
+  apply Nat.eq_of_mul_eq_mul_left (Module.finrank_pos (R := ℚ) (M := ↥(FPlus p n)))
+  rw [Module.finrank_mul_finrank ℚ ↥(FPlus p n) ↥(IntermediateField.extendScalars hFle),
+    Module.finrank_mul_finrank ℚ ↥(FPlus p n) ↥L]
+  have e : ↥L ≃ₗ[ℚ] ↥(IntermediateField.extendScalars hFle) :=
+    (IntermediateField.intermediateFieldMap (omAut σ) (L.restrictScalars ℚ)).toLinearEquiv
+  exact (LinearEquiv.finrank_eq e).symm
+
 /-- **Admissibility is `σ`-invariant** (the analytic heart of normality): if `L` is an admissible-`M`
 layer over `F⁺ₙ` and `σ` is a `ℚ`-algebra map of `Ω` (which fixes `F⁺ₙ` setwise, `F⁺ₙ/ℚ` normal),
 then `σ(L)` — viewed as an `F⁺ₙ`-extension via `extendScalars` — is again admissible: the iso `σ|_L`

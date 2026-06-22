@@ -1,1 +1,1 @@
-FOCUS: TG4 SES (restrXtoY surjective + ker = Gal(M∞⁺/L∞⁺)) COMPILES via IntermediateField.restrict (light encoding replaced heavy comap/codRestrict). Verifying lake build, then commit.
+FOCUS: isAdmissibleM_map. DONE: omAut (σ bijective), finrank_sigmaL [part a, compiles]. NEXT: finiteDimensional_sigmaL + isGalois/mulComm_sigmaL [part b, σ-conjugation iso Gal(σL/Fₙ⁺)≅Gal(L/Fₙ⁺)], then isUnramifiedOutsideP_sigmaL [part c, ANT core], then assemble.

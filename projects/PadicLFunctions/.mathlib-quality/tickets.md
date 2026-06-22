@@ -7165,6 +7165,19 @@ the bridge is the gateway to the IMC chain. **Decision needed before the large n
 - Option B: rebuild the needed §12 unit/Λ interfaces over Ω (more work, keeps §13 self-contained).
 - Option C: work abstractly — state TG5 (the one CFT assumption) and Γ⁺≅ℤp over an abstract iso, deferring
   the ambient reconciliation to where it's forced.
+- **USER DECISION (2026-06-22): Option A — embed Ω ↪ ℂ_[p] (common ambient), reuse §12 directly.** AND
+  **tackle isAdmissibleM_map (TG1-N-transport) NEXT** to make the foundation sorry-free before the §12 phase.
+  So execution order: (1) TG1-N-transport [below], then (2) the Ω↪ℂ_[p] bridge + TG2-Lambda, then TG5–TG9.
+
+### [TG1-N-transport] decomposition (isAdmissibleM_map: σ(L) admissible given L, σ:Ω→ₐ[ℚ]Ω)
+- σ bijective (Ω alg-closed+algebraic) → σ' : Ω ≃ₐ[ℚ] Ω; β := σ'|F⁺ₙ ∈ Gal(F⁺ₙ/ℚ) (F⁺ₙ/ℚ normal).
+- **[a] finrank + p-power**: [σL:ℚ]=[L:ℚ] (ℚ-iso AlgEquiv.intermediateFieldMap) + tower [·:ℚ]=[·:F⁺ₙ][F⁺ₙ:ℚ]
+  ⟹ [σL:F⁺ₙ]=[L:F⁺ₙ]=p^k. (Avoids semilinear finrank.)
+- **[b] Galois + abelian**: conjugation `φ ↦ σ'⁻¹∘φ∘σ'` is a group iso Gal(σL/F⁺ₙ) ≅ Gal(L/F⁺ₙ) (both fix
+  F⁺ₙ since σ'(F⁺ₙ)=F⁺ₙ); abelian transports; IsGalois via #aut = degree (or Normal transport).
+- **[c] unramified outside p** (ANT core): σ' restricts to ring auto of 𝓞_Ω fixing ℤ; σ'(𝓞_L)=𝓞_{σL} over
+  β:𝓞_{F⁺ₙ}≅𝓞_{F⁺ₙ}; primes P↦σ'P preserve residue char (σ' fixes p) and ramification index; β fixes the
+  unique prime over p. Needs RingOfIntegers functoriality under a base auto + ramificationIdx invariance.
 
 ## NEXT PHASE — §12 integration (Λ-module, CFT, Vandiver, IMC). Gateway = study §12
 The remaining tickets (TG2-Lambda, TG5–TG9) all need §12: `IwasawaAlgebra`, `Gamma`, `GPlus`,
