@@ -84,7 +84,7 @@ theorem neg [IsCMField K] {γ : 𝓞 (K⁺)} (hγ : IsPrimaryPlus p K γ) :
 @[simp]
 theorem neg_iff [IsCMField K] {γ : 𝓞 (K⁺)} :
     IsPrimaryPlus p K (-γ) ↔ IsPrimaryPlus p K γ :=
-  ⟨fun h => by simpa using h.neg, fun h => h.neg⟩
+  ⟨fun h ↦ by simpa using h.neg, fun h ↦ h.neg⟩
 
 /-- The sum of two K⁺-primary elements is K⁺-primary. -/
 theorem add [IsCMField K] {γ δ : 𝓞 (K⁺)}
@@ -300,7 +300,7 @@ theorem cyclotomicUnit_add (a b : ℕ) :
   rw [Finset.sum_range_add]
   congr 1
   rw [Finset.mul_sum]
-  refine Finset.sum_congr rfl fun j _ => ?_
+  refine Finset.sum_congr rfl fun j _ ↦ ?_
   rw [← pow_add, Nat.add_comm]
 
 /-- Symmetric form: `cyclotomicUnit (a + b) = cyclotomicUnit b + ζ^b · cyclotomicUnit a`. -/
