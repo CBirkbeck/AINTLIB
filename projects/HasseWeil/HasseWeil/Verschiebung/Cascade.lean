@@ -265,10 +265,10 @@ function form expected by the IsDualOf certificate and bound assembly. -/
     and `hasse_bound_target_via_qth_root_witness`. -/
 theorem mulByInt_three_pullback_cube_root_q_three_char_three
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
-    [CharP K 3] (h_card : Fintype.card K = 3)
-    (h_y_cube : ∃ g : W.toAffine.FunctionField,
+    [CharP K 3] (_h_card : Fintype.card K = 3)
+    (_h_y_cube : ∃ g : W.toAffine.FunctionField,
       g ^ Fintype.card K = mulByInt_y W ((Fintype.card K : ℕ) : ℤ))
-    (h_x_cube : ∃ g : W.toAffine.FunctionField,
+    (_h_x_cube : ∃ g : W.toAffine.FunctionField,
       g ^ Fintype.card K =
         (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback (x_gen W))
     (h_xy_subfield : ∀ z : W.toAffine.FunctionField,
@@ -294,7 +294,7 @@ of `verschiebungIsog_isDualOf_frobenius_of_qth_root_witness`. -/
     `verschiebungIsog_isDualOf_frobenius_of_qth_root_witness`. -/
 theorem verschiebungIsog_isDualOf_frobenius_q_three_char_three
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
-    [CharP K 3] (h_card : Fintype.card K = 3)
+    [CharP K 3] (_h_card : Fintype.card K = 3)
     (h_cube_root : ∀ z : W.toAffine.FunctionField,
       ∃ g : W.toAffine.FunctionField,
         g ^ Fintype.card K =
@@ -336,7 +336,8 @@ q=3 substrate). -/
 theorem hasse_bound_witness_parametric_assembled_q_three
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
     [CharP K 3] (h_card : Fintype.card K = 3)
-    (h_pc_sep : (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).IsSeparable)
+    (h_pc_sep :
+      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).IsSeparable)
     (h_pc_fin : @FiniteDimensional W.toAffine.FunctionField
       W.toAffine.FunctionField _ _
       (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).toAlgebra.toModule)
@@ -361,7 +362,8 @@ theorem hasse_bound_witness_parametric_assembled_q_three
 theorem hasse_bound_sq_witness_parametric_assembled_q_three
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
     [CharP K 3] (h_card : Fintype.card K = 3)
-    (h_pc_sep : (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).IsSeparable)
+    (h_pc_sep :
+      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).IsSeparable)
     (h_pc_fin : @FiniteDimensional W.toAffine.FunctionField
       W.toAffine.FunctionField _ _
       (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).toAlgebra.toModule)
@@ -402,7 +404,8 @@ common to all three primes). -/
 theorem hasse_bound_witness_parametric_assembled_q_five
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
     [CharP K 5] (h_card : Fintype.card K = 5)
-    (h_pc_sep : (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).IsSeparable)
+    (h_pc_sep :
+      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).IsSeparable)
     (h_pc_fin : @FiniteDimensional W.toAffine.FunctionField
       W.toAffine.FunctionField _ _
       (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).toAlgebra.toModule)
@@ -426,7 +429,8 @@ theorem hasse_bound_witness_parametric_assembled_q_five
 theorem hasse_bound_sq_witness_parametric_assembled_q_five
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
     [CharP K 5] (h_card : Fintype.card K = 5)
-    (h_pc_sep : (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).IsSeparable)
+    (h_pc_sep :
+      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).IsSeparable)
     (h_pc_fin : @FiniteDimensional W.toAffine.FunctionField
       W.toAffine.FunctionField _ _
       (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).toAlgebra.toModule)
@@ -451,7 +455,7 @@ theorem hasse_bound_sq_witness_parametric_assembled_q_five
     `verschiebungIsog_isDualOf_frobenius_of_qth_root_witness`. -/
 theorem verschiebungIsog_isDualOf_frobenius_q_five_char_five
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
-    [CharP K 5] (h_card : Fintype.card K = 5)
+    [CharP K 5] (_h_card : Fintype.card K = 5)
     (h_fifth_root : ∀ z : W.toAffine.FunctionField,
       ∃ g : W.toAffine.FunctionField,
         g ^ Fintype.card K =
@@ -473,7 +477,8 @@ transposition with Route 2 infrastructure. -/
 theorem hasse_bound_witness_parametric_assembled_q_seven
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
     [CharP K 7] (h_card : Fintype.card K = 7)
-    (h_pc_sep : (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).IsSeparable)
+    (h_pc_sep :
+      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).IsSeparable)
     (h_pc_fin : @FiniteDimensional W.toAffine.FunctionField
       W.toAffine.FunctionField _ _
       (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).toAlgebra.toModule)
@@ -497,7 +502,8 @@ theorem hasse_bound_witness_parametric_assembled_q_seven
 theorem hasse_bound_sq_witness_parametric_assembled_q_seven
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
     [CharP K 7] (h_card : Fintype.card K = 7)
-    (h_pc_sep : (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).IsSeparable)
+    (h_pc_sep :
+      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).IsSeparable)
     (h_pc_fin : @FiniteDimensional W.toAffine.FunctionField
       W.toAffine.FunctionField _ _
       (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).toAlgebra.toModule)
@@ -520,7 +526,7 @@ theorem hasse_bound_sq_witness_parametric_assembled_q_seven
 /-- **q=7 char=7 IsDualOf certificate (witness-parametric)**. -/
 theorem verschiebungIsog_isDualOf_frobenius_q_seven_char_seven
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
-    [CharP K 7] (h_card : Fintype.card K = 7)
+    [CharP K 7] (_h_card : Fintype.card K = 7)
     (h_seventh_root : ∀ z : W.toAffine.FunctionField,
       ∃ g : W.toAffine.FunctionField,
         g ^ Fintype.card K =
@@ -588,7 +594,8 @@ theorem hasse_bound_for_finite_field
 theorem hasse_bound_F_four
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
     [CharP K 2] (h_card : Fintype.card K = 4)
-    (h_pc_sep : (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).IsSeparable)
+    (h_pc_sep :
+      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).IsSeparable)
     (h_pc_fin : @FiniteDimensional W.toAffine.FunctionField
       W.toAffine.FunctionField _ _
       (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).toAlgebra.toModule)
@@ -611,7 +618,8 @@ theorem hasse_bound_F_four
 theorem hasse_bound_F_nine
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
     [CharP K 3] (h_card : Fintype.card K = 9)
-    (h_pc_sep : (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).IsSeparable)
+    (h_pc_sep :
+      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).IsSeparable)
     (h_pc_fin : @FiniteDimensional W.toAffine.FunctionField
       W.toAffine.FunctionField _ _
       (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).toAlgebra.toModule)
