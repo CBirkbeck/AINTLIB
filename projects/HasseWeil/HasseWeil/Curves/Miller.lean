@@ -1239,6 +1239,101 @@ theorem miller_hypothesis_holds
       · exact miller_at_some_some_degen W h₁ h₂ hxy
       · exact miller_at_some_some_nondegen W h₁ h₂ hxy
 
+/-- Degree of a single-point divisor: `deg (single P n) = n`. Helper for the
+`single_add` step of `general_kappa_reduce`. -/
+private lemma degree_single_eq
+    (P : ProjectiveSmoothPoint (⟨W⟩ : SmoothPlaneCurve F)) (n : ℤ) :
+    ProjectiveDivisor.degree (Finsupp.single P n :
+        ProjectiveDivisor (⟨W⟩ : SmoothPlaneCurve F)) = n := by
+  unfold ProjectiveDivisor.degree
+  exact Finsupp.sum_single_index rfl
+
+/-- Scaled single-minus-infinity identity: `single P n − n • (∞) = n • κ(P)`.
+The `ℤ`-scaled form of `single_minus_inf_eq_kappaDivisor`; helper for the
+`single_add` step of `general_kappa_reduce`. -/
+private lemma single_sub_nsmul_inf_eq_nsmul_kappaDivisor
+    (P : ProjectiveSmoothPoint (⟨W⟩ : SmoothPlaneCurve F)) (n : ℤ) :
+    (Finsupp.single P n : ProjectiveDivisor (⟨W⟩ : SmoothPlaneCurve F)) -
+        n • Finsupp.single
+          (ProjectiveSmoothPoint.infinity :
+            ProjectiveSmoothPoint (⟨W⟩ : SmoothPlaneCurve F)) (1 : ℤ) =
+      n • kappaDivisor W P.toAffinePoint := by
+  have h_base := single_minus_inf_eq_kappaDivisor W P
+  have : n • (Finsupp.single P (1 : ℤ) - Finsupp.single
+      (ProjectiveSmoothPoint.infinity :
+        ProjectiveSmoothPoint (⟨W⟩ : SmoothPlaneCurve F)) (1 : ℤ)) =
+    n • kappaDivisor W P.toAffinePoint := by rw [h_base]
+  rw [smul_sub, Finsupp.smul_single, smul_eq_mul, mul_one] at this
+  exact this
+
+/-- Combined `zsmul` + `add` linear equivalence for `kappaDivisor`:
+`n • κ(P) + κ(σ D') ~ κ(n • P + σ D')`. Helper for the `single_add` step of
+`general_kappa_reduce`, packaging `kappaDivisor_zsmul_linEquiv_of_miller` and
+`kappaDivisor_add_linEquiv_of_miller`. -/
+private lemma nsmul_kappaDivisor_add_linEquiv_of_miller
+    (h_miller : MillerHypothesis W)
+    (P : ProjectiveSmoothPoint (⟨W⟩ : SmoothPlaneCurve F)) (n : ℤ)
+    (D' : ProjectiveDivisor (⟨W⟩ : SmoothPlaneCurve F)) :
+    SmoothPlaneCurve.ProjLinearlyEquiv (⟨W⟩ : SmoothPlaneCurve F)
+      (n • kappaDivisor W P.toAffinePoint + kappaDivisor W
+        (projectiveDivisorSum W D'))
+      (kappaDivisor W (n • P.toAffinePoint + projectiveDivisorSum W D')) := by
+  have h_zsmul := (kappaDivisor_zsmul_linEquiv_of_miller W h_miller
+    P.toAffinePoint n).symm
+  have h_add := (kappaDivisor_add_linEquiv_of_miller W h_miller
+    (n • P.toAffinePoint) (projectiveDivisorSum W D')).symm
+  have h_step : SmoothPlaneCurve.ProjLinearlyEquiv (⟨W⟩ : SmoothPlaneCurve F)
+      (n • kappaDivisor W P.toAffinePoint +
+        kappaDivisor W (projectiveDivisorSum W D'))
+      (kappaDivisor W (n • P.toAffinePoint) +
+        kappaDivisor W (projectiveDivisorSum W D')) := by
+    change SmoothPlaneCurve.ProjIsPrincipal (⟨W⟩ : SmoothPlaneCurve F) _
+    have h_diff : (n • kappaDivisor W P.toAffinePoint +
+          kappaDivisor W (projectiveDivisorSum W D')) -
+        (kappaDivisor W (n • P.toAffinePoint) +
+          kappaDivisor W (projectiveDivisorSum W D')) =
+        n • kappaDivisor W P.toAffinePoint -
+          kappaDivisor W (n • P.toAffinePoint) := by abel
+    rw [h_diff]
+    change SmoothPlaneCurve.ProjIsPrincipal (⟨W⟩ : SmoothPlaneCurve F)
+      (n • kappaDivisor W P.toAffinePoint - kappaDivisor W (n • P.toAffinePoint))
+    have h_neg := (⟨W⟩ : SmoothPlaneCurve F).projPrincipalSubgroup.neg_mem
+      (h_zsmul.symm : SmoothPlaneCurve.ProjIsPrincipal _ _)
+    have h_rw : -(kappaDivisor W (n • P.toAffinePoint) -
+          n • kappaDivisor W P.toAffinePoint) =
+        n • kappaDivisor W P.toAffinePoint -
+          kappaDivisor W (n • P.toAffinePoint) := by abel
+    rw [← h_rw]
+    exact h_neg
+  exact h_step.trans h_add
+
+/-- `abel`-regrouping of the `single_add` reduction goal of
+`general_kappa_reduce` into its three principal summands (the single-point
+part, the inductive `D'` part, and the `kappaDivisor` correction term). -/
+private lemma general_kappa_reduce_regroup
+    (P : ProjectiveSmoothPoint (⟨W⟩ : SmoothPlaneCurve F)) (n : ℤ)
+    (D' : ProjectiveDivisor (⟨W⟩ : SmoothPlaneCurve F)) :
+    (Finsupp.single P n + D') -
+        (kappaDivisor W (n • P.toAffinePoint + projectiveDivisorSum W D') +
+          (n + ProjectiveDivisor.degree D') • Finsupp.single
+            (ProjectiveSmoothPoint.infinity :
+              ProjectiveSmoothPoint (⟨W⟩ : SmoothPlaneCurve F)) (1 : ℤ)) =
+      ((Finsupp.single P n : ProjectiveDivisor (⟨W⟩ : SmoothPlaneCurve F)) -
+          n • Finsupp.single
+            (ProjectiveSmoothPoint.infinity :
+              ProjectiveSmoothPoint (⟨W⟩ : SmoothPlaneCurve F)) (1 : ℤ) -
+          n • kappaDivisor W P.toAffinePoint) +
+      (D' - (kappaDivisor W (projectiveDivisorSum W D') +
+        (ProjectiveDivisor.degree D') • Finsupp.single
+          (ProjectiveSmoothPoint.infinity :
+            ProjectiveSmoothPoint (⟨W⟩ : SmoothPlaneCurve F)) (1 : ℤ))) +
+      ((n • kappaDivisor W P.toAffinePoint +
+          kappaDivisor W (projectiveDivisorSum W D')) -
+        kappaDivisor W (n • P.toAffinePoint +
+          projectiveDivisorSum W D')) := by
+  rw [add_smul]
+  abel
+
 /-- **General κ-reduction (Finsupp induction)**: for any projective divisor
 `D`, `D` is linearly equivalent to `kappaDivisor W (σ D) + (deg D) • (∞)`,
 where `σ` is the sum-of-points map. By Finsupp induction on `D`: the base
@@ -1269,95 +1364,24 @@ theorem general_kappa_reduce
             (ProjectiveSmoothPoint.infinity :
               ProjectiveSmoothPoint (⟨W⟩ : SmoothPlaneCurve F)) (1 : ℤ)))
     rw [projectiveDivisorSum_add, projectiveDivisorSum_single,
-      ProjectiveDivisor.degree_add]
-    have h_deg_single : ProjectiveDivisor.degree (Finsupp.single P n :
-        ProjectiveDivisor (⟨W⟩ : SmoothPlaneCurve F)) = n := by
-      unfold ProjectiveDivisor.degree
-      exact Finsupp.sum_single_index rfl
-    rw [h_deg_single]
-    have h_single_n : (Finsupp.single P n : ProjectiveDivisor
-        (⟨W⟩ : SmoothPlaneCurve F)) - n • Finsupp.single
-        (ProjectiveSmoothPoint.infinity :
-          ProjectiveSmoothPoint (⟨W⟩ : SmoothPlaneCurve F)) (1 : ℤ) =
-        n • kappaDivisor W P.toAffinePoint := by
-      have h_base := single_minus_inf_eq_kappaDivisor W P
-      have : n • (Finsupp.single P (1 : ℤ) - Finsupp.single
-          (ProjectiveSmoothPoint.infinity :
-            ProjectiveSmoothPoint (⟨W⟩ : SmoothPlaneCurve F)) (1 : ℤ)) =
-        n • kappaDivisor W P.toAffinePoint := by rw [h_base]
-      rw [smul_sub, Finsupp.smul_single, smul_eq_mul, mul_one] at this
-      exact this
+      ProjectiveDivisor.degree_add, degree_single_eq]
     have h_part1 : (Finsupp.single P n : ProjectiveDivisor
         (⟨W⟩ : SmoothPlaneCurve F)) - n • Finsupp.single
         (ProjectiveSmoothPoint.infinity :
           ProjectiveSmoothPoint (⟨W⟩ : SmoothPlaneCurve F)) (1 : ℤ) -
         n • kappaDivisor W P.toAffinePoint = 0 := by
-      rw [h_single_n, sub_self]
+      rw [single_sub_nsmul_inf_eq_nsmul_kappaDivisor, sub_self]
     have h_part2 : SmoothPlaneCurve.ProjIsPrincipal (⟨W⟩ : SmoothPlaneCurve F)
         (D' - (kappaDivisor W (projectiveDivisorSum W D') +
           (ProjectiveDivisor.degree D') • Finsupp.single
             (ProjectiveSmoothPoint.infinity :
               ProjectiveSmoothPoint (⟨W⟩ : SmoothPlaneCurve F)) (1 : ℤ))) := ih
-    have h_part3_eq :
-        SmoothPlaneCurve.ProjLinearlyEquiv (⟨W⟩ : SmoothPlaneCurve F)
-          (n • kappaDivisor W P.toAffinePoint + kappaDivisor W
-            (projectiveDivisorSum W D'))
-          (kappaDivisor W (n • P.toAffinePoint + projectiveDivisorSum W D')) := by
-      have h_zsmul := (kappaDivisor_zsmul_linEquiv_of_miller W h_miller
-        P.toAffinePoint n).symm
-      have h_add := (kappaDivisor_add_linEquiv_of_miller W h_miller
-        (n • P.toAffinePoint) (projectiveDivisorSum W D')).symm
-      have h_step : SmoothPlaneCurve.ProjLinearlyEquiv (⟨W⟩ : SmoothPlaneCurve F)
-          (n • kappaDivisor W P.toAffinePoint +
-            kappaDivisor W (projectiveDivisorSum W D'))
-          (kappaDivisor W (n • P.toAffinePoint) +
-            kappaDivisor W (projectiveDivisorSum W D')) := by
-        change SmoothPlaneCurve.ProjIsPrincipal (⟨W⟩ : SmoothPlaneCurve F) _
-        have h_diff : (n • kappaDivisor W P.toAffinePoint +
-              kappaDivisor W (projectiveDivisorSum W D')) -
-            (kappaDivisor W (n • P.toAffinePoint) +
-              kappaDivisor W (projectiveDivisorSum W D')) =
-            n • kappaDivisor W P.toAffinePoint -
-              kappaDivisor W (n • P.toAffinePoint) := by abel
-        rw [h_diff]
-        change SmoothPlaneCurve.ProjIsPrincipal (⟨W⟩ : SmoothPlaneCurve F)
-          (n • kappaDivisor W P.toAffinePoint - kappaDivisor W (n • P.toAffinePoint))
-        have h_neg := (⟨W⟩ : SmoothPlaneCurve F).projPrincipalSubgroup.neg_mem
-          (h_zsmul.symm : SmoothPlaneCurve.ProjIsPrincipal _ _)
-        have h_rw : -(kappaDivisor W (n • P.toAffinePoint) -
-              n • kappaDivisor W P.toAffinePoint) =
-            n • kappaDivisor W P.toAffinePoint -
-              kappaDivisor W (n • P.toAffinePoint) := by abel
-        rw [← h_rw]
-        exact h_neg
-      exact h_step.trans h_add
-    have h_diff_eq :
-        (Finsupp.single P n + D') -
-          (kappaDivisor W (n • P.toAffinePoint + projectiveDivisorSum W D') +
-            (n + ProjectiveDivisor.degree D') • Finsupp.single
-              (ProjectiveSmoothPoint.infinity :
-                ProjectiveSmoothPoint (⟨W⟩ : SmoothPlaneCurve F)) (1 : ℤ)) =
-        ((Finsupp.single P n : ProjectiveDivisor (⟨W⟩ : SmoothPlaneCurve F)) -
-            n • Finsupp.single
-              (ProjectiveSmoothPoint.infinity :
-                ProjectiveSmoothPoint (⟨W⟩ : SmoothPlaneCurve F)) (1 : ℤ) -
-            n • kappaDivisor W P.toAffinePoint) +
-        (D' - (kappaDivisor W (projectiveDivisorSum W D') +
-          (ProjectiveDivisor.degree D') • Finsupp.single
-            (ProjectiveSmoothPoint.infinity :
-              ProjectiveSmoothPoint (⟨W⟩ : SmoothPlaneCurve F)) (1 : ℤ))) +
-        ((n • kappaDivisor W P.toAffinePoint +
-            kappaDivisor W (projectiveDivisorSum W D')) -
-          kappaDivisor W (n • P.toAffinePoint +
-            projectiveDivisorSum W D')) := by
-      rw [add_smul]
-      abel
-    rw [h_diff_eq, h_part1, zero_add]
+    rw [general_kappa_reduce_regroup, h_part1, zero_add]
     have h_part3 : SmoothPlaneCurve.ProjIsPrincipal (⟨W⟩ : SmoothPlaneCurve F)
         ((n • kappaDivisor W P.toAffinePoint +
           kappaDivisor W (projectiveDivisorSum W D')) -
         kappaDivisor W (n • P.toAffinePoint + projectiveDivisorSum W D')) :=
-      h_part3_eq
+      nsmul_kappaDivisor_add_linEquiv_of_miller W h_miller P n D'
     exact (⟨W⟩ : SmoothPlaneCurve F).projPrincipalSubgroup.add_mem h_part2 h_part3
 
 /-- **`DivZeroReduce W` is unconditional** (Target 2): for every degree-zero
