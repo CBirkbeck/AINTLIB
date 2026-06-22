@@ -172,6 +172,56 @@ theorem PullbackEvaluation.stored_eq_toPointMap {β : Isogeny W.toAffine W.toAff
   rw [heq]
   exact (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mpr ⟨hxx, hyy⟩
 
+/-- Forward leg of `card_coordFibre_eq_card_storedFibre`: every coord-fibre point `P`
+over `Q` maps under `β` to `Q.toAffinePoint`. -/
+private theorem coordFibre_forward
+    (β : Isogeny W.toAffine W.toAffine) (cd : (β.endCurveMap W).CoordHom)
+    {bad : Set (W_smooth W).SmoothPoint} (hw : WeilPairing.PullbackEvaluation W β bad)
+    (Q : (W_smooth W).SmoothPoint)
+    (hQ1 : Q ∉ Curves.CurveMap.toPointMap cd '' bad) :
+    ∀ P : {P : (W_smooth W).SmoothPoint // Curves.CurveMap.toPointMap cd P = Q},
+      β.toAddMonoidHom P.1.toAffinePoint = Q.toAffinePoint := by
+  rintro ⟨P, hP⟩
+  have hPgood : P ∉ bad := fun hmem ↦ hQ1 ⟨P, hmem, hP⟩
+  have hco : β.toAddMonoidHom P.toAffinePoint =
+      (Curves.CurveMap.toPointMap cd P).toAffinePoint :=
+    PullbackEvaluation.stored_eq_toPointMap W hw cd hPgood
+  rw [hco, hP]
+
+/-- Backward leg of `card_coordFibre_eq_card_storedFibre`: every stored-fibre point `R`
+over `Q.toAffinePoint` is the affine image of some coord-fibre point over `Q`. -/
+private theorem coordFibre_backward
+    (β : Isogeny W.toAffine W.toAffine) (cd : (β.endCurveMap W).CoordHom)
+    {bad : Set (W_smooth W).SmoothPoint} (hw : WeilPairing.PullbackEvaluation W β bad)
+    (Q : (W_smooth W).SmoothPoint)
+    (hQ2 : Q ∉ (fun Q : (W_smooth W).SmoothPoint ↦ Q.toAffinePoint) ⁻¹'
+      (β.toAddMonoidHom '' ((fun P : (W_smooth W).SmoothPoint ↦ P.toAffinePoint) '' bad))) :
+    ∀ R : {R : W.toAffine.Point // β.toAddMonoidHom R = Q.toAffinePoint},
+      ∃ P : {P : (W_smooth W).SmoothPoint // Curves.CurveMap.toPointMap cd P = Q},
+        P.1.toAffinePoint = R.1 := by
+  rintro ⟨R, hR⟩
+  rcases R with _ | ⟨x, y, hns⟩
+  · exfalso
+    have hβ0 : β.toAddMonoidHom WeierstrassCurve.Affine.Point.zero = 0 :=
+      (congrArg β.toAddMonoidHom WeierstrassCurve.Affine.Point.zero_def.symm).trans
+        (map_zero β.toAddMonoidHom)
+    rw [hβ0, WeierstrassCurve.Affine.Point.zero_def,
+      Curves.SmoothPlaneCurve.SmoothPoint.toAffinePoint_def] at hR
+    simp at hR
+  · have hPgood : (⟨x, y, hns⟩ : (W_smooth W).SmoothPoint) ∉ bad := by
+      intro hmem
+      exact hQ2 ⟨(⟨x, y, hns⟩ : (W_smooth W).SmoothPoint).toAffinePoint,
+        ⟨_, hmem, rfl⟩, hR⟩
+    have hco : β.toAddMonoidHom
+        (⟨x, y, hns⟩ : (W_smooth W).SmoothPoint).toAffinePoint =
+        (Curves.CurveMap.toPointMap cd ⟨x, y, hns⟩).toAffinePoint :=
+      PullbackEvaluation.stored_eq_toPointMap W hw cd hPgood
+    refine ⟨⟨⟨x, y, hns⟩, ?_⟩, rfl⟩
+    apply smoothPoint_toAffinePoint_injective W
+    change (Curves.CurveMap.toPointMap cd ⟨x, y, hns⟩).toAffinePoint = Q.toAffinePoint
+    rw [← hco]
+    exact hR
+
 /-- The coordinate-map fibre over a good point `Q` and the stored-isogeny fibre over
 `Q.toAffinePoint` have equal cardinality: off the finite `bad` set, the coherence `hw`
 identifies `β`'s stored point map with `cd`'s coordinate point map. -/
@@ -185,48 +235,13 @@ private theorem card_coordFibre_eq_card_storedFibre
     Nat.card {P : (W_smooth W).SmoothPoint // Curves.CurveMap.toPointMap cd P = Q} =
       Nat.card {R : W.toAffine.Point // β.toAddMonoidHom R = Q.toAffinePoint} := by
   classical
-  have hforward : ∀ P : {P : (W_smooth W).SmoothPoint //
-      Curves.CurveMap.toPointMap cd P = Q},
-      β.toAddMonoidHom P.1.toAffinePoint = Q.toAffinePoint := by
-    rintro ⟨P, hP⟩
-    have hPgood : P ∉ bad := fun hmem ↦ hQ1 ⟨P, hmem, hP⟩
-    have hco : β.toAddMonoidHom P.toAffinePoint =
-        (Curves.CurveMap.toPointMap cd P).toAffinePoint :=
-      PullbackEvaluation.stored_eq_toPointMap W hw cd hPgood
-    rw [hco, hP]
-  have hbackward : ∀ R : {R : W.toAffine.Point //
-      β.toAddMonoidHom R = Q.toAffinePoint},
-      ∃ P : {P : (W_smooth W).SmoothPoint //
-        Curves.CurveMap.toPointMap cd P = Q}, P.1.toAffinePoint = R.1 := by
-    rintro ⟨R, hR⟩
-    rcases R with _ | ⟨x, y, hns⟩
-    · exfalso
-      have hβ0 : β.toAddMonoidHom WeierstrassCurve.Affine.Point.zero = 0 :=
-        (congrArg β.toAddMonoidHom WeierstrassCurve.Affine.Point.zero_def.symm).trans
-          (map_zero β.toAddMonoidHom)
-      rw [hβ0, WeierstrassCurve.Affine.Point.zero_def,
-        Curves.SmoothPlaneCurve.SmoothPoint.toAffinePoint_def] at hR
-      simp at hR
-    · have hPgood : (⟨x, y, hns⟩ : (W_smooth W).SmoothPoint) ∉ bad := by
-        intro hmem
-        exact hQ2 ⟨(⟨x, y, hns⟩ : (W_smooth W).SmoothPoint).toAffinePoint,
-          ⟨_, hmem, rfl⟩, hR⟩
-      have hco : β.toAddMonoidHom
-          (⟨x, y, hns⟩ : (W_smooth W).SmoothPoint).toAffinePoint =
-          (Curves.CurveMap.toPointMap cd ⟨x, y, hns⟩).toAffinePoint :=
-        PullbackEvaluation.stored_eq_toPointMap W hw cd hPgood
-      refine ⟨⟨⟨x, y, hns⟩, ?_⟩, rfl⟩
-      apply smoothPoint_toAffinePoint_injective W
-      change (Curves.CurveMap.toPointMap cd ⟨x, y, hns⟩).toAffinePoint = Q.toAffinePoint
-      rw [← hco]
-      exact hR
   refine Nat.card_congr (Equiv.ofBijective
-    (fun P ↦ ⟨P.1.toAffinePoint, hforward P⟩) ⟨?_, ?_⟩)
+    (fun P ↦ ⟨P.1.toAffinePoint, coordFibre_forward W β cd hw Q hQ1 P⟩) ⟨?_, ?_⟩)
   · intro P P' h
     exact Subtype.ext (smoothPoint_toAffinePoint_injective W
       (congrArg Subtype.val h))
   · intro R
-    obtain ⟨P, hP⟩ := hbackward R
+    obtain ⟨P, hP⟩ := coordFibre_backward W β cd hw Q hQ2 R
     exact ⟨P, Subtype.ext hP⟩
 
 /-- **III.4.10(c), good-fibre form — the W-3 headline**: a separable isogeny `β` over an
