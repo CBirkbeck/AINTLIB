@@ -7149,6 +7149,23 @@ commute_on_MPlusN are the reusable pieces. Next: Γ⁺-action (Rmk 13.7), Y∞�
   - Encoding lessons banked: ℚ-algebra diamond → refine/.mpr/explicit-instance bridges; ⨆-base heavy
     defeq (carrier isos) → use IntermediateField.restrict/restrict_algEquiv, NOT comap+codRestrict.
 
+## ⚠ ARCHITECTURAL DISCOVERY (2026-06-22) — §12 lives in ℂ_[p], §13 lives in Ω=AlgebraicClosure ℚ
+Scouting §12 to start TG2-Lambda/TG5 surfaced a **planning gap** the original TG board missed:
+- §13 (this file): Galois objects over **Ω = AlgebraicClosure ℚ** (F∞⁺, M∞⁺, L∞⁺, X∞⁺, Γ⁺ all in Ω).
+- §12: the analytic/units side over **ℂ_[p]** — `Fglobal/FglobalPlus ⊆ ℂ_[p]`, `globalUnits(Plus)`,
+  `localUnits(One)(Plus)`, `cycloUnits/cycloClosureOnePlus`, `NormCompatUnits`, `unitsTower1Plus`,
+  `cycloTower1Plus` (the E/U/C towers), `IwasawaAlgebra := PowerSeries 𝒪`, `Gamma := OneUnits p ≅ ℤp`.
+- mathlib has finite-level `autEquivPow : Gal(Fₙ/ℚ)≅(ℤ/pⁿ)ˣ` but NOT the inverse-limit cyclotomic
+  character `Gal(F∞/ℚ)≅ℤpˣ`.
+**Consequence**: TG2-Lambda and TG5–TG9 are NOT direct — they need a bridge between the two ambients
+(Ω vs ℂ_[p]) AND the inverse-limit cyclotomic character. This is a DESIGN FORK (see options below) and
+a /develop-level decision. The Galois side (TG1/TG3/TG4/TG2-carrier) is complete and ambient-correct;
+the bridge is the gateway to the IMC chain. **Decision needed before the large next-phase build.**
+- Option A: embed Ω ↪ ℂ_[p] (fix one prime above p), transport §13 objects into ℂ_[p], reuse §12 directly.
+- Option B: rebuild the needed §12 unit/Λ interfaces over Ω (more work, keeps §13 self-contained).
+- Option C: work abstractly — state TG5 (the one CFT assumption) and Γ⁺≅ℤp over an abstract iso, deferring
+  the ambient reconciliation to where it's forced.
+
 ## NEXT PHASE — §12 integration (Λ-module, CFT, Vandiver, IMC). Gateway = study §12
 The remaining tickets (TG2-Lambda, TG5–TG9) all need §12: `IwasawaAlgebra`, `Gamma`, `GPlus`,
 `gplusHomeo`, the unit towers (E∞,₁⁺/U∞,₁⁺/C∞,₁⁺), `iwasawa_theorem`. Recommended order:
