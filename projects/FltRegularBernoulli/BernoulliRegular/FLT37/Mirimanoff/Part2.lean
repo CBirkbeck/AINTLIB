@@ -92,7 +92,6 @@ theorem mirimanoffPolynomial_aeval_neg_one_eq_zero_of_odd (p : ℕ) [Fact p.Prim
     rw [map_neg, map_one]
   rw [hneg_one, Polynomial.aeval_algebraMap_apply_eq_algebraMap_eval, h, map_zero]
 
-
 /-- Vanishing of `φ_p(t)` for `t ∈ ZMod p \ {1}`: in fact `φ_p(t) = 0`
 for all `t ≠ 1` in `ZMod p`, using Fermat's little theorem `t^p = t`. -/
 theorem mirimanoffPolynomial_at_p_eval_eq_zero_of_ne_one (p : ℕ) [Fact p.Prime]
@@ -220,7 +219,6 @@ theorem mirimanoffPolynomial_two_eval_eq_div (p : ℕ) [hp : Fact p.Prime]
   have h_one_sub_ne : (1 - t) ≠ 0 := sub_ne_zero.mpr (Ne.symm ht)
   field_simp
   linear_combination h1
-
 
 /-- **Polynomial identity for `φ_3`.**
 
@@ -497,8 +495,6 @@ theorem mirimanoffPolynomial_at_p_isRoot (p : ℕ) [Fact p.Prime]
     (mirimanoffPolynomial p p).IsRoot t :=
   mirimanoffPolynomial_at_p_eval_eq_zero_of_ne_one p t ht
 
-
-
 /-- **Vanishing of φ_n at 1 for moderate weights.** For `2 ≤ n ≤ p-1`,
 `φ_n(1) = 0` in `ZMod p`. This is the standard sum-of-powers identity
 `∑_{k=1}^{p-1} k^m = 0` for `1 ≤ m < p-1`. -/
@@ -773,7 +769,6 @@ theorem mirimanoffPolynomial_aeval_at_p_one_eq_neg_one (p : ℕ) [Fact p.Prime]
   have hone : (1 : R) = algebraMap (ZMod p) R 1 := (map_one _).symm
   rw [hone, Polynomial.aeval_algebraMap_apply_eq_algebraMap_eval,
     mirimanoffPolynomial_at_p_eval_one, map_neg, map_one]
-
 
 /-- Evaluating any Mirimanoff polynomial at `0 ∈ R` for any
 `(ZMod p)`-algebra `R` gives `0`. -/
