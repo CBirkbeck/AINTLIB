@@ -1,1 +1,1 @@
-FOCUS: hPQ hb piece — e_ℤ(𝔭)=e_ℤ(𝔮) for two primes of 𝓞Fₙ⁺ over same ℓ (Fₙ⁺/ℚ Galois). Surveying mathlib+AINTLIB(Chebotarev) for: MulSemiringAction(Gal)(𝓞), ramificationIdx_eq_of_isGaloisGroup setup, or a direct number-field equal-ram lemma. Then finish hPQ.
+FOCUS: §13.2 Galois side COMPLETE (sorry-free, axiom-clean). isAdmissibleM_map done via PR40886 ⊥-case + ℤ-tower/Galois-action β-twist. NEXT PHASE: §12 bridge (Ω↪ℂ_[p]) → TG2-Lambda (Γ⁺≅ℤp, Λ-module) → TG5-TG9 (CFT, Cor 13.14, Vandiver, Thm 11.9, Thm 13.11).

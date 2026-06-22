@@ -7170,9 +7170,13 @@ the bridge is the gateway to the IMC chain. **Decision needed before the large n
   So execution order: (1) TG1-N-transport [below], then (2) the Ω↪ℂ_[p] bridge + TG2-Lambda, then TG5–TG9.
 
 ### [TG1-N-transport] decomposition (isAdmissibleM_map: σ(L) admissible given L, σ:Ω→ₐ[ℚ]Ω)
-- **STATUS (2026-06-22): 4/5 PROVEN — the WHOLE file now has a SINGLE sorry (the unramified ANT core
-  [c] below).** isAdmissibleM_map assembles sorry-free; helpers omAut/algHomFixingFPlus/
-  algEquivFixingFPlus + finrank_sigmaL/finiteDimensional_sigmaL/isGalois_sigmaL/mulComm_sigmaL all PROVEN.
+- **STATUS (2026-06-22): ✅ DONE — isAdmissibleM_map fully PROVEN, the ENTIRE §13.2 Galois construction
+  is SORRY-FREE and axiom-clean (propext/Classical.choice/Quot.sound).** All helpers proven. The
+  unramified core `isUnramifiedOutsideP_sigmaL`: reduction via isUnramifiedAt_iff_of_isDedekindDomain;
+  ⊥ case via VENDORED `isUnramifiedAt_bot` (mathlib PR #40886, per CB — `isUnramifiedAt_bot_charZero`,
+  remove on bump); β-twist hPQ via ℤ-tower (ramificationIdx_algebra_tower' ×2) + ramificationIdx_comap_eq
+  (eOI as ℤ-AlgEquiv) + ramificationIdx_eq_of_isGaloisGroup (auto IsGaloisGroup ℤ 𝓞F⁺ₙ from IsGalois ℚ F⁺ₙ;
+  import RamificationInertia.Galois) + IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver + cancel.
 - **[a] finrank + p-power — PROVEN** (`finrank_sigmaL`): [σL:ℚ]=[L:ℚ] (ℚ-iso intermediateFieldMap) +
   tower formula ⟹ [σL:F⁺ₙ]=[L:F⁺ₙ]=p^k. Plus `finiteDimensional_sigmaL` PROVEN.
 - **[b] Galois — PROVEN** (`isGalois_sigmaL`): Normal via normal_iff_forall_map_le; for an F⁺ₙ-auto τ of
