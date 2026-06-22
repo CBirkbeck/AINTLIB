@@ -184,17 +184,9 @@ theorem cyclotomicGaloisShiftedClass_class_invariant
   refine ⟨cyclotomicRingOfIntegersEquiv (p := p) K a x,
     cyclotomicRingOfIntegersEquiv (p := p) K a y, ?_, ?_, ?_⟩
   · -- σ_a x ≠ 0
-    intro h
-    apply hx_ne
-    have := (cyclotomicRingOfIntegersEquiv (p := p) K a).injective
-      (a₁ := x) (a₂ := 0) (by rw [h, map_zero])
-    exact this
+    exact (map_ne_zero_iff _ (cyclotomicRingOfIntegersEquiv (p := p) K a).injective).mpr hx_ne
   · -- σ_a y ≠ 0
-    intro h
-    apply hy_ne
-    have := (cyclotomicRingOfIntegersEquiv (p := p) K a).injective
-      (a₁ := y) (a₂ := 0) (by rw [h, map_zero])
-    exact this
+    exact (map_ne_zero_iff _ (cyclotomicRingOfIntegersEquiv (p := p) K a).injective).mpr hy_ne
   · -- span(σ_a x) · σ_a I₁ = span(σ_a y) · σ_a I₂
     change Ideal.span ({cyclotomicRingOfIntegersEquiv (p := p) K a x} : Set _) *
         Furtwaengler.cyclotomicGaloisConjugate (p := p) (K := K) a I₁.val =
@@ -310,9 +302,7 @@ theorem cyclotomicGalActionMonoidHom_one_apply (c : ClassGroup (𝓞 K)) :
   change ClassGroup.mk0 ⟨Furtwaengler.cyclotomicGaloisConjugate (p := p) (K := K) 1 I.val,
     _⟩ = ClassGroup.mk0 I
   congr 1
-  apply Subtype.ext
-  change Furtwaengler.cyclotomicGaloisConjugate (p := p) (K := K) 1 I.val = I.val
-  exact Furtwaengler.cyclotomicGaloisConjugate_one I.val
+  exact Subtype.ext (Furtwaengler.cyclotomicGaloisConjugate_one I.val)
 
 /-- The action is multiplicative in `a`: `σ_{a*b} = σ_a ∘ σ_b`. -/
 theorem cyclotomicGalActionMonoidHom_mul_apply
@@ -342,11 +332,7 @@ theorem cyclotomicGalActionMonoidHom_mul_apply
     ClassGroup.mk0 (cyclotomicGaloisConjugateNonZeroDivisors (p := p) (K := K) a
       (cyclotomicGaloisConjugateNonZeroDivisors (p := p) (K := K) b I))
   congr 1
-  apply Subtype.ext
-  change Furtwaengler.cyclotomicGaloisConjugate (p := p) (K := K) (a * b) I.val =
-    Furtwaengler.cyclotomicGaloisConjugate (p := p) (K := K) a
-      (Furtwaengler.cyclotomicGaloisConjugate (p := p) (K := K) b I.val)
-  exact Furtwaengler.cyclotomicGaloisConjugate_mul a b I.val
+  exact Subtype.ext (Furtwaengler.cyclotomicGaloisConjugate_mul a b I.val)
 
 /-- The σ_a action on `ClassGroupModP` is the identity at `a = 1`. -/
 theorem cyclotomicGalActionMonoidHomModP_one_apply (c : ClassGroupModP K p) :
@@ -365,9 +351,6 @@ theorem cyclotomicGalActionMonoidHomModP_mul_apply
         (cyclotomicGalActionMonoidHomModP (p := p) (K := K) b c) := by
   refine QuotientGroup.induction_on c ?_
   intro x
-  change QuotientGroup.mk (cyclotomicGalActionMonoidHom (p := p) (K := K) (a * b) x) =
-    cyclotomicGalActionMonoidHomModP (p := p) (K := K) a
-      (QuotientGroup.mk (cyclotomicGalActionMonoidHom (p := p) (K := K) b x))
   change QuotientGroup.mk (cyclotomicGalActionMonoidHom (p := p) (K := K) (a * b) x) =
     QuotientGroup.mk (cyclotomicGalActionMonoidHom (p := p) (K := K) a
       (cyclotomicGalActionMonoidHom (p := p) (K := K) b x))
