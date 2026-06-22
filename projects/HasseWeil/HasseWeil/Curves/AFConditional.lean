@@ -128,6 +128,7 @@ def NoFinitePolesBridge : Prop :=
     ∃ u : (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing,
       algebraMap _ (⟨W⟩ : SmoothPlaneCurve F).FunctionField u = f
 
+omit [W.IsElliptic] in
 /-- Given the no-finite-poles bridge, the unconditional point_minus_O
 property holds: if `(P) − (O)` is principal, then `P = 0`.
 
@@ -164,7 +165,7 @@ theorem pointMinusO_of_bridge
   have h_inf_ne :
       ((ProjectiveSmoothPoint.infinity : ProjectiveSmoothPoint
         (⟨W⟩ : SmoothPlaneCurve F))) ≠ ProjectiveSmoothPoint.affine Q := by
-    intro h; nomatch h
+    nofun
   rw [if_neg h_inf_ne, sub_zero] at h_eq
   -- h_eq: (if P.toProj = affine Q then 1 else 0) = (ord_P Q f).untopD 0
   -- Case split on whether P.toProj = affine Q.
