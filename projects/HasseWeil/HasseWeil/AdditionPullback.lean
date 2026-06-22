@@ -701,6 +701,73 @@ theorem addBaseHomPair_eq_aeval (α₁ α₂ : Isogeny W.toAffine W.toAffine) :
         Polynomial F →ₐ[F] KE).toRingHom := by
   ext <;> simp [addBaseHomPair, Polynomial.aeval_def]
 
+/-- Image of a coordinate-ring element `p • 1 + q • x` under `addCoordRingHomPair`,
+in terms of the base hom and the pulled-back `y`-coordinate. -/
+private theorem addCoordRingHomPair_smul_basis_eq
+    {α₁ α₂ : Isogeny W.toAffine W.toAffine} (hxy : AddNonInversePair α₁ α₂) (p q : Polynomial F) :
+    addCoordRingHomPair hxy
+        (p • (1 : R) + q • Affine.CoordinateRing.mk W.toAffine Polynomial.X) =
+      addBaseHomPair α₁ α₂ p + addBaseHomPair α₁ α₂ q * addPullback_y_pair α₁ α₂ := by
+  simp only [addCoordRingHomPair, map_add]
+  congr 1
+  · change AdjoinRoot.lift _ _ _ (p • 1) = _
+    rw [Algebra.smul_def, mul_one]
+    exact AdjoinRoot.lift_of _
+  · change AdjoinRoot.lift _ _ _ (q • AdjoinRoot.root _) = _
+    rw [Algebra.smul_def, map_mul]
+    congr 1
+    · exact AdjoinRoot.lift_of _
+    · exact AdjoinRoot.lift_root _
+
+/-- If a coordinate-ring element `p • 1 + q • x` with `q ≠ 0` lies in the kernel of
+`addCoordRingHomPair`, the norm/degree count is contradictory: the factored norm forces
+`Algebra.norm r' = 0` while `degree (norm r') = 2•q.degree + 3 ≠ ⊥`. -/
+private theorem addCoordRingHomPair_smul_basis_q_ne_zero
+    {α₁ α₂ : Isogeny W.toAffine W.toAffine} (hxy : AddNonInversePair α₁ α₂)
+    (hxinj : Function.Injective (addBaseHomPair α₁ α₂)) {p q : Polynomial F} (hq : q ≠ 0)
+    (h0 : addCoordRingHomPair hxy
+      (p • (1 : R) + q • Affine.CoordinateRing.mk W.toAffine Polynomial.X) = 0) : False := by
+  set r' := p • (1 : R) + q • Affine.CoordinateRing.mk W.toAffine Polynomial.X with hr'_def
+  have h_alg : ∀ f : Polynomial F,
+      addCoordRingHomPair hxy (algebraMap (Polynomial F) R f) =
+        addBaseHomPair α₁ α₂ f := by
+    intro f
+    change AdjoinRoot.lift _ _ _ (AdjoinRoot.of _ f) = _
+    exact AdjoinRoot.lift_of _
+  set conj_r := Affine.CoordinateRing.mk W.toAffine
+    (Polynomial.C p + Polynomial.C q *
+      (-Polynomial.X - Polynomial.C
+        (Polynomial.C W.a₁ * Polynomial.X + Polynomial.C W.a₃))) with hconj_def
+  have h_factor : algebraMap (Polynomial F) R (Algebra.norm (Polynomial F) r') =
+      r' * conj_r := by
+    rw [hr'_def, hconj_def]
+    change AdjoinRoot.of _ _ = _
+    rw [Affine.CoordinateRing.coe_norm_smul_basis, map_mul]
+    congr 1
+    rw [map_add, map_mul]
+    simp [Algebra.smul_def]
+  have hr'_zero : addCoordRingHomPair hxy r' = 0 := h0
+  have h_norm_zero : addBaseHomPair α₁ α₂ (Algebra.norm (Polynomial F) r') = 0 := by
+    rw [← h_alg, h_factor, map_mul, hr'_zero, zero_mul]
+  have h_norm_eq : Algebra.norm (Polynomial F) r' = 0 :=
+    hxinj (h_norm_zero.trans (map_zero _).symm)
+  rw [hr'_def] at h_norm_eq
+  have h_deg := Affine.CoordinateRing.degree_norm_smul_basis (W' := W.toAffine) p q
+  rw [h_norm_eq, Polynomial.degree_zero] at h_deg
+  have hq_deg : q.degree ≠ ⊥ := Polynomial.degree_ne_bot.mpr hq
+  have : 2 • q.degree + 3 ≠ (⊥ : WithBot ℕ) := by
+    intro h
+    apply hq_deg
+    cases hd : q.degree with
+    | bot => rfl
+    | coe n =>
+        rw [hd] at h
+        exact absurd h (by
+          change ¬ (2 • (↑n : WithBot ℕ) + 3 = ⊥)
+          simp [WithBot.mul_ne_bot])
+  exact absurd (h_deg ▸ le_max_right _ _ : 2 • q.degree + 3 ≤ ⊥)
+    (not_le.mpr (WithBot.bot_lt_iff_ne_bot.mpr this))
+
 /-- `addCoordAlgHomPair hxy` is injective, given injectivity of the base hom
 `addBaseHomPair α₁ α₂`. The pair analogue of `addCoordAlgHom_injective_of_baseHom_inj`. -/
 theorem addCoordAlgHomPair_injective_of_baseHom_inj {α₁ α₂ : Isogeny W.toAffine W.toAffine}
@@ -714,17 +781,7 @@ theorem addCoordAlgHomPair_injective_of_baseHom_inj {α₁ α₂ : Isogeny W.toA
   have h_image : addCoordRingHomPair hxy r =
       addBaseHomPair α₁ α₂ p +
         addBaseHomPair α₁ α₂ q * addPullback_y_pair α₁ α₂ := by
-    rw [← hpq]
-    simp only [addCoordRingHomPair, map_add]
-    congr 1
-    · change AdjoinRoot.lift _ _ _ (p • 1) = _
-      rw [Algebra.smul_def, mul_one]
-      exact AdjoinRoot.lift_of _
-    · change AdjoinRoot.lift _ _ _ (q • AdjoinRoot.root _) = _
-      rw [Algebra.smul_def, map_mul]
-      congr 1
-      · exact AdjoinRoot.lift_of _
-      · exact AdjoinRoot.lift_root _
+    rw [← hpq]; exact addCoordRingHomPair_smul_basis_eq hxy p q
   rw [h_image] at hr
   suffices hp : p = 0 ∧ q = 0 by
     obtain ⟨hp1, hp2⟩ := hp
@@ -735,49 +792,8 @@ theorem addCoordAlgHomPair_injective_of_baseHom_inj {α₁ α₂ : Isogeny W.toA
   by_cases hq : q = 0
   · rw [hq, map_zero, zero_mul, add_zero] at hr
     exact ⟨hxinj (hr.trans (map_zero _).symm), hq⟩
-  · exfalso
-    set r' := p • (1 : R) + q • Affine.CoordinateRing.mk W.toAffine Polynomial.X with hr'_def
-    have h_alg : ∀ f : Polynomial F,
-        addCoordRingHomPair hxy (algebraMap (Polynomial F) R f) =
-          addBaseHomPair α₁ α₂ f := by
-      intro f
-      change AdjoinRoot.lift _ _ _ (AdjoinRoot.of _ f) = _
-      exact AdjoinRoot.lift_of _
-    set conj_r := Affine.CoordinateRing.mk W.toAffine
-      (Polynomial.C p + Polynomial.C q *
-        (-Polynomial.X - Polynomial.C
-          (Polynomial.C W.a₁ * Polynomial.X + Polynomial.C W.a₃))) with hconj_def
-    have h_factor : algebraMap (Polynomial F) R (Algebra.norm (Polynomial F) r') =
-        r' * conj_r := by
-      rw [hr'_def, hconj_def]
-      change AdjoinRoot.of _ _ = _
-      rw [Affine.CoordinateRing.coe_norm_smul_basis, map_mul]
-      congr 1
-      rw [map_add, map_mul]
-      simp [Algebra.smul_def]
-    have hr'_zero : addCoordRingHomPair hxy r' = 0 := by
-      rw [show r' = r from hpq]
-      exact h_image.trans hr
-    have h_norm_zero : addBaseHomPair α₁ α₂ (Algebra.norm (Polynomial F) r') = 0 := by
-      rw [← h_alg, h_factor, map_mul, hr'_zero, zero_mul]
-    have h_norm_eq : Algebra.norm (Polynomial F) r' = 0 :=
-      hxinj (h_norm_zero.trans (map_zero _).symm)
-    rw [hr'_def] at h_norm_eq
-    have h_deg := Affine.CoordinateRing.degree_norm_smul_basis (W' := W.toAffine) p q
-    rw [h_norm_eq, Polynomial.degree_zero] at h_deg
-    have hq_deg : q.degree ≠ ⊥ := Polynomial.degree_ne_bot.mpr hq
-    have : 2 • q.degree + 3 ≠ (⊥ : WithBot ℕ) := by
-      intro h
-      apply hq_deg
-      cases hd : q.degree with
-      | bot => rfl
-      | coe n =>
-          rw [hd] at h
-          exact absurd h (by
-            change ¬ (2 • (↑n : WithBot ℕ) + 3 = ⊥)
-            simp [WithBot.mul_ne_bot])
-    exact absurd (h_deg ▸ le_max_right _ _ : 2 • q.degree + 3 ≤ ⊥)
-      (not_le.mpr (WithBot.bot_lt_iff_ne_bot.mpr this))
+  · exact (addCoordRingHomPair_smul_basis_q_ne_zero hxy hxinj hq
+      (hpq.symm ▸ h_image.trans hr)).elim
 
 -- The σ-invariance lemmas below express that the curve-negation involution
 -- `σ = (mulByInt W (-1)).pullback` fixes `addPullback_x_pair α₁ α₂` when both
