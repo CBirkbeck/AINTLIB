@@ -1,1 +1,1 @@
-FOCUS: TG1 — normality scaffold DONE (compiles, 1 sorry). Now: map_le_MPlusN_of_isAdmissibleM (admissible-layer transport under σ:Om→ₐ[ℚ]Om). Scouting mathlib for unramified/Galois transport under AlgEquiv, then decompose into TG1-N sub-tickets.
+FOCUS: TG1 action. normal_MinfPlus compiles (1 isolated sorry = TG1-N-transport). Now building: TG1a (def FinfPlusInMinf + instance Normal ℚ), then TG1b φ:Gal(M∞⁺/ℚ)↠Γ⁺ surjective, TG1c XinfPlus≃ker, TG1d MulDistribMulAction (GammaPlus) (XinfPlus).

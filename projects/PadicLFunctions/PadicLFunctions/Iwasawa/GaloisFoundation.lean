@@ -738,4 +738,66 @@ theorem normal_MinfPlus : Normal ℚ ↥(MinfPlus p) := by
         ⟨x, (IntermediateField.mem_restrictScalars ℚ).mpr hxn, rfl⟩
   exact h
 
+/-! ### The `Γ⁺`-action on `X⁺_∞` (Remark 13.7)
+
+`Γ⁺ = Gal(F∞⁺/ℚ)` acts on `X∞⁺ = Gal(M∞⁺/F∞⁺)` by `σ · x = σ̃ x σ̃⁻¹` for any lift `σ̃` to
+`Gal(M∞⁺/ℚ)` — well-defined since `X∞⁺` is abelian. We realize it via the group extension
+`1 → X∞⁺ → Gal(M∞⁺/ℚ) → Γ⁺ → 1`: `M∞⁺/ℚ` is normal (`normal_MinfPlus`) so the restriction onto
+`Γ⁺` is surjective, and its kernel is `X∞⁺`. -/
+
+/-- `F∞⁺` realized as a `ℚ`-subfield of `M∞⁺` (the kernel-target of `Gal(M∞⁺/ℚ) ↠ Γ⁺`). -/
+def FinfPlusInMinf : IntermediateField ℚ ↥(MinfPlus p) :=
+  IntermediateField.comap ((MinfPlus p).val.restrictScalars ℚ) (FinfPlus p)
+
+/-- The carrier iso `F∞⁺-in-M∞⁺ ≃ₐ[ℚ] F∞⁺`. -/
+noncomputable def FinfPlusInMinfEquiv : ↥(FinfPlusInMinf p) ≃ₐ[ℚ] ↥(FinfPlus p) :=
+  AlgEquiv.ofBijective
+    (AlgHom.codRestrict (((MinfPlus p).val.restrictScalars ℚ).comp (FinfPlusInMinf p).val)
+      (FinfPlus p).toSubalgebra (fun w => w.2))
+    ⟨fun a b hab => by
+        apply Subtype.ext; apply Subtype.ext
+        exact congrArg (fun w : ↥(FinfPlus p) => (w : Om)) hab,
+      fun y => ⟨⟨⟨(y : Om), FinfPlus_le_MinfPlus_restrict p y.2⟩, y.2⟩, Subtype.ext rfl⟩⟩
+
+/-- `F∞⁺-in-M∞⁺` is normal over `ℚ` (transfer of `normal_FinfPlus` along the carrier iso). -/
+instance normal_FinfPlusInMinf : Normal ℚ ↥(FinfPlusInMinf p) := by
+  haveI := normal_FinfPlus p
+  exact Normal.of_algEquiv (FinfPlusInMinfEquiv p).symm
+
+/-- `Gal(M∞⁺/ℚ)`. -/
+abbrev GalMinfPlusQ : Type := ↥(MinfPlus p) ≃ₐ[ℚ] ↥(MinfPlus p)
+
+/-- The restriction `Gal(M∞⁺/ℚ) →* Gal(F∞⁺/ℚ) = Γ⁺` (composed with the carrier iso). -/
+noncomputable def restrToGammaPlus : GalMinfPlusQ p →* GammaPlus p :=
+  (AlgEquiv.autCongr (FinfPlusInMinfEquiv p)).toMonoidHom.comp
+    (AlgEquiv.restrictNormalHom (FinfPlusInMinf p))
+
+/-- `Gal(M∞⁺/ℚ) ↠ Γ⁺` is surjective (`M∞⁺/ℚ` normal). -/
+theorem restrToGammaPlus_surjective : Function.Surjective (restrToGammaPlus p) := by
+  haveI := normal_MinfPlus p
+  refine (AlgEquiv.autCongr (FinfPlusInMinfEquiv p)).surjective.comp ?_
+  exact AlgEquiv.restrictNormalHom_surjective (F := ℚ) ↥(MinfPlus p)
+
+/-- An `F∞⁺`-automorphism of `M∞⁺` fixes every element whose value lies in `F∞⁺`. -/
+theorem XinfPlus_fixes (f : XinfPlus p) {z : ↥(MinfPlus p)} (hz : (z : Om) ∈ FinfPlus p) :
+    f z = z := by
+  have hzeq : z = algebraMap ↥(FinfPlus p) ↥(MinfPlus p) ⟨(z : Om), hz⟩ := Subtype.ext rfl
+  rw [hzeq]; exact f.commutes _
+
+/-- A `(F∞⁺-in-M∞⁺)`-automorphism of `M∞⁺` fixes every element whose value lies in `F∞⁺`. -/
+theorem GalFinfInMinf_fixes (g : ↥(MinfPlus p) ≃ₐ[↥(FinfPlusInMinf p)] ↥(MinfPlus p))
+    {z : ↥(MinfPlus p)} (hz : (z : Om) ∈ FinfPlus p) : g z = z := by
+  have hzeq : z = algebraMap ↥(FinfPlusInMinf p) ↥(MinfPlus p) ⟨z, hz⟩ := Subtype.ext rfl
+  rw [hzeq]; exact g.commutes _
+
+/-- Base-change `Gal(M∞⁺/F∞⁺) ≃* Gal(M∞⁺/F∞⁺-in-M∞⁺)` (same underlying maps; the two `ℚ`-iso bases
+`F∞⁺` and its copy `F∞⁺-in-M∞⁺ ⊆ M∞⁺` cut out the same automorphisms). -/
+def baseChangeEquiv :
+    XinfPlus p ≃* (↥(MinfPlus p) ≃ₐ[↥(FinfPlusInMinf p)] ↥(MinfPlus p)) where
+  toFun f := AlgEquiv.ofRingEquiv (f := f.toRingEquiv) (fun c => XinfPlus_fixes p f c.2)
+  invFun g := AlgEquiv.ofRingEquiv (f := g.toRingEquiv) (fun y => GalFinfInMinf_fixes p g y.2)
+  left_inv f := by ext x; rfl
+  right_inv g := by ext x; rfl
+  map_mul' a b := by ext x; rfl
+
 end Iwasawa.GaloisFoundation

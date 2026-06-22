@@ -7168,6 +7168,36 @@ commute_on_MPlusN are the reusable pieces. Next: Γ⁺-action (Rmk 13.7), Y∞�
     QuotientGroup.quotientKerEquivOfSurjective.
   - **Generality**: specific to these fields; the conjugation-descent core ("G acts on abelian normal
     N, descends to G/N") is a candidate Common/ lemma — extract during cleanup on main.
+- **PROGRESS (2026-06-22, /beastmode):**
+  - DONE: `normal_MinfPlus : Normal ℚ ↥(MinfPlus p)` scaffold compiles — the prerequisite for TG1b
+    (φ surjective). Reduced to ONE isolated lemma `isAdmissibleM_map` (see TG1-N-transport below).
+    Helpers: instIsAlgClosureOm/instNormalOm/instIsGaloisOm, restrictScalars_iSup_le,
+    normal_MPlusN_restrict, FPlus_le_MPlusN_restrict, MPlusN_le_MinfPlus_restrict,
+    FinfPlus_le_MinfPlus_restrict, map_le_MPlusN_of_isAdmissibleM.
+  - NEXT: TG1a (Normal ℚ F∞⁺-in-M∞⁺), then TG1b/c/d (the action) on top of normal_MinfPlus (black box).
+
+### [TG1-N-transport] Admissibility is invariant under `σ : Ω →ₐ[ℚ] Ω` (the one analytic gap of TG1)
+- **Status**: open  **Parent**: TG1 (the `normal_MinfPlus` dependency of TG1b)  **Type**: theorem
+- **File**: GaloisFoundation.lean (currently the single `sorry`, in `isAdmissibleM_map`)
+- **Statement**: `isAdmissibleM_map (n) (σ : Om →ₐ[ℚ] Om) {L} (hL : IsAdmissibleM p n L)
+    (hFle : FPlus p n ≤ map σ (L.restrictScalars ℚ)) : IsAdmissibleM p n (extendScalars hFle)`.
+  I.e. `σ(L)`, viewed as an `F⁺ₙ`-extension, is again admissible. The whole `Normal ℚ M∞⁺` proof is
+  already reduced to this one lemma.
+- **Sketch**: `σ` is bijective (Ω alg. closed & algebraic), restricting to `β = σ|F⁺ₙ ∈ Gal(F⁺ₙ/ℚ)`
+  (since `F⁺ₙ/ℚ` normal). The pair `(β, σ|_L)` is a `β`-semilinear iso `L ≅ σ(L)` of `F⁺ₙ`-extensions.
+  Transport each datum: (1) finrank via the semilinear bijection; (2) Galois+abelian by conjugating
+  `Gal(L/F⁺ₙ) ≅ Gal(σL/F⁺ₙ)`; (3) p-power degree from (1); (4) **unramified outside p** — the hard
+  ANT core: induced ring iso `𝓞_L ≃ 𝓞_{σL}` semilinear over `β : 𝓞_{F⁺ₙ} ≅ 𝓞_{F⁺ₙ}` carries primes
+  `P ↦ σ(P)` preserving residue char (`σ` fixes `ℤ`) and ramification index; `β` fixes the unique
+  prime over `p`, so "unramified at all `P` with `p ∉ P`" is preserved.
+- **Mathlib**: `Algebra.Unramified.of_equiv`, `RingHom.FormallyUnramified.respectsIso`,
+  `Ideal.ramificationIdx_map_eq` (all FIXED-base — need a base-moving `β` wrapper, likely a
+  sub-sub-ticket on `RingOfIntegers` functoriality under a base automorphism),
+  `IntermediateField.extendScalars`, `AlgEquiv.intermediateFieldMap`, `normal_iff_forall_map_eq`.
+- **Sources**: standard Galois theory of maximal-unramified-type extensions (RJW Rmk 13.7 assumes it
+  without proof; NOT CFT, NOT IMC content). **Generality**: these fields.
+- **Note**: the project's ONE structural (non-CFT) `sorry`; isolating it lets the full IMC chain
+  (TG1b–TG9, Thm 13.11) be built on `normal_MinfPlus` as a black box.
 
 ### [TG2] Λ(Γ⁺)-module structure on X∞⁺; connect Γ⁺ to §12's GPlus
 - **Status**: open  **Depends on**: TG1  **Type**: instance + iso
