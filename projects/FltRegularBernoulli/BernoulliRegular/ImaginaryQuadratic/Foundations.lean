@@ -166,12 +166,12 @@ lemma no_real_ringHom (ψ : Kminus p →+* ℝ) : False := by
   exact sqPlusPrime_no_real_root p _ h_root
 
 /-- No complex embedding of `Kminus p` into `ℂ` is real. -/
-lemma no_real_embedding (φ : Kminus p →+* ℂ) : ¬ NumberField.ComplexEmbedding.IsReal φ := fun h =>
+lemma no_real_embedding (φ : Kminus p →+* ℂ) : ¬ NumberField.ComplexEmbedding.IsReal φ := fun h ↦
   no_real_ringHom p h.embedding
 
 /-- Every infinite place of `Kminus p` is complex (not real). -/
 lemma isTotallyComplex_Kminus : NumberField.IsTotallyComplex (Kminus p) := by
-  refine ⟨fun v => ?_⟩
+  refine ⟨fun v ↦ ?_⟩
   rw [← NumberField.InfinitePlace.not_isReal_iff_isComplex]
   intro h_real
   obtain ⟨φ, h_φ_real, _⟩ := h_real
@@ -477,14 +477,14 @@ theorem discr_Kminus_natAbs_eq (hp3 : p % 4 = 3) :
       exact this
     rw [h2, ← NumberField.coe_discr]
   -- pb.basis elements are integral.
-  have h_pbBas_int : ∀ j : Fin 2, IsIntegral ℤ (pbBas j) := fun j => by
+  have h_pbBas_int : ∀ j : Fin 2, IsIntegral ℤ (pbBas j) := fun j ↦ by
     have : pbBas j = pb.basis ((finCongr hdim).symm j) := by simp [pbBas]
     rw [this]
     exact alphaPowerBasis_basis_isIntegral p hp3 _
   -- Lift to 𝓞.
-  let pbLift : Fin 2 → 𝓞 (Kminus p) := fun j => ⟨pbBas j, h_pbBas_int j⟩
+  let pbLift : Fin 2 → 𝓞 (Kminus p) := fun j ↦ ⟨pbBas j, h_pbBas_int j⟩
   -- Integer matrix: P_int i j = RingOfIntegers.basis.repr (pbLift j) (e i).
-  let P_int : Matrix (Fin 2) (Fin 2) ℤ := fun i j =>
+  let P_int : Matrix (Fin 2) (Fin 2) ℤ := fun i j ↦
     (NumberField.RingOfIntegers.basis (Kminus p)).repr (pbLift j) (e i)
   -- Key: iB.toMatrix pbBas = P_int.map (algebraMap ℤ ℚ).
   have h_toMatrix_eq : iB.toMatrix pbBas = P_int.map (algebraMap ℤ ℚ) := by
@@ -509,9 +509,9 @@ theorem discr_Kminus_natAbs_eq (hp3 : p % 4 = 3) :
       have := congrFun (congrFun h_toMatrix_eq.symm i) j
       change _ = iB.toMatrix pbBas i j
       exact this
-    conv_lhs => rw [show (fun i => (iB i : Kminus p) *
+    conv_lhs => rw [show (fun i ↦ (iB i : Kminus p) *
       (algebraMap ℚ (Kminus p)) ((P_int.map (algebraMap ℤ ℚ)) i j)) =
-      (fun i => (iB i : Kminus p) *
+      (fun i ↦ (iB i : Kminus p) *
         (algebraMap ℚ (Kminus p)) (iB.repr (pbBas j) i)) from by
       funext i; rw [h_entry]]
     conv_rhs => rw [← iB.sum_repr (pbBas j)]
