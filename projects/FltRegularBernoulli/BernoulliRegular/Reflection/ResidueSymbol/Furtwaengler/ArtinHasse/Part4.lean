@@ -121,12 +121,8 @@ theorem two_mul_dworkCoeffArtinHasseAtTo_two_sub_gamma_sq_mem_Q_cubed
   let c : ℚ := (PowerSeries.coeff (R := ℚ) 2) (artinHasseExpSeries ℓ)
   have hc : c = (1 : ℚ) / (Nat.factorial 2 : ℚ) := by
     simpa [c] using artinHasseExpSeries_coeff_eq_inv_factorial_of_lt ℓ hℓ
-  have hnum : c.num = 1 := by
-    rw [hc]
-    norm_num
-  have hden : c.den = 2 := by
-    rw [hc]
-    norm_num
+  have hnum : c.num = 1 := by rw [hc]; norm_num
+  have hden : c.den = 2 := by rw [hc]; norm_num
   have h :=
     dworkCoeffArtinHasseAtTo_den_mul_sub_num_gamma_pow_mem_Q_pow_succ S γ 2 2
   simpa [c, hnum, hden] using h
@@ -175,12 +171,9 @@ theorem dworkCoeffArtinHasse_lt_ell_leading
       let c : ℚ := (PowerSeries.coeff (R := ℚ) m) (artinHasseExpSeries ℓ)
       have hc : c = (1 : ℚ) / (Nat.factorial m : ℚ) := by
         simpa [c, m] using artinHasseExpSeries_coeff_eq_inv_factorial_of_lt ℓ hn
-      have hnum : c.num = 1 := by
-        rw [hc]
-        norm_num [Nat.factorial_pos]
+      have hnum : c.num = 1 := by rw [hc]; norm_num [Nat.factorial_pos]
       have hden : c.den = Nat.factorial m := by
-        rw [hc]
-        norm_num [Nat.factorial_pos, Nat.factorial_ne_zero]
+        rw [hc]; norm_num [Nat.factorial_pos, Nat.factorial_ne_zero]
       have hdenInv :
           ((Nat.factorial m : ℕ) : 𝓞 R') * dworkCoeffArtinHasseDenInv S m - 1 ∈
             S.Q ^ (m + 1) := by
@@ -216,12 +209,9 @@ theorem dworkCoeffArtinHasseAt_lt_ell_leading
       let c : ℚ := (PowerSeries.coeff (R := ℚ) m) (artinHasseExpSeries ℓ)
       have hc : c = (1 : ℚ) / (Nat.factorial m : ℚ) := by
         simpa [c, m] using artinHasseExpSeries_coeff_eq_inv_factorial_of_lt ℓ hn
-      have hnum : c.num = 1 := by
-        rw [hc]
-        norm_num [Nat.factorial_pos]
+      have hnum : c.num = 1 := by rw [hc]; norm_num [Nat.factorial_pos]
       have hden : c.den = Nat.factorial m := by
-        rw [hc]
-        norm_num [Nat.factorial_pos, Nat.factorial_ne_zero]
+        rw [hc]; norm_num [Nat.factorial_pos, Nat.factorial_ne_zero]
       have hdenInv :
           ((Nat.factorial m : ℕ) : 𝓞 R') * dworkCoeffArtinHasseDenInv S m - 1 ∈
             S.Q ^ (m + 1) := by
@@ -269,12 +259,9 @@ theorem dworkCoeffArtinHasseAtTo_lt_ell_leading
       let c : ℚ := (PowerSeries.coeff (R := ℚ) m) (artinHasseExpSeries ℓ)
       have hc : c = (1 : ℚ) / (Nat.factorial m : ℚ) := by
         simpa [c, m] using artinHasseExpSeries_coeff_eq_inv_factorial_of_lt ℓ hn
-      have hnum : c.num = 1 := by
-        rw [hc]
-        norm_num [Nat.factorial_pos]
+      have hnum : c.num = 1 := by rw [hc]; norm_num [Nat.factorial_pos]
       have hden : c.den = Nat.factorial m := by
-        rw [hc]
-        norm_num [Nat.factorial_pos, Nat.factorial_ne_zero]
+        rw [hc]; norm_num [Nat.factorial_pos, Nat.factorial_ne_zero]
       have hdenInvN :
           ((Nat.factorial m : ℕ) : 𝓞 R') * dworkCoeffArtinHasseDenInvTo S m N - 1 ∈
             S.Q ^ (N + 1) := by
