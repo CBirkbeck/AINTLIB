@@ -1366,16 +1366,10 @@ theorem orderTop_localExpand_addPullbackNumerator_reduced_negFrobenius_eq
     linarith
   rw [HahnSeries.orderTop_add_eq_right h_lt, h_dom]
 
-/-- **Leading coefficient companion**:
-`(localExpand(addPullbackNumerator_reduced_negFrobenius)).leadingCoeff = 1`
-for q ≥ 2. The leading coefficient of the dominant term `x_gen · (negFrob.π·x)²`
-is 1 (sub-helper 9 / `leadingCoeff_localExpand_x_gen_mul_frob_pullback_x_gen_sq`),
-which propagates through the strict-non-arch via `leadingCoeff_add_eq_right`. -/
-theorem leadingCoeff_localExpand_addPullbackNumerator_reduced_negFrobenius_eq
-    (hq : 2 ≤ Fintype.card K) :
-    (localExpand W (addPullbackNumerator_reduced_negFrobenius W)).leadingCoeff = 1 := by
-  have h_q : (2 : ℤ) ≤ (Fintype.card K : ℤ) := by exact_mod_cast hq
-  have h_eq : addPullbackNumerator_reduced_negFrobenius W =
+/-- The reduced negFrobenius numerator splits as `rest + dominant`, where the dominant
+term is `x_gen · (negFrob.π·x)²`. -/
+private lemma addPullbackNumerator_reduced_negFrobenius_split :
+    addPullbackNumerator_reduced_negFrobenius W =
       (algebraMap K W.toAffine.FunctionField W.a₄ *
             (x_gen W + (negFrobeniusIsog W).pullback (x_gen W))
           + (2 : W.toAffine.FunctionField) *
@@ -1392,13 +1386,14 @@ theorem leadingCoeff_localExpand_addPullbackNumerator_reduced_negFrobenius_eq
               algebraMap K W.toAffine.FunctionField W.a₂ * x_gen W *
               (negFrobeniusIsog W).pullback (x_gen W)) +
       (x_gen W * ((negFrobeniusIsog W).pullback (x_gen W)) ^ 2) := by
-    unfold addPullbackNumerator_reduced_negFrobenius
-    ring
-  rw [h_eq, map_add]
-  have h_rest := orderTop_localExpand_addPullbackNumerator_reduced_negFrobenius_rest_ge W hq
-  have h_dom := orderTop_localExpand_x_gen_mul_negFrobeniusIsog_pullback_x_gen_sq W
-  have h_lt : (localExpand W (x_gen W *
-      ((negFrobeniusIsog W).pullback (x_gen W)) ^ 2)).orderTop <
+  unfold addPullbackNumerator_reduced_negFrobenius
+  ring
+
+/-- The dominant term `x_gen · (negFrob.π·x)²` has strictly smaller `orderTop` than the
+rest of the reduced negFrobenius numerator (`q ≥ 2`), so it controls the leading term. -/
+private lemma orderTop_localExpand_dominant_lt_rest (hq : 2 ≤ Fintype.card K) :
+    (localExpand W (x_gen W *
+        ((negFrobeniusIsog W).pullback (x_gen W)) ^ 2)).orderTop <
       (localExpand W (
         algebraMap K W.toAffine.FunctionField W.a₄ *
             (x_gen W + (negFrobeniusIsog W).pullback (x_gen W))
@@ -1415,12 +1410,23 @@ theorem leadingCoeff_localExpand_addPullbackNumerator_reduced_negFrobenius_eq
           + (2 : W.toAffine.FunctionField) *
               algebraMap K W.toAffine.FunctionField W.a₂ * x_gen W *
               (negFrobeniusIsog W).pullback (x_gen W))).orderTop := by
-    rw [h_dom]
-    refine lt_of_lt_of_le ?_ h_rest
-    refine WithTop.coe_lt_coe.mpr ?_
-    linarith
-  rw [HahnSeries.leadingCoeff_add_eq_right h_lt]
-  -- Now: leadingCoeff(localExpand(dominant)) = 1.
+  rw [orderTop_localExpand_x_gen_mul_negFrobeniusIsog_pullback_x_gen_sq W]
+  refine lt_of_lt_of_le ?_
+    (orderTop_localExpand_addPullbackNumerator_reduced_negFrobenius_rest_ge W hq)
+  refine WithTop.coe_lt_coe.mpr ?_
+  have h_q : (2 : ℤ) ≤ (Fintype.card K : ℤ) := by exact_mod_cast hq
+  linarith
+
+/-- **Leading coefficient companion**:
+`(localExpand(addPullbackNumerator_reduced_negFrobenius)).leadingCoeff = 1`
+for q ≥ 2. The leading coefficient of the dominant term `x_gen · (negFrob.π·x)²`
+is 1 (sub-helper 9 / `leadingCoeff_localExpand_x_gen_mul_frob_pullback_x_gen_sq`),
+which propagates through the strict-non-arch via `leadingCoeff_add_eq_right`. -/
+theorem leadingCoeff_localExpand_addPullbackNumerator_reduced_negFrobenius_eq
+    (hq : 2 ≤ Fintype.card K) :
+    (localExpand W (addPullbackNumerator_reduced_negFrobenius W)).leadingCoeff = 1 := by
+  rw [addPullbackNumerator_reduced_negFrobenius_split, map_add,
+    HahnSeries.leadingCoeff_add_eq_right (orderTop_localExpand_dominant_lt_rest W hq)]
   rw [show (x_gen W * ((negFrobeniusIsog W).pullback (x_gen W)) ^ 2) =
       x_gen W * ((negFrobeniusIsog W).pullback (x_gen W)) ^ 2 from rfl,
     negFrobeniusIsog_pullback_x_gen]
