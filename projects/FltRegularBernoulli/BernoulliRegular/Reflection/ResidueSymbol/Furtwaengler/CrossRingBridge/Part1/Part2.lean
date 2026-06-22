@@ -38,7 +38,6 @@ theorem stickOrdOrd_sub_val_eq_val_mul_stickD_of_f_eq_one
       rw [← hpd, hD_zero, mul_zero]
     omega
   have ha_lt : (a : ZMod p).val < p := ZMod.val_lt (a : ZMod p)
-  have ha_le : (a : ZMod p).val ≤ p := Nat.le_of_lt ha_lt
   have harg_lt : (a : ZMod p).val * S.stickD < ℓ := by
     have hmul_lt :
         (a : ZMod p).val * S.stickD < p * S.stickD :=
@@ -273,7 +272,7 @@ theorem p_mul_stickOrdOrd_sub_val_eq_ell_sub_one_mul_residueOrbitSum_of_f_eq_ord
   have ha_lt : (a : ZMod p).val < p := ZMod.val_lt (a : ZMod p)
   have hpow_zmod : ((ℓ ^ orderOf u : ℕ) : ZMod p) = ((1 : ℕ) : ZMod p) := by
     have hval : ((u ^ orderOf u : CyclotomicUnitDelta p) : ZMod p) = (1 : ZMod p) :=
-      congrArg (fun x : CyclotomicUnitDelta p => (x : ZMod p))
+      congrArg (fun x : CyclotomicUnitDelta p ↦ (x : ZMod p))
         (pow_orderOf_eq_one u)
     have hleft : ((u ^ orderOf u : CyclotomicUnitDelta p) : ZMod p) =
         ((ℓ ^ orderOf u : ℕ) : ZMod p) := by
@@ -282,9 +281,8 @@ theorem p_mul_stickOrdOrd_sub_val_eq_ell_sub_one_mul_residueOrbitSum_of_f_eq_ord
         simp [u, ZMod.coe_unitOfCoprime]
       rw [hu]
       simp
-    rw [← hleft]
-    have hone : (1 : ZMod p) = ((1 : ℕ) : ZMod p) := by norm_num
-    exact hval.trans hone
+    rw [← hleft, hval]
+    simp
   have hpow : ℓ ^ orderOf u ≡ 1 [MOD p] :=
     (ZMod.natCast_eq_natCast_iff (ℓ ^ orderOf u) 1 p).mp hpow_zmod
   have hdiv : p ∣ ℓ ^ orderOf u - 1 := by
@@ -419,10 +417,10 @@ theorem StickelbergerExactConjugateExponents_phiPrimeGenDescent_one_of_sub_val_c
         h_ne_zero) :=
   StickelbergerExactConjugateExponents_phiPrimeGenDescent_one_of_sub_val_conjugates
     S h_ne_zero h_conj
-    (fun a =>
+    (fun a ↦
       descentRamificationIdx_dvd_p_mul_stickOrdOrd_sub_val_of_f_eq_one_of_unramified_base
         S hf he a)
-    (fun a =>
+    (fun a ↦
       dworkExponent_sub_val_div_descentRamificationIdx_eq_val_of_f_eq_one_of_unramified_base
         S hf he a)
 
