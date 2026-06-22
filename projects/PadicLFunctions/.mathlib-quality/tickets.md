@@ -7225,7 +7225,13 @@ commute_on_MPlusN are the reusable pieces. Next: Γ⁺-action (Rmk 13.7), Y∞�
   adjoin_induction over L∞⁺ = ⨆ₙ Lₙ⁺. Mathlib: as isMulCommutative_XinfPlus.  **Generality**: as X∞⁺.
 
 ### [TG4] Galois SES  0 → Gal(M∞⁺/L∞⁺) → X∞⁺ → Y∞⁺ → 0
-- **Status**: open  **Depends on**: TG3  **Type**: theorem (exact sequence)
+- **Status**: DONE (2026-06-22, sorry-free) — `restrXtoY` + `restrXtoY_surjective` + `ker_restrXtoY`
+  (= fixingSubgroup(L∞⁺-in-M∞⁺) = Gal(M∞⁺/L∞⁺)). Plus over-F∞⁺ normality (instNormalMinfPlusOverFinf,
+  instNormalLinfPlusOverFinf, ambient instNormalFPlusOm/FinfOm). KEY ENCODING NOTE: realize L∞⁺ inside
+  M∞⁺ via `IntermediateField.restrict`/`restrict_algEquiv` (NOT hand-built comap+codRestrict, which
+  timed out over the ⨆-base F∞⁺ — the user's "timeout = wrong encoding" lesson; mathlib's restrict is
+  the light primitive).
+- **Depends on**: TG3  **Type**: theorem (exact sequence)
 - **Statement**: the restriction `XinfPlus p →* YinfPlus p` is surjective with kernel ≃ Gal(M∞⁺/L∞⁺).
 - **Sketch**: `restrictNormalHom (L∞⁺-in-M∞⁺ over F∞⁺)` [needs Normal F∞⁺ L∞⁺ — prove like normal_FPlus
   but base F∞⁺; and LinfPlus_le_MinfPlus (have)]; surjective (restrictNormalHom_surjective); kernel =

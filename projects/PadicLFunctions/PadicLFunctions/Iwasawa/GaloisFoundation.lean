@@ -1016,4 +1016,24 @@ theorem ker_restrXtoY :
   rw [MonoidHom.mem_ker, MonoidHom.mem_ker]
   exact map_eq_one_iff _ (AlgEquiv.autCongr (LinfPlusInMinfEquiv p)).injective
 
+/-! ### Toward the `Λ(Γ⁺)`-module structure (TG2)
+
+The `Λ(Γ⁺)`-module structure on `X⁺_∞` begins with the **`ℤ[Γ⁺]`-module**: since `X∞⁺` is abelian
+(`isMulCommutative_XinfPlus`), `Additive X∞⁺` is an additive abelian group, and the conjugation
+action of Remark 13.7 (`instMulDistribMulActionGammaPlusXinfPlus`) distributes over it. Both facts
+are derived automatically by instance synthesis — recorded here as the first half of TG2. The
+remaining half (completion to `Λ(Γ⁺) = ℤp[[Γ⁺]]` and the identification `Γ⁺ ≅ ℤp` linking to §12's
+`IwasawaAlgebra`/`Gamma`) is ticket **TG2-Lambda**. -/
+
+/-- `X⁺_∞` is a commutative group (abelian — `isMulCommutative_XinfPlus`). This upgrades `Additive
+X∞⁺` to an additive **abelian** group, the carrier of the `Λ(Γ⁺)`-module of Theorem 13.11. -/
+instance instCommGroupXinfPlus : CommGroup (XinfPlus p) :=
+  { (inferInstance : Group (XinfPlus p)) with
+    mul_comm := fun a b => isMulCommutative_iff.mp (isMulCommutative_XinfPlus p) a b }
+
+/-- `Additive X⁺_∞` is an additive abelian group — together with the `Γ⁺`-action
+(`instMulDistribMulActionGammaPlusXinfPlus`) this is the `ℤ[Γ⁺]`-module starting the `Λ(Γ⁺)`-module
+structure of Theorem 13.11 (completion to `ℤp[[Γ⁺]]` + `Γ⁺ ≅ ℤp` is ticket TG2-Lambda). -/
+example : AddCommGroup (Additive (XinfPlus p)) := inferInstance
+
 end Iwasawa.GaloisFoundation
