@@ -451,6 +451,44 @@ theorem pullback_localParam_ne_of_pullback_x_ne {α β : Isogeny W.toAffine W.to
   rw [localExpand_pullback_x_gen W α h_α, localExpand_pullback_x_gen W β h_β,
     formalIsogenySeries_eq_of_pullback_localParam_eq W ht]
 
+/-- For an isogeny pair whose `x`-pullbacks have negative order at infinity, the
+two formal isogeny series have vanishing constant term, so the `Fin 2` family
+`![f_α, f_β]` is a lawful substitution family. This is the lawfulness side
+condition for the `(z,w)`-slope expansion. -/
+private lemma hasSubst_formalIsogenySeries_pair (α β : Isogeny W.toAffine W.toAffine)
+    (h_α : (W_smooth W).ordAtInfty (α.pullback (x_gen W)) < 0)
+    (h_β : (W_smooth W).ordAtInfty (β.pullback (x_gen W)) < 0) :
+    MvPowerSeries.HasSubst
+      (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F) := by
+  have hf0 : PowerSeries.constantCoeff (formalIsogenySeries W α) = 0 :=
+    constantCoeff_formalIsogenySeries_of_orderTop_pos W α
+      (orderTop_localExpand_pullback_localParam_pos_of_ord_x_neg W α h_α)
+  have hg0 : PowerSeries.constantCoeff (formalIsogenySeries W β) = 0 :=
+    constantCoeff_formalIsogenySeries_of_orderTop_pos W β
+      (orderTop_localExpand_pullback_localParam_pos_of_ord_x_neg W β h_β)
+  apply MvPowerSeries.hasSubst_of_constantCoeff_zero
+  intro s
+  fin_cases s <;> simpa [hf0, hg0]
+
+/-- The slope denominator is nonzero in the Laurent field: if the two `t`-pullbacks
+differ, then `ofPowerSeries (f_α − f_β) ≠ 0`. The two formal series differ
+because `localExpand` is injective and sends them to the two distinct
+`t`-pullbacks, and `ofPowerSeries` is injective. -/
+private lemma ofPowerSeries_sub_formalIsogenySeries_ne_zero
+    {α β : Isogeny W.toAffine W.toAffine}
+    (h_α : (W_smooth W).ordAtInfty (α.pullback (x_gen W)) < 0)
+    (h_β : (W_smooth W).ordAtInfty (β.pullback (x_gen W)) < 0)
+    (h_t_ne : α.pullback (localParam W) ≠ β.pullback (localParam W)) :
+    HahnSeries.ofPowerSeries ℤ F
+        (formalIsogenySeries W α - formalIsogenySeries W β) ≠ 0 := by
+  have hfg : formalIsogenySeries W α - formalIsogenySeries W β ≠ 0 := by
+    intro h0
+    apply h_t_ne
+    apply RingHom.injective (localExpand W)
+    rw [localExpand_pullback_localParam W α h_α,
+      localExpand_pullback_localParam W β h_β, sub_eq_zero.mp h0]
+  exact fun h ↦ hfg (HahnSeries.ofPowerSeries_injective (h.trans (map_zero _).symm))
+
 /-- **FG-B3, the `(z,w)`-slope expansion (chord case)**: the local expansion
 of the `(z,w)`-chart chord slope is the bivariate slope series substituted at
 the pair of formal isogeny series:
@@ -469,17 +507,7 @@ theorem localExpand_zwSlope_eq (α β : Isogeny W.toAffine W.toAffine)
           (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
           (formalSlopeBiv W)) := by
   -- Constant coefficients vanish, so the substitution is lawful.
-  have hf0 : PowerSeries.constantCoeff (formalIsogenySeries W α) = 0 :=
-    constantCoeff_formalIsogenySeries_of_orderTop_pos W α
-      (orderTop_localExpand_pullback_localParam_pos_of_ord_x_neg W α h_α)
-  have hg0 : PowerSeries.constantCoeff (formalIsogenySeries W β) = 0 :=
-    constantCoeff_formalIsogenySeries_of_orderTop_pos W β
-      (orderTop_localExpand_pullback_localParam_pos_of_ord_x_neg W β h_β)
-  have hb : MvPowerSeries.HasSubst
-      (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F) := by
-    apply MvPowerSeries.hasSubst_of_constantCoeff_zero
-    intro s
-    fin_cases s <;> simpa [hf0, hg0]
+  have hb := hasSubst_formalIsogenySeries_pair W α β h_α h_β
   -- The substituted divided-difference spec at `(f_α, f_β)`.
   have hspec := subst_formalSlopeBiv_spec W _ hb
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one] at hspec
@@ -489,14 +517,7 @@ theorem localExpand_zwSlope_eq (α β : Isogeny W.toAffine W.toAffine)
   have hwα := localExpand_pullback_wFunc W α h_α
   have hwβ := localExpand_pullback_wFunc W β h_β
   -- The denominator is nonzero.
-  have hfg : formalIsogenySeries W α - formalIsogenySeries W β ≠ 0 := by
-    intro h0
-    apply h_t_ne
-    apply RingHom.injective (localExpand W)
-    rw [hzα, hzβ, sub_eq_zero.mp h0]
-  have hofg_ne : HahnSeries.ofPowerSeries ℤ F
-      (formalIsogenySeries W α - formalIsogenySeries W β) ≠ 0 := fun h ↦
-    hfg (HahnSeries.ofPowerSeries_injective (h.trans (map_zero _).symm))
+  have hofg_ne := ofPowerSeries_sub_formalIsogenySeries_ne_zero W h_α h_β h_t_ne
   -- Assemble in the Laurent field.
   rw [zwSlope_def, map_div₀, map_sub, map_sub, hwα, hwβ, hzα, hzβ, ← map_sub, ← map_sub,
     show PowerSeries.subst (formalIsogenySeries W α) (formalW W)
