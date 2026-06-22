@@ -113,7 +113,7 @@ structure GeneralizedBernoulliToTeichmullerBridge
 lemma negHalf_mem_padicInt (hp_odd : p ≠ 2) :
     ∃ c : ℤ_[p], (c : ℚ_[p]) = -(1 / 2 : ℚ_[p]) := by
   have hp_prime : Nat.Prime p := hp.out
-  have h2_not_dvd : ¬ p ∣ 2 := fun h =>
+  have h2_not_dvd : ¬ p ∣ 2 := fun h ↦
     hp_odd (le_antisymm (Nat.le_of_dvd (by positivity) h) hp_prime.two_le)
   have h2_unit : IsUnit ((2 : ℕ) : ℤ_[p]) := by
     rw [PadicInt.isUnit_iff, PadicInt.norm_natCast_eq_one_iff]
@@ -126,7 +126,7 @@ lemma negHalf_mem_padicInt (hp_odd : p ≠ 2) :
     have h2_specQ :
         ((((h2_unit.unit : (ℤ_[p])ˣ).val : ℤ_[p]) : ℚ_[p])) =
           (2 : ℚ_[p]) :=
-      congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) h2_spec
+      congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) h2_spec
     rw [← h2_specQ]
     change (((((h2_unit.unit⁻¹ : (ℤ_[p])ˣ) * h2_unit.unit).val : ℤ_[p]) :
       ℚ_[p])) = 1
