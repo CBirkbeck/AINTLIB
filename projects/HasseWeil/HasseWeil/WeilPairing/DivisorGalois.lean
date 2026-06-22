@@ -3,44 +3,19 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 import Mathlib.RingTheory.DedekindDomain.AdicValuation
 import Mathlib.RingTheory.Localization.FractionRing
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-import HasseWeil.Curves.Valuation
 import HasseWeil.Curves.Infinity
+import HasseWeil.Curves.Valuation
 
 /-!
-# Adic-valuation transport under a ring isomorphism (divisor-Galois-descent engine)
+# Adic-valuation transport under ring equivalences
 
-For a ring isomorphism `Φ : R ≃+* R'` of Dedekind domains, the induced fraction-field isomorphism
-`σ = IsFractionRing.ringEquivOfRingEquiv Φ : K ≃+* K'` transports the adic valuations:
-
-```
-vQ.valuation K' (σ f) = vP.valuation K f
-```
-
-whenever `vQ.asIdeal = Ideal.map Φ vP.asIdeal` (i.e. `Φ` sends the height-one prime `vP` to `vQ`).
-Equivalently `ord` at `Q` of `σ f` equals `ord` at `P` of `f`.  This is the algebraic heart of the
-**divisor Galois descent** `div(σ f) = σ_*(div f)` — the `σ`-analogue of the translation transport
-`projectiveDivisorOf_translate` (`DivisorTranslate.lean`).
-
-## Main results (axiom-clean, no `sorry`)
-
-* `count_map_ringEquiv` — the multiplicity (`Associates.count`) of a prime in the factorization is
-  preserved by the ideal-lattice isomorphism `Ideal.map Φ`.
-* `intValuation_map_ringEquiv` — the integer adic valuation transports:
-  `vQ.intValuation (Φ r) = vP.intValuation r`.
-* `valuation_map_ringEquiv` — the fraction-field adic valuation transports for **all** `f`:
-  `vQ.valuation K' (σ f) = vP.valuation K f`.
-
-The geometric application (the function-field automorphism `σ = frobeniusFunctionFieldEquiv` of
-`K̄(E)`, with `Φ = CoordinateRing.map e` and `σ_* = π̄` on points) consumes `valuation_map_ringEquiv`
-via the `pointValuation ↔ HeightOneSpectrum.valuation` bridge `pointValuation_eq_heightOneValuation`.
-
-## References
-
-* Silverman, *The Arithmetic of Elliptic Curves*, II.3 (Galois action on `Div(C)`); III.8.1
-  (Galois equivariance of the Weil pairing).
+This file proves that a ring equivalence between Dedekind domains transports height-one
+prime ideals and their adic valuations. The main algebraic result is
+`valuation_map_ringEquiv`; the later lemmas record coordinate-ring and curve-cast transport
+facts used by Weil-pairing Galois descent.
 -/
 
 open IsDedekindDomain
@@ -85,10 +60,13 @@ theorem map_ne_bot_ringEquiv (Φ : R ≃+* R') (I : Ideal R) (hI : I ≠ ⊥) :
     rw [Ideal.map_bot]; exact le_of_eq h
   exact le_antisymm ((map_le_map_iff_ringEquiv Φ I ⊥).mp hle) bot_le
 
-/-- The divisibility `A ∣ B` transports under the ring iso `Φ` (via `Ideal.mapHom`, both ways). -/
+/-- The divisibility `A ∣ B` transports under the ring iso `Φ` via `Ideal.mapHom`, both
+ways. -/
 theorem map_dvd_iff_ringEquiv (Φ : R ≃+* R') (A B : Ideal R) :
     Ideal.map Φ.toRingHom A ∣ Ideal.map Φ.toRingHom B ↔ A ∣ B := by
-  have hcomp : Φ.symm.toRingHom.comp Φ.toRingHom = RingHom.id R := by ext x; simp
+  have hcomp : Φ.symm.toRingHom.comp Φ.toRingHom = RingHom.id R := by
+    ext x
+    simp
   constructor
   · intro h
     have h2 := map_dvd (Ideal.mapHom Φ.symm.toRingHom) h
@@ -104,9 +82,9 @@ theorem pow_dvd_iff_map_ringEquiv (Φ : R ≃+* R') (p I : Ideal R) (n : ℕ) :
   rw [← Ideal.map_pow]
   exact map_dvd_iff_ringEquiv Φ (p ^ n) I
 
-set_option maxHeartbeats 1000000 in
-/-- **Multiplicity is preserved by the ideal-lattice isomorphism** `Ideal.map Φ`: the `Associates`
-count of `p` in the factorization of `I` equals the count of `Φ(p)` in `Φ(I)`. -/
+/-- Multiplicity is preserved by the ideal-lattice isomorphism `Ideal.map Φ`: the
+`Associates` count of `p` in the factorization of `I` equals the count of `Φ(p)` in
+`Φ(I)`. -/
 theorem count_map_ringEquiv (Φ : R ≃+* R') (p I : Ideal R) (hp : Prime p) (hI : I ≠ ⊥) :
     (Associates.mk (Ideal.map Φ.toRingHom p)).count
         (Associates.mk (Ideal.map Φ.toRingHom I)).factors =
@@ -136,7 +114,7 @@ end IdealTransport
 
 section ValuationTransport
 
-/-- **The integer adic valuation transports under a ring iso** `Φ`: for height-one primes with
+/-- The integer adic valuation transports under a ring iso `Φ`: for height-one primes with
 `vQ.asIdeal = Ideal.map Φ vP.asIdeal`, `vQ.intValuation (Φ r) = vP.intValuation r`. -/
 theorem intValuation_map_ringEquiv (Φ : R ≃+* R')
     (vP : HeightOneSpectrum R) (vQ : HeightOneSpectrum R')
@@ -144,7 +122,8 @@ theorem intValuation_map_ringEquiv (Φ : R ≃+* R')
     vQ.intValuation (Φ r) = vP.intValuation r := by
   classical
   by_cases hr : r = 0
-  · subst hr; simp [map_zero]
+  · subst hr
+    simp [map_zero]
   · have hΦr : Φ r ≠ 0 := by
       simpa using (map_ne_zero_iff Φ.toRingHom (EquivLike.injective Φ)).mpr hr
     rw [HeightOneSpectrum.intValuation_if_neg _ hΦr,
@@ -166,7 +145,7 @@ theorem valuation_map_ringEquiv_algebraMap {K K' : Type*} [Field K] [Field K']
     HeightOneSpectrum.valuation_of_algebraMap, HeightOneSpectrum.valuation_of_algebraMap]
   exact intValuation_map_ringEquiv Φ vP vQ hPQ r
 
-/-- **The fraction-field adic valuation transports under a ring iso** `Φ` for all `f`
+/-- The fraction-field adic valuation transports under a ring iso `Φ` for all `f`
 (the divisor-Galois-descent engine): with `σ = ringEquivOfRingEquiv Φ` and
 `vQ.asIdeal = Ideal.map Φ vP.asIdeal`, `vQ.valuation K' (σ f) = vP.valuation K f`. -/
 theorem valuation_map_ringEquiv {K K' : Type*} [Field K] [Field K']
@@ -181,8 +160,6 @@ theorem valuation_map_ringEquiv {K K' : Type*} [Field K] [Field K']
 
 end ValuationTransport
 
-/-! ### Geometric ideal transport: `CoordinateRing.map f` on `XYIdeal` -/
-
 open WeierstrassCurve Polynomial
 
 /-- `CoordinateRing.map f` sends `XClass x` to `XClass (f x)` (on the mapped curve). -/
@@ -193,7 +170,8 @@ theorem map_XClass {A B : Type*} [CommRing A] [CommRing B] (W' : WeierstrassCurv
       WeierstrassCurve.Affine.CoordinateRing.XClass (W'.map f).toAffine (f x) := by
   rw [WeierstrassCurve.Affine.CoordinateRing.XClass,
     WeierstrassCurve.Affine.CoordinateRing.map_mk]
-  congr 1; simp [Polynomial.map_C, Polynomial.map_sub]
+  congr 1
+  simp [Polynomial.map_C, Polynomial.map_sub]
 
 /-- `CoordinateRing.map f` sends `YClass y` to `YClass (y.map f)` (on the mapped curve). -/
 theorem map_YClass {A B : Type*} [CommRing A] [CommRing B] (W' : WeierstrassCurve.Affine A)
@@ -203,11 +181,11 @@ theorem map_YClass {A B : Type*} [CommRing A] [CommRing B] (W' : WeierstrassCurv
       WeierstrassCurve.Affine.CoordinateRing.YClass (W'.map f).toAffine (y.map f) := by
   rw [WeierstrassCurve.Affine.CoordinateRing.YClass,
     WeierstrassCurve.Affine.CoordinateRing.map_mk]
-  congr 1; simp [Polynomial.map_sub]
+  congr 1
+  simp [Polynomial.map_sub]
 
-/-- **`CoordinateRing.map f` sends `XYIdeal x y` to `XYIdeal (f x) (y.map f)`** on the mapped curve.
-The coordinate-ring shadow of "an isomorphism of coordinate rings sends the maximal ideal at a point
-to the maximal ideal at the image point". -/
+/-- `CoordinateRing.map f` sends `XYIdeal x y` to `XYIdeal (f x) (y.map f)` on the
+mapped curve. -/
 theorem map_XYIdeal {A B : Type*} [CommRing A] [CommRing B] (W' : WeierstrassCurve.Affine A)
     (f : A →+* B) (x : A) (y : A[X]) :
     Ideal.map (WeierstrassCurve.Affine.CoordinateRing.map W' f)
@@ -218,19 +196,9 @@ theorem map_XYIdeal {A B : Type*} [CommRing A] [CommRing B] (W' : WeierstrassCur
   congr 1
   rw [Set.image_insert_eq, Set.image_singleton, map_XClass, map_YClass]
 
-/-! ### Cast lemmas: `ord`/`ordAtInfty` transport through a curve-equality `RingEquiv.cast`
-
-The function-field automorphism `σ = frobeniusFunctionFieldEquiv` is built as a raw fraction-field
-lift followed by a `RingEquiv.cast` along the curve equality `(W.baseChange K̄).map e = W.baseChange K̄`
-(`FrobeniusFunctionFieldEquiv.lean`).  These lemmas transport `pointValuation` and `ordAtInfty`
-through that cast, discharged by `subst` on the curve equality (the cast collapses to `rfl`), avoiding
-the curve-indexed `Eq.rec` transport that times out. -/
-
 open HasseWeil.Curves
 
-/-- **`pointValuation` transports through a curve-equality `RingEquiv.cast`.**  For equal curves
-`V₁ = V₂` and matching smooth points (`HEq P₁ P₂`), the `pointValuation` of `RingEquiv.cast g` at
-`P₂` on `V₂` equals the `pointValuation` of `g` at `P₁` on `V₁`. -/
+/-- `pointValuation` transports through a curve-equality `RingEquiv.cast`. -/
 theorem pointValuation_ringEquivCast {F : Type*} [Field F] [DecidableEq F]
     (V₁ V₂ : WeierstrassCurve F) (hV : V₁ = V₂)
     (P₁ : (⟨V₁.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint)
@@ -243,7 +211,7 @@ theorem pointValuation_ringEquivCast {F : Type*} [Field F] [DecidableEq F]
   obtain rfl := eq_of_heq hP
   rfl
 
-/-- **`ord_P` transports through a curve-equality `RingEquiv.cast`** (additive form of
+/-- `ord_P` transports through a curve-equality `RingEquiv.cast` (additive form of
 `pointValuation_ringEquivCast`). -/
 theorem ord_P_ringEquivCast {F : Type*} [Field F] [DecidableEq F]
     (V₁ V₂ : WeierstrassCurve F) (hV : V₁ = V₂)
@@ -257,9 +225,7 @@ theorem ord_P_ringEquivCast {F : Type*} [Field F] [DecidableEq F]
   obtain rfl := eq_of_heq hP
   rfl
 
-/-- **Equal affine curves with matching coordinates have heterogeneously-equal smooth points.**
-The bookkeeping lemma for transporting a smooth point across the curve equality
-`(W.baseChange K̄).map e = W.baseChange K̄`. -/
+/-- Equal affine curves with matching coordinates have heterogeneously-equal smooth points. -/
 theorem heq_smoothPoint {F : Type*} [Field F] (W₁ W₂ : WeierstrassCurve.Affine F)
     (hW : W₁ = W₂)
     (P₁ : (⟨W₁⟩ : SmoothPlaneCurve F).SmoothPoint)
@@ -271,8 +237,7 @@ theorem heq_smoothPoint {F : Type*} [Field F] (W₁ W₂ : WeierstrassCurve.Affi
     HasseWeil.Curves.SmoothPlaneCurve.SmoothPoint.ext hx hy
   rw [this]
 
-/-- **`ordAtInfty` transports through a curve-equality `RingEquiv.cast`**: σ fixing the place at
-infinity, modulo the curve relabelling. -/
+/-- `ordAtInfty` transports through a curve-equality `RingEquiv.cast`. -/
 theorem ordAtInfty_ringEquivCast {F : Type*} [Field F] [DecidableEq F]
     (V₁ V₂ : WeierstrassCurve F) (hV : V₁ = V₂)
     (g : V₁.toAffine.FunctionField) :
