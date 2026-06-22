@@ -47,9 +47,9 @@ private lemma seg4_h_arc_slitPlane {z₀ : ℂ} (hz_re : z₀.re = -1/2)
     right
     rw [h_eq]
     have hpi := Real.pi_pos
-    rw [show (fdArcAngle (3/5) : ℝ) = 2 * Real.pi / 3 from by unfold fdArcAngle; ring]
+    rw [show (fdArcAngle (3/5) : ℝ) = 2 * Real.pi / 3 by unfold fdArcAngle; ring]
     rw [exp_mul_I, ← ofReal_cos, ← ofReal_sin]
-    rw [show (2 * Real.pi / 3 : ℝ) = Real.pi - Real.pi / 3 from by ring,
+    rw [show (2 * Real.pi / 3 : ℝ) = Real.pi - Real.pi / 3 by ring,
       Real.cos_pi_sub, Real.sin_pi_sub, Real.cos_pi_div_three, Real.sin_pi_div_three]
     simp only [Complex.sub_im, Complex.add_im, Complex.mul_im,
       Complex.ofReal_re, Complex.ofReal_im, Complex.I_re, Complex.I_im,
@@ -70,7 +70,7 @@ private lemma seg4_h_arc_slitPlane {z₀ : ℂ} (hz_re : z₀.re = -1/2)
       have hθ_Icc : fdArcAngle t ∈ Icc (0 : ℝ) Real.pi := ⟨by linarith, by linarith⟩
       have := Real.strictAntiOn_cos hθ_Icc h_2pi3 hθ_hi
       have h_cos_2pi3 : Real.cos (2 * Real.pi / 3) = -1/2 := by
-        rw [show (2 * Real.pi / 3 : ℝ) = Real.pi - Real.pi / 3 from by ring,
+        rw [show (2 * Real.pi / 3 : ℝ) = Real.pi - Real.pi / 3 by ring,
             Real.cos_pi_sub, Real.cos_pi_div_three]
         norm_num
       linarith
@@ -96,7 +96,7 @@ private lemma seg4_h₃_eq_pure_im {H : ℝ} {z₀ : ℂ} (hz_re : z₀.re = -1/
     seg4_h₃ H z₀ t =
       ((Real.sqrt 3 / 2 + (5 * t - 3) * (H - Real.sqrt 3 / 2) - z₀.im : ℝ) : ℂ) * I := by
   unfold seg4_h₃ vertSeg_h₃
-  rw [show (-1/2 - z₀.re : ℝ) = 0 from by rw [hz_re]; ring]
+  rw [show (-1/2 - z₀.re : ℝ) = 0 by rw [hz_re]; ring]
   simp
 
 private lemma seg4_h₃_slitPlane_of_ne {H : ℝ} (hH : Real.sqrt 3 / 2 < H)
@@ -239,7 +239,7 @@ private lemma seg4_log_diff_eq_neg_pi_I {H : ℝ} (hH : Real.sqrt 3 / 2 < H)
       linarith [this, hK_eq_seg4]
     exact_mod_cast this
   rw [h_minus, h_plus,
-    show (((-(seg1Speed H * δ) : ℝ) : ℂ) * I) = ((seg1Speed H * δ : ℝ) : ℂ) * (-I) from by
+    show (((-(seg1Speed H * δ) : ℝ) : ℂ) * I) = ((seg1Speed H * δ : ℝ) : ℂ) * (-I) by
       push_cast; ring]
   exact vertSeg_log_diff_neg_I_pi hKδ
 
