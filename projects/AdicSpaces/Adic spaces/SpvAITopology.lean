@@ -606,6 +606,113 @@ theorem restrictIdeal_mem_SpvAI (v : Spv A) (I : Ideal A) :
 noncomputable def SpvAI.retraction (I : Ideal A) : Spv A → SpvAI A I :=
   fun v => ⟨restrictIdeal v I, restrictIdeal_mem_SpvAI v I⟩
 
+/-! ### Faithful principal-case `IsInSpvAI` (replaces the false general lemma)
+
+`ofValuation_restrictIdeal_isInSpvAI` is false as stated (B2, 2026-06-22: the general
+`cGammaIdeal` is unfaithful to Wedhorn Def 7.3). The Spa continuity construction only ever
+needs a **principal** ideal `(g)` (via `IsTateRing.principalPair`), where the faithful
+`cΓ_v((g)) = cGammaSingle` makes the dichotomy true. We prove it for `restrictIdealSingle`. -/
+
+variable {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀]
+
+/-- **Generic `CofinalValue` transfer.** For any `Compatible` restricted valuation `rs`,
+`CofinalValue` passes from `rs` to the canonical valuation of `ofValuation rs` (they are
+`IsEquiv`, and every value of the canonical valuation is a ratio of values via
+`exists_valuation_div_valuation_eq`). -/
+theorem cofinalValue_canon_of_restricted {Γ' : Type*} [LinearOrderedCommGroupWithZero Γ']
+    (rs : Valuation A Γ') {a : A} (h : Valuation.CofinalValue rs a) :
+    letI : ValuativeRel A := (ofValuation rs).toValuativeRel
+    Valuation.CofinalValue (ValuativeRel.valuation A) a := by
+  letI : ValuativeRel A := (ofValuation rs).toValuativeRel
+  haveI hcw : rs.Compatible := Valuation.Compatible.ofValuation _
+  have hequiv : (ValuativeRel.valuation A).IsEquiv rs := fun p q =>
+    (Valuation.Compatible.vle_iff_le (v := ValuativeRel.valuation A) p q).symm.trans
+      (Valuation.Compatible.vle_iff_le (v := rs) p q)
+  intro δ hδ
+  obtain ⟨s, t, hst⟩ := ValuativeRel.exists_valuation_div_valuation_eq (R := A) δ
+  have hct : (ValuativeRel.valuation A) (t : A) ≠ 0 := ValuativeRel.valuation_posSubmonoid_ne_zero t
+  have hlt : ∀ p q : A, ((ValuativeRel.valuation A) p < (ValuativeRel.valuation A) q ↔ rs p < rs q) :=
+    fun p q => le_iff_le_iff_lt_iff_lt.mp (hequiv q p)
+  have hrt : rs (t : A) ≠ 0 := by
+    rw [← zero_lt_iff]; have hh := (hlt 0 (t : A)).mp
+    simp only [map_zero] at hh; exact hh (zero_lt_iff.mpr hct)
+  subst hst
+  have hcs : 0 < (ValuativeRel.valuation A) s := by
+    rw [zero_lt_iff]; intro h0; rw [h0, zero_div] at hδ; exact lt_irrefl 0 hδ
+  have hrs : 0 < rs s := by
+    have hh := (hlt 0 s).mp; simp only [map_zero] at hh; exact hh hcs
+  obtain ⟨n, hn⟩ := h (rs s / rs (t : A)) (div_pos hrs (zero_lt_iff.mpr hrt))
+  exact ⟨n, by
+    rw [lt_div_iff₀ (zero_lt_iff.mpr hct), ← map_pow, ← map_mul, hlt, map_mul, map_pow,
+      ← lt_div_iff₀ (zero_lt_iff.mpr hrt)]
+    exact hn⟩
+
+/-- **Generic `IsMicrobial` transfer** (companion to `cofinalValue_canon_of_restricted`). -/
+theorem isMicrobial_canon_of_restricted {Γ' : Type*} [LinearOrderedCommGroupWithZero Γ']
+    (rs : Valuation A Γ') (h : Valuation.IsMicrobial rs) :
+    letI : ValuativeRel A := (ofValuation rs).toValuativeRel
+    Valuation.IsMicrobial (ValuativeRel.valuation A) := by
+  letI : ValuativeRel A := (ofValuation rs).toValuativeRel
+  haveI hcw : rs.Compatible := Valuation.Compatible.ofValuation _
+  have hequiv : (ValuativeRel.valuation A).IsEquiv rs := fun p q =>
+    (Valuation.Compatible.vle_iff_le (v := ValuativeRel.valuation A) p q).symm.trans
+      (Valuation.Compatible.vle_iff_le (v := rs) p q)
+  intro δ hδ
+  obtain ⟨p, q, hpq⟩ := ValuativeRel.exists_valuation_div_valuation_eq (R := A) δ
+  have hcq : (ValuativeRel.valuation A) (q : A) ≠ 0 := ValuativeRel.valuation_posSubmonoid_ne_zero q
+  have hle : ∀ x y : A, ((ValuativeRel.valuation A) x ≤ (ValuativeRel.valuation A) y ↔ rs x ≤ rs y) :=
+    hequiv
+  have hlt : ∀ x y : A, ((ValuativeRel.valuation A) x < (ValuativeRel.valuation A) y ↔ rs x < rs y) :=
+    fun x y => le_iff_le_iff_lt_iff_lt.mp (hequiv y x)
+  have hrq : rs (q : A) ≠ 0 := by
+    rw [← zero_lt_iff]; have hh := (hlt 0 (q : A)).mp
+    simp only [map_zero] at hh; exact hh (zero_lt_iff.mpr hcq)
+  subst hpq
+  have hcp : 0 < (ValuativeRel.valuation A) p := by
+    rw [zero_lt_iff]; intro h0; rw [h0, zero_div] at hδ; exact lt_irrefl 0 hδ
+  have hrp : 0 < rs p := by
+    have hh := (hlt 0 p).mp; simp only [map_zero] at hh; exact hh hcp
+  have hγ' : 0 < rs p / rs (q : A) := div_pos hrp (zero_lt_iff.mpr hrq)
+  obtain ⟨a, ha1, hainv, hage⟩ := h (rs p / rs (q : A)) hγ'
+  have h1 : (1 : _) ≤ (ValuativeRel.valuation A) a := by
+    have hh := (hle 1 a).mpr; simp only [map_one] at hh; exact hh ha1
+  have hca : 0 < (ValuativeRel.valuation A) a := lt_of_lt_of_le zero_lt_one h1
+  have hainv' : rs (q : A) / rs p ≤ rs a := by
+    rw [← inv_div]; exact (inv_le_comm₀ (lt_of_lt_of_le zero_lt_one ha1) hγ').mp hainv
+  refine ⟨a, h1, ?_, ?_⟩
+  · rw [inv_le_comm₀ hca hδ, inv_div, div_le_iff₀ hcp, ← map_mul, hle, map_mul, ← div_le_iff₀ hrp]
+    exact hainv'
+  · rw [div_le_iff₀ (zero_lt_iff.mpr hcq), ← map_mul, hle, map_mul, ← div_le_iff₀ (zero_lt_iff.mpr hrq)]
+    exact hage
+
+/-- **MICROBIAL CASE (Wedhorn Def 7.3, `v((g)) ∩ cΓ_v ≠ ∅` branch).** If some value `v(a)`
+reaches `v(g)⁻¹`, then `cGammaSingle` collapses to `cΓ_v` and `restrictIdealSingle` is microbial:
+every value-unit is bounded by a product of characteristic values (which are values, `v`
+multiplicative) and `v(g)⁻¹ ≤ v(a)`. -/
+theorem restrictIdealSingle_isMicrobial_of_reach (w : Valuation A Γ₀) (g : A) (hg : w g ≠ 0)
+    (hreach : ∃ a : A, (w g)⁻¹ ≤ w a) :
+    Valuation.IsMicrobial (w.restrictIdealSingle g hg) := by
+  sorry
+
+/-- **COFINAL CASE (Wedhorn Def 7.3, `v((g)) ∩ cΓ_v = ∅` branch + Lemma 7.2 + Lemma 7.1).**
+If no value reaches `v(g)⁻¹`, then `cGammaSingle = convexGenerated (v(g)⁻¹)` (rank-1), the
+generator `g` is cofinal (`exists_inv_pow_lt_of_mem_convexGenerated`), and by the cofinality
+ideal (Lemma 7.1, via the quotient by `cΓ_v`) every `a ∈ (g)` has cofinal value. -/
+theorem restrictIdealSingle_cofinal_of_not_reach (w : Valuation A Γ₀) (g : A) (hg : w g ≠ 0)
+    (hreach : ¬ ∃ a : A, (w g)⁻¹ ≤ w a) :
+    ∀ a ∈ Ideal.span {g}, Valuation.CofinalValue (w.restrictIdealSingle g hg) a := by
+  sorry
+
+/-- **Faithful principal-case Wedhorn 7.4(ii) / 7.1.2.** `restrictIdealSingle w g` lands in
+`Spv(A, (g))`. This is the true replacement for the false `ofValuation_restrictIdeal_isInSpvAI`,
+specialised to the principal ideal `(g)` that the Spa continuity construction uses. -/
+theorem ofValuation_restrictIdealSingle_isInSpvAI (w : Valuation A Γ₀) (g : A) (hg : w g ≠ 0) :
+    Spv.IsInSpvAI (ofValuation (w.restrictIdealSingle g hg)) (Ideal.span {g}) := by
+  by_cases hreach : ∃ a : A, (w g)⁻¹ ≤ w a
+  · exact Or.inr (isMicrobial_canon_of_restricted _ (restrictIdealSingle_isMicrobial_of_reach w g hg hreach))
+  · exact Or.inl fun a ha =>
+      cofinalValue_canon_of_restricted _ (restrictIdealSingle_cofinal_of_not_reach w g hg hreach a ha)
+
 /-- **General sub-lemma (value-equivalence from `cGammaIdeal` containing every
 value-unit).** If every nonzero value-unit `Units.mk0 (v a) ha` of `v` lies
 in `cGammaIdeal v I`, then the restriction `v.restrictIdeal I` is
