@@ -51,9 +51,6 @@ namespace HasseWeil.WeilPairing
 open HasseWeil HasseWeil.WeilPairing.DivisorPullback IsogenyBaseChangeConcrete
 open HasseWeil.WeilPairing.TorsionGeometric
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.unusedFintypeInType false
 set_option linter.style.longLine false
 
 section Assemble
@@ -69,6 +66,10 @@ variable [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic]
     (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
       SmoothPlaneCurve (AlgebraicClosure K)).CoordinateRing]
 
+omit [Fintype W.toAffine.Point]
+  [IsIntegrallyClosed
+    (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
+      SmoothPlaneCurve (AlgebraicClosure K)).CoordinateRing] in
 /-- **`ProjOrdTransport (rπ − s)_{K̄}` from the local comap witnesses** (Silverman III.4.10c),
 CoordHom-free.  The divisor-pullback functoriality `div((rπ−s)^* h) = (rπ−s)^*(div h)` for the
 base-changed separable `rπ − s`, obtained by the general reduction
@@ -82,6 +83,10 @@ theorem pencil_hproj_of_comapWitness (r' s' : ℤ)
     ProjOrdTransport (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s' pullback_L) :=
   projOrdTransport_of_comap_pointValuation hcomap
 
+omit [Fintype W.toAffine.Point]
+  [IsIntegrallyClosed
+    (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
+      SmoothPlaneCurve (AlgebraicClosure K)).CoordinateRing] in
 /-- **Finiteness of `ker (rπ − s)_{K̄}` from the degree match** (`#ker = deg > 0`).  The separable
 degree match `#ker = deg` together with positivity of the genuine `rπ − s` degree
 (`genuineIsogSmulSub_degree_pos`, transported through `hdeg_bc`) gives `Nat.card ker > 0`, hence the
@@ -135,12 +140,12 @@ theorem pencilScaling_one_of_comapWitness_noδ (r' s' : ℤ) (hr : r' ≠ 0) (hs
         s' • AddMonoidHom.id (W.baseChange (AlgebraicClosure K)).toAffine.Point)
       (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s'
         (pencilBaseChangePullback W (AlgebraicClosure K) r' s' hr hs hrK hsK)).degree := by
-  haveI : Finite (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s'
+  have : Finite (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s'
       (pencilBaseChangePullback W (AlgebraicClosure K) r' s' hr hs hrK hsK)).toAddMonoidHom.ker :=
     pencilIsogBaseChange_finiteKer_of_hkerdeg_pos W p r r' s'
       (pencilBaseChangePullback W (AlgebraicClosure K) r' s' hr hs hrK hsK) hkerdeg hdeg_pos
   set φL := pencilIsogBaseChange W p r (AlgebraicClosure K) r' s'
-    (pencilBaseChangePullback W (AlgebraicClosure K) r' s' hr hs hrK hsK) with hφL
+    (pencilBaseChangePullback W (AlgebraicClosure K) r' s' hr hs hrK hsK)
   refine weilScales_noδ (W.baseChange (AlgebraicClosure K)) ℓ hℓF φL
     (r' • frobeniusHomBaseChange W p r (AlgebraicClosure K) -
       s' • AddMonoidHom.id (W.baseChange (AlgebraicClosure K)).toAffine.Point)
@@ -189,6 +194,7 @@ structure PencilScalingComapData (r' s' : ℤ) where
   /-- Positivity of the degree (so the kernel is finite). -/
   hdeg_pos : 0 < (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s' pullback_L).degree
 
+omit [Fintype W.toAffine.Point] in
 /-- **One `WeilScales` instance for `(rπ − s)_{K̄}` from the abstract δ-free bundle** (Silverman
 III.8.6.1), CoordHom-free, no `δ`/`hsurj`.  For any `(r', s')` and prime `ℓ`, the bundle
 `PencilScalingComapData` yields
@@ -202,9 +208,9 @@ theorem pencilScaling_one_of_comapData (r' s' : ℤ)
       (r' • frobeniusHomBaseChange W p r (AlgebraicClosure K) -
         s' • AddMonoidHom.id (W.baseChange (AlgebraicClosure K)).toAffine.Point)
       (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s' d.pullback_L).degree := by
-  haveI : Finite (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s' d.pullback_L).toAddMonoidHom.ker :=
+  have : Finite (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s' d.pullback_L).toAddMonoidHom.ker :=
     pencilIsogBaseChange_finiteKer_of_hkerdeg_pos W p r r' s' d.pullback_L d.hkerdeg d.hdeg_pos
-  set φL := pencilIsogBaseChange W p r (AlgebraicClosure K) r' s' d.pullback_L with hφL
+  set φL := pencilIsogBaseChange W p r (AlgebraicClosure K) r' s' d.pullback_L
   refine weilScales_noδ (W.baseChange (AlgebraicClosure K)) ℓ hℓF φL
     (r' • frobeniusHomBaseChange W p r (AlgebraicClosure K) -
       s' • AddMonoidHom.id (W.baseChange (AlgebraicClosure K)).toAffine.Point)
@@ -217,6 +223,7 @@ theorem pencilScaling_one_of_comapData (r' s' : ℤ)
   intro S T hS hφT
   exact pencil_hcommPrime_of_hgcomm W p r r' s' d.pullback_L d.hgcomm ℓ hℓF S T hS hφT
 
+omit [Fintype W.toAffine.Point] in
 /-- **`PencilScaling` for `(rπ − s)_{K̄}` from a per-pair abstract δ-free bundle** (Silverman
 III.8.6.1), CoordHom-free, no `δ`/`hsurj`.  Given, for every `(r', s')`, a `PencilScalingComapData`
 bundle, the full leaf `PencilScaling W p r K̄ pencilDeg` holds for
@@ -228,13 +235,13 @@ theorem pencilScaling_of_comapData
       (fun r' s' ↦ ((pencilIsogBaseChange W p r (AlgebraicClosure K) r' s'
         (pencilData r' s').pullback_L).degree : ℤ)) := by
   intro r' s' _hps ℓ hℓp _hℓne hℓF
-  letI : Fact ℓ.Prime := ⟨hℓp⟩
-  rw [show (((pencilIsogBaseChange W p r (AlgebraicClosure K) r' s'
-      (pencilData r' s').pullback_L).degree : ℤ)).toNat =
-      (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s' (pencilData r' s').pullback_L).degree from
-    Int.toNat_natCast _]
+  have : Fact ℓ.Prime := ⟨hℓp⟩
+  simp only [Int.toNat_natCast]
   exact pencilScaling_one_of_comapData W p r r' s' ℓ hℓF (pencilData r' s')
 
+omit [IsIntegrallyClosed
+    (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
+      SmoothPlaneCurve (AlgebraicClosure K)).CoordinateRing] in
 /-- **The `hgcomm` field of `PencilScalingComapData` for the canonical pullback is DISCHARGED**
 (Silverman III.8.2), CoordHom-free.  For the canonical `pencilBaseChangePullback` (`r' ≠ 0`,
 `p ∤ r', s'`), the generic-point covariance leaf `MapTranslateGenericPoint` for the canonical action
@@ -251,6 +258,7 @@ theorem pencilScalingComapData_hgcomm_canonical (r' s' : ℤ) (hr : r' ≠ 0) (h
           (pencilBaseChangePullback W (AlgebraicClosure K) r' s' hr hs hrK hsK)).pullback) :=
   mapTranslateGenericPoint_pencil_canonical W p r r' s' hr hs hrK hsK
 
+omit [Fintype W.toAffine.Point] in
 /-- **`PencilScaling` for an arbitrary non-negative `deg` from the abstract δ-free bundles**, given
 the carried isogeny degrees realise it.  The form a top-level caller uses to obtain `PencilScaling`
 for a fixed degree function (e.g. `deg r s = (genuineIsogSmulSub …).degree`). -/
@@ -261,7 +269,7 @@ theorem pencilScaling_of_comapData_of_deg
       (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s' (pencilData r' s').pullback_L).degree) :
     PencilScaling W p r (AlgebraicClosure K) deg := by
   intro r' s' _hps ℓ hℓp _hℓne hℓF
-  letI : Fact ℓ.Prime := ⟨hℓp⟩
+  have : Fact ℓ.Prime := ⟨hℓp⟩
   rw [hdeg r' s']
   exact pencilScaling_one_of_comapData W p r r' s' ℓ hℓF (pencilData r' s')
 
@@ -286,7 +294,7 @@ the non-negative integer exponent the δ-free `weilScales_noδ_card` produces di
 `deg` parameter of `hasse_bound_unconditional_of_baseChange_scalings` to **avoid** the geometric
 degree match `#ker = deg`. -/
 noncomputable def pencilKerCard
-    (pullback_L : ∀ r' s' : ℤ,
+    (pullback_L : ∀ _ _ : ℤ,
       (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField →ₐ[AlgebraicClosure K]
         (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField) :
     ℤ → ℤ → ℤ :=
@@ -294,9 +302,13 @@ noncomputable def pencilKerCard
     (Nat.card (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s'
       (pullback_L r' s')).toAddMonoidHom.ker : ℤ)
 
+omit [Fintype W.toAffine.Point]
+  [IsIntegrallyClosed
+    (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
+      SmoothPlaneCurve (AlgebraicClosure K)).CoordinateRing] in
 /-- `pencilKerCard` is non-negative — it is a cast of a `Nat.card`. -/
 theorem pencilKerCard_nonneg
-    (pullback_L : ∀ r' s' : ℤ,
+    (pullback_L : ∀ _ _ : ℤ,
       (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField →ₐ[AlgebraicClosure K]
         (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField)
     (r' s' : ℤ) : 0 ≤ pencilKerCard W p r pullback_L r' s' :=
@@ -325,6 +337,7 @@ structure PencilScalingComapDataCard (r' s' : ℤ) where
   finiteKer :
     Finite (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s' pullback_L).toAddMonoidHom.ker
 
+omit [Fintype W.toAffine.Point] in
 /-- **One `WeilScales` instance for `(rπ − s)_{K̄}` with the `#ker` exponent from the degree-match-free
 bundle** (Silverman III.8.6.1), CoordHom-free, no `δ`/`hsurj`/`hkerdeg`.  For any `(r', s')` and prime
 `ℓ`, the bundle `PencilScalingComapDataCard` yields
@@ -339,8 +352,8 @@ theorem pencilScaling_one_of_comapData_card (r' s' : ℤ)
       (r' • frobeniusHomBaseChange W p r (AlgebraicClosure K) -
         s' • AddMonoidHom.id (W.baseChange (AlgebraicClosure K)).toAffine.Point)
       (Nat.card (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s' d.pullback_L).toAddMonoidHom.ker) := by
-  haveI := d.finiteKer
-  set φL := pencilIsogBaseChange W p r (AlgebraicClosure K) r' s' d.pullback_L with hφL
+  have := d.finiteKer
+  set φL := pencilIsogBaseChange W p r (AlgebraicClosure K) r' s' d.pullback_L
   refine weilScales_noδ_card (W.baseChange (AlgebraicClosure K)) ℓ hℓF φL
     (r' • frobeniusHomBaseChange W p r (AlgebraicClosure K) -
       s' • AddMonoidHom.id (W.baseChange (AlgebraicClosure K)).toAffine.Point)
@@ -351,6 +364,7 @@ theorem pencilScaling_one_of_comapData_card (r' s' : ℤ)
   intro S T hS hφT
   exact pencil_hcommPrime_of_hgcomm W p r r' s' d.pullback_L d.hgcomm ℓ hℓF S T hS hφT
 
+omit [Fintype W.toAffine.Point] in
 /-- **`PencilScaling` for `(rπ − s)_{K̄}` from a per-pair degree-match-free bundle, `#ker` exponent**
 (Silverman III.8.6.1), CoordHom-free, no `δ`/`hsurj`/`hkerdeg`.  Given, for every `(r', s')`, a
 `PencilScalingComapDataCard` bundle, the full leaf `PencilScaling W p r K̄ pencilKerCard` holds for the
@@ -366,11 +380,8 @@ theorem pencilScaling_of_comapData_card
     PencilScaling W p r (AlgebraicClosure K)
       (pencilKerCard W p r (fun r' s' ↦ (pencilData r' s').pullback_L)) := by
   intro r' s' _hps ℓ hℓp _hℓne hℓF
-  letI : Fact ℓ.Prime := ⟨hℓp⟩
-  rw [show (pencilKerCard W p r (fun r' s' ↦ (pencilData r' s').pullback_L) r' s').toNat =
-      Nat.card (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s'
-        (pencilData r' s').pullback_L).toAddMonoidHom.ker from
-    Int.toNat_natCast _]
+  have : Fact ℓ.Prime := ⟨hℓp⟩
+  simp only [pencilKerCard, Int.toNat_natCast]
   exact pencilScaling_one_of_comapData_card W p r r' s' ℓ hℓF (pencilData r' s')
 
 end Assemble
