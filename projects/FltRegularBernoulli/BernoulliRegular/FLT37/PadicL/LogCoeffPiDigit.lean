@@ -108,7 +108,7 @@ theorem sum_pow_mul_eval_eq_zero {P : Polynomial (ZMod p)} {i : ℕ}
     omega
   calc ∑ x : ZMod p, x ^ i * P.eval x
       = ∑ x : ZMod p, (Polynomial.X ^ i * P).eval x := by
-        refine Finset.sum_congr rfl fun x _ => ?_
+        refine Finset.sum_congr rfl fun x _ ↦ ?_
         rw [Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_X]
     _ = 0 := sum_eval_eq_zero_of_natDegree_lt hdeg
 
@@ -129,7 +129,7 @@ theorem sum_units_poly_mul_pow_eq_zero {P : Polynomial (ZMod p)} {i : ℕ}
   classical
   -- Sum over all of `ZMod p` is `0`; split off `x = 0`.
   have hall : ∑ x : ZMod p, x ^ i * P.eval x = 0 := sum_pow_mul_eval_eq_zero h
-  set f : ZMod p → ZMod p := fun x => x ^ i * P.eval x with hf
+  set f : ZMod p → ZMod p := fun x ↦ x ^ i * P.eval x with hf
   have hunits : ∑ j : (ZMod p)ˣ, f (j : ZMod p) = ∑ x ∈ Finset.univ \ {(0 : ZMod p)}, f x := by
     let φ : (ZMod p)ˣ ↪ ZMod p := ⟨fun x ↦ x, Units.val_injective⟩
     have hmap : (Finset.univ : Finset (ZMod p)ˣ).map φ = Finset.univ \ {0} := by
@@ -174,7 +174,7 @@ theorem sum_units_pow_mul_pow_eq_neg_one {i e : ℕ} (hdvd : (p - 1) ∣ (i + e)
     ∑ j : (ZMod p)ˣ, (j : ZMod p) ^ i * (j : ZMod p) ^ e = (-1 : ZMod p) := by
   rw [show (∑ j : (ZMod p)ˣ, (j : ZMod p) ^ i * (j : ZMod p) ^ e)
         = ∑ j : (ZMod p)ˣ, (j : ZMod p) ^ (i + e) from
-    Finset.sum_congr rfl fun j _ => by rw [pow_add]]
+    Finset.sum_congr rfl fun j _ ↦ by rw [pow_add]]
   rw [sum_units_pow_eq (i + e), if_pos hdvd]
 
 /-- **The sharp threshold at `i = 32, p = 37`** (the concrete `m(8)` bookkeeping):
@@ -258,7 +258,7 @@ theorem piDigitsVanishBelow_one_of_residue_poly {c : (ZMod p)ˣ → S.O}
   -- `Σ_j residue(c_j)·j^i = Σ_j j^i · P.eval j = 0`.
   rw [show (∑ j : (ZMod p)ˣ, S.residue (c j) * (j : ZMod p) ^ i)
         = ∑ j : (ZMod p)ˣ, (j : ZMod p) ^ i * P.eval (j : ZMod p) from
-    Finset.sum_congr rfl fun j _ => by rw [hP j]; ring]
+    Finset.sum_congr rfl fun j _ ↦ by rw [hP j]; ring]
   exact sum_units_poly_mul_pow_eq_zero hi0 hdeg
 
 /-! ## Part D — the sharp residual: the per-digit Coleman grading of `c`
