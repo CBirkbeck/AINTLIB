@@ -8,64 +8,21 @@ import HasseWeil.EC.IsogenyAG.DualGalois
 import HasseWeil.Curves.GenericFiber
 
 /-!
-# The generic-point covariance `hgcomm` for a general isogeny (evaluation + separation)
+# Generic-point covariance for a general isogeny
 
-This file closes the project's deepest *general* dual-side residual: the generic-point
-commutation leaf
+This file proves `MapTranslateGenericPoint` for the canonical action attached to a general
+`Basic.Isogeny β`, using a cofinite pullback-evaluation witness and closed-point separation.
 
-  `hgcomm : Point.map τ_S (g P_gen) = g P_gen + lift (β S)`   (`MapTranslateGenericPoint`),
+## Main definitions
 
-for a **general** `Basic.Isogeny β` with the **canonical** geometric action
-`g = Affine.Point.map β.pullback`, over an algebraically closed base.  Until now this leaf was
-discharged only case-by-case (`[m]` via division polynomials, Frobenius via `q`-power
-arithmetic); here it is proved from one precisely-scoped per-isogeny witness.
+* `EvaluatesTo`: valuation-style evaluation of a rational function at a smooth point.
+* `PullbackEvaluation`: cofinite compatibility between an isogeny's point map and pullback.
 
-## The engine (`mapTranslateGenericPoint_of_pullbackEvaluation`)
+## Main results
 
-The single irreducible input is the **cofinite pullback-evaluation witness**
-(`PullbackEvaluation β bad`, `bad` finite): at every smooth point `P ∉ bad`, the stored point
-map sends `P` to a *finite* point `(x', y')` and the pulled-back generators evaluate there,
-
-  `(β^* x_gen)(P) = x' = x(β P)`,  `(β^* y_gen)(P) = y' = y(β P)`,
-
-evaluation being the project's valuation idiom `v_P(f − c) < 1` (`EvaluatesTo`).  This is
-exactly the statement "the stored `toAddMonoidHom` is the geometric realization of the stored
-`pullback` at all but finitely many points" — the function-field ↔ point-map coherence that the
-abstract two-independent-fields `Isogeny` interface cannot see.  Given it, the covariance is
-**derived for every `S`** (not just kernel points) by the closed-point separation argument:
-
-* `τ_S(β^* x_gen)` evaluates at `P` to `x(β(P + S))` — translation moves the evaluation point
-  (`translate_ord_eq_all_nonzero`) and the witness evaluates at `P + S`;
-* the explicit group-law coordinate `addX(β^* x_gen, x_T, slope)` of `g P_gen + lift (β S)`
-  evaluates at `P` to `addX(x(βP), x_T, slope_F) = x(βP + βS)` — by `EvaluatesTo` arithmetic
-  plus the *same* mathlib `add_some` formula over `F`;
-* `x(β(P + S)) = x(βP + βS)` because the stored map is an `AddMonoidHom` — for the abstract
-  interface the group-law content of Silverman III.4.8 lives in the bundling of
-  `toAddMonoidHom`, so no further input is needed;
-* two functions of `K(E)` agreeing at the (cofinitely many) good points are equal: a nonzero
-  function has finitely many zeros (`finite_setOf_ord_P_nonzero`, Silverman II.1.2) while
-  `E(F)` is infinite over `F = F̄` (`smoothPoint_infinite`).
-
-The finitely many excluded points are: `bad`, the translate `P = −S`, points with
-`P + S ∈ bad`, and the fibres of the stored map over `{βS, −βS}` (fibres are finite because
-the witness forces the affine kernel into `bad`).
-
-## The CoordHom discharge (`pullbackEvaluation_of_coordHom`)
-
-For an `EC.Isogeny φ` with a coordinate-ring witness `cd : CoordHom` whose pullback and point
-map agree with `β`'s, the witness holds with `bad = ∅`: `β^* x_gen = algebraMap (cd.toAlgHom X)`
-(`cd.compat`) and the residue map at `P` sends `cd.toAlgHom X` to `x(toPointMap cd P)`
-(`evalAt_toPointMap`), so the generator evaluations are exact, with no excluded points.  Note a
-`CoordHom` forces the point map to send affine points to affine points (so `ker β = 0` in any
-*consistent* instance); isogenies with nontrivial affine kernel must instead discharge
-`PullbackEvaluation` with a nonempty `bad` (the kernel) from their residue computations — the
-witness shape is chosen so the `1 − π` / `rπ − s` SamePlace machinery can feed it.
-
-## Wiring
-
-`xy_family_of_pullbackEvaluation` / `xy_family_of_coordHom` feed the discharged `hgcomm` into
-`xy_family_of_genericPointCommutes` (`EC/IsogenyAG/DualGalois.lean`), the input of the dual
-witness's Galois fixed-field data.
+* `mapTranslateGenericPoint_of_pullbackEvaluation`: generic covariance from the witness.
+* `pullbackEvaluation_of_coordHom`: a `CoordHom` gives the witness with no bad set.
+* `xy_family_of_pullbackEvaluation`: the resulting dual-witness `xy_family` covariance.
 
 ## References
 
@@ -78,8 +35,7 @@ namespace HasseWeil.WeilPairing
 
 open HasseWeil
 
--- the `EvaluatesTo` block does not consume `[DecidableEq F]` or `W`'s instances in
--- types or proofs; the section variables are kept uniform for the engine below
+-- These instances are intentionally section-scoped for the engine below.
 set_option linter.unusedSectionVars false
 set_option linter.unusedDecidableInType false
 
@@ -87,13 +43,6 @@ variable {F : Type*} [Field F] [DecidableEq F]
 variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
 
 local notation "KE" => W.toAffine.FunctionField
-
-/-! ### The evaluation relation `EvaluatesTo` and its arithmetic
-
-`EvaluatesTo W P f c` says the rational function `f ∈ K(E)` takes the value `c ∈ F` at the
-smooth point `P`, in the project's valuation idiom: `v_P(f − c) < 1` (i.e. `f − c` vanishes at
-`P`).  This sidesteps partial evaluation maps entirely; the lemmas below make the relation
-compatible with the field operations, which is all the group-law formulas need. -/
 
 /-- `f ∈ K(E)` **evaluates to** `c ∈ F` at the smooth point `P`: `v_P(f − c) < 1`. -/
 def EvaluatesTo (P : (W_smooth W).SmoothPoint) (f : KE) (c : F) : Prop :=
@@ -253,23 +202,14 @@ theorem EvaluatesTo.div {P : (W_smooth W).SmoothPoint} {f g : KE} {c d : F}
           mul_le_mul_left ((W_smooth W).pointValuation_algebraMap_F_le_one P c) _
       _ < 1 := by rw [one_mul]; exact hsub
 
-/-! ### Separation: functions agreeing at cofinitely many points are equal
-
-Silverman II.1.2 (`finite_setOf_ord_P_nonzero`) + infinitude of `E(F̄)`
-(`smoothPoint_infinite`). -/
-
 variable (W)
 
-/-- **Separation**: two rational functions sharing a value at all points outside a finite set
-are equal, over an algebraically closed base.  A nonzero difference would have finitely many
-zeros (Silverman II.1.2), but it vanishes at the cofinitely many good points of the infinite
-`E(F̄)`. -/
+/-- Two rational functions sharing a value outside a finite set are equal. -/
 theorem eq_of_evaluatesTo_cofinite [IsAlgClosed F] {f g : KE}
     {badS : Set (W_smooth W).SmoothPoint} (hfin : badS.Finite)
     (h : ∀ P ∉ badS, ∃ c : F, EvaluatesTo W P f c ∧ EvaluatesTo W P g c) : f = g := by
   by_contra hne
   have hD : f - g ≠ 0 := sub_ne_zero_of_ne hne
-  -- Every good point is a zero of `f − g`.
   have hzero : ∀ P ∉ badS, (W_smooth W).ord_P P (f - g) ≠ 0 := by
     intro P hP
     obtain ⟨c, hf, hg⟩ := h P hP
@@ -283,7 +223,6 @@ theorem eq_of_evaluatesTo_cofinite [IsAlgClosed F] {f g : KE}
     rw [h0] at h1
     have h1' : ((1 : ℤ) : WithTop ℤ) ≤ ((0 : ℤ) : WithTop ℤ) := by exact_mod_cast h1
     exact absurd (WithTop.coe_le_coe.mp h1') (by norm_num)
-  -- So the (infinite) complement of `badS` sits inside the finite zero set.
   haveI hEll : (W_smooth W).toAffine.IsElliptic := ‹W.toAffine.IsElliptic›
   haveI : Infinite (W_smooth W).SmoothPoint := (W_smooth W).smoothPoint_infinite
   have hinf : (Set.univ \ badS : Set (W_smooth W).SmoothPoint).Infinite :=
@@ -292,13 +231,7 @@ theorem eq_of_evaluatesTo_cofinite [IsAlgClosed F] {f g : KE}
   intro P hP
   exact hzero P hP.2
 
-/-! ### Translation moves the evaluation point
-
-The `EvaluatesTo` form of the shipped valuation transport `translate_ord_eq_all_nonzero`
-(`EC/TranslateValuation.lean`): `(τ_S f)(P) = f(P + S)`. -/
-
-/-- **Translation–evaluation**: if `f` evaluates to `c` at `P + S`, then `τ_S f` evaluates to
-`c` at `P` (for affine `S` with `P + S` affine). -/
+/-- If `f` evaluates to `c` at `P + S`, then `τ_S f` evaluates to `c` at `P`. -/
 theorem evaluatesTo_translate (P : (W_smooth W).SmoothPoint)
     (xs ys : F) (hnsS : W.toAffine.Nonsingular xs ys)
     (h : (P.toAffinePoint +
@@ -334,20 +267,7 @@ theorem evaluatesTo_translate (P : (W_smooth W).SmoothPoint)
     exact (Curves.SmoothPlaneCurve.one_le_ord_P_iff_pointValuation_lt_one
       (P := P) hτ0).mp (h1.trans_eq hord.symm)
 
-/-! ### The cofinite pullback-evaluation witness
-
-The single irreducible per-isogeny input: at cofinitely many `P`, the stored point map lands at
-a finite point whose coordinates are the values of the pulled-back generators. -/
-
-/-- **The cofinite pullback-evaluation witness** for a `Basic.Isogeny β` with excluded set
-`bad`: at every smooth `P ∉ bad`, the stored point map sends `P` to a *finite* point `(x', y')`
-and `β^* x_gen`, `β^* y_gen` evaluate at `P` to `x'`, `y'`.
-
-This is "the stored `toAddMonoidHom` is the geometric realization of the stored `pullback` away
-from `bad`" — the coherence between the two independent fields of the abstract `Isogeny`
-interface, which is exactly what `hgcomm` cannot see abstractly.  For an isogeny with a
-`CoordHom` it holds with `bad = ∅` (`pullbackEvaluation_of_coordHom`); for an isogeny with
-affine kernel points, `bad` must contain the affine kernel (where `β^* x_gen` has poles). -/
+/-- A cofinite witness that an isogeny's point map and pullback agree on generators. -/
 def PullbackEvaluation (β : Isogeny W.toAffine W.toAffine)
     (bad : Set (W_smooth W).SmoothPoint) : Prop :=
   ∀ P : (W_smooth W).SmoothPoint, P ∉ bad →
@@ -368,13 +288,11 @@ private theorem toAffinePoint_injective :
   cases P; cases Q
   simp_all
 
-/-- All fibres of the stored point map over arbitrary points are finite, given the witness:
-the affine kernel is trapped inside `bad`, and a fibre is a kernel coset. -/
+/-- All fibres of the stored point map over arbitrary points are finite. -/
 theorem PullbackEvaluation.finite_fiber {β : Isogeny W.toAffine W.toAffine}
     {bad : Set (W_smooth W).SmoothPoint} (hw : PullbackEvaluation W β bad)
     (hbad : bad.Finite) (Q : W.toAffine.Point) :
     {P : (W_smooth W).SmoothPoint | β.toAddMonoidHom P.toAffinePoint = Q}.Finite := by
-  -- the point-level kernel is finite: `0` plus the affine kernel, which lies inside `bad`.
   have hker : {R : W.toAffine.Point | β.toAddMonoidHom R = 0}.Finite := by
     refine (Set.Finite.insert (0 : W.toAffine.Point)
       ((hbad.image (fun P : (W_smooth W).SmoothPoint ↦ P.toAffinePoint)))).subset ?_
@@ -385,10 +303,10 @@ theorem PullbackEvaluation.finite_fiber {β : Isogeny W.toAffine W.toAffine}
       obtain ⟨x', y', h', heq, -, -⟩ := hw ⟨x, y, hns⟩ hnotbad
       rw [Set.mem_setOf_eq] at hR
       have hcontra := WeierstrassCurve.Affine.Point.zero_def.symm.trans (hR.symm.trans heq)
-      simp at hcontra
-  -- a nonempty fibre injects into the kernel via subtraction of a base point.
+      cases hcontra
   rcases Set.eq_empty_or_nonempty
-    {P : (W_smooth W).SmoothPoint | β.toAddMonoidHom P.toAffinePoint = Q} with hemp | ⟨P₀, hP₀⟩
+    {P : (W_smooth W).SmoothPoint | β.toAddMonoidHom P.toAffinePoint = Q} with
+      hemp | ⟨P₀, hP₀⟩
   · rw [hemp]; exact Set.finite_empty
   · refine Set.Finite.of_finite_image (f := fun P : (W_smooth W).SmoothPoint ↦
       P.toAffinePoint - P₀.toAffinePoint) ?_ ?_
@@ -401,9 +319,7 @@ theorem PullbackEvaluation.finite_fiber {β : Isogeny W.toAffine W.toAffine}
     · intro P _ P' _ hPP'
       exact toAffinePoint_injective (sub_left_injective (G := W.toAffine.Point) hPP')
 
-/-- The pulled-back generator `β^* x_gen` is **not constant** (over an algebraically closed
-base): otherwise the stored point map would send cofinitely many points into the two-point
-locus `{x = c}`, contradicting fibre finiteness and the infinitude of `E(F̄)`. -/
+/-- The pulled-back generator `β^* x_gen` is not constant. -/
 theorem PullbackEvaluation.pullback_x_gen_ne_algebraMap [IsAlgClosed F]
     {β : Isogeny W.toAffine W.toAffine} {bad : Set (W_smooth W).SmoothPoint}
     (hw : PullbackEvaluation W β bad) (hbad : bad.Finite) (c : F) :
@@ -411,9 +327,7 @@ theorem PullbackEvaluation.pullback_x_gen_ne_algebraMap [IsAlgClosed F]
   intro hconst
   haveI hEll : (W_smooth W).toAffine.IsElliptic := ‹W.toAffine.IsElliptic›
   haveI : Infinite (W_smooth W).SmoothPoint := (W_smooth W).smoothPoint_infinite
-  -- a point with `x`-coordinate `c` exists over `F̄`.
   obtain ⟨Q₀, hQ₀x⟩ := (W_smooth W).exists_smoothPoint_of_x c
-  -- every good point maps into `{Q₀, −Q₀}`.
   have hgood : ∀ P : (W_smooth W).SmoothPoint, P ∉ bad →
       β.toAddMonoidHom P.toAffinePoint =
         (Affine.Point.some Q₀.x Q₀.y Q₀.nonsingular : W.toAffine.Point) ∨
@@ -450,12 +364,9 @@ theorem PullbackEvaluation.pullback_x_gen_ne_algebraMap [IsAlgClosed F]
       (hw.finite_fiber hbad _)).union
       (hw.finite_fiber hbad _)).subset hcover)
 
-/-! ### The engine -/
-
 variable (W)
 
-/-- The set of smooth points `P` for which the translate `P + Sk` is **not** an affine point is
-finite: such `P` are exactly the (single) preimage of `−Sk`. -/
+/-- The points whose translate by `Sk` is not affine form a finite set. -/
 private theorem notIsSome_add_finite (Sk : (W_smooth W).toAffine.Point) :
     {P : (W_smooth W).SmoothPoint | ¬(P.toAffinePoint + Sk).IsSome}.Finite := by
   refine (Set.Finite.preimage toAffinePoint_injective.injOn
@@ -467,8 +378,7 @@ private theorem notIsSome_add_finite (Sk : (W_smooth W).toAffine.Point) :
     exact hP
   exact this
 
-/-- The set of smooth points `P` whose translate `P + Sk` lands in the finite set `bad` is
-finite: it injects into `bad`'s image shifted by `−Sk`. -/
+/-- The points whose translate by `Sk` lands in a finite set form a finite set. -/
 private theorem translate_mem_finite {bad : Set (W_smooth W).SmoothPoint} (hbad : bad.Finite)
     (Sk : (W_smooth W).toAffine.Point) :
     {P : (W_smooth W).SmoothPoint |
@@ -483,14 +393,11 @@ private theorem translate_mem_finite {bad : Set (W_smooth W).SmoothPoint} (hbad 
   rw [Curves.SmoothPlaneCurve.SmoothPoint.translate_of_finite_toAffinePoint]
   exact add_sub_cancel_right _ _
 
-/-- **Per-point witness after translation.** At a good point `P` whose translate `P + Sk` is also
-good, the witness at the translate combines with additivity of the stored map to express
-`β P + β Sk` as a finite point `(xI, yI)`, and the *translated* pulled-back generators
-`τ_{Sk} (β^* x_gen)`, `τ_{Sk} (β^* y_gen)` evaluate at `P` to `xI`, `yI`. -/
+/-- The translated pullback generators evaluate to the coordinates of `β P + β Sk`. -/
 private theorem pullbackEvaluation_translate_key
     {β : Isogeny W.toAffine W.toAffine} {bad : Set (W_smooth W).SmoothPoint}
     (hw : PullbackEvaluation W β bad) (xs ys : F) (hnsS : W.toAffine.Nonsingular xs ys)
-    (P : (W_smooth W).SmoothPoint) (hP : P ∉ bad)
+    (P : (W_smooth W).SmoothPoint) (_hP : P ∉ bad)
     (h' : (P.toAffinePoint +
       (Affine.Point.some xs ys hnsS : (W_smooth W).toAffine.Point)).IsSome)
     (hP' : P.translate_of_finite (Affine.Point.some xs ys hnsS) h' ∉ bad) :
@@ -514,12 +421,7 @@ private theorem pullbackEvaluation_translate_key
     evaluatesTo_translate W P xs ys hnsS h' hxI,
     evaluatesTo_translate W P xs ys hnsS h' hyI⟩
 
-/-- **Per-point group-law coordinate evaluation** (genuine addition case).  At a good point `P`
-where the stored map sends `P` to the finite point `(xP, yP)` with `xP ≠ xT`, the `K(E)`-side
-addition coordinates `addX (β^* x_gen) x_T ℓ`, `addY (β^* x_gen) (β^* y_gen) x_T ℓ`
-(with `ℓ` the slope of `β^* x_gen` against `x_T`) evaluate at `P` to the `F`-side group-law
-coordinates of `(xP, yP) + (xT, yT)`, given the witness identification `hβsum` of `β P + β Sk`
-with `(xI, yI)`. -/
+/-- The `K(E)` group-law coordinates evaluate to the `F` group-law coordinates. -/
 private theorem pullbackEvaluation_addCoords_evaluatesTo
     {β : Isogeny W.toAffine W.toAffine} {Sk : (W_smooth W).toAffine.Point}
     (P : (W_smooth W).SmoothPoint)
@@ -540,7 +442,6 @@ private theorem pullbackEvaluation_addCoords_evaluatesTo
           ((By - algebraMap F KE yT) / (Bx - algebraMap F KE xT)))
         yI := by
   set ℓKE : KE := (By - algebraMap F KE yT) / (Bx - algebraMap F KE xT) with hℓKE
-  -- the F-level group law: `β P + T` in coordinates
   set ℓF : F := (yP - yT) / (xP - xT) with hℓF
   have hns3F := WeierstrassCurve.Affine.nonsingular_add hPns hT
     (fun hc ↦ hxPT hc.1)
@@ -552,10 +453,8 @@ private theorem pullbackEvaluation_addCoords_evaluatesTo
     exact (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mpr
       ⟨by rw [WeierstrassCurve.Affine.slope_of_X_ne hxPT],
        by rw [WeierstrassCurve.Affine.slope_of_X_ne hxPT]⟩
-  -- identify the witness coordinates with the group-law coordinates
   obtain ⟨hxx, hyy⟩ := (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mp
     (hβsum.symm.trans haddF)
-  -- evaluation of the slope and the addition formulas
   have hxden : xP - xT ≠ 0 := sub_ne_zero_of_ne hxPT
   have hslope : EvaluatesTo W P ℓKE ℓF :=
     (hyP.sub (evaluatesTo_algebraMap P yT)).div
@@ -579,11 +478,7 @@ private theorem pullbackEvaluation_addCoords_evaluatesTo
       (evaluatesTo_algebraMap P W.toAffine.a₃)
   exact ⟨hxx ▸ haddXev, hyy ▸ haddYev⟩
 
-/-- **The generic-point covariance `hgcomm` for a general isogeny** (Silverman III.8.2,
-generic-point form), from the cofinite pullback-evaluation witness, over an algebraically
-closed base.  This discharges the leaf `MapTranslateGenericPoint` for the **canonical** action
-`g = Affine.Point.map β.pullback`, for **every** `S` (not only kernel points), via the
-evaluation + separation argument described in the module docstring. -/
+/-- Generic-point covariance for the canonical action of an isogeny with a pullback witness. -/
 theorem mapTranslateGenericPoint_of_pullbackEvaluation [IsAlgClosed F]
     (β : Isogeny W.toAffine W.toAffine) {bad : Set (W_smooth W).SmoothPoint}
     (hbad : bad.Finite) (hw : PullbackEvaluation W β bad) :
@@ -609,10 +504,8 @@ theorem mapTranslateGenericPoint_of_pullbackEvaluation [IsAlgClosed F]
         ((translateAlgEquivOfPoint W S).toAlgHom By) hτns :=
     WeierstrassCurve.Affine.Point.map_some
       (f := (translateAlgEquivOfPoint W S).toAlgHom) hns1
-  -- The per-point evaluation facts, for affine `S`, packaged for the separation lemma.
-  -- We first dispose of `S = 0`, where the translation is the identity.
   rcases S with _ | ⟨xs, ys, hnsS⟩
-  · -- `S = 0`: `τ_0 = id` and `β 0 = 0`.
+  ·
     have hβ0 : β.toAddMonoidHom Affine.Point.zero = 0 :=
       (congrArg β.toAddMonoidHom WeierstrassCurve.Affine.Point.zero_def.symm).trans
         (map_zero β.toAddMonoidHom)
@@ -626,15 +519,13 @@ theorem mapTranslateGenericPoint_of_pullbackEvaluation [IsAlgClosed F]
         ((WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mpr ⟨rfl, rfl⟩))).trans
       (hzero_add.trans (congrArg
         (· + HasseWeil.liftPointToKE W (β.toAddMonoidHom Affine.Point.zero)) hgen1.symm))
-  · -- `S = (xs, ys)` affine.  Assemble the finite bad set for the separation argument.
+  ·
     set Sk : (W_smooth W).toAffine.Point := Affine.Point.some xs ys hnsS with hSk
-    -- the two finite exclusion sets tied to the translation
     have hB2fin : {P : (W_smooth W).SmoothPoint |
         ¬(P.toAffinePoint + Sk).IsSome}.Finite := notIsSome_add_finite W Sk
     have hB3fin : {P : (W_smooth W).SmoothPoint |
         ∃ h' : (P.toAffinePoint + Sk).IsSome,
           P.translate_of_finite Sk h' ∈ bad}.Finite := translate_mem_finite W hbad Sk
-    -- per-point evaluation data at a good point, shared by both `T`-branches
     have hkey : ∀ P : (W_smooth W).SmoothPoint, P ∉ bad →
         ∀ h' : (P.toAffinePoint + Sk).IsSome, P.translate_of_finite Sk h' ∉ bad →
         ∃ (xI yI : F) (hI : W.toAffine.Nonsingular xI yI),
@@ -643,9 +534,8 @@ theorem mapTranslateGenericPoint_of_pullbackEvaluation [IsAlgClosed F]
           EvaluatesTo W P (translateAlgEquivOfPoint W Sk Bx) xI ∧
           EvaluatesTo W P (translateAlgEquivOfPoint W Sk By) yI :=
       fun P hP h' hP' ↦ pullbackEvaluation_translate_key W hw xs ys hnsS P hP h' hP'
-    -- Case split on the image `T = β S`.
     rcases hTeq : β.toAddMonoidHom Sk with _ | ⟨xT, yT, hT⟩
-    · -- `T = 0`: the covariance degenerates to invariance of the two pulled-back generators.
+    ·
       have hbadS : (bad ∪ {P : (W_smooth W).SmoothPoint | ¬(P.toAffinePoint + Sk).IsSome} ∪
           {P : (W_smooth W).SmoothPoint | ∃ h' : (P.toAffinePoint + Sk).IsSome,
             P.translate_of_finite Sk h' ∈ bad}).Finite :=
@@ -667,7 +557,6 @@ theorem mapTranslateGenericPoint_of_pullbackEvaluation [IsAlgClosed F]
         push Not at hP3
         obtain ⟨xI, yI, hI, hβsum, hτx, hτy⟩ := hkey P hP1 hP2 (hP3 hP2)
         obtain ⟨xP, yP, hPns, heqP, hxP, hyP⟩ := hw P hP1
-        -- `β P + 0 = β P`, so the image coordinates agree.
         rw [hTeq, ← WeierstrassCurve.Affine.Point.zero_def, add_zero, heqP] at hβsum
         obtain ⟨hxx, hyy⟩ :=
           (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mp hβsum
@@ -686,7 +575,7 @@ theorem mapTranslateGenericPoint_of_pullbackEvaluation [IsAlgClosed F]
           ((WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mpr ⟨hX0, hY0⟩))).trans
         (hzero_add.trans (congrArg
           (· + HasseWeil.liftPointToKE W (β.toAddMonoidHom Sk)) hgen1.symm))
-    · -- `T = (x_T, y_T)` affine: the genuine group-law case.
+    ·
       have hne : Bx ≠ algebraMap F KE xT :=
         hw.pullback_x_gen_ne_algebraMap hbad xT
       have hTns' : (W_KE W).toAffine.Nonsingular (algebraMap F KE xT)
@@ -708,7 +597,6 @@ theorem mapTranslateGenericPoint_of_pullbackEvaluation [IsAlgClosed F]
         exact (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mpr
           ⟨by rw [WeierstrassCurve.Affine.slope_of_X_ne hne],
            by rw [WeierstrassCurve.Affine.slope_of_X_ne hne]⟩
-      -- bad set: also exclude the fibres over `T` and `−T`
       have hbadS : (bad ∪ {P : (W_smooth W).SmoothPoint |
             ¬(P.toAffinePoint + Sk).IsSome} ∪
           {P : (W_smooth W).SmoothPoint | ∃ h' : (P.toAffinePoint + Sk).IsSome,
@@ -739,7 +627,6 @@ theorem mapTranslateGenericPoint_of_pullbackEvaluation [IsAlgClosed F]
         push Not at hP3
         obtain ⟨xI, yI, hI, hβsum, hτx, hτy⟩ := hkey P hP1 hP2 (hP3 hP2)
         obtain ⟨xP, yP, hPns, heqP, hxP, hyP⟩ := hw P hP1
-        -- the image is not `±T`, so its `x`-coordinate differs from `x_T`
         have hxPT : xP ≠ xT := by
           intro hxx
           rcases WeierstrassCurve.Affine.Y_eq_of_X_eq hPns.1 hT.1 hxx with hyy | hyy
@@ -748,7 +635,6 @@ theorem mapTranslateGenericPoint_of_pullbackEvaluation [IsAlgClosed F]
           · refine hP5 (heqP.trans ?_)
             rw [HasseWeil.neg_some_eq_some W xT yT hT]
             exact (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mpr ⟨hxx, hyy⟩
-        -- the genuine group-law coordinate evaluation, isolated as a helper
         obtain ⟨haddXev, haddYev⟩ :=
           pullbackEvaluation_addCoords_evaluatesTo W P hPns hT heqP hTeq hβsum hxP hyP hxPT
         exact ⟨⟨xI, hτx, haddXev⟩, ⟨yI, hτy, haddYev⟩⟩
@@ -766,15 +652,9 @@ theorem mapTranslateGenericPoint_of_pullbackEvaluation [IsAlgClosed F]
 
 variable {W}
 
-/-! ### The CoordHom discharge -/
-
 variable (W)
 
-/-- **A `CoordHom` discharges the witness with no excluded points**: for an `EC.Isogeny φ`
-with coordinate-ring witness `cd`, whose pullback and point map agree with `β`'s, the
-pullback-evaluation witness holds with `bad = ∅`.  The generator evaluations are the residue
-coherence `evalAt_toPointMap` (`Curves/PointFunctor.lean`), and the image point is always
-affine (the coordinate-ring comorphism has no poles). -/
+/-- A `CoordHom` gives the pullback-evaluation witness with no bad set. -/
 theorem pullbackEvaluation_of_coordHom
     (φE : EC.Isogeny W.toAffine W.toAffine) (cd : φE.toCurveMap.CoordHom)
     (β : Isogeny W.toAffine W.toAffine)
@@ -782,9 +662,7 @@ theorem pullbackEvaluation_of_coordHom
     (h_hom : ∀ P : W.toAffine.Point, β.toAddMonoidHom P = φE.toPointMap cd P) :
     PullbackEvaluation W β ∅ := by
   intro P _
-  -- the image point under the coordinate-ring point functor
   set Q : (W_smooth W).SmoothPoint := Curves.CurveMap.toPointMap cd P with hQ
-  -- the value of the pulled-back coordinate functions at `P` is the coordinate of `Q`
   have hvalx : (W_smooth W).evalAt P
       (cd.toAlgHom (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X)) =
       Q.x := by
@@ -806,10 +684,10 @@ theorem pullbackEvaluation_of_coordHom
       WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine Polynomial.X from rfl]
     exact (W_smooth W).evalAt_y Q
   refine ⟨Q.x, Q.y, Q.nonsingular, ?_, ?_, ?_⟩
-  · -- the stored point map is the CoordHom point functor, which never escapes to `O`
+  ·
     rw [h_hom]
     rfl
-  · -- evaluation of `β^* x_gen` at `P`
+  ·
     have hxgen : β.pullback (x_gen W) =
         algebraMap W.toAffine.CoordinateRing KE
           (cd.toAlgHom (algebraMap (Polynomial F) W.toAffine.CoordinateRing
@@ -835,7 +713,7 @@ theorem pullbackEvaluation_of_coordHom
     rw [hrw]
     exact (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
       (C := W_smooth W) _ P).mpr hmem
-  · -- evaluation of `β^* y_gen` at `P`
+  ·
     have hygen : β.pullback (y_gen W) =
         algebraMap W.toAffine.CoordinateRing KE
           (cd.toAlgHom (AdjoinRoot.root W.toAffine.polynomial)) := by
@@ -861,9 +739,7 @@ theorem pullbackEvaluation_of_coordHom
     exact (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
       (C := W_smooth W) _ P).mpr hmem
 
-/-- **`hgcomm` for any isogeny with a `CoordHom`** over an algebraically closed base: the
-canonical-action generic-point covariance `MapTranslateGenericPoint`, with no per-`S` or
-per-point hypotheses. -/
+/-- Generic-point covariance for an isogeny with a `CoordHom`. -/
 theorem mapTranslateGenericPoint_of_coordHom [IsAlgClosed F]
     (φE : EC.Isogeny W.toAffine W.toAffine) (cd : φE.toCurveMap.CoordHom)
     (β : Isogeny W.toAffine W.toAffine)
@@ -874,12 +750,7 @@ theorem mapTranslateGenericPoint_of_coordHom [IsAlgClosed F]
   mapTranslateGenericPoint_of_pullbackEvaluation W β Set.finite_empty
     (pullbackEvaluation_of_coordHom W φE cd β h_pb h_hom)
 
-/-! ### Wiring into the dual-witness Galois data -/
-
-/-- **The `xy_family` covariance from the pullback-evaluation witness** (DUAL-2 wiring): the
-translation-covariance input of `fixedField_hfix_of_xy_family_of_card` /
-`dualGaloisData_of_basic_witnesses`, discharged for a general `β` from the cofinite
-pullback-evaluation witness over an algebraically closed base. -/
+/-- The `xy_family` covariance from the pullback-evaluation witness. -/
 theorem xy_family_of_pullbackEvaluation [IsAlgClosed F]
     (β : Isogeny W.toAffine W.toAffine) {bad : Set (W_smooth W).SmoothPoint}
     (hbad : bad.Finite) (hw : PullbackEvaluation W β bad) :
@@ -889,7 +760,7 @@ theorem xy_family_of_pullbackEvaluation [IsAlgClosed F]
   HasseWeil.xy_family_of_genericPointCommutes W β
     (mapTranslateGenericPoint_of_pullbackEvaluation W β hbad hw)
 
-/-- **The `xy_family` covariance from a `CoordHom`** (DUAL-2 wiring, CoordHom instance). -/
+/-- The `xy_family` covariance from a `CoordHom`. -/
 theorem xy_family_of_coordHom [IsAlgClosed F]
     (φE : EC.Isogeny W.toAffine W.toAffine) (cd : φE.toCurveMap.CoordHom)
     (β : Isogeny W.toAffine W.toAffine)
