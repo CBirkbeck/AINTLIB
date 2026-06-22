@@ -219,20 +219,31 @@ private lemma kappa_sq_dvd_four_delta (x₀ κ₀ : R)
     (dvd_mul_of_dvd_right hdvd_h_sq _)
 
 omit [IsDomain R] [IsPrincipalIdealRing R] [CharZero R] in
+/-- The univariate 3-division polynomial `W.Ψ₃`, evaluated at `x₀`, equals the
+explicit quartic `3x₀⁴ + b₂x₀³ + 3b₄x₀² + 3b₆x₀ + b₈`. This is definitional via the
+mathlib definition of `WeierstrassCurve.Ψ₃`; it bridges the named polynomial to the
+raw expression used internally. -/
+lemma eval_Ψ₃ (x₀ : R) :
+    (W.Ψ₃).eval x₀ =
+      3 * x₀ ^ 4 + W.b₂ * x₀ ^ 3 + 3 * W.b₄ * x₀ ^ 2 + 3 * W.b₆ * x₀ + W.b₈ := by
+  rw [WeierstrassCurve.Ψ₃]
+  simp only [eval_add, eval_mul, eval_pow, eval_C, eval_X, eval_ofNat]
+
+omit [IsDomain R] [IsPrincipalIdealRing R] [CharZero R] in
 /-- **Lutz–Nagell discriminant divisibility over PIDs.**
 
-For integral coordinates on the curve satisfying `κ₀² ∣ 4·Ψ₃(x₀)`,
-either κ₀ = 0 or κ₀² ∣ 4Δ. The hypothesis `κ₀² ∣ 4·Ψ₃(x₀)` follows from
-torsion via the coordinate formula for `2•P`. -/
+For integral coordinates on the curve satisfying `κ₀² ∣ 4·Ψ₃(x₀)`, where `Ψ₃` is
+mathlib's 3-division polynomial `WeierstrassCurve.Ψ₃`, either κ₀ = 0 or κ₀² ∣ 4Δ.
+The hypothesis `κ₀² ∣ 4·Ψ₃(x₀)` follows from torsion via the coordinate formula
+for `2•P`. -/
 theorem lutz_nagell_pid_discriminant
     {x₀ y₀ : R}
     (hcurve : y₀ ^ 2 + W.a₁ * x₀ * y₀ + W.a₃ * y₀ =
       x₀ ^ 3 + W.a₂ * x₀ ^ 2 + W.a₄ * x₀ + W.a₆)
-    (hdvd_Psi3 : (2 * y₀ + W.a₁ * x₀ + W.a₃) ^ 2 ∣
-      4 * (3 * x₀ ^ 4 + W.b₂ * x₀ ^ 3 +
-        3 * W.b₄ * x₀ ^ 2 + 3 * W.b₆ * x₀ + W.b₈)) :
+    (hdvd_Psi3 : (2 * y₀ + W.a₁ * x₀ + W.a₃) ^ 2 ∣ 4 * (W.Ψ₃).eval x₀) :
     (2 * y₀ + W.a₁ * x₀ + W.a₃) = 0 ∨
     (2 * y₀ + W.a₁ * x₀ + W.a₃) ^ 2 ∣ 4 * W.Δ := by
+  rw [eval_Ψ₃] at hdvd_Psi3
   by_cases hκ : 2 * y₀ + W.a₁ * x₀ + W.a₃ = 0
   · exact Or.inl hκ
   · exact Or.inr (kappa_sq_dvd_four_delta W x₀ _ (kappa_sq_eq_Psi2Sq W hcurve) hdvd_Psi3)

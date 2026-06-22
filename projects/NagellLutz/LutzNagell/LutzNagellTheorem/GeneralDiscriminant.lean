@@ -198,8 +198,9 @@ theorem lutz_nagell_discriminant_general
     -- and the ℚ/ℤ-specific Ψ₃ divisibility derived from torsion.
     have hcurve := curveZ_equation_of_integral W hpt hx hy
     have hkappa_sq := kappa_sq_eq_Psi2Sq_eval_general W hcurve
-    exact PID.lutz_nagell_pid_discriminant (R := ℤ) W hcurve
-      (kappa_sq_dvd_four_Psi3 W hpt htor hx hy rfl hkappa_sq hκ)
+    refine PID.lutz_nagell_pid_discriminant (R := ℤ) W hcurve ?_
+    rw [PID.eval_Ψ₃]
+    exact kappa_sq_dvd_four_Psi3 W hpt htor hx hy rfl hkappa_sq hκ
 
 /-- **Combined Lutz–Nagell theorem for general Weierstrass curves.**
 
