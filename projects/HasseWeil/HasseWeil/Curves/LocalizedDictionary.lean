@@ -650,52 +650,65 @@ theorem inv_notMem_fractionsAway (hPp : P.IsPrime)
   rw [hs]
   exact Ideal.mul_mem_right d' P huP
 
-/-- **The place identification** (the W-3b crux): for a maximal ideal `P` of `D` with
-trivial residue field, the point valuation at `pointAt P` is `< 1` on every element
-of `P`.  The local ring of `D` at `P` contains the (DVR) local ring of `C₁` at
-`pointAt P` — membership of `P ∩ F[C₁]` in `m_{pointAt P}` is residue-character
-vanishing — and is proper (`1/u ∉` for `0 ≠ u ∈ P`), so by DVR maximality the two
-local rings have the same valuation. -/
-theorem pointValuation_lt_one_of_mem_prime [IsAlgClosed F]
+/-- **Contraction step** of the place identification: a coordinate-ring element of `C₁`
+whose image in `D` lies in `P` lies in the maximal ideal `m_{pointAt P}`.  Indeed
+`m_{pointAt P}` is the kernel of the residue character, and the residue character factors
+the residue map of `P` through the residue field isomorphism, so vanishing in `D ⧸ P`
+gives vanishing of the residue. -/
+private theorem coordRingToClosure_mem_maximalIdealAt [IsAlgClosed F]
     (hbij : Function.Bijective (residueClosure C₂ Af P))
-    (hPp : P.IsPrime) (hP0 : P ≠ ⊥)
+    {r : C₁.CoordinateRing} (hr : coordRingToClosure C₂ Af hX hY r ∈ P) :
+    r ∈ C₁.maximalIdealAt (pointAt C₂ Af hX hY hbij) := by
+  rw [maximalIdealAt_pointAt C₂ Af hX hY hbij, RingHom.mem_ker]
+  change (RingEquiv.ofBijective (residueClosure C₂ Af P) hbij).symm
+    (Ideal.Quotient.mk P (coordRingToClosure C₂ Af hX hY r)) = 0
+  rw [Ideal.Quotient.eq_zero_iff_mem.mpr hr, map_zero]
+
+/-- **Valuation-ring containment** for the place identification: the valuation ring of
+`pointAt P` (the elements of value `≤ 1`) is contained in the fraction subring
+`fractionsAway P` (fractions `d/s` with `d, s ∈ D`, `s ∉ P`).  An element of value `≤ 1`
+is the image of a localized fraction `r/s` with `s ∉ m_{pointAt P}`; pushing `r, s` into
+`D`, the contraction step keeps the denominator out of `P`. -/
+private theorem mem_fractionsAway_of_pointValuation_le_one [IsAlgClosed F]
+    (hbij : Function.Bijective (residueClosure C₂ Af P)) (hPp : P.IsPrime)
+    {x : C₁.FunctionField}
+    (hx : C₁.pointValuation (pointAt C₂ Af hX hY hbij) x ≤ 1) :
+    x ∈ fractionsAway Af P hPp := by
+  obtain ⟨w, hw⟩ :=
+    SmoothPlaneCurve.mem_localRingAt_image_of_pointValuation_le_one x hx
+  obtain ⟨⟨r, s⟩, hmk⟩ :=
+    IsLocalization.surj (C₁.maximalIdealAt (pointAt C₂ Af hX hY hbij)).primeCompl w
+  have hxs : x * algebraMap C₁.CoordinateRing C₁.FunctionField (s : C₁.CoordinateRing) =
+      algebraMap C₁.CoordinateRing C₁.FunctionField r := by
+    have hmap := congrArg
+      (algebraMap (C₁.localRingAt (pointAt C₂ Af hX hY hbij)) C₁.FunctionField) hmk
+    rw [map_mul, hw, ← IsScalarTower.algebraMap_apply C₁.CoordinateRing
+        (C₁.localRingAt (pointAt C₂ Af hX hY hbij)) C₁.FunctionField,
+      ← IsScalarTower.algebraMap_apply C₁.CoordinateRing
+        (C₁.localRingAt (pointAt C₂ Af hX hY hbij)) C₁.FunctionField] at hmap
+    exact hmap
+  refine ⟨coordRingToClosure C₂ Af hX hY r, coordRingToClosure C₂ Af hX hY
+    (s : C₁.CoordinateRing), fun hsP ↦ s.2 (coordRingToClosure_mem_maximalIdealAt
+      C₂ Af hX hY hbij hsP), hxs⟩
+
+/-- **Strictness step** of the place identification: once the valuation ring of `pointAt P`
+is contained in `fractionsAway P` (`hO`), every element of `P` has point valuation `< 1`.
+The containment plus properness of `fractionsAway P` (`1/u ∉` for `0 ≠ u ∈ P`) forces
+`≤ 1` on all of `fractionsAway P` by DVR maximality; an element of `P` lying there has
+`≤ 1`, and value `1` would put its inverse in `fractionsAway P`, contradicting membership
+in `P`. -/
+private theorem pointValuation_lt_one_of_subset_fractionsAway [IsAlgClosed F]
+    (hbij : Function.Bijective (residueClosure C₂ Af P)) (hPp : P.IsPrime) (hP0 : P ≠ ⊥)
+    (hO : ∀ x : C₁.FunctionField,
+      C₁.pointValuation (pointAt C₂ Af hX hY hbij) x ≤ 1 → x ∈ fractionsAway Af P hPp)
     {d : integralClosure Af C₁.FunctionField} (hd : d ∈ P) :
     C₁.pointValuation (pointAt C₂ Af hX hY hbij) (d : C₁.FunctionField) < 1 := by
-  classical
-  -- (i) contraction: coordinate-ring elements landing in `P` lie in `m_{pointAt P}`
-  have hcontr : ∀ r : C₁.CoordinateRing, coordRingToClosure C₂ Af hX hY r ∈ P →
-      r ∈ C₁.maximalIdealAt (pointAt C₂ Af hX hY hbij) := by
-    intro r hr
-    rw [maximalIdealAt_pointAt C₂ Af hX hY hbij, RingHom.mem_ker]
-    change (RingEquiv.ofBijective (residueClosure C₂ Af P) hbij).symm
-      (Ideal.Quotient.mk P (coordRingToClosure C₂ Af hX hY r)) = 0
-    rw [Ideal.Quotient.eq_zero_iff_mem.mpr hr, map_zero]
-  -- (ii) the valuation ring of the point sits inside the fraction subring `R`
-  have hO : ∀ x : C₁.FunctionField,
-      C₁.pointValuation (pointAt C₂ Af hX hY hbij) x ≤ 1 →
-      x ∈ fractionsAway Af P hPp := by
-    intro x hx
-    obtain ⟨w, hw⟩ :=
-      SmoothPlaneCurve.mem_localRingAt_image_of_pointValuation_le_one x hx
-    obtain ⟨⟨r, s⟩, hmk⟩ :=
-      IsLocalization.surj (C₁.maximalIdealAt (pointAt C₂ Af hX hY hbij)).primeCompl w
-    have hxs : x * algebraMap C₁.CoordinateRing C₁.FunctionField (s : C₁.CoordinateRing) =
-        algebraMap C₁.CoordinateRing C₁.FunctionField r := by
-      have hmap := congrArg
-        (algebraMap (C₁.localRingAt (pointAt C₂ Af hX hY hbij)) C₁.FunctionField) hmk
-      rw [map_mul, hw, ← IsScalarTower.algebraMap_apply C₁.CoordinateRing
-          (C₁.localRingAt (pointAt C₂ Af hX hY hbij)) C₁.FunctionField,
-        ← IsScalarTower.algebraMap_apply C₁.CoordinateRing
-          (C₁.localRingAt (pointAt C₂ Af hX hY hbij)) C₁.FunctionField] at hmap
-      exact hmap
-    refine ⟨coordRingToClosure C₂ Af hX hY r, coordRingToClosure C₂ Af hX hY
-      (s : C₁.CoordinateRing), fun hsP ↦ s.2 (hcontr _ hsP), hxs⟩
-  -- (iii) `R` is a proper subring: `1/u ∉ R` for `0 ≠ u ∈ P`
+  -- `fractionsAway P` is a proper subring: `1/u ∉` for `0 ≠ u ∈ P`
   have hRne : fractionsAway Af P hPp ≠ ⊤ := by
     intro htop
     obtain ⟨u, huP, hu0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot hP0
     exact inv_notMem_fractionsAway Af hPp huP hu0 (htop ▸ Subring.mem_top _)
-  -- (iv) `≤ 1` on all of `R` by the intermediate-ring lemma
+  -- `≤ 1` on all of `fractionsAway P` by the intermediate-ring lemma
   have hle : ∀ z ∈ fractionsAway Af P hPp,
       C₁.pointValuation (pointAt C₂ Af hX hY hbij) z ≤ 1 :=
     le_one_of_forall_le_one_mem_of_ne_top _ hO hRne
@@ -703,7 +716,7 @@ theorem pointValuation_lt_one_of_mem_prime [IsAlgClosed F]
     ⟨d, 1, (Ideal.ne_top_iff_one P).mp hPp.ne_top, by simp⟩
   rcases lt_or_eq_of_le (hle _ hdmem) with h | h
   · exact h
-  -- (v) strictness: `v(d) = 1` would put `d⁻¹` in `R`, contradicting `d ∈ P`
+  -- strictness: `v(d) = 1` would put `d⁻¹` in `fractionsAway P`, contradicting `d ∈ P`
   · exfalso
     have hd0 : (d : C₁.FunctionField) ≠ 0 := by
       intro h0
@@ -714,6 +727,20 @@ theorem pointValuation_lt_one_of_mem_prime [IsAlgClosed F]
       rw [map_inv₀, h, inv_one]
     have hd0' : d ≠ 0 := fun h0 ↦ hd0 (by rw [h0]; rfl)
     exact inv_notMem_fractionsAway Af hPp hd hd0' (hO _ hinv)
+
+/-- **The place identification** (the W-3b crux): for a maximal ideal `P` of `D` with
+trivial residue field, the point valuation at `pointAt P` is `< 1` on every element
+of `P`.  The local ring of `D` at `P` contains the (DVR) local ring of `C₁` at
+`pointAt P` — membership of `P ∩ F[C₁]` in `m_{pointAt P}` is residue-character
+vanishing — and is proper (`1/u ∉` for `0 ≠ u ∈ P`), so by DVR maximality the two
+local rings have the same valuation. -/
+theorem pointValuation_lt_one_of_mem_prime [IsAlgClosed F]
+    (hbij : Function.Bijective (residueClosure C₂ Af P))
+    (hPp : P.IsPrime) (hP0 : P ≠ ⊥)
+    {d : integralClosure Af C₁.FunctionField} (hd : d ∈ P) :
+    C₁.pointValuation (pointAt C₂ Af hX hY hbij) (d : C₁.FunctionField) < 1 :=
+  pointValuation_lt_one_of_subset_fractionsAway C₂ Af hX hY hbij hPp hP0
+    (fun _ hx ↦ mem_fractionsAway_of_pointValuation_le_one C₂ Af hX hY hbij hPp hx) hd
 
 /-- **Evaluation form of the place identification**: every `d ∈ D` evaluates at
 `pointAt P` to its residue value: `v_{pointAt P}(d − residueValue d) < 1`. -/
