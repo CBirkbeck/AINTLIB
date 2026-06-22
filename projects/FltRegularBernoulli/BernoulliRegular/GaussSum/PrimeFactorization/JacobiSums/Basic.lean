@@ -41,9 +41,8 @@ local instance : NeZero (p - 1) := ⟨Nat.sub_ne_zero_of_lt hp.out.one_lt⟩
     apply (stickelbergerEmbedding p L).injective
     simp [stickelbergerEmbedding_gaussSumLift, gaussSum_one_stdAddChar]
   rw [hτ]
-  have htop : Ideal.span ({(-1 : 𝓞 L)} : Set (𝓞 L)) = ⊤ := by
-    rw [Ideal.span_singleton_eq_top]
-    exact isUnit_one.neg
+  have htop : Ideal.span ({(-1 : 𝓞 L)} : Set (𝓞 L)) = ⊤ :=
+    Ideal.span_singleton_eq_top.mpr isUnit_one.neg
   rw [htop, ← Ideal.one_eq_top, UniqueFactorizationMonoid.normalizedFactors_one]
   simp
 
@@ -104,9 +103,7 @@ lemma stickelbergerEmbedding_jacobiSumLift
     · subst hx1
       simpa [term, hx0] using
         (MulChar.map_nonunit ψ (show ¬ IsUnit (0 : ZMod p) by simp)).symm
-    · unfold term
-      simp [hx0, hx1]
-      simp [f, stickelbergerEmbedding_gaussSumLiftCharacterValue]
+    · simp [term, hx0, hx1, f, stickelbergerEmbedding_gaussSumLiftCharacterValue]
 
 lemma gaussSumLiftCharacterValue_mem_characterSubfield
     (χ : DirichletCharacter ℂ p) (a : (ZMod p)ˣ) :
@@ -269,13 +266,11 @@ lemma distinguishedPrimeAboveP_ramificationIdx_over_characterSubfield :
       (p := 𝔭) (P := Pchar)
       (G := Gal(characterSubfield (L := L) (p := p) / ℚ))
       (GAC := Gal(L / ℚ)) (GBC := ↥GBC)
-    rw [hramChar, one_mul, hramTotal] at h
-    exact h
+    rwa [hramChar, one_mul, hramTotal] at h
   haveI : (distinguishedPrimeAboveP p L).LiesOver Pchar := by
     rw [Ideal.liesOver_iff]
-  have hPchar_ne : Pchar ≠ ⊥ := by
-    have := (show Pchar.IsMaximal from inferInstance)
-    exact Ring.ne_bot_of_isMaximal_of_not_isField this
+  have hPchar_ne : Pchar ≠ ⊥ :=
+    Ring.ne_bot_of_isMaximal_of_not_isField inferInstance
       (NumberField.RingOfIntegers.not_isField (characterSubfield (L := L) (p := p)))
   rw [Ideal.ramificationIdx_eq_ramificationIdx' Pchar _ hPchar_ne]
   exact (Ideal.ramificationIdxIn_eq_ramificationIdx
