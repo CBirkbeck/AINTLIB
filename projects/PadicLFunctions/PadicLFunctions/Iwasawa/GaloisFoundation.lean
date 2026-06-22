@@ -784,8 +784,15 @@ theorem finiteDimensional_sigmaL (n : ℕ) (σ : Om →ₐ[ℚ] Om) {L : Interme
     (IntermediateField.intermediateFieldMap (omAut σ) (L.restrictScalars ℚ)).toLinearEquiv.finiteDimensional
   exact Module.Finite.of_restrictScalars_finite ℚ ↥(FPlus p n) ↥(IntermediateField.extendScalars hFle)
 
-/-- **[b] Galois transport**: `σ(L)/F⁺ₙ` is Galois. (Part of TG1-N-transport — `σ`-conjugation iso
-`Gal(σL/F⁺ₙ) ≅ Gal(L/F⁺ₙ)`; normality via `normal_iff_forall_map_le` + the conjugation argument.) -/
+/-- A `ℚ`-algebra endomorphism of `Ω` that fixes `F⁺ₙ` pointwise is `F⁺ₙ`-linear — upgrade the scalar
+ring (the underlying ring hom is unchanged; only the `commutes'` field is new). -/
+def algHomFixingFPlus (n : ℕ) (f : Om →ₐ[ℚ] Om)
+    (hf : ∀ c : ↥(FPlus p n), f (c : Om) = (c : Om)) : Om →ₐ[↥(FPlus p n)] Om :=
+  { f with commutes' := fun c => hf c }
+
+/-- **[b] Galois transport**: `σ(L)/F⁺ₙ` is Galois. Normality via `normal_iff_forall_map_le`: for an
+`F⁺ₙ`-auto `τ` of `Ω`, `σ⁻¹ τ σ` fixes `F⁺ₙ` (`σ(F⁺ₙ)=F⁺ₙ`), so by `Normal F⁺ₙ L` it maps `L` into `L`,
+whence `τ` maps `σ(L)` into `σ(L)`. Separability is automatic in char `0`. -/
 theorem isGalois_sigmaL (n : ℕ) (σ : Om →ₐ[ℚ] Om) {L : IntermediateField (FPlus p n) Om}
     (hL : IsAdmissibleM p n L)
     (hFle : FPlus p n ≤ IntermediateField.map σ (L.restrictScalars ℚ)) :
