@@ -45,9 +45,7 @@ theorem completedPrincipalUnitFirstGradedHom_zeta_ne_one :
       (completedLocalCyclotomicZetaPrincipalUnit p K) ≠ 1 := by
   intro h
   have hker : completedLocalCyclotomicZetaPrincipalUnit p K ∈
-      (completedPrincipalUnitFirstGradedHom p K).ker := by
-    rw [MonoidHom.mem_ker]
-    exact h
+      (completedPrincipalUnitFirstGradedHom p K).ker := MonoidHom.mem_ker.mpr h
   have hzeta_mem_two :
       completedLocalCyclotomicZetaUnit p K ∈ completedPrincipalUnitSubgroup p K 2 :=
     (mem_completedPrincipalUnitFirstGradedHom_ker (p := p) (K := K)).mp hker
@@ -110,8 +108,7 @@ theorem completedPrincipalUnitSubgroup_one_le_endpointSubgroup_of_zeta_zpowers_e
     exact Subgroup.mem_top _
   rcases Subgroup.mem_zpowers_iff.mp hmem with ⟨k, hk⟩
   have hker : (z ^ k)⁻¹ * (⟨u, hu⟩ : U1) ∈ f.ker := by
-    rw [MonoidHom.mem_ker]
-    rw [map_mul, map_inv, map_zpow, hk, inv_mul_cancel]
+    rw [MonoidHom.mem_ker, map_mul, map_inv, map_zpow, hk, inv_mul_cancel]
   have hU2 : ((((z ^ k)⁻¹ * (⟨u, hu⟩ : U1)) : U1) :
       completedLocalCyclotomicUnitGroup p K) ∈ completedPrincipalUnitSubgroup p K 2 :=
     (mem_completedPrincipalUnitFirstGradedHom_ker (p := p) (K := K)).mp hker
@@ -406,7 +403,7 @@ private theorem mem_ideal_smul_top_iff_self {R : Type*} [CommRing R]
     x ∈ I • (⊤ : Submodule R R) ↔ x ∈ I := by
   constructor
   · intro hx
-    refine Submodule.smul_induction_on hx (fun r hr y _ => ?_) ?_
+    refine Submodule.smul_induction_on hx (fun r hr y _ ↦ ?_) ?_
     · simpa [smul_eq_mul] using I.mul_mem_right y hr
     · intro x y hx hy
       exact I.add_mem hx hy
@@ -642,7 +639,7 @@ theorem exists_completed_pth_root_mem_two_of_mem_principalUnit_p_add_one
     ∃ v, v ∈ completedPrincipalUnitSubgroup p K 2 ∧ v ^ p = u := by
   let S := completedLocalCyclotomicRing p K
   let M := completedLocalCyclotomicMaximalIdeal p K
-  let f : ℕ → S := fun n =>
+  let f : ℕ → S := fun n ↦
     ((completedPthRootApproxSeq (p := p) (K := K) hu n).val : S)
   have hf : ∀ {m n : ℕ}, m ≤ n →
       f m ≡ f n [SMOD M ^ m • (⊤ : Submodule S S)] := by
