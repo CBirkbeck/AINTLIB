@@ -46,7 +46,7 @@ def oddCharacterInvSetoid : Setoid (DirichletCharacter ℂ p) where
 noncomputable def oddCharacterInvClass (χ : DirichletCharacter ℂ p) :
     Finset (DirichletCharacter ℂ p) := by
   classical
-  exact Finset.filter (fun ψ =>
+  exact Finset.filter (fun ψ ↦
     Quotient.mk (oddCharacterInvSetoid (p := p)) ψ =
       Quotient.mk (oddCharacterInvSetoid (p := p)) χ) (oddCharacters (p := p))
 
@@ -69,7 +69,7 @@ theorem oddCharacterInvClass_eq_pair
   constructor
   · intro hψ
     have hψ' :
-        ψ ∈ Finset.filter (fun ψ =>
+        ψ ∈ Finset.filter (fun ψ ↦
           Quotient.mk (oddCharacterInvSetoid (p := p)) ψ =
             Quotient.mk (oddCharacterInvSetoid (p := p)) χ) (oddCharacters (p := p)) := by
       simpa [oddCharacterInvClass] using hψ
@@ -87,7 +87,7 @@ theorem oddCharacterInvClass_eq_pair
       subst ψ
       have hχinv : χ⁻¹ ∈ oddCharacters (p := p) := inv_mem_oddCharacters (p := p) hχ
       have :
-          χ⁻¹ ∈ Finset.filter (fun ψ =>
+          χ⁻¹ ∈ Finset.filter (fun ψ ↦
             Quotient.mk (oddCharacterInvSetoid (p := p)) ψ =
               Quotient.mk (oddCharacterInvSetoid (p := p)) χ) (oddCharacters (p := p)) := by
         refine Finset.mem_filter.mpr ⟨hχinv, ?_⟩
@@ -118,23 +118,23 @@ pair product `(-(p : ℂ))` repeated once for each inversion class. -/
 theorem rawGaussProduct_of_mod_four_eq_one
     (hp_odd' : p ≠ 2) (hp₄ : p % 4 = 1) :
     Finset.prod (oddCharacters (p := p))
-        (fun χ => gaussSum χ (ZMod.stdAddChar (N := p))) =
+        (fun χ ↦ gaussSum χ (ZMod.stdAddChar (N := p))) =
       (-(p : ℂ)) ^ ((p - 1) / 4) := by
   classical
   let R := oddCharacterInvSetoid (p := p)
   let q : Finset (Quotient R) := (oddCharacters (p := p)).image (Quotient.mk R)
   have hpartition :
-      Finset.prod (oddCharacters (p := p)) (fun χ => gaussSum χ (ZMod.stdAddChar (N := p))) =
+      Finset.prod (oddCharacters (p := p)) (fun χ ↦ gaussSum χ (ZMod.stdAddChar (N := p))) =
         ∏ xbar ∈ q, ∏ ψ ∈ oddCharacters (p := p) with Quotient.mk R ψ = xbar,
           gaussSum ψ (ZMod.stdAddChar (N := p)) := by
     simpa [q, R] using
       (Finset.prod_partition (s := oddCharacters (p := p)) (R := R)
-        (f := fun χ => gaussSum χ (ZMod.stdAddChar (N := p))))
+        (f := fun χ ↦ gaussSum χ (ZMod.stdAddChar (N := p))))
   have hqcard :
       q.card = (p - 1) / 4 := by
     have hcard :
         (oddCharacters (p := p)).card =
-          ∑ xbar ∈ q, (Finset.filter (fun ψ => Quotient.mk R ψ = xbar)
+          ∑ xbar ∈ q, (Finset.filter (fun ψ ↦ Quotient.mk R ψ = xbar)
             (oddCharacters (p := p))).card := by
       simpa [q, R] using
         (Finset.card_eq_sum_card_image (f := Quotient.mk R) (s := oddCharacters (p := p)))
@@ -142,7 +142,7 @@ theorem rawGaussProduct_of_mod_four_eq_one
         (oddCharacters (p := p)).card = q.card * 2 := by
       calc
         (oddCharacters (p := p)).card =
-            ∑ xbar ∈ q, (Finset.filter (fun ψ => Quotient.mk R ψ = xbar)
+            ∑ xbar ∈ q, (Finset.filter (fun ψ ↦ Quotient.mk R ψ = xbar)
               (oddCharacters (p := p))).card := hcard
         _ = ∑ xbar ∈ q, (2 : ℕ) := by
               refine Finset.sum_congr rfl ?_
@@ -151,7 +151,7 @@ theorem rawGaussProduct_of_mod_four_eq_one
               simpa [R, oddCharacterInvClass] using
                 (oddCharacterInvClass_card (p := p) hp_odd' hp₄ hχ)
         _ = q.card * 2 :=
-              Finset.sum_const_nat (s := q) (m := 2) (f := fun _ => 2)
+              Finset.sum_const_nat (s := q) (m := 2) (f := fun _ ↦ 2)
                 (by intro _ _; rfl)
     rw [card_oddCharacters (p := p) hp_odd'] at hcard'
     omega
@@ -166,7 +166,7 @@ theorem rawGaussProduct_of_mod_four_eq_one
         have hχ_odd : χ.Odd := (Finset.mem_filter.mp hχ).2
         have hχ_ne : χ ≠ χ⁻¹ :=
           odd_character_ne_inv_of_mod_four_eq_one (p := p) hp_odd' hp₄ hχ_odd
-        rw [show Finset.filter (fun ψ => Quotient.mk R ψ = Quotient.mk R χ)
+        rw [show Finset.filter (fun ψ ↦ Quotient.mk R ψ = Quotient.mk R χ)
             (oddCharacters (p := p)) = oddCharacterInvClass (p := p) χ by
               rfl]
         rw [oddCharacterInvClass_eq_pair (p := p) hχ]
@@ -219,7 +219,7 @@ theorem inv_mem_oddCharactersWithoutQuadratic {χ : DirichletCharacter ℂ p}
 noncomputable def oddCharacterInvClassWithoutQuadratic
     (χ : DirichletCharacter ℂ p) : Finset (DirichletCharacter ℂ p) := by
   classical
-  exact Finset.filter (fun ψ =>
+  exact Finset.filter (fun ψ ↦
     Quotient.mk (oddCharacterInvSetoid (p := p)) ψ =
       Quotient.mk (oddCharacterInvSetoid (p := p)) χ) (oddCharactersWithoutQuadratic (p := p))
 
@@ -232,7 +232,7 @@ theorem oddCharacterInvClassWithoutQuadratic_eq_pair
   constructor
   · intro hψ
     have hψ' :
-        ψ ∈ Finset.filter (fun ψ =>
+        ψ ∈ Finset.filter (fun ψ ↦
           Quotient.mk (oddCharacterInvSetoid (p := p)) ψ =
             Quotient.mk (oddCharacterInvSetoid (p := p)) χ)
           (oddCharactersWithoutQuadratic (p := p)) := by
@@ -252,7 +252,7 @@ theorem oddCharacterInvClassWithoutQuadratic_eq_pair
       have hχinv : χ⁻¹ ∈ oddCharactersWithoutQuadratic (p := p) :=
         inv_mem_oddCharactersWithoutQuadratic (p := p) hχ
       have :
-          χ⁻¹ ∈ Finset.filter (fun ψ =>
+          χ⁻¹ ∈ Finset.filter (fun ψ ↦
             Quotient.mk (oddCharacterInvSetoid (p := p)) ψ =
               Quotient.mk (oddCharacterInvSetoid (p := p)) χ)
             (oddCharactersWithoutQuadratic (p := p)) := by
@@ -281,7 +281,7 @@ theorem oddCharacterInvClassWithoutQuadratic_card
 theorem rawGaussProduct_withoutQuadratic_of_mod_four_eq_three
     (hp_odd' : p ≠ 2) (hp₄ : p % 4 = 3) :
     Finset.prod (oddCharactersWithoutQuadratic (p := p))
-        (fun χ => gaussSum χ (ZMod.stdAddChar (N := p))) =
+        (fun χ ↦ gaussSum χ (ZMod.stdAddChar (N := p))) =
       (-(p : ℂ)) ^ ((p - 3) / 4) := by
   classical
   let R := oddCharacterInvSetoid (p := p)
@@ -289,18 +289,18 @@ theorem rawGaussProduct_withoutQuadratic_of_mod_four_eq_three
     (oddCharactersWithoutQuadratic (p := p)).image (Quotient.mk R)
   have hpartition :
       Finset.prod (oddCharactersWithoutQuadratic (p := p))
-          (fun χ => gaussSum χ (ZMod.stdAddChar (N := p))) =
+          (fun χ ↦ gaussSum χ (ZMod.stdAddChar (N := p))) =
         ∏ xbar ∈ q,
           ∏ ψ ∈ oddCharactersWithoutQuadratic (p := p) with Quotient.mk R ψ = xbar,
             gaussSum ψ (ZMod.stdAddChar (N := p)) := by
     simpa [q, R] using
       (Finset.prod_partition (s := oddCharactersWithoutQuadratic (p := p)) (R := R)
-        (f := fun χ => gaussSum χ (ZMod.stdAddChar (N := p))))
+        (f := fun χ ↦ gaussSum χ (ZMod.stdAddChar (N := p))))
   have hqcard :
       q.card = (p - 3) / 4 := by
     have hcard :
         (oddCharactersWithoutQuadratic (p := p)).card =
-          ∑ xbar ∈ q, (Finset.filter (fun ψ => Quotient.mk R ψ = xbar)
+          ∑ xbar ∈ q, (Finset.filter (fun ψ ↦ Quotient.mk R ψ = xbar)
             (oddCharactersWithoutQuadratic (p := p))).card := by
       simpa [q, R] using
         (Finset.card_eq_sum_card_image
@@ -309,7 +309,7 @@ theorem rawGaussProduct_withoutQuadratic_of_mod_four_eq_three
         (oddCharactersWithoutQuadratic (p := p)).card = q.card * 2 := by
       calc
         (oddCharactersWithoutQuadratic (p := p)).card =
-            ∑ xbar ∈ q, (Finset.filter (fun ψ => Quotient.mk R ψ = xbar)
+            ∑ xbar ∈ q, (Finset.filter (fun ψ ↦ Quotient.mk R ψ = xbar)
               (oddCharactersWithoutQuadratic (p := p))).card := hcard
         _ = ∑ xbar ∈ q, (2 : ℕ) := by
               refine Finset.sum_congr rfl ?_
@@ -318,7 +318,7 @@ theorem rawGaussProduct_withoutQuadratic_of_mod_four_eq_three
               simpa [R, oddCharacterInvClassWithoutQuadratic] using
                 (oddCharacterInvClassWithoutQuadratic_card (p := p) hp_odd' hχ)
         _ = q.card * 2 :=
-              Finset.sum_const_nat (s := q) (m := 2) (f := fun _ => 2)
+              Finset.sum_const_nat (s := q) (m := 2) (f := fun _ ↦ 2)
                 (by intro _ _; rfl)
     rw [card_oddCharactersWithoutQuadratic_of_mod_four_eq_three (p := p) hp_odd' hp₄] at hcard'
     omega
@@ -340,7 +340,7 @@ theorem rawGaussProduct_withoutQuadratic_of_mod_four_eq_three
             odd_selfInverse_character_eq_quadratic (p := p) hp_odd'
               (Finset.mem_filter.mp hχ_mem).2 hχself
           exact hχ_ne_quad hquad
-        rw [show Finset.filter (fun ψ => Quotient.mk R ψ = Quotient.mk R χ)
+        rw [show Finset.filter (fun ψ ↦ Quotient.mk R ψ = Quotient.mk R χ)
             (oddCharactersWithoutQuadratic (p := p)) =
               oddCharacterInvClassWithoutQuadratic (p := p) χ by rfl]
         rw [oddCharacterInvClassWithoutQuadratic_eq_pair (p := p) hχ]
@@ -359,7 +359,7 @@ and pair the remaining odd characters by inversion. -/
 theorem rawGaussProduct_of_mod_four_eq_three
     (hp_odd' : p ≠ 2) (hp₄ : p % 4 = 3) :
     Finset.prod (oddCharacters (p := p))
-        (fun χ => gaussSum χ (ZMod.stdAddChar (N := p))) =
+        (fun χ ↦ gaussSum χ (ZMod.stdAddChar (N := p))) =
       (Complex.I * (Real.sqrt p : ℂ)) * (-(p : ℂ)) ^ ((p - 3) / 4) := by
   classical
   have hquad_mem :
@@ -367,14 +367,14 @@ theorem rawGaussProduct_of_mod_four_eq_three
     quadraticCharComplex_mem_oddCharacters_of_mod_four_eq_three (p := p) hp_odd' hp₄
   calc
     Finset.prod (oddCharacters (p := p))
-        (fun χ => gaussSum χ (ZMod.stdAddChar (N := p))) =
+        (fun χ ↦ gaussSum χ (ZMod.stdAddChar (N := p))) =
       gaussSum (quadraticCharComplex p) (ZMod.stdAddChar (N := p)) *
         Finset.prod (oddCharactersWithoutQuadratic (p := p))
-          (fun χ => gaussSum χ (ZMod.stdAddChar (N := p))) := by
+          (fun χ ↦ gaussSum χ (ZMod.stdAddChar (N := p))) := by
             symm
             simpa [oddCharactersWithoutQuadratic] using
               (Finset.mul_prod_erase (s := oddCharacters (p := p))
-                (f := fun χ => gaussSum χ (ZMod.stdAddChar (N := p))) hquad_mem)
+                (f := fun χ ↦ gaussSum χ (ZMod.stdAddChar (N := p))) hquad_mem)
     _ =
       gaussSum (quadraticCharComplex p) (ZMod.stdAddChar (N := p)) *
         (-(p : ℂ)) ^ ((p - 3) / 4) := by
