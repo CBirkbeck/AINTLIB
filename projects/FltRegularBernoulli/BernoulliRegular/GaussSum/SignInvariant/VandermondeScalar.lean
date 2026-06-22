@@ -24,6 +24,12 @@ section SignInvariant
 
 variable (p : ℕ) [hp : Fact p.Prime]
 
+/-- For an odd prime `p`, decompose `p` as `2 * ((p - 1) / 2) + 1`. -/
+private theorem eq_two_mul_pred_div_two_add_one (hp2 : p ≠ 2) :
+    p = 2 * ((p - 1) / 2) + 1 := by
+  rw [Nat.two_mul_div_two_of_even (hp.out.even_sub_one hp2),
+    Nat.sub_add_cancel hp.out.one_le]
+
 theorem fourierBaseRoot_eq_exp_neg_one_div :
     fourierBaseRoot (p := p) = Complex.exp (2 * Real.pi * Complex.I * ((-1 : ℤ) / p)) := by
   rw [fourierBaseRoot]
@@ -39,10 +45,8 @@ theorem fourierBaseRoot_eq_exp_neg_one_div :
 
 theorem fourierBaseRoot_isPrimitiveRoot :
     IsPrimitiveRoot (fourierBaseRoot (p := p)) p := by
-  have hcop : IsCoprime (-1 : ℤ) p := by
-    refine ⟨-1, 0, by simp⟩
   rw [fourierBaseRoot_eq_exp_neg_one_div (p := p)]
-  exact Complex.isPrimitiveRoot_exp_of_isCoprime (-1) p hp.out.ne_zero hcop
+  exact Complex.isPrimitiveRoot_exp_of_isCoprime (-1) p hp.out.ne_zero ⟨-1, 0, by simp⟩
 
 theorem fourierBaseRoot_pow_eq_exp_neg (r : ℕ) :
     fourierBaseRoot (p := p) ^ r =
@@ -50,9 +54,8 @@ theorem fourierBaseRoot_pow_eq_exp_neg (r : ℕ) :
   rw [fourierBaseRoot]
   calc
     ZMod.stdAddChar (N := p) (-(1 : ZMod p)) ^ r =
-        ZMod.stdAddChar (N := p) ((r : ℕ) • (-(1 : ZMod p))) := by
-          symm
-          exact AddChar.map_nsmul_eq_pow _ _ _
+        ZMod.stdAddChar (N := p) ((r : ℕ) • (-(1 : ZMod p))) :=
+          (AddChar.map_nsmul_eq_pow _ _ _).symm
     _ = ZMod.stdAddChar (N := p) (-(r : ZMod p)) := by
           congr
           rw [nsmul_eq_mul]
@@ -161,16 +164,14 @@ theorem one_sub_fourierPow_mul_one_sub_fourierPow_complement_eq_doubleSin_sq
     {k : ℕ} (hkp : k ≤ p) :
     (1 - fourierBaseRoot (p := p) ^ k) * (1 - fourierBaseRoot (p := p) ^ (p - k)) =
       (2 * Complex.sin (Real.pi * (k : ℝ) / p)) ^ 2 := by
+  have hpow : fourierBaseRoot (p := p) ^ p = 1 :=
+    (fourierBaseRoot_isPrimitiveRoot (p := p)).pow_eq_one
   rcases eq_or_lt_of_le hkp with h_eq | hklt
   · subst k
-    have hpow : fourierBaseRoot (p := p) ^ p = 1 :=
-        (fourierBaseRoot_isPrimitiveRoot (p := p)).pow_eq_one
     rw [hpow, Nat.sub_self, pow_zero]
     simp
   rcases Nat.eq_zero_or_pos k with rfl | hk0
-  · have hpow : fourierBaseRoot (p := p) ^ p = 1 :=
-        (fourierBaseRoot_isPrimitiveRoot (p := p)).pow_eq_one
-    rw [pow_zero, Nat.sub_zero, hpow]
+  · rw [pow_zero, Nat.sub_zero, hpow]
     simp
   have hnorm :
       ‖1 - fourierBaseRoot (p := p) ^ k‖ ^ 2 =
@@ -179,8 +180,7 @@ theorem one_sub_fourierPow_mul_one_sub_fourierPow_complement_eq_doubleSin_sq
   have hpowComp : fourierBaseRoot (p := p) ^ (p - k) = conj (fourierBaseRoot (p := p) ^ k) := by
     rw [fourierPow_eq_exp_pos_complement (p := p) (k := p - k) (Nat.sub_le _ _)]
     have hsub : p - (p - k) = k := by omega
-    rw [hsub, fourierBaseRoot_pow_eq_exp_neg (p := p) k]
-    rw [← Complex.exp_conj]
+    rw [hsub, fourierBaseRoot_pow_eq_exp_neg (p := p) k, ← Complex.exp_conj]
     have hconjArg :
         (starRingEnd ℂ) (-(2 * Real.pi * (k : ℝ) / p) * Complex.I) =
           (2 * Real.pi * (k : ℝ) / p) * Complex.I := by
@@ -189,8 +189,7 @@ theorem one_sub_fourierPow_mul_one_sub_fourierPow_complement_eq_doubleSin_sq
   have hconjSub :
       1 - fourierBaseRoot (p := p) ^ (p - k) =
         conj (1 - fourierBaseRoot (p := p) ^ k) := by
-    rw [hpowComp]
-    rw [map_sub, map_one]
+    rw [hpowComp, map_sub, map_one]
   calc
     (1 - fourierBaseRoot (p := p) ^ k) * (1 - fourierBaseRoot (p := p) ^ (p - k))
         = (1 - fourierBaseRoot (p := p) ^ k) * conj (1 - fourierBaseRoot (p := p) ^ k) := by
@@ -202,8 +201,7 @@ theorem one_sub_fourierPow_mul_one_sub_fourierPow_complement_eq_doubleSin_sq
 
 theorem fourierBaseRoot_prod_one_sub_pow_eq_order :
     ∏ d ∈ Finset.range (p - 1), (1 - fourierBaseRoot (p := p) ^ (d + 1)) = p := by
-  have hp_eq : (p - 1 : ℕ) + 1 = p := by
-    simpa [Nat.add_comm] using (Nat.succ_pred_eq_of_pos hp.out.pos)
+  have hp_eq : (p - 1 : ℕ) + 1 = p := Nat.sub_add_cancel hp.out.one_le
   have hμ : IsPrimitiveRoot (fourierBaseRoot (p := p)) ((p - 1) + 1) := by
     rw [hp_eq]
     exact fourierBaseRoot_isPrimitiveRoot (p := p)
@@ -219,13 +217,9 @@ theorem fourierCyclotomicSingleDifferenceProduct_eq_weightedPairProduct
         (fourierBaseRoot (p := p) ^ (d + 1) - 1) ^ (p - (d + 1)) *
           (fourierBaseRoot (p := p) ^ (p - (d + 1)) - 1) ^ (d + 1) := by
   let n : ℕ := (p - 1) / 2
-  have hp_eqn : p = 2 * n + 1 := by
-    dsimp [n]
-    have htwo : 2 * ((p - 1) / 2) = p - 1 :=
-      Nat.two_mul_div_two_of_even (hp.out.even_sub_one hp2)
-    calc
-      p = (p - 1) + 1 := (Nat.succ_pred_eq_of_pos hp.out.pos).symm
-      _ = 2 * ((p - 1) / 2) + 1 := by rw [htwo]
+  have hp_eqn : p = 2 * n + 1 := eq_two_mul_pred_div_two_add_one (p := p) hp2
+  have hp_add : p = n + n + 1 := by
+    simpa [two_mul, add_assoc, add_left_comm, add_comm] using hp_eqn
   have hp_sub : p - 1 = n + n := by
     have := congrArg (fun m : ℕ => m - 1) hp_eqn
     simpa [two_mul, add_assoc, add_left_comm, add_comm] using this
@@ -239,12 +233,7 @@ theorem fourierCyclotomicSingleDifferenceProduct_eq_weightedPairProduct
     refine Finset.prod_congr rfl ?_
     intro d hd
     have hd' : d < n := Finset.mem_range.mp hd
-    have hp_add : p = n + n + 1 := by
-      simpa [two_mul, add_assoc, add_left_comm, add_comm] using hp_eqn
-    have hd1 : d + 1 ≤ n := Nat.succ_le_of_lt hd'
-    have hexp : n + n - d = p - (d + 1) := by
-      rw [hp_add]
-      omega
+    have hexp : n + n - d = p - (d + 1) := by omega
     rw [hexp]
   have hreflect :
       (∏ d ∈ Finset.range n,
@@ -256,15 +245,8 @@ theorem fourierCyclotomicSingleDifferenceProduct_eq_weightedPairProduct
     refine Finset.prod_congr rfl ?_
     intro d hd
     have hd' : d < n := Finset.mem_range.mp hd
-    have hd1 : d + 1 ≤ n := Nat.succ_le_of_lt hd'
-    have hp_add : p = n + n + 1 := by
-      simpa [two_mul, add_assoc, add_left_comm, add_comm] using hp_eqn
-    have hbase : n + (n - 1 - d) + 1 = p - (d + 1) := by
-      rw [hp_add, Nat.sub_sub]
-      omega
-    have hpow : n - (n - 1 - d) = d + 1 := by
-      rw [Nat.sub_sub]
-      omega
+    have hbase : n + (n - 1 - d) + 1 = p - (d + 1) := by omega
+    have hpow : n - (n - 1 - d) = d + 1 := by omega
     rw [hbase, hpow]
   have hsecond :
       (∏ x ∈ Finset.range n,
@@ -275,25 +257,15 @@ theorem fourierCyclotomicSingleDifferenceProduct_eq_weightedPairProduct
     intro x hx
     have hexp : n + n - (n + x) = n - x := Nat.add_sub_add_left n n x
     rw [hexp]
-  rw [hfirst, hsecond]
-  rw [hreflect, ← Finset.prod_mul_distrib]
-  have hhalf : (n + n) / 2 = n := by
-    have htwo : 2 * ((n + n) / 2) = n + n :=
-      Nat.two_mul_div_two_of_even (show Even (n + n) by exact ⟨n, by simp⟩)
-    omega
+  rw [hfirst, hsecond, hreflect, ← Finset.prod_mul_distrib]
+  have hhalf : (n + n) / 2 = n := by omega
   rw [hhalf]
 
 theorem two_mul_sum_range_halfWeightedExponent_eq_choose_three_succ
     (hp2 : p ≠ 2) :
     2 * (∑ d ∈ Finset.range ((p - 1) / 2), (d + 1) * (p - (d + 1))) = (p + 1).choose 3 := by
   let n : ℕ := (p - 1) / 2
-  have hp_eqn : p = 2 * n + 1 := by
-    dsimp [n]
-    have htwo : 2 * ((p - 1) / 2) = p - 1 :=
-      Nat.two_mul_div_two_of_even (hp.out.even_sub_one hp2)
-    calc
-      p = (p - 1) + 1 := (Nat.succ_pred_eq_of_pos hp.out.pos).symm
-      _ = 2 * ((p - 1) / 2) + 1 := by rw [htwo]
+  have hp_eqn : p = 2 * n + 1 := eq_two_mul_pred_div_two_add_one (p := p) hp2
   have hp_add : p = n + n + 1 := by simpa [two_mul, add_assoc, add_left_comm, add_comm] using hp_eqn
   have hsplit :
       ∑ i ∈ Finset.range (p + 1), i * (p - i) =
@@ -313,15 +285,8 @@ theorem two_mul_sum_range_halfWeightedExponent_eq_choose_three_succ
     intro i hi
     have hi' : i < n + 1 := Finset.mem_range.mp hi
     have hi_le : i ≤ n := Nat.lt_succ_iff.mp hi'
-    have hi1 : i ≤ n + 1 := Nat.le_of_lt hi'
-    have hp_add : p = n + n + 1 := by
-      simpa [two_mul, add_assoc, add_left_comm, add_comm] using hp_eqn
-    have hfirst : n + 1 + (n + 1 - 1 - i) = p - i := by
-      rw [hp_add, Nat.succ_sub_one]
-      omega
-    have hip : i ≤ p :=
-      le_trans (Nat.le_of_lt hi')
-        (by rw [hp_add]; omega)
+    have hfirst : n + 1 + (n + 1 - 1 - i) = p - i := by omega
+    have hip : i ≤ p := by omega
     rw [hfirst, Nat.sub_sub_self hip, Nat.mul_comm]
   have hshift :
       ∑ i ∈ Finset.range (n + 1), i * (p - i) =
@@ -344,17 +309,14 @@ theorem dvd_chooseThree_add_halfWeightedExponent (hp2 : p ≠ 2) :
       Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc] using
       (Nat.add_one_mul_choose_eq (p - 1) 2).symm
   have hdvd_choose2 : p ∣ p.choose 2 := by
-    rw [Nat.choose_two_right]
-    rw [Nat.mul_div_assoc _ (hp.out.even_sub_one hp2).two_dvd]
+    rw [Nat.choose_two_right, Nat.mul_div_assoc _ (hp.out.even_sub_one hp2).two_dvd]
     exact dvd_mul_right p ((p - 1) / 2)
   have hdvd2 :
       p ∣ 2 * (p.choose 3 + ∑ d ∈ Finset.range n, (d + 1) * (p - (d + 1))) := by
-    have hsum' : 2 * (∑ d ∈ Finset.range n, (d + 1) * (p - (d + 1))) = (p + 1).choose 3 := by
-      simpa [n] using hsum
     have hsum'' :
         (∑ d ∈ Finset.range n, (d + 1) * (p - (d + 1))) +
           (∑ d ∈ Finset.range n, (d + 1) * (p - (d + 1))) = (p + 1).choose 3 := by
-      simpa [two_mul] using hsum'
+      simpa [n, two_mul] using hsum
     have hEq :
         2 * (p.choose 3 + ∑ d ∈ Finset.range n, (d + 1) * (p - (d + 1))) =
           p * (p - 1).choose 2 + p.choose 2 := by
@@ -386,13 +348,9 @@ theorem halfRangeDoubleSinProduct_eq_sqrt_order (hp2 : p ≠ 2) :
       2 * Real.sin (Real.pi * ((d + 1 : ℕ) / p : ℝ)) = Real.sqrt p := by
   let n : ℕ := (p - 1) / 2
   let S : ℕ → ℝ := fun k => 2 * Real.sin (Real.pi * (k : ℝ) / p)
-  have hp_eqn : p = 2 * n + 1 := by
-    dsimp [n]
-    have htwo : 2 * ((p - 1) / 2) = p - 1 :=
-      Nat.two_mul_div_two_of_even (hp.out.even_sub_one hp2)
-    calc
-      p = (p - 1) + 1 := (Nat.succ_pred_eq_of_pos hp.out.pos).symm
-      _ = 2 * ((p - 1) / 2) + 1 := by rw [htwo]
+  have hp_eqn : p = 2 * n + 1 := eq_two_mul_pred_div_two_add_one (p := p) hp2
+  have hp_add : p = n + n + 1 := by
+    simpa [two_mul, add_assoc, add_left_comm, add_comm] using hp_eqn
   have hp_sub : p - 1 = n + n := by
     have := congrArg (fun m : ℕ => m - 1) hp_eqn
     simpa [two_mul, add_assoc, add_left_comm, add_comm] using this
@@ -408,8 +366,6 @@ theorem halfRangeDoubleSinProduct_eq_sqrt_order (hp2 : p ≠ 2) :
       intro d hd
       have hd' : d < n := Finset.mem_range.mp hd
       congr 2
-      have hp_add : p = n + n + 1 := by
-        simpa [two_mul, add_assoc, add_left_comm, add_comm] using hp_eqn
       omega
     rw [hreflect, ← Finset.prod_mul_distrib]
     calc
@@ -420,10 +376,7 @@ theorem halfRangeDoubleSinProduct_eq_sqrt_order (hp2 : p ≠ 2) :
             refine Finset.prod_congr rfl ?_
             intro d hd
             have hd' : d < n := Finset.mem_range.mp hd
-            have hle : d + 1 ≤ p := by
-              have hp_add : p = n + n + 1 := by
-                simpa [two_mul, add_assoc, add_left_comm, add_comm] using hp_eqn
-              omega
+            have hle : d + 1 ≤ p := by omega
             simpa [S, Complex.ofReal_sin] using
               (one_sub_fourierPow_mul_one_sub_fourierPow_complement_eq_doubleSin_sq
                 (p := p) (k := d + 1) hle)
@@ -439,10 +392,7 @@ theorem halfRangeDoubleSinProduct_eq_sqrt_order (hp2 : p ≠ 2) :
     refine Finset.prod_pos ?_
     intro d hd
     have hd' : d < n := Finset.mem_range.mp hd
-    have hdk : d + 1 < p := by
-      have hp_add : p = n + n + 1 := by
-        simpa [two_mul, add_assoc, add_left_comm, add_comm] using hp_eqn
-      omega
+    have hdk : d + 1 < p := by omega
     exact doubleSin_pos (p := p) (Nat.succ_pos d) hdk
   have hsq' : (∏ d ∈ Finset.range n, S (d + 1)) ^ 2 = (Real.sqrt p) ^ 2 := by
     rw [Real.sq_sqrt (show 0 ≤ (p : ℝ) by positivity)]
@@ -450,27 +400,17 @@ theorem halfRangeDoubleSinProduct_eq_sqrt_order (hp2 : p ≠ 2) :
   rcases sq_eq_sq_iff_eq_or_eq_neg.mp hsq' with hEq | hEq
   · simpa [n, S, div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm] using hEq
   · exfalso
-    have hsqrt_pos : 0 < Real.sqrt p := by
-      apply Real.sqrt_pos.2
-      exact_mod_cast hp.out.pos
+    have hsqrt_pos : 0 < Real.sqrt p := Real.sqrt_pos.2 (by exact_mod_cast hp.out.pos)
     linarith
 
 theorem negI_pow_orderHalfMul_eq_I_pow_half (hp2 : p ≠ 2) :
     (-Complex.I) ^ (p * ((p - 1) / 2)) = Complex.I ^ ((p - 1) / 2) := by
   let n : ℕ := (p - 1) / 2
-  have hp_eqn : p = 2 * n + 1 := by
-    dsimp [n]
-    have htwo : 2 * ((p - 1) / 2) = p - 1 :=
-      Nat.two_mul_div_two_of_even (hp.out.even_sub_one hp2)
-    calc
-      p = (p - 1) + 1 := (Nat.succ_pred_eq_of_pos hp.out.pos).symm
-      _ = 2 * ((p - 1) / 2) + 1 := by rw [htwo]
+  have hp_eqn : p = 2 * n + 1 := eq_two_mul_pred_div_two_add_one (p := p) hp2
   calc
     (-Complex.I) ^ (p * n) = (-Complex.I) ^ (2 * (n * n) + n) := by
       congr
-      have hp_add : p = n + n + 1 := by
-        simpa [two_mul, add_assoc, add_left_comm, add_comm] using hp_eqn
-      rw [hp_add]
+      rw [hp_eqn]
       ring
     _ = ((-Complex.I) ^ 2) ^ (n * n) * (-Complex.I) ^ n := by
           rw [pow_add, pow_mul]
