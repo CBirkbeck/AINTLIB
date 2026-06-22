@@ -7189,6 +7189,28 @@ the bridge is the gateway to the IMC chain. **Decision needed before the large n
   `Algebra.IsUnramifiedAt.congr`. PLAN: (1) σ:L≅σL → 𝓞_L≅𝓞_{σL} (mapAlgEquiv, β-semilinear); (2) prime
   P of 𝓞_{σL} with p∉P ↦ σ⁻¹P of 𝓞_L, base prime β-twisted but β fixes 𝔭|p; (3) ramificationIdx_map_eq
   + β ⟹ e preserved; (4) IsUnramifiedAt transports. ~150-line ANT sub-project; its own focused effort.
+- **AINTLIB/mathlib SURVEY (2026-06-22, per CB) — reusables found (so this is compose+β-twist, NOT from
+  scratch):**
+  - `Mathlib/NumberTheory/RamificationInertia/Unramified.lean`: `Algebra.isUnramifiedAt_iff_of_isDedekindDomain`
+    (`IsUnramifiedAt R p ↔ e(p|R)=1`), `Ideal.ramificationIdx_eq_one_of_isUnramifiedAt`. ⟹ reduce
+    IsUnramifiedAt to `ramificationIdx = 1`.
+  - `Mathlib/NumberTheory/RamificationInertia/Ramification.lean`: `Ideal.ramificationIdx_comap_eq`,
+    `ramificationIdx_map_eq` (ram idx invariant under `e : S ≃ₐ[R] S₁`, FIXED base R — apply with R=ℤ
+    where σ is fixed-base, then tower-multiplicativity to get the 𝓞F⁺ₙ-relative idx; OR build the β-twist).
+    Inertia analogues in `Inertia.lean`.
+  - `Mathlib/NumberTheory/RamificationInertia/Galois.lean`: `Ideal.MulAction` (Gal acts on `primesOver p`),
+    `ramificationIdx_eq_of_isGaloisGroup`, `exists_smul_eq_of_isGaloisGroup` (transitivity) — the
+    Galois-action-on-primes machinery (σ permutes primes preserving ram).
+  - `RingOfIntegers.mapAlgEquiv`/`mapRingEquiv` (𝓞 functoriality under field iso); `Algebra.Unramified.of_equiv`,
+    `Algebra.FormallyUnramified.of_equiv`, `RingHom.FormallyUnramified.respectsIso` (iso on both sides ⟹
+    handles the β source-twist + σ̃ target).
+  - **AINTLIB Chebotarev project** (`projects/Chebotarev/CebotarevDensity/Frobenius.lean`): `Chebotarev.UnramifiedIn`,
+    `UnramifiedIn.ramificationIdx_eq_one`, `Ideal.inertiaGroup_trivial_of_unramified` — sibling project,
+    importable; same ramification-of-unramified pattern.
+  - CLEANEST PLAN: P prime of 𝓞(σL), p∉P. (i) `isUnramifiedAt_iff_of_isDedekindDomain` ⟹ goal = e(P|𝓞F⁺ₙ)=1;
+    (ii) σ̃ := RingOfIntegers.mapRingEquiv (σ|_{σL→L} or its inverse) carries P↦σ̃P prime of 𝓞L, p∉σ̃P (σ fixes ℤ);
+    (iii) ram idx e(P|𝓞F⁺ₙ)=e(σ̃P|𝓞F⁺ₙ) via ramificationIdx_comap/map_eq + the β:𝓞F⁺ₙ≅𝓞F⁺ₙ relabeling;
+    (iv) L's hunr ⟹ e(σ̃P|𝓞F⁺ₙ)=1 ⟹ e(P|𝓞F⁺ₙ)=1 ⟹ IsUnramifiedAt. β-twist (iii) is the one remaining core.
 
 ## NEXT PHASE — §12 integration (Λ-module, CFT, Vandiver, IMC). Gateway = study §12
 The remaining tickets (TG2-Lambda, TG5–TG9) all need §12: `IwasawaAlgebra`, `Gamma`, `GPlus`,
