@@ -104,7 +104,7 @@ theorem residue_logCoeffSum (c : (ZMod p)ˣ → S.O) (i : ℕ) :
     S.residue (S.logCoeffSum c i) = ∑ j : (ZMod p)ˣ, S.residue (c j) * (j : ZMod p) ^ i := by
   unfold logCoeffSum
   rw [map_sum]
-  refine Finset.sum_congr rfl fun j _ => ?_
+  refine Finset.sum_congr rfl fun j _ ↦ ?_
   rw [map_mul, S.residue_omega_pow i j]
 
 end StickelbergerF1Setup
@@ -176,7 +176,7 @@ theorem sum_units_val_pow_eq_sum_range {i : ℕ} (hi0 : 0 < i) :
   -- First: `Σ_{k<p} k^i = Σ_{x:ZMod p} (x.val)^i` via the full bijection `range p ≃ ZMod p`.
   have hfull : ∑ k ∈ Finset.range p, (k : ℚ_[p]) ^ i =
       ∑ x : ZMod p, ((x : ZMod p).val : ℚ_[p]) ^ i := by
-    refine (Finset.sum_nbij' (fun x => (x : ZMod p).val) (fun k => (k : ZMod p))
+    refine (Finset.sum_nbij' (fun x ↦ (x : ZMod p).val) (fun k ↦ (k : ZMod p))
       ?_ ?_ ?_ ?_ ?_).symm
     · intro a _
       simp only [Finset.mem_range]
@@ -343,7 +343,7 @@ theorem residue_logCoeffSum_eq_zero_of_const_residue {c : (ZMod p)ˣ → S.O}
   rw [S.residue_logCoeffSum c i]
   rw [show (∑ j : (ZMod p)ˣ, S.residue (c j) * (j : ZMod p) ^ i)
         = r * ∑ j : (ZMod p)ˣ, (j : ZMod p) ^ i from by
-    rw [Finset.mul_sum]; exact Finset.sum_congr rfl fun j _ => by rw [hr j]]
+    rw [Finset.mul_sum]; exact Finset.sum_congr rfl fun j _ ↦ by rw [hr j]]
   rw [sum_units_pow_eq_zero_of_lt hi0 hip, mul_zero]
 
 /-- **The `𝔓`-adic order lower bound from Steps 1+2**: when the coefficients have
@@ -429,7 +429,7 @@ theorem normVal_logCoeffSum_of_integralAt {c : (ZMod p)ˣ → S.O} {i : ℕ}
   -- The integral identity, cast to ℚ.
   have hIQ : ((addVal S.O (S.logCoeffSum c i)).toNat : ℚ) + 2 * (i : ℚ)
       = ((p : ℚ) - 1) * (((bernoulliFactorQp p i).valuation : ℚ) + 1) := by
-    have hcast := congrArg (fun n : ℕ => (n : ℚ)) hint
+    have hcast := congrArg (fun n : ℕ ↦ (n : ℚ)) hint
     push_cast at hcast
     rw [hpsub, hvcast] at hcast
     linarith [hcast]
