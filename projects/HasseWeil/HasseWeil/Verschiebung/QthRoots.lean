@@ -84,6 +84,7 @@ noncomputable def polyExpandRoot
     Polynomial K :=
   hf.choose
 
+omit [DecidableEq K] in
 /-- Defining property: `polyExpandRoot f hf` satisfies `expand q · = f`. -/
 theorem polyExpandRoot_spec
     (f : Polynomial K) (hf : f ∈ Set.range (⇑(Polynomial.expand K (Fintype.card K)))) :
@@ -102,6 +103,7 @@ Held as a hypothesis here pending the precise mathlib lemma name. -/
 def PolyPowCardEq (K : Type*) [Field K] [Fintype K] : Prop :=
   ∀ f : Polynomial K, f ^ Fintype.card K = Polynomial.expand K (Fintype.card K) f
 
+omit [DecidableEq K] in
 /-- **Polynomial Frobenius identity, unconditional**: for `f ∈ K[X]` over a
     finite field `K` of cardinality `q = p^n`, we have `f^q = expand q f`.
 
@@ -127,6 +129,7 @@ theorem polyPowCardEq_of_finite : PolyPowCardEq K := by
 
 /-! ### The q-th root for `Φ_q(x_gen)`, witness form -/
 
+omit [W.toAffine.IsElliptic] [DecidableEq K] in
 /-- **Witness form**: given `Φ_q ∈ Polynomial.expand q-range` and the
     polynomial Frobenius identity, `Φ_q(x_gen) = π* g` for some
     `g ∈ K(E)` (specifically `g = polyExpandRoot Φ_q hΦ` evaluated at
@@ -142,6 +145,7 @@ theorem polyExpandRoot_aeval_pow_eq
   -- (aeval z f')^q = aeval z (f'^q) = aeval z (expand q f') = aeval z f
   rw [← map_pow, h_pow (polyExpandRoot f hf), polyExpandRoot_spec]
 
+omit [Fintype K] [DecidableEq K] in
 /-- The natural-number `p` casts to `0` in `K(E)` whenever `CharP K p`, transported
     through the injective `algebraMap K → K(E)`. Shared helper for the char-`p`
     Freshman's-dream and Weierstrass-substitution lemmas below. -/
@@ -158,6 +162,7 @@ that `Φ_q ∈ F_p[X^q]` and `ΨSq_q ∈ F_p[X^q]` generically (over the
 b-relation) for q = p^k in char p. This section ships the Lean
 formalisation, starting with the smallest case q = 2 in char 2. -/
 
+omit [Fintype K] [DecidableEq K] in
 /-- **q = 2 in char 2**: `W.Φ 2 ∈ Set.range (Polynomial.expand K 2)`.
     K-level specialisation of `Φ_two_mem_expand_two_charP` (`DivPolyExpand`). -/
 theorem Φ_two_mem_expand_two_char_two
@@ -174,6 +179,7 @@ Structurally simpler for `ΨSq_3 = Ψ₃²`: in char 3, `Ψ₃ = b₂·X³ + b�
 (since `3·X⁴`, `3b₄·X²`, `3b₆·X` all vanish), so `Ψ₃ = expand 3 (b₂·X + b₈)`
 and `ΨSq_3 = (expand 3 (b₂·X + b₈))² = expand 3 ((b₂·X + b₈)²)`. -/
 
+omit [Fintype K] [DecidableEq K] in
 /-- **q = 3 in char 3**: `W.Ψ₃ ∈ Set.range (Polynomial.expand K 3)`.
     K-level specialisation of `Ψ₃_mem_expand_three_charP` (`DivPolyExpand`). -/
 theorem Ψ₃_mem_expand_three_char_three
@@ -181,6 +187,7 @@ theorem Ψ₃_mem_expand_three_char_three
     W.Ψ₃ ∈ Set.range (⇑(Polynomial.expand K 3)) :=
   Ψ₃_mem_expand_three_charP W
 
+omit [Fintype K] [DecidableEq K] in
 /-- **q = 3 in char 3**: `W.ΨSq 3 ∈ Set.range (Polynomial.expand K 3)`.
     K-level specialisation of `ΨSq_three_mem_expand_three_charP` (`DivPolyExpand`). -/
 theorem ΨSq_three_mem_expand_three_char_three
@@ -188,6 +195,7 @@ theorem ΨSq_three_mem_expand_three_char_three
     W.ΨSq 3 ∈ Set.range (⇑(Polynomial.expand K 3)) :=
   ΨSq_three_mem_expand_three_charP W
 
+omit [Fintype K] [DecidableEq K] in
 /-- **Char-3 b-relation**: `b₈ = b₂·b₆ - b₄²`. K-level specialisation of
     `b_relation_of_charP_three` (`DivPolyExpand`). -/
 theorem b_relation_of_char_three
@@ -195,6 +203,7 @@ theorem b_relation_of_char_three
     W.b₈ = W.b₂ * W.b₆ - W.b₄ ^ 2 :=
   b_relation_of_charP_three W
 
+omit [Fintype K] [DecidableEq K] in
 /-- **q = 3 in char 3**: `W.Φ 3 ∈ Set.range (Polynomial.expand K 3)`.
     K-level specialisation of `Φ_three_mem_expand_three_charP` (`DivPolyExpand`).
     The substantive sympy-derived `linear_combination` multiplier lives at the
@@ -294,6 +303,7 @@ theorem mulByInt_q_pullback_y_gen_qth_root_of_witness
       (AdjoinRoot.root W.toAffine.polynomial))
   rw [mulByInt_pullback_y W ((Fintype.card K : ℕ) : ℤ) hn]
 
+omit [Fintype K] [DecidableEq K] in
 /-- **q = 2 in char 2**: `W.ΨSq 2 ∈ Set.range (Polynomial.expand K 2)`.
     K-level specialisation of `ΨSq_two_mem_expand_two_charP` (`DivPolyExpand`). -/
 theorem ΨSq_two_mem_expand_two_char_two
@@ -322,6 +332,7 @@ noncomputable def omega2_Y_coeff_char_two
   Polynomial.C W.a₁ * W.Ψ₃ +
     (Polynomial.C W.a₁ * Polynomial.X + Polynomial.C W.a₃) ^ 3
 
+omit [Fintype K] [DecidableEq K] in
 /-- **q = 2 in char 2**: the Y-coefficient of `ω 2` lies in
     `Polynomial.expand K 2`-range. The X¹ coefficient is `a₁(b₆ + a₃²)`,
     which vanishes because `b₆ = a₃²` in char 2 (from `b₆ = a₃² + 4·a₆`).
@@ -454,6 +465,7 @@ noncomputable def omega2_coupled_multiplier_char_two
       W.a₁ * W.a₄ ^ 2 * W.a₆ + 2 * W.a₂ * W.a₃ * W.a₄ * W.a₆ -
       W.a₃ * W.a₄ ^ 3)
 
+omit [Fintype K] [DecidableEq K] in
 /-- **The coupled identity (q=2 char-2)**: `A·ψ₂ + B·cubic_x` is in
     `Polynomial.expand K 2`-range, witnessed by `omega2_coupled_witness_char_two`.
 
@@ -480,6 +492,7 @@ In char 2, `f ∈ Set.range (Polynomial.expand K 2)` iff `f.derivative = 0`
 residual `A·ψ₂ + B·cubic_x`, every nonzero coefficient is at an even
 degree (sympy-verified, char-2-reduced), so its derivative vanishes. -/
 
+omit [Fintype K] [DecidableEq K] in
 set_option maxHeartbeats 1000000 in
 /-- **Derivative of `omega2_coupled_residual_char_two` vanishes in char 2**.
     Direct: the polynomial has only even-degree nonzero coefficients in
@@ -505,6 +518,7 @@ theorem omega2_coupled_residual_derivative_eq_zero
   ring_nf
   reduce_mod_char!
 
+omit [Fintype K] [DecidableEq K] in
 /-- **The coupled identity, unconditional (q=2 char-2)**: `A·ψ₂ + B·cubic_x ∈ expand-range`.
     Direct from the derivative-vanishes proof via `Polynomial.expand_contract`. -/
 theorem omega2_coupled_residual_mem_expand_two_char_two
@@ -604,9 +618,9 @@ are then transported via the closure properties of the Frobenius range. -/
     the K-subfield generated by these two images, conclude every
     `[q]*z` lies in the Frobenius range. -/
 theorem mulByInt_q_pullback_range_subset_frobenius_of_xy_subfield_witness
-    (h_x : (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback (x_gen W) ∈
+    (_h_x : (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback (x_gen W) ∈
         (frobeniusIsog W).pullback.range)
-    (h_y : (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback (y_gen W) ∈
+    (_h_y : (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback (y_gen W) ∈
         (frobeniusIsog W).pullback.range)
     (h_subfield : ∀ z : W.toAffine.FunctionField,
       (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback z ∈
@@ -715,6 +729,7 @@ in it and the IntermediateField is closed under K-algebra ops). Then
 since K(E) = FractionRing(CoordinateRing) and IntermediateField is closed
 under inverses, the IntermediateField contains all of K(E). -/
 
+omit [Fintype K] [DecidableEq K] in
 /-- **K(E) is generated as IntermediateField over K by x_gen and y_gen,
     witness-parametric form**: given the structural fact that every element of
     `CoordinateRing` maps into the K-subalgebra generated by x_gen and y_gen
@@ -759,6 +774,7 @@ Reference: Silverman, *The Arithmetic of Elliptic Curves*, II.1 (the
 function field as the fraction field of the affine coordinate ring of a
 plane curve, with x and y as transcendence-base / generators). -/
 
+omit [Fintype K] [DecidableEq K] in
 /-- **Coordinate-ring image lies in `Algebra.adjoin K {x_gen, y_gen}`** —
 the unconditional form of the witness `h_alg_top` that
 `functionField_eq_intermediateField_adjoin_xy_of_witness` would otherwise
@@ -821,6 +837,7 @@ theorem coordinateRing_algebraMap_mem_adjoin_xy
       -- a generator of the adjoin.
       exact Algebra.subset_adjoin (Set.mem_insert_of_mem _ rfl)
 
+omit [Fintype K] [DecidableEq K] in
 /-- **K(E) = adjoin K {x_gen, y_gen}** (unconditional). Composes the
 witness-parametric form with `coordinateRing_algebraMap_mem_adjoin_xy`. -/
 theorem functionField_eq_intermediateField_adjoin_xy
@@ -845,6 +862,7 @@ Three stepping-stone lemmas toward the squaring identity
 Tomorrow's session combines these with Session 14's coupled identity
 to identify the result with `mulByInt_y W 2`. -/
 
+omit [Fintype K] [DecidableEq K] in
 /-- **Char-2 freshman's dream for `a + b·y`**: `(a + b·y)² = a² + b²·y²`
     in char 2. The cross term `2·a·b·y` vanishes. -/
 theorem char_two_sq_basis_form (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
@@ -854,6 +872,7 @@ theorem char_two_sq_basis_form (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
   ring_nf
   linear_combination (a * b * y_gen W) * h_2
 
+omit [Fintype K] [DecidableEq K] in
 /-- **Weierstrass equation at the generic point in char 2**: `y_gen² =
     a₁·x_gen·y_gen + a₃·y_gen + cubic_x(x_gen)`. Direct from
     `generic_equation` (the Weierstrass equation at the generic point)
@@ -886,6 +905,7 @@ theorem y_gen_sq_weierstrass_char_two (W : WeierstrassCurve K)
     (y_gen W * algebraMap K W.toAffine.FunctionField W.a₁ * x_gen W +
       y_gen W * algebraMap K W.toAffine.FunctionField W.a₃) * h_2
 
+omit [Fintype K] [DecidableEq K] in
 /-- **α-squared basis form** (q=2 char-2): combined char-2 squaring
     + Weierstrass substitution. -/
 theorem alpha_squared_basis_form (W : WeierstrassCurve K)
@@ -904,22 +924,24 @@ theorem alpha_squared_basis_form (W : WeierstrassCurve K)
 `α₀² = aeval x_gen (A·ψ₂ + B·cubic_x) / (aeval x_gen ψ₂_poly)^4`,
 both via `polyExpandRoot_aeval_pow_eq` applied at q = 2. -/
 
+omit [DecidableEq K] in
 /-- **α₁ squared identity (q=2 char-2)**: simpler statement using
     `Fintype.card K`, sidestepping the dependent rewriting of `h_card`. -/
 theorem alpha_1_y_qth_root_pow_card_eq
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [CharP K 2]
-    (h_card : Fintype.card K = 2)
+    (_h_card : Fintype.card K = 2)
     (h_B' : omega2_Y_coeff_char_two W ∈
       Set.range (⇑(Polynomial.expand K (Fintype.card K)))) :
     (Polynomial.aeval (x_gen W) (polyExpandRoot _ h_B')) ^ Fintype.card K =
       Polynomial.aeval (x_gen W) (omega2_Y_coeff_char_two W) :=
   polyExpandRoot_aeval_pow_eq W _ h_B' (polyPowCardEq_of_finite (K := K)) (x_gen W)
 
+omit [DecidableEq K] in
 /-- **α₀ squared identity (q=2 char-2)**: simpler statement using
     `Fintype.card K`. -/
 theorem alpha_0_y_qth_root_pow_card_eq
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [CharP K 2]
-    (h_card : Fintype.card K = 2)
+    (_h_card : Fintype.card K = 2)
     (h_AB' : omega2_coupled_residual_char_two W ∈
       Set.range (⇑(Polynomial.expand K (Fintype.card K)))) :
     (Polynomial.aeval (x_gen W) (polyExpandRoot _ h_AB')) ^ Fintype.card K =
@@ -949,6 +971,7 @@ def OmegaTwoBasisHolds (W : WeierstrassCurve K) : Prop :=
   W.ω 2 = Polynomial.C (omega2_X_coeff_char_two W) +
     Polynomial.C (omega2_Y_coeff_char_two W) * Polynomial.X
 
+omit [Fintype K] [DecidableEq K] in
 set_option maxHeartbeats 1000000 in
 /-- **Unconditional basis decomposition of ω₂ in char 2**: the bivariate
     polynomial `W.ω 2` in `K[X][Y]` decomposes as `C(A) + C(B)·Y` after
@@ -978,6 +1001,7 @@ Bridge from `omegaTwoBasisHolds_char_two` (bivariate identity in K[X][Y])
 to the K(E)-level statement `ω_ff W 2 = aeval x_gen A + aeval x_gen B · y_gen`.
 Apply `algebraMap CR KE ∘ mk W` to both sides of the bivariate identity. -/
 
+omit [Fintype K] [DecidableEq K] in
 /-- **K(E)-level basis decomposition (q=2 char-2)**: at the generic point,
     `ω_ff W 2 = aeval x_gen A + aeval x_gen B · y_gen` in `K(E)` (char 2),
     derived from the bivariate identity `omegaTwoBasisHolds_char_two`. -/
@@ -1035,6 +1059,7 @@ theorem omega_ff_two_basis_decomp_char_two
     rfl
   rw [h_C_A, h_C_B, h_X_y]
 
+omit [Fintype K] [DecidableEq K] in
 /-- **ψ_ff W 2 in char 2 equals aeval x_gen (a₁X + a₃)**.
     Direct from ψ_two + char-2 simplification of ψ₂ = polynomialY. -/
 theorem psi_ff_two_eq_aeval_char_two
@@ -1071,6 +1096,7 @@ Combines all the axiom-clean component pieces shipped across Sessions
 7-19 to close the squaring identity:
 `(α₀ + α₁·y_gen)² = mulByInt_y W 2` in K(E) with char 2. -/
 
+omit [DecidableEq K] in
 /-- **Y-coefficient match (q=2 char-2, witness-parametric)**:
     `α₁² · ψ₂(x_gen) = aeval x_gen B / ψ₂(x_gen)^3` in K(E),
     parametric on the squaring identity for the polyExpandRoot
@@ -1096,6 +1122,7 @@ theorem alpha_1_sq_psi_eq_B_div_psi_cubed_of_witness
   rw [div_pow, h_polyRoot_sq]
   field_simp
 
+omit [DecidableEq K] in
 /-- **Polynomial-level constant-coefficient identity (q=2 char-2)**:
     multiply both sides of the constant-coefficient match by ψ_gen^4 to
     eliminate field inverses. Keeps `aeval x_gen (omega2_coupled_residual_char_two W)`
@@ -1146,6 +1173,7 @@ theorem alpha_0_sq_polynomial_match_char_two
     (Polynomial.aeval (x_gen W) (omega2_Y_coeff_char_two W) *
       Polynomial.aeval (x_gen W) (cubic_x W)) * h_2
 
+omit [DecidableEq K] in
 /-- **Squaring identity (q=2 char-2, witness-parametric)**: the explicit
     `α = α₀ + α₁·y_gen` squares to `mulByInt_y W 2`. -/
 theorem y_qth_root_squared_eq_mulByInt_y_two_of_witnesses
@@ -1243,6 +1271,7 @@ These will be combined with the polynomial-side identities
 identity, structurally analogous to Sessions 14-25's squaring arc but
 with cube root instead of square root. -/
 
+omit [Fintype K] [DecidableEq K] in
 /-- **Char-3 freshman's dream for `a + b·y`**: `(a + b·y)^3 = a^3 + b^3·y^3`
     in char 3. The cross terms `3·a²·b·y` and `3·a·b²·y²` vanish because
     `(3 : K(E)) = 0`. q=3 analog of `char_two_sq_basis_form`. -/
@@ -1253,6 +1282,7 @@ theorem char_three_cube_basis_form (W : WeierstrassCurve K)
   ring_nf
   linear_combination (a ^ 2 * b * y_gen W + a * b ^ 2 * y_gen W ^ 2) * h_3
 
+omit [Fintype K] [DecidableEq K] in
 /-- **Char-5 freshman's dream for `a + b·y`**: `(a + b·y)^5 = a^5 + b^5·y^5`
     in char 5. The four cross terms (coefficients C(5,k) ∈ {5, 10, 10, 5})
     all vanish via `(5 : K(E)) = 0`. q=5 analog of `char_three_cube_basis_form`. -/
@@ -1266,6 +1296,7 @@ theorem char_five_quintic_basis_form (W : WeierstrassCurve K)
       2 * a ^ 2 * b ^ 3 * y_gen W ^ 3 + a * b ^ 4 * y_gen W ^ 4) * h_5
 
 
+omit [Fintype K] [DecidableEq K] in
 /-- **Weierstrass equation at the generic point in char 3**:
     `y_gen² = -a₁·x_gen·y_gen - a₃·y_gen + cubic_x(x_gen)`.
     Direct from `generic_equation` — no char-specific sign collapse since
@@ -1288,6 +1319,7 @@ theorem y_gen_sq_weierstrass_char_three (W : WeierstrassCurve K)
   rw [h_a1, h_a2, h_a3, h_a4, h_a6] at h_eq
   linear_combination h_eq
 
+omit [Fintype K] [DecidableEq K] in
 /-- **Weierstrass equation at the generic point in char 5**:
     `y_gen² = -a₁·x_gen·y_gen - a₃·y_gen + cubic_x(x_gen)`.
     Same form as char 3 (any char ≠ 2). -/
@@ -1309,6 +1341,7 @@ theorem y_gen_sq_weierstrass_char_five (W : WeierstrassCurve K)
   rw [h_a1, h_a2, h_a3, h_a4, h_a6] at h_eq
   linear_combination h_eq
 
+omit [Fintype K] [DecidableEq K] in
 /-- **Weierstrass-cubing of `y_gen` in char 5**: `y_gen^3` in `{1, y_gen}`
     basis. Same form as char 3:
     `y_gen^3 = (ψ_2² + cubic_x)·y_gen - ψ_2·cubic_x`. -/
@@ -1331,6 +1364,7 @@ theorem y_gen_cubed_weierstrass_char_five (W : WeierstrassCurve K)
       (algebraMap K W.toAffine.FunctionField W.a₁ * x_gen W +
         algebraMap K W.toAffine.FunctionField W.a₃)) * h
 
+omit [Fintype K] [DecidableEq K] in
 /-- **Weierstrass-cubing of `y_gen` in char 3**: `y_gen^3` expressed in
     `{1, y_gen}` basis after two applications of the Weierstrass relation
     `y² = -ψ_2·y + cubic_x`:
@@ -1839,6 +1873,7 @@ noncomputable def omega3_witness_leading_partial_char_three
     2 * W.a₁ ^ 2 * W.a₂ ^ 5 * W.a₃ + W.a₁ * W.a₂ ^ 5 * W.a₄ +
     W.a₂ ^ 6 * W.a₃ + 2 * W.a₂ ^ 3 * W.a₃ ^ 3) * Polynomial.X ^ 5
 
+omit [Fintype K] [DecidableEq K] in
 /-- **Witness-parametric existential mem for the q=3 coupled residual**:
     given any polynomial `g` such that `expand K 3 g` equals the
     coupled residual, deduce the membership.
@@ -1854,6 +1889,7 @@ theorem omega3_coupled_residual_full_mem_expand_three_char_three_via_witness
         Set.range (⇑(Polynomial.expand K 3)) :=
   ⟨g, h_eq⟩
 
+omit [Fintype K] [DecidableEq K] in
 /-- **First helper for the q=3 ω_3 coupled-residual arc**: explicit form
     of `ψ_2² + cubic_x` in char 3.
 
@@ -1880,6 +1916,7 @@ theorem psi_2_sq_plus_cubic_x_form_char_three
       Polynomial.C W.a₄ * Polynomial.X +
       Polynomial.C W.a₆) * h_3P
 
+omit [Fintype K] [DecidableEq K] in
 /-- **Alternative form (negated b₄)** for `ψ_2² + cubic_x` in char 3:
     `(a₁X + a₃)² + (X³ + a₂X² + a₄X + a₆) = X³ + b₂·X² - b₄·X + b₆`.
     Uses `2·b₄ = -b₄` via `(3 : K) = 0`. -/
@@ -1894,6 +1931,7 @@ theorem psi_2_sq_plus_cubic_x_neg_b4_form_char_three
   rw [h_2b4_eq_neg_b4, Polynomial.C_neg, neg_mul]
   ring
 
+omit [Fintype K] [DecidableEq K] in
 /-- **Weierstrass-quartic of `y_gen` in char 3**: `y_gen^4` in `{1, y_gen}`
     basis after iterated Weierstrass substitution.
 
@@ -1933,6 +1971,7 @@ theorem y_gen_quartic_weierstrass_char_three (W : WeierstrassCurve K)
         algebraMap K W.toAffine.FunctionField W.a₆)) * h_sq +
     y_gen W * h_cube
 
+omit [Fintype K] [DecidableEq K] in
 /-- **Weierstrass-quintic of `y_gen` in char 3**: `y_gen^5` in `{1, y_gen}`
     basis after iterated Weierstrass substitution.
 
@@ -1984,6 +2023,7 @@ theorem y_gen_quintic_weierstrass_char_three (W : WeierstrassCurve K)
           algebraMap K W.toAffine.FunctionField W.a₆))) * h_sq +
     y_gen W * h_quartic
 
+omit [Fintype K] [DecidableEq K] in
 /-- **Weierstrass-quartic of `y_gen` in char 5** — same form as char 3
     (any char ≠ 2). -/
 theorem y_gen_quartic_weierstrass_char_five (W : WeierstrassCurve K)
@@ -2018,6 +2058,7 @@ theorem y_gen_quartic_weierstrass_char_five (W : WeierstrassCurve K)
         algebraMap K W.toAffine.FunctionField W.a₆)) * h_sq +
     y_gen W * h_cube
 
+omit [Fintype K] [DecidableEq K] in
 /-- **Weierstrass-quintic of `y_gen` in char 5** — same form as char 3. -/
 theorem y_gen_quintic_weierstrass_char_five (W : WeierstrassCurve K)
     [W.toAffine.IsElliptic] [CharP K 5] :
@@ -2070,6 +2111,7 @@ These helpers package the substitution generically for an arbitrary
 K(E) coefficient `p` (which will be specialized to
 `aeval x_gen (Polynomial.coeff (W.ω 3) k)` in the final composition). -/
 
+omit [Fintype K] [DecidableEq K] in
 /-- **Y² contribution helper**: `p · y_gen² = -p·ψ_2·y_gen + p·cubic_x`. -/
 theorem y_gen_sq_mul_basis_form_char_three (W : WeierstrassCurve K)
     [W.toAffine.IsElliptic] [CharP K 3] (p : W.toAffine.FunctionField) :
@@ -2083,6 +2125,7 @@ theorem y_gen_sq_mul_basis_form_char_three (W : WeierstrassCurve K)
   have h_sq := y_gen_sq_weierstrass_char_three W
   linear_combination p * h_sq
 
+omit [Fintype K] [DecidableEq K] in
 /-- **Y³ contribution helper**: `p · y_gen^3 = p·(ψ_2² + cubic_x)·y_gen
     - p·ψ_2·cubic_x`. -/
 theorem y_gen_cubed_mul_basis_form_char_three (W : WeierstrassCurve K)
@@ -2103,6 +2146,7 @@ theorem y_gen_cubed_mul_basis_form_char_three (W : WeierstrassCurve K)
   have h_cube := y_gen_cubed_weierstrass_char_three W
   linear_combination p * h_cube
 
+omit [Fintype K] [DecidableEq K] in
 /-- **Y⁴ contribution helper**: `p · y_gen^4 = -p·ψ_2·(ψ_2²+2·cubic_x)·y_gen +
     p·cubic_x·(ψ_2²+cubic_x)`. -/
 theorem y_gen_quartic_mul_basis_form_char_three (W : WeierstrassCurve K)
@@ -2129,6 +2173,7 @@ theorem y_gen_quartic_mul_basis_form_char_three (W : WeierstrassCurve K)
   have h_quartic := y_gen_quartic_weierstrass_char_three W
   linear_combination p * h_quartic
 
+omit [Fintype K] [DecidableEq K] in
 /-- **Y⁵ contribution helper**: `p · y_gen^5 = p·(ψ_2⁴+3ψ_2²·cubic_x+cubic_x²)·y_gen
     - p·ψ_2·cubic_x·(ψ_2²+2·cubic_x)`. -/
 theorem y_gen_quintic_mul_basis_form_char_three (W : WeierstrassCurve K)
@@ -2161,6 +2206,7 @@ theorem y_gen_quintic_mul_basis_form_char_three (W : WeierstrassCurve K)
   have h_quintic := y_gen_quintic_weierstrass_char_three W
   linear_combination p * h_quintic
 
+omit [Fintype K] [DecidableEq K] in
 /-- **α-cubed basis form** (q=3 char-3): combined char-3 cubing
     + Weierstrass substitution chain.
 
@@ -2188,6 +2234,7 @@ theorem alpha_cubed_basis_form_char_three (W : WeierstrassCurve K)
   rw [char_three_cube_basis_form, y_gen_cubed_weierstrass_char_three]
   ring
 
+omit [Fintype K] [DecidableEq K] in
 set_option maxHeartbeats 800000 in
 /-- **K(E)-level sum decomposition of `ω_ff W 3` via natDegree bound**:
     given `(W.ω 3).natDegree ≤ 5`, expresses `ω_ff W 3` as the explicit
@@ -2241,6 +2288,7 @@ theorem omega_ff_three_decomp_via_nat_degree_bound
     map_add, map_mul, map_pow, h_C_aeval, h_X_y]
   ring
 
+omit [Fintype K] [DecidableEq K] in
 set_option maxHeartbeats 1000000 in
 /-- **Witness-parametric `OmegaThreeBasisHoldsReduced` discharge**:
     given the polynomial-algebra decomposition of `ω_ff W 3` as a sum
@@ -2498,6 +2546,7 @@ theorem natDegree_ω_three_le_via_component_witnesses
     · omega
   · omega
 
+omit [Fintype K] [DecidableEq K] in
 /-- **`OmegaThreeBasisHoldsReduced` discharge via natDegree bound**:
     given `(W.ω 3).natDegree ≤ 5`, the basis decomposition holds
     UNCONDITIONALLY (modulo the single mathlib-API natDegree bound).
@@ -2545,7 +2594,7 @@ theorem ψ_2_ne_zero_of_char_three {K' : Type*} [CommRing K'] [Nontrivial K'] [C
   exact two_ne_zero_of_char_three h_coeff_1
 
 /-- **(W.ψ 4) ≠ 0 in char 3** — `ψ_4 = C preΨ_4 · ψ_2`, both nonzero. -/
-theorem ψ_four_ne_zero_of_char_three {K' : Type*} [CommRing K'] [Nontrivial K']
+theorem ψ_four_ne_zero_of_char_three {K' : Type*} [CommRing K']
     [IsDomain K'] [CharP K' 3] (W : WeierstrassCurve K') :
     (W.ψ 4 : (Polynomial K')[X]) ≠ 0 := by
   rw [WeierstrassCurve.ψ_four]
@@ -2556,14 +2605,14 @@ theorem ψ_four_ne_zero_of_char_three {K' : Type*} [CommRing K'] [Nontrivial K']
   · exact ψ_2_ne_zero_of_char_three W h2
 
 /-- **(W.ψ 4)² ≠ 0 in char 3**. -/
-theorem ψ_four_sq_ne_zero_of_char_three {K' : Type*} [CommRing K'] [Nontrivial K']
+theorem ψ_four_sq_ne_zero_of_char_three {K' : Type*} [CommRing K']
     [IsDomain K'] [CharP K' 3] (W : WeierstrassCurve K') :
     (W.ψ 4 : (Polynomial K')[X]) ^ 2 ≠ 0 :=
   pow_ne_zero 2 (ψ_four_ne_zero_of_char_three W)
 
 /-- **complEDSAux₂_3 = C preΨ_4² · ψ_2** in char 3 — explicit form via
     `complEDSAux₂_mul_b · ψ_2 = (ψ_4)²` + ψ_2 cancellation in domain. -/
-theorem complEDSAux₂_three_eq_of_char_three {K' : Type*} [CommRing K'] [Nontrivial K']
+theorem complEDSAux₂_three_eq_of_char_three {K' : Type*} [CommRing K']
     [IsDomain K'] [CharP K' 3] (W : WeierstrassCurve K') :
     complEDSAux₂ W.ψ₂ (Polynomial.C W.Ψ₃) (Polynomial.C W.preΨ₄) 3 =
       (Polynomial.C W.preΨ₄) ^ 2 * W.ψ₂ := by
@@ -2588,7 +2637,7 @@ theorem complEDSAux₂_three_eq_of_char_three {K' : Type*} [CommRing K'] [Nontri
     Via the explicit form `C preΨ_4² · ψ_2`: C preΨ_4² has Y-natDegree 0,
     ψ_2 has Y-natDegree ≤ 1, so the product has natDegree ≤ 1. -/
 theorem natDegree_complEDSAux₂_three_le_of_char_three {K' : Type*} [CommRing K']
-    [Nontrivial K'] [IsDomain K'] [CharP K' 3] (W : WeierstrassCurve K') :
+    [IsDomain K'] [CharP K' 3] (W : WeierstrassCurve K') :
     (complEDSAux₂ W.ψ₂ (Polynomial.C W.Ψ₃)
       (Polynomial.C W.preΨ₄) 3).natDegree ≤ 1 := by
   rw [complEDSAux₂_three_eq_of_char_three]
@@ -2601,13 +2650,14 @@ theorem natDegree_complEDSAux₂_three_le_of_char_three {K' : Type*} [CommRing K
   omega
 
 /-- **(W.ω 3).natDegree ≤ 5 UNCONDITIONAL in char 3**. -/
-theorem natDegree_ω_three_le_of_char_three {K' : Type*} [CommRing K'] [Nontrivial K']
+theorem natDegree_ω_three_le_of_char_three {K' : Type*} [CommRing K']
     [IsDomain K'] [CharP K' 3] (W : WeierstrassCurve K') :
     (W.ω 3).natDegree ≤ 5 :=
   natDegree_ω_three_le_via_component_witnesses W
     (natDegree_redInvarDenom_three_le W)
     (natDegree_complEDSAux₂_three_le_of_char_three W)
 
+omit [Fintype K] [DecidableEq K] in
 /-- **OmegaThreeBasisHoldsReduced UNCONDITIONAL in char 3** — composes the
     natDegree bound with `omegaThreeBasisHoldsReduced_via_nat_degree_bound`.
 
@@ -2675,6 +2725,7 @@ The y-side squaring identity needs `aeval x_gen (C a₁ X + C a₃) ≠ 0` in
 `KE`. Direct from `Δ_of_char_two`: if `a₁ X + a₃ = 0` as a polynomial,
 then `a₁ = a₃ = 0`, forcing `Δ = 0` and contradicting `[IsElliptic]`. -/
 
+omit [Fintype K] [DecidableEq K] in
 /-- In char 2 with `[IsElliptic]`, the polynomial `a₁ X + a₃ ∈ K[X]` is
 nonzero. Local copy of the same fact in `AdditionPullback/Frobenius.lean`,
 inlined here to avoid pulling that import chain into `Verschiebung`. -/
@@ -2693,6 +2744,7 @@ private theorem a₁X_plus_a₃_polynomial_ne_zero_char_two
     rw [WeierstrassCurve.Δ_of_char_two, h_a1, h_a3]; ring
   exact W.toAffine.isUnit_Δ.ne_zero h_delta
 
+omit [Fintype K] [DecidableEq K] in
 /-- `aeval x_gen (C a₁ X + C a₃) ≠ 0` in `KE` for char-2 elliptic `W`.
 The `h_psi_ne` discharge for the squaring identity. Combines the
 polynomial-level nonzero with injectivity of `K[X] → CoordinateRing → KE`. -/
