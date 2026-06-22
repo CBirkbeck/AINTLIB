@@ -613,4 +613,129 @@ theorem normal_FinfPlus : Normal ℚ (FinfPlus p) := by
   rw [FinfPlus]
   exact IntermediateField.normal_iSup (t := fun n => FPlus p n) (h := fun n => normal_FPlus p n)
 
+/-! ### `M⁺_∞/ℚ` is Galois — the prerequisite for the `Γ⁺`-action (Remark 13.7)
+
+`Γ⁺ = Gal(F∞⁺/ℚ)` acts on `X∞⁺ = Gal(M∞⁺/F∞⁺)` (Remark 13.7) via the group extension
+`1 → X∞⁺ → Gal(M∞⁺/ℚ) → Γ⁺ → 1`; the surjection onto `Γ⁺` exists because `M∞⁺/ℚ` is normal.
+`M∞⁺` is generated over `ℚ` by `F∞⁺` (normal) together with the finite layers `M⁺ₙ`, and each `M⁺ₙ`
+is `Gal(Ω/ℚ)`-stable — its defining property (finite abelian `p`-power, unramified outside `p`) is
+preserved by every `ℚ`-algebra map of `Ω` — hence normal over `ℚ`. -/
+
+instance instIsAlgClosureOm : IsAlgClosure ℚ Om := ⟨inferInstance, inferInstance⟩
+
+instance instNormalOm : Normal ℚ Om := IsAlgClosure.normal ℚ Om
+
+instance instIsGaloisOm : IsGalois ℚ Om := ⟨⟩
+
+/-- The base `F∞⁺` is contained in `M∞⁺` (as `ℚ`-subfields of `Ω`). -/
+theorem FinfPlus_le_MinfPlus_restrict :
+    FinfPlus p ≤ (MinfPlus p).restrictScalars ℚ := by
+  intro x hx
+  rw [IntermediateField.mem_restrictScalars]
+  exact (MinfPlus p).algebraMap_mem ⟨x, hx⟩
+
+/-- The base `F⁺ₙ` is contained in `M⁺ₙ` (as `ℚ`-subfields of `Ω`). -/
+theorem FPlus_le_MPlusN_restrict (n : ℕ) :
+    FPlus p n ≤ (MPlusN p n).restrictScalars ℚ := by
+  intro x hx
+  rw [IntermediateField.mem_restrictScalars]
+  exact (MPlusN p n).algebraMap_mem ⟨x, hx⟩
+
+/-- Each finite layer `M⁺ₙ` is contained in `M∞⁺` (as `ℚ`-subfields of `Ω`). -/
+theorem MPlusN_le_MinfPlus_restrict (n : ℕ) :
+    (MPlusN p n).restrictScalars ℚ ≤ (MinfPlus p).restrictScalars ℚ := by
+  intro x hx
+  rw [IntermediateField.mem_restrictScalars] at hx ⊢
+  rw [MinfPlus]
+  exact IntermediateField.subset_adjoin _ _ (Set.mem_iUnion.mpr ⟨n, hx⟩)
+
+/-- A `ℚ`-restricted compositum of `F⁺ₙ`-intermediate fields is `≤ X` as soon as `X` contains the
+base `F⁺ₙ` and each `ℚ`-restricted piece. (Replaces the missing `restrictScalars_iSup` for the one
+direction we need.) -/
+theorem restrictScalars_iSup_le {n : ℕ} {ι : Sort*} (f : ι → IntermediateField (FPlus p n) Om)
+    {X : IntermediateField ℚ Om} (hbase : FPlus p n ≤ X)
+    (hf : ∀ i, (f i).restrictScalars ℚ ≤ X) : (⨆ i, f i).restrictScalars ℚ ≤ X := by
+  rw [IntermediateField.iSup_eq_adjoin]
+  rw [show ((IntermediateField.adjoin (↑(FPlus p n)) (⋃ i, (↑(f i) : Set Om))).restrictScalars ℚ)
+        = IntermediateField.adjoin ℚ ((↑(FPlus p n) : Set Om) ∪ ⋃ i, ↑(f i))
+      from IntermediateField.restrictScalars_adjoin ℚ (FPlus p n) _,
+    IntermediateField.adjoin_le_iff]
+  rintro x (hxF | hxU)
+  · exact hbase hxF
+  · obtain ⟨i, hi⟩ := Set.mem_iUnion.mp hxU
+    exact hf i hi
+
+/-- **Admissibility is `σ`-invariant** (the analytic heart of normality): if `L` is an admissible-`M`
+layer over `F⁺ₙ` and `σ` is a `ℚ`-algebra map of `Ω` (which fixes `F⁺ₙ` setwise, `F⁺ₙ/ℚ` normal),
+then `σ(L)` — viewed as an `F⁺ₙ`-extension via `extendScalars` — is again admissible: the iso `σ|_L`
+transports finiteness, the (abelian) Galois structure, the `p`-power degree, and unramifiedness
+outside `p`. -/
+theorem isAdmissibleM_map (n : ℕ) (σ : Om →ₐ[ℚ] Om) {L : IntermediateField (FPlus p n) Om}
+    (hL : IsAdmissibleM p n L)
+    (hFle : FPlus p n ≤ IntermediateField.map σ (L.restrictScalars ℚ)) :
+    IsAdmissibleM p n (IntermediateField.extendScalars hFle) := by
+  sorry
+
+/-- **Admissible-layer transport**: a `ℚ`-algebra map `σ` of `Ω` carries any admissible-`M` layer
+over `F⁺ₙ` into `M⁺ₙ` (since `σ(L)` is again admissible, by `isAdmissibleM_map`). -/
+theorem map_le_MPlusN_of_isAdmissibleM (n : ℕ) (σ : Om →ₐ[ℚ] Om)
+    {L : IntermediateField (FPlus p n) Om} (hL : IsAdmissibleM p n L) :
+    IntermediateField.map σ (L.restrictScalars ℚ) ≤ (MPlusN p n).restrictScalars ℚ := by
+  have hFL : FPlus p n ≤ (L.restrictScalars ℚ) := by
+    intro x hx
+    rw [IntermediateField.mem_restrictScalars]
+    exact L.algebraMap_mem ⟨x, hx⟩
+  have hFle : FPlus p n ≤ IntermediateField.map σ (L.restrictScalars ℚ) :=
+    le_of_eq_of_le (IntermediateField.normal_iff_forall_map_eq.mp (normal_FPlus p n) σ).symm
+      (IntermediateField.map_mono σ hFL)
+  rw [← IntermediateField.extendScalars_restrictScalars hFle]
+  refine (IntermediateField.restrictScalars_le_iff ℚ).mpr ?_
+  rw [MPlusN]
+  exact le_iSup₂_of_le (IntermediateField.extendScalars hFle) (isAdmissibleM_map p n σ hL hFle) le_rfl
+
+/-- Each finite layer `M⁺ₙ`, as a `ℚ`-subfield of `Ω`, is normal over `ℚ` (it is `Gal(Ω/ℚ)`-stable
+by `map_le_MPlusN_of_isAdmissibleM`, with the base `F⁺ₙ` absorbed via `normal_FPlus`). -/
+theorem normal_MPlusN_restrict (n : ℕ) : Normal ℚ ↥((MPlusN p n).restrictScalars ℚ) := by
+  refine (IntermediateField.normal_iff_forall_map_le).mpr fun σ => ?_
+  rw [IntermediateField.map_le_iff_le_comap]
+  have hbotle : (⊥ : IntermediateField (FPlus p n) Om).restrictScalars ℚ ≤ FPlus p n := by
+    intro x hx
+    rw [IntermediateField.mem_restrictScalars, IntermediateField.mem_bot] at hx
+    obtain ⟨y, rfl⟩ := hx
+    exact y.2
+  have hb : FPlus p n ≤ IntermediateField.comap σ ((MPlusN p n).restrictScalars ℚ) := by
+    intro x hx
+    show σ x ∈ (MPlusN p n).restrictScalars ℚ
+    exact FPlus_le_MPlusN_restrict p n
+      ((IntermediateField.normal_iff_forall_map_le.mp (normal_FPlus p n) σ) ⟨x, hx, rfl⟩)
+  refine restrictScalars_iSup_le p (fun L => ⨆ _ : IsAdmissibleM p n L, L) hb (fun L => ?_)
+  by_cases h : IsAdmissibleM p n L
+  · rw [iSup_pos h, ← IntermediateField.map_le_iff_le_comap]
+    exact map_le_MPlusN_of_isAdmissibleM p n σ h
+  · rw [iSup_neg h]; exact le_trans hbotle hb
+
+/-- **`M⁺_∞/ℚ` is normal.** `M∞⁺` is generated over `ℚ` by `F∞⁺` and the layers `M⁺ₙ`, each
+`Gal(Ω/ℚ)`-stable, so `M∞⁺` is too. The prerequisite for the surjection `Gal(M∞⁺/ℚ) ↠ Γ⁺`. -/
+theorem normal_MinfPlus : Normal ℚ ↥(MinfPlus p) := by
+  have h : Normal ℚ ↥((MinfPlus p).restrictScalars ℚ) := by
+    refine (IntermediateField.normal_iff_forall_map_le).mpr fun σ => ?_
+    rw [IntermediateField.map_le_iff_le_comap]
+    nth_rewrite 1 [MinfPlus]
+    rw [show ((IntermediateField.adjoin (↑(FinfPlus p)) (⋃ n, (↑(MPlusN p n) : Set Om))).restrictScalars ℚ)
+          = IntermediateField.adjoin ℚ ((↑(FinfPlus p) : Set Om) ∪ ⋃ n, ↑(MPlusN p n))
+        from IntermediateField.restrictScalars_adjoin ℚ (FinfPlus p) _,
+      IntermediateField.adjoin_le_iff]
+    rintro x (hxF | hxM)
+    · -- `x ∈ F∞⁺`: `σ x ∈ F∞⁺ ⊆ M∞⁺`
+      show σ x ∈ (MinfPlus p).restrictScalars ℚ
+      exact FinfPlus_le_MinfPlus_restrict p
+        ((IntermediateField.normal_iff_forall_map_le.mp (normal_FinfPlus p) σ) ⟨x, hxF, rfl⟩)
+    · -- `x ∈ M⁺ₙ` for some `n`: `σ x ∈ M⁺ₙ ⊆ M∞⁺`
+      obtain ⟨n, hxn⟩ := Set.mem_iUnion.mp hxM
+      show σ x ∈ (MinfPlus p).restrictScalars ℚ
+      refine MPlusN_le_MinfPlus_restrict p n ?_
+      exact (IntermediateField.normal_iff_forall_map_le.mp (normal_MPlusN_restrict p n) σ)
+        ⟨x, (IntermediateField.mem_restrictScalars ℚ).mpr hxn, rfl⟩
+  exact h
+
 end Iwasawa.GaloisFoundation
