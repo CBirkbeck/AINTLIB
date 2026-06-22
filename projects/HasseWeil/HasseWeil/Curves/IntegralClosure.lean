@@ -626,6 +626,54 @@ theorem Polynomial.Monic.eq_X_sq_add_C_mul_X_add_C_of_natDegree_two
       if_neg (by omega : n ≠ 1)]
     simp
 
+/-- **Helper (degree bound)**: if an integral element `x : F(C)` is the image of a
+scalar `p ∈ F(X)` under `F(X) → F(C)`, then its minimal polynomial over `F[X]` has
+`natDegree ≤ 1`. Used to rule out the `q = 0` branch in the degree-2 case. -/
+private theorem natDegree_minpoly_le_one_of_eq_algebraMap_fracPoly
+    {x : C.FunctionField} (hx_Fx : IsIntegral (Polynomial F) x)
+    {p : FractionRing (Polynomial F)}
+    (hx_fx : x = algebraMap (FractionRing (Polynomial F)) C.FunctionField p) :
+    (minpoly (Polynomial F) x).natDegree ≤ 1 := by
+  have hmle1 : (minpoly (FractionRing (Polynomial F)) x).natDegree ≤ 1 := by
+    have h_le : (minpoly (FractionRing (Polynomial F)) x).degree ≤
+        (Polynomial.X - Polynomial.C p).degree :=
+      minpoly.min _ _ (Polynomial.monic_X_sub_C p) (by
+        rw [map_sub, Polynomial.aeval_X, Polynomial.aeval_C, hx_fx, sub_self])
+    rw [Polynomial.degree_X_sub_C] at h_le
+    exact Polynomial.natDegree_le_of_degree_le h_le
+  rwa [minpoly.isIntegrallyClosed_eq_field_fractions' _ hx_Fx,
+    Polynomial.natDegree_map_eq_of_injective
+      (IsFractionRing.injective (Polynomial F) (FractionRing (Polynomial F)))] at hmle1
+
+/-- **Helper (halving in char ≠ 2)**: in `F(X)`, if `2 · z = algebraMap r` for some
+`r : F[X]`, then `z` is the image of `C (2⁻¹) · r`. The polynomial-level inverse of
+`2` exists because `(2 : F) ≠ 0`. Used to descend `p ∈ F(X)` to `F[X]` once the
+trace `α + q' · b` is known to be `2 · p`. -/
+private theorem eq_algebraMap_C_inv_two_mul_of_two_mul [NeZero (2 : F)]
+    {z : FractionRing (Polynomial F)} {r : Polynomial F}
+    (h : (2 : FractionRing (Polynomial F)) * z =
+      algebraMap (Polynomial F) (FractionRing (Polynomial F)) r) :
+    z = algebraMap (Polynomial F) (FractionRing (Polynomial F))
+      (Polynomial.C ((2 : F)⁻¹) * r) := by
+  have h2_ne : (2 : F) ≠ 0 := NeZero.ne _
+  have h2p' : (2 : Polynomial F) * (Polynomial.C ((2 : F)⁻¹) * r) = r := by
+    rw [show (2 : Polynomial F) = Polynomial.C 2 from (map_ofNat Polynomial.C 2).symm,
+      ← mul_assoc, ← map_mul, mul_inv_cancel₀ h2_ne, map_one, one_mul]
+  have h2fx_map : (algebraMap (Polynomial F) (FractionRing (Polynomial F))) 2 =
+      (2 : FractionRing (Polynomial F)) := map_ofNat _ 2
+  have h2poly_ne : (2 : Polynomial F) ≠ 0 := by
+    rw [show (2 : Polynomial F) = Polynomial.C 2 from (map_ofNat Polynomial.C 2).symm]
+    exact (map_ne_zero_iff _ Polynomial.C_injective).mpr h2_ne
+  have h2fx_ne : (2 : FractionRing (Polynomial F)) ≠ 0 := by
+    rw [← h2fx_map]
+    exact (map_ne_zero_iff _ (IsFractionRing.injective
+      (Polynomial F) (FractionRing (Polynomial F)))).mpr h2poly_ne
+  refine mul_left_cancel₀ h2fx_ne ?_
+  rw [show (2 : FractionRing (Polynomial F)) *
+    algebraMap (Polynomial F) (FractionRing (Polynomial F)) (Polynomial.C ((2 : F)⁻¹) * r) =
+    algebraMap (Polynomial F) (FractionRing (Polynomial F)) r by
+      rw [← h2fx_map, ← map_mul, h2p'], ← h]
+
 -- Degree-2 case of `isIntegrallyClosed_coordinateRing_of_IsElliptic`, factored out:
 -- squarefreeness of the discriminant extracts a degree-2-integral `x` into `F[C]`.
 private theorem mem_coordinateRing_of_minpoly_natDegree_two
@@ -669,16 +717,7 @@ private theorem mem_coordinateRing_of_minpoly_natDegree_two
   · exfalso
     have hx_fx : x = algebraMap (FractionRing (Polynomial F)) C.FunctionField p := by
       rw [hpq, hq_zero, zero_smul, add_zero, Algebra.smul_def, mul_one]
-    have hmle1 : (minpoly (FractionRing (Polynomial F)) x).natDegree ≤ 1 := by
-      have h_le : (minpoly (FractionRing (Polynomial F)) x).degree ≤
-          (Polynomial.X - Polynomial.C p).degree :=
-        minpoly.min _ _ (Polynomial.monic_X_sub_C p) (by
-          rw [map_sub, Polynomial.aeval_X, Polynomial.aeval_C, hx_fx, sub_self])
-      rw [Polynomial.degree_X_sub_C] at h_le
-      exact Polynomial.natDegree_le_of_degree_le h_le
-    rw [minpoly.isIntegrallyClosed_eq_field_fractions' _ hx_Fx,
-      Polynomial.natDegree_map_eq_of_injective
-        (IsFractionRing.injective (Polynomial F) (FractionRing (Polynomial F)))] at hmle1
+    have := C.natDegree_minpoly_le_one_of_eq_algebraMap_fracPoly hx_Fx hx_fx
     omega
   · have hα_formula : αfx = 2 * p - q * C.bFracPoly := by linear_combination -hα_val
     have hγ_formula : γfx = p ^ 2 - p * q * C.bFracPoly - q ^ 2 * C.cFracPoly := by
@@ -703,26 +742,9 @@ private theorem mem_coordinateRing_of_minpoly_natDegree_two
         (α + q' * bp) := by
       rw [map_add, map_mul, hq', ← hbf_eq, ← hαfx_def]
       linear_combination -hα_formula
-    have h2_ne : (2 : F) ≠ 0 := NeZero.ne _
     set p' : Polynomial F := Polynomial.C ((2 : F)⁻¹) * (α + q' * bp) with hp'_def
-    have h2p' : (2 : Polynomial F) * p' = α + q' * bp := by
-      rw [hp'_def, show (2 : Polynomial F) = Polynomial.C 2 from (map_ofNat Polynomial.C 2).symm,
-        ← mul_assoc, ← map_mul, mul_inv_cancel₀ h2_ne, map_one, one_mul]
-    have hp_eq : p = algebraMap (Polynomial F) (FractionRing (Polynomial F)) p' := by
-      have h2fx_map : (algebraMap (Polynomial F) (FractionRing (Polynomial F))) 2 =
-          (2 : FractionRing (Polynomial F)) := map_ofNat _ 2
-      have h2poly_ne : (2 : Polynomial F) ≠ 0 := by
-        rw [show (2 : Polynomial F) = Polynomial.C 2 from (map_ofNat Polynomial.C 2).symm]
-        exact (map_ne_zero_iff _ Polynomial.C_injective).mpr h2_ne
-      have h2fx_ne : (2 : FractionRing (Polynomial F)) ≠ 0 := by
-        rw [← h2fx_map]
-        exact (map_ne_zero_iff _ (IsFractionRing.injective
-          (Polynomial F) (FractionRing (Polynomial F)))).mpr h2poly_ne
-      refine mul_left_cancel₀ h2fx_ne ?_
-      rw [show (2 : FractionRing (Polynomial F)) *
-        algebraMap (Polynomial F) (FractionRing (Polynomial F)) p' =
-        algebraMap (Polynomial F) (FractionRing (Polynomial F)) (α + q' * bp) by
-          rw [← h2fx_map, ← map_mul, h2p'], ← h2p]
+    have hp_eq : p = algebraMap (Polynomial F) (FractionRing (Polynomial F)) p' :=
+      eq_algebraMap_C_inv_two_mul_of_two_mul h2p
     have hp_img : (p : FractionRing (Polynomial F)) • (1 : C.FunctionField) =
         algebraMap C.CoordinateRing C.FunctionField
           (algebraMap (Polynomial F) C.CoordinateRing p') := by
