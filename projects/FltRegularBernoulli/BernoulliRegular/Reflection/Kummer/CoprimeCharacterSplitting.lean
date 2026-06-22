@@ -1,3 +1,3 @@
 module
 
-public import BernoulliRegular.Reflection.Kummer.CoprimeCharacterSplitting.Part2
+public import BernoulliRegular.Reflection.Kummer.CoprimeCharacterSplitting.LocallyPrimaryCharacterNontriviality

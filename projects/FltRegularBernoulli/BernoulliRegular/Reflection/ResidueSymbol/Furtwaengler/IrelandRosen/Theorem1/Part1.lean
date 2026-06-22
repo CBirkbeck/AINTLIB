@@ -2,7 +2,7 @@ module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.IrelandRosen.PrimeFamily
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.BundleConstruction
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CyclotomicLocalSetup.Part1
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CyclotomicLocalSetup.PrimitiveRootsResidueFieldBundle
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.DworkFactorization.FlexibleFiniteDworkProduct
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.EisensteinReciprocityInteger
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.TraceFormGalois

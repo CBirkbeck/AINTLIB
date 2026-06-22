@@ -5,7 +5,7 @@ public import BernoulliRegular.Reflection.Local.PowerMap
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.DworkFactorization.FiniteArtinHasseFormal
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.DworkFactorization.FiniteLogBounds
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.DworkFactorization.FiniteLogFormal
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.DworkFactorization.Basic.Part1
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.DworkFactorization.Basic.ThetaTruncProductExpansion
 public import Mathlib.RingTheory.AdicCompletion.Algebra
 public import Mathlib.RingTheory.AdicCompletion.AsTensorProduct
 public import Mathlib.RingTheory.AdicCompletion.Completeness

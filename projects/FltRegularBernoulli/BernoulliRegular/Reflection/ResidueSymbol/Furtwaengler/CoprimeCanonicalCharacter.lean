@@ -1,3 +1,3 @@
 module
 
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CoprimeCanonicalCharacter.Part2
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CoprimeCanonicalCharacter.ClassGroupModPHom

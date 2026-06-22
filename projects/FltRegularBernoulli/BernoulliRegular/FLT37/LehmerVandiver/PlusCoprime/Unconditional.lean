@@ -11,7 +11,7 @@ import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Thaine.ReflectionOther
 import BernoulliRegular.HMinus.HMinusCriterion
 import BernoulliRegular.Reflection.ClassGroupModP.AtomC
 import BernoulliRegular.Reflection.ClassGroupModP.SP2
-import BernoulliRegular.Reflection.FinalReflection.Part2
+import BernoulliRegular.Reflection.FinalReflection.WeakReflection
 import BernoulliRegular.UnitQuotient.PadicEigenspaceRankOne
 
 /-!

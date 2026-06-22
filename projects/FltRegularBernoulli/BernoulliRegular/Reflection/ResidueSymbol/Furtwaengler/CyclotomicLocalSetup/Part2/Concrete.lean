@@ -5,7 +5,7 @@ public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.KummerFurtw
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CanonicalResidueRoot
 public import Mathlib.NumberTheory.Cyclotomic.Basic
 public import Mathlib.RingTheory.Ideal.GoingUp
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CyclotomicLocalSetup.Part1
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CyclotomicLocalSetup.PrimitiveRootsResidueFieldBundle
 
 
 /-!
