@@ -858,6 +858,38 @@ private theorem intDegree_algebraMap_div_algebraMap
     RatFunc.intDegree_inv, RatFunc.intDegree_polynomial, RatFunc.intDegree_polynomial]
   ring
 
+/-- A quotient of polynomials minus a constant, written again as a single quotient: for nonzero
+`d : F[X]`, any `n : F[X]` and `lam : F`, subtracting the constant `lam` from `n / d` clears to
+`(n - C lam * d) / d` over `F[X]`. This is the algebraic identity underlying the long-division
+step in `ratFunc_exists_C_sub_intDegree_neg`. -/
+private theorem algebraMap_div_sub_C_eq {n d : Polynomial F} (hd : d ≠ 0) (lam : F) :
+    algebraMap (Polynomial F) (RatFunc F) n / algebraMap (Polynomial F) (RatFunc F) d -
+        RatFunc.C lam =
+      algebraMap (Polynomial F) (RatFunc F) (n - Polynomial.C lam * d) /
+        algebraMap (Polynomial F) (RatFunc F) d := by
+  have hd' : algebraMap (Polynomial F) (RatFunc F) d ≠ 0 :=
+    (map_ne_zero_iff _ (RatFunc.algebraMap_injective F)).mpr hd
+  rw [eq_div_iff hd', sub_mul, div_mul_cancel₀ _ hd', map_sub, map_mul, ← RatFunc.algebraMap_C]
+
+/-- The numerator drop in long division: if `n` and `d` are nonzero polynomials of equal
+`natDegree`, then subtracting `(n.leadingCoeff / d.leadingCoeff) • d` from `n` strictly
+lowers the degree, since the leading terms cancel. This is the degree bookkeeping behind the
+equal-degree case of `ratFunc_exists_C_sub_intDegree_neg`. -/
+private theorem degree_sub_C_leadingCoeff_div_mul_lt {n d : Polynomial F}
+    (hn : n ≠ 0) (hd : d ≠ 0) (h_eq : n.natDegree = d.natDegree) :
+    (n - Polynomial.C (n.leadingCoeff / d.leadingCoeff) * d).degree < n.degree := by
+  set lam : F := n.leadingCoeff / d.leadingCoeff with hlam
+  have hlc_d : d.leadingCoeff ≠ 0 := Polynomial.leadingCoeff_ne_zero.mpr hd
+  have hlc_n : n.leadingCoeff ≠ 0 := Polynomial.leadingCoeff_ne_zero.mpr hn
+  have hlam_ne : lam ≠ 0 := div_ne_zero hlc_n hlc_d
+  have h_lc : n.leadingCoeff = (Polynomial.C lam * d).leadingCoeff := by
+    rw [Polynomial.leadingCoeff_mul, Polynomial.leadingCoeff_C, hlam,
+      div_mul_cancel₀ _ hlc_d]
+  have h_deg : n.degree = (Polynomial.C lam * d).degree := by
+    rw [Polynomial.degree_C_mul hlam_ne, Polynomial.degree_eq_natDegree hn,
+      Polynomial.degree_eq_natDegree hd, h_eq]
+  exact Polynomial.degree_sub_lt h_deg hn h_lc
+
 private theorem ratFunc_exists_C_sub_intDegree_neg {r : RatFunc F}
     (hr : r.intDegree ≤ 0) :
     ∃ lam : F, r - RatFunc.C lam = 0 ∨ (r - RatFunc.C lam).intDegree < 0 := by
@@ -878,24 +910,12 @@ private theorem ratFunc_exists_C_sub_intDegree_neg {r : RatFunc F}
     rw [map_zero, sub_zero, h_intDeg]
     omega
   · set lam : F := n.leadingCoeff / d.leadingCoeff with hlam
-    have hlc_d : d.leadingCoeff ≠ 0 := Polynomial.leadingCoeff_ne_zero.mpr hd_ne
-    have hlc_n : n.leadingCoeff ≠ 0 := Polynomial.leadingCoeff_ne_zero.mpr hn_ne
-    have hlam_ne : lam ≠ 0 := div_ne_zero hlc_n hlc_d
-    have hd' : algebraMap (Polynomial F) (RatFunc F) d ≠ 0 :=
-      (map_ne_zero_iff _ (RatFunc.algebraMap_injective F)).mpr hd_ne
     have h_sub_eq : r - RatFunc.C lam =
         algebraMap (Polynomial F) (RatFunc F) (n - Polynomial.C lam * d) /
           algebraMap (Polynomial F) (RatFunc F) d := by
-      rw [eq_div_iff hd', sub_mul, hr_div, div_mul_cancel₀ _ hd', map_sub, map_mul,
-        ← RatFunc.algebraMap_C]
-    have h_lc : n.leadingCoeff = (Polynomial.C lam * d).leadingCoeff := by
-      rw [Polynomial.leadingCoeff_mul, Polynomial.leadingCoeff_C, hlam,
-        div_mul_cancel₀ _ hlc_d]
-    have h_deg : n.degree = (Polynomial.C lam * d).degree := by
-      rw [Polynomial.degree_C_mul hlam_ne, Polynomial.degree_eq_natDegree hn_ne,
-        Polynomial.degree_eq_natDegree hd_ne, h_eq]
+      rw [hr_div, algebraMap_div_sub_C_eq hd_ne]
     have h_deg_lt : (n - Polynomial.C lam * d).degree < n.degree :=
-      Polynomial.degree_sub_lt h_deg hn_ne h_lc
+      degree_sub_C_leadingCoeff_div_mul_lt hn_ne hd_ne h_eq
     by_cases h_num_zero : n - Polynomial.C lam * d = 0
     · exact ⟨lam, Or.inl (by rw [h_sub_eq, h_num_zero, map_zero, zero_div])⟩
     · refine ⟨lam, Or.inr ?_⟩
