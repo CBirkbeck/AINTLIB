@@ -242,15 +242,46 @@ theorem frobeniusRelativeCoordRingHom_smul_basis_eq (a b : Polynomial k) :
     · exact AdjoinRoot.lift_of _
     · exact AdjoinRoot.lift_root _
 
-/-- A vanishing rank-2 image forces the `Y`-coefficient to vanish: if
-`baseHom a + baseHom b * y_gen^p = 0` then `b = 0`. Uses the norm-degree
-analysis (`degree_norm_smul_basis`): a nonzero `b` would give the norm of
-`a • 1 + b • Y` degree `2·deg b + 3 ≠ ⊥`, yet the norm maps to zero, so it
-must itself be zero — a contradiction. -/
-private theorem frobeniusRelativeCoordRingHom_smul_basis_b_eq_zero (a b : Polynomial k)
+/-- **Degree obstruction to a vanishing rank-2 norm** (curve-generic): for an
+elliptic affine Weierstrass curve `W` over the field `k`, the `Polynomial k`-norm
+of a rank-2 element `a • 1 + b • Y` of its coordinate ring is nonzero whenever its
+`Y`-coefficient `b` is nonzero. By `degree_norm_smul_basis` the norm has degree
+`max (2·deg a) (2·deg b + 3)`; a nonzero `b` makes `2·deg b + 3 ≠ ⊥`, so the norm
+cannot have degree `⊥`, i.e. cannot be zero. -/
+private lemma norm_smul_basis_ne_zero_of_coeff_ne_zero (W : WeierstrassCurve k)
+    (a b : Polynomial k) (hb : b ≠ 0) :
+    Algebra.norm (Polynomial k)
+      (a • (1 : W.toAffine.CoordinateRing) +
+        b • Affine.CoordinateRing.mk W.toAffine Polynomial.X) ≠ 0 := by
+  intro h_norm_eq
+  have h_deg := Affine.CoordinateRing.degree_norm_smul_basis (W' := W.toAffine) a b
+  rw [h_norm_eq, Polynomial.degree_zero] at h_deg
+  have hb_deg : b.degree ≠ ⊥ := Polynomial.degree_ne_bot.mpr hb
+  have h2bot : 2 • b.degree + 3 ≠ (⊥ : WithBot ℕ) := by
+    intro h
+    apply hb_deg
+    cases hd : b.degree with
+    | bot => rfl
+    | coe n =>
+        rw [hd] at h
+        exact absurd h (by
+          change ¬ (2 • (↑n : WithBot ℕ) + 3 = ⊥)
+          simp [WithBot.mul_ne_bot])
+  exact absurd (h_deg ▸ le_max_right _ _ : 2 • b.degree + 3 ≤ ⊥)
+    (not_le.mpr (WithBot.bot_lt_iff_ne_bot.mpr h2bot))
+
+/-- **The `Polynomial k`-norm of a rank-2 element killed by the relative Frobenius
+coord ring hom vanishes**: if `baseHom a + baseHom b * y_gen^p = 0`, then the norm
+of `a • 1 + b • Y` in `(E.frobeniusTwist p).CoordinateRing` is zero. The norm
+factors as `r' * conj_r` with `r' = a • 1 + b • Y` (via `coe_norm_smul_basis`);
+since the coord ring hom sends `r'` to `baseHom a + baseHom b * y_gen^p = 0` and
+restricts to `frobeniusRelativeBaseHom` on `algebraMap`-images, the injectivity of
+`frobeniusRelativeBaseHom` forces the norm itself to vanish. -/
+private theorem frobeniusRelativeCoordRingHom_norm_smul_basis_eq_zero (a b : Polynomial k)
     (h0 : frobeniusRelativeBaseHom p E a + frobeniusRelativeBaseHom p E b * (y_gen E ^ p) = 0) :
-    b = 0 := by
-  by_contra hb
+    Algebra.norm (Polynomial k)
+      (a • (1 : (E.frobeniusTwist p).toAffine.CoordinateRing) +
+        b • Affine.CoordinateRing.mk (E.frobeniusTwist p).toAffine Polynomial.X) = 0 := by
   set r' := a • (1 : (E.frobeniusTwist p).toAffine.CoordinateRing) +
       b • Affine.CoordinateRing.mk (E.frobeniusTwist p).toAffine Polynomial.X with hr'_def
   have h_alg : ∀ f : Polynomial k,
@@ -276,25 +307,19 @@ private theorem frobeniusRelativeCoordRingHom_smul_basis_b_eq_zero (a b : Polyno
   have h_norm_zero : frobeniusRelativeBaseHom p E
       (Algebra.norm (Polynomial k) r') = 0 := by
     rw [← h_alg, h_factor, map_mul, hr'_zero, zero_mul]
-  have h_norm_eq : Algebra.norm (Polynomial k) r' = 0 :=
-    frobeniusRelativeBaseHom_injective p E (h_norm_zero.trans (map_zero _).symm)
-  rw [hr'_def] at h_norm_eq
-  have h_deg := Affine.CoordinateRing.degree_norm_smul_basis
-    (W' := (E.frobeniusTwist p).toAffine) a b
-  rw [h_norm_eq, Polynomial.degree_zero] at h_deg
-  have hb_deg : b.degree ≠ ⊥ := Polynomial.degree_ne_bot.mpr hb
-  have h2bot : 2 • b.degree + 3 ≠ (⊥ : WithBot ℕ) := by
-    intro h
-    apply hb_deg
-    cases hd : b.degree with
-    | bot => rfl
-    | coe n =>
-        rw [hd] at h
-        exact absurd h (by
-          change ¬ (2 • (↑n : WithBot ℕ) + 3 = ⊥)
-          simp [WithBot.mul_ne_bot])
-  exact absurd (h_deg ▸ le_max_right _ _ : 2 • b.degree + 3 ≤ ⊥)
-    (not_le.mpr (WithBot.bot_lt_iff_ne_bot.mpr h2bot))
+  exact frobeniusRelativeBaseHom_injective p E (h_norm_zero.trans (map_zero _).symm)
+
+/-- A vanishing rank-2 image forces the `Y`-coefficient to vanish: if
+`baseHom a + baseHom b * y_gen^p = 0` then `b = 0`. Uses the norm-degree
+analysis (`degree_norm_smul_basis`): a nonzero `b` would give the norm of
+`a • 1 + b • Y` degree `2·deg b + 3 ≠ ⊥`, yet the norm maps to zero, so it
+must itself be zero — a contradiction. -/
+private theorem frobeniusRelativeCoordRingHom_smul_basis_b_eq_zero (a b : Polynomial k)
+    (h0 : frobeniusRelativeBaseHom p E a + frobeniusRelativeBaseHom p E b * (y_gen E ^ p) = 0) :
+    b = 0 := by
+  by_contra hb
+  exact norm_smul_basis_ne_zero_of_coeff_ne_zero (E.frobeniusTwist p) a b hb
+    (frobeniusRelativeCoordRingHom_norm_smul_basis_eq_zero p E a b h0)
 
 /-- **Full coord ring injectivity** for `frobeniusRelativeCoordRingHom`.
 Pattern parallel to `mulByInt_coordHom_injective`: rank-2 basis
