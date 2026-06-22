@@ -101,7 +101,7 @@ lemma additivePrimeOrbit_under_characterSubfield_eq_distinguishedPrimeAboveP_und
 Gauss-sum ideal factorization of `χ`. The coefficient at `a` is the exponent
 of the prime `σ_a(P₀)`. -/
 noncomputable def additiveExponentVector (χ : DirichletCharacter ℂ p) :
-    (ZMod p)ˣ → ℕ := fun a =>
+    (ZMod p)ˣ → ℕ := fun a ↦
   sigmaOfUnitPrimeExponent (p := p) (L := L) a χ
 
 /-- The orbit map from `(ZMod (p - 1))ˣ` to the primes above `(p)`, obtained by
@@ -223,7 +223,7 @@ lemma sigmaOfCharacterUnit_mem_characterSideFixingSubgroup (b : (ZMod (p - 1))ˣ
 /-- The map from `(ZMod (p - 1))ˣ` to the subgroup fixing the additive
 subfield, given by the character-side cyclotomic lifts. -/
 noncomputable def sigmaOfCharacterUnitToFixingSubgroup :
-    (ZMod (p - 1))ˣ → characterSideFixingSubgroup (p := p) L := fun b =>
+    (ZMod (p - 1))ˣ → characterSideFixingSubgroup (p := p) L := fun b ↦
     ⟨sigmaOfCharacterUnit (p := p) L b,
       sigmaOfCharacterUnit_mem_characterSideFixingSubgroup (p := p) (L := L) b⟩
 
@@ -588,7 +588,7 @@ lemma additivePrimeOrbit_eq_singleton :
 lemma additiveExponentVector_eq_distinguishedPrimeExponent
     (χ : DirichletCharacter ℂ p) :
     additiveExponentVector (p := p) (L := L) χ =
-      fun _ => distinguishedPrimeExponent (p := p) (L := L) χ := by
+      fun _ ↦ distinguishedPrimeExponent (p := p) (L := L) χ := by
   funext a
   exact sigmaOfUnitPrimeExponent_eq_distinguishedPrimeExponent
     (p := p) (L := L) a χ
