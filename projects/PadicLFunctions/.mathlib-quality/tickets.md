@@ -7180,10 +7180,15 @@ the bridge is the gateway to the IMC chain. **Decision needed before the large n
 - **[b'] abelian — PROVEN** (`mulComm_sigmaL`): conjugation `φ ↦ ι⁻¹φι` (ι=intermediateFieldMap,
   β-semilinear) gives F⁺ₙ-autos `φL` of L (fixes F⁺ₙ via β-twist cancellation), upgraded by
   algEquivFixingFPlus; `keyφ : ι(φL z)=φ(ι z)`; transport hab (L abelian) along ι.
-- **[c] unramified outside p — SORRY (ANT core)** (`isUnramifiedOutsideP_sigmaL`): σ restricts to ring auto
-  of 𝓞_Ω fixing ℤ; σ(𝓞_L)=𝓞_{σL} over β:𝓞_{F⁺ₙ}≅𝓞_{F⁺ₙ}; primes P↦σP preserve residue char (σ fixes p) +
-  ramification index; β fixes the unique prime over p. Needs RingOfIntegers functoriality under a base auto
-  + ramificationIdx invariance. THE deepest remaining lemma.
+- **[c] unramified outside p — SORRY (ANT core, THE single remaining sorry in the file)**
+  (`isUnramifiedOutsideP_sigmaL`): σ restricts to ring auto of 𝓞_Ω fixing ℤ; σ(𝓞_L)=𝓞_{σL} over
+  β:𝓞_{F⁺ₙ}≅𝓞_{F⁺ₙ}; primes P↦σP preserve residue char (σ fixes p) + ramification index; β fixes the
+  unique prime over p. **Mathlib primitives found (all FIXED-base — the β-twist is the gap to bridge):**
+  `NumberField.RingOfIntegers.mapAlgEquiv`/`mapRingEquiv` (𝓞 functoriality), `Ideal.ramificationIdx_map_eq`
+  (ram idx invariant under AlgEquivClass), `Algebra.Unramified.of_equiv`, `RingHom.FormallyUnramified.respectsIso`,
+  `Algebra.IsUnramifiedAt.congr`. PLAN: (1) σ:L≅σL → 𝓞_L≅𝓞_{σL} (mapAlgEquiv, β-semilinear); (2) prime
+  P of 𝓞_{σL} with p∉P ↦ σ⁻¹P of 𝓞_L, base prime β-twisted but β fixes 𝔭|p; (3) ramificationIdx_map_eq
+  + β ⟹ e preserved; (4) IsUnramifiedAt transports. ~150-line ANT sub-project; its own focused effort.
 
 ## NEXT PHASE — §12 integration (Λ-module, CFT, Vandiver, IMC). Gateway = study §12
 The remaining tickets (TG2-Lambda, TG5–TG9) all need §12: `IwasawaAlgebra`, `Gamma`, `GPlus`,
