@@ -681,6 +681,312 @@ theorem relNorm_maximalIdealAt_eq
   rw [hsfn_R] at hsfn_one
   exact hsfn_one
 
+include φ cd in
+/-- **Primes over a nonzero maximal ideal are nonzero**: every prime `Q'` of `F[C₁]`
+in `primesOverFinset p` (for a nonzero maximal ideal `p` of `F[C₂]`) is itself nonzero.
+Were `Q' = ⊥`, its contraction `Q'.under = comap ⊥` would be `⊥` (the comorphism is
+injective), forcing `p = ⊥`. -/
+private theorem primesOverFinset_ne_bot {p : Ideal C₂.CoordinateRing}
+    (hpMax : p.IsMaximal) (hp_ne : p ≠ ⊥) :
+    letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    ∀ Q' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing, Q' ≠ ⊥ := by
+  letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+  letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+  haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    cd.module_finite
+  haveI htf : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    isTorsionFree_coordHom φ cd
+  haveI faithCR : FaithfulSMul C₂.CoordinateRing C₁.CoordinateRing :=
+    (faithfulSMul_iff_algebraMap_injective C₂.CoordinateRing C₁.CoordinateRing).mpr
+      (CurveMap.coordHom_injective φ cd)
+  haveI hpMax' : p.IsMaximal := hpMax
+  intro Q' hQ'
+  rw [IsDedekindDomain.mem_primesOverFinset_iff (B := C₁.CoordinateRing) hp_ne] at hQ'
+  intro h_eq
+  apply hp_ne
+  have h_over : p = Q'.under C₂.CoordinateRing := hQ'.2.over
+  rw [h_eq, Ideal.under, Ideal.comap_bot_of_injective _
+    (FaithfulSMul.algebraMap_injective C₂.CoordinateRing C₁.CoordinateRing)] at h_over
+  exact h_over
+
+include φ cd in
+/-- **A prime's relative norm is a smooth-point maximal ideal**: any maximal prime
+`Q'` of `F[C₁]` arises as `m_{P'}` for a smooth point `P'` of `C₁`
+(`exists_smoothPoint_of_isMaximal`), and then its relative norm is the maximal ideal
+`m_{φP'}` of `F[C₂]` (the `s = 1` core `relNorm_maximalIdealAt_eq`), under which `Q'`
+lies (`maximalIdealAt_liesOver_toPointMap`).  This is the common geometric input to
+both branches of the per-place count split. -/
+private theorem exists_smoothPoint_relNorm_maximalIdealAt_eq
+    {Q' : Ideal C₁.CoordinateRing} (hQ'max : Q'.IsMaximal) :
+    letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+    haveI : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      cd.module_finite
+    haveI : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      isTorsionFree_coordHom φ cd
+    ∃ P' : C₁.SmoothPoint, C₁.maximalIdealAt P' = Q' ∧
+      Ideal.relNorm C₂.CoordinateRing Q' = C₂.maximalIdealAt (toPointMap cd P') ∧
+      Q'.LiesOver (C₂.maximalIdealAt (toPointMap cd P')) := by
+  letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+  letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+  haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    cd.module_finite
+  haveI htf : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    isTorsionFree_coordHom φ cd
+  haveI hQ'max' : Q'.IsMaximal := hQ'max
+  obtain ⟨P', hP'⟩ := C₁.exists_smoothPoint_of_isMaximal hQ'max
+  haveI hlies' : (C₁.maximalIdealAt P').LiesOver
+      (C₂.maximalIdealAt (toPointMap cd P')) :=
+    maximalIdealAt_liesOver_toPointMap φ cd P'
+  refine ⟨P', hP', ?_, hP' ▸ hlies'⟩
+  rw [← hP', relNorm_maximalIdealAt_eq φ cd P']
+
+include φ cd in
+/-- **Count of `relNorm(Q')^k` at `m_Q`, the matching prime**: if a maximal prime `Q'`
+of `F[C₁]` lies over the smooth-point maximal ideal `p = m_Q` of `F[C₂]`, then
+`count_{m_Q}((relNorm Q')^k) = k`.  Here `relNorm Q' = m_{φP'} = p` (because both `p`
+and `m_{φP'}` are the contraction of `Q'`, by uniqueness of `LiesOver`), and
+`count_p(p^k) = k`. -/
+private theorem count_maximalIdealAt_relNorm_pow_self (Q : C₂.SmoothPoint)
+    {Q' : Ideal C₁.CoordinateRing} (hQ'max : Q'.IsMaximal)
+    (hQ'lies : letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+      Q'.LiesOver (C₂.maximalIdealAt Q)) (k : ℕ) :
+    letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+    haveI : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      cd.module_finite
+    haveI : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      isTorsionFree_coordHom φ cd
+    (Associates.mk (C₂.maximalIdealAt Q)).count
+        (Associates.mk ((Ideal.relNorm C₂.CoordinateRing Q') ^ k)).factors = k := by
+  letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+  letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+  haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    cd.module_finite
+  haveI htf : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    isTorsionFree_coordHom φ cd
+  haveI hQ'lies' : Q'.LiesOver (C₂.maximalIdealAt Q) := hQ'lies
+  set p : Ideal C₂.CoordinateRing := C₂.maximalIdealAt Q with hp_def
+  haveI hpMax : p.IsMaximal := C₂.maximalIdealAt_isMaximal Q
+  have hp_ne : p ≠ ⊥ := C₂.maximalIdealAt_ne_bot Q
+  have h_vp_irr : Irreducible (Associates.mk p) :=
+    (⟨p, hpMax.isPrime, hp_ne⟩ :
+      IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing).associates_irreducible
+  obtain ⟨P', _, hrel, hlies'⟩ := exists_smoothPoint_relNorm_maximalIdealAt_eq φ cd hQ'max
+  -- `m_{φP'} = p`: both are the contraction of `Q'` (uniqueness of `LiesOver`).
+  have hpeq : C₂.maximalIdealAt (toPointMap cd P') = p := by
+    have h1 : C₂.maximalIdealAt (toPointMap cd P') = Q'.under C₂.CoordinateRing := hlies'.over
+    have h2 : p = Q'.under C₂.CoordinateRing := hQ'lies'.over
+    exact h1.trans h2.symm
+  rw [hrel, hpeq, Associates.mk_pow,
+    Associates.count_pow (by rw [Associates.mk_ne_zero]; exact hp_ne) h_vp_irr,
+    Associates.count_self h_vp_irr, mul_one]
+
+include φ cd in
+/-- **Count of `relNorm(Q')^k` at `m_Q`, a non-matching prime**: if a maximal prime
+`Q'` of `F[C₁]` does *not* lie over `p = m_Q`, then `count_{m_Q}((relNorm Q')^k) = 0`.
+Here `relNorm Q' = m_{φP'}` for some smooth point `P'`, and `m_{φP'} ≠ p` (else `Q'`
+would lie over `p`); distinct maximal ideals have `count = 0`. -/
+private theorem count_maximalIdealAt_relNorm_pow_of_not_liesOver (Q : C₂.SmoothPoint)
+    {Q' : Ideal C₁.CoordinateRing} (hQ'max : Q'.IsMaximal)
+    (hQ'not : ¬ letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+      Q'.LiesOver (C₂.maximalIdealAt Q)) (k : ℕ) :
+    letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+    haveI : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      cd.module_finite
+    haveI : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      isTorsionFree_coordHom φ cd
+    (Associates.mk (C₂.maximalIdealAt Q)).count
+        (Associates.mk ((Ideal.relNorm C₂.CoordinateRing Q') ^ k)).factors = 0 := by
+  letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+  letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+  haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    cd.module_finite
+  haveI htf : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    isTorsionFree_coordHom φ cd
+  set p : Ideal C₂.CoordinateRing := C₂.maximalIdealAt Q with hp_def
+  haveI hpMax : p.IsMaximal := C₂.maximalIdealAt_isMaximal Q
+  have hp_ne : p ≠ ⊥ := C₂.maximalIdealAt_ne_bot Q
+  have h_vp_irr : Irreducible (Associates.mk p) :=
+    (⟨p, hpMax.isPrime, hp_ne⟩ :
+      IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing).associates_irreducible
+  obtain ⟨_, _, hrel, hlies'⟩ := exists_smoothPoint_relNorm_maximalIdealAt_eq φ cd hQ'max
+  -- `m_{φP'} ≠ p`, else `Q'` would lie over `p` (contradicting `hQ'not`).
+  have hPne : Ideal.relNorm C₂.CoordinateRing Q' ≠ p := by
+    rw [hrel]
+    intro hpe
+    exact hQ'not (hpe ▸ hlies')
+  haveI hP'max2 : (Ideal.relNorm C₂.CoordinateRing Q').IsMaximal := hrel ▸ C₂.maximalIdealAt_isMaximal _
+  have hP'_ne_bot2 : Ideal.relNorm C₂.CoordinateRing Q' ≠ ⊥ := hrel ▸ C₂.maximalIdealAt_ne_bot _
+  have h_vP'_irr : Irreducible (Associates.mk (Ideal.relNorm C₂.CoordinateRing Q')) :=
+    (⟨_, hP'max2.isPrime, hP'_ne_bot2⟩ :
+      IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing).associates_irreducible
+  have h_vp_ne_vP' :
+      (Associates.mk p) ≠ (Associates.mk (Ideal.relNorm C₂.CoordinateRing Q')) := by
+    intro h_eq
+    apply hPne
+    rw [Associates.mk_eq_mk_iff_associated] at h_eq
+    exact (associated_iff_eq.mp h_eq).symm
+  rw [Associates.mk_pow,
+    Associates.count_pow (by rw [Associates.mk_ne_zero]; exact hP'_ne_bot2) h_vp_irr,
+    Associates.count_eq_zero_of_ne h_vp_irr h_vP'_irr h_vp_ne_vP', Nat.mul_zero]
+
+include φ cd in
+/-- **Per-term count split** of the `relNorm`-factorisation product: the count of
+`m_Q` in `(relNorm Q')^k` is `k` when `Q'` lies over `m_Q` and `0` otherwise.  This is
+the `if-then-else` body that, summed over the support finset, collapses the relative
+norm of the factorisation to the fibre sum.  Combines the matching / non-matching
+branches `count_maximalIdealAt_relNorm_pow_self` and
+`count_maximalIdealAt_relNorm_pow_of_not_liesOver`. -/
+private theorem count_factors_relNorm_pow_eq_ite (Q : C₂.SmoothPoint)
+    {Q' : Ideal C₁.CoordinateRing} (hQ'max : Q'.IsMaximal) (k : ℕ) :
+    letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+    haveI : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      cd.module_finite
+    haveI : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      isTorsionFree_coordHom φ cd
+    (Associates.mk (C₂.maximalIdealAt Q)).count
+        (Associates.mk ((Ideal.relNorm C₂.CoordinateRing Q') ^ k)).factors =
+      if Q' ∈ IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q) C₁.CoordinateRing
+        then k else 0 := by
+  letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+  letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+  haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    cd.module_finite
+  haveI htf : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    isTorsionFree_coordHom φ cd
+  have hp_ne : C₂.maximalIdealAt Q ≠ ⊥ := C₂.maximalIdealAt_ne_bot Q
+  haveI hpMax : (C₂.maximalIdealAt Q).IsMaximal := C₂.maximalIdealAt_isMaximal Q
+  by_cases h_over : Q' ∈ IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q) C₁.CoordinateRing
+  · rw [if_pos h_over]
+    haveI hQ'lies : Q'.LiesOver (C₂.maximalIdealAt Q) :=
+      ((IsDedekindDomain.mem_primesOverFinset_iff (B := C₁.CoordinateRing) hp_ne).mp h_over).2
+    exact count_maximalIdealAt_relNorm_pow_self φ cd Q hQ'max hQ'lies k
+  · rw [if_neg h_over]
+    refine count_maximalIdealAt_relNorm_pow_of_not_liesOver φ cd Q hQ'max (fun hlies ↦ ?_) k
+    exact h_over ((IsDedekindDomain.mem_primesOverFinset_iff
+      (B := C₁.CoordinateRing) hp_ne).mpr ⟨hQ'max.isPrime, hlies⟩)
+
+/-- **A height-one support sum re-indexes onto a target ideal finset**: summing a term
+`g Q'.asIdeal` over the height-one primes of `F[C₁]` in a finset `S` whose ideal lies
+in a target finset `T`, equals `∑_{I ∈ T} g I`, provided a repackaging `toHOS : T →
+HeightOneSpectrum` with `(toHOS I).asIdeal = I` landing back in `S`.  The bijection
+sends `Q' ↦ Q'.asIdeal` with inverse `toHOS`.  Purely combinatorial (no algebra); used
+to collapse the `relNorm`-factorisation support sum onto `primesOverFinset`. -/
+private theorem sum_filter_heightOneSpectrum_eq_sum_of_asIdeal
+    (S : Finset (IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing))
+    (T : Finset (Ideal C₁.CoordinateRing))
+    (toHOS : ∀ I ∈ T, IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing)
+    (htoHOS_asIdeal : ∀ I (hI : I ∈ T), (toHOS I hI).asIdeal = I)
+    (htoHOS_mem : ∀ I (hI : I ∈ T), toHOS I hI ∈ S)
+    (g : Ideal C₁.CoordinateRing → ℕ) :
+    ∑ Q' ∈ S.filter (fun Q' ↦ Q'.asIdeal ∈ T), g Q'.asIdeal = ∑ I ∈ T, g I := by
+  refine Finset.sum_bij'
+    (i := fun (Q' : IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing) _ ↦ Q'.asIdeal)
+    (j := fun (I : Ideal C₁.CoordinateRing) hI ↦ toHOS I hI) ?_ ?_ ?_ ?_ ?_
+  · intro Q' hQ'
+    exact (Finset.mem_filter.mp hQ').2
+  · intro I hI
+    refine Finset.mem_filter.mpr ⟨htoHOS_mem I hI, ?_⟩
+    rw [htoHOS_asIdeal I hI]
+    exact hI
+  · intro Q' hQ'
+    apply IsDedekindDomain.HeightOneSpectrum.ext
+    exact htoHOS_asIdeal Q'.asIdeal (Finset.mem_filter.mp hQ').2
+  · intro I hI
+    exact htoHOS_asIdeal I hI
+  · intro Q' _
+    rfl
+
+include φ cd in
+/-- **The associated relative-norm power is nonzero**: for a height-one prime `Q'` of
+`F[C₁]` and any exponent `k`, the associate of `(relNorm Q'.asIdeal)^k` is nonzero —
+the relative norm of a nonzero ideal is nonzero (`relNorm_eq_bot_iff`), and powers of a
+nonzero ideal are nonzero.  Supplies the nonvanishing side-condition of
+`count_finset_prod_factors`. -/
+private theorem associates_relNorm_pow_ne_zero
+    (Q' : IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing) (k : ℕ) :
+    letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+    haveI : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      cd.module_finite
+    haveI : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      isTorsionFree_coordHom φ cd
+    Associates.mk ((Ideal.relNorm C₂.CoordinateRing Q'.asIdeal) ^ k) ≠ 0 := by
+  letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+  letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+  haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    cd.module_finite
+  haveI htf : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    isTorsionFree_coordHom φ cd
+  rw [Associates.mk_ne_zero]
+  apply pow_ne_zero
+  rw [Ne, Ideal.zero_eq_bot, Ideal.relNorm_eq_bot_iff]
+  exact Q'.ne_bot
+
+include φ cd in
+/-- **The relative norm of `span{w}` factors as a support sum of counts**: the
+multiplicity of `m_Q` in `relNorm(span{w})` equals `∑_{Q' ∈ S} count_{m_Q}((relNorm
+Q'.asIdeal)^(count_{Q'}(span{w})))` for any finset `S` containing the multiplicative
+support of `Q' ↦ Q'.maxPowDividing(span{w})`.  Rewrite `span{w}` by its height-one
+factorisation `∏ Q'.maxPowDividing`, push `relNorm` and `Associates.mk` through the
+finite product (`map_prod`), and apply `count_finset_prod_factors` (each factor is
+nonzero by `associates_relNorm_pow_ne_zero`).  This is the analytic backbone of the
+affine count identity, isolating the product/`count` bookkeeping from the per-place
+geometry. -/
+private theorem count_relNorm_span_eq_sum_support (Q : C₂.SmoothPoint)
+    (w : C₁.CoordinateRing) (hw : w ≠ 0)
+    (S : Finset (IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing))
+    (hS_supp : Function.mulSupport
+      (fun Q' : IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing ↦
+        Q'.maxPowDividing (Ideal.span ({w} : Set _))) ⊆ ↑S) :
+    letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+    haveI : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      cd.module_finite
+    haveI : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+      isTorsionFree_coordHom φ cd
+    (Associates.mk (C₂.maximalIdealAt Q)).count
+        (Associates.mk (Ideal.relNorm C₂.CoordinateRing (Ideal.span ({w} : Set _)))).factors =
+      ∑ Q' ∈ S, (Associates.mk (C₂.maximalIdealAt Q)).count
+        (Associates.mk ((Ideal.relNorm C₂.CoordinateRing Q'.asIdeal) ^
+          ((Associates.mk Q'.asIdeal).count
+            (Associates.mk (Ideal.span ({w} : Set _))).factors))).factors := by
+  letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+  letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+  haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    cd.module_finite
+  haveI htf : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    isTorsionFree_coordHom φ cd
+  set p : Ideal C₂.CoordinateRing := C₂.maximalIdealAt Q with hp_def
+  haveI hpMax : p.IsMaximal := C₂.maximalIdealAt_isMaximal Q
+  have hp_ne : p ≠ ⊥ := C₂.maximalIdealAt_ne_bot Q
+  have h_vp_irr : Irreducible (Associates.mk p) :=
+    (⟨p, hpMax.isPrime, hp_ne⟩ :
+      IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing).associates_irreducible
+  have hI_ne : Ideal.span ({w} : Set C₁.CoordinateRing) ≠ 0 := by
+    rw [Ne, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]; exact hw
+  have h_finprod_eq_prod :
+      (∏ᶠ Q' : IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing,
+        Q'.maxPowDividing (Ideal.span ({w} : Set _))) =
+      ∏ Q' ∈ S, Q'.maxPowDividing (Ideal.span ({w} : Set _)) :=
+    finprod_eq_prod_of_mulSupport_subset _ hS_supp
+  conv_lhs =>
+    rw [← Ideal.finprod_heightOneSpectrum_factorization hI_ne, h_finprod_eq_prod,
+      map_prod (Ideal.relNorm C₂.CoordinateRing)]
+  simp_rw [IsDedekindDomain.HeightOneSpectrum.maxPowDividing, map_pow]
+  rw [show Associates.mk (∏ Q' ∈ S, (Ideal.relNorm C₂.CoordinateRing) Q'.asIdeal ^
+        (Associates.mk Q'.asIdeal).count
+          (Associates.mk (Ideal.span ({w} : Set _))).factors) =
+      ∏ Q' ∈ S, Associates.mk ((Ideal.relNorm C₂.CoordinateRing) Q'.asIdeal ^
+        (Associates.mk Q'.asIdeal).count
+          (Associates.mk (Ideal.span ({w} : Set _))).factors) from
+      map_prod (Associates.mkMonoidHom (M := Ideal C₂.CoordinateRing)) _ _]
+  rw [count_finset_prod_factors
+    (fun Q' _ ↦ associates_relNorm_pow_ne_zero φ cd Q' _) h_vp_irr]
+
 /-- **The affine count identity — Silverman II.3.6, per-place**: for nonzero
 `w ∈ F[C₁]` and a smooth point `Q` of `C₂`, the multiplicity of `m_Q` in the
 relative norm `relNorm(span{w})` equals the fibre sum `Σ_{Q' over m_Q}` of the
@@ -706,36 +1012,17 @@ theorem count_relNorm_eq_sum_fiber :
     cd.module_finite
   haveI htf : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
     isTorsionFree_coordHom φ cd
-  haveI faithCR : FaithfulSMul C₂.CoordinateRing C₁.CoordinateRing :=
-    (faithfulSMul_iff_algebraMap_injective C₂.CoordinateRing C₁.CoordinateRing).mpr
-      (CurveMap.coordHom_injective φ cd)
-  have hcore : ∀ R : C₁.SmoothPoint,
-      Ideal.relNorm C₂.CoordinateRing (C₁.maximalIdealAt R) =
-        C₂.maximalIdealAt (toPointMap cd R) :=
-    relNorm_maximalIdealAt_eq φ cd
   intro w hw Q
   set p : Ideal C₂.CoordinateRing := C₂.maximalIdealAt Q with hp_def
   haveI hpMax : p.IsMaximal := C₂.maximalIdealAt_isMaximal Q
   have hp_ne : p ≠ ⊥ := C₂.maximalIdealAt_ne_bot Q
-  let vp : IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing :=
-    ⟨p, hpMax.isPrime, hp_ne⟩
-  have h_vp_irr : Irreducible (Associates.mk vp.asIdeal) := vp.associates_irreducible
-  -- span{intNorm w} = relNorm(span{w})
-  rw [show Ideal.span ({Algebra.intNorm C₂.CoordinateRing C₁.CoordinateRing w} : Set _) =
-      Ideal.relNorm C₂.CoordinateRing (Ideal.span ({w} : Set _)) from
-    (Ideal.relNorm_singleton (R := C₂.CoordinateRing) w).symm]
   have hI_ne : Ideal.span ({w} : Set C₁.CoordinateRing) ≠ 0 := by
     rw [Ne, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]; exact hw
   have h_supp := Ideal.hasFiniteMulSupport (R := C₁.CoordinateRing) hI_ne
-  have h_prime_ne_bot : ∀ Q' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing, Q' ≠ ⊥ := by
-    intro Q' hQ'
-    rw [IsDedekindDomain.mem_primesOverFinset_iff (B := C₁.CoordinateRing) hp_ne] at hQ'
-    intro h_eq
-    apply hp_ne
-    have h_over : p = Q'.under C₂.CoordinateRing := hQ'.2.over
-    rw [h_eq, Ideal.under, Ideal.comap_bot_of_injective _
-      (FaithfulSMul.algebraMap_injective C₂.CoordinateRing C₁.CoordinateRing)] at h_over
-    exact h_over
+  have h_prime_ne_bot : ∀ Q' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing, Q' ≠ ⊥ :=
+    primesOverFinset_ne_bot φ cd hpMax hp_ne
+  -- The support finset `S`: the actual support of `span{w}` together with the (possibly
+  -- non-dividing) primes over `m_Q`, so both `S`-sums below range over a common finset.
   let toHOS : ∀ Q' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing,
       IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing := fun Q' hQ' ↦
     ⟨Q', ((IsDedekindDomain.mem_primesOverFinset_iff (B := C₁.CoordinateRing) hp_ne).mp hQ').1,
@@ -751,126 +1038,33 @@ theorem count_relNorm_eq_sum_fiber :
     simp only [hS_def, Finset.coe_union, Set.mem_union]
     left
     exact h_supp.mem_toFinset.mpr hQ'
-  have h_finprod_eq_prod :
-      (∏ᶠ Q' : IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing,
-        Q'.maxPowDividing (Ideal.span ({w} : Set _))) =
-      ∏ Q' ∈ S, Q'.maxPowDividing (Ideal.span ({w} : Set _)) :=
-    finprod_eq_prod_of_mulSupport_subset _ hS_supp
-  conv_lhs =>
-    rw [← Ideal.finprod_heightOneSpectrum_factorization hI_ne, h_finprod_eq_prod,
-      map_prod (Ideal.relNorm C₂.CoordinateRing)]
-  simp_rw [IsDedekindDomain.HeightOneSpectrum.maxPowDividing, map_pow]
-  have h_term_ne : ∀ Q' ∈ S,
-      Associates.mk ((Ideal.relNorm C₂.CoordinateRing Q'.asIdeal) ^
-        ((Associates.mk Q'.asIdeal).count
-          (Associates.mk (Ideal.span ({w} : Set _))).factors)) ≠ 0 := by
-    intro Q' _
-    rw [Associates.mk_ne_zero]
-    apply pow_ne_zero
-    rw [Ne, Ideal.zero_eq_bot, Ideal.relNorm_eq_bot_iff]
-    exact Q'.ne_bot
-  rw [show Associates.mk (∏ Q' ∈ S, (Ideal.relNorm C₂.CoordinateRing) Q'.asIdeal ^
-        (Associates.mk Q'.asIdeal).count
-          (Associates.mk (Ideal.span ({w} : Set _))).factors) =
-      ∏ Q' ∈ S, Associates.mk ((Ideal.relNorm C₂.CoordinateRing) Q'.asIdeal ^
-        (Associates.mk Q'.asIdeal).count
-          (Associates.mk (Ideal.span ({w} : Set _))).factors) from
-      map_prod (Associates.mkMonoidHom (M := Ideal C₂.CoordinateRing)) _ _]
-  rw [count_finset_prod_factors h_term_ne h_vp_irr]
+  -- span{intNorm w} = relNorm(span{w}); then factor the count over the support `S`.
+  rw [show Ideal.span ({Algebra.intNorm C₂.CoordinateRing C₁.CoordinateRing w} : Set _) =
+      Ideal.relNorm C₂.CoordinateRing (Ideal.span ({w} : Set _)) from
+    (Ideal.relNorm_singleton (R := C₂.CoordinateRing) w).symm,
+    count_relNorm_span_eq_sum_support φ cd Q w hw S hS_supp]
+  -- Each term: `count_{m_Q}((relNorm Q')^k) = k` if `Q'` lies over `m_Q`, else `0`.
   have h_S_split : ∀ Q' ∈ S,
-      (Associates.mk vp.asIdeal).count
+      (Associates.mk p).count
         (Associates.mk ((Ideal.relNorm C₂.CoordinateRing Q'.asIdeal) ^
           ((Associates.mk Q'.asIdeal).count
             (Associates.mk (Ideal.span ({w} : Set _))).factors))).factors =
       if Q'.asIdeal ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing then
         (Associates.mk Q'.asIdeal).count (Associates.mk (Ideal.span ({w} : Set _))).factors
-      else 0 := by
-    intro Q' _
-    by_cases h_over : Q'.asIdeal ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing
-    · rw [if_pos h_over, ← map_pow]
-      -- relNorm(Q'^k) = p^k, count_p(p^k) = k, using the s=1 core
-      haveI hQ'prime : Q'.asIdeal.IsPrime := Q'.isPrime
-      haveI hQ'lies : Q'.asIdeal.LiesOver p :=
-        ((IsDedekindDomain.mem_primesOverFinset_iff (B := C₁.CoordinateRing) hp_ne).mp h_over).2
-      haveI hQ'max : Q'.asIdeal.IsMaximal := Ideal.IsPrime.isMaximal Q'.isPrime Q'.ne_bot
-      obtain ⟨P', hP'⟩ := C₁.exists_smoothPoint_of_isMaximal hQ'max
-      -- m_{φP'} = p
-      haveI hlies' : (C₁.maximalIdealAt P').LiesOver
-          (C₂.maximalIdealAt (toPointMap cd P')) :=
-        maximalIdealAt_liesOver_toPointMap φ cd P'
-      have hpeq : C₂.maximalIdealAt (toPointMap cd P') = p := by
-        have h1 : C₂.maximalIdealAt (toPointMap cd P') =
-            (C₁.maximalIdealAt P').under C₂.CoordinateRing := hlies'.over
-        have h2 : p = Q'.asIdeal.under C₂.CoordinateRing := hQ'lies.over
-        rw [hP'] at h1
-        exact h1.trans h2.symm
-      have hrelP' : Ideal.relNorm C₂.CoordinateRing Q'.asIdeal = p := by
-        rw [← hP', hcore P', hpeq]
-      rw [show Ideal.relNorm C₂.CoordinateRing
-          (Q'.asIdeal ^ (Associates.mk Q'.asIdeal).count
-            (Associates.mk (Ideal.span ({w} : Set _))).factors) =
-          p ^ (Associates.mk Q'.asIdeal).count
-            (Associates.mk (Ideal.span ({w} : Set _))).factors by
-        rw [map_pow, hrelP'], Associates.mk_pow]
-      change (Associates.mk vp.asIdeal).count
-        (Associates.mk vp.asIdeal ^ _).factors = _
-      rw [Associates.count_pow (by rw [Associates.mk_ne_zero]; exact hp_ne) h_vp_irr,
-        Associates.count_self h_vp_irr, mul_one]
-    · rw [if_neg h_over]
-      -- Q' lies over a DIFFERENT prime of C₂, so count_p(relNorm(Q')^k) = 0
-      haveI hQ'max : Q'.asIdeal.IsMaximal := Ideal.IsPrime.isMaximal Q'.isPrime Q'.ne_bot
-      obtain ⟨P', hP'⟩ := C₁.exists_smoothPoint_of_isMaximal hQ'max
-      -- m_{φP'} ≠ p (else Q' would lie over p)
-      haveI hlies' : (C₁.maximalIdealAt P').LiesOver
-          (C₂.maximalIdealAt (toPointMap cd P')) :=
-        maximalIdealAt_liesOver_toPointMap φ cd P'
-      have hPne : C₂.maximalIdealAt (toPointMap cd P') ≠ p := by
-        intro hpe
-        apply h_over
-        rw [IsDedekindDomain.mem_primesOverFinset_iff (B := C₁.CoordinateRing) hp_ne]
-        refine ⟨Q'.isPrime, ?_⟩
-        rw [← hP', ← hpe]
-        exact hlies'
-      have hrelP' : Ideal.relNorm C₂.CoordinateRing Q'.asIdeal =
-          C₂.maximalIdealAt (toPointMap cd P') := by
-        rw [← hP', hcore P']
-      rw [hrelP', Associates.mk_pow]
-      haveI hP'max2 : (C₂.maximalIdealAt (toPointMap cd P')).IsMaximal :=
-        C₂.maximalIdealAt_isMaximal _
-      have hP'_ne_bot2 : C₂.maximalIdealAt (toPointMap cd P') ≠ ⊥ :=
-        C₂.maximalIdealAt_ne_bot _
-      let vP' : IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing :=
-        ⟨_, hP'max2.isPrime, hP'_ne_bot2⟩
-      have h_vP'_irr : Irreducible (Associates.mk vP'.asIdeal) := vP'.associates_irreducible
-      have h_vp_ne_vP' : (Associates.mk vp.asIdeal) ≠ (Associates.mk vP'.asIdeal) := by
-        intro h_eq
-        apply hPne
-        rw [Associates.mk_eq_mk_iff_associated] at h_eq
-        exact (associated_iff_eq.mp h_eq).symm
-      change (Associates.mk vp.asIdeal).count (Associates.mk vP'.asIdeal ^ _).factors = 0
-      rw [Associates.count_pow (by rw [Associates.mk_ne_zero]; exact hP'_ne_bot2) h_vp_irr,
-        Associates.count_eq_zero_of_ne h_vp_irr h_vP'_irr h_vp_ne_vP', Nat.mul_zero]
+      else 0 := fun Q' _ ↦
+    count_factors_relNorm_pow_eq_ite φ cd Q
+      (Ideal.IsPrime.isMaximal Q'.isPrime Q'.ne_bot) _
   rw [Finset.sum_congr rfl h_S_split, Finset.sum_ite, Finset.sum_const_zero, add_zero]
-  refine Finset.sum_bij'
-    (i := fun (Q' : IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing) _ ↦ Q'.asIdeal)
-    (j := fun (Q'' : Ideal C₁.CoordinateRing) hQ'' ↦ toHOS Q'' hQ'') ?_ ?_ ?_ ?_ ?_
-  · intro Q' hQ'
-    exact (Finset.mem_filter.mp hQ').2
-  · intro Q'' hQ''
-    refine Finset.mem_filter.mpr ⟨?_, ?_⟩
-    · simp only [hS_def, Finset.mem_union]
+  -- Re-index the surviving terms (primes over `m_Q`) onto `primesOverFinset`.
+  exact sum_filter_heightOneSpectrum_eq_sum_of_asIdeal S
+    (IsDedekindDomain.primesOverFinset p C₁.CoordinateRing) toHOS
+    (fun _ _ ↦ rfl)
+    (fun Q'' hQ'' ↦ by
+      simp only [hS_def, Finset.mem_union]
       right
       simp only [sH, Finset.mem_image, Finset.mem_attach, true_and, Subtype.exists]
-      exact ⟨Q'', hQ'', rfl⟩
-    · change Q'' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing
-      exact hQ''
-  · intro Q' hQ'
-    apply IsDedekindDomain.HeightOneSpectrum.ext
-    rfl
-  · intro Q'' hQ''
-    rfl
-  · intro Q' hQ'
-    rfl
+      exact ⟨Q'', hQ'', rfl⟩)
+    (fun Q' ↦ (Associates.mk Q').count (Associates.mk (Ideal.span ({w} : Set _))).factors)
 
 /-- **Infinity coefficient pinned by degree**: two projective divisors on `C` with
 equal degree whose coefficients agree at every affine place agree at infinity as
