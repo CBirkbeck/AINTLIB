@@ -700,6 +700,71 @@ theorem isogeny_subsingleton_via_synonym_eq
       W.toAffine.FunctionField _ _ α.toAlgebra) :=
   Iff.rfl
 
+/-- Helper for `isogeny_omegaCoeff_ne_zero_of_isSeparable`: if the omega-based
+pullback coefficient vanishes, then `α.pullbackKaehler` is identically zero on
+`Ω[K(E)/F]`. Since `Ω` is one-dimensional over `K(E)` (`kaehler_rank_one`),
+vanishing on the invariant differential `ω` spreads to every differential by
+`α`-semilinearity (`pullbackKaehler_smul_KE`). -/
+private theorem pullbackKaehler_eq_zero_of_omegaPullbackCoeff_eq_zero
+    (α : Isogeny W.toAffine W.toAffine)
+    (h_zero : omegaPullbackCoeff W α = 0)
+    (ω' : Ω[W.toAffine.FunctionField⁄F]) :
+    α.pullbackKaehler ω' = 0 := by
+  have h_pK_ω : α.pullbackKaehler (invariantDifferential W.toAffine) = 0 := by
+    rw [Isogeny.pullbackKaehler_invariantDifferential, h_zero, zero_smul]
+  obtain ⟨a, ha⟩ := exists_smul_eq_of_finrank_eq_one
+    (kaehler_rank_one W.toAffine)
+    (invariantDifferential_ne_zero W.toAffine) ω'
+  rw [← ha, Isogeny.pullbackKaehler_smul_KE, h_pK_ω, smul_zero]
+
+/-- Helper for `isogeny_omegaCoeff_ne_zero_of_isSeparable`: if `α.pullbackKaehler`
+vanishes identically, then the cotangent map `KaehlerDifferential.map` for the
+square `F → F → K(E)_α → K(E)` is zero. The map agrees with `α.pullbackKaehler`
+on the `D`-generator `D x` (both `0`), hence is `0` on the invariant differential
+`ω = u⁻¹ • D x`, and `Ω` being one-dimensional then forces it to be `0` everywhere. -/
+private theorem kaehlerMap_eq_zero_of_pullbackKaehler_eq_zero
+    (α : Isogeny W.toAffine W.toAffine)
+    (h_pK_zero : ∀ ω' : Ω[W.toAffine.FunctionField⁄F], α.pullbackKaehler ω' = 0) :
+    KaehlerDifferential.map F F (IsogenyAlgebraSource W α)
+      W.toAffine.FunctionField = 0 := by
+  refine LinearMap.ext fun ω' ↦ ?_
+  obtain ⟨a, ha⟩ := exists_smul_eq_of_finrank_eq_one
+    (kaehler_rank_one W.toAffine)
+    (invariantDifferential_ne_zero W.toAffine) ω'
+  change KaehlerDifferential.map F F (IsogenyAlgebraSource W α)
+    W.toAffine.FunctionField ω' = (0 : Ω[W.toAffine.FunctionField⁄F])
+  rw [← ha]
+  have h_map_D : KaehlerDifferential.map F F (IsogenyAlgebraSource W α)
+      W.toAffine.FunctionField (KaehlerDifferential.D F (IsogenyAlgebraSource W α)
+        (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
+          (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X))) = 0 := by
+    rw [KaehlerDifferential.map_D]
+    exact (Isogeny.pullbackKaehler_D α _).symm.trans (h_pK_zero _)
+  have h_map_ω : KaehlerDifferential.map F F (IsogenyAlgebraSource W α)
+      W.toAffine.FunctionField (invariantDifferential W.toAffine) = 0 := by
+    change KaehlerDifferential.map F F (IsogenyAlgebraSource W α)
+      W.toAffine.FunctionField (((u_gen W)⁻¹ : IsogenyAlgebraSource W α) •
+        KaehlerDifferential.D F (IsogenyAlgebraSource W α) _) = 0
+    rw [LinearMap.map_smul, h_map_D, smul_zero]
+  exact (LinearMap.map_smul (KaehlerDifferential.map F F (IsogenyAlgebraSource W α)
+    W.toAffine.FunctionField) a (invariantDifferential W.toAffine)).trans
+    (by rw [h_map_ω, smul_zero])
+
+/-- Helper for `isogeny_omegaCoeff_ne_zero_of_isSeparable`: if the cotangent map
+`KaehlerDifferential.map` is zero, then so is `KaehlerDifferential.mapBaseChange`,
+by tensor induction (`mapBaseChange (x ⊗ₜ y) = x • map y`). -/
+private theorem mapBaseChange_eq_zero_of_kaehlerMap_eq_zero
+    (α : Isogeny W.toAffine W.toAffine)
+    (h_map_zero : KaehlerDifferential.map F F (IsogenyAlgebraSource W α)
+      W.toAffine.FunctionField = 0) :
+    KaehlerDifferential.mapBaseChange F (IsogenyAlgebraSource W α)
+      W.toAffine.FunctionField = 0 := by
+  refine LinearMap.ext fun η ↦ ?_
+  induction η with
+  | zero => simp
+  | tmul x y => simp [KaehlerDifferential.mapBaseChange_tmul, h_map_zero]
+  | add x y hx hy => simp [map_add, hx, hy]
+
 /-- **T-II-4-004 forward direction (axiom-clean)**: if `α` is separable,
 then `omegaPullbackCoeff W α ≠ 0`.
 
@@ -713,17 +778,11 @@ theorem isogeny_omegaCoeff_ne_zero_of_isSeparable
     (h_sep : α.IsSeparable) :
     omegaPullbackCoeff W α ≠ 0 := by
   intro h_zero
-  have h_pK_ω : α.pullbackKaehler (invariantDifferential W.toAffine) = 0 := by
-    rw [Isogeny.pullbackKaehler_invariantDifferential, h_zero, zero_smul]
   -- `α.pullbackKaehler` is `α`-semilinear and `Ω` is 1-dim, so vanishing on `ω`
   -- forces it to vanish everywhere.
   have h_pK_zero : ∀ ω' : Ω[W.toAffine.FunctionField⁄F],
-      α.pullbackKaehler ω' = 0 := by
-    intro ω'
-    obtain ⟨a, ha⟩ := exists_smul_eq_of_finrank_eq_one
-      (kaehler_rank_one W.toAffine)
-      (invariantDifferential_ne_zero W.toAffine) ω'
-    rw [← ha, Isogeny.pullbackKaehler_smul_KE, h_pK_ω, smul_zero]
+      α.pullbackKaehler ω' = 0 :=
+    pullbackKaehler_eq_zero_of_omegaPullbackCoeff_eq_zero W α h_zero
   haveI : Subsingleton (Ω[W.toAffine.FunctionField⁄IsogenyAlgebraSource W α]) :=
     (isogeny_subsingleton_via_synonym_eq W α).mpr
       (isogeny_subsingleton_kaehler_of_isSeparable W α h_sep)
@@ -733,38 +792,12 @@ theorem isogeny_omegaCoeff_ne_zero_of_isSeparable
       (IsogenyAlgebraSource W α) W.toAffine.FunctionField
   obtain ⟨t, ht⟩ := h_surj (invariantDifferential W.toAffine)
   -- The cotangent map `map : Ω[K(E)/F] → Ω[K(E)/F]` agrees with `α.pullbackKaehler`
-  -- on `D`-generators (both are `0`), and is determined on the 1-dim `Ω` by `ω`.
-  have h_map_zero : KaehlerDifferential.map F F (IsogenyAlgebraSource W α)
-      W.toAffine.FunctionField = 0 := by
-    refine LinearMap.ext fun ω' ↦ ?_
-    obtain ⟨a, ha⟩ := exists_smul_eq_of_finrank_eq_one
-      (kaehler_rank_one W.toAffine)
-      (invariantDifferential_ne_zero W.toAffine) ω'
-    change KaehlerDifferential.map F F (IsogenyAlgebraSource W α)
-      W.toAffine.FunctionField ω' = (0 : Ω[W.toAffine.FunctionField⁄F])
-    rw [← ha]
-    have h_map_D : KaehlerDifferential.map F F (IsogenyAlgebraSource W α)
-        W.toAffine.FunctionField (KaehlerDifferential.D F (IsogenyAlgebraSource W α)
-          (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
-            (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X))) = 0 := by
-      rw [KaehlerDifferential.map_D]
-      exact (Isogeny.pullbackKaehler_D α _).symm.trans (h_pK_zero _)
-    have h_map_ω : KaehlerDifferential.map F F (IsogenyAlgebraSource W α)
-        W.toAffine.FunctionField (invariantDifferential W.toAffine) = 0 := by
-      change KaehlerDifferential.map F F (IsogenyAlgebraSource W α)
-        W.toAffine.FunctionField (((u_gen W)⁻¹ : IsogenyAlgebraSource W α) •
-          KaehlerDifferential.D F (IsogenyAlgebraSource W α) _) = 0
-      rw [LinearMap.map_smul, h_map_D, smul_zero]
-    exact (LinearMap.map_smul (KaehlerDifferential.map F F (IsogenyAlgebraSource W α)
-      W.toAffine.FunctionField) a (invariantDifferential W.toAffine)).trans
-      (by rw [h_map_ω, smul_zero])
+  -- on `D`-generators (both are `0`), and is determined on the 1-dim `Ω` by `ω`;
+  -- `map = 0` then forces `mapBaseChange = 0`, contradicting surjectivity.
   have h_mbc_zero : KaehlerDifferential.mapBaseChange F (IsogenyAlgebraSource W α)
-      W.toAffine.FunctionField = 0 := by
-    refine LinearMap.ext fun η ↦ ?_
-    induction η with
-    | zero => simp
-    | tmul x y => simp [KaehlerDifferential.mapBaseChange_tmul, h_map_zero]
-    | add x y hx hy => simp [map_add, hx, hy]
+      W.toAffine.FunctionField = 0 :=
+    mapBaseChange_eq_zero_of_kaehlerMap_eq_zero W α
+      (kaehlerMap_eq_zero_of_pullbackKaehler_eq_zero W α h_pK_zero)
   rw [h_mbc_zero, LinearMap.zero_apply] at ht
   exact (invariantDifferential_ne_zero W.toAffine) ht.symm
 
