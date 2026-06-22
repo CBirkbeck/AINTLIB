@@ -7170,14 +7170,19 @@ the bridge is the gateway to the IMC chain. **Decision needed before the large n
   So execution order: (1) TG1-N-transport [below], then (2) the Ω↪ℂ_[p] bridge + TG2-Lambda, then TG5–TG9.
 
 ### [TG1-N-transport] decomposition (isAdmissibleM_map: σ(L) admissible given L, σ:Ω→ₐ[ℚ]Ω)
-- σ bijective (Ω alg-closed+algebraic) → σ' : Ω ≃ₐ[ℚ] Ω; β := σ'|F⁺ₙ ∈ Gal(F⁺ₙ/ℚ) (F⁺ₙ/ℚ normal).
-- **[a] finrank + p-power**: [σL:ℚ]=[L:ℚ] (ℚ-iso AlgEquiv.intermediateFieldMap) + tower [·:ℚ]=[·:F⁺ₙ][F⁺ₙ:ℚ]
-  ⟹ [σL:F⁺ₙ]=[L:F⁺ₙ]=p^k. (Avoids semilinear finrank.)
-- **[b] Galois + abelian**: conjugation `φ ↦ σ'⁻¹∘φ∘σ'` is a group iso Gal(σL/F⁺ₙ) ≅ Gal(L/F⁺ₙ) (both fix
-  F⁺ₙ since σ'(F⁺ₙ)=F⁺ₙ); abelian transports; IsGalois via #aut = degree (or Normal transport).
-- **[c] unramified outside p** (ANT core): σ' restricts to ring auto of 𝓞_Ω fixing ℤ; σ'(𝓞_L)=𝓞_{σL} over
-  β:𝓞_{F⁺ₙ}≅𝓞_{F⁺ₙ}; primes P↦σ'P preserve residue char (σ' fixes p) and ramification index; β fixes the
-  unique prime over p. Needs RingOfIntegers functoriality under a base auto + ramificationIdx invariance.
+- **STATUS (2026-06-22): 3/5 PROVEN.** isAdmissibleM_map assembles sorry-free from the helpers below;
+  `omAut` (σ bijective), `algHomFixingFPlus`, `algEquivFixingFPlus` (scalar-upgrade helpers) all proven.
+- **[a] finrank + p-power — PROVEN** (`finrank_sigmaL`): [σL:ℚ]=[L:ℚ] (ℚ-iso intermediateFieldMap) +
+  tower formula ⟹ [σL:F⁺ₙ]=[L:F⁺ₙ]=p^k. Plus `finiteDimensional_sigmaL` PROVEN.
+- **[b] Galois — PROVEN** (`isGalois_sigmaL`): Normal via normal_iff_forall_map_le; for an F⁺ₙ-auto τ of
+  Ω, `σ⁻¹τσ` fixes F⁺ₙ (algHomFixingFPlus) so Normal F⁺ₙ L maps L into L ⟹ τ maps σL into σL; +separable.
+- **[b'] abelian — SORRY** (`mulComm_sigmaL`): conjugation `φ ↦ ι⁻¹φι` (ι=intermediateFieldMap, β-semilinear)
+  gives F⁺ₙ-autos of L (φ_L fixes F⁺ₙ via β-twist cancellation, not because ι fixes F⁺ₙ); upgrade with
+  algEquivFixingFPlus; transport hab. TODO: the conjugation-as-injective-hom + the transport.
+- **[c] unramified outside p — SORRY (ANT core)** (`isUnramifiedOutsideP_sigmaL`): σ restricts to ring auto
+  of 𝓞_Ω fixing ℤ; σ(𝓞_L)=𝓞_{σL} over β:𝓞_{F⁺ₙ}≅𝓞_{F⁺ₙ}; primes P↦σP preserve residue char (σ fixes p) +
+  ramification index; β fixes the unique prime over p. Needs RingOfIntegers functoriality under a base auto
+  + ramificationIdx invariance. THE deepest remaining lemma.
 
 ## NEXT PHASE — §12 integration (Λ-module, CFT, Vandiver, IMC). Gateway = study §12
 The remaining tickets (TG2-Lambda, TG5–TG9) all need §12: `IwasawaAlgebra`, `Gamma`, `GPlus`,
