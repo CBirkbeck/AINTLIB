@@ -422,9 +422,7 @@ theorem ord_P_ΨSq_ff_eq_zero {x y x_Q y_Q : F}
   rw [ΨSq_ff_eq_algebraMap]
   exact ord_P_algebraMap_poly_eq_zero_of_eval_ne W P (ΨSq_poly_ne_zero W hℓ) hΨSq_eval_ne
 
--- `ΨSq_ff`/`mulByInt_x` carry the section `DecidableEq F` (via the coordinate ring) although the
--- type does not mention it; `classical` cannot substitute. Suppress the unused-in-type lint.
-set_option linter.unusedDecidableInType false in
+omit [DecidableEq F] in
 /-- `mulByInt_x ℓ − x_Q = algebraMap g / algebraMap ΨSq_ℓ` for the fibre polynomial `g`. -/
 theorem mulByInt_x_sub_const_eq_div {ℓ : ℤ} (hℓ : ℓ ≠ 0) (x_Q : F) :
     mulByInt_x W ℓ - algebraMap F KE x_Q =
