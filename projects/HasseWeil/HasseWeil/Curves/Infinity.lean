@@ -466,6 +466,111 @@ private theorem intDegree_ofFractionRing_eq_of_surj
     RatFunc.intDegree_polynomial]
   ring
 
+/-- **Cleared-denominator lift identity** for the basis element
+`f = r₁ + r₂ · coordY` (with `r₁, r₂ ∈ FractionRing F[X]`): if a common
+denominator `d` clears `r₁, r₂` to polynomials `p₁', p₂'` (i.e.
+`rᵢ · d = pᵢ'` in `FractionRing F[X]`), then `d · f` is the image under
+`algebraMap C.CoordinateRing C.FunctionField` of the polynomial-coefficient
+combination `p₁' • 1 + p₂' • mk X`. This moves the computation from the
+`FractionRing`-coefficient level down to the integral `CoordinateRing`. -/
+private theorem ordAtInfty_basis_fracPolyX_lift
+    {r₁ r₂ : FractionRing (Polynomial F)} {d p₁' p₂' : Polynomial F}
+    (h₁' : r₁ * algebraMap (Polynomial F) (FractionRing (Polynomial F)) d =
+        algebraMap (Polynomial F) (FractionRing (Polynomial F)) p₁')
+    (h₂' : r₂ * algebraMap (Polynomial F) (FractionRing (Polynomial F)) d =
+        algebraMap (Polynomial F) (FractionRing (Polynomial F)) p₂') :
+    algebraMap (Polynomial F) C.FunctionField d *
+        (algebraMap (FractionRing (Polynomial F)) C.FunctionField r₁ +
+         algebraMap (FractionRing (Polynomial F)) C.FunctionField r₂ *
+           C.coordYInFunctionField) =
+      algebraMap C.CoordinateRing C.FunctionField
+        (p₁' • (1 : C.CoordinateRing) +
+         p₂' • WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
+           (Polynomial.X : Polynomial (Polynomial F))) := by
+  rw [C.algebraMap_smul_basis_eq p₁' p₂', mul_add]
+  have h_left : algebraMap (Polynomial F) C.FunctionField d *
+      algebraMap (FractionRing (Polynomial F)) C.FunctionField r₁ =
+      algebraMap (Polynomial F) C.FunctionField p₁' := by
+    rw [show algebraMap (Polynomial F) C.FunctionField d =
+        algebraMap (FractionRing (Polynomial F)) C.FunctionField
+          (algebraMap (Polynomial F) (FractionRing (Polynomial F)) d) from
+      IsScalarTower.algebraMap_apply (Polynomial F) (FractionRing (Polynomial F))
+        C.FunctionField d,
+      ← map_mul, mul_comm, h₁',
+      ← IsScalarTower.algebraMap_apply (Polynomial F) (FractionRing (Polynomial F))
+        C.FunctionField p₁']
+  have h_right : algebraMap (Polynomial F) C.FunctionField d *
+      (algebraMap (FractionRing (Polynomial F)) C.FunctionField r₂ *
+       C.coordYInFunctionField) =
+      algebraMap (Polynomial F) C.FunctionField p₂' * C.coordYInFunctionField := by
+    rw [← mul_assoc,
+      show algebraMap (Polynomial F) C.FunctionField d =
+        algebraMap (FractionRing (Polynomial F)) C.FunctionField
+          (algebraMap (Polynomial F) (FractionRing (Polynomial F)) d) from
+      IsScalarTower.algebraMap_apply (Polynomial F) (FractionRing (Polynomial F))
+        C.FunctionField d,
+      ← map_mul,
+      mul_comm (algebraMap (Polynomial F) (FractionRing (Polynomial F)) d) r₂,
+      h₂', ← IsScalarTower.algebraMap_apply (Polynomial F) (FractionRing (Polynomial F))
+        C.FunctionField p₂']
+  rw [h_left, h_right]
+
+/-- The basis element `f = r₁ + r₂ · coordY` is nonzero whenever its
+cleared-denominator numerators `p₁', p₂'` are both nonzero. The argument runs
+through the lift identity `d · f = algebraMap (p₁' • 1 + p₂' • mk X)`: the
+polynomial combination is nonzero (its norm has positive degree), so its image
+in the fraction field is nonzero, forcing `d · f ≠ 0` and hence `f ≠ 0`. -/
+private theorem ordAtInfty_basis_fracPolyX_summand_ne_zero
+    {r₁ r₂ : FractionRing (Polynomial F)} {d p₁' p₂' : Polynomial F}
+    (hp₁'_ne : p₁' ≠ 0) (hp₂'_ne : p₂' ≠ 0)
+    (h_lift : algebraMap (Polynomial F) C.FunctionField d *
+        (algebraMap (FractionRing (Polynomial F)) C.FunctionField r₁ +
+         algebraMap (FractionRing (Polynomial F)) C.FunctionField r₂ *
+           C.coordYInFunctionField) =
+      algebraMap C.CoordinateRing C.FunctionField
+        (p₁' • (1 : C.CoordinateRing) +
+         p₂' • WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
+           (Polynomial.X : Polynomial (Polynomial F)))) :
+    algebraMap (FractionRing (Polynomial F)) C.FunctionField r₁ +
+      algebraMap (FractionRing (Polynomial F)) C.FunctionField r₂ *
+        C.coordYInFunctionField ≠ 0 := by
+  have hu_ne : p₁' • (1 : C.CoordinateRing) +
+      p₂' • WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
+        (Polynomial.X : Polynomial (Polynomial F)) ≠ 0 := by
+    intro h
+    have h_norm := C.natDegree_norm_smul_basis_of_both_ne_zero hp₁'_ne hp₂'_ne
+    rw [h, Algebra.norm_zero, Polynomial.natDegree_zero] at h_norm
+    have h_max_pos : 0 < max (2 * p₁'.natDegree) (2 * p₂'.natDegree + 3) := by
+      apply lt_max_of_lt_right; omega
+    omega
+  intro h
+  apply hu_ne
+  have h_alg_zero : algebraMap C.CoordinateRing C.FunctionField (p₁' • (1 : C.CoordinateRing) +
+      p₂' • WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
+        (Polynomial.X : Polynomial (Polynomial F))) = 0 := by
+    rw [← h_lift, h, mul_zero]
+  exact (IsFractionRing.injective C.CoordinateRing C.FunctionField)
+    (h_alg_zero.trans (map_zero _).symm)
+
+/-- The natural-number degree identity behind the basis decomposition: writing
+`p₁'.natDegree = a`, `p₂'.natDegree = b`, `d.natDegree = e`, the negated maximum
+`-(max (2a) (2b+3))` equals `-2e` plus the `min` of the two shifted intDegrees
+`-2(a - e)` and `-2(b - e) - 3`. A pure `omega` fact, isolating the arithmetic
+from the order-theoretic content. -/
+private theorem ordAtInfty_basis_fracPolyX_natDegree_arith
+    {r₁ r₂ : FractionRing (Polynomial F)} {d p₁' p₂' : Polynomial F}
+    (h_intDeg_r₁ : (RatFunc.ofFractionRing r₁ : RatFunc F).intDegree =
+        (p₁'.natDegree : ℤ) - (d.natDegree : ℤ))
+    (h_intDeg_r₂ : (RatFunc.ofFractionRing r₂ : RatFunc F).intDegree =
+        (p₂'.natDegree : ℤ) - (d.natDegree : ℤ)) :
+    (-(max (2 * p₁'.natDegree) (2 * p₂'.natDegree + 3) : ℕ) : ℤ) =
+      -2 * (d.natDegree : ℤ) +
+      min (- 2 * (RatFunc.ofFractionRing r₁ : RatFunc F).intDegree)
+          (- 2 * (RatFunc.ofFractionRing r₂ : RatFunc F).intDegree - 3) := by
+  rw [h_intDeg_r₁, h_intDeg_r₂]
+  push_cast
+  omega
+
 /-- **FractionRing-coefficient basis decomposition for `ordAtInfty`**: for
 `r₁, r₂ ∈ FractionRing F[X]` both nonzero, the order at infinity of
 `r₁ + r₂ · coordY` equals `min(-2·intDeg r₁, -2·intDeg r₂ - 3)`.
@@ -531,60 +636,14 @@ theorem ordAtInfty_basis_fracPolyX_of_both_ne_zero
     apply hd_alg_ne
     exact FaithfulSMul.algebraMap_injective (FractionRing (Polynomial F)) C.FunctionField
       (hh.trans (map_zero _).symm)
+  -- The cleared-denominator lift identity `d · f = algebraMap (p₁' • 1 + p₂' • mk X)`.
+  have h_lift := C.ordAtInfty_basis_fracPolyX_lift h₁' h₂'
+  -- Nonvanishing of `f = r₁ + r₂ · coordY`, read off the lift identity.
+  have hf_ne := C.ordAtInfty_basis_fracPolyX_summand_ne_zero hp₁'_ne hp₂'_ne h_lift
   set f : C.FunctionField :=
     algebraMap (FractionRing (Polynomial F)) C.FunctionField r₁ +
     algebraMap (FractionRing (Polynomial F)) C.FunctionField r₂ *
       C.coordYInFunctionField with hf_def
-  have h_lift : algebraMap (Polynomial F) C.FunctionField d * f =
-      algebraMap C.CoordinateRing C.FunctionField
-        (p₁' • (1 : C.CoordinateRing) +
-         p₂' • WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
-           (Polynomial.X : Polynomial (Polynomial F))) := by
-    rw [C.algebraMap_smul_basis_eq p₁' p₂', hf_def, mul_add]
-    have h_left : algebraMap (Polynomial F) C.FunctionField d *
-        algebraMap (FractionRing (Polynomial F)) C.FunctionField r₁ =
-        algebraMap (Polynomial F) C.FunctionField p₁' := by
-      rw [show algebraMap (Polynomial F) C.FunctionField d =
-          algebraMap (FractionRing (Polynomial F)) C.FunctionField
-            (algebraMap (Polynomial F) (FractionRing (Polynomial F)) d) from
-        IsScalarTower.algebraMap_apply (Polynomial F) (FractionRing (Polynomial F))
-          C.FunctionField d,
-        ← map_mul, mul_comm, h₁',
-        ← IsScalarTower.algebraMap_apply (Polynomial F) (FractionRing (Polynomial F))
-          C.FunctionField p₁']
-    have h_right : algebraMap (Polynomial F) C.FunctionField d *
-        (algebraMap (FractionRing (Polynomial F)) C.FunctionField r₂ *
-         C.coordYInFunctionField) =
-        algebraMap (Polynomial F) C.FunctionField p₂' * C.coordYInFunctionField := by
-      rw [← mul_assoc,
-        show algebraMap (Polynomial F) C.FunctionField d =
-          algebraMap (FractionRing (Polynomial F)) C.FunctionField
-            (algebraMap (Polynomial F) (FractionRing (Polynomial F)) d) from
-        IsScalarTower.algebraMap_apply (Polynomial F) (FractionRing (Polynomial F))
-          C.FunctionField d,
-        ← map_mul,
-        mul_comm (algebraMap (Polynomial F) (FractionRing (Polynomial F)) d) r₂,
-        h₂', ← IsScalarTower.algebraMap_apply (Polynomial F) (FractionRing (Polynomial F))
-          C.FunctionField p₂']
-    rw [h_left, h_right]
-  have hu_ne : p₁' • (1 : C.CoordinateRing) +
-      p₂' • WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
-        (Polynomial.X : Polynomial (Polynomial F)) ≠ 0 := by
-    intro h
-    have h_norm := C.natDegree_norm_smul_basis_of_both_ne_zero hp₁'_ne hp₂'_ne
-    rw [h, Algebra.norm_zero, Polynomial.natDegree_zero] at h_norm
-    have h_max_pos : 0 < max (2 * p₁'.natDegree) (2 * p₂'.natDegree + 3) := by
-      apply lt_max_of_lt_right; omega
-    omega
-  have hf_ne : f ≠ 0 := by
-    intro h
-    apply hu_ne
-    have h_alg_zero : algebraMap C.CoordinateRing C.FunctionField (p₁' • (1 : C.CoordinateRing) +
-        p₂' • WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
-          (Polynomial.X : Polynomial (Polynomial F))) = 0 := by
-      rw [← h_lift, h, mul_zero]
-    exact (IsFractionRing.injective C.CoordinateRing C.FunctionField)
-      (h_alg_zero.trans (map_zero _).symm)
   have h_ord_lhs : C.ordAtInfty (algebraMap (Polynomial F) C.FunctionField d * f) =
       C.ordAtInfty (algebraMap (Polynomial F) C.FunctionField d) + C.ordAtInfty f :=
     C.ordAtInfty_mul hd_KE_ne hf_ne
@@ -594,20 +653,9 @@ theorem ordAtInfty_basis_fracPolyX_of_both_ne_zero
   rw [h_ord_d] at h_ord_lhs
   have h_intDeg_r₁ := intDegree_ofFractionRing_eq_of_surj hp₁'_ne hd_ne h₁'
   have h_intDeg_r₂ := intDegree_ofFractionRing_eq_of_surj hp₂'_ne hd_ne h₂'
-  have h_p₁'_natDeg : p₁'.natDegree = p₁.natDegree + d₂.natDegree := by
-    rw [hp₁'_def, Polynomial.natDegree_mul hp₁_ne hd₂_ne]
-  have h_p₂'_natDeg : p₂'.natDegree = p₂.natDegree + d₁.natDegree := by
-    rw [hp₂'_def, Polynomial.natDegree_mul hp₂_ne hd₁_ne]
-  have h_d_natDeg : d.natDegree = d₁.natDegree + d₂.natDegree := by
-    rw [hd_def, Polynomial.natDegree_mul hd₁_ne hd₂_ne]
-  have h_arith_int :
-      (-(max (2 * p₁'.natDegree) (2 * p₂'.natDegree + 3) : ℕ) : ℤ) =
-      -2 * (d.natDegree : ℤ) +
-      min (- 2 * (RatFunc.ofFractionRing r₁ : RatFunc F).intDegree)
-          (- 2 * (RatFunc.ofFractionRing r₂ : RatFunc F).intDegree - 3) := by
-    rw [h_p₁'_natDeg, h_p₂'_natDeg, h_d_natDeg, h_intDeg_r₁, h_intDeg_r₂]
-    push_cast
-    omega
+  -- The pure natDegree/intDegree arithmetic linking `-(max …)` to `-2·d.natDeg + min …`.
+  have h_arith_int :=
+    ordAtInfty_basis_fracPolyX_natDegree_arith h_intDeg_r₁ h_intDeg_r₂
   have h_arith_lifted :
       ((-(max (2 * p₁'.natDegree) (2 * p₂'.natDegree + 3) : ℕ) : ℤ) : WithTop ℤ) =
       (((-2 * (d.natDegree : ℤ)) +
