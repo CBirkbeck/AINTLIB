@@ -101,11 +101,6 @@ theorem localCyclotomicUnitEquiv_zetaUnit
   rw [localCyclotomicZetaUnit_coe, localCyclotomicRingEquiv_algebraMap]
   simp only [Units.val_pow_eq_pow_val, localCyclotomicZetaUnit_coe]
   rw [← map_pow]
-  change algebraMap (𝓞 K) (localCyclotomicRing p K)
-      (cyclotomicRingOfIntegersEquiv (p := p) K a
-        (zeta_spec p ℚ K).toInteger) =
-    algebraMap (𝓞 K) (localCyclotomicRing p K)
-      ((zeta_spec p ℚ K).toInteger ^ (a : ZMod p).val)
   congr 1
   change cyclotomicSigmaOfUnit (p := p) K a • (zeta_spec p ℚ K).toInteger =
     (zeta_spec p ℚ K).toInteger ^ (a : ZMod p).val
@@ -156,7 +151,7 @@ theorem completedLocalCyclotomicUnitEquiv_zetaUnit
       completedLocalCyclotomicUnitGroup p K) : completedLocalCyclotomicRing p K)
   rw [completedLocalCyclotomicZetaUnit_coe, completedLocalCyclotomicRingEquiv_algebraMap]
   have hlocal := congrArg
-    (fun u : localCyclotomicUnitGroup p K => (u : localCyclotomicRing p K))
+    (fun u : localCyclotomicUnitGroup p K ↦ (u : localCyclotomicRing p K))
     (localCyclotomicUnitEquiv_zetaUnit (p := p) (K := K) a)
   change localCyclotomicRingEquiv (p := p) K a
       (localCyclotomicZetaUnit p K : localCyclotomicRing p K) =
@@ -263,7 +258,7 @@ theorem completedLocalCyclotomicRingEquiv_sub_self_mem_maximalIdeal
     have hhom : φ.comp e.toRingHom = e.toRingHom := Subsingleton.elim _ _
     exact RingHom.congr_fun hhom z
   have happ := congrArg
-    (fun f : localCyclotomicRing p K ⧸ M ^ 1 →+* localCyclotomicRing p K ⧸ M ^ 1 =>
+    (fun f : localCyclotomicRing p K ⧸ M ^ 1 →+* localCyclotomicRing p K ⧸ M ^ 1 ↦
       f (AdicCompletion.evalₐ M 1 x)) hquot1
   simpa [M, pow_one, sub_eq_zero] using happ
 
@@ -307,7 +302,7 @@ theorem completedLocalCyclotomicRingEquiv_uniformizer_sub_natCast_mul_mem_sq
         ((completedLocalCyclotomicZetaUnit p K ^ A :
           completedLocalCyclotomicUnitGroup p K) : S) := by
     have h := congrArg
-      (fun u : completedLocalCyclotomicUnitGroup p K => (u : S))
+      (fun u : completedLocalCyclotomicUnitGroup p K ↦ (u : S))
       (completedLocalCyclotomicUnitEquiv_zetaUnit (p := p) (K := K) a)
     change ((completedLocalCyclotomicUnitEquiv (p := p) K a
         (completedLocalCyclotomicZetaUnit p K) : completedLocalCyclotomicUnitGroup p K) :
@@ -337,9 +332,9 @@ theorem natCast_delta_val_pow_sub_zmod_pow_val_mem_completedMaximalIdeal
     have hA : (A : ZMod p) = (a : ZMod p) := ZMod.natCast_zmod_val (a : ZMod p)
     rw [Nat.cast_pow, hA]
   have hmod : A ^ n % p = c := by
-    have hleft : (((A ^ n : ℕ) : ZMod p).val) = A ^ n % p :=
+    have hleft : ((A ^ n : ℕ) : ZMod p).val = A ^ n % p :=
       ZMod.val_natCast p (A ^ n)
-    have hright : (((A ^ n : ℕ) : ZMod p).val) = c := by
+    have hright : ((A ^ n : ℕ) : ZMod p).val = c := by
       simpa [c] using congrArg ZMod.val hcast
     exact hleft.symm.trans hright
   have hdecomp : A ^ n = c + p * (A ^ n / p) := by
@@ -349,7 +344,7 @@ theorem natCast_delta_val_pow_sub_zmod_pow_val_mem_completedMaximalIdeal
   have hdiff : (A : S) ^ n - (c : S) = (p : S) * (A ^ n / p : S) := by
     have hcastdecomp : ((A ^ n : ℕ) : S) =
         ((c + p * (A ^ n / p) : ℕ) : S) :=
-      congrArg (fun m : ℕ => (m : S)) hdecomp
+      congrArg (fun m : ℕ ↦ (m : S)) hdecomp
     calc
       (A : S) ^ n - (c : S) = ((A ^ n : ℕ) : S) - (c : S) := by
         rw [Nat.cast_pow]
@@ -813,7 +808,7 @@ theorem completedPrincipalUnitGradedDeltaAction_apply_class_eq_pow
     completedPrincipalUnitGradedDeltaAction (p := p) K n a
         (completedPrincipalUnitGradedClass p K n u) =
       completedPrincipalUnitGradedClass p K n u ^
-        (((a : ZMod p) ^ n).val) := by
+        ((a : ZMod p) ^ n).val := by
   rw [completedPrincipalUnitGradedDeltaAction_apply_class, ← map_pow]
   apply (QuotientGroup.eq).2
   rw [mem_completedPrincipalUnitGradedSubgroup_iff]
@@ -854,7 +849,7 @@ theorem completedPrincipalUnitGradedDeltaAction_apply_eq_pow
     {n : ℕ} (hn : 1 ≤ n) (a : CyclotomicUnitDelta p)
     (x : completedPrincipalUnitGradedQuotient p K n) :
     completedPrincipalUnitGradedDeltaAction (p := p) K n a x =
-      x ^ (((a : ZMod p) ^ n).val) := by
+      x ^ ((a : ZMod p) ^ n).val := by
   refine QuotientGroup.induction_on x ?_
   intro u
   exact completedPrincipalUnitGradedDeltaAction_apply_class_eq_pow
@@ -879,7 +874,7 @@ theorem completedPrincipalUnitGradedQuotient_pow_eq_one
 instance completedPrincipalUnitGradedQuotientModuleZMod
     (n : ℕ) [Fact (1 ≤ n)] :
     Module (ZMod p) (Additive (completedPrincipalUnitGradedQuotient p K n)) :=
-  AddCommGroup.zmodModule (n := p) fun x => by
+  AddCommGroup.zmodModule (n := p) fun x ↦ by
     apply Additive.ext
     rw [toMul_nsmul, toMul_zero]
     simpa using completedPrincipalUnitGradedQuotient_pow_eq_one
