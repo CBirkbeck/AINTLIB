@@ -24,7 +24,7 @@ theorem exists_prime_dvd_num_of_one_lt_abs
   have hq_rat : (1 : ℚ) < |q| := by
     exact_mod_cast hq
   have hnum_gt_den_int : ((|q|).den : ℤ) < (|q|).num := by
-    have hnot : ¬ (|q|).num ≤ ((|q|).den : ℤ) := fun hle =>
+    have hnot : ¬ (|q|).num ≤ ((|q|).den : ℤ) := fun hle ↦
       (not_le_of_gt hq_rat) ((Rat.num_le_denom_iff).mp hle)
     exact lt_of_not_ge hnot
   have hden_lt_num : q.den < q.num.natAbs := by
