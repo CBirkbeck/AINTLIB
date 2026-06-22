@@ -55,7 +55,7 @@ theorem locallyPrimaryCoprimeCanonicalClassGroupModPHom_ne_one_of_not_isPow_badS
   exact
     coprimeCanonicalClassGroupModPHom_ne_one_of_not_isPow_badSet
       (p := p) (K := K) hp_ne_two η hη_ne hη_not_pow
-      (fun {_ _} hI hJ hmk =>
+      (fun {_ _} hI hJ hmk ↦
         Furtwaengler.pthSymbolAtIdeal_canonical_eq_of_mk0_eq_of_locallyPrimaryPseudoUnit
           (p := p) (K := K) hp_odd η B
           (kummerCharacterBadSet (p := p) (K := K) η)
@@ -230,12 +230,12 @@ theorem locallyPrimaryKummerBadSetClassGroupModPLinear_galois_pow_p_sub_i
             (I : Ideal (𝓞 K)) =
           Furtwaengler.pthSymbolAtIdeal_canonical (p := p) (K := K) η
             (J : Ideal (𝓞 K)) :=
-    fun hI hJ hmk =>
+    fun hI hJ hmk ↦
       Furtwaengler.pthSymbolAtIdeal_canonical_eq_of_mk0_eq_of_locallyPrimaryPseudoUnit
         (p := p) (K := K) hp_odd η B S hSprime hS_ne hη_ne
         hη_prime_to_p hη_local hsing hS_eta hS_p hI hJ hmk
   have hση_ne :
-      cyclotomicRingOfIntegersEquiv (p := p) K a η ≠ 0 := fun hzero =>
+      cyclotomicRingOfIntegersEquiv (p := p) K a η ≠ 0 := fun hzero ↦
     hη_ne <| (cyclotomicRingOfIntegersEquiv (p := p) K a).injective
       (hzero.trans (map_zero _).symm)
   have hu_ne : u ≠ 0 := by
@@ -243,11 +243,11 @@ theorem locallyPrimaryKummerBadSetClassGroupModPLinear_galois_pow_p_sub_i
     apply hση_ne
     rw [hu, hu_zero, zero_pow (Fact.out : Nat.Prime p).ne_zero, mul_zero]
   let Sinv : Finset (Ideal (𝓞 K)) :=
-    S.image (fun P => cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ P)
+    S.image (fun P ↦ cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ P)
   let Uinv : Finset (Ideal (𝓞 K)) :=
     (UniqueFactorizationMonoid.normalizedFactors
         (Ideal.span ({u} : Set (𝓞 K)))).toFinset.image
-      (fun P => cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ P)
+      (fun P ↦ cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ P)
   let T : Finset (Ideal (𝓞 K)) := (S ∪ Sinv) ∪ Uinv
   have hTprime : ∀ P ∈ T, P.IsPrime := by
     intro P hP
@@ -325,7 +325,7 @@ theorem locallyPrimaryKummerBadSetClassGroupModPLinear_galois_pow_p_sub_i
         (∀ Q ∈ UniqueFactorizationMonoid.normalizedFactors
           (cyclotomicGaloisConjugate (p := p) (K := K) a
             (I : Ideal (𝓞 K))),
-            u ∉ Q) := fun c =>
+            u ∉ Q) := fun c ↦
     Furtwaengler.GaloisCovarianceAvoidance.exists_galois_covariance_representative
       (p := p) (K := K) a hu_ne S T hTprime hT_ne hT_S hT_invS hT_invu c
   have hcov :=
@@ -403,20 +403,20 @@ theorem locallyPrimaryKummerBadSetClassGroupModPLinear_galois_pow_p_sub_i_clear_
             (I : Ideal (𝓞 K)) =
           Furtwaengler.pthSymbolAtIdeal_canonical (p := p) (K := K) η
             (J : Ideal (𝓞 K)) :=
-    fun hI hJ hmk =>
+    fun hI hJ hmk ↦
       Furtwaengler.pthSymbolAtIdeal_canonical_eq_of_mk0_eq_of_locallyPrimaryPseudoUnit
         (p := p) (K := K) hp_odd η B S hSprime hS_ne hη_ne
         hη_prime_to_p hη_local hsing hS_eta hS_p hI hJ hmk
   let Sinv : Finset (Ideal (𝓞 K)) :=
-    S.image (fun P => cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ P)
+    S.image (fun P ↦ cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ P)
   let Zinv : Finset (Ideal (𝓞 K)) :=
     (UniqueFactorizationMonoid.normalizedFactors
         (Ideal.span ({z} : Set (𝓞 K)))).toFinset.image
-      (fun P => cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ P)
+      (fun P ↦ cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ P)
   let Winv : Finset (Ideal (𝓞 K)) :=
     (UniqueFactorizationMonoid.normalizedFactors
         (Ideal.span ({w} : Set (𝓞 K)))).toFinset.image
-      (fun P => cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ P)
+      (fun P ↦ cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ P)
   let T : Finset (Ideal (𝓞 K)) := ((S ∪ Sinv) ∪ Zinv) ∪ Winv
   have hTprime : ∀ P ∈ T, P.IsPrime := by
     intro P hP
@@ -531,7 +531,7 @@ theorem locallyPrimaryKummerBadSetClassGroupModPLinear_galois_pow_p_sub_i_clear_
         (∀ Q ∈ UniqueFactorizationMonoid.normalizedFactors
           (cyclotomicGaloisConjugate (p := p) (K := K) a
             (I : Ideal (𝓞 K))),
-            w ∉ Q) := fun c =>
+            w ∉ Q) := fun c ↦
     Furtwaengler.GaloisCovarianceAvoidance.exists_galois_covariance_representative_two
       (p := p) (K := K) a hz_ne hw_ne S T hTprime hT_ne hT_S hT_invS
       hT_invz hT_invw c
