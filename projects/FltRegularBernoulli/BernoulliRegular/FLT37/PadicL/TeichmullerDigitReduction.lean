@@ -161,7 +161,7 @@ theorem isUnit_of_residue_ne_zero {x : S.O} (hx : S.residue x ≠ 0) : IsUnit x 
   -- `¬ π ∣ x` from `residue x ≠ 0`; then `addVal x < 1`, so `addVal x = 0`.
   have hndvd : ¬ S.π ∣ x := fun hdvd => hx ((S.residue_eq_zero_iff x).mpr hdvd)
   by_contra hne
-  have h1 : (1 : ℕ∞) ≤ addVal S.O x := ENat.one_le_iff_ne_zero.mpr hne
+  have h1 : (1 : ℕ∞) ≤ addVal S.O x := Order.one_le_iff_ne_zero.mpr hne
   exact hndvd (by simpa using (S.le_addVal_iff_pi_pow_dvd x 1).mp (by exact_mod_cast h1))
 
 /-- The geometric cofactor is a `𝔓`-adic **unit** (its residue `(p−1)·j^{p-2} =
@@ -191,11 +191,9 @@ so `addVal(ω j − j.val) = addVal(G_j·(ω j − j.val)) ≥ p − 1`. -/
 theorem omega_sub_natCast_addVal_ge (j : (ZMod p)ˣ) :
     ((p - 1 : ℕ) : ℕ∞) ≤ addVal S.O (((S.ω j : S.O)) - (((j : ZMod p).val : S.O))) := by
   -- The product `G_j · (ω j − j.val)` has order `≥ p − 1`.
-  obtain ⟨u, hu⟩ := S.isUnit_teichGeomCofactor j
   have hval : addVal S.O (S.teichGeomCofactor j * (((S.ω j : S.O)) - (((j : ZMod p).val : S.O))))
       = addVal S.O (((S.ω j : S.O)) - (((j : ZMod p).val : S.O))) := by
-    rw [addVal_mul]
-    rw [show addVal S.O (S.teichGeomCofactor j) = 0 from by
+    rw [addVal_mul, show addVal S.O (S.teichGeomCofactor j) = 0 from by
       rw [addVal_eq_zero_iff]; exact S.isUnit_teichGeomCofactor j, zero_add]
   rw [← hval, S.omega_sub_natCast_mul_geomCofactor j]
   -- `addVal(1 − (j.val)^{p-1}) = addVal((j.val)^{p-1} − 1) ≥ p − 1`.
