@@ -1,6 +1,6 @@
 module
 
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PrincipalUnitFactor.Part2.ConductorFlexibleSourceDataPhiFacts
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PrincipalUnitFactor.PhiConjNormChain.ConductorFlexibleSourceDataPhiFacts
 
 @[expose] public section
 

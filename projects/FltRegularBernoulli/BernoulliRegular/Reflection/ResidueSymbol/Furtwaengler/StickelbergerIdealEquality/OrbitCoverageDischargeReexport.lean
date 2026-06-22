@@ -1,3 +1,3 @@
 module
 
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.StickelbergerIdealEquality.Part2.FlexibleOrbitCoverageDischarge
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.StickelbergerIdealEquality.OrbitCoverage.FlexibleOrbitCoverageDischarge

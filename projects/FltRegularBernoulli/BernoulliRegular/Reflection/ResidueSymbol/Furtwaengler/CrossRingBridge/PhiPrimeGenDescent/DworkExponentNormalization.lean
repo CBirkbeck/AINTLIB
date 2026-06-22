@@ -1,6 +1,6 @@
 module
 
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CrossRingBridge.Part1.ResidueFieldEmbeddingAndPhiPrimeGenDescent
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CrossRingBridge.PhiPrimeGenDescent.ResidueFieldEmbeddingAndPhiPrimeGenDescent
 
 @[expose] public section
 

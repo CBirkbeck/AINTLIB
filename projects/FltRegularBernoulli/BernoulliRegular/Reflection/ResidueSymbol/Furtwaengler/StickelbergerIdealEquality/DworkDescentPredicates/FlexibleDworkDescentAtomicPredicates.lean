@@ -1,6 +1,6 @@
 module
 
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.StickelbergerIdealEquality.Part1.DworkDescentAtomicPredicates
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.StickelbergerIdealEquality.DworkDescentPredicates.DworkDescentAtomicPredicates
 
 @[expose] public section
 

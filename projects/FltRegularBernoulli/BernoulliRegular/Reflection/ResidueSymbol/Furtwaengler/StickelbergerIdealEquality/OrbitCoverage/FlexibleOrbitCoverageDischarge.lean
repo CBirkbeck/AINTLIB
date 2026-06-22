@@ -1,6 +1,6 @@
 module
 
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.StickelbergerIdealEquality.Part2.OrbitCoverageDischarge
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.StickelbergerIdealEquality.OrbitCoverage.OrbitCoverageDischarge
 
 @[expose] public section
 

@@ -1,6 +1,6 @@
 module
 
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CrossRingBridge.Part2.ConductorFlexiblePhiDescentCovariance
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CrossRingBridge.PhiDescentCovariance.ConductorFlexiblePhiDescentCovariance
 
 @[expose] public section
 

@@ -1,6 +1,6 @@
 module
 
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PhiPrimeElement.Part2.K2_2BundledInterface
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PhiPrimeElement.K2BundledInterface.K2_2BundledInterface
 
 @[expose] public section
 

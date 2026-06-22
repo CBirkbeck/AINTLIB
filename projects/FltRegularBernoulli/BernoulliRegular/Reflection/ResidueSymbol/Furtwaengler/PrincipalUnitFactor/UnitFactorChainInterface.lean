@@ -1,3 +1,3 @@
 module
 
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PrincipalUnitFactor.Part1.PhiDescentSemiPrimaryConj
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PrincipalUnitFactor.GaussSumPhiDescent.PhiDescentSemiPrimaryConj

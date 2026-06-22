@@ -1,6 +1,6 @@
 module
 
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PrincipalUnitFactor.Part2.PhiProductConjNormAndSemiPrimary
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PrincipalUnitFactor.PhiConjNormChain.PhiProductConjNormAndSemiPrimary
 
 @[expose] public section
 
