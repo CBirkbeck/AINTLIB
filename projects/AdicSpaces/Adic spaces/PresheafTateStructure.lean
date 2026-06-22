@@ -200,6 +200,25 @@ theorem presheafValue_idealOfDef_fg (D₀ : RationalLocData A) :
   (locIdeal_fg D₀.P D₀.T D₀.s).map _
 
 omit [PlusSubring A] in
+/-- `locSubringToRingOfDef D₀` has dense range: `ringOfDef` is by definition the topological
+closure of `range (coeRingHom ∘ locSubring.subtype)`, and the range of `g` is the same image
+viewed inside the subtype. -/
+private theorem locSubringToRingOfDef_denseRange (D₀ : RationalLocData A) :
+    DenseRange (locSubringToRingOfDef D₀) := by
+  letI := D₀.uniformSpace; letI := D₀.isUniformAddGroup; letI := D₀.isTopologicalRing
+  set g := locSubringToRingOfDef D₀ with hg_def
+  intro ⟨z, hz⟩
+  have hval_range : Subtype.val '' Set.range g =
+      ((D₀.coeRingHom.comp (locSubring D₀.P D₀.T D₀.s).subtype).range :
+        Set (presheafValue D₀)) := by
+    ext w; constructor
+    · rintro ⟨y, ⟨d, hd⟩, hw⟩; exact ⟨d, by rw [← hw, ← hd]; rfl⟩
+    · rintro ⟨d, hd⟩; exact ⟨g d, ⟨d, rfl⟩, hd⟩
+  have h1 : z ∈ closure (Subtype.val '' Set.range g) := hval_range ▸ hz
+  simp only [closure_subtype]
+  exact h1
+
+omit [PlusSubring A] in
 private theorem idealOfDef_pow_sub_val_preimage_closure (D₀ : RationalLocData A) (n : ℕ) :
     ((presheafValue_idealOfDef D₀ ^ n : Ideal (presheafValue_ringOfDef D₀)) :
       Set (presheafValue_ringOfDef D₀)) ⊆
@@ -333,6 +352,52 @@ private theorem idealOfDef_pow_subset_closure (D₀ : RationalLocData A) (n : �
       (fun _ ↦ continuous_mul_const _)
       (hg_dense.closure_eq ▸ Set.mem_univ _) hy hact
 
+omit [PlusSubring A] in
+/-- `g = locSubringToRingOfDef D₀` is uniform-inducing for the subspace uniformity on `locSubring`
+(comap of `D₀.uniformSpace`) and the subspace uniformity on `ringOfDef`. This is the key step that
+realises `ringOfDef` as an abstract completion of `locSubring`: it factors through the dense
+uniform embedding `coeRingHom : Localization.Away s → presheafValue`. -/
+private theorem locSubringToRingOfDef_isUniformInducing (D₀ : RationalLocData A) :
+    @IsUniformInducing _ _
+      (UniformSpace.comap (locSubring D₀.P D₀.T D₀.s).subtype D₀.uniformSpace)
+      (UniformSpace.comap Subtype.val inferInstance) (locSubringToRingOfDef D₀) := by
+  letI := D₀.uniformSpace; letI := D₀.isUniformAddGroup; letI := D₀.isTopologicalRing
+  set g := locSubringToRingOfDef D₀ with hg_def
+  have h_comp : (Subtype.val : presheafValue_ringOfDef D₀ → presheafValue D₀) ∘ g =
+      (D₀.coeRingHom : Localization.Away D₀.s → presheafValue D₀) ∘
+      (locSubring D₀.P D₀.T D₀.s).subtype := by ext d; rfl
+  have h_valg_ui : @IsUniformInducing _ _
+      (UniformSpace.comap (locSubring D₀.P D₀.T D₀.s).subtype D₀.uniformSpace)
+      (inferInstance : UniformSpace (presheafValue D₀))
+      (Subtype.val ∘ g) := h_comp ▸
+    (UniformSpace.Completion.isUniformInducing_coe _).comp ⟨rfl⟩
+  have hval_ui : @IsUniformInducing _ _
+      (UniformSpace.comap Subtype.val inferInstance)
+      (inferInstance : UniformSpace (presheafValue D₀))
+      (Subtype.val : presheafValue_ringOfDef D₀ → presheafValue D₀) := ⟨rfl⟩
+  constructor
+  rw [← hval_ui.comap_uniformity, Filter.comap_comap]
+  exact h_valg_ui.comap_uniformity
+
+omit [PlusSubring A] in
+/-- The additive subgroup `(J ^ n).toAddSubgroup`, `J = locIdeal`, is open in the subspace topology
+on `locSubring` (induced from `D₀.topology`). The subspace topology equals the `J`-adic topology
+(`locSubring_induced_eq_adicTopology`), in which the `n`-th basic neighbourhood of `0` is exactly
+this subgroup. -/
+private theorem locIdeal_pow_toAddSubgroup_isOpen (D₀ : RationalLocData A) (n : ℕ) :
+    @IsOpen _ (TopologicalSpace.induced (locSubring D₀.P D₀.T D₀.s).subtype D₀.topology)
+      (SetLike.coe ((locIdeal D₀.P D₀.T D₀.s) ^ n).toAddSubgroup :
+        Set (locSubring D₀.P D₀.T D₀.s)) := by
+  set J := locIdeal D₀.P D₀.T D₀.s with hJ_def
+  rw [locSubring_induced_eq_adicTopology D₀]
+  letI : TopologicalSpace (locSubring D₀.P D₀.T D₀.s) := J.adicTopology
+  haveI : IsTopologicalAddGroup (locSubring D₀.P D₀.T D₀.s) :=
+    @IsTopologicalRing.to_topologicalAddGroup _ _ J.adicTopology
+      (RingFilterBasis.isTopologicalRing
+        J.adic_basis.toRing_subgroups_basis.toRingFilterBasis)
+  exact AddSubgroup.isOpen_of_mem_nhds _
+    (J.hasBasis_nhds_zero_adic.mem_of_mem (i := n) trivial)
+
 set_option maxHeartbeats 4000000 in
 -- The AdicCompletion bridge proof has deep elaboration chains through ring equivs.
 omit [PlusSubring A] in
@@ -357,17 +422,7 @@ private theorem idealOfDef_pow_isClosed_aux (D₀ : RationalLocData A) (n : ℕ)
   set J := locIdeal D₀.P D₀.T D₀.s with hJ_def
   set g := locSubringToRingOfDef D₀ with hg_def
   set gJn := g '' (↑(J ^ n) : Set (locSubring D₀.P D₀.T D₀.s)) with hgJn_def
-  have hg_dense : DenseRange g := by
-    intro ⟨z, hz⟩
-    have hval_range : Subtype.val '' Set.range g =
-        ((D₀.coeRingHom.comp (locSubring D₀.P D₀.T D₀.s).subtype).range :
-          Set (presheafValue D₀)) := by
-      ext w; constructor
-      · rintro ⟨y, ⟨d, hd⟩, hw⟩; exact ⟨d, by rw [← hw, ← hd]; rfl⟩
-      · rintro ⟨d, hd⟩; exact ⟨g d, ⟨d, rfl⟩, hd⟩
-    have h1 : z ∈ closure (Subtype.val '' Set.range g) := hval_range ▸ hz
-    simp only [closure_subtype]
-    exact h1
+  have hg_dense : DenseRange g := locSubringToRingOfDef_denseRange D₀
   -- Proof: idealOfDef^n = ker(π) for a continuous ring hom
   --   π : ringOfDef → locSubring ⧸ (J ^ n)
   -- and ker(π) is closed since the target is discrete (T₁).
@@ -386,22 +441,8 @@ private theorem idealOfDef_pow_isClosed_aux (D₀ : RationalLocData A) (n : ℕ)
   -- Step A: g : locSubring -> ringOfDef is IsUniformInducing.
   have hg_ui : @IsUniformInducing _ _
       (UniformSpace.comap (locSubring D₀.P D₀.T D₀.s).subtype D₀.uniformSpace)
-      (UniformSpace.comap Subtype.val inferInstance) g := by
-    have h_comp : (Subtype.val : presheafValue_ringOfDef D₀ → presheafValue D₀) ∘ g =
-        (D₀.coeRingHom : Localization.Away D₀.s → presheafValue D₀) ∘
-        (locSubring D₀.P D₀.T D₀.s).subtype := by ext d; rfl
-    have h_valg_ui : @IsUniformInducing _ _
-        (UniformSpace.comap (locSubring D₀.P D₀.T D₀.s).subtype D₀.uniformSpace)
-        (inferInstance : UniformSpace (presheafValue D₀))
-        (Subtype.val ∘ g) := h_comp ▸
-      (UniformSpace.Completion.isUniformInducing_coe _).comp ⟨rfl⟩
-    have hval_ui : @IsUniformInducing _ _
-        (UniformSpace.comap Subtype.val inferInstance)
-        (inferInstance : UniformSpace (presheafValue D₀))
-        (Subtype.val : presheafValue_ringOfDef D₀ → presheafValue D₀) := ⟨rfl⟩
-    constructor
-    rw [← hval_ui.comap_uniformity, Filter.comap_comap]
-    exact h_valg_ui.comap_uniformity
+      (UniformSpace.comap Subtype.val inferInstance) g :=
+    locSubringToRingOfDef_isUniformInducing D₀
   -- Step B: ringOfDef is complete (closed subspace of complete space).
   have hcomplete : @CompleteSpace (presheafValue_ringOfDef D₀)
       (UniformSpace.comap Subtype.val inferInstance) :=
@@ -424,20 +465,9 @@ private theorem idealOfDef_pow_isClosed_aux (D₀ : RationalLocData A) (n : ℕ)
     AddSubgroup.isUniformAddGroup (locSubring D₀.P D₀.T D₀.s).toAddSubgroup
   let eRE := (AdicCompletionBridge.completionRingEquiv g hg_cont
     hg_ui hg_dense).symm
-  have htop_eq : (instTopologicalSpaceSubtype :
-      TopologicalSpace (locSubring D₀.P D₀.T D₀.s)) = J.adicTopology := by
-    exact hadic_eq
   have hJn_open : IsOpen (SetLike.coe (J ^ n).toAddSubgroup :
-      Set (locSubring D₀.P D₀.T D₀.s)) := by
-    rw [show instTopologicalSpaceSubtype =
-        (J.adicTopology : TopologicalSpace _) from htop_eq]
-    letI : TopologicalSpace (locSubring D₀.P D₀.T D₀.s) := J.adicTopology
-    haveI : IsTopologicalAddGroup (locSubring D₀.P D₀.T D₀.s) :=
-      @IsTopologicalRing.to_topologicalAddGroup _ _ J.adicTopology
-        (RingFilterBasis.isTopologicalRing
-          J.adic_basis.toRing_subgroups_basis.toRingFilterBasis)
-    exact AddSubgroup.isOpen_of_mem_nhds _
-      (J.hasBasis_nhds_zero_adic.mem_of_mem (i := n) trivial)
+      Set (locSubring D₀.P D₀.T D₀.s)) :=
+    locIdeal_pow_toAddSubgroup_isOpen D₀ n
   haveI hdisc : DiscreteTopology (locSubring D₀.P D₀.T D₀.s ⧸ J ^ n) :=
     QuotientAddGroup.discreteTopology hJn_open
   haveI : @IsTopologicalAddGroup (locSubring D₀.P D₀.T D₀.s ⧸ J ^ n)
@@ -653,18 +683,7 @@ private theorem idealOfDef_pow_val_isClosed (D₀ : RationalLocData A) (n : ℕ)
     have : IsClosed (closure gJn) := isClosed_closure
     rwa [← h_eq] at this
   -- DenseRange g: ringOfDef = topological closure of range(g).
-  have hg_dense : DenseRange g := by
-    intro ⟨z, hz⟩
-    have hval_range : Subtype.val '' Set.range g =
-        ((D₀.coeRingHom.comp (locSubring D₀.P D₀.T D₀.s).subtype).range :
-          Set (presheafValue D₀)) := by
-      ext w; constructor
-      · rintro ⟨y, ⟨d, hd⟩, hw⟩; exact ⟨d, by rw [← hw, ← hd]; rfl⟩
-      · rintro ⟨d, hd⟩; exact ⟨g d, ⟨d, rfl⟩, hd⟩
-    have h1 : z ∈ closure (Subtype.val '' Set.range g) := hval_range ▸ hz
-    -- closure in induced topology = preimage of closure in ambient
-    simp only [closure_subtype]
-    exact h1
+  have hg_dense : DenseRange g := locSubringToRingOfDef_denseRange D₀
   apply Set.Subset.antisymm
   · -- ⊆: idealOfDef^n ⊆ closure(gJn)
     exact idealOfDef_pow_subset_closure D₀ n hg_dense
