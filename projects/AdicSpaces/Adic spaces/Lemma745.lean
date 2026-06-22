@@ -397,6 +397,24 @@ theorem exists_valuation_extension (P : PairOfDefinition A) {Γ₀ : Type*}
     exact congrArg v_r (Subtype.ext rfl)
   · exact v_ext_at a n hn
 
+/-- The convex restriction of `V₀.valuation.comap (toFractionQuotient 𝔭)` vanishes on any
+element of `A₀` whose image in `A` lies in the prime `𝔭` (since `toFractionQuotient 𝔭`
+factors through `A / 𝔭`). -/
+theorem restrictToConvex_comap_toFractionQuotient_eq_zero_of_mem_prime
+    (P : PairOfDefinition A) {𝔭 : Ideal A} [𝔭.IsPrime]
+    (V₀ : ValuationSubring (FractionRing (A ⧸ 𝔭)))
+    (H : ConvexSubgroup V₀.ValueGroupˣ)
+    (hle : ∀ r : P.A₀, (V₀.valuation.comap (P.toFractionQuotient 𝔭)) r ≤ 1)
+    {b : P.A₀} (hb : (P.A₀.subtype b : A) ∈ 𝔭) :
+    (V₀.valuation.comap (P.toFractionQuotient 𝔭)).restrictToConvex H hle b = 0 := by
+  have hv₀_zero : (V₀.valuation.comap (P.toFractionQuotient 𝔭)) b = 0 := by
+    rw [Valuation.comap_apply, show P.toFractionQuotient 𝔭 b =
+        (algebraMap (A ⧸ 𝔭) (FractionRing (A ⧸ 𝔭))) ((Ideal.Quotient.mk 𝔭) (P.A₀.subtype b))
+        from rfl,
+      show (Ideal.Quotient.mk 𝔭) (P.A₀.subtype b) = 0 from
+        Ideal.Quotient.eq_zero_iff_mem.mpr hb, map_zero, map_zero]
+  rw [Valuation.restrictToConvex_unfold, dif_pos hv₀_zero]
+
 /-- **Rank-1 extension (Wedhorn Lemma 7.45, Steps 3-7).**
 
 Constructs a valuation `v_ext : Valuation A (WithZero H_gen.toSubgroup)` that is
@@ -485,18 +503,6 @@ theorem exists_spa_point_via_restrictToConvex (P : PairOfDefinition A)
     simp only [v₀_A₀, Valuation.comap_apply]
     exact (ValuationSubring.valuation_le_one_iff V₀ _).mpr (hrange₀ ⟨r, rfl⟩)
   set v_r := v₀_A₀.restrictToConvex H_gen hle_A₀ with v_r_def
-  have hv_r_lt_one_I : ∀ a : P.A₀, a ∈ P.I → v_r a < 1 := by
-    intro a ha
-    have hval_lt : v₀_A₀ a < 1 := by
-      simp only [v₀_A₀, Valuation.comap_apply]
-      exact P.pulledBackValuation_lt_one hnonunits₀ ha
-    by_cases hval_ne : v₀_A₀ a = 0
-    · have ha_supp : a ∈ v₀_A₀.supp := (Valuation.mem_supp_iff v₀_A₀ a).mpr hval_ne
-      have ha_supp_r : a ∈ v_r.supp :=
-        Valuation.supp_le_restrictToConvex_supp v₀_A₀ H_gen hle_A₀ ha_supp
-      rw [(Valuation.mem_supp_iff v_r a).mp ha_supp_r]; exact zero_lt_one
-    · exact Valuation.restrictToConvex_lt_one_of_val_lt_one
-        v₀_A₀ H_gen hle_A₀ hval_ne hval_lt
   have hv₀_a₀_ne : v₀_A₀ a₀ ≠ 0 := by
     intro h_eq
     apply ha₀_notp
@@ -531,10 +537,8 @@ theorem exists_spa_point_via_restrictToConvex (P : PairOfDefinition A)
       rw [supp_ofValuation, Valuation.mem_supp_iff] at ha₀_supp
       exact hv_r_s_ne (h_ext_A₀ a₀ ▸ ha₀_supp)
   classical
-  have hs_not_p : s ∉ 𝔭 := ha₀_notp
   have h_pow_mul : ∀ a : A, ∃ n : ℕ, s ^ n * a ∈ P.A₀ :=
     P.exists_pow_mul_mem_A₀ hs_nil
-  set v_s := v_r a₀ with v_s_def
   suffices h_val : ∃ (v_ext : Valuation A (WithZero H_gen.toSubgroup)),
       (∀ a : P.A₀, v_ext (P.A₀.subtype a) = v_r a) ∧
       (∀ a : A, a ∈ 𝔭 → v_ext a = 0) by
@@ -578,93 +582,19 @@ theorem exists_spa_point_via_restrictToConvex (P : PairOfDefinition A)
         simp only [Subring.subtype_apply]
       rw [this, h_ext_A₀ ⟨f, hf_A₀⟩]
       exact Valuation.restrictToConvex_le_one v₀_A₀ H_gen hle_A₀ ⟨f, hf_A₀⟩
-  have hfind_zero : ∀ (a : A), s ^ 0 * a ∈ P.A₀ → Nat.find (h_pow_mul a) = 0 :=
-    fun a h0 ↦ Nat.le_zero.mp (Nat.find_min' _ h0)
+  -- The valuation `v_ext` extending `v_r` from `A₀` to `A` is `exists_valuation_extension`
+  -- (Wedhorn 7.44(3)); it remains to check it vanishes on `𝔭`.
   have hs_A₀ : s ∈ P.A₀ := Subtype.coe_prop a₀
-  have h1_A₀ : (1 : A) ∈ P.A₀ := P.A₀.one_mem
-  have h0_A₀ : (0 : A) ∈ P.A₀ := P.A₀.zero_mem
-  have h0_mem : s ^ 0 * 0 ∈ P.A₀ := by simp only [pow_zero, mul_zero, P.A₀.zero_mem]
-  have h1_mem : s ^ 0 * 1 ∈ P.A₀ := by simp only [pow_zero, mul_one, P.A₀.one_mem]
-  let v_ext_fun : A → WithZero H_gen.toSubgroup := fun a ↦
-    let n := Nat.find (h_pow_mul a)
-    v_r ⟨s ^ n * a, Nat.find_spec (h_pow_mul a)⟩ * v_s⁻¹ ^ n
-  have v_ext_at : ∀ (a : A) (m : ℕ) (hm : s ^ m * a ∈ P.A₀),
-      v_ext_fun a = v_r ⟨s ^ m * a, hm⟩ * v_s⁻¹ ^ m :=
-    fun a m hm ↦ vExtFun_well_defined P v_r v_s hs_A₀ v_s_def
-      hv_r_s_ne _ m (Nat.find_spec (h_pow_mul a)) hm
-  have h_map_zero : v_ext_fun 0 = 0 := by
-    rw [v_ext_at 0 0 h0_mem]
-    simp only [pow_zero, one_mul, mul_one]
-    have : (⟨(0 : A), h0_A₀⟩ : P.A₀) = 0 := Subtype.ext rfl
-    rw [this, map_zero]
-  have h_map_one : v_ext_fun 1 = 1 := by
-    rw [v_ext_at 1 0 h1_mem]
-    simp only [pow_zero, mul_one]
-    have : (⟨(1 : A), h1_A₀⟩ : P.A₀) = 1 := Subtype.ext rfl
-    rw [this, map_one]
-  have h_map_mul : ∀ x y : A,
-      v_ext_fun (x * y) = v_ext_fun x * v_ext_fun y := by
-    intro x y
-    set nx := Nat.find (h_pow_mul x)
-    set ny := Nat.find (h_pow_mul y)
-    have hnx := Nat.find_spec (h_pow_mul x)
-    have hny := Nat.find_spec (h_pow_mul y)
-    have hprod_mem : s ^ (nx + ny) * (x * y) ∈ P.A₀ := by
-      rw [show s ^ (nx + ny) * (x * y) =
-        (s ^ nx * x) * (s ^ ny * y) from by ring]
-      exact P.A₀.mul_mem hnx hny
-    rw [v_ext_at (x * y) (nx + ny) hprod_mem,
-      v_ext_at x nx hnx, v_ext_at y ny hny]
-    exact vExtFun_map_mul P v_r v_s hnx hny hprod_mem
-  have h_map_add_le_max : ∀ x y : A,
-      v_ext_fun (x + y) ≤ max (v_ext_fun x) (v_ext_fun y) := by
-    intro x y
-    set nx := Nat.find (h_pow_mul x)
-    set ny := Nat.find (h_pow_mul y)
-    have hnx := Nat.find_spec (h_pow_mul x)
-    have hny := Nat.find_spec (h_pow_mul y)
-    have hNx : s ^ (nx + ny) * x ∈ P.A₀ :=
-      P.pow_mul_mem_A₀_of_le hs_A₀ hnx ny
-    have hNy : s ^ (nx + ny) * y ∈ P.A₀ := by
-      rw [show nx + ny = ny + nx from by omega]
-      exact P.pow_mul_mem_A₀_of_le hs_A₀ hny nx
-    have hNxy : s ^ (nx + ny) * (x + y) ∈ P.A₀ := by
-      rw [show s ^ (nx + ny) * (x + y) =
-        s ^ (nx + ny) * x + s ^ (nx + ny) * y from
-        mul_add _ _ _]
-      exact P.A₀.add_mem hNx hNy
-    rw [v_ext_at (x + y) (nx + ny) hNxy,
-      v_ext_at x (nx + ny) hNx, v_ext_at y (nx + ny) hNy]
-    exact vExtFun_map_add_le_max P v_r v_s hNx hNy hNxy
-  let v_ext : Valuation A (WithZero H_gen.toSubgroup) :=
-    { toFun := v_ext_fun
-      map_zero' := h_map_zero
-      map_one' := h_map_one
-      map_mul' := h_map_mul
-      map_add_le_max' := h_map_add_le_max }
-  refine ⟨v_ext, ?_, ?_⟩
-  · intro a
-    change v_ext_fun (P.A₀.subtype a) = v_r a
-    have hmem : s ^ 0 * (P.A₀.subtype a) ∈ P.A₀ := by
-      simp only [pow_zero, one_mul]; exact Subtype.coe_prop a
-    rw [v_ext_at (P.A₀.subtype a) 0 hmem]
-    simp only [pow_zero, one_mul, mul_one]
-    exact congrArg v_r (Subtype.ext rfl)
-  · intro a ha_p
-    change v_ext_fun a = 0
-    set n := Nat.find (h_pow_mul a)
-    have hn := Nat.find_spec (h_pow_mul a)
-    have h_in_p : s ^ n * a ∈ 𝔭 := 𝔭.mul_mem_left _ ha_p
-    have hv₀_zero : v₀_A₀ ⟨s ^ n * a, hn⟩ = 0 := by
-      rw [v₀_A₀_def, Valuation.comap_apply, show φ ⟨s ^ n * a, hn⟩ =
-        (algebraMap (A ⧸ 𝔭) (FractionRing (A ⧸ 𝔭)))
-          ((Ideal.Quotient.mk 𝔭) (s ^ n * a)) from rfl]
-      rw [show (Ideal.Quotient.mk 𝔭) (s ^ n * a) = 0 from
-        Ideal.Quotient.eq_zero_iff_mem.mpr h_in_p, map_zero, map_zero]
-    have hv_r_zero : v_r ⟨s ^ n * a, hn⟩ = 0 := by
-      rw [v_r_def, Valuation.restrictToConvex_unfold, dif_pos hv₀_zero]
-    change v_r ⟨s ^ n * a, hn⟩ * v_s⁻¹ ^ n = 0
-    rw [hv_r_zero, zero_mul]
+  have hv_r_s_ne' : v_r ⟨s, hs_A₀⟩ ≠ 0 := by
+    rwa [show (⟨s, hs_A₀⟩ : P.A₀) = a₀ from Subtype.ext rfl]
+  obtain ⟨v_ext, h_ext_A₀, h_ext_at⟩ :=
+    P.exists_valuation_extension v_r hs_A₀ hs_nil hv_r_s_ne'
+  refine ⟨v_ext, h_ext_A₀, fun a ha_p ↦ ?_⟩
+  obtain ⟨n, hn⟩ := h_pow_mul a
+  have hv_r_zero : v_r ⟨s ^ n * a, hn⟩ = 0 :=
+    P.restrictToConvex_comap_toFractionQuotient_eq_zero_of_mem_prime V₀ H_gen hle_A₀
+      (𝔭.mul_mem_left _ ha_p)
+  rw [h_ext_at a n hn, hv_r_zero, zero_mul]
 
 /-! ### Full proof assembly -/
 
