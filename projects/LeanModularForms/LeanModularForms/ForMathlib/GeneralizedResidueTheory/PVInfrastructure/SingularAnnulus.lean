@@ -66,17 +66,20 @@ private lemma singular_symmDiff_sup_bound {t₀ c : ℝ} (hc_pos : 0 < c) {t : �
   rw [norm_inv, Complex.norm_real, Real.norm_eq_abs, one_div]
   exact inv_anti₀ hc_pos ht_lower
 
+private lemma measurableSet_Lmul_annulus {t₀ : ℝ} {L : ℂ} {ε₁ ε₂ : ℝ} :
+    MeasurableSet {t : ℝ | ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁} :=
+  .inter (isOpen_lt continuous_const (continuous_const.mul
+      (continuous_abs.comp (continuous_id.sub continuous_const)))).measurableSet
+    (isClosed_le (continuous_const.mul
+      (continuous_abs.comp (continuous_id.sub continuous_const)))
+      continuous_const).measurableSet
+
 private lemma singular_annulus_f_lin_measurable {t₀ : ℝ} {L : ℂ} {ε₁ ε₂ : ℝ} :
     Measurable (fun t : ℝ ↦
       if ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁
       then (↑(t - t₀) : ℂ)⁻¹ else 0) := by
-  refine Measurable.ite (.inter ?_ ?_) ?_ measurable_const
-  · exact (isOpen_lt continuous_const (continuous_const.mul
-      (continuous_abs.comp (continuous_id.sub continuous_const)))).measurableSet
-  · exact (isClosed_le (continuous_const.mul
-      (continuous_abs.comp (continuous_id.sub continuous_const)))
-      continuous_const).measurableSet
-  · exact (Complex.measurable_ofReal.comp (measurable_id.sub_const t₀)).inv
+  refine Measurable.ite measurableSet_Lmul_annulus ?_ measurable_const
+  exact (Complex.measurable_ofReal.comp (measurable_id.sub_const t₀)).inv
 
 private lemma singular_annulus_f_lin_bound {t₀ : ℝ} {L : ℂ} {ε₁ ε₂ : ℝ}
     (hL_pos : 0 < ‖L‖) (hε₂_pos : 0 < ε₂) (t : ℝ) :
@@ -381,11 +384,7 @@ lemma singular_annulus_bound_explicit {γ : ℝ → ℂ} {a b t₀ : ℝ} {L : �
       continuous_const).measurableSet
   have hLmul_meas : MeasurableSet
       {t : ℝ | ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁} :=
-    .inter (isOpen_lt continuous_const (continuous_const.mul
-        (continuous_abs.comp (continuous_id.sub continuous_const)))).measurableSet
-      (isClosed_le (continuous_const.mul
-        (continuous_abs.comp (continuous_id.sub continuous_const)))
-        continuous_const).measurableSet
+    measurableSet_Lmul_annulus
   have hγAnn'_meas : MeasurableSet γAnn' :=
     measurableSet_Icc.inter (habs_meas.inter ((hh'_sm.measurable measurableSet_Ioi).inter
       (hh'_sm.measurable measurableSet_Iic)))
