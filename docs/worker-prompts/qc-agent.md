@@ -16,8 +16,9 @@ measure, and file findings. (Bumps = the bump owner; during a freeze you idle.)
 - Guardrails: prefix every `git checkout` / `git push` / `gh pr merge` with `LEAN4_GUARDRAILS_BYPASS=1`.
   **Never** put `2>/dev/null` next to a `lake`/`lean` command (a hook blocks it — use `2>&1`).
 - **You never commit to `main`.** You run skills only to *measure* what a proper pass would change,
-  then revert (`git checkout -- <file>` / `git stash`). Your only persistent writes are GitHub
-  issues/comments (findings) and the QC log.
+  then revert with `git stash push -- <file>` + `git stash drop` (**not** `git checkout -- <file>` —
+  the guardrail blocks it). Your only persistent writes are GitHub issues/comments (findings) and
+  the QC log.
 
 ## Each firing
 1. **Freeze check.** `gh issue list --repo CBirkbeck/AINTLIB --label freeze:active --state open` —
@@ -70,6 +71,22 @@ measure, and file findings. (Bumps = the bump owner; during a freeze you idle.)
    *"<date>: sampled cleanup #a #b, generalise #c #d — N shortcuts, M defects; filed #x #y."* This is
    how the owner sees QC is alive and its hit-rate.
 8. **Exit.**
+
+## Standing hygiene duty (dedup / junk-bundlers / naming) — ~once a day, not every firing
+Beyond sampling, the QC manager also keeps the library mathlib-clean (epic **#3248**, label
+`qc:dedup`). On roughly one firing a day (skip during a freeze), do a small hygiene pass:
+1. **Detect** — grep for (a) duplicate canonical results, (b) "junk bundlers" (a structure /
+   `_of_witnesses` / `_from_pack` decl that takes the hard part as a hypothesis and is **consumed but
+   never produced** by a sorry-free decl), (c) cryptic/duplicate filenames (`L6*`, `HoleE`, `Route*`,
+   `Cascade`, `Part N`, textbook numbers, `_axiom_clean`, `CaseIICor…`).
+2. **Triage 1–2** — *read the proof first* (a real, sorry-free proof is NOT junk however it's named —
+   e.g. StrongMultiplicityOne). Mechanical dup → `lane:cleanup`+`qc:dedup` ticket to delete+rewire.
+   Proof-architecture pruning or a rename in a WIP/diverged tree → a **dev-board ticket** on the owning
+   `dev/<project>` branch (renames are cross-cutting → producer-side, never main auto-merge).
+3. **Never delete a consumed/discharged decl; when unsure, route to the producer.**
+
+**Full protocol, the convention, scope, and all five QC-manager hats: `HANDOVER-qc-manager.md`** —
+read it on takeover (and recreate the four `[session-only]` crons, which do NOT transfer between sessions).
 
 ## Never
 Commit/push to `main`; bump or `lake update`; merge any PR; edit a `sorry`'d decl; act during a freeze.
