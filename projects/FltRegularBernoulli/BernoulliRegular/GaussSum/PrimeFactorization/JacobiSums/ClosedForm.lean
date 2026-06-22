@@ -77,33 +77,14 @@ private lemma distinguishedPrimeExponent_stickelbergerComplexCharacterGenerator_
           have hdvd :
               p - 1 ∣ (j : ℕ) + (k : ℕ) :=
             (stickelbergerComplexCharacterRoot_isPrimitiveRoot (p := p)).dvd_of_pow_eq_one _ hroot
-          obtain ⟨m, hm⟩ := hdvd
           have hj_pos : 0 < (j : ℕ) := Fin.pos_iff_ne_zero.mpr hj
           have hk_pos : 0 < (k : ℕ) := Fin.pos_iff_ne_zero.mpr hk
-          have hpred_pos : 0 < p - 1 := Nat.sub_pos_of_lt hp.out.one_lt
-          have hsum_pos : 0 < (j : ℕ) + (k : ℕ) := by
-            omega
+          have hsum_pos : 0 < (j : ℕ) + (k : ℕ) := by omega
           have hsum_lt : (j : ℕ) + (k : ℕ) < 2 * (p - 1) := by
             have hj_lt : (j : ℕ) < p - 1 := j.2
             have hk_lt : (k : ℕ) < p - 1 := k.2
             omega
-          have hmpos : 0 < m := by
-            by_contra hm0
-            have hm_eq_zero : m = 0 := Nat.eq_zero_of_not_pos hm0
-            have hzero : (j : ℕ) + (k : ℕ) = 0 := by
-              simpa [hm_eq_zero] using hm
-            exact (Nat.ne_of_gt hsum_pos) hzero
-          have hm_lt_two : m < 2 := by
-            by_contra hm2
-            have hm_ge_two : 2 ≤ m := Nat.not_lt.mp hm2
-            have hge : 2 * (p - 1) ≤ (j : ℕ) + (k : ℕ) := by
-              calc
-                2 * (p - 1) = (p - 1) * 2 := by rw [Nat.mul_comm]
-                _ ≤ (p - 1) * m := Nat.mul_le_mul_left (p - 1) hm_ge_two
-                _ = (j : ℕ) + (k : ℕ) := hm.symm
-            exact (Nat.not_le_of_lt hsum_lt) hge
-          have hm_eq : m = 1 := by omega
-          exact hsum (hm.trans (by simp [hm_eq]))
+          exact hsum (Nat.eq_of_dvd_of_lt_two_mul hsum_pos.ne' hdvd hsum_lt)
         have hprod : (g ^ (j : ℕ)) * (g ^ (k : ℕ)) ≠ 1 := by
           simpa [g, pow_add] using hgsum
         let JI : Ideal (𝓞 L) :=
