@@ -201,6 +201,34 @@ theorem ordAtInfty_a1L_minus_a2_minus_xgen_frobenius
   exact (W_smooth W).ord_sub_lt_concrete (-(Fintype.card K : ℤ)) (-2) h_neg_q_lt_neg2
     h_ord_a1L_minus_a2 h_ord_x_gen
 
+/-- **Strict non-archimedean pole bound**: if `ord B = -q` and `ord A ≠ -q`
+(with `3 ≤ |K|`), then `ord(A + B) ≤ -2`. Either `ord A < -q` (so `ord(A+B) =
+ord A < -q ≤ -2`) or `ord A > -q` (so `ord(A+B) = ord B = -q ≤ -2`). -/
+private theorem ordAtInfty_add_le_neg_two {A B : KE} (hq : 3 ≤ Fintype.card K)
+    (h_ord_B : (W_smooth W).ordAtInfty B = ((-(Fintype.card K : ℤ)) : WithTop ℤ))
+    (h_witness : (W_smooth W).ordAtInfty A ≠ ((-(Fintype.card K : ℤ)) : WithTop ℤ)) :
+    (W_smooth W).ordAtInfty (A + B) ≤ ((-2 : ℤ) : WithTop ℤ) := by
+  rcases lt_or_gt_of_ne h_witness with h_A_lt | h_A_gt
+  · have h_lt : (W_smooth W).ordAtInfty A < (W_smooth W).ordAtInfty B := by
+      rw [h_ord_B]; exact h_A_lt
+    have h_eq_A := (W_smooth W).ordAtInfty_add_eq_of_lt h_lt
+    have h_neg_q_le_neg2 : ((-(Fintype.card K : ℤ)) : WithTop ℤ) ≤
+        ((-2 : ℤ) : WithTop ℤ) := by
+      apply WithTop.coe_le_coe.mpr
+      have : (3 : ℤ) ≤ (Fintype.card K : ℤ) := by exact_mod_cast hq
+      linarith
+    exact h_eq_A.le.trans (h_A_lt.le.trans h_neg_q_le_neg2)
+  · have h_lt : (W_smooth W).ordAtInfty B < (W_smooth W).ordAtInfty A := by
+      rw [h_ord_B]; exact h_A_gt
+    have h_BA_eq : (W_smooth W).ordAtInfty (B + A) = (W_smooth W).ordAtInfty B :=
+      (W_smooth W).ordAtInfty_add_eq_of_lt h_lt
+    have h_AB_eq : (W_smooth W).ordAtInfty (A + B) = (W_smooth W).ordAtInfty B := by
+      rw [show A + B = B + A from by ring]; exact h_BA_eq
+    rw [h_AB_eq, h_ord_B]
+    apply WithTop.coe_le_coe.mpr
+    have : (3 : ℤ) ≤ (Fintype.card K : ℤ) := by exact_mod_cast hq
+    linarith
+
 /-- **Pole bound for q ≥ 3 with cancellation witness** (Path X-prime,
 **SUPERSEDED**): `ord_∞(addPullback_x W π) ≤ -2`, given the structural
 witness `ord(L² - π·x) ≠ -q`.
@@ -254,30 +282,7 @@ theorem addPullback_x_pole_frobenius_of_lc_witness
   have h_ord_B : (W_smooth W).ordAtInfty B =
       ((-(Fintype.card K : ℤ)) : WithTop ℤ) :=
     ordAtInfty_a1L_minus_a2_minus_xgen_frobenius W hq ha1 ha2
-  -- Step 3: case-split on ord(A) vs ord(B) = -q.
-  rcases lt_or_gt_of_ne h_witness with h_A_lt | h_A_gt
-  · -- ord(A) < -q. By strict non-arch, ord(A+B) = ord(A) ≤ -q-1.
-    have h_lt : (W_smooth W).ordAtInfty A < (W_smooth W).ordAtInfty B := by
-      rw [h_ord_B]; exact h_A_lt
-    have h_eq_A := (W_smooth W).ordAtInfty_add_eq_of_lt h_lt
-    -- ord(A+B) = ord(A) < -q ≤ -2.
-    have h_neg_q_le_neg2 : ((-(Fintype.card K : ℤ)) : WithTop ℤ) ≤
-        ((-2 : ℤ) : WithTop ℤ) := by
-      apply WithTop.coe_le_coe.mpr
-      have : (3 : ℤ) ≤ (Fintype.card K : ℤ) := by exact_mod_cast hq
-      linarith
-    exact h_eq_A.le.trans (h_A_lt.le.trans h_neg_q_le_neg2)
-  · -- ord(A) > -q. By strict non-arch, ord(A+B) = ord(B) = -q ≤ -2.
-    have h_lt : (W_smooth W).ordAtInfty B < (W_smooth W).ordAtInfty A := by
-      rw [h_ord_B]; exact h_A_gt
-    have h_BA_eq : (W_smooth W).ordAtInfty (B + A) = (W_smooth W).ordAtInfty B :=
-      (W_smooth W).ordAtInfty_add_eq_of_lt h_lt
-    have h_AB_eq : (W_smooth W).ordAtInfty (A + B) = (W_smooth W).ordAtInfty B := by
-      rw [show A + B = B + A from by ring]; exact h_BA_eq
-    rw [h_AB_eq, h_ord_B]
-    apply WithTop.coe_le_coe.mpr
-    have : (3 : ℤ) ≤ (Fintype.card K : ℤ) := by exact_mod_cast hq
-    linarith
+  exact ordAtInfty_add_le_neg_two W hq h_ord_B h_witness
 
 /-- **Sorry 1 closure for Frobenius case (q ≥ 3)** with leading-coefficient
 witness. Composes the pole bound with `addPullback_x_ne_const_frobenius_of_pole`. -/
