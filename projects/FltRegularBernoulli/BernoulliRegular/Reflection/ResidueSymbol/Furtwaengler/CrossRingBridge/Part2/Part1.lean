@@ -69,7 +69,7 @@ theorem TraceFormStickelbergerSetup.ringHom_compAddChar_eq_self_of_zeta_ell_fixe
     (τ : R' →+* R')
     (hτζ : τ S.zeta_ell = S.zeta_ell) :
     τ.toMonoidHom.compAddChar S.psi = S.psi := by
-  have hval_one : (((1 : (ZMod ℓ)ˣ) : ZMod ℓ).val) = 1 := by
+  have hval_one : ((1 : (ZMod ℓ)ˣ) : ZMod ℓ).val = 1 := by
     haveI : Fact (1 < ℓ) := ⟨(Fact.out : Nat.Prime ℓ).one_lt⟩
     simpa using (ZMod.val_one ℓ)
   have hact : τ S.zeta_ell = S.zeta_ell ^ ((1 : (ZMod ℓ)ˣ) : ZMod ℓ).val := by
@@ -104,7 +104,7 @@ theorem ConductorFlexibleTraceFormStickelbergerSetup.ringHom_compAddChar_eq_self
     (τ : R' →+* R')
     (hτζ : τ S.zeta_ell = S.zeta_ell) :
     τ.toMonoidHom.compAddChar S.psi = S.psi := by
-  have hval_one : (((1 : (ZMod ℓ)ˣ) : ZMod ℓ).val) = 1 := by
+  have hval_one : ((1 : (ZMod ℓ)ˣ) : ZMod ℓ).val = 1 := by
     haveI : Fact (1 < ℓ) := ⟨(Fact.out : Nat.Prime ℓ).one_lt⟩
     simpa using (ZMod.val_one ℓ)
   have hact : τ S.zeta_ell = S.zeta_ell ^ ((1 : (ZMod ℓ)ˣ) : ZMod ℓ).val := by
@@ -167,16 +167,7 @@ theorem phiPrimeGenDescent_conjugate_covariance_of_ringHom_index
     S.toConcreteStickelbergerSetup
       |>.ringHom_gaussSumInt_eq_of_residueChar_psi τ
         (a := c) (b := b) hτχ hτψ
-  calc
-    τ (algebraMap (𝓞 R') R' (S.gaussSumInt c ^ p))
-        = τ ((algebraMap (𝓞 R') R' (S.gaussSumInt c)) ^ p) := by
-          rw [map_pow]
-    _ = (τ (algebraMap (𝓞 R') R' (S.gaussSumInt c))) ^ p := by
-          rw [map_pow]
-    _ = (algebraMap (𝓞 R') R' (S.gaussSumInt b)) ^ p := by
-          rw [h_gauss]
-    _ = algebraMap (𝓞 R') R' (S.gaussSumInt b ^ p) := by
-          rw [map_pow]
+  rw [map_pow, map_pow, map_pow, h_gauss]
 
 namespace ConductorFlexibleFullTeichDworkSetup
 
@@ -220,16 +211,7 @@ theorem phiPrimeGenDescent_conjugate_covariance_of_ringHom_index
         algebraMap (𝓞 R') R' (S.gaussSumInt b) :=
     S.concrete.ringHom_gaussSumInt_eq_of_residueChar_psi τ
       (a := c) (b := b) hτχ hτψ
-  calc
-    τ (algebraMap (𝓞 R') R' (S.gaussSumInt c ^ p))
-        = τ ((algebraMap (𝓞 R') R' (S.gaussSumInt c)) ^ p) := by
-          rw [map_pow]
-    _ = (τ (algebraMap (𝓞 R') R' (S.gaussSumInt c))) ^ p := by
-          rw [map_pow]
-    _ = (algebraMap (𝓞 R') R' (S.gaussSumInt b)) ^ p := by
-          rw [h_gauss]
-    _ = algebraMap (𝓞 R') R' (S.gaussSumInt b ^ p) := by
-          rw [map_pow]
+  rw [map_pow, map_pow, map_pow, h_gauss]
 
 /-- Reciprocal-index flexible covariance from root actions.  This is the
 abstract source-conductor replacement for the old pair-conductor
@@ -469,7 +451,7 @@ theorem repeatedExactExponentsOnOrbit_phiPrimeGenDescent_sub_one_sourceConductor
       omega)
     (le_refl (p - 1))
     h_ne_zero
-    (fun a =>
+    (fun a ↦
       S.phiPrimeGenDescent_sub_one_conjugate_covariance_of_sourceConductorSigma
         h_psi hcop h_ne_zero a)
     h_div h_num
@@ -507,10 +489,10 @@ theorem repeatedExactOnOrbit_phiPrimeGenDescent_sub_one_of_f_eq_orderOf
         h_ne_zero) :=
   S.repeatedExactExponentsOnOrbit_phiPrimeGenDescent_sub_one_sourceConductorSigma
     h_psi hcop h_ne_zero
-    (fun a =>
+    (fun a ↦
       S.descentRamificationIdx_dvd_p_mul_stickOrdOrd_sub_val_of_f_eq_orderOf
         hℓp hf he a)
-    (fun a =>
+    (fun a ↦
       S.dworkExponent_sub_val_div_descentRamificationIdx_eq_repeatedMultiplicity_of_f_eq_orderOf
         hℓp hf he a)
 
@@ -548,12 +530,12 @@ theorem exactExponents_phiPrimeGenDescent_sub_one_sourceConductorSigma_split
       omega)
     (le_refl (p - 1))
     h_ne_zero
-    (fun a =>
+    (fun a ↦
       S.phiPrimeGenDescent_sub_one_conjugate_covariance_of_sourceConductorSigma
         h_psi hcop h_ne_zero a)
-    (fun a =>
+    (fun a ↦
       S.descentRamificationIdx_dvd_p_mul_stickOrdOrd_sub_val_of_f_eq_one hf he a)
-    (fun a =>
+    (fun a ↦
       S.dworkExponent_sub_val_div_descentRamificationIdx_eq_val_of_f_eq_one hf he a)
 
 end ConductorFlexibleFullTeichDworkSetup
