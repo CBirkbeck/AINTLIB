@@ -34,16 +34,16 @@ theorem hMinus_LValue_formula_of_residue_and_Kplus_residue
       ((NumberField.dedekindZeta_residue K : ℝ) : ℂ) =
         KplusResidue *
           Finset.prod (oddCharacters (p := p))
-            (fun χ => DirichletCharacter.LFunction χ 1))
+            (fun χ ↦ DirichletCharacter.LFunction χ 1))
     (hresPlus :
       ((NumberField.dedekindZeta_residue (NumberField.maximalRealSubfield K) : ℝ) : ℂ) =
         KplusResidue) :
     ((hMinus K : ℕ) : ℂ) =
       cyclotomicRelativeLValueCoefficient (p := p) (K := K) *
         Finset.prod (oddCharacters (p := p))
-          (fun χ => DirichletCharacter.LFunction χ 1) := by
+          (fun χ ↦ DirichletCharacter.LFunction χ 1) := by
   let O : ℂ :=
-    Finset.prod (oddCharacters (p := p)) (fun χ => DirichletCharacter.LFunction χ 1)
+    Finset.prod (oddCharacters (p := p)) (fun χ ↦ DirichletCharacter.LFunction χ 1)
   have hh : ((h K : ℕ) : ℂ) = ((hPlus K : ℕ) : ℂ) * ((hMinus K : ℕ) : ℂ) := by
     exact_mod_cast (h_eq_hPlus_mul_hMinus (p := p) (hp_odd := hp_odd') (K := K))
   have hhplus_ne : ((hPlus K : ℕ) : ℂ) ≠ 0 := by
@@ -72,49 +72,49 @@ theorem hMinus_formula_of_LValue_formula_and_gauss_product
       ((hMinus K : ℕ) : ℂ) =
         coefficient *
           Finset.prod (oddCharacters (p := p))
-            (fun χ => DirichletCharacter.LFunction χ 1))
+            (fun χ ↦ DirichletCharacter.LFunction χ 1))
     (hgauss :
       coefficient *
-          Finset.prod (oddCharacters (p := p)) (fun χ =>
+          Finset.prod (oddCharacters (p := p)) (fun χ ↦
             ((((Real.pi : ℝ) : ℂ) * Complex.I) * gaussSum χ (ZMod.stdAddChar (N := p)) / (p : ℂ))) =
         (2 * p : ℂ) *
           Finset.prod (oddCharacters (p := p))
-            (fun _ : DirichletCharacter ℂ p => (-(1 / 2 : ℂ)))) :
+            (fun _ : DirichletCharacter ℂ p ↦ (-(1 / 2 : ℂ)))) :
     ((hMinus K : ℕ) : ℂ) =
       (2 * p : ℂ) *
-        Finset.prod (oddCharacters (p := p)) (fun χ =>
+        Finset.prod (oddCharacters (p := p)) (fun χ ↦
           (-(1 / 2 : ℂ)) * BernoulliGen χ⁻¹ 1) := by
   have hodd :
-      Finset.prod (oddCharacters (p := p)) (fun χ => DirichletCharacter.LFunction χ 1) =
-        Finset.prod (oddCharacters (p := p)) (fun χ => oddLValueRhs p χ) := by
+      Finset.prod (oddCharacters (p := p)) (fun χ ↦ DirichletCharacter.LFunction χ 1) =
+        Finset.prod (oddCharacters (p := p)) (fun χ ↦ oddLValueRhs p χ) := by
     simpa [oddLProduct] using oddLProduct_one_eq_prod_oddLValueRhs (p := p)
   rw [hLValues, hodd, oddLValueRhs_product_eq_gauss_product_mul_bernoulli_product (p := p)]
   calc
     coefficient *
-        (Finset.prod (oddCharacters (p := p)) (fun χ =>
+        (Finset.prod (oddCharacters (p := p)) (fun χ ↦
             ((((Real.pi : ℝ) : ℂ) * Complex.I) * gaussSum χ (ZMod.stdAddChar (N := p)) / (p : ℂ))) *
-          Finset.prod (oddCharacters (p := p)) (fun χ => BernoulliGen χ⁻¹ 1)) =
+          Finset.prod (oddCharacters (p := p)) (fun χ ↦ BernoulliGen χ⁻¹ 1)) =
       (coefficient *
-          Finset.prod (oddCharacters (p := p)) (fun χ =>
+          Finset.prod (oddCharacters (p := p)) (fun χ ↦
             ((((Real.pi : ℝ) : ℂ) * Complex.I) *
               gaussSum χ (ZMod.stdAddChar (N := p)) / (p : ℂ)))) *
-        Finset.prod (oddCharacters (p := p)) (fun χ => BernoulliGen χ⁻¹ 1) := by
+        Finset.prod (oddCharacters (p := p)) (fun χ ↦ BernoulliGen χ⁻¹ 1) := by
           ring
     _ =
       ((2 * p : ℂ) *
           Finset.prod (oddCharacters (p := p))
-            (fun _ : DirichletCharacter ℂ p => (-(1 / 2 : ℂ)))) *
-        Finset.prod (oddCharacters (p := p)) (fun χ => BernoulliGen χ⁻¹ 1) := by
+            (fun _ : DirichletCharacter ℂ p ↦ (-(1 / 2 : ℂ)))) *
+        Finset.prod (oddCharacters (p := p)) (fun χ ↦ BernoulliGen χ⁻¹ 1) := by
           rw [hgauss]
     _ =
       (2 * p : ℂ) *
         (Finset.prod (oddCharacters (p := p))
-            (fun _ : DirichletCharacter ℂ p => (-(1 / 2 : ℂ))) *
-          Finset.prod (oddCharacters (p := p)) (fun χ => BernoulliGen χ⁻¹ 1)) := by
+            (fun _ : DirichletCharacter ℂ p ↦ (-(1 / 2 : ℂ))) *
+          Finset.prod (oddCharacters (p := p)) (fun χ ↦ BernoulliGen χ⁻¹ 1)) := by
             ring
     _ =
       (2 * p : ℂ) *
-        Finset.prod (oddCharacters (p := p)) (fun χ =>
+        Finset.prod (oddCharacters (p := p)) (fun χ ↦
           (-(1 / 2 : ℂ)) * BernoulliGen χ⁻¹ 1) := by
             rw [← Finset.prod_mul_distrib]
 
@@ -131,16 +131,16 @@ theorem hMinus_LValue_formula_of_residue_and_hPlus
         ((NumberField.dedekindZeta_residue K : ℝ) : ℂ) * (coefficient * plusFactor))
     (hres :
       ((NumberField.dedekindZeta_residue K : ℝ) : ℂ) =
-        Finset.prod (evenNontrivialCharacters (p := p)) (fun χ => evenLValueRhs p χ) *
-          Finset.prod (oddCharacters (p := p)) (fun χ => DirichletCharacter.LFunction χ 1))
+        Finset.prod (evenNontrivialCharacters (p := p)) (fun χ ↦ evenLValueRhs p χ) *
+          Finset.prod (oddCharacters (p := p)) (fun χ ↦ DirichletCharacter.LFunction χ 1))
     (hplus :
       ((hPlus K : ℕ) : ℂ) =
-        plusFactor * Finset.prod (evenNontrivialCharacters (p := p)) (fun χ => evenLValueRhs p χ)) :
+        plusFactor * Finset.prod (evenNontrivialCharacters (p := p)) (fun χ ↦ evenLValueRhs p χ)) :
     ((hMinus K : ℕ) : ℂ) =
       coefficient *
-        Finset.prod (oddCharacters (p := p)) (fun χ => DirichletCharacter.LFunction χ 1) := by
+        Finset.prod (oddCharacters (p := p)) (fun χ ↦ DirichletCharacter.LFunction χ 1) := by
   let O : ℂ :=
-    Finset.prod (oddCharacters (p := p)) (fun χ => DirichletCharacter.LFunction χ 1)
+    Finset.prod (oddCharacters (p := p)) (fun χ ↦ DirichletCharacter.LFunction χ 1)
   have hh : ((h K : ℕ) : ℂ) = ((hPlus K : ℕ) : ℂ) * ((hMinus K : ℕ) : ℂ) := by
     exact_mod_cast (h_eq_hPlus_mul_hMinus (p := p) (hp_odd := hp_odd') (K := K))
   have hhplus_ne : ((hPlus K : ℕ) : ℂ) ≠ 0 := by
@@ -157,15 +157,15 @@ theorem hMinus_LValue_formula_of_residue_and_hPlus_cyclotomic
     (hp_odd' : p ≠ 2)
     (hres :
       ((NumberField.dedekindZeta_residue K : ℝ) : ℂ) =
-        Finset.prod (evenNontrivialCharacters (p := p)) (fun χ => evenLValueRhs p χ) *
-          Finset.prod (oddCharacters (p := p)) (fun χ => DirichletCharacter.LFunction χ 1))
+        Finset.prod (evenNontrivialCharacters (p := p)) (fun χ ↦ evenLValueRhs p χ) *
+          Finset.prod (oddCharacters (p := p)) (fun χ ↦ DirichletCharacter.LFunction χ 1))
     (hplus :
       ((hPlus K : ℕ) : ℂ) =
         cyclotomicHPlusFactor (K := K) *
-          Finset.prod (evenNontrivialCharacters (p := p)) (fun χ => evenLValueRhs p χ)) :
+          Finset.prod (evenNontrivialCharacters (p := p)) (fun χ ↦ evenLValueRhs p χ)) :
     ((hMinus K : ℕ) : ℂ) =
       cyclotomicRelativeLValueCoefficient (p := p) (K := K) *
-        Finset.prod (oddCharacters (p := p)) (fun χ => DirichletCharacter.LFunction χ 1) := by
+        Finset.prod (oddCharacters (p := p)) (fun χ ↦ DirichletCharacter.LFunction χ 1) := by
   apply hMinus_LValue_formula_of_residue_and_hPlus (p := p) (K := K) hp_odd'
     (coefficient := cyclotomicRelativeLValueCoefficient (p := p) (K := K))
     (plusFactor := cyclotomicHPlusFactor (K := K))
@@ -190,21 +190,21 @@ theorem hMinus_formula_of_residue_and_hPlus_and_gauss
         ((NumberField.dedekindZeta_residue K : ℝ) : ℂ) * (coefficient * plusFactor))
     (hres :
       ((NumberField.dedekindZeta_residue K : ℝ) : ℂ) =
-        Finset.prod (evenNontrivialCharacters (p := p)) (fun χ => evenLValueRhs p χ) *
-          Finset.prod (oddCharacters (p := p)) (fun χ => DirichletCharacter.LFunction χ 1))
+        Finset.prod (evenNontrivialCharacters (p := p)) (fun χ ↦ evenLValueRhs p χ) *
+          Finset.prod (oddCharacters (p := p)) (fun χ ↦ DirichletCharacter.LFunction χ 1))
     (hplus :
       ((hPlus K : ℕ) : ℂ) =
-        plusFactor * Finset.prod (evenNontrivialCharacters (p := p)) (fun χ => evenLValueRhs p χ))
+        plusFactor * Finset.prod (evenNontrivialCharacters (p := p)) (fun χ ↦ evenLValueRhs p χ))
     (hgauss :
       coefficient *
-          Finset.prod (oddCharacters (p := p)) (fun χ =>
+          Finset.prod (oddCharacters (p := p)) (fun χ ↦
             ((((Real.pi : ℝ) : ℂ) * Complex.I) * gaussSum χ (ZMod.stdAddChar (N := p)) / (p : ℂ))) =
         (2 * p : ℂ) *
           Finset.prod (oddCharacters (p := p))
-            (fun _ : DirichletCharacter ℂ p => (-(1 / 2 : ℂ)))) :
+            (fun _ : DirichletCharacter ℂ p ↦ (-(1 / 2 : ℂ)))) :
     ((hMinus K : ℕ) : ℂ) =
       (2 * p : ℂ) *
-        Finset.prod (oddCharacters (p := p)) (fun χ =>
+        Finset.prod (oddCharacters (p := p)) (fun χ ↦
           (-(1 / 2 : ℂ)) * BernoulliGen χ⁻¹ 1) := by
   apply hMinus_formula_of_LValue_formula_and_gauss_product (p := p) (K := K)
     (coefficient := coefficient)
