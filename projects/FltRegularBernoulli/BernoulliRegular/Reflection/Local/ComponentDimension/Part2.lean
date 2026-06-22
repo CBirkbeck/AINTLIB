@@ -32,12 +32,10 @@ section CyclotomicSetup
 variable (p : ℕ) [Fact p.Prime]
   (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 
+-- The submodule structure repeatedly synthesizes the quotient's `ZMod p`
+-- module instance through additive/multiplicative wrappers.
 set_option synthInstance.maxHeartbeats 80000 in
--- The submodule structure repeatedly synthesizes the quotient's `ZMod p`
--- module instance through additive/multiplicative wrappers.
 set_option maxHeartbeats 800000 in
--- The submodule structure repeatedly synthesizes the quotient's `ZMod p`
--- module instance through additive/multiplicative wrappers.
 theorem exists_delta_zmod_pow_ne_one
     {k : ℕ} (hk_pos : 0 < k) (hk_lt : k < p - 1) :
     ∃ a : CyclotomicUnitDelta p, (a : ZMod p) ^ k ≠ 1 := by
@@ -72,12 +70,7 @@ theorem exists_delta_zmod_pow_ne_of_lt
     exact hpow
   have hdiff_units : a ^ (j - n) = 1 := by
     have hnj_eq : j = n + (j - n) := by omega
-    have hcancel : a ^ n * a ^ (j - n) = a ^ n * 1 := by
-      calc
-        a ^ n * a ^ (j - n) = a ^ j := by rw [← pow_add, ← hnj_eq]
-        _ = a ^ n := hpow_units.symm
-        _ = a ^ n * 1 := by rw [mul_one]
-    exact mul_left_cancel hcancel
+    rw [← mul_eq_left (a := a ^ n), ← pow_add, ← hnj_eq, hpow_units]
   exact ha (by
     change ((a ^ (j - n) : CyclotomicUnitDelta p) : ZMod p) = 1
     rw [hdiff_units]
@@ -97,12 +90,7 @@ theorem exists_delta_zmod_pow_ne_of_gt
     exact hpow
   have hdiff_units : a ^ (n - j) = 1 := by
     have hnj_eq : n = j + (n - j) := by omega
-    have hcancel : a ^ j * a ^ (n - j) = a ^ j * 1 := by
-      calc
-        a ^ j * a ^ (n - j) = a ^ n := by rw [← pow_add, ← hnj_eq]
-        _ = a ^ j := hpow_units
-        _ = a ^ j * 1 := by rw [mul_one]
-    exact mul_left_cancel hcancel
+    rw [← mul_eq_left (a := a ^ j), ← pow_add, ← hnj_eq, hpow_units]
   exact ha (by
     change ((a ^ (n - j) : CyclotomicUnitDelta p) : ZMod p) = 1
     rw [hdiff_units]
@@ -114,15 +102,13 @@ theorem completedPrincipalUnitSubgroupToOne_equiv
     completedPrincipalUnitSubgroupToOne (p := p) (K := K) n hn
         (completedPrincipalUnitSubgroupEquiv (p := p) K a n u) =
       completedPrincipalUnitSubgroupEquiv (p := p) K a 1
-        (completedPrincipalUnitSubgroupToOne (p := p) (K := K) n hn u) := by
+        (completedPrincipalUnitSubgroupToOne (p := p) (K := K) n hn u) :=
   rfl
 
+-- This proof crosses between quotient representatives, additive scalar
+-- notation, and the graded multiplicative quotient.
 set_option synthInstance.maxHeartbeats 80000 in
--- This proof crosses between quotient representatives, additive scalar
--- notation, and the graded multiplicative quotient.
 set_option maxHeartbeats 800000 in
--- This proof crosses between quotient representatives, additive scalar
--- notation, and the graded multiplicative quotient.
 theorem completedPrincipalUnitModPEigenspace_mem_filtration_succ_of_exists_pow_ne
     (n j : ℕ) [Fact (1 ≤ n)] (hnp : n ≤ p)
     (hne : ∃ a : CyclotomicUnitDelta p, (a : ZMod p) ^ n ≠ (a : ZMod p) ^ j)
@@ -180,8 +166,8 @@ theorem completedPrincipalUnitModPEigenspace_mem_filtration_succ_of_exists_pow_n
     change completedPrincipalUnitGradedDeltaAction (p := p) K n a
         (completedPrincipalUnitGradedClass p K n u) =
       (cj • y).toMul
-    rw [completedPrincipalUnitGradedDeltaAction_apply_class]
-    rw [zmod_smul_toMul_completedPrincipalUnitGraded (p := p) (K := K)]
+    rw [completedPrincipalUnitGradedDeltaAction_apply_class,
+      zmod_smul_toMul_completedPrincipalUnitGraded (p := p) (K := K)]
     change completedPrincipalUnitGradedClass p K n
         (completedPrincipalUnitSubgroupEquiv (p := p) K a n u) =
       (completedPrincipalUnitGradedClass p K n u) ^ cj.val
@@ -229,7 +215,7 @@ theorem completedPrincipalUnitModPDeltaAction_mem_filtration
   refine ⟨completedPrincipalUnitSubgroupEquiv (p := p) K a n u, ?_⟩
   apply Additive.ext
   change completedPrincipalUnitModPDeltaAction (p := p) K a
-      ((completedPrincipalUnitModPClassOfLevel (p := p) (K := K) n hn u)) =
+      (completedPrincipalUnitModPClassOfLevel (p := p) (K := K) n hn u) =
     completedPrincipalUnitModPClassOfLevel (p := p) (K := K) n hn
       (completedPrincipalUnitSubgroupEquiv (p := p) K a n u)
   rw [completedPrincipalUnitModPClassOfLevel_apply,
@@ -311,12 +297,10 @@ theorem completedPrincipalUnitModPFiltrationRep_spec
   Classical.choose_spec
     ((mem_completedPrincipalUnitModPFiltration_iff (p := p) (K := K) n hn).mp x.2)
 
+-- The representative-defined linear map needs extra heartbeats for repeated
+-- `ZMod p` scalar and quotient-instance synthesis.
 set_option synthInstance.maxHeartbeats 80000 in
--- The representative-defined linear map needs extra heartbeats for repeated
--- `ZMod p` scalar and quotient-instance synthesis.
 set_option maxHeartbeats 800000 in
--- The representative-defined linear map needs extra heartbeats for repeated
--- `ZMod p` scalar and quotient-instance synthesis.
 /-- The quotient map from a filtration step to the corresponding completed
 graded quotient. -/
 noncomputable def completedPrincipalUnitModPFiltrationToGraded
@@ -548,12 +532,10 @@ theorem completedPrincipalUnitModPFiltrationToGraded_equivariant
   exact completedPrincipalUnitGradedClass_eq_of_modPClassOfLevel_eq
     (p := p) (K := K) n hnp hclass
 
+-- The induction repeatedly instantiates filtration submodules at varying
+-- indices and transports through proof-irrelevant index bounds.
 set_option synthInstance.maxHeartbeats 80000 in
--- The induction repeatedly instantiates filtration submodules at varying
--- indices and transports through proof-irrelevant index bounds.
 set_option maxHeartbeats 800000 in
--- The induction repeatedly instantiates filtration submodules at varying
--- indices and transports through proof-irrelevant index bounds.
 theorem completedPrincipalUnitModPEigenspace_le_filtration
     {j : ℕ} (hj_low : 2 ≤ j) (hj_high : j ≤ p - 2) :
     completedPrincipalUnitModPDeltaPowerEigenspace (p := p) K j ≤
@@ -584,12 +566,10 @@ theorem completedPrincipalUnitModPEigenspace_le_filtration
         convert hstep using 1
   simpa using hmem j (by omega : 1 ≤ j) le_rfl
 
+-- The descending-filtration induction has the same varying-index submodule
+-- synthesis as the preceding containment theorem.
 set_option synthInstance.maxHeartbeats 80000 in
--- The descending-filtration induction has the same varying-index submodule
--- synthesis as the preceding containment theorem.
 set_option maxHeartbeats 800000 in
--- The descending-filtration induction has the same varying-index submodule
--- synthesis as the preceding containment theorem.
 theorem completedPrincipalUnitModPEigenspace_eq_zero_of_mem_filtration_succ
     {j : ℕ} (hj_low : 2 ≤ j) (hj_high : j ≤ p - 2)
     {x : Additive (completedPrincipalUnitModPQuotient p K)}
@@ -689,12 +669,10 @@ theorem completedPrincipalUnitModPFiltrationCharacterProjection_mem_globalRange
       w
   exact hcomm.symm
 
+-- The final comparison map composes projected submodules with the
+-- representative-defined filtration-to-graded map.
 set_option synthInstance.maxHeartbeats 80000 in
--- The final comparison map composes projected submodules with the
--- representative-defined filtration-to-graded map.
 set_option maxHeartbeats 800000 in
--- The final comparison map composes projected submodules with the
--- representative-defined filtration-to-graded map.
 noncomputable def completedPrincipalUnitModPCharacterProjectionRangeToGraded
     (hp_gt_two : 2 < p) {j : ℕ} [Fact (1 ≤ j)]
     (hj_low : 2 ≤ j) (hj_high : j ≤ p - 2) :
