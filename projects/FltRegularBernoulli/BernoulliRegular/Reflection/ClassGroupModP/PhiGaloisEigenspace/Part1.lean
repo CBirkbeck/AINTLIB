@@ -105,7 +105,7 @@ theorem eigenspaceCondition_mul_pow_p
     have hinj : Function.Injective (cyclotomicRingOfIntegersEquiv (p := p) K a) :=
       (cyclotomicRingOfIntegersEquiv (p := p) K a).injective
     exact hinj (h.trans (map_zero _).symm)
-  have hα_K : (algebraMap (𝓞 K) K) α ≠ 0 := fun h =>
+  have hα_K : (algebraMap (𝓞 K) K) α ≠ 0 := fun h ↦
     hα <| (FaithfulSMul.algebraMap_injective (𝓞 K) K)
       (h.trans (map_zero _).symm)
   refine ⟨u * (algebraMap (𝓞 K) K) α' /
@@ -151,7 +151,7 @@ theorem eigenspaceCondition_pow_p_zero (β : 𝓞 K) (hβ : β ≠ 0) :
     have := (cyclotomicRingOfIntegersEquiv (p := p) K a).injective
       (this.trans (map_zero _).symm)
     exact this
-  have hβ_K : (algebraMap (𝓞 K) K) β ≠ 0 := fun h =>
+  have hβ_K : (algebraMap (𝓞 K) K) β ≠ 0 := fun h ↦
     hβ <| (FaithfulSMul.algebraMap_injective (𝓞 K) K)
       (h.trans (map_zero _).symm)
   refine ⟨(algebraMap (𝓞 K) K) α / (algebraMap (𝓞 K) K) β, ?_⟩
@@ -493,7 +493,7 @@ theorem strongEigenspaceCondition_stickelbergerIdeal_eq_pow_mul_principal
   have hroot : ∀ a : CyclotomicUnitDelta p, ∃ u : 𝓞 K,
       cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ b =
         b ^ (((a⁻¹ : CyclotomicUnitDelta p) : ZMod p).val ^ i) *
-          Ideal.span ({u} : Set (𝓞 K)) := fun a =>
+          Ideal.span ({u} : Set (𝓞 K)) := fun a ↦
     strongEigenspaceCondition_ideal_pth_root_form
       (p := p) (K := K) h hη hb_ne a⁻¹
   choose u hu using hroot
@@ -506,14 +506,14 @@ theorem strongEigenspaceCondition_stickelbergerIdeal_eq_pow_mul_principal
         = ∏ a : CyclotomicUnitDelta p,
             (b ^ (((a⁻¹ : CyclotomicUnitDelta p) : ZMod p).val ^ i) *
               Ideal.span ({u a} : Set (𝓞 K))) ^ ((a : ZMod p).val) := by
-          refine Finset.prod_congr rfl fun a _ => ?_
+          refine Finset.prod_congr rfl fun a _ ↦ ?_
           rw [hu a]
     _ = ∏ a : CyclotomicUnitDelta p,
           (b ^
               ((((a⁻¹ : CyclotomicUnitDelta p) : ZMod p).val ^ i) *
                 ((a : ZMod p).val)) *
             Ideal.span ({u a} : Set (𝓞 K)) ^ ((a : ZMod p).val)) := by
-          refine Finset.prod_congr rfl fun a _ => ?_
+          refine Finset.prod_congr rfl fun a _ ↦ ?_
           rw [mul_pow, ← pow_mul]
     _ = (∏ a : CyclotomicUnitDelta p,
           b ^ ((((a⁻¹ : CyclotomicUnitDelta p) : ZMod p).val ^ i) *
@@ -535,8 +535,8 @@ theorem strongEigenspaceCondition_stickelbergerIdeal_eq_pow_mul_principal
           congr 1
           rw [← Ideal.prod_span_singleton
             (Finset.univ : Finset (CyclotomicUnitDelta p))
-            (fun a => u a ^ ((a : ZMod p).val))]
-          refine Finset.prod_congr rfl fun a _ => ?_
+            (fun a ↦ u a ^ ((a : ZMod p).val))]
+          refine Finset.prod_congr rfl fun a _ ↦ ?_
           rw [Ideal.span_singleton_pow]
 
 /-- Taking p-th roots in the ideal form when the strong eigenspace witnesses
@@ -585,7 +585,7 @@ theorem strongEigenspaceCondition_stickelbergerIdeal_eq_pow_of_unit_witness
   classical
   have hroot : ∀ a : CyclotomicUnitDelta p,
       cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ b =
-        b ^ (((a⁻¹ : CyclotomicUnitDelta p) : ZMod p).val ^ i) := fun a =>
+        b ^ (((a⁻¹ : CyclotomicUnitDelta p) : ZMod p).val ^ i) := fun a ↦
     strongEigenspaceCondition_ideal_pth_root_form_of_unit_witness
       (p := p) (K := K) h hη hb_ne a⁻¹
   unfold stickelbergerIdeal
@@ -596,12 +596,12 @@ theorem strongEigenspaceCondition_stickelbergerIdeal_eq_pow_of_unit_witness
         = ∏ a : CyclotomicUnitDelta p,
             (b ^ (((a⁻¹ : CyclotomicUnitDelta p) : ZMod p).val ^ i)) ^
               ((a : ZMod p).val) := by
-          refine Finset.prod_congr rfl fun a _ => ?_
+          refine Finset.prod_congr rfl fun a _ ↦ ?_
           rw [hroot a]
     _ = ∏ a : CyclotomicUnitDelta p,
           b ^ ((((a⁻¹ : CyclotomicUnitDelta p) : ZMod p).val ^ i) *
             ((a : ZMod p).val)) := by
-          refine Finset.prod_congr rfl fun a _ => ?_
+          refine Finset.prod_congr rfl fun a _ ↦ ?_
           rw [← pow_mul]
     _ = b ^ (∑ a : CyclotomicUnitDelta p,
           (((a⁻¹ : CyclotomicUnitDelta p) : ZMod p).val ^ i) *
@@ -628,9 +628,9 @@ theorem strongEigenspaceStickelbergerExponent_pos (i : ℕ) :
         strongEigenspaceStickelbergerExponent (p := p) i := by
     rw [strongEigenspaceStickelbergerExponent]
     exact Finset.single_le_sum
-      (f := fun a : CyclotomicUnitDelta p =>
+      (f := fun a : CyclotomicUnitDelta p ↦
         (((a⁻¹ : CyclotomicUnitDelta p) : ZMod p).val ^ i) * ((a : ZMod p).val))
-      (fun _ _ => Nat.zero_le _)
+      (fun _ _ ↦ Nat.zero_le _)
       (Finset.mem_univ (1 : CyclotomicUnitDelta p))
   exact lt_of_lt_of_le (by rw [hterm_one]; exact Nat.zero_lt_one) hle
 
@@ -699,7 +699,7 @@ theorem strongEigenspaceStickelbergerExponent_cast_zmod (i : ℕ) :
       ∑ a : CyclotomicUnitDelta p,
         (((a⁻¹ : CyclotomicUnitDelta p) : ZMod p) ^ i) * (a : ZMod p) := by
   rw [strongEigenspaceStickelbergerExponent, Nat.cast_sum]
-  refine Finset.sum_congr rfl fun a _ => ?_
+  refine Finset.sum_congr rfl fun a _ ↦ ?_
   rw [Nat.cast_mul, Nat.cast_pow, ZMod.natCast_zmod_val,
     ZMod.natCast_zmod_val]
 
@@ -714,9 +714,9 @@ theorem strongEigenspaceStickelbergerExponent_one_cast_zmod :
       (∑ a : CyclotomicUnitDelta p,
         (((a⁻¹ : CyclotomicUnitDelta p) : ZMod p) ^ 1) * (a : ZMod p)) =
         ∑ _a : CyclotomicUnitDelta p, (1 : ZMod p) := by
-    refine Finset.sum_congr rfl fun a _ => ?_
+    refine Finset.sum_congr rfl fun a _ ↦ ?_
     rw [pow_one, ← Units.val_mul]
-    exact congrArg (fun x : CyclotomicUnitDelta p => (x : ZMod p)) (inv_mul_cancel a)
+    exact congrArg (fun x : CyclotomicUnitDelta p ↦ (x : ZMod p)) (inv_mul_cancel a)
   rw [hsum]
   rw [Finset.sum_const, Finset.card_univ, ZMod.card_units, nsmul_eq_mul, mul_one]
   have hp_one_le : 1 ≤ p := (Fact.out : Nat.Prime p).one_le
