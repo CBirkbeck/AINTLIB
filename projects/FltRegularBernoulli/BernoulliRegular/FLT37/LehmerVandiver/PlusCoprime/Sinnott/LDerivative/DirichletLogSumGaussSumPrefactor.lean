@@ -1,4 +1,4 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative.Part1
+import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative.QuotientConvolutionFrobeniusDet
 
 @[expose] public section
 

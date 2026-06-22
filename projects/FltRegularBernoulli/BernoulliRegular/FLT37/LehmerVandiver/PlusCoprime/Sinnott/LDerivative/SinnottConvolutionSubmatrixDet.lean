@@ -1,4 +1,4 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative.Part6
+import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative.SinnottRankOnePerturbation
 
 @[expose] public section
 

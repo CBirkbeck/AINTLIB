@@ -1,7 +1,7 @@
 import BernoulliRegular.FLT37.Eichler.CaseIISection91FactorProducer
 import BernoulliRegular.FLT37.LehmerVandiver.CaseII.RealGenerator
 import BernoulliRegular.FLT37.LehmerVandiver.CaseII.B0Principalization
-import BernoulliRegular.FLT37.PrimaryUnits.Part1
+import BernoulliRegular.FLT37.PrimaryUnits.IsPrimaryPlusAndCyclotomicUnits
 import BernoulliRegular.UnitQuotient.Washington83UnitForward
 
 /-!

@@ -6,7 +6,7 @@ public import BernoulliRegular.FLT37.Mirimanoff
 public import FltRegular.NumberTheory.Cyclotomic.CaseI
 public import FltRegular.CaseI.Statement
 public import Mathlib.NumberTheory.Bernoulli
-public import BernoulliRegular.FLT37.CaseI.Part4
+public import BernoulliRegular.FLT37.CaseI.TaylorCoefficientMatch
 
 /-!
 # FLT case I: composed unit-power decomposition (FLT37e)

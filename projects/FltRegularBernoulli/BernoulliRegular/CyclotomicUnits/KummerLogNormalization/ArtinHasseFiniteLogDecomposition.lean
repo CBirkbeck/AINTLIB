@@ -1,4 +1,4 @@
-import BernoulliRegular.CyclotomicUnits.KummerLogNormalization.Part2
+import BernoulliRegular.CyclotomicUnits.KummerLogNormalization.ArtinHasseNormalizedSeries
 
 @[expose] public section
 

@@ -1,4 +1,4 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative.Part4
+import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative.SinnottMatrixEmbeddingIndexBridge
 
 @[expose] public section
 

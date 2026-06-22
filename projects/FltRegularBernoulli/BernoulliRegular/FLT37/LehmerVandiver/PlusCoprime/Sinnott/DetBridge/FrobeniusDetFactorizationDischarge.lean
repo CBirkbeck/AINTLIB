@@ -1,4 +1,4 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.DetBridge.Part1
+import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.DetBridge.CharacterActionRankOneDecomposition
 
 @[expose] public section
 

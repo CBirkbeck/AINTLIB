@@ -1,7 +1,7 @@
 import BernoulliRegular.FLT37.LehmerVandiver.CaseII.ProductDescent
 import BernoulliRegular.FLT37.KummerUnits
 import BernoulliRegular.FLT37.Eichler.CaseIIXiReality
-import BernoulliRegular.FLT37.PrimaryUnits.Part1
+import BernoulliRegular.FLT37.PrimaryUnits.IsPrimaryPlusAndCyclotomicUnits
 import BernoulliRegular.FLT37.Primary
 import BernoulliRegular.FLT37.Eichler.CaseIIRealAnchoredClass
 import BernoulliRegular.FLT37.Eichler.CaseIIRealRootClassConjFixed

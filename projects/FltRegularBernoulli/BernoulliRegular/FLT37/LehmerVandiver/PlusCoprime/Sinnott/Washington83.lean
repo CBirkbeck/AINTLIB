@@ -1,4 +1,4 @@
-import BernoulliRegular.Thaine.PollaczekUnitPlusGaloisAction.Part1
+import BernoulliRegular.Thaine.PollaczekUnitPlusGaloisAction.GaloisActionDecompositionAndEigenspace
 import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.IndexFormula
 import Mathlib.NumberTheory.Bernoulli
 

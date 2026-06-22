@@ -5,7 +5,7 @@ public import BernoulliRegular.TotallyRealSubfield.ZetaPrime
 public import BernoulliRegular.HMinus.KplusPrimeArithmetic
 public import Mathlib.RingTheory.RootsOfUnity.CyclotomicUnits
 public import FltRegular.NumberTheory.Cyclotomic.MoreLemmas
-public import BernoulliRegular.FLT37.PrimaryUnits.Part1
+public import BernoulliRegular.FLT37.PrimaryUnits.IsPrimaryPlusAndCyclotomicUnits
 
 /-!
 # Primary units of `𝓞 K⁺` (ticket FLT37c, scaffold)

@@ -7,7 +7,7 @@ public import BernoulliRegular.HMinus.KplusPrimeArithmetic
 public import Mathlib.FieldTheory.Finite.Basic
 public import Mathlib.NumberTheory.LegendreSymbol.Basic
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Galois
-public import BernoulliRegular.FLT37.Mirimanoff.Part1
+public import BernoulliRegular.FLT37.Mirimanoff.PolynomialDefinition
 
 /-!
 # Mirimanoff subfield trick (ticket FLT37d, scaffold)

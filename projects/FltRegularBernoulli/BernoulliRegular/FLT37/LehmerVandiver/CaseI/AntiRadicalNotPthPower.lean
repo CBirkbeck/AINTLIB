@@ -1,7 +1,7 @@
 import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer
 import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummerCaseI
 import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AKPrimarity
-import BernoulliRegular.FLT37.CaseI.Part1
+import BernoulliRegular.FLT37.CaseI.FactorDecompositionAndNorm
 import BernoulliRegular.FLT37.KummerUnits
 
 /-!
