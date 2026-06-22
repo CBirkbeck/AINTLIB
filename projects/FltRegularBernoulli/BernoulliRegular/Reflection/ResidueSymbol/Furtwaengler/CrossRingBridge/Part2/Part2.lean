@@ -41,7 +41,6 @@ theorem phiPrimeGenDescent_one_conjugate_covariance_of_ringHom_index
             omega)
           h_ne_zero)) =
       S.gaussSumInt b ^ p := by
-  classical
   set γ := phiPrimeGenDescent S
     (le_refl 1)
     (by
@@ -49,12 +48,7 @@ theorem phiPrimeGenDescent_one_conjugate_covariance_of_ringHom_index
       omega)
     h_ne_zero with hγ_def
   apply NumberField.RingOfIntegers.coe_injective (K := R')
-  change algebraMap (𝓞 R') R'
-      (algebraMap (𝓞 K) (𝓞 R')
-        (cyclotomicRingOfIntegersEquiv (p := p) K a γ)) =
-    algebraMap (𝓞 R') R' (S.gaussSumInt b ^ p)
-  rw [← hτ_K γ]
-  rw [hγ_def, algebraMap_phiPrimeGenDescent S
+  rw [← hτ_K γ, hγ_def, algebraMap_phiPrimeGenDescent S
     (le_refl 1)
     (by
       have hp_two : 2 ≤ p := (Fact.out : Nat.Prime p).two_le
@@ -68,11 +62,11 @@ theorem phiPrimeGenDescent_one_conjugate_covariance_of_ringHom_index
         (b := b) hτχ hτψ
   calc
     τ (algebraMap (𝓞 R') R' (S.gaussSumInt 1 ^ p))
-        = τ ((algebraMap (𝓞 R') R' (S.gaussSumInt 1)) ^ p) := by
+        = τ (algebraMap (𝓞 R') R' (S.gaussSumInt 1) ^ p) := by
           rw [map_pow]
-    _ = (τ (algebraMap (𝓞 R') R' (S.gaussSumInt 1))) ^ p := by
+    _ = τ (algebraMap (𝓞 R') R' (S.gaussSumInt 1)) ^ p := by
           rw [map_pow]
-    _ = (algebraMap (𝓞 R') R' (S.gaussSumInt b)) ^ p := by
+    _ = algebraMap (𝓞 R') R' (S.gaussSumInt b) ^ p := by
           rw [h_gauss]
     _ = algebraMap (𝓞 R') R' (S.gaussSumInt b ^ p) := by
           rw [map_pow]
@@ -108,10 +102,9 @@ theorem phiPrimeGenDescent_one_conjugate_covariance_of_ringHom
             have hp_two : 2 ≤ p := (Fact.out : Nat.Prime p).two_le
             omega)
           h_ne_zero)) =
-      S.gaussSumInt (p - (a : ZMod p).val) ^ p := by
-  set b : ℕ := p - (a : ZMod p).val with hb_def
-  exact phiPrimeGenDescent_one_conjugate_covariance_of_ringHom_index
-    S h_ne_zero a b τ hτ_K (by simpa [b, hb_def] using hτχ) hτψ
+      S.gaussSumInt (p - (a : ZMod p).val) ^ p :=
+  phiPrimeGenDescent_one_conjugate_covariance_of_ringHom_index
+    S h_ne_zero a (p - (a : ZMod p).val) τ hτ_K hτχ hτψ
 
 /-- Forall form of `phiPrimeGenDescent_one_conjugate_covariance_of_ringHom`,
 matching the covariance input of the split exact-exponent composer. -/
@@ -143,7 +136,7 @@ theorem phiPrimeGenDescent_one_conjugate_covariance_of_ringHom_family
               have hp_two : 2 ≤ p := (Fact.out : Nat.Prime p).two_le
               omega)
             h_ne_zero)) =
-        S.gaussSumInt (p - (a : ZMod p).val) ^ p := fun a =>
+        S.gaussSumInt (p - (a : ZMod p).val) ^ p := fun a ↦
   phiPrimeGenDescent_one_conjugate_covariance_of_ringHom
     S h_ne_zero a (τ a) (hτ_K a) (hτχ a) (hτψ a)
 
@@ -213,7 +206,7 @@ theorem phiPrimeGenDescent_one_conjugate_covariance_of_ringHom_root_actions_fami
               have hp_two : 2 ≤ p := (Fact.out : Nat.Prime p).two_le
               omega)
             h_ne_zero)) =
-        S.gaussSumInt (p - (a : ZMod p).val) ^ p := fun a =>
+        S.gaussSumInt (p - (a : ZMod p).val) ^ p := fun a ↦
   phiPrimeGenDescent_one_conjugate_covariance_of_ringHom_root_actions
     S h_ne_zero a (τ a) (hτ_K a) (hτζp a) (hτζℓ a)
 
@@ -246,7 +239,7 @@ theorem phiPrimeGenDescent_one_conjugate_covariance_of_pairSigma
   · intro x
     exact cyclotomicPairSigmaOfPAndOneFromPair_ringOfIntegers_apply
       (p := p) S.hℓ_ne_p a x
-  · have hζp_pow : (((S.zeta_p : R'ˣ) : R') ^ p) = 1 := by
+  · have hζp_pow : ((S.zeta_p : R'ˣ) : R') ^ p = 1 := by
       rw [← Units.val_pow_eq_pow_val, S.hzeta_p.pow_eq_one, Units.val_one]
     have hτζp :
         τ ((S.zeta_p : R'ˣ) : R') =
@@ -296,7 +289,7 @@ theorem phiPrimeGenDescent_sub_one_conjugate_covariance_of_pairSigma
   · intro x
     exact cyclotomicPairSigmaOfPAndOneFromPair_ringOfIntegers_apply
       (p := p) S.hℓ_ne_p a x
-  · have hζp_pow : (((S.zeta_p : R'ˣ) : R') ^ p) = 1 := by
+  · have hζp_pow : ((S.zeta_p : R'ˣ) : R') ^ p = 1 := by
       rw [← Units.val_pow_eq_pow_val, S.hzeta_p.pow_eq_one, Units.val_one]
     have hτζp :
         τ ((S.zeta_p : R'ˣ) : R') =
@@ -371,11 +364,11 @@ theorem StickelbergerExactConjugateExponents_phiPrimeGenDescent_sub_one_of_pairS
       omega)
     (le_refl (p - 1))
     h_ne_zero
-    (fun a => phiPrimeGenDescent_sub_one_conjugate_covariance_of_pairSigma S h_ne_zero a)
-    (fun a =>
+    (fun a ↦ phiPrimeGenDescent_sub_one_conjugate_covariance_of_pairSigma S h_ne_zero a)
+    (fun a ↦
       descentRamificationIdx_dvd_p_mul_stickOrdOrd_sub_val_of_f_eq_one_of_unramified_base
         S hf he a)
-    (fun a =>
+    (fun a ↦
       dworkExponent_sub_val_div_descentRamificationIdx_eq_val_of_f_eq_one_of_unramified_base
         S hf he a)
 
@@ -520,7 +513,7 @@ theorem residueMulChar_ringHomComp_apply_quotient
     (zeta_R : R'ˣ) (hzeta_R : IsPrimitiveRoot zeta_R p)
     (σ : R' →+* R'') (a : kˣ) :
     ((residueMulChar zeta_q hzeta_q hdiv zeta_R hzeta_R).ringHomComp σ) (a : k) =
-      σ ((residueMulChar zeta_q hzeta_q hdiv zeta_R hzeta_R) (a : k)) := by
+      σ ((residueMulChar zeta_q hzeta_q hdiv zeta_R hzeta_R) (a : k)) :=
   rfl
 
 /-! ### Embedding of `canonicalResidueZetaP P'` into `𝓞 R' / 𝔭`
@@ -532,7 +525,7 @@ The canonical primitive `p`-th root in `(𝓞 K / P')ˣ` embeds into
 /-- **Embedded canonical zeta in `𝓞 R' / 𝔭`**: the image of
 `canonicalResidueZetaP P'` under the residue field embedding (as an
 element of `(𝓞 R' / 𝔭)ˣ`). -/
-noncomputable def canonicalResidueZetaP_image
+def canonicalResidueZetaP_image
     {p : ℕ} [Fact p.Prime]
     {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
     {R' : Type*} [Field R'] [NumberField R']
@@ -559,7 +552,7 @@ noncomputable def canonicalResidueZetaP_image
     ((canonicalResidueZetaP_image (p := p) (K := K) (R' := R')
       h_over) : 𝓞 R' ⧸ 𝔭) =
       (residueFieldEmbedding h_over)
-        (canonicalResidueZetaP (p := p) (K := K) P' : 𝓞 K ⧸ P') := by
+        (canonicalResidueZetaP (p := p) (K := K) P' : 𝓞 K ⧸ P') :=
   rfl
 
 /-- **`canonicalResidueZetaP_image` underlying value is a primitive `p`-th
