@@ -103,9 +103,9 @@ theorem pthSymbolAtPrime_canonical_galois_numerator_of_strong
         pthSymbolAtPrime_canonical (p := p) (K := K) η Q := by
   rw [hu]
   haveI hQ_prime : Q.IsPrime := hmax.isPrime
-  have hη_pow : η ^ ((a : ZMod p).val ^ i : ℕ) ∉ Q := fun h =>
+  have hη_pow : η ^ ((a : ZMod p).val ^ i : ℕ) ∉ Q := fun h ↦
     hη (hQ_prime.mem_of_pow_mem _ h)
-  have hu_pow : u ^ p ∉ Q := fun h =>
+  have hu_pow : u ^ p ∉ Q := fun h ↦
     huQ (hQ_prime.mem_of_pow_mem _ h)
   rw [pthSymbolAtPrime_canonical_mul hbot hmax hη_pow hu_pow,
     pthSymbolAtPrime_canonical_pow hbot hmax hη _,
@@ -129,10 +129,10 @@ theorem pthSymbolAtIdeal_canonical_galois_numerator_of_strong
   unfold pthSymbolAtIdeal_canonical
   rw [show
       ((UniqueFactorizationMonoid.normalizedFactors I).map
-        (fun P => pthSymbolAtPrime_canonical (p := p) (K := K)
+        (fun P ↦ pthSymbolAtPrime_canonical (p := p) (K := K)
           (cyclotomicRingOfIntegersEquiv (p := p) K a η) P)).sum =
       ((UniqueFactorizationMonoid.normalizedFactors I).map
-        (fun P => ((a : ZMod p).val ^ i : ZMod p) *
+        (fun P ↦ ((a : ZMod p).val ^ i : ZMod p) *
           pthSymbolAtPrime_canonical (p := p) (K := K) η P)).sum from ?_]
   · rw [← Multiset.sum_map_mul_left]
   · apply congrArg Multiset.sum
@@ -260,7 +260,7 @@ theorem phiOnClassGroupModPLinear_galois_weight_one_minus_i
       phiOnClassGroupModPLinear h_ref19
         (Additive.ofMul (QuotientGroup.mk (ClassGroup.mk0 J) :
           ClassGroupModP K p)) =
-      phiOnClassGroup h_ref19 (ClassGroup.mk0 J) := fun _ => rfl
+      phiOnClassGroup h_ref19 (ClassGroup.mk0 J) := fun _ ↦ rfl
   rw [h_phi I]
   have h_galAction :
       cyclotomicGalActionInstance (p := p) (K := K) a
@@ -386,7 +386,7 @@ theorem phiOnClassGroupModPLinear_galois_divided_of_unit_u
   apply phiOnClassGroupModPLinear_galois_divided h_ref19 a hu v
   intros _ _ Q hQ
   obtain ⟨_, _, hQ_max⟩ := isPrime_of_mem_normalizedFactors hQ
-  exact fun h_in => hQ_max.isPrime.ne_top
+  exact fun h_in ↦ hQ_max.isPrime.ne_top
     (Ideal.eq_top_of_isUnit_mem _ h_in hu_unit)
 
 
