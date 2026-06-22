@@ -115,7 +115,7 @@ theorem thirtyseven_mul_bernoulliGenOmega_thirtytwo_eq :
     (R := ℚ_[37]) (N := 37) (χ := (teichmullerCharQp 37) ^ 31) hχ_ne_one
   rw [bernoulliGenOmega_def, show (32 - 1 : ℕ) = 31 from rfl,
     show (37 : ℚ_[37]) = ((37 : ℕ) : ℚ_[37]) from by norm_num, hT006, PadicInt.coe_sum]
-  refine Finset.sum_congr rfl fun a _ => ?_
+  refine Finset.sum_congr rfl fun a _ ↦ ?_
   rw [PadicInt.coe_mul, PadicInt.coe_pow, PadicInt.coe_natCast]
   congr 1
   rw [teichmullerCharQp_pow_eq_ringHomComp (p := 37) (n := 31),
