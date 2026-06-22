@@ -131,7 +131,7 @@ lemma legendreDirichlet_eq_of_sq_eq_one (hp_odd : p ≠ 2)
   classical
   haveI := dirichletCharacter_ℂ_isCyclic_prime p
   have h_card_le : (Finset.univ.filter
-      (fun a : DirichletCharacter ℂ p => a ^ 2 = 1)).card ≤ 2 :=
+      (fun a : DirichletCharacter ℂ p ↦ a ^ 2 = 1)).card ≤ 2 :=
     IsCyclic.card_pow_eq_one_le (by omega)
   have h_η_sq : (legendreDirichlet p) ^ 2 = 1 :=
     MulChar.isQuadratic_iff_sq_eq_one.mp (legendreDirichlet_isQuadratic p)
@@ -139,7 +139,7 @@ lemma legendreDirichlet_eq_of_sq_eq_one (hp_odd : p ≠ 2)
   by_contra h_χ_ne_η
   -- 1, η, χ are three distinct elements of {a | a^2 = 1}, contradicting ≤ 2.
   have h_sub : ({1, legendreDirichlet p, χ} : Finset (DirichletCharacter ℂ p)) ⊆
-      Finset.univ.filter (fun a : DirichletCharacter ℂ p => a ^ 2 = 1) := by
+      Finset.univ.filter (fun a : DirichletCharacter ℂ p ↦ a ^ 2 = 1) := by
     intro a ha
     simp only [Finset.mem_insert, Finset.mem_singleton] at ha
     simp only [Finset.mem_filter, Finset.mem_univ, true_and]
@@ -151,9 +151,9 @@ lemma legendreDirichlet_eq_of_sq_eq_one (hp_odd : p ≠ 2)
     rw [show ({1, legendreDirichlet p, χ} : Finset _) =
         insert 1 (insert (legendreDirichlet p) {χ}) from rfl,
       Finset.card_insert_of_notMem, Finset.card_insert_of_notMem, Finset.card_singleton]
-    · exact fun h => h_χ_ne_η (Finset.mem_singleton.mp h).symm
+    · exact fun h ↦ h_χ_ne_η (Finset.mem_singleton.mp h).symm
     · simp only [Finset.mem_insert, Finset.mem_singleton, not_or]
-      exact ⟨h_η_ne_one.symm, fun h => h_ne_one h.symm⟩
+      exact ⟨h_η_ne_one.symm, fun h ↦ h_ne_one h.symm⟩
   have : 3 ≤ 2 :=
     h3 ▸ Finset.card_le_card h_sub |>.trans h_card_le
   omega
@@ -193,7 +193,7 @@ theorem prod_rootNumber_ne_one_eq_rootNumber_legendre (hp_odd : p ≠ 2) :
     rw [h_prod_free, mul_one]
   -- Apply Finset.prod_involution to S_free with σ = inversion.
   refine Finset.prod_involution
-    (fun (χ : DirichletCharacter ℂ p) _ => χ⁻¹) ?_ ?_ ?_ ?_
+    (fun (χ : DirichletCharacter ℂ p) _ ↦ χ⁻¹) ?_ ?_ ?_ ?_
   · -- hg₁: W_χ * W_{χ⁻¹} = 1 for χ ∈ S_free.
     intro a ha
     have h_a_ne_one : a ≠ 1 := by
@@ -256,7 +256,7 @@ lemma prod_inv_reindex_nontrivialCharacters
     (∏ χ ∈ nontrivialCharacters p, f χ⁻¹) =
       ∏ χ ∈ nontrivialCharacters p, f χ := by
   classical
-  refine Finset.prod_bij (fun χ _ => χ⁻¹) ?_ ?_ ?_ ?_
+  refine Finset.prod_bij (fun χ _ ↦ χ⁻¹) ?_ ?_ ?_ ?_
   · intro χ hχ
     unfold nontrivialCharacters at hχ ⊢
     simp only [Finset.mem_erase, Finset.mem_univ, and_true] at hχ ⊢
@@ -290,20 +290,20 @@ theorem prod_completedLFunction_nontrivial_one_sub (s : ℂ) :
           DirichletCharacter.completedLFunction χ s := by
   haveI : NeZero p := ⟨hp.out.ne_zero⟩
   classical
-  have h_prim : ∀ χ ∈ nontrivialCharacters p, χ.IsPrimitive := fun χ hχ => by
+  have h_prim : ∀ χ ∈ nontrivialCharacters p, χ.IsPrimitive := fun χ hχ ↦ by
     unfold nontrivialCharacters at hχ
     have h_ne : χ ≠ 1 := by simpa using hχ
     exact DirichletCharacter.isPrimitive_of_ne_one p h_ne
   have h_each : ∀ χ ∈ nontrivialCharacters p,
       DirichletCharacter.completedLFunction χ (1 - s) =
       ((p : ℂ) ^ (s - 1/2) * DirichletCharacter.rootNumber χ) *
-        DirichletCharacter.completedLFunction χ⁻¹ s := fun χ hχ => by
+        DirichletCharacter.completedLFunction χ⁻¹ s := fun χ hχ ↦ by
     have := (h_prim χ hχ).completedLFunction_one_sub s
     linear_combination this
   rw [Finset.prod_congr rfl h_each, Finset.prod_mul_distrib, Finset.prod_mul_distrib,
     Finset.prod_const,
     prod_inv_reindex_nontrivialCharacters p
-      (fun χ : DirichletCharacter ℂ p => DirichletCharacter.completedLFunction χ s)]
+      (fun χ : DirichletCharacter ℂ p ↦ DirichletCharacter.completedLFunction χ s)]
   -- Now: (p^(s-1/2))^card · ∏ W_χ · ∏ completedL(χ, s)
   -- Goal: p^(card · (s-1/2)) · ∏ W_χ · ∏ completedL(χ, s)
   rw [mul_comm ((nontrivialCharacters p).card : ℂ) (s - 1/2),
@@ -330,9 +330,9 @@ lemma card_nontrivialCharacters : (nontrivialCharacters p).card = p - 2 := by
 lemma completedLFunction_ne_zero_of_one_lt_re
     {N : ℕ} [NeZero N] (χ : DirichletCharacter ℂ N) {s : ℂ} (hs : 1 < s.re) :
     DirichletCharacter.completedLFunction χ s ≠ 0 := by
-  have hs_ne_zero : s ≠ 0 := fun h => by
+  have hs_ne_zero : s ≠ 0 := fun h ↦ by
     simp only [h, Complex.zero_re] at hs; linarith
-  have hs_ne_one : s ≠ 1 := fun h => by
+  have hs_ne_one : s ≠ 1 := fun h ↦ by
     simp only [h, Complex.one_re] at hs; linarith
   have h_eq : DirichletCharacter.LFunction χ s =
       DirichletCharacter.completedLFunction χ s / DirichletCharacter.gammaFactor χ s :=
@@ -346,9 +346,9 @@ lemma completedLFunction_ne_zero_of_one_lt_re
 /-- The completed Riemann zeta is nonzero for `Re s > 1`. -/
 lemma completedRiemannZeta_ne_zero_of_one_lt_re {s : ℂ} (hs : 1 < s.re) :
     completedRiemannZeta s ≠ 0 := by
-  have hs_ne_zero : s ≠ 0 := fun h => by
+  have hs_ne_zero : s ≠ 0 := fun h ↦ by
     simp only [h, Complex.zero_re] at hs; linarith
-  have hs_ne_one : s ≠ 1 := fun h => by
+  have hs_ne_one : s ≠ 1 := fun h ↦ by
     simp only [h, Complex.one_re] at hs; linarith
   have h_zeta_ne : riemannZeta s ≠ 0 := riemannZeta_ne_zero_of_one_lt_re hs
   -- completedRiemannZeta s = Gammaℝ s · riemannZeta s (away from s = 0, 1).
@@ -430,7 +430,7 @@ theorem prod_rootNumber_eq_one_of_dedekindFE_of_one_lt_re (s : ℂ) (hs : 1 < s.
   haveI : NeZero p := ⟨hp.out.ne_zero⟩
   apply prod_rootNumber_eq_one_of_dedekindFE p s
     (completedRiemannZeta_ne_zero_of_one_lt_re hs)
-    (Finset.prod_ne_zero_iff.mpr fun χ _ => completedLFunction_ne_zero_of_one_lt_re χ hs)
+    (Finset.prod_ne_zero_iff.mpr fun χ _ ↦ completedLFunction_ne_zero_of_one_lt_re χ hs)
     h_FE
 
 /-- **WP-I (conditional)**: For `p ≡ 3 (mod 4)` prime, given the root-number
@@ -537,7 +537,7 @@ theorem gaussSum_oddCharacters_erase_legendre_prod
     have hχ_odd : χ.Odd := by
       simp only [oddCharacters, Finset.mem_filter, Finset.mem_univ, true_and] at hχ_odd_set
       exact hχ_odd_set
-    have hχ_ne_one : χ ≠ 1 := fun h => by
+    have hχ_ne_one : χ ≠ 1 := fun h ↦ by
       rw [h] at hχ_odd
       have h1 : (1 : DirichletCharacter ℂ p).Even := MulChar.one_apply isUnit_one.neg
       exact absurd hχ_odd h1.not_odd
@@ -547,7 +547,7 @@ theorem gaussSum_oddCharacters_erase_legendre_prod
   -- Apply prod_involution with f(χ) := gaussSum(χ) / c.
   have h_prod_f : ∏ χ ∈ S,
       (gaussSum χ (ZMod.stdAddChar : AddChar (ZMod p) ℂ) / c) = 1 := by
-    refine Finset.prod_involution (fun (χ : DirichletCharacter ℂ p) _ => χ⁻¹) ?_ ?_ ?_ ?_
+    refine Finset.prod_involution (fun (χ : DirichletCharacter ℂ p) _ ↦ χ⁻¹) ?_ ?_ ?_ ?_
     · intro χ hχ
       have h_pair_χ := h_pair χ hχ
       calc (gaussSum χ (ZMod.stdAddChar : AddChar (ZMod p) ℂ) / c) *
@@ -559,7 +559,7 @@ theorem gaussSum_oddCharacters_erase_legendre_prod
     · -- f(χ) ≠ 1 → χ⁻¹ ≠ χ: on S (excluding η), χ⁻¹ ≠ χ by uniqueness.
       intro χ hχ _ h_inv_eq
       have hχ_odd_set : χ ∈ oddCharacters p := (Finset.mem_erase.mp hχ).2
-      have hχ_ne_one : χ ≠ 1 := fun h => by
+      have hχ_ne_one : χ ≠ 1 := fun h ↦ by
         simp only [oddCharacters, Finset.mem_filter, Finset.mem_univ, true_and, h] at hχ_odd_set
         have : (1 : DirichletCharacter ℂ p) (-1) = -1 := hχ_odd_set
         rw [MulChar.one_apply (isUnit_one.neg)] at this
@@ -654,8 +654,8 @@ lemma card_oddCharacters_of_three_mod_four (hp_three_mod_four : p % 4 = 3) :
         rw [MulChar.mul_apply, show χ (-1) = -1 from hχ_odd, show η (-1) = -1 from h_η_odd]
         ring
       · rw [mul_assoc, h_η_sq, mul_one]
-  have h_inj : Function.Injective (fun χ : DirichletCharacter ℂ p => χ * η) :=
-    fun _ _ h => mul_right_cancel h
+  have h_inj : Function.Injective (fun χ : DirichletCharacter ℂ p ↦ χ * η) :=
+    fun _ _ h ↦ mul_right_cancel h
   have h_card_eq : E.card = (oddCharacters p).card := by
     rw [← h_image, Finset.card_image_of_injective E h_inj]
   -- E ⊔ oddCharacters = univ (disjoint union).
