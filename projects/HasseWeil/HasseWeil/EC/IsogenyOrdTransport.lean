@@ -22,7 +22,7 @@ The two inputs are genuinely independent: the first is "same place / same valuat
 second is the normalization `e = 1` (the ramification index), which for `[ℓ]` is the geometric
 content of separability.
 
-The main export is `ord_P_comap_eq_of_isEquiv_of_uniformizer`, plus the small valuation glue
+The main export is `comap_pointValuation_eq_of_isEquiv_of_ord_eq_one`, plus the small valuation glue
 lemmas it rests on (re-derived here, Fintype-free, so the file is independent of the
 `[Fintype K]`-scoped versions in `Hasse/L6Witnesses.lean`).
 
@@ -33,9 +33,20 @@ open WeierstrassCurve HasseWeil.Curves
 
 namespace HasseWeil
 
-set_option linter.unusedSectionVars false
-
 variable {F : Type*} [Field F] [DecidableEq F]
+
+/-- A `ℤᵐ⁰`-valued valuation on a field is surjective as soon as some element takes the value
+`exp (-1)`: the negative powers of that element realise every `exp (-n)`, and `0 ↦ 0`. Shared core
+of the two surjectivity lemmas below. -/
+private theorem surjective_of_eq_exp_neg_one {E : Type*} [Field E]
+    (v : Valuation E (WithZero (Multiplicative ℤ))) {t : E} (hvt : v t = WithZero.exp (-1 : ℤ)) :
+    Function.Surjective v := by
+  intro z
+  rcases eq_or_ne z 0 with rfl | hz
+  · exact ⟨0, map_zero _⟩
+  · exact ⟨t ^ (-(WithZero.log z)), by
+      rw [map_zpow₀, hvt, ← WithZero.exp_zsmul, smul_eq_mul, mul_neg_one, neg_neg,
+        WithZero.exp_log hz]⟩
 
 namespace Curves.SmoothPlaneCurve
 
@@ -47,18 +58,9 @@ with a uniformizer `t` (`ord_P t = 1`) realising `exp (-1)`; values are integer 
 theorem pointValuation_surjective' (P : C.SmoothPoint) :
     Function.Surjective (C.pointValuation P) := by
   obtain ⟨t, ht⟩ := C.exists_uniformizer P
-  rw [SmoothPlaneCurve.Uniformizer] at ht
-  have ht_ne : t ≠ 0 := by
-    intro h; rw [h, SmoothPlaneCurve.ord_P_zero] at ht; exact WithTop.top_ne_one ht
   have hone : C.ord_P P t = ((1 : ℤ) : WithTop ℤ) := by rw [ht]; rfl
-  have hvt : C.pointValuation P t = WithZero.exp (-1 : ℤ) :=
-    pointValuation_eq_exp_neg_of_ord_P_eq ht_ne hone
-  intro z
-  rcases eq_or_ne z 0 with rfl | hz
-  · exact ⟨0, map_zero _⟩
-  · refine ⟨t ^ (-(WithZero.log z)), ?_⟩
-    rw [map_zpow₀, hvt, ← WithZero.exp_zsmul, smul_eq_mul, mul_neg_one, neg_neg,
-      WithZero.exp_log hz]
+  exact surjective_of_eq_exp_neg_one _
+    (pointValuation_eq_exp_neg_of_ord_P_eq ht.ne_zero hone)
 
 end Curves.SmoothPlaneCurve
 
@@ -92,9 +94,7 @@ theorem Valuation.isEquiv_eq_of_surjective_withZeroInt
   have hk := key x₁ hvx₁
   rw [hx₁] at hk
   have hlog : (1 : ℤ) = WithZero.log (v x₁) * WithZero.log (w e) := by
-    have h2 : WithZero.log (WithZero.exp (1 : ℤ)) =
-        WithZero.log ((w e) ^ (WithZero.log (v x₁))) := by rw [hk]
-    rwa [WithZero.log_exp, WithZero.log_zpow, smul_eq_mul] at h2
+    rw [← WithZero.log_exp (1 : ℤ), hk, WithZero.log_zpow, smul_eq_mul]
   have hc1 : WithZero.log (w e) = 1 := by
     have hdvd : WithZero.log (w e) ∣ 1 := ⟨_, by rw [hlog]; ring⟩
     rcases Int.isUnit_iff.mp (isUnit_of_dvd_one hdvd) with hh | hh
@@ -127,15 +127,9 @@ theorem comap_pointValuation_surjective_of_ord_eq_one
     Function.Surjective ((C.pointValuation P).comap φ) := by
   have hφt_ne : φ t ≠ 0 := by
     intro h; rw [h, SmoothPlaneCurve.ord_P_zero] at ht; exact WithTop.top_ne_coe ht
-  have hvt : (C.pointValuation P).comap φ t = WithZero.exp (-1 : ℤ) := by
-    rw [_root_.Valuation.comap_apply]
-    exact pointValuation_eq_exp_neg_of_ord_P_eq hφt_ne ht
-  intro z
-  rcases eq_or_ne z 0 with rfl | hz
-  · exact ⟨0, map_zero _⟩
-  · refine ⟨t ^ (-(WithZero.log z)), ?_⟩
-    rw [map_zpow₀, hvt, ← WithZero.exp_zsmul, smul_eq_mul, mul_neg_one, neg_neg,
-      WithZero.exp_log hz]
+  refine surjective_of_eq_exp_neg_one _ (t := t) ?_
+  rw [_root_.Valuation.comap_apply]
+  exact pointValuation_eq_exp_neg_of_ord_P_eq hφt_ne ht
 
 /-- **General DVR order-transport (value-precise), the unramified case.**
 
