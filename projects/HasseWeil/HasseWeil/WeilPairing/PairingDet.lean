@@ -29,6 +29,12 @@ open Matrix
 /-- The standard symplectic form matrix `J = [[0,1],[-1,0]]` on `Fin 2`. -/
 def symJ (F : Type*) [CommRing F] : Matrix (Fin 2) (Fin 2) F := !![0, 1; -1, 0]
 
+/-- `symJ` is nonzero in its `(0,1)` entry, so it cancels from a scalar action: `a • J = b • J`
+forces `a = b`. -/
+private theorem symJ_smul_inj {F : Type*} [CommRing F] {a b : F}
+    (h : a • symJ F = b • symJ F) : a = b := by
+  simpa [symJ, Matrix.smul_apply] using congrFun (congrFun h 0) 1
+
 /-- **Symplectic determinant identity:** `φᵀ J φ = (det φ) • J` for any `2×2` matrix `φ`. -/
 theorem transpose_mul_symJ_mul {F : Type*} [CommRing F] (φ : Matrix (Fin 2) (Fin 2) F) :
     φᵀ * symJ F * φ = φ.det • symJ F := by
@@ -47,9 +53,7 @@ theorem det_eq_of_symplectic_adjoint {F : Type*} [CommRing F]
     φ.det = d := by
   have h1 : φᵀ * symJ F * φ = d • symJ F := by
     rw [hadj, Matrix.mul_assoc, hψφ, Matrix.mul_smul, Matrix.mul_one]
-  have h2 : φ.det • symJ F = d • symJ F := by rw [← transpose_mul_symJ_mul, h1]
-  have h01 := congrFun (congrFun h2 0) 1
-  simpa [symJ, Matrix.smul_apply] using h01
+  exact symJ_smul_inj (by rw [← transpose_mul_symJ_mul, h1])
 
 /-! ### The scaling form of Prop 8.6 (additivity-free — the load-bearing residual interface)
 
@@ -68,10 +72,8 @@ form of the pairing scaling `e(φS,φT) = e(S,T)^d` with `d = deg φ`), then `de
 single `φ` — no adjoint, no dual-additivity hypothesis. -/
 theorem det_eq_of_symplectic_scaling {F : Type*} [CommRing F]
     {φ : Matrix (Fin 2) (Fin 2) F} {d : F}
-    (hscale : φᵀ * symJ F * φ = d • symJ F) : φ.det = d := by
-  have h : φ.det • symJ F = d • symJ F := by rw [transpose_mul_symJ_mul] at hscale; exact hscale
-  have h01 := congrFun (congrFun h 0) 1
-  simpa [symJ, Matrix.smul_apply] using h01
+    (hscale : φᵀ * symJ F * φ = d • symJ F) : φ.det = d :=
+  symJ_smul_inj (by rw [← transpose_mul_symJ_mul]; exact hscale)
 
 /-- **The three Frobenius det facts from the per-isogeny scaling property** (additivity-free). Given
 the Weil-pairing scaling `φᵀ J φ = (deg φ) • J` for each of `π`, `1−π`, `rπ−s` (whose matrices on
