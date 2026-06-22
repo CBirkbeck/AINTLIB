@@ -417,16 +417,33 @@ theorem mem_plus_of_forall_spa_vle_one
         --   3. by_cases `v(subtype π) = 0`: if `0`, `v` itself is in `Spv(A,(π))` (trivial cofinal
         --      disjunct, `v(cπ)=0`) — `v` continuous directly via the criterion; else witness
         --      `v' := ofValuation (restrictIdealSingle (valuation under v.tVR) (subtype π) hg)`.
-        --   4. continuity: `Spv.isContinuous_of_isInSpvAI_of_lt_one_principal P hπ v' h_in h_le h_lt`
-        --      with `h_in := ofValuation_restrictIdealSingle_isInSpvAI …` (match `span{subtype π} =
-        --      map P.I` via `Ideal.map_span`); `h_le` via `B°° ⊆ B⁺` + `restrictIdealSingle_le_one`;
-        --      `h_lt` (strict `<1` on `P.I`) — derive from topological nilpotence of `P.I` generators.
+        --   4. continuity (CLEAN route — NO strict `<1` needed): `Spv.IsContinuous v'` unfolds
+        --      definitionally to `(valuation under v'.tVR).IsContinuous`, proved by
+        --        `Valuation.isContinuous_of_ideal_pow_lt P (valuation) (fun γ hγ =>
+        --           cofinalValue_principal_pow_lt P hπ h_le_AOO h_cof_π γ hγ)`
+        --      where `h_le_AOO : ∀ a, IsTopologicallyNilpotent a → v'(a) ≤ 1` (via `topNilp ⊆ B⁺`
+        --      [provable: `aⁿ ∈ B⁺` eventually + `a ∈ B°` ⟹ `a` integral over `B⁺` ⟹ `a ∈ B⁺`] +
+        --      `restrictIdealSingle_le_one`), and `h_cof_π : CofinalValue v' (subtype π)`.
+        --      `cofinalValue_principal_pow_lt` needs only `h_le_AOO` + `h_cof_π` — the wrapper
+        --      `isContinuous_of_isInSpvAI_of_lt_one_principal`'s `h_lt_one` was a RED HERRING (only
+        --      used to DERIVE `h_cof` in its microbial branch).
         --   5. goals (1b) `v' ≤ 1 on B⁺` and (2) `v'(x) > 1`: the existing `v`-proofs (below) give
         --      `v ≤ 1 on B⁺` / `v(x) > 1`; lift to `v'` via `restrictIdealSingle_le_one` /
-        --      `restrictIdealSingle_one_lt` (both proven, SpvAITopology) through the `ofValuation` /
-        --      `Compatible.vle_iff_le` bridge.
-        -- ⚠ This is a substantial witness restructure of the block below (case split + 3 goals re-
-        --   derived for `v'`); the `h_lt` strict-`<1`-on-`P.I` derivation is the one non-mechanical step.
+        --      `restrictIdealSingle_one_lt` through the `ofValuation` / `Compatible.vle_iff_le` bridge.
+        -- REMAINING FRONTIER (focused sub-development): `h_cof_π : CofinalValue v' (subtype π)`.
+        --   `restrictIdealSingle_cofinal_of_not_mem` (T-SPVAI-2) gives it WHEN `v'` is in the cofinal
+        --   branch (`v(π)⁻¹ ∉ cΓ_v`), equivalently `v(subtype π) < 1`. And `v(subtype π) < 1` DOES
+        --   hold — it is exactly Huber's continuity argument (c) (lines 387-389): for `a ∈ A°°`,
+        --   `aⁿ = g·x⁻¹` in `R = B⁺[x⁻¹]` with `g ∈ R` and `x⁻¹ ∈ 𝔪`, so
+        --   `s(aⁿ) = s(g)·s(x⁻¹) ≤ s(x⁻¹) < 1` (`hs_lt`), hence `v(aⁿ) < 1` (via `ht_equiv`), hence
+        --   `v(a) < 1`. So `v'` IS in the cofinal branch and `h_cof_π` follows from T-SPVAI-2.
+        --   ⟹ the principal-`(π)` restriction is correct (no need for Huber's full `A°°·A` ideal).
+        -- The remaining work to discharge this sorry is therefore: (i) formalise Huber (c) — the
+        --   `a ∈ A°° ⟹ aⁿ = g·x⁻¹` divisibility (topology of `R` + `x⁻¹ ∈ 𝔪`), giving `v < 1` on `A°°`
+        --   (this also supplies `h_le_AOO`); (ii) `topNilp ⊆ B⁺`; (iii) the witness restructure
+        --   (case split `v(subtype π) = 0` for the degenerate `supp` case, then the clean continuity
+        --   route + the apply-lemma goal-lifting in step 5). All criteria/lemmas are in place;
+        --   Huber (c) [step (i)] is the one substantive piece.
         sorry
       · -- `v ≤ 1` on `B⁺` (Huber property (b)): `f ∈ B⁺ ⊆ R := B⁺[x⁻¹]`, so `s f ≤ 1` (`hs_le`),
         -- transported to `v` by the extension equivalence `s ≈ t ∘ (R ↪ B_x)` (`ht_equiv`).

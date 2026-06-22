@@ -919,14 +919,19 @@ theorem restrictIdealSingle_isMicrobial_of_mem (w : Valuation A Γ₀) (g : A) (
   all in PresheafTateStructure; the Wedhorn828 `…_faithful` is downstream/un-importable).
 - Full recipe written into the FaithfulLocLift:411 comment (case split on `v(subtype π)=0`,
   criterion application, goal-lifting via the apply lemmas).
-- ⚠ **OPEN ROUTE QUESTION** (the one non-mechanical step): the continuity criterion
-  `isContinuous_of_isInSpvAI_of_lt_one_principal` uses `h_lt_one : ∀ a ∈ P.I, v(subtype a) < 1`
-  in its **microbial** branch. For the restricted witness `v'`, this is strict-`<1`-on-`P.I`,
-  which FAILS exactly when `v(subtype π) = 1` (π topnilp but a `v`-unit — possible for the
-  non-continuous extension `v`). RESOLUTION OPTIONS: (a) show `v'` always lands in the **cofinal**
-  branch (so `h_lt_one` is never invoked) — likely if `v(subtype π) < 1`; (b) a continuity
-  criterion not needing strict `<1`; (c) prove `v(subtype π) < 1` from the construction. Needs
-  analysis before the witness restructure can complete. (Possibly an `/expert-review` item.)
+- ✅ **Continuity route SIMPLIFIED** (the `h_lt_one` was a red herring): `Spv.IsContinuous v'`
+  unfolds to `(valuation).IsContinuous`, provable by `isContinuous_of_ideal_pow_lt` +
+  `cofinalValue_principal_pow_lt`, which need only `h_le_AOO` (≤1 on A°°, via `topNilp ⊆ B⁺` +
+  `restrictIdealSingle_le_one`) + `h_cof_π : CofinalValue v' (subtype π)`. No strict `<1`.
+- **FRONTIER RESOLVED to a focused sub-development** = `h_cof_π : CofinalValue v' (subtype π)`.
+  T-SPVAI-2 gives it when `v'` is in the cofinal branch (`v(subtype π) < 1`), and that **holds**:
+  it is Huber's continuity argument (c) — for `a ∈ A°°`, `aⁿ = g·x⁻¹` in `R = B⁺[x⁻¹]`, so
+  `s(aⁿ) ≤ s(x⁻¹) < 1` (`hs_lt`) ⟹ `v(a) < 1`. So the principal-`(π)` restriction IS correct (no
+  need for Huber's full `A°°·A` ideal). REMAINING to discharge the FaithfulLocLift:411 sorry:
+  (i) **formalise Huber (c)** `a ∈ A°° ⟹ aⁿ = g·x⁻¹` ⟹ `v < 1` on `A°°` (the one substantive
+  piece; also supplies `h_le_AOO`); (ii) `topNilp ⊆ B⁺`; (iii) the witness restructure (clean
+  continuity route + apply-lemma goal-lifting). All criteria/lemmas in place. Full recipe + the
+  Huber-(c) derivation in the FaithfulLocLift continuity comment.
 
 #### Statement / goal
 Replace the HU-e reference to the **false** `ofValuation_restrictIdeal_isInSpvAI` (currently in
