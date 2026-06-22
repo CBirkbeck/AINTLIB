@@ -25,12 +25,12 @@ abbrev zetaEvenSeries (k : ℕ) : ℝ :=
 /-- The zeta series at `2 * k`, `k ≠ 0`, is at least its `n = 1` term. -/
 theorem one_le_zetaEvenSeries {k : ℕ} (hk : k ≠ 0) :
     1 ≤ zetaEvenSeries k := by
-  have hsummable : Summable (fun n : ℕ => (1 : ℝ) / (n : ℝ) ^ (2 * k)) :=
+  have hsummable : Summable (fun n : ℕ ↦ (1 : ℝ) / (n : ℝ) ^ (2 * k)) :=
     (hasSum_zeta_nat hk).summable
   have hnonneg : ∀ n : ℕ, 0 ≤ (1 : ℝ) / (n : ℝ) ^ (2 * k) := by
     intro n
     positivity
-  have hle := hsummable.sum_le_tsum ({1} : Finset ℕ) (fun n _ => hnonneg n)
+  have hle := hsummable.sum_le_tsum ({1} : Finset ℕ) (fun n _ ↦ hnonneg n)
   simpa [zetaEvenSeries] using hle
 
 /-- A one-sided lower bound for `|B_{2k}|` extracted from the zeta-value
@@ -99,18 +99,18 @@ theorem bernoulli_div_self_abs_lower_bound {k : ℕ} (hk : k ≠ 0) :
 /-- Factorials dominate any fixed exponential, even after replacing `n!` by
 `(n - 1)!`. -/
 theorem tendsto_factorial_pred_div_const_pow_atTop {A : ℝ} (hA : 0 < A) :
-    Tendsto (fun n : ℕ => (Nat.factorial (n - 1) : ℝ) / A ^ n) atTop atTop := by
+    Tendsto (fun n : ℕ ↦ (Nat.factorial (n - 1) : ℝ) / A ^ n) atTop atTop := by
   have hzero : Tendsto
-      (fun n : ℕ => (1 : ℝ) * A ^ n / (Nat.factorial (n - 1) : ℝ)) atTop (𝓝 0) :=
+      (fun n : ℕ ↦ (1 : ℝ) * A ^ n / (Nat.factorial (n - 1) : ℝ)) atTop (𝓝 0) :=
     FloorSemiring.tendsto_mul_pow_div_factorial_sub_atTop 1 A 1
   have hzero' : Tendsto
-      (fun n : ℕ => A ^ n / (Nat.factorial (n - 1) : ℝ)) atTop (𝓝 0) := by
+      (fun n : ℕ ↦ A ^ n / (Nat.factorial (n - 1) : ℝ)) atTop (𝓝 0) := by
     simpa using hzero
   have hpos : ∀ n : ℕ, 0 < A ^ n / (Nat.factorial (n - 1) : ℝ) := by
     intro n
     positivity
   have hgt : Tendsto
-      (fun n : ℕ => A ^ n / (Nat.factorial (n - 1) : ℝ)) atTop (𝓝[>] (0 : ℝ)) := by
+      (fun n : ℕ ↦ A ^ n / (Nat.factorial (n - 1) : ℝ)) atTop (𝓝[>] (0 : ℝ)) := by
     rw [tendsto_nhdsWithin_iff]
     exact ⟨hzero', Eventually.of_forall hpos⟩
   have hinv := hgt.inv_tendsto_nhdsGT_zero
@@ -120,7 +120,7 @@ theorem tendsto_factorial_pred_div_const_pow_atTop {A : ℝ} (hA : 0 < A) :
   field_simp [pow_ne_zero n hA.ne', Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero (n - 1))]
 
 /-- The map `k ↦ 2 * k` tends to infinity. -/
-theorem tendsto_two_mul_atTop : Tendsto (fun k : ℕ => 2 * k) atTop atTop := by
+theorem tendsto_two_mul_atTop : Tendsto (fun k : ℕ ↦ 2 * k) atTop atTop := by
   apply tendsto_atTop_atTop_of_monotone
   · intro a b hab
     exact Nat.mul_le_mul_left 2 hab
@@ -130,7 +130,7 @@ theorem tendsto_two_mul_atTop : Tendsto (fun k : ℕ => 2 * k) atTop atTop := by
 /-- The lower bound for `|B_{2k}/(2k)|` tends to infinity. -/
 theorem tendsto_bernoulli_lower_bound_atTop :
     Tendsto
-      (fun k : ℕ => (Nat.factorial (2 * k - 1) : ℝ) /
+      (fun k : ℕ ↦ (Nat.factorial (2 * k - 1) : ℝ) /
         ((2 : ℝ) ^ (2 * k - 1) * Real.pi ^ (2 * k)))
       atTop atTop := by
   have hA : 0 < (2 : ℝ) * Real.pi := by positivity
@@ -158,7 +158,7 @@ theorem tendsto_bernoulli_lower_bound_atTop :
 /-- Diekmann's growth input: `|B_{2n}/(2n)|` tends to infinity. -/
 theorem tendsto_abs_bernoulli_div_self_even :
     Tendsto
-      (fun n : ℕ => |(((bernoulli (2 * n) : ℚ) / (2 * n : ℚ) : ℚ) : ℝ)|)
+      (fun n : ℕ ↦ |(((bernoulli (2 * n) : ℚ) / (2 * n : ℚ) : ℚ) : ℝ)|)
       atTop atTop := by
   refine tendsto_atTop_mono' atTop ?_ tendsto_bernoulli_lower_bound_atTop
   filter_upwards [eventually_ge_atTop 1] with k hk
@@ -176,10 +176,10 @@ theorem exists_large_even_multiple_abs_bernoulli_div_self_gt_one
     dsimp [c]
     rw [hd]
     omega
-  have hpow : Tendsto (fun t : ℕ => 2 ^ t) atTop atTop :=
+  have hpow : Tendsto (fun t : ℕ ↦ 2 ^ t) atTop atTop :=
     tendsto_pow_atTop_atTop_of_one_lt (by norm_num : 1 < (2 : ℕ))
-  have hc_tendsto : Tendsto (fun t : ℕ => c * 2 ^ t) atTop atTop := by
-    refine tendsto_atTop_mono (fun t => ?_) hpow
+  have hc_tendsto : Tendsto (fun t : ℕ ↦ c * 2 ^ t) atTop atTop := by
+    refine tendsto_atTop_mono (fun t ↦ ?_) hpow
     exact Nat.le_mul_of_pos_left (2 ^ t) hc_pos
   have hcomp := tendsto_abs_bernoulli_div_self_even.comp hc_tendsto
   have hevent := hcomp.eventually (eventually_gt_atTop 1)
