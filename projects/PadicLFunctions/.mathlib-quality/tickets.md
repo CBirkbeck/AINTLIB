@@ -7106,3 +7106,10 @@ BLOCKED — [TG-ABEL-3] X∞⁺ abelian (and hence the Γ⁺-action, the SES, al
   representation of Mₙ⁺ (not `⨆` over all intermediate fields) so downstream Galois-module reasoning
   is feasible. Both are mathlib-PR-scale. The mathematics is settled (RJW §13.2); the obstacle is Lean
   encoding/performance.
+
+---
+## UPDATE (2026-06-22, cont.) — X∞⁺ ABELIAN: WALL CLEARED (timeout was an encoding bug, per CB)
+[TG-ABEL-3] X∞⁺ abelian: **DONE**. Fix: break into lemmas + pass instances explicitly (no
+AlgEquiv.ofBijective; of_algHom in a clean top-level lemma context; @-apply with explicit instances).
+isMulCommutative_XinfPlus committed, axiom-clean. commute_restrict_AG, isAbelianGalois_comap_MPlusN,
+commute_on_MPlusN are the reusable pieces. Next: Γ⁺-action (Rmk 13.7), Y∞⁺ abelian, the SES.
