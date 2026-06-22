@@ -58,7 +58,7 @@ private theorem pow_pred_natCast_eq_of_modEq {p e f : ℕ} [Fact p.Prime]
   have hp : Nat.Prime p := ‹Fact p.Prime›.out
   have hj_coprime : Nat.Coprime j p :=
     (hp.coprime_iff_not_dvd.mpr
-      (fun hdvd => hj_ne (Nat.eq_zero_of_dvd_of_lt hdvd hjp))).symm
+      (fun hdvd ↦ hj_ne (Nat.eq_zero_of_dvd_of_lt hdvd hjp))).symm
   lift (((j : ℕ) : ZMod p)) to (ZMod p)ˣ using
     (ZMod.isUnit_iff_coprime j p).mpr hj_coprime with u hu
   rw [← Units.val_pow_eq_pow_val, ← Units.val_pow_eq_pow_val]
@@ -76,7 +76,7 @@ private theorem sum_floorTerm_pow_pred_natCast_eq_of_modEq {p a e f : ℕ}
     ((∑ j ∈ Finset.range p, j ^ e * (j * a / p) : ℕ) : ZMod p) =
       ((∑ j ∈ Finset.range p, j ^ f * (j * a / p) : ℕ) : ZMod p) := by
   push_cast
-  refine Finset.sum_congr rfl fun j hj => ?_
+  refine Finset.sum_congr rfl fun j hj ↦ ?_
   rw [Finset.mem_range] at hj
   congr 1
   by_cases hj_ne : j = 0
@@ -99,10 +99,10 @@ private theorem bernoulli_div_sub_eq_p_mul_of_expansions {p : ℕ} [Fact p.Prime
     (hmInv : mQ * mInv = 1) (hnInv : nQ * nInv = 1) :
     Bm_div - Bn_div =
       (p : ℚ_[p]) * (AmInv * AnInv * E + AmInv * mInv * zm - AnInv * nInv * zn) := by
-  have h_Am_ne : Am - 1 ≠ 0 := fun h0 => one_ne_zero <| by rw [← hAmInv, h0, zero_mul]
-  have h_An_ne : An - 1 ≠ 0 := fun h0 => one_ne_zero <| by rw [← hAnInv, h0, zero_mul]
-  have h_mQ_ne : mQ ≠ 0 := fun h0 => one_ne_zero <| by rw [← hmInv, h0, zero_mul]
-  have h_nQ_ne : nQ ≠ 0 := fun h0 => one_ne_zero <| by rw [← hnInv, h0, zero_mul]
+  have h_Am_ne : Am - 1 ≠ 0 := fun h0 ↦ one_ne_zero <| by rw [← hAmInv, h0, zero_mul]
+  have h_An_ne : An - 1 ≠ 0 := fun h0 ↦ one_ne_zero <| by rw [← hAnInv, h0, zero_mul]
+  have h_mQ_ne : mQ ≠ 0 := fun h0 ↦ one_ne_zero <| by rw [← hmInv, h0, zero_mul]
+  have h_nQ_ne : nQ ≠ 0 := fun h0 ↦ one_ne_zero <| by rw [← hnInv, h0, zero_mul]
   have h_Bm_expand : (Am - 1) * Bm = mQ * Am1 * Sm + (p : ℚ_[p]) * zm := by
     linear_combination hzm
   have h_Bn_expand : (An - 1) * Bn = nQ * An1 * Sn + (p : ℚ_[p]) * zn := by
@@ -225,11 +225,11 @@ theorem bernoulli_div_sModEq_of_modEq
   have h_mn_ZMod : ((a : ℕ) : ZMod p) ^ m = ((a : ℕ) : ZMod p) ^ n := by
     rw [ha_cast]
     simpa [Units.val_pow_eq_pow_val] using
-      congrArg (fun u : (ZMod p)ˣ => (u : ZMod p)) h_gmn_eq
+      congrArg (fun u : (ZMod p)ˣ ↦ (u : ZMod p)) h_gmn_eq
   have h_mn1_ZMod : ((a : ℕ) : ZMod p) ^ (m - 1) = ((a : ℕ) : ZMod p) ^ (n - 1) := by
     rw [ha_cast]
     simpa [Units.val_pow_eq_pow_val] using
-      congrArg (fun u : (ZMod p)ˣ => (u : ZMod p)) h_gmn1_eq
+      congrArg (fun u : (ZMod p)ˣ ↦ (u : ZMod p)) h_gmn1_eq
   -- Lift (C1), (C2) to `ℤ_[p]` via `toZMod` and
   -- `padicInt_sub_mem_span_p_of_toZMod_eq`.
   have hpℤ_ne : (p : ℤ_[p]) ≠ 0 := Nat.cast_ne_zero.mpr hp.ne_zero
@@ -341,20 +341,20 @@ theorem bernoulli_div_sModEq_of_modEq
   -- Cast `hE_eq` to ℚ_[p].
   have hE_eq_Q : (An_Q - 1) * Am1_Q * Sm_Q - (Am_Q - 1) * An1_Q * Sn_Q =
       (p : ℚ_[p]) * ((E : ℤ_[p]) : ℚ_[p]) := by
-    have := congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hE_eq
+    have := congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hE_eq
     rw [hAm_Q_def, hAn_Q_def, hAm1_Q_def, hAn1_Q_def, hSm_Q_def, hSn_Q_def]
     push_cast at this ⊢
     linear_combination this
   -- Unit relations in ℚ_[p].
   have h_mQ_mInv : mQ * ((mInv : ℤ_[p]) : ℚ_[p]) = 1 := by
-    rw [hmQ_def]; simpa using congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hmInv_mul
+    rw [hmQ_def]; simpa using congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hmInv_mul
   have h_nQ_nInv : nQ * ((nInv : ℤ_[p]) : ℚ_[p]) = 1 := by
-    rw [hnQ_def]; simpa using congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hnInv_mul
+    rw [hnQ_def]; simpa using congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hnInv_mul
   have h_Am_AmInv : (Am_Q - 1) * ((AmInv : ℤ_[p]) : ℚ_[p]) = 1 := by
-    have := congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hAmInv_mul
+    have := congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hAmInv_mul
     rw [hAm_Q_def]; push_cast at this; exact this
   have h_An_AnInv : (An_Q - 1) * ((AnInv : ℤ_[p]) : ℚ_[p]) = 1 := by
-    have := congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hAnInv_mul
+    have := congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hAnInv_mul
     rw [hAn_Q_def]; push_cast at this; exact this
   -- Reshape the witness from a single `ℤ_[p]`-coercion into the split `ℚ_[p]`
   -- form expected by `bernoulli_div_sub_eq_p_mul_of_expansions`.
