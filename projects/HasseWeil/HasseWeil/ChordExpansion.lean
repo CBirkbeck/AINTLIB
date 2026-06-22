@@ -1205,6 +1205,83 @@ private lemma zwSlopeLine_mul_eq_of_x_eq {α β : Isogeny W.toAffine W.toAffine}
     (addLineC_ne_zero_of_x_eq W h_x h_ni) (addLineC_def W α β)
     (pullback_weierstrass_eq W α) (addSlopePair_mul_u_of_x_eq W h_x h_ni)
 
+/-- The `f_w`-factor of the tangent λ-leg, expanded in the Laurent field
+(FG-B4a step (ii), `f_w∘` leg): the `localExpand` of the `(z,w)`-operator's
+`w`-partial evaluated at the pullback pair equals `ofPowerSeries` of the same
+partial with `α*t ↦ f_α` and `w_α ↦ w∘f_α`. A direct `simp` expansion using the
+two single-factor descents `localExpand_pullback_localParam`/`_wFunc`. -/
+private lemma localExpand_fw_factor_of_ord_x_neg
+    {α : Isogeny W.toAffine W.toAffine}
+    (h_α : (W_smooth W).ordAtInfty (α.pullback (x_gen W)) < 0) :
+    localExpand W (algebraMap F KE W.a₁ * α.pullback (localParam W)
+        + algebraMap F KE W.a₂ * α.pullback (localParam W) ^ 2
+        + 2 * (algebraMap F KE W.a₃ * α.pullback (-(y_gen W)⁻¹))
+        + 2 * (algebraMap F KE W.a₄
+            * (α.pullback (localParam W) * α.pullback (-(y_gen W)⁻¹)))
+        + 3 * (algebraMap F KE W.a₆ * α.pullback (-(y_gen W)⁻¹) ^ 2))
+      = HahnSeries.ofPowerSeries ℤ F
+          (PowerSeries.C W.a₁ * formalIsogenySeries W α
+            + PowerSeries.C W.a₂ * formalIsogenySeries W α ^ 2
+            + 2 * (PowerSeries.C W.a₃
+                * PowerSeries.subst (formalIsogenySeries W α) (formalW W))
+            + 2 * (PowerSeries.C W.a₄ * (formalIsogenySeries W α
+                * PowerSeries.subst (formalIsogenySeries W α) (formalW W)))
+            + 3 * (PowerSeries.C W.a₆
+                * PowerSeries.subst (formalIsogenySeries W α) (formalW W) ^ 2)) := by
+  simp only [map_add, map_mul, map_pow, map_ofNat, localExpand_algebraMap,
+    localExpand_pullback_localParam W α h_α, localExpand_pullback_wFunc W α h_α,
+    show (HahnSeries.ofPowerSeries ℤ F) (2 : PowerSeries F) = 2 from map_ofNat _ 2,
+    show (HahnSeries.ofPowerSeries ℤ F) (3 : PowerSeries F) = 3 from map_ofNat _ 3]
+
+/-- The `f_z`-factor of the tangent λ-leg, expanded in the Laurent field
+(FG-B4a step (ii), `f_z∘` leg): the `localExpand` of the `(z,w)`-operator's
+`z`-partial evaluated at the pullback pair equals `ofPowerSeries` of the same
+partial with `α*t ↦ f_α` and `w_α ↦ w∘f_α`. Same `simp` expansion as the
+`f_w`-leg. -/
+private lemma localExpand_fz_factor_of_ord_x_neg
+    {α : Isogeny W.toAffine W.toAffine}
+    (h_α : (W_smooth W).ordAtInfty (α.pullback (x_gen W)) < 0) :
+    localExpand W (3 * α.pullback (localParam W) ^ 2
+        + algebraMap F KE W.a₁ * α.pullback (-(y_gen W)⁻¹)
+        + 2 * (algebraMap F KE W.a₂
+            * (α.pullback (localParam W) * α.pullback (-(y_gen W)⁻¹)))
+        + algebraMap F KE W.a₄ * α.pullback (-(y_gen W)⁻¹) ^ 2)
+      = HahnSeries.ofPowerSeries ℤ F
+          (3 * formalIsogenySeries W α ^ 2
+            + PowerSeries.C W.a₁ * PowerSeries.subst (formalIsogenySeries W α) (formalW W)
+            + 2 * (PowerSeries.C W.a₂ * (formalIsogenySeries W α
+                * PowerSeries.subst (formalIsogenySeries W α) (formalW W)))
+            + PowerSeries.C W.a₄
+              * PowerSeries.subst (formalIsogenySeries W α) (formalW W) ^ 2) := by
+  simp only [map_add, map_mul, map_pow, map_ofNat, localExpand_algebraMap,
+    localExpand_pullback_localParam W α h_α, localExpand_pullback_wFunc W α h_α,
+    show (HahnSeries.ofPowerSeries ℤ F) (2 : PowerSeries F) = 2 from map_ofNat _ 2,
+    show (HahnSeries.ofPowerSeries ℤ F) (3 : PowerSeries F) = 3 from map_ofNat _ 3]
+
+/-- The implicit-differentiation unit factor `1 − f_w∘` is nonzero in the Laurent
+field (the cancellation side condition for the tangent λ-leg): `ofPowerSeries`
+is injective and the constant coefficient of `f_w∘f_α` vanishes (both `f_α` and
+`w∘f_α` have zero constant term), so the difference from `1` cannot be `0`. -/
+private lemma ofPowerSeries_one_sub_fw_factor_ne_zero
+    {α : Isogeny W.toAffine W.toAffine}
+    (hf0 : PowerSeries.constantCoeff (formalIsogenySeries W α) = 0) :
+    (1 : LaurentSeries F)
+      - HahnSeries.ofPowerSeries ℤ F
+          (PowerSeries.C W.a₁ * formalIsogenySeries W α
+            + PowerSeries.C W.a₂ * formalIsogenySeries W α ^ 2
+            + 2 * (PowerSeries.C W.a₃
+                * PowerSeries.subst (formalIsogenySeries W α) (formalW W))
+            + 2 * (PowerSeries.C W.a₄ * (formalIsogenySeries W α
+                * PowerSeries.subst (formalIsogenySeries W α) (formalW W)))
+            + 3 * (PowerSeries.C W.a₆
+                * PowerSeries.subst (formalIsogenySeries W α) (formalW W) ^ 2)) ≠ 0 := by
+  rw [show (1 : LaurentSeries F) = HahnSeries.ofPowerSeries ℤ F 1 from (map_one _).symm,
+    ← map_sub]
+  intro h0
+  have h1 := HahnSeries.ofPowerSeries_injective (h0.trans (map_zero _).symm)
+  have h2 := congrArg PowerSeries.constantCoeff h1
+  simp [hf0, constantCoeff_subst_formalW W _ hf0] at h2
+
 /-- **The tangent λ-leg (FG-B4a)**: at a tangent pair, the expansion of the
 line-data slope is the bivariate slope series substituted at `(f_α, f_β)`
 (with `f_β = f_α`). Valid for *all* summands, including inseparable ones
@@ -1233,67 +1310,17 @@ theorem localExpand_zwSlopeLine_of_x_eq {α β : Isogeny W.toAffine W.toAffine}
   have hsub : PowerSeries.HasSubst (formalIsogenySeries W α) :=
     PowerSeries.HasSubst.of_constantCoeff_zero' hf0
   rw [hfβ, formalSlopeBiv_diag W (formalIsogenySeries W α) hford]
-  -- The two factor-expansions: `f_w∘` and `f_z∘`.
-  have hfw : localExpand W (algebraMap F KE W.a₁ * α.pullback (localParam W)
-        + algebraMap F KE W.a₂ * α.pullback (localParam W) ^ 2
-        + 2 * (algebraMap F KE W.a₃ * α.pullback (-(y_gen W)⁻¹))
-        + 2 * (algebraMap F KE W.a₄
-            * (α.pullback (localParam W) * α.pullback (-(y_gen W)⁻¹)))
-        + 3 * (algebraMap F KE W.a₆ * α.pullback (-(y_gen W)⁻¹) ^ 2))
-      = HahnSeries.ofPowerSeries ℤ F
-          (PowerSeries.C W.a₁ * formalIsogenySeries W α
-            + PowerSeries.C W.a₂ * formalIsogenySeries W α ^ 2
-            + 2 * (PowerSeries.C W.a₃
-                * PowerSeries.subst (formalIsogenySeries W α) (formalW W))
-            + 2 * (PowerSeries.C W.a₄ * (formalIsogenySeries W α
-                * PowerSeries.subst (formalIsogenySeries W α) (formalW W)))
-            + 3 * (PowerSeries.C W.a₆
-                * PowerSeries.subst (formalIsogenySeries W α) (formalW W) ^ 2)) := by
-    simp only [map_add, map_mul, map_pow, map_ofNat, localExpand_algebraMap,
-      localExpand_pullback_localParam W α h_α, localExpand_pullback_wFunc W α h_α,
-      show (HahnSeries.ofPowerSeries ℤ F) (2 : PowerSeries F) = 2 from map_ofNat _ 2,
-      show (HahnSeries.ofPowerSeries ℤ F) (3 : PowerSeries F) = 3 from map_ofNat _ 3]
-  have hfz : localExpand W (3 * α.pullback (localParam W) ^ 2
-        + algebraMap F KE W.a₁ * α.pullback (-(y_gen W)⁻¹)
-        + 2 * (algebraMap F KE W.a₂
-            * (α.pullback (localParam W) * α.pullback (-(y_gen W)⁻¹)))
-        + algebraMap F KE W.a₄ * α.pullback (-(y_gen W)⁻¹) ^ 2)
-      = HahnSeries.ofPowerSeries ℤ F
-          (3 * formalIsogenySeries W α ^ 2
-            + PowerSeries.C W.a₁ * PowerSeries.subst (formalIsogenySeries W α) (formalW W)
-            + 2 * (PowerSeries.C W.a₂ * (formalIsogenySeries W α
-                * PowerSeries.subst (formalIsogenySeries W α) (formalW W)))
-            + PowerSeries.C W.a₄
-              * PowerSeries.subst (formalIsogenySeries W α) (formalW W) ^ 2) := by
-    simp only [map_add, map_mul, map_pow, map_ofNat, localExpand_algebraMap,
-      localExpand_pullback_localParam W α h_α, localExpand_pullback_wFunc W α h_α,
-      show (HahnSeries.ofPowerSeries ℤ F) (2 : PowerSeries F) = 2 from map_ofNat _ 2,
-      show (HahnSeries.ofPowerSeries ℤ F) (3 : PowerSeries F) = 3 from map_ofNat _ 3]
-  -- The `K(E)`-side identity, pushed to the Laurent field.
+  -- Push both the `K(E)`-side and the series-side implicit-differentiation
+  -- identities into the Laurent field, expanding the two `f_w∘`/`f_z∘` factors.
   have hL := congrArg (localExpand W) (zwSlopeLine_mul_eq_of_x_eq W h_x h_ni)
-  rw [map_mul, map_sub, map_one, hfw, hfz] at hL
-  -- The series-side identity, pushed to the Laurent field.
+  rw [map_mul, map_sub, map_one, localExpand_fw_factor_of_ord_x_neg W h_α,
+    localExpand_fz_factor_of_ord_x_neg W h_α] at hL
   have hser := congrArg (HahnSeries.ofPowerSeries ℤ F)
     (subst_derivative_formalW_key W (formalIsogenySeries W α) hsub)
   rw [map_mul, map_sub, map_one] at hser
-  -- Cancel the common unit factor `1 − f_w∘`.
-  have hD_ne : (1 : LaurentSeries F)
-      - HahnSeries.ofPowerSeries ℤ F
-          (PowerSeries.C W.a₁ * formalIsogenySeries W α
-            + PowerSeries.C W.a₂ * formalIsogenySeries W α ^ 2
-            + 2 * (PowerSeries.C W.a₃
-                * PowerSeries.subst (formalIsogenySeries W α) (formalW W))
-            + 2 * (PowerSeries.C W.a₄ * (formalIsogenySeries W α
-                * PowerSeries.subst (formalIsogenySeries W α) (formalW W)))
-            + 3 * (PowerSeries.C W.a₆
-                * PowerSeries.subst (formalIsogenySeries W α) (formalW W) ^ 2)) ≠ 0 := by
-    rw [show (1 : LaurentSeries F) = HahnSeries.ofPowerSeries ℤ F 1 from (map_one _).symm,
-      ← map_sub]
-    intro h0
-    have h1 := HahnSeries.ofPowerSeries_injective (h0.trans (map_zero _).symm)
-    have h2 := congrArg PowerSeries.constantCoeff h1
-    simp [hf0, constantCoeff_subst_formalW W _ hf0] at h2
-  exact mul_right_cancel₀ hD_ne (hL.trans hser.symm)
+  -- Cancel the common nonzero unit factor `1 − f_w∘`.
+  exact mul_right_cancel₀ (ofPowerSeries_one_sub_fw_factor_ne_zero W hf0)
+    (hL.trans hser.symm)
 
 /-- **The chord ν-leg**: the intercept expansion in the chord branch. -/
 theorem localExpand_zwNuLine_of_x_ne {α β : Isogeny W.toAffine W.toAffine}
