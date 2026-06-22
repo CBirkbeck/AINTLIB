@@ -7211,6 +7211,17 @@ the bridge is the gateway to the IMC chain. **Decision needed before the large n
     (ii) σ̃ := RingOfIntegers.mapRingEquiv (σ|_{σL→L} or its inverse) carries P↦σ̃P prime of 𝓞L, p∉σ̃P (σ fixes ℤ);
     (iii) ram idx e(P|𝓞F⁺ₙ)=e(σ̃P|𝓞F⁺ₙ) via ramificationIdx_comap/map_eq + the β:𝓞F⁺ₙ≅𝓞F⁺ₙ relabeling;
     (iv) L's hunr ⟹ e(σ̃P|𝓞F⁺ₙ)=1 ⟹ e(P|𝓞F⁺ₙ)=1 ⟹ IsUnramifiedAt. β-twist (iii) is the one remaining core.
+  - **STATUS (2026-06-22): ~85% BUILT IN COMPILING CODE.** Steps (i),(ii),(iv) DONE: the reduction
+    (instances resolve), eOI=mapRingEquiv, Q:=P.comap eOI.symm, hQp (p∉Q), hQ0 (Q≠⊥ via
+    map_comap_of_surjective), hQunr/hQ1 (L unramified at Q). TWO precise sorries remain, both fully tooled:
+    - **P=⊥ generic fibre**: IsUnramifiedAt (𝓞F⁺ₙ) ⊥ = FormallyUnramified (𝓞F⁺ₙ) (Loc.AtPrime ⊥ = Frac =
+      ext); base 𝓞F⁺ₙ is a RING (not field) so go via 𝓞F⁺ₙ→F⁺ₙ→ext + `Algebra.FormallyUnramified.of_isSeparable`
+      (F⁺ₙ→ext separable, char 0) + localization base-change. ~15 lines.
+    - **hPQ (β-twist core)**: e(P|𝓞F⁺ₙ)=e(Q|𝓞F⁺ₙ) via ℤ-tower: `ramificationIdx_algebra_tower'` (×2:
+      e(·|ℤ)=e(under|ℤ)·e(·|𝓞F⁺ₙ) for P-tower ℤ⊆𝓞F⁺ₙ⊆𝓞ext and Q-tower) + `ramificationIdx_map_eq` over
+      R=ℤ (eOI is a ℤ-AlgEquiv; Q=map eOI P ⟹ e(P|ℤ)=e(Q|ℤ)) + β=eOI|𝓞F⁺ₙ ⟹ e(P.under|ℤ)=e(Q.under|ℤ),
+      Q.under=map β (P.under) + Nat cancellation (e(under|ℤ)>0). ~30 lines, needs tower instances
+      (IsDedekindDomain/IsScalarTower/LiesOver) + the AlgEquivClass-over-ℤ on eOI.
 
 ## NEXT PHASE — §12 integration (Λ-module, CFT, Vandiver, IMC). Gateway = study §12
 The remaining tickets (TG2-Lambda, TG5–TG9) all need §12: `IwasawaAlgebra`, `Gamma`, `GPlus`,
