@@ -60,6 +60,15 @@ variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
 
 local notation "KE" => W.toAffine.FunctionField
 
+omit [IsIntegrallyClosed (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing] in
+/-- `Nat.card E[ℓ] = ℓ.natAbs²` over `K̄` (the `ℕ`-valued form of
+`card_torsion_ell`, whose statement is the `ℤ`-coerced `= ℓ²`). -/
+private theorem natCard_torsion_eq [IsAlgClosed F] (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0) :
+    Nat.card W.toAffine[(ℓ : ℤ)] = ℓ.natAbs ^ 2 := by
+  have hZ : (Nat.card W.toAffine[(ℓ : ℤ)] : ℤ) = ((ℓ.natAbs ^ 2 : ℕ) : ℤ) := by
+    rw [card_torsion_ell W ℓ hℓ]; push_cast; rw [sq_abs]
+  exact_mod_cast hZ
+
 section Surjectivity
 
 variable [IsAlgClosed F]
@@ -88,17 +97,9 @@ theorem mulByEllTorsionHom_surjective (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0) :
   have hℓ2 : ((ℓ ^ 2 : ℤ) : F) ≠ 0 := by push_cast; exact pow_ne_zero 2 hℓ
   set n := ℓ.natAbs with hn
   have hn0 : n ≠ 0 := by rw [hn]; exact Int.natAbs_ne_zero.mpr hℓ0
-  have hcard_ell : Nat.card W.toAffine[(ℓ : ℤ)] = n ^ 2 := by
-    have h := card_torsion_ell W ℓ hℓ
-    have hZ : (Nat.card W.toAffine[(ℓ : ℤ)] : ℤ) = ((n ^ 2 : ℕ) : ℤ) := by
-      rw [h]; push_cast [hn]; rw [sq_abs]
-    exact_mod_cast hZ
+  have hcard_ell : Nat.card W.toAffine[(ℓ : ℤ)] = n ^ 2 := natCard_torsion_eq W ℓ hℓ
   have hcard_ell2 : Nat.card W.toAffine[(ℓ ^ 2 : ℤ)] = n ^ 4 := by
-    have h := card_torsion_ell W (ℓ ^ 2) hℓ2
-    have hZ : (Nat.card W.toAffine[(ℓ ^ 2 : ℤ)] : ℤ) = ((n ^ 4 : ℕ) : ℤ) := by
-      rw [h]; push_cast [hn]
-      rw [show |ℓ| ^ 4 = (|ℓ| ^ 2) ^ 2 by ring, sq_abs]
-    exact_mod_cast hZ
+    rw [natCard_torsion_eq W (ℓ ^ 2) hℓ2, Int.natAbs_pow, ← pow_mul]
   have : Finite W.toAffine[(ℓ : ℤ)] :=
     Nat.finite_of_card_ne_zero (by rw [hcard_ell]; exact pow_ne_zero _ hn0)
   have : Finite W.toAffine[(ℓ ^ 2 : ℤ)] :=
@@ -143,14 +144,8 @@ omit [IsIntegrallyClosed (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing]
 theorem mulByInt_ker_finite (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0) :
     Finite (mulByInt W.toAffine ℓ).toAddMonoidHom.ker := by
   have hℓ0 : ℓ ≠ 0 := by rintro rfl; simp at hℓ
-  have hcard : Nat.card W.toAffine[(ℓ : ℤ)] = ℓ.natAbs ^ 2 := by
-    have h := card_torsion_ell W ℓ hℓ
-    have hZ : (Nat.card W.toAffine[(ℓ : ℤ)] : ℤ) = ((ℓ.natAbs ^ 2 : ℕ) : ℤ) := by
-      rw [h]; push_cast; rw [sq_abs]
-    exact_mod_cast hZ
-  have : Finite W.toAffine[(ℓ : ℤ)] :=
-    Nat.finite_of_card_ne_zero (by
-      rw [hcard]; exact pow_ne_zero _ (Int.natAbs_ne_zero.mpr hℓ0))
+  have : Finite W.toAffine[(ℓ : ℤ)] := Nat.finite_of_card_ne_zero (by
+    rw [natCard_torsion_eq W ℓ hℓ]; exact pow_ne_zero _ (Int.natAbs_ne_zero.mpr hℓ0))
   exact this
 
 omit [IsIntegrallyClosed (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing] in
