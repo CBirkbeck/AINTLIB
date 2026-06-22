@@ -22,8 +22,7 @@ open IsDedekindDomain
 
 namespace HasseWeil.WeilPairing
 
-variable {R R' : Type*} [CommRing R] [IsDomain R] [IsDedekindDomain R]
-  [CommRing R'] [IsDomain R'] [IsDedekindDomain R']
+variable {R R' : Type*} [CommRing R] [CommRing R']
 
 section IdealTransport
 
@@ -36,29 +35,6 @@ theorem map_le_map_iff_ringEquiv (Φ : R ≃+* R') (A B : Ideal R) :
     rwa [Ideal.comap_map_of_bijective Φ.toRingHom (EquivLike.bijective Φ),
       Ideal.comap_map_of_bijective Φ.toRingHom (EquivLike.bijective Φ)] at h2
   · exact Ideal.map_mono
-
-/-- `Ideal.map Φ p` is prime for a ring iso `Φ` and prime `p`. -/
-theorem map_prime_ringEquiv (Φ : R ≃+* R') (p : Ideal R) (hp : Prime p) :
-    Prime (Ideal.map Φ.toRingHom p) := by
-  have hpI : p.IsPrime := (Ideal.prime_iff_isPrime hp.ne_zero).mp hp
-  have hmap : (Ideal.map Φ.toRingHom p).IsPrime := Ideal.map_isPrime_of_equiv Φ
-  rw [Ideal.prime_iff_isPrime]
-  · exact hmap
-  · intro h
-    have hbot : p = ⊥ := by
-      have hle : Ideal.map Φ.toRingHom p ≤ Ideal.map Φ.toRingHom ⊥ := by
-        rw [Ideal.map_bot]; exact le_of_eq h
-      exact le_antisymm ((map_le_map_iff_ringEquiv Φ p ⊥).mp hle) bot_le
-    exact hp.ne_zero hbot
-
-/-- `Ideal.map Φ I` is nonzero for a ring iso `Φ` and `I ≠ ⊥`. -/
-theorem map_ne_bot_ringEquiv (Φ : R ≃+* R') (I : Ideal R) (hI : I ≠ ⊥) :
-    Ideal.map Φ.toRingHom I ≠ ⊥ := by
-  intro h
-  apply hI
-  have hle : Ideal.map Φ.toRingHom I ≤ Ideal.map Φ.toRingHom ⊥ := by
-    rw [Ideal.map_bot]; exact le_of_eq h
-  exact le_antisymm ((map_le_map_iff_ringEquiv Φ I ⊥).mp hle) bot_le
 
 /-- The divisibility `A ∣ B` transports under the ring iso `Φ` via `Ideal.mapHom`, both
 ways. -/
@@ -81,6 +57,31 @@ theorem pow_dvd_iff_map_ringEquiv (Φ : R ≃+* R') (p I : Ideal R) (n : ℕ) :
     Ideal.map Φ.toRingHom p ^ n ∣ Ideal.map Φ.toRingHom I ↔ p ^ n ∣ I := by
   rw [← Ideal.map_pow]
   exact map_dvd_iff_ringEquiv Φ (p ^ n) I
+
+/-- `Ideal.map Φ I` is nonzero for a ring iso `Φ` and `I ≠ ⊥`. -/
+theorem map_ne_bot_ringEquiv (Φ : R ≃+* R') (I : Ideal R) (hI : I ≠ ⊥) :
+    Ideal.map Φ.toRingHom I ≠ ⊥ := by
+  intro h
+  apply hI
+  have hle : Ideal.map Φ.toRingHom I ≤ Ideal.map Φ.toRingHom ⊥ := by
+    rw [Ideal.map_bot]; exact le_of_eq h
+  exact le_antisymm ((map_le_map_iff_ringEquiv Φ I ⊥).mp hle) bot_le
+
+variable [IsDedekindDomain R] [IsDedekindDomain R']
+
+/-- `Ideal.map Φ p` is prime for a ring iso `Φ` and prime `p`. -/
+theorem map_prime_ringEquiv (Φ : R ≃+* R') (p : Ideal R) (hp : Prime p) :
+    Prime (Ideal.map Φ.toRingHom p) := by
+  have hpI : p.IsPrime := (Ideal.prime_iff_isPrime hp.ne_zero).mp hp
+  have hmap : (Ideal.map Φ.toRingHom p).IsPrime := Ideal.map_isPrime_of_equiv Φ
+  rw [Ideal.prime_iff_isPrime]
+  · exact hmap
+  · intro h
+    have hbot : p = ⊥ := by
+      have hle : Ideal.map Φ.toRingHom p ≤ Ideal.map Φ.toRingHom ⊥ := by
+        rw [Ideal.map_bot]; exact le_of_eq h
+      exact le_antisymm ((map_le_map_iff_ringEquiv Φ p ⊥).mp hle) bot_le
+    exact hp.ne_zero hbot
 
 /-- Multiplicity is preserved by the ideal-lattice isomorphism `Ideal.map Φ`: the
 `Associates` count of `p` in the factorization of `I` equals the count of `Φ(p)` in
@@ -113,6 +114,8 @@ theorem count_map_ringEquiv (Φ : R ≃+* R') (p I : Ideal R) (hp : Prime p) (hI
 end IdealTransport
 
 section ValuationTransport
+
+variable [IsDedekindDomain R] [IsDedekindDomain R']
 
 /-- The integer adic valuation transports under a ring iso `Φ`: for height-one primes with
 `vQ.asIdeal = Ideal.map Φ vP.asIdeal`, `vQ.intValuation (Φ r) = vP.intValuation r`. -/
