@@ -403,11 +403,30 @@ theorem mem_plus_of_forall_spa_vle_one
         --     `J = Ideal.map P.A₀.subtype P.I` (Huber's `u|cΓ`; `restrictIdeal` preserves `v(x) > 1`
         --     since `v(x) ≥ 1 ∈ cΓ`, and keeps `v ≤ 1 on B⁺` as `≤ 1`/`0` — so HU-e(2)/(1b) transfer);
         --   • (c) `v ≤ 1 on A°°`: `B°° ⊆ B⁺` (open + integrally closed) + the proven `v ≤ 1 on B⁺`;
-        --   • (d) `IsInSpvAI (restrictIdeal v J) J`: `restrictIdeal_isInSpvAI` — ⚠ this bottoms at the
-        --     **documented project sorry `ofValuation_restrictIdeal_isInSpvAI`** (SpvAITopology.lean:484
-        --     = Wedhorn 7.4(ii)/7.5(2): the convex-subgroup cofinal/microbial dichotomy), one of the
-        --     spectral-machinery leaves. THIS is the single remaining bottom of the continuity.
-        -- LEAF — reduced to property (d) = Wedhorn 7.4(ii) dichotomy (`ofValuation_restrictIdeal_isInSpvAI`).
+        --   • (d) `IsInSpvAI (restrictIdealSingle v π) (π)`: ✅ **NOW AVAILABLE axiom-clean** as
+        --     `ofValuation_restrictIdealSingle_isInSpvAI` (SpvAITopology). The old general
+        --     `ofValuation_restrictIdeal_isInSpvAI` was FALSE (B2, 2026-06-22: `cGammaIdeal ≠`
+        --     Wedhorn Def 7.3); the faithful PRINCIPAL replacement is proven via Prop 1.20 + the
+        --     cofinal/microbial sub-lemmas (T-SPVAI-1/2/3, all axiom-clean).
+        -- WIRING RECIPE (T-SPVAI-4, all prerequisites confirmed available faithfully):
+        --   1. `haveI : IsTateRing (presheafValue D')` — reconstruct inline from
+        --      `presheafValue_{ringOfDef,idealOfDef,ringOfDef_isOpen,idealOfDef_fg,isAdic,topNilUnit}`
+        --      (all in PresheafTateStructure, upstream; NO noeth-`A₀`; the Wedhorn828
+        --      `presheafValue_isTateRing_faithful` is downstream so can't be imported).
+        --   2. `P := IsTateRing.principalPair (presheafValue D')`, `π := P.π`, `hπ := P.I_eq_span`.
+        --   3. by_cases `v(subtype π) = 0`: if `0`, `v` itself is in `Spv(A,(π))` (trivial cofinal
+        --      disjunct, `v(cπ)=0`) — `v` continuous directly via the criterion; else witness
+        --      `v' := ofValuation (restrictIdealSingle (valuation under v.tVR) (subtype π) hg)`.
+        --   4. continuity: `Spv.isContinuous_of_isInSpvAI_of_lt_one_principal P hπ v' h_in h_le h_lt`
+        --      with `h_in := ofValuation_restrictIdealSingle_isInSpvAI …` (match `span{subtype π} =
+        --      map P.I` via `Ideal.map_span`); `h_le` via `B°° ⊆ B⁺` + `restrictIdealSingle_le_one`;
+        --      `h_lt` (strict `<1` on `P.I`) — derive from topological nilpotence of `P.I` generators.
+        --   5. goals (1b) `v' ≤ 1 on B⁺` and (2) `v'(x) > 1`: the existing `v`-proofs (below) give
+        --      `v ≤ 1 on B⁺` / `v(x) > 1`; lift to `v'` via `restrictIdealSingle_le_one` /
+        --      `restrictIdealSingle_one_lt` (both proven, SpvAITopology) through the `ofValuation` /
+        --      `Compatible.vle_iff_le` bridge.
+        -- ⚠ This is a substantial witness restructure of the block below (case split + 3 goals re-
+        --   derived for `v'`); the `h_lt` strict-`<1`-on-`P.I` derivation is the one non-mechanical step.
         sorry
       · -- `v ≤ 1` on `B⁺` (Huber property (b)): `f ∈ B⁺ ⊆ R := B⁺[x⁻¹]`, so `s f ≤ 1` (`hs_le`),
         -- transported to `v` by the extension equivalence `s ≈ t ∘ (R ↪ B_x)` (`ht_equiv`).

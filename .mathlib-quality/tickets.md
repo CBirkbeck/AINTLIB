@@ -905,11 +905,28 @@ theorem restrictIdealSingle_isMicrobial_of_mem (w : Valuation A Γ₀) (g : A) (
 ---
 
 ### [T-SPVAI-4] Wire `restrictIdealSingle` into `mem_plus` continuity (HU-e)
-- **Status**: open
+- **Status**: in_progress (2026-06-22; infra DONE, witness restructure remaining)
 - **File**: `Adic spaces/FaithfulLocLift.lean`
 - **Depends on**: T-SPVAI-2, T-SPVAI-3
 - **Parallel**: no
 - **Type**: wiring (continuity discharge)
+
+#### Progress (2026-06-22)
+- ✅ Infra DONE: `restrictIdealSingle_le_one` + `restrictIdealSingle_one_lt` (apply lemmas,
+  SpvAITopology, axiom-clean); the faithful `ofValuation_restrictIdealSingle_isInSpvAI` (axiom-clean).
+- ✅ `IsTateRing (presheafValue D')` confirmed available faithfully UPSTREAM (reconstruct inline
+  from `presheafValue_{ringOfDef,idealOfDef,ringOfDef_isOpen,idealOfDef_fg,isAdic,topNilUnit}`,
+  all in PresheafTateStructure; the Wedhorn828 `…_faithful` is downstream/un-importable).
+- Full recipe written into the FaithfulLocLift:411 comment (case split on `v(subtype π)=0`,
+  criterion application, goal-lifting via the apply lemmas).
+- ⚠ **OPEN ROUTE QUESTION** (the one non-mechanical step): the continuity criterion
+  `isContinuous_of_isInSpvAI_of_lt_one_principal` uses `h_lt_one : ∀ a ∈ P.I, v(subtype a) < 1`
+  in its **microbial** branch. For the restricted witness `v'`, this is strict-`<1`-on-`P.I`,
+  which FAILS exactly when `v(subtype π) = 1` (π topnilp but a `v`-unit — possible for the
+  non-continuous extension `v`). RESOLUTION OPTIONS: (a) show `v'` always lands in the **cofinal**
+  branch (so `h_lt_one` is never invoked) — likely if `v(subtype π) < 1`; (b) a continuity
+  criterion not needing strict `<1`; (c) prove `v(subtype π) < 1` from the construction. Needs
+  analysis before the witness restructure can complete. (Possibly an `/expert-review` item.)
 
 #### Statement / goal
 Replace the HU-e reference to the **false** `ofValuation_restrictIdeal_isInSpvAI` (currently in
