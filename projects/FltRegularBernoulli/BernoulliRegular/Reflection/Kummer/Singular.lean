@@ -60,7 +60,7 @@ theorem eq_of_count_eq
     I = J := by
   rw [← FractionalIdeal.finprod_heightOneSpectrum_factorization' (K := K) hI,
       ← FractionalIdeal.finprod_heightOneSpectrum_factorization' (K := K) hJ]
-  exact finprod_congr (fun v => by rw [h v])
+  exact finprod_congr (fun v ↦ by rw [h v])
 
 omit [IsDomain R] in
 /-- `I^n = J^n` for nonzero fractional ideals over a Dedekind domain forces
