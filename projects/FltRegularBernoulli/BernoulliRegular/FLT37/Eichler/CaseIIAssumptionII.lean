@@ -1,4 +1,4 @@
-import BernoulliRegular.FLT37.Eichler.CaseIIThm95Discharge
+import BernoulliRegular.FLT37.Eichler.Reduction.VandermondeCollapseAndLemma99Bridge
 
 /-!
 # Washington Theorem 9.5 Case-II descent for `p = 37`: the discrete-log index step
