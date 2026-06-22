@@ -168,55 +168,66 @@ theorem addPullback_x_ne_const_of_pole (hxy : AddNonInverse W α) (c : F)
     rw [h_ord_c] at h_pole
     exact absurd h_pole (lt_irrefl _)
 
--- The four sub-lemmas below decompose the `px ∉ F(x_gen)` case of
+-- The sub-lemmas below decompose the `px ∉ F(x_gen)` case of
 -- `addPullback_x_quadratic_over_F`. This is pure field theory (Gauss's lemma plus
 -- the algebraic closure of `F` in `F(X)`), not a Silverman result.
+
+omit [DecidableEq F] [W.toAffine.IsElliptic] α in
+/-- Gauss's-lemma step: the `F`-minimal polynomial of an algebraic `α`, pushed to `F[X]`
+via the constant embedding, is irreducible. Monic with an irreducible image, shown via the
+`evalRingHom 0` retraction `F[X] → F` and leading-coefficient unit transport. -/
+private lemma minpoly_map_irreducible_over_polynomial
+    {α : KE} (h_alg : IsAlgebraic F α) :
+    Irreducible ((minpoly F α).map (algebraMap F (Polynomial F))) := by
+  have h_int : IsIntegral F α := h_alg.isIntegral
+  have h_monic : (minpoly F α).Monic := minpoly.monic h_int
+  have h_irr : Irreducible (minpoly F α) := minpoly.irreducible h_int
+  have h_monic_C : ((minpoly F α).map (algebraMap F (Polynomial F))).Monic :=
+    h_monic.map _
+  refine ⟨?_, ?_⟩
+  · have hnd_pos : 0 < (minpoly F α).natDegree :=
+      h_monic.natDegree_pos_of_not_isUnit h_irr.not_isUnit
+    have hnd_eq : ((minpoly F α).map (algebraMap F (Polynomial F))).natDegree =
+        (minpoly F α).natDegree :=
+      h_monic.natDegree_map _
+    exact Polynomial.not_isUnit_of_natDegree_pos _ (hnd_eq ▸ hnd_pos)
+  · intros a b hfact
+    let ev : Polynomial F →+* F := Polynomial.evalRingHom 0
+    have h_comp_id : ev.comp (algebraMap F (Polynomial F)) = RingHom.id F := by
+      ext c
+      change (Polynomial.evalRingHom 0).comp (algebraMap F (Polynomial F)) c = c
+      simp
+    have h_back : a.map ev * b.map ev = minpoly F α := by
+      have h1 : (a * b).map ev =
+          (minpoly F α).map (ev.comp (algebraMap F (Polynomial F))) := by
+        rw [← hfact, ← Polynomial.map_map]
+      rw [Polynomial.map_mul] at h1
+      rw [h1, h_comp_id, Polynomial.map_id]
+    have h_lc_prod : a.leadingCoeff * b.leadingCoeff = 1 := by
+      have h_mul_monic : (a * b).Monic := hfact.symm ▸ h_monic_C
+      have h_lc_mul : (a * b).leadingCoeff = a.leadingCoeff * b.leadingCoeff :=
+        Polynomial.leadingCoeff_mul a b
+      rw [h_mul_monic] at h_lc_mul
+      exact h_lc_mul.symm
+    have h_lc_a_unit : IsUnit a.leadingCoeff :=
+      IsUnit.of_mul_eq_one _ h_lc_prod
+    have h_lc_b_unit : IsUnit b.leadingCoeff :=
+      IsUnit.of_mul_eq_one_right _ h_lc_prod
+    rcases h_irr.isUnit_or_isUnit h_back.symm with hu | hu
+    · left
+      exact Polynomial.isUnit_of_isUnit_leadingCoeff_of_isUnit_map ev h_lc_a_unit hu
+    · right
+      exact Polynomial.isUnit_of_isUnit_leadingCoeff_of_isUnit_map ev h_lc_b_unit hu
 
 omit [DecidableEq F] [W.toAffine.IsElliptic] α in
 private lemma minpoly_F_monic_irreducible_in_F_x_gen
     {α : KE} (h_alg : IsAlgebraic F α) :
     Irreducible
       ((minpoly F α).map (algebraMap F (FractionRing (Polynomial F)))) := by
-  have h_int : IsIntegral F α := h_alg.isIntegral
-  have h_monic : (minpoly F α).Monic := minpoly.monic h_int
-  have h_irr : Irreducible (minpoly F α) := minpoly.irreducible h_int
   have h_monic_C : ((minpoly F α).map (algebraMap F (Polynomial F))).Monic :=
-    h_monic.map _
-  have h_step1 : Irreducible ((minpoly F α).map (algebraMap F (Polynomial F))) := by
-    refine ⟨?_, ?_⟩
-    · have hnd_pos : 0 < (minpoly F α).natDegree :=
-        h_monic.natDegree_pos_of_not_isUnit h_irr.not_isUnit
-      have hnd_eq : ((minpoly F α).map (algebraMap F (Polynomial F))).natDegree =
-          (minpoly F α).natDegree :=
-        h_monic.natDegree_map _
-      exact Polynomial.not_isUnit_of_natDegree_pos _ (hnd_eq ▸ hnd_pos)
-    · intros a b hfact
-      let ev : Polynomial F →+* F := Polynomial.evalRingHom 0
-      have h_comp_id : ev.comp (algebraMap F (Polynomial F)) = RingHom.id F := by
-        ext c
-        change (Polynomial.evalRingHom 0).comp (algebraMap F (Polynomial F)) c = c
-        simp
-      have h_back : a.map ev * b.map ev = minpoly F α := by
-        have h1 : (a * b).map ev =
-            (minpoly F α).map (ev.comp (algebraMap F (Polynomial F))) := by
-          rw [← hfact, ← Polynomial.map_map]
-        rw [Polynomial.map_mul] at h1
-        rw [h1, h_comp_id, Polynomial.map_id]
-      have h_lc_prod : a.leadingCoeff * b.leadingCoeff = 1 := by
-        have h_mul_monic : (a * b).Monic := hfact.symm ▸ h_monic_C
-        have h_lc_mul : (a * b).leadingCoeff = a.leadingCoeff * b.leadingCoeff :=
-          Polynomial.leadingCoeff_mul a b
-        rw [h_mul_monic] at h_lc_mul
-        exact h_lc_mul.symm
-      have h_lc_a_unit : IsUnit a.leadingCoeff :=
-        IsUnit.of_mul_eq_one _ h_lc_prod
-      have h_lc_b_unit : IsUnit b.leadingCoeff :=
-        IsUnit.of_mul_eq_one_right _ h_lc_prod
-      rcases h_irr.isUnit_or_isUnit h_back.symm with hu | hu
-      · left
-        exact Polynomial.isUnit_of_isUnit_leadingCoeff_of_isUnit_map ev h_lc_a_unit hu
-      · right
-        exact Polynomial.isUnit_of_isUnit_leadingCoeff_of_isUnit_map ev h_lc_b_unit hu
+    (minpoly.monic h_alg.isIntegral).map _
+  have h_step1 : Irreducible ((minpoly F α).map (algebraMap F (Polynomial F))) :=
+    minpoly_map_irreducible_over_polynomial h_alg
   have h_step2 :
       Irreducible
         (((minpoly F α).map (algebraMap F (Polynomial F))).map
