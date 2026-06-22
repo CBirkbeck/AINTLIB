@@ -56,10 +56,9 @@ lemma sigmaOfCharacterUnit_smul_gaussSumLift
           simpa [AlgEquiv.smul_def] using hcomp
     _ = gaussSum (χ ^ (b : ZMod (p - 1)).val) (ZMod.stdAddChar : AddChar (ZMod p) ℂ) :=
           characterSideEmbedding_gaussSumLift (p := p) (L := L) b χ
-    _ = stickelbergerEmbedding p L (gaussSumLift p L (χ ^ (b : ZMod (p - 1)).val)) := by
-          symm
-          exact stickelbergerEmbedding_gaussSumLift (p := p) (L := L)
-            (χ ^ (b : ZMod (p - 1)).val)
+    _ = stickelbergerEmbedding p L (gaussSumLift p L (χ ^ (b : ZMod (p - 1)).val)) :=
+          (stickelbergerEmbedding_gaussSumLift (p := p) (L := L)
+            (χ ^ (b : ZMod (p - 1)).val)).symm
 
 /-- The character-side Galois lift transports the integral Gauss-sum lift to the
 integral lift of the transformed character. -/
@@ -101,8 +100,8 @@ lemma stickelbergerEmbedding_sigmaOfUnit_smul_gaussSumLiftRootSum
     change stickelbergerEmbedding p L
         (((sigmaOfUnit (p := p) L a • gaussSumLiftCharacterRoot (p := p) L : 𝓞 L) : L)) =
       stickelbergerComplexCharacterRoot (p := p)
-    rw [sigmaOfUnit_smul_gaussSumLiftCharacterRoot]
-    rw [stickelbergerEmbedding_gaussSumLiftCharacterRoot]
+    rw [sigmaOfUnit_smul_gaussSumLiftCharacterRoot,
+      stickelbergerEmbedding_gaussSumLiftCharacterRoot]
   have haddroot :
       stickelbergerEmbedding p L ((sigmaOfUnit (p := p) L a) ζadd) =
         (stickelbergerComplexRoot p ^ (p - 1)) ^ (a : ZMod p).val := by
@@ -217,13 +216,11 @@ lemma stickelbergerEmbedding_sigmaOfUnit_smul_gaussSumLiftRootSum
                       ((((characterUnitGenerator (p := p)) ^ (m : ℕ) : (ZMod p)ˣ) : ZMod p)) := by
                     rw [map_mul, hpow_char', hpow_add', map_pow, map_pow, hcharroot, haddroot,
                       ← hchar, ← hadd]
-    _ = ∑ x : ZMod p, χ x * ((ZMod.stdAddChar : AddChar (ZMod p) ℂ).mulShift a) x := by
-          symm
-          exact sum_zmod_eq_sum_characterUnitGeneratorPowers (p := p)
+    _ = ∑ x : ZMod p, χ x * ((ZMod.stdAddChar : AddChar (ZMod p) ℂ).mulShift a) x :=
+          (sum_zmod_eq_sum_characterUnitGeneratorPowers (p := p)
             (F := fun x : ZMod p =>
-              χ x * ((ZMod.stdAddChar : AddChar (ZMod p) ℂ).mulShift a) x) hF0
-    _ = gaussSum χ ((ZMod.stdAddChar : AddChar (ZMod p) ℂ).mulShift a) := by
-          rfl
+              χ x * ((ZMod.stdAddChar : AddChar (ZMod p) ℂ).mulShift a) x) hF0).symm
+    _ = gaussSum χ ((ZMod.stdAddChar : AddChar (ZMod p) ℂ).mulShift a) := rfl
 
 /-- The additive-side Galois lift acts on `gaussSumLift` by the lifted scalar
 `χ⁻¹(a)`. -/
