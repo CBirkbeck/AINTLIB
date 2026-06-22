@@ -31,7 +31,7 @@ lemma h_formula_cyclotomic_complex (hp_odd' : p ≠ 2) :
     ((h K : ℕ) : ℂ) =
       ((NumberField.dedekindZeta_residue K : ℝ) : ℂ) *
         cyclotomicClassNumberFactor (p := p) (K := K) := by
-  simpa [cyclotomicClassNumberFactor] using congrArg (fun x : ℝ => (x : ℂ))
+  simpa [cyclotomicClassNumberFactor] using congrArg (fun x : ℝ ↦ (x : ℂ))
     (h_formula_cyclotomic (p := p) (K := K) hp_odd')
 
 def maximalRealSubfieldClassNumberFactor : ℂ :=
@@ -45,7 +45,7 @@ lemma hPlus_formula_complex :
     ((hPlus K : ℕ) : ℂ) =
       ((NumberField.dedekindZeta_residue (NumberField.maximalRealSubfield K) : ℝ) : ℂ) *
         maximalRealSubfieldClassNumberFactor (K := K) := by
-  simpa [maximalRealSubfieldClassNumberFactor] using congrArg (fun x : ℝ => (x : ℂ))
+  simpa [maximalRealSubfieldClassNumberFactor] using congrArg (fun x : ℝ ↦ (x : ℂ))
     (hPlus_formula (K := K))
 
 theorem maximalRealSubfieldClassNumberFactor_eq_explicit (hp_odd' : p ≠ 2) :
@@ -155,7 +155,7 @@ theorem cyclotomicRelativeLValueCoefficient_eq_explicit
           (2 ^ ((p - 1) / 2 : ℕ) * Units.regulator L)) =
       ((((2 * p : ℕ) : ℝ) * Real.sqrt ((p : ℝ) ^ (p - 2))) /
         ((2 * Real.pi) ^ ((p - 1) / 2) * Real.sqrt ((p : ℝ) ^ ((p - 3) / 2))) : ℝ) by
-    simpa [Complex.ofReal_div] using congrArg (fun x : ℝ => (x : ℂ)) hreal
+    simpa [Complex.ofReal_div] using congrArg (fun x : ℝ ↦ (x : ℂ)) hreal
   rw [hreg, hpow_two]
   field_simp [hLreg_ne, hsqrt_ne, hpow_pi_ne, hpow_two_ne]
 
@@ -188,7 +188,7 @@ theorem cyclotomicRelativeLValueCoefficient_eq_final
           ((2 * Real.pi) ^ a * Real.sqrt ((p : ℝ) ^ b))) =
         ((((2 * p : ℕ) : ℝ) * Real.sqrt ((p : ℝ) ^ a)) / (2 * Real.pi) ^ a : ℝ) by
     rw [cyclotomicRelativeLValueCoefficient_eq_explicit (p := p) (K := K) hp_odd']
-    simpa [a, b, Complex.ofReal_div] using congrArg (fun x : ℝ => (x : ℂ)) hreal
+    simpa [a, b, Complex.ofReal_div] using congrArg (fun x : ℝ ↦ (x : ℂ)) hreal
   rw [hsqrt_split]
   field_simp [hsqrtB_ne, hpow_pi_ne]
 
