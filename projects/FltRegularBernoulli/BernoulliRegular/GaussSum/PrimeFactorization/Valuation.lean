@@ -44,11 +44,8 @@ local notation "𝔭" => (Ideal.span ({(p : ℤ)} : Set ℤ))
 /-- Any prime of `𝓞_L` lying over `(p)` is nonzero. -/
 lemma primeAboveP_ne_bot {P : Ideal (𝓞 L)} [P.LiesOver 𝔭] : P ≠ ⊥ := by
   intro hbot
-  have h_over :
-      𝔭 = P.under ℤ :=
-    Ideal.LiesOver.over (p := 𝔭) (P := P)
   have hbotp : (Ideal.span ({(p : ℤ)} : Set ℤ) : Ideal ℤ) = ⊥ := by
-    simpa [hbot] using h_over
+    simpa [hbot] using Ideal.LiesOver.over (p := 𝔭) (P := P)
   exact Ideal.span_singleton_eq_bot.not.mpr
     (show (p : ℤ) ≠ 0 by exact_mod_cast hp.out.ne_zero) hbotp
 
@@ -87,12 +84,13 @@ lemma count_primeAboveP_span_p {P : Ideal (𝓞 L)} [P.IsPrime] [P.LiesOver 𝔭
         Ideal.span ({(p : 𝓞 L)} : Set (𝓞 L)) := by
     simpa using Ideal.map_span (algebraMap ℤ (𝓞 L)) ({(p : ℤ)} : Set ℤ)
   have hmap_ne_bot : Ideal.map (algebraMap ℤ (𝓞 L)) 𝔭 ≠ ⊥ := by
-    rw [show 𝔭 = Ideal.span ({(p : ℤ)} : Set ℤ) by rfl, hmap]
+    rw [hmap]
     exact Ideal.span_singleton_eq_bot.not.mpr
       (show (p : 𝓞 L) ≠ 0 by exact_mod_cast hp.out.ne_zero)
   have hram :
       Ideal.ramificationIdx 𝔭 P = p - 1 := by
-    rw [Ideal.ramificationIdx_eq_ramificationIdx' (q := P) (p := 𝔭) (hp := by simp [hp.out.ne_zero])]
+    rw [Ideal.ramificationIdx_eq_ramificationIdx' (q := P) (p := 𝔭)
+      (hp := by simp [hp.out.ne_zero])]
     simpa using
       (IsCyclotomicExtension.Rat.ramificationIdx_eq
         (p := p) (n := N) (k := 0) (m := p - 1) (K := L) (P := P) (by simp)
@@ -101,7 +99,7 @@ lemma count_primeAboveP_span_p {P : Ideal (𝓞 L)} [P.IsPrime] [P.LiesOver 𝔭
   rw [Ideal.IsDedekindDomain.ramificationIdx_eq_normalizedFactors_count
       (R := ℤ) (S := 𝓞 L) (p := 𝔭) (P := P) hmap_ne_bot inferInstance
       (primeAboveP_ne_bot (p := p) (L := L) (P := P))] at hram
-  rw [show 𝔭 = Ideal.span ({(p : ℤ)} : Set ℤ) by rfl, hmap] at hram
+  rw [hmap] at hram
   simpa using hram
 
 /-- The exponent of a chosen prime above `(p)` in the principal ideal
@@ -117,10 +115,7 @@ lemma primeAbovePExponent_add_inv_eq_pred
         primeAbovePExponent (p := p) (L := L) P χ⁻¹ = p - 1 := by
   let Iχ : Ideal (𝓞 L) := gaussSumIdeal (p := p) (L := L) χ
   let Iχinv : Ideal (𝓞 L) := gaussSumIdeal (p := p) (L := L) χ⁻¹
-  have hχinv : χ⁻¹ ≠ 1 := by
-    intro h
-    apply hχ
-    simpa using inv_eq_one.mp h
+  have hχinv : χ⁻¹ ≠ 1 := inv_ne_one.mpr hχ
   have hIχ : Iχ ≠ ⊥ := gaussSumIdeal_ne_bot (p := p) (L := L) hχ
   have hIχinv : Iχinv ≠ ⊥ := gaussSumIdeal_ne_bot (p := p) (L := L) hχinv
   have hcount :
@@ -131,7 +126,7 @@ lemma primeAbovePExponent_add_inv_eq_pred
               (Ideal.span ({(p : 𝓞 L)} : Set (𝓞 L)))).count P := by
                 simpa [Iχ, Iχinv, gaussSumIdeal] using
                   congrArg
-                    (fun I : Ideal (𝓞 L) =>
+                    (fun I : Ideal (𝓞 L) ↦
                       (UniqueFactorizationMonoid.normalizedFactors I).count P)
                     (gaussSum_ideal_mul_inv_eq_span_p (p := p) (L := L) hχ)
       _ = p - 1 := count_primeAboveP_span_p (p := p) (L := L) (P := P)
