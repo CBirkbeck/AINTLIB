@@ -47,14 +47,7 @@ theorem one_sub_fourierPow_complement_eq_negI_mul_exp_mul_doubleSin
             simpa [a, S, hhalf] using
               (BernoulliRegular.one_sub_exp_ofReal_mul_I (2 * Real.pi * (k : ℝ) / p))
     _ = (-Complex.I) * Complex.exp (a * Complex.I) * S := by
-            rw [Complex.exp_mul_I]
-            have hcos : Real.cos (a - Real.pi / 2) = Real.sin a := by
-              rw [Real.cos_sub]
-              simp
-            have hsin : Real.sin (a - Real.pi / 2) = -Real.cos a := by
-              rw [Real.sin_sub]
-              simp
-            rw [hcos, hsin]
+            rw [Complex.exp_mul_I, Real.cos_sub_pi_div_two, Real.sin_sub_pi_div_two]
             apply Complex.ext <;>
             simp [S, mul_add, add_mul, mul_assoc, mul_left_comm, mul_comm]
     _ = (-Complex.I) * Complex.exp ((Real.pi * (k : ℝ) / p) * Complex.I) *
@@ -71,9 +64,6 @@ theorem one_sub_fourierPow_complement_pow_order_eq_negI_pow_mul_negOnePow_mul_do
   rw [one_sub_fourierPow_complement_eq_negI_mul_exp_mul_doubleSin (p := p) hk0 hkp, mul_assoc,
     mul_pow, mul_pow]
   have hexp : Complex.exp a ^ p = (-1 : ℂ) ^ k := by
-    have hExpPi : Complex.exp (Real.pi * Complex.I) = (-1 : ℂ) := by
-      rw [Complex.exp_mul_I]
-      simp
     rw [← Complex.exp_nat_mul]
     have hp0 : (p : ℝ) ≠ 0 := by
       exact_mod_cast hp.out.ne_zero
@@ -91,7 +81,7 @@ theorem one_sub_fourierPow_complement_pow_order_eq_negI_pow_mul_negOnePow_mul_do
             rw [← mul_assoc]
       _ = Complex.exp (Real.pi * Complex.I) ^ k := by
             rw [Complex.exp_nat_mul]
-      _ = (-1 : ℂ) ^ k := by rw [hExpPi]
+      _ = (-1 : ℂ) ^ k := by rw [Complex.exp_pi_mul_I]
   have hfinal := congrArg
       (fun x : ℂ => (-Complex.I) ^ p *
         (x * (((2 * Real.sin (Real.pi * (k : ℝ) / p) : ℝ) : ℂ) ^ p))) hexp
@@ -151,8 +141,7 @@ theorem weightedPairFactor_eq_negI_pow_mul_root_mul_doubleSin_pow
           (fourierBaseRoot (p := p)) ^ (k * (p - k)) *
           (((2 * Real.sin (Real.pi * (k : ℝ) / p) : ℝ) : ℂ) ^ p) := by
             have hsign : (-1 : ℂ) ^ k * (-1 : ℂ) ^ k = 1 := by
-              rw [← pow_add]
-              rw [show k + k = 2 * k by ring, pow_mul]
+              rw [← mul_pow]
               simp
             rw [show (fourierBaseRoot (p := p) ^ (k * (p - k))) *
                 ((-1 : ℂ) ^ k * (((-Complex.I) ^ p * (-1 : ℂ) ^ k) *
