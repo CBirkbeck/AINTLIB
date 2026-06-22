@@ -1,3 +1,3 @@
 module
 
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CrossRingBridge.Part2.PhiDescentIndexOneCovariance
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CrossRingBridge.PhiDescentCovariance.PhiDescentIndexOneCovariance

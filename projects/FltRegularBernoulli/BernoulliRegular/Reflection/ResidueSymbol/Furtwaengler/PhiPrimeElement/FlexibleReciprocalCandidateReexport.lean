@@ -1,3 +1,3 @@
 module
 
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PhiPrimeElement.Part2.FlexibleReciprocalCandidateAssembly
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PhiPrimeElement.K2BundledInterface.FlexibleReciprocalCandidateAssembly
