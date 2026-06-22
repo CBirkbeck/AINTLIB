@@ -101,8 +101,7 @@ private theorem mem_cotangentIdeal_iff_factor_pow_one_eq_zero (q : R ⧸ I ^ 2) 
         (Ideal.Quotient.mk (I ^ 2) r) = 0
     rw [Ideal.mk_mem_cotangentIdeal]
     change r ∈ I ↔ Ideal.Quotient.mk (I ^ 1) r = 0
-    rw [Ideal.Quotient.eq_zero_iff_mem]
-    rw [pow_one]
+    rw [Ideal.Quotient.eq_zero_iff_mem, pow_one]
 
 end QuotientAux
 
@@ -271,8 +270,7 @@ theorem completedLocalCyclotomicUniformizer_ne_zero :
 
 theorem completedLocalCyclotomicMaximalIdeal_isPrincipal :
     Submodule.IsPrincipal (completedLocalCyclotomicMaximalIdeal p K) := by
-  rw [completedLocalCyclotomicMaximalIdeal_eq_span_uniformizer]
-  rw [Submodule.isPrincipal_iff]
+  rw [completedLocalCyclotomicMaximalIdeal_eq_span_uniformizer, Submodule.isPrincipal_iff]
   exact ⟨completedLocalCyclotomicUniformizer p K, rfl⟩
 
 theorem completedLocalCyclotomicMaximalIdeal_ne_bot :
@@ -294,8 +292,7 @@ theorem completedLocalCyclotomicMaximalIdeal_pow_le_ker_evalₐ (n : ℕ) :
   let M := localCyclotomicMaximalIdeal p K
   change (Ideal.map (algebraMap R S) M) ^ n ≤
     RingHom.ker (AdicCompletion.evalₐ M n).toRingHom
-  rw [← Ideal.map_pow]
-  rw [Ideal.map_le_iff_le_comap]
+  rw [← Ideal.map_pow, Ideal.map_le_iff_le_comap]
   intro x hx
   rw [Ideal.mem_comap, RingHom.mem_ker]
   simpa [R, M] using (Ideal.Quotient.eq_zero_iff_mem.mpr hx :
@@ -340,7 +337,7 @@ noncomputable def completedQuotientSquareEquivLocalQuotientSquare :
   let Mhat : Ideal S := completedLocalCyclotomicMaximalIdeal p K
   let f : S → R ⧸ M ^ 2 := AdicCompletion.evalₐ M 2
   let e : S ⧸ Mhat ^ 2 → R ⧸ M ^ 2 :=
-    fun q => Quotient.liftOn' q f (by
+    fun q ↦ Quotient.liftOn' q f (by
       intro a b h
       rw [← sub_eq_zero, ← map_sub]
       have hker : a - b ∈ RingHom.ker (AdicCompletion.evalₐ M 2).toRingHom := by
@@ -356,8 +353,8 @@ noncomputable def completedQuotientSquareEquivLocalQuotientSquare :
     | h b =>
       change f a = f b at hxy
       apply Ideal.Quotient.eq.mpr
-      rw [completedLocalCyclotomicMaximalIdeal_pow_eq_ker_evalₐ (p := p) (K := K) 2]
-      rw [RingHom.mem_ker, map_sub]
+      rw [completedLocalCyclotomicMaximalIdeal_pow_eq_ker_evalₐ (p := p) (K := K) 2,
+        RingHom.mem_ker, map_sub]
       exact sub_eq_zero.mpr hxy
   · intro y
     rcases AdicCompletion.surjective_evalₐ M 2 y with ⟨x, hx⟩
@@ -383,13 +380,11 @@ noncomputable def localQuotientSquareToCompletedQuotientSquare :
   let M := localCyclotomicMaximalIdeal p K
   let Mhat : Ideal S := completedLocalCyclotomicMaximalIdeal p K
   let g : R ⧸ M ^ 2 → S ⧸ Mhat ^ 2 :=
-    fun q => Quotient.liftOn' q
-      (fun r => Ideal.Quotient.mk (Mhat ^ 2) (algebraMap R S r))
+    fun q ↦ Quotient.liftOn' q
+      (fun r ↦ Ideal.Quotient.mk (Mhat ^ 2) (algebraMap R S r))
       (by
         intro a b h
-        rw [Ideal.Quotient.eq]
-        rw [← map_sub]
-        rw [← Ideal.map_pow]
+        rw [Ideal.Quotient.eq, ← map_sub, ← Ideal.map_pow]
         exact Ideal.mem_map_of_mem (algebraMap R S)
           ((Submodule.quotientRel_def (p := M ^ 2)).mp h))
   let e := completedQuotientSquareEquivLocalQuotientSquare (p := p) (K := K)
@@ -432,9 +427,8 @@ theorem completedQuotientSquareEquivLocalQuotientSquare_mem_cotangentIdeal
   rcases hq with ⟨x, hx, rfl⟩
   change completedQuotientSquareEquivLocalQuotientSquare (p := p) (K := K)
       (Ideal.Quotient.mk (Mhat ^ 2) x) ∈ M.cotangentIdeal
-  rw [completedQuotientSquareEquivLocalQuotientSquare_mk]
-  rw [mem_cotangentIdeal_iff_factor_pow_one_eq_zero]
-  rw [factor_evalₐ_pow_le M (by decide : 1 ≤ 2)]
+  rw [completedQuotientSquareEquivLocalQuotientSquare_mk,
+    mem_cotangentIdeal_iff_factor_pow_one_eq_zero, factor_evalₐ_pow_le M (by decide : 1 ≤ 2)]
   have hxker : x ∈ RingHom.ker (AdicCompletion.evalₐ M 1).toRingHom := by
     rw [← completedLocalCyclotomicMaximalIdeal_pow_eq_ker_evalₐ (p := p) (K := K) 1]
     simpa [Mhat] using hx
@@ -454,8 +448,7 @@ theorem localQuotientSquareToCompletedQuotientSquare_mem_cotangentIdeal
   | h r =>
     change localQuotientSquareToCompletedQuotientSquare (p := p) (K := K)
         (Ideal.Quotient.mk (M ^ 2) r) ∈ Mhat.cotangentIdeal
-    rw [localQuotientSquareToCompletedQuotientSquare_mk]
-    rw [Ideal.mk_mem_cotangentIdeal]
+    rw [localQuotientSquareToCompletedQuotientSquare_mk, Ideal.mk_mem_cotangentIdeal]
     have hr : r ∈ M :=
       (Ideal.mk_mem_cotangentIdeal (I := M) (x := r)).mp hq
     exact Ideal.mem_map_of_mem (algebraMap R S) hr
@@ -554,8 +547,8 @@ theorem natCast_prime_dvd_completedLocalCyclotomicUniformizer_pow_pred :
   have hmem : completedLocalCyclotomicUniformizer p K ^ (p - 1) ∈
       Ideal.span ({(p : completedLocalCyclotomicRing p K)} :
         Set (completedLocalCyclotomicRing p K)) := by
-    rw [span_natCast_prime_eq_completedLocalCyclotomicMaximalIdeal_pow_pred (p := p) (K := K)]
-    rw [completedLocalCyclotomicMaximalIdeal_pow_eq_span_uniformizer_pow]
+    rw [span_natCast_prime_eq_completedLocalCyclotomicMaximalIdeal_pow_pred (p := p) (K := K),
+      completedLocalCyclotomicMaximalIdeal_pow_eq_span_uniformizer_pow]
     exact Ideal.mem_span_singleton_self (completedLocalCyclotomicUniformizer p K ^ (p - 1))
   exact Ideal.mem_span_singleton.mp hmem
 
@@ -617,16 +610,16 @@ theorem completedLocalCyclotomicMaximalIdeal_pow_add_pred_eq_mul_span_natCast (n
       completedLocalCyclotomicMaximalIdeal p K ^ n *
         Ideal.span ({(p : completedLocalCyclotomicRing p K)} :
           Set (completedLocalCyclotomicRing p K)) := by
-  rw [pow_add]
-  rw [← span_natCast_prime_eq_completedLocalCyclotomicMaximalIdeal_pow_pred (p := p) (K := K)]
+  rw [pow_add,
+    ← span_natCast_prime_eq_completedLocalCyclotomicMaximalIdeal_pow_pred (p := p) (K := K)]
 
 theorem completedLocalCyclotomicMaximalIdeal_pow_add_pred_eq_span_natCast_mul (n : ℕ) :
     completedLocalCyclotomicMaximalIdeal p K ^ (n + (p - 1)) =
       Ideal.span ({(p : completedLocalCyclotomicRing p K)} :
         Set (completedLocalCyclotomicRing p K)) *
         completedLocalCyclotomicMaximalIdeal p K ^ n := by
-  rw [completedLocalCyclotomicMaximalIdeal_pow_add_pred_eq_mul_span_natCast (p := p) (K := K)]
-  rw [mul_comm]
+  rw [completedLocalCyclotomicMaximalIdeal_pow_add_pred_eq_mul_span_natCast (p := p) (K := K),
+    mul_comm]
 
 theorem exists_natCast_prime_mul_eq_of_mem_completedLocalCyclotomicMaximalIdeal_pow_add_pred
     {n : ℕ} {x : completedLocalCyclotomicRing p K}
@@ -694,8 +687,7 @@ theorem completedPrincipalUnitSubgroup_mono {m n : ℕ} (h : n ≤ m) :
 /-- The completed distinguished cyclotomic root is a principal unit. -/
 theorem completedLocalCyclotomicZetaUnit_mem_completedPrincipalUnitSubgroup_one :
     completedLocalCyclotomicZetaUnit p K ∈ completedPrincipalUnitSubgroup p K 1 := by
-  rw [mem_completedPrincipalUnitSubgroup_iff]
-  rw [pow_one]
+  rw [mem_completedPrincipalUnitSubgroup_iff, pow_one]
   let R := localCyclotomicRing p K
   let S := completedLocalCyclotomicRing p K
   let M := localCyclotomicMaximalIdeal p K
@@ -781,12 +773,12 @@ noncomputable def completedPrincipalUnitFirstGradedHom :
   let M := completedLocalCyclotomicMaximalIdeal p K
   let toOneUnits : completedPrincipalUnitSubgroup p K 1 →* Ideal.oneUnitsSubgroup M :=
   {
-    toFun := fun u => ⟨(u : completedLocalCyclotomicUnitGroup p K), by
+    toFun := fun u ↦ ⟨(u : completedLocalCyclotomicUnitGroup p K), by
       have hu := (mem_completedPrincipalUnitSubgroup_iff (p := p) (K := K) (n := 1)
         (u := (u : completedLocalCyclotomicUnitGroup p K))).mp u.2
       simpa [M] using hu⟩
     map_one' := rfl
-    map_mul' := fun _ _ => rfl
+    map_mul' := fun _ _ ↦ rfl
   }
   (Ideal.oneUnitsCotangentHom M).comp toOneUnits
 
@@ -818,8 +810,7 @@ theorem completedPrincipalUnitFirstGradedHom_ker :
       (completedPrincipalUnitSubgroup p K 2).subgroupOf
         (completedPrincipalUnitSubgroup p K 1) := by
   ext u
-  rw [mem_completedPrincipalUnitFirstGradedHom_ker]
-  rw [Subgroup.mem_subgroupOf]
+  rw [mem_completedPrincipalUnitFirstGradedHom_ker, Subgroup.mem_subgroupOf]
 
 theorem completedPrincipalUnitFirstGradedHom_surjective :
     Function.Surjective (completedPrincipalUnitFirstGradedHom p K) := by
