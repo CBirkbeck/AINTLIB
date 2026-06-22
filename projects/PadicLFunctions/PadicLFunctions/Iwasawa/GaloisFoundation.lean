@@ -954,6 +954,19 @@ theorem isUnramifiedOutsideP_sigmaL (n : ℕ) (σ : Om →ₐ[ℚ] Om) {L : Inte
   -- `e(·|ℤ)` is `eOI`-invariant; `β = eOI|𝓞F⁺ₙ` relabels primes of `𝓞F⁺ₙ` preserving `e(·|ℤ)`).
   have hPQ : (Ideal.under (𝓞 (FPlus p n)) P).ramificationIdx P
       = (Ideal.under (𝓞 (FPlus p n)) Q).ramificationIdx Q := by
+    -- ℤ-tower multiplicativity (instances all resolve): e(·|ℤ) = e(under|ℤ) · e(·|𝓞F⁺ₙ).
+    have e1 := Ideal.ramificationIdx_algebra_tower' (R := ℤ)
+      ((Ideal.under (𝓞 (FPlus p n)) P).under ℤ) (Ideal.under (𝓞 (FPlus p n)) P) P
+    have e2 := Ideal.ramificationIdx_algebra_tower' (R := ℤ)
+      ((Ideal.under (𝓞 (FPlus p n)) Q).under ℤ) (Ideal.under (𝓞 (FPlus p n)) Q) Q
+    -- Remaining (the genuine β-twist core), all mathlib-tooled:
+    --  hℓ : (P.under𝓞F⁺ₙ).under ℤ = (Q.under𝓞F⁺ₙ).under ℤ  (= P.under ℤ = Q.under ℤ, eOI is ℤ-linear)
+    --  hz : e(P|ℤ) = e(Q|ℤ)        via `ramificationIdx_map_eq` (eOI a ℤ-AlgEquiv; Q = map eOI P)
+    --  hb : e(P.under𝓞F⁺ₙ|ℤ) = e(Q.under𝓞F⁺ₙ|ℤ)  — `𝓞F⁺ₙ/ℤ` Galois (F⁺ₙ/ℚ Galois), the two primes
+    --       lie over the same ℓ, so `ramificationIdx_eq_of_isGaloisGroup` (or β = mapRingEquiv of
+    --       (omAut σ).restrictNormal F⁺ₙ + `ramificationIdx_map_eq`); needs the Gal-action on 𝓞F⁺ₙ.
+    --  hne : e(P.under𝓞F⁺ₙ|ℤ) ≠ 0  (ram-idx pos for a prime over a nonzero base prime)
+    --  then `Nat.eq_of_mul_eq_mul_left hne` on e1/e2/hz/hb gives the goal.
     sorry
   rw [hPQ]; exact hQ1
 
