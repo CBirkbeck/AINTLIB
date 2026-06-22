@@ -54,7 +54,7 @@ theorem rawGaussProduct_rhs_of_mod_four_eq_one
         _ = (p : ℝ) ^ m := by
               rw [Real.sqrt_sq_eq_abs]
               simp
-    simpa [Complex.ofReal_pow] using congrArg (fun x : ℝ => (x : ℂ)) hsqrt_real
+    simpa [Complex.ofReal_pow] using congrArg (fun x : ℝ ↦ (x : ℂ)) hsqrt_real
   calc
     (-(p : ℂ)) ^ m = ((-1 : ℂ) ^ m) * (p : ℂ) ^ m := by
       rw [show (-(p : ℂ)) = (-1 : ℂ) * (p : ℂ) by ring, mul_pow]
@@ -105,7 +105,7 @@ theorem rawGaussProduct_rhs_of_mod_four_eq_three
         _ = (p : ℝ) ^ m * Real.sqrt p := by rw [Real.sqrt_sq_eq_abs]; simp
         _ = Real.sqrt p * (p : ℝ) ^ m := by ring
     simpa [Complex.ofReal_mul, Complex.ofReal_pow] using
-      congrArg (fun x : ℝ => (x : ℂ)) hsqrt_real
+      congrArg (fun x : ℝ ↦ (x : ℂ)) hsqrt_real
   calc
     (Complex.I * (Real.sqrt p : ℂ)) * (-(p : ℂ)) ^ m =
         (Complex.I * (Real.sqrt p : ℂ)) * (((-1 : ℂ) ^ m) * (p : ℂ) ^ m) := by
@@ -119,7 +119,7 @@ Gauss-product formula used downstream. -/
 theorem rawGaussProduct
     (hp_odd' : p ≠ 2) :
     Finset.prod (oddCharacters (p := p))
-        (fun χ => gaussSum χ (ZMod.stdAddChar (N := p))) =
+        (fun χ ↦ gaussSum χ (ZMod.stdAddChar (N := p))) =
       (Complex.I ^ ((p - 1) / 2)) *
         (((Real.sqrt ((p : ℝ) ^ ((p - 1) / 2)) : ℝ) : ℂ)) := by
   by_cases hp₄ : p % 4 = 1
