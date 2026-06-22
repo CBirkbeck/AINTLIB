@@ -31,7 +31,6 @@ special case.
   a family of quadratic-form degree witnesses.
 * `hasse_bound_of_t_witness` — `|#E(F_q) − q − 1| ≤ 2√q` given both witness
   families.
-* `hasse_bound_sq_of_t_witness` — integer-form variant `(#E(F_q) − q − 1)² ≤ 4q`.
 
 ## References
 * [Silverman, *The Arithmetic of Elliptic Curves*], V.1.1.

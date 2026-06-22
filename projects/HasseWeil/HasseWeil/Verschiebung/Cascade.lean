@@ -262,8 +262,7 @@ theorem verschiebungIsog_isDualOf_frobenius_q_three_char_three
 
 The Hasse-Weil bound `|#E(F_q) - q - 1| ≤ 2√q` for q=3 char=3.
 
-Same structural shape as `hasse_bound_witness_parametric_assembled`
-(q=2 char=2 milestone, Session 24): the bound takes the standard
+Same structural shape as the q=2 char=2 milestone (Session 24): the bound takes the standard
 witness-parametric form, with q=3-specific specializations in the
 constraints (`[CharP K 3]`, `Fintype.card K = 3`).
 
@@ -329,9 +328,8 @@ theorem verschiebungIsog_isDualOf_frobenius_q_seven_char_seven
 
 /-! ### Parametric lift — one Hasse-Weil bound, all (q, char) pairs
 
-The Hasse-Weil bound is mathematically ONE theorem. The existing
-`hasse_bound_witness_parametric_assembled` (30f2f43) is already
-parametric in `Fintype.card K` — taking only `(hq : 2 ≤ Fintype.card K)`
+The Hasse-Weil bound is mathematically ONE theorem, parametric in
+`Fintype.card K` — taking only `(hq : 2 ≤ Fintype.card K)`
 and the standard witnesses (separability, finite-dim, sepDeg = pointCount,
 signed QF). NO prime constraint.
 

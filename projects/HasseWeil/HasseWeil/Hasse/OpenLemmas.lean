@@ -48,8 +48,7 @@ DELETED — each was superseded by a shipped axiom-clean theorem (see `GapSpines
 This file retains the PROVEN content: `Isogeny_eq_of_components`, L1', L7/L7a, the L10
 witness-parametric scaffold, the Miller wrappers L11a-f, L12b, L13, L14,
 `Polynomial.scalarExtensionEquiv` (now discharged via mathlib), the `witness_pc_*` lemmas,
-and the `HasseOpenLemmaPack` record (kept as a historical dependency interface; its consumer
-`hasse_bound_from_HasseOpenLemmaPack` is witness-parametric and proven). The docstrings below
+and the `HasseOpenLemmaPack` record (kept as a historical dependency interface). The docstrings below
 this header are HISTORICAL (they describe the pre-deletion plan).
 
 This file originally packaged the open mathematical lemmas
@@ -114,9 +113,7 @@ and audit flags:
   `∃ d, d = α.degree` placeholder is the appropriate marker.
 * **A8 — L7 docstring**: explicit dependency tower clarification
   (depends on L7a + γ.IsSeparable via K(E)/γ*K(E)/K(γ*x)).
-* **A9 — Pack rename**: `OpenLemmaPack` → `HasseOpenLemmaPack`,
-  `hasse_bound_from_pack` → `hasse_bound_from_HasseOpenLemmaPack` (with
-  `hasse_bound_from_pack` retained as a `@[deprecated]` alias).
+* **A9 — Pack rename**: `OpenLemmaPack` → `HasseOpenLemmaPack`.
 * **B1 — Miller edge-case audit**: documented above the Miller-derived
   Open Lemmas (`vertical_principal`, `line_principal`, `miller_principal`).
   P=O / Q=O / Q=-P / P=Q (tangent, including 2-torsion) all handled;
@@ -675,8 +672,8 @@ handled (or explicitly excluded by the standing hypotheses):
   Weierstrass-form pipeline (Silverman III.1).
 
 **Flag (NEW per reviewer round 3, 2026-05-15)**: the char 2/3 exclusion
-propagates to the bound's applicability — the assembled Hasse bound from
-`hasse_bound_from_HasseOpenLemmaPack` carries the same `[NeZero (2 : K)]`
+propagates to the bound's applicability — the assembled Hasse bound
+carries the same `[NeZero (2 : K)]`
 + `[NeZero (3 : K)]` cone as the Miller pipeline. Curves over `F_2` or
 `F_3` are not yet covered by the formalised bound. -/
 
@@ -1127,8 +1124,7 @@ claim — no `True` filler. The carrier universe is taken as the structure
 parameter `.{v}`, matching `Sinf`'s carrier-universe parameter.
 
 When any open lemma's `sorry` is discharged in the file above, the
-corresponding pack field becomes provable from that result; the final
-theorem `hasse_bound_from_pack` consumes this pack to deliver the bound. -/
+corresponding pack field becomes provable from that result. -/
 structure HasseOpenLemmaPack.{v}
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (hq : 2 ≤ Fintype.card K) where
