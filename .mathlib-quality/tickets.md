@@ -1,5 +1,15 @@
 # Ticket Board — Thm 8.28(b) sheafiness, revised 4-leaf plan (post /expert-review 2026-06-19)
 
+## ★ UPDATE 2026-06-22 (/develop --continue — T-L4/HU-e SpvAI leaf: B2 + faithful fix)
+- **The HU-e continuity bottom `ofValuation_restrictIdeal_isInSpvAI` was FALSE** (B2,
+  `b2_log.jsonl`): general `cGammaIdeal ≠` Wedhorn Def 7.3. User-approved fix = **principal-case**
+  faithful replacement `ofValuation_restrictIdealSingle_isInSpvAI` (the only case HU-e needs).
+  Infrastructure + TRUE replacement LANDED (build green); bottoms at 2 elementary sub-lemmas.
+- **NEW section [T-SPVAI-1..4] + [CLEANUP-SPVAI]** below (sub-dependency of T-L4 / HU-e): Prop 1.20
+  (cofinal·bounded), the cofinal + microbial sub-lemmas (both elementary — Prop 1.20 / `cGammaUnits`
+  is a convex subgroup; NO deep `minContain` infrastructure), and the `restrictIdealSingle` wiring.
+  **Next available: T-SPVAI-1** (no deps) and **T-SPVAI-3** (no deps) — parallel.
+
 ## ★ UPDATE 2026-06-21 (/develop resume audit, lean_verify'd + full build 9825 green)
 - **Leaf #1 (inducing / Prop 6.18) ELIMINATED** — T-L1a/b/c ✅DONE (commit b3749e9). The headline
   `embedding` field was rewired to ⟨`productRestrictionSub_isInducing_via_equalizer`, injective⟩ via
@@ -744,6 +754,201 @@ prime of `R[x⁻¹]`) — a further sub-step (going-up/structure of the localiza
   to it, so `hlocal_L` ⟹ `ι ↑a` unit in `ι(O)` ⟹ `(ι ↑a)⁻¹ = ι((↑a)⁻¹) ∈ ι(O)` ⟹ `(↑a)⁻¹ ∈ O`
   (ι injective) ⟹ `IsUnit a`. ⚠ ~35 lines of subring-coercion unit-chasing (`Subring.equivMapOfInjective`,
   `Units`, `LocalSubring.map_toSubring`); the only remaining FaithfulLocLift field-lemma piece.
+
+---
+
+## T-SPVAI — Faithful principal `IsInSpvAI` (sub-dependency of T-L4 / HU-e continuity)
+
+**Context (2026-06-22).** `ofValuation_restrictIdeal_isInSpvAI` was found **FALSE** (B2,
+`b2_log.jsonl`): the general `cGammaIdeal` diverges from Wedhorn Def 7.3 (`wedhorn.txt:2942`).
+User-approved faithful fix = the **principal** case (the only one HU-e uses, via
+`IsTateRing.principalPair`). Already landed (commits 94e2332/1eb111e/241d352, build green):
+`cGammaUnits`/`cGammaSingle`/`restrictIdealSingle`/`cGamma` + collapse identities
+(`cGammaSingle_eq_cGamma_of_mem`, `cGammaSingle_eq_convexGenerated_of_subset`) + the proven generic
+transfers (`cofinalValue_canon_of_restricted`, `isMicrobial_canon_of_restricted`) + the TRUE
+replacement `ofValuation_restrictIdealSingle_isInSpvAI` (sorry-free **modulo** the 2 sub-lemmas
+below). These tickets discharge those 2 sub-lemmas and wire the result into HU-e.
+
+### [T-SPVAI-1] Wedhorn Prop 1.20 — `cofinal · bounded = cofinal`
+- **Status**: open
+- **File**: `Adic spaces/OrderedGroupConvex.lean`
+- **Depends on**: none
+- **Parallel**: yes
+- **Type**: def + lemma (INFRASTRUCTURE — general ordered-group; IS Wedhorn Prop 1.20)
+
+#### Statement
+```lean
+/-- Wedhorn Def 1.16: `γ` is cofinal for the convex subgroup `H`. -/
+def ConvexSubgroup.IsCofinalElt (H : ConvexSubgroup Γ) (γ : Γ) : Prop :=
+  ∀ h ∈ H, ∃ n : ℕ, γ ^ n < h
+
+/-- **Wedhorn Proposition 1.20.** `Γ' γ` cofinal, `Δ ⊊ Γ'` proper convex, `δ ∈ Δ` ⟹ `δγ`
+cofinal for `Γ'`. -/
+theorem ConvexSubgroup.isCofinalElt_mul_of_mem_of_lt {Γ' Δ : ConvexSubgroup Γ}
+    (hlt : Δ < Γ') {γ : Γ} (hγ : Γ'.IsCofinalElt γ) {δ : Γ} (hδ : δ ∈ Δ) :
+    Γ'.IsCofinalElt (δ * γ) := by sorry
+```
+
+#### Proof sketch (wedhorn.txt:351-352)
+1. From `Δ ⊊ Γ'` pick `γ₀ ∈ Γ'` with `γ₀ < Δ` (i.e. `γ₀ < x` for all `x ∈ Δ`, so `Δ < γ₀⁻¹`):
+   `Δ` proper-convex in `Γ'` ⟹ ∃ element of `Γ'` strictly below all of `Δ` (the cofinal
+   direction). [The witness is `γ^n` for `n` large by `hγ`, see step 2 — can take `γ₀ := γ^n`.]
+2. By `hγ` (cofinal): `∃ n, γ^n < γ₀`. For any target `h ∈ Γ'`, `∃ m, γ^m < h`.
+3. `(δγ)^(2n) = δ^(2n) γ^(2n) < γ₀⁻¹ γ^(2n) < γ^n` — first `<` from `δ^(2n) ∈ Δ < γ₀⁻¹`
+   (`Δ` subgroup), second from `γ₀⁻¹ γ^n < 1` ⟺ `γ^n < γ₀`. Iterating gives `(δγ)` cofinal.
+4. Tactic realisation: `mul_lt_mul'`, `pow_lt_pow_left`-style monotonicity, `inv_lt_iff`,
+   `ConvexSubgroup` membership (`mul_mem`, `inv_mem`); the convexity gives `γ₀ < Δ` witness.
+
+#### Mathlib lemmas needed
+- `mul_le_mul'` / `mul_lt_mul'` (ordered comm group), `inv_mul_lt_iff` / `lt_inv_mul_iff`
+- `pow_le_pow_right'`, `mul_pow` — verify via `lean_loogle` at use time.
+
+#### Sources
+- Wedhorn, *Adic Spaces* (arXiv:1910.05934), **Proposition 1.20**, p. 6 (`wedhorn.txt:348`);
+  Definition 1.16, p. 5 (`wedhorn.txt:325`); Remark 1.19, p. 6 (`wedhorn.txt:339`).
+
+#### Generality decision
+- Stated over `{Γ : Type*} [LinearOrderedCommGroup Γ]` (Wedhorn's "totally ordered group");
+  applies to `Γ₀ˣ`. `ConvexSubgroup`-level, no valuation.
+
+---
+
+### [T-SPVAI-2] `restrictIdealSingle_cofinal_of_not_mem` (Wedhorn Lemma 7.1 + 7.2, `=∅` branch)
+- **Status**: open
+- **File**: `Adic spaces/SpvAITopology.lean` (sorry at the stated decl)
+- **Depends on**: T-SPVAI-1
+- **Parallel**: no
+- **Type**: lemma
+
+#### Statement
+```lean
+theorem restrictIdealSingle_cofinal_of_not_mem (w : Valuation A Γ₀) (g : A) (hg : w g ≠ 0)
+    (hmem : (Units.mk0 (w g) hg)⁻¹ ∉ Valuation.cGamma w) :
+    ∀ a ∈ Ideal.span {g}, Valuation.CofinalValue (w.restrictIdealSingle g hg) a := by sorry
+```
+
+#### Proof sketch (Wedhorn Lemma 7.1 `:2904` + 7.2 `:2911`)
+1. `hy : 1 < (Units.mk0 (w g) hg)⁻¹` — by_contra ⟹ `w g ≥ 1` ⟹ `mk0(w g) ∈ cGammaUnits ⊆ cGamma`
+   ⟹ `(mk0 w g)⁻¹ ∈ cGamma` (inv_mem), contra `hmem`. [verified pattern; needs `one_lt_inv'`-style]
+2. `hsub : cGammaUnits w ⊆ convexGenerated hy` — each char gen unit `u ≤ mk0(w b) < (mk0 w g)⁻¹`
+   (the `< (mk0 w g)⁻¹` from convexity: `(mk0 w g)⁻¹ ∉ cGamma` and `>1` ⟹ above every cGamma
+   element ⟹ above every char value), and `(mk0 w b)⁻¹ > (mk0 w g)` so `u ∈ [y⁻¹, y]` (`n=1`).
+3. `cGammaSingle w g hg = convexGenerated hy` — `cGammaSingle_eq_convexGenerated_of_subset` (done).
+4. `a ∈ Ideal.span {g}` ⟹ `a = g * c` (`Ideal.mem_span_singleton`). If `w a = 0` (⟺ `w c = 0`):
+   `rs a = 0`, `CofinalValue` trivial (`0^1 = 0 < δ`). Else `rs a = w a` (preserved).
+5. `CofinalValue rs (g*c)` ⟺ (plumbing) `IsCofinalElt cGammaSingle (mk0 (w(g*c)))` at `Γ₀ˣ`.
+   - `w c ≤ 1`: `mk0(w(g*c)) = mk0(w c)·(mk0 w g) ≤ mk0(w g) = y⁻¹` ⟹ cofinal via
+     `exists_inv_pow_lt_of_mem_convexGenerated` + `pow_le_pow_left'`.
+   - `w c > 1`: `mk0(w c) ∈ cGamma w` (char value, `vUnit_mem_cGamma`); `cGamma ⊊ convexGenerated hy`
+     (proper: `y ∈ cG, y ∉ cGamma`); apply **T-SPVAI-1** (Prop 1.20) with `γ := mk0(w g)`,
+     `Γ' := convexGenerated hy`, `Δ := cGamma w`, `δ := mk0(w c)`.
+6. Plumbing lemma (state inline or as helper): `CofinalValue (restrictToConvexBounded …) a` for
+   `mk0(v a) ∈ H` ⟺ `H.IsCofinalElt (mk0 (v a))` — unfold `restrictToConvexBounded_apply_mem`,
+   `WithZero`/subgroup coercions, `pow`/`<` transfer (mechanical).
+
+#### Mathlib lemmas needed
+- `Ideal.mem_span_singleton`, `map_mul`, `pow_le_pow_left'`, `one_lt_inv'`/`inv_lt_one'`,
+  `WithZero.coe_lt_coe`, `Units.val_lt_val` — verify at use time.
+
+#### Sources
+- Wedhorn Lemma 7.1 (`:2904`), Lemma 7.2 (`:2911`), Lemma 7.4 (`:2948`).
+
+#### Generality decision
+- Principal `(g)` only — justified: the general statement is FALSE (B2) and the consumer is
+  principal. `Γ₀` arbitrary `LinearOrderedCommGroupWithZero`, `A` the section `CommRing`.
+
+---
+
+### [T-SPVAI-3] `restrictIdealSingle_isMicrobial_of_mem` (`cGammaUnits` is a convex subgroup)
+- **Status**: open
+- **File**: `Adic spaces/CharacteristicSubgroup.lean` (helper) + `SpvAITopology.lean` (assembly)
+- **Depends on**: none
+- **Parallel**: yes
+- **Type**: lemma (+ structure helper)
+
+#### Statement
+```lean
+/-- `cGammaUnits w` is already a convex subgroup: bounded-by-one-value is closed under the group
+ops because `w` is multiplicative. Hence `cGamma w` membership ⟺ bounded by a single value. -/
+theorem Valuation.mem_cGamma_iff (w : Valuation A Γ₀) {u : Γ₀ˣ} :
+    u ∈ cGamma w ↔ u ∈ cGammaUnits w := by sorry  -- minContain of a convex subgroup = itself
+
+theorem restrictIdealSingle_isMicrobial_of_mem (w : Valuation A Γ₀) (g : A) (hg : w g ≠ 0)
+    (hmem : (Units.mk0 (w g) hg)⁻¹ ∈ Valuation.cGamma w) :
+    Valuation.IsMicrobial (w.restrictIdealSingle g hg) := by sorry
+```
+
+#### Proof sketch
+1. **`cGammaUnits w` is a `ConvexSubgroup`** (the key fact): for `u₁ ∈ [w(a₁)⁻¹, w(a₁)]`,
+   `u₂ ∈ [w(a₂)⁻¹, w(a₂)]` (`w aᵢ ≥ 1`): `u₁u₂ ∈ [w(a₁a₂)⁻¹, w(a₁a₂)]` since
+   `w(a₁a₂) = w a₁ · w a₂ ≥ 1` (`map_mul`); inverse: `u⁻¹ ∈ [w(a)⁻¹, w(a)]` (same interval);
+   convex: `u₁ ≤ u ≤ u₂` ⟹ `u ∈ [w(a₁)⁻¹, w(a₂)] ⊆ [w(a₁a₂)⁻¹, w(a₁a₂)]` (both `w aᵢ ≥ 1`);
+   `1 ∈` (a=1). Then `cGamma w = minContain(cGammaUnits w) = ` that subgroup (`minContain_le` both
+   ways), giving `mem_cGamma_iff`.
+2. `cGammaSingle w g hg = cGamma w` (`cGammaSingle_eq_cGamma_of_mem hmem`, done).
+3. `IsMicrobial rs`: `∀ γ ∈ cGamma w (= value group), ∃a, 1≤rs a ∧ (rs a)⁻¹≤γ≤rs a`. From
+   `mem_cGamma_iff`, `γ`'s unit `∈ cGammaUnits w` ⟹ `∃a, 1≤w a ∧ (mk0 w a)⁻¹≤γ≤mk0 w a`;
+   take that `a` (`rs a = w a`, preserved since `w a ≥ 1 ⟹ mk0(w a) ∈ cGammaSingle`).
+4. Plumbing: `γ : WithZero (cGammaSingle…).toSubgroup`, transfer to `Γ₀ˣ` via the identity.
+
+#### Mathlib lemmas needed
+- `map_mul`, `mul_le_mul'`, `inv_le_inv_iff`, `ConvexSubgroup.minContain_le`,
+  `ConvexSubgroup.subset_minContain` — all available/used already.
+
+#### Sources
+- Wedhorn Def 4.13 (`cΓ_v`, characteristic subgroup, p. 27) — the microbial notion `cΓ_v = Γ_v`.
+
+#### Generality decision
+- `mem_cGamma_iff` is a clean general characterisation of `cGamma` (reusable). Principal for the
+  microbial lemma (same justification as T-SPVAI-2).
+
+---
+
+### [T-SPVAI-4] Wire `restrictIdealSingle` into `mem_plus` continuity (HU-e)
+- **Status**: open
+- **File**: `Adic spaces/FaithfulLocLift.lean`
+- **Depends on**: T-SPVAI-2, T-SPVAI-3
+- **Parallel**: no
+- **Type**: wiring (continuity discharge)
+
+#### Statement / goal
+Replace the HU-e reference to the **false** `ofValuation_restrictIdeal_isInSpvAI` (currently in
+comments, FaithfulLocLift:398-410) with the TRUE `ofValuation_restrictIdealSingle_isInSpvAI`,
+feeding `Spv.isContinuous_of_isInSpvAI_of_lt_one_principal`.
+
+#### Proof sketch
+1. `P := IsTateRing.principalPair (presheafValue D')`; `π := P` generator; `g := P.A₀.subtype π`
+   (the image in `B`). The witness valuation `v` is the HU-c dominating valuation; restrict via
+   `v.restrictIdealSingle g (hg)` where `hg : v g ≠ 0` (from `g ≠ 0` / `v` on the relevant point).
+2. `Ideal.span {g} = Ideal.map P.A₀.subtype P.I` (since `P.I = (π)` principal; `Ideal.map_span`,
+   `Set.image_singleton`).
+3. Feed `ofValuation_restrictIdealSingle_isInSpvAI v g hg : IsInSpvAI (ofValuation …) (span{g})`
+   to `Spv.isContinuous_of_isInSpvAI_of_lt_one_principal` (rewriting the ideal via step 2) +
+   the existing `v ≤ 1 on B⁺` / `v < 1 on B°°` HU-e facts ⟹ continuity ⟹ contradiction ⟹ `mem_plus`.
+4. ⚠ The HU-e/d/c construction around this is the larger T-L4 body; this ticket is the
+   `restrictIdeal → restrictIdealSingle` swap + ideal-matching at the one continuity site.
+
+#### Mathlib lemmas needed
+- `Ideal.map_span`, `Set.image_singleton`, `Ideal.span_singleton_eq` (ideal-matching).
+
+#### Sources
+- Huber Thm 3.1 (`huber2.txt:585`, A°°-form continuity criterion); Wedhorn 7.10 reverse
+  (`Spv.isContinuous_of_isInSpvAI_of_lt_one_principal`, already in `SpvAI.lean`).
+
+#### Generality decision
+- Principal pair (the construction's actual setting). No new hypotheses on the headline.
+
+---
+
+### [CLEANUP-SPVAI] Run `/cleanup` on the T-SPVAI files
+- **Status**: open
+- **File**: `OrderedGroupConvex.lean`, `CharacteristicSubgroup.lean`, `SpvAITopology.lean`
+- **Depends on**: T-SPVAI-4
+- **Parallel**: no
+- **Type**: cleanup
+- **Description**: Cadence cleanup after the 4 T-SPVAI proof/wiring tickets (per §1g: ≥1 cleanup
+  per ~3 proof tickets + final per touched file). Golf the Prop 1.20 / convex-subgroup proofs,
+  check naming (`IsCofinalElt`, `mem_cGamma_iff`), strip the superseded false-leaf docs.
 
 ---
 
