@@ -147,7 +147,7 @@ omit [IsCyclotomicExtension {p} ℚ K] in
     {R' : KummerPairingRawComparison (p := p) (K := K) N T}
     (Rec : KummerCharacterUnitLiftRecipe (p := p) (K := K) R S χ)
     (e : R'.kummerComponent χ ≃* R.kummerComponent χ) :
-    (Rec.congrSource (R' := R') e).toFun = fun x => Rec.toFun (e x) := rfl
+    (Rec.congrSource (R' := R') e).toFun = fun x ↦ Rec.toFun (e x) := rfl
 
 omit [IsCyclotomicExtension {p} ℚ K] in
 /-- **`congrTarget` toFun** unfolds to post-composition with the equivalence. -/
@@ -156,7 +156,7 @@ omit [IsCyclotomicExtension {p} ℚ K] in
     (Rec : KummerCharacterUnitLiftRecipe (p := p) (K := K) R S χ)
     (e : (S.components.component χ).Carrier ≃*
       (S'.components.component χ).Carrier) :
-    (Rec.congrTarget (S' := S') e).toFun = fun x => e (Rec.toFun x) := rfl
+    (Rec.congrTarget (S' := S') e).toFun = fun x ↦ e (Rec.toFun x) := rfl
 
 omit [IsCyclotomicExtension {p} ℚ K] in
 /-- **`compose` toFun** unfolds to bilateral composition. -/
@@ -168,7 +168,7 @@ omit [IsCyclotomicExtension {p} ℚ K] in
     (eTarget : (S.components.component χ).Carrier ≃*
       (S'.components.component χ).Carrier) :
     (Rec.compose (R' := R') (S' := S') eSource eTarget).toFun =
-      fun x => eTarget (Rec.toFun (eSource x)) := rfl
+      fun x ↦ eTarget (Rec.toFun (eSource x)) := rfl
 
 omit [IsCyclotomicExtension {p} ℚ K] in
 /-- **`congrSource` with the identity equivalence** is the original recipe. -/
@@ -251,7 +251,7 @@ theorem KummerCharacterUnitLift.HomPromotion.PerExtensionRecipe.ofKummerComponen
     {χ : MulChar (ZMod p)ˣ ℚ}
     [Subsingleton (R.kummerComponent χ : Type _)] :
     KummerCharacterUnitLift.HomPromotion.PerExtensionRecipe.{u, v}
-      (p := p) (K := K) R S χ := fun _ _ _ _ =>
+      (p := p) (K := K) R S χ := fun _ _ _ _ ↦
   ⟨KummerCharacterUnitLiftRecipe.trivial
     (p := p) (K := K) (R := R) (S := S) (χ := χ)⟩
 
@@ -313,7 +313,7 @@ theorem KummerCharacterUnitLift.HomPromotion.PerExtensionRecipe.ofMulEquiv
     {χ : MulChar (ZMod p)ˣ ℚ}
     (e : R.kummerComponent χ ≃* (S.components.component χ).Carrier) :
     KummerCharacterUnitLift.HomPromotion.PerExtensionRecipe.{u, v}
-      (p := p) (K := K) R S χ := fun _ _ _ _ =>
+      (p := p) (K := K) R S χ := fun _ _ _ _ ↦
   ⟨KummerCharacterUnitLiftRecipe.ofMulEquiv
     (R := R) (S := S) (χ := χ) e⟩
 
@@ -357,7 +357,7 @@ theorem KummerCharacterUnitLift.HomPromotion.PerExtensionRecipe.ofInjectiveMonoi
     (f : R.kummerComponent χ →* (S.components.component χ).Carrier)
     (hf : Function.Injective f) :
     KummerCharacterUnitLift.HomPromotion.PerExtensionRecipe.{u, v}
-      (p := p) (K := K) R S χ := fun _ _ _ _ =>
+      (p := p) (K := K) R S χ := fun _ _ _ _ ↦
   ⟨KummerCharacterUnitLiftRecipe.ofMonoidHom
     (R := R) (S := S) (χ := χ) f hf⟩
 
@@ -396,7 +396,7 @@ theorem KummerCharacterUnitLift.HomPromotionFamily.ofPerCharacterRecipe
       KummerCharacterUnitLift.HomPromotionFamily.PerCharacterRecipe.{u, v}
         (p := p) (K := K) R S) :
     KummerCharacterUnitLift.HomPromotionFamily.{u, v} (p := p) (K := K) R S :=
-  fun χ =>
+  fun χ ↦
     KummerCharacterUnitLift.HomPromotion.ofPerExtensionRecipe
       (p := p) (K := K) (R := R) (S := S) (χ := χ) (recipes χ)
 
@@ -407,7 +407,7 @@ The trivial Kummer-side characters are handled automatically via
 `HomPromotion.ofKummerComponentSubsingleton`, leaving the substantive
 mathematical input as a `PerExtensionRecipe` only at characters whose
 χ-component is genuinely non-trivial. -/
-noncomputable def KummerCharacterUnitLift.HomPromotionFamily.ofNonTrivialPerCharacterRecipe
+theorem KummerCharacterUnitLift.HomPromotionFamily.ofNonTrivialPerCharacterRecipe
     {N : NondegenerateKummerPairing (p := p) (K := K) P}
     {T : KummerPairingTwistData (p := p) (K := K) N}
     {R : KummerPairingRawComparison (p := p) (K := K) N T}
@@ -418,7 +418,6 @@ noncomputable def KummerCharacterUnitLift.HomPromotionFamily.ofNonTrivialPerChar
         KummerCharacterUnitLift.HomPromotion.PerExtensionRecipe.{u, v}
           (p := p) (K := K) R S χ) :
     KummerCharacterUnitLift.HomPromotionFamily.{u, v} (p := p) (K := K) R S := by
-  classical
   refine KummerCharacterUnitLift.HomPromotionFamily.ofPartition
     (p := p) (K := K) (R := R) (S := S) ?_
   intro χ hχ
@@ -447,7 +446,7 @@ theorem KummerCharacterUnitLift.HomPromotionFamily.ofPerCharacterMulEquiv
     KummerCharacterUnitLift.HomPromotionFamily.{u, v} (p := p) (K := K) R S :=
   KummerCharacterUnitLift.HomPromotionFamily.ofPerCharacterRecipe
     (p := p) (K := K) (R := R) (S := S)
-    (fun χ =>
+    (fun χ ↦
       KummerCharacterUnitLift.HomPromotion.PerExtensionRecipe.ofMulEquiv
         (p := p) (K := K) (R := R) (S := S) (χ := χ) (eFamily χ))
 
@@ -466,7 +465,7 @@ theorem KummerCharacterUnitLift.HomPromotionFamily.ofPerCharacterInjectiveMonoid
     KummerCharacterUnitLift.HomPromotionFamily.{u, v} (p := p) (K := K) R S :=
   KummerCharacterUnitLift.HomPromotionFamily.ofPerCharacterRecipe
     (p := p) (K := K) (R := R) (S := S)
-    (fun χ =>
+    (fun χ ↦
       KummerCharacterUnitLift.HomPromotion.PerExtensionRecipe.ofInjectiveMonoidHom
         (p := p) (K := K) (R := R) (S := S) (χ := χ) (fFamily χ) (hFamily χ))
 
@@ -633,11 +632,12 @@ noncomputable def kummerToUnitQuotientEmbeddingData_of_perCharacterFamily
         (p := p) (K := K) R S pipelineFamily promotionFamily)
       componentChoice)
 
+omit [IsCyclotomicExtension {p} ℚ K] in
 /-- **Composite top-level composer feeding the cardinality inclusion.**
 
 Compress the embedding-data composer into the inclusion form consumed by
 the rank-inequality bridge. -/
-noncomputable def kummerToUnitQuotientInclusion_of_perCharacterFamily
+theorem kummerToUnitQuotientInclusion_of_perCharacterFamily
     [IsCyclotomicExtension {p} ℚ K] [IsCMField K]
     {N : NondegenerateKummerPairing (p := p) (K := K) P}
     {T : KummerPairingTwistData (p := p) (K := K) N}
