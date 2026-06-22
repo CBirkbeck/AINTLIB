@@ -554,6 +554,30 @@ theorem coordY_sub_algMap_linePolynomial_ne_zero (x y slope : F) :
     (W' := C.toAffine) _
     ((map_eq_zero_iff _ (IsFractionRing.injective _ _)).mp h)
 
+/-- The chord/tangent line polynomial `ℓ·(X − x) + y` has `natDegree ≤ 1`: it is
+linear in `X` (the leading term `C ℓ * (X - C x)` has degree at most one and the
+constant `C y` has degree zero). Used to bound the pole of the polynomial part of
+the chord line in `ordAtInfty_coordY_sub_algMap_linePolynomial`. -/
+private theorem natDegree_linePolynomial_le {R : Type*} [CommRing R] [Nontrivial R]
+    (x y slope : R) :
+    (WeierstrassCurve.Affine.linePolynomial x y slope).natDegree ≤ 1 := by
+  unfold WeierstrassCurve.Affine.linePolynomial
+  calc (Polynomial.C slope * (Polynomial.X - Polynomial.C x) + Polynomial.C y).natDegree
+      ≤ max (Polynomial.C slope * (Polynomial.X - Polynomial.C x)).natDegree
+            (Polynomial.C y).natDegree := Polynomial.natDegree_add_le _ _
+    _ ≤ max 1 0 := by
+        apply max_le_max
+        · calc (Polynomial.C slope * (Polynomial.X - Polynomial.C x)).natDegree
+              ≤ (Polynomial.C slope).natDegree + (Polynomial.X - Polynomial.C x).natDegree :=
+                Polynomial.natDegree_mul_le
+            _ ≤ 0 + 1 := by
+                apply Nat.add_le_add
+                · exact (Polynomial.natDegree_C _).le
+                · rw [Polynomial.natDegree_X_sub_C]
+            _ = 1 := by ring
+        · exact (Polynomial.natDegree_C _).le
+    _ = 1 := by simp
+
 /-- **Order at infinity of the chord line**: `ord_∞(coordY − ℓ(X − x) − y) = −3`.
 The Y-coordinate has triple pole at ∞, and the polynomial term has at most a
 double pole, so the difference inherits the triple pole. -/
@@ -584,23 +608,8 @@ theorem ordAtInfty_coordY_sub_algMap_linePolynomial (x y slope : F) :
   rcases hp with hp_ne | hp_zero
   · have h_one_ne : (1 : Polynomial F) ≠ 0 := one_ne_zero
     rw [C.ordAtInfty_basis_polynomial_of_both_ne_zero hp_ne h_one_ne]
-    have h_lp_deg : (WeierstrassCurve.Affine.linePolynomial x y slope).natDegree ≤ 1 := by
-      unfold WeierstrassCurve.Affine.linePolynomial
-      calc (Polynomial.C slope * (Polynomial.X - Polynomial.C x) + Polynomial.C y).natDegree
-          ≤ max (Polynomial.C slope * (Polynomial.X - Polynomial.C x)).natDegree
-                (Polynomial.C y).natDegree := Polynomial.natDegree_add_le _ _
-        _ ≤ max 1 0 := by
-            apply max_le_max
-            · calc (Polynomial.C slope * (Polynomial.X - Polynomial.C x)).natDegree
-                  ≤ (Polynomial.C slope).natDegree + (Polynomial.X - Polynomial.C x).natDegree :=
-                    Polynomial.natDegree_mul_le
-                _ ≤ 0 + 1 := by
-                    apply Nat.add_le_add
-                    · exact (Polynomial.natDegree_C _).le
-                    · rw [Polynomial.natDegree_X_sub_C]
-                _ = 1 := by ring
-            · exact (Polynomial.natDegree_C _).le
-        _ = 1 := by simp
+    have h_lp_deg : (WeierstrassCurve.Affine.linePolynomial x y slope).natDegree ≤ 1 :=
+      natDegree_linePolynomial_le x y slope
     have h_neg_deg : (-WeierstrassCurve.Affine.linePolynomial x y slope).natDegree =
         (WeierstrassCurve.Affine.linePolynomial x y slope).natDegree :=
       Polynomial.natDegree_neg _
