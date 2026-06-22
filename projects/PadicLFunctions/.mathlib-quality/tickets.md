@@ -7113,3 +7113,14 @@ BLOCKED — [TG-ABEL-3] X∞⁺ abelian (and hence the Γ⁺-action, the SES, al
 AlgEquiv.ofBijective; of_algHom in a clean top-level lemma context; @-apply with explicit instances).
 isMulCommutative_XinfPlus committed, axiom-clean. commute_restrict_AG, isAbelianGalois_comap_MPlusN,
 commute_on_MPlusN are the reusable pieces. Next: Γ⁺-action (Rmk 13.7), Y∞⁺ abelian, the SES.
+
+---
+## UPDATE (2026-06-22, cont.) — Γ⁺-action prerequisites DONE; conjugation-descent de-risked
+- isMulCommutative_galF, normal_FPlus, normal_FinfPlus: DONE (committed, axiom-clean). F∞⁺/ℚ normal
+  ⟹ X∞⁺ = ker(Gal(M∞⁺/ℚ) ↠ Γ⁺) is a normal subgroup.
+- Verified sound (typecheck): G = Gal(M∞⁺/ℚ) (ℚ-algebra on M∞⁺ via the tower), the restriction
+  G → Γ⁺, the comap F∞⁺-in-M∞⁺.
+- REMAINING for the Γ⁺-action: (a) Normal ℚ (comap F∞⁺-in-M∞⁺) [transfer, as in normal_FPlus];
+  (b) restrictNormalHom G ↠ Γ⁺ + N = ker ≅ X∞⁺; (c) conjugation descent (MulAut.conjNormal /
+  Subgroup.conjMulDistribMulAction; N abelian ⟹ factors through G/N ≅ Γ⁺); (d) package as the
+  Λ(Γ⁺)-action and connect to §12's IwasawaAlgebra. Patterns all established; no timeout pathology.
