@@ -69,7 +69,7 @@ theorem linearIndependent_dirichletCharacters :
   have h := linearIndependent_dirichletCharactersOnUnits (p := p)
   convert h using 1
   funext χ u
-  simp [restrictUnitsLinear, Function.comp_def, dirichletCharacterUnitMonoidHom_apply]
+  simp [restrictUnitsLinear, dirichletCharacterUnitMonoidHom_apply]
 
 /-- Evaluation at `0`. -/
 def evalAtZeroLinear : (ZMod p → ℂ) →ₗ[ℂ] ℂ where
@@ -95,11 +95,8 @@ theorem deltaZero_not_mem_span_dirichletCharacters :
   intro hdelta
   have hker : deltaZeroFunction (p := p) ∈ LinearMap.ker (evalAtZeroLinear (p := p)) :=
     span_dirichletCharacters_le_ker_evalAtZero (p := p) hdelta
-  have hzero : evalAtZeroLinear (p := p) (deltaZeroFunction (p := p)) = 0 := by
-    rw [LinearMap.mem_ker] at hker
-    exact hker
-  have hone := hzero
-  simp [evalAtZeroLinear, deltaZeroFunction] at hone
+  rw [LinearMap.mem_ker] at hker
+  simp [evalAtZeroLinear, deltaZeroFunction] at hker
 
 /-- The ambient family consisting of `δ₀` together with all Dirichlet
 characters. -/
@@ -146,16 +143,12 @@ def trivialCharacterBlock : Submodule ℂ (ZMod p → ℂ) :=
     (Set.range ![deltaZeroFunction (p := p), ((1 : DirichletCharacter ℂ p) : ZMod p → ℂ)])
 
 theorem deltaZero_mem_trivialBlock :
-    deltaZeroFunction (p := p) ∈ trivialBlock (p := p) := by
-  apply Submodule.subset_span
-  refine ⟨0, ?_⟩
-  simp
+    deltaZeroFunction (p := p) ∈ trivialBlock (p := p) :=
+  Submodule.subset_span ⟨0, by simp⟩
 
 theorem constOne_mem_trivialBlock :
-    (fun _ : ZMod p => (1 : ℂ)) ∈ trivialBlock (p := p) := by
-  apply Submodule.subset_span
-  refine ⟨1, ?_⟩
-  simp
+    (fun _ : ZMod p => (1 : ℂ)) ∈ trivialBlock (p := p) :=
+  Submodule.subset_span ⟨1, by simp⟩
 
 theorem constOne_eq_deltaZero_add_trivialCharacter :
     (fun _ : ZMod p => (1 : ℂ)) =
@@ -164,22 +157,14 @@ theorem constOne_eq_deltaZero_add_trivialCharacter :
   by_cases hx : x = 0
   · subst hx
     simp [deltaZeroFunction]
-  · have hx_unit : IsUnit x := isUnit_iff_ne_zero.mpr hx
-    have htriv : (1 : DirichletCharacter ℂ p) x = 1 := by
-      simpa using (MulChar.one_apply hx_unit : (1 : DirichletCharacter ℂ p) x = 1)
+  · have htriv : (1 : DirichletCharacter ℂ p) x = 1 :=
+      MulChar.one_apply (isUnit_iff_ne_zero.mpr hx)
     simp [deltaZeroFunction, hx, htriv]
 
 theorem trivialCharacter_eq_constOne_sub_deltaZero :
     (((1 : DirichletCharacter ℂ p) : ZMod p → ℂ)) =
-      (fun _ : ZMod p => (1 : ℂ)) - deltaZeroFunction (p := p) := by
-  ext x
-  by_cases hx : x = 0
-  · subst hx
-    simp [deltaZeroFunction]
-  · have hx_unit : IsUnit x := isUnit_iff_ne_zero.mpr hx
-    have htriv : (1 : DirichletCharacter ℂ p) x = 1 := by
-      simpa using (MulChar.one_apply hx_unit : (1 : DirichletCharacter ℂ p) x = 1)
-    simp [deltaZeroFunction, hx, htriv]
+      (fun _ : ZMod p => (1 : ℂ)) - deltaZeroFunction (p := p) :=
+  eq_sub_of_add_eq' (constOne_eq_deltaZero_add_trivialCharacter (p := p)).symm
 
 theorem trivialBlock_eq_trivialCharacterBlock :
     trivialBlock (p := p) = trivialCharacterBlock (p := p) := by
@@ -187,17 +172,10 @@ theorem trivialBlock_eq_trivialCharacterBlock :
   · refine Submodule.span_le.mpr ?_
     rintro _ ⟨i, rfl⟩
     fin_cases i
-    · apply Submodule.subset_span
-      refine ⟨0, ?_⟩
-      simp
+    · exact Submodule.subset_span ⟨0, by simp⟩
     · rw [constOne_eq_deltaZero_add_trivialCharacter (p := p)]
       exact (trivialCharacterBlock (p := p)).add_mem
-        (Submodule.subset_span <| by
-          refine ⟨0, ?_⟩
-          simp)
-        (Submodule.subset_span <| by
-          refine ⟨1, ?_⟩
-          simp)
+        (Submodule.subset_span ⟨0, by simp⟩) (Submodule.subset_span ⟨1, by simp⟩)
   · refine Submodule.span_le.mpr ?_
     rintro _ ⟨i, rfl⟩
     fin_cases i
@@ -210,9 +188,7 @@ theorem trivialBlock_eq_trivialCharacterBlock :
 theorem trivialCharacter_mem_trivialBlock :
     (((1 : DirichletCharacter ℂ p) : ZMod p → ℂ)) ∈ trivialBlock (p := p) := by
   rw [trivialBlock_eq_trivialCharacterBlock (p := p)]
-  apply Submodule.subset_span
-  refine ⟨1, ?_⟩
-  simp
+  exact Submodule.subset_span ⟨1, by simp⟩
 
 theorem normalizedDft_deltaZero :
     normalizedDft p (deltaZeroFunction (p := p)) =
@@ -263,9 +239,8 @@ def quadraticCharacterLine : Submodule ℂ (ZMod p → ℂ) :=
 
 theorem quadraticCharComplex_mem_quadraticCharacterLine :
     ((quadraticCharComplex p : DirichletCharacter ℂ p) : ZMod p → ℂ) ∈
-      quadraticCharacterLine (p := p) := by
-  apply Submodule.subset_span
-  simp
+      quadraticCharacterLine (p := p) :=
+  Submodule.mem_span_singleton_self _
 
 theorem normalizedDft_quadraticCharComplex_eq_scalar_smul (hp₂ : p ≠ 2) :
     normalizedDft p (quadraticCharComplex p) =
