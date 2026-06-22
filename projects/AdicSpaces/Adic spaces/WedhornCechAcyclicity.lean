@@ -12131,6 +12131,358 @@ theorem genRestrictedCover_isOXAcyclic_of_units
       (CompatiblePlusSubring.aplus_le_A₀ D₀))
 
 set_option linter.unusedSectionVars false in
+/-- **All-empty branch of the σ₊-dichotomy**: when *every* generator's
+piece-trace is empty, the base trace `rationalOpen D₀.T D₀.s` is empty, so all
+section rings of the restricted cover are zero rings and the cover is trivially
+`O_X`-acyclic. This is the `Tpos = ∅` case of
+`genRestrictedCover_isOXAcyclic_of_units_or_empty`. -/
+private theorem genRestrictedCover_isOXAcyclic_of_all_traces_empty
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A] [DecidableEq A]
+    (D₀ : RationalLocData A) (T : Finset A)
+    (hspan : Ideal.span (T : Set A) = ⊤)
+    (hplus : (A⁺ : Set A) ⊆ D₀.P.A₀)
+    (h_all_empty : ∀ t ∈ T,
+      rationalOpen (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).T
+        (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).s = ∅) :
+    (genRestrictedCover D₀ T hspan).IsOXAcyclic := by
+  classical
+  have h_base_empty : rationalOpen D₀.T D₀.s = ∅ := by
+    rw [Set.eq_empty_iff_forall_notMem]
+    intro v hv
+    obtain ⟨D', hD'_in, hv_in⟩ := (genRestrictedCover D₀ T hspan).hcover v hv
+    obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp hD'_in
+    rw [h_all_empty t ht] at hv_in
+    exact hv_in
+  haveI hsub_base :
+      Subsingleton (presheafValue (genRestrictedCover D₀ T hspan).base) :=
+    presheafValue_subsingleton_of_rationalOpen_empty D₀ hplus h_base_empty
+  constructor
+  · intro x _
+    exact Subsingleton.elim x 0
+  · intro f _
+    refine ⟨0, fun D ↦ ?_⟩
+    obtain ⟨t, ht, hDeq⟩ := Finset.mem_image.mp D.2
+    haveI : Subsingleton (presheafValue D.1) := by
+      rw [← hDeq]
+      exact presheafValue_subsingleton_of_rationalOpen_empty _ hplus
+        (h_all_empty t ht)
+    exact Subsingleton.elim _ _
+
+set_option linter.unusedSectionVars false in
+/-- **σ₋-emptiness transported to `B := 𝒪_X(D₀)`**: a Spa-`B`-point `w`
+dominated by a σ₋-index `t` (one whose `A`-trace is empty) cannot exist —
+its `A`-shadow `comap D₀.canonicalMap w` would land in the empty piece-trace.
+The transport core of `genRestrictedCover_isOXAcyclic_of_units_or_empty`. -/
+private theorem spaB_not_dominated_by_empty_index
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A] [DecidableEq A]
+    (D₀ : RationalLocData A) (T : Finset A)
+    (hspan : Ideal.span (T : Set A) = ⊤)
+    {t : A} (ht : t ∈ T)
+    (h_empty : rationalOpen (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).T
+      (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).s = ∅)
+    {w : Spv (presheafValue D₀)}
+    (hw : w ∈ Spa (presheafValue D₀) (presheafValue D₀)⁺)
+    (hcond : ∀ i ∈ T, w.vle (D₀.canonicalMap i) (D₀.canonicalMap t)) : False := by
+  have hv := comap_canonicalMap_mem_rationalOpen D₀
+    (canonicalMap_continuous D₀) hw
+  have hnz : ¬ (comap D₀.canonicalMap w).vle t 0 := by
+    intro h0
+    have hsupp : ∀ i ∈ T, i ∈ (comap D₀.canonicalMap w).supp := by
+      intro i hi
+      rw [ValuationSpectrum.mem_supp_iff]
+      refine (comap D₀.canonicalMap w).vle_trans ?_ h0
+      rw [ValuationSpectrum.comap_vle]
+      exact hcond i hi
+    have hle : Ideal.span (T : Set A) ≤ (comap D₀.canonicalMap w).supp :=
+      Ideal.span_le.mpr (fun i hi ↦ hsupp i hi)
+    rw [hspan] at hle
+    exact (comap D₀.canonicalMap w).not_vle_one_zero
+      (((comap D₀.canonicalMap w).mem_supp_iff 1).mp (hle Submodule.mem_top))
+  have htrace : comap D₀.canonicalMap w ∈
+      rationalOpen (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).T
+        (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).s := by
+    rw [RationalLocData.interSamePair_rationalOpen]
+    refine ⟨hv, hv.1, ?_, ?_⟩
+    · intro i hi
+      rw [genPieceDatum_T] at hi
+      rw [genPieceDatum_s, ValuationSpectrum.comap_vle]
+      exact hcond i hi
+    · rw [genPieceDatum_s]
+      exact hnz
+  rw [h_empty] at htrace
+  exact htrace
+
+set_option linter.unusedSectionVars false in
+/-- **Dominant generator of a Spa-`B`-point comes from `Tpos`**: every point
+of `Spa B` is dominated by some `t ∈ Tpos` (the σ₊-part). A maximal dominating
+index exists; if it were a σ₋-index it would contradict
+`spaB_not_dominated_by_empty_index`. The key fact driving the `Tpos`-cover
+congruence in `genRestrictedCover_isOXAcyclic_of_units_or_empty`. -/
+private theorem spaB_dominantGen_mem_Tpos
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A] [DecidableEq A]
+    (D₀ : RationalLocData A) (T : Finset A)
+    (hspan : Ideal.span (T : Set A) = ⊤)
+    (Tpos : Finset A) (hsub : Tpos ⊆ T) (hTn : T.Nonempty)
+    (h_empty : ∀ t ∈ T, t ∉ Tpos →
+      rationalOpen (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).T
+        (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).s = ∅)
+    {w : Spv (presheafValue D₀)}
+    (hw : w ∈ Spa (presheafValue D₀) (presheafValue D₀)⁺) :
+    ∃ t ∈ Tpos, ∀ i ∈ T, w.vle (D₀.canonicalMap i) (D₀.canonicalMap t) := by
+  haveI hTateB : IsTateRing (presheafValue D₀) :=
+    presheafValue_isTateRing_faithful D₀
+  haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  letI : DecidableEq (presheafValue D₀) := Classical.decEq _
+  letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
+  obtain ⟨m, hm, hmax⟩ := exists_vle_max_mem w (hTn.image D₀.canonicalMap)
+  obtain ⟨t_m, ht_m, rfl⟩ := Finset.mem_image.mp hm
+  by_cases htm : t_m ∈ Tpos
+  · exact ⟨t_m, htm, fun i hi ↦
+      hmax (D₀.canonicalMap i) (Finset.mem_image_of_mem _ hi)⟩
+  · exact (spaB_not_dominated_by_empty_index D₀ T hspan ht_m
+      (h_empty t_m ht_m htm) hw (fun i hi ↦
+        hmax (D₀.canonicalMap i) (Finset.mem_image_of_mem _ hi))).elim
+
+set_option linter.unusedSectionVars false in
+/-- **`Tpos`-image and full-`T`-image piece-opens agree on `Spa B`**: for a
+`Tpos`-image generator `u`, the rational open cut out by the full image set
+`T.image canonicalMap` coincides with the one cut out by the smaller
+`Tpos.image canonicalMap`. The extra σ₋-bounds are automatic since every point
+is dominated by a `Tpos`-index (`spaB_dominantGen_mem_Tpos`). This is the
+open-level congruence behind the `C_sub ≅ C_gen` step. -/
+private theorem rationalOpen_image_eq_of_dominantGen
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A] [DecidableEq A]
+    (D₀ : RationalLocData A) [DecidableEq (presheafValue D₀)] (T : Finset A)
+    (hspan : Ideal.span (T : Set A) = ⊤)
+    (Tpos : Finset A) (hsub : Tpos ⊆ T) (hTn : T.Nonempty)
+    (h_empty : ∀ t ∈ T, t ∉ Tpos →
+      rationalOpen (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).T
+        (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).s = ∅)
+    {u : presheafValue D₀} (hu : u ∈ Tpos.image D₀.canonicalMap) :
+    rationalOpen (T.image D₀.canonicalMap) u =
+      rationalOpen (Tpos.image D₀.canonicalMap) u := by
+  apply Set.Subset.antisymm
+  · rintro w ⟨hw, hcond, hnz⟩
+    exact ⟨hw, fun k hk ↦
+      hcond k (Finset.image_subset_image hsub hk), hnz⟩
+  · rintro w ⟨hw, hcond, hnz⟩
+    refine ⟨hw, ?_, hnz⟩
+    intro k hk
+    obtain ⟨t', htpos', hcondw⟩ :=
+      spaB_dominantGen_mem_Tpos D₀ T hspan Tpos hsub hTn h_empty hw
+    obtain ⟨i, hi, rfl⟩ := Finset.mem_image.mp hk
+    exact w.vle_trans (hcondw i hi)
+      (hcond (D₀.canonicalMap t') (Finset.mem_image_of_mem _ htpos'))
+
+set_option linter.unusedSectionVars false in
+/-- **The σ₊-dichotomy at `B := 𝒪_X(D₀)`** (the nonempty-`Tpos` core of
+`genRestrictedCover_isOXAcyclic_of_units_or_empty`): the image cover
+`imageGenCover D₀ T hspan` is `O_X`-acyclic when some generator is a
+canonical-image unit (`Tpos` nonempty) and every generator is EITHER such a
+unit OR has an empty piece-trace.
+
+Route: at `B` the full image cover is open-level congruent
+(`isOXAcyclic_congr`, via `rationalOpen_image_eq_of_dominantGen`) to the
+`Tpos`-image subcover `C_gen` — whose generators are RING units of `B`, so
+`C_gen` is acyclic by `isOXAcyclic_of_isGeneratedBy_ring_units`; the σ₋-pieces
+are empty on `Spa B` (`spaB_not_dominated_by_empty_index`) and are padded back
+on by `isOXAcyclic_of_empty_complement`. -/
+private theorem imageGenCover_isOXAcyclic_of_units_or_empty_B
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A] [DecidableEq A]
+    (D₀ : RationalLocData A) (T : Finset A)
+    (hspan : Ideal.span (T : Set A) = ⊤)
+    (hplus : (A⁺ : Set A) ⊆ D₀.P.A₀)
+    (Tpos : Finset A) (_hsub : Tpos ⊆ T) (hTne : Tpos.Nonempty)
+    (_h_units : ∀ t ∈ Tpos, IsUnit (D₀.canonicalMap t))
+    (_h_empty : ∀ t ∈ T, t ∉ Tpos →
+      rationalOpen (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).T
+        (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).s = ∅) :
+    haveI hTateB : IsTateRing (presheafValue D₀) :=
+      presheafValue_isTateRing_faithful D₀
+    haveI : IsNoetherianRing (presheafValue D₀) :=
+      presheafValue_isNoetherianRing_faithful D₀
+    haveI : IsStronglyNoetherian (presheafValue D₀) :=
+      presheafValue_isStronglyNoetherian_faithful D₀
+    haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+    (imageGenCover D₀ T hspan).IsOXAcyclic := by
+  classical
+  haveI hTateB : IsTateRing (presheafValue D₀) :=
+    presheafValue_isTateRing_faithful D₀
+  haveI : IsNoetherianRing (presheafValue D₀) :=
+    presheafValue_isNoetherianRing_faithful D₀
+  haveI : IsStronglyNoetherian (presheafValue D₀) :=
+    presheafValue_isStronglyNoetherian_faithful D₀
+  haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
+  haveI : NonarchimedeanRing (presheafValue D₀) := inferInstance
+  haveI : T2Space (presheafValue D₀) := inferInstance
+  letI : DecidableEq (presheafValue D₀) := Classical.decEq _
+  letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  have hplusB : ((presheafValue D₀)⁺ : Set (presheafValue D₀)) ⊆
+      ↑(presheafValue_concretePair D₀).A₀ :=
+    completedPlusSubring_le_ringOfDef D₀ hplus
+  have hTn : T.Nonempty := ⟨hTne.choose, _hsub hTne.choose_spec⟩
+  -- KEY-FACT: every Spa-B-point's dominant generator comes from Tpos.
+  have hkey : ∀ w ∈ Spa (presheafValue D₀) (presheafValue D₀)⁺,
+      ∃ t ∈ Tpos, ∀ i ∈ T, w.vle (D₀.canonicalMap i) (D₀.canonicalMap t) :=
+    fun w hw ↦ spaB_dominantGen_mem_Tpos D₀ T hspan Tpos _hsub hTn _h_empty hw
+  -- the Tpos-image spans B (it contains a unit)
+  have hspanB : Ideal.span ((Tpos.image D₀.canonicalMap :
+      Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤ :=
+    Ideal.eq_top_of_isUnit_mem _
+      (Ideal.subset_span (Finset.mem_coe.mpr
+        (Finset.mem_image_of_mem _ hTne.choose_spec)))
+      (_h_units hTne.choose hTne.choose_spec)
+  -- the B-native Tpos-generated cover of Spa B
+  let C_gen : RationalCovering (presheafValue D₀) :=
+    { base := globalLocData (presheafValue_concretePair D₀)
+      covers := (Tpos.image D₀.canonicalMap).image (fun u ↦
+        genPieceDatum (presheafValue_concretePair D₀)
+          (Tpos.image D₀.canonicalMap) u hspanB)
+      hsubset := by
+        intro D hD v hv
+        exact ⟨hv.1, fun x hx ↦ by
+          rw [Finset.mem_singleton.mp hx]
+          exact (v.vle_total 1 1).elim id id, v.not_vle_one_zero⟩
+      hcover := by
+        intro v hv
+        obtain ⟨t, htpos, hcond⟩ := hkey v hv.1
+        refine ⟨genPieceDatum (presheafValue_concretePair D₀)
+            (Tpos.image D₀.canonicalMap) (D₀.canonicalMap t) hspanB,
+          Finset.mem_image_of_mem _ (Finset.mem_image_of_mem _ htpos), ?_⟩
+        refine ⟨hv.1, ?_, ?_⟩
+        · intro k hk
+          rw [genPieceDatum_T] at hk
+          obtain ⟨i, hi, rfl⟩ := Finset.mem_image.mp hk
+          rw [genPieceDatum_s]
+          exact hcond i (_hsub hi)
+        · rw [genPieceDatum_s]
+          exact not_vle_zero_of_isUnit (_h_units t htpos) v }
+  -- C_gen is generated by the Tpos-image — ring units of B.
+  have hgenB : C_gen.IsGeneratedBy (Tpos.image D₀.canonicalMap) := by
+    constructor
+    · exact hspanB
+    · refine ⟨fun u ↦ ⟨genPieceDatum (presheafValue_concretePair D₀)
+        (Tpos.image D₀.canonicalMap) u.1 hspanB,
+        Finset.mem_image_of_mem _ u.2⟩, ⟨?_, ?_⟩, fun u ↦ ⟨rfl, rfl⟩⟩
+      · intro u₁ u₂ h
+        have hs := congrArg (fun D ↦ (D.1).s) h
+        exact Subtype.ext hs
+      · rintro ⟨D, hD⟩
+        rw [show C_gen.covers = (Tpos.image D₀.canonicalMap).image (fun u ↦
+          genPieceDatum (presheafValue_concretePair D₀)
+            (Tpos.image D₀.canonicalMap) u hspanB) from rfl,
+          Finset.mem_image] at hD
+        obtain ⟨u, hu, rfl⟩ := hD
+        exact ⟨⟨u, hu⟩, rfl⟩
+  have hunitsB : ∀ u ∈ Tpos.image D₀.canonicalMap, IsUnit u := by
+    intro u hu
+    obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp hu
+    exact _h_units t ht
+  have hC_gen_acyclic : C_gen.IsOXAcyclic :=
+    isOXAcyclic_of_isGeneratedBy_ring_units C_gen
+      (Tpos.image D₀.canonicalMap) (hTne.image _) hgenB hunitsB
+      ⟨globalLocData_isRational _, fun D hD ↦ by
+        obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp hD
+        exact RationalLocData.isRational_of_span_eq_top
+          (by rw [genPieceDatum_T]; exact hspanB)⟩
+      hplusB
+      (fun D hD ↦ by
+        obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp hD
+        exact hplusB)
+      (fun D hD ↦ by
+        obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp hD
+        rfl)
+  -- the full-T image span (public form of the private imageGenCover_span)
+  have hspanBT : Ideal.span ((T.image D₀.canonicalMap :
+      Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤ := by
+    rw [Finset.coe_image]
+    exact span_image_canonicalMap_eq_top D₀ T hspan
+  -- the Tpos-indexed subfamily of the FULL image cover
+  let C_sub : RationalCovering (presheafValue D₀) :=
+    { base := globalLocData (presheafValue_concretePair D₀)
+      covers := (Tpos.image D₀.canonicalMap).image (fun u ↦
+        genPieceDatum (presheafValue_concretePair D₀)
+          (T.image D₀.canonicalMap) u hspanBT)
+      hsubset := by
+        intro D hD v hv
+        exact ⟨hv.1, fun x hx ↦ by
+          rw [Finset.mem_singleton.mp hx]
+          exact (v.vle_total 1 1).elim id id, v.not_vle_one_zero⟩
+      hcover := by
+        intro v hv
+        obtain ⟨t, htpos, hcond⟩ := hkey v hv.1
+        refine ⟨genPieceDatum (presheafValue_concretePair D₀)
+            (T.image D₀.canonicalMap) (D₀.canonicalMap t) hspanBT,
+          Finset.mem_image_of_mem _ (Finset.mem_image_of_mem _ htpos), ?_⟩
+        refine ⟨hv.1, ?_, ?_⟩
+        · intro k hk
+          rw [genPieceDatum_T] at hk
+          obtain ⟨i, hi, rfl⟩ := Finset.mem_image.mp hk
+          rw [genPieceDatum_s]
+          exact hcond i hi
+        · rw [genPieceDatum_s]
+          exact not_vle_zero_of_isUnit (_h_units t htpos) v }
+  -- piece-opens of C_sub and C_gen agree: the σ₋-conditions are AUTOMATIC.
+  have hopens : ∀ u ∈ Tpos.image D₀.canonicalMap,
+      rationalOpen (T.image D₀.canonicalMap) u =
+      rationalOpen (Tpos.image D₀.canonicalMap) u :=
+    fun u hu ↦ rationalOpen_image_eq_of_dominantGen D₀ T hspan Tpos _hsub hTn
+      _h_empty hu
+  have hC_sub_acyclic : C_sub.IsOXAcyclic := by
+    refine isOXAcyclic_congr C_sub C_gen rfl (fun D hD ↦ ?_)
+      (fun D hD ↦ ?_) hC_gen_acyclic
+    · obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp hD
+      refine ⟨genPieceDatum (presheafValue_concretePair D₀)
+          (Tpos.image D₀.canonicalMap) u hspanB,
+        Finset.mem_image_of_mem _ hu, ?_⟩
+      rw [genPieceDatum_T, genPieceDatum_s, genPieceDatum_T, genPieceDatum_s]
+      exact hopens u hu
+    · obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp hD
+      refine ⟨genPieceDatum (presheafValue_concretePair D₀)
+          (T.image D₀.canonicalMap) u hspanBT,
+        Finset.mem_image_of_mem _ hu, ?_⟩
+      rw [genPieceDatum_T, genPieceDatum_s, genPieceDatum_T, genPieceDatum_s]
+      exact hopens u hu
+  -- pad the σ₋-pieces (empty at B) onto the subfamily.
+  refine isOXAcyclic_of_empty_complement (imageGenCover D₀ T hspan) C_sub
+    rfl ?_ (fun D hD _ ↦ ?_) (fun D hD hDn ↦ ?_) hC_sub_acyclic
+  · intro D hD
+    obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp hD
+    exact Finset.mem_image_of_mem _ (Finset.image_subset_image _hsub hu)
+  · obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp hD
+    exact hplusB
+  · obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp hD
+    obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp hu
+    have htn : t ∉ Tpos := fun htpos ↦ hDn (Finset.mem_image.mpr
+      ⟨D₀.canonicalMap t, Finset.mem_image_of_mem _ htpos, rfl⟩)
+    rw [Set.eq_empty_iff_forall_notMem]
+    rintro w ⟨hw, hcond, hnz⟩
+    refine spaB_not_dominated_by_empty_index D₀ T hspan ht (_h_empty t ht htn)
+      hw ?_
+    intro i hi
+    have h0 := hcond (D₀.canonicalMap i)
+      (by rw [genPieceDatum_T]; exact Finset.mem_image_of_mem _ hi)
+    rwa [genPieceDatum_s] at h0
+
+set_option linter.unusedSectionVars false in
 /-- **The σ₊-dichotomy engine** (Wedhorn p. 84 part (ii), wedhorn.txt:4236-4242,
 faithful form): the restricted cover `{D₀ ∩ R(T/t) : t ∈ T}` is `O_X`-acyclic
 when every generator is EITHER a canonical-image unit of `𝒪_X(D₀)` (the
@@ -12162,248 +12514,17 @@ theorem genRestrictedCover_isOXAcyclic_of_units_or_empty
   classical
   by_cases hTne : Tpos.Nonempty
   case neg =>
-    -- ALL piece-traces are empty, so the base trace is empty and every
-    -- section ring in sight is the zero ring.
+    -- ALL piece-traces are empty (σ₋-only): the cover is acyclic by the
+    -- all-empty branch (every section ring is the zero ring).
     rw [Finset.not_nonempty_iff_eq_empty] at hTne
-    have h_all_empty : ∀ t ∈ T,
-        rationalOpen (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).T
-          (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).s = ∅ :=
-      fun t ht ↦ _h_empty t ht (by rw [hTne]; exact Finset.notMem_empty t)
-    have h_base_empty : rationalOpen D₀.T D₀.s = ∅ := by
-      rw [Set.eq_empty_iff_forall_notMem]
-      intro v hv
-      obtain ⟨D', hD'_in, hv_in⟩ := (genRestrictedCover D₀ T hspan).hcover v hv
-      obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp hD'_in
-      rw [h_all_empty t ht] at hv_in
-      exact hv_in
-    haveI hsub_base :
-        Subsingleton (presheafValue (genRestrictedCover D₀ T hspan).base) :=
-      presheafValue_subsingleton_of_rationalOpen_empty D₀ hplus h_base_empty
-    constructor
-    · intro x _
-      exact Subsingleton.elim x 0
-    · intro f _
-      refine ⟨0, fun D ↦ ?_⟩
-      obtain ⟨t, ht, hDeq⟩ := Finset.mem_image.mp D.2
-      haveI : Subsingleton (presheafValue D.1) := by
-        rw [← hDeq]
-        exact presheafValue_subsingleton_of_rationalOpen_empty _ hplus
-          (h_all_empty t ht)
-      exact Subsingleton.elim _ _
+    exact genRestrictedCover_isOXAcyclic_of_all_traces_empty D₀ T hspan hplus
+      (fun t ht ↦ _h_empty t ht (by rw [hTne]; exact Finset.notMem_empty t))
   case pos =>
-    -- the B-instance suite (as in `imageGenCover_isOXAcyclic_of_units`)
-    haveI hTateB : IsTateRing (presheafValue D₀) :=
-      presheafValue_isTateRing_faithful D₀
-    haveI : IsNoetherianRing (presheafValue D₀) :=
-      presheafValue_isNoetherianRing_faithful D₀
-    haveI : IsStronglyNoetherian (presheafValue D₀) :=
-      presheafValue_isStronglyNoetherian_faithful D₀
-    haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
-    haveI : NonarchimedeanRing (presheafValue D₀) := inferInstance
-    haveI : T2Space (presheafValue D₀) := inferInstance
-    letI : DecidableEq (presheafValue D₀) := Classical.decEq _
-    letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    have hplusB : ((presheafValue D₀)⁺ : Set (presheafValue D₀)) ⊆
-        ↑(presheafValue_concretePair D₀).A₀ :=
-      completedPlusSubring_le_ringOfDef D₀ hplus
-    have hTn : T.Nonempty := ⟨hTne.choose, _hsub hTne.choose_spec⟩
-    -- σ₋-emptiness transported to B: a Spa-B-point dominated by a σ₋-index
-    -- would comap into the empty A-trace.
-    have hB_empty : ∀ t ∈ T, t ∉ Tpos →
-        ∀ w ∈ Spa (presheafValue D₀) (presheafValue D₀)⁺,
-        (∀ i ∈ T, w.vle (D₀.canonicalMap i) (D₀.canonicalMap t)) → False := by
-      intro t ht htn w hw hcond
-      have hv := comap_canonicalMap_mem_rationalOpen D₀
-        (canonicalMap_continuous D₀) hw
-      have hnz : ¬ (comap D₀.canonicalMap w).vle t 0 := by
-        intro h0
-        have hsupp : ∀ i ∈ T, i ∈ (comap D₀.canonicalMap w).supp := by
-          intro i hi
-          rw [ValuationSpectrum.mem_supp_iff]
-          refine (comap D₀.canonicalMap w).vle_trans ?_ h0
-          rw [ValuationSpectrum.comap_vle]
-          exact hcond i hi
-        have hle : Ideal.span (T : Set A) ≤ (comap D₀.canonicalMap w).supp :=
-          Ideal.span_le.mpr (fun i hi ↦ hsupp i hi)
-        rw [hspan] at hle
-        exact (comap D₀.canonicalMap w).not_vle_one_zero
-          (((comap D₀.canonicalMap w).mem_supp_iff 1).mp (hle Submodule.mem_top))
-      have htrace : comap D₀.canonicalMap w ∈
-          rationalOpen (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).T
-            (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).s := by
-        rw [RationalLocData.interSamePair_rationalOpen]
-        refine ⟨hv, hv.1, ?_, ?_⟩
-        · intro i hi
-          rw [genPieceDatum_T] at hi
-          rw [genPieceDatum_s, ValuationSpectrum.comap_vle]
-          exact hcond i hi
-        · rw [genPieceDatum_s]
-          exact hnz
-      rw [_h_empty t ht htn] at htrace
-      exact htrace
-    -- KEY-FACT: every Spa-B-point's dominant generator comes from Tpos.
-    have hkey : ∀ w ∈ Spa (presheafValue D₀) (presheafValue D₀)⁺,
-        ∃ t ∈ Tpos, ∀ i ∈ T, w.vle (D₀.canonicalMap i) (D₀.canonicalMap t) := by
-      intro w hw
-      obtain ⟨m, hm, hmax⟩ := exists_vle_max_mem w (hTn.image D₀.canonicalMap)
-      obtain ⟨t_m, ht_m, rfl⟩ := Finset.mem_image.mp hm
-      by_cases htm : t_m ∈ Tpos
-      · exact ⟨t_m, htm, fun i hi ↦
-          hmax (D₀.canonicalMap i) (Finset.mem_image_of_mem _ hi)⟩
-      · exact (hB_empty t_m ht_m htm w hw (fun i hi ↦
-          hmax (D₀.canonicalMap i) (Finset.mem_image_of_mem _ hi))).elim
-    -- the Tpos-image spans B (it contains a unit)
-    have hspanB : Ideal.span ((Tpos.image D₀.canonicalMap :
-        Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤ :=
-      Ideal.eq_top_of_isUnit_mem _
-        (Ideal.subset_span (Finset.mem_coe.mpr
-          (Finset.mem_image_of_mem _ hTne.choose_spec)))
-        (_h_units hTne.choose hTne.choose_spec)
-    -- the B-native Tpos-generated cover of Spa B
-    let C_gen : RationalCovering (presheafValue D₀) :=
-      { base := globalLocData (presheafValue_concretePair D₀)
-        covers := (Tpos.image D₀.canonicalMap).image (fun u ↦
-          genPieceDatum (presheafValue_concretePair D₀)
-            (Tpos.image D₀.canonicalMap) u hspanB)
-        hsubset := by
-          intro D hD v hv
-          exact ⟨hv.1, fun x hx ↦ by
-            rw [Finset.mem_singleton.mp hx]
-            exact (v.vle_total 1 1).elim id id, v.not_vle_one_zero⟩
-        hcover := by
-          intro v hv
-          obtain ⟨t, htpos, hcond⟩ := hkey v hv.1
-          refine ⟨genPieceDatum (presheafValue_concretePair D₀)
-              (Tpos.image D₀.canonicalMap) (D₀.canonicalMap t) hspanB,
-            Finset.mem_image_of_mem _ (Finset.mem_image_of_mem _ htpos), ?_⟩
-          refine ⟨hv.1, ?_, ?_⟩
-          · intro k hk
-            rw [genPieceDatum_T] at hk
-            obtain ⟨i, hi, rfl⟩ := Finset.mem_image.mp hk
-            rw [genPieceDatum_s]
-            exact hcond i (_hsub hi)
-          · rw [genPieceDatum_s]
-            exact not_vle_zero_of_isUnit (_h_units t htpos) v }
-    -- C_gen is generated by the Tpos-image — ring units of B.
-    have hgenB : C_gen.IsGeneratedBy (Tpos.image D₀.canonicalMap) := by
-      constructor
-      · exact hspanB
-      · refine ⟨fun u ↦ ⟨genPieceDatum (presheafValue_concretePair D₀)
-          (Tpos.image D₀.canonicalMap) u.1 hspanB,
-          Finset.mem_image_of_mem _ u.2⟩, ⟨?_, ?_⟩, fun u ↦ ⟨rfl, rfl⟩⟩
-        · intro u₁ u₂ h
-          have hs := congrArg (fun D ↦ (D.1).s) h
-          exact Subtype.ext hs
-        · rintro ⟨D, hD⟩
-          rw [show C_gen.covers = (Tpos.image D₀.canonicalMap).image (fun u ↦
-            genPieceDatum (presheafValue_concretePair D₀)
-              (Tpos.image D₀.canonicalMap) u hspanB) from rfl,
-            Finset.mem_image] at hD
-          obtain ⟨u, hu, rfl⟩ := hD
-          exact ⟨⟨u, hu⟩, rfl⟩
-    have hunitsB : ∀ u ∈ Tpos.image D₀.canonicalMap, IsUnit u := by
-      intro u hu
-      obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp hu
-      exact _h_units t ht
-    have hC_gen_acyclic : C_gen.IsOXAcyclic :=
-      isOXAcyclic_of_isGeneratedBy_ring_units C_gen
-        (Tpos.image D₀.canonicalMap) (hTne.image _) hgenB hunitsB
-        ⟨globalLocData_isRational _, fun D hD ↦ by
-          obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp hD
-          exact RationalLocData.isRational_of_span_eq_top
-            (by rw [genPieceDatum_T]; exact hspanB)⟩
-        hplusB
-        (fun D hD ↦ by
-          obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp hD
-          exact hplusB)
-        (fun D hD ↦ by
-          obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp hD
-          rfl)
-    -- the full-T image span (public form of the private imageGenCover_span)
-    have hspanBT : Ideal.span ((T.image D₀.canonicalMap :
-        Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤ := by
-      rw [Finset.coe_image]
-      exact span_image_canonicalMap_eq_top D₀ T hspan
-    -- the Tpos-indexed subfamily of the FULL image cover
-    let C_sub : RationalCovering (presheafValue D₀) :=
-      { base := globalLocData (presheafValue_concretePair D₀)
-        covers := (Tpos.image D₀.canonicalMap).image (fun u ↦
-          genPieceDatum (presheafValue_concretePair D₀)
-            (T.image D₀.canonicalMap) u hspanBT)
-        hsubset := by
-          intro D hD v hv
-          exact ⟨hv.1, fun x hx ↦ by
-            rw [Finset.mem_singleton.mp hx]
-            exact (v.vle_total 1 1).elim id id, v.not_vle_one_zero⟩
-        hcover := by
-          intro v hv
-          obtain ⟨t, htpos, hcond⟩ := hkey v hv.1
-          refine ⟨genPieceDatum (presheafValue_concretePair D₀)
-              (T.image D₀.canonicalMap) (D₀.canonicalMap t) hspanBT,
-            Finset.mem_image_of_mem _ (Finset.mem_image_of_mem _ htpos), ?_⟩
-          refine ⟨hv.1, ?_, ?_⟩
-          · intro k hk
-            rw [genPieceDatum_T] at hk
-            obtain ⟨i, hi, rfl⟩ := Finset.mem_image.mp hk
-            rw [genPieceDatum_s]
-            exact hcond i hi
-          · rw [genPieceDatum_s]
-            exact not_vle_zero_of_isUnit (_h_units t htpos) v }
-    -- piece-opens of C_sub and C_gen agree: the σ₋-conditions are AUTOMATIC.
-    have hopens : ∀ u ∈ Tpos.image D₀.canonicalMap,
-        rationalOpen (T.image D₀.canonicalMap) u =
-        rationalOpen (Tpos.image D₀.canonicalMap) u := by
-      intro u hu
-      apply Set.Subset.antisymm
-      · rintro w ⟨hw, hcond, hnz⟩
-        exact ⟨hw, fun k hk ↦
-          hcond k (Finset.image_subset_image _hsub hk), hnz⟩
-      · rintro w ⟨hw, hcond, hnz⟩
-        refine ⟨hw, ?_, hnz⟩
-        intro k hk
-        obtain ⟨t', htpos', hcondw⟩ := hkey w hw
-        obtain ⟨i, hi, rfl⟩ := Finset.mem_image.mp hk
-        exact w.vle_trans (hcondw i hi)
-          (hcond (D₀.canonicalMap t') (Finset.mem_image_of_mem _ htpos'))
-    have hC_sub_acyclic : C_sub.IsOXAcyclic := by
-      refine isOXAcyclic_congr C_sub C_gen rfl (fun D hD ↦ ?_)
-        (fun D hD ↦ ?_) hC_gen_acyclic
-      · obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp hD
-        refine ⟨genPieceDatum (presheafValue_concretePair D₀)
-            (Tpos.image D₀.canonicalMap) u hspanB,
-          Finset.mem_image_of_mem _ hu, ?_⟩
-        rw [genPieceDatum_T, genPieceDatum_s, genPieceDatum_T, genPieceDatum_s]
-        exact hopens u hu
-      · obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp hD
-        refine ⟨genPieceDatum (presheafValue_concretePair D₀)
-            (T.image D₀.canonicalMap) u hspanBT,
-          Finset.mem_image_of_mem _ hu, ?_⟩
-        rw [genPieceDatum_T, genPieceDatum_s, genPieceDatum_T, genPieceDatum_s]
-        exact hopens u hu
-    -- pad the σ₋-pieces (empty at B) onto the subfamily.
-    have hC_full_acyclic : (imageGenCover D₀ T hspan).IsOXAcyclic := by
-      refine isOXAcyclic_of_empty_complement (imageGenCover D₀ T hspan) C_sub
-        rfl ?_ (fun D hD _ ↦ ?_) (fun D hD hDn ↦ ?_) hC_sub_acyclic
-      · intro D hD
-        obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp hD
-        exact Finset.mem_image_of_mem _ (Finset.image_subset_image _hsub hu)
-      · obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp hD
-        exact hplusB
-      · obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp hD
-        obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp hu
-        have htn : t ∉ Tpos := fun htpos ↦ hDn (Finset.mem_image.mpr
-          ⟨D₀.canonicalMap t, Finset.mem_image_of_mem _ htpos, rfl⟩)
-        rw [Set.eq_empty_iff_forall_notMem]
-        rintro w ⟨hw, hcond, hnz⟩
-        refine hB_empty t ht htn w hw ?_
-        intro i hi
-        have h0 := hcond (D₀.canonicalMap i)
-          (by rw [genPieceDatum_T]; exact Finset.mem_image_of_mem _ hi)
-        rwa [genPieceDatum_s] at h0
-    exact genRestrictedCover_isOXAcyclic_of_B D₀ T hspan hC_full_acyclic
+    -- nonempty `Tpos`: the image cover is acyclic at `B = 𝒪_X(D₀)` (σ₊-dichotomy
+    -- core), then descend to the A-level restricted cover via the G4 transport.
+    exact genRestrictedCover_isOXAcyclic_of_B D₀ T hspan
+      (imageGenCover_isOXAcyclic_of_units_or_empty_B D₀ T hspan hplus Tpos _hsub
+        hTne _h_units _h_empty)
 
 /-- **Part (iv) pair-instances of the Prop A.3(1) standing hypothesis**
 (Wedhorn Prop A.3, p. 105, wedhorn.txt:5316-5318: "`U | V_{j₀…j_q}` is
