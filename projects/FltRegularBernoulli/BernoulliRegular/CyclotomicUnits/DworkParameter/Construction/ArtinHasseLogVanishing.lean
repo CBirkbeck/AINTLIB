@@ -1,6 +1,6 @@
 module
 
-public import BernoulliRegular.CyclotomicUnits.DworkParameter.Part8Conjugation
+public import BernoulliRegular.CyclotomicUnits.DworkParameter.Construction.ComplexConjugationAction
 
 /-!
 # The corrected Dwork parameter: vanishing of the finite Artin--Hasse logarithm

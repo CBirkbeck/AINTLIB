@@ -1,6 +1,6 @@
 module
 
-public import BernoulliRegular.CyclotomicUnits.DworkParameter.Part6
+public import BernoulliRegular.CyclotomicUnits.DworkParameter.SamePrimeLog.ArtinHasseLogDegreeSum
 
 /-!
 # The corrected Dwork parameter: same-prime finite Artin--Hasse logarithm

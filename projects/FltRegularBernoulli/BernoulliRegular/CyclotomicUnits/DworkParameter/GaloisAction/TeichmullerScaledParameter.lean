@@ -1,6 +1,6 @@
 module
 
-public import BernoulliRegular.CyclotomicUnits.DworkParameter.Part15
+public import BernoulliRegular.CyclotomicUnits.DworkParameter.PowerBasis.ConjugationFixedBasis
 public import BernoulliRegular.Characters
 
 @[expose] public section

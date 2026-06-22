@@ -1,6 +1,6 @@
 module
 
-public import BernoulliRegular.CyclotomicUnits.DworkParameter.Part9
+public import BernoulliRegular.CyclotomicUnits.DworkParameter.Construction.ArtinHasseTailUnit
 
 @[expose] public section
 

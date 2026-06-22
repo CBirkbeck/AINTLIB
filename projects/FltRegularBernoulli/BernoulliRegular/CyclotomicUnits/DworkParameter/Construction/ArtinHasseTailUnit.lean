@@ -1,6 +1,6 @@
 module
 
-public import BernoulliRegular.CyclotomicUnits.DworkParameter.Part8Tail
+public import BernoulliRegular.CyclotomicUnits.DworkParameter.Construction.ArtinHasseLogVanishing
 
 @[expose] public section
 

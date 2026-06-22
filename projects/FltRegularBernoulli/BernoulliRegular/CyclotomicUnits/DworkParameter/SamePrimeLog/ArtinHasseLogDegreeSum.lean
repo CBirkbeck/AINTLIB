@@ -1,6 +1,6 @@
 module
 
-public import BernoulliRegular.CyclotomicUnits.DworkParameter.Part5
+public import BernoulliRegular.CyclotomicUnits.DworkParameter.SamePrimeLog.ArtinHasseExpCoordLogHomogeneous
 
 @[expose] public section
 
