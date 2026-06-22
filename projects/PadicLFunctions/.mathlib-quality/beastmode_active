@@ -1,1 +1,1 @@
-FOCUS: TG1 — MulDistribMulAction (GammaPlus)(XinfPlus) COMPILES (Remark 13.7 done modulo 1 isolated sorry isAdmissibleM_map). Verifying lake build, then committing. Next: TG2 (Λ-module) or fill isAdmissibleM_map.
+FOCUS: TG3 (Y∞⁺ abelian) — porting X∞⁺-abelian machinery to L: instNormalLPlusN, instIsGaloisLPlusN, instIsAbelianGaloisLPlusN, isAbelianGalois_comap_LPlusN, commute_on_LPlusN, isMulCommutative_YinfPlus. Completable sorry-free (mirrors lines 506-583).

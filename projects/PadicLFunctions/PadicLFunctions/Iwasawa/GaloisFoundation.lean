@@ -582,6 +582,82 @@ instance isMulCommutative_XinfPlus : IsMulCommutative (XinfPlus p) := by
   | mul a b _ _ ha hb => rw [map_mul, map_mul, ha, hb]
   | inv a _ ha => rw [map_inv₀, map_inv₀, ha]
 
+/-! #### `Y⁺_∞ = Gal(L⁺_∞/F⁺_∞)` is abelian (TG3) — the same argument over the unramified tower `L⁺` -/
+
+/-- `Lₙ⁺/Fₙ⁺` is normal (compositum of normal admissible-`L` layers). -/
+instance instNormalLPlusN (n : ℕ) : Normal (FPlus p n) (LPlusN p n) := by
+  rw [LPlusN]
+  refine IntermediateField.normal_iSup (t := fun L => ⨆ _ : IsAdmissibleL p n L, L) (h := fun L => ?_)
+  by_cases h : IsAdmissibleL p n L
+  · rw [iSup_pos h]; haveI := isAbelianGalois_of_isAdmissibleL p h; infer_instance
+  · rw [iSup_neg h]; infer_instance
+
+/-- `Lₙ⁺/Fₙ⁺` is Galois. -/
+instance instIsGaloisLPlusN (n : ℕ) : IsGalois (FPlus p n) (LPlusN p n) := ⟨⟩
+
+/-- `Lₙ⁺/Fₙ⁺` is abelian Galois. -/
+instance instIsAbelianGaloisLPlusN (n : ℕ) : IsAbelianGalois (FPlus p n) (LPlusN p n) :=
+  haveI := isMulCommutative_galLPlusN p n; ⟨⟩
+
+/-- `Lₙ⁺`, viewed as an `Fₙ⁺`-subfield of `L∞⁺` (via `comap`), is abelian Galois over `Fₙ⁺`. -/
+lemma isAbelianGalois_comap_LPlusN (n : ℕ) [Algebra ↥(FPlus p n) ↥(FinfPlus p)]
+    [Algebra ↥(FPlus p n) ↥(LinfPlus p)] [IsScalarTower ↥(FPlus p n) ↥(FinfPlus p) Om]
+    [IsScalarTower ↥(FPlus p n) ↥(FinfPlus p) ↥(LinfPlus p)] :
+    IsAbelianGalois (FPlus p n)
+      ↥(IntermediateField.comap ((LinfPlus p).val.restrictScalars ↥(FPlus p n)) (LPlusN p n)) := by
+  let fEh : ↥(IntermediateField.comap ((LinfPlus p).val.restrictScalars ↥(FPlus p n)) (LPlusN p n))
+      →ₐ[FPlus p n] ↥(LPlusN p n) :=
+    AlgHom.codRestrict (((LinfPlus p).val.restrictScalars ↥(FPlus p n)).comp
+      (IntermediateField.comap ((LinfPlus p).val.restrictScalars ↥(FPlus p n)) (LPlusN p n)).val)
+      (LPlusN p n).toSubalgebra (fun w => w.2)
+  exact IsAbelianGalois.of_algHom fEh
+
+/-- **Base case for `Y⁺_∞` abelian**: two `Gal(L∞⁺/F∞⁺)`-automorphisms commute on any point coming
+from a finite layer `Lₙ⁺` (restrict to `Fₙ⁺`, where `Lₙ⁺` is abelian). -/
+theorem commute_on_LPlusN (n : ℕ) (σ τ : LinfPlus p ≃ₐ[FinfPlus p] LinfPlus p)
+    (z : ↥(LinfPlus p)) (hz : (z : Om) ∈ LPlusN p n) : σ (τ z) = τ (σ z) := by
+  have hle : FPlus p n ≤ FinfPlus p := by rw [FinfPlus]; exact le_iSup (FPlus p) n
+  letI : Algebra ↥(FPlus p n) ↥(FinfPlus p) := (IntermediateField.inclusion hle).toAlgebra
+  letI : IsScalarTower ↥(FPlus p n) ↥(FinfPlus p) Om := IsScalarTower.of_algebraMap_eq (fun _ => rfl)
+  letI : Algebra ↥(FPlus p n) ↥(LinfPlus p) :=
+    ((algebraMap ↥(FinfPlus p) ↥(LinfPlus p)).comp (IntermediateField.inclusion hle).toRingHom).toAlgebra
+  letI : IsScalarTower ↥(FPlus p n) ↥(FinfPlus p) ↥(LinfPlus p) :=
+    IsScalarTower.of_algebraMap_eq (fun _ => rfl)
+  exact @commute_restrict_AG ↥(FPlus p n) ↥(FinfPlus p) ↥(LinfPlus p) _ _ _ _ _ _ _
+    (IntermediateField.comap ((LinfPlus p).val.restrictScalars ↥(FPlus p n)) (LPlusN p n))
+    (isAbelianGalois_comap_LPlusN p n) σ τ ⟨z, hz⟩
+
+open IntermediateField in
+/-- **`Y⁺_∞ = Gal(L⁺_∞/F⁺_∞)` is abelian** (TG3): `L⁺_∞` is generated over `F⁺_∞` by the finite
+abelian layers `L⁺ₙ`, so any two automorphisms commute on generators and hence everywhere. -/
+instance isMulCommutative_YinfPlus : IsMulCommutative (YinfPlus p) := by
+  rw [isMulCommutative_iff]; intro σ τ
+  refine AlgEquiv.ext fun y => ?_
+  set Sgen : Set ↥(LinfPlus p) := ⋃ n, ((LinfPlus p).val ⁻¹' (LPlusN p n)) with hS
+  have himg : (LinfPlus p).val '' Sgen = ⋃ n, (LPlusN p n : Set Om) := by
+    rw [hS, Set.image_iUnion]
+    refine Set.iUnion_congr fun n => ?_
+    rw [Set.image_preimage_eq_inter_range]
+    exact Set.inter_eq_left.mpr (fun x hx =>
+      ⟨⟨x, by rw [LinfPlus]; exact subset_adjoin _ _ (Set.mem_iUnion.mpr ⟨n, hx⟩)⟩, rfl⟩)
+  have htop : adjoin (FinfPlus p) Sgen = ⊤ := by
+    apply IntermediateField.map_injective (LinfPlus p).val
+    rw [IntermediateField.adjoin_map, himg]
+    apply SetLike.coe_injective
+    rw [IntermediateField.coe_map, IntermediateField.coe_top, Set.image_univ,
+      IntermediateField.coe_val, Subtype.range_coe_subtype]
+    rfl
+  have hy : y ∈ adjoin (FinfPlus p) Sgen := htop ▸ mem_top
+  induction hy using IntermediateField.adjoin_induction with
+  | mem w hw =>
+    obtain ⟨n, hwn⟩ := Set.mem_iUnion.mp hw
+    rw [AlgEquiv.mul_apply, AlgEquiv.mul_apply]
+    exact commute_on_LPlusN p n σ τ w hwn
+  | algebraMap r => simp
+  | add a b _ _ ha hb => rw [map_add, map_add, ha, hb]
+  | mul a b _ _ ha hb => rw [map_mul, map_mul, ha, hb]
+  | inv a _ ha => rw [map_inv₀, map_inv₀, ha]
+
 /-! ### Toward the `Γ⁺`-action (Remark 13.7): `F⁺_∞/ℚ` is Galois
 
 `Γ⁺ = Gal(F∞⁺/ℚ)` acts on `X∞⁺` by `σ·x = σ̃xσ̃⁻¹` (conjugation by a lift `σ̃ ∈ Gal(M∞⁺/ℚ)`). The first
