@@ -91,9 +91,8 @@ noncomputable def pollaczekFactor {b : ℕ}
 @[simp]
 theorem pollaczekFactor_val {b : ℕ}
     (hb : b ∈ Finset.Ico 1 ((p - 1) / 2 + 1)) :
-    (pollaczekFactor p K hb : 𝓞 K) = cyclotomicUnit p K b := by
-  unfold pollaczekFactor
-  exact cyclotomicUnitUnit_val _ _ _ _ _
+    (pollaczekFactor p K hb : 𝓞 K) = cyclotomicUnit p K b :=
+  cyclotomicUnitUnit_val _ _ _ _ _
 
 /-- The **Pollaczek cyclotomic unit**
 
