@@ -106,12 +106,10 @@ noncomputable def completedPrincipalUnitModPCharacterProjectionRange (i : ℕ) :
     Submodule (ZMod p) (Additive (completedPrincipalUnitModPQuotient p K)) :=
   LinearMap.range (completedPrincipalUnitModPCharacterProjection (p := p) K i)
 
+-- The submodule structure repeatedly synthesizes the quotient's `ZMod p`
+-- module instance through additive/multiplicative wrappers.
 set_option synthInstance.maxHeartbeats 80000 in
--- The submodule structure repeatedly synthesizes the quotient's `ZMod p`
--- module instance through additive/multiplicative wrappers.
 set_option maxHeartbeats 800000 in
--- The submodule structure repeatedly synthesizes the quotient's `ZMod p`
--- module instance through additive/multiplicative wrappers.
 /-- The eigenspace in `completed U_1 / completed U_1^p` for the `j`-th
 power character of `Delta`. -/
 def completedPrincipalUnitModPDeltaPowerEigenspace (j : ℕ) :
@@ -210,7 +208,7 @@ noncomputable def completedQuotientPowEquivLocalQuotientPow (N : ℕ) :
   let Mhat : Ideal S := completedLocalCyclotomicMaximalIdeal p K
   let f : S → R ⧸ M ^ N := AdicCompletion.evalₐ M N
   let e : S ⧸ Mhat ^ N → R ⧸ M ^ N :=
-    fun q => Quotient.liftOn' q f (by
+    fun q ↦ Quotient.liftOn' q f (by
       intro a b h
       rw [← sub_eq_zero, ← map_sub]
       have hker : a - b ∈ RingHom.ker (AdicCompletion.evalₐ M N).toRingHom := by
@@ -226,8 +224,8 @@ noncomputable def completedQuotientPowEquivLocalQuotientPow (N : ℕ) :
     | h b =>
       change f a = f b at hxy
       apply Ideal.Quotient.eq.mpr
-      rw [completedLocalCyclotomicMaximalIdeal_pow_eq_ker_evalₐ (p := p) (K := K) N]
-      rw [RingHom.mem_ker, map_sub]
+      rw [completedLocalCyclotomicMaximalIdeal_pow_eq_ker_evalₐ (p := p) (K := K) N,
+        RingHom.mem_ker, map_sub]
       exact sub_eq_zero.mpr hxy
   · intro y
     rcases AdicCompletion.surjective_evalₐ M N y with ⟨x, hx⟩
@@ -254,13 +252,11 @@ noncomputable def localQuotientPowToCompletedQuotientPow (N : ℕ) :
   let M := localCyclotomicMaximalIdeal p K
   let Mhat : Ideal S := completedLocalCyclotomicMaximalIdeal p K
   let g : R ⧸ M ^ N → S ⧸ Mhat ^ N :=
-    fun q => Quotient.liftOn' q
-      (fun r => Ideal.Quotient.mk (Mhat ^ N) (algebraMap R S r))
+    fun q ↦ Quotient.liftOn' q
+      (fun r ↦ Ideal.Quotient.mk (Mhat ^ N) (algebraMap R S r))
       (by
         intro a b h
-        rw [Ideal.Quotient.eq]
-        rw [← map_sub]
-        rw [← Ideal.map_pow]
+        rw [Ideal.Quotient.eq, ← map_sub, ← Ideal.map_pow]
         exact Ideal.mem_map_of_mem (algebraMap R S)
           ((Submodule.quotientRel_def (p := M ^ N)).mp h))
   let e := completedQuotientPowEquivLocalQuotientPow (p := p) (K := K) N
@@ -314,9 +310,8 @@ theorem completedQuotientPowEquivLocalQuotientPow_mem_map_pow
   have hxker : x ∈ RingHom.ker (AdicCompletion.evalₐ M n).toRingHom := by
     rw [← completedLocalCyclotomicMaximalIdeal_pow_eq_ker_evalₐ (p := p) (K := K) n]
     simpa [Mhat] using hx
-  rw [← Ideal.Quotient.factor_ker (Ideal.pow_le_pow_right n.le_succ)]
-  rw [RingHom.mem_ker]
-  rw [factor_evalₐ_pow_le M n.le_succ]
+  rw [← Ideal.Quotient.factor_ker (Ideal.pow_le_pow_right n.le_succ), RingHom.mem_ker,
+    factor_evalₐ_pow_le M n.le_succ]
   exact RingHom.mem_ker.mp hxker
 
 theorem localQuotientPowToCompletedQuotientPow_mem_map_pow
@@ -412,13 +407,13 @@ noncomputable def completedPrincipalUnitGradedToIdealQuotient
   let M := completedLocalCyclotomicMaximalIdeal p K
   let N : Submodule S (M ^ n : Ideal S) :=
     M • (⊤ : Submodule S (M ^ n : Ideal S))
-  let toIdeal : completedPrincipalUnitSubgroup p K n → (M ^ n : Ideal S) := fun u =>
+  let toIdeal : completedPrincipalUnitSubgroup p K n → (M ^ n : Ideal S) := fun u ↦
     ⟨((u : completedLocalCyclotomicUnitGroup p K) : S) - 1, by
       have hu := (mem_completedPrincipalUnitSubgroup_iff (p := p) (K := K) (n := n)
         (u := (u : completedLocalCyclotomicUnitGroup p K))).mp u.2
       simpa [S, M] using hu⟩
   {
-    toFun := fun u => Multiplicative.ofAdd (Submodule.mkQ N (toIdeal u))
+    toFun := fun u ↦ Multiplicative.ofAdd (Submodule.mkQ N (toIdeal u))
     map_one' := by
       apply Multiplicative.ofAdd.injective
       change Submodule.mkQ N (toIdeal 1) = 0
@@ -801,7 +796,7 @@ theorem completedPrincipalUnitGradedClass_eq_of_modPClassOfLevel_eq
       completedPrincipalUnitModPClassOfLevel (p := p) (K := K) n (Fact.out : 1 ≤ n) v) :
     completedPrincipalUnitGradedClass p K n u =
       completedPrincipalUnitGradedClass p K n v := by
-  apply (QuotientGroup.eq).2
+  apply QuotientGroup.eq.2
   rw [mem_completedPrincipalUnitGradedSubgroup_iff]
   rw [completedPrincipalUnitModPClassOfLevel_apply,
     completedPrincipalUnitModPClassOfLevel_apply] at h
@@ -809,9 +804,9 @@ theorem completedPrincipalUnitGradedClass_eq_of_modPClassOfLevel_eq
       (completedPrincipalUnitSubgroupToOne (p := p) (K := K) n (Fact.out : 1 ≤ n) u)⁻¹ *
           completedPrincipalUnitSubgroupToOne (p := p) (K := K) n (Fact.out : 1 ≤ n) v ∈
         completedPrincipalUnitModPSubgroup p K :=
-    (QuotientGroup.eq).1 h
-  rw [completedPrincipalUnitModPSubgroup_eq_p_add_one (p := p) (K := K)] at hmod
-  rw [mem_completedPrincipalUnitPAddOneSubgroup_iff] at hmod
+    QuotientGroup.eq.1 h
+  rw [completedPrincipalUnitModPSubgroup_eq_p_add_one (p := p) (K := K),
+    mem_completedPrincipalUnitPAddOneSubgroup_iff] at hmod
   change ((u⁻¹ * v : completedPrincipalUnitSubgroup p K n) :
       completedLocalCyclotomicUnitGroup p K) ∈
     completedPrincipalUnitSubgroup p K (n + 1)
