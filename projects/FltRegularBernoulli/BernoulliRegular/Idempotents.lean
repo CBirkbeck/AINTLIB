@@ -122,9 +122,9 @@ lemma charIdempotent_mul_aux :
       = ∑ ρ : G, (χ σ * ψ (σ⁻¹ * ρ)) • MonoidAlgebra.single ρ⁻¹ (1 : R) := by
     intro σ
     rw [← (Group.mulLeft_bijective σ⁻¹).sum_comp
-      (g := fun τ => (χ σ • MonoidAlgebra.single σ⁻¹ (1 : R)) *
+      (g := fun τ ↦ (χ σ • MonoidAlgebra.single σ⁻¹ (1 : R)) *
         (ψ τ • MonoidAlgebra.single τ⁻¹ (1 : R)))]
-    refine Finset.sum_congr rfl fun ρ _ => ?_
+    refine Finset.sum_congr rfl fun ρ _ ↦ ?_
     -- single σ⁻¹ 1 * single (σ⁻¹ ρ)⁻¹ 1 = single ρ⁻¹ 1 (via `single_mul_single`).
     rw [smul_mul_assoc, mul_smul_comm, MonoidAlgebra.single_mul_single, mul_one,
       smul_smul]
@@ -135,11 +135,11 @@ lemma charIdempotent_mul_aux :
   -- Now rewrite each inner sum and then factor using ∑ σ ∑ ρ = ∑ ρ ∑ σ.
   simp_rw [inner]
   rw [Finset.sum_comm, Finset.smul_sum]
-  refine Finset.sum_congr rfl fun ρ _ => ?_
+  refine Finset.sum_congr rfl fun ρ _ ↦ ?_
   -- Goal: ∑ σ, (χ σ * ψ (σ⁻¹ * ρ)) • e_{ρ⁻¹}
   --     = (∑ σ, χ σ * ψ σ⁻¹) • ψ ρ • e_{ρ⁻¹}
   rw [smul_smul, Finset.sum_mul, Finset.sum_smul]
-  refine Finset.sum_congr rfl fun σ _ => ?_
+  refine Finset.sum_congr rfl fun σ _ ↦ ?_
   rw [map_mul, mul_assoc]
 
 /-- The "inner character sum" `∑_σ χ σ · χ σ⁻¹` equals `|G|` for any character `χ`.
@@ -155,8 +155,8 @@ is the off-diagonal case used to prove orthogonality. -/
 lemma sum_char_mul_char_inv_of_ne [IsDomain R] (h : χ ≠ ψ) :
     (∑ σ : G, χ σ * ψ σ⁻¹) = 0 := by
   -- Rewrite χ σ * ψ σ⁻¹ = (χ · ψ⁻¹) σ; use sum_eq_zero_of_ne_one.
-  have hne : χ * ψ⁻¹ ≠ 1 := fun hχψ => h (mul_inv_eq_one.mp hχψ)
-  have key : ∀ σ : G, χ σ * ψ σ⁻¹ = (χ * ψ⁻¹) σ := fun σ => by
+  have hne : χ * ψ⁻¹ ≠ 1 := fun hχψ ↦ h (mul_inv_eq_one.mp hχψ)
+  have key : ∀ σ : G, χ σ * ψ σ⁻¹ = (χ * ψ⁻¹) σ := fun σ ↦ by
     -- `(χ · ψ⁻¹) σ = χ σ * Ring.inverse (ψ σ) = χ σ * ψ σ⁻¹` since `ψ σ⁻¹`
     -- is the ring-inverse of `ψ σ` (which is a unit).
     rw [MulChar.mul_apply, MulChar.inv_apply_eq_inv]
@@ -187,7 +187,7 @@ end Orthogonality
 /-- Diekmann Lemma 50: the family `{ε_χ : χ : MulChar G R}` is a system of
 orthogonal idempotents in the group algebra `R[G]`. -/
 theorem orthogonalIdempotents_charIdempotent [IsDomain R] :
-    OrthogonalIdempotents (fun χ : MulChar G R => charIdempotent χ) where
+    OrthogonalIdempotents (fun χ : MulChar G R ↦ charIdempotent χ) where
   idem χ := isIdempotentElem_charIdempotent χ
   ortho _ _ h := charIdempotent_mul_of_ne h
 
@@ -291,7 +291,7 @@ theorem charIdempotent_sum_eq_one :
     split_ifs <;> simp only [zero_smul]
   simp_rw [hrw]
   rw [Finset.sum_ite_eq' Finset.univ (1 : G)
-    (fun σ => ((Fintype.card G : R)) • MonoidAlgebra.single σ⁻¹ (1 : R)), if_pos]
+    (fun σ ↦ ((Fintype.card G : R)) • MonoidAlgebra.single σ⁻¹ (1 : R)), if_pos]
   · -- Goal: `⅟|G| • (|G| • single (1:G)⁻¹ 1) = 1`.
     rw [inv_one, smul_smul, invOf_mul_self, one_smul]; rfl
   · exact Finset.mem_univ _
@@ -301,7 +301,7 @@ theorem charIdempotent_sum_eq_one :
 Packaging the results above we obtain:
 
 * `completeOrthogonalIdempotents_charIdempotent`: the structure
-  `CompleteOrthogonalIdempotents (fun χ => ε_χ)`;
+  `CompleteOrthogonalIdempotents (fun χ ↦ ε_χ)`;
 * `MonoidAlgebra.charComponentEquiv`: the induced ring isomorphism
   `R[G] ≃+* ∏_χ (ε_χ).Corner` from `CompleteOrthogonalIdempotents.ringEquivOfComm`.
 
@@ -314,7 +314,7 @@ here (Step D in the ticket plan).
 /-- **Diekmann Lemma 50 / Cor 51**: the character idempotents form a
 complete system of orthogonal idempotents in `R[G]`. -/
 theorem completeOrthogonalIdempotents_charIdempotent :
-    CompleteOrthogonalIdempotents (fun χ : MulChar G R => charIdempotent χ) where
+    CompleteOrthogonalIdempotents (fun χ : MulChar G R ↦ charIdempotent χ) where
   __ := orthogonalIdempotents_charIdempotent
   complete := charIdempotent_sum_eq_one
 
@@ -380,9 +380,9 @@ lemma single_mul_charIdempotent (c : G) (χ : MulChar G R) :
         simp_rw [Finset.mul_sum, mul_smul_comm, MonoidAlgebra.single_mul_single, mul_one]
     _ = ∑ σ : G, χ (σ * c) • MonoidAlgebra.single (c * (σ * c)⁻¹) (1 : R) :=
         ((Group.mulRight_bijective c).sum_comp
-          (fun σ => χ σ • MonoidAlgebra.single (c * σ⁻¹) (1 : R))).symm
+          (fun σ ↦ χ σ • MonoidAlgebra.single (c * σ⁻¹) (1 : R))).symm
     _ = ∑ σ : G, (χ c * χ σ) • MonoidAlgebra.single σ⁻¹ (1 : R) := by
-        refine Finset.sum_congr rfl fun σ _ => ?_
+        refine Finset.sum_congr rfl fun σ _ ↦ ?_
         rw [map_mul, mul_comm (χ σ) (χ c), mul_inv_rev, ← mul_assoc, mul_inv_cancel, one_mul]
     _ = χ c • ∑ σ : G, χ σ • MonoidAlgebra.single σ⁻¹ (1 : R) := by
         simp_rw [Finset.smul_sum, smul_smul]
@@ -405,25 +405,25 @@ of `ε_χ` over even Dirichlet characters. -/
 theorem plusIdempotent_eq_sum_even (c : G) (hc : c * c = 1) :
     plusIdempotent (R := R) c =
       letI := Classical.decEq R
-      ∑ χ ∈ (Finset.univ : Finset (MulChar G R)).filter (fun χ => χ c = 1),
+      ∑ χ ∈ (Finset.univ : Finset (MulChar G R)).filter (fun χ ↦ χ c = 1),
         charIdempotent χ := by
   classical
-  have h_dichotomy : ∀ χ : MulChar G R, χ c = 1 ∨ χ c = -1 := fun χ =>
+  have h_dichotomy : ∀ χ : MulChar G R, χ c = 1 ∨ χ c = -1 := fun χ ↦
     (mul_self_eq_one_iff (a := χ c)).mp (by rw [← map_mul, hc, MulChar.map_one])
   have h_all : plusIdempotent (R := R) c =
       ∑ χ : MulChar G R, (⅟(2 : R) * (1 + χ c)) • charIdempotent χ := by
     rw [← mul_one (plusIdempotent (R := R) c), ← charIdempotent_sum_eq_one (G := G) (R := R),
       Finset.mul_sum]
-    exact Finset.sum_congr rfl fun χ _ => plusIdempotent_mul_charIdempotent c χ
+    exact Finset.sum_congr rfl fun χ _ ↦ plusIdempotent_mul_charIdempotent c χ
   rw [h_all,
-    ← Finset.sum_filter_add_sum_filter_not Finset.univ (fun χ : MulChar G R => χ c = 1)]
-  have h_not : ∀ χ ∈ Finset.univ.filter (fun χ : MulChar G R => ¬ χ c = 1),
-      (⅟(2 : R) * (1 + χ c)) • charIdempotent χ = 0 := fun χ hχ => by
+    ← Finset.sum_filter_add_sum_filter_not Finset.univ (fun χ : MulChar G R ↦ χ c = 1)]
+  have h_not : ∀ χ ∈ Finset.univ.filter (fun χ : MulChar G R ↦ ¬ χ c = 1),
+      (⅟(2 : R) * (1 + χ c)) • charIdempotent χ = 0 := fun χ hχ ↦ by
     have hχc : χ c = -1 :=
       (h_dichotomy χ).resolve_left (Finset.mem_filter.mp hχ).2
     rw [hχc, show ((1 : R) + -1) = 0 by ring, mul_zero, zero_smul]
   rw [Finset.sum_eq_zero h_not, add_zero]
-  refine Finset.sum_congr rfl fun χ hχ => ?_
+  refine Finset.sum_congr rfl fun χ hχ ↦ ?_
   rw [(Finset.mem_filter.mp hχ).2,
     show (1 : R) + 1 = 2 by ring, invOf_mul_self, one_smul]
 
@@ -432,20 +432,20 @@ an involution. -/
 theorem minusIdempotent_eq_sum_odd (c : G) (hc : c * c = 1) :
     minusIdempotent (R := R) c =
       letI := Classical.decEq R
-      ∑ χ ∈ (Finset.univ : Finset (MulChar G R)).filter (fun χ => χ c = -1),
+      ∑ χ ∈ (Finset.univ : Finset (MulChar G R)).filter (fun χ ↦ χ c = -1),
         charIdempotent χ := by
   classical
-  have h_dichotomy : ∀ χ : MulChar G R, χ c = 1 ∨ χ c = -1 := fun χ =>
+  have h_dichotomy : ∀ χ : MulChar G R, χ c = 1 ∨ χ c = -1 := fun χ ↦
     (mul_self_eq_one_iff (a := χ c)).mp (by rw [← map_mul, hc, MulChar.map_one])
-  have h_neg_one_ne_one : (-1 : R) ≠ 1 := fun h =>
+  have h_neg_one_ne_one : (-1 : R) ≠ 1 := fun h ↦
     Invertible.ne_zero (2 : R) (by linear_combination -h)
   have h_split :
-      (∑ χ ∈ Finset.univ.filter (fun χ : MulChar G R => χ c = 1), charIdempotent χ) +
-      (∑ χ ∈ Finset.univ.filter (fun χ : MulChar G R => χ c = -1), charIdempotent χ) =
+      (∑ χ ∈ Finset.univ.filter (fun χ : MulChar G R ↦ χ c = 1), charIdempotent χ) +
+      (∑ χ ∈ Finset.univ.filter (fun χ : MulChar G R ↦ χ c = -1), charIdempotent χ) =
       (1 : MonoidAlgebra R G) := by
-    have h_filter_eq : (Finset.univ : Finset (MulChar G R)).filter (fun χ => ¬ χ c = 1) =
-        Finset.univ.filter (fun χ => χ c = -1) :=
-      Finset.filter_congr fun χ _ => ⟨(h_dichotomy χ).resolve_left, fun h hχ => by
+    have h_filter_eq : (Finset.univ : Finset (MulChar G R)).filter (fun χ ↦ ¬ χ c = 1) =
+        Finset.univ.filter (fun χ ↦ χ c = -1) :=
+      Finset.filter_congr fun χ _ ↦ ⟨(h_dichotomy χ).resolve_left, fun h hχ ↦ by
         rw [h] at hχ; exact h_neg_one_ne_one hχ⟩
     rw [← h_filter_eq, Finset.sum_filter_add_sum_filter_not, charIdempotent_sum_eq_one]
   linear_combination plusIdempotent_add_minusIdempotent (R := R) c -
