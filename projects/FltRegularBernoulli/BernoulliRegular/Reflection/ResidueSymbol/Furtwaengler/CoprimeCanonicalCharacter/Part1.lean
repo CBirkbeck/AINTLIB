@@ -103,7 +103,7 @@ theorem pthSymbolAtIdeal_canonical_eq_of_mk0_eq_of_coprime_principal_balance
       pthSymbolAtIdeal_canonical (p := p) (K := K) η (J : Ideal (𝓞 K)) :=
   pthSymbolAtIdeal_canonical_eq_of_mk0_eq_of_principal_balance
     (p := p) (K := K) η
-    (fun x y hx hy hxy => hprincipal hI hJ x y hx hy hxy)
+    (fun x y hx hy hxy ↦ hprincipal hI hJ x y hx hy hxy)
     hmk
 
 /-- If an ideal is coprime to a nonzero prime `P`, then `P` occurs with
@@ -151,7 +151,7 @@ theorem normalizedFactors_count_span_eq_of_principal_balance
   have hJ_ne : (J : Ideal (𝓞 K)) ≠ ⊥ :=
     mem_nonZeroDivisors_iff_ne_zero.mp J.2
   have hcount := congrArg
-    (fun A : Ideal (𝓞 K) =>
+    (fun A : Ideal (𝓞 K) ↦
       (UniqueFactorizationMonoid.normalizedFactors A).count P) hxy
   rw [UniqueFactorizationMonoid.normalizedFactors_mul
         (by simpa [Ideal.zero_eq_bot] using hspanx_ne)
@@ -334,9 +334,9 @@ theorem exists_clear_denominators_span_of_colon_coprime
     rw [Ideal.mem_colon_span_singleton]
     exact (Ideal.span ({y} : Set (𝓞 K))).mul_mem_right x
       (Ideal.mem_span_singleton_self y)
-  have hD_ne : D ≠ ⊥ := fun hD =>
+  have hD_ne : D ≠ ⊥ := fun hD ↦
     hy (by simpa [hD] using hyD)
-  have hSmax : ∀ P ∈ S, P.IsMaximal := fun P hP =>
+  have hSmax : ∀ P ∈ S, P.IsMaximal := fun P hP ↦
     (hSprime P hP).isMaximal (hS_ne P hP)
   obtain ⟨b, hb_ne, hbD, hb_coprime⟩ :=
     Reflection.ResidueSymbol.IdealAvoidance.exists_mem_coprime_principal_finset
@@ -413,7 +413,7 @@ theorem colon_coprime_finset_of_principal_balance_left
     ∀ P ∈ S,
       IsCoprime
         ((Ideal.span ({y} : Set (𝓞 K))).colon
-          (Ideal.span ({x} : Set (𝓞 K)) : Set (𝓞 K))) P := fun P hP =>
+          (Ideal.span ({x} : Set (𝓞 K)) : Set (𝓞 K))) P := fun P hP ↦
   colon_coprime_of_principal_balance_left
     (K := K) (P := P) (hI P hP) hxy
 
@@ -637,7 +637,7 @@ theorem pthSymbolAtIdeal_canonical_principal_balance_of_clear_denominators
         (Ideal.span ({y} : Set (𝓞 K))) :=
   pthSymbolAtIdeal_canonical_principal_balance_of_clear_denominators_span
     (p := p) (K := K) η S hvanish
-    (fun hI hJ x y hx hy hxy => by
+    (fun hI hJ x y hx hy hxy ↦ by
       obtain ⟨a, b, ha, hb, ha_coprime, hb_coprime, hxb⟩ :=
         hclear hI hJ x y hx hy hxy
       exact ⟨a, b, ha, hb, ha_coprime, hb_coprime, by rw [hxb]⟩)
@@ -691,7 +691,7 @@ theorem pthSymbolAtIdeal_canonical_principal_balance_of_colon_coprime
             (Ideal.span ({x} : Set (𝓞 K)))).count P =
           (UniqueFactorizationMonoid.normalizedFactors
             (Ideal.span ({y} : Set (𝓞 K)))).count P :=
-    fun P hP =>
+    fun P hP ↦
       normalizedFactors_count_span_eq_of_coprime_principal_balance
         (K := K) S hSprime hS_ne hI hJ hx hy hxy hP
   exact exists_clear_denominators_span_of_colon_coprime
@@ -728,7 +728,7 @@ theorem pthSymbolAtIdeal_canonical_principal_balance_of_coprime_vanishing
         (Ideal.span ({y} : Set (𝓞 K))) :=
   pthSymbolAtIdeal_canonical_principal_balance_of_colon_coprime
     (p := p) (K := K) η S hSprime hS_ne hvanish
-    (fun hI _hJ _x _y _hx _hy hxy =>
+    (fun hI _hJ _x _y _hx _hy hxy ↦
       colon_coprime_finset_of_principal_balance_left
         (K := K) S hI hxy)
     hI hJ x y hx hy hxy
@@ -756,7 +756,7 @@ theorem pthSymbolAtIdeal_canonical_eq_of_mk0_eq_of_coprime_vanishing
       pthSymbolAtIdeal_canonical (p := p) (K := K) η (J : Ideal (𝓞 K)) :=
   pthSymbolAtIdeal_canonical_eq_of_mk0_eq_of_coprime_principal_balance
     (p := p) (K := K) η S
-    (fun hI hJ x y hx hy hxy =>
+    (fun hI hJ x y hx hy hxy ↦
       pthSymbolAtIdeal_canonical_principal_balance_of_coprime_vanishing
         (p := p) (K := K) η S hSprime hS_ne hvanish
         hI hJ x y hx hy hxy)
@@ -795,14 +795,14 @@ theorem pthSymbolAtIdeal_canonical_eq_of_mk0_eq_of_locallyPrimaryPseudoUnit
       pthSymbolAtIdeal_canonical (p := p) (K := K) η (J : Ideal (𝓞 K)) :=
   pthSymbolAtIdeal_canonical_eq_of_mk0_eq_of_coprime_vanishing
     (p := p) (K := K) η S hSprime hS_ne
-    (fun _z hz hzcop =>
+    (fun _z hz hzcop ↦
       locallyPrimaryPseudoUnit_principalSymbol_eq_zero_canonical_of_coprime_badSet
         p hp_odd K B S hη_ne hz hη_prime_to_p hη_local hη_span hS_eta hS_p hzcop)
     hI hJ hmk
 
 /-- The canonical residue symbol as a bad-set-coprime ideal-symbol datum, once
 class invariance is known for representatives coprime to the bad set. -/
-noncomputable def coprimeCanonicalIdealSymbolData
+def coprimeCanonicalIdealSymbolData
     (η : 𝓞 K) (S : Finset (Ideal (𝓞 K)))
     (hSprime : ∀ P ∈ S, P.IsPrime)
     (hS_ne : ∀ P ∈ S, P ≠ ⊥)
