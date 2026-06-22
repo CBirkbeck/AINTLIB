@@ -772,6 +772,47 @@ theorem finrank_sigmaL (n : ℕ) (σ : Om →ₐ[ℚ] Om) {L : IntermediateField
     (IntermediateField.intermediateFieldMap (omAut σ) (L.restrictScalars ℚ)).toLinearEquiv
   exact (LinearEquiv.finrank_eq e).symm
 
+/-- **[a'] finiteness transport**: `σ(L)/F⁺ₙ` is finite (the `ℚ`-iso `L ≅ σ(L)` + `L/ℚ` finite). -/
+theorem finiteDimensional_sigmaL (n : ℕ) (σ : Om →ₐ[ℚ] Om) {L : IntermediateField (FPlus p n) Om}
+    [FiniteDimensional (FPlus p n) L]
+    (hFle : FPlus p n ≤ IntermediateField.map σ (L.restrictScalars ℚ)) :
+    FiniteDimensional (FPlus p n) (IntermediateField.extendScalars hFle) := by
+  haveI : FiniteDimensional ℚ ↥(FPlus p n) := instFiniteDimensionalFPlus p n
+  haveI : FiniteDimensional ℚ ↥L := Module.Finite.trans ↥(FPlus p n) ↥L
+  haveI : FiniteDimensional ℚ ↥(L.restrictScalars ℚ) := inferInstanceAs (FiniteDimensional ℚ ↥L)
+  haveI : FiniteDimensional ℚ ↥(IntermediateField.extendScalars hFle) :=
+    (IntermediateField.intermediateFieldMap (omAut σ) (L.restrictScalars ℚ)).toLinearEquiv.finiteDimensional
+  exact Module.Finite.of_restrictScalars_finite ℚ ↥(FPlus p n) ↥(IntermediateField.extendScalars hFle)
+
+/-- **[b] Galois transport**: `σ(L)/F⁺ₙ` is Galois. (Part of TG1-N-transport — `σ`-conjugation iso
+`Gal(σL/F⁺ₙ) ≅ Gal(L/F⁺ₙ)`; normality via `normal_iff_forall_map_le` + the conjugation argument.) -/
+theorem isGalois_sigmaL (n : ℕ) (σ : Om →ₐ[ℚ] Om) {L : IntermediateField (FPlus p n) Om}
+    (hL : IsAdmissibleM p n L)
+    (hFle : FPlus p n ≤ IntermediateField.map σ (L.restrictScalars ℚ)) :
+    IsGalois (FPlus p n) (IntermediateField.extendScalars hFle) := by
+  sorry
+
+/-- **[b] abelian transport**: `Gal(σL/F⁺ₙ)` is commutative (conjugation iso to the abelian
+`Gal(L/F⁺ₙ)`). -/
+theorem mulComm_sigmaL (n : ℕ) (σ : Om →ₐ[ℚ] Om) {L : IntermediateField (FPlus p n) Om}
+    (hL : IsAdmissibleM p n L)
+    (hFle : FPlus p n ≤ IntermediateField.map σ (L.restrictScalars ℚ)) :
+    ∀ φ ψ : IntermediateField.extendScalars hFle ≃ₐ[FPlus p n] IntermediateField.extendScalars hFle,
+      φ * ψ = ψ * φ := by
+  sorry
+
+/-- **[c] unramified-outside-`p` transport** — the analytic core: `σ` induces a ring automorphism of
+`𝓞_Ω` fixing `ℤ`, semilinear over `β = σ|F⁺ₙ : 𝓞_{F⁺ₙ} ≅ 𝓞_{F⁺ₙ}`; it carries primes `P ↦ σ(P)`
+preserving residue characteristic and ramification index, and `β` fixes the unique prime over `p`,
+so "unramified at every `P` with `p ∉ P`" is preserved. (Needs `RingOfIntegers` functoriality under
+a base automorphism + `ramificationIdx` invariance.) -/
+theorem isUnramifiedOutsideP_sigmaL (n : ℕ) (σ : Om →ₐ[ℚ] Om) {L : IntermediateField (FPlus p n) Om}
+    (hL : IsAdmissibleM p n L)
+    (hFle : FPlus p n ≤ IntermediateField.map σ (L.restrictScalars ℚ))
+    [FiniteDimensional (FPlus p n) (IntermediateField.extendScalars hFle)] :
+    @IsUnramifiedOutsideP p _ n (IntermediateField.extendScalars hFle) ‹_› := by
+  sorry
+
 /-- **Admissibility is `σ`-invariant** (the analytic heart of normality): if `L` is an admissible-`M`
 layer over `F⁺ₙ` and `σ` is a `ℚ`-algebra map of `Ω` (which fixes `F⁺ₙ` setwise, `F⁺ₙ/ℚ` normal),
 then `σ(L)` — viewed as an `F⁺ₙ`-extension via `extendScalars` — is again admissible: the iso `σ|_L`
@@ -781,7 +822,13 @@ theorem isAdmissibleM_map (n : ℕ) (σ : Om →ₐ[ℚ] Om) {L : IntermediateFi
     (hL : IsAdmissibleM p n L)
     (hFle : FPlus p n ≤ IntermediateField.map σ (L.restrictScalars ℚ)) :
     IsAdmissibleM p n (IntermediateField.extendScalars hFle) := by
-  sorry
+  obtain ⟨hfin, -, -, ⟨k, hk⟩, -⟩ := id hL
+  haveI : FiniteDimensional (FPlus p n) L := hfin
+  haveI hfd : FiniteDimensional (FPlus p n) (IntermediateField.extendScalars hFle) :=
+    finiteDimensional_sigmaL p n σ hFle
+  refine ⟨hfd, isGalois_sigmaL p n σ hL hFle, mulComm_sigmaL p n σ hL hFle, ⟨k, ?_⟩,
+    isUnramifiedOutsideP_sigmaL p n σ hL hFle⟩
+  rw [finrank_sigmaL p n σ hFle]; exact hk
 
 /-- **Admissible-layer transport**: a `ℚ`-algebra map `σ` of `Ω` carries any admissible-`M` layer
 over `F⁺ₙ` into `M⁺ₙ` (since `σ(L)` is again admissible, by `isAdmissibleM_map`). -/
