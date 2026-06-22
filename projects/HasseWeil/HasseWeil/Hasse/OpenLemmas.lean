@@ -1327,67 +1327,6 @@ structure HasseOpenLemmaPack.{v}
 
 /-! ### Bundle and final consumer -/
 
-/-- **The Hasse bound from the HasseOpenLemmaPack (reviewer round 2 revised
-2026-05-15).**
-
-`|#E(F_q) − q − 1| ≤ 2√q`, derived axiom-clean by feeding an
-`HasseOpenLemmaPack W hq` (which bundles all open lemmas) through the canonical
-consumer.
-
-Per reviewer round 2: the universal L11 (`∃!` dual) has been replaced by
-the Miller primitives L11a-f (which transitively support L9 = the specific
-dual existence for Frobenius); L12 has been dropped in favour of L12b.
-The composition still goes through pc_sep / pc_fin / pc_sepDeg / qf_nonneg
-as before — the new Miller primitives feed L9's eventual proof, not the
-top-level bound composition.
-
-Per reviewer Q5: this signature makes the dependency on the open lemmas
-explicit at the Lean level — replacing any open lemma's discharge with a
-real proof immediately reduces this theorem's sorry budget without further
-glue work.
-
-**Round 4 reviewer plan** (char 2/3 generality): once the
-`T-MILLER-PROJECTIVE-REFACTOR` ticket lands (Miller proven via projective
-line/tangent geometry instead of slope formulas), the `[NeZero (2 : K)]`
-and `[NeZero (3 : K)]` hypotheses inherited by this consumer drop, and
-this theorem becomes `hasse_bound_universal` (= `T-HASSE-BOUND-UNIVERSAL`)
-covering all characteristics. The bound's STATEMENT is uniform; only the
-proof infrastructure currently restricts. -/
-theorem hasse_bound_from_HasseOpenLemmaPack
-    [Fintype W.toAffine.Point] (hq : 2 ≤ Fintype.card K)
-    (pack : HasseOpenLemmaPack W hq) :
-    |(↑(pointCount W.toAffine) - ↑(Fintype.card K) - 1 : ℝ)| ≤
-      2 * Real.sqrt (Fintype.card K : ℝ) := by
-  -- Construct the four-field witness bundle from the pack, then feed it
-  -- to the canonical consumer `hasse_bound_of_witnesses`.
-  refine hasse_bound_of_witnesses (hq := hq) W ⟨?_, ?_, ?_, ?_⟩
-  · -- pc_sep: derive directly from the shipped axiom-clean Witness #1 in
-    -- SilvermanIV14 (sub-helper 139), extracting (p, CharP, Fact p.Prime)
-    -- from FiniteField.card'. This bypasses the additivity_witness_for_pc_sep
-    -- sorry-glue (round-5 reviewer micro-task, 2026-05-15).
-    obtain ⟨p, hCharP, ⟨_n, _hn_pos⟩, hp_prime, _hcard⟩ := FiniteField.card' K
-    haveI : CharP K p := hCharP
-    haveI : Fact p.Prime := ⟨hp_prime⟩
-    exact HasseWeil.isogOneSub_negFrobenius_isSeparable (K := K) W p hq
-  · -- pc_fin: axiom-clean (already shipped).
-    exact isogOneSub_negFrobenius_finiteDimensional W hq
-  · -- pc_sepDeg_eq_pointCount: directly pack.l6_v_1_3.
-    exact pack.l6_v_1_3
-  · -- qf_nonneg: directly `pack.l8_qf_nonneg` (the III.6.3 QF
-    -- non-negativity, stated intrinsically on the integer form).
-    exact pack.l8_qf_nonneg
-
-/-- **DEPRECATED ALIAS** for `hasse_bound_from_HasseOpenLemmaPack`. Kept
-for backward compatibility per reviewer round 3 (2026-05-15) — new code
-should use the renamed form. -/
-@[deprecated hasse_bound_from_HasseOpenLemmaPack (since := "2026-05-15")]
-theorem hasse_bound_from_pack
-    [Fintype W.toAffine.Point] (hq : 2 ≤ Fintype.card K)
-    (pack : HasseOpenLemmaPack W hq) :
-    |(↑(pointCount W.toAffine) - ↑(Fintype.card K) - 1 : ℝ)| ≤
-      2 * Real.sqrt (Fintype.card K : ℝ) :=
-  hasse_bound_from_HasseOpenLemmaPack W hq pack
-
 end OpenLemmas
 
 end HasseWeil

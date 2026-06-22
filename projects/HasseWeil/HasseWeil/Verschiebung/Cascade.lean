@@ -200,53 +200,6 @@ This is the first time the Hasse-Weil bound itself appears as a typed
 theorem in the codebase — `|#E(F_q) − q − 1| ≤ 2√q` for q=2 char=2,
 publication-shaped witness-parametric, axiom-clean. -/
 
-/-- **Hasse-Weil bound, assembled (witness-parametric)**: combines Worker A's
-    Day 4 deferred witnesses with the QF non-negativity input. The discriminant
-    argument needs only non-negativity (`BoundOfWitnesses.lean`,
-    `traceOfFrobenius_sq_le_of_qf_nonneg`); the previous `_signed`-shape
-    hypothesis demanded equality to a placeholder isogeny's degree, which is
-    structurally false at `(r, s) = (0, 0)`. Routed through
-    `hasse_bound_via_signed_QF_negFrobenius_qf_nonneg`. -/
-theorem hasse_bound_witness_parametric_assembled
-    (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
-    (hq : 2 ≤ Fintype.card K)
-    (h_pc_sep : (isogOneSub_negFrobenius W hq).IsSeparable)
-    (h_pc_fin : @FiniteDimensional W.toAffine.FunctionField
-      W.toAffine.FunctionField _ _
-      (isogOneSub_negFrobenius W hq).toAlgebra.toModule)
-    (h_sepDeg_eq_pointCount :
-      (isogOneSub_negFrobenius W hq).sepDegree = pointCount W.toAffine)
-    [h_pc_ker_finite : Finite (isogOneSub_negFrobenius W hq).kernel]
-    (h_qf_nonneg : ∀ r s : ℤ,
-      0 ≤ (Fintype.card K : ℤ) * r ^ 2 -
-        isogTrace (frobeniusIsog W) (isogOneSub_negFrobenius W hq) *
-          r * s + s ^ 2) :
-    |(↑(pointCount W.toAffine) - ↑(Fintype.card K) - 1 : ℝ)| ≤
-      2 * Real.sqrt (Fintype.card K : ℝ) :=
-  hasse_bound_via_signed_QF_negFrobenius_qf_nonneg W hq h_pc_sep h_pc_fin
-    h_sepDeg_eq_pointCount h_qf_nonneg
-
-/-- **Squared form** of `hasse_bound_witness_parametric_assembled`:
-    `(#E(F_q) − q − 1)² ≤ 4q` in the witness-parametric assembly. -/
-theorem hasse_bound_sq_witness_parametric_assembled
-    (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
-    (hq : 2 ≤ Fintype.card K)
-    (h_pc_sep : (isogOneSub_negFrobenius W hq).IsSeparable)
-    (h_pc_fin : @FiniteDimensional W.toAffine.FunctionField
-      W.toAffine.FunctionField _ _
-      (isogOneSub_negFrobenius W hq).toAlgebra.toModule)
-    (h_sepDeg_eq_pointCount :
-      (isogOneSub_negFrobenius W hq).sepDegree = pointCount W.toAffine)
-    [h_pc_ker_finite : Finite (isogOneSub_negFrobenius W hq).kernel]
-    (h_qf_nonneg : ∀ r s : ℤ,
-      0 ≤ (Fintype.card K : ℤ) * r ^ 2 -
-        isogTrace (frobeniusIsog W) (isogOneSub_negFrobenius W hq) *
-          r * s + s ^ 2) :
-    ((pointCount W.toAffine : ℤ) - Fintype.card K - 1) ^ 2 ≤
-      4 * (Fintype.card K : ℤ) :=
-  hasse_bound_sq_via_signed_QF_negFrobenius_qf_nonneg W hq h_pc_sep h_pc_fin
-    h_sepDeg_eq_pointCount h_qf_nonneg
-
 /-! ### q=3 char=3 cube-root existence (witness-parametric)
 
 Bridges a q=3 cube-root-existence hypothesis to the universal q-th-root
@@ -325,64 +278,6 @@ This is the second milestone: at least one (q, char) ≠ (2, 2)
 instance shipped axiom-clean (witness-parametric on the deferred
 q=3 substrate). -/
 
-/-- **Hasse-Weil bound, assembled for q=3 char=3 (witness-parametric)**:
-    The q=3 char=3 specialization of `hasse_bound_witness_parametric_assembled`.
-
-    Given `[CharP K 3]` and `Fintype.card K = 3`, plus the standard
-    witness-parametric inputs (separability, finite-dim, sepDegree =
-    pointCount, signed QF), the Hasse-Weil bound holds.
-
-    Q=3 char=3 milestone analog of `hasse_bound_witness_parametric_assembled`. -/
-theorem hasse_bound_witness_parametric_assembled_q_three
-    (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
-    [CharP K 3] (h_card : Fintype.card K = 3)
-    (h_pc_sep :
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).IsSeparable)
-    (h_pc_fin : @FiniteDimensional W.toAffine.FunctionField
-      W.toAffine.FunctionField _ _
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).toAlgebra.toModule)
-    (h_sepDeg_eq_pointCount :
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).sepDegree =
-        pointCount W.toAffine)
-    [h_pc_ker_finite : Finite
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).kernel]
-    (h_qf_nonneg : ∀ r s : ℤ,
-      0 ≤ (Fintype.card K : ℤ) * r ^ 2 -
-        isogTrace (frobeniusIsog W)
-          (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)) *
-          r * s + s ^ 2) :
-    |(↑(pointCount W.toAffine) - ↑(Fintype.card K) - 1 : ℝ)| ≤
-      2 * Real.sqrt (Fintype.card K : ℝ) :=
-  hasse_bound_witness_parametric_assembled W
-    (h_card ▸ by decide : 2 ≤ Fintype.card K)
-    h_pc_sep h_pc_fin h_sepDeg_eq_pointCount h_qf_nonneg
-
-/-- **Squared form** of `hasse_bound_witness_parametric_assembled_q_three`:
-    `(#E(F_q) − q − 1)² ≤ 4q` for q=3 char=3. -/
-theorem hasse_bound_sq_witness_parametric_assembled_q_three
-    (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
-    [CharP K 3] (h_card : Fintype.card K = 3)
-    (h_pc_sep :
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).IsSeparable)
-    (h_pc_fin : @FiniteDimensional W.toAffine.FunctionField
-      W.toAffine.FunctionField _ _
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).toAlgebra.toModule)
-    (h_sepDeg_eq_pointCount :
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).sepDegree =
-        pointCount W.toAffine)
-    [h_pc_ker_finite : Finite
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).kernel]
-    (h_qf_nonneg : ∀ r s : ℤ,
-      0 ≤ (Fintype.card K : ℤ) * r ^ 2 -
-        isogTrace (frobeniusIsog W)
-          (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)) *
-          r * s + s ^ 2) :
-    ((pointCount W.toAffine : ℤ) - Fintype.card K - 1) ^ 2 ≤
-      4 * (Fintype.card K : ℤ) :=
-  hasse_bound_sq_witness_parametric_assembled W
-    (h_card ▸ by decide : 2 ≤ Fintype.card K)
-    h_pc_sep h_pc_fin h_sepDeg_eq_pointCount h_qf_nonneg
-
 /-! ### q=5 char=5 milestone — witness-parametric bound assembly
 
 The Hasse-Weil bound `|#E(F_q) - q - 1| ≤ 2√q` for q=5 char=5.
@@ -395,60 +290,6 @@ direct transposition of q=3.
 This is the THIRD milestone: at least three (q, char) instances shipped
 axiom-clean (witness-parametric on the deferred Worker A witnesses
 common to all three primes). -/
-
-/-- **Hasse-Weil bound, assembled for q=5 char=5 (witness-parametric)**:
-    The q=5 char=5 specialization of `hasse_bound_witness_parametric_assembled`.
-
-    Same structural shape as q=2 (30f2f43) and q=3 (e8b93c3) milestones.
-    Three primes typed in the codebase. -/
-theorem hasse_bound_witness_parametric_assembled_q_five
-    (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
-    [CharP K 5] (h_card : Fintype.card K = 5)
-    (h_pc_sep :
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).IsSeparable)
-    (h_pc_fin : @FiniteDimensional W.toAffine.FunctionField
-      W.toAffine.FunctionField _ _
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).toAlgebra.toModule)
-    (h_sepDeg_eq_pointCount :
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).sepDegree =
-        pointCount W.toAffine)
-    [h_pc_ker_finite : Finite
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).kernel]
-    (h_qf_nonneg : ∀ r s : ℤ,
-      0 ≤ (Fintype.card K : ℤ) * r ^ 2 -
-        isogTrace (frobeniusIsog W)
-          (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)) *
-          r * s + s ^ 2) :
-    |(↑(pointCount W.toAffine) - ↑(Fintype.card K) - 1 : ℝ)| ≤
-      2 * Real.sqrt (Fintype.card K : ℝ) :=
-  hasse_bound_witness_parametric_assembled W
-    (h_card ▸ by decide : 2 ≤ Fintype.card K)
-    h_pc_sep h_pc_fin h_sepDeg_eq_pointCount h_qf_nonneg
-
-/-- **Squared form** of `hasse_bound_witness_parametric_assembled_q_five`. -/
-theorem hasse_bound_sq_witness_parametric_assembled_q_five
-    (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
-    [CharP K 5] (h_card : Fintype.card K = 5)
-    (h_pc_sep :
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).IsSeparable)
-    (h_pc_fin : @FiniteDimensional W.toAffine.FunctionField
-      W.toAffine.FunctionField _ _
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).toAlgebra.toModule)
-    (h_sepDeg_eq_pointCount :
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).sepDegree =
-        pointCount W.toAffine)
-    [h_pc_ker_finite : Finite
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).kernel]
-    (h_qf_nonneg : ∀ r s : ℤ,
-      0 ≤ (Fintype.card K : ℤ) * r ^ 2 -
-        isogTrace (frobeniusIsog W)
-          (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)) *
-          r * s + s ^ 2) :
-    ((pointCount W.toAffine : ℤ) - Fintype.card K - 1) ^ 2 ≤
-      4 * (Fintype.card K : ℤ) :=
-  hasse_bound_sq_witness_parametric_assembled W
-    (h_card ▸ by decide : 2 ≤ Fintype.card K)
-    h_pc_sep h_pc_fin h_sepDeg_eq_pointCount h_qf_nonneg
 
 /-- **q=5 char=5 IsDualOf certificate (witness-parametric)** — 5th-root
     function form. Specialization of
@@ -471,57 +312,6 @@ theorem verschiebungIsog_isDualOf_frobenius_q_five_char_five
 The Hasse-Weil bound `|#E(F_q) - q - 1| ≤ 2√q` for q=7 char=7. Same
 shape as q=2 (30f2f43), q=3 (e8b93c3), q=5 (528e755). Direct
 transposition with Route 2 infrastructure. -/
-
-/-- **Hasse-Weil bound, assembled for q=7 char=7 (witness-parametric)** —
-    FOURTH project milestone. -/
-theorem hasse_bound_witness_parametric_assembled_q_seven
-    (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
-    [CharP K 7] (h_card : Fintype.card K = 7)
-    (h_pc_sep :
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).IsSeparable)
-    (h_pc_fin : @FiniteDimensional W.toAffine.FunctionField
-      W.toAffine.FunctionField _ _
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).toAlgebra.toModule)
-    (h_sepDeg_eq_pointCount :
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).sepDegree =
-        pointCount W.toAffine)
-    [h_pc_ker_finite : Finite
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).kernel]
-    (h_qf_nonneg : ∀ r s : ℤ,
-      0 ≤ (Fintype.card K : ℤ) * r ^ 2 -
-        isogTrace (frobeniusIsog W)
-          (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)) *
-          r * s + s ^ 2) :
-    |(↑(pointCount W.toAffine) - ↑(Fintype.card K) - 1 : ℝ)| ≤
-      2 * Real.sqrt (Fintype.card K : ℝ) :=
-  hasse_bound_witness_parametric_assembled W
-    (h_card ▸ by decide : 2 ≤ Fintype.card K)
-    h_pc_sep h_pc_fin h_sepDeg_eq_pointCount h_qf_nonneg
-
-/-- **Squared form** of `hasse_bound_witness_parametric_assembled_q_seven`. -/
-theorem hasse_bound_sq_witness_parametric_assembled_q_seven
-    (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
-    [CharP K 7] (h_card : Fintype.card K = 7)
-    (h_pc_sep :
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).IsSeparable)
-    (h_pc_fin : @FiniteDimensional W.toAffine.FunctionField
-      W.toAffine.FunctionField _ _
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).toAlgebra.toModule)
-    (h_sepDeg_eq_pointCount :
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).sepDegree =
-        pointCount W.toAffine)
-    [h_pc_ker_finite : Finite
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).kernel]
-    (h_qf_nonneg : ∀ r s : ℤ,
-      0 ≤ (Fintype.card K : ℤ) * r ^ 2 -
-        isogTrace (frobeniusIsog W)
-          (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)) *
-          r * s + s ^ 2) :
-    ((pointCount W.toAffine : ℤ) - Fintype.card K - 1) ^ 2 ≤
-      4 * (Fintype.card K : ℤ) :=
-  hasse_bound_sq_witness_parametric_assembled W
-    (h_card ▸ by decide : 2 ≤ Fintype.card K)
-    h_pc_sep h_pc_fin h_sepDeg_eq_pointCount h_qf_nonneg
 
 /-- **q=7 char=7 IsDualOf certificate (witness-parametric)**. -/
 theorem verschiebungIsog_isDualOf_frobenius_q_seven_char_seven
@@ -559,83 +349,5 @@ For F_{p^k} with k ≥ 2 (like F_4, F_8, F_9, F_25, ...), the parametric
 theorem applies directly — `Fintype.card K = p^k` plus the same
 witnesses. The y-root identity (the prime-specific structure) goes
 through `[CharP K p]` (not p^k) because Frobenius is at the prime base. -/
-
-/-- **Hasse-Weil bound, fully parametric**: ONE theorem covering all
-    finite fields F_q for any prime power q ≥ 2.
-
-    This is `hasse_bound_witness_parametric_assembled` re-exported
-    with a name that makes the parametric nature obvious. The per-prime
-    wrappers `_q_two/three/five/seven` are specializations of this
-    theorem. F_{p^k} with k ≥ 2 also specializes here directly. -/
-theorem hasse_bound_for_finite_field
-    (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
-    (hq : 2 ≤ Fintype.card K)
-    (h_pc_sep : (isogOneSub_negFrobenius W hq).IsSeparable)
-    (h_pc_fin : @FiniteDimensional W.toAffine.FunctionField
-      W.toAffine.FunctionField _ _
-      (isogOneSub_negFrobenius W hq).toAlgebra.toModule)
-    (h_sepDeg_eq_pointCount :
-      (isogOneSub_negFrobenius W hq).sepDegree = pointCount W.toAffine)
-    [h_pc_ker_finite : Finite (isogOneSub_negFrobenius W hq).kernel]
-    (h_qf_nonneg : ∀ r s : ℤ,
-      0 ≤ (Fintype.card K : ℤ) * r ^ 2 -
-        isogTrace (frobeniusIsog W) (isogOneSub_negFrobenius W hq) *
-          r * s + s ^ 2) :
-    |(↑(pointCount W.toAffine) - ↑(Fintype.card K) - 1 : ℝ)| ≤
-      2 * Real.sqrt (Fintype.card K : ℝ) :=
-  hasse_bound_witness_parametric_assembled W hq h_pc_sep h_pc_fin
-    h_sepDeg_eq_pointCount h_qf_nonneg
-
-/-- **F_4 instance demonstrating F_{p^k} coverage**: the parametric
-    bound applied to `F_4 = F_{2^2}`. Direct specialization of
-    `hasse_bound_for_finite_field` with `Fintype.card K = 4` and
-    `[CharP K 2]`. Demonstrates the parametric form covers F_{p^k}
-    with k ≥ 2 directly without any new theorem. -/
-theorem hasse_bound_F_four
-    (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
-    [CharP K 2] (h_card : Fintype.card K = 4)
-    (h_pc_sep :
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).IsSeparable)
-    (h_pc_fin : @FiniteDimensional W.toAffine.FunctionField
-      W.toAffine.FunctionField _ _
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).toAlgebra.toModule)
-    (h_sepDeg_eq_pointCount :
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).sepDegree =
-        pointCount W.toAffine)
-    [h_pc_ker_finite : Finite
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).kernel]
-    (h_qf_nonneg : ∀ r s : ℤ,
-      0 ≤ (Fintype.card K : ℤ) * r ^ 2 -
-        isogTrace (frobeniusIsog W)
-          (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)) *
-          r * s + s ^ 2) :
-    |(↑(pointCount W.toAffine) - ↑(Fintype.card K) - 1 : ℝ)| ≤
-      2 * Real.sqrt (Fintype.card K : ℝ) :=
-  hasse_bound_for_finite_field W (h_card ▸ by decide : 2 ≤ Fintype.card K)
-    h_pc_sep h_pc_fin h_sepDeg_eq_pointCount h_qf_nonneg
-
-/-- **F_9 instance demonstrating F_{p^k} coverage** (q=9, char=3). -/
-theorem hasse_bound_F_nine
-    (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
-    [CharP K 3] (h_card : Fintype.card K = 9)
-    (h_pc_sep :
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).IsSeparable)
-    (h_pc_fin : @FiniteDimensional W.toAffine.FunctionField
-      W.toAffine.FunctionField _ _
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).toAlgebra.toModule)
-    (h_sepDeg_eq_pointCount :
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).sepDegree =
-        pointCount W.toAffine)
-    [h_pc_ker_finite : Finite
-      (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)).kernel]
-    (h_qf_nonneg : ∀ r s : ℤ,
-      0 ≤ (Fintype.card K : ℤ) * r ^ 2 -
-        isogTrace (frobeniusIsog W)
-          (isogOneSub_negFrobenius W (h_card ▸ by decide : 2 ≤ Fintype.card K)) *
-          r * s + s ^ 2) :
-    |(↑(pointCount W.toAffine) - ↑(Fintype.card K) - 1 : ℝ)| ≤
-      2 * Real.sqrt (Fintype.card K : ℝ) :=
-  hasse_bound_for_finite_field W (h_card ▸ by decide : 2 ≤ Fintype.card K)
-    h_pc_sep h_pc_fin h_sepDeg_eq_pointCount h_qf_nonneg
 
 end HasseWeil

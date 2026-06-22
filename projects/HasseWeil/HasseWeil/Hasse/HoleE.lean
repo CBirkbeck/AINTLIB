@@ -56,43 +56,6 @@ hole_e_closer_via_frobenius_dual_witness — all built on the placeholder
 hasse_bound_F_* exploration. Deleted. The genuine `_negFrobenius` Hasse-bound
 assembly below is the live path. -/
 
-/-- **β_qf-parametric form of `hasse_bound_via_signed_QF_negFrobenius`**:
-takes the QF isogeny family `β_qf : ℤ → ℤ → Isogeny W.toAffine W.toAffine`
-as a parameter instead of hard-coding the placeholder `isogSmulSub`.
-
-This makes the QF identity hypothesis dischargeable when β_qf has genuine
-pullback (e.g., via `addPullbackAlgHom_negFrobenius` for r·π − s·id).
-The placeholder `isogSmulSub` makes the hard-coded version's QF identity
-structurally false (placeholder has degree 1, not q·r² − t·rs + s²).
-
-See `.mathlib-quality/qf-line-322-failure-mode.md` for the analysis. -/
-theorem hasse_bound_via_signed_QF_negFrobenius_beta_param
-    (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
-    (hq : 2 ≤ Fintype.card K)
-    (h_pc_sep : (isogOneSub_negFrobenius W hq).IsSeparable)
-    (h_pc_fin : @FiniteDimensional W.toAffine.FunctionField
-      W.toAffine.FunctionField _ _
-      (isogOneSub_negFrobenius W hq).toAlgebra.toModule)
-    (h_sepDeg_eq_pointCount :
-      (isogOneSub_negFrobenius W hq).sepDegree = pointCount W.toAffine)
-    [Finite (isogOneSub_negFrobenius W hq).kernel]
-    (β_qf : ℤ → ℤ → Isogeny W.toAffine W.toAffine)
-    (h_qf_deg : ∀ r s : ℤ, ((β_qf r s).degree : ℤ) =
-      (Fintype.card K : ℤ) * r ^ 2 -
-        isogTrace (frobeniusIsog W) (isogOneSub_negFrobenius W hq) *
-          r * s + s ^ 2) :
-    |(↑(pointCount W.toAffine) - ↑(Fintype.card K) - 1 : ℝ)| ≤
-      2 * Real.sqrt (Fintype.card K : ℝ) :=
-  hasse_bound_of_all_witnesses W
-    (β_pc := isogOneSub_negFrobenius W hq)
-    (h_pc_hom := rfl)
-    (h_pc_sep := h_pc_sep)
-    (h_pc_fin := h_pc_fin)
-    (h_pc_fiber_witness := hole_d_of_hom_and_sepDegree W
-      (isogOneSub_negFrobenius W hq) rfl h_sepDeg_eq_pointCount)
-    (β_qf := β_qf)
-    (h_qf_deg := h_qf_deg)
-
 /-! ### Streamlined wire-up consuming Witness #1 + Witness #2 + fiber witness
 
 The Witness #1 and Witness #3 specialisations (`isogOneSub_negFrobenius_*`)
@@ -158,33 +121,6 @@ theorem hasse_bound_sq_via_signed_QF_negFrobenius_qf_nonneg
     (h_pc_fiber_witness := hole_d_of_hom_and_sepDegree W
       (isogOneSub_negFrobenius W hq) rfl h_sepDeg_eq_pointCount)
     (h_qf_nonneg := h_qf_nonneg)
-
-/-- **Streamlined Day 4 bound, non-negativity form**: same as
-`hasse_bound_via_signed_QF_negFrobenius_streamlined` but consumes a QF
-non-negativity hypothesis directly. -/
-theorem hasse_bound_via_signed_QF_negFrobenius_streamlined_qf_nonneg
-    (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
-    (hq : 2 ≤ Fintype.card K)
-    (h_pc_sep : (isogOneSub_negFrobenius W hq).IsSeparable)
-    (h_pc_fin : @FiniteDimensional W.toAffine.FunctionField
-      W.toAffine.FunctionField _ _
-      (isogOneSub_negFrobenius W hq).toAlgebra.toModule)
-    (h_pc_fiber_witness : ∃ P₀ : W.toAffine.Point,
-      Nat.card {P : W.toAffine.Point //
-          (isogOneSub_negFrobenius W hq).toAddMonoidHom P =
-            (isogOneSub_negFrobenius W hq).toAddMonoidHom P₀} =
-        (isogOneSub_negFrobenius W hq).sepDegree)
-    [Finite (isogOneSub_negFrobenius W hq).kernel]
-    (h_qf_nonneg : ∀ r s : ℤ,
-      0 ≤ (Fintype.card K : ℤ) * r ^ 2 -
-        isogTrace (frobeniusIsog W) (isogOneSub_negFrobenius W hq) *
-          r * s + s ^ 2) :
-    |(↑(pointCount W.toAffine) - ↑(Fintype.card K) - 1 : ℝ)| ≤
-      2 * Real.sqrt (Fintype.card K : ℝ) :=
-  hasse_bound_via_signed_QF_negFrobenius_qf_nonneg W hq h_pc_sep h_pc_fin
-    (isogOneSub_negFrobenius_sepDegree_eq_pointCount_of_witnesses W hq
-      h_pc_sep h_pc_fin h_pc_fiber_witness)
-    h_qf_nonneg
 
 /-! ### Galois-witness / bijection cascade — REMOVED (2026-05-28 placeholder grind)
 

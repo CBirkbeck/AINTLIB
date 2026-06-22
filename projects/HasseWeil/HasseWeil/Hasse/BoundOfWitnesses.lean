@@ -89,21 +89,6 @@ theorem hasse_bound_of_t_witness
   exact abs_le_two_sqrt_of_sq_le _ _
     (traceOfFrobenius_sq_le_of_witness W t β h_deg)
 
-/-- **Hasse's theorem (integer form), witness form.** `(#E(F_q) − q − 1)² ≤ 4q`
-    given the two witness families. -/
-theorem hasse_bound_sq_of_t_witness
-    (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
-    (t : ℤ)
-    (h_pc : (pointCount W.toAffine : ℤ) = Fintype.card K + 1 - t)
-    (β : ℤ → ℤ → Isogeny W.toAffine W.toAffine)
-    (h_deg : ∀ r s : ℤ, ((β r s).degree : ℤ) =
-      (Fintype.card K : ℤ) * r ^ 2 - t * r * s + s ^ 2) :
-    ((pointCount W.toAffine : ℤ) - Fintype.card K - 1) ^ 2 ≤
-      4 * (Fintype.card K : ℤ) := by
-  have htrace : (pointCount W.toAffine : ℤ) - ↑(Fintype.card K) - 1 = -t := by linarith
-  rw [htrace, neg_sq]
-  exact traceOfFrobenius_sq_le_of_witness W t β h_deg
-
 /-! ### Fully-chained Hasse bound (hom + kernel + quadratic witnesses) -/
 
 /-- **Fully-chained Hasse bound**. The Silverman V.1 chain in its most direct
@@ -194,33 +179,6 @@ theorem hasse_bound_of_all_witnesses
   hasse_bound_of_full_witnesses W β_pc h_pc_hom
     (Isogeny.card_kernel_eq_degree_of_separable_witness β_pc h_pc_sep
       h_pc_fin h_pc_fiber_witness)
-    β_qf h_qf_deg
-
-/-- **Integer-form consolidated Hasse bound** — same witnesses as
-    `hasse_bound_of_all_witnesses`, squared conclusion. -/
-theorem hasse_bound_sq_of_all_witnesses
-    (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
-    (β_pc : Isogeny W.toAffine W.toAffine)
-    (h_pc_hom : β_pc.toAddMonoidHom =
-      (AddMonoidHom.id _) - (frobeniusIsog W).toAddMonoidHom)
-    (h_pc_sep : β_pc.IsSeparable)
-    (h_pc_fin : @FiniteDimensional W.toAffine.FunctionField
-      W.toAffine.FunctionField _ _ β_pc.toAlgebra.toModule)
-    (h_pc_fiber_witness : ∃ P₀ : W.toAffine.Point,
-      Nat.card {P : W.toAffine.Point //
-          β_pc.toAddMonoidHom P = β_pc.toAddMonoidHom P₀} =
-        β_pc.sepDegree)
-    [h_pc_ker_finite : Finite β_pc.kernel]
-    (β_qf : ℤ → ℤ → Isogeny W.toAffine W.toAffine)
-    (h_qf_deg : ∀ r s : ℤ, ((β_qf r s).degree : ℤ) =
-      (Fintype.card K : ℤ) * r ^ 2 -
-        isogTrace (frobeniusIsog W) β_pc * r * s + s ^ 2) :
-    ((pointCount W.toAffine : ℤ) - Fintype.card K - 1) ^ 2 ≤
-      4 * (Fintype.card K : ℤ) :=
-  hasse_bound_sq_of_t_witness W (isogTrace (frobeniusIsog W) β_pc)
-    (pointCount_eq_of_hom_kernel_witness W β_pc h_pc_hom
-      (Isogeny.card_kernel_eq_degree_of_separable_witness β_pc h_pc_sep
-        h_pc_fin h_pc_fiber_witness))
     β_qf h_qf_deg
 
 end HasseWeil

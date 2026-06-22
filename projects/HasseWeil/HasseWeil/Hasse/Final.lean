@@ -57,18 +57,4 @@ theorem hasse_bound_of_witnesses
   exact hasse_bound_via_signed_QF_negFrobenius_qf_nonneg W hq
     hw.pc_sep hw.pc_fin hw.pc_sepDeg_eq_pointCount hw.qf_nonneg
 
-/-- **Squared form** of `hasse_bound_of_witnesses`:
-`(#E(F_q) − q − 1)² ≤ 4q` from the same witness bundle. -/
-theorem hasse_bound_sq_of_witnesses
-    (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
-    {hq : 2 ≤ Fintype.card K} (hw : HasseWitnesses W hq) :
-    ((pointCount W.toAffine : ℤ) - Fintype.card K - 1) ^ 2 ≤
-      4 * (Fintype.card K : ℤ) := by
-  haveI : Finite (isogOneSub_negFrobenius W hq).kernel := by
-    rw [kernel_eq_top_of_hom_eq_id_sub_frobenius W (isogOneSub_negFrobenius W hq) rfl]
-    haveI : Fintype (⊤ : AddSubgroup W.toAffine.Point) := Fintype.ofFinite _
-    exact Finite.of_fintype _
-  exact hasse_bound_sq_via_signed_QF_negFrobenius_qf_nonneg W hq
-    hw.pc_sep hw.pc_fin hw.pc_sepDeg_eq_pointCount hw.qf_nonneg
-
 end HasseWeil
