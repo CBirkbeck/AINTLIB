@@ -411,6 +411,33 @@ private theorem resid_addPullback_x_pair
   exact resid_sub (resid_sub (resid_sub
     (resid_add (resid_sq hL) (resid_mul (resid_a₁ P) hL)) (resid_const P _)) hx₁) hx₂
 
+/-- `addPullback_y_pair` in `negY`-of-secant form: `-(ℓ·(addX − x₁) + y₁) − a₁·addX − a₃`
+(`ℓ = addSlopePair`, `addX = addPullback_x_pair`), in `algebraMap F KE`-coefficient form. -/
+private lemma addPullback_y_pair_eq_negY_form :
+    addPullback_y_pair α₁ α₂ =
+      -((addSlopePair α₁ α₂) * (addPullback_x_pair α₁ α₂ - α₁.pullback (x_gen W))
+            + α₁.pullback (y_gen W))
+        - algebraMap F KE W.toAffine.a₁ * (addPullback_x_pair α₁ α₂)
+        - algebraMap F KE W.toAffine.a₃ := by
+  rw [show addPullback_y_pair α₁ α₂ =
+      (W_KE W).toAffine.negY (addPullback_x_pair α₁ α₂)
+        ((addSlopePair α₁ α₂) * (addPullback_x_pair α₁ α₂ - α₁.pullback (x_gen W))
+          + α₁.pullback (y_gen W)) from rfl]
+  unfold WeierstrassCurve.Affine.negY
+  have ha₁ : (W_KE W).toAffine.a₁ = algebraMap F KE W.toAffine.a₁ := rfl
+  have ha₃ : (W_KE W).toAffine.a₃ = algebraMap F KE W.toAffine.a₃ := rfl
+  rw [ha₁, ha₃]
+
+/-- `addY` in `negY`-of-`negAddY` form: `addY x₁ x₂ y₁ ℓ = -(ℓ·(addX x₁ x₂ ℓ − x₁) + y₁)
+− a₁·addX x₁ x₂ ℓ − a₃` (definitional, holds for any slope `ℓ`). -/
+private lemma addY_eq_negY_form (x₁ x₂ y₁ ℓ : F) :
+    W.toAffine.addY x₁ x₂ y₁ ℓ =
+      -(ℓ * (W.toAffine.addX x₁ x₂ ℓ - x₁) + y₁)
+        - W.toAffine.a₁ * (W.toAffine.addX x₁ x₂ ℓ) - W.toAffine.a₃ := by
+  unfold WeierstrassCurve.Affine.addY WeierstrassCurve.Affine.negY
+    WeierstrassCurve.Affine.negAddY
+  ring
+
 /-- **The `y`-coordinate residue of the addition formula** (non-doubling case): under the four
 generator residues with `x₁ ≠ x₂`, the addition-formula `y`-coordinate `addPullback_y_pair α₁ α₂`
 residues to `addY x₁ x₂ y₁ (slope x₁ x₂ y₁ y₂)`. -/
@@ -423,29 +450,8 @@ private theorem resid_addPullback_y_pair
       (W.toAffine.addY x₁ x₂ y₁ (W.toAffine.slope x₁ x₂ y₁ y₂)) := by
   have hL := resid_addSlopePair hx₁ hx₂ hy₁ hy₂ hx_ne
   have hX := resid_addPullback_x_pair hx₁ hx₂ hy₁ hy₂ hx_ne
-  -- `addY X₁ X₂ Y₁ ℓ = -(addX) - a₁·(addX) - a₃ - (ℓ·(addX − X₁) + Y₁)`  (negY of negAddY).
-  -- Express both sides as polynomial combinations of the generator residues + addX residue.
-  have ha₁ : (W_KE W).toAffine.a₁ = algebraMap F KE W.toAffine.a₁ := rfl
-  have ha₃ : (W_KE W).toAffine.a₃ = algebraMap F KE W.toAffine.a₃ := rfl
-  rw [show addPullback_y_pair α₁ α₂ =
-      -((addSlopePair α₁ α₂) * (addPullback_x_pair α₁ α₂ - α₁.pullback (x_gen W))
-            + α₁.pullback (y_gen W))
-        - algebraMap F KE W.toAffine.a₁ * (addPullback_x_pair α₁ α₂)
-        - algebraMap F KE W.toAffine.a₃ from by
-    rw [show addPullback_y_pair α₁ α₂ =
-        (W_KE W).toAffine.negY (addPullback_x_pair α₁ α₂)
-          ((addSlopePair α₁ α₂) * (addPullback_x_pair α₁ α₂ - α₁.pullback (x_gen W))
-            + α₁.pullback (y_gen W)) from rfl]
-    unfold WeierstrassCurve.Affine.negY
-    rw [ha₁, ha₃]]
-  rw [show W.toAffine.addY x₁ x₂ y₁ (W.toAffine.slope x₁ x₂ y₁ y₂) =
-      -((W.toAffine.slope x₁ x₂ y₁ y₂) *
-              (W.toAffine.addX x₁ x₂ (W.toAffine.slope x₁ x₂ y₁ y₂) - x₁) + y₁)
-        - W.toAffine.a₁ * (W.toAffine.addX x₁ x₂ (W.toAffine.slope x₁ x₂ y₁ y₂))
-        - W.toAffine.a₃ from by
-    unfold WeierstrassCurve.Affine.addY WeierstrassCurve.Affine.negY
-      WeierstrassCurve.Affine.negAddY
-    ring]
+  rw [addPullback_y_pair_eq_negY_form,
+    addY_eq_negY_form x₁ x₂ y₁ (W.toAffine.slope x₁ x₂ y₁ y₂)]
   -- `-u ≡ -a`: rewrite as `0 - u`.
   have hnegAddY : resid P
       (-((addSlopePair α₁ α₂) * (addPullback_x_pair α₁ α₂ - α₁.pullback (x_gen W))
