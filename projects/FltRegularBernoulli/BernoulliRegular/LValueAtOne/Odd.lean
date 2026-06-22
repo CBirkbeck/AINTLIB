@@ -13,7 +13,7 @@ sine-side boundary-value identities.
 
 noncomputable section
 
-open scoped BigOperators Topology
+open scoped BigOperators
 
 namespace BernoulliRegular
 
@@ -66,8 +66,6 @@ theorem odd_LFunction_zero_eq_neg_BernoulliGen_one_of_sinZeta_one_formula
         (((Real.pi : ℝ) : ℂ) * ((1 / 2 : ℂ) - (a.val : ℂ) / (p : ℂ)))) :
     DirichletCharacter.LFunction χ 0 = -BernoulliGen χ 1 := by
   have hp_ne_one : p ≠ 1 := hp.out.ne_one
-  have hp_ne_zero : (p : ℂ) ≠ 0 := by
-    exact_mod_cast hp.out.ne_zero
   have hχ_zero : χ 0 = 0 := χ.map_zero' hp_ne_one
   have hsum_zero : ∑ a : ZMod p, χ a = 0 := MulChar.sum_eq_zero_of_ne_one hχ_ne_one
   have hpi : (((Real.pi : ℝ) : ℂ)⁻¹) * (((Real.pi : ℝ) : ℂ)) = 1 := by
@@ -99,11 +97,7 @@ theorem odd_LFunction_zero_eq_neg_BernoulliGen_one_of_sinZeta_one_formula
           simp_rw [mul_sub]
           rw [Finset.sum_sub_distrib]
           have hconst : ∑ a : ZMod p, χ a * (1 / 2 : ℂ) = 0 := by
-            calc
-              ∑ a : ZMod p, χ a * (1 / 2 : ℂ) = (1 / 2 : ℂ) * ∑ a : ZMod p, χ a := by
-                rw [Finset.mul_sum]
-                refine Finset.sum_congr rfl fun a _ => by rw [mul_comm]
-              _ = 0 := by rw [hsum_zero, mul_zero]
+            rw [← Finset.sum_mul, hsum_zero, zero_mul]
           rw [hconst, zero_sub]
     _ = -BernoulliGen χ 1 := by
           congr 1
