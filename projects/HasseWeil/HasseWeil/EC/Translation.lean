@@ -141,7 +141,7 @@ noncomputable def translateCoordAlgHom (xk yk : F) (h_eq : W.toAffine.Equation x
         (algebraMap F (Polynomial F) r)) = _
     change AdjoinRoot.lift (translateBaseHom W xk yk) (translateY_xy W xk yk) _
       (AdjoinRoot.mk _ (Polynomial.C (algebraMap F (Polynomial F) r))) = _
-    rw [AdjoinRoot.lift_mk, Polynomial.eval₂_C]
+    rw [AdjoinRoot.lift_mk]
     simp [translateBaseHom, Polynomial.eval₂_C]
 
 local notation "R" => W.toAffine.CoordinateRing
@@ -233,8 +233,8 @@ theorem translateCoordAlgHom_injective_of_baseHom_inj (xk yk : F)
 hom via `IsFractionRing.liftAlgHom`. Witness-parametric on the base-hom
 injectivity (which gives the `Function.Injective` for the lift).
 
-This is the core algebra-hom packaging — analogous to `addPullbackAlgHom`
-in `HasseWeil/AdditionPullback.lean:124`. -/
+This is the core algebra-hom packaging — analogous to
+`HasseWeil.addPullbackAlgHom`. -/
 noncomputable def translateAlgHom (xk yk : F) (h_eq : W.toAffine.Equation xk yk)
     (hxy : TranslateNonInverse W xk yk)
     (hxinj : Function.Injective (translateBaseHom W xk yk)) :
@@ -316,7 +316,6 @@ theorem translateSlope_xy_eq (xk yk : F) :
     translateSlope_xy W xk yk =
       (y_gen W - algebraMap F KE yk) / (x_gen W - algebraMap F KE xk) := by
   unfold translateSlope_xy
-  classical
   rw [WeierstrassCurve.Affine.slope_of_X_ne]
   intro h_eq
   exact x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h_eq)
@@ -335,7 +334,6 @@ omit [DecidableEq F] in
 theorem ord_translateSlope_xy (xk yk : F) :
     (W_smooth W).ordAtInfty (translateSlope_xy W xk yk) =
       ((-1 : ℤ) : WithTop ℤ) := by
-  classical
   rw [translateSlope_xy_eq W xk yk]
   exact (W_smooth W).ordAtInfty_div_of_ord_eq (x_gen_sub_const_ne_zero W xk)
     (-3) (-2) (ord_y_gen_sub_const W yk) (ord_x_gen_sub_const W xk)
