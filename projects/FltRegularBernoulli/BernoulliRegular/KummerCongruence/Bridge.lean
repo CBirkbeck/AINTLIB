@@ -84,7 +84,7 @@ private lemma bernoulliGen_mul_p_sub_sum_pow_mem {p : ℕ} [hp : Fact p.Prime]
     change (∑ a : ZMod p, (teichmuller p a) ^ n * (a.val : ℤ_[p])) -
         (∑ a : ZMod p, (a.val : ℤ_[p]) ^ (p * n + 1)) ∈ _
     rw [← Finset.sum_sub_distrib]
-    exact Ideal.sum_mem _ fun a _ => hterm_mem a
+    exact Ideal.sum_mem _ fun a _ ↦ hterm_mem a
   rw [PadicInt.maximalIdeal_eq_span_p, Ideal.span_singleton_pow,
     Ideal.mem_span_singleton] at hST_mem
   obtain ⟨w, hw⟩ := hST_mem
@@ -94,7 +94,7 @@ private lemma bernoulliGen_mul_p_sub_sum_pow_mem {p : ℕ} [hp : Fact p.Prime]
       ∑ a : ZMod p, ((teichmullerCharQp p) ^ n) a * (a.val : ℚ_[p]) := by
     change ((∑ a : ZMod p, (teichmuller p a) ^ n * (a.val : ℤ_[p]) : ℤ_[p]) : ℚ_[p]) = _
     rw [PadicInt.coe_sum]
-    refine Finset.sum_congr rfl fun a _ => ?_
+    refine Finset.sum_congr rfl fun a _ ↦ ?_
     rw [PadicInt.coe_mul, PadicInt.coe_pow, PadicInt.coe_natCast]
     congr 1
     rw [teichmullerCharQp_pow_eq_ringHomComp (p := p) (n := n),
@@ -108,8 +108,8 @@ private lemma bernoulliGen_mul_p_sub_sum_pow_mem {p : ℕ} [hp : Fact p.Prime]
     rw [PadicInt.coe_sum]
     simp_rw [show ∀ a : ZMod p,
         (((a.val : ℤ_[p]) ^ (p * n + 1) : ℤ_[p]) : ℚ_[p]) = ((a.val : ℚ_[p]) ^ (p * n + 1)) from
-      fun a => by rw [PadicInt.coe_pow, PadicInt.coe_natCast]]
-    refine Finset.sum_nbij (fun a => a.val) ?_ ?_ ?_ ?_
+      fun a ↦ by rw [PadicInt.coe_pow, PadicInt.coe_natCast]]
+    refine Finset.sum_nbij (fun a ↦ a.val) ?_ ?_ ?_ ?_
     · intro a _; simp only [Finset.mem_range]; exact ZMod.val_lt a
     · intros a _ b _ hab; exact ZMod.val_injective _ hab
     · intros k hk
@@ -153,7 +153,7 @@ private lemma sum_pow_t_sub_p_mul_bernoulli_mem {p : ℕ} [hp : Fact p.Prime]
   · -- IH for `p · B_j ∈ ℤ_[p]` at j < t (via the unified restricted theorem).
     intro j hj hj_two hj_even
     exact p_mul_bernoulli_mem_padicInt_restricted hp_odd hj_two hj_even
-      (fun j' hj' => h_below_t j' (Nat.le_trans hj' hj.le))
+      (fun j' hj' ↦ h_below_t j' (Nat.le_trans hj' hj.le))
 
 /-- **Ingredient 3 of T012** (T011 + `t ≡ 1 (mod p)` + integrality). With
 `t := p·n + 1`, `t ≡ n+1 (mod p-1)` and `t ≡ 1 (mod p)`, so Kummer's congruence
@@ -188,12 +188,12 @@ private lemma bernoulli_t_sub_div_mem {p : ℕ} [hp : Fact p.Prime]
       omega
     unfold Nat.ModEq; rw [h_eq, Nat.add_mul_mod_self_left]
   -- `p ∤ t` since `t = p·n + 1 ≡ 1 (mod p)` and `p ≥ 3`.
-  have ht_coprime : ¬ (p : ℕ) ∣ t := fun h => by
+  have ht_coprime : ¬ (p : ℕ) ∣ t := fun h ↦ by
     have h_pn : p ∣ p * n := ⟨n, rfl⟩
     rw [(ht_def : t = p * n + 1)] at h
     exact absurd (Nat.le_of_dvd (by omega) ((Nat.dvd_add_right h_pn).mp h)) (by omega)
   -- `p ∤ (t + 1) = p·n + 2`: since `p ≥ 3`.
-  have ht_p_plus : ¬ (p : ℕ) ∣ (t + 1) := fun h => by
+  have ht_p_plus : ¬ (p : ℕ) ∣ (t + 1) := fun h ↦ by
     have h_pn : p ∣ p * n := ⟨n, rfl⟩
     have h_eq_t1 : t + 1 = p * n + 2 := by simp [ht_def]
     rw [h_eq_t1] at h
@@ -212,7 +212,7 @@ private lemma bernoulli_t_sub_div_mem {p : ℕ} [hp : Fact p.Prime]
   have hn1Inv_mul : ((n + 1 : ℕ) : ℤ_[p]) * n1Inv = 1 := by
     change ((hn1_unit.unit * hn1_unit.unit⁻¹ : (ℤ_[p])ˣ).val : ℤ_[p]) = 1; simp
   have hn1Inv_mul_Qp : ((n + 1 : ℕ) : ℚ_[p]) * ((n1Inv : ℤ_[p]) : ℚ_[p]) = 1 := by
-    simpa using congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hn1Inv_mul
+    simpa using congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hn1Inv_mul
   -- `b := bn1 · n1Inv`, so `B_{n+1}/(n+1) = b` in ℚ_[p].
   set b : ℤ_[p] := bn1 * n1Inv with hb_def
   have hb : (((bernoulli (n + 1) : ℚ) / (n + 1 : ℕ) : ℚ) : ℚ_[p]) = ((b : ℤ_[p]) : ℚ_[p]) := by
@@ -285,10 +285,10 @@ theorem bernoulliGen_teichmuller_pow_sModEq_div
   have h_p_sq_lt_p_cube : p ^ 2 < p ^ 3 := by
     have h_p2_pos : 0 < p ^ 2 := by positivity
     simpa [pow_succ] using (Nat.mul_lt_mul_left h_p2_pos).mpr hp.one_lt
-  have h_below_t : ∀ j, j ≤ t → ¬ (p : ℕ) ^ 3 ∣ (j + 1) := fun j hj hdvd =>
+  have h_below_t : ∀ j, j ≤ t → ¬ (p : ℕ) ^ 3 ∣ (j + 1) := fun j hj hdvd ↦
     absurd (Nat.le_of_dvd (Nat.succ_pos j) hdvd) (by omega)
   have h_p_lt_p_sq : p < p ^ 2 := by nlinarith [hp.one_lt]
-  have h_below_n1 : ∀ j, j ≤ n + 1 → ¬ (p : ℕ) ^ 3 ∣ (j + 1) := fun j hj hdvd =>
+  have h_below_n1 : ∀ j, j ≤ n + 1 → ¬ (p : ℕ) ^ 3 ∣ (j + 1) := fun j hj hdvd ↦
     absurd (Nat.le_of_dvd (Nat.succ_pos j) hdvd) (by omega)
   -- The three ingredients, each an independent `mod p^k` congruence.
   obtain ⟨z₁, hz₁⟩ := bernoulliGen_mul_p_sub_sum_pow_mem hp_odd hn_odd hn_pos
