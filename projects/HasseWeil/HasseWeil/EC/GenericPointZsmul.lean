@@ -483,6 +483,67 @@ theorem zsmul_genericPoint_eq (n : ℤ) (hn : n ≠ 0) :
     rfl
 
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
+/-- The Jacobian point `smulEval (W_KE W) x₀ y₀ m` (the `m`-fold scalar multiple of a
+    nonsingular affine point, read in Jacobian coordinates) is itself nonsingular. -/
+private lemma jacobian_nonsingular_smulEval (m : ℤ) {x₀ y₀ : KE}
+    (h_ns : (W_KE W).toAffine.Nonsingular x₀ y₀) :
+    WeierstrassCurve.Jacobian.Nonsingular (W_KE W).toJacobian
+      (smulEval (W_KE W) x₀ y₀ m) := by
+  have h_smulEval := WeierstrassCurve.zsmul_eq_smulEval (W := W_KE W) h_ns m
+  have h_ns_jac := (m • WeierstrassCurve.Jacobian.Point.fromAffine
+    (Affine.Point.some x₀ y₀ h_ns)).nonsingular
+  change WeierstrassCurve.Jacobian.NonsingularLift _ _ at h_ns_jac
+  rw [h_smulEval] at h_ns_jac
+  exact h_ns_jac
+
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
+/-- Transport across the affine ↔ Jacobian equivalence: the `m`-fold scalar multiple of an
+    affine point `.some x₀ y₀ _` is the `toAffineLift` of the `m`-fold multiple of its Jacobian
+    image `fromAffine (.some x₀ y₀ _)`. -/
+private lemma zsmul_some_eq_toAffineLift_fromAffine (m : ℤ) {x₀ y₀ : KE}
+    (h_ns : (W_KE W).toAffine.Nonsingular x₀ y₀) :
+    m • Affine.Point.some x₀ y₀ h_ns =
+      WeierstrassCurve.Jacobian.Point.toAffineLift
+        (m • WeierstrassCurve.Jacobian.Point.fromAffine
+          (Affine.Point.some x₀ y₀ h_ns)) := by
+  have h_inv :
+      WeierstrassCurve.Jacobian.Point.toAffineAddEquiv (W_KE W)
+        (WeierstrassCurve.Jacobian.Point.fromAffine
+          (Affine.Point.some x₀ y₀ h_ns)) =
+      Affine.Point.some x₀ y₀ h_ns :=
+    (WeierstrassCurve.Jacobian.Point.toAffineAddEquiv (W_KE W)).right_inv _
+  have h := map_zsmul (WeierstrassCurve.Jacobian.Point.toAffineAddEquiv (W_KE W))
+    m (WeierstrassCurve.Jacobian.Point.fromAffine
+      (Affine.Point.some x₀ y₀ h_ns))
+  rw [WeierstrassCurve.Jacobian.Point.toAffineAddEquiv_apply] at h
+  rw [show WeierstrassCurve.Jacobian.Point.toAffineAddEquiv (W_KE W)
+    (WeierstrassCurve.Jacobian.Point.fromAffine _) =
+    WeierstrassCurve.Jacobian.Point.toAffineLift
+      (WeierstrassCurve.Jacobian.Point.fromAffine _) from rfl] at h
+  have h2 : WeierstrassCurve.Jacobian.Point.toAffineLift
+      (WeierstrassCurve.Jacobian.Point.fromAffine
+        (Affine.Point.some x₀ y₀ h_ns)) =
+      Affine.Point.some x₀ y₀ h_ns := by
+    rw [← WeierstrassCurve.Jacobian.Point.toAffineAddEquiv_apply]
+    exact h_inv
+  rw [h2] at h
+  exact h.symm
+
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
+/-- The `toAffineLift` of the `m`-fold Jacobian multiple of `fromAffine (.some x₀ y₀ _)` is the
+    plain `toAffine` of the explicit division-polynomial coordinate vector `smulEval`. -/
+private lemma toAffineLift_zsmul_fromAffine_eq_toAffine (m : ℤ) {x₀ y₀ : KE}
+    (h_ns : (W_KE W).toAffine.Nonsingular x₀ y₀) :
+    WeierstrassCurve.Jacobian.Point.toAffineLift
+        (m • WeierstrassCurve.Jacobian.Point.fromAffine
+          (Affine.Point.some x₀ y₀ h_ns)) =
+      WeierstrassCurve.Jacobian.Point.toAffine (W_KE W)
+        (smulEval (W_KE W) x₀ y₀ m) := by
+  unfold WeierstrassCurve.Jacobian.Point.toAffineLift
+  rw [WeierstrassCurve.zsmul_eq_smulEval (W := W_KE W) h_ns m]
+  rfl
+
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Generalized Jacobian theorem**: for any nonsingular point `(x₀, y₀)` on
     `W_KE`, `m • .some x₀ y₀ _` has Jacobian-affine coordinates given by
     `(φ_m(x₀, y₀)/ψ_m(x₀, y₀)², ω_m(x₀, y₀)/ψ_m(x₀, y₀)³)`, provided
@@ -495,60 +556,17 @@ theorem zsmul_affine_point_eq (m : ℤ) {x₀ y₀ : KE}
         (((W_KE W).ω m).evalEval x₀ y₀ / ((W_KE W).ψ m).evalEval x₀ y₀ ^ 3),
       m • Affine.Point.some x₀ y₀ h_ns =
         Affine.Point.some _ _ h_ns' := by
-  have h_smulEval := WeierstrassCurve.zsmul_eq_smulEval (W := W_KE W) h_ns m
   have hZ : smulEval (W_KE W) x₀ y₀ m 2 ≠ 0 := h_ψ_ne
-  have h_ns_smulEval :
-      WeierstrassCurve.Jacobian.Nonsingular (W_KE W).toJacobian
-        (smulEval (W_KE W) x₀ y₀ m) := by
-    have h_ns_jac := (m • WeierstrassCurve.Jacobian.Point.fromAffine
-      (Affine.Point.some x₀ y₀ h_ns)).nonsingular
-    change WeierstrassCurve.Jacobian.NonsingularLift _ _ at h_ns_jac
-    rw [h_smulEval] at h_ns_jac
-    exact h_ns_jac
+  have h_ns_smulEval := jacobian_nonsingular_smulEval W m h_ns
   have h_ns_affine :
       (W_KE W).toAffine.Nonsingular
         (smulEval (W_KE W) x₀ y₀ m 0 / smulEval (W_KE W) x₀ y₀ m 2 ^ 2)
         (smulEval (W_KE W) x₀ y₀ m 1 / smulEval (W_KE W) x₀ y₀ m 2 ^ 3) :=
     (WeierstrassCurve.Jacobian.nonsingular_of_Z_ne_zero hZ).mp h_ns_smulEval
   refine ⟨h_ns_affine, ?_⟩
-  have h_inv :
-      WeierstrassCurve.Jacobian.Point.toAffineAddEquiv (W_KE W)
-        (WeierstrassCurve.Jacobian.Point.fromAffine
-          (Affine.Point.some x₀ y₀ h_ns)) =
-      Affine.Point.some x₀ y₀ h_ns :=
-    (WeierstrassCurve.Jacobian.Point.toAffineAddEquiv (W_KE W)).right_inv _
-  have h_toAffine :
-      m • Affine.Point.some x₀ y₀ h_ns =
-      WeierstrassCurve.Jacobian.Point.toAffineLift
-        (m • WeierstrassCurve.Jacobian.Point.fromAffine
-          (Affine.Point.some x₀ y₀ h_ns)) := by
-    have h := map_zsmul (WeierstrassCurve.Jacobian.Point.toAffineAddEquiv (W_KE W))
-      m (WeierstrassCurve.Jacobian.Point.fromAffine
-        (Affine.Point.some x₀ y₀ h_ns))
-    rw [WeierstrassCurve.Jacobian.Point.toAffineAddEquiv_apply] at h
-    rw [show WeierstrassCurve.Jacobian.Point.toAffineAddEquiv (W_KE W)
-      (WeierstrassCurve.Jacobian.Point.fromAffine _) =
-      WeierstrassCurve.Jacobian.Point.toAffineLift
-        (WeierstrassCurve.Jacobian.Point.fromAffine _) from rfl] at h
-    have h2 : WeierstrassCurve.Jacobian.Point.toAffineLift
-        (WeierstrassCurve.Jacobian.Point.fromAffine
-          (Affine.Point.some x₀ y₀ h_ns)) =
-        Affine.Point.some x₀ y₀ h_ns := by
-      rw [← WeierstrassCurve.Jacobian.Point.toAffineAddEquiv_apply]
-      exact h_inv
-    rw [h2] at h
-    exact h.symm
-  rw [h_toAffine]
-  have h_eq_lift :
-      WeierstrassCurve.Jacobian.Point.toAffineLift
-        (m • WeierstrassCurve.Jacobian.Point.fromAffine
-          (Affine.Point.some x₀ y₀ h_ns)) =
-      WeierstrassCurve.Jacobian.Point.toAffine (W_KE W)
-        (smulEval (W_KE W) x₀ y₀ m) := by
-    unfold WeierstrassCurve.Jacobian.Point.toAffineLift
-    rw [h_smulEval]
-    rfl
-  rw [h_eq_lift, WeierstrassCurve.Jacobian.Point.toAffine_of_Z_ne_zero h_ns_smulEval hZ]
+  rw [zsmul_some_eq_toAffineLift_fromAffine W m h_ns,
+    toAffineLift_zsmul_fromAffine_eq_toAffine W m h_ns,
+    WeierstrassCurve.Jacobian.Point.toAffine_of_Z_ne_zero h_ns_smulEval hZ]
   rfl
 
 private lemma zsmul_genericPoint_ne_zero (n : ℤ) (hn : n ≠ 0) :
@@ -596,32 +614,7 @@ theorem ψ_m_evalEval_mulByInt_ne_zero (m n : ℤ) (hn : n ≠ 0) (hmn : m * n �
         (Affine.Point.some (mulByInt_x W n) (mulByInt_y W n) hns_n)).point.lift _ _ = 0
     rw [h_smulEval]
     exact WeierstrassCurve.Jacobian.Point.toAffine_of_Z_eq_zero h_Z'
-  have h_inv :
-      WeierstrassCurve.Jacobian.Point.toAffineAddEquiv (W_KE W)
-        (WeierstrassCurve.Jacobian.Point.fromAffine
-          (Affine.Point.some (mulByInt_x W n) (mulByInt_y W n) hns_n)) =
-      Affine.Point.some (mulByInt_x W n) (mulByInt_y W n) hns_n :=
-    (WeierstrassCurve.Jacobian.Point.toAffineAddEquiv (W_KE W)).right_inv _
-  have h_main : m • Affine.Point.some (mulByInt_x W n) (mulByInt_y W n) hns_n =
-      WeierstrassCurve.Jacobian.Point.toAffineLift
-        (m • WeierstrassCurve.Jacobian.Point.fromAffine
-          (Affine.Point.some (mulByInt_x W n) (mulByInt_y W n) hns_n)) := by
-    have h := map_zsmul (WeierstrassCurve.Jacobian.Point.toAffineAddEquiv (W_KE W))
-      m (WeierstrassCurve.Jacobian.Point.fromAffine
-        (Affine.Point.some (mulByInt_x W n) (mulByInt_y W n) hns_n))
-    rw [WeierstrassCurve.Jacobian.Point.toAffineAddEquiv_apply] at h
-    rw [show WeierstrassCurve.Jacobian.Point.toAffineAddEquiv (W_KE W)
-      (WeierstrassCurve.Jacobian.Point.fromAffine _) =
-      WeierstrassCurve.Jacobian.Point.toAffineLift
-        (WeierstrassCurve.Jacobian.Point.fromAffine _) from rfl] at h
-    have h2 : WeierstrassCurve.Jacobian.Point.toAffineLift
-        (WeierstrassCurve.Jacobian.Point.fromAffine
-          (Affine.Point.some (mulByInt_x W n) (mulByInt_y W n) hns_n)) =
-        Affine.Point.some (mulByInt_x W n) (mulByInt_y W n) hns_n := by
-      rw [← WeierstrassCurve.Jacobian.Point.toAffineAddEquiv_apply]; exact h_inv
-    rw [h2] at h
-    exact h.symm
-  rw [h_main, h_toAffine_eq_zero]
+  rw [zsmul_some_eq_toAffineLift_fromAffine W m hns_n, h_toAffine_eq_zero]
 
 /-- The bivariate `φ_m` at `(mulByInt_x W n, mulByInt_y W n)` equals the univariate
     `eval₂ (algebraMap F KE) (mulByInt_x W n) (W.Φ m)`. -/
