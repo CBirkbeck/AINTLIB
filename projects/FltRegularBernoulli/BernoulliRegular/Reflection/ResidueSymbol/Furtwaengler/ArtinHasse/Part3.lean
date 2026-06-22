@@ -281,7 +281,7 @@ theorem quotient_mk_artinHasseDworkParameterApproxTo_factor_eq
   dsimp only
   let φ : 𝓞 R' ⧸ S.Q ^ (N + 1) →+* 𝓞 R' ⧸ S.Q ^ (M + 1) :=
     Ideal.Quotient.factor (Ideal.pow_le_pow_right (Nat.succ_le_succ hMN))
-  let term : ℕ → 𝓞 R' ⧸ S.Q ^ (M + 1) := fun n =>
+  let term : ℕ → 𝓞 R' ⧸ S.Q ^ (M + 1) := fun n ↦
     S.rIntegralRatToQuotient M
       (⟨(PowerSeries.coeff (R := ℚ) n) (artinHasseExpInverseSeries ℓ),
         artinHasseExpInverseSeries_coeff_isRIntegral ℓ n⟩ :
@@ -435,7 +435,7 @@ theorem artinHasseDworkParameterApproxTo_sub_pi_mem_Q_sq_of_pos
     (S : ConcreteStickelbergerSetup ℓ p k K R') {N : ℕ} (hN : 0 < N) :
     artinHasseDworkParameterApproxTo S N - S.π ∈ S.Q ^ 2 := by
   classical
-  let f : ℕ → 𝓞 R' := fun n => artinHasseInverseCoeffLiftTo S N n
+  let f : ℕ → 𝓞 R' := fun n ↦ artinHasseInverseCoeffLiftTo S N n
   have h1N : 1 ≤ N := Nat.succ_le_of_lt hN
   have hmem_one :
       1 ∈ Finset.range (N + 1) := by
