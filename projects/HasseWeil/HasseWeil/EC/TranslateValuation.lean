@@ -2099,6 +2099,32 @@ theorem ord_P_translateAlgEquivOfPoint_algebraMap_eq_of_ne_zero
     (ord_P_translateAlgEquivOfPoint_algebraMap_ge_of_ne_zero W P xk yk h_ns h r hr)
     (ord_P_translateAlgEquivOfPoint_algebraMap_le_of_ne_zero W P xk yk h_ns h r hr)
 
+/-- A nonzero function-field element `g` is a quotient of two nonzero coordinate-ring
+elements (with nonzero algebraMap images): `g = algC a / algC b`. The `DecidableEq F`
+section instance is reported unused by the linter but is needed for `CoordinateRing`
+instance synthesis (so it cannot be `omit`ted). -/
+private theorem exists_coordinateRing_fraction_ne_zero
+    (g : (W_smooth W).FunctionField) (hg : g ≠ 0) :
+    ∃ a b : (W_smooth W).CoordinateRing, a ≠ 0 ∧ b ≠ 0 ∧
+      algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField a ≠ 0 ∧
+      algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField b ≠ 0 ∧
+      g = algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField a /
+        algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField b := by
+  obtain ⟨a, b, hb_nzd, hab⟩ := IsFractionRing.div_surjective
+    (A := (W_smooth W).CoordinateRing) g
+  have hb_ne : b ≠ 0 := nonZeroDivisors.ne_zero hb_nzd
+  have h_algMap_b_ne :
+      algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField b ≠ 0 := fun h_eq ↦
+    hb_ne ((IsFractionRing.injective _ _) (h_eq.trans (map_zero _).symm))
+  have ha_ne : a ≠ 0 := by
+    intro ha
+    apply hg
+    rw [← hab, ha, map_zero, zero_div]
+  have h_algMap_a_ne :
+      algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField a ≠ 0 := fun h_eq ↦
+    ha_ne ((IsFractionRing.injective _ _) (h_eq.trans (map_zero _).symm))
+  exact ⟨a, b, ha_ne, hb_ne, h_algMap_a_ne, h_algMap_b_ne, hab.symm⟩
+
 /-- K(E)-level ord transport identity: for nonzero `g ∈ K(E)`,
 `ord_P (τ_k g) = ord_(P+k) g`. Feeds the consumer
 `isTranslateValuationCompatible_of_ord_P_eq`. -/
@@ -2116,21 +2142,11 @@ theorem translate_ord_eq_all_nonzero
   set k_pt : (W_smooth W).toAffine.Point :=
     Affine.Point.some xk yk h_ns with hk_pt_def
   set P' := P.translate_of_finite k_pt h with hP'_def
+  obtain ⟨a, b, ha_ne, hb_ne, h_algMap_a_ne, h_algMap_b_ne, hab_eq⟩ :=
+    exists_coordinateRing_fraction_ne_zero W g hg
   set algC : (W_smooth W).CoordinateRing →+* (W_smooth W).FunctionField :=
     algebraMap (W_smooth W).CoordinateRing
       (W_smooth W).FunctionField with halgC_def
-  obtain ⟨a, b, hb_nzd, hab⟩ := IsFractionRing.div_surjective
-    (A := (W_smooth W).CoordinateRing) g
-  have hb_ne : b ≠ 0 := nonZeroDivisors.ne_zero hb_nzd
-  have h_algMap_b_ne : algC b ≠ 0 := fun h_eq ↦
-    hb_ne ((IsFractionRing.injective _ _) (h_eq.trans (map_zero _).symm))
-  have ha_ne : a ≠ 0 := by
-    intro ha
-    apply hg
-    rw [← hab, ha, map_zero, zero_div]
-  have h_algMap_a_ne : algC a ≠ 0 := fun h_eq ↦
-    ha_ne ((IsFractionRing.injective _ _) (h_eq.trans (map_zero _).symm))
-  have hab_eq : g = algC a / algC b := hab.symm
   have h_τ_g : (translateAlgEquivOfPoint W k_pt) g =
       (translateAlgEquivOfPoint W k_pt) (algC a) /
       (translateAlgEquivOfPoint W k_pt) (algC b) := by
