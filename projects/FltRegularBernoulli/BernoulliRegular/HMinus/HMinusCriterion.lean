@@ -94,15 +94,17 @@ theorem p_dvd_hMinus_iff_p_dvd_some_bernoulli (hp_odd' : p ≠ 2) :
         Finset.prod S (fun j =>
           (-(1 / 2 : ℚ_[p])) * ((((bernoulli (j + 1) : ℚ) / (j + 1) : ℚ) : ℚ_[p]))) := by
     calc
-      ((A : ℤ_[p]) : ℚ_[p]) = ∏ j ∈ S, (((a j : ℤ_[p]) : ℚ_[p])) := by
+      ((A : ℤ_[p]) : ℚ_[p]) = ∏ j ∈ S, ((a j : ℤ_[p]) : ℚ_[p]) := by
         dsimp [A]
-        change (algebraMap ℤ_[p] ℚ_[p]) (∏ j ∈ S, a j) = ∏ j ∈ S, (algebraMap ℤ_[p] ℚ_[p]) (a j)
+        change (algebraMap ℤ_[p] ℚ_[p]) (∏ j ∈ S, a j) =
+          ∏ j ∈ S, (algebraMap ℤ_[p] ℚ_[p]) (a j)
         rw [map_prod]
       _ = Finset.prod S (fun j =>
             (-(1 / 2 : ℚ_[p])) * ((((bernoulli (j + 1) : ℚ) / (j + 1) : ℚ) : ℚ_[p]))) :=
           Finset.prod_congr rfl ha_cast
   have hzA :
-      (((hMinus K : ℕ) : ℚ_[p])) = ((A : ℤ_[p]) : ℚ_[p]) + (p : ℚ_[p]) * (z : ℚ_[p]) := by
+      (((hMinus K : ℕ) : ℚ_[p])) =
+        ((A : ℤ_[p]) : ℚ_[p]) + (p : ℚ_[p]) * (z : ℚ_[p]) := by
     calc
       (((hMinus K : ℕ) : ℚ_[p])) =
           Finset.prod S (fun j =>
