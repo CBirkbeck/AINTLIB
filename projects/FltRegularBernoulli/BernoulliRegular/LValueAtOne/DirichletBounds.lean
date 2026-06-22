@@ -38,9 +38,9 @@ lemma norm_sum_range_smul_le_of_antitone_of_nonneg_of_bounded
             ≤ ∑ i ∈ Finset.range (n - 1),
                 ‖(a (i + 1) - a i) • ∑ j ∈ Finset.range (i + 1), z j‖ := by
               simpa using norm_sum_le (Finset.range (n - 1))
-                (fun i => (a (i + 1) - a i) • ∑ j ∈ Finset.range (i + 1), z j)
+                (fun i ↦ (a (i + 1) - a i) • ∑ j ∈ Finset.range (i + 1), z j)
         _ ≤ ∑ i ∈ Finset.range (n - 1), B * (a i - a (i + 1)) := by
-              refine Finset.sum_le_sum fun i hi => ?_
+              refine Finset.sum_le_sum fun i hi ↦ ?_
               have hdiff_nonpos : a (i + 1) - a i ≤ 0 := sub_nonpos.mpr (ha (Nat.le_succ i))
               calc
                 ‖(a (i + 1) - a i) • ∑ j ∈ Finset.range (i + 1), z j‖
@@ -61,7 +61,7 @@ lemma norm_sum_range_smul_le_of_antitone_of_nonneg_of_bounded
                 calc
                   ∑ i ∈ Finset.range (n - 1), (a i - a (i + 1))
                       = ∑ i ∈ Finset.range (n - 1), -((a (i + 1) - a i)) := by
-                          refine Finset.sum_congr rfl fun i hi => by ring
+                          refine Finset.sum_congr rfl fun i hi ↦ by ring
                   _ = -∑ i ∈ Finset.range (n - 1), (a (i + 1) - a i) := by
                         rw [Finset.sum_neg_distrib]
                   _ = a 0 - a (n - 1) := by linarith
@@ -120,9 +120,9 @@ lemma norm_sum_range_shift_smul_le_of_antitone_of_nonneg_of_bounded
   simpa [two_mul, add_comm, add_left_comm, add_assoc, mul_add, add_mul, mul_comm, mul_left_comm,
     mul_assoc] using
     (norm_sum_range_smul_le_of_antitone_of_nonneg_of_bounded
-      (a := fun k => a (m + k)) (z := fun k => z (m + k)) (B := 2 * B)
-      (ha := fun i j hij => ha (Nat.add_le_add_left hij m))
-      (ha_nonneg := fun k => ha_nonneg (m + k))
-      (hbound := fun k => norm_sum_range_shift_le_of_bounded (z := z) (B := B) hbound m k) n)
+      (a := fun k ↦ a (m + k)) (z := fun k ↦ z (m + k)) (B := 2 * B)
+      (ha := fun i j hij ↦ ha (Nat.add_le_add_left hij m))
+      (ha_nonneg := fun k ↦ ha_nonneg (m + k))
+      (hbound := fun k ↦ norm_sum_range_shift_le_of_bounded (z := z) (B := B) hbound m k) n)
 
 end BernoulliRegular
