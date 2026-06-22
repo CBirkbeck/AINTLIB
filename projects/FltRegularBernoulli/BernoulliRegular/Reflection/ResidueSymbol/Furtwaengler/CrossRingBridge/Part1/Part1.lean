@@ -64,7 +64,7 @@ giving an injection `𝓞 K / P → 𝓞 R' / 𝔭`. -/
 
 /-- **Residue-field embedding** induced by a prime `𝔭` of `𝓞 R'` lying
 over `P ⊂ 𝓞 K`. -/
-noncomputable def residueFieldEmbedding
+def residueFieldEmbedding
     {K : Type*} [Field K] [NumberField K]
     {R' : Type*} [Field R'] [NumberField R']
     [Algebra K R'] [IsScalarTower ℚ K R']
@@ -103,8 +103,7 @@ theorem residueFieldEmbedding_injective
   rw [Ideal.quotientMap_mk] at hx
   -- hx: Ideal.Quotient.mk 𝔭 (algebraMap a) = 0, so algebraMap a ∈ 𝔭, so a ∈ comap = P.
   rw [Ideal.Quotient.eq_zero_iff_mem] at hx
-  rw [Ideal.Quotient.eq_zero_iff_mem]
-  rw [← h_over]
+  rw [Ideal.Quotient.eq_zero_iff_mem, ← h_over]
   exact hx
 
 /-! ### CharP transfer through the bridge
@@ -169,7 +168,7 @@ lift `γ ∈ 𝓞 K` of `S.gaussSumInt a ^ p ∈ 𝓞 R'`. We name this lift
 /-- **Constructive descent generator**: for index `a`, the unique lift
 `γ ∈ 𝓞 K` with `algebraMap γ = S.gaussSumInt a ^ p`, extracted from
 `exists_descentPrime_pow_mul_stickOrdOrd_div`. -/
-noncomputable def phiPrimeGenDescent
+def phiPrimeGenDescent
     {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)]
     {k : Type*} [Field k] [Fintype k] [Algebra (ZMod ℓ) k]
     {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
@@ -446,10 +445,8 @@ theorem ConcreteStickelbergerSetup.descentPrime_under_eq_span_ell
   have h_ell_in : (ℓ : 𝓞 K) ∈ S.descentPrime :=
     S.descentPrime_contains_ell
   have h_ell_in_under : (ℓ : ℤ) ∈ S.descentPrime.under ℤ := by
-    rw [show S.descentPrime.under ℤ =
-        Ideal.comap (algebraMap ℤ (𝓞 K)) S.descentPrime from rfl]
-    rw [Ideal.mem_comap]
-    rw [show (algebraMap ℤ (𝓞 K) (ℓ : ℤ)) = (ℓ : 𝓞 K) from by push_cast; rfl]
+    rw [Ideal.mem_under,
+      show (algebraMap ℤ (𝓞 K) (ℓ : ℤ)) = (ℓ : 𝓞 K) from by push_cast; rfl]
     exact h_ell_in
   have h_under_ne : S.descentPrime.under ℤ ≠ ⊥ := by
     intro hbot
@@ -470,11 +467,7 @@ theorem ConcreteStickelbergerSetup.descentPrime_under_eq_span_ell
       exact_mod_cast (Fact.out : Nat.Prime ℓ).ne_zero)
   have h_span_le :
       Ideal.span ({(ℓ : ℤ)} : Set ℤ) ≤ S.descentPrime.under ℤ := by
-    rw [Ideal.span_le]
-    intro x hx
-    rw [Set.mem_singleton_iff] at hx
-    rw [hx]
-    exact h_ell_in_under
+    rw [Ideal.span_singleton_le_iff_mem]; exact h_ell_in_under
   exact (Ideal.IsMaximal.eq_of_le inferInstance
     (Ideal.IsMaximal.ne_top inferInstance) h_span_le).symm
 
@@ -500,7 +493,7 @@ theorem ConcreteStickelbergerSetup.ramificationIdx_span_ell_Q_eq_ell_sub_one
   haveI := S.hQ_prime
   haveI : S.Q.LiesOver (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) :=
     liesOver_span_ell_of_ell_mem S.Q S.Q_ne_bot' S.hQ
-  have h_ne_dvd : ¬ ℓ ∣ p := fun hdvd => by
+  have h_ne_dvd : ¬ ℓ ∣ p := fun hdvd ↦ by
     have h_eq : ℓ = p :=
       (Nat.prime_dvd_prime_iff_eq (Fact.out : Nat.Prime ℓ)
         (Fact.out : Nat.Prime p)).mp hdvd
@@ -588,7 +581,7 @@ theorem cyclotomicPair_relative_inertiaDeg_eq_one_of_liesOver_sourcePrime
   letI : P.LiesOver q := ⟨h_under_P.symm⟩
   letI : Q.LiesOver P := ⟨h_lies.symm⟩
   haveI : Q.LiesOver q := Ideal.LiesOver.trans Q P q
-  have hℓ_not_dvd_p : ¬ ℓ ∣ p := fun hdvd => by
+  have hℓ_not_dvd_p : ¬ ℓ ∣ p := fun hdvd ↦ by
     have h_eq : ℓ = p :=
       (Nat.prime_dvd_prime_iff_eq (Fact.out : Nat.Prime ℓ)
         (Fact.out : Nat.Prime p)).mp hdvd
@@ -629,12 +622,8 @@ theorem cyclotomicPair_relative_inertiaDeg_eq_one_of_liesOver_sourcePrime
       orderOf (ℓ : ZMod p) * P.inertiaDeg Q =
         orderOf (ℓ : ZMod p) * 1 := by
     rw [mul_one]
-    have h_tmp :
-        orderOf (ℓ : ZMod p) = orderOf (ℓ : ZMod p) * P.inertiaDeg Q := by
-      have h_tower_order := h_tower
-      rw [h_abs_R, h_abs_K] at h_tower_order
-      exact h_tower_order
-    exact h_tmp.symm
+    rw [h_abs_R, h_abs_K] at h_tower
+    exact h_tower.symm
   exact Nat.eq_of_mul_eq_mul_left h_order_pos h_cancel
 
 /-- Prime-over data for a source prime, including the split residue-field
@@ -667,7 +656,7 @@ namespace Ref18SourcePrimeOverData
 
 /-- The inverse canonical residue-field isomorphism attached to residue-degree
 one source prime-over data. -/
-noncomputable def quotientIso
+def quotientIso
     {ℓ p : ℕ}
     {K : Type*} [Field K] [NumberField K]
     {R' : Type*} [Field R'] [NumberField R'] [Algebra K R']
@@ -697,7 +686,7 @@ theorem quotientIso_isKAlgebraCompatible
 /-- Choose the prime-over data for one source prime in the cyclotomic pair
 extension.  The only source-side arithmetic inputs are the facts that `P` lies
 over `ℓ` and not over `p`; the latter prevents the degenerate `ℓ = p` case. -/
-noncomputable def ofFiniteCyclotomicPair
+def ofFiniteCyclotomicPair
     {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)]
     {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
     {R' : Type*} [Field R'] [NumberField R'] [Algebra K R']
@@ -715,7 +704,7 @@ noncomputable def ofFiniteCyclotomicPair
     Classical.choose_spec h_exists
   have hQ_prime : Q.IsPrime := hQ_spec.1.isPrime
   have h_lies : Q.under (𝓞 K) = P := hQ_spec.2
-  have hℓ_ne_p : ℓ ≠ p := fun h =>
+  have hℓ_ne_p : ℓ ≠ p := fun h ↦
     hp_notin_P (by simpa [h] using hℓ_in_P)
   have h_inertia : P.inertiaDeg Q = 1 := by
     letI : Q.IsPrime := hQ_prime
