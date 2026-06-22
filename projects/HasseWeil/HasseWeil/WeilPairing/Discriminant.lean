@@ -34,6 +34,14 @@ theorem exists_int_balanced {q : ℤ} (hq : 0 < q) (a : ℤ) : ∃ r : ℤ, |a -
   rw [abs_le]
   constructor <;> linarith [hd, h0, h1]
 
+/-- **Positive semidefiniteness (the discriminant step 2).** Once `t² ≤ 4q` (with `0 < q`), the
+quadratic form `Q(r,s) = q·r² − t·rs + s²` is non-negative everywhere, via the SOS identity
+`4q·Q = (2qr − ts)² + (4q − t²)s² ≥ 0`. -/
+private theorem qf_nonneg_of_disc {q t : ℤ} (hq : 0 < q) (hdisc : t ^ 2 ≤ 4 * q) (r s : ℤ) :
+    0 ≤ q * r ^ 2 - t * r * s + s ^ 2 := by
+  nlinarith [sq_nonneg (2 * q * r - t * s),
+    mul_nonneg (by linarith : (0 : ℤ) ≤ 4 * q - t ^ 2) (sq_nonneg s), hq]
+
 /-- **The discriminant lemma (Silverman V.1.1).** If the quadratic form `Q(r,s) = q·r² − t·rs + s²`
 (with `0 < q`) is non-negative on every `(r,s)` whose `s` is coprime to a prime `p`, then it is
 non-negative on **all** `(r,s)`.
@@ -49,14 +57,14 @@ theorem qf_nonneg_of_nonneg_on_coprime {q t : ℤ} (hq : 0 < q) {p : ℕ} (hp : 
     push Not at hcon                       -- 4 * q < t ^ 2
     obtain ⟨ℓ, hℓ_ge, hℓ_prime⟩ := Nat.exists_infinite_primes (p + 1)
     have hℓp : ℓ ≠ p := by omega
-    have h1ℓ : (1 : ℤ) < (ℓ : ℤ) := by exact_mod_cast hℓ_prime.one_lt
+    have h1ℓ : (1 : ℤ) < (ℓ : ℤ) := mod_cast hℓ_prime.one_lt
     obtain ⟨n, hn⟩ : ∃ n : ℕ, q < (ℓ : ℤ) ^ n := pow_unbounded_of_one_lt q h1ℓ
     set s : ℤ := (ℓ : ℤ) ^ n with hsdef
     have hs_pos : 0 < s := lt_trans hq hn
     have hps : ¬ (p : ℤ) ∣ s := by
       rw [hsdef]
       intro hdvd
-      have hnat : p ∣ ℓ ^ n := by exact_mod_cast hdvd
+      have hnat : p ∣ ℓ ^ n := mod_cast hdvd
       exact hℓp ((Nat.prime_dvd_prime_iff_eq hp hℓ_prime).mp (hp.dvd_of_dvd_pow hnat)).symm
     obtain ⟨r, hbal⟩ := exists_int_balanced hq (t * s)
     have hQ : 0 ≤ q * r ^ 2 - t * r * s + s ^ 2 := h r s hps
@@ -73,9 +81,7 @@ theorem qf_nonneg_of_nonneg_on_coprime {q t : ℤ} (hq : 0 < q) {p : ℕ} (hp : 
         = (2 * q * r - t * s) ^ 2 + (4 * q - t ^ 2) * s ^ 2 := by ring
     nlinarith [h4qQ, key, hbsq, hmul, hs2gt]
   -- Step 2: positive semidefiniteness `4q·Q = (2qr − ts)² + (4q − t²)s² ≥ 0`.
-  intro r s
-  nlinarith [sq_nonneg (2 * q * r - t * s),
-    mul_nonneg (by linarith : (0 : ℤ) ≤ 4 * q - t ^ 2) (sq_nonneg s), hq]
+  exact qf_nonneg_of_disc hq hdisc
 
 /-- **The discriminant lemma, coprime-in-BOTH-coordinates form** (reviewer round-23, Route B).
 If the quadratic form `Q(r,s) = q·r² − t·rs + s²` (with `0 < q`) is non-negative on every `(r,s)` whose
@@ -101,9 +107,9 @@ theorem qf_nonneg_of_nonneg_on_coprime_both {q t : ℤ} (hq : 0 < q) {p : ℕ} (
     by_contra hcon
     push Not at hcon                       -- 4 * q < t ^ 2
     have hΔ : (1 : ℤ) ≤ t ^ 2 - 4 * q := by linarith
-    set C : ℤ := q - t + 1 with hCdef
+    set C : ℤ := q - t + 1
     set m : ℤ := (p : ℤ) * (|C| + 1) with hmdef
-    have hp2 : (2 : ℤ) ≤ (p : ℤ) := by exact_mod_cast hp.two_le
+    have hp2 : (2 : ℤ) ≤ (p : ℤ) := mod_cast hp.two_le
     have habsC : (0 : ℤ) ≤ |C| := abs_nonneg C
     have hCle : C ≤ |C| := le_abs_self C
     have hm_ge : |C| + 1 ≤ m := by rw [hmdef]; nlinarith [habsC, hp2]
@@ -116,15 +122,13 @@ theorem qf_nonneg_of_nonneg_on_coprime_both {q t : ℤ} (hq : 0 < q) {p : ℕ} (
       intro hdvd
       have hd1 : (p : ℤ) ∣ (r - m * t) := dvd_sub hdvd (hpm.mul_right t)
       rw [hrdef, add_sub_cancel_left] at hd1
-      rcases Int.isUnit_iff.mp (isUnit_of_dvd_one hd1) with h1 | h1 <;>
-        · rw [h1] at hp2; norm_num at hp2
+      linarith [Int.le_of_dvd one_pos hd1]
     -- `s ≡ 1 (mod p)`: same, with `s − 2·m·q = 1`.
     have hps : ¬ (p : ℤ) ∣ s := by
       intro hdvd
       have hd1 : (p : ℤ) ∣ (s - 2 * m * q) := dvd_sub hdvd ((hpm.mul_left 2).mul_right q)
       rw [hsdef, add_sub_cancel_left] at hd1
-      rcases Int.isUnit_iff.mp (isUnit_of_dvd_one hd1) with h1 | h1 <;>
-        · rw [h1] at hp2; norm_num at hp2
+      linarith [Int.le_of_dvd one_pos hd1]
     have hQ : 0 ≤ q * r ^ 2 - t * r * s + s ^ 2 := h r s hpr hps
     -- The reviewer's `ring` identity at `(r,s) = (m·t+1, 2·m·q+1)`.
     have hkey : q * r ^ 2 - t * r * s + s ^ 2
@@ -137,8 +141,6 @@ theorem qf_nonneg_of_nonneg_on_coprime_both {q t : ℤ} (hq : 0 < q) {p : ℕ} (
     rw [hkey] at hQ
     linarith [hQ, hbound]
   -- Step 2: positive semidefiniteness `4q·Q = (2qr − ts)² + (4q − t²)s² ≥ 0`.
-  intro r s
-  nlinarith [sq_nonneg (2 * q * r - t * s),
-    mul_nonneg (by linarith : (0 : ℤ) ≤ 4 * q - t ^ 2) (sq_nonneg s), hq]
+  exact qf_nonneg_of_disc hq hdisc
 
 end HasseWeil.WeilPairing
