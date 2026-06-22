@@ -42,6 +42,10 @@ Loop until your lane is empty or a freeze is active:
 5. **Merge (auto — cleanup never changes a statement).** Re-check freeze. `git fetch origin main`; if
    main moved, rebase `cleanup/<n>` and re-verify. Push; `gh pr create --fill --base main`; then
    `gh pr merge --squash --delete-branch`. `gh issue close <n>`.
+   **Worktree hygiene (storage):** do NOT `git worktree add` a fresh worktree per ticket — each carries a
+   ~10G `.lake` build and they pile up fast. Reuse ONE worktree and just switch branches; if you *did*
+   create a per-ticket worktree, `LEAN4_GUARDRAILS_BYPASS=1 git worktree remove --force <its-path>` now that
+   the PR is merged. (A janitor prunes closed-ticket worktrees every 2h, but clean up your own.)
 6. **Next ticket.** When the lane is empty or a freeze appears, exit.
 
 **Never** change a theorem/def statement (that's the `/generalise` lane). **Never** add `sorry`/`admit`.

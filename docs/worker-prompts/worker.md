@@ -60,5 +60,10 @@ Loop until the queue is empty or a freeze is active:
      **STOP** — the coordinator reviews and merges. Do not self-merge.
 6. **Next ticket.** Loop until the queue is empty or a freeze appears, then exit.
 
+**Worktree hygiene (storage):** do NOT `git worktree add` a fresh worktree per ticket — each carries a
+~10G `.lake` build and they pile up fast. Reuse ONE worktree and just switch branches; if you *did* create a
+per-ticket worktree, `LEAN4_GUARDRAILS_BYPASS=1 git worktree remove --force <its-path>` once its PR is merged.
+(A janitor prunes closed-ticket worktrees every 2h as a backstop — but clean up your own.)
+
 **Never** add `sorry`/`admit`, change a statement except via `/generalise`, or run `lake update` / bump mathlib —
 the bump is done centrally on `main`.
