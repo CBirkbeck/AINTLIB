@@ -492,6 +492,63 @@ theorem exists_inv_pow_lt_of_mem_convexGenerated {y : Γ} (hy : 1 < y) {h : Γ}
   obtain ⟨m, hm⟩ := inv_pow_succ_lt_of_mem_convexGenerated hy hh
   exact ⟨m + 1, by rwa [inv_pow]⟩
 
+/-- **Wedhorn Definition 1.16.** `γ` is *cofinal* for the subgroup `H` if every element of
+`H` eventually dominates a power of `γ` (`∀ h ∈ H, ∃ n, γ^n < h`). -/
+def IsCofinalElt (H : ConvexSubgroup Γ) (γ : Γ) : Prop :=
+  ∀ h ∈ H, ∃ n : ℕ, γ ^ n < h
+
+/-- **Wedhorn Proposition 1.20** (`wedhorn.txt:348`). If `γ` is cofinal for the convex
+subgroup `Γ'` and `Δ ⊊ Γ'` is a proper convex subgroup, then `δ * γ` is cofinal for `Γ'`
+for every `δ ∈ Δ`. -/
+theorem isCofinalElt_mul_of_mem_of_lt {Γ' Δ : ConvexSubgroup Γ}
+    (hlt : Δ < Γ') {γ : Γ} (hγ : IsCofinalElt Γ' γ) {δ : Γ} (hδ : δ ∈ Δ) :
+    IsCofinalElt Γ' (δ * γ) := by
+  intro h hh
+  obtain ⟨x, hxQ, hxD⟩ := SetLike.exists_of_lt hlt
+  -- WLOG the witness `z ∈ Γ' \ Δ` has `1 < z`.
+  obtain ⟨z, hzQ, hzD, hz_gt⟩ : ∃ z, z ∈ Γ' ∧ z ∉ Δ ∧ 1 < z := by
+    rcases lt_trichotomy x 1 with hl | he | hg
+    · exact ⟨x⁻¹, inv_mem hxQ, fun e => hxD (by simpa using inv_mem e), one_lt_inv'.mpr hl⟩
+    · exact absurd (he ▸ one_mem Δ) hxD
+    · exact ⟨x, hxQ, hxD, hg⟩
+  obtain ⟨n, hn⟩ := hγ z⁻¹ (inv_mem hzQ)
+  have hzi_lt : z⁻¹ < 1 := inv_lt_one'.mpr hz_gt
+  have hγ_lt : γ < 1 := by
+    by_contra hge; rw [not_lt] at hge
+    exact absurd (lt_of_lt_of_le hn (le_trans hzi_lt.le (one_le_pow_of_one_le' hge n)))
+      (lt_irrefl _)
+  have hn1 : 1 ≤ n := by
+    rcases Nat.eq_zero_or_pos n with rfl | hp
+    · simp only [pow_zero] at hn; exact absurd (hn.trans hzi_lt) (lt_irrefl _)
+    · exact hp
+  -- `z` dominates all of `Δ` (convexity: `z ∉ Δ`, `z > 1`, `1 ∈ Δ`).
+  have hz_gt_D : ∀ d ∈ Δ, d < z := fun d hd => by
+    by_contra hge; rw [not_lt] at hge
+    exact hzD (Δ.convex (one_mem Δ) hd hz_gt.le hge)
+  -- Key inequality `(δγ)^(2n) < γ^n` (Wedhorn 1.20 proof).
+  have hzγn : z * γ ^ n < 1 := by
+    have h2 : γ ^ n * z < z⁻¹ * z := mul_lt_mul_left hn z
+    rw [inv_mul_cancel] at h2; rwa [mul_comm] at h2
+  have hkey : (δ * γ) ^ (2 * n) < γ ^ n := by
+    have hδ2n : δ ^ (2 * n) < z := hz_gt_D _ (Δ.toSubgroup.pow_mem hδ (2 * n))
+    calc (δ * γ) ^ (2 * n) = δ ^ (2 * n) * γ ^ (2 * n) := mul_pow δ γ (2 * n)
+      _ < z * γ ^ (2 * n) := mul_lt_mul_left hδ2n _
+      _ = (z * γ ^ n) * γ ^ n := by rw [two_mul, pow_add, ← mul_assoc]
+      _ < 1 * γ ^ n := mul_lt_mul_left hzγn _
+      _ = γ ^ n := one_mul _
+  -- Cofinality: pick `m ≥ 1` with `γ^m < h`, then `(δγ)^(2nm) < γ^(nm) ≤ γ^m < h`.
+  obtain ⟨m, hm1, hm⟩ : ∃ m, 1 ≤ m ∧ γ ^ m < h := by
+    obtain ⟨m0, hm0⟩ := hγ h hh
+    rcases Nat.eq_zero_or_pos m0 with rfl | hp
+    · exact ⟨1, le_refl _, by rw [pow_one]; rw [pow_zero] at hm0; exact lt_trans hγ_lt hm0⟩
+    · exact ⟨m0, hp, hm0⟩
+  refine ⟨2 * n * m, ?_⟩
+  calc (δ * γ) ^ (2 * n * m) = ((δ * γ) ^ (2 * n)) ^ m := by rw [← pow_mul]
+    _ < (γ ^ n) ^ m := pow_lt_pow_left' (Nat.one_le_iff_ne_zero.mp hm1) hkey
+    _ = γ ^ (n * m) := by rw [← pow_mul]
+    _ ≤ γ ^ m := pow_le_pow_right_of_le_one' hγ_lt.le (Nat.le_mul_of_pos_left m hn1)
+    _ < h := hm
+
 /-- If every convex subgroup is `⊥` or `⊤`, the group is `MulArchimedean`. -/
 theorem mulArchimedean_of_no_proper_nontrivial
     (h : ∀ H : ConvexSubgroup Γ, H = ⊥ ∨ H = ⊤) : MulArchimedean Γ where

@@ -693,7 +693,28 @@ bounded-by-products of `cGammaUnits`.] -/
 theorem restrictIdealSingle_isMicrobial_of_mem (w : Valuation A Γ₀) (g : A) (hg : w g ≠ 0)
     (hmem : (Units.mk0 (w g) hg)⁻¹ ∈ Valuation.cGamma w) :
     Valuation.IsMicrobial (w.restrictIdealSingle g hg) := by
-  sorry
+  intro γ hγ
+  obtain ⟨u', rfl⟩ := WithZero.ne_zero_iff_exists.mp hγ.ne'
+  -- `↑u' ∈ cGammaSingle = cGamma w`, so by `mem_cGamma_iff` it is bounded by a value `w a`.
+  have hu_mem : (↑u' : Γ₀ˣ) ∈ Valuation.cGamma w := by
+    rw [← Valuation.cGammaSingle_eq_cGamma_of_mem hg hmem]; exact u'.2
+  obtain ⟨a, ha, hva, hlo, hhi⟩ := Valuation.mem_cGamma_iff.mp hu_mem
+  have hmem_a : Units.mk0 (w a) hva ∈ Valuation.cGammaSingle w g hg :=
+    Valuation.vUnit_mem_cGammaSingle hg ha hva
+  have hrsa : w.restrictIdealSingle g hg a =
+      ((⟨Units.mk0 (w a) hva, hmem_a⟩ : (Valuation.cGammaSingle w g hg).toSubgroup) :
+        WithZero (Valuation.cGammaSingle w g hg).toSubgroup) :=
+    Valuation.restrictToConvexBounded_apply_mem _ _ _ hva hmem_a
+  refine ⟨a, ?_, ?_, ?_⟩
+  · -- 1 ≤ rs a
+    rw [hrsa, ← WithZero.coe_one, WithZero.coe_le_coe, ← Subtype.coe_le_coe]
+    exact Units.val_le_val.mp ha
+  · -- (rs a)⁻¹ ≤ ↑u'
+    rw [hrsa, ← WithZero.coe_inv, WithZero.coe_le_coe, ← Subtype.coe_le_coe]
+    exact hlo
+  · -- ↑u' ≤ rs a
+    rw [hrsa, WithZero.coe_le_coe, ← Subtype.coe_le_coe]
+    exact hhi
 
 /-- **COFINAL CASE (Wedhorn Def 7.3, `v((g)) ∩ cΓ_v = ∅` branch + Lemma 7.2 + Lemma 7.1).**
 If `v(g)⁻¹ ∉ cΓ_v`, then `v(g)⁻¹ > 1` and `cGammaSingle = convexGenerated (v(g)⁻¹)`
@@ -704,7 +725,73 @@ cofinality ideal (Lemma 7.1: `w c ≤ 1` ⇒ smaller value stays cofinal; `w c >
 theorem restrictIdealSingle_cofinal_of_not_mem (w : Valuation A Γ₀) (g : A) (hg : w g ≠ 0)
     (hmem : (Units.mk0 (w g) hg)⁻¹ ∉ Valuation.cGamma w) :
     ∀ a ∈ Ideal.span {g}, Valuation.CofinalValue (w.restrictIdealSingle g hg) a := by
-  sorry
+  intro a ha
+  obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton.mp ha
+  -- `v(g)⁻¹ ∉ cΓ_v` and `> 1`; the characteristic generators are below it, so
+  -- `cGammaSingle = convexGenerated (v(g)⁻¹)`.
+  have hy : (1 : Γ₀ˣ) < (Units.mk0 (w g) hg)⁻¹ := by
+    by_contra hle; rw [not_lt] at hle
+    apply hmem
+    have hge1 : (1 : Γ₀ˣ) ≤ Units.mk0 (w g) hg := inv_le_one'.mp hle
+    have hwg : (1 : Γ₀) ≤ w g := Units.val_le_val.mpr hge1
+    exact inv_mem (Valuation.mem_cGamma_iff.mpr
+      ⟨g, hwg, hg, (inv_le_one'.mpr hge1).trans hge1, le_refl _⟩)
+  have hsub : Valuation.cGammaUnits w ⊆ (ConvexSubgroup.convexGenerated hy : Set Γ₀ˣ) := by
+    rintro u ⟨b, hb, hvb, hlo, hhi⟩
+    have hby : Units.mk0 (w b) hvb < (Units.mk0 (w g) hg)⁻¹ := by
+      by_contra hge; rw [not_lt] at hge
+      apply hmem
+      have hbmem : Units.mk0 (w b) hvb ∈ Valuation.cGamma w :=
+        Valuation.mem_cGamma_iff.mpr ⟨b, hb, hvb,
+          (inv_le_one'.mpr (Units.val_le_val.mp hb)).trans (Units.val_le_val.mp hb), le_refl _⟩
+      exact (Valuation.cGamma w).convex (one_mem _) hbmem hy.le hge
+    exact ConvexSubgroup.mem_convexGenerated_of_between
+      (le_trans (inv_le_inv_iff.mpr hby.le) hlo) (le_trans hhi hby.le)
+  have hCS : Valuation.cGammaSingle w g hg = ConvexSubgroup.convexGenerated hy :=
+    Valuation.cGammaSingle_eq_convexGenerated_of_subset hg hy hsub
+  -- The generator `mk0(w g)` is cofinal for `convexGenerated hy` (`y⁻¹ = mk0 w g`).
+  have hgen : ConvexSubgroup.IsCofinalElt (ConvexSubgroup.convexGenerated hy)
+      (Units.mk0 (w g) hg) := fun h hh => by
+    obtain ⟨n, hn⟩ := ConvexSubgroup.exists_inv_pow_lt_of_mem_convexGenerated hy hh
+    exact ⟨n, by simpa [inv_inv] using hn⟩
+  have hΔlt : Valuation.cGamma w < ConvexSubgroup.convexGenerated hy :=
+    lt_of_le_of_ne (ConvexSubgroup.minContain_le hsub)
+      (fun heq => hmem (heq ▸ ConvexSubgroup.self_mem_convexGenerated hy))
+  intro δ hδ
+  obtain ⟨u', rfl⟩ := WithZero.ne_zero_iff_exists.mp hδ.ne'
+  have hu'_mem : (↑u' : Γ₀ˣ) ∈ ConvexSubgroup.convexGenerated hy := by rw [← hCS]; exact u'.2
+  by_cases hgc0 : w (g * c) = 0
+  · exact ⟨1, by rw [pow_one, Valuation.restrictIdealSingle,
+      Valuation.restrictToConvexBounded_apply_zero _ _ _ hgc0]; exact WithZero.zero_lt_coe _⟩
+  by_cases hmgc : Units.mk0 (w (g * c)) hgc0 ∈ Valuation.cGammaSingle w g hg
+  · -- Preserved: reduce to `IsCofinalElt (convexGenerated hy) (mk0 w(g*c))` at `↑u'`.
+    have hvc : w c ≠ 0 := fun h => hgc0 (by rw [map_mul, h, mul_zero])
+    have hcof : ConvexSubgroup.IsCofinalElt (ConvexSubgroup.convexGenerated hy)
+        (Units.mk0 (w (g * c)) hgc0) := by
+      by_cases hwc1 : w c ≤ 1
+      · -- `mk0 w(g*c) ≤ mk0 w g`, so cofinal follows from the generator's.
+        have hle : Units.mk0 (w (g * c)) hgc0 ≤ Units.mk0 (w g) hg := by
+          rw [← Valuation.mk0_v_mul hg hvc]
+          exact mul_le_of_le_one_right' (Units.val_le_val.mp hwc1)
+        intro h hh
+        obtain ⟨n, hn⟩ := hgen h hh
+        exact ⟨n, lt_of_le_of_lt (pow_le_pow_left' hle n) hn⟩
+      · -- `w c > 1` ⇒ `mk0 w c ∈ cΓ_v`; Prop 1.20.
+        push_neg at hwc1
+        have hcmem : Units.mk0 (w c) hvc ∈ Valuation.cGamma w :=
+          Valuation.mem_cGamma_iff.mpr ⟨c, hwc1.le, hvc,
+            (inv_le_one'.mpr (Units.val_le_val.mp hwc1.le)).trans (Units.val_le_val.mp hwc1.le),
+            le_refl _⟩
+        have hmul := ConvexSubgroup.isCofinalElt_mul_of_mem_of_lt hΔlt hgen hcmem
+        rw [mul_comm, Valuation.mk0_v_mul hg hvc] at hmul
+        exact hmul
+    obtain ⟨n, hn⟩ := hcof (↑u') hu'_mem
+    refine ⟨n, ?_⟩
+    rw [Valuation.restrictIdealSingle, Valuation.restrictToConvexBounded_apply_mem _ _ _ hgc0 hmgc,
+      ← WithZero.coe_pow, WithZero.coe_lt_coe, ← Subtype.coe_lt_coe, SubgroupClass.coe_pow]
+    exact hn
+  · exact ⟨1, by rw [pow_one, Valuation.restrictIdealSingle,
+      Valuation.restrictToConvexBounded_apply_not_mem _ _ _ hgc0 hmgc]; exact WithZero.zero_lt_coe _⟩
 
 /-- **Faithful principal-case Wedhorn 7.4(ii) / 7.1.2.** `restrictIdealSingle w g` lands in
 `Spv(A, (g))`. This is the true replacement for the false `ofValuation_restrictIdeal_isInSpvAI`,

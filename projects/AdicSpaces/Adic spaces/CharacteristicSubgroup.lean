@@ -578,6 +578,57 @@ theorem cGammaUnits_subset_cGamma (v : Valuation A Γ₀) :
     cGammaUnits v ⊆ (cGamma v : Set Γ₀ˣ) :=
   ConvexSubgroup.subset_minContain _
 
+/-- Helper: `mk0(v a) * mk0(v b) = mk0(v (a*b))` as units. -/
+theorem mk0_v_mul {v : Valuation A Γ₀} {a b : A} (hva : v a ≠ 0) (hvb : v b ≠ 0) :
+    Units.mk0 (v a) hva * Units.mk0 (v b) hvb =
+      Units.mk0 (v (a * b)) (by rw [map_mul]; exact mul_ne_zero hva hvb) :=
+  Units.ext (by rw [Units.val_mul]; exact (map_mul v a b).symm)
+
+/-- **`cGammaUnits v` is already a convex subgroup** — bounded-by-one-value is closed under the
+group operations because `v` is multiplicative (`mk0(v a)·mk0(v b) = mk0(v(a*b))`, `v(a*b) ≥ 1`).
+Hence `cΓ_v = cGammaUnits v` (`mem_cGamma_iff`), so every element of `cΓ_v` is bounded by a
+single value — the content of microbiality. -/
+def cGammaConvex (v : Valuation A Γ₀) : ConvexSubgroup Γ₀ˣ where
+  toSubgroup :=
+    { carrier := cGammaUnits v
+      one_mem' := ⟨1, (map_one v).ge, by rw [map_one]; exact one_ne_zero,
+        by simp [map_one], by simp [map_one]⟩
+      mul_mem' := by
+        rintro u₁ u₂ ⟨a, ha, hva, hlo₁, hhi₁⟩ ⟨b, hb, hvb, hlo₂, hhi₂⟩
+        refine ⟨a * b, by rw [map_mul]; exact one_le_mul ha hb,
+          by rw [map_mul]; exact mul_ne_zero hva hvb, ?_, ?_⟩
+        · rw [← mk0_v_mul hva hvb, mul_inv]; exact mul_le_mul' hlo₁ hlo₂
+        · rw [← mk0_v_mul hva hvb]; exact mul_le_mul' hhi₁ hhi₂
+      inv_mem' := by
+        rintro u ⟨a, ha, hva, hlo, hhi⟩
+        refine ⟨a, ha, hva, inv_le_inv_iff.mpr hhi, ?_⟩
+        have := inv_le_inv_iff.mpr hlo; rwa [inv_inv] at this }
+  convex' := by
+    rintro u₁ u₂ x ⟨a, ha, hva, hlo₁, hhi₁⟩ ⟨b, hb, hvb, hlo₂, hhi₂⟩ hx1 hx2
+    refine ⟨a * b, by rw [map_mul]; exact one_le_mul ha hb,
+      by rw [map_mul]; exact mul_ne_zero hva hvb, ?_, ?_⟩
+    · -- (mk0 v(a*b))⁻¹ = (mk0 v a)⁻¹·(mk0 v b)⁻¹ ≤ (mk0 v a)⁻¹ ≤ u₁ ≤ x
+      rw [← mk0_v_mul hva hvb, mul_inv]
+      calc (Units.mk0 (v a) hva)⁻¹ * (Units.mk0 (v b) hvb)⁻¹
+          ≤ (Units.mk0 (v a) hva)⁻¹ :=
+            mul_le_of_le_one_right' (inv_le_one'.mpr (Units.val_le_val.mp hb))
+        _ ≤ u₁ := hlo₁
+        _ ≤ x := hx1
+    · -- x ≤ u₂ ≤ mk0 v b ≤ mk0 v a · mk0 v b = mk0 v(a*b)
+      rw [← mk0_v_mul hva hvb]
+      calc x ≤ u₂ := hx2
+        _ ≤ Units.mk0 (v b) hvb := hhi₂
+        _ ≤ Units.mk0 (v a) hva * Units.mk0 (v b) hvb :=
+            le_mul_of_one_le_left' (Units.val_le_val.mp ha)
+
+/-- **`cΓ_v = cGammaUnits v`**: membership in the characteristic subgroup is exactly being
+bounded between `(v a)⁻¹` and `v a` for some `a` with `1 ≤ v a`. -/
+theorem mem_cGamma_iff {v : Valuation A Γ₀} {u : Γ₀ˣ} :
+    u ∈ cGamma v ↔ u ∈ cGammaUnits v := by
+  refine ⟨fun hu => ?_, fun hu => cGammaUnits_subset_cGamma v hu⟩
+  have hle : cGamma v ≤ cGammaConvex v := ConvexSubgroup.minContain_le subset_rfl
+  exact (SetLike.le_def.mp hle) hu
+
 /-- **YES branch (Wedhorn Def 7.3, `v((g)) ∩ cΓ_v ≠ ∅`).** If the single generator `v(g)⁻¹`
 already lies in `cΓ_v`, then `cGammaSingle` collapses to `cΓ_v`. -/
 theorem cGammaSingle_eq_cGamma_of_mem {v : Valuation A Γ₀} {g : A} (hg : v g ≠ 0)

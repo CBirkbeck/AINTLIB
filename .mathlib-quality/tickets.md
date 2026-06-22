@@ -770,7 +770,7 @@ replacement `ofValuation_restrictIdealSingle_isInSpvAI` (sorry-free **modulo** t
 below). These tickets discharge those 2 sub-lemmas and wire the result into HU-e.
 
 ### [T-SPVAI-1] Wedhorn Prop 1.20 — `cofinal · bounded = cofinal`
-- **Status**: open
+- **Status**: done (2026-06-22; `IsCofinalElt` + `isCofinalElt_mul_of_mem_of_lt`, OrderedGroupConvex, axiom-clean)
 - **File**: `Adic spaces/OrderedGroupConvex.lean`
 - **Depends on**: none
 - **Parallel**: yes
@@ -814,7 +814,7 @@ theorem ConvexSubgroup.isCofinalElt_mul_of_mem_of_lt {Γ' Δ : ConvexSubgroup Γ
 ---
 
 ### [T-SPVAI-2] `restrictIdealSingle_cofinal_of_not_mem` (Wedhorn Lemma 7.1 + 7.2, `=∅` branch)
-- **Status**: open
+- **Status**: done (2026-06-22; SpvAITopology, via Prop 1.20 + convexGenerated cofinality)
 - **File**: `Adic spaces/SpvAITopology.lean` (sorry at the stated decl)
 - **Depends on**: T-SPVAI-1
 - **Parallel**: no
@@ -860,7 +860,7 @@ theorem restrictIdealSingle_cofinal_of_not_mem (w : Valuation A Γ₀) (g : A) (
 ---
 
 ### [T-SPVAI-3] `restrictIdealSingle_isMicrobial_of_mem` (`cGammaUnits` is a convex subgroup)
-- **Status**: open
+- **Status**: done (2026-06-22; `cGammaConvex` + `mem_cGamma_iff` in CharSubgroup + assembly in SpvAITopology)
 - **File**: `Adic spaces/CharacteristicSubgroup.lean` (helper) + `SpvAITopology.lean` (assembly)
 - **Depends on**: none
 - **Parallel**: yes
