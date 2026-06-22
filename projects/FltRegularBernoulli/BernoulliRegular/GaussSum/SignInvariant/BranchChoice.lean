@@ -20,8 +20,6 @@ namespace BernoulliRegular
 
 section SignInvariant
 
-open scoped BigOperators ComplexConjugate
-
 variable (p : ℕ) [hp : Fact p.Prime]
 
 attribute [local instance] Classical.decEq Classical.propDecidable
@@ -30,7 +28,6 @@ attribute [local instance] Classical.decEq Classical.propDecidable
 `(p - 1) / 2`. -/
 theorem card_even_characters (hp₂ : p ≠ 2) :
     (Finset.univ.filter fun χ : DirichletCharacter ℂ p => χ.Even).card = (p - 1) / 2 := by
-  classical
   let E : Finset (DirichletCharacter ℂ p) := Finset.univ.filter fun χ => χ.Even
   let O : Finset (DirichletCharacter ℂ p) := Finset.univ.filter fun χ => χ.Odd
   have hdisj : Disjoint E O := by
@@ -51,42 +48,27 @@ theorem card_even_characters (hp₂ : p ≠ 2) :
     DirichletCharacter.sum_characters_eq_zero (R := ℂ) (n := p) hneg_ne_one
   have hsum_split :
       (∑ χ : DirichletCharacter ℂ p, χ (-1 : ZMod p)) = (E.card : ℂ) - O.card := by
-    have hsum_union :
-        (∑ χ : DirichletCharacter ℂ p, χ (-1 : ZMod p)) =
-          (E ∪ O).sum (fun χ => χ (-1 : ZMod p)) := by
-      rw [hunion]
     have hsum_E : E.sum (fun χ => χ (-1 : ZMod p)) = E.card := by
       calc
-        E.sum (fun χ => χ (-1 : ZMod p)) = E.sum (fun _ => (1 : ℂ)) := by
-          refine Finset.sum_congr rfl ?_
-          intro χ hχ
-          have hχ_even : χ.Even := by simpa [E] using hχ
-          simpa [DirichletCharacter.Even] using hχ_even
+        E.sum (fun χ => χ (-1 : ZMod p)) = E.sum (fun _ => (1 : ℂ)) :=
+          Finset.sum_congr rfl fun χ hχ => by simpa [E, DirichletCharacter.Even] using hχ
         _ = E.card := by simp
     have hsum_O : O.sum (fun χ => χ (-1 : ZMod p)) = -(O.card : ℂ) := by
       calc
-        O.sum (fun χ => χ (-1 : ZMod p)) = O.sum (fun _ => (-1 : ℂ)) := by
-          refine Finset.sum_congr rfl ?_
-          intro χ hχ
-          have hχ_odd : χ.Odd := by simpa [O] using hχ
-          simpa [DirichletCharacter.Odd] using hχ_odd
+        O.sum (fun χ => χ (-1 : ZMod p)) = O.sum (fun _ => (-1 : ℂ)) :=
+          Finset.sum_congr rfl fun χ hχ => by simpa [O, DirichletCharacter.Odd] using hχ
         _ = -(O.card : ℂ) := by simp
     calc
       (∑ χ : DirichletCharacter ℂ p, χ (-1 : ZMod p)) =
           E.sum (fun χ => χ (-1 : ZMod p)) + O.sum (fun χ => χ (-1 : ZMod p)) := by
-            rw [hsum_union, Finset.sum_union hdisj]
+            rw [← hunion, Finset.sum_union hdisj]
       _ = (E.card : ℂ) - O.card := by
             rw [hsum_E, hsum_O]
             simp [sub_eq_add_neg]
-  have hbalance : (E.card : ℂ) - O.card = 0 := by
-    rw [← hsum_split]
-    exact hsum_zero
+  have hbalance : (E.card : ℂ) - O.card = 0 := hsum_split ▸ hsum_zero
   have hsame : E.card = O.card := by
-    have hsame_real : (E.card : ℝ) = O.card := by
-      have hdiff_real : (E.card : ℝ) - O.card = 0 := by
-        simpa using congrArg Complex.re hbalance
-      nlinarith
-    exact_mod_cast hsame_real
+    have hcast : (E.card : ℂ) = O.card := sub_eq_zero.mp hbalance
+    exact_mod_cast hcast
   have hcard_total : E.card + O.card = p - 1 := by
     calc
       E.card + O.card = (E ∪ O).card := by
@@ -116,6 +98,11 @@ theorem inv_eval_neg_one_eq (χ : DirichletCharacter ℂ p) :
 
 theorem even_inv_iff {χ : DirichletCharacter ℂ p} : χ⁻¹.Even ↔ χ.Even := by
   simp [DirichletCharacter.Even, inv_eval_neg_one_eq (p := p) χ]
+
+omit hp in
+/-- The trivial character is even. -/
+private theorem one_even : (1 : DirichletCharacter ℂ p).Even :=
+  MulChar.one_apply isUnit_one.neg
 
 theorem quadraticCharComplex_even_of_mod_four_eq_one
     (hp₂ : p ≠ 2) (hp₄ : p % 4 = 1) :
@@ -193,11 +180,8 @@ theorem disjoint_evenNonselfdualCharacterReps_image_inv :
 theorem card_evenNonselfdualCharacterFinset_of_mod_four_eq_one
     (hp₂ : p ≠ 2) (hp₄ : p % 4 = 1) :
     (evenNonselfdualCharacterFinset (p := p)).card = (p - 5) / 2 := by
-  classical
   let E : Finset (DirichletCharacter ℂ p) := Finset.univ.filter fun χ => χ.Even
-  have htriv_even : (1 : DirichletCharacter ℂ p).Even := by
-    change (1 : DirichletCharacter ℂ p) (-1 : ZMod p) = 1
-    rw [MulChar.one_apply (show IsUnit (-1 : ZMod p) from isUnit_one.neg)]
+  have htriv_even : (1 : DirichletCharacter ℂ p).Even := one_even (p := p)
   have hquad_even : (quadraticCharComplex p).Even :=
     quadraticCharComplex_even_of_mod_four_eq_one (p := p) hp₂ hp₄
   have hq_ne : quadraticCharComplex p ≠ (1 : DirichletCharacter ℂ p) :=
@@ -215,11 +199,8 @@ theorem card_evenNonselfdualCharacterFinset_of_mod_four_eq_one
 theorem card_evenNonselfdualCharacterFinset_of_mod_four_eq_three
     (hp₂ : p ≠ 2) (hp₄ : p % 4 = 3) :
     (evenNonselfdualCharacterFinset (p := p)).card = (p - 3) / 2 := by
-  classical
   let E : Finset (DirichletCharacter ℂ p) := Finset.univ.filter fun χ => χ.Even
-  have htriv_even : (1 : DirichletCharacter ℂ p).Even := by
-    change (1 : DirichletCharacter ℂ p) (-1 : ZMod p) = 1
-    rw [MulChar.one_apply (show IsUnit (-1 : ZMod p) from isUnit_one.neg)]
+  have htriv_even : (1 : DirichletCharacter ℂ p).Even := one_even (p := p)
   have hquad_odd : (quadraticCharComplex p).Odd :=
     quadraticCharComplex_odd_of_mod_four_eq_three (p := p) hp₂ hp₄
   have hq_not_even : ¬ (quadraticCharComplex p).Even :=
@@ -246,52 +227,33 @@ theorem card_evenNonselfdualCharacterFinset_of_mod_four_eq_three
     omega
   · simpa [E] using htriv_even
 
+/-- The even non-self-dual characters split into inverse pairs, each represented
+once in `evenNonselfdualCharacterReps`. -/
+private theorem card_evenNonselfdualCharacterFinset_eq_two_mul_reps (hp₂ : p ≠ 2) :
+    (evenNonselfdualCharacterFinset (p := p)).card =
+      2 * (evenNonselfdualCharacterReps (p := p)).card := by
+  rw [evenNonselfdualCharacterFinset_eq_union_evenReps_image_inv (p := p) hp₂,
+    Finset.card_union_of_disjoint (disjoint_evenNonselfdualCharacterReps_image_inv (p := p)),
+    Finset.card_image_of_injective _ (fun χ ψ hEq => by simpa using congrArg Inv.inv hEq),
+    two_mul]
+
 theorem card_evenNonselfdualCharacterReps_of_mod_four_eq_one
     (hp₂ : p ≠ 2) (hp₄ : p % 4 = 1) :
     (evenNonselfdualCharacterReps (p := p)).card = (p - 5) / 4 := by
-  let reps := evenNonselfdualCharacterReps (p := p)
-  have hsplit :
-      (evenNonselfdualCharacterFinset (p := p)).card = reps.card + reps.card := by
-    rw [evenNonselfdualCharacterFinset_eq_union_evenReps_image_inv (p := p) hp₂,
-      Finset.card_union_of_disjoint (disjoint_evenNonselfdualCharacterReps_image_inv (p := p)),
-      Finset.card_image_of_injective _ (fun χ ψ hEq => by simpa using congrArg Inv.inv hEq)]
-  have hcard : (evenNonselfdualCharacterFinset (p := p)).card = (p - 5) / 2 :=
-    card_evenNonselfdualCharacterFinset_of_mod_four_eq_one (p := p) hp₂ hp₄
-  have htwice : (p - 5) / 2 = reps.card * 2 := by
-    omega
-  have hdiv : ((p - 5) / 2) / 2 = reps.card :=
-    Nat.div_eq_of_eq_mul_left (by decide : 0 < 2) htwice
-  have hquarter : ((p - 5) / 2) / 2 = (p - 5) / 4 := by
-    omega
-  calc
-    reps.card = ((p - 5) / 2) / 2 := hdiv.symm
-    _ = (p - 5) / 4 := hquarter
+  have hsplit := card_evenNonselfdualCharacterFinset_eq_two_mul_reps (p := p) hp₂
+  have hcard := card_evenNonselfdualCharacterFinset_of_mod_four_eq_one (p := p) hp₂ hp₄
+  omega
 
 theorem card_evenNonselfdualCharacterReps_of_mod_four_eq_three
     (hp₂ : p ≠ 2) (hp₄ : p % 4 = 3) :
     (evenNonselfdualCharacterReps (p := p)).card = (p - 3) / 4 := by
-  let reps := evenNonselfdualCharacterReps (p := p)
-  have hsplit :
-      (evenNonselfdualCharacterFinset (p := p)).card = reps.card + reps.card := by
-    rw [evenNonselfdualCharacterFinset_eq_union_evenReps_image_inv (p := p) hp₂,
-      Finset.card_union_of_disjoint (disjoint_evenNonselfdualCharacterReps_image_inv (p := p)),
-      Finset.card_image_of_injective _ (fun χ ψ hEq => by simpa using congrArg Inv.inv hEq)]
-  have hcard : (evenNonselfdualCharacterFinset (p := p)).card = (p - 3) / 2 :=
-    card_evenNonselfdualCharacterFinset_of_mod_four_eq_three (p := p) hp₂ hp₄
-  have htwice : (p - 3) / 2 = reps.card * 2 := by
-    omega
-  have hdiv : ((p - 3) / 2) / 2 = reps.card :=
-    Nat.div_eq_of_eq_mul_left (by decide : 0 < 2) htwice
-  have hquarter : ((p - 3) / 2) / 2 = (p - 3) / 4 := by
-    omega
-  calc
-    reps.card = ((p - 3) / 2) / 2 := hdiv.symm
-    _ = (p - 3) / 4 := hquarter
+  have hsplit := card_evenNonselfdualCharacterFinset_eq_two_mul_reps (p := p) hp₂
+  have hcard := card_evenNonselfdualCharacterFinset_of_mod_four_eq_three (p := p) hp₂ hp₄
+  omega
 
 theorem prod_pairBlockDeterminants_eq_negOnePow_card_evenReps :
     Finset.prod (nonselfdualCharacterReps (p := p)) (fun χ => -(χ (-1))) =
       (-1 : ℂ) ^ (evenNonselfdualCharacterReps (p := p)).card := by
-  classical
   let reps := nonselfdualCharacterReps (p := p)
   let g : DirichletCharacter ℂ p → ℂ := fun χ => if χ.Even then (-1 : ℂ) else 1
   have hrewrite :
@@ -373,45 +335,20 @@ theorem normalizedDft_quadraticScalar_eq_one_of_mod_four_eq_one
       (p := p) hp₂
   have hdet_vand := det_normalizedDft_eq_negOnePow_of_mod_four_eq_one (p := p) hp₂ hp₄
   have hpair := prod_pairBlockDeterminants_of_mod_four_eq_one (p := p) hp₂ hp₄
+  have hexp : (p - 1) / 4 = (p - 5) / 4 + 1 := by
+    have := hp.out.two_le
+    omega
   have hdet_q :
       LinearMap.det (normalizedDft p) = qScalar * (-1 : ℂ) ^ ((p - 1) / 4) := by
-    obtain ⟨k, hk⟩ : ∃ k : ℕ, p = 4 * k + 1 := by
-      refine ⟨p / 4, ?_⟩
-      omega
+    rw [hexp, pow_succ]
     calc
       LinearMap.det (normalizedDft p)
           = (-1 : ℂ) * (qScalar * (-1 : ℂ) ^ ((p - 5) / 4)) := by
               simpa [qScalar, hpair] using hdet_block
-      _ = qScalar * (-1 : ℂ) ^ ((p - 1) / 4) := by
-            have hkpos : 0 < k := by
-              by_contra hkzero
-              have hk0 : k = 0 := Nat.eq_zero_of_not_pos hkzero
-              rw [hk0] at hk
-              exact hp.out.ne_one hk
-            have hquarter2 : ((4 * k + 1 - 5) / 4 : ℕ) = k - 1 := by
-              rcases Nat.exists_eq_succ_of_ne_zero (Nat.ne_of_gt hkpos) with ⟨k', rfl⟩
-              have hsub : 4 * (k' + 1) + 1 - 5 = 4 * k' := by
-                omega
-              rw [hsub]
-              norm_num
-            have hquarter1 : ((4 * k + 1 - 1) / 4 : ℕ) = k := by
-              have hsub : 4 * k + 1 - 1 = 4 * k := by
-                omega
-              rw [hsub]
-              omega
-            rw [hk,
-              hquarter2,
-              hquarter1,
-              show k = (k - 1) + 1 by omega,
-              pow_add]
-            simp
+      _ = qScalar * ((-1 : ℂ) ^ ((p - 5) / 4) * -1) := by ring
   have hpow_ne : ((-1 : ℂ) ^ ((p - 1) / 4)) ≠ 0 := by simp
-  have heq : qScalar * (-1 : ℂ) ^ ((p - 1) / 4) = 1 * (-1 : ℂ) ^ ((p - 1) / 4) := by
-    calc
-      qScalar * (-1 : ℂ) ^ ((p - 1) / 4) = LinearMap.det (normalizedDft p) := hdet_q.symm
-      _ = (-1 : ℂ) ^ ((p - 1) / 4) := hdet_vand
-      _ = 1 * (-1 : ℂ) ^ ((p - 1) / 4) := by simp
-  exact mul_right_cancel₀ hpow_ne heq
+  refine mul_right_cancel₀ hpow_ne ?_
+  rw [one_mul, ← hdet_q, hdet_vand]
 
 /-- Comparing the two determinant formulas forces the quadratic block scalar to
 be `-I` in the imaginary branch. -/
@@ -435,19 +372,10 @@ theorem normalizedDft_quadraticScalar_eq_neg_I_of_mod_four_eq_three
   have hpow_ne : ((-1 : ℂ) ^ ((p - 3) / 4)) ≠ 0 := by simp
   have heq : (qScalar * (-1 : ℂ)) * (-1 : ℂ) ^ ((p - 3) / 4) =
       Complex.I * (-1 : ℂ) ^ ((p - 3) / 4) := by
-    calc
-      (qScalar * (-1 : ℂ)) * (-1 : ℂ) ^ ((p - 3) / 4) = LinearMap.det (normalizedDft p) :=
-        hdet_q.symm
-      _ = (-1 : ℂ) ^ ((p - 3) / 4) * Complex.I := hdet_vand
-      _ = Complex.I * (-1 : ℂ) ^ ((p - 3) / 4) := by ring
+    rw [← hdet_q, hdet_vand, mul_comm]
   have hneg : qScalar * (-1 : ℂ) = Complex.I :=
     mul_right_cancel₀ hpow_ne heq
-  calc
-    qScalar = qScalar * (1 : ℂ) := by ring
-    _ = qScalar * ((-1 : ℂ) * (-1 : ℂ)) := by ring
-    _ = (qScalar * (-1 : ℂ)) * (-1 : ℂ) := by ring
-    _ = Complex.I * (-1 : ℂ) := by rw [hneg]
-    _ = -Complex.I := by ring
+  linear_combination (-1 : ℂ) * hneg
 
 /-- The determinant comparison fixes the positive real branch of the quadratic
 Gauss sum. -/
@@ -461,8 +389,7 @@ theorem gaussSum_quadraticCharComplex_eq_sqrt_of_mod_four_eq_one
       (Real.sqrt p : ℂ)⁻¹ * gaussSum (quadraticCharComplex p) (ZMod.stdAddChar (N := p)) = 1 := by
     rw [← normalizedDft_quadraticScalar_eq_scaledGaussSum_of_mod_four_eq_one (p := p) hp₂ hp₄]
     exact normalizedDft_quadraticScalar_eq_one_of_mod_four_eq_one (p := p) hp₂ hp₄
-  have hmul := congrArg (fun z : ℂ => (Real.sqrt p : ℂ) * z) hscaled
-  simpa [hsqrt_ne, mul_assoc] using hmul
+  exact ((inv_mul_eq_one₀ hsqrt_ne).mp hscaled).symm
 
 /-- The determinant comparison fixes the positive imaginary branch of the
 quadratic Gauss sum. -/
@@ -479,13 +406,10 @@ theorem gaussSum_quadraticCharComplex_eq_I_mul_sqrt_of_mod_four_eq_three
     rw [← normalizedDft_quadraticScalar_eq_neg_scaledGaussSum_of_mod_four_eq_three
       (p := p) hp₂ hp₄]
     exact normalizedDft_quadraticScalar_eq_neg_I_of_mod_four_eq_three (p := p) hp₂ hp₄
-  have hscaled := congrArg (fun z : ℂ => (-1 : ℂ) * z) hscaled_neg
   have hscaled' :
       (Real.sqrt p : ℂ)⁻¹ * gaussSum (quadraticCharComplex p) (ZMod.stdAddChar (N := p)) =
-        Complex.I := by
-    simpa [mul_assoc] using hscaled
-  have hmul := congrArg (fun z : ℂ => (Real.sqrt p : ℂ) * z) hscaled'
-  simpa [hsqrt_ne, mul_assoc, mul_left_comm, mul_comm] using hmul
+        Complex.I := neg_inj.mp hscaled_neg
+  rw [(inv_mul_eq_iff_eq_mul₀ hsqrt_ne).mp hscaled', mul_comm]
 
 end SignInvariant
 
