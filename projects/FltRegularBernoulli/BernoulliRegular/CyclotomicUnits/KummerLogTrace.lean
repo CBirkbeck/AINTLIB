@@ -1,7 +1,7 @@
 module
 
 public import BernoulliRegular.CyclotomicUnits.KummerLogMatrix
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PrincipalUnitFactor.Part3
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PrincipalUnitFactor.ConjNormSemiPrimaryAndUnitFactorData
 
 /-!
 # Trace source for the Kummer logarithm columns

@@ -1,7 +1,7 @@
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.ArbitraryDegreeSourceData
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PrincipalUnitFactor.Part2
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PrincipalUnitFactor.ConductorFlexiblePhiFacts
 
 /-!
 # Ireland--Rosen prime source theorem

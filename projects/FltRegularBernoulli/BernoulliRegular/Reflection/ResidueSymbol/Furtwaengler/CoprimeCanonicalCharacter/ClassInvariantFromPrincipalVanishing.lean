@@ -1,7 +1,7 @@
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.CoprimeClassCharacter
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PthSymbolPrincipalCanonical.Part1
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PthSymbolPrincipalCanonical.CanonicalIdealSymbol
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.OneSidedKummerReciprocity
 
 
