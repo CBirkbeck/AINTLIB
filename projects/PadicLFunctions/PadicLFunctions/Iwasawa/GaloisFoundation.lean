@@ -797,7 +797,37 @@ theorem isGalois_sigmaL (n : ℕ) (σ : Om →ₐ[ℚ] Om) {L : IntermediateFiel
     (hL : IsAdmissibleM p n L)
     (hFle : FPlus p n ≤ IntermediateField.map σ (L.restrictScalars ℚ)) :
     IsGalois (FPlus p n) (IntermediateField.extendScalars hFle) := by
-  sorry
+  obtain ⟨hfin, hgalL, -, -, -⟩ := id hL
+  haveI : FiniteDimensional (FPlus p n) ↥L := hfin
+  haveI : IsGalois (FPlus p n) ↥L := hgalL
+  haveI : FiniteDimensional (FPlus p n) ↥(IntermediateField.extendScalars hFle) :=
+    finiteDimensional_sigmaL p n σ hFle
+  have hσF : ∀ c : ↥(FPlus p n), (omAut σ) (c : Om) ∈ FPlus p n := fun c =>
+    (IntermediateField.normal_iff_forall_map_le.mp (normal_FPlus p n) (omAut σ).toAlgHom)
+      ⟨(c : Om), c.2, rfl⟩
+  haveI : Normal (FPlus p n) ↥(IntermediateField.extendScalars hFle) := by
+    refine (IntermediateField.normal_iff_forall_map_le).mpr fun τ => ?_
+    rw [IntermediateField.map_le_iff_le_comap]
+    intro x hx
+    rw [IntermediateField.mem_extendScalars] at hx
+    obtain ⟨y, hy, rfl⟩ := hx
+    show τ (σ y) ∈ IntermediateField.extendScalars hFle
+    rw [IntermediateField.mem_extendScalars, IntermediateField.mem_map]
+    have hgfix : ∀ c : ↥(FPlus p n),
+        ((omAut σ).symm.toAlgHom.comp ((τ.restrictScalars ℚ).comp (omAut σ).toAlgHom)) (c : Om)
+          = (c : Om) := by
+      intro c
+      have h1 : τ ((omAut σ) (c : Om)) = (omAut σ) (c : Om) := τ.commutes ⟨(omAut σ) (c : Om), hσF c⟩
+      show (omAut σ).symm (τ ((omAut σ) (c : Om))) = (c : Om)
+      rw [h1, AlgEquiv.symm_apply_apply]
+    set g := algHomFixingFPlus p n
+      ((omAut σ).symm.toAlgHom.comp ((τ.restrictScalars ℚ).comp (omAut σ).toAlgHom)) hgfix with hg
+    have hgL : IntermediateField.map g L ≤ L :=
+      IntermediateField.normal_iff_forall_map_le.mp inferInstance g
+    refine ⟨g y, hgL ⟨y, hy, rfl⟩, ?_⟩
+    show (omAut σ) ((omAut σ).symm (τ ((omAut σ) y))) = τ (σ y)
+    rw [AlgEquiv.apply_symm_apply, omAut_apply]
+  exact ⟨⟩
 
 /-- **[b] abelian transport**: `Gal(σL/F⁺ₙ)` is commutative (conjugation iso to the abelian
 `Gal(L/F⁺ₙ)`). -/
