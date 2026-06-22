@@ -285,7 +285,7 @@ private lemma addOrderOf_ne_two_of_kappa_ne_zero
   have h2P : (2 : ℕ) • Affine.Point.some _ _ hns = 0 := by
     convert addOrderOf_nsmul_eq_zero (x := Affine.Point.some _ _ hns) using 2; exact h2.symm
   have h2Jac := nsmul_eq_zero_affine_to_jac W h2P
-  have hψ₂ := evalEval_ψ_eq_zero_of_zsmul_eq_zero W hns 2 h2Jac
+  have hψ₂ := evalEval_ψ_eq_zero_of_zsmul_eq_zero (curveK R K W) hns 2 h2Jac
   rw [WeierstrassCurve.ψ_two, WeierstrassCurve.ψ₂,
       WeierstrassCurve.Affine.evalEval_polynomialY] at hψ₂
   simp only [curveK_a₁, curveK_a₃] at hψ₂

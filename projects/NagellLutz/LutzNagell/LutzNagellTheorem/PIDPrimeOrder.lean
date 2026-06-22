@@ -57,15 +57,16 @@ theorem y_isInteger_of_x_isInteger_on_curve
 
 /-! ### Extract ψ = 0 from torsion -/
 
-omit [IsDomain R] [UniqueFactorizationMonoid R] [DecidableEq K] [IsFractionRing R K] in
-/-- If `n • P = 0` in the Jacobian point group, then `ψ_n(x,y) = 0`. -/
-theorem evalEval_ψ_eq_zero_of_zsmul_eq_zero
-    {x y : K} (hns : (curveK R K W).toAffine.Nonsingular x y) (n : ℤ)
+/-- If `n • P = 0` in the Jacobian point group of a Weierstrass curve over a field, then
+`ψ_n(x,y) = 0`. -/
+theorem evalEval_ψ_eq_zero_of_zsmul_eq_zero {F : Type*} [Field F] [DecidableEq F]
+    (E : WeierstrassCurve F)
+    {x y : F} (hns : E.toAffine.Nonsingular x y) (n : ℤ)
     (htors : n • (Jacobian.Point.fromAffine
       (Affine.Point.some _ _ hns)) = 0) :
-    ((curveK R K W).ψ n).evalEval x y = 0 := by
-  have heval := zsmul_eq_smulEval (curveK R K W) hns n
-  have hzero := Jacobian.Point.zero_point (W' := (curveK R K W).toJacobian)
+    (E.ψ n).evalEval x y = 0 := by
+  have heval := zsmul_eq_smulEval E hns n
+  have hzero := Jacobian.Point.zero_point (W' := E.toJacobian)
   rw [Jacobian.Point.ext_iff] at htors
   rw [heval, hzero] at htors
   exact (Jacobian.Z_eq_zero_of_equiv (Quotient.exact htors)).mpr rfl
@@ -108,7 +109,6 @@ of `preΨ_p` with `(p : R)`, which involves casting from `ℤ` to `R`.
 These require matching the leading coefficient of `preΨ_p` with `(p : R)`,
 which involves casting from `ℤ` to `R`. -/
 
-omit [DecidableEq K] in
 /-- For odd prime `p`, if `p • P = 0` and `(p : R)` is squarefree, then `x ∈ R`. -/
 theorem x_isInteger_of_odd_prime_torsion_squarefree
     {x y : K} (hns : (curveK R K W).toAffine.Nonsingular x y)
@@ -116,7 +116,7 @@ theorem x_isInteger_of_odd_prime_torsion_squarefree
     (htors : (p : ℤ) • (Jacobian.Point.fromAffine (Affine.Point.some _ _ hns)) = 0)
     (hsf : Squarefree (p : R)) :
     IsLocalization.IsInteger R x := by
-  have hψ := evalEval_ψ_eq_zero_of_zsmul_eq_zero W hns (p : ℤ) htors
+  have hψ := evalEval_ψ_eq_zero_of_zsmul_eq_zero (curveK R K W) hns (p : ℤ) htors
   have hodd_int : ¬Even (p : ℤ) := by rwa [Int.even_coe_nat, hp.even_iff]
   rw [evalEval_ψ_odd (curveK R K W) hns.left (p : ℤ) hodd_int] at hψ
   have hmap : (curveK R K W).preΨ (p : ℤ) = (W.preΨ (p : ℤ)).map (algebraMap R K) := by
@@ -154,7 +154,7 @@ theorem integrality_of_order_four_squarefree
     (h2ne : (2 : ℕ) • (Affine.Point.some _ _ hns) ≠ 0)
     (hsf : Squarefree (2 : R)) :
     (IsLocalization.IsInteger R x) ∧ IsLocalization.IsInteger R y := by
-  have hψ₄ := evalEval_ψ_eq_zero_of_zsmul_eq_zero W hns 4 h4
+  have hψ₄ := evalEval_ψ_eq_zero_of_zsmul_eq_zero (curveK R K W) hns 4 h4
   rw [WeierstrassCurve.ψ_four] at hψ₄
   simp only [evalEval_mul, evalEval_C] at hψ₄
   rcases mul_eq_zero.mp hψ₄ with hpreΨ | hψ₂
@@ -173,14 +173,13 @@ theorem integrality_of_order_four_squarefree
 
 /-! ### Order-2 torsion: bounded denominators -/
 
-omit [DecidableEq K] in
 /-- If `2•P = 0`, then `den(x) ∣ (4 : R)`. Requires `(4 : R) ≠ 0`
 (automatic for `CharZero R`). -/
 theorem den_dvd_of_order_two (h4_ne : (4 : R) ≠ 0)
     {x y : K} (hns : (curveK R K W).toAffine.Nonsingular x y)
     (h2 : (2 : ℤ) • (Jacobian.Point.fromAffine (Affine.Point.some _ _ hns)) = 0) :
     (IsFractionRing.den R x : R) ∣ (4 : R) := by
-  have hψ := evalEval_ψ_eq_zero_of_zsmul_eq_zero W hns 2 h2
+  have hψ := evalEval_ψ_eq_zero_of_zsmul_eq_zero (curveK R K W) hns 2 h2
   rw [WeierstrassCurve.ψ_two] at hψ
   have hΨ_zero : (curveK R K W).Ψ₂Sq.eval x = 0 := by
     have h := evalEval_eq_of_mk_eq (curveK R K W) hns.left
@@ -197,7 +196,6 @@ theorem den_dvd_of_order_two (h4_ne : (4 : R) ≠ 0)
 
 /-! ### Combined integrality -/
 
-omit [DecidableEq K] in
 /-- Full integrality for odd prime order when `(p : R)` is squarefree. -/
 theorem prime_order_integrality_squarefree
     {x y : K} (hns : (curveK R K W).toAffine.Nonsingular x y)

@@ -58,7 +58,7 @@ theorem evalEval_ψ_eq_zero_of_zsmul_eq_zero_general
     (htors : n • (Jacobian.Point.fromAffine
       (Affine.Point.some _ _ hns)) = 0) :
     ((curveQ W).ψ n).evalEval x y = 0 :=
-  PID.evalEval_ψ_eq_zero_of_zsmul_eq_zero W hns n htors
+  PID.evalEval_ψ_eq_zero_of_zsmul_eq_zero (curveQ W) hns n htors
 
 /-! ### ψ₂ = 0 implies 2•P = 0 (converse direction) -/
 
