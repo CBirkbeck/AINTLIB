@@ -846,7 +846,43 @@ theorem mulComm_sigmaL (n : ℕ) (σ : Om →ₐ[ℚ] Om) {L : IntermediateField
     (hFle : FPlus p n ≤ IntermediateField.map σ (L.restrictScalars ℚ)) :
     ∀ φ ψ : IntermediateField.extendScalars hFle ≃ₐ[FPlus p n] IntermediateField.extendScalars hFle,
       φ * ψ = ψ * φ := by
-  sorry
+  obtain ⟨_, _, hab, _, _⟩ := id hL
+  have hσF : ∀ c : ↥(FPlus p n), (omAut σ) (c : Om) ∈ FPlus p n := fun c =>
+    (IntermediateField.normal_iff_forall_map_le.mp (normal_FPlus p n) (omAut σ).toAlgHom)
+      ⟨(c : Om), c.2, rfl⟩
+  set ι : ↥L ≃ₐ[ℚ] ↥(IntermediateField.extendScalars hFle) :=
+    IntermediateField.intermediateFieldMap (omAut σ) (L.restrictScalars ℚ) with hι
+  have hfix : ∀ (χ : IntermediateField.extendScalars hFle ≃ₐ[FPlus p n]
+        IntermediateField.extendScalars hFle) (c : ↥(FPlus p n)),
+      (ι.trans ((χ.restrictScalars ℚ).trans ι.symm)) (algebraMap ↥(FPlus p n) ↥L c)
+        = algebraMap ↥(FPlus p n) ↥L c := by
+    intro χ c
+    have hιc : ι (algebraMap ↥(FPlus p n) ↥L c)
+        = algebraMap ↥(FPlus p n) ↥(IntermediateField.extendScalars hFle)
+            ⟨(omAut σ) (c : Om), hσF c⟩ := Subtype.ext rfl
+    show ι.symm ((χ.restrictScalars ℚ) (ι (algebraMap ↥(FPlus p n) ↥L c)))
+      = algebraMap ↥(FPlus p n) ↥L c
+    rw [hιc]
+    show ι.symm (χ (algebraMap ↥(FPlus p n) ↥(IntermediateField.extendScalars hFle)
+      ⟨(omAut σ) (c : Om), hσF c⟩)) = algebraMap ↥(FPlus p n) ↥L c
+    rw [χ.commutes, ← hιc, AlgEquiv.symm_apply_apply]
+  intro φ ψ
+  set φL : ↥L ≃ₐ[FPlus p n] ↥L :=
+    algEquivFixingFPlus p n (ι.trans ((φ.restrictScalars ℚ).trans ι.symm)) (hfix φ) with hφL
+  set ψL : ↥L ≃ₐ[FPlus p n] ↥L :=
+    algEquivFixingFPlus p n (ι.trans ((ψ.restrictScalars ℚ).trans ι.symm)) (hfix ψ) with hψL
+  have keyφ : ∀ z, ι (φL z) = φ (ι z) := fun z => by
+    rw [hφL]; show ι (ι.symm (φ (ι z))) = φ (ι z); rw [AlgEquiv.apply_symm_apply]
+  have keyψ : ∀ z, ι (ψL z) = ψ (ι z) := fun z => by
+    rw [hψL]; show ι (ι.symm (ψ (ι z))) = ψ (ι z); rw [AlgEquiv.apply_symm_apply]
+  apply AlgEquiv.ext
+  intro x
+  rw [show x = ι (ι.symm x) from (ι.apply_symm_apply x).symm]
+  show φ (ψ (ι (ι.symm x))) = ψ (φ (ι (ι.symm x)))
+  rw [← keyψ (ι.symm x), ← keyφ (ψL (ι.symm x)), ← keyφ (ι.symm x), ← keyψ (φL (ι.symm x))]
+  congr 1
+  have h := AlgEquiv.ext_iff.mp (hab φL ψL) (ι.symm x)
+  rwa [AlgEquiv.mul_apply, AlgEquiv.mul_apply] at h
 
 /-- **[c] unramified-outside-`p` transport** — the analytic core: `σ` induces a ring automorphism of
 `𝓞_Ω` fixing `ℤ`, semilinear over `β = σ|F⁺ₙ : 𝓞_{F⁺ₙ} ≅ 𝓞_{F⁺ₙ}`; it carries primes `P ↦ σ(P)`
