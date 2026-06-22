@@ -986,7 +986,7 @@ theorem oneSub_alpha_star_u_ord_eq_zero (hq : 2 ≤ Fintype.card K)
             (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq))) = 0 := by
   obtain ⟨hx, hy⟩ := oneSub_two_residues_nondoubling W p r hq P h_ns hx_ne hQ
   set α := oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
-    (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq) with hα
+    (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)
   have hu_resid : (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
         SmoothPlaneCurve (AlgebraicClosure K)).pointValuation P
       (alpha_star_u (W.baseChange (AlgebraicClosure K)) α -
@@ -1046,7 +1046,7 @@ theorem oneSub_alpha_star_u_ord_eq_zero_of_residues (hq : 2 ≤ Fintype.card K)
           (oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
             (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq))) = 0 := by
   set α := oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
-    (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq) with hα
+    (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)
   have hu_resid : (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
         SmoothPlaneCurve (AlgebraicClosure K)).pointValuation P
       (alpha_star_u (W.baseChange (AlgebraicClosure K)) α -
@@ -1122,7 +1122,7 @@ theorem oneSub_alpha_star_polyX_ord_eq_zero_of_residues (hq : 2 ≤ Fintype.card
             ((oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
               (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)).pullback
               (HasseWeil.y_gen (W.baseChange (AlgebraicClosure K))))) = 0 := by
-  set α := oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K) (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq) with hα
+  set α := oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K) (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)
   have hνQ_ne : 3 * x ^ 2 + 2 * (W.baseChange (AlgebraicClosure K)).a₂ * x + (W.baseChange (AlgebraicClosure K)).a₄ - (W.baseChange (AlgebraicClosure K)).a₁ * y ≠ 0 := by
     intro h0
     -- both partials of the nonsingular Weierstrass equation would vanish, contradicting `h_ns`.
