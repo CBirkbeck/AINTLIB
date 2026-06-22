@@ -884,6 +884,7 @@ theorem mulComm_sigmaL (n : ℕ) (σ : Om →ₐ[ℚ] Om) {L : IntermediateField
   have h := AlgEquiv.ext_iff.mp (hab φL ψL) (ι.symm x)
   rwa [AlgEquiv.mul_apply, AlgEquiv.mul_apply] at h
 
+open NumberField in
 /-- **[c] unramified-outside-`p` transport** — the analytic core: `σ` induces a ring automorphism of
 `𝓞_Ω` fixing `ℤ`, semilinear over `β = σ|F⁺ₙ : 𝓞_{F⁺ₙ} ≅ 𝓞_{F⁺ₙ}`; it carries primes `P ↦ σ(P)`
 preserving residue characteristic and ramification index, and `β` fixes the unique prime over `p`,
@@ -900,13 +901,36 @@ theorem isUnramifiedOutsideP_sigmaL (n : ℕ) (σ : Om →ₐ[ℚ] Om) {L : Inte
   · -- `P = ⊥`: the generic fibre — unramified (the residue extension is separable, char `0`).
     subst hP0
     sorry
-  -- **Reduction works** (all `IsDedekindDomain`/`EssFiniteType`/`CharZero`/`IsIntegral` instances on
-  -- the rings of integers resolve via the `NumberField` instance): reduce to `e(P | 𝓞 F⁺ₙ) = 1`.
+  -- **Reduction** (all `IsDedekindDomain`/`EssFiniteType`/`CharZero`/`IsIntegral` instances on the
+  -- rings of integers resolve via the `NumberField` instance): reduce to `e(P | 𝓞 F⁺ₙ) = 1`.
   rw [Algebra.isUnramifiedAt_iff_of_isDedekindDomain hP0]
-  -- **Remaining = the β-twist core**: `σ̃ : 𝓞(σL) ≅ 𝓞 L` (`RingOfIntegers.mapRingEquiv`) carries `P` to
-  -- a prime not over `p` (σ fixes `ℤ`); `L` is unramified there (`hL`); and `ramificationIdx` is
-  -- invariant under the `β`-semilinear `σ̃` (β = σ|F⁺ₙ relabels 𝓞_{F⁺ₙ}'s primes, fixing the one over `p`).
-  sorry
+  obtain ⟨hfinL, -, -, -, hunr⟩ := id hL
+  haveI : FiniteDimensional (FPlus p n) ↥L := hfinL
+  haveI := numberField_of_finite_layer p n L
+  -- `eOI : 𝓞(σL) ≅ 𝓞 L`, carrying `P` to the prime `Q := eOI(P)` of `𝓞 L`.
+  let eOI : 𝓞 ↥(IntermediateField.extendScalars hFle) ≃+* 𝓞 ↥L :=
+    NumberField.RingOfIntegers.mapRingEquiv
+      (IntermediateField.intermediateFieldMap (omAut σ) (L.restrictScalars ℚ)).symm.toRingEquiv
+  set Q : Ideal (𝓞 ↥L) := P.comap (eOI.symm : 𝓞 ↥L →+* 𝓞 ↥(IntermediateField.extendScalars hFle))
+    with hQdef
+  have hQp : (p : 𝓞 ↥L) ∉ Q := by
+    rw [hQdef, Ideal.mem_comap]
+    simpa [map_natCast] using hPp
+  have hQ0 : Q ≠ ⊥ := by
+    rw [hQdef]; intro h
+    apply hP0
+    have hmc := Ideal.map_comap_of_surjective
+      (eOI.symm : 𝓞 ↥L →+* 𝓞 ↥(IntermediateField.extendScalars hFle)) eOI.symm.surjective P
+    rw [h, Ideal.map_bot] at hmc
+    exact hmc.symm
+  have hQunr : Algebra.IsUnramifiedAt (𝓞 (FPlus p n)) Q := hunr Q hQp
+  have hQ1 := (Algebra.isUnramifiedAt_iff_of_isDedekindDomain (R := 𝓞 (FPlus p n)) hQ0).mp hQunr
+  -- **The β-twist core**: `e(P | 𝓞 F⁺ₙ) = e(Q | 𝓞 F⁺ₙ)` via the ℤ-tower (`eOI` is `ℤ`-linear, so
+  -- `e(·|ℤ)` is `eOI`-invariant; `β = eOI|𝓞F⁺ₙ` relabels primes of `𝓞F⁺ₙ` preserving `e(·|ℤ)`).
+  have hPQ : (Ideal.under (𝓞 (FPlus p n)) P).ramificationIdx P
+      = (Ideal.under (𝓞 (FPlus p n)) Q).ramificationIdx Q := by
+    sorry
+  rw [hPQ]; exact hQ1
 
 /-- **Admissibility is `σ`-invariant** (the analytic heart of normality): if `L` is an admissible-`M`
 layer over `F⁺ₙ` and `σ` is a `ℚ`-algebra map of `Ω` (which fixes `F⁺ₙ` setwise, `F⁺ₙ/ℚ` normal),

@@ -1,1 +1,1 @@
-FOCUS: isUnramifiedOutsideP_sigmaL (ANT core, single sorry). FIRST surveying AINTLIB+FltRegular+mathlib for reusable ramification-under-automorphism / prime-transport / IsUnramifiedAt-transport / RingOfIntegers-functoriality. Then build the lemma reusing what exists.
+FOCUS: isUnramifiedOutsideP_sigmaL — JUST DO IT (no deferring). Two pieces: (a) P=⊥ generic fibre unramified; (b) β-twist e(P|𝓞Fₙ⁺)=1 via σ̃=mapRingEquiv + ram-idx invariance. Building now.
