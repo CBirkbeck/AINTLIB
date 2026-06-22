@@ -497,7 +497,94 @@ theorem ofValuation_restrictIdeal_isInSpvAI
     {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀]
     (w : Valuation A Γ₀) (I : Ideal A) :
     Spv.IsInSpvAI (ofValuation (w.restrictIdeal I)) I := by
-  sorry
+  letI : ValuativeRel A := (ofValuation (w.restrictIdeal I)).toValuativeRel
+  haveI hcw : (w.restrictIdeal I).Compatible := Valuation.Compatible.ofValuation _
+  -- `canon := ValuativeRel.valuation A` is `IsEquiv` to `w.restrictIdeal I` (both `Compatible`).
+  have hequiv : (ValuativeRel.valuation A).IsEquiv (w.restrictIdeal I) := fun a b =>
+    (Valuation.Compatible.vle_iff_le (v := ValuativeRel.valuation A) a b).symm.trans
+      (Valuation.Compatible.vle_iff_le (v := w.restrictIdeal I) a b)
+  -- CORE (Wedhorn 7.4 via 7.2): the cofinal/microbial dichotomy for the restricted valuation.
+  -- ⚠ FALSE AS STATED for the current `cGammaIdeal` encoding (B2, 2026-06-22).
+  -- `cGammaIdeal v I = minContain (cGammaIdealUnits v I)` UNCONDITIONALLY adjoins the ideal
+  -- generators `{u : ∃ a∈I, v a ≤ u ≤ 1}` (second clause). Wedhorn Def 7.3 (wedhorn.txt:2942) instead
+  -- sets `cΓ_v(I) = cΓ_v` whenever `v(I) ∩ cΓ_v ≠ ∅`, adjoining ideal generators ONLY in the
+  -- complementary case `v(I) ∩ cΓ_v = ∅`. The encoding therefore diverges precisely on
+  -- `v(I) ∩ cΓ_v ≠ ∅`, and there the dichotomy fails.
+  -- COUNTEREXAMPLE: `A = k(y)[x]`, `w` the rank-2 composite valuation (`x`-adic, then `y`-adic on the
+  -- residue field `k(y)`), value group `ℤ×ℤ` lex; `I = (x-1)`.
+  --   • `cΓ_w = ⟨(0,1)⟩` is PROPER (`(0,1) = w(1/y)`, `1/y ∈ k(y) ⊆ A`).
+  --   • `b₂ := x-1 ∈ I`, `w(b₂) = 1 ∈ cΓ_w` (so `v(I) ∩ cΓ_w ≠ ∅`); `restrictIdeal` preserves it
+  --     (`restrictIdeal_apply_of_mem_ideal`), so `rw(b₂) = 1` and `CofinalValue rw b₂` FAILS
+  --     (`1ⁿ = 1 ≮ γ` for `γ < 1`) ⟹ left disjunct false.
+  --   • `b₁ := x(x-1) ∈ I`, `w(b₁) = (-1,0)` is cofinal below `cΓ_w`; `restrictIdeal` preserves it too,
+  --     so `Γ_{rw} ⊋ cΓ_w = cΓ_{rw}` ⟹ `rw` is NOT microbial (`γ = (1,0)` has no witness, no `a∈A`
+  --     has `w(a) ≥ (1,0)`) ⟹ right disjunct false.
+  -- Both disjuncts fail. The honest fix is to correct `cGammaIdeal` to Wedhorn Def 7.3's case-split
+  -- (faithful, unconditional truth) OR to restrict this lemma to `v(I) ∩ cΓ_v = ∅` (permitted: the
+  -- result is genuinely false without it). USER DECISION required — see b2_log 2026-06-22.
+  have hdich : (∀ a ∈ I, Valuation.CofinalValue (w.restrictIdeal I) a) ∨
+      Valuation.IsMicrobial (w.restrictIdeal I) := by
+    sorry
+  -- TRANSFER (IsEquiv invariance of cofinality): `w.restrictIdeal I` ⤳ `canon`.
+  have hcof_tr : ∀ a : A, Valuation.CofinalValue (w.restrictIdeal I) a →
+      Valuation.CofinalValue (ValuativeRel.valuation A) a := by
+    intro x hx δ hδ
+    obtain ⟨a, b, hab⟩ := ValuativeRel.exists_valuation_div_valuation_eq (R := A) δ
+    have hcb : (ValuativeRel.valuation A) (b : A) ≠ 0 := ValuativeRel.valuation_posSubmonoid_ne_zero b
+    have hlt : ∀ p q : A, ((ValuativeRel.valuation A) p < (ValuativeRel.valuation A) q ↔
+        (w.restrictIdeal I) p < (w.restrictIdeal I) q) :=
+      fun p q => le_iff_le_iff_lt_iff_lt.mp (hequiv q p)
+    have hrb : (w.restrictIdeal I) (b : A) ≠ 0 := by
+      rw [← zero_lt_iff]; have hh := (hlt 0 (b : A)).mp
+      simp only [map_zero] at hh; exact hh (zero_lt_iff.mpr hcb)
+    subst hab
+    have hca : 0 < (ValuativeRel.valuation A) a := by
+      rw [zero_lt_iff]; intro h0; rw [h0, zero_div] at hδ; exact lt_irrefl 0 hδ
+    have hra : 0 < (w.restrictIdeal I) a := by
+      have hh := (hlt 0 a).mp; simp only [map_zero] at hh; exact hh hca
+    obtain ⟨n, hn⟩ := hx ((w.restrictIdeal I) a / (w.restrictIdeal I) (b : A))
+      (div_pos hra (zero_lt_iff.mpr hrb))
+    exact ⟨n, by
+      rw [lt_div_iff₀ (zero_lt_iff.mpr hcb), ← map_pow, ← map_mul, hlt, map_mul, map_pow,
+        ← lt_div_iff₀ (zero_lt_iff.mpr hrb)]
+      exact hn⟩
+  -- TRANSFER (IsEquiv invariance of microbiality): `w.restrictIdeal I` ⤳ `canon`.
+  have hmicr_tr : Valuation.IsMicrobial (w.restrictIdeal I) →
+      Valuation.IsMicrobial (ValuativeRel.valuation A) := by
+    intro hm δ hδ
+    obtain ⟨p, q, hpq⟩ := ValuativeRel.exists_valuation_div_valuation_eq (R := A) δ
+    have hcq : (ValuativeRel.valuation A) (q : A) ≠ 0 := ValuativeRel.valuation_posSubmonoid_ne_zero q
+    have hle : ∀ x y : A, ((ValuativeRel.valuation A) x ≤ (ValuativeRel.valuation A) y ↔
+        (w.restrictIdeal I) x ≤ (w.restrictIdeal I) y) := hequiv
+    have hlt : ∀ x y : A, ((ValuativeRel.valuation A) x < (ValuativeRel.valuation A) y ↔
+        (w.restrictIdeal I) x < (w.restrictIdeal I) y) :=
+      fun x y => le_iff_le_iff_lt_iff_lt.mp (hequiv y x)
+    have hrq : (w.restrictIdeal I) (q : A) ≠ 0 := by
+      rw [← zero_lt_iff]; have hh := (hlt 0 (q : A)).mp
+      simp only [map_zero] at hh; exact hh (zero_lt_iff.mpr hcq)
+    subst hpq
+    have hcp : 0 < (ValuativeRel.valuation A) p := by
+      rw [zero_lt_iff]; intro h0; rw [h0, zero_div] at hδ; exact lt_irrefl 0 hδ
+    have hrp : 0 < (w.restrictIdeal I) p := by
+      have hh := (hlt 0 p).mp; simp only [map_zero] at hh; exact hh hcp
+    have hγ' : 0 < (w.restrictIdeal I) p / (w.restrictIdeal I) (q : A) :=
+      div_pos hrp (zero_lt_iff.mpr hrq)
+    obtain ⟨a, ha1, hainv, hage⟩ := hm ((w.restrictIdeal I) p / (w.restrictIdeal I) (q : A)) hγ'
+    have h1 : (1 : _) ≤ (ValuativeRel.valuation A) a := by
+      have hh := (hle 1 a).mpr; simp only [map_one] at hh; exact hh ha1
+    have hca : 0 < (ValuativeRel.valuation A) a := lt_of_lt_of_le zero_lt_one h1
+    have hainv' : (w.restrictIdeal I) (q : A) / (w.restrictIdeal I) p ≤ (w.restrictIdeal I) a := by
+      rw [← inv_div]; exact (inv_le_comm₀ (lt_of_lt_of_le zero_lt_one ha1) hγ').mp hainv
+    refine ⟨a, h1, ?_, ?_⟩
+    · rw [inv_le_comm₀ hca hδ, inv_div, div_le_iff₀ hcp, ← map_mul, hle, map_mul,
+        ← div_le_iff₀ hrp]
+      exact hainv'
+    · rw [div_le_iff₀ (zero_lt_iff.mpr hcq), ← map_mul, hle, map_mul,
+        ← div_le_iff₀ (zero_lt_iff.mpr hrq)]
+      exact hage
+  rcases hdich with hcof | hmicr
+  · exact Or.inl fun a ha => hcof_tr a (hcof a ha)
+  · exact Or.inr (hmicr_tr hmicr)
 
 /-- **Sub-lemma for Wedhorn 7.5(2) image.** The Spv-level `restrictIdeal v I`
 satisfies the disjunctive characterisation `Spv.IsInSpvAI`.
