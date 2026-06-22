@@ -173,7 +173,7 @@ theorem realCyclotomicUnitZMod_eq_zero_iff [IsCMField K] (k : ZMod p) :
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
   unfold realCyclotomicUnitZMod
   rw [realCyclotomicUnit_eq_zero_iff]
-  refine ⟨fun h => ?_, fun h => ?_⟩
+  refine ⟨fun h ↦ ?_, fun h ↦ ?_⟩
   · rw [show (0 : ZMod p) = ((0 : ℕ) : ZMod p) from by push_cast; rfl,
       ← ZMod.natCast_zmod_val k, ZMod.natCast_eq_natCast_iff]
     exact (Nat.modEq_zero_iff_dvd).mpr h
@@ -193,7 +193,7 @@ theorem isUnit_realCyclotomicUnitZMod_of_units [IsCMField K] (k : (ZMod p)ˣ)
 theorem isUnit_realCyclotomicUnitZMod_iff [IsCMField K] (k : ZMod p) :
     IsUnit (realCyclotomicUnitZMod p K k) ↔ k ≠ 0 := by
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
-  refine ⟨fun h hk => ?_, fun h => ?_⟩
+  refine ⟨fun h hk ↦ ?_, fun h ↦ ?_⟩
   · subst hk
     rw [realCyclotomicUnitZMod_zero] at h
     exact not_isUnit_zero h
@@ -268,7 +268,7 @@ theorem realCyclotomicUnitPlusZMod_one [IsCMField K] :
 
 theorem realCyclotomicUnitPlusZMod_eq_zero_iff [IsCMField K] (k : ZMod p) :
     realCyclotomicUnitPlusZMod p K k = 0 ↔ k = 0 := by
-  refine ⟨fun h => ?_, fun h => ?_⟩
+  refine ⟨fun h ↦ ?_, fun h ↦ ?_⟩
   · have h_alg := congrArg
       (algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)) h
     rw [algebraMap_realCyclotomicUnitPlusZMod, map_zero] at h_alg
@@ -350,7 +350,7 @@ theorem isUnit_realCyclotomicUnitPlusZMod_of_units [IsCMField K] (k : (ZMod p)ˣ
 theorem isUnit_realCyclotomicUnitPlusZMod_iff [IsCMField K] (k : ZMod p) :
     IsUnit (realCyclotomicUnitPlusZMod p K k) ↔ k ≠ 0 := by
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
-  refine ⟨fun h hk => ?_, fun h => ?_⟩
+  refine ⟨fun h hk ↦ ?_, fun h ↦ ?_⟩
   · subst hk
     rw [realCyclotomicUnitPlusZMod_zero] at h
     exact not_isUnit_zero h
