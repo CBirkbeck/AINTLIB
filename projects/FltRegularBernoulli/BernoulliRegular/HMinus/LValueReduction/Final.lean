@@ -28,16 +28,16 @@ theorem hMinus_formula_of_residue_and_hPlus_cyclotomic_and_gauss
     (hp_odd' : p ≠ 2)
     (hres :
       ((NumberField.dedekindZeta_residue K : ℝ) : ℂ) =
-        Finset.prod (evenNontrivialCharacters (p := p)) (fun χ => evenLValueRhs p χ) *
-          Finset.prod (oddCharacters (p := p)) (fun χ => DirichletCharacter.LFunction χ 1))
+        Finset.prod (evenNontrivialCharacters (p := p)) (fun χ ↦ evenLValueRhs p χ) *
+          Finset.prod (oddCharacters (p := p)) (fun χ ↦ DirichletCharacter.LFunction χ 1))
     (hplus :
       ((hPlus K : ℕ) : ℂ) =
         cyclotomicHPlusFactor (K := K) *
-          Finset.prod (evenNontrivialCharacters (p := p)) (fun χ => evenLValueRhs p χ))
+          Finset.prod (evenNontrivialCharacters (p := p)) (fun χ ↦ evenLValueRhs p χ))
     (hgauss : cyclotomicHGaussGoal (p := p) K) :
     ((hMinus K : ℕ) : ℂ) =
       (2 * p : ℂ) *
-        Finset.prod (oddCharacters (p := p)) (fun χ =>
+        Finset.prod (oddCharacters (p := p)) (fun χ ↦
           (-(1 / 2 : ℂ)) * BernoulliGen χ⁻¹ 1) := by
   apply hMinus_formula_of_residue_and_hPlus_and_gauss (p := p) (K := K) hp_odd'
     (coefficient := cyclotomicRelativeLValueCoefficient (p := p) (K := K))
@@ -64,7 +64,7 @@ class-number formula with the odd and even `L(1, χ)` evaluations. -/
 theorem hMinus_formula (hp_odd' : p ≠ 2) :
     ((hMinus K : ℕ) : ℂ) =
       (2 * p : ℂ) *
-        Finset.prod (oddCharacters (p := p)) fun χ =>
+        Finset.prod (oddCharacters (p := p)) fun χ ↦
           (-(1 / 2 : ℂ)) * BernoulliGen χ⁻¹ 1 := by
   apply hMinus_formula_of_residue_and_hPlus_cyclotomic_and_gauss
     (p := p) (K := K) hp_odd'
@@ -77,9 +77,9 @@ theorem hMinus_formula (hp_odd' : p ≠ 2) :
       _ = evenLProduct p (1 : ℂ) * oddLProduct p (1 : ℂ) := by
             rw [nontrivialLProduct_eq_even_mul_odd]
       _ =
-          Finset.prod (evenNontrivialCharacters (p := p)) (fun χ => evenLValueRhs p χ) *
+          Finset.prod (evenNontrivialCharacters (p := p)) (fun χ ↦ evenLValueRhs p χ) *
             Finset.prod (oddCharacters (p := p))
-              (fun χ => DirichletCharacter.LFunction χ 1) := by
+              (fun χ ↦ DirichletCharacter.LFunction χ 1) := by
             rw [evenLProduct_one_eq_prod_evenLValueRhs (p := p)]
             rfl
   · exact hPlus_formula_of_evenLValues (p := p) (K := K) hp_odd'
