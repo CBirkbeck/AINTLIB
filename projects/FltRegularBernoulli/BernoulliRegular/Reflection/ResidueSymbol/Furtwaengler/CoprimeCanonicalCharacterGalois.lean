@@ -227,6 +227,26 @@ theorem exists_galois_covariance_representative_two
 
 end GaloisCovarianceAvoidance
 
+/-- The class-mod-`p` Galois action sends the class of `I` to the class of any
+representative `σI` whose underlying ideal is the Galois conjugate of `I`. -/
+private theorem cyclotomicGalActionMonoidHomModP_mk_mk0
+    (a : CyclotomicUnitDelta p) (I σI : (Ideal (𝓞 K))⁰)
+    (hσI : (σI : Ideal (𝓞 K)) =
+      cyclotomicGaloisConjugate (p := p) (K := K) a (I : Ideal (𝓞 K))) :
+    cyclotomicGalActionMonoidHomModP (p := p) (K := K) a
+        (QuotientGroup.mk (ClassGroup.mk0 I) : ClassGroupModP K p) =
+      (QuotientGroup.mk (ClassGroup.mk0 σI) : ClassGroupModP K p) := by
+  change QuotientGroup.map _ _
+      (cyclotomicGalActionMonoidHom (p := p) (K := K) a) _
+      (QuotientGroup.mk (ClassGroup.mk0 I)) =
+    QuotientGroup.mk (ClassGroup.mk0 σI)
+  rw [QuotientGroup.map_mk]
+  congr 1
+  change cyclotomicGalActionOnClassGroup (p := p) (K := K) a (ClassGroup.mk0 I) =
+    ClassGroup.mk0 σI
+  rw [cyclotomicGalActionOnClassGroup_mk0]
+  exact congrArg ClassGroup.mk0 (Subtype.ext hσI.symm)
+
 /-- Prime-level numerator transform for an eigenspace relation
 `σ_a η = η^(a^i) * u^p`, at primes avoiding both `η` and `u`. -/
 theorem pthSymbolAtPrime_canonical_galois_numerator_of_pow_mul_pow_p
@@ -241,9 +261,9 @@ theorem pthSymbolAtPrime_canonical_galois_numerator_of_pow_mul_pow_p
         pthSymbolAtPrime_canonical (p := p) (K := K) η Q := by
   rw [hu]
   haveI hQ_prime : Q.IsPrime := hmax.isPrime
-  have hη_pow : η ^ ((a : ZMod p).val ^ i : ℕ) ∉ Q := fun h =>
+  have hη_pow : η ^ ((a : ZMod p).val ^ i : ℕ) ∉ Q := fun h ↦
     hη (hQ_prime.mem_of_pow_mem _ h)
-  have hu_pow : u ^ p ∉ Q := fun h =>
+  have hu_pow : u ^ p ∉ Q := fun h ↦
     huQ (hQ_prime.mem_of_pow_mem _ h)
   rw [pthSymbolAtPrime_canonical_mul hbot hmax hη_pow hu_pow,
     pthSymbolAtPrime_canonical_pow hbot hmax hη _,
@@ -266,10 +286,10 @@ theorem pthSymbolAtIdeal_canonical_galois_numerator_of_pow_mul_pow_p
   unfold pthSymbolAtIdeal_canonical
   rw [show
       ((normalizedFactors I).map
-        (fun P => pthSymbolAtPrime_canonical (p := p) (K := K)
+        (fun P ↦ pthSymbolAtPrime_canonical (p := p) (K := K)
           (cyclotomicRingOfIntegersEquiv (p := p) K a η) P)).sum =
       ((normalizedFactors I).map
-        (fun P => ((a : ZMod p).val ^ i : ZMod p) *
+        (fun P ↦ ((a : ZMod p).val ^ i : ZMod p) *
           pthSymbolAtPrime_canonical (p := p) (K := K) η P)).sum from ?_]
   · rw [← Multiset.sum_map_mul_left]
   · apply congrArg Multiset.sum
@@ -312,11 +332,10 @@ theorem pthSymbolAtPrime_canonical_galois_numerator_of_clear_denominators
         (cyclotomicRingOfIntegersEquiv (p := p) K a η) Q =
       (n : ZMod p) *
         pthSymbolAtPrime_canonical (p := p) (K := K) η Q := by
-  classical
   haveI hQ_prime : Q.IsPrime := hmax.isPrime
-  have hz_pow : z ^ p ∉ Q := fun h =>
+  have hz_pow : z ^ p ∉ Q := fun h ↦
     hzQ (hQ_prime.mem_of_pow_mem p h)
-  have hw_pow : w ^ p ∉ Q := fun h =>
+  have hw_pow : w ^ p ∉ Q := fun h ↦
     hwQ (hQ_prime.mem_of_pow_mem p h)
   by_cases hη : η ∈ Q
   · have hη_pow : η ^ n ∈ Q := Q.pow_mem_of_mem hη n hn_pos
@@ -328,9 +347,9 @@ theorem pthSymbolAtPrime_canonical_galois_numerator_of_clear_denominators
       (hQ_prime.mem_or_mem hleft_mem).resolve_right hw_pow
     rw [pthSymbolAtPrime_canonical_eq_zero_of_mem hbot hmax hση,
       pthSymbolAtPrime_canonical_eq_zero_of_mem hbot hmax hη, mul_zero]
-  · have hη_pow : η ^ n ∉ Q := fun h =>
+  · have hη_pow : η ^ n ∉ Q := fun h ↦
       hη (hQ_prime.mem_of_pow_mem n h)
-    have hright_not : η ^ n * z ^ p ∉ Q := fun h =>
+    have hright_not : η ^ n * z ^ p ∉ Q := fun h ↦
       (hQ_prime.mem_or_mem h).elim hη_pow hz_pow
     have hση :
         cyclotomicRingOfIntegersEquiv (p := p) K a η ∉ Q := by
@@ -340,7 +359,7 @@ theorem pthSymbolAtPrime_canonical_galois_numerator_of_clear_denominators
       exact Q.mul_mem_right _ hσ
     have heq :=
       congrArg
-        (fun x => pthSymbolAtPrime_canonical (p := p) (K := K) x Q)
+        (fun x ↦ pthSymbolAtPrime_canonical (p := p) (K := K) x Q)
         hclear
     change
       pthSymbolAtPrime_canonical (p := p) (K := K)
@@ -351,8 +370,8 @@ theorem pthSymbolAtPrime_canonical_galois_numerator_of_clear_denominators
       pthSymbolAtPrime_canonical_mul (p := p) (K := K) hbot hmax hη_pow hz_pow,
       pthSymbolAtPrime_canonical_pow (p := p) (K := K) hbot hmax hη n,
       pthSymbolAtPrime_canonical_pow_p_eq_zero (p := p) (K := K) hbot hmax hzQ,
-      add_zero] at heq
-    simpa [add_zero] using heq
+      add_zero, add_zero] at heq
+    exact heq
 
 /-- Ideal-level denominator-cleared numerator transform. -/
 theorem pthSymbolAtIdeal_canonical_galois_numerator_of_clear_denominators
@@ -371,10 +390,10 @@ theorem pthSymbolAtIdeal_canonical_galois_numerator_of_clear_denominators
   unfold pthSymbolAtIdeal_canonical
   rw [show
       ((normalizedFactors I).map
-        (fun P => pthSymbolAtPrime_canonical (p := p) (K := K)
+        (fun P ↦ pthSymbolAtPrime_canonical (p := p) (K := K)
           (cyclotomicRingOfIntegersEquiv (p := p) K a η) P)).sum =
       ((normalizedFactors I).map
-        (fun P => (n : ZMod p) *
+        (fun P ↦ (n : ZMod p) *
           pthSymbolAtPrime_canonical (p := p) (K := K) η P)).sum from ?_]
   · rw [← Multiset.sum_map_mul_left]
   · apply congrArg Multiset.sum
@@ -453,17 +472,8 @@ theorem coprimeCanonicalClassGroupModPHom_galois_weight_one_minus_i_mk0
   have hgal :
       cyclotomicGalActionMonoidHomModP (p := p) (K := K) a
           (QuotientGroup.mk (ClassGroup.mk0 I) : ClassGroupModP K p) =
-        (QuotientGroup.mk (ClassGroup.mk0 σI) : ClassGroupModP K p) := by
-    change QuotientGroup.map _ _
-        (cyclotomicGalActionMonoidHom (p := p) (K := K) a) _
-        (QuotientGroup.mk (ClassGroup.mk0 I)) =
-      QuotientGroup.mk (ClassGroup.mk0 σI)
-    rw [QuotientGroup.map_mk]
-    congr 1
-    change cyclotomicGalActionOnClassGroup (p := p) (K := K) a (ClassGroup.mk0 I) =
-      ClassGroup.mk0 σI
-    rw [cyclotomicGalActionOnClassGroup_mk0]
-    rfl
+        (QuotientGroup.mk (ClassGroup.mk0 σI) : ClassGroupModP K p) :=
+    cyclotomicGalActionMonoidHomModP_mk_mk0 (p := p) (K := K) a I σI rfl
   have hσI' : ∀ P ∈ S, IsCoprime (σI : Ideal (𝓞 K)) P := by
     simpa [σI] using hσI
   have hσ_eval :=
@@ -756,17 +766,8 @@ theorem coprimeCanonicalClassGroupModPHom_galois_weight_one_minus_i_mk0_clear_de
   have hgal :
       cyclotomicGalActionMonoidHomModP (p := p) (K := K) a
           (QuotientGroup.mk (ClassGroup.mk0 I) : ClassGroupModP K p) =
-        (QuotientGroup.mk (ClassGroup.mk0 σI) : ClassGroupModP K p) := by
-    change QuotientGroup.map _ _
-        (cyclotomicGalActionMonoidHom (p := p) (K := K) a) _
-        (QuotientGroup.mk (ClassGroup.mk0 I)) =
-      QuotientGroup.mk (ClassGroup.mk0 σI)
-    rw [QuotientGroup.map_mk]
-    congr 1
-    change cyclotomicGalActionOnClassGroup (p := p) (K := K) a (ClassGroup.mk0 I) =
-      ClassGroup.mk0 σI
-    rw [cyclotomicGalActionOnClassGroup_mk0]
-    rfl
+        (QuotientGroup.mk (ClassGroup.mk0 σI) : ClassGroupModP K p) :=
+    cyclotomicGalActionMonoidHomModP_mk_mk0 (p := p) (K := K) a I σI rfl
   have hσI' : ∀ P ∈ S, IsCoprime (σI : Ideal (𝓞 K)) P := by
     simpa [σI] using hσI
   have hσ_eval :=
