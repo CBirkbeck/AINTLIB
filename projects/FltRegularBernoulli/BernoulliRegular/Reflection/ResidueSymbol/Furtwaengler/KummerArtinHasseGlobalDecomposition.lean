@@ -1,7 +1,7 @@
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.KummerArtinHasseTeichmuller
-public import BernoulliRegular.Reflection.SingularKummer.LocalizationKernel.Part1
+public import BernoulliRegular.Reflection.SingularKummer.LocalizationKernel.LocalToCompletedBridge
 
 /-!
 # Global lambda decomposition for the Kummer--Artin--Hasse correction

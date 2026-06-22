@@ -1,3 +1,0 @@
-module
-
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PrincipalUnitFactor.Part1.Part2

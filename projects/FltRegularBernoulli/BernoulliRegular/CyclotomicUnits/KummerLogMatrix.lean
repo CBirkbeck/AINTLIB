@@ -2,7 +2,7 @@ module
 
 public import BernoulliRegular.CyclotomicUnits.DworkParameter
 public import BernoulliRegular.CyclotomicUnits.Vandermonde
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PrincipalUnitFactor.Part2
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PrincipalUnitFactor.ConductorFlexiblePhiFacts
 
 /-!
 # The Kummer logarithm coefficient matrix

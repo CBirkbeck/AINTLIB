@@ -10,7 +10,7 @@ public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.LambdaLocal
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.OneSidedKummerReciprocity
 public import BernoulliRegular.Reflection.SingularKummer.FiniteLevelCharacterLift
 public import BernoulliRegular.Reflection.SingularKummer.IntegralNormalization
-public import BernoulliRegular.Reflection.SingularKummer.LocalizationKernel.Part2
+public import BernoulliRegular.Reflection.SingularKummer.LocalizationKernel.DimensionKernelChoice
 
 /-!
 # Final weak reflection statements
