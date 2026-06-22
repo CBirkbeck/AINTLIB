@@ -66,9 +66,12 @@ lemma exists_some_of_ne_zero {Q : Affine.Point ((curveK R K W).toAffine)}
 
 /-! ### The powerful denominator theorem (no torsion hypothesis needed) -/
 
-omit [CharZero R] [DecidableEq K] in
-/-- Every prime factor of `den_R(x)` on a curve point has multiplicity at least 2. -/
-theorem den_powerful_of_on_curve {x y : K}
+omit [IsPrincipalIdealRing R] [CharZero R] [DecidableEq K] in
+/-- Every prime factor of `den_R(x)` on a curve point has multiplicity at least 2.
+
+Only needs `R` to be a UFD (not a PID): the proof is a thin wrapper around the
+UFD-general `den_no_simple_prime_factor_of_on_curve`. -/
+theorem den_powerful_of_on_curve [UniqueFactorizationMonoid R] {x y : K}
     (heq : y ^ 2 + algebraMap R K W.a₁ * x * y + algebraMap R K W.a₃ * y =
       x ^ 3 + algebraMap R K W.a₂ * x ^ 2 + algebraMap R K W.a₄ * x + algebraMap R K W.a₆) :
     ∀ q : R, Prime q → q ∣ (IsFractionRing.den R x : R) →
