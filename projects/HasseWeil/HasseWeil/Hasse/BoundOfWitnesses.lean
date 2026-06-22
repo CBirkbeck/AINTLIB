@@ -1,4 +1,4 @@
-import HasseWeil.HasseBound
+import HasseWeil.DiscriminantBounds
 import HasseWeil.Hasse.PointFix
 
 /-!

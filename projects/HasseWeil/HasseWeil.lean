@@ -48,7 +48,7 @@ import HasseWeil.Hasse.PointFix
 import HasseWeil.EC.PointMap
 import HasseWeil.Hasse.Separability
 import HasseWeil.Hasse.TorsionCard
-import HasseWeil.HasseBound
+import HasseWeil.DiscriminantBounds
 import HasseWeil.InvariantDifferentialPullback
 import HasseWeil.PullbackCoeff
 import HasseWeil.RouteBInduction
