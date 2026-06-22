@@ -187,6 +187,62 @@ noncomputable def residueAway : F →+* Af ⧸ awayIdealAt Af Q :=
   (Ideal.Quotient.mk (awayIdealAt Af Q)).comp
     ((algebraMap C₂.CoordinateRing Af).comp (algebraMap F C₂.CoordinateRing))
 
+/-- Every residue of a coordinate-ring element in `Af⧸q` is a scalar: for `g : F[C₂]`
+there is `c : F` with `residueAway c = mk (algebraMap g)`.  This is `F → F[C₂]⧸m_Q`
+bijective (`hbij2`, from `IsAlgClosed F`) transported across `q ∩ F[C₂] = m_Q`
+(`awayIdealAt_under`). -/
+private theorem residueAway_eq_mk_algebraMap [IsAlgClosed F]
+    (hfQ : f ∉ C₂.maximalIdealAt Q) (g : C₂.CoordinateRing) :
+    ∃ c : F, residueAway Af Q c =
+      Ideal.Quotient.mk (awayIdealAt Af Q) (algebraMap C₂.CoordinateRing Af g) := by
+  have hbij2 := C₂.algebraMap_bijective_quotient_of_maximal (C₂.maximalIdealAt_isMaximal Q)
+  obtain ⟨c, hc⟩ := hbij2.2 (Ideal.Quotient.mk (C₂.maximalIdealAt Q) g)
+  refine ⟨c, ?_⟩
+  have hle : C₂.maximalIdealAt Q ≤
+      (awayIdealAt Af Q).comap (algebraMap C₂.CoordinateRing Af) :=
+    le_of_eq (awayIdealAt_under f Af Q hfQ).symm
+  have happ := congrArg
+    (Ideal.quotientMap (awayIdealAt Af Q) (algebraMap C₂.CoordinateRing Af) hle) hc
+  rw [show (algebraMap F (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q)) c =
+    Ideal.Quotient.mk (C₂.maximalIdealAt Q) (algebraMap F C₂.CoordinateRing c) from rfl,
+    Ideal.quotientMap_mk, Ideal.quotientMap_mk] at happ
+  exact happ
+
+/-- **Surjectivity** of the residue map `F → Af⧸q`.  Any element of `Af` is `a/fⁿ`; the
+residue of `a` is a scalar `ca` and the residue of `f` is a nonzero scalar `cf` (both via
+`residueAway_eq_mk_algebraMap`; `cf ≠ 0` since `f` is a unit in `Af`), so `a/fⁿ` has
+scalar residue `ca / cfⁿ`. -/
+private theorem residueAway_surjective [IsAlgClosed F]
+    (hfQ : f ∉ C₂.maximalIdealAt Q) :
+    Function.Surjective (residueAway Af Q) := by
+  classical
+  haveI hqprime : (awayIdealAt Af Q).IsPrime := awayIdealAt_isPrime f Af Q hfQ
+  haveI : IsDomain (Af ⧸ awayIdealAt Af Q) := inferInstance
+  intro w
+  obtain ⟨z, rfl⟩ := Ideal.Quotient.mk_surjective w
+  obtain ⟨⟨a, s⟩, h1⟩ := IsLocalization.surj (Submonoid.powers f) z
+  obtain ⟨n, hsn⟩ := s.2
+  obtain ⟨ca, hca⟩ := residueAway_eq_mk_algebraMap f Af Q hfQ a
+  obtain ⟨cf, hcf⟩ := residueAway_eq_mk_algebraMap f Af Q hfQ f
+  -- `mk z · (mk f-image)ⁿ = mk a-image` from the localization relation
+  have hspec := congrArg (Ideal.Quotient.mk (awayIdealAt Af Q)) h1
+  rw [map_mul, show ((s : Submonoid.powers f) : C₂.CoordinateRing) = f ^ n from hsn.symm,
+    map_pow, map_pow] at hspec
+  -- the residue of `f` is a nonzero scalar
+  have hfu : IsUnit (Ideal.Quotient.mk (awayIdealAt Af Q)
+      (algebraMap C₂.CoordinateRing Af f)) :=
+    (IsLocalization.map_units Af (⟨f, Submonoid.mem_powers f⟩ : Submonoid.powers f)).map _
+  have hcf0 : cf ≠ 0 := by
+    rintro rfl
+    rw [map_zero] at hcf
+    exact hfu.ne_zero hcf.symm
+  refine ⟨ca / cf ^ n, ?_⟩
+  have hcfu : IsUnit (residueAway Af Q (cf ^ n)) := by
+    rw [map_pow, hcf]
+    exact hfu.pow n
+  refine hcfu.mul_right_cancel ?_
+  rw [← map_mul, div_mul_cancel₀ ca (pow_ne_zero n hcf0), hca, map_pow, hcf, ← hspec]
+
 /-- **Residue triviality for the good affine open over `K̄`**: the residue map
 `F → Af⧸q` at a smooth point off `{f = 0}` is bijective.  Surjectivity: any element of
 `Af` is `a/fⁿ`; the residue of `a` is a scalar (`F → F[C₂]⧸m_Q` is bijective), the
@@ -195,52 +251,9 @@ residue. -/
 theorem residue_away_bijective [IsAlgClosed F]
     (hfQ : f ∉ C₂.maximalIdealAt Q) :
     Function.Bijective (residueAway Af Q) := by
-  classical
   haveI hqprime : (awayIdealAt Af Q).IsPrime := awayIdealAt_isPrime f Af Q hfQ
   haveI : IsDomain (Af ⧸ awayIdealAt Af Q) := inferInstance
-  constructor
-  · exact (residueAway Af Q).injective
-  · intro w
-    obtain ⟨z, rfl⟩ := Ideal.Quotient.mk_surjective w
-    obtain ⟨⟨a, s⟩, h1⟩ := IsLocalization.surj (Submonoid.powers f) z
-    obtain ⟨n, hsn⟩ := s.2
-    -- residues of coordinate-ring elements are scalars (through `F[C₂]⧸m_Q ≅ F`)
-    have hbij2 := C₂.algebraMap_bijective_quotient_of_maximal (C₂.maximalIdealAt_isMaximal Q)
-    have hscalar : ∀ g : C₂.CoordinateRing, ∃ c : F,
-        residueAway Af Q c =
-          Ideal.Quotient.mk (awayIdealAt Af Q) (algebraMap C₂.CoordinateRing Af g) := by
-      intro g
-      obtain ⟨c, hc⟩ := hbij2.2 (Ideal.Quotient.mk (C₂.maximalIdealAt Q) g)
-      refine ⟨c, ?_⟩
-      have hle : C₂.maximalIdealAt Q ≤
-          (awayIdealAt Af Q).comap (algebraMap C₂.CoordinateRing Af) :=
-        le_of_eq (awayIdealAt_under f Af Q hfQ).symm
-      have happ := congrArg
-        (Ideal.quotientMap (awayIdealAt Af Q) (algebraMap C₂.CoordinateRing Af) hle) hc
-      rw [show (algebraMap F (C₂.CoordinateRing ⧸ C₂.maximalIdealAt Q)) c =
-        Ideal.Quotient.mk (C₂.maximalIdealAt Q) (algebraMap F C₂.CoordinateRing c) from rfl,
-        Ideal.quotientMap_mk, Ideal.quotientMap_mk] at happ
-      exact happ
-    obtain ⟨ca, hca⟩ := hscalar a
-    obtain ⟨cf, hcf⟩ := hscalar f
-    -- `mk z · (mk f-image)ⁿ = mk a-image` from the localization relation
-    have hspec := congrArg (Ideal.Quotient.mk (awayIdealAt Af Q)) h1
-    rw [map_mul, show ((s : Submonoid.powers f) : C₂.CoordinateRing) = f ^ n from hsn.symm,
-      map_pow, map_pow] at hspec
-    -- the residue of `f` is a nonzero scalar
-    have hfu : IsUnit (Ideal.Quotient.mk (awayIdealAt Af Q)
-        (algebraMap C₂.CoordinateRing Af f)) :=
-      (IsLocalization.map_units Af (⟨f, Submonoid.mem_powers f⟩ : Submonoid.powers f)).map _
-    have hcf0 : cf ≠ 0 := by
-      rintro rfl
-      rw [map_zero] at hcf
-      exact hfu.ne_zero hcf.symm
-    refine ⟨ca / cf ^ n, ?_⟩
-    have hcfu : IsUnit (residueAway Af Q (cf ^ n)) := by
-      rw [map_pow, hcf]
-      exact hfu.pow n
-    refine hcfu.mul_right_cancel ?_
-    rw [← map_mul, div_mul_cancel₀ ca (pow_ne_zero n hcf0), hca, map_pow, hcf, ← hspec]
+  exact ⟨(residueAway Af Q).injective, residueAway_surjective f Af Q hfQ⟩
 
 end Residue
 
