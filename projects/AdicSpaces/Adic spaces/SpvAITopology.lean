@@ -685,33 +685,38 @@ theorem isMicrobial_canon_of_restricted {Γ' : Type*} [LinearOrderedCommGroupWit
   · rw [div_le_iff₀ (zero_lt_iff.mpr hcq), ← map_mul, hle, map_mul, ← div_le_iff₀ (zero_lt_iff.mpr hrq)]
     exact hage
 
-/-- **MICROBIAL CASE (Wedhorn Def 7.3, `v((g)) ∩ cΓ_v ≠ ∅` branch).** If some value `v(a)`
-reaches `v(g)⁻¹`, then `cGammaSingle` collapses to `cΓ_v` and `restrictIdealSingle` is microbial:
-every value-unit is bounded by a product of characteristic values (which are values, `v`
-multiplicative) and `v(g)⁻¹ ≤ v(a)`. -/
-theorem restrictIdealSingle_isMicrobial_of_reach (w : Valuation A Γ₀) (g : A) (hg : w g ≠ 0)
-    (hreach : ∃ a : A, (w g)⁻¹ ≤ w a) :
+/-- **MICROBIAL CASE (Wedhorn Def 7.3, `v((g)) ∩ cΓ_v ≠ ∅` branch).** If the single generator
+`v(g)⁻¹` lies in `cΓ_v`, then `cGammaSingle = cΓ_v` (`cGammaSingle_eq_cGamma_of_mem`) and
+`restrictIdealSingle` is microbial: every value-unit of `cΓ_v` is bounded by a product of
+characteristic values, which is itself a value (`v` multiplicative). [Remaining: `minContain`
+bounded-by-products of `cGammaUnits`.] -/
+theorem restrictIdealSingle_isMicrobial_of_mem (w : Valuation A Γ₀) (g : A) (hg : w g ≠ 0)
+    (hmem : (Units.mk0 (w g) hg)⁻¹ ∈ Valuation.cGamma w) :
     Valuation.IsMicrobial (w.restrictIdealSingle g hg) := by
   sorry
 
 /-- **COFINAL CASE (Wedhorn Def 7.3, `v((g)) ∩ cΓ_v = ∅` branch + Lemma 7.2 + Lemma 7.1).**
-If no value reaches `v(g)⁻¹`, then `cGammaSingle = convexGenerated (v(g)⁻¹)` (rank-1), the
-generator `g` is cofinal (`exists_inv_pow_lt_of_mem_convexGenerated`), and by the cofinality
-ideal (Lemma 7.1, via the quotient by `cΓ_v`) every `a ∈ (g)` has cofinal value. -/
-theorem restrictIdealSingle_cofinal_of_not_reach (w : Valuation A Γ₀) (g : A) (hg : w g ≠ 0)
-    (hreach : ¬ ∃ a : A, (w g)⁻¹ ≤ w a) :
+If `v(g)⁻¹ ∉ cΓ_v`, then `v(g)⁻¹ > 1` and `cGammaSingle = convexGenerated (v(g)⁻¹)`
+(`cGammaSingle_eq_convexGenerated_of_subset`, the characteristic generators being `< v(g)⁻¹` by
+convexity). The generator `g` is cofinal (`exists_inv_pow_lt_of_mem_convexGenerated`), and by the
+cofinality ideal (Lemma 7.1: `w c ≤ 1` ⇒ smaller value stays cofinal; `w c > 1` ⇒ `w c ∈ cΓ_v`
+⇒ cofinal·bounded = cofinal, Remark 1.20) every `a ∈ (g)` has cofinal value. -/
+theorem restrictIdealSingle_cofinal_of_not_mem (w : Valuation A Γ₀) (g : A) (hg : w g ≠ 0)
+    (hmem : (Units.mk0 (w g) hg)⁻¹ ∉ Valuation.cGamma w) :
     ∀ a ∈ Ideal.span {g}, Valuation.CofinalValue (w.restrictIdealSingle g hg) a := by
   sorry
 
 /-- **Faithful principal-case Wedhorn 7.4(ii) / 7.1.2.** `restrictIdealSingle w g` lands in
 `Spv(A, (g))`. This is the true replacement for the false `ofValuation_restrictIdeal_isInSpvAI`,
-specialised to the principal ideal `(g)` that the Spa continuity construction uses. -/
+specialised to the principal ideal `(g)` that the Spa continuity construction uses. The split is
+the faithful Wedhorn Def 7.3 criterion `v(g)⁻¹ ∈ cΓ_v` (⟺ microbial). -/
 theorem ofValuation_restrictIdealSingle_isInSpvAI (w : Valuation A Γ₀) (g : A) (hg : w g ≠ 0) :
     Spv.IsInSpvAI (ofValuation (w.restrictIdealSingle g hg)) (Ideal.span {g}) := by
-  by_cases hreach : ∃ a : A, (w g)⁻¹ ≤ w a
-  · exact Or.inr (isMicrobial_canon_of_restricted _ (restrictIdealSingle_isMicrobial_of_reach w g hg hreach))
+  by_cases hmem : (Units.mk0 (w g) hg)⁻¹ ∈ Valuation.cGamma w
+  · exact Or.inr (isMicrobial_canon_of_restricted _
+      (restrictIdealSingle_isMicrobial_of_mem w g hg hmem))
   · exact Or.inl fun a ha =>
-      cofinalValue_canon_of_restricted _ (restrictIdealSingle_cofinal_of_not_reach w g hg hreach a ha)
+      cofinalValue_canon_of_restricted _ (restrictIdealSingle_cofinal_of_not_mem w g hg hmem a ha)
 
 /-- **General sub-lemma (value-equivalence from `cGammaIdeal` containing every
 value-unit).** If every nonzero value-unit `Units.mk0 (v a) ha` of `v` lies

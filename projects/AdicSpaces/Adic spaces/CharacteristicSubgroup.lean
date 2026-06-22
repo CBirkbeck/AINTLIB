@@ -568,6 +568,38 @@ noncomputable def restrictIdealSingle (v : Valuation A Γ₀) (g : A) (hg : v g 
   v.restrictToConvexBounded (cGammaSingle v g hg)
     (fun _ hva ha ↦ vUnit_mem_cGammaSingle hg ha hva)
 
+/-- **The pure characteristic convex subgroup `cΓ_v = minContain(cGammaUnits)`** (Wedhorn 4.13,
+as a `ConvexSubgroup`). It is the characteristic subgroup of the restricted valuation, so
+`restrictIdealSingle` is microbial iff `cGammaSingle = cGamma`. -/
+noncomputable def cGamma (v : Valuation A Γ₀) : ConvexSubgroup Γ₀ˣ :=
+  ConvexSubgroup.minContain (cGammaUnits v)
+
+theorem cGammaUnits_subset_cGamma (v : Valuation A Γ₀) :
+    cGammaUnits v ⊆ (cGamma v : Set Γ₀ˣ) :=
+  ConvexSubgroup.subset_minContain _
+
+/-- **YES branch (Wedhorn Def 7.3, `v((g)) ∩ cΓ_v ≠ ∅`).** If the single generator `v(g)⁻¹`
+already lies in `cΓ_v`, then `cGammaSingle` collapses to `cΓ_v`. -/
+theorem cGammaSingle_eq_cGamma_of_mem {v : Valuation A Γ₀} {g : A} (hg : v g ≠ 0)
+    (hmem : (Units.mk0 (v g) hg)⁻¹ ∈ cGamma v) :
+    cGammaSingle v g hg = cGamma v := by
+  apply le_antisymm
+  · exact ConvexSubgroup.minContain_le (Set.insert_subset hmem (cGammaUnits_subset_cGamma v))
+  · exact ConvexSubgroup.minContain_le
+      (fun u hu ↦ ConvexSubgroup.subset_minContain _ (Set.mem_insert_of_mem _ hu))
+
+/-- **NO branch (Wedhorn Def 7.3 + Lemma 7.2, `v((g)) ∩ cΓ_v = ∅`).** If the characteristic
+generators are all bounded by powers of `v(g)⁻¹`, then `cGammaSingle = convexGenerated(v(g)⁻¹)`
+— the rank-decorated single-generator convex subgroup. -/
+theorem cGammaSingle_eq_convexGenerated_of_subset {v : Valuation A Γ₀} {g : A} (hg : v g ≠ 0)
+    (hy : 1 < (Units.mk0 (v g) hg)⁻¹)
+    (hsub : cGammaUnits v ⊆ (ConvexSubgroup.convexGenerated hy : Set Γ₀ˣ)) :
+    cGammaSingle v g hg = ConvexSubgroup.convexGenerated hy := by
+  apply le_antisymm
+  · exact ConvexSubgroup.minContain_le
+      (Set.insert_subset (ConvexSubgroup.self_mem_convexGenerated hy) hsub)
+  · exact ConvexSubgroup.convexGenerated_le (invGen_mem_cGammaSingle v g hg)
+
 end Valuation
 
 namespace ValuationSpectrum
