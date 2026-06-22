@@ -38,7 +38,7 @@ namespace BernoulliRegular
 
 section ClassNumberFormula
 
-variable (p : ℕ) [hp : Fact p.Prime] (hp_odd : p ≠ 2)
+variable (p : ℕ) [hp : Fact p.Prime]
   (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K] [IsCMField K]
 
 /-- The class number formula for `K`, rearranged to solve for `h`. -/
@@ -203,13 +203,15 @@ lemma maximalRealSubfield_torsion_eq_one_or_neg_one
     apply φ.injective
     simpa [hr] using hur.symm
 
-set_option linter.unusedSectionVars false in
 lemma maximalRealSubfield_torsionOrder_eq_two :
     Units.torsionOrder (NumberField.maximalRealSubfield K) = 2 := by
   let L := NumberField.maximalRealSubfield K
   classical
-  refine (Finset.card_eq_two.2 ⟨1, ⟨-1, neg_one_mem_torsion⟩,
-    by simp [← Subtype.coe_ne_coe], Finset.ext fun x ↦ ⟨fun _ ↦ ?_, fun _ ↦ Finset.mem_univ _⟩⟩)
+  refine
+    Finset.card_eq_two.2
+      ⟨1, ⟨-1, neg_one_mem_torsion⟩, by simp [← Subtype.coe_ne_coe],
+        Finset.ext fun x ↦
+          ⟨fun _ ↦ ?_, fun _ ↦ Finset.mem_univ _⟩⟩
   rw [Finset.mem_insert, Finset.mem_singleton, ← Subtype.val_inj, ← Subtype.val_inj]
   exact maximalRealSubfield_torsion_eq_one_or_neg_one (K := K) x
 
@@ -297,7 +299,6 @@ lemma zeta_not_mem_maximalRealSubfield (hp_odd' : p ≠ 2) :
     have hneq : (-1 : ℂ) ≠ 1 := by norm_num
     exact hneq hneg
 
-set_option linter.unusedSectionVars false in
 lemma zetaInteger_not_mem_field_range (hp_odd' : p ≠ 2) :
     (((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K) : K) ∉
       Set.range (algebraMap (NumberField.maximalRealSubfield K) K) := by
@@ -309,7 +310,6 @@ lemma zetaInteger_not_mem_field_range (hp_odd' : p ≠ 2) :
     simpa [hx] using hxmem
   exact zeta_not_mem_maximalRealSubfield (p := p) (K := K) hp_odd' hzmem
 
-set_option linter.unusedSectionVars false in
 lemma zetaInteger_not_mem_ring_range (hp_odd' : p ≠ 2) :
     (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ∉
       Set.range (algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)) := by
@@ -318,7 +318,6 @@ lemma zetaInteger_not_mem_ring_range (hp_odd' : p ≠ 2) :
   refine ⟨(x : NumberField.maximalRealSubfield K), ?_⟩
   exact congrArg (fun y : 𝓞 K => (y : K)) hx
 
-set_option linter.unusedSectionVars false in
 lemma zetaInteger_adjoin_eq_top_maximalRealSubfield (hp_odd' : p ≠ 2) :
     Algebra.adjoin (NumberField.maximalRealSubfield K)
       ({(((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K) : K)} : Set K) = ⊤ := by
@@ -342,7 +341,6 @@ lemma zetaInteger_adjoin_eq_top_maximalRealSubfield (hp_odd' : p ≠ 2) :
     Algebra.IsAlgebraic.isAlgebraic _
   exact Algebra.adjoin_eq_top_of_primitive_element hzeta_alg hL
 
-set_option linter.unusedSectionVars false in
 set_option linter.unusedSectionVars false in
 lemma one_add_zetaInteger_isUnit (hp_odd' : p ≠ 2) :
     IsUnit (1 + ((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K)) := by
@@ -422,26 +420,24 @@ lemma zetaInteger_pow_eq_one :
       (((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger_isPrimitiveRoot.isUnit_unit
         (NeZero.ne p)).pow_eq_one)
 
-set_option linter.unusedSectionVars false in
 lemma zetaInteger_pow_pred_mul_eq_one :
     (((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (p - 1) *
         (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K) = 1 := by
   calc
     (((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (p - 1) *
         (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K)
-    = (((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K) ^ ((p - 1) + 1) : 𝓞 K) := by
+    = (((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K) ^ ((p - 1) + 1) :
+        𝓞 K) := by
       rw [pow_succ]
   _ = (((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K) ^ p : 𝓞 K) := by
       rw [Nat.sub_add_cancel hp.out.one_le]
     _ = 1 := zetaInteger_pow_eq_one (p := p) (K := K)
 
-set_option linter.unusedSectionVars false in
 lemma zetaInteger_mul_pow_pred_eq_one :
     (((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K) *
         (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ (p - 1) : 𝓞 K) = 1 := by
   simpa [mul_comm] using zetaInteger_pow_pred_mul_eq_one (p := p) (K := K)
 
-set_option linter.unusedSectionVars false in
 lemma one_add_zetaInteger_pow_pred_isUnit (hp_odd' : p ≠ 2) :
     IsUnit (1 + ((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (p - 1)) := by
   let ζi : 𝓞 K := (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger
@@ -455,7 +451,6 @@ lemma one_add_zetaInteger_pow_pred_isUnit (hp_odd' : p ≠ 2) :
   rw [← hmul]
   exact hzeta_unit.mul (one_add_zetaInteger_isUnit (p := p) (K := K) hp_odd')
 
-set_option linter.unusedSectionVars false in
 lemma algebraMap_piPlus_eq_two_sub_zeta_sub_zetaPowPred :
     (algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)) (piPlus p K) =
       (2 : 𝓞 K) - (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger -
@@ -474,7 +469,6 @@ lemma algebraMap_piPlus_eq_two_sub_zeta_sub_zetaPowPred :
           rw [zetaInteger_mul_pow_pred_eq_one (p := p) (K := K)]
           ring_nf
 
-set_option linter.unusedSectionVars false in
 lemma aeval_zetaInteger_quadratic_eq_zero :
     Polynomial.aeval (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger
       (Polynomial.X ^ 2 + Polynomial.C (piPlus p K - 2) * Polynomial.X + 1 :
@@ -493,7 +487,6 @@ lemma aeval_zetaInteger_quadratic_eq_zero :
     mul_comm]
     using hcalc
 
-set_option linter.unusedSectionVars false in
 lemma minpoly_maximalRealSubfield_zetaInteger_eq_quadratic (hp_odd' : p ≠ 2) :
     minpoly (𝓞 (NumberField.maximalRealSubfield K))
         ((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K) =
@@ -503,7 +496,8 @@ lemma minpoly_maximalRealSubfield_zetaInteger_eq_quadratic (hp_odd' : p ≠ 2) :
   let ζi : 𝓞 K := (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger
   have hint : IsIntegral A ζi := IsIntegralClosure.isIntegral A K ζi
   have hdeg :
-      (Polynomial.X ^ 2 + Polynomial.C (piPlus p K - 2) * Polynomial.X + 1 : Polynomial A).degree ≤
+      ((Polynomial.X ^ 2 + Polynomial.C (piPlus p K - 2) * Polynomial.X + 1 :
+          Polynomial A).degree) ≤
         (minpoly A ζi).degree := by
     have hnatdeg : 2 ≤ (minpoly A ζi).natDegree :=
       (minpoly.two_le_natDegree_iff hint).2
@@ -528,7 +522,6 @@ lemma minpoly_maximalRealSubfield_zetaInteger_eq_quadratic (hp_odd' : p ≠ 2) :
   · intro Q hQ hQroot
     exact hdeg.trans (minpoly.min (A := A) (x := ζi) hQ hQroot)
 
-set_option linter.unusedSectionVars false in
 lemma aeval_derivative_minpoly_zetaInteger_eq_zeta_sub_complexConj_zeta (hp_odd' : p ≠ 2) :
     Polynomial.aeval (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger
       (Polynomial.derivative
@@ -547,7 +540,6 @@ lemma aeval_derivative_minpoly_zetaInteger_eq_zeta_sub_complexConj_zeta (hp_odd'
     (show ((1 + 1 : 𝓞 K) * ζi) + (((2 : 𝓞 K) - ζi - ζi ^ (p - 1)) - 2) =
         ζi - ζi ^ (p - 1) by ring)
 
-set_option linter.unusedSectionVars false in
 lemma span_zetaInteger_sub_zetaPowPred_eq_zetaPrime (hp_odd' : p ≠ 2) :
     Ideal.span
         ({((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K) -
@@ -568,7 +560,6 @@ lemma span_zetaInteger_sub_zetaPowPred_eq_zetaPrime (hp_odd' : p ≠ 2) :
   rw [← hcalc, Ideal.span_singleton_mul_right_unit]
   exact one_add_zetaInteger_pow_pred_isUnit (p := p) (K := K) hp_odd'
 
-set_option linter.unusedSectionVars false in
 lemma differentIdeal_maximalRealSubfield_eq_zetaPrime (hp_odd' : p ≠ 2) :
     differentIdeal (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K) = zetaPrime p K := by
   let A := 𝓞 (NumberField.maximalRealSubfield K)
@@ -608,7 +599,6 @@ lemma differentIdeal_maximalRealSubfield_eq_zetaPrime (hp_odd' : p ≠ 2) :
       (p := p) (K := K) hp_odd'
   exact le_antisymm hle hP_le
 
-set_option linter.unusedSectionVars false in
 lemma absNorm_differentIdeal_maximalRealSubfield_eq_prime (hp_odd' : p ≠ 2) :
     Ideal.absNorm (differentIdeal (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)) = p := by
   rw [differentIdeal_maximalRealSubfield_eq_zetaPrime (p := p) (K := K) hp_odd',
@@ -617,7 +607,6 @@ lemma absNorm_differentIdeal_maximalRealSubfield_eq_prime (hp_odd' : p ≠ 2) :
     (IsCyclotomicExtension.zeta_spec p ℚ K).norm_toInteger_sub_one_of_prime_ne_two' hp_odd']
   simp [Int.natAbs_natCast]
 
-set_option linter.unusedSectionVars false in
 lemma natAbs_discr_maximalRealSubfield_eq_pow (hp_odd' : p ≠ 2) :
     (NumberField.discr (NumberField.maximalRealSubfield K)).natAbs = p ^ ((p - 3) / 2) := by
   let L := NumberField.maximalRealSubfield K
