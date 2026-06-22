@@ -63,17 +63,24 @@ def fdBoundary : ℝ → ℂ := fun t ↦
 /-- Full partition including endpoints. -/
 def fdBoundaryFullPartition : Finset ℝ := {0, 1, 2, 3, 4, 5}
 
-lemma fdBoundary_at_three :
-    fdBoundary 3 = ellipticPointRho := by
-  simp only [fdBoundary, show ¬(3 : ℝ) ≤ 1 by norm_num,
-    show ¬(3 : ℝ) ≤ 2 by norm_num, le_refl (3 : ℝ),
-    ite_true, ite_false]
+/-- The arc point of segment 3 at parameter `t = 3` is the elliptic point `ρ`. Shared by
+`fdBoundary_at_three` and `fdBoundary_H_at_three`, since segment 3 is height-independent. -/
+private lemma exp_seg3_at_three :
+    Complex.exp ((↑Real.pi / 2 + (↑(3 : ℝ) - 2) * (2 * ↑Real.pi / 3 - ↑Real.pi / 2)) * I) =
+      ellipticPointRho := by
   rw [show (↑Real.pi / 2 + (↑(3 : ℝ) - 2) * (2 * ↑Real.pi / 3 - ↑Real.pi / 2)) * I =
       ↑(2 * Real.pi / 3) * I by push_cast; ring, exp_mul_I, ← ofReal_cos, ← ofReal_sin,
     show (2 * Real.pi / 3 : ℝ) = Real.pi - Real.pi / 3 by ring,
     Real.cos_pi_sub, Real.cos_pi_div_three, Real.sin_pi_sub, Real.sin_pi_div_three]
   simp [ellipticPointRho, ellipticPointRho', UpperHalfPlane.coe_mk]
   ring
+
+lemma fdBoundary_at_three :
+    fdBoundary 3 = ellipticPointRho := by
+  simp only [fdBoundary, show ¬(3 : ℝ) ≤ 1 by norm_num,
+    show ¬(3 : ℝ) ≤ 2 by norm_num, le_refl (3 : ℝ),
+    ite_true, ite_false]
+  exact exp_seg3_at_three
 
 /-- Segment 1 at height H: right vertical from (1/2 + H·i) down
 to ρ+1. -/
@@ -133,12 +140,7 @@ lemma fdBoundary_H_at_three (H : ℝ) :
   simp only [fdBoundary_H, show ¬(3 : ℝ) ≤ 1 by norm_num,
     show ¬(3 : ℝ) ≤ 2 by norm_num, le_refl (3 : ℝ),
     ite_true, ite_false]
-  rw [show (↑Real.pi / 2 + (↑(3 : ℝ) - 2) * (2 * ↑Real.pi / 3 - ↑Real.pi / 2)) * I =
-      ↑(2 * Real.pi / 3) * I by push_cast; ring, exp_mul_I, ← ofReal_cos, ← ofReal_sin,
-    show (2 * Real.pi / 3 : ℝ) = Real.pi - Real.pi / 3 by ring,
-    Real.cos_pi_sub, Real.cos_pi_div_three, Real.sin_pi_sub, Real.sin_pi_div_three]
-  simp [ellipticPointRho, ellipticPointRho', UpperHalfPlane.coe_mk]
-  ring
+  exact exp_seg3_at_three
 
 lemma fdBoundary_H_at_four (H : ℝ) :
     fdBoundary_H H 4 = -1 / 2 + H * I := by
