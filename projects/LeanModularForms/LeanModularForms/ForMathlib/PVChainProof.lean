@@ -1,51 +1,23 @@
 /-
-Copyright (c) 2026. All rights reserved.
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import LeanModularForms.ForMathlib.CoreIdentityProof
 
 /-!
-# PV Chain Proof: Discharging h_pvChain
+# PV Chain Proof
 
-This file discharges the `h_pvChain` hypothesis from `CoreIdentityProof.lean`,
-which bundles:
-1. `FDWindingDataFull H` for some large `H`
-2. Height bound: all S points below H
-3. PV chain identity: `Sigma gWN(boundary, s) * ord(f,s) = -(k/12 - ord_cusp)`
+This file packages the principal-value chain identity used in the valence formula proof.
 
-## Strategy
+## Main definitions
 
-Both sides of the PV chain identity are limits of the *same* epsilon-truncated
-integral of `logDeriv(f)` around the FD boundary:
+* `PVChainData`: winding data, a height bound, and two limits for a common integrand.
 
-- **Residue side**: the CPV integral tends to `2 pi i * Sigma gWN * ord`,
-  by the generalized residue theorem applied to `logDeriv(f)` (which has
-  simple poles with residue = order of vanishing).
+## Main results
 
-- **Modular side**: the same CPV integral tends to `-(2 pi i)(k/12 - ord_inf)`,
-  via T-cancellation of verticals, S-arc contribution, and horizontal winding.
-
-By `tendsto_nhds_unique` the two limits agree, and cancelling `2 pi i` gives
-the PV chain identity.
-
-## Architecture
-
-### `PVChainData`
-
-Bundles the two `Tendsto` hypotheses for a common integrand `F_eps` at a
-given height `H`, together with the `FDWindingDataFull` at that height.
-
-### `pvChainIdentity`
-
-The core theorem: from `PVChainData` extract the identity
-  `Sigma gWN * ord = -(k/12 - ord_cusp)`
-via uniqueness of limits and algebraic manipulation.
-
-### `discharge_pvChain`
-
-Assembles `h_pvChain` from `PVChainData` by packaging the identity with
-the height bound.
+* `pvChainIdentity`: extracts the PV chain identity from `PVChainData`.
+* `valence_formula_of_two_sides_Hgt1`: valence formula variant using data over heights `H > 1`.
 
 ## References
 
@@ -66,20 +38,9 @@ omit f hf in
 private lemma pvChain_two_pi_I_ne_zero : (2 : ℂ) * ↑Real.pi * I ≠ 0 := by
   simp [Real.pi_ne_zero]
 
-/-- Data for the PV chain identity at height `H`.
-
-This bundles:
-1. `FDWindingDataFull H` -- winding weights at all FD boundary points
-2. A common integrand function `F_eps : R -> C` (the epsilon-truncated
-   integral of `logDeriv(f)` around the FD boundary)
-3. The residue-side limit: `F_eps` tends to the winding-weighted ord sum
-4. The modular-side limit: `F_eps` tends to the modular-side expression
-5. Height bound: all points in `S` lie below `H`
-
-The two Tendsto hypotheses share the same integrand, so
-`tendsto_nhds_unique` applies. -/
-structure PVChainData
-    (S : Finset UpperHalfPlane) (H : ℝ) where
+/-- Data for the PV chain identity at height `H`, including winding data, a height
+bound, and the two limits of a common integrand. -/
+structure PVChainData (S : Finset UpperHalfPlane) (H : ℝ) where
   /-- The full winding data at height `H`. -/
   D : FDWindingDataFull H
   /-- All points in `S` lie below the horizontal segment. -/
@@ -99,19 +60,8 @@ structure PVChainData
     (𝓝 (-(2 * ↑Real.pi * I *
       ((k : ℂ) / 12 - (orderAtCusp' f : ℂ)))))
 
-/-- **The PV chain identity**: from `PVChainData`, extract
-
-  `Sigma gWN(gamma, s) * ord(f, s) = -(k/12 - ord_cusp)`
-
-by uniqueness of limits (both the residue and modular sides are limits
-of the same epsilon-truncated integral) and cancellation of `2 pi i`.
-
-This is the heart of the valence formula proof: the analytical content
-is in constructing the two `Tendsto` hypotheses; the algebraic content
-is this uniqueness + cancellation argument. -/
-theorem pvChainIdentity
-    (S : Finset UpperHalfPlane)
-    {H : ℝ} (data : PVChainData f S H) :
+/-- Extracts the PV chain identity from the two limits bundled in `PVChainData`. -/
+theorem pvChainIdentity (S : Finset UpperHalfPlane) {H : ℝ} (data : PVChainData f S H) :
     ∑ s ∈ S,
       generalizedWindingNumber data.D.boundary (↑s : ℂ) *
         (orderOfVanishingAt' (⇑f) s : ℂ) =
@@ -119,9 +69,8 @@ theorem pvChainIdentity
   refine mul_left_cancel₀ pvChain_two_pi_I_ne_zero ?_
   linear_combination tendsto_nhds_unique data.h_res data.h_mod
 
-/-- Variant of `valence_formula_of_two_sides` with `mkD` over `H > 1` instead
-of `H > √3/2`. Useful when the `FDWindingDataFull` constructor only works
-for `H > 1` (e.g. the unconditional `mkFDWindingDataFull_unconditional`). -/
+/-- Variant of `valence_formula_of_two_sides` whose boundary data is available
+over heights satisfying `H > 1`. -/
 theorem valence_formula_of_two_sides_Hgt1
     (S : Finset UpperHalfPlane) (hS : ∀ p ∈ S, p ∈ 𝒟)
     (hS_complete : ∀ p, p ∈ 𝒟 → orderOfVanishingAt' (⇑f) p ≠ 0 → p ∈ S)
