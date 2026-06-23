@@ -496,6 +496,83 @@ theorem mulByIntSingular_finite (n : ℤ) (hn : n ≠ 0) : (mulByIntSingular W n
   have h2' : ((1 : ℤ) : WithTop ℤ) ≤ ((0 : ℤ) : WithTop ℤ) := by exact_mod_cast h2
   exact absurd (WithTop.coe_le_coe.mp h2') (by norm_num)
 
+/-- The on-curve identity `φ_n = Φ_n` evaluated at a smooth point: in the coordinate ring
+`mk (φ_n) = mk (C (Φ_n))` (`mk_φ`), so the two-variable evaluation of `φ_n` agrees with the
+one-variable evaluation of `Φ_n` at any smooth point. -/
+private theorem mulByInt_evalEval_φ_eq_Φ (n : ℤ) (P : (W_smooth W).SmoothPoint) :
+    (W.φ n).evalEval P.x P.y = (W.Φ n).eval P.x := by
+  have h1 : (W_smooth W).evalAt P (AdjoinRoot.mk W.toAffine.polynomial (W.φ n)) =
+      (W.φ n).evalEval P.x P.y := (W_smooth W).evalAt_mk P (W.φ n)
+  have h2 : (W_smooth W).evalAt P
+      (AdjoinRoot.mk W.toAffine.polynomial (Polynomial.C (W.Φ n))) =
+      (Polynomial.C (W.Φ n)).evalEval P.x P.y := (W_smooth W).evalAt_mk P _
+  have h3 : AdjoinRoot.mk W.toAffine.polynomial (W.φ n) =
+      AdjoinRoot.mk W.toAffine.polynomial (Polynomial.C (W.Φ n)) :=
+    WeierstrassCurve.Affine.CoordinateRing.mk_φ (W := W.toAffine) n
+  rw [← h1, h3, h2, Polynomial.evalEval_C]
+
+/-- The on-curve identity `ψ_n² = ΨSq_n` evaluated at a smooth point: in the coordinate ring
+`mk (ψ_n)² = mk (C (ΨSq_n))` (via `mk_ψ` then `mk_Ψ_sq`), so the square of the two-variable
+evaluation of `ψ_n` agrees with the one-variable evaluation of `ΨSq_n` at any smooth
+point. -/
+private theorem mulByInt_evalEval_ψ_sq_eq_ΨSq (n : ℤ) (P : (W_smooth W).SmoothPoint) :
+    (W.ψ n).evalEval P.x P.y ^ 2 = (W.ΨSq n).eval P.x := by
+  have h1 : (W_smooth W).evalAt P (AdjoinRoot.mk W.toAffine.polynomial (W.ψ n)) =
+      (W.ψ n).evalEval P.x P.y := (W_smooth W).evalAt_mk P (W.ψ n)
+  have h2 : (W_smooth W).evalAt P
+      (AdjoinRoot.mk W.toAffine.polynomial (Polynomial.C (W.ΨSq n))) =
+      (Polynomial.C (W.ΨSq n)).evalEval P.x P.y := (W_smooth W).evalAt_mk P _
+  have h3 : AdjoinRoot.mk W.toAffine.polynomial (W.ψ n) ^ 2 =
+      AdjoinRoot.mk W.toAffine.polynomial (Polynomial.C (W.ΨSq n)) := by
+    have hψΨ' : AdjoinRoot.mk W.toAffine.polynomial (W.ψ n) =
+        AdjoinRoot.mk W.toAffine.polynomial (W.Ψ n) :=
+      WeierstrassCurve.Affine.CoordinateRing.mk_ψ (W := W.toAffine) n
+    rw [hψΨ']
+    exact WeierstrassCurve.Affine.CoordinateRing.mk_Ψ_sq (W := W.toAffine) n
+  calc (W.ψ n).evalEval P.x P.y ^ 2
+      = (W_smooth W).evalAt P (AdjoinRoot.mk W.toAffine.polynomial (W.ψ n)) ^ 2 := by
+        rw [h1]
+    _ = (W_smooth W).evalAt P
+          (AdjoinRoot.mk W.toAffine.polynomial (W.ψ n) ^ 2) := (map_pow _ _ _).symm
+    _ = (W_smooth W).evalAt P
+          (AdjoinRoot.mk W.toAffine.polynomial (Polynomial.C (W.ΨSq n))) :=
+        congrArg ((W_smooth W).evalAt P) h3
+    _ = (W.ΨSq n).eval P.x := by rw [h2, Polynomial.evalEval_C]
+
+/-- The pulled-back `x`-generator `[n]^* x_gen = Φ_n/ΨSq_n` (`mulByInt_x`) evaluates at a
+smooth point `P` with `ψ_n(P) ≠ 0` to the affine `x`-coordinate
+`φ_n(P)/ψ_n(P)²` of `n • P` — `Φ_n(P)` and `ΨSq_n(P)` evaluate via
+`evaluatesTo_algebraMap_mk`, divided after rewriting through the on-curve identities
+`mulByInt_evalEval_φ_eq_Φ`, `mulByInt_evalEval_ψ_sq_eq_ΨSq`. -/
+private theorem mulByInt_x_evaluatesTo (n : ℤ) (P : (W_smooth W).SmoothPoint)
+    (hψ : (W.ψ n).evalEval P.x P.y ≠ 0) :
+    EvaluatesTo W P (mulByInt_x W n)
+      ((W.φ n).evalEval P.x P.y / (W.ψ n).evalEval P.x P.y ^ 2) := by
+  have hΦev : EvaluatesTo W P (Φ_ff W n) ((W.Φ n).eval P.x) := by
+    have h := evaluatesTo_algebraMap_mk W P (Polynomial.C (W.Φ n))
+    rwa [Polynomial.evalEval_C] at h
+  have hΨev : EvaluatesTo W P (ΨSq_ff W n) ((W.ΨSq n).eval P.x) := by
+    have h := evaluatesTo_algebraMap_mk W P (Polynomial.C (W.ΨSq n))
+    rwa [Polynomial.evalEval_C] at h
+  have hΨne : (W.ΨSq n).eval P.x ≠ 0 := by
+    rw [← mulByInt_evalEval_ψ_sq_eq_ΨSq W n P]; exact pow_ne_zero 2 hψ
+  rw [mulByInt_evalEval_φ_eq_Φ W n P, mulByInt_evalEval_ψ_sq_eq_ΨSq W n P]
+  exact hΦev.div hΨev hΨne
+
+/-- The pulled-back `y`-generator `[n]^* y_gen = ω_n/ψ_n³` (`mulByInt_y`) evaluates at a
+smooth point `P` with `ψ_n(P) ≠ 0` to the affine `y`-coordinate
+`ω_n(P)/ψ_n(P)³` of `n • P` — `ω_n(P)` and `ψ_n(P)` evaluate via
+`evaluatesTo_algebraMap_mk`, and the denominator `ψ_n(P)³ ≠ 0`. -/
+private theorem mulByInt_y_evaluatesTo (n : ℤ) (P : (W_smooth W).SmoothPoint)
+    (hψ : (W.ψ n).evalEval P.x P.y ≠ 0) :
+    EvaluatesTo W P (mulByInt_y W n)
+      ((W.ω n).evalEval P.x P.y / (W.ψ n).evalEval P.x P.y ^ 3) := by
+  have hωev : EvaluatesTo W P (ω_ff W n) ((W.ω n).evalEval P.x P.y) :=
+    evaluatesTo_algebraMap_mk W P (W.ω n)
+  have hψev : EvaluatesTo W P (ψ_ff W n) ((W.ψ n).evalEval P.x P.y) :=
+    evaluatesTo_algebraMap_mk W P (W.ψ n)
+  exact hωev.div (hψev.pow 3) (pow_ne_zero 3 hψ)
+
 /-- **The pullback-evaluation witness for `[n]`** (the all-points division-polynomial
 evaluation): away from the zero locus of `ψ_n`, the stored point map computes
 `n • P = (φ_n(P)/ψ_n(P)², ω_n(P)/ψ_n(P)³)` (`zsmul_affine_point_eq_general`), and the
@@ -508,60 +585,9 @@ theorem pullbackEvaluation_mulByInt (n : ℤ) (hn : n ≠ 0) :
   simp only [mulByIntSingular, Set.mem_setOf_eq] at hP
   have hψ : (W.ψ n).evalEval P.x P.y ≠ 0 := hP
   obtain ⟨h_ns', h_eq⟩ := zsmul_affine_point_eq_general W n P.nonsingular hψ
-  -- the on-curve identities `φ_n = Φ_n` and `ψ_n² = ΨSq_n` at `P`
-  have hφΦ : (W.φ n).evalEval P.x P.y = (W.Φ n).eval P.x := by
-    have h1 : (W_smooth W).evalAt P (AdjoinRoot.mk W.toAffine.polynomial (W.φ n)) =
-        (W.φ n).evalEval P.x P.y := (W_smooth W).evalAt_mk P (W.φ n)
-    have h2 : (W_smooth W).evalAt P
-        (AdjoinRoot.mk W.toAffine.polynomial (Polynomial.C (W.Φ n))) =
-        (Polynomial.C (W.Φ n)).evalEval P.x P.y := (W_smooth W).evalAt_mk P _
-    have h3 : AdjoinRoot.mk W.toAffine.polynomial (W.φ n) =
-        AdjoinRoot.mk W.toAffine.polynomial (Polynomial.C (W.Φ n)) :=
-      WeierstrassCurve.Affine.CoordinateRing.mk_φ (W := W.toAffine) n
-    rw [← h1, h3, h2, Polynomial.evalEval_C]
-  have hψΨ : (W.ψ n).evalEval P.x P.y ^ 2 = (W.ΨSq n).eval P.x := by
-    have h1 : (W_smooth W).evalAt P (AdjoinRoot.mk W.toAffine.polynomial (W.ψ n)) =
-        (W.ψ n).evalEval P.x P.y := (W_smooth W).evalAt_mk P (W.ψ n)
-    have h2 : (W_smooth W).evalAt P
-        (AdjoinRoot.mk W.toAffine.polynomial (Polynomial.C (W.ΨSq n))) =
-        (Polynomial.C (W.ΨSq n)).evalEval P.x P.y := (W_smooth W).evalAt_mk P _
-    have h3 : AdjoinRoot.mk W.toAffine.polynomial (W.ψ n) ^ 2 =
-        AdjoinRoot.mk W.toAffine.polynomial (Polynomial.C (W.ΨSq n)) := by
-      have hψΨ' : AdjoinRoot.mk W.toAffine.polynomial (W.ψ n) =
-          AdjoinRoot.mk W.toAffine.polynomial (W.Ψ n) :=
-        WeierstrassCurve.Affine.CoordinateRing.mk_ψ (W := W.toAffine) n
-      rw [hψΨ']
-      exact WeierstrassCurve.Affine.CoordinateRing.mk_Ψ_sq (W := W.toAffine) n
-    calc (W.ψ n).evalEval P.x P.y ^ 2
-        = (W_smooth W).evalAt P (AdjoinRoot.mk W.toAffine.polynomial (W.ψ n)) ^ 2 := by
-          rw [h1]
-      _ = (W_smooth W).evalAt P
-            (AdjoinRoot.mk W.toAffine.polynomial (W.ψ n) ^ 2) := (map_pow _ _ _).symm
-      _ = (W_smooth W).evalAt P
-            (AdjoinRoot.mk W.toAffine.polynomial (Polynomial.C (W.ΨSq n))) :=
-          congrArg ((W_smooth W).evalAt P) h3
-      _ = (W.ΨSq n).eval P.x := by rw [h2, Polynomial.evalEval_C]
-  -- the four constituent evaluations
-  have hΦev : EvaluatesTo W P (Φ_ff W n) ((W.Φ n).eval P.x) := by
-    have h := evaluatesTo_algebraMap_mk W P (Polynomial.C (W.Φ n))
-    rwa [Polynomial.evalEval_C] at h
-  have hΨev : EvaluatesTo W P (ΨSq_ff W n) ((W.ΨSq n).eval P.x) := by
-    have h := evaluatesTo_algebraMap_mk W P (Polynomial.C (W.ΨSq n))
-    rwa [Polynomial.evalEval_C] at h
-  have hωev : EvaluatesTo W P (ω_ff W n) ((W.ω n).evalEval P.x P.y) :=
-    evaluatesTo_algebraMap_mk W P (W.ω n)
-  have hψev : EvaluatesTo W P (ψ_ff W n) ((W.ψ n).evalEval P.x P.y) :=
-    evaluatesTo_algebraMap_mk W P (W.ψ n)
-  have hΨne : (W.ΨSq n).eval P.x ≠ 0 := by
-    rw [← hψΨ]; exact pow_ne_zero 2 hψ
-  -- the two coordinate evaluations
-  have hxev : EvaluatesTo W P (mulByInt_x W n)
-      ((W.φ n).evalEval P.x P.y / (W.ψ n).evalEval P.x P.y ^ 2) := by
-    rw [hφΦ, hψΨ]
-    exact hΦev.div hΨev hΨne
-  have hyev : EvaluatesTo W P (mulByInt_y W n)
-      ((W.ω n).evalEval P.x P.y / (W.ψ n).evalEval P.x P.y ^ 3) :=
-    hωev.div (hψev.pow 3) (pow_ne_zero 3 hψ)
+  -- the two coordinate evaluations of the pulled-back generators
+  have hxev := mulByInt_x_evaluatesTo W n P hψ
+  have hyev := mulByInt_y_evaluatesTo W n P hψ
   have hpb : (mulByInt W.toAffine n).pullback = mulByInt_pullbackAlgHom W n hn :=
     dif_neg hn
   refine ⟨_, _, h_ns', ?_, ?_, ?_⟩
