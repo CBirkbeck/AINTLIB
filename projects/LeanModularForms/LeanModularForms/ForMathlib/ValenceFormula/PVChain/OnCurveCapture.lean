@@ -17,6 +17,7 @@ point is captured by one of the singular sets `sArcOfS S` or `sVertOfS S`.
 * `oncurve_arc_capture` — arc points (‖·‖ = 1) land in `sArcOfS S`
 * `oncurve_vert_capture` — seg1 points (t ∈ (0,1)) land in `sVertOfS S`
 * `height_contradiction` — seg5 / endpoint points (im = H) contradict the height bound
+* `seg4_eq_seg1_minus_one_H` — the T-shift relation `seg4_H (4 - s) = seg1_H s - 1`
 * `oncurve_seg4_capture` — seg4 points (t ∈ (3,4)) land in `sVertOfS S` via T-periodicity
 * `oncurve_full_capture` — full assembly for all t ∈ [0,5]
 -/
