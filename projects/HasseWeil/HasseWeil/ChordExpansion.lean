@@ -1522,6 +1522,46 @@ theorem subst_formalW_of_expansions {ξ η : KE} {f s : PowerSeries F}
     linear_combination hL
   exact eq_subst_formalW_of_fixedPoint W f hf_ord s hs_ord hfix
 
+/-- The series inversion spec `(i∘f)·(1 − a₁f − a₃(w∘f)) = −f`, pushed to the
+Laurent field (from `formalInverse_spec` substituted at `f`). -/
+private theorem subst_formalInverse_spec_laurent (f : PowerSeries F)
+    (hf0 : PowerSeries.constantCoeff f = 0) :
+    HahnSeries.ofPowerSeries ℤ F (PowerSeries.subst f (formalInverse W))
+      * ((1 : LaurentSeries F)
+          - HahnSeries.ofPowerSeries ℤ F (PowerSeries.C W.a₁) * HahnSeries.ofPowerSeries ℤ F f
+          - HahnSeries.ofPowerSeries ℤ F (PowerSeries.C W.a₃)
+              * HahnSeries.ofPowerSeries ℤ F (PowerSeries.subst f (formalW W)))
+      = -(HahnSeries.ofPowerSeries ℤ F f) := by
+  have hsub : PowerSeries.HasSubst f := PowerSeries.HasSubst.of_constantCoeff_zero' hf0
+  have hspec : PowerSeries.subst f (formalInverse W)
+      * (1 - PowerSeries.C W.a₁ * f
+          - PowerSeries.C W.a₃ * PowerSeries.subst f (formalW W))
+      = -f := by
+    have h := congrArg (PowerSeries.substAlgHom (R := F) hsub) (formalInverse_spec W)
+    rw [show (PowerSeries.substAlgHom (R := F) hsub) (-PowerSeries.X)
+        = -((PowerSeries.substAlgHom (R := F) hsub) PowerSeries.X) from map_neg _ _] at h
+    simp only [map_mul, map_sub, map_one] at h
+    simpa only [PowerSeries.coe_substAlgHom, PowerSeries.subst_X hsub, subst_C' f hsub] using h
+  have h := congrArg (HahnSeries.ofPowerSeries ℤ F) hspec
+  rw [show (HahnSeries.ofPowerSeries ℤ F) (-f)
+      = -(HahnSeries.ofPowerSeries ℤ F f) from map_neg _ f] at h
+  simp only [map_mul, map_sub, map_one] at h
+  exact h
+
+/-- The unit factor `1 − a₁f − a₃(w∘f)` is nonzero in `LaurentSeries F` (constant term `1`). -/
+private theorem one_sub_a1f_sub_a3_subst_formalW_ne (f : PowerSeries F)
+    (hf0 : PowerSeries.constantCoeff f = 0) :
+    (1 : LaurentSeries F)
+      - HahnSeries.ofPowerSeries ℤ F (PowerSeries.C W.a₁) * HahnSeries.ofPowerSeries ℤ F f
+      - HahnSeries.ofPowerSeries ℤ F (PowerSeries.C W.a₃)
+          * HahnSeries.ofPowerSeries ℤ F (PowerSeries.subst f (formalW W)) ≠ 0 := by
+  rw [show (1 : LaurentSeries F) = HahnSeries.ofPowerSeries ℤ F 1 from (map_one _).symm,
+    ← map_mul, ← map_mul, ← map_sub, ← map_sub]
+  intro h0
+  have h1 := HahnSeries.ofPowerSeries_injective (h0.trans (map_zero _).symm)
+  have h2 := congrArg PowerSeries.constantCoeff h1
+  simp [hf0, constantCoeff_subst_formalW W f hf0] at h2
+
 set_option backward.isDefEq.respectTransparency false in
 /-- **The inversion step at a chart-expanded pair** ([Sil] IV §1 p. 120, the
 `i(z₃)` move): given the `z`- and `w`-expansions of `(ξ, η)`, the expansion of
@@ -1536,18 +1576,6 @@ theorem localExpand_neg_div_negY_of_expansions {ξ η : KE} {f : PowerSeries F}
       HahnSeries.ofPowerSeries ℤ F (PowerSeries.subst f (formalW W))) :
     localExpand W (-ξ / (W_KE W).toAffine.negY ξ η) =
       HahnSeries.ofPowerSeries ℤ F (PowerSeries.subst f (formalInverse W)) := by
-  have hsub : PowerSeries.HasSubst f := PowerSeries.HasSubst.of_constantCoeff_zero' hf0
-  -- The substituted inversion spec `i∘f · (1 − a₁f − a₃(w∘f)) = −f`.
-  have hspec : PowerSeries.subst f (formalInverse W)
-      * (1 - PowerSeries.C W.a₁ * f
-          - PowerSeries.C W.a₃ * PowerSeries.subst f (formalW W))
-      = -f := by
-    have h := congrArg (PowerSeries.substAlgHom (R := F) hsub) (formalInverse_spec W)
-    rw [show (PowerSeries.substAlgHom (R := F) hsub) (-PowerSeries.X)
-        = -((PowerSeries.substAlgHom (R := F) hsub) PowerSeries.X) from map_neg _ _] at h
-    simp only [map_mul, map_sub, map_one] at h
-    simpa only [PowerSeries.coe_substAlgHom, PowerSeries.subst_X hsub, subst_C' f hsub] using h
-  -- The coordinate expansions of the pair.
   have hξ : localExpand W ξ =
       HahnSeries.ofPowerSeries ℤ F f /
         HahnSeries.ofPowerSeries ℤ F (PowerSeries.subst f (formalW W)) := by
@@ -1558,40 +1586,18 @@ theorem localExpand_neg_div_negY_of_expansions {ξ η : KE} {f : PowerSeries F}
       -(HahnSeries.ofPowerSeries ℤ F (PowerSeries.subst f (formalW W)))⁻¹ := by
     calc localExpand W η = localExpand W (-(-η⁻¹ : KE)⁻¹) := congrArg _ (y_eq_neg_inv_w η)
       _ = _ := by rw [map_neg, map_inv₀, hw]
-  -- Nonvanishing of the expanded `w`-series and of the unit factor.
   have hWb_ne : HahnSeries.ofPowerSeries ℤ F (PowerSeries.subst f (formalW W)) ≠ 0 := by
     intro h0
     apply neg_ne_zero.mpr (inv_ne_zero hη_ne)
     apply RingHom.injective (localExpand W)
     rw [hw, h0, map_zero]
-  have hU_ne : (1 : LaurentSeries F)
-      - HahnSeries.ofPowerSeries ℤ F (PowerSeries.C W.a₁) * HahnSeries.ofPowerSeries ℤ F f
-      - HahnSeries.ofPowerSeries ℤ F (PowerSeries.C W.a₃)
-          * HahnSeries.ofPowerSeries ℤ F (PowerSeries.subst f (formalW W)) ≠ 0 := by
-    rw [show (1 : LaurentSeries F) = HahnSeries.ofPowerSeries ℤ F 1 from (map_one _).symm,
-      ← map_mul, ← map_mul, ← map_sub, ← map_sub]
-    intro h0
-    have h1 := HahnSeries.ofPowerSeries_injective (h0.trans (map_zero _).symm)
-    have h2 := congrArg PowerSeries.constantCoeff h1
-    simp [hf0, constantCoeff_subst_formalW W f hf0] at h2
-  -- The spec, pushed to the Laurent field.
-  have hspecL : HahnSeries.ofPowerSeries ℤ F (PowerSeries.subst f (formalInverse W))
-      * ((1 : LaurentSeries F)
-          - HahnSeries.ofPowerSeries ℤ F (PowerSeries.C W.a₁) * HahnSeries.ofPowerSeries ℤ F f
-          - HahnSeries.ofPowerSeries ℤ F (PowerSeries.C W.a₃)
-              * HahnSeries.ofPowerSeries ℤ F (PowerSeries.subst f (formalW W)))
-      = -(HahnSeries.ofPowerSeries ℤ F f) := by
-    have h := congrArg (HahnSeries.ofPowerSeries ℤ F) hspec
-    rw [show (HahnSeries.ofPowerSeries ℤ F) (-f)
-        = -(HahnSeries.ofPowerSeries ℤ F f) from map_neg _ f] at h
-    simp only [map_mul, map_sub, map_one] at h
-    exact h
-  -- The negation, as chart algebra in the Laurent field.
   have hnegY : (W_KE W).toAffine.negY ξ η
       = -η - algebraMap F KE W.a₁ * ξ - algebraMap F KE W.a₃ := rfl
   rw [hnegY, map_div₀, map_neg, map_sub, map_sub, map_neg, map_mul,
     localExpand_algebraMap, localExpand_algebraMap, hξ, hη]
-  exact neg_div_negY_field _ _ _ _ _ hWb_ne hU_ne hspecL
+  exact neg_div_negY_field _ _ _ _ _ hWb_ne
+    (one_sub_a1f_sub_a3_subst_formalW_ne W f hf0)
+    (subst_formalInverse_spec_laurent W f hf0)
 
 /-- The pair family `![f, g]` of two series with vanishing constant term is a
 lawful substitution family, and each of its two entries has vanishing constant
