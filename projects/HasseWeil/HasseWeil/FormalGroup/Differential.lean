@@ -303,6 +303,56 @@ private lemma finsupp_fin2_decompose (e : Fin 2 →₀ ℕ) :
     e = Finsupp.single 0 (e 0) + Finsupp.single 1 (e 1) := by
   ext i; fin_cases i <;> simp [Finsupp.add_apply]
 
+-- Value of the surviving antidiagonal term in `coeff_10_prod_orthogonal`:
+-- the product of the single-index coefficients of the substituted powers.
+private lemma coeff_subst_X0_X1_single_mul (g : PowerSeries R) (d0 d1 n : ℕ) :
+    MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1)
+      (PowerSeries.subst (MvPowerSeries.X 0) (g ^ d0)) *
+    MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) n)
+      (PowerSeries.subst (MvPowerSeries.X 1) (g ^ d1)) =
+    PowerSeries.coeff 1 (g ^ d0) * PowerSeries.coeff n (g ^ d1) := by
+  rw [show Finsupp.single (0 : Fin 2) 1 = Finsupp.single 0 1 + Finsupp.single 1 0
+      from by simp,
+      show Finsupp.single (1 : Fin 2) n = Finsupp.single 0 0 + Finsupp.single 1 n
+      from by simp]
+  rw [coeff_subst_X0, coeff_subst_X1]; simp
+
+-- Orthogonality vanishing: any antidiagonal pair `(e1, e2)` summing to the
+-- surviving index `(single 0 1, single 1 n)` but distinct from it contributes
+-- a zero coefficient product. Case split on `e1 1` and `e2 0`; the only way both
+-- vanish is `(e1, e2) = (single 0 1, single 1 n)`, contradicting `hne`.
+private lemma coeff_subst_X0_X1_mul_eq_zero_of_ne (g : PowerSeries R) (d0 d1 n : ℕ)
+    {e1 e2 : Fin 2 →₀ ℕ}
+    (hmem : e1 + e2 = Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) n)
+    (hne : (e1, e2) ≠ (Finsupp.single (0 : Fin 2) 1, Finsupp.single (1 : Fin 2) n)) :
+    MvPowerSeries.coeff e1
+        (PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) (g ^ d0)) *
+      MvPowerSeries.coeff e2
+        (PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) (g ^ d1)) = 0 := by
+  rw [show e1 = Finsupp.single 0 (e1 0) + Finsupp.single 1 (e1 1)
+      from finsupp_fin2_decompose e1,
+      show e2 = Finsupp.single 0 (e2 0) + Finsupp.single 1 (e2 1)
+      from finsupp_fin2_decompose e2]
+  rw [coeff_subst_X0, coeff_subst_X1]
+  by_cases h1 : e1 1 = 0
+  · rw [if_pos h1]
+    by_cases h2 : e2 0 = 0
+    · -- Both e1 1 = 0 and e2 0 = 0: forces (e1, e2) = (single 0 1, single 1 n)
+      exfalso; apply hne
+      have h10 : e1 0 + e2 0 = 1 := by
+        have := DFunLike.congr_fun hmem 0; simp [Finsupp.add_apply] at this; linarith
+      have h1n : e1 1 + e2 1 = n := by
+        have := DFunLike.congr_fun hmem 1; simp [Finsupp.add_apply] at this; linarith
+      have he10 : e1 0 = 1 := by omega
+      have he21 : e2 1 = n := by omega
+      ext1
+      · show e1 = Finsupp.single 0 1
+        rw [finsupp_fin2_decompose e1, h1, he10]; simp
+      · show e2 = Finsupp.single 1 n
+        rw [finsupp_fin2_decompose e2, h2, he21]; simp
+    · rw [if_neg h2, mul_zero]
+  · rw [if_neg h1, zero_mul]
+
 -- Orthogonality: coeff_{(1,n)} (f(X_0)^d0 * f(X_1)^d1) = coeff_1(f^d0) * coeff_n(f^d1)
 set_option maxHeartbeats 800000 in
 private theorem coeff_10_prod_orthogonal (g : PowerSeries R) (d0 d1 n : ℕ) :
@@ -318,46 +368,12 @@ private theorem coeff_10_prod_orthogonal (g : PowerSeries R) (d0 d1 n : ℕ) :
   rw [← PowerSeries.subst_pow ha0, ← PowerSeries.subst_pow ha1]
   -- Expand product using coeff_mul over antidiagonal
   rw [MvPowerSeries.coeff_mul]
-  -- Compute the surviving term: (single 0 1, single 1 n)
-  have hsurv : MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1)
-      (PowerSeries.subst (MvPowerSeries.X 0) (g ^ d0)) *
-    MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) n)
-      (PowerSeries.subst (MvPowerSeries.X 1) (g ^ d1)) =
-    PowerSeries.coeff 1 (g ^ d0) * PowerSeries.coeff n (g ^ d1) := by
-    rw [show Finsupp.single (0 : Fin 2) 1 = Finsupp.single 0 1 + Finsupp.single 1 0
-        from by simp,
-        show Finsupp.single (1 : Fin 2) n = Finsupp.single 0 0 + Finsupp.single 1 n
-        from by simp]
-    rw [coeff_subst_X0, coeff_subst_X1]; simp
-  rw [← hsurv]
-  -- Only one term in the antidiagonal sum survives
+  -- Only the surviving term `(single 0 1, single 1 n)` contributes
+  rw [← coeff_subst_X0_X1_single_mul g d0 d1 n]
   apply Finset.sum_eq_single (Finsupp.single 0 1, Finsupp.single 1 n)
   · -- Other terms vanish by orthogonality of X_0 and X_1 substitutions
     intro ⟨e1, e2⟩ hmem hne
-    rw [Finset.mem_antidiagonal] at hmem
-    rw [show e1 = Finsupp.single 0 (e1 0) + Finsupp.single 1 (e1 1)
-        from finsupp_fin2_decompose e1,
-        show e2 = Finsupp.single 0 (e2 0) + Finsupp.single 1 (e2 1)
-        from finsupp_fin2_decompose e2]
-    rw [coeff_subst_X0, coeff_subst_X1]
-    by_cases h1 : e1 1 = 0
-    · rw [if_pos h1]
-      by_cases h2 : e2 0 = 0
-      · -- Both e1 1 = 0 and e2 0 = 0: forces (e1, e2) = (single 0 1, single 1 n)
-        exfalso; apply hne
-        have h10 : e1 0 + e2 0 = 1 := by
-          have := DFunLike.congr_fun hmem 0; simp [Finsupp.add_apply] at this; linarith
-        have h1n : e1 1 + e2 1 = n := by
-          have := DFunLike.congr_fun hmem 1; simp [Finsupp.add_apply] at this; linarith
-        have he10 : e1 0 = 1 := by omega
-        have he21 : e2 1 = n := by omega
-        ext1
-        · show e1 = Finsupp.single 0 1
-          rw [finsupp_fin2_decompose e1, h1, he10]; simp
-        · show e2 = Finsupp.single 1 n
-          rw [finsupp_fin2_decompose e2, h2, he21]; simp
-      · rw [if_neg h2, mul_zero]
-    · rw [if_neg h1, zero_mul]
+    exact coeff_subst_X0_X1_mul_eq_zero_of_ne g d0 d1 n (Finset.mem_antidiagonal.mp hmem) hne
   · -- The target pair is in the antidiagonal
     intro hmem
     rw [Finset.mem_antidiagonal] at hmem
