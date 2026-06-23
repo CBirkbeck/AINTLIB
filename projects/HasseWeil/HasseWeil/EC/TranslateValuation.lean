@@ -1947,6 +1947,83 @@ theorem ord_P_translateAlgEquivOfPoint_algebraMap_le_of_ne_zero
   rw [h_ord_eq_count]
   exact h_step1
 
+/-- After translating the lift `f · algMap q = algMap u` by `-k` and using `τ_{-k} ∘ τ_k = id`
+(with `f = τ_k (algMap r)`), the numerator's `τ_{-k}`-image factors as
+`τ_{-k}(algMap u) = algMap r · τ_{-k}(algMap q)`. Here `-k = (xk, negY xk yk)`, and the maps are
+routed through `RingHom`s on `(W_smooth W).FunctionField` to fix `HMul` unification. -/
+private theorem translateAlgEquivOfPoint_neg_algebraMap_numerator_eq
+    (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
+    (h_ns_neg : W.toAffine.Nonsingular xk (W.toAffine.negY xk yk))
+    (r u q : (W_smooth W).CoordinateRing) (f : (W_smooth W).FunctionField)
+    (hf : (translateAlgEquivOfPoint W
+        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+        (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField r) = f)
+    (h_lift : f *
+      algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField q =
+      algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField u) :
+    letI algC : (W_smooth W).CoordinateRing →+* (W_smooth W).FunctionField :=
+      algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField
+    letI τkneg : (W_smooth W).FunctionField →+* (W_smooth W).FunctionField :=
+      ((translateAlgEquivOfPoint W
+        (Affine.Point.some xk (W.toAffine.negY xk yk) h_ns_neg :
+          (W_smooth W).toAffine.Point)).toRingEquiv).toRingHom
+    τkneg (algC u) = algC r * τkneg (algC q) := by
+  rw [← h_lift, map_mul]
+  congr 1
+  rw [← hf]
+  exact translateAlgEquivOfPoint_neg_apply_apply W xk yk h_ns h_ns_neg _
+
+/-- The `τ_{-k}`-image of `algMap q` is a unit at `P + k` whenever `q` is a nonzero CoordinateRing
+element that is a unit at `P` (`q ∉ maxIdealAt P`): `ord_(P+k) (τ_{-k}(algMap q)) = 0`. The point is
+that `(P + k) + (-k) = P`, so `q ∉ maxIdealAt P` transports to `q ∉ maxIdealAt` of the back-translate
+of `P + k` by `-k`. Here `-k = (xk, negY xk yk)`. -/
+private theorem ord_P_translate_translateAlgEquivOfPoint_neg_algebraMap_eq_zero_of_notMem
+    (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
+    (h_ns_neg : W.toAffine.Nonsingular xk (W.toAffine.negY xk yk))
+    (h : (P.toAffinePoint +
+        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)).IsSome)
+    (q : (W_smooth W).CoordinateRing) (hq_ne_zero : q ≠ 0)
+    (hq_notMem : q ∉ (W_smooth W).maximalIdealAt P) :
+    (W_smooth W).ord_P
+      (P.translate_of_finite (Affine.Point.some xk yk h_ns :
+        (W_smooth W).toAffine.Point) h)
+      ((translateAlgEquivOfPoint W
+        (Affine.Point.some xk (W.toAffine.negY xk yk) h_ns_neg :
+          (W_smooth W).toAffine.Point))
+        (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField q)) = 0 := by
+  set k_neg : (W_smooth W).toAffine.Point :=
+    Affine.Point.some xk (W.toAffine.negY xk yk) h_ns_neg with hk_neg_def
+  set P' := P.translate_of_finite (Affine.Point.some xk yk h_ns :
+    (W_smooth W).toAffine.Point) h with hP'_def
+  set τkneg : (W_smooth W).FunctionField →+* (W_smooth W).FunctionField :=
+    ((translateAlgEquivOfPoint W k_neg).toRingEquiv).toRingHom with hτkneg_def
+  set algC : (W_smooth W).CoordinateRing →+* (W_smooth W).FunctionField :=
+    algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField with halgC_def
+  -- `(P+k) + (-k) = P`, so `q ∉ maxIdealAt` of `(P+k).translate_of_finite (-k)`.
+  have h_P'_plus_neg_k : P'.toAffinePoint + k_neg = P.toAffinePoint :=
+    translate_of_finite_toAffinePoint_add_neg W P xk yk h_ns h_ns_neg h
+  have h_P'_plus_neg_k_isSome : (P'.toAffinePoint + k_neg).IsSome := by
+    rw [h_P'_plus_neg_k]; exact Affine.Point.some_isSome P.x P.y P.nonsingular
+  have h_P'_translate : P'.translate_of_finite k_neg h_P'_plus_neg_k_isSome = P :=
+    Curves.SmoothPlaneCurve.SmoothPoint.ext
+      (Curves.SmoothPlaneCurve.SmoothPoint.translate_of_finite_x P' _ _
+        (by rw [h_P'_plus_neg_k]; rfl))
+      (Curves.SmoothPlaneCurve.SmoothPoint.translate_of_finite_y P' _ _
+        (by rw [h_P'_plus_neg_k]; rfl))
+  have hq_notMem' : (q : (W_smooth W).CoordinateRing) ∉
+      (W_smooth W).maximalIdealAt (P'.translate_of_finite k_neg h_P'_plus_neg_k_isSome) := by
+    rw [h_P'_translate]; exact hq_notMem
+  -- `τ_{-k}(algMap q)` is nonzero, hence its order is determined by its point valuation, which is
+  -- `1` since `q` is a unit there.
+  have h_algMap_q_ne : algC q ≠ 0 := fun h_eq ↦
+    hq_ne_zero ((IsFractionRing.injective _ _) (h_eq.trans (map_zero _).symm))
+  have h_τ_neg_q_ne : τkneg (algC q) ≠ 0 := fun h_eq ↦
+    h_algMap_q_ne ((translateAlgEquivOfPoint W k_neg).injective (h_eq.trans (map_zero _).symm))
+  exact (Curves.SmoothPlaneCurve.ord_P_eq_zero_iff_pointValuation_eq_one (W_smooth W)
+    h_τ_neg_q_ne).mpr
+    (pointValuation_translateAlgEquivOfPoint_algebraMap_eq_one_of_notMem
+      W P' xk (W.toAffine.negY xk yk) h_ns_neg h_P'_plus_neg_k_isSome q hq_notMem')
+
 /-- **Reverse inequality, numerator bound.** If `algMap u` is `τ_k (algMap r)` scaled by a
 CoordinateRing element `q` that is a unit at `P` (`q ∉ maxIdealAt P`), then the order of the
 numerator `algMap u` at `P` bounds the order of `algMap r` at `P + k`:
@@ -1973,8 +2050,8 @@ private theorem ord_P_algebraMap_le_ord_P_translate_algebraMap_of_lift
       (P.translate_of_finite (Affine.Point.some xk yk h_ns :
         (W_smooth W).toAffine.Point) h)
       (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField r) := by
-  set k_pt : (W_smooth W).toAffine.Point := Affine.Point.some xk yk h_ns with hk_pt_def
-  set P' := P.translate_of_finite k_pt h with hP'_def
+  set P' := P.translate_of_finite (Affine.Point.some xk yk h_ns :
+    (W_smooth W).toAffine.Point) h with hP'_def
   set yk_neg : F := W.toAffine.negY xk yk with hyk_neg_def
   have h_ns_neg : W.toAffine.Nonsingular xk yk_neg :=
     (Affine.nonsingular_neg xk yk).mpr h_ns
@@ -2000,36 +2077,14 @@ private theorem ord_P_algebraMap_le_ord_P_translate_algebraMap_of_lift
     exact_mod_cast this
   -- Apply `τ_{-k}` to the lift and cancel using `τ_{-k} ∘ τ_k = id`:
   -- `τ_{-k}(algMap u) = algMap r · τ_{-k}(algMap q)`.
-  have h_τ_neg_u : τkneg (algC u) = algC r * τkneg (algC q) := by
-    rw [← h_lift, map_mul]
-    congr 1
-    rw [← hf]
-    exact translateAlgEquivOfPoint_neg_apply_apply W xk yk h_ns h_ns_neg _
+  have h_τ_neg_u : τkneg (algC u) = algC r * τkneg (algC q) :=
+    translateAlgEquivOfPoint_neg_algebraMap_numerator_eq W xk yk h_ns h_ns_neg r u q f hf h_lift
   -- `(P+k) + (-k) = P`, so `q ∉ maxIdealAt` of `(P+k).translate_of_finite (-k)`, hence
   -- `τ_{-k}(algMap q)` is a unit at `P+k`.
-  have h_P'_plus_neg_k : P'.toAffinePoint + k_neg = P.toAffinePoint :=
-    translate_of_finite_toAffinePoint_add_neg W P xk yk h_ns h_ns_neg h
-  have h_P'_plus_neg_k_isSome : (P'.toAffinePoint + k_neg).IsSome := by
-    rw [h_P'_plus_neg_k]; exact Affine.Point.some_isSome P.x P.y P.nonsingular
-  have h_P'_translate : P'.translate_of_finite k_neg h_P'_plus_neg_k_isSome = P :=
-    Curves.SmoothPlaneCurve.SmoothPoint.ext
-      (Curves.SmoothPlaneCurve.SmoothPoint.translate_of_finite_x P' _ _
-        (by rw [h_P'_plus_neg_k]; rfl))
-      (Curves.SmoothPlaneCurve.SmoothPoint.translate_of_finite_y P' _ _
-        (by rw [h_P'_plus_neg_k]; rfl))
-  have hq_notMem' : (q : (W_smooth W).CoordinateRing) ∉
-      (W_smooth W).maximalIdealAt (P'.translate_of_finite k_neg h_P'_plus_neg_k_isSome) := by
-    rw [h_P'_translate]; exact hq_notMem
   have hq_ne_zero : q ≠ 0 := fun h_eq ↦ hq_notMem (h_eq ▸ Submodule.zero_mem _)
-  have h_algMap_q_ne : algC q ≠ 0 := fun h_eq ↦
-    hq_ne_zero ((IsFractionRing.injective _ _) (h_eq.trans (map_zero _).symm))
-  have h_τ_neg_q_ne : τkneg (algC q) ≠ 0 := fun h_eq ↦
-    h_algMap_q_ne ((translateAlgEquivOfPoint W k_neg).injective (h_eq.trans (map_zero _).symm))
   have h_ord_τ_neg_q_zero : (W_smooth W).ord_P P' (τkneg (algC q)) = 0 :=
-    (Curves.SmoothPlaneCurve.ord_P_eq_zero_iff_pointValuation_eq_one (W_smooth W)
-      h_τ_neg_q_ne).mpr
-      (pointValuation_translateAlgEquivOfPoint_algebraMap_eq_one_of_notMem
-        W P' xk yk_neg h_ns_neg h_P'_plus_neg_k_isSome q hq_notMem')
+    ord_P_translate_translateAlgEquivOfPoint_neg_algebraMap_eq_zero_of_notMem
+      W P xk yk h_ns h_ns_neg h q hq_ne_zero hq_notMem
   -- Conclude: `m ≤ ord_{P+k} (algMap r · τ_{-k}(algMap q)) = ord_{P+k}(algMap r)`.
   rw [h_τ_neg_u, Curves.SmoothPlaneCurve.ord_P_mul, h_ord_τ_neg_q_zero, add_zero] at h_step2
   rwa [h_ord_u_eq_count]
