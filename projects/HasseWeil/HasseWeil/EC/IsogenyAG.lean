@@ -319,6 +319,27 @@ noncomputable def Isogeny.frobeniusCoordHom :
     (Isogeny.frobenius W).degree = Fintype.card K :=
   HasseWeil.frobenius_finrank_functionField K W
 
+/-- **Frobenius coordinate-evaluation step.** Evaluating a pulled-back
+coordinate-ring element `r` through the Frobenius coordinate hom at a smooth
+point `(x, y)` equals the `q`-th power (`q := #K`) of the plain evaluation:
+Frobenius acts as `r ↦ r^q` on `W.CoordinateRing`, and `evalAt` is a ring hom,
+so it commutes with the power. This is the common core of both the `x`- and
+`y`-coordinate computations in `Isogeny.frobenius_toPointMap`. -/
+private theorem Isogeny.frobenius_evalAtPullback {x y : K}
+    (h : W.Nonsingular x y) (r : W.CoordinateRing) :
+    Curves.CurveMap.evalAtPullback (Isogeny.frobeniusCoordHom W)
+        (⟨x, y, h⟩ : (⟨W⟩ : Curves.SmoothPlaneCurve K).SmoothPoint) r =
+      (Curves.SmoothPlaneCurve.evalAt (⟨W⟩ : Curves.SmoothPlaneCurve K)
+        ⟨x, y, h⟩ r) ^ Fintype.card K := by
+  rw [Curves.CurveMap.evalAtPullback_apply]
+  change Curves.SmoothPlaneCurve.evalAt (⟨W⟩ : Curves.SmoothPlaneCurve K)
+      ⟨x, y, h⟩ (FiniteField.frobeniusAlgHom K W.CoordinateRing r) = _
+  rw [show (FiniteField.frobeniusAlgHom K W.CoordinateRing) r =
+      r ^ Fintype.card K from
+      congr_fun (FiniteField.coe_frobeniusAlgHom (K := K)
+        (R := W.CoordinateRing)) r,
+    map_pow]
+
 set_option maxHeartbeats 800000 in
 /-- The Frobenius isogeny acts as the **identity** on `K`-rational points: for
 any `(x, y) ∈ W(K)`, Frobenius sends `(x, y) ↦ (x^q, y^q) = (x, y)` since
@@ -339,39 +360,18 @@ preserved by definition. -/
         (⟨x, y, h⟩ : (⟨W⟩ : Curves.SmoothPlaneCurve K).SmoothPoint) =
       ⟨x, y, h⟩ := by
       ext
-      · -- x-coord = x
+      · -- x-coord: `(evalAt x)^q = x` by `evalAt_x` then `pow_card`.
         change Curves.CurveMap.evalAtPullback (Isogeny.frobeniusCoordHom W)
           (⟨x, y, h⟩ : (⟨W⟩ : Curves.SmoothPlaneCurve K).SmoothPoint)
           (WeierstrassCurve.Affine.CoordinateRing.mk W
             (Polynomial.C Polynomial.X)) = x
-        rw [Curves.CurveMap.evalAtPullback_apply]
-        change Curves.SmoothPlaneCurve.evalAt (⟨W⟩ : Curves.SmoothPlaneCurve K)
-          ⟨x, y, h⟩ (FiniteField.frobeniusAlgHom K W.CoordinateRing
-            (WeierstrassCurve.Affine.CoordinateRing.mk W
-              (Polynomial.C Polynomial.X))) = x
-        rw [show (FiniteField.frobeniusAlgHom K W.CoordinateRing)
-            (WeierstrassCurve.Affine.CoordinateRing.mk W
-              (Polynomial.C Polynomial.X)) =
-          (WeierstrassCurve.Affine.CoordinateRing.mk W
-            (Polynomial.C Polynomial.X)) ^ Fintype.card K from
-          congr_fun (FiniteField.coe_frobeniusAlgHom (K := K)
-            (R := W.CoordinateRing)) _,
-          map_pow,
+        rw [Isogeny.frobenius_evalAtPullback W h,
           Curves.SmoothPlaneCurve.evalAt_x, FiniteField.pow_card]
-      · -- y-coord = y
+      · -- y-coord: `(evalAt y)^q = y` by `evalAt_y` then `pow_card`.
         change Curves.CurveMap.evalAtPullback (Isogeny.frobeniusCoordHom W)
           (⟨x, y, h⟩ : (⟨W⟩ : Curves.SmoothPlaneCurve K).SmoothPoint)
           (WeierstrassCurve.Affine.CoordinateRing.mk W Y) = y
-        rw [Curves.CurveMap.evalAtPullback_apply]
-        change Curves.SmoothPlaneCurve.evalAt (⟨W⟩ : Curves.SmoothPlaneCurve K)
-          ⟨x, y, h⟩ (FiniteField.frobeniusAlgHom K W.CoordinateRing
-            (WeierstrassCurve.Affine.CoordinateRing.mk W Y)) = y
-        rw [show (FiniteField.frobeniusAlgHom K W.CoordinateRing)
-            (WeierstrassCurve.Affine.CoordinateRing.mk W Y) =
-          (WeierstrassCurve.Affine.CoordinateRing.mk W Y) ^ Fintype.card K from
-          congr_fun (FiniteField.coe_frobeniusAlgHom (K := K)
-            (R := W.CoordinateRing)) _,
-          map_pow,
+        rw [Isogeny.frobenius_evalAtPullback W h,
           Curves.SmoothPlaneCurve.evalAt_y, FiniteField.pow_card]
     rw [h_sp_eq]
     rfl
