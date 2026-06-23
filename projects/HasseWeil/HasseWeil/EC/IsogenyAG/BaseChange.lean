@@ -442,6 +442,126 @@ noncomputable def baseChangeIsogeny [IsAlgClosed L] :
 variable (cd : φ.toCurveMap.CoordHom)
 
 omit [DecidableEq K] [DecidableEq L] in
+/-- On `L`-constants the coordinate-ring pullback of the base-changed isogeny
+agrees with `algebraMap ∘ baseChangeAlgHom`: both `K`-algebra structure maps send
+`a : L` to its image, so the two sides reduce to `algebraMap`-functoriality
+(`commutes` + `IsScalarTower.algebraMap_apply`).  This is the constant branch of
+`ofEquationCoordRingHom_eq_algebraMap_comp_baseChangeAlgHom`. -/
+private theorem ofEquationCoordRingHom_baseChangeAlgHom_const (a : L) :
+    ofEquationCoordRingHom (W.baseChange L) (W.baseChange L)
+        (baseChangeXgen W φ L) (baseChangeYgen W φ L)
+        (baseChange_generic_equation W φ L)
+        (algebraMap L (W.baseChange L).toAffine.CoordinateRing a) =
+      algebraMap (W.baseChange L).toAffine.CoordinateRing
+        (W.baseChange L).toAffine.FunctionField
+        (cd.baseChangeAlgHom L (algebraMap L (W.baseChange L).toAffine.CoordinateRing a)) := by
+  have hcomm : cd.baseChangeAlgHom L
+      (algebraMap L (W.baseChange L).toAffine.CoordinateRing a) =
+      algebraMap L (W.baseChange L).toAffine.CoordinateRing a :=
+    (cd.baseChangeAlgHom L).commutes a
+  rw [hcomm]
+  exact ((ofEquationCoordAlgHom (W.baseChange L) (W.baseChange L)
+      (baseChangeXgen W φ L) (baseChangeYgen W φ L)
+      (baseChange_generic_equation W φ L)).commutes a).trans
+    (IsScalarTower.algebraMap_apply L (W.baseChange L).toAffine.CoordinateRing
+      (W.baseChange L).toAffine.FunctionField a)
+
+omit [DecidableEq K] [DecidableEq L] in
+/-- On the `X` generator the coordinate-ring pullback of the base-changed isogeny
+agrees with `algebraMap ∘ baseChangeAlgHom`: rewrite the left side by
+`ofEquationCoordAlgHom_x` to `baseChangeXgen`, the right side by
+`baseChangeAlgHom_X`, then move `algebraMap` past `coordRingMap`
+(`functionFieldMap_algebraMap`) and recognise `cd.compat` to land on the pullback
+of `x_gen`.  This is the `X`-generator branch of
+`ofEquationCoordRingHom_eq_algebraMap_comp_baseChangeAlgHom`. -/
+private theorem ofEquationCoordRingHom_baseChangeAlgHom_X :
+    ofEquationCoordRingHom (W.baseChange L) (W.baseChange L)
+        (baseChangeXgen W φ L) (baseChangeYgen W φ L)
+        (baseChange_generic_equation W φ L)
+        (algebraMap (Polynomial L) (W.baseChange L).toAffine.CoordinateRing Polynomial.X) =
+      algebraMap (W.baseChange L).toAffine.CoordinateRing
+        (W.baseChange L).toAffine.FunctionField
+        (cd.baseChangeAlgHom L
+          (algebraMap (Polynomial L) (W.baseChange L).toAffine.CoordinateRing Polynomial.X)) := by
+  have hLx : ofEquationCoordRingHom (W.baseChange L) (W.baseChange L)
+      (baseChangeXgen W φ L) (baseChangeYgen W φ L)
+      (baseChange_generic_equation W φ L)
+      (algebraMap (Polynomial L) (W.baseChange L).toAffine.CoordinateRing Polynomial.X) =
+      baseChangeXgen W φ L :=
+    ofEquationCoordAlgHom_x (W.baseChange L) (W.baseChange L) (baseChangeXgen W φ L)
+      (baseChangeYgen W φ L) (baseChange_generic_equation W φ L)
+  have hRx : cd.baseChangeAlgHom L
+      (algebraMap (Polynomial L) (W.baseChange L).toAffine.CoordinateRing Polynomial.X) =
+      (⟨W.toAffine⟩ : SmoothPlaneCurve K).coordRingMap L
+        (cd.toAlgHom (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X)) :=
+    CurveMap.CoordHom.baseChangeAlgHom_X cd L
+  rw [hLx, hRx]
+  have h3 : algebraMap (W.baseChange L).toAffine.CoordinateRing
+      (W.baseChange L).toAffine.FunctionField
+      ((⟨W.toAffine⟩ : SmoothPlaneCurve K).coordRingMap L
+        (cd.toAlgHom (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X))) =
+      (⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L
+        (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
+          (cd.toAlgHom (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X))) :=
+    (SmoothPlaneCurve.functionFieldMap_algebraMap
+      (⟨W.toAffine⟩ : SmoothPlaneCurve K) L _).symm
+  rw [h3]
+  have h4 : algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
+      (cd.toAlgHom (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X)) =
+      φ.toCurveMap.pullback (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
+        (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X)) :=
+    (cd.compat _).symm
+  rw [h4]
+  rfl
+
+omit [DecidableEq K] [DecidableEq L] in
+/-- On the root generator (the `Y` generator) the coordinate-ring pullback of the
+base-changed isogeny agrees with `algebraMap ∘ baseChangeAlgHom`: rewrite the left
+side by `ofEquationCoordAlgHom_y` to `baseChangeYgen`, the right side by
+`baseChangeAlgHom_root`, then move `algebraMap` past `coordRingMap`
+(`functionFieldMap_algebraMap`) and recognise `cd.compat` to land on the pullback
+of `y_gen`.  This is the root-generator branch of
+`ofEquationCoordRingHom_eq_algebraMap_comp_baseChangeAlgHom`. -/
+private theorem ofEquationCoordRingHom_baseChangeAlgHom_root :
+    ofEquationCoordRingHom (W.baseChange L) (W.baseChange L)
+        (baseChangeXgen W φ L) (baseChangeYgen W φ L)
+        (baseChange_generic_equation W φ L)
+        (AdjoinRoot.root (W.baseChange L).toAffine.polynomial) =
+      algebraMap (W.baseChange L).toAffine.CoordinateRing
+        (W.baseChange L).toAffine.FunctionField
+        (cd.baseChangeAlgHom L (AdjoinRoot.root (W.baseChange L).toAffine.polynomial)) := by
+  have hLy : ofEquationCoordRingHom (W.baseChange L) (W.baseChange L)
+      (baseChangeXgen W φ L) (baseChangeYgen W φ L)
+      (baseChange_generic_equation W φ L)
+      (AdjoinRoot.root (W.baseChange L).toAffine.polynomial) =
+      baseChangeYgen W φ L :=
+    ofEquationCoordAlgHom_y (W.baseChange L) (W.baseChange L) (baseChangeXgen W φ L)
+      (baseChangeYgen W φ L) (baseChange_generic_equation W φ L)
+  have hRy : cd.baseChangeAlgHom L
+      (AdjoinRoot.root (W.baseChange L).toAffine.polynomial) =
+      (⟨W.toAffine⟩ : SmoothPlaneCurve K).coordRingMap L
+        (cd.toAlgHom (AdjoinRoot.root W.toAffine.polynomial)) :=
+    CurveMap.CoordHom.baseChangeAlgHom_root cd L
+  rw [hLy, hRy]
+  have h3 : algebraMap (W.baseChange L).toAffine.CoordinateRing
+      (W.baseChange L).toAffine.FunctionField
+      ((⟨W.toAffine⟩ : SmoothPlaneCurve K).coordRingMap L
+        (cd.toAlgHom (AdjoinRoot.root W.toAffine.polynomial))) =
+      (⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L
+        (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
+          (cd.toAlgHom (AdjoinRoot.root W.toAffine.polynomial))) :=
+    (SmoothPlaneCurve.functionFieldMap_algebraMap
+      (⟨W.toAffine⟩ : SmoothPlaneCurve K) L _).symm
+  rw [h3]
+  have h4 : algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
+      (cd.toAlgHom (AdjoinRoot.root W.toAffine.polynomial)) =
+      φ.toCurveMap.pullback (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
+        (AdjoinRoot.root W.toAffine.polynomial)) :=
+    (cd.compat _).symm
+  rw [h4]
+  rfl
+
+omit [DecidableEq K] [DecidableEq L] in
 /-- The coordinate-ring pullback of the base-changed isogeny is
 `algebraMap ∘ baseChangeAlgHom`: both sides are ring homs out of the
 `AdjoinRoot` presentation, agreeing on `L`-constants and on the two generators
@@ -458,100 +578,11 @@ theorem ofEquationCoordRingHom_eq_algebraMap_comp_baseChangeAlgHom :
   · -- agreement on `L[X]`
     refine Polynomial.ringHom_ext (fun a ↦ ?_) ?_
     · -- constants from `L`
-      show ofEquationCoordRingHom (W.baseChange L) (W.baseChange L)
-          (baseChangeXgen W φ L) (baseChangeYgen W φ L)
-          (baseChange_generic_equation W φ L)
-          (algebraMap L (W.baseChange L).toAffine.CoordinateRing a) =
-        algebraMap (W.baseChange L).toAffine.CoordinateRing
-          (W.baseChange L).toAffine.FunctionField
-          (cd.baseChangeAlgHom L (algebraMap L (W.baseChange L).toAffine.CoordinateRing a))
-      have hcomm : cd.baseChangeAlgHom L
-          (algebraMap L (W.baseChange L).toAffine.CoordinateRing a) =
-          algebraMap L (W.baseChange L).toAffine.CoordinateRing a :=
-        (cd.baseChangeAlgHom L).commutes a
-      rw [hcomm]
-      exact ((ofEquationCoordAlgHom (W.baseChange L) (W.baseChange L)
-          (baseChangeXgen W φ L) (baseChangeYgen W φ L)
-          (baseChange_generic_equation W φ L)).commutes a).trans
-        (IsScalarTower.algebraMap_apply L (W.baseChange L).toAffine.CoordinateRing
-          (W.baseChange L).toAffine.FunctionField a)
+      exact ofEquationCoordRingHom_baseChangeAlgHom_const W φ L cd a
     · -- the `X` generator
-      show ofEquationCoordRingHom (W.baseChange L) (W.baseChange L)
-          (baseChangeXgen W φ L) (baseChangeYgen W φ L)
-          (baseChange_generic_equation W φ L)
-          (algebraMap (Polynomial L) (W.baseChange L).toAffine.CoordinateRing Polynomial.X) =
-        algebraMap (W.baseChange L).toAffine.CoordinateRing
-          (W.baseChange L).toAffine.FunctionField
-          (cd.baseChangeAlgHom L
-            (algebraMap (Polynomial L) (W.baseChange L).toAffine.CoordinateRing Polynomial.X))
-      have hLx : ofEquationCoordRingHom (W.baseChange L) (W.baseChange L)
-          (baseChangeXgen W φ L) (baseChangeYgen W φ L)
-          (baseChange_generic_equation W φ L)
-          (algebraMap (Polynomial L) (W.baseChange L).toAffine.CoordinateRing Polynomial.X) =
-          baseChangeXgen W φ L :=
-        ofEquationCoordAlgHom_x (W.baseChange L) (W.baseChange L) (baseChangeXgen W φ L)
-          (baseChangeYgen W φ L) (baseChange_generic_equation W φ L)
-      have hRx : cd.baseChangeAlgHom L
-          (algebraMap (Polynomial L) (W.baseChange L).toAffine.CoordinateRing Polynomial.X) =
-          (⟨W.toAffine⟩ : SmoothPlaneCurve K).coordRingMap L
-            (cd.toAlgHom (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X)) :=
-        CurveMap.CoordHom.baseChangeAlgHom_X cd L
-      rw [hLx, hRx]
-      have h3 : algebraMap (W.baseChange L).toAffine.CoordinateRing
-          (W.baseChange L).toAffine.FunctionField
-          ((⟨W.toAffine⟩ : SmoothPlaneCurve K).coordRingMap L
-            (cd.toAlgHom (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X))) =
-          (⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L
-            (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
-              (cd.toAlgHom (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X))) :=
-        (SmoothPlaneCurve.functionFieldMap_algebraMap
-          (⟨W.toAffine⟩ : SmoothPlaneCurve K) L _).symm
-      rw [h3]
-      have h4 : algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
-          (cd.toAlgHom (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X)) =
-          φ.toCurveMap.pullback (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
-            (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X)) :=
-        (cd.compat _).symm
-      rw [h4]
-      rfl
+      exact ofEquationCoordRingHom_baseChangeAlgHom_X W φ L cd
   · -- the root generator
-    show ofEquationCoordRingHom (W.baseChange L) (W.baseChange L)
-        (baseChangeXgen W φ L) (baseChangeYgen W φ L)
-        (baseChange_generic_equation W φ L)
-        (AdjoinRoot.root (W.baseChange L).toAffine.polynomial) =
-      algebraMap (W.baseChange L).toAffine.CoordinateRing
-        (W.baseChange L).toAffine.FunctionField
-        (cd.baseChangeAlgHom L (AdjoinRoot.root (W.baseChange L).toAffine.polynomial))
-    have hLy : ofEquationCoordRingHom (W.baseChange L) (W.baseChange L)
-        (baseChangeXgen W φ L) (baseChangeYgen W φ L)
-        (baseChange_generic_equation W φ L)
-        (AdjoinRoot.root (W.baseChange L).toAffine.polynomial) =
-        baseChangeYgen W φ L :=
-      ofEquationCoordAlgHom_y (W.baseChange L) (W.baseChange L) (baseChangeXgen W φ L)
-        (baseChangeYgen W φ L) (baseChange_generic_equation W φ L)
-    have hRy : cd.baseChangeAlgHom L
-        (AdjoinRoot.root (W.baseChange L).toAffine.polynomial) =
-        (⟨W.toAffine⟩ : SmoothPlaneCurve K).coordRingMap L
-          (cd.toAlgHom (AdjoinRoot.root W.toAffine.polynomial)) :=
-      CurveMap.CoordHom.baseChangeAlgHom_root cd L
-    rw [hLy, hRy]
-    have h3 : algebraMap (W.baseChange L).toAffine.CoordinateRing
-        (W.baseChange L).toAffine.FunctionField
-        ((⟨W.toAffine⟩ : SmoothPlaneCurve K).coordRingMap L
-          (cd.toAlgHom (AdjoinRoot.root W.toAffine.polynomial))) =
-        (⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L
-          (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
-            (cd.toAlgHom (AdjoinRoot.root W.toAffine.polynomial))) :=
-      (SmoothPlaneCurve.functionFieldMap_algebraMap
-        (⟨W.toAffine⟩ : SmoothPlaneCurve K) L _).symm
-    rw [h3]
-    have h4 : algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
-        (cd.toAlgHom (AdjoinRoot.root W.toAffine.polynomial)) =
-        φ.toCurveMap.pullback (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
-          (AdjoinRoot.root W.toAffine.polynomial)) :=
-      (cd.compat _).symm
-    rw [h4]
-    rfl
+    exact ofEquationCoordRingHom_baseChangeAlgHom_root W φ L cd
 
 /-- **The base-changed coordinate-ring witness** (ISO-BC item 2): the
 `baseChangeAlgHom` of `cd`, packaged with the `compat` field for the
@@ -631,3 +662,4 @@ theorem baseChange_toPointMap_compat [IsAlgClosed L] (P : W.toAffine.Point) :
     exact hsome _ _ _ _ _ _ hx.symm hy.symm
 
 end HasseWeil.EC.Isogeny
+
