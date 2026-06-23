@@ -503,6 +503,7 @@ theorem miller_hypothesis_holds_allChar
       · exact miller_at_some_some_degen_allChar W h₁ h₂ hxy
       · exact miller_at_some_some_nondegen_allChar W h₁ h₂ hxy
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 /-- Degree of a single-point divisor: `deg (single P n) = n`. Helper for the
 `single_add` step of `general_kappa_reduce_of_miller` (char-uniform analogue of
 `degree_single_eq` from `Miller.lean`). -/
@@ -513,6 +514,7 @@ private lemma degree_single_eq_allChar
   unfold ProjectiveDivisor.degree
   exact Finsupp.sum_single_index rfl
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 /-- Scaled single-minus-infinity identity: `single P n − n • (∞) = n • κ(P)`.
 The `ℤ`-scaled form of `single_minus_inf_eq_kappaDivisor`; helper for the
 `single_add` step of `general_kappa_reduce_of_miller` (char-uniform analogue of
@@ -532,6 +534,7 @@ private lemma single_sub_nsmul_inf_eq_nsmul_kappaDivisor_allChar
   rw [smul_sub, Finsupp.smul_single, smul_eq_mul, mul_one] at this
   exact this
 
+omit [WeierstrassCurve.IsElliptic W] in
 /-- Combined `zsmul` + `add` linear equivalence for `kappaDivisor`:
 `n • κ(P) + κ(σ D') ~ κ(n • P + σ D')`. Helper for the `single_add` step of
 `general_kappa_reduce_of_miller`, packaging `kappaDivisor_zsmul_linEquiv_of_miller`
@@ -574,6 +577,7 @@ private lemma nsmul_kappaDivisor_add_linEquiv_of_miller_allChar
     exact h_neg
   exact h_step.trans h_add
 
+omit [WeierstrassCurve.IsElliptic W] in
 /-- `abel`-regrouping of the `single_add` reduction goal of
 `general_kappa_reduce_of_miller` into its three principal summands (the
 single-point part, the inductive `D'` part, and the `kappaDivisor` correction
@@ -663,7 +667,7 @@ theorem divZeroReduce_holds_allChar
 `Curves.picZeroIsoE_of_AFInputs`. -/
 noncomputable def picZeroIsoE_of_AFInputs_allChar
     [IsAlgClosed F] [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing] (a : AFInputs W) :
+    (a : AFInputs W) :
     SmoothPlaneCurve.PicProj₀ (⟨W⟩ : SmoothPlaneCurve F) ≃+ W.Point :=
   let h_van : ∀ D : ProjectiveDivisor (⟨W⟩ : SmoothPlaneCurve F),
       D ∈ (⟨W⟩ : SmoothPlaneCurve F).projPrincipalSubgroup →
@@ -682,16 +686,15 @@ noncomputable def picZeroIsoE_of_AFInputs_allChar
 /-- **`AFInputs W` (all char)**: bundles `miller_hypothesis_holds_allChar`,
 `divZeroReduce_holds_allChar`, and `noFinitePolesBridge_unconditional`. -/
 theorem afInputs_allChar
-    [IsAlgClosed F] [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing] : AFInputs W where
+    [IsAlgClosed F] [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing] :
+    AFInputs W where
   miller := miller_hypothesis_holds_allChar W
   divZeroReduce := divZeroReduce_holds_allChar W
   noFinitePolesBridge := noFinitePolesBridge_unconditional W
 
 /-- **Pic⁰(E) ≅ E (all char)**: char-uniform `picZeroIsoE`. -/
 noncomputable def picZeroIsoE_allChar
-    [IsAlgClosed F] [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing] :
+    [IsAlgClosed F] [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing] :
     SmoothPlaneCurve.PicProj₀ (⟨W⟩ : SmoothPlaneCurve F) ≃+ W.Point :=
   picZeroIsoE_of_AFInputs_allChar W (afInputs_allChar W)
 
@@ -701,7 +704,7 @@ all-char)**: composes the Pic⁰(E) ≅ E iso without `[NeZero 2/3]`. Takes
 unconditional once `T10-SUB-PRINCIPAL-DEGZERO-ALLCHAR` ships. -/
 noncomputable def picZeroIsoE_of_AFInputs_witness_pdz_allChar
     [IsAlgClosed F] [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing] (a : AFInputs W)
+    (a : AFInputs W)
     (h_pdz : ∀ D : ProjectiveDivisor (⟨W⟩ : SmoothPlaneCurve F),
       D ∈ (⟨W⟩ : SmoothPlaneCurve F).projPrincipalSubgroup →
       D ∈ ProjectiveDivisor.degZero (⟨W⟩ : SmoothPlaneCurve F)) :
