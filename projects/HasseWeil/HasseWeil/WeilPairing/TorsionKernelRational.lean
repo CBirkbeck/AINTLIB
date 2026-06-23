@@ -132,11 +132,7 @@ private theorem yCoord_descends_of_equation {F : Type*} [Field F] [IsAlgClosed F
     rw [Affine.equation_iff] at heqn
     simp only [IsRoot.def, hq, eval_map, eval₂_sub, eval₂_add, eval₂_X_pow, eval₂_mul,
       eval₂_C, eval₂_X]
-    rw [show (W.map (algebraMap F L)).a₁ = algebraMap F L W.a₁ from rfl,
-      show (W.map (algebraMap F L)).a₂ = algebraMap F L W.a₂ from rfl,
-      show (W.map (algebraMap F L)).a₃ = algebraMap F L W.a₃ from rfl,
-      show (W.map (algebraMap F L)).a₄ = algebraMap F L W.a₄ from rfl,
-      show (W.map (algebraMap F L)).a₆ = algebraMap F L W.a₆ from rfl] at heqn
+    simp only [map_a₁, map_a₂, map_a₃, map_a₄, map_a₆] at heqn
     rw [hc1, hc0]
     push_cast [map_add, map_mul, map_pow]
     linear_combination heqn
@@ -241,14 +237,13 @@ theorem hdesc_mulByInt [IsAlgClosed F] (ℓ : ℤ) (hℓ : ℓ ≠ 0) :
           genericPointAct W (mulByInt W.toAffine ℓ) σ - genericPoint W := by
   intro σ
   letI := (mulByInt W.toAffine ℓ).toAlgebra
-  set g : (W_KE W).toAffine.Point →+ (W_KE W).toAffine.Point := zsmulAddGroupHom ℓ with hg
+  set g : (W_KE W).toAffine.Point →+ (W_KE W).toAffine.Point := zsmulAddGroupHom ℓ
   obtain ⟨hns, hsmul⟩ := zsmul_genericPoint_eq W ℓ hℓ
   have hsmul' : ℓ • genericPoint W =
       Affine.Point.some (mulByInt_x W ℓ) (mulByInt_y W ℓ) hns :=
     Subsingleton.elim (instDecidableEqFunctionField W) FractionRing.instDecidableEq ▸ hsmul
   have hgP : g (genericPoint W) =
-      Affine.Point.some (mulByInt_x W ℓ) (mulByInt_y W ℓ) hns := by
-    rw [hg]; change ℓ • genericPoint W = _; exact hsmul'
+      Affine.Point.some (mulByInt_x W ℓ) (mulByInt_y W ℓ) hns := hsmul'
   have hX : mulByInt_x W ℓ = (mulByInt W.toAffine ℓ).pullback (x_gen W) :=
     (mulByInt_pullback_x W ℓ hℓ).symm
   have hY : mulByInt_y W ℓ = (mulByInt W.toAffine ℓ).pullback (y_gen W) :=
@@ -258,7 +253,6 @@ theorem hdesc_mulByInt [IsAlgClosed F] (ℓ : ℤ) (hℓ : ℓ ≠ 0) :
       WeierstrassCurve.Affine.Point.map (W' := W) (σ.toAlgHom.restrictScalars F)
         (g (genericPoint W)) := by
     unfold genericPointAct
-    rw [hg]
     change ℓ • _ = WeierstrassCurve.Affine.Point.map (W' := W)
       (σ.toAlgHom.restrictScalars F) (ℓ • _)
     exact (map_zsmul (WeierstrassCurve.Affine.Point.map (W' := W)
@@ -266,11 +260,7 @@ theorem hdesc_mulByInt [IsAlgClosed F] (ℓ : ℤ) (hℓ : ℓ ≠ 0) :
   have hmem := genericPointAct_mem_ker_g W (mulByInt W.toAffine ℓ) g
     (mulByInt_x W ℓ) (mulByInt_y W ℓ) hns hgP hX hY σ hequiv
   have hker : (ℓ : ℤ) • (genericPointAct W (mulByInt W.toAffine ℓ) σ - genericPoint W) = 0 := by
-    have hsmul_eq : ℓ • genericPointAct W (mulByInt W.toAffine ℓ) σ = ℓ • genericPoint W := by
-      have h1 : g (genericPointAct W (mulByInt W.toAffine ℓ) σ) =
-          ℓ • genericPointAct W (mulByInt W.toAffine ℓ) σ := rfl
-      have h2 : g (genericPoint W) = ℓ • genericPoint W := rfl
-      rw [← h1, ← h2]; exact hmem
+    have hsmul_eq : ℓ • genericPointAct W (mulByInt W.toAffine ℓ) σ = ℓ • genericPoint W := hmem
     rw [zsmul_sub, hsmul_eq, sub_self]
   obtain ⟨k, hk0, hklift⟩ := kernelOverKE_descends W ℓ hℓ _ hker
   refine ⟨k, ?_, hklift⟩
@@ -520,7 +510,6 @@ theorem mulByInt_genCoords_minpoly_splits [IsAlgClosed F] (ℓ : ℤ) (hℓ : �
         (algebraMap W.toAffine.FunctionField W.toAffine.FunctionField)) ∧
     Polynomial.Splits ((minpoly W.toAffine.FunctionField (y_gen W)).map
         (algebraMap W.toAffine.FunctionField W.toAffine.FunctionField)) := by
-  classical
   refine ⟨minpoly_gen_splits_of_mem_range W ℓ hℓ (x_gen W) (fun g hfix ↦ ?_),
           minpoly_gen_splits_of_mem_range W ℓ hℓ (y_gen W) (fun g hfix ↦ ?_)⟩
   · exact (sigma_genCoord_mem_range_proto W ℓ hℓ
