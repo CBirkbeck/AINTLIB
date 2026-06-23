@@ -1219,6 +1219,252 @@ theorem pointValuation_translateY_xy_le_one_of_isSome
   · exact h_a3_le
 
 open Polynomial in
+/-- **Constant-coefficient leaf.** For `c : F`, the τ_k-image of the constant
+coordinate-ring element `of (C c)` has point-valuation `≤ 1` at `P`: since `τ_k`
+is an `F`-algebra map it fixes `algebraMap F KE c`, whose valuation is `≤ 1` by
+`pointValuation_algebraMap_F_le_one`. (Leaf of the inner coefficient induction in
+`pointValuation_translateAlgEquivOfPoint_algebraMap_le_one_of_isSome`.) -/
+private theorem pointValuation_translateAlgEquivOfPoint_of_C_le_one
+    (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
+    (h : (P.toAffinePoint +
+        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)).IsSome)
+    (c : F) :
+    (W_smooth W).pointValuation P
+      ((translateAlgEquivOfPoint W
+        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+        ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+          ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) (Polynomial.C c)))) ≤ 1 := by
+  have h_const :
+      (AdjoinRoot.of (W_smooth W).toAffine.polynomial) (Polynomial.C c) =
+      algebraMap F (W_smooth W).CoordinateRing c :=
+    (IsScalarTower.algebraMap_apply F F[X] (W_smooth W).CoordinateRing c).symm
+  rw [h_const, ← IsScalarTower.algebraMap_apply F
+    (W_smooth W).CoordinateRing (W_smooth W).FunctionField c]
+  change (W_smooth W).pointValuation P
+    ((translateAlgEquivOfPoint W
+      (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+      (algebraMap F W.toAffine.FunctionField c)) ≤ 1
+  rw [(translateAlgEquivOfPoint W
+    (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)).commutes c]
+  exact (W_smooth W).pointValuation_algebraMap_F_le_one P c
+
+/-- **`x`-generator power leaf.** For `m : ℕ`, the `m`-th power of the τ_k-image
+of the `x`-generator `of X` has point-valuation `≤ 1` at `P`: the generator maps
+to `translateX_xy`, whose valuation is `≤ 1` by
+`pointValuation_translateX_xy_le_one_of_isSome`, and powers preserve `≤ 1`.
+(Leaf of the inner coefficient induction.) -/
+private theorem pointValuation_translateAlgEquivOfPoint_of_X_pow_le_one
+    (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
+    (h : (P.toAffinePoint +
+        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)).IsSome)
+    (m : ℕ) :
+    (W_smooth W).pointValuation P
+      (((translateAlgEquivOfPoint W
+        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+        ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+          ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) Polynomial.X))) ^ m) ≤ 1 := by
+  have h_tau_x : translateAlgEquivOfPoint W
+      (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point) (x_gen W) =
+      translateX_xy W xk yk :=
+    translateAlgEquivOfPoint_apply_x_gen W xk yk h_ns
+  have h_tx_le := pointValuation_translateX_xy_le_one_of_isSome W P xk yk h_ns h
+  have h_X_to_x_gen :
+      (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+        ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) Polynomial.X) =
+      x_gen W := rfl
+  rw [h_X_to_x_gen, h_tau_x]
+  exact pointValuation_pow_le_one W P h_tx_le m
+
+open Polynomial in
+/-- **Coefficient lift.** For any `a : F[X]`, the τ_k-image of the
+coordinate-ring element `of a` has point-valuation `≤ 1` at `P`. Polynomial
+induction on `a`: the sum case is additivity (`pointValuation_add_le_one`), and a
+monomial `C c * X^m` splits into the constant and `x`-power leaves
+(`pointValuation_translateAlgEquivOfPoint_of_C_le_one` /
+`..._of_X_pow_le_one`) combined by `pointValuation_mul_le_one`. -/
+private theorem pointValuation_translateAlgEquivOfPoint_of_le_one
+    (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
+    (h : (P.toAffinePoint +
+        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)).IsSome)
+    (a : F[X]) :
+    (W_smooth W).pointValuation P
+      ((translateAlgEquivOfPoint W
+        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+        ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+          ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) a))) ≤ 1 := by
+  induction a using Polynomial.induction_on' with
+  | add p q hp hq =>
+    rw [show (AdjoinRoot.of (W_smooth W).toAffine.polynomial) (p + q) =
+          (AdjoinRoot.of (W_smooth W).toAffine.polynomial) p +
+          (AdjoinRoot.of (W_smooth W).toAffine.polynomial) q from map_add _ _ _,
+      show (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+          ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) p +
+            (AdjoinRoot.of (W_smooth W).toAffine.polynomial) q) =
+        (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+          ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) p) +
+        (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+          ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) q) from map_add _ _ _,
+      show (translateAlgEquivOfPoint W
+          (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+        ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+          ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) p) +
+          (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+            ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) q)) =
+        (translateAlgEquivOfPoint W
+          (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+          ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+            ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) p)) +
+        (translateAlgEquivOfPoint W
+          (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+          ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+            ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) q)) from map_add _ _ _]
+    exact pointValuation_add_le_one W P hp hq
+  | monomial m c =>
+    rw [show (Polynomial.monomial m c : F[X]) = Polynomial.C c * Polynomial.X ^ m
+      from (Polynomial.C_mul_X_pow_eq_monomial).symm]
+    rw [show (AdjoinRoot.of (W_smooth W).toAffine.polynomial)
+          (Polynomial.C c * Polynomial.X ^ m) =
+        (AdjoinRoot.of (W_smooth W).toAffine.polynomial) (Polynomial.C c) *
+        (AdjoinRoot.of (W_smooth W).toAffine.polynomial) (Polynomial.X ^ m) from
+      map_mul _ _ _]
+    rw [show (AdjoinRoot.of (W_smooth W).toAffine.polynomial) (Polynomial.X ^ m) =
+        ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) Polynomial.X) ^ m from
+      map_pow _ _ _]
+    rw [show (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+          ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) (Polynomial.C c) *
+            (AdjoinRoot.of (W_smooth W).toAffine.polynomial) Polynomial.X ^ m) =
+        (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+          ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) (Polynomial.C c)) *
+        (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+          ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) Polynomial.X) ^ m from by
+      rw [map_mul, map_pow]]
+    rw [show (translateAlgEquivOfPoint W
+          (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+        ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+          ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) (Polynomial.C c)) *
+          (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+              ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) Polynomial.X) ^ m) =
+        (translateAlgEquivOfPoint W
+          (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+          ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+            ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) (Polynomial.C c))) *
+        ((translateAlgEquivOfPoint W
+          (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+            ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+              ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) Polynomial.X))) ^ m from by
+      rw [show
+          (translateAlgEquivOfPoint W
+              (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+            ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+                ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) (Polynomial.C c)) *
+              (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+                  ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) Polynomial.X) ^ m) =
+          (translateAlgEquivOfPoint W
+              (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+            ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+              ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) (Polynomial.C c))) *
+          (translateAlgEquivOfPoint W
+              (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+            ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+                ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) Polynomial.X) ^ m) from
+        map_mul _ _ _]
+      rw [show
+          (translateAlgEquivOfPoint W
+              (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+            ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+                ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) Polynomial.X) ^ m) =
+          ((translateAlgEquivOfPoint W
+              (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+            ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+                ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) Polynomial.X))) ^ m from
+        map_pow _ _ _]]
+    exact pointValuation_mul_le_one W P
+      (pointValuation_translateAlgEquivOfPoint_of_C_le_one W P xk yk h_ns h c)
+      (pointValuation_translateAlgEquivOfPoint_of_X_pow_le_one W P xk yk h_ns h m)
+
+/-- **`y`-generator power leaf.** For `n : ℕ`, the `n`-th power of the τ_k-image
+of the `y`-generator `root` has point-valuation `≤ 1` at `P`: the generator maps
+to `translateY_xy`, whose valuation is `≤ 1` by
+`pointValuation_translateY_xy_le_one_of_isSome`, and powers preserve `≤ 1`. -/
+private theorem pointValuation_translateAlgEquivOfPoint_root_pow_le_one
+    (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
+    (h : (P.toAffinePoint +
+        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)).IsSome)
+    (n : ℕ) :
+    (W_smooth W).pointValuation P
+      (((translateAlgEquivOfPoint W
+        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+        ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+          (AdjoinRoot.root (W_smooth W).toAffine.polynomial))) ^ n) ≤ 1 := by
+  have h_tau_y : translateAlgEquivOfPoint W
+      (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point) (y_gen W) =
+      translateY_xy W xk yk :=
+    translateAlgEquivOfPoint_apply_y_gen W xk yk h_ns
+  have h_ty_le := pointValuation_translateY_xy_le_one_of_isSome W P xk yk h_ns h
+  rw [show (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+        (AdjoinRoot.root (W_smooth W).toAffine.polynomial) = y_gen W from rfl, h_tau_y]
+  exact pointValuation_pow_le_one W P h_ty_le n
+
+open Polynomial in
+/-- **Monomial lift.** For `n : ℕ` and `a : F[X]`, the τ_k-image of the
+coordinate-ring element `mk (C a * X^n)` (i.e. `of a * root^n`) has
+point-valuation `≤ 1` at `P`. The product splits via `pointValuation_mul_le_one`
+into the coefficient lift (`pointValuation_translateAlgEquivOfPoint_of_le_one`)
+and the `y`-power leaf (`..._root_pow_le_one`). (Leaf of the outer bivariate
+induction.) -/
+private theorem pointValuation_translateAlgEquivOfPoint_mk_monomial_le_one
+    (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
+    (h : (P.toAffinePoint +
+        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)).IsSome)
+    (n : ℕ) (a : F[X]) :
+    (W_smooth W).pointValuation P
+      ((translateAlgEquivOfPoint W
+        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+        ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+          (AdjoinRoot.mk (W_smooth W).toAffine.polynomial
+            (Polynomial.C a * Polynomial.X ^ n)))) ≤ 1 := by
+  rw [show AdjoinRoot.mk (W_smooth W).toAffine.polynomial
+        (Polynomial.C a * Polynomial.X ^ n) =
+      (AdjoinRoot.of (W_smooth W).toAffine.polynomial) a *
+        (AdjoinRoot.root (W_smooth W).toAffine.polynomial) ^ n from by
+    rw [map_mul, map_pow, AdjoinRoot.mk_X, AdjoinRoot.mk_C]]
+  rw [show (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+        ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) a *
+          (AdjoinRoot.root (W_smooth W).toAffine.polynomial) ^ n) =
+      (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+          ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) a) *
+        (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+            (AdjoinRoot.root (W_smooth W).toAffine.polynomial) ^ n from by
+    rw [map_mul, map_pow]]
+  rw [show (translateAlgEquivOfPoint W
+          (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+        ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+            ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) a) *
+          (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+              (AdjoinRoot.root (W_smooth W).toAffine.polynomial) ^ n) =
+        (translateAlgEquivOfPoint W
+          (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+          ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+            ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) a)) *
+        (translateAlgEquivOfPoint W
+          (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+          ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+              (AdjoinRoot.root (W_smooth W).toAffine.polynomial) ^ n) from
+      map_mul _ _ _]
+  rw [show (translateAlgEquivOfPoint W
+          (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+        ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+              (AdjoinRoot.root (W_smooth W).toAffine.polynomial) ^ n) =
+        ((translateAlgEquivOfPoint W
+          (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+            ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+              (AdjoinRoot.root (W_smooth W).toAffine.polynomial))) ^ n from
+      map_pow _ _ _]
+  exact pointValuation_mul_le_one W P
+    (pointValuation_translateAlgEquivOfPoint_of_le_one W P xk yk h_ns h a)
+    (pointValuation_translateAlgEquivOfPoint_root_pow_le_one W P xk yk h_ns h n)
+
+open Polynomial in
 /-- **Polynomial induction lift**: for any `r ∈ CoordinateRing` and non-zero
 `k = (xk, yk)` with `(P + k).IsSome`, `pV(τ_k(algMap r)) ≤ 1` at `P`. -/
 theorem pointValuation_translateAlgEquivOfPoint_algebraMap_le_one_of_isSome
@@ -1231,30 +1477,23 @@ theorem pointValuation_translateAlgEquivOfPoint_algebraMap_le_one_of_isSome
         (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)
         (algebraMap (W_smooth W).CoordinateRing
           (W_smooth W).FunctionField r)) ≤ 1 := by
-  have h_tau_x : translateAlgEquivOfPoint W
-      (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point) (x_gen W) =
-      translateX_xy W xk yk :=
-    translateAlgEquivOfPoint_apply_x_gen W xk yk h_ns
-  have h_tau_y : translateAlgEquivOfPoint W
-      (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point) (y_gen W) =
-      translateY_xy W xk yk :=
-    translateAlgEquivOfPoint_apply_y_gen W xk yk h_ns
-  have h_tx_le := pointValuation_translateX_xy_le_one_of_isSome W P xk yk h_ns h
-  have h_ty_le := pointValuation_translateY_xy_le_one_of_isSome W P xk yk h_ns h
+  -- Bivariate induction on `r = mk p`, `p : F[X][X]`: the addition cases are
+  -- discharged by additivity of the point-valuation, and each monomial leaf
+  -- `mk (C a * X^n)` by `pointValuation_translateAlgEquivOfPoint_mk_monomial_le_one`.
   induction r using AdjoinRoot.induction_on with | _ p => ?_
   induction p using Polynomial.induction_on' with
   | add p q hp hq =>
     rw [show AdjoinRoot.mk (W_smooth W).toAffine.polynomial (p + q) =
             AdjoinRoot.mk (W_smooth W).toAffine.polynomial p +
-            AdjoinRoot.mk (W_smooth W).toAffine.polynomial q from map_add _ _ _]
-    rw [show (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-              (AdjoinRoot.mk (W_smooth W).toAffine.polynomial p +
-                AdjoinRoot.mk (W_smooth W).toAffine.polynomial q) =
-            (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-              (AdjoinRoot.mk (W_smooth W).toAffine.polynomial p) +
-            (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-              (AdjoinRoot.mk (W_smooth W).toAffine.polynomial q) from map_add _ _ _]
-    rw [show (translateAlgEquivOfPoint W
+            AdjoinRoot.mk (W_smooth W).toAffine.polynomial q from map_add _ _ _,
+      show (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+            (AdjoinRoot.mk (W_smooth W).toAffine.polynomial p +
+              AdjoinRoot.mk (W_smooth W).toAffine.polynomial q) =
+          (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+            (AdjoinRoot.mk (W_smooth W).toAffine.polynomial p) +
+          (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+            (AdjoinRoot.mk (W_smooth W).toAffine.polynomial q) from map_add _ _ _,
+      show (translateAlgEquivOfPoint W
             (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
           ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
               (AdjoinRoot.mk (W_smooth W).toAffine.polynomial p) +
@@ -1267,148 +1506,11 @@ theorem pointValuation_translateAlgEquivOfPoint_algebraMap_le_one_of_isSome
           (translateAlgEquivOfPoint W
             (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
             ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-              (AdjoinRoot.mk (W_smooth W).toAffine.polynomial q)) from
-        map_add _ _ _]
+              (AdjoinRoot.mk (W_smooth W).toAffine.polynomial q)) from map_add _ _ _]
     exact pointValuation_add_le_one W P hp hq
   | monomial n a =>
-    -- Step through the unfolding manually with show terms to avoid AlgEquiv pattern issues.
-    rw [← Polynomial.C_mul_X_pow_eq_monomial, map_mul, map_pow,
-        AdjoinRoot.mk_X, AdjoinRoot.mk_C, map_mul, map_pow]
-    rw [show (translateAlgEquivOfPoint W
-            (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-          ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-              ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) a) *
-            (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-                (AdjoinRoot.root (W_smooth W).toAffine.polynomial) ^ n) =
-          (translateAlgEquivOfPoint W
-            (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-            ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-              ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) a)) *
-          (translateAlgEquivOfPoint W
-            (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-            ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-                (AdjoinRoot.root (W_smooth W).toAffine.polynomial) ^ n) from
-        map_mul _ _ _]
-    rw [show (translateAlgEquivOfPoint W
-            (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-          ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-                (AdjoinRoot.root (W_smooth W).toAffine.polynomial) ^ n) =
-          ((translateAlgEquivOfPoint W
-            (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-              ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-                (AdjoinRoot.root (W_smooth W).toAffine.polynomial))) ^ n from
-        map_pow _ _ _]
-    rw [show (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-          (AdjoinRoot.root (W_smooth W).toAffine.polynomial) = y_gen W from rfl]
-    rw [h_tau_y]
-    apply pointValuation_mul_le_one W P
-    · induction a using Polynomial.induction_on' with
-      | add p q hp hq =>
-        rw [show (AdjoinRoot.of (W_smooth W).toAffine.polynomial) (p + q) =
-              (AdjoinRoot.of (W_smooth W).toAffine.polynomial) p +
-              (AdjoinRoot.of (W_smooth W).toAffine.polynomial) q from map_add _ _ _,
-          show (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-              ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) p +
-                (AdjoinRoot.of (W_smooth W).toAffine.polynomial) q) =
-            (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-              ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) p) +
-            (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-              ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) q) from map_add _ _ _,
-          show (translateAlgEquivOfPoint W
-              (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-            ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-              ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) p) +
-              (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-                ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) q)) =
-            (translateAlgEquivOfPoint W
-              (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-              ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-                ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) p)) +
-            (translateAlgEquivOfPoint W
-              (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-              ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-                ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) q)) from map_add _ _ _]
-        exact pointValuation_add_le_one W P hp hq
-      | monomial m c =>
-        rw [show (Polynomial.monomial m c : F[X]) = Polynomial.C c * Polynomial.X ^ m
-          from (Polynomial.C_mul_X_pow_eq_monomial).symm]
-        rw [show (AdjoinRoot.of (W_smooth W).toAffine.polynomial)
-              (Polynomial.C c * Polynomial.X ^ m) =
-            (AdjoinRoot.of (W_smooth W).toAffine.polynomial) (Polynomial.C c) *
-            (AdjoinRoot.of (W_smooth W).toAffine.polynomial) (Polynomial.X ^ m) from
-          map_mul _ _ _]
-        rw [show (AdjoinRoot.of (W_smooth W).toAffine.polynomial) (Polynomial.X ^ m) =
-            ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) Polynomial.X) ^ m from
-          map_pow _ _ _]
-        rw [show (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-              ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) (Polynomial.C c) *
-                (AdjoinRoot.of (W_smooth W).toAffine.polynomial) Polynomial.X ^ m) =
-            (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-              ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) (Polynomial.C c)) *
-            (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-              ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) Polynomial.X) ^ m from by
-          rw [map_mul, map_pow]]
-        rw [show (translateAlgEquivOfPoint W
-              (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-            ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-              ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) (Polynomial.C c)) *
-              (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-                  ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) Polynomial.X) ^ m) =
-            (translateAlgEquivOfPoint W
-              (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-              ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-                ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) (Polynomial.C c))) *
-            ((translateAlgEquivOfPoint W
-              (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-                ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-                  ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) Polynomial.X))) ^ m from by
-          rw [show
-              (translateAlgEquivOfPoint W
-                  (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-                ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-                    ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) (Polynomial.C c)) *
-                  (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-                      ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) Polynomial.X) ^ m) =
-              (translateAlgEquivOfPoint W
-                  (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-                ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-                  ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) (Polynomial.C c))) *
-              (translateAlgEquivOfPoint W
-                  (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-                ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-                    ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) Polynomial.X) ^ m) from
-            map_mul _ _ _]
-          rw [show
-              (translateAlgEquivOfPoint W
-                  (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-                ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-                    ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) Polynomial.X) ^ m) =
-              ((translateAlgEquivOfPoint W
-                  (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-                ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-                    ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) Polynomial.X))) ^ m from
-            map_pow _ _ _]]
-        apply pointValuation_mul_le_one W P
-        · have h_const :
-              (AdjoinRoot.of (W_smooth W).toAffine.polynomial) (Polynomial.C c) =
-              algebraMap F (W_smooth W).CoordinateRing c :=
-            (IsScalarTower.algebraMap_apply F F[X] (W_smooth W).CoordinateRing c).symm
-          rw [h_const, ← IsScalarTower.algebraMap_apply F
-            (W_smooth W).CoordinateRing (W_smooth W).FunctionField c]
-          change (W_smooth W).pointValuation P
-            ((translateAlgEquivOfPoint W
-              (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-              (algebraMap F W.toAffine.FunctionField c)) ≤ 1
-          rw [(translateAlgEquivOfPoint W
-            (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)).commutes c]
-          exact (W_smooth W).pointValuation_algebraMap_F_le_one P c
-        · have h_X_to_x_gen :
-              (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-                ((AdjoinRoot.of (W_smooth W).toAffine.polynomial) Polynomial.X) =
-              x_gen W := rfl
-          rw [h_X_to_x_gen, h_tau_x]
-          exact pointValuation_pow_le_one W P h_tx_le m
-    · exact pointValuation_pow_le_one W P h_ty_le n
+    rw [← Polynomial.C_mul_X_pow_eq_monomial]
+    exact pointValuation_translateAlgEquivOfPoint_mk_monomial_le_one W P xk yk h_ns h n a
 
 /-- **Linearisation of `τ_k` on the two-generator combination.** For
 `a b : CoordinateRing`, the image under `τ_k ∘ algebraMap` of the linear
