@@ -153,6 +153,68 @@ theorem baseChangeAlgHom_coordRingMap (u : C₂.CoordinateRing) :
       exact baseChangeAlgHom_root cd L
   exact RingHom.congr_fun key u
 
+/-- **`coordRingMap` pushes the `K`-level span into the `L`-level span of the
+image set** (Step 1 of `baseChange_module_finite`).  With `L[C₁]` an algebra over
+`L[C₂]` through `cd.baseChangeAlgHom L`, every element `u` of the
+`C₂.CoordinateRing`-span of a set `S` has `coordRingMap`-image inside the
+`(C₂.baseChange L).CoordinateRing`-span of `coordRingMap '' S`.
+
+The span induction uses that `coordRingMap` is `cd → baseChangeAlgHom`
+semilinear — the naturality square `baseChangeAlgHom_coordRingMap`. -/
+private theorem coordRingMap_mem_span_image_of_mem_span
+    (s : Set C₁.CoordinateRing) {u : C₁.CoordinateRing}
+    (hu : u ∈ @Submodule.span C₂.CoordinateRing _ _ _ cd.toAlgebra.toModule s) :
+    C₁.coordRingMap L u ∈ @Submodule.span (C₂.baseChange L).CoordinateRing _ _ _
+      (cd.baseChangeAlgHom L).toRingHom.toAlgebra.toModule (C₁.coordRingMap L '' s) := by
+  letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+  letI : Algebra (C₂.baseChange L).CoordinateRing (C₁.baseChange L).CoordinateRing :=
+    (cd.baseChangeAlgHom L).toRingHom.toAlgebra
+  induction hu using Submodule.span_induction with
+  | mem x hx => exact Submodule.subset_span (Set.mem_image_of_mem _ hx)
+  | zero =>
+    rw [map_zero]; exact Submodule.zero_mem _
+  | add x y _ _ ihx ihy =>
+    rw [map_add]; exact Submodule.add_mem _ ihx ihy
+  | smul r x _ ihx =>
+    have hsemi : C₁.coordRingMap L (r • x) =
+        (C₂.coordRingMap L r) • (C₁.coordRingMap L x) := by
+      rw [Algebra.smul_def, Algebra.smul_def, map_mul]
+      congr 1
+      exact (baseChangeAlgHom_coordRingMap cd L r).symm
+    rw [hsemi]
+    exact Submodule.smul_mem _ _ ihx
+
+/-- **The `coordRingMap`-images span all of `L[C₁]`** (Step 2 of
+`baseChange_module_finite`).  Given that every `coordRingMap`-image already lies
+in a submodule `M` over `(C₂.baseChange L).CoordinateRing`, every element of
+`L[C₁]` does too.
+
+Surjectivity of `fwdPinned` (`fwdPinned_surjective`) reduces an arbitrary `w` to
+a tensor `l ⊗ u`, and `L`-scalars are `baseChangeAlgHom`-scalars because the
+`AlgHom` fixes `L` (`commutes`). -/
+private theorem mem_of_coordRingMap_mem
+    (M : @Submodule (C₂.baseChange L).CoordinateRing (C₁.baseChange L).CoordinateRing _ _
+      (cd.baseChangeAlgHom L).toRingHom.toAlgebra.toModule)
+    (hM : ∀ u : C₁.CoordinateRing, C₁.coordRingMap L u ∈ M)
+    (w : (C₁.baseChange L).CoordinateRing) : w ∈ M := by
+  letI : Algebra (C₂.baseChange L).CoordinateRing (C₁.baseChange L).CoordinateRing :=
+    (cd.baseChangeAlgHom L).toRingHom.toAlgebra
+  obtain ⟨z, rfl⟩ := C₁.fwdPinned_surjective L w
+  induction z using TensorProduct.induction_on with
+  | zero =>
+    rw [map_zero]; exact Submodule.zero_mem _
+  | tmul l u =>
+    rw [C₁.fwdPinned_tmul L l u]
+    have hsmul : l • C₁.coordRingMap L u =
+        (algebraMap L (C₂.baseChange L).CoordinateRing l) • C₁.coordRingMap L u := by
+      rw [Algebra.smul_def, Algebra.smul_def]
+      congr 1
+      exact ((cd.baseChangeAlgHom L).commutes l).symm
+    rw [hsmul]
+    exact Submodule.smul_mem _ _ (hM u)
+  | add x y ihx ihy =>
+    rw [map_add]; exact Submodule.add_mem _ ihx ihy
+
 /-- **Base change preserves module-finiteness of a coordinate-ring witness**:
 `L[C₁]` is a finite module over `L[C₂]` via `cd.baseChangeAlgHom L` (the
 `K`-level finiteness input is supplied by `CoordHom.module_finite`).
@@ -179,47 +241,9 @@ theorem baseChange_module_finite :
   refine Module.finite_def.mpr ⟨S.image (C₁.coordRingMap L), ?_⟩
   rw [eq_top_iff]
   rintro w -
-  -- Step 1: `coordRingMap`-images of `K`-level elements lie in the span.
-  have key : ∀ u : C₁.CoordinateRing,
-      C₁.coordRingMap L u ∈ Submodule.span (C₂.baseChange L).CoordinateRing
-        ((S.image (C₁.coordRingMap L) : Finset (C₁.baseChange L).CoordinateRing) :
-          Set (C₁.baseChange L).CoordinateRing) := by
-    intro u
-    have humem : u ∈ (⊤ : Submodule C₂.CoordinateRing C₁.CoordinateRing) :=
-      Submodule.mem_top
-    rw [← hS] at humem
-    induction humem using Submodule.span_induction with
-    | mem x hx =>
-      exact Submodule.subset_span
-        (Finset.mem_coe.mpr (Finset.mem_image_of_mem _ (Finset.mem_coe.mp hx)))
-    | zero =>
-      rw [map_zero]; exact Submodule.zero_mem _
-    | add x y _ _ ihx ihy =>
-      rw [map_add]; exact Submodule.add_mem _ ihx ihy
-    | smul r x _ ihx =>
-      have hsemi : C₁.coordRingMap L (r • x) =
-          (C₂.coordRingMap L r) • (C₁.coordRingMap L x) := by
-        rw [Algebra.smul_def, Algebra.smul_def, map_mul]
-        congr 1
-        exact (baseChangeAlgHom_coordRingMap cd L r).symm
-      rw [hsemi]
-      exact Submodule.smul_mem _ _ ihx
-  -- Step 2: every element of `L[C₁]` is an `L`-combination of images.
-  obtain ⟨z, rfl⟩ := C₁.fwdPinned_surjective L w
-  induction z using TensorProduct.induction_on with
-  | zero =>
-    rw [map_zero]; exact Submodule.zero_mem _
-  | tmul l u =>
-    rw [C₁.fwdPinned_tmul L l u]
-    have hsmul : l • C₁.coordRingMap L u =
-        (algebraMap L (C₂.baseChange L).CoordinateRing l) • C₁.coordRingMap L u := by
-      rw [Algebra.smul_def, Algebra.smul_def]
-      congr 1
-      exact ((cd.baseChangeAlgHom L).commutes l).symm
-    rw [hsmul]
-    exact Submodule.smul_mem _ _ (key u)
-  | add x y ihx ihy =>
-    rw [map_add]; exact Submodule.add_mem _ ihx ihy
+  refine mem_of_coordRingMap_mem cd L _ (fun u => ?_) w
+  rw [Finset.coe_image]
+  exact coordRingMap_mem_span_image_of_mem_span cd L _ (hS ▸ Submodule.mem_top)
 
 end CurveMap.CoordHom
 
