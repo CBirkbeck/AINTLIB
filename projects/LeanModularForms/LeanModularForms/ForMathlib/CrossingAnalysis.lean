@@ -138,7 +138,8 @@ theorem crossing_isolated_left (γ : PwC1Immersion x y) (z₀ : E) (p : ℝ)
     rw [interior_Icc]
     intro s hs
     obtain ⟨hs_smooth, hs_Ioo, hs_dpos⟩ := hq_cond hs
-    have h_sub : HasDerivAt (fun t ↦ (γ : ℝ → E) t - z₀) (deriv (γ : ℝ → E) s - 0) s :=
+    have h_sub : HasDerivAt (fun t ↦ (γ : ℝ → E) t - z₀)
+        (deriv (γ : ℝ → E) s - 0) s :=
       (γ.toPiecewiseC1Path.differentiable_off_extend s hs_Ioo hs_smooth).hasDerivAt.sub
         (hasDerivAt_const s z₀)
     simp only [sub_zero] at h_sub
@@ -186,7 +187,8 @@ theorem crossing_isolated_right (γ : PwC1Immersion x y) (z₀ : E) (p : ℝ)
     rw [interior_Icc]
     intro s hs
     obtain ⟨hs_smooth, hs_Ioo, hs_dpos⟩ := hr_cond hs
-    have h_sub : HasDerivAt (fun t ↦ (γ : ℝ → E) t - z₀) (deriv (γ : ℝ → E) s - 0) s :=
+    have h_sub : HasDerivAt (fun t ↦ (γ : ℝ → E) t - z₀)
+        (deriv (γ : ℝ → E) s - 0) s :=
       (γ.toPiecewiseC1Path.differentiable_off_extend s hs_Ioo hs_smooth).hasDerivAt.sub
         (hasDerivAt_const s z₀)
     simp only [sub_zero] at h_sub
@@ -206,7 +208,8 @@ theorem crossing_isolated (γ : PwC1Immersion x y) (z₀ : E) (t₀ : ℝ)
   by_cases hpart : t₀ ∈ γ.toPiecewiseC1Path.partition
   · rw [punctured_nhds_eq_nhdsWithin_sup_nhdsWithin, Filter.eventually_sup]
     exact ⟨(crossing_isolated_left γ z₀ t₀ hpart ht₀.1 hcross).mono fun t ht ↦ Or.inl ht,
-           (crossing_isolated_right γ z₀ t₀ hpart ht₀.2 hcross).mono fun t ht ↦ Or.inl ht⟩
+           (crossing_isolated_right γ z₀ t₀ hpart ht₀.2 hcross).mono
+             fun t ht ↦ Or.inl ht⟩
   · exact (crossing_isolated_smooth γ z₀ t₀ ht₀ hcross hpart).mono fun t ht ↦ Or.inl ht
 
 /-- No point of the crossing set in `(0, 1)` is an accumulation point. -/
