@@ -163,6 +163,52 @@ private lemma zw_identity_of_weierstrass {K : Type*} [Field K] (a₁ a₂ a₃ a
   field_simp
   linear_combination -h
 
+/-- The `w = −η⁻¹` expansion of an equation-satisfying pair with an `x`-pole at
+`O` has positive `orderTop` (`η` itself has a pole, so `−η⁻¹` reduces to `O`).
+This is the order side condition that lets FG-B1 reconstruct the `w`-expansion as
+an honest power series. The proof reads off `ord_∞ η < 0` from the Weierstrass
+equation (via `ord_∞ η < ord_∞ ξ < 0`) and negates/inverts it. -/
+private lemma orderTop_localExpand_neg_inv_pos_of_equation {ξ η : KE}
+    (h_weier : (W_KE W).toAffine.Equation ξ η) (hξ_ne : ξ ≠ 0) (hη_ne : η ≠ 0)
+    (hξ_neg : (W_smooth W).ordAtInfty ξ < 0) :
+    0 < (localExpand W (-η⁻¹ : KE)).orderTop := by
+  obtain ⟨n, hn⟩ : ∃ n : ℤ, (W_smooth W).ordAtInfty η = (n : WithTop ℤ) := by
+    cases hh : (W_smooth W).ordAtInfty η with
+    | top => exact absurd ((W_smooth W).ordAtInfty_eq_top_iff _ |>.mp hh) hη_ne
+    | coe k => exact ⟨k, rfl⟩
+  have hn_neg : n < 0 := by
+    have h1 : (W_smooth W).ordAtInfty η < 0 :=
+      lt_trans (ordAtInfty_y_lt_ordAtInfty_x_of_equation_of_ord_x_neg W hξ_ne hη_ne
+        h_weier hξ_neg) hξ_neg
+    rw [hn] at h1
+    exact_mod_cast h1
+  have h_ord_w : (W_smooth W).ordAtInfty (-η⁻¹ : KE) = ((-n : ℤ) : WithTop ℤ) :=
+    ((W_smooth W).ordAtInfty_neg _).trans
+      (((W_smooth W).ordAtInfty_inv _).trans (by rw [hn]; rfl))
+  rw [orderTop_localExpand_eq_ordAtInfty W, h_ord_w,
+    show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl, WithTop.coe_lt_coe]
+  omega
+
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
+/-- The `(z,w)`-chart identity in `K(E)` for an equation-satisfying pair: dividing
+the Weierstrass equation by `−η³` exhibits `w = −η⁻¹` as the value of the
+`(z,w)`-Weierstrass operator at `z = −ξ/η` (coefficients spelled through
+`algebraMap`). This is the curve-equation input that FG-B1 pushes through
+`localExpand`. Wraps the generic-field algebra `zw_identity_of_weierstrass`. -/
+private lemma neg_inv_eq_weierstrassZW_of_equation {ξ η : KE}
+    (h_weier : (W_KE W).toAffine.Equation ξ η) (hη_ne : η ≠ 0) :
+    (-η⁻¹ : KE) = (-ξ / η) ^ 3
+      + algebraMap F KE W.a₁ * (-ξ / η) * (-η⁻¹)
+      + algebraMap F KE W.a₂ * (-ξ / η) ^ 2 * (-η⁻¹)
+      + algebraMap F KE W.a₃ * (-η⁻¹) ^ 2
+      + algebraMap F KE W.a₄ * (-ξ / η) * (-η⁻¹) ^ 2
+      + algebraMap F KE W.a₆ * (-η⁻¹) ^ 3 := by
+  have h_weier' : η ^ 2 + algebraMap F KE W.a₁ * ξ * η + algebraMap F KE W.a₃ * η
+      = ξ ^ 3 + algebraMap F KE W.a₂ * ξ ^ 2 + algebraMap F KE W.a₄ * ξ
+        + algebraMap F KE W.a₆ :=
+    (Affine.equation_iff _ _).mp h_weier
+  exact zw_identity_of_weierstrass _ _ _ _ _ ξ η hη_ne h_weier'
+
 /-- **FG-B1, the abstract keystone** (`w_pair = w ∘ z_pair`): for a pair
 `(ξ, η)` in `K(E)` satisfying the Weierstrass equation, with an `x`-pole at
 `O` (`ord_∞ ξ < 0`) and `z`-expansion `localExpand (−ξ/η) = ofPowerSeries f`,
@@ -189,59 +235,25 @@ theorem localExpand_wPair {ξ η : KE} {f : PowerSeries F}
   have hz_pos : 0 < (localExpand W (-ξ / η)).orderTop := by
     rw [orderTop_localExpand_eq_ordAtInfty W]
     exact ordAtInfty_neg_div_pos_of_equation_of_ord_x_neg W hξ_ne hη_ne h_weier hξ_neg
-  have hf0 : PowerSeries.constantCoeff f = 0 :=
-    constantCoeff_eq_zero_of_ofPowerSeries_orderTop_pos (hz ▸ hz_pos)
   have hf_ord : 1 ≤ PowerSeries.order f :=
-    PowerSeries.one_le_order_iff_constCoeff_eq_zero.mpr hf0
-  -- The `w`-expansion has positive order (`η` has a pole at `O`).
-  obtain ⟨n, hn⟩ : ∃ n : ℤ, (W_smooth W).ordAtInfty η = (n : WithTop ℤ) := by
-    cases hh : (W_smooth W).ordAtInfty η with
-    | top => exact absurd ((W_smooth W).ordAtInfty_eq_top_iff _ |>.mp hh) hη_ne
-    | coe k => exact ⟨k, rfl⟩
-  have hn_neg : n < 0 := by
-    have h1 : (W_smooth W).ordAtInfty η < 0 :=
-      lt_trans (ordAtInfty_y_lt_ordAtInfty_x_of_equation_of_ord_x_neg W hξ_ne hη_ne
-        h_weier hξ_neg) hξ_neg
-    rw [hn] at h1
-    exact_mod_cast h1
-  have h_ord_w : (W_smooth W).ordAtInfty (-η⁻¹ : KE) = ((-n : ℤ) : WithTop ℤ) :=
-    ((W_smooth W).ordAtInfty_neg _).trans
-      (((W_smooth W).ordAtInfty_inv _).trans (by rw [hn]; rfl))
-  have hw_pos : 0 < (localExpand W (-η⁻¹ : KE)).orderTop := by
-    rw [orderTop_localExpand_eq_ordAtInfty W, h_ord_w,
-      show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl, WithTop.coe_lt_coe]
-    omega
-  -- Reconstruct the `w`-expansion as a power series `s` of positive order
+    PowerSeries.one_le_order_iff_constCoeff_eq_zero.mpr
+      (constantCoeff_eq_zero_of_ofPowerSeries_orderTop_pos (hz ▸ hz_pos))
+  -- Reconstruct the positive-order `w`-expansion as a power series `s`
   -- (`s` is introduced as an opaque variable so that the `localExpand`-to-
   -- `ofPowerSeries` rewrite below terminates).
+  have hw_pos : 0 < (localExpand W (-η⁻¹ : KE)).orderTop :=
+    orderTop_localExpand_neg_inv_pos_of_equation W h_weier hξ_ne hη_ne hξ_neg
   obtain ⟨s, hs_def⟩ : ∃ s : PowerSeries F,
       s = PowerSeries.mk fun k ↦ (localExpand W (-η⁻¹ : KE)).coeff (k : ℤ) := ⟨_, rfl⟩
   have hwfact : localExpand W (-η⁻¹ : KE) = HahnSeries.ofPowerSeries ℤ F s := by
-    rw [hs_def]
-    exact (ofPowerSeries_mk_coeff hw_pos.le).symm
-  have hs0 : PowerSeries.constantCoeff s = 0 :=
-    constantCoeff_eq_zero_of_ofPowerSeries_orderTop_pos (hwfact ▸ hw_pos)
+    rw [hs_def]; exact (ofPowerSeries_mk_coeff hw_pos.le).symm
   have hs_ord : 1 ≤ PowerSeries.order s :=
-    PowerSeries.one_le_order_iff_constCoeff_eq_zero.mpr hs0
-  -- The Weierstrass equation, with the base-changed coefficients spelled
-  -- through `algebraMap` (definitionally equal).
-  have h_weier' : η ^ 2 + algebraMap F KE W.a₁ * ξ * η + algebraMap F KE W.a₃ * η
-      = ξ ^ 3 + algebraMap F KE W.a₂ * ξ ^ 2 + algebraMap F KE W.a₄ * ξ
-        + algebraMap F KE W.a₆ := by
-    have h := (Affine.equation_iff _ _).mp h_weier
-    exact h
-  -- The `(z,w)`-chart identity in `K(E)`.
-  have hKE : (-η⁻¹ : KE) = (-ξ / η) ^ 3
-      + algebraMap F KE W.a₁ * (-ξ / η) * (-η⁻¹)
-      + algebraMap F KE W.a₂ * (-ξ / η) ^ 2 * (-η⁻¹)
-      + algebraMap F KE W.a₃ * (-η⁻¹) ^ 2
-      + algebraMap F KE W.a₄ * (-ξ / η) * (-η⁻¹) ^ 2
-      + algebraMap F KE W.a₆ * (-η⁻¹) ^ 3 :=
-    zw_identity_of_weierstrass _ _ _ _ _ ξ η hη_ne h_weier'
-  -- Push through `localExpand` and rewrite both charts as `ofPowerSeries`.
-  have hL := congrArg (localExpand W) hKE
+    PowerSeries.one_le_order_iff_constCoeff_eq_zero.mpr
+      (constantCoeff_eq_zero_of_ofPowerSeries_orderTop_pos (hwfact ▸ hw_pos))
+  -- Push the `(z,w)`-chart identity through `localExpand`, descend along the
+  -- injective `ofPowerSeries` to a fixed point of `weierstrassZWAt W f` in `F⟦z⟧`.
+  have hL := congrArg (localExpand W) (neg_inv_eq_weierstrassZW_of_equation W h_weier hη_ne)
   simp only [map_add, map_mul, map_pow, localExpand_algebraMap, hz, hwfact] at hL
-  -- Descend along the injective `ofPowerSeries` to a fixed point in `F⟦z⟧`.
   have hfix : s = weierstrassZWAt W f s := by
     apply HahnSeries.ofPowerSeries_injective (Γ := ℤ) (R := F)
     simp only [weierstrassZWAt, map_add, map_mul, map_pow]
