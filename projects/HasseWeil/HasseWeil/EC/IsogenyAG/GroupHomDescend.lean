@@ -68,6 +68,27 @@ open HasseWeil.Curves
 variable {K : Type*} [Field K] [DecidableEq K]
 variable (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
 
+omit [DecidableEq K] [W.toAffine.IsElliptic] in
+/-- The induced map on affine points `HasseWeil.Affine.Point.map f hf` is
+injective whenever the ring homomorphism `f` is injective.
+
+This is the injectivity reduction underlying the descent: the conclusion of the
+algebraically-closed III.4.8 is pulled back along this injective inclusion of
+`K`-points into `K̄`-points (see `addHomProperty_descend_of_baseChange`). -/
+private theorem map_injective_of_injective {L : Type*} [Field L] [DecidableEq L]
+    (f : K →+* L) (hf : Function.Injective f) :
+    Function.Injective (HasseWeil.Affine.Point.map (W := W) f hf) := by
+  rintro (_ | ⟨x₁, y₁, h₁⟩) (_ | ⟨x₂, y₂, h₂⟩) hP
+  · rfl
+  · exact absurd hP (by simp)
+  · exact absurd hP (by simp)
+  · rw [HasseWeil.Affine.Point.map_some, HasseWeil.Affine.Point.map_some,
+      Affine.Point.some.injEq] at hP
+    obtain ⟨hx, hy⟩ := hP
+    obtain rfl := hf hx
+    obtain rfl := hf hy
+    rfl
+
 /-- **The descent engine for ISO-L7** (axiom-clean).
 
 Let `F := AlgebraicClosure K`.  Given an isogeny `φ` over `K` with coord-ring
@@ -103,19 +124,7 @@ theorem addHomProperty_descend_of_baseChange
   let δ : W.toAffine.Point → (W.baseChange (AlgebraicClosure K)).toAffine.Point :=
     HasseWeil.Affine.Point.map (W := W) f hf
   -- `δ` is injective (`Affine.Point.map` of an injective ring hom).
-  have hδ_inj : Function.Injective δ := by
-    rintro (_ | ⟨x₁, y₁, h₁⟩) (_ | ⟨x₂, y₂, h₂⟩) hP
-    · rfl
-    · exact absurd hP (by simp [δ])
-    · exact absurd hP (by simp [δ])
-    · have hP' : (HasseWeil.Affine.Point.map (W := W) f hf (.some x₁ y₁ h₁)) =
-          HasseWeil.Affine.Point.map (W := W) f hf (.some x₂ y₂ h₂) := hP
-      rw [HasseWeil.Affine.Point.map_some, HasseWeil.Affine.Point.map_some,
-        Affine.Point.some.injEq] at hP'
-      obtain ⟨hx, hy⟩ := hP'
-      obtain rfl := hf hx
-      obtain rfl := hf hy
-      rfl
+  have hδ_inj : Function.Injective δ := map_injective_of_injective W f hf
   -- The alg-closed III.4.8 (Silverman, geometric) for the base-changed isogeny.
   -- (`Ramification.lean` supplies the Dedekind / integrally-closed instances on the
   -- base-changed coordinate ring; `AlgebraicClosure K` is `IsAlgClosed`.)
