@@ -1693,6 +1693,54 @@ theorem zero_le_ord_P_of_pointValuation_le_one {f : (W_smooth W).FunctionField}
       rw [h_unz_one]
       simp
 
+/-- Base step of the powers extension: for any `s` in the coordinate ring,
+`0 ≤ ord_P P (τ_k(algMap s))`. Combines `pV ≤ 1` (Item 2) with
+`zero_le_ord_P_of_pointValuation_le_one`. -/
+private theorem zero_le_ord_P_translateAlgEquivOfPoint_algebraMap_of_isSome
+    (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
+    (h : (P.toAffinePoint +
+        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)).IsSome)
+    (s : (W_smooth W).CoordinateRing) :
+    (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P
+      ((translateAlgEquivOfPoint W
+        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+        (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField s)) := by
+  have h_le : (W_smooth W).pointValuation P
+      ((translateAlgEquivOfPoint W
+        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+        (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField s)) ≤ 1 :=
+    pointValuation_translateAlgEquivOfPoint_algebraMap_le_one_of_isSome
+      W P xk yk h_ns h s
+  exact zero_le_ord_P_of_pointValuation_le_one W P h_le
+
+/-- Inductive step of the powers extension: if `m` lies in the maximal ideal at
+`P+k`, then `1 ≤ ord_P P (τ_k(algMap m))`. Item 3 gives `pV < 1`, which is `ord ≥ 1`
+(`one_le_ord_P_iff_pointValuation_lt_one`), with the zero case handled by `ord_P_zero`. -/
+private theorem one_le_ord_P_translateAlgEquivOfPoint_algebraMap_of_mem
+    (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
+    (h : (P.toAffinePoint +
+        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)).IsSome)
+    (m : (W_smooth W).CoordinateRing)
+    (h_m : m ∈ (W_smooth W).maximalIdealAt
+      (P.translate_of_finite (Affine.Point.some xk yk h_ns :
+        (W_smooth W).toAffine.Point) h)) :
+    (1 : WithTop ℤ) ≤ (W_smooth W).ord_P P
+      ((translateAlgEquivOfPoint W
+        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+        (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField m)) := by
+  set f : (W_smooth W).FunctionField :=
+    (translateAlgEquivOfPoint W
+      (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+      (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField m) with hf
+  have h_pV_lt : (W_smooth W).pointValuation P f < 1 :=
+    isTranslateMaxIdealCompatible_on_CoordinateRing_some
+      W P xk yk h_ns h m h_m
+  by_cases h_zero : f = 0
+  · rw [h_zero, Curves.SmoothPlaneCurve.ord_P_zero]
+    exact le_top
+  · exact (Curves.SmoothPlaneCurve.one_le_ord_P_iff_pointValuation_lt_one
+      (P := P) h_zero).mpr h_pV_lt
+
 /-- **Powers extension**: `r ∈ maxIdealAt(P+k)^n` implies
 `ord_P P (τ_k(algMap r)) ≥ n`. Proof via `Submodule.pow_induction_on_left'`.
 
@@ -1723,35 +1771,24 @@ theorem ord_P_translateAlgEquivOfPoint_algebraMap_ge_of_pow_mem
   refine Submodule.pow_induction_on_left' ((W_smooth W).maximalIdealAt P')
     (C := fun i x _ ↦ (i : WithTop ℤ) ≤ (W_smooth W).ord_P P (τ (algC x)))
     ?_ ?_ ?_ h_mem
-  · intro s
+  · -- Base case: `0 ≤ ord_P P (τ_k(algMap s))`.
+    intro s
     change (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P (τ (algC s))
-    have h_le : (W_smooth W).pointValuation P (τ (algC s)) ≤ 1 := by
-      change (W_smooth W).pointValuation P
-        ((translateAlgEquivOfPoint W k_pt) (algC s)) ≤ 1
-      exact pointValuation_translateAlgEquivOfPoint_algebraMap_le_one_of_isSome
-        W P xk yk h_ns h s
-    exact zero_le_ord_P_of_pointValuation_le_one W P h_le
-  · intro x y i _ _ hx_ge hy_ge
+    exact zero_le_ord_P_translateAlgEquivOfPoint_algebraMap_of_isSome W P xk yk h_ns h s
+  · -- Add case: `ord(x+y) ≥ min(ord x, ord y) ≥ min` of the two IHs.
+    intro x y i _ _ hx_ge hy_ge
     have h_rw : τ (algC (x + y)) = τ (algC x) + τ (algC y) := by
       rw [map_add, map_add]
     rw [h_rw]
     refine le_trans (le_min hx_ge hy_ge) ?_
     exact Curves.SmoothPlaneCurve.ord_P_add_le _ _
-  · intro m h_m i x _ hx_ge
+  · -- mem_mul case: `ord(τ_k(algMap m)) ≥ 1` for `m ∈ M`, then `ord_P_mul` adds with IH.
+    intro m h_m i x _ hx_ge
     have h_rw : τ (algC (m * x)) = τ (algC m) * τ (algC x) := by
       rw [map_mul, map_mul]
     rw [h_rw, Curves.SmoothPlaneCurve.ord_P_mul]
-    have h_m_pV_lt : (W_smooth W).pointValuation P (τ (algC m)) < 1 := by
-      change (W_smooth W).pointValuation P
-        ((translateAlgEquivOfPoint W k_pt) (algC m)) < 1
-      exact isTranslateMaxIdealCompatible_on_CoordinateRing_some
-        W P xk yk h_ns h m h_m
-    have h_m_ord_ge : (1 : WithTop ℤ) ≤ (W_smooth W).ord_P P (τ (algC m)) := by
-      by_cases h_m_zero : τ (algC m) = 0
-      · rw [h_m_zero, Curves.SmoothPlaneCurve.ord_P_zero]
-        exact le_top
-      · exact (Curves.SmoothPlaneCurve.one_le_ord_P_iff_pointValuation_lt_one
-          (P := P) h_m_zero).mpr h_m_pV_lt
+    have h_m_ord_ge : (1 : WithTop ℤ) ≤ (W_smooth W).ord_P P (τ (algC m)) :=
+      one_le_ord_P_translateAlgEquivOfPoint_algebraMap_of_mem W P xk yk h_ns h m h_m
     have h_succ : ((i.succ : ℕ) : WithTop ℤ) =
         (1 : WithTop ℤ) + (i : WithTop ℤ) := by
       have : (i.succ : ℤ) = 1 + (i : ℤ) := by push_cast; lia
