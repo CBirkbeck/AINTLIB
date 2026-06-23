@@ -51,7 +51,7 @@ private theorem vertDelta_mul_eq {H : ℝ} (hH : fdHeightValid H) (ε : ℝ) :
     5 * vertDelta H ε * (H - Real.sqrt 3 / 2) = ε := by
   have hH' : 0 < H - Real.sqrt 3 / 2 := by unfold fdHeightValid at hH; linarith
   unfold vertDelta
-  field_simp [ne_of_gt (show (0 : ℝ) < 5 * (H - Real.sqrt 3 / 2) from by positivity)]
+  field_simp [ne_of_gt (show (0 : ℝ) < 5 * (H - Real.sqrt 3 / 2) by positivity)]
   exact mul_div_cancel_right₀ _ (by nlinarith)
 
 private theorem norm_ofReal_mul_I_eq (r : ℝ) (hr : 0 ≤ r) :
@@ -61,7 +61,8 @@ private theorem norm_ofReal_mul_I_eq (r : ℝ) (hr : 0 ≤ r) :
 private theorem two_sin_abs_le_of_le_arcsin {α ε : ℝ} (hε : 0 < ε) (hε_lt : ε < 1/3)
     (hα : |α| ≤ Real.arcsin (ε/2)) : 2 * Real.sin |α| ≤ ε := by
   have : Real.sin |α| ≤ ε / 2 := by
-    rw [← Real.sin_arcsin (show (-1 : ℝ) ≤ ε / 2 by linarith) (show ε / 2 ≤ 1 by linarith)]
+    rw [← Real.sin_arcsin (show (-1 : ℝ) ≤ ε / 2 by linarith)
+      (show ε / 2 ≤ 1 by linarith)]
     exact Real.sin_le_sin_of_le_of_le_pi_div_two
       (by linarith [abs_nonneg α, Real.pi_pos])
       (Real.arcsin_le_pi_div_two _) hα
@@ -71,7 +72,8 @@ private theorem ε_lt_two_sin_abs {α ε : ℝ} (hε : 0 < ε) (hε_lt : ε < 1/
     (hα_pi2 : |α| ≤ Real.pi / 2) (hα : Real.arcsin (ε/2) < |α|) :
     ε < 2 * Real.sin |α| := by
   have : ε / 2 < Real.sin |α| := by
-    rw [← Real.sin_arcsin (show (-1 : ℝ) ≤ ε / 2 by linarith) (show ε / 2 ≤ 1 by linarith)]
+    rw [← Real.sin_arcsin (show (-1 : ℝ) ≤ ε / 2 by linarith)
+      (show ε / 2 ≤ 1 by linarith)]
     exact Real.sin_lt_sin_of_lt_of_le_pi_div_two
       (by linarith [Real.arcsin_nonneg.mpr (show (0 : ℝ) ≤ ε / 2 by linarith)]) hα_pi2 hα
   linarith
@@ -88,11 +90,11 @@ theorem arc_near_at_rho_arcsin {ε : ℝ} (hε : 0 < ε) (hε_lt : ε < 1/3)
   have ht1 : (1 : ℝ)/5 < t := by
     nlinarith [(abs_le.mp ht).1, arcsinDelta_lt_one_fifth hε hε_lt]
   rw [fdBoundaryFun_arc_dist_rho H t ht1 ht2,
-    show (fdArcAngle t - 2 * Real.pi / 3) / 2 = 5 * (t - 3/5) * Real.pi / 12 from by
+    show (fdArcAngle t - 2 * Real.pi / 3) / 2 = 5 * (t - 3/5) * Real.pi / 12 by
       simp only [fdArcAngle]; ring]
   set α := 5 * (t - 3/5) * Real.pi / 12
   have hα_le_asin : |α| ≤ Real.arcsin (ε / 2) := by
-    rw [show α = 5 * Real.pi / 12 * (t - 3/5) from by ring, abs_mul,
+    rw [show α = 5 * Real.pi / 12 * (t - 3/5) by ring, abs_mul,
       abs_of_pos (by positivity), ← half_angle_arcsinDelta]
     exact mul_le_mul_of_nonneg_left ht (by positivity)
   have hα_le_pi : |α| ≤ Real.pi :=
@@ -117,11 +119,11 @@ theorem arc_far_at_rho_arcsin {ε : ℝ} (hε : 0 < ε) (hε_lt : ε < 1/3)
       _ ≤ 1 := by norm_num
       _ ≤ _ := fdBoundaryFun_seg1_dist_rho_lower H (1/5) (le_refl _)
   rw [fdBoundaryFun_arc_dist_rho H t ht1 (le_of_lt ht3),
-    show (fdArcAngle t - 2 * Real.pi / 3) / 2 = 5 * (t - 3/5) * Real.pi / 12 from by
+    show (fdArcAngle t - 2 * Real.pi / 3) / 2 = 5 * (t - 3/5) * Real.pi / 12 by
       simp only [fdArcAngle]; ring]
   set α := 5 * (t - 3/5) * Real.pi / 12
   have hα_abs : |α| = 5 * Real.pi / 12 * |t - 3/5| := by
-    rw [show α = 5 * Real.pi / 12 * (t - 3/5) from by ring, abs_mul,
+    rw [show α = 5 * Real.pi / 12 * (t - 3/5) by ring, abs_mul,
       abs_of_pos (by positivity)]
   have hα_gt_asin : Real.arcsin (ε / 2) < |α| := by
     rw [hα_abs, ← half_angle_arcsinDelta]
@@ -138,8 +140,8 @@ theorem fdBoundaryFun_seg4_dist_rho (hH : fdHeightValid H) (t : ℝ)
     ‖fdBoundaryFun H t - ellipticPointRho‖ =
       5 * (t - 3/5) * (H - Real.sqrt 3 / 2) := by
   have hH' : 0 < H - Real.sqrt 3 / 2 := by unfold fdHeightValid at hH; linarith
-  simp only [fdBoundaryFun, show ¬t ≤ 1/5 from by linarith,
-    show ¬t ≤ 2/5 from by linarith, show ¬t ≤ 3/5 from by linarith,
+  simp only [fdBoundaryFun, show ¬t ≤ 1/5 by linarith,
+    show ¬t ≤ 2/5 by linarith, show ¬t ≤ 3/5 by linarith,
     ht4, ite_true, ite_false,
     ellipticPointRho, ellipticPointRho', UpperHalfPlane.coe_mk]
   have h_eq : (-1 : ℂ) / 2 +
@@ -186,11 +188,11 @@ theorem arc_near_at_rhoPlusOne_arcsin {ε : ℝ} (hε : 0 < ε) (hε_lt : ε < 1
   · rw [fdBoundaryFun_at_one_fifth, sub_self, norm_zero]
     linarith
   rw [fdBoundaryFun_arc_dist_rhoPlusOne H t ht1' ht2,
-    show (fdArcAngle t - Real.pi / 3) / 2 = 5 * (t - 1/5) * Real.pi / 12 from by
+    show (fdArcAngle t - Real.pi / 3) / 2 = 5 * (t - 1/5) * Real.pi / 12 by
       simp only [fdArcAngle]; ring]
   set α := 5 * (t - 1/5) * Real.pi / 12
   have hα_le_asin : |α| ≤ Real.arcsin (ε / 2) := by
-    rw [show α = 5 * Real.pi / 12 * (t - 1/5) from by ring, abs_mul,
+    rw [show α = 5 * Real.pi / 12 * (t - 1/5) by ring, abs_mul,
       abs_of_pos (by positivity), ← half_angle_arcsinDelta]
     exact mul_le_mul_of_nonneg_left ht (by positivity)
   have hα_le_pi : |α| ≤ Real.pi :=
@@ -211,11 +213,11 @@ theorem arc_far_at_rhoPlusOne_arcsin {ε : ℝ} (hε : 0 < ε) (hε_lt : ε < 1/
     simp only [sub_self, abs_zero] at hδt
     linarith [arcsinDelta_pos hε]
   rw [fdBoundaryFun_arc_dist_rhoPlusOne H t ht1 ht_arc.2,
-    show (fdArcAngle t - Real.pi / 3) / 2 = 5 * (t - 1/5) * Real.pi / 12 from by
+    show (fdArcAngle t - Real.pi / 3) / 2 = 5 * (t - 1/5) * Real.pi / 12 by
       simp only [fdArcAngle]; ring]
   set α := 5 * (t - 1/5) * Real.pi / 12
   have hα_abs : |α| = 5 * Real.pi / 12 * |t - 1/5| := by
-    rw [show α = 5 * Real.pi / 12 * (t - 1/5) from by ring, abs_mul,
+    rw [show α = 5 * Real.pi / 12 * (t - 1/5) by ring, abs_mul,
       abs_of_pos (by positivity)]
   have hα_gt_asin : Real.arcsin (ε / 2) < |α| := by
     rw [hα_abs, ← half_angle_arcsinDelta]
@@ -232,7 +234,7 @@ theorem fdBoundaryFun_seg1_dist_rhoPlusOne (hH : fdHeightValid H) (t : ℝ)
     ‖fdBoundaryFun H t - ellipticPointRhoPlusOne‖ =
       5 * (1/5 - t) * (H - Real.sqrt 3 / 2) := by
   have hH' : 0 < H - Real.sqrt 3 / 2 := by unfold fdHeightValid at hH; linarith
-  simp only [fdBoundaryFun, show t ≤ 1/5 from by linarith, ite_true,
+  simp only [fdBoundaryFun, show t ≤ 1/5 by linarith, ite_true,
     ellipticPointRhoPlusOne, ellipticPointRhoPlusOne', UpperHalfPlane.coe_mk]
   have h_eq : (1 : ℂ) / 2 +
       (↑H - 5 * ↑t * (↑H - ↑(Real.sqrt 3) / 2)) * I -
@@ -305,7 +307,7 @@ private theorem rho_far_left {H : ℝ}
   · push Not at ht1
     have ht3 : t ≤ 3/5 := by linarith [ht.2, arcsinDelta_pos hε]
     exact arc_far_at_rho_arcsin H hε hε_13 ⟨le_of_lt ht1, ht3⟩ (by
-      rw [show t - 3/5 = -(3/5 - t) from by ring, abs_neg,
+      rw [show t - 3/5 = -(3/5 - t) by ring, abs_neg,
         abs_of_pos (by linarith [ht.2, arcsinDelta_pos hε])]
       linarith [ht.2])
 
@@ -342,7 +344,7 @@ private theorem rho_near {H : ℝ} (hH : 1 < H)
   rw [hγ t ht01]
   by_cases ht35 : t ≤ 3/5
   · exact arc_near_at_rho_arcsin H hε hε_13 ht35 (by
-      rw [show t - 3/5 = -(3/5 - t) from by ring, abs_neg,
+      rw [show t - 3/5 = -(3/5 - t) by ring, abs_neg,
         abs_of_nonneg (by linarith)]
       linarith [ht.1])
   · push Not at ht35
