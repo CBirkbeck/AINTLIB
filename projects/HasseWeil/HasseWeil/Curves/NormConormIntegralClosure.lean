@@ -372,7 +372,7 @@ theorem valuation_algebraMap_coordinateRing_C₁_le_one
   | monomial n a =>
     rw [← Polynomial.C_mul_X_pow_eq_monomial, map_mul, map_mul, map_pow, map_pow, w.map_mul,
       map_pow w]
-    refine mul_le_one' ?_ (pow_le_one₀ zero_le' hy)
+    refine mul_le_one' ?_ (pow_le_one₀ zero_le hy)
     induction a using Polynomial.induction_on' with
     | add p q hp hq =>
       rw [Polynomial.C_add, map_add, map_add]
@@ -380,7 +380,7 @@ theorem valuation_algebraMap_coordinateRing_C₁_le_one
     | monomial m c =>
       rw [← Polynomial.C_mul_X_pow_eq_monomial, Polynomial.C_mul, Polynomial.C_pow,
         map_mul, map_mul, map_pow, map_pow, w.map_mul, map_pow w]
-      refine mul_le_one' ?_ (pow_le_one₀ zero_le' hx)
+      refine mul_le_one' ?_ (pow_le_one₀ zero_le hx)
       -- the `F`-constant `c`: a base-ring element of `B`, hence `v`-integral.  Route the
       -- `F`-constant through `C₂.CoordinateRing` (where `valuation_algebraMap_coordinateRing_le_one`
       -- applies): `(mk (C (C c)))_{C₁} = algMap_F c = algMap_{C₂.CR}(algMap_F c)` via the towers.
@@ -418,7 +418,7 @@ noncomputable def centerIdealOnC₁
             v.valuation C₁.FunctionField (algebraMap C₁.CoordinateRing C₁.FunctionField a)
           ≤ 1 * v.valuation C₁.FunctionField
               (algebraMap C₁.CoordinateRing C₁.FunctionField a) :=
-            mul_le_mul_right' (valuation_algebraMap_coordinateRing_C₁_le_one v hx hy r) _
+            mul_le_mul_left (valuation_algebraMap_coordinateRing_C₁_le_one v hx hy r) _
       _ < 1 := by rw [one_mul]; exact ha
 
 @[simp] theorem mem_centerIdealOnC₁
@@ -460,7 +460,7 @@ theorem bPrime_valuation_eq_pointValuation_of_coordGen_le_one
     · intro a b hab
       rw [hc_def, mem_centerIdealOnC₁, map_mul, (w).map_mul] at hab
       by_contra h
-      push_neg at h
+      push Not at h
       obtain ⟨ha, hb⟩ := h
       rw [hc_def, mem_centerIdealOnC₁, not_lt] at ha hb
       have ha1 : w (algebraMap C₁.CoordinateRing C₁.FunctionField a) = 1 :=
@@ -774,7 +774,7 @@ theorem valuation_algebraMap_F_eq_one
       = v.valuation C₁.FunctionField (algebraMap F C₁.FunctionField c) *
         v.valuation C₁.FunctionField (algebraMap F C₁.FunctionField c⁻¹) := hprod.symm
     _ ≤ v.valuation C₁.FunctionField (algebraMap F C₁.FunctionField c) * 1 :=
-        mul_le_mul_left' hcinv_le _
+        mul_le_mul_right hcinv_le _
     _ = v.valuation C₁.FunctionField (algebraMap F C₁.FunctionField c) := mul_one _
 
 /-- **The Weierstrass relation in `K(C₁)` with `F`-constant coefficients**:
@@ -823,11 +823,11 @@ theorem valuation_a₁X_add_a₃_le
       w (coordXFun C₁) := by
     rw [w.map_mul]
     rcases eq_or_ne C₁.toAffine.a₁ 0 with h0 | h0
-    · rw [h0, map_zero (algebraMap F C₁.FunctionField), w.map_zero, zero_mul]; exact zero_le'
+    · rw [h0, map_zero (algebraMap F C₁.FunctionField), w.map_zero, zero_mul]; exact zero_le
     · rw [valuation_algebraMap_F_eq_one v h0, one_mul]
   have ha₃ : w (algebraMap F C₁.FunctionField C₁.toAffine.a₃) ≤ w (coordXFun C₁) := by
     rcases eq_or_ne C₁.toAffine.a₃ 0 with h0 | h0
-    · rw [h0, map_zero (algebraMap F C₁.FunctionField), w.map_zero]; exact zero_le'
+    · rw [h0, map_zero (algebraMap F C₁.FunctionField), w.map_zero]; exact zero_le
     · rw [valuation_algebraMap_F_eq_one v h0]; exact le_of_lt hx
   exact le_trans (w.map_add _ _) (max_le ha₁x ha₃)
 
@@ -843,7 +843,7 @@ theorem valuation_const_mul_pow_le {Γ₀ : Type*} [LinearOrderedCommGroupWithZe
     w (algebraMap F C₁.FunctionField c * t ^ k) ≤ w t ^ 3 := by
   rw [w.map_mul, map_pow]
   calc w (algebraMap F C₁.FunctionField c) * w t ^ k
-      ≤ 1 * w t ^ k := mul_le_mul_right' (hc c) _
+      ≤ 1 * w t ^ k := mul_le_mul_left (hc c) _
     _ = w t ^ k := one_mul _
     _ ≤ w t ^ 3 := pow_le_pow_right₀ h1 hk
 
@@ -890,7 +890,7 @@ theorem valuation_weierstrassCubic_le
     (le_of_lt hx) (fun c => by
       rcases eq_or_ne c 0 with h0 | h0
       · rw [h0, map_zero (algebraMap F C₁.FunctionField), (v.valuation C₁.FunctionField).map_zero]
-        exact zero_le'
+        exact zero_le
       · exact le_of_eq (valuation_algebraMap_F_eq_one v h0))
 
 set_option maxHeartbeats 1600000 in
@@ -906,7 +906,7 @@ theorem valuation_a₁X_add_a₃_le_generic {Γ₀ : Type*} [LinearOrderedCommGr
       w (coordXFun C₁) := by
     rw [w.map_mul]
     calc w (algebraMap F C₁.FunctionField C₁.toAffine.a₁) * w (coordXFun C₁)
-        ≤ 1 * w (coordXFun C₁) := mul_le_mul_right' (hc _) _
+        ≤ 1 * w (coordXFun C₁) := mul_le_mul_left (hc _) _
       _ = w (coordXFun C₁) := one_mul _
   have ha₃ : w (algebraMap F C₁.FunctionField C₁.toAffine.a₃) ≤ w (coordXFun C₁) :=
     le_trans (hc _) h1
@@ -940,7 +940,7 @@ theorem valuation_coordYFun_le_sq_generic {Γ₀ : Type*} [LinearOrderedCommGrou
     refine le_trans (Valuation.map_sub w _ _) (max_le_max ?_ ?_)
     · exact valuation_weierstrassCubic_le_generic w (coordXFun C₁) h1X hc
     · rw [w.map_mul]
-      exact mul_le_mul_right' (valuation_a₁X_add_a₃_le_generic w h1X hc) _
+      exact mul_le_mul_left (valuation_a₁X_add_a₃_le_generic w h1X hc) _
   -- trichotomy: `Y ≤ X²`
   by_contra hcon
   rw [not_le] at hcon
@@ -950,7 +950,7 @@ theorem valuation_coordYFun_le_sq_generic {Γ₀ : Type*} [LinearOrderedCommGrou
   have hY0 : (0 : Γ₀) < Y := zero_lt_iff.mpr hYne
   have hXleX2 : X ≤ X ^ 2 := by
     calc X = X * 1 := (mul_one X).symm
-      _ ≤ X * X := mul_le_mul_left' h1X X
+      _ ≤ X * X := mul_le_mul_right h1X X
       _ = X ^ 2 := (sq X).symm
   -- `X³ < X·Y` and `X·Y < Y²`, so `max(X³, X·Y) < Y²` — contradicting `hYsq`.
   have hX3_lt : X ^ 3 < X * Y := by
@@ -1065,7 +1065,7 @@ theorem valuation_coordYFun_div_coordXFun_sq_le_one
   rw [map_div₀, div_le_one₀ (zero_lt_iff.mpr hwx2ne), map_pow]
   have hc : ∀ c : F, w (algebraMap F C₁.FunctionField c) ≤ 1 := fun c => by
     rcases eq_or_ne c 0 with h0 | h0
-    · rw [h0, map_zero (algebraMap F C₁.FunctionField), w.map_zero]; exact zero_le'
+    · rw [h0, map_zero (algebraMap F C₁.FunctionField), w.map_zero]; exact zero_le
     · exact le_of_eq (valuation_algebraMap_F_eq_one v h0)
   exact valuation_coordYFun_le_sq_generic w hx hc
 
@@ -1200,7 +1200,7 @@ theorem valuation_coordYFun_le_one (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ :=
   have hxle : w (coordXFun C₁) ≤ 1 := valuation_coordXFun_le_one hreg v
   have hc : ∀ c : F, w (algebraMap F C₁.FunctionField c) ≤ 1 := fun c => by
     rcases eq_or_ne c 0 with h0 | h0
-    · rw [h0, map_zero (algebraMap F C₁.FunctionField), w.map_zero]; exact zero_le'
+    · rw [h0, map_zero (algebraMap F C₁.FunctionField), w.map_zero]; exact zero_le
     · exact le_of_eq (valuation_algebraMap_F_eq_one v h0)
   -- the Weierstrass relation, rearranged: `y₁² = c − b·y₁`
   have hyeq : coordYFun C₁ ^ 2 =
@@ -1216,13 +1216,13 @@ theorem valuation_coordYFun_le_one (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ :=
       algebraMap F C₁.FunctionField C₁.toAffine.a₄ * coordXFun C₁ +
       algebraMap F C₁.FunctionField C₁.toAffine.a₆) ≤ 1 := by
     have hx3 : w (coordXFun C₁ ^ 3) ≤ 1 := by
-      rw [map_pow]; exact pow_le_one₀ zero_le' hxle
+      rw [map_pow]; exact pow_le_one₀ zero_le hxle
     have hmono : ∀ (cf : F) (k : ℕ),
         w (algebraMap F C₁.FunctionField cf * coordXFun C₁ ^ k) ≤ 1 := by
       intro cf k
       rw [w.map_mul, map_pow]
       calc w (algebraMap F C₁.FunctionField cf) * w (coordXFun C₁) ^ k
-          ≤ 1 * 1 := mul_le_mul' (hc cf) (pow_le_one₀ zero_le' hxle)
+          ≤ 1 * 1 := mul_le_mul' (hc cf) (pow_le_one₀ zero_le hxle)
         _ = 1 := mul_one 1
     have ha₂ := hmono C₁.toAffine.a₂ 2
     have ha₄' : w (algebraMap F C₁.FunctionField C₁.toAffine.a₄ * coordXFun C₁) ≤ 1 := by
@@ -1252,7 +1252,7 @@ theorem valuation_coordYFun_le_one (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ :=
     rw [w.map_mul]
     calc w (algebraMap F C₁.FunctionField C₁.toAffine.a₁ * coordXFun C₁ +
             algebraMap F C₁.FunctionField C₁.toAffine.a₃) * w (coordYFun C₁)
-        ≤ 1 * w (coordYFun C₁) := mul_le_mul_right' hlin _
+        ≤ 1 * w (coordYFun C₁) := mul_le_mul_left hlin _
       _ = w (coordYFun C₁) := one_mul _
   have hYne : w (coordYFun C₁) ≠ 0 := by
     rw [Ne, Valuation.zero_iff]; exact coordYFun_ne_zero (C₁ := C₁)
