@@ -2,6 +2,13 @@ module
 
 public import BernoulliRegular.CyclotomicUnits.DworkParameter.SamePrimeLog.SamePrimeFiniteLogAdditivity
 
+/-!
+# Homogeneous Artin-Hasse exponential coordinates
+
+This file relates homogeneous pieces of the finite Artin-Hasse exponential coordinate
+series to factorial-weighted formal logarithm coefficients modulo powers of `lambdaIdeal`.
+-/
+
 @[expose] public section
 
 noncomputable section
@@ -42,6 +49,7 @@ noncomputable def samePrimeFiniteArtinHasseExpCoordLogHomogeneousTerm
   ((-1 : ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1)) ^ (n + 1)) *
     samePrimeFiniteArtinHasseExpCoordLogHomogeneousCore (p := p) (K := K) N n d x hx
 
+/-- The homogeneous term is the signed quotient evaluation when `n` is positive and `n ≤ d`. -/
 theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousTerm_eq_signed_eval
     (N n d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hn : n ≠ 0) (hnd : n ≤ d) :
@@ -65,6 +73,7 @@ def samePrimeFiniteArtinHasseExpCoordQuotientSeries
     (PowerSeries.map (Ideal.Quotient.mk ((lambdaIdeal p K) ^ (N + 1)))
       (integralExpMinusOneSeries p K))
 
+/-- Mapping the homogeneous coordinate polynomial to the quotient recovers its quotient series. -/
 theorem samePrimeFiniteArtinHasseExpCoordPoly_map_eq_quotientSeries
     (N : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     (((samePrimeFiniteArtinHasseExpCoordPoly (p := p) (K := K) N x).map
@@ -117,6 +126,8 @@ theorem samePrimeFiniteArtinHasseExpCoordPoly_map_eq_quotientSeries
       rw [hpoly, map_zero]
       rw [hpowmap, hxzero, zero_mul]
 
+/-- Quotienting a coefficient of a polynomial power agrees with the corresponding quotient-series
+coefficient. -/
 theorem quotient_mk_samePrimeFiniteArtinHasseExpCoordPoly_pow_coeff_eq
     (N n d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     Ideal.Quotient.mk ((lambdaIdeal p K) ^ (N + 1))
@@ -149,6 +160,8 @@ theorem quotient_mk_samePrimeFiniteArtinHasseExpCoordPoly_pow_coeff_eq
         ((samePrimeFiniteArtinHasseExpCoordQuotientSeries (p := p) (K := K) N x) ^ n) := by
         rw [hseries]
 
+/-- Coefficients of powers of the quotient series split into the `x ^ d` factor and the mapped
+Artin--Hasse exponential coefficient. -/
 theorem coeff_samePrimeFiniteArtinHasseExpCoordQuotientSeries_pow
     (N n d : ℕ) (x : ValuedIntegerRing p K) :
     (PowerSeries.coeff
@@ -184,6 +197,7 @@ theorem coeff_samePrimeFiniteArtinHasseExpCoordQuotientSeries_pow
             (integralExpMinusOneSeries p K)) ^ n) := by
         simp [xbar, q, A, EpsMinus]
 
+/-- The signed homogeneous numerator coefficient lies in the expected power of `lambdaIdeal`. -/
 theorem samePrimeFiniteArtinHasseExpCoord_signed_pow_coeff_mem_lambdaIdeal_pow
     (N n d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     ((-1 : ValuedIntegerRing p K) ^ (n + 1)) *
@@ -193,11 +207,13 @@ theorem samePrimeFiniteArtinHasseExpCoord_signed_pow_coeff_mem_lambdaIdeal_pow
     (samePrimeFiniteArtinHasseExpCoordPoly_pow_coeff_mem_lambdaIdeal_pow
       (p := p) (K := K) N hx n d)
 
+/-- Integral representative of the signed homogeneous logarithm numerator. -/
 def samePrimeFiniteArtinHasseExpCoordLogHomogeneousNumerator
     (N n d : ℕ) (x : ValuedIntegerRing p K) : ValuedIntegerRing p K :=
   ((-1 : ValuedIntegerRing p K) ^ (n + 1)) *
     ((samePrimeFiniteArtinHasseExpCoordPoly (p := p) (K := K) N x) ^ n).coeff d
 
+/-- The homogeneous logarithm numerator is contained in the expected power of `lambdaIdeal`. -/
 theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousNumerator_mem_lambdaIdeal_pow
     (N n d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     samePrimeFiniteArtinHasseExpCoordLogHomogeneousNumerator (p := p) (K := K) N n d x ∈
@@ -205,11 +221,13 @@ theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousNumerator_mem_lambdaIdeal
   samePrimeFiniteArtinHasseExpCoord_signed_pow_coeff_mem_lambdaIdeal_pow
     (p := p) (K := K) N n d hx
 
+/-- Quotient map modulo `(lambdaIdeal p K) ^ (N + 1)`. -/
 def samePrimeQuotientMap (N : ℕ) :
     ValuedIntegerRing p K →+*
       ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1) :=
   Ideal.Quotient.mk ((lambdaIdeal p K) ^ (N + 1))
 
+/-- Map from integral rationals to the same-prime quotient ring. -/
 def samePrimeRIntegralRatToQuotient (N : ℕ) :
     Furtwaengler.DieudonneDwork.rIntegralRatSubring p →+*
       ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1) :=
@@ -223,6 +241,8 @@ private theorem mul_mul_mul_rotate_eq_of_eq_of_eq {R : Type*} [CommSemigroup R]
   rw [hy]
   ac_rfl
 
+/-- The mapped factorial-weighted formal logarithm coefficient has the expected quotient
+coefficient formula. -/
 theorem samePrime_rIntegralRatToQuotient_factorialWeightedLogCoeff
     (N d n : ℕ) :
     samePrimeRIntegralRatToQuotient (p := p) (K := K) N
@@ -321,9 +341,8 @@ theorem samePrime_rIntegralRatToQuotient_factorialWeightedLogCoeff
           hcoeff
 
 set_option linter.style.longLine false in
-set_option maxHeartbeats 800000 in
--- The quotient-sum comparison is elaboration-heavy because the target expands
--- finite sums, quotient maps, and power-series coefficients at the same time.
+/-- The factorial-weighted homogeneous numerator sum is the quotient image of the corresponding
+formal logarithm coefficient sum. -/
 theorem quotient_mk_samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sum_eq_formal
     (N d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     samePrimeQuotientMap (p := p) (K := K) N
@@ -462,6 +481,8 @@ theorem quotient_mk_samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_w
         rw [hmapsum]
 
 set_option linter.style.longLine false in
+/-- Increasing the precision from `N` to `M` changes a weighted homogeneous numerator only in a
+high power of `lambdaIdeal`. -/
 theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_precision_mem_lambdaIdeal_pow
     (N M n d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hNM : N ≤ M) (hn1 : 1 ≤ n) (hnd : n ≤ d) :
@@ -479,15 +500,15 @@ theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_
     simpa [s] using
       Nat.factorization_mul_pred_le_pred
         (ell := p) (n := n) (Fact.out : Nat.Prime p) hn0
-  have hs_le_d : s ≤ d := by omega
+  have hs_le_d : s ≤ d := by lia
   have hu : N + 1 + s ≤ u := by
     by_cases hdsmall : d < N + n
     · dsimp [u]
       rw [if_pos hdsmall]
-      omega
+      lia
     · dsimp [u]
       rw [if_neg hdsmall]
-      omega
+      lia
   have hpowdiff :
       ((samePrimeFiniteArtinHasseExpCoordPoly (p := p) (K := K) N x) ^ n).coeff d -
           ((samePrimeFiniteArtinHasseExpCoordPoly (p := p) (K := K) M x) ^ n).coeff d ∈
@@ -536,10 +557,11 @@ theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_
       d.factorial.factorization p * (p - 1) + (N + 1) ≤
         (d.factorial / n).factorization p * (p - 1) + u := by
     rw [hfac, Nat.add_mul]
-    omega
+    lia
   exact Ideal.pow_le_pow_right htarget hweighted
 
 set_option linter.style.longLine false in
+/-- A convenient high-precision specialization of the weighted numerator precision estimate. -/
 theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_highPrecision_mem_lambdaIdeal_pow
     (N n d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hn1 : 1 ≤ n) (hnd : n ≤ d) :
@@ -555,9 +577,8 @@ theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_
     (Nat.le_add_right N (d.factorial.factorization p * (p - 1))) hn1 hnd
 
 set_option linter.style.longLine false in
-set_option maxHeartbeats 800000 in
--- The proof compares two expanded quotient sums after rewriting a formal
--- coefficient sum to zero, so elaboration needs the same local bump.
+/-- If the degree is not a power of `p`, the factorial-weighted homogeneous numerator sum lies in
+the predicted high power of `lambdaIdeal`. -/
 theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sum_mem_lambdaIdeal_pow_of_not_pow
     (N d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hd : ¬ ∃ r : ℕ, d = p ^ r) :
@@ -570,7 +591,7 @@ theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sum_
   let D : ℕ := d.factorial.factorization p * (p - 1)
   let M : ℕ := D + N
   let I : Ideal (ValuedIntegerRing p K) := (lambdaIdeal p K) ^ (D + (N + 1))
-  have hNM : N ≤ M := by omega
+  have hNM : N ≤ M := by lia
   have hdiff :
       (∑ n ∈ Finset.Icc 1 d,
         ((d.factorial / n : ℕ) : ValuedIntegerRing p K) *
@@ -639,8 +660,8 @@ theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sum_
 
 set_option linter.style.longLine false in
 set_option maxHeartbeats 800000 in
--- The power-degree slice repeats the quotient-sum comparison after replacing
--- the formal coefficient sum by its single surviving monomial.
+/-- For degrees `p ^ r`, subtracting the surviving monomial gives the same high-power
+`lambdaIdeal` divisibility. -/
 theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_pow_mem_lambdaIdeal_pow
     (N r : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     (∑ n ∈ Finset.Icc 1 (p ^ r),
@@ -658,7 +679,7 @@ theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_
   have hd_ne : d ≠ 0 := pow_ne_zero r (Fact.out : Nat.Prime p).ne_zero
   have hd_mem : d ∈ Finset.Icc 1 d :=
     Finset.mem_Icc.mpr ⟨Nat.succ_le_of_lt (Nat.pos_of_ne_zero hd_ne), le_rfl⟩
-  have hNM : N ≤ M := by omega
+  have hNM : N ≤ M := by lia
   have hdiff :
       (∑ n ∈ Finset.Icc 1 d,
         ((d.factorial / n : ℕ) : ValuedIntegerRing p K) *
@@ -684,7 +705,7 @@ theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_
     have hq :=
       quotient_mk_samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sum_eq_formal
         (p := p) (K := K) M d hx
-    rw [show d = p ^ r from rfl] at hq
+    rw [show d = p ^ r by rfl] at hq
     rw [Furtwaengler.FiniteArtinHasseFormal.sum_factorialWeightedLogCoeff_eq_factorial_div_pow
       p r] at hq
     simpa [d, samePrimeQuotientMap, samePrimeRIntegralRatToQuotient, map_mul,
