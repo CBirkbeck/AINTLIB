@@ -21,7 +21,6 @@ monotonicity of `sin` on `[0, π/2]` via `|sin α| = sin|α|`. The analytic core
 ## Main results
 
 * `singleCrossingData_atI_of_ftcHyp` -- `SingleCrossingData` at `i` from `ArcFTCHyp`
-* `windingNumber_atI_of_ftcHyp` -- winding number at `i` is `-1/2`
 -/
 
 open Complex MeasureTheory Set Filter Topology
@@ -84,35 +83,45 @@ private theorem abs_halfAngle_le_pi12 {t : ℝ}
       ≤ 5 * Real.pi / 12 * (1/5) := by gcongr
     _ = Real.pi / 12 := by ring
 
+private theorem two_sin_abs_le_of_le_arcsin {α ε : ℝ} (hε : 0 < ε) (hε_lt : ε < 1/3)
+    (hα : |α| ≤ Real.arcsin (ε / 2)) : 2 * Real.sin |α| ≤ ε := by
+  have : Real.sin |α| ≤ ε / 2 := by
+    rw [← Real.sin_arcsin (show (-1 : ℝ) ≤ ε / 2 by linarith) (show ε / 2 ≤ 1 by linarith)]
+    exact Real.sin_le_sin_of_le_of_le_pi_div_two
+      (by linarith [abs_nonneg α, Real.pi_pos]) (Real.arcsin_le_pi_div_two _) hα
+  linarith
+
+private theorem ε_lt_two_sin_abs {α ε : ℝ} (hε : 0 < ε) (hε_lt : ε < 1/3)
+    (hα_pi2 : |α| ≤ Real.pi / 2) (hα : Real.arcsin (ε / 2) < |α|) :
+    ε < 2 * Real.sin |α| := by
+  have : ε / 2 < Real.sin |α| := by
+    rw [← Real.sin_arcsin (show (-1 : ℝ) ≤ ε / 2 by linarith) (show ε / 2 ≤ 1 by linarith)]
+    exact Real.sin_lt_sin_of_lt_of_le_pi_div_two
+      (by linarith [Real.arcsin_nonneg.mpr (show (0 : ℝ) ≤ ε / 2 by linarith)]) hα_pi2 hα
+  linarith
+
 /-- Near bound: `|t - 2/5| ≤ arcsinDelta(ε)` implies `‖γ(t) - i‖ ≤ ε`. -/
 theorem arc_near_at_I_arcsin (H : ℝ) {ε : ℝ} (hε : 0 < ε) (hε_lt : ε < 1/3)
     {t : ℝ} (ht : |t - 2/5| ≤ arcsinDelta ε) :
     ‖fdBoundaryFun H t - I‖ ≤ ε := by
-  have hpi := Real.pi_pos
-  have hδ_small := arcsinDelta_lt_one_fifth hε hε_lt
   have ht1 : (1 : ℝ)/5 < t := by
-    have := (abs_le.mp ht).1; have := arcsinDelta_pos hε; nlinarith
+    nlinarith [(abs_le.mp ht).1, arcsinDelta_lt_one_fifth hε hε_lt, arcsinDelta_pos hε]
   have ht2 : t ≤ 3/5 := by
-    have := (abs_le.mp ht).2; nlinarith
+    nlinarith [(abs_le.mp ht).2, arcsinDelta_lt_one_fifth hε hε_lt]
   rw [fdBoundaryFun_arc_dist_I H t ht1 ht2, halfAngle_eq]
   set α := 5 * (t - 2/5) * Real.pi / 12
   have hα_le_asin : |α| ≤ Real.arcsin (ε / 2) := by
     rw [abs_halfAngle_eq, ← half_angle_arcsinDelta]
     exact mul_le_mul_of_nonneg_left ht (by positivity)
-  have harc_le : Real.arcsin (ε / 2) ≤ Real.pi / 2 := Real.arcsin_le_pi_div_two _
-  have hα_le_pi : |α| ≤ Real.pi := by linarith
+  have hα_le_pi : |α| ≤ Real.pi :=
+    (hα_le_asin.trans (Real.arcsin_le_pi_div_two _)).trans (by linarith [Real.pi_pos])
   rw [Real.abs_sin_eq_sin_abs_of_abs_le_pi hα_le_pi]
-  have h_sin_le : Real.sin |α| ≤ ε / 2 := by
-    rw [← Real.sin_arcsin (show (-1 : ℝ) ≤ ε / 2 by linarith) (show ε / 2 ≤ 1 by linarith)]
-    exact Real.sin_le_sin_of_le_of_le_pi_div_two
-      (by linarith [abs_nonneg α]) harc_le hα_le_asin
-  linarith
+  exact two_sin_abs_le_of_le_arcsin hε hε_lt hα_le_asin
 
 /-- Far bound on arc: `|t - 2/5| > arcsinDelta(ε)` implies `ε < ‖γ(t) - i‖`. -/
 theorem arc_far_at_I_arcsin (H : ℝ) {ε : ℝ} (hε : 0 < ε) (hε_lt : ε < 1/3)
     {t : ℝ} (ht_arc : t ∈ Icc (1/5 : ℝ) (3/5)) (hδt : arcsinDelta ε < |t - 2/5|) :
     ε < ‖fdBoundaryFun H t - I‖ := by
-  have hpi := Real.pi_pos
   rcases eq_or_lt_of_le ht_arc.1 with rfl | ht1
   · calc ε < 1/3 := hε_lt
       _ < 1/2 := by norm_num
@@ -123,13 +132,8 @@ theorem arc_far_at_I_arcsin (H : ℝ) {ε : ℝ} (hε : 0 < ε) (hε_lt : ε < 1
     rw [abs_halfAngle_eq, ← half_angle_arcsinDelta]
     exact mul_lt_mul_of_pos_left hδt (by positivity)
   have hα_le_pi12 := abs_halfAngle_le_pi12 ht_arc
-  have hα_le_pi : |α| ≤ Real.pi := by linarith
-  have harc_nn : 0 ≤ Real.arcsin (ε / 2) := Real.arcsin_nonneg.mpr (by linarith)
-  rw [Real.abs_sin_eq_sin_abs_of_abs_le_pi hα_le_pi]
-  have h_sin_gt : ε / 2 < Real.sin |α| := by
-    rw [← Real.sin_arcsin (show (-1 : ℝ) ≤ ε / 2 by linarith) (show ε / 2 ≤ 1 by linarith)]
-    exact Real.sin_lt_sin_of_lt_of_le_pi_div_two (by linarith) (by linarith) hα_gt_asin
-  linarith
+  rw [Real.abs_sin_eq_sin_abs_of_abs_le_pi (by linarith [Real.pi_pos])]
+  exact ε_lt_two_sin_abs hε hε_lt (by linarith [Real.pi_pos]) hα_gt_asin
 
 /-- Construct `SingleCrossingData` at `i` from `ArcFTCHyp`.
 
