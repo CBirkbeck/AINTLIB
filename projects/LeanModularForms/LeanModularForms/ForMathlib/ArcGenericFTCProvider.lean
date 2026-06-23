@@ -56,7 +56,8 @@ private lemma hasDerivAt_arc_h₀ (H : ℝ) (z₀ : ℂ) (t : ℝ) :
       (-seg1Speed H) t := by
     have hd : HasDerivAt (fun s : ℝ ↦ 5 * s * (H - Real.sqrt 3 / 2))
         (5 * (H - Real.sqrt 3 / 2)) t :=
-      (((hasDerivAt_id t).const_mul (5 : ℝ)).mul_const (H - Real.sqrt 3 / 2)).congr_deriv (by ring)
+      (((hasDerivAt_id t).const_mul (5 : ℝ)).mul_const (H - Real.sqrt 3 / 2)).congr_deriv
+        (by ring)
     exact (((hasDerivAt_const t H).sub hd).sub_const z₀.im).congr_deriv
       (by unfold seg1Speed; ring)
   have h1 : HasDerivAt
@@ -319,7 +320,8 @@ private lemma arc_seg5_ftc {H : ℝ} (hH : 1 < H) {θ₀ : ℝ} :
       volume (4/5) 1 ∧
     ∫ t in (4/5 : ℝ)..(1 : ℝ),
         deriv (arc_h₅ H (exp (↑θ₀ * I))) t / arc_h₅ H (exp (↑θ₀ * I)) t =
-      Complex.log (arc_h₅ H (exp (↑θ₀ * I)) 1) - Complex.log (arc_h₅ H (exp (↑θ₀ * I)) (4/5)) := by
+      Complex.log (arc_h₅ H (exp (↑θ₀ * I)) 1) -
+        Complex.log (arc_h₅ H (exp (↑θ₀ * I)) (4/5)) := by
   apply LogDerivFTC.ftc_log_on_segment (by norm_num : (4/5 : ℝ) ≤ 1)
     (arc_h₅_continuous H _).continuousOn
     (fun t _ ↦ (hasDerivAt_arc_h₅ H _ t).differentiableAt)
@@ -372,7 +374,8 @@ private lemma arc_branch_correction_45 {H : ℝ} (hH : 1 < H) (θ₀ : ℝ) :
     rw [arcZ₀_re_eq, arcZ₀_im_eq, show ((5 * (4/5) - 9/2 - Real.cos θ₀ : ℝ) : ℂ) =
       ((-1/2 - Real.cos θ₀ : ℝ) : ℂ) by push_cast; ring]
   rw [h_val]
-  set w := ((-1/2 - Real.cos θ₀ : ℝ) : ℂ) + ((H - Real.sin θ₀ : ℝ) : ℂ) * I with hw_def
+  set w := ((-1/2 - Real.cos θ₀ : ℝ) : ℂ) + ((H - Real.sin θ₀ : ℝ) : ℂ) * I
+    with hw_def
   have h_im_pos : 0 < w.im := by
     rw [hw_def]
     simp only [Complex.add_im, Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im,
