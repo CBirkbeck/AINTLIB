@@ -277,21 +277,15 @@ theorem coeff_formalW_pow_three (n : ℕ) :
   rw [h]
   exact coeff_formalW_cube W n
 
-/-- The convolution `conv₃` of `formalW_coeff` with truncation agrees with the full version,
-    since `formalW_coeff W k = 0` for `k < 3`. -/
-theorem conv₃_truncate (n : ℕ) :
-    conv₃ (fun m ↦ if m < n then formalW_coeff W m else 0) n =
-      conv₃ (formalW_coeff W) n := by
-  unfold conv₃
-  apply Finset.sum_congr rfl
-  intro i hi
-  apply Finset.sum_congr rfl
-  intro j hj
-  simp only [Finset.mem_range, Nat.lt_succ_iff] at hi hj
-  show (if i < n then formalW_coeff W i else 0) *
-       (if j < n then formalW_coeff W j else 0) *
-       (if n - i - j < n then formalW_coeff W (n - i - j) else 0) =
-       formalW_coeff W i * formalW_coeff W j * formalW_coeff W (n - i - j)
+/-- A single term of the `conv₃_truncate` triple sum: for indices `i ≤ n` and
+    `j ≤ n - i`, truncating the three `formalW_coeff` factors at level `n` does not
+    change the product, because `formalW_coeff W 0 = 0` absorbs the only index
+    (namely `0`) that can fall outside the truncation range. -/
+private theorem conv₃_truncate_term {n i j : ℕ} (hi : i ≤ n) (hj : j ≤ n - i) :
+    (if i < n then formalW_coeff W i else 0) *
+        (if j < n then formalW_coeff W j else 0) *
+        (if n - i - j < n then formalW_coeff W (n - i - j) else 0) =
+      formalW_coeff W i * formalW_coeff W j * formalW_coeff W (n - i - j) := by
   rcases lt_or_eq_of_le hi with h_i_lt | h_i_eq
   · rw [if_pos h_i_lt]
     rcases lt_or_eq_of_le hj with h_j_lt | h_j_eq
@@ -322,6 +316,19 @@ theorem conv₃_truncate (n : ℕ) :
     rw [if_neg (by omega : ¬ (i < i))]
     rw [show formalW_coeff W 0 = 0 from formalW_coeff_zero W]
     ring
+
+/-- The convolution `conv₃` of `formalW_coeff` with truncation agrees with the full version,
+    since `formalW_coeff W k = 0` for `k < 3`. -/
+theorem conv₃_truncate (n : ℕ) :
+    conv₃ (fun m ↦ if m < n then formalW_coeff W m else 0) n =
+      conv₃ (formalW_coeff W) n := by
+  unfold conv₃
+  apply Finset.sum_congr rfl
+  intro i hi
+  apply Finset.sum_congr rfl
+  intro j hj
+  simp only [Finset.mem_range, Nat.lt_succ_iff] at hi hj
+  exact conv₃_truncate_term W hi hj
 
 /-- **Silverman IV.1.1**: The defining recurrence for `formalW W` as a `PowerSeries`
     identity.
