@@ -22,6 +22,13 @@ where `m(ε) → 2`.
 
 ## Main Results
 
+* `logDeriv_modform_S_transform` — logDeriv functional equation for the modular form
+  under `z ↦ -1/z`
+* `S_isometry_unit_circle` — `z ↦ -1/z` is an isometry on the unit circle
+* `fdBoundary_arc_S_reverse` — arc reversal `γ(4 - t) = -1/γ(t)`
+* `arc_cpv_integral_S_identity` — the ε-truncated arc integral equals
+  `-(k·(π/12)·I)·m(ε)` by S-symmetry
+* `arc_non_excluded_measure_tendsto` — the non-excluded measure `m(ε)` tends to `2`
 * `arc_cpv_contribution_tendsto` — Tendsto for `sArcOfS S`-only truncation
 * `arc_cpv_eventually_eq_union` — bridge from `sArcOfS S ∪ sVertOfS S` to `sArcOfS S`
 * `tendsto_pvIntegral_arc_bridge` — final bridge for Assembly.lean
