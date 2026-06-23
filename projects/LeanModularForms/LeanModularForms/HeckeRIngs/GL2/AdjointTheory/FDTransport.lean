@@ -935,7 +935,7 @@ theorem sum_SL_tile_petersson_Gamma_p_α_eq_sum_SL_tile_traceSlash_Gamma1
             fun τ ↦ ∑ q ∈ Finset.univ.filter
               (fun q : SL(2, ℤ) ⧸ Gamma_p_α (N := N) α ↦
                 slGamma_p_αToGamma1 (N := N) α q = q'),
-                petersson k F (G ∣[k] ((q.out : SL(2, ℤ))⁻¹ * q'.out)) τ from by
+                petersson k F (G ∣[k] ((q.out : SL(2, ℤ))⁻¹ * q'.out)) τ by
           funext τ
           simp only [petersson, Finset.sum_apply, Finset.mul_sum, Finset.sum_mul]]
         rw [integral_finsetSum _ (h_int q')]
@@ -1445,7 +1445,7 @@ theorem exists_Gamma1_mul_inv_mem_Gamma0 (p : ℕ) (hp : Nat.Prime p) (hpN : Nat
       rw [show ((g * (Gamma1_S_corrector N p hpN)⁻¹).1 1 0 : ℤ) =
           (g.1 1 0) * (((Gamma1_S_corrector N p hpN)⁻¹).1 0 0) +
           (g.1 1 1) * (((Gamma1_S_corrector N p hpN)⁻¹).1 1 0)
-        from by rw [Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two]]
+        by rw [Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two]]
       simp only [Gamma1_S_corrector, Matrix.SpecialLinearGroup.coe_inv,
         Matrix.adjugate_fin_two_of,
         Matrix.cons_val', Matrix.cons_val_zero, Matrix.cons_val_one,
@@ -1467,7 +1467,7 @@ theorem exists_Gamma1_mul_inv_mem_Gamma0 (p : ℕ) (hp : Nat.Prime p) (hpN : Nat
         rw [show ((g * (lowerUni (m : ℤ))⁻¹).1 1 0 : ℤ) =
             (g.1 1 0) * (((lowerUni (m : ℤ))⁻¹).1 0 0) +
             (g.1 1 1) * (((lowerUni (m : ℤ))⁻¹).1 1 0)
-          from by rw [Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two]]
+          by rw [Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two]]
         simp only [lowerUni, Matrix.SpecialLinearGroup.coe_inv, Matrix.adjugate_fin_two_of,
           Matrix.cons_val', Matrix.cons_val_zero,
           Matrix.cons_val_one, Matrix.empty_val', Matrix.cons_val_fin_one, Matrix.of_apply]
@@ -1645,7 +1645,7 @@ theorem exists_Gamma1_mul_inv_mem_Gamma_up (p : ℕ) (hp : Nat.Prime p) (hpN : N
       rw [show ((g * (Gamma1_S_corrector_up N p hpN)⁻¹).1 0 1 : ℤ) =
           (g.1 0 0) * (((Gamma1_S_corrector_up N p hpN)⁻¹).1 0 1) +
           (g.1 0 1) * (((Gamma1_S_corrector_up N p hpN)⁻¹).1 1 1)
-        from by rw [Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two]]
+        by rw [Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two]]
       simp only [Gamma1_S_corrector_up, Matrix.SpecialLinearGroup.coe_inv,
         Matrix.adjugate_fin_two_of,
         Matrix.cons_val', Matrix.cons_val_zero, Matrix.cons_val_one,
@@ -1663,7 +1663,7 @@ theorem exists_Gamma1_mul_inv_mem_Gamma_up (p : ℕ) (hp : Nat.Prime p) (hpN : N
       rw [show ((g * (ModularGroup.T ^ m)⁻¹).1 0 1 : ℤ) =
           (g.1 0 0) * (((ModularGroup.T ^ m)⁻¹).1 0 1) +
           (g.1 0 1) * (((ModularGroup.T ^ m)⁻¹).1 1 1)
-        from by rw [Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two]]
+        by rw [Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two]]
       rw [← zpow_neg, ModularGroup.coe_T_zpow]
       simp only [Matrix.cons_val', Matrix.cons_val_zero, Matrix.cons_val_one,
         Matrix.empty_val', Matrix.cons_val_fin_one, Matrix.of_apply]
