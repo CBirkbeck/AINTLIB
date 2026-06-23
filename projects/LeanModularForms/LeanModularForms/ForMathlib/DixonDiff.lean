@@ -234,7 +234,8 @@ theorem dixonH2_differentiableAt_of_regular {f : ℂ → ℂ}
         (by positivity) hM₀_nn)
       (hD t ht_Icc) (norm_nonneg _)
       (mul_nonneg hM₀_nn (inv_nonneg.mpr hε_pos.le))
-  exact dixonH2_differentiableAt hoff h_int ⟨max M 0, hM₀_nn, hM_bd⟩ ⟨K, hD⟩ h_meas h_F'_meas
+  exact dixonH2_differentiableAt hoff h_int ⟨max M 0, hM₀_nn, hM_bd⟩ ⟨K, hD⟩
+    h_meas h_F'_meas
 
 private lemma dslope_comm (f : ℂ → ℂ) (a b : ℂ) : dslope f a b = dslope f b a := by
   by_cases h : b = a
@@ -266,7 +267,8 @@ private lemma min3_ball_subsets (w₀ : ℂ) {ε_m ε_d δ_C : ℝ}
     (Metric.ball w₀ ε ⊆ Metric.ball w₀ δ_C) := by
   refine ⟨by positivity,
     Metric.ball_subset_ball (by linarith [min_le_left (min ε_m ε_d) δ_C, min_le_left ε_m ε_d]),
-    Metric.ball_subset_ball (by linarith [min_le_left (min ε_m ε_d) δ_C, min_le_right ε_m ε_d]),
+    Metric.ball_subset_ball
+      (by linarith [min_le_left (min ε_m ε_d) δ_C, min_le_right ε_m ε_d]),
     Metric.ball_subset_ball (by linarith [min_le_right (min ε_m ε_d) δ_C])⟩
 
 private lemma dslope_deriv_product_bound
@@ -505,8 +507,8 @@ private lemma dslope_deriv_mul_extend_aestronglyMeasurable
   rw [h_uIoc] at ht
   have ht_Icc : t ∈ Icc (0 : ℝ) 1 := Ioc_subset_Icc_self ht
   have h_diff : DifferentiableAt ℂ (dslope f (γ.toPiecewiseC1Path t)) w₀ :=
-    ((Complex.differentiableOn_dslope (hU.mem_nhds (hγ t ht_Icc))).mpr hf w₀ hw₀).differentiableAt
-      (hU.mem_nhds hw₀)
+    ((Complex.differentiableOn_dslope (hU.mem_nhds (hγ t ht_Icc))).mpr
+      hf w₀ hw₀).differentiableAt (hU.mem_nhds hw₀)
   have hy_within : Tendsto (fun n ↦ w₀ + h_seq n) atTop (𝓝[≠] w₀) :=
     tendsto_nhdsWithin_iff.mpr ⟨by simpa using h_seq_tendsto.const_add w₀,
       Eventually.of_forall fun n h ↦
