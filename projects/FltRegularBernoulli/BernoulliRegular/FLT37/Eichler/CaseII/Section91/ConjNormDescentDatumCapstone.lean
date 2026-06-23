@@ -2,34 +2,26 @@ import BernoulliRegular.FLT37.Eichler.CaseII.Section91.DescendedEquationIntegerL
 import BernoulliRegular.FLT37.Eichler.CaseII.FreeContent.DescentEquationPackaging
 
 /-!
-# [FLT37-CASEII-R2] The descended free-content datum from the factor equations (capstone)
+# Descended free-content datum from the factor equations
 
-This file composes the two proven halves of Washington's §9.1 conjugate-norm descent into a single
-lemma: **from the factor equations of `x, y` (at two distinct indices `a, b`), the anchor equation,
-Assumption II, and the descent invariants, the descended Washington datum `(ω, θ, ρ₀²)` IS a
-`FreeContentCaseIIData37`.**  Concretely it chains
+This file composes the two proven halves of Washington's §9.1 conjugate-norm
+descent into a single lemma. From the factor equations of `x, y` at two
+distinct indices, the anchor equation, Assumption II, and the descent
+invariants, the descended Washington datum `(ω, θ, ρ₀²)` is a
+`FreeContentCaseIIData37`.
 
-* `washington_section91_integer_descended_equation` (`CaseIISection91IntegerDescent.lean`) — the
-  proven reassembly **algebra** lifted to `𝓞 K`: factor eqns + anchor + Assumption II + integer
-  witnesses ⟹ the integer descended equation `ω³⁷ + θ³⁷ = δ'·((1−ζ)(1−ζ³⁶))^{2e−1}·z'³⁷`; and
-* `freeContentCaseIIData37_of_descended_equation` (`CaseIIFreeContentDatumPackaging.lean`) — the
-  proven **packaging**: the integer descended equation + reality + `𝔭`-coprimality + the two datum
-  invariants (`hxy'`, `hdenom'`) ⟹ `∃ n' (D' : FreeContentCaseIIData37 K n'), D'.z = z'`.
+The main result chains:
 
-The result `freeContentCaseIIData37_of_factorEquations` reduces the FLT37 Case-II descent step
-**exactly** to the **factor-equation extraction** (Washington Lemma 9.1/9.2: producing the
-conjugate-paired `37`-th-root generators `ρ_a, ρ_b, ρ_0` and the real units `η_a, η_b, η_0` from
-the root-ideal
-principalization), the integer witnesses, and the descent invariants `hxy'`/`hdenom'` (structure
-fields, established by the construction — not derivable from the equation, by design).
+* `washington_section91_integer_descended_equation`: the reassembly algebra
+  lifted to `𝓞 K`.
+* `freeContentCaseIIData37_of_descended_equation`: the packaging step from the
+  descended equation, reality, coprimality, and datum invariants.
 
-The `λ`-content of the descended datum is `n' = 2·(2e−1)`, **even** (`λ = (1−ζ)(1−ζ³⁶)` is the real
-prime, `v_𝔭 = 2`): the previously-suspected "content-parity obstruction" is **spurious** (it
-conflated the real-`λ` exponent `2e−1` with the `(ζ−1)`-valuation `2(2e−1)`).
-
-It imports only; it does **not** modify any existing file.  No `sorry`, no `axiom`.
+The descended datum has even lambda-content `n' = 2 * (2 * e - 1)`. This
+separates the real-prime exponent from the `(ζ - 1)`-valuation `2 * (2 * e - 1)`.
 
 ## References
+
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83, §9.1, pp. 179–180.
 -/
 
@@ -46,20 +38,12 @@ open FLT37 BernoulliRegular
 variable {K : Type} [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K]
   [NumberField.IsCMField K]
 
-/-- **[FLT37-CASEII-DESCENDED-DATUM] The descended Washington datum is a free-content datum.**
+/-- The descended Washington datum obtained from the factor equations is a
+free-content Case-II datum.
 
-From the factor equations at two distinct indices `a, b` (with `ηA = ζ^a`, `ηB = ζ^b`,
-`a ≢ ±b mod 37`), the squared-anchor equation, **Assumption II** (`η_a = u³⁷·η_b`), integer
-witnesses `ω, θ, z'` for the conjugate-norm building blocks `u²ρ_aσρ_a`, `−ρ_bσρ_b`, `ρ₀²`, and
-the descent
-invariants (reality of `ω, θ`; `𝔭`-coprimality of `θ, z'`; `(ζ−1)³ ∣ ω+θ`; the sharp adjacent
-denominator `hdenom'`), there is a free-content Case-II datum `D'` at content `n' = 2(2e−1)` whose
-Fermat variable `D'.z` is exactly `z'` (`= ρ₀²`, Washington's `ξ₁`).
-
-This is the composition of the proven reassembly **algebra**
-(`washington_section91_integer_descended_equation`) with the proven **packaging**
-(`freeContentCaseIIData37_of_descended_equation`).  It reduces the whole Case-II descent step to the
-factor-equation extraction (Washington Lemma 9.1/9.2). -/
+The result packages the factor equations, the squared-anchor equation,
+Assumption II, integer witnesses for the conjugate-norm building blocks, and
+the descent invariants into a datum `D'` with Fermat variable `D'.z = z'`. -/
 theorem freeContentCaseIIData37_of_factorEquations
     {x y ρa ρb ρ0 : K} {ηa ηb η0 u : Kˣ} {ηA ηB : 𝓞 K}
     {Λa Λb Λ : Kˣ} {e : ℕ}
