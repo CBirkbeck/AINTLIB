@@ -37,10 +37,12 @@ Given `D : MultiPoleCrossData γ s` with `crossings.card = n`:
 5. **Sum convergence**: combine constant smooth pieces and per-window
    convergences via `Tendsto.add`.
 
-## Main result
+## Main results
 
 * `hasCauchyPV_inv_sub_multiCrossing` — multi-crossing CPV existence for
   any `card ≥ 0`.
+* `hasCauchyPVOn_multiCrossing_higherOrder` — higher-order CPV vanishing
+  under condition (B).
 
 ## References
 
@@ -653,7 +655,7 @@ private lemma antiderivPow_FTC_on_avoiding
         (h_ne u (Set.Ioo_subset_Icc_self hu.1))).const_mul c
     have h_chain := h_F_at.comp u (h_diff u hu)
     rwa [show c * (1 / (f u - s) ^ k) * deriv f u =
-        c * deriv f u / (f u - s) ^ k from by ring] at h_chain
+        c * deriv f u / (f u - s) ^ k by ring] at h_chain
   have h_Fγ_cont : ContinuousOn (fun v ↦ F (f v)) (Set.Icc a b) := fun u hu ↦
     (((hasDerivAt_antiderivative_pow_inv_complex hk
       (h_ne u hu)).continuousAt).const_mul c).comp_continuousWithinAt (hf_cont u hu)
@@ -795,7 +797,7 @@ private theorem cpv_higherOrder_tendsto_along_sorted_corner
           if_pos (lt_of_lt_of_le hε.2 (h_far_uniform u hu))]; ring]
       exact h_FTC
     rw [show c * (antiderivPow s k (γf 1) - antiderivPow s k (γf a)) =
-        c * antiderivPow s k (γf 1) - c * antiderivPow s k (γf a) from by ring]
+        c * antiderivPow s k (γf 1) - c * antiderivPow s k (γf a) by ring]
     exact Tendsto.congr' h_event.symm tendsto_const_nhds
   | cons t rest IH =>
     intro a h_a_lt h_a_le_1 h_a_in_unit h_t_le_1mr h_pairwise
@@ -916,7 +918,7 @@ private theorem cpv_higherOrder_tendsto_along_sorted_corner
     rw [show c * (antiderivPow s k (γf 1) - antiderivPow s k (γf a)) =
         (c * antiderivPow s k (γf (t - r)) - c * antiderivPow s k (γf a)) +
         c * (antiderivPow s k (γf (t + r)) - antiderivPow s k (γf (t - r))) +
-        c * (antiderivPow s k (γf 1) - antiderivPow s k (γf (t + r))) from by ring]
+        c * (antiderivPow s k (γf 1) - antiderivPow s k (γf (t + r))) by ring]
     exact h_combined
 
 /-- **Per-crossing higher-order window convergence (corner-friendly form).**
@@ -1335,7 +1337,7 @@ theorem hasCauchyPVOn_multiCrossing_higherOrder_corner
         h_sorted_t_le_1mr h_sorted_pair h_sorted_window_conv h_sorted_smooth
         h_sorted_Ioo h_sorted_at h_sorted_local
     have h_closed : γf 0 = γf 1 := closed_immersion_extend_zero_eq_one γ
-    rw [show c * (antiderivPow s k (γf 1) - antiderivPow s k (γf 0)) = 0 from by
+    rw [show c * (antiderivPow s k (γf 1) - antiderivPow s k (γf 0)) = 0 by
       rw [← h_closed]; ring] at h_recursive
     refine Tendsto.congr (fun ε ↦ intervalIntegral.integral_congr fun t _ ↦
       cpvIntegrand_eq_cpvIntegrandOn_singleton) h_recursive
