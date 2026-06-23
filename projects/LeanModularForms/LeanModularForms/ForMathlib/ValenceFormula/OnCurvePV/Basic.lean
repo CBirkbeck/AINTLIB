@@ -13,7 +13,7 @@ import LeanModularForms.ForMathlib.ValenceFormula.WindingWeights.RhoPlusOne
 /-!
 # On-Curve PV: Infrastructure
 
-Bridge lemmas, elliptic point CPV, segment geometry helpers, arc injectivity,
+Bridge lemmas, elliptic point CPV, segment geometry helpers,
 and CPV helper lemmas (avoidance, concatenation, sub-interval extension, integrability).
 -/
 
