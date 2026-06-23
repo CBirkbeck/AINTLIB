@@ -252,7 +252,8 @@ lemma coe_levelRaiseMatrix_inv_smul (l : ℕ) [NeZero l] (z : UpperHalfPlane) :
 /-- The conjugation factor `σ` for `(levelRaiseMatrix l)⁻¹` is the
 identity (positive determinant `1/l`). -/
 lemma σ_levelRaiseMatrix_inv (l : ℕ) [NeZero l] :
-    UpperHalfPlane.σ ((levelRaiseMatrix l)⁻¹ : GL (Fin 2) ℝ) = ContinuousAlgEquiv.refl ℝ ℂ := by
+    UpperHalfPlane.σ ((levelRaiseMatrix l)⁻¹ : GL (Fin 2) ℝ) =
+      ContinuousAlgEquiv.refl ℝ ℂ := by
   unfold UpperHalfPlane.σ
   rw [if_pos (levelRaiseMatrix_inv_det_pos l)]
 
@@ -282,7 +283,8 @@ lemma slash_eq_of_levelRaiseFun_eq (l : ℕ) [NeZero l] (k : ℤ) (f g : UpperHa
       ← zpow_add₀ (Nat.cast_ne_zero.mpr (NeZero.ne l) : (l : ℂ) ≠ 0),
       show k - 1 + (1 - k) = 0 by ring, zpow_zero, one_smul]
   conv_lhs => rw [hf_eq]
-  have hσA : UpperHalfPlane.σ (mapGL ℝ A : GL (Fin 2) ℝ) = ContinuousAlgEquiv.refl ℝ ℂ := by
+  have hσA : UpperHalfPlane.σ (mapGL ℝ A : GL (Fin 2) ℝ) =
+      ContinuousAlgEquiv.refl ℝ ℂ := by
     unfold UpperHalfPlane.σ
     rw [if_pos (show (0 : ℝ) < (Matrix.GeneralLinearGroup.det (mapGL ℝ A)).val by
       rw [Matrix.SpecialLinearGroup.det_mapGL]; norm_num)]
@@ -551,7 +553,8 @@ private lemma natCast_eq_mul_natCast_div {l N : ℕ} (h_dvd : l ∣ N) :
 /-- Algebraic two-multiplier contradiction: if `f ∣[k] M` is both `c₁ • f` and
 `c₂ • f` for two distinct scalars, then `f = 0`. -/
 lemma fun_eq_zero_of_two_multipliers (k : ℤ) (f : UpperHalfPlane → ℂ) (M : GL (Fin 2) ℝ)
-    {c₁ c₂ : ℂ} (hne : c₁ ≠ c₂) (h₁ : f ∣[k] M = c₁ • f) (h₂ : f ∣[k] M = c₂ • f) : f = 0 := by
+    {c₁ c₂ : ℂ} (hne : c₁ ≠ c₂) (h₁ : f ∣[k] M = c₁ • f)
+    (h₂ : f ∣[k] M = c₂ • f) : f = 0 := by
   have h_diff : (c₁ - c₂) • f = 0 := by rw [sub_smul, h₁.symm.trans h₂, sub_self]
   exact (smul_eq_zero.mp h_diff).resolve_left (sub_ne_zero.mpr hne)
 
@@ -709,7 +712,8 @@ private lemma N_dvd_inv_val_mul_val_sub_one (N : ℕ) [NeZero N] (u : (ZMod N)ˣ
 
 private lemma controlled_lift_det_identity (N : ℕ) [NeZero N] (u : (ZMod N)ˣ) :
     ((u⁻¹.val : ZMod N).val : ℤ) * ((u.val : ZMod N).val : ℤ) -
-      ((((u⁻¹.val : ZMod N).val : ℤ) * ((u.val : ZMod N).val : ℤ) - 1) / (N : ℤ)) * (N : ℤ) =
+      ((((u⁻¹.val : ZMod N).val : ℤ) * ((u.val : ZMod N).val : ℤ) - 1) / (N : ℤ))
+        * (N : ℤ) =
         1 := by
   linarith [Int.ediv_mul_cancel (N_dvd_inv_val_mul_val_sub_one N u)]
 
