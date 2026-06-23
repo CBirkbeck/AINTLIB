@@ -4339,78 +4339,102 @@ private theorem ord_RHS_pair_zsmul_frobenius_mulByInt_neg
     exact_mod_cast (by norm_num : (-6 : ℤ) < 0)
   exact ((W_smooth W).ordAtInfty_add_eq_of_lt h_lt).trans step2
 
-/-- **`ord_∞(addPullback_y_pair (zsmul r π) (mulByInt -s)) = -3`** — the pole of order `3` at `O`
-for the genuine pencil `rπ − s`.  Pair analogue of `ord_addPullback_y_negFrobenius`.  From the curve
-equation (`addPullback_pair_equation`), `ord_∞ X = -2`, and the dominant `ord(X³) = -6`: writing
-`m = ord(Y)`, the equation gives `ord(Y² + a₁XY + a₃Y) = -6`; one shows `m ≤ -3` (else `Y²` would not
-reach `-6`), then `Y²` strictly dominates, forcing `2m = -6`, i.e. `m = -3`. -/
-theorem ord_addPullback_y_pair_zsmul_frobenius_mulByInt_neg
+/-- Helper: the pair x-coordinate `X` is nonzero (its pole order `-2` is finite). -/
+private theorem addPullback_x_pair_zsmul_frobenius_mulByInt_neg_ne_zero
     (r s : ℤ) (hr : r ≠ 0) (hs : s ≠ 0) (hrK : (r : K) ≠ 0) (hsK : (s : K) ≠ 0) :
-    (W_smooth W).ordAtInfty
-        ((addPullback_y_pair ((frobeniusIsog W).zsmul r) (mulByInt W.toAffine (-s))) : KE) =
-      ((-3 : ℤ) : WithTop ℤ) := by
-  haveI : (W_smooth W).toAffine.IsElliptic := inferInstanceAs W.toAffine.IsElliptic
-  set X := addPullback_x_pair ((frobeniusIsog W).zsmul r) (mulByInt W.toAffine (-s)) with hX
-  set Y := addPullback_y_pair ((frobeniusIsog W).zsmul r) (mulByInt W.toAffine (-s)) with hY
-  have hX_ord : (W_smooth W).ordAtInfty X = ((-2 : ℤ) : WithTop ℤ) :=
-    ord_addPullback_x_pair_zsmul_frobenius_mulByInt_neg W r s hr hs hrK hsK
-  have hX_ne : X ≠ 0 := by
-    intro h
-    have ht : (W_smooth W).ordAtInfty X = ⊤ := by rw [h]; exact (W_smooth W).ordAtInfty_zero
-    rw [hX_ord] at ht; exact WithTop.coe_ne_top ht
-  -- Curve equation in standard form (from the pair `AddNonInversePair`).
-  have h_eq : Y ^ 2 + algebraMap K KE W.toAffine.a₁ * X * Y + algebraMap K KE W.toAffine.a₃ * Y =
+    (addPullback_x_pair ((frobeniusIsog W).zsmul r) (mulByInt W.toAffine (-s)) : KE) ≠ 0 := by
+  intro h
+  have ht : (W_smooth W).ordAtInfty
+      (addPullback_x_pair ((frobeniusIsog W).zsmul r) (mulByInt W.toAffine (-s)) : KE) = ⊤ := by
+    rw [h]; exact (W_smooth W).ordAtInfty_zero
+  rw [ord_addPullback_x_pair_zsmul_frobenius_mulByInt_neg W r s hr hs hrK hsK] at ht
+  exact WithTop.coe_ne_top ht
+
+/-- Helper: the curve equation for the pair, in standard Weierstrass form
+`Y² + a₁·X·Y + a₃·Y = X³ + a₂·X² + a₄·X + a₆` (from `addPullback_pair_equation`). -/
+private theorem weierstrass_lhs_pair_zsmul_frobenius_mulByInt_neg_eq
+    (r s : ℤ) (hr : r ≠ 0) (hs : s ≠ 0) (hrK : (r : K) ≠ 0) (hsK : (s : K) ≠ 0) :
+    letI X := (addPullback_x_pair ((frobeniusIsog W).zsmul r) (mulByInt W.toAffine (-s)) : KE)
+    letI Y := (addPullback_y_pair ((frobeniusIsog W).zsmul r) (mulByInt W.toAffine (-s)) : KE)
+    Y ^ 2 + algebraMap K KE W.toAffine.a₁ * X * Y + algebraMap K KE W.toAffine.a₃ * Y =
       X ^ 3 + algebraMap K KE W.toAffine.a₂ * X ^ 2 + algebraMap K KE W.toAffine.a₄ * X +
         algebraMap K KE W.toAffine.a₆ := by
-    have h := addPullback_pair_equation
-      (AddNonInversePair_zsmul_frobenius_mulByInt_neg W r s hr hs hrK hsK)
-    rw [WeierstrassCurve.Affine.equation_iff] at h
-    exact h
-  have h_lhs_ord : (W_smooth W).ordAtInfty
+  have h := addPullback_pair_equation
+    (AddNonInversePair_zsmul_frobenius_mulByInt_neg W r s hr hs hrK hsK)
+  rw [WeierstrassCurve.Affine.equation_iff] at h
+  exact h
+
+/-- Helper: `ord_∞(Y² + a₁·X·Y + a₃·Y) = -6` for the pair, via the curve equation and the
+dominant `ord(RHS) = -6` (`ord_RHS_pair_zsmul_frobenius_mulByInt_neg`). -/
+private theorem ord_weierstrass_lhs_pair_zsmul_frobenius_mulByInt_neg
+    (r s : ℤ) (hr : r ≠ 0) (hs : s ≠ 0) (hrK : (r : K) ≠ 0) (hsK : (s : K) ≠ 0) :
+    letI X := (addPullback_x_pair ((frobeniusIsog W).zsmul r) (mulByInt W.toAffine (-s)) : KE)
+    letI Y := (addPullback_y_pair ((frobeniusIsog W).zsmul r) (mulByInt W.toAffine (-s)) : KE)
+    (W_smooth W).ordAtInfty
         (Y ^ 2 + algebraMap K KE W.toAffine.a₁ * X * Y + algebraMap K KE W.toAffine.a₃ * Y) =
       ((-6 : ℤ) : WithTop ℤ) :=
-    h_eq ▸ ord_RHS_pair_zsmul_frobenius_mulByInt_neg W r s hr hs hrK hsK
-  -- Y ≠ 0.
-  have hY_ne : Y ≠ 0 := by
-    intro h
-    have h_zero : Y ^ 2 + algebraMap K KE W.toAffine.a₁ * X * Y +
-        algebraMap K KE W.toAffine.a₃ * Y = 0 := by rw [h]; ring
-    have h_ord_eq : (W_smooth W).ordAtInfty
-        (Y ^ 2 + algebraMap K KE W.toAffine.a₁ * X * Y + algebraMap K KE W.toAffine.a₃ * Y) = ⊤ :=
-      (congrArg (W_smooth W).ordAtInfty h_zero).trans (W_smooth W).ordAtInfty_zero
-    exact WithTop.top_ne_coe (h_ord_eq.symm.trans h_lhs_ord)
-  obtain ⟨m, hm⟩ : ∃ m : ℤ, (W_smooth W).ordAtInfty Y = ((m : ℤ) : WithTop ℤ) := by
-    obtain ⟨m, hm⟩ := WithTop.ne_top_iff_exists.mp
-      (((W_smooth W).ordAtInfty_eq_top_iff _).not.mpr hY_ne)
-    exact ⟨m, hm.symm⟩
-  have hY_sq_ord : (W_smooth W).ordAtInfty (Y ^ 2) = ((2 * m : ℤ) : WithTop ℤ) :=
-    (W_smooth W).ord_pow_concrete hY_ne m 2 hm
-  have h_xy_ord : (W_smooth W).ordAtInfty (X * Y) = (((-2 + m : ℤ)) : WithTop ℤ) := by
-    refine ((W_smooth W).ordAtInfty_mul hX_ne hY_ne).trans ?_
-    rw [hX_ord, hm]; push_cast; rfl
-  -- Step (a): m ≤ -3.
-  have h_m_le : m ≤ -3 := by
-    by_contra h_not_le
-    push Not at h_not_le
-    have h_y_sq_ge : ((-4 : ℤ) : WithTop ℤ) ≤ (W_smooth W).ordAtInfty (Y ^ 2) := by
-      rw [hY_sq_ord]; exact_mod_cast (by linarith : (-4 : ℤ) ≤ 2 * m)
-    have h_a1xy_ge : ((-4 : ℤ) : WithTop ℤ) ≤
-        (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₁ * X * Y) := by
-      rw [show algebraMap K KE W.toAffine.a₁ * X * Y =
-          algebraMap K KE W.toAffine.a₁ * (X * Y) from by ring]
-      refine ord_algebraMap_mul_ge W W.toAffine.a₁ ?_
-      rw [h_xy_ord]; exact_mod_cast (by linarith : (-4 : ℤ) ≤ -2 + m)
-    have h_a3y_ge : ((-4 : ℤ) : WithTop ℤ) ≤
-        (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₃ * Y) := by
-      refine ord_algebraMap_mul_ge W W.toAffine.a₃ ?_
-      rw [hm]; exact_mod_cast (by linarith : (-4 : ℤ) ≤ m)
-    have h_lhs_ge : ((-4 : ℤ) : WithTop ℤ) ≤ (W_smooth W).ordAtInfty
-        (Y ^ 2 + algebraMap K KE W.toAffine.a₁ * X * Y + algebraMap K KE W.toAffine.a₃ * Y) :=
-      ord_add_ge_of_both_ge W (ord_add_ge_of_both_ge W h_y_sq_ge h_a1xy_ge) h_a3y_ge
-    rw [h_lhs_ord] at h_lhs_ge
-    have h46 : (-4 : ℤ) ≤ -6 := by exact_mod_cast h_lhs_ge
-    omega
-  -- Step (b): Y² strictly dominates ⟹ ord(LHS) = 2m.
+  weierstrass_lhs_pair_zsmul_frobenius_mulByInt_neg_eq W r s hr hs hrK hsK ▸
+    ord_RHS_pair_zsmul_frobenius_mulByInt_neg W r s hr hs hrK hsK
+
+/-- Helper: the pair y-coordinate `Y` is nonzero — otherwise the Weierstrass LHS would vanish,
+contradicting `ord_∞(LHS) = -6`. -/
+private theorem addPullback_y_pair_zsmul_frobenius_mulByInt_neg_ne_zero
+    (r s : ℤ) (hr : r ≠ 0) (hs : s ≠ 0) (hrK : (r : K) ≠ 0) (hsK : (s : K) ≠ 0) :
+    (addPullback_y_pair ((frobeniusIsog W).zsmul r) (mulByInt W.toAffine (-s)) : KE) ≠ 0 := by
+  set X := (addPullback_x_pair ((frobeniusIsog W).zsmul r) (mulByInt W.toAffine (-s)) : KE)
+  set Y := (addPullback_y_pair ((frobeniusIsog W).zsmul r) (mulByInt W.toAffine (-s)) : KE)
+  intro h
+  have h_zero : Y ^ 2 + algebraMap K KE W.toAffine.a₁ * X * Y +
+      algebraMap K KE W.toAffine.a₃ * Y = 0 := by rw [h]; ring
+  have h_ord_eq : (W_smooth W).ordAtInfty
+      (Y ^ 2 + algebraMap K KE W.toAffine.a₁ * X * Y + algebraMap K KE W.toAffine.a₃ * Y) = ⊤ :=
+    (congrArg (W_smooth W).ordAtInfty h_zero).trans (W_smooth W).ordAtInfty_zero
+  exact WithTop.top_ne_coe
+    (h_ord_eq.symm.trans (ord_weierstrass_lhs_pair_zsmul_frobenius_mulByInt_neg W r s hr hs hrK hsK))
+
+/-- Order-arithmetic helper (step (a)): if `ord(LHS) = -6`, the y-order `m` of the Weierstrass LHS
+satisfies `m ≤ -3`. Otherwise all three summands would have order `≥ -4`, forcing `ord(LHS) ≥ -4`,
+contradicting `-6`. Purely generic in `X`, `Y`, `m` and the per-term order data. -/
+private theorem ord_y_le_neg_three_of_weierstrass_lhs_ord {X Y : KE} {m : ℤ}
+    (hY_sq_ord : (W_smooth W).ordAtInfty (Y ^ 2) = ((2 * m : ℤ) : WithTop ℤ))
+    (hm : (W_smooth W).ordAtInfty Y = ((m : ℤ) : WithTop ℤ))
+    (h_xy_ord : (W_smooth W).ordAtInfty (X * Y) = (((-2 + m : ℤ)) : WithTop ℤ))
+    (h_lhs_ord : (W_smooth W).ordAtInfty
+        (Y ^ 2 + algebraMap K KE W.toAffine.a₁ * X * Y + algebraMap K KE W.toAffine.a₃ * Y) =
+      ((-6 : ℤ) : WithTop ℤ)) :
+    m ≤ -3 := by
+  by_contra h_not_le
+  push Not at h_not_le
+  have h_y_sq_ge : ((-4 : ℤ) : WithTop ℤ) ≤ (W_smooth W).ordAtInfty (Y ^ 2) := by
+    rw [hY_sq_ord]; exact_mod_cast (by linarith : (-4 : ℤ) ≤ 2 * m)
+  have h_a1xy_ge : ((-4 : ℤ) : WithTop ℤ) ≤
+      (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₁ * X * Y) := by
+    rw [show algebraMap K KE W.toAffine.a₁ * X * Y =
+        algebraMap K KE W.toAffine.a₁ * (X * Y) from by ring]
+    refine ord_algebraMap_mul_ge W W.toAffine.a₁ ?_
+    rw [h_xy_ord]; exact_mod_cast (by linarith : (-4 : ℤ) ≤ -2 + m)
+  have h_a3y_ge : ((-4 : ℤ) : WithTop ℤ) ≤
+      (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₃ * Y) := by
+    refine ord_algebraMap_mul_ge W W.toAffine.a₃ ?_
+    rw [hm]; exact_mod_cast (by linarith : (-4 : ℤ) ≤ m)
+  have h_lhs_ge : ((-4 : ℤ) : WithTop ℤ) ≤ (W_smooth W).ordAtInfty
+      (Y ^ 2 + algebraMap K KE W.toAffine.a₁ * X * Y + algebraMap K KE W.toAffine.a₃ * Y) :=
+    ord_add_ge_of_both_ge W (ord_add_ge_of_both_ge W h_y_sq_ge h_a1xy_ge) h_a3y_ge
+  rw [h_lhs_ord] at h_lhs_ge
+  have h46 : (-4 : ℤ) ≤ -6 := by exact_mod_cast h_lhs_ge
+  omega
+
+/-- Order-arithmetic helper (step (b)): when `m ≤ -3`, the `Y²` term strictly dominates both the
+`a₁·X·Y` and `a₃·Y` terms (`2m < -2 + m` and `2m < m`), so the order of the Weierstrass LHS equals
+`ord(Y²)`. Purely generic in `X`, `Y`, `m` and the per-term order data. -/
+private theorem ord_weierstrass_lhs_eq_ord_y_sq_of_y_dominates {X Y : KE} {m : ℤ}
+    (hm : (W_smooth W).ordAtInfty Y = ((m : ℤ) : WithTop ℤ))
+    (hY_sq_ord : (W_smooth W).ordAtInfty (Y ^ 2) = ((2 * m : ℤ) : WithTop ℤ))
+    (h_xy_ord : (W_smooth W).ordAtInfty (X * Y) = (((-2 + m : ℤ)) : WithTop ℤ))
+    (hm_le : m ≤ -3) :
+    (W_smooth W).ordAtInfty
+        (Y ^ 2 + algebraMap K KE W.toAffine.a₁ * X * Y + algebraMap K KE W.toAffine.a₃ * Y) =
+      (W_smooth W).ordAtInfty (Y ^ 2) := by
   have h_a1xy_gt : (W_smooth W).ordAtInfty (Y ^ 2) <
       (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₁ * X * Y) := by
     rw [hY_sq_ord, show algebraMap K KE W.toAffine.a₁ * X * Y =
@@ -4431,11 +4455,45 @@ theorem ord_addPullback_y_pair_zsmul_frobenius_mulByInt_neg
   have h_a3y_gt' : (W_smooth W).ordAtInfty
       (Y ^ 2 + algebraMap K KE W.toAffine.a₁ * X * Y) <
       (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₃ * Y) := h_inner_eq ▸ h_a3y_gt
-  have h_outer_eq : (W_smooth W).ordAtInfty
-      (Y ^ 2 + algebraMap K KE W.toAffine.a₁ * X * Y + algebraMap K KE W.toAffine.a₃ * Y) =
-      (W_smooth W).ordAtInfty (Y ^ 2) :=
-    ((W_smooth W).ordAtInfty_add_eq_of_lt h_a3y_gt').trans h_inner_eq
-  rw [h_outer_eq, hY_sq_ord] at h_lhs_ord
+  exact ((W_smooth W).ordAtInfty_add_eq_of_lt h_a3y_gt').trans h_inner_eq
+
+/-- **`ord_∞(addPullback_y_pair (zsmul r π) (mulByInt -s)) = -3`** — the pole of order `3` at `O`
+for the genuine pencil `rπ − s`.  Pair analogue of `ord_addPullback_y_negFrobenius`.  From the curve
+equation (`addPullback_pair_equation`), `ord_∞ X = -2`, and the dominant `ord(X³) = -6`: writing
+`m = ord(Y)`, the equation gives `ord(Y² + a₁XY + a₃Y) = -6`; one shows `m ≤ -3` (else `Y²` would not
+reach `-6`), then `Y²` strictly dominates, forcing `2m = -6`, i.e. `m = -3`. -/
+theorem ord_addPullback_y_pair_zsmul_frobenius_mulByInt_neg
+    (r s : ℤ) (hr : r ≠ 0) (hs : s ≠ 0) (hrK : (r : K) ≠ 0) (hsK : (s : K) ≠ 0) :
+    (W_smooth W).ordAtInfty
+        ((addPullback_y_pair ((frobeniusIsog W).zsmul r) (mulByInt W.toAffine (-s))) : KE) =
+      ((-3 : ℤ) : WithTop ℤ) := by
+  haveI : (W_smooth W).toAffine.IsElliptic := inferInstanceAs W.toAffine.IsElliptic
+  set X := addPullback_x_pair ((frobeniusIsog W).zsmul r) (mulByInt W.toAffine (-s)) with hX
+  set Y := addPullback_y_pair ((frobeniusIsog W).zsmul r) (mulByInt W.toAffine (-s)) with hY
+  have hX_ne : X ≠ 0 :=
+    addPullback_x_pair_zsmul_frobenius_mulByInt_neg_ne_zero W r s hr hs hrK hsK
+  have hY_ne : Y ≠ 0 :=
+    addPullback_y_pair_zsmul_frobenius_mulByInt_neg_ne_zero W r s hr hs hrK hsK
+  have h_lhs_ord : (W_smooth W).ordAtInfty
+        (Y ^ 2 + algebraMap K KE W.toAffine.a₁ * X * Y + algebraMap K KE W.toAffine.a₃ * Y) =
+      ((-6 : ℤ) : WithTop ℤ) :=
+    ord_weierstrass_lhs_pair_zsmul_frobenius_mulByInt_neg W r s hr hs hrK hsK
+  -- Let `m = ord(Y)`; record the orders of the dominant `Y²` and the cross term `X·Y`.
+  obtain ⟨m, hm⟩ : ∃ m : ℤ, (W_smooth W).ordAtInfty Y = ((m : ℤ) : WithTop ℤ) := by
+    obtain ⟨m, hm⟩ := WithTop.ne_top_iff_exists.mp
+      (((W_smooth W).ordAtInfty_eq_top_iff _).not.mpr hY_ne)
+    exact ⟨m, hm.symm⟩
+  have hY_sq_ord : (W_smooth W).ordAtInfty (Y ^ 2) = ((2 * m : ℤ) : WithTop ℤ) :=
+    (W_smooth W).ord_pow_concrete hY_ne m 2 hm
+  have h_xy_ord : (W_smooth W).ordAtInfty (X * Y) = (((-2 + m : ℤ)) : WithTop ℤ) := by
+    refine ((W_smooth W).ordAtInfty_mul hX_ne hY_ne).trans ?_
+    rw [ord_addPullback_x_pair_zsmul_frobenius_mulByInt_neg W r s hr hs hrK hsK, hm]; push_cast; rfl
+  -- Step (a): `m ≤ -3` (else the LHS could not reach order `-6`).
+  have h_m_le : m ≤ -3 :=
+    ord_y_le_neg_three_of_weierstrass_lhs_ord W hY_sq_ord hm h_xy_ord h_lhs_ord
+  -- Step (b): `Y²` strictly dominates ⟹ `ord(LHS) = ord(Y²) = 2m`, so `m = -3`.
+  rw [ord_weierstrass_lhs_eq_ord_y_sq_of_y_dominates W hm hY_sq_ord h_xy_ord h_m_le,
+    hY_sq_ord] at h_lhs_ord
   have h_2m : (2 * m : ℤ) = -6 := by exact_mod_cast h_lhs_ord
   rw [hm]; exact_mod_cast (by omega : m = -3)
 
