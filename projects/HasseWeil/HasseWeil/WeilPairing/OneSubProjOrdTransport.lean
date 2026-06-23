@@ -51,11 +51,6 @@ namespace HasseWeil.WeilPairing
 
 open HasseWeil HasseWeil.WeilPairing.DivisorPullback IsogenyBaseChangeConcrete
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.unusedFintypeInType false
-set_option linter.style.longLine false
-
 section Assemble
 
 variable {K : Type*} [Field K] [Fintype K] [DecidableEq K]
@@ -69,6 +64,10 @@ variable [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic]
     (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
       SmoothPlaneCurve (AlgebraicClosure K)).CoordinateRing]
 
+omit [Fintype W.toAffine.Point]
+  [IsIntegrallyClosed
+    (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
+      SmoothPlaneCurve (AlgebraicClosure K)).CoordinateRing] in
 /-- **`ProjOrdTransport (1 − π)_{K̄}` from the local comap witnesses** (Silverman III.4.10c),
 CoordHom-free.  The divisor-pullback functoriality `div((1−π)^* h) = (1−π)^*(div h)` for the
 base-changed separable `1 − π`, obtained by the general reduction
@@ -116,12 +115,9 @@ theorem oneSubFrobeniusScaling_of_comapWitness (hq : 2 ≤ Fintype.card K)
     hsurj
     (oneSub_hcommPrime_discharged W p r hq)
 
-/-! ### Discharging the degree identity `hdeg_eq`
-
-The degree input of `oneSubFrobeniusScaling_of_comapWitness` is assembled from already-built tracked
-lemmas (no dependence on the local comap-residue files), so the leaf-2 scaling for `(1 − π)_{K̄}`
-reduces to just the local comap witnesses `hcomap` and the surjectivity `hsurj`. -/
-
+omit [IsIntegrallyClosed
+    (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
+      SmoothPlaneCurve (AlgebraicClosure K)).CoordinateRing] in
 /-- **`deg(1 − π)_{K̄} = #E(𝔽_q)`** (Silverman V.1.3 + degree base-change invariance), assembled.
 Chains the curve-free base-change degree invariance
 `oneSubFrobeniusIsogBaseChange_degree_eq_of_finrankBaseChange` (`deg(1 − π)_{K̄} = deg(1 − π)` over
@@ -164,17 +160,6 @@ theorem oneSubFrobeniusScaling_of_comapWitness_surj (hq : 2 ≤ Fintype.card K)
     hcomap
     hsurj
 
-/-! ### The `δ`-free, surjectivity-free `1 − π` scaling (reviewer round-22 Q3)
-
-The routes above build the divisor-pushforward dual `δ` (`divisorPushforwardDual`), whose construction
-needs the surjectivity `hsurj` (it powers the `deg(φ^*D) = #ker · deg D` formula behind the `Pic⁰`
-descent).  The `δ`-free scaling `weilScales_noδ` (`SeparableScaling.lean`) eliminates `δ` entirely —
-it reads the dual point at each image `φ T` off the *primitive* σ-bridge as the explicit `#ker(φ) • T`,
-needing neither a dual endomorphism nor surjectivity.  Routing leaf 2 through it drops `hsurj` from the
-carried inputs: only the V.1.3 degree identity, the local comap witnesses, and the (proved) Wall A
-covariance remain — and the latter two are internal, so the *carried* residual is just V.1.3 (via the
-degree identity) plus the comap witnesses. -/
-
 /-- **`OneSubFrobeniusScaling` for `(1 − π)_{K̄}` — `δ`-free and surjectivity-free** (Silverman
 III.8.6.1), CoordHom-free.  The symplectic scaling
 `e_ℓ((id − π̄) S, (id − π̄) T) = e_ℓ(S, T)^{deg(1 − π)}` on `E_{K̄}[ℓ]` (every prime `ℓ ≠ p`), proved
@@ -201,17 +186,15 @@ theorem oneSubFrobeniusScaling_of_comapWitness_noδ (hq : 2 ≤ Fintype.card K)
       (oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
         (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq))) :
     OneSubFrobeniusScaling W p r (AlgebraicClosure K) hq := by
-  intro ℓ hℓp hℓne hℓF
-  letI : Fact ℓ.Prime := ⟨hℓp⟩
-  haveI : Finite
+  intro ℓ hℓp _ hℓF
+  have : Fact ℓ.Prime := ⟨hℓp⟩
+  have : Finite
       (oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
         (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)).toAddMonoidHom.ker :=
     oneSubFrobeniusIsogBaseChange_finiteKer W p r
       (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)
-  -- The concrete base-changed isogeny, with point map `id − π̄` (by construction).
   set φL := oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
-    (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq) with hφL
-  -- Apply the `δ`-free `WeilScales` bridge to `φL` — no `δ`, no `hsurj`.
+    (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)
   refine weilScales_noδ (W.baseChange (AlgebraicClosure K)) ℓ hℓF φL
     (AddMonoidHom.id (W.baseChange (AlgebraicClosure K)).toAffine.Point -
       frobeniusHomBaseChange W p r (AlgebraicClosure K))
@@ -225,7 +208,6 @@ theorem oneSubFrobeniusScaling_of_comapWitness_noδ (hq : 2 ≤ Fintype.card K)
     (oneSubFrobeniusIsogBaseChange_hkerdeg_of_degree_eq_pointCount W p r
       (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq) hdeg_eq)
     ?_
-  -- The translation covariance (proved Wall A), per torsion `S, T`.
   intro S T hS hφT
   exact oneSub_hcommPrime_discharged W p r hq ℓ hℓF S T hS hφT
 
@@ -245,22 +227,9 @@ theorem oneSubFrobeniusScaling_of_comapWitness_noδ_clean (hq : 2 ≤ Fintype.ca
     (oneSubFrobeniusIsogBaseChange_degree_eq_pointCount W p r hq)
     hcomap
 
-/-! ### Assembling the local comap witnesses for `(1 − π)_{K̄}` (the three fields, all discharged)
-
-The three fields of `ComapPointValuationWitness` for the base-changed `1 − π` are now ALL proved
-unconditionally (CoordHom-free, no carried geometric residual):
-
-* `affine` = `comap_pointValuation_oneSub_eq_affine` (`OneSubAffineResidues.lean`, UNCONDITIONAL over
-  all affine images — non-doubling/doubling × non-2-torsion/2-torsion);
-* `affineToInfty` = `comap_pointValuation_oneSub_eq_infty` (`OneSubInftyResidues.lean`, the
-  translation-invariance trick at kernel points);
-* `infinity` = `inftyOrdTransport_oneSub` (`OneSubInftyResidues.lean`, the two infinity orders
-  `-2`, `-3` via the discharged base-change order-transport).
-
-So the witness `comapPointValuationWitness_oneSub` is assembled with **zero carried hypotheses**, and
-the leaf-2 scaling `oneSubFrobeniusScaling_holds` follows from the `δ`-free, surjectivity-free clean
-reduction `oneSubFrobeniusScaling_of_comapWitness_noδ_clean`. -/
-
+omit [IsIntegrallyClosed
+    (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
+      SmoothPlaneCurve (AlgebraicClosure K)).CoordinateRing] in
 /-- **The local comap-valuation witnesses `ComapPointValuationWitness` for `(1 − π)_{K̄}`**, assembled
 from the three proved fields (CoordHom-free, no carried geometric residual).  The structure literal
 packages the affine-image comap identity (`comap_pointValuation_oneSub_eq_affine`), the infinity-image
