@@ -27,10 +27,16 @@ It is kept here in a lightweight `Curves/` file (depending only on the mathlib `
 and `DiscreteValuationRing` API) so that the place classification need not import the heavy char-`p`
 `Hasse/L6Witnesses`.
 
-## Main result
+## Main results
 
 * `rankOne_valuationSubring_le_eq_of_ne_top` — a DVR valuation subring `A ≤ B`, `B ≠ ⊤` forces
-  `A = B`.
+  `A = B` (the DVR-domination engine).
+* `valuationSubring_isDVR_of_surjective_withZeroInt` — a surjective `ℤᵐ⁰`-valued valuation on a
+  field has a discrete (rank-one) valuation subring.
+* `Valuation.isEquiv_iff_eq_of_surjective_withZeroInt` — two surjective `ℤᵐ⁰`-valued valuations
+  that are `IsEquiv` are in fact equal.
+* `Valuation.isEquiv_of_valuationSubring_le` — downward valuation-subring domination
+  `O_v ≤ O_w` implies `v.IsEquiv w`.
 -/
 
 namespace HasseWeil.Curves
