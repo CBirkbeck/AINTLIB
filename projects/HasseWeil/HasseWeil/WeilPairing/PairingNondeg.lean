@@ -70,10 +70,6 @@ namespace HasseWeil.WeilPairing
 
 open HasseWeil HasseWeil.WeilPairing.TorsionGeometric HasseWeil.WeilPairing.DivisorPullback
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.style.longLine false
-
 variable {F : Type*} [Field F] [DecidableEq F]
 variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
   [IsIntegrallyClosed (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing]
@@ -86,6 +82,7 @@ variable [IsAlgClosed F]
 
 /-! ### The single deep geometric input: `[ℓ]` is surjective on `E(K̄)` -/
 
+omit [IsIntegrallyClosed (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing] in
 /-- **`[ℓ] : E(K̄) → E(K̄)` is surjective** (Silverman III.4.10b: every nonzero isogeny is surjective
 on `K̄`-points). For `Q ∈ E(K̄)`, the `x`-coordinate of a preimage is a root of the degree-`ℓ²`
 polynomial `Φ_ℓ(X) − x_Q · Ψ_ℓ²(X)` over `K̄`, which splits since `K̄` is algebraically closed; the
@@ -109,7 +106,7 @@ theorem mulByInt_point_surjective (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0) :
   · -- `Q = (x_Q, y_Q)`: the `x`-coordinate of a preimage is a root of the fibre polynomial
     -- `g := Φ_ℓ − x_Q·Ψ²_ℓ`, which is monic of degree `ℓ² > 0`, hence has a root over `K̄`.
     set g : Polynomial F := W.Φ ℓ - Polynomial.C x_Q * W.ΨSq ℓ with hg_def
-    have hΦ_monic : (W.Φ ℓ).Monic := show (W.Φ ℓ).leadingCoeff = 1 from W.leadingCoeff_Φ ℓ
+    have hΦ_monic : (W.Φ ℓ).Monic := W.leadingCoeff_Φ ℓ
     have hΦ_natDeg : (W.Φ ℓ).natDegree = ℓ.natAbs ^ 2 := W.natDegree_Φ ℓ
     have hℓ2_pos : 0 < ℓ.natAbs ^ 2 := pow_pos (Int.natAbs_pos.mpr hℓ0) 2
     have hsub_natDeg_le :
@@ -130,10 +127,9 @@ theorem mulByInt_point_surjective (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0) :
       exact_mod_cast hℓ2_pos.ne')
     -- `g(x₀) = 0` ⟹ `Φ_ℓ(x₀) = x_Q · Ψ²_ℓ(x₀)`.
     have hroot : (W.Φ ℓ).eval x₀ = x_Q * (W.ΨSq ℓ).eval x₀ := by
-      have := hx₀
       rw [Polynomial.IsRoot.def, hg_def, Polynomial.eval_sub, Polynomial.eval_mul,
-        Polynomial.eval_C, sub_eq_zero] at this
-      exact this
+        Polynomial.eval_C, sub_eq_zero] at hx₀
+      exact hx₀
     -- Lift `x₀` to a point `(x₀, y₀)` on the curve.
     obtain ⟨y₀, hy₀eq⟩ := exists_point_on_curve W x₀
     have hns₀ : W.toAffine.Nonsingular x₀ y₀ :=
@@ -185,6 +181,7 @@ at every place `v` (`pullbackDivisor_apply`). Since `[ℓ]` is surjective on `E(
 (`mulByInt_point_surjective`), every place is `[ℓ]·v` for some `v`, so `pullbackDivisor [ℓ] D`
 determines `D` — i.e. `pullbackDivisor [ℓ]` is injective. -/
 
+omit [IsIntegrallyClosed (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing] in
 /-- **`pullbackDivisor [ℓ]` is injective** (over `K̄`). If `pullbackDivisor [ℓ] D₁ = pullbackDivisor
 [ℓ] D₂` then `D₁ = D₂`: at any place `w`, by `pullbackDivisor_apply`, `D₁((ℓ·w.toAffine).proj) =
 D₂((ℓ·w.toAffine).proj)`; surjectivity of `[ℓ]` on points (`mulByInt_point_surjective`) makes every
@@ -235,6 +232,7 @@ The torsion-torsor of `SeparableKernelTorsor.lean` makes `forward : ker[ℓ] →
 an `F`-algebra map, with the translation `τ_{k.val}` for the descended kernel point `k = σ(P_gen) −
 P_gen` (`hdesc_mulByInt`). This is the geometric content `Aut ≃ ker[ℓ]` (Silverman III.4.10c). -/
 
+omit [IsIntegrallyClosed (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing] in
 /-- **Every `[ℓ]^*K(E)`-automorphism of `K(E)` is a translation by an `ℓ`-torsion point.** For each
 `σ ∈ Aut(K(E)/[ℓ]^*K(E))` there is `k ∈ E[ℓ]` with `σ z = τ_k z` for all `z`. The kernel point `k =
 σ(P_gen) − P_gen` is supplied by the descent torsor `hdesc_mulByInt`; the agreement is forced on the
@@ -279,6 +277,7 @@ every automorphism `σ`, so `g_T ∈ (⊥ : IntermediateField [ℓ]^*K(E) K(E))`
 (`IsGalois.mem_bot_iff_fixed`), i.e. `g_T = [ℓ]^* h` (`IntermediateField.mem_bot`; `algebraMap` of
 `[ℓ].toAlgebra` is `[ℓ].pullback`). -/
 
+omit [IsIntegrallyClosed (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing] in
 /-- **`g` fixed by all `ℓ`-translations lies in `[ℓ]^*K(E)`.** If `τ_S g = g` for every `S ∈ E[ℓ]`,
 then `g = [ℓ]^* h` for some `h ∈ K(E)`. Combines `aut_eq_translate` (every automorphism is a
 translation), the Galois `IsGalois.mem_bot_iff_fixed`, and `IntermediateField.mem_bot`. -/
@@ -303,12 +302,11 @@ theorem mem_pullback_range_of_translate_fixed (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 
   -- Hence `g ∈ ⊥`, i.e. `g ∈ range (algebraMap base K(E)) = range [ℓ].pullback`.
   have hbot : g ∈ (⊥ : IntermediateField KE KE) :=
     (IsGalois.mem_bot_iff_fixed g).mpr hfix
-  rw [IntermediateField.mem_bot] at hbot
-  obtain ⟨h, hh⟩ := hbot
-  exact ⟨h, hh⟩
+  rwa [IntermediateField.mem_bot] at hbot
 
 /-! ### Assembly: nondegeneracy `(∀ S, e_ℓ(S,T) = 1) → T = O` -/
 
+omit [IsAlgClosed F] [IsIntegrallyClosed (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing] in
 /-- **`[ℓ]^*((T) − (O))` is the divisor of `g_T`.** The fibre-pullback `pullbackDivisor [ℓ]` of
 the divisor `(T) − (O) = kappaDivisor T` equals `pullbackDiv [ℓ] T − pullbackDiv [ℓ] O`, the divisor
 of `g_T` (`weilFunction_divisor`). (`∞.toAffinePoint = O`.) -/
@@ -369,7 +367,7 @@ theorem weilPairing_nondegenerate (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0)
       Curves.kappaDivisor W.toAffine T :=
     pullbackDivisor_injective W ℓ hℓ (hdiv_pullback.symm.trans hdiv_kappa)
   -- `(T) − (O)` is principal (it is `div h`), so `T = O` by Abel–Jacobi.
-  refine eq_zero_of_kappaDivisor_principal W ⟨h, hh_ne, hdiv_eq⟩
+  exact eq_zero_of_kappaDivisor_principal W ⟨h, hh_ne, hdiv_eq⟩
 
 end Nondeg
 
