@@ -23,7 +23,6 @@ case-split on `z.re`: when `z.re ≤ 0`, `γ(t) - z ∈ slitPlane`; when `z.re >
 ## Main results
 
 * `fdBoundary_contourIntegral_interior_eq`
-* `fdBoundaryPC1Path_contourIntegral_interior_eq`
 * `fdBoundary_interior_winding_complete`
 -/
 
@@ -83,8 +82,8 @@ private lemma ref5_cd (z : ℂ) (H : ℝ) : ContDiff ℝ ⊤ (ref5 z H) := by
 
 private lemma ref5_eq (z : ℂ) (H : ℝ) {t : ℝ} (ht : 4/5 < t) :
     fdBoundaryFun H t - z = ref5 z H t := by
-  simp only [fdBoundaryFun, show ¬t ≤ 1/5 from by linarith, show ¬t ≤ 2/5 from by linarith,
-    show ¬t ≤ 3/5 from by linarith, show ¬t ≤ 4/5 from by linarith, ite_false, ref5]
+  simp only [fdBoundaryFun, show ¬t ≤ 1/5 by linarith, show ¬t ≤ 2/5 by linarith,
+    show ¬t ≤ 3/5 by linarith, show ¬t ≤ 4/5 by linarith, ite_false, ref5]
   apply Complex.ext <;> push_cast <;> simp [add_re, sub_re, mul_re, mul_im, ofReal_re,
     ofReal_im, I_re, I_im, add_im, sub_im]
 
@@ -110,8 +109,8 @@ private lemma ref4n_cd (z : ℂ) (H : ℝ) : ContDiff ℝ ⊤ (ref4n z H) := by
 
 private lemma ref4n_eq (z : ℂ) (H : ℝ) {t : ℝ} (ht3 : 3/5 < t) (ht4 : t ≤ 4/5) :
     -(fdBoundaryFun H t - z) = ref4n z H t := by
-  simp only [fdBoundaryFun, show ¬t ≤ 1/5 from by linarith, show ¬t ≤ 2/5 from by linarith,
-    show ¬t ≤ 3/5 from by linarith, ht4, ite_true, ite_false, ref4n]
+  simp only [fdBoundaryFun, show ¬t ≤ 1/5 by linarith, show ¬t ≤ 2/5 by linarith,
+    show ¬t ≤ 3/5 by linarith, ht4, ite_true, ite_false, ref4n]
   apply Complex.ext <;> push_cast <;> simp [neg_re, neg_im, add_re, sub_re, mul_re, mul_im,
     ofReal_re, ofReal_im, I_re, I_im, add_im, sub_im] <;> ring
 
@@ -238,7 +237,7 @@ private lemma arcRef_eq35 (z : ℂ) (H : ℝ) :
   unfold arcRef
   rw [fdBoundaryFun_at_three_fifths]
   simp only [ellipticPointRho, ellipticPointRho', UpperHalfPlane.coe_mk]
-  rw [show fdArcAngle (3/5) = Real.pi - Real.pi / 3 from by unfold fdArcAngle; ring,
+  rw [show fdArcAngle (3/5) = Real.pi - Real.pi / 3 by unfold fdArcAngle; ring,
     exp_mul_I, ← ofReal_cos, ← ofReal_sin,
     Real.cos_pi_sub, Real.sin_pi_sub, Real.cos_pi_div_three, Real.sin_pi_div_three]
   push_cast
