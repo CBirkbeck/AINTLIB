@@ -42,7 +42,8 @@ theorem pv_split_at_crossing {γ : ℝ → ℂ} {a b : ℝ} {s : ℂ} {ε δ t�
     (h_far : ∀ t ∈ Icc a b, δ < |t - t₀| → ε < ‖γ t - s‖)
     (h_near : ∀ t, |t - t₀| ≤ δ → ‖γ t - s‖ ≤ ε)
     (hint_left : IntervalIntegrable (fun t ↦ (γ t - s)⁻¹ * deriv γ t) volume a (t₀ - δ))
-    (hint_right : IntervalIntegrable (fun t ↦ (γ t - s)⁻¹ * deriv γ t) volume (t₀ + δ) b) :
+    (hint_right : IntervalIntegrable (fun t ↦ (γ t - s)⁻¹ * deriv γ t)
+      volume (t₀ + δ) b) :
     (∫ t in a..b, if ‖γ t - s‖ > ε then (γ t - s)⁻¹ * deriv γ t else 0) =
       (∫ t in a..(t₀ - δ), (γ t - s)⁻¹ * deriv γ t) +
         (∫ t in (t₀ + δ)..b, (γ t - s)⁻¹ * deriv γ t) := by
