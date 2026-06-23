@@ -28,8 +28,8 @@ identity, and the GL₂⁺ change-of-variables lemma `peterssonInner_slash_adjoi
 
 * `heckeT_n_cusp` — the Hecke operator `T_n` on cusp forms
 * `heckeT_p_cusp` / `diamondOp_cusp` — `T_p` and `⟨d⟩` restricted to cusp forms
-* `adjointGamma0Rep` / `peterssonAdj` — adjoint representatives for the change of
-  variables
+* `adjointGamma0Rep` / `adjointGamma1Rep` / `peterssonAdj` — adjoint representatives for
+  the change of variables
 * `peterssonInner_slash_adjoint` — DS Proposition 5.5.2, GL₂⁺ change of variables
 
 ## References
