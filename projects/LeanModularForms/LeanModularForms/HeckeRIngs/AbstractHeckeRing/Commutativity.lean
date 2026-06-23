@@ -21,13 +21,17 @@ namespace HeckeRing
 
 variable {G : Type*} [Group G] (P : HeckePair G)
 
-/-- An anti-involution of an HeckePair: `ι : G →* Gᵐᵒᵖ`,
+/-- An anti-involution of a HeckePair: `ι : G →* Gᵐᵒᵖ`,
 involutive and preserving both `H` and `Δ`. -/
 @[ext]
 structure AntiInvolution where
+  /-- The underlying homomorphism to the opposite group. -/
   toFun : G →* MulOpposite G
+  /-- The induced map on `G` is involutive. -/
   involutive : ∀ g, (toFun (toFun g).unop).unop = g
+  /-- The induced map preserves membership in `H`. -/
   map_H : ∀ g, g ∈ P.H → (toFun g).unop ∈ P.H
+  /-- The induced map preserves membership in `Δ`. -/
   map_Δ : ∀ g, g ∈ P.Δ → (toFun g).unop ∈ P.Δ
 
 variable {P}
@@ -64,9 +68,10 @@ lemma bar_doubleCoset_eq (g₁ g₂ : G)
     DoubleCoset.doubleCoset (ι.bar g₂) P.H P.H := by
   obtain ⟨h₁, hh₁, h₂, hh₂, hprod⟩ := (DoubleCoset.eq P.H P.H _ _).mp
     (DoubleCoset.mk_eq_of_doubleCoset_eq h)
-  rw [show ι.bar g₂ = ι.bar h₂ * ι.bar g₁ * ι.bar h₁ from by
+  rw [show ι.bar g₂ = ι.bar h₂ * ι.bar g₁ * ι.bar h₁ by
     rw [hprod, bar_mul, bar_mul, mul_assoc]]
-  symm; rw [mul_assoc]
+  symm
+  rw [mul_assoc]
   trans DoubleCoset.doubleCoset (ι.bar g₁ * ι.bar h₁) (P.H : Set G) P.H
   · exact doset_mul_left_eq_self P ⟨ι.bar h₂, ι.bar_mem_H hh₂⟩ _
   · exact DoubleCoset.doubleCoset_mul_right_eq_self P ⟨ι.bar h₁, ι.bar_mem_H hh₁⟩ _
@@ -77,7 +82,8 @@ noncomputable def onHeckeCoset (D : HeckeCoset P) : HeckeCoset P :=
     (⟦⟨ι.bar (g : G), ι.bar_mem_Δ g.2⟩⟧ : HeckeCoset P))
     (fun _ _ (h : @Setoid.r _ (dcSetoid P) _ _) ↦ by
       show (⟦_⟧ : HeckeCoset P) = ⟦_⟧
-      rw [HeckeCoset.eq_iff]; exact ι.bar_doubleCoset_eq _ _ h) D
+      rw [HeckeCoset.eq_iff]
+      exact ι.bar_doubleCoset_eq _ _ h) D
 
 /-- `onHeckeCoset ⟦g⟧` equals `⟦bar(g)⟧`. -/
 lemma onHeckeCoset_mk (g : P.Δ) :
@@ -132,7 +138,8 @@ private lemma inverse_product_mem_doubleCoset
   calc g₁⁻¹ * (rep : G)⁻¹ * g_D
       = g₁⁻¹ * (rep : G)⁻¹ * (g_D * k * k⁻¹) := by group
     _ = g₁⁻¹ * (rep : G)⁻¹ *
-          ((rep : G) * g₁ * ((j_rep : G) * (HeckeCoset.rep D₂ : G)) * k⁻¹) := by rw [hprod']
+          ((rep : G) * g₁ * ((j_rep : G) * (HeckeCoset.rep D₂ : G)) * k⁻¹) := by
+      rw [hprod']
     _ = (j_rep : G) * (HeckeCoset.rep D₂ : G) * k⁻¹ := by group
 
 private lemma conj_mem_of_stabilizer (g : G)
@@ -153,10 +160,12 @@ private lemma bar_quotient_diff_mem_H
     x₂ * x₁⁻¹ ∈ P.H := by
   rw [← ι.bar_bar (x₂ * x₁⁻¹)]
   refine ι.bar_mem_H ?_
-  rw [show ι.bar (x₂ * x₁⁻¹) = (ι.bar x₁)⁻¹ * ι.bar x₂ from by
+  rw [show ι.bar (x₂ * x₁⁻¹) = (ι.bar x₁)⁻¹ * ι.bar x₂ by
     rw [← ι.bar_inv, ← ι.bar_mul],
-    show (ι.bar x₁)⁻¹ * ι.bar x₂ = b₁⁻¹ * (g₂⁻¹ * a₁⁻¹ * a₂ * g₂) * b₂ from by
-      rw [hbarx₁, hbarx₂]; group]
+    show (ι.bar x₁)⁻¹ * ι.bar x₂ =
+        b₁⁻¹ * (g₂⁻¹ * a₁⁻¹ * a₂ * g₂) * b₂ by
+      rw [hbarx₁, hbarx₂]
+      group]
   exact P.H.mul_mem (P.H.mul_mem (P.H.inv_mem hb₁) hconj) hb₂
 
 private lemma decompQuot_eq_of_conj_mem (g₁ : P.Δ)
@@ -164,16 +173,22 @@ private lemma decompQuot_eq_of_conj_mem (g₁ : P.Δ)
     (hxx_H : (((g₁ : G))⁻¹ * (i₂.out : G)⁻¹ * g_D) *
       (((g₁ : G))⁻¹ * (i₁.out : G)⁻¹ * g_D)⁻¹ ∈ P.H) :
     i₁ = i₂ := by
-  have hconj_H : ((g₁ : G))⁻¹ * (i₂.out : G)⁻¹ * (i₁.out : G) * ((g₁ : G)) ∈ P.H := by
-    convert hxx_H using 1; group
-  have hconj_H' : ((g₁ : G))⁻¹ * (i₁.out : G)⁻¹ * (i₂.out : G) * ((g₁ : G)) ∈ P.H := by
-    convert P.H.inv_mem hconj_H using 1; group
+  have hconj_H :
+      ((g₁ : G))⁻¹ * (i₂.out : G)⁻¹ * (i₁.out : G) * ((g₁ : G)) ∈ P.H := by
+    convert hxx_H using 1
+    group
+  have hconj_H' :
+      ((g₁ : G))⁻¹ * (i₁.out : G)⁻¹ * (i₂.out : G) * ((g₁ : G)) ∈ P.H := by
+    convert P.H.inv_mem hconj_H using 1
+    group
   rw [show i₁ = ⟦i₁.out⟧ from (Quotient.out_eq' i₁).symm,
       show i₂ = ⟦i₂.out⟧ from (Quotient.out_eq' i₂).symm,
       @Quotient.eq'', QuotientGroup.leftRel_apply,
       Subgroup.mem_subgroupOf, Subgroup.mem_pointwise_smul_iff_inv_smul_mem, ConjAct.smul_def]
   simp only [map_inv, ConjAct.ofConjAct_toConjAct, inv_inv]
-  convert hconj_H' using 1; simp [Subgroup.coe_mul]; group
+  convert hconj_H' using 1
+  simp [Subgroup.coe_mul]
+  group
 
 private lemma conj_kernel_mem_of_stabilizer_mem
     (a₁ a₂ : P.H) (g₂ : G)
@@ -183,7 +198,8 @@ private lemma conj_kernel_mem_of_stabilizer_mem
     ConjAct.smul_def] at hrel
   simp only [map_inv, ConjAct.ofConjAct_toConjAct, inv_inv, Subgroup.coe_mul,
     Subgroup.coe_inv] at hrel
-  convert hrel using 1; group
+  convert hrel using 1
+  group
 
 private lemma fwd_inj_i (g₁ g₂ : P.Δ) (g_D : G)
     (i₁ i₂ : decompQuot P g₁)
@@ -197,7 +213,8 @@ private lemma fwd_inj_i (g₁ g₂ : P.Δ) (g_D : G)
   rw [@Quotient.eq'', QuotientGroup.leftRel_apply] at hj'_eq
   exact decompQuot_eq_of_conj_mem g₁ i₁ i₂ g_D
     (bar_quotient_diff_mem_H ι
-      (((g₁ : G))⁻¹ * (i₁.out : G)⁻¹ * g_D) (((g₁ : G))⁻¹ * (i₂.out : G)⁻¹ * g_D)
+      (((g₁ : G))⁻¹ * (i₁.out : G)⁻¹ * g_D)
+      (((g₁ : G))⁻¹ * (i₂.out : G)⁻¹ * g_D)
       ((g₂ : G))
       (a₁ : G) b₁ (a₂ : G) b₂
       a₁.2 hb₁ a₂.2 hb₂ hbarx₁_eq hbarx₂_eq
@@ -218,20 +235,27 @@ private lemma fwd_y_mem (g₁ g₂ g_D : G)
       g₂⁻¹ * j'_val⁻¹ * q₀_val * g_D = h₁ * g₁ * h₂ := by
   have hab_eq : a_val * g₂ * b_val =
       ι.bar g_D * (ι.bar i_val)⁻¹ * (ι.bar g₁)⁻¹ := by
-    rw [← hbarx_eq, ι.bar_mul, ι.bar_mul, ι.bar_inv, ι.bar_inv]; group
+    rw [← hbarx_eq, ι.bar_mul, ι.bar_mul, ι.bar_inv, ι.bar_inv]
+    group
   have key1 : g₂⁻¹ * a_val⁻¹ * ι.bar g_D =
       b_val * ι.bar g₁ * ι.bar i_val := by
     calc g₂⁻¹ * a_val⁻¹ * ι.bar g_D
         = g₂⁻¹ * a_val⁻¹ * (a_val * g₂ * b_val *
-          (ι.bar g₁ * ι.bar i_val)) := by rw [hab_eq]; group
+          (ι.bar g₁ * ι.bar i_val)) := by
+          rw [hab_eq]
+          group
       _ = _ := by group
   rw [show g₂⁻¹ * j'_val⁻¹ * q₀_val * g_D =
       (g₂⁻¹ * hn₂_val⁻¹ * g₂) * (b_val * ι.bar g₁ * ι.bar i_val) * h'_val by
     rw [hj'_coe, show g₂⁻¹ * (a_val * hn₂_val)⁻¹ * q₀_val * g_D =
-      g₂⁻¹ * (a_val * hn₂_val)⁻¹ * (q₀_val * g_D) from by group,
-      hq₀_eq, ← key1]; group, hbar₁']
+      g₂⁻¹ * (a_val * hn₂_val)⁻¹ * (q₀_val * g_D) by group,
+      hq₀_eq, ← key1]
+    group, hbar₁']
+  have hn₂_inv_mem : g₂⁻¹ * hn₂_val⁻¹ * g₂ ∈ P.H := by
+    convert P.H.inv_mem hn₂_mem using 1
+    group
   exact ⟨(g₂⁻¹ * hn₂_val⁻¹ * g₂) * b_val * h1₁,
-    P.H.mul_mem (P.H.mul_mem (by convert P.H.inv_mem hn₂_mem using 1; group) hb) h1₁.2,
+    P.H.mul_mem (P.H.mul_mem hn₂_inv_mem hb) h1₁.2,
     h2₁ * ι.bar i_val * h'_val,
     P.H.mul_mem (P.H.mul_mem h2₁.2 (ι.bar_mem_H hi)) h'_mem, by group⟩
 
@@ -245,19 +269,25 @@ private lemma fwd_pair_mem (g₁ : P.Δ) (g₂ g_D q₀_val : G)
     ((ConjAct.toConjAct ((g₁ : G)) • P.H).subgroupOf P.H) c
   have hn₁_coe : ((⟦c⟧ : decompQuot P g₁).out : G) = (c : G) * (n₁ : G) := by
     simpa [Subgroup.coe_mul] using congr_arg (Subtype.val : ↥P.H → G) hn₁_eq
-  apply leftCoset_eq_of_not_disjoint; rw [@Set.not_disjoint_iff]
+  apply leftCoset_eq_of_not_disjoint
+  rw [@Set.not_disjoint_iff]
   refine ⟨j'_val * g₂ * (((⟦c⟧ : decompQuot P g₁).out : G) * ((g₁ : G))),
     ⟨1, P.H.one_mem, by simp [smul_eq_mul]⟩, ?_⟩
   refine ⟨d_val⁻¹ * (((g₁ : G))⁻¹ * (n₁ : G) * ((g₁ : G))),
     P.H.mul_mem (P.H.inv_mem hd) (conj_mem_of_stabilizer ((g₁ : G)) n₁), ?_⟩
-  simp only [smul_eq_mul]; rw [hn₁_coe]
+  simp only [smul_eq_mul]
+  rw [hn₁_coe]
   have h_prod_eq : j'_val * g₂ * ((c : G) * ((g₁ : G)) * d_val) =
-      q₀_val * g_D := by rw [← hy_eq]; group
+      q₀_val * g_D := by
+    rw [← hy_eq]
+    group
   calc q₀_val * g_D * (d_val⁻¹ * (((g₁ : G))⁻¹ * (n₁ : G) * ((g₁ : G))))
       = (q₀_val * g_D * d_val⁻¹) *
         (((g₁ : G))⁻¹ * (n₁ : G) * ((g₁ : G))) := by group
     _ = j'_val * g₂ * ((c : G) * ((g₁ : G))) *
-        (((g₁ : G))⁻¹ * (n₁ : G) * ((g₁ : G))) := by rw [← h_prod_eq]; group
+        (((g₁ : G))⁻¹ * (n₁ : G) * ((g₁ : G))) := by
+      rw [← h_prod_eq]
+      group
     _ = j'_val * g₂ * ((c : G) * (n₁ : G) * ((g₁ : G))) := by group
 
 private lemma q₀_out_mul_eq_bar_mul (D : HeckeCoset P) (h1D h2D : P.H)
@@ -269,12 +299,15 @@ private lemma q₀_out_mul_eq_bar_mul (D : HeckeCoset P) (h1D h2D : P.H)
   subst hq₀
   obtain ⟨n, hn_eq⟩ := QuotientGroup.mk_out_eq_mul
     ((ConjAct.toConjAct (HeckeCoset.rep D : G) • P.H).subgroupOf P.H) ⟨(h1D : G), h1D.2⟩
-  have hn_coe : ((⟦⟨(h1D : G), h1D.2⟩⟧ : decompQuot P (HeckeCoset.rep D)).out : G) =
-      (h1D : G) * (n : G) := by
+  have hn_coe :
+      ((⟦⟨(h1D : G), h1D.2⟩⟧ : decompQuot P (HeckeCoset.rep D)).out : G) =
+        (h1D : G) * (n : G) := by
     simpa [Subgroup.coe_mul] using congr_arg (Subtype.val : ↥P.H → G) hn_eq
   exact ⟨⟨(h2D : G)⁻¹ * ((HeckeCoset.rep D : G)⁻¹ * (n : G) * (HeckeCoset.rep D : G)),
     P.H.mul_mem (P.H.inv_mem h2D.2) (conj_mem_of_stabilizer (HeckeCoset.rep D : G) n)⟩,
-    by rw [hn_coe, hbarD]; group⟩
+    by
+      rw [hn_coe, hbarD]
+      group⟩
 
 private noncomputable def heckeMultiplicity_le_comm_fwdMap
     (h_fix : ∀ D : HeckeCoset P, ι.onHeckeCoset D = D) (D₁ D₂ D : HeckeCoset P)
@@ -340,7 +373,8 @@ private lemma heckeMultiplicity_le_comm_fwdMap_injective
       (h1₁ : G) * (HeckeCoset.rep D₁ : G) * (h2₁ : G))
     (q₀ : decompQuot P (HeckeCoset.rep D)) (hq₀ : q₀ = ⟦⟨(h1D : G), h1D.2⟩⟧) :
     Function.Injective
-      (heckeMultiplicity_le_comm_fwdMap ι h_fix D₁ D₂ D h1D h2D hbarD h1₁ h2₁ hbar₁ q₀ hq₀) := by
+      (heckeMultiplicity_le_comm_fwdMap ι h_fix D₁ D₂ D h1D h2D hbarD h1₁ h2₁ hbar₁
+        q₀ hq₀) := by
   set g₁ := (HeckeCoset.rep D₁ : G)
   set g₂ := (HeckeCoset.rep D₂ : G)
   set g_D := (HeckeCoset.rep D : G)
@@ -354,7 +388,8 @@ private lemma heckeMultiplicity_le_comm_fwdMap_injective
     have := bar_mem_doubleCoset ι h_fix D₂ _
       (inverse_product_mem_doubleCoset g₁ g₂ g_D D₂ rfl i'.out j'.out hc)
     rwa [HeckeCoset.toSet_eq_rep, DoubleCoset.mem_doubleCoset] at this
-  have hbarx₁_dc := bar_dc i₁ j₁ h₁; have hbarx₂_dc := bar_dc i₂ j₂ h₂
+  have hbarx₁_dc := bar_dc i₁ j₁ h₁
+  have hbarx₂_dc := bar_dc i₂ j₂ h₂
   change (⟦⟨hbarx₁_dc.choose, hbarx₁_dc.choose_spec.1⟩⟧ :
       decompQuot P (HeckeCoset.rep D₂)) =
     ⟦⟨hbarx₂_dc.choose, hbarx₂_dc.choose_spec.1⟩⟧ at hj'_eq
@@ -368,10 +403,14 @@ private lemma heckeMultiplicity_le_comm_fwdMap_injective
     hbarx₂_dc.choose_spec.2.choose_spec.2 hj'_eq
   subst hi₁₂
   have hj₁₂ : j₁ = j₂ := by
-    by_contra hne; apply decompQuot_coset_diff P (HeckeCoset.rep D₂) j₁ j₂ hne
+    by_contra hne
+    apply decompQuot_coset_diff P (HeckeCoset.rep D₂) j₁ j₂ hne
     exact set_singleton_mul_left_cancel ((i₁.out : G) * g₁)
-      (by have := h₁.trans h₂.symm; rwa [mul_assoc, mul_assoc] at this)
-  subst hj₁₂; rfl
+      (by
+        have := h₁.trans h₂.symm
+        rwa [mul_assoc, mul_assoc] at this)
+  subst hj₁₂
+  rfl
 
 private lemma heckeMultiplicity_le_comm (h_fix : ∀ D : HeckeCoset P, ι.onHeckeCoset D = D)
     (D₁ D₂ D : HeckeCoset P) :
@@ -383,7 +422,8 @@ private lemma heckeMultiplicity_le_comm (h_fix : ∀ D : HeckeCoset P, ι.onHeck
   unfold heckeMultiplicity
   rw [← heckeMultiplicity_uniform P (HeckeCoset.rep D₂) (HeckeCoset.rep D₁) D q₀]
   exact_mod_cast Nat.card_le_card_of_injective
-    (heckeMultiplicity_le_comm_fwdMap ι h_fix D₁ D₂ D h1D h2D hbarD h1₁ h2₁ hbar₁ q₀ hq₀)
+    (heckeMultiplicity_le_comm_fwdMap ι h_fix D₁ D₂ D h1D h2D hbarD h1₁ h2₁ hbar₁
+      q₀ hq₀)
     (heckeMultiplicity_le_comm_fwdMap_injective ι h_fix D₁ D₂ D h1D h2D hbarD
       h1₁ h2₁ hbar₁ q₀ hq₀)
 
@@ -406,7 +446,8 @@ lemma m_comm_of_onHeckeCoset_eq (h_fix : ∀ D : HeckeCoset P, ι.onHeckeCoset D
     m P (HeckeCoset.rep D₁) (HeckeCoset.rep D₂) =
     m P (HeckeCoset.rep D₂) (HeckeCoset.rep D₁) := by
   ext D
-  simpa only [m, Finsupp.coe_mk] using heckeMultiplicity_comm_of_onHeckeCoset_eq ι h_fix D₁ D₂ D
+  simpa only [m, Finsupp.coe_mk] using
+    heckeMultiplicity_comm_of_onHeckeCoset_eq ι h_fix D₁ D₂ D
 
 /-- Shimura Proposition 3.8: the Hecke ring is commutative when the anti-involution
 fixes every double coset. -/
@@ -420,8 +461,10 @@ theorem mul_comm_of_antiInvolution (h_fix : ∀ D : HeckeCoset P, ι.onHeckeCose
     · intro D₂ b
       rw [T_single_mul_T_single, T_single_mul_T_single,
         m_comm_of_onHeckeCoset_eq ι h_fix D₁ D₂, smul_comm]
-    · intro g₁ g₂ hg₁ hg₂; rw [mul_add, add_mul, hg₁, hg₂]
-  · intro f₁ f₂ hf₁ hf₂; rw [add_mul, mul_add, hf₁, hf₂]
+    · intro g₁ g₂ hg₁ hg₂
+      rw [mul_add, add_mul, hg₁, hg₂]
+  · intro f₁ f₂ hf₁ hf₂
+    rw [add_mul, mul_add, hf₁, hf₂]
 
 end AntiInvolution
 
