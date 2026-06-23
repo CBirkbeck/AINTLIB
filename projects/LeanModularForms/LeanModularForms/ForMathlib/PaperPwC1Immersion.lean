@@ -42,6 +42,7 @@ automatically interval-integrable on each piece, and so on `[0, 1]` by gluing.
   (both lie in `S`, `a < b`, no element of `S` strictly between them).
 * `ClosedPwC1Curve x` — a closed path at `x` that is paper-`C¹`-piecewise.
 * `ClosedPwC1Immersion x` — extends with non-vanishing derivative on each piece.
+* `ClosedPwC1Immersion.toPwC1Immersion` — forgets to the legacy `PwC1Immersion x x`.
 
 ## Main results
 
@@ -472,13 +473,13 @@ theorem lipschitzWith_extend (γ : ClosedPwC1Curve x) :
     intro u
     rcases le_total u 0 with hu0 | hu0
     · rw [γ.toPath.extend_of_le_zero hu0,
-        show max 0 (min u 1) = 0 from by
+        show max 0 (min u 1) = 0 by
           simp [min_eq_left (hu0.trans zero_le_one), max_eq_left hu0],
         γ.toPath.extend_zero]
     · rcases le_total u 1 with hu1 | hu1
       · simp [min_eq_left hu1, max_eq_right hu0]
       · rw [γ.toPath.extend_of_one_le hu1,
-          show max 0 (min u 1) = 1 from by simp [min_eq_right hu1], γ.toPath.extend_one]
+          show max 0 (min u 1) = 1 by simp [min_eq_right hu1], γ.toPath.extend_one]
   have h_proj_lip : ‖s' - t'‖ ≤ ‖s - t‖ := by
     rw [Real.norm_eq_abs, Real.norm_eq_abs]
     calc |s' - t'|
