@@ -585,6 +585,55 @@ theorem Φ_two_mul_eval_ne_zero_of_ΨSq_zero {ℓ : ℤ} (hℓ : ℓ ≠ 0)
     mul_zero, mul_zero, add_zero, Polynomial.eval_one] at hev
   exact one_ne_zero hev.symm
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
+/-- **`0 ≤ ord_P (Φ_ff n)`**: the numerator `Φ_ff n = algebraMap (W.Φ n)` is a regular function,
+so it has nonnegative order at every smooth point (zero off its zero locus, positive at a root). -/
+private theorem ord_P_Φ_ff_nonneg (n : ℤ)
+    (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPoint) :
+    (0 : WithTop ℤ) ≤ (⟨W⟩ : SmoothPlaneCurve F).ord_P P (Φ_ff W n) := by
+  rw [Φ_ff_eq_algebraMap]
+  rcases eq_or_ne ((W.Φ n).eval P.x) 0 with h0 | h0
+  · exact le_trans (by norm_num)
+      (one_le_ord_P_algebraMap_poly_of_root W P (W.Φ_ne_zero n) h0)
+  · rw [ord_P_algebraMap_poly_eq_zero_of_eval_ne W P (W.Φ_ne_zero n) h0]
+
+omit [DecidableEq F] in
+/-- **`ord_P (ΨSq_ff n) = ord_P (Φ_ff n) + 2`** from the `[n]`-torsion pole
+`ord_P (mulByInt_x n) = -2`. Since `mulByInt_x n = Φ_ff n / ΨSq_ff n`, additivity of `ord_P`
+(`ord_P_mul`, `ord_P_inv`) turns the pole equation into the relation between the denominator and
+numerator orders. -/
+private theorem ord_P_ΨSq_ff_eq_ord_P_Φ_ff_add_two {n : ℤ} (hn : n ≠ 0)
+    (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPoint)
+    (hpole : (⟨W⟩ : SmoothPlaneCurve F).ord_P P (mulByInt_x W n) = ((-2 : ℤ) : WithTop ℤ)) :
+    (⟨W⟩ : SmoothPlaneCurve F).ord_P P (ΨSq_ff W n) =
+      (⟨W⟩ : SmoothPlaneCurve F).ord_P P (Φ_ff W n) + ((2 : ℤ) : WithTop ℤ) := by
+  have hΨ_ne : ΨSq_ff W n ≠ 0 := ΨSq_ff_ne_zero W hn
+  have hxeq : mulByInt_x W n = Φ_ff W n * (ΨSq_ff W n)⁻¹ := by
+    rw [mulByInt_x, div_eq_mul_inv]
+  rw [hxeq, (⟨W⟩ : SmoothPlaneCurve F).ord_P_mul,
+    (⟨W⟩ : SmoothPlaneCurve F).ord_P_inv _ hΨ_ne] at hpole
+  obtain ⟨m, hm⟩ := exists_intCast_ord_P W P hΨ_ne
+  obtain ⟨k, hk⟩ := exists_intCast_ord_P W P (Φ_ff_ne_zero W n)
+  rw [hm, hk] at hpole ⊢
+  have hkm : (k : ℤ) + -m = -2 := by exact_mod_cast hpole
+  norm_cast
+  omega
+
+omit [DecidableEq F] in
+/-- **`ord_P (ψ_ff n) = 1` from `ord_P (ΨSq_ff n) = 2`**: halving the order of the square, using
+`ψ_ff n ^ 2 = ΨSq_ff n` and additivity of `ord_P`. This converts the double zero of `ΨSq` into the
+simple zero of `ψ`. -/
+private theorem ord_P_ψ_ff_eq_one_of_ord_P_ΨSq_ff_eq_two {n : ℤ} (hn : n ≠ 0)
+    (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPoint)
+    (hΨ_ord : (⟨W⟩ : SmoothPlaneCurve F).ord_P P (ΨSq_ff W n) = ((2 : ℤ) : WithTop ℤ)) :
+    (⟨W⟩ : SmoothPlaneCurve F).ord_P P (ψ_ff W n) = ((1 : ℤ) : WithTop ℤ) := by
+  have hψ_ne : ψ_ff W n ≠ 0 := ψ_ff_ne_zero W hn
+  rw [← ψ_ff_sq_eq_ΨSq_ff, sq, (⟨W⟩ : SmoothPlaneCurve F).ord_P_mul] at hΨ_ord
+  obtain ⟨m, hm⟩ := exists_intCast_ord_P W P hψ_ne
+  rw [hm] at hΨ_ord ⊢
+  have : (m + m : ℤ) = 2 := by exact_mod_cast hΨ_ord
+  exact_mod_cast (by omega : m = 1)
+
 /-- **`ord_P (ψ_ff(2ℓ)) = 1` at a `2ℓ`-torsion point `P`** with `(2ℓ : F) ≠ 0`. From the
 `[2ℓ]`-torsion pole `ord_P (mulByInt_x (2ℓ)) = -2` (which already forces `ΨSq_{2ℓ}(P.x) = 0`) and
 `mulByInt_x (2ℓ) = Φ_ff(2ℓ)/ΨSq_ff(2ℓ)`: since `ord_P (Φ_ff(2ℓ)) = 0` (`Φ_{2ℓ}(P.x) ≠ 0`,
@@ -597,50 +646,27 @@ theorem ord_P_ψ_ff_two_mul_eq_one {ℓ : ℤ} (hℓ : ℓ ≠ 0) (h2ℓF : (2 *
   have h2ℓ : (2 * ℓ : ℤ) ≠ 0 := by omega
   have h2ℓF' : ((2 * ℓ : ℤ) : F) ≠ 0 := by push_cast; exact h2ℓF
   have hpole := ord_P_mulByInt_x_eq_neg_two_of_torsion' W (2 * ℓ) h2ℓ h2ℓF' P hQ2
-  have hΨ_ne : ΨSq_ff W (2 * ℓ) ≠ 0 := ΨSq_ff_ne_zero W h2ℓ
-  have hΦnonneg : (0 : WithTop ℤ) ≤ (⟨W⟩ : SmoothPlaneCurve F).ord_P P (Φ_ff W (2 * ℓ)) := by
-    rw [Φ_ff_eq_algebraMap]
-    rcases eq_or_ne ((W.Φ (2 * ℓ)).eval P.x) 0 with h0 | h0
-    · exact le_trans (by norm_num)
-        (one_le_ord_P_algebraMap_poly_of_root W P (W.Φ_ne_zero (2 * ℓ)) h0)
-    · rw [ord_P_algebraMap_poly_eq_zero_of_eval_ne W P (W.Φ_ne_zero (2 * ℓ)) h0]
+  -- The pole `ord_P (mulByInt_x (2ℓ)) = -2` ties the denominator and numerator orders together.
+  have hΨrel := ord_P_ΨSq_ff_eq_ord_P_Φ_ff_add_two W h2ℓ P hpole
+  -- `ΨSq_ff` has positive order (numerator order is `≥ 0`), so `ΨSq_{2ℓ}(P.x) = 0`.
   have hΨpos : (0 : WithTop ℤ) < (⟨W⟩ : SmoothPlaneCurve F).ord_P P (ΨSq_ff W (2 * ℓ)) := by
-    have hxeq : mulByInt_x W (2 * ℓ) = Φ_ff W (2 * ℓ) * (ΨSq_ff W (2 * ℓ))⁻¹ := by
-      rw [mulByInt_x, div_eq_mul_inv]
-    rw [hxeq, (⟨W⟩ : SmoothPlaneCurve F).ord_P_mul,
-      (⟨W⟩ : SmoothPlaneCurve F).ord_P_inv _ hΨ_ne] at hpole
-    obtain ⟨m, hm⟩ := exists_intCast_ord_P W P hΨ_ne
     obtain ⟨k, hk⟩ := exists_intCast_ord_P W P (Φ_ff_ne_zero W (2 * ℓ))
-    rw [hm, hk] at hpole
-    rw [hk] at hΦnonneg
-    rw [hm]
-    have hk0 : (0 : ℤ) ≤ k := by exact_mod_cast hΦnonneg
-    have hkm : (k : ℤ) + -m = -2 := by exact_mod_cast hpole
-    exact_mod_cast (by omega : (0 : ℤ) < m)
+    have hk0 : (0 : ℤ) ≤ k := by exact_mod_cast hk ▸ ord_P_Φ_ff_nonneg W (2 * ℓ) P
+    rw [hΨrel, hk]; exact_mod_cast (by omega : (0 : ℤ) < k + 2)
   have hΨSq0 : (W.ΨSq (2 * ℓ)).eval P.x = 0 := by
     by_contra h0
     rw [ΨSq_ff_eq_algebraMap, ord_P_algebraMap_poly_eq_zero_of_eval_ne W P
       (ΨSq_poly_ne_zero W h2ℓ) h0] at hΨpos
     exact lt_irrefl _ hΨpos
+  -- Coprimality then forces `Φ_{2ℓ}(P.x) ≠ 0`, so the numerator order is `0` and `ord_P (ΨSq) = 2`.
   have hΦeval : (W.Φ (2 * ℓ)).eval P.x ≠ 0 := Φ_two_mul_eval_ne_zero_of_ΨSq_zero W hℓ P hΨSq0
   have hΦ_ord : (⟨W⟩ : SmoothPlaneCurve F).ord_P P (Φ_ff W (2 * ℓ)) = 0 := by
     rw [Φ_ff_eq_algebraMap]
     exact ord_P_algebraMap_poly_eq_zero_of_eval_ne W P (W.Φ_ne_zero (2 * ℓ)) hΦeval
   have hΨ_ord : (⟨W⟩ : SmoothPlaneCurve F).ord_P P (ΨSq_ff W (2 * ℓ)) = ((2 : ℤ) : WithTop ℤ) := by
-    have hx_eq : mulByInt_x W (2 * ℓ) = Φ_ff W (2 * ℓ) * (ΨSq_ff W (2 * ℓ))⁻¹ := by
-      rw [mulByInt_x, div_eq_mul_inv]
-    rw [hx_eq, (⟨W⟩ : SmoothPlaneCurve F).ord_P_mul,
-      (⟨W⟩ : SmoothPlaneCurve F).ord_P_inv _ hΨ_ne, hΦ_ord, zero_add] at hpole
-    obtain ⟨m, hm⟩ := exists_intCast_ord_P W P hΨ_ne
-    rw [hm] at hpole ⊢
-    have : (-m : ℤ) = -2 := by exact_mod_cast hpole
-    exact_mod_cast (by omega : m = 2)
-  have hψ_ne : ψ_ff W (2 * ℓ) ≠ 0 := ψ_ff_ne_zero W h2ℓ
-  rw [← ψ_ff_sq_eq_ΨSq_ff, sq, (⟨W⟩ : SmoothPlaneCurve F).ord_P_mul] at hΨ_ord
-  obtain ⟨m, hm⟩ := exists_intCast_ord_P W P hψ_ne
-  rw [hm] at hΨ_ord ⊢
-  have : (m + m : ℤ) = 2 := by exact_mod_cast hΨ_ord
-  exact_mod_cast (by omega : m = 1)
+    rw [hΨrel, hΦ_ord]; norm_num
+  -- Halving via `ψ_ff² = ΨSq_ff` gives the simple zero `ord_P (ψ_ff (2ℓ)) = 1`.
+  exact ord_P_ψ_ff_eq_one_of_ord_P_ΨSq_ff_eq_two W h2ℓ P hΨ_ord
 
 omit [W.toAffine.IsElliptic] in
 /-- **`ord_P (ψ_ff ℓ) = 0` at an affine `[ℓ]`-image** (`ψ_ℓ(P) ≠ 0`). The `y`-denominator is a unit
