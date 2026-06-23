@@ -43,9 +43,6 @@ poles of `φ^*x_gen₂`).
 
 open WeierstrassCurve
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-
 namespace HasseWeil.WeilPairing
 
 open HasseWeil HasseWeil.Curves
@@ -65,14 +62,17 @@ noncomputable def conorm (φ : HasseWeil.Isogeny W₁ W₂) :
     W₁.toAffine.FunctionField →* W₂.toAffine.FunctionField :=
   @Algebra.norm W₂.toAffine.FunctionField W₁.toAffine.FunctionField _ _ φ.toAlgebra
 
+omit [IsAlgClosed F] in
 @[simp] theorem conorm_mul (φ : HasseWeil.Isogeny W₁ W₂) (f g : W₁.toAffine.FunctionField) :
     conorm φ (f * g) = conorm φ f * conorm φ g :=
   (conorm φ).map_mul f g
 
+omit [IsAlgClosed F] in
 @[simp] theorem conorm_one (φ : HasseWeil.Isogeny W₁ W₂) :
     conorm φ (1 : W₁.toAffine.FunctionField) = 1 :=
   (conorm φ).map_one
 
+omit [IsAlgClosed F] in
 /-- The conorm of a nonzero function is nonzero (a monoid hom sends a unit to a unit). -/
 theorem conorm_ne_zero (φ : HasseWeil.Isogeny W₁ W₂) {f : W₁.toAffine.FunctionField}
     (hf : f ≠ 0) : conorm φ f ≠ 0 :=
@@ -89,6 +89,7 @@ norm–conorm leaf automatically; only `hsep` (genuine separability) remains car
 
 set_option synthInstance.maxHeartbeats 400000 in
 set_option maxHeartbeats 800000 in
+omit [IsAlgClosed F] in
 /-- **Two-curve isogeny finite-dimensionality (unconditional)**: `K(E₁)` is finite-dimensional over
 `K(E₂)` via `φ.pullback`, for any two-curve isogeny `φ`. -/
 theorem isogeny_finiteDimensional_twoCurve (φ : HasseWeil.Isogeny W₁ W₂) :
@@ -237,6 +238,7 @@ generic surjective `ℤᵐ⁰`-valued valuation with prescribed affine center. -
 
 set_option synthInstance.maxHeartbeats 400000 in
 set_option maxHeartbeats 800000 in
+omit [DecidableEq F] [IsAlgClosed F] in
 /-- **A surjective valuation on `K(C)` with affine center `m_Q` is `pointValuation Q`** (the place
 dictionary for a smooth curve, general form).  If `w : K(C) → ℤᵐ⁰` is surjective, is `≤ 1` on the
 coordinate ring `F[C]`, and has center exactly `m_Q` (i.e. `w(algebraMap b) < 1 ↔ b ∈ m_Q`), then
@@ -319,6 +321,7 @@ adic valuation is `pointValuation P`. -/
 
 set_option synthInstance.maxHeartbeats 400000 in
 set_option maxHeartbeats 1600000 in
+omit [IsAlgClosed F] in
 /-- **The pulled-back coordinate ring of `E₂` is `≤ 1` at a regular point `P`** (value bound, the
 generator induction).  If `φ^*(x_gen₂)`, `φ^*(y_gen₂)` are `≤ 1` at `P`, then `φ^*(algebraMap c)` is
 `≤ 1` at `P` for every `c ∈ F[E₂]` (it is a polynomial in the two generators with `F`-constant — i.e.
@@ -346,7 +349,7 @@ theorem pointValuation_le_one_pullback_coordinateRing
     have hXeq : φ.pullback (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
         W₂.toAffine.FunctionField (AdjoinRoot.mk W₂.toAffine.polynomial Polynomial.X)) =
         φ.pullback (y_gen W₂) := rfl
-    refine mul_le_one' ?_ (by rw [hXeq]; exact pow_le_one₀ zero_le' hy)
+    refine mul_le_one' ?_ (by rw [hXeq]; exact pow_le_one₀ zero_le hy)
     induction a using Polynomial.induction_on' with
     | add p q hp hq =>
       rw [Polynomial.C_add, map_add, map_add, map_add]
@@ -358,7 +361,7 @@ theorem pointValuation_le_one_pullback_coordinateRing
       have hXgen : φ.pullback (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
           W₂.toAffine.FunctionField (AdjoinRoot.mk W₂.toAffine.polynomial
             (Polynomial.C Polynomial.X))) = φ.pullback (x_gen W₂) := rfl
-      refine mul_le_one' ?_ (by rw [hXgen]; exact pow_le_one₀ zero_le' hx)
+      refine mul_le_one' ?_ (by rw [hXgen]; exact pow_le_one₀ zero_le hx)
       -- the `F`-constant leg `φ^*(algMap_F d) = algMap_F d` is regular at `P` (constant).
       have hdconst : φ.pullback (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
           W₂.toAffine.FunctionField (AdjoinRoot.mk W₂.toAffine.polynomial
@@ -377,6 +380,7 @@ theorem pointValuation_le_one_pullback_coordinateRing
 
 set_option synthInstance.maxHeartbeats 400000 in
 set_option maxHeartbeats 1600000 in
+omit [IsAlgClosed F] in
 /-- **A regular point with a vanishing `B`-function is cut out by a `B`-prime** (reverse place
 dictionary / surjectivity).  If both pulled-back generators are regular at `P` (`P ∉ poleLocus`) and
 some nonzero `z ∈ B` vanishes at `P` (`pointValuation P (algebraMap_B z) < 1`), then there is a
@@ -463,14 +467,13 @@ theorem exists_bPrime_eq_pointValuation_of_notMem_poleLocus
         intro a b ha hb
         simp only [Set.mem_setOf_eq, map_add] at *
         exact lt_of_le_of_lt (pv.map_add _ _) (max_lt ha hb)
-      zero_mem' := by simp [Set.mem_setOf_eq, map_zero]
+      zero_mem' := by simp only [Set.mem_setOf_eq, map_zero, pv.map_zero]; exact zero_lt_one
       smul_mem' := by
         intro c b hb
         simp only [Set.mem_setOf_eq, smul_eq_mul, map_mul, pv.map_mul] at *
         calc pv (algebraMap Bb W₁.toAffine.FunctionField c) *
               pv (algebraMap Bb W₁.toAffine.FunctionField b)
-            ≤ 1 * pv (algebraMap Bb W₁.toAffine.FunctionField b) :=
-              mul_le_mul_right' (hregB c) _
+            ≤ 1 * pv (algebraMap Bb W₁.toAffine.FunctionField b) := by gcongr; exact hregB c
           _ = pv (algebraMap Bb W₁.toAffine.FunctionField b) := one_mul _
           _ < 1 := hb } with hq_def
   have hq_mem_iff : ∀ b : Bb, b ∈ q ↔
@@ -482,7 +485,7 @@ theorem exists_bPrime_eq_pointValuation_of_notMem_poleLocus
     · intro a b hab
       rw [hq_mem_iff, map_mul, pv.map_mul] at hab
       by_contra h
-      push_neg at h
+      push Not at h
       obtain ⟨ha, hb⟩ := h
       rw [hq_mem_iff, not_lt] at ha hb
       have ha1 : pv (algebraMap Bb W₁.toAffine.FunctionField a) = 1 := le_antisymm (hregB a) ha
@@ -1030,8 +1033,7 @@ theorem twoCurve_ord_conorm_eq_sum_fiber
       show (placeRestrictionPointMap φ
         (ProjectiveSmoothPoint.infinity : ProjectiveSmoothPoint
           (⟨W₁⟩ : SmoothPlaneCurve F)).toAffinePoint).toProjectiveSmoothPoint ≠ _
-      simp only [Curves.ProjectiveSmoothPoint.toAffinePoint_infinity,
-        Affine.Point.toProjectiveSmoothPoint_zero]
+      simp only [Curves.ProjectiveSmoothPoint.toAffinePoint_infinity]
       exact fun h => by cases h
     | affine P' =>
       -- `P' ∉ poleLocus` (its image is affine `Q`), and `aw` vanishes at `P'` (it's in support).
@@ -1215,7 +1217,7 @@ theorem placeRestrictionPushforward_projectiveDivisorOf
     placeRestrictionPushforward φ ((⟨W₁⟩ : SmoothPlaneCurve F).projectiveDivisorOf f) =
       (⟨W₂⟩ : SmoothPlaneCurve F).projectiveDivisorOf (conorm φ f) :=
   placeRestrictionPushforward_projectiveDivisorOf_of_algebraMap φ hfin
-    (fun w hw => placeRestrictionPushforward_projectiveDivisorOf_algebraMap φ hfin hsep hreg hw) f
+    (fun _ hw => placeRestrictionPushforward_projectiveDivisorOf_algebraMap φ hfin hsep hreg hw) f
 
 /-- **`PlaceRestrictionPreservesPrincipal` (Silverman II.3.6/II.3.7), separable case** — the single
 remaining wall of char-0 isogeny symmetry, CoordHom-free.  Given that `K(E₁)/φ*K(E₂)` is finite and
