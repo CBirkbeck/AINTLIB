@@ -9,13 +9,12 @@ import LeanModularForms.ForMathlib.ValenceFormula.WindingWeights.Common
 /-!
 # Winding Number Weight at i
 
-PV integral computation and generalized winding number of `fdBoundary_H`
-around the point i.
+PV integral computation for `fdBoundary_H` around the point `i` — the analytic
+input for its winding-number weight.
 
 ## Main Results
 
 * `pv_integral_at_i_tendsto` — PV integral converges to -iπ
-* `gWN_fdBoundary_H_at_i` — gWN = -1/2 at i
 -/
 
 open Complex MeasureTheory Set Filter Topology
