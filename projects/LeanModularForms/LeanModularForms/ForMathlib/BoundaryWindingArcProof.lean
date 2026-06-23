@@ -36,11 +36,13 @@ theorem arcT₀_gt_one_fifth {θ₀ : ℝ} (h : Real.pi / 3 < θ₀) : 1/5 < arc
   rw [arcT₀, lt_div_iff₀ (by positivity : (0 : ℝ) < 5 * Real.pi)]
   nlinarith [Real.pi_pos]
 
-theorem arcT₀_lt_three_fifths {θ₀ : ℝ} (h : θ₀ < 2 * Real.pi / 3) : arcT₀ θ₀ < 3/5 := by
+theorem arcT₀_lt_three_fifths {θ₀ : ℝ} (h : θ₀ < 2 * Real.pi / 3) :
+    arcT₀ θ₀ < 3/5 := by
   rw [arcT₀, div_lt_iff₀ (by positivity : (0 : ℝ) < 5 * Real.pi)]
   nlinarith [Real.pi_pos]
 
-theorem arcT₀_mem_Ioo {θ₀ : ℝ} (h_lo : Real.pi / 3 < θ₀) (h_hi : θ₀ < 2 * Real.pi / 3) :
+theorem arcT₀_mem_Ioo {θ₀ : ℝ} (h_lo : Real.pi / 3 < θ₀)
+    (h_hi : θ₀ < 2 * Real.pi / 3) :
     arcT₀ θ₀ ∈ Ioo (0 : ℝ) 1 :=
   ⟨(by norm_num : (0 : ℝ) < 1/5).trans (arcT₀_gt_one_fifth h_lo),
     (arcT₀_lt_three_fifths h_hi).trans (by norm_num : (3/5 : ℝ) < 1)⟩
@@ -93,7 +95,8 @@ theorem arc_near_generic (H : ℝ) {θ₀ ε : ℝ} (hε : 0 < ε) (hε_lt : ε 
 and assuming `|t - t₀| ≤ 2/5` (which follows from `t, t₀ ∈ [1/5, 3/5]`),
 the distance exceeds `ε`. -/
 theorem arc_far_on_arc {H θ₀ ε t : ℝ} (hε : 0 < ε) (hε_lt : ε < 1/3)
-    (ht1 : 1/5 < t) (ht2 : t ≤ 3/5) (ht₀_lo : 1/5 ≤ arcT₀ θ₀) (ht₀_hi : arcT₀ θ₀ ≤ 3/5)
+    (ht1 : 1/5 < t) (ht2 : t ≤ 3/5) (ht₀_lo : 1/5 ≤ arcT₀ θ₀)
+    (ht₀_hi : arcT₀ θ₀ ≤ 3/5)
     (hδt : arcsinDelta ε < |t - arcT₀ θ₀|) :
     ε < ‖fdBoundaryFun H t - exp (↑θ₀ * I)‖ := by
   have hpi := Real.pi_pos
@@ -125,7 +128,8 @@ theorem arcZ₀_im_eq (θ₀ : ℝ) : (exp (↑θ₀ * I)).im = Real.sin θ₀ :
   Complex.exp_ofReal_mul_I_im θ₀
 
 /-- For `z₀ = exp(iθ₀)` with `θ₀ ∈ (π/3, 2π/3)`, we have `|z₀.re| < 1/2`. -/
-theorem arcZ₀_abs_re_lt {θ₀ : ℝ} (h_lo : Real.pi / 3 < θ₀) (h_hi : θ₀ < 2 * Real.pi / 3) :
+theorem arcZ₀_abs_re_lt {θ₀ : ℝ} (h_lo : Real.pi / 3 < θ₀)
+    (h_hi : θ₀ < 2 * Real.pi / 3) :
     |(exp (↑θ₀ * I)).re| < 1/2 := by
   have hpi := Real.pi_pos
   rw [arcZ₀_re_eq, abs_lt]
@@ -225,7 +229,8 @@ theorem arcsinDelta_lt_arcGap {H θ₀ ε : ℝ} (h_lo : Real.pi / 3 < θ₀)
   arcsinDelta_lt_of_gap (arcGap_pos h_lo h_hi) (arcGap_le_one_fifth θ₀)
     hε (arcThreshold_lt_gap hε_thr)
 
-/-- Both gap bounds: `arcsinDelta ε < arcT₀ θ₀ - 1/5` and `arcsinDelta ε < 3/5 - arcT₀ θ₀`. -/
+/-- Both gap bounds: `arcsinDelta ε < arcT₀ θ₀ - 1/5` and
+`arcsinDelta ε < 3/5 - arcT₀ θ₀`. -/
 theorem arcsinDelta_lt_arcT₀_bounds {H θ₀ ε : ℝ} (h_lo : Real.pi / 3 < θ₀)
     (h_hi : θ₀ < 2 * Real.pi / 3) (hε : 0 < ε) (hε_thr : ε < arcThreshold H θ₀) :
     arcsinDelta ε < arcT₀ θ₀ - 1/5 ∧ arcsinDelta ε < 3/5 - arcT₀ θ₀ :=
