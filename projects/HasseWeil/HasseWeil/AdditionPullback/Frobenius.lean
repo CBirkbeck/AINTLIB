@@ -1908,22 +1908,18 @@ private theorem negFrobeniusIsog_addNonInverse_for_y_ord :
   rw [negFrobeniusIsog_pullback_x_gen] at h_x
   exact x_gen_ne_frobeniusIsog_pullback_x_gen W h_x
 
-/-- **`ord_∞(addPullback_y W (-π)) = -3`** for `q ≥ 2` (any characteristic).
-
-Mirror of `ord_addPullback_x_negFrobenius` for the y-coordinate. Strategy:
-the curve equation `Y² + a₁·X·Y + a₃·Y = X³ + a₂·X² + a₄·X + a₆` (from
-`addPullback_equation`) has RHS ord `= -6` (since `ord(X) = -2`); case
-analysis on `ord(Y)` rules out `ord(Y) ≥ -2` (would give ord(LHS) `≥ -4 >
--6`) and `ord(Y) ≤ -4` (would give ord(LHS) `= 2 · ord(Y) ≤ -8 < -6`),
-leaving `ord(Y) = -3`. -/
-theorem ord_addPullback_y_negFrobenius (hq : 2 ≤ Fintype.card K) :
-    (W_smooth W).ordAtInfty (addPullback_y W (negFrobeniusIsog W)) =
-      ((-3 : ℤ) : WithTop ℤ) := by
-  have hX_ord : (W_smooth W).ordAtInfty (addPullback_x W (negFrobeniusIsog W)) =
-      ((-2 : ℤ) : WithTop ℤ) := ord_addPullback_x_negFrobenius W hq
-  have hX_ne : addPullback_x W (negFrobeniusIsog W) ≠ 0 :=
-    addPullback_x_negFrobenius_ne_zero W hq
-  -- Curve equation in standard form.
+/-- The standard-form curve equation evaluated at the negative-Frobenius pullback
+point has order `-6` at infinity (it equals the RHS, whose order is computed by
+`ord_RHS_negFrobenius`). -/
+private theorem addPullback_y_negFrobenius_lhs_ord (hq : 2 ≤ Fintype.card K) :
+    (W_smooth W).ordAtInfty
+        (addPullback_y W (negFrobeniusIsog W) ^ 2 +
+         algebraMap K KE W.toAffine.a₁ *
+           addPullback_x W (negFrobeniusIsog W) *
+           addPullback_y W (negFrobeniusIsog W) +
+         algebraMap K KE W.toAffine.a₃ *
+           addPullback_y W (negFrobeniusIsog W)) =
+      ((-6 : ℤ) : WithTop ℤ) := by
   have h_eq : addPullback_y W (negFrobeniusIsog W) ^ 2 +
               algebraMap K KE W.toAffine.a₁ *
                 addPullback_x W (negFrobeniusIsog W) *
@@ -1939,99 +1935,113 @@ theorem ord_addPullback_y_negFrobenius (hq : 2 ≤ Fintype.card K) :
     have h := addPullback_equation (negFrobeniusIsog_addNonInverse_for_y_ord W)
     rw [WeierstrassCurve.Affine.equation_iff] at h
     exact h
-  -- ord(LHS) = ord(RHS) = -6.
-  have h_lhs_ord : (W_smooth W).ordAtInfty
+  exact h_eq ▸ ord_RHS_negFrobenius W hq
+
+/-- The negative-Frobenius pullback `y`-coordinate is nonzero: otherwise the
+standard-form LHS would vanish, forcing its order to be `⊤ ≠ -6`. -/
+private theorem addPullback_y_negFrobenius_ne_zero (hq : 2 ≤ Fintype.card K) :
+    addPullback_y W (negFrobeniusIsog W) ≠ 0 := by
+  have h_lhs_ord := addPullback_y_negFrobenius_lhs_ord W hq
+  intro h
+  have h_zero : addPullback_y W (negFrobeniusIsog W) ^ 2 +
+      algebraMap K KE W.toAffine.a₁ *
+        addPullback_x W (negFrobeniusIsog W) *
+        addPullback_y W (negFrobeniusIsog W) +
+      algebraMap K KE W.toAffine.a₃ *
+        addPullback_y W (negFrobeniusIsog W) = 0 := by rw [h]; ring
+  have h_ord_eq : (W_smooth W).ordAtInfty
+      (addPullback_y W (negFrobeniusIsog W) ^ 2 +
+       algebraMap K KE W.toAffine.a₁ *
+         addPullback_x W (negFrobeniusIsog W) *
+         addPullback_y W (negFrobeniusIsog W) +
+       algebraMap K KE W.toAffine.a₃ *
+         addPullback_y W (negFrobeniusIsog W)) = ⊤ :=
+    (congrArg (W_smooth W).ordAtInfty h_zero).trans (W_smooth W).ordAtInfty_zero
+  exact WithTop.top_ne_coe (h_ord_eq.symm.trans h_lhs_ord)
+
+/-- Step (a): writing `m = ord(Y)`, the order of the standard-form LHS being `-6`
+forces `m ≤ -3` (otherwise every term would have order `≥ -4`, contradicting `-6`). -/
+private theorem addPullback_y_negFrobenius_ord_le (m : ℤ)
+    (hm : (W_smooth W).ordAtInfty (addPullback_y W (negFrobeniusIsog W)) =
+        ((m : ℤ) : WithTop ℤ))
+    (h_xy_ord : (W_smooth W).ordAtInfty
+        (addPullback_x W (negFrobeniusIsog W) *
+          addPullback_y W (negFrobeniusIsog W)) =
+        (((-2 + m : ℤ)) : WithTop ℤ))
+    (hY_sq_ord : (W_smooth W).ordAtInfty
+        (addPullback_y W (negFrobeniusIsog W) ^ 2) =
+        ((2 * m : ℤ) : WithTop ℤ))
+    (h_lhs_ord : (W_smooth W).ordAtInfty
         (addPullback_y W (negFrobeniusIsog W) ^ 2 +
          algebraMap K KE W.toAffine.a₁ *
            addPullback_x W (negFrobeniusIsog W) *
            addPullback_y W (negFrobeniusIsog W) +
          algebraMap K KE W.toAffine.a₃ *
            addPullback_y W (negFrobeniusIsog W)) =
-      ((-6 : ℤ) : WithTop ℤ) :=
-    h_eq ▸ ord_RHS_negFrobenius W hq
-  -- Case 1: rule out Y = 0.
-  have hY_ne : addPullback_y W (negFrobeniusIsog W) ≠ 0 := by
-    intro h
-    have h_zero : addPullback_y W (negFrobeniusIsog W) ^ 2 +
+        ((-6 : ℤ) : WithTop ℤ)) :
+    m ≤ -3 := by
+  by_contra h_not_le
+  push Not at h_not_le
+  have h_m_ge : -2 ≤ m := by omega
+  have h_y_sq_ge : ((-4 : ℤ) : WithTop ℤ) ≤
+      (W_smooth W).ordAtInfty
+        (addPullback_y W (negFrobeniusIsog W) ^ 2) := by
+    rw [hY_sq_ord]
+    exact_mod_cast (by linarith : (-4 : ℤ) ≤ 2 * m)
+  have h_a1xy_ge : ((-4 : ℤ) : WithTop ℤ) ≤
+      (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₁ *
+        addPullback_x W (negFrobeniusIsog W) *
+        addPullback_y W (negFrobeniusIsog W)) := by
+    have h_assoc : algebraMap K KE W.toAffine.a₁ *
+        addPullback_x W (negFrobeniusIsog W) *
+        addPullback_y W (negFrobeniusIsog W) =
         algebraMap K KE W.toAffine.a₁ *
-          addPullback_x W (negFrobeniusIsog W) *
-          addPullback_y W (negFrobeniusIsog W) +
-        algebraMap K KE W.toAffine.a₃ *
-          addPullback_y W (negFrobeniusIsog W) = 0 := by rw [h]; ring
-    have h_ord_eq : (W_smooth W).ordAtInfty
+        (addPullback_x W (negFrobeniusIsog W) *
+          addPullback_y W (negFrobeniusIsog W)) := by ring
+    rw [h_assoc]
+    refine ord_algebraMap_mul_ge W W.toAffine.a₁ ?_
+    rw [h_xy_ord]
+    exact_mod_cast (by linarith : (-4 : ℤ) ≤ -2 + m)
+  have h_a3y_ge : ((-4 : ℤ) : WithTop ℤ) ≤
+      (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₃ *
+        addPullback_y W (negFrobeniusIsog W)) := by
+    refine ord_algebraMap_mul_ge W W.toAffine.a₃ ?_
+    rw [hm]
+    exact_mod_cast (by linarith : (-4 : ℤ) ≤ m)
+  have h_lhs_ge : ((-4 : ℤ) : WithTop ℤ) ≤ (W_smooth W).ordAtInfty
+      (addPullback_y W (negFrobeniusIsog W) ^ 2 +
+       algebraMap K KE W.toAffine.a₁ *
+         addPullback_x W (negFrobeniusIsog W) *
+         addPullback_y W (negFrobeniusIsog W) +
+       algebraMap K KE W.toAffine.a₃ *
+         addPullback_y W (negFrobeniusIsog W)) :=
+    ord_add_ge_of_both_ge W
+      (ord_add_ge_of_both_ge W h_y_sq_ge h_a1xy_ge) h_a3y_ge
+  rw [h_lhs_ord] at h_lhs_ge
+  have h46 : (-4 : ℤ) ≤ -6 := by exact_mod_cast h_lhs_ge
+  omega
+
+/-- Step (b): once `m ≤ -3`, the `Y²` term strictly dominates the other two LHS
+terms in valuation, so the standard-form LHS has the same order as `Y²`. -/
+private theorem addPullback_y_negFrobenius_lhs_ord_eq_sq (m : ℤ)
+    (hm : (W_smooth W).ordAtInfty (addPullback_y W (negFrobeniusIsog W)) =
+        ((m : ℤ) : WithTop ℤ))
+    (h_xy_ord : (W_smooth W).ordAtInfty
+        (addPullback_x W (negFrobeniusIsog W) *
+          addPullback_y W (negFrobeniusIsog W)) =
+        (((-2 + m : ℤ)) : WithTop ℤ))
+    (hY_sq_ord : (W_smooth W).ordAtInfty
+        (addPullback_y W (negFrobeniusIsog W) ^ 2) =
+        ((2 * m : ℤ) : WithTop ℤ))
+    (h_m_le : m ≤ -3) :
+    (W_smooth W).ordAtInfty
         (addPullback_y W (negFrobeniusIsog W) ^ 2 +
          algebraMap K KE W.toAffine.a₁ *
            addPullback_x W (negFrobeniusIsog W) *
            addPullback_y W (negFrobeniusIsog W) +
          algebraMap K KE W.toAffine.a₃ *
-           addPullback_y W (negFrobeniusIsog W)) = ⊤ :=
-      (congrArg (W_smooth W).ordAtInfty h_zero).trans (W_smooth W).ordAtInfty_zero
-    exact WithTop.top_ne_coe (h_ord_eq.symm.trans h_lhs_ord)
-  -- Extract m = ord(Y) as integer.
-  obtain ⟨m, hm⟩ : ∃ m : ℤ,
-      (W_smooth W).ordAtInfty (addPullback_y W (negFrobeniusIsog W)) =
-        ((m : ℤ) : WithTop ℤ) := by
-    have h_ne_top : (W_smooth W).ordAtInfty
-        (addPullback_y W (negFrobeniusIsog W)) ≠ ⊤ :=
-      ((W_smooth W).ordAtInfty_eq_top_iff _).not.mpr hY_ne
-    obtain ⟨m, hm⟩ := WithTop.ne_top_iff_exists.mp h_ne_top
-    exact ⟨m, hm.symm⟩
-  -- Y² has ord 2m.
-  have hY_sq_ord : (W_smooth W).ordAtInfty
-      (addPullback_y W (negFrobeniusIsog W) ^ 2) =
-      ((2 * m : ℤ) : WithTop ℤ) :=
-    (W_smooth W).ord_pow_concrete hY_ne m 2 hm
-  -- ord(X·Y) = -2 + m.
-  have h_xy_ord : (W_smooth W).ordAtInfty
-      (addPullback_x W (negFrobeniusIsog W) *
-        addPullback_y W (negFrobeniusIsog W)) =
-      (((-2 + m : ℤ)) : WithTop ℤ) := by
-    refine ((W_smooth W).ordAtInfty_mul hX_ne hY_ne).trans ?_
-    rw [hX_ord, hm]
-    push_cast; rfl
-  -- Step (a): show m ≤ -3 by contradiction.
-  have h_m_le : m ≤ -3 := by
-    by_contra h_not_le
-    push Not at h_not_le
-    have h_m_ge : -2 ≤ m := by omega
-    have h_y_sq_ge : ((-4 : ℤ) : WithTop ℤ) ≤
-        (W_smooth W).ordAtInfty
-          (addPullback_y W (negFrobeniusIsog W) ^ 2) := by
-      rw [hY_sq_ord]
-      exact_mod_cast (by linarith : (-4 : ℤ) ≤ 2 * m)
-    have h_a1xy_ge : ((-4 : ℤ) : WithTop ℤ) ≤
-        (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₁ *
-          addPullback_x W (negFrobeniusIsog W) *
-          addPullback_y W (negFrobeniusIsog W)) := by
-      have h_assoc : algebraMap K KE W.toAffine.a₁ *
-          addPullback_x W (negFrobeniusIsog W) *
-          addPullback_y W (negFrobeniusIsog W) =
-          algebraMap K KE W.toAffine.a₁ *
-          (addPullback_x W (negFrobeniusIsog W) *
-            addPullback_y W (negFrobeniusIsog W)) := by ring
-      rw [h_assoc]
-      refine ord_algebraMap_mul_ge W W.toAffine.a₁ ?_
-      rw [h_xy_ord]
-      exact_mod_cast (by linarith : (-4 : ℤ) ≤ -2 + m)
-    have h_a3y_ge : ((-4 : ℤ) : WithTop ℤ) ≤
-        (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₃ *
-          addPullback_y W (negFrobeniusIsog W)) := by
-      refine ord_algebraMap_mul_ge W W.toAffine.a₃ ?_
-      rw [hm]
-      exact_mod_cast (by linarith : (-4 : ℤ) ≤ m)
-    have h_lhs_ge : ((-4 : ℤ) : WithTop ℤ) ≤ (W_smooth W).ordAtInfty
-        (addPullback_y W (negFrobeniusIsog W) ^ 2 +
-         algebraMap K KE W.toAffine.a₁ *
-           addPullback_x W (negFrobeniusIsog W) *
-           addPullback_y W (negFrobeniusIsog W) +
-         algebraMap K KE W.toAffine.a₃ *
-           addPullback_y W (negFrobeniusIsog W)) :=
-      ord_add_ge_of_both_ge W
-        (ord_add_ge_of_both_ge W h_y_sq_ge h_a1xy_ge) h_a3y_ge
-    rw [h_lhs_ord] at h_lhs_ge
-    have h46 : (-4 : ℤ) ≤ -6 := by exact_mod_cast h_lhs_ge
-    omega
-  -- Step (b): from m ≤ -3, Y² strictly dominates LHS, so ord(LHS) = 2m.
+           addPullback_y W (negFrobeniusIsog W)) =
+      (W_smooth W).ordAtInfty (addPullback_y W (negFrobeniusIsog W) ^ 2) := by
   have h_a1xy_gt : (W_smooth W).ordAtInfty
       (addPullback_y W (negFrobeniusIsog W) ^ 2) <
       (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₁ *
@@ -2078,6 +2088,51 @@ theorem ord_addPullback_y_negFrobenius (hq : 2 ≤ Fintype.card K) :
          addPullback_y W (negFrobeniusIsog W)) =
       (W_smooth W).ordAtInfty (addPullback_y W (negFrobeniusIsog W) ^ 2) :=
     ((W_smooth W).ordAtInfty_add_eq_of_lt h_a3y_gt').trans h_inner_eq
+  exact h_outer_eq
+
+/-- **`ord_∞(addPullback_y W (-π)) = -3`** for `q ≥ 2` (any characteristic).
+
+Mirror of `ord_addPullback_x_negFrobenius` for the y-coordinate. Strategy:
+the curve equation `Y² + a₁·X·Y + a₃·Y = X³ + a₂·X² + a₄·X + a₆` (from
+`addPullback_equation`) has RHS ord `= -6` (since `ord(X) = -2`); case
+analysis on `ord(Y)` rules out `ord(Y) ≥ -2` (would give ord(LHS) `≥ -4 >
+-6`) and `ord(Y) ≤ -4` (would give ord(LHS) `= 2 · ord(Y) ≤ -8 < -6`),
+leaving `ord(Y) = -3`. -/
+theorem ord_addPullback_y_negFrobenius (hq : 2 ≤ Fintype.card K) :
+    (W_smooth W).ordAtInfty (addPullback_y W (negFrobeniusIsog W)) =
+      ((-3 : ℤ) : WithTop ℤ) := by
+  have hX_ord : (W_smooth W).ordAtInfty (addPullback_x W (negFrobeniusIsog W)) =
+      ((-2 : ℤ) : WithTop ℤ) := ord_addPullback_x_negFrobenius W hq
+  have hX_ne : addPullback_x W (negFrobeniusIsog W) ≠ 0 :=
+    addPullback_x_negFrobenius_ne_zero W hq
+  have h_lhs_ord := addPullback_y_negFrobenius_lhs_ord W hq
+  have hY_ne := addPullback_y_negFrobenius_ne_zero W hq
+  -- Extract m = ord(Y) as integer.
+  obtain ⟨m, hm⟩ : ∃ m : ℤ,
+      (W_smooth W).ordAtInfty (addPullback_y W (negFrobeniusIsog W)) =
+        ((m : ℤ) : WithTop ℤ) := by
+    have h_ne_top : (W_smooth W).ordAtInfty
+        (addPullback_y W (negFrobeniusIsog W)) ≠ ⊤ :=
+      ((W_smooth W).ordAtInfty_eq_top_iff _).not.mpr hY_ne
+    obtain ⟨m, hm⟩ := WithTop.ne_top_iff_exists.mp h_ne_top
+    exact ⟨m, hm.symm⟩
+  -- Y² has ord 2m.
+  have hY_sq_ord : (W_smooth W).ordAtInfty
+      (addPullback_y W (negFrobeniusIsog W) ^ 2) =
+      ((2 * m : ℤ) : WithTop ℤ) :=
+    (W_smooth W).ord_pow_concrete hY_ne m 2 hm
+  -- ord(X·Y) = -2 + m.
+  have h_xy_ord : (W_smooth W).ordAtInfty
+      (addPullback_x W (negFrobeniusIsog W) *
+        addPullback_y W (negFrobeniusIsog W)) =
+      (((-2 + m : ℤ)) : WithTop ℤ) := by
+    refine ((W_smooth W).ordAtInfty_mul hX_ne hY_ne).trans ?_
+    rw [hX_ord, hm]
+    push_cast; rfl
+  have h_m_le : m ≤ -3 :=
+    addPullback_y_negFrobenius_ord_le W m hm h_xy_ord hY_sq_ord h_lhs_ord
+  have h_outer_eq :=
+    addPullback_y_negFrobenius_lhs_ord_eq_sq W m hm h_xy_ord hY_sq_ord h_m_le
   rw [h_outer_eq, hY_sq_ord] at h_lhs_ord
   -- Conclude m = -3.
   have h_2m : (2 * m : ℤ) = -6 := by exact_mod_cast h_lhs_ord
