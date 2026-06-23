@@ -16,8 +16,8 @@ fundamental domain boundary.
 
 * `fdBoundary_H_im_pos` — positive imaginary part
 * `fdBoundary_H_im_ge_sqrt3_div_2` — imaginary part ≥ √3/2
+* `fdBoundary_H_im_le_H` — imaginary part ≤ H
 * `fdBoundary_H_re_abs_le_half` — |real part| ≤ 1/2
-* `fdBoundary_continuous` — continuity of fixed-height boundary
 -/
 
 open Complex MeasureTheory Set Filter Topology
