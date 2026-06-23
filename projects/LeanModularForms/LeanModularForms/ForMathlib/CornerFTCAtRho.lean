@@ -29,7 +29,8 @@ private lemma fdHeightValid.sub_pos {H : ℝ} (hH : fdHeightValid H) :
 
 private lemma cornerFTC_tendsto_aux (f : ℝ → ℝ) (hcont : ContinuousAt f 0)
     (hval : f 0 = -(Real.pi / 3)) :
-    Tendsto (fun ε : ℝ ↦ (↑(f ε) : ℂ) * I) (𝓝[>] 0) (𝓝 (-(↑Real.pi / 3 * I))) := by
+    Tendsto (fun ε : ℝ ↦ (↑(f ε) : ℂ) * I) (𝓝[>] 0)
+      (𝓝 (-(↑Real.pi / 3 * I))) := by
   rw [show -(↑Real.pi / 3 * I : ℂ) = ↑(-(Real.pi / 3)) * I by push_cast; ring]
   have h := hval ▸ hcont.tendsto
   exact ((continuous_ofReal.continuousAt.tendsto.comp h).mul_const I).mono_left
@@ -163,7 +164,8 @@ private lemma integrand_form_eq' (f : ℝ → ℂ) (z : ℂ) (t : ℝ) :
   rw [show (fun s ↦ f s - z) = (fun s ↦ f s + (-z)) by ext; ring,
     deriv_add_const, div_eq_mul_inv, mul_comm]
 
-private lemma ne_zero_of_norm_eq_pos {z : ℂ} {ε : ℝ} (hε : 0 < ε) (h : ‖z‖ = ε) : z ≠ 0 :=
+private lemma ne_zero_of_norm_eq_pos {z : ℂ} {ε : ℝ} (hε : 0 < ε) (h : ‖z‖ = ε) :
+    z ≠ 0 :=
   fun hz ↦ by rw [hz, norm_zero] at h; linarith
 
 /-- Simplification of the `vertDelta` formula: `5 * (ε / (5 * c)) * c = ε` when `0 < c`. -/
