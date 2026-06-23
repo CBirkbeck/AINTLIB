@@ -111,7 +111,7 @@ theorem fdBoundaryFun_arg_left (H : ℝ) {δ : ℝ} (hδ : 0 < δ) (hδs : δ < 
   rw [h_eq]
   have h_trig : (↑(Real.cos α) : ℂ) + ↑(-(Real.sin α)) * I =
       Complex.cos ↑(-α) + Complex.sin ↑(-α) * I := by
-    rw [← Complex.ofReal_cos, ← Complex.ofReal_sin, Real.cos_neg, Real.sin_neg, ofReal_neg]
+    rw [← ofReal_cos, ← ofReal_sin, Real.cos_neg, Real.sin_neg, ofReal_neg]
   rw [h_trig]
   refine Complex.arg_mul_cos_add_sin_mul_I (by positivity) ⟨?_, ?_⟩ <;>
     · rw [hα_def]; nlinarith [Real.pi_pos]
@@ -146,7 +146,7 @@ theorem fdBoundaryFun_arg_right (H : ℝ) {δ : ℝ} (hδ : 0 < δ) (hδs : δ <
   rw [h_eq]
   have h_trig : (↑(Real.cos α) : ℂ) + ↑(Real.sin α) * I =
       Complex.cos ↑α + Complex.sin ↑α * I := by
-    rw [← Complex.ofReal_cos, ← Complex.ofReal_sin]
+    rw [← ofReal_cos, ← ofReal_sin]
   rw [h_trig, Complex.arg_neg_eq_arg_sub_pi_of_im_pos (by simp [mul_im]; positivity),
     Complex.arg_mul_cos_add_sin_mul_I (show (0:ℝ) < 2 * Real.sin α by positivity)
       ⟨by rw [hα_def]; nlinarith [Real.pi_pos], by linarith⟩]
