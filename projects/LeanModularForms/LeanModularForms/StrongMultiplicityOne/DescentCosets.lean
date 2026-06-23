@@ -11,6 +11,20 @@ import LeanModularForms.StrongMultiplicityOne.LevelChangeCharSpace
 The forms `h`, `g`, Miyake's dichotomy 4.6.4, and the descent coset
 machinery: `descendExtraGamma`, `descendCosetList`, their determinant and
 action properties, culminating in `descendCosetList_action`.
+
+## Main definitions
+
+* `descendCosetCount` — number of descent coset representatives (`p`, or `p + 1`
+  when `p² ∤ N`).
+* `descendExtraGamma` — the extra coset representative, used when `p² ∤ N`.
+* `descendCosetList` — the descent coset representatives for `Γ₀(N) → Γ₀(N/p)`
+  (Miyake Lemma 4.5.11).
+
+## Main results
+
+* `miyake_4_6_4_dichotomy_strong` — the strengthened Miyake dichotomy (Lemma 4.6.4).
+* `descendCosetList_det` — every descent coset representative has determinant `p`.
+* `descendCosetList_action` — the action of the descent coset list (the culmination).
 -/
 
 open CongruenceSubgroup Matrix.SpecialLinearGroup
@@ -94,11 +108,11 @@ private lemma descend_rotation_mat_det_map_eq_one
       (Int.cast : ℤ → ZMod N)).det = 1 := by
   rw [show (!![u * a, -(v * b); v * b, u * a] : Matrix (Fin 2) (Fin 2) ℤ).map
         (Int.cast : ℤ → ZMod N) =
-      (Int.castRingHom (ZMod N)).mapMatrix !![u * a, -(v * b); v * b, u * a] from by
+      (Int.castRingHom (ZMod N)).mapMatrix !![u * a, -(v * b); v * b, u * a] by
     ext i j; fin_cases i <;> fin_cases j <;> simp [RingHom.mapMatrix_apply, Matrix.map_apply],
     ← RingHom.map_det,
     show (!![u * a, -(v * b); v * b, u * a] : Matrix (Fin 2) (Fin 2) ℤ).det =
-        (u * a) ^ 2 + (v * b) ^ 2 from by simp only [Matrix.det_fin_two_of]; ring,
+        (u * a) ^ 2 + (v * b) ^ 2 by simp only [Matrix.det_fin_two_of]; ring,
     map_add, map_pow, map_pow]
   set x := (Int.castRingHom (ZMod N)) (u * a)
   set y := (Int.castRingHom (ZMod N)) (v * b)
@@ -238,7 +252,7 @@ theorem descendCosetList_det (p N : ℕ) [NeZero p] [NeZero N] (hp : p.Prime) :
         Matrix.SpecialLinearGroup.mapGL_coe_matrix,
         Matrix.SpecialLinearGroup.map_apply_coe,
         RingHom.mapMatrix_apply,
-        show ((descendExtraGamma p N).val.map (algebraMap ℤ ℝ)).det = 1 from by
+        show ((descendExtraGamma p N).val.map (algebraMap ℤ ℝ)).det = 1 by
           simp [← Int.cast_det, (descendExtraGamma p N).property]]
     simp [Matrix.det_fin_two]
 
@@ -326,7 +340,7 @@ private lemma descend_upper_tri_target_witness
   refine descend_aux_lift_int_eq_to_GL hp m.val
     (by rw [Matrix.GeneralLinearGroup.val_mkOfDetNeZero]
         exact descend_aux_lit_real_eq_map_int p m'.val) ?_
-  rw [show (γ' : Matrix (Fin 2) (Fin 2) ℤ) = !![A, B; C, D] from by
+  rw [show (γ' : Matrix (Fin 2) (Fin 2) ℤ) = !![A, B; C, D] by
     ext i j; fin_cases i <;> fin_cases j <;> rfl]
   exact descend_upper_tri_raw_matrix_identity p A B C D
     (m.val : ℤ) (m'.val : ℤ) α01_int hα01'
@@ -507,10 +521,10 @@ private lemma descend_extra_target_witness
   · have h10p_γp : (!![(1 : ℤ), 0; 0, (p : ℤ)] * (γ_p : Matrix (Fin 2) (Fin 2) ℤ) :
           Matrix (Fin 2) (Fin 2) ℤ) =
         !![aint, bint; (p : ℤ) * cint, (p : ℤ) * dint] := by
-      rw [show (γ_p : Matrix (Fin 2) (Fin 2) ℤ) = !![aint, bint; cint, dint] from by
+      rw [show (γ_p : Matrix (Fin 2) (Fin 2) ℤ) = !![aint, bint; cint, dint] by
         ext i j; fin_cases i <;> fin_cases j <;> rfl]
       ext i j; fin_cases i <;> fin_cases j <;> simp [Matrix.mul_apply, Fin.sum_univ_two]
-    rw [h10p_γp, show (γ' : Matrix (Fin 2) (Fin 2) ℤ) = !![Aint, Bint; Cint, Dint] from by
+    rw [h10p_γp, show (γ' : Matrix (Fin 2) (Fin 2) ℤ) = !![Aint, Bint; Cint, Dint] by
       ext i j; fin_cases i <;> fin_cases j <;> rfl]
     exact descend_extra_raw_matrix_identity p Aint Bint Cint Dint
       aint bint cint dint (m.val : ℤ) α01_int h_det_γp hα01'
