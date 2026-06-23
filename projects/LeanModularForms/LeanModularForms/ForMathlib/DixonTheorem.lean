@@ -47,8 +47,8 @@ so `h2(w) = 2πi · n(γ,w) · f(w)`.
 * K. Hungerbuhler, J. Wasem, *A generalized notion of winding numbers*
 -/
 
-open Complex Set Filter Topology MeasureTheory
-open scoped Classical Real Interval
+open Complex Set Filter MeasureTheory
+open scoped Real Interval
 
 noncomputable section
 
@@ -365,7 +365,7 @@ private lemma cauchy_integrand_intervalIntegrable
       (volume.restrict (Ioc (0 : ℝ) 1)) :=
     ((h_cont_prod.mono Ioc_subset_Icc_self).aestronglyMeasurable
       measurableSet_Ioc).mul (stronglyMeasurable_deriv _).aestronglyMeasurable
-  haveI : IsFiniteMeasure (volume.restrict (Ioc (0 : ℝ) 1)) :=
+  have : IsFiniteMeasure (volume.restrict (Ioc (0 : ℝ) 1)) :=
     ⟨by rw [Measure.restrict_apply_univ]; exact measure_Ioc_lt_top⟩
   obtain ⟨C, hC⟩ := (isCompact_Icc (a := (0 : ℝ)) (b := 1)).bddAbove_image h_cont_prod.norm
   refine MeasureTheory.Integrable.of_bound h_meas (max C 0 * K) ?_
