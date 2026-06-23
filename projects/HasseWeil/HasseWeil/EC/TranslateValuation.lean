@@ -1369,146 +1369,112 @@ theorem pointValuation_translateAlgEquivOfPoint_algebraMap_le_one_of_isSome
           exact pointValuation_pow_le_one W P h_tx_le m
     · exact pointValuation_pow_le_one W P h_ty_le n
 
-/-- `IsTranslateMaxIdealCompatible_on_CoordinateRing` for non-zero `k`: for
-`r ∈ maxIdealAt(P + k)` in the coordinate ring, `pV P (τ_k (algMap r)) < 1`. -/
-theorem isTranslateMaxIdealCompatible_on_CoordinateRing_some
+/-- **Linearisation of `τ_k` on the two-generator combination.** For
+`a b : CoordinateRing`, the image under `τ_k ∘ algebraMap` of the linear
+combination `a · XClass xPK + b · YClass (C yPK)` of the two generators of the
+maximal ideal at `P + k` splits as a sum of two products, with the generator
+images normalised to `τ_k x_gen − algMap xPK` and `τ_k y_gen − algMap yPK`.
+Pure `algebraMap`/`AlgEquiv` linearity (`map_add`/`map_mul`/`map_sub` plus
+`AlgEquiv.commutes` for the constant terms), with the generator–class identities
+`x_gen_sub_const_eq_algebraMap_XClass` / `y_gen_sub_const_eq_algebraMap_YClass`. -/
+private theorem translateAlgEquivOfPoint_algebraMap_XClass_add_YClass_some
     (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
     (h : (P.toAffinePoint +
-        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)).IsSome) :
-    IsTranslateMaxIdealCompatible_on_CoordinateRing W P
-      (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point) h := by
-  have h_xy := isTranslateXY_evaluatesAt_some W P xk yk h_ns h
-  obtain ⟨h_xy_x, h_xy_y⟩ := h_xy
-  intro r h_mem
-  have h_mem' : r ∈ Ideal.span ({Affine.CoordinateRing.XClass (W_smooth W).toAffine
-        (P.translate_of_finite (Affine.Point.some xk yk h_ns :
-          (W_smooth W).toAffine.Point) h).x,
-      Affine.CoordinateRing.YClass (W_smooth W).toAffine
-        (Polynomial.C (P.translate_of_finite (Affine.Point.some xk yk h_ns :
-          (W_smooth W).toAffine.Point) h).y)} :
-      Set (W_smooth W).CoordinateRing) := h_mem
-  rw [Ideal.mem_span_pair] at h_mem'
-  obtain ⟨a, b, hab⟩ := h_mem'
-  have h_PKx :=
-    (P.translate_of_finite (Affine.Point.some xk yk h_ns :
-      (W_smooth W).toAffine.Point) h).x
-  have h_PKy :=
-    (P.translate_of_finite (Affine.Point.some xk yk h_ns :
-      (W_smooth W).toAffine.Point) h).y
-  rw [← hab]
-  rw [show (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-        (a * Affine.CoordinateRing.XClass (W_smooth W).toAffine
+        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)).IsSome)
+    (a b : (W_smooth W).CoordinateRing) :
+    (translateAlgEquivOfPoint W
+        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+        ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+          (a * Affine.CoordinateRing.XClass (W_smooth W).toAffine
+              (P.translate_of_finite (Affine.Point.some xk yk h_ns :
+                (W_smooth W).toAffine.Point) h).x +
+            b * Affine.CoordinateRing.YClass (W_smooth W).toAffine
+              (Polynomial.C (P.translate_of_finite (Affine.Point.some xk yk h_ns :
+                (W_smooth W).toAffine.Point) h).y))) =
+      (translateAlgEquivOfPoint W
+          (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+          ((algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField) a) *
+        ((translateAlgEquivOfPoint W
+            (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)) (x_gen W) -
+          algebraMap F W.toAffine.FunctionField
             (P.translate_of_finite (Affine.Point.some xk yk h_ns :
-              (W_smooth W).toAffine.Point) h).x +
-          b * Affine.CoordinateRing.YClass (W_smooth W).toAffine
-            (Polynomial.C (P.translate_of_finite (Affine.Point.some xk yk h_ns :
-              (W_smooth W).toAffine.Point) h).y)) =
-        (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField) a *
-          (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-            (Affine.CoordinateRing.XClass (W_smooth W).toAffine
+              (W_smooth W).toAffine.Point) h).x) +
+      (translateAlgEquivOfPoint W
+          (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+          ((algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField) b) *
+        ((translateAlgEquivOfPoint W
+            (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)) (y_gen W) -
+          algebraMap F W.toAffine.FunctionField
+            (P.translate_of_finite (Affine.Point.some xk yk h_ns :
+              (W_smooth W).toAffine.Point) h).y) := by
+  rw [map_add, map_mul, map_mul]
+  change (translateAlgEquivOfPoint W
+      (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+      ((algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField) a *
+          (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField)
+            (Affine.CoordinateRing.XClass W.toAffine
               (P.translate_of_finite (Affine.Point.some xk yk h_ns :
                 (W_smooth W).toAffine.Point) h).x) +
-        (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField) b *
-          (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-            (Affine.CoordinateRing.YClass (W_smooth W).toAffine
+        (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField) b *
+          (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField)
+            (Affine.CoordinateRing.YClass W.toAffine
               (Polynomial.C (P.translate_of_finite (Affine.Point.some xk yk h_ns :
-                (W_smooth W).toAffine.Point) h).y)) from by
-      rw [map_add, map_mul, map_mul]]
-  change (W_smooth W).pointValuation P
-      ((translateAlgEquivOfPoint W
-        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-        ((algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField) a *
-            (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField)
-              (Affine.CoordinateRing.XClass W.toAffine
-                (P.translate_of_finite (Affine.Point.some xk yk h_ns :
-                  (W_smooth W).toAffine.Point) h).x) +
-          (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField) b *
-            (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField)
-              (Affine.CoordinateRing.YClass W.toAffine
-                (Polynomial.C (P.translate_of_finite (Affine.Point.some xk yk h_ns :
-                  (W_smooth W).toAffine.Point) h).y)))) < 1
+                (W_smooth W).toAffine.Point) h).y))) = _
   rw [← x_gen_sub_const_eq_algebraMap_XClass W
       (P.translate_of_finite (Affine.Point.some xk yk h_ns :
         (W_smooth W).toAffine.Point) h).x,
     ← y_gen_sub_const_eq_algebraMap_YClass W
       (P.translate_of_finite (Affine.Point.some xk yk h_ns :
-        (W_smooth W).toAffine.Point) h).y]
-  rw [show (translateAlgEquivOfPoint W
-        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-      ((algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField) a *
-          (x_gen W - algebraMap F W.toAffine.FunctionField
+        (W_smooth W).toAffine.Point) h).y,
+    map_add, map_mul, map_mul, map_sub, map_sub,
+    (translateAlgEquivOfPoint W
+      (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)).commutes,
+    (translateAlgEquivOfPoint W
+      (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)).commutes]
+
+/-- **Value bound on the two-generator combination.** For
+`a b : CoordinateRing`, the point-valuation at `P` of `τ_k` applied to the
+normalised combination `τ_k(algMap a)·(τ_k x_gen − algMap xPK) +
+τ_k(algMap b)·(τ_k y_gen − algMap yPK)` is `< 1`, given the
+`IsTranslateXY_evaluatesAt` bounds `h_xy_x`/`h_xy_y` on the two generator
+differences. Triangle inequality (`Valuation.map_add` + `max_lt`) and the
+product bound `pointValuation_mul_lt_one_of_le_and_lt`, using the global lift
+`pointValuation_translateAlgEquivOfPoint_algebraMap_le_one_of_isSome` for the
+two scalar factors. -/
+private theorem pointValuation_translateAlgEquivOfPoint_XClass_add_YClass_lt_one_some
+    (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
+    (h : (P.toAffinePoint +
+        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)).IsSome)
+    (a b : (W_smooth W).CoordinateRing)
+    (h_xy_x : (W_smooth W).pointValuation P
+        ((translateAlgEquivOfPoint W
+            (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)) (x_gen W) -
+          algebraMap F W.toAffine.FunctionField
             (P.translate_of_finite (Affine.Point.some xk yk h_ns :
-              (W_smooth W).toAffine.Point) h).x) +
-        (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField) b *
-          (y_gen W - algebraMap F W.toAffine.FunctionField
+              (W_smooth W).toAffine.Point) h).x) < 1)
+    (h_xy_y : (W_smooth W).pointValuation P
+        ((translateAlgEquivOfPoint W
+            (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)) (y_gen W) -
+          algebraMap F W.toAffine.FunctionField
             (P.translate_of_finite (Affine.Point.some xk yk h_ns :
-              (W_smooth W).toAffine.Point) h).y)) =
-      (translateAlgEquivOfPoint W
-        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-        ((algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField) a *
-          (x_gen W - algebraMap F W.toAffine.FunctionField
-            (P.translate_of_finite (Affine.Point.some xk yk h_ns :
-              (W_smooth W).toAffine.Point) h).x)) +
-      (translateAlgEquivOfPoint W
-        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-        ((algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField) b *
-          (y_gen W - algebraMap F W.toAffine.FunctionField
-            (P.translate_of_finite (Affine.Point.some xk yk h_ns :
-              (W_smooth W).toAffine.Point) h).y)) from map_add _ _ _]
-  rw [show (translateAlgEquivOfPoint W
-        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-      ((algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField) a *
-        (x_gen W - algebraMap F W.toAffine.FunctionField
-          (P.translate_of_finite (Affine.Point.some xk yk h_ns :
-            (W_smooth W).toAffine.Point) h).x)) =
-      (translateAlgEquivOfPoint W
-        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-        ((algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField) a) *
-      (translateAlgEquivOfPoint W
-        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-        (x_gen W - algebraMap F W.toAffine.FunctionField
-          (P.translate_of_finite (Affine.Point.some xk yk h_ns :
-            (W_smooth W).toAffine.Point) h).x) from map_mul _ _ _]
-  rw [show (translateAlgEquivOfPoint W
-        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-      ((algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField) b *
-        (y_gen W - algebraMap F W.toAffine.FunctionField
-          (P.translate_of_finite (Affine.Point.some xk yk h_ns :
-            (W_smooth W).toAffine.Point) h).y)) =
-      (translateAlgEquivOfPoint W
-        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-        ((algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField) b) *
-      (translateAlgEquivOfPoint W
-        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-        (y_gen W - algebraMap F W.toAffine.FunctionField
-          (P.translate_of_finite (Affine.Point.some xk yk h_ns :
-            (W_smooth W).toAffine.Point) h).y) from map_mul _ _ _]
-  rw [show (translateAlgEquivOfPoint W
-        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-      (x_gen W - algebraMap F W.toAffine.FunctionField
-        (P.translate_of_finite (Affine.Point.some xk yk h_ns :
-          (W_smooth W).toAffine.Point) h).x) =
-      (translateAlgEquivOfPoint W
-        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)) (x_gen W) -
-      algebraMap F W.toAffine.FunctionField
-        (P.translate_of_finite (Affine.Point.some xk yk h_ns :
-          (W_smooth W).toAffine.Point) h).x from by
-    rw [map_sub]
-    rw [(translateAlgEquivOfPoint W
-      (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)).commutes]]
-  rw [show (translateAlgEquivOfPoint W
-        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-      (y_gen W - algebraMap F W.toAffine.FunctionField
-        (P.translate_of_finite (Affine.Point.some xk yk h_ns :
-          (W_smooth W).toAffine.Point) h).y) =
-      (translateAlgEquivOfPoint W
-        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)) (y_gen W) -
-      algebraMap F W.toAffine.FunctionField
-        (P.translate_of_finite (Affine.Point.some xk yk h_ns :
-          (W_smooth W).toAffine.Point) h).y from by
-    rw [map_sub]
-    rw [(translateAlgEquivOfPoint W
-      (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)).commutes]]
+              (W_smooth W).toAffine.Point) h).y) < 1) :
+    (W_smooth W).pointValuation P
+        ((translateAlgEquivOfPoint W
+            (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+            ((algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField) a) *
+          ((translateAlgEquivOfPoint W
+              (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)) (x_gen W) -
+            algebraMap F W.toAffine.FunctionField
+              (P.translate_of_finite (Affine.Point.some xk yk h_ns :
+                (W_smooth W).toAffine.Point) h).x) +
+        (translateAlgEquivOfPoint W
+            (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+            ((algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField) b) *
+          ((translateAlgEquivOfPoint W
+              (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)) (y_gen W) -
+            algebraMap F W.toAffine.FunctionField
+              (P.translate_of_finite (Affine.Point.some xk yk h_ns :
+                (W_smooth W).toAffine.Point) h).y)) < 1 := by
   refine lt_of_le_of_lt (((W_smooth W).pointValuation P).map_add _ _) ?_
   apply max_lt
   · apply pointValuation_mul_lt_one_of_le_and_lt W P
@@ -1519,6 +1485,34 @@ theorem isTranslateMaxIdealCompatible_on_CoordinateRing_some
     · exact pointValuation_translateAlgEquivOfPoint_algebraMap_le_one_of_isSome
         W P xk yk h_ns h b
     · exact h_xy_y
+
+/-- `IsTranslateMaxIdealCompatible_on_CoordinateRing` for non-zero `k`: for
+`r ∈ maxIdealAt(P + k)` in the coordinate ring, `pV P (τ_k (algMap r)) < 1`. -/
+theorem isTranslateMaxIdealCompatible_on_CoordinateRing_some
+    (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
+    (h : (P.toAffinePoint +
+        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)).IsSome) :
+    IsTranslateMaxIdealCompatible_on_CoordinateRing W P
+      (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point) h := by
+  obtain ⟨h_xy_x, h_xy_y⟩ := isTranslateXY_evaluatesAt_some W P xk yk h_ns h
+  intro r h_mem
+  have h_mem' : r ∈ Ideal.span ({Affine.CoordinateRing.XClass (W_smooth W).toAffine
+        (P.translate_of_finite (Affine.Point.some xk yk h_ns :
+          (W_smooth W).toAffine.Point) h).x,
+      Affine.CoordinateRing.YClass (W_smooth W).toAffine
+        (Polynomial.C (P.translate_of_finite (Affine.Point.some xk yk h_ns :
+          (W_smooth W).toAffine.Point) h).y)} :
+      Set (W_smooth W).CoordinateRing) := h_mem
+  rw [Ideal.mem_span_pair] at h_mem'
+  obtain ⟨a, b, hab⟩ := h_mem'
+  show (W_smooth W).pointValuation P
+      ((translateAlgEquivOfPoint W
+        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
+        ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField) r)) < 1
+  rw [← hab,
+    translateAlgEquivOfPoint_algebraMap_XClass_add_YClass_some W P xk yk h_ns h a b]
+  exact pointValuation_translateAlgEquivOfPoint_XClass_add_YClass_lt_one_some
+    W P xk yk h_ns h a b h_xy_x h_xy_y
 
 /-- For `r ∈ CoordinateRing` with `r ∉ maxIdealAt(P+k)`,
 `pV P (τ_k(algMap r)) = 1`. -/
