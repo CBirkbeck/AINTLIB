@@ -139,7 +139,7 @@ private lemma cuspForm_finsetSum_toModularForm' {α : Type*} [DecidableEq α]
     {Γ : Subgroup (GL (Fin 2) ℝ)} {k : ℤ} (s : Finset α) (F : α → CuspForm Γ k) :
     (∑ q ∈ s, F q : CuspForm Γ k).toModularForm' = ∑ q ∈ s, (F q).toModularForm' := by
   refine Finset.induction_on s ?_ ?_
-  · simp [Finset.sum_empty]; rfl
+  · simp only [Finset.sum_empty]; rfl
   · intro q s hqs ih
     rw [Finset.sum_insert hqs, Finset.sum_insert hqs, ← ih]; rfl
 
@@ -230,7 +230,7 @@ private lemma delta_slash_sum_coeff_zero_sq_case {L : ℕ} [NeZero L] {k : ℤ}
       (fun z ↦ ∑ v : Fin (descendCosetCount p L),
         ((⇑Δ_form : UpperHalfPlane → ℂ) ∣[k]
           descendCosetList p L hp v) z)).coeff m = 0 := by
-  have h_cnt : descendCosetCount p L = p := by simp [descendCosetCount, hp_sq]
+  have h_cnt : descendCosetCount p L = p := by rw [descendCosetCount, if_pos hp_sq]
   rw [descendCosetList_slash_sum_eq_T_p_upper_range_slash_sum p hp h_cnt
     (⇑Δ_form : UpperHalfPlane → ℂ),
     show (⇑Δ_form : UpperHalfPlane → ℂ) =
@@ -572,7 +572,6 @@ private lemma slash_sum_V_p_qExp_coeff_eq {N : ℕ} [NeZero N] {k : ℤ}
   rw [h_qexp, ModularForm.qExpansion_smul (F := ModularForm ((Gamma1 (N / p)).map (mapGL ℝ)) k)
       one_pos (one_mem_strictPeriods_Gamma1_map (N / p)) D g_low_cast.toModularForm',
     PowerSeries.coeff_smul, smul_eq_mul]
-
 
 private lemma slash_sum_Δ_form_qExp_coeff_zero {N : ℕ} [NeZero N] {k : ℤ} (χ : (ZMod N)ˣ →* ℂˣ)
     (p : ℕ) [NeZero p] (hp : p.Prime) (hpN : p ∣ N) [NeZero (N / p)]
@@ -974,7 +973,7 @@ private lemma descent_l_prime_gt_one_apply {N : ℕ} [NeZero N] {k : ℤ} (χ : 
 
 private lemma descent_slashSum_qExp_coeff_eq_of_l_eq_one {N : ℕ} [NeZero N] {k : ℤ}
     (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) {p : ℕ} [NeZero p] (hp : p.Prime)
-    {l' : ℕ} [NeZero l'] (hl'_le : 1 ≥ l')
+    {l' : ℕ} [NeZero l'] (hl'_le : l' ≤ 1)
     [NeZero (l' * N)] [NeZero ((l' * N) / p)]
     (g_low_cast : CuspForm ((Gamma1 ((l' * N) / p)).map (mapGL ℝ)) k)
     (hp_dvd_lN : p ∣ l' * N)
