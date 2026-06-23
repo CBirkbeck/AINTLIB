@@ -31,6 +31,11 @@ special case.
   a family of quadratic-form degree witnesses.
 * `hasse_bound_of_t_witness` — `|#E(F_q) − q − 1| ≤ 2√q` given both witness
   families.
+* `hasse_bound_of_full_witnesses` — the same bound from the `1 − π` hom/kernel
+  witness (trace computed internally) plus the quadratic-form witness family.
+* `hasse_bound_of_all_witnesses` — the top-level plug-in form, gathering every
+  upstream dependency (separable + finite-dim + fiber + QF witnesses) into one
+  theorem whose hypotheses map one-to-one to the outstanding upstream tickets.
 
 ## References
 * [Silverman, *The Arithmetic of Elliptic Curves*], V.1.1.
