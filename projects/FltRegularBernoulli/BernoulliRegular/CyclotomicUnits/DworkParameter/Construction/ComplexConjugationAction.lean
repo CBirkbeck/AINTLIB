@@ -1,8 +1,17 @@
 module
 
-public import BernoulliRegular.CyclotomicUnits.DworkParameter.Construction.DworkParameterConstruction
+public import
+  BernoulliRegular.CyclotomicUnits.DworkParameter.Construction.DworkParameterConstruction
 public import BernoulliRegular.Reflection.Local.DeltaAction
 public import Mathlib.Topology.Algebra.UniformRing
+
+/-!
+# Complex conjugation on Dwork parameters
+
+This file constructs cyclotomic and complex-conjugation automorphisms on the valued
+integer ring and the lambda-adic Dwork completion, and proves how they act on the
+Dwork parameter.
+-/
 
 @[expose] public section
 
@@ -28,8 +37,6 @@ open Furtwaengler.KummerArtinHasse
 open MonoidWithZeroHom.ValueGroup₀
 open BernoulliRegular.Reflection.Local
 
-set_option maxHeartbeats 800000 in
--- The proof compares value-group basic neighborhoods for two valuation type synonyms.
 omit [NumberField K] in
 theorem uniformContinuous_withValCongr_comap
     (v : Valuation K ℤᵐ⁰) (σ : K ≃+* K) :
@@ -88,8 +95,6 @@ theorem uniformContinuous_withValCongr_comap
   rw [hval, ← hδ₀_emb]
   exact hx
 
-set_option maxHeartbeats 800000 in
--- The proof is the inverse-neighborhood version of `uniformContinuous_withValCongr_comap`.
 omit [NumberField K] in
 theorem uniformContinuous_withValCongr_comap_symm
     (v : Valuation K ℤᵐ⁰) (σ : K ≃+* K) :
