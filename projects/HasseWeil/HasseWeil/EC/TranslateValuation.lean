@@ -552,6 +552,51 @@ theorem weierstrass_factorization
     rw [h]
   linear_combination h_gen - h_eq_alg
 
+/-- In the doubling case (`P = (xk, yk)`), the factor `A` differs from the nonzero
+constant `yk − negY xk yk` by `(y_gen − yk) + a₁·(x_gen − xk)` — both in `m_P` — so
+`pointValuation P (A − algebraMap (yk − negY xk yk)) < 1`. -/
+private theorem pointValuation_A_sub_algC_lt_one_of_doubling
+    (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_eq_x : P.x = xk) (h_eq_y : P.y = yk)
+    (h_a1_le : (W_smooth W).pointValuation P ((W_KE W).a₁) ≤ 1) :
+    (W_smooth W).pointValuation P
+      ((y_gen W + algebraMap F KE yk + (W_KE W).a₁ * x_gen W + (W_KE W).a₃) -
+        algebraMap F KE (yk - W.toAffine.negY xk yk)) < 1 := by
+  have h_negY : W.toAffine.negY xk yk = -yk - W.a₁ * xk - W.a₃ := rfl
+  have ha1 : (W_KE W).a₁ = algebraMap F KE W.a₁ := rfl
+  have ha3 : (W_KE W).a₃ = algebraMap F KE W.a₃ := rfl
+  have h_diff_eq :
+      (y_gen W + algebraMap F KE yk + (W_KE W).a₁ * x_gen W + (W_KE W).a₃) -
+        algebraMap F KE (yk - W.toAffine.negY xk yk) =
+      (y_gen W - algebraMap F KE yk) + (W_KE W).a₁ * (x_gen W - algebraMap F KE xk) := by
+    rw [h_negY, ha1, ha3]
+    push_cast
+    ring
+  rw [h_diff_eq]
+  apply lt_of_le_of_lt (((W_smooth W).pointValuation P).map_add _ _)
+  apply max_lt
+  · rw [← h_eq_y]
+    have h_ymem : Affine.CoordinateRing.YClass W.toAffine (Polynomial.C P.y) ∈
+        (W_smooth W).maximalIdealAt P :=
+      YClass_mem_maximalIdealAt W P P.y rfl
+    have h_lt :=
+      (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
+        (C := W_smooth W) (Affine.CoordinateRing.YClass W.toAffine (Polynomial.C P.y))
+        P).mpr h_ymem
+    have h_yeq := y_gen_sub_const_eq_algebraMap_YClass W P.y
+    rw [h_yeq]
+    exact h_lt
+  · rw [← h_eq_x]
+    have h_xmem : Affine.CoordinateRing.XClass W.toAffine P.x ∈
+        (W_smooth W).maximalIdealAt P :=
+      XClass_mem_maximalIdealAt W P P.x rfl
+    have h_lt :=
+      (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
+        (C := W_smooth W) (Affine.CoordinateRing.XClass W.toAffine P.x) P).mpr h_xmem
+    have h_xeq := x_gen_sub_const_eq_algebraMap_XClass W P.x
+    apply pointValuation_mul_lt_one_of_le_and_lt W P h_a1_le
+    rw [h_xeq]
+    exact h_lt
+
 /-- Helper: at `P = (xk, yk)` with `yk ≠ negY xk yk` (non-2-tor), the K(E)
 factor `A = y_gen + alg yk + a₁ · x_gen + a₃` has `pointValuation = 1` at
 `P`. This is because `A` evaluates to `yk − negY xk yk ≠ 0` at `P`. -/
@@ -579,44 +624,8 @@ theorem pointValuation_A_eq_one_of_doubling
       · exact pointValuation_add_le_one W P h_y_le h_alg_yk_le
       · exact pointValuation_mul_le_one W P h_a1_le h_x_le
     · exact h_a3_le
-  have h_diff_lt : (W_smooth W).pointValuation P
-      ((y_gen W + algebraMap F KE yk + (W_KE W).a₁ * x_gen W + (W_KE W).a₃) -
-        algebraMap F KE (yk - W.toAffine.negY xk yk)) < 1 := by
-    have h_negY : W.toAffine.negY xk yk = -yk - W.a₁ * xk - W.a₃ := rfl
-    have ha1 : (W_KE W).a₁ = algebraMap F KE W.a₁ := rfl
-    have ha3 : (W_KE W).a₃ = algebraMap F KE W.a₃ := rfl
-    have h_diff_eq :
-        (y_gen W + algebraMap F KE yk + (W_KE W).a₁ * x_gen W + (W_KE W).a₃) -
-          algebraMap F KE (yk - W.toAffine.negY xk yk) =
-        (y_gen W - algebraMap F KE yk) + (W_KE W).a₁ * (x_gen W - algebraMap F KE xk) := by
-      rw [h_negY, ha1, ha3]
-      push_cast
-      ring
-    rw [h_diff_eq]
-    apply lt_of_le_of_lt (((W_smooth W).pointValuation P).map_add _ _)
-    apply max_lt
-    · rw [← h_eq_y]
-      have h_ymem : Affine.CoordinateRing.YClass W.toAffine (Polynomial.C P.y) ∈
-          (W_smooth W).maximalIdealAt P :=
-        YClass_mem_maximalIdealAt W P P.y rfl
-      have h_lt :=
-        (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
-          (C := W_smooth W) (Affine.CoordinateRing.YClass W.toAffine (Polynomial.C P.y))
-          P).mpr h_ymem
-      have h_yeq := y_gen_sub_const_eq_algebraMap_YClass W P.y
-      rw [h_yeq]
-      exact h_lt
-    · rw [← h_eq_x]
-      have h_xmem : Affine.CoordinateRing.XClass W.toAffine P.x ∈
-          (W_smooth W).maximalIdealAt P :=
-        XClass_mem_maximalIdealAt W P P.x rfl
-      have h_lt :=
-        (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
-          (C := W_smooth W) (Affine.CoordinateRing.XClass W.toAffine P.x) P).mpr h_xmem
-      have h_xeq := x_gen_sub_const_eq_algebraMap_XClass W P.x
-      apply pointValuation_mul_lt_one_of_le_and_lt W P h_a1_le
-      rw [h_xeq]
-      exact h_lt
+  have h_diff_lt :=
+    pointValuation_A_sub_algC_lt_one_of_doubling W P xk yk h_eq_x h_eq_y h_a1_le
   have h_c_ne : yk - W.toAffine.negY xk yk ≠ 0 := sub_ne_zero.mpr h_not_2_tor
   have h_alg_c_eq : (W_smooth W).pointValuation P
       (algebraMap F KE (yk - W.toAffine.negY xk yk)) = 1 :=
