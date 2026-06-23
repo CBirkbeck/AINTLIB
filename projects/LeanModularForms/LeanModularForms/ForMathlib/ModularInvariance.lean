@@ -137,6 +137,11 @@ private lemma meromorphicOrderAt_comp_neg_inv (g : ℂ → ℂ) (p : ℂ) (hp : 
   rw [hn.symm, meromorphicOrderAt_eq_int_iff (mero_neg_inv_fwd g p hp hg_mero)]
   exact neg_inv_finite_order_witness g p hp n h hh_an hh_ne hh_eq
 
+private lemma neg_inv_im_pos {z : ℂ} (hz : 0 < z.im) : 0 < (-z⁻¹).im := by
+  have hz_ne : z ≠ 0 := fun h ↦ by simp [h] at hz
+  rw [neg_inv, Complex.inv_im]
+  exact div_pos (by simp [hz]) (Complex.normSq_pos.mpr (neg_ne_zero.mpr hz_ne))
+
 /-- T-invariance of vanishing order: `ord(f, z+1) = ord(f, z)`. -/
 lemma ord_add_one_eq (p : ℍ) :
     orderOfVanishingAt' f ((1 : ℝ) +ᵥ p) = orderOfVanishingAt' f p := by
@@ -168,8 +173,7 @@ lemma modform_comp_ofComplex_S_identity (z : ℂ) (hz : 0 < z.im) :
     f (UpperHalfPlane.ofComplex (-(1:ℂ)/z)) = (z : ℂ) ^ k * f (UpperHalfPlane.ofComplex z) := by
   have hz_ne : z ≠ 0 := fun h ↦ by simp [h] at hz
   have h_neg_inv_im : 0 < (-(1:ℂ)/z).im := by
-    rw [show -(1:ℂ)/z = (-z)⁻¹ by field_simp, Complex.inv_im]
-    exact div_pos (by simp [hz]) (Complex.normSq_pos.mpr (neg_ne_zero.mpr hz_ne))
+    rw [show -(1:ℂ)/z = -z⁻¹ by field_simp]; exact neg_inv_im_pos hz
   rw [UpperHalfPlane.ofComplex_apply_of_im_pos hz,
     UpperHalfPlane.ofComplex_apply_of_im_pos h_neg_inv_im]
   set z_uhp : UpperHalfPlane := ⟨z, hz⟩
@@ -179,7 +183,7 @@ lemma modform_comp_ofComplex_S_identity (z : ℂ) (hz : 0 < z.im) :
       change -(1:ℂ)/z = (-z)⁻¹
       field_simp)
   rw [h_eq]
-  have hS : ModularGroup.S ∈ Gamma 1 := by rw [Gamma_one_top]; exact Subgroup.mem_top _
+  have hS : ModularGroup.S ∈ Gamma 1 := Gamma_one_top ▸ Subgroup.mem_top _
   simpa [ModularGroup.denom_S] using SlashInvariantForm.slash_action_eqn_SL'' f hS z_uhp
 
 /-- S-invariance of vanishing order: `ord(f, S·z) = ord(f, z)`. -/
@@ -201,9 +205,7 @@ lemma ord_S_eq (p : ℍ) :
         rw [Filter.EventuallyEq, eventually_nhdsWithin_iff]
         filter_upwards [isOpen_lt continuous_const continuous_im |>.mem_nhds p.im_pos] with z hz _
         have hz_ne : z ≠ 0 := fun h ↦ by simp [h] at hz
-        have h_neg_inv_im : 0 < (-z⁻¹).im := by
-          rw [neg_inv, Complex.inv_im]
-          exact div_pos (by simp [hz]) (Complex.normSq_pos.mpr (neg_ne_zero.mpr hz_ne))
+        have h_neg_inv_im : 0 < (-z⁻¹).im := neg_inv_im_pos hz
         simp only [smul_eq_mul, hG_def, dif_pos h_neg_inv_im, dif_pos hz]
         have h_eq := modform_comp_ofComplex_S_identity f z hz
         rw [show -(1:ℂ)/z = -z⁻¹ by field_simp,
