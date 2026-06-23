@@ -423,7 +423,7 @@ lemma petN_self_re_nonneg (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
 
 This provides the algebraic inner product structure needed for the spectral theorem.
 The inner product is `⟪f, g⟫ := petN f g` (conjugate-linear in first, linear in second). -/
-noncomputable def petN_innerProductCore :
+@[reducible] noncomputable def petN_innerProductCore :
     @InnerProductSpace.Core ℂ (CuspForm ((Gamma1 N).map (mapGL ℝ)) k) _ _ _ where
   inner f g := petN f g
   conj_inner_symm f g := petN_conj_symm f g
