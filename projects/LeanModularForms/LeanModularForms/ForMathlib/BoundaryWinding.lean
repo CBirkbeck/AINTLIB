@@ -69,8 +69,9 @@ theorem hasGeneralizedWindingNumber_neg_half_of_scd {γ : PiecewiseC1Path x y} {
 - `h_near`: inside the δ-window, the curve is ε-close to `z₀`
 
 **Analytic parameter** (`ArcFTCHyp`): the FTC identity, integrability, and limit. -/
-def mkSingleCrossingData_smooth {H : ℝ} (γ : PiecewiseC1Path (fdStart H) (fdStart H)) (z₀ : ℂ)
-    (t₀ : ℝ) (ht₀ : t₀ ∈ Ioo 0 1) (δ : ℝ → ℝ) (threshold : ℝ) (hthresh : 0 < threshold)
+def mkSingleCrossingData_smooth {H : ℝ} (γ : PiecewiseC1Path (fdStart H) (fdStart H))
+    (z₀ : ℂ) (t₀ : ℝ) (ht₀ : t₀ ∈ Ioo 0 1) (δ : ℝ → ℝ) (threshold : ℝ)
+    (hthresh : 0 < threshold)
     (hδ_pos : ∀ ε, 0 < ε → ε < threshold → 0 < δ ε)
     (hδ_small : ∀ ε, 0 < ε → ε < threshold → δ ε < min t₀ (1 - t₀))
     (h_far : ∀ ε, 0 < ε → ε < threshold →
@@ -97,7 +98,8 @@ def mkSingleCrossingData_smooth {H : ℝ} (γ : PiecewiseC1Path (fdStart H) (fdS
 /-- From a generic smooth crossing `SingleCrossingData` with limit `L = -(π * I)`,
 extract `HasGeneralizedWindingNumber γ z₀ (-1/2)`. -/
 theorem boundaryWinding_of_smoothFTCHyp {H : ℝ} (γ : PiecewiseC1Path (fdStart H) (fdStart H))
-    (z₀ : ℂ) (t₀ : ℝ) (ht₀ : t₀ ∈ Ioo 0 1) (δ : ℝ → ℝ) (threshold : ℝ) (hthresh : 0 < threshold)
+    (z₀ : ℂ) (t₀ : ℝ) (ht₀ : t₀ ∈ Ioo 0 1) (δ : ℝ → ℝ) (threshold : ℝ)
+    (hthresh : 0 < threshold)
     (hδ_pos : ∀ ε, 0 < ε → ε < threshold → 0 < δ ε)
     (hδ_small : ∀ ε, 0 < ε → ε < threshold → δ ε < min t₀ (1 - t₀))
     (h_far : ∀ ε, 0 < ε → ε < threshold →
