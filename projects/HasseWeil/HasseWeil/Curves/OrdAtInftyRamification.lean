@@ -132,29 +132,38 @@ theorem ordAtInfty_ringHom_eq_zero_of_ordAtInfty_eq_zero
   norm_cast
   omega
 
-/-- **The ramification-pullback law at infinity (abstract form).** Let
-`ψ : F(C₂) → F(C₁)` be a field homomorphism preserving regularity at `O`
-(`hreg`), `t` a uniformizer at `O₂` (`ord_∞^{C₂} t = 1`), and `e` the order of
-`ψ t` at `O₁`.  Then for every nonzero `g`,
+/-- **Order of `ψ` on an integer power of `t`.** If `ψ t ≠ 0` and `ord_∞(ψ t) = e`,
+then `ord_∞(ψ (t ^ k)) = k · e` for every `k : ℤ`.  Just `map_zpow₀` (`ψ` is a
+field hom, so `ψ (t ^ k) = (ψ t) ^ k`) followed by `ordAtInfty_zpow`. -/
+private theorem ordAtInfty_ringHom_zpow_uniformizer
+    (ψ : C₂.FunctionField →+* C₁.FunctionField) {t : C₂.FunctionField}
+    (hψt_ne : ψ t ≠ 0) {e : ℕ} (he : C₁.ordAtInfty (ψ t) = ((e : ℤ) : WithTop ℤ))
+    (k : ℤ) :
+    C₁.ordAtInfty (ψ (t ^ k)) = (((k * e : ℤ)) : WithTop ℤ) := by
+  rw [map_zpow₀, C₁.ordAtInfty_zpow hψt_ne he k]
 
-  `ord_∞^{C₁}(ψ g) = e · ord_∞^{C₂}(g)`.
+/-- **The unit-factorization core of the pullback law** (value form).  With `ψ`
+preserving regularity (`hreg`), `t` a uniformizer at `O₂` (`ord_∞ t = 1`), `e` the
+order of `ψ t`, and `g ≠ 0` of integer order `ord_∞ g = n`, the image `ψ g` has
+order exactly `n · e` at `O₁`.
 
-This is Silverman's valuation-pullback formula `ord_P(φ* g) = e_φ(P)·ord_{φP}(g)`
-at `P = O`. -/
-theorem ordAtInfty_ringHom_eq_nsmul
+Write `g = u · t ^ n` with `u := g · t ^ (-n)` a unit at `O₂` (`ord_∞ u = 0`).
+Then `ψ u` is a unit at `O₁` (`ord_∞(ψ u) = 0`, via
+`ordAtInfty_ringHom_eq_zero_of_ordAtInfty_eq_zero`), and `ψ (t ^ n)` has order
+`n · e` (`ordAtInfty_ringHom_zpow_uniformizer`), so additivity of `ord_∞` gives
+`ord_∞(ψ g) = 0 + n · e`. -/
+private theorem ordAtInfty_ringHom_eq_mul_of_ordAtInfty_eq
     (ψ : C₂.FunctionField →+* C₁.FunctionField)
     (hreg : ∀ f : C₂.FunctionField, 0 ≤ C₂.ordAtInfty f →
       0 ≤ C₁.ordAtInfty (ψ f))
     {t : C₂.FunctionField} (ht : C₂.ordAtInfty t = ((1 : ℤ) : WithTop ℤ))
     {e : ℕ} (he : C₁.ordAtInfty (ψ t) = ((e : ℤ) : WithTop ℤ))
-    {g : C₂.FunctionField} (hg : g ≠ 0) :
-    C₁.ordAtInfty (ψ g) = e • C₂.ordAtInfty g := by
-  -- `t ≠ 0` (its order is `1`, not `⊤`); `ψ` injective so `ψ t ≠ 0`, `ψ g ≠ 0`.
+    {g : C₂.FunctionField} (hg : g ≠ 0) {n : ℤ}
+    (hn : C₂.ordAtInfty g = ((n : ℤ) : WithTop ℤ)) :
+    C₁.ordAtInfty (ψ g) = (((n * e : ℤ)) : WithTop ℤ) := by
+  -- `t ≠ 0` (its order is `1`, not `⊤`); `ψ` injective so `ψ t ≠ 0`.
   have ht_ne : t ≠ 0 := fun h ↦ by simp [h] at ht
   have hψt_ne : ψ t ≠ 0 := (map_ne_zero ψ).mpr ht_ne
-  -- Extract the integer order `n` of `g` at `O₂`.
-  obtain ⟨n, hn⟩ : ∃ n : ℤ, C₂.ordAtInfty g = ((n : ℤ) : WithTop ℤ) :=
-    ⟨_, C₂.ordAtInfty_of_ne hg⟩
   -- `u := g · t^(-n)` is a unit at `O₂`: `ord_∞ u = n + (-n)·1 = 0`.
   set u : C₂.FunctionField := g * t ^ (-n) with hu_def
   have htzpow_ne : t ^ (-n) ≠ 0 := zpow_ne_zero _ ht_ne
@@ -174,19 +183,38 @@ theorem ordAtInfty_ringHom_eq_nsmul
   -- Now `g = u · t^n`, so `ψ g = ψ u · ψ(t^n)`, giving `ord_∞(ψ g) = 0 + n·e`.
   have hg_eq : g = u * t ^ n := by
     rw [hu_def, mul_assoc, ← zpow_add₀ ht_ne, neg_add_cancel, zpow_zero, mul_one]
-  have htn_ord : C₁.ordAtInfty (ψ (t ^ n)) = (((n * e : ℤ)) : WithTop ℤ) := by
-    rw [map_zpow₀, C₁.ordAtInfty_zpow hψt_ne he n]
-  -- Compute the order of `ψ g` directly.
-  have hψg_ord : C₁.ordAtInfty (ψ g) = (((n * e : ℤ)) : WithTop ℤ) := by
-    have hsplit : C₁.ordAtInfty (ψ g) =
-        C₁.ordAtInfty (ψ u) + C₁.ordAtInfty (ψ (t ^ n)) := by
-      conv_lhs => rw [hg_eq, map_mul]
-      exact C₁.ordAtInfty_mul hψu_ne hψtn_ne
-    rw [hsplit, htn_ord, hψu0]
-    norm_num
+  have hsplit : C₁.ordAtInfty (ψ g) =
+      C₁.ordAtInfty (ψ u) + C₁.ordAtInfty (ψ (t ^ n)) := by
+    conv_lhs => rw [hg_eq, map_mul]
+    exact C₁.ordAtInfty_mul hψu_ne hψtn_ne
+  rw [hsplit, ordAtInfty_ringHom_zpow_uniformizer ψ hψt_ne he n, hψu0]
+  norm_num
+
+/-- **The ramification-pullback law at infinity (abstract form).** Let
+`ψ : F(C₂) → F(C₁)` be a field homomorphism preserving regularity at `O`
+(`hreg`), `t` a uniformizer at `O₂` (`ord_∞^{C₂} t = 1`), and `e` the order of
+`ψ t` at `O₁`.  Then for every nonzero `g`,
+
+  `ord_∞^{C₁}(ψ g) = e · ord_∞^{C₂}(g)`.
+
+This is Silverman's valuation-pullback formula `ord_P(φ* g) = e_φ(P)·ord_{φP}(g)`
+at `P = O`. -/
+theorem ordAtInfty_ringHom_eq_nsmul
+    (ψ : C₂.FunctionField →+* C₁.FunctionField)
+    (hreg : ∀ f : C₂.FunctionField, 0 ≤ C₂.ordAtInfty f →
+      0 ≤ C₁.ordAtInfty (ψ f))
+    {t : C₂.FunctionField} (ht : C₂.ordAtInfty t = ((1 : ℤ) : WithTop ℤ))
+    {e : ℕ} (he : C₁.ordAtInfty (ψ t) = ((e : ℤ) : WithTop ℤ))
+    {g : C₂.FunctionField} (hg : g ≠ 0) :
+    C₁.ordAtInfty (ψ g) = e • C₂.ordAtInfty g := by
+  -- Extract the integer order `n` of `g` at `O₂`.
+  obtain ⟨n, hn⟩ : ∃ n : ℤ, C₂.ordAtInfty g = ((n : ℤ) : WithTop ℤ) :=
+    ⟨_, C₂.ordAtInfty_of_ne hg⟩
+  -- Unit-factorization core: `ord_∞(ψ g) = n · e` (value form).
+  have hψg_ord : C₁.ordAtInfty (ψ g) = (((n * e : ℤ)) : WithTop ℤ) :=
+    ordAtInfty_ringHom_eq_mul_of_ordAtInfty_eq ψ hreg ht he hg hn
   -- `n·e = e • (n : WithTop ℤ)`, both equal to `(e*n : ℤ)`.
-  rw [hψg_ord, hn]
-  rw [coe_nsmul_int e n]
+  rw [hψg_ord, hn, coe_nsmul_int e n]
   congr 1
   ring
 
