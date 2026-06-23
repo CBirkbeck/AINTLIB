@@ -3393,195 +3393,20 @@ the y-coordinate pullbacks: `ord((zsmul r π).pb y_gen) = -3q` and
 /-- **`ord_∞(mulByInt_y W r) = -3`** for `r ≠ 0` with `(r : K) ≠ 0`.
 The `(mulByInt_x W r, mulByInt_y W r)` curve point has `ord(mulByInt_x) = -2`,
 so the curve equation `Y² + a₁·X·Y + a₃·Y = X³ + ...` forces
-`ord(Y) = -3` (the `2 ord(Y) = 3 ord(X)` halving). -/
+`ord(Y) = -3` (the `2 ord(Y) = 3 ord(X)` halving).
+
+This is the separable `M = -2` instance of the general halving lemma
+`ordAtInfty_mulByInt_y_eq_of_x`: with `(r : K) ≠ 0` the `x`-order is `-2`
+(via `ordAtInfty_mulByInt_x`), and `3·(-2)/2 = -3`. -/
 theorem ordAtInfty_mulByInt_y_eq_neg_three
     (r : ℤ) (hr : r ≠ 0) (hrK : (r : K) ≠ 0) :
     (W_smooth W).ordAtInfty (mulByInt_y W r) =
       ((-3 : ℤ) : WithTop ℤ) := by
   have hX_ord : (W_smooth W).ordAtInfty (mulByInt_x W r) = ((-2 : ℤ) : WithTop ℤ) :=
     ordAtInfty_mulByInt_x W r hr hrK
-  have hX_ne : mulByInt_x W r ≠ 0 := mulByInt_x_ne_zero W r hr
-  -- Curve equation for (mulByInt_x, mulByInt_y) on W_KE.
-  have h_eq : mulByInt_y W r ^ 2 +
-        algebraMap K KE W.toAffine.a₁ * mulByInt_x W r * mulByInt_y W r +
-        algebraMap K KE W.toAffine.a₃ * mulByInt_y W r =
-      mulByInt_x W r ^ 3 +
-        algebraMap K KE W.toAffine.a₂ * mulByInt_x W r ^ 2 +
-        algebraMap K KE W.toAffine.a₄ * mulByInt_x W r +
-        algebraMap K KE W.toAffine.a₆ := by
-    have h_alg := pullback_equation W (mulByInt W.toAffine r)
-    have hx_pb : (mulByInt W.toAffine r).pullback (x_gen W) = mulByInt_x W r := by
-      show (mulByInt W.toAffine r).pullback
-        (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
-          (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X)) = _
-      exact mulByInt_pullback_x W r hr
-    have hy_pb : (mulByInt W.toAffine r).pullback (y_gen W) = mulByInt_y W r := by
-      show (mulByInt W.toAffine r).pullback
-        (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
-          (AdjoinRoot.root W.toAffine.polynomial)) = _
-      exact mulByInt_pullback_y W r hr
-    rw [hx_pb, hy_pb] at h_alg
-    rw [WeierstrassCurve.Affine.equation_iff] at h_alg
-    have h_a1 : (W_KE W).toAffine.a₁ = algebraMap K KE W.toAffine.a₁ := rfl
-    have h_a2 : (W_KE W).toAffine.a₂ = algebraMap K KE W.toAffine.a₂ := rfl
-    have h_a3 : (W_KE W).toAffine.a₃ = algebraMap K KE W.toAffine.a₃ := rfl
-    have h_a4 : (W_KE W).toAffine.a₄ = algebraMap K KE W.toAffine.a₄ := rfl
-    have h_a6 : (W_KE W).toAffine.a₆ = algebraMap K KE W.toAffine.a₆ := rfl
-    rw [h_a1, h_a2, h_a3, h_a4, h_a6] at h_alg
-    exact h_alg
-  -- Compute ord(RHS) = -6 (X³ dominates).
-  have hX_sq : (W_smooth W).ordAtInfty (mulByInt_x W r ^ 2) = ((-4 : ℤ) : WithTop ℤ) :=
-    ((W_smooth W).ord_pow_concrete hX_ne (-2) 2 hX_ord).trans rfl
-  have hX_cube : (W_smooth W).ordAtInfty (mulByInt_x W r ^ 3) = ((-6 : ℤ) : WithTop ℤ) :=
-    ((W_smooth W).ord_pow_concrete hX_ne (-2) 3 hX_ord).trans rfl
-  have h_rhs_ord : (W_smooth W).ordAtInfty
-      (mulByInt_x W r ^ 3 +
-        algebraMap K KE W.toAffine.a₂ * mulByInt_x W r ^ 2 +
-        algebraMap K KE W.toAffine.a₄ * mulByInt_x W r +
-        algebraMap K KE W.toAffine.a₆) = ((-6 : ℤ) : WithTop ℤ) := by
-    have h_a2X2 : ((-4 : ℤ) : WithTop ℤ) ≤
-        (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₂ * mulByInt_x W r ^ 2) :=
-      ord_algebraMap_mul_ge W W.toAffine.a₂ hX_sq.symm.le
-    have h_a4X : ((-2 : ℤ) : WithTop ℤ) ≤
-        (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₄ * mulByInt_x W r) :=
-      ord_algebraMap_mul_ge W W.toAffine.a₄ hX_ord.symm.le
-    have h_a6 : (0 : WithTop ℤ) ≤
-        (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₆) := by
-      by_cases ha₆ : W.toAffine.a₆ = 0
-      · rw [ha₆, map_zero]
-        exact (W_smooth W).ordAtInfty_zero.symm ▸ le_top
-      · rw [ordAtInfty_algebraMap_F_nonzero W ha₆]
-    have step1 : (W_smooth W).ordAtInfty
-        (mulByInt_x W r ^ 3 + algebraMap K KE W.toAffine.a₂ * mulByInt_x W r ^ 2) =
-        ((-6 : ℤ) : WithTop ℤ) := by
-      have h_lt : (W_smooth W).ordAtInfty (mulByInt_x W r ^ 3) <
-          (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₂ * mulByInt_x W r ^ 2) := by
-        rw [hX_cube]
-        refine lt_of_lt_of_le ?_ h_a2X2
-        exact_mod_cast (by norm_num : (-6 : ℤ) < -4)
-      exact ((W_smooth W).ordAtInfty_add_eq_of_lt h_lt).trans hX_cube
-    have step2 : (W_smooth W).ordAtInfty
-        (mulByInt_x W r ^ 3 + algebraMap K KE W.toAffine.a₂ * mulByInt_x W r ^ 2 +
-          algebraMap K KE W.toAffine.a₄ * mulByInt_x W r) =
-        ((-6 : ℤ) : WithTop ℤ) := by
-      have h_lt : (W_smooth W).ordAtInfty
-          (mulByInt_x W r ^ 3 + algebraMap K KE W.toAffine.a₂ * mulByInt_x W r ^ 2) <
-          (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₄ * mulByInt_x W r) := by
-        rw [step1]
-        refine lt_of_lt_of_le ?_ h_a4X
-        exact_mod_cast (by norm_num : (-6 : ℤ) < -2)
-      exact ((W_smooth W).ordAtInfty_add_eq_of_lt h_lt).trans step1
-    have h_lt : (W_smooth W).ordAtInfty
-        (mulByInt_x W r ^ 3 + algebraMap K KE W.toAffine.a₂ * mulByInt_x W r ^ 2 +
-          algebraMap K KE W.toAffine.a₄ * mulByInt_x W r) <
-        (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₆) := by
-      rw [step2]
-      refine lt_of_lt_of_le ?_ h_a6
-      exact_mod_cast (by norm_num : (-6 : ℤ) < 0)
-    exact ((W_smooth W).ordAtInfty_add_eq_of_lt h_lt).trans step2
-  -- ord(LHS) = ord(RHS) = -6.
-  have h_lhs_ord : (W_smooth W).ordAtInfty
-      (mulByInt_y W r ^ 2 +
-        algebraMap K KE W.toAffine.a₁ * mulByInt_x W r * mulByInt_y W r +
-        algebraMap K KE W.toAffine.a₃ * mulByInt_y W r) = ((-6 : ℤ) : WithTop ℤ) :=
-    h_eq ▸ h_rhs_ord
-  -- Y ≠ 0 (else LHS = 0, ord = ⊤ ≠ -6).
-  have hY_ne : mulByInt_y W r ≠ 0 := by
-    intro h
-    have h_zero : mulByInt_y W r ^ 2 +
-        algebraMap K KE W.toAffine.a₁ * mulByInt_x W r * mulByInt_y W r +
-        algebraMap K KE W.toAffine.a₃ * mulByInt_y W r = 0 := by rw [h]; ring
-    have h_ord_eq : (W_smooth W).ordAtInfty
-        (mulByInt_y W r ^ 2 +
-          algebraMap K KE W.toAffine.a₁ * mulByInt_x W r * mulByInt_y W r +
-          algebraMap K KE W.toAffine.a₃ * mulByInt_y W r) = ⊤ :=
-      (congrArg (W_smooth W).ordAtInfty h_zero).trans (W_smooth W).ordAtInfty_zero
-    exact WithTop.top_ne_coe (h_ord_eq.symm.trans h_lhs_ord)
-  -- Extract m = ord(Y) as integer.
-  obtain ⟨m, hm⟩ : ∃ m : ℤ,
-      (W_smooth W).ordAtInfty (mulByInt_y W r) = ((m : ℤ) : WithTop ℤ) := by
-    have h_ne_top : (W_smooth W).ordAtInfty (mulByInt_y W r) ≠ ⊤ :=
-      ((W_smooth W).ordAtInfty_eq_top_iff _).not.mpr hY_ne
-    obtain ⟨m, hm⟩ := WithTop.ne_top_iff_exists.mp h_ne_top
-    exact ⟨m, hm.symm⟩
-  -- Y² has ord 2m.
-  have hY_sq_ord : (W_smooth W).ordAtInfty (mulByInt_y W r ^ 2) =
-      ((2 * m : ℤ) : WithTop ℤ) :=
-    (W_smooth W).ord_pow_concrete hY_ne m 2 hm
-  -- ord(X · Y) = -2 + m.
-  have h_xy_ord : (W_smooth W).ordAtInfty (mulByInt_x W r * mulByInt_y W r) =
-      (((-2 + m : ℤ)) : WithTop ℤ) := by
-    refine ((W_smooth W).ordAtInfty_mul hX_ne hY_ne).trans ?_
-    rw [hX_ord, hm]; push_cast; rfl
-  -- Step (a): m ≤ -3 by contradiction with m ≥ -2.
-  have h_m_le : m ≤ -3 := by
-    by_contra h_not_le
-    push Not at h_not_le
-    have h_m_ge : -2 ≤ m := by omega
-    have h_y_sq_ge : ((-4 : ℤ) : WithTop ℤ) ≤
-        (W_smooth W).ordAtInfty (mulByInt_y W r ^ 2) := by
-      rw [hY_sq_ord]
-      exact_mod_cast (by linarith : (-4 : ℤ) ≤ 2 * m)
-    have h_a1xy_ge : ((-4 : ℤ) : WithTop ℤ) ≤
-        (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₁ *
-          mulByInt_x W r * mulByInt_y W r) := by
-      have h_assoc : algebraMap K KE W.toAffine.a₁ * mulByInt_x W r * mulByInt_y W r =
-          algebraMap K KE W.toAffine.a₁ * (mulByInt_x W r * mulByInt_y W r) := by ring
-      rw [h_assoc]
-      refine ord_algebraMap_mul_ge W W.toAffine.a₁ ?_
-      rw [h_xy_ord]
-      exact_mod_cast (by linarith : (-4 : ℤ) ≤ -2 + m)
-    have h_a3y_ge : ((-4 : ℤ) : WithTop ℤ) ≤
-        (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₃ * mulByInt_y W r) := by
-      refine ord_algebraMap_mul_ge W W.toAffine.a₃ ?_
-      rw [hm]
-      exact_mod_cast (by linarith : (-4 : ℤ) ≤ m)
-    have h_lhs_ge : ((-4 : ℤ) : WithTop ℤ) ≤ (W_smooth W).ordAtInfty
-        (mulByInt_y W r ^ 2 +
-          algebraMap K KE W.toAffine.a₁ * mulByInt_x W r * mulByInt_y W r +
-          algebraMap K KE W.toAffine.a₃ * mulByInt_y W r) :=
-      ord_add_ge_of_both_ge W
-        (ord_add_ge_of_both_ge W h_y_sq_ge h_a1xy_ge) h_a3y_ge
-    rw [h_lhs_ord] at h_lhs_ge
-    have h46 : (-4 : ℤ) ≤ -6 := by exact_mod_cast h_lhs_ge
-    omega
-  -- Step (b): from m ≤ -3, Y² strictly dominates LHS, so ord(LHS) = 2m.
-  have h_a1xy_gt : (W_smooth W).ordAtInfty (mulByInt_y W r ^ 2) <
-      (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₁ *
-        mulByInt_x W r * mulByInt_y W r) := by
-    have h_assoc : algebraMap K KE W.toAffine.a₁ * mulByInt_x W r * mulByInt_y W r =
-        algebraMap K KE W.toAffine.a₁ * (mulByInt_x W r * mulByInt_y W r) := by ring
-    rw [hY_sq_ord, h_assoc]
-    refine lt_of_lt_of_le ?_ (ord_algebraMap_mul_ge W W.toAffine.a₁
-      (n := (((-2 + m : ℤ)) : WithTop ℤ)) (le_of_eq h_xy_ord.symm))
-    exact_mod_cast (by linarith : (2 * m : ℤ) < -2 + m)
-  have h_a3y_gt : (W_smooth W).ordAtInfty (mulByInt_y W r ^ 2) <
-      (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₃ * mulByInt_y W r) := by
-    rw [hY_sq_ord]
-    refine lt_of_lt_of_le ?_ (ord_algebraMap_mul_ge W W.toAffine.a₃
-      (n := ((m : ℤ) : WithTop ℤ)) (le_of_eq hm.symm))
-    exact_mod_cast (by linarith : (2 * m : ℤ) < m)
-  have h_inner_eq : (W_smooth W).ordAtInfty
-      (mulByInt_y W r ^ 2 +
-        algebraMap K KE W.toAffine.a₁ * mulByInt_x W r * mulByInt_y W r) =
-      (W_smooth W).ordAtInfty (mulByInt_y W r ^ 2) :=
-    (W_smooth W).ordAtInfty_add_eq_of_lt h_a1xy_gt
-  have h_a3y_gt' : (W_smooth W).ordAtInfty
-      (mulByInt_y W r ^ 2 +
-        algebraMap K KE W.toAffine.a₁ * mulByInt_x W r * mulByInt_y W r) <
-      (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₃ * mulByInt_y W r) :=
-    h_inner_eq ▸ h_a3y_gt
-  have h_outer_eq : (W_smooth W).ordAtInfty
-      (mulByInt_y W r ^ 2 +
-        algebraMap K KE W.toAffine.a₁ * mulByInt_x W r * mulByInt_y W r +
-        algebraMap K KE W.toAffine.a₃ * mulByInt_y W r) =
-      (W_smooth W).ordAtInfty (mulByInt_y W r ^ 2) :=
-    ((W_smooth W).ordAtInfty_add_eq_of_lt h_a3y_gt').trans h_inner_eq
-  rw [h_outer_eq, hY_sq_ord] at h_lhs_ord
-  have h_2m : (2 * m : ℤ) = -6 := by exact_mod_cast h_lhs_ord
-  rw [hm]
-  have h_m_eq : m = -3 := by omega
-  exact_mod_cast h_m_eq
+  -- Specialise the general halving lemma at `M = -2`; `3 · (-2) / 2 = -3`.
+  have h := ordAtInfty_mulByInt_y_eq_of_x W r hr hX_ord (by norm_num) (by decide)
+  rwa [show (3 * (-2) / 2 : ℤ) = -3 from by norm_num] at h
 
 /-- `ord_∞((zsmul r π).pb y_gen) = -3q` for `r ≠ 0` with `(r : K) ≠ 0`.
 Reduces to `ord_∞(mulByInt_y W r ^ q) = q · ord(mulByInt_y r) = q · -3 = -3q`. -/
