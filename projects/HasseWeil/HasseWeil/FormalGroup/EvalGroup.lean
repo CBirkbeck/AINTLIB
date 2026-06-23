@@ -392,6 +392,55 @@ The first coefficient identity is essentially the contrapositive of
 
 omit [IsLocalRing R] [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R]
   [IsLinearTopology R R] [T2Space R] [CompleteSpace R] in
+/-- The `single i j` coefficient of the variable `X i` vanishes when `j ≠ 1`:
+`X i` is the monomial `single i 1`, and `single i j = single i 1` forces `j = 1`.
+This is the right-hand-side computation in `coeff_j0_of_ne_one` (and `F.lunit`). -/
+private lemma coeff_single_X_self_of_ne_one (i : Fin 2) (j : ℕ) (hj : j ≠ 1) :
+    MvPowerSeries.coeff (Finsupp.single i j)
+      (MvPowerSeries.X i : MvPowerSeries (Fin 2) R) = 0 := by
+  rw [MvPowerSeries.coeff_X]
+  split_ifs with h
+  · -- `single i j = single i 1` would give `j = 1`, contradiction.
+    exfalso
+    apply hj
+    have := DFunLike.congr_fun h i
+    simpa [Finsupp.single_apply] using this
+  · rfl
+
+omit [IsLocalRing R] [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R]
+  [IsLinearTopology R R] [T2Space R] [CompleteSpace R] in
+/-- The off-diagonal term in the `coeff_subst` expansion for `F(X, 0)` vanishes:
+for any multi-index `d ≠ single 0 j`, the `single 0 j` coefficient of the
+substituted monomial `(X 0) ^ (d 0) * 0 ^ (d 1)` is zero. There are two cases:
+if `d 1 ≠ 0` the factor `0 ^ (d 1)` is zero; if `d 1 = 0` then `d = single 0 (d 0)`
+with `d 0 ≠ j`, so the surviving monomial `single 0 (d 0)` differs from `single 0 j`. -/
+private lemma coeff_single_X_pow_mul_zero_pow_of_ne
+    {j : ℕ} {d : Fin 2 →₀ ℕ} (hd : d ≠ Finsupp.single (0 : Fin 2) j) :
+    MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) j)
+      ((MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) R) ^ (d 0)
+        * (0 : MvPowerSeries (Fin 2) R) ^ (d 1)) = 0 := by
+  by_cases hd1 : d 1 = 0
+  · -- d 1 = 0, so d = single 0 (d 0). Since d ≠ single 0 j, d 0 ≠ j.
+    have hdeq : d = Finsupp.single (0 : Fin 2) (d 0) := by
+      ext i; fin_cases i
+      · simp
+      · simp [hd1]
+    have hdj : d 0 ≠ j := fun heq ↦ hd (by rw [hdeq, heq])
+    simp only [hd1, pow_zero, mul_one]
+    rw [show ((MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) R) ^ (d 0)) =
+          MvPowerSeries.monomial (R := R) (Finsupp.single 0 (d 0)) 1 from by
+        rw [MvPowerSeries.X_pow_eq]]
+    rw [MvPowerSeries.coeff_monomial]
+    rw [if_neg]
+    intro heq
+    apply hdj
+    have := DFunLike.congr_fun heq 0
+    simpa [Finsupp.single_apply] using this.symm
+  · -- d 1 ≠ 0, so 0 ^ (d 1) = 0.
+    rw [zero_pow hd1, mul_zero, map_zero]
+
+omit [IsLocalRing R] [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R]
+  [IsLinearTopology R R] [T2Space R] [CompleteSpace R] in
 /-- For any `j ≠ 1`, `coeff (j, 0) F.toSeries = 0`. This is the coefficient-level
 statement of `F.lunit` saying `F(X, 0) = X`. -/
 theorem FormalGroup.coeff_j0_of_ne_one (F : FormalGroup R) (j : ℕ) (hj : j ≠ 1) :
@@ -405,15 +454,8 @@ theorem FormalGroup.coeff_j0_of_ne_one (F : FormalGroup R) (j : ℕ) (hj : j ≠
   -- RHS: coeff (single 0 j) (X 0) = 1 if j=1, 0 else. Since j ≠ 1, = 0.
   have hrhs : MvPowerSeries.coeff
       (Finsupp.single (0 : Fin 2) j) (MvPowerSeries.X (0 : Fin 2) :
-        MvPowerSeries (Fin 2) R) = 0 := by
-    rw [MvPowerSeries.coeff_X]
-    split_ifs with h
-    · -- Finsupp.single 0 j = Finsupp.single 0 1 would give j = 1, contradiction.
-      exfalso
-      apply hj
-      have := DFunLike.congr_fun h 0
-      simpa [Finsupp.single_apply] using this
-    · rfl
+        MvPowerSeries (Fin 2) R) = 0 :=
+    coeff_single_X_self_of_ne_one 0 j hj
   rw [hrhs] at key
   -- LHS: coeff (single 0 j) (subst ![X 0, 0] F) via coeff_subst.
   rw [MvPowerSeries.coeff_subst ha,
@@ -431,31 +473,12 @@ theorem FormalGroup.coeff_j0_of_ne_one (F : FormalGroup R) (j : ℕ) (hj : j ≠
         rw [MvPowerSeries.X_pow_eq],
         MvPowerSeries.coeff_monomial_same, smul_eq_mul, mul_one] at key
     exact key
-  · -- Other terms vanish: for d ≠ single 0 j, need to show
-    -- coeff (single 0 j) (X 0^(d 0) * 0^(d 1)) = 0.
+  · -- Other terms vanish: for d ≠ single 0 j, the monomial coefficient is `0`
+    -- (see `coeff_single_X_pow_mul_zero_pow_of_ne`), so the smul term is `0`.
     intro d hd
     simp only [Finsupp.prod_fintype _ _ (fun i ↦ pow_zero _), Fin.prod_univ_two,
       Matrix.cons_val_zero, Matrix.cons_val_one]
-    by_cases hd1 : d 1 = 0
-    · -- d 1 = 0, so d = single 0 (d 0). Since d ≠ single 0 j, d 0 ≠ j.
-      have hdeq : d = Finsupp.single (0 : Fin 2) (d 0) := by
-        ext i; fin_cases i
-        · simp
-        · simp [hd1]
-      have hdj : d 0 ≠ j := fun heq ↦ hd (by rw [hdeq, heq])
-      simp only [hd1, pow_zero, mul_one]
-      rw [show ((MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) R) ^ (d 0)) =
-            MvPowerSeries.monomial (R := R) (Finsupp.single 0 (d 0)) 1 from by
-          rw [MvPowerSeries.X_pow_eq]]
-      rw [MvPowerSeries.coeff_monomial]
-      rw [if_neg]
-      · rw [smul_zero]
-      · intro heq
-        apply hdj
-        have := DFunLike.congr_fun heq 0
-        simpa [Finsupp.single_apply] using this.symm
-    · -- d 1 ≠ 0, so 0^(d 1) = 0.
-      rw [zero_pow hd1, mul_zero, map_zero, smul_zero]
+    rw [coeff_single_X_pow_mul_zero_pow_of_ne hd, smul_zero]
 
 /-- Right-unit: `evalAdd F x ⟨0, _⟩ = x.1`. -/
 theorem FormalGroup.evalAdd_zero_right
