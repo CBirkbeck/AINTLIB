@@ -54,11 +54,10 @@ that pins down the irreducible content as sharply as possible:
   `picDual` on the fixed two-term decomposition `rπ + [−s]`* — and discharges everything else
   non-circularly.
 
-* `htrace_dual_of_picDual_frobeniusFamily_additive` — the engine **instantiated** at the concrete
-  Route-C decomposition `α = genuineIsogSmulSub = (frobeniusIsog.zsmul r) + [−s]` (which holds by
-  `rfl`, `genuineIsogSmulSub_toAddMonoidHom`).  Its hypotheses are exactly the two shipped seeds
-  (`picDual(rπ) = rV` from `Isogeny.picDual_zsmul_eq_zsmul_of_isDual`, `picDual[−s] = [−s]` from
-  `picDual_mulByInt_eq_self`/`smul_sub`) **plus** the single named additivity residual `hadd`.
+* `picDual_eq_rV_sub_s_of_additive` — the same engine in **picDual-value form**, delivering the
+  III.6.2(c) dual value `α̂ = r·V − s·id` directly (the form Route-C Part (B) v3 ultimately wants)
+  from the two seeds (`picDual α₁ = r·V`, `picDual α₂ = −s·id`) **plus** the single named additivity
+  residual `hadd` (`hbeta`/`hsum` are not needed for the purely-value conclusion).
 
 ## The precise remaining lemma (the irreducible sub-decomposition)
 
