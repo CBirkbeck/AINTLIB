@@ -548,6 +548,39 @@ theorem FormalGroup.evalAdd_zero_right
 
 omit [IsLocalRing R] [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R]
   [IsLinearTopology R R] [T2Space R] [CompleteSpace R] in
+/-- The off-diagonal term in the `coeff_subst` expansion for `F(0, X)` vanishes:
+for any multi-index `d ≠ single 1 j`, the `single 1 j` coefficient of the
+substituted monomial `0 ^ (d 0) * (X 1) ^ (d 1)` is zero. This is the slot-`1`
+analogue of `coeff_single_X_pow_mul_zero_pow_of_ne`. There are two cases:
+if `d 0 ≠ 0` the factor `0 ^ (d 0)` is zero; if `d 0 = 0` then `d = single 1 (d 1)`
+with `d 1 ≠ j`, so the surviving monomial `single 1 (d 1)` differs from `single 1 j`. -/
+private lemma coeff_single_zero_pow_mul_X_pow_of_ne
+    {j : ℕ} {d : Fin 2 →₀ ℕ} (hd : d ≠ Finsupp.single (1 : Fin 2) j) :
+    MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) j)
+      ((0 : MvPowerSeries (Fin 2) R) ^ (d 0)
+        * (MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) R) ^ (d 1)) = 0 := by
+  by_cases hd0 : d 0 = 0
+  · -- d 0 = 0, so d = single 1 (d 1). Since d ≠ single 1 j, d 1 ≠ j.
+    have hdeq : d = Finsupp.single (1 : Fin 2) (d 1) := by
+      ext i; fin_cases i
+      · simp [hd0]
+      · simp
+    have hdj : d 1 ≠ j := fun heq ↦ hd (by rw [hdeq, heq])
+    simp only [hd0, pow_zero, one_mul]
+    rw [show ((MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) R) ^ (d 1)) =
+          MvPowerSeries.monomial (R := R) (Finsupp.single 1 (d 1)) 1 from by
+        rw [MvPowerSeries.X_pow_eq]]
+    rw [MvPowerSeries.coeff_monomial]
+    rw [if_neg]
+    intro heq
+    apply hdj
+    have := DFunLike.congr_fun heq 1
+    simpa [Finsupp.single_apply] using this.symm
+  · -- d 0 ≠ 0, so 0 ^ (d 0) = 0.
+    rw [zero_pow hd0, zero_mul, map_zero]
+
+omit [IsLocalRing R] [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R]
+  [IsLinearTopology R R] [T2Space R] [CompleteSpace R] in
 /-- For any `j ≠ 1`, `coeff (0, j) F.toSeries = 0`. Analogue of `coeff_j0_of_ne_one`
 via `F.runit`. -/
 theorem FormalGroup.coeff_0j_of_ne_one (F : FormalGroup R) (j : ℕ) (hj : j ≠ 1) :
@@ -557,16 +590,12 @@ theorem FormalGroup.coeff_0j_of_ne_one (F : FormalGroup R) (j : ℕ) (hj : j ≠
     apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro s; fin_cases s <;> simp
   have key := congr_arg
     (MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) j)) F.runit
+  -- RHS: coeff (single 1 j) (X 1) = 0 since j ≠ 1 (the `i = 1` instance of the
+  -- shared `coeff_single_X_self_of_ne_one`).
   have hrhs : MvPowerSeries.coeff
       (Finsupp.single (1 : Fin 2) j) (MvPowerSeries.X (1 : Fin 2) :
-        MvPowerSeries (Fin 2) R) = 0 := by
-    rw [MvPowerSeries.coeff_X]
-    split_ifs with h
-    · exfalso
-      apply hj
-      have := DFunLike.congr_fun h 1
-      simpa [Finsupp.single_apply] using this
-    · rfl
+        MvPowerSeries (Fin 2) R) = 0 :=
+    coeff_single_X_self_of_ne_one 1 j hj
   rw [hrhs] at key
   rw [MvPowerSeries.coeff_subst ha,
       finsum_eq_single _ (Finsupp.single (1 : Fin 2) j)] at key
@@ -582,27 +611,12 @@ theorem FormalGroup.coeff_0j_of_ne_one (F : FormalGroup R) (j : ℕ) (hj : j ≠
         rw [MvPowerSeries.X_pow_eq],
         MvPowerSeries.coeff_monomial_same, smul_eq_mul, mul_one] at key
     exact key
-  · intro d hd
+  · -- Other terms vanish: for d ≠ single 1 j, the monomial coefficient is `0`
+    -- (see `coeff_single_zero_pow_mul_X_pow_of_ne`), so the smul term is `0`.
+    intro d hd
     simp only [Finsupp.prod_fintype _ _ (fun i ↦ pow_zero _), Fin.prod_univ_two,
       Matrix.cons_val_zero, Matrix.cons_val_one]
-    by_cases hd0 : d 0 = 0
-    · have hdeq : d = Finsupp.single (1 : Fin 2) (d 1) := by
-        ext i; fin_cases i
-        · simp [hd0]
-        · simp
-      have hdj : d 1 ≠ j := fun heq ↦ hd (by rw [hdeq, heq])
-      simp only [hd0, pow_zero, one_mul]
-      rw [show ((MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) R) ^ (d 1)) =
-            MvPowerSeries.monomial (R := R) (Finsupp.single 1 (d 1)) 1 from by
-          rw [MvPowerSeries.X_pow_eq]]
-      rw [MvPowerSeries.coeff_monomial]
-      rw [if_neg]
-      · rw [smul_zero]
-      · intro heq
-        apply hdj
-        have := DFunLike.congr_fun heq 1
-        simpa [Finsupp.single_apply] using this.symm
-    · rw [zero_pow hd0, zero_mul, map_zero, smul_zero]
+    rw [coeff_single_zero_pow_mul_X_pow_of_ne hd, smul_zero]
 
 /-- Left-unit: `evalAdd F ⟨0, _⟩ y = y.1`. -/
 theorem FormalGroup.evalAdd_zero_left
