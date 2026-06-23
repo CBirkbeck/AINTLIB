@@ -23,7 +23,7 @@ This is Shimura §3.1, Proposition 3.3.
 
 * `deg_T_single` : `deg(T_single D a) = a * HeckeCoset_deg D`
 * `HeckeCoset_deg_pos` : `0 < HeckeCoset_deg D`
-* `deg_one` : `deg 1 = 1`
+* `deg_mul` : `deg(f * g) = deg f * deg g` (the degree map is multiplicative)
 
 ## Proof strategy
 
