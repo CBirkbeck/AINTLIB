@@ -6,7 +6,7 @@ Authors: Chris Birkbeck
 import HasseWeil.WeilPairing.PencilComapScaling
 import HasseWeil.WeilPairing.OneSubInftyResidues
 import HasseWeil.WeilPairing.WallAGenericRealization
-import HasseWeil.WeilPairing.SeparableWitnesses
+import HasseWeil.WeilPairing.IsogenyWitnessReductions
 import HasseWeil.EC.SeparableKernelTorsor
 
 /-!

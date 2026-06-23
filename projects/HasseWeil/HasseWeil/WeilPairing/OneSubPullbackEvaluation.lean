@@ -3,9 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.WeilPairing.PencilComapWitnesses
+import HasseWeil.WeilPairing.PencilComapPointValuation
 import HasseWeil.WeilPairing.OneSubComapConcrete
-import HasseWeil.WeilPairing.OneSubWitnesses
+import HasseWeil.WeilPairing.OneSubFrobeniusBaseChangeWitnesses
 import HasseWeil.EC.KernelCountGeneral
 import HasseWeil.EC.IsogenyAG.CovarianceDischarge
 import HasseWeil.EC.IsogenyAG.DualGaloisClosed

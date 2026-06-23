@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.Hasse.PoleDivisorFallback
-import HasseWeil.Hasse.OpenLemmas
+import HasseWeil.Hasse.HasseInfrastructure
 import HasseWeil.Hasse.OpenLemmaPrimitives
 
 /-!

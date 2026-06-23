@@ -6,7 +6,7 @@ Authors: Chris Birkbeck
 import Mathlib.RingTheory.Valuation.LocalSubring
 import HasseWeil.Curves.FrobeniusFixedPoint
 import HasseWeil.Curves.PicZero
-import HasseWeil.Hasse.L6ViaPoleDivisor
+import HasseWeil.Hasse.SepDegreeEqPointCount
 import HasseWeil.Hasse.PointFix
 import HasseWeil.Hasse.PoleDivisor2Tor
 import HasseWeil.Hasse.PoleDivisorFallback

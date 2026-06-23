@@ -1,5 +1,5 @@
-import HasseWeil.Hasse.Witnesses
-import HasseWeil.Hasse.HoleE
+import HasseWeil.Hasse.HasseWitnessBundle
+import HasseWeil.Hasse.HasseBoundQFNonneg
 import HasseWeil.Hasse.PointFix
 
 /-!

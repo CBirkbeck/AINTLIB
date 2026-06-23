@@ -5,7 +5,7 @@ Authors: Chris Birkbeck
 -/
 import HasseWeil.WeilPairing.MapTranslateGenericAdditive
 import HasseWeil.Curves.FrobeniusFixedPoint
-import HasseWeil.WeilPairing.OneSubWitnesses
+import HasseWeil.WeilPairing.OneSubFrobeniusBaseChangeWitnesses
 
 /-!
 # The Frobenius generic-point covariance leaf is PROVABLE over `K̄` (reviewer round-21 "Wall B")

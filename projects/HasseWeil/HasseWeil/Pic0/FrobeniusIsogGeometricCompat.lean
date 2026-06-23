@@ -1,4 +1,4 @@
-import HasseWeil.Pic0.RouteCGeometric
+import HasseWeil.Pic0.PicDualDegreeViaGeometricInjectivity
 
 /-!
 # Route C (geometric): discharging the `hcompat` residual from the construction

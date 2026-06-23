@@ -1,5 +1,5 @@
-import HasseWeil.Pic0.RouteCGeometric
-import HasseWeil.Pic0.RouteCAdditivity
+import HasseWeil.Pic0.PicDualDegreeViaGeometricInjectivity
+import HasseWeil.Pic0.PicDualAdditivityReduction
 
 /-!
 # Route C — the theorem-of-the-square reduction of dual additivity (Silverman III.6.2(c))

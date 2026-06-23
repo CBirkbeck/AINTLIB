@@ -6,7 +6,7 @@ Authors: Chris Birkbeck
 import HasseWeil.WeilPairing.WallAGenericRealization
 import HasseWeil.Hasse.IsogOneSubXyFamily
 import HasseWeil.WeilPairing.FrobeniusGenericCovariance
-import HasseWeil.WeilPairing.SeparableWitnesses
+import HasseWeil.WeilPairing.IsogenyWitnessReductions
 
 /-!
 # Wall A closed for `1 − π`: the base-changed pullback is a genuine translatable action over `K̄`

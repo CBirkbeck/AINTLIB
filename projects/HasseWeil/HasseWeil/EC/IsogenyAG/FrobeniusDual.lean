@@ -6,7 +6,7 @@ Authors: Chris Birkbeck
 import HasseWeil.EC.IsogenyAG.Dual
 import HasseWeil.EC.IsogenyAG.MulByIntBasepoint
 import HasseWeil.Verschiebung.PurelyInsep
-import HasseWeil.Verschiebung.QthRootRouteB
+import HasseWeil.Verschiebung.UniversalQthRootWitness
 
 /-!
 # The Frobenius dual — the Verschiebung as an `EC.Isogeny` (Silverman III.6.1 Case 2)

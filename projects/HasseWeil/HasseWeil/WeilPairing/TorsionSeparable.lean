@@ -1,6 +1,6 @@
 import HasseWeil.Hasse.Separability
 import HasseWeil.Hasse.TorsionCard
-import HasseWeil.RouteBInduction
+import HasseWeil.OmegaCoeffMulByIntFiniteField
 import HasseWeil.AdditionPullback.Differential
 import HasseWeil.Curves.Differentials
 

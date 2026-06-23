@@ -6,7 +6,7 @@ Authors: Chris Birkbeck
 import HasseWeil.EC.SeparableKernelTorsor
 import HasseWeil.WallA.VSideDual
 import HasseWeil.WeilPairing.HcommLemma
-import HasseWeil.WeilPairing.OneSubWitnesses
+import HasseWeil.WeilPairing.OneSubFrobeniusBaseChangeWitnesses
 import HasseWeil.WeilPairing.PencilDualDivisor
 
 /-!

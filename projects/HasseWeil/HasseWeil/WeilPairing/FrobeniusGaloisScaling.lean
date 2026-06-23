@@ -7,7 +7,7 @@ import HasseWeil.WeilPairing.Pairing
 import HasseWeil.WeilPairing.FrobMatrixData
 import HasseWeil.WeilPairing.FrobeniusFunctionFieldEquiv
 import HasseWeil.WeilPairing.FrobeniusDivisorGalois
-import HasseWeil.WeilPairing.OneSubWitnesses
+import HasseWeil.WeilPairing.OneSubFrobeniusBaseChangeWitnesses
 import HasseWeil.WeilPairing.FrobeniusConjugation
 
 /-!

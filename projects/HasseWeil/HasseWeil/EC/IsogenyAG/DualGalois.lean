@@ -7,7 +7,7 @@ import HasseWeil.EC.IsogenyAG.Dual
 import HasseWeil.EC.IsogenyAG.Bridge
 import HasseWeil.EC.SeparableKernelTorsor
 import HasseWeil.Hasse.PointFix
-import HasseWeil.WeilPairing.SeparableWitnesses
+import HasseWeil.WeilPairing.IsogenyWitnessReductions
 import HasseWeil.WeilPairing.PencilCovariance
 
 /-!

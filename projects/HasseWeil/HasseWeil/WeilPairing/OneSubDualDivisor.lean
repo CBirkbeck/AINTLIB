@@ -5,7 +5,7 @@ Authors: Chris Birkbeck
 -/
 import HasseWeil.WeilPairing.OneSubScaling
 import HasseWeil.WeilPairing.PicDualDivisorClassLemma
-import HasseWeil.WeilPairing.OneSubWitnesses
+import HasseWeil.WeilPairing.OneSubFrobeniusBaseChangeWitnesses
 import HasseWeil.Curves.MillerAllChar
 
 /-!

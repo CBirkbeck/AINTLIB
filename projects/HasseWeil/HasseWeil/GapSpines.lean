@@ -9,12 +9,12 @@ import HasseWeil.Curves.FintypeProjectiveSmoothPoint
 import HasseWeil.DualIsogeny
 import HasseWeil.EC.IsogenyKernel
 import HasseWeil.GapQfKernel
-import HasseWeil.Hasse.L6ViaPoleDivisor
+import HasseWeil.Hasse.SepDegreeEqPointCount
 import HasseWeil.Hasse.L6Witnesses
 import HasseWeil.Hasse.PointFix
 import HasseWeil.Hasse.PoleDivisor2Tor
-import HasseWeil.Verschiebung.Cascade
-import HasseWeil.Verschiebung.QthRootRouteB
+import HasseWeil.Verschiebung.VerschiebungIsDualOfFrobenius
+import HasseWeil.Verschiebung.UniversalQthRootWitness
 
 /-!
 # Middle spines of the Hasse skeleton (GAP-QF dual chain + GAP-L6 point count)
