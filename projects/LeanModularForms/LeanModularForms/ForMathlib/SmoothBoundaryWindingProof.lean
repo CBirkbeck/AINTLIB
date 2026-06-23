@@ -22,23 +22,17 @@ non-interior point on the FD boundary, the generalized winding number is `-1/2`.
 `mkFDWindingDataFull` takes a `FDWindingData` and the boundary condition as a
 hypothesis, producing `FDWindingDataFull`.
 
-### Pathway 2: From SmoothBoundaryWindingData
-`mkFDWindingDataFull_of_smoothData` constructs `FDWindingDataFull` from
-`SmoothBoundaryWindingData` at each smooth boundary point.
-
-### Pathway 3: Geometric classification
+### Pathway 2: Geometric classification
 `smooth_boundary_classification` shows smooth boundary points fall into
 two cases (vertical edge or non-elliptic arc), enabling case-by-case
 construction of `SmoothBoundaryWindingData`.
 
 ## Main results
 
+* `BoundaryWindingHyp` — the boundary winding condition (winding number `-1/2`
+  at every smooth FD-boundary point)
 * `mkFDWindingDataFull` — assembler from `FDWindingData` + boundary hypothesis
-* `boundaryWindingHyp_of_smoothData` — from `SmoothBoundaryWindingData` oracle
-* `mkFDWindingDataFull_of_smoothData` — full assembler via smooth data
 * `smooth_boundary_classification` — geometric dichotomy for boundary points
-* `boundary_point_on_vert_edge`, `boundary_point_on_arc_range` — geometric
-  descriptions of the two cases
 
 ## References
 
