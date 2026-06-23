@@ -27,6 +27,63 @@ namespace HasseWeil.Curves.SmoothPlaneCurve
 variable {F : Type*} [Field F] (C : SmoothPlaneCurve F) [C.toAffine.IsElliptic]
 
 omit [C.toAffine.IsElliptic] in
+/-- The order at infinity of `algebraMap p` for a nonzero polynomial `p` is
+`-2 · natDeg p`, an even integer, hence never `-1`.
+
+This is the `q = 0` branch of the parity obstruction: `u = p • 1`. -/
+private theorem ordAtInfty_algebraMap_polynomial_ne_neg_one
+    {p : Polynomial F} (hp : p ≠ 0) :
+    C.ordAtInfty (algebraMap (Polynomial F) C.FunctionField p) ≠
+      ((-1 : ℤ) : WithTop ℤ) := by
+  rw [C.ordAtInfty_algebraMap_polynomial_of_ne_zero hp]
+  intro h_eq
+  have h_int : (-2 * (p.natDegree : ℤ) : ℤ) = -1 := WithTop.coe_injective h_eq
+  omega
+
+omit [C.toAffine.IsElliptic] in
+/-- The order at infinity of `algebraMap q · coordY` for a nonzero polynomial `q`
+is `-2 · natDeg q - 3`, an odd integer `≤ -3`, hence never `-1`.
+
+This is the `p = 0` branch of the parity obstruction: `u = q • Y`. The order is
+computed additively as `ord(algebraMap q) + ord(coordY) = -2·natDeg q + (-3)`. -/
+private theorem ordAtInfty_algebraMap_mul_coordY_ne_neg_one
+    {q : Polynomial F} (hq : q ≠ 0) :
+    C.ordAtInfty
+        (algebraMap (Polynomial F) C.FunctionField q * C.coordYInFunctionField) ≠
+      ((-1 : ℤ) : WithTop ℤ) := by
+  have hq_alg_ne : algebraMap (Polynomial F) C.FunctionField q ≠ 0 := by
+    rw [Ne, ← map_zero (algebraMap (Polynomial F) C.FunctionField)]
+    exact fun h ↦ hq
+      (FaithfulSMul.algebraMap_injective (Polynomial F) C.FunctionField h)
+  rw [C.ordAtInfty_mul hq_alg_ne C.coordYInFunctionField_ne_zero,
+    ordAtInfty_coordYInFunctionField,
+    C.ordAtInfty_algebraMap_polynomial_of_ne_zero hq]
+  -- LHS = ((-2·natDeg q : ℤ)) + ((-3 : ℤ)) = ((-2·natDeg q - 3 : ℤ)). Never -1.
+  intro h_eq
+  rw [← WithTop.coe_add, WithTop.coe_inj] at h_eq
+  omega
+
+omit [C.toAffine.IsElliptic] in
+/-- For `p, q` both nonzero, the order at infinity of the image of `p • 1 + q • Y`
+is `-max(2·natDeg p, 2·natDeg q + 3) ≤ -3`, hence never `-1`.
+
+This is the both-nonzero branch of the parity obstruction. -/
+private theorem ordAtInfty_smul_basis_both_ne_zero_ne_neg_one
+    {p q : Polynomial F} (hp : p ≠ 0) (hq : q ≠ 0) :
+    C.ordAtInfty (algebraMap C.CoordinateRing C.FunctionField
+        (p • (1 : C.CoordinateRing) +
+         q • WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
+           (Polynomial.X : Polynomial (Polynomial F)))) ≠
+      ((-1 : ℤ) : WithTop ℤ) := by
+  rw [C.ordAtInfty_smul_basis_coordinateRing_of_both_ne_zero hp hq]
+  intro h_eq
+  have h_int : (-(max (2 * p.natDegree) (2 * q.natDegree + 3) : ℕ) : ℤ) =
+      (-1 : ℤ) := WithTop.coe_injective h_eq
+  have h3 : 3 ≤ max (2 * p.natDegree) (2 * q.natDegree + 3) := by
+    apply le_max_of_le_right; omega
+  omega
+
+omit [C.toAffine.IsElliptic] in
 /-- **Parity obstruction**: for any nonzero coordinate-ring element
 `u ∈ F[E]`, the order at infinity of its image in `F(E)` is never
 exactly `-1`. The decomposition `u = p · 1 + q · y` gives
@@ -42,52 +99,24 @@ theorem coordRingImage_ordAtInfty_ne_neg_one
       ((-1 : ℤ) : WithTop ℤ) := by
   obtain ⟨p, q, hpq⟩ :=
     WeierstrassCurve.Affine.CoordinateRing.exists_smul_basis_eq u
-  -- u = p • 1 + q • Y. Reduce to cases on (p, q).
+  -- u = p • 1 + q • Y. Reduce to cases on (p, q); each branch is a parity fact.
   by_cases hp : p = 0
   · by_cases hq : q = 0
     · -- Both zero ⟹ u = 0, contradiction.
       exfalso; apply hu
       rw [← hpq, hp, hq, zero_smul, zero_smul, zero_add]
-    · -- p = 0, q ≠ 0: u = q • Y. ord = -2·natDeg q - 3 (odd ≥ 3).
-      rw [← hpq, hp]
-      -- Use algebraMap_smul_basis_eq to convert:
-      -- algMap (0 • 1 + q • Y) = algMap 0 + algMap q · coordY = algMap q · coordY
-      rw [C.algebraMap_smul_basis_eq 0 q]
-      simp only [map_zero, zero_add]
-      -- Goal: ord(algMap q · coordY) ≠ -1
-      have hq_alg_ne :
-          (algebraMap (Polynomial F) C.FunctionField q) ≠ 0 := by
-        rw [Ne, ← map_zero (algebraMap (Polynomial F) C.FunctionField)]
-        exact fun h ↦ hq
-          (FaithfulSMul.algebraMap_injective (Polynomial F) C.FunctionField h)
-      rw [C.ordAtInfty_mul hq_alg_ne C.coordYInFunctionField_ne_zero,
-        ordAtInfty_coordYInFunctionField,
-        C.ordAtInfty_algebraMap_polynomial_of_ne_zero hq]
-      -- LHS = ((-2·natDeg q : ℤ)) + ((-3 : ℤ)) : WithTop ℤ
-      -- = ((-2·natDeg q - 3 : ℤ) : WithTop ℤ). Odd ≥ 3 in absolute value, never -1.
-      intro h_eq
-      rw [← WithTop.coe_add, WithTop.coe_inj] at h_eq
-      omega
+    · -- p = 0, q ≠ 0: u = q • Y. Odd order ≤ -3.
+      rw [← hpq, hp, C.algebraMap_smul_basis_eq 0 q]
+      simpa only [map_zero, zero_add] using
+        C.ordAtInfty_algebraMap_mul_coordY_ne_neg_one hq
   · by_cases hq : q = 0
-    · -- p ≠ 0, q = 0: u = p • 1. ord = -2·natDeg p (even).
-      rw [← hpq, hq]
-      rw [C.algebraMap_smul_basis_eq p 0]
-      simp only [map_zero, zero_mul, add_zero]
-      rw [C.ordAtInfty_algebraMap_polynomial_of_ne_zero hp]
-      intro h_eq
-      have h_int : (-2 * (p.natDegree : ℤ) : ℤ) = -1 :=
-        WithTop.coe_injective h_eq
-      omega
-    · -- Both nonzero: use the basis lemma.
-      rw [← hpq,
-        C.ordAtInfty_smul_basis_coordinateRing_of_both_ne_zero hp hq]
-      intro h_eq
-      have h_int : (-(max (2 * p.natDegree) (2 * q.natDegree + 3) : ℕ) : ℤ) =
-          (-1 : ℤ) :=
-        WithTop.coe_injective h_eq
-      have h3 : 3 ≤ max (2 * p.natDegree) (2 * q.natDegree + 3) := by
-        apply le_max_of_le_right; omega
-      omega
+    · -- p ≠ 0, q = 0: u = p • 1. Even order.
+      rw [← hpq, hq, C.algebraMap_smul_basis_eq p 0]
+      simpa only [map_zero, zero_mul, add_zero] using
+        C.ordAtInfty_algebraMap_polynomial_ne_neg_one hp
+    · -- Both nonzero: order is -max(2·natDeg p, 2·natDeg q + 3) ≤ -3.
+      rw [← hpq]
+      exact C.ordAtInfty_smul_basis_both_ne_zero_ne_neg_one hp hq
 
 omit [C.toAffine.IsElliptic] in
 /-- Function-field version: for any `f ∈ K(E)*` lying in the image of
