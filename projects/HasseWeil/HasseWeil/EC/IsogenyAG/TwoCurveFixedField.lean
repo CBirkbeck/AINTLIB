@@ -55,6 +55,7 @@ namespace Isogeny
 
 /-! ### The two-curve generator extensionality reducer -/
 
+omit [DecidableEq F] [W₂.IsElliptic] in
 /-- **Two-curve `AlgHom` extensionality on the generic coordinates.** An `F`-algebra hom out of
 `K(E₂)` is determined by its values on `x_gen W₂` and `y_gen W₂`.  (The two-curve analogue of
 `algHom_ext_x_y_gen`; same proof, with distinct source/target.) -/
@@ -85,6 +86,18 @@ theorem translate_pullback_invariance_of_xy_twoCurve
     (algHom_ext_x_y_gen_twoCurve
       (ψ₁ := (translateAlgEquivOfPoint W₁ k).toAlgHom.comp β.pullback)
       (ψ₂ := β.pullback) h_x h_y) z
+
+/-- **Full covariance from the xy-covariance family, two-curve.** The per-generator covariance
+`h_xy_family` extends, via `translate_pullback_invariance_of_xy_twoCurve`, to covariance of every
+kernel translation with `β.pullback` on all of `K(E₂)`. -/
+private theorem hcov_of_xy_family (β : Isogeny W₁ W₂)
+    (h_xy_family : ∀ k : β.kernel,
+      (translateAlgEquivOfPoint W₁ k.val (β.pullback (x_gen W₂)) = β.pullback (x_gen W₂)) ∧
+      (translateAlgEquivOfPoint W₁ k.val (β.pullback (y_gen W₂)) = β.pullback (y_gen W₂)))
+    (k : β.kernel) (z : W₂.FunctionField) :
+    translateAlgEquivOfPoint W₁ k.val (β.pullback z) = β.pullback z :=
+  translate_pullback_invariance_of_xy_twoCurve β k.val
+    (h_xy_family k).1 (h_xy_family k).2 z
 
 /-! ### Two-curve finite-dimensionality of the pullback extension
 
@@ -193,7 +206,7 @@ theorem kernelMulSemiringAction_twoCurve_smul (β : Isogeny W₁ W₂)
 kernel points give distinct translations (`translateAlgEquivOfPoint_injective`, source-only). -/
 scoped instance faithfulSMul_kernel_twoCurve (β : Isogeny W₁ W₂) :
     FaithfulSMul (Multiplicative β.kernel) W₁.FunctionField where
-  eq_of_smul_eq_smul {g₁ g₂} h :=
+  eq_of_smul_eq_smul {_ _} h :=
     Multiplicative.toAdd.injective <| Subtype.ext <|
       translateAlgEquivOfPoint_injective W₁ (AlgEquiv.ext fun f => h f)
 
@@ -235,10 +248,7 @@ theorem pullback_fieldRange_le_fixedField_twoCurve (β : Isogeny W₁ W₂)
         IntermediateField F W₁.FunctionField) := by
   rintro z ⟨w, rfl⟩
   intro g
-  change translateAlgEquivOfPoint W₁ (Multiplicative.toAdd g).val (β.pullback w) = β.pullback w
-  exact translate_pullback_invariance_of_xy_twoCurve β (Multiplicative.toAdd g).val
-    (h_xy_family (Multiplicative.toAdd g)).1
-    (h_xy_family (Multiplicative.toAdd g)).2 w
+  exact hcov_of_xy_family β h_xy_family (Multiplicative.toAdd g) w
 
 /-- **`[K(E₁) : Im(β*)] = deg β`, two-curve** (the two-curve
 `finrank_pullback_fieldRange_eq_degree`): the source function field has the same dimension over the
@@ -290,11 +300,7 @@ theorem pullback_fieldRange_eq_fixedField_twoCurve (β : Isogeny W₁ W₂)
     β.pullback.fieldRange =
       (FixedPoints.intermediateField (Multiplicative β.kernel) :
         IntermediateField F W₁.FunctionField) := by
-  have hcov : ∀ k : β.kernel, ∀ z : W₂.FunctionField,
-      translateAlgEquivOfPoint W₁ k.val (β.pullback z) = β.pullback z :=
-    fun k z => translate_pullback_invariance_of_xy_twoCurve β k.val
-      (h_xy_family k).1 (h_xy_family k).2 z
-  haveI : Finite β.kernel := finite_kernel_of_hcov_twoCurve β hcov
+  haveI : Finite β.kernel := finite_kernel_of_hcov_twoCurve β (hcov_of_xy_family β h_xy_family)
   haveI : Fintype (Multiplicative β.kernel) := Fintype.ofFinite _
   haveI := finiteDimensional_pullback_fieldRange_twoCurve β
   refine IntermediateField.eq_of_le_of_finrank_eq'
@@ -313,12 +319,6 @@ theorem fixedField_hfix_twoCurve (β : Isogeny W₁ W₂)
     ∀ z : W₁.FunctionField,
       z ∈ β.pullback.range ↔
         ∀ σ ∈ (Set.range (fun k : β.kernel => translateAlgEquivOfPoint W₁ k.val)), σ z = z := by
-  have hcov : ∀ k : β.kernel, ∀ z : W₂.FunctionField,
-      translateAlgEquivOfPoint W₁ k.val (β.pullback z) = β.pullback z :=
-    fun k z => translate_pullback_invariance_of_xy_twoCurve β k.val
-      (h_xy_family k).1 (h_xy_family k).2 z
-  haveI : Finite β.kernel := finite_kernel_of_hcov_twoCurve β hcov
-  haveI : Fintype (Multiplicative β.kernel) := Fintype.ofFinite _
   have h_eq := pullback_fieldRange_eq_fixedField_twoCurve β h_xy_family h_card
   intro z
   constructor
