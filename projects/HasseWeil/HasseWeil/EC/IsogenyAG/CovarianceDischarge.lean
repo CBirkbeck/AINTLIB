@@ -311,6 +311,78 @@ private theorem pullback_mk_evaluatesTo {β : Isogeny W.toAffine W.toAffine}
     exact ih.mul hyAtom
 
 variable {W} in
+/-- Coordinate-ring elements transport along a witnessed pullback: if the two pulled-back
+generators evaluate at `P` to the coordinates of `Q`, then for every coordinate-ring element
+`z` the pullback of its function-field image evaluates at `P` to `z`'s value at `Q`
+(`(W_smooth W).evalAt Q z`).  Reduces `z = mk p` to the polynomial core
+`pullback_mk_evaluatesTo` via `evalAt_mk`. -/
+private theorem pullback_algebraMap_evaluatesTo_evalAt
+    {β : Isogeny W.toAffine W.toAffine} {P Q : (W_smooth W).SmoothPoint}
+    (hx : EvaluatesTo W P (β.pullback (x_gen W)) Q.x)
+    (hy : EvaluatesTo W P (β.pullback (y_gen W)) Q.y) (z : R) :
+    EvaluatesTo W P (β.pullback (algebraMap R KE z)) ((W_smooth W).evalAt Q z) := by
+  obtain ⟨p, rfl⟩ := AdjoinRoot.mk_surjective z
+  have hval : (W_smooth W).evalAt Q (AdjoinRoot.mk W.toAffine.polynomial p) =
+      p.evalEval Q.x Q.y := (W_smooth W).evalAt_mk Q p
+  rw [hval]
+  exact pullback_mk_evaluatesTo hx hy p
+
+variable {W} in
+/-- A function vanishing-to-value at `Q` (its `g - c` has `pointValuation < 1`) is a good
+fraction over the local ring at `Q`: there are coordinate-ring elements `a`, `b` with
+`b ∉ maximalIdealAt Q`, `(g - c) * b = a`, and so `b(Q) ≠ 0` while `a(Q) = 0`.  Packages
+`exists_mul_algebraMap_eq_of_pointValuation_le_one` with the resulting `evalAt` facts:
+multiplying by the unit `b` preserves the `< 1` valuation, forcing `a ∈ maximalIdealAt Q`. -/
+private theorem exists_good_fraction_of_evaluatesTo {Q : (W_smooth W).SmoothPoint} {g : KE}
+    {c : F} (hg : EvaluatesTo W Q g c) :
+    ∃ a b : R, (g - algebraMap F KE c) * algebraMap R KE b = algebraMap R KE a ∧
+      (W_smooth W).evalAt Q b ≠ 0 ∧ (W_smooth W).evalAt Q a = 0 := by
+  obtain ⟨a, b, hbm', hfrac'⟩ :=
+    exists_mul_algebraMap_eq_of_pointValuation_le_one (C := W_smooth W)
+      (h := g - algebraMap F KE c) (le_of_lt hg)
+  have hsm : b ∉ (W_smooth W).maximalIdealAt Q := hbm'
+  have hfrac : (g - algebraMap F KE c) * algebraMap R KE b = algebraMap R KE a := hfrac'
+  refine ⟨a, b, hfrac, fun hc ↦ hsm ?_, ?_⟩
+  · exact (W_smooth W).ker_evalAt Q ▸ RingHom.mem_ker.mpr hc
+  · -- the numerator vanishes at `Q`: its valuation is `< 1`
+    have hav : (W_smooth W).pointValuation Q (algebraMap R KE a) < 1 := by
+      calc (W_smooth W).pointValuation Q (algebraMap R KE a)
+          = (W_smooth W).pointValuation Q ((g - algebraMap F KE c) *
+              algebraMap R KE b) := by rw [hfrac]
+        _ = (W_smooth W).pointValuation Q (g - algebraMap F KE c) *
+              (W_smooth W).pointValuation Q (algebraMap R KE b) :=
+            Valuation.map_mul _ _ _
+        _ ≤ (W_smooth W).pointValuation Q (g - algebraMap F KE c) * 1 :=
+            mul_le_mul' le_rfl ((W_smooth W).pointValuation_algebraMap_le_one b Q)
+        _ = (W_smooth W).pointValuation Q (g - algebraMap F KE c) := mul_one _
+        _ < 1 := hg
+    exact RingHom.mem_ker.mp ((W_smooth W).ker_evalAt Q ▸
+      (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
+        (C := W_smooth W) a Q).mp hav)
+
+variable {W} in
+/-- The shifted pullback vanishes: under the two generator evaluations at `P → Q`, the
+pullback of `g - c` (for `g` evaluating to `c` at `Q`) evaluates to `0` at `P`.  Writes
+`g - c = a / b` from `exists_good_fraction_of_evaluatesTo`, transports `a` and `b` through
+`pullback_algebraMap_evaluatesTo_evalAt`, and divides (`a(Q) = 0`, `b(Q) ≠ 0`). -/
+private theorem pullback_sub_const_evaluatesTo_zero
+    {β : Isogeny W.toAffine W.toAffine} {P Q : (W_smooth W).SmoothPoint}
+    (hx : EvaluatesTo W P (β.pullback (x_gen W)) Q.x)
+    (hy : EvaluatesTo W P (β.pullback (y_gen W)) Q.y)
+    {g : KE} {c : F} (hg : EvaluatesTo W Q g c) :
+    EvaluatesTo W P (β.pullback (g - algebraMap F KE c)) 0 := by
+  obtain ⟨a, b, hfrac, hsval, haval⟩ := exists_good_fraction_of_evaluatesTo hg
+  have hsne0 : b ≠ 0 := fun hc ↦ hsval (hc ▸ map_zero _)
+  have hsKE : algebraMap R KE b ≠ 0 := fun hc ↦
+    hsne0 (IsFractionRing.injective R KE (hc.trans (map_zero _).symm))
+  have hdivKE : g - algebraMap F KE c = algebraMap R KE a / algebraMap R KE b :=
+    (eq_div_iff hsKE).mpr hfrac
+  rw [hdivKE, map_div₀]
+  have h := (pullback_algebraMap_evaluatesTo_evalAt hx hy a).div
+    (pullback_algebraMap_evaluatesTo_evalAt hx hy b) hsval
+  rwa [haval, zero_div] at h
+
+variable {W} in
 /-- **Evaluation transport along a witnessed pullback**: if the stored point map sends `P`
 (good for the witness) to the smooth point `Q`, and `g` evaluates to `c` at `Q`, then
 `β^* g` evaluates to `c` at `P`.
@@ -335,52 +407,9 @@ theorem PullbackEvaluation.pullback_evaluatesTo {β : Isogeny W.toAffine W.toAff
   obtain ⟨hQx, hQy⟩ := (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mp hQ'
   have hxQ : EvaluatesTo W P (β.pullback (x_gen W)) Q.x := by rw [hQx]; exact hx
   have hyQ : EvaluatesTo W P (β.pullback (y_gen W)) Q.y := by rw [hQy]; exact hy
-  -- coordinate-ring elements transport
-  have key : ∀ z : R, EvaluatesTo W P (β.pullback (algebraMap R KE z))
-      ((W_smooth W).evalAt Q z) := by
-    intro z
-    obtain ⟨p, rfl⟩ := AdjoinRoot.mk_surjective z
-    have hval : (W_smooth W).evalAt Q (AdjoinRoot.mk W.toAffine.polynomial p) =
-        p.evalEval Q.x Q.y := (W_smooth W).evalAt_mk Q p
-    rw [hval]
-    exact pullback_mk_evaluatesTo hxQ hyQ p
-  -- write `g − c` as a good fraction over the local ring at `Q`
-  obtain ⟨a, b, hbm', hfrac'⟩ :=
-    exists_mul_algebraMap_eq_of_pointValuation_le_one (C := W_smooth W)
-      (h := g - algebraMap F KE c) (le_of_lt hg)
-  have hsm : b ∉ (W_smooth W).maximalIdealAt Q := hbm'
-  have hfrac : (g - algebraMap F KE c) * algebraMap R KE b = algebraMap R KE a := hfrac'
-  have hsne0 : b ≠ 0 := fun hc ↦
-    hsm (hc ▸ Ideal.zero_mem ((W_smooth W).maximalIdealAt Q))
-  have hsKE : algebraMap R KE b ≠ 0 := fun hc ↦
-    hsne0 (IsFractionRing.injective R KE (hc.trans (map_zero _).symm))
-  have hsval : (W_smooth W).evalAt Q b ≠ 0 := fun hc ↦
-    hsm ((W_smooth W).ker_evalAt Q ▸ RingHom.mem_ker.mpr hc)
-  -- the numerator vanishes at `Q`
-  have hav : (W_smooth W).pointValuation Q (algebraMap R KE a) < 1 := by
-    calc (W_smooth W).pointValuation Q (algebraMap R KE a)
-        = (W_smooth W).pointValuation Q ((g - algebraMap F KE c) *
-            algebraMap R KE b) := by rw [hfrac]
-      _ = (W_smooth W).pointValuation Q (g - algebraMap F KE c) *
-            (W_smooth W).pointValuation Q (algebraMap R KE b) :=
-          Valuation.map_mul _ _ _
-      _ ≤ (W_smooth W).pointValuation Q (g - algebraMap F KE c) * 1 :=
-          mul_le_mul' le_rfl ((W_smooth W).pointValuation_algebraMap_le_one b Q)
-      _ = (W_smooth W).pointValuation Q (g - algebraMap F KE c) := mul_one _
-      _ < 1 := hg
-  have ham : a ∈ (W_smooth W).maximalIdealAt Q :=
-    (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
-      (C := W_smooth W) a Q).mp hav
-  have haval : (W_smooth W).evalAt Q a = 0 :=
-    RingHom.mem_ker.mp ((W_smooth W).ker_evalAt Q ▸ ham)
-  -- assemble: `β^*(g − c)` evaluates to `0`
-  have hdivKE : g - algebraMap F KE c = algebraMap R KE a / algebraMap R KE b :=
-    (eq_div_iff hsKE).mpr hfrac
-  have hsub : EvaluatesTo W P (β.pullback (g - algebraMap F KE c)) 0 := by
-    rw [hdivKE, map_div₀]
-    have h := (key a).div (key b) hsval
-    rwa [haval, zero_div] at h
-  -- and `β^* g = β^*(g − c) + c`
+  -- `β^*(g − c)` evaluates to `0`, and `β^* g = β^*(g − c) + c`
+  have hsub : EvaluatesTo W P (β.pullback (g - algebraMap F KE c)) 0 :=
+    pullback_sub_const_evaluatesTo_zero hxQ hyQ hg
   have hgsplit : β.pullback g =
       β.pullback (g - algebraMap F KE c) + algebraMap F KE c := by
     rw [map_sub, β.pullback.commutes c, sub_add_cancel]
