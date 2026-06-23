@@ -203,6 +203,48 @@ private theorem ΨSq_ff_eq_aeval (ℓ : ℤ) :
   rw [← algebraMap_polynomial_eq_aeval_x_gen, ΨSq_ff,
     IsScalarTower.algebraMap_apply (Polynomial F) W.toAffine.CoordinateRing KE]
 
+/-- `ΨSq_ff ℓ` is a unit at `P`: its residue is the nonzero constant `ΨSq_ℓ(P.x)`,
+so `pointValuation P (ΨSq_ff ℓ) = 1`. -/
+private theorem pointValuation_ΨSq_ff_eq_one (ℓ : ℤ)
+    (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPoint)
+    (hΨSq_ne : (W.ΨSq ℓ).eval P.x ≠ 0) :
+    (⟨W⟩ : SmoothPlaneCurve F).pointValuation P (ΨSq_ff W ℓ) = 1 := by
+  have hbridge : (⟨W⟩ : SmoothPlaneCurve F).pointValuation P
+      (ΨSq_ff W ℓ - algebraMap F KE ((W.ΨSq ℓ).eval P.x)) < 1 := by
+    rw [ΨSq_ff_eq_aeval]
+    exact pointValuation_aeval_sub_eval_lt_one P (pointValuation_x_gen_le_one W P)
+      (by rw [x_gen_sub_const_eq_algebraMap_XClass W P.x]
+          exact (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
+            (C := (⟨W⟩ : SmoothPlaneCurve F)) _ P).mpr (XClass_mem_maximalIdealAt W P P.x rfl))
+      (W.ΨSq ℓ)
+  -- residue of `ΨSq_ff` is the nonzero constant `ΨSq_ℓ(P.x)`, so `pointValuation = 1`.
+  have hconst : (⟨W⟩ : SmoothPlaneCurve F).pointValuation P
+      (algebraMap F KE ((W.ΨSq ℓ).eval P.x)) = 1 :=
+    pointValuation_algebraMap_F_eq_one_of_ne_zero W P hΨSq_ne
+  have hsplit : ΨSq_ff W ℓ = (ΨSq_ff W ℓ - algebraMap F KE ((W.ΨSq ℓ).eval P.x)) +
+      algebraMap F KE ((W.ΨSq ℓ).eval P.x) := by ring
+  rw [hsplit, ((⟨W⟩ : SmoothPlaneCurve F).pointValuation P).map_add_eq_of_lt_right
+    (by rw [hconst]; exact hbridge), hconst]
+
+/-- The numerator `Φ_ff ℓ − x·ΨSq_ff ℓ` is in `m_P` (`< 1`): it is the `aeval` of
+`Φ_ℓ − C x·ΨSq_ℓ`, whose `P.x`-evaluation vanishes (`hx_eq`). -/
+private theorem pointValuation_Φ_ff_sub_mul_ΨSq_ff_lt_one (ℓ : ℤ)
+    (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPoint) {x : F}
+    (hx_eq : (W.Φ ℓ).eval P.x - x * (W.ΨSq ℓ).eval P.x = 0) :
+    (⟨W⟩ : SmoothPlaneCurve F).pointValuation P
+        (Φ_ff W ℓ - algebraMap F KE x * ΨSq_ff W ℓ) < 1 := by
+  rw [Φ_ff_eq_aeval, ΨSq_ff_eq_aeval,
+    show Polynomial.aeval (x_gen W) (W.Φ ℓ) -
+          algebraMap F KE x * Polynomial.aeval (x_gen W) (W.ΨSq ℓ) =
+        Polynomial.aeval (x_gen W) (W.Φ ℓ - Polynomial.C x * W.ΨSq ℓ) -
+          algebraMap F KE ((W.Φ ℓ - Polynomial.C x * W.ΨSq ℓ).eval P.x) from by
+      rw [map_sub, map_mul, Polynomial.aeval_C, Polynomial.eval_sub, Polynomial.eval_mul,
+        Polynomial.eval_C, hx_eq, map_zero]; ring]
+  exact pointValuation_aeval_sub_eval_lt_one P (pointValuation_x_gen_le_one W P)
+    (by rw [x_gen_sub_const_eq_algebraMap_XClass W P.x]
+        exact (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
+          (C := (⟨W⟩ : SmoothPlaneCurve F)) _ P).mpr (XClass_mem_maximalIdealAt W P P.x rfl)) _
+
 /-- **The `x`-coordinate value bridge**: for affine image `[ℓ]·P = some x y h_ns`,
 `mulByInt_x ℓ ≡ x` modulo `m_P`, i.e. `pointValuation P (mulByInt_x ℓ − x) < 1`. -/
 private theorem pointValuation_mulByInt_x_sub_lt_one [IsAlgClosed F] (ℓ : ℤ) (hℓ : ℓ ≠ 0)
@@ -221,37 +263,9 @@ private theorem pointValuation_mulByInt_x_sub_lt_one [IsAlgClosed F] (ℓ : ℤ)
     rw [hΦ, hΨSq, hx, div_mul_cancel₀ _ (pow_ne_zero 2 hψ), sub_self]
   -- `ΨSq_ff` is a unit at `P` (its residue `ΨSq_ℓ(P.x) ≠ 0`).
   have hΨSq_ff_ne : ΨSq_ff W ℓ ≠ 0 := ΨSq_ff_ne_zero W hℓ
-  have hΨSq_unit : (⟨W⟩ : SmoothPlaneCurve F).pointValuation P (ΨSq_ff W ℓ) = 1 := by
-    have hbridge : (⟨W⟩ : SmoothPlaneCurve F).pointValuation P
-        (ΨSq_ff W ℓ - algebraMap F KE ((W.ΨSq ℓ).eval P.x)) < 1 := by
-      rw [ΨSq_ff_eq_aeval]
-      exact pointValuation_aeval_sub_eval_lt_one P (pointValuation_x_gen_le_one W P)
-        (by rw [x_gen_sub_const_eq_algebraMap_XClass W P.x]
-            exact (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
-              (C := (⟨W⟩ : SmoothPlaneCurve F)) _ P).mpr (XClass_mem_maximalIdealAt W P P.x rfl))
-        (W.ΨSq ℓ)
-    -- residue of `ΨSq_ff` is the nonzero constant `ΨSq_ℓ(P.x)`, so `pointValuation = 1`.
-    have hconst : (⟨W⟩ : SmoothPlaneCurve F).pointValuation P
-        (algebraMap F KE ((W.ΨSq ℓ).eval P.x)) = 1 :=
-      pointValuation_algebraMap_F_eq_one_of_ne_zero W P hΨSq_ne
-    have hsplit : ΨSq_ff W ℓ = (ΨSq_ff W ℓ - algebraMap F KE ((W.ΨSq ℓ).eval P.x)) +
-        algebraMap F KE ((W.ΨSq ℓ).eval P.x) := by ring
-    rw [hsplit, ((⟨W⟩ : SmoothPlaneCurve F).pointValuation P).map_add_eq_of_lt_right
-      (by rw [hconst]; exact hbridge), hconst]
+  have hΨSq_unit := pointValuation_ΨSq_ff_eq_one ℓ P hΨSq_ne
   -- `mulByInt_x ℓ − x = (Φ_ff − x·ΨSq_ff)/ΨSq_ff`; numerator `≡ 0`, denominator a unit.
-  have hnum : (⟨W⟩ : SmoothPlaneCurve F).pointValuation P
-      (Φ_ff W ℓ - algebraMap F KE x * ΨSq_ff W ℓ) < 1 := by
-    rw [Φ_ff_eq_aeval, ΨSq_ff_eq_aeval,
-      show Polynomial.aeval (x_gen W) (W.Φ ℓ) -
-            algebraMap F KE x * Polynomial.aeval (x_gen W) (W.ΨSq ℓ) =
-          Polynomial.aeval (x_gen W) (W.Φ ℓ - Polynomial.C x * W.ΨSq ℓ) -
-            algebraMap F KE ((W.Φ ℓ - Polynomial.C x * W.ΨSq ℓ).eval P.x) from by
-        rw [map_sub, map_mul, Polynomial.aeval_C, Polynomial.eval_sub, Polynomial.eval_mul,
-          Polynomial.eval_C, hx_eq, map_zero]; ring]
-    exact pointValuation_aeval_sub_eval_lt_one P (pointValuation_x_gen_le_one W P)
-      (by rw [x_gen_sub_const_eq_algebraMap_XClass W P.x]
-          exact (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
-            (C := (⟨W⟩ : SmoothPlaneCurve F)) _ P).mpr (XClass_mem_maximalIdealAt W P P.x rfl)) _
+  have hnum := pointValuation_Φ_ff_sub_mul_ΨSq_ff_lt_one ℓ P hx_eq
   -- Assemble: `mulByInt_x ℓ − x = (Φ_ff − x·ΨSq_ff) · ΨSq_ff⁻¹`.
   have hmx : mulByInt_x W ℓ - algebraMap F KE x =
       (Φ_ff W ℓ - algebraMap F KE x * ΨSq_ff W ℓ) * (ΨSq_ff W ℓ)⁻¹ := by
