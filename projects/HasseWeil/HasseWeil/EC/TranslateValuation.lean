@@ -188,6 +188,15 @@ theorem pointValuation_algebraMap_F_eq_one_of_ne_zero
     rw [← WithZero.coe_unzero hv, h_unz]
     rfl
 
+/-- If the denominator `b` is a unit at `P` (`pointValuation = 1`) and `a ∈ m_P`
+(`pointValuation < 1`), then `a / b ∈ m_P`. -/
+private theorem pointValuation_div_lt_one_of_denom_eq_one (P : (W_smooth W).SmoothPoint)
+    {a b : (W_smooth W).FunctionField}
+    (hb : (W_smooth W).pointValuation P b = 1) (ha : (W_smooth W).pointValuation P a < 1) :
+    (W_smooth W).pointValuation P (a / b) < 1 := by
+  rw [div_eq_mul_inv, Valuation.map_mul, map_inv₀, hb, inv_one, mul_one]
+  exact ha
+
 /-- For chord-case `P` (P.x ≠ xk), the difference `translateSlope_xy −
 alg(chord slope at P, k)` vanishes at `P`. -/
 theorem pointValuation_translateSlope_xy_sub_alg_slope_lt_one_of_X_ne
@@ -240,25 +249,7 @@ theorem pointValuation_translateSlope_xy_sub_alg_slope_lt_one_of_X_ne
         ((y_gen W - algebraMap F KE yk) * algebraMap F KE (P.x - xk) -
           algebraMap F KE (P.y - yk) * (x_gen W - algebraMap F KE xk)) < 1 :=
     pointValuation_chord_numerator_lt_one_of_X_ne W P xk yk h_x
-  calc (W_smooth W).pointValuation P
-          (((y_gen W - algebraMap F KE yk) * algebraMap F KE (P.x - xk) -
-            algebraMap F KE (P.y - yk) * (x_gen W - algebraMap F KE xk)) /
-          ((x_gen W - algebraMap F KE xk) * algebraMap F KE (P.x - xk)))
-      = (W_smooth W).pointValuation P
-            ((y_gen W - algebraMap F KE yk) * algebraMap F KE (P.x - xk) -
-              algebraMap F KE (P.y - yk) * (x_gen W - algebraMap F KE xk)) *
-          (W_smooth W).pointValuation P
-            ((x_gen W - algebraMap F KE xk) * algebraMap F KE (P.x - xk))⁻¹ := by
-        rw [div_eq_mul_inv]
-        exact Valuation.map_mul _ _ _
-    _ = (W_smooth W).pointValuation P
-            ((y_gen W - algebraMap F KE yk) * algebraMap F KE (P.x - xk) -
-              algebraMap F KE (P.y - yk) * (x_gen W - algebraMap F KE xk)) * 1 := by
-        rw [map_inv₀, h_denom_pV, inv_one]
-    _ = (W_smooth W).pointValuation P
-            ((y_gen W - algebraMap F KE yk) * algebraMap F KE (P.x - xk) -
-              algebraMap F KE (P.y - yk) * (x_gen W - algebraMap F KE xk)) := mul_one _
-    _ < 1 := h_num_pV_lt
+  exact pointValuation_div_lt_one_of_denom_eq_one W P h_denom_pV h_num_pV_lt
 
 /-- Chord-case slope factor bound: the product
 `(slope_K − alg slope_F) · (slope_K + alg slope_F + a₁)` has `pointValuation < 1` at `P`,
