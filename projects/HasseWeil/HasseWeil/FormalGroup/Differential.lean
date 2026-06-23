@@ -1256,6 +1256,53 @@ private lemma subst_zero_X0_pderiv0 (F : FormalGroup R) :
 
 /-! #### The `dX_at_zero` translation identity -/
 
+/-- The diagonal substitution `![F.toSeries, F.toSeries]` has constant coefficient
+zero in both slots, hence is a valid substitution. -/
+private lemma hasSubst_diagF (F : FormalGroup R) :
+    MvPowerSeries.HasSubst
+      (![F.toSeries, F.toSeries] : Fin 2 → MvPowerSeries (Fin 2) R) := by
+  apply MvPowerSeries.hasSubst_of_constantCoeff_zero
+  intro s; fin_cases s
+  · exact FG.constantCoeff_FG_toSeries F
+  · exact FG.constantCoeff_FG_toSeries F
+
+/-- Composing the substitution `![F.toSeries, F.toSeries]` after `![0, X 0]` sends
+slot `0` to `0` and slot `1` to `F.toSeries`, i.e. it equals `![0, F.toSeries]`. -/
+private lemma subst_diagF_comp_shift0X0 (F : FormalGroup R) :
+    (fun s ↦ MvPowerSeries.subst
+      (![F.toSeries, F.toSeries] : Fin 2 → MvPowerSeries (Fin 2) R)
+      ((![(0 : MvPowerSeries (Fin 2) R), MvPowerSeries.X 0] :
+        Fin 2 → MvPowerSeries (Fin 2) R) s)) =
+      (![0, F.toSeries] : Fin 2 → MvPowerSeries (Fin 2) R) := by
+  have hb := hasSubst_diagF F
+  funext s; fin_cases s
+  · show MvPowerSeries.subst
+      (![F.toSeries, F.toSeries] : Fin 2 → MvPowerSeries (Fin 2) R) 0 = 0
+    rw [← MvPowerSeries.substAlgHom_apply hb, map_zero]
+  · show MvPowerSeries.subst
+      (![F.toSeries, F.toSeries] : Fin 2 → MvPowerSeries (Fin 2) R)
+      (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) = F.toSeries
+    rw [MvPowerSeries.subst_X hb 0]; rfl
+
+/-- Substituting `![F.toSeries, F.toSeries]` into `subst (X 0) F.dX_at_zero` collapses
+the nested substitution to `subst F.toSeries F.dX_at_zero`. -/
+private lemma subst_diagF_subst_X0_dX_at_zero (F : FormalGroup R) :
+    MvPowerSeries.subst
+      (![F.toSeries, F.toSeries] : Fin 2 → MvPowerSeries (Fin 2) R)
+      (PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) F.dX_at_zero) =
+      PowerSeries.subst (F.toSeries : MvPowerSeries (Fin 2) R) F.dX_at_zero := by
+  have hb := hasSubst_diagF F
+  have hX0_unit : MvPowerSeries.HasSubst
+      ((fun _ : Unit ↦ (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R))) := by
+    apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro _; simp
+  show MvPowerSeries.subst _
+    (MvPowerSeries.subst (fun _ : Unit ↦ (MvPowerSeries.X 0 :
+        MvPowerSeries (Fin 2) R)) F.dX_at_zero) = _
+  rw [MvPowerSeries.subst_comp_subst_apply hX0_unit hb]
+  congr 1
+  funext _
+  rw [MvPowerSeries.subst_X hb 0]; rfl
+
 /-- Auxiliary: `subst ![0, F.toSeries] (pderiv 0 F.toSeries) =
 PowerSeries.subst F.toSeries F.dX_at_zero`. -/
 private lemma subst_zero_F_pderiv0_eq (F : FormalGroup R) :
@@ -1268,45 +1315,11 @@ private lemma subst_zero_F_pderiv0_eq (F : FormalGroup R) :
         Fin 2 → MvPowerSeries (Fin 2) R) := by
     apply MvPowerSeries.hasSubst_of_constantCoeff_zero
     intro s; fin_cases s <;> simp
-  have hb : MvPowerSeries.HasSubst
-      (![F.toSeries, F.toSeries] : Fin 2 → MvPowerSeries (Fin 2) R) := by
-    apply MvPowerSeries.hasSubst_of_constantCoeff_zero
-    intro s; fin_cases s
-    · exact FG.constantCoeff_FG_toSeries F
-    · exact FG.constantCoeff_FG_toSeries F
   have happ := congr_arg (MvPowerSeries.subst
       (![F.toSeries, F.toSeries] : Fin 2 → MvPowerSeries (Fin 2) R))
     (subst_zero_X0_pderiv0 F)
-  rw [MvPowerSeries.subst_comp_subst_apply hshift0X0 hb] at happ
-  have hcomp_lhs : (fun s ↦ MvPowerSeries.subst
-      (![F.toSeries, F.toSeries] : Fin 2 → MvPowerSeries (Fin 2) R)
-      ((![(0 : MvPowerSeries (Fin 2) R), MvPowerSeries.X 0] :
-        Fin 2 → MvPowerSeries (Fin 2) R) s)) =
-      (![0, F.toSeries] : Fin 2 → MvPowerSeries (Fin 2) R) := by
-    funext s; fin_cases s
-    · show MvPowerSeries.subst
-        (![F.toSeries, F.toSeries] : Fin 2 → MvPowerSeries (Fin 2) R) 0 = 0
-      rw [← MvPowerSeries.substAlgHom_apply hb, map_zero]
-    · show MvPowerSeries.subst
-        (![F.toSeries, F.toSeries] : Fin 2 → MvPowerSeries (Fin 2) R)
-        (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) = F.toSeries
-      rw [MvPowerSeries.subst_X hb 0]; rfl
-  rw [hcomp_lhs] at happ
-  have hX0_unit : MvPowerSeries.HasSubst
-      ((fun _ : Unit ↦ (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R))) := by
-    apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro _; simp
-  have hrhs : MvPowerSeries.subst
-      (![F.toSeries, F.toSeries] : Fin 2 → MvPowerSeries (Fin 2) R)
-      (PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) F.dX_at_zero) =
-      PowerSeries.subst (F.toSeries : MvPowerSeries (Fin 2) R) F.dX_at_zero := by
-    show MvPowerSeries.subst _
-      (MvPowerSeries.subst (fun _ : Unit ↦ (MvPowerSeries.X 0 :
-          MvPowerSeries (Fin 2) R)) F.dX_at_zero) = _
-    rw [MvPowerSeries.subst_comp_subst_apply hX0_unit hb]
-    congr 1
-    funext _
-    rw [MvPowerSeries.subst_X hb 0]; rfl
-  rw [hrhs] at happ
+  rw [MvPowerSeries.subst_comp_subst_apply hshift0X0 (hasSubst_diagF F),
+      subst_diagF_comp_shift0X0 F, subst_diagF_subst_X0_dX_at_zero F] at happ
   exact happ
 
 /-- **Silverman IV.4.2, intermediate step**: translation identity for
