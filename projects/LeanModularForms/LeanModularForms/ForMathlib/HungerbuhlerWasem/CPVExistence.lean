@@ -1,5 +1,5 @@
 /-
-Copyright (c) 2026. All rights reserved.
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
@@ -379,7 +379,8 @@ theorem arg_right_annular_tendsto
     Tendsto (fun ε : ℝ ↦
       Complex.arg ((γ (t₀ + r) - s) / (γ (t₀ + δ_right ε) - s)))
       (𝓝[>] (0 : ℝ)) (𝓝 ((γ (t₀ + r) - s) / L).arg) := by
-  have h_recip : Tendsto (fun ε : ℝ ↦ ((δ_right ε : ℝ) : ℂ) / (γ (t₀ + δ_right ε) - s))
+  have h_recip : Tendsto
+      (fun ε : ℝ ↦ ((δ_right ε : ℝ) : ℂ) / (γ (t₀ + δ_right ε) - s))
       (𝓝[>] (0 : ℝ)) (𝓝 (1 / L)) := by
     rw [one_div]
     refine ((exit_chord_tendsto_right h_deriv h_at hδ_pos hδ_to_zero).inv₀ hL).congr' ?_
@@ -393,7 +394,8 @@ theorem arg_right_annular_tendsto
   filter_upwards [hδ_pos] with ε hε
   rw [Function.comp_apply, show (γ (t₀ + r) - s) * (((δ_right ε : ℝ) : ℂ) /
       (γ (t₀ + δ_right ε) - s)) =
-      ((δ_right ε : ℝ) : ℂ) * ((γ (t₀ + r) - s) / (γ (t₀ + δ_right ε) - s)) from by ring]
+      ((δ_right ε : ℝ) : ℂ) *
+        ((γ (t₀ + r) - s) / (γ (t₀ + δ_right ε) - s)) from by ring]
   exact Complex.arg_real_mul _ hε
 
 /-- **Left annular quotient arg convergence.** -/
@@ -417,7 +419,7 @@ theorem arg_left_annular_tendsto
   filter_upwards [hδ_pos] with ε hε
   rw [Function.comp_apply, show (γ (t₀ - δ_left ε) - s) / ((δ_left ε : ℝ) : ℂ) /
       (γ (t₀ - r) - s) =
-      (((δ_left ε)⁻¹ : ℝ) : ℂ) * ((γ (t₀ - δ_left ε) - s) / (γ (t₀ - r) - s)) from by
+      (((δ_left ε)⁻¹ : ℝ) : ℂ) *
+        ((γ (t₀ - δ_left ε) - s) / (γ (t₀ - r) - s)) from by
     push_cast; field_simp]
   exact Complex.arg_real_mul _ (inv_pos.mpr hε)
-
