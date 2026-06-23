@@ -2720,6 +2720,118 @@ With `ord_T(slope) = n ≤ −1` (the slope bound, finite since `slope ≠ 0`):
 The `cases h_n : ord_T(s)` destructure to a finite `n` is the wall-break:
 all `WithTop ℤ` arithmetic happens via `ℤ` and `omega`. -/
 
+/-- **A function whose order is `≤ −1` is nonzero.** If `ord_P P f ≤ −1` then
+`f ≠ 0`, since the zero function has order `⊤`. Generic building block: lets a
+strict order bound supply the nonvanishing hypothesis needed for `cases` on
+`ord_P P f` to land in the finite branch. -/
+private theorem ne_zero_of_ord_P_le_neg_one {C : Curves.SmoothPlaneCurve F}
+    {P : C.SmoothPoint} {f : C.FunctionField}
+    (hf : C.ord_P P f ≤ ((-1 : ℤ) : WithTop ℤ)) : f ≠ 0 := fun h_zero ↦ by
+  rw [h_zero, C.ord_P_zero] at hf
+  exact absurd hf (by simp)
+
+/-- **`addX` decomposition of `translateX_xy` into slope² plus a remainder.**
+Unfolding `translateX_xy` and `WeierstrassCurve.Affine.addX` writes the
+translated x-coordinate as `s² + (a₁·s + (−a₂ − x_gen − xk))`, where
+`s = translateSlope_xy`. The `s²` term carries the (doubled, strictly negative)
+slope order; the remainder collects the lower-order pieces. -/
+private theorem translateX_xy_eq_slope_sq_add_rest (xk yk : F) :
+    translateX_xy W xk yk =
+      translateSlope_xy W xk yk * translateSlope_xy W xk yk +
+        ((W_KE W).a₁ * translateSlope_xy W xk yk +
+          (-(W_KE W).a₂ + -x_gen W + -algebraMap F KE xk)) := by
+  unfold translateX_xy
+  rw [WeierstrassCurve.Affine.addX]
+  ring
+
+set_option linter.unusedDecidableInType false in
+/-- **`ord_P P s ≤ ord_P P (a₁·s)`.** The slope order is a lower bound for the
+order of the linear term `a₁·s`: when `a₁ = 0` the term is `0` (order `⊤`),
+otherwise `ord_P (a₁·s) = ord_P a₁ + ord_P s = 0 + ord_P s` since the constant
+`a₁ = algebraMap F KE W.a₁` has order `0`. -/
+private theorem ord_P_slope_le_ord_P_a1_mul_slope (xk yk : F)
+    (h_ns : W.toAffine.Nonsingular xk yk) :
+    (W_smooth W).ord_P (negSmoothPoint W xk yk h_ns) (translateSlope_xy W xk yk) ≤
+      (W_smooth W).ord_P (negSmoothPoint W xk yk h_ns)
+        ((W_KE W).a₁ * translateSlope_xy W xk yk) := by
+  set P := negSmoothPoint W xk yk h_ns
+  set s : KE := translateSlope_xy W xk yk
+  by_cases ha1 : (W_KE W).a₁ = 0
+  · have h_zero : (W_KE W).a₁ * s = 0 := by rw [ha1, zero_mul]
+    have h_top : (W_smooth W).ord_P P ((W_KE W).a₁ * s) = ⊤ := by
+      rw [h_zero]; exact (W_smooth W).ord_P_zero
+    rw [h_top]; exact le_top
+  · have h_a1_F : W.a₁ ≠ 0 := fun h ↦ ha1 (by
+      change algebraMap F KE W.a₁ = 0
+      rw [h, map_zero])
+    have h_a1_ord : (W_smooth W).ord_P P ((W_KE W).a₁) = 0 := by
+      change (W_smooth W).ord_P P (algebraMap F KE W.a₁) = 0
+      exact (W_smooth W).ord_P_algebraMap_F_of_ne_zero h_a1_F P
+    have h_mul_ord : (W_smooth W).ord_P P ((W_KE W).a₁ * s) =
+        (W_smooth W).ord_P P ((W_KE W).a₁) + (W_smooth W).ord_P P s :=
+      SmoothPlaneCurve.ord_P_mul (P := P) _ _
+    rw [h_mul_ord, h_a1_ord, zero_add]
+
+/-- **The remainder's constant part `−a₂ − x_gen − xk` has nonnegative order.**
+Each summand is (the negative of) either a constant `algebraMap F KE _` or the
+generic x-coordinate `x_gen`, all of nonnegative order at any smooth point;
+`ord_P_neg` strips the signs and `ord_P_le_add_of_le_of_le` combines the sum. -/
+private theorem ord_P_translate_const_part_nonneg (xk : F)
+    (P : (W_smooth W).SmoothPoint) :
+    (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P
+      (-(W_KE W).a₂ + -x_gen W + -algebraMap F KE xk) := by
+  have h_a2_neg : (W_smooth W).ord_P P (-(W_KE W).a₂) =
+      (W_smooth W).ord_P P ((W_KE W).a₂) := SmoothPlaneCurve.ord_P_neg (P := P) _
+  have h_xgen_neg : (W_smooth W).ord_P P (-x_gen W) =
+      (W_smooth W).ord_P P (x_gen W) := SmoothPlaneCurve.ord_P_neg (P := P) _
+  have h_xk_neg : (W_smooth W).ord_P P (-algebraMap F KE xk) =
+      (W_smooth W).ord_P P (algebraMap F KE xk) := SmoothPlaneCurve.ord_P_neg (P := P) _
+  have h_a2 : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P (-(W_KE W).a₂) := by
+    rw [h_a2_neg]; exact ord_P_algebraMap_F_nonneg W P W.a₂
+  have h_xgen : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P (-x_gen W) := by
+    rw [h_xgen_neg]; exact ord_P_x_gen_nonneg W P
+  have h_xk : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P (-algebraMap F KE xk) := by
+    rw [h_xk_neg]; exact ord_P_algebraMap_F_nonneg W P xk
+  exact ord_P_le_add_of_le_of_le (ord_P_le_add_of_le_of_le h_a2 h_xgen) h_xk
+
+set_option linter.unusedDecidableInType false in
+/-- **`ord_P P s ≤ ord_P P rest`** for `rest = a₁·s + (−a₂ − x_gen − xk)`, when
+`ord_P P s ≤ 0`. The linear term `a₁·s` has order `≥ ord_P s`
+(`ord_P_slope_le_ord_P_a1_mul_slope`); the constant part has order `≥ 0 ≥ ord_P s`
+(`ord_P_translate_const_part_nonneg`); `ord_P_le_add_of_le_of_le` lifts the common
+lower bound to the sum. -/
+private theorem ord_P_slope_le_ord_P_translate_rest (xk yk : F)
+    (h_ns : W.toAffine.Nonsingular xk yk)
+    (h_le : (W_smooth W).ord_P (negSmoothPoint W xk yk h_ns)
+      (translateSlope_xy W xk yk) ≤ 0) :
+    (W_smooth W).ord_P (negSmoothPoint W xk yk h_ns) (translateSlope_xy W xk yk) ≤
+      (W_smooth W).ord_P (negSmoothPoint W xk yk h_ns)
+        ((W_KE W).a₁ * translateSlope_xy W xk yk +
+          (-(W_KE W).a₂ + -x_gen W + -algebraMap F KE xk)) :=
+  ord_P_le_add_of_le_of_le (ord_P_slope_le_ord_P_a1_mul_slope W xk yk h_ns)
+    (le_trans h_le (ord_P_translate_const_part_nonneg W xk _))
+
+/-- **A doubled strictly-negative order dominates a sum.** If `ord_P P a = n + n`
+with `n < 0`, and `n ≤ ord_P P b`, then `n + n < n ≤ ord_P P b`, so the `a`-term
+is the unique smallest-order summand: `ord_P_add_eq_of_lt` gives
+`ord_P P (a + b) = n + n < 0`. Generic building block for "leading slope² term
+wins" pole-order arguments. -/
+private theorem ord_P_add_double_lt_zero {C : Curves.SmoothPlaneCurve F}
+    {P : C.SmoothPoint} {a b : C.FunctionField} {n : ℤ}
+    (ha : C.ord_P P a = ((n : ℤ) : WithTop ℤ) + ((n : ℤ) : WithTop ℤ))
+    (hb : ((n : ℤ) : WithTop ℤ) ≤ C.ord_P P b) (hn : n < 0) :
+    C.ord_P P (a + b) < 0 := by
+  have h_lt : C.ord_P P a < C.ord_P P b := by
+    rw [ha]
+    refine lt_of_lt_of_le ?_ hb
+    rw [show ((n : ℤ) : WithTop ℤ) + ((n : ℤ) : WithTop ℤ) =
+        (((n + n : ℤ) : ℤ) : WithTop ℤ) from rfl]
+    exact_mod_cast (show n + n < n by omega)
+  rw [SmoothPlaneCurve.ord_P_add_eq_of_lt h_lt, ha,
+    show ((n : ℤ) : WithTop ℤ) + ((n : ℤ) : WithTop ℤ) =
+      (((n + n : ℤ) : ℤ) : WithTop ℤ) from rfl]
+  exact_mod_cast (show n + n < 0 by omega)
+
 set_option linter.unusedDecidableInType false in
 /-- **`ord_T (translateX_xy) < 0` at smooth 2-torsion `T`**: from the
 slope bound + `addX` decomposition, with all WithTop arithmetic reduced to
@@ -2731,109 +2843,34 @@ theorem ord_P_translateX_xy_lt_zero_at_2tor
         (translateX_xy W xk yk) < 0 := by
   set P := negSmoothPoint W xk yk h_ns
   set s : KE := translateSlope_xy W xk yk
-  set rest : KE := (W_KE W).a₁ * s + (-(W_KE W).a₂ + -x_gen W +
-      -algebraMap F KE xk)
-  set sq2 : KE := s * s
+  -- Slope bound: `ord_P P s ≤ −1`, hence `s ≠ 0`.
   have h_slope_ord : (W_smooth W).ord_P P s ≤ ((-1 : ℤ) : WithTop ℤ) :=
     ord_P_translateSlope_xy_le_neg_one_at_2tor W xk yk h_ns h_2_tor
-  have h_s_ne : s ≠ 0 := fun h_zero ↦ by
-    have h_top : (W_smooth W).ord_P P s = ⊤ := by
-      rw [h_zero]; exact (W_smooth W).ord_P_zero
-    rw [h_top] at h_slope_ord
-    exact absurd h_slope_ord (by simp)
-  have h_unfold : translateX_xy W xk yk = sq2 + rest := by
-    change translateX_xy W xk yk = s * s +
-      ((W_KE W).a₁ * s + (-(W_KE W).a₂ + -x_gen W +
-        -algebraMap F KE xk))
-    unfold translateX_xy
-    rw [WeierstrassCurve.Affine.addX]
-    ring
-  rw [h_unfold]
+  have h_s_ne : s ≠ 0 := ne_zero_of_ord_P_le_neg_one h_slope_ord
+  -- `addX`: `translateX_xy = s² + rest`, then destructure `ord_P P s = ↑n`.
+  rw [translateX_xy_eq_slope_sq_add_rest]
   cases h_n : (W_smooth W).ord_P P s with
   | top => exact absurd ((SmoothPlaneCurve.ord_P_eq_top_iff _).mp h_n) h_s_ne
   | coe n =>
       rw [h_n] at h_slope_ord
       have h_n_le : n ≤ -1 := by exact_mod_cast h_slope_ord
-      have h_sq_mul : (W_smooth W).ord_P P sq2 =
+      -- `ord_P P (s²) = ↑n + ↑n`.
+      have h_sq_mul : (W_smooth W).ord_P P (s * s) =
           (W_smooth W).ord_P P s + (W_smooth W).ord_P P s :=
         SmoothPlaneCurve.ord_P_mul (P := P) s s
-      have h_sq_ord : (W_smooth W).ord_P P sq2 =
+      have h_sq_ord : (W_smooth W).ord_P P (s * s) =
           ((n : ℤ) : WithTop ℤ) + ((n : ℤ) : WithTop ℤ) := by
         rw [h_sq_mul, h_n]
-      have h_a1s_ord : ((n : ℤ) : WithTop ℤ) ≤
-          (W_smooth W).ord_P P ((W_KE W).a₁ * s) := by
-        by_cases ha1 : (W_KE W).a₁ = 0
-        · have h_zero : (W_KE W).a₁ * s = 0 := by rw [ha1, zero_mul]
-          have h_top : (W_smooth W).ord_P P ((W_KE W).a₁ * s) = ⊤ := by
-            rw [h_zero]; exact (W_smooth W).ord_P_zero
-          rw [h_top]; exact le_top
-        · have h_a1_F : W.a₁ ≠ 0 := fun h ↦ ha1 (by
-            change algebraMap F KE W.a₁ = 0
-            rw [h, map_zero])
-          have h_a1_ord : (W_smooth W).ord_P P ((W_KE W).a₁) = 0 := by
-            change (W_smooth W).ord_P P (algebraMap F KE W.a₁) = 0
-            exact (W_smooth W).ord_P_algebraMap_F_of_ne_zero h_a1_F P
-          have h_mul_ord : (W_smooth W).ord_P P ((W_KE W).a₁ * s) =
-              (W_smooth W).ord_P P ((W_KE W).a₁) +
-                (W_smooth W).ord_P P s :=
-            SmoothPlaneCurve.ord_P_mul (P := P) _ _
-          rw [h_mul_ord, h_a1_ord, zero_add, h_n]
-      have h_a2_neg : (W_smooth W).ord_P P (-(W_KE W).a₂) =
-          (W_smooth W).ord_P P ((W_KE W).a₂) :=
-        SmoothPlaneCurve.ord_P_neg (P := P) _
-      have h_xgen_neg : (W_smooth W).ord_P P (-x_gen W) =
-          (W_smooth W).ord_P P (x_gen W) :=
-        SmoothPlaneCurve.ord_P_neg (P := P) _
-      have h_xk_neg : (W_smooth W).ord_P P (-algebraMap F KE xk) =
-          (W_smooth W).ord_P P (algebraMap F KE xk) :=
-        SmoothPlaneCurve.ord_P_neg (P := P) _
-      have h_a2 : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P (-(W_KE W).a₂) := by
-        rw [h_a2_neg]; exact ord_P_algebraMap_F_nonneg W P W.a₂
-      have h_xgen : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P (-x_gen W) := by
-        rw [h_xgen_neg]; exact ord_P_x_gen_nonneg W P
-      have h_xk : (0 : WithTop ℤ) ≤
-          (W_smooth W).ord_P P (-algebraMap F KE xk) := by
-        rw [h_xk_neg]; exact ord_P_algebraMap_F_nonneg W P xk
-      have h_const_ord : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P
-          (-(W_KE W).a₂ + -x_gen W + -algebraMap F KE xk) := by
-        have h12 := SmoothPlaneCurve.ord_P_add_le (P := P)
-          (-(W_KE W).a₂) (-x_gen W)
-        have h12' : (0 : WithTop ℤ) ≤
-            (W_smooth W).ord_P P (-(W_KE W).a₂ + -x_gen W) :=
-          le_trans (le_min h_a2 h_xgen) h12
-        have h123 := SmoothPlaneCurve.ord_P_add_le (P := P)
-          (-(W_KE W).a₂ + -x_gen W) (-algebraMap F KE xk)
-        exact le_trans (le_min h12' h_xk) h123
-      have h_n_le_zero : ((n : ℤ) : WithTop ℤ) ≤ (0 : WithTop ℤ) := by
-        exact_mod_cast (show n ≤ 0 by omega)
+      -- `ord_P P rest ≥ ↑n` (linear term `≥ ord_P s`, constant part `≥ 0 ≥ ↑n`).
+      have h_s_le_zero : (W_smooth W).ord_P P s ≤ (0 : WithTop ℤ) := by
+        rw [h_n]; exact_mod_cast (show n ≤ 0 by omega)
       have h_rest_ord : ((n : ℤ) : WithTop ℤ) ≤
-          (W_smooth W).ord_P P rest := by
-        change ((n : ℤ) : WithTop ℤ) ≤ (W_smooth W).ord_P P
-            ((W_KE W).a₁ * s + (-(W_KE W).a₂ + -x_gen W +
-              -algebraMap F KE xk))
-        have h_sum := SmoothPlaneCurve.ord_P_add_le (P := P)
-          ((W_KE W).a₁ * s)
-          (-(W_KE W).a₂ + -x_gen W + -algebraMap F KE xk)
-        exact le_trans
-          (le_min h_a1s_ord (le_trans h_n_le_zero h_const_ord)) h_sum
-      have h_lt : (W_smooth W).ord_P P sq2 <
-          (W_smooth W).ord_P P rest := by
-        rw [h_sq_ord]
-        refine lt_of_lt_of_le ?_ h_rest_ord
-        show ((n : ℤ) : WithTop ℤ) + ((n : ℤ) : WithTop ℤ) <
-          ((n : ℤ) : WithTop ℤ)
-        rw [show ((n : ℤ) : WithTop ℤ) + ((n : ℤ) : WithTop ℤ) =
-            (((n + n : ℤ) : ℤ) : WithTop ℤ) from rfl]
-        exact_mod_cast (show n + n < n by omega)
-      have h_add_eq : (W_smooth W).ord_P P (sq2 + rest) =
-          (W_smooth W).ord_P P sq2 :=
-        SmoothPlaneCurve.ord_P_add_eq_of_lt h_lt
-      rw [h_add_eq, h_sq_ord]
-      change ((n : ℤ) : WithTop ℤ) + ((n : ℤ) : WithTop ℤ) <
-        (0 : WithTop ℤ)
-      rw [show ((n : ℤ) : WithTop ℤ) + ((n : ℤ) : WithTop ℤ) =
-          (((n + n : ℤ) : ℤ) : WithTop ℤ) from rfl]
-      exact_mod_cast (show n + n < 0 by omega)
+          (W_smooth W).ord_P P ((W_KE W).a₁ * s +
+            (-(W_KE W).a₂ + -x_gen W + -algebraMap F KE xk)) := by
+        rw [← h_n]
+        exact ord_P_slope_le_ord_P_translate_rest W xk yk h_ns h_s_le_zero
+      -- `s²` is the unique smallest-order term: `ord_P P (s² + rest) = 2n < 0`.
+      exact ord_P_add_double_lt_zero h_sq_ord h_rest_ord (by omega)
 
 /-! ### `translateX_xy_transcendental` extended to 2-torsion `T` -/
 
