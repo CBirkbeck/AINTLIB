@@ -669,69 +669,44 @@ theorem fAdd_comm (F : FormalGroup.FormalGroup R) (f g : PowerSeries R)
       exact subst_matrix_X0 (show Fin 2 → MvPowerSeries Unit R from ![f, g]) hb
   rw [heq] at step; exact step.symm
 
-set_option maxHeartbeats 800000 in
-/-- `F(F(f, g), h) = F(f, F(g, h))`: associativity of the formal addition. -/
-theorem fAdd_assoc (F : FormalGroup.FormalGroup R) (f g h : PowerSeries R)
-    (hf : PowerSeries.constantCoeff f = 0) (hg : PowerSeries.constantCoeff g = 0)
-    (hh : PowerSeries.constantCoeff h = 0) :
-    fAdd F (fAdd F f g) h = fAdd F f (fAdd F g h) := by
-  -- Strategy: apply subst ![f,g,h] to F.assoc, then show each side equals fAdd ∘ fAdd.
-  -- HasSubst for variable embeddings (Fin 2 → Fin 3)
-  have h_XY : MvPowerSeries.HasSubst
-      (![MvPowerSeries.X (0 : Fin 3), MvPowerSeries.X 1] :
-        Fin 2 → MvPowerSeries (Fin 3) R) := by
-    apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro s; fin_cases s <;> simp
-  have h_YZ : MvPowerSeries.HasSubst
-      (![MvPowerSeries.X (1 : Fin 3), MvPowerSeries.X 2] :
-        Fin 2 → MvPowerSeries (Fin 3) R) := by
-    apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro s; fin_cases s <;> simp
-  -- HasSubst for the outer substitutions in F.assoc (Fin 2 → Fin 3)
-  have h_FXY_Z : MvPowerSeries.HasSubst
+/-- The map `![F(X₀, X₁), X₂] : Fin 2 → MvPowerSeries (Fin 3) R` — the outer
+substitution on the left of `F.assoc` — admits substitution. Its second
+component is a variable and its first is `F` evaluated at variables, so each
+component has vanishing constant coefficient. -/
+private lemma hasSubst_substXY_X2 (F : FormalGroup.FormalGroup R) :
+    MvPowerSeries.HasSubst
       (![MvPowerSeries.subst
             (![MvPowerSeries.X (0 : Fin 3), MvPowerSeries.X 1] :
               Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries,
           MvPowerSeries.X 2] : Fin 2 → MvPowerSeries (Fin 3) R) := by
-    apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro s; fin_cases s
-    · simp only []
-      exact (constantCoeff_subst_vanishing h_XY (fun s ↦ by fin_cases s <;> simp)
-        F.toSeries).trans (constantCoeff_FG_toSeries F)
-    · simp
-  have h_X_FYZ : MvPowerSeries.HasSubst
+  apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro s; fin_cases s
+  · simp only []
+    exact (constantCoeff_subst_vanishing MvPowerSeries.HasSubst.X_X
+      (fun s ↦ by fin_cases s <;> simp) F.toSeries).trans (constantCoeff_FG_toSeries F)
+  · simp
+
+/-- The map `![X₀, F(X₁, X₂)] : Fin 2 → MvPowerSeries (Fin 3) R` — the outer
+substitution on the right of `F.assoc` — admits substitution. Its first
+component is a variable and its second is `F` evaluated at variables, so each
+component has vanishing constant coefficient. -/
+private lemma hasSubst_X0_substYZ (F : FormalGroup.FormalGroup R) :
+    MvPowerSeries.HasSubst
       (![MvPowerSeries.X (0 : Fin 3),
           MvPowerSeries.subst
             (![MvPowerSeries.X (1 : Fin 3), MvPowerSeries.X 2] :
               Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries] :
         Fin 2 → MvPowerSeries (Fin 3) R) := by
-    apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro s; fin_cases s
-    · simp
-    · simp only []
-      exact (constantCoeff_subst_vanishing h_YZ (fun s ↦ by fin_cases s <;> simp)
-        F.toSeries).trans (constantCoeff_FG_toSeries F)
-  -- HasSubst for the specialization map (Fin 3 → Unit)
-  have h_fgh : MvPowerSeries.HasSubst
-      (show Fin 3 → MvPowerSeries Unit R from ![f, g, h]) := by
-    apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro s; fin_cases s
-    · simpa [PowerSeries.constantCoeff_eq] using hf
-    · simpa [PowerSeries.constantCoeff_eq] using hg
-    · simpa [PowerSeries.constantCoeff_eq] using hh
-  -- Specialized pair HasSubst
-  have hfg := hasSubst_pair f g hf hg
-  -- Helper: subst_X lemmas for the Fin 3 → Unit substitution
-  have subst_fgh_X0 : MvPowerSeries.subst
-      (show Fin 3 → MvPowerSeries Unit R from ![f, g, h])
-      (MvPowerSeries.X (0 : Fin 3)) = f :=
-    subst_fin3_X _ h_fgh 0
-  have subst_fgh_X1 : MvPowerSeries.subst
-      (show Fin 3 → MvPowerSeries Unit R from ![f, g, h])
-      (MvPowerSeries.X (1 : Fin 3)) = g :=
-    subst_fin3_X _ h_fgh 1
-  have subst_fgh_X2 : MvPowerSeries.subst
-      (show Fin 3 → MvPowerSeries Unit R from ![f, g, h])
-      (MvPowerSeries.X (2 : Fin 3)) = h :=
-    subst_fin3_X _ h_fgh 2
-  -- Helper: composed substitution for LHS
-  -- subst ![f,g,h] (subst ![F(X,Y), Z] F) = subst ![F(f,g), h] F
-  have comp_L : MvPowerSeries.subst (show Fin 3 → MvPowerSeries Unit R from ![f, g, h])
+  apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro s; fin_cases s
+  · simp
+  · simp only []
+    exact (constantCoeff_subst_vanishing MvPowerSeries.HasSubst.X_X
+      (fun s ↦ by fin_cases s <;> simp) F.toSeries).trans (constantCoeff_FG_toSeries F)
+
+/-- Specialising the left side `F(F(X₀,X₁), X₂)` of `F.assoc` at `![f,g,h]`
+collapses the nested substitution to `F(F(f,g), h) = subst ![fAdd F f g, h] F`. -/
+private lemma subst_fgh_substXY_X2 (F : FormalGroup.FormalGroup R) (f g h : PowerSeries R)
+    (h_fgh : MvPowerSeries.HasSubst (show Fin 3 → MvPowerSeries Unit R from ![f, g, h])) :
+    MvPowerSeries.subst (show Fin 3 → MvPowerSeries Unit R from ![f, g, h])
       (MvPowerSeries.subst
         (![MvPowerSeries.subst
               (![MvPowerSeries.X (0 : Fin 3), MvPowerSeries.X 1] :
@@ -739,21 +714,24 @@ theorem fAdd_assoc (F : FormalGroup.FormalGroup R) (f g h : PowerSeries R)
             MvPowerSeries.X 2] : Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries) =
       MvPowerSeries.subst
         (show Fin 2 → MvPowerSeries Unit R from ![fAdd F f g, h]) F.toSeries := by
-    rw [MvPowerSeries.subst_comp_subst_apply h_FXY_Z h_fgh]
+  rw [MvPowerSeries.subst_comp_subst_apply (hasSubst_substXY_X2 F) h_fgh]
+  congr 1; funext s; fin_cases s
+  · -- s = 0: subst ![f,g,h] (subst ![X0, X1] F) = fAdd F f g
+    show MvPowerSeries.subst _ (MvPowerSeries.subst _ F.toSeries) = _
+    simp only []; unfold fAdd
+    rw [MvPowerSeries.subst_comp_subst_apply MvPowerSeries.HasSubst.X_X h_fgh]
     congr 1; funext s; fin_cases s
-    · -- s = 0: subst ![f,g,h] (subst ![X0, X1] F) = fAdd F f g
-      show MvPowerSeries.subst _ (MvPowerSeries.subst _ F.toSeries) = _
-      simp only []; unfold fAdd
-      rw [MvPowerSeries.subst_comp_subst_apply h_XY h_fgh]
-      congr 1; funext s; fin_cases s
-      · exact subst_fin3_X _ h_fgh 0
-      · exact subst_fin3_X _ h_fgh 1
-    · -- s = 1: subst ![f,g,h] (X 2) = h
-      show MvPowerSeries.subst _ (MvPowerSeries.X 2) = _
-      exact subst_fin3_X _ h_fgh 2
-  -- Helper: composed substitution for RHS
-  -- subst ![f,g,h] (subst ![X, F(Y,Z)] F) = subst ![f, F(g,h)] F
-  have comp_R : MvPowerSeries.subst (show Fin 3 → MvPowerSeries Unit R from ![f, g, h])
+    · exact subst_fin3_X _ h_fgh 0
+    · exact subst_fin3_X _ h_fgh 1
+  · -- s = 1: subst ![f,g,h] (X 2) = h
+    show MvPowerSeries.subst _ (MvPowerSeries.X 2) = _
+    exact subst_fin3_X _ h_fgh 2
+
+/-- Specialising the right side `F(X₀, F(X₁,X₂))` of `F.assoc` at `![f,g,h]`
+collapses the nested substitution to `F(f, F(g,h)) = subst ![f, fAdd F g h] F`. -/
+private lemma subst_fgh_X0_substYZ (F : FormalGroup.FormalGroup R) (f g h : PowerSeries R)
+    (h_fgh : MvPowerSeries.HasSubst (show Fin 3 → MvPowerSeries Unit R from ![f, g, h])) :
+    MvPowerSeries.subst (show Fin 3 → MvPowerSeries Unit R from ![f, g, h])
       (MvPowerSeries.subst
         (![MvPowerSeries.X (0 : Fin 3),
             MvPowerSeries.subst
@@ -762,22 +740,38 @@ theorem fAdd_assoc (F : FormalGroup.FormalGroup R) (f g h : PowerSeries R)
           Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries) =
       MvPowerSeries.subst
         (show Fin 2 → MvPowerSeries Unit R from ![f, fAdd F g h]) F.toSeries := by
-    rw [MvPowerSeries.subst_comp_subst_apply h_X_FYZ h_fgh]
+  rw [MvPowerSeries.subst_comp_subst_apply (hasSubst_X0_substYZ F) h_fgh]
+  congr 1; funext s; fin_cases s
+  · -- s = 0: subst ![f,g,h] (X 0) = f
+    show MvPowerSeries.subst _ (MvPowerSeries.X 0) = _
+    exact subst_fin3_X _ h_fgh 0
+  · -- s = 1: subst ![f,g,h] (subst ![X1, X2] F) = fAdd F g h
+    show MvPowerSeries.subst _ (MvPowerSeries.subst _ F.toSeries) = _
+    simp only []; unfold fAdd
+    rw [MvPowerSeries.subst_comp_subst_apply MvPowerSeries.HasSubst.X_X h_fgh]
     congr 1; funext s; fin_cases s
-    · -- s = 0: subst ![f,g,h] (X 0) = f
-      show MvPowerSeries.subst _ (MvPowerSeries.X 0) = _
-      exact subst_fin3_X _ h_fgh 0
-    · -- s = 1: subst ![f,g,h] (subst ![X1, X2] F) = fAdd F g h
-      show MvPowerSeries.subst _ (MvPowerSeries.subst _ F.toSeries) = _
-      simp only []; unfold fAdd
-      rw [MvPowerSeries.subst_comp_subst_apply h_YZ h_fgh]
-      congr 1; funext s; fin_cases s
-      · exact subst_fin3_X _ h_fgh 1
-      · exact subst_fin3_X _ h_fgh 2
-  -- Main proof: apply subst ![f,g,h] to F.assoc, use comp_L and comp_R
+    · exact subst_fin3_X _ h_fgh 1
+    · exact subst_fin3_X _ h_fgh 2
+
+set_option maxHeartbeats 800000 in
+/-- `F(F(f, g), h) = F(f, F(g, h))`: associativity of the formal addition. -/
+theorem fAdd_assoc (F : FormalGroup.FormalGroup R) (f g h : PowerSeries R)
+    (hf : PowerSeries.constantCoeff f = 0) (hg : PowerSeries.constantCoeff g = 0)
+    (hh : PowerSeries.constantCoeff h = 0) :
+    fAdd F (fAdd F f g) h = fAdd F f (fAdd F g h) := by
+  -- Strategy: apply subst ![f,g,h] to F.assoc, then show each side equals fAdd ∘ fAdd.
+  -- HasSubst for the specialization map (Fin 3 → Unit).
+  have h_fgh : MvPowerSeries.HasSubst
+      (show Fin 3 → MvPowerSeries Unit R from ![f, g, h]) := by
+    apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro s; fin_cases s
+    · simpa [PowerSeries.constantCoeff_eq] using hf
+    · simpa [PowerSeries.constantCoeff_eq] using hg
+    · simpa [PowerSeries.constantCoeff_eq] using hh
+  -- Apply subst ![f,g,h] to F.assoc and rewrite each side as an iterated fAdd.
   have step := congr_arg
     (MvPowerSeries.subst (show Fin 3 → MvPowerSeries Unit R from ![f, g, h])) F.assoc
-  rw [comp_L, comp_R] at step
+  rw [subst_fgh_substXY_X2 F f g h h_fgh,
+      subst_fgh_X0_substYZ F f g h h_fgh] at step
   exact step
 
 set_option maxHeartbeats 1600000 in
