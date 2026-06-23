@@ -20,16 +20,6 @@ infrastructure used by both the convex and null-homologous versions.
   each singular term has PV
 * `generalizedResidueTheorem'` -- CPV equals `2 pi i . Sigma winding . residue`
   (convex domain, with explicit PV hypothesis)
-* `residueAt` -- residue via contour integral
-* `generalizedResidueTheorem_higher_order_tendsto` -- higher-order Tendsto formulation
-  (no convexity needed)
-* Helper lemmas: `hasSimplePoleAt_sum_div_sub`, `differentiableOn_sum_div_sub`,
-  `residueSimplePole_sum_div_sub`, `continuousAt_sum_remainder`
-
-The convex-domain theorems `generalizedResidueTheorem`,
-`generalizedResidueTheorem_higher_order`, and
-`generalizedResidueTheorem_higher_order_simple` are in `GeneralizedTheorem.lean`,
-where they are proved as corollaries of the null-homologous versions.
 -/
 
 open Complex MeasureTheory Set Filter Topology Metric
