@@ -16,22 +16,12 @@ and Mathlib's q-expansion infrastructure.
 
 ## Main results
 
-Period-`N` cascade (original convention; sparse at non-multiples of `N`):
+The Fourier formulas use the canonical period-1 convention (the standard
+Miyake / Diamond–Shurman convention), consumed by `Newforms.lean`:
 
-* `fourierCoeff_heckeT_p` — the fundamental prime formula (DS Prop 5.2.2):
-    `a_m(T_p f) = p^{1-k} a_{pm}(f) + χ(p) a_{m/p}(f)`
-    (in our slash normalisation; DS has `a_{pm} + χ(p) p^{k-1} a_{m/p}`)
-* `fourierCoeff_heckeT_n` — the general formula (DS Prop 5.3.1):
-    `a_m(T_n f) = Σ_{d | gcd(m,n)} d^{k-1} χ(d) a_{mn/d²}(f)`
-* `eigenvalue_eq_fourierCoeff` — for normalised eigenforms (Miy Thm 4.5.16):
-    if `f|T_n = λ_n f` and `a_1(f) = 1`, then `λ_n = a_n(f)`
-
-Canonical period-1 cascade (the standard Miyake / Diamond–Shurman
-Fourier convention, consumed by `Newforms.lean`):
-
-* `fourierCoeff_heckeT_ppow_period_one`,
-  `fourierCoeff_heckeT_n_period_one` — period-1 siblings of the prime-power
-  and general `T_n` formulas.
+* `fourierCoeff_heckeT_n_period_one` — the general `T_n` Fourier formula
+  (DS Prop 5.3.1, period-1 convention):
+    `a_m(T_n f) = Σ_{d | gcd(m,n)} d^{k-1} χ(d) a_{mn/d²}(f)`.
 * `IsNormalisedEigenform_one` — period-1 normalised-eigenform predicate
   using `(qExpansion (1 : ℝ) f).coeff 1 = 1`, superseding
   `IsNormalisedEigenform` (whose period-`N` condition is vacuous for
