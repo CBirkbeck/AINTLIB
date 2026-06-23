@@ -57,12 +57,8 @@ theorem omegaPullbackCoeff_addIsog_id
     rw [show (addIsog hxy hinj).pullback (x_gen W)
         = (addIsog hxy hinj).pullback (algebraMap R KE (algebraMap (Polynomial K) R Polynomial.X))
         from rfl, hpx]
-  have hu_ne : alpha_star_u W (addIsog hxy hinj) ≠ 0 := by
-    rw [alpha_star_u_eq]
-    exact fun h ↦ u_gen_ne_zero W
-      ((addIsog hxy hinj).pullback_injective (h.trans (map_zero _).symm))
   have hu3_ne : 2 * addPullback_y W α + algebraMap K KE W.a₁ * addPullback_x W α
-      + algebraMap K KE W.a₃ ≠ 0 := hu ▸ hu_ne
+      + algebraMap K KE W.a₃ ≠ 0 := hu ▸ alpha_star_u_ne_zero W (addIsog hxy hinj)
   apply omegaPullbackCoeff_unique
   rw [omegaPullbackCoeff_spec, hpx, hu,
     kaehler_D_addPullback_x_eq_one_add_smul_omega W α h_ne, smul_smul,
@@ -104,12 +100,8 @@ theorem omegaPullbackCoeff_addIsog_pair
     rw [show (addIsog hxy hinj).pullback (x_gen W)
         = (addIsog hxy hinj).pullback (algebraMap R KE (algebraMap (Polynomial K) R Polynomial.X))
         from rfl, hpx]
-  have hu_ne : alpha_star_u W (addIsog hxy hinj) ≠ 0 := by
-    rw [alpha_star_u_eq]
-    exact fun h ↦ u_gen_ne_zero W
-      ((addIsog hxy hinj).pullback_injective (h.trans (map_zero _).symm))
   have hu3_ne : 2 * addPullback_y_pair α₁ α₂ + algebraMap K KE W.a₁ * addPullback_x_pair α₁ α₂
-      + algebraMap K KE W.a₃ ≠ 0 := hu ▸ hu_ne
+      + algebraMap K KE W.a₃ ≠ 0 := hu ▸ alpha_star_u_ne_zero W (addIsog hxy hinj)
   apply omegaPullbackCoeff_unique
   rw [omegaPullbackCoeff_spec, hpx, hu,
     kaehler_D_addPullback_x_pair_eq_smul_omega W α₁ α₂ h_ne, smul_smul,
@@ -154,13 +146,9 @@ theorem omegaPullbackCoeff_mulByInt_succ (k : ℤ) (hk2 : 2 ≤ k) :
       = 2 * addPullback_y W (mulByInt W.toAffine k)
         + algebraMap K KE W.a₁ * addPullback_x W (mulByInt W.toAffine k) + algebraMap K KE W.a₃ := by
     rw [alpha_star_u_mulByInt W (k + 1) hk1, ← hAx, ← hAy]
-  have hu_ne : alpha_star_u W (mulByInt W.toAffine (k + 1)) ≠ 0 := by
-    rw [alpha_star_u_eq]
-    exact fun h ↦ u_gen_ne_zero W
-      ((mulByInt W.toAffine (k + 1)).pullback_injective (h.trans (map_zero _).symm))
   have hu3_ne : 2 * addPullback_y W (mulByInt W.toAffine k)
       + algebraMap K KE W.a₁ * addPullback_x W (mulByInt W.toAffine k) + algebraMap K KE W.a₃ ≠ 0 :=
-    hu ▸ hu_ne
+    hu ▸ alpha_star_u_ne_zero W (mulByInt W.toAffine (k + 1))
   -- `[k+1]*x = addPullback_x [k]` (mulByInt_pullback_x + RB-ID).
   have hpx : (mulByInt W.toAffine (k + 1)).pullback
         (algebraMap R KE (algebraMap (Polynomial K) R Polynomial.X))
@@ -190,6 +178,7 @@ theorem omegaPullbackCoeff_mulByInt_pos (n : ℤ) (hn : 1 ≤ n) :
   · subst h1; rw [mulByInt_one_eq_id, omegaPullbackCoeff_id, Int.cast_one, map_one]
   · exact omegaPullbackCoeff_mulByInt_ge_two W n (by omega)
 
+omit [Fintype K] in
 /-- **RB negation**: `a_{[-n]} = -a_{[n]}` for `n ≠ 0`. The `[-n]`-pullback of `x_gen`
 agrees with the `[n]`-pullback (`mulByInt_x_neg`), while `α*u` flips sign
 (`negY`-symmetry of `mulByInt_y`), so the spec equation flips sign and uniqueness
