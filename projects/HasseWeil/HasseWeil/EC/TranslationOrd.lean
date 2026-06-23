@@ -99,6 +99,52 @@ theorem XClass_mem_maximalIdealAt
   unfold Affine.CoordinateRing.XYIdeal
   exact Ideal.subset_span (Set.mem_insert _ _)
 
+/-! ### Generic order-positivity helpers (reused by both x- and y-sides) -/
+
+/-- **`0 ≤ ord_P P f` from `pointValuation P f ≤ 1`**: generic
+order-nonnegativity on any smooth plane curve. For a nonzero `f`, a
+valuation bounded by `1` forces the (negated) `toAdd` of the value to be
+nonpositive, hence the order is nonnegative. -/
+private theorem ord_P_nonneg_of_pointValuation_le_one
+    {C : SmoothPlaneCurve F} {P : C.SmoothPoint} {f : C.FunctionField}
+    (hf : f ≠ 0) (h_v_le : C.pointValuation P f ≤ 1) :
+    (0 : WithTop ℤ) ≤ C.ord_P P f := by
+  have hv : C.pointValuation P f ≠ 0 :=
+    (C.pointValuation P).ne_zero_iff.mpr hf
+  unfold SmoothPlaneCurve.ord_P
+  rw [dif_neg hv]
+  rw [show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl,
+      WithTop.coe_le_coe]
+  have h_unz_le : WithZero.unzero hv ≤ 1 := by
+    rw [← WithZero.coe_le_coe, WithZero.coe_one, WithZero.coe_unzero]
+    exact h_v_le
+  have h_toAdd : (WithZero.unzero hv).toAdd ≤ 0 := by
+    have h1 : ((1 : Multiplicative ℤ)).toAdd = (0 : ℤ) := rfl
+    have h2 : Multiplicative.toAdd (WithZero.unzero hv) ≤
+        Multiplicative.toAdd (1 : Multiplicative ℤ) := h_unz_le
+    rw [h1] at h2
+    exact h2
+  omega
+
+/-- **`1 ≤ ord_P P f` from `0 ≤ ord_P P f`, `ord_P P f ≠ 0` and
+`ord_P P f ≠ ⊤`**: generic order strict-positivity on any smooth plane
+curve. A nonnegative, nonzero, finite order is at least `1`. -/
+private theorem one_le_ord_P_of_nonneg_of_ne_zero
+    {C : SmoothPlaneCurve F} {P : C.SmoothPoint} {f : C.FunctionField}
+    (h_nonneg : (0 : WithTop ℤ) ≤ C.ord_P P f)
+    (h_ne_zero : C.ord_P P f ≠ 0) (h_ne_top : C.ord_P P f ≠ ⊤) :
+    ((1 : ℤ) : WithTop ℤ) ≤ C.ord_P P f := by
+  cases h : C.ord_P P f with
+  | top => exact absurd h h_ne_top
+  | coe n =>
+      rw [h] at h_nonneg h_ne_zero
+      have hn0 : (0 : ℤ) ≤ n := by exact_mod_cast h_nonneg
+      have hn_ne : n ≠ 0 := by
+        intro hn
+        apply h_ne_zero
+        rw [hn]; rfl
+      exact_mod_cast (show (1 : ℤ) ≤ n by omega)
+
 /-! ### Order at `−T` of `x_gen − xk` is positive -/
 
 /-- **Foundational ord-positivity at `−T`**: at the smooth point
@@ -128,36 +174,13 @@ theorem one_le_ord_P_x_gen_sub_const
       (IsFractionRing.injective W.toAffine.CoordinateRing KE)).mpr hu_ne
   have h_ord_nonneg : (0 : WithTop ℤ) ≤
       (W_smooth W).ord_P P
-        (algebraMap W.toAffine.CoordinateRing KE u) := by
-    have hv : (W_smooth W).pointValuation P
-        (algebraMap W.toAffine.CoordinateRing KE u) ≠ 0 :=
-      ((W_smooth W).pointValuation P).ne_zero_iff.mpr h_au_ne
-    unfold SmoothPlaneCurve.ord_P
-    rw [dif_neg hv]
-    rw [show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl,
-        WithTop.coe_le_coe]
-    have h_unz_le : WithZero.unzero hv ≤ 1 := by
-      rw [← WithZero.coe_le_coe, WithZero.coe_one, WithZero.coe_unzero]
-      exact (W_smooth W).pointValuation_algebraMap_le_one u P
-    have h_toAdd : (WithZero.unzero hv).toAdd ≤ 0 := by
-      have h2 : Multiplicative.toAdd (WithZero.unzero hv) ≤
-          Multiplicative.toAdd (1 : Multiplicative ℤ) := h_unz_le
-      rwa [show ((1 : Multiplicative ℤ)).toAdd = (0 : ℤ) from rfl] at h2
-    omega
+        (algebraMap W.toAffine.CoordinateRing KE u) :=
+    ord_P_nonneg_of_pointValuation_le_one h_au_ne
+      ((W_smooth W).pointValuation_algebraMap_le_one u P)
   have h_ne_top : (W_smooth W).ord_P P
       (algebraMap W.toAffine.CoordinateRing KE u) ≠ ⊤ :=
     (SmoothPlaneCurve.ord_P_eq_top_iff _).not.mpr h_au_ne
-  cases h : (W_smooth W).ord_P P
-      (algebraMap W.toAffine.CoordinateRing KE u) with
-  | top => exact absurd h h_ne_top
-  | coe n =>
-      rw [h] at h_ord_nonneg h_ord_ne_zero
-      have hn0 : (0 : ℤ) ≤ n := by exact_mod_cast h_ord_nonneg
-      have hn_ne : n ≠ 0 := by
-        intro hn
-        apply h_ord_ne_zero
-        rw [hn]; rfl
-      exact_mod_cast (show (1 : ℤ) ≤ n by omega)
+  exact one_le_ord_P_of_nonneg_of_ne_zero h_ord_nonneg h_ord_ne_zero h_ne_top
 
 /-! ### `ord_P (x_gen − xk) ≤ 1` at `−T` for non-2-torsion `T`
 
@@ -557,50 +580,6 @@ theorem YClass_mem_maximalIdealAt
     Affine.CoordinateRing.XYIdeal W.toAffine P.x (Polynomial.C P.y)
   unfold Affine.CoordinateRing.XYIdeal
   exact Ideal.subset_span (Set.mem_insert_of_mem _ rfl)
-
-/-- **`0 ≤ ord_P P f` from `pointValuation P f ≤ 1`**: generic
-order-nonnegativity on any smooth plane curve. For a nonzero `f`, a
-valuation bounded by `1` forces the (negated) `toAdd` of the value to be
-nonpositive, hence the order is nonnegative. -/
-private theorem ord_P_nonneg_of_pointValuation_le_one
-    {C : SmoothPlaneCurve F} {P : C.SmoothPoint} {f : C.FunctionField}
-    (hf : f ≠ 0) (h_v_le : C.pointValuation P f ≤ 1) :
-    (0 : WithTop ℤ) ≤ C.ord_P P f := by
-  have hv : C.pointValuation P f ≠ 0 :=
-    (C.pointValuation P).ne_zero_iff.mpr hf
-  unfold SmoothPlaneCurve.ord_P
-  rw [dif_neg hv]
-  rw [show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl,
-      WithTop.coe_le_coe]
-  have h_unz_le : WithZero.unzero hv ≤ 1 := by
-    rw [← WithZero.coe_le_coe, WithZero.coe_one, WithZero.coe_unzero]
-    exact h_v_le
-  have h_toAdd : (WithZero.unzero hv).toAdd ≤ 0 := by
-    have h1 : ((1 : Multiplicative ℤ)).toAdd = (0 : ℤ) := rfl
-    have h2 : Multiplicative.toAdd (WithZero.unzero hv) ≤
-        Multiplicative.toAdd (1 : Multiplicative ℤ) := h_unz_le
-    rw [h1] at h2
-    exact h2
-  omega
-
-/-- **`1 ≤ ord_P P f` from `0 ≤ ord_P P f`, `ord_P P f ≠ 0` and
-`ord_P P f ≠ ⊤`**: generic order strict-positivity on any smooth plane
-curve. A nonnegative, nonzero, finite order is at least `1`. -/
-private theorem one_le_ord_P_of_nonneg_of_ne_zero
-    {C : SmoothPlaneCurve F} {P : C.SmoothPoint} {f : C.FunctionField}
-    (h_nonneg : (0 : WithTop ℤ) ≤ C.ord_P P f)
-    (h_ne_zero : C.ord_P P f ≠ 0) (h_ne_top : C.ord_P P f ≠ ⊤) :
-    ((1 : ℤ) : WithTop ℤ) ≤ C.ord_P P f := by
-  cases h : C.ord_P P f with
-  | top => exact absurd h h_ne_top
-  | coe n =>
-      rw [h] at h_nonneg h_ne_zero
-      have hn0 : (0 : ℤ) ≤ n := by exact_mod_cast h_nonneg
-      have hn_ne : n ≠ 0 := by
-        intro hn
-        apply h_ne_zero
-        rw [hn]; rfl
-      exact_mod_cast (show (1 : ℤ) ≤ n by omega)
 
 /-- **Foundational ord-positivity for the y-side**: at any smooth point
 `P` of `W_smooth W` with `P.y = yk'`, the function `y_gen − yk'` has order
