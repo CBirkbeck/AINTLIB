@@ -337,6 +337,71 @@ private lemma addPullback_x_quadratic_over_F (h_alg : IsAlgebraic F (addPullback
     ring
   · exact addPullback_x_quadratic_over_F_case_two h_alg hfin hmem
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] α in
+/-- Embedding identity for the quadratic discriminant `c₁² - 4·c₀`: pushing the two
+constants `c₁, c₀ : F` into `F(X) = FractionRing F[X]` and forming `α'² - 4·γ'` equals the
+image of the constant polynomial `C (c₁² - 4·c₀)` under `F[X] → F(X)`. Pure scalar-tower /
+`algebraMap` bookkeeping; no curve data is involved. -/
+private lemma algebraMap_sq_sub_four_eq_C_discr (c₁ c₀ : F) :
+    (algebraMap F (FractionRing (Polynomial F)) c₁) ^ 2 -
+        4 * algebraMap F (FractionRing (Polynomial F)) c₀ =
+      algebraMap (Polynomial F) (FractionRing (Polynomial F))
+        (Polynomial.C (c₁ ^ 2 - 4 * c₀)) := by
+  have h_alg_F_FX : ∀ x : F,
+      algebraMap F (FractionRing (Polynomial F)) x =
+      algebraMap (Polynomial F) (FractionRing (Polynomial F)) (Polynomial.C x) := by
+    intro x
+    rw [IsScalarTower.algebraMap_apply F (Polynomial F) (FractionRing (Polynomial F))]
+    rfl
+  rw [h_alg_F_FX c₁, h_alg_F_FX c₀, ← map_pow, ← Polynomial.C_pow,
+    show (4 : FractionRing (Polynomial F)) =
+      algebraMap (Polynomial F) (FractionRing (Polynomial F)) (4 : Polynomial F) from
+    (map_ofNat _ 4).symm, ← map_mul, ← map_sub]
+  congr 1
+  change Polynomial.C (c₁ ^ 2) - (4 : Polynomial F) * Polynomial.C c₀ =
+    Polynomial.C (c₁ ^ 2 - 4 * c₀)
+  rw [show (4 : Polynomial F) = Polynomial.C (4 : F) from
+    (map_ofNat Polynomial.C 4).symm, ← Polynomial.C_mul, ← Polynomial.C_sub]
+
+omit [DecidableEq F] [W.toAffine.IsElliptic] α in
+/-- Degree-parity contradiction closing the `px ∉ F(x_gen)` case. From the polynomial
+identity `C (c₁² - 4·c₀) · v² = u² · Δ` with `u, v ≠ 0` (and `Δ = C.polynomialDiscriminant`
+of degree 3 in char ≠ 2), the left side has even degree `2·deg v` while the right has odd
+degree `2·deg u + 3`; if instead `c₁² - 4·c₀ = 0` then `u² = 0` or `Δ = 0`, both impossible.
+-/
+private lemma false_of_C_discr_mul_sq_eq_sq_mul_polynomialDiscriminant [NeZero (2 : F)]
+    (C : HasseWeil.Curves.SmoothPlaneCurve F) (c₁ c₀ : F) {u v : Polynomial F}
+    (hu_ne : u ≠ 0) (hv_ne : v ≠ 0)
+    (h_polyEq : Polynomial.C (c₁ ^ 2 - 4 * c₀) * v ^ 2 =
+      u ^ 2 * C.polynomialDiscriminant) :
+    False := by
+  by_cases hΔ : c₁ ^ 2 - 4 * c₀ = 0
+  · rw [hΔ, Polynomial.C_0, zero_mul] at h_polyEq
+    rcases mul_eq_zero.mp h_polyEq.symm with h | h
+    · exact hu_ne (pow_eq_zero_iff (n := 2) (by decide : 2 ≠ 0) |>.mp h)
+    · exact C.polynomialDiscriminant_ne_zero h
+  · have hC_ne : Polynomial.C (c₁ ^ 2 - 4 * c₀) ≠ 0 :=
+      Polynomial.C_ne_zero.mpr hΔ
+    have hD_natDeg : C.polynomialDiscriminant.natDegree = 3 :=
+      C.polynomialDiscriminant_natDegree
+    have hLHS_natDeg :
+        (Polynomial.C (c₁ ^ 2 - 4 * c₀) * v ^ 2).natDegree =
+          2 * v.natDegree := by
+      rw [Polynomial.natDegree_mul hC_ne (pow_ne_zero 2 hv_ne),
+        Polynomial.natDegree_C, Polynomial.natDegree_pow]
+      lia
+    have hRHS_natDeg :
+        (u ^ 2 * C.polynomialDiscriminant).natDegree =
+          2 * u.natDegree + 3 := by
+      rw [Polynomial.natDegree_mul (pow_ne_zero 2 hu_ne)
+          C.polynomialDiscriminant_ne_zero,
+        Polynomial.natDegree_pow, hD_natDeg]
+    have hdeg_eq : 2 * v.natDegree = 2 * u.natDegree + 3 := by
+      have := congrArg Polynomial.natDegree h_polyEq
+      rw [hLHS_natDeg, hRHS_natDeg] at this
+      exact this
+    lia
+
 private lemma minpoly_not_const_degree_two [NeZero (2 : F)] (c₁ c₀ : F)
     (heval : (addPullback_x W α) ^ 2 -
       algebraMap F KE c₁ * addPullback_x W α + algebraMap F KE c₀ = 0)
@@ -391,24 +456,8 @@ private lemma minpoly_not_const_degree_two [NeZero (2 : F)] (c₁ c₀ : F)
       p q α' γ' hE2' hγ_form
   have h_αsq_4γ : α' ^ 2 - 4 * γ' =
       algebraMap (Polynomial F) (FractionRing (Polynomial F))
-        (Polynomial.C (c₁ ^ 2 - 4 * c₀)) := by
-    have h_alg_F_FX : ∀ x : F,
-        algebraMap F (FractionRing (Polynomial F)) x =
-        algebraMap (Polynomial F) (FractionRing (Polynomial F)) (Polynomial.C x) := by
-      intro x
-      rw [IsScalarTower.algebraMap_apply F (Polynomial F) (FractionRing (Polynomial F))]
-      rfl
-    change (algebraMap F (FractionRing (Polynomial F)) c₁) ^ 2 -
-        4 * algebraMap F (FractionRing (Polynomial F)) c₀ = _
-    rw [h_alg_F_FX c₁, h_alg_F_FX c₀, ← map_pow, ← Polynomial.C_pow,
-      show (4 : FractionRing (Polynomial F)) =
-        algebraMap (Polynomial F) (FractionRing (Polynomial F)) (4 : Polynomial F) from
-      (map_ofNat _ 4).symm, ← map_mul, ← map_sub]
-    congr 1
-    change Polynomial.C (c₁ ^ 2) - (4 : Polynomial F) * Polynomial.C c₀ =
-      Polynomial.C (c₁ ^ 2 - 4 * c₀)
-    rw [show (4 : Polynomial F) = Polynomial.C (4 : F) from
-      (map_ofNat Polynomial.C 4).symm, ← Polynomial.C_mul, ← Polynomial.C_sub]
+        (Polynomial.C (c₁ ^ 2 - 4 * c₀)) :=
+    algebraMap_sq_sub_four_eq_C_discr c₁ c₀
   rw [h_αsq_4γ] at hDid
   obtain ⟨u, v, _hcop, hmk⟩ :=
     IsFractionRing.exists_reduced_fraction (A := Polynomial F)
@@ -446,32 +495,7 @@ private lemma minpoly_not_const_degree_two [NeZero (2 : F)] (c₁ c₀ : F)
     rcases mul_eq_zero.mp hq_v_eq_u with h | h
     · exact hq_ne h
     · exact hav_ne h
-  by_cases hΔ : c₁ ^ 2 - 4 * c₀ = 0
-  · rw [hΔ, Polynomial.C_0, zero_mul] at h_polyEq
-    rcases mul_eq_zero.mp h_polyEq.symm with h | h
-    · exact hu_ne (pow_eq_zero_iff (n := 2) (by decide : 2 ≠ 0) |>.mp h)
-    · exact C.polynomialDiscriminant_ne_zero h
-  · have hC_ne : Polynomial.C (c₁ ^ 2 - 4 * c₀) ≠ 0 :=
-      Polynomial.C_ne_zero.mpr hΔ
-    have hD_natDeg : C.polynomialDiscriminant.natDegree = 3 :=
-      C.polynomialDiscriminant_natDegree
-    have hLHS_natDeg :
-        (Polynomial.C (c₁ ^ 2 - 4 * c₀) * (v : Polynomial F) ^ 2).natDegree =
-          2 * (v : Polynomial F).natDegree := by
-      rw [Polynomial.natDegree_mul hC_ne (pow_ne_zero 2 hv_ne),
-        Polynomial.natDegree_C, Polynomial.natDegree_pow]
-      lia
-    have hRHS_natDeg :
-        (u ^ 2 * C.polynomialDiscriminant).natDegree =
-          2 * u.natDegree + 3 := by
-      rw [Polynomial.natDegree_mul (pow_ne_zero 2 hu_ne)
-          C.polynomialDiscriminant_ne_zero,
-        Polynomial.natDegree_pow, hD_natDeg]
-    have hdeg_eq : 2 * (v : Polynomial F).natDegree = 2 * u.natDegree + 3 := by
-      have := congrArg Polynomial.natDegree h_polyEq
-      rw [hLHS_natDeg, hRHS_natDeg] at this
-      exact this
-    lia
+  exact false_of_C_discr_mul_sq_eq_sq_mul_polynomialDiscriminant C c₁ c₀ hu_ne hv_ne h_polyEq
 
 /-- Image of a power-basis element `p • 1 + q • Y` under `addCoordRingHom`: it splits as
 `addBaseHom p + addBaseHom q * addPullback_y`, since the lift sends the basis generators
