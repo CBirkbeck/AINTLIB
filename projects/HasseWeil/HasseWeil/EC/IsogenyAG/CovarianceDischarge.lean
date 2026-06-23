@@ -846,6 +846,94 @@ private theorem relativeFrobenius_pullback_ω_ff (e : ℕ) (n : ℤ) :
   rw [h1, relativeFrobenius_pullback_coordRingMap p E e]
   rfl
 
+/-- `Frob_{p^e}^*` of the twisted `[n]`-`x`-coordinate is the `p^e`-th power of the original
+`[n]`-`x`-coordinate: `Frob*(mulByInt_x E^{(p^e)} n) = (mulByInt_x E n)^{p^e}`.  Unfolding
+`mulByInt_x = Φ_ff / ΨSq_ff` and pushing the pullback through the quotient reduces this to
+`relativeFrobenius_pullback_Φ_ff` and `relativeFrobenius_pullback_ΨSq_ff`. -/
+private theorem relativeFrobenius_pullback_mulByInt_x (e : ℕ) (n : ℤ) :
+    (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
+      (mulByInt_x (E.iterateFrobeniusTwist p e) n) = mulByInt_x E n ^ p ^ e := by
+  have hdiv : (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
+      (Φ_ff (E.iterateFrobeniusTwist p e) n /
+        ΨSq_ff (E.iterateFrobeniusTwist p e) n) =
+      (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
+        (Φ_ff (E.iterateFrobeniusTwist p e) n) /
+      (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
+        (ΨSq_ff (E.iterateFrobeniusTwist p e) n) := map_div₀ _ _ _
+  rw [show mulByInt_x (E.iterateFrobeniusTwist p e) n =
+      Φ_ff (E.iterateFrobeniusTwist p e) n /
+        ΨSq_ff (E.iterateFrobeniusTwist p e) n from rfl,
+    hdiv, relativeFrobenius_pullback_Φ_ff p E e n,
+    relativeFrobenius_pullback_ΨSq_ff p E e n, ← div_pow]
+  rfl
+
+/-- `Frob_{p^e}^*` of the twisted `[n]`-`y`-coordinate is the `p^e`-th power of the original
+`[n]`-`y`-coordinate: `Frob*(mulByInt_y E^{(p^e)} n) = (mulByInt_y E n)^{p^e}`.  Unfolding
+`mulByInt_y = ω_ff / ψ_ff^3` and pushing the pullback through the quotient and the cube
+reduces this to `relativeFrobenius_pullback_ω_ff` and `relativeFrobenius_pullback_ψ_ff`. -/
+private theorem relativeFrobenius_pullback_mulByInt_y (e : ℕ) (n : ℤ) :
+    (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
+      (mulByInt_y (E.iterateFrobeniusTwist p e) n) = mulByInt_y E n ^ p ^ e := by
+  have hdiv : (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
+      (ω_ff (E.iterateFrobeniusTwist p e) n /
+        ψ_ff (E.iterateFrobeniusTwist p e) n ^ 3) =
+      (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
+        (ω_ff (E.iterateFrobeniusTwist p e) n) /
+      (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
+        (ψ_ff (E.iterateFrobeniusTwist p e) n ^ 3) := map_div₀ _ _ _
+  have hpow3 : (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
+      (ψ_ff (E.iterateFrobeniusTwist p e) n ^ 3) =
+      (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
+        (ψ_ff (E.iterateFrobeniusTwist p e) n) ^ 3 := map_pow _ _ _
+  rw [show mulByInt_y (E.iterateFrobeniusTwist p e) n =
+      ω_ff (E.iterateFrobeniusTwist p e) n /
+        ψ_ff (E.iterateFrobeniusTwist p e) n ^ 3 from rfl,
+    hdiv, hpow3, relativeFrobenius_pullback_ω_ff p E e n,
+    relativeFrobenius_pullback_ψ_ff p E e n, pow_right_comm, ← div_pow]
+  rfl
+
+/-- The `x`-generator instance of the relative-Frobenius `[n]`-pullback covariance: both sides
+equal `(mulByInt_x E n)^{p^e}` — the left by `Frob* x_gen' = x_gen^{p^e}`, the ring-hom
+power law and `mulByInt_pullbackAlgHom_x_gen`; the right by
+`relativeFrobenius_pullback_mulByInt_x`. -/
+private theorem relativeFrobenius_mulByIntPullbackCovariant_x_gen (e : ℕ) (n : ℤ)
+    (hn : n ≠ 0) :
+    HasseWeil.mulByInt_pullbackAlgHom E.toAffine n hn
+        ((Isogeny.relativeFrobenius p E e).toCurveMap.pullback
+          (x_gen (E.iterateFrobeniusTwist p e))) =
+      (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
+        (mulByInt_x (E.iterateFrobeniusTwist p e) n) := by
+  have h1 : (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
+      (x_gen (E.iterateFrobeniusTwist p e)) = x_gen E ^ p ^ e :=
+    relativeFrobenius_pullback_x_gen p E e
+  have h2 : HasseWeil.mulByInt_pullbackAlgHom E.toAffine n hn (x_gen E ^ p ^ e) =
+      HasseWeil.mulByInt_pullbackAlgHom E.toAffine n hn (x_gen E) ^ p ^ e :=
+    map_pow _ _ _
+  have h3 : HasseWeil.mulByInt_pullbackAlgHom E.toAffine n hn (x_gen E) =
+      mulByInt_x E n := HasseWeil.mulByInt_pullbackAlgHom_x_gen E n hn
+  rw [h1, h2, h3, relativeFrobenius_pullback_mulByInt_x]
+
+/-- The `y`-generator instance of the relative-Frobenius `[n]`-pullback covariance: both sides
+equal `(mulByInt_y E n)^{p^e}` — the left by `Frob* y_gen' = y_gen^{p^e}`, the ring-hom
+power law and `mulByInt_pullbackAlgHom_y_gen`; the right by
+`relativeFrobenius_pullback_mulByInt_y`. -/
+private theorem relativeFrobenius_mulByIntPullbackCovariant_y_gen (e : ℕ) (n : ℤ)
+    (hn : n ≠ 0) :
+    HasseWeil.mulByInt_pullbackAlgHom E.toAffine n hn
+        ((Isogeny.relativeFrobenius p E e).toCurveMap.pullback
+          (y_gen (E.iterateFrobeniusTwist p e))) =
+      (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
+        (mulByInt_y (E.iterateFrobeniusTwist p e) n) := by
+  have h1 : (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
+      (y_gen (E.iterateFrobeniusTwist p e)) = y_gen E ^ p ^ e :=
+    relativeFrobenius_pullback_y_gen p E e
+  have h2 : HasseWeil.mulByInt_pullbackAlgHom E.toAffine n hn (y_gen E ^ p ^ e) =
+      HasseWeil.mulByInt_pullbackAlgHom E.toAffine n hn (y_gen E) ^ p ^ e :=
+    map_pow _ _ _
+  have h3 : HasseWeil.mulByInt_pullbackAlgHom E.toAffine n hn (y_gen E) =
+      mulByInt_y E n := HasseWeil.mulByInt_pullbackAlgHom_y_gen E n hn
+  rw [h1, h2, h3, relativeFrobenius_pullback_mulByInt_y]
+
 /-- **The relative Frobenius satisfies the `[n]`-pullback covariance** (Silverman III.4.8
 for `Frob_{p^e} : E → E^{(p^e)}`, the cross-curve case), unconditionally and for every
 `n ≠ 0`: `[n]*_E ∘ Frob* = Frob* ∘ [n]*_{E^{(p^e)}}`.  On the generators both sides are
@@ -854,62 +942,10 @@ and ring-hom arithmetic, the right by the division-polynomial twist-compatibilit
 (`relativeFrobenius_pullback_Φ_ff` and friends).  This discharges the covariance input of
 the relative-Frobenius double dual named in `CanonicalDual.lean`. -/
 theorem Isogeny.relativeFrobenius_mulByIntPullbackCovariant (e : ℕ) (n : ℤ) (hn : n ≠ 0) :
-    (Isogeny.relativeFrobenius p E e).MulByIntPullbackCovariant n hn := by
-  refine Isogeny.mulByIntPullbackCovariant_of_x_y_gen _ n hn ?_ ?_
-  · -- the `x`-generator equation: both sides are `(mulByInt_x E n)^{p^e}`
-    have h1 : (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
-        (x_gen (E.iterateFrobeniusTwist p e)) = x_gen E ^ p ^ e :=
-      relativeFrobenius_pullback_x_gen p E e
-    have h2 : HasseWeil.mulByInt_pullbackAlgHom E.toAffine n hn (x_gen E ^ p ^ e) =
-        HasseWeil.mulByInt_pullbackAlgHom E.toAffine n hn (x_gen E) ^ p ^ e :=
-      map_pow _ _ _
-    have h3 : HasseWeil.mulByInt_pullbackAlgHom E.toAffine n hn (x_gen E) =
-        mulByInt_x E n := HasseWeil.mulByInt_pullbackAlgHom_x_gen E n hn
-    have hdiv : (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
-        (Φ_ff (E.iterateFrobeniusTwist p e) n /
-          ΨSq_ff (E.iterateFrobeniusTwist p e) n) =
-        (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
-          (Φ_ff (E.iterateFrobeniusTwist p e) n) /
-        (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
-          (ΨSq_ff (E.iterateFrobeniusTwist p e) n) := map_div₀ _ _ _
-    have hX : (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
-        (mulByInt_x (E.iterateFrobeniusTwist p e) n) = mulByInt_x E n ^ p ^ e := by
-      rw [show mulByInt_x (E.iterateFrobeniusTwist p e) n =
-          Φ_ff (E.iterateFrobeniusTwist p e) n /
-            ΨSq_ff (E.iterateFrobeniusTwist p e) n from rfl,
-        hdiv, relativeFrobenius_pullback_Φ_ff p E e n,
-        relativeFrobenius_pullback_ΨSq_ff p E e n, ← div_pow]
-      rfl
-    rw [h1, h2, h3, hX]
-  · -- the `y`-generator equation: both sides are `(mulByInt_y E n)^{p^e}`
-    have h1 : (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
-        (y_gen (E.iterateFrobeniusTwist p e)) = y_gen E ^ p ^ e :=
-      relativeFrobenius_pullback_y_gen p E e
-    have h2 : HasseWeil.mulByInt_pullbackAlgHom E.toAffine n hn (y_gen E ^ p ^ e) =
-        HasseWeil.mulByInt_pullbackAlgHom E.toAffine n hn (y_gen E) ^ p ^ e :=
-      map_pow _ _ _
-    have h3 : HasseWeil.mulByInt_pullbackAlgHom E.toAffine n hn (y_gen E) =
-        mulByInt_y E n := HasseWeil.mulByInt_pullbackAlgHom_y_gen E n hn
-    have hdiv : (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
-        (ω_ff (E.iterateFrobeniusTwist p e) n /
-          ψ_ff (E.iterateFrobeniusTwist p e) n ^ 3) =
-        (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
-          (ω_ff (E.iterateFrobeniusTwist p e) n) /
-        (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
-          (ψ_ff (E.iterateFrobeniusTwist p e) n ^ 3) := map_div₀ _ _ _
-    have hpow3 : (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
-        (ψ_ff (E.iterateFrobeniusTwist p e) n ^ 3) =
-        (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
-          (ψ_ff (E.iterateFrobeniusTwist p e) n) ^ 3 := map_pow _ _ _
-    have hY : (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
-        (mulByInt_y (E.iterateFrobeniusTwist p e) n) = mulByInt_y E n ^ p ^ e := by
-      rw [show mulByInt_y (E.iterateFrobeniusTwist p e) n =
-          ω_ff (E.iterateFrobeniusTwist p e) n /
-            ψ_ff (E.iterateFrobeniusTwist p e) n ^ 3 from rfl,
-        hdiv, hpow3, relativeFrobenius_pullback_ω_ff p E e n,
-        relativeFrobenius_pullback_ψ_ff p E e n, pow_right_comm, ← div_pow]
-      rfl
-    rw [h1, h2, h3, hY]
+    (Isogeny.relativeFrobenius p E e).MulByIntPullbackCovariant n hn :=
+  Isogeny.mulByIntPullbackCovariant_of_x_y_gen _ n hn
+    (relativeFrobenius_mulByIntPullbackCovariant_x_gen p E e n hn)
+    (relativeFrobenius_mulByIntPullbackCovariant_y_gen p E e n hn)
 
 end RelativeFrobeniusCovariance
 
