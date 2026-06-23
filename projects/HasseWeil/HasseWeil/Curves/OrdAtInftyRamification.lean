@@ -309,6 +309,60 @@ theorem le_ordAtInfty_sum {ι : Type*} {C : SmoothPlaneCurve F} {c : WithTop ℤ
     (fun a b ha hb ↦ le_trans (le_min ha hb) (C.ordAtInfty_add_ge_min a b))
     (by simp) h
 
+/-- **The constant term of a vanishing polynomial, via `ψ`** (Horner rearrangement).
+If `z ∈ F(C₁)` is a root of `p ∈ F(C₂)[X]` (acting through `ψ`, i.e.
+`aeval z p = 0`), then the image of the constant term equals minus the sum of the
+higher-degree terms:
+
+  `ψ (p.coeff 0) = -∑_{i<deg p} p.coeff (i+1) • z^(i+1)`.
+
+Just `aeval_eq_sum_range` to write `0 = aeval z p` as a `Finset.range (deg+1)` sum,
+`Finset.sum_range_succ'` to peel off the `i = 0` (constant) term, then
+`eq_neg_of_add_eq_zero_right`. -/
+private theorem ringHom_coeff_zero_eq_neg_sum_of_aeval_eq_zero
+    (ψ : C₂.FunctionField →+* C₁.FunctionField) {z : C₁.FunctionField}
+    (p : Polynomial C₂.FunctionField)
+    (hp : letI : Algebra C₂.FunctionField C₁.FunctionField := ψ.toAlgebra
+      (Polynomial.aeval z) p = 0) :
+    letI : Algebra C₂.FunctionField C₁.FunctionField := ψ.toAlgebra
+    ψ (p.coeff 0) =
+      -∑ i ∈ Finset.range p.natDegree, p.coeff (i + 1) • z ^ (i + 1) := by
+  letI : Algebra C₂.FunctionField C₁.FunctionField := ψ.toAlgebra
+  rw [Polynomial.aeval_eq_sum_range, Finset.sum_range_succ'] at hp
+  have hconst : p.coeff 0 • (z ^ 0 : C₁.FunctionField) = ψ (p.coeff 0) := by
+    rw [pow_zero, Algebra.smul_def, mul_one, RingHom.algebraMap_toAlgebra]
+  rw [← hconst]
+  exact eq_neg_of_add_eq_zero_right hp
+
+/-- **Each higher monomial of an algebraic relation has order `≥ a`** at `O₁`.
+If `ord_∞ ∘ ψ` is trivial on `F(C₂)×` (`htriv`) and `ord_∞ z = a ≥ 0`, then for
+every coefficient `c ∈ F(C₂)` and every `i`, the term `c • z^(i+1)` (the algebra
+action through `ψ`) satisfies `a ≤ ord_∞ (c • z^(i+1))`.
+
+If `c = 0` the term is `0` (order `⊤`).  Otherwise `ord_∞(ψ c) = 0` (`htriv`) and
+`ord_∞ (z^(i+1)) = (i+1)·a`, so additivity gives order `(i+1)·a ≥ a` (as `a ≥ 0`). -/
+private theorem le_ordAtInfty_smul_pow_succ_of_ordAtInfty_eq_zero
+    (ψ : C₂.FunctionField →+* C₁.FunctionField)
+    (htriv : ∀ k : C₂.FunctionField, k ≠ 0 →
+      C₁.ordAtInfty (ψ k) = ((0 : ℤ) : WithTop ℤ))
+    {z : C₁.FunctionField} (hz : z ≠ 0) {a : ℤ}
+    (ha : C₁.ordAtInfty z = ((a : ℤ) : WithTop ℤ)) (ha_nonneg : 0 ≤ a)
+    (c : C₂.FunctionField) (i : ℕ) :
+    letI : Algebra C₂.FunctionField C₁.FunctionField := ψ.toAlgebra
+    ((a : ℤ) : WithTop ℤ) ≤ C₁.ordAtInfty (c • z ^ (i + 1)) := by
+  letI : Algebra C₂.FunctionField C₁.FunctionField := ψ.toAlgebra
+  rcases eq_or_ne c 0 with hc | hc
+  · rw [hc, zero_smul]
+    simp
+  · have hψc : ψ c ≠ 0 := (map_ne_zero ψ).mpr hc
+    have hzpow : z ^ (i + 1) ≠ 0 := pow_ne_zero _ hz
+    rw [Algebra.smul_def, RingHom.algebraMap_toAlgebra,
+      C₁.ordAtInfty_mul hψc hzpow, htriv _ hc, C₁.ordAtInfty_pow hz, ha,
+      coe_nsmul_int, ← WithTop.coe_add, WithTop.coe_le_coe]
+    have hi : (0 : ℤ) ≤ (i : ℤ) := Int.natCast_nonneg i
+    push_cast
+    nlinarith
+
 /-- If `ord_∞ ∘ ψ` vanishes on all of `F(C₂)×`, then no element of `F(C₁)` that
 is algebraic over the image of `ψ` can have *strictly positive* order at `O₁`.
 
@@ -327,47 +381,21 @@ private theorem not_ordAtInfty_pos_of_isAlgebraic
     (hpos : 0 < C₁.ordAtInfty z) : False := by
   letI : Algebra C₂.FunctionField C₁.FunctionField := ψ.toAlgebra
   have halg' : IsAlgebraic C₂.FunctionField z := halg
-  have hint : IsIntegral C₂.FunctionField z := halg'.isIntegral
   -- the (positive, integer) order of `z` at `O₁`
   obtain ⟨a, ha⟩ : ∃ a : ℤ, C₁.ordAtInfty z = ((a : ℤ) : WithTop ℤ) :=
     ⟨_, C₁.ordAtInfty_of_ne hz⟩
-  have ha_pos : 0 < a := by
-    rw [ha] at hpos
-    exact_mod_cast hpos
-  -- the minimal polynomial of `z` over `F(C₂)`, with nonzero constant term
+  have ha_pos : 0 < a := by rw [ha] at hpos; exact_mod_cast hpos
+  -- the minimal polynomial of `z` over `F(C₂)`, with nonzero constant term `a₀`
   set m : Polynomial C₂.FunctionField := minpoly C₂.FunctionField z with hm_def
-  have hc0 : m.coeff 0 ≠ 0 := minpoly.coeff_zero_ne_zero hint hz
-  have haev : (Polynomial.aeval z) m = 0 := minpoly.aeval _ _
-  rw [Polynomial.aeval_eq_sum_range, Finset.sum_range_succ'] at haev
-  -- isolate the constant term: `ψ a₀ = -(higher terms)`
-  have hconst : m.coeff 0 • (z ^ 0 : C₁.FunctionField) = ψ (m.coeff 0) := by
-    rw [pow_zero, Algebra.smul_def, mul_one, RingHom.algebraMap_toAlgebra]
-  have hkey : ψ (m.coeff 0) =
-      -∑ i ∈ Finset.range m.natDegree, m.coeff (i + 1) • z ^ (i + 1) := by
-    rw [← hconst]
-    exact eq_neg_of_add_eq_zero_right haev
-  -- every higher term has order at least `a` (`= 0 + (i+1)·a`)
-  have hterm : ∀ i ∈ Finset.range m.natDegree,
-      ((a : ℤ) : WithTop ℤ) ≤ C₁.ordAtInfty (m.coeff (i + 1) • z ^ (i + 1)) := by
-    intro i _
-    rcases eq_or_ne (m.coeff (i + 1)) 0 with hci | hci
-    · rw [hci, zero_smul]
-      simp
-    · have hψci : ψ (m.coeff (i + 1)) ≠ 0 := (map_ne_zero ψ).mpr hci
-      have hzpow : z ^ (i + 1) ≠ 0 := pow_ne_zero _ hz
-      rw [Algebra.smul_def, RingHom.algebraMap_toAlgebra,
-        C₁.ordAtInfty_mul hψci hzpow, htriv _ hci, C₁.ordAtInfty_pow hz, ha,
-        coe_nsmul_int, ← WithTop.coe_add, WithTop.coe_le_coe]
-      have hi : (0 : ℤ) ≤ (i : ℤ) := Int.natCast_nonneg i
-      push_cast
-      nlinarith
-  -- ultrametric: the sum of the higher terms has order ≥ a > 0 — but it is
-  -- `-ψ a₀`, of order 0
-  have hsum : ((a : ℤ) : WithTop ℤ) ≤
-      C₁.ordAtInfty (∑ i ∈ Finset.range m.natDegree, m.coeff (i + 1) • z ^ (i + 1)) :=
-    le_ordAtInfty_sum _ _ hterm
-  have h0 := htriv _ hc0
+  -- isolate the constant term: `ψ a₀ = -(higher terms)`, and `ord_∞(ψ a₀) = 0`
+  have hkey := ringHom_coeff_zero_eq_neg_sum_of_aeval_eq_zero ψ m (minpoly.aeval _ _)
+  have h0 := htriv _ (minpoly.coeff_zero_ne_zero halg'.isIntegral hz)
   rw [hkey, C₁.ordAtInfty_neg] at h0
+  -- ultrametric: each higher term has order `≥ a`, so does their sum — but it is
+  -- `-ψ a₀`, of order `0`, forcing `a ≤ 0`, contradicting `a > 0`.
+  have hsum := le_ordAtInfty_sum (Finset.range m.natDegree)
+    (fun i ↦ m.coeff (i + 1) • z ^ (i + 1)) fun i _ ↦
+      le_ordAtInfty_smul_pow_succ_of_ordAtInfty_eq_zero ψ htriv hz ha ha_pos.le _ i
   rw [h0, WithTop.coe_le_coe] at hsum
   omega
 
