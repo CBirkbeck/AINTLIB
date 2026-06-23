@@ -21,8 +21,8 @@ an integer multiple of `2π`, giving the integer-valuedness of the winding numbe
 
 ## Main results
 
-* `Complex.exists_continuous_arg_lift_of_avoids` — existence of continuous arg lift
-  for `γ : ℝ → ℂ` continuous on `[0,1]` avoiding `w`.
+* `Complex.exists_continuous_arg_lift_with_partition` — existence of a continuous arg lift
+  (together with its partition witness) for `γ : ℝ → ℂ` continuous on `[0,1]` avoiding `w`.
 
 ## Strategy
 
@@ -88,7 +88,7 @@ theorem mem_slitPlane_of_ball_one (z : ℂ) (hz : ‖z - 1‖ < 1 / 2) :
 
 /-! ### W-1 helpers (deferred main theorem)
 
-The main `exists_continuous_arg_lift_of_avoids` theorem is deferred — it uses
+The main `exists_continuous_arg_lift_with_partition` theorem is deferred — it uses
 the telescoping-sum approach with `Finset.sum` over `N` partition segments,
 each contributing `Im(log(segRatio j t))` where `segRatio j t` lies in
 `ball(1, 1/2) ⊆ slitPlane` by W-0 + `mem_slitPlane_of_ball_one`.
