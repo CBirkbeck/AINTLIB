@@ -445,6 +445,21 @@ theorem RationalLocData.completedPlusSubringBase_le_completedPlusSubring
   rw [RationalLocData.completedPlusSubring, Subalgebra.mem_toSubring]
   exact (integralClosure ↥(D.completedPlusSubringBase) (presheafValue D)).algebraMap_mem ⟨x, hx⟩
 
+/-- **`completedPlusSubringBase` is bounded** (the `A⁺`-based ring of integral elements is bounded;
+Wedhorn 7.19 + Def 7.14, the `A⁺`-analogue of `coeRingHom_image_locSubring_isBounded`/`ringOfDef`).
+This is one of the two `A⁺`-based localization-topology residuals of the IRIE interface (T-LA3);
+the deep `isIntegrallyClosed` field is now free via the integral-closure-in-completion refactor. -/
+theorem RationalLocData.completedPlusSubringBase_isBounded (D : RationalLocData A) [PlusSubring A] :
+    TopologicalRing.IsBounded (D.completedPlusSubringBase : Set (presheafValue D)) :=
+  sorry
+
+/-- **`completedPlusSubringBase` is open** (the `A⁺`-based ring of integral elements is open;
+Wedhorn 7.19, from `A⁺` open via `CompatiblePlusSubring.isOpen'`, the `A⁺`-analogue of
+`presheafValue_ringOfDef_isOpen`). The second `A⁺`-based localization-topology residual (T-LA3). -/
+theorem RationalLocData.completedPlusSubringBase_isOpen (D : RationalLocData A) [PlusSubring A] :
+    IsOpen (D.completedPlusSubringBase : Set (presheafValue D)) :=
+  sorry
+
 /-- `locPlusSubring ≤ C = (locPlusSubring)^int` (every element is integral over itself). -/
 theorem RationalLocData.locPlusSubring_le_integralClosure (D : RationalLocData A) [PlusSubring A] :
     D.locPlusSubring ≤ (integralClosure ↥(D.locPlusSubring) (Localization.Away D.s)).toSubring := by
@@ -514,10 +529,14 @@ subring) is essential — risk #1. -/
 instance RationalLocData.presheafValuePlus_isRingOfIntegralElements
     (D : RationalLocData A) [PlusSubring A] :
     IsRingOfIntegralElements ((presheafValue D)⁺) where
-  -- `B⁺ ⊇ completedPlusSubringBase`, which is open (`A⁺` open ⟹ the `A⁺`-integral base is open;
-  -- Wedhorn 7.19, via `CompatiblePlusSubring.isOpen'`). An integral closure of an open subring is
-  -- open (it contains the open subring). [T-LA3 isOpen residual.]
-  isOpen := sorry
+  -- `B⁺ = integralClosure(base) ⊇ completedPlusSubringBase`, which is open; a subring containing
+  -- an open neighbourhood of `0` is open. Reduced to `completedPlusSubringBase_isOpen`.
+  isOpen := by
+    show IsOpen ((presheafValue D)⁺ : Set (presheafValue D))
+    change IsOpen (D.completedPlusSubring.toAddSubgroup : Set (presheafValue D))
+    exact AddSubgroup.isOpen_of_mem_nhds _ (Filter.mem_of_superset
+      (D.completedPlusSubringBase_isOpen.mem_nhds D.completedPlusSubringBase.zero_mem)
+      (fun x hx => D.completedPlusSubringBase_le_completedPlusSubring hx))
   -- **FREE under the refactor**: `B⁺ = (integralClosure ↥base (presheafValue D)).toSubring`, so an
   -- element integral over `B⁺` is integral over `base` (transitivity, `integralClosure` is integral
   -- over the base), hence lies in `integralClosure base = B⁺`. This is what the refactor buys: the
@@ -532,10 +551,16 @@ instance RationalLocData.presheafValuePlus_isRingOfIntegralElements
     letI := (integralClosure ↥(D.completedPlusSubringBase) (presheafValue D)).algebra
     exact isIntegral_trans
       (A := integralClosure ↥(D.completedPlusSubringBase) (presheafValue D)) a ha
-  -- `base ⊆ (presheafValue D)°` (`C ⊆ A_s°` by Lemma 7.20 + completion preserves power-bounded),
-  -- and the integral closure of a power-bounded set is power-bounded (integral over bounded ⟹
-  -- power-bounded). [T-LA3 subset_powerBounded residual.]
-  subset_powerBounded := sorry
+  -- `B⁺ = integralClosure(base)`: every element is integral over the bounded `completedPlusSubringBase`,
+  -- hence power-bounded (`IsBounded.isPowerBounded_of_isIntegral`). Reduced to
+  -- `completedPlusSubringBase_isBounded`.
+  subset_powerBounded := by
+    intro x hx
+    have hx_int : IsIntegral ↥(D.completedPlusSubringBase) x := by
+      have hx' : x ∈ D.completedPlusSubring := hx
+      rwa [RationalLocData.completedPlusSubring, Subalgebra.mem_toSubring,
+        mem_integralClosure_iff] at hx'
+    exact D.completedPlusSubringBase_isBounded.isPowerBounded_of_isIntegral hx_int
 
 /-- The canonical map `A →+* presheafValue D` sends `A⁺` into `B⁺`. -/
 theorem RationalLocData.canonicalMap_integral (D : RationalLocData A)
