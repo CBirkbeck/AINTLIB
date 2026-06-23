@@ -95,7 +95,7 @@ private lemma neg_seg1_h_arc_slitPlane {z₀ : ℂ} (hz_re : z₀.re = 1/2)
     right
     rw [← h_eq]
     have hpi := Real.pi_pos
-    rw [show (fdArcAngle (1/5) : ℝ) = Real.pi / 3 from by unfold fdArcAngle; ring]
+    rw [show (fdArcAngle (1/5) : ℝ) = Real.pi / 3 by unfold fdArcAngle; ring]
     rw [exp_mul_I, ← ofReal_cos, ← ofReal_sin, Real.cos_pi_div_three, Real.sin_pi_div_three]
     simp only [Complex.neg_im, Complex.sub_im, Complex.add_im, Complex.mul_im,
       Complex.ofReal_re, Complex.ofReal_im, Complex.I_re, Complex.I_im,
@@ -201,7 +201,7 @@ private alias seg1_seg5_ftc := neg_vertSeg_h₅_ftc
 private lemma seg1_junction_15 (H : ℝ) (z₀ : ℂ) :
     seg1_h₀ H z₀ (1/5) = seg1_h_arc z₀ (1/5) := by
   unfold seg1_h₀ vertSeg_h₀ seg1_h_arc vertSeg_h_arc
-  rw [show (fdArcAngle (1/5) : ℝ) = Real.pi / 3 from by unfold fdArcAngle; ring,
+  rw [show (fdArcAngle (1/5) : ℝ) = Real.pi / 3 by unfold fdArcAngle; ring,
     exp_mul_I, ← ofReal_cos, ← ofReal_sin, Real.cos_pi_div_three, Real.sin_pi_div_three]
   refine Complex.ext ?_ ?_ <;> simp
 
@@ -232,8 +232,8 @@ private lemma seg1_log_diff_eq_neg_pi_I {H : ℝ} (hH : Real.sqrt 3 / 2 < H)
         seg1Speed H * (seg1T₀ H z₀.im + δ) := by unfold seg1Speed; ring
     exact_mod_cast by rw [this, mul_add, seg1Speed_mul_t₀ hH]; ring
   rw [h_minus, h_plus,
-    show -(((seg1Speed H * δ : ℝ) : ℂ) * I) = ((seg1Speed H * δ : ℝ) : ℂ) * (-I) from by ring,
-    show -(((-(seg1Speed H * δ) : ℝ) : ℂ) * I) = ((seg1Speed H * δ : ℝ) : ℂ) * I from by
+    show -(((seg1Speed H * δ : ℝ) : ℂ) * I) = ((seg1Speed H * δ : ℝ) : ℂ) * (-I) by ring,
+    show -(((-(seg1Speed H * δ) : ℝ) : ℂ) * I) = ((seg1Speed H * δ : ℝ) : ℂ) * I by
       push_cast; ring]
   exact vertSeg_log_diff_neg_I_pi hKδ
 
