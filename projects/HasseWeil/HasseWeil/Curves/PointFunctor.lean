@@ -123,13 +123,49 @@ noncomputable def evalAtPullback {φ : CurveMap C₁ C₂} (coordHom : φ.CoordH
     evalAtPullback coordHom P (algebraMap F C₂.CoordinateRing c) = c := by
   rw [evalAtPullback_apply, AlgHom.commutes, SmoothPlaneCurve.evalAt_algebraMap]
 
+/-- Extensionality for ring homs out of the bivariate polynomial ring
+`(F[X])[Y]`: two such homs are equal once they agree on the double-constant
+`C (C c)`, on the inner generator `C X`, and on the outer generator `Y`.
+
+This is the nested (`Polynomial`-over-`Polynomial`) analogue of
+`Polynomial.ringHom_ext`: applying that lemma at the outer `Y` layer and again
+at the inner `X` layer reduces equality to these three families of generators. -/
+private theorem ringHom_ext_bivariate {f g : Polynomial (Polynomial F) →+* F}
+    (hC : ∀ c : F, f (Polynomial.C (Polynomial.C c)) =
+      g (Polynomial.C (Polynomial.C c)))
+    (hX : f (Polynomial.C Polynomial.X) = g (Polynomial.C Polynomial.X))
+    (hY : f Polynomial.X = g Polynomial.X) : f = g := by
+  refine Polynomial.ringHom_ext (fun p ↦ ?_) hY
+  -- agree on `C p` for `p : F[X]`; reduce to `(f ∘ C) = (g ∘ C)` and apply
+  -- `Polynomial.ringHom_ext` again on the inner layer.
+  change f.comp Polynomial.C p = g.comp Polynomial.C p
+  congr 1
+  exact Polynomial.ringHom_ext hC hX
+
+/-- The composite `(F[X])[Y] →+* F` sending `g ↦ evalAtPullback coordHom P (mk g)`
+agrees with bivariate evaluation at the image coordinates on the three generators:
+it fixes double-constants `C (C c)` (via `evalAtPullback_algebraMap`) and sends
+`C X`, `Y` to the image coordinates `x'`, `y'` definitionally. -/
+private theorem evalAtPullback_comp_mk_double_C {φ : CurveMap C₁ C₂}
+    (coordHom : φ.CoordHom) (P : C₁.SmoothPoint) (c : F) :
+    (evalAtPullback coordHom P).comp
+      (WeierstrassCurve.Affine.CoordinateRing.mk C₂.toAffine)
+      (Polynomial.C (Polynomial.C c)) = c := by
+  change evalAtPullback coordHom P
+    (WeierstrassCurve.Affine.CoordinateRing.mk C₂.toAffine
+      (Polynomial.C (Polynomial.C c))) = c
+  rw [show WeierstrassCurve.Affine.CoordinateRing.mk C₂.toAffine
+      (Polynomial.C (Polynomial.C c)) = algebraMap F C₂.CoordinateRing c from rfl,
+    evalAtPullback_algebraMap]
+
 /-- **Universal property at the image point**: for any bivariate polynomial `g`,
 the value of `mk g ∈ F[C₂]` under `evalAtPullback` equals `g` evaluated
 bivariately at the image coordinates `(x', y')`.
 
-Proof: both sides are ring homs `(F[X])[Y] →+* F`; equality is by
-`Polynomial.ringHom_ext` applied at the outer (Y) and inner (X) layers, agreeing
-on constants in `F`, on the inner `X`, and on the outer `Y`. -/
+Proof: both sides are ring homs `(F[X])[Y] →+* F` — `ρ` factoring through
+`F[C₂]`, `σ` the bivariate evaluation at `(x', y')` — and they agree on the
+generators (`ringHom_ext_bivariate`): on double-constants by
+`evalAtPullback_comp_mk_double_C`, and on `C X`, `Y` definitionally. -/
 theorem evalAtPullback_mk {φ : CurveMap C₁ C₂} (coordHom : φ.CoordHom)
     (P : C₁.SmoothPoint) (g : Polynomial (Polynomial F)) :
     evalAtPullback coordHom P
@@ -148,44 +184,28 @@ theorem evalAtPullback_mk {φ : CurveMap C₁ C₂} (coordHom : φ.CoordHom)
   -- Two ring homs `(F[X])[Y] →+* F`:
   --   `ρ` factors through `F[C₂]`;
   --   `σ` is the bivariate evaluation at `(x', y')`.
-  let mk₂ := WeierstrassCurve.Affine.CoordinateRing.mk C₂.toAffine
   let ρ : Polynomial (Polynomial F) →+* F :=
-    (evalAtPullback coordHom P).comp mk₂
+    (evalAtPullback coordHom P).comp
+      (WeierstrassCurve.Affine.CoordinateRing.mk C₂.toAffine)
   let σ : Polynomial (Polynomial F) →+* F :=
     (Polynomial.evalRingHom x').comp (Polynomial.evalRingHom (Polynomial.C y'))
   change ρ g = σ g
   congr 1
-  refine Polynomial.ringHom_ext (fun p ↦ ?_) ?_
-  · -- agree on `C p` for `p : F[X]`; reduce to `(ρ ∘ C) = (σ ∘ C)` and apply
-    -- `Polynomial.ringHom_ext` again.
-    change ρ.comp Polynomial.C p = σ.comp Polynomial.C p
-    congr 1
-    refine Polynomial.ringHom_ext (fun c ↦ ?_) ?_
-    · change ρ (Polynomial.C (Polynomial.C c)) = σ (Polynomial.C (Polynomial.C c))
-      have hρ_c : ρ (Polynomial.C (Polynomial.C c)) = c := by
-        change evalAtPullback coordHom P
-          (mk₂ (Polynomial.C (Polynomial.C c))) = c
-        have h_alg : mk₂ (Polynomial.C (Polynomial.C c)) =
-            algebraMap F C₂.CoordinateRing c := rfl
-        rw [h_alg, evalAtPullback_algebraMap]
-      have hσ_c : σ (Polynomial.C (Polynomial.C c)) = c := by
-        change (Polynomial.evalRingHom x') ((Polynomial.evalRingHom
-          (Polynomial.C y')) (Polynomial.C (Polynomial.C c))) = c
-        simp
-      rw [hρ_c, hσ_c]
-    · change ρ (Polynomial.C Polynomial.X) = σ (Polynomial.C Polynomial.X)
-      have hρ_X : ρ (Polynomial.C Polynomial.X) = x' := rfl
-      have hσ_X : σ (Polynomial.C Polynomial.X) = x' := by
-        change (Polynomial.evalRingHom x') ((Polynomial.evalRingHom
-          (Polynomial.C y')) (Polynomial.C Polynomial.X)) = x'
-        simp
-      rw [hρ_X, hσ_X]
-  · have hρ_Y : ρ Polynomial.X = y' := rfl
-    have hσ_Y : σ Polynomial.X = y' := by
-      change (Polynomial.evalRingHom x') ((Polynomial.evalRingHom
-        (Polynomial.C y')) Polynomial.X) = y'
-      simp
-    rw [hρ_Y, hσ_Y]
+  refine ringHom_ext_bivariate (fun c ↦ ?_) ?_ ?_
+  · -- double-constants: both sides return `c`
+    rw [show ρ (Polynomial.C (Polynomial.C c)) = c from
+      evalAtPullback_comp_mk_double_C coordHom P c]
+    change c = (Polynomial.evalRingHom x') ((Polynomial.evalRingHom
+      (Polynomial.C y')) (Polynomial.C (Polynomial.C c)))
+    simp
+  · -- inner generator `C X`: `ρ` gives `x'` definitionally; `σ` reduces to `x'`
+    change x' = (Polynomial.evalRingHom x') ((Polynomial.evalRingHom
+      (Polynomial.C y')) (Polynomial.C Polynomial.X))
+    simp
+  · -- outer generator `Y`: `ρ` gives `y'` definitionally; `σ` reduces to `y'`
+    change y' = (Polynomial.evalRingHom x') ((Polynomial.evalRingHom
+      (Polynomial.C y')) Polynomial.X)
+    simp
 
 /-- The image point `(x', y')` satisfies the Weierstrass equation of `C₂`.
 Immediate from `evalAtPullback_mk` applied to `W₂.polynomial`, which vanishes
