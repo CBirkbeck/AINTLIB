@@ -147,12 +147,112 @@ noncomputable def translateCoordAlgHom (xk yk : F) (h_eq : W.toAffine.Equation x
 local notation "R" => W.toAffine.CoordinateRing
 
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
+/-- Image of a power-basis element `p • 1 + q • Y` under `translateCoordRingHom`: it
+splits as `translateBaseHom p + translateBaseHom q * translateY_xy`, since the
+`AdjoinRoot.lift` sends the basis generators to the translation-formula outputs.
+(Translation analogue of `addCoordRingHom_smulBasis`.) -/
+private theorem translateCoordRingHom_smulBasis (xk yk : F)
+    (h_eq : W.toAffine.Equation xk yk) (hxy : TranslateNonInverse W xk yk)
+    (p q : Polynomial F) :
+    translateCoordRingHom W xk yk h_eq hxy
+        (p • (1 : R) + q • Affine.CoordinateRing.mk W.toAffine Polynomial.X) =
+      translateBaseHom W xk yk p +
+        translateBaseHom W xk yk q * translateY_xy W xk yk := by
+  simp only [translateCoordRingHom, map_add]
+  congr 1
+  · change AdjoinRoot.lift _ _ _ (p • 1) = _
+    rw [Algebra.smul_def, mul_one]
+    exact AdjoinRoot.lift_of _
+  · change AdjoinRoot.lift _ _ _ (q • AdjoinRoot.root _) = _
+    rw [Algebra.smul_def, map_mul]
+    congr 1
+    · exact AdjoinRoot.lift_of _
+    · exact AdjoinRoot.lift_root _
+
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
+/-- On the image of the base ring `F[X]` (under `algebraMap _ R`), `translateCoordRingHom`
+agrees with `translateBaseHom`, since the `AdjoinRoot.lift` is defined by lifting that
+base hom along `AdjoinRoot.of`. -/
+private theorem translateCoordRingHom_algebraMap (xk yk : F)
+    (h_eq : W.toAffine.Equation xk yk) (hxy : TranslateNonInverse W xk yk)
+    (f : Polynomial F) :
+    translateCoordRingHom W xk yk h_eq hxy (algebraMap (Polynomial F) R f) =
+      translateBaseHom W xk yk f := by
+  change AdjoinRoot.lift _ _ _ (AdjoinRoot.of _ f) = _
+  exact AdjoinRoot.lift_of _
+
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
+/-- The norm of the power-basis element `p • 1 + q • Y`, pushed into the coordinate ring,
+factors as the element times its conjugate `C p + C q * (-Y - C (a₁X + a₃))`. This is a
+purely coordinate-ring statement (independent of the translation data). -/
+private theorem algebraMap_norm_smulBasis_eq_mul_conj (p q : Polynomial F) :
+    algebraMap (Polynomial F) R
+        (Algebra.norm (Polynomial F)
+          (p • (1 : R) + q • Affine.CoordinateRing.mk W.toAffine Polynomial.X)) =
+      (p • (1 : R) + q • Affine.CoordinateRing.mk W.toAffine Polynomial.X) *
+        Affine.CoordinateRing.mk W.toAffine
+          (Polynomial.C p + Polynomial.C q *
+            (-Polynomial.X - Polynomial.C
+              (Polynomial.C W.a₁ * Polynomial.X + Polynomial.C W.a₃))) := by
+  change AdjoinRoot.of _ _ = _
+  rw [Affine.CoordinateRing.coe_norm_smul_basis, map_mul]
+  congr 1
+  rw [map_add, map_mul]
+  simp [Algebra.smul_def]
+
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
+/-- The norm of the power-basis element `p • 1 + q • Y` is nonzero whenever `q ≠ 0`: its
+degree is `max (2·deg p) (2·deg q + 3)`, and the second summand is finite (`≠ ⊥`). This is
+a purely coordinate-ring statement (independent of the translation data). -/
+private theorem norm_smulBasis_ne_zero_of_snd_ne_zero (p : Polynomial F) {q : Polynomial F}
+    (hq : q ≠ 0) :
+    Algebra.norm (Polynomial F)
+        (p • (1 : R) + q • Affine.CoordinateRing.mk W.toAffine Polynomial.X) ≠ 0 := by
+  intro h_norm_eq
+  have h_deg := Affine.CoordinateRing.degree_norm_smul_basis (W' := W.toAffine) p q
+  rw [h_norm_eq, Polynomial.degree_zero] at h_deg
+  have hq_deg : q.degree ≠ ⊥ := Polynomial.degree_ne_bot.mpr hq
+  have hqd : 2 • q.degree + 3 ≠ (⊥ : WithBot ℕ) := by
+    intro h
+    apply hq_deg
+    cases hd : q.degree with
+    | bot => rfl
+    | coe n =>
+        rw [hd] at h
+        exact absurd h (by
+          change ¬ (2 • (↑n : WithBot ℕ) + 3 = ⊥)
+          simp [WithBot.mul_ne_bot])
+  exact absurd (h_deg ▸ le_max_right _ _ : 2 • q.degree + 3 ≤ ⊥)
+    (not_le.mpr (WithBot.bot_lt_iff_ne_bot.mpr hqd))
+
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
+/-- The base hom `translateBaseHom` sends the norm of a kernel element `p • 1 + q • Y` to
+`0`: the norm factors through the element via `algebraMap_norm_smulBasis_eq_mul_conj`, and
+the ring hom kills the element (hypothesis `hr`). -/
+private theorem translateBaseHom_norm_smulBasis_eq_zero (xk yk : F)
+    (h_eq : W.toAffine.Equation xk yk) (hxy : TranslateNonInverse W xk yk)
+    {p q : Polynomial F}
+    (hr : translateCoordRingHom W xk yk h_eq hxy
+      (p • (1 : R) + q • Affine.CoordinateRing.mk W.toAffine Polynomial.X) = 0) :
+    translateBaseHom W xk yk
+        (Algebra.norm (Polynomial F)
+          (p • (1 : R) + q • Affine.CoordinateRing.mk W.toAffine Polynomial.X)) = 0 := by
+  rw [← translateCoordRingHom_algebraMap W xk yk h_eq hxy,
+    algebraMap_norm_smulBasis_eq_mul_conj, map_mul, hr, zero_mul]
+
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Witness-parametric `translateCoordAlgHom_injective`**: takes the
 base-hom injectivity (`hxinj`) as an explicit hypothesis. Transposes
 `addCoordAlgHom_injective_of_baseHom_inj` to the translation-by-(xk,yk)
 case. The only α-specific parts of that proof were `addBaseHom W α` and
 `addPullback_y W α`; here they become `translateBaseHom W xk yk` and
-`translateY_xy W xk yk`. -/
+`translateY_xy W xk yk`.
+
+Outline: decompose `r = p • 1 + q • Y` on the rank-2 basis; its image splits via
+`translateCoordRingHom_smulBasis`. If `q = 0` the image vanishing is exactly `hxinj` on
+`p`; if `q ≠ 0` the norm `N(r) ≠ 0` (`norm_smulBasis_ne_zero_of_snd_ne_zero`) yet
+`translateBaseHom N(r) = 0` (`translateBaseHom_norm_smulBasis_eq_zero`), contradicting
+`hxinj`. -/
 theorem translateCoordAlgHom_injective_of_baseHom_inj (xk yk : F)
     (h_eq : W.toAffine.Equation xk yk) (hxy : TranslateNonInverse W xk yk)
     (hxinj : Function.Injective (translateBaseHom W xk yk)) :
@@ -161,73 +261,23 @@ theorem translateCoordAlgHom_injective_of_baseHom_inj (xk yk : F)
   rw [injective_iff_map_eq_zero]
   intro r hr
   obtain ⟨p, q, hpq⟩ := Affine.CoordinateRing.exists_smul_basis_eq r
-  have h_image : translateCoordRingHom W xk yk h_eq hxy r =
-      translateBaseHom W xk yk p +
-        translateBaseHom W xk yk q * translateY_xy W xk yk := by
-    rw [← hpq]
-    simp only [translateCoordRingHom, map_add]
-    congr 1
-    · change AdjoinRoot.lift _ _ _ (p • 1) = _
-      rw [Algebra.smul_def, mul_one]
-      exact AdjoinRoot.lift_of _
-    · change AdjoinRoot.lift _ _ _ (q • AdjoinRoot.root _) = _
-      rw [Algebra.smul_def, map_mul]
-      congr 1
-      · exact AdjoinRoot.lift_of _
-      · exact AdjoinRoot.lift_root _
-  rw [h_image] at hr
+  rw [← hpq] at hr ⊢
+  rw [translateCoordRingHom_smulBasis] at hr
   suffices hp : p = 0 ∧ q = 0 by
     obtain ⟨hp1, hp2⟩ := hp
-    rw [← hpq, hp1, hp2]
+    rw [hp1, hp2]
     change (0 : Polynomial F) • (1 : R) + (0 : Polynomial F) •
       Affine.CoordinateRing.mk W.toAffine Polynomial.X = 0
     rw [Algebra.smul_def, Algebra.smul_def, map_zero, zero_mul, zero_mul, add_zero]
   by_cases hq : q = 0
   · rw [hq, map_zero, zero_mul, add_zero] at hr
     exact ⟨hxinj (hr.trans (map_zero _).symm), hq⟩
-  · exfalso
-    set r' := p • (1 : R) + q • Affine.CoordinateRing.mk W.toAffine Polynomial.X with hr'_def
-    have h_alg : ∀ f : Polynomial F,
-        translateCoordRingHom W xk yk h_eq hxy
-            (algebraMap (Polynomial F) R f) = translateBaseHom W xk yk f := by
-      intro f
-      change AdjoinRoot.lift _ _ _ (AdjoinRoot.of _ f) = _
-      exact AdjoinRoot.lift_of _
-    set conj_r := Affine.CoordinateRing.mk W.toAffine
-      (Polynomial.C p + Polynomial.C q *
-        (-Polynomial.X - Polynomial.C
-          (Polynomial.C W.a₁ * Polynomial.X + Polynomial.C W.a₃))) with hconj_def
-    have h_factor : algebraMap (Polynomial F) R (Algebra.norm (Polynomial F) r') =
-        r' * conj_r := by
-      rw [hr'_def, hconj_def]
-      change AdjoinRoot.of _ _ = _
-      rw [Affine.CoordinateRing.coe_norm_smul_basis, map_mul]
-      congr 1
-      rw [map_add, map_mul]
-      simp [Algebra.smul_def]
-    have hr'_zero : translateCoordRingHom W xk yk h_eq hxy r' = 0 := by
-      rw [show r' = r from hpq]
-      exact h_image.trans hr
-    have h_norm_zero : translateBaseHom W xk yk (Algebra.norm (Polynomial F) r') = 0 := by
-      rw [← h_alg, h_factor, map_mul, hr'_zero, zero_mul]
-    have h_norm_eq : Algebra.norm (Polynomial F) r' = 0 :=
-      hxinj (h_norm_zero.trans (map_zero _).symm)
-    rw [hr'_def] at h_norm_eq
-    have h_deg := Affine.CoordinateRing.degree_norm_smul_basis (W' := W.toAffine) p q
-    rw [h_norm_eq, Polynomial.degree_zero] at h_deg
-    have hq_deg : q.degree ≠ ⊥ := Polynomial.degree_ne_bot.mpr hq
-    have : 2 • q.degree + 3 ≠ (⊥ : WithBot ℕ) := by
-      intro h
-      apply hq_deg
-      cases hd : q.degree with
-      | bot => rfl
-      | coe n =>
-          rw [hd] at h
-          exact absurd h (by
-            change ¬ (2 • (↑n : WithBot ℕ) + 3 = ⊥)
-            simp [WithBot.mul_ne_bot])
-    exact absurd (h_deg ▸ le_max_right _ _ : 2 • q.degree + 3 ≤ ⊥)
-      (not_le.mpr (WithBot.bot_lt_iff_ne_bot.mpr this))
+  · -- `q ≠ 0`: the norm of `p • 1 + q • Y` is nonzero, yet `translateBaseHom` sends it to
+    -- `0` (the ring hom kills the element), contradicting `hxinj`.
+    refine absurd ?_ (norm_smulBasis_ne_zero_of_snd_ne_zero (W := W) p hq)
+    refine hxinj (Eq.trans ?_ (map_zero _).symm)
+    exact translateBaseHom_norm_smulBasis_eq_zero W xk yk h_eq hxy
+      ((translateCoordRingHom_smulBasis W xk yk h_eq hxy p q).trans hr)
 
 /-- The translation algebra hom on `K(E)`, lifted from the coordinate-ring
 hom via `IsFractionRing.liftAlgHom`. Witness-parametric on the base-hom
