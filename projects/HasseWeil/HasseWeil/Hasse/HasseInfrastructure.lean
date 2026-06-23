@@ -725,7 +725,7 @@ theorem vertical_principal
         HasseWeil.Curves.ProjectiveSmoothPoint
           (⟨W.toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve K)) (1 : ℤ) =
       Finsupp.single HasseWeil.Curves.ProjectiveSmoothPoint.infinity 1 +
-        Finsupp.single HasseWeil.Curves.ProjectiveSmoothPoint.infinity 1 from by
+        Finsupp.single HasseWeil.Curves.ProjectiveSmoothPoint.infinity 1 by
     rw [show (2 : ℤ) = 1 + 1 from rfl, add_smul, one_smul]]
   abel
 
@@ -777,7 +777,7 @@ theorem line_principal
           (⟨W.toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve K)) (1 : ℤ) =
       Finsupp.single HasseWeil.Curves.ProjectiveSmoothPoint.infinity 1 +
         (2 : ℤ) • Finsupp.single
-          HasseWeil.Curves.ProjectiveSmoothPoint.infinity 1 from by
+          HasseWeil.Curves.ProjectiveSmoothPoint.infinity 1 by
     rw [show (3 : ℤ) = 1 + 2 from rfl, add_smul, one_smul]]
   abel
 
