@@ -40,9 +40,8 @@ private lemma normSq_sub_one_eq_of_re_halfFM (z : ℂ) (hre : z.re = 1/2) :
   ring
 
 private lemma norm_eq_of_normSq_eqFM {z w : ℂ}
-    (h : Complex.normSq z = Complex.normSq w) : ‖z‖ = ‖w‖ :=
-  (sq_eq_sq₀ (norm_nonneg z) (norm_nonneg w)).mp <| by
-    linarith [normSq_eq_norm_sq z, normSq_eq_norm_sq w]
+    (h : Complex.normSq z = Complex.normSq w) : ‖z‖ = ‖w‖ := by
+  rw [Complex.norm_def, Complex.norm_def, h]
 
 private lemma normSq_eq_one_of_norm_eq_oneFM {z : ℂ} (h : ‖z‖ = 1) :
     Complex.normSq z = 1 := by
@@ -155,19 +154,24 @@ lemma S_smul_S_smulFM (p : ℍ) : ModularGroup.S • (ModularGroup.S • p) = p 
 lemma S_smul_injectiveFM : Function.Injective (ModularGroup.S • · : ℍ → ℍ) :=
   Function.HasLeftInverse.injective ⟨(ModularGroup.S • ·), S_smul_S_smulFM⟩
 
+/-- Any `SL(2, ℤ)`-action preserves orbits: `orbFM(g • p) = orbFM(p)`. -/
+private lemma orbFM_smul_eqFM (g : SL(2, ℤ)) (p : ℍ) : orbFM (g • p) = orbFM p := by
+  change Quotient.mk'' (g • p) = Quotient.mk'' p
+  rw [Quotient.eq'', MulAction.orbitRel_apply, MulAction.mem_orbit_iff]
+  exact ⟨g, rfl⟩
+
 /-- T⁻¹-translation preserves orbits: `orbFM((-1)+ᵥp) = orbFM(p)`. -/
 lemma orb_vAdd_neg_one_eq (p : ℍ) :
     orbFM ((-1 : ℝ) +ᵥ p) = orbFM p := by
-  change Quotient.mk'' ((-1 : ℝ) +ᵥ p) = Quotient.mk'' p
-  rw [Quotient.eq'', MulAction.orbitRel_apply, MulAction.mem_orbit_iff]
-  exact ⟨ModularGroup.T⁻¹, by simpa using UpperHalfPlane.modular_T_zpow_smul p (-1)⟩
+  have h : ((-1 : ℝ) +ᵥ p) = ModularGroup.T⁻¹ • p := by
+    simpa using (UpperHalfPlane.modular_T_zpow_smul p (-1)).symm
+  rw [h]
+  exact orbFM_smul_eqFM _ p
 
 /-- S-action preserves orbits: `orbFM(S • p) = orbFM(p)`. -/
 lemma orb_S_smul_eq (p : ℍ) :
-    orbFM (ModularGroup.S • p) = orbFM p := by
-  change Quotient.mk'' (ModularGroup.S • p) = Quotient.mk'' p
-  rw [Quotient.eq'', MulAction.orbitRel_apply, MulAction.mem_orbit_iff]
-  exact ⟨ModularGroup.S, rfl⟩
+    orbFM (ModularGroup.S • p) = orbFM p :=
+  orbFM_smul_eqFM ModularGroup.S p
 
 /-- The left-vertical filter of S: points with `re = -1/2` and `‖p‖ > 1`. -/
 def sLeftVertFM (S : Finset ℍ) : Finset ℍ :=
@@ -248,7 +252,7 @@ theorem sum_ord_rightArc_eq_sum_ord_leftArcFM (S : Finset ℍ) (hS : ∀ p ∈ S
         (ord_S_eq f p ▸ ord_ne_zero_of_cast_ne_zeroFM hord),
       S_smul_norm_of_unitFM p hnorm, ?_⟩, ?_⟩
     · change (ModularGroup.S • p : ℍ).re < 0
-      rw [S_smul_re_neg_of_unitFM p hnorm, show p.re = (p : ℂ).re from rfl]
+      rw [S_smul_re_neg_of_unitFM p hnorm, ← UpperHalfPlane.coe_re]
       linarith
     · exact ord_S_eq f p ▸ hord
   · exact S_smul_injectiveFM.injOn
@@ -260,7 +264,7 @@ theorem sum_ord_rightArc_eq_sum_ord_leftArcFM (S : Finset ℍ) (hS : ∀ p ∈ S
         (ord_S_eq f q ▸ ord_ne_zero_of_cast_ne_zeroFM hord),
       S_smul_norm_of_unitFM q hnorm, ?_⟩, ?_⟩, S_smul_S_smulFM q⟩
     · change (ModularGroup.S • q : ℍ).re > 0
-      rw [S_smul_re_neg_of_unitFM q hnorm, show q.re = (q : ℂ).re from rfl]
+      rw [S_smul_re_neg_of_unitFM q hnorm, ← UpperHalfPlane.coe_re]
       linarith
     · exact ord_S_eq f q ▸ hord
   · exact fun p _ ↦ by rw [ord_S_eq f p]
