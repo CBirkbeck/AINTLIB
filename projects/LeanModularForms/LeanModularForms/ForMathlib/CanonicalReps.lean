@@ -52,7 +52,8 @@ noncomputable def repLeftVert : Finset ℍ := sLeftVertFM (s₀FM f hf)
 
 /-- Left arc representatives: points in `s₀` with `‖p‖ = 1`, `re < 0`, not `ρ`. -/
 noncomputable def repLeftArc : Finset ℍ :=
-  (s₀FM f hf).filter (fun p ↦ p ≠ ellipticPointRho' ∧ ‖(p : ℂ)‖ = 1 ∧ (p : ℂ).re < 0)
+  (s₀FM f hf).filter
+    (fun p ↦ p ≠ ellipticPointRho' ∧ ‖(p : ℂ)‖ = 1 ∧ (p : ℂ).re < 0)
 
 /-- The canonical representative finset: union of strict interior, left vertical, and left arc. -/
 noncomputable def repCanon : Finset ℍ :=
@@ -306,7 +307,7 @@ private lemma c_abs_le_one_of_smul_fd (g : SL(2, ℤ)) (p₁ p₂ : ℍ)
   have hp2_im := im_gt hp₂
   nlinarith [mul_pos (by linarith : (0:ℝ) < p₁.im - 1/2)
     (by linarith : (0:ℝ) < p₂.im - 1/2),
-    mul_nonneg (show (0 : ℝ) ≤ (↑c : ℝ) ^ 2 - 4 from by linarith)
+    mul_nonneg (show (0 : ℝ) ≤ (↑c : ℝ) ^ 2 - 4 by linarith)
       (mul_nonneg p₂.im_pos.le p₁.im_pos.le),
     sq_nonneg p₂.im, p₂.im_pos, p₁.im_pos]
 
@@ -366,7 +367,8 @@ private lemma injOn_c_ne_zero (g : SL(2, ℤ)) (p₁ p₂ : ℍ)
   have h_p1_nsq := normSq_eq_one_of_denom_one g⁻¹ p₁ hp₁_fd
     ((inv_c_sq_eq g).trans h_csq)
     (normSq_denom_one_of_im_eq g⁻¹ p₁ p₂ (inv_smul_eq_iff.mpr hg.symm) h_im_eq)
-  have nsq_to_norm : ∀ {p : ℍ}, Complex.normSq (p : ℂ) = 1 → ‖(p : ℂ)‖ = 1 := fun {p} hp ↦ by
+  have nsq_to_norm : ∀ {p : ℍ},
+      Complex.normSq (p : ℂ) = 1 → ‖(p : ℂ)‖ = 1 := fun {p} hp ↦ by
     nlinarith [Complex.normSq_eq_norm_sq (p : ℂ), norm_nonneg (p : ℂ),
       sq_nonneg (‖(p : ℂ)‖ - 1), hp]
   have h_p1_norm := nsq_to_norm h_p1_nsq
