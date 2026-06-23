@@ -14,6 +14,12 @@ import LeanModularForms.ForMathlib.ValenceFormula.Boundary.Smooth
 Infrastructure lemmas needed to apply `generalizedResidueTheorem'` to
 `logDeriv (modularFormCompOfComplex f)` on `fdBoundary_H H`.
 
+## Main definitions
+
+* `allZerosInFdBox` — the finite set of zeros of `f` inside `fdBox M`.
+* `logDerivPatched` — `logDeriv f` patched to its regular part at each pole, so that the
+  `ContinuousAt` hypothesis of `generalizedResidueTheorem'` holds.
+
 ## Main Results
 
 * `hasSimplePoleAt_logDeriv_of_zero'` — logDeriv f has `HasSimplePoleAt` at zeros
@@ -130,7 +136,7 @@ theorem hasSimplePoleAt_logDeriv_of_zero_full (s : ℍ) (hs : f s = 0) :
       convert ((hasDerivAt_id z).sub (hasDerivAt_const z (s : ℂ))).pow n using 1
       all_goals first | rfl | simp
     rw [logDeriv_apply, h_hd.deriv, div_eq_div_iff h_pow_ne_zero hzs, mul_assoc, ← pow_succ,
-      show n - 1 + 1 = n from by omega]
+      show n - 1 + 1 = n by omega]
   have h_eq_at_z : (modularFormCompOfComplex f) =ᶠ[𝓝 z]
       (fun w ↦ (w - (s : ℂ)) ^ n * g w) :=
     Filter.eventually_iff_exists_mem.mpr
@@ -375,9 +381,9 @@ lemma fdBoundary_H_norm_ge_one {H : ℝ} (hH : 1 ≤ H) (t : ℝ) (ht : t ∈ Ic
       have : |w.re| ^ 2 = (1/2 : ℝ) ^ 2 := by rw [hre]
       nlinarith [sq_abs w.re]
     refine norm_ge_one_of_normSq_ge_one ?_
-    rw [normSq_apply, show w.re * w.re = w.re ^ 2 from by ring, h_re_sq]
+    rw [normSq_apply, show w.re * w.re = w.re ^ 2 by ring, h_re_sq]
     nlinarith [mul_self_le_mul_self (by positivity : (0:ℝ) ≤ Real.sqrt 3 / 2) him,
-               Real.mul_self_sqrt (show (0:ℝ) ≤ 3 from by norm_num)]
+               Real.mul_self_sqrt (show (0:ℝ) ≤ 3 by norm_num)]
   by_cases h1 : t ≤ 1
   · rw [fdBoundary_H_eq_seg1_H h1]
     apply side _ (by simp [fdBoundary_seg1_H, mul_re, I_re, I_im, ofReal_re, ofReal_im, div_ofNat])
@@ -387,17 +393,17 @@ lemma fdBoundary_H_norm_ge_one {H : ℝ} (hH : 1 ≤ H) (t : ℝ) (ht : t ∈ Ic
     by_cases h3 : t ≤ 3
     · rw [fdBoundary_H_eq_fdBoundary_on_13 H (by linarith) h3]
       suffices ‖fdBoundary t‖ = 1 by linarith
-      simp only [fdBoundary, show ¬(t ≤ 1) from by linarith, ↓reduceIte]
+      simp only [fdBoundary, show ¬(t ≤ 1) by linarith, ↓reduceIte]
       split_ifs
       · change ‖fdBoundary_seg2 t‖ = 1
         unfold fdBoundary_seg2
         rw [show (↑Real.pi / 3 + (↑t - 1) * (↑Real.pi / 2 - ↑Real.pi / 3)) * I =
-            ↑(Real.pi / 3 + (t - 1) * (Real.pi / 2 - Real.pi / 3)) * I from by push_cast; ring]
+            ↑(Real.pi / 3 + (t - 1) * (Real.pi / 2 - Real.pi / 3)) * I by push_cast; ring]
         exact Complex.norm_exp_ofReal_mul_I _
       · change ‖fdBoundary_seg3 t‖ = 1
         unfold fdBoundary_seg3
         rw [show (↑Real.pi / 2 + (↑t - 2) * (2 * ↑Real.pi / 3 - ↑Real.pi / 2)) * I =
-            ↑(Real.pi / 2 + (t - 2) * (2 * Real.pi / 3 - Real.pi / 2)) * I from by push_cast; ring]
+            ↑(Real.pi / 2 + (t - 2) * (2 * Real.pi / 3 - Real.pi / 2)) * I by push_cast; ring]
         exact Complex.norm_exp_ofReal_mul_I _
     · push Not at h3
       by_cases h4 : t ≤ 4
@@ -558,9 +564,9 @@ lemma winding_zero_for_non_fd_point_H_geo (S : Finset UpperHalfPlane)
     have h_curve_sq_ge : ‖fdBoundary_H H t‖ ^ 2 ≥ 1 := by
       nlinarith [norm_nonneg (fdBoundary_H H t), fdBoundary_H_norm_ge_one hH t ht]
     have h_im_pos : 0 < (fdBoundary_H H t).im := fdBoundary_H_im_pos H hH_sqrt3 t ht
-    nlinarith [mul_nonneg (show z₀.im - (fdBoundary_H H t).im ≥ 0 from by linarith)
-      (show z₀.im + (fdBoundary_H H t).im ≥ 0 from by linarith),
-      (show ‖z₀‖ ^ 2 < 1 from by nlinarith [norm_nonneg z₀])]
+    nlinarith [mul_nonneg (show z₀.im - (fdBoundary_H H t).im ≥ 0 by linarith)
+      (show z₀.im + (fdBoundary_H H t).im ≥ 0 by linarith),
+      (show ‖z₀‖ ^ 2 < 1 by nlinarith [norm_nonneg z₀])]
   · push Not at h_re_half
     by_cases h_re_pos : z₀.re > 1/2
     · refine go (ω := -1) (by norm_num) (fun t ht ↦ ?_)
