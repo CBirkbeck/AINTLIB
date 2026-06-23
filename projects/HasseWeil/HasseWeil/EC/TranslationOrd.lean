@@ -3825,6 +3825,36 @@ theorem translateAlgEquivOfPoint_add_2tor_x_gen
   rw [Affine.Point.add_of_X_ne (h_x₂_ne)] at h_gen_eq
   exact (Affine.Point.some.injEq _ _ _ _ _ _).mp h_gen_eq |>.1
 
+/-- **2-torsion analogue of `translateAlgHom_nonTor_commutes_translateSlope_xy`**:
+the translate-by-`(xk₂, yk₂)` 2-torsion algebra hom sends the generic slope
+`translateSlope_xy W xk₁ yk₁` (the secant slope through `(x_gen, y_gen)` and the
+constant point `(xk₁, yk₁)`) to the secant slope through the *images*
+`(translateX_xy, translateY_xy)` and `(xk₁, yk₁)`. Same `σ_commutes_slope_of_X_ne`
+argument as the non-torsion sibling, but with `translateAlgHom_of_2tor` and its
+`_apply_x_gen` / `_apply_y_gen` evaluation lemmas. -/
+private theorem translateAlgHom_2tor_commutes_translateSlope_xy
+    (xk₁ yk₁ : F) (xk₂ yk₂ : F) (h_ns₂ : W.toAffine.Nonsingular xk₂ yk₂)
+    (h_2_tor₂ : yk₂ = W.toAffine.negY xk₂ yk₂)
+    (h_x₂_ne : translateX_xy W xk₂ yk₂ ≠ algebraMap F KE xk₁) :
+    translateAlgHom_of_2tor W xk₂ yk₂ h_ns₂ h_2_tor₂
+        (translateSlope_xy W xk₁ yk₁) =
+      (W_KE W).toAffine.slope (translateX_xy W xk₂ yk₂)
+        (algebraMap F KE xk₁)
+        (translateY_xy W xk₂ yk₂) (algebraMap F KE yk₁) := by
+  set σ := translateAlgHom_of_2tor W xk₂ yk₂ h_ns₂ h_2_tor₂
+  have hσx : σ (x_gen W) = translateX_xy W xk₂ yk₂ :=
+    translateAlgHom_of_2tor_apply_x_gen W xk₂ yk₂ h_ns₂ h_2_tor₂
+  have hσy : σ (y_gen W) = translateY_xy W xk₂ yk₂ :=
+    translateAlgHom_of_2tor_apply_y_gen W xk₂ yk₂ h_ns₂ h_2_tor₂
+  have hx_ne : x_gen W ≠ algebraMap F KE xk₁ := fun h ↦
+    x_gen_sub_const_ne_zero W xk₁ (sub_eq_zero.mpr h)
+  have hx_σ_ne_full : σ (x_gen W) ≠ σ (algebraMap F KE xk₁) := by
+    rwa [σ.commutes, hσx]
+  change σ ((W_KE W).toAffine.slope (x_gen W) (algebraMap F KE xk₁)
+      (y_gen W) (algebraMap F KE yk₁)) = _
+  rw [σ_commutes_slope_of_X_ne W hx_ne hx_σ_ne_full]
+  rw [σ.commutes xk₁, σ.commutes yk₁, hσx, hσy]
+
 /-- **Substantive group-hom on y_gen for 2-tor T₁, T₂, sum non-zero**. -/
 theorem translateAlgEquivOfPoint_add_2tor_y_gen
     (xk₁ yk₁ : F) (h_ns₁ : W.toAffine.Nonsingular xk₁ yk₁)
@@ -3849,32 +3879,10 @@ theorem translateAlgEquivOfPoint_add_2tor_y_gen
   rw [σ_commutes_addY W (x_gen W) (algebraMap F KE xk₁) (y_gen W)
         (translateSlope_xy W xk₁ yk₁)]
   rw [σ.commutes xk₁, hσx, hσy]
-  have hx_ne : x_gen W ≠ algebraMap F KE xk₁ := fun h ↦
-    x_gen_sub_const_ne_zero W xk₁ (sub_eq_zero.mpr h)
-  have hx_σ_ne_full : σ (x_gen W) ≠ σ (algebraMap F KE xk₁) := by
-    rwa [σ.commutes, hσx]
-  have h_slope_eq : σ (translateSlope_xy W xk₁ yk₁) =
-      (W_KE W).toAffine.slope (translateX_xy W xk₂ yk₂)
-        (algebraMap F KE xk₁)
-        (translateY_xy W xk₂ yk₂) (algebraMap F KE yk₁) := by
-    change σ ((W_KE W).toAffine.slope (x_gen W) (algebraMap F KE xk₁)
-        (y_gen W) (algebraMap F KE yk₁)) = _
-    rw [σ_commutes_slope_of_X_ne W hx_ne hx_σ_ne_full]
-    rw [σ.commutes xk₁, σ.commutes yk₁, hσx, hσy]
-  rw [h_slope_eq]
-  have h_gen_eq : (genericPoint W + liftSomePoint W xk₂ yk₂ h_ns₂) +
-      liftSomePoint W xk₁ yk₁ h_ns₁ = genericPoint W +
-        liftSomePoint W xk₃ yk₃ h_ns₃ := by
-    rw [add_assoc, add_comm (liftSomePoint W xk₂ yk₂ h_ns₂)
-      (liftSomePoint W xk₁ yk₁ h_ns₁)]
-    congr 1
-    have h₁ := (liftPointToKE_some W xk₁ yk₁ h_ns₁).symm
-    have h₂ := (liftPointToKE_some W xk₂ yk₂ h_ns₂).symm
-    have h₃ := (liftPointToKE_some W xk₃ yk₃ h_ns₃).symm
-    rw [h₁, h₂, h₃]
-    rw [← liftPointToKE_add]
-    rw [show (Affine.Point.some xk₁ yk₁ h_ns₁ + Affine.Point.some xk₂ yk₂ h_ns₂
-        : W.toAffine.Point) = Affine.Point.some xk₃ yk₃ h_ns₃ from h_sum]
+  rw [translateAlgHom_2tor_commutes_translateSlope_xy W xk₁ yk₁ xk₂ yk₂
+        h_ns₂ h_2_tor₂ h_x₂_ne]
+  have h_gen_eq := genericPoint_add_liftSomePoint_add_eq_of_sum W
+    xk₁ yk₁ h_ns₁ xk₂ yk₂ h_ns₂ xk₃ yk₃ h_ns₃ h_sum
   rw [genericPoint_add_liftSomePoint W xk₂ yk₂ h_ns₂] at h_gen_eq
   rw [genericPoint_add_liftSomePoint W xk₃ yk₃ h_ns₃] at h_gen_eq
   unfold liftSomePoint at h_gen_eq
