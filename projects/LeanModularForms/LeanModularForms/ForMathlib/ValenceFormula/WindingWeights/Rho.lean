@@ -9,13 +9,12 @@ import LeanModularForms.ForMathlib.ValenceFormula.WindingWeights.Common
 /-!
 # Winding Number Weight at ρ
 
-PV integral computation and generalized winding number of `fdBoundary_H`
-around the elliptic point ρ = e^{2πi/3}.
+PV integral computation for `fdBoundary_H` around the elliptic point
+ρ = e^{2πi/3} — the analytic input for its winding-number weight.
 
 ## Main Results
 
 * `pv_integral_at_rho_tendsto` — PV integral converges to -iπ/3
-* `gWN_fdBoundary_H_at_rho` — gWN = -1/6 at ρ
 -/
 
 open Complex MeasureTheory Set Filter Topology
