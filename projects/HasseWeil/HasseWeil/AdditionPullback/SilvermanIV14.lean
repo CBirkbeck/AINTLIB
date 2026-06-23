@@ -3512,6 +3512,151 @@ theorem kaehler_D_addPullback_x_pair_ring_identity {R : Type*} [CommRing R]
     (-(2 * (Y₁ - Y₂) + c1 * (X₁ - X₂)) * (a₁ - a₂)) * hα₁ +
       ((2 * (Y₁ - Y₂) + c1 * (X₁ - X₂)) * (a₁ - a₂)) * hα₂
 
+/-- **Leibniz-on-quotient for the pair slope** (denominator cleared): with
+`Xᵢ = αᵢ*x`, `Yᵢ = αᵢ*y` and `D` the universal `K`-derivation, the differential of
+`addSlopePair = (Y₁ - Y₂)/(X₁ - X₂)` multiplied through by `(X₁ - X₂)²` is the cleared
+quotient rule `(X₁ - X₂)·(D Y₁ - D Y₂) - (Y₁ - Y₂)·(D X₁ - D X₂)`. A leaf of
+`kaehler_D_addPullback_x_pair_eq_smul_omega`; `h_ne` provides the nonzero denominator. -/
+private theorem kaehler_D_addSlopePair_clearDenomSq
+    (α₁ α₂ : Isogeny W.toAffine W.toAffine)
+    (h_ne : α₁.pullback (x_gen W) ≠ α₂.pullback (x_gen W)) :
+    (α₁.pullback (x_gen W) - α₂.pullback (x_gen W)) ^ 2 •
+        KaehlerDifferential.D K W.toAffine.FunctionField (addSlopePair α₁ α₂) =
+      (α₁.pullback (x_gen W) - α₂.pullback (x_gen W)) •
+          (KaehlerDifferential.D K W.toAffine.FunctionField (α₁.pullback (y_gen W)) -
+            KaehlerDifferential.D K W.toAffine.FunctionField (α₂.pullback (y_gen W))) -
+        (α₁.pullback (y_gen W) - α₂.pullback (y_gen W)) •
+          (KaehlerDifferential.D K W.toAffine.FunctionField (α₁.pullback (x_gen W)) -
+            KaehlerDifferential.D K W.toAffine.FunctionField (α₂.pullback (x_gen W))) := by
+  set D := KaehlerDifferential.D K W.toAffine.FunctionField with hD_def
+  set X₁ := α₁.pullback (x_gen W) with hX₁
+  set X₂ := α₂.pullback (x_gen W) with hX₂
+  set Y₁ := α₁.pullback (y_gen W) with hY₁
+  set Y₂ := α₂.pullback (y_gen W) with hY₂
+  have hDen_ne : X₁ - X₂ ≠ 0 := sub_ne_zero.mpr h_ne
+  have h_slope : addSlopePair α₁ α₂ = (Y₁ - Y₂) / (X₁ - X₂) :=
+    addSlopePair_eq_of_x_ne h_ne
+  rw [h_slope, D.leibniz_div (Y₁ - Y₂) (X₁ - X₂), map_sub, map_sub, smul_smul,
+    show (X₁ - X₂) ^ 2 * (X₁ - X₂)⁻¹ ^ 2 = 1 from by
+      rw [← mul_pow, mul_inv_cancel₀ hDen_ne, one_pow], one_smul]
+
+/-- **Leibniz-on-`addX` for the pair `x`-coordinate**: with `ℓ = addSlopePair`, the differential of
+`addPullback_x_pair = ℓ² + a₁·ℓ - a₂ - X₁ - X₂` is `(2·ℓ + a₁)·D ℓ - D X₁ - D X₂` via the
+power/product Leibniz rules on the `addX` formula. A leaf of
+`kaehler_D_addPullback_x_pair_eq_smul_omega`, independent of the nonzero-denominator hypothesis. -/
+private theorem kaehler_D_addPullback_x_pair_via_slope
+    (α₁ α₂ : Isogeny W.toAffine W.toAffine) :
+    KaehlerDifferential.D K W.toAffine.FunctionField (addPullback_x_pair α₁ α₂) =
+      (2 * addSlopePair α₁ α₂ + algebraMap K KE W.a₁) •
+          KaehlerDifferential.D K W.toAffine.FunctionField (addSlopePair α₁ α₂) -
+        KaehlerDifferential.D K W.toAffine.FunctionField (α₁.pullback (x_gen W)) -
+        KaehlerDifferential.D K W.toAffine.FunctionField (α₂.pullback (x_gen W)) := by
+  set D := KaehlerDifferential.D K W.toAffine.FunctionField with hD_def
+  set X₁ := α₁.pullback (x_gen W) with hX₁
+  set X₂ := α₂.pullback (x_gen W) with hX₂
+  unfold addPullback_x_pair WeierstrassCurve.Affine.addX
+  set ℓ := addSlopePair α₁ α₂ with hℓ
+  change D ((ℓ) ^ 2 + (W_KE W).toAffine.a₁ * ℓ
+          - (W_KE W).toAffine.a₂ - X₁ - X₂) = _
+  rw [show (W_KE W).toAffine.a₁ = algebraMap K KE W.a₁ from rfl,
+    show (W_KE W).toAffine.a₂ = algebraMap K KE W.a₂ from rfl]
+  rw [map_sub, map_sub, map_sub, map_add, D.leibniz (algebraMap K KE W.a₁) ℓ,
+    D.leibniz_pow ℓ 2, D.map_algebraMap W.a₁, D.map_algebraMap W.a₂]
+  simp only [smul_zero, add_zero, sub_zero]
+  change (2 : ℕ) • ℓ ^ (2 - 1) • D ℓ + (algebraMap K KE) W.a₁ • D ℓ - D X₁ - D X₂ =
+    (2 * ℓ + (algebraMap K KE) W.a₁) • D ℓ - D X₁ - D X₂
+  rw [show (2 - 1 : ℕ) = 1 from rfl, pow_one, add_smul,
+    show (2 : ℕ) • (ℓ • D ℓ) = ((2 : KE)) • (ℓ • D ℓ) from
+      (Nat.cast_smul_eq_nsmul (R := KE) 2 _).symm, smul_smul]
+
+/-- **`(X₁ - X₂)²`-cleared differential of the pair `x`-coordinate**: combines the cleared slope
+rule (`kaehler_D_addSlopePair_clearDenomSq`) with the `addX` Leibniz expansion
+(`kaehler_D_addPullback_x_pair_via_slope`) into a single denominator-free expression for
+`(X₁ - X₂)² • D(addPullback_x_pair)`. A leaf of
+`kaehler_D_addPullback_x_pair_eq_smul_omega`. -/
+private theorem kaehler_D_addPullback_x_pair_clearDenomSq
+    (α₁ α₂ : Isogeny W.toAffine W.toAffine)
+    (h_ne : α₁.pullback (x_gen W) ≠ α₂.pullback (x_gen W)) :
+    (α₁.pullback (x_gen W) - α₂.pullback (x_gen W)) ^ 2 •
+        KaehlerDifferential.D K W.toAffine.FunctionField (addPullback_x_pair α₁ α₂) =
+      (2 * addSlopePair α₁ α₂ + algebraMap K KE W.a₁) •
+          ((α₁.pullback (x_gen W) - α₂.pullback (x_gen W)) •
+            (KaehlerDifferential.D K W.toAffine.FunctionField (α₁.pullback (y_gen W)) -
+              KaehlerDifferential.D K W.toAffine.FunctionField (α₂.pullback (y_gen W)))) -
+        (2 * addSlopePair α₁ α₂ + algebraMap K KE W.a₁) •
+          ((α₁.pullback (y_gen W) - α₂.pullback (y_gen W)) •
+            (KaehlerDifferential.D K W.toAffine.FunctionField (α₁.pullback (x_gen W)) -
+              KaehlerDifferential.D K W.toAffine.FunctionField (α₂.pullback (x_gen W)))) -
+        (α₁.pullback (x_gen W) - α₂.pullback (x_gen W)) ^ 2 •
+          KaehlerDifferential.D K W.toAffine.FunctionField (α₁.pullback (x_gen W)) -
+        (α₁.pullback (x_gen W) - α₂.pullback (x_gen W)) ^ 2 •
+          KaehlerDifferential.D K W.toAffine.FunctionField (α₂.pullback (x_gen W)) := by
+  set D := KaehlerDifferential.D K W.toAffine.FunctionField with hD_def
+  set X₁ := α₁.pullback (x_gen W) with hX₁
+  set X₂ := α₂.pullback (x_gen W) with hX₂
+  set Y₁ := α₁.pullback (y_gen W) with hY₁
+  set Y₂ := α₂.pullback (y_gen W) with hY₂
+  rw [kaehler_D_addPullback_x_pair_via_slope W α₁ α₂, smul_sub, smul_sub, smul_smul,
+    mul_comm ((X₁ - X₂) ^ 2) (2 * addSlopePair α₁ α₂ + algebraMap K KE W.a₁),
+    ← smul_smul, kaehler_D_addSlopePair_clearDenomSq W α₁ α₂ h_ne, smul_sub]
+
+/-- **Pullback-equation collapse of the `ω`-coefficient** (the `id ⊞ α` scalar identity): the
+`(X₁ - X₂)²`-cleared coefficient of `ω` coming from the substituted image differentials equals
+`(X₁ - X₂)²` times the sum-point coefficient `(2·y₃ + a₁·x₃ + a₃)·(c_{α₁} + c_{α₂})`. Proved by
+unfolding `addPullback_x/y_pair` and `alpha_star_u`, substituting the two pullback Weierstrass
+equations (`pullback_equation α₁/α₂`), clearing the denominator, and closing with the free-variable
+algebra core `kaehler_D_addPullback_x_pair_ring_identity`. The scalar half of
+`kaehler_D_addPullback_x_pair_eq_smul_omega`. -/
+private theorem kaehler_D_addPullback_x_pair_coeff_collapse
+    (α₁ α₂ : Isogeny W.toAffine W.toAffine)
+    (h_ne : α₁.pullback (x_gen W) ≠ α₂.pullback (x_gen W)) :
+    (2 * addSlopePair α₁ α₂ + algebraMap K KE W.a₁) *
+            ((α₁.pullback (x_gen W) - α₂.pullback (x_gen W)) *
+              ((3 * α₁.pullback (x_gen W) ^ 2 +
+                      2 * algebraMap K KE W.a₂ * α₁.pullback (x_gen W) + algebraMap K KE W.a₄ -
+                    algebraMap K KE W.a₁ * α₁.pullback (y_gen W)) *
+                  omegaPullbackCoeff W α₁ -
+                (3 * α₂.pullback (x_gen W) ^ 2 +
+                      2 * algebraMap K KE W.a₂ * α₂.pullback (x_gen W) + algebraMap K KE W.a₄ -
+                    algebraMap K KE W.a₁ * α₂.pullback (y_gen W)) *
+                  omegaPullbackCoeff W α₂)) -
+          (2 * addSlopePair α₁ α₂ + algebraMap K KE W.a₁) *
+            ((α₁.pullback (y_gen W) - α₂.pullback (y_gen W)) *
+              (alpha_star_u W α₁ * omegaPullbackCoeff W α₁ -
+                alpha_star_u W α₂ * omegaPullbackCoeff W α₂)) -
+        (α₁.pullback (x_gen W) - α₂.pullback (x_gen W)) ^ 2 *
+          (alpha_star_u W α₁ * omegaPullbackCoeff W α₁) -
+      (α₁.pullback (x_gen W) - α₂.pullback (x_gen W)) ^ 2 *
+        (alpha_star_u W α₂ * omegaPullbackCoeff W α₂) =
+    (α₁.pullback (x_gen W) - α₂.pullback (x_gen W)) ^ 2 *
+      ((2 * addPullback_y_pair α₁ α₂ + algebraMap K KE W.a₁ * addPullback_x_pair α₁ α₂ +
+          algebraMap K KE W.a₃) *
+        (omegaPullbackCoeff W α₁ + omegaPullbackCoeff W α₂)) := by
+  set X₁ := α₁.pullback (x_gen W) with hX₁
+  set X₂ := α₂.pullback (x_gen W) with hX₂
+  set Y₁ := α₁.pullback (y_gen W) with hY₁
+  set Y₂ := α₂.pullback (y_gen W) with hY₂
+  have hDen_ne : X₁ - X₂ ≠ 0 := sub_ne_zero.mpr h_ne
+  have h_slope : addSlopePair α₁ α₂ = (Y₁ - Y₂) / (X₁ - X₂) :=
+    addSlopePair_eq_of_x_ne h_ne
+  rw [addPullback_y_pair, addPullback_x_pair, h_slope]
+  rw [show alpha_star_u W α₁ = 2 * Y₁ + algebraMap K KE W.a₁ * X₁ + algebraMap K KE W.a₃ from rfl,
+    show alpha_star_u W α₂ = 2 * Y₂ + algebraMap K KE W.a₁ * X₂ + algebraMap K KE W.a₃ from rfl]
+  have hα₁ := pullback_equation W α₁
+  rw [WeierstrassCurve.Affine.equation_iff] at hα₁
+  have hα₂ := pullback_equation W α₂
+  rw [WeierstrassCurve.Affine.equation_iff] at hα₂
+  simp only [WeierstrassCurve.Affine.addX, WeierstrassCurve.Affine.addY,
+    WeierstrassCurve.Affine.negAddY, WeierstrassCurve.Affine.negY,
+    W_KE, WeierstrassCurve.toAffine, WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₂,
+    WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆] at hα₁ hα₂ ⊢
+  field_simp [hDen_ne]
+  -- The cleared scalar identity is the `(α₁,α₂)`-combination of the two pullback Weierstrass
+  -- equations (the `id ⊞ α` collapse); discharged by the free-variable algebra core.
+  exact kaehler_D_addPullback_x_pair_ring_identity X₁ X₂ Y₁ Y₂ (algebraMap K KE W.a₁)
+    (omegaPullbackCoeff W α₁) (omegaPullbackCoeff W α₂) (algebraMap K KE W.a₂)
+    (algebraMap K KE W.a₃) (algebraMap K KE W.a₄) (algebraMap K KE W.a₆) hα₁ hα₂
+
 /-- **General-pair III.5.2 differential collapse**: for genuine pairs (`α₁*x ≠ α₂*x`), the
 differential of the pair addition `x`-coordinate is
 `u₃ • ((a_{α₁} + a_{α₂}) • ω)`, where `u₃ = 2·addPullback_y_pair + a₁·addPullback_x_pair + a₃`
@@ -3537,41 +3682,11 @@ theorem kaehler_D_addPullback_x_pair_eq_smul_omega
   -- Slope = (Y₁ - Y₂)/(X₁ - X₂).
   have h_slope : addSlopePair α₁ α₂ = (Y₁ - Y₂) / (X₁ - X₂) :=
     addSlopePair_eq_of_x_ne h_ne
-  -- STEP 1: D(addPullback_x_pair) cleared of Den² (mirror `kaehler_D_addPullback_x_general` +
-  -- `kaehler_D_addSlope_general`, with X₁/Y₁ in place of x_gen/y_gen).
-  -- D(slope): Den² • D(slope) = Den • (D Y₁ - D Y₂) - (Y₁ - Y₂) • (D X₁ - D X₂).
-  have h_Dslope : (X₁ - X₂) ^ 2 • D (addSlopePair α₁ α₂) =
-      (X₁ - X₂) • (D Y₁ - D Y₂) - (Y₁ - Y₂) • (D X₁ - D X₂) := by
-    rw [h_slope, D.leibniz_div (Y₁ - Y₂) (X₁ - X₂), map_sub, map_sub, smul_smul,
-      show (X₁ - X₂) ^ 2 * (X₁ - X₂)⁻¹ ^ 2 = 1 from by
-        rw [← mul_pow, mul_inv_cancel₀ hDen_ne, one_pow], one_smul]
-  -- D(addPullback_x_pair) = (2·slope + a₁)•D(slope) - D X₁ - D X₂  (Leibniz on addX).
-  have h_Dx : D (addPullback_x_pair α₁ α₂) =
-      (2 * addSlopePair α₁ α₂ + algebraMap K KE W.a₁) • D (addSlopePair α₁ α₂) - D X₁ - D X₂ := by
-    unfold addPullback_x_pair WeierstrassCurve.Affine.addX
-    set ℓ := addSlopePair α₁ α₂ with hℓ
-    change D ((ℓ) ^ 2 + (W_KE W).toAffine.a₁ * ℓ
-            - (W_KE W).toAffine.a₂ - X₁ - X₂) = _
-    rw [show (W_KE W).toAffine.a₁ = algebraMap K KE W.a₁ from rfl,
-      show (W_KE W).toAffine.a₂ = algebraMap K KE W.a₂ from rfl]
-    rw [map_sub, map_sub, map_sub, map_add, D.leibniz (algebraMap K KE W.a₁) ℓ,
-      D.leibniz_pow ℓ 2, D.map_algebraMap W.a₁, D.map_algebraMap W.a₂]
-    simp only [smul_zero, add_zero, sub_zero]
-    change (2 : ℕ) • ℓ ^ (2 - 1) • D ℓ + (algebraMap K KE) W.a₁ • D ℓ - D X₁ - D X₂ =
-      (2 * ℓ + (algebraMap K KE) W.a₁) • D ℓ - D X₁ - D X₂
-    rw [show (2 - 1 : ℕ) = 1 from rfl, pow_one, add_smul,
-      show (2 : ℕ) • (ℓ • D ℓ) = ((2 : KE)) • (ℓ • D ℓ) from
-        (Nat.cast_smul_eq_nsmul (R := KE) 2 _).symm, smul_smul]
-  -- Cleared form: Den² • D(addPullback_x_pair).
-  have hcleared : (X₁ - X₂) ^ 2 • D (addPullback_x_pair α₁ α₂) =
-      (2 * addSlopePair α₁ α₂ + algebraMap K KE W.a₁) •
-        ((X₁ - X₂) • (D Y₁ - D Y₂)) -
-      (2 * addSlopePair α₁ α₂ + algebraMap K KE W.a₁) •
-        ((Y₁ - Y₂) • (D X₁ - D X₂)) -
-      (X₁ - X₂) ^ 2 • D X₁ - (X₁ - X₂) ^ 2 • D X₂ := by
-    rw [h_Dx, smul_sub, smul_sub, smul_smul,
-      mul_comm ((X₁ - X₂) ^ 2) (2 * addSlopePair α₁ α₂ + algebraMap K KE W.a₁),
-      ← smul_smul, h_Dslope, smul_sub]
+  -- STEP 1: the `(X₁ - X₂)²`-cleared differential of the pair `x`-coordinate (Leibniz on the slope
+  -- quotient + on the `addX` formula), assembled in `kaehler_D_addPullback_x_pair_clearDenomSq`.
+  have hcleared := kaehler_D_addPullback_x_pair_clearDenomSq W α₁ α₂ h_ne
+  simp only [← hX₁, ← hX₂, ← hY₁, ← hY₂] at hcleared
+  -- STEP 2: substitute the four image-differential leaves `D(αᵢ*x)`, `D(αᵢ*y)`.
   rw [show D X₁ = (alpha_star_u W α₁ * omegaPullbackCoeff W α₁) •
         invariantDifferential W.toAffine from kaehler_D_alpha_pullback_x_eq_smul_omega W α₁,
       show D Y₁ = ((3 * X₁ ^ 2 + 2 * algebraMap K KE W.a₂ * X₁ + algebraMap K KE W.a₄ -
@@ -3587,23 +3702,8 @@ theorem kaehler_D_addPullback_x_pair_eq_smul_omega
     (X₁ - X₂) ^ 2 • _ = (X₁ - X₂) ^ 2 • _)
   rw [hcleared]
   simp only [smul_smul, ← sub_smul]
+  -- STEP 3: both sides are now `(scalar) • ω`; the scalar identity is the pullback-equation collapse.
   congr 1
-  rw [addPullback_y_pair, addPullback_x_pair, h_slope]
-  rw [show alpha_star_u W α₁ = 2 * Y₁ + algebraMap K KE W.a₁ * X₁ + algebraMap K KE W.a₃ from rfl,
-    show alpha_star_u W α₂ = 2 * Y₂ + algebraMap K KE W.a₁ * X₂ + algebraMap K KE W.a₃ from rfl]
-  have hα₁ := pullback_equation W α₁
-  rw [WeierstrassCurve.Affine.equation_iff] at hα₁
-  have hα₂ := pullback_equation W α₂
-  rw [WeierstrassCurve.Affine.equation_iff] at hα₂
-  simp only [WeierstrassCurve.Affine.addX, WeierstrassCurve.Affine.addY,
-    WeierstrassCurve.Affine.negAddY, WeierstrassCurve.Affine.negY,
-    W_KE, WeierstrassCurve.toAffine, WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₂,
-    WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆] at hα₁ hα₂ ⊢
-  field_simp [hDen_ne]
-  -- The cleared scalar identity is the `(α₁,α₂)`-combination of the two pullback Weierstrass
-  -- equations (the `id ⊞ α` collapse); discharged by the free-variable algebra core.
-  exact kaehler_D_addPullback_x_pair_ring_identity X₁ X₂ Y₁ Y₂ (algebraMap K KE W.a₁)
-    (omegaPullbackCoeff W α₁) (omegaPullbackCoeff W α₂) (algebraMap K KE W.a₂)
-    (algebraMap K KE W.a₃) (algebraMap K KE W.a₄) (algebraMap K KE W.a₆) hα₁ hα₂
+  exact kaehler_D_addPullback_x_pair_coeff_collapse W α₁ α₂ h_ne
 
 end HasseWeil
