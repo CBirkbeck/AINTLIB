@@ -9,7 +9,7 @@ public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.DworkFactor
 # Homogeneous expansion of the finite Artin-Hasse logarithm input
 
 This file records the one-variable homogeneous polynomial whose value at `1`
-is the finite Artin-Hasse principal-unit coordinate `E_N(x) - 1`.  It then
+is the finite Artin-Hasse principal-unit coordinate `E_N(x) - 1`. It then
 expands `finiteLog N (E_N(x) - 1)` as the localized finite-log evaluator
 applied to the homogeneous coefficients of powers of that polynomial.
 -/
@@ -37,7 +37,7 @@ variable {R' : Type w} [Field R'] [NumberField R'] [Algebra K R'] [IsScalarTower
 variable (F : FullTeichStickelbergerSetup ℓ p k K R')
 
 /-- Homogeneous bookkeeping polynomial for the finite Artin-Hasse
-principal-unit coordinate.  Its coefficient in formal degree `n` is the
+principal-unit coordinate. Its coefficient in formal degree `n` is the
 `Q^n`-integral representative of the `n`-th Artin-Hasse term. -/
 noncomputable def finiteArtinHasseExpCoordPoly (N : ℕ) (x : 𝓞 R') :
     Polynomial (𝓞 R') :=
@@ -75,7 +75,7 @@ theorem finiteArtinHasseExpCoordPoly_coeff_eq_of_pos_le
       dworkCoeffArtinHasseAtTo F.toConcreteStickelbergerSetup x N d := by
   classical
   have hdpos : 0 < d := Nat.pos_of_ne_zero hd0
-  have hdmem : d - 1 ∈ Finset.range N := Finset.mem_range.mpr (by omega)
+  have hdmem : d - 1 ∈ Finset.range N := Finset.mem_range.mpr (by lia)
   rw [finiteArtinHasseExpCoordPoly, Polynomial.finsetSum_coeff]
   calc
     (∑ n ∈ Finset.range N,
@@ -89,7 +89,7 @@ theorem finiteArtinHasseExpCoordPoly_coeff_eq_of_pos_le
         refine Finset.sum_eq_single_of_mem (d - 1) hdmem ?_
         intro n _hn hne
         have hne_degree : n + 1 ≠ d := fun h =>
-          hne (by omega)
+          hne (by lia)
         simp [Polynomial.coeff_monomial, hne_degree]
     _ = dworkCoeffArtinHasseAtTo F.toConcreteStickelbergerSetup x N d := by
         simp [Nat.sub_add_cancel hdpos]
@@ -131,7 +131,7 @@ theorem finiteArtinHasseExpCoordPoly_coeff_sub_coeff_mem_Q_pow
       have hM :
           (c.den : 𝓞 R') * dworkCoeffArtinHasseAtTo S x M d -
               (c.num : 𝓞 R') * x ^ d ∈ F.Q ^ (N + 1 + d) :=
-        Ideal.pow_le_pow_right (by omega) hMhigh
+        Ideal.pow_le_pow_right (by lia) hMhigh
       have hden_mul :
           (c.den : 𝓞 R') *
               ((F.finiteArtinHasseExpCoordPoly N x).coeff d -
@@ -230,7 +230,7 @@ theorem quotient_mk_finiteArtinHasseExpCoordPoly_coeff_eq
   · have hdpos : 0 < d := Nat.pos_of_ne_zero hd0
     by_cases hdN : d ≤ N
     · have hdmem : d - 1 ∈ Finset.range N :=
-        Finset.mem_range.mpr (by omega)
+        Finset.mem_range.mpr (by lia)
       have hcoeff_poly :
           (F.finiteArtinHasseExpCoordPoly N x).coeff d =
             dworkCoeffArtinHasseAtTo S x N d := by
@@ -247,7 +247,7 @@ theorem quotient_mk_finiteArtinHasseExpCoordPoly_coeff_eq
               refine Finset.sum_eq_single_of_mem (d - 1) hdmem ?_
               intro n hn hne
               have hne_degree : n + 1 ≠ d := fun h =>
-                hne (by omega)
+                hne (by lia)
               simp [Polynomial.coeff_monomial, hne_degree]
           _ = dworkCoeffArtinHasseAtTo S x N d := by
               simp [Nat.sub_add_cancel hdpos, S]
@@ -293,14 +293,14 @@ theorem quotient_mk_finiteArtinHasseExpCoordPoly_coeff_eq
                 (PowerSeries.coeff (R := A) d) (Eps - 1) *
                   Ideal.Quotient.mk QN (x ^ d)
             rw [hcoeff_E]
-    · have hNd : N + 1 ≤ d := by omega
+    · have hNd : N + 1 ≤ d := by lia
       have hcoeff_poly :
           (F.finiteArtinHasseExpCoordPoly N x).coeff d = 0 := by
         rw [finiteArtinHasseExpCoordPoly, Polynomial.finsetSum_coeff]
         refine Finset.sum_eq_zero ?_
         intro n hn
         have hnlt : n < N := Finset.mem_range.mp hn
-        have hne_degree : n + 1 ≠ d := by omega
+        have hne_degree : n + 1 ≠ d := by lia
         simp [Polynomial.coeff_monomial, hne_degree]
       have hxpow : x ^ d ∈ F.Q ^ (N + 1) :=
         Ideal.pow_le_pow_right hNd (Ideal.pow_mem_pow hx d)
@@ -480,7 +480,7 @@ theorem finiteArtinHasseExpCoordPoly_pow_coeff_eq_zero_of_lt
     ((F.finiteArtinHasseExpCoordPoly N x) ^ n).coeff d = 0 := by
   induction n generalizing d with
   | zero =>
-      omega
+      lia
   | succ n ih =>
       rw [pow_succ, Polynomial.coeff_mul]
       refine Finset.sum_eq_zero ?_
@@ -489,7 +489,7 @@ theorem finiteArtinHasseExpCoordPoly_pow_coeff_eq_zero_of_lt
         simpa using Finset.mem_antidiagonal.mp ha
       by_cases ha_lt : a.1 < n
       · rw [ih ha_lt, zero_mul]
-      · have hb_zero : a.2 = 0 := by omega
+      · have hb_zero : a.2 = 0 := by lia
         rw [hb_zero, F.finiteArtinHasseExpCoordPoly_coeff_zero, mul_zero]
 
 theorem finiteArtinHasseExpCoordPoly_pow_le_of_mem_support
@@ -540,15 +540,15 @@ theorem finiteArtinHasseExpCoordPoly_pow_coeff_sub_coeff_mem_Q_pow
               F.Q ^ (if d < N + (n + 1) then N + 1 + d else d) := by
           refine Ideal.pow_le_pow_right ?_ hmul₁
           by_cases hdsmall : d < N + (n + 1)
-          · have ha1small : a.1 < N + n := by omega
+          · have ha1small : a.1 < N + n := by lia
             rw [if_pos hdsmall, if_pos ha1small]
-            omega
+            lia
           · rw [if_neg hdsmall]
             by_cases ha1small : a.1 < N + n
             · rw [if_pos ha1small]
-              omega
+              lia
             · rw [if_neg ha1small]
-              omega
+              lia
         have hterm₂ :
             (PM ^ n).coeff a.1 * (PN.coeff a.2 - PM.coeff a.2) ∈
               F.Q ^ (if d < N + (n + 1) then N + 1 + d else d) := by
@@ -570,15 +570,15 @@ theorem finiteArtinHasseExpCoordPoly_pow_coeff_sub_coeff_mem_Q_pow
               simpa [pow_add] using Ideal.mul_mem_mul hPMpow₁ hdiff₂
             refine Ideal.pow_le_pow_right ?_ hmul₂
             by_cases hdsmall : d < N + (n + 1)
-            · have ha2N : a.2 ≤ N := by omega
+            · have ha2N : a.2 ≤ N := by lia
               rw [if_pos hdsmall, if_pos ha2N]
-              omega
+              lia
             · rw [if_neg hdsmall]
               by_cases ha2N : a.2 ≤ N
               · rw [if_pos ha2N]
-                omega
+                lia
               · rw [if_neg ha2N]
-                omega
+                lia
         rw [show
             (PN ^ n).coeff a.1 * PN.coeff a.2 -
                 (PM ^ n).coeff a.1 * PM.coeff a.2 =
@@ -601,7 +601,7 @@ noncomputable def finiteArtinHasseExpCoordLogHomogeneousCore
           have h :=
             Nat.factorization_mul_pred_le_pred
               (ell := ℓ) (n := n) (Fact.out : Nat.Prime ℓ) hn
-          omega)
+          lia)
     else 0
 
 /-- Signed homogeneous finite-log term attached to the degree-`d`
@@ -612,11 +612,12 @@ noncomputable def finiteArtinHasseExpCoordLogHomogeneousTerm
   ((-1 : 𝓞 R' ⧸ F.Q ^ (N + 1)) ^ (n + 1)) *
     F.finiteArtinHasseExpCoordLogHomogeneousCore N n d x hx
 
+/-- The Artin-Hasse denominator exponent is bounded by the ambient degree. -/
 theorem finiteArtinHasse_den_exponent_le {n d : ℕ} (hn : n ≠ 0) (hnd : n ≤ d) :
     n.factorization ℓ * (ℓ - 1) ≤ d := by
   have h := Nat.factorization_mul_pred_le_pred
     (ell := ℓ) (n := n) (Fact.out : Nat.Prime ℓ) hn
-  omega
+  lia
 
 theorem finiteArtinHasseExpCoordLogHomogeneousTerm_eq_signed_eval
     (N n d : ℕ) {x : 𝓞 R'} (hx : x ∈ F.Q) (hn : n ≠ 0) (hnd : n ≤ d) :
@@ -635,6 +636,7 @@ theorem finiteArtinHasseExpCoord_signed_pow_coeff_mem_Q_pow
         ((F.finiteArtinHasseExpCoordPoly N x) ^ n).coeff d ∈ F.Q ^ d :=
   Ideal.mul_mem_left _ _ (F.finiteArtinHasseExpCoordPoly_pow_coeff_mem_Q_pow N hx n d)
 
+/-- Signed numerator of the homogeneous finite-log contribution before quotienting. -/
 def finiteArtinHasseExpCoordLogHomogeneousNumerator
     (N n d : ℕ) (x : 𝓞 R') : 𝓞 R' :=
   ((-1 : 𝓞 R') ^ (n + 1)) *
@@ -728,15 +730,15 @@ theorem finiteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_precision
     simpa [s] using
       Nat.factorization_mul_pred_le_pred
         (ell := ℓ) (n := n) (Fact.out : Nat.Prime ℓ) hn0
-  have hs_le_d : s ≤ d := by omega
+  have hs_le_d : s ≤ d := by lia
   have hu : N + 1 + s ≤ u := by
     by_cases hdsmall : d < N + n
     · dsimp [u]
       rw [if_pos hdsmall]
-      omega
+      lia
     · dsimp [u]
       rw [if_neg hdsmall]
-      omega
+      lia
   have hpowdiff :
       ((F.finiteArtinHasseExpCoordPoly N x) ^ n).coeff d -
           ((F.finiteArtinHasseExpCoordPoly M x) ^ n).coeff d ∈ F.Q ^ u := by
@@ -778,7 +780,7 @@ theorem finiteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_precision
       d.factorial.factorization ℓ * (ℓ - 1) + (N + 1) ≤
         (d.factorial / n).factorization ℓ * (ℓ - 1) + u := by
     rw [hfac, Nat.add_mul]
-    omega
+    lia
   exact Ideal.pow_le_pow_right htarget hweighted
 
 theorem finiteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_highPrecision_mem_Q_pow
@@ -803,7 +805,7 @@ theorem finiteArtinHasseLogHomogeneousNumerator_factorial_weighted_sum_mem_Q_pow
   let D : ℕ := d.factorial.factorization ℓ * (ℓ - 1)
   let M : ℕ := D + N
   let I : Ideal (𝓞 R') := F.Q ^ (D + (N + 1))
-  have hNM : N ≤ M := by omega
+  have hNM : N ≤ M := by lia
   have hdiff :
       (∑ n ∈ Finset.Icc 1 d,
         ((d.factorial / n : ℕ) : 𝓞 R') *
@@ -871,7 +873,7 @@ theorem finiteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_pow_mem_Q
   have hd_ne : d ≠ 0 := pow_ne_zero r (Fact.out : Nat.Prime ℓ).ne_zero
   have hd_mem : d ∈ Finset.Icc 1 d :=
     Finset.mem_Icc.mpr ⟨Nat.succ_le_of_lt (Nat.pos_of_ne_zero hd_ne), le_rfl⟩
-  have hNM : N ≤ M := by omega
+  have hNM : N ≤ M := by lia
   have hdiff :
       (∑ n ∈ Finset.Icc 1 d,
         ((d.factorial / n : ℕ) : 𝓞 R') *
@@ -894,7 +896,7 @@ theorem finiteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_pow_mem_Q
     have hq :=
       F.quotient_mk_finiteArtinHasseLogHomogeneousNumerator_factorial_weighted_sum_eq_formal
         M d hx
-    rw [show d = ℓ ^ r from rfl] at hq
+    rw [show d = ℓ ^ r by rfl] at hq
     rw [FiniteArtinHasseFormal.sum_factorialWeightedLogCoeff_eq_factorial_div_pow ℓ r] at hq
     simpa [d, map_mul, mul_comm, mul_left_comm, mul_assoc] using hq
   have htarget_sum :
