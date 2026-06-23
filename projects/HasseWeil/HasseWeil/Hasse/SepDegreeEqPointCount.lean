@@ -75,6 +75,7 @@ the hypothesis to the L6 composer. The remaining obligation is the
 finrank-tower formula proper.
 -/
 
+omit [Fintype K] in
 /-- **UPPER tower step (axiom-clean)**: for any isogeny `φ : W → W`,
 `Module.finrank φ.pullback.fieldRange K(E) = φ.degree`. Direct
 adaptation of `frobenius_finrank_eq_fieldRange_finrank` to arbitrary
