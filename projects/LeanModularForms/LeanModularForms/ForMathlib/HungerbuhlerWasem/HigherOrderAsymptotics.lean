@@ -15,23 +15,15 @@ For a curve `γ` flat of order `n` at `t₀` with `γ(t₀) = s`, the antideriva
 parameter-excised CPV `→ 0` result needed by the sector cancellation argument
 of T-SC-01.
 
-This file restores the F-diff asymptotic subset of the deleted
-`HigherOrderCancel.lean` (git ref `79bcaa5^`, lines 477-1300+) into
-`namespace HungerbuhlerWasem`. Only the asymptotic / FTC chain leading to the
-five headline theorems is restored; the upstream `HasCauchyPVOn`-based
-cancellation API (which depended on the also-deleted `HigherOrderAssembly.lean`)
-is intentionally omitted as it isn't needed for T-SC-01.
+This file provides the F-diff asymptotic chain: the antiderivative-difference
+`F(γ(t)) − F(tangent target) → 0` results (under flatness `n ≥ k ≥ 2`) feeding the
+sector-cancellation argument of T-SC-01.
 
-## Headline theorems
+## Main results
 
-* `integral_pow_inv_eq_FTC` — FTC for `γ'/(γ-s)^k` on a smooth piece.
-* `closed_excised_integral_eq_antideriv_diff` — closed-form excised integral
-  via antiderivative differences.
 * `F_diff_at_tangent_target_tendsto_zero_right` — F-diff vs tangent target → 0
   from the right, under flatness and `n ≥ k`.
 * `F_diff_at_tangent_target_tendsto_zero_left` — mirror form on the left.
-* `cpv_excised_tendsto_zero_of_F_diff_zero` — combined excised-integral form
-  of the F-diff Tendsto hypothesis.
 -/
 
 open Complex Set Filter Topology MeasureTheory
@@ -50,7 +42,7 @@ theorem hasDerivAt_antiderivative_pow_inv_complex
   have h_pow : HasDerivAt (fun w : ℂ ↦ (w - s) ^ (k - 1))
       (↑(k - 1) * (z - s) ^ (k - 1 - 1) * 1) z :=
     ((hasDerivAt_id z).sub_const s).pow (k - 1)
-  rw [show k - 1 - 1 = k - 2 from by lia] at h_pow
+  rw [show k - 1 - 1 = k - 2 by lia] at h_pow
   have h_const := (h_pow.inv (pow_ne_zero _ (sub_ne_zero.mpr hz))).const_mul
     (-(↑(k - 1) : ℂ)⁻¹)
   convert h_const using 1
