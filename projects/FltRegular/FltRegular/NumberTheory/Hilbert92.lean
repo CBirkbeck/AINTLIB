@@ -59,7 +59,7 @@ lemma systemOfUnits.IsFundamental.maximal' [Module A G] (S : systemOfUnits p G r
   letI := hs.choose
   convert hs.choose_spec a ‹_› <;> symm <;> exact Nat.card_eq_fintype_card.symm
 
-lemma LinearIndependent.update {ι} [DecidableEq ι] {R} [CommRing R] [Module R G]
+lemma LinearIndependent.update' {ι} [DecidableEq ι] {R} [CommRing R] [Module R G]
     (f : ι → G) (l : ι →₀ R) (i : ι) (g : G) (σ : R)
     (hσ : σ ∈ nonZeroDivisors R) (hg : σ • g = Finsupp.linearCombination R f l)
     (hl : l i ∈ nonZeroDivisors R) (hf : LinearIndependent R f) :
@@ -117,7 +117,7 @@ lemma lemma2 [Module A G] (S : systemOfUnits p G s) (hs : S.IsFundamental)
     intro g hg
     have := Fact.mk hp
     let S' : systemOfUnits p G (s + 1) := ⟨Function.update S.units i g,
-      LinearIndependent.update _ _ _ _ _ _ (CyclotomicIntegers.one_sub_zeta_mem_nonZeroDivisors p)
+      LinearIndependent.update' _ _ _ _ _ _ (CyclotomicIntegers.one_sub_zeta_mem_nonZeroDivisors p)
       hg (ha ▸ one_mem A⁰) S.linearIndependent⟩
     let a' := a.comapDomain (Fin.succAbove i) Fin.succAbove_right_injective.injOn
     have hS' : S'.units ∘ Fin.succAbove i = S.units ∘ Fin.succAbove i := by
