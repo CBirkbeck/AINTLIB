@@ -143,19 +143,14 @@ private theorem ordAtInftyValuation_algebraMap_polynomial_eq_exp {q : Polynomial
   congr 1
   ring
 
-/-- **Rational-image valuation agreement.** For `w` with `w x_gen = exp 2` and
-`w` trivial on `F^×`, the value on the image of any `r ∈ F(x) = Frac(F[X])`
-agrees with `ordAtInftyValuation`. -/
-theorem valuation_algebraMap_fracPolyX_eq_ordAtInftyValuation
-    (w : Valuation KE (WithZero (Multiplicative ℤ))) (hu : w (x_gen W) = WithZero.exp 2)
-    (hc : ∀ c : F, c ≠ 0 → w (algebraMap F KE c) = 1) (r : FractionRing (Polynomial F)) :
-    w (algebraMap (FractionRing (Polynomial F)) KE r) =
-      (W_smooth W).ordAtInftyValuation
-        (algebraMap (FractionRing (Polynomial F)) KE r) := by
-  rcases eq_or_ne r 0 with hr | hr
-  · subst hr
-    rw [map_zero]
-    exact (map_zero _).trans (map_zero _).symm
+/-- **Numerator/denominator model in `K(E)`.** Any nonzero `r ∈ F(x) = Frac(F[X])`
+is the image of a quotient of nonzero polynomials: there exist `p d : F[X]`, both
+nonzero, with `algebraMap r = algebraMap p / algebraMap d` in `K(E)`. Obtained from
+`IsLocalization.surj` plus the compatibility `algebraMap r · algebraMap d = algebraMap p`. -/
+private theorem exists_polynomial_div_of_fracPolyX_ne_zero {r : FractionRing (Polynomial F)}
+    (hr : r ≠ 0) : ∃ p d : Polynomial F, p ≠ 0 ∧ d ≠ 0 ∧
+      algebraMap (FractionRing (Polynomial F)) KE r =
+        algebraMap (Polynomial F) KE p / algebraMap (Polynomial F) KE d := by
   obtain ⟨⟨p, ⟨d, hd_mem⟩⟩, h_surj⟩ :=
     IsLocalization.surj (nonZeroDivisors (Polynomial F)) r
   have hd_ne : d ≠ 0 := nonZeroDivisors.ne_zero hd_mem
@@ -178,26 +173,52 @@ theorem valuation_algebraMap_fracPolyX_eq_ordAtInftyValuation
   have h_alg_d_ne : algebraMap (Polynomial F) KE d ≠ 0 := by
     rw [Ne, ← map_zero (algebraMap (Polynomial F) KE)]
     exact fun h ↦ hd_ne (FaithfulSMul.algebraMap_injective (Polynomial F) KE h)
-  have h_r_div : algebraMap (FractionRing (Polynomial F)) KE r =
-      algebraMap (Polynomial F) KE p / algebraMap (Polynomial F) KE d := by
-    rw [eq_div_iff h_alg_d_ne]
-    exact h_KE
-  have h_w : w (algebraMap (FractionRing (Polynomial F)) KE r) =
+  refine ⟨p, d, hp_ne, hd_ne, ?_⟩
+  rw [eq_div_iff h_alg_d_ne]
+  exact h_KE
+
+/-- **Quotient-of-polynomials value via the degree formula.** A `ℤᵐ⁰`-valued
+valuation `v` on a field `L` over `F[X]` that takes the value `exp (2·natDeg q)` on
+the image of every nonzero polynomial `q` takes the value `exp (2·(natDeg p − natDeg d))`
+on `algebraMap p / algebraMap d` (for nonzero `p d`). Shared computation used for both
+`w` and `ordAtInftyValuation` (stated over a generic `L` so it applies at either
+spelling of the function field). -/
+private theorem valuation_polynomial_div_eq_exp_sub {L : Type*} [Field L] [Algebra (Polynomial F) L]
+    (v : Valuation L (WithZero (Multiplicative ℤ)))
+    (hv : ∀ q : Polynomial F, q ≠ 0 →
+      v (algebraMap (Polynomial F) L q) = WithZero.exp (2 * (q.natDegree : ℤ)))
+    {p d : Polynomial F} (hp : p ≠ 0) (hd : d ≠ 0) :
+    v (algebraMap (Polynomial F) L p / algebraMap (Polynomial F) L d) =
       WithZero.exp (2 * ((p.natDegree : ℤ) - (d.natDegree : ℤ))) := by
-    rw [h_r_div, map_div₀, valuation_algebraMap_polynomial_eq_exp W w hu hc hp_ne,
-        valuation_algebraMap_polynomial_eq_exp W w hu hc hd_ne, ← WithZero.exp_sub]
-    congr 1
-    ring
-  rw [h_w]
-  conv_rhs => rw [h_r_div]
-  rw [show (W_smooth W).ordAtInftyValuation
-        (algebraMap (Polynomial F) KE p / algebraMap (Polynomial F) KE d) =
-      (W_smooth W).ordAtInftyValuation (algebraMap (Polynomial F) KE p) /
-        (W_smooth W).ordAtInftyValuation (algebraMap (Polynomial F) KE d) from
-    map_div₀ _ _ _, ordAtInftyValuation_algebraMap_polynomial_eq_exp W hp_ne,
-    ordAtInftyValuation_algebraMap_polynomial_eq_exp W hd_ne, ← WithZero.exp_sub]
+  rw [map_div₀, hv p hp, hv d hd, ← WithZero.exp_sub]
   congr 1
   ring
+
+/-- **Rational-image valuation agreement.** For `w` with `w x_gen = exp 2` and
+`w` trivial on `F^×`, the value on the image of any `r ∈ F(x) = Frac(F[X])`
+agrees with `ordAtInftyValuation`. -/
+theorem valuation_algebraMap_fracPolyX_eq_ordAtInftyValuation
+    (w : Valuation KE (WithZero (Multiplicative ℤ))) (hu : w (x_gen W) = WithZero.exp 2)
+    (hc : ∀ c : F, c ≠ 0 → w (algebraMap F KE c) = 1) (r : FractionRing (Polynomial F)) :
+    w (algebraMap (FractionRing (Polynomial F)) KE r) =
+      (W_smooth W).ordAtInftyValuation
+        (algebraMap (FractionRing (Polynomial F)) KE r) := by
+  rcases eq_or_ne r 0 with hr | hr
+  · subst hr
+    rw [map_zero]
+    exact (map_zero _).trans (map_zero _).symm
+  obtain ⟨p, d, hp_ne, hd_ne, h_r_div⟩ := exists_polynomial_div_of_fracPolyX_ne_zero W hr
+  have hL : w (algebraMap (FractionRing (Polynomial F)) KE r) =
+      WithZero.exp (2 * ((p.natDegree : ℤ) - (d.natDegree : ℤ))) := by
+    rw [h_r_div]
+    exact valuation_polynomial_div_eq_exp_sub w
+      (fun q hq ↦ valuation_algebraMap_polynomial_eq_exp W w hu hc hq) hp_ne hd_ne
+  have hR : (W_smooth W).ordAtInftyValuation (algebraMap (FractionRing (Polynomial F)) KE r) =
+      WithZero.exp (2 * ((p.natDegree : ℤ) - (d.natDegree : ℤ))) := by
+    rw [h_r_div]
+    exact valuation_polynomial_div_eq_exp_sub (W_smooth W).ordAtInftyValuation
+      (fun q hq ↦ ordAtInftyValuation_algebraMap_polynomial_eq_exp W hq) hp_ne hd_ne
+  rw [hL, hR]
 
 /-- **Parity distinctness.** The two summands of the basis decomposition have
 distinct `ordAtInftyValuation`: `ord_∞(algMap r₁)` is even while
