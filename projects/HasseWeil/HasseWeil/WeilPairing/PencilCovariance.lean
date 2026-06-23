@@ -5,7 +5,7 @@ Authors: Chris Birkbeck
 -/
 import HasseWeil.WeilPairing.MapTranslateGenericAdditive
 import HasseWeil.WeilPairing.FrobeniusGenericCovariance
-import HasseWeil.WeilPairing.SeparableWitnesses
+import HasseWeil.WeilPairing.IsogenyWitnessReductions
 import HasseWeil.WeilPairing.PencilSeparable
 import HasseWeil.WeilPairing.WallAGeometricRealization
 

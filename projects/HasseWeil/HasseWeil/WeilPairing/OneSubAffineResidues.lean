@@ -5,7 +5,7 @@ Authors: Chris Birkbeck
 -/
 import HasseWeil.WeilPairing.OneSubComapConcrete
 import HasseWeil.WeilPairing.WallAGenericRealization
-import HasseWeil.WeilPairing.OneSubWitnesses
+import HasseWeil.WeilPairing.OneSubFrobeniusBaseChangeWitnesses
 
 /-!
 # Discharging the closed-point residues of the concrete `(1 − π)_{K̄}` (CoordHom-free, axiom-clean)

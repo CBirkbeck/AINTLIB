@@ -9,7 +9,7 @@ import HasseWeil.EC.IsogenyKernel
 import HasseWeil.Frobenius
 import HasseWeil.InvariantDifferentialPullback
 import HasseWeil.PullbackCoeff
-import HasseWeil.RouteBGeneral
+import HasseWeil.OmegaCoeffMulByIntGeneral
 
 /-!
 # Witness-parametric Silverman III.5.5 and V.1.2

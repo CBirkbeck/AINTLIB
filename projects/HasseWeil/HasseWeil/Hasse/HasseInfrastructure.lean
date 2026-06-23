@@ -4,11 +4,11 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.Hasse.Final
-import HasseWeil.Hasse.Witnesses
+import HasseWeil.Hasse.HasseWitnessBundle
 import HasseWeil.Hasse.OneSubFrobenius
 import HasseWeil.Hasse.Separability
 import HasseWeil.Hasse.PoleDivisorFallback
-import HasseWeil.Hasse.HoleE
+import HasseWeil.Hasse.HasseBoundQFNonneg
 import HasseWeil.Hasse.PointFix
 import HasseWeil.Curves.RamificationAtInfinity
 import HasseWeil.Curves.NoFinitePolesBridge
@@ -25,7 +25,7 @@ import HasseWeil.AdditionPullback.Frobenius
 import HasseWeil.AdditionPullback.Differential
 import HasseWeil.Frobenius
 import HasseWeil.DualIsogeny
-import HasseWeil.Verschiebung.Cascade
+import HasseWeil.Verschiebung.VerschiebungIsDualOfFrobenius
 import Mathlib.RingTheory.AdjoinRoot
 import Mathlib.RingTheory.PolynomialAlgebra
 import Mathlib.RingTheory.TensorProduct.Basic

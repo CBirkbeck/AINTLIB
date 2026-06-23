@@ -1,4 +1,4 @@
-import HasseWeil.Pic0.RouteCTheoremOfSquare
+import HasseWeil.Pic0.PicDualClassMapMultiplicativity
 import HasseWeil.Curves.MillerAllChar
 import HasseWeil.Ramification
 

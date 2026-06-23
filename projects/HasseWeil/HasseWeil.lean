@@ -43,7 +43,7 @@ import HasseWeil.EC.MulByIntUnramified
 import HasseWeil.EC.PointMapSurjective
 import HasseWeil.DegreeQuadraticForm
 import HasseWeil.Frobenius
-import HasseWeil.Hasse.BoundOfWitnesses
+import HasseWeil.Hasse.HasseBoundParametric
 import HasseWeil.Hasse.PointFix
 import HasseWeil.EC.PointMap
 import HasseWeil.Hasse.Separability
@@ -51,14 +51,14 @@ import HasseWeil.Hasse.TorsionCard
 import HasseWeil.DiscriminantBounds
 import HasseWeil.InvariantDifferentialPullback
 import HasseWeil.PullbackCoeff
-import HasseWeil.RouteBInduction
+import HasseWeil.OmegaCoeffMulByIntFiniteField
 import HasseWeil.GapQfKernel
 import HasseWeil.GapSpines
-import HasseWeil.Pic0.RouteCAssembly
-import HasseWeil.Pic0.RouteCGeometric
-import HasseWeil.Pic0.RouteCTheoremOfSquare
-import HasseWeil.Pic0.RouteCTheoremOfSquareDiv
-import HasseWeil.Pic0.RouteCAddFormula
+import HasseWeil.Pic0.PicDualDegreeViaIsDualOf
+import HasseWeil.Pic0.PicDualDegreeViaGeometricInjectivity
+import HasseWeil.Pic0.PicDualClassMapMultiplicativity
+import HasseWeil.Pic0.TheoremOfSquareDivisorForm
+import HasseWeil.Pic0.PicDualPullbackTheoremOfSquare
 import HasseWeil.WeilPairing.Assembly
 import HasseWeil.WeilPairing.TorsionSeparable
 import HasseWeil.WeilPairing.SigmaBridge
@@ -75,17 +75,17 @@ import HasseWeil.WeilPairing.FrobeniusDivisorGalois
 import HasseWeil.WeilPairing.FrobeniusGaloisScaling
 import HasseWeil.WeilPairing.OneSubScaling
 import HasseWeil.WeilPairing.IsogenyBaseChangeConcrete
-import HasseWeil.WeilPairing.OneSubWitnesses
+import HasseWeil.WeilPairing.OneSubFrobeniusBaseChangeWitnesses
 import HasseWeil.WeilPairing.OneSubDualDivisor
 import HasseWeil.WeilPairing.PencilDualDivisor
-import HasseWeil.WeilPairing.SeparableWitnesses
+import HasseWeil.WeilPairing.IsogenyWitnessReductions
 import HasseWeil.WeilPairing.MapTranslateGenericAdditive
 import HasseWeil.WeilPairing.FrobeniusGenericCovariance
 import HasseWeil.WeilPairing.PencilSeparable
 import HasseWeil.WeilPairing.OneSubProjOrdTransport
 import HasseWeil.WeilPairing.PencilCovariance
 import HasseWeil.WeilPairing.PencilComapScaling
-import HasseWeil.WeilPairing.PencilComapWitnesses
+import HasseWeil.WeilPairing.PencilComapPointValuation
 import HasseWeil.WeilPairing.HasseBound
 
 -- Silverman continuation (2026-06-09): faithful isogeny + III.4.8, the Tate module, isogeny classes
@@ -113,7 +113,7 @@ import HasseWeil.TateModule.TorsionPowStructure
 import HasseWeil.TateModule.InverseSystem
 import HasseWeil.TateModule.TateModule
 import HasseWeil.TateModule.Representation
-import HasseWeil.EC.IsogenyAG.WallCascade
+import HasseWeil.EC.IsogenyAG.DualGaloisDataUnconditional
 import HasseWeil.Curves.LocalizedDictionary
 import HasseWeil.EC.KernelCountGeneral
 import HasseWeil.Curves.KernelOfDifferential
@@ -127,4 +127,4 @@ import HasseWeil.WeilPairing.OneSubPullbackEvaluation
 import HasseWeil.EC.IsogenyAG.DualUniversal
 import HasseWeil.EC.IsogenyAG.BaseChange
 import HasseWeil.Curves.CoordHomFinite
-import HasseWeil.RouteBGeneral
+import HasseWeil.OmegaCoeffMulByIntGeneral

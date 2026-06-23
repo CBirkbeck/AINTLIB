@@ -1,4 +1,4 @@
-import HasseWeil.Pic0.RouteCAssembly
+import HasseWeil.Pic0.PicDualDegreeViaIsDualOf
 import HasseWeil.IsogenyBaseChange
 import HasseWeil.Pic0.ToClassFunctorial
 

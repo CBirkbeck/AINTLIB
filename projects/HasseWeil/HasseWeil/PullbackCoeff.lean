@@ -1,6 +1,6 @@
 import HasseWeil.DualIsogeny
 import HasseWeil.InvariantDifferentialPullback
-import HasseWeil.RouteBGeneral
+import HasseWeil.OmegaCoeffMulByIntGeneral
 
 /-!
 # The Pullback Coefficient and Dual Additivity (Silverman III.5.6, III.6.2c)

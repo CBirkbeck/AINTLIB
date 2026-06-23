@@ -1,7 +1,7 @@
 import HasseWeil.DegreeQuadraticForm
 import HasseWeil.Frobenius
 import HasseWeil.DualIsogeny
-import HasseWeil.Hasse.BoundOfWitnesses
+import HasseWeil.Hasse.HasseBoundParametric
 import HasseWeil.Hasse.QuadraticForm
 import HasseWeil.Hasse.PointFix
 import HasseWeil.Hasse.Separability

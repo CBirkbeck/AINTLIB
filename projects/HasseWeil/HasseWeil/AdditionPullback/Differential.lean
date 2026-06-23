@@ -7,7 +7,7 @@ import Mathlib.RingTheory.AlgebraicIndependent.TranscendenceBasis
 import HasseWeil.AdditionPullback.Frobenius
 import HasseWeil.BridgeFrobenius
 import HasseWeil.Curves.Differentials
-import HasseWeil.Hasse.HoleE
+import HasseWeil.Hasse.HasseBoundQFNonneg
 
 /-!
 # Differential pullback for the addition isogeny `1 − π`

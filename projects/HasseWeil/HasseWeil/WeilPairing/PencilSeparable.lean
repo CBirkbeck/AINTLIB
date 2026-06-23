@@ -5,7 +5,7 @@ Authors: Chris Birkbeck
 -/
 import HasseWeil.GapSpines
 import HasseWeil.WeilPairing.PencilDualDivisor
-import HasseWeil.WeilPairing.SeparableWitnesses
+import HasseWeil.WeilPairing.IsogenyWitnessReductions
 import HasseWeil.WeilPairing.OmegaBaseChange
 
 /-!

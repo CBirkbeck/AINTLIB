@@ -2,7 +2,7 @@ import HasseWeil.ChordExpansion
 import HasseWeil.EC.MulByIntAddRecurrence
 import HasseWeil.FormalIsogenySeries
 import HasseWeil.Ramification
-import HasseWeil.RouteBInduction
+import HasseWeil.OmegaCoeffMulByIntFiniteField
 import HasseWeil.Curves.Infinity
 
 /-!

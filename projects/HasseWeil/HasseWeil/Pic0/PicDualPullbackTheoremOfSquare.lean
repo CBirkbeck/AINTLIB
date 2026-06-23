@@ -1,5 +1,5 @@
-import HasseWeil.Pic0.RouteCTheoremOfSquareDiv
-import HasseWeil.Pic0.RouteCGeometric
+import HasseWeil.Pic0.TheoremOfSquareDivisorForm
+import HasseWeil.Pic0.PicDualDegreeViaGeometricInjectivity
 
 /-!
 # Route C — the **pulled-back theorem of the square** over `F̄` (Silverman III.6.2(c))

@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.AdditionPullback.Frobenius
-import HasseWeil.Hasse.HoleE
+import HasseWeil.Hasse.HasseBoundQFNonneg
 import HasseWeil.Verschiebung.IsDual
 import HasseWeil.Verschiebung.QthRoots
 

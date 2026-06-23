@@ -13,7 +13,7 @@ import HasseWeil.FrobeniusIsogeny
 import HasseWeil.Hasse.IsogOneSubXyFamily
 import HasseWeil.Hasse.OneSubFrobenius
 import HasseWeil.Hasse.PointFix
-import HasseWeil.Hasse.Witnesses
+import HasseWeil.Hasse.HasseWitnessBundle
 import HasseWeil.Ramification
 
 /-!

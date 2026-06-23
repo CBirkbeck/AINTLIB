@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.GapQfKernel
-import HasseWeil.Verschiebung.Cascade
+import HasseWeil.Verschiebung.VerschiebungIsDualOfFrobenius
 import HasseWeil.Verschiebung.Route2Universal
 
 /-!

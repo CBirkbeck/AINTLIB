@@ -8,7 +8,7 @@ import Mathlib.FieldTheory.IsAlgClosed.Basic
 import HasseWeil.Curves.Differentials
 import HasseWeil.EC.SeparableKernelTorsor
 import HasseWeil.Hasse.TorsionCard
-import HasseWeil.RouteBGeneral
+import HasseWeil.OmegaCoeffMulByIntGeneral
 
 /-!
 # `#E[ℓ] = ℓ²` over an algebraically closed field, via the separable-kernel torsor
