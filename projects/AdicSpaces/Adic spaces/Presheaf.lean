@@ -424,15 +424,26 @@ theorem RationalLocData.divByS_mem_locPlusSubring (D : RationalLocData A)
     divByS t D.s ∈ D.locPlusSubring :=
   Subring.subset_closure (Set.mem_union_right _ ⟨⟨t, ht⟩, rfl⟩)
 
-/-- The completion plus subring `O_X(R(T/s))⁺ = Ĉ` (Wedhorn 8.16): the topological closure of
-the image of the **integral closure** `C = (A⁺[T/s])^int` of `locPlusSubring` in
-`Localization.Away D.s`. Using the integral closure `C` (not merely the generated subring
-`locPlusSubring`) is essential for `Ĉ` to be a genuine ring of integral elements
-(Definition 7.14 / Wedhorn 7.19 + 7.47; expert-review 2026-06-18, Q2 / risk #1). -/
-noncomputable def RationalLocData.completedPlusSubring (D : RationalLocData A) [PlusSubring A] :
+/-- The pre-integral-closure base of `completedPlusSubring`: the topological closure of the image
+of the localization's `A⁺`-integral subring `C = (A⁺[T/s])^int`. `completedPlusSubring` is its
+**integral closure in the completion** (Wedhorn 8.16 / 7.47(4): `Ĉ = (image of C)^int`, the two
+agreeing by [Hu1] 2.4.3 — we take the integral-closure-in-the-completion form as the definition so
+that `isIntegrallyClosed` is free, avoiding the [Hu1] 2.4.3 completion-transfer). -/
+noncomputable def RationalLocData.completedPlusSubringBase (D : RationalLocData A) [PlusSubring A] :
     Subring (presheafValue D) :=
   ((integralClosure ↥(D.locPlusSubring) (Localization.Away D.s)).toSubring.map
     D.coeRingHom).topologicalClosure
+
+noncomputable def RationalLocData.completedPlusSubring (D : RationalLocData A) [PlusSubring A] :
+    Subring (presheafValue D) :=
+  (integralClosure ↥(D.completedPlusSubringBase) (presheafValue D)).toSubring
+
+theorem RationalLocData.completedPlusSubringBase_le_completedPlusSubring
+    (D : RationalLocData A) [PlusSubring A] :
+    D.completedPlusSubringBase ≤ D.completedPlusSubring := by
+  intro x hx
+  rw [RationalLocData.completedPlusSubring, Subalgebra.mem_toSubring]
+  exact (integralClosure ↥(D.completedPlusSubringBase) (presheafValue D)).algebraMap_mem ⟨x, hx⟩
 
 /-- `locPlusSubring ≤ C = (locPlusSubring)^int` (every element is integral over itself). -/
 theorem RationalLocData.locPlusSubring_le_integralClosure (D : RationalLocData A) [PlusSubring A] :
@@ -447,7 +458,8 @@ theorem RationalLocData.coeRingHom_locPlusSubring_le_completedPlusSubring
     (D : RationalLocData A) [PlusSubring A] :
     (D.locPlusSubring).map D.coeRingHom ≤ D.completedPlusSubring := by
   rintro y ⟨x, hx, rfl⟩
-  exact Subring.le_topologicalClosure _ ⟨x, D.locPlusSubring_le_integralClosure hx, rfl⟩
+  exact D.completedPlusSubringBase_le_completedPlusSubring
+    (Subring.le_topologicalClosure _ ⟨x, D.locPlusSubring_le_integralClosure hx, rfl⟩)
 
 /-- An element of `locPlusSubring` maps into `completedPlusSubring`. -/
 theorem RationalLocData.coeRingHom_mem_completedPlusSubring
@@ -502,8 +514,27 @@ subring) is essential — risk #1. -/
 instance RationalLocData.presheafValuePlus_isRingOfIntegralElements
     (D : RationalLocData A) [PlusSubring A] :
     IsRingOfIntegralElements ((presheafValue D)⁺) where
+  -- `B⁺ ⊇ completedPlusSubringBase`, which is open (`A⁺` open ⟹ the `A⁺`-integral base is open;
+  -- Wedhorn 7.19, via `CompatiblePlusSubring.isOpen'`). An integral closure of an open subring is
+  -- open (it contains the open subring). [T-LA3 isOpen residual.]
   isOpen := sorry
-  isIntegrallyClosed := sorry
+  -- **FREE under the refactor**: `B⁺ = (integralClosure ↥base (presheafValue D)).toSubring`, so an
+  -- element integral over `B⁺` is integral over `base` (transitivity, `integralClosure` is integral
+  -- over the base), hence lies in `integralClosure base = B⁺`. This is what the refactor buys: the
+  -- [Hu1] 2.4.3 completion-transfer of integral-closedness is sidestepped by taking the integral
+  -- closure IN the completion as the definition.
+  isIntegrallyClosed := fun a ha => by
+    -- `(presheafValue D)⁺ = (integralClosure ↥base (presheafValue D)).toSubring` is integrally
+    -- closed in `presheafValue D` by the mathlib instance
+    -- `instIsIntegrallyClosedIn…IntegralClosure`; extract membership via `isIntegral_iff`.
+    show a ∈ D.completedPlusSubring
+    rw [RationalLocData.completedPlusSubring, Subalgebra.mem_toSubring, mem_integralClosure_iff]
+    letI := (integralClosure ↥(D.completedPlusSubringBase) (presheafValue D)).algebra
+    exact isIntegral_trans
+      (A := integralClosure ↥(D.completedPlusSubringBase) (presheafValue D)) a ha
+  -- `base ⊆ (presheafValue D)°` (`C ⊆ A_s°` by Lemma 7.20 + completion preserves power-bounded),
+  -- and the integral closure of a power-bounded set is power-bounded (integral over bounded ⟹
+  -- power-bounded). [T-LA3 subset_powerBounded residual.]
   subset_powerBounded := sorry
 
 /-- The canonical map `A →+* presheafValue D` sends `A⁺` into `B⁺`. -/
