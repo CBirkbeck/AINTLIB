@@ -254,6 +254,101 @@ scalar multiplication by naturals. On `F.EvalGroup hAdic`, `n • x` therefore
 corresponds (at the underlying ring level) to the formal-group multiplication
 series `[n](T) = mulByNatSeries F n` evaluated at `x.val.1`. -/
 
+omit [IsLocalRing R] [IsUniformAddGroup R] [IsTopologicalRing R] [IsLinearTopology R R]
+  [T2Space R] [CompleteSpace R] in
+/-- Both components of the substitution vector `![mulByNatSeries F n, X]` (the one
+realising `[n+1](T) = fAdd F [n](T) X` as `subst ![[n](T), X] F.toSeries`) have
+zero constant coefficient. This is the substitution hypothesis feeding the
+`eval₂_subst_bridge` in the inductive step of `nsmul_val`. -/
+private lemma nsmul_val_substVector_constantCoeff_zero (F : FormalGroup R) (n : ℕ) :
+    ∀ s, MvPowerSeries.constantCoeff
+        ((![HasseWeil.FG.mulByNatSeries F n, PowerSeries.X] : Fin 2 → MvPowerSeries Unit R) s)
+          = 0 := by
+  intro s
+  fin_cases s
+  · -- component 0 = mulByNatSeries F n.
+    change MvPowerSeries.constantCoeff
+      (HasseWeil.FG.mulByNatSeries F n : PowerSeries R) = 0
+    exact HasseWeil.FG.constantCoeff_mulByNatSeries F n
+  · -- component 1 = PowerSeries.X.
+    change MvPowerSeries.constantCoeff (PowerSeries.X : PowerSeries R) = 0
+    change PowerSeries.constantCoeff (R := R) PowerSeries.X = 0
+    simp
+
+/-- The inductive (`n+1`) step of the `nsmul/formal-[n]` bridge `nsmul_val`.
+
+Given the value of `n • x` (the induction hypothesis `ih`), the value of
+`(n+1) • x` is computed by:
+* unfolding `(n+1) • x = n • x +_F x` and `[n+1](T) = fAdd F [n](T) X`, then
+* transporting the ring evaluation through `subst ![[n](T), X] F.toSeries` with
+  `eval₂_subst_bridge`, where the inner evaluations become `(n • x).val.1` (by
+  `ih`) and `x.val.1`, matching `F.evalAdd (n • x).val x.val`. -/
+private theorem nsmul_val_succ
+    (F : FormalGroup R) (hAdic : IsAdic (maximalIdeal R))
+    (n : ℕ) (x : F.EvalGroup hAdic)
+    (ih : (n • x).val.1 =
+      PowerSeries.eval₂ (RingHom.id R) x.val.1 (F.mulByNatHom n).toSeries) :
+    ((n + 1) • x).val.1 =
+      PowerSeries.eval₂ (RingHom.id R) x.val.1 (F.mulByNatHom (n + 1)).toSeries := by
+  -- LHS: ((n+1) • x).val.1 = (n • x + x).val.1 = F.evalAdd (n • x).val x.val.
+  rw [succ_nsmul, FormalGroup.EvalGroup.val_add]
+  -- RHS: unfold mulByNatHom_toSeries, then mulByNatSeries (n+1) = fAdd F (mulByNatSeries F n) X.
+  rw [F.mulByNatHom_toSeries]
+  change F.evalAdd (n • x).val x.val =
+    PowerSeries.eval₂ (RingHom.id R) x.val.1
+      (HasseWeil.FG.mulByNatSeries F (n + 1))
+  -- mulByNatSeries F (n+1) = fAdd F (mulByNatSeries F n) X
+  --                        = subst ![mulByNatSeries F n, X] F.toSeries (by def of fAdd).
+  change F.evalAdd (n • x).val x.val =
+    PowerSeries.eval₂ (RingHom.id R) x.val.1
+      (HasseWeil.FG.fAdd F (HasseWeil.FG.mulByNatSeries F n) PowerSeries.X)
+  -- `fAdd F f g = MvPowerSeries.subst ![f, g] F.toSeries` (definitional).
+  -- Apply the substitution bridge.
+  let a : Fin 2 → MvPowerSeries Unit R :=
+    ![HasseWeil.FG.mulByNatSeries F n, PowerSeries.X]
+  have ha0 : ∀ s, MvPowerSeries.constantCoeff (a s) = 0 :=
+    nsmul_val_substVector_constantCoeff_zero F n
+  have ha : MvPowerSeries.HasSubst a :=
+    MvPowerSeries.hasSubst_of_constantCoeff_zero (fun s ↦ ha0 s)
+  have hb_mem : ∀ _ : Unit, x.val.1 ∈ maximalIdeal R := fun _ ↦ x.val.2
+  -- Bridge: eval₂ id (fun _ ↦ x) (subst a F.toSeries) =
+  --         eval₂ id (fun s ↦ eval₂ id (fun _ ↦ x) (a s)) F.toSeries.
+  have bridge :=
+    eval₂_subst_bridge hAdic ha0 ha (b := fun _ : Unit ↦ x.val.1) hb_mem F.toSeries
+  -- The RHS of bridge is evaluated at the pair (eval_x (mulByNatSeries F n), x).
+  -- Using the induction hypothesis, this becomes (![(n • x).val.1, x.val.1]).
+  -- Compute the two functions and match.
+  have hfun : (fun s : Fin 2 ↦
+        MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ x.val.1) (a s)) =
+      ![(n • x).val.1, x.val.1] := by
+    funext s
+    fin_cases s
+    · -- s = 0: eval₂ id x (mulByNatSeries F n) = (n • x).val.1 by ih.
+      change MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ x.val.1)
+          (HasseWeil.FG.mulByNatSeries F n : PowerSeries R) = ((n • x).val.1 : R)
+      change PowerSeries.eval₂ (RingHom.id R) x.val.1
+          (HasseWeil.FG.mulByNatSeries F n) = _
+      have ih' : (n • x).val.1 =
+          PowerSeries.eval₂ (RingHom.id R) x.val.1
+            (F.mulByNatHom n).toSeries := ih
+      rw [F.mulByNatHom_toSeries] at ih'
+      exact ih'.symm
+    · -- s = 1: eval₂ id x PowerSeries.X = x.val.1.
+      change MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ x.val.1)
+          (PowerSeries.X : PowerSeries R) = x.val.1
+      change PowerSeries.eval₂ (RingHom.id R) x.val.1 PowerSeries.X = _
+      rw [PowerSeries.eval₂_X]
+  -- Match the bridge RHS to F.evalAdd (n • x).val x.val.
+  rw [hfun] at bridge
+  -- bridge's LHS is eval_x (subst a F.toSeries) = eval_x (fAdd F ...).
+  -- bridge's RHS is eval₂ id ![(n•x), x] F.toSeries = F.evalAdd (n • x).val x.val.
+  change _ = PowerSeries.eval₂ (RingHom.id R) x.val.1
+    (MvPowerSeries.subst a F.toSeries)
+  change _ = MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ x.val.1)
+    (MvPowerSeries.subst a F.toSeries)
+  rw [bridge]
+  rfl
+
 /-- **nsmul/formal-[n] bridge**. On the wrapper `F.EvalGroup hAdic`, the
 `AddGroup` scalar action `n • x` agrees (at the underlying ring level) with
 `PowerSeries.eval₂ (RingHom.id R) x.val.1 (F.mulByNatHom n).toSeries`. -/
@@ -270,74 +365,7 @@ theorem FormalGroup.EvalGroup.nsmul_val
     rw [show (0 : PowerSeries R) = ((0 : Polynomial R) : PowerSeries R) from by simp,
         PowerSeries.eval₂_coe]
     simp
-  | succ n ih =>
-    -- LHS: ((n+1) • x).val.1 = (n • x + x).val.1 = F.evalAdd (n • x).val x.val.
-    rw [succ_nsmul, FormalGroup.EvalGroup.val_add]
-    -- RHS: unfold mulByNatHom_toSeries, then mulByNatSeries (n+1) = fAdd F (mulByNatSeries F n) X.
-    rw [F.mulByNatHom_toSeries]
-    change F.evalAdd (n • x).val x.val =
-      PowerSeries.eval₂ (RingHom.id R) x.val.1
-        (HasseWeil.FG.mulByNatSeries F (n + 1))
-    -- mulByNatSeries F (n+1) = fAdd F (mulByNatSeries F n) X
-    --                        = subst ![mulByNatSeries F n, X] F.toSeries (by def of fAdd).
-    change F.evalAdd (n • x).val x.val =
-      PowerSeries.eval₂ (RingHom.id R) x.val.1
-        (HasseWeil.FG.fAdd F (HasseWeil.FG.mulByNatSeries F n) PowerSeries.X)
-    -- `fAdd F f g = MvPowerSeries.subst ![f, g] F.toSeries` (definitional).
-    -- Apply the substitution bridge.
-    let a : Fin 2 → MvPowerSeries Unit R :=
-      ![HasseWeil.FG.mulByNatSeries F n, PowerSeries.X]
-    have ha0 : ∀ s, MvPowerSeries.constantCoeff (a s) = 0 := by
-      intro s
-      fin_cases s
-      · -- a 0 = mulByNatSeries F n.
-        change MvPowerSeries.constantCoeff
-          (HasseWeil.FG.mulByNatSeries F n : PowerSeries R) = 0
-        exact HasseWeil.FG.constantCoeff_mulByNatSeries F n
-      · -- a 1 = PowerSeries.X.
-        change MvPowerSeries.constantCoeff (PowerSeries.X : PowerSeries R) = 0
-        change PowerSeries.constantCoeff (R := R) PowerSeries.X = 0
-        simp
-    have ha : MvPowerSeries.HasSubst a :=
-      MvPowerSeries.hasSubst_of_constantCoeff_zero (fun s ↦ ha0 s)
-    have hb_mem : ∀ _ : Unit, x.val.1 ∈ maximalIdeal R := fun _ ↦ x.val.2
-    -- Bridge: eval₂ id (fun _ ↦ x) (subst a F.toSeries) =
-    --         eval₂ id (fun s ↦ eval₂ id (fun _ ↦ x) (a s)) F.toSeries.
-    have bridge :=
-      eval₂_subst_bridge hAdic ha0 ha (b := fun _ : Unit ↦ x.val.1) hb_mem F.toSeries
-    -- The RHS of bridge is evaluated at the pair (eval_x (mulByNatSeries F n), x).
-    -- Using the induction hypothesis, this becomes (![(n • x).val.1, x.val.1]).
-    -- Compute the two functions and match.
-    have hfun : (fun s : Fin 2 ↦
-          MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ x.val.1) (a s)) =
-        ![(n • x).val.1, x.val.1] := by
-      funext s
-      fin_cases s
-      · -- s = 0: eval₂ id x (mulByNatSeries F n) = (n • x).val.1 by ih.
-        change MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ x.val.1)
-            (HasseWeil.FG.mulByNatSeries F n : PowerSeries R) = ((n • x).val.1 : R)
-        change PowerSeries.eval₂ (RingHom.id R) x.val.1
-            (HasseWeil.FG.mulByNatSeries F n) = _
-        have ih' : (n • x).val.1 =
-            PowerSeries.eval₂ (RingHom.id R) x.val.1
-              (F.mulByNatHom n).toSeries := ih
-        rw [F.mulByNatHom_toSeries] at ih'
-        exact ih'.symm
-      · -- s = 1: eval₂ id x PowerSeries.X = x.val.1.
-        change MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ x.val.1)
-            (PowerSeries.X : PowerSeries R) = x.val.1
-        change PowerSeries.eval₂ (RingHom.id R) x.val.1 PowerSeries.X = _
-        rw [PowerSeries.eval₂_X]
-    -- Match the bridge RHS to F.evalAdd (n • x).val x.val.
-    rw [hfun] at bridge
-    -- bridge's LHS is eval_x (subst a F.toSeries) = eval_x (fAdd F ...).
-    -- bridge's RHS is eval₂ id ![(n•x), x] F.toSeries = F.evalAdd (n • x).val x.val.
-    change _ = PowerSeries.eval₂ (RingHom.id R) x.val.1
-      (MvPowerSeries.subst a F.toSeries)
-    change _ = MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ x.val.1)
-      (MvPowerSeries.subst a F.toSeries)
-    rw [bridge]
-    rfl
+  | succ n ih => exact nsmul_val_succ F hAdic n x ih
 
 /-! ### The graded-isomorphism congruence (Silverman IV.3.2.a)
 
