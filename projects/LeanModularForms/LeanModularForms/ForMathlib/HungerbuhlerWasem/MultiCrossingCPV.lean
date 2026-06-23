@@ -11,8 +11,8 @@ import LeanModularForms.ForMathlib.HungerbuhlerWasem.Crossing
 This file delivers two headline multi-crossing CPV theorems for **arbitrary**
 cardinality `D.crossings.card ≥ 0`:
 
-* `hasCauchyPV_inv_sub_multiCrossing` (T-BR-Y9d): simple-pole CPV existence.
-* `hasCauchyPVOn_multiCrossing_higherOrder` (T-BR-Y9e): higher-order CPV
+* `hasCauchyPV_inv_sub_multiCrossing_corner` (T-BR-Y9d): simple-pole CPV existence.
+* `hasCauchyPVOn_multiCrossing_higherOrder_corner` (T-BR-Y9e): higher-order CPV
   vanishing under condition (B).
 
 ## Strategy
@@ -39,9 +39,9 @@ Given `D : MultiPoleCrossData γ s` with `crossings.card = n`:
 
 ## Main results
 
-* `hasCauchyPV_inv_sub_multiCrossing` — multi-crossing CPV existence for
+* `hasCauchyPV_inv_sub_multiCrossing_corner` — multi-crossing CPV existence for
   any `card ≥ 0`.
-* `hasCauchyPVOn_multiCrossing_higherOrder` — higher-order CPV vanishing
+* `hasCauchyPVOn_multiCrossing_higherOrder_corner` — higher-order CPV vanishing
   under condition (B).
 
 ## References
