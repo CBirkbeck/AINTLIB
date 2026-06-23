@@ -1037,6 +1037,66 @@ theorem translateAlgEquivOfPoint_apply_y_gen
 instance W_smooth_toAffine_isElliptic : (W_smooth W).toAffine.IsElliptic :=
   inferInstanceAs W.toAffine.IsElliptic
 
+/-- If `P + (xk, yk)` is a finite point, then `P` is not the negation of `(xk, yk)`,
+i.e. `(P.x, P.y) ≠ (xk, negY xk yk)`. (If it were, the sum would be the point at
+infinity, contradicting `IsSome`.) -/
+private theorem not_eq_negY_pair_of_add_isSome
+    (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
+    (h : (P.toAffinePoint +
+        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)).IsSome) :
+    ¬(P.x = xk ∧ P.y = W.toAffine.negY xk yk) := by
+  intro ⟨h_x_eq, h_y_eq⟩
+  have h_zero : P.toAffinePoint +
+      (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point) = 0 := by
+    change Affine.Point.some P.x P.y P.nonsingular +
+        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point) = 0
+    exact Affine.Point.add_of_Y_eq h_x_eq h_y_eq
+  exact Affine.Point.zero_not_isSome (h_zero ▸ h)
+
+/-- In the equal-`x` branch of an addition with `(P.x, P.y) ≠ (xk, negY xk yk)`,
+the point is genuinely being doubled: `P.y = yk` and `yk ≠ negY xk yk`. -/
+private theorem yk_ne_negY_and_eq_of_x_eq
+    (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
+    (h_not_zero_pair : ¬(P.x = xk ∧ P.y = W.toAffine.negY xk yk)) (h_xeq : P.x = xk) :
+    P.y = yk ∧ yk ≠ W.toAffine.negY xk yk := by
+  have h_y_ne_negY : P.y ≠ W.toAffine.negY xk yk := fun h_yeq ↦
+    h_not_zero_pair ⟨h_xeq, h_yeq⟩
+  have h_yeq : P.y = yk :=
+    W.toAffine.Y_eq_of_Y_ne P.nonsingular.1 h_ns.1 h_xeq h_y_ne_negY
+  exact ⟨h_yeq, h_yeq ▸ h_y_ne_negY⟩
+
+/-- The `x_gen` half of `isTranslateXY_evaluatesAt_some`: dispatches the
+equal-`x` (doubling) and distinct-`x` (chord) cases of the `addX` valuation bound. -/
+private theorem pointValuation_translateX_xy_sub_alg_addX_lt_one_of_isSome
+    (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
+    (h_not_zero_pair : ¬(P.x = xk ∧ P.y = W.toAffine.negY xk yk)) :
+    (W_smooth W).pointValuation P
+      (translateX_xy W xk yk -
+        algebraMap F KE
+          (W.toAffine.addX P.x xk (W.toAffine.slope P.x xk P.y yk))) < 1 := by
+  by_cases h_xeq : P.x = xk
+  · obtain ⟨h_yeq, h_not_2_tor⟩ :=
+      yk_ne_negY_and_eq_of_x_eq W P xk yk h_ns h_not_zero_pair h_xeq
+    exact pointValuation_translateX_xy_sub_alg_addX_lt_one_of_doubling W P xk yk
+      h_xeq h_yeq h_not_2_tor
+  · exact pointValuation_translateX_xy_sub_alg_addX_lt_one_of_X_ne W P xk yk h_xeq
+
+/-- The `y_gen` half of `isTranslateXY_evaluatesAt_some`: dispatches the
+equal-`x` (doubling) and distinct-`x` (chord) cases of the `addY` valuation bound. -/
+private theorem pointValuation_translateY_xy_sub_alg_addY_lt_one_of_isSome
+    (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
+    (h_not_zero_pair : ¬(P.x = xk ∧ P.y = W.toAffine.negY xk yk)) :
+    (W_smooth W).pointValuation P
+      (translateY_xy W xk yk -
+        algebraMap F KE
+          (W.toAffine.addY P.x xk P.y (W.toAffine.slope P.x xk P.y yk))) < 1 := by
+  by_cases h_xeq : P.x = xk
+  · obtain ⟨h_yeq, h_not_2_tor⟩ :=
+      yk_ne_negY_and_eq_of_x_eq W P xk yk h_ns h_not_zero_pair h_xeq
+    exact pointValuation_translateY_xy_sub_alg_addY_lt_one_of_doubling W P xk yk
+      h_xeq h_yeq h_not_2_tor
+  · exact pointValuation_translateY_xy_sub_alg_addY_lt_one_of_X_ne W P xk yk h_xeq
+
 /-- **Composition**: `IsTranslateXY_evaluatesAt` for non-zero `k`,
 unifying the chord and tangent discharges. -/
 theorem isTranslateXY_evaluatesAt_some
@@ -1047,13 +1107,8 @@ theorem isTranslateXY_evaluatesAt_some
       (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point) h := by
   set k : (W_smooth W).toAffine.Point :=
       (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point) with hk_def
-  have h_not_zero_pair : ¬(P.x = xk ∧ P.y = W.toAffine.negY xk yk) := by
-    intro ⟨h_x_eq, h_y_eq⟩
-    have h_zero : P.toAffinePoint + k = 0 := by
-      change Affine.Point.some P.x P.y P.nonsingular +
-          (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point) = 0
-      exact Affine.Point.add_of_Y_eq h_x_eq h_y_eq
-    exact Affine.Point.zero_not_isSome (h_zero ▸ h)
+  have h_not_zero_pair : ¬(P.x = xk ∧ P.y = W.toAffine.negY xk yk) :=
+    not_eq_negY_pair_of_add_isSome W P xk yk h_ns h
   have hsum :
       P.toAffinePoint + k =
         (Affine.Point.some (W.toAffine.addX P.x xk (W.toAffine.slope P.x xk P.y yk))
@@ -1079,25 +1134,11 @@ theorem isTranslateXY_evaluatesAt_some
     exact translateAlgEquivOfPoint_apply_y_gen W xk yk h_ns
   refine ⟨?_, ?_⟩
   · rw [h_tau_x, h_PK_x]
-    by_cases h_xeq : P.x = xk
-    · have h_y_ne_negY : P.y ≠ W.toAffine.negY xk yk := fun h_yeq ↦
-        h_not_zero_pair ⟨h_xeq, h_yeq⟩
-      have h_yeq : P.y = yk :=
-        W.toAffine.Y_eq_of_Y_ne P.nonsingular.1 h_ns.1 h_xeq h_y_ne_negY
-      have h_not_2_tor : yk ≠ W.toAffine.negY xk yk := h_yeq ▸ h_y_ne_negY
-      exact pointValuation_translateX_xy_sub_alg_addX_lt_one_of_doubling W P xk yk
-        h_xeq h_yeq h_not_2_tor
-    · exact pointValuation_translateX_xy_sub_alg_addX_lt_one_of_X_ne W P xk yk h_xeq
+    exact pointValuation_translateX_xy_sub_alg_addX_lt_one_of_isSome W P xk yk h_ns
+      h_not_zero_pair
   · rw [h_tau_y, h_PK_y]
-    by_cases h_xeq : P.x = xk
-    · have h_y_ne_negY : P.y ≠ W.toAffine.negY xk yk := fun h_yeq ↦
-        h_not_zero_pair ⟨h_xeq, h_yeq⟩
-      have h_yeq : P.y = yk :=
-        W.toAffine.Y_eq_of_Y_ne P.nonsingular.1 h_ns.1 h_xeq h_y_ne_negY
-      have h_not_2_tor : yk ≠ W.toAffine.negY xk yk := h_yeq ▸ h_y_ne_negY
-      exact pointValuation_translateY_xy_sub_alg_addY_lt_one_of_doubling W P xk yk
-        h_xeq h_yeq h_not_2_tor
-    · exact pointValuation_translateY_xy_sub_alg_addY_lt_one_of_X_ne W P xk yk h_xeq
+    exact pointValuation_translateY_xy_sub_alg_addY_lt_one_of_isSome W P xk yk h_ns
+      h_not_zero_pair
 
 /-- **Unified slope bound**: for any P and non-zero `k = (xk, yk)` with
 `(P + k).IsSome`, `pV(translateSlope_xy W xk yk) ≤ 1` at `P`. -/
