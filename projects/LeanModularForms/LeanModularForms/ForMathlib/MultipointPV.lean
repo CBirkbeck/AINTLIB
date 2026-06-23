@@ -8,33 +8,25 @@ import LeanModularForms.ForMathlib.CauchyPrincipalValue
 /-!
 # Multi-Point Cauchy Principal Value Infrastructure
 
-Algebraic lemmas for multi-point Cauchy principal values and minimum separation
-of finite sets. These are the building blocks for the generalized residue theorem.
+Algebraic lemmas for multi-point Cauchy principal values. These are building
+blocks for the generalized residue theorem.
 
 ## Main results
-
-### Finite set separation
-
-* `finset_discrete_min_sep` -- positive minimum separation in a finite set of distinct
-  complex numbers.
-* `finset_discrete_min_sep'` -- variant with `S.card > 1` hypothesis.
-* `disjoint_balls_of_small_epsilon` -- disjoint balls for sufficiently small epsilon.
 
 ### Algebraic operations on `cpvIntegrandOn`
 
 * `cpvIntegrandOn_sub` -- pointwise subtraction of CPV integrands
 * `cpvIntegrandOn_add` -- pointwise addition of CPV integrands
-* `cpvIntegrandOn_neg` -- pointwise negation of CPV integrands
 
 ### Algebraic operations on `HasCauchyPVOn`
 
 * `HasCauchyPVOn.sub` -- subtraction of multi-point CPV limits
 * `HasCauchyPVOn.add` -- addition of multi-point CPV limits
-* `hasCauchyPVOn_of_tendsto_sub` -- transfer via vanishing difference
+* `HasCauchyPVOn.zero_fun` -- the zero function has multi-point CPV zero
+* `HasCauchyPVOn.finset_sum` -- finite sums of multi-point CPV limits
 
 ### Connection between single-point and multi-point CPV
 
-* `hasCauchyPVOn_singleton_of_hasCauchyPV` -- single-point to multi-point
 * `hasCauchyPV_of_hasCauchyPVOn_singleton` -- multi-point (singleton) to single-point
 
 ## References
