@@ -1168,6 +1168,67 @@ private lemma coeff_prod_subst_vec_zero_X0 (d e : Fin 2 →₀ ℕ) :
   · simp [hd0]
   · rw [zero_pow hd0, zero_mul, map_zero, if_neg hd0]
 
+/-- Reindexing: a finsum over `d : Fin 2 →₀ ℕ` of a term that vanishes unless
+`d 0 = 0` collapses to a finsum over `n : ℕ` along `n ↦ Finsupp.single 1 n`, the
+map enumerating `{d | d 0 = 0}`. -/
+private lemma finsum_ite_first_eq_zero_eq_finsum_single_one (g : (Fin 2 →₀ ℕ) → R) :
+    (∑ᶠ d : Fin 2 →₀ ℕ, if d 0 = 0 then g d else 0) =
+      ∑ᶠ n : ℕ, g (Finsupp.single (1 : Fin 2) n) := by
+  classical
+  symm
+  let ι : ℕ → Fin 2 →₀ ℕ := fun n ↦ Finsupp.single (1 : Fin 2) n
+  have hinj : Function.Injective ι := fun a b hab ↦ by
+    have := DFunLike.congr_fun hab (1 : Fin 2)
+    simp [ι] at this; exact this
+  have himg : ∀ d : Fin 2 →₀ ℕ, d ∈ Set.range ι ↔ d 0 = 0 := by
+    intro d; constructor
+    · rintro ⟨n, rfl⟩
+      simp [ι]
+    · intro h0
+      refine ⟨d 1, ?_⟩
+      ext i; fin_cases i
+      · simp [ι, h0]
+      · simp [ι]
+  -- Expand the LHS finsum as an indicator finsum, then pull back through `ι`.
+  have key : ∀ d : Fin 2 →₀ ℕ,
+      (if d 0 = 0 then g d else (0 : R)) = Set.indicator (Set.range ι) g d := by
+    intro d; rw [Set.indicator_apply]
+    split_ifs with h1 h2 h3
+    · rfl
+    · exfalso; exact h2 ((himg d).mpr h1)
+    · exfalso; exact h1 ((himg d).mp h3)
+    · rfl
+  conv_rhs => arg 1; ext d; rw [key d]
+  rw [← finsum_mem_def, ← finsum_subtype_eq_finsum_cond (· ∈ Set.range ι)]
+  rw [← finsum_comp_equiv (Equiv.ofInjective ι hinj)]
+  apply finsum_congr
+  intro n
+  have h1 : ((Equiv.ofInjective ι hinj n : Set.range ι) : Fin 2 →₀ ℕ) =
+      Finsupp.single (1 : Fin 2) n := rfl
+  rw [h1]
+
+/-- The per-term coefficient match for `subst_zero_X0_pderiv0`: at index
+`Finsupp.single 1 n`, the coefficient of `pderiv 0 F.toSeries` reproduces the
+`n`-th coefficient of `F.dX_at_zero`, against the same `(X 0)^n` factor. -/
+private lemma coeff_single_one_pderiv0_smul_eq_dX_at_zero (F : FormalGroup R)
+    (e : Fin 2 →₀ ℕ) (n : ℕ) :
+    MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) n)
+        (MvPowerSeries.pderiv 0 F.toSeries) •
+        MvPowerSeries.coeff e
+          ((MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) ^ ((Finsupp.single (1 : Fin 2) n) 1)) =
+      PowerSeries.coeff n F.dX_at_zero •
+        MvPowerSeries.coeff e ((MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) ^ n) := by
+  rw [Finsupp.single_eq_same, MvPowerSeries.coeff_pderiv]
+  -- coeff at (single 1 n) of pderiv 0 F = (0 + 1) • coeff_{single 1 n + single 0 1} F
+  --                                     = coeff_{(1, n)}(F) [using (1, n) = single 0 1 + single 1 n].
+  rw [show (Finsupp.single (1 : Fin 2) n : Fin 2 →₀ ℕ) 0 = 0 by
+      rw [Finsupp.single_apply]; rfl,
+    show Finsupp.single (1 : Fin 2) n + Finsupp.single 0 1 =
+        Finsupp.single 0 1 + Finsupp.single 1 n by rw [add_comm]]
+  -- Match with the `dX_at_zero` formula.
+  rw [FormalGroup.dX_at_zero, PowerSeries.coeff_mk]
+  simp
+
 /-- Silverman's identity `F_X(0, T) = dX_at_zero(T)`. -/
 private lemma subst_zero_X0_pderiv0 (F : FormalGroup R) :
     MvPowerSeries.subst
@@ -1188,74 +1249,10 @@ private lemma subst_zero_X0_pderiv0 (F : FormalGroup R) :
   simp_rw [coeff_prod_subst_vec_zero_X0]
   -- LHS: finsum d, (if d 0 = 0 then coeff_d(pderiv 0 F) • coeff_e (X 0)^(d 1) else 0)
   simp_rw [smul_ite, smul_zero]
-  -- Now we reindex LHS: for each d with d 0 = 0, d = single 1 (d 1) (as Finsupp).
-  -- Map such d to n = d 1 : ℕ, giving RHS.
-  -- Use finsum over ℕ by reindexing.
-  rw [show (∑ᶠ (d : Fin 2 →₀ ℕ), if d 0 = 0 then
-      MvPowerSeries.coeff d (MvPowerSeries.pderiv 0 F.toSeries) •
-        MvPowerSeries.coeff e
-          ((MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) ^ d 1) else 0) =
-    ∑ᶠ (n : ℕ),
-      MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) n)
-        (MvPowerSeries.pderiv 0 F.toSeries) •
-        MvPowerSeries.coeff e
-          ((MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) ^ n) from ?_]
-  · -- Now reindex and match with RHS.
-    apply finsum_congr
-    intro n
-    rw [MvPowerSeries.coeff_pderiv]
-    -- coeff at (single 1 n) of pderiv 0 F = (0 + 1) • coeff_{single 1 n + single 0 1} F
-    --                                     = coeff_{(1, n)}(F) [using index (1, n) = single 0 1 + single 1 n].
-    rw [show (Finsupp.single (1 : Fin 2) n : Fin 2 →₀ ℕ) 0 = 0 by
-        rw [Finsupp.single_apply]; rfl,
-      show Finsupp.single (1 : Fin 2) n + Finsupp.single 0 1 =
-          Finsupp.single 0 1 + Finsupp.single 1 n by rw [add_comm]]
-    -- Match with dX_at_zero formula.
-    rw [FormalGroup.dX_at_zero, PowerSeries.coeff_mk]
-    simp
-  · -- Reindex the finsum: use `finsum_mem_coe_finset` or Equiv.ofInjective.
-    -- The support of the LHS function is contained in {single 1 n : n : ℕ}, indexed by ℕ.
-    symm
-    let ι : ℕ → Fin 2 →₀ ℕ := fun n ↦ Finsupp.single (1 : Fin 2) n
-    have hinj : Function.Injective ι := fun a b hab ↦ by
-      have := DFunLike.congr_fun hab (1 : Fin 2)
-      simp [ι] at this; exact this
-    have himg : ∀ d : Fin 2 →₀ ℕ, d ∈ Set.range ι ↔ d 0 = 0 := by
-      intro d; constructor
-      · rintro ⟨n, rfl⟩
-        simp [ι]
-      · intro h0
-        refine ⟨d 1, ?_⟩
-        ext i; fin_cases i
-        · simp [ι, h0]
-        · simp [ι]
-    -- Expand LHS finsum as indicator finsum, then pull back through ι.
-    have key : ∀ d : Fin 2 →₀ ℕ,
-        (if d 0 = 0 then
-          MvPowerSeries.coeff d (MvPowerSeries.pderiv 0 F.toSeries) •
-            MvPowerSeries.coeff e
-              ((MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) ^ d 1) else (0 : R)) =
-        Set.indicator (Set.range ι)
-          (fun d ↦ MvPowerSeries.coeff d (MvPowerSeries.pderiv 0 F.toSeries) •
-            MvPowerSeries.coeff e
-              ((MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) ^ d 1)) d := by
-      intro d; rw [Set.indicator_apply]
-      split_ifs with h1 h2 h3
-      · rfl
-      · exfalso; exact h2 ((himg d).mpr h1)
-      · exfalso; exact h1 ((himg d).mp h3)
-      · rfl
-    conv_rhs => arg 1; ext d; rw [key d]
-    rw [← finsum_mem_def, ← finsum_subtype_eq_finsum_cond (· ∈ Set.range ι)]
-    rw [← finsum_comp_equiv (Equiv.ofInjective ι hinj)]
-    apply finsum_congr
-    intro n
-    -- Goal: coeff (single 1 n) • coeff e (X 0 ^ n) = coeff (ι n : subtype) • coeff e (X 0 ^ (ι n)_1).
-    have h1 : ((Equiv.ofInjective ι hinj n : Set.range ι) : Fin 2 →₀ ℕ) =
-        Finsupp.single (1 : Fin 2) n := rfl
-    have h2 : ((Finsupp.single (1 : Fin 2) n) : Fin 2 →₀ ℕ) 1 = n := by
-      rw [Finsupp.single_apply, if_pos rfl]
-    rw [h1, h2]
+  -- Reindex the LHS along `n ↦ single 1 n` (the `d 0 = 0` slice), …
+  rw [finsum_ite_first_eq_zero_eq_finsum_single_one]
+  -- … then match the reindexed terms with the RHS coefficient-by-coefficient.
+  exact finsum_congr fun n ↦ coeff_single_one_pderiv0_smul_eq_dX_at_zero F e n
 
 /-! #### The `dX_at_zero` translation identity -/
 
