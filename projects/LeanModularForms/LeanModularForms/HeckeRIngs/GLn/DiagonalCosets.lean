@@ -3,13 +3,13 @@ Copyright (c) 2024 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.GLn.Basic
-import Mathlib.LinearAlgebra.Matrix.Transvection
-import Mathlib.LinearAlgebra.FreeModule.PID
-import Mathlib.RingTheory.PrincipalIdealDomain
 import Mathlib.Algebra.EuclideanDomain.Int
-import Mathlib.LinearAlgebra.Matrix.Basis
 import Mathlib.LinearAlgebra.Determinant
+import Mathlib.LinearAlgebra.FreeModule.PID
+import Mathlib.LinearAlgebra.Matrix.Basis
+import Mathlib.LinearAlgebra.Matrix.Transvection
+import Mathlib.RingTheory.PrincipalIdealDomain
+import LeanModularForms.HeckeRIngs.GLn.Basic
 
 /-!
 # Diagonal Coset Representatives for GL_n Hecke Ring
@@ -37,7 +37,7 @@ representative (elementary divisor theorem / Smith normal form).
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §3.2
 -/
 
-open Matrix Subgroup.Commensurable Pointwise HeckeRing Matrix.SpecialLinearGroup
+open Matrix Matrix.SpecialLinearGroup
 
 namespace HeckeRing.GLn
 
@@ -65,7 +65,8 @@ noncomputable def diagMat (a : Fin n → ℕ) : GL (Fin n) ℚ :=
     (↑(diagMat n a) : Matrix (Fin n) (Fin n) ℚ) =
     Matrix.diagonal (fun i ↦ (a i : ℚ)) := by unfold diagMat; rw [dif_pos ha]; rfl
 
-lemma diagMat_hasIntEntries (a : Fin n → ℕ) (ha : ∀ i, 0 < a i) : HasIntEntries n (diagMat n a) :=
+lemma diagMat_hasIntEntries (a : Fin n → ℕ) (ha : ∀ i, 0 < a i) :
+    HasIntEntries n (diagMat n a) :=
   ⟨Matrix.diagonal (fun i ↦ (a i : ℤ)),
     by ext i j; simp [ha, Matrix.diagonal_apply, Matrix.map_apply]⟩
 
@@ -252,7 +253,8 @@ private lemma sign_correct_unit_transform (A : Matrix (Fin n) (Fin n) ℤ) (d : 
     have hflip_det : flip.det = -1 := by
       rw [Matrix.det_diagonal, Finset.prod_update_of_mem (Finset.mem_univ 0)]; simp
     have hflip_sq : flip * flip = 1 := by
-      rw [Matrix.diagonal_mul_diagonal]; ext i j; simp only [Matrix.diagonal_apply, Matrix.one_apply]
+      rw [Matrix.diagonal_mul_diagonal]; ext i j
+      simp only [Matrix.diagonal_apply, Matrix.one_apply]
       by_cases h : i = j
       · subst h; by_cases hi : i = 0 <;> simp [hi]
       · simp [h]
@@ -479,7 +481,8 @@ private lemma gcd_step_matrix_eq (k : ℕ) (e : Fin (k + 2) ≃ Fin 2 ⊕ Fin k)
       ((fromBlocks !![(1 : ℤ), -(a.gcdB b * (b / ↑(a.gcd b)));
         1, 1 - a.gcdB b * (b / ↑(a.gcd b))] 0 0 (1 : Matrix (Fin k) (Fin k) ℤ)).submatrix e e) =
     Matrix.diagonal d' := by
-  have hH : Matrix.diagonal (fun i : Fin 2 ↦ (d ∘ e.symm) (Sum.inl i)) = !![a, (0 : ℤ); 0, b] := by
+  have hH : Matrix.diagonal (fun i : Fin 2 ↦ (d ∘ e.symm) (Sum.inl i)) =
+      !![a, (0 : ℤ); 0, b] := by
     ext i m; fin_cases i <;> fin_cases m <;> simp [Function.comp, he0, he1, hda, hdb]
   have hH' : Matrix.diagonal (fun i : Fin 2 ↦ (d' ∘ e.symm) (Sum.inl i)) =
       !![↑(a.gcd b), (0 : ℤ); 0, (a / ↑(a.gcd b)) * (b / ↑(a.gcd b)) * ↑(a.gcd b)] := by
@@ -670,8 +673,7 @@ private lemma slSuccEmbed_mul_diagonal (k : ℕ) (d : Fin (k + 2) → ℤ)
     · fin_cases i; fin_cases j; simp [fromBlocks, Function.comp, he_inl]
     · simp [fromBlocks]
     · simp [fromBlocks]
-    · set_option linter.unusedSimpArgs false in
-      simp [fromBlocks, diagonal_apply, Function.comp, he_inr]
+    · simp [fromBlocks, diagonal_apply, Function.comp, he_inr]
   rw [h_decomp]
   rw [fromBlocks_multiply]; simp only [Matrix.mul_zero, Matrix.zero_mul, add_zero, zero_add,
     Matrix.one_mul]
@@ -685,8 +687,7 @@ private lemma slSuccEmbed_mul_diagonal (k : ℕ) (d : Fin (k + 2) → ℤ)
     · fin_cases i; fin_cases j; simp [fromBlocks, Function.comp, d_out, he_inl]
     · simp [fromBlocks]
     · simp [fromBlocks]
-    · set_option linter.unusedSimpArgs false in
-      simp [fromBlocks, diagonal_apply, Function.comp, d_out, he_inr]
+    · simp [fromBlocks, diagonal_apply, Function.comp, d_out, he_inr]
   rw [h_out_decomp, hmul]
 
 /-- Prepending a head entry `c` that divides every entry of `d_tail'` to a divisibility chain
@@ -745,7 +746,8 @@ private lemma exists_divchain_of_posdiag (d : Fin n → ℤ) (hd : ∀ i, 0 < d 
         else d_tail' ⟨i.val - 1, by omega⟩
       have hd₂_pos : ∀ i, 0 < d₂ i := by
         intro i; simp only [d₂]; split_ifs <;> [exact hd₁_pos 0; exact hd_tail'_pos _]
-      have hd₂_chain : ∀ (i : ℕ) (hi : i + 1 < k + 2), d₂ ⟨i, by omega⟩ ∣ d₂ ⟨i + 1, hi⟩ :=
+      have hd₂_chain : ∀ (i : ℕ) (hi : i + 1 < k + 2),
+          d₂ ⟨i, by omega⟩ ∣ d₂ ⟨i + 1, hi⟩ :=
         divChain_prepend k (d₁ 0) d_tail'
           (dvd_diag_of_SL_transform (k + 1) (fun i : Fin (k + 1) ↦ d₁ ⟨i.val + 1, by omega⟩)
             d_tail' (d₁ 0) (fun i ↦ hd₁_div ⟨i.val + 1, by omega⟩)
