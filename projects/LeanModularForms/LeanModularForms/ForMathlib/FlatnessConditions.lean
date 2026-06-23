@@ -124,7 +124,7 @@ private theorem tangentDeviation_isLittleO_of_hasDerivWithinAt
   set r := fun t ↦ γ t - γ t₀ - (t - t₀) • L with hr_def
   have hr := hasDerivWithinAt_iff_isLittleO.mp hderiv
   have h_eq : ∀ t, tangentDeviation (γ t - γ t₀) L = tangentDeviation (r t) L := fun t ↦ by
-    rw [show γ t - γ t₀ = (t - t₀) • L + r t from by simp [hr_def],
+    rw [show γ t - γ t₀ = (t - t₀) • L + r t by simp [hr_def],
       tangentDeviation_add, tangentDeviation_real_smul_self _ _ hL, zero_add]
   have hO : (fun t ↦ tangentDeviation (r t) L) =O[𝓝[u] t₀] r :=
     Asymptotics.isBigO_iff.mpr
