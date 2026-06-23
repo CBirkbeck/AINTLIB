@@ -330,6 +330,138 @@ theorem conv₃_truncate (n : ℕ) :
   simp only [Finset.mem_range, Nat.lt_succ_iff] at hi hj
   exact conv₃_truncate_term W hi hj
 
+/-- The `n`-th coefficient of the recurrence's right-hand side `z³ + a₁zw + a₂z²w +
+    a₃w² + a₄zw² + a₆w³`, expanded via `coeff_C_mul`, `coeff_X_pow_mul` and the
+    convolution helpers into the same shape produced by `formalW_step`. -/
+private theorem coeff_recurrence_rhs (n : ℕ) :
+    @PowerSeries.coeff R _ n
+      (PowerSeries.X ^ 3 +
+        @PowerSeries.C R _ W.a₁ * PowerSeries.X * formalW W +
+        @PowerSeries.C R _ W.a₂ * PowerSeries.X ^ 2 * formalW W +
+        @PowerSeries.C R _ W.a₃ * (formalW W) ^ 2 +
+        @PowerSeries.C R _ W.a₄ * PowerSeries.X * (formalW W) ^ 2 +
+        @PowerSeries.C R _ W.a₆ * (formalW W) ^ 3) =
+    (if n = 3 then 1 else 0) +
+      W.a₁ * (if 1 ≤ n then formalW_coeff W (n - 1) else 0) +
+      W.a₂ * (if 2 ≤ n then formalW_coeff W (n - 2) else 0) +
+      W.a₃ * conv₂ (formalW_coeff W) n +
+      W.a₄ * (if 1 ≤ n then conv₂ (formalW_coeff W) (n - 1) else 0) +
+      W.a₆ * conv₃ (formalW_coeff W) n := by
+  rw [show (@PowerSeries.C R _ W.a₁ * PowerSeries.X * formalW W : PowerSeries R) =
+        @PowerSeries.C R _ W.a₁ * (PowerSeries.X * formalW W) from mul_assoc _ _ _,
+      show (@PowerSeries.C R _ W.a₂ * PowerSeries.X ^ 2 * formalW W : PowerSeries R) =
+        @PowerSeries.C R _ W.a₂ * (PowerSeries.X ^ 2 * formalW W) from mul_assoc _ _ _,
+      show (@PowerSeries.C R _ W.a₄ * PowerSeries.X * (formalW W) ^ 2 : PowerSeries R) =
+        @PowerSeries.C R _ W.a₄ * (PowerSeries.X * (formalW W) ^ 2) from mul_assoc _ _ _]
+  rw [map_add, map_add, map_add, map_add, map_add]
+  rw [PowerSeries.coeff_C_mul, PowerSeries.coeff_C_mul, PowerSeries.coeff_C_mul,
+      PowerSeries.coeff_C_mul, PowerSeries.coeff_C_mul]
+  rw [PowerSeries.coeff_X_pow]
+  rw [coeff_formalW_pow_two W n, coeff_formalW_pow_three W n]
+  rw [show (PowerSeries.X * formalW W : PowerSeries R) = PowerSeries.X ^ 1 * formalW W from by
+        rw [pow_one]]
+  rw [show (PowerSeries.X * (formalW W) ^ 2 : PowerSeries R)
+        = PowerSeries.X ^ 1 * (formalW W) ^ 2 from by rw [pow_one]]
+  rw [PowerSeries.coeff_X_pow_mul', PowerSeries.coeff_X_pow_mul',
+      PowerSeries.coeff_X_pow_mul']
+  -- Now: simplify coeff (n - k) (formalW W) = formalW_coeff W (n - k)
+  -- and coeff (n - 1) ((formalW W)^2) = conv₂ ... (n - 1)
+  rw [show @PowerSeries.coeff R _ (n - 1) (formalW W)
+        = formalW_coeff W (n - 1) from by
+      show @PowerSeries.coeff R _ (n - 1) (PowerSeries.mk (formalW_coeff W)) = _
+      rw [PowerSeries.coeff_mk]]
+  rw [show @PowerSeries.coeff R _ (n - 2) (formalW W)
+        = formalW_coeff W (n - 2) from by
+      show @PowerSeries.coeff R _ (n - 2) (PowerSeries.mk (formalW_coeff W)) = _
+      rw [PowerSeries.coeff_mk]]
+  rw [coeff_formalW_pow_two W (n - 1)]
+
+/-- Base cases `n ∈ {0, 1, 2}`: both sides of the recurrence vanish, since
+    `formalW_coeff W k = 0` for `k < 3` and every convolution sum is empty/zero. -/
+private theorem formalW_step_eq_recurrence_rhs_of_lt_three (n : ℕ) (hn3 : n < 3) :
+    formalW_step W n (fun m _ ↦ formalW_coeff W m) =
+      (if n = 3 then 1 else 0) +
+        W.a₁ * (if 1 ≤ n then formalW_coeff W (n - 1) else 0) +
+        W.a₂ * (if 2 ≤ n then formalW_coeff W (n - 2) else 0) +
+        W.a₃ * conv₂ (formalW_coeff W) n +
+        W.a₄ * (if 1 ≤ n then conv₂ (formalW_coeff W) (n - 1) else 0) +
+        W.a₆ * conv₃ (formalW_coeff W) n := by
+  unfold formalW_step
+  dsimp only
+  simp only [dite_eq_ite]
+  rw [if_pos hn3, if_neg (by omega : ¬ (n = 3))]
+  interval_cases n
+  all_goals
+    simp [conv₂, conv₃, formalW_coeff_zero, formalW_coeff_one, formalW_coeff_two,
+          Finset.sum_range_succ]
+
+/-- The base case `n = 3`: the `z³` term contributes `1`, and every other term
+    vanishes because `formalW_coeff W k = 0` for `k < 3`. -/
+private theorem formalW_step_eq_recurrence_rhs_three (n : ℕ) (hn_eq3 : n = 3) :
+    formalW_step W n (fun m _ ↦ formalW_coeff W m) =
+      (if n = 3 then 1 else 0) +
+        W.a₁ * (if 1 ≤ n then formalW_coeff W (n - 1) else 0) +
+        W.a₂ * (if 2 ≤ n then formalW_coeff W (n - 2) else 0) +
+        W.a₃ * conv₂ (formalW_coeff W) n +
+        W.a₄ * (if 1 ≤ n then conv₂ (formalW_coeff W) (n - 1) else 0) +
+        W.a₆ * conv₃ (formalW_coeff W) n := by
+  unfold formalW_step
+  dsimp only
+  simp only [dite_eq_ite]
+  rw [if_neg (by omega : ¬ (n < 3)), if_pos hn_eq3]
+  subst hn_eq3
+  simp only []
+  rw [if_pos (by norm_num : (1 : ℕ) ≤ 3), if_pos (by norm_num : (2 : ℕ) ≤ 3),
+      if_pos (by norm_num : (1 : ℕ) ≤ 3)]
+  rw [show formalW_coeff W (3 - 1) = formalW_coeff W 2 from by norm_num,
+      show formalW_coeff W (3 - 2) = formalW_coeff W 1 from by norm_num,
+      formalW_coeff_one W, formalW_coeff_two W]
+  simp [conv₂, conv₃, formalW_coeff_zero, formalW_coeff_one, formalW_coeff_two,
+        Finset.sum_range_succ]
+
+/-- The inductive case `4 ≤ n`: the recursion produces exactly the truncated
+    convolutions, which equal the full ones by `conv₂_truncate`, `conv₂_truncate'`
+    and `conv₃_truncate`; the remaining linear terms match after `ring`. -/
+private theorem formalW_step_eq_recurrence_rhs_of_four_le (n : ℕ) (hn4 : 4 ≤ n) :
+    formalW_step W n (fun m _ ↦ formalW_coeff W m) =
+      (if n = 3 then 1 else 0) +
+        W.a₁ * (if 1 ≤ n then formalW_coeff W (n - 1) else 0) +
+        W.a₂ * (if 2 ≤ n then formalW_coeff W (n - 2) else 0) +
+        W.a₃ * conv₂ (formalW_coeff W) n +
+        W.a₄ * (if 1 ≤ n then conv₂ (formalW_coeff W) (n - 1) else 0) +
+        W.a₆ * conv₃ (formalW_coeff W) n := by
+  unfold formalW_step
+  dsimp only
+  simp only [dite_eq_ite]
+  -- Clear the step's `n < 3` / `n = 3` guards (LHS) and the `n = 3` term on the RHS.
+  rw [if_neg (by omega : ¬ (n < 3)), if_neg (by omega : ¬ (n = 3)),
+      if_neg (by omega : ¬ (n = 3))]
+  rw [if_pos (show 1 ≤ n from by omega), if_pos (show 2 ≤ n from by omega),
+      if_pos (show 1 ≤ n from by omega)]
+  -- Use conv₂_truncate, conv₃_truncate for the LHS
+  rw [conv₂_truncate W n, conv₂_truncate' W n (by omega), conv₃_truncate W n]
+  -- The truncated w(n-1) and w(n-2) become formalW_coeff (already beta-reduced)
+  rw [show (if n - 1 < n then formalW_coeff W (n - 1) else 0) = formalW_coeff W (n - 1) from
+        if_pos (by omega)]
+  rw [show (if n - 2 < n then formalW_coeff W (n - 2) else 0) = formalW_coeff W (n - 2) from
+        if_pos (by omega)]
+  ring
+
+/-- The `formalW_step` recursion equals the recurrence right-hand side from
+    `coeff_recurrence_rhs`, by case analysis on `n` (`n < 3`, `n = 3`, `4 ≤ n`). -/
+private theorem formalW_step_eq_recurrence_rhs (n : ℕ) :
+    formalW_step W n (fun m _ ↦ formalW_coeff W m) =
+      (if n = 3 then 1 else 0) +
+        W.a₁ * (if 1 ≤ n then formalW_coeff W (n - 1) else 0) +
+        W.a₂ * (if 2 ≤ n then formalW_coeff W (n - 2) else 0) +
+        W.a₃ * conv₂ (formalW_coeff W) n +
+        W.a₄ * (if 1 ≤ n then conv₂ (formalW_coeff W) (n - 1) else 0) +
+        W.a₆ * conv₃ (formalW_coeff W) n := by
+  rcases lt_trichotomy n 3 with hn3 | hn_eq3 | hn3
+  · exact formalW_step_eq_recurrence_rhs_of_lt_three W n hn3
+  · exact formalW_step_eq_recurrence_rhs_three W n hn_eq3
+  · exact formalW_step_eq_recurrence_rhs_of_four_le W n (by omega)
+
 /-- **Silverman IV.1.1**: The defining recurrence for `formalW W` as a `PowerSeries`
     identity.
 
@@ -348,102 +480,16 @@ theorem formalW_recurrence :
         @PowerSeries.C R _ W.a₃ * (formalW W) ^ 2 +
         @PowerSeries.C R _ W.a₄ * PowerSeries.X * (formalW W) ^ 2 +
         @PowerSeries.C R _ W.a₆ * (formalW W) ^ 3 := by
-  -- Strategy: prove coefficient-by-coefficient. The LHS coefficient unfolds via
-  -- WellFounded.fix_eq + formalW_step. The RHS coefficient is computed using
-  -- the helpers coeff_formalW_pow_two, coeff_formalW_pow_three.
+  -- Coefficient-by-coefficient. The RHS coefficient is `coeff_recurrence_rhs`; the
+  -- LHS coefficient unfolds via `formalW_coeff_eq_step` to `formalW_step`, and the two
+  -- match by `formalW_step_eq_recurrence_rhs`.
   ext n
-  -- Step 1: compute the RHS coefficient
-  have hRHS : @PowerSeries.coeff R _ n
-      (PowerSeries.X ^ 3 +
-        @PowerSeries.C R _ W.a₁ * PowerSeries.X * formalW W +
-        @PowerSeries.C R _ W.a₂ * PowerSeries.X ^ 2 * formalW W +
-        @PowerSeries.C R _ W.a₃ * (formalW W) ^ 2 +
-        @PowerSeries.C R _ W.a₄ * PowerSeries.X * (formalW W) ^ 2 +
-        @PowerSeries.C R _ W.a₆ * (formalW W) ^ 3) =
-    (if n = 3 then 1 else 0) +
-      W.a₁ * (if 1 ≤ n then formalW_coeff W (n - 1) else 0) +
-      W.a₂ * (if 2 ≤ n then formalW_coeff W (n - 2) else 0) +
-      W.a₃ * conv₂ (formalW_coeff W) n +
-      W.a₄ * (if 1 ≤ n then conv₂ (formalW_coeff W) (n - 1) else 0) +
-      W.a₆ * conv₃ (formalW_coeff W) n := by
-    rw [show (@PowerSeries.C R _ W.a₁ * PowerSeries.X * formalW W : PowerSeries R) =
-          @PowerSeries.C R _ W.a₁ * (PowerSeries.X * formalW W) from mul_assoc _ _ _,
-        show (@PowerSeries.C R _ W.a₂ * PowerSeries.X ^ 2 * formalW W : PowerSeries R) =
-          @PowerSeries.C R _ W.a₂ * (PowerSeries.X ^ 2 * formalW W) from mul_assoc _ _ _,
-        show (@PowerSeries.C R _ W.a₄ * PowerSeries.X * (formalW W) ^ 2 : PowerSeries R) =
-          @PowerSeries.C R _ W.a₄ * (PowerSeries.X * (formalW W) ^ 2) from mul_assoc _ _ _]
-    rw [map_add, map_add, map_add, map_add, map_add]
-    rw [PowerSeries.coeff_C_mul, PowerSeries.coeff_C_mul, PowerSeries.coeff_C_mul,
-        PowerSeries.coeff_C_mul, PowerSeries.coeff_C_mul]
-    rw [PowerSeries.coeff_X_pow]
-    rw [coeff_formalW_pow_two W n, coeff_formalW_pow_three W n]
-    rw [show (PowerSeries.X * formalW W : PowerSeries R) = PowerSeries.X ^ 1 * formalW W from by
-          rw [pow_one]]
-    rw [show (PowerSeries.X * (formalW W) ^ 2 : PowerSeries R)
-          = PowerSeries.X ^ 1 * (formalW W) ^ 2 from by rw [pow_one]]
-    rw [PowerSeries.coeff_X_pow_mul', PowerSeries.coeff_X_pow_mul',
-        PowerSeries.coeff_X_pow_mul']
-    -- Now: simplify coeff (n - k) (formalW W) = formalW_coeff W (n - k)
-    -- and coeff (n - 1) ((formalW W)^2) = conv₂ ... (n - 1)
-    rw [show @PowerSeries.coeff R _ (n - 1) (formalW W)
-          = formalW_coeff W (n - 1) from by
-        show @PowerSeries.coeff R _ (n - 1) (PowerSeries.mk (formalW_coeff W)) = _
-        rw [PowerSeries.coeff_mk]]
-    rw [show @PowerSeries.coeff R _ (n - 2) (formalW W)
-          = formalW_coeff W (n - 2) from by
-        show @PowerSeries.coeff R _ (n - 2) (PowerSeries.mk (formalW_coeff W)) = _
-        rw [PowerSeries.coeff_mk]]
-    rw [coeff_formalW_pow_two W (n - 1)]
-  -- Step 2: rewrite the LHS coefficient via formalW_coeff_eq_step
+  rw [coeff_recurrence_rhs W n]
   show @PowerSeries.coeff R _ n (formalW W) = _
   conv_lhs =>
     rw [show formalW W = PowerSeries.mk (formalW_coeff W) from rfl, PowerSeries.coeff_mk,
         formalW_coeff_eq_step W n]
-  rw [hRHS]
-  -- Step 3: case analysis on n
-  unfold formalW_step
-  -- Beta-reduce the inner lambda and convert dite to ite
-  dsimp only
-  simp only [dite_eq_ite]
-  by_cases hn3 : n < 3
-  · -- n < 3 case: LHS = 0
-    rw [if_pos hn3]
-    -- RHS: all terms vanish
-    have h1 : ¬ (n = 3) := by omega
-    rw [if_neg h1]
-    interval_cases n
-    all_goals
-      simp [conv₂, conv₃, formalW_coeff_zero, formalW_coeff_one, formalW_coeff_two,
-            Finset.sum_range_succ]
-  · push Not at hn3
-    rw [if_neg (not_lt.mpr hn3)]
-    by_cases hn_eq3 : n = 3
-    · -- n = 3 case: LHS = 1
-      rw [if_pos hn_eq3]
-      subst hn_eq3
-      simp only []
-      have h1 : (1 : ℕ) ≤ 3 := by norm_num
-      have h2 : (2 : ℕ) ≤ 3 := by norm_num
-      rw [if_pos h1, if_pos h2, if_pos h1]
-      rw [show formalW_coeff W (3 - 1) = formalW_coeff W 2 from by norm_num,
-          show formalW_coeff W (3 - 2) = formalW_coeff W 1 from by norm_num,
-          formalW_coeff_one W, formalW_coeff_two W]
-      simp [conv₂, conv₃, formalW_coeff_zero, formalW_coeff_one, formalW_coeff_two,
-            Finset.sum_range_succ]
-    · -- n ≥ 4 case
-      rw [if_neg hn_eq3]
-      have hn4 : 4 ≤ n := by omega
-      rw [if_neg hn_eq3]
-      rw [if_pos (show 1 ≤ n from by omega), if_pos (show 2 ≤ n from by omega),
-          if_pos (show 1 ≤ n from by omega)]
-      -- Use conv₂_truncate, conv₃_truncate for the LHS
-      rw [conv₂_truncate W n, conv₂_truncate' W n (by omega), conv₃_truncate W n]
-      -- The truncated w(n-1) and w(n-2) become formalW_coeff (already beta-reduced)
-      rw [show (if n - 1 < n then formalW_coeff W (n - 1) else 0) = formalW_coeff W (n - 1) from
-            if_pos (by omega)]
-      rw [show (if n - 2 < n then formalW_coeff W (n - 2) else 0) = formalW_coeff W (n - 2) from
-            if_pos (by omega)]
-      ring
+  exact formalW_step_eq_recurrence_rhs W n
 
 /-! ### Uniqueness of `formalW` (Silverman IV.1.1(b))
 
