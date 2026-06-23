@@ -35,7 +35,7 @@ theorem seg4T₀_gt_three_fifths {H c : ℝ} (hH : Real.sqrt 3 / 2 < H)
 theorem seg4T₀_lt_four_fifths {H c : ℝ} (hH : Real.sqrt 3 / 2 < H) (hc : c < H) :
     seg4T₀ H c < 4/5 := by
   unfold seg4T₀
-  rw [show (4 : ℝ)/5 = 3/5 + 1/5 from by ring, add_lt_add_iff_left,
+  rw [show (4 : ℝ)/5 = 3/5 + 1/5 by ring, add_lt_add_iff_left,
     div_lt_iff₀ (seg1Speed_pos hH), seg1Speed]
   linarith
 
@@ -51,8 +51,8 @@ private theorem fdBoundaryFun_seg4_im_speed (H t : ℝ)
     (ht3 : 3/5 < t) (ht4 : t ≤ 4/5) :
     (fdBoundaryFun H t).im = Real.sqrt 3 / 2 + seg1Speed H * (t - 3/5) := by
   have h : (fdBoundaryFun H t).im = Real.sqrt 3 / 2 + (5 * t - 3) * (H - Real.sqrt 3 / 2) := by
-    simp only [fdBoundaryFun, show ¬t ≤ 1/5 from by linarith,
-      show ¬t ≤ 2/5 from by linarith, show ¬t ≤ 3/5 from by linarith,
+    simp only [fdBoundaryFun, show ¬t ≤ 1/5 by linarith,
+      show ¬t ≤ 2/5 by linarith, show ¬t ≤ 3/5 by linarith,
       ht4, ite_true, ite_false]
     simp [add_im, sub_im, mul_im, ofReal_re, ofReal_im, I_re, I_im, div_ofNat, neg_im]
   rw [h, seg1Speed]; ring
@@ -208,7 +208,7 @@ def smoothBoundaryData_seg4_of_ftcHyp {H : ℝ} (hH : Real.sqrt 3 / 2 < H)
   hδ_small := fun ε _ hε_thr ↦ by
     obtain ⟨_, _, h_lin_lt_lo, h_lin_lt_hi⟩ := linDelta_lt_gap_seg4 hH hz_re hc_lo hε_thr
     exact lt_min (by linarith)
-      (by linarith [show (1 : ℝ) - seg4T₀ H z₀.im = (4/5 - seg4T₀ H z₀.im) + 1/5 from by ring])
+      (by linarith [show (1 : ℝ) - seg4T₀ H z₀.im = (4/5 - seg4T₀ H z₀.im) + 1/5 by ring])
   h_far := fun _ _ hε_thr t ht hδt ↦ by
     rw [hγ t ht]; exact seg4_far_bound hH hz_re hc_lo hc_hi hε_thr ht hδt
   h_near := fun ε _ hε_thr t ht ↦ by
