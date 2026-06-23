@@ -1,7 +1,7 @@
 /-
-Copyright (c) 2024. All rights reserved.
+Copyright (c) 2024 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors:
+Authors: Chris Birkbeck
 -/
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
 import LeanModularForms.ForMathlib.SegmentFTC
@@ -31,7 +31,9 @@ theorem fdBoundary_H_at_two_eq_I (H : ℝ) :
     fdBoundary_H H 2 = I := by
   simp only [fdBoundary_H, show ¬((2 : ℝ) ≤ 1) by norm_num, le_refl, ↓reduceIte]
   rw [show ((↑(Real.pi : ℝ) / 3 + (↑(2:ℝ) - 1) *
-      (↑(Real.pi : ℝ) / 2 - ↑(Real.pi : ℝ) / 3)) * I = ↑(Real.pi / 2) * I) by push_cast; ring,
+      (↑(Real.pi : ℝ) / 2 - ↑(Real.pi : ℝ) / 3)) * I = ↑(Real.pi / 2) * I) by
+        push_cast
+        ring,
     Complex.exp_ofReal_mul_I, Real.cos_pi_div_two, Real.sin_pi_div_two]
   push_cast; ring
 
@@ -101,7 +103,8 @@ lemma continuousOn_arg_im_nonneg :
 lemma continuousOn_clog_im_nonneg :
     ContinuousOn Complex.log {z : ℂ | 0 ≤ z.im ∧ z ≠ 0} := by
   intro z ⟨hz_im, hz_ne⟩
-  rw [show Complex.log = fun w ↦ ↑(Real.log ‖w‖) + ↑(Complex.arg w) * I from funext fun _ ↦ rfl]
+  rw [show Complex.log =
+      (fun w ↦ ↑(Real.log ‖w‖) + ↑(Complex.arg w) * I) from funext fun _ ↦ rfl]
   refine ContinuousWithinAt.add ?_ ?_
   · exact (continuous_ofReal.continuousAt.comp
       ((Real.continuousAt_log (norm_ne_zero_iff.mpr hz_ne)).comp
@@ -177,14 +180,13 @@ lemma ftc_log_piece_lower {g h : ℝ → ℂ} {a b : ℝ} (hab : a ≤ b)
   have h_ftc := intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le hab
     hnh_log_cont (fun t ht ↦ by
       have := (hh_diff t ht).hasDerivAt.neg.clog_real (hnh_slit t ht)
-      exact (show -deriv h t / -h t = deriv h t / h t by simp only [neg_div_neg_eq]) ▸ this) hint_h
+      exact (show -deriv h t / -h t = deriv h t / h t by
+        simp only [neg_div_neg_eq]) ▸ this) hint_h
   exact ⟨hint_g, by
     calc ∫ t in a..b, deriv g t / g t
         = ∫ t in a..b, deriv h t / h t := intervalIntegral.integral_congr_ae h_congr
       _ = Complex.log (-(h b)) - Complex.log (-(h a)) := h_ftc
       _ = Complex.log (-(g b)) - Complex.log (-(g a)) := by rw [heq_a, heq_b]⟩
-
-/-! ### Shared derivative and trigonometric lemmas used by the i, ρ, ρ+1 proofs -/
 
 /-- Derivative of the parametric arc `exp(i·π(1+t)/6) - s`. -/
 lemma hasDerivAt_arc_sub_const (s : ℂ) (t : ℝ) :
