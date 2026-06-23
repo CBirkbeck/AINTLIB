@@ -590,6 +590,71 @@ theorem sum_ramificationIdx_over_fiber [IsAlgClosed F] [C.toAffine.IsElliptic]
   rw [h, Ideal.mem_bot] at hx_mem
   exact Polynomial.X_sub_C_ne_zero a hx_mem
 
+/-- The principal ideal `(X − a)` of `F[X]` is nonzero, since `X − a` is. -/
+private theorem span_X_sub_C_ne_bot (a : F) :
+    Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)} ≠ ⊥ := by
+  rw [Ne, Ideal.span_singleton_eq_bot]
+  exact Polynomial.X_sub_C_ne_zero a
+
+/-- A prime ideal `M` of `F[C]` lying over the nonzero principal prime `(X − a)`
+of `F[X]` is maximal: it is nonzero (its contraction is `(X − a) ≠ ⊥`, using that
+the algebra map `F[X] → F[C]` is injective), and a nonzero prime of a Dedekind
+domain is maximal. -/
+private theorem isMaximal_of_isPrime_of_liesOver_span_X_sub_C {a : F}
+    {M : Ideal C.CoordinateRing} (hMprime : M.IsPrime)
+    (hMlies : M.LiesOver (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)})) :
+    M.IsMaximal := by
+  have hp_ne := span_X_sub_C_ne_bot (F := F) a
+  have hM_ne_bot : M ≠ ⊥ := by
+    intro h
+    apply hp_ne
+    have h_over : Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)} =
+        M.under (Polynomial F) := hMlies.over
+    rw [h, Ideal.under, Ideal.comap_bot_of_injective _
+      (FaithfulSMul.algebraMap_injective (Polynomial F) C.CoordinateRing)]
+      at h_over
+    exact h_over
+  exact Ideal.IsPrime.isMaximal hMprime hM_ne_bot
+
+/-- If the maximal ideal `maximalIdealAt P` of a smooth point `P` lies over the
+principal prime `(X − a)`, then `P.x = a`. The contraction of `maximalIdealAt P`
+is `(X − P.x)`, so `(X − P.x)` and `(X − a)` generate the same ideal, hence are
+associated; being monic of the same degree they are equal, so `P.x = a`. -/
+private theorem smoothPoint_x_eq_of_liesOver_span_X_sub_C {a : F} (P : C.SmoothPoint)
+    (hP_over : (C.maximalIdealAt P).LiesOver
+      (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)})) : P.x = a := by
+  haveI h_over_P := C.maximalIdealAt_liesOver P
+  have h_both : Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)} =
+      Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)} := by
+    rw [h_over_P.over, hP_over.over]
+  have h_assoc : Associated (Polynomial.X - Polynomial.C P.x)
+      (Polynomial.X - Polynomial.C a) :=
+    Ideal.span_singleton_eq_span_singleton.mp h_both
+  have h_eq : Polynomial.X - Polynomial.C P.x = Polynomial.X - Polynomial.C a :=
+    Polynomial.eq_of_monic_of_associated (Polynomial.monic_X_sub_C _)
+      (Polynomial.monic_X_sub_C _) h_assoc
+  have hCeq : Polynomial.C P.x = Polynomial.C a := by
+    linear_combination -h_eq
+  exact Polynomial.C_injective hCeq
+
+/-- The inertia degree of any prime `M` of `F[C]` lying over `(X − a)` is `1`.
+Such an `M` is maximal, hence equals `maximalIdealAt P` for a smooth point `P`
+with `P.x = a`, where the residue degree is `1` by `inertiaDeg_maximalIdealAt`. -/
+private theorem inertiaDeg_eq_one_of_isPrime_of_liesOver_span_X_sub_C
+    [IsAlgClosed F] [C.toAffine.IsElliptic] [IsIntegrallyClosed C.CoordinateRing]
+    {a : F} {M : Ideal C.CoordinateRing} (hMprime : M.IsPrime)
+    (hMlies : M.LiesOver (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)})) :
+    Ideal.inertiaDeg (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) M = 1 := by
+  haveI hMmax : M.IsMaximal :=
+    C.isMaximal_of_isPrime_of_liesOver_span_X_sub_C hMprime hMlies
+  obtain ⟨P, hP⟩ := C.exists_smoothPoint_of_isMaximal hMmax
+  have hP_over : (C.maximalIdealAt P).LiesOver
+      (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) := hP ▸ hMlies
+  have h_Px : P.x = a := C.smoothPoint_x_eq_of_liesOver_span_X_sub_C P hP_over
+  have h_id := C.inertiaDeg_maximalIdealAt P
+  rw [hP, h_Px] at h_id
+  exact h_id
+
 /-- **Σ e_M = 2**: sum of ramification indices over primes of `F[C]` lying
 over `(X − a)` equals `[F(C) : F(X)] = 2`. Derived from
 `sum_ramificationIdx_over_fiber` (Σ e·f) by simplifying f = 1 via
@@ -613,49 +678,11 @@ theorem sum_ramificationIdx_eq_finrank [IsAlgClosed F] [C.toAffine.IsElliptic]
   have h_sum := C.sum_ramificationIdx_over_fiber a
   simp only at h_sum
   rw [← h_sum]
-  have hp_ne : p ≠ ⊥ := by
-    intro h
-    have hx_mem : (Polynomial.X - Polynomial.C a : Polynomial F) ∈ p :=
-      Ideal.subset_span rfl
-    rw [h, Ideal.mem_bot] at hx_mem
-    exact Polynomial.X_sub_C_ne_zero a hx_mem
+  have hp_ne : p ≠ ⊥ := span_X_sub_C_ne_bot (F := F) a
   apply Finset.sum_congr rfl
   intro M hM
   rw [IsDedekindDomain.mem_primesOverFinset_iff hp_ne] at hM
-  haveI hMprime : M.IsPrime := hM.1
-  haveI hMlies : M.LiesOver p := hM.2
-  haveI hMmax : M.IsMaximal := by
-    have hM_ne_bot : M ≠ ⊥ := by
-      intro h
-      apply hp_ne
-      have h_over : p = M.under (Polynomial F) := hMlies.over
-      rw [h, Ideal.under, Ideal.comap_bot_of_injective _
-        (FaithfulSMul.algebraMap_injective (Polynomial F) C.CoordinateRing)]
-        at h_over
-      exact h_over
-    exact Ideal.IsPrime.isMaximal hMprime hM_ne_bot
-  obtain ⟨P, hP⟩ := C.exists_smoothPoint_of_isMaximal hMmax
-  haveI h_over_P := C.maximalIdealAt_liesOver P
-  rw [hP] at h_over_P
-  have hP_over : (C.maximalIdealAt P).LiesOver p := hP ▸ hMlies
-  have h_both : Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)} =
-      p := by
-    have h1 : Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)} =
-        M.under (Polynomial F) := h_over_P.over
-    have h2 : p = M.under (Polynomial F) := hMlies.over
-    rw [h1, h2]
-  have h_assoc : Associated (Polynomial.X - Polynomial.C P.x)
-      (Polynomial.X - Polynomial.C a) :=
-    Ideal.span_singleton_eq_span_singleton.mp h_both
-  have h_eq : Polynomial.X - Polynomial.C P.x = Polynomial.X - Polynomial.C a :=
-    Polynomial.eq_of_monic_of_associated (Polynomial.monic_X_sub_C _)
-      (Polynomial.monic_X_sub_C _) h_assoc
-  have hCeq : Polynomial.C P.x = Polynomial.C a := by
-    linear_combination -h_eq
-  have h_Px : P.x = a := Polynomial.C_injective hCeq
-  have h_id := C.inertiaDeg_maximalIdealAt P
-  rw [hP, h_Px] at h_id
-  rw [h_id, mul_one]
+  rw [C.inertiaDeg_eq_one_of_isPrime_of_liesOver_span_X_sub_C hM.1 hM.2, mul_one]
 
 /-- **Fibers agree**: under `[IsAlgClosed F]` + `[C.toAffine.IsElliptic]`,
 the smooth F-rational points with x-coordinate `a` are in bijection with
