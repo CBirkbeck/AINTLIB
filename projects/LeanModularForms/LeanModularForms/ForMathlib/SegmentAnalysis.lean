@@ -1,10 +1,10 @@
 /-
-Copyright (c) 2024. All rights reserved.
+Copyright (c) 2024 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.ForMathlib.FDBoundaryPath
 import LeanModularForms.ForMathlib.ArcFTCLimit
+import LeanModularForms.ForMathlib.FDBoundaryPath
 import LeanModularForms.ForMathlib.SegmentFTC
 
 /-!
@@ -14,40 +14,17 @@ This file proves integrability and FTC for the log-derivative integrand
 `(γ(t) - z₀)⁻¹ * γ'(t)` along each of the 5 segments of the fundamental domain
 boundary, for the crossing point `z₀ = i`.
 
-## Strategy
-
-For each segment, we define a smooth reference function that equals
-`fdBoundaryFun H t - I` on the segment. Since each reference is `ContDiff ℝ ⊤`
-and nonvanishing (checked via the real or imaginary part), the log-derivative
-integrand is continuous and hence integrable. These are combined across segments
-via `IntervalIntegrable.trans` and transferred to the `PiecewiseC1Path` via
-ae-equality.
-
 ## Main results
-
-### Per-segment integrability
 
 * `fdBoundary_seg1_intervalIntegrable_I` — seg1 `[0, a]` for `a ≤ 1/5`
 * `seg2_intervalIntegrable_I` — seg2 `[1/5, a]` for `a < 2/5`
 * `seg3_intervalIntegrable_I` — seg3 `[a, 3/5]` for `2/5 < a`
 * `seg4_full_intervalIntegrable_I` — seg4 `[3/5, 4/5]`
 * `seg5_full_intervalIntegrable_I` — seg5 `[4/5, 1]`
-
-### Combined integrability (fills `hint_left`/`hint_right` in `ArcFTCHyp`)
-
 * `fdBoundary_integrable_left_of_I` — integrability on `[0, 2/5 - δ]`
 * `fdBoundary_integrable_right_of_I` — integrability on `[2/5 + δ, 1]`
-
-### FTC
-
-* `seg1_ftc_I` — FTC on seg1 (slitPlane)
-* `seg5_ftc_I` — FTC on seg5 (slitPlane)
-
-### Transfer and assembly
-
 * `transfer_integrability` — from `fdBoundaryFun` to `γ.toPath.extend`
 * `transfer_integral` — integral equality transfer
-* `arcFTCHyp_atI` — complete `ArcFTCHyp` at `i`
 -/
 
 open Complex MeasureTheory Set Filter Topology
@@ -287,8 +264,8 @@ theorem seg3_intervalIntegrable_I (H : ℝ) {a : ℝ} (ha : 2/5 < a) (ha' : a �
       (fun t ht ↦ arc_sub_I_ne_zero_seg3 H (by linarith [ht.1]) ht.2)).mul
       (continuous_const.mul arc_exp_continuous).continuousOn)
 
-private lemma refSeg_intervalIntegrable_aux (H : ℝ) (g : ℝ → ℂ) {α β : ℝ} (hαβ : α ≤ β)
-    (hcd : ContDiff ℝ ⊤ g) (hne : ∀ t, g t ≠ 0)
+private lemma refSeg_intervalIntegrable_aux (H : ℝ) (g : ℝ → ℂ) {α β : ℝ}
+    (hαβ : α ≤ β) (hcd : ContDiff ℝ ⊤ g) (hne : ∀ t, g t ≠ 0)
     (hev : ∀ t ∈ Ioo α β, (fun s ↦ fdBoundaryFun H s - I) =ᶠ[𝓝 t] g) :
     IntervalIntegrable
       (fun t ↦ (fdBoundaryFun H t - I)⁻¹ * deriv (fdBoundaryFun H) t) volume α β := by
