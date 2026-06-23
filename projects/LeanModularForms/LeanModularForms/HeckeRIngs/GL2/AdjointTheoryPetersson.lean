@@ -10,10 +10,11 @@ import LeanModularForms.HeckeRIngs.GL2.Unified.RingTransport
 # Hecke adjoint theory: Petersson development and eigenform diagonalization
 
 This file is the downstream continuation of
-`LeanModularForms.HeckeRIngs.GL2.AdjointTheory`. It contains the bulk of the
-adjoint theory of Hecke operators with respect to the Petersson inner product —
-the long T090/T024/T128/T205 double-coset tile development — culminating in the
-adjoint identity `heckeT_p_adjoint`, normality `heckeT_n_normal`, and the
+`LeanModularForms.HeckeRIngs.GL2.AdjointTheory`. The long T090/T024/T128/T205
+double-coset tile development and the `T_p` adjoint identity `heckeT_p_adjoint`
+live in the imported `AdjointTheory/*` modules; building on them, this file develops
+the adjoint theory of Hecke operators with respect to the Petersson inner product —
+the general `T_n` adjoint and normality (`heckeT_n_adjoint`, `heckeT_n_normal`) and the
 existence of a simultaneous eigenform basis for cusp form spaces.
 
 The core cusp/Hecke infrastructure (`heckeT_n_cusp`, `PreservesCusps`,
@@ -22,8 +23,6 @@ the imported `AdjointTheory.lean`; this file builds on top of it.
 
 ## Main results
 
-* `heckeT_p_adjoint` — T_p* = ⟨p⟩⁻¹ T_p (Diamond–Shurman Thm 5.5.3)
-* `diamondOp_petersson_unitary` — `⟨d⟩` is unitary for pet
 * `heckeT_n_adjoint` — adjoint of the general `T_n`
 * `heckeT_n_normal` — T_n is normal
 * `exists_simultaneous_eigenform_basis` — spectral theorem for Hecke operators
