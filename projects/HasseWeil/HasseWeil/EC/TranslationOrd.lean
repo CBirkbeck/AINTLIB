@@ -2313,6 +2313,50 @@ theorem translateAlgHom_inv_round_trip_x_gen
   unfold genericPoint at h_gen_eq
   exact (Affine.Point.some.injEq _ _ _ _ _ _).mp h_gen_eq |>.1
 
+/-- `translateX_xy T ≠ algebraMap F KE xk` for non-2-torsion `T = (xk, yk)`.
+Forward (`τ`-direction) analogue of `translateX_xy_neg_ne_algebraMap`: direct
+from the transcendence of `translateX_xy T`. -/
+private theorem translateX_xy_ne_algebraMap_const
+    (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
+    (h_not_2_tor : yk ≠ W.toAffine.negY xk yk) :
+    translateX_xy W xk yk ≠ algebraMap F KE xk := by
+  intro h_eq
+  apply translateX_xy_transcendental W xk yk h_ns h_not_2_tor
+  refine ⟨Polynomial.X - Polynomial.C xk,
+    Polynomial.X_sub_C_ne_zero _, ?_⟩
+  rw [_root_.map_sub, Polynomial.aeval_X, Polynomial.aeval_C, h_eq, sub_self]
+
+/-- **Image of the secant slope under `τ = τ_T`**: `τ` carries the slope
+`translateSlope_xy(−T)` (the secant slope at the generic point used to define
+`τ_{−T}`) to the secant slope at the translated coordinates `(translateX_xy(T),
+translateY_xy(T))` and `(xk, negY xk yk)`. The forward (`τ`-direction) analogue
+of `translateAlgHom_neg_commutes_translateSlope_xy`: both x-coordinates differ
+(transcendence of `x_gen` and of `translateX_xy T`), so
+`σ_commutes_slope_of_X_ne` applies, after which the constant images `τ xk`,
+`τ (negY xk yk)` and the generator images `hτx`, `hτy` evaluate the result. -/
+private theorem translateAlgHom_commutes_translateSlope_xy
+    (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
+    (h_not_2_tor : yk ≠ W.toAffine.negY xk yk) :
+    translateAlgHom_of_nonTorsion W xk yk h_ns h_not_2_tor
+        (translateSlope_xy W xk (W.toAffine.negY xk yk)) =
+      (W_KE W).toAffine.slope (translateX_xy W xk yk)
+        (algebraMap F KE xk)
+        (translateY_xy W xk yk) (algebraMap F KE (W.toAffine.negY xk yk)) := by
+  set τ := translateAlgHom_of_nonTorsion W xk yk h_ns h_not_2_tor
+  have hτx : τ (x_gen W) = translateX_xy W xk yk :=
+    translateAlgHom_apply_x_gen W xk yk h_ns h_not_2_tor
+  have hτy : τ (y_gen W) = translateY_xy W xk yk :=
+    translateAlgHom_apply_y_gen W xk yk h_ns h_not_2_tor
+  have hx_ne : x_gen W ≠ algebraMap F KE xk := fun h ↦
+    x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h)
+  have hx_τ_ne_full : τ (x_gen W) ≠ τ (algebraMap F KE xk) := by
+    rw [τ.commutes, hτx]
+    exact translateX_xy_ne_algebraMap_const W xk yk h_ns h_not_2_tor
+  change τ ((W_KE W).toAffine.slope (x_gen W) (algebraMap F KE xk)
+      (y_gen W) (algebraMap F KE (W.toAffine.negY xk yk))) = _
+  rw [σ_commutes_slope_of_X_ne W hx_ne hx_τ_ne_full]
+  rw [τ.commutes xk, τ.commutes (W.toAffine.negY xk yk), hτx, hτy]
+
 /-- **Inverse round-trip on `y_gen`**: `τ(σ(y_gen)) = y_gen`. -/
 theorem translateAlgHom_inv_round_trip_y_gen
     (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
@@ -2330,35 +2374,10 @@ theorem translateAlgHom_inv_round_trip_y_gen
   rw [σ_commutes_addY W (x_gen W) (algebraMap F KE xk)
         (y_gen W) (translateSlope_xy W xk (W.toAffine.negY xk yk))]
   rw [τ.commutes xk, hτx, hτy]
-  have hx_ne : x_gen W ≠ algebraMap F KE xk := fun h ↦
-    x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h)
-  have hx_τ_ne : τ (x_gen W) ≠ algebraMap F KE xk := by
-    rw [hτx]
-    intro h_eq
-    apply translateX_xy_transcendental W xk yk h_ns h_not_2_tor
-    refine ⟨Polynomial.X - Polynomial.C xk,
-      Polynomial.X_sub_C_ne_zero _, ?_⟩
-    rw [_root_.map_sub, Polynomial.aeval_X, Polynomial.aeval_C, h_eq, sub_self]
-  have hx_τ_ne_full : τ (x_gen W) ≠ τ (algebraMap F KE xk) := by
-    rwa [τ.commutes]
-  have h_slope_eq : τ (translateSlope_xy W xk (W.toAffine.negY xk yk)) =
-      (W_KE W).toAffine.slope (translateX_xy W xk yk)
-        (algebraMap F KE xk)
-        (translateY_xy W xk yk) (algebraMap F KE (W.toAffine.negY xk yk)) := by
-    change τ ((W_KE W).toAffine.slope (x_gen W) (algebraMap F KE xk)
-        (y_gen W) (algebraMap F KE (W.toAffine.negY xk yk))) = _
-    rw [σ_commutes_slope_of_X_ne W hx_ne hx_τ_ne_full]
-    rw [τ.commutes xk, τ.commutes (W.toAffine.negY xk yk), hτx, hτy]
-  rw [h_slope_eq]
-  have h_gen_eq : (genericPoint W + liftSomePoint W xk yk h_ns) +
-      liftSomePoint_neg W xk yk h_ns = genericPoint W :=
-    genericPoint_round_trip W xk yk h_ns
-  have h_ne_2 : translateX_xy W xk yk ≠ algebraMap F KE xk := by
-    intro h_eq
-    apply translateX_xy_transcendental W xk yk h_ns h_not_2_tor
-    refine ⟨Polynomial.X - Polynomial.C xk,
-      Polynomial.X_sub_C_ne_zero _, ?_⟩
-    rw [_root_.map_sub, Polynomial.aeval_X, Polynomial.aeval_C, h_eq, sub_self]
+  rw [translateAlgHom_commutes_translateSlope_xy W xk yk h_ns h_not_2_tor]
+  have h_gen_eq := genericPoint_round_trip W xk yk h_ns
+  have h_ne_2 : translateX_xy W xk yk ≠ algebraMap F KE xk :=
+    translateX_xy_ne_algebraMap_const W xk yk h_ns h_not_2_tor
   rw [genericPoint_add_liftSomePoint W xk yk h_ns] at h_gen_eq
   unfold liftSomePoint_neg liftSomePoint at h_gen_eq
   rw [Affine.Point.add_of_X_ne (h_ne_2)] at h_gen_eq
