@@ -1912,6 +1912,174 @@ private lemma localExpand_neg_inv_negY_eq_subst {α β : Isogeny W.toAffine W.to
   rw [map_add, map_mul, h_lam, hz₃, h_nu, ← map_mul, ← map_add] at h
   exact h
 
+/-- **The series-side bookkeeping for the chord-addition assembly**, packaged.
+From the two pole hypotheses `h_α`/`h_β`: both formal isogeny series have
+vanishing constant term, the pair `![f_α, f_β]` is a lawful substitution family,
+and the substituted formal slope / intercept / `z₃` series all have vanishing
+constant term. -/
+private lemma formalIsogenySeries_pair_constantCoeff_data
+    (α β : Isogeny W.toAffine W.toAffine)
+    (h_α : (W_smooth W).ordAtInfty (α.pullback (x_gen W)) < 0)
+    (h_β : (W_smooth W).ordAtInfty (β.pullback (x_gen W)) < 0) :
+    PowerSeries.constantCoeff (formalIsogenySeries W α) = 0 ∧
+      PowerSeries.constantCoeff (formalIsogenySeries W β) = 0 ∧
+      MvPowerSeries.HasSubst
+        (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F) ∧
+      PowerSeries.constantCoeff
+          (MvPowerSeries.subst
+            (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
+            (formalSlopeBiv W)) = 0 ∧
+      PowerSeries.constantCoeff
+          (MvPowerSeries.subst
+            (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
+            (formalNuBiv W)) = 0 ∧
+      PowerSeries.constantCoeff
+          (MvPowerSeries.subst
+            (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
+            (formalZ3 W)) = 0 := by
+  have hf0 : PowerSeries.constantCoeff (formalIsogenySeries W α) = 0 :=
+    constantCoeff_formalIsogenySeries_of_orderTop_pos W α
+      (orderTop_localExpand_pullback_localParam_pos_of_ord_x_neg W α h_α)
+  have hg0 : PowerSeries.constantCoeff (formalIsogenySeries W β) = 0 :=
+    constantCoeff_formalIsogenySeries_of_orderTop_pos W β
+      (orderTop_localExpand_pullback_localParam_pos_of_ord_x_neg W β h_β)
+  obtain ⟨hb, hb'⟩ := hasSubst_cons_pair (f := formalIsogenySeries W α)
+    (g := formalIsogenySeries W β) hf0 hg0
+  obtain ⟨hΛ0, hN0, hf₃0⟩ := constantCoeff_subst_slope_nu_z3_eq_zero W _ hb hb'
+  exact ⟨hf0, hg0, hb, hΛ0, hN0, hf₃0⟩
+
+/-- The Laurent expansion of the negated sum of the two `t`-pullbacks: it is
+`ofPS (−f_α) − ofPS f_β`, the `T`-leg of the cleared Vieta push. -/
+private lemma localExpand_neg_sum_pullback_localParam
+    (α β : Isogeny W.toAffine W.toAffine)
+    (h_α : (W_smooth W).ordAtInfty (α.pullback (x_gen W)) < 0)
+    (h_β : (W_smooth W).ordAtInfty (β.pullback (x_gen W)) < 0) :
+    localExpand W (-α.pullback (localParam W) - β.pullback (localParam W))
+      = HahnSeries.ofPowerSeries ℤ F (-(formalIsogenySeries W α))
+        - HahnSeries.ofPowerSeries ℤ F (formalIsogenySeries W β) := by
+  rw [map_sub, map_neg, localExpand_pullback_localParam W α h_α,
+    localExpand_pullback_localParam W β h_β, ← map_neg]
+
+/-- **The `z`-leg `−localExpand X₃ = z₃∘ · localExpand Y₃′`**, assembled. The
+cleared chart-Vieta identity (`addPullback_vieta_cleared`) is `nsmul`-normalised,
+its `A∘`/`B∘`/`T`-legs are expanded (`localExpand_chordA/B_substituted`,
+`localExpand_neg_sum_pullback_localParam`), pushed to the Laurent field
+(`cleared_push`), and the unit `A∘` is cancelled against the pure-series Vieta
+mirror (`localExpand_negX_eq_subst_formalZ3_mul`). -/
+private lemma localExpand_negX_pair_eq_subst_formalZ3_mul_negY
+    (α β : Isogeny W.toAffine W.toAffine)
+    (h_α : (W_smooth W).ordAtInfty (α.pullback (x_gen W)) < 0)
+    (h_β : (W_smooth W).ordAtInfty (β.pullback (x_gen W)) < 0)
+    (h_ni : AddNonInversePair α β)
+    (hb : MvPowerSeries.HasSubst
+      (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F))
+    (hΛ0 : PowerSeries.constantCoeff
+      (MvPowerSeries.subst
+        (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
+        (formalSlopeBiv W)) = 0)
+    (h_lam : localExpand W (zwSlopeLine W α β) =
+      HahnSeries.ofPowerSeries ℤ F
+        (MvPowerSeries.subst
+          (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
+          (formalSlopeBiv W)))
+    (h_nu : localExpand W (zwNuLine W α β) =
+      HahnSeries.ofPowerSeries ℤ F
+        (MvPowerSeries.subst
+          (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
+          (formalNuBiv W))) :
+    -(localExpand W (addPullback_x_pair α β))
+      = HahnSeries.ofPowerSeries ℤ F
+          (MvPowerSeries.subst
+            (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
+            (formalZ3 W))
+        * localExpand W
+            ((W_KE W).toAffine.negY (addPullback_x_pair α β) (addPullback_y_pair α β)) := by
+  have hcl := addPullback_vieta_cleared W α β h_α h_β h_ni
+  simp only [nsmul_eq_mul, Nat.cast_ofNat] at hcl
+  have hA := localExpand_chordA_substituted W _ hb h_lam
+  have hB := localExpand_chordB_substituted W _ hb h_lam h_nu
+  have hT := localExpand_neg_sum_pullback_localParam W α β h_α h_β
+  have hclL := cleared_push (localExpand W) hA hB hT hcl
+  exact localExpand_negX_eq_subst_formalZ3_mul W hb hΛ0 hclL
+
+/-- **The `z`-leg as a chart-quotient expansion**: dividing the `z`-leg
+identity by the (nonzero) expansion of `Y₃′`, the expansion of the chart `z`
+coordinate `−X₃/Y₃′` is the substituted `z₃` series. -/
+private lemma localExpand_negX_div_negY_pair_eq_subst_formalZ3
+    {α β : Isogeny W.toAffine W.toAffine}
+    (hY₃'_ne : (W_KE W).toAffine.negY (addPullback_x_pair α β) (addPullback_y_pair α β) ≠ 0)
+    (hXY : -(localExpand W (addPullback_x_pair α β))
+      = HahnSeries.ofPowerSeries ℤ F
+          (MvPowerSeries.subst
+            (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
+            (formalZ3 W))
+        * localExpand W
+            ((W_KE W).toAffine.negY (addPullback_x_pair α β) (addPullback_y_pair α β))) :
+    localExpand W (-(addPullback_x_pair α β)
+        / (W_KE W).toAffine.negY (addPullback_x_pair α β) (addPullback_y_pair α β))
+      = HahnSeries.ofPowerSeries ℤ F
+          (MvPowerSeries.subst
+            (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
+            (formalZ3 W)) := by
+  have hLY'ne : localExpand W
+      ((W_KE W).toAffine.negY (addPullback_x_pair α β) (addPullback_y_pair α β)) ≠ 0 := by
+    intro h0
+    exact hY₃'_ne (RingHom.injective (localExpand W) (h0.trans (map_zero _).symm))
+  rw [map_div₀, map_neg, hXY]
+  exact mul_div_cancel_right₀ _ hLY'ne
+
+/-- The constant term of the `w`-leg series `λ∘·z₃∘ + ν∘` vanishes, given that
+the substituted slope, `z₃` and intercept series all have zero constant term.
+This is the `hs0` side condition for the Hensel identification. -/
+private lemma constantCoeff_subst_slope_mul_z3_add_nu_eq_zero
+    {α β : Isogeny W.toAffine W.toAffine}
+    (hΛ0 : PowerSeries.constantCoeff
+      (MvPowerSeries.subst
+        (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
+        (formalSlopeBiv W)) = 0)
+    (hN0 : PowerSeries.constantCoeff
+      (MvPowerSeries.subst
+        (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
+        (formalNuBiv W)) = 0)
+    (hf₃0 : PowerSeries.constantCoeff
+      (MvPowerSeries.subst
+        (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
+        (formalZ3 W)) = 0) :
+    PowerSeries.constantCoeff
+      (MvPowerSeries.subst
+        (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
+        (formalSlopeBiv W)
+      * MvPowerSeries.subst
+        (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
+        (formalZ3 W)
+      + MvPowerSeries.subst
+        (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
+        (formalNuBiv W)) = 0 := by
+  simp [hf₃0, hN0]
+
+/-- **The closing rewrite of the chord spec**: the inversion series substituted
+at `z₃∘` *is* the bivariate formal group law substituted at the pair
+`(f_α, f_β)`, via the chord spec `formalGroupLaw_eq_chord` (FG-A6) and the
+substitution composition law (`mv_subst_powerSeries_subst`). -/
+private lemma subst_formalInverse_subst_formalZ3_eq_subst_formalGroupLaw
+    {α β : Isogeny W.toAffine W.toAffine}
+    (hb : MvPowerSeries.HasSubst
+      (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)) :
+    HahnSeries.ofPowerSeries ℤ F
+        (PowerSeries.subst
+          (MvPowerSeries.subst
+            (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
+            (formalZ3 W))
+          (formalInverse W))
+      = HahnSeries.ofPowerSeries ℤ F
+          (MvPowerSeries.subst
+            (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
+            (formalGroupLaw W).toMvPowerSeries) := by
+  have hgz₃ : MvPowerSeries.HasSubst (fun _ : Unit ↦ formalZ3 W) :=
+    MvPowerSeries.hasSubst_of_constantCoeff_zero fun _ ↦ constantCoeff_formalZ3 W
+  rw [formalGroupLaw_eq_chord W,
+    mv_subst_powerSeries_subst _ hb hgz₃ (formalInverse W)]
+
 /-- **T-IV-BRIDGE-003** (Silverman IV.1.4, FG-B5): the local `z = −x/y`
 expansion of the genuine pair sum `α(P) + β(P)` — the chord-tangent addition
 `addPullback_x_pair`/`addPullback_y_pair` on the generic point — equals the
@@ -1935,31 +2103,14 @@ theorem formalIsogenySeries_add (α β : Isogeny W.toAffine W.toAffine)
           (![formalIsogenySeries W α, formalIsogenySeries W β] :
             Fin 2 → PowerSeries F)
           (formalGroupLaw W).toMvPowerSeries) := by
-  -- ## Series-side bookkeeping: the substitution family is lawful.
-  have hf0 : PowerSeries.constantCoeff (formalIsogenySeries W α) = 0 :=
-    constantCoeff_formalIsogenySeries_of_orderTop_pos W α
-      (orderTop_localExpand_pullback_localParam_pos_of_ord_x_neg W α h_α)
-  have hg0 : PowerSeries.constantCoeff (formalIsogenySeries W β) = 0 :=
-    constantCoeff_formalIsogenySeries_of_orderTop_pos W β
-      (orderTop_localExpand_pullback_localParam_pos_of_ord_x_neg W β h_β)
-  obtain ⟨hb, hb'⟩ := hasSubst_cons_pair (f := formalIsogenySeries W α)
-    (g := formalIsogenySeries W β) hf0 hg0
-  obtain ⟨hΛ0, hN0, hf₃0⟩ := constantCoeff_subst_slope_nu_z3_eq_zero W _ hb hb'
+  -- ## Series-side bookkeeping: lawful family + vanishing constant terms.
+  obtain ⟨-, -, hb, hΛ0, hN0, hf₃0⟩ :=
+    formalIsogenySeries_pair_constantCoeff_data W α β h_α h_β
   -- ## The expansion legs of the `(z,w)`-line data, per branch.
   obtain ⟨hc, h_lam, h_nu⟩ := zwLine_data_expansions W α β h_α h_β h_ni
-  -- ## The cleared Vieta identity, `nsmul`-normalised and pushed to Laurent.
-  have hcl := addPullback_vieta_cleared W α β h_α h_β h_ni
-  simp only [nsmul_eq_mul, Nat.cast_ofNat] at hcl
-  have hA := localExpand_chordA_substituted W _ hb h_lam
-  have hB := localExpand_chordB_substituted W _ hb h_lam h_nu
-  have hT : localExpand W (-α.pullback (localParam W) - β.pullback (localParam W))
-      = HahnSeries.ofPowerSeries ℤ F (-(formalIsogenySeries W α))
-        - HahnSeries.ofPowerSeries ℤ F (formalIsogenySeries W β) := by
-    rw [map_sub, map_neg, localExpand_pullback_localParam W α h_α,
-      localExpand_pullback_localParam W β h_β, ← map_neg]
-  have hclL := cleared_push (localExpand W) hA hB hT hcl
-  -- ## Cancel the unit `A∘` against the pure-series mirror: the `z`-leg.
-  have hXY := localExpand_negX_eq_subst_formalZ3_mul W hb hΛ0 hclL
+  -- ## The `z`-leg `−localExpand X₃ = z₃∘ · localExpand Y₃′`.
+  have hXY := localExpand_negX_pair_eq_subst_formalZ3_mul_negY W α β h_α h_β h_ni hb hΛ0
+    h_lam h_nu
   -- ## `Y₃′ ≠ 0` (else `X₃ = 0` and the line intercept would vanish).
   have hY₃line : (W_KE W).toAffine.negY (addPullback_x_pair α β) (addPullback_y_pair α β)
       = addSlopePair α β * (addPullback_x_pair α β - α.pullback (x_gen W))
@@ -1967,36 +2118,15 @@ theorem formalIsogenySeries_add (α β : Isogeny W.toAffine W.toAffine)
     Affine.negY_negY (W' := (W_KE W).toAffine) _ _
   have hY₃'_ne : (W_KE W).toAffine.negY (addPullback_x_pair α β) (addPullback_y_pair α β)
       ≠ 0 := negY_addPullback_pair_ne_zero W hc hY₃line hXY
-  have hLY'ne : localExpand W
-      ((W_KE W).toAffine.negY (addPullback_x_pair α β) (addPullback_y_pair α β)) ≠ 0 := by
-    intro h0
-    exact hY₃'_ne (RingHom.injective (localExpand W) (h0.trans (map_zero _).symm))
-  -- ## The `z`-leg at `(X₃, Y₃′)`.
-  have hz₃ : localExpand W (-(addPullback_x_pair α β)
-        / (W_KE W).toAffine.negY (addPullback_x_pair α β) (addPullback_y_pair α β))
-      = HahnSeries.ofPowerSeries ℤ F
-          (MvPowerSeries.subst
-            (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
-            (formalZ3 W)) := by
-    rw [map_div₀, map_neg, hXY]
-    exact mul_div_cancel_right₀ _ hLY'ne
+  -- ## The `z`-leg at `(X₃, Y₃′)`, as a chart quotient.
+  have hz₃ := localExpand_negX_div_negY_pair_eq_subst_formalZ3 W hY₃'_ne hXY
   -- ## The `w`-leg from the line: `−1/Y₃′ = λ·z₃′ + ν`, expanded.
   have hw₃' := localExpand_neg_inv_negY_eq_subst W hc hY₃'_ne hY₃line h_lam h_nu hz₃
   -- ## Hensel: the `w`-leg series is `w ∘ z₃∘`.
   have h_weier₃ : (W_KE W).toAffine.Equation (addPullback_x_pair α β)
       ((W_KE W).toAffine.negY (addPullback_x_pair α β) (addPullback_y_pair α β)) :=
     (Affine.equation_neg _ _).mpr (addPullback_pair_equation h_ni)
-  have hs0 : PowerSeries.constantCoeff
-      (MvPowerSeries.subst
-        (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
-        (formalSlopeBiv W)
-      * MvPowerSeries.subst
-        (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
-        (formalZ3 W)
-      + MvPowerSeries.subst
-        (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
-        (formalNuBiv W)) = 0 := by
-    simp [hf₃0, hN0]
+  have hs0 := constantCoeff_subst_slope_mul_z3_add_nu_eq_zero W hΛ0 hN0 hf₃0
   have hw_id := subst_formalW_of_expansions W h_weier₃ hY₃'_ne hf₃0 hs0 hz₃ hw₃'
   -- ## The inversion step, and the chord spec of the formal group law.
   have hfinal := localExpand_neg_div_negY_of_expansions W hY₃'_ne hf₃0 hz₃
@@ -2005,10 +2135,7 @@ theorem formalIsogenySeries_add (α β : Isogeny W.toAffine W.toAffine)
       ((W_KE W).toAffine.negY (addPullback_x_pair α β) (addPullback_y_pair α β))
       = addPullback_y_pair α β := Affine.negY_negY (W' := (W_KE W).toAffine) _ _
   rw [hYY] at hfinal
-  have hgz₃ : MvPowerSeries.HasSubst (fun _ : Unit ↦ formalZ3 W) :=
-    MvPowerSeries.hasSubst_of_constantCoeff_zero fun _ ↦ constantCoeff_formalZ3 W
-  rw [formalGroupLaw_eq_chord W,
-    mv_subst_powerSeries_subst _ hb hgz₃ (formalInverse W)]
+  rw [← subst_formalInverse_subst_formalZ3_eq_subst_formalGroupLaw W hb]
   exact hfinal
 
 end HasseWeil
