@@ -113,9 +113,9 @@ theorem seg1_near_of_linDelta {H : ℝ} (hH : Real.sqrt 3 / 2 < H)
 `z₀.im > √3/2`, the norm `‖z₀‖` exceeds 1. -/
 theorem norm_gt_one_of_re_sq_quarter {z₀ : ℂ} (hz_re_sq : z₀.re ^ 2 = 1/4)
     (hc_lo : Real.sqrt 3 / 2 < z₀.im) : 1 < ‖z₀‖ := by
-  nlinarith [Complex.normSq_eq_norm_sq z₀, norm_nonneg z₀,
-    Real.mul_self_sqrt (show (3 : ℝ) ≥ 0 by norm_num), hc_lo, Real.sqrt_nonneg 3,
-    Complex.normSq_apply z₀, hz_re_sq, sq_nonneg z₀.im]
+  nlinarith [Complex.normSq_eq_norm_sq z₀, norm_nonneg z₀, hc_lo, hz_re_sq,
+    Complex.normSq_apply z₀, Real.mul_self_sqrt (show (0 : ℝ) ≤ 3 by norm_num),
+    Real.sqrt_nonneg 3]
 
 /-- For `z₀` on seg1 with `z₀.im > √3/2`, the norm `‖z₀‖` exceeds 1. -/
 theorem norm_gt_one_of_seg1_interior {z₀ : ℂ} (hz_re : z₀.re = 1/2)
