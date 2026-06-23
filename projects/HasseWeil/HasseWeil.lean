@@ -60,7 +60,6 @@ import HasseWeil.Pic0.PicDualClassMapMultiplicativity
 import HasseWeil.Pic0.TheoremOfSquareDivisorForm
 import HasseWeil.Pic0.PicDualPullbackTheoremOfSquare
 import HasseWeil.WeilPairing.Assembly
-import HasseWeil.WeilPairing.TorsionSeparable
 import HasseWeil.WeilPairing.SigmaBridge
 import HasseWeil.WeilPairing.WeilFunction
 import HasseWeil.WeilPairing.RootsOfUnity
@@ -69,7 +68,6 @@ import HasseWeil.WeilPairing.PairingProps
 import HasseWeil.WeilPairing.DetDeg
 import HasseWeil.WeilPairing.HasseAssembly
 import HasseWeil.WeilPairing.FrobMatrixData
-import HasseWeil.WeilPairing.FrobeniusGalois
 import HasseWeil.WeilPairing.DivisorGalois
 import HasseWeil.WeilPairing.FrobeniusDivisorGalois
 import HasseWeil.WeilPairing.FrobeniusGaloisScaling
@@ -125,7 +123,6 @@ import HasseWeil.EC.IsogenyAG.CanonicalDual
 import HasseWeil.WeilPairing.AdjointTransfer
 import HasseWeil.EC.IsogenyAG.DualAdditivity
 import HasseWeil.EC.IsogenyAG.CovarianceDischarge
-import HasseWeil.WeilPairing.OneSubPullbackEvaluation
 import HasseWeil.EC.IsogenyAG.DualUniversal
 import HasseWeil.EC.IsogenyAG.BaseChange
 import HasseWeil.Curves.CoordHomFinite
