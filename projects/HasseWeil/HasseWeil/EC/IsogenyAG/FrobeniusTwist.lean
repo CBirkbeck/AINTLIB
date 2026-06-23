@@ -745,10 +745,77 @@ noncomputable def EC.Isogeny.relativeFrobenius (e : ℕ) :
 
 /-! #### The compositional identity and the pullback field range -/
 
+/-- Base-ring agreement for the compositional identity: on the polynomial base
+`AdjoinRoot.mk _ (C q)`, the relative-Frobenius coordinate-ring hom precomposed with
+`CoordinateRing.map (iterateFrobenius F p e)` agrees with the iterate-Frobenius on `K(E)`
+precomposed with the structure map. This is the `of`-branch of `ringHom_ext` and the
+algebraic heart: `iterateFrobenius` commutes through `eval₂` (`RingHom.iterateFrobenius_comm`,
+`Polynomial.hom_eval₂`). -/
+private theorem relativeFrobenius_coordRingHom_eq_on_C (e : ℕ) (q : Polynomial F) :
+    ofEquationCoordRingHom E (E.iterateFrobeniusTwist p e)
+        (x_gen E ^ p ^ e) (y_gen E ^ p ^ e)
+        (iterateFrobeniusTwist_generic_equation p E e)
+      (Affine.CoordinateRing.map E.toAffine (iterateFrobenius F p e)
+        (AdjoinRoot.mk _ (Polynomial.C q))) =
+      (iterateFrobenius (E.toAffine.FunctionField) p e)
+        ((algebraMap E.toAffine.CoordinateRing (E.toAffine.FunctionField))
+          (AdjoinRoot.mk _ (Polynomial.C q))) := by
+  rw [WeierstrassCurve.Affine.CoordinateRing.map_mk, Polynomial.map_C]
+  change AdjoinRoot.lift _ _ _ (AdjoinRoot.mk _ (Polynomial.C _)) = _
+  rw [AdjoinRoot.lift_mk, Polynomial.eval₂_C]
+  change ((Polynomial.mapRingHom (iterateFrobenius F p e)) q).eval₂
+      (algebraMap F (E.toAffine.FunctionField)) (x_gen E ^ p ^ e) = _
+  rw [show (Polynomial.mapRingHom (iterateFrobenius F p e)) q =
+        q.map (iterateFrobenius F p e) from rfl,
+      Polynomial.eval₂_map,
+      show ((algebraMap F (E.toAffine.FunctionField)).comp (iterateFrobenius F p e)) =
+        ((iterateFrobenius (E.toAffine.FunctionField) p e).comp
+          (algebraMap F (E.toAffine.FunctionField))) from
+        RingHom.iterateFrobenius_comm (algebraMap F (E.toAffine.FunctionField)) p e,
+      show (x_gen E ^ p ^ e : E.toAffine.FunctionField) =
+        (iterateFrobenius (E.toAffine.FunctionField) p e) (x_gen E) from rfl,
+      ← Polynomial.hom_eval₂]
+  change (iterateFrobenius (E.toAffine.FunctionField) p e) (q.eval₂ _ _) =
+    (iterateFrobenius (E.toAffine.FunctionField) p e) (algebraMap _ _ _)
+  congr 1
+  change q.eval₂ (algebraMap F (E.toAffine.FunctionField)) (x_gen E) =
+    algebraMap _ _ ((AdjoinRoot.of _) q)
+  exact (algebraMap_CR_KE_of_eq_eval₂ E q).symm
+
+/-- Root agreement for the compositional identity: at `AdjoinRoot.root` both sides of the
+identity evaluate to `y_gen E ^ p ^ e` (the relative-Frobenius hom sends the root to the
+twisted `y`-generator via `ofEquationCoordAlgHom_y`, the iterate-Frobenius side via the
+power on `y_gen`). This is the root-branch of `ringHom_ext`. -/
+private theorem relativeFrobenius_coordRingHom_eq_on_root (e : ℕ) :
+    ofEquationCoordRingHom E (E.iterateFrobeniusTwist p e)
+        (x_gen E ^ p ^ e) (y_gen E ^ p ^ e)
+        (iterateFrobeniusTwist_generic_equation p E e)
+      (Affine.CoordinateRing.map E.toAffine (iterateFrobenius F p e)
+        (AdjoinRoot.root _)) =
+      (iterateFrobenius (E.toAffine.FunctionField) p e)
+        ((algebraMap E.toAffine.CoordinateRing (E.toAffine.FunctionField))
+          (AdjoinRoot.root _)) := by
+  rw [show WeierstrassCurve.Affine.CoordinateRing.map E.toAffine (iterateFrobenius F p e)
+        (AdjoinRoot.root E.toAffine.polynomial) =
+        AdjoinRoot.root (E.iterateFrobeniusTwist p e).toAffine.polynomial by
+      change AdjoinRoot.lift _ _ _ _ = _
+      rw [AdjoinRoot.lift_root]
+      rfl]
+  rw [show ofEquationCoordRingHom E (E.iterateFrobeniusTwist p e)
+        (x_gen E ^ p ^ e) (y_gen E ^ p ^ e)
+        (iterateFrobeniusTwist_generic_equation p E e)
+        (AdjoinRoot.root (E.iterateFrobeniusTwist p e).toAffine.polynomial) =
+          y_gen E ^ p ^ e from
+      ofEquationCoordAlgHom_y E (E.iterateFrobeniusTwist p e) (x_gen E ^ p ^ e)
+        (y_gen E ^ p ^ e) (iterateFrobeniusTwist_generic_equation p E e)]
+  rfl
+
 /-- **Compositional identity**: the relative Frobenius pullback of the
 `CoordinateRing.map (iterateFrobenius F p e)`-image of `r` is the `p^e`-th power of
 the image of `r` (mirror of `frobeniusRelativeCoordRingHom_comp_map`). The
-algebraic heart of pure inseparability. -/
+algebraic heart of pure inseparability. Proved by `AdjoinRoot.ringHom_ext` from the
+base-ring agreement (`relativeFrobenius_coordRingHom_eq_on_C`) and the root agreement
+(`relativeFrobenius_coordRingHom_eq_on_root`). -/
 private theorem relativeFrobenius_coordRingHom_comp_map (e : ℕ) :
     (ofEquationCoordRingHom E (E.iterateFrobeniusTwist p e)
         (x_gen E ^ p ^ e) (y_gen E ^ p ^ e)
@@ -757,58 +824,8 @@ private theorem relativeFrobenius_coordRingHom_comp_map (e : ℕ) :
       (iterateFrobenius (E.toAffine.FunctionField) p e).comp
         (algebraMap E.toAffine.CoordinateRing (E.toAffine.FunctionField)) := by
   apply AdjoinRoot.ringHom_ext
-  · -- composition with `of`: agree on the polynomial-base.
-    apply RingHom.ext
-    intro q
-    change ofEquationCoordRingHom E (E.iterateFrobeniusTwist p e)
-        (x_gen E ^ p ^ e) (y_gen E ^ p ^ e)
-        (iterateFrobeniusTwist_generic_equation p E e)
-      (Affine.CoordinateRing.map E.toAffine (iterateFrobenius F p e)
-        (AdjoinRoot.mk _ (Polynomial.C q))) = _
-    rw [WeierstrassCurve.Affine.CoordinateRing.map_mk, Polynomial.map_C]
-    change AdjoinRoot.lift _ _ _ (AdjoinRoot.mk _ (Polynomial.C _)) = _
-    rw [AdjoinRoot.lift_mk, Polynomial.eval₂_C]
-    change ((Polynomial.mapRingHom (iterateFrobenius F p e)) q).eval₂
-        (algebraMap F (E.toAffine.FunctionField)) (x_gen E ^ p ^ e) = _
-    rw [show (Polynomial.mapRingHom (iterateFrobenius F p e)) q =
-          q.map (iterateFrobenius F p e) from rfl,
-        Polynomial.eval₂_map,
-        show ((algebraMap F (E.toAffine.FunctionField)).comp (iterateFrobenius F p e)) =
-          ((iterateFrobenius (E.toAffine.FunctionField) p e).comp
-            (algebraMap F (E.toAffine.FunctionField))) from
-          RingHom.iterateFrobenius_comm (algebraMap F (E.toAffine.FunctionField)) p e,
-        show (x_gen E ^ p ^ e : E.toAffine.FunctionField) =
-          (iterateFrobenius (E.toAffine.FunctionField) p e) (x_gen E) from rfl,
-        ← Polynomial.hom_eval₂]
-    change (iterateFrobenius (E.toAffine.FunctionField) p e) (q.eval₂ _ _) =
-      (iterateFrobenius (E.toAffine.FunctionField) p e) (algebraMap _ _ _)
-    congr 1
-    change q.eval₂ (algebraMap F (E.toAffine.FunctionField)) (x_gen E) =
-      algebraMap _ _ ((AdjoinRoot.of _) q)
-    exact (algebraMap_CR_KE_of_eq_eval₂ E q).symm
-  · -- At root: both sides give y_gen^(p^e).
-    change ofEquationCoordRingHom E (E.iterateFrobeniusTwist p e)
-        (x_gen E ^ p ^ e) (y_gen E ^ p ^ e)
-        (iterateFrobeniusTwist_generic_equation p E e)
-      (Affine.CoordinateRing.map E.toAffine (iterateFrobenius F p e)
-        (AdjoinRoot.root _)) =
-      (iterateFrobenius (E.toAffine.FunctionField) p e)
-        ((algebraMap E.toAffine.CoordinateRing (E.toAffine.FunctionField))
-          (AdjoinRoot.root _))
-    rw [show WeierstrassCurve.Affine.CoordinateRing.map E.toAffine (iterateFrobenius F p e)
-          (AdjoinRoot.root E.toAffine.polynomial) =
-          AdjoinRoot.root (E.iterateFrobeniusTwist p e).toAffine.polynomial by
-        change AdjoinRoot.lift _ _ _ _ = _
-        rw [AdjoinRoot.lift_root]
-        rfl]
-    rw [show ofEquationCoordRingHom E (E.iterateFrobeniusTwist p e)
-          (x_gen E ^ p ^ e) (y_gen E ^ p ^ e)
-          (iterateFrobeniusTwist_generic_equation p E e)
-          (AdjoinRoot.root (E.iterateFrobeniusTwist p e).toAffine.polynomial) =
-            y_gen E ^ p ^ e from
-        ofEquationCoordAlgHom_y E (E.iterateFrobeniusTwist p e) (x_gen E ^ p ^ e)
-          (y_gen E ^ p ^ e) (iterateFrobeniusTwist_generic_equation p E e)]
-    rfl
+  · exact RingHom.ext fun q => relativeFrobenius_coordRingHom_eq_on_C p E e q
+  · exact relativeFrobenius_coordRingHom_eq_on_root p E e
 
 theorem relativeFrobenius_pullback_coordRingMap (e : ℕ) (r : E.toAffine.CoordinateRing) :
     (EC.Isogeny.relativeFrobenius p E e).toCurveMap.pullback
