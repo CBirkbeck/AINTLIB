@@ -2145,6 +2145,48 @@ theorem translateAlgHom_round_trip_x_gen
   unfold genericPoint at h_gen_eq
   exact (Affine.Point.some.injEq _ _ _ _ _ _).mp h_gen_eq |>.1
 
+/-- **Forward round-trip at the `Affine.Point` level**:
+`(P_gen + (−T_lift)) + T_lift = P_gen`. Counterpart of `genericPoint_round_trip`
+with `T_lift` and `−T_lift` swapped, via `add_assoc` + `add_comm` +
+`liftSomePoint_add_neg_eq_zero` + `add_zero`. -/
+private theorem genericPoint_round_trip_neg
+    (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk) :
+    (genericPoint W + liftSomePoint_neg W xk yk h_ns) +
+        liftSomePoint W xk yk h_ns = genericPoint W := by
+  rw [add_assoc, add_comm (liftSomePoint_neg W xk yk h_ns)
+      (liftSomePoint W xk yk h_ns), liftSomePoint_add_neg_eq_zero, add_zero]
+
+/-- **Image of the secant slope under `σ = τ_{−T}`**: `σ` carries the slope
+`translateSlope_xy T` (the secant slope at the generic point used to define
+`τ_T`) to the secant slope at the negated coordinates `(translateX_xy(−T),
+translateY_xy(−T))` and `(xk, yk)`. Both x-coordinates differ (transcendence of
+`x_gen`), so `σ_commutes_slope_of_X_ne` applies, after which the constant images
+`σ xk`, `σ yk` and the generator images `hσx`, `hσy` evaluate the result. -/
+private theorem translateAlgHom_neg_commutes_translateSlope_xy
+    (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
+    (h_not_2_tor : yk ≠ W.toAffine.negY xk yk) :
+    translateAlgHom_of_nonTorsion_neg W xk yk h_ns h_not_2_tor
+        (translateSlope_xy W xk yk) =
+      (W_KE W).toAffine.slope (translateX_xy W xk (W.toAffine.negY xk yk))
+        (algebraMap F KE xk)
+        (translateY_xy W xk (W.toAffine.negY xk yk)) (algebraMap F KE yk) := by
+  set σ := translateAlgHom_of_nonTorsion_neg W xk yk h_ns h_not_2_tor
+  have hσx : σ (x_gen W) = translateX_xy W xk (W.toAffine.negY xk yk) :=
+    translateAlgHom_neg_apply_x_gen W xk yk h_ns h_not_2_tor
+  have hσy : σ (y_gen W) = translateY_xy W xk (W.toAffine.negY xk yk) :=
+    translateAlgHom_neg_apply_y_gen W xk yk h_ns h_not_2_tor
+  have hx_ne : x_gen W ≠ algebraMap F KE xk := fun h ↦
+    x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h)
+  have hx_σ_ne : σ (x_gen W) ≠ algebraMap F KE xk := by
+    rw [hσx]
+    exact translateX_xy_neg_ne_algebraMap W xk yk h_ns h_not_2_tor
+  have hx_σ_ne_full : σ (x_gen W) ≠ σ (algebraMap F KE xk) := by
+    rwa [σ.commutes]
+  change σ ((W_KE W).toAffine.slope (x_gen W) (algebraMap F KE xk)
+      (y_gen W) (algebraMap F KE yk)) = _
+  rw [σ_commutes_slope_of_X_ne W hx_ne hx_σ_ne_full]
+  rw [σ.commutes xk, σ.commutes yk, hσx, hσy]
+
 /-- **Round-trip on `y_gen`** — Silverman III.4.10(a) at the algebra-hom level.
 `σ(τ(y_gen)) = y_gen` where τ = translation by T, σ = translation by −T.
 
@@ -2166,28 +2208,8 @@ theorem translateAlgHom_round_trip_y_gen
   rw [σ_commutes_addY W (x_gen W) (algebraMap F KE xk) (y_gen W)
         (translateSlope_xy W xk yk)]
   rw [σ.commutes xk, hσx, hσy]
-  have hx_ne : x_gen W ≠ algebraMap F KE xk := fun h ↦
-    x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h)
-  have hx_σ_ne : σ (x_gen W) ≠ algebraMap F KE xk := by
-    rw [hσx]
-    exact translateX_xy_neg_ne_algebraMap W xk yk h_ns h_not_2_tor
-  have hx_σ_ne_full : σ (x_gen W) ≠ σ (algebraMap F KE xk) := by
-    rwa [σ.commutes]
-  have h_slope_eq : σ (translateSlope_xy W xk yk) =
-      (W_KE W).toAffine.slope (translateX_xy W xk (W.toAffine.negY xk yk))
-        (algebraMap F KE xk)
-        (translateY_xy W xk (W.toAffine.negY xk yk)) (algebraMap F KE yk) := by
-    change σ ((W_KE W).toAffine.slope (x_gen W) (algebraMap F KE xk)
-        (y_gen W) (algebraMap F KE yk)) = _
-    rw [σ_commutes_slope_of_X_ne W hx_ne hx_σ_ne_full]
-    rw [σ.commutes xk, σ.commutes yk, hσx, hσy]
-  rw [h_slope_eq]
-  have h_gen_eq : (genericPoint W + liftSomePoint_neg W xk yk h_ns) +
-      liftSomePoint W xk yk h_ns = genericPoint W := by
-    rw [add_assoc]
-    rw [add_comm (liftSomePoint_neg W xk yk h_ns)
-        (liftSomePoint W xk yk h_ns)]
-    rw [liftSomePoint_add_neg_eq_zero, add_zero]
+  rw [translateAlgHom_neg_commutes_translateSlope_xy W xk yk h_ns h_not_2_tor]
+  have h_gen_eq := genericPoint_round_trip_neg W xk yk h_ns
   have h_ne_2 : translateX_xy W xk (W.toAffine.negY xk yk) ≠ algebraMap F KE xk :=
     translateX_xy_neg_ne_algebraMap W xk yk h_ns h_not_2_tor
   rw [genericPoint_add_liftSomePoint_neg W xk yk h_ns] at h_gen_eq
