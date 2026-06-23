@@ -58,19 +58,17 @@ theorem rangeIncl_mulByInt_le_fixed_twoCurve (φ : Isogeny W₁ W₂)
   -- identify the explicit pullback AlgHom with `(mulByInt …).pullback`
   have hpb : (mulByInt W₁ (φ.degree : ℤ)).pullback =
       HasseWeil.mulByInt_pullbackAlgHom W₁ (φ.degree : ℤ) hm := dif_neg hm
-  show (translateAlgEquivOfPoint W₁ k.val)
-      ((HasseWeil.mulByInt_pullbackAlgHom W₁ (φ.degree : ℤ) hm) w) =
-    (HasseWeil.mulByInt_pullbackAlgHom W₁ (φ.degree : ℤ) hm) w
-  rw [← hpb]
-  -- `[m]`-covariance: `τ_k([m]* w) = [m]*(τ_{[m]k} w)` (field-general genuine leaf on E₁).
-  rw [WeilPairing.hcomm_of_isGenuineWith W₁ (mulByInt W₁ (φ.degree : ℤ))
-    (HasseWeil.mulByInt_isGenuineWith_general W₁ (φ.degree : ℤ) hm) k.val
-    (WeilPairing.mapTranslateGenericPoint_mulByInt W₁ (φ.degree : ℤ) k.val) w]
   -- `[m] k = (deg φ) • k = 0` for `k ∈ ker φ` (Lagrange), so `τ_{[m]k} = τ_0 = refl`.
   have hk0 : (mulByInt W₁ (φ.degree : ℤ)).toAddMonoidHom k.val = 0 := by
     rw [mulByInt_apply, natCast_zsmul]
     exact kernel_nsmul_degree_eq_zero φ h_card k.property
-  rw [hk0]
+  show (translateAlgEquivOfPoint W₁ k.val)
+      ((HasseWeil.mulByInt_pullbackAlgHom W₁ (φ.degree : ℤ) hm) w) =
+    (HasseWeil.mulByInt_pullbackAlgHom W₁ (φ.degree : ℤ) hm) w
+  -- `[m]`-covariance: `τ_k([m]* w) = [m]*(τ_{[m]k} w)` (field-general genuine leaf on E₁).
+  rw [← hpb, WeilPairing.hcomm_of_isGenuineWith W₁ (mulByInt W₁ (φ.degree : ℤ))
+    (HasseWeil.mulByInt_isGenuineWith_general W₁ (φ.degree : ℤ) hm) k.val
+    (WeilPairing.mapTranslateGenericPoint_mulByInt W₁ (φ.degree : ℤ) k.val) w, hk0]
   rfl
 
 /-- **The two-curve `K̄`-dual range inclusion `Im([deg φ]_{E₁}*) ⊆ Im(φ*)`** (Silverman III.6.1,
@@ -97,9 +95,8 @@ theorem mulByInt_deg_rangeIncl_twoCurve (φ : Isogeny W₁ W₂)
       (h_xy_family k).1 (h_xy_family k).2 z
   haveI : Finite φ.kernel := finite_kernel_of_hcov_twoCurve φ hcov
   have hm : (φ.degree : ℤ) ≠ 0 := by exact_mod_cast (degree_pos_twoCurve φ).ne'
-  have hfix := fixedField_hfix_twoCurve φ h_xy_family h_card
   rintro z hz
-  rw [hfix z]
+  rw [fixedField_hfix_twoCurve φ h_xy_family h_card z]
   exact rangeIncl_mulByInt_le_fixed_twoCurve φ h_card hm z hz
 
 end Isogeny
