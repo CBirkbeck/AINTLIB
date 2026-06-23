@@ -258,6 +258,49 @@ omit [W.toAffine.IsElliptic] in
 @[simp] theorem mem_torsionUnionSet {L : Set ℕ} {P : W.toAffine.Point} :
     P ∈ torsionUnionSet W L ↔ ∃ ℓ ∈ L, ((ℓ : ℤ)) • P = 0 := Iff.rfl
 
+omit [W.toAffine.IsElliptic] in
+/-- **Coprime-order torsion is trivial**: a point annihilated by two coprime integers is
+zero — a Bézout combination `a·m + b·n = 1` reconstructs `P = 1 • P` from `m • P = 0` and
+`n • P = 0`.  The disjointness behind distinct-prime torsion. -/
+private theorem eq_zero_of_smul_eq_zero_of_isCoprime
+    {P : W.toAffine.Point} {m n : ℤ} (hcop : IsCoprime m n)
+    (hm : m • P = 0) (hn : n • P = 0) : P = 0 := by
+  obtain ⟨a, b, hab⟩ := hcop
+  calc P = (1 : ℤ) • P := (one_smul ℤ _).symm
+    _ = (a * m + b * n) • P := by rw [hab]
+    _ = a • (m • P) + b • (n • P) := by rw [add_smul, mul_smul, mul_smul]
+    _ = 0 := by rw [hm, hn, smul_zero, smul_zero, add_zero]
+
+omit [W.toAffine.IsElliptic] in
+/-- **Per-prime nonzero torsion points are distinct**: the chosen nonzero `ℓ`-torsion points
+(one per prime `ℓ ∈ L`) form an injective family, since a point killed by two distinct
+primes is killed by their coprime combination, hence zero
+(`eq_zero_of_smul_eq_zero_of_isCoprime`). -/
+private theorem injective_torsionChoice {L : Set ℕ}
+    (hLp : ∀ ℓ ∈ L, Nat.Prime ℓ) {f : ↥L → W.toAffine.Point}
+    (hf_spec : ∀ ℓ : ↥L, ((ℓ : ℕ) : ℤ) • f ℓ = 0 ∧ f ℓ ≠ 0) :
+    Function.Injective f := by
+  rintro ⟨ℓ₁, h₁⟩ ⟨ℓ₂, h₂⟩ heq
+  by_contra hne
+  have hℓne : ℓ₁ ≠ ℓ₂ := fun hc ↦ hne (Subtype.ext hc)
+  have h1 : ((ℓ₁ : ℕ) : ℤ) • f ⟨ℓ₁, h₁⟩ = 0 := (hf_spec ⟨ℓ₁, h₁⟩).1
+  have h2 : ((ℓ₂ : ℕ) : ℤ) • f ⟨ℓ₁, h₁⟩ = 0 := by
+    rw [heq]; exact (hf_spec ⟨ℓ₂, h₂⟩).1
+  have hcop : IsCoprime ((ℓ₁ : ℕ) : ℤ) ((ℓ₂ : ℕ) : ℤ) := by
+    rw [Int.isCoprime_iff_gcd_eq_one, Int.gcd_natCast_natCast]
+    exact (Nat.coprime_primes (hLp ℓ₁ h₁) (hLp ℓ₂ h₂)).mpr hℓne
+  exact (hf_spec ⟨ℓ₁, h₁⟩).2 (eq_zero_of_smul_eq_zero_of_isCoprime W hcop h1 h2)
+
+/-- **A nonzero `ℓ`-torsion point for each prime `ℓ ∈ L`** (over `K̄`): the per-prime
+existence source `exists_torsion_ne_zero` packaged as a family indexed by `↥L`. -/
+private theorem exists_torsionChoice [IsAlgClosed F] {L : Set ℕ}
+    (hLp : ∀ ℓ ∈ L, Nat.Prime ℓ) (hLchar : ∀ ℓ ∈ L, ((ℓ : ℤ) : F) ≠ 0) (ℓ : ↥L) :
+    ∃ P : W.toAffine.Point, ((ℓ : ℕ) : ℤ) • P = 0 ∧ P ≠ 0 := by
+  obtain ⟨ℓ, hℓ⟩ := ℓ
+  refine exists_torsion_ne_zero W ((ℓ : ℕ) : ℤ) (hLchar ℓ hℓ) ?_
+  rw [Int.natAbs_natCast]
+  exact (hLp ℓ hℓ).one_lt
+
 /-- **The torsion union over infinitely many good primes is infinite**: each `E[ℓ]`
 contributes a nonzero point (`exists_torsion_ne_zero`), and the contributions are pairwise
 distinct since nonzero torsion at coprime orders is disjoint
@@ -268,34 +311,11 @@ theorem torsionUnionSet_infinite [IsAlgClosed F] {L : Set ℕ}
     (torsionUnionSet W L).Infinite := by
   have : Infinite ↥L := hL.to_subtype
   -- choose a nonzero `ℓ`-torsion point for each `ℓ ∈ L`
-  have hchoice : ∀ ℓ : ↥L,
-      ∃ P : W.toAffine.Point, ((ℓ : ℕ) : ℤ) • P = 0 ∧ P ≠ 0 := by
-    rintro ⟨ℓ, hℓ⟩
-    refine exists_torsion_ne_zero W ((ℓ : ℕ) : ℤ) (hLchar ℓ hℓ) ?_
-    rw [Int.natAbs_natCast]
-    exact (hLp ℓ hℓ).one_lt
-  set f : ↥L → W.toAffine.Point := fun ℓ ↦ (hchoice ℓ).choose
+  set f : ↥L → W.toAffine.Point := fun ℓ ↦ (exists_torsionChoice W hLp hLchar ℓ).choose
   have hf_spec : ∀ ℓ : ↥L, ((ℓ : ℕ) : ℤ) • f ℓ = 0 ∧ f ℓ ≠ 0 :=
-    fun ℓ ↦ (hchoice ℓ).choose_spec
+    fun ℓ ↦ (exists_torsionChoice W hLp hLchar ℓ).choose_spec
   -- distinct primes give distinct points: nonzero torsion at coprime orders is disjoint
-  have hinj : Function.Injective f := by
-    rintro ⟨ℓ₁, h₁⟩ ⟨ℓ₂, h₂⟩ heq
-    by_contra hne
-    have hℓne : ℓ₁ ≠ ℓ₂ := fun hc ↦ hne (Subtype.ext hc)
-    have h1 : ((ℓ₁ : ℕ) : ℤ) • f ⟨ℓ₁, h₁⟩ = 0 := (hf_spec ⟨ℓ₁, h₁⟩).1
-    have h2 : ((ℓ₂ : ℕ) : ℤ) • f ⟨ℓ₁, h₁⟩ = 0 := by
-      rw [heq]; exact (hf_spec ⟨ℓ₂, h₂⟩).1
-    have hcop : IsCoprime ((ℓ₁ : ℕ) : ℤ) ((ℓ₂ : ℕ) : ℤ) := by
-      rw [Int.isCoprime_iff_gcd_eq_one, Int.gcd_natCast_natCast]
-      exact (Nat.coprime_primes (hLp ℓ₁ h₁) (hLp ℓ₂ h₂)).mpr hℓne
-    obtain ⟨a, b, hab⟩ := hcop
-    refine (hf_spec ⟨ℓ₁, h₁⟩).2 ?_
-    calc f ⟨ℓ₁, h₁⟩ = (1 : ℤ) • f ⟨ℓ₁, h₁⟩ := (one_smul ℤ _).symm
-      _ = (a * ((ℓ₁ : ℕ) : ℤ) + b * ((ℓ₂ : ℕ) : ℤ)) • f ⟨ℓ₁, h₁⟩ := by rw [hab]
-      _ = a • (((ℓ₁ : ℕ) : ℤ) • f ⟨ℓ₁, h₁⟩) + b • (((ℓ₂ : ℕ) : ℤ) • f ⟨ℓ₁, h₁⟩) := by
-          rw [add_smul, mul_smul, mul_smul]
-      _ = 0 := by rw [h1, h2, smul_zero, smul_zero, add_zero]
-  refine (Set.infinite_range_of_injective hinj).mono ?_
+  refine (Set.infinite_range_of_injective (injective_torsionChoice W hLp hf_spec)).mono ?_
   rintro P ⟨ℓ, rfl⟩
   exact ⟨ℓ.val, ℓ.prop, (hf_spec ℓ).1⟩
 
