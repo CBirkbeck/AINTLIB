@@ -301,6 +301,62 @@ theorem polynomialY_evalEval_ne_zero_at_negSmoothPoint
   rw [hneg]
   linear_combination -h_eq
 
+/-! ### Generic ring-theoretic helpers for the maxIdeal-span discharge
+
+The unconditional maxIdeal-span computations (both the non-2-torsion
+`XClass` case below and the 2-torsion `YClass` companion) factor through
+three purely ring-theoretic facts about a ring hom `f` and span-singleton
+membership. They are stated generically here and reused by both proofs. -/
+
+/-- **Span-singleton membership transports along a ring hom**: if
+`a * b ∈ span {c}` in `R`, then `f a * f b ∈ span {f c}` in `S`. -/
+private theorem map_mul_mem_span_singleton_of_mul_mem
+    {R S : Type*} [CommRing R] [CommRing S] (f : R →+* S) {a b c : R}
+    (h : a * b ∈ Ideal.span ({c} : Set R)) :
+    f a * f b ∈ Ideal.span ({f c} : Set S) := by
+  rw [← map_mul]
+  obtain ⟨d, hd⟩ := Ideal.mem_span_singleton'.mp h
+  exact Ideal.mem_span_singleton'.mpr ⟨f d, by rw [← hd, map_mul]⟩
+
+/-- **A unit factor may be dropped from a span-singleton membership**: if
+`a * u ∈ span {c}` and `u` is a unit, then `a ∈ span {c}`. -/
+private theorem mem_span_singleton_of_mul_unit_mem
+    {S : Type*} [CommRing S] {a u c : S} (hu : IsUnit u)
+    (h : a * u ∈ Ideal.span ({c} : Set S)) :
+    a ∈ Ideal.span ({c} : Set S) := by
+  have hle : Ideal.span ({a * u} : Set S) ≤ Ideal.span ({c} : Set S) :=
+    Ideal.span_le.mpr (Set.singleton_subset_iff.mpr h)
+  refine hle ?_
+  rw [Ideal.span_singleton_mul_right_unit hu a]
+  exact Ideal.mem_span_singleton_self a
+
+/-- **Image of a two-generator span when the second generator's image is
+redundant**: if `f y ∈ span {f x}`, then `map f (span {x, y}) = span {f x}`.
+The surviving generator is the *first* of the pair. -/
+private theorem map_span_pair_eq_span_singleton_left
+    {R S : Type*} [CommRing R] [CommRing S] (f : R →+* S) {x y : R}
+    (hy : f y ∈ Ideal.span ({f x} : Set S)) :
+    Ideal.map f (Ideal.span ({x, y} : Set R)) = Ideal.span ({f x} : Set S) := by
+  rw [Ideal.map_span, Set.image_pair]
+  refine le_antisymm (Ideal.span_le.mpr (fun z hz ↦ ?_))
+    (Ideal.span_mono (Set.singleton_subset_iff.mpr (Set.mem_insert _ _)))
+  rcases Set.mem_insert_iff.mp hz with rfl | hz'
+  · exact Ideal.subset_span rfl
+  · simp only [Set.mem_singleton_iff] at hz'
+    rw [hz']; exact hy
+
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
+/-- **The maximal ideal of the local ring is the pushforward of
+`maximalIdealAt`**: under the localisation map `f`, the maximal ideal of
+`localRingAt P` is `map f (maximalIdealAt P)`, since `localRingAt P` is by
+definition `Localization.AtPrime (maximalIdealAt P)`. -/
+private theorem maximalIdeal_localRingAt_eq_map_maximalIdealAt
+    (P : (W_smooth W).SmoothPoint) :
+    IsLocalRing.maximalIdeal ((W_smooth W).localRingAt P) =
+      Ideal.map (algebraMap (W_smooth W).CoordinateRing
+        ((W_smooth W).localRingAt P)) ((W_smooth W).maximalIdealAt P) :=
+  (Localization.AtPrime.map_eq_maximalIdeal).symm
+
 /-! ### Unconditional maxIdeal-span discharge for non-2-torsion case
 
 Reproduces the relevant content from `localRing_isDVR`'s second case
@@ -335,6 +391,8 @@ theorem maximalIdeal_localRingAt_eq_span_XClass_of_non_2_tor
   have hY : W.toAffine.polynomialY.evalEval xk (W.toAffine.negY xk yk) ≠ 0 :=
     polynomialY_evalEval_ne_zero_at_negSmoothPoint W xk yk h_not_2_tor
   set yk' : F := W.toAffine.negY xk yk with hyk'
+  -- `Q` is the quotient `polynomial /ₘ (Y - yk')`; it does not vanish at the
+  -- non-2-torsion point, so its localisation `f Q` is a unit.
   set Q : (W_smooth W).CoordinateRing :=
     Affine.CoordinateRing.mk W.toAffine
       (W.toAffine.polynomial /ₘ (Y - Polynomial.C (Polynomial.C yk')))
@@ -345,42 +403,21 @@ theorem maximalIdeal_localRingAt_eq_span_XClass_of_non_2_tor
     Affine.CoordinateRing.YClass W.toAffine (Polynomial.C yk') with hYC
   set f := algebraMap (W_smooth W).CoordinateRing
     ((W_smooth W).localRingAt P_smooth) with hf
-  have h_yc_mul : YC * Q ∈ Ideal.span ({XC} : Set _) :=
-    yclass_mul_quot_in_xclass_span W.toAffine h_eq_at
-  have h_Q_notmem : Q ∉ P_ideal := mk_quot_not_mem W.toAffine h_eq_at hY
-  have h_f_yc_mul : f YC * f Q ∈ Ideal.span ({f XC} : Set _) := by
-    rw [← map_mul]
-    obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp h_yc_mul
-    exact Ideal.mem_span_singleton'.mpr ⟨f c, by rw [← hc, map_mul]⟩
+  -- In the coordinate ring, `YC * Q ∈ span {XC}` and `Q ∉ P_ideal`.
   have h_f_Q_unit : IsUnit (f Q) :=
     IsLocalization.map_units ((W_smooth W).localRingAt P_smooth)
-      (⟨Q, h_Q_notmem⟩ : P_ideal.primeCompl)
-  have h_f_yc_mem : f YC ∈ Ideal.span ({f XC} : Set _) := by
-    obtain ⟨u, hu⟩ := h_f_Q_unit
-    have h1 : f YC * (↑u : _) ∈ Ideal.span ({f XC} : Set _) := by
-      rwa [hu]
-    obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp h1
-    refine Ideal.mem_span_singleton'.mpr ⟨c * (↑u⁻¹ : _), ?_⟩
-    have h_cancel : f YC = f YC * (↑u : _) * (↑u⁻¹ : _) := by
-      rw [mul_assoc, Units.mul_inv, mul_one]
-    rw [h_cancel, ← hc]
-    ring
-  have h_pideal_eq : P_ideal = Ideal.span ({XC, YC} : Set _) := rfl
-  have h_map_eq : Ideal.map f P_ideal = Ideal.span ({f XC} : Set _) := by
-    rw [h_pideal_eq, Ideal.map_span, Set.image_pair]
-    exact le_antisymm
-      (Ideal.span_le.mpr (fun z hz ↦ by
-        rcases (Set.mem_insert_iff.mp hz) with rfl | hz'
-        · exact Ideal.subset_span rfl
-        · simp only [Set.mem_singleton_iff] at hz'
-          rw [hz']; exact h_f_yc_mem))
-      (Ideal.span_mono (Set.singleton_subset_iff.mpr (Set.mem_insert _ _)))
-  have h_loc_eq : IsLocalRing.maximalIdeal
-      ((W_smooth W).localRingAt P_smooth) = Ideal.map f P_ideal := by
-    change IsLocalRing.maximalIdeal
-        (Localization.AtPrime P_ideal) = Ideal.map f P_ideal
-    exact (Localization.AtPrime.map_eq_maximalIdeal).symm
-  rw [h_loc_eq, h_map_eq]
+      (⟨Q, mk_quot_not_mem W.toAffine h_eq_at hY⟩ : P_ideal.primeCompl)
+  -- Transport `YC * Q ∈ span {XC}` to the local ring, then cancel the unit
+  -- `f Q` to conclude `f YC ∈ span {f XC}`.
+  have h_f_yc_mem : f YC ∈ Ideal.span ({f XC} : Set _) :=
+    mem_span_singleton_of_mul_unit_mem h_f_Q_unit
+      (map_mul_mem_span_singleton_of_mul_mem f
+        (yclass_mul_quot_in_xclass_span W.toAffine h_eq_at))
+  -- Hence `map f P_ideal = map f (span {XC, YC}) = span {f XC}`, which is the
+  -- maximal ideal of the local ring (`maximalIdealAt P_smooth` is the span
+  -- `{XC, YC}` by definition).
+  rw [maximalIdeal_localRingAt_eq_map_maximalIdealAt W P_smooth]
+  exact map_span_pair_eq_span_singleton_left f h_f_yc_mem
 
 /-- **`ord_P (x_gen − xk) = 1` at `−T` for non-2-torsion (UNCONDITIONAL)**:
 combines the witness-parametric `ord_P_x_gen_sub_const_eq_one_of_maxIdeal_span`
