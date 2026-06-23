@@ -2072,6 +2072,63 @@ theorem intDegree_normAsRatFunc_algebraMap
       ((Algebra.norm (Polynomial F) u).natDegree : ℤ) := by
   rw [C.normAsRatFunc_algebraMap_eq u, RatFunc.intDegree_polynomial]
 
+/-- **Fibers of the `x`-projection are pairwise disjoint**: the smooth-point
+    `x`-preimage finsets `a ↦ (C.smoothPoint_x_preimage_finite a).toFinset` are
+    pairwise disjoint over any set of `x`-values — distinct `x`-coordinates have
+    disjoint fibers. Extracted from
+    `divisorOf_algMap_degree_eq_natDegree_norm` (the `h_disjoint` step), the
+    side condition for splitting the degree sum over a `biUnion` of fibers. -/
+private theorem pairwiseDisjoint_smoothPoint_x_preimage (s : Set F) :
+    s.PairwiseDisjoint
+      (fun a ↦ (C.smoothPoint_x_preimage_finite a).toFinset) := by
+  intro a₁ _ a₂ _ h_ne
+  rw [Function.onFun, Finset.disjoint_left]
+  intro P hP₁ hP₂
+  have hP₁_x : P.x = a₁ := (C.smoothPoint_x_preimage_finite a₁).mem_toFinset.mp hP₁
+  have hP₂_x : P.x = a₂ := (C.smoothPoint_x_preimage_finite a₂).mem_toFinset.mp hP₂
+  exact h_ne (hP₁_x.symm.trans hP₂_x)
+
+open scoped Classical in
+/-- **Support of `divisorOf (algMap u)` lies over the roots of `N(u)`**: every
+    smooth point in the support of the affine divisor of `algMap u` has its
+    `x`-coordinate a root of the algebra norm `Algebra.norm F[X] u`, hence sits
+    in the `biUnion` of the `x`-fibers over those roots. Extracted from
+    `divisorOf_algMap_degree_eq_natDegree_norm` (the `h_supp_sub` step): this is
+    the geometric core — a zero/pole of `u` forces `u ∈ maximalIdealAt P`, so
+    `P.x` is a root of `N(u)` via `norm_eval_at_x_of_zero_at_smoothPoint`. -/
+private theorem divisorOf_algMap_support_subset_biUnion_smoothPoint_x_preimage
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    {u : C.CoordinateRing} (hu : u ≠ 0)
+    (hNu : Algebra.norm (Polynomial F) u ≠ 0) :
+    (C.divisorOf (algebraMap C.CoordinateRing C.FunctionField u)).support ⊆
+      (Algebra.norm (Polynomial F) u).roots.toFinset.biUnion
+        (fun a ↦ (C.smoothPoint_x_preimage_finite a).toFinset) := by
+  classical
+  intro P hP
+  have h_ne_zero :
+      C.divisorOf (algebraMap C.CoordinateRing C.FunctionField u) P ≠ 0 :=
+    Finsupp.mem_support_iff.mp hP
+  have h_ord_ne :
+      C.ord_P P (algebraMap C.CoordinateRing C.FunctionField u) ≠ 0 := by
+    intro h_eq
+    apply h_ne_zero
+    rw [SmoothPlaneCurve.divisorOf_apply, h_eq]; rfl
+  have h_u_mem : u ∈ C.maximalIdealAt P :=
+    (C.ord_P_algebraMap_ne_zero_iff_mem_maximalIdealAt hu P).mp h_ord_ne
+  obtain ⟨p, q, hpq⟩ :=
+    WeierstrassCurve.Affine.CoordinateRing.exists_smul_basis_eq u
+  have hPu : Polynomial.eval P.x p + Polynomial.eval P.x q * P.y = 0 := by
+    rw [← C.mem_maximalIdealAt_iff_eval_zero P p q, hpq]
+    exact h_u_mem
+  have h_isRoot : (Algebra.norm (Polynomial F) u).IsRoot P.x := by
+    rw [Polynomial.IsRoot, ← hpq]
+    exact C.norm_eval_at_x_of_zero_at_smoothPoint P p q hPu
+  have hPx_root : P.x ∈ (Algebra.norm (Polynomial F) u).roots :=
+    (Polynomial.mem_roots hNu).mpr h_isRoot
+  rw [Finset.mem_biUnion]
+  refine ⟨P.x, Multiset.mem_toFinset.mpr hPx_root, ?_⟩
+  exact (C.smoothPoint_x_preimage_finite P.x).mem_toFinset.mpr rfl
+
 /-- **Helper B for `u ∈ F[C]`** (composition step): the affine divisor degree of
     `algMap u` equals the polynomial `natDegree` of the algebra norm
     `Algebra.norm F[X] u`. -/
@@ -2083,48 +2140,14 @@ theorem divisorOf_algMap_degree_eq_natDegree_norm
   classical
   have hNu : Algebra.norm (Polynomial F) u ≠ 0 := fun h ↦
     hu ((Algebra.norm_eq_zero_iff (R := Polynomial F)).mp h)
-  let Sa : F → Finset C.SmoothPoint :=
-    fun a ↦ (C.smoothPoint_x_preimage_finite a).toFinset
-  set S : Finset C.SmoothPoint :=
-    (Algebra.norm (Polynomial F) u).roots.toFinset.biUnion Sa with hS_def
-  have h_disjoint : ((Algebra.norm (Polynomial F) u).roots.toFinset :
-        Set F).PairwiseDisjoint Sa := by
-    intro a₁ _ a₂ _ h_ne
-    rw [Function.onFun, Finset.disjoint_left]
-    intro P hP₁ hP₂
-    have hP₁_x : P.x = a₁ := (C.smoothPoint_x_preimage_finite a₁).mem_toFinset.mp hP₁
-    have hP₂_x : P.x = a₂ := (C.smoothPoint_x_preimage_finite a₂).mem_toFinset.mp hP₂
-    exact h_ne (hP₁_x.symm.trans hP₂_x)
-  have h_supp_sub :
-      (C.divisorOf (algebraMap C.CoordinateRing C.FunctionField u)).support ⊆ S := by
-    intro P hP
-    have h_ne_zero :
-        C.divisorOf (algebraMap C.CoordinateRing C.FunctionField u) P ≠ 0 :=
-      Finsupp.mem_support_iff.mp hP
-    have h_ord_ne :
-        C.ord_P P (algebraMap C.CoordinateRing C.FunctionField u) ≠ 0 := by
-      intro h_eq
-      apply h_ne_zero
-      rw [SmoothPlaneCurve.divisorOf_apply, h_eq]; rfl
-    have h_u_mem : u ∈ C.maximalIdealAt P :=
-      (C.ord_P_algebraMap_ne_zero_iff_mem_maximalIdealAt hu P).mp h_ord_ne
-    obtain ⟨p, q, hpq⟩ :=
-      WeierstrassCurve.Affine.CoordinateRing.exists_smul_basis_eq u
-    have hPu : Polynomial.eval P.x p + Polynomial.eval P.x q * P.y = 0 := by
-      rw [← C.mem_maximalIdealAt_iff_eval_zero P p q, hpq]
-      exact h_u_mem
-    have h_isRoot : (Algebra.norm (Polynomial F) u).IsRoot P.x := by
-      rw [Polynomial.IsRoot, ← hpq]
-      exact C.norm_eval_at_x_of_zero_at_smoothPoint P p q hPu
-    have hPx_root : P.x ∈ (Algebra.norm (Polynomial F) u).roots :=
-      (Polynomial.mem_roots hNu).mpr h_isRoot
-    rw [hS_def, Finset.mem_biUnion]
-    refine ⟨P.x, Multiset.mem_toFinset.mpr hPx_root, ?_⟩
-    exact (C.smoothPoint_x_preimage_finite P.x).mem_toFinset.mpr rfl
   rw [show (C.divisorOf (algebraMap C.CoordinateRing C.FunctionField u)).degree =
-      ∑ P ∈ S, C.divisorOf (algebraMap C.CoordinateRing C.FunctionField u) P from
-    Finsupp.sum_of_support_subset _ h_supp_sub _ (fun _ _ ↦ rfl)]
-  rw [hS_def, Finset.sum_biUnion h_disjoint]
+      ∑ P ∈ (Algebra.norm (Polynomial F) u).roots.toFinset.biUnion
+          (fun a ↦ (C.smoothPoint_x_preimage_finite a).toFinset),
+        C.divisorOf (algebraMap C.CoordinateRing C.FunctionField u) P from
+    Finsupp.sum_of_support_subset _
+      (C.divisorOf_algMap_support_subset_biUnion_smoothPoint_x_preimage hu hNu)
+      _ (fun _ _ ↦ rfl)]
+  rw [Finset.sum_biUnion (C.pairwiseDisjoint_smoothPoint_x_preimage _)]
   rw [Finset.sum_congr rfl (fun a _ ↦
     C.fiber_sum_divisorOf_algMap_eq_count_norm hu a)]
   exact_mod_cast SmoothPlaneCurve.sum_count_X_sub_C_eq_natDegree (F := F) hNu
