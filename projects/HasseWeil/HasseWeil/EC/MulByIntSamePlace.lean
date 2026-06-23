@@ -706,6 +706,62 @@ private theorem ordAtInfty_mulByInt_rhs_eq_neg_six_aux (ℓ : ℤ) (hℓ : ℓ �
   rw [← step2] at h_lt
   exact ((⟨W⟩ : SmoothPlaneCurve F).ordAtInfty_add_eq_of_lt h_lt).trans step2
 
+/-- Step (a) of `ordAtInfty_mulByInt_y_of_lhs_eq_neg_six_aux`: writing `m = ord_∞ Y`, the
+order of the standard-form LHS being `-6` forces `m ≤ -3` (else every term has order `≥ -4`). -/
+private theorem ordAtInfty_mulByInt_y_of_lhs_eq_neg_six_aux_m_le (ℓ : ℤ) (m : ℤ)
+    (hm : (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty (mulByInt_y W ℓ) = ((m : ℤ) : WithTop ℤ))
+    (h_xy_ord : (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty (mulByInt_x W ℓ * mulByInt_y W ℓ) =
+      (((-2 + m : ℤ)) : WithTop ℤ))
+    (hY_sq_ord : (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty (mulByInt_y W ℓ ^ 2) =
+      ((2 * m : ℤ) : WithTop ℤ))
+    (h_lhs_ord : (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty
+      (mulByInt_y W ℓ ^ 2 + algebraMap F KE W.a₁ * mulByInt_x W ℓ * mulByInt_y W ℓ +
+        algebraMap F KE W.a₃ * mulByInt_y W ℓ) = ((-6 : ℤ) : WithTop ℤ)) :
+    m ≤ -3 := by
+  have ha1xy : algebraMap F KE W.a₁ * mulByInt_x W ℓ * mulByInt_y W ℓ =
+      algebraMap F KE W.a₁ * (mulByInt_x W ℓ * mulByInt_y W ℓ) := by ring
+  by_contra! h_not_le
+  have h_lhs_ge : ((-4 : ℤ) : WithTop ℤ) ≤ (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty
+      (mulByInt_y W ℓ ^ 2 + algebraMap F KE W.a₁ * mulByInt_x W ℓ * mulByInt_y W ℓ +
+        algebraMap F KE W.a₃ * mulByInt_y W ℓ) :=
+    ord_add_ge_of_both_ge_aux' (ord_add_ge_of_both_ge_aux'
+      (by rw [hY_sq_ord]; exact_mod_cast (by lia : (-4 : ℤ) ≤ 2 * m))
+      (ha1xy ▸ ord_algebraMap_mul_ge_aux' W.a₁
+        (by rw [h_xy_ord]; exact_mod_cast (by lia : (-4 : ℤ) ≤ -2 + m))))
+      (ord_algebraMap_mul_ge_aux' W.a₃ (by rw [hm]; exact_mod_cast (by lia : (-4 : ℤ) ≤ m)))
+  rw [h_lhs_ord] at h_lhs_ge
+  exact absurd (by exact_mod_cast h_lhs_ge : (-4 : ℤ) ≤ -6) (by lia)
+
+/-- Step (b) of `ordAtInfty_mulByInt_y_of_lhs_eq_neg_six_aux`: once `m ≤ -3`, the `Y²` term
+strictly dominates the other two LHS terms, so the standard-form LHS has the same order as `Y²`. -/
+private theorem ordAtInfty_mulByInt_y_of_lhs_eq_neg_six_aux_lhs_eq_sq (ℓ : ℤ) (m : ℤ)
+    (hm : (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty (mulByInt_y W ℓ) = ((m : ℤ) : WithTop ℤ))
+    (h_xy_ord : (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty (mulByInt_x W ℓ * mulByInt_y W ℓ) =
+      (((-2 + m : ℤ)) : WithTop ℤ))
+    (hY_sq_ord : (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty (mulByInt_y W ℓ ^ 2) =
+      ((2 * m : ℤ) : WithTop ℤ))
+    (h_m_le : m ≤ -3) :
+    (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty
+      (mulByInt_y W ℓ ^ 2 + algebraMap F KE W.a₁ * mulByInt_x W ℓ * mulByInt_y W ℓ +
+        algebraMap F KE W.a₃ * mulByInt_y W ℓ) =
+      (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty (mulByInt_y W ℓ ^ 2) := by
+  have ha1xy : algebraMap F KE W.a₁ * mulByInt_x W ℓ * mulByInt_y W ℓ =
+      algebraMap F KE W.a₁ * (mulByInt_x W ℓ * mulByInt_y W ℓ) := by ring
+  have h_a1xy_gt : (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty (mulByInt_y W ℓ ^ 2) <
+      (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty
+        (algebraMap F KE W.a₁ * mulByInt_x W ℓ * mulByInt_y W ℓ) := by
+    rw [hY_sq_ord, ha1xy]
+    refine lt_of_lt_of_le ?_ (ord_algebraMap_mul_ge_aux' W.a₁ (le_of_eq h_xy_ord.symm))
+    exact_mod_cast (by lia : (2 * m : ℤ) < -2 + m)
+  have h_a3y_gt : (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty (mulByInt_y W ℓ ^ 2) <
+      (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty
+        (algebraMap F KE W.a₃ * mulByInt_y W ℓ) := by
+    rw [hY_sq_ord]
+    refine lt_of_lt_of_le ?_ (ord_algebraMap_mul_ge_aux' W.a₃ (le_of_eq hm.symm))
+    exact_mod_cast (by lia : (2 * m : ℤ) < m)
+  have h_inner_eq := (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty_add_eq_of_lt h_a1xy_gt
+  exact ((⟨W⟩ : SmoothPlaneCurve F).ordAtInfty_add_eq_of_lt (h_inner_eq ▸ h_a3y_gt)).trans h_inner_eq
+
 /-- From `ord_∞(Y² + a₁XY + a₃Y) = -6` together with `ord_∞ X = -2` (`X = mulByInt_x ℓ`,
 `Y = mulByInt_y ℓ`), conclude `ord_∞ Y = -3`. Writing `m := ord_∞ Y`, the cross term `a₁XY` and the
 linear term `a₃Y` have order `≥ -2 + m` and `≥ m`; a lower bound forces `m ≤ -3`, after which `Y²`
@@ -735,40 +791,10 @@ private theorem ordAtInfty_mulByInt_y_of_lhs_eq_neg_six_aux (ℓ : ℤ)
       (((-2 + m : ℤ)) : WithTop ℤ) := by
     refine ((⟨W⟩ : SmoothPlaneCurve F).ordAtInfty_mul hX_ne hY_ne).trans ?_
     rw [hX_ord, hm]; push_cast; rfl
-  -- Reshape `a₁·X·Y` as `a₁·(X·Y)` so the constant-multiple order bound applies.
-  have ha1xy : algebraMap F KE W.a₁ * mulByInt_x W ℓ * mulByInt_y W ℓ =
-      algebraMap F KE W.a₁ * (mulByInt_x W ℓ * mulByInt_y W ℓ) := by ring
-  have h_m_le : m ≤ -3 := by
-    by_contra! h_not_le
-    have h_lhs_ge : ((-4 : ℤ) : WithTop ℤ) ≤ (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty
-        (mulByInt_y W ℓ ^ 2 + algebraMap F KE W.a₁ * mulByInt_x W ℓ * mulByInt_y W ℓ +
-          algebraMap F KE W.a₃ * mulByInt_y W ℓ) :=
-      ord_add_ge_of_both_ge_aux' (ord_add_ge_of_both_ge_aux'
-        (by rw [hY_sq_ord]; exact_mod_cast (by lia : (-4 : ℤ) ≤ 2 * m))
-        (ha1xy ▸ ord_algebraMap_mul_ge_aux' W.a₁
-          (by rw [h_xy_ord]; exact_mod_cast (by lia : (-4 : ℤ) ≤ -2 + m))))
-        (ord_algebraMap_mul_ge_aux' W.a₃ (by rw [hm]; exact_mod_cast (by lia : (-4 : ℤ) ≤ m)))
-    rw [h_lhs_ord] at h_lhs_ge
-    exact absurd (by exact_mod_cast h_lhs_ge : (-4 : ℤ) ≤ -6) (by lia)
-  have h_a1xy_gt : (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty (mulByInt_y W ℓ ^ 2) <
-      (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty
-        (algebraMap F KE W.a₁ * mulByInt_x W ℓ * mulByInt_y W ℓ) := by
-    rw [hY_sq_ord, ha1xy]
-    refine lt_of_lt_of_le ?_ (ord_algebraMap_mul_ge_aux' W.a₁ (le_of_eq h_xy_ord.symm))
-    exact_mod_cast (by lia : (2 * m : ℤ) < -2 + m)
-  have h_a3y_gt : (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty (mulByInt_y W ℓ ^ 2) <
-      (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty
-        (algebraMap F KE W.a₃ * mulByInt_y W ℓ) := by
-    rw [hY_sq_ord]
-    refine lt_of_lt_of_le ?_ (ord_algebraMap_mul_ge_aux' W.a₃ (le_of_eq hm.symm))
-    exact_mod_cast (by lia : (2 * m : ℤ) < m)
-  have h_inner_eq := (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty_add_eq_of_lt h_a1xy_gt
-  have h_outer_eq : (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty
-      (mulByInt_y W ℓ ^ 2 +
-        algebraMap F KE W.a₁ * mulByInt_x W ℓ * mulByInt_y W ℓ +
-        algebraMap F KE W.a₃ * mulByInt_y W ℓ) =
-      (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty (mulByInt_y W ℓ ^ 2) :=
-    ((⟨W⟩ : SmoothPlaneCurve F).ordAtInfty_add_eq_of_lt (h_inner_eq ▸ h_a3y_gt)).trans h_inner_eq
+  have h_m_le :=
+    ordAtInfty_mulByInt_y_of_lhs_eq_neg_six_aux_m_le ℓ m hm h_xy_ord hY_sq_ord h_lhs_ord
+  have h_outer_eq :=
+    ordAtInfty_mulByInt_y_of_lhs_eq_neg_six_aux_lhs_eq_sq ℓ m hm h_xy_ord hY_sq_ord h_m_le
   rw [h_outer_eq, hY_sq_ord] at h_lhs_ord
   have h_2m : (2 * m : ℤ) = -6 := by exact_mod_cast h_lhs_ord
   rw [hm]; exact_mod_cast (by lia : m = -3)
