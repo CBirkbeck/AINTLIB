@@ -32,7 +32,7 @@ namespace HeckeRing.GL2.MainLemma
 `(Γ₁(N)).map (mapGL ℝ)` inside `GL(2, ℝ)`. -/
 theorem Gamma1_mapGL_le_of_dvd {M N : ℕ} (h : N ∣ M) :
     (Gamma1 M).map (mapGL ℝ) ≤ (Gamma1 N).map (mapGL ℝ) :=
-  Subgroup.map_mono (HeckeRing.GL2.Gamma1_le_of_dvd h)
+  Subgroup.map_mono (Gamma1_le_of_dvd h)
 
 /-- Restriction along `Γ₁(N) ≤ Γ₁(M)` (for `M ∣ N`) carries
 `modFormCharSpace k χ` into `modFormCharSpace k (χ.comp (ZMod.unitsMap h))`,
@@ -64,23 +64,23 @@ theorem heckeT_p_divN_preserves_modFormCharSpace
     (hp : Nat.Prime p) (hpN : ¬ Nat.Coprime p N) (χ : (ZMod N)ˣ →* ℂˣ)
     {f : ModularForm ((Gamma1 N).map (mapGL ℝ)) k}
     (hf : f ∈ modFormCharSpace k χ) :
-    HeckeRing.GL2.heckeT_p_divN k p hp hpN f ∈ modFormCharSpace k χ := by
+    heckeT_p_divN k p hp hpN f ∈ modFormCharSpace k χ := by
   rw [modFormCharSpace_iff_nebentypus] at hf ⊢
   intro g
-  show (HeckeRing.GL2.heckeT_p_ut k p hp.pos ⇑f) ∣[k] mapGL ℝ (g : SL(2, ℤ)) =
-    ↑(χ (Gamma0MapUnits g)) • HeckeRing.GL2.heckeT_p_ut k p hp.pos ⇑f
-  rw [HeckeRing.GL2.heckeT_p_ut_orbit_comm_gamma0_fun k p hp hpN f g]
-  show HeckeRing.GL2.heckeT_p_ut k p hp.pos (⇑f ∣[k] mapGL ℝ (g : SL(2, ℤ))) = _
+  show (heckeT_p_ut k p hp.pos ⇑f) ∣[k] mapGL ℝ (g : SL(2, ℤ)) =
+    ↑(χ (Gamma0MapUnits g)) • heckeT_p_ut k p hp.pos ⇑f
+  rw [heckeT_p_ut_orbit_comm_gamma0_fun k p hp hpN f g]
+  show heckeT_p_ut k p hp.pos (⇑f ∣[k] mapGL ℝ (g : SL(2, ℤ))) = _
   rw [hf g]
   exact DFunLike.ext _ _ fun _ ↦ DFunLike.congr_fun
-    ((HeckeRing.GL2.heckeT_p_divN k p hp hpN).map_smul _ f) _
+    ((heckeT_p_divN k p hp hpN).map_smul _ f) _
 
 private theorem levelRaise_conj_char_eq
     (M : ℕ) [NeZero M] (d : ℕ) [NeZero d] (χ : (ZMod M)ˣ →* ℂˣ)
     (γ' : ↥(Gamma0 (d * M)))
     (hdvd : (d : ℤ) ∣ ((γ' : SL(2, ℤ)) : Matrix (Fin 2) (Fin 2) ℤ) 1 0)
     (h_conj_G0 :
-      (HeckeRing.GL2.levelRaiseConjOfDvd d (γ' : SL(2, ℤ)) hdvd : SL(2, ℤ)) ∈
+      (levelRaiseConjOfDvd d (γ' : SL(2, ℤ)) hdvd : SL(2, ℤ)) ∈
         Gamma0 M) :
     χ (Gamma0MapUnits (⟨_, h_conj_G0⟩ : ↥(Gamma0 M))) =
       (χ.comp (ZMod.unitsMap (Nat.dvd_mul_left M d))) (Gamma0MapUnits γ') := by
@@ -88,9 +88,9 @@ private theorem levelRaise_conj_char_eq
   congr 1
   apply Units.ext
   rw [ZMod.unitsMap_val, Gamma0MapUnits_val, Gamma0MapUnits_val]
-  show (((HeckeRing.GL2.levelRaiseConjOfDvd d (γ' : SL(2, ℤ)) hdvd
+  show (((levelRaiseConjOfDvd d (γ' : SL(2, ℤ)) hdvd
     : SL(2, ℤ)) : Matrix (Fin 2) (Fin 2) ℤ) 1 1 : ZMod M) = _
-  rw [HeckeRing.GL2.levelRaiseConjOfDvd_lower_right]
+  rw [levelRaiseConjOfDvd_lower_right]
   exact (ZMod.cast_intCast (Nat.dvd_mul_left M d)
     (((γ' : SL(2, ℤ)) : Matrix (Fin 2) (Fin 2) ℤ) 1 1)).symm
 
@@ -102,20 +102,20 @@ theorem modularFormLevelRaise_mem_modFormCharSpace
     (M : ℕ) [NeZero M] (d : ℕ) [NeZero d] (k : ℤ) (χ : (ZMod M)ˣ →* ℂˣ)
     {f : ModularForm ((Gamma1 M).map (mapGL ℝ)) k}
     (hf : f ∈ modFormCharSpace k χ) :
-    HeckeRing.GL2.modularFormLevelRaise M d k f ∈
+    modularFormLevelRaise M d k f ∈
       modFormCharSpace k (χ.comp (ZMod.unitsMap (Nat.dvd_mul_left M d))) := by
   rw [modFormCharSpace_iff_nebentypus] at hf ⊢
   intro γ'
   have hdvd : (d : ℤ) ∣ ((γ' : SL(2, ℤ)) : Matrix (Fin 2) (Fin 2) ℤ) 1 0 :=
-    HeckeRing.GL2.Gamma0_dmul_lower_left_dvd d M _ γ'.property
-  rw [HeckeRing.GL2.coe_modularFormLevelRaise,
-    HeckeRing.GL2.slash_mapGL_levelRaiseFun d k _ hdvd]
+    Gamma0_dmul_lower_left_dvd d M _ γ'.property
+  rw [coe_modularFormLevelRaise,
+    slash_mapGL_levelRaiseFun d k _ hdvd]
   have h_conj_G0 :
-      (HeckeRing.GL2.levelRaiseConjOfDvd d (γ' : SL(2, ℤ)) hdvd : SL(2, ℤ)) ∈
+      (levelRaiseConjOfDvd d (γ' : SL(2, ℤ)) hdvd : SL(2, ℤ)) ∈
         Gamma0 M :=
-    HeckeRing.GL2.levelRaiseConjOfDvd_mem_Gamma0 d M _ γ'.property
+    levelRaiseConjOfDvd_mem_Gamma0 d M _ γ'.property
   rw [hf ⟨_, h_conj_G0⟩, levelRaise_conj_char_eq M d χ γ' hdvd h_conj_G0]
   exact DFunLike.ext _ _ fun _ ↦ DFunLike.congr_fun
-    ((HeckeRing.GL2.modularFormLevelRaise M d k).map_smul _ f) _
+    ((modularFormLevelRaise M d k).map_smul _ f) _
 
 end HeckeRing.GL2.MainLemma
