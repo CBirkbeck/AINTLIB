@@ -1,6 +1,7 @@
 /-
-Copyright (c) 2026. All rights reserved.
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
 -/
 import LeanModularForms.ForMathlib.HungerbuhlerWasem.LaurentExtraction
 import LeanModularForms.ForMathlib.HungerbuhlerWasem.SectorCancellation
@@ -461,7 +462,8 @@ private lemma laurent_sum_extend {N M : ℕ} (hNM : N ≤ M) (c : Fin N → ℂ)
         (if hj : j.val < N then c ⟨j.val, hj⟩ else (0 : ℂ)) /
           (z - s) ^ (j.val + 1) := by
   classical
-  have h_emb : Function.Injective (fun k : Fin N ↦ (⟨k.val, lt_of_lt_of_le k.isLt hNM⟩ : Fin M)) := by
+  have h_emb : Function.Injective
+      (fun k : Fin N ↦ (⟨k.val, lt_of_lt_of_le k.isLt hNM⟩ : Fin M)) := by
     intro a b hab; ext; exact Fin.mk.inj_iff.mp hab
   rw [show (∑ j : Fin M, (if hj : j.val < N then c ⟨j.val, hj⟩ else (0 : ℂ)) /
         (z - s) ^ (j.val + 1)) =
