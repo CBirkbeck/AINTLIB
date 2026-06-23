@@ -172,6 +172,82 @@ theorem le_ordAtInfty_algebraMap_mul (c : F) {f : C.FunctionField}
       zero_add]
     exact hb
 
+/-- **Lower bound for the cubic side of a Weierstrass equation**: if
+`ord_∞ X = 2m` with `m ≤ -1`, then the right-hand side
+`X³ + a₂X² + a₄X + a₆` has `ord_∞ ≥ 6m`.  Each summand is bounded below by
+`6m` (`X³` attains it exactly; the lower-degree terms have larger order since
+`m ≤ 0`), and the ultrametric `ordAtInfty_add_ge_min` combines them. -/
+private theorem le_ordAtInfty_weierstrass_rhs {X : C.FunctionField}
+    {a₂ a₄ a₆ : F} {m : ℤ} (hm : m ≤ -1) (hX_ne : X ≠ 0)
+    (hX : C.ordAtInfty X = ((2 * m : ℤ) : WithTop ℤ)) :
+    ((6 * m : ℤ) : WithTop ℤ) ≤ C.ordAtInfty
+      (X ^ 3 + algebraMap F C.FunctionField a₂ * X ^ 2 +
+        algebraMap F C.FunctionField a₄ * X +
+        algebraMap F C.FunctionField a₆) := by
+  have hX3 : C.ordAtInfty (X ^ 3) = ((6 * m : ℤ) : WithTop ℤ) :=
+    (C.ord_pow_concrete hX_ne (2 * m) 3 hX).trans
+      (WithTop.coe_inj.mpr (by push_cast; ring))
+  have hX2 : C.ordAtInfty (X ^ 2) = ((4 * m : ℤ) : WithTop ℤ) :=
+    (C.ord_pow_concrete hX_ne (2 * m) 2 hX).trans
+      (WithTop.coe_inj.mpr (by push_cast; ring))
+  have h_r2 : ((6 * m : ℤ) : WithTop ℤ) ≤ C.ordAtInfty
+      (algebraMap F C.FunctionField a₂ * X ^ 2) :=
+    C.le_ordAtInfty_algebraMap_mul a₂ (le_of_le_of_eq
+      (by exact_mod_cast (by linarith : (6 * m : ℤ) ≤ 4 * m)) hX2.symm)
+  have h_r3 : ((6 * m : ℤ) : WithTop ℤ) ≤ C.ordAtInfty
+      (algebraMap F C.FunctionField a₄ * X) :=
+    C.le_ordAtInfty_algebraMap_mul a₄ (le_of_le_of_eq
+      (by exact_mod_cast (by linarith : (6 * m : ℤ) ≤ 2 * m)) hX.symm)
+  have h_r4 : ((6 * m : ℤ) : WithTop ℤ) ≤ C.ordAtInfty
+      (algebraMap F C.FunctionField a₆) := by
+    rcases eq_or_ne a₆ 0 with rfl | h6
+    · rw [map_zero, C.ordAtInfty_zero]
+      exact le_top
+    · rw [C.ordAtInfty_algebraMap_F_nonzero h6]
+      exact_mod_cast (by linarith : (6 * m : ℤ) ≤ 0)
+  have h12 := le_trans (le_min hX3.symm.le h_r2)
+    (C.ordAtInfty_add_ge_min _ _)
+  have h123 := le_trans (le_min h12 h_r3) (C.ordAtInfty_add_ge_min _ _)
+  exact le_trans (le_min h123 h_r4) (C.ordAtInfty_add_ge_min _ _)
+
+/-- **The `Y²`-term dominates the left side of a Weierstrass equation**: if
+`ord_∞ X = 2m`, `ord_∞ Y = v` with `m ≤ -1` and `v < 3m`, then the left-hand
+side `Y² + a₁XY + a₃Y` has `ord_∞` exactly `2v`.  Since `v < 2m` the term
+`a₁XY` (order `≥ 2m + v`) is strictly above `Y²` (order `2v`), and since
+`v < 0` so is `a₃Y` (order `≥ v`); `ordAtInfty_add_eq_of_lt` then pins the
+sum to `2v`. -/
+private theorem ordAtInfty_weierstrass_lhs_eq {X Y : C.FunctionField}
+    {a₁ a₃ : F} {m v : ℤ} (hm : m ≤ -1) (hv_lt : v < 3 * m)
+    (hX_ne : X ≠ 0) (hY_ne : Y ≠ 0)
+    (hX : C.ordAtInfty X = ((2 * m : ℤ) : WithTop ℤ))
+    (hv : C.ordAtInfty Y = ((v : ℤ) : WithTop ℤ)) :
+    C.ordAtInfty (Y ^ 2 + algebraMap F C.FunctionField a₁ * X * Y +
+        algebraMap F C.FunctionField a₃ * Y) =
+      ((2 * v : ℤ) : WithTop ℤ) := by
+  have hY2 : C.ordAtInfty (Y ^ 2) = ((2 * v : ℤ) : WithTop ℤ) :=
+    (C.ord_pow_concrete hY_ne v 2 hv).trans
+      (WithTop.coe_inj.mpr (by push_cast; ring))
+  have hXY : C.ordAtInfty (X * Y) = ((2 * m + v : ℤ) : WithTop ℤ) := by
+    rw [C.ordAtInfty_mul hX_ne hY_ne, hX, hv, ← WithTop.coe_add]
+  have h_t2 : ((2 * m + v : ℤ) : WithTop ℤ) ≤ C.ordAtInfty
+      (algebraMap F C.FunctionField a₁ * X * Y) := by
+    rw [mul_assoc]
+    exact C.le_ordAtInfty_algebraMap_mul a₁ hXY.symm.le
+  have h_t3 : ((v : ℤ) : WithTop ℤ) ≤ C.ordAtInfty
+      (algebraMap F C.FunctionField a₃ * Y) :=
+    C.le_ordAtInfty_algebraMap_mul a₃ hv.symm.le
+  have hstep1 : C.ordAtInfty (Y ^ 2 +
+      algebraMap F C.FunctionField a₁ * X * Y) =
+      ((2 * v : ℤ) : WithTop ℤ) := by
+    refine (C.ordAtInfty_add_eq_of_lt ?_).trans hY2
+    rw [hY2]
+    refine lt_of_lt_of_le ?_ h_t2
+    exact_mod_cast (by linarith : 2 * v < 2 * m + v)
+  refine (C.ordAtInfty_add_eq_of_lt ?_).trans hstep1
+  rw [hstep1]
+  refine lt_of_lt_of_le ?_ h_t3
+  exact_mod_cast (by linarith : 2 * v < v)
+
 /-- **One-sided `y`-order bound from a Weierstrass-type equation**: if
 `(X, Y)` satisfies `Y² + a₁XY + a₃Y = X³ + a₂X² + a₄X + a₆` over the constant
 field and `ord_∞ X = 2m` with `m ≤ -1`, then `ord_∞ Y ≥ 3m`.
@@ -196,66 +272,15 @@ theorem le_ordAtInfty_y_of_weierstrass {X Y : C.FunctionField}
   have hv_lt : v < 3 * m := by exact_mod_cast hv_lt'
   have hY_ne : Y ≠ 0 :=
     (C.ordAtInfty_eq_top_iff Y).not.mp (ne_of_eq_of_ne hv WithTop.coe_ne_top)
-  -- the right side has order ≥ 6m
-  have hX3 : C.ordAtInfty (X ^ 3) = ((6 * m : ℤ) : WithTop ℤ) :=
-    (C.ord_pow_concrete hX_ne (2 * m) 3 hX).trans
-      (WithTop.coe_inj.mpr (by push_cast; ring))
-  have hX2 : C.ordAtInfty (X ^ 2) = ((4 * m : ℤ) : WithTop ℤ) :=
-    (C.ord_pow_concrete hX_ne (2 * m) 2 hX).trans
-      (WithTop.coe_inj.mpr (by push_cast; ring))
-  have h_r2 : ((6 * m : ℤ) : WithTop ℤ) ≤ C.ordAtInfty
-      (algebraMap F C.FunctionField a₂ * X ^ 2) :=
-    C.le_ordAtInfty_algebraMap_mul a₂ (le_of_le_of_eq
-      (by exact_mod_cast (by linarith : (6 * m : ℤ) ≤ 4 * m)) hX2.symm)
-  have h_r3 : ((6 * m : ℤ) : WithTop ℤ) ≤ C.ordAtInfty
-      (algebraMap F C.FunctionField a₄ * X) :=
-    C.le_ordAtInfty_algebraMap_mul a₄ (le_of_le_of_eq
-      (by exact_mod_cast (by linarith : (6 * m : ℤ) ≤ 2 * m)) hX.symm)
-  have h_r4 : ((6 * m : ℤ) : WithTop ℤ) ≤ C.ordAtInfty
-      (algebraMap F C.FunctionField a₆) := by
-    rcases eq_or_ne a₆ 0 with rfl | h6
-    · rw [map_zero, C.ordAtInfty_zero]
-      exact le_top
-    · rw [C.ordAtInfty_algebraMap_F_nonzero h6]
-      exact_mod_cast (by linarith : (6 * m : ℤ) ≤ 0)
-  have h_rhs : ((6 * m : ℤ) : WithTop ℤ) ≤ C.ordAtInfty
-      (X ^ 3 + algebraMap F C.FunctionField a₂ * X ^ 2 +
-        algebraMap F C.FunctionField a₄ * X +
-        algebraMap F C.FunctionField a₆) := by
-    have h12 := le_trans (le_min hX3.symm.le h_r2)
-      (C.ordAtInfty_add_ge_min _ _)
-    have h123 := le_trans (le_min h12 h_r3) (C.ordAtInfty_add_ge_min _ _)
-    exact le_trans (le_min h123 h_r4) (C.ordAtInfty_add_ge_min _ _)
-  -- the left side has order exactly `2v < 6m`
-  have hY2 : C.ordAtInfty (Y ^ 2) = ((2 * v : ℤ) : WithTop ℤ) :=
-    (C.ord_pow_concrete hY_ne v 2 hv).trans
-      (WithTop.coe_inj.mpr (by push_cast; ring))
-  have hXY : C.ordAtInfty (X * Y) = ((2 * m + v : ℤ) : WithTop ℤ) := by
-    rw [C.ordAtInfty_mul hX_ne hY_ne, hX, hv, ← WithTop.coe_add]
-  have h_t2 : ((2 * m + v : ℤ) : WithTop ℤ) ≤ C.ordAtInfty
-      (algebraMap F C.FunctionField a₁ * X * Y) := by
-    rw [mul_assoc]
-    exact C.le_ordAtInfty_algebraMap_mul a₁ hXY.symm.le
-  have h_t3 : ((v : ℤ) : WithTop ℤ) ≤ C.ordAtInfty
-      (algebraMap F C.FunctionField a₃ * Y) :=
-    C.le_ordAtInfty_algebraMap_mul a₃ hv.symm.le
-  have hstep1 : C.ordAtInfty (Y ^ 2 +
-      algebraMap F C.FunctionField a₁ * X * Y) =
-      ((2 * v : ℤ) : WithTop ℤ) := by
-    refine (C.ordAtInfty_add_eq_of_lt ?_).trans hY2
-    rw [hY2]
-    refine lt_of_lt_of_le ?_ h_t2
-    exact_mod_cast (by linarith : 2 * v < 2 * m + v)
-  have hstep2 : C.ordAtInfty (Y ^ 2 +
-      algebraMap F C.FunctionField a₁ * X * Y +
-      algebraMap F C.FunctionField a₃ * Y) =
-      ((2 * v : ℤ) : WithTop ℤ) := by
-    refine (C.ordAtInfty_add_eq_of_lt ?_).trans hstep1
-    rw [hstep1]
-    refine lt_of_lt_of_le ?_ h_t3
-    exact_mod_cast (by linarith : 2 * v < v)
-  rw [h_eq] at hstep2
-  rw [hstep2] at h_rhs
+  -- the cubic right side has order `≥ 6m`
+  have h_rhs := C.le_ordAtInfty_weierstrass_rhs (a₂ := a₂) (a₄ := a₄)
+    (a₆ := a₆) hm hX_ne hX
+  -- the left side has order exactly `2v`, where the `Y²` term dominates
+  have hlhs := C.ordAtInfty_weierstrass_lhs_eq (a₁ := a₁) (a₃ := a₃)
+    hm hv_lt hX_ne hY_ne hX hv
+  -- the equation `h_eq` forces `2v = ord(LHS) = ord(RHS) ≥ 6m`, contradicting `v < 3m`
+  rw [h_eq] at hlhs
+  rw [hlhs] at h_rhs
   have : (6 * m : ℤ) ≤ 2 * v := by exact_mod_cast h_rhs
   linarith
 
