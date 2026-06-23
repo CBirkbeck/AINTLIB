@@ -27,6 +27,11 @@ on each segment, and sum via `intervalIntegral.sum_integral_adjacent_intervals`.
 
 * `Complex.contourIntegral_inv_eq_sum_log_segRatio` — the contour integral of
   `(z - w)⁻¹` along `γ` equals a sum of complex logs of segment ratios.
+* `Complex.hasGeneralizedWindingNumber_eq_arg_diff_W1_closed` — (W-2) the winding number of a
+  closed `γ` around `w` equals `(θ(1) - θ(0)) / (2π)` via the continuous arg lift.
+* `Complex.hasGeneralizedWindingNumber_integer_of_closed` — (W-3) that winding number is an integer.
+* `Complex.generalizedWindingNumber_locally_const_of_closed` — (W-4) the winding number is
+  locally constant in `w`.
 -/
 
 open Set MeasureTheory
