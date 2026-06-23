@@ -2102,18 +2102,41 @@ theorem divisorOf_algMap_degree_eq_natDegree_norm
     C.fiber_sum_divisorOf_algMap_eq_count_norm hu a)]
   exact_mod_cast SmoothPlaneCurve.sum_count_X_sub_C_eq_natDegree (F := F) hNu
 
-/-- **Helper B (full unconditional form)**: under `[IsAlgClosed F]` +
-    `[C.toAffine.IsElliptic]` + `[IsIntegrallyClosed C.CoordinateRing]`, for any
-    `f ∈ F(C)`, `(C.divisorOf f).degree = intDegree (C.normAsRatFunc f)`. -/
-theorem helperB
+/-- **Helper B, zero case**: the affine divisor degree of `0` equals the
+    `intDegree` of `normAsRatFunc 0` (both sides vanish). The `f = 0` branch of
+    `helperB`, isolated as an unconditional fact. -/
+private theorem divisorOf_degree_eq_intDegree_normAsRatFunc_zero :
+    (C.divisorOf (0 : C.FunctionField)).degree =
+      ((C.normAsRatFunc (0 : C.FunctionField)).intDegree : ℤ) := by
+  rw [C.divisorOf_zero, Divisor.degree_zero, C.normAsRatFunc_zero,
+    RatFunc.intDegree_zero]
+
+/-- **Helper B, algebra-map atom in `degree = intDegree` shape**: for nonzero
+    `u : C.CoordinateRing`, the affine divisor degree of `algMap u` equals the
+    `intDegree` of `normAsRatFunc (algMap u)`. Rephrases
+    `divisorOf_algMap_degree_eq_natDegree_norm` through
+    `intDegree_normAsRatFunc_algebraMap` so it matches the `helperB` conclusion
+    shape; this is the building block applied to both numerator and denominator
+    in the general case. -/
+private theorem divisorOf_algMap_degree_eq_intDegree_normAsRatFunc
     [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
-    (f : C.FunctionField) :
+    {u : C.CoordinateRing} (hu : u ≠ 0) :
+    (C.divisorOf (algebraMap C.CoordinateRing C.FunctionField u)).degree =
+      ((C.normAsRatFunc
+        (algebraMap C.CoordinateRing C.FunctionField u)).intDegree : ℤ) := by
+  rw [C.divisorOf_algMap_degree_eq_natDegree_norm hu,
+    C.intDegree_normAsRatFunc_algebraMap u]
+
+/-- **Helper B, nonzero case**: for `f ≠ 0`, the affine divisor degree of `f`
+    equals the `intDegree` of `normAsRatFunc f`. Writes `f = u / v` with
+    `u, v : C.CoordinateRing`, splits both sides multiplicatively
+    (`divisorOf_mul`/`divisorOf_inv` and `normAsRatFunc_mul`/`normAsRatFunc_inv`
+    against `intDegree_mul`/`intDegree_inv`), and reduces to the algebra-map atom
+    `divisorOf_algMap_degree_eq_intDegree_normAsRatFunc` on `u` and `v`. -/
+private theorem divisorOf_degree_eq_intDegree_normAsRatFunc_of_ne_zero
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    {f : C.FunctionField} (hf : f ≠ 0) :
     (C.divisorOf f).degree = ((C.normAsRatFunc f).intDegree : ℤ) := by
-  classical
-  by_cases hf : f = 0
-  · subst hf
-    rw [C.divisorOf_zero, Divisor.degree_zero, C.normAsRatFunc_zero,
-      RatFunc.intDegree_zero]
   obtain ⟨u, v, hv_mem, h_eq⟩ :=
     IsFractionRing.div_surjective (A := C.CoordinateRing) f
   have hv_ne : v ≠ 0 := nonZeroDivisors.ne_zero hv_mem
@@ -2140,10 +2163,20 @@ theorem helperB
     (C.normAsRatFunc_eq_zero_iff _).not.mpr h_alg_v_ne
   rw [RatFunc.intDegree_mul hN_alg_u_ne (inv_ne_zero hN_alg_v_ne),
     RatFunc.intDegree_inv]
-  rw [C.divisorOf_algMap_degree_eq_natDegree_norm hu_ne,
-    C.divisorOf_algMap_degree_eq_natDegree_norm hv_ne,
-    ← C.intDegree_normAsRatFunc_algebraMap u,
-    ← C.intDegree_normAsRatFunc_algebraMap v]
+  rw [C.divisorOf_algMap_degree_eq_intDegree_normAsRatFunc hu_ne,
+    C.divisorOf_algMap_degree_eq_intDegree_normAsRatFunc hv_ne]
+
+/-- **Helper B (full unconditional form)**: under `[IsAlgClosed F]` +
+    `[C.toAffine.IsElliptic]` + `[IsIntegrallyClosed C.CoordinateRing]`, for any
+    `f ∈ F(C)`, `(C.divisorOf f).degree = intDegree (C.normAsRatFunc f)`. -/
+theorem helperB
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    (f : C.FunctionField) :
+    (C.divisorOf f).degree = ((C.normAsRatFunc f).intDegree : ℤ) := by
+  by_cases hf : f = 0
+  · subst hf
+    exact C.divisorOf_degree_eq_intDegree_normAsRatFunc_zero
+  · exact C.divisorOf_degree_eq_intDegree_normAsRatFunc_of_ne_zero hf
 
 /-- **Silverman II.3.1(b) unconditional**: for any `f : C.FunctionField` under
     `[IsAlgClosed F]` + `[C.toAffine.IsElliptic]` +
