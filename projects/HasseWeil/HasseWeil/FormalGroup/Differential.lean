@@ -523,8 +523,150 @@ private theorem antidiag_term_vanish (F : FormalGroup R) (d n : ℕ)
       fin_cases i <;> simp_all [Finsupp.single_eq_same]
     rw [he2eq, coeff_runit_pow, if_neg (fun h ↦ hB ⟨by omega, h⟩), mul_zero]
 
+-- Sub-lemma: the antidiagonal sum for `coeff_{(1,n)} (F^d * F)` collapses to the two
+-- surviving terms — pair A `(single 1 1, single 0 1 + single 1 (n-1))` and pair B
+-- `(single 0 1 + single 1 (n-d), single 1 d)` — every other term vanishing by
+-- `antidiag_term_vanish`. This is the combinatorial core of the `succ` step of
+-- `coeff_10_FG_pow`.
+set_option maxHeartbeats 800000 in
+private theorem coeff_10_FG_pow_antidiag_split (F : FormalGroup R) {d n : ℕ}
+    (hn1 : 1 ≤ n) (hdn : d ≤ n) :
+    ∑ p ∈ Finset.antidiagonal
+        (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) n),
+        MvPowerSeries.coeff p.1 F.toSeries *
+          MvPowerSeries.coeff p.2 (F.toSeries ^ d) =
+      MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) 1) F.toSeries *
+        MvPowerSeries.coeff
+          (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) (n - 1))
+          (F.toSeries ^ d) +
+      MvPowerSeries.coeff
+        (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) (n - d))
+        F.toSeries *
+        MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) d) (F.toSeries ^ d) := by
+  have hA_mem : (Finsupp.single (1 : Fin 2) 1,
+      Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) (n - 1)) ∈
+      Finset.antidiagonal
+        (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) n) := by
+    rw [Finset.mem_antidiagonal]; ext i; fin_cases i
+    · simp [Finsupp.add_apply, Finsupp.single_eq_same]
+    · simp [Finsupp.add_apply, Finsupp.single_eq_same]; omega
+  have hB_mem : (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) (n - d),
+      Finsupp.single (1 : Fin 2) d) ∈
+      Finset.antidiagonal
+        (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) n) := by
+    rw [Finset.mem_antidiagonal]; ext i; fin_cases i
+    · simp [Finsupp.add_apply, Finsupp.single_eq_same]
+    · simp [Finsupp.add_apply, Finsupp.single_eq_same]; omega
+  have hAB_ne : (Finsupp.single (1 : Fin 2) 1,
+      Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) (n - 1)) ≠
+      (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) (n - d),
+       Finsupp.single (1 : Fin 2) d) := by
+    intro h; have := congr_arg Prod.fst h; simp only at this
+    exact absurd (DFunLike.congr_fun this 0) (by
+      simp [Finsupp.add_apply, Finsupp.single_eq_same])
+  -- Step 1: extract pair A
+  rw [← Finset.add_sum_erase _
+    (fun p : (Fin 2 →₀ ℕ) × (Fin 2 →₀ ℕ) ↦
+      MvPowerSeries.coeff p.1 F.toSeries *
+        MvPowerSeries.coeff p.2 (F.toSeries ^ d))
+    hA_mem]
+  congr 1
+  -- Step 2: extract pair B from the erased sum
+  rw [← Finset.add_sum_erase _
+    (fun p : (Fin 2 →₀ ℕ) × (Fin 2 →₀ ℕ) ↦
+      MvPowerSeries.coeff p.1 F.toSeries *
+        MvPowerSeries.coeff p.2 (F.toSeries ^ d))
+    (Finset.mem_erase.mpr ⟨hAB_ne.symm, hB_mem⟩)]
+  -- Step 3: show the remaining sum is 0
+  suffices hzero : ∀ p ∈ ((Finset.antidiagonal
+      (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) n)).erase
+      (Finsupp.single (1 : Fin 2) 1,
+       Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) (n - 1))).erase
+      (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) (n - d),
+       Finsupp.single (1 : Fin 2) d),
+      MvPowerSeries.coeff p.1 F.toSeries *
+        MvPowerSeries.coeff p.2 (F.toSeries ^ d) = 0 by
+    rw [Finset.sum_eq_zero hzero, add_zero]
+  intro ⟨e1, e2⟩ he
+  rw [Finset.mem_erase] at he
+  obtain ⟨hneB, he'⟩ := he
+  rw [Finset.mem_erase] at he'
+  obtain ⟨hneA, hmem⟩ := he'
+  rw [Finset.mem_antidiagonal] at hmem
+  apply antidiag_term_vanish F d n e1 e2 hmem
+  · -- Not pair A
+    intro ⟨h10, h11⟩; apply hneA
+    have h0sum := DFunLike.congr_fun hmem 0
+    simp [Finsupp.add_apply, Finsupp.single_eq_same] at h0sum
+    have h1sum := DFunLike.congr_fun hmem 1
+    simp [Finsupp.add_apply, Finsupp.single_eq_same] at h1sum
+    exact Prod.ext
+      (Finsupp.ext fun i ↦ by fin_cases i <;>
+        simp_all [Finsupp.single_eq_same])
+      (Finsupp.ext fun i ↦ by fin_cases i <;>
+        simp_all [Finsupp.add_apply, Finsupp.single_eq_same,
+          Finsupp.single_eq_of_ne (show (1 : Fin 2) ≠ 0 by decide),
+          Finsupp.single_eq_of_ne (show (0 : Fin 2) ≠ 1 by decide)]; omega)
+  · -- Not pair B
+    intro ⟨h10, h21⟩; apply hneB
+    have h1sum := DFunLike.congr_fun hmem 1
+    simp [Finsupp.add_apply, Finsupp.single_eq_same] at h1sum
+    exact Prod.ext
+      (Finsupp.ext fun i ↦ by fin_cases i <;>
+        simp_all [Finsupp.add_apply, Finsupp.single_eq_same,
+          Finsupp.single_eq_of_ne (show (1 : Fin 2) ≠ 0 by decide),
+          Finsupp.single_eq_of_ne (show (0 : Fin 2) ≠ 1 by decide)]; omega)
+      (Finsupp.ext fun i ↦ by
+        fin_cases i
+        · simp
+          have h0sum := DFunLike.congr_fun hmem 0
+          simp [Finsupp.add_apply, Finsupp.single_eq_same] at h0sum
+          omega
+        · simp [Finsupp.single_eq_same, h21])
+
+-- Sub-lemma: the `n = 0` branch of the `succ` step of `coeff_10_FG_pow` (where
+-- `d = 0` too, after `pow_zero`/cast normalisation) — the antidiagonal sum for
+-- `coeff_{(1,0)} (1 * F)` reduces to its single surviving term `(single 0 1, 0)`,
+-- giving `coeff_0 (dX_at_zero F)`.
+private theorem coeff_10_FG_pow_succ_zero (F : FormalGroup R) :
+    ∑ p ∈ Finset.antidiagonal
+        (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) 0),
+        MvPowerSeries.coeff p.1 F.toSeries *
+          MvPowerSeries.coeff p.2 (1 : MvPowerSeries (Fin 2) R) =
+      PowerSeries.coeff 0 F.dX_at_zero := by
+  rw [Finset.sum_eq_single (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) 0, 0)]
+  · simp only [MvPowerSeries.coeff_one, mul_one, Finsupp.single_zero, add_zero, ite_true]
+    rw [FormalGroup.dX_at_zero, PowerSeries.coeff_mk]
+    simp only [Finsupp.single_zero, add_zero]
+  · intro ⟨e1, e2⟩ hmem hne
+    rw [MvPowerSeries.coeff_one]
+    split_ifs with h
+    · subst h; exfalso; apply hne
+      rw [Finset.mem_antidiagonal] at hmem
+      ext1 <;> simp_all [add_zero]
+    · exact mul_zero _
+  · intro hmem; exfalso; apply hmem
+    rw [Finset.mem_antidiagonal]; simp
+
+-- Sub-lemma: the `d + 1 > n + 1` branch of `coeff_10_FG_pow` — the coefficient of
+-- `X¹Yⁿ` in `F^(d+1)` vanishes, since `F^(d+1)` has constant coefficient nilpotent
+-- of order ≤ 1 < d + 1 = degree of the index.
+private theorem coeff_10_FG_pow_succ_vanish (F : FormalGroup R) {d n : ℕ}
+    (hdn : ¬ d + 1 ≤ n + 1) :
+    MvPowerSeries.coeff
+      (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) n)
+      (F.toSeries ^ (d + 1)) = 0 := by
+  apply MvPowerSeries.coeff_eq_zero_of_constantCoeff_nilpotent (m := 1)
+  · rw [pow_one, FG.constantCoeff_FG_toSeries]
+  · rw [map_add]; simp only [Finsupp.degree_apply]
+    rw [Finsupp.support_single _ (by norm_num : (1 : ℕ) ≠ 0)]
+    simp only [Finset.sum_singleton, Finsupp.single_eq_same]
+    by_cases hn0 : n = 0
+    · subst hn0; simp; omega
+    · rw [Finsupp.support_single _ hn0, Finset.sum_singleton,
+        Finsupp.single_eq_same]; omega
+
 -- Sub-lemma: coeff_{(1,n)} (F^d) = d * coeff_{n+1-d} (dX_at_zero F) when d ≤ n+1
-set_option maxHeartbeats 6400000 in
 private theorem coeff_10_FG_pow (F : FormalGroup R) :
     ∀ (d n : ℕ),
     MvPowerSeries.coeff
@@ -557,30 +699,12 @@ private theorem coeff_10_FG_pow (F : FormalGroup R) :
       --   value: coeff_{(1,n-d)} F * 1 = coeff_{n-d}(dxF)
       -- We handle separately whether n = 0 (pair A doesn't exist) or n ≥ 1.
       by_cases hn : n = 0
-      · -- n = 0, d = 0: the sum reduces to a single term
+      · -- n = 0, d = 0: the sum reduces to a single term (`coeff_10_FG_pow_succ_zero`)
         subst hn
         have hd0 : d = 0 := by omega
         subst hd0
-        -- After subst, goal should be about coeff_{(1,0)} (F * 1) or similar
-        -- After subst, goal:
-        -- Σ_{p ∈ antidiag} coeff p.1 F * coeff p.2 (F^0) = ↑(0+1) * coeff_{0+1-(0+1)} dxF
         simp only [pow_zero, Nat.zero_add, Nat.sub_self, Nat.cast_one, one_mul]
-        -- Goal: Σ_{x ∈ antidiag} coeff x.1 F * coeff x.2 1 = coeff_0 dxF
-        -- The only nonzero term has x.2 = 0, so x.1 = single 0 1 + single 1 0.
-        -- Use sum_eq_single to isolate it.
-        rw [Finset.sum_eq_single (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) 0, 0)]
-        · simp only [MvPowerSeries.coeff_one, mul_one, Finsupp.single_zero, add_zero, ite_true]
-          rw [FormalGroup.dX_at_zero, PowerSeries.coeff_mk]
-          simp only [Finsupp.single_zero, add_zero]
-        · intro ⟨e1, e2⟩ hmem hne
-          rw [MvPowerSeries.coeff_one]
-          split_ifs with h
-          · subst h; exfalso; apply hne
-            rw [Finset.mem_antidiagonal] at hmem
-            ext1 <;> simp_all [add_zero]
-          · exact mul_zero _
-        · intro hmem; exfalso; apply hmem
-          rw [Finset.mem_antidiagonal]; simp
+        exact coeff_10_FG_pow_succ_zero F
       · -- n ≥ 1: both pair A and pair B contribute
         have hn1 : 1 ≤ n := by omega
         -- We need the sum to equal (d+1) * coeff_{n-d}(dxF)
@@ -589,29 +713,6 @@ private theorem coeff_10_FG_pow (F : FormalGroup R) :
         --   = d * coeff_{n-d}(dxF) [since (n-1)+1-d = n-d when d ≤ n, and d ≤ (n-1)+1 iff d ≤ n]
         -- pair B contributes: coeff_{(1,n-d)} F = coeff_{n-d}(dxF)
         -- Total: (d+1) * coeff_{n-d}(dxF) ✓
-        -- First, show the sum equals pair A value + pair B value
-        -- using sum_eq_add for two distinguished elements
-        have hA_mem : (Finsupp.single (1 : Fin 2) 1,
-            Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) (n - 1)) ∈
-            Finset.antidiagonal
-              (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) n) := by
-          rw [Finset.mem_antidiagonal]; ext i; fin_cases i
-          · simp [Finsupp.add_apply, Finsupp.single_eq_same]
-          · simp [Finsupp.add_apply, Finsupp.single_eq_same]; omega
-        have hB_mem : (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) (n - d),
-            Finsupp.single (1 : Fin 2) d) ∈
-            Finset.antidiagonal
-              (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) n) := by
-          rw [Finset.mem_antidiagonal]; ext i; fin_cases i
-          · simp [Finsupp.add_apply, Finsupp.single_eq_same]
-          · simp [Finsupp.add_apply, Finsupp.single_eq_same]; omega
-        have hAB_ne : (Finsupp.single (1 : Fin 2) 1,
-            Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) (n - 1)) ≠
-            (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) (n - d),
-             Finsupp.single (1 : Fin 2) d) := by
-          intro h; have := congr_arg Prod.fst h; simp only at this
-          exact absurd (DFunLike.congr_fun this 0) (by
-            simp [Finsupp.add_apply, Finsupp.single_eq_same])
         -- Compute pair A value
         have hA_val :
             MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) 1) F.toSeries *
@@ -631,98 +732,18 @@ private theorem coeff_10_FG_pow (F : FormalGroup R) :
             PowerSeries.coeff (n - d) F.dX_at_zero := by
           rw [coeff_runit_pow, if_pos rfl, mul_one, FormalGroup.dX_at_zero,
             PowerSeries.coeff_mk]
-        -- The sum = A_val + B_val (all other terms vanish)
-        -- We show this by computing that for every term in the antidiagonal,
-        -- either it's pair A, pair B, or it's zero.
-        have hsum_eq : ∑ p ∈ Finset.antidiagonal
-            (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) n),
-            MvPowerSeries.coeff p.1 F.toSeries *
-              MvPowerSeries.coeff p.2 (F.toSeries ^ d) =
-            MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) 1) F.toSeries *
-              MvPowerSeries.coeff
-                (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) (n - 1))
-                (F.toSeries ^ d) +
-            MvPowerSeries.coeff
-              (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) (n - d))
-              F.toSeries *
-              MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) d) (F.toSeries ^ d) := by
-          -- Step 1: extract pair A
-          rw [← Finset.add_sum_erase _
-            (fun p : (Fin 2 →₀ ℕ) × (Fin 2 →₀ ℕ) ↦
-              MvPowerSeries.coeff p.1 F.toSeries *
-                MvPowerSeries.coeff p.2 (F.toSeries ^ d))
-            hA_mem]
-          congr 1
-          -- Step 2: extract pair B from the erased sum
-          rw [← Finset.add_sum_erase _
-            (fun p : (Fin 2 →₀ ℕ) × (Fin 2 →₀ ℕ) ↦
-              MvPowerSeries.coeff p.1 F.toSeries *
-                MvPowerSeries.coeff p.2 (F.toSeries ^ d))
-            (Finset.mem_erase.mpr ⟨hAB_ne.symm, hB_mem⟩)]
-          -- Step 3: show the remaining sum is 0
-          suffices hzero : ∀ p ∈ ((Finset.antidiagonal
-              (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) n)).erase
-              (Finsupp.single (1 : Fin 2) 1,
-               Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) (n - 1))).erase
-              (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) (n - d),
-               Finsupp.single (1 : Fin 2) d),
-              MvPowerSeries.coeff p.1 F.toSeries *
-                MvPowerSeries.coeff p.2 (F.toSeries ^ d) = 0 by
-            rw [Finset.sum_eq_zero hzero, add_zero]
-          intro ⟨e1, e2⟩ he
-          rw [Finset.mem_erase] at he
-          obtain ⟨hneB, he'⟩ := he
-          rw [Finset.mem_erase] at he'
-          obtain ⟨hneA, hmem⟩ := he'
-          rw [Finset.mem_antidiagonal] at hmem
-          apply antidiag_term_vanish F d n e1 e2 hmem
-          · -- Not pair A
-            intro ⟨h10, h11⟩; apply hneA
-            have h0sum := DFunLike.congr_fun hmem 0
-            simp [Finsupp.add_apply, Finsupp.single_eq_same] at h0sum
-            have h1sum := DFunLike.congr_fun hmem 1
-            simp [Finsupp.add_apply, Finsupp.single_eq_same] at h1sum
-            exact Prod.ext
-              (Finsupp.ext fun i ↦ by fin_cases i <;>
-                simp_all [Finsupp.single_eq_same])
-              (Finsupp.ext fun i ↦ by fin_cases i <;>
-                simp_all [Finsupp.add_apply, Finsupp.single_eq_same,
-                  Finsupp.single_eq_of_ne (show (1 : Fin 2) ≠ 0 by decide),
-                  Finsupp.single_eq_of_ne (show (0 : Fin 2) ≠ 1 by decide)]; omega)
-          · -- Not pair B
-            intro ⟨h10, h21⟩; apply hneB
-            have h1sum := DFunLike.congr_fun hmem 1
-            simp [Finsupp.add_apply, Finsupp.single_eq_same] at h1sum
-            exact Prod.ext
-              (Finsupp.ext fun i ↦ by fin_cases i <;>
-                simp_all [Finsupp.add_apply, Finsupp.single_eq_same,
-                  Finsupp.single_eq_of_ne (show (1 : Fin 2) ≠ 0 by decide),
-                  Finsupp.single_eq_of_ne (show (0 : Fin 2) ≠ 1 by decide)]; omega)
-              (Finsupp.ext fun i ↦ by
-                fin_cases i
-                · simp
-                  have h0sum := DFunLike.congr_fun hmem 0
-                  simp [Finsupp.add_apply, Finsupp.single_eq_same] at h0sum
-                  omega
-                · simp [Finsupp.single_eq_same, h21])
-        -- The sum equals A_val + B_val = (d+1) * coeff_{n-d} dxF
+        -- The sum = A_val + B_val = (d+1) * coeff_{n-d} dxF
+        -- (the split into the two surviving terms is `coeff_10_FG_pow_antidiag_split`)
         trans ((d : R) * PowerSeries.coeff (n - d) F.dX_at_zero +
           PowerSeries.coeff (n - d) F.dX_at_zero)
         · -- LHS = A_val + B_val
-          have hgoal := hsum_eq; rw [hA_val, hB_val] at hgoal; exact hgoal
+          have hgoal := coeff_10_FG_pow_antidiag_split F hn1 hdn'
+          rw [hA_val, hB_val] at hgoal; exact hgoal
         · -- A_val + B_val = (d+1) * coeff_{n+1-(d+1)} dxF
           rw [show n + 1 - (d + 1) = n - d from by omega]; push_cast; ring
     · -- d + 1 > n + 1: coeff vanishes by nilpotent degree bound
       rw [if_neg hdn]
-      apply MvPowerSeries.coeff_eq_zero_of_constantCoeff_nilpotent (m := 1)
-      · rw [pow_one, FG.constantCoeff_FG_toSeries]
-      · rw [map_add]; simp only [Finsupp.degree_apply]
-        rw [Finsupp.support_single _ (by norm_num : (1 : ℕ) ≠ 0)]
-        simp only [Finset.sum_singleton, Finsupp.single_eq_same]
-        by_cases hn0 : n = 0
-        · subst hn0; simp; omega
-        · rw [Finsupp.support_single _ hn0, Finset.sum_singleton,
-            Finsupp.single_eq_same]; omega
+      exact coeff_10_FG_pow_succ_vanish F hdn
 
 /-- The explicit `Finset` sum that both sides of `coeff_10_lhs` reduce to:
 `Σ_{k=0}^{n} (k+1) · coeff_{k+1}(f) · coeff_{n-k}(F_X(0,T))`. -/
