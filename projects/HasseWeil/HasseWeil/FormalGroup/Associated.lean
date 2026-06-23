@@ -397,6 +397,82 @@ private lemma two_le_sum_of_not_mem_lowDeg {d : Fin 2 →₀ ℕ}
       have hd1 : d 1 = 0 := by omega
       right; left; ext i; fin_cases i <;> simp [hd0', hd1]
 
+omit [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R] [IsLinearTopology R R]
+  [T2Space R] [CompleteSpace R] in
+/-- **Tail-monomial bound.** For `x, y ∈ M^n` with `n ≥ 1`, any monomial
+`x^a · y^b` of total degree `a + b ≥ 2` lies in `M^(n+1)`.
+
+The exponents satisfy `x^a ∈ M^(n·a)` and `y^b ∈ M^(n·b)`, so the product lies in
+`M^(n·a + n·b) = M^(n·(a + b)) ⊆ M^(2n) ⊆ M^(n+1)`. This is the per-term estimate
+for the higher-order tail in `evalAdd_sub_add_mem_pow_succ`. -/
+private theorem mul_pow_mem_maximalIdeal_pow_succ_of_two_le
+    {n a b : ℕ} (hn : 1 ≤ n) (hab : 2 ≤ a + b)
+    {x y : R} (hx : x ∈ (maximalIdeal R) ^ n) (hy : y ∈ (maximalIdeal R) ^ n) :
+    x ^ a * y ^ b ∈ (maximalIdeal R) ^ (n + 1) := by
+  -- x^a ∈ M^(n * a) and y^b ∈ M^(n * b).
+  have hxpow : x ^ a ∈ (maximalIdeal R) ^ (n * a) := by
+    rw [pow_mul]; exact Ideal.pow_mem_pow hx a
+  have hypow : y ^ b ∈ (maximalIdeal R) ^ (n * b) := by
+    rw [pow_mul]; exact Ideal.pow_mem_pow hy b
+  -- Product lies in M^(n*a + n*b) = M^(n*(a + b)).
+  have hprod_mem : x ^ a * y ^ b ∈ (maximalIdeal R) ^ (n * a + n * b) := by
+    rw [Ideal.IsTwoSided.pow_add]
+    exact Ideal.mul_mem_mul hxpow hypow
+  -- M^(n*(a + b)) ⊆ M^(n+1) since n*(a + b) ≥ 2n ≥ n + 1.
+  have hbound : n + 1 ≤ n * a + n * b := by
+    have : n + n ≤ n * a + n * b := by
+      calc n + n = n * 2 := by ring
+        _ ≤ n * (a + b) := Nat.mul_le_mul_left n hab
+        _ = n * a + n * b := by ring
+    omega
+  exact (Ideal.pow_le_pow_right hbound) hprod_mem
+
+omit [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R] [IsLinearTopology R R]
+  [T2Space R] [CompleteSpace R] in
+/-- **Low-degree sum.** The sum of the `eval₂`-term function over the low-degree
+finset `{0, single 0 1, single 1 1}` collapses to `x + y`.
+
+This isolates the use of the unit axioms `constantCoeff F.toSeries = 0` (the
+`d = 0` term vanishes) and `coeff_10 F = coeff_01 F = 1` (the two degree-one
+terms contribute `x` and `y`). It is the "low-degree part" of
+`evalAdd_sub_add_mem_pow_succ`. -/
+private theorem sum_lowDegFinset_eval₂_term_eq
+    (F : FormalGroup R) (x y : maximalIdeal R) :
+    ∑ d ∈ lowDegFinset,
+        (RingHom.id R) (MvPowerSeries.coeff d F.toSeries) *
+          (d.prod fun s e ↦ (![x.1, y.1] : Fin 2 → R) s ^ e) = x.1 + y.1 := by
+  have h01 : (Finsupp.single (0 : Fin 2) 1 : Fin 2 →₀ ℕ) ≠ Finsupp.single 1 1 :=
+    single_zero_ne_single_one
+  rw [lowDegFinset, Finset.sum_insert (by
+        simp [Finset.mem_insert, Finset.mem_singleton, single_zero_one_ne_zero.symm,
+              single_one_one_ne_zero.symm]),
+      Finset.sum_insert (by simp [Finset.mem_singleton, h01]),
+      Finset.sum_singleton]
+  -- Term at d = 0 vanishes (constant coefficient is zero).
+  have hterm_zero :
+      (RingHom.id R) (MvPowerSeries.coeff (0 : Fin 2 →₀ ℕ) F.toSeries) *
+        ((0 : Fin 2 →₀ ℕ).prod fun s e ↦ (![x.1, y.1] : Fin 2 → R) s ^ e) = 0 := by
+    simp only [Finsupp.prod_zero_index, mul_one, RingHom.id_apply]
+    rw [MvPowerSeries.coeff_zero_eq_constantCoeff]
+    exact HasseWeil.FG.constantCoeff_FG_toSeries F
+  -- Term at d = single 0 1 equals x.
+  have hterm_10 :
+      (RingHom.id R) (MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1) F.toSeries) *
+        ((Finsupp.single (0 : Fin 2) 1).prod fun s e ↦
+          (![x.1, y.1] : Fin 2 → R) s ^ e) = x.1 := by
+    simp only [RingHom.id_apply, HasseWeil.FG.FormalGroup.coeff_10,
+      Finsupp.prod_single_index, pow_zero, pow_one,
+      Matrix.cons_val_zero, one_mul]
+  -- Term at d = single 1 1 equals y.
+  have hterm_01 :
+      (RingHom.id R) (MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) 1) F.toSeries) *
+        ((Finsupp.single (1 : Fin 2) 1).prod fun s e ↦
+          (![x.1, y.1] : Fin 2 → R) s ^ e) = y.1 := by
+    simp only [RingHom.id_apply, HasseWeil.FG.FormalGroup.coeff_01,
+      Finsupp.prod_single_index, pow_zero, pow_one,
+      Matrix.cons_val_one, Matrix.cons_val_zero, one_mul]
+  rw [hterm_zero, hterm_10, hterm_01, zero_add]
+
 /-- **The key congruence for the graded isomorphism** (Silverman IV.3.2.a).
 
 For `x, y ∈ M^n` with `n ≥ 1`, the formal-group operation `F(x, y)` differs
@@ -428,31 +504,9 @@ theorem FormalGroup.evalAdd_sub_add_mem_pow_succ
     (RingHom.id R) (MvPowerSeries.coeff d F.toSeries) *
       (d.prod fun s e ↦ (![x.1, y.1] : Fin 2 → R) s ^ e) with hterm
   change F.evalAdd x y - (x.1 + y.1) ∈ _
-  -- Compute ∑ d ∈ lowDegFinset, term d = x + y.
-  have hsum_S : ∑ d ∈ lowDegFinset, term d = x.1 + y.1 := by
-    have h01 : (Finsupp.single (0 : Fin 2) 1 : Fin 2 →₀ ℕ) ≠ Finsupp.single 1 1 :=
-      single_zero_ne_single_one
-    rw [lowDegFinset, Finset.sum_insert (by
-          simp [Finset.mem_insert, Finset.mem_singleton, single_zero_one_ne_zero.symm,
-                single_one_one_ne_zero.symm]),
-        Finset.sum_insert (by simp [Finset.mem_singleton, h01]),
-        Finset.sum_singleton]
-    -- Term at d = 0.
-    have hterm_zero : term 0 = 0 := by
-      simp only [hterm, Finsupp.prod_zero_index, mul_one, RingHom.id_apply]
-      rw [MvPowerSeries.coeff_zero_eq_constantCoeff]
-      exact HasseWeil.FG.constantCoeff_FG_toSeries F
-    -- Term at d = single 0 1.
-    have hterm_10 : term (Finsupp.single (0 : Fin 2) 1) = x.1 := by
-      simp only [hterm, RingHom.id_apply, HasseWeil.FG.FormalGroup.coeff_10,
-        Finsupp.prod_single_index, pow_zero, pow_one,
-        Matrix.cons_val_zero, one_mul]
-    -- Term at d = single 1 1.
-    have hterm_01 : term (Finsupp.single (1 : Fin 2) 1) = y.1 := by
-      simp only [hterm, RingHom.id_apply, HasseWeil.FG.FormalGroup.coeff_01,
-        Finsupp.prod_single_index, pow_zero, pow_one,
-        Matrix.cons_val_one, Matrix.cons_val_zero, one_mul]
-    rw [hterm_zero, hterm_10, hterm_01, zero_add]
+  -- The low-degree part of the sum is `x + y` (unit axioms).
+  have hsum_S : ∑ d ∈ lowDegFinset, term d = x.1 + y.1 :=
+    sum_lowDegFinset_eval₂_term_eq F x y
   -- Shift the tendsto by -(x + y).
   have hsum_term : HasSum term (F.evalAdd x y) := hsum
   have htendsto :
@@ -467,7 +521,7 @@ theorem FormalGroup.evalAdd_sub_add_mem_pow_succ
   have hrewrite : (∑ d ∈ N, term d) - (x.1 + y.1) = ∑ d ∈ N \ lowDegFinset, term d := by
     rw [← hsum_S, ← Finset.sum_sdiff hN, add_sub_cancel_right]
   rw [hrewrite]
-  -- Each term in N \ lowDegFinset lies in M^(n+1).
+  -- Each term in N \ lowDegFinset lies in M^(n+1): it is a higher-order monomial.
   apply ((maximalIdeal R) ^ (n + 1)).sum_mem
   intro d hd
   rw [Finset.mem_sdiff] at hd
@@ -475,29 +529,10 @@ theorem FormalGroup.evalAdd_sub_add_mem_pow_succ
   have hd_sum : 2 ≤ d 0 + d 1 := two_le_sum_of_not_mem_lowDeg hd_not_low
   simp only [hterm, RingHom.id_apply]
   apply ((maximalIdeal R) ^ (n + 1)).mul_mem_left
-  -- Show x^(d 0) * y^(d 1) ∈ M^(n+1).
+  -- Reduce the monomial to `x^(d 0) * y^(d 1)` and apply the tail-monomial bound.
   rw [Finsupp.prod_fintype _ _ (fun i ↦ pow_zero _), Fin.prod_univ_two,
       Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_zero]
-  -- x^(d 0) ∈ M^(n * d 0) and y^(d 1) ∈ M^(n * d 1).
-  have hxpow : x.1 ^ (d 0) ∈ (maximalIdeal R) ^ (n * d 0) := by
-    rw [pow_mul]
-    exact Ideal.pow_mem_pow hx (d 0)
-  have hypow : y.1 ^ (d 1) ∈ (maximalIdeal R) ^ (n * d 1) := by
-    rw [pow_mul]
-    exact Ideal.pow_mem_pow hy (d 1)
-  -- Product lies in M^(n*(d 0) + n*(d 1)) = M^(n*(d 0 + d 1)).
-  have hprod_mem : x.1 ^ (d 0) * y.1 ^ (d 1) ∈
-      (maximalIdeal R) ^ (n * d 0 + n * d 1) := by
-    rw [Ideal.IsTwoSided.pow_add]
-    exact Ideal.mul_mem_mul hxpow hypow
-  -- M^(n*(d 0 + d 1)) ⊆ M^(n+1) since n*(d 0 + d 1) ≥ 2n ≥ n + 1.
-  have hbound : n + 1 ≤ n * d 0 + n * d 1 := by
-    have : n + n ≤ n * d 0 + n * d 1 := by
-      calc n + n = n * 2 := by ring
-        _ ≤ n * (d 0 + d 1) := Nat.mul_le_mul_left n hd_sum
-        _ = n * d 0 + n * d 1 := by ring
-    omega
-  exact (Ideal.pow_le_pow_right hbound) hprod_mem
+  exact mul_pow_mem_maximalIdeal_pow_succ_of_two_le hn hd_sum hx hy
 
 /-- **`evalNeg` inverts `+` modulo `M^(n+1)`** (the additive analogue of the
 graded-isomorphism congruence for negation).
