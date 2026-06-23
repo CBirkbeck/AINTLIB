@@ -18,14 +18,8 @@ and log-derivative FTC. These are the building blocks for computing integrals of
 
 ### Telescoping FTC for log-derivatives
 
-* `ftc_telescope_two` — FTC on two consecutive segments telescopes
-* `ftc_telescope_three` — FTC on three consecutive segments telescopes
-* `ftc_telescope_closed_split` — for closed curves, the full integral telescopes
-  to the log difference at the crossing boundary
 * `ftc_telescope_integrability` — transfer integrability via a.e. agreement
 * `ftc_telescope_transfer` — transfer both integrability and FTC via a.e. agreement
-* `ftc_telescope_piecewise_two` — piecewise FTC with two local comparison functions
-* `ftc_telescope_piecewise_three` — piecewise FTC with three local comparison functions
 
 ### Log-derivative FTC on segments
 
@@ -33,7 +27,6 @@ and log-derivative FTC. These are the building blocks for computing integrals of
 * `integral_logDeriv_eq_log_sub` — `∫ f'/f = log f(b) - log f(a)` in slitPlane
 * `ftc_log_on_segment` — combined integrability + FTC for a single C^1 function
 * `ftc_log_neg_on_segment` — same when `-f` stays in slitPlane
-* `integral_logDeriv_eq_neg_log_sub` — bare FTC when `-f` stays in slitPlane
 * `ftc_log_pieceFM` — combined integrability + FTC when `f` and `g` agree a.e.
 
 ## References
