@@ -212,13 +212,9 @@ private theorem boundary_weight_at
     (h_not_int : ¬(‖(s : ℂ)‖ > 1 ∧ |(s : ℂ).re| < 1/2)) :
     generalizedWindingNumber D.boundary (↑s : ℂ) = -1/2 := by
   have hs_fd := hS s hs
-  have hnorm_ge : 1 ≤ ‖(s : ℂ)‖ :=
-    Complex.norm_def (s : ℂ) ▸ Real.sqrt_one ▸ Real.sqrt_le_sqrt hs_fd.1
-  have h_nsq_ge : Complex.normSq (s : ℂ) ≥ 1 := by
-    rw [Complex.normSq_eq_norm_sq]; nlinarith [hnorm_ge, sq_nonneg (‖(s : ℂ)‖ - 1)]
   exact (D.boundary_winding (↑s) s.2 (hH_above s hs)
     (fun h ↦ hsi (UpperHalfPlane.ext h)) (fun h ↦ hsρ (UpperHalfPlane.ext h))
-    (fun h ↦ hsρ1 (UpperHalfPlane.ext h)) h_not_int h_nsq_ge hs_fd.2).eq
+    (fun h ↦ hsρ1 (UpperHalfPlane.ext h)) h_not_int hs_fd.1 hs_fd.2).eq
 
 private lemma rho_singleton_sum_eq (S : Finset UpperHalfPlane)
     (hS_complete : ∀ p, p ∈ 𝒟 → orderOfVanishingAt' (⇑f) p ≠ 0 → p ∈ S)
