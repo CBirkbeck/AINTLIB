@@ -5018,6 +5018,40 @@ The bridge: given `ord_P P (τ_k f) = ord_{P+k} f` for all `f ≠ 0`,
 conclude pointwise pointValuation equality, hence
 `IsTranslateValuationCompatible`. -/
 
+/-- **`ord_P` equality ⇒ `pointValuation` equality** (generic, two
+(point, function) pairs on a single smooth plane curve). For nonzero `f`
+at `P` and nonzero `g` at `Q`, an equality of orders forces the
+underlying multiplicative valuations to coincide: the order is
+`-(unzero ·).toAdd` on the nonzero locus, so equal orders give equal
+`toAdd`, hence equal `unzero`, hence — re-coercing through
+`WithZero.coe_unzero` — equal valuations. This is the additive-to-
+multiplicative injectivity at the heart of the ord-form bridge. -/
+private theorem pointValuation_eq_of_ord_P_eq
+    {C : SmoothPlaneCurve F} {P Q : C.SmoothPoint}
+    {f g : C.FunctionField} (hf : f ≠ 0) (hg : g ≠ 0)
+    (h_ord : C.ord_P P f = C.ord_P Q g) :
+    C.pointValuation P f = C.pointValuation Q g := by
+  have hv1 : C.pointValuation P f ≠ 0 :=
+    (C.pointValuation P).ne_zero_iff.mpr hf
+  have hv2 : C.pointValuation Q g ≠ 0 :=
+    (C.pointValuation Q).ne_zero_iff.mpr hg
+  have h_def1 : C.ord_P P f =
+      ((-(WithZero.unzero hv1).toAdd : ℤ) : WithTop ℤ) := by
+    unfold SmoothPlaneCurve.ord_P
+    exact dif_neg hv1
+  have h_def2 : C.ord_P Q g =
+      ((-(WithZero.unzero hv2).toAdd : ℤ) : WithTop ℤ) := by
+    unfold SmoothPlaneCurve.ord_P
+    exact dif_neg hv2
+  rw [h_def1, h_def2] at h_ord
+  have h_int_eq : (-(WithZero.unzero hv1).toAdd : ℤ) =
+      (-(WithZero.unzero hv2).toAdd : ℤ) := by
+    exact_mod_cast h_ord
+  have h_unzero_eq : WithZero.unzero hv1 = WithZero.unzero hv2 := by
+    apply Multiplicative.toAdd.injective
+    omega
+  rw [← WithZero.coe_unzero hv1, ← WithZero.coe_unzero hv2, h_unzero_eq]
+
 /-- **Piece 4 (ord-form bridge)**: from `ord_P` agreement on every nonzero
 element, derive `IsTranslateValuationCompatible`. Uses the structural
 relationship between `ord_P` and `pointValuation` (additive log of the
@@ -5047,30 +5081,7 @@ theorem isTranslateValuationCompatible_of_ord_P_eq
       have := (translateAlgEquivOfPoint W k).injective
       apply this
       rw [h_eq, map_zero]
-    have h_ord_eq : (W_smooth W).ord_P P (translateAlgEquivOfPoint W k f) =
-        (W_smooth W).ord_P (P.translate_of_finite k h) f := h_ord f hf
-    have hv1 : (W_smooth W).pointValuation P
-        (translateAlgEquivOfPoint W k f) ≠ 0 :=
-      ((W_smooth W).pointValuation P).ne_zero_iff.mpr hτf_ne
-    have hv2 : (W_smooth W).pointValuation (P.translate_of_finite k h) f ≠ 0 :=
-      ((W_smooth W).pointValuation _).ne_zero_iff.mpr hf
-    have h_def1 : (W_smooth W).ord_P P
-        (translateAlgEquivOfPoint W k f) =
-        ((-(WithZero.unzero hv1).toAdd : ℤ) : WithTop ℤ) := by
-      unfold Curves.SmoothPlaneCurve.ord_P
-      exact dif_neg hv1
-    have h_def2 : (W_smooth W).ord_P (P.translate_of_finite k h) f =
-        ((-(WithZero.unzero hv2).toAdd : ℤ) : WithTop ℤ) := by
-      unfold Curves.SmoothPlaneCurve.ord_P
-      exact dif_neg hv2
-    rw [h_def1, h_def2] at h_ord_eq
-    have h_int_eq : (-(WithZero.unzero hv1).toAdd : ℤ) =
-        (-(WithZero.unzero hv2).toAdd : ℤ) := by
-      exact_mod_cast h_ord_eq
-    have h_unzero_eq : WithZero.unzero hv1 = WithZero.unzero hv2 := by
-      apply Multiplicative.toAdd.injective
-      omega
-    rw [← WithZero.coe_unzero hv1, ← WithZero.coe_unzero hv2, h_unzero_eq]
+    exact pointValuation_eq_of_ord_P_eq hτf_ne hf (h_ord f hf)
 
 /-! ### Modular Step (B'') discharge — Piece 5: clean interface for Worker A
 
