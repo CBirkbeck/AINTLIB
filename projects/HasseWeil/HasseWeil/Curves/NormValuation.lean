@@ -1931,6 +1931,63 @@ theorem sum_count_X_sub_C_eq_natDegree [IsAlgClosed F] [DecidableEq F]
     SmoothPlaneCurve.count_X_sub_C_eq_rootMultiplicity (F := F) hp a)]
   exact Polynomial.sum_rootMultiplicity_eq_natDegree F p
 
+/-- **Primes over `(X-a)` are maximal**: every prime `Q` of `F[C]` in
+    `primesOverFinset (X-a) F[C]` is maximal. Unpacks the `primesOverFinset`
+    membership into `IsPrime` + `LiesOver (X-a)` and feeds it to
+    `isMaximal_of_isPrime_of_liesOver_span_X_sub_C`. The maximality input to the
+    fibre bijection in `fiber_sum_divisorOf_algMap_eq_count_norm`. -/
+private theorem isMaximal_of_mem_primesOverFinset_span_X_sub_C
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    {a : F} {Q : Ideal C.CoordinateRing}
+    (hQ : Q ∈ IsDedekindDomain.primesOverFinset
+      (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))
+      C.CoordinateRing) :
+    Q.IsMaximal := by
+  have hp_ne := span_X_sub_C_ne_bot (F := F) a
+  haveI hp_max := isMaximal_span_X_sub_C (F := F) a
+  have hQ' := (IsDedekindDomain.mem_primesOverFinset_iff
+    (B := C.CoordinateRing) hp_ne).mp hQ
+  exact C.isMaximal_of_isPrime_of_liesOver_span_X_sub_C hQ'.1 hQ'.2
+
+/-- **Smooth points map into `primesOverFinset (X-a)`**: for a smooth point `P`
+    with `P.x = a`, the maximal ideal `maximalIdealAt P` is a prime of `F[C]`
+    lying over `(X-a)`, hence belongs to `primesOverFinset (X-a) F[C]`. The
+    forward map of the fibre bijection in
+    `fiber_sum_divisorOf_algMap_eq_count_norm`. -/
+private theorem maximalIdealAt_mem_primesOverFinset_of_eq_x
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    {a : F} (P : C.SmoothPoint) (hPx : P.x = a) :
+    C.maximalIdealAt P ∈ IsDedekindDomain.primesOverFinset
+      (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))
+      C.CoordinateRing := by
+  have hp_ne := span_X_sub_C_ne_bot (F := F) a
+  haveI hp_max := isMaximal_span_X_sub_C (F := F) a
+  rw [IsDedekindDomain.mem_primesOverFinset_iff (B := C.CoordinateRing) hp_ne]
+  exact ⟨(C.maximalIdealAt_isMaximal P).isPrime,
+    C.maximalIdealAt_liesOver_of_eq_x P hPx⟩
+
+/-- **Pre-images of `primesOverFinset (X-a)` have `x = a`**: if a prime `Q` of
+    `F[C]` lies in `primesOverFinset (X-a) F[C]` and `Q = maximalIdealAt P` for a
+    smooth point `P`, then `P.x = a`. Transports the `LiesOver (X-a)` witness from
+    `Q` to `maximalIdealAt P` and applies
+    `smoothPoint_x_eq_of_liesOver_span_X_sub_C`. The backward map of the fibre
+    bijection in `fiber_sum_divisorOf_algMap_eq_count_norm`. -/
+private theorem smoothPoint_x_eq_of_maximalIdealAt_mem_primesOverFinset
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    {a : F} {Q : Ideal C.CoordinateRing}
+    (hQ : Q ∈ IsDedekindDomain.primesOverFinset
+      (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))
+      C.CoordinateRing)
+    {P : C.SmoothPoint} (hP : C.maximalIdealAt P = Q) :
+    P.x = a := by
+  have hp_ne := span_X_sub_C_ne_bot (F := F) a
+  haveI hp_max := isMaximal_span_X_sub_C (F := F) a
+  have hQ' := (IsDedekindDomain.mem_primesOverFinset_iff
+    (B := C.CoordinateRing) hp_ne).mp hQ
+  refine C.smoothPoint_x_eq_of_liesOver_span_X_sub_C P ?_
+  rw [hP]
+  exact hQ'.2
+
 /-- **Per-fiber sum identity in smooth-point form** (Helper B's per-fiber,
     smooth-point-indexed form): for nonzero `u ∈ F[C]` and `a ∈ F`, the sum
     of the affine divisor's value at smooth points with `x`-coordinate `a`
@@ -1946,23 +2003,8 @@ theorem fiber_sum_divisorOf_algMap_eq_count_norm
         (Ideal.span ({Algebra.norm (Polynomial F) u} : Set (Polynomial F)))).factors :
         ℤ) := by
   classical
-  set p : Ideal (Polynomial F) :=
-    Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)) with hp_def
-  have hp_ne : p ≠ ⊥ := by
-    rw [hp_def, Ne, Ideal.span_singleton_eq_bot]; exact Polynomial.X_sub_C_ne_zero a
-  haveI hp_max : p.IsMaximal := Ideal.Quotient.maximal_of_isField _
-    ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField (Field.toIsField F))
-  have h_isMax_of_primesOver :
-      ∀ Q ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing, Q.IsMaximal := by
-    intro Q hQ
-    have hQ' := (IsDedekindDomain.mem_primesOverFinset_iff (B := C.CoordinateRing) hp_ne).mp hQ
-    refine Ideal.IsPrime.isMaximal hQ'.1 ?_
-    intro h_eq
-    apply hp_ne
-    have h_over : p = Q.under (Polynomial F) := hQ'.2.over
-    rw [h_eq, Ideal.under, Ideal.comap_bot_of_injective _
-      (FaithfulSMul.algebraMap_injective (Polynomial F) C.CoordinateRing)] at h_over
-    exact h_over
+  -- Rewrite each fibre term as a count at `maximalIdealAt P`, then expand the
+  -- right-hand count as a sum of `Q`-adic counts over `primesOverFinset (X-a)`.
   rw [show ∑ P ∈ (C.smoothPoint_x_preimage_finite a).toFinset,
       C.divisorOf (algebraMap C.CoordinateRing C.FunctionField u) P =
       ∑ P ∈ (C.smoothPoint_x_preimage_finite a).toFinset,
@@ -1971,52 +2013,37 @@ theorem fiber_sum_divisorOf_algMap_eq_count_norm
     Finset.sum_congr rfl (fun P _ ↦ C.divisorOf_algebraMap_apply_eq_count P hu)]
   rw [C.count_relNorm_singleton_eq_sum_count_fiber hu a]
   push_cast
+  -- Both sides now sum the same count; reindex along the fibre bijection
+  -- `P ↦ maximalIdealAt P`, with inverse `Q ↦ (a chosen smooth point of `Q`)`.
   refine Finset.sum_bij'
     (i := fun (P : C.SmoothPoint) _ ↦ C.maximalIdealAt P)
     (j := fun (Q : Ideal C.CoordinateRing) hQ ↦
-      (C.exists_smoothPoint_of_isMaximal (h_isMax_of_primesOver Q hQ)).choose)
+      (C.exists_smoothPoint_of_isMaximal
+        (C.isMaximal_of_mem_primesOverFinset_span_X_sub_C hQ)).choose)
     ?_ ?_ ?_ ?_ ?_
-  · intro P hP
-    have hPx : P.x = a := (C.smoothPoint_x_preimage_finite a).mem_toFinset.mp hP
-    rw [IsDedekindDomain.mem_primesOverFinset_iff (B := C.CoordinateRing) hp_ne]
-    refine ⟨(C.maximalIdealAt_isMaximal P).isPrime, ?_⟩
-    exact C.maximalIdealAt_liesOver_of_eq_x P hPx
-  · intro Q hQ
+  · -- `i` lands in `primesOverFinset (X-a)`.
+    intro P hP
+    exact C.maximalIdealAt_mem_primesOverFinset_of_eq_x P
+      ((C.smoothPoint_x_preimage_finite a).mem_toFinset.mp hP)
+  · -- `j` lands in the fibre `{P | P.x = a}`.
+    intro Q hQ
     rw [(C.smoothPoint_x_preimage_finite a).mem_toFinset, Set.mem_setOf_eq]
-    set P' := (C.exists_smoothPoint_of_isMaximal (h_isMax_of_primesOver Q hQ)).choose
-    have hP' : C.maximalIdealAt P' = Q :=
-      (C.exists_smoothPoint_of_isMaximal (h_isMax_of_primesOver Q hQ)).choose_spec
-    have hP'_lies : (C.maximalIdealAt P').LiesOver
-        (Ideal.span ({Polynomial.X - Polynomial.C P'.x} : Set (Polynomial F))) :=
-      C.maximalIdealAt_liesOver P'
-    have h_under_P' : (C.maximalIdealAt P').under (Polynomial F) =
-        Ideal.span ({Polynomial.X - Polynomial.C P'.x} : Set (Polynomial F)) :=
-      hP'_lies.over.symm
-    have hQ' := (IsDedekindDomain.mem_primesOverFinset_iff (B := C.CoordinateRing) hp_ne).mp hQ
-    have h_under_Q : Q.under (Polynomial F) = p := hQ'.2.over.symm
-    rw [hP'] at h_under_P'
-    have h_eq_under : Ideal.span ({Polynomial.X - Polynomial.C P'.x} :
-        Set (Polynomial F)) = p := h_under_P'.symm.trans h_under_Q
-    have h_assoc : Associated (Polynomial.X - Polynomial.C P'.x)
-        (Polynomial.X - Polynomial.C a : Polynomial F) :=
-      Ideal.span_singleton_eq_span_singleton.mp h_eq_under
-    have h_eq2 : (Polynomial.X - Polynomial.C P'.x : Polynomial F) =
-        Polynomial.X - Polynomial.C a :=
-      Polynomial.eq_of_monic_of_associated (Polynomial.monic_X_sub_C _)
-        (Polynomial.monic_X_sub_C _) h_assoc
-    have hCeq : Polynomial.C P'.x = Polynomial.C a := by linear_combination -h_eq2
-    exact Polynomial.C_injective hCeq
-  · intro P hP
+    exact C.smoothPoint_x_eq_of_maximalIdealAt_mem_primesOverFinset hQ
+      (C.exists_smoothPoint_of_isMaximal
+        (C.isMaximal_of_mem_primesOverFinset_span_X_sub_C hQ)).choose_spec
+  · -- `j ∘ i = id`.
+    intro P hP
     apply C.maximalIdealAt_injective
     exact (C.exists_smoothPoint_of_isMaximal
-      (h_isMax_of_primesOver (C.maximalIdealAt P) (by
-        rw [IsDedekindDomain.mem_primesOverFinset_iff (B := C.CoordinateRing) hp_ne]
-        refine ⟨(C.maximalIdealAt_isMaximal P).isPrime, ?_⟩
-        exact C.maximalIdealAt_liesOver_of_eq_x P
+      (C.isMaximal_of_mem_primesOverFinset_span_X_sub_C
+        (C.maximalIdealAt_mem_primesOverFinset_of_eq_x P
           ((C.smoothPoint_x_preimage_finite a).mem_toFinset.mp hP)))).choose_spec
-  · intro Q hQ
-    exact (C.exists_smoothPoint_of_isMaximal (h_isMax_of_primesOver Q hQ)).choose_spec
-  · intros
+  · -- `i ∘ j = id`.
+    intro Q hQ
+    exact (C.exists_smoothPoint_of_isMaximal
+      (C.isMaximal_of_mem_primesOverFinset_span_X_sub_C hQ)).choose_spec
+  · -- Summand equality is definitional.
+    intros
     rfl
 
 /-- **`normAsRatFunc (algMap u)` factors through the polynomial-form norm**: for
