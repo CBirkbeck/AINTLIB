@@ -13,6 +13,15 @@ import LeanModularForms.HeckeRIngs.GL2.Newforms
 
 CuspForm-level preservation lemmas and Miyake's Lemma 4.6.5 (single-prime
 coprime filter and its iterated forms).
+
+## Main results
+
+* `cuspForm_restrictSubgroup_mem_cuspFormCharSpace`,
+  `cuspForm_levelRaise_mem_cuspFormCharSpace` — subgroup-restriction and
+  level-raising preserve the Nebentypus character space.
+* `miyake_4_6_5_iterated_L` — Miyake's Lemma 4.6.5, iterated coprime filter.
+* `miyake_h_form_general` — the general `h`-form construction: a level-`l'² · N`
+  cusp form with `q`-expansion supported on `(n, l') ≠ 1`.
 -/
 
 open CongruenceSubgroup Matrix.SpecialLinearGroup
@@ -237,7 +246,7 @@ private theorem miyake_4_6_5_iterated_helper
           rw [hg'_qexp n, hg_step_qexp n, h_prod_eq]
           exact ite_coprime_filter_compose hq_prime n _ _⟩
     rw [show χ_M.comp (ZMod.unitsMap (dvd_trans hM_dvd_qM hqM_dvd_M')) =
-        (χ_M.comp (ZMod.unitsMap hM_dvd_qM)).comp (ZMod.unitsMap hqM_dvd_M') from by
+        (χ_M.comp (ZMod.unitsMap hM_dvd_qM)).comp (ZMod.unitsMap hqM_dvd_M') by
       rw [MonoidHom.comp_assoc, ZMod.unitsMap_comp]]
     exact hg'_χ
 
@@ -300,7 +309,7 @@ private theorem miyake_4_6_5_single_prime_coprime_to_N
       (cuspForm_restrictSubgroup_mem_cuspFormCharSpace χ hN_dvd_pN hfχ) p hp
       (fun h ↦ hp.coprime_iff_not_dvd.mp h (Nat.dvd_mul_right p N))
   rw [show (χ.comp (ZMod.unitsMap hN_dvd_pN)).comp
-        (ZMod.unitsMap (Nat.dvd_mul_left (p * N) p)) = χ.comp (ZMod.unitsMap hN_dvd_ppN) from by
+        (ZMod.unitsMap (Nat.dvd_mul_left (p * N) p)) = χ.comp (ZMod.unitsMap hN_dvd_ppN) by
       rw [MonoidHom.comp_assoc, ZMod.unitsMap_comp]] at h_g_ppN_χ
   have key : ∀ (inst : NeZero (p * (p * N))) (h : N ∣ p * (p * N)),
       ∃ g : CuspForm (Subgroup.map (mapGL ℝ) (Gamma1 (p * (p * N)))) k,
@@ -361,7 +370,7 @@ private theorem finish_peel_step
     rw [hg'_qexp n, hg_int_qexp n, h_S_prod_split]
     exact ite_coprime_filter_compose hq_prime n _ _⟩
   rw [show χ.comp (ZMod.unitsMap hNM) =
-      (χ.comp (ZMod.unitsMap hNN')).comp (ZMod.unitsMap hN'M) from by
+      (χ.comp (ZMod.unitsMap hNN')).comp (ZMod.unitsMap hN'M) by
     rw [MonoidHom.comp_assoc, ZMod.unitsMap_comp]]
   exact hg'_χ
 
