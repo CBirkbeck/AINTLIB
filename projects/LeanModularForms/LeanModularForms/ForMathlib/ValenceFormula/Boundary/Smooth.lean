@@ -15,8 +15,6 @@ for the fundamental domain boundary.
 
 * `fdBoundary_HCurve` — H-parameterized boundary as `PiecewiseC1Curve`
 * `fdBoundary_HImmersion` — H-parameterized boundary as `PiecewiseC1Immersion`
-* `fdBoundaryCurve` — fixed-height boundary as `PiecewiseC1Curve`
-* `fdBoundaryImmersion` — fixed-height boundary as `PiecewiseC1Immersion`
 -/
 
 open Complex MeasureTheory Set Filter Topology
@@ -553,7 +551,7 @@ lemma fdBoundary_H_deriv_bound_ex {H : ℝ} (hH : Real.sqrt 3 / 2 < H) :
           (lt_of_le_of_ne ht1 (Ne.symm h1)) ht3).deriv]
       simp only [norm_mul, Complex.norm_I, mul_one]
       have hexp : ‖exp ((↑Real.pi * (↑t + 1) / 6) * I)‖ = 1 := by
-        rw [show (↑Real.pi * (↑t + 1) / 6 : ℂ) * I = ↑(Real.pi * (t + 1) / 6) * I from by
+        rw [show (↑Real.pi * (↑t + 1) / 6 : ℂ) * I = ↑(Real.pi * (t + 1) / 6) * I by
           push_cast; ring]
         exact Complex.norm_exp_ofReal_mul_I _
       rw [hexp, one_mul]
