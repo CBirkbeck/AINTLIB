@@ -690,23 +690,23 @@ theorem ord_P_ψ_ff_eq_zero {x y x_Q y_Q : F}
     (((⟨W⟩ : SmoothPlaneCurve F).ord_P_algebraMap_ne_zero_iff_mem_maximalIdealAt hne P).mp h_ne)
 
 omit [DecidableEq F] in
-private theorem ord_P_y_numerator_eq_zero
+/-- The non-constant remainder of `ord_P_y_numerator_eq_zero` lies in `m_P` (`ord_P > 0`):
+given `X` regular and `X ≡ x_Q`, `Y ≡ y_Q` at `P`, the part
+`3(X−x_Q)(X+x_Q) + 2a₂(X−x_Q) − a₁(Y−y_Q)` has positive order. -/
+private theorem ord_P_y_numerator_remainder_pos
     (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPoint) {X Y : KE} {x_Q y_Q : F}
-    (hc : (3 * x_Q ^ 2 + 2 * W.a₂ * x_Q + W.a₄ - W.a₁ * y_Q : F) ≠ 0)
     (hX_reg : (0 : WithTop ℤ) ≤ (⟨W⟩ : SmoothPlaneCurve F).ord_P P X)
     (hX_sub : ((1 : ℤ) : WithTop ℤ) ≤
       (⟨W⟩ : SmoothPlaneCurve F).ord_P P (X - algebraMap F KE x_Q))
     (hY_sub : ((1 : ℤ) : WithTop ℤ) ≤
       (⟨W⟩ : SmoothPlaneCurve F).ord_P P (Y - algebraMap F KE y_Q)) :
-    (⟨W⟩ : SmoothPlaneCurve F).ord_P P
-        (3 * X ^ 2 + 2 * algebraMap F KE W.a₂ * X + algebraMap F KE W.a₄ -
-          algebraMap F KE W.a₁ * Y) = 0 := by
+    (0 : WithTop ℤ) < (⟨W⟩ : SmoothPlaneCurve F).ord_P P
+        (3 * ((X - algebraMap F KE x_Q) * (X + algebraMap F KE x_Q)) +
+          algebraMap F KE (2 * W.a₂) * (X - algebraMap F KE x_Q) -
+          algebraMap F KE W.a₁ * (Y - algebraMap F KE y_Q)) := by
   classical
   set xq := algebraMap F KE x_Q with hxq
   set yq := algebraMap F KE y_Q with hyq
-  have hC_ord : (⟨W⟩ : SmoothPlaneCurve F).ord_P P
-      (algebraMap F KE (3 * x_Q ^ 2 + 2 * W.a₂ * x_Q + W.a₄ - W.a₁ * y_Q)) = 0 :=
-    (⟨W⟩ : SmoothPlaneCurve F).ord_P_algebraMap_F_of_ne_zero hc P
   have hX_xq_reg : (0 : WithTop ℤ) ≤ (⟨W⟩ : SmoothPlaneCurve F).ord_P P (X + xq) := by
     have hxqreg : (0 : WithTop ℤ) ≤ (⟨W⟩ : SmoothPlaneCurve F).ord_P P xq := by
       rw [hxq]; exact ord_P_algebraMap_F_nonneg W P _
@@ -729,16 +729,33 @@ private theorem ord_P_y_numerator_eq_zero
     rw [(⟨W⟩ : SmoothPlaneCurve F).ord_P_mul]
     have hh := add_le_add (ord_P_algebraMap_F_nonneg W P W.a₁) hY_sub
     rwa [zero_add] at hh
-  have hR'_pos : (0 : WithTop ℤ) < (⟨W⟩ : SmoothPlaneCurve F).ord_P P
-      (3 * ((X - xq) * (X + xq)) + algebraMap F KE (2 * W.a₂) * (X - xq) -
-        algebraMap F KE W.a₁ * (Y - yq)) := by
-    refine lt_of_lt_of_le (show (0 : WithTop ℤ) < ((1 : ℤ) : WithTop ℤ) by
-      exact_mod_cast Int.zero_lt_one) ?_
-    rw [sub_eq_add_neg]
-    refine le_trans (le_min (le_trans (le_min ht1 ht2)
-      (SmoothPlaneCurve.ord_P_add_le (P := P) _ _)) ?_)
-      (SmoothPlaneCurve.ord_P_add_le (P := P) _ _)
-    rw [SmoothPlaneCurve.ord_P_neg]; exact ht3
+  refine lt_of_lt_of_le (show (0 : WithTop ℤ) < ((1 : ℤ) : WithTop ℤ) by
+    exact_mod_cast Int.zero_lt_one) ?_
+  rw [sub_eq_add_neg]
+  refine le_trans (le_min (le_trans (le_min ht1 ht2)
+    (SmoothPlaneCurve.ord_P_add_le (P := P) _ _)) ?_)
+    (SmoothPlaneCurve.ord_P_add_le (P := P) _ _)
+  rw [SmoothPlaneCurve.ord_P_neg]; exact ht3
+
+omit [DecidableEq F] in
+private theorem ord_P_y_numerator_eq_zero
+    (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPoint) {X Y : KE} {x_Q y_Q : F}
+    (hc : (3 * x_Q ^ 2 + 2 * W.a₂ * x_Q + W.a₄ - W.a₁ * y_Q : F) ≠ 0)
+    (hX_reg : (0 : WithTop ℤ) ≤ (⟨W⟩ : SmoothPlaneCurve F).ord_P P X)
+    (hX_sub : ((1 : ℤ) : WithTop ℤ) ≤
+      (⟨W⟩ : SmoothPlaneCurve F).ord_P P (X - algebraMap F KE x_Q))
+    (hY_sub : ((1 : ℤ) : WithTop ℤ) ≤
+      (⟨W⟩ : SmoothPlaneCurve F).ord_P P (Y - algebraMap F KE y_Q)) :
+    (⟨W⟩ : SmoothPlaneCurve F).ord_P P
+        (3 * X ^ 2 + 2 * algebraMap F KE W.a₂ * X + algebraMap F KE W.a₄ -
+          algebraMap F KE W.a₁ * Y) = 0 := by
+  classical
+  set xq := algebraMap F KE x_Q with hxq
+  set yq := algebraMap F KE y_Q with hyq
+  have hC_ord : (⟨W⟩ : SmoothPlaneCurve F).ord_P P
+      (algebraMap F KE (3 * x_Q ^ 2 + 2 * W.a₂ * x_Q + W.a₄ - W.a₁ * y_Q)) = 0 :=
+    (⟨W⟩ : SmoothPlaneCurve F).ord_P_algebraMap_F_of_ne_zero hc P
+  have hR'_pos := ord_P_y_numerator_remainder_pos W P hX_reg hX_sub hY_sub
   have hsplit : 3 * X ^ 2 + 2 * algebraMap F KE W.a₂ * X + algebraMap F KE W.a₄ -
         algebraMap F KE W.a₁ * Y =
       algebraMap F KE (3 * x_Q ^ 2 + 2 * W.a₂ * x_Q + W.a₄ - W.a₁ * y_Q) +
