@@ -75,7 +75,7 @@ theorem contourIntegral_smul (c : ℂ) (f : ℂ → ℂ) (γ : PiecewiseC1Path x
 /-- The contour integral of the zero function is zero. -/
 theorem contourIntegral_zero (γ : PiecewiseC1Path x y) :
     contourIntegral (fun _ ↦ 0) γ = 0 := by
-  simp [contourIntegral]
+  simp only [contourIntegral, zero_mul, intervalIntegral.integral_zero]
 
 /-- **Finset sum linearity for contour integrals.** When each integrand
 `contourIntegrand (f i) γ` is interval-integrable on `[0, 1]`,
@@ -87,14 +87,14 @@ theorem contourIntegral_finset_sum {ι : Type*} (s : Finset ι)
       ∑ i ∈ s, contourIntegral (f i) γ := by
   classical
   induction s using Finset.induction_on with
-  | empty => simp [contourIntegral_zero]
+  | empty => simp only [Finset.sum_empty, contourIntegral_zero]
   | @insert j t hi ih =>
     have h_t : ∀ i ∈ t, IntervalIntegrable (contourIntegrand (f i) γ) volume 0 1 :=
       fun i hi ↦ hf i (Finset.mem_insert_of_mem hi)
     have h_t_int : IntervalIntegrable
         (contourIntegrand (fun z ↦ ∑ i ∈ t, f i z) γ) volume 0 1 := by
       refine (IntervalIntegrable.sum t h_t).congr fun u _ ↦ ?_
-      simp [contourIntegrand, Finset.sum_mul]
+      simp only [contourIntegrand, Finset.sum_apply, Finset.sum_mul]
     rw [Finset.sum_insert hi,
         funext (fun z ↦ Finset.sum_insert hi (s := t) (a := j) (f := fun i ↦ f i z)),
         contourIntegral_add (f j) _ γ (hf j (Finset.mem_insert_self _ _)) h_t_int,
