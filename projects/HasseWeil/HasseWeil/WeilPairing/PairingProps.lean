@@ -77,20 +77,12 @@ theorem bilinDivisor_isPrincipal (T₁ T₂ : W.toAffine.Point) :
           Finsupp.single T₂.toProjectiveSmoothPoint 1 +
         Finsupp.single (0 : W.toAffine.Point).toProjectiveSmoothPoint 1) := by
   refine projIsPrincipal_of_degZero_of_sigma_eq_zero _ ?_ ?_
-  · rw [← Curves.ProjectiveDivisor.degreeHom_apply, map_add, map_sub, map_sub,
-      Curves.ProjectiveDivisor.degreeHom_apply, Curves.ProjectiveDivisor.degreeHom_apply,
-      Curves.ProjectiveDivisor.degreeHom_apply, Curves.ProjectiveDivisor.degreeHom_apply,
-      degree_single, degree_single, degree_single, degree_single]
+  · rw [← Curves.ProjectiveDivisor.degreeHom_apply, map_add, map_sub, map_sub]
+    simp only [Curves.ProjectiveDivisor.degreeHom_apply, degree_single]
     ring
-  · rw [Curves.projectiveDivisorSum_add, Curves.projectiveDivisorSum_sub,
-      Curves.projectiveDivisorSum_sub, Curves.projectiveDivisorSum_single,
-      Curves.projectiveDivisorSum_single, Curves.projectiveDivisorSum_single,
-      Curves.projectiveDivisorSum_single,
-      Affine.Point.toProjectiveSmoothPoint_toAffinePoint,
-      Affine.Point.toProjectiveSmoothPoint_toAffinePoint,
-      Affine.Point.toProjectiveSmoothPoint_toAffinePoint,
-      Affine.Point.toProjectiveSmoothPoint_toAffinePoint]
-    simp only [one_zsmul, smul_zero]
+  · simp only [Curves.projectiveDivisorSum_add, Curves.projectiveDivisorSum_sub,
+      Curves.projectiveDivisorSum_single, Affine.Point.toProjectiveSmoothPoint_toAffinePoint,
+      one_zsmul, smul_zero]
     abel
 
 omit [IsIntegrallyClosed (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing] [IsAlgClosed F] in
