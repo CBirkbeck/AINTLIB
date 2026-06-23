@@ -2545,6 +2545,91 @@ theorem algebraMap_a₁X_plus_a₃ :
     intro c; rw [Polynomial.C_eq_algebraMap, ← IsScalarTower.algebraMap_apply]
   rw [map_add, map_mul, h_C, h_C, h_x_alg]
 
+/-- Helper for Piece 3c: the σ-equation as a vanishing `{1, Y}`-decomposition.
+
+If `f = a • 1 + b • Y` is fixed by `σ = (mulByInt W (-1)).pullback`, then applying
+σ (which fixes `algebraMap` images and sends `Y ↦ -Y - a₁·x - a₃`) and rearranging
+against the original decomposition yields
+`(b·(a₁X+a₃)) • 1 + (2b) • Y = 0` in the `Frac(K[X])`-basis `{1, Y}` of `KE`. -/
+private lemma sigma_fixed_decomp_coeffs_vanish {a b : FractionRing (Polynomial K)}
+    {f : KE} (h_fixed : (mulByInt W.toAffine (-1)).pullback f = f)
+    (h_decomp : f = a • (1 : KE) + b • y_gen W) :
+    (b * algebraMap (Polynomial K) (FractionRing (Polynomial K))
+        (Polynomial.C W.toAffine.a₁ * Polynomial.X + Polynomial.C W.toAffine.a₃)) •
+        (1 : (W_smooth W).FunctionField) +
+      (2 * b) • (W_smooth W).coordYInFunctionField = 0 := by
+  -- `bXf` is the image of `a₁ X + a₃` in `Frac(K[X])`.
+  set bXf : FractionRing (Polynomial K) :=
+    algebraMap (Polynomial K) (FractionRing (Polynomial K))
+      (Polynomial.C W.toAffine.a₁ * Polynomial.X + Polynomial.C W.toAffine.a₃)
+    with hbXf
+  have h_bXf_image_KE : algebraMap (FractionRing (Polynomial K)) KE bXf =
+      algebraMap K KE W.toAffine.a₁ * x_gen W + algebraMap K KE W.toAffine.a₃ := by
+    rw [hbXf, ← IsScalarTower.algebraMap_apply (Polynomial K)
+      (FractionRing (Polynomial K)) KE]
+    exact algebraMap_a₁X_plus_a₃ W
+  -- Rewrite the decomposition and σ(f) into `y_gen`/`algebraMap` form.
+  have h_decomp' : f =
+      algebraMap (FractionRing (Polynomial K)) KE a +
+      algebraMap (FractionRing (Polynomial K)) KE b * y_gen W := by
+    rw [h_decomp]
+    change a • (1 : KE) + b • y_gen W =
+      algebraMap _ KE a + algebraMap _ KE b * y_gen W
+    simp only [Algebra.smul_def, mul_one]
+  have h_σf : (mulByInt W.toAffine (-1)).pullback f =
+      algebraMap (FractionRing (Polynomial K)) KE a +
+      algebraMap (FractionRing (Polynomial K)) KE b *
+        (-y_gen W - algebraMap K KE W.toAffine.a₁ * x_gen W -
+         algebraMap K KE W.toAffine.a₃) := by
+    conv_lhs => rw [h_decomp']
+    rw [map_add, map_mul,
+      mulByInt_neg_one_pullback_algebraMap_kx,
+      mulByInt_neg_one_pullback_algebraMap_kx,
+      mulByInt_neg_one_pullback_y_gen_eq]
+  -- Combine σ(f) = f into the vanishing basis decomposition.
+  change (b * bXf) • (1 : KE) + (2 * b) • y_gen W = (0 : KE)
+  rw [Algebra.smul_def, Algebra.smul_def, mul_one,
+    map_mul, map_mul, h_bXf_image_KE, map_ofNat]
+  have h_combine :
+      algebraMap (FractionRing (Polynomial K)) KE a +
+        algebraMap (FractionRing (Polynomial K)) KE b *
+          (-y_gen W - algebraMap K KE W.toAffine.a₁ * x_gen W -
+           algebraMap K KE W.toAffine.a₃) =
+        algebraMap (FractionRing (Polynomial K)) KE a +
+        algebraMap (FractionRing (Polynomial K)) KE b * y_gen W :=
+    h_σf.symm.trans (h_fixed.trans h_decomp')
+  linear_combination -h_combine
+
+/-- Helper for Piece 3c: char-split forcing `b = 0`.
+
+From the two vanishing coefficients of `sigma_fixed_decomp_coeffs_vanish`,
+namely `b·(a₁X+a₃) = 0` and `2·b = 0` in `Frac(K[X])`, conclude `b = 0`.
+In char 2, `a₁X + a₃ ≠ 0` (from `[IsElliptic]`, via `a₁X_plus_a₃_ne_zero_char_two`),
+so the first equation gives `b = 0`; in char ≠ 2, `2 ≠ 0` in `Frac(K[X])`, so the
+second does. -/
+private lemma eq_zero_of_mul_a₁X_plus_a₃_and_two_mul_eq_zero
+    {b : FractionRing (Polynomial K)}
+    (hpb : b * algebraMap (Polynomial K) (FractionRing (Polynomial K))
+        (Polynomial.C W.toAffine.a₁ * Polynomial.X + Polynomial.C W.toAffine.a₃) = 0)
+    (hqb : 2 * b = 0) : b = 0 := by
+  by_cases h2 : (2 : K) = 0
+  · -- Char 2: `a₁ X + a₃ ≠ 0`, so `b · (a₁X+a₃) = 0` forces `b = 0`.
+    haveI : CharP K 2 := CharTwo.of_one_ne_zero_of_two_eq_zero one_ne_zero h2
+    have h_bXf_ne : algebraMap (Polynomial K) (FractionRing (Polynomial K))
+        (Polynomial.C W.toAffine.a₁ * Polynomial.X + Polynomial.C W.toAffine.a₃) ≠ 0 :=
+      fun h_eq ↦ a₁X_plus_a₃_ne_zero_char_two W
+        (FaithfulSMul.algebraMap_injective (Polynomial K)
+          (FractionRing (Polynomial K)) (h_eq.trans (map_zero _).symm))
+    rcases mul_eq_zero.mp hpb with h | h
+    · exact h
+    · exact absurd h h_bXf_ne
+  · -- Char ≠ 2: `2 ≠ 0` in `Frac(K[X])`, so `2 * b = 0` forces `b = 0`.
+    have h_two_ne : (2 : FractionRing (Polynomial K)) ≠ 0 :=
+      fun h_eq ↦ h2 (two_K_eq_zero_of_two_fractionRing h_eq)
+    rcases mul_eq_zero.mp hqb with h | h
+    · exact absurd h h_two_ne
+    · exact h
+
 /-! ### Path 2 Step 3 Piece 3c: σ-fixed implies in K(x) image
 
 If `f ∈ K(E)` is fixed by the curve-negation involution `σ`, then `f` lies in
@@ -2572,71 +2657,12 @@ theorem sigma_fixed_implies_in_KX_image
     rw [h_decomp, h_b, zero_smul, add_zero]
     change a • (1 : KE) = algebraMap (FractionRing (Polynomial K)) KE a
     rw [Algebra.smul_def, mul_one]
-  -- `bXf` is the image of `a₁ X + a₃` in `Frac(K[X])`.
-  set bXf : FractionRing (Polynomial K) :=
-    algebraMap (Polynomial K) (FractionRing (Polynomial K))
-      (Polynomial.C W.toAffine.a₁ * Polynomial.X + Polynomial.C W.toAffine.a₃)
-    with hbXf
-  have h_bXf_image_KE : algebraMap (FractionRing (Polynomial K)) KE bXf =
-      algebraMap K KE W.toAffine.a₁ * x_gen W + algebraMap K KE W.toAffine.a₃ := by
-    rw [hbXf, ← IsScalarTower.algebraMap_apply (Polynomial K)
-      (FractionRing (Polynomial K)) KE]
-    exact algebraMap_a₁X_plus_a₃ W
-  -- Compute the decomposition and σ(f) in `y_gen` form (for σ-lemma access).
-  have h_decomp' : f =
-      algebraMap (FractionRing (Polynomial K)) KE a +
-      algebraMap (FractionRing (Polynomial K)) KE b * y_gen W := by
-    rw [h_decomp]
-    change a • (1 : KE) + b • y_gen W =
-      algebraMap _ KE a + algebraMap _ KE b * y_gen W
-    simp only [Algebra.smul_def, mul_one]
-  have h_σf : (mulByInt W.toAffine (-1)).pullback f =
-      algebraMap (FractionRing (Polynomial K)) KE a +
-      algebraMap (FractionRing (Polynomial K)) KE b *
-        (-y_gen W - algebraMap K KE W.toAffine.a₁ * x_gen W -
-         algebraMap K KE W.toAffine.a₃) := by
-    conv_lhs => rw [h_decomp']
-    rw [map_add, map_mul,
-      mulByInt_neg_one_pullback_algebraMap_kx,
-      mulByInt_neg_one_pullback_algebraMap_kx,
-      mulByInt_neg_one_pullback_y_gen_eq]
-  -- Combine into a vanishing basis decomposition.
-  have h_zero : (b * bXf) • (1 : (W_smooth W).FunctionField) +
-      (2 * b) • (W_smooth W).coordYInFunctionField = 0 := by
-    change (b * bXf) • (1 : KE) + (2 * b) • y_gen W = (0 : KE)
-    rw [Algebra.smul_def, Algebra.smul_def, mul_one,
-      map_mul, map_mul, h_bXf_image_KE, map_ofNat]
-    have h_combine :
-        algebraMap (FractionRing (Polynomial K)) KE a +
-          algebraMap (FractionRing (Polynomial K)) KE b *
-            (-y_gen W - algebraMap K KE W.toAffine.a₁ * x_gen W -
-             algebraMap K KE W.toAffine.a₃) =
-          algebraMap (FractionRing (Polynomial K)) KE a +
-          algebraMap (FractionRing (Polynomial K)) KE b * y_gen W :=
-      h_σf.symm.trans (h_fixed.trans h_decomp')
-    linear_combination -h_combine
-  obtain ⟨hpb, hqb⟩ := (W_smooth W).decomp_zero_iff h_zero
-  by_cases h2 : (2 : K) = 0
-  · -- Char 2: bXf ≠ 0 (from `a₁ X + a₃ ≠ 0`), so `b · bXf = 0` forces `b = 0`.
-    haveI : CharP K 2 := CharTwo.of_one_ne_zero_of_two_eq_zero one_ne_zero h2
-    have h_bXf_ne : bXf ≠ 0 := fun h_eq ↦
-      a₁X_plus_a₃_ne_zero_char_two W
-        (FaithfulSMul.algebraMap_injective (Polynomial K)
-          (FractionRing (Polynomial K)) (h_eq.trans (map_zero _).symm))
-    rcases mul_eq_zero.mp hpb with h | h
-    · exact h
-    · exact absurd h h_bXf_ne
-  · -- Char ≠ 2: `2 ≠ 0` in `Frac(K[X])`, so `2 * b = 0` forces `b = 0`.
-    have h_inj : Function.Injective
-        (algebraMap K (FractionRing (Polynomial K))) :=
-      FaithfulSMul.algebraMap_injective K (FractionRing (Polynomial K))
-    have h_two_ne : (2 : FractionRing (Polynomial K)) ≠ 0 := by
-      intro h_eq
-      apply h2; apply h_inj
-      rw [map_zero, map_ofNat]; exact h_eq
-    rcases mul_eq_zero.mp hqb with h | h
-    · exact absurd h h_two_ne
-    · exact h
+  -- σ-fixedness turns the decomposition into a vanishing `{1, Y}`-decomposition
+  -- `(b·(a₁X+a₃)) • 1 + (2b) • Y = 0`; basis-independence then gives both
+  -- coefficients zero, and a char-split forces `b = 0`.
+  obtain ⟨hpb, hqb⟩ :=
+    (W_smooth W).decomp_zero_iff (sigma_fixed_decomp_coeffs_vanish W h_fixed h_decomp)
+  exact eq_zero_of_mul_a₁X_plus_a₃_and_two_mul_eq_zero W hpb hqb
 
 /-! ### Path 2 Step 3 Piece 3d: addPullback_x_negFrobenius lies in K(x) -/
 
