@@ -863,6 +863,45 @@ theorem FormalGroup.dX_at_zero_chain (f : FormalGroupHom F G) :
   -- key : coeff_n (f' * dF) = c1 * coeff_n (subst f dG)
   rw [key, PowerSeries.coeff_C_mul]
 
+/-- Substitution along `f` preserves the normalization `ω_G · G_X(0,·) = 1`:
+`ω_G(f(T)) · G_X(0, f(T)) = 1` in `R⟦T⟧`.
+
+Substitution by a series with zero constant coefficient is a ring homomorphism
+(`PowerSeries.substAlgHom`), so it sends the product `ω_G · G_X(0,·) = 1`
+(`invariantDiff_mul_dX_at_zero`) to `1`. -/
+private lemma subst_invariantDiff_mul_dX_at_zero (f : FormalGroupHom F G) :
+    PowerSeries.subst f.toSeries G.invariantDiff *
+      PowerSeries.subst f.toSeries G.dX_at_zero = 1 := by
+  have hf := f.hasSubst
+  rw [← PowerSeries.subst_mul hf, G.invariantDiff_mul_dX_at_zero]
+  rw [show PowerSeries.subst f.toSeries =
+      (PowerSeries.substAlgHom hf : PowerSeries R →ₐ[R] PowerSeries R)
+      from (PowerSeries.coe_substAlgHom hf).symm]
+  exact (PowerSeries.substAlgHom hf).map_one
+
+/-- Algebraic cancellation lemma in a commutative ring: given `a * d = c * e`,
+`w * e = 1`, `d * v = 1` and that `d` is a unit, then `w * a = c * v`.
+
+Both sides become `c` after multiplying on the right by the unit `d`, so they
+are equal. This is the ring-theoretic core of the invariant-differential chain
+rule, abstracted away from the power-series substitution. -/
+private lemma mul_eq_of_unit_cancel {A : Type*} [CommRing A] {a c d e v w : A}
+    (hae : a * d = c * e) (hwe : w * e = 1) (hdv : d * v = 1) (hd : IsUnit d) :
+    w * a = c * v := by
+  apply hd.mul_right_cancel
+  trans c
+  · calc w * a * d
+        = w * (a * d) := mul_assoc _ _ _
+      _ = w * (c * e) := congr_arg (w * ·) hae
+      _ = c * (w * e) := mul_left_comm _ _ _
+      _ = c * 1 := congr_arg (c * ·) hwe
+      _ = c := mul_one _
+  · exact (calc c * v * d
+        = c * (v * d) := mul_assoc _ _ _
+      _ = c * (d * v) := congr_arg (c * ·) (mul_comm v d)
+      _ = c * 1 := congr_arg (c * ·) hdv
+      _ = c := mul_one _).symm
+
 /-- **Corollary IV.4.3** (chain rule for invariant differentials).
 
 For a formal group homomorphism `f : F → G` with `f(T) = c₁T + O(T²)`:
@@ -887,36 +926,12 @@ theorem FormalGroup.invariantDiff_chain (f : FormalGroupHom F G) :
   set f' : PowerSeries R := PowerSeries.derivative R f.toSeries
   set ωF : PowerSeries R := F.invariantDiff
   set dF : PowerSeries R := F.dX_at_zero
-  -- The intermediate identity: f' * dF = c₁ * dG'
-  have hdx : f' * dF = c₁ * dG' := F.dX_at_zero_chain f
-  -- Substitution preserves the product ωG · dxG = 1
-  have hsubst_prod : ωG' * dG' = 1 := by
-    change PowerSeries.subst f.toSeries G.invariantDiff *
-        PowerSeries.subst f.toSeries G.dX_at_zero = 1
-    have hf := f.hasSubst
-    rw [← PowerSeries.subst_mul hf, G.invariantDiff_mul_dX_at_zero]
-    rw [show PowerSeries.subst f.toSeries =
-        (PowerSeries.substAlgHom hf : PowerSeries R →ₐ[R] PowerSeries R)
-        from (PowerSeries.coe_substAlgHom hf).symm]
-    exact (PowerSeries.substAlgHom hf).map_one
-  -- Cancel dX_at_zero F (a unit) from the right.
-  -- Both sides, when multiplied by dF, equal c₁.
-  apply F.dX_at_zero_isUnit.mul_right_cancel
-  trans c₁
-  · -- ωG' * f' * dF = ωG' * (f' * dF) = ωG' * (c₁ * dG')
-    --              = c₁ * (ωG' * dG') = c₁ * 1 = c₁
-    calc ωG' * f' * dF
-        = ωG' * (f' * dF) := mul_assoc _ _ _
-      _ = ωG' * (c₁ * dG') := congr_arg (ωG' * ·) hdx
-      _ = c₁ * (ωG' * dG') := mul_left_comm _ _ _
-      _ = c₁ * 1 := congr_arg (c₁ * ·) hsubst_prod
-      _ = c₁ := mul_one _
-  · -- c₁ * ωF * dF = c₁ * (ωF * dF) = c₁ * (dF * ωF) = c₁ * 1 = c₁
-    exact (calc c₁ * ωF * dF
-        = c₁ * (ωF * dF) := mul_assoc _ _ _
-      _ = c₁ * (dF * ωF) := congr_arg (c₁ * ·) (mul_comm ωF dF)
-      _ = c₁ * 1 := congr_arg (c₁ * ·) F.dX_at_zero_mul_invariantDiff
-      _ = c₁ := mul_one _).symm
+  -- Two ingredients: the `dX_at_zero` chain identity `f' * dF = c₁ * dG'` and the
+  -- substituted normalization `ωG' * dG' = 1`. Cancel the unit `dF` via the
+  -- abstract algebraic lemma `mul_eq_of_unit_cancel`.
+  exact mul_eq_of_unit_cancel (F.dX_at_zero_chain f)
+    (subst_invariantDiff_mul_dX_at_zero f) F.dX_at_zero_mul_invariantDiff
+    F.dX_at_zero_isUnit
 
 /-! ### Silverman IV.4.2: translation invariance of the invariant differential
 
