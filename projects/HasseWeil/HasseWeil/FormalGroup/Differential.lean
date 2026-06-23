@@ -724,14 +724,24 @@ private theorem coeff_10_FG_pow (F : FormalGroup R) :
         · rw [Finsupp.support_single _ hn0, Finset.sum_singleton,
             Finsupp.single_eq_same]; omega
 
--- LHS computation: coeff_{(1,n)} of f(F(X,Y))
--- = coeff_n (f' * dF)
-set_option maxHeartbeats 6400000 in
-private theorem coeff_10_lhs (F G : FormalGroup R) (f : FormalGroupHom F G) (n : ℕ) :
+/-- The explicit `Finset` sum that both sides of `coeff_10_lhs` reduce to:
+`Σ_{k=0}^{n} (k+1) · coeff_{k+1}(f) · coeff_{n-k}(F_X(0,T))`. -/
+private noncomputable def coeff_10_sum (F G : FormalGroup R) (f : FormalGroupHom F G)
+    (n : ℕ) : R :=
+  ∑ k ∈ Finset.range (n + 1), (↑(k + 1) : R) * PowerSeries.coeff (k + 1) f.toSeries *
+    PowerSeries.coeff (n - k) F.dX_at_zero
+
+/-- LHS shaping for `coeff_10_lhs`: the coefficient of `X¹Yⁿ` in `f(F(X,Y))`
+unfolds (via `coeff_subst` and `coeff_10_FG_pow`) to the explicit range sum
+`coeff_10_sum`. The `d = 0` term drops out and the surviving terms are reindexed
+by `k = d - 1`. -/
+private theorem coeff_10_subst_eq_sum (F G : FormalGroup R) (f : FormalGroupHom F G)
+    (n : ℕ) :
     MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) n)
       (PowerSeries.subst F.toSeries f.toSeries) =
-    PowerSeries.coeff n (PowerSeries.derivative R f.toSeries * F.dX_at_zero) := by
-  -- Step 1: Expand LHS using PowerSeries.coeff_subst
+    coeff_10_sum F G f n := by
+  rw [coeff_10_sum]
+  -- Expand LHS using PowerSeries.coeff_subst
   have haF : PowerSeries.HasSubst (S := R) F.toSeries :=
     PowerSeries.HasSubst.of_constantCoeff_zero (FG.constantCoeff_FG_toSeries F)
   rw [PowerSeries.coeff_subst haF]
@@ -740,20 +750,12 @@ private theorem coeff_10_lhs (F G : FormalGroup R) (f : FormalGroupHom F G) (n :
   -- LHS = finsum d, coeff_d(f) * (if d ≤ n+1 then d * coeff_{n+1-d}(dxF) else 0)
   simp_rw [mul_ite, mul_zero]
   -- LHS = finsum d, if d ≤ n+1 then coeff_d(f) * (d * coeff_{n+1-d}(dxF)) else 0
-  -- Step 2: Expand RHS using coeff_mul and coeff_derivative
-  rw [PowerSeries.coeff_mul]
-  -- RHS = Σ_{(i,j) ∈ antidiag n} coeff_i(f') * coeff_j(dxF)
-  simp_rw [PowerSeries.coeff_derivative]
-  -- RHS = Σ_{(i,j) ∈ antidiag n} (coeff_{i+1}(f) * (i+1)) * coeff_j(dxF)
-  -- Step 3: Convert finsum to Finset.sum (terms vanish for d > n+1)
   -- The finsum has finite support; only d ∈ {0, ..., n+1} contribute
   -- For d = 0: 0 * ... = 0, so d = 0 doesn't contribute
   -- For d ∈ {1, ..., n+1}: contributes coeff_d(f) * d * coeff_{n+1-d}(dxF)
   -- For d > n+1: if branch gives 0
-  -- Reindex: let i = d - 1 (so d = i+1, i ∈ {0, ..., n}), giving:
-  --   (i+1) * coeff_{i+1}(f) * coeff_{n-i}(dxF)
-  -- This matches the RHS with j = n - i.
-  -- First, kill the d = 0 term
+  -- Reindex: let i = d - 1 (so d = i+1, i ∈ {0, ..., n})
+  -- First, normalise the multiplication order inside the if
   conv_lhs =>
     arg 1; ext d
     rw [show (if d ≤ n + 1 then PowerSeries.coeff d f.toSeries *
@@ -785,10 +787,23 @@ private theorem coeff_10_lhs (F G : FormalGroup R) (f : FormalGroupHom F G) (n :
     have : n + 1 - (k + 1) = n - k := by omega
     rw [this]
   rw [Finset.sum_congr rfl hsimp]
-  -- Now LHS: Σ_{k=0}^{n} (↑(k+1) * coeff_{k+1}(f) * coeff_{n-k}(dxF))
-  -- RHS: Σ_{(a,b) ∈ antidiag n} coeff_{a+1}(f) * (↑a+1) * coeff_b(dxF)
-  -- Match via k <-> (k, n - k)
-  apply Finset.sum_nbij' (fun k ↦ (k, n - k)) (fun p ↦ p.1)
+
+/-- RHS shaping for `coeff_10_lhs`: the `n`-th coefficient of `f'(T) · F_X(0,T)`
+unfolds (via `coeff_mul` and `coeff_derivative`) to the explicit range sum
+`coeff_10_sum`, matching the antidiagonal sum against `range (n+1)` through the
+bijection `k ↦ (k, n - k)`. -/
+private theorem coeff_derivative_mul_dX_eq_sum (F G : FormalGroup R)
+    (f : FormalGroupHom F G) (n : ℕ) :
+    PowerSeries.coeff n (PowerSeries.derivative R f.toSeries * F.dX_at_zero) =
+    coeff_10_sum F G f n := by
+  rw [coeff_10_sum]
+  -- Expand RHS using coeff_mul and coeff_derivative
+  rw [PowerSeries.coeff_mul]
+  -- = Σ_{(i,j) ∈ antidiag n} coeff_i(f') * coeff_j(dxF)
+  simp_rw [PowerSeries.coeff_derivative]
+  -- = Σ_{(i,j) ∈ antidiag n} (coeff_{i+1}(f) * (i+1)) * coeff_j(dxF)
+  -- Match Σ_{k ∈ range(n+1)} ... against the antidiagonal via k <-> (k, n - k)
+  refine (Finset.sum_nbij' (fun k ↦ (k, n - k)) (fun p ↦ p.1) ?_ ?_ ?_ ?_ ?_).symm
   · intro k hk; rw [Finset.mem_range] at hk
     rw [Finset.mem_antidiagonal]; omega
   · intro ⟨a, b⟩ hab
@@ -800,10 +815,18 @@ private theorem coeff_10_lhs (F G : FormalGroup R) (f : FormalGroupHom F G) (n :
   · intro k hk
     rw [Finset.mem_range] at hk
     change (↑(k + 1) : R) * PowerSeries.coeff (k + 1) f.toSeries *
-      PowerSeries.coeff (n - k) F.dX_at_zero =
+        PowerSeries.coeff (n - k) F.dX_at_zero =
       PowerSeries.coeff (k + 1) f.toSeries * (↑k + 1) *
         PowerSeries.coeff (n - k) F.dX_at_zero
     push_cast; ring
+
+-- LHS computation: coeff_{(1,n)} of f(F(X,Y))
+-- = coeff_n (f' * dF)
+private theorem coeff_10_lhs (F G : FormalGroup R) (f : FormalGroupHom F G) (n : ℕ) :
+    MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) n)
+      (PowerSeries.subst F.toSeries f.toSeries) =
+    PowerSeries.coeff n (PowerSeries.derivative R f.toSeries * F.dX_at_zero) :=
+  (coeff_10_subst_eq_sum F G f n).trans (coeff_derivative_mul_dX_eq_sum F G f n).symm
 
 theorem FormalGroup.dX_at_zero_chain (f : FormalGroupHom F G) :
     (PowerSeries.derivative R f.toSeries) * F.dX_at_zero =
