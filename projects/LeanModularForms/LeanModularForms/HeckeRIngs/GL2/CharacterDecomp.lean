@@ -3,17 +3,18 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import LeanModularForms.HeckeRIngs.GL2.Gamma1Pair
-import LeanModularForms.Modularforms.DimensionFormulas
-import Mathlib.LinearAlgebra.Semisimple
-import Mathlib.LinearAlgebra.Eigenspace.Semisimple
-import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
-import Mathlib.LinearAlgebra.Eigenspace.Pi
-import Mathlib.FieldTheory.IsAlgClosed.Basic
 import Mathlib.Algebra.DirectSum.Module
+import Mathlib.FieldTheory.IsAlgClosed.Basic
 import Mathlib.FieldTheory.Separable
 import Mathlib.LinearAlgebra.Dimension.Constructions
+import Mathlib.LinearAlgebra.Eigenspace.Pi
+import Mathlib.LinearAlgebra.Eigenspace.Semisimple
+import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
+import Mathlib.LinearAlgebra.Semisimple
 import Mathlib.NumberTheory.MulChar.Duality
+
+import LeanModularForms.HeckeRIngs.GL2.Gamma1Pair
+import LeanModularForms.Modularforms.DimensionFormulas
 
 /-!
 # Character decomposition of `ModularForm (Γ₁(N)) k`
@@ -81,8 +82,10 @@ lemma charDecomp_char_mul_of_jointEigenvector (ρ : G →* Module.End K V) (χ :
 /-- If `g` has finite order and `v ≠ 0` is a joint eigenvector with eigenvalues
 `χ`, then `χ g ≠ 0`: the eigenvalue of a finite-order element is a root of
 unity (hence a unit). -/
-lemma charDecomp_char_ne_zero_of_jointEigenvector (ρ : G →* Module.End K V) (χ : G → K) (v : V)
-    (hv : v ≠ 0) (hv_mem : ∀ g, v ∈ (ρ g).eigenspace (χ g)) {g : G} (hg : IsOfFinOrder g) :
+lemma charDecomp_char_ne_zero_of_jointEigenvector
+    (ρ : G →* Module.End K V) (χ : G → K) (v : V)
+    (hv : v ≠ 0) (hv_mem : ∀ g, v ∈ (ρ g).eigenspace (χ g)) {g : G}
+    (hg : IsOfFinOrder g) :
     χ g ≠ 0 := by
   obtain ⟨n, hnpos, hn⟩ := hg.exists_pow_eq_one
   intro hzero
@@ -101,7 +104,8 @@ def charDecomp_charHomOfEigenvector [Finite G] (ρ : G →* Module.End K V) (χ 
   toFun g := Units.mk0 (χ g)
     (charDecomp_char_ne_zero_of_jointEigenvector ρ χ v hv hv_mem (isOfFinOrder_of_finite g))
   map_one' := Units.ext (charDecomp_char_one_of_jointEigenvector ρ χ v hv hv_mem)
-  map_mul' g₁ g₂ := Units.ext (charDecomp_char_mul_of_jointEigenvector ρ χ v hv hv_mem g₁ g₂)
+  map_mul' g₁ g₂ :=
+    Units.ext (charDecomp_char_mul_of_jointEigenvector ρ χ v hv hv_mem g₁ g₂)
 
 @[simp]
 lemma charDecomp_charHomOfEigenvector_val [Finite G] (ρ : G →* Module.End K V) (χ : G → K)
@@ -136,9 +140,10 @@ private lemma iSupIndep_iInf_eigenspace_of_isSemisimple {ι : Type*} (f : ι →
     · exact hcomm hij
   simpa only [heq] using Module.End.independent_iInf_maxGenEigenspace_of_forall_mapsTo f h_mapsTo
 
-private lemma iSup_iInf_eigenspace_eq_top_of_isSemisimple [IsAlgClosed K] [FiniteDimensional K V]
-    {ι : Type*} (f : ι → Module.End K V) (hcomm : Pairwise fun i j ↦ Commute (f i) (f j))
-    (hss : ∀ i, (f i).IsSemisimple) : (⨆ χ : ι → K, ⨅ i, (f i).eigenspace (χ i)) = ⊤ := by
+private lemma iSup_iInf_eigenspace_eq_top_of_isSemisimple [IsAlgClosed K]
+    [FiniteDimensional K V] {ι : Type*} (f : ι → Module.End K V)
+    (hcomm : Pairwise fun i j ↦ Commute (f i) (f j)) (hss : ∀ i, (f i).IsSemisimple) :
+    (⨆ χ : ι → K, ⨅ i, (f i).eigenspace (χ i)) = ⊤ := by
   have heq (i : ι) (μ : K) : (f i).maxGenEigenspace μ = (f i).eigenspace μ :=
     (hss i).isFinitelySemisimple.maxGenEigenspace_eq_eigenspace μ
   simpa only [heq] using
@@ -197,7 +202,8 @@ instance modularForm_Gamma0_finiteDimensional :
 
 /-- For each diamond operator, the supremum of its eigenspaces is the whole
 space. -/
-lemma diamondOp_iSup_eigenspace_eq_top (d : (ZMod N)ˣ) : ⨆ μ : ℂ, (diamondOpHom k d).eigenspace μ =
+lemma diamondOp_iSup_eigenspace_eq_top (d : (ZMod N)ˣ) :
+    ⨆ μ : ℂ, (diamondOpHom k d).eigenspace μ =
     (⊤ : Submodule ℂ (ModularForm ((Gamma1 N).map (mapGL ℝ)) k)) :=
   (diamondOp_isSemisimple d).iSup_eigenspace_eq_top
 
@@ -216,13 +222,15 @@ lemma jointDiamondEigenspace_eq_modFormCharSpace (χ₀ : (ZMod N)ˣ →* ℂˣ)
 /-- If `jointDiamondEigenspace k χ ≠ ⊥`, then `χ` comes from a character, i.e.,
 equals `(d ↦ (χ₀ d : ℂ))` for some `χ₀ : (ZMod N)ˣ →* ℂˣ`. -/
 lemma exists_charHom_of_jointDiamondEigenspace_ne_bot {χ : (ZMod N)ˣ → ℂ}
-    (hχ : jointDiamondEigenspace k χ ≠ ⊥) : ∃ χ₀ : (ZMod N)ˣ →* ℂˣ, (fun d ↦ ((χ₀ d) : ℂ)) = χ :=
+    (hχ : jointDiamondEigenspace k χ ≠ ⊥) :
+    ∃ χ₀ : (ZMod N)ˣ →* ℂˣ, (fun d ↦ ((χ₀ d) : ℂ)) = χ :=
   exists_charHom_of_iInf_eigenspace_ne_bot (ρ := diamondOpHom k) hχ
 
 /-- **The character subspaces `modFormCharSpace k χ` span the whole space**:
 modular forms for `Γ₁(N)` decompose into the span of Nebentypus character
 spaces, one for each character `(ZMod N)ˣ →* ℂˣ`. -/
-theorem ModularForm_Gamma1_iSup_charSpace (k : ℤ) : (⨆ χ : (ZMod N)ˣ →* ℂˣ, modFormCharSpace k χ) =
+theorem ModularForm_Gamma1_iSup_charSpace (k : ℤ) :
+    (⨆ χ : (ZMod N)ˣ →* ℂˣ, modFormCharSpace k χ) =
     (⊤ : Submodule ℂ (ModularForm ((Gamma1 N).map (mapGL ℝ)) k)) := by
   have h_top_fun : (⨆ χ : (ZMod N)ˣ → ℂ, jointDiamondEigenspace k χ) = ⊤ :=
     iSup_iInf_eigenspace_eq_top_of_isSemisimple (diamondOpHom k) diamondOpHom_pairwise_commute
@@ -294,7 +302,8 @@ lemma diamondOpCusp_isSemisimple (d : (ZMod N)ˣ) : (diamondOpCuspHom k d).IsSem
 
 /-- The cusp-form diamond operators pairwise commute. -/
 lemma diamondOpCuspHom_pairwise_commute :
-    Pairwise fun d₁ d₂ : (ZMod N)ˣ ↦ Commute (diamondOpCuspHom k d₁) (diamondOpCuspHom k d₂) :=
+    Pairwise fun d₁ d₂ : (ZMod N)ˣ ↦
+      Commute (diamondOpCuspHom k d₁) (diamondOpCuspHom k d₂) :=
   fun _ _ _ ↦ (Commute.all _ _).map (diamondOpCuspHom k)
 
 /-- For each cusp-form diamond operator, the supremum of its eigenspaces is
@@ -391,7 +400,8 @@ theorem exists_finsupp_charSpace_of_diamondOpHom_invariant
     (hp : ∀ d : (ZMod N)ˣ, ∀ f ∈ p, diamondOpHom k d f ∈ p)
     {f : ModularForm ((Gamma1 N).map (mapGL ℝ)) k} (hf : f ∈ p) :
     ∃ g : ((ZMod N)ˣ →* ℂˣ) →₀ ModularForm ((Gamma1 N).map (mapGL ℝ)) k,
-      (∀ χ : (ZMod N)ˣ →* ℂˣ, g χ ∈ p ⊓ modFormCharSpace k χ) ∧ (g.sum fun _ y ↦ y) = f :=
+      (∀ χ : (ZMod N)ˣ →* ℂˣ, g χ ∈ p ⊓ modFormCharSpace k χ) ∧
+        (g.sum fun _ y ↦ y) = f :=
   (Submodule.mem_iSup_iff_exists_finsupp _ _).mp <|
     (modFormCharSpace_iSup_inf_of_diamondOpHom_invariant k p hp).symm ▸ hf
 
@@ -403,7 +413,8 @@ theorem exists_finsupp_charSpace_of_diamondOpCuspHom_invariant
     (hp : ∀ d : (ZMod N)ˣ, ∀ f ∈ p, diamondOpCuspHom k d f ∈ p)
     {f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k} (hf : f ∈ p) :
     ∃ g : ((ZMod N)ˣ →* ℂˣ) →₀ CuspForm ((Gamma1 N).map (mapGL ℝ)) k,
-      (∀ χ : (ZMod N)ˣ →* ℂˣ, g χ ∈ p ⊓ cuspFormCharSpace k χ) ∧ (g.sum fun _ y ↦ y) = f :=
+      (∀ χ : (ZMod N)ˣ →* ℂˣ, g χ ∈ p ⊓ cuspFormCharSpace k χ) ∧
+        (g.sum fun _ y ↦ y) = f :=
   (Submodule.mem_iSup_iff_exists_finsupp _ _).mp <|
     (cuspFormCharSpace_iSup_inf_of_diamondOpCuspHom_invariant k p hp).symm ▸ hf
 
