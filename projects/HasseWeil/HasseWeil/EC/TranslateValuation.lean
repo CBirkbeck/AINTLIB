@@ -488,6 +488,22 @@ theorem pointValuation_translateY_xy_sub_alg_addY_lt_one_of_X_ne
     · exact pointValuation_slope_diff_mul_alg_addX_diff_lt_one_of_X_ne W P xk yk h_x
   · exact pointValuation_y_gen_sub_alg_y_self_lt_one W P
 
+/-- The base change to `K(E)` of the Weierstrass equation satisfied by `(xk, yk)`:
+the F-level relation `W.Equation xk yk` becomes the `equation_iff'`-normal-form
+identity `… = 0` for `W_KE` at `(algebraMap F KE xk, algebraMap F KE yk)`. -/
+private theorem weierstrass_equation_image_eq_zero
+    (xk yk : F) (h_eq : W.toAffine.Equation xk yk) :
+    (algebraMap F KE yk) ^ 2 +
+        (W_KE W).a₁ * algebraMap F KE xk * algebraMap F KE yk +
+        (W_KE W).a₃ * algebraMap F KE yk -
+        ((algebraMap F KE xk) ^ 3 +
+          (W_KE W).a₂ * (algebraMap F KE xk) ^ 2 +
+          (W_KE W).a₄ * algebraMap F KE xk +
+          (W_KE W).a₆) = 0 := by
+  have h_map : (W_KE W).toAffine.Equation (algebraMap F KE xk) (algebraMap F KE yk) :=
+    Affine.Equation.map (algebraMap F KE) h_eq
+  rwa [WeierstrassCurve.Affine.equation_iff'] at h_map
+
 /-- **Weierstrass factorization** in K(E): from the curve equation at
 `(xk, yk)` and the generic-point equation, the K(E)-level identity
 `(y_gen − alg yk) · A = (x_gen − alg xk) · B`, where `A, B` are the
@@ -508,7 +524,6 @@ theorem weierstrass_factorization
           (W_KE W).a₁ * algebraMap F KE yk) := by
   have h_gen : (W_KE W).toAffine.Equation (x_gen W) (y_gen W) := generic_equation W
   rw [WeierstrassCurve.Affine.equation_iff'] at h_gen
-  rw [WeierstrassCurve.Affine.equation_iff'] at h_eq
   have h_eq_alg :
       (algebraMap F KE yk) ^ 2 +
         (W_KE W).a₁ * algebraMap F KE xk * algebraMap F KE yk +
@@ -516,48 +531,8 @@ theorem weierstrass_factorization
         ((algebraMap F KE xk) ^ 3 +
           (W_KE W).a₂ * (algebraMap F KE xk) ^ 2 +
           (W_KE W).a₄ * algebraMap F KE xk +
-          (W_KE W).a₆) = 0 := by
-    have h := congrArg (algebraMap F KE) h_eq
-    rw [map_zero] at h
-    change _ = (0 : KE)
-    change (algebraMap F KE yk) ^ 2 +
-        algebraMap F KE W.a₁ * algebraMap F KE xk * algebraMap F KE yk +
-        algebraMap F KE W.a₃ * algebraMap F KE yk -
-        ((algebraMap F KE xk) ^ 3 +
-          algebraMap F KE W.a₂ * (algebraMap F KE xk) ^ 2 +
-          algebraMap F KE W.a₄ * algebraMap F KE xk +
-          algebraMap F KE W.a₆) = 0
-    rw [show (algebraMap F KE) yk ^ 2 = algebraMap F KE (yk ^ 2) from
-        (map_pow _ _ _).symm,
-      show algebraMap F KE W.a₁ * algebraMap F KE xk = algebraMap F KE (W.a₁ * xk) from
-        (map_mul _ _ _).symm,
-      show algebraMap F KE (W.a₁ * xk) * algebraMap F KE yk =
-          algebraMap F KE (W.a₁ * xk * yk) from (map_mul _ _ _).symm,
-      show algebraMap F KE W.a₃ * algebraMap F KE yk =
-          algebraMap F KE (W.a₃ * yk) from (map_mul _ _ _).symm,
-      show algebraMap F KE xk ^ 3 = algebraMap F KE (xk ^ 3) from
-        (map_pow _ _ _).symm,
-      show algebraMap F KE xk ^ 2 = algebraMap F KE (xk ^ 2) from
-        (map_pow _ _ _).symm,
-      show algebraMap F KE W.a₂ * algebraMap F KE (xk ^ 2) =
-          algebraMap F KE (W.a₂ * xk ^ 2) from (map_mul _ _ _).symm,
-      show algebraMap F KE W.a₄ * algebraMap F KE xk =
-          algebraMap F KE (W.a₄ * xk) from (map_mul _ _ _).symm,
-      show algebraMap F KE (yk ^ 2) + algebraMap F KE (W.a₁ * xk * yk) =
-          algebraMap F KE (yk ^ 2 + W.a₁ * xk * yk) from (map_add _ _ _).symm,
-      show algebraMap F KE (yk ^ 2 + W.a₁ * xk * yk) + algebraMap F KE (W.a₃ * yk) =
-          algebraMap F KE (yk ^ 2 + W.a₁ * xk * yk + W.a₃ * yk) from (map_add _ _ _).symm,
-      show algebraMap F KE (xk ^ 3) + algebraMap F KE (W.a₂ * xk ^ 2) =
-          algebraMap F KE (xk ^ 3 + W.a₂ * xk ^ 2) from (map_add _ _ _).symm,
-      show algebraMap F KE (xk ^ 3 + W.a₂ * xk ^ 2) + algebraMap F KE (W.a₄ * xk) =
-          algebraMap F KE (xk ^ 3 + W.a₂ * xk ^ 2 + W.a₄ * xk) from (map_add _ _ _).symm,
-      show algebraMap F KE (xk ^ 3 + W.a₂ * xk ^ 2 + W.a₄ * xk) + algebraMap F KE W.a₆ =
-          algebraMap F KE (xk ^ 3 + W.a₂ * xk ^ 2 + W.a₄ * xk + W.a₆) from (map_add _ _ _).symm,
-      show algebraMap F KE (yk ^ 2 + W.a₁ * xk * yk + W.a₃ * yk) -
-          algebraMap F KE (xk ^ 3 + W.a₂ * xk ^ 2 + W.a₄ * xk + W.a₆) =
-        algebraMap F KE (yk ^ 2 + W.a₁ * xk * yk + W.a₃ * yk -
-          (xk ^ 3 + W.a₂ * xk ^ 2 + W.a₄ * xk + W.a₆)) from (map_sub _ _ _).symm]
-    rw [h]
+          (W_KE W).a₆) = 0 :=
+    weierstrass_equation_image_eq_zero W xk yk h_eq
   linear_combination h_gen - h_eq_alg
 
 /-- In the doubling case (`P = (xk, yk)`), the factor `A` differs from the nonzero
