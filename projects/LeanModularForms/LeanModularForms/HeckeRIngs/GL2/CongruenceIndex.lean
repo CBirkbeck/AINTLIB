@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import Mathlib.Algebra.Field.ZMod
-import Mathlib.Data.ZMod.Units
 import Mathlib.GroupTheory.Index
 import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
 
@@ -98,7 +97,8 @@ private lemma Gamma0_prime_index_surj :
   · refine ⟨⟨p, p.lt_succ_self⟩, ?_⟩
     rw [QuotientGroup.eq, Gamma0_mem]
     simpa [Gamma0Rep] using h
-  · obtain ⟨j₀, hj₀⟩ : ∃ j₀ : ZMod p, (p : ℤ) ∣ σ.1 0 0 - (j₀.val : ℤ) * σ.1 1 0 :=
+  · obtain ⟨j₀, hj₀⟩ :
+        ∃ j₀ : ZMod p, (p : ℤ) ∣ σ.1 0 0 - (j₀.val : ℤ) * σ.1 1 0 :=
       ⟨_, dvd_sub_val_mul p hp _ _ h⟩
     refine ⟨⟨j₀.val, Nat.lt_succ_of_lt (ZMod.val_lt j₀)⟩, ?_⟩
     rw [QuotientGroup.eq, Gamma0_mem]
@@ -178,7 +178,8 @@ private lemma Gamma0_relindex_step_surj (k : ℕ) (hk : 0 < k) :
     have h1_dvd : (p : ℤ) ∣ 1 :=
       hdet ▸ dvd_sub (dvd_mul_of_dvd_left h00_dvd _) (dvd_mul_of_dvd_right h10_dvd _)
     exact absurd (Int.le_of_dvd one_pos h1_dvd) (not_le.mpr (mod_cast hp.one_lt))
-  obtain ⟨c₀, hc₀⟩ : ∃ c₀ : ZMod p, (p : ℤ) ∣ q - (c₀.val : ℤ) * σ.1 0 0 :=
+  obtain ⟨c₀, hc₀⟩ :
+      ∃ c₀ : ZMod p, (p : ℤ) ∣ q - (c₀.val : ℤ) * σ.1 0 0 :=
     ⟨_, dvd_sub_val_mul p hp q _ h00_ne⟩
   refine ⟨⟨c₀.val, ZMod.val_lt c₀⟩, ?_⟩
   rw [QuotientGroup.eq, Subgroup.mem_subgroupOf]
