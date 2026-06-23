@@ -38,7 +38,8 @@ Properties (under appropriate hypotheses, requiring monotonicity arguments):
 - `Tendsto (firstExitTimeRight γ t₀ s δ) (𝓝[>] 0) (𝓝[>] t₀)` requires
   γ to enter B_ε within an arbitrarily small right-neighborhood of t₀
   (e.g., when γ has right-derivative L ≠ 0). -/
-noncomputable def firstExitTimeRight (γ : ℝ → ℂ) (t₀ δ : ℝ) (s : ℂ) (ε : ℝ) : ℝ :=
+noncomputable def firstExitTimeRight (γ : ℝ → ℂ) (t₀ δ : ℝ) (s : ℂ) (ε : ℝ) :
+    ℝ :=
   sInf {t ∈ Icc t₀ (t₀ + δ) | ε ≤ ‖γ t - s‖}
 
 /-- The set defining `firstExitTimeRight` is nonempty when `γ(t₀+δ)` is far enough. -/
@@ -268,7 +269,8 @@ theorem firstExitTimeRight_tendsto_t₀
     set t₁ := t₀ + min η δ / 2 with ht₁_def
     have ht₁_mem : t₁ ∈ Ioc t₀ (t₀ + δ) :=
       ⟨by linarith [lt_min hη_pos hδ], by linarith [min_le_right η δ]⟩
-    refine ⟨‖γ t₁ - s‖, by simpa [norm_pos_iff, sub_ne_zero] using h_leave t₁ ht₁_mem, ?_⟩
+    refine ⟨‖γ t₁ - s‖,
+      by simpa [norm_pos_iff, sub_ne_zero] using h_leave t₁ ht₁_mem, ?_⟩
     intro ε hε_pos hε_lt
     rw [Real.dist_eq, sub_zero, abs_of_pos hε_pos] at hε_lt
     have h_t₁_mem_Icc : t₁ ∈ Icc t₀ (t₀ + δ) := ⟨ht₁_mem.1.le, ht₁_mem.2⟩
@@ -298,7 +300,8 @@ theorem firstExitTimeLeft_tendsto_t₀
     set t₁ := t₀ - min η δ / 2 with ht₁_def
     have ht₁_mem : t₁ ∈ Ico (t₀ - δ) t₀ :=
       ⟨by linarith [min_le_right η δ], by linarith [lt_min hη_pos hδ]⟩
-    refine ⟨‖γ t₁ - s‖, by simpa [norm_pos_iff, sub_ne_zero] using h_leave t₁ ht₁_mem, ?_⟩
+    refine ⟨‖γ t₁ - s‖,
+      by simpa [norm_pos_iff, sub_ne_zero] using h_leave t₁ ht₁_mem, ?_⟩
     intro ε hε_pos hε_lt
     rw [Real.dist_eq, sub_zero, abs_of_pos hε_pos] at hε_lt
     have h_t₁_mem_Icc : t₁ ∈ Icc (t₀ - δ) t₀ := ⟨ht₁_mem.1, ht₁_mem.2.le⟩
