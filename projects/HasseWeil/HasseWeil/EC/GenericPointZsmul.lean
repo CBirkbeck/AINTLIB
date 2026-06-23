@@ -404,84 +404,6 @@ theorem zsmul_genericPoint_two_of_witness
     Affine.Point.add_self_of_Y_ne (mulByInt_y_one_ne_negY W), Affine.Point.some.injEq]
   exact ⟨h_addX_two, h_addY_two⟩
 
-/-- **Main theorem (Silverman III.4.2)**: for every `n ≠ 0`, `n • genericPoint W`
-    has coordinates `(mulByInt_x W n, mulByInt_y W n)`. -/
-theorem zsmul_genericPoint_eq (n : ℤ) (hn : n ≠ 0) :
-    ∃ h : (W_KE W).toAffine.Nonsingular (mulByInt_x W n) (mulByInt_y W n),
-      n • genericPoint W =
-        Affine.Point.some (mulByInt_x W n) (mulByInt_y W n) h := by
-  have hψ : ψ_ff W n ≠ 0 := ψ_ff_ne_zero W hn
-  have hns := generic_nonsingular W
-  have h_smulEval := WeierstrassCurve.zsmul_eq_smulEval (W := W_KE W) hns n
-  have hZ : smulEval (W_KE W) (x_gen W) (y_gen W) n 2 ≠ 0 := by
-    rw [smulEval_generic_Z]; exact hψ
-  have h_ns_smulEval :
-      WeierstrassCurve.Jacobian.Nonsingular (W_KE W).toJacobian
-        (smulEval (W_KE W) (x_gen W) (y_gen W) n) := by
-    have h_ns_jac := (n • WeierstrassCurve.Jacobian.Point.fromAffine
-      (Affine.Point.some (x_gen W) (y_gen W) hns)).nonsingular
-    change WeierstrassCurve.Jacobian.NonsingularLift _ _ at h_ns_jac
-    rw [h_smulEval] at h_ns_jac
-    exact h_ns_jac
-  have h_ns_affine :
-      (W_KE W).toAffine.Nonsingular
-        (smulEval (W_KE W) (x_gen W) (y_gen W) n 0 /
-          smulEval (W_KE W) (x_gen W) (y_gen W) n 2 ^ 2)
-        (smulEval (W_KE W) (x_gen W) (y_gen W) n 1 /
-          smulEval (W_KE W) (x_gen W) (y_gen W) n 2 ^ 3) :=
-    (WeierstrassCurve.Jacobian.nonsingular_of_Z_ne_zero hZ).mp h_ns_smulEval
-  rw [smulEval_generic_X, smulEval_generic_Y, smulEval_generic_Z] at h_ns_affine
-  have h_x_eq : Φ_ff W n / ψ_ff W n ^ 2 = mulByInt_x W n := by
-    change _ = Φ_ff W n / ΨSq_ff W n
-    rw [ψ_ff_sq_eq_ΨSq_ff]
-  rw [h_x_eq] at h_ns_affine
-  refine ⟨h_ns_affine, ?_⟩
-  have h_inv :
-      WeierstrassCurve.Jacobian.Point.toAffineAddEquiv (W_KE W)
-        (WeierstrassCurve.Jacobian.Point.fromAffine
-          (Affine.Point.some (x_gen W) (y_gen W) hns)) =
-      Affine.Point.some (x_gen W) (y_gen W) hns :=
-    (WeierstrassCurve.Jacobian.Point.toAffineAddEquiv (W_KE W)).right_inv _
-  have h_toAffine :
-      n • (Affine.Point.some (x_gen W) (y_gen W) hns) =
-      WeierstrassCurve.Jacobian.Point.toAffineLift
-        (n • WeierstrassCurve.Jacobian.Point.fromAffine
-          (Affine.Point.some (x_gen W) (y_gen W) hns)) := by
-    have h := map_zsmul (WeierstrassCurve.Jacobian.Point.toAffineAddEquiv (W_KE W))
-      n (WeierstrassCurve.Jacobian.Point.fromAffine
-        (Affine.Point.some (x_gen W) (y_gen W) hns))
-    rw [WeierstrassCurve.Jacobian.Point.toAffineAddEquiv_apply] at h
-    rw [show WeierstrassCurve.Jacobian.Point.toAffineAddEquiv (W_KE W)
-      (WeierstrassCurve.Jacobian.Point.fromAffine _) =
-      WeierstrassCurve.Jacobian.Point.toAffineLift
-        (WeierstrassCurve.Jacobian.Point.fromAffine _) from rfl] at h
-    have h2 : WeierstrassCurve.Jacobian.Point.toAffineLift
-        (WeierstrassCurve.Jacobian.Point.fromAffine
-          (Affine.Point.some (x_gen W) (y_gen W) hns)) =
-        Affine.Point.some (x_gen W) (y_gen W) hns := by
-      rw [← WeierstrassCurve.Jacobian.Point.toAffineAddEquiv_apply]
-      exact h_inv
-    rw [h2] at h
-    exact h.symm
-  change n • Affine.Point.some (x_gen W) (y_gen W) hns = _
-  rw [h_toAffine]
-  have h_eq_lift :
-      WeierstrassCurve.Jacobian.Point.toAffineLift
-        (n • WeierstrassCurve.Jacobian.Point.fromAffine
-          (Affine.Point.some (x_gen W) (y_gen W) hns)) =
-      WeierstrassCurve.Jacobian.Point.toAffine (W_KE W)
-        (smulEval (W_KE W) (x_gen W) (y_gen W) n) := by
-    unfold WeierstrassCurve.Jacobian.Point.toAffineLift
-    rw [h_smulEval]
-    rfl
-  rw [h_eq_lift, WeierstrassCurve.Jacobian.Point.toAffine_of_Z_ne_zero h_ns_smulEval hZ,
-    Affine.Point.some.injEq]
-  refine ⟨?_, ?_⟩
-  · rw [smulEval_generic_X, smulEval_generic_Z]
-    exact h_x_eq
-  · rw [smulEval_generic_Y, smulEval_generic_Z]
-    rfl
-
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- The Jacobian point `smulEval (W_KE W) x₀ y₀ m` (the `m`-fold scalar multiple of a
     nonsingular affine point, read in Jacobian coordinates) is itself nonsingular. -/
@@ -542,6 +464,46 @@ private lemma toAffineLift_zsmul_fromAffine_eq_toAffine (m : ℤ) {x₀ y₀ : K
   unfold WeierstrassCurve.Jacobian.Point.toAffineLift
   rw [WeierstrassCurve.zsmul_eq_smulEval (W := W_KE W) h_ns m]
   rfl
+
+/-- **Main theorem (Silverman III.4.2)**: for every `n ≠ 0`, `n • genericPoint W`
+    has coordinates `(mulByInt_x W n, mulByInt_y W n)`. -/
+theorem zsmul_genericPoint_eq (n : ℤ) (hn : n ≠ 0) :
+    ∃ h : (W_KE W).toAffine.Nonsingular (mulByInt_x W n) (mulByInt_y W n),
+      n • genericPoint W =
+        Affine.Point.some (mulByInt_x W n) (mulByInt_y W n) h := by
+  have hψ : ψ_ff W n ≠ 0 := ψ_ff_ne_zero W hn
+  have hns := generic_nonsingular W
+  have hZ : smulEval (W_KE W) (x_gen W) (y_gen W) n 2 ≠ 0 := by
+    rw [smulEval_generic_Z]; exact hψ
+  -- The `m`-fold multiple is nonsingular in Jacobian coordinates.
+  have h_ns_smulEval := jacobian_nonsingular_smulEval W n hns
+  -- Reading off the affine nonsingularity from `Z ≠ 0`, then identifying the
+  -- generic-point coordinates with `Φ_ff / ψ_ff²` etc. and finally `mulByInt_x`.
+  have h_ns_affine :
+      (W_KE W).toAffine.Nonsingular
+        (smulEval (W_KE W) (x_gen W) (y_gen W) n 0 /
+          smulEval (W_KE W) (x_gen W) (y_gen W) n 2 ^ 2)
+        (smulEval (W_KE W) (x_gen W) (y_gen W) n 1 /
+          smulEval (W_KE W) (x_gen W) (y_gen W) n 2 ^ 3) :=
+    (WeierstrassCurve.Jacobian.nonsingular_of_Z_ne_zero hZ).mp h_ns_smulEval
+  rw [smulEval_generic_X, smulEval_generic_Y, smulEval_generic_Z] at h_ns_affine
+  have h_x_eq : Φ_ff W n / ψ_ff W n ^ 2 = mulByInt_x W n := by
+    change _ = Φ_ff W n / ΨSq_ff W n
+    rw [ψ_ff_sq_eq_ΨSq_ff]
+  rw [h_x_eq] at h_ns_affine
+  refine ⟨h_ns_affine, ?_⟩
+  -- Transport `n • genericPoint` across the affine ↔ Jacobian equivalence and unfold to
+  -- the explicit `smulEval` coordinate vector, then read off both coordinates.
+  change n • Affine.Point.some (x_gen W) (y_gen W) hns = _
+  rw [zsmul_some_eq_toAffineLift_fromAffine W n hns,
+    toAffineLift_zsmul_fromAffine_eq_toAffine W n hns,
+    WeierstrassCurve.Jacobian.Point.toAffine_of_Z_ne_zero h_ns_smulEval hZ,
+    Affine.Point.some.injEq]
+  refine ⟨?_, ?_⟩
+  · rw [smulEval_generic_X, smulEval_generic_Z]
+    exact h_x_eq
+  · rw [smulEval_generic_Y, smulEval_generic_Z]
+    rfl
 
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Generalized Jacobian theorem**: for any nonsingular point `(x₀, y₀)` on
