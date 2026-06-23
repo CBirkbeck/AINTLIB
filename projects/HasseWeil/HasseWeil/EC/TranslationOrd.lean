@@ -172,6 +172,71 @@ The proof leverages Mathlib's `IsDedekindDomain.HeightOneSpectrum.intValuation_s
 when the prime ideal equals `span{r}` for a generator `r`, `intValuation
 r = exp(-1)`. -/
 
+/-- **`ord_P P f ≤ 1` from `pointValuation P f = exp(-1)`**: generic
+valuation-to-order computation on any smooth plane curve. Since
+`ord_P P f = -(unzero hv).toAdd` for nonzero valuation, a valuation of
+`exp(-1) = ofAdd(-1)` gives `ord_P P f = 1`. (Forward companion of
+`pointValuation_eq_exp_neg_of_ord_P_eq`.) -/
+private theorem ord_P_le_one_of_pointValuation_eq_exp_neg_one
+    {C : SmoothPlaneCurve F} {P : C.SmoothPoint} {f : C.FunctionField}
+    (hf : C.pointValuation P f = WithZero.exp (-1 : ℤ)) :
+    C.ord_P P f ≤ ((1 : ℤ) : WithTop ℤ) := by
+  have h_val_ne : C.pointValuation P f ≠ 0 := by
+    rw [hf]; exact WithZero.exp_ne_zero
+  unfold SmoothPlaneCurve.ord_P
+  rw [dif_neg h_val_ne]
+  have h_unz : WithZero.unzero h_val_ne = Multiplicative.ofAdd (-1 : ℤ) := by
+    rwa [← WithZero.coe_inj, WithZero.coe_unzero]
+  rw [h_unz]
+  rfl
+
+/-- **`algMap XClass ≠ 0` in the local ring at `P`**: the image of the
+nonzero coordinate-ring element `XClass W xk` under the localisation map
+`CoordinateRing → localRingAt P` is nonzero, since the localisation is
+injective (the prime complement avoids zero divisors). -/
+private theorem algMap_XClass_localRingAt_ne_zero
+    (xk : F) (P : (W_smooth W).SmoothPoint) :
+    algebraMap (W_smooth W).CoordinateRing
+        ((W_smooth W).localRingAt P)
+        (Affine.CoordinateRing.XClass W.toAffine xk) ≠ 0 := by
+  have h_xc_ne : Affine.CoordinateRing.XClass W.toAffine xk ≠ 0 :=
+    Affine.CoordinateRing.XClass_ne_zero (W' := W.toAffine) (x := xk)
+  rw [show algebraMap (W_smooth W).CoordinateRing
+      ((W_smooth W).localRingAt P) = (algebraMap _ _) from rfl]
+  exact (map_ne_zero_iff _
+    (IsLocalization.injective (M := ((W_smooth W).maximalIdealAt P).primeCompl)
+      ((W_smooth W).localRingAt P)
+      ((W_smooth W).maximalIdealAt P).primeCompl_le_nonZeroDivisors)).mpr h_xc_ne
+
+/-- **`pointValuation P (algMap XClass) = exp(-1)` from the maxIdeal-span
+hypothesis**: when the maximal ideal of the local ring at `P` equals
+`span{algMap XClass}`, the generator has integer valuation `exp(-1)`
+(`intValuation_singleton`), which lifts to the function field via
+`valuation_of_algebraMap`. -/
+private theorem pointValuation_algMap_XClass_eq_exp_neg_one_of_maxIdeal_span
+    (xk : F) (P : (W_smooth W).SmoothPoint)
+    (h_max_eq : IsLocalRing.maximalIdeal ((W_smooth W).localRingAt P) =
+      Ideal.span ({algebraMap (W_smooth W).CoordinateRing
+        ((W_smooth W).localRingAt P)
+        (Affine.CoordinateRing.XClass W.toAffine xk)} : Set _)) :
+    (W_smooth W).pointValuation P
+        (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField
+          (Affine.CoordinateRing.XClass W.toAffine xk)) =
+      WithZero.exp (-1 : ℤ) := by
+  set v := IsDiscreteValuationRing.maximalIdeal ((W_smooth W).localRingAt P)
+    with hv_def
+  have h_int_val : v.intValuation
+      (algebraMap (W_smooth W).CoordinateRing
+        ((W_smooth W).localRingAt P)
+        (Affine.CoordinateRing.XClass W.toAffine xk)) =
+      WithZero.exp (-1 : ℤ) :=
+    v.intValuation_singleton (algMap_XClass_localRingAt_ne_zero W xk P) h_max_eq
+  change v.valuation _ _ = _
+  rw [IsScalarTower.algebraMap_apply (W_smooth W).CoordinateRing
+    ((W_smooth W).localRingAt P) (W_smooth W).FunctionField]
+  rw [IsDedekindDomain.HeightOneSpectrum.valuation_of_algebraMap]
+  exact h_int_val
+
 /-- **`ord_P (x_gen − xk) ≤ 1` at `−T`, witness-parametric on the
 maxIdeal-span hypothesis**: given that the maximal ideal of the local
 ring at `−T = (xk, negY xk yk)` equals `span{algMap XClass}`, we have
@@ -188,51 +253,8 @@ theorem ord_P_x_gen_sub_const_le_one_of_maxIdeal_span
         (x_gen W - algebraMap F KE xk) ≤ ((1 : ℤ) : WithTop ℤ) := by
   set P := negSmoothPoint W xk yk h_ns
   rw [x_gen_sub_const_eq_algebraMap_XClass W xk]
-  set v := IsDiscreteValuationRing.maximalIdeal ((W_smooth W).localRingAt P)
-    with hv_def
-  have h_xc_ne : Affine.CoordinateRing.XClass W.toAffine xk ≠ 0 :=
-    Affine.CoordinateRing.XClass_ne_zero (W' := W.toAffine) (x := xk)
-  have h_xc_loc_ne : algebraMap (W_smooth W).CoordinateRing
-      ((W_smooth W).localRingAt P)
-        (Affine.CoordinateRing.XClass W.toAffine xk) ≠ 0 := by
-    rw [show algebraMap (W_smooth W).CoordinateRing
-        ((W_smooth W).localRingAt P) = (algebraMap _ _) from rfl]
-    exact (map_ne_zero_iff _
-      (IsLocalization.injective (M := ((W_smooth W).maximalIdealAt P).primeCompl)
-        ((W_smooth W).localRingAt P)
-        ((W_smooth W).maximalIdealAt P).primeCompl_le_nonZeroDivisors)).mpr h_xc_ne
-  have h_int_val : v.intValuation
-      (algebraMap (W_smooth W).CoordinateRing
-        ((W_smooth W).localRingAt P)
-        (Affine.CoordinateRing.XClass W.toAffine xk)) =
-      WithZero.exp (-1 : ℤ) :=
-    v.intValuation_singleton h_xc_loc_ne h_max_eq
-  have h_val_KE : (W_smooth W).pointValuation P
-      (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField
-        (Affine.CoordinateRing.XClass W.toAffine xk)) =
-      WithZero.exp (-1 : ℤ) := by
-    change v.valuation _ _ = _
-    rw [IsScalarTower.algebraMap_apply (W_smooth W).CoordinateRing
-      ((W_smooth W).localRingAt P) (W_smooth W).FunctionField]
-    rw [IsDedekindDomain.HeightOneSpectrum.valuation_of_algebraMap]
-    exact h_int_val
-  change (W_smooth W).pointValuation P
-      (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField
-        (Affine.CoordinateRing.XClass W.toAffine xk)) =
-      WithZero.exp (-1 : ℤ) at h_val_KE
-  have h_val_ne : (W_smooth W).pointValuation P
-      (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField
-        (Affine.CoordinateRing.XClass W.toAffine xk)) ≠ 0 := by
-    rw [h_val_KE]; exact WithZero.exp_ne_zero
-  change (W_smooth W).ord_P P
-      (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField
-        (Affine.CoordinateRing.XClass W.toAffine xk)) ≤ ((1 : ℤ) : WithTop ℤ)
-  unfold SmoothPlaneCurve.ord_P
-  rw [dif_neg h_val_ne]
-  have h_unz : WithZero.unzero h_val_ne = Multiplicative.ofAdd (-1 : ℤ) := by
-    rwa [← WithZero.coe_inj, WithZero.coe_unzero]
-  rw [h_unz]
-  rfl
+  exact ord_P_le_one_of_pointValuation_eq_exp_neg_one
+    (pointValuation_algMap_XClass_eq_exp_neg_one_of_maxIdeal_span W xk P h_max_eq)
 
 /-- **`ord_P (x_gen − xk) = 1` at `−T`, witness-parametric on the
 maxIdeal-span hypothesis**: combines the `≥ 1` form
