@@ -21,10 +21,15 @@ $$\operatorname{ord}_\infty(f) + \tfrac{1}{2}\operatorname{ord}_i(f)
 
 ## Main results
 
+* `fd_orbit_i_eq_i` — a point of `𝒟` in the `i`-orbit equals `i`
+* `fd_orbit_rho_eq` — a point of `𝒟` in the `ρ`-orbit equals `ρ` or `ρ + 1`
+* `orb_repCanon_nonEll` — `repCanon` representatives have non-elliptic orbits
 * `finsum_nonell_eq_repCanon_sum` — the `∑ᶠ` over non-elliptic orbits equals the
   `repCanon` Finset sum
+* `repCanon_sum_split` — the `repCanon` sum splits into strict interior, left vertical
+  edge, and left arc
 * `valence_formula_textbook_orbit_finsum` — the valence formula in literal orbit-sum form,
-  conditional on the core identity `valence_formula_orbit_sum`
+  conditional on the core identity (supplied as the hypothesis `h_core`)
 -/
 
 open Complex MeasureTheory Set Filter Topology CongruenceSubgroup
@@ -273,7 +278,7 @@ theorem repCanon_sum_split :
 
 include hf in
 /-- **The Valence Formula** for weight-`k` modular forms on `SL₂(ℤ)`, in textbook orbit-sum
-form, conditional on the core identity `valence_formula_orbit_sum`.
+form, conditional on the core identity (supplied as the hypothesis `h_core`).
 
 The core identity states that for any finite set `S ⊆ 𝒟` capturing all zeros,
 the explicit coefficient expansion holds. This is proved separately via contour
