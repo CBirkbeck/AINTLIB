@@ -50,6 +50,16 @@ namespace HungerbuhlerWasem
 
 namespace MultiPoleDCT
 
+/-- Termwise bound for a finite Laurent sum: if `0 < B ≤ ‖z‖`, then the norm of
+`∑ k, a k / z ^ (k + 1)` is at most the termwise bound `∑ k, ‖a k‖ / B ^ (k + 1)`. -/
+private lemma norm_laurentSum_le {N : ℕ} (a : Fin N → ℂ) {z : ℂ} {B : ℝ}
+    (hB : 0 < B) (hBz : B ≤ ‖z‖) :
+    ‖∑ k : Fin N, a k / z ^ (k.val + 1)‖ ≤ ∑ k : Fin N, ‖a k‖ / B ^ (k.val + 1) :=
+  (norm_sum_le _ _).trans <| Finset.sum_le_sum fun k _ ↦ by
+    rw [norm_div, norm_pow]
+    exact div_le_div_of_nonneg_left (norm_nonneg _) (pow_pos hB _)
+      (pow_le_pow_left₀ hB.le hBz _)
+
 variable {x : ℂ}
 
 /-- The "bad set" for a finite set `T` of pole candidates: parameters `t ∈ [0,1]`
@@ -105,8 +115,7 @@ theorem badSetIcc_iInter_pos (γP : PiecewiseC1Path x x) (T : Finset ℂ) :
       exact absurd (h 1 zero_lt_one).2.choose_spec.1 (Finset.notMem_empty _)
   · intro ⟨ht_Icc, ht_in_T⟩ ε hε_pos
     refine ⟨ht_Icc, _, Finset.mem_coe.mp ht_in_T, ?_⟩
-    rw [sub_self, norm_zero]
-    exact hε_pos.le
+    rw [sub_self, norm_zero]; exact hε_pos.le
 
 /-- The volume of the bad set tends to zero as `ε → 0+` for a closed piecewise-`C¹`
 immersion `γ`. -/
@@ -154,10 +163,7 @@ theorem cpvIntegrand_polarPart_intervalIntegrable
     by_cases h : ε < ‖γP.toPath.extend t - s‖
     · have h_ne : γP.toPath.extend t ≠ s := fun heq ↦ by
         rw [heq, sub_self, norm_zero] at h; linarith
-      rw [if_pos h, Set.indicator_of_mem (a := t) h]
-      change decomp.polarPart s (γP.toPath.extend t) * deriv γP.toPath.extend t =
-        laurentSum (γP.toPath.extend t) * deriv γP.toPath.extend t
-      rw [decomp.polarPart_eq s hs _ h_ne]
+      rw [if_pos h, Set.indicator_of_mem (a := t) h, decomp.polarPart_eq s hs _ h_ne]
     · rw [if_neg h, Set.indicator_of_notMem (a := t) h]
   have h_meas_set : MeasurableSet {t : ℝ | ε < ‖γP.toPath.extend t - s‖} :=
     (isOpen_lt continuous_const
@@ -171,10 +177,7 @@ theorem cpvIntegrand_polarPart_intervalIntegrable
       ‖h_curve t‖ ≤ M := fun t h_far_s ↦ by
     rw [show ‖h_curve t‖ = ‖laurentSum (γP.toPath.extend t)‖ * ‖deriv γP.toPath.extend t‖
       from norm_mul _ _]
-    exact mul_le_mul ((norm_sum_le _ _).trans <| Finset.sum_le_sum fun k _ ↦ by
-        rw [norm_div, norm_pow]
-        exact div_le_div_of_nonneg_left (norm_nonneg _) (pow_pos hε _)
-          (pow_le_pow_left₀ hε.le h_far_s.le _))
+    exact mul_le_mul (norm_laurentSum_le a hε h_far_s.le)
       (norm_deriv_le_of_lipschitz hLip) (norm_nonneg _) h_M_polar_nonneg
   have h_curve_meas : Measurable h_curve :=
     (Finset.measurable_sum _ fun k _ ↦
@@ -291,11 +294,8 @@ theorem hasCauchyPVOn_polarPart_of_hasCauchyPV_multipole
           rw [heq, sub_self, norm_zero] at h_far_s; linarith
       rw [h_polarPart_eq, Set.indicator_of_mem (show t ∈ badSetIcc γP T ε from
         ⟨ht_Icc, s', hs'_mem, h_close_s'⟩), norm_mul]
-      refine mul_le_mul ?_ (h_deriv_le t) (norm_nonneg _) hM_polar_nonneg
-      refine (norm_sum_le _ _).trans (Finset.sum_le_sum fun k _ ↦ ?_)
-      rw [norm_div, norm_pow]
-      exact div_le_div_of_nonneg_left (norm_nonneg _) (pow_pos h_3R_pos _)
-        (pow_le_pow_left₀ h_3R_pos.le h_dist_far _)
+      exact mul_le_mul (norm_laurentSum_le a h_3R_pos h_dist_far)
+        (h_deriv_le t) (norm_nonneg _) hM_polar_nonneg
     · rw [if_neg h_cond, norm_zero]
       exact Set.indicator_nonneg (fun _ _ ↦ hM_nonneg) t
   have h_int_bound : ∀ ε ∈ Set.Ioo (0 : ℝ) R,
