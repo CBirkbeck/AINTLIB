@@ -792,7 +792,6 @@ theorem no_survivor_of_weight_lt
     obtain ⟨c, hc⟩ := hdiv
     -- (p-a)*d + M = (q-1) * c.
     have : (q - 1) * c = (p - a) * d + M := by
-      change (q - 1) * c = _
       rw [show (Fintype.card k - 1) * c = (q - 1) * c from rfl] at hc
       exact hc.symm
     -- c = 1 because 0 < (q-1)*c < 2(q-1) and q-1 ≥ 1.
