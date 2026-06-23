@@ -65,13 +65,13 @@ private lemma truncation_iff_shift
   · rintro ⟨s, hs, h_near⟩
     rcases sVertOfS_re S s hs with hre | hre
     · exact ⟨s - 1, sVertOfS_pair_left S s hs hre,
-        by rwa [show (z - 1) - (s - 1) = z - s from by ring]⟩
+        by rwa [show (z - 1) - (s - 1) = z - s by ring]⟩
     · exact ⟨s, hs, (norm_sub_one_le hz_re hre).trans h_near⟩
   · rintro ⟨s, hs, h_near⟩
     rcases sVertOfS_re S s hs with hre | hre
     · exact ⟨s, hs, (norm_sub_le_sub_one hz_re hre).trans h_near⟩
     · exact ⟨s + 1, sVertOfS_pair_right S s hs hre,
-        by rwa [show z - (s + 1) = (z - 1) - s from by ring]⟩
+        by rwa [show z - (s + 1) = (z - 1) - s by ring]⟩
 
 omit f hf in
 private lemma norm_shift_neg_inv_eq {z s : ℂ} (hz_re : z.re = 1/2) (hs_unit : ‖s‖ = 1) :
@@ -161,7 +161,7 @@ private lemma integral_seg4_cov (G : ℝ → ℂ) :
     ∫ t in (3:ℝ)..4, G t = ∫ u in (0:ℝ)..1, G (4 - u) := by
   have h := @intervalIntegral.integral_comp_sub_left
     ℂ _ _ (a := 0) (b := 1) G 4
-  simp only [sub_zero, show (4:ℝ) - 1 = 3 from by norm_num] at h
+  simp only [sub_zero, show (4:ℝ) - 1 = 3 by norm_num] at h
   exact h.symm
 
 omit hf in
@@ -327,7 +327,7 @@ private lemma norm_deriv_fdBoundary_H_le
     (ht_ne1 : t ≠ 1) (ht_ne3 : t ≠ 3) (ht_ne4 : t ≠ 4) :
     ‖deriv (fdBoundary_H H) t‖ ≤ max H 1 := by
   have h_norm_cast : ‖(↑H - ↑(Real.sqrt 3) / 2 : ℂ)‖ = H - Real.sqrt 3 / 2 := by
-    rw [show (↑H - ↑(Real.sqrt 3) / 2 : ℂ) = ↑(H - Real.sqrt 3 / 2) from by push_cast; ring,
+    rw [show (↑H - ↑(Real.sqrt 3) / 2 : ℂ) = ↑(H - Real.sqrt 3 / 2) by push_cast; ring,
       Complex.norm_real, Real.norm_of_nonneg (by linarith [Real.sqrt_nonneg 3])]
   by_cases h1 : t < 1
   · erw [(fdBoundary_H_hasDerivAt_seg1 H h1).deriv]
@@ -340,10 +340,10 @@ private lemma norm_deriv_fdBoundary_H_le
       simp only [norm_mul, Complex.norm_I, mul_one]
       have hexp : ‖exp ((↑Real.pi * (↑t + 1) / 6 : ℂ) * I)‖ = 1 := by
         rw [show (↑Real.pi * (↑t + 1) / 6 : ℂ) * I =
-          ↑(Real.pi * (t + 1) / 6) * I from by push_cast; ring]
+          ↑(Real.pi * (t + 1) / 6) * I by push_cast; ring]
         exact Complex.norm_exp_ofReal_mul_I _
       have hpi : ‖(↑Real.pi / 6 : ℂ)‖ = Real.pi / 6 := by
-        rw [show (↑Real.pi / 6 : ℂ) = ↑(Real.pi / 6) from by push_cast; ring,
+        rw [show (↑Real.pi / 6 : ℂ) = ↑(Real.pi / 6) by push_cast; ring,
           Complex.norm_real, Real.norm_of_nonneg (by positivity)]
       rw [hexp, one_mul, hpi]
       exact le_max_of_le_right (by linarith [Real.pi_le_four])
@@ -589,7 +589,7 @@ private lemma modular_side_h_capture
         · have h_lt4 : t < 4 := lt_of_le_of_ne h4 h4'
           have ht_seg4 : fdBoundary_H H t = fdBoundary_H H (4 - t) - 1 := by
             have h4_u := seg4_eq_seg1_minus_one_H H (4 - t)
-            simp only [show (4:ℝ) - (4 - t) = t from by ring] at h4_u
+            simp only [show (4:ℝ) - (4 - t) = t by ring] at h4_u
             rw [fdBoundary_H_eq_seg4_H h3 h4, h4_u,
               fdBoundary_H_eq_seg1_H (by linarith : 4 - t ≤ 1)]
           have h_F_zero_shifted :
@@ -677,7 +677,7 @@ theorem cpv_modular_side_tendsto
   refine (?_ : Tendsto _ _ _).congr' (h_split.mono fun ε h ↦ h.symm)
   rw [show -(2 * ↑Real.pi * I * ((k : ℂ) / 12 - ↑(orderAtCusp' f))) =
     0 + (-(2 * ↑Real.pi * I * (↑k / 12)) +
-      2 * ↑Real.pi * I * ↑(orderAtCusp' f)) from by ring]
+      2 * ↑Real.pi * I * ↑(orderAtCusp' f)) by ring]
   exact Filter.Tendsto.congr (fun ε ↦ by ring)
     (h_vert_tendsto.add (h_arc.add h_seg5))
 
