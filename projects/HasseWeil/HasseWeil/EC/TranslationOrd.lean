@@ -1457,6 +1457,152 @@ the y-side analogue of Lemma 1's pole at infinity.
 
 Proof structure parallels `ord_P_translateX_xy_eq_neg_two_of_non_2_tor`. -/
 
+/-- **`ord_P (2) ≥ 0`.** The constant `2 = 1 + 1` has nonnegative order at any
+smooth point, since `ord_P 1 = 0` and `ord_P` is non-archimedean. Generic
+building block for bounding the orders of integer-scaled function-field
+elements. -/
+private theorem ord_P_two_nonneg {C : Curves.SmoothPlaneCurve F}
+    {P : C.SmoothPoint} : (0 : WithTop ℤ) ≤ C.ord_P P (2 : C.FunctionField) := by
+  rw [show (2 : C.FunctionField) = (1 : C.FunctionField) + 1 by ring]
+  calc (0 : WithTop ℤ) = min (C.ord_P P 1) (C.ord_P P 1) := by simp
+    _ ≤ _ := SmoothPlaneCurve.ord_P_add_le (P := P) _ _
+
+/-- **A common lower bound on the orders of `a` and `b` bounds `ord_P (a + b)`.**
+From `n ≤ ord_P a` and `n ≤ ord_P b`, the non-archimedean inequality gives
+`n ≤ min (ord_P a) (ord_P b) ≤ ord_P (a + b)`. Generic building block for
+combining order lower bounds across a sum. -/
+private theorem ord_P_le_add_of_le_of_le {C : Curves.SmoothPlaneCurve F}
+    {P : C.SmoothPoint} {a b : C.FunctionField} {n : WithTop ℤ}
+    (ha : n ≤ C.ord_P P a) (hb : n ≤ C.ord_P P b) :
+    n ≤ C.ord_P P (a + b) :=
+  (le_min ha hb).trans (SmoothPlaneCurve.ord_P_add_le (P := P) a b)
+
+/-- **`ord_P` of a sum of nonneg-order terms is nonneg.** The `n = 0` case of
+`ord_P_le_add_of_le_of_le`. Generic building block reused throughout the
+cube-combination order bounds. -/
+private theorem ord_P_add_nonneg {C : Curves.SmoothPlaneCurve F}
+    {P : C.SmoothPoint} {a b : C.FunctionField}
+    (ha : (0 : WithTop ℤ) ≤ C.ord_P P a) (hb : (0 : WithTop ℤ) ≤ C.ord_P P b) :
+    (0 : WithTop ℤ) ≤ C.ord_P P (a + b) :=
+  ord_P_le_add_of_le_of_le ha hb
+
+/-- **`ord_P` of a product of nonneg-order terms is nonneg.** Immediate from
+additivity `ord_P (a * b) = ord_P a + ord_P b`. Generic building block. -/
+private theorem ord_P_mul_nonneg {C : Curves.SmoothPlaneCurve F}
+    {P : C.SmoothPoint} {a b : C.FunctionField}
+    (ha : (0 : WithTop ℤ) ≤ C.ord_P P a) (hb : (0 : WithTop ℤ) ≤ C.ord_P P b) :
+    (0 : WithTop ℤ) ≤ C.ord_P P (a * b) := by
+  rw [SmoothPlaneCurve.ord_P_mul (P := P)]; simpa using add_le_add ha hb
+
+/-- **`ord_P (2 * a) ≥ 0` when `ord_P a ≥ 0`.** Combines `ord_P_two_nonneg`
+with `ord_P_mul_nonneg`; used for the `2 * a₁` and `2 * xg` factors. -/
+private theorem ord_P_two_mul_nonneg {C : Curves.SmoothPlaneCurve F}
+    {P : C.SmoothPoint} {a : C.FunctionField}
+    (ha : (0 : WithTop ℤ) ≤ C.ord_P P a) :
+    (0 : WithTop ℤ) ≤ C.ord_P P ((2 : C.FunctionField) * a) :=
+  ord_P_mul_nonneg ord_P_two_nonneg ha
+
+/-- **The `-(yd³)` term has order `0`.** When `ord_P yd = 0`, the leading term
+`-(yd ^ 3)` of the cube combination has order exactly `0`; this is the dominant
+(smallest-order) term against which all `xd`-power terms are compared. -/
+private theorem ord_P_neg_yd_cube_eq_zero {C : Curves.SmoothPlaneCurve F}
+    {P : C.SmoothPoint} {yd : C.FunctionField} (hyd : C.ord_P P yd = 0) :
+    C.ord_P P (-(yd ^ 3)) = 0 := by
+  rw [SmoothPlaneCurve.ord_P_neg, SmoothPlaneCurve.ord_P_pow (P := P), hyd]; simp
+
+/-- **The `xd`-linear term `-(2·a₁·yd²·xd)` has order `≥ 1`.** Its order is
+`ord_P (2 * a₁) + ord_P (yd²) + ord_P xd = (≥0) + 0 + 1`, using `ord_P yd = 0`
+and `ord_P xd = 1`. The first of the three `xd`-power bounds. -/
+private theorem one_le_ord_P_xd_linear_term {C : Curves.SmoothPlaneCurve F}
+    {P : C.SmoothPoint} {xd yd a1 : C.FunctionField}
+    (hxd : C.ord_P P xd = ((1 : ℤ) : WithTop ℤ)) (hyd : C.ord_P P yd = 0)
+    (ha1 : (0 : WithTop ℤ) ≤ C.ord_P P a1) :
+    ((1 : ℤ) : WithTop ℤ) ≤
+      C.ord_P P (-((2 : C.FunctionField) * a1 * yd ^ 2 * xd)) := by
+  have h_yd_sq : C.ord_P P (yd ^ 2) = 0 := by
+    rw [SmoothPlaneCurve.ord_P_pow (P := P) yd 2, hyd]; simp
+  rw [SmoothPlaneCurve.ord_P_neg, SmoothPlaneCurve.ord_P_mul (P := P) _ xd,
+    SmoothPlaneCurve.ord_P_mul (P := P) _ (yd ^ 2), h_yd_sq, add_zero, hxd]
+  simpa using add_le_add (ord_P_two_mul_nonneg ha1) (le_refl ((1 : ℤ) : WithTop ℤ))
+
+/-- **The `xd²` coefficient `yd·(a₂+2·xg+xk') - a₁²·yd` has order `≥ 0`.**
+A sum/product of nonneg-order pieces (using `ord_P yd = 0`): the factor
+`a₂ + 2·xg + xk'` is nonneg, `yd` times it is nonneg, and `a₁²·yd` is nonneg. -/
+private theorem ord_P_xd_quadratic_coef_nonneg {C : Curves.SmoothPlaneCurve F}
+    {P : C.SmoothPoint} {yd a1 a2 xk' xg : C.FunctionField}
+    (hyd : C.ord_P P yd = 0) (ha1 : (0 : WithTop ℤ) ≤ C.ord_P P a1)
+    (ha2 : (0 : WithTop ℤ) ≤ C.ord_P P a2) (hxk' : (0 : WithTop ℤ) ≤ C.ord_P P xk')
+    (hxg : (0 : WithTop ℤ) ≤ C.ord_P P xg) :
+    (0 : WithTop ℤ) ≤
+      C.ord_P P (yd * (a2 + (2 : C.FunctionField) * xg + xk') - a1 ^ 2 * yd) := by
+  have h_sum_nn : (0 : WithTop ℤ) ≤
+      C.ord_P P (a2 + (2 : C.FunctionField) * xg + xk') :=
+    ord_P_add_nonneg (ord_P_add_nonneg ha2 (ord_P_two_mul_nonneg hxg)) hxk'
+  have h_mul1' : (0 : WithTop ℤ) ≤
+      C.ord_P P (yd * (a2 + (2 : C.FunctionField) * xg + xk')) := by
+    rw [SmoothPlaneCurve.ord_P_mul (P := P), hyd, zero_add]; exact h_sum_nn
+  have h_a1sq_yd_nn : (0 : WithTop ℤ) ≤ C.ord_P P (-(a1 ^ 2 * yd)) := by
+    rw [SmoothPlaneCurve.ord_P_neg, SmoothPlaneCurve.ord_P_mul (P := P), hyd,
+      add_zero, SmoothPlaneCurve.ord_P_pow (P := P)]
+    simpa using nsmul_le_nsmul_right ha1 2
+  rw [show yd * (a2 + (2 : C.FunctionField) * xg + xk') - a1 ^ 2 * yd =
+      yd * (a2 + (2 : C.FunctionField) * xg + xk') + -(a1 ^ 2 * yd) by ring]
+  exact ord_P_add_nonneg h_mul1' h_a1sq_yd_nn
+
+/-- **The `xd²` term `(yd·(a₂+2·xg+xk') - a₁²·yd)·xd²` has order `≥ 2`.**
+Combines the nonneg coefficient (`ord_P_xd_quadratic_coef_nonneg`) with
+`ord_P (xd²) = 2`. The second of the three `xd`-power bounds. -/
+private theorem two_le_ord_P_xd_quadratic_term {C : Curves.SmoothPlaneCurve F}
+    {P : C.SmoothPoint} {xd yd a1 a2 xk' xg : C.FunctionField}
+    (hxd : C.ord_P P xd = ((1 : ℤ) : WithTop ℤ)) (hyd : C.ord_P P yd = 0)
+    (ha1 : (0 : WithTop ℤ) ≤ C.ord_P P a1) (ha2 : (0 : WithTop ℤ) ≤ C.ord_P P a2)
+    (hxk' : (0 : WithTop ℤ) ≤ C.ord_P P xk') (hxg : (0 : WithTop ℤ) ≤ C.ord_P P xg) :
+    ((2 : ℤ) : WithTop ℤ) ≤
+      C.ord_P P
+        ((yd * (a2 + (2 : C.FunctionField) * xg + xk') - a1 ^ 2 * yd) * xd ^ 2) := by
+  have h_xd_sq_eq : C.ord_P P (xd ^ 2) = ((2 : ℤ) : WithTop ℤ) := by
+    rw [SmoothPlaneCurve.ord_P_pow (P := P) xd 2, hxd]; rfl
+  rw [SmoothPlaneCurve.ord_P_mul (P := P), h_xd_sq_eq]
+  calc ((2 : ℤ) : WithTop ℤ) = 0 + ((2 : ℤ) : WithTop ℤ) := by rw [zero_add]
+    _ ≤ _ := add_le_add
+      (ord_P_xd_quadratic_coef_nonneg hyd ha1 ha2 hxk' hxg) (le_refl _)
+
+/-- **The `xd³` coefficient `-yg + a₁·(a₂+xg+xk') - a₃` has order `≥ 0`.**
+A sum of nonneg-order pieces: `-yg`, the product `a₁·(a₂+xg+xk')`, and `-a₃`. -/
+private theorem ord_P_xd_cubic_coef_nonneg {C : Curves.SmoothPlaneCurve F}
+    {P : C.SmoothPoint} {a1 a2 a3 xk' xg yg : C.FunctionField}
+    (ha1 : (0 : WithTop ℤ) ≤ C.ord_P P a1) (ha2 : (0 : WithTop ℤ) ≤ C.ord_P P a2)
+    (ha3 : (0 : WithTop ℤ) ≤ C.ord_P P a3) (hxk' : (0 : WithTop ℤ) ≤ C.ord_P P xk')
+    (hxg : (0 : WithTop ℤ) ≤ C.ord_P P xg) (hyg : (0 : WithTop ℤ) ≤ C.ord_P P yg) :
+    (0 : WithTop ℤ) ≤ C.ord_P P (-yg + a1 * (a2 + xg + xk') - a3) := by
+  have h_a2xxk_nn : (0 : WithTop ℤ) ≤ C.ord_P P (a2 + xg + xk') :=
+    ord_P_add_nonneg (ord_P_add_nonneg ha2 hxg) hxk'
+  have h_a1mul_nn : (0 : WithTop ℤ) ≤ C.ord_P P (a1 * (a2 + xg + xk')) :=
+    ord_P_mul_nonneg ha1 h_a2xxk_nn
+  rw [show -yg + a1 * (a2 + xg + xk') - a3 =
+      -yg + a1 * (a2 + xg + xk') + -a3 by ring]
+  exact ord_P_add_nonneg
+    (ord_P_add_nonneg (by rwa [SmoothPlaneCurve.ord_P_neg]) h_a1mul_nn)
+    (by rwa [SmoothPlaneCurve.ord_P_neg])
+
+/-- **The `xd³` term `(-yg + a₁·(a₂+xg+xk') - a₃)·xd³` has order `≥ 3`.**
+Combines the nonneg coefficient (`ord_P_xd_cubic_coef_nonneg`) with
+`ord_P (xd³) = 3`. The third of the three `xd`-power bounds. -/
+private theorem three_le_ord_P_xd_cubic_term {C : Curves.SmoothPlaneCurve F}
+    {P : C.SmoothPoint} {xd a1 a2 a3 xk' xg yg : C.FunctionField}
+    (hxd : C.ord_P P xd = ((1 : ℤ) : WithTop ℤ)) (ha1 : (0 : WithTop ℤ) ≤ C.ord_P P a1)
+    (ha2 : (0 : WithTop ℤ) ≤ C.ord_P P a2) (ha3 : (0 : WithTop ℤ) ≤ C.ord_P P a3)
+    (hxk' : (0 : WithTop ℤ) ≤ C.ord_P P xk') (hxg : (0 : WithTop ℤ) ≤ C.ord_P P xg)
+    (hyg : (0 : WithTop ℤ) ≤ C.ord_P P yg) :
+    ((3 : ℤ) : WithTop ℤ) ≤
+      C.ord_P P ((-yg + a1 * (a2 + xg + xk') - a3) * xd ^ 3) := by
+  have h_xd_cube_eq : C.ord_P P (xd ^ 3) = ((3 : ℤ) : WithTop ℤ) := by
+    rw [SmoothPlaneCurve.ord_P_pow (P := P) xd 3, hxd]; rfl
+  rw [SmoothPlaneCurve.ord_P_mul (P := P), h_xd_cube_eq]
+  calc ((3 : ℤ) : WithTop ℤ) = 0 + ((3 : ℤ) : WithTop ℤ) := by rw [zero_add]
+    _ ≤ _ := add_le_add
+      (ord_P_xd_cubic_coef_nonneg ha1 ha2 ha3 hxk' hxg hyg) (le_refl _)
+
 /-- **Abstract `ord_P`-engine for the `translateY_xy` cube identity.**
 Given a smooth point `P` of a smooth plane curve `C` and function-field
 elements `xd` (with `ord_P xd = 1`), `yd` (with `ord_P yd = 0`) and
@@ -1482,91 +1628,33 @@ private theorem ord_P_translateY_cube_combination_eq_zero
         (-((2 : C.FunctionField) * a1 * yd ^ 2 * xd) +
           ((yd * (a2 + (2 : C.FunctionField) * xg + xk') - a1 ^ 2 * yd) * xd ^ 2 +
             (-yg + a1 * (a2 + xg + xk') - a3) * xd ^ 3))) = 0 := by
-  have h_yd_sq : C.ord_P P (yd ^ 2) = 0 := by
-    rw [SmoothPlaneCurve.ord_P_pow (P := P) yd 2, hyd]; simp
-  have h_xd_sq_eq : C.ord_P P (xd ^ 2) = ((2 : ℤ) : WithTop ℤ) := by
-    rw [SmoothPlaneCurve.ord_P_pow (P := P) xd 2, hxd]; rfl
-  have h_xd_cube_eq : C.ord_P P (xd ^ 3) = ((3 : ℤ) : WithTop ℤ) := by
-    rw [SmoothPlaneCurve.ord_P_pow (P := P) xd 3, hxd]; rfl
-  -- The three xd-power terms of the cubic combination.
+  -- Order facts for the four monomials, via the per-term helpers above.
+  have h_neg_yd_cube : C.ord_P P (-(yd ^ 3)) = 0 := ord_P_neg_yd_cube_eq_zero hyd
+  have h_T2 : ((1 : ℤ) : WithTop ℤ) ≤
+      C.ord_P P (-((2 : C.FunctionField) * a1 * yd ^ 2 * xd)) :=
+    one_le_ord_P_xd_linear_term hxd hyd ha1
+  have h_T3 : ((2 : ℤ) : WithTop ℤ) ≤
+      C.ord_P P
+        ((yd * (a2 + (2 : C.FunctionField) * xg + xk') - a1 ^ 2 * yd) * xd ^ 2) :=
+    two_le_ord_P_xd_quadratic_term hxd hyd ha1 ha2 hxk' hxg
+  have h_T4 : ((3 : ℤ) : WithTop ℤ) ≤
+      C.ord_P P ((-yg + a1 * (a2 + xg + xk') - a3) * xd ^ 3) :=
+    three_le_ord_P_xd_cubic_term hxd ha1 ha2 ha3 hxk' hxg hyg
+  -- Name the three xd-power terms and bound their sum below by `1`.
   set B : C.FunctionField := -((2 : C.FunctionField) * a1 * yd ^ 2 * xd) with hB
   set T3 : C.FunctionField :=
     (yd * (a2 + (2 : C.FunctionField) * xg + xk') - a1 ^ 2 * yd) * xd ^ 2 with hT3
   set T4 : C.FunctionField :=
     (-yg + a1 * (a2 + xg + xk') - a3) * xd ^ 3 with hT4
-  have h_two_nn : (0 : WithTop ℤ) ≤ C.ord_P P (2 : C.FunctionField) := by
-    rw [show (2 : C.FunctionField) = (1 : C.FunctionField) + 1 by ring]
-    calc (0 : WithTop ℤ) = min (C.ord_P P 1) (C.ord_P P 1) := by simp
-      _ ≤ _ := SmoothPlaneCurve.ord_P_add_le (P := P) _ _
-  have h_T2 : ((1 : ℤ) : WithTop ℤ) ≤ C.ord_P P B := by
-    rw [hB, SmoothPlaneCurve.ord_P_neg,
-      SmoothPlaneCurve.ord_P_mul (P := P) _ xd,
-      SmoothPlaneCurve.ord_P_mul (P := P) _ (yd ^ 2), h_yd_sq, add_zero, hxd]
-    have h_2a1_nn : (0 : WithTop ℤ) ≤ C.ord_P P ((2 : C.FunctionField) * a1) := by
-      rw [SmoothPlaneCurve.ord_P_mul (P := P)]
-      simpa using add_le_add h_two_nn ha1
-    simpa using add_le_add h_2a1_nn (le_refl ((1 : ℤ) : WithTop ℤ))
-  have h_T3_coef_nn : (0 : WithTop ℤ) ≤
-      C.ord_P P (yd * (a2 + (2 : C.FunctionField) * xg + xk') - a1 ^ 2 * yd) := by
-    have h_2x_nn : (0 : WithTop ℤ) ≤ C.ord_P P ((2 : C.FunctionField) * xg) := by
-      rw [SmoothPlaneCurve.ord_P_mul (P := P)]
-      simpa using add_le_add h_two_nn hxg
-    have h_sum_nn : (0 : WithTop ℤ) ≤
-        C.ord_P P (a2 + (2 : C.FunctionField) * xg + xk') := by
-      have h12' : (0 : WithTop ℤ) ≤ C.ord_P P (a2 + (2 : C.FunctionField) * xg) :=
-        (le_min ha2 h_2x_nn).trans (SmoothPlaneCurve.ord_P_add_le (P := P) a2 _)
-      exact (le_min h12' hxk').trans
-        (SmoothPlaneCurve.ord_P_add_le (P := P) _ xk')
-    have h_mul1' : (0 : WithTop ℤ) ≤
-        C.ord_P P (yd * (a2 + (2 : C.FunctionField) * xg + xk')) := by
-      rw [SmoothPlaneCurve.ord_P_mul (P := P), hyd, zero_add]; exact h_sum_nn
-    have h_a1sq_yd_nn : (0 : WithTop ℤ) ≤ C.ord_P P (-(a1 ^ 2 * yd)) := by
-      rw [SmoothPlaneCurve.ord_P_neg, SmoothPlaneCurve.ord_P_mul (P := P), hyd,
-        add_zero, SmoothPlaneCurve.ord_P_pow (P := P)]
-      simpa using nsmul_le_nsmul_right ha1 2
-    rw [show yd * (a2 + (2 : C.FunctionField) * xg + xk') - a1 ^ 2 * yd =
-        yd * (a2 + (2 : C.FunctionField) * xg + xk') + -(a1 ^ 2 * yd) by ring]
-    exact (le_min h_mul1' h_a1sq_yd_nn).trans
-      (SmoothPlaneCurve.ord_P_add_le (P := P) _ _)
-  have h_T3 : ((2 : ℤ) : WithTop ℤ) ≤ C.ord_P P T3 := by
-    rw [hT3, SmoothPlaneCurve.ord_P_mul (P := P), h_xd_sq_eq]
-    calc ((2 : ℤ) : WithTop ℤ) = 0 + ((2 : ℤ) : WithTop ℤ) := by rw [zero_add]
-      _ ≤ _ := add_le_add h_T3_coef_nn (le_refl _)
-  have h_T4_coef_nn : (0 : WithTop ℤ) ≤
-      C.ord_P P (-yg + a1 * (a2 + xg + xk') - a3) := by
-    have h_neg_yg_nn : (0 : WithTop ℤ) ≤ C.ord_P P (-yg) := by
-      rwa [SmoothPlaneCurve.ord_P_neg]
-    have h_a2xxk_nn : (0 : WithTop ℤ) ≤ C.ord_P P (a2 + xg + xk') := by
-      have h12' : (0 : WithTop ℤ) ≤ C.ord_P P (a2 + xg) :=
-        (le_min ha2 hxg).trans (SmoothPlaneCurve.ord_P_add_le (P := P) a2 xg)
-      exact (le_min h12' hxk').trans
-        (SmoothPlaneCurve.ord_P_add_le (P := P) _ xk')
-    have h_a1mul_nn : (0 : WithTop ℤ) ≤ C.ord_P P (a1 * (a2 + xg + xk')) := by
-      rw [SmoothPlaneCurve.ord_P_mul (P := P)]
-      simpa using add_le_add ha1 h_a2xxk_nn
-    have h_neg_a3_nn : (0 : WithTop ℤ) ≤ C.ord_P P (-a3) := by
-      rwa [SmoothPlaneCurve.ord_P_neg]
-    rw [show -yg + a1 * (a2 + xg + xk') - a3 =
-        -yg + a1 * (a2 + xg + xk') + -a3 by ring]
-    have h12' : (0 : WithTop ℤ) ≤ C.ord_P P (-yg + a1 * (a2 + xg + xk')) :=
-      (le_min h_neg_yg_nn h_a1mul_nn).trans
-        (SmoothPlaneCurve.ord_P_add_le (P := P) (-yg) _)
-    exact (le_min h12' h_neg_a3_nn).trans
-      (SmoothPlaneCurve.ord_P_add_le (P := P) _ (-a3))
-  have h_T4 : ((3 : ℤ) : WithTop ℤ) ≤ C.ord_P P T4 := by
-    rw [hT4, SmoothPlaneCurve.ord_P_mul (P := P), h_xd_cube_eq]
-    calc ((3 : ℤ) : WithTop ℤ) = 0 + ((3 : ℤ) : WithTop ℤ) := by rw [zero_add]
-      _ ≤ _ := add_le_add h_T4_coef_nn (le_refl _)
-  have h_neg_yd_cube : C.ord_P P (-(yd ^ 3)) = 0 := by
-    rw [SmoothPlaneCurve.ord_P_neg, SmoothPlaneCurve.ord_P_pow (P := P), hyd]; simp
   have h_T234 : ((1 : ℤ) : WithTop ℤ) ≤ C.ord_P P (B + (T3 + T4)) := by
     have h_T3' : ((1 : ℤ) : WithTop ℤ) ≤ C.ord_P P T3 :=
       le_trans (by exact_mod_cast (show (1 : ℤ) ≤ 2 by norm_num)) h_T3
     have h_T4' : ((1 : ℤ) : WithTop ℤ) ≤ C.ord_P P T4 :=
       le_trans (by exact_mod_cast (show (1 : ℤ) ≤ 3 by norm_num)) h_T4
     have h_T34 : ((1 : ℤ) : WithTop ℤ) ≤ C.ord_P P (T3 + T4) :=
-      (le_min h_T3' h_T4').trans (SmoothPlaneCurve.ord_P_add_le (P := P) T3 T4)
-    exact (le_min h_T2 h_T34).trans (SmoothPlaneCurve.ord_P_add_le (P := P) B _)
+      ord_P_le_add_of_le_of_le h_T3' h_T4'
+    exact ord_P_le_add_of_le_of_le h_T2 h_T34
+  -- The `-(yd³)` term dominates: it has strictly smaller order than the rest.
   have h_strict : C.ord_P P (-(yd ^ 3)) < C.ord_P P (B + (T3 + T4)) := by
     rw [h_neg_yd_cube]
     exact lt_of_lt_of_le (by exact_mod_cast (show (0 : ℤ) < 1 by norm_num)) h_T234
