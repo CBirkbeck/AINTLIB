@@ -2021,6 +2021,84 @@ private theorem addPullback_y_negFrobenius_ord_le (m : ℤ)
   have h46 : (-4 : ℤ) ≤ -6 := by exact_mod_cast h_lhs_ge
   omega
 
+/-- Step (b), first dominance: for `m ≤ -3` the `Y²` term strictly dominates the
+`a₁·X·Y` term in valuation, i.e. `ord(Y²) < ord(a₁·X·Y)`. With `ord(Y²) = 2m` and
+`ord(X·Y) = -2 + m`, this is `2m < -2 + m`, which holds since `m ≤ -3 < -2`. -/
+private theorem ord_y_sq_lt_a1_mul_x_mul_y_negFrobenius (m : ℤ)
+    (h_xy_ord : (W_smooth W).ordAtInfty
+        (addPullback_x W (negFrobeniusIsog W) *
+          addPullback_y W (negFrobeniusIsog W)) =
+        (((-2 + m : ℤ)) : WithTop ℤ))
+    (hY_sq_ord : (W_smooth W).ordAtInfty
+        (addPullback_y W (negFrobeniusIsog W) ^ 2) =
+        ((2 * m : ℤ) : WithTop ℤ))
+    (h_m_le : m ≤ -3) :
+    (W_smooth W).ordAtInfty
+        (addPullback_y W (negFrobeniusIsog W) ^ 2) <
+      (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₁ *
+        addPullback_x W (negFrobeniusIsog W) *
+        addPullback_y W (negFrobeniusIsog W)) := by
+  have h_assoc : algebraMap K KE W.toAffine.a₁ *
+      addPullback_x W (negFrobeniusIsog W) *
+      addPullback_y W (negFrobeniusIsog W) =
+      algebraMap K KE W.toAffine.a₁ *
+      (addPullback_x W (negFrobeniusIsog W) *
+        addPullback_y W (negFrobeniusIsog W)) := by ring
+  rw [hY_sq_ord, h_assoc]
+  refine lt_of_lt_of_le ?_ (ord_algebraMap_mul_ge W W.toAffine.a₁
+    (n := (((-2 + m : ℤ)) : WithTop ℤ)) (le_of_eq h_xy_ord.symm))
+  exact_mod_cast (by linarith : (2 * m : ℤ) < -2 + m)
+
+/-- Step (b), second dominance: for `m ≤ -3` the `Y²` term strictly dominates the
+`a₃·Y` term in valuation, i.e. `ord(Y²) < ord(a₃·Y)`. With `ord(Y²) = 2m` and
+`ord(Y) = m`, this is `2m < m`, which holds since `m ≤ -3 < 0`. -/
+private theorem ord_y_sq_lt_a3_mul_y_negFrobenius (m : ℤ)
+    (hm : (W_smooth W).ordAtInfty (addPullback_y W (negFrobeniusIsog W)) =
+        ((m : ℤ) : WithTop ℤ))
+    (hY_sq_ord : (W_smooth W).ordAtInfty
+        (addPullback_y W (negFrobeniusIsog W) ^ 2) =
+        ((2 * m : ℤ) : WithTop ℤ))
+    (h_m_le : m ≤ -3) :
+    (W_smooth W).ordAtInfty
+        (addPullback_y W (negFrobeniusIsog W) ^ 2) <
+      (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₃ *
+        addPullback_y W (negFrobeniusIsog W)) := by
+  rw [hY_sq_ord]
+  refine lt_of_lt_of_le ?_ (ord_algebraMap_mul_ge W W.toAffine.a₃
+    (n := ((m : ℤ) : WithTop ℤ)) (le_of_eq hm.symm))
+  exact_mod_cast (by linarith : (2 * m : ℤ) < m)
+
+/-- Step (b), combination: if the `Y²` term strictly dominates both the `a₁·X·Y`
+and the `a₃·Y` terms in valuation, then the full standard-form LHS
+`Y² + a₁·X·Y + a₃·Y` has the same order as `Y²`. Pure ultrametric bookkeeping via
+`ordAtInfty_add_eq_of_lt`, twice (inner sum first, then the outer `+ a₃·Y`). -/
+private theorem ord_lhs_eq_y_sq_of_y_sq_dominates_negFrobenius
+    (h_a1xy_gt : (W_smooth W).ordAtInfty
+        (addPullback_y W (negFrobeniusIsog W) ^ 2) <
+      (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₁ *
+        addPullback_x W (negFrobeniusIsog W) *
+        addPullback_y W (negFrobeniusIsog W)))
+    (h_a3y_gt : (W_smooth W).ordAtInfty
+        (addPullback_y W (negFrobeniusIsog W) ^ 2) <
+      (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₃ *
+        addPullback_y W (negFrobeniusIsog W))) :
+    (W_smooth W).ordAtInfty
+        (addPullback_y W (negFrobeniusIsog W) ^ 2 +
+         algebraMap K KE W.toAffine.a₁ *
+           addPullback_x W (negFrobeniusIsog W) *
+           addPullback_y W (negFrobeniusIsog W) +
+         algebraMap K KE W.toAffine.a₃ *
+           addPullback_y W (negFrobeniusIsog W)) =
+      (W_smooth W).ordAtInfty (addPullback_y W (negFrobeniusIsog W) ^ 2) := by
+  have h_inner_eq : (W_smooth W).ordAtInfty
+      (addPullback_y W (negFrobeniusIsog W) ^ 2 +
+       algebraMap K KE W.toAffine.a₁ *
+         addPullback_x W (negFrobeniusIsog W) *
+         addPullback_y W (negFrobeniusIsog W)) =
+      (W_smooth W).ordAtInfty (addPullback_y W (negFrobeniusIsog W) ^ 2) :=
+    (W_smooth W).ordAtInfty_add_eq_of_lt h_a1xy_gt
+  exact ((W_smooth W).ordAtInfty_add_eq_of_lt (h_inner_eq ▸ h_a3y_gt)).trans h_inner_eq
+
 /-- Step (b): once `m ≤ -3`, the `Y²` term strictly dominates the other two LHS
 terms in valuation, so the standard-form LHS has the same order as `Y²`. -/
 private theorem addPullback_y_negFrobenius_lhs_ord_eq_sq (m : ℤ)
@@ -2042,53 +2120,12 @@ private theorem addPullback_y_negFrobenius_lhs_ord_eq_sq (m : ℤ)
          algebraMap K KE W.toAffine.a₃ *
            addPullback_y W (negFrobeniusIsog W)) =
       (W_smooth W).ordAtInfty (addPullback_y W (negFrobeniusIsog W) ^ 2) := by
-  have h_a1xy_gt : (W_smooth W).ordAtInfty
-      (addPullback_y W (negFrobeniusIsog W) ^ 2) <
-      (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₁ *
-        addPullback_x W (negFrobeniusIsog W) *
-        addPullback_y W (negFrobeniusIsog W)) := by
-    have h_assoc : algebraMap K KE W.toAffine.a₁ *
-        addPullback_x W (negFrobeniusIsog W) *
-        addPullback_y W (negFrobeniusIsog W) =
-        algebraMap K KE W.toAffine.a₁ *
-        (addPullback_x W (negFrobeniusIsog W) *
-          addPullback_y W (negFrobeniusIsog W)) := by ring
-    rw [hY_sq_ord, h_assoc]
-    refine lt_of_lt_of_le ?_ (ord_algebraMap_mul_ge W W.toAffine.a₁
-      (n := (((-2 + m : ℤ)) : WithTop ℤ)) (le_of_eq h_xy_ord.symm))
-    exact_mod_cast (by linarith : (2 * m : ℤ) < -2 + m)
-  have h_a3y_gt : (W_smooth W).ordAtInfty
-      (addPullback_y W (negFrobeniusIsog W) ^ 2) <
-      (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₃ *
-        addPullback_y W (negFrobeniusIsog W)) := by
-    rw [hY_sq_ord]
-    refine lt_of_lt_of_le ?_ (ord_algebraMap_mul_ge W W.toAffine.a₃
-      (n := ((m : ℤ) : WithTop ℤ)) (le_of_eq hm.symm))
-    exact_mod_cast (by linarith : (2 * m : ℤ) < m)
-  have h_inner_eq : (W_smooth W).ordAtInfty
-      (addPullback_y W (negFrobeniusIsog W) ^ 2 +
-       algebraMap K KE W.toAffine.a₁ *
-         addPullback_x W (negFrobeniusIsog W) *
-         addPullback_y W (negFrobeniusIsog W)) =
-      (W_smooth W).ordAtInfty (addPullback_y W (negFrobeniusIsog W) ^ 2) :=
-    (W_smooth W).ordAtInfty_add_eq_of_lt h_a1xy_gt
-  have h_a3y_gt' : (W_smooth W).ordAtInfty
-      (addPullback_y W (negFrobeniusIsog W) ^ 2 +
-       algebraMap K KE W.toAffine.a₁ *
-         addPullback_x W (negFrobeniusIsog W) *
-         addPullback_y W (negFrobeniusIsog W)) <
-      (W_smooth W).ordAtInfty (algebraMap K KE W.toAffine.a₃ *
-        addPullback_y W (negFrobeniusIsog W)) := h_inner_eq ▸ h_a3y_gt
-  have h_outer_eq : (W_smooth W).ordAtInfty
-      (addPullback_y W (negFrobeniusIsog W) ^ 2 +
-       algebraMap K KE W.toAffine.a₁ *
-         addPullback_x W (negFrobeniusIsog W) *
-         addPullback_y W (negFrobeniusIsog W) +
-       algebraMap K KE W.toAffine.a₃ *
-         addPullback_y W (negFrobeniusIsog W)) =
-      (W_smooth W).ordAtInfty (addPullback_y W (negFrobeniusIsog W) ^ 2) :=
-    ((W_smooth W).ordAtInfty_add_eq_of_lt h_a3y_gt').trans h_inner_eq
-  exact h_outer_eq
+  -- `Y²` strictly dominates `a₁·X·Y` and `a₃·Y` in valuation (since `m ≤ -3`)...
+  have h_a1xy_gt :=
+    ord_y_sq_lt_a1_mul_x_mul_y_negFrobenius W m h_xy_ord hY_sq_ord h_m_le
+  have h_a3y_gt := ord_y_sq_lt_a3_mul_y_negFrobenius W m hm hY_sq_ord h_m_le
+  -- ...so the full standard-form LHS has the same order as `Y²`.
+  exact ord_lhs_eq_y_sq_of_y_sq_dominates_negFrobenius W h_a1xy_gt h_a3y_gt
 
 /-- **`ord_∞(addPullback_y W (-π)) = -3`** for `q ≥ 2` (any characteristic).
 
