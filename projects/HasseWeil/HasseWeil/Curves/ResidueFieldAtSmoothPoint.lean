@@ -270,26 +270,24 @@ Strategy:
 4. Pick a good Q; for each P above, combine Piece 2/3 (e = 1) + Piece 9 (f = 1).
 5. Apply Piece 8. -/
 
-
-set_option synthInstance.maxHeartbeats 400000 in
-set_option maxHeartbeats 2000000 in
-/-- **T-II-2-009 full unconditional form** (Deliverable 1):
-for a separable `CurveMap` with `CoordHom` pullback over `[IsAlgClosed F]`,
-there exists a height-one prime `Q` in `C₂.CoordinateRing` whose fiber
-cardinality in `C₁.CoordinateRing` equals `φ.separableDegree`. -/
-theorem CurveMap.exists_heightOneSpectrum_fiber_card_eq_sepDegree_unconditional
+/-- **Good height-one prime exists** (Pieces 1 + 6): contracting the finite
+ramified locus of `C₁.CoordinateRing` via `HeightOneSpectrum.under` to a
+finite subset of `HeightOneSpectrum C₂.CoordinateRing`, and using that the
+latter is infinite over an algebraically closed elliptic base, there exists a
+height-one prime `Q` in `C₂.CoordinateRing` lying under **no** ramified prime
+of `C₁.CoordinateRing` — i.e. its whole fiber avoids `differentIdeal`. -/
+private theorem CurveMap.exists_heightOneSpectrum_not_liesUnder_ramified
     [IsAlgClosed F]
     [C₂.toAffine.IsElliptic]
     [IsIntegrallyClosed C₂.CoordinateRing]
     [IsIntegrallyClosed C₁.CoordinateRing]
     (φ : Curves.CurveMap C₁ C₂) (coordHom : φ.CoordHom)
-    (hsep : φ.IsSeparable)
+    (hfin : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _
+      coordHom.toAlgebra.toModule)
     (htorsion : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _
       coordHom.toAlgebra.toModule)
     (hfaithful : @FaithfulSMul C₂.CoordinateRing C₁.CoordinateRing
       coordHom.toAlgebra.toSMul)
-    (hessfin : @Algebra.EssFiniteType C₂.CoordinateRing C₁.CoordinateRing _ _
-      coordHom.toAlgebra)
     (hsepFF :
       letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
       @Algebra.IsSeparable (FractionRing C₂.CoordinateRing)
@@ -297,10 +295,9 @@ theorem CurveMap.exists_heightOneSpectrum_fiber_card_eq_sepDegree_unconditional
         (FractionRing.liftAlgebra C₂.CoordinateRing (FractionRing C₁.CoordinateRing))) :
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
     ∃ Q : IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing,
-      (IsDedekindDomain.primesOverFinset Q.asIdeal C₁.CoordinateRing).card = φ.separableDegree := by
-  have hfin : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _
-      coordHom.toAlgebra.toModule := by
-    exact coordHom.module_finite
+      ∀ P : IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing,
+        P.asIdeal ∣ differentIdeal C₂.CoordinateRing C₁.CoordinateRing →
+        P.under C₂.CoordinateRing ≠ Q := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
   letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
   haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR := hfin
@@ -308,13 +305,6 @@ theorem CurveMap.exists_heightOneSpectrum_fiber_card_eq_sepDegree_unconditional
     htorsion
   haveI hfaithful' : @FaithfulSMul C₂.CoordinateRing C₁.CoordinateRing algCR.toSMul :=
     hfaithful
-  haveI hessfin' : @Algebra.EssFiniteType C₂.CoordinateRing C₁.CoordinateRing _ _ algCR :=
-    hessfin
-  haveI : Algebra.IsIntegral C₂.CoordinateRing C₁.CoordinateRing :=
-    Algebra.IsIntegral.of_finite _ _
-  -- Scalar tower F → C₂.CR → C₁.CR from coordHom.compat (needed for Piece 9).
-  haveI : IsScalarTower F C₂.CoordinateRing C₁.CoordinateRing :=
-    IsScalarTower.of_algHom coordHom.toAlgHom
   -- Step 1: bad locus in C₁.CR is finite (Piece 1).
   have hfin_bad :
       {P : IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing |
@@ -325,26 +315,65 @@ theorem CurveMap.exists_heightOneSpectrum_fiber_card_eq_sepDegree_unconditional
   have hinf_C2 : Set.Infinite
       ({P : IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing | True}) :=
     C₂.heightOneSpectrum_infinite
-  have hgood_ne : ∃ Q : IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing,
+  by_contra h
+  push Not at h
+  apply hinf_C2
+  have hsub : ({P : IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing | True} : Set _)
+      ⊆ (fun P : IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing ↦ P.under C₂.CoordinateRing)
+        '' {P | P.asIdeal ∣ differentIdeal C₂.CoordinateRing C₁.CoordinateRing} := by
+    intro Q _
+    obtain ⟨P, hPdvd, hPeq⟩ := h Q
+    exact ⟨P, hPdvd, hPeq⟩
+  exact (hfin_bad.image _).subset hsub
+
+/-- **Per-prime `e · f = 1`** (Pieces 2/3 + Piece 9): for a height-one prime
+`Q` of `C₂.CoordinateRing` whose fiber avoids the ramified locus, every prime
+`P` in that fiber has `ramificationIdx Q P * inertiaDeg Q P = 1`. The
+ramification side `e = 1` is Pieces 2/3 (unramified at `P` ⇒ `e = 1`); the
+inertia side `f = 1` is Piece 9 over the algebraically closed base. This is
+exactly the witness consumed by
+`exists_heightOneSpectrum_fiber_card_eq_sepDegree`. -/
+private theorem CurveMap.ramificationIdx_mul_inertiaDeg_eq_one_of_not_liesUnder_ramified
+    [IsAlgClosed F]
+    [IsIntegrallyClosed C₂.CoordinateRing]
+    [IsIntegrallyClosed C₁.CoordinateRing]
+    (φ : Curves.CurveMap C₁ C₂) (coordHom : φ.CoordHom)
+    (hfin : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _
+      coordHom.toAlgebra.toModule)
+    (htorsion : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _
+      coordHom.toAlgebra.toModule)
+    (hfaithful : @FaithfulSMul C₂.CoordinateRing C₁.CoordinateRing
+      coordHom.toAlgebra.toSMul)
+    (hessfin : @Algebra.EssFiniteType C₂.CoordinateRing C₁.CoordinateRing _ _
+      coordHom.toAlgebra)
+    (hsepFF :
+      letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
+      @Algebra.IsSeparable (FractionRing C₂.CoordinateRing)
+        (FractionRing C₁.CoordinateRing) _ _
+        (FractionRing.liftAlgebra C₂.CoordinateRing (FractionRing C₁.CoordinateRing)))
+    (Q : IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing)
+    (hQ_good :
+      letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
       ∀ P : IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing,
         P.asIdeal ∣ differentIdeal C₂.CoordinateRing C₁.CoordinateRing →
-        P.under C₂.CoordinateRing ≠ Q := by
-    by_contra h
-    push Not at h
-    apply hinf_C2
-    have hsub : ({P : IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing | True} : Set _)
-        ⊆ (fun P : IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing ↦ P.under C₂.CoordinateRing)
-          '' {P | P.asIdeal ∣ differentIdeal C₂.CoordinateRing C₁.CoordinateRing} := by
-      intro Q _
-      obtain ⟨P, hPdvd, hPeq⟩ := h Q
-      exact ⟨P, hPdvd, hPeq⟩
-    exact (hfin_bad.image _).subset hsub
-  obtain ⟨Q, hQ_good⟩ := hgood_ne
-  refine ⟨Q, ?_⟩
-  -- Step 4: apply Piece 8 with h_ef_one_Q derived per-P.
+        P.under C₂.CoordinateRing ≠ Q) :
+    letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
+    ∀ P ∈ IsDedekindDomain.primesOverFinset Q.asIdeal C₁.CoordinateRing,
+      Ideal.ramificationIdx Q.asIdeal P *
+        Ideal.inertiaDeg Q.asIdeal P = 1 := by
+  letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
+  letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+  haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR := hfin
+  haveI htorsion' : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    htorsion
+  haveI hfaithful' : @FaithfulSMul C₂.CoordinateRing C₁.CoordinateRing algCR.toSMul :=
+    hfaithful
+  haveI hessfin' : @Algebra.EssFiniteType C₂.CoordinateRing C₁.CoordinateRing _ _ algCR :=
+    hessfin
+  -- Scalar tower F → C₂.CR → C₁.CR from coordHom.compat (needed for Piece 9).
+  haveI : IsScalarTower F C₂.CoordinateRing C₁.CoordinateRing :=
+    IsScalarTower.of_algHom coordHom.toAlgHom
   haveI hQmax : Q.asIdeal.IsMaximal := Q.isPrime.isMaximal Q.ne_bot
-  apply φ.exists_heightOneSpectrum_fiber_card_eq_sepDegree
-    coordHom hsep Q
   intro P hP_mem
   -- Unpack membership: P prime, P lies over Q.asIdeal.
   rw [IsDedekindDomain.mem_primesOverFinset_iff Q.ne_bot] at hP_mem
@@ -377,5 +406,47 @@ theorem CurveMap.exists_heightOneSpectrum_fiber_card_eq_sepDegree_unconditional
   -- Apply the combined e·f = 1 witness.
   exact CurveMap.CoordHom.ef_one_of_ram_one_and_algClosed
     φ coordHom hQmax hPmax hP_lies hram ‹_›
+
+set_option synthInstance.maxHeartbeats 400000 in
+set_option maxHeartbeats 2000000 in
+/-- **T-II-2-009 full unconditional form** (Deliverable 1):
+for a separable `CurveMap` with `CoordHom` pullback over `[IsAlgClosed F]`,
+there exists a height-one prime `Q` in `C₂.CoordinateRing` whose fiber
+cardinality in `C₁.CoordinateRing` equals `φ.separableDegree`. -/
+theorem CurveMap.exists_heightOneSpectrum_fiber_card_eq_sepDegree_unconditional
+    [IsAlgClosed F]
+    [C₂.toAffine.IsElliptic]
+    [IsIntegrallyClosed C₂.CoordinateRing]
+    [IsIntegrallyClosed C₁.CoordinateRing]
+    (φ : Curves.CurveMap C₁ C₂) (coordHom : φ.CoordHom)
+    (hsep : φ.IsSeparable)
+    (htorsion : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _
+      coordHom.toAlgebra.toModule)
+    (hfaithful : @FaithfulSMul C₂.CoordinateRing C₁.CoordinateRing
+      coordHom.toAlgebra.toSMul)
+    (hessfin : @Algebra.EssFiniteType C₂.CoordinateRing C₁.CoordinateRing _ _
+      coordHom.toAlgebra)
+    (hsepFF :
+      letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
+      @Algebra.IsSeparable (FractionRing C₂.CoordinateRing)
+        (FractionRing C₁.CoordinateRing) _ _
+        (FractionRing.liftAlgebra C₂.CoordinateRing (FractionRing C₁.CoordinateRing))) :
+    letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
+    ∃ Q : IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing,
+      (IsDedekindDomain.primesOverFinset Q.asIdeal C₁.CoordinateRing).card = φ.separableDegree := by
+  -- `Module.Finite` (Pieces 1–6 input) from the coordinate-ring pullback.
+  have hfin : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _
+      coordHom.toAlgebra.toModule := coordHom.module_finite
+  letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
+  -- Steps 1–3 (Pieces 1 + 6): a good height-one prime `Q` exists, lying under
+  -- no ramified prime of `C₁`.
+  obtain ⟨Q, hQ_good⟩ :=
+    φ.exists_heightOneSpectrum_not_liesUnder_ramified coordHom hfin htorsion hfaithful hsepFF
+  refine ⟨Q, ?_⟩
+  -- Step 4 (Piece 8): the fiber card equals the separable degree once every
+  -- prime above `Q` satisfies `e · f = 1`, which Pieces 2/3 + 9 supply.
+  exact φ.exists_heightOneSpectrum_fiber_card_eq_sepDegree coordHom hsep Q
+    (φ.ramificationIdx_mul_inertiaDeg_eq_one_of_not_liesUnder_ramified
+      coordHom hfin htorsion hfaithful hessfin hsepFF Q hQ_good)
 
 end HasseWeil.Curves
