@@ -8,9 +8,17 @@ import LeanModularForms.StrongMultiplicityOne.DescentCosets
 /-!
 # Strong Multiplicity One via Miyake §4.6 — Hecke descent map
 
-The `multipass_*` slash-sum machinery and the Hecke descent linear map
-`miyake_hecke_descend` together with its q-expansion/character properties.
-Part of a multi-file split of `StrongMultiplicityOne.lean`.
+The `multipass_*` slash-sum machinery and the Hecke descent map — the slash sum
+`Σ_v f ∣[k] descendCosetList p N hp v` — together with its cusp, character, and
+invariance properties. Part of a multi-file split of `StrongMultiplicityOne.lean`.
+
+## Main results
+
+* `miyake_hecke_descend_cusp` — the descent slash sum vanishes at every cusp of
+  `Γ₁(N/p)`.
+* `miyake_hecke_descend_char` — slashing the descent sum by `γ_d ∈ Γ₀(N/p)` scales
+  it by `χ'(d)` (character equivariance).
+* `miyake_hecke_descend_Gamma1_inv` — `Γ₁(N)`-invariance of the descent sum.
 -/
 
 open CongruenceSubgroup Matrix.SpecialLinearGroup
@@ -148,8 +156,8 @@ private lemma specialLinearGroup_map_intCast_mul_inv_eq_one
   have h_φ_def : ∀ γ : SL(2, ℤ),
       (γ : Matrix (Fin 2) (Fin 2) ℤ).map (Int.cast : ℤ → ZMod d) = (φ γ).val := fun γ ↦ by
     ext i j; rw [map_apply_coe]; simp [RingHom.mapMatrix_apply]
-  rw [h_φ_def, show φ (a * b⁻¹) = φ a * (φ b)⁻¹ from by rw [map_mul, map_inv],
-    show φ a = φ b from by
+  rw [h_φ_def, show φ (a * b⁻¹) = φ a * (φ b)⁻¹ by rw [map_mul, map_inv],
+    show φ a = φ b by
       ext i j; simp only [← h_φ_def]; exact congr_fun (congr_fun (ha.trans hb.symm) i) j,
     mul_inv_cancel]
   rfl
@@ -180,7 +188,7 @@ private lemma levelRaiseConj_mul_inv_zero_one_dvd_p
   rw [← ZMod.intCast_zmod_eq_zero_iff_dvd,
     show ((γt * γ'⁻¹ : SL(2, ℤ)) : Matrix (Fin 2) (Fin 2) ℤ) 0 1 =
       (γt : Matrix (Fin 2) (Fin 2) ℤ) 0 0 * (γ'⁻¹).val 0 1 +
-      (γt : Matrix (Fin 2) (Fin 2) ℤ) 0 1 * (γ'⁻¹).val 1 1 from by
+      (γt : Matrix (Fin 2) (Fin 2) ℤ) 0 1 * (γ'⁻¹).val 1 1 by
       show (γt.val * γ'⁻¹.val) 0 1 = _
       simp [Matrix.mul_apply, Fin.sum_univ_two]]
   push_cast
@@ -340,7 +348,7 @@ private lemma multipass_V_p_slash_upper_aux
   rw [HeckeRing.GL2.modularFormLevelRaise_apply (N / p) p k g_low,
     show (HeckeRing.GL2.levelRaiseMatrix p • (⟨(↑w + ↑j) / ↑p,
         by simpa using div_pos (by linarith [w.im_pos]) (Nat.cast_pos.mpr hp.pos)⟩
-          : UpperHalfPlane)) = (j : ℝ) +ᵥ w from by
+          : UpperHalfPlane)) = (j : ℝ) +ᵥ w by
       refine UpperHalfPlane.ext ?_
       rw [HeckeRing.GL2.coe_levelRaiseMatrix_smul, UpperHalfPlane.coe_vadd]
       push_cast; field_simp [Nat.cast_ne_zero.mpr hp.ne_zero]; ring]
@@ -435,7 +443,7 @@ lemma miyake_descent_upper_tri_qExpansion
   rw [show (fun z : UpperHalfPlane ↦
       ∑ v ∈ Finset.range p,
         (⇑g ∣[k] (T_p_upper p hp.pos v : GL (Fin 2) ℚ)) z) =
-      (⇑(heckeT_p_divN k p hp hpM_not_coprime g) : UpperHalfPlane → ℂ) from by
+      (⇑(heckeT_p_divN k p hp hpM_not_coprime g) : UpperHalfPlane → ℂ) by
     funext z
     show ∑ v ∈ Finset.range p,
         (⇑g ∣[k] (T_p_upper p hp.pos v : GL (Fin 2) ℚ)) z =
@@ -503,7 +511,7 @@ theorem miyake_hecke_descend_char
   ext z
   rw [show (fun z' : UpperHalfPlane ↦ ∑ v : Fin (descendCosetCount p N),
       (⇑f ∣[k] descendCosetList p N hp v) z') =
-      (∑ v : Fin (descendCosetCount p N), (⇑f ∣[k] descendCosetList p N hp v)) from by
+      (∑ v : Fin (descendCosetCount p N), (⇑f ∣[k] descendCosetList p N hp v)) by
     ext z'; rw [Finset.sum_apply],
     SlashAction.sum_slash, Pi.smul_apply, Finset.sum_apply, Finset.sum_apply,
     (Equiv.sum_comp σ (fun v ↦ (⇑f ∣[k] descendCosetList p N hp v) z)).symm, Finset.smul_sum]
