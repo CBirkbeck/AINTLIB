@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import Mathlib.FieldTheory.IsAlgClosed.Basic
+
 import HasseWeil.Curves.Differentials
 import HasseWeil.EC.SeparableKernelTorsor
 import HasseWeil.Hasse.TorsionCard
@@ -44,21 +45,17 @@ local notation "R" => W.toAffine.CoordinateRing
 theorem hcov_of_xy (φ : Isogeny W.toAffine W.toAffine) (k : W.toAffine.Point)
     (h_x : translateAlgEquivOfPoint W k (φ.pullback (x_gen W)) = φ.pullback (x_gen W))
     (h_y : translateAlgEquivOfPoint W k (φ.pullback (y_gen W)) = φ.pullback (y_gen W)) :
-    ∀ z : KE, translateAlgEquivOfPoint W k (φ.pullback z) = φ.pullback z := by
-  have h_eq : (translateAlgEquivOfPoint W k).toAlgHom.comp φ.pullback = φ.pullback :=
-    algHom_ext_x_y_gen W (ψ₁ := (translateAlgEquivOfPoint W k).toAlgHom.comp φ.pullback)
-      (ψ₂ := φ.pullback) h_x h_y
-  intro z
-  exact congrFun (congrArg DFunLike.coe h_eq) z
+    ∀ z : KE, translateAlgEquivOfPoint W k (φ.pullback z) = φ.pullback z :=
+  DFunLike.congr_fun <| algHom_ext_x_y_gen W
+    (ψ₁ := (translateAlgEquivOfPoint W k).toAlgHom.comp φ.pullback) (ψ₂ := φ.pullback) h_x h_y
 
 /-- **The `hxy` witness for `[ℓ]`** (Silverman III.4.10c / addition formula): for every kernel
 point `k ∈ E[ℓ]`, the function-field translation `τ_k = translateAlgEquivOfPoint W k` fixes the
 `ℓ`-division coordinate functions `mulByInt_x ℓ` and `mulByInt_y ℓ`. Mathematically these are the
 `x`- and `y`-coordinates of `[ℓ]·P` as functions of `P`; precomposing with translation by `k`
 gives `P ↦ x([ℓ](P+k)) = x([ℓ]P + [ℓ]k) = x([ℓ]P)` since `[ℓ]k = O`. -/
-theorem hxy_mulByInt (ℓ : ℤ) (hℓ : ℓ ≠ 0) :
-    ∀ k : (mulByInt W.toAffine ℓ).kernel,
-      translateAlgEquivOfPoint W k.val (mulByInt_x W ℓ) = mulByInt_x W ℓ ∧
+theorem hxy_mulByInt (ℓ : ℤ) (hℓ : ℓ ≠ 0) : ∀ k : (mulByInt W.toAffine ℓ).kernel,
+    translateAlgEquivOfPoint W k.val (mulByInt_x W ℓ) = mulByInt_x W ℓ ∧
       translateAlgEquivOfPoint W k.val (mulByInt_y W ℓ) = mulByInt_y W ℓ := by
   intro k
   set m : (W_KE W).toAffine.Point →+ (W_KE W).toAffine.Point :=
@@ -98,13 +95,16 @@ theorem hcov_mulByInt_of_xy (ℓ : ℤ) (hℓ : ℓ ≠ 0)
         (mulByInt W.toAffine ℓ).pullback z := by
   intro k
   refine hcov_of_xy W (mulByInt W.toAffine ℓ) k.val ?_ ?_
-  · -- `x_gen W` is definitionally the displayed `algebraMap …` form of `mulByInt_pullback_x`.
+  · -- `x_gen W` is only definitionally the displayed `algebraMap …` form of `mulByInt_pullback_x`,
+    -- so the explicit type on `hpx` is what lets `rw` match it in the goal.
     have hpx : (mulByInt W.toAffine ℓ).pullback (x_gen W) = mulByInt_x W ℓ :=
       mulByInt_pullback_x W ℓ hℓ
-    rw [hpx]; exact (hxy k).1
+    rw [hpx]
+    exact (hxy k).1
   · have hpy : (mulByInt W.toAffine ℓ).pullback (y_gen W) = mulByInt_y W ℓ :=
       mulByInt_pullback_y W ℓ hℓ
-    rw [hpy]; exact (hxy k).2
+    rw [hpy]
+    exact (hxy k).2
 
 /-- **Assembly**: given the capstone's output `#ker[ℓ] = deg[ℓ]`, conclude `#E[ℓ] = ℓ²`. -/
 theorem card_torsion_ell_of_ker_deg (ℓ : ℤ) (hℓ : ℓ ≠ 0)
