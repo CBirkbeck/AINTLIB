@@ -49,7 +49,7 @@ theorem dslope_eq_integral_deriv {U : Set ℂ} (hU : Convex ℝ U) (hU_open : Is
     (hf : DifferentiableOn ℂ f U) {c w : ℂ} (hc : c ∈ U) (hw : w ∈ U) :
     dslope f c w = ∫ t in (0 : ℝ)..1, deriv f (c + t • (w - c)) := by
   have h_seg : ∀ t ∈ Icc (0 : ℝ) 1, c + t • (w - c) ∈ U := fun t ht ↦ by
-    rw [show c + t • (w - c) = (1 - t) • c + t • w from by module]
+    rw [show c + t • (w - c) = (1 - t) • c + t • w by module]
     exact hU hc hw (by linarith [ht.2]) ht.1 (by linarith)
   have h_deriv : ∀ t ∈ Icc (0 : ℝ) 1,
       HasDerivAt f (deriv f (c + t • (w - c))) (c + t • (w - c)) := fun t ht ↦
@@ -60,14 +60,15 @@ theorem dslope_eq_integral_deriv {U : Set ℂ} (hU : Convex ℝ U) (hU_open : Is
   have h_cont : ContinuousOn (fun t : ℝ ↦ deriv f (c + t • (w - c))) (Icc (0 : ℝ) 1) :=
     h_deriv_contU.comp (by continuity : Continuous _).continuousOn h_seg
   have h_int := integral_unitInterval_deriv_eq_sub h_cont h_deriv
-  rw [show c + (w - c) = w from by ring] at h_int
+  rw [show c + (w - c) = w by ring] at h_int
   by_cases hwc : w = c
   · subst hwc; simp
   · have hne : w - c ≠ 0 := sub_ne_zero.mpr hwc
     have h_mul : (w - c) * ∫ t in (0 : ℝ)..1, deriv f (c + t • (w - c)) = f w - f c := by
       rwa [← smul_eq_mul]
     rw [dslope_of_ne f hwc, slope_def_module, smul_eq_mul]
-    rw [show (w - c)⁻¹ * (f w - f c) = ∫ t in (0 : ℝ)..1, deriv f (c + t • (w - c)) from ?_]
+    rw [show (w - c)⁻¹ * (f w - f c) = ∫ t in (0 : ℝ)..1, deriv f (c + t • (w - c))
+      from ?_]
     rw [← h_mul, ← mul_assoc, inv_mul_cancel₀ hne, one_mul]
 
 set_option backward.isDefEq.respectTransparency false in
@@ -229,7 +230,8 @@ theorem deriv_dslope_bounded_on_compact_open {U : Set ℂ} (hU_open : IsOpen U)
   rw [Metric.mem_ball] at hw
   have h_ds_diff_U : DifferentiableOn ℂ (dslope f c) U :=
     (Complex.differentiableOn_dslope (hU_open.mem_nhds (hK_sub hc))).mpr hf
-  have h_cB_w_w0 : Metric.closedBall w (ρ / 2) ⊆ Metric.closedBall w₀ (3 * ρ / 2) := fun z hz ↦ by
+  have h_cB_w_w0 :
+      Metric.closedBall w (ρ / 2) ⊆ Metric.closedBall w₀ (3 * ρ / 2) := fun z hz ↦ by
     rw [Metric.mem_closedBall] at hz ⊢
     linarith [dist_triangle z w w₀]
   have h_DC : DiffContOnCl ℂ (dslope f c) (Metric.ball w (ρ / 2)) :=
@@ -237,7 +239,8 @@ theorem deriv_dslope_bounded_on_compact_open {U : Set ℂ} (hU_open : IsOpen U)
       h_cB_w_sub (h_cB_w_w0 (Metric.ball_subset_closedBall hz)),
      (h_ds_diff_U.mono fun z hz ↦
        h_cB_w_sub (h_cB_w_w0 (Metric.closure_ball_subset_closedBall hz))).continuousOn⟩
-  have h_sphere_bound : ∀ z ∈ Metric.sphere w (ρ / 2), ‖dslope f c z‖ ≤ max M 0 := fun z hz ↦
+  have h_sphere_bound : ∀ z ∈ Metric.sphere w (ρ / 2),
+      ‖dslope f c z‖ ≤ max M 0 := fun z hz ↦
     le_max_of_le_left
       (hM ⟨(c, z), ⟨hc, h_cB_w_w0 (Metric.sphere_subset_closedBall hz)⟩, rfl⟩)
   linarith [Complex.norm_deriv_le_of_forall_mem_sphere_norm_le (by positivity : (0:ℝ) < ρ / 2)
