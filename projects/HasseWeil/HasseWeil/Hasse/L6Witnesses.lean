@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import Mathlib.RingTheory.Valuation.LocalSubring
+import HasseWeil.Curves.RankOneDomination
 import HasseWeil.Curves.FrobeniusFixedPoint
 import HasseWeil.Curves.PicZero
 import HasseWeil.Hasse.SepDegreeEqPointCount
@@ -80,15 +81,21 @@ theorem ord_kernel_pullback_x_eq_neg_two
     (⟨W.toAffine⟩ : SmoothPlaneCurve K).ordAtPoint T.val
         ((isogOneSub_negFrobenius W hq).pullback (x_gen W)) =
       (-2 : ℤ) := by
-  rcases T.val with _ | ⟨xT, yT, h_ns⟩
-  · rw [SmoothPlaneCurve.ordAtPoint_zero_eq_ordAtInfty]
+  rcases h_val_eq : T.val with _ | ⟨xT, yT, h_ns⟩
+  · change (W_smooth W).ordAtPoint Affine.Point.zero
+        ((isogOneSub_negFrobenius W hq).pullback (x_gen W)) = (-2 : ℤ)
+    rw [SmoothPlaneCurve.ordAtPoint_zero_eq_ordAtInfty]
     exact ordAtInfty_isogOneSub_negFrobenius_pullback_x_gen W hq
-  · rw [SmoothPlaneCurve.ordAtPoint_some_eq_ord_P]
-    by_cases h_2tor : yT = W.toAffine.negY xT yT
-    · exact lemma3_pole_at_T_at_2tor W xT yT h_ns h_2tor hq
-    · exact lemma3_pole_at_T_unconditional W xT yT h_ns h_2tor hq
+  · by_cases h_2tor : yT = W.toAffine.negY xT yT
+    · change (W_smooth W).ordAtPoint (Affine.Point.some xT yT h_ns)
+          ((isogOneSub_negFrobenius W hq).pullback (x_gen W)) = (-2 : ℤ)
+      rw [SmoothPlaneCurve.ordAtPoint_some_eq_ord_P]
+      exact lemma3_pole_at_T_at_2tor W xT yT h_ns h_2tor hq
+    · change (W_smooth W).ordAtPoint (Affine.Point.some xT yT h_ns)
+          ((isogOneSub_negFrobenius W hq).pullback (x_gen W)) = (-2 : ℤ)
+      rw [SmoothPlaneCurve.ordAtPoint_some_eq_ord_P]
+      exact lemma3_pole_at_T_unconditional W xT yT h_ns h_2tor hq
 
-omit [Fintype K] [DecidableEq K] in
 /-- **Polynomial-in-1/f lands in valuation integer ring**: for any polynomial `p`,
 the image `polyToFieldOfInv f p` satisfies `pointValuation P ≤ 1` provided
 `pointValuation P f⁻¹ ≤ 1`. Induction on polynomial structure. -/
@@ -112,6 +119,7 @@ theorem pointValuation_polyToFieldOfInv_le_one
     exact le_trans ((⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).pointValuation
       P |>.map_add _ _) (max_le hp hq)
   | monomial n c _ih =>
+    -- Goal at the monomial step is for C c * X^(n+1). Expand the map.
     rw [map_mul, map_pow,
         Curves.RamificationAtInfinity.polyToFieldOfInv_C,
         Curves.RamificationAtInfinity.polyToFieldOfInv_X, map_mul]
@@ -123,9 +131,13 @@ theorem pointValuation_polyToFieldOfInv_le_one
         (f⁻¹ ^ (n + 1)) ≤ 1 := by
       rw [map_pow]
       exact pow_le_one' h_inv_le_one (n + 1)
-    simpa using mul_le_one' h_c h_inv_pow
+    calc (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).pointValuation P
+            ((algebraMap K W.toAffine.FunctionField) c)
+        * (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).pointValuation P
+            (f⁻¹ ^ (n + 1))
+        ≤ 1 * 1 := mul_le_one' h_c h_inv_pow
+      _ = 1 := one_mul _
 
-omit [Fintype K] [DecidableEq K] in
 /-- **General API**: for any `f : K(E)` with `1/f` in the valuation integer at a smooth
 point `P`, every element of `Sinf.carrier` for `f` has nonneg ord at `P` (when viewed
 in `K(E)` via the embedding). General version of
@@ -159,6 +171,7 @@ theorem sinf_carrier_ord_nonneg_of_inv_le_one
   set b : W.toAffine.FunctionField :=
     algebraMap data.carrier (Curves.RamificationAtInfinity.LinfAt (k := K) f) a
     with hb_def
+  -- Build φ : Polynomial K → integer via codRestrict.
   let φ : Polynomial K →+* ((⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).pointValuation P).integer :=
     (Curves.RamificationAtInfinity.polyToFieldOfInv (k := K) f).toRingHom.codRestrict
       _ (pointValuation_polyToFieldOfInv_le_one W P f h_inv_le_one)
@@ -171,7 +184,8 @@ theorem sinf_carrier_ord_nonneg_of_inv_le_one
     have h_comp :
         (algebraMap ((⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).pointValuation P).integer
           W.toAffine.FunctionField).comp φ =
-          (Curves.RamificationAtInfinity.polyToFieldOfInv (k := K) f).toRingHom := rfl
+          (Curves.RamificationAtInfinity.polyToFieldOfInv (k := K) f).toRingHom := by
+      ext c; all_goals rfl
     rw [h_comp]
     exact hp_eval
   have h_v_le :
@@ -185,14 +199,23 @@ theorem sinf_carrier_ord_nonneg_of_inv_le_one
         (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).pointValuation P b ≠ 0 :=
       ((⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).pointValuation P).ne_zero_iff.mpr hb
     unfold Curves.SmoothPlaneCurve.ord_P
-    rw [dif_neg hv, show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl, WithTop.coe_le_coe]
+    rw [dif_neg hv]
+    rw [show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl, WithTop.coe_le_coe]
     have h_unz_le : WithZero.unzero hv ≤ 1 := by
       rw [← WithZero.coe_le_coe, WithZero.coe_one, WithZero.coe_unzero]
       exact h_v_le
-    exact neg_nonneg.mpr (Multiplicative.toAdd_le.mpr h_unz_le)
+    have h_toAdd : (WithZero.unzero hv).toAdd ≤ 0 := by
+      have h1 : ((1 : Multiplicative ℤ)).toAdd = (0 : ℤ) := rfl
+      have h2 : Multiplicative.toAdd (WithZero.unzero hv) ≤
+          Multiplicative.toAdd (1 : Multiplicative ℤ) := h_unz_le
+      rw [h1] at h2; exact h2
+    linarith
 
-/-- **UNCONDITIONAL: `ord_T((γ.pullback x_gen)⁻¹) = 2`** for every kernel point `T`:
-`1/f` has a zero of order 2 at every kernel point. -/
+/-- **UNCONDITIONAL: `ord_T((γ.pullback x_gen)⁻¹) = 2`** for every kernel point T.
+
+Direct consequence of `ord_kernel_pullback_x_eq_neg_two` + `ordAtPoint_inv`.
+Says `1/f` has a zero of order 2 at every kernel point — a key input to
+`Sinf_ord_nonneg_at_kernel_point_unconditional`. -/
 theorem inv_gamma_pullback_x_pos_at_kernel
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (hq : 2 ≤ Fintype.card K)
@@ -203,7 +226,11 @@ theorem inv_gamma_pullback_x_pos_at_kernel
   OpenLemmaPrimitives.kernel_point_is_pole_of_gamma_pullback_x W hq T
     (ord_kernel_pullback_x_eq_neg_two W hq T)
 
-/-- Every `Sinf`-carrier element has nonnegative `ord_P` at an affine kernel point. -/
+/-- **UNCONDITIONAL: Sinf-carrier elements have nonneg ord at affine kernel points**.
+
+Direct application of `sinf_carrier_ord_nonneg_of_inv_le_one` with the kernel-point
+witness `inv_gamma_pullback_x_pos_at_kernel`. Handles the affine sub-case of
+`Sinf_ord_nonneg_at_kernel_point_unconditional`. -/
 theorem Sinf_ord_nonneg_at_affine_kernel_point
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (hq : 2 ≤ Fintype.card K)
@@ -225,12 +252,16 @@ theorem Sinf_ord_nonneg_at_affine_kernel_point
   rw [h_T_val, Curves.SmoothPlaneCurve.ordAtPoint_some_eq_ord_P] at h_inv_pos
   have h_f_inv_ne : ((isogOneSub_negFrobenius W hq).pullback (x_gen W))⁻¹ ≠ 0 := by
     intro h_zero
-    rw [h_zero, Curves.SmoothPlaneCurve.ord_P_zero] at h_inv_pos
-    exact WithTop.coe_ne_top h_inv_pos.symm
+    have h_top : (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ord_P ⟨xT, yT, h_ns⟩
+        ((isogOneSub_negFrobenius W hq).pullback (x_gen W))⁻¹ = ⊤ := by
+      rw [h_zero]; exact Curves.SmoothPlaneCurve.ord_P_zero
+    rw [h_inv_pos] at h_top
+    exact WithTop.coe_ne_top h_top
   have h_inv_ord_nonneg : (0 : WithTop ℤ) ≤
       (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ord_P ⟨xT, yT, h_ns⟩
         ((isogOneSub_negFrobenius W hq).pullback (x_gen W))⁻¹ := by
-    rw [h_inv_pos]; norm_num
+    rw [h_inv_pos]
+    exact_mod_cast (by norm_num : (0 : ℤ) ≤ 2)
   have h_inv_le_one :
       (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).pointValuation ⟨xT, yT, h_ns⟩
         ((isogOneSub_negFrobenius W hq).pullback (x_gen W))⁻¹ ≤ 1 :=
@@ -246,11 +277,11 @@ The following lemmas are stated with `sorry` to lock down the decomposition tree
 Each `sorry` is a planned-leaf in `.mathlib-quality/decomposition-residual-walls.md`
 with attached source citation and adversarial-attack record. -/
 
-omit [Fintype K] in
 /-- **DECOMP — Obstacle 1, L2**: Polynomial in 1/f has `ord_∞ ≥ 0` when
-`0 ≤ ord_∞ f⁻¹`.
+`0 ≤ ord_∞ f⁻¹`. Induction on polynomial structure.
 
-Source: Silverman II.1 + IV.1 (valuation algebra at infinity). -/
+Source: Silverman II.1 + IV.1 (valuation algebra at infinity).
+Sizing: ~30 LOC poly induction. -/
 theorem ordAtInfty_polyToFieldOfInv_nonneg
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (f : W.toAffine.FunctionField)
@@ -264,7 +295,10 @@ theorem ordAtInfty_polyToFieldOfInv_nonneg
     by_cases hc : c = 0
     · subst hc
       rw [map_zero]
-      exact le_top.trans_eq (W_smooth W).ordAtInfty_zero.symm
+      change (0 : WithTop ℤ) ≤ (W_smooth W).ordAtInfty (0 : W.toAffine.FunctionField)
+      have h : (W_smooth W).ordAtInfty (0 : W.toAffine.FunctionField) = ⊤ :=
+        Curves.SmoothPlaneCurve.ordAtInfty_zero (C := W_smooth W)
+      rw [h]; exact le_top
     · rw [ordAtInfty_algebraMap_F_nonzero (W := W) hc]
   | add p q hp hq =>
     rw [map_add]
@@ -276,12 +310,20 @@ theorem ordAtInfty_polyToFieldOfInv_nonneg
     by_cases hc : c = 0
     · subst hc
       rw [map_zero, zero_mul]
-      exact le_top.trans_eq (W_smooth W).ordAtInfty_zero.symm
+      have h : (W_smooth W).ordAtInfty (0 : W.toAffine.FunctionField) = ⊤ :=
+        Curves.SmoothPlaneCurve.ordAtInfty_zero (C := W_smooth W)
+      rw [h]; exact le_top
     · by_cases hf_inv : f⁻¹ = 0
       · rw [hf_inv, zero_pow (by omega : n + 1 ≠ 0), mul_zero]
-        exact le_top.trans_eq (W_smooth W).ordAtInfty_zero.symm
-      · have h_alg_ne : (algebraMap K W.toAffine.FunctionField) c ≠ 0 := fun heq ↦
-          hc <| (algebraMap K W.toAffine.FunctionField).injective <| by rwa [map_zero]
+        have h : (W_smooth W).ordAtInfty (0 : W.toAffine.FunctionField) = ⊤ :=
+          Curves.SmoothPlaneCurve.ordAtInfty_zero (C := W_smooth W)
+        rw [h]; exact le_top
+      · have h_alg_ne : (algebraMap K W.toAffine.FunctionField) c ≠ 0 := by
+          intro heq
+          apply hc
+          have := (algebraMap K W.toAffine.FunctionField).injective
+            (heq.trans (algebraMap K W.toAffine.FunctionField).map_zero.symm)
+          exact this
         have h_pow_ne : f⁻¹ ^ (n + 1) ≠ 0 := pow_ne_zero _ hf_inv
         have h_mul : (W_smooth W).ordAtInfty
             ((algebraMap K W.toAffine.FunctionField) c * f⁻¹ ^ (n + 1)) =
@@ -295,9 +337,9 @@ theorem ordAtInfty_polyToFieldOfInv_nonneg
         rw [h_pow]
         exact nsmul_nonneg h_inv_nonneg (n + 1)
 
-omit [Fintype K] [DecidableEq K] in
-/-- Strict-dominance of `ord_∞` over a Finset sum: if every summand has `ord_∞` strictly
-greater than some finite bound `c`, so does the sum. -/
+/-- **HELPER for L3**: strict-dominance of `ord_∞` over a Finset sum. If every
+summand has `ord_∞` strictly greater than some finite bound `c`, so does the
+sum (using non-archimedean `ordAtInfty_add_ge_min` + induction on the Finset). -/
 lemma ord_finset_sum_strict_gt
     {ι : Type*} [DecidableEq ι] (s : Finset ι)
     (C : Curves.SmoothPlaneCurve K) (φ : ι → C.FunctionField)
@@ -306,17 +348,36 @@ lemma ord_finset_sum_strict_gt
     c < C.ordAtInfty (∑ i ∈ s, φ i) := by
   induction s using Finset.induction with
   | empty =>
-    simpa only [Finset.sum_empty, C.ordAtInfty_zero] using hc.lt_top
+    simp only [Finset.sum_empty, C.ordAtInfty_zero]
+    exact lt_top_iff_ne_top.mpr hc
   | @insert i s hi ih =>
     rw [Finset.sum_insert hi]
-    exact (lt_min (h i (Finset.mem_insert_self _ _))
-      (ih fun j hj ↦ h j (Finset.mem_insert_of_mem hj))).trans_le (C.ordAtInfty_add_ge_min _ _)
+    have h_i := h i (Finset.mem_insert_self _ _)
+    have h_s := ih (fun j hj ↦ h j (Finset.mem_insert_of_mem hj))
+    calc c < min (C.ordAtInfty (φ i)) (C.ordAtInfty (∑ j ∈ s, φ j)) :=
+          lt_min h_i h_s
+      _ ≤ C.ordAtInfty (φ i + ∑ j ∈ s, φ j) := C.ordAtInfty_add_ge_min _ _
 
-omit [Fintype K] in
-/-- **DECOMP — Obstacle 1, L3**: if `g : K(E)` is integral over `Polynomial K`
-(via `polyToFieldOfInv f`) and `ord_∞(1/f) ≥ 0`, then `ord_∞(g) ≥ 0`.
+/-- **DECOMP — Obstacle 1, L3**: Strict-dominance for `ord_∞` on integral elements.
+If `g : K(E)` is integral over `Polynomial K` (via `polyToFieldOfInv f`) and
+`ord_∞(1/f) ≥ 0`, then `ord_∞(g) ≥ 0`.
 
-Source: classical valuation theory (Atiyah-Macdonald §5 / Bourbaki Comm Alg V§1). -/
+Source: classical valuation theory (Atiyah-Macdonald §5 / Bourbaki Comm Alg V§1).
+Proof by contradiction via the strict-dominance of the leading monomial of the
+monic integral polynomial.
+
+Proof outline:
+1. By contradiction: assume `ord_∞(g) = m < 0` (finite integer < 0).
+2. Get the monic integral relation `p ∈ K[X][Y]` with `aeval g p = 0`.
+3. Split p = X^n + eraseLead p (n = natDegree p, leadingCoeff = 1 from monic).
+4. Sublemma `h_sum_strict_gt`: for any `q` with `q.natDegree < k`,
+   `ord_∞(aeval g q) > k * m` (proved by Finset.sum induction over the
+   `aeval_eq_sum_range'` expansion, using `ordAtInfty_polyToFieldOfInv_nonneg`
+   for the coefficient bound + `ordAtInfty_pow_of_ord_eq` for `g^i`).
+5. n = 0: monic of degree 0 ⟹ p = 1, so aeval g 1 = 1 ≠ 0, contradiction.
+6. n ≥ 1: ord(g^n) = n*m, ord(aeval g (eraseLead p)) > n*m (sublemma),
+   so by `ordAtInfty_add_eq_of_lt`, ord(aeval g p) = n*m ≠ ⊤. But
+   aeval g p = 0 ⟹ ord = ⊤. Contradiction. -/
 theorem ordAtInfty_nonneg_of_isIntegral_polyToFieldOfInv
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (f : W.toAffine.FunctionField)
@@ -390,7 +451,12 @@ theorem ordAtInfty_nonneg_of_isIntegral_polyToFieldOfInv
       have h_im_gt_km_wt :
           (((k : ℤ) * m : ℤ) : WithTop ℤ) < (((i : ℤ) * m : ℤ) : WithTop ℤ) := by
         exact_mod_cast h_im_gt_km
-      exact h_im_gt_km_wt.trans_le (le_add_of_nonneg_left h_coef_nn)
+      calc (((k : ℤ) * m : ℤ) : WithTop ℤ)
+          < (((i : ℤ) * m : ℤ) : WithTop ℤ) := h_im_gt_km_wt
+        _ = 0 + (((i : ℤ) * m : ℤ) : WithTop ℤ) := by rw [zero_add]
+        _ ≤ (W_smooth W).ordAtInfty
+              ((algebraMap (Polynomial K) W.toAffine.FunctionField) (q.coeff i)) +
+            (((i : ℤ) * m : ℤ) : WithTop ℤ) := add_le_add h_coef_nn (le_refl _)
   -- Split on n
   rcases Nat.eq_zero_or_pos n with hn_zero | hn_pos
   · -- n = 0: p is monic of degree 0, so p = 1
@@ -442,11 +508,11 @@ theorem ordAtInfty_nonneg_of_isIntegral_polyToFieldOfInv
     rw [hp_eval_aeval, h_zero_top] at h_aeval_ord
     exact WithTop.top_ne_coe h_aeval_ord
 
-omit [Fintype K] in
 /-- **DECOMP — Obstacle 1, composer**: Sinf carrier elements have nonneg ord_∞.
 
 Source: composes `Module.Finite → IsIntegral` (carrier) + `IsIntegral.algebraMap`
-(transfer to K(E)) + `ordAtInfty_nonneg_of_isIntegral_polyToFieldOfInv`. -/
+(transfer to K(E)) + `ordAtInfty_nonneg_of_isIntegral_polyToFieldOfInv`.
+Sizing: ~30 LOC composition. -/
 theorem sinf_carrier_ordAtInfty_nonneg_of_inv_nonneg
     {W : WeierstrassCurve K} [W.toAffine.IsElliptic]
     (f : W.toAffine.FunctionField)
@@ -464,12 +530,16 @@ theorem sinf_carrier_ordAtInfty_nonneg_of_inv_nonneg
   letI := data.moduleFinite
   haveI : Algebra.IsIntegral (Polynomial K) data.carrier :=
     Algebra.IsIntegral.of_finite (Polynomial K) data.carrier
-  have h_int_a : IsIntegral (Polynomial K) a := Algebra.IsIntegral.isIntegral a
-  exact ordAtInfty_nonneg_of_isIntegral_polyToFieldOfInv W f h_inv_nonneg _
-    (h_int_a.algebraMap (B := Curves.RamificationAtInfinity.LinfAt (k := K) f))
+  have h_int_a : IsIntegral (Polynomial K) a :=
+    Algebra.IsIntegral.isIntegral (R := Polynomial K) a
+  have h_int_b : IsIntegral (Polynomial K)
+      (algebraMap data.carrier (Curves.RamificationAtInfinity.LinfAt (k := K) f) a) :=
+    h_int_a.algebraMap (B := Curves.RamificationAtInfinity.LinfAt (k := K) f)
+  exact ordAtInfty_nonneg_of_isIntegral_polyToFieldOfInv W f h_inv_nonneg _ h_int_b
 
 /-- **DECOMP — Obstacle 1, kernel-point specialization**: at `T.val = .zero`,
-Sinf-carrier elements have nonneg `ord_∞`. -/
+Sinf-carrier elements have nonneg `ord_∞`. Composes
+`inv_gamma_pullback_x_pos_at_kernel` + `sinf_carrier_ordAtInfty_nonneg_of_inv_nonneg`. -/
 theorem Sinf_ordAtInfty_nonneg_at_infinity_kernel_point
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (hq : 2 ≤ Fintype.card K)
@@ -486,13 +556,15 @@ theorem Sinf_ordAtInfty_nonneg_at_infinity_kernel_point
           ((isogOneSub_negFrobenius W hq).pullback (x_gen W))) a) := by
   have h_inv_pos := inv_gamma_pullback_x_pos_at_kernel W hq T
   rw [h_T_val, Curves.SmoothPlaneCurve.ordAtPoint_zero_eq_ordAtInfty] at h_inv_pos
+  -- h_inv_pos : (⟨W.toAffine⟩ : SmoothPlaneCurve K).ordAtInfty (...)⁻¹ = (2 : WithTop ℤ)
+  -- Target: 0 ≤ (W_smooth W).ordAtInfty (...)⁻¹
   have h_inv_nonneg : (0 : WithTop ℤ) ≤
       (W_smooth W).ordAtInfty
         ((isogOneSub_negFrobenius W hq).pullback (x_gen W))⁻¹ := by
     change (0 : WithTop ℤ) ≤ (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtInfty
         ((isogOneSub_negFrobenius W hq).pullback (x_gen W))⁻¹
     rw [h_inv_pos]
-    norm_num
+    exact_mod_cast (by norm_num : (0 : ℤ) ≤ 2)
   exact sinf_carrier_ordAtInfty_nonneg_of_inv_nonneg
     ((isogOneSub_negFrobenius W hq).pullback (x_gen W)) h_inv_nonneg data a
 
@@ -516,10 +588,21 @@ theorem Sinf_ord_nonneg_at_kernel_point_unconditional
       (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val
         (algebraMap data.carrier (Curves.RamificationAtInfinity.LinfAt (k := K)
           ((isogOneSub_negFrobenius W hq).pullback (x_gen W))) a) := by
+  letI := data.commRing
+  letI := data.algLinfAt
   rcases h_T_val : T.val with _ | ⟨xT, yT, h_ns⟩
-  · rw [Curves.SmoothPlaneCurve.ordAtPoint_zero_eq_ordAtInfty]
+  · change (0 : WithTop ℤ) ≤
+      (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint Affine.Point.zero
+        (algebraMap data.carrier (Curves.RamificationAtInfinity.LinfAt (k := K)
+          ((isogOneSub_negFrobenius W hq).pullback (x_gen W))) a)
+    rw [Curves.SmoothPlaneCurve.ordAtPoint_zero_eq_ordAtInfty]
     exact Sinf_ordAtInfty_nonneg_at_infinity_kernel_point W hq T h_T_val data a
-  · rw [Curves.SmoothPlaneCurve.ordAtPoint_some_eq_ord_P]
+  · change (0 : WithTop ℤ) ≤
+      (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint
+        (Affine.Point.some xT yT h_ns)
+        (algebraMap data.carrier (Curves.RamificationAtInfinity.LinfAt (k := K)
+          ((isogOneSub_negFrobenius W hq).pullback (x_gen W))) a)
+    rw [Curves.SmoothPlaneCurve.ordAtPoint_some_eq_ord_P]
     exact Sinf_ord_nonneg_at_affine_kernel_point W hq T xT yT h_ns h_T_val data a
 
 /-! ## Obstacle 2 — kernel-prime correspondence helpers
@@ -554,11 +637,15 @@ theorem ord_kernel_pullback_x_eq_neg_two_of_two_torsion_witness
         ((isogOneSub_negFrobenius W hq).pullback (x_gen W)) =
       (-2 : ℤ) := by
   rcases h_val_eq : T.val with _ | ⟨xT, yT, h_ns⟩
-  · rw [SmoothPlaneCurve.ordAtPoint_zero_eq_ordAtInfty]
+  · change (W_smooth W).ordAtPoint Affine.Point.zero
+        ((isogOneSub_negFrobenius W hq).pullback (x_gen W)) = (-2 : ℤ)
+    rw [SmoothPlaneCurve.ordAtPoint_zero_eq_ordAtInfty]
     exact ordAtInfty_isogOneSub_negFrobenius_pullback_x_gen W hq
   · by_cases h_2tor : yT = W.toAffine.negY xT yT
     · exact h_two_torsion_witness xT yT h_ns h_val_eq h_2tor
-    · rw [SmoothPlaneCurve.ordAtPoint_some_eq_ord_P]
+    · change (W_smooth W).ordAtPoint (Affine.Point.some xT yT h_ns)
+          ((isogOneSub_negFrobenius W hq).pullback (x_gen W)) = (-2 : ℤ)
+      rw [SmoothPlaneCurve.ordAtPoint_some_eq_ord_P]
       exact lemma3_pole_at_T_unconditional W xT yT h_ns h_2tor hq
 
 /-! ## #2 T-W2-DISCHARGE-FROM-PER-POINT-WITNESS
@@ -578,7 +665,9 @@ witness; the latter follows from W1 (2-torsion case) + the shipped
 lemma3 (non-2-torsion) + ordAtInfty witness. -/
 
 /-- **#2 T-W2-DISCHARGE-FROM-PER-POINT-WITNESS**: support cardinality
-discharge conditional on per-K-rational-point pole-existence. -/
+discharge conditional on per-K-rational-point pole-existence. The
+discharge uses the `Fintype ProjectiveSmoothPoint` instance + card
+identity from #1. -/
 theorem support_card_eq_pointCount_of_per_point_witness
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
     (hq : 2 ≤ Fintype.card K)
@@ -594,14 +683,22 @@ theorem support_card_eq_pointCount_of_per_point_witness
         (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K)
         ((isogOneSub_negFrobenius W hq).pullback (x_gen W)))).support).card =
       pointCount W.toAffine := by
+  -- Support is the set of P with value ≠ 0; by hypothesis this is all P.
   have h_support_eq_univ :
       (Curves.SmoothPlaneCurve.projectiveDivisorOf
           (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K)
           ((isogOneSub_negFrobenius W hq).pullback (x_gen W))).support =
         (Finset.univ :
           Finset (Curves.ProjectiveSmoothPoint
-            (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K))) :=
-    Finset.eq_univ_of_forall fun P ↦ Finsupp.mem_support_iff.mpr (h_per_point_ne_zero P)
+            (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K))) := by
+    apply Finset.ext
+    intro P
+    constructor
+    · intro _; exact Finset.mem_univ P
+    · intro _
+      rw [Finsupp.mem_support_iff]
+      exact h_per_point_ne_zero P
+  -- Compose: |support| = |univ| = Fintype.card ProjectiveSmoothPoint = pointCount.
   rw [h_support_eq_univ, Finset.card_univ,
       Curves.ProjectiveSmoothPoint.card_eq_card_affine_point]
   rfl
@@ -618,10 +715,17 @@ to produce the input to Lemma 5. -/
 /-- **T5-T6 combined: h_pole_orders derivation from T5 + T6 witnesses**:
 given the support-card witness and the per-kernel-point ord = -2
 witness, derive the `h_pole_orders` hypothesis of
-`lemma5_of_pole_orders_and_support_card`. -/
+`lemma5_of_pole_orders_and_support_card`.
+
+This is a structural composition: each point in the support has either
+.affine kernel point (where `divisorOf` ord = -2) or .infinity
+(where `ordAtInfty` = -2). In both cases, `(projectiveDivisorOf f).toNat
+= 0` and `(-(.)).toNat = 2`. -/
 theorem h_pole_orders_of_T5_T6_witnesses
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
     (hq : 2 ≤ Fintype.card K)
+    -- The per-point pole-order witness: every point P in the support
+    -- has projectiveDivisorOf value = -2 (signed integer level).
     (h_per_point_neg_two :
       ∀ P ∈ ((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
           ((isogOneSub_negFrobenius W hq).pullback (x_gen W)))).support,
@@ -634,8 +738,10 @@ theorem h_pole_orders_of_T5_T6_witnesses
       (-((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
         ((isogOneSub_negFrobenius W hq).pullback (x_gen W))) P)).toNat = 2 := by
   intro P hP
-  rw [h_per_point_neg_two P hP]
-  exact ⟨rfl, rfl⟩
+  have h_eq := h_per_point_neg_two P hP
+  constructor
+  · rw [h_eq]; rfl
+  · rw [h_eq]; rfl
 
 /-! ## R25-B3-LOWER-WIRE — `finrank_pullback_fieldRange_field_eq_two`
 
@@ -648,18 +754,21 @@ typeclass synth wall + gammaBar transfer of the iso
 `K(E) ≃ₐ[K] γ.pullback.fieldRange`). -/
 
 /-- **R25-B3-LOWER-WIRE (witness-parametric, `@`-explicit Module instance)**:
-`Module.finrank K⟮f⟯ γ.pullback.fieldRange = 2` for `f = γ.pullback x_gen`,
-given the substantive content as a single named hypothesis. -/
+discharges the LOWER step of the B3 tower given the substantive content
+as a single named hypothesis. The `@`-explicit Module instance shape
+matches the inclusion-algebra-derived module used by `finrank_mul_finrank`
+in B3 composition. -/
 theorem finrank_pullback_fieldRange_field_eq_two_of_witness
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (hq : 2 ≤ Fintype.card K)
-    -- Inclusion (shipped at PoleDivisorFallback.lean:3273).
+    -- Inclusion K⟮f⟯ ⊆ γ.pullback.fieldRange (shipped at PoleDivisorFallback.lean:3273).
     (h_le : IntermediateField.adjoin K
               ({(isogOneSub_negFrobenius W hq).pullback (x_gen W)} :
                 Set W.toAffine.FunctionField) ≤
             (isogOneSub_negFrobenius W hq).pullback.fieldRange)
-    -- LOWER step witness (`@`-explicit Module instance avoids the letI synth
-    -- wall documented in `feedback_isscalartower_letI_synth_wall`).
+    -- LOWER step witness — substantive content factored as hypothesis.
+    -- Uses `@`-explicit Module instance to avoid the letI synth wall
+    -- documented in `feedback_isscalartower_letI_synth_wall`.
     (h_lower_witness :
       @Module.finrank
         ↥(IntermediateField.adjoin K
@@ -719,8 +828,8 @@ theorem finrank_pullback_fieldRange_field_eq_two_unconditional
       ↥(isogOneSub_negFrobenius W hq).pullback.fieldRange
       _ _
       (IntermediateField.inclusion h_le).toAlgebra.toModule = 2 := by
-  set γ := isogOneSub_negFrobenius W hq
-  set f : W.toAffine.FunctionField := γ.pullback (x_gen W)
+  set γ := isogOneSub_negFrobenius W hq with hγ_def
+  set f : W.toAffine.FunctionField := γ.pullback (x_gen W) with hf_def
   -- The gammaBar iso K(E) ≃ₐ[K] γ.pullback.fieldRange.
   let gammaBar : W.toAffine.FunctionField ≃ₐ[K] ↥γ.pullback.fieldRange :=
     AlgEquiv.ofInjectiveField γ.pullback
@@ -803,6 +912,7 @@ theorem finrank_pullback_fieldRange_field_eq_two_unconditional
               Polynomial.X))) : W.toAffine.FunctionField) = f
         rw [← IsScalarTower.algebraMap_apply (Polynomial K)
           (FractionRing (Polynomial K)) W.toAffine.FunctionField]
+        change ((gammaBar (x_gen W)) : W.toAffine.FunctionField) = f
         rfl
       rw [h_LHS, h_RHS]
     exact DFunLike.congr_fun h_eq r
@@ -843,7 +953,10 @@ discharge. The composition is REAL (not a literal `_of_witness` wrapper):
 the body discharges two of the three projective-point cases axiom-clean. -/
 
 /-- **T22 substantive composition (2-torsion ord as single witness)**:
-`|support (projectiveDivisorOf (γ.pullback x_gen))| = pointCount W.toAffine`. -/
+`|support (projectiveDivisorOf (γ.pullback x_gen))| = pointCount W.toAffine`,
+discharged by case-analysing projective points (.infinity via shipped
+`ordAtInfty = -2`, .affine non-2-torsion via shipped `lemma3_pole_at_T_unconditional`,
+.affine 2-torsion via the witness). -/
 theorem support_card_eq_pointCount_of_two_torsion_ord_witness
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
     (hq : 2 ≤ Fintype.card K)
@@ -861,12 +974,16 @@ theorem support_card_eq_pointCount_of_two_torsion_ord_witness
   intro P
   cases P with
   | infinity =>
+    -- ord_∞ (γ.pullback x_gen) = -2, hence projectiveDivisorOf .infinity = -2 ≠ 0.
     have h_inf : (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtInfty
         ((isogOneSub_negFrobenius W hq).pullback (x_gen W)) = ((-2 : ℤ) : WithTop ℤ) :=
       ordAtInfty_isogOneSub_negFrobenius_pullback_x_gen W hq
     rw [Curves.SmoothPlaneCurve.projectiveDivisorOf_apply_infinity, h_inf]
     decide
   | affine Q =>
+    -- For Q = ⟨xT, yT, h_ns⟩, the affine point .some xT yT h_ns lies in
+    -- ker γ (= ⊤ on K-rational points), so ord_Q (γ.pullback x_gen) = -2
+    -- via T6 case analysis with the 2-torsion witness h_2_tor.
     rw [Curves.SmoothPlaneCurve.projectiveDivisorOf_apply_affine]
     obtain ⟨xT, yT, h_ns⟩ := Q
     have hP_kernel : Affine.Point.some xT yT h_ns ∈
@@ -885,7 +1002,8 @@ theorem support_card_eq_pointCount_of_two_torsion_ord_witness
         ⟨Affine.Point.some xT yT h_ns, hP_kernel⟩
         (fun xT' yT' h_ns' _ h_2tor ↦
           h_2_tor xT' yT' h_ns' h_2tor)
-    rw [← Curves.SmoothPlaneCurve.ordAtPoint_some_eq_ord_P, h_ord]
+    rw [Curves.SmoothPlaneCurve.ordAtPoint_some_eq_ord_P] at h_ord
+    rw [h_ord]
     decide
 
 /-! ## Witness-parametric L3 + L4 closures from a single 2-torsion witness
@@ -901,7 +1019,11 @@ These three closures together reduce L3 + L4 to the single substantive 2-torsion
 sub-leaf (the addition-formula degeneracy at 2-torsion). -/
 
 /-- **Pointwise: divisor value = -2 at every K-rational projective point** given the
-2-torsion witness. -/
+2-torsion witness. Combines the shipped non-2-torsion `lemma3_pole_at_T_unconditional` +
+∞ value `ordAtInfty_isogOneSub_negFrobenius_pullback_x_gen` with the 2-torsion witness.
+
+Uses the `W_smooth W` framing throughout (= `⟨W.toAffine⟩` by `rfl`, but the existing
+non-2-torsion / ∞ lemmas were stated with `W_smooth W`, so the rewrites match). -/
 theorem projectiveDivisorOf_pullback_x_gen_eq_neg_two_of_two_torsion_witness
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (hq : 2 ≤ Fintype.card K)
@@ -922,7 +1044,9 @@ theorem projectiveDivisorOf_pullback_x_gen_eq_neg_two_of_two_torsion_witness
         ordAtInfty_isogOneSub_negFrobenius_pullback_x_gen W hq]; rfl
 
 /-- **L4 witness-parametric** (Silverman V.1.1 support cardinality, single 2-torsion witness):
-the pole-divisor support has cardinality `pointCount`. -/
+the pole-divisor support has cardinality `pointCount`, deriving the per-point hypothesis of
+`support_card_eq_pointCount_of_per_point_witness` from the single 2-torsion witness via the
+pointwise helper above. -/
 theorem l6_support_card_of_two_torsion_witness
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
     (hq : 2 ≤ Fintype.card K)
@@ -936,6 +1060,8 @@ theorem l6_support_card_of_two_torsion_witness
       pointCount W.toAffine :=
   support_card_eq_pointCount_of_per_point_witness W hq
     (fun P ↦ by
+      -- Goal frames as `⟨W.toAffine⟩` (per the closer); helper uses `W_smooth W` (defeq).
+      -- `change` forces unification across the two synonyms.
       change (Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
           ((isogOneSub_negFrobenius W hq).pullback (x_gen W))) P ≠ 0
       rw [projectiveDivisorOf_pullback_x_gen_eq_neg_two_of_two_torsion_witness
@@ -964,63 +1090,32 @@ Composes 4 shipped axiom-clean ingredients:
 
 variable {K : Type*} [Field K] [Fintype K] [DecidableEq K]
 
-/-- **General field-valuation helper (axiom-clean).** Two surjective
-`ℤᵐ⁰ = WithZero (Multiplicative ℤ)`-valued valuations on a field that are
-`Valuation.IsEquiv` are in fact *equal* (value-precise, not just equivalent). -/
+/-- **Re-export** of `HasseWeil.Curves.Valuation.isEquiv_iff_eq_of_surjective_withZeroInt`
+(relocated to the lightweight `HasseWeil/Curves/RankOneDomination.lean`).  Two surjective
+`ℤᵐ⁰`-valued valuations on a field that are `Valuation.IsEquiv` are *equal*.  Kept here under the
+historical name for the V.1.3 valuation-identification consumers below. -/
 theorem Valuation.isEquiv_iff_eq_of_surjective_withZeroInt
     {F : Type*} [Field F] (v w : Valuation F (WithZero (Multiplicative ℤ)))
     (hv : Function.Surjective v) (hw : Function.Surjective w) (h : v.IsEquiv w) :
-    v = w := by
-  obtain ⟨e, he⟩ := hv (WithZero.exp 1)
-  have hvpow : ∀ k : ℤ, v (e ^ k) = WithZero.exp k := by
-    intro k; rw [map_zpow₀, he, ← WithZero.exp_zsmul, smul_eq_mul, mul_one]
-  have hwe0 : w e ≠ 0 :=
-    (h.eq_zero).ne.mp (by rw [he]; exact WithZero.exp_ne_zero)
-  have key : ∀ x : F, v x ≠ 0 → w x = (w e) ^ (WithZero.log (v x)) := by
-    intro x hx
-    set m := WithZero.log (v x) with hm
-    have hvu : v (x * e ^ (-m)) = 1 := by
-      rw [map_mul, hvpow (-m), ← WithZero.exp_log hx, ← hm, ← WithZero.exp_add,
-        add_neg_cancel, WithZero.exp_zero]
-    have hwu : w (x * e ^ (-m)) = 1 := (h.eq_one_iff_eq_one).mp hvu
-    rwa [map_mul, map_zpow₀, zpow_neg, mul_inv_eq_one₀ (zpow_ne_zero _ hwe0)] at hwu
-  have h1we : (1 : WithZero (Multiplicative ℤ)) < w e := by
-    rw [← h.one_lt_iff_one_lt, he, ← WithZero.exp_zero, WithZero.exp_lt_exp]; norm_num
-  have hc_pos : 0 < WithZero.log (w e) :=
-    (WithZero.lt_log_iff_exp_lt hwe0).mpr (by rwa [WithZero.exp_zero])
-  obtain ⟨x₁, hx₁⟩ := hw (WithZero.exp 1)
-  have hvx₁ : v x₁ ≠ 0 :=
-    (h.eq_zero).ne.mpr (by rw [hx₁]; exact WithZero.exp_ne_zero)
-  have hk := key x₁ hvx₁
-  rw [hx₁] at hk
-  have hlog : (1 : ℤ) = WithZero.log (v x₁) * WithZero.log (w e) := by
-    have h2 := congrArg WithZero.log hk
-    rwa [WithZero.log_exp, WithZero.log_zpow, smul_eq_mul] at h2
-  have hc1 : WithZero.log (w e) = 1 := by
-    have hdvd : WithZero.log (w e) ∣ 1 := ⟨_, by rw [hlog]; ring⟩
-    rcases Int.isUnit_iff.mp (isUnit_of_dvd_one hdvd) with hh | hh
-    · exact hh
-    · omega
-  ext x
-  rcases eq_or_ne (v x) 0 with hx0 | hx0
-  · rw [hx0, (h.eq_zero).mp hx0]
-  · rw [key x hx0, ← WithZero.exp_log hwe0, hc1, ← WithZero.exp_zsmul, smul_eq_mul, mul_one,
-      WithZero.exp_log hx0]
+    v = w :=
+  HasseWeil.Curves.Valuation.isEquiv_iff_eq_of_surjective_withZeroInt v w hv hw h
 
-/-- **General valuation-subring maximality glue (axiom-clean).** If the valuation
-subring of `v` dominates into the valuation subring of `w` (`O_v ≤ O_w` in the
-`LocalSubring` domination order), then `v.IsEquiv w`. -/
+/-- **Re-export** of `HasseWeil.Curves.Valuation.isEquiv_of_valuationSubring_le`
+(relocated to the lightweight `HasseWeil/Curves/RankOneDomination.lean`).  Kept here under the
+historical name for the V.1.3 valuation-identification consumers below. -/
 theorem Valuation.isEquiv_of_valuationSubring_le
     {F : Type*} [Field F] {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀]
     (v w : Valuation F Γ₀)
     (hle : v.valuationSubring.toLocalSubring ≤ w.valuationSubring.toLocalSubring) :
-    v.IsEquiv w := by
-  rw [Valuation.isEquiv_iff_valuationSubring]
-  exact ValuationSubring.toLocalSubring_injective
-    (v.valuationSubring.isMax_toLocalSubring.eq_of_le hle)
+    v.IsEquiv w :=
+  HasseWeil.Curves.Valuation.isEquiv_of_valuationSubring_le v w hle
 
-/-- **F.1 downstream dispatch**: the order-based ideal
-`P_T = {a ∈ data.carrier | ord_T(algebraMap a) > 0}`, for a kernel point `T`. -/
+/-- **F.1 downstream dispatch**: the order-based prime ideal P_T = {a ∈ data.carrier |
+ord_T(algebraMap a) > 0}, uniformly across kernel points T (including T = O).
+
+Same content as the former OpenLemmas `bridge_Bi_kernelToPrime` (an upstream sorry,
+deleted 2026-06-11), but built here where the required `Sinf_ord_nonneg` is
+available axiom-clean. -/
 noncomputable def bridge_Bi_kernelToPrime_v2
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (hq : 2 ≤ Fintype.card K)
@@ -1046,9 +1141,9 @@ noncomputable def bridge_Bi_kernelToPrime_v2
       (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val
         (algebraMap data.carrier L (a + b))
     rw [map_add]
-    exact lt_of_lt_of_le (lt_min ha hb)
-      ((⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint_add_le T.val
-        (algebraMap data.carrier L a) (algebraMap data.carrier L b))
+    have h_le := (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint_add_le T.val
+      (algebraMap data.carrier L a) (algebraMap data.carrier L b)
+    exact lt_of_lt_of_le (lt_min ha hb) h_le
   · change (0 : WithTop ℤ) <
       (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val
         (algebraMap data.carrier L (0 : data.carrier))
@@ -1061,16 +1156,18 @@ noncomputable def bridge_Bi_kernelToPrime_v2
     change (0 : WithTop ℤ) <
       (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val
         (algebraMap data.carrier L (r • a))
-    rw [smul_eq_mul (α := data.carrier), map_mul]
+    have h_smul : (r : data.carrier) • a = r * a := smul_eq_mul (α := data.carrier) r a
+    rw [h_smul, map_mul]
     have h_mul : (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val
         ((algebraMap data.carrier L r) * (algebraMap data.carrier L a)) =
       (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val (algebraMap data.carrier L r) +
       (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val (algebraMap data.carrier L a) :=
       (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint_mul T.val _ _
     rw [h_mul]
+    have h_r_nonneg :=
+      Conditional.Sinf_ord_nonneg_at_kernel_point_unconditional W hq data T r
     calc (0 : WithTop ℤ) < _ := ha
-      _ ≤ _ := le_add_of_nonneg_left
-        (Conditional.Sinf_ord_nonneg_at_kernel_point_unconditional W hq data T r)
+      _ ≤ _ := le_add_of_nonneg_left h_r_nonneg
 
 /-- **F.1 companion downstream**: the v2 ideal is prime.
 
@@ -1116,10 +1213,20 @@ theorem bridge_Bi_isPrime_v2
     have hA : (0 : WithTop ℤ) ≤
         (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val (algebraMap data.carrier L x) :=
       Conditional.Sinf_ord_nonneg_at_kernel_point_unconditional W hq data T x
-    rcases lt_or_eq_of_le hA with h | h
-    · exact Or.inl h
-    · rw [← h, zero_add] at hxy'
-      exact Or.inr hxy'
+    have hB : (0 : WithTop ℤ) ≤
+        (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val (algebraMap data.carrier L y) :=
+      Conditional.Sinf_ord_nonneg_at_kernel_point_unconditional W hq data T y
+    change (0 : WithTop ℤ) <
+        (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val (algebraMap data.carrier L x)
+      ∨ (0 : WithTop ℤ) <
+        (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val (algebraMap data.carrier L y)
+    by_contra h
+    push Not at h
+    obtain ⟨hA', hB'⟩ := h
+    have hA0 := le_antisymm hA' hA
+    have hB0 := le_antisymm hB' hB
+    rw [hA0, hB0, add_zero] at hxy'
+    exact lt_irrefl 0 hxy'
 
 /-- **F.1 companion downstream**: the v2 ideal lies over `xIdeal := (X) ⊂ Polynomial K`.
 
@@ -1206,7 +1313,12 @@ theorem bridge_Bi_liesOver_v2
     rw [map_mul, Polynomial.aeval_X,
       (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint_mul T.val g
         (Polynomial.aeval g q), h_ord_g]
-    exact add_pos_of_pos_of_nonneg (by decide) (h_aeval_nonneg q)
+    -- `0 < 2 + ord (aeval g q)` since `ord (aeval g q) ≥ 0`.
+    calc (0 : WithTop ℤ) < (2 : WithTop ℤ) := by decide
+      _ ≤ (2 : WithTop ℤ) +
+          (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val
+            (Polynomial.aeval g q) :=
+        le_add_of_nonneg_right (h_aeval_nonneg q)
   · -- Converse, by contraposition: `¬(X ∣ p) ⟹ ord_T (aeval g p) = 0`, hence not `> 0`.
     rw [← not_imp_not]
     intro h_ndvd
@@ -1243,16 +1355,37 @@ theorem bridge_Bi_liesOver_v2
         (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val
           (g * Polynomial.aeval g q) := by
       rw [h_ord_const, h_ord_rest]
-      exact add_pos_of_pos_of_nonneg (by decide) (h_aeval_nonneg q)
+      calc (0 : WithTop ℤ) < (2 : WithTop ℤ) := by decide
+        _ ≤ (2 : WithTop ℤ) +
+            (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val
+              (Polynomial.aeval g q) :=
+          le_add_of_nonneg_right (h_aeval_nonneg q)
     rw [(⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint_add_eq_of_lt T.val h_lt,
       h_ord_const]
     -- Goal: `¬ (0 < 0)`.
     exact lt_irrefl 0
 
 /-- **F.1 substrate (SHIPPABLE direction): membership in `P_T^n` forces
-`ord_T ≥ n`.** For the order-based kernel prime
-`P_T := bridge_Bi_kernelToPrime_v2 W hq data T`, an element of `P_T^n` has
-curve-order at least `n` at `T`: `a ∈ P_T^n → (n : WithTop ℤ) ≤ ord_T(algebraMap a)`. -/
+`ord_T ≥ n`.**
+
+For the order-based kernel prime `P_T := bridge_Bi_kernelToPrime_v2 W hq data T`
+(defined as `{a : carrier | 0 < ord_T(algebraMap a)}`), any element of the `n`-th
+power `P_T^n` has curve-order at least `n` at `T`:
+
+  `a ∈ P_T^n → (n : WithTop ℤ) ≤ ord_T(algebraMap a)`.
+
+This is the "easy half" of the carrier-valuation ↔ `ord_T` identification and is
+**fully axiom-clean**: it follows from `P_T`'s definition by `Submodule.pow_induction_on_left'`,
+using only
+* `Sinf_ord_nonneg_at_kernel_point_unconditional` (base case, `n = 0`: `ord_T ≥ 0`);
+* `ordAtPoint_add_le` (additivity / non-archimedean min);
+* `ordAtPoint_mul` together with the defining inequality of `P_T` (the
+  multiplicative-step: a factor in `P_T` contributes `ord_T ≥ 1`).
+
+It supplies the `¬ (xIdeal.map ≤ P_T^3)` half of `Sinf_ramificationIdx_eq_two_at_kernel`
+via contraposition (`a ∈ P_T^3 → 3 ≤ ord_T(f⁻¹) = 2`, false). The converse
+direction (`n ≤ ord_T → a ∈ P_T^n`) is the genuinely-open DVR-exactness gap,
+isolated as `Sinf_kernelPrime_pow_mem_of_le_ord`. -/
 theorem Sinf_kernelPrime_pow_le_ord
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (hq : 2 ≤ Fintype.card K)
@@ -1273,21 +1406,28 @@ theorem Sinf_kernelPrime_pow_le_ord
   letI := data.algLinfAt
   set L : Type _ := Curves.RamificationAtInfinity.LinfAt (k := K)
     ((isogOneSub_negFrobenius W hq).pullback (x_gen W))
+  -- Induct on membership in `P_T ^ n` (dependent left induction), proving the
+  -- order bound `(n : WithTop ℤ) ≤ ord_T(algebraMap a)`.
   induction ha using Submodule.pow_induction_on_left' with
   | algebraMap r =>
-    simpa only [Nat.cast_zero, Algebra.algebraMap_self_apply] using
-      Conditional.Sinf_ord_nonneg_at_kernel_point_unconditional W hq data T r
+    -- Base case `n = 0`: `(0 : WithTop ℤ) ≤ ord_T(algebraMap (carrier) r)`.
+    -- `algebraMap carrier carrier r = r`, and `ord ≥ 0` on the carrier.
+    simp only [Nat.cast_zero, Algebra.algebraMap_self_apply]
+    exact Conditional.Sinf_ord_nonneg_at_kernel_point_unconditional W hq data T r
   | add x y i _ _ hx hy =>
+    -- Additive step: `(i : WithTop ℤ) ≤ ord_T(x), ord_T(y) ⟹ ≤ ord_T(x + y)`.
     have h_add : (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val
         (algebraMap data.carrier L (x + y)) =
         (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val
           (algebraMap data.carrier L x + algebraMap data.carrier L y) :=
       congrArg _ (map_add _ x y)
     rw [h_add]
-    exact (le_min hx hy).trans
+    exact le_trans (le_min hx hy)
       ((⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint_add_le T.val
         (algebraMap data.carrier L x) (algebraMap data.carrier L y))
   | mem_mul m hm i x _ hx =>
+    -- Multiplicative step: `m ∈ P_T` (so `ord_T(m) ≥ 1`) and `(i:_) ≤ ord_T(x)`
+    -- ⟹ `(i+1 : _) ≤ ord_T(m * x)`.
     have h_mul : (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val
         (algebraMap data.carrier L (m * x)) =
         (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val
@@ -1299,6 +1439,10 @@ theorem Sinf_kernelPrime_pow_le_ord
           (algebraMap data.carrier L m) (algebraMap data.carrier L x))
     rw [h_mul]
     -- `hm : 0 < ord_T(algebraMap m)`; on `WithTop ℤ`, `0 < v → 1 ≤ v`.
+    have hm' : (0 : WithTop ℤ) <
+        (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val
+          (algebraMap data.carrier L m) := hm
+    -- On `WithTop ℤ`, `0 < v → 1 ≤ v` (the value group is `ℤ`, discrete).
     have hWithTop : ∀ v : WithTop ℤ, (0 : WithTop ℤ) < v → (1 : WithTop ℤ) ≤ v := by
       intro v hv
       induction v using WithTop.recTopCoe with
@@ -1306,14 +1450,26 @@ theorem Sinf_kernelPrime_pow_le_ord
       | coe z => norm_cast at hv ⊢
     have hm1 : (1 : WithTop ℤ) ≤
         (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val
-          (algebraMap data.carrier L m) := hWithTop _ hm
-    rw [Nat.cast_succ, add_comm]
-    exact add_le_add hm1 hx
+          (algebraMap data.carrier L m) := hWithTop _ hm'
+    -- `(i+1 : WithTop ℤ) = 1 + (i : WithTop ℤ) ≤ ord_T(m) + ord_T(x)`.
+    rw [Nat.cast_succ]
+    calc ((i : WithTop ℤ) + 1) = 1 + (i : WithTop ℤ) := by rw [add_comm]
+      _ ≤ _ := add_le_add hm1 hx
 
 /-- **F.1 infrastructure: the order-based kernel prime is nonzero (`≠ ⊥`).**
 
-The order-based kernel prime `bridge_Bi_kernelToPrime_v2 W hq data T` is a nonzero
-ideal of the carrier. -/
+The order-based kernel prime `P_T := bridge_Bi_kernelToPrime_v2 W hq data T`
+is a nonzero ideal of the carrier: the element `xc := algebraMap (Polynomial K)
+carrier X` lies in `P_T` (its image `f⁻¹` in `LinfAt f` has `ord_T = 2 > 0`,
+`inv_gamma_pullback_x_pos_at_kernel`) and is nonzero (its image is `f⁻¹ ≠ 0`,
+and `algebraMap carrier (LinfAt f)` is injective as an `IsFractionRing`
+embedding). Hence `P_T ≠ ⊥`.
+
+This is the height-one packaging input: together with `bridge_Bi_isPrime_v2`
+(primality) it lets `P_T` be viewed as an
+`IsDedekindDomain.HeightOneSpectrum data.carrier`, whose intrinsic
+`intValuation` is the subject of `Sinf_intValuation_eq_ordAtPoint_at_kernel`.
+Axiom-clean. -/
 theorem Sinf_kernelPrime_ne_bot
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (hq : 2 ≤ Fintype.card K)
@@ -1345,17 +1501,33 @@ theorem Sinf_kernelPrime_ne_bot
   have h_mem : xc ∈ bridge_Bi_kernelToPrime_v2 W hq data T := by
     change (0 : WithTop ℤ) < (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val
       (algebraMap data.carrier L xc)
-    simp [h_ord_xc]
-  -- `xc ≠ 0`: if `xc = 0` its image has `ord_T = ⊤`, contradicting `ord_T = 2`.
-  have h_xc_ne : xc ≠ 0 := fun h0 ↦
-    WithTop.coe_ne_top <| h_ord_xc.symm.trans <| by
-      rw [h0, map_zero]
-      exact (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint_zero_function T.val
+    rw [h_ord_xc]
+    decide
+  -- `xc ≠ 0`: its image `f⁻¹` is nonzero, and `algebraMap carrier L` is injective.
+  have h_xc_ne : xc ≠ 0 := by
+    intro h0
+    have h_img0 : algebraMap data.carrier L xc = 0 := by rw [h0, map_zero]
+    rw [h_tower] at h_img0
+    -- `f⁻¹ = 0` forces `ord_T(f⁻¹) = ⊤`, contradicting `ord_T(f⁻¹) = 2`.
+    have h_top : (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val
+        ((isogOneSub_negFrobenius W hq).pullback (x_gen W))⁻¹ = ⊤ := by
+      rw [h_img0]; exact (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint_zero_function T.val
+    rw [Conditional.inv_gamma_pullback_x_pos_at_kernel W hq T] at h_top
+    exact WithTop.coe_ne_top h_top
   -- A nonzero element of `P_T` witnesses `P_T ≠ ⊥`.
-  exact (Submodule.ne_bot_iff _).2 ⟨xc, h_mem, h_xc_ne⟩
+  intro h_bot
+  rw [h_bot] at h_mem
+  exact h_xc_ne (Ideal.mem_bot.mp h_mem)
 
-/-- The order-based kernel prime `P_T`, packaged as an element of the height-one
-spectrum `IsDedekindDomain.HeightOneSpectrum data.carrier` of the carrier. -/
+/-- The order-based kernel prime `P_T` packaged as an
+`IsDedekindDomain.HeightOneSpectrum data.carrier`: primality from
+`bridge_Bi_isPrime_v2`, `ne_bot` from `Sinf_kernelPrime_ne_bot`.
+
+This is the height-one packaging that lets the carrier's intrinsic `P_T`-adic
+`intValuation` machinery (`IsDedekindDomain.HeightOneSpectrum.intValuation`,
+`…_le_pow_iff_mem`) apply to `P_T`. Used to phrase the residual valuation
+identity (`Sinf_intValuation_le_exp_neg_at_kernel`) and to derive the
+membership lemma `Sinf_kernelPrime_pow_mem_of_le_ord`. Axiom-clean. -/
 noncomputable def Sinf_kernelPrime_heightOne
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (hq : 2 ≤ Fintype.card K)
@@ -1376,30 +1548,38 @@ noncomputable def Sinf_kernelPrime_heightOne
 
 /-- **Curve-side value form (axiom-clean helper).** For a finite smooth point `P`
 and a nonzero function `f` whose additive order is the integer `n`
-(`ord_P P f = (n : WithTop ℤ)`), the `pointValuation` is the exponential of the
-negated order: `pointValuation P f = WithZero.exp (-n)`. -/
+(`ord_P P f = (n : WithTop ℤ)`), the project's `pointValuation` is the exponential of
+the negated order: `pointValuation P f = WithZero.exp (-n)`. Immediate from the
+definition `ord_P P f = -(unzero …).toAdd` (for `f ≠ 0`) and
+`WithZero.exp a = coe (Multiplicative.ofAdd a)`. -/
 theorem Curves.SmoothPlaneCurve.pointValuation_eq_exp_neg_of_ord_P_eq
     {F : Type*} [Field F] {C : Curves.SmoothPlaneCurve F} {P : C.SmoothPoint}
     {f : C.FunctionField} {n : ℤ} (hf : f ≠ 0)
     (hn : C.ord_P P f = (n : WithTop ℤ)) :
     C.pointValuation P f = WithZero.exp (-n) := by
   have hv : C.pointValuation P f ≠ 0 := (C.pointValuation P).ne_zero_iff.mpr hf
+  -- `ord_P P f = -(unzero hv).toAdd` by definition (for `f ≠ 0`).
   have hord : C.ord_P P f = ((-(WithZero.unzero hv).toAdd : ℤ) : WithTop ℤ) := by
-    rw [Curves.SmoothPlaneCurve.ord_P, dif_neg hv]
-  have hneq : n = -(WithZero.unzero hv).toAdd := mod_cast hn.symm.trans hord
+    unfold Curves.SmoothPlaneCurve.ord_P; rw [dif_neg hv]
+  -- Hence `n = -(unzero hv).toAdd`.
+  have hneq : n = -(WithZero.unzero hv).toAdd := by
+    have h := hord.symm.trans hn; exact_mod_cast h.symm
   rw [hneq, neg_neg, WithZero.exp, ofAdd_toAdd, WithZero.coe_unzero]
 
 /-- **Curve-side surjectivity (axiom-clean helper).** The `pointValuation` at a
-finite smooth point `P` is surjective onto `ℤᵐ⁰`. -/
+finite smooth point `P` is surjective onto `ℤᵐ⁰`: the DVR has a uniformizer
+(`exists_uniformizer`, `ord_P = 1`), realising `exp (-1)`, and every value is a power
+of it (the value group is `ℤ`). -/
 theorem Curves.SmoothPlaneCurve.pointValuation_surjective
     {F : Type*} [Field F] (C : Curves.SmoothPlaneCurve F) (P : C.SmoothPoint) :
     Function.Surjective (C.pointValuation P) := by
-  obtain ⟨t, ht⟩ := C.exists_uniformizer P
+  obtain ⟨t, ht⟩ := Curves.SmoothPlaneCurve.exists_uniformizer C P
   rw [Curves.SmoothPlaneCurve.Uniformizer] at ht
   have ht_ne : t ≠ 0 := by
     intro h; rw [h, Curves.SmoothPlaneCurve.ord_P_zero] at ht; exact WithTop.top_ne_one ht
+  have hone : C.ord_P P t = ((1 : ℤ) : WithTop ℤ) := by rw [ht]; rfl
   have hvt : C.pointValuation P t = WithZero.exp (-1 : ℤ) :=
-    Curves.SmoothPlaneCurve.pointValuation_eq_exp_neg_of_ord_P_eq ht_ne ht
+    Curves.SmoothPlaneCurve.pointValuation_eq_exp_neg_of_ord_P_eq ht_ne hone
   intro z
   rcases eq_or_ne z 0 with rfl | hz
   · exact ⟨0, map_zero _⟩
@@ -1433,51 +1613,52 @@ theorem Sinf_kernelPrime_valuation_surjective
   letI := data.algLinfAt
   letI := data.isFractionRing
   set L : Type _ := Curves.RamificationAtInfinity.LinfAt (k := K)
-    ((isogOneSub_negFrobenius W hq).pullback (x_gen W))
+    ((isogOneSub_negFrobenius W hq).pullback (x_gen W)) with hL
   obtain ⟨π, hπ⟩ := (Sinf_kernelPrime_heightOne W hq data T).valuation_exists_uniformizer L
+  -- `hπ : v π = ofAdd (-1)`; reinterpret as `exp (-1)`.
+  have hπ' : (Sinf_kernelPrime_heightOne W hq data T).valuation L π = WithZero.exp (-1 : ℤ) := hπ
   intro z
   rcases eq_or_ne z 0 with rfl | hz
   · exact ⟨0, map_zero _⟩
   · refine ⟨π ^ (-(WithZero.log z)), ?_⟩
-    rw [map_zpow₀, hπ, ← WithZero.exp_zsmul, smul_eq_mul, mul_neg_one, neg_neg,
+    rw [map_zpow₀, hπ', ← WithZero.exp_zsmul, smul_eq_mul, mul_neg_one, neg_neg,
       WithZero.exp_log hz]
 
 /-- **F.1 ABSTRACT CRUX (mathlib-shaped reusable reduction) — rank-one overring is
 self-or-top.**
 
-For a valuation subring `A` of a field `L` that is a discrete valuation ring (rank one),
-any larger valuation subring `B ≥ A` with `B ≠ ⊤` must equal `A`. -/
+For a valuation subring `A` of a field `L` that is a **discrete valuation ring**
+(rank one — its only overrings are `A` itself and the whole field `⊤`), any larger
+valuation subring `B ≥ A` with `B ≠ ⊤` must equal `A`.
+
+**Mathematical content (the geometric crux of V.1.3).** Overrings of a valuation
+subring `A` are in order-reversing bijection with the primes of `A`
+(`ValuationSubring.primeSpectrumEquiv`: `B ↦ idealOfLE A B`, `ofPrime A (idealOfLE A B h) = B`).
+A DVR has exactly two primes, `⊥` and the maximal ideal
+(`IsDiscreteValuationRing.iff_pid_with_one_nonzero_prime`: `∃! P ≠ ⊥, P.IsPrime`).
+The bottom prime gives the whole field (`ofPrime A ⊥ = ⊤`), the maximal ideal gives
+`A` (`ofPrime A m_A = A`). So `A ≤ B`, `B ≠ ⊤` forces `idealOfLE A B = m_A`, whence
+`B = ofPrime A m_A = A`.
+
+**Not in mathlib.** Searched (5 distinct queries over
+`Mathlib/RingTheory/Valuation/{ValuationSubring,LocalSubring,RankOne,Discrete/Basic}.lean`
+and `Mathlib/RingTheory/DiscreteValuationRing/{Basic,TFAE}.lean`): there is **no**
+packaged "rank-one / DVR overring `= {self, ⊤}`" lemma, no `ofPrime ⊥ = ⊤`, no
+`ofPrime maximalIdeal = self`, no `ValuationSubring` covering-`⊤` (`CovBy`) lemma. The
+ingredients (`primeSpectrumEquiv`, `ofPrime_idealOfLE`, `iff_pid_with_one_nonzero_prime`,
+`valuationSubring_isDiscreteValuationRing`) all exist; the assembly is the residual.
+
+This is the single reusable fact closing the V.1.3 affine valuation-subring
+domination.
+
+**Relocated** to the lightweight `HasseWeil/Curves/RankOneDomination.lean` (depending only on the
+mathlib `ValuationSubring`/`DiscreteValuationRing` API), so the curve-completeness place
+classification can use it without importing this heavy char-`p` file.  Re-exported here under the
+historical name so the V.1.3 domination consumers below continue to resolve. -/
 theorem rankOne_valuationSubring_le_eq_of_ne_top {L : Type*} [Field L]
     (A B : ValuationSubring L) [IsDiscreteValuationRing A]
-    (hAB : A ≤ B) (hB : B ≠ ⊤) : A = B := by
-  classical
-  have hPprime : (A.idealOfLE B hAB).IsPrime := ValuationSubring.prime_idealOfLE A B hAB
-  -- Equal primes give equal overrings, routed through `primeSpectrumEquiv` (which bundles
-  -- the `IsPrime` instance) to dodge the instance-dependent-motive wall in `ofPrime`.
-  have transport : ∀ (C : ValuationSubring L) (hC : A ≤ C),
-      A.idealOfLE B hAB = A.idealOfLE C hC → B = C := by
-    intro C hC hEq
-    have hPS : (⟨A.idealOfLE B hAB, hPprime⟩ : PrimeSpectrum A)
-        = ⟨A.idealOfLE C hC, ValuationSubring.prime_idealOfLE A C hC⟩ :=
-      PrimeSpectrum.ext hEq
-    have hval := congrArg (fun P ↦ ((ValuationSubring.primeSpectrumEquiv A) P).1) hPS
-    simpa only [ValuationSubring.primeSpectrumEquiv_apply, ValuationSubring.ofPrime_idealOfLE]
-      using hval
-  rcases eq_or_ne (A.idealOfLE B hAB) ⊥ with hbot | hne
-  · -- Bottom prime `⊥`: would force `B = ⊤`, contradicting `hB`.
-    refine absurd (transport ⊤ le_top ?_) hB
-    rw [hbot, ValuationSubring.idealOfLE, IsLocalRing.maximalIdeal_eq_bot]
-    refine (Ideal.comap_bot_of_injective (ValuationSubring.inclusion A ⊤ le_top) ?_).symm
-    intro a b hab
-    have hab' := congrArg (Subtype.val (p := (· ∈ (⊤ : ValuationSubring L)))) hab
-    rw [ValuationSubring.inclusion, Subring.coe_inclusion, Subring.coe_inclusion] at hab'
-    exact Subtype.ext hab'
-  · -- Nonzero prime: maximal in the dimension-≤-1 ring `A`, hence `= maximalIdeal A`.
-    have hmax : (A.idealOfLE B hAB).IsMaximal := hPprime.isMaximal hne
-    refine (transport A le_rfl ?_).symm
-    rw [IsLocalRing.eq_maximalIdeal hmax, ValuationSubring.idealOfLE]
-    ext x
-    rw [Ideal.mem_comap, show (ValuationSubring.inclusion A A le_rfl) x = x from rfl]
+    (hAB : A ≤ B) (hB : B ≠ ⊤) : A = B :=
+  HasseWeil.Curves.rankOne_valuationSubring_le_eq_of_ne_top A B hAB hB
 
 /-- **F.1 wiring helper — the carrier adic-valuation subring is a DVR.**
 
@@ -1510,9 +1691,10 @@ theorem Sinf_kernelPrime_valuationSubring_isDVR
   letI := data.algLinfAt
   letI := data.isFractionRing
   set L : Type _ := Curves.RamificationAtInfinity.LinfAt (k := K)
-    ((isogOneSub_negFrobenius W hq).pullback (x_gen W))
-  set v := (Sinf_kernelPrime_heightOne W hq data T).valuation L
+    ((isogOneSub_negFrobenius W hq).pullback (x_gen W)) with hL
+  set v := (Sinf_kernelPrime_heightOne W hq data T).valuation L with hv
   have hsurj : Function.Surjective v := Sinf_kernelPrime_valuation_surjective W hq data T
+  -- `valueGroup v = ⊤`: surjectivity gives every unit of `ℤᵐ⁰` in the value group.
   have hvg : MonoidWithZeroHom.valueGroup (.ofClass v) = ⊤ := by
     rw [eq_top_iff]
     intro y _
@@ -1520,21 +1702,44 @@ theorem Sinf_kernelPrime_valuationSubring_isDVR
     refine ⟨1, by simp, ?_⟩
     obtain ⟨x, hx⟩ := hsurj (y : WithZero (Multiplicative ℤ))
     exact ⟨x, by rw [map_one, one_mul]; exact hx.symm⟩
+  -- `(WithZero (Multiplicative ℤ))ˣ ≃* Multiplicative ℤ` is cyclic and nontrivial.
   haveI : IsCyclic (WithZero (Multiplicative ℤ))ˣ :=
     isCyclic_of_surjective WithZero.unitsWithZeroEquiv.symm.toMonoidHom
       WithZero.unitsWithZeroEquiv.symm.surjective
   haveI : Nontrivial (WithZero (Multiplicative ℤ))ˣ :=
     WithZero.unitsWithZeroEquiv.symm.toEquiv.nontrivial
-  haveI : IsCyclic (MonoidWithZeroHom.valueGroup (.ofClass v)) :=
-    hvg ▸ isCyclic_of_surjective Subgroup.topEquiv.symm.toMonoidHom
+  -- Transport cyclic + nontrivial across `(WithZero (Multiplicative ℤ))ˣ ≃* ⊤ = valueGroup v`.
+  haveI : IsCyclic (MonoidWithZeroHom.valueGroup (.ofClass v)) := by
+    rw [hvg]
+    exact isCyclic_of_surjective Subgroup.topEquiv.symm.toMonoidHom
       Subgroup.topEquiv.symm.surjective
-  haveI : Nontrivial (MonoidWithZeroHom.valueGroup (.ofClass v)) :=
-    hvg ▸ Subgroup.topEquiv.symm.toEquiv.nontrivial
+  haveI : Nontrivial (MonoidWithZeroHom.valueGroup (.ofClass v)) := by
+    rw [hvg]; exact Subgroup.topEquiv.symm.toEquiv.nontrivial
   exact Valuation.valuationSubring_isDiscreteValuationRing v
 
 /-- **F.1 field-level forward half (named residual).** For any `x` in the function field
 `L`, if the carrier `P_T`-adic valuation is `≤ 1` (i.e. `x` is `P_T`-integral) then the
-curve order at the kernel point is nonnegative: `ord_T(x) ≥ 0`. -/
+curve order at the kernel point is nonnegative: `ord_T(x) ≥ 0`.
+
+**Mathematical content (the EASY half of V.1.3, per the domination docstring).** The
+prime `P_T = bridge_Bi_kernelToPrime_v2` is *defined* as `{a : carrier | 0 < ord_T(a)}`,
+and `v(x) ≤ 1` means `x` lies in the adic valuation subring, which is the localization
+`carrier_{P_T}`. Such an `x = a/s` has `s ∉ P_T`, so `ord_T(s) ≤ 0`; with the carrier
+nonnegativity `Sinf_ord_nonneg_at_kernel_point_unconditional` (`ord_T ≥ 0` on the
+carrier) this forces `ord_T(s) = 0`, and `ord_T(a) ≥ 0`, whence
+`ord_T(x) = ord_T(a) - ord_T(s) ≥ 0`. The *only* missing mathlib glue is the
+identification `{x | v(x) ≤ 1} = localization at P_T` together with the
+denominator-not-in-prime representative (`IsLocalization.AtPrime` ↔ adic valuation
+subring); the carrier-level facts (`P_T` definition, `Sinf_ord_nonneg…`) are shipped.
+
+Searched (3 queries) `Mathlib/RingTheory/DedekindDomain/AdicValuation.lean`
+(`valuation_div_le_one_iff`, `valuation_of_mk'`, `valuation_le_one`),
+`Mathlib/RingTheory/Valuation/ValuationSubring.lean`: there is `valuation_div_le_one_iff`
+(needs a coprimality hypothesis at `v`) but no off-the-shelf
+`valuationSubring = IsLocalization.AtPrime` bridge in the needed direction. Isolated as
+this named residual; consumes only the *forward* (`Sinf_kernelPrime_pow_le_ord`-side)
+content, NOT the open reverse `bridge_Bii`. Tracked under `/develop` sub-ticket
+`T-V-1-3-RAMIDX-EQ-ORDATPOINT`. -/
 theorem Sinf_ordAtPoint_nonneg_of_valuation_le_one
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (hq : 2 ≤ Fintype.card K)
@@ -1561,9 +1766,14 @@ theorem Sinf_ordAtPoint_nonneg_of_valuation_le_one
   letI := data.isDedekindDomain
   letI := data.algLinfAt
   letI := data.isFractionRing
+  -- `v(x) ≤ 1` (= `x` is `P_T`-integral) ⟹ `x = algebraMap n / algebraMap d` with `d ∉ P_T`,
+  -- packaged multiplicatively as `x * algebraMap d = algebraMap n`
+  -- (`IsDedekindDomain.HeightOneSpectrum.exists_primeCompl_mul_eq_of_integer`).
   obtain ⟨n, d, hnd⟩ :=
     IsDedekindDomain.HeightOneSpectrum.exists_primeCompl_mul_eq_of_integer
       (Sinf_kernelPrime_heightOne W hq data T) x hx
+  -- Apply `ord_T` to `hnd`; `ord_T` is additive (`ordAtPoint_mul`):
+  -- `ord_T(x) + ord_T(algebraMap d) = ord_T(algebraMap n)`.
   -- `.trans` matches the middle `ord_T(x * algebraMap d)` up to defeq, sidestepping the
   -- syntactic `Mul`-instance mismatch between `LinfAt` and `C.FunctionField`.
   have hord :
@@ -1578,24 +1788,38 @@ theorem Sinf_ordAtPoint_nonneg_of_valuation_le_one
       (algebraMap data.carrier (Curves.RamificationAtInfinity.LinfAt (k := K)
         ((isogOneSub_negFrobenius W hq).pullback (x_gen W))) (d : data.carrier))).symm.trans
       (congrArg ((⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val) hnd)
+  -- `ord_T(algebraMap n) ≥ 0`: carrier elements have nonneg order at the kernel point.
   have hn_nonneg :=
     Conditional.Sinf_ord_nonneg_at_kernel_point_unconditional W hq data T n
+  -- `ord_T(algebraMap d) = 0`: `d ∉ P_T = {a | 0 < ord_T(algebraMap a)}` gives `≤ 0`,
+  -- and carrier nonnegativity gives `≥ 0`.
   have hd_nonneg :=
     Conditional.Sinf_ord_nonneg_at_kernel_point_unconditional W hq data T (d : data.carrier)
-  -- `d.prop : (d : carrier) ∉ asIdeal`, defeq to `¬ (0 < ord_T(algebraMap d))`.
   have hd_le : (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val
       (algebraMap data.carrier (Curves.RamificationAtInfinity.LinfAt (k := K)
-        ((isogOneSub_negFrobenius W hq).pullback (x_gen W))) (d : data.carrier)) ≤ 0 :=
-    not_lt.mp d.prop
+        ((isogOneSub_negFrobenius W hq).pullback (x_gen W))) (d : data.carrier)) ≤ 0 := by
+    -- `d.prop : (d : carrier) ∉ v.asIdeal = bridge_Bi_kernelToPrime_v2`, whose carrier is
+    -- `{a | 0 < ord_T(algebraMap a)}`.
+    have hmem : (d : data.carrier) ∉ (Sinf_kernelPrime_heightOne W hq data T).asIdeal := d.prop
+    have hnot : ¬ ((0 : WithTop ℤ) <
+        (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val
+          (algebraMap data.carrier (Curves.RamificationAtInfinity.LinfAt (k := K)
+            ((isogOneSub_negFrobenius W hq).pullback (x_gen W))) (d : data.carrier))) := hmem
+    exact not_lt.mp hnot
   have hd_zero := le_antisymm hd_le hd_nonneg
+  -- Conclude `ord_T(x) = ord_T(algebraMap n) ≥ 0`.
   rw [hd_zero, add_zero] at hord
-  exact hord ▸ hn_nonneg
+  rw [hord]
+  exact hn_nonneg
 
 /-- **F.1 wiring helper — the valuation-subring INCLUSION `A ≤ B`.**
 
 The underlying-subring (SetLike) inclusion of the carrier `P_T`-adic valuation subring
-into the curve's `pointValuation` subring at the finite point `⟨xT, yT, h_ns⟩` (the
-*easy half* of the valuation-subring domination). -/
+into the curve's `pointValuation` subring at the finite point `⟨xT, yT, h_ns⟩`. This is
+the *easy half* of the domination: `v_{P_T}(x) ≤ 1 → ord_T(x) ≥ 0`
+(`Sinf_ordAtPoint_nonneg_of_valuation_le_one`) → `pointValuation P x ≤ 1`
+(`Curves.pointValuation_le_one_of_ord_nonneg`), using `ordAtPoint T.val = ord_P P` for
+`T.val = .some xT yT h_ns`. -/
 theorem Sinf_kernelPrime_valuationSubring_le_pointValuation_subring
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (hq : 2 ≤ Fintype.card K)
@@ -1621,20 +1845,58 @@ theorem Sinf_kernelPrime_valuationSubring_le_pointValuation_subring
   letI := data.algLinfAt
   letI := data.isFractionRing
   intro x hx
+  -- `x ∈ A` means `v_{P_T}(x) ≤ 1`; the goal `x ∈ B` means `pointValuation P x ≤ 1`.
+  have hx1 : (Sinf_kernelPrime_heightOne W hq data T).valuation
+      (Curves.RamificationAtInfinity.LinfAt (k := K)
+        ((isogOneSub_negFrobenius W hq).pullback (x_gen W))) x ≤ 1 :=
+    (Valuation.mem_valuationSubring_iff _ x).mp hx
+  -- `v_{P_T}(x) ≤ 1 → ord_T(x) ≥ 0` (the easy field-level forward half).
   have h_ord : (0 : WithTop ℤ) ≤
       (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val x :=
-    Sinf_ordAtPoint_nonneg_of_valuation_le_one W hq data T x
-      ((Valuation.mem_valuationSubring_iff _ x).mp hx)
+    Sinf_ordAtPoint_nonneg_of_valuation_le_one W hq data T x hx1
+  -- Rewrite `ordAtPoint T.val = ord_P ⟨xT, yT, h_ns⟩` (finite kernel point).
   rw [hTval, Curves.SmoothPlaneCurve.ordAtPoint_some_eq_ord_P] at h_ord
+  -- The goal `x ∈ (pointValuation P).valuationSubring` is `pointValuation P x ≤ 1`.
   refine (Valuation.mem_valuationSubring_iff _ x).mpr ?_
+  -- `x = 0`: `pointValuation P 0 = 0 ≤ 1`; `x ≠ 0`: apply the `ord ≥ 0 → ≤ 1` bridge.
   rcases eq_or_ne x 0 with rfl | hx0
   · simp only [map_zero]; exact zero_le_one' _
   · exact Curves.pointValuation_le_one_of_ord_nonneg
       (W := W.toAffine) hx0 ⟨xT, yT, h_ns⟩ h_ord
 
-/-- **F.1 (affine branch) — the valuation-subring domination.** For a finite kernel point
-`⟨xT, yT, h_ns⟩`, the carrier's `P_T`-adic valuation subring dominates the curve's local
-ring at that point in the `LocalSubring` order. -/
+/-- **F.1 IRREDUCIBLE RESIDUAL (affine branch) — the valuation-subring DOMINATION.**
+
+This is the precise, sharply-typed residual underlying
+`Sinf_kernelPrime_valuation_isEquiv_pointValuation_at_affine`: the `LocalSubring`
+domination of the carrier's `P_T`-adic valuation subring over the curve's local ring at
+the finite point `⟨xT, yT, h_ns⟩`,
+`O_{v_{P_T}}.toLocalSubring ≤ O_{pointValuation}.toLocalSubring`.
+
+Via the banked `Valuation.isEquiv_of_valuationSubring_le` (which upgrades *any*
+domination to `IsEquiv` for free by valuation-subring maximality), this single
+inequality yields the full equivalence; the target theorem below is then a one-line
+application.
+
+**Why this is the irreducible gap (not the easy half).** The `LocalSubring`
+domination order (`Mathlib/RingTheory/LocalRing/LocalSubring.lean`, line ~69) is
+`A ≤ B ↔ ∃ h : A.toSubring ≤ B.toSubring, IsLocalHom (Subring.inclusion h)`. The
+*subring inclusion* `O_{v_{P_T}} ⊆ O_{pointValuation}` is the easy half — it is exactly
+`∀ x, v_{P_T}(x) ≤ 1 → pointValuation x ≤ 1`, which reduces (via
+`pointValuation_le_one_of_ord_nonneg`) to `ord_T(x) ≥ 0` and is supplied by
+`Sinf_ord_nonneg_at_kernel_point_unconditional` together with `P_T = {ord_T > 0}` (so a
+`P_T`-integral `x = a/b` with `b ∉ P_T` has `ord_T b = 0`, whence `ord_T x ≥ 0`).
+But the **`IsLocalHom` component** is the genuinely-open content: it requires
+`∀ a ∈ O_{v_{P_T}}, pointValuation(a) = 1 → v_{P_T}(a) = 1`, i.e. the *reverse*
+implication `ord_T(a) ≥ 0 → v_{P_T}(a) ≤ 1` (equivalently the DVR-exactness
+`a ∈ P_T^n ← n ≤ ord_T(a)`), whose forward half only is shipped as
+`Sinf_kernelPrime_pow_le_ord`; the reverse half is
+`Sinf_kernelPrime_pow_mem_of_le_ord` (the content of the since-deleted upstream
+`bridge_Bii_bijective`). (Two distinct
+discretely-valued valuation subrings of a field are incomparable; bare inclusion does
+NOT force equality without the local-hom datum encoding the reverse direction.)
+
+Tracked as `/develop` sub-ticket
+`.mathlib-quality/tickets/hasse/T-V-1-3-RAMIDX-EQ-ORDATPOINT.md`. -/
 theorem Sinf_kernelPrime_valuationSubring_le_pointValuation_at_affine
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (hq : 2 ≤ Fintype.card K)
@@ -1660,26 +1922,39 @@ theorem Sinf_kernelPrime_valuationSubring_le_pointValuation_at_affine
   letI := data.algLinfAt
   letI := data.isFractionRing
   set L : Type _ := Curves.RamificationAtInfinity.LinfAt (k := K)
-    ((isogOneSub_negFrobenius W hq).pullback (x_gen W))
-  set P : (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).SmoothPoint := ⟨xT, yT, h_ns⟩
+    ((isogOneSub_negFrobenius W hq).pullback (x_gen W)) with hL
+  set P : (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).SmoothPoint := ⟨xT, yT, h_ns⟩ with hP
+  -- The two valuation subrings.
   set A : ValuationSubring L :=
-    ((Sinf_kernelPrime_heightOne W hq data T).valuation L).valuationSubring
+    ((Sinf_kernelPrime_heightOne W hq data T).valuation L).valuationSubring with hA
   set B : ValuationSubring L :=
     ((⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).pointValuation P).valuationSubring with hB
+  -- `A` is a DVR: its (adic) valuation `v.valuation L` is rank-one discrete
+  -- (cyclic + nontrivial value group from surjectivity onto `ℤᵐ⁰`).
   haveI : IsDiscreteValuationRing A := Sinf_kernelPrime_valuationSubring_isDVR W hq data T
+  -- (1) Subring inclusion `A ≤ B`: `v_{P_T}(x) ≤ 1 → ord_T(x) ≥ 0 → pointValuation P x ≤ 1`.
   have hAB : A ≤ B :=
     Sinf_kernelPrime_valuationSubring_le_pointValuation_subring W hq data T xT yT h_ns hTval
+  -- (3) `B ≠ ⊤`: `pointValuation P` is nontrivial (surjective onto `ℤᵐ⁰`).
   have hBtop : B ≠ ⊤ := by
+    -- Nontriviality from surjectivity: some `x` has `pointValuation P x ≠ 1` and `≠ 0`.
     have hNontriv : ((⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).pointValuation P).IsNontrivial := by
       refine ⟨?_⟩
       obtain ⟨x, hx⟩ := Curves.SmoothPlaneCurve.pointValuation_surjective
         (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K) P (WithZero.exp (1 : ℤ))
       refine ⟨x, ?_, ?_⟩
-      · exact hx ▸ WithZero.exp_ne_zero
-      · simp [hx, ← WithZero.exp_zero, WithZero.exp_inj]
+      · -- `pointValuation P x = exp 1 ≠ 0`.
+        rw [hx]; exact WithZero.exp_ne_zero
+      · -- `pointValuation P x = exp 1 ≠ 1` (since `exp` is injective and `1 = exp 0`).
+        rw [hx]
+        have h1 : (1 : WithZero (Multiplicative ℤ)) = WithZero.exp (0 : ℤ) :=
+          (WithZero.exp_zero).symm
+        rw [h1, Ne, WithZero.exp_inj]; norm_num
+    -- `B = ⊤ ↔ ¬ IsNontrivial`, but `IsNontrivial` holds, so `B ≠ ⊤`.
     intro htop
     rw [hB] at htop
     exact (Valuation.valuationSubring_eq_top_iff _).mp htop hNontriv
+  -- The DVR-domination crux: `A = B`, then the `LocalSubring` order is `le_of_eq`.
   have hEq : A = B := rankOne_valuationSubring_le_eq_of_ne_top A B hAB hBtop
   exact le_of_eq (congrArg ValuationSubring.toLocalSubring hEq)
 
@@ -1687,7 +1962,23 @@ theorem Sinf_kernelPrime_valuationSubring_le_pointValuation_at_affine
 
 For a finite kernel point (`T.val = .some xT yT h_ns`), the carrier's intrinsic
 `P_T`-adic valuation `(Sinf_kernelPrime_heightOne …).valuation` on `L` is
-`Valuation.IsEquiv` to the curve's `pointValuation ⟨xT, yT, h_ns⟩`. -/
+`Valuation.IsEquiv` to the curve's `pointValuation ⟨xT, yT, h_ns⟩`.
+
+This is now a **one-line application** of the banked maximality lemma
+`Valuation.isEquiv_of_valuationSubring_le` to the sharply-isolated valuation-subring
+domination `Sinf_kernelPrime_valuationSubring_le_pointValuation_at_affine`
+(`O_{v_{P_T}} ≤ O_{pointValuation}` in the `LocalSubring` order); the equivalence's
+reverse maximal-order inclusion is FREE by valuation-subring maximality. The deep
+content has been pushed entirely into that domination residual (whose `IsLocalHom`
+component was the content of the since-deleted upstream `bridge_Bii_bijective`).
+
+The *value* identity then follows purely formally (see
+`Sinf_intValuation_eq_exp_neg_ordAtPoint_at_kernel`) from this equivalence together
+with the surjectivity helpers `Sinf_kernelPrime_valuation_surjective`,
+`Curves.SmoothPlaneCurve.pointValuation_surjective` and the banked
+`Valuation.isEquiv_iff_eq_of_surjective_withZeroInt`.
+
+Tracked as `/develop` sub-ticket `T-V-1-3-RAMIDX-EQ-ORDATPOINT`. -/
 theorem Sinf_kernelPrime_valuation_isEquiv_pointValuation_at_affine
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (hq : 2 ≤ Fintype.card K)
@@ -1705,8 +1996,17 @@ theorem Sinf_kernelPrime_valuation_isEquiv_pointValuation_at_affine
     ((Sinf_kernelPrime_heightOne W hq data T).valuation
         (Curves.RamificationAtInfinity.LinfAt (k := K)
           ((isogOneSub_negFrobenius W hq).pullback (x_gen W)))).IsEquiv
-      ((⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).pointValuation ⟨xT, yT, h_ns⟩) :=
-  Valuation.isEquiv_of_valuationSubring_le _ _
+      ((⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).pointValuation ⟨xT, yT, h_ns⟩) := by
+  letI := data.commRing
+  letI := data.isDomain
+  letI := data.isDedekindDomain
+  letI := data.algLinfAt
+  letI := data.isFractionRing
+  -- The equivalence follows from the valuation-subring domination by the banked
+  -- maximality lemma `Valuation.isEquiv_of_valuationSubring_le` (the reverse maximal-order
+  -- inclusion is FREE). The domination is the sharply-isolated residual
+  -- `Sinf_kernelPrime_valuationSubring_le_pointValuation_at_affine`.
+  exact Valuation.isEquiv_of_valuationSubring_le _ _
     (Sinf_kernelPrime_valuationSubring_le_pointValuation_at_affine
       W hq data T xT yT h_ns hTval)
 
@@ -1747,9 +2047,9 @@ theorem Sinf_intValuation_eq_exp_neg_ordAtInfty_at_zero
   letI := data.algLinfAt
   letI := data.isFractionRing
   set L : Type _ := Curves.RamificationAtInfinity.LinfAt (k := K)
-    ((isogOneSub_negFrobenius W hq).pullback (x_gen W))
-  set v := Sinf_kernelPrime_heightOne W hq data T
-  set C : Curves.SmoothPlaneCurve K := ⟨W.toAffine⟩
+    ((isogOneSub_negFrobenius W hq).pullback (x_gen W)) with hL
+  set v := Sinf_kernelPrime_heightOne W hq data T with hv
+  set C : Curves.SmoothPlaneCurve K := ⟨W.toAffine⟩ with hC
   -- The two valuations on `L`: the carrier `P_T`-adic `v.valuation`, and the
   -- infinity-place valuation `ordAtInftyValuation` (just packaged in `Curves/Infinity.lean`).
   set w := C.ordAtInftyValuation with hw
@@ -1769,8 +2069,8 @@ theorem Sinf_intValuation_eq_exp_neg_ordAtInfty_at_zero
     intro x hx
     have hx1 : v.valuation L x ≤ 1 := (Valuation.mem_valuationSubring_iff _ x).mp hx
     have h_ord : (0 : WithTop ℤ) ≤ C.ordAtInfty x := by
-      simpa only [hTval, Curves.SmoothPlaneCurve.ordAtPoint_zero_eq_ordAtInfty] using
-        Sinf_ordAtPoint_nonneg_of_valuation_le_one W hq data T x hx1
+      have := Sinf_ordAtPoint_nonneg_of_valuation_le_one W hq data T x hx1
+      rwa [hTval, Curves.SmoothPlaneCurve.ordAtPoint_zero_eq_ordAtInfty] at this
     refine (Valuation.mem_valuationSubring_iff _ x).mpr ?_
     rcases eq_or_ne x 0 with rfl | hx0
     · simp only [map_zero]; exact zero_le_one' _
@@ -1782,7 +2082,10 @@ theorem Sinf_intValuation_eq_exp_neg_ordAtInfty_at_zero
       obtain ⟨x, hx⟩ := C.ordAtInftyValuation_surjective (WithZero.exp (1 : ℤ))
       refine ⟨x, ?_, ?_⟩
       · rw [hw, hx]; exact WithZero.exp_ne_zero
-      · rw [hw, hx, Ne, ← WithZero.exp_zero, WithZero.exp_inj]; norm_num
+      · rw [hw, hx]
+        have h1 : (1 : WithZero (Multiplicative ℤ)) = WithZero.exp (0 : ℤ) :=
+          (WithZero.exp_zero).symm
+        rw [h1, Ne, WithZero.exp_inj]; norm_num
     intro htop
     rw [hB] at htop
     exact (Valuation.valuationSubring_eq_top_iff _).mp htop hNontriv
@@ -1802,9 +2105,47 @@ theorem Sinf_intValuation_eq_exp_neg_ordAtInfty_at_zero
 
 /-- **F.1 RESIDUAL SUB-LEAF — the irreducible valuation identification (value identity).**
 
-For the height-one prime `v := Sinf_kernelPrime_heightOne …` (whose `asIdeal` is `P_T`)
-and any nonzero carrier element `a`, if `ord_T(algebraMap a) = (d : WithTop ℤ)` then
-`v.intValuation a = WithZero.exp (-d)`. -/
+This is the **single, sharply-isolated mathematical gap** for the entire V.1.3
+ramification chain: the carrier's intrinsic `P_T`-adic valuation *equals*
+`exp(-ord_T)` on the carrier. For the height-one prime `v := Sinf_kernelPrime_heightOne …`
+(whose `asIdeal` is `P_T := bridge_Bi_kernelToPrime_v2 …`), any *nonzero* carrier
+element `a`, and any integer `d`,
+
+  `ord_T(algebraMap a) = (d : WithTop ℤ) → v.intValuation a = WithZero.exp (-d)`.
+
+This is the **per-element value form** of the valuation agreement `v_{P_T} = exp(-ord_T)`
+on the shared fraction field `LinfAt f = W.toAffine.FunctionField`. From it the
+two-sided membership equivalence `a ∈ P_T^n ↔ n ≤ ord_T(a)` and the consumed
+inequality `Sinf_intValuation_le_exp_neg_at_kernel` follow purely formally (below),
+and it is precisely the reusable content the former `bridge_Bii_bijective` /
+`bridge_Biv_inertia_eq_one` targets needed (both deleted 2026-06-11).
+
+**Why this is genuinely irreducible (the deep geometric content).** It is the
+closed-point ↔ prime valuation agreement across *two different Dedekind domains*:
+* the curve side `ordAtPoint T` is `ord_P` (`Curves/Valuation.lean`, the DVR
+  `W.CoordinateRing` localized at `maximalIdealAt T`) when `T.val = .some …`, and the
+  **degree-based** `ordAtInfty` (`Curves/Infinity.lean`, `-intDegree ∘ normAsRatFunc`,
+  *not* packaged as a DVR/`HeightOneSpectrum`) when `T.val = .zero`;
+* the carrier side `v.intValuation` is the `P_T`-adic valuation of
+  `integralClosure (Polynomial K) (LinfAt f)` (`RamificationAtInfinity.lean`).
+
+Both are valuations on `LinfAt f`, and `P_T = {a | ord_T(algebraMap a) > 0}` is by
+construction the contraction of the place `T`. The two valuation *subrings* coincide
+(`O_{P_T} = {ord_T ≥ 0}`); the easy inclusion `O_{P_T} ⊆ {ord_T ≥ 0}` plus the
+domination order makes `O_{P_T}` an `IsMax` `LocalSubring` (`ValuationSubring.isMax_toLocalSubring`,
+`Mathlib/RingTheory/Valuation/LocalSubring.lean`), whence equality — but promoting
+*equal valuation subrings* to the *value identity* in `ℤᵐ⁰` requires value-group
+normalisation (a common uniformizer realising `exp(-1)` carrier-side and `ord_T = 1`
+curve-side), *uniformly across the `ord_P` and `ordAtInfty` branches*. The `ordAtInfty`
+branch additionally lacks any DVR/`ValuationSubring` packaging in the project. This is
+substantial new infrastructure — the same content that underlay the since-deleted
+`bridge_Bii_bijective` (`OpenLemmas.lean`), not an import unblock. The **forward**
+direction (`a ∈ P_T^n → ord_T(a) ≥ n`, equivalently `v.intValuation a ≤ exp(-n) → …`)
+is SHIPPED axiom-clean as `Sinf_kernelPrime_pow_le_ord`.
+
+Tracked as `/develop` sub-ticket
+`.mathlib-quality/tickets/hasse/T-V-1-3-RAMIDX-EQ-ORDATPOINT.md`. **This declaration
+is the sole `sorry` of the chain.** -/
 theorem Sinf_intValuation_eq_exp_neg_ordAtPoint_at_kernel
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (hq : 2 ≤ Fintype.card K)
@@ -1830,29 +2171,52 @@ theorem Sinf_intValuation_eq_exp_neg_ordAtPoint_at_kernel
   letI := data.algLinfAt
   letI := data.isFractionRing
   set L : Type _ := Curves.RamificationAtInfinity.LinfAt (k := K)
-    ((isogOneSub_negFrobenius W hq).pullback (x_gen W))
-  set v := Sinf_kernelPrime_heightOne W hq data T
+    ((isogOneSub_negFrobenius W hq).pullback (x_gen W)) with hL
+  set v := Sinf_kernelPrime_heightOne W hq data T with hv
+  -- Case-split on the kernel point: finite (`.some`) vs. infinity (`.zero`).
   rcases h_T_val : T.val with _ | ⟨xT, yT, h_ns⟩
-  · exact Sinf_intValuation_eq_exp_neg_ordAtInfty_at_zero W hq data T h_T_val d a ha0 had
-  · set P : (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).SmoothPoint := ⟨xT, yT, h_ns⟩
-    set w := (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).pointValuation P
+  · -- INFINITY branch: delegate to the isolated `ordAtInfty` residual.
+    exact Sinf_intValuation_eq_exp_neg_ordAtInfty_at_zero W hq data T h_T_val d a ha0 had
+  · -- AFFINE branch: apply the banked maximality lemmas to `v` and `pointValuation P`.
+    set P : (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).SmoothPoint := ⟨xT, yT, h_ns⟩ with hP
+    set w := (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).pointValuation P with hw
+    -- `had` (rewritten along `T.val = .some …`): `ord_P P (algebraMap a) = d`.
     rw [h_T_val, Curves.SmoothPlaneCurve.ordAtPoint_some_eq_ord_P] at had
+    -- `algebraMap a ≠ 0` (carrier ↪ L is an IsFractionRing embedding).
     have h_img_ne : algebraMap data.carrier L a ≠ 0 := by
       simpa using (IsFractionRing.injective data.carrier L).ne ha0
+    -- The two valuations are equivalent (the irreducible residual), then EQUAL
+    -- (both surjective onto `ℤᵐ⁰`, banked `isEquiv_iff_eq_of_surjective_withZeroInt`).
+    have h_isEquiv : v.valuation L |>.IsEquiv w :=
+      Sinf_kernelPrime_valuation_isEquiv_pointValuation_at_affine
+        W hq data T xT yT h_ns h_T_val
     have h_eq : v.valuation L = w :=
       Valuation.isEquiv_iff_eq_of_surjective_withZeroInt _ _
         (Sinf_kernelPrime_valuation_surjective W hq data T)
-        (Curves.SmoothPlaneCurve.pointValuation_surjective _ P)
-        (Sinf_kernelPrime_valuation_isEquiv_pointValuation_at_affine
-          W hq data T xT yT h_ns h_T_val)
+        (Curves.SmoothPlaneCurve.pointValuation_surjective _ P) h_isEquiv
+    -- `intValuation a = v.valuation (algebraMap a) = w (algebraMap a) = exp(-d)`.
     rw [← v.valuation_of_algebraMap (K := L) a, h_eq]
+    -- `w (algebraMap a) = pointValuation P (algebraMap a) = exp(-ord_P) = exp(-d)`.
     exact Curves.SmoothPlaneCurve.pointValuation_eq_exp_neg_of_ord_P_eq h_img_ne had
 
 /-- **F.1: the consumed valuation inequality.**
 
 For the height-one prime `v := Sinf_kernelPrime_heightOne …` (whose `asIdeal` is
 `P_T`) and any carrier element `a`, if `ord_T(algebraMap a) ≥ m` then
-`v.intValuation a ≤ WithZero.exp (-m)`. -/
+`v.intValuation a ≤ WithZero.exp (-m)`.
+
+**No bare `sorry`**: this is now *derived* from the value-identity leaf
+`Sinf_intValuation_eq_exp_neg_ordAtPoint_at_kernel`. The derivation is purely formal:
+* `a = 0` ⟹ `v.intValuation 0 = 0 ≤ exp(-m)` (`Valuation.map_zero`, `WithZero.zero_le`);
+* `a ≠ 0` ⟹ `algebraMap a ≠ 0` (`IsFractionRing.injective`), so `ord_T(algebraMap a)`
+  is a genuine integer `d` (not `⊤`); the leaf gives `v.intValuation a = exp(-d)`, and
+  `(m : WithTop ℤ) ≤ (d : WithTop ℤ)` forces `m ≤ d`, hence `exp(-d) ≤ exp(-m)` by
+  antitonicity of `exp` (`WithZero.exp_le_exp`).
+
+Via `IsDedekindDomain.HeightOneSpectrum.intValuation_le_pow_iff_mem` this is the
+**reverse** half of `v_{P_T}(a) = exp(-ord_T(a))` (`ord_T(a) ≥ m ⟹ a ∈ P_T^m`); the
+forward half is shipped (`Sinf_kernelPrime_pow_le_ord`). Tracked as `/develop`
+sub-ticket `.mathlib-quality/tickets/hasse/T-V-1-3-RAMIDX-EQ-ORDATPOINT.md`. -/
 theorem Sinf_intValuation_le_exp_neg_at_kernel
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (hq : 2 ≤ Fintype.card K)
@@ -1879,26 +2243,48 @@ theorem Sinf_intValuation_le_exp_neg_at_kernel
   letI := data.algLinfAt
   letI := data.isFractionRing
   set L : Type _ := Curves.RamificationAtInfinity.LinfAt (k := K)
-    ((isogOneSub_negFrobenius W hq).pullback (x_gen W))
+    ((isogOneSub_negFrobenius W hq).pullback (x_gen W)) with hL
+  -- `a = 0`: `intValuation 0 = 0 ≤ exp(-m)`.
   rcases eq_or_ne a 0 with rfl | ha0
   · rw [(Sinf_kernelPrime_heightOne W hq data T).intValuation.map_zero]
-    exact zero_le
+    exact WithZero.zero_le _
+  -- `a ≠ 0`: image is nonzero, so `ord_T(image a) = (d : WithTop ℤ)` for a genuine `d`.
   have h_img_ne : algebraMap data.carrier L a ≠ 0 := by
     simpa using (IsFractionRing.injective data.carrier L).ne ha0
+  -- `ord_T(image a) ≠ ⊤`, hence `= (d : WithTop ℤ)` for some `d : ℤ`.
   have h_ne_top : (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val
       (algebraMap data.carrier L a) ≠ ⊤ := by
     rw [Ne, (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint_eq_top_iff]
     exact h_img_ne
   obtain ⟨d, hd⟩ := WithTop.ne_top_iff_exists.mp h_ne_top
-  rw [Sinf_intValuation_eq_exp_neg_ordAtPoint_at_kernel W hq data T d a ha0 hd.symm]
+  -- The leaf identity: `v.intValuation a = exp(-d)`.
+  have h_eq := Sinf_intValuation_eq_exp_neg_ordAtPoint_at_kernel W hq data T d a ha0 hd.symm
+  rw [h_eq]
+  -- `(m : WithTop ℤ) ≤ (d : WithTop ℤ)` (rewrite `ha` along `hd`) forces `m ≤ d`.
   rw [← hd] at ha
   have hmd : m ≤ d := by exact_mod_cast ha
-  exact WithZero.exp_le_exp.mpr (by omega)
+  -- `exp` is antitone in the negated exponent: `m ≤ d ⟹ exp(-d) ≤ exp(-m)`.
+  rw [WithZero.exp_le_exp]
+  omega
 
-/-- **F.1: the reverse membership direction.** If the curve-order at the kernel
-point `T` of a carrier element's image is at least `n`, then the element lies in
-the `n`-th power of the order-based kernel prime
-`P_T := bridge_Bi_kernelToPrime_v2 W hq data T`. -/
+/-- **F.1: the reverse membership direction `ord_T ≥ n ⟹ a ∈ P_T^n`.**
+
+The converse of `Sinf_kernelPrime_pow_le_ord`: a carrier element whose curve-order
+at `T` is at least `n` lies in the `n`-th power of the order-based kernel prime
+`P_T := bridge_Bi_kernelToPrime_v2 W hq data T`:
+
+  `(n : WithTop ℤ) ≤ ord_T(algebraMap a) → a ∈ P_T^n`.
+
+**No bare `sorry`**: this is now *derived* from the isolated valuation residual
+`Sinf_intValuation_le_exp_neg_at_kernel` by packaging `P_T` as a
+`HeightOneSpectrum` (`Sinf_kernelPrime_heightOne`) and applying
+`IsDedekindDomain.HeightOneSpectrum.intValuation_le_pow_iff_mem`
+(`a ∈ v.asIdeal^n ↔ v.intValuation a ≤ exp(-n)`). The genuine open content lives
+entirely in that residual (the carrier-valuation ↔ `ord_T` agreement, the
+closed-point ↔ prime identification underlying `bridge_Bii_bijective`). The
+forward direction is shipped axiom-clean (`Sinf_kernelPrime_pow_le_ord`). Tracked
+as `/develop` sub-ticket
+`.mathlib-quality/tickets/hasse/T-V-1-3-RAMIDX-EQ-ORDATPOINT.md`. -/
 theorem Sinf_kernelPrime_pow_mem_of_le_ord
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (hq : 2 ≤ Fintype.card K)
@@ -1920,10 +2306,15 @@ theorem Sinf_kernelPrime_pow_mem_of_le_ord
   letI := data.isDomain
   letI := data.isDedekindDomain
   letI := data.algLinfAt
-  set v := Sinf_kernelPrime_heightOne W hq data T
+  -- Package `P_T` as a `HeightOneSpectrum` and convert `a ∈ P_T^n` into the
+  -- valuation bound `v.intValuation a ≤ exp(-n)` via `intValuation_le_pow_iff_mem`.
+  set v := Sinf_kernelPrime_heightOne W hq data T with hv
   -- `v.asIdeal = P_T` definitionally.
   change a ∈ v.asIdeal ^ n
   rw [← IsDedekindDomain.HeightOneSpectrum.intValuation_le_pow_iff_mem v a n]
+  -- Remaining bound `v.intValuation a ≤ exp(-(n:ℤ))` is the residual valuation
+  -- identity with `m = (n : ℤ)`; the hypothesis `ha` (`(n:WithTop ℤ) ≤ ord_T`)
+  -- matches `((n:ℤ):WithTop ℤ) ≤ ord_T` up to the `ℕ → ℤ → WithTop ℤ` casts.
   refine Sinf_intValuation_le_exp_neg_at_kernel W hq data T (n : ℤ) a ?_
   exact_mod_cast ha
 
@@ -1973,11 +2364,15 @@ theorem Sinf_ramificationIdx_eq_two_at_kernel
   letI := data.algLinfAt
   letI := data.isScalarTower
   set L : Type _ := Curves.RamificationAtInfinity.LinfAt (k := K)
-    ((isogOneSub_negFrobenius W hq).pullback (x_gen W))
+    ((isogOneSub_negFrobenius W hq).pullback (x_gen W)) with hL
+  set P_T := bridge_Bi_kernelToPrime_v2 W hq data T with hP_T
+  -- `xc := algebraMap (Polynomial K) carrier X`; its image in `L` is `f⁻¹`.
   set xc : data.carrier := algebraMap (Polynomial K) data.carrier Polynomial.X with hxc
+  -- Step 1: the curve-order of `xc`'s image at `T` is `2` (it is `ord_T(f⁻¹) = 2`).
   have h_ord_xc : (⟨W.toAffine⟩ : Curves.SmoothPlaneCurve K).ordAtPoint T.val
       (algebraMap data.carrier L xc) = (2 : WithTop ℤ) := by
-    -- Scalar-tower collapse: `algebraMap carrier L (algebraMap (Poly K) carrier X) = f⁻¹`.
+    -- Scalar-tower collapse: `algebraMap carrier L (algebraMap (Poly K) carrier X)`
+    -- `= aeval f⁻¹ X = f⁻¹`.
     have h_tower : algebraMap data.carrier L xc =
         ((isogOneSub_negFrobenius W hq).pullback (x_gen W))⁻¹ := by
       rw [hxc, ← IsScalarTower.algebraMap_apply (Polynomial K) data.carrier L Polynomial.X,
@@ -1985,17 +2380,28 @@ theorem Sinf_ramificationIdx_eq_two_at_kernel
         Curves.RamificationAtInfinity.polyToFieldOfInv_X]
     rw [h_tower]
     exact Conditional.inv_gamma_pullback_x_pos_at_kernel W hq T
+  -- Step 2: `xIdeal.map (algebraMap) = span {xc}`.
   have h_map : (Curves.RamificationAtInfinity.xIdeal (k := K)).map
       (algebraMap (Polynomial K) data.carrier) = Ideal.span {xc} := by
     rw [Curves.RamificationAtInfinity.xIdeal, Ideal.map_span, Set.image_singleton]
+  -- Step 3: `ramificationIdx = 2` via `ramificationIdx_spec` with `n = 2`:
+  --   `xIdeal.map ≤ P_T ^ 2`  and  `¬ xIdeal.map ≤ P_T ^ 3`.
   refine Ideal.ramificationIdx_spec ?_ ?_
-  · rw [h_map, Ideal.span_singleton_le_iff_mem]
+  · -- `xIdeal.map ≤ P_T ^ 2`, i.e. `xc ∈ P_T ^ 2`.  RESIDUAL direction:
+    -- `2 ≤ ord_T(image xc) = 2 ⟹ xc ∈ P_T ^ 2`.
+    rw [h_map, Ideal.span_singleton_le_iff_mem]
     refine Sinf_kernelPrime_pow_mem_of_le_ord W hq data T 2 xc ?_
     rw [h_ord_xc]; norm_num
-  · rw [h_map, Ideal.span_singleton_le_iff_mem]
+  · -- `¬ (xIdeal.map ≤ P_T ^ 3)`, i.e. `xc ∉ P_T ^ 3`.  SHIPPED direction:
+    -- if `xc ∈ P_T ^ 3` then `3 ≤ ord_T(image xc) = 2`, contradiction.
+    rw [h_map, Ideal.span_singleton_le_iff_mem]
     intro h_mem
     have h_le := Sinf_kernelPrime_pow_le_ord W hq data T 3 xc h_mem
-    rw [h_ord_xc, show (2 : WithTop ℤ) = ((2 : ℕ) : WithTop ℤ) from rfl, Nat.cast_le] at h_le
+    rw [h_ord_xc] at h_le
+    -- `h_le : (↑3 : WithTop ℤ) ≤ 2`, which is false.
+    rw [show (2 : WithTop ℤ) = ((2 : ℤ) : WithTop ℤ) from rfl,
+      show ((3 : ℕ) : WithTop ℤ) = ((3 : ℤ) : WithTop ℤ) from by norm_cast,
+      WithTop.coe_le_coe] at h_le
     omega
 
 /-- **F.1 downstream dispatch — Bridge B(iii): order at every kernel-prime is `−2`.**
@@ -2027,11 +2433,13 @@ theorem bridge_Biii_ord_eq_neg_two_v2
     data.ordAt (bridge_Bi_kernelToPrime_v2 W hq data T) = (-2 : ℤ) := by
   letI := data.commRing
   letI := data.algPoly
+  -- `Sinf.ordAt P = -(ramificationIdx … P : ℤ)` by definition; reduce to the
+  -- `ℕ`-level ramification-index computation.
   change -(Ideal.ramificationIdx
       (Curves.RamificationAtInfinity.xIdeal (k := K))
       (bridge_Bi_kernelToPrime_v2 W hq data T) : ℤ) = (-2 : ℤ)
   rw [Sinf_ramificationIdx_eq_two_at_kernel W hq data T]
-  rfl
+  norm_num
 
 /-! ### F.1 linchpin — kernel ↔ primes-over-(x) membership characterization
 
@@ -2052,7 +2460,13 @@ closed via the embeddings classification in GapSpines instead.) -/
 /-- **F.1 linchpin (backward / injectivity-side membership)** — axiom-clean.
 
 Every order-based kernel-prime `P_T := bridge_Bi_kernelToPrime_v2 W hq data T` is a
-member of `primesOverFinset xIdeal data.carrier`. -/
+member of `primesOverFinset xIdeal data.carrier`.
+
+Composes the shipped downstream witnesses `bridge_Bi_isPrime_v2`
+(`P_T.IsPrime`) and `bridge_Bi_liesOver_v2` (`P_T.LiesOver xIdeal`) with the Mathlib
+characterization `mem_primesOverFinset_iff` (`P ∈ primesOverFinset p B ↔ P.IsPrime ∧
+P.LiesOver p`, for `p` maximal and `p ≠ ⊥`), discharged by `xIdeal_isMaximal` and
+`xIdeal_ne_bot`. -/
 theorem bridge_Bii_kernelToPrime_mem_primesOverFinset_v2
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (hq : 2 ≤ Fintype.card K)
@@ -2070,15 +2484,52 @@ theorem bridge_Bii_kernelToPrime_mem_primesOverFinset_v2
   letI := data.isDedekindDomain
   letI := data.algPoly
   letI := data.isTorsionFree
+  -- `mem_primesOverFinset_iff` reduces to `P ∈ primesOver = ⟨IsPrime, LiesOver⟩`.
   rw [IsDedekindDomain.mem_primesOverFinset_iff Curves.RamificationAtInfinity.xIdeal_ne_bot]
   exact ⟨bridge_Bi_isPrime_v2 W hq data T, bridge_Bi_liesOver_v2 W hq data T⟩
 
-/-- **F.1 injectivity — the kernel-to-prime map is injective.**
+/-- **F.1 injectivity — the kernel-to-prime map is injective** (CLOSED, deep pass
+2026-05-27, `T-SINF-CLOSED-POINT-PRIME-BRIDGE`, injectivity half).
 
 The order-based kernel-to-prime map `T ↦ P_T := bridge_Bi_kernelToPrime_v2 W hq data T`
-is injective: distinct `F_q`-rational kernel points of `1 − π` give distinct primes of
-`data.carrier` lying over `xIdeal := (X)`. The injective half of the closed-point ↔ prime
-correspondence (Silverman V.1.1, p. 138); axiom-clean, with no `IsAlgClosed`. -/
+is injective: two distinct `F_q`-rational kernel points of `1 − π` give distinct primes
+of `data.carrier` lying over `xIdeal := (X)`.
+
+This is the **injective half** of the closed-point ↔ prime correspondence (Silverman
+V.1.1 proof, book p. 138), the companion to the shipped backward membership
+`bridge_Bii_kernelToPrime_mem_primesOverFinset_v2`. (The surjectivity residual cone was
+deleted 2026-06-11.)
+
+**Proof (axiom-clean — the tractable direction, unlike surjectivity).** Crucially this
+direction does *not* need the inertia-1 / `K`-rationality descent that blocked the
+deleted surjectivity residual: here we
+*start* with two genuine `F_q`-rational kernel points `T₁, T₂` and only need to recover
+them from their primes, which is exactly what the **already-shipped valuation
+equivalences** deliver. Write `P_Tᵢ = (Sinf_kernelPrime_heightOne … Tᵢ).asIdeal`; equal
+primes give equal height-one spectra (`HeightOneSpectrum.ext`), hence the *same*
+`P_T`-adic valuation `v.valuation L` on `L = K(E) = Frac(carrier)`. Identify that
+valuation with the curve place at `Tᵢ`:
+* finite point: `Sinf_kernelPrime_valuation_isEquiv_pointValuation_at_affine` (+
+  `isEquiv_iff_eq_of_surjective_withZeroInt`, both valuations surjective onto `ℤᵐ⁰`)
+  gives `v.valuation L = pointValuation ⟨xᵢ, yᵢ, _⟩`;
+* point at infinity: the same valuation-subring DVR-domination
+  (`Sinf_kernelPrime_valuationSubring_isDVR`, `Sinf_ordAtPoint_nonneg_of_valuation_le_one`,
+  `ordAtInftyValuation_le_one_of_ordAtInfty_nonneg`, `rankOne_valuationSubring_le_eq_of_ne_top`)
+  gives `v.valuation L = ordAtInftyValuation`.
+Then: *affine vs affine* — `pointValuation P₁ = pointValuation P₂` forces
+`maximalIdealAt P₁ = maximalIdealAt P₂` (via
+`pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt`), hence `P₁ = P₂` by the
+*unconditional* `maximalIdealAt_injective`; *mixed* — `ordAtInftyValuation =
+pointValuation P` is impossible since `coordX` is regular at every affine point
+(`pointValuation_algebraMap_le_one`, `coordX = algebraMap_CR (mk X)`) yet has a pole at
+infinity (`ordAtInfty coordX = -2`, so `ordAtInftyValuation coordX = exp 2 > 1`);
+*∞ vs ∞* — the same point. No `IsAlgClosed`, no `sorry`: `[propext, Classical.choice,
+Quot.sound]`.
+
+The injective twin of the (deleted) surjectivity residual and of the residue residual
+`Sinf_finrank_kappa_kernelPrime_eq_one`; the witness-parametric upstream factoring is
+`Sinf_closed_point_prime_bridge` (`Hasse/OpenLemmaPrimitives.lean`). Tracked: `/develop`
+`T-SINF-CLOSED-POINT-PRIME-BRIDGE`. -/
 theorem Sinf_kernelToPrime_v2_injective
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (hq : 2 ≤ Fintype.card K)
@@ -2134,9 +2585,10 @@ theorem Sinf_kernelToPrime_v2_injective
   have h_coordX_inf : C.ordAtInftyValuation C.coordX = WithZero.exp (2 : ℤ) := by
     have := C.ordAtInftyValuation_eq_exp_neg_of_ordAtInfty_eq C.coordX_ne_zero
       C.ordAtInfty_coordX
-    rwa [neg_neg] at this
+    rwa [show (-(-2 : ℤ)) = (2 : ℤ) from by norm_num] at this
   have h_exp2_gt_one : (1 : WithZero (Multiplicative ℤ)) < WithZero.exp (2 : ℤ) := by
-    rw [← WithZero.exp_zero, WithZero.exp_lt_exp]
+    rw [show (1 : WithZero (Multiplicative ℤ)) = WithZero.exp (0 : ℤ) from
+      WithZero.exp_zero.symm, WithZero.exp_lt_exp]
     norm_num
   -- `ordAtInftyValuation` and `pointValuation P` differ (apply both to `coordX`).
   have h_inf_ne_affine : ∀ P : C.SmoothPoint,
@@ -2179,7 +2631,8 @@ theorem Sinf_kernelToPrime_v2_injective
           obtain ⟨x, hx⟩ := C.ordAtInftyValuation_surjective (WithZero.exp (1 : ℤ))
           refine ⟨x, ?_, ?_⟩
           · rw [hx]; exact WithZero.exp_ne_zero
-          · rw [hx, Ne, WithZero.exp_eq_one]; norm_num
+          · rw [hx, show (1 : WithZero (Multiplicative ℤ)) = WithZero.exp (0 : ℤ) from
+              WithZero.exp_zero.symm, Ne, WithZero.exp_inj]; norm_num
         intro htop; exact (Valuation.valuationSubring_eq_top_iff _).mp htop hNontriv
       exact rankOne_valuationSubring_le_eq_of_ne_top _ _ hAB hBtop
     -- `v₂.valuation L = pointValuation P₂` (affine branch).
@@ -2217,7 +2670,8 @@ theorem Sinf_kernelToPrime_v2_injective
           obtain ⟨x, hx⟩ := C.ordAtInftyValuation_surjective (WithZero.exp (1 : ℤ))
           refine ⟨x, ?_, ?_⟩
           · rw [hx]; exact WithZero.exp_ne_zero
-          · rw [hx, Ne, WithZero.exp_eq_one]; norm_num
+          · rw [hx, show (1 : WithZero (Multiplicative ℤ)) = WithZero.exp (0 : ℤ) from
+              WithZero.exp_zero.symm, Ne, WithZero.exp_inj]; norm_num
         intro htop; exact (Valuation.valuationSubring_eq_top_iff _).mp htop hNontriv
       exact rankOne_valuationSubring_le_eq_of_ne_top _ _ hAB hBtop
     have h_aff : v₁.valuation L =
@@ -2254,9 +2708,18 @@ theorem Sinf_kernelToPrime_v2_injective
     have hy : y₁ = y₂ := congrArg Curves.SmoothPlaneCurve.SmoothPoint.y h_pt_eq
     subst hx; subst hy; rfl
 
-/-- **L1 (closed leaf): a prime over `xIdeal` contains `algebraMap X`.** For any prime `P`
-of `data.carrier` lying over `xIdeal := (X)`, the element
-`algebraMap (Polynomial K) data.carrier X` lies in `P`. -/
+/-- **L1 (closed leaf): a prime over `xIdeal` contains `algebraMap X`.**
+
+For any prime `P` of `data.carrier` lying over `xIdeal := (X)`, the element
+`algebraMap (Polynomial K) data.carrier X` lies in `P`. This is the concrete,
+shipped membership fact underlying the geometric reading "`f⁻¹` vanishes at `P`,
+i.e. `f` has a pole at `P`" (since `algebraMap X` maps to `f⁻¹` in `LinfAt f`
+under the scalar tower; cf. `bridge_Bi_liesOver_v2`).
+
+Pure `LiesOver` algebra: `P.LiesOver (X)` gives `(X) = P.under (Polynomial K) =
+P.comap (algebraMap …)` (`Ideal.LiesOver.over`), and `X ∈ (X)`
+(`Ideal.mem_span_singleton`, `dvd_refl`); rewriting through `mem_comap` yields
+`algebraMap X ∈ P`. No `sorry`, no `IsAlgClosed`. -/
 theorem Sinf_algebraMap_X_mem_of_liesOver
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (hq : 2 ≤ Fintype.card K)
@@ -2270,14 +2733,16 @@ theorem Sinf_algebraMap_X_mem_of_liesOver
     algebraMap (Polynomial K) data.carrier Polynomial.X ∈ P := by
   letI := data.commRing
   letI := data.algPoly
+  -- `X ∈ xIdeal = span {X}`.
   have hX_mem : Polynomial.X ∈ Curves.RamificationAtInfinity.xIdeal (k := K) := by
     rw [Curves.RamificationAtInfinity.xIdeal, Ideal.mem_span_singleton]
+  -- `LiesOver` ⟹ `xIdeal = P.comap (algebraMap …)`; rewrite membership through it.
   haveI := hP_liesOver
   have h_over : Curves.RamificationAtInfinity.xIdeal (k := K) =
       Ideal.comap (algebraMap (Polynomial K) data.carrier) P := by
-    rw [← Ideal.under_def]
-    exact Ideal.LiesOver.over
-  rwa [h_over, Ideal.mem_comap] at hX_mem
+    rw [← Ideal.under_def]; exact Ideal.LiesOver.over
+  rw [h_over, Ideal.mem_comap] at hX_mem
+  exact hX_mem
 
 /-! ### F.1 linchpin (forward / surjectivity residual) — DELETED 2026-06-11
 
@@ -2313,10 +2778,17 @@ NormValuation bijection — the reason the whole sorried cone (membership charac
 place→point extraction, `bridge_Bii_surjective_v2`, `bridge_Bii_mem_primesOverFinset_v2`)
 was retired rather than discharged. -/
 
-/-- **L1.5 (closed leaf): `algebraMap X ∈ P` ⟹ `P.LiesOver (X)`**
+/-- **L1.5 (closed leaf): `algebraMap X ∈ P` ⟹ `P.LiesOver (X)`** (deep pass 2026-05-28).
 
-For a prime `P` of the `Sinf` carrier, membership of the generator `algebraMap X ∈ P`
-upgrades to the full `LiesOver` relation `P.LiesOver xIdeal`. -/
+The converse packaging of `Sinf_algebraMap_X_mem_of_liesOver` (L1): for a *prime* `P` of
+the `Sinf` carrier, membership of the generator `algebraMap X ∈ P` upgrades to the full
+`LiesOver` relation `P.LiesOver xIdeal`. Pure ideal theory, no `IsAlgClosed`:
+`algebraMap X ∈ P` gives `(X) = span{X} ≤ P.comap`; `xIdeal` is *maximal*
+(`xIdeal_isMaximal`) and `P.comap ≠ ⊤` (`P` prime ⟹ `≠ ⊤`, comap of proper is proper),
+so maximality forces `(X) = P.comap`, i.e. `P.under (K[X]) = (X)`, i.e. `P.LiesOver (X)`.
+
+This let the (now-deleted) CORE/extraction residuals be stated in the cleaner `LiesOver`
+form (matching the shipped `Sinf.inertiaDeg_eq_one_of_algebraMap_surjective`). -/
 theorem Sinf_liesOver_of_algebraMap_X_mem
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (hq : 2 ≤ Fintype.card K)
@@ -2331,15 +2803,21 @@ theorem Sinf_liesOver_of_algebraMap_X_mem
     P.LiesOver (Curves.RamificationAtInfinity.xIdeal (k := K)) := by
   letI := data.commRing
   letI := data.algPoly
+  haveI := hP_prime
+  -- `(X) = span{X} ≤ P.comap` from `algebraMap X ∈ P`.
   have h_le : Curves.RamificationAtInfinity.xIdeal (k := K) ≤
       Ideal.comap (algebraMap (Polynomial K) data.carrier) P := by
-    rwa [Curves.RamificationAtInfinity.xIdeal, Ideal.span_le, Set.singleton_subset_iff,
+    rw [Curves.RamificationAtInfinity.xIdeal, Ideal.span_le, Set.singleton_subset_iff,
       SetLike.mem_coe, Ideal.mem_comap]
+    exact hX_mem
+  -- `P.comap ≠ ⊤` (comap of a proper ideal is proper).
+  have h_comap_ne_top : Ideal.comap (algebraMap (Polynomial K) data.carrier) P ≠ ⊤ := by
+    rw [Ne, Ideal.comap_eq_top_iff]; exact hP_prime.ne_top
+  -- `xIdeal` maximal + `≤` + `≠ ⊤` ⟹ equality, i.e. `P.under = (X)`, i.e. `LiesOver`.
   have h_eq : Curves.RamificationAtInfinity.xIdeal (k := K) =
       Ideal.comap (algebraMap (Polynomial K) data.carrier) P :=
-    Curves.RamificationAtInfinity.xIdeal_isMaximal.eq_of_le
-      (mt Ideal.comap_eq_top_iff.mp hP_prime.ne_top) h_le
-  exact ⟨h_eq.trans (Ideal.under_def _ P).symm⟩
+    (Curves.RamificationAtInfinity.xIdeal_isMaximal).eq_of_le h_comap_ne_top h_le
+  exact ⟨by rw [← Ideal.under_def] at h_eq; exact h_eq⟩
 
 /-! ### F.1 residue residual — residue-value-is-in-`K` core
 
@@ -2390,30 +2868,43 @@ theorem residue_in_base_affine_of_pointValuation_le_one {F : Type*} [Field F]
     ∃ lam : F, C.pointValuation P (g - algebraMap F C.FunctionField lam) < 1 := by
   haveI : (C.maximalIdealAt P).IsMaximal := C.maximalIdealAt_isMaximal P
   haveI : (C.maximalIdealAt P).IsPrime := (C.maximalIdealAt_isMaximal P).isPrime
+  -- `g` regular at `P` lifts into the local ring `localRingAt P`.
   obtain ⟨x, hx⟩ :=
     Curves.SmoothPlaneCurve.mem_localRingAt_image_of_pointValuation_le_one
       (C := C) (P := P) g hg
+  -- `algebraMap F (M.ResidueField)` is surjective.
   have hsurj :
       Function.Surjective (algebraMap F (C.maximalIdealAt P).ResidueField) := by
     have hsurj_F_quot :
         Function.Surjective (algebraMap F (C.CoordinateRing ⧸ C.maximalIdealAt P)) := by
-      refine fun w ↦ ⟨(C.quotientMaximalIdealAtEquiv P) w,
-        (AlgEquiv.commutes (C.quotientMaximalIdealAtEquiv P).symm _).symm.trans
-          ((C.quotientMaximalIdealAtEquiv P).symm_apply_apply w)⟩
+      intro w
+      refine ⟨(C.quotientMaximalIdealAtEquiv P) w, ?_⟩
+      calc algebraMap F (C.CoordinateRing ⧸ C.maximalIdealAt P)
+              ((C.quotientMaximalIdealAtEquiv P) w)
+          = (C.quotientMaximalIdealAtEquiv P).symm ((C.quotientMaximalIdealAtEquiv P) w) :=
+            (AlgEquiv.commutes (C.quotientMaximalIdealAtEquiv P).symm _).symm
+        _ = w := (C.quotientMaximalIdealAtEquiv P).symm_apply_apply w
     rw [IsScalarTower.algebraMap_eq F (C.CoordinateRing ⧸ C.maximalIdealAt P)
         (C.maximalIdealAt P).ResidueField, RingHom.coe_comp]
     exact ((C.maximalIdealAt P).bijective_algebraMap_quotient_residueField.surjective).comp
       hsurj_F_quot
+  -- the value `lam := g(P)` is the `F`-preimage of the residue of the lift.
   obtain ⟨lam, hlam⟩ := hsurj (IsLocalRing.residue (C.localRingAt P) x)
   refine ⟨lam, ?_⟩
   set xc : C.localRingAt P :=
     algebraMap C.CoordinateRing (C.localRingAt P) (algebraMap F C.CoordinateRing lam) with hxc
+  -- `x − lam` vanishes at the residue field, hence lies in the maximal ideal.
   have h_mem : x - xc ∈ IsLocalRing.maximalIdeal (C.localRingAt P) := by
-    rw [← IsLocalRing.residue_eq_zero_iff, map_sub, sub_eq_zero, hxc, ← hlam,
-      ← IsLocalRing.ResidueField.algebraMap_eq,
+    rw [← IsLocalRing.residue_eq_zero_iff, map_sub, sub_eq_zero, hxc]
+    rw [show IsLocalRing.residue (C.localRingAt P)
+          (algebraMap C.CoordinateRing (C.localRingAt P)
+            (algebraMap F C.CoordinateRing lam))
+        = algebraMap F (C.maximalIdealAt P).ResidueField lam from ?_, hlam]
+    rw [← IsLocalRing.ResidueField.algebraMap_eq,
       ← IsScalarTower.algebraMap_apply C.CoordinateRing (C.localRingAt P)
         (C.maximalIdealAt P).ResidueField,
       ← IsScalarTower.algebraMap_apply F C.CoordinateRing (C.maximalIdealAt P).ResidueField]
+  -- pushing `x − lam` into the function field gives `g − lam`.
   have h_img : algebraMap (C.localRingAt P) C.FunctionField (x - xc)
       = g - algebraMap F C.FunctionField lam := by
     rw [map_sub, hx, hxc,
@@ -2421,17 +2912,35 @@ theorem residue_in_base_affine_of_pointValuation_le_one {F : Type*} [Field F]
       ← IsScalarTower.algebraMap_apply F C.CoordinateRing C.FunctionField]
   rw [← h_img]
   unfold Curves.SmoothPlaneCurve.pointValuation
-  rwa [IsDedekindDomain.HeightOneSpectrum.valuation_lt_one_iff_mem]
+  rw [IsDedekindDomain.HeightOneSpectrum.valuation_lt_one_iff_mem]
+  exact h_mem
 
-/-- **Residue-at-the-point-at-infinity is in the base field**: for a smooth
-Weierstrass-curve wrapper `C` over a field `F`, any function `g` regular at
-infinity (`0 ≤ ordAtInfty g`) has a value `lam : F` with `g − lam` vanishing at
-infinity (`0 < ordAtInfty (g − lam)`). -/
+/-- **Residue-at-the-point-at-infinity is in the base field** (place-at-infinity
+case of the residue residual — ISOLATED single-case residual).
+
+For a smooth Weierstrass-curve wrapper `C` over a field `F`, the point at
+infinity `O = [0 : 1 : 0]` is `F`-rational with residue field `F`, so any
+function `g` *regular at infinity* (`0 ≤ ordAtInfty g`) has a value `lam : F`
+such that `g − lam` *vanishes at infinity* (`0 < ordAtInfty (g − lam)`).
+
+This is the exact place-at-infinity analogue of
+`residue_in_base_affine_of_pointValuation_le_one`. It is isolated as a single
+remaining residual because the project's place at infinity is currently only
+equipped with the *multiplicative* `ordAtInfty` API (via `Algebra.norm` to
+`F(X)`, `Curves/Infinity.lean`) and lacks the *local-ring-at-infinity* /
+residue-field development that the affine case obtains for free from
+`Localization.AtPrime (maximalIdealAt P)`. Discharging it requires building the
+DVR at `O` (uniformizer `x/y`, ramification `e = 2`, residue degree `f = 1`)
+and identifying its residue field with `F` — the local analogue at `O` of the
+affine `quotientMaximalIdealAtEquiv`. Unlike the affine case (which needs no
+hypothesis on `F` because `quotientMaximalIdealAtEquiv` is field-agnostic), the
+intended construction is also field-agnostic: `O` is always `F`-rational. -/
 theorem residue_in_base_at_infinity_of_ordAtInfty_nonneg {F : Type*} [Field F]
     (C : Curves.SmoothPlaneCurve F) (g : C.FunctionField)
     (hg : (0 : WithTop ℤ) ≤ C.ordAtInfty g) :
     ∃ lam : F, (0 : WithTop ℤ) <
       C.ordAtInfty (g - algebraMap F C.FunctionField lam) := by
+  -- Decompose `g = α + β · y` over `F(x)` in the `{1, y}` basis.
   obtain ⟨p, q, hpq⟩ := C.exists_decomp g
   set α : C.FunctionField :=
     algebraMap (FractionRing (Polynomial F)) C.FunctionField p with hα
@@ -2439,36 +2948,52 @@ theorem residue_in_base_at_infinity_of_ordAtInfty_nonneg {F : Type*} [Field F]
     algebraMap (FractionRing (Polynomial F)) C.FunctionField q with hβ
   have h_eq_g : g = α + β * C.coordYInFunctionField := by
     rw [hpq, Algebra.smul_def, mul_one, Algebra.smul_def]
+  -- `ord g = min(ord α, ord β + ord y)`: the even (x-part) / odd (y-part) split.
   have h_ord_g : C.ordAtInfty g = min (C.ordAtInfty α)
       (C.ordAtInfty β + C.ordAtInfty C.coordYInFunctionField) := by
     rw [h_eq_g]; exact C.ordAtInfty_basis_eq_min p q
   rw [h_ord_g, le_min_iff] at hg
   obtain ⟨hg_x, hg_y⟩ := hg
+  -- x-part `α = algebraMap p` is regular at `∞`: extract its value `lam ∈ F`.
   obtain ⟨lam, hlam⟩ := C.ordAtInfty_exists_const_sub_pos_of_fracPolyX_nonneg (r₀ := p) hg_x
   refine ⟨lam, ?_⟩
+  -- y-part `β · y` regular at `∞` is in fact `> 0` (odd order ≥ 0 ⟹ ≥ 1 > 0).
   have hg_y_pos : (0 : WithTop ℤ) < C.ordAtInfty (β * C.coordYInFunctionField) := by
     by_cases hβ0 : β = 0
     · rw [hβ0, zero_mul, C.ordAtInfty_zero]; exact WithTop.coe_lt_top 0
     · have hq0 : q ≠ 0 := by
         intro h; apply hβ0; rw [hβ, h, map_zero]
+      -- `ord(β·y) = ord β + ord y = (-2·intDeg q) + (-3)`.
       have h_ord_βy : C.ordAtInfty (β * C.coordYInFunctionField) =
           (((-2 * (RatFunc.ofFractionRing q : RatFunc F).intDegree) + (-3) : ℤ)
             : WithTop ℤ) := by
         rw [C.ordAtInfty_mul hβ0 C.coordYInFunctionField_ne_zero, hβ,
           C.ordAtInfty_algebraMap_fracPolyX_of_ne_zero hq0,
           C.ordAtInfty_coordYInFunctionField, ← WithTop.coe_add]
-      rw [h_ord_βy]
-      have h_int : (0 : ℤ) ≤ -2 * (RatFunc.ofFractionRing q : RatFunc F).intDegree + -3 := by
+      -- the same expression bounds `hg_y` from below by `0`.
+      have hg_y' : (0 : WithTop ℤ) ≤
+          (((-2 * (RatFunc.ofFractionRing q : RatFunc F).intDegree) + (-3) : ℤ)
+            : WithTop ℤ) := by
         rw [hβ, C.ordAtInfty_algebraMap_fracPolyX_of_ne_zero hq0,
           C.ordAtInfty_coordYInFunctionField, ← WithTop.coe_add] at hg_y
-        exact_mod_cast hg_y
-      exact_mod_cast (by omega :
-        (0 : ℤ) < -2 * (RatFunc.ofFractionRing q : RatFunc F).intDegree + -3)
+        exact hg_y
+      rw [h_ord_βy]
+      -- `0 ≤ -2·intDeg − 3` forces `-2·intDeg − 3 ≥ 1 > 0` by parity.
+      have h_int : (0 : ℤ) ≤ -2 * (RatFunc.ofFractionRing q : RatFunc F).intDegree + -3 := by
+        exact_mod_cast hg_y'
+      have h_pos : (0 : ℤ) < -2 * (RatFunc.ofFractionRing q : RatFunc F).intDegree + -3 := by
+        omega
+      exact_mod_cast h_pos
+  -- `g − lam = (α − lam) + β·y`, both summands `> 0`, so the sum is `> 0`.
   have h_sub_eq : g - algebraMap F C.FunctionField lam =
       (α - algebraMap F C.FunctionField lam) + β * C.coordYInFunctionField := by
     rw [h_eq_g]; ring
   rw [h_sub_eq]
-  exact (lt_min hlam hg_y_pos).trans_le (C.ordAtInfty_add_ge_min _ _)
+  calc (0 : WithTop ℤ)
+      < min (C.ordAtInfty (α - algebraMap F C.FunctionField lam))
+          (C.ordAtInfty (β * C.coordYInFunctionField)) := lt_min hlam hg_y_pos
+    _ ≤ C.ordAtInfty ((α - algebraMap F C.FunctionField lam) + β * C.coordYInFunctionField) :=
+        C.ordAtInfty_add_ge_min _ _
 
 theorem Sinf_kappa_kernelPrime_residue_in_base
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
@@ -2487,11 +3012,13 @@ theorem Sinf_kappa_kernelPrime_residue_in_base
   letI := data.algLinfAt
   haveI := data.isScalarTower
   set L : Type _ := Curves.RamificationAtInfinity.LinfAt (k := K)
-    ((isogOneSub_negFrobenius W hq).pullback (x_gen W))
-  set C : Curves.SmoothPlaneCurve K := ⟨W.toAffine⟩
+    ((isogOneSub_negFrobenius W hq).pullback (x_gen W)) with hL
+  set C : Curves.SmoothPlaneCurve K := ⟨W.toAffine⟩ with hC
+  -- `g := algebraMap_L a ∈ FunctionField`, regular at `T` (ord ≥ 0).
   set g : W.toAffine.FunctionField := algebraMap data.carrier L a with hg_def
   have hg_nonneg : (0 : WithTop ℤ) ≤ C.ordAtPoint T.val g :=
     Conditional.Sinf_ord_nonneg_at_kernel_point_unconditional W hq data T a
+  -- The composite `K[X] → carrier → L` sends the constant `C lam` to `lam : L`.
   have h_const : ∀ lam : K,
       algebraMap data.carrier L ((algebraMap (Polynomial K) data.carrier) (Polynomial.C lam))
         = algebraMap K W.toAffine.FunctionField lam := by
@@ -2499,6 +3026,7 @@ theorem Sinf_kappa_kernelPrime_residue_in_base
     rw [← IsScalarTower.algebraMap_apply (Polynomial K) data.carrier L,
       Curves.RamificationAtInfinity.LinfAt.algebraMap_polynomial_apply,
       Curves.RamificationAtInfinity.polyToFieldOfInv_C]
+  -- It suffices to find `lam` with `0 < ord_T (g − lam)`.
   suffices h_suff : ∃ lam : K, (0 : WithTop ℤ) <
       C.ordAtPoint T.val (g - algebraMap K W.toAffine.FunctionField lam) by
     obtain ⟨lam, hlam⟩ := h_suff
@@ -2508,20 +3036,21 @@ theorem Sinf_kappa_kernelPrime_residue_in_base
     rwa [map_sub, h_const lam, ← hg_def]
   rcases h_T_val : T.val with _ | ⟨xT, yT, h_ns⟩
   · rw [h_T_val, Curves.SmoothPlaneCurve.ordAtPoint_zero_eq_ordAtInfty] at hg_nonneg
-    exact residue_in_base_at_infinity_of_ordAtInfty_nonneg (F := K) C g hg_nonneg
+    obtain ⟨lam, hlam⟩ :=
+      residue_in_base_at_infinity_of_ordAtInfty_nonneg (F := K) C g hg_nonneg
+    exact ⟨lam, hlam⟩
   · rw [h_T_val, Curves.SmoothPlaneCurve.ordAtPoint_some_eq_ord_P] at hg_nonneg
-    set P : C.SmoothPoint := ⟨xT, yT, h_ns⟩
+    set P : C.SmoothPoint := ⟨xT, yT, h_ns⟩ with hP
     have hg_le_one : C.pointValuation P g ≤ 1 := by
       by_cases hg0 : g = 0
       · rw [hg0, map_zero]; exact zero_le_one
       · exact Curves.pointValuation_le_one_of_ord_nonneg (W := W.toAffine) hg0 P hg_nonneg
     obtain ⟨lam, hlam⟩ :=
       residue_in_base_affine_of_pointValuation_le_one C P g hg_le_one
+    -- `pointValuation P (g − lam) < 1 → 0 < ord_P (g − lam)`.
     refine ⟨lam, ?_⟩
     rcases eq_or_ne (g - algebraMap K W.toAffine.FunctionField lam) 0 with h0 | hne
-    · rw [h0]
-      simp only [SmoothPlaneCurve.ordAtPoint_zero_function,
-        LinearOrderedAddCommGroupWithTop.top_pos]
+    · rw [h0]; simp
     · exact lt_of_lt_of_le (by norm_num)
         ((C.one_le_ord_P_iff_pointValuation_lt_one (P := P) hne).mpr hlam)
 
@@ -2537,10 +3066,24 @@ hypothesis `Σ_{P ∈ primesOverFinset (X)} f_P = #E(F_q)`, using only DONE asse
 `GapSpines.Sinf_sum_inertiaDeg_over_xIdeal_eq_pointCount_via_tower`; the sorried
 L6Witnesses statement and its consumer cone were deleted. -/
 
-/-- **F.1 UNIFYING BRIDGE combinator**: given the sum-of-inertia identity
-`Σ_{P ∈ primesOverFinset (X)} f_P = pointCount`, every carrier prime `P` lying over
-`xIdeal := (X)` is the place `bridge_Bi_kernelToPrime_v2 W hq data T` at some `F_q`-rational
-kernel point `T`. -/
+/-- **F.1 UNIFYING BRIDGE combinator** (deep pass 2026-05-28, Phase 1):
+*given* the sharp sum-of-inertia identity `Σ_{P ∈ primesOverFinset (X)} f_P = pointCount`,
+a bare carrier prime `P` of `data.carrier` lying over `xIdeal := (X)` IS the place at an
+`F_q`-rational kernel point.
+
+**Pure Finset/cardinality argument over the DONE assets** (no new geometric content):
+1. Lift `P ∈ primesOverFinset` via `mem_primesOverFinset_iff` + `LiesOver` (from `hP_liesOver`).
+2. The kernel-to-prime map `T ↦ P_T := bridge_Bi_kernelToPrime_v2 W hq data T` lands in
+   `primesOverFinset` (`bridge_Bii_kernelToPrime_mem_primesOverFinset_v2`) and is injective
+   (`Sinf_kernelToPrime_v2_injective`). Form `image := Finset.univ.image (T ↦ P_T)` over the
+   *finite* kernel (`kernel = ⊤` via `kernel_eq_top_of_hom_eq_id_sub_frobenius`, then
+   `Nat.card kernel = pointCount`). Hence `image ⊆ primesOverFinset` and `image.card =
+   pointCount`.
+3. The sum hypothesis combined with `Ideal.inertiaDeg_pos ≥ 1` (`xIdeal` maximal,
+   `Module.Finite (K[X]) carrier` via `data.moduleFinite`, each `P` in the finset `LiesOver`):
+   `pointCount = Σ inertiaDeg ≥ #primesOverFinset`. Together with `#image ≤ #primesOverFinset`:
+   equal cardinalities, so `image = primesOverFinset` (`Finset.eq_of_subset_of_card_le`).
+4. `P ∈ image` ⟹ `∃ T, P = P_T`. Done. -/
 theorem Sinf_primeOver_eq_kernelPrime_place_of_sum_inertia_eq_pointCount
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
     (hq : 2 ≤ Fintype.card K)
@@ -2591,9 +3134,10 @@ theorem Sinf_primeOver_eq_kernelPrime_place_of_sum_inertia_eq_pointCount
       (isogOneSub_negFrobenius W hq) rfl, AddSubgroup.card_top]
     exact Nat.card_eq_fintype_card
   have h_image_card : image.card = pointCount W.toAffine := by
-    rwa [himage_def,
+    rw [himage_def,
       Finset.card_image_of_injective _ (Sinf_kernelToPrime_v2_injective W hq data),
       Finset.card_univ, ← Nat.card_eq_fintype_card]
+    exact h_card_kernel
   -- Step 3: pointCount ≥ #primesOverFinset (from h_sum + inertiaDeg_pos).
   haveI hmax : (Curves.RamificationAtInfinity.xIdeal (k := K)).IsMaximal :=
     Curves.RamificationAtInfinity.xIdeal_isMaximal
@@ -2611,13 +3155,22 @@ theorem Sinf_primeOver_eq_kernelPrime_place_of_sum_inertia_eq_pointCount
       haveI := hQ_prime
       haveI := hQ_liesOver
       exact Ideal.inertiaDeg_pos (Curves.RamificationAtInfinity.xIdeal (k := K)) Q
-    simpa using Finset.card_nsmul_le_sum _ _ 1 h_one_le
+    calc (IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier).card
+        = ∑ _Q ∈ IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K))
+            data.carrier, (1 : ℕ) := by
+          rw [Finset.sum_const, smul_eq_mul, mul_one]
+      _ ≤ ∑ Q ∈ IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K))
+            data.carrier,
+              Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) Q :=
+          Finset.sum_le_sum h_one_le
   -- Step 4: image = primesOverFinset (same finite cardinality, subset).
   have h_image_eq :
       image = IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier :=
-    Finset.eq_of_subset_of_card_le h_image_sub (by rwa [h_image_card])
+    Finset.eq_of_subset_of_card_le h_image_sub
+      (by rw [h_image_card]; exact h_sum_ge_card)
   -- Step 5: P ∈ image, so P = P_T for some T.
-  rw [← h_image_eq, himage_def, Finset.mem_image] at hP_mem
+  rw [← h_image_eq] at hP_mem
+  rw [himage_def, Finset.mem_image] at hP_mem
   obtain ⟨T, _, hPT⟩ := hP_mem
   exact ⟨T, hPT.symm⟩
 
@@ -2640,21 +3193,29 @@ K3 ⟹ K6 chain expects: once K3 is shipped as the K̄-pole-set identification, 
 K2 (`smoothPoint_fiber_eq_primesOver` over `K̄`) + K1+K5 (residue-degree splitting) would
 have closed the (deleted) sorried sum-of-inertia leaf. -/
 
-/-- **Phase 3 K3 alias**: the K̄-Frobenius-fixed locus *as a `Set`*. -/
+/-- **Phase 3 K3 alias**: the K̄-Frobenius-fixed locus *as a `Set`* — the natural target
+the K3 step (poles of `f_K̄` = `ker((1−π)_K̄)`) lands in. Using the `setOf`-predicate form
+(`{P | geomFrobeniusPointFun W P = P}`) sidesteps the `AddSubgroup → Set` coercion (which
+is finicky to elaborate at L6Witnesses' `[IsElliptic]` instance context). -/
 def ker_oneSubGeomFrobHom_setOfFixed_K
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] :
     Set (W.baseChange (AlgebraicClosure K)).toAffine.Point :=
   {P | geomFrobeniusPointFun W P = P}
 
-/-- **Phase 3 K4** (cardinality form): `#{P | geomFrob P = P}.ncard = pointCount`. -/
+/-- **Phase 3 K4** (cardinality form): `#{P | geomFrob P = P}.ncard = pointCount`. Pure
+composition of mathlib's `ncard_fixedLocus_geomFrobenius_eq_pointCount`-style finite-locus
+cardinality with the K̄-fixed-locus definition. Axiom-clean. -/
 theorem ker_oneSubGeomFrobHom_setOfFixed_card_eq_pointCount
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point] :
     (ker_oneSubGeomFrobHom_setOfFixed_K W).ncard = Fintype.card W.toAffine.Point := by
-  rw [ker_oneSubGeomFrobHom_setOfFixed_K, ← ker_oneSubGeomFrobHom_eq_fixedLocus]
+  -- The setOf-predicate form is exactly the RHS of `ker_oneSubGeomFrobHom_eq_fixedLocus`,
+  -- whose LHS is the AddSubgroup coercion shipped in L5.
+  unfold ker_oneSubGeomFrobHom_setOfFixed_K
+  rw [← ker_oneSubGeomFrobHom_eq_fixedLocus]
   exact ncard_ker_oneSubGeomFrobHom_eq_pointCount W
 
-/-- **Phase 3 K3+K4 dispatcher (`.ncard` form)**: if `geomPoles` is the `id − π_K̄` kernel
-locus, then `geomPoles.ncard = pointCount`. -/
+/-- **Phase 3 K3+K4 dispatcher (`.ncard` form)** — axiom-clean over `K3 +
+ncard_ker_oneSubGeomFrobHom_eq_pointCount`. -/
 theorem geom_poles_card_eq_pointCount_of_pole_eq_ker
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
     (geomPoles : Set (W.baseChange (AlgebraicClosure K)).toAffine.Point)
@@ -2662,15 +3223,17 @@ theorem geom_poles_card_eq_pointCount_of_pole_eq_ker
     geomPoles.ncard = Fintype.card W.toAffine.Point := by
   rw [h_K3, ker_oneSubGeomFrobHom_setOfFixed_card_eq_pointCount]
 
-/-- **F.1 Phase-3 K3+K4 dispatcher (`Nat.card` form)** — the K3 + K4 composition,
-phrased with `Nat.card` of the bundled subtype `↥geomPoles`. -/
+/-- **F.1 Phase-3 K3+K4 dispatcher (`Nat.card` form)** — the same K3 + K4 composition,
+phrased with `Nat.card` of the *bundled subtype* `↥geomPoles` (the natural shape for
+K2's `smoothPoint_fiber_eq_primesOver`-style consumers). Pure composition of
+`geom_poles_card_eq_pointCount_of_pole_eq_ker` with `Nat.card_coe_set_eq`. -/
 theorem geom_poles_natCard_eq_pointCount_of_pole_eq_ker
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
     (geomPoles : Set (W.baseChange (AlgebraicClosure K)).toAffine.Point)
     (h_K3 : geomPoles = ker_oneSubGeomFrobHom_setOfFixed_K W) :
-    Nat.card geomPoles = Fintype.card W.toAffine.Point :=
-  (Nat.card_coe_set_eq geomPoles).trans
-    (geom_poles_card_eq_pointCount_of_pole_eq_ker W geomPoles h_K3)
+    Nat.card geomPoles = Fintype.card W.toAffine.Point := by
+  rw [Nat.card_coe_set_eq]
+  exact geom_poles_card_eq_pointCount_of_pole_eq_ker W geomPoles h_K3
 
 /-! ### Phase 3 K3 — concrete `geomPoles` definition (deep pass 2026-05-28)
 
@@ -2689,21 +3252,35 @@ both sides unfold to `{P | geomFrobeniusPointFun W P = P}` via
 `oneSubGeomFrobHom_apply` + `sub_eq_zero` + `eq_comm`. -/
 
 /-- **Phase 3 K3 — concrete geometric pole set** (`oneSubGeomFrobHom`-kernel framing):
-the set of `K̄`-points `P` killed by `id − π_K̄` (equivalently, fixed by `π_K̄`). -/
+the set of `K̄`-points `P` killed by `id − π_K̄` (equivalently, fixed by `π_K̄`). This is the
+concrete K̄-side `geomPoles` shape feeding the Phase-3 K3+K4 dispatcher
+`geom_poles_card_eq_pointCount_of_pole_eq_ker`. -/
 def geomPoles_oneSubFrob
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] :
     Set (W.baseChange (AlgebraicClosure K)).toAffine.Point :=
   {P | oneSubGeomFrobHom W P = 0}
 
-/-- **Phase 3 K3 — concrete equality**: the `oneSubGeomFrobHom`-kernel set equals the
-`setOf`-predicate fixed-locus `{P | geomFrobeniusPointFun W P = P}`. -/
+/-- **Phase 3 K3 — concrete equality** (the K3 hypothesis of
+`geom_poles_card_eq_pointCount_of_pole_eq_ker`): the `oneSubGeomFrobHom`-kernel set
+equals the `setOf`-predicate fixed-locus. Near-tautological: both sides unfold to
+`{P | geomFrobeniusPointFun W P = P}` via `oneSubGeomFrobHom_apply`/`sub_eq_zero`. -/
 theorem geomPoles_oneSubFrob_eq_ker_setOfFixed
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] :
-    geomPoles_oneSubFrob W = ker_oneSubGeomFrobHom_setOfFixed_K W :=
-  ker_oneSubGeomFrobHom_eq_fixedLocus W
+    geomPoles_oneSubFrob W = ker_oneSubGeomFrobHom_setOfFixed_K W := by
+  -- Both sides are `{P | something P}`. The `oneSubGeomFrobHom`-kernel set
+  -- is literally the SetLike-coercion of `(oneSubGeomFrobHom W).ker`, which
+  -- L5 (`ker_oneSubGeomFrobHom_eq_fixedLocus`) identifies with the
+  -- `geomFrobeniusPointFun`-fixed locus = `ker_oneSubGeomFrobHom_setOfFixed_K W`.
+  change {P | oneSubGeomFrobHom W P = 0} = {P | geomFrobeniusPointFun W P = P}
+  rw [← ker_oneSubGeomFrobHom_eq_fixedLocus]
+  rfl
 
-/-- **Phase 3 K3+K4 composition (concrete form)** — the `Nat.card` cardinality of the concrete
-`oneSubGeomFrobHom`-kernel geometric pole set equals `pointCount`. -/
+/-- **Phase 3 K3+K4 composition (concrete form)** — `Nat.card` cardinality of the concrete
+`oneSubGeomFrobHom`-kernel geometric pole set equals `pointCount`. Pure composition of
+`geomPoles_oneSubFrob_eq_ker_setOfFixed` (K3) with
+`geom_poles_natCard_eq_pointCount_of_pole_eq_ker` (K3+K4 dispatcher, shipped above).
+Axiom-clean. This is the witness shape consumed by the K2+K5 splitting witness
+(`Sinf_sum_inertiaDeg_eq_pointCount_of_K3_K2K5_witnesses` at L3569). -/
 theorem geomPoles_oneSubFrob_card_eq_pointCount
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point] :
     Nat.card (geomPoles_oneSubFrob W) = Fintype.card W.toAffine.Point :=
@@ -2746,8 +3323,13 @@ theorem Sinf_sum_inertiaDeg_eq_pointCount_of_K3_K2K5_witnesses
     letI := data.algPoly
     ∑ P ∈ IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
       (Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) P) =
-        pointCount W.toAffine :=
-  h_K2K5_split.trans (geom_poles_natCard_eq_pointCount_of_pole_eq_ker W geomPoles h_K3)
+        pointCount W.toAffine := by
+  -- K3 + K4 dispatcher: Nat.card geomPoles = Fintype.card W.toAffine.Point = pointCount.
+  have h_geom : Nat.card geomPoles = Fintype.card W.toAffine.Point :=
+    geom_poles_natCard_eq_pointCount_of_pole_eq_ker W geomPoles h_K3
+  -- Compose: Σ f_P = #geomPoles = pointCount.
+  rw [h_K2K5_split, h_geom]
+  rfl
 
 /-! ### F.1 downstream dispatch — Bridge B(iv): residue field is `K` at every kernel-prime
 
@@ -2767,7 +3349,10 @@ content). The structure algebra map `K[X]⧸(X) → data.carrier ⧸ P_T` of the
 ring at the order-based kernel-prime `P_T := bridge_Bi_kernelToPrime_v2 W hq data T`
 is surjective. Equivalently `data.carrier ⧸ P_T` is generated over the base residue
 field `K[X]⧸(X)` by `1`, so it *is* the base residue field (`≅ K`), giving residue
-degree `1`. -/
+degree `1`.
+
+Reduces (via the constant-generation of `K[X]⧸(X)`, `quotientXAlgEquiv`) to the
+residue-value core `Sinf_kappa_kernelPrime_residue_in_base`. -/
 theorem Sinf_kappa_kernelPrime_algebraMap_surjective
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (hq : 2 ≤ Fintype.card K)
@@ -2790,7 +3375,7 @@ theorem Sinf_kappa_kernelPrime_algebraMap_surjective
   letI := data.commRing
   letI := data.algPoly
   letI := data.algLinfAt
-  set P_T : Ideal data.carrier := bridge_Bi_kernelToPrime_v2 W hq data T
+  set P_T : Ideal data.carrier := bridge_Bi_kernelToPrime_v2 W hq data T with hP_T
   letI : Algebra (Polynomial K ⧸ Curves.RamificationAtInfinity.xIdeal (k := K))
       (data.carrier ⧸ P_T) :=
     Ideal.Quotient.algebraQuotientOfLEComap
@@ -2798,13 +3383,20 @@ theorem Sinf_kappa_kernelPrime_algebraMap_surjective
   have h_le : Curves.RamificationAtInfinity.xIdeal (k := K) ≤
       Ideal.comap (algebraMap (Polynomial K) data.carrier) P_T :=
     (Ideal.LiesOver.over (p := Curves.RamificationAtInfinity.xIdeal (k := K)) (P := P_T)).le
+  -- `data.kappa P_T` is definitionally `data.carrier ⧸ P_T`.
   intro w
+  -- Lift `w` to a carrier element `a`.
   obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective (I := P_T) w
+  -- Residue-value core: `a ≡ algebraMap (C lam)` mod `P_T` for some constant `lam ∈ K`.
   obtain ⟨lam, hlam⟩ := Sinf_kappa_kernelPrime_residue_in_base W hq data T a
+  -- Preimage: the class of the constant `C lam` in `K[X]⧸(X)`.
   refine ⟨Ideal.Quotient.mk (Curves.RamificationAtInfinity.xIdeal (k := K)) (Polynomial.C lam), ?_⟩
   change Ideal.quotientMap P_T (algebraMap (Polynomial K) data.carrier) h_le
       (Ideal.Quotient.mk _ (Polynomial.C lam)) = _
-  rw [Ideal.quotientMap_mk, Ideal.Quotient.eq, ← neg_sub]
+  rw [Ideal.quotientMap_mk]
+  -- Now: `Quotient.mk (algebraMap (C lam)) = Quotient.mk a`, i.e. their difference ∈ P_T.
+  rw [Ideal.Quotient.eq, ← neg_sub]
+  -- `algebraMap (C lam) - a ∈ P_T`; we have `a - algebraMap (C lam) ∈ P_T`.
   exact neg_mem hlam
 
 /-- **F.1 residue residual (V.1.3 B(iv)): the residue field at a kernel-prime is `K`.**
@@ -2815,8 +3407,27 @@ bridge_Bi_kernelToPrime_v2 W hq data T`, viewed as a module over the base residu
 ring `Polynomial K ⧸ xIdeal` (`≅ K` via `quotientXAlgEquiv`), has finrank `1`.
 Equivalently `data.carrier ⧸ P_T ≃ₐ[K] K`.
 
+**Now proven** by `le_antisymm`:
+* lower bound `1 ≤ finrank`: mathlib `Ideal.inertiaDeg_pos` (`xIdeal` maximal,
+  carrier module-finite, `LiesOver`) transported through `inertiaDeg_algebraMap`;
+* upper bound `finrank ≤ 1`: `finrank_le_one` at `1`, from surjectivity of the
+  structure algebra map `K[X]⧸(X) → carrier ⧸ P_T`
+  (`Sinf_kappa_kernelPrime_algebraMap_surjective`).
+
+The *only* residual is the geometric residue-value core
+`Sinf_kappa_kernelPrime_residue_in_base` (every carrier element is congruent mod
+`P_T` to a `K`-constant — the residue field at the `F_q`-rational place `T` is `K`).
+That core is the integral-closure / `FunctionField`-level descent of Worker K's
+field-agnostic affine residue iso `quotientMaximalIdealAtEquiv`
+(`Curves/NormValuation.lean:52`), whose `CoordinateRing → carrier`/place-at-infinity
+wiring is the missing piece; upstream the same content is the witness hypothesis
+`Sinf_inertia_one_at_kernel.h_inertia_witness` (`Hasse/OpenLemmaPrimitives.lean:246`).
+
 * **Silverman**: V.1.1 proof (book p. 138, inertia computation): every
-  `F_q`-rational kernel point produces a prime with trivial residue extension. -/
+  `F_q`-rational kernel point produces a prime with trivial residue extension.
+* **Project**: Bridge B(iv), V.1.3 substrate; on the Hasse critical path. Tracked
+  alongside the closed-point ↔ prime correspondence
+  `/develop` `T-SINF-CLOSED-POINT-PRIME-BRIDGE`. -/
 theorem Sinf_finrank_kappa_kernelPrime_eq_one
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (hq : 2 ≤ Fintype.card K)
@@ -2834,27 +3445,52 @@ theorem Sinf_finrank_kappa_kernelPrime_eq_one
   letI := data.algPoly
   letI := data.isDomain
   letI := data.moduleFinite
-  set P_T : Ideal data.carrier := bridge_Bi_kernelToPrime_v2 W hq data T
+  set P_T : Ideal data.carrier := bridge_Bi_kernelToPrime_v2 W hq data T with hP_T
+  -- `inertiaDeg (X) P_T = finrank (K[X]⧸(X)) (kappa P_T)`; we prove the finrank `= 1`
+  -- by `le_antisymm`. `kappa P_T` is *definitionally* `data.carrier ⧸ P_T`, and the
+  -- module structure used by `inertiaDeg` is `Quotient.algebraQuotientOfLEComap`,
+  -- which is exactly the algebra `(K[X]⧸(X)) → (carrier⧸P_T)` we work with below.
   haveI : P_T.IsPrime := bridge_Bi_isPrime_v2 W hq data T
-  haveI : (Curves.RamificationAtInfinity.xIdeal (k := K)).IsMaximal :=
+  -- The base ideal `(X)` is maximal and the carrier is module-finite over `K[X]`, so
+  -- the residue ring `carrier ⧸ P_T` is a nontrivial finite `K[X]⧸(X)`-module.
+  haveI hmax : (Curves.RamificationAtInfinity.xIdeal (k := K)).IsMaximal :=
     Curves.RamificationAtInfinity.xIdeal_isMaximal
+  -- Install the algebra instance `inertiaDeg` uses, so `finrank … (kappa P_T)` and
+  -- `finrank … (carrier ⧸ P_T)` refer to the same module structure.
   letI : Algebra (Polynomial K ⧸ Curves.RamificationAtInfinity.xIdeal (k := K))
       (data.carrier ⧸ P_T) :=
     Ideal.Quotient.algebraQuotientOfLEComap
       (Ideal.LiesOver.over (p := Curves.RamificationAtInfinity.xIdeal (k := K)) (P := P_T)).le
+  -- LOWER BOUND `1 ≤ finrank`: `inertiaDeg_pos` (mathlib) via `LiesOver` + maximal +
+  -- module-finite, transported through `inertiaDeg_algebraMap`.
   have h_ge : 1 ≤ Module.finrank (Polynomial K ⧸ Curves.RamificationAtInfinity.xIdeal (k := K))
       (data.kappa P_T) := by
     have hpos := Ideal.inertiaDeg_pos (Curves.RamificationAtInfinity.xIdeal (k := K)) P_T
     rwa [Ideal.inertiaDeg_algebraMap] at hpos
+  -- UPPER BOUND `finrank ≤ 1`: the residue ring is generated over `K[X]⧸(X)` by `1`,
+  -- because the structure algebra map `(K[X]⧸(X)) → (carrier⧸P_T)` is SURJECTIVE —
+  -- the residue-field-at-an-`F_q`-rational-point content, isolated as
+  -- `Sinf_kappa_kernelPrime_algebraMap_surjective`.
   have h_surj := Sinf_kappa_kernelPrime_algebraMap_surjective W hq data T
   have h_le : Module.finrank (Polynomial K ⧸ Curves.RamificationAtInfinity.xIdeal (k := K))
       (data.kappa P_T) ≤ 1 :=
     finrank_le_one (1 : data.kappa P_T) fun w ↦ by
       obtain ⟨c, hc⟩ := h_surj w
-      exact ⟨c, by rw [Algebra.smul_def, hc, mul_one]⟩
+      exact ⟨c, by rw [Algebra.smul_def, hc]; exact mul_one w⟩
   exact le_antisymm h_le h_ge
 
 /-- **F.1 downstream dispatch — Bridge B(iv): inertia degree at every kernel-prime is `1`.**
+
+Downstream un-import-blocked analogue of the former upstream
+`HasseWeil.bridge_Biv_inertia_eq_one` (an OpenLemmas.lean `sorry`, deleted
+2026-06-11), stated with the
+same binders as `bridge_Biii_ord_eq_neg_two_v2` and the order-based kernel-prime
+`bridge_Bi_kernelToPrime_v2`.
+
+Via `Sinf.inertiaDeg_eq_finrank_kappa` (with the `LiesOver` instance supplied by
+`bridge_Bi_liesOver_v2`), `inertiaDeg (X) P_T = Module.finrank (Polynomial K ⧸ (X))
+(data.kappa P_T)`, discharged by the isolated residue residual
+`Sinf_finrank_kappa_kernelPrime_eq_one`.
 
 * **Silverman**: V.1.1 proof (book p. 138, inertia computation): every
   `F_q`-rational kernel point of `γ = 1 − π` produces a prime with trivial residue
@@ -2872,8 +3508,11 @@ theorem bridge_Biv_inertia_eq_one_v2
         (bridge_Bi_kernelToPrime_v2 W hq data T) = 1 := by
   letI := data.commRing
   letI := data.algPoly
+  -- Supply the `LiesOver` instance so `inertiaDeg_eq_finrank_kappa` applies.
   haveI := bridge_Bi_liesOver_v2 W hq data T
+  -- `inertiaDeg (X) P_T = finrank (Polynomial K ⧸ (X)) (kappa P_T)`.
   rw [data.inertiaDeg_eq_finrank_kappa (bridge_Bi_kernelToPrime_v2 W hq data T)]
+  -- Discharge via the isolated residue residual.
   exact Sinf_finrank_kappa_kernelPrime_eq_one W hq data T
 
 /-! ### Phase C (deep pass 2026-05-28) — surjective-kernel-to-prime composer
@@ -2926,28 +3565,38 @@ theorem Sinf_sum_inertiaDeg_eq_pointCount_of_surjectivity_witness
   haveI : Finite W.toAffine.Point := Finite.of_fintype _
   haveI : Finite (isogOneSub_negFrobenius W hq).kernel := inferInstance
   haveI : Fintype (isogOneSub_negFrobenius W hq).kernel := Fintype.ofFinite _
+  -- Step 1: image of the kernel-to-prime map.
   set image : Finset (Ideal data.carrier) :=
     (Finset.univ : Finset (isogOneSub_negFrobenius W hq).kernel).image
       (fun T ↦ bridge_Bi_kernelToPrime_v2 W hq data T) with himage_def
+  -- image ⊆ primesOverFinset (backward direction shipped).
   have h_image_sub : image ⊆
       IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier := by
     intro Q hQ
     rw [himage_def, Finset.mem_image] at hQ
     obtain ⟨T, _, rfl⟩ := hQ
     exact bridge_Bii_kernelToPrime_mem_primesOverFinset_v2 W hq data T
+  -- primesOverFinset ⊆ image (from h_surj).
   have h_pof_sub_image :
       IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier ⊆ image := by
     intro P hP
     obtain ⟨T, rfl⟩ := h_surj P hP
     rw [himage_def, Finset.mem_image]
     exact ⟨T, Finset.mem_univ _, rfl⟩
+  -- image = primesOverFinset (both inclusions).
   have h_image_eq :
       image = IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier :=
     le_antisymm h_image_sub h_pof_sub_image
+  -- Step 2: rewrite the sum over `primesOverFinset` as a sum over the kernel via the image.
   rw [← h_image_eq, himage_def,
     Finset.sum_image (fun T₁ _ T₂ _ h_eq ↦
       Sinf_kernelToPrime_v2_injective W hq data h_eq)]
-  simp only [bridge_Biv_inertia_eq_one_v2]
+  -- Step 3: each kernel-prime has inertia 1, sum becomes Σ 1 = #univ = #kernel = pointCount.
+  have h_inertia_one : ∀ T : (isogOneSub_negFrobenius W hq).kernel,
+      Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K))
+          (bridge_Bi_kernelToPrime_v2 W hq data T) = 1 :=
+    fun T ↦ bridge_Biv_inertia_eq_one_v2 W hq data T
+  simp only [h_inertia_one]
   rw [Finset.sum_const, smul_eq_mul, mul_one, Finset.card_univ,
     ← Nat.card_eq_fintype_card,
     kernel_eq_top_of_hom_eq_id_sub_frobenius W (isogOneSub_negFrobenius W hq) rfl,
@@ -2973,8 +3622,23 @@ axiom-clean in PoleDivisorFallback).
 
 The composer is pure Finset arithmetic over shipped lemmas (no new sorries). -/
 
-/-- **F.1 Phase B squeeze composer.** Given the witness `Σ e_P · f_P = 2 · pointCount` as a
-hypothesis, the sum-of-inertia identity `Σ f_P = pointCount` over the primes above `xIdeal`. -/
+/-- **F.1 Phase B squeeze composer** (deep pass 2026-05-28; witness-form for the
+sum-of-inertia identity). Given the LHS witness `Σ e_P · f_P = 2 · pointCount` (the
+fundamental ramification identity's value) directly as a hypothesis, the target
+sum-of-inertia identity `Σ f_P = pointCount` follows by the **cardinality squeeze**:
+
+* The kernel-to-prime image `T ↦ P_T` lands in `primesOverFinset` and is injective with
+  cardinality `pointCount` (`bridge_Bii_kernelToPrime_mem_primesOverFinset_v2`,
+  `Sinf_kernelToPrime_v2_injective`, `kernel_eq_top_of_hom_eq_id_sub_frobenius`).
+* Each kernel-prime contributes `e_{P_T} · f_{P_T} = 2 · 1 = 2` to `Σ e_P · f_P`
+  (`bridge_Biii_ord_eq_neg_two_v2`, `Sinf.toNat_neg_ordAt_eq_ramificationIdx`,
+  `bridge_Biv_inertia_eq_one_v2`).
+* So `Σ_{image} e_P · f_P = 2 · pointCount`; equality with `Σ_{primesOverFinset} e_P · f_P =
+  2 · pointCount` (the hypothesis) forces `image = primesOverFinset` (complement sum is 0,
+  each complement term is ≥ 1, so complement is empty).
+* Hence `Σ_{primesOverFinset} f_P = Σ_{T ∈ kernel} f_{P_T} = Σ_T 1 = pointCount`.
+
+The composer is pure Finset arithmetic over shipped lemmas, axiom-clean. -/
 theorem Sinf_sum_inertiaDeg_over_xIdeal_eq_pointCount_of_finrank_witness
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
     (hq : 2 ≤ Fintype.card K)
@@ -3037,7 +3701,7 @@ theorem Sinf_sum_inertiaDeg_over_xIdeal_eq_pointCount_of_finrank_witness
       -- e_{P_T} = 2: ord = -2 ⟹ (-ord).toNat = 2.
       rw [bridge_Biii_ord_eq_neg_two_v2 W hq data T,
           bridge_Biv_inertia_eq_one_v2 W hq data T]
-      rfl
+      decide
     simp only [h_each]
     rw [Finset.sum_const, smul_eq_mul, Finset.card_univ,
       ← Nat.card_eq_fintype_card, h_card_kernel]
@@ -3055,16 +3719,23 @@ theorem Sinf_sum_inertiaDeg_over_xIdeal_eq_pointCount_of_finrank_witness
     obtain ⟨hQ_prime, hQ_liesOver⟩ := hQ
     haveI := hQ_prime
     haveI := hQ_liesOver
+    -- inertiaDeg ≥ 1
     have h_f_pos := Ideal.inertiaDeg_pos
       (Curves.RamificationAtInfinity.xIdeal (k := K)) Q
+    -- For Q ∈ primesOverFinset, ramificationIdx ≥ 1 via the LiesOver fact
+    -- (`Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver`).
     have h_e_pos : 1 ≤ (-(data.ordAt Q)).toNat := by
       rw [data.toNat_neg_ordAt_eq_ramificationIdx Q]
+      letI := data.isTorsionFree
       have h_ne_zero : Ideal.ramificationIdx
           (Curves.RamificationAtInfinity.xIdeal (k := K)) Q ≠ 0 :=
         Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver Q
           Curves.RamificationAtInfinity.xIdeal_ne_bot
       omega
-    exact Nat.mul_pos h_e_pos h_f_pos
+    calc (1 : ℕ) = 1 * 1 := by ring
+      _ ≤ (-(data.ordAt Q)).toNat *
+            Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) Q :=
+          Nat.mul_le_mul h_e_pos h_f_pos
   -- The sum over the complement is 0 + each term ≥ 1 ⟹ complement empty.
   have h_image_eq :
       image = IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier := by
@@ -3082,6 +3753,15 @@ theorem Sinf_sum_inertiaDeg_over_xIdeal_eq_pointCount_of_finrank_witness
             data.carrier) \ image,
           (-(data.ordAt Q)).toNat *
             Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) Q = 0 := by
+      have : ∑ Q ∈ (IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K))
+              data.carrier) \ image,
+            (-(data.ordAt Q)).toNat *
+              Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) Q +
+          ∑ Q ∈ image, (-(data.ordAt Q)).toNat *
+            Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) Q =
+          ∑ Q ∈ IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K))
+            data.carrier, (-(data.ordAt Q)).toNat *
+              Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) Q := h_sum_split
       omega
     -- complement is empty: each term ≥ 1 but sum = 0 ⟹ no terms.
     have h_compl_empty :
