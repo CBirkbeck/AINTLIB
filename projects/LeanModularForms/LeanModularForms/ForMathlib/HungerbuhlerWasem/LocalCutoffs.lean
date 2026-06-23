@@ -684,37 +684,17 @@ theorem LocalDerivedCutoffs.δ_left_tendsto_zero
     (fun ε hε_pos hε_lt d hd0 hdδ ↦
       D.h_near_left ε hε_pos hε_lt (t₀ - d) (by linarith) (by linarith))
 
-/-- **`D.δ_right ε < r` for `ε` near `0⁺`** (within the threshold window). -/
-private lemma LocalDerivedCutoffs.δ_right_lt_r_eventually
+/-- **Eventual transfer of a sub-threshold property.** Any property that holds
+for every `ε` in the open threshold window `(0, D.threshold)` holds eventually
+as `ε → 0⁺`. Specialises to the positivity / `< r` bounds of `D.δ_left`,
+`D.δ_right` used in `perCrossing_window_integral_tendsto_exact`. -/
+private lemma LocalDerivedCutoffs.eventually_of_lt_thresh
     {γ : ClosedPwC1Immersion x} {s : ℂ} {t₀ r : ℝ}
-    (D : LocalDerivedCutoffs γ s t₀ r) :
-    ∀ᶠ ε in 𝓝[>] (0 : ℝ), D.δ_right ε < r := by
+    (D : LocalDerivedCutoffs γ s t₀ r) {P : ℝ → Prop}
+    (h : ∀ ε, 0 < ε → ε < D.threshold → P ε) :
+    ∀ᶠ ε in 𝓝[>] (0 : ℝ), P ε := by
   filter_upwards [Ioo_mem_nhdsGT D.hthresh] with ε hε
-  exact D.hδ_right_lt ε hε.1 hε.2
-
-/-- **`D.δ_left ε < r` for `ε` near `0⁺`** (within the threshold window). -/
-private lemma LocalDerivedCutoffs.δ_left_lt_r_eventually
-    {γ : ClosedPwC1Immersion x} {s : ℂ} {t₀ r : ℝ}
-    (D : LocalDerivedCutoffs γ s t₀ r) :
-    ∀ᶠ ε in 𝓝[>] (0 : ℝ), D.δ_left ε < r := by
-  filter_upwards [Ioo_mem_nhdsGT D.hthresh] with ε hε
-  exact D.hδ_left_lt ε hε.1 hε.2
-
-/-- **`0 < D.δ_right ε` for `ε` near `0⁺`** (within the threshold window). -/
-private lemma LocalDerivedCutoffs.δ_right_pos_eventually
-    {γ : ClosedPwC1Immersion x} {s : ℂ} {t₀ r : ℝ}
-    (D : LocalDerivedCutoffs γ s t₀ r) :
-    ∀ᶠ ε in 𝓝[>] (0 : ℝ), 0 < D.δ_right ε := by
-  filter_upwards [Ioo_mem_nhdsGT D.hthresh] with ε hε
-  exact D.hδ_right_pos ε hε.1 hε.2
-
-/-- **`0 < D.δ_left ε` for `ε` near `0⁺`** (within the threshold window). -/
-private lemma LocalDerivedCutoffs.δ_left_pos_eventually
-    {γ : ClosedPwC1Immersion x} {s : ℂ} {t₀ r : ℝ}
-    (D : LocalDerivedCutoffs γ s t₀ r) :
-    ∀ᶠ ε in 𝓝[>] (0 : ℝ), 0 < D.δ_left ε := by
-  filter_upwards [Ioo_mem_nhdsGT D.hthresh] with ε hε
-  exact D.hδ_left_pos ε hε.1 hε.2
+  exact h ε hε.1 hε.2
 
 /-- **Real/imaginary decomposition of `Complex.log (a / b)`** for nonzero `a`, `b`:
 the real part is `log ‖a‖ - log ‖b‖` and the imaginary part is `arg (a / b)`. -/
@@ -981,13 +961,13 @@ theorem perCrossing_window_integral_tendsto_exact
   have hδL_tendsto : Tendsto D.δ_left (𝓝[>] (0 : ℝ)) (𝓝[>] (0 : ℝ)) :=
     LocalDerivedCutoffs.δ_left_tendsto_zero hr_pos h_window_Icc h_local_unique_r D
   have hδR_lt_r : ∀ᶠ ε in 𝓝[>] (0 : ℝ), D.δ_right ε < r :=
-    D.δ_right_lt_r_eventually
+    D.eventually_of_lt_thresh D.hδ_right_lt
   have hδL_lt_r : ∀ᶠ ε in 𝓝[>] (0 : ℝ), D.δ_left ε < r :=
-    D.δ_left_lt_r_eventually
+    D.eventually_of_lt_thresh D.hδ_left_lt
   have hδR_pos_ev : ∀ᶠ ε in 𝓝[>] (0 : ℝ), 0 < D.δ_right ε :=
-    D.δ_right_pos_eventually
+    D.eventually_of_lt_thresh D.hδ_right_pos
   have hδL_pos_ev : ∀ᶠ ε in 𝓝[>] (0 : ℝ), 0 < D.δ_left ε :=
-    D.δ_left_pos_eventually
+    D.eventually_of_lt_thresh D.hδ_left_pos
   set Λ_R : ℝ → ℂ := fun ε ↦
     Complex.log ((γf (t₀ + r) - s) / (γf (t₀ + D.δ_right ε) - s)) with hΛR_def
   set Λ_L : ℝ → ℂ := fun ε ↦
