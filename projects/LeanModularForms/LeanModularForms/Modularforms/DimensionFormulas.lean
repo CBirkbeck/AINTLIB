@@ -197,5 +197,5 @@ lemma dim_gen_cong_levels (k : ℤ) (Γ : Subgroup SL(2, ℤ)) (hΓ : Subgroup.i
       rw [trunc.map_sub, hfg, sub_self]
     have := congrArg (fun t : Fin N → ℂ ↦ t ⟨m, hm⟩) hsub
     simpa [trunc] using this
-  haveI : FiniteDimensional ℂ (Fin N → ℂ) := by infer_instance
+  haveI : FiniteDimensional ℂ (Fin N → ℂ) := inferInstance
   simpa using (FiniteDimensional.of_injective trunc htrunc_inj)
