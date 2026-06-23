@@ -1301,24 +1301,10 @@ theorem orderTop_localExpand_addPullbackNumerator_reduced_negFrobenius_rest_ge
   refine orderTop_sub_ge_of_both_ge ?_ h_t3
   exact orderTop_add_ge_of_both_ge h_t1 h_t2
 
-/-- **MAIN THEOREM** (LaurentSeries-side mirror of
-`ordAtInfty_addPullbackNumerator_reduced_negFrobenius_eq`):
-`(localExpand(addPullbackNumerator_reduced_negFrobenius)).orderTop = -2-4q`
-for q ≥ 2.
-
-Algebraic decomposition: the full expression is `rest + dominant`, where
-* `dominant = x_gen · (negFrob.π·x)²` has orderTop = -2-4q (sub-helper 45)
-* `rest` (the other 7 terms) has orderTop ≥ -3-3q (sub-helper 58)
-
-For q ≥ 2: -2-4q < -3-3q, so `orderTop_add_eq_right` extracts the dominant
-orderTop. -/
-theorem orderTop_localExpand_addPullbackNumerator_reduced_negFrobenius_eq
-    (hq : 2 ≤ Fintype.card K) :
-    (localExpand W (addPullbackNumerator_reduced_negFrobenius W)).orderTop =
-      (((-2 - 4 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) := by
-  have h_q : (2 : ℤ) ≤ (Fintype.card K : ℤ) := by exact_mod_cast hq
-  -- Algebraic decomposition: full = rest + dominant.
-  have h_eq : addPullbackNumerator_reduced_negFrobenius W =
+/-- The reduced negFrobenius numerator splits as `rest + dominant`, where
+`dominant = x_gen · (negFrob.π·x)²`. Pure ring identity (unfold + `ring`). -/
+private theorem addPullbackNumerator_reduced_negFrobenius_split_eq :
+    addPullbackNumerator_reduced_negFrobenius W =
       (algebraMap K W.toAffine.FunctionField W.a₄ *
             (x_gen W + (negFrobeniusIsog W).pullback (x_gen W))
           + (2 : W.toAffine.FunctionField) *
@@ -1335,14 +1321,15 @@ theorem orderTop_localExpand_addPullbackNumerator_reduced_negFrobenius_eq
               algebraMap K W.toAffine.FunctionField W.a₂ * x_gen W *
               (negFrobeniusIsog W).pullback (x_gen W)) +
       (x_gen W * ((negFrobeniusIsog W).pullback (x_gen W)) ^ 2) := by
-    unfold addPullbackNumerator_reduced_negFrobenius
-    ring
-  rw [h_eq, map_add]
-  -- Goal: orderTop(localExpand(rest) + localExpand(dominant)) = -2-4q
-  have h_rest := orderTop_localExpand_addPullbackNumerator_reduced_negFrobenius_rest_ge W hq
-  have h_dom := orderTop_localExpand_x_gen_mul_negFrobeniusIsog_pullback_x_gen_sq W
-  -- Strict non-arch: dominant strictly less than rest, so add_eq_right applies.
-  have h_lt : (localExpand W (x_gen W *
+  unfold addPullbackNumerator_reduced_negFrobenius
+  ring
+
+/-- The dominant term `localExpand(x_gen · (negFrob.π·x)²)` has strictly smaller
+`orderTop` than the `rest` (for `q ≥ 2`): `-2-4q < -3-3q`. Combines the dominant
+order (sub-helper 45) with the `rest ≥ -3-3q` bound (sub-helper 58). -/
+private theorem orderTop_localExpand_dominant_lt_rest_negFrobenius
+    (hq : 2 ≤ Fintype.card K) :
+    (localExpand W (x_gen W *
       ((negFrobeniusIsog W).pullback (x_gen W)) ^ 2)).orderTop <
       (localExpand W (
         algebraMap K W.toAffine.FunctionField W.a₄ *
@@ -1360,11 +1347,33 @@ theorem orderTop_localExpand_addPullbackNumerator_reduced_negFrobenius_eq
           + (2 : W.toAffine.FunctionField) *
               algebraMap K W.toAffine.FunctionField W.a₂ * x_gen W *
               (negFrobeniusIsog W).pullback (x_gen W))).orderTop := by
-    rw [h_dom]
-    refine lt_of_lt_of_le ?_ h_rest
-    refine WithTop.coe_lt_coe.mpr ?_
-    linarith
-  rw [HahnSeries.orderTop_add_eq_right h_lt, h_dom]
+  have h_q : (2 : ℤ) ≤ (Fintype.card K : ℤ) := by exact_mod_cast hq
+  have h_rest := orderTop_localExpand_addPullbackNumerator_reduced_negFrobenius_rest_ge W hq
+  have h_dom := orderTop_localExpand_x_gen_mul_negFrobeniusIsog_pullback_x_gen_sq W
+  rw [h_dom]
+  refine lt_of_lt_of_le ?_ h_rest
+  refine WithTop.coe_lt_coe.mpr ?_
+  linarith
+
+/-- **MAIN THEOREM** (LaurentSeries-side mirror of
+`ordAtInfty_addPullbackNumerator_reduced_negFrobenius_eq`):
+`(localExpand(addPullbackNumerator_reduced_negFrobenius)).orderTop = -2-4q`
+for q ≥ 2.
+
+Algebraic decomposition: the full expression is `rest + dominant`, where
+* `dominant = x_gen · (negFrob.π·x)²` has orderTop = -2-4q (sub-helper 45)
+* `rest` (the other 7 terms) has orderTop ≥ -3-3q (sub-helper 58)
+
+For q ≥ 2: -2-4q < -3-3q, so `orderTop_add_eq_right` extracts the dominant
+orderTop. -/
+theorem orderTop_localExpand_addPullbackNumerator_reduced_negFrobenius_eq
+    (hq : 2 ≤ Fintype.card K) :
+    (localExpand W (addPullbackNumerator_reduced_negFrobenius W)).orderTop =
+      (((-2 - 4 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) := by
+  rw [addPullbackNumerator_reduced_negFrobenius_split_eq W, map_add,
+    HahnSeries.orderTop_add_eq_right
+      (orderTop_localExpand_dominant_lt_rest_negFrobenius W hq),
+    orderTop_localExpand_x_gen_mul_negFrobeniusIsog_pullback_x_gen_sq W]
 
 /-- The reduced negFrobenius numerator splits as `rest + dominant`, where the dominant
 term is `x_gen · (negFrob.π·x)²`. -/
