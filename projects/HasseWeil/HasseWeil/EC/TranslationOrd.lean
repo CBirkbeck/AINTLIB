@@ -1572,6 +1572,47 @@ private theorem ord_P_translateY_cube_combination_eq_zero
     exact lt_of_lt_of_le (by exact_mod_cast (show (0 : ℤ) < 1 by norm_num)) h_T234
   exact (SmoothPlaneCurve.ord_P_add_eq_of_lt h_strict).trans h_neg_yd_cube
 
+/-- **`y_gen W` has nonneg ord at any smooth point** (it is in the image of the
+coordinate ring, being `algebraMap R KE (AdjoinRoot.root …)`). The y-side
+companion to `ord_P_x_gen_nonneg`, used wherever `ord_P (y_gen) ≥ 0` is needed
+(e.g. as the `hyg` hypothesis of `ord_P_translateY_cube_combination_eq_zero`). -/
+private theorem ord_P_y_gen_nonneg (P : (W_smooth W).SmoothPoint) :
+    (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P (y_gen W) :=
+  ord_P_algebraMap_R_nonneg W P _
+
+/-- **`ord_P (f ^ 3) = 3` from `ord_P f = 1`.** Specialises `ord_P_pow` to a
+cube and the value `1`, turning the natural-number scalar `3 • (1 : WithTop ℤ)`
+into the integer `3`. Used for `xd ^ 3` once `ord_P xd = 1` is known. -/
+private theorem ord_P_cube_eq_three_of_ord_P_eq_one
+    {C : Curves.SmoothPlaneCurve F} {P : C.SmoothPoint} {f : C.FunctionField}
+    (hf : C.ord_P P f = ((1 : ℤ) : WithTop ℤ)) :
+    C.ord_P P (f ^ 3) = ((3 : ℤ) : WithTop ℤ) := by
+  rw [SmoothPlaneCurve.ord_P_pow (P := P) f 3, hf]; rfl
+
+/-- **A function whose ord is a finite integer `n` away from `0` has ord `-n`.**
+If `ord_P f + n = 0` in `WithTop ℤ`, then `ord_P f = -n`. This isolates the
+final integer-cancellation step shared by the exact pole-order computations
+(`ord_P (translateX_xy) = -2`, `ord_P (translateY_xy) = -3`): the hypothesis
+forces `ord_P f` to be finite (the `⊤` branch gives `⊤ = 0`), after which
+casting back through `WithTop.coe` solves the remaining integer equation. -/
+private theorem ord_P_eq_neg_of_add_coe_eq_zero
+    {C : Curves.SmoothPlaneCurve F} {P : C.SmoothPoint} {f : C.FunctionField}
+    {n : ℤ} (h : C.ord_P P f + ((n : ℤ) : WithTop ℤ) = 0) :
+    C.ord_P P f = ((-n : ℤ) : WithTop ℤ) := by
+  cases ht_case : C.ord_P P f with
+  | top => rw [ht_case, top_add] at h; exact absurd h (by simp)
+  | coe k =>
+      rw [ht_case] at h
+      have h_int_eq : k + n = 0 := by
+        have h_sum : ((k + n : ℤ) : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) := by
+          rw [show ((k + n : ℤ) : WithTop ℤ) =
+            ((k : ℤ) : WithTop ℤ) + ((n : ℤ) : WithTop ℤ) from by
+              push_cast; ring]
+          exact h
+        exact_mod_cast h_sum
+      have h_k_eq : k = -n := by omega
+      exact_mod_cast h_k_eq
+
 /-- **`ord_P (translateY_xy) = -3` exact at `−T` for non-2-torsion `T`**:
 combines the algebraic identity `translateY_xy_mul_cube_eq` with the
 ord-vanishing facts `ord_P (yd) = 0` and `ord_P (xd) = 1` to derive the
@@ -1589,7 +1630,6 @@ theorem ord_P_translateY_xy_eq_neg_three_of_non_2_tor
   set a2 := algebraMap F KE W.a₂ with ha2_def
   set a3 := algebraMap F KE W.a₃ with ha3_def
   set xk' := algebraMap F KE xk with hxk'_def
-  have h_xd_ne : xd ≠ 0 := x_gen_sub_const_ne_zero W xk
   have h_xd_ord_eq : (W_smooth W).ord_P P xd = ((1 : ℤ) : WithTop ℤ) :=
     ord_P_x_gen_sub_const_eq_one_of_non_2_tor W xk yk h_ns h_not_2_tor
   have h_yd_ord : (W_smooth W).ord_P P yd = 0 :=
@@ -1604,36 +1644,10 @@ theorem ord_P_translateY_xy_eq_neg_three_of_non_2_tor
     ord_P_algebraMap_F_nonneg W P W.a₃
   have h_xk_nn : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P xk' :=
     ord_P_algebraMap_F_nonneg W P xk
-  have h_yg_nn : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P (y_gen W) := by
-    by_cases hf : y_gen W = 0
-    · rw [hf]
-      rw [show ((W_smooth W).ord_P P (0 : KE)) = ⊤ from
-          SmoothPlaneCurve.ord_P_zero]
-      exact le_top
-    · have h_v_le : (W_smooth W).pointValuation P (y_gen W) ≤ 1 :=
-        pointValuation_y_gen_le_one W P
-      have hv : (W_smooth W).pointValuation P (y_gen W) ≠ 0 :=
-        ((W_smooth W).pointValuation P).ne_zero_iff.mpr hf
-      unfold SmoothPlaneCurve.ord_P
-      rw [dif_neg hv]
-      rw [show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl,
-          WithTop.coe_le_coe]
-      have h_unz_le : WithZero.unzero hv ≤ 1 := by
-        rw [← WithZero.coe_le_coe, WithZero.coe_one, WithZero.coe_unzero]
-        exact h_v_le
-      have h_toAdd : (WithZero.unzero hv).toAdd ≤ 0 := by
-        have h1 : ((1 : Multiplicative ℤ)).toAdd = (0 : ℤ) := rfl
-        have h2 : Multiplicative.toAdd (WithZero.unzero hv) ≤
-            Multiplicative.toAdd (1 : Multiplicative ℤ) := h_unz_le
-        rwa [h1] at h2
-      omega
-  have h_xd_cube_eq : (W_smooth W).ord_P P (xd^3) = ((3 : ℤ) : WithTop ℤ) := by
-    have h_pow : (W_smooth W).ord_P P (xd^3) =
-        (3 : ℕ) • (W_smooth W).ord_P P xd :=
-      SmoothPlaneCurve.ord_P_pow (P := P) xd 3
-    rw [h_pow, h_xd_ord_eq]
-    change (3 : ℕ) • ((1 : ℤ) : WithTop ℤ) = ((3 : ℤ) : WithTop ℤ)
-    rfl
+  have h_yg_nn : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P (y_gen W) :=
+    ord_P_y_gen_nonneg W P
+  have h_xd_cube_eq : (W_smooth W).ord_P P (xd^3) = ((3 : ℤ) : WithTop ℤ) :=
+    ord_P_cube_eq_three_of_ord_P_eq_one h_xd_ord_eq
   have h_RHS' : (W_smooth W).ord_P P
       (-(yd^3) +
         (-((2 : KE) * a1 * yd^2 * xd) +
@@ -1657,27 +1671,7 @@ theorem ord_P_translateY_xy_eq_neg_three_of_non_2_tor
       (W_smooth W).ord_P P (xd^3) :=
     SmoothPlaneCurve.ord_P_mul (P := P) (translateY_xy W xk yk) (xd^3)
   rw [h_split₁, h_xd_cube_eq] at h_LHS_ord
-  have h_tY_ne : translateY_xy W xk yk ≠ 0 := by
-    intro h_zero
-    rw [h_zero] at h_LHS_ord
-    rw [show ((W_smooth W).ord_P P (0 : KE)) = ⊤ from
-        Curves.SmoothPlaneCurve.ord_P_zero] at h_LHS_ord
-    simp at h_LHS_ord
-  have h_tY_ne_top : (W_smooth W).ord_P P (translateY_xy W xk yk) ≠ ⊤ :=
-    (SmoothPlaneCurve.ord_P_eq_top_iff _).not.mpr h_tY_ne
-  cases ht_case : (W_smooth W).ord_P P (translateY_xy W xk yk) with
-  | top => exact absurd ht_case h_tY_ne_top
-  | coe k =>
-      rw [ht_case] at h_LHS_ord
-      have h_int_eq : k + 3 = 0 := by
-        have h_sum : ((k + 3 : ℤ) : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) := by
-          rw [show ((k + 3 : ℤ) : WithTop ℤ) =
-            ((k : ℤ) : WithTop ℤ) + ((3 : ℤ) : WithTop ℤ) from by
-              push_cast; ring]
-          exact h_LHS_ord
-        exact_mod_cast h_sum
-      have h_k_eq : k = -3 := by omega
-      exact_mod_cast h_k_eq
+  exact ord_P_eq_neg_of_add_coe_eq_zero (n := 3) h_LHS_ord
 
 /-! ### `translateX_xy_transcendental` (axiom-clean for non-2-torsion `T`)
 
