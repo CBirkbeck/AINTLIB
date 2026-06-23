@@ -1555,6 +1555,66 @@ theorem isTranslateMaxIdealCompatible_on_CoordinateRing_some
   exact pointValuation_translateAlgEquivOfPoint_XClass_add_YClass_lt_one_some
     W P xk yk h_ns h a b h_xy_x h_xy_y
 
+/-- If `r ∉ maximalIdealAt P'`, then its evaluation `evalAt P' r` is a nonzero
+constant. Immediate from `ker_evalAt`: the maximal ideal is exactly the kernel
+of evaluation, so an element outside it has nonzero value. -/
+private theorem evalAt_ne_zero_of_notMem_maximalIdealAt
+    (P' : (W_smooth W).SmoothPoint) (r : (W_smooth W).CoordinateRing)
+    (h_notMem : r ∉ (W_smooth W).maximalIdealAt P') :
+    (W_smooth W).evalAt P' r ≠ 0 := by
+  intro h_c
+  apply h_notMem
+  rw [← (W_smooth W).ker_evalAt P', RingHom.mem_ker]
+  exact h_c
+
+/-- Subtracting off its evaluation lands `r` in the maximal ideal: with
+`c = evalAt P' r`, the difference `r - algebraMap c` lies in `maximalIdealAt P'`.
+This is the "vanishing at `P'`" half of `ker_evalAt`, since `evalAt` is constant
+on the image of `algebraMap F`. -/
+private theorem sub_algebraMap_evalAt_mem_maximalIdealAt
+    (P' : (W_smooth W).SmoothPoint) (r : (W_smooth W).CoordinateRing) :
+    r - algebraMap F (W_smooth W).CoordinateRing ((W_smooth W).evalAt P' r) ∈
+      (W_smooth W).maximalIdealAt P' := by
+  rw [← (W_smooth W).ker_evalAt P', RingHom.mem_ker, map_sub,
+    Curves.SmoothPlaneCurve.evalAt_algebraMap]
+  simp
+
+/-- The translate `AlgEquiv` of a constant-corrected coordinate function splits as
+`τ_Q(algMap r) = τ_Q(algMap r') + algMap c`, where `r' = r - algMap c` and the
+last summand is the *same* constant `c` because `τ_Q` is an `F`-algebra equivalence
+(so it commutes with `algebraMap F`) and `algMap F → FunctionField` factors through
+`CoordinateRing`. Purely the ring/`F`-algebra structure of `τ_Q`; no valuation
+input. -/
+private theorem translateAlgEquivOfPoint_algebraMap_eq_add_algebraMap_const
+    (Q : W.toAffine.Point) (r' : (W_smooth W).CoordinateRing) (c : F) :
+    (translateAlgEquivOfPoint W Q)
+        (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField
+          (r' + algebraMap F (W_smooth W).CoordinateRing c)) =
+      (translateAlgEquivOfPoint W Q)
+        (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField r') +
+      algebraMap F W.toAffine.FunctionField c := by
+  rw [map_add]
+  rw [show (translateAlgEquivOfPoint W Q)
+          ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField) r' +
+            (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+              ((algebraMap F (W_smooth W).CoordinateRing) c)) =
+        (translateAlgEquivOfPoint W Q)
+          ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField) r') +
+        (translateAlgEquivOfPoint W Q)
+          ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+            ((algebraMap F (W_smooth W).CoordinateRing) c)) from map_add _ _ _]
+  congr 1
+  show (translateAlgEquivOfPoint W Q)
+      ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
+        ((algebraMap F (W_smooth W).CoordinateRing) c)) =
+    algebraMap F W.toAffine.FunctionField c
+  rw [← IsScalarTower.algebraMap_apply F (W_smooth W).CoordinateRing
+    (W_smooth W).FunctionField c]
+  change (translateAlgEquivOfPoint W Q)
+      (algebraMap F W.toAffine.FunctionField c) =
+    algebraMap F W.toAffine.FunctionField c
+  rw [(translateAlgEquivOfPoint W Q).commutes c]
+
 /-- For `r ∈ CoordinateRing` with `r ∉ maxIdealAt(P+k)`,
 `pV P (τ_k(algMap r)) = 1`. -/
 theorem pointValuation_translateAlgEquivOfPoint_algebraMap_eq_one_of_notMem
@@ -1572,72 +1632,28 @@ theorem pointValuation_translateAlgEquivOfPoint_algebraMap_eq_one_of_notMem
           (W_smooth W).FunctionField r)) = 1 := by
   set P' := P.translate_of_finite
     (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point) h with hP'_def
+  -- `r` corrected by its constant value `c = evalAt P' r` lands in `maximalIdealAt P'`.
   set c : F := (W_smooth W).evalAt P' r with hc_def
-  have h_c_ne : c ≠ 0 := by
-    intro h_c
-    apply h_notMem
-    rw [← (W_smooth W).ker_evalAt P', RingHom.mem_ker]
-    exact h_c
+  have h_c_ne : c ≠ 0 := evalAt_ne_zero_of_notMem_maximalIdealAt W P' r h_notMem
   set r' : (W_smooth W).CoordinateRing :=
     r - algebraMap F (W_smooth W).CoordinateRing c with hr'_def
-  have h_r'_mem : r' ∈ (W_smooth W).maximalIdealAt P' := by
-    rw [← (W_smooth W).ker_evalAt P', RingHom.mem_ker]
-    change (W_smooth W).evalAt P' (r - algebraMap F (W_smooth W).CoordinateRing c) = 0
-    rw [map_sub, Curves.SmoothPlaneCurve.evalAt_algebraMap]
-    simp [hc_def]
-  have h_decomp : (translateAlgEquivOfPoint W
-      (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-        (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField r) =
-      (translateAlgEquivOfPoint W
-        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-        (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField r') +
-      algebraMap F W.toAffine.FunctionField c := by
-    have h_r_eq : r = r' + algebraMap F (W_smooth W).CoordinateRing c := by
-      rw [hr'_def]; ring
-    rw [h_r_eq, map_add]
-    rw [show (translateAlgEquivOfPoint W
-            (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-          ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField) r' +
-            (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-              ((algebraMap F (W_smooth W).CoordinateRing) c)) =
-          (translateAlgEquivOfPoint W
-            (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-            ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField) r') +
-          (translateAlgEquivOfPoint W
-            (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-            ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-              ((algebraMap F (W_smooth W).CoordinateRing) c)) from map_add _ _ _]
-    congr 1
-    show (translateAlgEquivOfPoint W
-        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-        ((algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField)
-          ((algebraMap F (W_smooth W).CoordinateRing) c)) =
-      algebraMap F W.toAffine.FunctionField c
-    rw [← IsScalarTower.algebraMap_apply F (W_smooth W).CoordinateRing
-      (W_smooth W).FunctionField c]
-    change (translateAlgEquivOfPoint W
-        (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point))
-        (algebraMap F W.toAffine.FunctionField c) =
-      algebraMap F W.toAffine.FunctionField c
-    rw [(translateAlgEquivOfPoint W
-      (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)).commutes c]
-  rw [h_decomp]
+  have h_r'_mem : r' ∈ (W_smooth W).maximalIdealAt P' :=
+    sub_algebraMap_evalAt_mem_maximalIdealAt W P' r
+  -- Split `τ_k(algMap r) = τ_k(algMap r') + algMap c`; the constant `c` is preserved.
+  have h_r_eq : r = r' + algebraMap F (W_smooth W).CoordinateRing c := by rw [hr'_def]; ring
+  rw [h_r_eq, translateAlgEquivOfPoint_algebraMap_eq_add_algebraMap_const W _ r' c]
+  -- `pV` of the constant term is `1`; the maximal-ideal term is strictly smaller.
+  have h_alg_c_eq_one : (W_smooth W).pointValuation P
+      (algebraMap F (W_smooth W).FunctionField c) = 1 :=
+    pointValuation_algebraMap_F_eq_one_of_ne_zero W P h_c_ne
   have h_lt : (W_smooth W).pointValuation P
       (translateAlgEquivOfPoint W
         (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)
         (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField r')) <
       (W_smooth W).pointValuation P
         (algebraMap F (W_smooth W).FunctionField c) := by
-    have h_lt_one := isTranslateMaxIdealCompatible_on_CoordinateRing_some
-      W P xk yk h_ns h r' h_r'_mem
-    have h_alg_c_eq_one : (W_smooth W).pointValuation P
-        (algebraMap F (W_smooth W).FunctionField c) = 1 :=
-      pointValuation_algebraMap_F_eq_one_of_ne_zero W P h_c_ne
     rw [h_alg_c_eq_one]
-    exact h_lt_one
-  have h_alg_c_eq_one : (W_smooth W).pointValuation P
-      (algebraMap F (W_smooth W).FunctionField c) = 1 :=
-    pointValuation_algebraMap_F_eq_one_of_ne_zero W P h_c_ne
+    exact isTranslateMaxIdealCompatible_on_CoordinateRing_some W P xk yk h_ns h r' h_r'_mem
   exact (Valuation.map_add_eq_of_lt_right _ h_lt).trans h_alg_c_eq_one
 
 /-- For nonzero `f` with `pV P f ≤ 1`, `0 ≤ ord_P P f` — companion to
