@@ -21,10 +21,12 @@ This file combines:
 The end result is a ForMathlib-native, axiom-clean final valence formula
 theorem that requires only `hf : f ≠ 0` as input.
 
-## Main result
+## Main results
 
 * `valence_formula_textbook_unconditional_FM` — the fully unconditional
   valence formula in the ForMathlib chain
+* `valence_formula_textbook_orbit_finsum_FM` — the textbook valence formula in
+  finsum-over-orbits form, proved unconditionally
 -/
 
 open Complex MeasureTheory Set Filter Topology CongruenceSubgroup
