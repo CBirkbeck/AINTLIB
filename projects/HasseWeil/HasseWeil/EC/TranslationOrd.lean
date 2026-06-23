@@ -719,6 +719,54 @@ theorem maximalIdeal_localRingAt_eq_span_YClass_of_2_tor
     exact (Localization.AtPrime.map_eq_maximalIdeal).symm
   rw [h_loc_eq, h_map_eq]
 
+/-- **`algMap YClass ≠ 0` in the local ring at `P`**: y-side mirror of
+`algMap_XClass_localRingAt_ne_zero`. The image of the nonzero
+coordinate-ring element `YClass W (C yk')` under the localisation map
+`CoordinateRing → localRingAt P` is nonzero, since the localisation is
+injective (the prime complement avoids zero divisors). -/
+private theorem algMap_YClass_localRingAt_ne_zero
+    (yk' : F) (P : (W_smooth W).SmoothPoint) :
+    algebraMap (W_smooth W).CoordinateRing
+        ((W_smooth W).localRingAt P)
+        (Affine.CoordinateRing.YClass W.toAffine (Polynomial.C yk')) ≠ 0 := by
+  have h_yc_ne : Affine.CoordinateRing.YClass W.toAffine (Polynomial.C yk') ≠ 0 :=
+    Affine.CoordinateRing.YClass_ne_zero (W' := W.toAffine)
+      (y := Polynomial.C yk')
+  exact (map_ne_zero_iff _
+    (IsLocalization.injective (M := ((W_smooth W).maximalIdealAt P).primeCompl)
+      ((W_smooth W).localRingAt P)
+      ((W_smooth W).maximalIdealAt P).primeCompl_le_nonZeroDivisors)).mpr h_yc_ne
+
+/-- **`pointValuation P (algMap YClass) = exp(-1)` from the maxIdeal-span
+hypothesis**: y-side mirror of
+`pointValuation_algMap_XClass_eq_exp_neg_one_of_maxIdeal_span`. When the
+maximal ideal of the local ring at `P` equals `span{algMap YClass}`, the
+generator has integer valuation `exp(-1)` (`intValuation_singleton`),
+which lifts to the function field via `valuation_of_algebraMap`. -/
+private theorem pointValuation_algMap_YClass_eq_exp_neg_one_of_maxIdeal_span
+    (yk' : F) (P : (W_smooth W).SmoothPoint)
+    (h_max_eq : IsLocalRing.maximalIdeal ((W_smooth W).localRingAt P) =
+      Ideal.span ({algebraMap (W_smooth W).CoordinateRing
+        ((W_smooth W).localRingAt P)
+        (Affine.CoordinateRing.YClass W.toAffine (Polynomial.C yk'))} : Set _)) :
+    (W_smooth W).pointValuation P
+        (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField
+          (Affine.CoordinateRing.YClass W.toAffine (Polynomial.C yk'))) =
+      WithZero.exp (-1 : ℤ) := by
+  set v := IsDiscreteValuationRing.maximalIdeal ((W_smooth W).localRingAt P)
+    with hv_def
+  have h_int_val : v.intValuation
+      (algebraMap (W_smooth W).CoordinateRing
+        ((W_smooth W).localRingAt P)
+        (Affine.CoordinateRing.YClass W.toAffine (Polynomial.C yk'))) =
+      WithZero.exp (-1 : ℤ) :=
+    v.intValuation_singleton (algMap_YClass_localRingAt_ne_zero W yk' P) h_max_eq
+  change v.valuation _ _ = _
+  rw [IsScalarTower.algebraMap_apply (W_smooth W).CoordinateRing
+    ((W_smooth W).localRingAt P) (W_smooth W).FunctionField]
+  rw [IsDedekindDomain.HeightOneSpectrum.valuation_of_algebraMap]
+  exact h_int_val
+
 /-- **`ord_P (y_gen - yk') ≤ 1` at `−T`, witness-parametric on the
 maxIdeal-span hypothesis (YClass form)**: y-side mirror of
 `ord_P_x_gen_sub_const_le_one_of_maxIdeal_span`. -/
@@ -735,59 +783,9 @@ theorem ord_P_y_gen_sub_negY_const_le_one_of_maxIdeal_span
       ((1 : ℤ) : WithTop ℤ) := by
   set P := negSmoothPoint W xk yk h_ns
   rw [y_gen_sub_const_eq_algebraMap_YClass W (W.toAffine.negY xk yk)]
-  set v := IsDiscreteValuationRing.maximalIdeal ((W_smooth W).localRingAt P)
-    with hv_def
-  have h_yc_ne : Affine.CoordinateRing.YClass W.toAffine
-      (Polynomial.C (W.toAffine.negY xk yk)) ≠ 0 :=
-    Affine.CoordinateRing.YClass_ne_zero (W' := W.toAffine)
-      (y := Polynomial.C (W.toAffine.negY xk yk))
-  have h_yc_loc_ne : algebraMap (W_smooth W).CoordinateRing
-      ((W_smooth W).localRingAt P)
-        (Affine.CoordinateRing.YClass W.toAffine
-          (Polynomial.C (W.toAffine.negY xk yk))) ≠ 0 := by
-    exact (map_ne_zero_iff _
-      (IsLocalization.injective (M := ((W_smooth W).maximalIdealAt P).primeCompl)
-        ((W_smooth W).localRingAt P)
-        ((W_smooth W).maximalIdealAt P).primeCompl_le_nonZeroDivisors)).mpr h_yc_ne
-  have h_int_val : v.intValuation
-      (algebraMap (W_smooth W).CoordinateRing
-        ((W_smooth W).localRingAt P)
-        (Affine.CoordinateRing.YClass W.toAffine
-          (Polynomial.C (W.toAffine.negY xk yk)))) =
-      WithZero.exp (-1 : ℤ) :=
-    v.intValuation_singleton h_yc_loc_ne h_max_eq
-  have h_val_KE : (W_smooth W).pointValuation P
-      (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField
-        (Affine.CoordinateRing.YClass W.toAffine
-          (Polynomial.C (W.toAffine.negY xk yk)))) =
-      WithZero.exp (-1 : ℤ) := by
-    change v.valuation _ _ = _
-    rw [IsScalarTower.algebraMap_apply (W_smooth W).CoordinateRing
-      ((W_smooth W).localRingAt P) (W_smooth W).FunctionField]
-    rw [IsDedekindDomain.HeightOneSpectrum.valuation_of_algebraMap]
-    exact h_int_val
-  change (W_smooth W).pointValuation P
-      (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField
-        (Affine.CoordinateRing.YClass W.toAffine
-          (Polynomial.C (W.toAffine.negY xk yk)))) =
-      WithZero.exp (-1 : ℤ) at h_val_KE
-  have h_val_ne : (W_smooth W).pointValuation P
-      (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField
-        (Affine.CoordinateRing.YClass W.toAffine
-          (Polynomial.C (W.toAffine.negY xk yk)))) ≠ 0 := by
-    rw [h_val_KE]; exact WithZero.exp_ne_zero
-  change (W_smooth W).ord_P P
-      (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField
-        (Affine.CoordinateRing.YClass W.toAffine
-          (Polynomial.C (W.toAffine.negY xk yk)))) ≤ ((1 : ℤ) : WithTop ℤ)
-  unfold SmoothPlaneCurve.ord_P
-  rw [dif_neg h_val_ne]
-  have h_unz : WithZero.unzero h_val_ne = Multiplicative.ofAdd (-1 : ℤ) := by
-    rwa [← WithZero.coe_inj, WithZero.coe_unzero]
-  rw [h_unz]
-  change ((-(Multiplicative.ofAdd (-1 : ℤ)).toAdd : ℤ) : WithTop ℤ) ≤
-    ((1 : ℤ) : WithTop ℤ)
-  rfl
+  exact ord_P_le_one_of_pointValuation_eq_exp_neg_one
+    (pointValuation_algMap_YClass_eq_exp_neg_one_of_maxIdeal_span W
+      (W.toAffine.negY xk yk) P h_max_eq)
 
 /-- **`ord_P (y_gen - negY xk yk) = 1` at `−T` for 2-torsion (UNCONDITIONAL)**:
 y-side companion to `ord_P_x_gen_sub_const_eq_one_of_non_2_tor`.
