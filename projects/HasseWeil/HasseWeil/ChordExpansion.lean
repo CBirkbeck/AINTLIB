@@ -1039,6 +1039,37 @@ theorem localExpand_zwSlopeLine_of_x_ne {α β : Isogeny W.toAffine W.toAffine}
   exact localExpand_zwSlope_eq W α β h_α h_β
     (pullback_localParam_ne_of_pullback_x_ne W h_α h_β h_x)
 
+/-- The series-side intercept decomposition `ν∘b = w∘f_α − f_α·(λ∘b)` (the substitution at
+`(f_α, f_β)` is lawful since both `formalIsogenySeries` have zero constant coefficient). -/
+private theorem subst_formalNuBiv_eq {α β : Isogeny W.toAffine W.toAffine}
+    (h_α : (W_smooth W).ordAtInfty (α.pullback (x_gen W)) < 0)
+    (h_β : (W_smooth W).ordAtInfty (β.pullback (x_gen W)) < 0) :
+    MvPowerSeries.subst
+        (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
+        (formalNuBiv W)
+      = PowerSeries.subst (formalIsogenySeries W α) (formalW W)
+        - formalIsogenySeries W α
+          * MvPowerSeries.subst
+              (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
+              (formalSlopeBiv W) := by
+  have hf0 : PowerSeries.constantCoeff (formalIsogenySeries W α) = 0 :=
+    constantCoeff_formalIsogenySeries_of_orderTop_pos W α
+      (orderTop_localExpand_pullback_localParam_pos_of_ord_x_neg W α h_α)
+  have hg0 : PowerSeries.constantCoeff (formalIsogenySeries W β) = 0 :=
+    constantCoeff_formalIsogenySeries_of_orderTop_pos W β
+      (orderTop_localExpand_pullback_localParam_pos_of_ord_x_neg W β h_β)
+  have hb : MvPowerSeries.HasSubst
+      (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F) := by
+    apply MvPowerSeries.hasSubst_of_constantCoeff_zero
+    intro s
+    fin_cases s <;> simpa [hf0, hg0]
+  rw [show formalNuBiv W
+      = PowerSeries.subst (MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) F)
+          (formalW W) - MvPowerSeries.X 0 * formalSlopeBiv W from rfl,
+    mv_subst_sub _ hb, MvPowerSeries.subst_mul hb, MvPowerSeries.subst_X hb,
+    subst_subst_X _ hb]
+  simp only [Matrix.cons_val_zero]
+
 /-- **The ν-leg, parametric in the λ-leg** (uniform over the two branches):
 given the λ-expansion match, the line-data intercept `ν = −1/c` expands to the
 intercept series `formalNuBiv` substituted at `(f_α, f_β)`. The `K(E)`-side
@@ -1057,37 +1088,9 @@ theorem localExpand_zwNuLine_eq {α β : Isogeny W.toAffine W.toAffine}
         (MvPowerSeries.subst
           (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
           (formalNuBiv W)) := by
-  -- The substitution is lawful (FG-B3's block).
-  have hf0 : PowerSeries.constantCoeff (formalIsogenySeries W α) = 0 :=
-    constantCoeff_formalIsogenySeries_of_orderTop_pos W α
-      (orderTop_localExpand_pullback_localParam_pos_of_ord_x_neg W α h_α)
-  have hg0 : PowerSeries.constantCoeff (formalIsogenySeries W β) = 0 :=
-    constantCoeff_formalIsogenySeries_of_orderTop_pos W β
-      (orderTop_localExpand_pullback_localParam_pos_of_ord_x_neg W β h_β)
-  have hb : MvPowerSeries.HasSubst
-      (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F) := by
-    apply MvPowerSeries.hasSubst_of_constantCoeff_zero
-    intro s
-    fin_cases s <;> simpa [hf0, hg0]
-  -- The `K(E)`-side line identity `ν = w_α − λ·t_α`.
   have hKE := zwNuLine_eq_sub W (α := α) (β := β) hc
-  -- The series-side intercept decomposition `ν∘b = w∘f_α − f_α·(λ∘b)`.
-  have hser : MvPowerSeries.subst
-        (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
-        (formalNuBiv W)
-      = PowerSeries.subst (formalIsogenySeries W α) (formalW W)
-        - formalIsogenySeries W α
-          * MvPowerSeries.subst
-              (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
-              (formalSlopeBiv W) := by
-    rw [show formalNuBiv W
-        = PowerSeries.subst (MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) F)
-            (formalW W) - MvPowerSeries.X 0 * formalSlopeBiv W from rfl,
-      mv_subst_sub _ hb, MvPowerSeries.subst_mul hb, MvPowerSeries.subst_X hb,
-      subst_subst_X _ hb]
-    simp only [Matrix.cons_val_zero]
   rw [hKE, map_sub, map_mul, localExpand_pullback_wFunc W α h_α, h_lam,
-    localExpand_pullback_localParam W α h_α, hser, map_sub, map_mul]
+    localExpand_pullback_localParam W α h_α, subst_formalNuBiv_eq W h_α h_β, map_sub, map_mul]
   ring
 
 /-! ### FG-B4a: the tangent λ-leg
