@@ -56,6 +56,76 @@ variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
 
 local notation "KE" => W.toAffine.FunctionField
 
+/-- **The `≤` direction of the kernel count, from the kernel-translation covariance.**
+The forward map `kernelTranslateForwardAut` embeds `ker β` injectively into
+`Aut(K(E)/β^*K(E))`, and `K(E)/β^*K(E)` is finite-dimensional for any isogeny
+(`isogeny_finiteDimensional`), so mathlib's `AlgEquiv.card_le` bounds that automorphism
+group by `[K(E) : β^*K(E)] = β.degree`.  Composing the two inequalities gives
+`#ker β ≤ deg β` from the covariance witness `hcov` alone — no separability or algebraic
+closure needed (Silverman III.4.10c, the `≤` half). -/
+private theorem kernel_card_le_degree_of_hcov
+    (β : Isogeny W.toAffine W.toAffine)
+    (hcov : ∀ k : β.kernel, ∀ z : KE,
+      translateAlgEquivOfPoint W k.val (β.pullback z) = β.pullback z) :
+    Nat.card β.kernel ≤ β.degree := by
+  letI βAlg : Algebra KE KE := β.toAlgebra
+  haveI hfd : @FiniteDimensional KE KE _ _ β.toAlgebra.toModule :=
+    isogeny_finiteDimensional W β
+  haveI hAutFin : Finite (@AlgEquiv KE KE KE _ _ _ β.toAlgebra β.toAlgebra) :=
+    Finite.of_fintype _
+  have hle1 : Nat.card β.kernel ≤
+      Nat.card (@AlgEquiv KE KE KE _ _ _ β.toAlgebra β.toAlgebra) :=
+    Nat.card_le_card_of_injective _ (kernelTranslateForwardAut_injective W β hcov)
+  have hle2 : Nat.card (@AlgEquiv KE KE KE _ _ _ β.toAlgebra β.toAlgebra) ≤ β.degree := by
+    have h := @AlgEquiv.card_le KE KE _ _ β.toAlgebra hfd
+    rwa [← Nat.card_eq_fintype_card] at h
+  exact le_trans hle1 hle2
+
+/-- **Finiteness of the target points to avoid.** The set of target smooth points `Q'`
+whose coordinates are evaluations of the two pulled-back generators along some `p` in the
+finite coherence set `bad` is finite: it is contained in a finite union (indexed by `bad`)
+of subsingleton fibres, each subsingleton because a smooth point is determined by its two
+coordinates (`SmoothPoint.ext`) and an evaluation pins each coordinate uniquely
+(`EvaluatesTo.unique`). -/
+private theorem badTarget_finite (β : Isogeny W.toAffine W.toAffine)
+    {bad : Set (W_smooth W).SmoothPoint} (hbad : bad.Finite) :
+    {Q' : (W_smooth W).SmoothPoint | ∃ p ∈ bad,
+      WeilPairing.EvaluatesTo W p (β.pullback (x_gen W)) Q'.x ∧
+      WeilPairing.EvaluatesTo W p (β.pullback (y_gen W)) Q'.y}.Finite := by
+  have hsub : {Q' : (W_smooth W).SmoothPoint | ∃ p ∈ bad,
+      WeilPairing.EvaluatesTo W p (β.pullback (x_gen W)) Q'.x ∧
+      WeilPairing.EvaluatesTo W p (β.pullback (y_gen W)) Q'.y} ⊆
+      ⋃ p ∈ bad, {Q' : (W_smooth W).SmoothPoint |
+        WeilPairing.EvaluatesTo W p (β.pullback (x_gen W)) Q'.x ∧
+        WeilPairing.EvaluatesTo W p (β.pullback (y_gen W)) Q'.y} := by
+    rintro Q' ⟨p, hp, h1, h2⟩
+    exact Set.mem_biUnion hp ⟨h1, h2⟩
+  refine Set.Finite.subset (Set.Finite.biUnion hbad fun p _ ↦ ?_) hsub
+  refine Set.Subsingleton.finite ?_
+  rintro Q₁ ⟨hx₁, hy₁⟩ Q₂ ⟨hx₂, hy₂⟩
+  exact Curves.SmoothPlaneCurve.SmoothPoint.ext (hx₁.unique hx₂) (hy₁.unique hy₂)
+
+/-- **Each good fibre point lands in the stored fibre over `Q`.** If a smooth point `pt`
+outside the coherence set `bad` evaluates the two pulled-back generators to the
+coordinates of `Q`, then the *stored* image `β.toAddMonoidHom pt.toAffinePoint` is
+`Q.toAffinePoint`.  The coherence witness `hw` supplies the stored image as
+`Affine.Point.some x' y'` with `x', y'` the same evaluations, so `EvaluatesTo.unique`
+identifies `(x', y') = (Q.x, Q.y)` — the irreducible tie between the stored point map and
+the stored pullback. -/
+private theorem mapAddMonoidHom_toAffinePoint_of_evaluatesTo
+    (β : Isogeny W.toAffine W.toAffine)
+    {bad : Set (W_smooth W).SmoothPoint}
+    (hw : WeilPairing.PullbackEvaluation W β bad)
+    (Q pt : (W_smooth W).SmoothPoint) (hpt : pt ∉ bad)
+    (hex : WeilPairing.EvaluatesTo W pt (β.pullback (x_gen W)) Q.x)
+    (hey : WeilPairing.EvaluatesTo W pt (β.pullback (y_gen W)) Q.y) :
+    β.toAddMonoidHom pt.toAffinePoint = Q.toAffinePoint := by
+  obtain ⟨x', y', h', heq, hx, hy⟩ := hw pt hpt
+  have hxx : x' = Q.x := hx.unique hex
+  have hyy : y' = Q.y := hy.unique hey
+  rw [heq, Curves.SmoothPlaneCurve.SmoothPoint.toAffinePoint_def]
+  exact (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mpr ⟨hxx, hyy⟩
+
 set_option backward.isDefEq.respectTransparency false in
 -- Instance resolution must identify `Module`/`Algebra` structures along different paths
 -- (`FractionRing` vs `OreLocalization`), as in `HasseWeil/Curves/GoodAffineLocus.lean`.
@@ -84,19 +154,11 @@ theorem card_kernel_eq_degree_of_separable [IsAlgClosed F]
       translateAlgEquivOfPoint W k.val (β.pullback z) = β.pullback z :=
     fun k z ↦ WeilPairing.hcov_of_mapTranslateGenericPoint_canonical W β hgcomm k z
   have hker_fin : Finite β.kernel := finite_kernel_of_hcov W β hcov
+  have hle : Nat.card β.kernel ≤ β.degree := kernel_card_le_degree_of_hcov W β hcov
+  -- ===== the `≥` direction: the localized fibre dictionary =====
   letI βAlg : Algebra KE KE := β.toAlgebra
   haveI hfd : @FiniteDimensional KE KE _ _ β.toAlgebra.toModule :=
     isogeny_finiteDimensional W β
-  haveI hAutFin : Finite (@AlgEquiv KE KE KE _ _ _ β.toAlgebra β.toAlgebra) :=
-    Finite.of_fintype _
-  have hle1 : Nat.card β.kernel ≤
-      Nat.card (@AlgEquiv KE KE KE _ _ _ β.toAlgebra β.toAlgebra) :=
-    Nat.card_le_card_of_injective _ (kernelTranslateForwardAut_injective W β hcov)
-  have hle2 : Nat.card (@AlgEquiv KE KE KE _ _ _ β.toAlgebra β.toAlgebra) ≤ β.degree := by
-    have h := @AlgEquiv.card_le KE KE _ _ β.toAlgebra hfd
-    rwa [← Nat.card_eq_fintype_card] at h
-  have hle : Nat.card β.kernel ≤ β.degree := le_trans hle1 hle2
-  -- ===== the `≥` direction: the localized fibre dictionary =====
   haveI hsepAlg : @Algebra.IsSeparable (W_smooth W).FunctionField (W_smooth W).FunctionField
       _ _ β.toAlgebra := hsep
   haveI twFKL : @IsScalarTower F KE KE _ β.toAlgebra.toSMul _ :=
@@ -120,16 +182,7 @@ theorem card_kernel_eq_degree_of_separable [IsAlgClosed F]
   set badT : Set (W_smooth W).SmoothPoint := {Q' | ∃ p ∈ bad,
     WeilPairing.EvaluatesTo W p (β.pullback (x_gen W)) Q'.x ∧
     WeilPairing.EvaluatesTo W p (β.pullback (y_gen W)) Q'.y} with hbadT_def
-  have hbadTfin : badT.Finite := by
-    have hsub : badT ⊆ ⋃ p ∈ bad, {Q' : (W_smooth W).SmoothPoint |
-        WeilPairing.EvaluatesTo W p (β.pullback (x_gen W)) Q'.x ∧
-        WeilPairing.EvaluatesTo W p (β.pullback (y_gen W)) Q'.y} := by
-      rintro Q' ⟨p, hp, h1, h2⟩
-      exact Set.mem_biUnion hp ⟨h1, h2⟩
-    refine Set.Finite.subset (Set.Finite.biUnion hbad fun p _ ↦ ?_) hsub
-    refine Set.Subsingleton.finite ?_
-    rintro Q₁ ⟨hx₁, hy₁⟩ Q₂ ⟨hx₂, hy₂⟩
-    exact Curves.SmoothPlaneCurve.SmoothPoint.ext (hx₁.unique hx₂) (hy₁.unique hy₂)
+  have hbadTfin : badT.Finite := hbadT_def ▸ badTarget_finite W β hbad
   -- the localized good fibre
   obtain ⟨Q, hQbadT, S, hScard, hSpts⟩ :=
     @Curves.LocalizedDictionary.exists_good_fiber_points F _ (W_smooth W) f₀ Af _ _ _
@@ -138,15 +191,9 @@ theorem card_kernel_eq_degree_of_separable [IsAlgClosed F]
   -- each produced point is in the *stored* fibre over `Q`
   have hfibmem : ∀ pt ∈ S, β.toAddMonoidHom pt.toAffinePoint = Q.toAffinePoint := by
     intro pt hpt
-    obtain ⟨hvx, hvy⟩ := hSpts pt hpt
-    have hex : WeilPairing.EvaluatesTo W pt (β.pullback (x_gen W)) Q.x := hvx
-    have hey : WeilPairing.EvaluatesTo W pt (β.pullback (y_gen W)) Q.y := hvy
+    obtain ⟨hex, hey⟩ := hSpts pt hpt
     have hptgood : pt ∉ bad := fun hmem ↦ hQbadT ⟨pt, hmem, hex, hey⟩
-    obtain ⟨x', y', h', heq, hx, hy⟩ := hw pt hptgood
-    have hxx : x' = Q.x := hx.unique hex
-    have hyy : y' = Q.y := hy.unique hey
-    rw [heq, Curves.SmoothPlaneCurve.SmoothPoint.toAffinePoint_def]
-    exact (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mpr ⟨hxx, hyy⟩
+    exact mapAddMonoidHom_toAffinePoint_of_evaluatesTo W β hw Q pt hptgood hex hey
   -- the fibre has at least `deg β` elements
   have hSne : S.Nonempty := by
     rw [← Finset.card_pos, hScard]
