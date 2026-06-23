@@ -449,6 +449,89 @@ theorem le_ordAtInfty_mulByInt_y (n : ℤ) (hn : n ≠ 0) {m : ℤ} (hm : m ≤ 
     exact h_alg
   exact (W_smooth W).le_ordAtInfty_y_of_weierstrass hm hM h_eq
 
+/-! ### The two summands of the pulled-back regular function -/
+
+/-- **The `F(x)`-summand stays regular under `[n]^*`**: for `r ∈ F(x)` with
+`ord_∞ r ≥ 0` in `K(E)` and `ord_∞(mulByInt_x W n) = M < 0`, the pullback
+`[n]^*(r) ∈ K(E)` still has `ord_∞ ≥ 0`.  Via
+`ord_mulByInt_pullback_algebraMap_fracPolyX` the source bound `ord_∞ r = -2t ≥ 0`
+forces `t ≤ 0`, and then the image order `t·M ≥ 0` since `M < 0`. -/
+private theorem ordAtInfty_mulByInt_pullback_fracPolyX_nonneg (n : ℤ) (hn : n ≠ 0)
+    {M : ℤ} (hM : (W_smooth W).ordAtInfty (mulByInt_x W n) = ((M : ℤ) : WithTop ℤ))
+    (hMneg : M < 0) {r : FractionRing (Polynomial F)}
+    (hr_ord : 0 ≤ (W_smooth W).ordAtInfty
+      (algebraMap (FractionRing (Polynomial F)) KE r)) :
+    0 ≤ (W_smooth W).ordAtInfty
+      (mulByInt_pullbackAlgHom W n hn
+        (algebraMap (FractionRing (Polynomial F)) KE r)) := by
+  rcases eq_or_ne r 0 with rfl | hr
+  · rw [map_zero, map_zero]
+    exact le_ordAtInfty_zero' W _
+  · obtain ⟨t, hsrc, himg⟩ :=
+      ord_mulByInt_pullback_algebraMap_fracPolyX W n hn hM hMneg hr
+    rw [hsrc] at hr_ord
+    have ht : t ≤ 0 := by
+      have : (0 : ℤ) ≤ -2 * t := by exact_mod_cast hr_ord
+      linarith
+    rw [himg]
+    have : (0 : ℤ) ≤ t * M := by
+      nlinarith [mul_nonneg (by linarith : (0:ℤ) ≤ -t) (by linarith : (0:ℤ) ≤ -M)]
+    exact_mod_cast this
+
+/-- **The `y`-summand stays regular under `[n]^*`**: for `r ∈ F(x)` whose
+`{1, y}`-coefficient bound gives `ord_∞ r + ord_∞(y_gen) ≥ 0`, i.e.
+`ord_∞ r ≥ 3` (here `ord_∞(y_gen) = -3`), and with
+`ord_∞(mulByInt_x W n) = 2m`, `m ≤ -1`, the pulled-back `y`-term
+`[n]^*(r) · mulByInt_y W n` has `ord_∞ ≥ 0`.  The source bound forces `t ≤ -2`,
+the image of `r` has order `t·(2m)`, and the curve-equation bound
+`ord_∞(mulByInt_y) ≥ 3m` (`le_ordAtInfty_mulByInt_y`) then gives
+`t·(2m) + 3m ≥ 0`. -/
+private theorem ordAtInfty_mulByInt_pullback_y_term_nonneg (n : ℤ) (hn : n ≠ 0)
+    {m : ℤ} (hm_le : m ≤ -1)
+    (hM : (W_smooth W).ordAtInfty (mulByInt_x W n) = ((2 * m : ℤ) : WithTop ℤ))
+    {r : FractionRing (Polynomial F)}
+    (hr_ord : 0 ≤ (W_smooth W).ordAtInfty
+        (algebraMap (FractionRing (Polynomial F)) KE r) + ((-3 : ℤ) : WithTop ℤ)) :
+    0 ≤ (W_smooth W).ordAtInfty
+      (mulByInt_pullbackAlgHom W n hn
+        (algebraMap (FractionRing (Polynomial F)) KE r) * mulByInt_y W n) := by
+  have hMneg : 2 * m < 0 := by omega
+  rcases eq_or_ne r 0 with rfl | hr
+  · rw [map_zero, map_zero, zero_mul]
+    exact le_ordAtInfty_zero' W _
+  · obtain ⟨t, hsrc, himg⟩ :=
+      ord_mulByInt_pullback_algebraMap_fracPolyX W n hn hM hMneg hr
+    rw [hsrc] at hr_ord
+    have ht : t ≤ -2 := by
+      have h0 : (0 : WithTop ℤ) ≤ ((-2 * t + -3 : ℤ) : WithTop ℤ) := by
+        rw [WithTop.coe_add]
+        exact_mod_cast hr_ord
+      have : (0 : ℤ) ≤ -2 * t + -3 := by exact_mod_cast h0
+      omega
+    have h_y := le_ordAtInfty_mulByInt_y W n hn hm_le hM
+    have himg_ne : mulByInt_pullbackAlgHom W n hn
+        (algebraMap (FractionRing (Polynomial F)) KE r) ≠ 0 :=
+      ((W_smooth W).ordAtInfty_eq_top_iff _).not.mp
+        (ne_of_eq_of_ne himg WithTop.coe_ne_top)
+    have hy_ne : mulByInt_y W n ≠ 0 :=
+      mulByInt_y_ne_zero' W n hn
+    have hmul := (W_smooth W).ordAtInfty_mul himg_ne hy_ne
+    rw [himg] at hmul
+    calc (0 : WithTop ℤ) ≤ ((t * (2 * m) + 3 * m : ℤ) : WithTop ℤ) := by
+          have : (0 : ℤ) ≤ t * (2 * m) + 3 * m := by
+            nlinarith [mul_nonneg (by linarith : (0:ℤ) ≤ -2 - t)
+              (by linarith : (0:ℤ) ≤ -(2 * m))]
+          exact_mod_cast this
+      _ = ((t * (2 * m) : ℤ) : WithTop ℤ) + ((3 * m : ℤ) : WithTop ℤ) := by
+          rw [← WithTop.coe_add]
+      _ ≤ ((t * (2 * m) : ℤ) : WithTop ℤ) +
+            (W_smooth W).ordAtInfty (mulByInt_y W n) :=
+          add_le_add le_rfl h_y
+      _ = (W_smooth W).ordAtInfty
+            (mulByInt_pullbackAlgHom W n hn
+              (algebraMap (FractionRing (Polynomial F)) KE r) *
+             mulByInt_y W n) := hmul.symm
+
 /-! ### The basepoint condition -/
 
 /-- **The `[n]`-pullback preserves regularity at infinity** (the basepoint
@@ -500,56 +583,9 @@ theorem mulByInt_pullbackAlgHom_ordAtInfty_nonneg (n : ℤ) (hn : n ≠ 0)
   rw [himg]
   refine le_trans (le_min ?_ ?_) ((W_smooth W).ordAtInfty_add_ge_min _ _)
   · -- the `F(x)`-part: `ord ≥ 0` transports to `ord ≥ 0`
-    rcases eq_or_ne r₁ 0 with rfl | hr₁
-    · rw [map_zero, map_zero]
-      exact le_ordAtInfty_zero' W _
-    · obtain ⟨t, hsrc, himg1⟩ :=
-        ord_mulByInt_pullback_algebraMap_fracPolyX W n hn hM hMneg hr₁
-      rw [hsrc] at hf1
-      have ht : t ≤ 0 := by
-        have : (0 : ℤ) ≤ -2 * t := by exact_mod_cast hf1
-        linarith
-      rw [himg1]
-      have : (0 : ℤ) ≤ t * (2 * m) := by
-        nlinarith [mul_nonneg (by linarith : (0:ℤ) ≤ -t)
-          (by linarith : (0:ℤ) ≤ -(2 * m))]
-      exact_mod_cast this
+    exact ordAtInfty_mulByInt_pullback_fracPolyX_nonneg W n hn hM hMneg hf1
   · -- the `y`-part: `ord ≥ 3` on the coefficient transports to `ord > 0`
-    rcases eq_or_ne r₂ 0 with rfl | hr₂
-    · rw [map_zero, map_zero, zero_mul]
-      exact le_ordAtInfty_zero' W _
-    · obtain ⟨t, hsrc, himg2⟩ :=
-        ord_mulByInt_pullback_algebraMap_fracPolyX W n hn hM hMneg hr₂
-      rw [hsrc] at hf2
-      have ht : t ≤ -2 := by
-        have h0 : (0 : WithTop ℤ) ≤ ((-2 * t + -3 : ℤ) : WithTop ℤ) := by
-          rw [WithTop.coe_add]
-          exact_mod_cast hf2
-        have : (0 : ℤ) ≤ -2 * t + -3 := by exact_mod_cast h0
-        omega
-      have h_y := le_ordAtInfty_mulByInt_y W n hn hm_le hM
-      have himg2_ne : mulByInt_pullbackAlgHom W n hn
-          (algebraMap (FractionRing (Polynomial F)) KE r₂) ≠ 0 :=
-        ((W_smooth W).ordAtInfty_eq_top_iff _).not.mp
-          (ne_of_eq_of_ne himg2 WithTop.coe_ne_top)
-      have hy_ne : mulByInt_y W n ≠ 0 :=
-        mulByInt_y_ne_zero' W n hn
-      have hmul := (W_smooth W).ordAtInfty_mul himg2_ne hy_ne
-      rw [himg2] at hmul
-      calc (0 : WithTop ℤ) ≤ ((t * (2 * m) + 3 * m : ℤ) : WithTop ℤ) := by
-            have : (0 : ℤ) ≤ t * (2 * m) + 3 * m := by
-              nlinarith [mul_nonneg (by linarith : (0:ℤ) ≤ -2 - t)
-                (by linarith : (0:ℤ) ≤ -(2 * m))]
-            exact_mod_cast this
-        _ = ((t * (2 * m) : ℤ) : WithTop ℤ) + ((3 * m : ℤ) : WithTop ℤ) := by
-            rw [← WithTop.coe_add]
-        _ ≤ ((t * (2 * m) : ℤ) : WithTop ℤ) +
-              (W_smooth W).ordAtInfty (mulByInt_y W n) :=
-            add_le_add le_rfl h_y
-        _ = (W_smooth W).ordAtInfty
-              (mulByInt_pullbackAlgHom W n hn
-                (algebraMap (FractionRing (Polynomial F)) KE r₂) *
-               mulByInt_y W n) := hmul.symm
+    exact ordAtInfty_mulByInt_pullback_y_term_nonneg W n hn hm_le hM hf2
 
 namespace EC
 
