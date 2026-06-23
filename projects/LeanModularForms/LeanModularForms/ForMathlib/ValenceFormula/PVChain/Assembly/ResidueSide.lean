@@ -367,7 +367,7 @@ theorem cpv_residue_side_tendsto (S : Finset UpperHalfPlane) (hS : ∀ p ∈ S, 
       congr 1
       exact residue_logDerivPatched_eq_raw F S0 hSimplePoles s hs
     rw [Finset.sum_congr rfl h_res_congr,
-      show S0 = Sbox ∪ (S_on \ Sbox) from by
+      show S0 = Sbox ∪ (S_on \ Sbox) by
       rw [hS0_def]
       exact Finset.union_sdiff_self_eq_union.symm]
     rw [Finset.sum_union Finset.disjoint_sdiff]
