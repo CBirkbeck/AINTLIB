@@ -2603,6 +2603,39 @@ theorem ord_P_B_minus_a1_yk_eq_zero_at_2tor
     ord_P_B_minus_a1_yk_decomposed_eq_zero_at_2tor W xk yk h_ns h_2_tor
   exact h_eq ▸ h_decomposed
 
+/-- **A function whose order is `0` is nonzero.** If `ord_P P f = 0` then `f ≠ 0`,
+since the zero function has order `⊤ ≠ 0`. Generic building block (companion to
+`ne_zero_of_ord_P_le_neg_one`): an *exact* order value supplies the nonvanishing
+hypothesis needed before a `cases` on a related order can land in a finite branch
+or before `ord_P_inv` (which needs `f ≠ 0`) can fire. -/
+private theorem ne_zero_of_ord_P_eq_zero {C : Curves.SmoothPlaneCurve F}
+    {P : C.SmoothPoint} {f : C.FunctionField}
+    (hf : C.ord_P P f = 0) : f ≠ 0 := fun h_zero ↦ by
+  rw [h_zero, C.ord_P_zero] at hf
+  exact absurd hf (by simp)
+
+/-- **`ord_P P (b · a⁻¹) ≤ −1`** when `b` has order `0` and `a` has order `≥ 1`.
+The quotient `b / a` of an order-`0` numerator by an order-`≥ 1` denominator has
+strictly negative order: additivity and `ord_P_inv` give
+`ord_P (b · a⁻¹) = ord_P b − ord_P a = −ord_P a`, and destructuring the finite
+order `ord_P a = ↑n` (finite since `a ≠ 0`) reduces the bound `−n ≤ −1` to the
+integer fact `1 ≤ n`, dispatched by `omega`. Generic building block for the
+"slope = (order-`0`) / (order-`≥ 1`)" pole-order arguments at 2-torsion. -/
+private theorem ord_P_mul_inv_le_neg_one {C : Curves.SmoothPlaneCurve F}
+    {P : C.SmoothPoint} {a b : C.FunctionField} (ha_ne : a ≠ 0)
+    (ha : ((1 : ℤ) : WithTop ℤ) ≤ C.ord_P P a) (hb : C.ord_P P b = 0) :
+    C.ord_P P (b * a⁻¹) ≤ ((-1 : ℤ) : WithTop ℤ) := by
+  rw [SmoothPlaneCurve.ord_P_mul (P := P) _ _,
+    SmoothPlaneCurve.ord_P_inv (P := P) _ ha_ne, hb, zero_add]
+  cases h_a : C.ord_P P a with
+  | top => exact absurd ((SmoothPlaneCurve.ord_P_eq_top_iff _).mp h_a) ha_ne
+  | coe n =>
+      rw [h_a] at ha
+      have h_n : (1 : ℤ) ≤ n := by exact_mod_cast ha
+      change -((n : ℤ) : WithTop ℤ) ≤ ((-1 : ℤ) : WithTop ℤ)
+      rw [show -((n : ℤ) : WithTop ℤ) = ((-n : ℤ) : WithTop ℤ) from rfl]
+      exact_mod_cast (show -n ≤ -1 by omega)
+
 /-! ### `ord_T (translateSlope_xy) ≤ −1` at smooth 2-torsion `T`
 
 Cleaner approach (per user directive): express `slope = (B − a₁ yk) / A`
@@ -2630,40 +2663,26 @@ theorem ord_P_translateSlope_xy_le_neg_one_at_2tor
       (x_gen W - algebraMap F KE xk) * Bma := by
     rw [hA_def, hBma_def]
     exact curve_identity_translate W xk yk h_ns.1
+  -- Order facts for numerator `Bma` (= `0`) and denominator `A` (≥ `1`).
   have h_A_ord : ((1 : ℤ) : WithTop ℤ) ≤ (W_smooth W).ord_P P A := by
     rw [hA_def]
     exact one_le_ord_P_A_at_2tor W xk yk h_ns h_2_tor
   have h_Bma_ord : (W_smooth W).ord_P P Bma = 0 := by
     rw [hBma_def]
     exact ord_P_B_minus_a1_yk_eq_zero_at_2tor W xk yk h_ns h_2_tor
+  -- `A ≠ 0`: the RHS `(x_gen − xk) · Bma` of the curve identity is nonzero.
   have h_x_ne : x_gen W - algebraMap F KE xk ≠ 0 :=
     x_gen_sub_const_ne_zero W xk
-  have h_Bma_ne : Bma ≠ 0 := fun h_zero ↦ by
-    have h_top : (W_smooth W).ord_P P Bma = ⊤ :=
-      (SmoothPlaneCurve.ord_P_eq_top_iff _).mpr h_zero
-    have h_eq : (⊤ : WithTop ℤ) = (0 : WithTop ℤ) := h_top.symm.trans h_Bma_ord
-    exact absurd h_eq (by simp)
-  have h_A_ne : A ≠ 0 := fun h_zero ↦ by
-    have h_LHS_zero : (y_gen W - algebraMap F KE yk) * A = 0 := by
-      rw [h_zero, mul_zero]
-    rw [h_id] at h_LHS_zero
-    exact (mul_ne_zero h_x_ne h_Bma_ne) h_LHS_zero
+  have h_Bma_ne : Bma ≠ 0 := ne_zero_of_ord_P_eq_zero h_Bma_ord
+  have h_A_ne : A ≠ 0 :=
+    right_ne_zero_of_mul (a := y_gen W - algebraMap F KE yk)
+      (h_id ▸ mul_ne_zero h_x_ne h_Bma_ne)
+  -- `slope = Bma / A`, so `ord_P slope = ord_P Bma − ord_P A ≤ 0 − 1 = −1`.
   have h_slope_eq : translateSlope_xy W xk yk = Bma / A := by
     rw [translateSlope_xy_eq, div_eq_div_iff h_x_ne h_A_ne]
     linear_combination h_id
   rw [h_slope_eq, div_eq_mul_inv]
-  have h_mul : (W_smooth W).ord_P P (Bma * A⁻¹) =
-      (W_smooth W).ord_P P Bma + (W_smooth W).ord_P P A⁻¹ :=
-    SmoothPlaneCurve.ord_P_mul (P := P) _ _
-  rw [h_mul, SmoothPlaneCurve.ord_P_inv (P := P) _ h_A_ne, h_Bma_ord, zero_add]
-  cases h_A : (W_smooth W).ord_P P A with
-  | top => exact absurd ((SmoothPlaneCurve.ord_P_eq_top_iff _).mp h_A) h_A_ne
-  | coe n =>
-      rw [h_A] at h_A_ord
-      have h_n : (1 : ℤ) ≤ n := by exact_mod_cast h_A_ord
-      change -((n : ℤ) : WithTop ℤ) ≤ ((-1 : ℤ) : WithTop ℤ)
-      rw [show -((n : ℤ) : WithTop ℤ) = ((-n : ℤ) : WithTop ℤ) from rfl]
-      exact_mod_cast (show -n ≤ -1 by omega)
+  exact ord_P_mul_inv_le_neg_one h_A_ne h_A_ord h_Bma_ord
 
 /-! ### `ord_T (translateX_xy) < 0` at smooth 2-torsion `T`
 
