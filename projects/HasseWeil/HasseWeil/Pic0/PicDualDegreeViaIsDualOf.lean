@@ -39,7 +39,7 @@ the genuineness machinery; they differ in *how the dual composition is obtained*
 
 ## The residual list (each a statable Lean signature)
 
-The assembled `routeC_qf_nonneg_generic_of_picDual_chain` closes modulo exactly:
+The assembled `qf_nonneg_generic_via_picDual` closes modulo exactly:
 
 * **`hnat`** — Silverman III.3.4 naturality of `κ` for `β = rπ−s` (`Isogeny.Naturality`); the
   `relNorm 𝔭 = 𝔭.under` general-base / localisation-tower residual.  *(Deep.)*
