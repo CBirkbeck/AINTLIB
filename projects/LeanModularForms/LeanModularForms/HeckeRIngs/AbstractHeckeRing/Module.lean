@@ -77,7 +77,7 @@ lemma smulOrbit_lcRel (g : P.Δ) {β₁ β₂ : P.Δ} (h : lcRel P β₁ β₂) 
   rw [hj_coe, ← hβ'_eq]
   conv_rhs =>
     rw [show (β : G) * k * (k⁻¹ * (i.out : G) * ↑n) * (g : G) =
-      (β : G) * (i.out : G) * (g : G) * ((g : G)⁻¹ * ↑n * (g : G)) from by group,
+      (β : G) * (i.out : G) * (g : G) * ((g : G)⁻¹ * ↑n * (g : G)) by group,
       ← Set.singleton_mul_singleton, mul_assoc]
   rw [Subgroup.singleton_mul_subgroup hn_conj]
 
