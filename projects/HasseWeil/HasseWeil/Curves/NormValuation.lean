@@ -1545,6 +1545,108 @@ theorem count_relNorm_pow_of_mem_primesOverFinset
   rw [C.relNorm_pow_of_mem_primesOverFinset hQ n]
   exact count_self_pow_heightOneSpectrum vp n
 
+/-- **Primes over `(X-a)` are nonzero**: any `Q ∈ primesOverFinset (X-a) F[C]`
+    is a nonzero ideal of `F[C]`. If `Q = ⊥` then it lies over
+    `⊥.under F[X] = ⊥` (the algebra map is injective), contradicting that it lies
+    over the nonzero `(X-a)`. Setup helper for
+    `count_relNorm_singleton_eq_sum_count_fiber`. -/
+private theorem ne_bot_of_mem_primesOverFinset_span_X_sub_C
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic] {a : F}
+    {Q : Ideal C.CoordinateRing}
+    (hQ : Q ∈ IsDedekindDomain.primesOverFinset
+      (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))
+      C.CoordinateRing) :
+    Q ≠ ⊥ := by
+  have hp_ne : (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F))) ≠ ⊥ := by
+    rw [Ne, Ideal.span_singleton_eq_bot]; exact Polynomial.X_sub_C_ne_zero a
+  haveI hp_max : (Ideal.span ({Polynomial.X - Polynomial.C a} :
+      Set (Polynomial F))).IsMaximal := Ideal.Quotient.maximal_of_isField _
+    ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField (Field.toIsField F))
+  rw [IsDedekindDomain.mem_primesOverFinset_iff hp_ne] at hQ
+  intro h_eq
+  apply hp_ne
+  have h_over : (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F))) =
+      Q.under (Polynomial F) := hQ.2.over
+  rw [h_eq, Ideal.under, Ideal.comap_bot_of_injective _
+    (FaithfulSMul.algebraMap_injective (Polynomial F) C.CoordinateRing)] at h_over
+  exact h_over
+
+/-- **Off-fiber count vanishes**: for a height-one prime `Q` of `F[C]` that does
+    NOT lie over `(X-a)`, the `(X-a)`-adic count of `relNorm Q ^ k` is `0`.
+    Choosing a smooth point `P` for the maximal ideal `Q` gives `relNorm Q = (X-P.x)`
+    with `P.x ≠ a` (else `Q` would lie over `(X-a)`); the two distinct linear primes
+    `(X-a)`, `(X-P.x)` of `F[X]` are non-associated, so `Associates.count_eq_zero_of_ne`
+    and `Associates.count_pow` collapse the count. The vanishing branch of
+    `count_relNorm_singleton_eq_sum_count_fiber`. -/
+private theorem count_relNorm_pow_eq_zero_of_not_mem_primesOverFinset
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    {a : F} {Q : IsDedekindDomain.HeightOneSpectrum C.CoordinateRing}
+    (h_over : Q.asIdeal ∉ IsDedekindDomain.primesOverFinset
+      (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))
+      C.CoordinateRing) (k : ℕ) :
+    (Associates.mk
+        (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))).count
+      (Associates.mk ((Ideal.relNorm (Polynomial F) Q.asIdeal) ^ k)).factors = 0 := by
+  classical
+  have hp_ne : (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F))) ≠ ⊥ := by
+    rw [Ne, Ideal.span_singleton_eq_bot]; exact Polynomial.X_sub_C_ne_zero a
+  haveI hp_max : (Ideal.span ({Polynomial.X - Polynomial.C a} :
+      Set (Polynomial F))).IsMaximal := Ideal.Quotient.maximal_of_isField _
+    ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField (Field.toIsField F))
+  let vp : IsDedekindDomain.HeightOneSpectrum (Polynomial F) :=
+    ⟨_, hp_max.isPrime, hp_ne⟩
+  have h_vp_irr : Irreducible (Associates.mk vp.asIdeal) := vp.associates_irreducible
+  haveI hQ_max : Q.asIdeal.IsMaximal := Ideal.IsPrime.isMaximal Q.isPrime Q.ne_bot
+  obtain ⟨P, hP⟩ := C.exists_smoothPoint_of_isMaximal hQ_max
+  have hPx_ne : P.x ≠ a := by
+    intro h_eq
+    apply h_over
+    rw [IsDedekindDomain.mem_primesOverFinset_iff (B := C.CoordinateRing) hp_ne]
+    refine ⟨Q.isPrime, ?_⟩
+    rw [← hP]
+    exact C.maximalIdealAt_liesOver_of_eq_x P h_eq
+  have h_relNorm_Q :
+      Ideal.relNorm (Polynomial F) Q.asIdeal =
+        Ideal.span ({Polynomial.X - Polynomial.C P.x} : Set (Polynomial F)) := by
+    rw [← hP]
+    exact C.relNorm_maximalIdealAt P
+  rw [h_relNorm_Q, Associates.mk_pow]
+  have hQ_count_factor : (Associates.mk
+      (Ideal.span ({Polynomial.X - Polynomial.C P.x} : Set _) :
+        Ideal (Polynomial F))) ≠ 0 := by
+    rw [Associates.mk_ne_zero, Ne, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]
+    exact Polynomial.X_sub_C_ne_zero P.x
+  haveI hPx_max : (Ideal.span ({Polynomial.X - Polynomial.C P.x} :
+      Set (Polynomial F))).IsMaximal :=
+    Ideal.Quotient.maximal_of_isField _
+      ((Polynomial.quotientSpanXSubCAlgEquiv P.x).toRingEquiv.isField (Field.toIsField F))
+  have hPx_ne_bot : (Ideal.span ({Polynomial.X - Polynomial.C P.x} :
+      Set (Polynomial F))) ≠ ⊥ := by
+    rw [Ne, Ideal.span_singleton_eq_bot]; exact Polynomial.X_sub_C_ne_zero P.x
+  let vPx : IsDedekindDomain.HeightOneSpectrum (Polynomial F) :=
+    ⟨_, hPx_max.isPrime, hPx_ne_bot⟩
+  have h_vPx_irr : Irreducible (Associates.mk vPx.asIdeal) := vPx.associates_irreducible
+  have h_vp_ne_vPx : (Associates.mk vp.asIdeal) ≠ (Associates.mk vPx.asIdeal) := by
+    intro h_eq
+    apply hPx_ne
+    rw [Associates.mk_eq_mk_iff_associated] at h_eq
+    have h_id_eq : vp.asIdeal = vPx.asIdeal := associated_iff_eq.mp h_eq
+    change (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F))) =
+      (Ideal.span ({Polynomial.X - Polynomial.C P.x} : _)) at h_id_eq
+    have h_assoc : Associated (Polynomial.X - Polynomial.C a)
+        (Polynomial.X - Polynomial.C P.x : Polynomial F) :=
+      Ideal.span_singleton_eq_span_singleton.mp h_id_eq
+    have h_eq2 : (Polynomial.X - Polynomial.C a : Polynomial F) =
+        Polynomial.X - Polynomial.C P.x :=
+      Polynomial.eq_of_monic_of_associated (Polynomial.monic_X_sub_C _)
+        (Polynomial.monic_X_sub_C _) h_assoc
+    have hCeq : Polynomial.C a = Polynomial.C P.x := by linear_combination -h_eq2
+    exact (Polynomial.C_injective hCeq).symm
+  change (Associates.mk vp.asIdeal).count
+    (Associates.mk vPx.asIdeal ^ _).factors = 0
+  rw [Associates.count_pow hQ_count_factor h_vp_irr,
+    Associates.count_eq_zero_of_ne h_vp_irr h_vPx_irr h_vp_ne_vPx, Nat.mul_zero]
+
 /-- **Per-fiber count identity** (Helper B's per-fiber piece, count form): for
     nonzero `u ∈ F[C]` and `a ∈ F`, the `(X-a)`-adic count of
     `Ideal.span {Algebra.norm F[X] u}` in `F[X]` equals the sum of `Q`-adic
@@ -1575,15 +1677,8 @@ theorem count_relNorm_singleton_eq_sum_count_fiber
   have hI_ne : Ideal.span ({u} : Set C.CoordinateRing) ≠ 0 := by
     rw [Ne, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]; exact hu
   have h_supp := Ideal.hasFiniteMulSupport (R := C.CoordinateRing) hI_ne
-  have h_prime_ne_bot : ∀ Q ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing, Q ≠ ⊥ := by
-    intro Q hQ
-    rw [IsDedekindDomain.mem_primesOverFinset_iff hp_ne] at hQ
-    intro h_eq
-    apply hp_ne
-    have h_over : p = Q.under (Polynomial F) := hQ.2.over
-    rw [h_eq, Ideal.under, Ideal.comap_bot_of_injective _
-      (FaithfulSMul.algebraMap_injective (Polynomial F) C.CoordinateRing)] at h_over
-    exact h_over
+  have h_prime_ne_bot : ∀ Q ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing, Q ≠ ⊥ :=
+    fun Q hQ ↦ C.ne_bot_of_mem_primesOverFinset_span_X_sub_C hQ
   let toHOS : ∀ Q ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing,
       IsDedekindDomain.HeightOneSpectrum C.CoordinateRing := fun Q hQ ↦
     ⟨Q, ((IsDedekindDomain.mem_primesOverFinset_iff (B := C.CoordinateRing) hp_ne).mp hQ).1,
@@ -1640,56 +1735,7 @@ theorem count_relNorm_singleton_eq_sum_count_fiber
     · rw [if_pos h_over, ← map_pow]
       exact C.count_relNorm_pow_of_mem_primesOverFinset h_over _
     · rw [if_neg h_over]
-      haveI hQ_max : Q.asIdeal.IsMaximal := by
-        apply Ideal.IsPrime.isMaximal Q.isPrime Q.ne_bot
-      obtain ⟨P, hP⟩ := C.exists_smoothPoint_of_isMaximal hQ_max
-      have hPx_ne : P.x ≠ a := by
-        intro h_eq
-        apply h_over
-        rw [IsDedekindDomain.mem_primesOverFinset_iff (B := C.CoordinateRing) hp_ne]
-        refine ⟨Q.isPrime, ?_⟩
-        rw [← hP]
-        exact C.maximalIdealAt_liesOver_of_eq_x P h_eq
-      have h_relNorm_Q :
-          Ideal.relNorm (Polynomial F) Q.asIdeal =
-            Ideal.span ({Polynomial.X - Polynomial.C P.x} : Set (Polynomial F)) := by
-        rw [← hP]
-        exact C.relNorm_maximalIdealAt P
-      rw [h_relNorm_Q, Associates.mk_pow]
-      have hQ_count_factor : (Associates.mk
-          (Ideal.span ({Polynomial.X - Polynomial.C P.x} : Set _) :
-            Ideal (Polynomial F))) ≠ 0 := by
-        rw [Associates.mk_ne_zero, Ne, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]
-        exact Polynomial.X_sub_C_ne_zero P.x
-      haveI hPx_max : (Ideal.span ({Polynomial.X - Polynomial.C P.x} :
-          Set (Polynomial F))).IsMaximal :=
-        Ideal.Quotient.maximal_of_isField _
-          ((Polynomial.quotientSpanXSubCAlgEquiv P.x).toRingEquiv.isField (Field.toIsField F))
-      have hPx_ne_bot : (Ideal.span ({Polynomial.X - Polynomial.C P.x} :
-          Set (Polynomial F))) ≠ ⊥ := by
-        rw [Ne, Ideal.span_singleton_eq_bot]; exact Polynomial.X_sub_C_ne_zero P.x
-      let vPx : IsDedekindDomain.HeightOneSpectrum (Polynomial F) :=
-        ⟨_, hPx_max.isPrime, hPx_ne_bot⟩
-      have h_vPx_irr : Irreducible (Associates.mk vPx.asIdeal) := vPx.associates_irreducible
-      have h_vp_ne_vPx : (Associates.mk vp.asIdeal) ≠ (Associates.mk vPx.asIdeal) := by
-        intro h_eq
-        apply hPx_ne
-        rw [Associates.mk_eq_mk_iff_associated] at h_eq
-        have h_id_eq : vp.asIdeal = vPx.asIdeal := associated_iff_eq.mp h_eq
-        change p = (Ideal.span ({Polynomial.X - Polynomial.C P.x} : _)) at h_id_eq
-        have h_assoc : Associated (Polynomial.X - Polynomial.C a)
-            (Polynomial.X - Polynomial.C P.x : Polynomial F) :=
-          Ideal.span_singleton_eq_span_singleton.mp h_id_eq
-        have h_eq2 : (Polynomial.X - Polynomial.C a : Polynomial F) =
-            Polynomial.X - Polynomial.C P.x :=
-          Polynomial.eq_of_monic_of_associated (Polynomial.monic_X_sub_C _)
-            (Polynomial.monic_X_sub_C _) h_assoc
-        have hCeq : Polynomial.C a = Polynomial.C P.x := by linear_combination -h_eq2
-        exact (Polynomial.C_injective hCeq).symm
-      change (Associates.mk vp.asIdeal).count
-        (Associates.mk vPx.asIdeal ^ _).factors = 0
-      rw [Associates.count_pow hQ_count_factor h_vp_irr,
-        Associates.count_eq_zero_of_ne h_vp_irr h_vPx_irr h_vp_ne_vPx, Nat.mul_zero]
+      exact C.count_relNorm_pow_eq_zero_of_not_mem_primesOverFinset h_over _
   rw [Finset.sum_congr rfl h_S_split]
   rw [Finset.sum_ite, Finset.sum_const_zero, add_zero]
   refine Finset.sum_bij'
