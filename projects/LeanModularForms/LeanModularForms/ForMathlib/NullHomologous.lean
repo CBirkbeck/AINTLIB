@@ -21,12 +21,14 @@ topological condition required by the generalized residue theorem of Hungerbuhle
 
 ## Main results
 
-* `isNullHomologous_of_convex` -- every closed piecewise C^1 immersion in a convex open
-  set is null-homologous.
 * `IsNullHomologous.mono` -- monotonicity: null-homologous in `U` implies null-homologous
   in any superset `V ⊇ U`.
-* `IsNullHomologous.closed` -- extract that the underlying path is closed (trivial since
-  `x = x`).
+* `generalizedWindingNumber_eq_zero_of_far_lipschitz` -- for a Lipschitz closed immersion,
+  the generalized winding number around `w` is `0` once `‖w‖` is large enough.
+* `winding_eventually_zero_cocompact_of_lipschitz` -- the winding number is eventually `0`
+  cocompactly (no boundedness of `U` required).
+* `IsNullHomologous.winding_zero_nhds_of_not_mem_of_closed` -- winding number `0` on a
+  neighbourhood of any point outside a closed set avoided by `γ`.
 
 ## Design notes
 
@@ -181,7 +183,7 @@ theorem generalizedWindingNumber_eq_zero_of_far_lipschitz
   have h_norm_2piIn : ‖(2 : ℂ) * (↑Real.pi : ℂ) * I * (n : ℂ)‖ =
       2 * Real.pi * (|n| : ℝ) := by
     rw [show (2 : ℂ) * (↑Real.pi : ℂ) * I * (n : ℂ) =
-      ((2 * Real.pi : ℝ) : ℂ) * (I * (n : ℂ)) from by push_cast; ring,
+      ((2 * Real.pi : ℝ) : ℂ) * (I * (n : ℂ)) by push_cast; ring,
       norm_mul, norm_mul, Complex.norm_real, Real.norm_eq_abs,
       abs_of_pos h_2pi_pos, Complex.norm_I, one_mul, Complex.norm_intCast]
   have hL : 2 * Real.pi * (|n| : ℝ) ≤ (K : ℝ) / (‖w‖ - R) := by
