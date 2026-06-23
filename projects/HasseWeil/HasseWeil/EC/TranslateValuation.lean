@@ -351,6 +351,93 @@ theorem addY_eq_unfolded_neg_negAddY {R : Type*} [CommRing R]
   unfold WeierstrassCurve.Affine.negY WeierstrassCurve.Affine.negAddY
   ring
 
+/-- Pure ring identity used to split the chord-case `addY`-difference into the
+four valuation-bounded pieces (T1–T4) of
+`pointValuation_translateY_xy_sub_alg_addY_lt_one_of_X_ne`. With `aK`/`aF` the
+K(E)- and F-level `addX` values, `ℓK`/`ℓF` the slopes, `xK`/`yK` the generic
+coordinates and `a₁`/`a₃` the curve constants, the unfolded `negAddY`-difference
+equals `-T1 + T2 - T3 - T4`. -/
+theorem addY_diff_four_term_ring_identity {R : Type*} [CommRing R]
+    (ℓK aK xK yK xP yP ℓF aF a₁ a₃ : R) :
+    -(ℓK * (aK - xK) + yK) - a₁ * aK - a₃ -
+        (-(ℓF * (aF - xP) + yP) - a₁ * aF - a₃) =
+      -((ℓK + a₁) * (aK - aF)) + ℓK * (xK - xP) -
+        (ℓK - ℓF) * (aF - xP) - (yK - yP) := by
+  ring
+
+/-- T1 (chord case): the product `(slope_K + a₁) · (translateX_xy − alg addX)`
+has `pointValuation < 1` at `P`. The first factor has valuation `≤ 1` (sum of a
+slope with valuation `≤ 1` and a constant), the second is the regular vanishing
+of the `x`-coordinate evaluation (`…translateX_xy_sub_alg_addX…`). -/
+private theorem pointValuation_slope_add_a₁_mul_translateX_diff_lt_one_of_X_ne
+    (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_x : P.x ≠ xk) :
+    (W_smooth W).pointValuation P
+      ((translateSlope_xy W xk yk + (W.map (algebraMap F KE)).a₁) *
+        ((W.map (algebraMap F KE)).toAffine.addX (x_gen W) (algebraMap F KE xk)
+            (translateSlope_xy W xk yk) -
+          algebraMap F KE (W.toAffine.addX P.x xk (W.toAffine.slope P.x xk P.y yk)))) < 1 := by
+  have h_factor1_le : (W_smooth W).pointValuation P
+      (translateSlope_xy W xk yk + (W.map (algebraMap F KE)).a₁) ≤ 1 := by
+    apply pointValuation_add_le_one W P
+    · exact pointValuation_translateSlope_xy_le_one_of_X_ne W P xk yk h_x
+    · exact (W_smooth W).pointValuation_algebraMap_F_le_one P W.a₁
+  have h_diff_addX_lt : (W_smooth W).pointValuation P
+      ((W.map (algebraMap F KE)).toAffine.addX (x_gen W) (algebraMap F KE xk)
+          (translateSlope_xy W xk yk) -
+        algebraMap F KE (W.toAffine.addX P.x xk (W.toAffine.slope P.x xk P.y yk))) < 1 := by
+    change (W_smooth W).pointValuation P
+      (translateX_xy W xk yk -
+        algebraMap F KE (W.toAffine.addX P.x xk (W.toAffine.slope P.x xk P.y yk))) < 1
+    exact pointValuation_translateX_xy_sub_alg_addX_lt_one_of_X_ne W P xk yk h_x
+  exact pointValuation_mul_lt_one_of_le_and_lt W P h_factor1_le h_diff_addX_lt
+
+/-- T2 (chord case): the product `slope_K · (x_gen − alg P.x)` has
+`pointValuation < 1` at `P`. The slope has valuation `≤ 1`; the generator
+difference `x_gen − alg P.x` vanishes at `P`
+(`pointValuation_x_gen_sub_alg_x_self_lt_one`). -/
+private theorem pointValuation_slope_mul_x_gen_diff_lt_one_of_X_ne
+    (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_x : P.x ≠ xk) :
+    (W_smooth W).pointValuation P
+      (translateSlope_xy W xk yk * (x_gen W - algebraMap F KE P.x)) < 1 := by
+  refine pointValuation_mul_lt_one_of_le_and_lt W P
+    (pointValuation_translateSlope_xy_le_one_of_X_ne W P xk yk h_x) ?_
+  exact pointValuation_x_gen_sub_alg_x_self_lt_one W P
+
+/-- T3 (chord case): the product `(slope_K − alg slope_F) · (alg addX − alg P.x)`
+has `pointValuation < 1` at `P`. The slope difference is the regular vanishing of
+the slope evaluation (`…translateSlope_xy_sub_alg_slope…`), strictly `< 1`; the
+constant `addX − P.x` lifts from `F`, so its valuation is `≤ 1`. -/
+private theorem pointValuation_slope_diff_mul_alg_addX_diff_lt_one_of_X_ne
+    (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_x : P.x ≠ xk) :
+    (W_smooth W).pointValuation P
+      ((translateSlope_xy W xk yk - algebraMap F KE (W.toAffine.slope P.x xk P.y yk)) *
+        (algebraMap F KE (W.toAffine.addX P.x xk (W.toAffine.slope P.x xk P.y yk)) -
+          algebraMap F KE P.x)) < 1 := by
+  have h_addX_diff_F_le : (W_smooth W).pointValuation P
+      (algebraMap F KE (W.toAffine.addX P.x xk (W.toAffine.slope P.x xk P.y yk)) -
+        algebraMap F KE P.x) ≤ 1 := by
+    rw [← map_sub]
+    exact (W_smooth W).pointValuation_algebraMap_F_le_one P
+      (W.toAffine.addX P.x xk (W.toAffine.slope P.x xk P.y yk) - P.x)
+  rw [mul_comm]
+  exact pointValuation_mul_lt_one_of_le_and_lt W P h_addX_diff_F_le
+    (pointValuation_translateSlope_xy_sub_alg_slope_lt_one_of_X_ne W P xk yk h_x)
+
+/-- T4 (chord case): the generator difference `y_gen − alg P.y` lies in the
+maximal ideal at `P` (vanishes at `P`), hence has `pointValuation < 1`. The
+`y`-coordinate mirror of `pointValuation_x_gen_sub_alg_x_self_lt_one`. -/
+private theorem pointValuation_y_gen_sub_alg_y_self_lt_one
+    (P : (W_smooth W).SmoothPoint) :
+    (W_smooth W).pointValuation P (y_gen W - algebraMap F KE P.y) < 1 := by
+  have h_ymem : Affine.CoordinateRing.YClass W.toAffine (Polynomial.C P.y) ∈
+      (W_smooth W).maximalIdealAt P :=
+    YClass_mem_maximalIdealAt W P P.y rfl
+  have h_lt :=
+    (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
+      (C := W_smooth W) (Affine.CoordinateRing.YClass W.toAffine (Polynomial.C P.y)) P).mpr h_ymem
+  rw [y_gen_sub_const_eq_algebraMap_YClass W P.y]
+  exact h_lt
+
 /-- For chord-case `P` (P.x ≠ xk), the difference
 `translateY_xy − alg(W.addY P.x xk P.y slope_at_P)` has `pointValuation < 1` at P.
 This is the geometric content "value of τ_k(y_gen) at P equals (P+k).y"
@@ -381,95 +468,25 @@ theorem pointValuation_translateY_xy_sub_alg_addY_lt_one_of_X_ne
   set addX_K : KE := (W.map (algebraMap F KE)).toAffine.addX (x_gen W) (algebraMap F KE xk) slope_K
     with haddX_K
   set addX_F : F := W.toAffine.addX P.x xk slope_F with haddX_F
-  have h_diff_eq :
-      -(slope_K * (addX_K - x_gen W) + y_gen W) -
-          (W.map (algebraMap F KE)).a₁ * addX_K - (W.map (algebraMap F KE)).a₃ -
-        (-(algebraMap F KE slope_F * (algebraMap F KE addX_F - algebraMap F KE P.x) +
-            algebraMap F KE P.y) -
-          (W.map (algebraMap F KE)).a₁ * algebraMap F KE addX_F -
-          (W.map (algebraMap F KE)).a₃) =
-      -((slope_K + (W.map (algebraMap F KE)).a₁) *
-          (addX_K - algebraMap F KE addX_F)) +
-        slope_K * (x_gen W - algebraMap F KE P.x) -
-        (slope_K - algebraMap F KE slope_F) *
-          (algebraMap F KE addX_F - algebraMap F KE P.x) -
-        (y_gen W - algebraMap F KE P.y) := by
-    ring
-  rw [h_diff_eq]
-  have h_T1 : (W_smooth W).pointValuation P
-      ((slope_K + (W.map (algebraMap F KE)).a₁) *
-        (addX_K - algebraMap F KE addX_F)) < 1 := by
-    have h_factor1_le : (W_smooth W).pointValuation P
-        (slope_K + (W.map (algebraMap F KE)).a₁) ≤ 1 := by
-      apply pointValuation_add_le_one W P
-      · exact pointValuation_translateSlope_xy_le_one_of_X_ne W P xk yk h_x
-      · exact (W_smooth W).pointValuation_algebraMap_F_le_one P W.a₁
-    have h_diff_addX_lt : (W_smooth W).pointValuation P
-        (addX_K - algebraMap F KE addX_F) < 1 := by
-      change (W_smooth W).pointValuation P
-        (translateX_xy W xk yk - algebraMap F KE (W.toAffine.addX P.x xk slope_F)) < 1
-      exact pointValuation_translateX_xy_sub_alg_addX_lt_one_of_X_ne W P xk yk h_x
-    exact pointValuation_mul_lt_one_of_le_and_lt W P h_factor1_le h_diff_addX_lt
-  have h_T2 : (W_smooth W).pointValuation P
-      (slope_K * (x_gen W - algebraMap F KE P.x)) < 1 := by
-    have h_slope_K_le : (W_smooth W).pointValuation P slope_K ≤ 1 :=
-      pointValuation_translateSlope_xy_le_one_of_X_ne W P xk yk h_x
-    have h_xgen_diff_lt : (W_smooth W).pointValuation P
-        (x_gen W - algebraMap F KE P.x) < 1 := by
-      have h_xmem : Affine.CoordinateRing.XClass W.toAffine P.x ∈
-          (W_smooth W).maximalIdealAt P :=
-        XClass_mem_maximalIdealAt W P P.x rfl
-      have h_lt :=
-        (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
-          (C := W_smooth W) (Affine.CoordinateRing.XClass W.toAffine P.x) P).mpr h_xmem
-      have h_eq := x_gen_sub_const_eq_algebraMap_XClass W P.x
-      rw [h_eq]
-      exact h_lt
-    exact pointValuation_mul_lt_one_of_le_and_lt W P h_slope_K_le h_xgen_diff_lt
-  have h_T3 : (W_smooth W).pointValuation P
-      ((slope_K - algebraMap F KE slope_F) *
-        (algebraMap F KE addX_F - algebraMap F KE P.x)) < 1 := by
-    have h_slope_diff_lt : (W_smooth W).pointValuation P
-        (slope_K - algebraMap F KE slope_F) < 1 :=
-      pointValuation_translateSlope_xy_sub_alg_slope_lt_one_of_X_ne W P xk yk h_x
-    have h_addX_diff_F_le : (W_smooth W).pointValuation P
-        (algebraMap F KE addX_F - algebraMap F KE P.x) ≤ 1 := by
-      rw [← map_sub]
-      exact (W_smooth W).pointValuation_algebraMap_F_le_one P (addX_F - P.x)
-    have h_swap : (slope_K - algebraMap F KE slope_F) *
-        (algebraMap F KE addX_F - algebraMap F KE P.x) =
-        (algebraMap F KE addX_F - algebraMap F KE P.x) *
-        (slope_K - algebraMap F KE slope_F) := by ring
-    rw [h_swap]
-    exact pointValuation_mul_lt_one_of_le_and_lt W P h_addX_diff_F_le h_slope_diff_lt
-  have h_T4 : (W_smooth W).pointValuation P
-      (y_gen W - algebraMap F KE P.y) < 1 := by
-    have h_ymem : Affine.CoordinateRing.YClass W.toAffine (Polynomial.C P.y) ∈
-        (W_smooth W).maximalIdealAt P :=
-      YClass_mem_maximalIdealAt W P P.y rfl
-    have h_lt :=
-      (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
-        (C := W_smooth W) (Affine.CoordinateRing.YClass W.toAffine (Polynomial.C P.y))
-        P).mpr h_ymem
-    have h_eq := y_gen_sub_const_eq_algebraMap_YClass W P.y
-    rw [h_eq]
-    exact h_lt
-  refine lt_of_le_of_lt (((W_smooth W).pointValuation P).map_sub _ _) ?_
-  apply max_lt
-  · refine lt_of_le_of_lt (((W_smooth W).pointValuation P).map_sub _ _) ?_
-    apply max_lt
-    · refine lt_of_le_of_lt (((W_smooth W).pointValuation P).map_add _ _) ?_
-      apply max_lt
+  -- Split the unfolded `negAddY`-difference into the four pieces T1–T4.
+  rw [addY_diff_four_term_ring_identity slope_K addX_K (x_gen W) (y_gen W)
+      (algebraMap F KE P.x) (algebraMap F KE P.y) (algebraMap F KE slope_F)
+      (algebraMap F KE addX_F) (W.map (algebraMap F KE)).a₁ (W.map (algebraMap F KE)).a₃]
+  -- Bound each piece (T1–T4) and assemble via the ultrametric inequality.
+  refine lt_of_le_of_lt (((W_smooth W).pointValuation P).map_sub _ _) (max_lt ?_ ?_)
+  · refine lt_of_le_of_lt (((W_smooth W).pointValuation P).map_sub _ _) (max_lt ?_ ?_)
+    · refine lt_of_le_of_lt (((W_smooth W).pointValuation P).map_add _ _) (max_lt ?_ ?_)
       · calc (W_smooth W).pointValuation P
               (-((slope_K + (W.map (algebraMap F KE)).a₁) *
                   (addX_K - algebraMap F KE addX_F)))
             = (W_smooth W).pointValuation P
               ((slope_K + (W.map (algebraMap F KE)).a₁) *
                 (addX_K - algebraMap F KE addX_F)) := Valuation.map_neg _ _
-          _ < 1 := h_T1
-      · exact h_T2
-    · exact h_T3
-  · exact h_T4
+          _ < 1 :=
+            pointValuation_slope_add_a₁_mul_translateX_diff_lt_one_of_X_ne W P xk yk h_x
+      · exact pointValuation_slope_mul_x_gen_diff_lt_one_of_X_ne W P xk yk h_x
+    · exact pointValuation_slope_diff_mul_alg_addX_diff_lt_one_of_X_ne W P xk yk h_x
+  · exact pointValuation_y_gen_sub_alg_y_self_lt_one W P
 
 /-- **Weierstrass factorization** in K(E): from the curve equation at
 `(xk, yk)` and the generic-point equation, the K(E)-level identity
