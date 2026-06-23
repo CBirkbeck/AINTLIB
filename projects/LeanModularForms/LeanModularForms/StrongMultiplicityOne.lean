@@ -8,19 +8,26 @@ import LeanModularForms.StrongMultiplicityOne.InductiveStep
 /-!
 # Strong Multiplicity One via Miyake §4.6
 
-This file assembles an axiom-clean proof of `strongMultiplicityOne`
-(Miyake Theorem 4.6.12 / Diamond–Shurman Theorem 5.8.2) by following
-Miyake's algebraic descent in §4.6 of *Modular Forms* (2006).
+This file develops the route-B Main Lemma (Miyake Theorem 4.6.8) and the
+eigenvalue machinery toward strong multiplicity one (Miyake Theorem 4.6.12 /
+Diamond–Shurman Theorem 5.8.2), following Miyake's algebraic descent in §4.6
+of *Modular Forms* (2006).
 
 The supporting development is split across the `StrongMultiplicityOne/` modules;
-this file holds the route-B finale.
+the finale `strongMultiplicityOne` itself is assembled downstream in
+`StrongMultiplicityOne/ConstantMultiple.lean`.
 
 ## Main results
 
-* `miyake_4_6_8_main_lemma_cuspForm`: Miyake's Main Lemma (Theorem 4.6.8).
-* `mainLemma_charSpace_routeB`: per-character Main Lemma.
-* `newform_unique_routeB`: uniqueness of newforms.
-* `strongMultiplicityOne`: Strong Multiplicity One.
+* `miyake_4_6_8_main_lemma_cuspForm`: Miyake's Main Lemma (Theorem 4.6.8),
+  unconditional cusp-form form.
+* `coprimeSieve_admits_squarefree_decomposition_in_charSpace`: the squarefree
+  divisor decomposition in a Nebentypus character space.
+* `newform_eigenvalue_at_prime_sq`: the relation
+  `λ_{q²}(f) = λ_q(f)² - χ(q)·q^{k-1}` (DS 5.3 / Miyake 4.5.13).
+* `mainLemma_charSpace_routeB`: per-character Main Lemma (route B). The finale
+  `strongMultiplicityOne` is assembled downstream in
+  `StrongMultiplicityOne/ConstantMultiple.lean`.
 
 ## References
 
