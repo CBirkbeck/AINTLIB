@@ -2510,6 +2510,71 @@ private theorem B_minus_a1_yk_decomposition (xk yk : F) :
   push_cast [map_add, map_sub, map_mul, map_pow, map_ofNat]
   ring
 
+/-- **`ord_P (a + b) = 0` from `ord_P b = 0` and `1 ≤ ord_P a`.** The summand
+`b` has the strictly smaller order (`0 < 1 ≤ ord_P a`), so by strict
+non-archimedeanity (`ord_P_add_eq_of_lt`) it dominates the sum:
+`ord_P (a + b) = ord_P b = 0`. Generic building block for the recurring
+"low-order constant + high-order remainder pins the sum to the constant's
+order" pole-order arguments. -/
+private theorem ord_P_add_eq_zero_of_eq_zero_of_one_le
+    {C : Curves.SmoothPlaneCurve F} {P : C.SmoothPoint} {a b : C.FunctionField}
+    (hb : C.ord_P P b = 0) (ha : ((1 : ℤ) : WithTop ℤ) ≤ C.ord_P P a) :
+    C.ord_P P (a + b) = 0 := by
+  have h_lt : C.ord_P P b < C.ord_P P a :=
+    lt_of_lt_of_le (by rw [hb]; exact_mod_cast (show (0 : ℤ) < 1 by norm_num)) ha
+  rw [add_comm, SmoothPlaneCurve.ord_P_add_eq_of_lt h_lt, hb]
+
+/-- **The constant `C = 3 xk² + 2 a₂ xk + a₄ − a₁ yk` is nonzero at smooth
+2-torsion.** This constant equals `−polynomialX.evalEval xk yk`, which is
+nonzero at a smooth 2-torsion point (`polynomialX_evalEval_ne_zero_at_2tor`);
+unfolding `evalEval_polynomialX` and clearing signs transfers the nonvanishing
+to `C`. -/
+private theorem C_const_ne_zero_at_2tor
+    (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
+    (h_2_tor : yk = W.toAffine.negY xk yk) :
+    (3 * xk ^ 2 + 2 * W.a₂ * xk + W.a₄ - W.a₁ * yk : F) ≠ 0 := by
+  have h_polX : W.toAffine.polynomialX.evalEval xk yk ≠ 0 :=
+    polynomialX_evalEval_ne_zero_at_2tor W xk yk h_ns h_2_tor
+  rw [WeierstrassCurve.Affine.evalEval_polynomialX] at h_polX
+  intro h
+  apply h_polX
+  linear_combination -h
+
+/-- **`ord_T ((x_gen − xk) · (x_gen + 2 xk + a₂)) ≥ 1` at smooth 2-torsion.**
+The first factor `x_gen − xk` vanishes at `T` to order `≥ 1`
+(`one_le_ord_P_x_gen_sub_const`); the second factor `x_gen + (2 xk + a₂)` is a
+sum of a nonneg-order generator and a constant, hence has order `≥ 0`. By
+additivity `ord_T (·) = ord_T (x_gen − xk) + ord_T (x_gen + …)`, the product
+order is `≥ 1 + 0 = 1`. (Additivity is applied in term mode on the abstract
+factors, since `ord_P_mul` does not rewrite under a forced `KE` type.) -/
+private theorem one_le_ord_P_x_gen_sub_mul_factor_at_2tor
+    (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk) :
+    ((1 : ℤ) : WithTop ℤ) ≤ (W_smooth W).ord_P (negSmoothPoint W xk yk h_ns)
+        ((x_gen W - algebraMap F KE xk) *
+          (x_gen W + algebraMap F KE (2 * xk + W.a₂))) := by
+  set P := negSmoothPoint W xk yk h_ns
+  have h_x_nonneg : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P (x_gen W) :=
+    ord_P_x_gen_nonneg W P
+  have h_const_nonneg : (0 : WithTop ℤ) ≤
+      (W_smooth W).ord_P P (algebraMap F KE (2 * xk + W.a₂)) :=
+    ord_P_algebraMap_F_nonneg W P _
+  have h_R_nonneg : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P
+      (x_gen W + algebraMap F KE (2 * xk + W.a₂)) :=
+    ord_P_add_nonneg h_x_nonneg h_const_nonneg
+  have h_x_sub : ((1 : ℤ) : WithTop ℤ) ≤
+      (W_smooth W).ord_P P (x_gen W - algebraMap F KE xk) :=
+    one_le_ord_P_x_gen_sub_const W xk yk h_ns
+  have h_prod_eq : (W_smooth W).ord_P P
+      ((x_gen W - algebraMap F KE xk) *
+        (x_gen W + algebraMap F KE (2 * xk + W.a₂))) =
+      (W_smooth W).ord_P P (x_gen W - algebraMap F KE xk) +
+        (W_smooth W).ord_P P
+          (x_gen W + algebraMap F KE (2 * xk + W.a₂)) :=
+    SmoothPlaneCurve.ord_P_mul (P := P) _ _
+  rw [h_prod_eq]
+  have h := add_le_add h_x_sub h_R_nonneg
+  rwa [add_zero] at h
+
 set_option linter.unusedDecidableInType false in
 /-- **`ord_T (B − a₁ yk) = 0` at smooth 2-torsion `T`**: stated in
 decomposed form `(x_gen − xk) · (x_gen + 2 xk + a₂) + C` where
@@ -2526,64 +2591,16 @@ theorem ord_P_B_minus_a1_yk_decomposed_eq_zero_at_2tor
           algebraMap F KE
             (3 * xk ^ 2 + 2 * W.a₂ * xk + W.a₄ - W.a₁ * yk)) = 0 := by
   set P := negSmoothPoint W xk yk h_ns
-  have hC_ne : (3 * xk ^ 2 + 2 * W.a₂ * xk + W.a₄ - W.a₁ * yk : F) ≠ 0 := by
-    have h_polX : W.toAffine.polynomialX.evalEval xk yk ≠ 0 :=
-      polynomialX_evalEval_ne_zero_at_2tor W xk yk h_ns h_2_tor
-    rw [WeierstrassCurve.Affine.evalEval_polynomialX] at h_polX
-    intro h
-    apply h_polX
-    linear_combination -h
+  -- The constant summand `C` is nonzero, so it has order `0`.
   have h_C_ord : (W_smooth W).ord_P P
       (algebraMap F KE
         (3 * xk ^ 2 + 2 * W.a₂ * xk + W.a₄ - W.a₁ * yk)) = 0 :=
-    (W_smooth W).ord_P_algebraMap_F_of_ne_zero hC_ne P
-  have h_x_nonneg : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P (x_gen W) :=
-    ord_P_x_gen_nonneg W P
-  have h_const_nonneg : (0 : WithTop ℤ) ≤
-      (W_smooth W).ord_P P (algebraMap F KE (2 * xk + W.a₂)) :=
-    ord_P_algebraMap_F_nonneg W P _
-  have h_R_nonneg : (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P
-      (x_gen W + algebraMap F KE (2 * xk + W.a₂)) := by
-    have h := SmoothPlaneCurve.ord_P_add_le (P := P)
-      (x_gen W) (algebraMap F KE (2 * xk + W.a₂))
-    exact le_trans (le_min h_x_nonneg h_const_nonneg) h
-  have h_x_sub : ((1 : ℤ) : WithTop ℤ) ≤
-      (W_smooth W).ord_P P (x_gen W - algebraMap F KE xk) :=
-    one_le_ord_P_x_gen_sub_const W xk yk h_ns
-  have h_prod_eq : (W_smooth W).ord_P P
-      ((x_gen W - algebraMap F KE xk) *
-        (x_gen W + algebraMap F KE (2 * xk + W.a₂))) =
-      (W_smooth W).ord_P P (x_gen W - algebraMap F KE xk) +
-        (W_smooth W).ord_P P
-          (x_gen W + algebraMap F KE (2 * xk + W.a₂)) :=
-    SmoothPlaneCurve.ord_P_mul (P := P) _ _
-  have h_prod_ord : ((1 : ℤ) : WithTop ℤ) ≤
-      (W_smooth W).ord_P P
-        ((x_gen W - algebraMap F KE xk) *
-          (x_gen W + algebraMap F KE (2 * xk + W.a₂))) := by
-    rw [h_prod_eq]
-    have h := add_le_add h_x_sub h_R_nonneg
-    rwa [add_zero] at h
-  have h_lt : (W_smooth W).ord_P P
-      (algebraMap F KE
-        (3 * xk ^ 2 + 2 * W.a₂ * xk + W.a₄ - W.a₁ * yk)) <
-      (W_smooth W).ord_P P
-        ((x_gen W - algebraMap F KE xk) *
-          (x_gen W + algebraMap F KE (2 * xk + W.a₂))) := by
-    rw [h_C_ord]
-    refine lt_of_lt_of_le ?_ h_prod_ord
-    exact_mod_cast (show (0 : ℤ) < 1 by norm_num)
-  have h_ord_eq : (W_smooth W).ord_P P
-      ((x_gen W - algebraMap F KE xk) *
-          (x_gen W + algebraMap F KE (2 * xk + W.a₂)) +
-        algebraMap F KE
-          (3 * xk ^ 2 + 2 * W.a₂ * xk + W.a₄ - W.a₁ * yk)) =
-      (W_smooth W).ord_P P
-        (algebraMap F KE
-          (3 * xk ^ 2 + 2 * W.a₂ * xk + W.a₄ - W.a₁ * yk)) := by
-    rw [add_comm]
-    exact SmoothPlaneCurve.ord_P_add_eq_of_lt h_lt
-  rw [h_ord_eq, h_C_ord]
+    (W_smooth W).ord_P_algebraMap_F_of_ne_zero
+      (C_const_ne_zero_at_2tor W xk yk h_ns h_2_tor) P
+  -- The product summand has order `≥ 1`, strictly above `ord_P C = 0`,
+  -- so the constant dominates the sum and pins its order to `0`.
+  exact ord_P_add_eq_zero_of_eq_zero_of_one_le h_C_ord
+    (one_le_ord_P_x_gen_sub_mul_factor_at_2tor W xk yk h_ns)
 
 set_option linter.unusedDecidableInType false in
 /-- **`ord_T (B − a₁ yk) = 0` at smooth 2-torsion `T`**: bridge from the
