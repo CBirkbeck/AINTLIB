@@ -32,7 +32,9 @@ in across tickets DUAL-Q1…Q4.
 
 ## Status (DUAL-Q1…Q4)
 
-The arc is landed end-to-end with the deep input now isolated to **one** named `sorry`:
+The arc is landed end-to-end and is now **axiom-clean** (the headline results depend only on
+`propext`/`Classical.choice`/`Quot.sound`); the formerly-isolated deep input is handled by the
+`K̄`-direct route (MOVE 2, below):
 
 * **DUAL-Q1** (`galActFunctionField` + API): the `Gal(L/F)`-action on `F(C_L)` via `σ ⊗ id` through
   `functionField_baseChange_tensorEquiv`, with `_id`/`_trans` and the *fixed-the-base-field* easy
@@ -82,14 +84,13 @@ The arc is landed end-to-end with the deep input now isolated to **one** named `
   `galActFunctionField_algebraMap_L` + the base-`L` extensionality `ringHom_ext_baseL`). So
   `descentData_over_kbar_intermediate` is **sorry-free**, consuming a single isolated leaf.
 
-  **The single remaining `sorry`** is now narrowed to exactly `twoCurveKbarRangeIncl_descended`: the
-  **`L`-level two-curve `K̄`-dual range inclusion** `Im([deg φ]_L*) ⊆ Im(ψ_L)` over a concrete finite
-  Galois `L ⊆ K̄`. This is Silverman III.6.1's deep input (`DualGaloisData.hincl`, via III.4.10c
-  fixed-field) for a *two-curve* `φ_K̄ : E₁_K̄ → E₂_K̄`; the project's K̄-dual machinery
-  (`exists_dual_of_pullbackEvaluation_general`) is endomorphism-only, so this inclusion is the
-  irreducible remaining infrastructure. The factorization downstream of the inclusion
-  (`CurveMap.factorThroughPullback`) is already axiom-clean. See the declaration (REVIEW-PENDING). The
-  label gate is discharged ungated in `IsogenyClassLabel.lean` (`*_charZero`).
+  **The deep input** (formerly the single isolated `sorry`) was the **`L`-level two-curve `K̄`-dual
+  range inclusion** `Im([deg φ]_L*) ⊆ Im(ψ_L)` over a concrete finite Galois `L ⊆ K̄` — Silverman
+  III.6.1's input (`DualGaloisData.hincl`, via III.4.10c fixed-field) for a *two-curve*
+  `φ_K̄ : E₁_K̄ → E₂_K̄`. The finite-`L` route carrying it has since been **superseded by the
+  `K̄`-direct route** (MOVE 2; see the "(removed) finite-L geometric descent chain" note below), so
+  the arc is now `sorry`-free / axiom-clean. The label gate is discharged ungated in
+  `IsogenyClassLabel.lean` (`*_charZero`).
 -/
 
 namespace HasseWeil.EC
@@ -161,7 +162,7 @@ theorem galActFrac_trans (C : SmoothPlaneCurve F) (L : Type*) [Field L] [Algebra
   obtain ⟨n, d, -, rfl⟩ := IsFractionRing.div_surjective
     (A := L ⊗[F] C.toAffine.CoordinateRing) x
   show galActFrac C L (σ.trans τ) _ = galActFrac C L τ (galActFrac C L σ _)
-  simp only [galActFrac, map_div₀, AlgEquiv.trans_apply,
+  simp only [galActFrac, map_div₀,
     IsFractionRing.algEquivOfAlgEquiv_algebraMap]
   rw [congr_id_trans]
   rfl
@@ -1569,7 +1570,7 @@ theorem bc_equation :
       (generic_equation W₂)
     rwa [show (W_KE W₂).toAffine.map
         (φ.toCurveMap.pullback : W₂.toAffine.FunctionField →+* W₁.toAffine.FunctionField) =
-        W₂.map (algebraMap K W₁.toAffine.FunctionField) from by
+        W₂.map (algebraMap K W₁.toAffine.FunctionField) by
       show (W₂.map _).map _ = W₂.map _
       rw [WeierstrassCurve.map_map, AlgHom.comp_algebraMap]] at h
   have hpush := WeierstrassCurve.Affine.Equation.map
