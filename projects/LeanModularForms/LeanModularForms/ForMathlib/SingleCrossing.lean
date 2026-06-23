@@ -110,14 +110,16 @@ private theorem cpvIntegrand_zero_on_middle (D : SingleCrossingData γ z₀)
   exact D.h_near ε hε_pos hε_lt t
     (abs_le.mpr ⟨by linarith [ht.1], by linarith [ht.2]⟩)
 
+private theorem singleton_compl_mem_ae (a : ℝ) : ({a} : Set ℝ)ᶜ ∈ ae volume :=
+  compl_mem_ae_iff.mpr ((Set.finite_singleton _).measure_zero volume)
+
 private theorem cpvIntegrand_eq_full_left_ae (D : SingleCrossingData γ z₀)
     {ε : ℝ} (hε_pos : 0 < ε) (hε_lt : ε < D.threshold)
     (h_left_lt : (0 : ℝ) < D.t₀ - D.δ ε) :
     ∀ᵐ t ∂volume, t ∈ Set.uIoc 0 (D.t₀ - D.δ ε) →
       cpvIntegrand (fun z ↦ (z - z₀)⁻¹) γ.toPath.extend z₀ ε t =
         (γ.toPath.extend t - z₀)⁻¹ * deriv γ.toPath.extend t := by
-  have h_sing : ({D.t₀ - D.δ ε} : Set ℝ)ᶜ ∈ ae volume :=
-    compl_mem_ae_iff.mpr ((Set.finite_singleton _).measure_zero volume)
+  have h_sing := singleton_compl_mem_ae (D.t₀ - D.δ ε)
   filter_upwards [h_sing] with t ht_ne ht_mem
   rw [Set.uIoc_of_le h_left_lt.le] at ht_mem
   have ht_lt : t < D.t₀ - D.δ ε :=
@@ -135,8 +137,7 @@ private theorem cpvIntegrand_eq_full_right_ae (D : SingleCrossingData γ z₀)
     ∀ᵐ t ∂volume, t ∈ Set.uIoc (D.t₀ + D.δ ε) 1 →
       cpvIntegrand (fun z ↦ (z - z₀)⁻¹) γ.toPath.extend z₀ ε t =
         (γ.toPath.extend t - z₀)⁻¹ * deriv γ.toPath.extend t := by
-  have h_sing : ({D.t₀ + D.δ ε} : Set ℝ)ᶜ ∈ ae volume :=
-    compl_mem_ae_iff.mpr ((Set.finite_singleton _).measure_zero volume)
+  have h_sing := singleton_compl_mem_ae (D.t₀ + D.δ ε)
   filter_upwards [h_sing] with t ht_ne ht_mem
   rw [Set.uIoc_of_le h_right_lt.le] at ht_mem
   have hδ_pos := D.hδ_pos ε hε_pos hε_lt
