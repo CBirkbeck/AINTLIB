@@ -38,7 +38,8 @@ theorem deg_T_diag_ppow (i k : ℕ) (hk : 0 < k) :
     (fun j hj ↦ by
       obtain rfl : j = 0 := by lia
       simpa only [Fin.zero_eta, Fin.isValue, Matrix.cons_val_zero, zero_add, Fin.mk_one,
-        Matrix.cons_val_one, Matrix.cons_val_fin_one] using Nat.pow_dvd_pow p (Nat.le_add_right i k))
+        Matrix.cons_val_one, Matrix.cons_val_fin_one] using
+        Nat.pow_dvd_pow p (Nat.le_add_right i k))
     k hk (by
       simp only [Fin.isValue, Matrix.cons_val_one, Matrix.cons_val_fin_one, Matrix.cons_val_zero,
         Nat.pow_div (Nat.le_add_right i k) hp.pos, add_tsub_cancel_left])
@@ -50,8 +51,8 @@ theorem deg_T_diag_scalar (c : ℕ) (hc : 0 < c) :
 
 private lemma deg_T_ad_of_pos (a d : ℕ) (ha : 0 < a) (hd : 0 < d) (hdvd : a ∣ d) :
     deg (GL_pair 2) (T_ad a d) = HeckeCoset_deg (GL_pair 2) (T_diag ![a, d]) := by
-  simp only [T_ad_of_pos a d ha hd hdvd, T_elem, Nat.succ_eq_add_one, Nat.reduceAdd, deg_T_single,
-    one_mul]
+  simp only [T_ad_of_pos a d ha hd hdvd, T_elem, Nat.succ_eq_add_one, Nat.reduceAdd,
+    deg_T_single, one_mul]
 
 include hp in
 private lemma deg_ppow_term_lt (i k : ℕ) (h2i : 2 * i < k) :
@@ -102,13 +103,13 @@ theorem deg_T_sum_prime_pow (k : ℕ) :
   induction k using Nat.twoStepInduction with
   | zero =>
     rw [T_sum_ppow_expansion p hp 0, map_sum]
-    simp only [Nat.zero_div, zero_add, Finset.range_one, zero_tsub, pow_zero, Finset.sum_singleton,
-      T_ad_one_one, map_one]
+    simp only [Nat.zero_div, zero_add, Finset.range_one, zero_tsub, pow_zero,
+      Finset.sum_singleton, T_ad_one_one, map_one]
   | one =>
     rw [T_sum_ppow_expansion p hp 1, map_sum]
-    simpa only [Nat.reduceDiv, zero_add, Finset.range_one, Finset.sum_singleton, pow_zero, tsub_zero,
-      pow_one, Nat.reduceAdd, geom_sum_two, mul_zero, tsub_self, one_mul, Nat.cast_add,
-      Nat.cast_one] using deg_ppow_term_lt p hp 0 1 (by lia)
+    simpa only [Nat.reduceDiv, zero_add, Finset.range_one, Finset.sum_singleton, pow_zero,
+      tsub_zero, pow_one, Nat.reduceAdd, geom_sum_two, mul_zero, tsub_self, one_mul,
+      Nat.cast_add, Nat.cast_one] using deg_ppow_term_lt p hp 0 1 (by lia)
   | more k ih _ => exact deg_T_sum_prime_pow_aux p hp k ih
 
 /-- Theorem 3.24(7): `deg(T(m)) = σ₁(m)`. -/
@@ -127,7 +128,8 @@ theorem deg_T_sum (m : ℕ+) : deg (GL_pair 2) (T_sum m) = (σ 1) (m : ℕ) := b
     have ha_pos : 0 < a := zero_lt_one.trans ha
     have hb_pos : 0 < b := zero_lt_one.trans hb
     rw [show T_sum ⟨a * b, hn⟩ = T_sum ⟨a, ha_pos⟩ * T_sum ⟨b, hb_pos⟩ from
-      (T_sum_mul_coprime ⟨a, ha_pos⟩ ⟨b, hb_pos⟩ hcop).symm, map_mul, iha ha_pos, ihb hb_pos]
+      (T_sum_mul_coprime ⟨a, ha_pos⟩ ⟨b, hb_pos⟩ hcop).symm, map_mul, iha ha_pos,
+      ihb hb_pos]
     exact_mod_cast (ArithmeticFunction.isMultiplicative_sigma.map_mul_of_coprime hcop).symm
 
 end HeckeRing.GL2
