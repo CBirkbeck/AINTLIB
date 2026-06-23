@@ -170,7 +170,6 @@ omit [DecidableEq F] in
 theorem kaehlerD_x_gen_eq_u_smul_omega :
     KaehlerDifferential.D F KE (x_gen W) =
       u_gen W • invariantDifferential W.toAffine := by
-  classical
   rw [show invariantDifferential W.toAffine =
         (u_gen W)⁻¹ • KaehlerDifferential.D F KE (x_gen W) from rfl,
     smul_smul, mul_inv_cancel₀ (u_gen_ne_zero W), one_smul]
@@ -182,7 +181,6 @@ theorem kaehlerD_y_gen_eq_num_smul_omega :
       (3 * x_gen W ^ 2 + 2 * algebraMap F KE W.a₂ * x_gen W +
         algebraMap F KE W.a₄ - algebraMap F KE W.a₁ * y_gen W) •
         invariantDifferential W.toAffine := by
-  classical
   have h127 := kaehler_curve_eqn W
   have hu : algebraMap F KE W.a₃ + (2 : KE) * y_gen W + algebraMap F KE W.a₁ * x_gen W =
       u_gen W := by
