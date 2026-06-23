@@ -250,26 +250,37 @@ theorem ordAtInftyValuation_basis_summands_distinct {r₁ r₂ : FractionRing (P
       intro h_eq
       omega
 
-/-- **Valuation determined by `x_gen`, `y_gen`.** A `ℤᵐ⁰`-valued valuation `w` on
-`K(E)` with `w x_gen = exp 2`, `w y_gen = exp 3`, and trivial on `F^×` equals
-`ordAtInftyValuation`. The decomposition `f = α + β·coordY` (`α, β ∈ F(x)`) plus
-the parity-distinctness of the two summands lets `map_add_of_distinct_val` read
-off both valuations as the *same* maximum of agreeing summand-values. -/
-theorem eq_ordAtInftyValuation_of_x_y (w : Valuation KE (WithZero (Multiplicative ℤ)))
-    (hx : w (x_gen W) = WithZero.exp 2) (hy : w (y_gen W) = WithZero.exp 3)
-    (hc : ∀ c : F, c ≠ 0 → w (algebraMap F KE c) = 1) :
-    w = (W_smooth W).ordAtInftyValuation := by
-  have h_rat := valuation_algebraMap_fracPolyX_eq_ordAtInftyValuation W w hx hc
-  have h_coordY : w (W_smooth W).coordYInFunctionField =
+/-- **Value on the coordinate function `y`.** A valuation `w` with `w y_gen = exp 3`
+agrees with `ordAtInftyValuation` on `coordYInFunctionField` (which is `y_gen`):
+both equal `exp (-3)`. -/
+private theorem valuation_coordYInFunctionField_eq_ordAtInftyValuation
+    (w : Valuation KE (WithZero (Multiplicative ℤ))) (hy : w (y_gen W) = WithZero.exp 3) :
+    w (W_smooth W).coordYInFunctionField =
       (W_smooth W).ordAtInftyValuation (W_smooth W).coordYInFunctionField := by
-    have h_yeq : (W_smooth W).coordYInFunctionField = y_gen W := by
-      rw [← (W_smooth W).coordY_eq_coordYInFunctionField]
-      exact coordY_W_smooth_eq_y_gen W
-    rw [h_yeq, hy,
-      (W_smooth W).ordAtInftyValuation_eq_exp_neg_of_ordAtInfty_eq
-        (h_yeq ▸ (W_smooth W).coordYInFunctionField_ne_zero)
-        (by rw [← h_yeq]; exact (W_smooth W).ordAtInfty_coordYInFunctionField)]
-    norm_num
+  have h_yeq : (W_smooth W).coordYInFunctionField = y_gen W := by
+    rw [← (W_smooth W).coordY_eq_coordYInFunctionField]
+    exact coordY_W_smooth_eq_y_gen W
+  rw [h_yeq, hy,
+    (W_smooth W).ordAtInftyValuation_eq_exp_neg_of_ordAtInfty_eq
+      (h_yeq ▸ (W_smooth W).coordYInFunctionField_ne_zero)
+      (by rw [← h_yeq]; exact (W_smooth W).ordAtInfty_coordYInFunctionField)]
+  norm_num
+
+/-- **Extension from generators to all of `K(E)`.** A valuation `w` that agrees
+with `ordAtInftyValuation` on every `F(x)`-rational image (`h_rat`) and on the
+coordinate function `coordYInFunctionField` (`h_coordY`) agrees everywhere. The
+decomposition `f = α + β·coordY` (`α, β ∈ F(x)`, via `exists_decomp`) plus the
+parity-distinctness of the two summands (`ordAtInftyValuation_basis_summands_distinct`)
+lets `map_add_of_distinct_val` read off both valuations as the *same* maximum of
+agreeing summand-values. -/
+private theorem eq_ordAtInftyValuation_of_agree_fracPolyX_coordY
+    (w : Valuation KE (WithZero (Multiplicative ℤ)))
+    (h_rat : ∀ r : FractionRing (Polynomial F),
+      w (algebraMap (FractionRing (Polynomial F)) KE r) =
+        (W_smooth W).ordAtInftyValuation (algebraMap (FractionRing (Polynomial F)) KE r))
+    (h_coordY : w (W_smooth W).coordYInFunctionField =
+      (W_smooth W).ordAtInftyValuation (W_smooth W).coordYInFunctionField) :
+    w = (W_smooth W).ordAtInftyValuation := by
   apply Valuation.ext
   intro f
   obtain ⟨p, q, hf⟩ := (W_smooth W).exists_decomp f
@@ -316,6 +327,19 @@ theorem eq_ordAtInftyValuation_of_x_y (w : Valuation KE (WithZero (Multiplicativ
       Valuation.map_add_of_distinct_val (W_smooth W).ordAtInftyValuation h_dist
     rw [hL, hα_agree, hβc_agree]
     exact hR.symm
+
+/-- **Valuation determined by `x_gen`, `y_gen`.** A `ℤᵐ⁰`-valued valuation `w` on
+`K(E)` with `w x_gen = exp 2`, `w y_gen = exp 3`, and trivial on `F^×` equals
+`ordAtInftyValuation`. The decomposition `f = α + β·coordY` (`α, β ∈ F(x)`) plus
+the parity-distinctness of the two summands lets `map_add_of_distinct_val` read
+off both valuations as the *same* maximum of agreeing summand-values. -/
+theorem eq_ordAtInftyValuation_of_x_y (w : Valuation KE (WithZero (Multiplicative ℤ)))
+    (hx : w (x_gen W) = WithZero.exp 2) (hy : w (y_gen W) = WithZero.exp 3)
+    (hc : ∀ c : F, c ≠ 0 → w (algebraMap F KE c) = 1) :
+    w = (W_smooth W).ordAtInftyValuation :=
+  eq_ordAtInftyValuation_of_agree_fracPolyX_coordY W w
+    (valuation_algebraMap_fracPolyX_eq_ordAtInftyValuation W w hx hc)
+    (valuation_coordYInFunctionField_eq_ordAtInftyValuation W w hy)
 
 /-- `ord_P (-T) (τ_T x_gen) = -2`, uniformly across 2-torsion and non-2-torsion
 `T = (xk, yk)`. Dispatches to the two shipped cases. -/
