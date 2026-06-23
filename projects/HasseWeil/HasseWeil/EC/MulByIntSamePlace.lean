@@ -334,6 +334,49 @@ private theorem pointValuation_mulByInt_y_sub_lt_one [IsAlgClosed F] (ℓ : ℤ)
       mul_inv_cancel₀ (pow_ne_zero 3 hψ_ff_ne), mul_one]
   rwa [hmy, map_mul, map_inv₀, hψ3_unit, inv_one, mul_one]
 
+/-- The monomial inductive step of `pointValuation_bivariate_bridge`: from the bridge bound
+for `C q · Xⁿ`, derive it for `C q · Xⁿ⁺¹` (the multiply-by-`X` step, splitting `Au·v − Ab·b`
+into `Au·(v−b) + b·(Au−Ab)`). -/
+private theorem pointValuation_bivariate_bridge_monomial
+    (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPoint) {u v : KE} {a b : F}
+    (hv : (⟨W⟩ : SmoothPlaneCurve F).pointValuation P (v - algebraMap F KE b) < 1)
+    (n : ℕ) (q : Polynomial F)
+    (ih : (⟨W⟩ : SmoothPlaneCurve F).pointValuation P
+        ((((Polynomial.C q) * Polynomial.X ^ n).map
+            (Polynomial.mapRingHom (algebraMap F KE))).evalEval u v -
+          algebraMap F KE (((Polynomial.C q) * Polynomial.X ^ n).evalEval a b)) < 1) :
+    (⟨W⟩ : SmoothPlaneCurve F).pointValuation P
+        ((((Polynomial.C q) * Polynomial.X ^ (n + 1)).map
+            (Polynomial.mapRingHom (algebraMap F KE))).evalEval u v -
+          algebraMap F KE (((Polynomial.C q) * Polynomial.X ^ (n + 1)).evalEval a b)) < 1 := by
+  -- abbreviations for the degree-`n` evaluations.
+  set Au : KE := (((Polynomial.C q) * Polynomial.X ^ n).map
+    (Polynomial.mapRingHom (algebraMap F KE))).evalEval u v with hAu
+  set Ab : F := ((Polynomial.C q) * Polynomial.X ^ n).evalEval a b with hAb
+  -- `(C q · X^(n+1))(u,v) = Au · v` and `(C q · X^(n+1))(a,b) = Ab · b`.
+  have heval_u : (((Polynomial.C q) * Polynomial.X ^ (n + 1)).map
+      (Polynomial.mapRingHom (algebraMap F KE))).evalEval u v = Au * v := by
+    rw [hAu, show (Polynomial.C q) * Polynomial.X ^ (n + 1) =
+        ((Polynomial.C q) * Polynomial.X ^ n) * Polynomial.X from by ring,
+      Polynomial.map_mul, Polynomial.map_X, Polynomial.evalEval_mul, Polynomial.evalEval_X]
+  have heval_ab : ((Polynomial.C q) * Polynomial.X ^ (n + 1)).evalEval a b = Ab * b := by
+    rw [hAb, show (Polynomial.C q) * Polynomial.X ^ (n + 1) =
+        ((Polynomial.C q) * Polynomial.X ^ n) * Polynomial.X from by ring,
+      Polynomial.evalEval_mul, Polynomial.evalEval_X]
+  have hAu_le : (⟨W⟩ : SmoothPlaneCurve F).pointValuation P Au ≤ 1 := by
+    have hAu_split : Au = (Au - algebraMap F KE Ab) + algebraMap F KE Ab := by ring
+    rw [hAu_split]
+    exact pointValuation_add_le_one W P (le_of_lt ih)
+      ((⟨W⟩ : SmoothPlaneCurve F).pointValuation_algebraMap_F_le_one P _)
+  rw [heval_u, heval_ab,
+    show Au * v - algebraMap F KE (Ab * b) =
+        Au * (v - algebraMap F KE b) + algebraMap F KE b * (Au - algebraMap F KE Ab) from by
+      push_cast [map_mul]; ring]
+  refine lt_of_le_of_lt (((⟨W⟩ : SmoothPlaneCurve F).pointValuation P).map_add _ _) (max_lt ?_ ?_)
+  · exact pointValuation_mul_lt_one_of_le_and_lt W P hAu_le hv
+  · exact pointValuation_mul_lt_one_of_le_and_lt W P
+      ((⟨W⟩ : SmoothPlaneCurve F).pointValuation_algebraMap_F_le_one P _) ih
+
 /-- **Bivariate value bridge**: if `u ≡ a` and `v ≡ b` modulo `m_P` (both `u, v` regular at `P`),
 then `p(u, v) ≡ p(a, b)` modulo `m_P` for any bivariate `p : F[X][X]` (the coefficients pushed
 through `algebraMap F K(E)`). Polynomial induction reducing to the two univariate bridges. -/
@@ -366,33 +409,7 @@ private theorem pointValuation_bivariate_bridge
     exact lt_of_le_of_lt (((⟨W⟩ : SmoothPlaneCurve F).pointValuation P).map_add _ _)
       (max_lt h₁ h₂)
   | monomial n q ih =>
-    -- abbreviations for the degree-`n` evaluations.
-    set Au : KE := (((Polynomial.C q) * Polynomial.X ^ n).map
-      (Polynomial.mapRingHom (algebraMap F KE))).evalEval u v with hAu
-    set Ab : F := ((Polynomial.C q) * Polynomial.X ^ n).evalEval a b with hAb
-    -- `(C q · X^(n+1))(u,v) = Au · v` and `(C q · X^(n+1))(a,b) = Ab · b`.
-    have heval_u : (((Polynomial.C q) * Polynomial.X ^ (n + 1)).map
-        (Polynomial.mapRingHom (algebraMap F KE))).evalEval u v = Au * v := by
-      rw [hAu, show (Polynomial.C q) * Polynomial.X ^ (n + 1) =
-          ((Polynomial.C q) * Polynomial.X ^ n) * Polynomial.X from by ring,
-        Polynomial.map_mul, Polynomial.map_X, Polynomial.evalEval_mul, Polynomial.evalEval_X]
-    have heval_ab : ((Polynomial.C q) * Polynomial.X ^ (n + 1)).evalEval a b = Ab * b := by
-      rw [hAb, show (Polynomial.C q) * Polynomial.X ^ (n + 1) =
-          ((Polynomial.C q) * Polynomial.X ^ n) * Polynomial.X from by ring,
-        Polynomial.evalEval_mul, Polynomial.evalEval_X]
-    have hAu_le : (⟨W⟩ : SmoothPlaneCurve F).pointValuation P Au ≤ 1 := by
-      have hAu_split : Au = (Au - algebraMap F KE Ab) + algebraMap F KE Ab := by ring
-      rw [hAu_split]
-      exact pointValuation_add_le_one W P (le_of_lt ih)
-        ((⟨W⟩ : SmoothPlaneCurve F).pointValuation_algebraMap_F_le_one P _)
-    rw [heval_u, heval_ab,
-      show Au * v - algebraMap F KE (Ab * b) =
-          Au * (v - algebraMap F KE b) + algebraMap F KE b * (Au - algebraMap F KE Ab) from by
-        push_cast [map_mul]; ring]
-    refine lt_of_le_of_lt (((⟨W⟩ : SmoothPlaneCurve F).pointValuation P).map_add _ _) (max_lt ?_ ?_)
-    · exact pointValuation_mul_lt_one_of_le_and_lt W P hAu_le hv
-    · exact pointValuation_mul_lt_one_of_le_and_lt W P
-        ((⟨W⟩ : SmoothPlaneCurve F).pointValuation_algebraMap_F_le_one P _) ih
+    exact pointValuation_bivariate_bridge_monomial P hv n q ih
 
 /-- `[ℓ].pullback (algebraMap (mk p)) = p(mulByInt_x ℓ, mulByInt_y ℓ)` (coefficients pushed through
 `algebraMap F K(E)`). The coordinate-ring comorphism of `[ℓ]` substitutes the division coordinate
