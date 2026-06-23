@@ -484,6 +484,68 @@ private theorem ofEquation_ord_mul_nonneg_aux {C : Curves.SmoothPlaneCurve F}
   exact_mod_cast this
 
 omit [WeierstrassCurve.IsElliptic E.toAffine] in
+/-- **The `F(x)`-summand stays regular under the pullback**: for `r ∈ F(x)` whose
+image already has `ord_∞ ≥ 0` in `K(V)`, and with `ord_∞ u = M < 0`, the pulled-back
+`F(x)`-part `(ofEquationPullback …) r` still has `ord_∞ ≥ 0` in `K(E)`.  Via
+`ord_ofEquationPullback_algebraMap_fracPolyX` the source bound `ord_∞ r = -2t ≥ 0`
+forces `t ≤ 0`, and then the image order `t·M ≥ 0` since `M < 0`.  The
+`ofEquationPullback` analogue of `ordAtInfty_mulByInt_pullback_fracPolyX_nonneg`. -/
+private theorem ordAtInfty_ofEquationPullback_fracPolyX_nonneg
+    {M : ℤ} (hu : (W_smooth E).ordAtInfty u = ((M : ℤ) : WithTop ℤ)) (hMneg : M < 0)
+    {r : FractionRing (Polynomial F)}
+    (hr_ord : 0 ≤ (W_smooth V).ordAtInfty
+      (algebraMap (FractionRing (Polynomial F)) KV r)) :
+    0 ≤ (W_smooth E).ordAtInfty
+      (ofEquationPullback E V u v h_eqn h_trans
+        (algebraMap (FractionRing (Polynomial F)) KV r)) := by
+  rcases eq_or_ne r 0 with rfl | hr
+  · rw [map_zero, map_zero]
+    exact le_of_le_of_eq le_top ((W_smooth E).ordAtInfty_zero).symm
+  · obtain ⟨t, hsrc, himg⟩ :=
+      ord_ofEquationPullback_algebraMap_fracPolyX E V u v h_eqn h_trans hu hMneg hr
+    rw [hsrc] at hr_ord
+    have ht : t ≤ 0 := by
+      have : (0 : ℤ) ≤ -2 * t := by exact_mod_cast hr_ord
+      linarith
+    rw [himg]
+    have : (0 : ℤ) ≤ t * M := by
+      nlinarith [mul_nonneg (by linarith : (0:ℤ) ≤ -t) (by linarith : (0:ℤ) ≤ -M)]
+    exact_mod_cast this
+
+omit [WeierstrassCurve.IsElliptic E.toAffine] in
+/-- **The `y`-summand stays regular under the pullback**: for `r ∈ F(x)` whose
+`{1, y}`-coefficient bound gives `ord_∞ r ≥ 3` (here `ord_∞(y_gen V) = -3`), and
+with `ord_∞ u = 2m`, `m ≤ -1`, the pulled-back `y`-term `(ofEquationPullback …) r · v`
+has `ord_∞ ≥ 0` in `K(E)`.  The source bound forces `t ≤ -2`, the image of `r` has
+order `t·(2m)`, and the curve-equation bound `ord_∞ v ≥ 3m` (`h_y`) then gives
+`t·(2m) + 3m ≥ 0` through `ofEquation_ord_mul_nonneg_aux`.  The `ofEquationPullback`
+analogue of `ordAtInfty_mulByInt_pullback_y_term_nonneg`. -/
+private theorem ordAtInfty_ofEquationPullback_y_term_nonneg
+    {m : ℤ} (hm : m ≤ -1)
+    (hu : (W_smooth E).ordAtInfty u = ((2 * m : ℤ) : WithTop ℤ)) (hMneg : 2 * m < 0)
+    (h_y : ((3 * m : ℤ) : WithTop ℤ) ≤ (W_smooth E).ordAtInfty v)
+    {r : FractionRing (Polynomial F)}
+    (hr_ord : 0 ≤ (W_smooth V).ordAtInfty
+        (algebraMap (FractionRing (Polynomial F)) KV r) + ((-3 : ℤ) : WithTop ℤ)) :
+    0 ≤ (W_smooth E).ordAtInfty
+      (ofEquationPullback E V u v h_eqn h_trans
+        (algebraMap (FractionRing (Polynomial F)) KV r) * v) := by
+  rcases eq_or_ne r 0 with rfl | hr
+  · rw [map_zero, map_zero, zero_mul]
+    exact le_of_le_of_eq le_top ((W_smooth E).ordAtInfty_zero).symm
+  · have hv_ne : v ≠ 0 := ofEquation_v_ne_zero E V u v h_eqn h_trans
+    obtain ⟨t, hsrc, himg⟩ :=
+      ord_ofEquationPullback_algebraMap_fracPolyX E V u v h_eqn h_trans hu hMneg hr
+    rw [hsrc] at hr_ord
+    have ht : t ≤ -2 := by
+      have h0 : (0 : WithTop ℤ) ≤ ((-2 * t + -3 : ℤ) : WithTop ℤ) := by
+        rw [WithTop.coe_add]
+        exact_mod_cast hr_ord
+      have : (0 : ℤ) ≤ -2 * t + -3 := by exact_mod_cast h0
+      omega
+    exact ofEquation_ord_mul_nonneg_aux hm ht himg h_y hv_ne
+
+omit [WeierstrassCurve.IsElliptic E.toAffine] in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 800000 in
 /-- **The basepoint condition**: the pullback preserves regularity at infinity,
@@ -541,35 +603,9 @@ theorem ofEquationPullback_ordAtInfty_nonneg
   rw [himg]
   refine le_trans (le_min ?_ ?_) ((W_smooth E).ordAtInfty_add_ge_min _ _)
   · -- the `F(x)`-part: `ord ≥ 0` transports to `ord ≥ 0`
-    rcases eq_or_ne r₁ 0 with rfl | hr₁
-    · rw [map_zero, map_zero]
-      exact le_of_le_of_eq le_top ((W_smooth E).ordAtInfty_zero).symm
-    · obtain ⟨t, hsrc, himg1⟩ :=
-        ord_ofEquationPullback_algebraMap_fracPolyX E V u v h_eqn h_trans hu hMneg hr₁
-      rw [hsrc] at hf1
-      have ht : t ≤ 0 := by
-        have : (0 : ℤ) ≤ -2 * t := by exact_mod_cast hf1
-        linarith
-      rw [himg1]
-      have : (0 : ℤ) ≤ t * (2 * m) := by
-        nlinarith [mul_nonneg (by linarith : (0:ℤ) ≤ -t)
-          (by linarith : (0:ℤ) ≤ -(2 * m))]
-      exact_mod_cast this
-  · -- the `y`-part
-    rcases eq_or_ne r₂ 0 with rfl | hr₂
-    · rw [map_zero, map_zero, zero_mul]
-      exact le_of_le_of_eq le_top ((W_smooth E).ordAtInfty_zero).symm
-    · have hv_ne : v ≠ 0 := ofEquation_v_ne_zero E V u v h_eqn h_trans
-      obtain ⟨t, hsrc, himg2⟩ :=
-        ord_ofEquationPullback_algebraMap_fracPolyX E V u v h_eqn h_trans hu hMneg hr₂
-      rw [hsrc] at hf2
-      have ht : t ≤ -2 := by
-        have h0 : (0 : WithTop ℤ) ≤ ((-2 * t + -3 : ℤ) : WithTop ℤ) := by
-          rw [WithTop.coe_add]
-          exact_mod_cast hf2
-        have : (0 : ℤ) ≤ -2 * t + -3 := by exact_mod_cast h0
-        omega
-      exact ofEquation_ord_mul_nonneg_aux hm ht himg2 h_y hv_ne
+    exact ordAtInfty_ofEquationPullback_fracPolyX_nonneg E V u v h_eqn h_trans hu hMneg hf1
+  · -- the `y`-part: `ord ≥ 3` on the coefficient transports to `ord ≥ 0`
+    exact ordAtInfty_ofEquationPullback_y_term_nonneg E V u v h_eqn h_trans hm hu hMneg h_y hf2
 
 /-- **The packaged builder**: a genuine `EC.Isogeny E.toAffine V.toAffine` from an
 `Equation` witness, transcendence of the `x`-image, and the even-negative-order
