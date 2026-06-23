@@ -20,9 +20,22 @@ This file develops the **full** form of Strong Multiplicity One as stated by Miy
 Neither `f` nor `g` is assumed normalised; the conclusion is `g = c • f` for some
 `c ∈ ℂ`.
 
-This **builds on** the same-level normalised-newform uniqueness theorem
-`HeckeRing.GL2.strongMultiplicityOne` (Miyake Theorem 4.6.8 +
-Atkin–Lehner uniqueness, route B) and **never modifies it**.
+This **builds on** the route-B Main Lemma `mainLemma_charSpace_routeB`
+(Miyake Theorem 4.6.8 + Atkin–Lehner uniqueness) from
+`LeanModularForms.StrongMultiplicityOne` and **never modifies it**.
+
+## Main definitions
+
+* `cuspFormsOldChar` — Miyake's character-refined old space `S_k^♭(N, χ)`
+  (p. 162); relating it to the project's `cuspFormsOld` is the API gap flagged
+  below.
+
+## Main results
+
+* `strongMultiplicityOne_constMul` — Miyake Theorem 4.6.12: a shared-eigenvalue
+  `g ∈ S_k(Γ₁(N), χ)` is a constant multiple `c • f` of a normalised newform `f`.
+* `strongMultiplicityOne` — Diamond–Shurman Theorem 5.8.2.1: two newforms with
+  equal eigenvalues off a finite set are equal (the `c = 1` corollary).
 
 ## Proof outline (Miyake pp. 163–164)
 
