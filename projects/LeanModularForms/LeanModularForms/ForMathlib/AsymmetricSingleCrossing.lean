@@ -21,12 +21,8 @@ bound when `δ_R ≠ δ_L`).
   cutoffs, near/far bounds, and an FTC-driven limit `E(ε) → L`.
 * `AsymmetricSingleCrossingData.hasCauchyPV` — the CPV of `(z - z₀)⁻¹` along
   `γ` exists with limit `L`.
-* `AsymmetricSingleCrossingData.hasWindingNumber`,
-  `windingNumber_eq` — the `generalizedWindingNumber` equals `L / (2πi)`.
-* `SingleCrossingData.toAsymmetric` — every symmetric crossing data lifts to
-  an asymmetric one (taking `δ_left = δ_right = δ`). This makes the asymmetric
-  framework backwards compatible: existing FD-curve constructors continue to
-  work via this wrapper.
+* `AsymmetricSingleCrossingData.hasWindingNumber` — the
+  `generalizedWindingNumber` equals `L / (2πi)`.
 
 ## References
 
@@ -126,12 +122,12 @@ private theorem cpvIntegrand_eq_full_left_ae (D : AsymmetricSingleCrossingData �
   filter_upwards [h_sing] with t ht_ne ht_mem
   rw [Set.uIoc_of_le h_left_lt.le] at ht_mem
   have ht_lt : t < D.t₀ - D.δ_left ε :=
-    lt_of_le_of_ne ht_mem.2 (fun h ↦ ht_ne (Set.mem_singleton_iff.mpr h))
+    ht_mem.2.lt_of_ne (fun h ↦ ht_ne (Set.mem_singleton_iff.mpr h))
   have hδ_pos := D.hδ_left_pos ε hε_pos hε_lt
   simp only [cpvIntegrand]
   rw [if_pos]
   apply D.h_far_left ε hε_pos hε_lt t
-  · exact ⟨ht_mem.1.le, le_of_lt (by linarith [D.ht₀.2])⟩
+  · exact ⟨ht_mem.1.le, by linarith [D.ht₀.2]⟩
   · linarith
   · linarith
 
@@ -172,7 +168,7 @@ private theorem cutoff_integral_eq_E (D : AsymmetricSingleCrossingData γ z₀)
   have hF_int_left : IntervalIntegrable F volume 0 (D.t₀ - D.δ_left ε) :=
     (D.hint_left ε hε_pos hε_lt).congr_ae
       ((ae_restrict_iff' measurableSet_uIoc).mpr
-        (hF_left.mono (fun t ht hm ↦ (ht hm).symm)))
+        (hF_left.mono (fun _ ht hm ↦ (ht hm).symm)))
   have hF_int_mid : IntervalIntegrable F volume (D.t₀ - D.δ_left ε)
       (D.t₀ + D.δ_right ε) :=
     (IntervalIntegrable.zero (μ := volume)
@@ -181,7 +177,7 @@ private theorem cutoff_integral_eq_E (D : AsymmetricSingleCrossingData γ z₀)
   have hF_int_right : IntervalIntegrable F volume (D.t₀ + D.δ_right ε) 1 :=
     (D.hint_right ε hε_pos hε_lt).congr_ae
       ((ae_restrict_iff' measurableSet_uIoc).mpr
-        (hF_right.mono (fun t ht hm ↦ (ht hm).symm)))
+        (hF_right.mono (fun _ ht hm ↦ (ht hm).symm)))
   rw [show ∫ t in (0 : ℝ)..1, F t =
       (∫ t in (0 : ℝ)..(D.t₀ - D.δ_left ε), F t) +
       (∫ t in (D.t₀ - D.δ_left ε)..(D.t₀ + D.δ_right ε), F t) +
@@ -197,18 +193,14 @@ private theorem cutoff_integral_eq_E (D : AsymmetricSingleCrossingData γ z₀)
 /-- The CPV of `(z - z₀)⁻¹` along `γ` exists and equals `D.L`. -/
 theorem hasCauchyPV (D : AsymmetricSingleCrossingData γ z₀) :
     HasCauchyPV (fun z ↦ (z - z₀)⁻¹) γ z₀ D.L := by
-  simp only [HasCauchyPV]
-  have h_ev : (fun ε ↦ ∫ t in (0 : ℝ)..1,
-      cpvIntegrand (fun z ↦ (z - z₀)⁻¹) γ.toPath.extend z₀ ε t)
-      =ᶠ[𝓝[>] 0] D.E := by
-    filter_upwards [Ioo_mem_nhdsGT D.hthresh] with ε hε
-    exact D.cutoff_integral_eq_E hε.1 hε.2
-  exact D.h_limit.congr' h_ev.symm
+  refine D.h_limit.congr' ?_
+  filter_upwards [Ioo_mem_nhdsGT D.hthresh] with ε hε
+  exact (D.cutoff_integral_eq_E hε.1 hε.2).symm
 
 /-- The generalized winding number at `z₀` equals `L / (2πi)`. -/
 theorem hasWindingNumber (D : AsymmetricSingleCrossingData γ z₀) :
     HasGeneralizedWindingNumber γ z₀ (D.L / (2 * ↑Real.pi * I)) := by
-  rw [show D.L / (2 * ↑Real.pi * I) = (2 * ↑Real.pi * I)⁻¹ * D.L by ring]
+  rw [div_eq_inv_mul]
   exact hasGeneralizedWindingNumber_of_hasCauchyPV D.hasCauchyPV
 end AsymmetricSingleCrossingData
 
