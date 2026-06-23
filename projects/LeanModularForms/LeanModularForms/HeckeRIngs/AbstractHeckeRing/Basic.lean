@@ -17,7 +17,8 @@ import Mathlib.Tactic.Group
 # Hecke Rings: Basic Definitions
 
 Basic definitions for Hecke rings following Shimura Ch. 3: `HeckePair`, double coset
-spaces `HeckeCoset` and `HeckeLeftCoset`, the Hecke ring type `𝕋`, and foundational double coset lemmas.
+spaces `HeckeCoset` and `HeckeLeftCoset`, the Hecke ring type `𝕋` and module type `HeckeModule`,
+and foundational double coset lemmas.
 -/
 
 open Set DoubleCoset Subgroup Subgroup.Commensurable
