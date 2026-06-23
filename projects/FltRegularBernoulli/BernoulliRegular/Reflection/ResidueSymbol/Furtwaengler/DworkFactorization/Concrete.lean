@@ -5,7 +5,10 @@ public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.DworkFactor
 /-!
 # Concrete Artin-Hasse quotient facts
 
-Split from `DworkFactorization.lean`.
+This file collects the concrete quotient computations for the Artin-Hasse
+Dwork factors used in Furtwaengler's congruence argument.  It includes the
+low-precision theta reductions, finite quotient forms of the Dwork recursion,
+and the inverse-series normalization of the Dwork parameter.
 -/
 
 @[expose] public section
@@ -34,12 +37,13 @@ variable (S : ConcreteStickelbergerSetup ℓ p k K R')
 `Q`. -/
 theorem dworkCoeffArtinHasse_zero_sub_one_mem_Q :
     dworkCoeffArtinHasse S 0 - 1 ∈ S.Q := by
-  simp
+  simp only [dworkCoeffArtinHasse_zero, sub_self, Ideal.zero_mem]
 
 /-- The zero-th theta truncation is congruent to `1` modulo `Q`. -/
 theorem dworkThetaTrunc_artinHasse_zero_sub_one_mem_Q (u : 𝓞 R') :
     dworkThetaTrunc (dworkCoeffArtinHasse S) 0 u - 1 ∈ S.Q := by
-  simp [dworkThetaTrunc]
+  simp only [dworkThetaTrunc, Nat.reduceAdd, Finset.range_one, Finset.sum_singleton,
+    dworkCoeffArtinHasse_zero, pow_zero, mul_one, sub_self, Ideal.zero_mem]
 
 /-- The linear Artin-Hasse coefficient is congruent to `π` modulo `Q^2`. -/
 theorem dworkCoeffArtinHasse_one_sub_pi_mem_Q_sq :
@@ -86,7 +90,8 @@ theorem dworkCoeffArtinHasse_one_sub_pi_mem_Q_cubed :
     rw [← pow_add] at hmul'
     exact hmul'
   convert hmul using 1
-  simp [dworkCoeffArtinHasse, dworkCoeffArtinHasseRaw, hcoeff]
+  simp only [dworkCoeffArtinHasse, dworkCoeffArtinHasseRaw, Nat.succ_eq_add_one,
+    zero_add, hcoeff, Rat.num_ofNat, Int.cast_one, pow_one, one_mul]
   ring
 
 /-- The first Artin-Hasse theta truncation is congruent to `1 + πu` modulo
@@ -98,7 +103,9 @@ theorem dworkThetaTrunc_artinHasse_one_sub_one_add_pi_mul_mem_Q_sq (u : 𝓞 R')
   have hmul : (dworkCoeffArtinHasse S 1 - S.π) * u ∈ S.Q ^ 2 :=
     Ideal.mul_mem_right _ _ hcoeff
   convert hmul using 1
-  simp [dworkThetaTrunc, Finset.sum_range_succ]
+  simp only [dworkThetaTrunc, Nat.reduceAdd, Finset.sum_range_succ, Finset.range_one,
+    Finset.sum_singleton, dworkCoeffArtinHasse_zero, pow_zero, mul_one, pow_one,
+    add_sub_add_left_eq_sub]
   ring
 
 /-- The first parameterized Artin-Hasse theta truncation is congruent to
@@ -111,7 +118,9 @@ theorem dworkThetaTrunc_artinHasseAt_one_sub_one_add_pi_mul_mem_Q_sq
   have hmul : (dworkCoeffArtinHasseAt S γ 1 - S.π) * u ∈ S.Q ^ 2 :=
     Ideal.mul_mem_right _ _ hcoeff
   convert hmul using 1
-  simp [dworkThetaTrunc, Finset.sum_range_succ]
+  simp only [dworkThetaTrunc, Nat.reduceAdd, Finset.sum_range_succ, Finset.range_one,
+    Finset.sum_singleton, dworkCoeffArtinHasseAt_zero, pow_zero, mul_one, pow_one,
+    add_sub_add_left_eq_sub]
   ring
 
 /-- The first precision-indexed parameterized Artin-Hasse theta truncation is
@@ -125,7 +134,9 @@ theorem dworkThetaTrunc_artinHasseAtTo_one_sub_one_add_pi_mul_mem_Q_sq
   have hmul : (dworkCoeffArtinHasseAtTo S γ 1 1 - S.π) * u ∈ S.Q ^ 2 :=
     Ideal.mul_mem_right _ _ hcoeff
   convert hmul using 1
-  simp [dworkThetaTrunc, Finset.sum_range_succ]
+  simp only [dworkThetaTrunc, Nat.reduceAdd, Finset.sum_range_succ, Finset.range_one,
+    Finset.sum_singleton, dworkCoeffArtinHasseAtTo_zero, pow_zero, mul_one, pow_one,
+    add_sub_add_left_eq_sub]
   ring
 
 /-- Any positive precision-indexed parameterized Artin-Hasse theta
@@ -138,10 +149,11 @@ theorem quotient_mk_dworkThetaTrunc_artinHasseAtTo_eq_one_add_pi_mul_mod_sq_of_o
       Ideal.Quotient.mk (S.Q ^ 2) (1 + S.π * u) := by
   classical
   let coeff : ℕ → 𝓞 R' := dworkCoeffArtinHasseAtTo S γ N
-  have h0mem : 0 ∈ Finset.range (N + 1) := by simp
+  have h0mem : 0 ∈ Finset.range (N + 1) := Finset.mem_range.mpr (Nat.succ_pos N)
   have h1lt : 1 < N + 1 := Nat.lt_succ_of_le hN
   have h1mem : 1 ∈ Finset.range (N + 1) \ {0} := by
-    simp [h1lt]
+    exact Finset.mem_sdiff.mpr ⟨Finset.mem_range.mpr h1lt, by simp only [Finset.mem_singleton,
+      one_ne_zero, not_false_eq_true]⟩
   have hcoeff₁ : coeff 1 - S.π ∈ S.Q ^ 2 :=
     S.dworkCoeffArtinHasseAtTo_one_sub_pi_mem_Q_sq hγ hγπ hN
   have hlinear :
