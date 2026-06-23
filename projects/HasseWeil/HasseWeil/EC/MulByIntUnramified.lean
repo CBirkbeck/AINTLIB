@@ -882,6 +882,80 @@ private theorem ord_P_psiTwo_pullback_eq_one (ℓ : ℤ) (hℓ : ℓ ≠ 0) (h2�
     (⟨W⟩ : SmoothPlaneCurve F).ord_P_inv _ (pow_ne_zero 4 hψℓ_ne),
     (⟨W⟩ : SmoothPlaneCurve F).ord_P_pow, hψℓ_ord, hψ2ℓ_ord]; simp
 
+/-- **`n = 1` via the invariant differential (char `2` leg).** When `[2ℓ]` is inseparable
+(`(2ℓ : F) = 0`) the duplication route degenerates, so the witness is the char-uniform differential
+bound `ord_P_mulByInt_y_sub_const_le_one`: with the numerator unit `polynomialX(Q) ≠ 0` (encoded by
+`hCconst`) it gives `ord_P (mulByInt_y ℓ − y_Q) ≤ 1`, which with the lower bound `1 ≤ ord_P (…)`
+pins the order to `1`. -/
+private theorem ord_P_mulByInt_y_sub_const_eq_one_of_two_mul_eq_zero (ℓ : ℤ) (hℓ : ℓ ≠ 0)
+    (hℓF : (ℓ : F) ≠ 0) (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPoint) {x_Q y_Q : F}
+    (hY_sub_ne : mulByInt_y W ℓ - algebraMap F KE y_Q ≠ 0)
+    (hCconst : (3 * x_Q ^ 2 + 2 * W.a₂ * x_Q + W.a₄ - W.a₁ * y_Q : F) ≠ 0)
+    (hX_reg : (0 : WithTop ℤ) ≤ (⟨W⟩ : SmoothPlaneCurve F).ord_P P (mulByInt_x W ℓ))
+    (h_one_le_X : ((1 : ℤ) : WithTop ℤ) ≤
+      (⟨W⟩ : SmoothPlaneCurve F).ord_P P (mulByInt_x W ℓ - algebraMap F KE x_Q))
+    (h_one_le_Y : ((1 : ℤ) : WithTop ℤ) ≤
+      (⟨W⟩ : SmoothPlaneCurve F).ord_P P (mulByInt_y W ℓ - algebraMap F KE y_Q)) :
+    (⟨W⟩ : SmoothPlaneCurve F).ord_P P (mulByInt_y W ℓ - algebraMap F KE y_Q) =
+      ((1 : ℤ) : WithTop ℤ) := by
+  have hPX_ord : (⟨W⟩ : SmoothPlaneCurve F).ord_P P
+      (3 * (mulByInt_x W ℓ) ^ 2 + 2 * algebraMap F KE W.a₂ * (mulByInt_x W ℓ) +
+        algebraMap F KE W.a₄ - algebraMap F KE W.a₁ * (mulByInt_y W ℓ)) = 0 :=
+    ord_P_y_numerator_eq_zero W P hCconst hX_reg h_one_le_X h_one_le_Y
+  exact le_antisymm
+    (ord_P_mulByInt_y_sub_const_le_one W ℓ hℓ hℓF P y_Q hY_sub_ne hPX_ord) h_one_le_Y
+
+/-- **`n = 1` via the duplication formula (char `≠ 2` leg).** When `(2ℓ : F) ≠ 0` the pulled-back
+2-division polynomial `Ψ₂ ∘ [ℓ] = 2(mulByInt_y − y_Q) + a₁(mulByInt_x − x_Q)` has order `1`
+(`ord_P_psiTwo_pullback_eq_one`, the `[2ℓ]`-torsion pole). Its `2(mulByInt_y − y_Q)` term has order
+`n := ord_P (mulByInt_y ℓ − y_Q)` (as `2` is a unit), strictly dominating the
+`a₁(mulByInt_x − x_Q)` term whenever `a₁ ≠ 0` (using the strict order gap
+`ord_P (mulByInt_y − y_Q) < ord_P (mulByInt_x − x_Q)`), so the sum has order `n`, forcing `n = 1`. -/
+private theorem ord_P_mulByInt_y_sub_const_eq_one_of_two_mul_ne_zero (ℓ : ℤ) (hℓ : ℓ ≠ 0)
+    (h2ℓF : (2 * ℓ : F) ≠ 0) (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPoint) {x_Q y_Q : F}
+    (h2torKE : (2 : KE) * algebraMap F KE y_Q + algebraMap F KE W.a₁ * algebraMap F KE x_Q +
+      algebraMap F KE W.a₃ = 0)
+    (hQ2P : (mulByInt W.toAffine (2 * ℓ)).toAddMonoidHom P.toAffinePoint = (0 : W.toAffine.Point))
+    (hψℓ_ord : (⟨W⟩ : SmoothPlaneCurve F).ord_P P (ψ_ff W ℓ) = 0)
+    (h_gap : (⟨W⟩ : SmoothPlaneCurve F).ord_P P (mulByInt_y W ℓ - algebraMap F KE y_Q) <
+      (⟨W⟩ : SmoothPlaneCurve F).ord_P P (mulByInt_x W ℓ - algebraMap F KE x_Q)) :
+    (⟨W⟩ : SmoothPlaneCurve F).ord_P P (mulByInt_y W ℓ - algebraMap F KE y_Q) =
+      ((1 : ℤ) : WithTop ℤ) := by
+  have h2F : (2 : F) ≠ 0 := by
+    intro h; apply h2ℓF
+    rw [show (2 * ℓ : F) = 2 * (ℓ : F) from by ring, h, zero_mul]
+  have hAprime_ord :
+      (⟨W⟩ : SmoothPlaneCurve F).ord_P P
+        ((2 : KE) * mulByInt_y W ℓ + algebraMap F KE W.a₁ * mulByInt_x W ℓ +
+          algebraMap F KE W.a₃) = ((1 : ℤ) : WithTop ℤ) :=
+    ord_P_psiTwo_pullback_eq_one W ℓ hℓ h2ℓF P hQ2P hψℓ_ord
+  have hAprime_eq : (2 : KE) * mulByInt_y W ℓ + algebraMap F KE W.a₁ * mulByInt_x W ℓ +
+      algebraMap F KE W.a₃ = 2 * (mulByInt_y W ℓ - algebraMap F KE y_Q) +
+        algebraMap F KE W.a₁ * (mulByInt_x W ℓ - algebraMap F KE x_Q) := by
+    linear_combination h2torKE
+  have h2KE : algebraMap F KE 2 = (2 : KE) := map_ofNat (algebraMap F KE) 2
+  have hterm1_ord : (⟨W⟩ : SmoothPlaneCurve F).ord_P P
+      (2 * (mulByInt_y W ℓ - algebraMap F KE y_Q)) =
+      (⟨W⟩ : SmoothPlaneCurve F).ord_P P (mulByInt_y W ℓ - algebraMap F KE y_Q) := by
+    rw [← h2KE, (⟨W⟩ : SmoothPlaneCurve F).ord_P_mul,
+      (⟨W⟩ : SmoothPlaneCurve F).ord_P_algebraMap_F_of_ne_zero h2F, zero_add]
+  rw [hAprime_eq] at hAprime_ord
+  by_cases ha1 : W.a₁ = 0
+  · rw [ha1, map_zero, zero_mul, add_zero, hterm1_ord] at hAprime_ord
+    exact hAprime_ord
+  · have hterm2 : (⟨W⟩ : SmoothPlaneCurve F).ord_P P
+        (algebraMap F KE W.a₁ * (mulByInt_x W ℓ - algebraMap F KE x_Q)) =
+        (⟨W⟩ : SmoothPlaneCurve F).ord_P P (mulByInt_x W ℓ - algebraMap F KE x_Q) := by
+      rw [(⟨W⟩ : SmoothPlaneCurve F).ord_P_mul,
+        (⟨W⟩ : SmoothPlaneCurve F).ord_P_algebraMap_F_of_ne_zero ha1, zero_add]
+    have hlt : (⟨W⟩ : SmoothPlaneCurve F).ord_P P
+        (2 * (mulByInt_y W ℓ - algebraMap F KE y_Q)) <
+        (⟨W⟩ : SmoothPlaneCurve F).ord_P P
+          (algebraMap F KE W.a₁ * (mulByInt_x W ℓ - algebraMap F KE x_Q)) := by
+      rw [hterm1_ord, hterm2]; exact h_gap
+    rw [SmoothPlaneCurve.ord_P_add_eq_of_lt hlt, hterm1_ord] at hAprime_ord
+    exact hAprime_ord
+
 /-- **The `y`-variant `e = 1` unramifiedness of `[ℓ]` (2-torsion image).** For `[ℓ]` separable
 (`(ℓ : F) ≠ 0`) and a smooth point `P` of `⟨W⟩` whose image `[ℓ]·P = (x_Q, y_Q)` is an affine
 *2-torsion* point (`y_Q = negY x_Q y_Q`), the pullback `[ℓ]^*(y_gen − y_Q) = mulByInt_y ℓ − y_Q`
@@ -1044,73 +1118,20 @@ theorem ord_P_mulByInt_y_sub_const_eq_one (ℓ : ℤ) (hℓ : ℓ ≠ 0) (hℓF 
       hBma_ord, add_zero] at hh
     exact_mod_cast hh
   have hM_gt_n : (n : ℤ) < M := by omega
-  have ha_eq_n : a = n := by
-    by_cases ha1 : W.a₁ = 0
-    · have hAeq2 : (⟨W⟩ : SmoothPlaneCurve F).ord_P P A =
-          (⟨W⟩ : SmoothPlaneCurve F).ord_P P (Y - yq) := by
-        rw [hA_eq, ha1, map_zero, zero_mul, add_zero]
-      rw [ha, hn] at hAeq2; exact_mod_cast hAeq2
-    · have hterm2 : (⟨W⟩ : SmoothPlaneCurve F).ord_P P (algebraMap F KE W.a₁ * (X - xq)) =
-          ((M : ℤ) : WithTop ℤ) := by
-        rw [(⟨W⟩ : SmoothPlaneCurve F).ord_P_mul,
-          (⟨W⟩ : SmoothPlaneCurve F).ord_P_algebraMap_F_of_ne_zero ha1, zero_add, hM]
-      have hlt : (⟨W⟩ : SmoothPlaneCurve F).ord_P P (Y - yq) <
-          (⟨W⟩ : SmoothPlaneCurve F).ord_P P (algebraMap F KE W.a₁ * (X - xq)) := by
-        rw [hn, hterm2]; exact_mod_cast hM_gt_n
-      have hAeq2 : (⟨W⟩ : SmoothPlaneCurve F).ord_P P A =
-          (⟨W⟩ : SmoothPlaneCurve F).ord_P P (Y - yq) := by
-        rw [hA_eq]; exact SmoothPlaneCurve.ord_P_add_eq_of_lt hlt
-      rw [ha, hn] at hAeq2; exact_mod_cast hAeq2
-  have hM_eq : M = 2 * n := by omega
   have hQ2P : (mulByInt W.toAffine (2 * ℓ)).toAddMonoidHom P.toAffinePoint =
       (0 : W.toAffine.Point) :=
     mulByInt_two_mul_eq_zero_of_image_2_tor W ℓ P h_ns' h_2_tor_Q hsmul'
-  suffices hgoal : (⟨W⟩ : SmoothPlaneCurve F).ord_P P (Y - yq) = ((1 : ℤ) : WithTop ℤ) by
-    exact hgoal
-  rw [hn]
-  congr 1
   rcases eq_or_ne (2 * ℓ : F) 0 with _h2 | h2
   · -- In char 2 the duplication route degenerates (`Ψ₂ = a₁X + a₃`, `[2ℓ]` inseparable), so the
-    -- witness is the differential bound `ord_P_mulByInt_y_sub_const_le_one`, valid in every char.
-    have hPX_ord : (⟨W⟩ : SmoothPlaneCurve F).ord_P P
-        (3 * X ^ 2 + 2 * algebraMap F KE W.a₂ * X + algebraMap F KE W.a₄ -
-          algebraMap F KE W.a₁ * Y) = 0 :=
-      ord_P_y_numerator_eq_zero W P hCconst hX_reg h_one_le_X h_one_le_Y
-    have hle : (⟨W⟩ : SmoothPlaneCurve F).ord_P P (Y - yq) ≤ ((1 : ℤ) : WithTop ℤ) := by
-      rw [hY, hyq]
-      exact ord_P_mulByInt_y_sub_const_le_one W ℓ hℓ hℓF P y_Q
-        (by rw [← hyq, ← hY]; exact hY_sub_ne) (by rw [← hX, ← hY]; exact hPX_ord)
-    rw [hn] at hle
-    have hn_le : n ≤ 1 := by exact_mod_cast hle
-    have hn_ge : (1 : ℤ) ≤ n := by rw [hn] at h_one_le_Y; exact_mod_cast h_one_le_Y
-    omega
-  · have hAprime_ord :
-        (⟨W⟩ : SmoothPlaneCurve F).ord_P P
-          ((2 : KE) * Y + algebraMap F KE W.a₁ * X + algebraMap F KE W.a₃) =
-        ((1 : ℤ) : WithTop ℤ) :=
-      ord_P_psiTwo_pullback_eq_one W ℓ hℓ h2 P hQ2P hψℓ_ord
-    have hAprime_eq : (2 : KE) * Y + algebraMap F KE W.a₁ * X + algebraMap F KE W.a₃ =
-        2 * (Y - yq) + algebraMap F KE W.a₁ * (X - xq) := by
-      linear_combination h2torKE
-    have h2F : (2 : F) ≠ 0 := by
-      intro h; apply h2
-      rw [show (2 * ℓ : F) = 2 * (ℓ : F) from by ring, h, zero_mul]
-    have hterm1_ord : (⟨W⟩ : SmoothPlaneCurve F).ord_P P (2 * (Y - yq)) =
-        ((n : ℤ) : WithTop ℤ) := by
-      rw [← h2KE, (⟨W⟩ : SmoothPlaneCurve F).ord_P_mul,
-        (⟨W⟩ : SmoothPlaneCurve F).ord_P_algebraMap_F_of_ne_zero h2F, zero_add, hn]
-    rw [hAprime_eq] at hAprime_ord
-    by_cases ha1 : W.a₁ = 0
-    · rw [ha1, map_zero, zero_mul, add_zero, hterm1_ord] at hAprime_ord
-      exact_mod_cast hAprime_ord
-    · have hterm2 : (⟨W⟩ : SmoothPlaneCurve F).ord_P P (algebraMap F KE W.a₁ * (X - xq)) =
-          ((M : ℤ) : WithTop ℤ) := by
-        rw [(⟨W⟩ : SmoothPlaneCurve F).ord_P_mul,
-          (⟨W⟩ : SmoothPlaneCurve F).ord_P_algebraMap_F_of_ne_zero ha1, zero_add, hM]
-      have hlt : (⟨W⟩ : SmoothPlaneCurve F).ord_P P (2 * (Y - yq)) <
-          (⟨W⟩ : SmoothPlaneCurve F).ord_P P (algebraMap F KE W.a₁ * (X - xq)) := by
-        rw [hterm1_ord, hterm2]; exact_mod_cast (by omega : (n : ℤ) < M)
-      rw [SmoothPlaneCurve.ord_P_add_eq_of_lt hlt, hterm1_ord] at hAprime_ord
-      exact_mod_cast hAprime_ord
+    -- witness is the differential bound, valid in every char.
+    exact ord_P_mulByInt_y_sub_const_eq_one_of_two_mul_eq_zero W ℓ hℓ hℓF P hY_sub_ne hCconst
+      hX_reg h_one_le_X h_one_le_Y
+  · -- In char `≠ 2` the duplication formula `Ψ₂ ∘ [ℓ]` has order `1`; the dominant
+    -- `2(mulByInt_y − y_Q)` term then pins the order, using the strict gap `n < M`.
+    have h_gap : (⟨W⟩ : SmoothPlaneCurve F).ord_P P (Y - yq) <
+        (⟨W⟩ : SmoothPlaneCurve F).ord_P P (X - xq) := by
+      rw [hn, hM]; exact_mod_cast hM_gt_n
+    exact ord_P_mulByInt_y_sub_const_eq_one_of_two_mul_ne_zero W ℓ hℓ h2 P h2torKE hQ2P
+      hψℓ_ord h_gap
 
 end HasseWeil
