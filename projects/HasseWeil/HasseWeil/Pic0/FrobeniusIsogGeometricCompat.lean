@@ -65,6 +65,7 @@ noncomputable def frobeniusCurveMap :
     HasseWeil.Curves.CurveMap ⟨W.toAffine⟩ ⟨W.toAffine⟩ where
   pullback := FiniteField.frobeniusAlgHom K W.toAffine.FunctionField
 
+omit [DecidableEq K] [WeierstrassCurve.IsElliptic W.toAffine] in
 @[simp] theorem frobeniusCurveMap_pullback :
     (frobeniusCurveMap W).pullback =
       FiniteField.frobeniusAlgHom K W.toAffine.FunctionField := rfl
@@ -82,11 +83,13 @@ noncomputable def frobeniusCurveMapCoordHom :
         (FiniteField.frobeniusAlgHom K W.toAffine.CoordinateRing u)
     simp only [FiniteField.coe_frobeniusAlgHom, map_pow]
 
+omit [DecidableEq K] [WeierstrassCurve.IsElliptic W.toAffine] in
 @[simp] theorem frobeniusCurveMapCoordHom_toAlgHom :
     (frobeniusCurveMapCoordHom W).toAlgHom =
       FiniteField.frobeniusAlgHom K W.toAffine.CoordinateRing := rfl
 
 set_option maxHeartbeats 800000 in
+omit [DecidableEq K] in
 /-- **Frobenius geometric image at a rational point is the identity.** The image
 of `(x, y) ∈ W(K)` under the Frobenius comorphism `CurveMap.toPointMap` has
 coordinates `(x^q, y^q) = (x, y)` by `FiniteField.pow_card`.  Hence the geometric
@@ -108,14 +111,8 @@ theorem frobeniusCurveMap_toPointMap (x y : K) (h : W.toAffine.Nonsingular x y) 
       (FiniteField.frobeniusAlgHom K W.toAffine.CoordinateRing
         (WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine
           (Polynomial.C Polynomial.X))) = x
-    rw [show (FiniteField.frobeniusAlgHom K W.toAffine.CoordinateRing)
-        (WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine
-          (Polynomial.C Polynomial.X)) =
-      (WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine
-        (Polynomial.C Polynomial.X)) ^ Fintype.card K from
-        congr_fun (FiniteField.coe_frobeniusAlgHom (K := K)
-          (R := W.toAffine.CoordinateRing)) _,
-      map_pow, HasseWeil.Curves.SmoothPlaneCurve.evalAt_x, FiniteField.pow_card]
+    rw [FiniteField.coe_frobeniusAlgHom, map_pow,
+      HasseWeil.Curves.SmoothPlaneCurve.evalAt_x, FiniteField.pow_card]
   · -- y-coordinate: evalAt ⟨x,y,h⟩ (frob (mk Y)) = y^q = y.
     change HasseWeil.Curves.CurveMap.evalAtPullback (frobeniusCurveMapCoordHom W)
       (⟨x, y, h⟩ : (⟨W.toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve K).SmoothPoint)
@@ -127,14 +124,8 @@ theorem frobeniusCurveMap_toPointMap (x y : K) (h : W.toAffine.Nonsingular x y) 
       (FiniteField.frobeniusAlgHom K W.toAffine.CoordinateRing
         (WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine
           (Polynomial.X (R := Polynomial K)))) = y
-    rw [show (FiniteField.frobeniusAlgHom K W.toAffine.CoordinateRing)
-        (WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine
-          (Polynomial.X (R := Polynomial K))) =
-      (WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine
-        (Polynomial.X (R := Polynomial K))) ^ Fintype.card K from
-        congr_fun (FiniteField.coe_frobeniusAlgHom (K := K)
-          (R := W.toAffine.CoordinateRing)) _,
-      map_pow, HasseWeil.Curves.SmoothPlaneCurve.evalAt_y, FiniteField.pow_card]
+    rw [FiniteField.coe_frobeniusAlgHom, map_pow,
+      HasseWeil.Curves.SmoothPlaneCurve.evalAt_y, FiniteField.pow_card]
 
 /-- **Frobenius `hcompat` building block.** The stored additive point map of
 `frobeniusIsog W` (the identity on `K`-rational points) agrees with the geometric
