@@ -42,6 +42,10 @@ Loop until your lane is empty or a freeze is active:
    passed the lib gate is exactly how a cleanup regression reached `main` — #2299. For `«Adic spaces»`
    modules use guillemets: `lake build "«Adic spaces».Foo"`.) **Zero new `sorry`**;
    `#print axioms` on the touched declarations shows only `propext` / `Classical.choice` / `Quot.sound`.
+   **AND the file must be lint-clean** — building by module name emits NO linter warnings on sorry-free
+   decls. The two warnings QC reopens most often (do NOT leave them): **`unusedSectionVars`** → add
+   `omit [Inst] in` before the theorem; **`overlappingInstances`** → drop the redundant instance argument
+   the linter names. Golfing while leaving these is the #1 shortcut QC catches (#3075→#3580, #3612→#3660).
    If you can't meet the bar, comment why, relabel `state:in-progress`→`state:todo`, unassign, move on.
 5. **Merge (auto — cleanup never changes a statement).** Re-check freeze. `git fetch origin main`; if
    main moved, rebase `cleanup/<n>` and re-verify. Push; `gh pr create --fill --base main`; then

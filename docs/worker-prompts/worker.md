@@ -51,8 +51,11 @@ Loop until the queue is empty or a freeze is active:
    from a lib root and `lake build <lib>` silently skips them (a broken orphan that passed the lib gate is how a
    cleanup regression reached `main` — #2299; for `«Adic spaces»` use guillemets, `lake build "«Adic spaces».Foo"`);
    **zero new `sorry`**; `#print axioms` on touched decls shows only `propext`/`Classical.choice`/`Quot.sound`.
-   Plus, by lane: **decompose** → the top-level statement is byte-for-byte unchanged; **generalise** → every
-   prior consumer of the lemma still compiles (the old statement follows from the new one). If you can't meet
+   Plus, by lane: **cleanup** → the file is **lint-clean** (no warnings on sorry-free decls; the two QC reopens
+   most — `unusedSectionVars` via `omit [Inst] in`, and `overlappingInstances` via dropping the redundant
+   instance arg — must be cleared; #3075→#3580, #3612→#3660); **decompose** → the top-level statement is
+   byte-for-byte unchanged; **generalise** → every prior consumer of the lemma still compiles (the old
+   statement follows from the new one). If you can't meet
    the bar, comment why, relabel `state:in-progress`→`state:todo`, unassign, move on.
 5. **Merge — depends on the lane** (re-check freeze first; `git fetch origin main`, rebase + re-verify if main moved):
    - **`lane:cleanup` / `lane:decompose`** (statement-preserving) → push; `gh pr create --fill --base main`;
