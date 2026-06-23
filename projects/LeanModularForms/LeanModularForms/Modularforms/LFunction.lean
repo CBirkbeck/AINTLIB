@@ -75,28 +75,22 @@ lemma strictWidthInfty_Gamma1_mapGL (N : ℕ) :
     ((Gamma1 N).map (mapGL ℝ)).strictWidthInfty = 1 :=
   CongruenceSubgroup.strictWidthInfty_Gamma1 N
 
-open CongruenceSubgroup Matrix.SpecialLinearGroup in
+/-- The point `i · t` lies in the upper half-plane when `0 < t`. -/
+private lemma imAxis_mem {t : ℝ} (ht : 0 < t) : 0 < (Complex.I * (t : ℂ)).im := by
+  rw [Complex.mul_im, Complex.I_im, Complex.I_re,
+    Complex.ofReal_re, Complex.ofReal_im]
+  simpa using ht
 
 /-- **Modular form on the positive imaginary axis.**
 
 Maps `t > 0` to `f` evaluated at `i · t ∈ ℍ`, and `t ≤ 0` to `0`. -/
 noncomputable def imAxis [ModularFormClass F Γ k] (f : F) (t : ℝ) : ℂ :=
-  if h : 0 < t then
-    f ⟨Complex.I * (t : ℂ), by
-      show 0 < (Complex.I * (t : ℂ)).im
-      rw [Complex.mul_im, Complex.I_im, Complex.I_re,
-        Complex.ofReal_re, Complex.ofReal_im]
-      simpa using h⟩
-  else 0
+  if h : 0 < t then f ⟨Complex.I * (t : ℂ), imAxis_mem h⟩ else 0
 
 @[simp]
 lemma imAxis_apply_of_pos [ModularFormClass F Γ k] (f : F) {t : ℝ} (ht : 0 < t) :
-    imAxis f t = f ⟨Complex.I * (t : ℂ), by
-      show 0 < (Complex.I * (t : ℂ)).im
-      rw [Complex.mul_im, Complex.I_im, Complex.I_re,
-        Complex.ofReal_re, Complex.ofReal_im]
-      simpa using ht⟩ := by
-  unfold imAxis; rw [dif_pos ht]
+    imAxis f t = f ⟨Complex.I * (t : ℂ), imAxis_mem ht⟩ := by
+  rw [imAxis, dif_pos ht]
 
 end ModularForms
 
@@ -139,8 +133,6 @@ theorem unique {F G : ℂ → ℂ} (hF : Differentiable ℂ F) (hG : Differentia
 
 end HasEntireExtension
 
-namespace HasMeromorphicExtensionWithPole
-
 /-- **Quotient pole sufficient condition.**
 
 If `num, den : 𝕜 → 𝕜` are meromorphic at `x`, both with finite
@@ -164,8 +156,6 @@ theorem _root_.meromorphicOrderAt_div_neg_of_orderAt_lt
       WithTop.coe_lt_coe]
   lia
 
-end HasMeromorphicExtensionWithPole
-
 /-- **Meromorphic extension with a pole — analytic obligation Prop.**
 
 A coefficient sequence `a : ℕ → ℂ` *has a meromorphic extension with a pole*
@@ -183,10 +173,6 @@ def HasMeromorphicExtensionWithPole (a : ℕ → ℂ) : Prop :=
     ∀ F : ℂ → ℂ, Differentiable ℂ F →
       (∀ {s : ℂ}, abscissaOfAbsConv a < s.re → F s = LSeries a s) →
       F =ᶠ[nhdsWithin s₀ {s₀}ᶜ] g
-
-namespace HasMeromorphicExtensionWithPole
-
-end HasMeromorphicExtensionWithPole
 
 /-- **Coprime-stripped coefficient sequence at a Finset of primes.**
 
