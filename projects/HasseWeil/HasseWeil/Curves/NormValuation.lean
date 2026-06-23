@@ -963,96 +963,143 @@ theorem ramificationIdx_maximalIdealAt_ne_zero [IsAlgClosed F]
   rw [Ideal.span_singleton_eq_bot] at h_eq
   exact Polynomial.X_sub_C_ne_zero P.x h_eq
 
+/-- **Degree count for `(X − a)`-powers**: if two powers of the principal ideal
+`(X − a)` of `F[X]` coincide, the exponents agree. The ideals are associated as
+elements of the UFD `F[X]`, so comparing degrees of `(X − a)^m` and `(X − a)^n`
+(each `m` resp. `n`, since `X − a` has degree `1`) forces `m = n`. -/
+private theorem eq_of_span_X_sub_C_pow_eq {a : F} {m n : ℕ}
+    (h : (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) ^ m =
+      (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) ^ n) :
+    m = n := by
+  rw [Ideal.span_singleton_pow, Ideal.span_singleton_pow,
+    Ideal.span_singleton_eq_span_singleton] at h
+  have h_deg := Polynomial.degree_eq_degree_of_associated h
+  rw [Polynomial.degree_pow, Polynomial.degree_pow,
+    Polynomial.degree_X_sub_C, nsmul_one, nsmul_one] at h_deg
+  exact_mod_cast h_deg
+
+/-- **`Σ e_Q = 2` over the fibre**: the ramification indices of the primes of
+`F[C]` lying over `(X − a)` sum to `[F(C) : F(X)] = 2`. This is
+`sum_ramificationIdx_eq_finrank` with the finrank simplified to `2` via
+`finrank_functionField_over_fracPolynomialX`. -/
+private theorem sum_ramificationIdx_primesOver_eq_two [IsAlgClosed F]
+    [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic] (a : F) :
+    ∑ Q ∈ IsDedekindDomain.primesOverFinset
+        (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) C.CoordinateRing,
+      (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}).ramificationIdx Q =
+      2 := by
+  have h_sum_e := C.sum_ramificationIdx_eq_finrank a
+  simp only [C.finrank_functionField_over_fracPolynomialX] at h_sum_e
+  exact h_sum_e
+
+/-- **`Σ s_Q · e_Q = 2` over the fibre**: given any exponent function `f` such
+that `relNorm Q = (X − a)^{f Q}` for every prime `Q` of `F[C]` lying over
+`(X − a)`, the weighted sum `Σ f Q · e_Q` equals `2`. Substituting
+`relNorm Q ^ e_Q = (X − a)^{f Q · e_Q}` into the fibre factorization
+`∏ relNorm Q ^ e_Q = (X − a)^2` collapses the product to a single
+`(X − a)`-power, and the degree count `eq_of_span_X_sub_C_pow_eq` reads off the
+exponent. -/
+private theorem sum_mul_ramificationIdx_primesOver_eq_two [IsAlgClosed F]
+    [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic] (a : F)
+    {f : Ideal C.CoordinateRing → ℕ}
+    (hf : ∀ Q ∈ IsDedekindDomain.primesOverFinset
+        (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) C.CoordinateRing,
+      Ideal.relNorm (Polynomial F) Q =
+        (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) ^ (f Q)) :
+    ∑ Q ∈ IsDedekindDomain.primesOverFinset
+        (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) C.CoordinateRing,
+      f Q * (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}).ramificationIdx Q =
+      2 := by
+  set p : Ideal (Polynomial F) :=
+    Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)} with hp_def
+  haveI hp_max : p.IsMaximal := Ideal.Quotient.maximal_of_isField _
+    ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField (Field.toIsField F))
+  -- the finset `primesOverFinset p` coincides with `(p.primesOver).toFinset`
+  have h_idx : IsDedekindDomain.primesOverFinset p C.CoordinateRing =
+      (p.primesOver C.CoordinateRing : Set _).toFinset := by
+    apply Finset.coe_injective
+    rw [Set.coe_toFinset, IsDedekindDomain.coe_primesOverFinset (span_X_sub_C_ne_bot (F := F) a)]
+  -- `(X - a)·F[C] = ∏ relNorm Q ^ e_Q`; substitute `relNorm Q = (X - a)^{f Q}`
+  have h_fibre := C.prod_relNorm_pow_primesOver_eq_X_sub_C_pow_two a
+  simp only at h_fibre
+  have h_fibre_subst : ∏ Q ∈ (p.primesOver C.CoordinateRing : Set _).toFinset,
+      p ^ (f Q * p.ramificationIdx Q) = p ^ 2 := by
+    rw [← h_fibre]
+    refine Finset.prod_congr rfl fun Q hQ_fs ↦ ?_
+    rw [hf Q (h_idx ▸ hQ_fs), pow_mul]
+  rw [Finset.prod_pow_eq_pow_sum] at h_fibre_subst
+  rw [h_idx]
+  exact eq_of_span_X_sub_C_pow_eq h_fibre_subst
+
+/-- **The fibre exponent is `1`**: for every prime `Q` of `F[C]` lying over
+`(X − a)`, the exponent `primesOverExp a Q` in `relNorm Q = (X − a)^{·}` is `1`.
+
+Two sums over the fibre agree: `Σ e_Q = 2` (`sum_ramificationIdx_primesOver_eq_two`,
+the degree of the extension) and `Σ s_Q · e_Q = 2`
+(`sum_mul_ramificationIdx_primesOver_eq_two`, from the norm of `(X − a)·F[C]`),
+where `s_Q := primesOverExp a Q ≥ 1`. Since `e_Q ≤ s_Q · e_Q` term-by-term,
+`Finset.sum_eq_sum_iff_of_le` forces equality in every term, so `e_Q = s_Q · e_Q`;
+as `e_Q ≠ 0` (`ramificationIdx_ne_zero_of_liesOver`), this gives `s_Q = 1`. -/
+private theorem primesOverExp_eq_one_of_mem_primesOver [IsAlgClosed F]
+    [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic] (a : F)
+    (Q : Ideal C.CoordinateRing)
+    (hQ : Q ∈ (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}).primesOver
+            C.CoordinateRing) :
+    C.primesOverExp a Q hQ = 1 := by
+  classical
+  set p : Ideal (Polynomial F) :=
+    Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)} with hp_def
+  haveI hp_max : p.IsMaximal := Ideal.Quotient.maximal_of_isField _
+    ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField (Field.toIsField F))
+  have hp_ne := span_X_sub_C_ne_bot (F := F) a
+  -- the exponent function on the whole ring (`0` off the fibre)
+  set s_fn : Ideal C.CoordinateRing → ℕ := fun R ↦
+    if hR : R ∈ p.primesOver C.CoordinateRing then C.primesOverExp a R hR else 0 with hs_fn
+  have h_s_fn_eq : ∀ R (hR : R ∈ p.primesOver C.CoordinateRing),
+      s_fn R = C.primesOverExp a R hR := fun R hR ↦ dif_pos hR
+  -- `Σ e_R = 2` and `Σ s_R · e_R = 2`, both over `primesOverFinset`
+  have h_sum_e := C.sum_ramificationIdx_primesOver_eq_two a
+  have h_sum_se : ∑ R ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing,
+      s_fn R * p.ramificationIdx R = 2 := by
+    refine C.sum_mul_ramificationIdx_primesOver_eq_two a fun R hR_fs ↦ ?_
+    have hR : R ∈ p.primesOver C.CoordinateRing :=
+      (IsDedekindDomain.mem_primesOverFinset_iff (B := C.CoordinateRing) hp_ne).mp hR_fs
+    rw [h_s_fn_eq R hR]
+    exact C.relNorm_eq_pow_primesOverExp a R hR
+  -- termwise `e_R ≤ s_R · e_R`, so all terms coincide
+  have h_pointwise : ∀ R ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing,
+      p.ramificationIdx R ≤ s_fn R * p.ramificationIdx R := by
+    intro R hR_fs
+    have hR : R ∈ p.primesOver C.CoordinateRing :=
+      (IsDedekindDomain.mem_primesOverFinset_iff (B := C.CoordinateRing) hp_ne).mp hR_fs
+    have : 1 ≤ s_fn R := by rw [h_s_fn_eq R hR]; exact C.one_le_primesOverExp a R hR
+    nlinarith
+  have h_sum_eq : ∑ R ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing,
+      p.ramificationIdx R = ∑ R ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing,
+        s_fn R * p.ramificationIdx R := by rw [h_sum_e, h_sum_se]
+  have h_each := (Finset.sum_eq_sum_iff_of_le h_pointwise).mp h_sum_eq
+  -- evaluate at `Q`: `e_Q = s_Q · e_Q` with `e_Q ≠ 0`
+  have hQ_fs : Q ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing :=
+    (IsDedekindDomain.mem_primesOverFinset_iff (B := C.CoordinateRing) hp_ne).mpr hQ
+  have h_Q := h_each Q hQ_fs
+  rw [h_s_fn_eq Q hQ] at h_Q
+  haveI : Q.IsPrime := hQ.1
+  haveI : Q.LiesOver p := hQ.2
+  have h_e_ne_zero : p.ramificationIdx Q ≠ 0 :=
+    Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver Q hp_ne
+  -- `e_Q = s_Q · e_Q` with `0 < e_Q` cancels to `s_Q = 1`
+  refine Nat.eq_of_mul_eq_mul_right (Nat.pos_of_ne_zero h_e_ne_zero) ?_
+  rw [one_mul, ← h_Q]
+
 /-- **Helper B s = 1 closure**: `relNorm M_P = (X - P.x)`. -/
 theorem relNorm_maximalIdealAt [IsAlgClosed F]
     [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
     (P : C.SmoothPoint) :
     Ideal.relNorm (Polynomial F) (C.maximalIdealAt P) =
       Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)} := by
-  classical
-  obtain ⟨s, hs_ge, hs_le, hs_eq⟩ :=
-    C.exists_relNorm_maximalIdealAt_eq_pow_bracketed P
-  suffices hs_one : s = 1 by rw [hs_eq, hs_one, pow_one]
-  interval_cases s
-  · rfl
-  · exfalso
-    set p : Ideal (Polynomial F) :=
-      Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)} with hp_def
-    haveI hp_max : p.IsMaximal := Ideal.Quotient.maximal_of_isField _
-      ((Polynomial.quotientSpanXSubCAlgEquiv P.x).toRingEquiv.isField
-        (Field.toIsField F))
-    let s_fn : Ideal C.CoordinateRing → ℕ := fun Q ↦
-      if hQ : Q ∈ p.primesOver C.CoordinateRing then C.primesOverExp P.x Q hQ else 0
-    have h_s_fn_eq : ∀ Q (hQ : Q ∈ p.primesOver C.CoordinateRing),
-        s_fn Q = C.primesOverExp P.x Q hQ := fun Q hQ ↦ dif_pos hQ
-    have h_s_fn_ge : ∀ Q ∈ p.primesOver C.CoordinateRing, 1 ≤ s_fn Q := by
-      intro Q hQ
-      rw [h_s_fn_eq Q hQ]
-      exact C.one_le_primesOverExp P.x Q hQ
-    have h_fibre := C.prod_relNorm_pow_primesOver_eq_X_sub_C_pow_two P.x
-    have h_fibre_subst : ∏ Q ∈ p.primesOver C.CoordinateRing,
-        p ^ (s_fn Q * p.ramificationIdx Q) = p ^ 2 := by
-      rw [← h_fibre]
-      apply Finset.prod_congr rfl
-      intro Q hQ_fs
-      have hQ : Q ∈ p.primesOver C.CoordinateRing := Set.mem_toFinset.mp hQ_fs
-      rw [show s_fn Q = C.primesOverExp P.x Q hQ from dif_pos hQ,
-          C.relNorm_eq_pow_primesOverExp P.x Q hQ, pow_mul]
-    rw [Finset.prod_pow_eq_pow_sum] at h_fibre_subst
-    have h_sum_se : ∑ Q ∈ p.primesOver C.CoordinateRing,
-        s_fn Q * p.ramificationIdx Q = 2 := by
-      rw [Ideal.span_singleton_pow, Ideal.span_singleton_pow,
-        Ideal.span_singleton_eq_span_singleton] at h_fibre_subst
-      have h_deg := Polynomial.degree_eq_degree_of_associated h_fibre_subst
-      rw [Polynomial.degree_pow, Polynomial.degree_pow,
-        Polynomial.degree_X_sub_C, nsmul_one, nsmul_one] at h_deg
-      exact_mod_cast h_deg
-    have h_sum_e := C.sum_ramificationIdx_eq_finrank P.x
-    simp only [C.finrank_functionField_over_fracPolynomialX] at h_sum_e
-    have h_pointwise : ∀ Q ∈ (p.primesOver C.CoordinateRing : Set _).toFinset,
-        p.ramificationIdx Q ≤
-          s_fn Q * p.ramificationIdx Q := by
-      intro Q hQ_fs
-      have hQ : Q ∈ p.primesOver C.CoordinateRing := Set.mem_toFinset.mp hQ_fs
-      have := h_s_fn_ge Q hQ
-      nlinarith
-    have hp_ne : p ≠ ⊥ := by
-      intro h_eq
-      have : (Polynomial.X - Polynomial.C P.x : Polynomial F) ∈ p :=
-        Ideal.subset_span rfl
-      rw [h_eq, Ideal.mem_bot] at this
-      exact Polynomial.X_sub_C_ne_zero P.x this
-    have h_finset_eq : (p.primesOver C.CoordinateRing : Set _).toFinset =
-        IsDedekindDomain.primesOverFinset p C.CoordinateRing := by
-      apply Finset.coe_injective
-      rw [Set.coe_toFinset, IsDedekindDomain.coe_primesOverFinset hp_ne]
-    have h_sum_e' : ∑ Q ∈ p.primesOver C.CoordinateRing,
-        p.ramificationIdx Q = 2 := by
-      rw [h_finset_eq]
-      exact h_sum_e
-    have h_sum_eq : ∑ Q ∈ p.primesOver C.CoordinateRing,
-        p.ramificationIdx Q = ∑ Q ∈ p.primesOver C.CoordinateRing,
-          s_fn Q * p.ramificationIdx Q := by
-      rw [h_sum_e', h_sum_se]
-    have h_each := (Finset.sum_eq_sum_iff_of_le h_pointwise).mp h_sum_eq
-    have hM_mem := C.maximalIdealAt_mem_primesOver P
-    have hM_fs : C.maximalIdealAt P ∈ (p.primesOver C.CoordinateRing : Set _).toFinset :=
-      Set.mem_toFinset.mpr hM_mem
-    have h_M := h_each (C.maximalIdealAt P) hM_fs
-    rw [h_s_fn_eq _ hM_mem] at h_M
-    have h_exp_eq : C.primesOverExp P.x (C.maximalIdealAt P) hM_mem = 2 := by
-      have h1 := C.relNorm_eq_pow_primesOverExp P.x (C.maximalIdealAt P) hM_mem
-      rw [hs_eq] at h1
-      rw [Ideal.span_singleton_pow, Ideal.span_singleton_pow,
-        Ideal.span_singleton_eq_span_singleton] at h1
-      have h_deg := Polynomial.degree_eq_degree_of_associated h1
-      rw [Polynomial.degree_pow, Polynomial.degree_pow,
-        Polynomial.degree_X_sub_C, nsmul_one, nsmul_one] at h_deg
-      exact_mod_cast h_deg.symm
-    rw [h_exp_eq] at h_M
-    have h_e_ne_zero := C.ramificationIdx_maximalIdealAt_ne_zero P
-    apply h_e_ne_zero
-    linarith [h_M]
+  have hM_mem := C.maximalIdealAt_mem_primesOver P
+  rw [C.relNorm_eq_pow_primesOverExp P.x (C.maximalIdealAt P) hM_mem,
+    C.primesOverExp_eq_one_of_mem_primesOver P.x (C.maximalIdealAt P) hM_mem, pow_one]
 
 /-- **Helper B keystone (full primesOver version)**: for any prime `Q` in
     `(X - a).primesOver C.CoordinateRing`, `relNorm Q = span {X - a}`.
