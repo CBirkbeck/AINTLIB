@@ -185,7 +185,7 @@ theorem analyticRemainder_contourIntegral_zero
         deriv γP.toPath.extend t
     unfold PiecewiseC1Path.contourIntegrand
     rw [show (γP t - w₀) * decomp.analyticRemainder (γP t) / (γP t - w₀) =
-      decomp.analyticRemainder (γP t) from by field_simp]
+      decomp.analyticRemainder (γP t) by field_simp]
   exact contourIntegral_eq_zero_of_nullHomologous_at w₀ hw₀_in_U hw₀_off h_dixon_G
     h_cauchy_int (h_deriv_int.continuousOn_mul h_inv_cont)
 
