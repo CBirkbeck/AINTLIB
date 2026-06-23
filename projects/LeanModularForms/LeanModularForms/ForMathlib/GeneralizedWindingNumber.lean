@@ -26,10 +26,6 @@ the point `z₀`.
 * `HasGeneralizedWindingNumber.eq` — bridge: the predicate implies
   `generalizedWindingNumber γ z₀ = w`.
 
-* `HasGeneralizedWindingNumber.unique` — uniqueness of the winding number value.
-
-* `HasGeneralizedWindingNumber.neg` — negation compatibility.
-
 * `hasGeneralizedWindingNumber_of_avoids` — if `γ` avoids `z₀` (with positive minimum
   distance), the generalized winding number equals the classical contour integral formula.
 
