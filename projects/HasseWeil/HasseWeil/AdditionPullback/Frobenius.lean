@@ -843,93 +843,97 @@ private lemma ord_sub_ge_of_both_ge {f g : KE} {n : WithTop ℤ}
   rw [sub_eq_add_neg]
   exact ord_add_ge_of_both_ge W hf (ord_neg_ge W hg)
 
-/-- **`ord_∞(addPullbackNumerator_reduced_frobenius) = -2 - 4q`** for `q ≥ 2`.
-
-The unique smallest-order term is `x_gen · (π·x)²` at `-2 - 4q`. Every
-other term has `ord ≥ -3 - 3q` (a uniform bound that holds even in
-characteristic 2 where the `2·a₆`, `−2·y·π·y`, `2·a₂·x·π·x` terms
-vanish). Since `-2 - 4q < -3 - 3q` for `q ≥ 2`, strict non-archimedean
-additivity picks out the dominant term. -/
-theorem ordAtInfty_addPullbackNumerator_reduced_frobenius_eq
-    (hq : 2 ≤ Fintype.card K) :
-    (W_smooth W).ordAtInfty (addPullbackNumerator_reduced_frobenius W) =
-      (((-2 - 4 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) := by
-  -- Setup: the integer-level inequalities, named so linarith can use them.
-  have h_q : (1 : ℤ) < (Fintype.card K : ℤ) := by exact_mod_cast hq
-  have h_int_t1 : (-3 - 3 * (Fintype.card K : ℤ) : ℤ) ≤ -2 * (Fintype.card K : ℤ) := by linarith
-  have h_int_t2 : (-3 - 3 * (Fintype.card K : ℤ) : ℤ) ≤ (0 : ℤ) := by linarith
-  have h_int_t3 : (-3 - 3 * (Fintype.card K : ℤ) : ℤ) ≤ -3 * (Fintype.card K : ℤ) := by linarith
-  have h_int_t5 : (-3 - 3 * (Fintype.card K : ℤ) : ℤ) ≤ -2 - 3 * (Fintype.card K : ℤ) := by linarith
-  have h_int_t6 : (-3 - 3 * (Fintype.card K : ℤ) : ℤ) ≤ -4 - 2 * (Fintype.card K : ℤ) := by linarith
-  have h_int_t7 : (-3 - 3 * (Fintype.card K : ℤ) : ℤ) ≤ -2 - 2 * (Fintype.card K : ℤ) := by linarith
-  have h_int_dom : (-2 - 4 * (Fintype.card K : ℤ) : ℤ) <
-      -3 - 3 * (Fintype.card K : ℤ) := by linarith
-  -- The seven "rest" terms each have ord ≥ -3 - 3q.
-  -- Term 1: a₄ · (x_gen + π·x).
-  have h_t1 : (((-3 - 3 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) ≤
+/-- Helper: `ord_∞(a₄ · (x_gen + π·x)) ≥ -3 - 3q` for `q ≥ 2`. -/
+private lemma ord_a4_mul_x_add_pi_x_ge (hq : 2 ≤ Fintype.card K) :
+    (((-3 - 3 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) ≤
       (W_smooth W).ordAtInfty
         (algebraMap K KE W.toAffine.a₄ *
           (x_gen W + (frobeniusIsog W).pullback (x_gen W))) := by
-    refine ord_algebraMap_mul_ge W W.toAffine.a₄ ?_
-    rw [ord_x_gen_add_pi_x_eq W hq]
-    exact WithTop.coe_le_coe.mpr h_int_t1
-  -- Term 2: 2 · a₆.
-  have h_t2 : (((-3 - 3 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) ≤
+  have h_q : (1 : ℤ) < (Fintype.card K : ℤ) := by exact_mod_cast hq
+  have h_int : (-3 - 3 * (Fintype.card K : ℤ) : ℤ) ≤ -2 * (Fintype.card K : ℤ) := by linarith
+  refine ord_algebraMap_mul_ge W W.toAffine.a₄ ?_
+  rw [ord_x_gen_add_pi_x_eq W hq]
+  exact WithTop.coe_le_coe.mpr h_int
+
+/-- Helper: `ord_∞(2 · a₆) ≥ -3 - 3q` for `q ≥ 2`. -/
+private lemma ord_two_mul_a6_ge (hq : 2 ≤ Fintype.card K) :
+    (((-3 - 3 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) ≤
       (W_smooth W).ordAtInfty ((2 : KE) * algebraMap K KE W.toAffine.a₆) := by
-    refine ord_two_mul_ge W ?_
-    by_cases ha₆ : W.toAffine.a₆ = 0
-    · rw [ha₆, map_zero]
-      exact (W_smooth W).ordAtInfty_zero.symm ▸
-        (le_top : (((-3 - 3 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) ≤ ⊤)
-    · rw [ordAtInfty_algebraMap_F_nonzero W ha₆]
-      exact WithTop.coe_le_coe.mpr h_int_t2
-  -- Term 3: a₃ · (y_gen + π·y).
-  have h_t3 : (((-3 - 3 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) ≤
+  have h_q : (1 : ℤ) < (Fintype.card K : ℤ) := by exact_mod_cast hq
+  have h_int : (-3 - 3 * (Fintype.card K : ℤ) : ℤ) ≤ (0 : ℤ) := by linarith
+  refine ord_two_mul_ge W ?_
+  by_cases ha₆ : W.toAffine.a₆ = 0
+  · rw [ha₆, map_zero]
+    exact (W_smooth W).ordAtInfty_zero.symm ▸
+      (le_top : (((-3 - 3 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) ≤ ⊤)
+  · rw [ordAtInfty_algebraMap_F_nonzero W ha₆]
+    exact WithTop.coe_le_coe.mpr h_int
+
+/-- Helper: `ord_∞(a₃ · (y_gen + π·y)) ≥ -3 - 3q` for `q ≥ 2`. -/
+private lemma ord_a3_mul_y_add_pi_y_ge (hq : 2 ≤ Fintype.card K) :
+    (((-3 - 3 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) ≤
       (W_smooth W).ordAtInfty
         (algebraMap K KE W.toAffine.a₃ *
           (y_gen W + (frobeniusIsog W).pullback (y_gen W))) := by
-    refine ord_algebraMap_mul_ge W W.toAffine.a₃ ?_
-    rw [ord_y_gen_add_pi_y_eq W hq]
-    exact WithTop.coe_le_coe.mpr h_int_t3
-  -- Term 4: 2 · y_gen · π·y.
-  have h_t4 : (((-3 - 3 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) ≤
+  have h_int : (-3 - 3 * (Fintype.card K : ℤ) : ℤ) ≤ -3 * (Fintype.card K : ℤ) := by linarith
+  refine ord_algebraMap_mul_ge W W.toAffine.a₃ ?_
+  rw [ord_y_gen_add_pi_y_eq W hq]
+  exact WithTop.coe_le_coe.mpr h_int
+
+/-- Helper: `ord_∞(2 · y_gen · π·y) ≥ -3 - 3q`. -/
+private lemma ord_two_mul_y_mul_pi_y_ge :
+    (((-3 - 3 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) ≤
       (W_smooth W).ordAtInfty
         ((2 : KE) * y_gen W * (frobeniusIsog W).pullback (y_gen W)) := by
-    rw [show (2 : KE) * y_gen W * (frobeniusIsog W).pullback (y_gen W) =
-        (2 : KE) * (y_gen W * (frobeniusIsog W).pullback (y_gen W)) from by ring]
-    refine ord_two_mul_ge W ?_
-    rw [ord_y_gen_mul_pi_y_eq W]
-    exact le_refl _
-  -- Term 5: a₁ · (x_gen · π·y + π·x · y_gen).
-  have h_t5 : (((-3 - 3 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) ≤
+  rw [show (2 : KE) * y_gen W * (frobeniusIsog W).pullback (y_gen W) =
+      (2 : KE) * (y_gen W * (frobeniusIsog W).pullback (y_gen W)) from by ring]
+  refine ord_two_mul_ge W ?_
+  rw [ord_y_gen_mul_pi_y_eq W]
+  exact le_refl _
+
+/-- Helper: `ord_∞(a₁ · (x_gen · π·y + π·x · y_gen)) ≥ -3 - 3q` for `q ≥ 2`. -/
+private lemma ord_a1_mul_cross_ge (hq : 2 ≤ Fintype.card K) :
+    (((-3 - 3 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) ≤
       (W_smooth W).ordAtInfty
         (algebraMap K KE W.toAffine.a₁ *
           (x_gen W * (frobeniusIsog W).pullback (y_gen W) +
            (frobeniusIsog W).pullback (x_gen W) * y_gen W)) := by
-    refine ord_algebraMap_mul_ge W W.toAffine.a₁ ?_
-    refine le_trans ?_ (ord_x_pi_y_plus_pi_x_y_ge W hq)
-    exact WithTop.coe_le_coe.mpr h_int_t5
-  -- Term 6: x_gen² · π·x.
-  have h_t6 : (((-3 - 3 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) ≤
+  have h_int : (-3 - 3 * (Fintype.card K : ℤ) : ℤ) ≤ -2 - 3 * (Fintype.card K : ℤ) := by linarith
+  refine ord_algebraMap_mul_ge W W.toAffine.a₁ ?_
+  refine le_trans ?_ (ord_x_pi_y_plus_pi_x_y_ge W hq)
+  exact WithTop.coe_le_coe.mpr h_int
+
+/-- Helper: `ord_∞(x_gen² · π·x) ≥ -3 - 3q` for `q ≥ 2`. -/
+private lemma ord_x_sq_mul_pi_x_ge (hq : 2 ≤ Fintype.card K) :
+    (((-3 - 3 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) ≤
       (W_smooth W).ordAtInfty
         (x_gen W ^ 2 * (frobeniusIsog W).pullback (x_gen W)) := by
-    rw [ord_x_gen_sq_mul_pi_x_eq W]
-    exact WithTop.coe_le_coe.mpr h_int_t6
-  -- Term 7: 2 · a₂ · x_gen · π·x.
-  have h_t7 : (((-3 - 3 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) ≤
+  have h_q : (1 : ℤ) < (Fintype.card K : ℤ) := by exact_mod_cast hq
+  have h_int : (-3 - 3 * (Fintype.card K : ℤ) : ℤ) ≤ -4 - 2 * (Fintype.card K : ℤ) := by linarith
+  rw [ord_x_gen_sq_mul_pi_x_eq W]
+  exact WithTop.coe_le_coe.mpr h_int
+
+/-- Helper: `ord_∞(2 · a₂ · x_gen · π·x) ≥ -3 - 3q` for `q ≥ 2`. -/
+private lemma ord_two_mul_a2_mul_x_mul_pi_x_ge (hq : 2 ≤ Fintype.card K) :
+    (((-3 - 3 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) ≤
       (W_smooth W).ordAtInfty
         ((2 : KE) * algebraMap K KE W.toAffine.a₂ * x_gen W *
           (frobeniusIsog W).pullback (x_gen W)) := by
-    rw [show (2 : KE) * algebraMap K KE W.toAffine.a₂ * x_gen W *
-        (frobeniusIsog W).pullback (x_gen W) =
-        (2 : KE) * (algebraMap K KE W.toAffine.a₂ *
-          (x_gen W * (frobeniusIsog W).pullback (x_gen W))) from by ring]
-    refine ord_two_mul_ge W ?_
-    refine ord_algebraMap_mul_ge W W.toAffine.a₂ ?_
-    rw [ord_x_gen_mul_pi_x_eq W]
-    exact WithTop.coe_le_coe.mpr h_int_t7
-  -- Chain the 7 bounds into a single bound for the rest-sum.
-  have h_rest : (((-3 - 3 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) ≤
+  have h_q : (1 : ℤ) < (Fintype.card K : ℤ) := by exact_mod_cast hq
+  have h_int : (-3 - 3 * (Fintype.card K : ℤ) : ℤ) ≤ -2 - 2 * (Fintype.card K : ℤ) := by linarith
+  rw [show (2 : KE) * algebraMap K KE W.toAffine.a₂ * x_gen W *
+      (frobeniusIsog W).pullback (x_gen W) =
+      (2 : KE) * (algebraMap K KE W.toAffine.a₂ *
+        (x_gen W * (frobeniusIsog W).pullback (x_gen W))) from by ring]
+  refine ord_two_mul_ge W ?_
+  refine ord_algebraMap_mul_ge W W.toAffine.a₂ ?_
+  rw [ord_x_gen_mul_pi_x_eq W]
+  exact WithTop.coe_le_coe.mpr h_int
+
+/-- Helper: the six non-dominant "rest" terms of the reduced numerator together
+have `ord_∞ ≥ -3 - 3q` for `q ≥ 2` (chains the seven term bounds). -/
+private lemma ord_addPullbackNumerator_reduced_rest_ge (hq : 2 ≤ Fintype.card K) :
+    (((-3 - 3 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) ≤
       (W_smooth W).ordAtInfty (
         algebraMap K KE W.toAffine.a₄ *
             (x_gen W + (frobeniusIsog W).pullback (x_gen W))
@@ -943,14 +947,17 @@ theorem ordAtInfty_addPullbackNumerator_reduced_frobenius_eq
           + x_gen W ^ 2 * (frobeniusIsog W).pullback (x_gen W)
           + (2 : KE) * algebraMap K KE W.toAffine.a₂ *
               x_gen W * (frobeniusIsog W).pullback (x_gen W)) := by
-    have h12 := ord_add_ge_of_both_ge W h_t1 h_t2
-    have h123 := ord_sub_ge_of_both_ge W h12 h_t3
-    have h1234 := ord_sub_ge_of_both_ge W h123 h_t4
-    have h12345 := ord_sub_ge_of_both_ge W h1234 h_t5
-    have h123456 := ord_add_ge_of_both_ge W h12345 h_t6
-    exact ord_add_ge_of_both_ge W h123456 h_t7
-  -- Algebraic identity: addPullbackNumerator_reduced = dominant + rest.
-  have h_eq : addPullbackNumerator_reduced_frobenius W =
+  have h12 := ord_add_ge_of_both_ge W (ord_a4_mul_x_add_pi_x_ge W hq) (ord_two_mul_a6_ge W hq)
+  have h123 := ord_sub_ge_of_both_ge W h12 (ord_a3_mul_y_add_pi_y_ge W hq)
+  have h1234 := ord_sub_ge_of_both_ge W h123 (ord_two_mul_y_mul_pi_y_ge W)
+  have h12345 := ord_sub_ge_of_both_ge W h1234 (ord_a1_mul_cross_ge W hq)
+  have h123456 := ord_add_ge_of_both_ge W h12345 (ord_x_sq_mul_pi_x_ge W hq)
+  exact ord_add_ge_of_both_ge W h123456 (ord_two_mul_a2_mul_x_mul_pi_x_ge W hq)
+
+/-- Helper: the Weierstrass reduction splits the reduced numerator as the
+dominant term `x_gen · (π·x)²` plus the rest sum. -/
+private lemma addPullbackNumerator_reduced_frobenius_eq_dom_add_rest :
+    addPullbackNumerator_reduced_frobenius W =
       x_gen W * (frobeniusIsog W).pullback (x_gen W) ^ 2 +
       (algebraMap K KE W.toAffine.a₄ *
             (x_gen W + (frobeniusIsog W).pullback (x_gen W))
@@ -964,15 +971,14 @@ theorem ordAtInfty_addPullbackNumerator_reduced_frobenius_eq
           + x_gen W ^ 2 * (frobeniusIsog W).pullback (x_gen W)
           + (2 : KE) * algebraMap K KE W.toAffine.a₂ *
               x_gen W * (frobeniusIsog W).pullback (x_gen W)) := by
-    unfold addPullbackNumerator_reduced_frobenius
-    ring
-  -- ord(T_dom) = -2-4q.
-  have h_dom_ord : (W_smooth W).ordAtInfty
-      (x_gen W * (frobeniusIsog W).pullback (x_gen W) ^ 2) =
-      (((-2 - 4 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) :=
-    ord_x_gen_mul_pi_x_sq_eq W
-  have h_dom_lt_rest : (W_smooth W).ordAtInfty
-      (x_gen W * (frobeniusIsog W).pullback (x_gen W) ^ 2) <
+  unfold addPullbackNumerator_reduced_frobenius
+  ring
+
+/-- Helper: the dominant term has strictly smaller `ord_∞` than the rest sum
+(`-2 - 4q < -3 - 3q` for `q ≥ 2`). -/
+private lemma ord_dom_lt_rest (hq : 2 ≤ Fintype.card K) :
+    (W_smooth W).ordAtInfty
+        (x_gen W * (frobeniusIsog W).pullback (x_gen W) ^ 2) <
       (W_smooth W).ordAtInfty (
         algebraMap K KE W.toAffine.a₄ *
             (x_gen W + (frobeniusIsog W).pullback (x_gen W))
@@ -986,11 +992,28 @@ theorem ordAtInfty_addPullbackNumerator_reduced_frobenius_eq
           + x_gen W ^ 2 * (frobeniusIsog W).pullback (x_gen W)
           + (2 : KE) * algebraMap K KE W.toAffine.a₂ *
               x_gen W * (frobeniusIsog W).pullback (x_gen W)) := by
-    rw [h_dom_ord]
-    refine lt_of_lt_of_le ?_ h_rest
-    exact WithTop.coe_lt_coe.mpr h_int_dom
-  -- Now strict non-arch: ord(T_dom + T_rest) = ord(T_dom).
-  exact h_eq.symm ▸ ((W_smooth W).ordAtInfty_add_eq_of_lt h_dom_lt_rest).trans h_dom_ord
+  have h_q : (1 : ℤ) < (Fintype.card K : ℤ) := by exact_mod_cast hq
+  have h_int_dom : (-2 - 4 * (Fintype.card K : ℤ) : ℤ) <
+      -3 - 3 * (Fintype.card K : ℤ) := by linarith
+  rw [ord_x_gen_mul_pi_x_sq_eq W]
+  refine lt_of_lt_of_le ?_ (ord_addPullbackNumerator_reduced_rest_ge W hq)
+  exact WithTop.coe_lt_coe.mpr h_int_dom
+
+/-- **`ord_∞(addPullbackNumerator_reduced_frobenius) = -2 - 4q`** for `q ≥ 2`.
+
+The unique smallest-order term is `x_gen · (π·x)²` at `-2 - 4q`. Every
+other term has `ord ≥ -3 - 3q` (a uniform bound that holds even in
+characteristic 2 where the `2·a₆`, `−2·y·π·y`, `2·a₂·x·π·x` terms
+vanish). Since `-2 - 4q < -3 - 3q` for `q ≥ 2`, strict non-archimedean
+additivity picks out the dominant term. -/
+theorem ordAtInfty_addPullbackNumerator_reduced_frobenius_eq
+    (hq : 2 ≤ Fintype.card K) :
+    (W_smooth W).ordAtInfty (addPullbackNumerator_reduced_frobenius W) =
+      (((-2 - 4 * (Fintype.card K : ℤ)) : ℤ) : WithTop ℤ) := by
+  have h_eq := addPullbackNumerator_reduced_frobenius_eq_dom_add_rest W
+  exact h_eq.symm ▸
+    ((W_smooth W).ordAtInfty_add_eq_of_lt (ord_dom_lt_rest W hq)).trans
+      (ord_x_gen_mul_pi_x_sq_eq W)
 
 /-! ### Sorry 1 closure for Frobenius case (q ≥ 2, any characteristic) -/
 
