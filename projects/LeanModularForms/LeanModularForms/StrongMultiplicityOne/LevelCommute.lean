@@ -540,9 +540,9 @@ theorem miyake_4_6_6_level_commute_delta {N : ℕ} [NeZero N] {k : ℤ}
       have hsi_N : (σ_perm i).val < descendCosetCount p N :=
         h_cnt_N ▸ Nat.lt_succ_of_lt (σ_perm i).isLt
       rw [show descendCosetList p (l * N) hp (finCongr h_cnt_lN.symm i.castSucc) =
-            descendCosetList p (l * N) hp ⟨i.val, hi_lN⟩ from by congr 1,
+            descendCosetList p (l * N) hp ⟨i.val, hi_lN⟩ by congr 1,
         show descendCosetList p N hp (finCongr h_cnt_N.symm (σ_perm i).castSucc) =
-            descendCosetList p N hp ⟨(σ_perm i).val, hsi_N⟩ from by congr 1]
+            descendCosetList p N hp ⟨(σ_perm i).val, hsi_N⟩ by congr 1]
       exact m6_2_delta_upper_tri_match p hp l f σ_perm hσ z i.isLt
         (σ_perm i).isLt (by simp)
     · exact delta_levelRaise_extra_term_commute p hp hpN l hpl hlNp χ χ' hχ_eq f hfχ
