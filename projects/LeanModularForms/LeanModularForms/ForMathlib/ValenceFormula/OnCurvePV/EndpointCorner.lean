@@ -28,7 +28,7 @@ private lemma one_lt_norm_corner (H : ℝ) (hH : Real.sqrt 3 / 2 < H) (s : ℂ)
     (hs_re : s.re ^ 2 = 1/4) (hs_im : s.im = H) : 1 < ‖s‖ := by
   have hH0 : 0 < H := by linarith [Real.sqrt_pos.mpr (show (0:ℝ) < 3 by norm_num)]
   rw [show ‖s‖ = Real.sqrt (Complex.normSq s) from rfl, Real.lt_sqrt (by norm_num)]
-  rw [Complex.normSq_apply, hs_im, show s.re * s.re = s.re ^ 2 from by ring, hs_re]
+  rw [Complex.normSq_apply, hs_im, show s.re * s.re = s.re ^ 2 by ring, hs_re]
   nlinarith [mul_lt_mul hH hH.le (by positivity : (0:ℝ) < Real.sqrt 3 / 2) hH0.le,
              Real.mul_self_sqrt (show (0:ℝ) ≤ 3 by norm_num)]
 
@@ -153,8 +153,8 @@ private lemma endpoint_integrand_seg1 (H : ℝ) (s : ℂ) (hs_def : s = (1/2 : �
   rw [endpoint_diff_seg1 H s hs_def c hc_def t ht1.le]
   erw [(fdBoundary_H_hasDerivAt_seg1 H ht1).deriv]
   have hc_eq : (↑H - ↑(Real.sqrt 3) / 2 : ℂ) = ↑c := by push_cast [hc_def]; ring
-  rw [show (-(↑H - ↑(Real.sqrt 3) / 2 : ℂ)) * I = -(↑c : ℂ) * I from by rw [hc_eq],
-    show (↑(-t * c) : ℂ) * I = ↑t * (-(↑c : ℂ) * I) from by push_cast; ring]
+  rw [show (-(↑H - ↑(Real.sqrt 3) / 2 : ℂ)) * I = -(↑c : ℂ) * I by rw [hc_eq],
+    show (↑(-t * c) : ℂ) * I = ↑t * (-(↑c : ℂ) * I) by push_cast; ring]
   exact mul_inv_rev_cancel ↑t _
     (mul_ne_zero (neg_ne_zero.mpr (Complex.ofReal_ne_zero.mpr hc.ne')) I_ne_zero)
 
@@ -390,8 +390,8 @@ lemma cpv_at_corner (H : ℝ) (hH : Real.sqrt 3 / 2 < H) :
       rw [h_diff_seg4 t ht3 ht4.le]
       erw [(fdBoundary_H_hasDerivAt_seg4 H ht3 ht4).deriv]
       have hc_eq : (↑H - ↑(Real.sqrt 3) / 2 : ℂ) = ↑c := by push_cast [hc_def]; ring
-      rw [show (↑H - ↑(Real.sqrt 3) / 2 : ℂ) * I = (↑c : ℂ) * I from by rw [hc_eq],
-        show (↑((t - 4) * c) : ℂ) * I = ↑(t - 4) * (↑c * I) from by push_cast; ring]
+      rw [show (↑H - ↑(Real.sqrt 3) / 2 : ℂ) * I = (↑c : ℂ) * I by rw [hc_eq],
+        show (↑((t - 4) * c) : ℂ) * I = ↑(t - 4) * (↑c * I) by push_cast; ring]
       exact mul_inv_rev_cancel ↑(t - 4) _
         (mul_ne_zero (Complex.ofReal_ne_zero.mpr hc.ne') I_ne_zero)
     have h_integrand_seg5 : ∀ t, 4 < t →
