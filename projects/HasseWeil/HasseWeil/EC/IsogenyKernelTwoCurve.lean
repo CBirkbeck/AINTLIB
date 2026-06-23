@@ -115,7 +115,7 @@ theorem finite_fiber_twoCurve {β : Isogeny W₁ W₂}
       obtain ⟨x', y', h', heq, -, -⟩ := hw ⟨x, y, hns⟩ hnotbad
       rw [Set.mem_setOf_eq] at hR
       have hcontra := WeierstrassCurve.Affine.Point.zero_def.symm.trans (hR.symm.trans heq)
-      simp at hcontra
+      simp only [reduceCtorEq] at hcontra
   -- a nonempty fibre injects into the kernel via subtraction of a base point.
   rcases Set.eq_empty_or_nonempty
     {P : (W_smooth W₁).SmoothPoint | β.toAddMonoidHom P.toAffinePoint = Q} with hemp | ⟨P₀, hP₀⟩
@@ -216,10 +216,9 @@ theorem card_kernel_eq_degree_twoCurve [IsAlgClosed F]
     have hey : WeilPairing.EvaluatesTo W₁ pt (β.pullback (y_gen W₂)) Q.y := hvy
     have hptgood : pt ∉ bad := fun hmem => hQbadT ⟨pt, hmem, hex, hey⟩
     obtain ⟨x', y', h', heq, hx, hy⟩ := hw pt hptgood
-    have hxx : x' = Q.x := hx.unique hex
-    have hyy : y' = Q.y := hy.unique hey
     rw [heq, Curves.SmoothPlaneCurve.SmoothPoint.toAffinePoint_def]
-    exact (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mpr ⟨hxx, hyy⟩
+    exact (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mpr
+      ⟨hx.unique hex, hy.unique hey⟩
   -- the fibre has at least `deg β` elements
   have hSne : S.Nonempty := by
     rw [← Finset.card_pos, hScard]
