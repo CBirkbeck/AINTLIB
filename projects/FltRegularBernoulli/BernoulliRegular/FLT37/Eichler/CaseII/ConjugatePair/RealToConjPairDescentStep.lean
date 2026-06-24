@@ -216,7 +216,7 @@ theorem caseIIRealToConjPairSigmaEquivariant_conclusion_realized
   refine ⟨?_, D'.hy, D'.hz, D'.x_conj, map_one _, ?_⟩
   · -- `(ζ-1) ∤ D'.x`: `σ` fixes `span{ζ-1}` (`caseII_map_zetaSubOne_span`) and `σD'.x = D'.y`, so
     -- `(ζ-1)∣D'.x ⟺ D'.x ∈ span{ζ-1} ⟺ D'.y = σD'.x ∈ σ(span{ζ-1}) = span{ζ-1} ⟺ (ζ-1)∣D'.y`.
-    have h37z : (D'.hζ.unit'.1) ^ 37 = 1 := by
+    have h37z : D'.hζ.unit'.1 ^ 37 = 1 := by
       rw [← Units.val_pow_eq_pow_val, D'.hζ.unit'_pow, Units.val_one]
     intro hdvd
     apply D'.hy
