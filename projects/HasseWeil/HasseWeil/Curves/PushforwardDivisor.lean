@@ -1627,13 +1627,35 @@ private theorem pushforwardDivisorVal_projectiveDivisorOf_mul (φ : CurveMap C�
         φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf h) := by
   rw [C₁.projectiveDivisorOf_mul hg hh, map_add]
 
+/-- **LHS quotient form.** From a product equation `g * b = a` with `g, b` nonzero,
+the projective divisor of the pushforward of the quotient factor `g` is the
+*difference* of those of `a` and `b`: rewriting `g` as `a / b` and applying LHS
+multiplicativity (`projectiveDivisorOf_pushforward_mul`) gives the subtraction. -/
+private theorem projectiveDivisorOf_pushforward_eq_sub_of_mul_eq (φ : CurveMap C₁ C₂)
+    {g a b : C₁.FunctionField} (hg : g ≠ 0) (hb : b ≠ 0) (hgb : g * b = a) :
+    C₂.projectiveDivisorOf (φ.pushforward g) =
+      C₂.projectiveDivisorOf (φ.pushforward a) -
+        C₂.projectiveDivisorOf (φ.pushforward b) := by
+  rw [← hgb, projectiveDivisorOf_pushforward_mul φ hg hb]; abel
+
+/-- **RHS quotient form.** From a product equation `g * b = a` with `g, b` nonzero,
+the pushforward of the projective divisor of the quotient factor `g` is the
+*difference* of those of `a` and `b`: rewriting `g` as `a / b` and applying RHS
+multiplicativity (`pushforwardDivisorVal_projectiveDivisorOf_mul`) gives it. -/
+private theorem pushforwardDivisorVal_projectiveDivisorOf_eq_sub_of_mul_eq (φ : CurveMap C₁ C₂)
+    (cd : φ.CoordHom) {g a b : C₁.FunctionField} (hg : g ≠ 0) (hb : b ≠ 0) (hgb : g * b = a) :
+    φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf g) =
+      φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf a) -
+        φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf b) := by
+  rw [← hgb, pushforwardDivisorVal_projectiveDivisorOf_mul φ cd hg hb]; abel
+
 /-- **The `f = u/v` reduction.** Given the norm–conorm identity on the image of
 `algebraMap` (the `algebraMap` case `key`), it holds for every `f ∈ K(C₁)`.
 Writing a nonzero `f` as `au / av` with `au, av` images of nonzero coordinate-ring
 elements (`IsFractionRing.div_surjective`), `f * av = au`; multiplicativity of
-both sides (`projectiveDivisorOf_pushforward_mul`,
-`pushforwardDivisorVal_projectiveDivisorOf_mul`) reduces the goal for `f` to the
-`algebraMap` case applied to `u` and `v`. -/
+both sides (`projectiveDivisorOf_pushforward_eq_sub_of_mul_eq`,
+`pushforwardDivisorVal_projectiveDivisorOf_eq_sub_of_mul_eq`) reduces the goal for
+`f` to the `algebraMap` case applied to `u` and `v`. -/
 private theorem projectiveDivisorOf_pushforward_eq_of_algebraMap (φ : CurveMap C₁ C₂)
     (cd : φ.CoordHom)
     (hfd : letI : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
@@ -1655,17 +1677,11 @@ private theorem projectiveDivisorOf_pushforward_eq_of_algebraMap (φ : CurveMap 
       hv_ne ((IsFractionRing.injective C₁.CoordinateRing C₁.FunctionField)
         (h.trans (map_zero _).symm))
     have hu_ne : u ≠ 0 := fun hu ↦ hf (by rw [← hf_eq, hau, hu, map_zero, zero_div])
-    -- `f * av = au`, so additivity of both sides reduces `f` to `u` and `v`.
+    -- `f * av = au`, so the quotient-form additivity of both sides reduces `f` to `u` and `v`.
     have hf_av : f * av = au := by rw [← hf_eq, div_mul_cancel₀ _ hav_ne]
-    have hgoalL : C₂.projectiveDivisorOf (φ.pushforward f) =
-        C₂.projectiveDivisorOf (φ.pushforward au) -
-          C₂.projectiveDivisorOf (φ.pushforward av) := by
-      rw [← hf_av, projectiveDivisorOf_pushforward_mul φ hf hav_ne]; abel
-    have hgoalR : φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf f) =
-        φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf au) -
-          φ.pushforwardDivisorVal cd (C₁.projectiveDivisorOf av) := by
-      rw [← hf_av, pushforwardDivisorVal_projectiveDivisorOf_mul φ cd hf hav_ne]; abel
-    rw [hgoalL, hgoalR, hau, hav, key u hu_ne, key v hv_ne]
+    rw [projectiveDivisorOf_pushforward_eq_sub_of_mul_eq φ hf hav_ne hf_av,
+      pushforwardDivisorVal_projectiveDivisorOf_eq_sub_of_mul_eq φ cd hf hav_ne hf_av,
+      hau, hav, key u hu_ne, key v hv_ne]
 
 /-- **NEW-1(ii) — Silverman II.3.6, norm–conorm identity** `div(N_φ f) = φ_∗(div f)`.
 For a curve map `φ : C₁ → C₂` with coordinate-ring witness `cd` and a function
