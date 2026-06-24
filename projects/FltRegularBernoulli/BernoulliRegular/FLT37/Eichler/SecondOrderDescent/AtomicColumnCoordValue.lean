@@ -6,7 +6,7 @@ import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.ColumnSumCoeffLinearity
 This file isolates the **single atomic scalar** behind the per-single-column second-order
 coefficient identity `CaseIICor823SecondOrderColumnCoeff37`
 (`CaseIICor823SecondOrderColumnCoeff.lean`).  It imports only; it does **not** modify any
-existing file.  No `sorry`, no `axiom`.
+existing file.
 
 ## What is genuinely left, and what this file proves
 
@@ -75,8 +75,6 @@ isolates the residual to that single scalar and records the discrepancy as a mac
 
 noncomputable section
 
-set_option maxRecDepth 4000
-
 open NumberField
 
 namespace BernoulliRegular.FLT37.Eichler
@@ -84,14 +82,6 @@ namespace BernoulliRegular.FLT37.Eichler
 open BernoulliRegular.CyclotomicUnits
 open BernoulliRegular.CyclotomicUnits.PadicLogSetup
 open BernoulliRegular.CyclotomicUnits.PadicLogSetup.DworkParameter
-
-/-! ## 1. The atomic level-`72` column-coordinate residual
-
-`CaseIICor823SecondOrderColumnCoordValue37` is the per-single-column `evalₐ`-coordinate form of the
-target `CaseIICor823SecondOrderColumnCoeff37`: the level-`72` mod-`37²` even-degree-`32` Dwork
-coordinate of one completed real cyclotomic-unit logarithm column equals the second-order Bernoulli
-factor times the column's Teichmüller-Vandermonde factor `(((a+2)²)^{16} − 1)`.  It is strictly the
-single-scalar core (no `repr`, no `dworkFixedEvenPowerBasis`), the genuine `p`-adic-`L` content. -/
 
 open BernoulliRegular (CPlusGenerator) in
 /-- **The atomic level-`72` mod-`37²` Dwork column-coordinate residual** (a `def … : Prop`, **not**
@@ -120,14 +110,6 @@ def CaseIICor823SecondOrderColumnCoordValue37
       caseIICor823SecondOrderBernoulliFactorModSq *
         (((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 2) ^ ((15 : ℕ) + 1) - 1)
 
-/-! ## 2. The proven `ϖ ↔ λ` reduction: the target follows from the atomic coordinate residual -/
-
-set_option maxHeartbeats 1600000 in
--- The `ϖ ↔ λ` bridge `caseIICor823SecondOrder_columnCoeffModSq_eq_evalₐ` is applied pointwise; its
--- statement carries the heavy `adicCompletionIntegers` `evalₐ`.  We `rw` the small
--- `rationalPadicIntegerToZModSq`-head left side and discharge the residue with `convert … using 3`,
--- which peels the application so the heavy `evalₐ` argument is matched syntactically, never forcing
--- a full `whnf`/`isDefEq` of the `adicCompletionIntegers` quotient transport (the wall).
 open BernoulliRegular (CPlusGenerator) in
 /-- **`CaseIICor823SecondOrderColumnCoeff37` from the atomic level-`72` coordinate residual
 `CaseIICor823SecondOrderColumnCoordValue37`** (proven, axiom-clean).
@@ -182,16 +164,6 @@ theorem fermatLastTheoremFor_thirtyseven_of_columnCoordValue
     caseII_pthPow
     (caseIICor823SecondOrderColumnCoeff37_of_columnCoordValue caseII_columnCoordValue)
     noSecondOrderIrregular
-
-/-! ## 3. The first-order-structure lift, and the scalar discrepancy with the stated factor
-
-The proven first-order single-column value `concreteSquaredKummerLogMatrixEntry_congr` reads, mod
-`37`, as `(2·(-(32!)⁻¹)) · bernoulliFactor 16 · ((a+2)^{32} − 1) = 0`.  Lifting that exact
-normalization to mod `37²` (replacing the mod-`37` reduction `bernoulliFactor 16` by the `37`-adic
-value `(B₃₂/32) mod 37² = B₃₂.num·(32·B₃₂.den)⁻¹`) gives the structurally-expected level-`72`
-coordinate factor `firstOrderStructureLiftFactor`.  We record, by `decide`, its value `407 = 37·11`,
-the stated factor's value `1073 = 37·29`, and that they **differ** in `ZMod 37²` — both `37·(unit)`
-but with different units (`11 ≢ 29 (mod 37)`). -/
 
 /-- **The first-order-structure lift of the level-`72` column coordinate factor**: the mod-`37²`
 value obtained by lifting the proven first-order single-column normalization
