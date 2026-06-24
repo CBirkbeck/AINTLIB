@@ -57,69 +57,15 @@ theorem caseI_class_eq_of_ideal_pow_factored
     mt Ideal.span_singleton_eq_bot.mp hγ
   have hδ_ne : Ideal.span ({δ} : Set (𝓞 K)) ≠ ⊥ :=
     mt Ideal.span_singleton_eq_bot.mp hδ
-  have h𝔞γ_ne : 𝔞 * Ideal.span ({γ} : Set (𝓞 K)) ≠ ⊥ := mul_ne_zero h𝔞_nz hγ_ne
-  have h𝔞'δ_ne : 𝔞' * Ideal.span ({δ} : Set (𝓞 K)) ≠ ⊥ := mul_ne_zero h𝔞'_nz hδ_ne
+  -- Cancel the `p`-th power on the ideal identity, then read off the class
+  -- equality via `mk0_eq_mk0_iff`: the principal factors `(δ)`, `(γ)` are the
+  -- witnesses certifying `[σ𝔞] = [𝔞]`.
   have h_canceled : 𝔞 * Ideal.span ({γ} : Set (𝓞 K)) =
       𝔞' * Ideal.span ({δ} : Set (𝓞 K)) :=
     Ideal.pow_left_inj_of_ne_zero (n := p) (Nat.pos_iff_ne_zero.mp hp_pos)
-      h𝔞γ_ne h𝔞'δ_ne h_pow_eq
-  have hγ_principal :
-      ClassGroup.mk0
-        (⟨Ideal.span ({γ} : Set (𝓞 K)),
-          mem_nonZeroDivisors_iff_ne_zero.mpr hγ_ne⟩
-            : nonZeroDivisors (Ideal (𝓞 K))) = 1 :=
-    (ClassGroup.mk0_eq_one_iff _).mpr ⟨γ, rfl⟩
-  have hδ_principal :
-      ClassGroup.mk0
-        (⟨Ideal.span ({δ} : Set (𝓞 K)),
-          mem_nonZeroDivisors_iff_ne_zero.mpr hδ_ne⟩
-            : nonZeroDivisors (Ideal (𝓞 K))) = 1 :=
-    (ClassGroup.mk0_eq_one_iff _).mpr ⟨δ, rfl⟩
-  have h_𝔞γ_class :
-      ClassGroup.mk0
-        (⟨𝔞 * Ideal.span ({γ} : Set (𝓞 K)),
-          mem_nonZeroDivisors_iff_ne_zero.mpr h𝔞γ_ne⟩
-            : nonZeroDivisors (Ideal (𝓞 K))) =
-      ClassGroup.mk0
-        (⟨𝔞, mem_nonZeroDivisors_iff_ne_zero.mpr h𝔞_nz⟩
-          : nonZeroDivisors (Ideal (𝓞 K))) := by
-    rw [show (⟨𝔞 * Ideal.span ({γ} : Set (𝓞 K)),
-          mem_nonZeroDivisors_iff_ne_zero.mpr h𝔞γ_ne⟩
-            : nonZeroDivisors (Ideal (𝓞 K))) =
-          (⟨𝔞, mem_nonZeroDivisors_iff_ne_zero.mpr h𝔞_nz⟩
-            : nonZeroDivisors (Ideal (𝓞 K))) *
-          ⟨Ideal.span ({γ} : Set _),
-            mem_nonZeroDivisors_iff_ne_zero.mpr hγ_ne⟩ from rfl,
-        map_mul, hγ_principal, mul_one]
-  have h_𝔞'δ_class :
-      ClassGroup.mk0
-        (⟨𝔞' * Ideal.span ({δ} : Set (𝓞 K)),
-          mem_nonZeroDivisors_iff_ne_zero.mpr h𝔞'δ_ne⟩
-            : nonZeroDivisors (Ideal (𝓞 K))) =
-      ClassGroup.mk0
-        (⟨𝔞', mem_nonZeroDivisors_iff_ne_zero.mpr h𝔞'_nz⟩
-          : nonZeroDivisors (Ideal (𝓞 K))) := by
-    rw [show (⟨𝔞' * Ideal.span ({δ} : Set (𝓞 K)),
-          mem_nonZeroDivisors_iff_ne_zero.mpr h𝔞'δ_ne⟩
-            : nonZeroDivisors (Ideal (𝓞 K))) =
-          (⟨𝔞', mem_nonZeroDivisors_iff_ne_zero.mpr h𝔞'_nz⟩
-            : nonZeroDivisors (Ideal (𝓞 K))) *
-          ⟨Ideal.span ({δ} : Set _),
-            mem_nonZeroDivisors_iff_ne_zero.mpr hδ_ne⟩ from rfl,
-        map_mul, hδ_principal, mul_one]
-  have h_class_eq : ClassGroup.mk0
-      (⟨𝔞 * Ideal.span ({γ} : Set (𝓞 K)),
-        mem_nonZeroDivisors_iff_ne_zero.mpr h𝔞γ_ne⟩
-          : nonZeroDivisors (Ideal (𝓞 K))) =
-      ClassGroup.mk0
-      (⟨𝔞' * Ideal.span ({δ} : Set (𝓞 K)),
-        mem_nonZeroDivisors_iff_ne_zero.mpr h𝔞'δ_ne⟩
-          : nonZeroDivisors (Ideal (𝓞 K))) := by
-    congr 1
-    exact Subtype.ext h_canceled
-  rw [h_𝔞γ_class] at h_class_eq
-  rw [h_𝔞'δ_class] at h_class_eq
-  exact h_class_eq.symm
+      (mul_ne_zero h𝔞_nz hγ_ne) (mul_ne_zero h𝔞'_nz hδ_ne) h_pow_eq
+  refine ClassGroup.mk0_eq_mk0_iff.mpr ⟨δ, γ, hδ, hγ, ?_⟩
+  rw [mul_comm (Ideal.span ({δ} : Set (𝓞 K))), ← h_canceled, mul_comm]
 
 end CaseI
 
