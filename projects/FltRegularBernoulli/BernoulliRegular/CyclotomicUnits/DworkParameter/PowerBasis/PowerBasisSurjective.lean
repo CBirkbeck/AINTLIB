@@ -364,9 +364,9 @@ theorem exists_natCast_prime_pow_mul_eq_of_mem_dworkParameterIdeal_pow_mul_pred_
 theorem natCast_prime_pow_mem_dworkParameterIdeal_pow_mul_pred (m : ℕ) :
     (p : DworkCompleteIntegerRing p K) ^ m ∈
       (dworkParameterIdeal p K) ^ (m * (p - 1)) := by
-  rw [show m * (p - 1) = m * (p - 1) + 0 by omega]
-  rw [dworkParameterIdeal_pow_mul_pred_add_eq_span_natCast_prime_pow_mul
-    (p := p) (K := K) m 0]
+  rw [show m * (p - 1) = m * (p - 1) + 0 by omega,
+    dworkParameterIdeal_pow_mul_pred_add_eq_span_natCast_prime_pow_mul
+      (p := p) (K := K) m 0]
   have hmul := Ideal.mul_mem_mul
     (Ideal.mem_span_singleton_self ((p : DworkCompleteIntegerRing p K) ^ m))
     (show (1 : DworkCompleteIntegerRing p K) ∈
@@ -384,7 +384,7 @@ theorem mem_lambdaIdeal_iff_valuation_le_lambda
     x ∈ lambdaIdeal p K ↔
       Valued.v (x : ValuedCompletion p K) ≤
         Valued.v (valuedCyclotomicLambdaInteger p K : ValuedCompletion p K) := by
-  let hv :=
+  have hv :=
     IsDedekindDomain.HeightOneSpectrum.adicCompletionIntegers.integers
       (K := K) (v := Furtwaengler.KummerArtinHasse.lambdaHeightOneSpectrum p K)
   have hset :=
