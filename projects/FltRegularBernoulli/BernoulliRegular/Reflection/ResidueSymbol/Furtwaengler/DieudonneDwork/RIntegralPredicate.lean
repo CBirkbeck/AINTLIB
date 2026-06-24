@@ -56,35 +56,27 @@ the prime ideal `(r)`. -/
 def IsRIntegralRat (r : ℕ) (q : ℚ) : Prop := (q.den : ℕ).Coprime r
 
 theorem IsRIntegralRat.zero (r : ℕ) : IsRIntegralRat r 0 := by
-  unfold IsRIntegralRat
-  simp
+  simp [IsRIntegralRat]
 
 theorem IsRIntegralRat.one (r : ℕ) : IsRIntegralRat r 1 := by
-  unfold IsRIntegralRat
-  simp
+  simp [IsRIntegralRat]
 
 theorem IsRIntegralRat.intCast (r : ℕ) (n : ℤ) : IsRIntegralRat r (n : ℚ) := by
-  unfold IsRIntegralRat
-  rw [Rat.den_intCast]
-  exact Nat.coprime_one_left r
+  simp [IsRIntegralRat, Rat.den_intCast]
 
 theorem IsRIntegralRat.natCast (r : ℕ) (n : ℕ) : IsRIntegralRat r (n : ℚ) := by
-  unfold IsRIntegralRat
-  rw [Rat.den_natCast]
-  exact Nat.coprime_one_left r
+  simp [IsRIntegralRat, Rat.den_natCast]
 
 theorem IsRIntegralRat.add {r : ℕ} {q₁ q₂ : ℚ}
     (h₁ : IsRIntegralRat r q₁) (h₂ : IsRIntegralRat r q₂) :
     IsRIntegralRat r (q₁ + q₂) := by
   unfold IsRIntegralRat at h₁ h₂ ⊢
-  refine Nat.Coprime.coprime_dvd_left (Rat.add_den_dvd q₁ q₂) ?_
-  exact h₁.mul_left h₂
+  exact (h₁.mul_left h₂).coprime_dvd_left (Rat.add_den_dvd q₁ q₂)
 
 theorem IsRIntegralRat.neg {r : ℕ} {q : ℚ} (h : IsRIntegralRat r q) :
     IsRIntegralRat r (-q) := by
   unfold IsRIntegralRat at h ⊢
-  rw [Rat.neg_den]
-  exact h
+  rwa [Rat.neg_den]
 
 theorem IsRIntegralRat.sub {r : ℕ} {q₁ q₂ : ℚ}
     (h₁ : IsRIntegralRat r q₁) (h₂ : IsRIntegralRat r q₂) :
@@ -96,14 +88,17 @@ theorem IsRIntegralRat.mul {r : ℕ} {q₁ q₂ : ℚ}
     (h₁ : IsRIntegralRat r q₁) (h₂ : IsRIntegralRat r q₂) :
     IsRIntegralRat r (q₁ * q₂) := by
   unfold IsRIntegralRat at h₁ h₂ ⊢
-  refine Nat.Coprime.coprime_dvd_left (Rat.mul_den_dvd q₁ q₂) ?_
-  exact h₁.mul_left h₂
+  exact (h₁.mul_left h₂).coprime_dvd_left (Rat.mul_den_dvd q₁ q₂)
 
 theorem IsRIntegralRat.pow {r : ℕ} {q : ℚ} (h : IsRIntegralRat r q) (n : ℕ) :
     IsRIntegralRat r (q ^ n) := by
   induction n with
   | zero => simpa using IsRIntegralRat.one r
   | succ n ih => rw [pow_succ]; exact ih.mul h
+
+theorem IsRIntegralRat.sum {r : ℕ} {ι : Type*} {s : Finset ι} {f : ι → ℚ}
+    (hf : ∀ i ∈ s, IsRIntegralRat r (f i)) : IsRIntegralRat r (∑ i ∈ s, f i) :=
+  Finset.sum_induction f _ (fun _ _ => IsRIntegralRat.add) (IsRIntegralRat.zero r) hf
 
 namespace IsRIntegralRat
 
@@ -236,13 +231,7 @@ theorem toZMod_finset_sum {r : ℕ} {ι : Type*} (s : Finset ι)
     have hfa : IsRIntegralRat r (f a) := hf a (by simp [ha])
     have hfs : ∀ i ∈ s, IsRIntegralRat r (f i) := fun i hi =>
       hf i (Finset.mem_insert_of_mem hi)
-    have hsum_s : IsRIntegralRat r (Finset.sum s f) := by
-      apply Finset.sum_induction
-      · intro _ _ ha hb
-        exact ha.add hb
-      · exact IsRIntegralRat.zero r
-      · intro i hi
-        exact hfs i hi
+    have hsum_s : IsRIntegralRat r (Finset.sum s f) := IsRIntegralRat.sum hfs
     calc
       toZMod (Finset.sum (insert a s) f) hsum
           = toZMod (f a + Finset.sum s f) (hfa.add hsum_s) := by
@@ -273,7 +262,7 @@ theorem exists_eq_natCast_mul_of_toZMod_eq_zero {r : ℕ} {q : ℚ}
       _ = Rat.divInt ((r : ℤ) * k) (q.den : ℤ) := by rw [hk]
       _ = (r : ℚ) * Rat.divInt k (q.den : ℤ) := by
         rw [Rat.divInt_eq_div, Rat.divInt_eq_div]
-        norm_num
+        push_cast
         ring
 
 end IsRIntegralRat
@@ -368,11 +357,7 @@ theorem IsRIntegralPS.mul {r : ℕ} {F G : PowerSeries ℚ}
   rw [PowerSeries.coeff_mul]
   -- The n-th coefficient of F*G is ∑_{i+j=n} (F.coeff i) * (G.coeff j).
   -- Each summand is r-integral by closure, and the sum is r-integral.
-  apply Finset.sum_induction
-  · intro a b ha hb; exact ha.add hb
-  · exact IsRIntegralRat.zero r
-  · intro ⟨i, j⟩ _
-    exact (hF i).mul (hG j)
+  exact IsRIntegralRat.sum fun ⟨i, j⟩ _ => (hF i).mul (hG j)
 
 theorem IsRIntegralPS.pow {r : ℕ} {F : PowerSeries ℚ} (hF : IsRIntegralPS r F)
     (k : ℕ) : IsRIntegralPS r (F ^ k) := by
@@ -411,12 +396,7 @@ theorem IsRIntegralPS.finset_sum {r : ℕ} {ι : Type*} (s : Finset ι)
     IsRIntegralPS r (∑ i ∈ s, F i) := fun n => by
   classical
   rw [map_sum]
-  apply Finset.sum_induction
-  · intro a b ha hb
-    exact ha.add hb
-  · exact IsRIntegralRat.zero r
-  · intro i hi
-    exact hF i hi n
+  exact IsRIntegralRat.sum fun i hi => hF i hi n
 
 theorem IsRIntegralPS.subst {r : ℕ} {F G : PowerSeries ℚ}
     (hF : IsRIntegralPS r F) (hG : IsRIntegralPS r G)
@@ -434,12 +414,7 @@ theorem IsRIntegralPS.subst {r : ℕ} {F G : PowerSeries ℚ}
     simpa [term, smul_eq_mul] using (hF d).mul ((hG.pow d) n)
   have hfinite := PowerSeries.coeff_subst_finite' hsubst F n
   rw [finsum_eq_sum _ hfinite]
-  apply Finset.sum_induction
-  · intro a b ha hb
-    exact ha.add hb
-  · exact IsRIntegralRat.zero r
-  · intro d _
-    exact hterm d
+  exact IsRIntegralRat.sum fun d _ => hterm d
 
 theorem IsRIntegralPS.substInv_of_constantCoeff_zero_coeff_one
     {r : ℕ} {P : PowerSeries ℚ}
@@ -503,12 +478,7 @@ theorem mul_right_integral {r : ℕ} {F G : PowerSeries ℚ}
   let s : Finset (ℕ × ℕ) := Finset.antidiagonal n
   refine ⟨Finset.sum s (fun p =>
     qF p.1 * (PowerSeries.coeff (R := ℚ) p.2) G), ?_, ?_⟩
-  · apply Finset.sum_induction
-    · intro _ _ ha hb
-      exact ha.add hb
-    · exact IsRIntegralRat.zero r
-    · intro p _
-      exact (hqF p.1).mul (hG p.2)
+  · exact IsRIntegralRat.sum fun p _ => (hqF p.1).mul (hG p.2)
   · calc
       (PowerSeries.coeff (R := ℚ) n) (F * G)
           = Finset.sum s (fun p =>
@@ -544,23 +514,19 @@ theorem coeff_mul_left_multiple_pos_right_integral_lt {r n : ℕ} {F G : PowerSe
       (hFpos p.1 (Nat.succ_le_of_lt (Nat.pos_of_ne_zero hp0))).choose *
         (PowerSeries.coeff (R := ℚ) p.2) G
   refine ⟨Finset.sum s qTerm, ?_, ?_⟩
-  · apply Finset.sum_induction
-    · intro _ _ ha hb
-      exact ha.add hb
-    · exact IsRIntegralRat.zero r
-    · intro p hp
-      by_cases hp0 : p.1 = 0
-      · rw [dif_pos hp0]
-        exact IsRIntegralRat.zero r
-      · have hp1pos : 0 < p.1 := Nat.pos_of_ne_zero hp0
-        have hp2lt : p.2 < n := by
-          have hsum : p.1 + p.2 = n := by
-            simpa [s] using Finset.mem_antidiagonal.mp hp
-          rw [← hsum]
-          exact Nat.lt_add_of_pos_left hp1pos
-        rw [dif_neg hp0]
-        exact ((hFpos p.1 (Nat.succ_le_of_lt hp1pos)).choose_spec.1).mul
-          (hGlt p.2 hp2lt)
+  · refine IsRIntegralRat.sum fun p hp => ?_
+    by_cases hp0 : p.1 = 0
+    · rw [dif_pos hp0]
+      exact IsRIntegralRat.zero r
+    · have hp1pos : 0 < p.1 := Nat.pos_of_ne_zero hp0
+      have hp2lt : p.2 < n := by
+        have hsum : p.1 + p.2 = n := by
+          simpa [s] using Finset.mem_antidiagonal.mp hp
+        rw [← hsum]
+        exact Nat.lt_add_of_pos_left hp1pos
+      rw [dif_neg hp0]
+      exact ((hFpos p.1 (Nat.succ_le_of_lt hp1pos)).choose_spec.1).mul
+        (hGlt p.2 hp2lt)
   · calc
       (PowerSeries.coeff (R := ℚ) n) (F * G)
           = Finset.sum s (fun p =>
