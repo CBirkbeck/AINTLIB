@@ -161,6 +161,70 @@ private lemma smul_eq_zero_of_not_le {s : σ} {a : σ →₀ ℕ}
   rw [this]
   simp
 
+/-- The summand `(p.1 s) • (coeff p.1 f * coeff p.2 g)` vanishes unless
+`single s 1 ≤ p.1`, so summing it over the antidiagonal of `d + single s 1`
+agrees with summing it over only those terms with `single s 1 ≤ p.1`. This is
+the "filter is harmless" step in the left half of the Leibniz rule. -/
+private theorem sum_antidiagonal_smul_fst_eq_filter [DecidableEq σ] (s : σ)
+    (f g : MvPowerSeries σ R) (d : σ →₀ ℕ) :
+    (∑ p ∈ Finset.antidiagonal (d + (Finsupp.single s 1 : σ →₀ ℕ)),
+        (p.1 s : ℕ) • (coeff (R := R) p.1 f * coeff (R := R) p.2 g)) =
+      ∑ p ∈ (Finset.antidiagonal (d + (Finsupp.single s 1 : σ →₀ ℕ))).filter
+            (fun p ↦ (Finsupp.single s 1 : σ →₀ ℕ) ≤ p.1),
+        (p.1 s : ℕ) • (coeff (R := R) p.1 f * coeff (R := R) p.2 g) := by
+  symm
+  apply Finset.sum_filter_of_ne
+  intro p _ hne
+  by_contra hle
+  exact hne (smul_eq_zero_of_not_le hle _)
+
+/-- Reindexing for the left half of the Leibniz rule: shifting the first
+coordinate by `single s 1` is a bijection from the antidiagonal of `d` onto the
+terms of the antidiagonal of `d + single s 1` with `single s 1 ≤ p.1`, and it
+turns the scalar `p.1 s + 1` into `(p.1 + single s 1) s`. -/
+private theorem sum_antidiagonal_shift_fst [DecidableEq σ] (s : σ)
+    (f g : MvPowerSeries σ R) (d : σ →₀ ℕ) :
+    (∑ p ∈ Finset.antidiagonal d,
+        (p.1 s + 1 : ℕ) •
+          (coeff (R := R) (p.1 + Finsupp.single s 1) f * coeff (R := R) p.2 g)) =
+      ∑ p ∈ (Finset.antidiagonal (d + (Finsupp.single s 1 : σ →₀ ℕ))).filter
+            (fun p ↦ (Finsupp.single s 1 : σ →₀ ℕ) ≤ p.1),
+        (p.1 s : ℕ) • (coeff (R := R) p.1 f * coeff (R := R) p.2 g) := by
+  set e : σ →₀ ℕ := Finsupp.single s 1 with he
+  -- Reindex using the explicit bijection. Use `sum_nbij'` with
+  -- source = antidiag d, target = filter.
+  refine Finset.sum_nbij' (fun p ↦ (p.1 + e, p.2)) (fun p ↦ (p.1 - e, p.2))
+    ?_ ?_ ?_ ?_ ?_
+  · -- forward `(p.1 + e, p.2) ∈ filter` given `p ∈ antidiag d`
+    intro p hp
+    simp only [Finset.mem_antidiagonal] at hp
+    simp only [Finset.mem_filter, Finset.mem_antidiagonal]
+    refine ⟨?_, le_add_self⟩
+    rw [add_right_comm, hp]
+  · -- backward `(p.1 - e, p.2) ∈ antidiag d` given `p ∈ filter`
+    intro p hp
+    simp only [Finset.mem_filter, Finset.mem_antidiagonal] at hp
+    simp only [Finset.mem_antidiagonal]
+    obtain ⟨hsum, hle⟩ := hp
+    rw [tsub_add_eq_add_tsub hle, hsum]
+    exact add_tsub_cancel_right _ _
+  · -- left-inverse on antidiag d: (p + e) - e = p
+    intro p _
+    ext : 1
+    · exact add_tsub_cancel_right _ _
+    · rfl
+  · -- right-inverse on filter: (p - e) + e = p
+    intro p hp
+    simp only [Finset.mem_filter] at hp
+    ext : 1
+    · exact tsub_add_cancel_of_le hp.2
+    · rfl
+  · -- value equality: `(p s + 1) • ... = (p + e) s • ...`.
+    intro p hp
+    simp only [Finset.mem_antidiagonal] at hp
+    congr 1
+    rw [Finsupp.add_apply, single_self_apply]
+
 /-- Helper: the "left half" of the Leibniz rule expressed as a sum over
 the antidiagonal of `d + single s 1`. -/
 private theorem coeff_pderiv_mul_left [DecidableEq σ] (s : σ) (f g : MvPowerSeries σ R)
@@ -168,62 +232,17 @@ private theorem coeff_pderiv_mul_left [DecidableEq σ] (s : σ) (f g : MvPowerSe
     coeff (R := R) d (pderiv s f * g) =
       ∑ p ∈ Finset.antidiagonal (d + (Finsupp.single s 1 : σ →₀ ℕ)),
         (p.1 s : ℕ) • (coeff (R := R) p.1 f * coeff (R := R) p.2 g) := by
-  set e : σ →₀ ℕ := Finsupp.single s 1 with he
   -- Step 1: expand `coeff_mul` and `coeff_pderiv`, distribute the scalar.
   have hmul : coeff (R := R) d (pderiv s f * g) =
       ∑ p ∈ Finset.antidiagonal d,
-        (p.1 s + 1 : ℕ) • (coeff (R := R) (p.1 + e) f * coeff (R := R) p.2 g) := by
+        (p.1 s + 1 : ℕ) •
+          (coeff (R := R) (p.1 + Finsupp.single s 1) f * coeff (R := R) p.2 g) := by
     rw [coeff_mul]
     refine Finset.sum_congr rfl fun p _ ↦ ?_
     rw [coeff_pderiv, smul_mul_assoc]
-  rw [hmul]
-  -- Step 2: reindex via `(p, q) ↦ (p + e, q) : antidiag d → antidiag (d + e)`.
-  -- The image is exactly `{t ∈ antidiag (d+e) : e ≤ t.1}`. We prove equality
-  -- with the filtered sum, and then use `sum_filter_of_ne` (summand is 0
-  -- when `¬ e ≤ t.1`).
-  rw [show (∑ p ∈ Finset.antidiagonal (d + e),
-        (p.1 s : ℕ) • (coeff (R := R) p.1 f * coeff (R := R) p.2 g)) =
-      ∑ p ∈ (Finset.antidiagonal (d + e)).filter (fun p ↦ e ≤ p.1),
-        (p.1 s : ℕ) • (coeff (R := R) p.1 f * coeff (R := R) p.2 g) from ?_]
-  · -- Now reindex using the explicit bijection. Use `sum_nbij'` with
-    -- source = antidiag d, target = filter.
-    refine Finset.sum_nbij' (fun p ↦ (p.1 + e, p.2)) (fun p ↦ (p.1 - e, p.2))
-      ?_ ?_ ?_ ?_ ?_
-    · -- forward `(p.1 + e, p.2) ∈ filter` given `p ∈ antidiag d`
-      intro p hp
-      simp only [Finset.mem_antidiagonal] at hp
-      simp only [Finset.mem_filter, Finset.mem_antidiagonal]
-      refine ⟨?_, le_add_self⟩
-      rw [add_right_comm, hp]
-    · -- backward `(p.1 - e, p.2) ∈ antidiag d` given `p ∈ filter`
-      intro p hp
-      simp only [Finset.mem_filter, Finset.mem_antidiagonal] at hp
-      simp only [Finset.mem_antidiagonal]
-      obtain ⟨hsum, hle⟩ := hp
-      rw [tsub_add_eq_add_tsub hle, hsum]
-      exact add_tsub_cancel_right _ _
-    · -- left-inverse on antidiag d: (p + e) - e = p
-      intro p _
-      ext : 1
-      · exact add_tsub_cancel_right _ _
-      · rfl
-    · -- right-inverse on filter: (p - e) + e = p
-      intro p hp
-      simp only [Finset.mem_filter] at hp
-      ext : 1
-      · exact tsub_add_cancel_of_le hp.2
-      · rfl
-    · -- value equality: `(p s + 1) • ... = (p + e) s • ...`.
-      intro p hp
-      simp only [Finset.mem_antidiagonal] at hp
-      congr 1
-      rw [Finsupp.add_apply, single_self_apply]
-  · -- the filter is harmless because summand = 0 outside it
-    symm
-    apply Finset.sum_filter_of_ne
-    intro p _ hne
-    by_contra hle
-    exact hne (smul_eq_zero_of_not_le hle _)
+  -- Step 2: collapse the right-hand sum to the `single s 1 ≤ p.1` filter (the
+  -- summand vanishes elsewhere), then reindex via `(p, q) ↦ (p + single s 1, q)`.
+  rw [hmul, sum_antidiagonal_smul_fst_eq_filter s f g d, sum_antidiagonal_shift_fst s f g d]
 
 /-- Helper: the "right half" of the Leibniz rule. -/
 private theorem coeff_pderiv_mul_right [DecidableEq σ] (s : σ) (f g : MvPowerSeries σ R)
