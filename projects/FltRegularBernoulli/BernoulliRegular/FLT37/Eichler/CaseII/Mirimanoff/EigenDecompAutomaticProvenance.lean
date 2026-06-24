@@ -153,12 +153,13 @@ theorem caseIIResidueProvenance_exists_decomp
           c17 ⟨Fin.castSucc k, h⟩ else (0 : ZMod 37)) = c17 k := by
       rw [dif_pos (by rw [Fin.val_castSucc]; exact k.2)]
       congr 1
+    -- The eigenvector identity is the proven `caseIIResidueProvenance_eigenvector_castSucc`
+    -- (`Fin.castSucc k` and its `Fin.castLE` index are definitionally equal).
     have heig : caseIIConjugateResidue_eigenvector (Fin.castSucc k) =
         cyclotomicUnitFreePartModPClass (p := 37) (CyclotomicField 37 ℚ)
           (Additive.ofMul (cyclotomicUnitFreeClass (CyclotomicField 37 ℚ)
-            (FLT37.pollaczekUnit 37 (CyclotomicField 37 ℚ) (2 * (k : ℕ) + 2)))) := by
-      unfold caseIIConjugateResidue_eigenvector
-      congr 2
+            (FLT37.pollaczekUnit 37 (CyclotomicField 37 ℚ) (2 * (k : ℕ) + 2)))) :=
+      caseIIResidueProvenance_eigenvector_castSucc k
     rw [hcoeff, heig]
   · -- `c 17 = 0`: `(17 : Fin 18).1 = 17`, and `17 < 17` is false.
     have h17 : ((17 : Fin 18) : ℕ) = 17 := by decide
