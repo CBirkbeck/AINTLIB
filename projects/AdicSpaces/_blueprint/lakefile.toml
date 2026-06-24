@@ -1,0 +1,49 @@
+# Side-build for the AdicSpaces Verso blueprint.
+#
+# Self-contained Lake package, DECOUPLED from AINTLIB's root lakefile: it lives
+# entirely under projects/AdicSpaces/_blueprint/ and is never referenced by the
+# root workspace. It exists only to compile + render the Verso blueprint on the
+# v4.31.0-rc2 toolchain.
+#
+# It reuses the already-built «Adic spaces» oleans by path-requiring the AINTLIB
+# workspace (../../..), then adds the patched VersoBlueprint. mathlib is pinned to
+# d90090f and required LAST so its transitive deps (proofwidgets, batteries,
+# aesop, …) win over VersoBlueprint's older manifest — otherwise
+# `lake exe cache get` computes wrong hashes.
+#
+# The blueprint .lean sources live one directory up, in projects/AdicSpaces/
+# (root module `AdicSpacesBlueprint`, renderer `AdicSpacesBlueprintMain`); these
+# are SIBLING modules of the `«Adic spaces»` lib, so the root workspace's lib glob
+# never picks them up. srcDir = ".." picks them up here.
+name = "AdicSpacesBlueprintBuild"
+defaultTargets = ["AdicSpacesBlueprint"]
+
+[leanOptions]
+pp.unicode.fun = true
+
+# Reuse the workspace's built «Adic spaces» oleans.
+[[require]]
+name = "AINTLIB"
+path = "../../.."
+
+[[require]]
+name = "VersoBlueprint"
+git = "https://github.com/leanprover/verso-blueprint"
+rev = "v4.30.0"
+
+# mathlib LAST so its transitive pins win the reconciliation.
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4.git"
+rev = "d90090f647ca"
+
+# The blueprint library + its renderer entry point both live one dir up.
+[[lean_lib]]
+name = "AdicSpacesBlueprint"
+srcDir = ".."
+globs = ["AdicSpacesBlueprint"]
+
+[[lean_lib]]
+name = "AdicSpacesBlueprintMain"
+srcDir = ".."
+globs = ["AdicSpacesBlueprintMain"]
