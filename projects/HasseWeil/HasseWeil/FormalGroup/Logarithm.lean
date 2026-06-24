@@ -395,6 +395,139 @@ theorem coeff_monomial_pow_high (n : ℕ) (c : R) (i : ℕ) (hi : 2 ≤ i) :
   nlinarith
 
 open PowerSeries in
+/-- One binomial term of the expansion: the `(n+1)`-th coefficient of
+`h^m * g^(d-m) * (d.choose m)` equals the scalar `d.choose m` times the
+`(n+1)`-th coefficient of `h^m * g^(d-m)`. The natural-number binomial
+coefficient is pushed through `PowerSeries.C` via `map_natCast`, then pulled
+out with `PowerSeries.coeff_C_mul`. -/
+private theorem coeff_choose_term_eq (h g : PowerSeries R) (n d m : ℕ) :
+    PowerSeries.coeff (n + 1) (h ^ m * g ^ (d - m) * (d.choose m : PowerSeries R)) =
+      (d.choose m : R) * PowerSeries.coeff (n + 1) (h ^ m * g ^ (d - m)) := by
+  rw [← map_natCast (PowerSeries.C : R →+* PowerSeries R) (d.choose m), mul_comm,
+    PowerSeries.coeff_C_mul]
+
+open PowerSeries in
+/-- The `(n+1)`-th coefficient of `(g + C c * X^(n+1))^d`, expanded by the
+binomial theorem, equals the sum over `m ∈ range (d+1)` of
+`(d.choose m) • coeff (n+1) (h^m * g^(d-m))`, where `h = C c * X^(n+1)`. -/
+private theorem coeff_add_monomial_pow_eq_sum (g : PowerSeries R) (n : ℕ) (c : R) (d : ℕ) :
+    PowerSeries.coeff (n + 1) ((g + PowerSeries.C c * PowerSeries.X ^ (n + 1)) ^ d) =
+      ∑ m ∈ Finset.range (d + 1),
+        (d.choose m : R) *
+          PowerSeries.coeff (n + 1)
+            ((PowerSeries.C c * PowerSeries.X ^ (n + 1)) ^ m * g ^ (d - m)) := by
+  set h : PowerSeries R := PowerSeries.C c * PowerSeries.X ^ (n + 1) with hdef
+  rw [show g + h = h + g from add_comm g h, add_pow h g d, map_sum]
+  exact Finset.sum_congr rfl fun m _ ↦ coeff_choose_term_eq h g n d m
+
+open PowerSeries in
+/-- For `m ≥ 2`, the term `coeff (n+1) ((C c * X^(n+1))^m * g^k)` vanishes: the
+monomial power `(C c * X^(n+1))^m = C (c^m) * X^(m*(n+1))` has order
+`m*(n+1) > n+1`, so every contribution in the convolution `coeff_mul` is zero. -/
+private theorem coeff_monomial_pow_mul_eq_zero (g : PowerSeries R) (n : ℕ) (c : R)
+    {m : ℕ} (hm : 2 ≤ m) (k : ℕ) :
+    PowerSeries.coeff (n + 1)
+        ((PowerSeries.C c * PowerSeries.X ^ (n + 1)) ^ m * g ^ k) = 0 := by
+  rw [PowerSeries.coeff_mul]
+  apply Finset.sum_eq_zero
+  intro ⟨a, b⟩ hab
+  have hab' : a + b = n + 1 := Finset.mem_antidiagonal.mp hab
+  rw [monomial_pow_eq, PowerSeries.coeff_C_mul_X_pow]
+  split_ifs with heq
+  · exact absurd heq (by nlinarith)
+  · simp
+
+open PowerSeries in
+/-- When `g` has zero constant coefficient, the linear term
+`coeff (n+1) ((C c * X^(n+1)) * g^(d+1))` vanishes: every convolution summand
+either has the monomial factor evaluate away from `X^(n+1)` or forces `g^(d+1)`
+to be read at degree `0`, where it has zero constant coefficient. -/
+private theorem coeff_monomial_mul_pow_succ_eq_zero (g : PowerSeries R)
+    (hg : @PowerSeries.constantCoeff R _ g = 0) (n : ℕ) (c : R) (d : ℕ) :
+    PowerSeries.coeff (n + 1)
+        ((PowerSeries.C c * PowerSeries.X ^ (n + 1)) * g ^ (d + 1)) = 0 := by
+  rw [PowerSeries.coeff_mul]
+  apply Finset.sum_eq_zero
+  intro ⟨a, b⟩ hab
+  have hab' : a + b = n + 1 := Finset.mem_antidiagonal.mp hab
+  rw [PowerSeries.coeff_C_mul_X_pow]
+  split_ifs with ha
+  · have hb : b = 0 := by omega
+    subst hb
+    rw [PowerSeries.coeff_zero_eq_constantCoeff_apply, map_pow, hg, zero_pow (by omega)]
+    simp
+  · simp
+
+open PowerSeries in
+/-- The `d = 0` case of `coeff_add_monomial_pow_eq`: the zeroth power is `1`,
+whose `(n+1)`-th coefficient is `0`, and the `if`-correction vanishes. -/
+private theorem coeff_add_monomial_pow_eq_zero (g : PowerSeries R) (n : ℕ) (c : R) :
+    PowerSeries.coeff (n + 1) ((g + PowerSeries.C c * PowerSeries.X ^ (n + 1)) ^ 0) =
+      PowerSeries.coeff (n + 1) (g ^ 0) + (if (0 : ℕ) = 1 then c else 0) := by
+  rw [coeff_add_monomial_pow_eq_sum, Finset.sum_range_one]
+  simp only [Nat.choose_self, Nat.cast_one, one_mul, pow_zero, Nat.sub_self, mul_one]
+  rw [if_neg (by decide : (0 : ℕ) ≠ 1), add_zero]
+
+open PowerSeries in
+/-- The `d = 1` case of `coeff_add_monomial_pow_eq`: the expansion has two terms,
+`coeff (n+1) g` and `coeff (n+1) (C c * X^(n+1)) = c`, giving the `+ c`
+correction. -/
+private theorem coeff_add_monomial_pow_eq_one (g : PowerSeries R) (n : ℕ) (c : R) :
+    PowerSeries.coeff (n + 1) ((g + PowerSeries.C c * PowerSeries.X ^ (n + 1)) ^ 1) =
+      PowerSeries.coeff (n + 1) (g ^ 1) + (if (1 : ℕ) = 1 then c else 0) := by
+  set h : PowerSeries R := PowerSeries.C c * PowerSeries.X ^ (n + 1) with hdef
+  rw [coeff_add_monomial_pow_eq_sum, Finset.sum_range_succ, Finset.sum_range_one]
+  -- Evaluate: choose 1 0 = 1, choose 1 1 = 1, 1 - 0 = 1, 1 - 1 = 0.
+  rw [Nat.choose_zero_right, Nat.choose_one_right]
+  rw [show (1 - 0 : ℕ) = 1 from rfl, show (1 - 1 : ℕ) = 0 from rfl]
+  rw [show (g ^ 1 : PowerSeries R) = g from pow_one _]
+  rw [show (h ^ 0 : PowerSeries R) = 1 from pow_zero _]
+  rw [show (h ^ 1 : PowerSeries R) = h from pow_one _]
+  rw [show (g ^ 0 : PowerSeries R) = 1 from pow_zero _]
+  rw [if_pos rfl]
+  simp only [Nat.cast_one, one_mul, mul_one]
+  -- Goal: coeff (n+1) g + coeff (n+1) h = coeff (n+1) g + c
+  rw [show PowerSeries.coeff (n + 1) h = c from by
+        rw [hdef, PowerSeries.coeff_C_mul_X_pow, if_pos rfl]]
+
+open PowerSeries in
+/-- The `d + 2` case of `coeff_add_monomial_pow_eq`: split the binomial sum into
+`m = 0`, `m = 1`, and `m ≥ 2`. The `m = 0` term is `coeff (n+1) (g^(d+2))`; the
+`m ≥ 2` terms vanish by `coeff_monomial_pow_mul_eq_zero`; and the `m = 1` term
+vanishes by `coeff_monomial_mul_pow_succ_eq_zero`. The `if`-correction is `0`. -/
+private theorem coeff_add_monomial_pow_eq_succ_succ (g : PowerSeries R)
+    (hg : @PowerSeries.constantCoeff R _ g = 0) (n : ℕ) (c : R) (d : ℕ) :
+    PowerSeries.coeff (n + 1) ((g + PowerSeries.C c * PowerSeries.X ^ (n + 1)) ^ (d + 2)) =
+      PowerSeries.coeff (n + 1) (g ^ (d + 2)) + (if (d + 2 : ℕ) = 1 then c else 0) := by
+  set h : PowerSeries R := PowerSeries.C c * PowerSeries.X ^ (n + 1) with hdef
+  rw [coeff_add_monomial_pow_eq_sum]
+  -- Split the range into {0, 1} ∪ {m | 2 ≤ m}.
+  rw [show Finset.range (d + 2 + 1) =
+          insert 0 (insert 1 ((Finset.range (d + 2 + 1)).filter (2 ≤ ·))) from by
+    ext m
+    simp only [Finset.mem_insert, Finset.mem_filter, Finset.mem_range]
+    omega]
+  rw [Finset.sum_insert (by
+    simp only [Finset.mem_insert, Finset.mem_filter, Finset.mem_range]
+    omega)]
+  rw [Finset.sum_insert (by
+    simp only [Finset.mem_filter, Finset.mem_range]
+    omega)]
+  -- m = 0 term: choose(d+2, 0) = 1, h^0 = 1, g^(d+2-0) = g^(d+2).
+  simp only [Nat.choose_zero_right, Nat.sub_zero, Nat.cast_one, one_mul, pow_zero]
+  -- m = 1 term: choose(d+2, 1) = d+2, h^1 = h, g^(d+2-1) = g^(d+1).
+  rw [Nat.choose_one_right]
+  rw [show (h ^ 1 : PowerSeries R) * g ^ (d + 2 - 1) = h * g ^ (d + 1) from by
+    rw [pow_one, show d + 2 - 1 = d + 1 from by omega]]
+  -- The m ≥ 2 sum is 0.
+  rw [Finset.sum_eq_zero (fun m hm ↦ by
+    simp only [Finset.mem_filter, Finset.mem_range] at hm
+    rw [coeff_monomial_pow_mul_eq_zero g n c hm.2 (d + 2 - m), mul_zero]), add_zero]
+  rw [if_neg (by omega : d + 2 ≠ 1), add_zero]
+  -- The m = 1 term vanishes since g has zero constant coefficient.
+  rw [coeff_monomial_mul_pow_succ_eq_zero g hg n c d, mul_zero, add_zero]
+
+open PowerSeries in
 /-- Key fact: `coeff (n+1) ((g + h) ^ d) = coeff (n+1) (g^d) + (if d = 1 then c else 0)`,
 where `h = C c * X^(n+1)` and `g` has zero constant coefficient. -/
 theorem coeff_add_monomial_pow_eq (g : PowerSeries R)
@@ -402,126 +535,10 @@ theorem coeff_add_monomial_pow_eq (g : PowerSeries R)
     PowerSeries.coeff (n + 1)
         ((g + PowerSeries.C c * PowerSeries.X ^ (n + 1)) ^ d) =
       PowerSeries.coeff (n + 1) (g ^ d) + (if d = 1 then c else 0) := by
-  set h : PowerSeries R := PowerSeries.C c * PowerSeries.X ^ (n + 1) with hdef
-  -- Expand via commuted add_pow.
-  have hcomm : (h + g) ^ d =
-      ∑ m ∈ Finset.range (d + 1), h ^ m * g ^ (d - m) * (d.choose m : PowerSeries R) :=
-    add_pow h g d
-  rw [show g + h = h + g from add_comm g h, hcomm]
-  rw [map_sum]
-  -- Helper: `(k : ℕ) → PowerSeries R` via nat-cast equals `C (k : R)`.
-  have hnatCast : ∀ k : ℕ, ((k : ℕ) : PowerSeries R) = PowerSeries.C ((k : ℕ) : R) := by
-    intro k
-    induction k with
-    | zero =>
-      push_cast
-      exact (map_zero _).symm
-    | succ k ih =>
-      rw [show ((k + 1 : ℕ) : PowerSeries R) = ((k : ℕ) : PowerSeries R) + 1 from by push_cast; rfl]
-      rw [ih]
-      rw [show ((k + 1 : ℕ) : R) = ((k : ℕ) : R) + 1 from by push_cast; rfl]
-      rw [map_add, map_one]
-  have hterm : ∀ m : ℕ,
-      PowerSeries.coeff (n + 1) (h ^ m * g ^ (d - m) * (d.choose m : PowerSeries R)) =
-        (d.choose m : R) * PowerSeries.coeff (n + 1) (h ^ m * g ^ (d - m)) := by
-    intro m
-    rw [hnatCast]
-    rw [show h ^ m * g ^ (d - m) * PowerSeries.C ((d.choose m : ℕ) : R) =
-            PowerSeries.C ((d.choose m : ℕ) : R) * (h ^ m * g ^ (d - m)) from
-        mul_comm _ _]
-    rw [PowerSeries.coeff_C_mul]
-  simp_rw [hterm]
-  -- Case analysis on d.
   match d with
-  | 0 =>
-    -- d = 0: Σ over {0} of h^0 * g^0 * 1 = coeff 0 * coeff (n+1) 1 = 0.
-    rw [Finset.sum_range_one]
-    simp only [Nat.choose_self, Nat.cast_one, one_mul, pow_zero, Nat.sub_self, mul_one]
-    rw [if_neg (by decide : (0 : ℕ) ≠ 1)]
-    rw [add_zero]
-  | 1 =>
-    -- d = 1: Σ over {0, 1}.
-    rw [Finset.sum_range_succ, Finset.sum_range_one]
-    -- Compute all involved factors explicitly.
-    change (((1 : ℕ).choose 0 : R)) * PowerSeries.coeff (n + 1) (h ^ 0 * g ^ (1 - 0))
-          + (((1 : ℕ).choose 1 : R)) * PowerSeries.coeff (n + 1) (h ^ 1 * g ^ (1 - 1))
-            = PowerSeries.coeff (n + 1) (g ^ 1) + (if (1 : ℕ) = 1 then c else 0)
-    -- Evaluate: 1 - 0 = 1, 1 - 1 = 0, choose 1 0 = 1, choose 1 1 = 1.
-    rw [Nat.choose_zero_right, Nat.choose_one_right]
-    rw [show (1 - 0 : ℕ) = 1 from rfl, show (1 - 1 : ℕ) = 0 from rfl]
-    rw [show (g ^ 1 : PowerSeries R) = g from pow_one _]
-    rw [show (h ^ 0 : PowerSeries R) = 1 from pow_zero _]
-    rw [show (h ^ 1 : PowerSeries R) = h from pow_one _]
-    rw [show (g ^ 0 : PowerSeries R) = 1 from pow_zero _]
-    rw [if_pos rfl]
-    -- Goal: 1 * coeff (n+1) (1 * g) + 1 * coeff (n+1) (h * 1) = coeff (n+1) g + c
-    simp only [Nat.cast_one, one_mul, mul_one]
-    -- Goal: coeff (n+1) g + coeff (n+1) h = coeff (n+1) g + c
-    rw [show PowerSeries.coeff (n + 1) h = c from by
-          rw [hdef, PowerSeries.coeff_C_mul_X_pow, if_pos rfl]]
-  | d + 2 =>
-    -- d + 2 ≥ 2. Split into {0, 1, 2, ..., d+1, d+2}.
-    -- We'll extract m = 0 and m = 1 via Finset.sum_range_succ twice (from the low end).
-    -- But Finset.sum_range_succ extracts the TOP. So we use Finset.sum_range_succ'.
-    -- Plan: handle m = 0 and m = 1 directly by induction on the whole range.
-    -- For clarity use the split into {0, 1} ∪ filter (2 ≤ ·).
-    rw [show Finset.range (d + 2 + 1) =
-            insert 0 (insert 1 ((Finset.range (d + 2 + 1)).filter (2 ≤ ·))) from by
-      ext m
-      simp only [Finset.mem_insert, Finset.mem_filter, Finset.mem_range]
-      omega]
-    rw [Finset.sum_insert (by
-      simp only [Finset.mem_insert, Finset.mem_filter, Finset.mem_range]
-      omega)]
-    rw [Finset.sum_insert (by
-      simp only [Finset.mem_filter, Finset.mem_range]
-      omega)]
-    -- Compute m=0 term: choose(d+2, 0) = 1, h^0 = 1, g^(d+2-0) = g^(d+2).
-    simp only [Nat.choose_zero_right, Nat.sub_zero, Nat.cast_one, one_mul, pow_zero]
-    -- Compute m=1 term: choose(d+2, 1) = d+2, h^1 = h, g^(d+2-1) = g^(d+1).
-    rw [Nat.choose_one_right]
-    rw [show (h ^ 1 : PowerSeries R) * g ^ (d + 2 - 1) = h * g ^ (d + 1) from by
-      rw [pow_one, show d + 2 - 1 = d + 1 from by omega]]
-    -- Show the m ≥ 2 sum is 0.
-    have hhigh :
-        (∑ m ∈ (Finset.range (d + 2 + 1)).filter (2 ≤ ·),
-          (↑((d + 2).choose m) : R) *
-            PowerSeries.coeff (n + 1) (h ^ m * g ^ (d + 2 - m))) = 0 := by
-      apply Finset.sum_eq_zero
-      intro m hm
-      simp only [Finset.mem_filter, Finset.mem_range] at hm
-      obtain ⟨_, hm2⟩ := hm
-      -- coeff (n+1) (h^m * g^(d+2-m)) = 0: h^m has order m*(n+1) > n+1.
-      have hcoeff_zero : PowerSeries.coeff (n + 1) (h ^ m * g ^ (d + 2 - m)) = 0 := by
-        rw [PowerSeries.coeff_mul]
-        apply Finset.sum_eq_zero
-        intro ⟨a, b⟩ hab
-        have hab' : a + b = n + 1 := Finset.mem_antidiagonal.mp hab
-        rw [hdef, monomial_pow_eq, PowerSeries.coeff_C_mul_X_pow]
-        split_ifs with heq
-        · exfalso
-          nlinarith
-        · simp
-      rw [hcoeff_zero]
-      rw [mul_zero]
-    rw [hhigh, add_zero]
-    -- Goal: [coeff (n+1) g^(d+2)] + [d+2 * coeff (n+1) (h * g^(d+1))] = coeff (n+1) g^(d+2) + 0
-    rw [if_neg (by omega : d + 2 ≠ 1)]
-    rw [add_zero]
-    -- Show coeff (n+1) (h * g^(d+1)) = 0 since g^(d+1) has constantCoeff 0 for d ≥ 0.
-    have : PowerSeries.coeff (n + 1) (h * g ^ (d + 1)) = 0 := by
-      rw [PowerSeries.coeff_mul]
-      apply Finset.sum_eq_zero
-      intro ⟨a, b⟩ hab
-      have hab' : a + b = n + 1 := Finset.mem_antidiagonal.mp hab
-      rw [hdef, PowerSeries.coeff_C_mul_X_pow]
-      split_ifs with ha
-      · have hb : b = 0 := by omega
-        subst hb
-        rw [PowerSeries.coeff_zero_eq_constantCoeff_apply, map_pow, hg, zero_pow (by omega)]
-        simp
-      · simp
-    rw [this, mul_zero, add_zero]
+  | 0 => exact coeff_add_monomial_pow_eq_zero g n c
+  | 1 => exact coeff_add_monomial_pow_eq_one g n c
+  | d + 2 => exact coeff_add_monomial_pow_eq_succ_succ g hg n c d
 
 open PowerSeries in
 /-- Key identity for the induction step: when we add a monomial `C c * X^(n+1)`
