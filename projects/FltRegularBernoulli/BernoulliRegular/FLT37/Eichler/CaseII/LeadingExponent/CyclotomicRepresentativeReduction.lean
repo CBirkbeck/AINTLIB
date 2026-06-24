@@ -150,13 +150,13 @@ theorem caseIIEx811Bridge_evalₐ_nsmul_thirtyseven_eq_zero
   -- Hence `(37 : ValuedIntegerRing/λ^N) = 0`, so `37 • (evalₐ N X) = 0`.
   have hzero : ((37 : ℕ) : ValuedIntegerRing 37 K ⧸ (lambdaIdeal 37 K) ^ N) = 0 := by
     rw [show ((37 : ℕ) : ValuedIntegerRing 37 K ⧸ (lambdaIdeal 37 K) ^ N) =
-        Ideal.Quotient.mk ((lambdaIdeal 37 K) ^ N) ((37 : ℕ) : ValuedIntegerRing 37 K) from by
+        Ideal.Quotient.mk ((lambdaIdeal 37 K) ^ N) ((37 : ℕ) : ValuedIntegerRing 37 K) by
       rw [map_natCast]]
     rw [Ideal.Quotient.eq_zero_iff_mem]
     exact h37mem
   rw [show ((37 : ℕ) • AdicCompletion.evalₐ (lambdaIdeal 37 K) N X) =
       ((37 : ℕ) : ValuedIntegerRing 37 K ⧸ (lambdaIdeal 37 K) ^ N) •
-        AdicCompletion.evalₐ (lambdaIdeal 37 K) N X from by
+        AdicCompletion.evalₐ (lambdaIdeal 37 K) N X by
     rw [Nat.cast_smul_eq_nsmul]]
   rw [hzero, zero_smul]
 
@@ -232,7 +232,7 @@ theorem caseIIEx811Bridge_realUnitToFreePartModP_eq_of_div_mem_pPowerSubgroup
   rw [show ((37 : ℕ) • FLT37.realUnitToFreePartModP (K := CyclotomicField 37 ℚ)
         (Additive.ofMul w)) =
       ((37 : ℕ) : ZMod 37) •
-        FLT37.realUnitToFreePartModP (K := CyclotomicField 37 ℚ) (Additive.ofMul w) from by
+        FLT37.realUnitToFreePartModP (K := CyclotomicField 37 ℚ) (Additive.ofMul w) by
     rw [Nat.cast_smul_eq_nsmul]]
   rw [ZMod.natCast_self, zero_smul, zero_add]
 
@@ -332,7 +332,7 @@ theorem caseIIEx811Bridge_exists_cyclotomic_div_mem_pPowerSubgroup
     rw [← QuotientGroup.mk_pow, ← QuotientGroup.mk_inv, ← QuotientGroup.mk_mul]
     rw [mul_inv_cancel, QuotientGroup.mk_one]
   · -- `u * (u * (k^37)⁻¹)⁻¹ = k^37 ∈ pPowerSubgroup (⊤) 37`.
-    rw [show u * (u * (k ^ 37)⁻¹)⁻¹ = k ^ 37 from by
+    rw [show u * (u * (k ^ 37)⁻¹)⁻¹ = k ^ 37 by
       rw [mul_inv_rev, inv_inv, ← mul_assoc, mul_right_comm, mul_inv_cancel, one_mul]]
     exact ⟨k, Subgroup.mem_top k, rfl⟩
 
