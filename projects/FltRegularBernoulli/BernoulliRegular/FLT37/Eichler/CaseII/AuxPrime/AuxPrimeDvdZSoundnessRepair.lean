@@ -101,8 +101,6 @@ geometric sum `∑_{i<37} ζⁱ = 0` reduces to `37 = 0` in `𝔽₁₄₉`, for
 (Bézout `4·37 - 1·149 = -1`), contradicting that `lv149` is a proper (prime) ideal. -/
 theorem caseII_thirtyseven_notMem_lv149 :
     ((37 : ℕ) : 𝓞 (CyclotomicField 37 ℚ)) ∉ lv149 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  haveI : Fact (Nat.Prime 149) := ⟨by decide⟩
   intro h37
   -- `149 ∈ lv149` (lv149 lies over the rational prime 149).
   have h149 : ((149 : ℕ) : 𝓞 (CyclotomicField 37 ℚ)) ∈ lv149 := by
@@ -133,20 +131,19 @@ i.e. `37 ∈ lv149`, contradicting `caseII_thirtyseven_notMem_lv149`. -/
 theorem caseII_zeta_sub_one_notMem_lv149 {ζ : CyclotomicField 37 ℚ}
     (hζ : IsPrimitiveRoot ζ 37) :
     (hζ.toInteger - 1) ∉ lv149 := by
-  haveI : NeZero (37 : ℕ) := ⟨by decide⟩
   intro hmem
   -- `∑_{i<37} ζ_int^i = 0` in `𝓞 K`.
   have hgeom : ∑ i ∈ range 37, (hζ.toInteger) ^ i = 0 :=
     hζ.toInteger_isPrimitiveRoot.geom_sum_eq_zero (by decide)
   -- Each `ζ_int^i ≡ 1 (mod lv149)`, since `ζ_int - 1 ∈ lv149` divides `ζ_int^i - 1`.
-  have hpow_sub : ∀ i, (hζ.toInteger) ^ i - 1 ∈ lv149 := fun i =>
+  have hpow_sub : ∀ i, (hζ.toInteger) ^ i - 1 ∈ lv149 := fun i ↦
     lv149.mem_of_dvd (sub_one_dvd_pow_sub_one _ i) hmem
   -- Sum the congruences: `0 = ∑ ζ_int^i ≡ ∑ 1 = 37 (mod lv149)`, so `37 ∈ lv149`.
   have hsum_sub :
       (∑ i ∈ range 37, (hζ.toInteger) ^ i) -
         (∑ _i ∈ range 37, (1 : 𝓞 (CyclotomicField 37 ℚ))) ∈ lv149 := by
     rw [← Finset.sum_sub_distrib]
-    exact Ideal.sum_mem _ (fun i _ => hpow_sub i)
+    exact Ideal.sum_mem _ (fun i _ ↦ hpow_sub i)
   rw [hgeom, Finset.sum_const, Finset.card_range, nsmul_eq_mul, mul_one, zero_sub,
     neg_mem_iff] at hsum_sub
   exact caseII_thirtyseven_notMem_lv149 (by exact_mod_cast hsum_sub)
@@ -196,7 +193,6 @@ theorem caseII_dvd_z_of_factorization {ζ : CyclotomicField 37 ℚ}
 telescope: the factorized `ℓ ∣ ω + θ`.  `CaseIILehmerVandiverDvdZ37Strict` is the over-stated
 `CaseIILehmerVandiverDvdZ37` **plus** that genuine datum; it is **true** and discharged below. -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **Washington Lemma 9.8's factorized output over the Case-II descent telescope**
 (a `def … : Prop`, **not** an axiom) — the genuine analytic content the bare twisted equation lacks.
 
@@ -228,7 +224,6 @@ def CaseIILemma98DescentSumMem37
       x' + y' = (D.hζ.toInteger - 1) ^ a * (u : 𝓞 (CyclotomicField 37 ℚ)) * z' ∧
       x' + y' ∈ lv149
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **Washington Lemma 9.7 over the Case-II descent telescope, corrected (R4-ELLZ)**
 (a `def … : Prop`, **not** an axiom).
 
@@ -260,7 +255,6 @@ def CaseIILehmerVandiverDvdZ37Strict
 
 /-! ## 3. Discharging the corrected `ℓ ∣ z` -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **The corrected `ℓ ∣ z` is genuinely true** (proven, axiom-clean).
 
 `CaseIILehmerVandiverDvdZ37Strict` holds: given the genuine Lemma-9.8 factorized output
@@ -273,7 +267,6 @@ theorem caseIILehmerVandiverDvdZ37Strict_proven
   obtain ⟨a, u, hfact, hsum⟩ := hlemma98
   exact caseII_dvd_z_of_factorization D.hζ hfact hsum
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **The over-stated `CaseIILehmerVandiverDvdZ37` from the corrected form + the genuine Lemma-9.8
 datum** (proven, axiom-clean).
 
@@ -297,7 +290,6 @@ inputs.  Composing with `caseIILehmerVandiverDvdZ37_of_strict`, we supply that i
 **genuine** Lemma-9.8 datum `CaseIILemma98DescentSumMem37` (the factorized `ℓ ∣ ω + θ`), so the
 `ℓ ∣ z` residual is now sound (no false universal over the bare twisted equation). -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **FLT37 from the genuine residuals, with the sound (factorized Lemma-9.8) `ℓ ∣ z` datum**
 (proven, axiom-clean given the named inputs + the carried second-order Bernoulli Prop).
 
