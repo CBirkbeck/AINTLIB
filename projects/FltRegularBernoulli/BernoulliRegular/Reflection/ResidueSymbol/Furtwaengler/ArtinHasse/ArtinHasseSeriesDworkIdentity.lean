@@ -40,13 +40,9 @@ substantive Dieudonné-Dwork content) is proved separately.
 
 noncomputable section
 
-open scoped NumberField
-
 namespace BernoulliRegular
 
 namespace Furtwaengler
-
-universe u v w
 
 /-- The Artin-Hasse "log" series at prime `r`:
 `L_r(T) := ∑_{i ≥ 0} T^{r^i} / r^i ∈ ℚ[[T]]`.
@@ -759,7 +755,6 @@ theorem rescale_exp_mapTo_mul
     let Rps : PowerSeries A := (rescale_exp_isRIntegral r).mapTo φ
     PowerSeries.rescale a Rps * PowerSeries.rescale b Rps =
       PowerSeries.rescale (a + b) Rps := by
-  classical
   dsimp only
   let Rps : PowerSeries A := (rescale_exp_isRIntegral r).mapTo φ
   ext n
