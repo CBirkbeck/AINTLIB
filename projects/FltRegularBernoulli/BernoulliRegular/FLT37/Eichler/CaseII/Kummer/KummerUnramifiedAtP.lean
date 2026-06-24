@@ -56,8 +56,7 @@ It imports only; it does **not** modify any existing file.
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Polynomial NumberField.IsCMField
-open scoped nonZeroDivisors
+open NumberField
 
 namespace BernoulliRegular.FLT37.Eichler.CaseIIAt37
 
@@ -181,7 +180,7 @@ lemma exists_integral_primary_radical (_hp : p ≠ 2) (α : K) {c N : 𝓞 K}
   set a : 𝓞 K := γ ^ p + ϖ ^ p * M with ha_def
   -- `ϖ^p ∣ a - 1 = (γ^p - 1) + ϖ^p·M` (primarity), used for both the congruence and `¬ ϖ ∣ a`.
   have ha_cong : ϖ ^ p ∣ a - 1 := by
-    rw [ha_def, show γ ^ p + ϖ ^ p * M - 1 = (γ ^ p - 1) + ϖ ^ p * M from by ring]
+    rw [ha_def, show γ ^ p + ϖ ^ p * M - 1 = (γ ^ p - 1) + ϖ ^ p * M by ring]
     exact dvd_add (zeta_sub_one_pow_dvd_pow_sub_one hζ hγ_sub_one) (Dvd.intro M rfl)
   refine ⟨a, γ, hγ_ne, ?_, ha_cong, ?_⟩
   · -- `algebraMap a = α·γ^p`.  Field identity from `hform`: `(α-1)·c = ϖ^p·N`.
