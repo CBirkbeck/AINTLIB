@@ -286,6 +286,54 @@ private theorem coe_nsmul_int (k : ℕ) (a : ℤ) :
   | zero => simp
   | succ n ih => rw [succ_nsmul, ih, ← WithTop.coe_add]; congr 1; push_cast; ring
 
+/-- **`v` ≤ 1 on the pullback of `coordX C₂`** (the base-ring input to the `∞`-exclusion): for every
+height-one prime `v` of `B`, the image `φ^* coordX₂ = algebraMap K(C₂) K(C₁) (coordX C₂)` is a
+base-ring element of `B`, hence a `v`-adic integer.  Routes the image through `C₂.CoordinateRing`
+(where `valuation_algebraMap_coordinateRing_le_one` applies): `coordX C₂ = algMap_{C₂.CR→K(C₁)}
+(mk (C X))` via the coordinate-ring tower. -/
+private theorem valuation_pullback_coordX₂_le_one
+    (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂))) :
+    v.valuation C₁.FunctionField
+      (algebraMap C₂.FunctionField C₁.FunctionField C₂.coordX) ≤ 1 := by
+  have hcr : algebraMap C₂.CoordinateRing C₁.FunctionField
+        (WeierstrassCurve.Affine.CoordinateRing.mk C₂.toAffine (Polynomial.C Polynomial.X)) =
+      algebraMap C₂.FunctionField C₁.FunctionField C₂.coordX := by
+    rw [SmoothPlaneCurve.coordX,
+      IsScalarTower.algebraMap_apply C₂.CoordinateRing C₂.FunctionField C₁.FunctionField]
+    rfl
+  rw [← hcr]
+  exact valuation_algebraMap_coordinateRing_le_one v _
+
+/-- **The ramified pole of `φ^* coordX₂` at `∞` of `C₁`, from regularity**: given `OrdAtInftyReg`
+(`hreg`), there is a ramification index `e ≥ 1` at `∞` with `ord_∞^{C₁}(φ^* coordX₂) = e·(−2)`.
+Combines the pullback ramification formula `ord_∞^{C₁}(φ^* g) = e·ord_∞^{C₂}(g)`
+(`exists_pos_ramificationIdx_ordAtInfty_ringHom_of_isAlgebraic`, with `e ≥ 1` and `K(C₁)/K(C₂)`
+algebraic from finiteness) with `ord_∞^{C₂}(coordX₂) = −2` (`ordAtInfty_coordX`). -/
+private theorem exists_pos_ramificationIdx_pole_pullback_coordX₂
+    (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂)) :
+    ∃ e : ℕ, 1 ≤ e ∧ C₁.ordAtInfty (algebraMap C₂.FunctionField C₁.FunctionField C₂.coordX) =
+      ((((e : ℤ) * (-2 : ℤ)) : ℤ) : WithTop ℤ) := by
+  -- the ramification index `e ≥ 1` at `∞`, from `hreg` + algebraicity (finiteness)
+  obtain ⟨e, he, hform⟩ :
+      ∃ e : ℕ, 1 ≤ e ∧ ∀ g : C₂.FunctionField, g ≠ 0 →
+        C₁.ordAtInfty (algebraMap C₂.FunctionField C₁.FunctionField g) = e • C₂.ordAtInfty g := by
+    have halg : letI : Algebra C₂.FunctionField C₁.FunctionField := algKL
+        IsAlgebraic C₂.FunctionField C₁.coordX :=
+      Algebra.IsAlgebraic.isAlgebraic C₁.coordX
+    exact SmoothPlaneCurve.exists_pos_ramificationIdx_ordAtInfty_ringHom_of_isAlgebraic
+      (algebraMap C₂.FunctionField C₁.FunctionField) hreg halg
+  -- the pole of `φ^* coordX₂` at `∞` of `C₁`: `ord_∞ = e·(-2) < 0`
+  exact ⟨e, he, by rw [hform C₂.coordX C₂.coordX_ne_zero, C₂.ordAtInfty_coordX, coe_nsmul_int]⟩
+
+/-- **A ramified pole is negative in `ℤᵐ⁰`**: for `e ≥ 1`, the value `e·(−2)` is not `≥ 0` in
+`WithTop ℤ`.  The arithmetic core of the `∞`-exclusion: `ord_∞ ≥ 0` (the `≤ 1`/integrality
+condition) is incompatible with a strictly-negative ramified pole. -/
+private theorem not_zero_le_coe_mul_neg_two {e : ℕ} (he : 1 ≤ e) :
+    ¬ (0 : WithTop ℤ) ≤ ((((e : ℤ) * (-2 : ℤ)) : ℤ) : WithTop ℤ) := by
+  rw [show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl, WithTop.coe_le_coe]
+  have : (1 : ℤ) ≤ e := by exact_mod_cast he
+  omega
+
 /-- **The `∞`-exclusion `hinf`, discharged from regularity** (axiom-clean): given `OrdAtInftyReg`
 (`hreg`, the basepoint-regularity carried by an isogeny), *no* height-one prime `v` of `B` has
 `v.valuation = C₁.ordAtInftyValuation`.  This is the geometric content excluding the place at
@@ -298,42 +346,18 @@ with `e ≥ 1` and `K(C₁)/K(C₂)` algebraic from finiteness) gives
 theorem bPrime_valuation_ne_ordAtInfty (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂))
     (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂))) :
     v.valuation C₁.FunctionField ≠ C₁.ordAtInftyValuation := by
-  -- the ramification index `e ≥ 1` at `∞`, from `hreg` + algebraicity (finiteness)
-  obtain ⟨e, he, hform⟩ :
-      ∃ e : ℕ, 1 ≤ e ∧ ∀ g : C₂.FunctionField, g ≠ 0 →
-        C₁.ordAtInfty (algebraMap C₂.FunctionField C₁.FunctionField g) = e • C₂.ordAtInfty g := by
-    have halg : letI : Algebra C₂.FunctionField C₁.FunctionField := algKL
-        IsAlgebraic C₂.FunctionField C₁.coordX :=
-      Algebra.IsAlgebraic.isAlgebraic C₁.coordX
-    exact SmoothPlaneCurve.exists_pos_ramificationIdx_ordAtInfty_ringHom_of_isAlgebraic
-      (algebraMap C₂.FunctionField C₁.FunctionField) hreg halg
-  -- the pole of `φ^* coordX₂` at `∞` of `C₁`: `ord_∞ = e·(-2) < 0`
-  have hpole : C₁.ordAtInfty (algebraMap C₂.FunctionField C₁.FunctionField C₂.coordX) =
-      ((((e : ℤ) * (-2 : ℤ)) : ℤ) : WithTop ℤ) := by
-    rw [hform C₂.coordX C₂.coordX_ne_zero, C₂.ordAtInfty_coordX, coe_nsmul_int]
   intro hv
-  -- `coordX₂` image is a base-ring element of `B`, so `v ≤ 1` on it
-  have hle : v.valuation C₁.FunctionField
-      (algebraMap C₂.FunctionField C₁.FunctionField C₂.coordX) ≤ 1 := by
-    have hcr : algebraMap C₂.CoordinateRing C₁.FunctionField
-          (WeierstrassCurve.Affine.CoordinateRing.mk C₂.toAffine (Polynomial.C Polynomial.X)) =
-        algebraMap C₂.FunctionField C₁.FunctionField C₂.coordX := by
-      rw [SmoothPlaneCurve.coordX,
-        IsScalarTower.algebraMap_apply C₂.CoordinateRing C₂.FunctionField C₁.FunctionField]
-      rfl
-    rw [← hcr]
-    exact valuation_algebraMap_coordinateRing_le_one v _
-  -- but `v = ordAtInftyValuation` and the pole forces `> 1`
+  -- `coordX₂` image is a base-ring element of `B`, so `v ≤ 1` on it; with `v = ordAtInftyValuation`
+  -- this forces `ord_∞^{C₁}(φ^* coordX₂) ≥ 0`
+  have hle := valuation_pullback_coordX₂_le_one v
   rw [hv] at hle
   have halg_ne : algebraMap C₂.FunctionField C₁.FunctionField C₂.coordX ≠ 0 := by
     rw [Ne, map_eq_zero_iff _ (FaithfulSMul.algebraMap_injective C₂.FunctionField C₁.FunctionField)]
     exact C₂.coordX_ne_zero
+  -- but the ramified pole `ord_∞^{C₁}(φ^* coordX₂) = e·(-2) < 0` (`e ≥ 1` from `hreg`) contradicts it
+  obtain ⟨e, he, hpole⟩ := exists_pos_ramificationIdx_pole_pullback_coordX₂ hreg
   rw [C₁.ordAtInftyValuation_le_one_iff_ordAtInfty_nonneg halg_ne, hpole] at hle
-  have he2 : ((e : ℤ) * (-2 : ℤ)) < 0 := by
-    have : (1 : ℤ) ≤ e := by exact_mod_cast he
-    nlinarith
-  rw [show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl, WithTop.coe_le_coe] at hle
-  omega
+  exact not_zero_le_coe_mul_neg_two he hle
 
 /-! ### The point case of the place classification (curve-completeness, affine half)
 
