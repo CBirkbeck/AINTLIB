@@ -14,6 +14,23 @@ namespace Sinnott
 
 variable (p : ℕ) [hp : Fact p.Prime]
 
+/-- `cyclotomicZetaInteger p K`, viewed in `K` via the ring of integers, is a
+primitive `p`-th root of unity. This is the `𝓞 K`-level
+`cyclotomicZetaInteger_isPrimitiveRoot` pushed forward along the injective
+`algebraMap (𝓞 K) K`. -/
+private theorem cyclotomicZetaInteger_K_isPrimitiveRoot
+    (K : Type) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K] :
+    IsPrimitiveRoot ((BernoulliRegular.cyclotomicZetaInteger (p := p) K : 𝓞 K) : K) p :=
+  (BernoulliRegular.cyclotomicZetaInteger_isPrimitiveRoot (p := p) K).map_of_injective
+    (FaithfulSMul.algebraMap_injective (𝓞 K) K)
+
+/-- A natural power of `stdAddChar c` is `stdAddChar` at the scaled argument:
+`stdAddChar c ^ k = stdAddChar (c * k)` (since `stdAddChar` is an additive
+character, `c ^ k = stdAddChar (k • c)` via `AddChar.map_nsmul_eq_pow`). -/
+private theorem stdAddChar_pow (c : ZMod p) (k : ℕ) :
+    ZMod.stdAddChar (N := p) c ^ k = ZMod.stdAddChar (N := p) (c * (k : ZMod p)) := by
+  rw [show c * (k : ZMod p) = k • c by rw [nsmul_eq_mul, mul_comm], AddChar.map_nsmul_eq_pow]
+
 def RegOfFamilySqEqProdNontrivialQeSq
     (K : Type) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
     [NumberField.IsCMField K]
@@ -90,7 +107,6 @@ theorem matrixRestrictionToSinnott_of_regOfFamily_sq_eq_prod_nontrivial_qe_sq
   rw [h]
   ring
 
-
 /-- **`KummerDirichletDeterminant` from the eigenvalue-product hypothesis**:
 final synthesis chain. Assuming the substantive eigenvalue-product identity
 `RegOfFamilySqEqProdNontrivialQeSq`, the entire PF-1 chain
@@ -127,16 +143,10 @@ theorem exists_embedding_index
   classical
   haveI hp_prime : Nat.Prime p := hp.out
   haveI : NeZero p := ⟨hp_prime.ne_zero⟩
-  -- `cyclotomicZetaInteger` is a primitive p-th root in 𝓞 K.
-  have h_zeta_OK : IsPrimitiveRoot
-      (BernoulliRegular.cyclotomicZetaInteger (p := p) K) p :=
-    BernoulliRegular.cyclotomicZetaInteger_isPrimitiveRoot (p := p) K
-  -- Push to K via the algebraMap (𝓞 K → K), which is injective.
+  -- `cyclotomicZetaInteger`, viewed in K, is a primitive p-th root.
   have h_zeta_K : IsPrimitiveRoot
-      ((BernoulliRegular.cyclotomicZetaInteger (p := p) K : 𝓞 K) : K) p := by
-    have h_inj : Function.Injective (algebraMap (𝓞 K) K) :=
-      FaithfulSMul.algebraMap_injective (𝓞 K) K
-    exact h_zeta_OK.map_of_injective h_inj
+      ((BernoulliRegular.cyclotomicZetaInteger (p := p) K : 𝓞 K) : K) p :=
+    cyclotomicZetaInteger_K_isPrimitiveRoot (p := p) K
   -- Push to ℂ via w.embedding, which is injective (it's a ring hom on a field).
   have h_emb_inj : Function.Injective (w.embedding) :=
     (w.embedding).injective
@@ -201,16 +211,7 @@ theorem exists_log_w_zeta_pow_sub_one_eq_log_stdAddChar
   -- Step 3: substitute w.embedding(ζ_K) = stdAddChar(a) via ha_eq.
   rw [ha_eq]
   -- Step 4: rearrange ‖stdAddChar(a)^k - 1‖ = ‖1 - stdAddChar(a*k)‖.
-  have h_pow : (ZMod.stdAddChar (N := p) ((a : ZMod p))) ^ k =
-      ZMod.stdAddChar (N := p) (((a : ZMod p)) * k) := by
-    -- stdAddChar(k • a) = stdAddChar(a)^k via AddChar.map_nsmul_eq_pow
-    have h_smul : ((a : ZMod p)) * k = k • ((a : ZMod p)) := by
-      rw [nsmul_eq_mul, mul_comm]
-    rw [h_smul, AddChar.map_nsmul_eq_pow]
-  rw [h_pow]
-  rw [show ‖ZMod.stdAddChar (N := p) (((a : ZMod p)) * k) - 1‖ =
-      ‖(1 : ℂ) - ZMod.stdAddChar (N := p) (((a : ZMod p)) * k)‖ from by
-    rw [← neg_sub, norm_neg]]
+  rw [stdAddChar_pow, norm_sub_rev]
 
 /-- **Sinnott `A`-matrix entry in `stdAddChar` form**: under the embedding-index
 identification, the per-entry expression of `sinnottMatrixA p K [i, w]` becomes
@@ -250,21 +251,7 @@ theorem sinnottMatrixA_apply_eq_log_stdAddChar
   -- Apply norm_embedding_eq + ring-hom commutativity.
   rw [← NumberField.InfinitePlace.norm_embedding_eq w_K]
   rw [map_sub, map_pow, map_one]
-  rw [embeddingIndex_spec (p := p) K w_K]
-  have h_pow : (ZMod.stdAddChar (N := p)
-        ((embeddingIndex (p := p) K w_K : ZMod p))) ^ k_idx =
-      ZMod.stdAddChar (N := p)
-        ((embeddingIndex (p := p) K w_K : ZMod p) * (k_idx : ZMod p)) := by
-    have h_smul : ((embeddingIndex (p := p) K w_K : ZMod p)) * (k_idx : ZMod p) =
-        k_idx • ((embeddingIndex (p := p) K w_K : ZMod p)) := by
-      rw [nsmul_eq_mul, mul_comm]
-    rw [h_smul, AddChar.map_nsmul_eq_pow]
-  rw [h_pow]
-  rw [show ‖ZMod.stdAddChar (N := p)
-        ((embeddingIndex (p := p) K w_K : ZMod p) * (k_idx : ZMod p)) - 1‖ =
-      ‖(1 : ℂ) - ZMod.stdAddChar (N := p)
-        ((embeddingIndex (p := p) K w_K : ZMod p) * (k_idx : ZMod p))‖ from by
-    rw [← neg_sub, norm_neg]]
+  rw [embeddingIndex_spec (p := p) K w_K, stdAddChar_pow, norm_sub_rev]
 
 /-- **Sinnott `B`-matrix entry in `stdAddChar` form**: the column-constant
 log-evaluation entry of `sinnottMatrixB` expressed as
@@ -292,12 +279,7 @@ theorem sinnottMatrixB_apply_eq_log_stdAddChar
   rw [h_zeta_eq]
   rw [← NumberField.InfinitePlace.norm_embedding_eq w_K]
   rw [map_sub, map_one]
-  rw [embeddingIndex_spec (p := p) K w_K]
-  rw [show ‖ZMod.stdAddChar (N := p)
-        ((embeddingIndex (p := p) K w_K : ZMod p)) - 1‖ =
-      ‖(1 : ℂ) - ZMod.stdAddChar (N := p)
-        ((embeddingIndex (p := p) K w_K : ZMod p))‖ from by
-    rw [← neg_sub, norm_neg]]
+  rw [embeddingIndex_spec (p := p) K w_K, norm_sub_rev]
 
 /-- **K⁺-place embedding-index-quotient**: for `v : InfinitePlace K⁺`, the
 embedding-index of the corresponding K-place `(equivInfinitePlace K).symm v`,
@@ -570,11 +552,8 @@ theorem embeddingIndex_eq_iff_embedding_eq
     -- w.embedding : K →+* ℂ. Lift to K →ₐ[ℚ] ℂ.
     -- For NumberField K, K is a ℚ-algebra, ℂ is a ℚ-algebra, and any ring hom is ℚ-algebra.
     have h_pb : IsPrimitiveRoot
-        (((BernoulliRegular.cyclotomicZetaInteger (p := p) K : 𝓞 K) : K)) p := by
-      have h_OK := BernoulliRegular.cyclotomicZetaInteger_isPrimitiveRoot (p := p) K
-      have h_inj : Function.Injective (algebraMap (𝓞 K) K) :=
-        FaithfulSMul.algebraMap_injective (𝓞 K) K
-      exact h_OK.map_of_injective h_inj
+        (((BernoulliRegular.cyclotomicZetaInteger (p := p) K : 𝓞 K) : K)) p :=
+      cyclotomicZetaInteger_K_isPrimitiveRoot (p := p) K
     -- Lift each w.embedding to a ℚ-algebra hom.
     let φ₁ : K →ₐ[ℚ] ℂ := { w₁.embedding with commutes' := fun r => by simp }
     let φ₂ : K →ₐ[ℚ] ℂ := { w₂.embedding with commutes' := fun r => by simp }
@@ -674,11 +653,8 @@ theorem embeddingIndex_neg_implies_place_eq
     exact stdAddChar_neg_eq_conj p _
   -- Step 2: Use power basis to extend agreement on ζ_K to agreement everywhere.
   have h_pb : IsPrimitiveRoot
-      (((BernoulliRegular.cyclotomicZetaInteger (p := p) K : 𝓞 K) : K)) p := by
-    have h_OK := BernoulliRegular.cyclotomicZetaInteger_isPrimitiveRoot (p := p) K
-    have h_inj : Function.Injective (algebraMap (𝓞 K) K) :=
-      FaithfulSMul.algebraMap_injective (𝓞 K) K
-    exact h_OK.map_of_injective h_inj
+      (((BernoulliRegular.cyclotomicZetaInteger (p := p) K : 𝓞 K) : K)) p :=
+    cyclotomicZetaInteger_K_isPrimitiveRoot (p := p) K
   -- Lift both ring homs to ℚ-AlgHoms.
   let φ₁ : K →ₐ[ℚ] ℂ := w₁.embedding.toRatAlgHom
   let φ₂_conj : K →ₐ[ℚ] ℂ := ((starRingEnd ℂ).comp w₂.embedding).toRatAlgHom
