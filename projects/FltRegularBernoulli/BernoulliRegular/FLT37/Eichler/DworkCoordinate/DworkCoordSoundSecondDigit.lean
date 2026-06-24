@@ -85,12 +85,8 @@ noncomputable section
 
 set_option maxRecDepth 4000
 
-open NumberField
-open scoped BigOperators
-
 namespace BernoulliRegular.FLT37.Eichler
 
-open BernoulliRegular (CPlusGenerator CPlusExponentProduct)
 open BernoulliRegular.CyclotomicUnits
 open BernoulliRegular.CyclotomicUnits.PadicLogSetup
 open BernoulliRegular.CyclotomicUnits.PadicLogSetup.DworkParameter
@@ -212,12 +208,12 @@ theorem caseIICor823Level71SoundCoordIdentity
           ((37 : ZMod (37 ^ 2)) * ((ρ₀.val : ℕ) : ZMod (37 ^ 2))) =
       (37 : ZMod (37 ^ 2)) *
         ((1 - teichmullerCoeffModSq (p := 37) (δ : ZMod 37) ^ (i : ℕ)) *
-          ((ρ₀.val : ℕ) : ZMod (37 ^ 2))) from by ring]
+          ((ρ₀.val : ℕ) : ZMod (37 ^ 2))) by ring]
   rw [show (1 - ((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 32)) *
         ((37 : ZMod (37 ^ 2)) * ((ρ₀.val : ℕ) : ZMod (37 ^ 2))) =
       (37 : ZMod (37 ^ 2)) *
         ((1 - ((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 32)) *
-          ((ρ₀.val : ℕ) : ZMod (37 ^ 2))) from by ring]
+          ((ρ₀.val : ℕ) : ZMod (37 ^ 2))) by ring]
   apply thirtyseven_mul_eq_of_castHom_eq
   -- mod-`37`: reduce both factors; only `castHom (τ(k)³²) = castHom ((a+2)³²)` is nontrivial.
   have hδval : (δ : ZMod 37) = (((a : ℕ) + 2 : ℕ) : ZMod 37) := by
@@ -279,7 +275,7 @@ theorem caseIICor823Level71SoundSecondOrderPartValue
     rw [show (1 : ZMod 37) - (ZMod.castHom (by norm_num : (37 : ℕ) ∣ 37 ^ 2) (ZMod 37))
           (((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 32)) =
         -((ZMod.castHom (by norm_num : (37 : ℕ) ∣ 37 ^ 2) (ZMod 37))
-            (((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 32)) - 1) from by ring]
+            (((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 32)) - 1) by ring]
     rw [h]
   have hρ₀ : (ZMod.castHom (by norm_num : (37 : ℕ) ∣ 37 ^ 2) (ZMod 37))
       (((ρ₀.val : ℕ) : ZMod (37 ^ 2))) = ρ₀ := by
