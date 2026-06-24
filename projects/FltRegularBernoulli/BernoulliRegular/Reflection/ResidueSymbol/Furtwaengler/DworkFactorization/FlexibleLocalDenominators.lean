@@ -18,7 +18,7 @@ uses an actual local representation `ℓ^m * y = d * x` with
 noncomputable section
 
 open scoped NumberField
-open WithZero Multiplicative IsDedekindDomain
+open WithZero IsDedekindDomain
 
 namespace BernoulliRegular
 
@@ -137,8 +137,8 @@ theorem quotientFractionEval_eq_mk_mul_inv
         S.quotientInvOfNotMemQ N s hs := by
   apply (S.quotient_mk_isUnit_of_not_mem_Q N hs).mul_left_inj.mp
   rw [mul_comm (S.quotientFractionEval N x s hs),
-    S.quotientFractionEval_den_mul N x s hs]
-  rw [mul_assoc, S.quotientInvOfNotMemQ_mul_quotient_mk N s hs, mul_one]
+    S.quotientFractionEval_den_mul N x s hs,
+    mul_assoc, S.quotientInvOfNotMemQ_mul_quotient_mk N s hs, mul_one]
 
 theorem quotientFractionEvalPrimeCompl_add
     (N : ℕ) (x₁ x₂ : 𝓞 R') (s₁ s₂ : S.Q.primeCompl) :
@@ -481,8 +481,8 @@ theorem quotientFractionEval_eq_mk_mul_inv
         F.quotientInvOfNotMemQ N s hs := by
   apply (F.quotient_mk_isUnit_of_not_mem_Q N hs).mul_left_inj.mp
   rw [mul_comm (F.quotientFractionEval N x s hs),
-    F.quotientFractionEval_den_mul N x s hs]
-  rw [mul_assoc, F.quotientInvOfNotMemQ_mul_quotient_mk N s hs, mul_one]
+    F.quotientFractionEval_den_mul N x s hs,
+    mul_assoc, F.quotientInvOfNotMemQ_mul_quotient_mk N s hs, mul_one]
 
 theorem quotientFractionEvalPrimeCompl_add
     (N : ℕ) (x₁ x₂ : 𝓞 R') (s₁ s₂ : F.Q.primeCompl) :
@@ -613,8 +613,7 @@ theorem natCast_ell_pow_not_mem_Q_pow_mul_pred_succ (m : ℕ) :
     have hπpow :
         Associated (((F.zeta_ell_int - 1) ^ (ℓ - 1)) ^ m)
           (F.π ^ (m * (ℓ - 1))) := by
-      rw [F.hπ, ← pow_mul]
-      rw [Nat.mul_comm (ℓ - 1) m]
+      rw [F.hπ, ← pow_mul, Nat.mul_comm (ℓ - 1) m]
     exact h.trans hπpow
   intro hmem
   have hpi_mem : F.π ^ (m * (ℓ - 1)) ∈ F.Q ^ (m * (ℓ - 1) + 1) :=
@@ -697,13 +696,12 @@ theorem mem_Q_pow_of_natCast_ell_pow_mul_mem_Q_pow_add_mul_pred
   have hQpow_ne : F.Q ^ n ≠ ⊥ :=
     pow_ne_zero n F.toConductorFlexibleTraceFormStickelbergerSetup.Q_ne_bot
   have hJ_le : J ≤ F.Q ^ n := by
-    rw [← Ideal.dvd_iff_le]
-    rw [UniqueFactorizationMonoid.dvd_iff_normalizedFactors_le_normalizedFactors
-      hQpow_ne hJ_ne]
-    rw [UniqueFactorizationMonoid.normalizedFactors_pow,
+    rw [← Ideal.dvd_iff_le,
+      UniqueFactorizationMonoid.dvd_iff_normalizedFactors_le_normalizedFactors
+        hQpow_ne hJ_ne,
+      UniqueFactorizationMonoid.normalizedFactors_pow,
       UniqueFactorizationMonoid.normalizedFactors_irreducible hQ_irr,
-      normalize_eq, Multiset.nsmul_singleton]
-    rw [Multiset.le_iff_count]
+      normalize_eq, Multiset.nsmul_singleton, Multiset.le_iff_count]
     intro P
     by_cases hP : P = F.Q
     · subst P
@@ -720,12 +718,12 @@ theorem quotientFractionEvalPrimeCompl_den_mul_eq_mk
         ((d : 𝓞 R') * x) d =
       Ideal.Quotient.mk (F.Q ^ (N + 1)) x := by
   rw [show
-      F.quotientFractionEvalPrimeCompl N
-          ((d : 𝓞 R') * x) d =
-        F.quotientFractionEval N
-          ((d : 𝓞 R') * x) (d : 𝓞 R') d.property from rfl]
-  rw [F.quotientFractionEval_eq_mk_mul_inv]
-  rw [map_mul, mul_assoc,
+        F.quotientFractionEvalPrimeCompl N
+            ((d : 𝓞 R') * x) d =
+          F.quotientFractionEval N
+            ((d : 𝓞 R') * x) (d : 𝓞 R') d.property from rfl,
+    F.quotientFractionEval_eq_mk_mul_inv,
+    map_mul, mul_assoc,
     mul_comm (Ideal.Quotient.mk (F.Q ^ (N + 1)) x),
     ← mul_assoc,
     F.quotient_mk_mul_quotientInvOfNotMemQ,
@@ -764,9 +762,7 @@ theorem exists_primeCompl_natCast_ell_pow_denom_of_mem_Q_pow
       ((ℓ : 𝓞 R') ^ m) * y = (d : 𝓞 R') * x ∧ y ∈ F.Q ^ s := by
   classical
   by_cases hx0 : x = 0
-  · subst x
-    refine ⟨0, 1, ?_, by simp⟩
-    simp
+  · exact ⟨0, 1, by simp [hx0], by simp⟩
   let v : HeightOneSpectrum (𝓞 R') :=
     { asIdeal := F.Q
       isPrime := F.toConductorFlexibleTraceFormStickelbergerSetup.Q_isPrime
@@ -858,10 +854,10 @@ theorem quotientFractionEvalPrimeCompl_mem_map_Q_pow_of_natCast_ell_pow_mul_mem
     F.mem_Q_pow_of_natCast_ell_pow_mul_mem_Q_pow_add_mul_pred
       (m := m) (n := s) hy
   rw [show
-      F.quotientFractionEvalPrimeCompl N y d =
-        F.quotientFractionEval N y (d : 𝓞 R') d.property
-      from rfl]
-  rw [F.quotientFractionEval_eq_mk_mul_inv]
+        F.quotientFractionEvalPrimeCompl N y d =
+          F.quotientFractionEval N y (d : 𝓞 R') d.property
+        from rfl,
+    F.quotientFractionEval_eq_mk_mul_inv]
   exact
     (Ideal.map (Ideal.Quotient.mk (F.Q ^ (N + 1))) (F.Q ^ s)).mul_mem_right
       (F.quotientInvOfNotMemQ N (d : 𝓞 R') d.property)
