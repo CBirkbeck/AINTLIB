@@ -129,7 +129,6 @@ theorem caseII_assocUnit_sigma_twist {m : ℕ} (D : RealCaseIIData37 K m) (hp : 
       (-1) ^ m *
         associated_eta_zero_unit_of_spanSingleton hp D.hζ D.equation D.hy D.hz
           (caseII_etaInv η) hb₂ hspan₂ := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   -- Abbreviations for the two associate units.
   set U₁ := associated_eta_zero_unit_of_spanSingleton hp D.hζ D.equation D.hy D.hz η hb₁ hspan₁
     with hU₁def
