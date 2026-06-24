@@ -7,7 +7,7 @@ public import BernoulliRegular.Characters
 
 noncomputable section
 
-open scoped NumberField Topology
+open scoped NumberField
 
 namespace BernoulliRegular
 namespace CyclotomicUnits
@@ -32,10 +32,9 @@ theorem one_add_pow_sub_one_sub_natCast_mul_mem_pow_succ
           ((1 + x) ^ k - 1 - (k : R) * x) * (1 + x) ∈ I ^ (n + 1) :=
         Ideal.mul_mem_right (1 + x) (I ^ (n + 1)) ih
       have hxx : x * x ∈ I ^ (n + 1) := by
-        have hx2 : x * x ∈ I ^ n * I ^ n := Ideal.mul_mem_mul hx hx
-        have hx2' : x * x ∈ I ^ (n + n) := by
-          simpa [pow_add] using hx2
-        exact Ideal.pow_le_pow_right (by omega : n + 1 ≤ n + n) hx2'
+        have hx2 : x * x ∈ I ^ (n + n) := by
+          simpa [pow_add] using Ideal.mul_mem_mul hx hx
+        exact Ideal.pow_le_pow_right (by omega : n + 1 ≤ n + n) hx2
       have hright : (k : R) * (x * x) ∈ I ^ (n + 1) :=
         Ideal.mul_mem_left (I ^ (n + 1)) (k : R) hxx
       have hsum :
@@ -179,8 +178,7 @@ theorem rationalPadicIntegerToZMod_eq_zero_iff_mem_primeIdeal
   rw [rationalPadicPrimeIdeal_eq_maximalIdeal (p := p)]
   constructor
   · intro hx
-    rw [IsLocalRing.mem_maximalIdeal] at hx
-    rw [IsLocalRing.mem_maximalIdeal]
+    rw [IsLocalRing.mem_maximalIdeal] at hx ⊢
     intro hxunit
     have hpre : IsUnit (e.symm x) := by
       simpa using hxunit.map e.symm.toRingHom
@@ -262,12 +260,10 @@ theorem scaledDworkParameter_sub_natCast_mul_lambda_mem_sq
     Nat.sub_pos_of_lt (Fact.out : Nat.Prime p).one_lt
   have hcoeffParam :
       algebraMap (RationalPadicIntegerRing p) S (omegaR - avalR) ∈
-        dworkParameterIdeal p K := by
-    have htmp :
-        algebraMap (RationalPadicIntegerRing p) S (omegaR - avalR) ∈
-          (dworkParameterIdeal p K) ^ (p - 1) := by
-      simpa [one_mul] using hcoeffParamPow
-    exact Ideal.pow_le_self (Nat.ne_of_gt hp_pred_pos) htmp
+        dworkParameterIdeal p K :=
+    Ideal.pow_le_self (Nat.ne_of_gt hp_pred_pos)
+      (show algebraMap (RationalPadicIntegerRing p) S (omegaR - avalR) ∈
+          (dworkParameterIdeal p K) ^ (p - 1) by simpa [one_mul] using hcoeffParamPow)
   have hcoeffI :
       algebraMap (RationalPadicIntegerRing p) S (omegaR - avalR) ∈ I := by
     simpa [I, dworkParameterIdeal_eq_dworkCompleteLambdaIdeal (p := p) (K := K)]
@@ -289,8 +285,7 @@ theorem scaledDworkParameter_sub_natCast_mul_lambda_mem_sq
           algebraMap (RationalPadicIntegerRing p) S avalR * lambda =
         algebraMap (RationalPadicIntegerRing p) S omegaR * (varpi - lambda) +
           algebraMap (RationalPadicIntegerRing p) S (omegaR - avalR) * lambda
-    rw [map_sub]
-    rw [mul_sub, sub_mul]
+    rw [map_sub, mul_sub, sub_mul]
     abel
   rw [hdecomp]
   exact (I ^ 2).add_mem hterm1 hterm2
@@ -432,7 +427,7 @@ theorem samePrimeFiniteLog_eq_mk_of_mem_pow_of_two_le
         (Ideal.pow_le_self (Nat.ne_of_gt (lt_of_lt_of_le (by decide : 0 < 2) hm)) hx) =
       Ideal.Quotient.mk ((lambdaIdeal p K) ^ (m + 1)) x := by
   classical
-  let hxI : x ∈ lambdaIdeal p K :=
+  have hxI : x ∈ lambdaIdeal p K :=
     Ideal.pow_le_self (Nat.ne_of_gt (lt_of_lt_of_le (by decide : 0 < 2) hm)) hx
   unfold samePrimeFiniteLog
   rw [Finset.sum_eq_single 1]
