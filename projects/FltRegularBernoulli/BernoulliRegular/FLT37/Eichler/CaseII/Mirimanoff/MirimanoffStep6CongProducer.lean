@@ -65,11 +65,11 @@ false (a genuine consequence of the descent over real data).  See
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Finset Polynomial
+open NumberField IsCyclotomicExtension Polynomial
 
 namespace BernoulliRegular.FLT37.Eichler
 
-open FLT37 FLT37.LehmerVandiver.CaseII BernoulliRegular
+open FLT37 FLT37.LehmerVandiver.CaseII
 
 /-! ## 0. `1 - ζ^s ∉ lv149`, and `-1` is a `37`-th power in the residue field -/
 
