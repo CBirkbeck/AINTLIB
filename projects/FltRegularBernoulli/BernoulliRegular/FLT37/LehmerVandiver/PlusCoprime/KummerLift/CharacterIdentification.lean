@@ -75,7 +75,7 @@ theorem pollaczekUnit_val_eq_prod (i : ℕ) :
     intro b _
     rw [Units.val_pow_eq_pow_val, pollaczekFactor_val]]
   rw [Finset.prod_attach (Finset.Ico 1 ((p - 1) / 2 + 1))
-    (fun b ↦ cyclotomicUnit p K b ^ (b ^ (p - 1 - i)))]
+    (fun b => cyclotomicUnit p K b ^ (b ^ (p - 1 - i)))]
 
 /-- **Aggregate σ_a-twist for `pollaczekUnit` (substitution form)**:
 applying σ_a to the Pollaczek product, multiplied by the ζ-prefactor
@@ -166,9 +166,7 @@ theorem zeta_pow_mul_cyclotomicUnit_p_sub_eq_neg
   have hζ_sub_one_ne_zero : (ζ - 1 : 𝓞 K) ≠ 0 :=
     (zeta_spec p ℚ K).zeta_sub_one_prime'.ne_zero
   -- ζ^p = 1.
-  have hζ_p : ζ ^ p = 1 := by
-    have hζ_prim : IsPrimitiveRoot ζ p := (zeta_spec p ℚ K).toInteger_isPrimitiveRoot
-    exact hζ_prim.pow_eq_one
+  have hζ_p : ζ ^ p = 1 := (zeta_spec p ℚ K).toInteger_isPrimitiveRoot.pow_eq_one
   -- Multiply both sides by (ζ - 1) and cancel.
   refine mul_right_cancel₀ hζ_sub_one_ne_zero ?_
   calc ζ ^ c * cyclotomicUnit p K (p - c) * (ζ - 1)
@@ -196,9 +194,7 @@ theorem cyclotomicUnit_eq_neg_zeta_pow_mul_cyclotomicUnit_p_sub
         cyclotomicUnit p K (p - d) := by
   haveI : NeZero p := ⟨hp.out.ne_zero⟩
   set ζ : 𝓞 K := ((zeta_spec p ℚ K).toInteger : 𝓞 K)
-  have hζ_p : ζ ^ p = 1 := by
-    have hζ_prim : IsPrimitiveRoot ζ p := (zeta_spec p ℚ K).toInteger_isPrimitiveRoot
-    exact hζ_prim.pow_eq_one
+  have hζ_p : ζ ^ p = 1 := (zeta_spec p ℚ K).toInteger_isPrimitiveRoot.pow_eq_one
   -- Apply zeta_pow_mul_cyclotomicUnit_p_sub_eq_neg with c = p - d.
   have h := zeta_pow_mul_cyclotomicUnit_p_sub_eq_neg
     (p := p) (K := K) (p - d) (Nat.sub_le _ _)
@@ -210,8 +206,7 @@ theorem cyclotomicUnit_eq_neg_zeta_pow_mul_cyclotomicUnit_p_sub
   have h_pow : ζ ^ d * ζ ^ (p - d) = 1 := by
     rw [← pow_add, Nat.add_sub_cancel' hd, hζ_p]
   calc cyclotomicUnit p K d
-      = 1 * cyclotomicUnit p K d := by ring
-    _ = (ζ ^ d * ζ ^ (p - d)) * cyclotomicUnit p K d := by rw [h_pow]
+      = (ζ ^ d * ζ ^ (p - d)) * cyclotomicUnit p K d := by rw [h_pow, one_mul]
     _ = ζ ^ d * (ζ ^ (p - d) * cyclotomicUnit p K d) := by ring
     _ = ζ ^ d * (-cyclotomicUnit p K (p - d)) := by rw [h]
     _ = -ζ ^ d * cyclotomicUnit p K (p - d) := by ring
@@ -241,12 +236,12 @@ theorem cyclotomicUnit_pow_eq_neg_zeta_pow_mul_cyclotomicUnit_p_sub_pow
         (((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (((a : ZMod p) * b).val) *
           cyclotomicUnit p K (p - ((a : ZMod p) * b).val)) ^ (b ^ E) := by
   rw [cyclotomicUnit_eq_neg_zeta_pow_mul_cyclotomicUnit_p_sub p K
-      (((a : ZMod p) * b).val) hb_lt]
-  rw [show -((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (((a : ZMod p) * b).val) *
+      (((a : ZMod p) * b).val) hb_lt,
+    show -((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (((a : ZMod p) * b).val) *
         cyclotomicUnit p K (p - ((a : ZMod p) * b).val) =
       (-1) * (((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (((a : ZMod p) * b).val) *
-        cyclotomicUnit p K (p - ((a : ZMod p) * b).val)) by ring]
-  rw [mul_pow]
+        cyclotomicUnit p K (p - ((a : ZMod p) * b).val)) by ring,
+    mul_pow]
 
 /-- **Aggregate half-range reduction**: applying the per-term swap
 identity uniformly over the Pollaczek product (independently of
@@ -274,7 +269,7 @@ theorem cyclotomicSigmaOfUnit_smul_pollaczekUnit_swap_uniform
         ∏ b ∈ Finset.Ico 1 ((p - 1) / 2 + 1),
           cyclotomicUnit p K (p - ((a : ZMod p) * b).val) ^ (b ^ (p - 1 - i)) := by
   -- For each b, ((a · b).val) < p, so ≤ p as required by per-term lemma.
-  have h_le : ∀ b : ℕ, ((a : ZMod p) * b).val ≤ p := fun b ↦
+  have h_le : ∀ b : ℕ, ((a : ZMod p) * b).val ≤ p := fun b =>
     Nat.le_of_lt ((((a : ZMod p) * b)).val_lt)
   -- Apply the per-term swap to each factor, then aggregate.
   rw [show ∏ b ∈ Finset.Ico 1 ((p - 1) / 2 + 1),
@@ -283,7 +278,7 @@ theorem cyclotomicSigmaOfUnit_smul_pollaczekUnit_swap_uniform
         (-1) ^ (b ^ (p - 1 - i)) *
           (((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (((a : ZMod p) * b).val) *
             cyclotomicUnit p K (p - ((a : ZMod p) * b).val)) ^ (b ^ (p - 1 - i))
-      from Finset.prod_congr rfl fun b _ ↦ by
+      from Finset.prod_congr rfl fun b _ => by
         exact cyclotomicUnit_pow_eq_neg_zeta_pow_mul_cyclotomicUnit_p_sub_pow
           p K a b (p - 1 - i) (h_le b)]
   -- Now distribute the product over (-1)^{...} · (ζ^{...} · cycU(p - ...))^{...}.
@@ -293,7 +288,7 @@ theorem cyclotomicSigmaOfUnit_smul_pollaczekUnit_swap_uniform
       (-1) ^ (∑ b ∈ Finset.Ico 1 ((p - 1) / 2 + 1), b ^ (p - 1 - i))
       from Finset.prod_pow_eq_pow_sum
         (Finset.Ico 1 ((p - 1) / 2 + 1))
-        (fun b ↦ b ^ (p - 1 - i)) (-1)]
+        (fun b => b ^ (p - 1 - i)) (-1)]
   -- Distribute (ζ^{...} · cycU)^{exp} = ζ^{... · exp} · cycU^{exp}.
   rw [show ∏ b ∈ Finset.Ico 1 ((p - 1) / 2 + 1),
         (((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (((a : ZMod p) * b).val) *
@@ -305,7 +300,7 @@ theorem cyclotomicSigmaOfUnit_smul_pollaczekUnit_swap_uniform
           cyclotomicUnit p K (p - ((a : ZMod p) * b).val) ^ (b ^ (p - 1 - i))
       from by
         rw [← Finset.prod_mul_distrib]
-        refine Finset.prod_congr rfl fun b _ ↦ ?_
+        refine Finset.prod_congr rfl fun b _ => ?_
         rw [mul_pow, ← pow_mul]]
   ring
 
@@ -353,8 +348,7 @@ theorem halfReduce_mem_half_range (hp_odd : p ≠ 2) (a : (ZMod p)ˣ) {b : ℕ}
   unfold halfReduce
   split_ifs with h
   · exact ⟨h_ab_val_pos, by omega⟩
-  · push Not at h
-    refine ⟨by omega, ?_⟩
+  · refine ⟨by omega, ?_⟩
     -- Goal: p - (a · b).val < (p - 1) / 2 + 1.
     -- (a · b).val > (p-1)/2, so (a · b).val ≥ (p-1)/2 + 1 = k + 1.
     -- p - (a · b).val ≤ p - k - 1 = (since p = 2k+1) k = (p-1)/2.
@@ -364,9 +358,7 @@ theorem halfReduce_mem_half_range (hp_odd : p ≠ 2) (a : (ZMod p)ˣ) {b : ℕ}
 /-- Auxiliary: `(a⁻¹).val * a.val = 1` in `ZMod p`. -/
 theorem unit_inv_val_mul_val (a : (ZMod p)ˣ) :
     ((a⁻¹ : (ZMod p)ˣ) : ZMod p) * ((a : (ZMod p)ˣ) : ZMod p) = 1 := by
-  rw [← Units.val_mul]
-  rw [show a⁻¹ * a = (1 : (ZMod p)ˣ) from inv_mul_cancel a]
-  exact Units.val_one
+  rw [← Units.val_mul, inv_mul_cancel, Units.val_one]
 
 /-- **`halfReduce` round-trip**: for `b ∈ Ico 1 ((p-1)/2 + 1)`, `a` a unit,
 and `p` odd, applying `halfReduce` with `a` then `a⁻¹` recovers `b`. -/
@@ -387,7 +379,7 @@ theorem halfReduce_round_trip (hp_odd : p ≠ 2) (a : (ZMod p)ˣ) {b : ℕ}
     omega
   have hb_val : ((b : ℕ) : ZMod p).val = b := by
     rw [ZMod.val_natCast, Nat.mod_eq_of_lt hb_lt_p]
-  have h_ab_ne : (a : ZMod p) * (b : ZMod p) ≠ 0 := fun h ↦ by
+  have h_ab_ne : (a : ZMod p) * (b : ZMod p) ≠ 0 := fun h => by
     rcases mul_eq_zero.mp h with h' | h'
     · exact a.ne_zero h'
     · exact hb_zmod_ne_zero h'
@@ -399,28 +391,20 @@ theorem halfReduce_round_trip (hp_odd : p ≠ 2) (a : (ZMod p)ˣ) {b : ℕ}
   -- after natCast_val + cast_id, then unit-inverse cancellation.
   have h_simplify_α : ((a⁻¹ : (ZMod p)ˣ) : ZMod p) *
       ((((a : ZMod p) * (b : ZMod p)).val : ℕ) : ZMod p) = (b : ZMod p) := by
-    rw [ZMod.natCast_val, ZMod.cast_id]
-    calc ((a⁻¹ : (ZMod p)ˣ) : ZMod p) * ((a : ZMod p) * (b : ZMod p))
-        = (((a⁻¹ : (ZMod p)ˣ) : ZMod p) * (a : ZMod p)) * (b : ZMod p) := by ring
-      _ = 1 * (b : ZMod p) := by rw [unit_inv_val_mul_val]
-      _ = (b : ZMod p) := by ring
+    rw [ZMod.natCast_val, ZMod.cast_id, ← mul_assoc, unit_inv_val_mul_val, one_mul]
   have h_simplify_β : ((a⁻¹ : (ZMod p)ˣ) : ZMod p) *
       (((p - ((a : ZMod p) * (b : ZMod p)).val) : ℕ) : ZMod p) = -(b : ZMod p) := by
     have h_cast :
         (((p - ((a : ZMod p) * (b : ZMod p)).val) : ℕ) : ZMod p) =
           -((a : ZMod p) * (b : ZMod p)) := by
-      rw [Nat.cast_sub (Nat.le_of_lt h_ab_val_lt)]
-      rw [ZMod.natCast_self]
-      have h_val_cast : ((((a : ZMod p) * (b : ZMod p)).val : ℕ) : ZMod p) =
-          (a : ZMod p) * (b : ZMod p) :=
-        (ZMod.natCast_val _).trans (ZMod.cast_id _ _)
-      rw [h_val_cast]
+      rw [Nat.cast_sub (Nat.le_of_lt h_ab_val_lt), ZMod.natCast_self, ZMod.natCast_val,
+        ZMod.cast_id]
       ring
-    rw [h_cast]
-    calc ((a⁻¹ : (ZMod p)ˣ) : ZMod p) * (-((a : ZMod p) * (b : ZMod p)))
-        = -((((a⁻¹ : (ZMod p)ˣ) : ZMod p) * (a : ZMod p)) * (b : ZMod p)) := by ring
-      _ = -(1 * (b : ZMod p)) := by rw [unit_inv_val_mul_val]
-      _ = -(b : ZMod p) := by ring
+    rw [h_cast, mul_neg, ← mul_assoc, unit_inv_val_mul_val, one_mul]
+  have h_val_eq : (((a⁻¹ : (ZMod p)ˣ) : ZMod p) *
+      (((p - ((a : ZMod p) * (b : ZMod p)).val) : ℕ) : ZMod p)).val = p - b := by
+    rw [h_simplify_β, ZMod.neg_val]
+    simp [hb_zmod_ne_zero, hb_val]
   unfold halfReduce
   split_ifs with h_outer h_inner h_inner
   · -- Case α (lower-half) → if-branch: result = (a⁻¹ · h).val = b. ✓
@@ -431,19 +415,9 @@ theorem halfReduce_round_trip (hp_odd : p ≠ 2) (a : (ZMod p)ˣ) {b : ℕ}
     rw [h_simplify_α, hb_val]; omega
   · -- Case β (upper-half) → if-branch: contradicts h_simplify_β giving p - b > k.
     exfalso
-    push Not at h_outer
-    have h_val_eq : (((a⁻¹ : (ZMod p)ˣ) : ZMod p) *
-        (((p - ((a : ZMod p) * (b : ZMod p)).val) : ℕ) : ZMod p)).val = p - b := by
-      rw [h_simplify_β, ZMod.neg_val]
-      simp [hb_zmod_ne_zero, hb_val]
     rw [h_val_eq] at h_inner
     omega
   · -- Case β (upper-half) → else-branch: result = p - (a⁻¹ · h).val = b. ✓
-    push Not at h_outer
-    have h_val_eq : (((a⁻¹ : (ZMod p)ˣ) : ZMod p) *
-        (((p - ((a : ZMod p) * (b : ZMod p)).val) : ℕ) : ZMod p)).val = p - b := by
-      rw [h_simplify_β, ZMod.neg_val]
-      simp [hb_zmod_ne_zero, hb_val]
     rw [h_val_eq]; omega
 
 omit [NumberField K] [IsCyclotomicExtension {p} ℚ K] in
@@ -459,8 +433,8 @@ theorem halfReduce_prod_reindex (hp_odd : p ≠ 2) (a : (ZMod p)ˣ)
     ∏ b ∈ Finset.Ico 1 ((p - 1) / 2 + 1), f b (halfReduce p a b) =
       ∏ b' ∈ Finset.Ico 1 ((p - 1) / 2 + 1), f (halfReduce p a⁻¹ b') b' := by
   refine Finset.prod_nbij'
-    (fun b ↦ halfReduce p a b)
-    (fun b' ↦ halfReduce p a⁻¹ b')
+    (fun b => halfReduce p a b)
+    (fun b' => halfReduce p a⁻¹ b')
     ?_ ?_ ?_ ?_ ?_
   · intro b hb; exact halfReduce_mem_half_range p hp_odd a hb
   · intro b' hb'; exact halfReduce_mem_half_range p hp_odd a⁻¹ hb'
@@ -547,7 +521,7 @@ theorem cyclotomicSigmaOfUnit_smul_pollaczekUnit_half_range_reindex
           else -((zeta_spec p ℚ K).toInteger : 𝓞 K) ^
                 (((a : ZMod p) * (b : ZMod p)).val)) *
           cyclotomicUnit p K (halfReduce p a b)) ^ (b ^ (p - 1 - i))
-      from Finset.prod_congr rfl fun b _ ↦ by
+      from Finset.prod_congr rfl fun b _ => by
         rw [cyclotomicUnit_eq_if_upper_pair_up]]
   -- Note: `((a : ZMod p) * b).val` (with `b : ℕ`) equals `((a : ZMod p) * (b : ZMod p)).val`
   -- after the natCast — the identity holds because `(↑b : ZMod p) = (b : ZMod p)` on naturals.
@@ -565,7 +539,7 @@ theorem cyclotomicSigmaOfUnit_smul_pollaczekUnit_half_range_reindex
           cyclotomicUnit p K (halfReduce p a b) ^ (b ^ (p - 1 - i)))
       from by
         rw [← Finset.prod_mul_distrib]
-        refine Finset.prod_congr rfl fun b _ ↦ ?_
+        refine Finset.prod_congr rfl fun b _ => ?_
         rw [mul_pow]]
   -- Now reindex the cyclotomicUnit-product via halfReduce bijection.
   congr 1
@@ -574,7 +548,7 @@ theorem cyclotomicSigmaOfUnit_smul_pollaczekUnit_half_range_reindex
   -- `((a : ZMod p) * (b : ZMod p))`.
   -- Use halfReduce_prod_reindex with f(b, b') := cyclotomicUnit p K b' ^ (b ^ E).
   exact halfReduce_prod_reindex (p := p) (K := K) hp_odd a
-    (fun b b' ↦ cyclotomicUnit p K b' ^ (b ^ (p - 1 - i)))
+    (fun b b' => cyclotomicUnit p K b' ^ (b ^ (p - 1 - i)))
 
 end StageFive
 
@@ -595,18 +569,13 @@ theorem halfReduce_pow_mod_eq (a : (ZMod p)ˣ) (b' E : ℕ) :
         else (-(((a⁻¹ : (ZMod p)ˣ) : ZMod p) * (b' : ZMod p))) ^ E) := by
   unfold halfReduce
   split_ifs with h
-  · rw [show ((((a⁻¹ : (ZMod p)ˣ) : ZMod p) * (b' : ZMod p)).val : ZMod p) =
-        ((a⁻¹ : (ZMod p)ˣ) : ZMod p) * (b' : ZMod p) from
-        (ZMod.natCast_val _).trans (ZMod.cast_id _ _)]
+  · rw [ZMod.natCast_val, ZMod.cast_id]
   · -- Goal: (((p - ((a⁻¹) · b').val) : ℕ) : ZMod p)^E = (-(...))^E.
     haveI : NeZero p := ⟨hp.out.ne_zero⟩
     have h_val_lt : (((a⁻¹ : (ZMod p)ˣ) : ZMod p) * (b' : ZMod p)).val < p :=
       (((a⁻¹ : (ZMod p)ˣ) : ZMod p) * (b' : ZMod p)).val_lt
-    rw [Nat.cast_sub (Nat.le_of_lt h_val_lt), ZMod.natCast_self]
-    rw [show ((((((a⁻¹ : (ZMod p)ˣ) : ZMod p) * (b' : ZMod p)).val : ℕ)) : ZMod p) =
-        ((a⁻¹ : (ZMod p)ˣ) : ZMod p) * (b' : ZMod p) from
-        (ZMod.natCast_val _).trans (ZMod.cast_id _ _)]
-    rw [zero_sub]
+    rw [Nat.cast_sub (Nat.le_of_lt h_val_lt), ZMod.natCast_self, ZMod.natCast_val,
+      ZMod.cast_id, zero_sub]
 
 /-- **LV005c1b-6a**: for `E` even, the case-split form of
 `halfReduce_pow_mod_eq` collapses (since `(-1)^E = 1`):
@@ -639,8 +608,7 @@ theorem unit_inv_val_pow_E_eq_pow_i (a : (ZMod p)ˣ) (i : ℕ) (hi : i ≤ p - 1
   symm
   apply eq_inv_of_mul_eq_one_left
   -- Goal: ((a : ZMod p)) ^ (p-1-i) * ((a : ZMod p)) ^ i = 1.
-  rw [← pow_add]
-  rw [show i + (p - 1 - i) = p - 1 by omega]
+  rw [← pow_add, show i + (p - 1 - i) = p - 1 by omega]
   exact ZMod.pow_card_sub_one_eq_one a.ne_zero
 
 omit hp [NumberField K] [IsCyclotomicExtension {p} ℚ K] in
@@ -682,9 +650,8 @@ theorem halfReduce_pow_eq_pow_mul_pow (a : (ZMod p)ˣ) (b' i : ℕ)
     (hi : i ≤ p - 1) (hi_even : Even (p - 1 - i)) :
     ((halfReduce p a⁻¹ b' : ℕ) : ZMod p) ^ (p - 1 - i) =
       ((a : (ZMod p)ˣ) : ZMod p) ^ i * (b' : ZMod p) ^ (p - 1 - i) := by
-  rw [halfReduce_pow_mod_eq_of_even p a b' (p - 1 - i) hi_even]
-  rw [mul_pow]
-  rw [unit_inv_val_pow_E_eq_pow_i p a i hi]
+  rw [halfReduce_pow_mod_eq_of_even p a b' (p - 1 - i) hi_even, mul_pow,
+    unit_inv_val_pow_E_eq_pow_i p a i hi]
 
 /-- **LV005c1b-6 ℕ-level mod-equivalence**: ℕ-level form of the half-range
 exponent identity. -/
@@ -696,19 +663,13 @@ theorem halfReduce_pow_modEq (a : (ZMod p)ˣ) (b' i : ℕ)
   have h_zmod := halfReduce_pow_eq_pow_mul_pow p a b' i hi hi_even
   apply (ZMod.natCast_eq_natCast_iff' _ _ p).mp
   push_cast
-  rw [show ((((((a : (ZMod p)ˣ) : ZMod p) ^ i).val : ℕ) : ZMod p)) =
-      ((a : (ZMod p)ˣ) : ZMod p) ^ i from by
-        rw [ZMod.natCast_val, ZMod.cast_id]]
+  rw [ZMod.natCast_val, ZMod.cast_id]
   exact h_zmod
 
 /-- **Bridge: ℕ-Nat.ModEq → ℤ-divisibility**. -/
 theorem natModEq_to_intDvd {a b : ℕ} {n : ℕ} (h : a ≡ b [MOD n]) :
-    (n : ℤ) ∣ (a : ℤ) - b := by
-  rw [Int.dvd_iff_emod_eq_zero, Int.sub_emod]
-  rw [Nat.ModEq] at h
-  have h_int : ((a : ℕ) : ℤ) % n = ((b : ℕ) : ℤ) % n := by
-    exact_mod_cast h
-  rw [h_int, sub_self, Int.zero_emod]
+    (n : ℤ) ∣ (a : ℤ) - b :=
+  dvd_sub_comm.mp (Nat.modEq_iff_dvd.mp h)
 
 /-- **LV005c1b-6d (per-term)**: for each `b'` in the half-range, there
 exists `γ_b' : (𝓞 K)ˣ` such that
@@ -734,7 +695,7 @@ theorem cyclotomicUnit_pow_halfReduce_per_term
   have hb'_coprime : b'.Coprime p :=
     (Nat.coprime_of_lt_prime (Nat.one_le_iff_ne_zero.mp hb'_pos)
       hb'_lt_p hp.out).symm
-  have hp_two : 2 ≤ p := by have := hp.out.two_le; omega
+  have hp_two : 2 ≤ p := hp.out.two_le
   -- Get the unit form of cyclotomicUnit and apply 6c.
   set x := cyclotomicUnitUnit p K b' hb'_coprime hp_two
   have h_x_val : ((x : (𝓞 K)ˣ) : 𝓞 K) = cyclotomicUnit p K b' :=
@@ -760,7 +721,7 @@ theorem cyclotomicUnit_pow_halfReduce_aggregate
           ((γ : 𝓞 K)) ^ p := by
   classical
   -- For each b' ∈ half-range, choose a witness γ_b' from 6d.
-  let γ_fn : ℕ → (𝓞 K)ˣ := fun b' ↦
+  let γ_fn : ℕ → (𝓞 K)ˣ := fun b' =>
     if h : b' ∈ Finset.Ico 1 ((p - 1) / 2 + 1) then
       Classical.choose
         (cyclotomicUnit_pow_halfReduce_per_term p K a b' i h hp_odd hi hi_even)
@@ -773,7 +734,7 @@ theorem cyclotomicUnit_pow_halfReduce_aggregate
         (cyclotomicUnit p K b' ^
             (((a^i : (ZMod p)ˣ) : ZMod p).val * b' ^ (p - 1 - i)) *
           ((γ_fn b' : 𝓞 K)) ^ p) from
-      Finset.prod_congr rfl fun b' hb' ↦ by
+      Finset.prod_congr rfl fun b' hb' => by
         simp only [γ_fn, hb', dif_pos]
         exact Classical.choose_spec
           (cyclotomicUnit_pow_halfReduce_per_term p K a b' i hb' hp_odd hi hi_even)]
@@ -793,7 +754,7 @@ theorem prod_cyclotomicUnit_pow_mul_eq_pollaczekUnit_pow
   rw [pollaczekUnit_val_eq_prod]
   -- Goal: ∏ cyclotomicUnit b' ^ (N * b'^E) = (∏ cyclotomicUnit b' ^ b'^E)^N.
   rw [← Finset.prod_pow]
-  refine Finset.prod_congr rfl fun b' _ ↦ ?_
+  refine Finset.prod_congr rfl fun b' _ => ?_
   rw [← pow_mul, mul_comm]
 
 /-- **LV005c1b main theorem (almost-eigenvalue form)**: the σ_a-twist of
@@ -842,10 +803,6 @@ theorem cyclotomicSigmaOfUnit_smul_pollaczekUnit_almost_eigenvalue
   ring
 
 end StageSix
-
-set_option maxRecDepth 4000000
-set_option linter.style.setOption false in
-set_option maxHeartbeats 4000000
 
 /-- **Power-sum half-range divisibility for FLT37**: `S = ∑_{b=1}^{18} b^4
 = 432345 = 37 · 11685`. Direct kernel-`decide` numerical computation.
