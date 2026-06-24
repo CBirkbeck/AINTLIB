@@ -67,8 +67,7 @@ It imports only; it does **not** modify any existing file.  No `sorry`, no `axio
 
 noncomputable section
 
-open NumberField NumberField.IsCMField IsCyclotomicExtension UniqueFactorizationMonoid Polynomial
-open scoped nonZeroDivisors
+open NumberField NumberField.IsCMField IsCyclotomicExtension Polynomial
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -353,7 +352,7 @@ theorem freeContentCaseIIData37_pContent_descend_of_anchorExtractionData
   have hA37 : ηA ^ 37 = 1 := by
     rw [hηA]; exact Dr.hζ.toInteger_isPrimitiveRoot.pow_eq_one
   have hB37 : ηB ^ 37 = 1 := by
-    rw [hηB, ← pow_mul, show 2 * 37 = 37 * 2 from by norm_num, pow_mul, hA37, one_pow]
+    rw [hηB, ← pow_mul, show 2 * 37 = 37 * 2 by norm_num, pow_mul, hA37, one_pow]
   -- `ηA ≠ 1`, `ηB ≠ 1`, `ηA ≠ ηB`, `ηA·ηB ≠ 1`.
   have hA1 : ηA ≠ 1 := Dr.hζ.toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37)
   have hB1 : ηB ≠ 1 := by
@@ -368,7 +367,7 @@ theorem freeContentCaseIIData37_pContent_descend_of_anchorExtractionData
     · exact Dr.hζ.toInteger_isPrimitiveRoot.ne_zero (by decide : 37 ≠ 0) h0
     · exact hA1 (by rw [hηA]; linear_combination h1)
   have hABp : ηA * ηB ≠ 1 := by
-    rw [hηA, hηB, show Dr.hζ.toInteger * Dr.hζ.toInteger ^ 2 = Dr.hζ.toInteger ^ 3 from by ring]
+    rw [hηA, hηB, show Dr.hζ.toInteger * Dr.hζ.toInteger ^ 2 = Dr.hζ.toInteger ^ 3 by ring]
     exact Dr.hζ.toInteger_isPrimitiveRoot.pow_ne_one_of_pos_of_lt (by omega) (by decide : 3 < 37)
   -- The three `Λ`-units.
   have hΛne : ∀ (η : 𝓞 (CyclotomicField 37 ℚ)), η ^ 37 = 1 → η ≠ 1 →
