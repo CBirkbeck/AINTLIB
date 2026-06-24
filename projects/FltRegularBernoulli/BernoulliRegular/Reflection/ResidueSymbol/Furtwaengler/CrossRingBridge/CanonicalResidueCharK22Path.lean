@@ -258,14 +258,10 @@ theorem exists_unit_eq_of_span_eq
   obtain ⟨u, hu⟩ := h_assoc
   -- hu : γ₁ * u = γ₂
   refine ⟨u⁻¹, ?_⟩
-  have h_inv_mul : ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) * (u : 𝓞 K) = 1 := by
-    rw [← Units.val_mul]
-    simp
+  have h_inv_mul : ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) * (u : 𝓞 K) = 1 := u.inv_mul
   have : ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) * γ₂ = γ₁ := by
-    rw [← hu]
-    rw [show ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) * (γ₁ * (u : 𝓞 K)) =
-      γ₁ * (((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) * (u : 𝓞 K)) by ring]
-    rw [h_inv_mul, mul_one]
+    rw [← hu, show ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) * (γ₁ * (u : 𝓞 K)) =
+      γ₁ * (((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) * (u : 𝓞 K)) by ring, h_inv_mul, mul_one]
   exact this.symm
 
 /-! ### Bridging phiPrimeGenDescent and h_stick.gen via unit correction
@@ -353,9 +349,8 @@ theorem pthSymbolAtPrime_canonical_h_stick_gen_eq_K_chain_target
       -((a : ZMod p) *
         BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical
           (p := p) (K := K) (((Fintype.card (𝓞 K ⧸ P') : ℤ) : 𝓞 K)) P) := by
-  rw [phiPrimeGen_eq_gen]
-  rw [pthSymbolAtPrime_canonical_eq_of_eq_mul_unit hP'_bot hP'_max _ _ (u : 𝓞 K)
-    hu_notin h_phi_notin_P' hu_eq hu_symbol]
+  rw [phiPrimeGen_eq_gen, pthSymbolAtPrime_canonical_eq_of_eq_mul_unit hP'_bot hP'_max _ _
+    (u : 𝓞 K) hu_notin h_phi_notin_P' hu_eq hu_symbol]
   exact h_K_chain
 
 /-! ### Discharging h_χp_eq_one
@@ -373,9 +368,9 @@ theorem mulChar_pow_ringHomComp_pow_p_eq_one
     {p : ℕ}
     (χ : MulChar k R') (hχ : χ ^ p = 1) (a : ℕ) (σ : R' →+* R'') :
     (χ ^ a).ringHomComp σ ^ p = 1 := by
-  rw [MulChar.ringHomComp_pow]
-  rw [show (χ ^ a) ^ p = (χ ^ p) ^ a from by rw [← pow_mul, ← pow_mul, mul_comm]]
-  rw [hχ, one_pow, MulChar.ringHomComp_one]
+  rw [MulChar.ringHomComp_pow,
+    show (χ ^ a) ^ p = (χ ^ p) ^ a from by rw [← pow_mul, ← pow_mul, mul_comm],
+    hχ, one_pow, MulChar.ringHomComp_one]
 
 /-! ### Concrete residue-character specialization
 
@@ -576,8 +571,7 @@ theorem Nat.mod_eq_one_of_dvd_sub_one
     (hdiv : p ∣ N - 1) :
     N % p = 1 := by
   rcases hdiv with ⟨m, hm⟩
-  have hN_eq : N = p * m + 1 := by
-    omega
+  have hN_eq : N = p * m + 1 := by omega
   rw [hN_eq, Nat.add_mod, Nat.mul_mod_right]
   simp [Nat.mod_eq_of_lt hp]
 
