@@ -159,7 +159,6 @@ theorem quotient_mk_dworkThetaTrunc_artinHasseAtTo_eq_sum_rIntegralRatToQuotient
               DieudonneDwork.rIntegralRatSubring ℓ) *
           Ideal.Quotient.mk (S.Q ^ (N + 1)) (γ ^ n) *
           Ideal.Quotient.mk (S.Q ^ (N + 1)) (u ^ n) := by
-  classical
   rw [dworkThetaTrunc, map_sum]
   refine Finset.sum_congr rfl ?_
   intro n _hn
@@ -198,9 +197,8 @@ theorem quotient_mk_dworkThetaTrunc_artinHasseAtTo_eq_trunc_eval
             (S.rIntegralRatToQuotient N))).eval₂
         (RingHom.id (𝓞 R' ⧸ S.Q ^ (N + 1)))
         (Ideal.Quotient.mk (S.Q ^ (N + 1)) (γ * u)) := by
-  classical
-  rw [S.quotient_mk_dworkThetaTrunc_artinHasseAtTo_eq_sum_rIntegralRatToQuotient]
-  rw [PowerSeries.eval₂_trunc_eq_sum_range]
+  rw [S.quotient_mk_dworkThetaTrunc_artinHasseAtTo_eq_sum_rIntegralRatToQuotient,
+    PowerSeries.eval₂_trunc_eq_sum_range]
   refine Finset.sum_congr rfl ?_
   intro n _hn
   simp [map_pow, mul_pow, mul_assoc]
@@ -238,11 +236,10 @@ theorem quotient_mk_dworkThetaTrunc_artinHasseAtTo_approx_one_eq_one_add_pi
   have hSubInv :
       PowerSeries.subst (PowerSeries.C πbar) Ips = PowerSeries.C γbar := by
     rw [powerSeries_subst_C_eq_C_eval₂_trunc_of_pow_succ_eq_zero
-      πbar N hπnil Ips]
-    rw [← hInvEval]
+      πbar N hπnil Ips, ← hInvEval]
   have hInv0 : PowerSeries.constantCoeff Ips = 0 := by
-    rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply]
-    rw [DieudonneDwork.IsRIntegralPS.coeff_mapTo]
+    rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply,
+      DieudonneDwork.IsRIntegralPS.coeff_mapTo]
     have hcoeff0 :
         (PowerSeries.coeff (R := ℚ) 0) (artinHasseExpInverseSeries ℓ) = 0 := by
       rw [PowerSeries.coeff_zero_eq_constantCoeff_apply]
