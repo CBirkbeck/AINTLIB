@@ -36,12 +36,9 @@ It imports only; it does **not** modify any existing file.
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Polynomial NumberField.IsCMField
-open scoped nonZeroDivisors
+open NumberField NumberField.IsCMField
 
 namespace BernoulliRegular.FLT37.Eichler
-
-open FLT37.LehmerVandiver.CaseII
 
 variable {K : Type} [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K]
   [NumberField.IsCMField K]
@@ -80,8 +77,7 @@ def TwistedConjPairData37.of_pairedSolution {m : ℕ} (D : TwistedConjPairData37
       (ε₃' : 𝓞 K) * ((D.hζ.unit'.1 - 1) ^ m * z') ^ 37) :
     TwistedConjPairData37 K (m - 1) := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  have hm : 1 ≤ m := D.one_le_m
-  have hm_sub : m - 1 + 1 = m := Nat.sub_add_cancel hm
+  have hm_sub : m - 1 + 1 = m := Nat.sub_add_cancel D.one_le_m
   exact
     { ζ := D.ζ
       hζ := D.hζ
