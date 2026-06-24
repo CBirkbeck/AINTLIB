@@ -68,11 +68,11 @@ producer local power `IsPthPowerModPrime 37 lv149 δ` then follows from the prov
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Polynomial
+open NumberField Polynomial
 
 namespace BernoulliRegular.FLT37.Eichler
 
-open FLT37 FLT37.LehmerVandiver.CaseII BernoulliRegular
+open FLT37.LehmerVandiver.CaseII
 
 /-- The sound real-data form of the §9.1 residue identification.
 
