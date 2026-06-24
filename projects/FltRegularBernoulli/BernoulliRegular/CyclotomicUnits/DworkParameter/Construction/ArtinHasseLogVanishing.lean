@@ -33,9 +33,6 @@ vanishes, which is the `p`-torsion input to the same-prime principal-unit argume
 
 noncomputable section
 
-open scoped NumberField
-open PowerSeries
-
 namespace BernoulliRegular
 namespace CyclotomicUnits
 namespace PadicLogSetup
@@ -188,7 +185,6 @@ theorem dworkParameter_eval_exp_mod (N : ℕ) :
         (AdicCompletion.evalₐ (lambdaIdeal p K) (N + 1) (dworkParameter p K)) =
       Ideal.Quotient.mk ((lambdaIdeal p K) ^ (N + 1))
         (valuedCyclotomicZetaInteger p K) := by
-  classical
   dsimp only
   let A : Type _ := ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1)
   let q : ValuedIntegerRing p K →+* A :=
@@ -317,7 +313,6 @@ theorem quotient_mk_dworkParameterExpApprox_eq_trunc_eval (N : ℕ) :
       (PowerSeries.trunc N Eps).eval₂ (RingHom.id A)
         (Ideal.Quotient.mk ((lambdaIdeal p K) ^ N)
           (dworkParameterApprox p K N)) := by
-  classical
   dsimp only [dworkParameterExpApprox]
   rw [PowerSeries.eval₂_trunc_eq_sum_range, map_sum,
     PowerSeries.eval₂_trunc_eq_sum_range]
@@ -494,7 +489,6 @@ theorem samePrimeFiniteLog_factorPow {M N : ℕ} (hMN : M ≤ N)
     Ideal.Quotient.factorPow (lambdaIdeal p K) (Nat.succ_le_succ hMN)
         (samePrimeFiniteLog (p := p) (K := K) N x hx) =
       samePrimeFiniteLog (p := p) (K := K) M x hx := by
-  classical
   let cutoffM : ℕ := samePrimeFiniteLogCutoff (p := p) M
   let cutoffN : ℕ := samePrimeFiniteLogCutoff (p := p) N
   let termN : ℕ → ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (M + 1) := fun n =>
@@ -596,10 +590,10 @@ noncomputable def artinHasseLog_eval_dworkParameter :
         (dworkParameterFiniteArtinHasseLogCoord (p := p) (K := K) N),
     by
       intro M N hMN
-      let hEqM : (I ^ M • ⊤ : Ideal R) = I ^ M := by
+      have hEqM : (I ^ M • ⊤ : Ideal R) = I ^ M := by
         ext y
         simp
-      let hEqN : (I ^ N • ⊤ : Ideal R) = I ^ N := by
+      have hEqN : (I ^ N • ⊤ : Ideal R) = I ^ N := by
         ext y
         simp
       apply (Ideal.quotientEquivAlgOfEq R hEqM).injective
@@ -633,7 +627,7 @@ theorem artinHasseLog_eval_dworkParameter_evalₐ (N : ℕ) :
         (artinHasseLog_eval_dworkParameter p K) =
       dworkParameterFiniteArtinHasseLogCoord (p := p) (K := K) N := by
   unfold artinHasseLog_eval_dworkParameter
-  let hEq :
+  have hEq :
       ((lambdaIdeal p K) ^ N • ⊤ : Ideal (ValuedIntegerRing p K)) =
         (lambdaIdeal p K) ^ N := by
     ext y
