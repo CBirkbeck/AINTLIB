@@ -52,20 +52,14 @@ open Matrix SpecialLinearGroup
 
 namespace SL2Reduction
 
-/-- The determinant of the upper unitriangular `2 × 2` matrix `!![1, t; 0, 1]` is `1`. -/
 private lemma det_upperUniTri {R : Type*} [CommRing R] (t : R) :
     (!![1, t; 0, 1] : Matrix (Fin 2) (Fin 2) R).det = 1 := by
   simp [det_fin_two_of]
 
 private lemma natAbs_emod_lt (a c : ℤ) (hc : c ≠ 0) : (a % c).natAbs < c.natAbs := by
-  rw [Int.natAbs_emod a hc]
-  split
-  · exact Nat.mod_lt _ (Int.natAbs_pos.mpr hc)
-  · rename_i h
-    push Not at h
-    have : a.natAbs % c.natAbs ≠ 0 :=
-      fun heq ↦ h.2 (Int.natAbs_dvd_natAbs.mp (Nat.dvd_of_mod_eq_zero heq))
-    omega
+  have hlt := Int.emod_lt a hc
+  have hnonneg := Int.emod_nonneg a hc
+  omega
 
 private lemma isCoprime_emod {d : ℕ} [NeZero d] {a₁ c₁ : ℤ}
     (hac : IsCoprime (a₁ : ZMod d) (c₁ : ZMod d)) :
@@ -74,11 +68,7 @@ private lemma isCoprime_emod {d : ℕ} [NeZero d] {a₁ c₁ : ℤ}
   push_cast
   exact hac.symm.add_mul_left_right _
 
-/-- **Coprime lifting (stable range of ℤ)**: the proof uses Euclidean descent.
-Given `IsCoprime a₁ c₁` in `ZMod d`, apply the extended Euclidean algorithm to
-`(a₁, c₁)` in `ℤ`, swapping at each step. The coprimality in `ZMod d` is preserved
-under the Euclidean step `(a₁, c₁) ↦ (c₁, a₁ % c₁)`, and the back-substitution
-`a₀ = r₀ + q * c₀` recovers the correct congruence class modulo `d`. -/
+/-- Coprime elements of `ZMod d` lift to coprime integers. -/
 theorem IsCoprime.lift_to_int {d : ℕ} [NeZero d] {a c : ZMod d} (hac : IsCoprime a c) :
     ∃ a₀ c₀ : ℤ, (a₀ : ZMod d) = a ∧ (c₀ : ZMod d) = c ∧ IsCoprime a₀ c₀ := by
   obtain ⟨a₁, rfl⟩ := ZMod.intCast_surjective a
@@ -87,9 +77,10 @@ theorem IsCoprime.lift_to_int {d : ℕ} [NeZero d] {a c : ZMod d} (hac : IsCopri
       IsCoprime (a₁ : ZMod d) (c₁ : ZMod d) →
       ∃ a₀ c₀ : ℤ, (a₀ : ZMod d) = a₁ ∧ (c₀ : ZMod d) = c₁ ∧ IsCoprime a₀ c₀ from
     h c₁.natAbs a₁ c₁ le_rfl hac
-  -- Helper for the base case (c₁ = 0).
   have zero_case : ∀ a₁ : ℤ, IsCoprime (a₁ : ZMod d) 0 →
-      ∃ a₀ c₀ : ℤ, (a₀ : ZMod d) = a₁ ∧ (c₀ : ZMod d) = 0 ∧ IsCoprime a₀ c₀ := fun a₁ hac ↦ by
+      ∃ a₀ c₀ : ℤ,
+        (a₀ : ZMod d) = a₁ ∧ (c₀ : ZMod d) = 0 ∧ IsCoprime a₀ c₀ := by
+    intro a₁ hac
     have hunit : IsUnit (a₁ : ZMod d) := by rwa [isCoprime_zero_right] at hac
     rw [ZMod.coe_int_isUnit_iff_isCoprime] at hunit
     exact ⟨a₁, d, rfl, by simp, hunit.symm⟩
@@ -107,8 +98,7 @@ theorem IsCoprime.lift_to_int {d : ℕ} [NeZero d] {a c : ZMod d} (hac : IsCopri
     obtain ⟨c₀, r₀, hc₀, hr₀, hcop⟩ := ih c₁ (a₁ % c₁)
       (Nat.lt_succ_iff.mp ((natAbs_emod_lt a₁ c₁ hc₁).trans_le hle)) (isCoprime_emod hac)
     refine ⟨r₀ + a₁ / c₁ * c₀, c₀, ?_, hc₀, hcop.symm.add_mul_right_left _⟩
-    conv_rhs => rw [show a₁ = a₁ % c₁ + a₁ / c₁ * c₁ from by
-      have := Int.mul_ediv_add_emod a₁ c₁; linarith]
+    conv_rhs => rw [← Int.emod_add_ediv_mul a₁ c₁]
     push_cast
     rw [hr₀, hc₀]
 
@@ -126,7 +116,7 @@ theorem SL2_eq_upperUniTri {R : Type*} [CommRing R] (h : SpecialLinearGroup (Fin
   | _ a b c dd hdet =>
     simp at h00 h10
     subst h00; subst h10
-    fin_cases i <;> fin_cases j <;> simp [cons_val_zero, cons_val_one]
+    fin_cases i <;> fin_cases j <;> simp
     linear_combination hdet
 
 /-- An upper unitriangular matrix in SL₂(ℤ/dℤ) is in the range of the reduction map. -/
@@ -138,7 +128,6 @@ theorem upperUniTri_mem_range (d : ℕ) [NeZero d] (t : ZMod d) :
   obtain ⟨t₀, rfl⟩ := ZMod.intCast_surjective t
   refine ⟨⟨!![1, t₀; 0, 1], det_upperUniTri _⟩, ?_⟩
   ext i j
-  simp only [map_apply_coe, RingHom.mapMatrix_apply, map_apply]
   fin_cases i <;> fin_cases j <;> simp
 
 /-- If two SL₂ elements share the same first column, their quotient has
@@ -151,8 +140,7 @@ theorem inv_mul_10_eq_zero {R : Type*} [CommRing R] (M g : SpecialLinearGroup (F
   | _ a₂ b₂ c₂ d₂ hdet₂ =>
     simp at h0 h1
     subst h0; subst h1
-    simp [coe_inv, adjugate_fin_two, mul_apply, Fin.sum_univ_two, of_apply,
-      cons_val_zero, cons_val_one]
+    simp [coe_inv, adjugate_fin_two, mul_apply, Fin.sum_univ_two, of_apply]
     ring
 
 /-- If two SL₂ elements share the same first column, their quotient has
@@ -165,14 +153,10 @@ theorem inv_mul_00_eq_one {R : Type*} [CommRing R] (M g : SpecialLinearGroup (Fi
   | _ a₂ b₂ c₂ d₂ hdet₂ =>
     simp at h0 h1
     subst h0; subst h1
-    simp [coe_inv, adjugate_fin_two, mul_apply, Fin.sum_univ_two, of_apply,
-      cons_val_zero, cons_val_one]
+    simp [coe_inv, adjugate_fin_two, mul_apply, Fin.sum_univ_two, of_apply]
     linear_combination hdet₁
 
-/-- **Strong approximation for SL₂**: The reduction map `SL₂(ℤ) → SL₂(ℤ/dℤ)` is surjective.
-
-For any element of `SL₂(ℤ/dℤ)`, there exists a preimage in `SL₂(ℤ)` under the
-natural ring homomorphism `ℤ → ℤ/dℤ`. -/
+/-- The reduction map `SL₂(ℤ) → SL₂(ℤ/dℤ)` is surjective. -/
 theorem SL2_reduction_surjective (d : ℕ) [NeZero d] :
     Function.Surjective (SpecialLinearGroup.map (Int.castRingHom (ZMod d)) :
       SpecialLinearGroup (Fin 2) ℤ →* SpecialLinearGroup (Fin 2) (ZMod d)) := by
