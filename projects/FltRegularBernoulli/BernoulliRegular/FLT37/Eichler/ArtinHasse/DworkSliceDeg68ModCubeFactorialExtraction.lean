@@ -56,7 +56,6 @@ noncomputable section
 set_option maxRecDepth 100000
 
 open NumberField
-open scoped BigOperators
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -139,7 +138,7 @@ theorem neg_thirtyseven_artinHasseTail_mul_dworkParameter_pow_thirtytwo_coordMod
   have hprod := Ideal.mul_mem_mul h37 htail
   -- `(rationalPadicPrimeIdeal)^1 * (rationalPadicPrimeIdeal)^2 = (rationalPadicPrimeIdeal)^3`.
   rw [show (rationalPadicPrimeIdeal 37) * (rationalPadicPrimeIdeal 37) ^ 2 =
-      (rationalPadicPrimeIdeal 37) ^ 3 from by ring] at hprod
+      (rationalPadicPrimeIdeal 37) ^ 3 by ring] at hprod
   exact hprod
 
 omit [NumberField.IsCMField K] in
@@ -166,7 +165,7 @@ theorem dworkParameter_pow_sixtyeight_coordModCube_eq_neg_thirtyseven
   rw [show (-(37 : DworkCompleteIntegerRing 37 K) *
         artinHasseTailUnit (p := 37) (K := K) hp2 * dworkParameter 37 K ^ 32) =
       ((-37 : RationalPadicIntegerRing 37)) •
-        (artinHasseTailUnit (p := 37) (K := K) hp2 * dworkParameter 37 K ^ 32) from by
+        (artinHasseTailUnit (p := 37) (K := K) hp2 * dworkParameter 37 K ^ 32) by
     rw [show ((-37 : RationalPadicIntegerRing 37)) •
           (artinHasseTailUnit (p := 37) (K := K) hp2 * dworkParameter 37 K ^ 32) =
         algebraMap (RationalPadicIntegerRing 37) (DworkCompleteIntegerRing 37 K) (-37) *
@@ -184,7 +183,7 @@ theorem dworkParameter_pow_sixtyeight_coordModCube_eq_neg_thirtyseven
   -- `rationalPadicIntegerToZModCube (-37 · 1) = (-37 : ZMod 37³)`
   rw [mul_one,
     show ((-37 : RationalPadicIntegerRing 37)) =
-      (((-37 : ℤ)) : RationalPadicIntegerRing 37) from by push_cast; ring]
+      (((-37 : ℤ)) : RationalPadicIntegerRing 37) by push_cast; ring]
   rw [map_intCast]
   push_cast
   ring
