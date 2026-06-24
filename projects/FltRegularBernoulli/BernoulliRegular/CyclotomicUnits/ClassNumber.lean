@@ -37,9 +37,7 @@ theorem dvd_h_iff_dvd_hMinus_of_dvd_hPlus_imp
   constructor
   · intro hpH
     rw [h_eq_hPlus_mul_hMinus p hp_odd K] at hpH
-    rcases hp.out.dvd_mul.mp hpH with hplus | hminus
-    · exact hplus_to_hminus hplus
-    · exact hminus
+    exact (hp.out.dvd_mul.mp hpH).elim hplus_to_hminus id
   · intro hminus
     rw [h_eq_hPlus_mul_hMinus p hp_odd K]
     exact dvd_mul_of_dvd_right hminus (hPlus K)
