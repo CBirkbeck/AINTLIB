@@ -63,7 +63,7 @@ It imports only; it does **not** modify any existing file.
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Finset Polynomial NumberField.IsCMField
+open NumberField Polynomial NumberField.IsCMField
 open scoped nonZeroDivisors
 
 namespace BernoulliRegular.FLT37.Eichler
@@ -218,7 +218,7 @@ theorem caseII_neg_zetaPow_one_sub (a : ℤ) :
     (-(zetaPow 37 (CyclotomicField 37 ℚ) (-a))) * (1 - zetaPow 37 (CyclotomicField 37 ℚ) a) =
       1 - zetaPow 37 (CyclotomicField 37 ℚ) (-a) := by
   have hmul : zetaPow 37 (CyclotomicField 37 ℚ) (-a) * zetaPow 37 (CyclotomicField 37 ℚ) a = 1 := by
-    rw [← zetaPow_add, neg_add_cancel]; simp [zetaPow]
+    rw [← zetaPow_add, neg_add_cancel]; simp only [zetaPow, zpow_zero, Units.val_one]
   linear_combination hmul
 
 /-- **The key field identity** (`¬37∣a`):
@@ -271,7 +271,7 @@ theorem caseII_gammaA_ratio_eq_correctedRadical
     congr 1
     have hmul : zetaPow 37 (CyclotomicField 37 ℚ) a *
         zetaPow 37 (CyclotomicField 37 ℚ) (-a) = 1 := by
-      rw [← zetaPow_add, add_neg_cancel]; simp [zetaPow]
+      rw [← zetaPow_add, add_neg_cancel]; simp only [zetaPow, zpow_zero, Units.val_one]
     linear_combination -hmul
   -- Unfold the corrected radical and root ratio; normalize coes and substitute the specs.
   simp only [caseII_correctedRadical, caseII_rootRatioK, caseII_correctionUnit_val,
@@ -477,7 +477,7 @@ The downstream consumer form (`CaseIIRealStep6.lean`): the step-6 cyclic-power c
 theorem caseII_zetaPow_eq_one_of_dvd {a : ℤ} (ha : (37 : ℤ) ∣ a) :
     zetaPow 37 (CyclotomicField 37 ℚ) a = 1 := by
   rw [zetaPow_congr 37 (CyclotomicField 37 ℚ) (e₂ := 0) (by simpa using ha)]
-  simp [zetaPow]
+  simp only [zetaPow, zpow_zero, Units.val_one]
 
 open FLT37.LehmerVandiver.CaseII in
 /-- **Washington Lemma 9.8 step 6 over `RealCaseIIData37`, fully proven** (`p = 37`).
