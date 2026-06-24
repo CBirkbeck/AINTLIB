@@ -1,5 +1,29 @@
 import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative.FrobeniusDetFormulaCharacterMatrix
 
+/-!
+# Sinnott matrix embedding index bridge
+
+This file relates the quotient convolution log-norm determinant to Sinnott regulator
+matrices and packages the remaining matrix-restriction hypotheses used in the
+Lehmer-Vandiver plus-coprime argument.
+
+## Main definitions
+
+* `convolutionMatrixLogNorm`: the full convolution matrix at the cyclotomic-unit log norm.
+* `MatrixRestrictionToSinnott`: the named matrix-restriction proposition.
+* `QuotientCharBijectionToEvenNontriv`: the named even-character bijection proposition.
+* `sinnottMatrixA` and `sinnottMatrixB`: the dependent and column-constant parts of the
+  Sinnott log-embedding matrix.
+
+## Main results
+
+* `FrobeniusDetIdentity_of_MatrixRestrictionToSinnott`: reduces the Frobenius determinant
+  identity to the named matrix-restriction hypothesis.
+* `KummerDirichletDeterminant_of_MatrixRestrictionToSinnott`: reduces the final determinant
+  statement to the same matrix-restriction hypothesis.
+* `sinnottMatrix_eq_two_smul_A_sub_B`: rewrites the Sinnott matrix as `2 • (A - B)`.
+-/
+
 @[expose] public section
 
 noncomputable section
@@ -62,9 +86,6 @@ theorem det_convolutionMatrixLogNorm_sq_eq_prod_DirichletLogSum_sq
   classical
   rw [convolutionMatrixLogNorm]
   rw [det_convolutionMatrix_sq_eq_prod_lambda_sq_unconditional (p := p) _ hp_two]
-  -- Goal: (∏ k, ∑ a, (e.symm k)(↑a) · ((log ‖1 - stdAddChar(↑a)‖ : ℝ) : ℂ))² =
-  --       (∏ χ, DirichletLogSum p χ)²
-  -- Apply eigenvalue identification: ∑ a, χ(↑a) · log = -DirichletLogSum p χ.
   have h_eigen : ∀ k : (ZMod p)ˣ,
       ∑ a : (ZMod p)ˣ, ((dirichletCharEquivUnits p).symm k) ((a : ZMod p)) *
           ((Real.log ‖(1 : ℂ) -
@@ -73,8 +94,6 @@ theorem det_convolutionMatrixLogNorm_sq_eq_prod_DirichletLogSum_sq
     frobenius_eigenvalue_eq_neg_DirichletLogSum p
       ((dirichletCharEquivUnits p).symm k)
   rw [Finset.prod_congr rfl (fun k _ ↦ h_eigen k)]
-  -- Goal: (∏ k, -DirichletLogSum p (e.symm k))² = (∏ χ, DirichletLogSum p χ)²
-  -- Reindex k ↔ χ via e.symm.
   have h_reindex : ∏ k : (ZMod p)ˣ,
         -DirichletLogSum p ((dirichletCharEquivUnits p).symm k) =
       ∏ χ : DirichletCharacter ℂ p, -DirichletLogSum p χ := by
@@ -84,7 +103,6 @@ theorem det_convolutionMatrixLogNorm_sq_eq_prod_DirichletLogSum_sq
     intro k
     rfl
   rw [h_reindex]
-  -- (∏ χ, -X χ)² = (∏ χ, X χ)² (sign squares away).
   have h_sign : ∀ χ : DirichletCharacter ℂ p,
       -DirichletLogSum p χ = (-1) * DirichletLogSum p χ := fun _ ↦ by ring
   rw [Finset.prod_congr rfl (fun χ _ ↦ h_sign χ)]
@@ -114,8 +132,10 @@ theorem nontrivialCharacters_eq_evenNontriv_disjUnion_odd :
   · intro hχ_ne
     haveI : NeZero (2 : ℕ) := ⟨by norm_num⟩
     rcases χ.even_or_odd with h_even | h_odd
-    · left; exact ⟨h_even, hχ_ne⟩
-    · right; exact h_odd
+    · left
+      exact ⟨h_even, hχ_ne⟩
+    · right
+      exact h_odd
   · haveI : NeZero (2 : ℕ) := ⟨by norm_num⟩
     rintro (⟨_, hne⟩ | hodd)
     · exact hne
@@ -216,11 +236,10 @@ theorem convolutionMatrixLogNorm_det_eq_zero
     (hp_odd : p ≠ 2) (hp_two : 2 ≤ p)
     (hodd_nonempty : (BernoulliRegular.oddCharacters p).Nonempty) :
     (convolutionMatrixLogNorm p).det = 0 := by
-  -- det² = 0 ⟹ det = 0.
   have h_sq : (convolutionMatrixLogNorm p).det ^ 2 = 0 := by
     rw [det_convolutionMatrixLogNorm_sq_split (p := p) hp_two]
     rw [prod_oddCharacters_DirichletLogSum_eq_zero (p := p) hp_odd hodd_nonempty]
-    ring
+    ring_nf
   exact pow_eq_zero_iff (n := 2) two_ne_zero |>.mp h_sq
 
 omit hp in
@@ -241,7 +260,8 @@ theorem prod_evenNontriv_eq_prod_evenNontriv_inv
   · intro χ hχ
     refine ⟨χ⁻¹, inv_mem_evenNontrivialCharacters (p := p) hχ, ?_⟩
     exact inv_inv χ
-  · intro χ _; rfl
+  · intro χ _
+    rfl
 
 /-- **Sinnott analytic identity in `(∏ DLS p χ)²` form** (without inversion).
 The shipped `hPlus_mul_regulator_sq_eq` uses `χ⁻¹`; by the χ ↔ χ⁻¹
@@ -342,7 +362,7 @@ theorem quotientCharBijectionToEvenNontriv_proof (hp_two : 2 < p) :
     rw [h1, nat_card_mulChar_cyclotomicEvenDelta_eq p]
     rw [Nat.card_eq_fintype_card]
     exact BernoulliRegular.cyclotomicEvenDelta_card (p := p) hp_two
-  have h_p_odd : Odd p := hp.out.odd_of_ne_two (by omega)
+  have h_p_odd : Odd p := hp.out.odd_of_ne_two (by lia)
   refine Finset.prod_bij (fun ξ _ ↦ dirichletOfQuotientChar p ξ) ?_ ?_ ?_ ?_
   · intro ξ hξ
     rw [Finset.mem_erase] at hξ
@@ -362,11 +382,11 @@ theorem quotientCharBijectionToEvenNontriv_proof (hp_two : 2 < p) :
     have h_card_eq : (BernoulliRegular.evenNontrivialCharacters p).card =
         ((Finset.univ : Finset
             (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ)).erase 1).card := by
-      rw [BernoulliRegular.card_evenNontrivialCharacters (p := p) (by omega)]
+      rw [BernoulliRegular.card_evenNontrivialCharacters (p := p) (by lia)]
       rw [Finset.card_erase_of_mem (Finset.mem_univ _)]
       rw [Finset.card_univ, h_card_mc]
       rcases h_p_odd with ⟨k, hk⟩
-      omega
+      lia
     have h_in : ∀ ξ : MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ,
         ξ ∈ (Finset.univ : Finset
               (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ)).erase 1 →
@@ -411,17 +431,12 @@ theorem FrobeniusDetIdentity_of_named_hypotheses
   letI : DecidableEq (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) :=
     Classical.decEq _
   unfold FrobeniusDetIdentity
-  -- Step 1: get det² in log p · (∏ nontriv DLS)² form.
   have h_det_sq := det_convolutionMatrixLogNormEven_sq_eq_log_p_sq_mul_nontrivial_DLS_sq
       p hp_two
-  -- Step 2: from MatrixRestrictionToSinnott + h_det_sq.
   unfold MatrixRestrictionToSinnott at h_matrix
-  -- h_matrix : 2^(p-3) · det²(M_even) = qe(1)² · regOfFamily²
   unfold QuotientCharBijectionToEvenNontriv at h_bij
-  -- Step 3: use quotientEigenvalue_trivial = (log p) / 2.
   have h_qe := quotientEigenvalue_trivial_eq_half_log_p p hp_two
   rw [h_qe] at h_matrix
-  -- Step 4: cardinality
   have h_card : Fintype.card (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) =
       (p - 1) / 2 := by
     have h1 : Fintype.card (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) =
@@ -430,29 +445,14 @@ theorem FrobeniusDetIdentity_of_named_hypotheses
     rw [h1, nat_card_mulChar_cyclotomicEvenDelta_eq p]
     rw [Nat.card_eq_fintype_card]
     exact BernoulliRegular.cyclotomicEvenDelta_card (p := p) hp_two
-  -- Step 5: apply the bijection on the goal side.
   rw [← prod_evenNontriv_eq_prod_evenNontriv_inv (p := p) (DirichletLogSum p)]
-  -- Step 6: log p ≠ 0
   have h_log_ne : ((Real.log p : ℝ) : ℂ) ≠ 0 := by
     have h_pos : (1 : ℝ) < (p : ℝ) := by
       have : (1 : ℝ) < (2 : ℝ) := by norm_num
       exact lt_of_lt_of_le this (by exact_mod_cast hp_two.le)
     exact_mod_cast (Real.log_pos h_pos).ne'
-  -- Step 7: combine h_det_sq + h_matrix + h_bij to derive
-  -- regOfFamily² = (∏ DLS(χ⁻¹))².
-  -- h_det_sq : det²(M_even) = (log p)² · (∏ DLS(dχ ξ))² / 4^card
-  -- h_matrix : 2^(p-3) · det²(M_even) = ((log p)/2)² · regOfFamily²
-  -- h_bij : ∏_{ξ≠1} DLS(dχ ξ) = ∏_{χ even nontriv} DLS(χ)
   rw [h_bij] at h_det_sq
-  -- Substitute h_det_sq into h_matrix:
-  -- 2^(p-3) · ((log p)² · (∏ DLS χ)² / 4^card) = ((log p)/2)² · regOfFamily²
-  -- (log p)² · 2^(p-3) · (∏ DLS χ)² / 4^card = (log p)² / 4 · regOfFamily²
-  -- Cancel (log p)²: 2^(p-3) · (∏ DLS χ)² / 4^card = regOfFamily² / 4
-  -- 4^card = 2^(p-1), so 2^(p-3) / 2^(p-1) = 1/4
-  -- (1/4) · (∏ DLS χ)² = regOfFamily² / 4
-  -- (∏ DLS χ)² = regOfFamily²
   rw [h_det_sq] at h_matrix
-  -- h_matrix : 2^(p-3) · ((log p)² · (∏ DLS χ)² / 4^card) = ((log p)/2)² · regOfFamily²
   have h_two_pow_card : (4 : ℂ) ^ Fintype.card
       (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) =
       (2 : ℂ) ^ (p - 1) := by
@@ -461,22 +461,16 @@ theorem FrobeniusDetIdentity_of_named_hypotheses
     congr 1
     have h_p_odd : Odd p := hp.out.odd_of_ne_two hp_odd
     rcases h_p_odd with ⟨k, hk⟩
-    omega
+    lia
   rw [h_two_pow_card] at h_matrix
-  -- h_matrix : 2^(p-3) · ((log p)² · (∏ DLS χ)² / 2^(p-1)) = ((log p)/2)² · regOfFamily²
   have h_log_sq_ne : (((Real.log p : ℝ) : ℂ)) ^ 2 ≠ 0 := pow_ne_zero _ h_log_ne
   have h_two_ne : ((2 : ℂ) ^ (p - 1)) ≠ 0 := pow_ne_zero _ (by norm_num)
   have h_two_ne' : ((2 : ℂ) ^ (p - 3)) ≠ 0 := pow_ne_zero _ (by norm_num)
   have h_p_ge : (2 : ℂ) ^ (p - 1) = 4 * (2 : ℂ) ^ (p - 3) := by
-    rw [show p - 1 = (p - 3) + 2 from by omega, pow_add]
+    rw [show p - 1 = (p - 3) + 2 from by lia, pow_add]
     ring
   rw [h_p_ge] at h_matrix
-  -- h_matrix : 2^(p-3) · ((log p)² · (∏)² / (4 · 2^(p-3))) = ((log p)/2)² · regOfFamily²
-  -- LHS = (log p)² · (∏)² / 4. RHS = (log p)² / 4 · regOfFamily².
-  -- Cancel (log p)²/4 from both sides: (∏)² = regOfFamily².
   field_simp at h_matrix
-  -- h_matrix : (∏ DLS χ)² · 4 = 4 · regOfFamily²
-  -- Goal: regOfFamily² = (∏ DLS χ)²
   linear_combination -h_matrix / 4
 
 /-- **`FrobeniusDetIdentity` from `MatrixRestrictionToSinnott` alone**: with
@@ -524,11 +518,9 @@ theorem fintype_card_InfinitePlace_eq
     rw [this, Nat.totient_prime hp.out]
   have h_totally_complex := NumberField.IsTotallyComplex.finrank K
   rw [h_finrank_eq] at h_totally_complex
-  -- h_totally_complex : p - 1 = 2 * nrComplexPlaces K
-  -- Since K is totally complex, card InfinitePlace = nrComplexPlaces (no real places).
   rw [NumberField.InfinitePlace.card_eq_nrRealPlaces_add_nrComplexPlaces]
   rw [NumberField.IsTotallyComplex.nrRealPlaces_eq_zero (K := K), zero_add]
-  omega
+  lia
 
 /-- **K-place ↔ CyclotomicEvenDelta bijection**: for K = ℚ(ζ_p) cyclotomic
 totally complex, there is a non-canonical bijection between infinite places
@@ -705,14 +697,14 @@ theorem sinnottMatrix_entry_decomp
     have h_lt_p : k_idx < p := by
       change ((((NumberField.Units.equivFinRank
                 (NumberField.maximalRealSubfield K)).symm i).cast _) + 2 : ℕ) < p
-      omega
+      lia
     have h_pos : 0 < k_idx := by
       change 0 < ((((NumberField.Units.equivFinRank
                   (NumberField.maximalRealSubfield K)).symm i).cast _) + 2 : ℕ)
-      omega
+      lia
     have := Nat.le_of_dvd h_pos h_dvd
-    omega
-  have h_p_ge_two : 2 ≤ p := by omega
+    lia
+  have h_p_ge_two : 2 ≤ p := by lia
   exact log_realCyclotomicUnit_at_Kplus_place_eq_sub_decomp (p := p) (K := K)
     k_idx h_idx_coprime h_p_ge_two w.val
 
