@@ -43,7 +43,6 @@ theorem det_charMatrix_nontriv_sq_mul_det_A_sub_B
           sinnottCorrectionColVec (p := p) K
               ((equivNontrivCharKplusNeW₀ p K hp_two).symm w).val *
             sinnottCorrectionRowVec (p := p) K hp_odd hp_three i)).det := by
-  classical
   -- det((A-B)) = det((A-B)^T)
   rw [show (Matrix.of fun (i : {w : NumberField.InfinitePlace
               (NumberField.maximalRealSubfield K) //
@@ -155,7 +154,6 @@ theorem det_sinnottDiagonalEigenvalueMatrix_nontriv_sq
           (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ)).erase 1,
         quotientEigenvalue p ξ) *
         (sinnottShiftedCharMatrix_nontriv_sq p K hp_odd hp_three hp_two).det := by
-  classical
   rw [sinnottDiagonalEigenvalueMatrix_nontriv_sq_eq_diag_mul_shifted
     (p := p) K hp_odd hp_three hp_two]
   rw [Matrix.det_mul, Matrix.det_diagonal]
@@ -432,7 +430,6 @@ theorem det_charMatrix_sq_mul_det_A_sub_B_eq_prod_qe_mul_det_D'_mul_scalar
               w ≠ NumberField.Units.dirichletUnitTheorem.w₀}) =>
             -sinnottCorrectionColVec (p := p) K
               ((equivNontrivCharKplusNeW₀ p K hp_two).symm w).val)).det) := by
-  classical
   rw [det_charMatrix_nontriv_sq_mul_det_A_sub_B (p := p) K hp_odd hp_three hp_two]
   rw [det_D_nontriv_sq_sub_rank_one_apply
     (p := p) K hp_odd hp_three hp_two h_diagDet]
