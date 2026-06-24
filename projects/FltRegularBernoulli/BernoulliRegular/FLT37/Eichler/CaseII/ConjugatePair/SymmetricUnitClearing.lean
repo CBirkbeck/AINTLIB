@@ -157,7 +157,6 @@ theorem caseII_conjPair_symmetric_clear
       ¬ (hζ.unit'.1 - 1) ∣ z'' ∧
       x'' ^ 37 + y'' ^ 37 =
         (ε'' : 𝓞 K) * ((hζ.unit'.1 - 1) ^ m * z'') ^ 37 := by
-  classical
   -- `σ δ₁` as an element of `𝓞 K`: the conjugate of the witness unit.
   -- The units-vs-elements bridge `(unitsComplexConj K u : 𝓞 K) = σ (u : 𝓞 K)` is `rfl`.
   have hσ_unit : ∀ u : (𝓞 K)ˣ,
