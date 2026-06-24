@@ -4,7 +4,6 @@ public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PhiPrimeSym
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.StickelbergerIdealEquality
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.Uniformizer
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CyclotomicPairGalois
-public import Mathlib.RingTheory.Ideal.GoingUp
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CrossRingBridge.ResidueFieldBridgeAndDescentGenerator
 
 /-!
@@ -156,11 +155,9 @@ theorem phiPrimeGenDescent_conjugate_covariance_of_ringHom_index
       (cyclotomicRingOfIntegersEquiv (p := p) K a
         (phiPrimeGenDescent S hc₁ hc₂ h_ne_zero)) =
       S.gaussSumInt b ^ p := by
-  classical
   set γ := phiPrimeGenDescent S hc₁ hc₂ h_ne_zero with hγ_def
   apply NumberField.RingOfIntegers.coe_injective (K := R')
-  rw [← hτ_K γ]
-  rw [hγ_def, algebraMap_phiPrimeGenDescent S hc₁ hc₂ h_ne_zero]
+  rw [← hτ_K γ, hγ_def, algebraMap_phiPrimeGenDescent S hc₁ hc₂ h_ne_zero]
   have h_gauss :
       τ (algebraMap (𝓞 R') R' (S.gaussSumInt c)) =
         algebraMap (𝓞 R') R' (S.gaussSumInt b) :=
@@ -201,11 +198,9 @@ theorem phiPrimeGenDescent_conjugate_covariance_of_ringHom_index
       (cyclotomicRingOfIntegersEquiv (p := p) K a
         (S.phiPrimeGenDescent h_psi hc₁ hc₂ h_ne_zero)) =
       S.gaussSumInt b ^ p := by
-  classical
   set γ := S.phiPrimeGenDescent h_psi hc₁ hc₂ h_ne_zero with hγ_def
   apply NumberField.RingOfIntegers.coe_injective (K := R')
-  rw [← hτ_K γ]
-  rw [hγ_def, S.algebraMap_phiPrimeGenDescent h_psi hc₁ hc₂ h_ne_zero]
+  rw [← hτ_K γ, hγ_def, S.algebraMap_phiPrimeGenDescent h_psi hc₁ hc₂ h_ne_zero]
   have h_gauss :
       τ (algebraMap (𝓞 R') R' (S.gaussSumInt c)) =
         algebraMap (𝓞 R') R' (S.gaussSumInt b) :=
@@ -373,7 +368,6 @@ theorem repeatedExactExponentsOnOrbit_flexiblePhiPrimeGenDescent_of_sub_val_conj
               S.concrete.descentPrime)) :
     S.StickelbergerRepeatedExactExponentsOnOrbit
       (S.phiPrimeGenDescent h_psi hc₁ hc₂ h_ne_zero) := by
-  classical
   haveI : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
   refine S.stickelbergerRepeatedExactExponentsOnOrbit_of_conjugate_descentPrime_emultiplicity ?_
   intro a
