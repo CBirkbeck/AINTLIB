@@ -12,6 +12,9 @@ For a nonzero torsion point `(x₀, y₀) ∈ ℤ²` on a general Weierstrass cu
 ## Main results
 
 * `lutz_nagell_discriminant_general`: the general discriminant divisibility theorem.
+* `lutz_nagell_general`: the combined Lutz–Nagell theorem — a torsion point either has
+  integral coordinates satisfying the discriminant divisibility, or has order `2` with
+  `4x, 8y ∈ ℤ`.
 
 ## Proof outline
 
@@ -83,7 +86,7 @@ private lemma Phi2_eval_eq (x : ℚ) :
     eval x ((curveQ W).Φ 2) =
       x * eval x (curveQ W).Ψ₂Sq - eval x (curveQ W).Ψ₃ := by
   conv_lhs =>
-    rw [show (curveQ W).Φ 2 = X * (curveQ W).Ψ₂Sq - (curveQ W).Ψ₃ from by
+    rw [show (curveQ W).Φ 2 = X * (curveQ W).Ψ₂Sq - (curveQ W).Ψ₃ by
       rw [WeierstrassCurve.Φ, WeierstrassCurve.ΨSq_two]
       simp [even_two, WeierstrassCurve.preΨ_three, WeierstrassCurve.preΨ_one]]
   simp only [eval_sub, eval_mul, eval_X]
