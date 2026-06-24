@@ -8,7 +8,7 @@ open NumberField
 open NumberField.IsCMField
 open IsCyclotomicExtension
 open BernoulliRegular.Reflection.Local
-open scoped BigOperators NumberField
+open scoped NumberField
 
 namespace BernoulliRegular
 namespace CyclotomicUnits
