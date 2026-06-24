@@ -77,7 +77,7 @@ It imports only; it does **not** modify any existing file.
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Polynomial NumberField.IsCMField
+open NumberField Polynomial NumberField.IsCMField
 open scoped nonZeroDivisors
 
 namespace BernoulliRegular.FLT37.Eichler
@@ -191,14 +191,14 @@ theorem caseII_etaInv_etaOne_notMem_pair
   · -- ζ^36 ≠ ζ: else ζ^35 = 1, contradicting order 37.
     rw [← Subtype.coe_injective.ne_iff, h_inv, h_one, Ne, ← sub_eq_zero,
       show (D.hζ.unit'.1 : 𝓞 K) ^ 36 - D.hζ.unit'.1 =
-        D.hζ.unit'.1 * (D.hζ.unit'.1 ^ 35 - 1) from by ring]
+        D.hζ.unit'.1 * (D.hζ.unit'.1 ^ 35 - 1) by ring]
     refine mul_ne_zero (hprim.ne_zero (by decide)) ?_
     rw [sub_ne_zero]
     exact fun h ↦ hprim.pow_ne_one_of_pos_of_lt (by decide) (by decide) h
   · -- ζ^36 ≠ ζ²: else ζ^34 = 1, contradicting order 37.
     rw [← Subtype.coe_injective.ne_iff, h_inv, h_two, Ne, ← sub_eq_zero,
       show (D.hζ.unit'.1 : 𝓞 K) ^ 36 - D.hζ.unit'.1 ^ 2 =
-        D.hζ.unit'.1 ^ 2 * (D.hζ.unit'.1 ^ 34 - 1) from by ring]
+        D.hζ.unit'.1 ^ 2 * (D.hζ.unit'.1 ^ 34 - 1) by ring]
     refine mul_ne_zero (pow_ne_zero _ (hprim.ne_zero (by decide))) ?_
     rw [sub_ne_zero]
     exact fun h ↦ hprim.pow_ne_one_of_pos_of_lt (by decide) (by decide) h
