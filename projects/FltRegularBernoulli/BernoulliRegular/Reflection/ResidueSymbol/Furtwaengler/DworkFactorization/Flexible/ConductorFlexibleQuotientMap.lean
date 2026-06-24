@@ -55,14 +55,11 @@ theorem Q_isMaximal : S.Q.IsMaximal := by
   have hℓ_zero : (ℓ : 𝓞 R') = 0 := by
     rw [← Ideal.mem_bot, ← hQ_bot]
     exact S.hQ
-  have hℓ_ne_zero : (ℓ : 𝓞 R') ≠ 0 := by
-    exact_mod_cast (Fact.out : Nat.Prime ℓ).ne_zero
-  exact hℓ_ne_zero hℓ_zero
+  exact absurd hℓ_zero (by exact_mod_cast (Fact.out : Nat.Prime ℓ).ne_zero)
 
 /-- A natural number coprime to `ℓ` is not in the selected prime `Q`. -/
 theorem natCast_not_mem_Q_of_coprime_ell {m : ℕ} (hm : m.Coprime ℓ) :
     (m : 𝓞 R') ∉ S.Q := by
-  classical
   intro hmem
   haveI : CharP k ℓ := by
     rw [← Algebra.charP_iff (ZMod ℓ) k ℓ]
@@ -330,10 +327,9 @@ noncomputable def dworkCoeffArtinHasseDenInvTo (n N : ℕ) : 𝓞 R' :=
 
 theorem dworkCoeffArtinHasseDenInvTo_spec (n N : ℕ) :
     (((PowerSeries.coeff (R := ℚ) n) (artinHasseExpSeries ℓ)).den : 𝓞 R') *
-        S.dworkCoeffArtinHasseDenInvTo n N - 1 ∈ S.Q ^ (N + 1) :=
-  by
-    simpa [dworkCoeffArtinHasseDenInvTo] using
-      Classical.choose_spec (S.dworkCoeffArtinHasseDenInvTo_exists n N)
+        S.dworkCoeffArtinHasseDenInvTo n N - 1 ∈ S.Q ^ (N + 1) := by
+  simpa [dworkCoeffArtinHasseDenInvTo] using
+    Classical.choose_spec (S.dworkCoeffArtinHasseDenInvTo_exists n N)
 
 /-- Precision-indexed denominator inverse for inverse-series coefficients. -/
 theorem artinHasseInverseCoeffDenInvTo_exists (n N : ℕ) :
@@ -354,10 +350,9 @@ noncomputable def artinHasseInverseCoeffDenInvTo (n N : ℕ) : 𝓞 R' :=
 
 theorem artinHasseInverseCoeffDenInvTo_spec (n N : ℕ) :
     (((PowerSeries.coeff (R := ℚ) n) (artinHasseExpInverseSeries ℓ)).den : 𝓞 R') *
-        S.artinHasseInverseCoeffDenInvTo n N - 1 ∈ S.Q ^ (N + 1) :=
-  by
-    simpa [artinHasseInverseCoeffDenInvTo] using
-      Classical.choose_spec (S.artinHasseInverseCoeffDenInvTo_exists n N)
+        S.artinHasseInverseCoeffDenInvTo n N - 1 ∈ S.Q ^ (N + 1) := by
+  simpa [artinHasseInverseCoeffDenInvTo] using
+    Classical.choose_spec (S.artinHasseInverseCoeffDenInvTo_exists n N)
 
 /-- Precision-indexed lift of the inverse-series coefficient evaluated at
 `π`. -/
@@ -466,7 +461,6 @@ theorem quotient_mk_artinHasseDworkParameterApproxTo_eq_sum_rIntegralRatToQuotie
             artinHasseExpInverseSeries_coeff_isRIntegral ℓ n⟩ :
               DieudonneDwork.rIntegralRatSubring ℓ) *
           Ideal.Quotient.mk (S.Q ^ (N + 1)) (S.π ^ n) := by
-  classical
   rw [artinHasseDworkParameterApproxTo, map_sum]
   refine Finset.sum_congr rfl ?_
   intro n _hn
@@ -483,7 +477,6 @@ theorem quotient_mk_artinHasseDworkParameterApproxTo_eq_trunc_eval
           (S.rIntegralRatToQuotient N))).eval₂
         (RingHom.id (𝓞 R' ⧸ S.Q ^ (N + 1)))
         (Ideal.Quotient.mk (S.Q ^ (N + 1)) S.π) := by
-  classical
   rw [S.quotient_mk_artinHasseDworkParameterApproxTo_eq_sum_rIntegralRatToQuotient]
   rw [PowerSeries.eval₂_trunc_eq_sum_range]
   refine Finset.sum_congr rfl ?_
@@ -500,7 +493,6 @@ theorem quotient_mk_artinHasseDworkParameterApproxTo_factor_eq
         (S.artinHasseDworkParameterApproxTo N)) =
       Ideal.Quotient.mk (S.Q ^ (M + 1))
         (S.artinHasseDworkParameterApproxTo M) := by
-  classical
   dsimp only
   let φ : 𝓞 R' ⧸ S.Q ^ (N + 1) →+* 𝓞 R' ⧸ S.Q ^ (M + 1) :=
     Ideal.Quotient.factor (Ideal.pow_le_pow_right (Nat.succ_le_succ hMN))
@@ -571,7 +563,6 @@ theorem quotient_mk_artinHasseDworkParameterApproxTo_factor_eq
 
 theorem artinHasseDworkParameterApproxTo_mem_Q (N : ℕ) :
     S.artinHasseDworkParameterApproxTo N ∈ S.Q := by
-  classical
   unfold artinHasseDworkParameterApproxTo
   apply Ideal.sum_mem
   intro n hn
@@ -595,7 +586,6 @@ theorem artinHasseInverseCoeffLiftTo_one_sub_pi_mem_Q_sq_of_one_le
 theorem artinHasseDworkParameterApproxTo_sub_pi_mem_Q_sq_of_pos
     {N : ℕ} (hN : 0 < N) :
     S.artinHasseDworkParameterApproxTo N - S.π ∈ S.Q ^ 2 := by
-  classical
   let f : ℕ → 𝓞 R' := fun n => S.artinHasseInverseCoeffLiftTo N n
   have h1N : 1 ≤ N := Nat.succ_le_of_lt hN
   have hmem_one :
