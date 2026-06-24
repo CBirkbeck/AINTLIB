@@ -256,8 +256,7 @@ theorem exists_artinHasseExp_inverse_product_pow_prime_iterate_mul_tail_eq_frobe
                   θ (WittVector.teichmuller ℓ
                     ((((_root_.frobeniusEquiv k ℓ).symm ^ r) (c.coeff r)) ^ ℓ)))) ^
                 (ℓ ^ (r + 1))) ^ (ℓ ^ (m - 1 - j)) := by
-          rw [hprod]
-          simp
+          rw [hprod, one_mul]
 
 /-- Reindexed form of the carry-free tail comparison.  The Frobenius-shifted
 tail on the right is rewritten by peeling off the zeroth Witt coordinate and
@@ -494,18 +493,11 @@ theorem artinHasseExp_inverse_reindexed_shifted_range_eq_tail_of_pos
   classical
   dsimp only
   let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
-  let θ : WittVector ℓ k →+* A :=
-    F.toConcreteStickelbergerSetup.wittThetaModQPow N
-  let Eps : PowerSeries A :=
-    (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
-        (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let Ips : PowerSeries A :=
     (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
       (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let πbar : A := Ideal.Quotient.mk (F.Q ^ (N + 1)) F.π
   let δ : A := (PowerSeries.trunc (N + 1) Ips).eval₂ (RingHom.id A) πbar
-  let cTail : WittVector ℓ k := WittVector.mk ℓ (fun r => c.coeff (r + 1))
   refine Finset.prod_congr rfl ?_
   intro j _hj
   congr 1
