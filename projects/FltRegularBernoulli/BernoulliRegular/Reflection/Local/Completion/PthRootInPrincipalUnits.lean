@@ -18,8 +18,6 @@ recorded in the adic completion at the cyclotomic maximal ideal.
 
 noncomputable section
 
-open scoped NumberField
-
 namespace BernoulliRegular
 namespace Reflection
 namespace Local
@@ -90,7 +88,7 @@ theorem completedLocalCyclotomicEndpointSubgroup_le_principalUnitSubgroup_one :
   rw [completedLocalCyclotomicEndpointSubgroup]
   exact sup_le
     (completedLocalCyclotomicMuP_le_completedPrincipalUnitSubgroup_one (p := p) (K := K))
-    (completedPrincipalUnitSubgroup_mono (p := p) (K := K) (by decide : 1 ≤ 2))
+    (completedPrincipalUnitSubgroup_mono (p := p) (K := K) one_le_two)
 
 theorem completedPrincipalUnitSubgroup_one_le_endpointSubgroup_of_zeta_zpowers_eq_top
     (htop : Subgroup.zpowers
@@ -217,7 +215,7 @@ theorem pow_mem_completedPrincipalUnitSubgroup_add_pred_of_two_le {n : ℕ} (hn 
     have hxpow_np : x ^ p ∈ M ^ (n * p) := by
       simpa [pow_mul] using hxpow_raw
     have hp_one : 1 ≤ p := (Fact.out : Nat.Prime p).one_le
-    have hn_pos : 0 < n := lt_of_lt_of_le (by decide : 0 < 2) hn
+    have hn_pos : 0 < n := lt_of_lt_of_le two_pos hn
     have hnp : n + (p - 1) ≤ n * p := by
       have hmul : n * p = n + n * (p - 1) := by
         calc
@@ -255,7 +253,7 @@ theorem pow_mem_completedPrincipalUnitSubgroup_p_add_one_of_mem_two
       _ = p + 1 := by rw [Nat.sub_add_cancel hp_one]
   simpa [hidx] using
     pow_mem_completedPrincipalUnitSubgroup_add_pred_of_two_le (p := p) (K := K)
-      (n := 2) (by decide) hu
+      (n := 2) le_rfl hu
 
 theorem completedPrincipalUnitPowerSubgroup_two_le_p_add_one :
     completedPrincipalUnitPowerSubgroup p K p 2 ≤
@@ -665,7 +663,7 @@ theorem exists_completed_pth_root_mem_two_of_mem_principalUnit_p_add_one
     ring
   let v : completedLocalCyclotomicUnitGroup p K :=
     completedOneAddUnitOfMemMaximalIdealPow (p := p) (K := K) (n := 2)
-      (by decide) hL_two
+      two_ne_zero hL_two
   have hv_coe : (v : S) = L := by
     simp [v]
   have hv_mem : v ∈ completedPrincipalUnitSubgroup p K 2 := by
@@ -714,7 +712,7 @@ theorem exists_completed_pth_root_of_mem_principalUnit_p_add_one
       (p := p) (K := K) hu with
     ⟨v, hv, hvp⟩
   exact ⟨v, completedPrincipalUnitSubgroup_mono (p := p) (K := K)
-    (m := 2) (n := 1) (by decide) hv, hvp⟩
+    (m := 2) (n := 1) one_le_two hv, hvp⟩
 
 theorem completedPrincipalUnitPowerEndpointReverse_of_recursive :
     completedPrincipalUnitPowerEndpointReverse p K := by
