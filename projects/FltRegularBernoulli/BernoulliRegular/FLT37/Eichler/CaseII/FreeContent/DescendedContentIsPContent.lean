@@ -97,7 +97,6 @@ theorem caseII_span_x_add_y_eq_p_pow_mul (D : RealCaseIIData37 K m) (hp : (37 : 
         Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) ^ (37 * m + 1) * 𝔍 ∧
       ¬ Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) ∣ 𝔍 := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  haveI : NeZero 37 := ⟨by decide⟩
   set 𝔭 : Ideal (𝓞 K) := Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) with h𝔭
   -- `(x + y·η₀) = 𝔪·𝔠(η₀)·𝔭`, with `𝔠(η₀) = 𝔞(η₀)³⁷` and `𝔞(η₀) = 𝔭^m·𝔞₀`.
   have hmcp := m_mul_c_mul_p hp D.hζ D.equation D.hy D.etaZero
@@ -119,8 +118,7 @@ theorem caseII_span_x_add_y_eq_p_pow_mul (D : RealCaseIIData37 K m) (hp : (37 : 
           rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy D.etaZero ^ 37 * 𝔭 := by
       rw [← hmcp, hcspec]
     rw [hη0, mul_one] at hbase
-    rw [hbase, ← ha0spec]
-    rw [mul_pow, ← pow_mul, show 37 * m = m * 37 from by ring]
+    rw [hbase, ← ha0spec, mul_pow, ← pow_mul, show 37 * m = m * 37 from by ring]
     ring
   · -- `𝔭 ∤ (𝔪·𝔞₀³⁷)`: `𝔭` prime, `¬𝔭∣𝔪`, `¬𝔭∣𝔞₀`.
     have hp_prime : Prime 𝔭 := by
@@ -143,7 +141,7 @@ theorem caseII_span_x_add_y_eq_p_pow_mul (D : RealCaseIIData37 K m) (hp : (37 : 
 theorem caseII_x_add_y_emultiplicity_eq (D : RealCaseIIData37 K m) (hp : (37 : ℕ) ≠ 2) :
     emultiplicity (D.hζ.toInteger - 1 : 𝓞 K) (D.x + D.y) = (37 * m + 1 : ℕ) := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  set π : 𝓞 K := (D.hζ.toInteger - 1 : 𝓞 K) with hπ
+  set π : 𝓞 K := (D.hζ.toInteger - 1 : 𝓞 K)
   have hπ_prime : Prime π := D.hζ.zeta_sub_one_prime'
   obtain ⟨𝔍, h𝔍eq, h𝔍cop⟩ := caseII_span_x_add_y_eq_p_pow_mul D hp
   -- lower bound: `(ζ−1)^{37m+1} ∣ x+y`.
@@ -156,8 +154,7 @@ theorem caseII_x_add_y_emultiplicity_eq (D : RealCaseIIData37 K m) (hp : (37 : �
         Ideal.span ({D.x + D.y} : Set (𝓞 K)) := by
       rw [Ideal.span_singleton_pow, Ideal.dvd_span_singleton, Ideal.mem_span_singleton]
       exact hd
-    rw [h𝔍eq] at hideal
-    rw [show (37 * m + 2 : ℕ) = (37 * m + 1) + 1 from rfl, pow_succ] at hideal
+    rw [h𝔍eq, show (37 * m + 2 : ℕ) = (37 * m + 1) + 1 from rfl, pow_succ] at hideal
     have hp𝔭_ne : (Ideal.span ({π} : Set (𝓞 K))) ^ (37 * m + 1) ≠ 0 := by
       apply pow_ne_zero
       rw [Ne, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]
@@ -201,9 +198,8 @@ theorem caseII_lambda_emultiplicity {ζ ζ' : K} (hζ : IsPrimitiveRoot ζ 37)
   have hmemζ' : (hζ'.toInteger) ∈ nthRootsFinset 37 (1 : 𝓞 K) :=
     hζ'.toInteger_isPrimitiveRoot.mem_nthRootsFinset (by decide : 0 < 37)
   have hmem36 : (hζ'.toInteger ^ 36) ∈ nthRootsFinset 37 (1 : 𝓞 K) := by
-    rw [mem_nthRootsFinset (by norm_num)]
-    rw [← pow_mul, show 36 * 37 = 37 * 36 from by norm_num, pow_mul,
-      hζ'.toInteger_isPrimitiveRoot.pow_eq_one, one_pow]
+    rw [mem_nthRootsFinset (by norm_num), ← pow_mul, show 36 * 37 = 37 * 36 from by norm_num,
+      pow_mul, hζ'.toInteger_isPrimitiveRoot.pow_eq_one, one_pow]
   -- `1 − ζ'`: associate of `ζ − 1` (members `1`, `ζ'` of `nthRootsFinset`, base `ζ`).
   have h1 : Associated (hζ.toInteger - 1 : 𝓞 K) (1 - hζ'.toInteger) := by
     have hne : (1 : 𝓞 K) ≠ hζ'.toInteger :=
@@ -263,8 +259,7 @@ theorem caseII_anchor_sq_integral {K : Type} [Field K] [NumberField K] {ζ : K}
       algebraMap (𝓞 K) K ((u0 : 𝓞 K)) ^ 2 *
         (algebraMap (𝓞 K) K ((1 - hζ.toInteger) * (1 - hζ.toInteger ^ 36))) ^ (2 * e) *
         (ρ0 ^ 2) ^ 37 := by
-    rw [map_pow, hanchor]
-    rw [show (2 * e) = e * 2 from by ring, pow_mul]
+    rw [map_pow, hanchor, show (2 * e) = e * 2 from by ring, pow_mul]
     ring
   rw [hsq, ← hz']
   simp only [map_mul, map_pow]
@@ -287,7 +282,7 @@ theorem caseII_anchor_exponent_eq (D : RealCaseIIData37 K m) (hp : (37 : ℕ) �
     (hz'_cop : ¬ (D.hζ.toInteger - 1 : 𝓞 K) ∣ z') :
     2 * e = 37 * m + 1 := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  set π : 𝓞 K := (D.hζ.toInteger - 1 : 𝓞 K) with hπ
+  set π : 𝓞 K := (D.hζ.toInteger - 1 : 𝓞 K)
   have hπ_prime : Prime π := D.hζ.zeta_sub_one_prime'
   -- squared integral anchor equation (lambda root `ζ'`).
   have hsq := caseII_anchor_sq_integral hζ' hanchor hz'
@@ -296,8 +291,8 @@ theorem caseII_anchor_exponent_eq (D : RealCaseIIData37 K m) (hp : (37 : ℕ) �
     rw [emultiplicity_pow hπ_prime, caseII_x_add_y_emultiplicity_eq D hp]
     push_cast; ring
   have hu0 : emultiplicity π ((u0 : 𝓞 K) ^ 2) = 0 := by
-    rw [emultiplicity_pow hπ_prime]
-    rw [emultiplicity_eq_zero.mpr (fun h ↦ hπ_prime.not_unit (isUnit_of_dvd_unit h u0.isUnit))]
+    rw [emultiplicity_pow hπ_prime,
+      emultiplicity_eq_zero.mpr (fun h ↦ hπ_prime.not_unit (isUnit_of_dvd_unit h u0.isUnit))]
     simp
   -- `v_𝔭(λ) = 2` with `𝔭 = D.hζ−1` and lambda root `ζ'` (the two-root lambda lemma).
   have hlam : emultiplicity π (((1 - hζ'.toInteger) * (1 - hζ'.toInteger ^ 36)) ^ (2 * e)) =
@@ -308,11 +303,11 @@ theorem caseII_anchor_exponent_eq (D : RealCaseIIData37 K m) (hp : (37 : ℕ) �
     rw [emultiplicity_pow hπ_prime, emultiplicity_eq_zero.mpr hz'_cop]; simp
   have hRHS : emultiplicity π ((u0 : 𝓞 K) ^ 2 *
       ((1 - hζ'.toInteger) * (1 - hζ'.toInteger ^ 36)) ^ (2 * e) * z' ^ 37) = (4 * e : ℕ) := by
-    rw [emultiplicity_mul hπ_prime, emultiplicity_mul hπ_prime, hu0, hlam, hz'mult]
-    rw [zero_add, add_zero]; push_cast; ring
+    rw [emultiplicity_mul hπ_prime, emultiplicity_mul hπ_prime, hu0, hlam, hz'mult,
+      zero_add, add_zero]
+    push_cast; ring
   -- combine: `2(37m+1) = 4e` in `ℕ∞`, hence in `ℕ`.
-  rw [hsq] at hLHS
-  rw [hRHS] at hLHS
+  rw [hsq, hRHS] at hLHS
   have : (2 * (37 * m + 1) : ℕ) = (4 * e : ℕ) := by exact_mod_cast hLHS.symm
   omega
 
@@ -358,7 +353,6 @@ honest reduction of the non-`p`-content gap to its precise residual. -/
 
 variable [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
 
-open scoped Classical in
 /-- **[FLT37-CASEII-§9.1-PCONTENT-EXTRACTION-DATA] The §9.1 `ℓ ∣ ξ₁`-extraction data with the
 `p`-content-of-descended-content condition** (a `def … : Prop`, **not** an axiom).
 
@@ -474,8 +468,8 @@ theorem freeContentCaseIIData37_of_descended_equation_xyz_explicit
   set ε' : (𝓞 K)ˣ := δ * η36u ^ (2 * e - 1) with hε'_def
   have hequation' : ω ^ 37 + θ ^ 37 =
       (ε' : 𝓞 K) * (hζ.toInteger - 1) ^ (2 * (2 * e - 1)) * z' ^ 37 := by
-    rw [hequation, freeContentPackaging_Lambda_eq hζ, mul_pow, ← pow_mul]
-    rw [hε'_def, Units.val_mul, Units.val_pow_eq_pow_val, hη36u_val]
+    rw [hequation, freeContentPackaging_Lambda_eq hζ, mul_pow, ← pow_mul,
+      hε'_def, Units.val_mul, Units.val_pow_eq_pow_val, hη36u_val]
     ring
   have hn'_ge : 1 ≤ 2 * (2 * e - 1) := by omega
   let D' : FreeContentCaseIIData37 K (2 * (2 * e - 1)) :=
@@ -514,14 +508,14 @@ theorem freeContentCaseIIDvdZData37_pContent_descend_pContentOutput
       caseIIFreeDvdZFactorCount D' < caseIIFreeDvdZFactorCount D := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   have hp : (37 : ℕ) ≠ 2 := by decide
-  set Dr := freeContentCaseIIData37_toReal D.toFreeContentCaseIIData37 with hDr
+  set Dr := freeContentCaseIIData37_toReal D.toFreeContentCaseIIData37
   let Drz : RealCaseIIDvdZData37 m :=
     { toRealCaseIIData37 := Dr, z_mem := D.z_mem, x_notMem := D.x_notMem, y_notMem := D.y_notMem }
   have hnonterm' : ¬ ∃ αU : (𝓞 (CyclotomicField 37 ℚ))ˣ,
       caseII_correctedRadical Dr Dr.etaOne (caseII_correctionUnit Dr.etaOne) =
         algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ)
           (αU : 𝓞 (CyclotomicField 37 ℚ)) := by
-    rw [← caseIIFree_correctedRadical_eq_real D.toFreeContentCaseIIData37]; exact hnonterm
+    rwa [← caseIIFree_correctedRadical_eq_real D.toFreeContentCaseIIData37]
   -- The proven factor equations at `ζ`, `ζ²`.
   obtain ⟨ηa, ηb, ρa, ρb, hηa_real, hηb_real, hfa_pos, hfa_neg, hfb_pos, hfb_neg⟩ :=
     caseII_section91_factorEquations_etaOne_etaTwo Dr hcop
@@ -573,12 +567,12 @@ theorem freeContentCaseIIDvdZData37_pContent_descend_pContentOutput
       have hsucc : η ^ 37 = η ^ 36 * η := by rw [pow_succ]
       rw [hη37, h36, one_mul] at hsucc; exact hsucc.symm
     exact hη1 this
-  set Λa : (CyclotomicField 37 ℚ)ˣ := Units.mk0 _ (hΛne ηA hA37 hA1) with hΛa_def
-  set Λb : (CyclotomicField 37 ℚ)ˣ := Units.mk0 _ (hΛne ηB hB37 hB1) with hΛb_def
+  set Λa : (CyclotomicField 37 ℚ)ˣ := Units.mk0 _ (hΛne ηA hA37 hA1)
+  set Λb : (CyclotomicField 37 ℚ)ˣ := Units.mk0 _ (hΛne ηB hB37 hB1)
   have hΛspec_ne := hΛne (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger
     ((zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger_isPrimitiveRoot.pow_eq_one)
     ((zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37))
-  set Λ : (CyclotomicField 37 ℚ)ˣ := Units.mk0 _ hΛspec_ne with hΛ_def
+  set Λ : (CyclotomicField 37 ℚ)ˣ := Units.mk0 _ hΛspec_ne
   have hΛa_val : (Λa : CyclotomicField 37 ℚ) = algebraMap (𝓞 (CyclotomicField 37 ℚ))
       (CyclotomicField 37 ℚ) ((1 - ηA) * (1 - ηA ^ 36)) := rfl
   have hΛb_val : (Λb : CyclotomicField 37 ℚ) = algebraMap (𝓞 (CyclotomicField 37 ℚ))
@@ -590,7 +584,7 @@ theorem freeContentCaseIIDvdZData37_pContent_descend_pContentOutput
   have hanchor' : algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) Dr.x +
       algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) Dr.y =
       (η0 : CyclotomicField 37 ℚ) * (Λ : CyclotomicField 37 ℚ) ^ e * ρ0 ^ 37 := by
-    rw [hΛ_val, ← map_add]; exact hanchor
+    rwa [hΛ_val, ← map_add]
   have hint_eq := washington_section91_integer_descended_equation (K := CyclotomicField 37 ℚ)
     (x := algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) Dr.x)
     (y := algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) Dr.y)
@@ -656,7 +650,7 @@ theorem no_pContent_freeContentCaseIIDvdZData37
     ∃ (m : ℕ) (E : FreeContentCaseIIDvdZData37 (37 * (m + 1))), caseIIFreeDvdZFactorCount E = k
   have hP : ∃ k, P k := ⟨_, m₀, D₀, rfl⟩
   obtain ⟨mmin, Dmin, hk⟩ := Nat.find_spec hP
-  set k := Nat.find hP with hkdef
+  set k := Nat.find hP
   by_cases hunit : ∃ αU : (𝓞 (CyclotomicField 37 ℚ))ˣ,
       Dmin.toFreeContentCaseIIData37.caseIIFree_correctedRadical =
         algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ)
@@ -748,7 +742,6 @@ theorem fermatLastTheoremFor_thirtyseven_of_pContentDescent
     (noSecondOrderIrregular : NoSecondOrderIrregularPair 37 32) :
     FermatLastTheoremFor 37 := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  haveI : NeZero 37 := ⟨by decide⟩
   exact BernoulliRegular.fermatLastTheoremFor_thirtyseven_of_remaining
     (BernoulliRegular.cor8_19Bridge_of_not_dvd_hPlus 37 (CyclotomicField 37 ℚ)
       Sinnott.flt37_not_dvd_hPlus)
