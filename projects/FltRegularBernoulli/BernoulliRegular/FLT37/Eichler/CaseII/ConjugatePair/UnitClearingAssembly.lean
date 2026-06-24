@@ -154,7 +154,7 @@ theorem caseIIConjPairUnitClearingStep37_of_sigmaEquivariant_and_normPower
     unit_isPow_of_prod_isPow_of_quotient_isPow
       (a := ε₁) (b := unitsComplexConj (CyclotomicField 37 ℚ) ε₁)
       ⟨w, hw⟩
-      ⟨v, by rw [hε_conj]; exact hv⟩
+      ⟨v, hε_conj ▸ hv⟩
   -- §2: the symmetric clearing produces the clean σ-conjugate-pair solution.
   exact caseII_conjPair_symmetric_clear D.hζ hy' hz' hx'_conj hε_conj hδ₁ e'
 
