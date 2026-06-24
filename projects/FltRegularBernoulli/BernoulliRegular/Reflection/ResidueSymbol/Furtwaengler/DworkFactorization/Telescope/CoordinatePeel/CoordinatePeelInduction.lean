@@ -31,6 +31,13 @@ variable {R' : Type w} [Field R'] [NumberField R'] [Algebra K R'] [IsScalarTower
 
 variable (F : FullTeichStickelbergerSetup ℓ p k K R')
 
+/-- If a `ℓ`-power-of-power of `x` vanishes, so does the next one: the
+`ε ^ ℓ ^ (m + 1) = 0` boundary hypothesis propagates upward through `ℓ`. -/
+private theorem pow_pow_ell_succ_eq_zero {M : Type*} [MonoidWithZero M]
+    {x : M} {n : ℕ} (hx : x ^ ℓ ^ n = 0) : x ^ ℓ ^ (n + 1) = 0 := by
+  rw [pow_succ, pow_mul, hx]
+  exact zero_pow (Nat.Prime.ne_zero Fact.out)
+
 /-- One depth-indexed coordinate peel for a Frobenius-shifted tail at the
 zero boundary. -/
 theorem artinHasseExp_frobenius_tail_succ_depth_eq_coeff_zero_mul_shifted_tail_of_zero_iterate
@@ -230,11 +237,7 @@ theorem artinHasseExp_tail_range_depth_eq_frobenius_root_tail_range_depth_pow
                   ((((_root_.frobeniusEquiv k ℓ).symm ^ r)
                     (cRoot.coeff r)) ^ ℓ)))) ^
               (ℓ ^ (r + 1))) ^ (ℓ ^ (m + 1 - j)) := by
-          rw [← pow_mul]
-          congr 1
-          have hsucc : m + 1 - j = (m - j) + 1 := by
-            omega
-          rw [hsucc, Nat.pow_succ, Nat.mul_comm]
+          rw [← pow_mul, ← pow_succ', show (m - j) + 1 = m + 1 - j from by omega]
 
 /-- At the zero boundary, the accumulated non-shifted lower-depth tail is the
 next full Frobenius-shifted root tail at parameter `ε^ℓ`. -/
@@ -292,16 +295,9 @@ theorem artinHasseExp_tail_range_depth_eq_frobenius_root_tail_succ_depth_of_zero
       N D m ε c
   have hεnext_m : εnext ^ (ℓ ^ m) = 0 := by
     dsimp [εnext]
-    rw [← pow_mul]
-    rw [show ℓ * ℓ ^ m = ℓ ^ (m + 1) by
-      rw [Nat.pow_succ, Nat.mul_comm]]
+    rw [← pow_mul, ← pow_succ']
     exact hzero
-  have hεnext_succ : εnext ^ (ℓ ^ (m + 1)) = 0 := by
-    have hpow : εnext ^ (ℓ ^ (m + 1)) = (εnext ^ (ℓ ^ m)) ^ ℓ := by
-      rw [show ℓ ^ (m + 1) = ℓ ^ m * ℓ by rw [Nat.pow_succ]]
-      rw [pow_mul]
-    rw [hpow, hεnext_m]
-    exact zero_pow (Nat.Prime.ne_zero (Fact.out : Nat.Prime ℓ))
+  have hεnext_succ : εnext ^ (ℓ ^ (m + 1)) = 0 := pow_pow_ell_succ_eq_zero hεnext_m
   have hEzero :
       (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A) 0 = 1 := by
     simpa [A, Eps] using F.artinHasseExp_trunc_eval_zero N
@@ -424,9 +420,7 @@ theorem artinHasseExp_tail_current_range_depth_eq_frobenius_root_tail_range_dept
                   ((((_root_.frobeniusEquiv k ℓ).symm ^ r)
                     (cRoot.coeff r)) ^ ℓ)))) ^
               (ℓ ^ (r + 1))) ^ (ℓ ^ (m - j)) := by
-          rw [← pow_mul]
-          congr 1
-          rw [hsucc, Nat.pow_succ, Nat.mul_comm]
+          rw [← pow_mul, ← pow_succ', hsucc]
 
 /-- At the zero boundary, the accumulated current-parameter non-shifted tail
 extends to the full rooted Frobenius-coordinate tail by adding the trivial
@@ -721,23 +715,13 @@ theorem artinHasseExp_frobenius_tail_depth_eq_coordinatePeelProduct_of_zero_iter
       have htail :=
         F.artinHasseExp_tail_range_depth_eq_frobenius_root_tail_succ_depth_of_zero_iterate
           N D m ε hzero cTail
-      have hzero_next : ε ^ (ℓ ^ ((m + 1) + 1)) = 0 := by
-        have hpow : ε ^ (ℓ ^ ((m + 1) + 1)) =
-            (ε ^ (ℓ ^ (m + 1))) ^ ℓ := by
-          rw [show ℓ ^ ((m + 1) + 1) = ℓ ^ (m + 1) * ℓ by rw [Nat.pow_succ]]
-          rw [pow_mul]
-        rw [hpow, hzero]
-        exact zero_pow (Nat.Prime.ne_zero (Fact.out : Nat.Prime ℓ))
+      have hzero_next : ε ^ (ℓ ^ ((m + 1) + 1)) = 0 := pow_pow_ell_succ_eq_zero hzero
       have hRootTailShift : ∀ j : ℕ, RootTailShift j = RootTail j := by
         intro j
         dsimp [RootTailShift, RootTail]
         refine Finset.prod_congr rfl ?_
         intro r _hr
-        have hparam : (ε ^ ℓ) ^ (ℓ ^ j) = (ε ^ (ℓ ^ j)) ^ ℓ := by
-          rw [← pow_mul, ← pow_mul]
-          congr 1
-          exact Nat.mul_comm ℓ (ℓ ^ j)
-        rw [hparam]
+        rw [pow_right_comm]
       have hroot_tail :
           (∏ j ∈ Finset.range m, (W j) ^ (ℓ ^ (m - j))) =
             ∏ j ∈ Finset.range (m + 2),
