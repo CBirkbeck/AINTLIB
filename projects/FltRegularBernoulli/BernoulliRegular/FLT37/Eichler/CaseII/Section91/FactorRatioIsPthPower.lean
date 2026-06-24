@@ -224,14 +224,10 @@ theorem caseII_section91_factorRatio_isPthPower
       algebraMap (𝓞 K) K (D.x + D.y * (η : 𝓞 K)) /
         algebraMap (𝓞 K) K (D.x + D.y * (η : 𝓞 K) ^ 36) := rfl
   rw [hα₀] at hβ
-  -- nonzero facts.
-  have hnumK_ne : algebraMap (𝓞 K) K (D.x + D.y * (η : 𝓞 K)) ≠ 0 := hnum_ne
-  have hdenK_ne : algebraMap (𝓞 K) K (D.x + D.y * (η : 𝓞 K) ^ 36) ≠ 0 := hden_ne
   -- Clear all denominators; the goal is then a polynomial identity using `hβ`, `h_unit_prod`.
-  rw [h_denom_id, div_div_div_eq]
-  rw [div_eq_iff (mul_ne_zero h1η_ne hdenK_ne)]
+  rw [h_denom_id, div_div_div_eq, div_eq_iff (mul_ne_zero h1η_ne hden_ne)]
   -- `hβ` cleared: `nη = uη·β³⁷·dη`.
-  rw [div_eq_iff hdenK_ne] at hβ
+  rw [div_eq_iff hden_ne] at hβ
   -- close by ring-with-hypotheses: coeff `(vη·e1)` for `hβ`, `(β³⁷·dη·e1)` for `h_unit_prod`.
   linear_combination
     (algebraMap (𝓞 K) K (-((η : 𝓞 K) ^ 36)) * algebraMap (𝓞 K) K (1 - (η : 𝓞 K))) * hβ +
