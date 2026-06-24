@@ -1414,6 +1414,68 @@ private theorem subst_zero_LogPreservesAdd_RHS (F : FormalGroup R) [Module ℚ R
     rfl
   rw [hX1_eq]
 
+/-- The coefficient of `(X 1) ^ k` at the monomial `single 1 b` in
+`MvPowerSeries (Fin 2) R`: it is `1` when `k = b` and `0` otherwise, since
+`(X 1) ^ k = monomial (single 1 k) 1`. -/
+private theorem coeff_single_1_X1_pow (b k : ℕ) :
+    MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) b)
+      ((MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) ^ k) =
+      if k = b then 1 else 0 := by
+  rw [show (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) ^ k =
+      MvPowerSeries.monomial (Finsupp.single (1 : Fin 2) k) 1 by
+    rw [MvPowerSeries.X_pow_eq]]
+  split_ifs with hk
+  · subst hk
+    exact MvPowerSeries.coeff_monomial_same _ _
+  · rw [MvPowerSeries.coeff_monomial_ne]
+    intro heq
+    have := DFunLike.congr_fun heq 1
+    simp at this
+    exact hk this.symm
+
+/-- Evaluating the basis monomial of `d` under `X 0 ↦ 0, X 1 ↦ X 1` when
+`d 0 = 0`: the `X 0` factor is absent, so the product is `(X 1) ^ (d 1)`. -/
+private theorem prod_eval_zero_X1_of_fst_eq_zero (d : Fin 2 →₀ ℕ) (h0 : d 0 = 0) :
+    (d.prod fun s e ↦ (![(0 : MvPowerSeries (Fin 2) R), MvPowerSeries.X 1] : Fin 2 →
+        MvPowerSeries (Fin 2) R) s ^ e) =
+      (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) ^ (d 1) := by
+  classical
+  rw [Finsupp.prod]
+  have hsub : d.support ⊆ {1} := by
+    intro i hi
+    simp only [Finset.mem_singleton]
+    fin_cases i
+    · exact (Finsupp.mem_support_iff.mp hi h0).elim
+    · rfl
+  by_cases hb' : d 1 = 0
+  · have hempty : d.support = ∅ := by
+      apply Finset.eq_empty_iff_forall_notMem.mpr
+      intro i hi
+      have := hsub hi
+      rw [Finset.mem_singleton] at this
+      subst this
+      exact Finsupp.mem_support_iff.mp hi hb'
+    rw [hempty, Finset.prod_empty, hb', pow_zero]
+  · have hsupp : d.support = {1} := by
+      apply Finset.Subset.antisymm hsub
+      intro i hi
+      rw [Finset.mem_singleton] at hi; subst hi
+      exact Finsupp.mem_support_iff.mpr hb'
+    rw [hsupp, Finset.prod_singleton]
+    rfl
+
+/-- Evaluating the basis monomial of `d` under `X 0 ↦ 0, X 1 ↦ X 1` when
+`d 0 ≠ 0`: the `X 0` factor evaluates to `0 ^ (d 0) = 0`, killing the product. -/
+private theorem prod_eval_zero_X1_of_fst_ne_zero (d : Fin 2 →₀ ℕ) (h0 : d 0 ≠ 0) :
+    (d.prod fun s e ↦ (![(0 : MvPowerSeries (Fin 2) R), MvPowerSeries.X 1] : Fin 2 →
+        MvPowerSeries (Fin 2) R) s ^ e) = 0 := by
+  classical
+  rw [Finsupp.prod]
+  have h0mem : (0 : Fin 2) ∈ d.support :=
+    Finsupp.mem_support_iff.mpr h0
+  rw [Finset.prod_eq_zero h0mem]
+  simp [zero_pow h0]
+
 /-- Auxiliary: the coefficients of `subst ![0, X 1] h` at `single 1 b`
 coincide with the coefficients of `h` at `single 1 b`. More explicitly,
 if `g = subst ![0, X 1] h`, then `coeff (single 1 b) g = coeff (single 1 b) h`.
@@ -1432,37 +1494,19 @@ private theorem coeff_subst_zero_X1_at_single_1 (h : MvPowerSeries (Fin 2) R) (b
     intro s; fin_cases s <;> simp
   -- Substitute `X 0 ↦ 0, X 1 ↦ X 1`. First rewrite the LHS via coeff_subst.
   classical
-  set a : Fin 2 → MvPowerSeries (Fin 2) R :=
-    ![0, MvPowerSeries.X 1] with ha_def
   rw [MvPowerSeries.coeff_subst h0X1 h (Finsupp.single 1 b)]
-  -- Goal: ∑ᶠ d, coeff d h • coeff (single 1 b) (d.prod (fun s e => (a s)^e))
+  -- Goal: ∑ᶠ d, coeff d h • coeff (single 1 b) (d.prod (fun s e => (![0, X 1] s)^e))
   --          = coeff (single 1 b) h.
   -- Only d = single 1 b contributes; others give zero.
   rw [finsum_eq_single _ (Finsupp.single (1 : Fin 2) b)]
-  · -- Case d = single 1 b: d.prod _ = (a 1)^b = (X 1)^b, coeff (single 1 b) ((X 1)^b) = 1.
-    have hprod : (Finsupp.single (1 : Fin 2) b).prod
-        (fun s e ↦ (a s) ^ e) =
-        (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) ^ b := by
-      -- support of single 1 b is {1} if b ≠ 0, else ∅.
-      by_cases hb : b = 0
-      · subst hb
-        simp [Finsupp.prod]
-      · rw [Finsupp.prod_single_index (by simp)]
-        rfl
-    rw [hprod]
-    -- coeff (single 1 b) ((X 1)^b) = 1.
-    have hc : MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) b)
-        ((MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) ^ b) = 1 := by
-      rw [show (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) ^ b =
-        MvPowerSeries.monomial (Finsupp.single (1 : Fin 2) b) 1 by
-        rw [MvPowerSeries.X_pow_eq]]
-      exact MvPowerSeries.coeff_monomial_same _ _
-    rw [hc, smul_eq_mul, mul_one]
+  · -- Case d = single 1 b: d.prod _ = (X 1)^b, coeff (single 1 b) ((X 1)^b) = 1.
+    rw [prod_eval_zero_X1_of_fst_eq_zero _ (by simp), coeff_single_1_X1_pow,
+      if_pos (by simp), smul_eq_mul, mul_one]
   · -- For d ≠ single 1 b: the contribution is zero.
     intro d hd
     -- Two cases: d 0 ≠ 0 OR (d 0 = 0 AND d 1 ≠ b).
     by_cases h0 : d 0 = 0
-    · -- d 0 = 0 but d ≠ single 1 b: so d 1 ≠ b.
+    · -- d 0 = 0 but d ≠ single 1 b: so d 1 ≠ b, hence coeff (single 1 b) ((X 1)^(d 1)) = 0.
       have hd1 : d 1 ≠ b := by
         intro h1
         apply hd
@@ -1472,56 +1516,9 @@ private theorem coeff_subst_zero_X1_at_single_1 (h : MvPowerSeries (Fin 2) R) (b
           rw [h0]; simp
         · change d 1 = (Finsupp.single (1 : Fin 2) b) 1
           rw [h1]; simp
-      -- d.prod: support is subset of {0, 1}. Since d 0 = 0, support ⊆ {1}.
-      -- d.prod = (a 1)^(d 1) = (X 1)^(d 1). Coefficient at (single 1 b) is 0 since d 1 ≠ b.
-      have hprod : d.prod (fun s e ↦ (a s) ^ e) =
-          (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) ^ (d 1) := by
-        -- d.prod over support. Support of d does not include 0 (since d 0 = 0).
-        rw [Finsupp.prod]
-        have : d.support ⊆ {1} := by
-          intro i hi
-          simp only [Finset.mem_singleton]
-          fin_cases i
-          · exact (Finsupp.mem_support_iff.mp hi h0).elim
-          · rfl
-        by_cases hb' : d 1 = 0
-        · have : d.support = ∅ := by
-            apply Finset.eq_empty_iff_forall_notMem.mpr
-            intro i hi
-            have := this hi
-            rw [Finset.mem_singleton] at this
-            subst this
-            exact Finsupp.mem_support_iff.mp hi hb'
-          rw [this, Finset.prod_empty]
-          rw [hb', pow_zero]
-        · have : d.support = {1} := by
-            apply Finset.Subset.antisymm this
-            intro i hi
-            rw [Finset.mem_singleton] at hi; subst hi
-            exact Finsupp.mem_support_iff.mpr hb'
-          rw [this, Finset.prod_singleton]
-          rfl
-      rw [hprod]
-      have hc : MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) b)
-          ((MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) ^ (d 1)) = 0 := by
-        rw [show (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) ^ (d 1) =
-            MvPowerSeries.monomial (Finsupp.single (1 : Fin 2) (d 1)) 1 by
-          rw [MvPowerSeries.X_pow_eq]]
-        rw [MvPowerSeries.coeff_monomial_ne]
-        intro heq
-        have := DFunLike.congr_fun heq 1
-        simp at this
-        exact hd1 this.symm
-      rw [hc, smul_zero]
+      rw [prod_eval_zero_X1_of_fst_eq_zero _ h0, coeff_single_1_X1_pow, if_neg hd1, smul_zero]
     · -- d 0 ≠ 0: d.prod = 0.
-      have hprod : d.prod (fun s e ↦ (a s) ^ e) = 0 := by
-        rw [Finsupp.prod]
-        -- 0 is in support since d 0 ≠ 0.
-        have h0mem : (0 : Fin 2) ∈ d.support :=
-          Finsupp.mem_support_iff.mpr h0
-        rw [Finset.prod_eq_zero h0mem]
-        simp [ha_def, zero_pow h0]
-      rw [hprod, map_zero, smul_zero]
+      rw [prod_eval_zero_X1_of_fst_ne_zero _ h0, map_zero, smul_zero]
 
 /-- The substitution `X 0 ↦ 0, X 1 ↦ X 1` (i.e. `![0, X 1]`) admits
 substitution on `MvPowerSeries (Fin 2) R`, since both entries have zero
