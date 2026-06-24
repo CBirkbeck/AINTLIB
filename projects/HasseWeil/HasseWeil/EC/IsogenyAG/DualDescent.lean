@@ -391,6 +391,66 @@ private theorem norm_fixed (C : SmoothPlaneCurve F) (L : Type*) [Field L] [Algeb
       (AlgEquiv.refl (R := F) (A₁ := C.toAffine.CoordinateRing))) d)]
   rfl
 
+/-- The norm `∏_σ (σ ⊗ id) d` splits off its identity factor: `∏_σ (σ ⊗ id) d = d · ∏_{σ ≠ 1}
+(σ ⊗ id) d`. The `σ = 1` factor is `(1 ⊗ id) d = d` because `ringAct` at the identity is the identity
+`AlgEquiv`. -/
+private theorem prod_ringAct_eq_self_mul_prod_erase_one (C : SmoothPlaneCurve F) (L : Type*)
+    [Field L] [Algebra F L] [FiniteDimensional F L] [IsGalois F L]
+    [DecidableEq (L ≃ₐ[F] L)] (d : L ⊗[F] C.toAffine.CoordinateRing) :
+    ∏ σ : L ≃ₐ[F] L, ringAct C L σ d
+      = d * ∏ σ ∈ (Finset.univ.erase (1 : L ≃ₐ[F] L)), ringAct C L σ d := by
+  rw [← Finset.mul_prod_erase Finset.univ (fun σ => ringAct C L σ d)
+    (Finset.mem_univ (1 : L ≃ₐ[F] L))]
+  congr 1
+  show (Algebra.TensorProduct.congr (1 : L ≃ₐ[F] L) (AlgEquiv.refl (R := F)
+      (A₁ := C.toAffine.CoordinateRing))) d = d
+  rw [show (1 : L ≃ₐ[F] L) = AlgEquiv.refl from rfl, Algebra.TensorProduct.congr_refl]
+  rfl
+
+/-- Image of a numerator scaled by the complementary norm factor. With `den = d · P` and `d ≠ 0`, the
+`algebraMap` of `a' · P` into `Frac(L ⊗_F F[C])` equals `(a'/d) · den`. This is the bookkeeping that
+turns an arbitrary ratio `a/d` into the normalized ratio with the `Gal`-fixed denominator `den`. -/
+private theorem algebraMap_mul_eq_div_mul_of_eq_mul (C : SmoothPlaneCurve F) (L : Type*)
+    [Field L] [Algebra F L]
+    (d P den a' : L ⊗[F] C.toAffine.CoordinateRing) (hd0 : d ≠ 0) (hdenP : den = d * P) :
+    letI := C.isDomain_tensorCoordRing L
+    algebraMap (L ⊗[F] C.toAffine.CoordinateRing)
+        (FractionRing (L ⊗[F] C.toAffine.CoordinateRing)) (a' * P)
+      = (algebraMap _ _ a' / algebraMap _ _ d) * algebraMap _ _ den := by
+  letI := C.isDomain_tensorCoordRing L
+  have hdmap0 : algebraMap (L ⊗[F] C.toAffine.CoordinateRing)
+      (FractionRing (L ⊗[F] C.toAffine.CoordinateRing)) d ≠ 0 :=
+    (map_ne_zero_iff _ (IsFractionRing.injective _
+      (FractionRing (L ⊗[F] C.toAffine.CoordinateRing)))).2 hd0
+  rw [hdenP, map_mul, map_mul]
+  field_simp
+
+/-- The normalized numerator is `Gal`-fixed. If the ratio `a/d` is `galActFrac`-fixed and `den =
+∏_σ (σ ⊗ id) d = d · P`, then the numerator `a · P` is fixed by every `σ ⊗ id`. The fixedness of the
+quotient, the multiplicativity of `galActFrac`, its compatibility with `algebraMap`
+(`galActFrac_algebraMap`), and the fixedness of the norm denominator (`norm_fixed`) combine after
+clearing `algebraMap` by injectivity. -/
+private theorem ringAct_numerator_fixed (C : SmoothPlaneCurve F) (L : Type*) [Field L] [Algebra F L]
+    [FiniteDimensional F L] [IsGalois F L]
+    (a d P : L ⊗[F] C.toAffine.CoordinateRing) (hd0 : d ≠ 0)
+    (hdenP : (∏ σ : L ≃ₐ[F] L, ringAct C L σ d) = d * P)
+    (hy : letI := C.isDomain_tensorCoordRing L
+          ∀ σ : L ≃ₐ[F] L,
+            galActFrac C L σ (algebraMap _ (FractionRing (L ⊗[F] C.toAffine.CoordinateRing)) a
+                / algebraMap _ _ d)
+              = algebraMap _ (FractionRing (L ⊗[F] C.toAffine.CoordinateRing)) a
+                / algebraMap _ _ d) :
+    letI := C.isDomain_tensorCoordRing L
+    ∀ τ : L ≃ₐ[F] L, ringAct C L τ (a * P) = a * P := by
+  letI := C.isDomain_tensorCoordRing L
+  have hnmap := fun a' => algebraMap_mul_eq_div_mul_of_eq_mul C L d P
+    (∏ σ : L ≃ₐ[F] L, ringAct C L σ d) a' hd0 hdenP
+  intro τ
+  apply IsFractionRing.injective (L ⊗[F] C.toAffine.CoordinateRing)
+    (FractionRing (L ⊗[F] C.toAffine.CoordinateRing))
+  rw [← galActFrac_algebraMap, hnmap a, map_mul, hy τ, galActFrac_algebraMap,
+    norm_fixed C L d τ, ← hnmap]
+
 /-- **Fraction lift**: a `galActFrac`-fixed element of `Frac(L ⊗_F F[C])` is a ratio `n/den` of two
 `σ ⊗ id`-fixed elements of `L ⊗_F F[C]` (with `den ≠ 0`). The denominator is the norm of an arbitrary
 denominator; the numerator is forced fixed by the fixed quotient. -/
@@ -409,10 +469,12 @@ private theorem the_lift (C : SmoothPlaneCurve F) (L : Type*) [Field L] [Algebra
           / algebraMap _ (FractionRing (L ⊗[F] C.toAffine.CoordinateRing)) den := by
   letI := C.isDomain_tensorCoordRing L
   classical
+  -- write `y = a/d`, and take `den` to be the norm `∏_σ (σ ⊗ id) d` of the denominator
   obtain ⟨a, d, hd, rfl⟩ := IsFractionRing.div_surjective
     (A := L ⊗[F] C.toAffine.CoordinateRing) y
   set den := ∏ σ : L ≃ₐ[F] L, ringAct C L σ d with hden
   have hd0 : d ≠ 0 := nonZeroDivisors.ne_zero hd
+  -- `den ≠ 0` (a product of nonzero `AlgEquiv` images) and hence its `algebraMap` is nonzero
   have hden0B : den ≠ 0 := by
     rw [hden]; apply Finset.prod_ne_zero_iff.2; intro σ _ h
     exact hd0 ((ringAct C L σ).injective (by rw [h, map_zero]))
@@ -420,33 +482,15 @@ private theorem the_lift (C : SmoothPlaneCurve F) (L : Type*) [Field L] [Algebra
       (FractionRing (L ⊗[F] C.toAffine.CoordinateRing)) den ≠ 0 :=
     (map_ne_zero_iff _ (IsFractionRing.injective _
       (FractionRing (L ⊗[F] C.toAffine.CoordinateRing)))).2 hden0B
-  have hdmap0 : algebraMap (L ⊗[F] C.toAffine.CoordinateRing)
-      (FractionRing (L ⊗[F] C.toAffine.CoordinateRing)) d ≠ 0 :=
-    (map_ne_zero_iff _ (IsFractionRing.injective _
-      (FractionRing (L ⊗[F] C.toAffine.CoordinateRing)))).2 hd0
+  -- split off the complementary factor `P = ∏_{σ ≠ 1} (σ ⊗ id) d`, so `den = d · P`
   set P := ∏ σ ∈ (Finset.univ.erase (1 : L ≃ₐ[F] L)), ringAct C L σ d with hP
-  have hdenP : den = d * P := by
-    rw [hden, hP, ← Finset.mul_prod_erase Finset.univ (fun σ => ringAct C L σ d)
-      (Finset.mem_univ (1 : L ≃ₐ[F] L))]
-    congr 1
-    show (Algebra.TensorProduct.congr (1 : L ≃ₐ[F] L) (AlgEquiv.refl (R := F)
-        (A₁ := C.toAffine.CoordinateRing))) d = d
-    rw [show (1 : L ≃ₐ[F] L) = AlgEquiv.refl from rfl, Algebra.TensorProduct.congr_refl]
-    rfl
-  have hnmap : ∀ a' : L ⊗[F] C.toAffine.CoordinateRing,
-      algebraMap (L ⊗[F] C.toAffine.CoordinateRing)
-        (FractionRing (L ⊗[F] C.toAffine.CoordinateRing)) (a' * P)
-      = (algebraMap _ _ a' / algebraMap _ _ d) * algebraMap _ _ den := by
-    intro a'
-    rw [hdenP, map_mul, map_mul]
-    field_simp
+  have hdenP : den = d * P := prod_ringAct_eq_self_mul_prod_erase_one C L d
+  -- the witnesses: numerator `a · P`, denominator `den`; `n/den = a/d · den/den = y`
   refine ⟨a * P, den, ?_, fun τ => norm_fixed C L d τ, hdenmap0,
-    by rw [hnmap a, mul_div_assoc, div_self hdenmap0, mul_one]⟩
-  intro τ
-  apply IsFractionRing.injective (L ⊗[F] C.toAffine.CoordinateRing)
-    (FractionRing (L ⊗[F] C.toAffine.CoordinateRing))
-  rw [← galActFrac_algebraMap, hnmap a, map_mul, hy τ, galActFrac_algebraMap,
-    norm_fixed C L d τ, ← hnmap]
+    by rw [algebraMap_mul_eq_div_mul_of_eq_mul C L d P den a hd0 hdenP,
+      mul_div_assoc, div_self hdenmap0, mul_one]⟩
+  -- the numerator is `Gal`-fixed because the quotient and the norm denominator both are
+  exact ringAct_numerator_fixed C L a d P hd0 hdenP hy
 
 /-- **Transport of Galois-fixedness through the tensor presentation.** If `x ∈ (C.baseChange L).
 FunctionField` is fixed by every `galActFunctionField C L σ`, then its image
