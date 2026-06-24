@@ -7,7 +7,6 @@ public import BernoulliRegular.CyclotomicUnits.DworkParameter.SamePrimeLog.Artin
 noncomputable section
 
 open scoped NumberField
-open PowerSeries
 
 namespace BernoulliRegular
 namespace CyclotomicUnits
@@ -87,7 +86,6 @@ theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_eval_sum
   exact samePrimeNatDivEval_eq_of_eq (p := p) (K := K) han
     (by simp [samePrimeFiniteArtinHasseExpCoordLogHomogeneousNumerator]) hnum0 _
 
-set_option linter.style.longLine false in
 theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_zero_of_factorial_weighted_sum_mem
     (N d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hclear :
@@ -134,7 +132,6 @@ theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_zero_of_fact
             (p := p) (K := K) N d hx
     _ = 0 := htransport
 
-set_option linter.style.longLine false in
 theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_zero_of_not_pow
     (N d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hd : ¬ ∃ r : ℕ, d = p ^ r) :
@@ -425,7 +422,6 @@ theorem samePrimeFiniteArtinHasseLogTerm_eq_zero_of_succ_le_index
   samePrimeFiniteArtinHasseLogTerm_eq_zero_of_succ_le (p := p) (K := K) hx
     (hr.trans (le_samePrimeArtinHasseLogTermOrder (p := p) r))
 
-set_option linter.style.longLine false in
 /-- The attached `samePrimeNatDivEval`-sum of a pointwise difference `num - target`
 splits as the difference of the two attached eval-sums, using additivity of
 `samePrimeNatDivEval` on the shared membership level. -/
@@ -501,7 +497,6 @@ private theorem samePrimeNatDivEval_attach_sum_sub_eq
         rw [samePrimeNatDivEval_neg (p := p) (K := K) han (htarget0 a) hneg]
         ring
 
-set_option linter.style.longLine false in
 /-- The attached `samePrimeNatDivEval`-sum of the indicator `target` supported at
 `n = p ^ r` (value `x ^ (p ^ r)`) collapses to the single nonzero term and equals
 the same-prime finite Artin--Hasse log term. -/
@@ -587,7 +582,6 @@ private theorem samePrimeNatDivEval_attach_sum_target_eq_finiteArtinHasseLogTerm
             samePrimeNatDivEval_prime_pow_zero_eq_finiteArtinHasseLogTerm
               (p := p) (K := K) N r hx htarget0_d
 
-set_option linter.style.longLine false in
 set_option maxHeartbeats 800000 in
 -- This is the same-prime port of the homogeneous `p^r` slice comparison; it
 -- expands three attached finite sums and transports finite-log additivity.
@@ -737,7 +731,6 @@ theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_logTerm_of_f
         rw [heval_sub]
     _ = 0 := htransport
 
-set_option linter.style.longLine false in
 theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_logTerm
     (N r : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum
