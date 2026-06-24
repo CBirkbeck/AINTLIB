@@ -117,11 +117,11 @@ bridge (the §9.1 identification of the free `ε₁/ε₂`).
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Finset Polynomial NumberField.IsCMField
+open NumberField Polynomial
 
 namespace BernoulliRegular.FLT37.Eichler
 
-open FLT37 FLT37.LehmerVandiver.CaseII BernoulliRegular
+open FLT37 FLT37.LehmerVandiver.CaseII
 
 /-! ## 1. Washington's `j = 0` over real data (Lemma 9.8 deep core, PROVEN)
 
