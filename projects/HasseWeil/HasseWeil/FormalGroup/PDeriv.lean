@@ -320,52 +320,76 @@ theorem pderiv_mul (s : σ) (f g : MvPowerSeries σ R) :
 
 /-! ### Monomial formula -/
 
+/-- Per-coefficient identity behind `pderiv_monomial` when `single s 1 ≤ n`: the `coeff d` of
+`pderiv s (monomial n a)`, namely `(d s + 1) • coeff_{d + single s 1} (monomial n a)`, equals
+`coeff d (monomial (n - single s 1) (a * n s))`. On the diagonal `d + single s 1 = n` we have
+`d s + 1 = n s`, turning `(d s + 1) • a` into `a * n s`; off the diagonal both sides vanish
+(`d + single s 1 = n ↔ d = n - single s 1` since `single s 1 ≤ n`). -/
+private lemma coeff_pderiv_monomial_single_le {s : σ} {n d : σ →₀ ℕ} {a : R}
+    (hle : Finsupp.single s 1 ≤ n) :
+    (d s + 1 : ℕ) • coeff (R := R) (d + Finsupp.single s 1) (monomial n a) =
+      coeff (R := R) d (monomial (n - Finsupp.single s 1) (a * n s)) := by
+  classical
+  have he_s : (Finsupp.single s 1 : σ →₀ ℕ) s = 1 := single_self_apply s
+  rw [coeff_monomial, coeff_monomial]
+  by_cases hd : d + Finsupp.single s 1 = n
+  · -- d = n - single s 1; hence d s + 1 = n s.
+    have hdeq : d = n - Finsupp.single s 1 := by
+      rw [← hd]
+      exact (add_tsub_cancel_right d _).symm
+    rw [if_pos hd, if_pos hdeq]
+    -- `(d s + 1) • a = a * n s`.
+    have heq : d s + 1 = n s := by
+      have hds : (d + Finsupp.single s 1 : σ →₀ ℕ) s = n s := by rw [hd]
+      simp only [Finsupp.add_apply, he_s] at hds
+      exact hds
+    rw [heq, nsmul_eq_mul, mul_comm]
+  · rw [if_neg hd]
+    -- d + single s 1 ≠ n means d ≠ n - single s 1 (when single s 1 ≤ n).
+    have hd' : d ≠ n - Finsupp.single s 1 := by
+      intro heq
+      apply hd
+      rw [heq, tsub_add_cancel_of_le hle]
+    rw [if_neg hd', smul_zero]
+
+/-- Per-coefficient identity behind `pderiv_monomial` when `¬ single s 1 ≤ n` (i.e.
+`single s 1 ⊄ n`): then `n s = 0`, so the right-hand coefficient `a * n s` vanishes, and
+`d + single s 1 = n` can never hold, so the left-hand coefficient vanishes too. -/
+private lemma coeff_pderiv_monomial_not_single_le {s : σ} {n d : σ →₀ ℕ} {a : R}
+    (hle : ¬ Finsupp.single s 1 ≤ n) :
+    (d s + 1 : ℕ) • coeff (R := R) (d + Finsupp.single s 1) (monomial n a) =
+      coeff (R := R) d (monomial (n - Finsupp.single s 1) (a * n s)) := by
+  classical
+  have he_s : (Finsupp.single s 1 : σ →₀ ℕ) s = 1 := single_self_apply s
+  rw [coeff_monomial, coeff_monomial]
+  -- `single s 1 ⊄ n` forces `n s = 0`.
+  have hns : n s = 0 := by
+    by_contra hne
+    apply hle
+    intro i
+    by_cases hi : i = s
+    · subst hi
+      rw [he_s]
+      exact Nat.one_le_iff_ne_zero.mpr hne
+    · rw [Finsupp.single_apply, if_neg (Ne.symm hi)]
+      exact Nat.zero_le _
+  rw [hns, Nat.cast_zero, mul_zero]
+  -- and `d + single s 1 = n` is impossible.
+  have hne : d + Finsupp.single s 1 ≠ n := by
+    intro heq
+    apply hle
+    rw [← heq]
+    exact le_add_self
+  rw [if_neg hne, smul_zero]
+  split_ifs <;> rfl
+
 theorem pderiv_monomial (s : σ) (n : σ →₀ ℕ) (a : R) :
     pderiv s (monomial n a) = monomial (n - Finsupp.single s 1) (a * n s) := by
-  classical
-  set e : σ →₀ ℕ := Finsupp.single s 1 with he
-  have he_s : e s = 1 := single_self_apply s
   ext d
-  rw [coeff_pderiv, coeff_monomial, coeff_monomial]
-  by_cases hle : e ≤ n
-  · by_cases hd : d + e = n
-    · -- d = n - e; hence d + e = n, d s + 1 = n s.
-      have hdeq : d = n - e := by
-        rw [← hd]
-        exact (add_tsub_cancel_right d e).symm
-      rw [if_pos hd, if_pos hdeq]
-      -- `(d s + 1) • a = a * n s`.
-      have heq : d s + 1 = n s := by
-        have hds : (d + e) s = n s := by rw [hd]
-        simp only [Finsupp.add_apply, he_s] at hds
-        exact hds
-      rw [heq, nsmul_eq_mul, mul_comm]
-    · rw [if_neg hd]
-      -- d + e ≠ n means d ≠ n - e (when e ≤ n).
-      have hd' : d ≠ n - e := by
-        intro heq
-        apply hd
-        rw [heq, tsub_add_cancel_of_le hle]
-      rw [if_neg hd', smul_zero]
-  · -- e ⊄ n, so `d + e ≠ n` always. Also `n s = 0`.
-    have hns : n s = 0 := by
-      by_contra hne
-      apply hle
-      intro i
-      by_cases hi : i = s
-      · subst hi
-        rw [he_s]
-        exact Nat.one_le_iff_ne_zero.mpr hne
-      · rw [he, Finsupp.single_apply, if_neg (Ne.symm hi)]
-        exact Nat.zero_le _
-    rw [hns, Nat.cast_zero, mul_zero]
-    have hne : d + e ≠ n := by
-      intro heq
-      apply hle
-      rw [← heq]
-      exact le_add_self
-    rw [if_neg hne, smul_zero]
-    split_ifs <;> rfl
+  rw [coeff_pderiv]
+  by_cases hle : Finsupp.single s 1 ≤ n
+  · exact coeff_pderiv_monomial_single_le hle
+  · exact coeff_pderiv_monomial_not_single_le hle
 
 end CommSemiring
 
