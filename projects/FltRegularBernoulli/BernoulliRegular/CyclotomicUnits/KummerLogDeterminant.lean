@@ -15,10 +15,6 @@ range are nonzero modulo `p`.
 
 noncomputable section
 
-open NumberField
-open NumberField.IsCMField
-open scoped BigOperators NumberField
-
 namespace BernoulliRegular
 namespace CyclotomicUnits
 
