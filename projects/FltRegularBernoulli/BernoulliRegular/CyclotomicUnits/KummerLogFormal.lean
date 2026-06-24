@@ -328,8 +328,8 @@ theorem coeff_logOf_eq_of_coeff_eq_le
       PowerSeries.coeff d (PowerSeries.logOf G) := by
   have hFsub0 : PowerSeries.constantCoeff (F - 1) = 0 := by simp [hF0]
   have hGsub0 : PowerSeries.constantCoeff (G - 1) = 0 := by simp [hG0]
-  rw [PowerSeries.logOf_eq, PowerSeries.logOf_eq]
-  rw [Furtwaengler.FiniteArtinHasseFormal.coeff_subst_log_eq_sum_Icc
+  rw [PowerSeries.logOf_eq, PowerSeries.logOf_eq,
+    Furtwaengler.FiniteArtinHasseFormal.coeff_subst_log_eq_sum_Icc
       (F - 1) hFsub0 d,
     Furtwaengler.FiniteArtinHasseFormal.coeff_subst_log_eq_sum_Icc
       (G - 1) hGsub0 d]
@@ -392,8 +392,8 @@ theorem coeff_logOf_rescale_eq_pow_mul_coeff_logOf
   have hsub :
       PowerSeries.rescale a F - 1 = PowerSeries.rescale a (F - 1) := by
     rw [map_sub, map_one]
-  rw [PowerSeries.logOf_eq, PowerSeries.logOf_eq]
-  rw [Furtwaengler.FiniteArtinHasseFormal.coeff_subst_log_eq_sum_Icc
+  rw [PowerSeries.logOf_eq, PowerSeries.logOf_eq,
+    Furtwaengler.FiniteArtinHasseFormal.coeff_subst_log_eq_sum_Icc
       (PowerSeries.rescale a F - 1) hRsub0 d,
     Furtwaengler.FiniteArtinHasseFormal.coeff_subst_log_eq_sum_Icc
       (F - 1) hFsub0 d]
@@ -530,8 +530,8 @@ theorem coeff_logOf_formalArtinHasseScaledNormalizedExpMinusOne_eq_bernoulli
         Polynomial.C
           ((_root_.bernoulli (2 * j) : ℚ) /
             (((2 * j : ℕ) : ℚ) * (Nat.factorial (2 * j) : ℚ))) := by
-  rw [coeff_logOf_formalArtinHasseScaledNormalizedExpMinusOne_eq_pow_mul]
-  rw [coeff_logOf_formalArtinHasseNormalizedExpMinusOne_eq_bernoulli hj hjp]
+  rw [coeff_logOf_formalArtinHasseScaledNormalizedExpMinusOne_eq_pow_mul,
+    coeff_logOf_formalArtinHasseNormalizedExpMinusOne_eq_bernoulli hj hjp]
 
 theorem coeff_formalKummerLogSeries_eq_neg_bernoulli_mul_X_pow_sub_one
     {p j : ℕ} [Fact p.Prime] (hj : 1 ≤ j) (hjp : 2 * j ≤ p - 3) :
@@ -566,7 +566,7 @@ theorem coeff_formalKummerLogSeries_eq_neg_bernoulli_mul_X_pow_sub_one
           simp [formalKummerLogSeries, hnorm, hscaled]
     _ =
           -Polynomial.C q * (Polynomial.X ^ (2 * j) - 1) := by
-          simp [kummerLogScalarX]
+          simp only [kummerLogScalarX]
           ring
 
 /-- Reduction of a rational number modulo `p`, written using numerator and
