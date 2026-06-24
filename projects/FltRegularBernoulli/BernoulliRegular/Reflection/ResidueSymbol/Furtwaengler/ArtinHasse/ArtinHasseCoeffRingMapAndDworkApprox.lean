@@ -62,7 +62,6 @@ theorem artinHasseExpSeries_pow_mapTo_eq_rescale_exp_mul_subst_X_pow_mapTo
     hE.mapTo φ ^ r =
       hRes.mapTo φ *
         PowerSeries.subst ((PowerSeries.X : PowerSeries A) ^ r) (hE.mapTo φ) := by
-  classical
   dsimp only
   let hE : DieudonneDwork.IsRIntegralPS r (artinHasseExpSeries r) :=
     fun n ↦ artinHasseExpSeries_coeff_isRIntegral r n
@@ -180,6 +179,19 @@ theorem artinHasseExpSeries_mapTo_subst_inverse
     _ = 1 + (PowerSeries.X : PowerSeries A) := by
           simp
 
+private theorem exists_inverse_mod_pow_of_not_mem_maximal
+    {A : Type*} [CommRing A] {I : Ideal A} [I.IsMaximal] {x : A} {e : ℕ}
+    (he : e ≠ 0) (hx : x ∉ I) :
+    ∃ y : A, x * y - 1 ∈ I ^ e := by
+  have hunit : IsUnit (Ideal.Quotient.mk (I ^ e) x) :=
+    (Ideal.Quotient.isUnit_mk_pow_iff_notMem (I := I) (n := e) he).2 hx
+  rcases isUnit_iff_exists.mp hunit with ⟨u, hxu, _hux⟩
+  rcases Ideal.Quotient.mk_surjective u with ⟨y, rfl⟩
+  refine ⟨y, ?_⟩
+  have hzero : Ideal.Quotient.mk (I ^ e) (x * y - 1) = 0 := by
+    rw [map_sub, map_mul, hxu, map_one, sub_self]
+  exact Ideal.Quotient.eq_zero_iff_mem.mp hzero
+
 namespace ConcreteStickelbergerSetup
 
 variable {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)]
@@ -208,7 +220,6 @@ theorem Q_isMaximal : S.Q.IsMaximal := by
 `ℓ`. -/
 theorem natCast_not_mem_Q_of_coprime_ell {m : ℕ} (hm : m.Coprime ℓ) :
     (m : 𝓞 R') ∉ S.Q := by
-  classical
   intro hmem
   haveI : CharP k ℓ := by
     rw [← Algebra.charP_iff (ZMod ℓ) k ℓ]
@@ -219,31 +230,6 @@ theorem natCast_not_mem_Q_of_coprime_ell {m : ℕ} (hm : m.Coprime ℓ) :
   have hnot_dvd : ¬ ℓ ∣ m :=
     ((Fact.out : Nat.Prime ℓ).coprime_iff_not_dvd).1 hm.symm
   exact hnot_dvd ((CharP.cast_eq_zero_iff k ℓ m).1 hres)
-
-end ConcreteStickelbergerSetup
-
-private theorem exists_inverse_mod_pow_of_not_mem_maximal
-    {A : Type*} [CommRing A] {I : Ideal A} [I.IsMaximal] {x : A} {e : ℕ}
-    (he : e ≠ 0) (hx : x ∉ I) :
-    ∃ y : A, x * y - 1 ∈ I ^ e := by
-  have hunit : IsUnit (Ideal.Quotient.mk (I ^ e) x) :=
-    (Ideal.Quotient.isUnit_mk_pow_iff_notMem (I := I) (n := e) he).2 hx
-  rcases isUnit_iff_exists.mp hunit with ⟨u, hxu, _hux⟩
-  rcases Ideal.Quotient.mk_surjective u with ⟨y, rfl⟩
-  refine ⟨y, ?_⟩
-  have hzero : Ideal.Quotient.mk (I ^ e) (x * y - 1) = 0 := by
-    rw [map_sub, map_mul, hxu, map_one, sub_self]
-  exact Ideal.Quotient.eq_zero_iff_mem.mp hzero
-
-namespace ConcreteStickelbergerSetup
-
-variable {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)]
-variable {k : Type u} [Field k] [Fintype k] [Algebra (ZMod ℓ) k]
-variable {K : Type v} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-variable {R' : Type w} [Field R'] [NumberField R'] [Algebra K R'] [IsScalarTower ℚ K R']
-  [IsCyclotomicExtension {p, ℓ} ℚ R']
-
-variable (S : ConcreteStickelbergerSetup ℓ p k K R')
 
 /-- The denominator of an `ℓ`-integral rational is a unit modulo every power
 of the selected prime `Q`. -/
@@ -458,7 +444,6 @@ theorem isRIntegralPS_trunc_eval₂_factor_eq
         (RingHom.id (𝓞 R' ⧸ S.Q ^ (N + 1))) zN) =
       (PowerSeries.trunc (M + 1) FM).eval₂
         (RingHom.id (𝓞 R' ⧸ S.Q ^ (M + 1))) zM := by
-  classical
   dsimp only
   let φ : 𝓞 R' ⧸ S.Q ^ (N + 1) →+* 𝓞 R' ⧸ S.Q ^ (M + 1) :=
     Ideal.Quotient.factor (Ideal.pow_le_pow_right (Nat.succ_le_succ hMN))
@@ -581,10 +566,9 @@ theorem dworkCoeffArtinHasseDenInv_spec
       [IsCyclotomicExtension {p, ℓ} ℚ R']
     (S : ConcreteStickelbergerSetup ℓ p k K R') (n : ℕ) :
     (((PowerSeries.coeff (R := ℚ) n) (artinHasseExpSeries ℓ)).den : 𝓞 R') *
-        dworkCoeffArtinHasseDenInv S n - 1 ∈ S.Q ^ (n + 1) :=
-  by
-    simpa [dworkCoeffArtinHasseDenInv] using
-      Classical.choose_spec (dworkCoeffArtinHasseDenInv_exists S n)
+        dworkCoeffArtinHasseDenInv S n - 1 ∈ S.Q ^ (n + 1) := by
+  simpa [dworkCoeffArtinHasseDenInv] using
+    Classical.choose_spec (dworkCoeffArtinHasseDenInv_exists S n)
 
 /-- Precision-indexed inverse modulo `Q^(N+1)` for denominators of the
 Artin-Hasse exponential coefficients. -/
@@ -623,10 +607,9 @@ theorem dworkCoeffArtinHasseDenInvTo_spec
       [IsCyclotomicExtension {p, ℓ} ℚ R']
     (S : ConcreteStickelbergerSetup ℓ p k K R') (n N : ℕ) :
     (((PowerSeries.coeff (R := ℚ) n) (artinHasseExpSeries ℓ)).den : 𝓞 R') *
-        dworkCoeffArtinHasseDenInvTo S n N - 1 ∈ S.Q ^ (N + 1) :=
-  by
-    simpa [dworkCoeffArtinHasseDenInvTo] using
-      Classical.choose_spec (dworkCoeffArtinHasseDenInvTo_exists S n N)
+        dworkCoeffArtinHasseDenInvTo S n N - 1 ∈ S.Q ^ (N + 1) := by
+  simpa [dworkCoeffArtinHasseDenInvTo] using
+    Classical.choose_spec (dworkCoeffArtinHasseDenInvTo_exists S n N)
 
 /-- Existence of an inverse modulo `Q^(n+1)` for the denominator of the
 `n`-th coefficient of the formal inverse of `E_ℓ(T)-1`. -/
@@ -668,10 +651,9 @@ theorem artinHasseInverseCoeffDenInv_spec
       [IsCyclotomicExtension {p, ℓ} ℚ R']
     (S : ConcreteStickelbergerSetup ℓ p k K R') (n : ℕ) :
     (((PowerSeries.coeff (R := ℚ) n) (artinHasseExpInverseSeries ℓ)).den : 𝓞 R') *
-        artinHasseInverseCoeffDenInv S n - 1 ∈ S.Q ^ (n + 1) :=
-  by
-    simpa [artinHasseInverseCoeffDenInv] using
-      Classical.choose_spec (artinHasseInverseCoeffDenInv_exists S n)
+        artinHasseInverseCoeffDenInv S n - 1 ∈ S.Q ^ (n + 1) := by
+  simpa [artinHasseInverseCoeffDenInv] using
+    Classical.choose_spec (artinHasseInverseCoeffDenInv_exists S n)
 
 /-- Precision-indexed denominator inverse for inverse-series coefficients:
 for an `N`-th truncation we need each rational coefficient lifted modulo
@@ -712,10 +694,9 @@ theorem artinHasseInverseCoeffDenInvTo_spec
       [IsCyclotomicExtension {p, ℓ} ℚ R']
     (S : ConcreteStickelbergerSetup ℓ p k K R') (n N : ℕ) :
     (((PowerSeries.coeff (R := ℚ) n) (artinHasseExpInverseSeries ℓ)).den : 𝓞 R') *
-        artinHasseInverseCoeffDenInvTo S n N - 1 ∈ S.Q ^ (N + 1) :=
-  by
-    simpa [artinHasseInverseCoeffDenInvTo] using
-      Classical.choose_spec (artinHasseInverseCoeffDenInvTo_exists S n N)
+        artinHasseInverseCoeffDenInvTo S n N - 1 ∈ S.Q ^ (N + 1) := by
+  simpa [artinHasseInverseCoeffDenInvTo] using
+    Classical.choose_spec (artinHasseInverseCoeffDenInvTo_exists S n N)
 
 /-- Integral `Q`-adic lift of the `n`-th term of
 `artinHasseExpInverseSeries ℓ` evaluated at `π = ζ_ℓ - 1`. -/
