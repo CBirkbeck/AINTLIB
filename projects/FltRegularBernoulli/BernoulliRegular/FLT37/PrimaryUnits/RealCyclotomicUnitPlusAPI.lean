@@ -36,19 +36,10 @@ namespace BernoulliRegular
 
 namespace FLT37
 
-section PrimaryPlus
-
-variable (p : ℕ) [hp : Fact p.Prime]
-  (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-
-local notation3 "K⁺" => NumberField.maximalRealSubfield K
-
 section RealCyclotomicUnits
 
 variable (p : ℕ) [hp : Fact p.Prime]
   (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-
-local notation3 "K⁺" => NumberField.maximalRealSubfield K
 
 /-- The real cyclotomic combination descends to `𝓞 K⁺`: there exists
 `y ∈ 𝓞 K⁺` with `algebraMap y = realCyclotomicUnit p K k`. -/
@@ -71,7 +62,6 @@ theorem algebraMap_realCyclotomicUnitPlus [IsCMField K] (k : ℕ) :
         (realCyclotomicUnitPlus p K k) =
       realCyclotomicUnit p K k :=
   (exists_realCyclotomicUnit_descent p K k).choose_spec
-
 
 /-- `realCyclotomicUnitPlus p K 1 = 1` in `𝓞 K⁺`. -/
 theorem realCyclotomicUnitPlus_one [IsCMField K] :
@@ -236,7 +226,6 @@ theorem zetaSubOne_dvd_cyclotomicUnitZMod_sub_natCast (k : ZMod p) :
       cyclotomicUnitZMod p K k - (k.val : 𝓞 K) :=
   zetaSubOne_dvd_cyclotomicUnit_sub_natCast p K k.val
 
-
 /-- ZMod-indexed wrapper for the K⁺-side cyclotomic unit. -/
 noncomputable def realCyclotomicUnitPlusZMod [IsCMField K] (k : ZMod p) :
     𝓞 (NumberField.maximalRealSubfield K) :=
@@ -376,8 +365,6 @@ theorem realCyclotomicUnitPlus_norm_int_sq_eq_one [IsCMField K]
     <;> rw [h] <;> norm_num
 
 end RealCyclotomicUnits
-
-end PrimaryPlus
 
 end FLT37
 
