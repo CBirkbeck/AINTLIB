@@ -11,10 +11,8 @@ Artin-Hasse finite logarithms.
 
 noncomputable section
 
-open NumberField
-open NumberField.IsCMField
 open BernoulliRegular.Reflection.Local
-open scoped BigOperators NumberField
+open scoped NumberField
 
 namespace BernoulliRegular
 namespace CyclotomicUnits
@@ -36,8 +34,8 @@ theorem dworkParameterPowerLinearMap_of_polynomial_eval₂
   rw [Polynomial.eval₂_eq_sum_range'
     (f := algebraMap (RationalPadicIntegerRing p)
       (DworkCompleteIntegerRing p K))
-    (p := P) hdeg (x := dworkParameter p K)]
-  rw [dworkParameterPowerLinearMap_apply]
+    (p := P) hdeg (x := dworkParameter p K),
+    dworkParameterPowerLinearMap_apply]
   exact (Fin.sum_univ_eq_sum_range
     (fun i : ℕ ↦
       algebraMap (RationalPadicIntegerRing p) (DworkCompleteIntegerRing p K)
@@ -55,8 +53,8 @@ theorem dworkParameterQuotientCoeffModP_mk_polynomial_eval₂_of_natDegree_lt
             (dworkParameter p K) P)) =
       rationalPadicIntegerToZMod p (P.coeff (i : ℕ)) := by
   rw [dworkParameterPowerLinearMap_of_polynomial_eval₂
-    (p := p) (K := K) P hdeg]
-  rw [dworkParameterQuotientCoeffModP_mk_powerLinearMap]
+    (p := p) (K := K) P hdeg,
+    dworkParameterQuotientCoeffModP_mk_powerLinearMap]
 
 omit [NumberField.IsCMField K] in
 theorem valuedLambdaQuotientDworkCoeffModP_evalₐ_polynomial_eval₂_of_natDegree_lt
@@ -69,8 +67,8 @@ theorem valuedLambdaQuotientDworkCoeffModP_evalₐ_polynomial_eval₂_of_natDegr
             (dworkParameter p K) P)) =
       rationalPadicIntegerToZMod p (P.coeff (i : ℕ)) := by
   rw [dworkParameterPowerLinearMap_of_polynomial_eval₂
-    (p := p) (K := K) P hdeg]
-  rw [valuedLambdaQuotientDworkCoeffModP_evalₐ_powerLinearMap]
+    (p := p) (K := K) P hdeg,
+    valuedLambdaQuotientDworkCoeffModP_evalₐ_powerLinearMap]
 
 omit [NumberField.IsCMField K] in
 /-- The cyclotomic action multiplies the `i`-th Dwork power-basis coordinate
@@ -84,7 +82,6 @@ theorem dworkParameterPowerBasis_repr_dworkCompleteCyclotomicEquiv_toZMod
       (a : ZMod p) ^ (i : ℕ) *
         rationalPadicIntegerToZMod p
           ((dworkParameterPowerBasis p K).repr x i) := by
-  classical
   let c : Fin (p - 1) → RationalPadicIntegerRing p :=
     (dworkParameterPowerBasis p K).repr x
   have hx : dworkParameterPowerLinearMap p K c = x := by
