@@ -83,8 +83,7 @@ It imports only and does **not** modify any existing file.
 
 noncomputable section
 
-open NumberField NumberField.IsCMField IsCyclotomicExtension UniqueFactorizationMonoid Polynomial
-open scoped nonZeroDivisors
+open NumberField NumberField.IsCMField IsCyclotomicExtension Polynomial
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -93,7 +92,6 @@ open FLT37.LehmerVandiver.CaseII
 variable [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
   [NumberField.IsCMField (CyclotomicField 37 ℚ)]
 
-open scoped Classical in
 /-- **[FLT37-CASEII-§9.1-WITNESS-RESIDUAL] The §9.1 witness data, anchor + factor eqns discharged**
 (a `def … : Prop`, **not** an axiom).
 
@@ -209,7 +207,7 @@ theorem caseII_anchor_real_rho0_genuineUnit
   obtain ⟨k, hk⟩ := realCaseIIData37_odd_m D
   set e : ℕ := 37 * k + 19 with he_def
   have h2e : 37 * m + 1 = 2 * e := by rw [hk, he_def]; ring
-  set 𝔭 : Ideal (𝓞 K) := Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) with h𝔭_def
+  set 𝔭 : Ideal (𝓞 K) := Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K))
   have hcube : Ideal.span ({D.x + D.y} : Set (𝓞 K)) = 𝔭 ^ (37 * m + 1) * 𝔞₀ ^ 37 :=
     caseII_span_x_add_y_eq_anchorCube D hp hcop
   have hΛspan : Ideal.span ({Λi} : Set (𝓞 K)) = 𝔭 ^ 2 :=
@@ -296,10 +294,8 @@ theorem caseIISection91DvdZGenuineUnitExtractionData37_of_washingtonWitnesses
     ρ0 ^ 2, δ', he, by norm_num,
     hanchor, hII, ?_, hω, hθ, map_pow _ _ _, hδ', hω_real, hθ_real, hθ_cop, hxy', hdenom', ?_,
     hz'_mem, hω_notMem, hθ_notMem⟩
-  ·
-    rw [← coe_ringOfIntegersComplexConj, hu0_real]
-  ·
-    rw [← Ideal.span_singleton_pow, hρ0_span]
+  · rw [← coe_ringOfIntegersComplexConj, hu0_real]
+  · rw [← Ideal.span_singleton_pow, hρ0_span]
 
 /-- **[FLT37-CASEII-R2 DESCENT STEP] The §9.1 factor-count descent step from the witness residual**
 (proven, axiom-clean): for a `p`-content `ℓ ∣ z` free-content datum `D` in the non-terminal regime
@@ -441,7 +437,6 @@ theorem caseIIWashingtonSection91Witnesses37_antecedent_inhabited
       caseII_section91_factorEquations_etaOne_etaTwo D.toRealCaseIIData37 hcop
     exact ⟨ηa, ηb, ρa, ρb, hηa, hηb, hfa, hfb⟩
 
-open scoped Classical in
 /-- **[FLT37-CASEII-§9.1 REAL ASSUMPTION II] Washington's Assumption II in its real-`37`-th-power
 form** (a `def … : Prop`, **not** an axiom).
 
@@ -477,7 +472,6 @@ def CaseIIWashingtonAssumptionIIReal37 : Prop :=
             (v : CyclotomicField 37 ℚ) ∧
         (ηa : (CyclotomicField 37 ℚ)ˣ) = v ^ 37 * ηb
 
-open scoped Classical in
 /-- **[FLT37-CASEII-§9.1 LEMMA 9.6/9.7 + DESCENT WITNESSES] The *carried* §9.1 content keyed to the
 real Assumption-II unit `v`** (a `def … : Prop`, **not** an axiom).
 
@@ -579,20 +573,17 @@ theorem caseIIWashingtonSection91Witnesses37_of_assumptionIIReal_lemma96
     h_lemma96 D hcop e u0 ρ0 he hanchor ηa ηb ρa ρb hηa hηb hfa hfb v hv_real hII
   refine ⟨v, ω, θ, δ', hII, hω, hθ, hδ', ?_, ?_, hθ_cop, hxy', hdenom', hz'_mem, hω_notMem,
     hθ_notMem⟩
-  ·
-    apply RingOfIntegers.ext
+  · apply RingOfIntegers.ext
     rw [coe_ringOfIntegersComplexConj,
       show ((ω : 𝓞 (CyclotomicField 37 ℚ)) : CyclotomicField 37 ℚ) =
         algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) ω from rfl, hω]
     exact washington_omega_real (u := (v : CyclotomicField 37 ℚ)) hv_real
-  ·
-    apply RingOfIntegers.ext
+  · apply RingOfIntegers.ext
     rw [coe_ringOfIntegersComplexConj,
       show ((θ : 𝓞 (CyclotomicField 37 ℚ)) : CyclotomicField 37 ℚ) =
         algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) θ from rfl, hθ]
     exact washington_section91_theta_real ρb
 
-open scoped Classical in
 /-- **[FLT37-CASEII-§9.1 LEMMA 9.6/9.7 PROPAGATION DATA] The *carried* §9.1 content with the sharp
 `𝔭`-invariants `hxy'`/`hdenom'` REMOVED** (a `def … : Prop`, **not** an axiom).
 
