@@ -33,13 +33,23 @@ root `ω` and its key properties.
 
 noncomputable section
 
-open NumberField
 
 namespace BernoulliRegular
 
 namespace FLT37
 
 section MirimanoffPolynomial
+
+/-- In `(ZMod p)[X]` the constant polynomial `C (p : ZMod p)` vanishes, since `(p : ZMod p) = 0`.
+Used when differentiating telescope identities (the `X^p` term has zero derivative mod `p`). -/
+private theorem C_natCast_self_eq_zero (p : ℕ) :
+    (Polynomial.C ((p : ℕ) : ZMod p) : Polynomial (ZMod p)) = 0 := by
+  rw [ZMod.natCast_self, Polynomial.C_0]
+
+/-- In `ZMod p` (`p` prime, hence `≥ 2`), `0 = -1` is impossible. Packages the recurring
+"`1` is not a root of `φ_p`" contradiction, since `φ_p.eval 1 = -1 ≠ 0`. -/
+private theorem zero_eq_neg_one_elim {p : ℕ} [Fact p.Prime] (h : (0 : ZMod p) = -1) : False :=
+  one_ne_zero (neg_eq_zero.mp h.symm)
 
 /-- `φ_1` is monic. -/
 theorem mirimanoffPolynomial_one_monic (p : ℕ) [Fact p.Prime] :
@@ -133,9 +143,7 @@ theorem mirimanoffPolynomial_two_mul_X_sub_one (p : ℕ) [hp : Fact p.Prime] :
       Polynomial.derivative_one, sub_zero, mul_one] at h2
   -- RHS: (X^p - X)' = p · X^(p-1) - 1 = -1 in (ZMod p)[X] since p ≡ 0.
   rw [Polynomial.derivative_sub, Polynomial.derivative_X_pow, Polynomial.derivative_X] at h2
-  have hp_zero : (Polynomial.C ((p : ℕ) : ZMod p) : Polynomial (ZMod p)) = 0 := by
-    rw [ZMod.natCast_self, Polynomial.C_0]
-  rw [hp_zero, zero_mul, zero_sub] at h2
+  rw [C_natCast_self_eq_zero p, zero_mul, zero_sub] at h2
   -- h2 : φ_1' · (X - 1) + φ_1 = -1
   -- Step 3: Multiply by X. φ_2 = X · φ_1' (Euler operator).
   have h3 : Polynomial.X * Polynomial.derivative (mirimanoffPolynomial p 1) *
@@ -238,9 +246,7 @@ theorem mirimanoffPolynomial_three_mul_X_sub_one (p : ℕ) [hp : Fact p.Prime] :
       Polynomial.derivative_sub, Polynomial.derivative_neg,
       Polynomial.derivative_X_pow] at h2
   -- (X^p)' = p · X^{p-1} = 0 in (ZMod p)[X].
-  have hp_zero : (Polynomial.C ((p : ℕ) : ZMod p) : Polynomial (ZMod p)) = 0 := by
-    rw [ZMod.natCast_self, Polynomial.C_0]
-  rw [hp_zero, zero_mul, neg_zero, zero_sub] at h2
+  rw [C_natCast_self_eq_zero p, zero_mul, neg_zero, zero_sub] at h2
   -- h2 : φ_2' · (X - 1) + φ_2 = -φ_1'
   -- Multiply by X.
   have h3 : Polynomial.X * Polynomial.derivative (mirimanoffPolynomial p 2) *
@@ -316,7 +322,6 @@ theorem mirimanoffPolynomial_three_eval_eq_div (p : ℕ) [hp : Fact p.Prime]
     (mirimanoffPolynomial p 3).eval t = t * (t + 1) / (t - 1) ^ 2 := by
   have h1 := mirimanoffPolynomial_three_eval_mul_X_sub_one_sq p t ht
   have h_t_sub_one_ne : (t - 1) ≠ 0 := sub_ne_zero.mpr ht
-  have h_sq_ne : (t - 1) ^ 2 ≠ 0 := pow_ne_zero _ h_t_sub_one_ne
   field_simp
   linear_combination h1
 
@@ -501,7 +506,6 @@ theorem mirimanoffPolynomial_at_p_isRoot (p : ℕ) [Fact p.Prime]
 theorem mirimanoffPolynomial_eval_one_eq_zero (p : ℕ) [hp : Fact p.Prime]
     {n : ℕ} (hn_ge : 2 ≤ n) (hn_le : n ≤ p - 1) :
     (mirimanoffPolynomial p n).eval 1 = 0 := by
-  classical
   have hp_two : 2 ≤ p := hp.1.two_le
   rw [mirimanoffPolynomial_eval]
   simp only [one_pow, mul_one]
@@ -546,7 +550,7 @@ theorem mirimanoffPolynomial_at_p_mem_roots (p : ℕ) [hp : Fact p.Prime]
     mirimanoffPolynomial_at_p_eval_one p
   rw [h, Polynomial.eval_zero] at h_eval
   -- h_eval : 0 = -1 in ZMod p; impossible
-  exact one_ne_zero (neg_eq_zero.mp h_eval.symm)
+  exact zero_eq_neg_one_elim h_eval
 
 /-- **Biconditional:** `φ_p(t) = 0 ↔ t ≠ 1` in `ZMod p`. -/
 theorem mirimanoffPolynomial_at_p_eval_eq_zero_iff (p : ℕ) [Fact p.Prime]
@@ -558,7 +562,7 @@ theorem mirimanoffPolynomial_at_p_eval_eq_zero_iff (p : ℕ) [Fact p.Prime]
     have h_one : (mirimanoffPolynomial p p).eval 1 = -1 :=
       mirimanoffPolynomial_at_p_eval_one p
     rw [h_eval] at h_one
-    exact one_ne_zero (neg_eq_zero.mp h_one.symm)
+    exact zero_eq_neg_one_elim h_one
   · exact mirimanoffPolynomial_at_p_eval_eq_zero_of_ne_one p t
 
 /-- **Biconditional:** `t` is a root of `φ_p` ↔ `t ≠ 1` in `ZMod p`. -/
@@ -577,7 +581,6 @@ theorem mirimanoffPolynomial_at_p_mem_roots_iff (p : ℕ) [Fact p.Prime] (t : ZM
 /-- The roots-`Finset` of `φ_p` is exactly `ZMod p \ {1}`. -/
 theorem mirimanoffPolynomial_at_p_roots_toFinset (p : ℕ) [hp : Fact p.Prime] :
     (mirimanoffPolynomial p p).roots.toFinset = Finset.univ.erase (1 : ZMod p) := by
-  classical
   apply Finset.Subset.antisymm
   · intro t ht
     rw [Multiset.mem_toFinset, Polynomial.mem_roots'] at ht
@@ -589,7 +592,7 @@ theorem mirimanoffPolynomial_at_p_roots_toFinset (p : ℕ) [hp : Fact p.Prime] :
       mirimanoffPolynomial_at_p_eval_one p
     rw [Polynomial.IsRoot.def] at ht
     rw [ht.2] at h_eval
-    exact one_ne_zero (neg_eq_zero.mp h_eval.symm)
+    exact zero_eq_neg_one_elim h_eval
   · intro t ht
     rw [Finset.mem_erase] at ht
     rw [Multiset.mem_toFinset]
@@ -598,7 +601,6 @@ theorem mirimanoffPolynomial_at_p_roots_toFinset (p : ℕ) [hp : Fact p.Prime] :
 /-- The Multiset of roots of `φ_p` has cardinality exactly `p - 1`. -/
 theorem mirimanoffPolynomial_at_p_roots_card (p : ℕ) [hp : Fact p.Prime] :
     (mirimanoffPolynomial p p).roots.card = p - 1 := by
-  classical
   have h_natDeg : (mirimanoffPolynomial p p).natDegree = p - 1 :=
     mirimanoffPolynomial_at_p_natDegree p
   have h_le : (mirimanoffPolynomial p p).roots.card ≤
@@ -619,7 +621,6 @@ theorem mirimanoffPolynomial_at_p_roots_card (p : ℕ) [hp : Fact p.Prime] :
 /-- The roots of `φ_p` are nodup (each root has multiplicity 1). -/
 theorem mirimanoffPolynomial_at_p_roots_nodup (p : ℕ) [hp : Fact p.Prime] :
     (mirimanoffPolynomial p p).roots.Nodup := by
-  classical
   rw [← Multiset.toFinset_card_eq_card_iff_nodup,
     mirimanoffPolynomial_at_p_roots_toFinset,
     Finset.card_erase_of_mem (Finset.mem_univ _),
@@ -646,7 +647,6 @@ theorem mirimanoffPolynomial_at_p_splits (p : ℕ) [hp : Fact p.Prime] :
 the Finset `univ \ {1}`. -/
 theorem mirimanoffPolynomial_at_p_roots_eq (p : ℕ) [hp : Fact p.Prime] :
     (mirimanoffPolynomial p p).roots = (Finset.univ.erase (1 : ZMod p)).val := by
-  classical
   rw [← mirimanoffPolynomial_at_p_roots_toFinset, Multiset.toFinset_val,
     (mirimanoffPolynomial_at_p_roots_nodup p).dedup]
 
@@ -656,7 +656,6 @@ theorem mirimanoffPolynomial_at_p_eq_finset_prod (p : ℕ) [hp : Fact p.Prime] :
     mirimanoffPolynomial p p =
       ∏ a ∈ (Finset.univ.erase (1 : ZMod p)),
         (Polynomial.X - Polynomial.C a) := by
-  classical
   rw [mirimanoffPolynomial_at_p_eq_prod, mirimanoffPolynomial_at_p_roots_eq,
     ← Finset.prod_eq_multiset_prod]
 
@@ -671,7 +670,6 @@ theorem mirimanoffPolynomial_at_p_finset_prod_natDegree (p : ℕ) [Fact p.Prime]
 theorem X_pow_card_sub_X_eq_prod (p : ℕ) [hp : Fact p.Prime] :
     (Polynomial.X ^ p - Polynomial.X : Polynomial (ZMod p)) =
       ∏ a : ZMod p, (Polynomial.X - Polynomial.C a) := by
-  classical
   rw [← mirimanoffPolynomial_at_p_mul_X_sub_one,
     mirimanoffPolynomial_at_p_eq_finset_prod, mul_comm,
     show (Polynomial.X - 1 : Polynomial (ZMod p)) =
