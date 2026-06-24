@@ -77,7 +77,7 @@ It imports only; it does **not** modify any existing file.  No `sorry`, no `axio
 
 noncomputable section
 
-open NumberField NumberField.IsCMField IsCyclotomicExtension UniqueFactorizationMonoid Polynomial
+open NumberField NumberField.IsCMField IsCyclotomicExtension
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -117,8 +117,7 @@ def caseII_descended_realData
     (hθ_cop : ¬ (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger - 1 ∣ θ)
     (hz'_cop : ¬ (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger - 1 ∣ z') :
     RealCaseIIData37 (CyclotomicField 37 ℚ) (2 * m - 1) := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  set ζspec := zeta_spec 37 ℚ (CyclotomicField 37 ℚ) with hζspec
+  set ζspec := zeta_spec 37 ℚ (CyclotomicField 37 ℚ)
   -- The unit factor `−ζ³⁶` of the `Λ → (ζ−1)²` conversion.
   set η36u : (𝓞 (CyclotomicField 37 ℚ))ˣ :=
     (freeContentPackaging_neg_zeta_pow_36_isUnit ζspec).unit with hη36u_def
@@ -134,7 +133,7 @@ def caseII_descended_realData
     -- `2·(2e−1) = 37·((2m−1)+1)`, so `(ζ−1)^{2(2e−1)}·z'³⁷ = ((ζ−1)^{2m}·z')³⁷`.
     rw [hequation, freeContentPackaging_Lambda_eq ζspec, mul_pow, ← pow_mul, hε'_def,
       Units.val_mul, Units.val_pow_eq_pow_val, hη36u_val, mul_pow, ← pow_mul]
-    have hexp : 2 * (2 * e - 1) = 37 * (((2 * m - 1) + 1)) := by omega
+    have hexp : 2 * (2 * e - 1) = 37 * ((2 * m - 1) + 1) := by omega
     rw [hexp]
     ring
   exact
@@ -200,7 +199,6 @@ theorem caseII_descended_hxy_hdenom
       ω + θ * (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger ^ 36 =
           ((zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger - 1) * c ∧
         ¬ ((zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger - 1) ∣ c) := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   have hp : (37 : ℕ) ≠ 2 := by decide
   -- Package the descended data as `RealCaseIIData37 (2m−1)` over `zeta_spec`.
   set D' := caseII_descended_realData hm h2e hequation hω_real hθ_real hθ_cop hz'_cop
