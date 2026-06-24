@@ -35,7 +35,7 @@ The non-circular content used here:
 
 @[expose] public section
 
-open NumberField NumberField.IsCMField IsCyclotomicExtension Ideal Polynomial
+open NumberField Polynomial
 open scoped NumberField nonZeroDivisors
 
 namespace BernoulliRegular
@@ -72,14 +72,12 @@ theorem caseII_a0_quotient_pow_isPrincipal
         (aEtaZeroDvdPPow hp_ne_two hζ e hy :
           FractionalIdeal (𝓞 K)⁰ K)) ^ p :
         FractionalIdeal (𝓞 K)⁰ K) : Submodule (𝓞 K) K).IsPrincipal := by
-  set η₀ := zetaSubOneDvdRoot hp_ne_two hζ e hy with hη₀
+  set η₀ := zetaSubOneDvdRoot hp_ne_two hζ e hy
   -- `𝔭 = span(ζ-1)` is nonzero as a fractional ideal.
-  have hπ_ne : (hζ.toInteger - 1 : 𝓞 K) ≠ 0 :=
-    hζ.toInteger_isPrimitiveRoot.sub_one_ne_zero hpri.out.one_lt
   have hP_ne : (Ideal.span ({hζ.toInteger - 1} : Set (𝓞 K)) :
       FractionalIdeal (𝓞 K)⁰ K) ≠ 0 := by
-    simp only [ne_eq, FractionalIdeal.coeIdeal_eq_zero, Ideal.span_singleton_eq_bot]
-    exact hπ_ne
+    simpa only [ne_eq, FractionalIdeal.coeIdeal_eq_zero, Ideal.span_singleton_eq_bot]
+      using hζ.toInteger_isPrimitiveRoot.sub_one_ne_zero hpri.out.one_lt
   -- `𝔞(η₀) = 𝔭^m · 𝔞₀` as fractional ideals.
   have hcoe : (rootDivZetaSubOneDvdGcd hp_ne_two hζ e hy η₀ :
         FractionalIdeal (𝓞 K)⁰ K) =
@@ -107,9 +105,8 @@ theorem caseII_a0_quotient_pow_isPrincipal
       mul_div_mul_left _ _ (pow_ne_zero m hP_ne)]
   rw [key, mul_pow]
   -- First factor principal.
-  have h1 := caseII_specificQuotient_pow_isPrincipal p K hp_ne_two hζ e hy η η₀
-  rw [FractionalIdeal.isPrincipal_iff] at h1
-  obtain ⟨g, hg⟩ := h1
+  obtain ⟨g, hg⟩ := (FractionalIdeal.isPrincipal_iff _).mp
+    (caseII_specificQuotient_pow_isPrincipal p K hp_ne_two hζ e hy η η₀)
   -- Second factor is `span((ζ-1)^{mp})`, principal.
   rw [FractionalIdeal.isPrincipal_iff]
   refine ⟨g * (algebraMap (𝓞 K) K (hζ.toInteger - 1)) ^ (m * p), ?_⟩
@@ -207,10 +204,9 @@ theorem caseII_fixedRealGenerator_of_realIdealModel
         Ideal.span ({algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K) a₀} :
           Set (𝓞 K)) *
           aEtaZeroDvdPPow hp_ne_two hζ e hy := by
-    have hfac' := hfac
     rw [← FractionalIdeal.coeIdeal_span_singleton,
-      ← FractionalIdeal.coeIdeal_mul] at hfac'
-    exact FractionalIdeal.coeIdeal_injective (K := K) hfac'
+      ← FractionalIdeal.coeIdeal_mul] at hfac
+    exact FractionalIdeal.coeIdeal_injective (K := K) hfac
   have hp_a : ¬ Ideal.span ({hζ.toInteger - 1} : Set (𝓞 K)) ∣
       rootDivZetaSubOneDvdGcd hp_ne_two hζ e hy η := by
     rw [p_dvd_a_iff hp_ne_two hζ e hy η]
@@ -283,7 +279,7 @@ noncomputable def washingtonCaseIIAdjacentFixedGenerators37Source_of_realIdealDe
     (h_not_dvd : ¬ (37 : ℕ) ∣ hPlus (CyclotomicField 37 ℚ))
     (models : CaseIIRealIdealDescent37) :
     WashingtonCaseIIAdjacentFixedGenerators37Source :=
-  fun _hV _hSO {_m} D ↦
+  fun _hV _hSO {_m} D =>
     { atEtaOne :=
         D.fixedIntegralGenerator_of_realIdealModel h_not_dvd D.etaOne D.etaOne_ne_etaZero
           (J := (models D D.etaOne D.etaOne_ne_etaZero).1)
