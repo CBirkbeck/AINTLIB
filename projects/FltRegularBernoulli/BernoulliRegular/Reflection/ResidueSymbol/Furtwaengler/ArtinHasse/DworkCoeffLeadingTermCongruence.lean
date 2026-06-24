@@ -142,7 +142,7 @@ theorem pow_sub_pow_mem_pow_succ_of_sub_mem_sq
       have hleft : γ ^ n * (γ - π) ∈ I ^ (n + 2) := by
         have hmul : γ ^ n * (γ - π) ∈ I ^ n * I ^ 2 :=
           Ideal.mul_mem_mul hγn hγπ
-        simpa [pow_add, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using hmul
+        simpa [Ideal.IsTwoSided.pow_add] using hmul
       have hright : (γ ^ n - π ^ n) * π ∈ I ^ (n + 2) := by
         have hmul : (γ ^ n - π ^ n) * π ∈ I ^ (n + 1) * I ^ 1 :=
           Ideal.mul_mem_mul ih (by simpa using hπ)
