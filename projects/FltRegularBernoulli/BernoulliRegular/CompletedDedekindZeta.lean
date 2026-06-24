@@ -41,8 +41,6 @@ unconditionally (see `prod_rootNumber_eq_one_of_dedekindFE` in `GaussSumProduct`
 
 noncomputable section
 
-open Complex
-
 namespace BernoulliRegular
 
 section CompletedDedekindZeta
