@@ -273,10 +273,10 @@ theorem cross_ring_identity_from_K2_1_K2_2c
   have h_K21 := ideal_quotient_mk_gaussSumInt_pow_pow_div_apply_smul_eq_one S a hp h_χp_eq_one
     hf hN_mod_p unit_a h_unit hg_ne
   -- Substitute (ℓ' ^ f - 1)/p = (NP' - 1)/p via hN_eq.
-  rw [← hN_eq]
-  rw [← mul_one ((((Ideal.Quotient.mk 𝔭) (S.gaussSumInt a)) ^ p) ^ ((ℓ' ^ f - 1) / p))]
-  rw [← h_χ_value]
-  rw [show ((((Ideal.Quotient.mk 𝔭) (S.gaussSumInt a)) ^ p) ^ ((ℓ' ^ f - 1) / p)) *
+  rw [← hN_eq,
+      ← mul_one ((((Ideal.Quotient.mk 𝔭) (S.gaussSumInt a)) ^ p) ^ ((ℓ' ^ f - 1) / p)),
+      ← h_χ_value,
+      show ((((Ideal.Quotient.mk 𝔭) (S.gaussSumInt a)) ^ p) ^ ((ℓ' ^ f - 1) / p)) *
       (((S.residueCharInt ^ a).ringHomComp
           (Ideal.Quotient.mk 𝔭)) unit_a *
         (((Ideal.Quotient.mk 𝔭) S.zeta_p_int) :
@@ -289,8 +289,8 @@ theorem cross_ring_identity_from_K2_1_K2_2c
       (((Ideal.Quotient.mk 𝔭) S.zeta_p_int) :
           𝓞 R' ⧸ 𝔭) ^
           (- BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical
-            (p := p) (K := K) (((Fintype.card (𝓞 K ⧸ P') : ℤ) : 𝓞 K)) P).val by ring]
-  rw [h_K21, one_mul, hN_eq]
+            (p := p) (K := K) (((Fintype.card (𝓞 K ⧸ P') : ℤ) : 𝓞 K)) P).val by ring,
+      h_K21, one_mul, hN_eq]
 
 /-! ### K2-2c with character pow
 
@@ -320,10 +320,10 @@ theorem residueMulChar_pow_ringHomComp_apply_quotient_canonical
         (a * (BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical
           (p := p) (K := K) α P).val) := by
   letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
-  rw [MulChar.ringHomComp_apply, MulChar.pow_apply' _ ha]
-  rw [residueMulChar_apply_quotient_canonical_eq_pow_pthSymbol
-    P hbot hdiv hp_in zeta_R hzeta_R hα]
-  rw [← pow_mul, map_pow, mul_comm]
+  rw [MulChar.ringHomComp_apply, MulChar.pow_apply' _ ha,
+      residueMulChar_apply_quotient_canonical_eq_pow_pthSymbol
+        P hbot hdiv hp_in zeta_R hzeta_R hα,
+      ← pow_mul, map_pow, mul_comm]
 
 /-! ### h_χ_value derivation: the per-index K2-2c content (negated form)
 
@@ -347,10 +347,9 @@ theorem pow_add_eq_one_of_order_dvd_p
     {x : G} {p : ℕ} (_hp : 0 < p) (hx : x ^ p = 1)
     (m n : ℕ) (h_sum : (m + n) % p = 0) :
     x ^ m * x ^ n = 1 := by
-  rw [← pow_add]
-  rw [show m + n = p * ((m + n) / p) + (m + n) % p from (Nat.div_add_mod _ _).symm]
-  rw [h_sum, add_zero]
-  rw [pow_mul, hx, one_pow]
+  rw [← pow_add,
+      show m + n = p * ((m + n) / p) + (m + n) % p from (Nat.div_add_mod _ _).symm,
+      h_sum, add_zero, pow_mul, hx, one_pow]
 
 /-- **Sum of `n.val` and `(-n).val` is `0 mod p`** for `n : ZMod p`. -/
 theorem ZMod.val_add_neg_val {p : ℕ} [NeZero p] (n : ZMod p) :
@@ -494,10 +493,10 @@ theorem cross_ring_identity_from_K2_1_K2_2c_general
         𝓞 R' ⧸ 𝔭) ^ t.val := by
   have h_K21 := ideal_quotient_mk_gaussSumInt_pow_pow_div_apply_smul_eq_one S a hp h_χp_eq_one
     hf hN_mod_p unit_a h_unit hg_ne
-  rw [← hN_eq]
-  rw [← mul_one ((((Ideal.Quotient.mk 𝔭) (S.gaussSumInt a)) ^ p) ^ ((ℓ' ^ f - 1) / p))]
-  rw [← h_χ_value]
-  rw [show ((((Ideal.Quotient.mk 𝔭) (S.gaussSumInt a)) ^ p) ^ ((ℓ' ^ f - 1) / p)) *
+  rw [← hN_eq,
+      ← mul_one ((((Ideal.Quotient.mk 𝔭) (S.gaussSumInt a)) ^ p) ^ ((ℓ' ^ f - 1) / p)),
+      ← h_χ_value,
+      show ((((Ideal.Quotient.mk 𝔭) (S.gaussSumInt a)) ^ p) ^ ((ℓ' ^ f - 1) / p)) *
       (((S.residueCharInt ^ a).ringHomComp
           (Ideal.Quotient.mk 𝔭)) unit_a *
         (((Ideal.Quotient.mk 𝔭) S.zeta_p_int) :
@@ -506,8 +505,8 @@ theorem cross_ring_identity_from_K2_1_K2_2c_general
           (Ideal.Quotient.mk 𝔭)) unit_a *
         (((Ideal.Quotient.mk 𝔭) (S.gaussSumInt a)) ^ p) ^ ((ℓ' ^ f - 1) / p)) *
       (((Ideal.Quotient.mk 𝔭) S.zeta_p_int) :
-          𝓞 R' ⧸ 𝔭) ^ t.val by ring]
-  rw [h_K21, one_mul]
+          𝓞 R' ⧸ 𝔭) ^ t.val by ring,
+      h_K21, one_mul]
 
 /-! ### Full K2-2 path (a) per-index theorem
 
@@ -759,10 +758,8 @@ theorem ideal_quotient_mk_zeta_p_int_pow_p_eq_one
   -- h : zeta_p_int_unit ^ p = 1 (in (𝓞 R')ˣ)
   have h_val : ((S.zeta_p_int_unit ^ p : (𝓞 R')ˣ) : 𝓞 R') = 1 := by
     rw [h]; rfl
-  rw [Units.val_pow_eq_pow_val] at h_val
-  rw [show (S.zeta_p_int_unit : 𝓞 R') =
-      S.zeta_p_int from
-    S.zeta_p_int_unit_coe] at h_val
+  rw [Units.val_pow_eq_pow_val,
+      show (S.zeta_p_int_unit : 𝓞 R') = S.zeta_p_int from S.zeta_p_int_unit_coe] at h_val
   rw [h_val, map_one]
 
 /-! ### Discharging h_χ_eval_pow from residueCharInt = residueMulChar
