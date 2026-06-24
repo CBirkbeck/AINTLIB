@@ -33,7 +33,6 @@ theorem subgroup_not_dvd_index_of_pSaturated_top_of_pow_eq_one_mem
     (hsat : pSaturated H (⊤ : Subgroup G) p)
     (htorsion : ∀ g : G, g ^ p = 1 → g ∈ H) :
     ¬ p ∣ H.index := by
-  classical
   intro hdiv
   have hcard : p ∣ Nat.card (G ⧸ H) := by
     simpa [Subgroup.index_eq_card] using hdiv
@@ -57,10 +56,7 @@ theorem subgroup_not_dvd_index_of_pSaturated_top_of_pow_eq_one_mem
     simpa [mul_assoc] using H.mul_mem hghH hhH
   have hquot_one : ((g : G) : G ⧸ H) = 1 :=
     (QuotientGroup.eq_one_iff (N := H) g).mpr hgH
-  have hp_one : p = 1 := by
-    rw [← hq_order]
-    simp [hquot_one]
-  exact (Fact.out : Nat.Prime p).ne_one hp_one
+  exact (Fact.out : Nat.Prime p).ne_one (by rw [← hq_order]; simp [hquot_one])
 
 variable {K : Type} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
   [NumberField.IsCMField K]
@@ -71,7 +67,6 @@ local notation3 "K⁺" => NumberField.maximalRealSubfield K
 unit group for prime conductor. -/
 theorem CPlus_index_ne_zero (hp_three : 3 ≤ p) :
     (CPlus (p := p) (K := K) hp_three).index ≠ 0 := by
-  classical
   by_cases hp_eq_three : p = 3
   · rw [CPlus_eq_top_of_eq_three (p := p) (K := K) hp_three hp_eq_three]
     simp
@@ -107,7 +102,6 @@ group forces p not to divide the cyclotomic-unit index. -/
 theorem not_dvd_index_of_pSaturated (hp_three : 3 ≤ p)
     (hsat : pSaturated (CPlus (p := p) (K := K) hp_three) (EPlus (K := K)) p) :
     ¬ p ∣ (CPlus (p := p) (K := K) hp_three).index := by
-  classical
   let H : Subgroup (𝓞 K⁺)ˣ := CPlus (p := p) (K := K) hp_three
   haveI : H.FiniteIndex := ⟨by
     simpa [H] using CPlus_index_ne_zero (p := p) (K := K) hp_three⟩
