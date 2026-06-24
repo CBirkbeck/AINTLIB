@@ -14,6 +14,8 @@ we reach a contradiction.
 
 * `LutzNagell.PID.den_no_simple_prime_factor_of_on_curve`: if `(x, y)` is on the
   curve, `q` is prime, `q ∣ den(x)`, and `q² ∤ den(x)`, then `False`.
+* `LutzNagell.PID.den_not_prime_of_on_curve`: the corollary that `den(x)` cannot be a
+  prime element (the special case `q = den(x)`).
 -/
 
 namespace LutzNagell
