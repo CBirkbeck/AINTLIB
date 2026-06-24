@@ -2637,6 +2637,47 @@ theorem algebraMap_a₁X_plus_a₃ :
     intro c; rw [Polynomial.C_eq_algebraMap, ← IsScalarTower.algebraMap_apply]
   rw [map_add, map_mul, h_C, h_C, h_x_alg]
 
+/-- The image of `a₁ X + a₃` under the composite `K[X] → Frac(K[X]) → KE` equals
+`a₁ · x_gen + a₃` in `KE`. Lifts `algebraMap_a₁X_plus_a₃` along the scalar tower
+`K[X] → Frac(K[X]) → KE`. -/
+private lemma algebraMap_fractionRing_a₁X_plus_a₃ :
+    algebraMap (FractionRing (Polynomial K)) KE
+        (algebraMap (Polynomial K) (FractionRing (Polynomial K))
+          (Polynomial.C W.toAffine.a₁ * Polynomial.X + Polynomial.C W.toAffine.a₃)) =
+      algebraMap K KE W.toAffine.a₁ * x_gen W + algebraMap K KE W.toAffine.a₃ := by
+  rw [← IsScalarTower.algebraMap_apply (Polynomial K)
+    (FractionRing (Polynomial K)) KE]
+  exact algebraMap_a₁X_plus_a₃ W
+
+/-- A `Frac(K[X])`-basis `{1, Y}` smul-decomposition rewritten with `algebraMap`:
+`a • 1 + b • y_gen = algebraMap a + (algebraMap b) · y_gen` in `KE`. Direct from
+`Algebra.smul_def`. -/
+private lemma smul_one_add_smul_y_gen_eq_algebraMap
+    (a b : FractionRing (Polynomial K)) :
+    a • (1 : KE) + b • y_gen W =
+      algebraMap (FractionRing (Polynomial K)) KE a +
+      algebraMap (FractionRing (Polynomial K)) KE b * y_gen W := by
+  simp only [Algebra.smul_def, mul_one]
+
+/-- σ acting on an `algebraMap`-decomposition: applying `σ = (mulByInt W (-1)).pullback`
+to `algebraMap a + (algebraMap b) · y_gen` gives
+`algebraMap a + (algebraMap b) · (-y_gen - a₁·x - a₃)`, since σ fixes the
+`Frac(K[X])`-images (`mulByInt_neg_one_pullback_algebraMap_kx`) and sends
+`y_gen ↦ -y_gen - a₁·x - a₃` (`mulByInt_neg_one_pullback_y_gen_eq`). -/
+private lemma mulByInt_neg_one_pullback_algebraMap_add_algebraMap_mul_y_gen
+    (a b : FractionRing (Polynomial K)) :
+    (mulByInt W.toAffine (-1)).pullback
+        (algebraMap (FractionRing (Polynomial K)) KE a +
+         algebraMap (FractionRing (Polynomial K)) KE b * y_gen W) =
+      algebraMap (FractionRing (Polynomial K)) KE a +
+      algebraMap (FractionRing (Polynomial K)) KE b *
+        (-y_gen W - algebraMap K KE W.toAffine.a₁ * x_gen W -
+         algebraMap K KE W.toAffine.a₃) := by
+  rw [map_add, map_mul,
+    mulByInt_neg_one_pullback_algebraMap_kx,
+    mulByInt_neg_one_pullback_algebraMap_kx,
+    mulByInt_neg_one_pullback_y_gen_eq]
+
 /-- Helper for Piece 3c: the σ-equation as a vanishing `{1, Y}`-decomposition.
 
 If `f = a • 1 + b • Y` is fixed by `σ = (mulByInt W (-1)).pullback`, then applying
@@ -2650,38 +2691,12 @@ private lemma sigma_fixed_decomp_coeffs_vanish {a b : FractionRing (Polynomial K
         (Polynomial.C W.toAffine.a₁ * Polynomial.X + Polynomial.C W.toAffine.a₃)) •
         (1 : (W_smooth W).FunctionField) +
       (2 * b) • (W_smooth W).coordYInFunctionField = 0 := by
-  -- `bXf` is the image of `a₁ X + a₃` in `Frac(K[X])`.
-  set bXf : FractionRing (Polynomial K) :=
-    algebraMap (Polynomial K) (FractionRing (Polynomial K))
-      (Polynomial.C W.toAffine.a₁ * Polynomial.X + Polynomial.C W.toAffine.a₃)
-    with hbXf
-  have h_bXf_image_KE : algebraMap (FractionRing (Polynomial K)) KE bXf =
-      algebraMap K KE W.toAffine.a₁ * x_gen W + algebraMap K KE W.toAffine.a₃ := by
-    rw [hbXf, ← IsScalarTower.algebraMap_apply (Polynomial K)
-      (FractionRing (Polynomial K)) KE]
-    exact algebraMap_a₁X_plus_a₃ W
-  -- Rewrite the decomposition and σ(f) into `y_gen`/`algebraMap` form.
+  -- Rewrite `f` and `σ(f)` into `algebraMap`/`y_gen` form via the basis-decomposition
+  -- helpers, so that `σ(f) = f` reads as an identity in `{1, y_gen, x_gen}`.
   have h_decomp' : f =
       algebraMap (FractionRing (Polynomial K)) KE a +
-      algebraMap (FractionRing (Polynomial K)) KE b * y_gen W := by
-    rw [h_decomp]
-    change a • (1 : KE) + b • y_gen W =
-      algebraMap _ KE a + algebraMap _ KE b * y_gen W
-    simp only [Algebra.smul_def, mul_one]
-  have h_σf : (mulByInt W.toAffine (-1)).pullback f =
-      algebraMap (FractionRing (Polynomial K)) KE a +
-      algebraMap (FractionRing (Polynomial K)) KE b *
-        (-y_gen W - algebraMap K KE W.toAffine.a₁ * x_gen W -
-         algebraMap K KE W.toAffine.a₃) := by
-    conv_lhs => rw [h_decomp']
-    rw [map_add, map_mul,
-      mulByInt_neg_one_pullback_algebraMap_kx,
-      mulByInt_neg_one_pullback_algebraMap_kx,
-      mulByInt_neg_one_pullback_y_gen_eq]
-  -- Combine σ(f) = f into the vanishing basis decomposition.
-  change (b * bXf) • (1 : KE) + (2 * b) • y_gen W = (0 : KE)
-  rw [Algebra.smul_def, Algebra.smul_def, mul_one,
-    map_mul, map_mul, h_bXf_image_KE, map_ofNat]
+      algebraMap (FractionRing (Polynomial K)) KE b * y_gen W :=
+    h_decomp.trans (smul_one_add_smul_y_gen_eq_algebraMap W a b)
   have h_combine :
       algebraMap (FractionRing (Polynomial K)) KE a +
         algebraMap (FractionRing (Polynomial K)) KE b *
@@ -2689,7 +2704,13 @@ private lemma sigma_fixed_decomp_coeffs_vanish {a b : FractionRing (Polynomial K
            algebraMap K KE W.toAffine.a₃) =
         algebraMap (FractionRing (Polynomial K)) KE a +
         algebraMap (FractionRing (Polynomial K)) KE b * y_gen W :=
-    h_σf.symm.trans (h_fixed.trans h_decomp')
+    ((h_decomp' ▸ mulByInt_neg_one_pullback_algebraMap_add_algebraMap_mul_y_gen
+      W a b).symm).trans (h_fixed.trans h_decomp')
+  -- Reduce the goal to that identity in the `Frac(K[X])`-basis `{1, Y}` of `KE`.
+  change (b * algebraMap (Polynomial K) (FractionRing (Polynomial K)) _) • (1 : KE) +
+    (2 * b) • y_gen W = (0 : KE)
+  rw [Algebra.smul_def, Algebra.smul_def, mul_one,
+    map_mul, map_mul, algebraMap_fractionRing_a₁X_plus_a₃ W, map_ofNat]
   linear_combination -h_combine
 
 /-- Helper for Piece 3c: char-split forcing `b = 0`.
