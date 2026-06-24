@@ -10,16 +10,13 @@ import LeanModularForms.HeckeRIngs.GL2.CongruenceIndex
 /-!
 # Degree Formulas for GL_n Hecke Ring
 
-Degree formulas for the diagonal Hecke operators `T(a₁,...,aₙ)`, including Gaussian binomial
-coefficients for the prime-power case.
-
-## Main definitions
-
-* `gaussianBinom q n k` : the Gaussian binomial coefficient `[n choose k]_q`
+Degree formulas for the diagonal Hecke operators `T(a₁,...,aₙ)`, specialised to the `n = 2`
+prime-power and scalar cases.
 
 ## Main results
 
-* `upperTriRep_card_le_HeckeCoset_deg` : `∏_{i<j} (a_j / a_i) ≤ deg(T(a₁,...,aₙ))`
+* `HeckeCoset_deg_T_diag_two_prime` : `deg(T(p^i, p^(i+k))) = p^(k-1) * (p + 1)` for `k ≥ 1`
+* `HeckeCoset_deg_T_diag_two_scalar` : `deg(T(c, c)) = 1`
 
 ## Important note on degree formulas
 
@@ -221,7 +218,7 @@ theorem HeckeCoset_deg_T_diag_two_scalar (a : Fin 2 → ℕ) (ha : ∀ i, 0 < a 
     rw [h_def, hsmul, Subgroup.relIndex_self]; simp
   have hδ_mem : (δ : GL (Fin 2) ℚ) ∈
       DoubleCoset.doubleCoset (↑(diagMat_delta 2 a)) H H := by
-    rw [show DoubleCoset.doubleCoset (↑(diagMat_delta 2 a)) H H = HeckeCoset.toSet D from by
+    rw [show DoubleCoset.doubleCoset (↑(diagMat_delta 2 a)) H H = HeckeCoset.toSet D by
       simp only [D, H, T_diag, HeckeCoset.toSet_mk]]
     exact HeckeCoset.rep_mem D
   rw [DoubleCoset.mem_doubleCoset] at hδ_mem; obtain ⟨h₁, hh₁, h₂, hh₂, hδ_eq⟩ := hδ_mem
