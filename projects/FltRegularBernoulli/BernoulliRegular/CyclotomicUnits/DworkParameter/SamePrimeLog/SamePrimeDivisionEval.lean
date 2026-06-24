@@ -6,9 +6,6 @@ public import BernoulliRegular.CyclotomicUnits.DworkParameter.CompletedRing.Inte
 
 noncomputable section
 
-open scoped NumberField
-open PowerSeries
-
 namespace BernoulliRegular
 namespace CyclotomicUnits
 namespace PadicLogSetup
@@ -72,12 +69,11 @@ theorem samePrimeNatDivEval_natCast_mul_eq_mk {N n s : ℕ} (hn : n ≠ 0)
   let v : ℕ := n.factorization p
   let c : ℕ := ordCompl[p] n
   let y : R := samePrimeNatDivNumerator (p := p) (K := K) n s z hz
-  let hc : Nat.Coprime c p := samePrimeFiniteLog_ordCompl_coprime (p := p) hn
+  have hc : Nat.Coprime c p := samePrimeFiniteLog_ordCompl_coprime (p := p) hn
   have hn_decomp_nat : p ^ v * c = n := by
     simpa [v, c] using Nat.ordProj_mul_ordCompl_eq_self n p
   have hn_cast : (n : R) = (p : R) ^ v * (c : R) := by
-    rw [← hn_decomp_nat]
-    rw [Nat.cast_mul, Nat.cast_pow]
+    rw [← hn_decomp_nat, Nat.cast_mul, Nat.cast_pow]
   have hnum : (p : R) ^ v * y = z := by
     simpa [v, y] using
       samePrimeNatDivNumerator_mul_spec (p := p) (K := K) hz
@@ -269,7 +265,7 @@ theorem samePrimeNatDivEval_mul_denominator_right {N n m s : ℕ} (hn : n ≠ 0)
   let R : Type _ := ValuedIntegerRing p K
   let I : Ideal R := lambdaIdeal p K
   let q : R →+* R ⧸ I ^ (N + 1) := Ideal.Quotient.mk (I ^ (N + 1))
-  let hnm : n * m ≠ 0 := Nat.mul_ne_zero hn hm
+  have hnm : n * m ≠ 0 := Nat.mul_ne_zero hn hm
   let vn : ℕ := n.factorization p
   let vm : ℕ := m.factorization p
   let y : R := samePrimeNatDivNumerator (p := p) (K := K) n s z hz
@@ -354,7 +350,7 @@ theorem samePrimeNatDivEval_add_common_denominator {N n m s : ℕ} (hn : n ≠ 0
       samePrimeNatDivEval (p := p) (K := K) N (n * m) s
         (Nat.mul_ne_zero hn hm)
         ((m : ValuedIntegerRing p K) * z + (n : ValuedIntegerRing p K) * w) hzw := by
-  let hnm : n * m ≠ 0 := Nat.mul_ne_zero hn hm
+  have hnm : n * m ≠ 0 := Nat.mul_ne_zero hn hm
   have hfac : (n * m).factorization p =
       n.factorization p + m.factorization p := by
     simpa using
@@ -764,12 +760,11 @@ theorem samePrimeFiniteLogTermCore_natCast_mul_eq_mk {N n : ℕ} (hn : n ≠ 0)
   let v : ℕ := n.factorization p
   let c : ℕ := ordCompl[p] n
   let y : R := samePrimeFiniteLogTermNumerator (p := p) (K := K) n x hx
-  let hc : Nat.Coprime c p := samePrimeFiniteLog_ordCompl_coprime (p := p) hn
+  have hc : Nat.Coprime c p := samePrimeFiniteLog_ordCompl_coprime (p := p) hn
   have hn_decomp_nat : p ^ v * c = n := by
     simpa [v, c] using Nat.ordProj_mul_ordCompl_eq_self n p
   have hn_cast : (n : R) = (p : R) ^ v * (c : R) := by
-    rw [← hn_decomp_nat]
-    rw [Nat.cast_mul, Nat.cast_pow]
+    rw [← hn_decomp_nat, Nat.cast_mul, Nat.cast_pow]
   have hnum : (p : R) ^ v * y = x ^ n := by
     simpa [v, y] using
       samePrimeFiniteLogTermNumerator_mul_spec (p := p) (K := K) hn hx
