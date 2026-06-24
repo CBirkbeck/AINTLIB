@@ -69,7 +69,6 @@ theorem caseIIBridge_thirtyseven_of_freeContentDescent
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     (h_step : FreeContentCaseIIDescentStep37) :
     BernoulliRegular.CaseIIBridge 37 (CyclotomicField 37 ℚ) 32 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   refine ⟨?_⟩
   intro _hV _hSO a b c hprod hgcd hcase hEq
   exact no_realCaseIIData37_of_freeContentDescent h_step
@@ -92,8 +91,6 @@ theorem fermatLastTheoremFor_thirtyseven_of_freeContentDescent
     (h_step : FreeContentCaseIIDescentStep37)
     (noSecondOrderIrregular : NoSecondOrderIrregularPair 37 32) :
     FermatLastTheoremFor 37 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  haveI : NeZero 37 := ⟨by decide⟩
   exact fermatLastTheoremFor_thirtyseven_of_remaining
     (cor8_19Bridge_of_not_dvd_hPlus 37 (CyclotomicField 37 ℚ) Sinnott.flt37_not_dvd_hPlus)
     caseIBridge_thirtyseven_eichler
