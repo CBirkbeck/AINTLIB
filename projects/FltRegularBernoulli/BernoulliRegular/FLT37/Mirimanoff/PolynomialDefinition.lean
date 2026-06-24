@@ -240,6 +240,11 @@ private theorem natCast_ne_zero_of_pos_of_lt {p m : ℕ} (hpos : 0 < m) (hlt : m
     (m : ZMod p) ≠ 0 := fun h =>
   absurd (Nat.le_of_dvd hpos ((ZMod.natCast_eq_zero_iff m p).mp h)) (by omega)
 
+/-- The negation of a natural number strictly between `0` and `p` is nonzero in `ZMod p`. -/
+private theorem neg_natCast_ne_zero_of_pos_of_lt {p m : ℕ} (hpos : 0 < m) (hlt : m < p) :
+    (-(m : ZMod p)) ≠ 0 :=
+  neg_ne_zero.mpr (natCast_ne_zero_of_pos_of_lt hpos hlt)
+
 /-- The constant coefficient of `mirimanoffPolynomial p n` is `0`. -/
 theorem mirimanoffPolynomial_coeff_zero (p : ℕ) [Fact p.Prime] (n : ℕ) :
     (mirimanoffPolynomial p n).coeff 0 = 0 := by
@@ -318,8 +323,8 @@ theorem mirimanoffPolynomial_coeff_ne_zero_of_mem_Ico
 theorem mirimanoffPolynomial_coeff_one (p : ℕ) [hp : Fact p.Prime] (n : ℕ) :
     (mirimanoffPolynomial p n).coeff 1 = 1 := by
   have h2le : 2 ≤ p := hp.1.two_le
-  rw [mirimanoffPolynomial_coeff_of_mem_Ico p n 1 (Finset.mem_Ico.mpr ⟨le_refl _, h2le⟩)]
-  rw [Nat.cast_one, one_pow]
+  rw [mirimanoffPolynomial_coeff_of_mem_Ico p n 1 (Finset.mem_Ico.mpr ⟨le_refl _, h2le⟩),
+    Nat.cast_one, one_pow]
 
 /-- Coefficient of `φ_n` at index `2` is `2^(n-1)` (for `p ≥ 3`). -/
 theorem mirimanoffPolynomial_coeff_two (p : ℕ) [hp : Fact p.Prime] (n : ℕ)
@@ -402,9 +407,7 @@ theorem mirimanoffPolynomial_coeff (p : ℕ) [Fact p.Prime] (n k : ℕ) :
       if 1 ≤ k ∧ k < p then (k : ZMod p) ^ (n - 1) else 0 := by
   by_cases hk_zero : k = 0
   · subst hk_zero
-    rw [mirimanoffPolynomial_coeff_zero]
-    rw [if_neg]
-    omega
+    rw [mirimanoffPolynomial_coeff_zero, if_neg (by omega)]
   by_cases hk_lt : k < p
   · rw [if_pos ⟨Nat.one_le_iff_ne_zero.mpr hk_zero, hk_lt⟩]
     exact mirimanoffPolynomial_coeff_of_mem_Ico p n k
@@ -517,13 +520,10 @@ theorem mirimanoffPolynomial_eval_neg_one_eq_zero_of_odd (p : ℕ) [hp : Fact p.
   have h2 : (2 : ZMod p) * (mirimanoffPolynomial p n).eval (-1) = 0 := by
     linear_combination hsym
   have hp_two : 2 ≤ p := hp.1.two_le
+  obtain ⟨m, hm⟩ := hp_odd
   have h2_ne : (2 : ZMod p) ≠ 0 := by
-    intro h
-    rw [show (2 : ZMod p) = ((2 : ℕ) : ZMod p) from by push_cast; rfl,
-      ZMod.natCast_eq_zero_iff] at h
-    have : p ≤ 2 := Nat.le_of_dvd (by omega) h
-    obtain ⟨m, hm⟩ := hp_odd
-    omega
+    rw [show (2 : ZMod p) = ((2 : ℕ) : ZMod p) from by push_cast; rfl]
+    exact natCast_ne_zero_of_pos_of_lt (by omega) (by omega)
   exact (mul_eq_zero.mp h2).resolve_left h2_ne
 
 /-- The weight-`1` Mirimanoff polynomial is `φ_1(X) = ∑_{k=1}^{p-1} X^k`,
@@ -570,7 +570,6 @@ theorem sum_Ico_natCast_eq_sum_ne_zero {p : ℕ} [hp : Fact p.Prime] {α : Type*
     [AddCommMonoid α] (f : ZMod p → α) :
     ∑ k ∈ Finset.Ico 1 p, f (k : ZMod p) =
       ∑ x ∈ Finset.univ.erase (0 : ZMod p), f x := by
-  classical
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
   refine Finset.sum_bij (fun k _ => (k : ZMod p)) ?_ ?_ ?_ ?_
   · intro k hk
@@ -701,15 +700,7 @@ theorem mirimanoffPolynomial_leadingCoeff_of_even (p : ℕ) [Fact p.Prime] {n : 
     (hn : 1 ≤ n) (hn_even : Even n) :
     (mirimanoffPolynomial p n).leadingCoeff = -1 := by
   rw [mirimanoffPolynomial_leadingCoeff]
-  have hn1_odd : Odd (n - 1) := by
-    rw [show n = (n - 1) + 1 from (Nat.sub_add_cancel hn).symm] at hn_even
-    rcases hn_even with ⟨k, hk⟩
-    -- n - 1 + 1 = 2 * k
-    -- Need: Odd (n - 1)
-    refine ⟨k - 1, ?_⟩
-    have hk_pos : 1 ≤ k := by omega
-    omega
-  exact Odd.neg_one_pow hn1_odd
+  exact Odd.neg_one_pow (Nat.Even.sub_odd hn hn_even odd_one)
 
 /-- The `(p-1)`-th coefficient of `φ_p` is `1`. -/
 theorem mirimanoffPolynomial_at_p_coeff_card_sub_one (p : ℕ) [hp : Fact p.Prime] :
@@ -720,8 +711,7 @@ theorem mirimanoffPolynomial_at_p_coeff_card_sub_one (p : ℕ) [hp : Fact p.Prim
   rw [Finset.sum_eq_single (p - 1)]
   · rw [Polynomial.coeff_X_pow_self]
   · intro j hj hj_ne
-    rw [Polynomial.coeff_X_pow]
-    rw [if_neg (fun h => hj_ne h.symm)]
+    rw [Polynomial.coeff_X_pow, if_neg (fun h => hj_ne h.symm)]
   · intro hcontra
     exact absurd hp1 hcontra
 
@@ -733,11 +723,8 @@ theorem mirimanoffPolynomial_at_p_coeff_p_sub_two (p : ℕ) [hp : Fact p.Prime]
   rw [mirimanoffPolynomial_coeff_p_sub_two p p (by omega)]
   -- `(-2 : ZMod p) ^ (p - 1) = 1` by Fermat's little theorem
   have h_ne : (-2 : ZMod p) ≠ 0 := by
-    intro h
-    have h2 : (2 : ZMod p) = 0 := by linear_combination -h
-    rw [show (2 : ZMod p) = ((2 : ℕ) : ZMod p) from by push_cast; rfl,
-      ZMod.natCast_eq_zero_iff] at h2
-    exact absurd (Nat.le_of_dvd (by omega) h2) (by omega)
+    rw [show (-2 : ZMod p) = -((2 : ℕ) : ZMod p) from by push_cast; ring]
+    exact neg_natCast_ne_zero_of_pos_of_lt (by omega) (by omega)
   exact ZMod.pow_card_sub_one_eq_one h_ne
 
 /-- The `(p-3)`-th coefficient of `φ_p` is `1` (for `p ≥ 5`).
@@ -748,11 +735,8 @@ theorem mirimanoffPolynomial_at_p_coeff_p_sub_three (p : ℕ) [hp : Fact p.Prime
   rw [mirimanoffPolynomial_coeff_p_sub_three p p hp_five]
   -- `(-3 : ZMod p) ^ (p - 1) = 1` by Fermat's little theorem
   have h_ne : (-3 : ZMod p) ≠ 0 := by
-    intro h
-    have h3 : (3 : ZMod p) = 0 := by linear_combination -h
-    rw [show (3 : ZMod p) = ((3 : ℕ) : ZMod p) from by push_cast; rfl,
-      ZMod.natCast_eq_zero_iff] at h3
-    exact absurd (Nat.le_of_dvd (by omega) h3) (by omega)
+    rw [show (-3 : ZMod p) = -((3 : ℕ) : ZMod p) from by push_cast; ring]
+    exact neg_natCast_ne_zero_of_pos_of_lt (by omega) (by omega)
   exact ZMod.pow_card_sub_one_eq_one h_ne
 
 /-- The `(p-4)`-th coefficient of `φ_p` is `1` (for `p ≥ 7`).
@@ -763,11 +747,8 @@ theorem mirimanoffPolynomial_at_p_coeff_p_sub_four (p : ℕ) [hp : Fact p.Prime]
   rw [mirimanoffPolynomial_coeff_p_sub_four p p hp_seven]
   -- `(-4 : ZMod p) ^ (p - 1) = 1` by Fermat's little theorem
   have h_ne : (-4 : ZMod p) ≠ 0 := by
-    intro h
-    have h4 : (4 : ZMod p) = 0 := by linear_combination -h
-    rw [show (4 : ZMod p) = ((4 : ℕ) : ZMod p) from by push_cast; rfl,
-      ZMod.natCast_eq_zero_iff] at h4
-    exact absurd (Nat.le_of_dvd (by omega) h4) (by omega)
+    rw [show (-4 : ZMod p) = -((4 : ℕ) : ZMod p) from by push_cast; ring]
+    exact neg_natCast_ne_zero_of_pos_of_lt (by omega) (by omega)
   exact ZMod.pow_card_sub_one_eq_one h_ne
 
 /-- The `2`nd coefficient of `φ_p` is `1` (for `p ≥ 3`). Equals
