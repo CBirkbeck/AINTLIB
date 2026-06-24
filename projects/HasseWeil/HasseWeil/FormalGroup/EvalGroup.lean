@@ -970,6 +970,55 @@ private theorem powerSeries_eval₂_eq_mvEval₂
 
 /-! ### The inverse axiom: `F(x, -_F x) = 0` -/
 
+omit [IsLocalRing R] [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R]
+  [IsLinearTopology R R] [T2Space R] [CompleteSpace R] in
+/-- The inverse-axiom substitution map `![X, i]` (with `i = F.inverse`) has zero
+constant coefficient in every slot, so it is substitutable. -/
+private lemma constantCoeff_inverseSubstMap (F : FormalGroup R) :
+    ∀ s, MvPowerSeries.constantCoeff
+      ((![PowerSeries.X, F.inverse] : Fin 2 → MvPowerSeries Unit R) s) = 0 := by
+  intro s
+  fin_cases s
+  · -- a 0 = PowerSeries.X: constantCoeff = 0.
+    show MvPowerSeries.constantCoeff (PowerSeries.X : PowerSeries R) = 0
+    change PowerSeries.constantCoeff (R := R) PowerSeries.X = 0
+    simp
+  · -- a 1 = F.inverse: constantCoeff = 0 by F.inverse_constantCoeff.
+    show MvPowerSeries.constantCoeff (F.inverse : PowerSeries R) = 0
+    exact F.inverse_constantCoeff
+
+omit [IsLocalRing R] [IsUniformAddGroup R] [IsTopologicalRing R] [IsLinearTopology R R]
+  [T2Space R] [CompleteSpace R] in
+/-- Evaluating the zero univariate series (viewed as `MvPowerSeries Unit R`) at any
+point gives `0`. -/
+private lemma eval₂_zero_mvPowerSeries_unit (x : R) :
+    MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ x) (0 : MvPowerSeries Unit R) = 0 := by
+  change PowerSeries.eval₂ (RingHom.id R) x (0 : PowerSeries R) = 0
+  rw [show (0 : PowerSeries R) = ((0 : Polynomial R) : PowerSeries R) from by simp,
+      PowerSeries.eval₂_coe]
+  simp
+
+omit [IsUniformAddGroup R] [IsTopologicalRing R] [IsLinearTopology R R] [T2Space R]
+  [CompleteSpace R] in
+/-- Evaluating the inverse-axiom substitution map `![X, i]` componentwise at `x ∈ M`
+yields `![x, -_F x]`: the first slot is `x` itself, the second is `evalNeg F x`. -/
+private lemma eval₂_inverseSubstMap_eq (F : FormalGroup R)
+    (x : IsLocalRing.maximalIdeal R) :
+    (fun s : Fin 2 ↦ MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ x.1)
+        ((![PowerSeries.X, F.inverse] : Fin 2 → MvPowerSeries Unit R) s)) =
+      ![x.1, F.evalNeg x] := by
+  funext s
+  fin_cases s
+  · -- s = 0: a 0 = PowerSeries.X, eval_x X = x.1.
+    show MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ x.1) (PowerSeries.X : PowerSeries R)
+        = x.1
+    change PowerSeries.eval₂ (RingHom.id R) x.1 PowerSeries.X = x.1
+    rw [PowerSeries.eval₂_X]
+  · -- s = 1: a 1 = F.inverse, eval_x inverse = F.evalNeg x (definitionally).
+    show MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ x.1) F.inverse = F.evalNeg x
+    change PowerSeries.eval₂ (RingHom.id R) x.1 F.inverse = F.evalNeg x
+    rfl
+
 /-- **The inverse axiom** (Silverman IV.3): `F(x, i(x)) = 0`, i.e.,
 `evalAdd F x (evalNeg F x) = 0`. -/
 theorem FormalGroup.evalAdd_evalNeg
@@ -990,16 +1039,8 @@ theorem FormalGroup.evalAdd_evalNeg
   -- or equivalently treat everything in MvPowerSeries.
   -- Set up: a : Fin 2 → PowerSeries R = MvPowerSeries Unit R
   let a : Fin 2 → MvPowerSeries Unit R := ![PowerSeries.X, F.inverse]
-  have ha0 : ∀ s, MvPowerSeries.constantCoeff (a s) = 0 := by
-    intro s
-    fin_cases s
-    · -- a 0 = PowerSeries.X: constantCoeff = 0.
-      show MvPowerSeries.constantCoeff (PowerSeries.X : PowerSeries R) = 0
-      change PowerSeries.constantCoeff (R := R) PowerSeries.X = 0
-      simp
-    · -- a 1 = F.inverse: constantCoeff = 0 by F.inverse_constantCoeff.
-      show MvPowerSeries.constantCoeff (F.inverse : PowerSeries R) = 0
-      exact F.inverse_constantCoeff
+  have ha0 : ∀ s, MvPowerSeries.constantCoeff (a s) = 0 :=
+    constantCoeff_inverseSubstMap F
   have ha : MvPowerSeries.HasSubst a :=
     MvPowerSeries.hasSubst_of_constantCoeff_zero (fun s ↦ ha0 s)
   -- The substitution gives us `subst a F.toSeries` ∈ MvPowerSeries Unit R = PowerSeries R.
@@ -1012,33 +1053,7 @@ theorem FormalGroup.evalAdd_evalNeg
   have bridge := eval₂_subst_bridge hAdic ha0 ha (b := fun _ : Unit ↦ x.1) hb_mem F.toSeries
   -- bridge: eval₂ id (fun _ ↦ x.1) (subst a F.toSeries) =
   --         eval₂ id (fun s ↦ eval₂ id (fun _ ↦ x.1) (a s)) F.toSeries
-  rw [hsubst_zero] at bridge
-  have heval_zero : MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ x.1)
-      (0 : MvPowerSeries Unit R) = 0 := by
-    change PowerSeries.eval₂ (RingHom.id R) x.1 (0 : PowerSeries R) = 0
-    rw [show (0 : PowerSeries R) = ((0 : Polynomial R) : PowerSeries R) from by simp,
-        PowerSeries.eval₂_coe]
-    simp
-  rw [heval_zero] at bridge
-  -- Now LHS of bridge is 0. RHS: eval₂ id (fun s ↦ eval_x (a s)) F.toSeries.
-  -- The function `fun s ↦ eval_x (a s)` is `fun s ↦ eval_x (![X, inverse] s)`:
-  --   s = 0: eval_x X = x.1.
-  --   s = 1: eval_x inverse = F.evalNeg x.
-  have hfun : (fun s : Fin 2 ↦
-        MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ x.1) (a s)) =
-      ![x.1, F.evalNeg x] := by
-    funext s
-    fin_cases s
-    · -- s = 0: a 0 = PowerSeries.X, eval_x X = x.1.
-      show MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ x.1) (PowerSeries.X : PowerSeries R)
-          = x.1
-      change PowerSeries.eval₂ (RingHom.id R) x.1 PowerSeries.X = x.1
-      rw [PowerSeries.eval₂_X]
-    · -- s = 1: a 1 = F.inverse, eval_x inverse = F.evalNeg x (definitionally).
-      show MvPowerSeries.eval₂ (RingHom.id R) (fun _ : Unit ↦ x.1) F.inverse = F.evalNeg x
-      change PowerSeries.eval₂ (RingHom.id R) x.1 F.inverse = F.evalNeg x
-      rfl
-  rw [hfun] at bridge
+  rw [hsubst_zero, eval₂_zero_mvPowerSeries_unit, eval₂_inverseSubstMap_eq] at bridge
   exact bridge.symm
 
 /-! ### Associativity of `evalAdd`
