@@ -5,8 +5,8 @@
 - Goal of brief: Status check (what's done / left) + soundness check (lemmas/defs/thms not
   vacuous or junk) + plan check for remaining work
 - Scope: Whole Wedhorn Thm 8.28(b) project + current IRIE/Leaf-A frontier
-- Reply received: false
-- Reply integrated: false
+- Reply received: true (2026-06-24)
+- Reply integrated: true (2026-06-24) — see integration.md; board updated (#73 validated, #76 re-route scoped)
 
 ## Questions in the brief
 
