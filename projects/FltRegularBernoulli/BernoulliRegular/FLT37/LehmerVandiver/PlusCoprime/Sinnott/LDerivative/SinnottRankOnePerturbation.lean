@@ -1,5 +1,14 @@
 import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative.EmbeddingIndexBijectivity
 
+/-!
+# Rank-one perturbation sums for Sinnott matrices
+
+This file bundles the reindexing lemmas that compare sums over infinite
+places of the maximal real subfield with sums over `CyclotomicEvenDelta p`,
+then applies those identifications to the column-difference matrix
+`sinnottMatrixA - sinnottMatrixB`.
+-/
+
 @[expose] public section
 
 noncomputable section
@@ -29,7 +38,6 @@ theorem familyIndexAsUnit_quotient_ne_one
         (familyIndexAsUnit p K hp_odd hp_three i) ≠ 1 := by
   classical
   intro h
-  -- q(a) = 1 iff a ∈ kernel = CyclotomicEvenDeltaSubgroup = ⟨-1⟩.
   have h_mem : familyIndexAsUnit p K hp_odd hp_three i ∈
       BernoulliRegular.CyclotomicEvenDeltaSubgroup p := by
     rw [← QuotientGroup.eq_one_iff]
@@ -59,7 +67,6 @@ theorem familyIndexAsUnit_injective
     Function.Injective (familyIndexAsUnit p K hp_odd hp_three) := by
   classical
   intro i₁ i₂ h_eq
-  -- Same unit → same val → same idx → same Fin → same i.
   have h_val_eq : ((familyIndexAsUnit p K hp_odd hp_three i₁ : (ZMod p)ˣ) : ZMod p).val =
       ((familyIndexAsUnit p K hp_odd hp_three i₂ : (ZMod p)ˣ) : ZMod p).val := by
     rw [h_eq]
@@ -97,8 +104,6 @@ theorem familyIndexAsUnit_injective
   rw [h_v1, h_v2] at h_val_eq
   have h_fin_eq : j₁.val = j₂.val := by omega
   have h_fin : j₁ = j₂ := Fin.ext h_fin_eq
-  -- j₁ = Fin.cast _ (eqFR.symm i₁), and similarly for j₂.
-  -- Since cast is injective: eqFR.symm i₁ = eqFR.symm i₂.
   have h_symm_eq : (NumberField.Units.equivFinRank
       (NumberField.maximalRealSubfield K)).symm i₁ =
       (NumberField.Units.equivFinRank
@@ -132,7 +137,6 @@ theorem familyIndexAsUnit_quotient_injective
   classical
   intro i₁ i₂ h_eq
   simp only at h_eq
-  -- The familyIndexAsUnit values are equal in the quotient.
   have h_div : familyIndexAsUnit p K hp_odd hp_three i₁ /
       familyIndexAsUnit p K hp_odd hp_three i₂ ∈
       BernoulliRegular.CyclotomicEvenDeltaSubgroup p :=
@@ -149,7 +153,7 @@ theorem familyIndexAsUnit_quotient_injective
   obtain ⟨h_ge_two, h_le_two⟩ := familyIndexAsUnit_val_in_range
     (p := p) K hp_odd hp_three i₂
   rcases h_mod with h0 | h1
-  · -- Case 1: a₁ * a₂⁻¹ = 1. So a₁ = a₂, hence i₁ = i₂.
+  ·
     rw [h0, zpow_zero] at hk
     have h_a_eq : familyIndexAsUnit p K hp_odd hp_three i₁ =
         familyIndexAsUnit p K hp_odd hp_three i₂ := by
@@ -159,8 +163,7 @@ theorem familyIndexAsUnit_quotient_injective
           1 * familyIndexAsUnit p K hp_odd hp_three i₂ := by rw [hk]
       rwa [inv_mul_cancel_right, one_mul] at this
     exact familyIndexAsUnit_injective (p := p) K hp_odd hp_three h_a_eq
-  · -- Case 2: a₁ * a₂⁻¹ = -1. So a₁ = -a₂. But val(a₁), val(a₂) ∈ [2, (p-1)/2],
-    -- val(-a₂) = p - val(a₂) ∈ [(p+1)/2, p-2], disjoint range. Contradiction.
+  ·
     rw [h1, zpow_one] at hk
     have h_neg : familyIndexAsUnit p K hp_odd hp_three i₁ =
         -familyIndexAsUnit p K hp_odd hp_three i₂ := by
@@ -169,14 +172,15 @@ theorem familyIndexAsUnit_quotient_injective
             familyIndexAsUnit p K hp_odd hp_three i₂ =
           -1 * familyIndexAsUnit p K hp_odd hp_three i₂ := by rw [hk]
       rwa [inv_mul_cancel_right, neg_one_mul] at this
-    -- val of (-a₂) is p - val(a₂).
     have h_p_prime : Nat.Prime p := hp.out
     haveI : NeZero p := ⟨h_p_prime.ne_zero⟩
     haveI : NeZero ((familyIndexAsUnit p K hp_odd hp_three i₂ : (ZMod p)ˣ) : ZMod p) := by
       refine ⟨?_⟩
       intro h_zero
       rw [show ((((familyIndexAsUnit p K hp_odd hp_three i₂ : (ZMod p)ˣ) : ZMod p)).val) = 0 from
-        by rw [h_zero]; exact ZMod.val_zero] at h_ge_two
+        by
+          rw [h_zero]
+          exact ZMod.val_zero] at h_ge_two
       omega
     have h_v_eq : ((familyIndexAsUnit p K hp_odd hp_three i₁ : (ZMod p)ˣ) : ZMod p).val =
         ((-familyIndexAsUnit p K hp_odd hp_three i₂ : (ZMod p)ˣ) : ZMod p).val := by
@@ -187,7 +191,6 @@ theorem familyIndexAsUnit_quotient_injective
         p - ((familyIndexAsUnit p K hp_odd hp_three i₂ : (ZMod p)ˣ) : ZMod p).val
       exact ZMod.val_neg_of_ne_zero _
     rw [h_v_neg] at h_v_eq
-    -- `v₁ = p - v₂`, while both indices lie in incompatible half ranges.
     omega
 
 /-- **Row-side bijection** (cardinality form): the family-index set
@@ -205,15 +208,10 @@ noncomputable def familyIndexEquivNonTrivialCE
       {c : BernoulliRegular.CyclotomicEvenDelta p // c ≠ 1} := by
   classical
   refine Fintype.equivOfCardEq ?_
-  -- Use the canonical bijection InfinitePlace K⁺ ≃ CyclotomicEvenDelta p
-  -- and reduce the subtype cardinalities to (p-1)/2 - 1 = (p-3)/2 each.
   have h_bij : NumberField.InfinitePlace (NumberField.maximalRealSubfield K) ≃
       BernoulliRegular.CyclotomicEvenDelta p :=
     KplusInfinitePlaceEquivCyclotomicEvenDelta_canonical
       (p := p) K hp_two
-  -- LHS = # InfinitePlace K⁺ - 1
-  -- RHS = # CyclotomicEvenDelta p - 1
-  -- Equal because both ambient cardinalities are equal via h_bij.
   rw [Fintype.card_subtype_compl (p := fun w ↦
     w = NumberField.Units.dirichletUnitTheorem.w₀)]
   rw [Fintype.card_subtype_compl (p := fun c ↦ c = 1)]
@@ -268,7 +266,6 @@ noncomputable def familyIndexAsCEnotOneEquiv
     (familyIndexAsCEnotOne (p := p) K hp_odd hp_three hp_ge_five) ?_
   refine (Fintype.bijective_iff_injective_and_card _).mpr
     ⟨familyIndexAsCEnotOne_injective (p := p) K hp_odd hp_three hp_ge_five, ?_⟩
-  -- Cardinality equality from the shipped familyIndexEquivNonTrivialCE.
   exact Fintype.card_congr
     (familyIndexEquivNonTrivialCE (p := p) K hp_odd hp_three hp_two)
 
@@ -344,8 +341,6 @@ theorem kplusEmbeddingIndexQuotientShifted_bijective
     [NumberField.IsCMField K] (hp_two : 2 < p) :
     Function.Bijective (kplusEmbeddingIndexQuotientShifted (p := p) K) := by
   classical
-  -- Compose the shipped column-side bijection with right-multiplication
-  -- by (k(w₀))⁻¹ in the abelian group CyclotomicEvenDelta p.
   set kw₀_inv : BernoulliRegular.CyclotomicEvenDelta p :=
     (kplusEmbeddingIndexQuotient (p := p) K
       NumberField.Units.dirichletUnitTheorem.w₀)⁻¹ with h_kw₀_inv
@@ -419,8 +414,6 @@ theorem sum_kplus_ne_w₀_shifted_eq_sum_CE_ne_one
         f (kplusEmbeddingIndexQuotientShifted (p := p) K v.val) =
       ∑ c : {c : BernoulliRegular.CyclotomicEvenDelta p // c ≠ 1}, f c.val := by
   classical
-  -- Use the shifted bijection restricted to subtypes via Equiv.subtypeEquiv.
-  -- v ≠ w₀ ↔ shifted_apply v ≠ shifted_apply w₀ = 1.
   let e : NumberField.InfinitePlace (NumberField.maximalRealSubfield K) ≃
       BernoulliRegular.CyclotomicEvenDelta p :=
     KplusInfinitePlaceEquivCyclotomicEvenDelta_shifted (p := p) K hp_two
@@ -453,11 +446,7 @@ theorem sum_char_convolutionMatrixLogNormEven_col
       ξ b⁻¹ * quotientEigenvalue p ξ := by
   classical
   unfold quotientEigenvalue convolutionMatrixLogNormEven
-  -- Apply ∑ c, ξ(c) · M[c, b] = ∑ c, ξ(c) · f(c·b) = ξ(b⁻¹) · ∑ c', ξ(c') · f(c')
-  -- via the substitution c ↦ c · b⁻¹.
   rw [Finset.mul_sum]
-  -- Use the bijection `c ↦ c·b⁻¹` in reverse.
-  -- Apply Equiv.sum_comp with `Equiv.mulRight b` to rewrite LHS sum.
   rw [show (∑ c : BernoulliRegular.CyclotomicEvenDelta p,
         ξ c * (Matrix.of fun a b ↦ convolutionLogNormDescended p (a * b)) c b) =
       ∑ c : BernoulliRegular.CyclotomicEvenDelta p,
@@ -467,7 +456,6 @@ theorem sum_char_convolutionMatrixLogNormEven_col
   refine Finset.sum_congr rfl ?_
   intro c _
   rw [Matrix.of_apply]
-  -- (c · b⁻¹) · b = c.
   have h_simp : (c * b⁻¹) * b = c := by group
   rw [h_simp, map_mul, map_inv]
   ring
@@ -491,7 +479,8 @@ theorem sum_char_convolutionMatrixLogNormEven_col_diff
           convolutionMatrixLogNormEven p c 1) =
       ξ c * convolutionMatrixLogNormEven p c b -
         ξ c * convolutionMatrixLogNormEven p c 1 := by
-    intro c; ring
+    intro c
+    ring
   rw [Finset.sum_congr rfl (fun c _ ↦ h_sub c)]
   rw [Finset.sum_sub_distrib]
   rw [sum_char_convolutionMatrixLogNormEven_col, sum_char_convolutionMatrixLogNormEven_col]
@@ -516,9 +505,6 @@ theorem sum_convolutionMatrixLogNormEven_col_diff_eq_zero
           convolutionMatrixLogNormEven p c 1) = 0 := by
   classical
   have h := sum_char_convolutionMatrixLogNormEven_col_diff (p := p) 1 b
-  -- At trivial character, ξ c = 1(c) = 1 (for c ∈ units; matched on CyclotomicEvenDelta
-  -- p via the trivial MulChar on the group). So the LHS becomes the unweighted sum.
-  -- And (1(b⁻¹) - 1) = (1 - 1) = 0, hence RHS = 0.
   have h_one : ∀ c : BernoulliRegular.CyclotomicEvenDelta p,
       (1 : MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) c *
         (convolutionMatrixLogNormEven p c b -
@@ -531,7 +517,8 @@ theorem sum_convolutionMatrixLogNormEven_col_diff_eq_zero
   rw [Finset.sum_congr rfl (fun c _ ↦ h_one c)] at h
   rw [h]
   rw [show ((1 : MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) b⁻¹ - 1) = 0 from by
-    rw [MulChar.one_apply (Group.isUnit _)]; ring]
+    rw [MulChar.one_apply (Group.isUnit _)]
+    ring]
   ring
 
 /-- **Restricted character-weighted sum of column-difference**: summing
