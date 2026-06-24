@@ -65,7 +65,7 @@ It imports only; it does **not** modify any existing file.
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Finset Polynomial NumberField.IsCMField
+open NumberField IsCyclotomicExtension Polynomial NumberField.IsCMField
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -81,7 +81,7 @@ unit, so `(Q w)^148 = 1`, i.e. `((Q w)^37)^4 = 1`.  This is the cyclic-group ste
 theorem caseII_pow37_pow4_eq_one_of_notMem {w : 𝓞 (CyclotomicField 37 ℚ)} (hw : w ∉ lv149) :
     ((Ideal.Quotient.mk lv149 w) ^ 37) ^ 4 = 1 := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  set Q := Ideal.Quotient.mk lv149 with hQ
+  set Q := Ideal.Quotient.mk lv149
   have hw0 : Q w ≠ 0 := fun h ↦ hw ((Ideal.Quotient.eq_zero_iff_mem).mp h)
   -- The residue as a unit `u = Units.mk0 (Q w)`; its order divides `Nat.card (…)ˣ = 148`.
   set u : (𝓞 (CyclotomicField 37 ℚ) ⧸ lv149)ˣ := Units.mk0 (Q w) hw0 with hu
@@ -140,7 +140,7 @@ theorem caseII_realStep6_iff_sigma {m : ℕ}
           (Ideal.Quotient.mk lv149
             (ringOfIntegersComplexConj (CyclotomicField 37 ℚ)
               (D.x + zetaPow 37 (CyclotomicField 37 ℚ) a * D.y))) ^ 4 := by
-  set Q := Ideal.Quotient.mk lv149 with hQ
+  set Q := Ideal.Quotient.mk lv149
   -- `ζ^a·x + y = ζ^a·σβ`, so `Q(ζ^a·x+y) = Q(ζ^a)·Q(σβ)`.
   have hfac : Q (zetaPow 37 (CyclotomicField 37 ℚ) a * D.x + D.y) =
       Q (zetaPow 37 (CyclotomicField 37 ℚ) a) *
@@ -166,7 +166,7 @@ theorem caseII_real_x_add_zetaPow_y_notMem {m : ℕ}
     (hy : D.y ∉ lv149) {a : ℤ} (haj : ¬ (37 : ℤ) ∣ (a - j)) :
     D.x + zetaPow 37 (CyclotomicField 37 ℚ) a * D.y ∉ lv149 := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  set Q := Ideal.Quotient.mk lv149 with hQ
+  set Q := Ideal.Quotient.mk lv149
   intro hmem
   -- `Q(x) = -Q(ζ^j)·Q(y)` from the factor hypothesis.
   have hx_eq : Q D.x =
@@ -293,7 +293,7 @@ theorem caseII_pow4_eq_of_ratio_isPthPower {γ δ : 𝓞 (CyclotomicField 37 ℚ
     (hv : (Ideal.Quotient.mk lv149 γ) * (Ideal.Quotient.mk lv149 δ)⁻¹ = v ^ 37) :
     (Ideal.Quotient.mk lv149 γ) ^ 4 = (Ideal.Quotient.mk lv149 δ) ^ 4 := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  set Q := Ideal.Quotient.mk lv149 with hQ
+  set Q := Ideal.Quotient.mk lv149
   have hγ0 : Q γ ≠ 0 := fun h ↦ hγ ((Ideal.Quotient.eq_zero_iff_mem).mp h)
   have hδ0 : Q δ ≠ 0 := fun h ↦ hδ ((Ideal.Quotient.eq_zero_iff_mem).mp h)
   -- `v ≠ 0`: else `v^37 = 0 = Q γ·(Q δ)⁻¹`, but `Q γ ≠ 0` and `(Q δ)⁻¹ ≠ 0`.
@@ -337,7 +337,7 @@ theorem caseII_realStep6_sigma_of_gammaRatio {m : ℕ}
           (ringOfIntegersComplexConj (CyclotomicField 37 ℚ)
             (D.x + zetaPow 37 (CyclotomicField 37 ℚ) a * D.y))) ^ 4 := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  set Q := Ideal.Quotient.mk lv149 with hQ
+  set Q := Ideal.Quotient.mk lv149
   -- `σβ = (1-ζ^{-a})·σγ` (apply `σ` to `hβ`).
   have hσβ : ringOfIntegersComplexConj (CyclotomicField 37 ℚ)
       (D.x + zetaPow 37 (CyclotomicField 37 ℚ) a * D.y) =
