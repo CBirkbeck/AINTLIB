@@ -210,6 +210,61 @@ case (they only see `Eᵢ`, not `φ`), and the diagram commute is the pure-plumb
 `picZeroOfPoint_placeRestrictionPushforwardPicZero`.  The *only* `φ`-specific input is the
 CoordHom-free preserves-principal hypothesis `h_pres`. -/
 
+/-- **σ̄ is injective on Pic⁰** (curve-side stage of the chase): from the witness `h_inj`
+(`κ ∘ σ̄ = id`), the descended sum map `picZeroSumOfWitness W h_van` has a left inverse `κ`, hence is
+injective.  Independent of any isogeny — used for the source curve `W₁` in the diagram chase. -/
+private theorem picZeroSumOfWitness_injective (W : Affine F) [W.IsElliptic]
+    (h_van : ∀ D : ProjectiveDivisor (⟨W⟩ : SmoothPlaneCurve F),
+      D ∈ (⟨W⟩ : SmoothPlaneCurve F).projPrincipalSubgroup →
+      Curves.projectiveDivisorSum W D = 0)
+    (h_inj : ∀ D : SmoothPlaneCurve.PicProj₀ (⟨W⟩ : SmoothPlaneCurve F),
+      Curves.picZeroOfPoint W
+        (HasseWeil.EC.Isogeny.picZeroSumOfWitness W h_van D) = D) :
+    Function.Injective (HasseWeil.EC.Isogeny.picZeroSumOfWitness W h_van) := by
+  intro D₁ D₂ h
+  have hh : Curves.picZeroOfPoint W
+      (HasseWeil.EC.Isogeny.picZeroSumOfWitness W h_van D₁) =
+      Curves.picZeroOfPoint W
+        (HasseWeil.EC.Isogeny.picZeroSumOfWitness W h_van D₂) := by rw [h]
+  rwa [h_inj D₁, h_inj D₂] at hh
+
+/-- **The Abel–Jacobi map `κ` is additive** (curve-side stage of the chase): given the witnesses
+`h_van` / `h_inj`, the point-to-Pic⁰ map `picZeroOfPoint W` is a group homomorphism.  Proof: its
+left inverse `σ̄ = picZeroSumOfWitness W h_van` is injective (`picZeroSumOfWitness_injective`) and a
+group hom with `σ̄ ∘ κ = id` (`picZeroSumOfWitness_picZeroOfPoint`), so `κ` inherits additivity.
+Independent of any isogeny — used for the source curve `W₁`. -/
+private theorem picZeroOfPoint_add_of_witnesses (W : Affine F) [W.IsElliptic]
+    (h_van : ∀ D : ProjectiveDivisor (⟨W⟩ : SmoothPlaneCurve F),
+      D ∈ (⟨W⟩ : SmoothPlaneCurve F).projPrincipalSubgroup →
+      Curves.projectiveDivisorSum W D = 0)
+    (h_inj : ∀ D : SmoothPlaneCurve.PicProj₀ (⟨W⟩ : SmoothPlaneCurve F),
+      Curves.picZeroOfPoint W
+        (HasseWeil.EC.Isogeny.picZeroSumOfWitness W h_van D) = D)
+    (R₁ R₂ : W.Point) :
+    Curves.picZeroOfPoint W (R₁ + R₂) =
+      Curves.picZeroOfPoint W R₁ + Curves.picZeroOfPoint W R₂ := by
+  apply picZeroSumOfWitness_injective W h_van h_inj
+  rw [(HasseWeil.EC.Isogeny.picZeroSumOfWitness W h_van).map_add,
+    HasseWeil.EC.Isogeny.picZeroSumOfWitness_picZeroOfPoint,
+    HasseWeil.EC.Isogeny.picZeroSumOfWitness_picZeroOfPoint,
+    HasseWeil.EC.Isogeny.picZeroSumOfWitness_picZeroOfPoint]
+
+/-- **The CoordHom-free transport identity**: `placeRestrictionPointMap φ` factors through the Pic⁰
+round-trip `σ̄₂ ∘ φ_∗ ∘ κ₁`.  Composes the Pic⁰ diagram commute
+`picZeroOfPoint_placeRestrictionPushforwardPicZero` (`κ₂ ∘ φ = φ_∗ ∘ κ₁`) with the target-curve
+"easy" direction `picZeroSumOfWitness_picZeroOfPoint` (`σ̄₂ ∘ κ₂ = id`).  This is the single bridge
+that moves additivity between `Eᵢ` and `Pic⁰(Eᵢ)`; the chase applies it at `P`, `Q`, and `P + Q`. -/
+private theorem placeRestrictionPointMap_eq_picZeroSum_pushforward (φ : HasseWeil.Isogeny W₁ W₂)
+    (h_van_W₂ : ∀ D : ProjectiveDivisor (⟨W₂⟩ : SmoothPlaneCurve F),
+      D ∈ (⟨W₂⟩ : SmoothPlaneCurve F).projPrincipalSubgroup →
+      Curves.projectiveDivisorSum W₂ D = 0)
+    (h_pres : PlaceRestrictionPreservesPrincipal φ) (R : W₁.toAffine.Point) :
+    placeRestrictionPointMap φ R =
+      HasseWeil.EC.Isogeny.picZeroSumOfWitness W₂ h_van_W₂
+        (placeRestrictionPushforwardPicZero φ h_pres (Curves.picZeroOfPoint W₁ R)) := by
+  rw [← picZeroOfPoint_placeRestrictionPushforwardPicZero φ h_pres R,
+    HasseWeil.EC.Isogeny.picZeroSumOfWitness_picZeroOfPoint]
+
 /-- **CoordHom-free Silverman III.4.8 (witness-parametric)**: the place-restriction point map
 `placeRestrictionPointMap φ` is additive, given
 * `h_van_W₁`, `h_van_W₂`: σ vanishes on principal divisors of `E₁`, `E₂` (curve-side, proven for
@@ -232,49 +287,21 @@ theorem placeRestrictionPointMap_add_of_picZero_witnesses (φ : HasseWeil.Isogen
     (P Q : W₁.toAffine.Point) :
     placeRestrictionPointMap φ (P + Q) =
       placeRestrictionPointMap φ P + placeRestrictionPointMap φ Q := by
-  -- Set up σ̄ at the Pic⁰ level via the witnesses, and the CoordHom-free pushforward at Pic⁰.
-  set sb1 := HasseWeil.EC.Isogeny.picZeroSumOfWitness W₁ h_van_W₁ with hsb1_def
-  set sb2 := HasseWeil.EC.Isogeny.picZeroSumOfWitness W₂ h_van_W₂ with hsb2_def
-  set pushPic := placeRestrictionPushforwardPicZero φ h_pres with hpushPic_def
-  -- σ̄ ∘ κ = id (the "easy" direction).
-  have h_easy_W₁ : ∀ R : W₁.toAffine.Point, sb1 (Curves.picZeroOfPoint W₁ R) = R :=
-    HasseWeil.EC.Isogeny.picZeroSumOfWitness_picZeroOfPoint W₁ h_van_W₁
-  have h_easy_W₂ : ∀ R : W₂.toAffine.Point, sb2 (Curves.picZeroOfPoint W₂ R) = R :=
-    HasseWeil.EC.Isogeny.picZeroSumOfWitness_picZeroOfPoint W₂ h_van_W₂
-  -- Diagram commute at the Pic⁰ level (CoordHom-free).
-  have h_diag : ∀ R : W₁.toAffine.Point,
-      Curves.picZeroOfPoint W₂ (placeRestrictionPointMap φ R) =
-        pushPic (Curves.picZeroOfPoint W₁ R) :=
-    picZeroOfPoint_placeRestrictionPushforwardPicZero φ h_pres
-  -- σ̄_W₁ is injective (from h_inj_W₁: κ ∘ σ̄ = id).
-  have h_sb1_inj : Function.Injective sb1 := by
-    intro D₁ D₂ h
-    have hh : Curves.picZeroOfPoint W₁ (sb1 D₁) = Curves.picZeroOfPoint W₁ (sb1 D₂) := by rw [h]
-    rw [h_inj_W₁ D₁, h_inj_W₁ D₂] at hh
-    exact hh
-  -- κ_W₁ is additive (σ̄_W₁ injective + σ̄ ∘ κ = id + σ̄ group hom).
-  have h_κ_W₁_add : ∀ R₁ R₂ : W₁.toAffine.Point,
-      Curves.picZeroOfPoint W₁ (R₁ + R₂) =
-        Curves.picZeroOfPoint W₁ R₁ + Curves.picZeroOfPoint W₁ R₂ := by
-    intro R₁ R₂
-    apply h_sb1_inj
-    rw [sb1.map_add, h_easy_W₁, h_easy_W₁, h_easy_W₁]
-  -- The chase: a calc chain through sb2 ∘ κ_W₂ = id.
+  -- Abbreviate σ̄₂ and the CoordHom-free pushforward at Pic⁰; both are group homs.
+  set sb2 := HasseWeil.EC.Isogeny.picZeroSumOfWitness W₂ h_van_W₂
+  set pushPic := placeRestrictionPushforwardPicZero φ h_pres
+  -- The chase: transport `φ` to `σ̄₂ ∘ φ_∗ ∘ κ₁` (curve-side helper), then push additivity through
+  -- `κ₁` (curve-side) and the two group homs `φ_∗`, `σ̄₂`.
   calc placeRestrictionPointMap φ (P + Q)
-      = sb2 (Curves.picZeroOfPoint W₂ (placeRestrictionPointMap φ (P + Q))) :=
-        (h_easy_W₂ _).symm
-    _ = sb2 (pushPic (Curves.picZeroOfPoint W₁ (P + Q))) := by rw [h_diag]
+      = sb2 (pushPic (Curves.picZeroOfPoint W₁ (P + Q))) :=
+        placeRestrictionPointMap_eq_picZeroSum_pushforward φ h_van_W₂ h_pres (P + Q)
     _ = sb2 (pushPic (Curves.picZeroOfPoint W₁ P + Curves.picZeroOfPoint W₁ Q)) := by
-          rw [h_κ_W₁_add]
-    _ = sb2 (pushPic (Curves.picZeroOfPoint W₁ P) + pushPic (Curves.picZeroOfPoint W₁ Q)) := by
-          rw [pushPic.map_add]
+          rw [picZeroOfPoint_add_of_witnesses W₁ h_van_W₁ h_inj_W₁]
     _ = sb2 (pushPic (Curves.picZeroOfPoint W₁ P)) +
-          sb2 (pushPic (Curves.picZeroOfPoint W₁ Q)) := by rw [sb2.map_add]
-    _ = sb2 (Curves.picZeroOfPoint W₂ (placeRestrictionPointMap φ P)) +
-          sb2 (Curves.picZeroOfPoint W₂ (placeRestrictionPointMap φ Q)) := by
-          rw [← h_diag, ← h_diag]
+          sb2 (pushPic (Curves.picZeroOfPoint W₁ Q)) := by rw [pushPic.map_add, sb2.map_add]
     _ = placeRestrictionPointMap φ P + placeRestrictionPointMap φ Q := by
-          rw [h_easy_W₂, h_easy_W₂]
+          rw [← placeRestrictionPointMap_eq_picZeroSum_pushforward φ h_van_W₂ h_pres P,
+            ← placeRestrictionPointMap_eq_picZeroSum_pushforward φ h_van_W₂ h_pres Q]
 
 /-! ### The CoordHom-free Silverman III.4.8, curve-side witnesses discharged (all char)
 
