@@ -57,7 +57,7 @@ It imports only `CaseIIRawRatioCongruence.lean`; it does **not** modify any exis
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Polynomial NumberField.IsCMField
+open NumberField Polynomial
 open scoped nonZeroDivisors
 
 namespace BernoulliRegular.FLT37.Eichler
