@@ -181,7 +181,7 @@ theorem petN_add_right
     petN f (g₁ + g₂) = petN f g₁ + petN f g₂ := by
   simp only [petN, ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun q _ ↦ ?_
-  rw [show ⇑(g₁ + g₂) ∣[k] q.out⁻¹ = (⇑g₁ ∣[k] q.out⁻¹) + (⇑g₂ ∣[k] q.out⁻¹) from by
+  rw [show ⇑(g₁ + g₂) ∣[k] q.out⁻¹ = (⇑g₁ ∣[k] q.out⁻¹) + (⇑g₂ ∣[k] q.out⁻¹) by
     rw [CuspForm.coe_add]; exact SlashAction.add_slash k _ _ _]
   exact peterssonInner_add_right k fd _ _ _
     (integrableOn_petersson_slash f g₁ (q.out)⁻¹)
@@ -341,7 +341,7 @@ theorem IsFundamentalDomain.smul_of_eq_conjAct
       ConjAct.smul_def, map_inv, ConjAct.ofConjAct_toConjAct, inv_inv] at this
   · rw [Subgroup.mem_pointwise_smul_iff_inv_smul_mem,
       ConjAct.smul_def, map_inv, ConjAct.ofConjAct_toConjAct, inv_inv,
-      show g⁻¹ * (g * (h₁ : G_outer) * g⁻¹) * g = (h₁ : G_outer) from by group]
+      show g⁻¹ * (g * (h₁ : G_outer) * g⁻¹) * g = (h₁ : G_outer) by group]
     exact h₁.2
   · show g • ((g⁻¹ * (h₂ : G_outer) * g) • x) = (h₂ : G_outer) • (g • x)
     simp only [smul_smul, mul_inv_cancel_left, mul_assoc]
@@ -363,7 +363,7 @@ theorem IsFundamentalDomain.aedisjoint_smul_of_mul_inv_mem
   rw [one_smul, show ((⟨g₁⁻¹ * g₂, h_mem⟩ : H) • D : Set α) = (g₁⁻¹ * g₂) • D from rfl]
     at h_core
   show μ ((g₁ • D) ∩ (g₂ • D)) = 0
-  rw [show (g₁ • D) ∩ (g₂ • D) = g₁ • (D ∩ ((g₁⁻¹ * g₂) • D)) from by
+  rw [show (g₁ • D) ∩ (g₂ • D) = g₁ • (D ∩ ((g₁⁻¹ * g₂) • D)) by
       rw [Set.smul_set_inter, ← mul_smul, mul_inv_cancel_left], measure_smul]
   exact h_core
 
@@ -555,7 +555,7 @@ noncomputable def slLeftMul (h : SL(2, ℤ)) :
       change (QuotientGroup.leftRel _).r _ _ at hab
       rw [QuotientGroup.leftRel_apply] at hab
       refine QuotientGroup.eq.mpr ?_
-      rw [show (h * a)⁻¹ * (h * b) = a⁻¹ * b from by group]; exact hab)
+      rw [show (h * a)⁻¹ * (h * b) = a⁻¹ * b by group]; exact hab)
 
 omit [NeZero N] in
 @[simp]
@@ -588,7 +588,7 @@ theorem slToPslQuot_slLeftMul (h : SL(2, ℤ)) (q : SL(2, ℤ) ⧸ Gamma1 N) :
           change (QuotientGroup.leftRel _).r _ _
           rw [QuotientGroup.leftRel_apply] at hab ⊢
           rw [show ((QuotientGroup.mk h : PSL(2, ℤ)) * a)⁻¹ *
-              ((QuotientGroup.mk h : PSL(2, ℤ)) * b) = a⁻¹ * b from by group]
+              ((QuotientGroup.mk h : PSL(2, ℤ)) * b) = a⁻¹ * b by group]
           exact hab)
         (slToPslQuot q) := by
   induction q using QuotientGroup.induction_on with
@@ -640,13 +640,13 @@ theorem slToPslQuot_fiber_card_uniform
       show slLeftMul h (slLeftMul h⁻¹ q) = q
       rw [slLeftMul_comp, mul_inv_cancel, slLeftMul_one])
   · simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hq ⊢
-    rw [show q₂' = QuotientGroup.mk (QuotientGroup.mk g₂ : PSL(2, ℤ)) from by
+    rw [show q₂' = QuotientGroup.mk (QuotientGroup.mk g₂ : PSL(2, ℤ)) by
       rw [← slToPslQuot_mk]; exact hq₂.symm]
     refine slToPslQuot_slLeftMul_eq_of_eq h q g₁ g₂ ?_ ?_
     · rw [hq, ← slToPslQuot_mk]; exact hq₁.symm
     · rw [hh_def, ← QuotientGroup.mk_inv, ← QuotientGroup.mk_mul]
   · simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hq ⊢
-    rw [show q₁' = QuotientGroup.mk (QuotientGroup.mk g₁ : PSL(2, ℤ)) from by
+    rw [show q₁' = QuotientGroup.mk (QuotientGroup.mk g₁ : PSL(2, ℤ)) by
       rw [← slToPslQuot_mk]; exact hq₁.symm]
     refine slToPslQuot_slLeftMul_eq_of_eq h⁻¹ q g₂ g₁ ?_ ?_
     · rw [hq, ← slToPslQuot_mk]; exact hq₂.symm
@@ -699,7 +699,7 @@ theorem setIntegral_SL_tile_eq_PSL_tile (h : ℍ → ℂ)
     rfl
   rw [show ((slToPslQuot q).out : PSL(2, ℤ))⁻¹ • (fdo : Set ℍ) =
       ((QuotientGroup.mk γ : PSL(2, ℤ))⁻¹ •
-        ((QuotientGroup.mk q.out : PSL(2, ℤ))⁻¹ • (fdo : Set ℍ))) from by
+        ((QuotientGroup.mk q.out : PSL(2, ℤ))⁻¹ • (fdo : Set ℍ))) by
       rw [h_eq_PSL, mul_inv_rev, mul_smul]]
   rw [PSL_inv_smul_set_eq_SL q.out fdo, PSL_inv_smul_set_eq_SL γ _]
   symm
@@ -748,13 +748,13 @@ noncomputable def Gamma1QuotEquivOfGamma0
     intro a b hab; change (QuotientGroup.leftRel _).r _ _
     change (QuotientGroup.leftRel _).r _ _ at hab
     rw [QuotientGroup.leftRel_apply] at hab ⊢
-    rw [show (a * γ⁻¹)⁻¹ * (b * γ⁻¹) = γ * (a⁻¹ * b) * γ⁻¹ from by group]
+    rw [show (a * γ⁻¹)⁻¹ * (b * γ⁻¹) = γ * (a⁻¹ * b) * γ⁻¹ by group]
     exact HeckeRing.GL2.Gamma0_normalizes_Gamma1 ⟨γ, hγ⟩ _ hab)
   invFun := Quotient.map (· * γ) (by
     intro a b hab; change (QuotientGroup.leftRel _).r _ _
     change (QuotientGroup.leftRel _).r _ _ at hab
     rw [QuotientGroup.leftRel_apply] at hab ⊢
-    rw [show (a * γ)⁻¹ * (b * γ) = γ⁻¹ * (a⁻¹ * b) * γ from by group]
+    rw [show (a * γ)⁻¹ * (b * γ) = γ⁻¹ * (a⁻¹ * b) * γ by group]
     convert HeckeRing.GL2.Gamma0_normalizes_Gamma1
       ⟨γ⁻¹, (Gamma0 N).inv_mem hγ⟩ _ hab using 1
     simp [mul_assoc])
@@ -843,19 +843,19 @@ theorem petN_slash_invariant
   rw [show peterssonInner k fd (⇑f' ∣[k] (⟦δ⟧ : SL(2, ℤ) ⧸ Gamma1 N).out⁻¹)
       (⇑g' ∣[k] (⟦δ⟧ : SL(2, ℤ) ⧸ Gamma1 N).out⁻¹) =
     peterssonInner k fd (⇑f ∣[k] (γ * (⟦δ⟧ : SL(2, ℤ) ⧸ Gamma1 N).out⁻¹))
-      (⇑g ∣[k] (γ * (⟦δ⟧ : SL(2, ℤ) ⧸ Gamma1 N).out⁻¹)) from by
+      (⇑g ∣[k] (γ * (⟦δ⟧ : SL(2, ℤ) ⧸ Gamma1 N).out⁻¹)) by
     congr 1 <;> [rw [hf']; rw [hg']] <;> rw [← SlashAction.slash_mul]]
   simp only [peterssonInner, petersson_slash_SL, ← setIntegral_smul_eq,
-    show σ ⟦δ⟧ = ⟦δ * γ⁻¹⟧ from by simp [σ]]
+    show σ ⟦δ⟧ = ⟦δ * γ⁻¹⟧ by simp [σ]]
   rw [show γ * (⟦δ⟧ : SL(2, ℤ) ⧸ Gamma1 N).out⁻¹ =
       (γ * (⟦δ⟧ : SL(2, ℤ) ⧸ Gamma1 N).out⁻¹ *
         (⟦δ * γ⁻¹⟧ : SL(2, ℤ) ⧸ Gamma1 N).out) *
-      (⟦δ * γ⁻¹⟧ : SL(2, ℤ) ⧸ Gamma1 N).out⁻¹ from by group, mul_smul]
+      (⟦δ * γ⁻¹⟧ : SL(2, ℤ) ⧸ Gamma1 N).out⁻¹ by group, mul_smul]
   refine setIntegral_Gamma1_smul_petersson f g _ ?_ _
   rw [show γ * (⟦δ⟧ : SL(2, ℤ) ⧸ Gamma1 N).out⁻¹ *
       (⟦δ * γ⁻¹⟧ : SL(2, ℤ) ⧸ Gamma1 N).out =
     ((⟦δ * γ⁻¹⟧ : SL(2, ℤ) ⧸ Gamma1 N).out⁻¹ * (δ * γ⁻¹) *
-     (γ * ((⟦δ⟧ : SL(2, ℤ) ⧸ Gamma1 N).out⁻¹ * δ)⁻¹ * γ⁻¹))⁻¹ from by group]
+     (γ * ((⟦δ⟧ : SL(2, ℤ) ⧸ Gamma1 N).out⁻¹ * δ)⁻¹ * γ⁻¹))⁻¹ by group]
   exact (Gamma1 N).inv_mem ((Gamma1 N).mul_mem (out_mem (δ * γ⁻¹))
     (HeckeRing.GL2.Gamma0_normalizes_Gamma1 ⟨γ, hγ⟩ _ ((Gamma1 N).inv_mem (out_mem δ))))
 
