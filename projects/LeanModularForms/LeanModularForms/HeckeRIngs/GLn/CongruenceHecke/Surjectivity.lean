@@ -182,7 +182,7 @@ private lemma coprime_mul_coeff (f g : HeckeAlgebra 2)
 
 open HeckeRing.GLn.Inj
   (T_gen_pow_support_qpower T_gen_pow_entries_qpower support_mul_exists
-   det_SLnZ_eq_one det_doubleCoset_eq prod_rep_T_diag det_mulMap_eq)
+   prod_rep_T_diag det_mulMap_eq)
 
 private lemma support_det_mul (f g : HeckeAlgebra 2) (d₁ d₂ : ℚ)
     (hf : ∀ D, f D ≠ 0 →
@@ -625,11 +625,14 @@ private lemma π_injective : Function.Injective π_hom := by
   change (MvPolynomial.eval₂ (Int.castRingHom (HeckeAlgebra 2))
     (fun i : GenIdx ↦ T_gen 2 i.1.1 i.2) P) D_s = 0 at h_zero
   rw [MvPolynomial.eval₂_eq] at h_zero
-  change (∑ d ∈ MvPolynomial.support P, (Int.castRingHom (HeckeAlgebra 2)) (MvPolynomial.coeff d P) *
+  change (∑ d ∈ MvPolynomial.support P,
+    (Int.castRingHom (HeckeAlgebra 2)) (MvPolynomial.coeff d P) *
     ∏ i ∈ d.support, T_gen 2 (↑i.1) i.2 ^ d i) D_s = 0 at h_zero
-  rw [show (∑ d ∈ MvPolynomial.support P, (Int.castRingHom (HeckeAlgebra 2)) (MvPolynomial.coeff d P) *
+  rw [show (∑ d ∈ MvPolynomial.support P,
+        (Int.castRingHom (HeckeAlgebra 2)) (MvPolynomial.coeff d P) *
         ∏ i ∈ d.support, T_gen 2 (↑i.1) i.2 ^ d i) D_s =
-      ∑ d ∈ MvPolynomial.support P, ((Int.castRingHom (HeckeAlgebra 2)) (MvPolynomial.coeff d P) *
+      ∑ d ∈ MvPolynomial.support P,
+        ((Int.castRingHom (HeckeAlgebra 2)) (MvPolynomial.coeff d P) *
         ∏ i ∈ d.support, T_gen 2 (↑i.1) i.2 ^ d i) D_s from Finset.sum_apply' _] at h_zero
   have h_term : ∀ d ∈ P.support,
       (((Int.castRingHom (HeckeAlgebra 2)) (P.coeff d)) *
@@ -785,7 +788,8 @@ private lemma Gamma0_HeckeCoset_deg_scalar (c : ℕ) (hc : 0 < c)
         DoubleCoset.doubleCoset (diagMat 2 (fun _ : Fin 2 ↦ c) : GL (Fin 2) ℚ) H H := by
       simp only [D, T_diag_Gamma0, HeckeCoset.toSet_mk]; rfl
     rw [← h1]; exact HeckeCoset.rep_mem D
-  rw [DoubleCoset.mem_doubleCoset] at hδ_mem; obtain ⟨h₁, hh₁, h₂, hh₂, hδ_eq⟩ := hδ_mem
+  rw [DoubleCoset.mem_doubleCoset] at hδ_mem
+  obtain ⟨h₁, hh₁, h₂, hh₂, hδ_eq⟩ := hδ_mem
   have hδ_simp : (δ : GL (Fin 2) ℚ) = (h₁ * h₂) * diagMat 2 (fun _ : Fin 2 ↦ c) := by
     rw [hδ_eq, mul_assoc, diagMat_scalar_comm 2 c hc h₂, ← mul_assoc]
   rw [hδ_simp, map_mul, ← smul_smul]
@@ -801,9 +805,11 @@ private lemma Gamma0_HeckeCoset_deg_scalar (c : ℕ) (hc : 0 < c)
   ext x; simp only [Subgroup.mem_pointwise_smul_iff_inv_smul_mem, ConjAct.smul_def,
     map_inv, ConjAct.ofConjAct_toConjAct, inv_inv]
   constructor
-  · intro hx; have : x = (h₁ * h₂) * ((h₁ * h₂)⁻¹ * x * (h₁ * h₂)) * (h₁ * h₂)⁻¹ := by group
+  · intro hx
+    have : x = (h₁ * h₂) * ((h₁ * h₂)⁻¹ * x * (h₁ * h₂)) * (h₁ * h₂)⁻¹ := by group
     rw [this]; exact H.mul_mem (H.mul_mem (H.mul_mem hh₁ hh₂) hx) (H.inv_mem (H.mul_mem hh₁ hh₂))
-  · intro hx; exact H.mul_mem (H.mul_mem (H.inv_mem (H.mul_mem hh₁ hh₂)) hx) (H.mul_mem hh₁ hh₂)
+  · intro hx
+    exact H.mul_mem (H.mul_mem (H.inv_mem (H.mul_mem hh₁ hh₂)) hx) (H.mul_mem hh₁ hh₂)
 
 private lemma T_single_mul_eq_of_deg_one_left
     (D_c D_x D_out : HeckeCoset (Gamma0_pair N))
@@ -986,8 +992,10 @@ private lemma Gamma0_T_diag_rep_det (a : Fin 2 → ℕ) (ha : ∀ i, 0 < a i)
   push_cast; simp [Fin.prod_univ_two]
 
 private lemma T_diag_Gamma0_one_ppow_ne_p_ppow (p : ℕ) (hp : p.Prime) (k : ℕ) (hk : 1 ≤ k)
-    (h1 : ∀ i, 0 < (![1, p^(k+1)] : Fin 2 → ℕ) i) (hg1 : Int.gcd ((![1, p^(k+1)] : Fin 2 → ℕ) 0) N = 1)
-    (h2 : ∀ i, 0 < (![p, p^k] : Fin 2 → ℕ) i) (hg2 : Int.gcd ((![p, p^k] : Fin 2 → ℕ) 0) N = 1) :
+    (h1 : ∀ i, 0 < (![1, p^(k+1)] : Fin 2 → ℕ) i)
+    (hg1 : Int.gcd ((![1, p^(k+1)] : Fin 2 → ℕ) 0) N = 1)
+    (h2 : ∀ i, 0 < (![p, p^k] : Fin 2 → ℕ) i)
+    (hg2 : Int.gcd ((![p, p^k] : Fin 2 → ℕ) 0) N = 1) :
     T_diag_Gamma0 N (![1, p^(k+1)]) h1 hg1 ≠ T_diag_Gamma0 N (![p, p^k]) h2 hg2 := by
   intro heq
   have h_GL_eq : cosetMap N (T_diag_Gamma0 N (![1, p^(k+1)]) h1 hg1) =
@@ -1051,7 +1059,8 @@ private lemma coprimeDet_diagMat (v : Fin 2 → ℕ) (hv : ∀ i, 0 < v i)
     CoprimeDet N ⟨diagMat 2 v, hmem⟩ := by
   intro A' hA'
   have h_det_eq : (A'.det : ℚ) = ((v 0 * v 1 : ℕ) : ℚ) := by
-    rw [show (A'.det : ℚ) = (A'.map (Int.cast : ℤ → ℚ)).det from (det_intMat_cast 2 A').symm, ← hA']
+    rw [show (A'.det : ℚ) = (A'.map (Int.cast : ℤ → ℚ)).det from (det_intMat_cast 2 A').symm,
+      ← hA']
     show (diagMat 2 v : GL (Fin 2) ℚ).val.det = _
     rw [diagMat_det 2 v hv]; push_cast; rw [Fin.prod_univ_two]
   have h_A'_det : A'.det = (v 0 * v 1 : ℕ) := by exact_mod_cast h_det_eq
@@ -1123,16 +1132,20 @@ private lemma mulSupport_Gamma0_pp_GL_split (p : ℕ) (hp : p.Prime) (k : ℕ) (
     (HeckeCoset.rep (T_diag_Gamma0 N (![1, p^k]) h_pos2 (by simp)) : GL (Fin 2) ℚ)
     (by rw [show ((i₀.out : H) : GL (Fin 2) ℚ) = (SL_i₀ : GL (Fin 2) ℚ) from hSL_i₀.symm]
         exact HeckeRing.GL2.SLnZ_to_GLnQ_det SL_i₀)
-    (by have := Gamma0_T_diag_rep_det N (![1, p]) h_pos1 (by simp); push_cast at this; rw [this]; ring)
+    (by have := Gamma0_T_diag_rep_det N (![1, p]) h_pos1 (by simp)
+        push_cast at this; rw [this]; ring)
     (by rw [show ((j₀.out : H) : GL (Fin 2) ℚ) = (SL_j₀ : GL (Fin 2) ℚ) from hSL_j₀.symm]
         exact HeckeRing.GL2.SLnZ_to_GLnQ_det SL_j₀)
-    (by have := Gamma0_T_diag_rep_det N (![1, p^k]) h_pos2 (by simp); push_cast at this; rw [this]; ring)
+    (by have := Gamma0_T_diag_rep_det N (![1, p^k]) h_pos2 (by simp)
+        push_cast at this; rw [this]; ring)
     SL_La SL_Ra h_prod_eq
   have h_dvd := HeckeRing.GL2.mulSupport_pp_dvd_p p hp k hk a ha_pos h_a_div
     (HeckeCoset.rep (T_diag_Gamma0 N (![1, p]) h_pos1 (by simp)) : GL (Fin 2) ℚ)
     (HeckeCoset.rep (T_diag_Gamma0 N (![1, p^k]) h_pos2 (by simp)) : GL (Fin 2) ℚ)
-    (i₀.out : GL (Fin 2) ℚ) (j₀.out : GL (Fin 2) ℚ) SL_L₁ SL_R₁ SL_L₂ SL_R₂ SL_La SL_Ra SL_i₀ SL_j₀
-    (by rw [hα_eq, hSL_L₁, hSL_R₁]) (by rw [hβ_eq, hSL_L₂, hSL_R₂]) hSL_i₀.symm hSL_j₀.symm h_prod_eq
+    (i₀.out : GL (Fin 2) ℚ) (j₀.out : GL (Fin 2) ℚ)
+    SL_L₁ SL_R₁ SL_L₂ SL_R₂ SL_La SL_Ra SL_i₀ SL_j₀
+    (by rw [hα_eq, hSL_L₁, hSL_R₁]) (by rw [hβ_eq, hSL_L₂, hSL_R₂])
+    hSL_i₀.symm hSL_j₀.symm h_prod_eq
   exact ⟨h_det, HeckeRing.GL2.mulSupport_pp_case_split p hp k hk a ha_pos h_a_div h_det h_dvd⟩
 
 private lemma mulSupport_Gamma0_pp_subset (p : ℕ) (hp : p.Prime)
@@ -1149,7 +1162,8 @@ private lemma mulSupport_Gamma0_pp_subset (p : ℕ) (hp : p.Prime)
         (fun i ↦ by fin_cases i <;> simp [hp.pos, pow_pos hp.pos])
         (by show Int.gcd (↑p) ↑N = 1; exact hpN) := by
   obtain ⟨a, ha_pos, ha_gcd, ha_div, hrep⟩ := Gamma0_exists_diag_rep N (HeckeCoset.rep A)
-  have hA_eq : A = T_diag_Gamma0 N a ha_pos ha_gcd := by rw [← hrep]; exact (HeckeCoset.mk_rep A).symm
+  have hA_eq : A = T_diag_Gamma0 N a ha_pos ha_gcd := by
+    rw [← hrep]; exact (HeckeCoset.mk_rep A).symm
   have h_a_div : DivChain 2 a := fun i hi ↦ (show i = 0 by omega) ▸ ha_div
   have h_pN_cop : Nat.Coprime p N := by rwa [Int.gcd_natCast_natCast] at hpN
   obtain ⟨h_det, h_GL⟩ :=
