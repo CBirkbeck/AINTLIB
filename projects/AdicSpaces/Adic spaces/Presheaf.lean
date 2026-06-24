@@ -454,13 +454,8 @@ theorem RationalLocData.completedPlusSubringBase_isBounded (D : RationalLocData 
     TopologicalRing.IsBounded (D.completedPlusSubringBase : Set (presheafValue D)) :=
   sorry
 
-/-- **`completedPlusSubringBase` is open** (the `A⁺`-based ring of integral elements is open;
-Wedhorn 7.19, from `A⁺` open via `CompatiblePlusSubring.isOpen'`, the `A⁺`-analogue of
-`presheafValue_ringOfDef_isOpen`). The second `A⁺`-based localization-topology residual (T-LA3). -/
-theorem RationalLocData.completedPlusSubringBase_isOpen (D : RationalLocData A) [PlusSubring A]
-    [IsRingOfIntegralElements (A⁺)] :
-    IsOpen (D.completedPlusSubringBase : Set (presheafValue D)) :=
-  sorry
+-- `completedPlusSubringBase_isOpen` is proven below, after the `locIdeal ⊆ locPlusSubring`
+-- absorption helpers it depends on (Wedhorn Prop 7.19 / Lemma 7.20).
 
 /-- `locPlusSubring ≤ C = (locPlusSubring)^int` (every element is integral over itself). -/
 theorem RationalLocData.locPlusSubring_le_integralClosure (D : RationalLocData A) [PlusSubring A] :
@@ -468,6 +463,119 @@ theorem RationalLocData.locPlusSubring_le_integralClosure (D : RationalLocData A
   intro x hx
   rw [Subalgebra.mem_toSubring]
   exact (integralClosure ↥(D.locPlusSubring) (Localization.Away D.s)).algebraMap_mem ⟨x, hx⟩
+
+/-- Every multiplicative monomial in the `locSubring` generators (`algebraMap A₀` and the `tᵢ/s`)
+factors as `algebraMap(a₀) · p` with `a₀ ∈ A₀` and `p ∈ locPlusSubring`. Infrastructure for the
+`A₀·I ⊆ I ⊆ A⁺` absorption (Wedhorn Prop 7.19 / Lemma 7.20). The `∃ a₀, ∃ p`-decomposition is the
+multiplicatively-closed predicate that the naive `c·algebraMap(x) ∈ locPlusSubring` is not. -/
+theorem RationalLocData.locSubring_monomial_factor (D : RationalLocData A) [PlusSubring A]
+    {m : Localization.Away D.s}
+    (hm : m ∈ Submonoid.closure
+      ((algebraMap A (Localization.Away D.s)) '' (D.P.A₀ : Set A) ∪
+       Set.range (fun t : D.T ↦ divByS (t : A) D.s))) :
+    ∃ a₀ ∈ (D.P.A₀ : Set A), ∃ p ∈ (D.locPlusSubring : Set (Localization.Away D.s)),
+      m = algebraMap A (Localization.Away D.s) a₀ * p := by
+  induction hm using Submonoid.closure_induction with
+  | mem x hx =>
+    rcases hx with ⟨a, ha, rfl⟩ | ⟨t, rfl⟩
+    · exact ⟨a, ha, 1, one_mem _, by rw [mul_one]⟩
+    · exact ⟨1, D.P.A₀.one_mem, divByS (t : A) D.s, D.divByS_mem_locPlusSubring t.2,
+        by rw [map_one, one_mul]⟩
+  | one => exact ⟨1, D.P.A₀.one_mem, 1, one_mem _, by rw [map_one, one_mul]⟩
+  | mul x y _ _ ihx ihy =>
+    obtain ⟨a₀, ha₀, p, hp, rfl⟩ := ihx
+    obtain ⟨a₀', ha₀', p', hp', rfl⟩ := ihy
+    exact ⟨a₀ * a₀', D.P.A₀.mul_mem ha₀ ha₀', p * p', D.locPlusSubring.mul_mem hp hp', by
+      rw [map_mul]; ring⟩
+
+/-- **Absorption `locSubring · algebraMap(I) ⊆ locPlusSubring`** (Wedhorn Prop 7.19 / Lemma 7.20):
+the ideal of definition `I` satisfies `A₀·I ⊆ I` (it is an ideal of `A₀`) and `I ⊆ A°° ⊆ A⁺`, so a
+ring-of-definition element times the image of an `I`-element lands in the `A⁺`-based subring. This is
+why `A⁺⟨X⟩` contains the ideal of definition of `A⟨X⟩`, hence is open. -/
+theorem RationalLocData.locSubring_mul_algebraMap_idealOfDef_mem (D : RationalLocData A)
+    [PlusSubring A] [IsRingOfIntegralElements (A⁺)]
+    {c : Localization.Away D.s} (hc : c ∈ locSubring D.P D.T D.s)
+    {a : D.P.A₀} (ha : a ∈ D.P.I) :
+    c * algebraMap A (Localization.Away D.s) (a : A) ∈ D.locPlusSubring := by
+  rw [locSubring, Subring.mem_closure_iff] at hc
+  induction hc using AddSubgroup.closure_induction with
+  | mem x hx =>
+    obtain ⟨a₀, ha₀, p, hp, rfl⟩ := D.locSubring_monomial_factor hx
+    have ha₀a : (⟨a₀, ha₀⟩ : D.P.A₀) * a ∈ D.P.I := Ideal.mul_mem_left _ _ ha
+    have hmem : a₀ * (a : A) ∈ (A⁺ : Set A) := by
+      have hnil := D.P.isTopologicallyNilpotent_of_mem ha₀a
+      have := IsRingOfIntegralElements.topologicallyNilpotentElements_subset
+        (B := (A⁺ : Subring A)) ‹_› hnil
+      simpa using this
+    have hrw : algebraMap A (Localization.Away D.s) a₀ * p
+        * algebraMap A (Localization.Away D.s) (a : A)
+        = algebraMap A (Localization.Away D.s) (a₀ * (a : A)) * p := by
+      rw [map_mul]; ring
+    rw [hrw]
+    exact D.locPlusSubring.mul_mem (D.algebraMap_Aplus_mem_locPlusSubring hmem) hp
+  | zero => rw [zero_mul]; exact zero_mem _
+  | add x y _ _ ihx ihy => rw [add_mul]; exact add_mem ihx ihy
+  | neg x _ ihx => rw [neg_mul]; exact neg_mem ihx
+
+/-- The image of the ideal of definition `locIdeal` in `Aₛ` lands in `locPlusSubring`
+(Wedhorn Prop 7.19). Proven by ideal-span induction with the strengthened predicate
+`∀ c ∈ locSubring, c · (image) ∈ locPlusSubring`, which absorbs the span's ring-multiplication. -/
+theorem RationalLocData.locIdeal_subtype_mem_locPlusSubring (D : RationalLocData A) [PlusSubring A]
+    [IsRingOfIntegralElements (A⁺)] {z : locSubring D.P D.T D.s}
+    (hz : z ∈ locIdeal D.P D.T D.s) :
+    ((locSubring D.P D.T D.s).subtype z : Localization.Away D.s) ∈ D.locPlusSubring := by
+  have key : ∀ c : locSubring D.P D.T D.s,
+      ((locSubring D.P D.T D.s).subtype (c * z) : Localization.Away D.s) ∈ D.locPlusSubring := by
+    refine Submodule.span_induction ?_ ?_ ?_ ?_ hz
+    · rintro w ⟨a, ha, rfl⟩ c
+      have : (locSubring D.P D.T D.s).subtype (c * algebraMapD D.P D.T D.s a)
+          = (c : Localization.Away D.s) * algebraMap A (Localization.Away D.s) (a : A) := by
+        rw [map_mul]; rfl
+      rw [this]
+      exact D.locSubring_mul_algebraMap_idealOfDef_mem c.2 ha
+    · intro c; rw [mul_zero, map_zero]; exact zero_mem _
+    · intro x y _ _ hx hy c; rw [mul_add, map_add]; exact add_mem (hx c) (hy c)
+    · intro r x _ hx c; rw [smul_eq_mul, ← mul_assoc]; exact hx (c * r)
+  simpa using key 1
+
+/-- The first ideal-of-definition neighborhood `locNhd 1` (image of `locIdeal` in `Aₛ`) lands in
+`locPlusSubring` (Wedhorn Prop 7.19: `A⁺⟨X⟩` contains the ideal of definition of `A⟨X⟩`). -/
+theorem RationalLocData.locNhd_one_subset_locPlusSubring (D : RationalLocData A) [PlusSubring A]
+    [IsRingOfIntegralElements (A⁺)] :
+    (locNhd D.P D.T D.s 1 : Set (Localization.Away D.s)) ⊆
+      (D.locPlusSubring : Set (Localization.Away D.s)) := by
+  intro y hy
+  rw [locNhd, pow_one] at hy
+  obtain ⟨z, hz, rfl⟩ := AddSubgroup.mem_map.mp hy
+  exact D.locIdeal_subtype_mem_locPlusSubring hz
+
+/-- **`completedPlusSubringBase` is open** (Wedhorn Prop 7.19: `A⁺` open ⟹ `A⁺⟨X⟩` open ⟹
+`(A⁺⟨X⟩)ⁱⁿᵗ` open). The `A⁺`-analogue of `presheafValue_ringOfDef_isOpen`: the completion's
+`locIdeal`-adic neighborhood `closure(coeRingHom '' locNhd 1)` lands inside the base (via the
+absorption `locNhd 1 ⊆ locPlusSubring ⊆ (locPlusSubring)ⁱⁿᵗ`), so the closed base is a neighborhood
+of `0`, hence open. The first `A⁺`-based localization-topology residual (T-LA3). -/
+theorem RationalLocData.completedPlusSubringBase_isOpen (D : RationalLocData A) [PlusSubring A]
+    [IsRingOfIntegralElements (A⁺)] :
+    IsOpen (D.completedPlusSubringBase : Set (presheafValue D)) := by
+  letI := D.uniformSpace; letI := D.isUniformAddGroup; letI := D.isTopologicalRing
+  have hbasis := (locBasis D.P D.T D.s D.hopen).hasBasis_nhds_zero
+  set f := (D.coeRingHom : Localization.Away D.s → presheafValue D) with hf_def
+  have hbasis_compl : (nhds (0 : presheafValue D)).HasBasis (fun _ : ℕ => True)
+      (fun n => closure (f '' (locNhd D.P D.T D.s n : Set (Localization.Away D.s)))) :=
+    (map_zero D.coeRingHom : f 0 = 0) ▸
+      hbasis.hasBasis_of_isDenseInducing UniformSpace.Completion.isDenseInducing_coe
+  have himage_sub : f '' (locNhd D.P D.T D.s 1 : Set (Localization.Away D.s)) ⊆
+      (D.completedPlusSubringBase : Set (presheafValue D)) := by
+    rintro x ⟨y, hy, rfl⟩
+    have hy_ic : y ∈ (integralClosure ↥(D.locPlusSubring) (Localization.Away D.s)).toSubring :=
+      D.locPlusSubring_le_integralClosure (D.locNhd_one_subset_locPlusSubring hy)
+    exact Subring.le_topologicalClosure _ ⟨y, hy_ic, rfl⟩
+  have hClosed : IsClosed (D.completedPlusSubringBase : Set (presheafValue D)) :=
+    Subring.isClosed_topologicalClosure _
+  change IsOpen ((D.completedPlusSubringBase).toAddSubgroup : Set (presheafValue D))
+  exact AddSubgroup.isOpen_of_mem_nhds _
+    (Filter.mem_of_superset (hbasis_compl.mem_of_mem (i := 1) trivial)
+      (closure_minimal himage_sub hClosed))
 
 /-- The image of `locPlusSubring` under `coeRingHom` is contained in
 `completedPlusSubring` (the closure contains the image). -/
