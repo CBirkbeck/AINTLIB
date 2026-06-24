@@ -237,6 +237,7 @@ lemma same₀₃ : a.negOnePow = d.negOnePow := by rw [same.1, same.2.1, same.2.
 protected lemma abs : HaveSameParity₄ |a| |b| |c| |d| := by
   simpa only [HaveSameParity₄, negOnePow_abs] using same
 
+omit same in
 lemma perm (σ : Perm (Fin 4)) :
     ∀ t : Fin 4 → ℤ, HaveSameParity₄ (t 0) (t 1) (t 2) (t 3) →
       HaveSameParity₄ (t (σ 0)) (t (σ 1)) (t (σ 2)) (t (σ 3)) := by
@@ -373,7 +374,7 @@ attribute [local reducible] Nat.rawCast Mathlib.Meta.NormNum.instAddMonoidWithOn
 lemma rel₄_iff_evenRec (m : ℤ) : rel₄ W (2 * m + 1) (2 * m - 1) 3 1 = 0 ↔ EvenRec W m := by
   have hr : rel₄ W (2 * m + 1) (2 * m - 1) 3 1
       = rel₄ W (2 * m + 1) (2 * (m - 1) + 1) (2 * 1 + 1) (2 * 0 + 1) := by
-    congr 1 <;> ring
+    congr 1; ring
   rw [iff_comm, EvenRec, ← sub_eq_zero, hr, rel₄, addMulSub_odd, addMulSub_odd,
     addMulSub_odd, addMulSub_odd, addMulSub_odd, addMulSub_odd]
   ring_nf
@@ -581,7 +582,7 @@ theorem rel₄_of_oddRec_evenRec {a b c d : ℤ} (same : HaveSameParity₄ a b c
   by_cases h₃₂ : t (σ 3) = t (σ 2); · rw [h₃₂, rel₄_same₂₃ zero, smul_zero]
   by_cases h₂₁ : t (σ 2) = t (σ 1); · rw [h₂₁, rel₄_same₁₂ zero, smul_zero]
   by_cases h₁₀ : t (σ 1) = t (σ 0); · rw [h₁₀, rel₄_same₀₁ zero, smul_zero]
-  rw [rel₄_of_anti_oddRec_evenRec one two oddRec evenRec (same.abs.perm _ _ same.abs), smul_zero]
+  rw [rel₄_of_anti_oddRec_evenRec one two oddRec evenRec (same.abs.perm _ _), smul_zero]
   exact ⟨nonneg _, (anti <| by decide).lt_of_ne h₃₂,
     (anti <| by decide).lt_of_ne h₂₁, (anti <| by decide).lt_of_ne h₁₀⟩
 
