@@ -32,7 +32,6 @@ It imports only; it does **not** modify any existing file.  No `sorry`, no `axio
 noncomputable section
 
 open NumberField
-open scoped BigOperators
 
 namespace BernoulliRegular
 namespace CyclotomicUnits
