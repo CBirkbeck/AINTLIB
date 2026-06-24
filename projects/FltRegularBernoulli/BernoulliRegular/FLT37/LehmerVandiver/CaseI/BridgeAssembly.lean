@@ -28,8 +28,6 @@ With all four closed, FLT37 is unconditional with axiom budget
 
 noncomputable section
 
-open NumberField
-
 namespace BernoulliRegular
 
 /-- **FLT37 from four parametric inputs (LV010-D form).** `FermatLastTheoremFor 37` holds given
