@@ -6,9 +6,6 @@ public import BernoulliRegular.CyclotomicUnits.DworkParameter.Construction.Artin
 
 noncomputable section
 
-open scoped NumberField
-open PowerSeries
-
 namespace BernoulliRegular
 namespace CyclotomicUnits
 namespace PadicLogSetup
@@ -116,8 +113,7 @@ theorem dworkParameterExp_eq_zeta :
         (valuedCyclotomicZetaInteger p K) := by
   apply AdicCompletion.ext_evalₐ
   intro N
-  rw [dworkParameterExp_evalₐ]
-  rw [AdicCompletion.evalₐ_of]
+  rw [dworkParameterExp_evalₐ, AdicCompletion.evalₐ_of]
   exact quotient_mk_dworkParameterExpApprox_eq_zeta (p := p) (K := K) N
 
 theorem evalIntegralPowerSeriesMod_exp_dworkParameter (N : ℕ) :
@@ -128,8 +124,7 @@ theorem evalIntegralPowerSeriesMod_exp_dworkParameter (N : ℕ) :
     evalIntegralPowerSeriesMod p K (integralExpSeries p K) (dworkParameter p K) N =
         Ideal.Quotient.mk ((lambdaIdeal p K) ^ N)
           (dworkParameterExpApprox p K N) := by
-      rw [evalIntegralPowerSeriesMod]
-      rw [dworkParameter_evalₐ]
+      rw [evalIntegralPowerSeriesMod, dworkParameter_evalₐ]
       exact (quotient_mk_dworkParameterExpApprox_eq_trunc_eval
         (p := p) (K := K) N).symm
     _ = Ideal.Quotient.mk ((lambdaIdeal p K) ^ N)
@@ -143,8 +138,7 @@ theorem dworkParameter_eval_exp :
         (valuedCyclotomicZetaInteger p K) := by
   apply AdicCompletion.ext_evalₐ
   intro N
-  rw [evalIntegralPowerSeries_evalₐ]
-  rw [AdicCompletion.evalₐ_of]
+  rw [evalIntegralPowerSeries_evalₐ, AdicCompletion.evalₐ_of]
   exact evalIntegralPowerSeriesMod_exp_dworkParameter (p := p) (K := K) N
 
 /-- Uniqueness of the completed inverse-series construction: a completed
