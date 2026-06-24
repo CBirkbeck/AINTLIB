@@ -1494,50 +1494,77 @@ private theorem coeff_subst_zero_X1_at_single_1 (h : MvPowerSeries (Fin 2) R) (b
         simp [ha_def, zero_pow h0]
       rw [hprod, map_zero, smul_zero]
 
+/-- The substitution `X 0 ↦ 0, X 1 ↦ X 1` (i.e. `![0, X 1]`) admits
+substitution on `MvPowerSeries (Fin 2) R`, since both entries have zero
+constant coefficient. -/
+private theorem hasSubst_eval_zero_X1 :
+    MvPowerSeries.HasSubst
+      (![(0 : MvPowerSeries (Fin 2) R), MvPowerSeries.X 1] :
+        Fin 2 → MvPowerSeries (Fin 2) R) := by
+  apply MvPowerSeries.hasSubst_of_constantCoeff_zero
+  intro s; fin_cases s <;> simp
+
+/-- **Step 1 of `LogPreservesAdd`**: the partial derivative in variable `0` of
+the difference between the two sides of `LogPreservesAdd F` vanishes. Both sides
+have the same `pderiv 0` (equal to `subst (X 0) F.invariantDiff`), via
+`pderiv_LogPreservesAdd_LHS` and `pderiv_LogPreservesAdd_RHS`. -/
+private theorem pderiv_zero_LogPreservesAdd_diff (F : FormalGroup R) [Module ℚ R] :
+    MvPowerSeries.pderiv 0
+        (PowerSeries.subst (F.toSeries : MvPowerSeries (Fin 2) R) F.log -
+          (PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) F.log +
+            PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) F.log)) =
+      0 := by
+  rw [MvPowerSeries.pderiv_sub, pderiv_LogPreservesAdd_LHS F, pderiv_LogPreservesAdd_RHS F]
+  exact sub_self _
+
+/-- **Step 2 of `LogPreservesAdd`**: substituting `X 0 ↦ 0` in the difference
+between the two sides of `LogPreservesAdd F` gives `0`. Each side reduces to
+`subst (X 1) F.log` under this substitution, via `subst_zero_LogPreservesAdd_LHS`
+and `subst_zero_LogPreservesAdd_RHS`. -/
+private theorem subst_zero_X1_LogPreservesAdd_diff (F : FormalGroup R) [Module ℚ R] :
+    MvPowerSeries.subst
+        (![0, MvPowerSeries.X 1] : Fin 2 → MvPowerSeries (Fin 2) R)
+        (PowerSeries.subst (F.toSeries : MvPowerSeries (Fin 2) R) F.log -
+          (PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) F.log +
+            PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) F.log)) =
+      0 := by
+  rw [← MvPowerSeries.substAlgHom_apply hasSubst_eval_zero_X1, map_sub,
+    MvPowerSeries.substAlgHom_apply hasSubst_eval_zero_X1,
+    MvPowerSeries.substAlgHom_apply hasSubst_eval_zero_X1,
+    subst_zero_LogPreservesAdd_LHS F, subst_zero_LogPreservesAdd_RHS F]
+  exact sub_self _
+
+/-- **Uniqueness step**: a bivariate series `h` whose `pderiv 0` vanishes and
+which becomes `0` after substituting `X 0 ↦ 0` is itself `0`. The substitution
+hypothesis pins down every coefficient at `single 1 b` (via
+`coeff_subst_zero_X1_at_single_1`), and `eq_zero_of_pderiv_zero_and_const_zero`
+then concludes from the derivative hypothesis. -/
+private theorem eq_zero_of_pderiv_zero_and_subst_zero_X1 [Module ℚ R]
+    (h : MvPowerSeries (Fin 2) R) (hd : MvPowerSeries.pderiv 0 h = 0)
+    (hsub : MvPowerSeries.subst
+        (![0, MvPowerSeries.X 1] : Fin 2 → MvPowerSeries (Fin 2) R) h = 0) :
+    h = 0 := by
+  apply eq_zero_of_pderiv_zero_and_const_zero h hd
+  intro b
+  have hcoeff := congr_arg (MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) b)) hsub
+  rw [MvPowerSeries.coeff_zero] at hcoeff
+  rw [← hcoeff]
+  exact (coeff_subst_zero_X1_at_single_1 h b).symm
+
 /-- **Silverman IV.5.2**: the formal logarithm preserves addition. -/
 theorem FormalGroup.logPreservesAdd (F : FormalGroup R) [Module ℚ R] :
     F.LogPreservesAdd := by
   unfold FormalGroup.LogPreservesAdd
-  -- Let h = LHS - RHS. Goal: LHS = RHS, equivalently h = 0.
-  have pderiv_lhs := pderiv_LogPreservesAdd_LHS F
-  have pderiv_rhs := pderiv_LogPreservesAdd_RHS F
-  have subst0_lhs := subst_zero_LogPreservesAdd_LHS F
-  have subst0_rhs := subst_zero_LogPreservesAdd_RHS F
-  -- Define the difference.
+  -- Let `h` be the difference of the two sides; the goal is `h = 0`.
   set h : MvPowerSeries (Fin 2) R :=
     PowerSeries.subst (F.toSeries : MvPowerSeries (Fin 2) R) F.log -
       (PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) F.log +
         PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) F.log)
     with hh
-  suffices h = 0 by
-    have := this
-    rw [hh] at this
-    linear_combination this
-  -- Step 1: pderiv 0 h = 0.
-  have hd : MvPowerSeries.pderiv 0 h = 0 := by
-    rw [hh, MvPowerSeries.pderiv_sub]
-    rw [pderiv_lhs, pderiv_rhs]
-    exact sub_self _
-  -- Step 2: subst ![0, X 1] h = 0.
-  have h0X1 : MvPowerSeries.HasSubst
-      (![(0 : MvPowerSeries (Fin 2) R), MvPowerSeries.X 1] :
-        Fin 2 → MvPowerSeries (Fin 2) R) := by
-    apply MvPowerSeries.hasSubst_of_constantCoeff_zero
-    intro s; fin_cases s <;> simp
-  have hsub : MvPowerSeries.subst
-      (![0, MvPowerSeries.X 1] : Fin 2 → MvPowerSeries (Fin 2) R) h = 0 := by
-    rw [hh]
-    rw [← MvPowerSeries.substAlgHom_apply h0X1, map_sub]
-    rw [MvPowerSeries.substAlgHom_apply h0X1, MvPowerSeries.substAlgHom_apply h0X1]
-    rw [subst0_lhs, subst0_rhs]
-    exact sub_self _
-  -- Combine: if coeff (single 1 b) h = 0 for all b, and pderiv 0 h = 0, then h = 0.
-  apply eq_zero_of_pderiv_zero_and_const_zero h hd
-  intro b
-  have := congr_arg (MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) b)) hsub
-  rw [MvPowerSeries.coeff_zero] at this
-  rw [← this]
-  exact (coeff_subst_zero_X1_at_single_1 h b).symm
+  suffices h = 0 by rw [hh] at this; linear_combination this
+  -- `pderiv 0 h = 0` (Step 1) and `subst (X 0 ↦ 0) h = 0` (Step 2) force `h = 0`.
+  exact eq_zero_of_pderiv_zero_and_subst_zero_X1 h
+    (hh ▸ pderiv_zero_LogPreservesAdd_diff F) (hh ▸ subst_zero_X1_LogPreservesAdd_diff F)
 
 /-! #### Packaging `log_F` as a formal group homomorphism
 
