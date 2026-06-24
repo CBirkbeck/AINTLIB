@@ -54,7 +54,7 @@ So the saturation/membership detour is redundant for the K-side expansion.
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension
+open NumberField
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -76,7 +76,6 @@ comes from `K⁺`, `complexConj_algebraMap_eq`), and the odd-prime cancellation
 unity, giving `V = α^37` in `(𝓞 K)ˣ`; finally `exists_real_unit_pow_eq_of_K_root` descends the
 `37`-th root to `(𝓞 K⁺)ˣ`. -/
 
-open scoped NumberField in
 /-- **Membership-free kernel-vanishing collapse** (proven, axiom-clean — **no** `w ∈ C⁺`).
 
 For *any* real unit `v : (𝓞 K⁺)ˣ` whose mod-`37` free-part class vanishes
