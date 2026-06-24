@@ -72,8 +72,7 @@ It imports only; it does **not** modify any existing file.  No `sorry`, no `axio
 
 noncomputable section
 
-open NumberField NumberField.IsCMField IsCyclotomicExtension UniqueFactorizationMonoid Polynomial
-open scoped nonZeroDivisors
+open NumberField
 
 namespace BernoulliRegular.FLT37.Eichler
 
