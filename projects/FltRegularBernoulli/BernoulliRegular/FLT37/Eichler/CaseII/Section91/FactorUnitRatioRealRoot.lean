@@ -251,7 +251,7 @@ theorem caseII_washington_factorRatio_localPower
     BernoulliRegular.IsPthPowerModPrime 37 lv149
       (((εp * ua) / (-(εp * ub)) : (𝓞 (CyclotomicField 37 ℚ))ˣ) : 𝓞 (CyclotomicField 37 ℚ)) := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  set Q := Ideal.Quotient.mk lv149 with hQ
+  set Q := Ideal.Quotient.mk lv149
   -- Washington Lemma 9.8 over real data (proven): `x + y ∈ 𝔩`.
   have hxy : D.x + D.y ∈ lv149 :=
     caseII_real_x_add_y_mem_of_dvd_z hSO D.toRealCaseIIData37 D.z_mem D.x_notMem D.y_notMem
@@ -365,16 +365,16 @@ private theorem caseII_washington_etaZero_descent
     exact (pow_two _).symm
   -- Integral generators `r_a, r_b` (`ρ_a⁰ = algebraMap r_a`, `ρ_b⁰ = algebraMap r_b`).
   obtain ⟨ra, hra⟩ := caseII_factorGenerator_integral_of_unitInt D.toRealCaseIIData37 D.etaOne
-    D.toCaseIIData37.etaOne_ne_etaZero ηa₀ ρa₀ ua hua (by rw [hηOne]; exact hfa₀)
+    D.toCaseIIData37.etaOne_ne_etaZero ηa₀ ρa₀ ua hua (by rwa [hηOne])
   obtain ⟨rb, hrb⟩ := caseII_factorGenerator_integral_of_unitInt D.toRealCaseIIData37 D.etaTwo
-    D.toCaseIIData37.etaTwo_ne_etaZero ηb₀ ρb₀ ub hub (by rw [hηTwo]; exact hfb₀)
+    D.toCaseIIData37.etaTwo_ne_etaZero ηb₀ ρb₀ ub hub (by rwa [hηTwo])
   -- `𝔭`-coprimality of the generators (sharp non-anchor valuation).
   have hra_p : ¬ (D.hζ.toInteger - 1 : 𝓞 (CyclotomicField 37 ℚ)) ∣ ra :=
     caseII_zeta_sub_one_not_dvd_factorGenerator D.toRealCaseIIData37 D.etaOne
-      D.toCaseIIData37.etaOne_ne_etaZero ηa₀ ρa₀ ua ra hua hra (by rw [hηOne]; exact hfa₀)
+      D.toCaseIIData37.etaOne_ne_etaZero ηa₀ ρa₀ ua ra hua hra (by rwa [hηOne])
   have hrb_p : ¬ (D.hζ.toInteger - 1 : 𝓞 (CyclotomicField 37 ℚ)) ∣ rb :=
     caseII_zeta_sub_one_not_dvd_factorGenerator D.toRealCaseIIData37 D.etaTwo
-      D.toCaseIIData37.etaTwo_ne_etaZero ηb₀ ρb₀ ub rb hub hrb (by rw [hηTwo]; exact hfb₀)
+      D.toCaseIIData37.etaTwo_ne_etaZero ηb₀ ρb₀ ub rb hub hrb (by rwa [hηTwo])
   -- The integral factor equations in `𝓞 K`.
   have hFa_int : D.x + D.hζ.toInteger * D.y =
       (1 - D.hζ.toInteger) * (ua : 𝓞 (CyclotomicField 37 ℚ)) * ra ^ 37 := by
@@ -439,15 +439,14 @@ private theorem caseII_washington_etaZero_descent
     hua, hub] at hKval
   rw [hεpK] at hKval
   set ζK : CyclotomicField 37 ℚ :=
-    algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger) with hζK
+    algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (D.hζ.toInteger)
   set εK : CyclotomicField 37 ℚ :=
     algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (ε' : 𝓞 (CyclotomicField 37 ℚ))
-    with hεK
   -- `ζK + 1 ≠ 0` (it is the image of the unit `εp`).
   have hεpK_ne : ζK + 1 ≠ 0 := by
     intro h0
     have : algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ)
-        (εp : 𝓞 (CyclotomicField 37 ℚ)) = 0 := by rw [hεpK]; exact h0
+        (εp : 𝓞 (CyclotomicField 37 ℚ)) = 0 := by rwa [hεpK]
     rw [map_eq_zero_iff _ hinj] at this
     exact Units.ne_zero εp this
   refine ⟨ηa₀, ηb₀, ρa₀, ρb₀, εK, hfa₀, hfb₀, ?_⟩
@@ -790,7 +789,7 @@ theorem caseIISection91PContentExtractionDataWithUnits37_proven
     hxy', hdenom', hz'_span2, hint_eq, hz'_mem, hω_notMem_cond ω hω, hθ_notMem_cond θ hθ,
     hcontent⟩
   · -- anchor equation with `η₀ = algebraMap u₀`, ρ₀ = algebraMap ρ₀.
-    rw [IsUnit.unit_spec]; exact hanchor
+    rwa [IsUnit.unit_spec]
   · -- reality of `η₀ = algebraMap u₀`.
     rw [IsUnit.unit_spec]
     change complexConj (CyclotomicField 37 ℚ)
