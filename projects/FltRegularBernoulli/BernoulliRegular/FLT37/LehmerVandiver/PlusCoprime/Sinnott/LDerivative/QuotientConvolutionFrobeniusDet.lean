@@ -41,9 +41,6 @@ What's needed: the closed-form of `L(0, χ)` (= `-B_{1,χ}`) and
 
 noncomputable section
 
-open Real Complex
-open scoped NumberField
-
 namespace BernoulliRegular
 
 namespace FLT37
@@ -272,7 +269,6 @@ noncomputable def quotCharEquivQuot :
   rw [Fintype.card_eq_nat_card, Fintype.card_eq_nat_card]
   exact nat_card_mulChar_cyclotomicEvenDelta_eq p
 
-
 /-- **Matrix-level eigenvalue formula on the quotient**: for the multiplicative
 convolution matrix `convolutionMatrixOnEven f`:
 
@@ -326,21 +322,9 @@ theorem characterMatrixOnEven_mul_convolutionMatrixOnEven_eq_diag_mul_inverse
   letI : Fintype (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) :=
     Fintype.ofFinite _
   ext ξ b
-  rw [characterMatrixOnEven_mul_convolutionMatrixOnEven_apply]
-  rw [Matrix.mul_apply]
-  change ξ b⁻¹ *
-      ∑ a : BernoulliRegular.CyclotomicEvenDelta p, ξ a * f a =
-    ∑ ψ : MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ,
-      Matrix.diagonal (fun ξ' : MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ ↦
-        ∑ a : BernoulliRegular.CyclotomicEvenDelta p, ξ' a * f a) ξ ψ *
-        inverseCharacterMatrixOnEven p ψ b
+  rw [characterMatrixOnEven_mul_convolutionMatrixOnEven_apply, Matrix.diagonal_mul]
   simp only [inverseCharacterMatrixOnEven, Matrix.of_apply]
-  rw [Finset.sum_eq_single ξ]
-  · rw [Matrix.diagonal_apply_eq]; ring
-  · intro ψ _ hψ
-    rw [Matrix.diagonal_apply_ne _ hψ.symm, zero_mul]
-  · intro h
-    exact absurd (Finset.mem_univ ξ) h
+  ring
 
 /-- **Square character matrix on `CyclotomicEvenDelta p`**: the
 `((p-1)/2) × ((p-1)/2)` matrix indexed by `CyclotomicEvenDelta p × CyclotomicEvenDelta p`
@@ -383,23 +367,9 @@ theorem characterMatrixSquareOnEven_mul_convolutionMatrixOnEven_eq_diag_mul_inv
       inverseCharacterMatrixSquareOnEven p := by
   classical
   ext k b
-  rw [characterMatrixSquareOnEven_mul_convolutionMatrixOnEven_apply]
-  rw [Matrix.mul_apply]
-  have h_rhs : ∑ j : BernoulliRegular.CyclotomicEvenDelta p,
-      Matrix.diagonal (fun k' : BernoulliRegular.CyclotomicEvenDelta p ↦
-        ∑ a : BernoulliRegular.CyclotomicEvenDelta p,
-          ((quotCharEquivQuot p).symm k') a * f a) k j *
-        inverseCharacterMatrixSquareOnEven p j b =
-      (∑ a : BernoulliRegular.CyclotomicEvenDelta p,
-          ((quotCharEquivQuot p).symm k) a * f a) *
-        ((quotCharEquivQuot p).symm k) b⁻¹ := by
-    rw [Finset.sum_eq_single k]
-    · rw [Matrix.diagonal_apply_eq]; rfl
-    · intro j _ hj
-      rw [Matrix.diagonal_apply_ne _ hj.symm, zero_mul]
-    · intro h
-      exact absurd (Finset.mem_univ k) h
-  rw [h_rhs]; ring
+  rw [characterMatrixSquareOnEven_mul_convolutionMatrixOnEven_apply, Matrix.diagonal_mul]
+  simp only [inverseCharacterMatrixSquareOnEven, Matrix.of_apply]
+  ring
 
 /-- **Square determinant identity on the quotient**:
 
@@ -582,7 +552,6 @@ theorem det_convolutionMatrixOnEven_sq_eq_prod_lambda_sq_unconditional
   det_convolutionMatrixOnEven_sq_eq_prod_lambda_sq (p := p) f
     (det_characterMatrixSquareOnEven_ne_zero (p := p) hp_two)
 
-
 /-- **Symmetry of the quotient convolution matrix**: since the quotient group
 `CyclotomicEvenDelta p` is abelian, the convolution matrix is symmetric. -/
 theorem convolutionMatrixLogNormEven_symm
@@ -675,7 +644,6 @@ theorem prod_quot_eq_prod_mulChar
     (fun ξ ↦ f ξ)
     (fun k ↦ f ((quotCharEquivQuot p).symm k))
     (fun ξ ↦ by simp only [Equiv.symm_apply_apply])).symm
-
 
 /-- **Half-sum identity**: for any even function `f : (ZMod p)ˣ → ℂ`
 (with `f(-a) = f(a)`), summing over the full group gives twice the sum
@@ -831,7 +799,6 @@ theorem two_mul_quotientEigenvalue_trivial_eq_sum_logNorm (hp_two : 2 < p) :
       _ = _
   rw [MulChar.one_apply h_unit, one_mul]
 
-
 /-- **Entry evaluation on quotient representatives**: for any `a b : (ZMod p)ˣ`,
 the entry of `convolutionMatrixLogNormEven p` at `(q(a), q(b))` is the
 log-norm at the representative `a · b`. Direct from the quotient map being
@@ -852,7 +819,6 @@ theorem convolutionMatrixLogNormEven_apply_quotient
         QuotientGroup.mk b = QuotientGroup.mk (a * b) from rfl]
   unfold convolutionLogNormDescended
   rfl
-
 
 /-- **∏ over odd characters of DLS = 0** (when there exists at least one odd
 character, equivalently when `p ≠ 2`): immediate corollary of
