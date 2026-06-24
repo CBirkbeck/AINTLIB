@@ -29,7 +29,7 @@ shape used by the Mirimanoff-polynomial argument that closes case I.
 
 noncomputable section
 
-open NumberField NumberField.IsCMField IsCyclotomicExtension
+open NumberField IsCyclotomicExtension
 
 namespace BernoulliRegular
 
@@ -117,10 +117,7 @@ theorem zetaSubOne_sq_dvd_factor_p_sub_k_sub_taylor
   refine dvd_add h1 ?_
   -- (p - k : ℕ) + k = p (using k ≤ p).
   have h_sum : ((p - k : ℕ) : 𝓞 K) + (k : 𝓞 K) = (p : 𝓞 K) := by
-    have : ((p - k + k : ℕ) : 𝓞 K) = (p : 𝓞 K) := by
-      rw [Nat.sub_add_cancel hk]
-    push_cast at this
-    exact this
+    rw [← Nat.cast_add, Nat.sub_add_cancel hk]
   rw [h_sum]
   -- Goal: (ζ-1)^2 ∣ b · p · (ζ-1).
   exact h_bpz
@@ -262,10 +259,8 @@ theorem fltCaseI_mirimanoff_relation_of_regular
       ((a : 𝓞 K) +
         ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (p - k) * (b : 𝓞 K))) := by
     rw [Ideal.mem_span_singleton] at hD
-    have hp_dvd : ε ^ 2 ∣ ((p : ℕ) : 𝓞 K) :=
+    have hp_dvd : ε ^ 2 ∣ (p : 𝓞 K) :=
       zetaSubOne_sq_dvd_p (p := p) (K := K) hp_three
-    have hp_cast : ((p : ℕ) : 𝓞 K) = (p : 𝓞 K) := by rfl
-    rw [hp_cast] at hp_dvd
     exact hp_dvd.trans hD
   have h_combined : ε ^ 2 ∣
       ((2 * ((m : ℤ) * (a + b) - b * k) : ℤ) : 𝓞 K) * ε := by
@@ -297,15 +292,8 @@ theorem fltCaseI_mirimanoff_relation_of_regular
   have h_eps_ne : ε ≠ 0 := by
     rw [hε_def]; exact zetaSubOne_ne_zero p K
   have h_eps_dvd_int : ε ∣ ((2 * ((m : ℤ) * (a + b) - b * k) : ℤ) : 𝓞 K) := by
-    obtain ⟨w, hw⟩ := h_combined
-    refine ⟨w, ?_⟩
-    have h_mul : ((2 * ((m : ℤ) * (a + b) - b * k) : ℤ) : 𝓞 K) * ε =
-        ε * (ε * w) := by rw [hw, sq]; ring
-    have : ε * ((2 * ((m : ℤ) * (a + b) - b * k) : ℤ) : 𝓞 K) = ε * (ε * w) := by
-      rw [show ε * ((2 * ((m : ℤ) * (a + b) - b * k) : ℤ) : 𝓞 K) =
-        ((2 * ((m : ℤ) * (a + b) - b * k) : ℤ) : 𝓞 K) * ε from by ring]
-      exact h_mul
-    exact mul_left_cancel₀ h_eps_ne this
+    rw [← mul_dvd_mul_iff_right h_eps_ne, ← sq]
+    exact h_combined
   have h_p_dvd : (p : ℤ) ∣ (2 * ((m : ℤ) * (a + b) - b * k)) := by
     rwa [zetaSubOne_dvd_intCast_iff] at h_eps_dvd_int
   -- For p odd integer, p ∣ 2c ⟹ p ∣ c.
@@ -390,7 +378,7 @@ theorem fltCaseI_mirimanoff_scale_of_regular
     haveI := IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_two⟩
     ∃ m₁ m_k : ℕ, (p : ℤ) ∣ ((m_k : ℤ) - (k : ℤ) * m₁) := by
   haveI : IsCMField K := IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_two⟩
-  have h_one_lt : 1 < p := by have := hp.1.two_le; omega
+  have h_one_lt : 1 < p := hp.1.one_lt
   obtain ⟨m₁, m_k, h_cross⟩ := fltCaseI_mirimanoff_p_dvd_cross_of_regular
     (K := K) hp_two hp_odd hp_three h_reg heq hc hab h_one_lt hk
   refine ⟨m₁, m_k, ?_⟩
@@ -408,7 +396,7 @@ theorem fltCaseI_mirimanoff_relation_one_of_regular
     (hc : ¬ (p : ℤ) ∣ c) (hab : IsCoprime a b) :
     haveI := IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_two⟩
     ∃ m : ℕ, (p : ℤ) ∣ ((m : ℤ) * (a + b) - b) := by
-  have h_one_lt : 1 < p := by have := hp.1.two_le; omega
+  have h_one_lt : 1 < p := hp.1.one_lt
   obtain ⟨m, hm⟩ := fltCaseI_mirimanoff_relation_of_regular
     (K := K) hp_two hp_odd hp_three h_reg heq hc hab h_one_lt
   -- hm : p ∣ m·(a + b) - b·1 = m·(a + b) - b.
@@ -626,9 +614,8 @@ theorem fltCaseI_mirimanoff_eq_b_div_c_of_regular
   -- c ≠ 0 in ZMod p (from p ∤ c).
   have h_c_ne : (c : ZMod p) ≠ 0 := by
     intro hz
-    have : ((c : ℤ) : ZMod p) = 0 := by exact hz
-    rw [ZMod.intCast_zmod_eq_zero_iff_dvd] at this
-    exact hc (by exact_mod_cast this)
+    rw [ZMod.intCast_zmod_eq_zero_iff_dvd] at hz
+    exact hc (by exact_mod_cast hz)
   -- p ∣ m·c - b ⟹ (m : ZMod p) · c = b ⟹ m = b · c⁻¹.
   have hmc : (((m : ℤ) * c - b : ℤ) : ZMod p) = 0 := by
     rw [ZMod.intCast_zmod_eq_zero_iff_dvd]
