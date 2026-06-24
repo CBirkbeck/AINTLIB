@@ -31,6 +31,20 @@ variable {R' : Type w} [Field R'] [NumberField R'] [Algebra K R'] [IsScalarTower
 
 variable (F : FullTeichStickelbergerSetup ℓ p k K R')
 
+private theorem prod_range_pow_prime_pred_sub_eq_sub
+    {A : Type*} [CommMonoid A] (q m : ℕ) (C : ℕ → A) :
+    (∏ j ∈ Finset.range m, C j ^ (q ^ (m - 1 - j))) ^ q =
+      ∏ j ∈ Finset.range m, C j ^ (q ^ (m - j)) := by
+  rw [← Finset.prod_pow]
+  refine Finset.prod_congr rfl ?_
+  intro j hj
+  rw [← pow_mul]
+  congr 1
+  have hjlt : j < m := Finset.mem_range.mp hj
+  have hsub : m - j = m - 1 - j + 1 := by
+    omega
+  rw [hsub, pow_succ]
+
 /-- Successor formula for the accumulated product-side correction: one more
 Dwork step contributes the ordinary-exponential correction at the
 Teichmüller Frobenius trace sum. -/
@@ -220,16 +234,8 @@ theorem artinHasseExpFrobeniusProductIterCorrection_eq_prod
         F.artinHasseExpFrobeniusProductIterCorrection_succ_eq N m y ε hε
       have hpowprod :
           (∏ j ∈ Finset.range m, a j ^ (ℓ ^ (m - 1 - j))) ^ ℓ =
-            ∏ j ∈ Finset.range m, a j ^ (ℓ ^ (m - j)) := by
-        rw [← Finset.prod_pow]
-        refine Finset.prod_congr rfl ?_
-        intro j hj
-        have hjlt : j < m := Finset.mem_range.mp hj
-        have hexp : ℓ ^ (m - 1 - j) * ℓ = ℓ ^ (m - j) := by
-          rw [← pow_succ]
-          congr 1
-          omega
-        rw [← pow_mul, hexp]
+            ∏ j ∈ Finset.range m, a j ^ (ℓ ^ (m - j)) :=
+        prod_range_pow_prime_pred_sub_eq_sub ℓ m a
       calc
         F.artinHasseExpFrobeniusProductIterCorrection N y ε (m + 1)
             =
@@ -245,7 +251,7 @@ theorem artinHasseExpFrobeniusProductIterCorrection_eq_prod
         _ =
               ∏ j ∈ Finset.range (m + 1), a j ^ (ℓ ^ (m - j)) := by
               rw [Finset.prod_range_succ]
-              simp
+              simp only [Nat.sub_self, pow_zero, pow_one]
 
 /-- Closed product form for the accumulated base-side correction in the
 finite Dwork telescope. -/
@@ -281,16 +287,8 @@ theorem artinHasseExpBaseIterCorrectionTrace_eq_prod
         F.artinHasseExpBaseIterCorrectionTrace_succ_eq N m y ε hε
       have hpowprod :
           (∏ j ∈ Finset.range m, a j ^ (ℓ ^ (m - 1 - j))) ^ ℓ =
-            ∏ j ∈ Finset.range m, a j ^ (ℓ ^ (m - j)) := by
-        rw [← Finset.prod_pow]
-        refine Finset.prod_congr rfl ?_
-        intro j hj
-        have hjlt : j < m := Finset.mem_range.mp hj
-        have hexp : ℓ ^ (m - 1 - j) * ℓ = ℓ ^ (m - j) := by
-          rw [← pow_succ]
-          congr 1
-          omega
-        rw [← pow_mul, hexp]
+            ∏ j ∈ Finset.range m, a j ^ (ℓ ^ (m - j)) :=
+        prod_range_pow_prime_pred_sub_eq_sub ℓ m a
       calc
         (F.toConcreteStickelbergerSetup.artinHasseExpIterCorrection N ε (m + 1)) ^ t
             =
@@ -306,7 +304,7 @@ theorem artinHasseExpBaseIterCorrectionTrace_eq_prod
         _ =
               ∏ j ∈ Finset.range (m + 1), a j ^ (ℓ ^ (m - j)) := by
               rw [Finset.prod_range_succ]
-              simp
+              simp only [Nat.sub_self, pow_zero, pow_one]
 
 /-- Closed product comparison for the accumulated correction factors.  At
 each Frobenius iterate this is just the additive law for the ordinary
@@ -625,20 +623,6 @@ theorem artinHasseExp_adjustedProduct_mul_traceCarryTeichProduct_mul_base_eq
               (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
                 (ε ^ (ℓ ^ m) * zbar ^ (ℓ ^ (i : ℕ))) := by
           simpa [A, Eps, zbar, t] using hcmp
-
-private theorem prod_range_pow_prime_pred_sub_eq_sub
-    {A : Type*} [CommMonoid A] (q m : ℕ) (C : ℕ → A) :
-    (∏ j ∈ Finset.range m, C j ^ (q ^ (m - 1 - j))) ^ q =
-      ∏ j ∈ Finset.range m, C j ^ (q ^ (m - j)) := by
-  rw [← Finset.prod_pow]
-  refine Finset.prod_congr rfl ?_
-  intro j hj
-  rw [← pow_mul]
-  congr 1
-  have hjlt : j < m := Finset.mem_range.mp hj
-  have hsub : m - j = m - 1 - j + 1 := by
-    omega
-  rw [hsub, pow_succ]
 
 /-- Zero-boundary powered comparison between the Frobenius product and the
 base value, with the accumulated trace-carry correction explicitly present. -/
