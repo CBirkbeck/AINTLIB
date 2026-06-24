@@ -43,7 +43,7 @@ residual.
 
 noncomputable section
 
-open NumberField NumberField.IsCMField IsCyclotomicExtension UniqueFactorizationMonoid Polynomial
+open NumberField NumberField.IsCMField IsCyclotomicExtension Polynomial
 open scoped nonZeroDivisors
 
 namespace BernoulliRegular.FLT37.Eichler
@@ -106,7 +106,7 @@ theorem caseII_factorGenerator_integral_of_unitInt
     rw [show (1 - algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (η : 𝓞 _)) *
         ((ηa : CyclotomicField 37 ℚ) * ρa ^ 37) =
         (1 - algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (η : 𝓞 _)) *
-          (ηa : CyclotomicField 37 ℚ) * ρa ^ 37 from by ring, ← hfa, hLHS]
+          (ηa : CyclotomicField 37 ℚ) * ρa ^ 37 by ring, ← hfa, hLHS]
   -- The clean route: `ρ_a³⁷ = algebraMap(M · N · u_a⁻¹)`, `(ζ−1) = (1−η)·N` for an integer `N`.
   -- `(1 − η) ∣ (ζ − 1)`: both are `𝔭`-uniformizers, `Associated`.
   obtain ⟨N, hN⟩ : (1 - (η : 𝓞 (CyclotomicField 37 ℚ))) ∣ (D.hζ.toInteger - 1) := by
@@ -322,7 +322,7 @@ private theorem caseII_descended_root_pow_facts
       (by rw [pow_one]; exact h)
     omega
   have hABp : ζ * ζ ^ 2 ≠ 1 := by
-    rw [show ζ * ζ ^ 2 = ζ ^ 3 from by ring]
+    rw [show ζ * ζ ^ 2 = ζ ^ 3 by ring]
     intro h
     have : (37 : ℕ) ∣ 3 := (D.hζ.toInteger_isPrimitiveRoot.pow_eq_one_iff_dvd 3).mp h
     omega
@@ -445,7 +445,7 @@ private theorem caseII_descended_field_equation
   refine ⟨δ', ?_⟩
   -- Nonzero facts.
   have hζ36_37 : (ζ ^ 36) ^ 37 = 1 := by
-    rw [← pow_mul, show 36 * 37 = 37 * 36 from by norm_num, pow_mul, hζ37, one_pow]
+    rw [← pow_mul, show 36 * 37 = 37 * 36 by norm_num, pow_mul, hζ37, one_pow]
   have hζ36_ne1 : ζ ^ 36 ≠ 1 := by
     intro h
     have : ζ ^ 37 = ζ ^ 36 * ζ := by rw [← pow_succ]
@@ -519,8 +519,8 @@ private theorem caseII_descended_field_equation
       (mul_ne_zero h1ζ2_ne h1ζ2_36_ne))
     (Λ := Units.mk0 (am ((1 - ζs) * (1 - ζs ^ 36))) hΛam_ne)
     (e := e) he ?_ ?_ hΛacoe hΛbcoe ?_ ?_ ?_ ?_ ?_ hII ?_
-  · rw [← map_mul, show ζ * ζ ^ 36 = ζ ^ 37 from by ring, hζ37, map_one]
-  · rw [← map_mul, show ζ ^ 2 * (ζ ^ 2) ^ 36 = (ζ ^ 2) ^ 37 from by ring, hζ2_37, map_one]
+  · rw [← map_mul, show ζ * ζ ^ 36 = ζ ^ 37 by ring, hζ37, map_one]
+  · rw [← map_mul, show ζ ^ 2 * (ζ ^ 2) ^ 36 = (ζ ^ 2) ^ 37 by ring, hζ2_37, map_one]
   · exact hfa
   · exact caseII_factorEq_neg_of_pos D
       ⟨ζ, D.hζ.toInteger_isPrimitiveRoot.mem_nthRootsFinset (by decide : 0 < 37)⟩ ηa ρa hηa hfa
@@ -535,10 +535,10 @@ private theorem caseII_descended_field_equation
     convert hanchor using 2
   · -- `hcrux`.
     rw [hΛacoe, hΛbcoe, hmapθ', hΛcoe,
-      show (1 - am ζ) * (1 - am (ζ ^ 36)) = am ((1 - ζ) * (1 - ζ ^ 36)) from by
+      show (1 - am ζ) * (1 - am (ζ ^ 36)) = am ((1 - ζ) * (1 - ζ ^ 36)) by
         rw [map_mul, map_sub, map_sub, map_one],
       show (1 - am (ζ ^ 2)) * (1 - am ((ζ ^ 2) ^ 36)) =
-        am ((1 - ζ ^ 2) * (1 - (ζ ^ 2) ^ 36)) from by rw [map_mul, map_sub, map_sub, map_one]]
+        am ((1 - ζ ^ 2) * (1 - (ζ ^ 2) ^ 36)) by rw [map_mul, map_sub, map_sub, map_one]]
     exact hθ'_id
 
 open scoped Classical in
