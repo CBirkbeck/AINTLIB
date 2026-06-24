@@ -34,7 +34,6 @@ This is T027d2 of the Stickelberger chain.
 
 noncomputable section
 
-
 namespace BernoulliRegular
 
 open Polynomial
@@ -272,7 +271,7 @@ prime `p`, since `χ(-1)² = χ(1) = 1` in a field of characteristic zero. -/
 theorem DirichletCharacter.chi_neg_one_sq (χ : DirichletCharacter ℂ p) :
     χ (-1) = 1 ∨ χ (-1) = -1 := by
   have h_sq : χ (-1) * χ (-1) = 1 := by
-    rw [← map_mul, show ((-1 : ZMod p) * -1) = 1 from by ring, map_one]
+    rw [← map_mul, show ((-1 : ZMod p) * -1) = 1 by ring, map_one]
   rcases mul_self_eq_one_iff.mp h_sq with h | h
   · exact Or.inl h
   · exact Or.inr h
