@@ -5,8 +5,6 @@ public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.IntegralBri
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.KummerFurtwaengler
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CanonicalResidueRoot
 public import Mathlib.NumberTheory.Cyclotomic.Basic
-public import Mathlib.RingTheory.Ideal.GoingUp
-
 
 /-!
 # Concrete cyclotomic local setup at a prime above ℓ ≠ p
@@ -153,11 +151,8 @@ omit [Q.IsPrime] in
 /-- `Q ≠ ⊥` whenever `(ℓ : 𝓞 R') ∈ Q`, since `ℓ ≠ 0`. -/
 theorem Q_ne_bot (hQ : (ℓ : 𝓞 R') ∈ Q) : Q ≠ ⊥ := by
   intro hQ_bot
-  rw [hQ_bot] at hQ
-  rw [Ideal.mem_bot] at hQ
-  have h_pos : (ℓ : 𝓞 R') ≠ 0 := by
-    exact_mod_cast (Fact.out : ℓ.Prime).ne_zero
-  exact h_pos hQ
+  rw [hQ_bot, Ideal.mem_bot] at hQ
+  exact (by exact_mod_cast (Fact.out : ℓ.Prime).ne_zero : (ℓ : 𝓞 R') ≠ 0) hQ
 
 /-- Q is maximal (since prime + non-bot in a Dedekind domain). -/
 theorem Q_isMaximal (hQ : (ℓ : 𝓞 R') ∈ Q) : Q.IsMaximal :=
@@ -617,7 +612,6 @@ theorem canonicalSplittingIso_isKAlgebraCompatible
 /-- **Stage 4 / `zeta_k`**: a primitive `p`-th root of unity in
 `(𝓞 K ⧸ P)ˣ` for the bundle, namely `canonicalResidueZetaP P`. -/
 noncomputable def zeta_k_residueField
-    [IsCyclotomicExtension {p₀} ℚ K₀]
     (P : Ideal (𝓞 K₀)) [_hP_max : P.IsMaximal]
     (_hP_ne_bot : P ≠ ⊥)
     (_hp_notin_P : (p₀ : 𝓞 K₀) ∉ P) :
