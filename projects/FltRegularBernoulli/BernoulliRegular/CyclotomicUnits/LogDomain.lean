@@ -20,7 +20,6 @@ residue-field fact that the local image of any real unit becomes congruent to
 noncomputable section
 
 open NumberField
-open scoped NumberField
 
 namespace BernoulliRegular
 namespace CyclotomicUnits
