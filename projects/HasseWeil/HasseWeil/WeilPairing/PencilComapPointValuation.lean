@@ -584,10 +584,7 @@ theorem mulByInt_baseChange_pullback_y_gen (m : ℤ) (hm : m ≠ 0) :
     mulByInt_pullback_y (W.baseChange (AlgebraicClosure K)) m hm,
     functionFieldMap_mulByInt_y]
 
-
 /-! ### Bespoke `r·π̄` summand isogeny over K̄ (transparent pullback) -/
-
-
 
 /-- **The base-changed `r·π̄` summand isogeny** `α₁ = rFrobBaseChange r'`.  Pullback is the transparent
 base change `baseChangePullback ((frobeniusIsog W).zsmul r').pullback`; point map is `r'•π̄`. -/
@@ -677,7 +674,6 @@ theorem addPullback_y_pair_rFrob_mulByInt (r' s' : ℤ) (hs' : s' ≠ 0) :
     (y₁ := ((HasseWeil.frobeniusIsog W).zsmul r').pullback (HasseWeil.y_gen W))
     (ℓ := addSlopePair ((HasseWeil.frobeniusIsog W).zsmul r') (mulByInt W.toAffine (-s')))
 
-
 /-! ### `rFrobBaseChange` pullback on generators and point image -/
 
 /-- **K-level**: `((frobeniusIsog).zsmul r')^* x_gen = ((mulByInt r')^* x_gen)^q`. -/
@@ -755,7 +751,6 @@ theorem rFrobBaseChange_apply (r' : ℤ) (Q : (W.baseChange (AlgebraicClosure K)
       frobeniusHomBaseChange W p r (AlgebraicClosure K)
         ((mulByInt (W.baseChange (AlgebraicClosure K)).toAffine r').toAddMonoidHom Q) := by
   rw [rFrobBaseChange_toAddMonoidHom, AddMonoidHom.smul_apply, mulByInt_apply, map_zsmul]
-
 
 /-! ### The `r·π̄` per-summand residues -/
 
@@ -850,7 +845,6 @@ theorem rFrobBaseChange_resid_xy_of_ne_zero (r' : ℤ) (hr' : r' ≠ 0)
   · rw [rFrobBaseChange_pullback_y_gen W p r r' hr']
     exact residPV_pow W hy (Fintype.card K)
 
-
 /-! ### The pullback decomposition and point-map decomposition for the pencil -/
 
 /-- **The `x`-generator pullback decomposition for `(rπ − s)_{K̄}`**:
@@ -891,7 +885,6 @@ theorem pencil_toAddMonoidHom_decomp (r' s' : ℤ) (hr : r' ≠ 0) (hs : s' ≠ 
     AddMonoidHom.sub_apply, AddMonoidHom.smul_apply, AddMonoidHom.smul_apply,
     mulByInt_apply, AddMonoidHom.id_apply, neg_smul, sub_eq_add_neg]
 
-
 /-! ### `rFrobBaseChange` on a finite point (explicit `some` form) -/
 
 /-- **`(rFrobBaseChange r')` on `[r']`-image `some xr yr`**: gives `some (xr^q) (yr^q)`. -/
@@ -909,8 +902,6 @@ theorem rFrobBaseChange_apply_some (r' : ℤ)
           (RingHom.injective
             (FiniteField.frobeniusAlgHom K (AlgebraicClosure K)).toRingHom) xr yr).mpr hr1) := by
   rw [rFrobBaseChange_apply, hQr, frobeniusHomBaseChange_apply_some]
-
-
 
 /-! ### The affine comap field
 
