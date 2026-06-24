@@ -67,7 +67,7 @@ theorem partialPowerSum_p_sub_one_eq_zero (p : ℕ) [hp : Fact p.Prime]
     have h_succ : p - 1 + 1 = p := by omega
     rw [h_succ, Finset.sum_range_eq_add_Ico (f := fun j ↦ (j : ZMod p) ^ e)
         (by omega : 0 < p)]
-    simp [zero_pow (Nat.one_le_iff_ne_zero.mp he₁)]
+    simp only [Nat.cast_zero, zero_pow (Nat.one_le_iff_ne_zero.mp he₁), zero_add]
   -- Step 2: rewrite `∑_{j ∈ range p}` as `∑_{x : ZMod p}` via the bijection
   -- `j ↦ (j : ZMod p)`, which is bijective on `range p` since `p` is the
   -- characteristic.
