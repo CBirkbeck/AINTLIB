@@ -6,6 +6,7 @@ import Mathlib.Topology.Algebra.Nonarchimedean.AdicTopology
 import Mathlib.Topology.Algebra.OpenSubgroup
 import Mathlib.RingTheory.Finiteness.Ideal
 import Mathlib.RingTheory.Ideal.Maps
+import Mathlib.RingTheory.Polynomial.Subring
 import «Adic spaces».Bounded
 
 /-!
@@ -814,6 +815,50 @@ theorem PairOfDefinition.mem_adjoin_of_mem_T (P : PairOfDefinition A) (T : Finse
     {t : A} (ht : t ∈ T) : t ∈ (P.adjoin T hT).A₀ := by
   change t ∈ Subring.closure ((P.A₀ : Set A) ∪ ↑T)
   exact Subring.subset_closure (Set.mem_union_right _ (Finset.mem_coe.mpr ht))
+
+/-- **`A°` is integrally closed** (Wedhorn 5.30(4), general form): if `x` satisfies a monic
+polynomial with power-bounded coefficients, then `x` is power-bounded. Proof: the finitely many
+power-bounded coefficients, adjoined to a ring of definition `A₀`, generate a *bounded* subring
+(`isBounded_adjoin`); `x` is integral over it, hence power-bounded
+(`IsBounded.isPowerBounded_of_isIntegral`). This is the "integral over `A°` ⟹ `A°`" form, replacing
+the narrower "integral over a fixed *bounded* subring" — the faithful Wedhorn route for the affinoid
+`B⁺ ⊆ B°` axiom (avoids the over-strong uniform-boundedness statement). -/
+theorem PairOfDefinition.isPowerBounded_of_monic_powerBounded_eval
+    (P : PairOfDefinition A) [NonarchimedeanRing A]
+    {x : A} {p : Polynomial A} (hp_monic : p.Monic)
+    (hp_coeff : ∀ i, TopologicalRing.IsPowerBounded (p.coeff i))
+    (hp_eval : p.eval x = 0) :
+    TopologicalRing.IsPowerBounded x := by
+  classical
+  set T : Finset A := (Finset.range (p.natDegree + 1)).image p.coeff with hT_def
+  have hT_pb : ∀ t ∈ T, TopologicalRing.IsPowerBounded t := by
+    intro t ht
+    rw [hT_def, Finset.mem_image] at ht
+    obtain ⟨i, _, rfl⟩ := ht
+    exact hp_coeff i
+  set B' : Subring A := Subring.closure ((P.A₀ : Set A) ∪ ↑T) with hB'_def
+  have hB'_bounded : TopologicalRing.IsBounded (B' : Set A) := P.isBounded_adjoin T hT_pb
+  have hcoeff_mem : ∀ i, p.coeff i ∈ B' := by
+    intro i
+    by_cases hi : i ≤ p.natDegree
+    · exact Subring.subset_closure (Set.mem_union_right _
+        (Finset.mem_coe.mpr (Finset.mem_image.mpr
+          ⟨i, Finset.mem_range.mpr (Nat.lt_succ_of_le hi), rfl⟩)))
+    · rw [Polynomial.coeff_eq_zero_of_natDegree_lt (not_le.mp hi)]
+      exact B'.zero_mem
+  have hcoeffs : (↑p.coeffs : Set A) ⊆ (B' : Set A) := by
+    intro c hc
+    rw [Finset.mem_coe, Polynomial.mem_coeffs_iff] at hc
+    obtain ⟨i, _, rfl⟩ := hc
+    exact hcoeff_mem i
+  have hint : IsIntegral (↥B') x := by
+    refine ⟨p.toSubring B' hcoeffs, ?_, ?_⟩
+    · rw [Polynomial.monic_toSubring]; exact hp_monic
+    · show Polynomial.eval₂ (algebraMap (↥B') A) x (p.toSubring B' hcoeffs) = 0
+      rw [Polynomial.eval₂_eq_eval_map,
+        show (algebraMap (↥B') A) = B'.subtype from rfl, Polynomial.map_toSubring]
+      exact hp_eval
+  exact hB'_bounded.isPowerBounded_of_isIntegral hint
 
 end AdjoinFinset
 

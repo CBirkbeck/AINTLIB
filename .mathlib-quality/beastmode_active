@@ -1,0 +1,1 @@
+FOCUS: L1 — reroute IRIE subset_powerBounded to power-bounded (B⁺⊆B°). Need: (A) completedPlusSubringBase⊆A°, (B) A° integrally closed [via integral-over-finite-pb-coeffs ⟹ bounded subring ⟹ pb], divByS pb, closure-of-pb. Then L2 construction-level LL-bdd.
