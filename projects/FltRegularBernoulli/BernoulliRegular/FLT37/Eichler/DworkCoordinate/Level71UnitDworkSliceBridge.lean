@@ -78,12 +78,8 @@ noncomputable section
 
 set_option maxRecDepth 4000
 
-open NumberField
-open scoped BigOperators
-
 namespace BernoulliRegular.FLT37.Eichler
 
-open BernoulliRegular (CPlusGenerator CPlusExponentProduct)
 open BernoulliRegular.CyclotomicUnits
 open BernoulliRegular.CyclotomicUnits.PadicLogSetup
 open BernoulliRegular.CyclotomicUnits.PadicLogSetup.DworkParameter
@@ -376,7 +372,7 @@ theorem rIntegralRat_scalar_factors_through_coordModSq_x32
     show (((q : ℚ).den : ℕ) : ZMod (37 ^ 2)) *
         (((q : ℚ).num : ZMod (37 ^ 2)) * (((q : ℚ).den : ℕ) : ZMod (37 ^ 2))⁻¹ * C) =
       ((q : ℚ).num : ZMod (37 ^ 2)) *
-        ((((q : ℚ).den : ℕ) : ZMod (37 ^ 2)) * (((q : ℚ).den : ℕ) : ZMod (37 ^ 2))⁻¹) * C from by
+        ((((q : ℚ).den : ℕ) : ZMod (37 ^ 2)) * (((q : ℚ).den : ℕ) : ZMod (37 ^ 2))⁻¹) * C by
       ring]
   rw [ZMod.mul_inv_of_unit _ hunit, mul_one]
 
@@ -494,14 +490,14 @@ theorem formalSum32_residue_modSq_eq_thirtyseven :
             Furtwaengler.DieudonneDwork.rIntegralRatSubring 37) : ℚ) =
         (Nat.factorial 32 : ℚ) *
           (PowerSeries.coeff (R := ℚ) 32)
-            (PowerSeries.logOf (rationalArtinHasseNormalizedExpMinusOneSeries 37)) from by
+            (PowerSeries.logOf (rationalArtinHasseNormalizedExpMinusOneSeries 37)) by
       simpa using hcoe]
     rw [coeff_logOf_rationalArtinHasseNormalizedExpMinusOneSeries_eq_bernoulli (p := 37)
       (j := 16) (by norm_num) (by norm_num)]
     have hfac_ne : (Nat.factorial (2 * 16) : ℚ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero _
     have hb : (_root_.bernoulli (2 * 16) : ℚ) = (_root_.bernoulli 32 : ℚ) := by norm_num
     rw [show (((2 * 16 : ℕ) : ℚ) * (Nat.factorial (2 * 16) : ℚ)) =
-        (32 : ℚ) * (Nat.factorial 32 : ℚ) from by norm_num, hb]
+        (32 : ℚ) * (Nat.factorial 32 : ℚ) by norm_num, hb]
     field_simp
   -- explicit num/den of `s = B₃₂/32`; cross-multiply to get `s.num·16320 = -7709321041217·s.den`.
   have hcross : s.num * (16320 : ℤ) = (-7709321041217 : ℤ) * s.den := by
@@ -545,12 +541,12 @@ theorem formalSum32_residue_modSq_eq_thirtyseven :
   rw [show ((16320 : ℕ) : ZMod (37 ^ 2)) *
         (((s.num : ℤ) : ZMod (37 ^ 2)) * (((s.den : ℕ)) : ZMod (37 ^ 2))⁻¹) =
       (((s.num : ℤ) : ZMod (37 ^ 2)) * ((16320 : ℕ) : ZMod (37 ^ 2))) *
-        (((s.den : ℕ)) : ZMod (37 ^ 2))⁻¹ from by ring]
+        (((s.den : ℕ)) : ZMod (37 ^ 2))⁻¹ by ring]
   rw [hcrossZ]
   rw [show (((-7709321041217 : ℤ) : ZMod (37 ^ 2)) * (((s.den : ℕ)) : ZMod (37 ^ 2))) *
         (((s.den : ℕ)) : ZMod (37 ^ 2))⁻¹ =
       ((-7709321041217 : ℤ) : ZMod (37 ^ 2)) *
-        ((((s.den : ℕ)) : ZMod (37 ^ 2)) * (((s.den : ℕ)) : ZMod (37 ^ 2))⁻¹) from by ring,
+        ((((s.den : ℕ)) : ZMod (37 ^ 2)) * (((s.den : ℕ)) : ZMod (37 ^ 2))⁻¹) by ring,
     ZMod.mul_inv_of_unit _ hunit_sden, mul_one, hconst]
 
 omit [NumberField.IsCMField K] in
