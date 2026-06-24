@@ -347,6 +347,32 @@ theorem FormalGroup.coeff_swap (F : FormalGroup R) (d : Fin 2 →₀ ℕ) :
       Matrix.cons_val_zero, Matrix.cons_val_one]
     rw [coeff_swap_offDiag d d' hd', smul_zero]
 
+omit [IsLocalRing R] [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R]
+  [IsLinearTopology R R] [T2Space R] [CompleteSpace R] in
+/-- The summand-level symmetry behind `evalAdd_comm`: swapping the multi-index via
+`finsupp_swap` and the evaluation point via `![y, x] ↦ ![x, y]` leaves each term of the
+`hasSum_eval₂` expansion of `F.toSeries` unchanged. The coefficient factor is matched by
+`F.coeff_swap` (commutativity of the formal group law) and the monomial factor by expanding
+both length-two products and applying `finsupp_swap_apply_zero`/`finsupp_swap_apply_one`. -/
+private lemma evalAdd_comm_term_eq (F : FormalGroup R) (x y : R) (d : Fin 2 →₀ ℕ) :
+    (RingHom.id R) (MvPowerSeries.coeff (finsupp_swap d) F.toSeries) *
+        ((finsupp_swap d).prod fun s e ↦ (![y, x] : Fin 2 → R) s ^ e) =
+      (RingHom.id R) (MvPowerSeries.coeff d F.toSeries) *
+        (d.prod fun s e ↦ (![x, y] : Fin 2 → R) s ^ e) := by
+  simp only [RingHom.id_apply]
+  -- Key: coeff (finsupp_swap d) F = coeff d F by F.coeff_swap.
+  rw [← F.coeff_swap d]
+  congr 1
+  -- Show product equality.
+  rw [Finsupp.prod_fintype _ _ (fun i ↦ pow_zero _),
+      Finsupp.prod_fintype _ _ (fun i ↦ pow_zero _),
+      Fin.prod_univ_two, Fin.prod_univ_two,
+      Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.cons_val_zero, Matrix.cons_val_one]
+  rw [finsupp_swap_apply_zero, finsupp_swap_apply_one]
+  simp only [Matrix.cons_val_zero]
+  ring
+
 -- The proof uses a reindexed `HasSum` via `finsupp_swap` equivalence; this
 -- requires substantial term manipulation and benefits from a higher heartbeat
 -- limit.
@@ -372,26 +398,8 @@ theorem FormalGroup.evalAdd_comm
           (d'.prod fun s e ↦ (![y.1, x.1] : Fin 2 → R) s ^ e)) (finsupp_swap d))
         (MvPowerSeries.eval₂ (RingHom.id R) (![y.1, x.1] : Fin 2 → R) F.toSeries) :=
     (finsupp_swap.hasSum_iff).mpr hsum_yx
-  -- Show the reindexed sum function equals the xy sum function.
-  have hterm_eq : ∀ d : Fin 2 →₀ ℕ,
-      (RingHom.id R) (MvPowerSeries.coeff (finsupp_swap d) F.toSeries) *
-        ((finsupp_swap d).prod fun s e ↦ (![y.1, x.1] : Fin 2 → R) s ^ e) =
-      (RingHom.id R) (MvPowerSeries.coeff d F.toSeries) *
-        (d.prod fun s e ↦ (![x.1, y.1] : Fin 2 → R) s ^ e) := by
-    intro d
-    simp only [RingHom.id_apply]
-    -- Key: coeff (finsupp_swap d) F = coeff d F by F.coeff_swap.
-    rw [← F.coeff_swap d]
-    congr 1
-    -- Show product equality.
-    rw [Finsupp.prod_fintype _ _ (fun i ↦ pow_zero _),
-        Finsupp.prod_fintype _ _ (fun i ↦ pow_zero _),
-        Fin.prod_univ_two, Fin.prod_univ_two,
-        Matrix.cons_val_zero, Matrix.cons_val_one,
-        Matrix.cons_val_zero, Matrix.cons_val_one]
-    rw [finsupp_swap_apply_zero, finsupp_swap_apply_one]
-    simp only [Matrix.cons_val_zero]
-    ring
+  -- Show the reindexed sum function equals the xy sum function (termwise via
+  -- `evalAdd_comm_term_eq`).
   have hsum_xy_match : HasSum
       (fun d : Fin 2 →₀ ℕ ↦
         (RingHom.id R) (MvPowerSeries.coeff d F.toSeries) *
@@ -399,7 +407,7 @@ theorem FormalGroup.evalAdd_comm
       (MvPowerSeries.eval₂ (RingHom.id R) (![y.1, x.1] : Fin 2 → R) F.toSeries) := by
     convert hsum_yx_reindex using 1
     ext d
-    exact (hterm_eq d).symm
+    exact (evalAdd_comm_term_eq F x.1 y.1 d).symm
   exact hsum_xy.unique hsum_xy_match
 
 /-! ### Unit axioms: `evalAdd F x 0 = x` and `evalAdd F 0 y = y`
