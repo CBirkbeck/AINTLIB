@@ -92,17 +92,16 @@ theorem caseII_quotient_sub_intCast_mem_37
       _ ≤ m * 37 := Nat.mul_le_mul_right 37 hm
   -- Step 1: rewrite the RHS to expose the `(ζ-1)^{37-1}` factor: collapse the cube, reorder,
   -- and split `(ζ-1)^{m·37} = (ζ-1)^{(37-1)} · (ζ-1)^{m·37-(37-1)}`.
-  have hmod := heq
   rw [mul_pow, ← pow_mul, mul_comm (ε₃ : 𝓞 K), mul_assoc,
-    ← Nat.sub_add_cancel hp_le, add_comm _ (37 - 1), pow_add, mul_assoc] at hmod
+    ← Nat.sub_add_cancel hp_le, add_comm _ (37 - 1), pow_add, mul_assoc] at heq
   -- Step 2: pass to `𝓞 K / (37)`; the RHS vanishes (since `(ζ-1)^{37-1} ∼ 37`), so `37 ∣ LHS`.
-  apply_fun Ideal.Quotient.mk (Ideal.span <| singleton ((37 : ℕ) : 𝓞 K)) at hmod
+  apply_fun Ideal.Quotient.mk (Ideal.span <| singleton ((37 : ℕ) : 𝓞 K)) at heq
   rw [map_mul, (Ideal.Quotient.eq_zero_iff_dvd _ _).mpr
       (associated_zeta_sub_one_pow_prime hζ).symm.dvd, zero_mul,
-    Ideal.Quotient.eq_zero_iff_dvd] at hmod
+    Ideal.Quotient.eq_zero_iff_dvd] at heq
   -- Steps 3, 5, 6 (`exists_solution'_aux`): `37 ∣ ε₁ x'^37 + ε₂ y'^37` ⟹ `37 ∣ ↑(ε₁/ε₂) - a^37`.
   obtain ⟨a, ha⟩ :=
-    exists_solution'_aux (p := 37) (K := K) (by decide : (37 : ℕ) ≠ 2) hζ hx' hmod
+    exists_solution'_aux (p := 37) (K := K) (by decide : (37 : ℕ) ≠ 2) hζ hx' heq
   -- Step 4 (`exists_dvd_pow_sub_Int_pow`): the freshman's dream collapses `a^37` to a rational
   -- `(b : ℤ)^37 = ((b^37 : ℤ) : 𝓞 K)`.
   obtain ⟨b, hb⟩ :=
