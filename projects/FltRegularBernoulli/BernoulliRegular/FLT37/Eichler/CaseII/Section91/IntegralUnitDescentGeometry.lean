@@ -45,8 +45,7 @@ sharp root-ideal arithmetic), **not carried**.  So the FLT37 Case-II endpoint re
 
 noncomputable section
 
-open NumberField NumberField.IsCMField IsCyclotomicExtension UniqueFactorizationMonoid Polynomial
-open scoped nonZeroDivisors
+open NumberField NumberField.IsCMField IsCyclotomicExtension Polynomial
 
 namespace BernoulliRegular.FLT37.Eichler
 
