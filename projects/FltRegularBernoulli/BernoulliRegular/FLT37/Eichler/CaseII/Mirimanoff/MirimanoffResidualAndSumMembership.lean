@@ -88,7 +88,7 @@ power mod `lv149`;
 
 noncomputable section
 
-open NumberField Finset Polynomial
+open NumberField Polynomial
 
 namespace BernoulliRegular.FLT37.Eichler
 
