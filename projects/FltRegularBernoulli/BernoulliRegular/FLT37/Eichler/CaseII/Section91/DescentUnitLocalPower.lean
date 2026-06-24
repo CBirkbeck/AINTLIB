@@ -72,7 +72,7 @@ descent unit (the mathematically correct descent object), non-circularly from th
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Polynomial
+open NumberField Polynomial
 
 namespace BernoulliRegular.FLT37.Eichler
 
