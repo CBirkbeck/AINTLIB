@@ -23,7 +23,6 @@ compatibility of the truncation approximations modulo powers of the principal
 noncomputable section
 
 open scoped NumberField
-open PowerSeries
 
 namespace BernoulliRegular
 namespace CyclotomicUnits
