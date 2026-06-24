@@ -95,11 +95,8 @@ noncomputable section
 
 set_option maxRecDepth 4000
 
-open NumberField
-
 namespace BernoulliRegular.FLT37.Eichler
 
-open BernoulliRegular (CPlusGenerator CPlusExponentProduct)
 open BernoulliRegular.CyclotomicUnits
 open BernoulliRegular.CyclotomicUnits.PadicLogSetup
 open BernoulliRegular.CyclotomicUnits.PadicLogSetup.DworkParameter
@@ -316,7 +313,7 @@ theorem thirtyseven_mul_eq_castHom_val (Z : ZMod (37 ^ 2)) :
   -- `.val = n % 37`, reducing to a `Nat.ModEq` on `37 * n`.
   obtain ⟨n, hn⟩ : ∃ n : ℕ, Z = ((n : ℕ) : ZMod (37 ^ 2)) := ⟨Z.val, (ZMod.natCast_zmod_val Z).symm⟩
   rw [hn, map_natCast, ZMod.val_natCast]
-  rw [show (37 : ZMod (37 ^ 2)) = ((37 : ℕ) : ZMod (37 ^ 2)) from by push_cast; ring]
+  rw [show (37 : ZMod (37 ^ 2)) = ((37 : ℕ) : ZMod (37 ^ 2)) by push_cast; ring]
   rw [← Nat.cast_mul, ← Nat.cast_mul, ZMod.natCast_eq_natCast_iff]
   -- `37 * n ≡ 37 * (n % 37) [MOD 37²]`: write `n = 37·q + r`, then
   -- `37·n = 37²·q + 37·r ≡ 37·r [MOD 37²]`.
@@ -410,7 +407,7 @@ theorem caseII_E32EigenunitLogPiVal37_of_shape
     have h := caseII_eigenunitDetector_even_of_shape hcol (15 : Fin 17)
     have hv : ((15 : Fin 17) : ℕ) = 15 := by decide
     rw [hv, if_pos rfl] at h
-    rw [show 2 * ((15 : ℕ) + 1) = 32 from by norm_num] at h
+    rw [show 2 * ((15 : ℕ) + 1) = 32 by norm_num] at h
     exact h
 
 open BernoulliRegular (CPlusGenerator) in
@@ -470,7 +467,7 @@ theorem thirtyseven_mul_val_ne_zero {ρ : ZMod 37} (hρ : ρ ≠ 0) :
     · exact absurd (ZMod.val_eq_zero ρ |>.mp h0) hρ
     · exact hpos
   have hval_lt : ρ.val < 37 := ZMod.val_lt ρ
-  rw [show (37 : ZMod (37 ^ 2)) = ((37 : ℕ) : ZMod (37 ^ 2)) from by push_cast; ring,
+  rw [show (37 : ZMod (37 ^ 2)) = ((37 : ℕ) : ZMod (37 ^ 2)) by push_cast; ring,
     ← Nat.cast_mul, Ne, ZMod.natCast_eq_zero_iff]
   -- `37² ∤ 37·ρ.val` because `0 < 37·ρ.val < 37²`.
   intro hdvd
