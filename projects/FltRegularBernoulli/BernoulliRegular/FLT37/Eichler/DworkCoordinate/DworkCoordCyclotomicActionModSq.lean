@@ -63,9 +63,6 @@ noncomputable section
 
 set_option maxRecDepth 4000
 
-open NumberField
-open scoped BigOperators
-
 namespace BernoulliRegular.CyclotomicUnits
 
 open BernoulliRegular.Reflection.Local
