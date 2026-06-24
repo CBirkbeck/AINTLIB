@@ -5,10 +5,6 @@ public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.DworkAssemb
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.DworkWitt
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.LeadingCongruence
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.TraceCoefficientExpansion
-public import Mathlib.Algebra.CharP.Lemmas
-public import Mathlib.Algebra.BigOperators.Ring.Finset
-public import Mathlib.Data.Fintype.Fin
-public import Mathlib.RingTheory.Nilpotent.Basic
 
 /-!
 # Basic Dwork factorization algebra
@@ -20,13 +16,9 @@ Split from `DworkFactorization.lean`.
 
 noncomputable section
 
-open scoped NumberField
-
 namespace BernoulliRegular
 
 namespace Furtwaengler
-
-universe u v w
 
 /-- The finite truncation `∑_{n ≤ N} λ_n T^n` of a Dwork theta series. -/
 def dworkThetaTrunc {A : Type*} [CommSemiring A]
@@ -505,6 +497,12 @@ theorem quotient_mk_mem_pow_succ_eq_zero
   rw [← map_pow, Ideal.Quotient.eq_zero_iff_mem]
   exact Ideal.pow_mem_pow hx (N + 1)
 
+/-- The constant power series at a nilpotent element is substitutable. -/
+private theorem hasSubst_C_of_isNilpotent {A : Type*} [CommRing A] {a : A}
+    (ha : IsNilpotent a) : PowerSeries.HasSubst (PowerSeries.C a : PowerSeries A) := by
+  change IsNilpotent (PowerSeries.constantCoeff (PowerSeries.C a : PowerSeries A))
+  simpa using ha
+
 /-- Substitution of a nilpotent constant into a power series is the finite
 polynomial evaluation at that constant. -/
 theorem powerSeries_subst_C_eq_C_sum_range_of_pow_succ_eq_zero
@@ -512,10 +510,8 @@ theorem powerSeries_subst_C_eq_C_sum_range_of_pow_succ_eq_zero
     (F : PowerSeries A) :
     PowerSeries.subst (PowerSeries.C a) F =
       PowerSeries.C (∑ n ∈ Finset.range (N + 1), PowerSeries.coeff n F * a ^ n) := by
-  have hnil : IsNilpotent a := ⟨N + 1, ha⟩
-  have hsubst : PowerSeries.HasSubst (PowerSeries.C a : PowerSeries A) := by
-    change IsNilpotent (PowerSeries.constantCoeff (PowerSeries.C a : PowerSeries A))
-    simpa using hnil
+  have hsubst : PowerSeries.HasSubst (PowerSeries.C a : PowerSeries A) :=
+    hasSubst_C_of_isNilpotent ⟨N + 1, ha⟩
   ext m
   by_cases hm : m = 0
   · subst m
@@ -560,9 +556,8 @@ theorem powerSeries_trunc_eval₂_mul_of_pow_succ_eq_zero
     (PowerSeries.trunc (N + 1) (F * G)).eval₂ (RingHom.id A) a =
       (PowerSeries.trunc (N + 1) F).eval₂ (RingHom.id A) a *
         (PowerSeries.trunc (N + 1) G).eval₂ (RingHom.id A) a := by
-  have hCa : PowerSeries.HasSubst (PowerSeries.C a : PowerSeries A) := by
-    change IsNilpotent (PowerSeries.constantCoeff (PowerSeries.C a : PowerSeries A))
-    exact ⟨N + 1, by simpa using ha⟩
+  have hCa : PowerSeries.HasSubst (PowerSeries.C a : PowerSeries A) :=
+    hasSubst_C_of_isNilpotent ⟨N + 1, ha⟩
   apply PowerSeries.C_injective
   calc
     PowerSeries.C ((PowerSeries.trunc (N + 1) (F * G)).eval₂ (RingHom.id A) a)
@@ -586,9 +581,8 @@ theorem powerSeries_trunc_eval₂_pow_of_pow_succ_eq_zero
     (F : PowerSeries A) (m : ℕ) :
     (PowerSeries.trunc (N + 1) (F ^ m)).eval₂ (RingHom.id A) a =
       ((PowerSeries.trunc (N + 1) F).eval₂ (RingHom.id A) a) ^ m := by
-  have hCa : PowerSeries.HasSubst (PowerSeries.C a : PowerSeries A) := by
-    change IsNilpotent (PowerSeries.constantCoeff (PowerSeries.C a : PowerSeries A))
-    exact ⟨N + 1, by simpa using ha⟩
+  have hCa : PowerSeries.HasSubst (PowerSeries.C a : PowerSeries A) :=
+    hasSubst_C_of_isNilpotent ⟨N + 1, ha⟩
   apply PowerSeries.C_injective
   calc
     PowerSeries.C ((PowerSeries.trunc (N + 1) (F ^ m)).eval₂ (RingHom.id A) a)
@@ -678,9 +672,8 @@ theorem powerSeries_trunc_eval₂_subst_X_pow_of_pow_succ_eq_zero
         (PowerSeries.subst ((PowerSeries.X : PowerSeries A) ^ r) F)).eval₂
         (RingHom.id A) a =
       (PowerSeries.trunc (N + 1) F).eval₂ (RingHom.id A) (a ^ r) := by
-  have hCa : PowerSeries.HasSubst (PowerSeries.C a : PowerSeries A) := by
-    change IsNilpotent (PowerSeries.constantCoeff (PowerSeries.C a : PowerSeries A))
-    exact ⟨N + 1, by simpa using ha⟩
+  have hCa : PowerSeries.HasSubst (PowerSeries.C a : PowerSeries A) :=
+    hasSubst_C_of_isNilpotent ⟨N + 1, ha⟩
   have hXr : PowerSeries.HasSubst ((PowerSeries.X : PowerSeries A) ^ r) :=
     PowerSeries.HasSubst.X_pow hr
   apply PowerSeries.C_injective
