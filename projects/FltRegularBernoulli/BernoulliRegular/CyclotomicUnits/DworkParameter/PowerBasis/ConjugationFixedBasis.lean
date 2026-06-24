@@ -6,7 +6,7 @@ public import BernoulliRegular.CyclotomicUnits.DworkParameter.PowerBasis.PowerBa
 
 noncomputable section
 
-open scoped NumberField Topology WithZero
+open scoped WithZero
 
 namespace BernoulliRegular
 namespace CyclotomicUnits
@@ -28,7 +28,7 @@ theorem continuous_valuedCompletionCyclotomicEquiv
   let v : Valuation K ℤᵐ⁰ := (lambdaHeightOneSpectrum p K).valuation K
   let σ : K ≃+* K := (cyclotomicSigmaOfUnit (p := p) K a).toRingEquiv
   let w : Valuation K ℤᵐ⁰ := v.comap σ.toRingHom
-  let h : v.IsEquiv w :=
+  have h : v.IsEquiv w :=
     lambdaValuation_isEquiv_comap_cyclotomicSigma (p := p) (K := K) a
   change Continuous fun x ↦
     (((UniformSpace.Completion.mapRingEquiv
@@ -161,24 +161,20 @@ theorem dworkCompleteComplexConj_powerLinearMap
         (dworkParameterPowerLinearMap p K a) =
       dworkParameterPowerLinearMap p K (dworkSignedCoefficients p a) := by
   classical
-  rw [dworkParameterPowerLinearMap_apply, dworkParameterPowerLinearMap_apply]
-  rw [map_sum]
+  rw [dworkParameterPowerLinearMap_apply, dworkParameterPowerLinearMap_apply, map_sum]
   refine Finset.sum_congr rfl ?_
   intro i _hi
   rw [map_mul, Conjugation.dworkCompleteComplexConj_algebraMap_rationalPadicInteger,
     map_pow, Conjugation.dworkCompleteComplexConj_dworkParameter_eq_neg
       (p := p) (K := K) hp_two]
   dsimp [dworkSignedCoefficients]
-  rw [map_mul, map_pow]
-  rw [neg_pow]
-  rw [map_mul]
+  rw [map_mul, map_pow, neg_pow, map_mul]
   have hsign :
       (-1 : DworkCompleteIntegerRing p K) ^ (i : ℕ) =
         algebraMap (ValuedIntegerRing p K) (DworkCompleteIntegerRing p K)
           ((rationalPadicIntegerToValuedInteger (p := p) (K := K)
             (-1 : RationalPadicIntegerRing p)) ^ (i : ℕ)) := by
-    rw [← map_pow]
-    rw [← algebraMap_rationalPadicInteger_dworkComplete_apply (p := p) (K := K)]
+    rw [← map_pow, ← algebraMap_rationalPadicInteger_dworkComplete_apply (p := p) (K := K)]
     simp
   rw [hsign]
   ring_nf
@@ -376,10 +372,8 @@ theorem dworkEvenPowerLinearMap_injective (hp_two : 2 < p) :
       dworkParameterPowerLinearMap p K (dworkEvenCoeffExtend p a) =
         dworkParameterPowerLinearMap p K (dworkEvenCoeffExtend p b) :=
     congrArg Subtype.val hab
-  have hext :=
-    dworkParameterPowerLinearMap_injective (p := p) (K := K) hfull
   ext i
-  have hi := congrFun hext i.1
+  have hi := congrFun (dworkParameterPowerLinearMap_injective (p := p) (K := K) hfull) i.1
   simpa [dworkEvenCoeffExtend, i.2] using hi
 
 theorem dworkEvenPowerLinearMap_surjective (hp_two : 2 < p) :
