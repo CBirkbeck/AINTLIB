@@ -1743,6 +1743,171 @@ theorem relNorm_eq_under (P : Ideal (B (C₁ := C₁) (C₂ := C₂)))
   obtain ⟨Q, hQ⟩ := C₂.exists_smoothPoint_of_isMaximal hm
   rw [relNorm_eq_of_under P hP Q hQ.symm, hQ]
 
+/-- **The `B`-primes over a maximal ideal are nonzero**: every prime `P` of `B` in
+`primesOverFinset p` is `≠ ⊥`.  If `P = ⊥` then, since `C₂.CoordinateRing → B` is injective,
+`P.under = ⊥`, contradicting maximality of `p`.  Supplies the `≠ ⊥` data needed to repackage each
+fibre prime as a `HeightOneSpectrum`.  (`B`-analogue of `primesOverFinset_ne_bot` in
+`PushforwardDivisor.lean`.) -/
+private theorem primesOverFinset_B_ne_bot {p : Ideal C₂.CoordinateRing} [p.IsMaximal]
+    (hp_ne : p ≠ ⊥) (P : Ideal (B (C₁ := C₁) (C₂ := C₂)))
+    (hP : P ∈ IsDedekindDomain.primesOverFinset p (B (C₁ := C₁) (C₂ := C₂))) : P ≠ ⊥ := by
+  rw [IsDedekindDomain.mem_primesOverFinset_iff (B := B (C₁ := C₁) (C₂ := C₂)) hp_ne] at hP
+  intro h_eq
+  apply hp_ne
+  have h_over : p = P.under C₂.CoordinateRing := hP.2.over
+  rw [h_eq, Ideal.under, Ideal.comap_bot_of_injective _
+    (FaithfulSMul.algebraMap_injective C₂.CoordinateRing (B (C₁ := C₁) (C₂ := C₂)))] at h_over
+  exact h_over
+
+/-- **The associated relative-norm power is nonzero (over `B`)**: for a height-one prime `P` of `B`
+and any exponent `k`, the associate of `(relNorm P.asIdeal)^k` is nonzero — the relative norm of a
+nonzero ideal is nonzero (`relNorm_eq_bot_iff`) and powers of a nonzero ideal are nonzero.  Supplies
+the nonvanishing side-condition of `count_finset_prod_factors`.  (`B`-analogue of
+`associates_relNorm_pow_ne_zero`.) -/
+private theorem associates_relNorm_B_pow_ne_zero
+    (P : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂))) (k : ℕ) :
+    Associates.mk ((Ideal.relNorm C₂.CoordinateRing P.asIdeal) ^ k) ≠ 0 := by
+  rw [Associates.mk_ne_zero]
+  apply pow_ne_zero
+  rw [Ne, Ideal.zero_eq_bot, Ideal.relNorm_eq_bot_iff]
+  exact P.ne_bot
+
+set_option maxHeartbeats 1600000 in
+/-- **The relative norm of `span{w}` factors as a support sum of counts (over `B`)**: the
+multiplicity of `m_Q` in `relNorm(span{w})` for `w ∈ B` equals `∑_{P ∈ S} count_{m_Q}((relNorm
+P.asIdeal)^(count_P(span{w})))` for any finset `S` containing the multiplicative support of `P ↦
+P.maxPowDividing(span{w})`.  Rewrite `span{w}` by its height-one factorisation, push `relNorm` and
+`Associates.mk` through the finite product (`map_prod`), and apply `count_finset_prod_factors` (each
+factor is nonzero by `associates_relNorm_B_pow_ne_zero`).  This isolates the product/`count`
+bookkeeping from the per-place geometry.  (`B`-analogue of `count_relNorm_span_eq_sum_support`.) -/
+private theorem count_relNorm_span_B_eq_sum_support (Q : C₂.SmoothPoint)
+    {w : B (C₁ := C₁) (C₂ := C₂)} (hw : w ≠ 0)
+    (S : Finset (IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂))))
+    (hS_supp : Function.mulSupport
+      (fun P : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)) =>
+        P.maxPowDividing (Ideal.span ({w} : Set _))) ⊆ ↑S) :
+    (Associates.mk (C₂.maximalIdealAt Q)).count
+        (Associates.mk (Ideal.relNorm C₂.CoordinateRing (Ideal.span {w}))).factors =
+      ∑ P ∈ S, (Associates.mk (C₂.maximalIdealAt Q)).count
+        (Associates.mk ((Ideal.relNorm C₂.CoordinateRing P.asIdeal) ^
+          ((Associates.mk P.asIdeal).count
+            (Associates.mk (Ideal.span ({w} : Set _))).factors))).factors := by
+  classical
+  set p : Ideal C₂.CoordinateRing := C₂.maximalIdealAt Q with hp_def
+  haveI hpMax : p.IsMaximal := C₂.maximalIdealAt_isMaximal Q
+  have hp_ne : p ≠ ⊥ := C₂.maximalIdealAt_ne_bot Q
+  let vp : IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing :=
+    ⟨p, hpMax.isPrime, hp_ne⟩
+  have h_vp_irr : Irreducible (Associates.mk vp.asIdeal) := vp.associates_irreducible
+  have hI_ne : Ideal.span ({w} : Set (B (C₁ := C₁) (C₂ := C₂))) ≠ 0 := by
+    rw [Ne, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]; exact hw
+  have h_finprod_eq_prod :
+      (∏ᶠ P : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)),
+        P.maxPowDividing (Ideal.span ({w} : Set _))) =
+      ∏ P ∈ S, P.maxPowDividing (Ideal.span ({w} : Set _)) :=
+    finprod_eq_prod_of_mulSupport_subset _ hS_supp
+  conv_lhs =>
+    rw [← Ideal.finprod_heightOneSpectrum_factorization hI_ne, h_finprod_eq_prod,
+      map_prod (Ideal.relNorm C₂.CoordinateRing)]
+  simp_rw [IsDedekindDomain.HeightOneSpectrum.maxPowDividing, map_pow]
+  rw [show Associates.mk (∏ P ∈ S, (Ideal.relNorm C₂.CoordinateRing) P.asIdeal ^
+        (Associates.mk P.asIdeal).count
+          (Associates.mk (Ideal.span ({w} : Set _))).factors) =
+      ∏ P ∈ S, Associates.mk ((Ideal.relNorm C₂.CoordinateRing) P.asIdeal ^
+        (Associates.mk P.asIdeal).count
+          (Associates.mk (Ideal.span ({w} : Set _))).factors) from
+      map_prod (Associates.mkMonoidHom (M := Ideal C₂.CoordinateRing)) _ _]
+  rw [count_finset_prod_factors (fun P _ => associates_relNorm_B_pow_ne_zero P _) h_vp_irr]
+
+set_option maxHeartbeats 1600000 in
+/-- **Per-term count split** of the `relNorm`-factorisation product (over `B`): the count of `m_Q`
+in `(relNorm P.asIdeal)^k` is `k` when `P` lies over `m_Q` and `0` otherwise.  In the matching
+branch `relNorm(P) = m_Q` (via `relNorm_eq_under`, using `LiesOver`), so the count is `k`; in the
+non-matching branch `relNorm(P) = P.under` is a different maximal ideal (realised as a smooth point
+via `exists_smoothPoint_of_isMaximal`), so the count is `0`.  This is the `if-then-else` body that,
+summed over the support finset, collapses the relative norm of the factorisation to the fibre sum.
+(`B`-analogue of `count_factors_relNorm_pow_eq_ite`.) -/
+private theorem count_factors_relNorm_B_pow_eq_ite (Q : C₂.SmoothPoint)
+    (P : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂))) (k : ℕ) :
+    (Associates.mk (C₂.maximalIdealAt Q)).count
+        (Associates.mk ((Ideal.relNorm C₂.CoordinateRing P.asIdeal) ^ k)).factors =
+      if P.asIdeal ∈ IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q)
+          (B (C₁ := C₁) (C₂ := C₂)) then k else 0 := by
+  classical
+  set p : Ideal C₂.CoordinateRing := C₂.maximalIdealAt Q with hp_def
+  haveI hpMax : p.IsMaximal := C₂.maximalIdealAt_isMaximal Q
+  have hp_ne : p ≠ ⊥ := C₂.maximalIdealAt_ne_bot Q
+  let vp : IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing :=
+    ⟨p, hpMax.isPrime, hp_ne⟩
+  have h_vp_irr : Irreducible (Associates.mk vp.asIdeal) := vp.associates_irreducible
+  haveI hPmax : P.asIdeal.IsMaximal := Ideal.IsPrime.isMaximal P.isPrime P.ne_bot
+  haveI hPunder_max : (P.asIdeal.under C₂.CoordinateRing).IsMaximal :=
+    Ideal.isMaximal_comap_of_isIntegral_of_isMaximal P.asIdeal
+  have hrelP : Ideal.relNorm C₂.CoordinateRing P.asIdeal = P.asIdeal.under C₂.CoordinateRing :=
+    relNorm_eq_under P.asIdeal hPmax hPunder_max
+  by_cases h_over : P.asIdeal ∈ IsDedekindDomain.primesOverFinset p (B (C₁ := C₁) (C₂ := C₂))
+  · rw [if_pos h_over]
+    haveI hPlies : P.asIdeal.LiesOver p :=
+      ((IsDedekindDomain.mem_primesOverFinset_iff (B := B (C₁ := C₁) (C₂ := C₂)) hp_ne).mp
+        h_over).2
+    have hunder_eq : P.asIdeal.under C₂.CoordinateRing = p := hPlies.over.symm
+    rw [hrelP, hunder_eq, Associates.mk_pow]
+    change (Associates.mk vp.asIdeal).count (Associates.mk vp.asIdeal ^ _).factors = _
+    rw [Associates.count_pow (by rw [Associates.mk_ne_zero]; exact hp_ne) h_vp_irr,
+      Associates.count_self h_vp_irr, mul_one]
+  · rw [if_neg h_over]
+    have hPne : P.asIdeal.under C₂.CoordinateRing ≠ p := by
+      intro hpe
+      apply h_over
+      rw [IsDedekindDomain.mem_primesOverFinset_iff (B := B (C₁ := C₁) (C₂ := C₂)) hp_ne]
+      exact ⟨P.isPrime, ⟨hpe.symm⟩⟩
+    rw [hrelP, Associates.mk_pow]
+    obtain ⟨Q', hQ'⟩ := C₂.exists_smoothPoint_of_isMaximal hPunder_max
+    have hP'_ne_bot2 : P.asIdeal.under C₂.CoordinateRing ≠ ⊥ := by
+      rw [← hQ']; exact C₂.maximalIdealAt_ne_bot Q'
+    let vP' : IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing :=
+      ⟨_, hPunder_max.isPrime, hP'_ne_bot2⟩
+    have h_vP'_irr : Irreducible (Associates.mk vP'.asIdeal) := vP'.associates_irreducible
+    have h_vp_ne_vP' : (Associates.mk vp.asIdeal) ≠ (Associates.mk vP'.asIdeal) := by
+      intro h_eq
+      apply hPne
+      rw [Associates.mk_eq_mk_iff_associated] at h_eq
+      exact (associated_iff_eq.mp h_eq).symm
+    change (Associates.mk vp.asIdeal).count (Associates.mk vP'.asIdeal ^ _).factors = 0
+    rw [Associates.count_pow (by rw [Associates.mk_ne_zero]; exact hP'_ne_bot2) h_vp_irr,
+      Associates.count_eq_zero_of_ne h_vp_irr h_vP'_irr h_vp_ne_vP', Nat.mul_zero]
+
+/-- **A height-one support sum re-indexes onto a target ideal finset (over `B`)**: summing a term
+`g P.asIdeal` over the height-one primes of `B` in a finset `S` whose ideal lies in a target finset
+`T`, equals `∑_{I ∈ T} g I`, provided a repackaging `toHOS : T → HeightOneSpectrum` with
+`(toHOS I).asIdeal = I` landing back in `S`.  The bijection sends `P ↦ P.asIdeal` with inverse
+`toHOS`.  Purely combinatorial (no algebra); collapses the `relNorm`-factorisation support sum onto
+`primesOverFinset`.  (`B`-analogue of `sum_filter_heightOneSpectrum_eq_sum_of_asIdeal`.) -/
+private theorem sum_filter_heightOneSpectrum_B_eq_sum_of_asIdeal
+    (S : Finset (IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂))))
+    (T : Finset (Ideal (B (C₁ := C₁) (C₂ := C₂))))
+    (toHOS : ∀ I ∈ T, IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)))
+    (htoHOS_asIdeal : ∀ I (hI : I ∈ T), (toHOS I hI).asIdeal = I)
+    (htoHOS_mem : ∀ I (hI : I ∈ T), toHOS I hI ∈ S)
+    (g : Ideal (B (C₁ := C₁) (C₂ := C₂)) → ℕ) :
+    ∑ P ∈ S.filter (fun P => P.asIdeal ∈ T), g P.asIdeal = ∑ I ∈ T, g I := by
+  refine Finset.sum_bij'
+    (i := fun (P : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂))) _ => P.asIdeal)
+    (j := fun (I : Ideal (B (C₁ := C₁) (C₂ := C₂))) hI => toHOS I hI) ?_ ?_ ?_ ?_ ?_
+  · intro P hP
+    exact (Finset.mem_filter.mp hP).2
+  · intro I hI
+    refine Finset.mem_filter.mpr ⟨htoHOS_mem I hI, ?_⟩
+    rw [htoHOS_asIdeal I hI]
+    exact hI
+  · intro P hP
+    apply IsDedekindDomain.HeightOneSpectrum.ext
+    exact htoHOS_asIdeal P.asIdeal (Finset.mem_filter.mp hP).2
+  · intro I hI
+    exact htoHOS_asIdeal I hI
+  · intro P _
+    rfl
+
 /-! ### The per-place norm–divisor count over `B` (T-A2, the core)
 
 The `B`-analogue of `CurveMap.count_relNorm_eq_sum_fiber` (`PushforwardDivisor.lean`): the
@@ -1768,26 +1933,15 @@ theorem count_relNorm_eq_sum_fiber_B {w : B (C₁ := C₁) (C₂ := C₂)} (hw :
   set p : Ideal C₂.CoordinateRing := C₂.maximalIdealAt Q with hp_def
   haveI hpMax : p.IsMaximal := C₂.maximalIdealAt_isMaximal Q
   have hp_ne : p ≠ ⊥ := C₂.maximalIdealAt_ne_bot Q
-  let vp : IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing :=
-    ⟨p, hpMax.isPrime, hp_ne⟩
-  have h_vp_irr : Irreducible (Associates.mk vp.asIdeal) := vp.associates_irreducible
   have hI_ne : Ideal.span ({w} : Set (B (C₁ := C₁) (C₂ := C₂))) ≠ 0 := by
     rw [Ne, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]; exact hw
+  -- The support finset `S`: the actual support of `span{w}` together with the (possibly
+  -- non-dividing) primes over `p`, repackaged as height-one spectra, so both `S`-sums share it.
   have h_supp := Ideal.hasFiniteMulSupport (R := B (C₁ := C₁) (C₂ := C₂)) hI_ne
-  have h_prime_ne_bot : ∀ P ∈ IsDedekindDomain.primesOverFinset p (B (C₁ := C₁) (C₂ := C₂)),
-      P ≠ ⊥ := by
-    intro P hP
-    rw [IsDedekindDomain.mem_primesOverFinset_iff (B := B (C₁ := C₁) (C₂ := C₂)) hp_ne] at hP
-    intro h_eq
-    apply hp_ne
-    have h_over : p = P.under C₂.CoordinateRing := hP.2.over
-    rw [h_eq, Ideal.under, Ideal.comap_bot_of_injective _
-      (FaithfulSMul.algebraMap_injective C₂.CoordinateRing (B (C₁ := C₁) (C₂ := C₂)))] at h_over
-    exact h_over
   let toHOS : ∀ P ∈ IsDedekindDomain.primesOverFinset p (B (C₁ := C₁) (C₂ := C₂)),
       IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)) := fun P hP =>
     ⟨P, ((IsDedekindDomain.mem_primesOverFinset_iff (B := B (C₁ := C₁) (C₂ := C₂)) hp_ne).mp hP).1,
-      h_prime_ne_bot P hP⟩
+      primesOverFinset_B_ne_bot hp_ne P hP⟩
   let sH : Finset (IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂))) :=
     (IsDedekindDomain.primesOverFinset p (B (C₁ := C₁) (C₂ := C₂))).attach.image
       (fun ⟨P, hP⟩ => toHOS P hP)
@@ -1800,96 +1954,20 @@ theorem count_relNorm_eq_sum_fiber_B {w : B (C₁ := C₁) (C₂ := C₂)} (hw :
     simp only [hS_def, Finset.coe_union, Set.mem_union]
     left
     exact h_supp.mem_toFinset.mpr hP
-  have h_finprod_eq_prod :
-      (∏ᶠ P : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)),
-        P.maxPowDividing (Ideal.span ({w} : Set _))) =
-      ∏ P ∈ S, P.maxPowDividing (Ideal.span ({w} : Set _)) :=
-    finprod_eq_prod_of_mulSupport_subset _ hS_supp
-  conv_lhs =>
-    rw [← Ideal.finprod_heightOneSpectrum_factorization hI_ne, h_finprod_eq_prod,
-      map_prod (Ideal.relNorm C₂.CoordinateRing)]
-  simp_rw [IsDedekindDomain.HeightOneSpectrum.maxPowDividing, map_pow]
-  have h_term_ne : ∀ P ∈ S,
-      Associates.mk ((Ideal.relNorm C₂.CoordinateRing P.asIdeal) ^
-        ((Associates.mk P.asIdeal).count
-          (Associates.mk (Ideal.span ({w} : Set _))).factors)) ≠ 0 := by
-    intro P _
-    rw [Associates.mk_ne_zero]
-    apply pow_ne_zero
-    rw [Ne, Ideal.zero_eq_bot, Ideal.relNorm_eq_bot_iff]
-    exact P.ne_bot
-  rw [show Associates.mk (∏ P ∈ S, (Ideal.relNorm C₂.CoordinateRing) P.asIdeal ^
-        (Associates.mk P.asIdeal).count
-          (Associates.mk (Ideal.span ({w} : Set _))).factors) =
-      ∏ P ∈ S, Associates.mk ((Ideal.relNorm C₂.CoordinateRing) P.asIdeal ^
-        (Associates.mk P.asIdeal).count
-          (Associates.mk (Ideal.span ({w} : Set _))).factors) from
-      map_prod (Associates.mkMonoidHom (M := Ideal C₂.CoordinateRing)) _ _]
-  rw [count_finset_prod_factors h_term_ne h_vp_irr]
-  have h_S_split : ∀ P ∈ S,
-      (Associates.mk vp.asIdeal).count
-        (Associates.mk ((Ideal.relNorm C₂.CoordinateRing P.asIdeal) ^
-          ((Associates.mk P.asIdeal).count
-            (Associates.mk (Ideal.span ({w} : Set _))).factors))).factors =
-      if P.asIdeal ∈ IsDedekindDomain.primesOverFinset p (B (C₁ := C₁) (C₂ := C₂)) then
-        (Associates.mk P.asIdeal).count (Associates.mk (Ideal.span ({w} : Set _))).factors
-      else 0 := by
-    intro P _
-    haveI hPmax : P.asIdeal.IsMaximal := Ideal.IsPrime.isMaximal P.isPrime P.ne_bot
-    haveI hPunder_max : (P.asIdeal.under C₂.CoordinateRing).IsMaximal :=
-      Ideal.isMaximal_comap_of_isIntegral_of_isMaximal P.asIdeal
-    have hrelP : Ideal.relNorm C₂.CoordinateRing P.asIdeal = P.asIdeal.under C₂.CoordinateRing :=
-      relNorm_eq_under P.asIdeal hPmax hPunder_max
-    by_cases h_over : P.asIdeal ∈ IsDedekindDomain.primesOverFinset p (B (C₁ := C₁) (C₂ := C₂))
-    · rw [if_pos h_over]
-      haveI hPlies : P.asIdeal.LiesOver p :=
-        ((IsDedekindDomain.mem_primesOverFinset_iff (B := B (C₁ := C₁) (C₂ := C₂)) hp_ne).mp
-          h_over).2
-      have hunder_eq : P.asIdeal.under C₂.CoordinateRing = p := hPlies.over.symm
-      rw [hrelP, hunder_eq, Associates.mk_pow]
-      change (Associates.mk vp.asIdeal).count (Associates.mk vp.asIdeal ^ _).factors = _
-      rw [Associates.count_pow (by rw [Associates.mk_ne_zero]; exact hp_ne) h_vp_irr,
-        Associates.count_self h_vp_irr, mul_one]
-    · rw [if_neg h_over]
-      have hPne : P.asIdeal.under C₂.CoordinateRing ≠ p := by
-        intro hpe
-        apply h_over
-        rw [IsDedekindDomain.mem_primesOverFinset_iff (B := B (C₁ := C₁) (C₂ := C₂)) hp_ne]
-        exact ⟨P.isPrime, ⟨hpe.symm⟩⟩
-      rw [hrelP, Associates.mk_pow]
-      obtain ⟨Q', hQ'⟩ := C₂.exists_smoothPoint_of_isMaximal hPunder_max
-      have hP'_ne_bot2 : P.asIdeal.under C₂.CoordinateRing ≠ ⊥ := by
-        rw [← hQ']; exact C₂.maximalIdealAt_ne_bot Q'
-      let vP' : IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing :=
-        ⟨_, hPunder_max.isPrime, hP'_ne_bot2⟩
-      have h_vP'_irr : Irreducible (Associates.mk vP'.asIdeal) := vP'.associates_irreducible
-      have h_vp_ne_vP' : (Associates.mk vp.asIdeal) ≠ (Associates.mk vP'.asIdeal) := by
-        intro h_eq
-        apply hPne
-        rw [Associates.mk_eq_mk_iff_associated] at h_eq
-        exact (associated_iff_eq.mp h_eq).symm
-      change (Associates.mk vp.asIdeal).count (Associates.mk vP'.asIdeal ^ _).factors = 0
-      rw [Associates.count_pow (by rw [Associates.mk_ne_zero]; exact hP'_ne_bot2) h_vp_irr,
-        Associates.count_eq_zero_of_ne h_vp_irr h_vP'_irr h_vp_ne_vP', Nat.mul_zero]
-  rw [Finset.sum_congr rfl h_S_split, Finset.sum_ite, Finset.sum_const_zero, add_zero]
-  refine Finset.sum_bij'
-    (i := fun (P : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂))) _ => P.asIdeal)
-    (j := fun (P'' : Ideal (B (C₁ := C₁) (C₂ := C₂))) hP'' => toHOS P'' hP'') ?_ ?_ ?_ ?_ ?_
-  · intro P hP
-    exact (Finset.mem_filter.mp hP).2
-  · intro P'' hP''
-    refine Finset.mem_filter.mpr ⟨?_, ?_⟩
-    · simp only [hS_def, Finset.mem_union]
+  -- Factor the count of `m_Q` in `relNorm(span{w})` over the support `S`.
+  rw [count_relNorm_span_B_eq_sum_support Q hw S hS_supp]
+  -- Each term: `count_{m_Q}((relNorm P)^k) = k` if `P` lies over `m_Q`, else `0`.
+  rw [Finset.sum_congr rfl (fun P _ => count_factors_relNorm_B_pow_eq_ite Q P _),
+    Finset.sum_ite, Finset.sum_const_zero, add_zero]
+  -- Re-index the surviving terms (primes over `m_Q`) onto `primesOverFinset`.
+  exact sum_filter_heightOneSpectrum_B_eq_sum_of_asIdeal S
+    (IsDedekindDomain.primesOverFinset p (B (C₁ := C₁) (C₂ := C₂))) toHOS
+    (fun _ _ => rfl)
+    (fun P'' hP'' => by
+      simp only [hS_def, Finset.mem_union]
       right
       simp only [sH, Finset.mem_image, Finset.mem_attach, true_and, Subtype.exists]
-      exact ⟨P'', hP'', rfl⟩
-    · exact hP''
-  · intro P hP
-    apply IsDedekindDomain.HeightOneSpectrum.ext
-    rfl
-  · intro P'' hP''
-    rfl
-  · intro P hP
-    rfl
+      exact ⟨P'', hP'', rfl⟩)
+    (fun P => (Associates.mk P).count (Associates.mk (Ideal.span ({w} : Set _))).factors)
 
 end HasseWeil.Curves.NormConormIntegralClosure
