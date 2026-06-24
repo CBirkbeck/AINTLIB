@@ -2104,46 +2104,51 @@ theorem mPbL_eq_mulByInt_baseChange_kbar [DecidableEq (AlgebraicClosure K)] (hn 
         = HasseWeil.mulByInt_y W₁ n from HasseWeil.mulByInt_pullbackAlgHom_y_gen W₁ n hn,
       functionFieldMap_mulByInt_y_kbar]
 
-/-- **`ψ_L` is `Gal(L/F)`-equivariant** (the full statement on all of `F(E₂_L)`). Reduce, via
-`ringHom_ext_baseL`, to the three generators: on the `L`-constants `algebraMap L _ l` it is the
-`σ`-semilinearity of the Galois action (`galActFunctionField_algebraMap_L`) matched against the
-`L`-linearity of `ψ_L`; on `x_gen`/`y_gen` (which are `functionFieldMap`-images, so Galois-fixed via
-`galActFunctionField_fixes_baseChange`) both sides are the (also Galois-fixed) `bcXgen`/`bcYgen`. -/
-theorem psiL_galEquivariant : GalEquivariant L ((psiL W₁ W₂ φ L)) := by
-  intro σ
-  -- compare the two ring homs `x ↦ psiL (galAct σ x)` and `x ↦ galAct σ (psiL x)`
-  have hfun : (psiL W₁ W₂ φ L).toRingHom.comp (galActFunctionField (⟨W₂.toAffine⟩) L σ).toRingHom =
+/-- **`ψ_L` intertwines the Galois action, at the ring-hom level** (the equivariance engine for a
+*fixed* `σ`): the two `K`-ring homs `x ↦ ψ_L (galAct σ x)` and `x ↦ galAct σ (ψ_L x)` out of
+`F(E₂_L)` coincide. Proven by `ringHom_ext_baseL` on the three generators: on the `L`-constants
+`algebraMap L _ l` it is the `σ`-semilinearity of the Galois action
+(`galActFunctionField_algebraMap_L`) matched against the `L`-linearity of `ψ_L`; on `x_gen`/`y_gen`
+(which are `functionFieldMap`-images, so Galois-fixed via `galActFunctionField_fixes_baseChange`)
+both sides are the (also Galois-fixed) `bcXgen`/`bcYgen`. -/
+private theorem psiL_comp_galActFunctionField_eq (σ : L ≃ₐ[K] L) :
+    (psiL W₁ W₂ φ L).toRingHom.comp (galActFunctionField (⟨W₂.toAffine⟩) L σ).toRingHom =
       (galActFunctionField (⟨W₁.toAffine⟩) L σ).toRingHom.comp (psiL W₁ W₂ φ L).toRingHom := by
-    apply ringHom_ext_baseL W₂ L
-    · -- L-constants
-      intro l
-      show (psiL W₁ W₂ φ L) (galActFunctionField (⟨W₂.toAffine⟩) L σ
-          (algebraMap L _ l)) =
-        galActFunctionField (⟨W₁.toAffine⟩) L σ ((psiL W₁ W₂ φ L) (algebraMap L _ l))
-      rw [galActFunctionField_algebraMap_L]
-      rw [psiL_algebraMap_L, psiL_algebraMap_L, galActFunctionField_algebraMap_L]
-    · -- x_gen of E₂_L : a functionFieldMap-image, hence Galois-fixed
-      show (psiL W₁ W₂ φ L) (galActFunctionField (⟨W₂.toAffine⟩) L σ (x_gen (W₂.baseChange L))) =
-        galActFunctionField (⟨W₁.toAffine⟩) L σ ((psiL W₁ W₂ φ L) (x_gen (W₂.baseChange L)))
-      rw [← functionFieldMap_x_gen, galActFunctionField_fixes_baseChange,
-        functionFieldMap_x_gen]
-      show _ = galActFunctionField (⟨W₁.toAffine⟩) L σ
-        ((bcIsog W₁ W₂ φ L).toCurveMap.pullback (x_gen (W₂.baseChange L)))
-      rw [bcIsog_pullback_x_gen, bcXgen, galActFunctionField_fixes_baseChange]
-      show (bcIsog W₁ W₂ φ L).toCurveMap.pullback (x_gen (W₂.baseChange L)) = _
-      rw [bcIsog_pullback_x_gen]; rfl
-    · -- y_gen of E₂_L
-      show (psiL W₁ W₂ φ L) (galActFunctionField (⟨W₂.toAffine⟩) L σ (y_gen (W₂.baseChange L))) =
-        galActFunctionField (⟨W₁.toAffine⟩) L σ ((psiL W₁ W₂ φ L) (y_gen (W₂.baseChange L)))
-      rw [← functionFieldMap_y_gen, galActFunctionField_fixes_baseChange,
-        functionFieldMap_y_gen]
-      show _ = galActFunctionField (⟨W₁.toAffine⟩) L σ
-        ((bcIsog W₁ W₂ φ L).toCurveMap.pullback (y_gen (W₂.baseChange L)))
-      rw [bcIsog_pullback_y_gen, bcYgen, galActFunctionField_fixes_baseChange]
-      show (bcIsog W₁ W₂ φ L).toCurveMap.pullback (y_gen (W₂.baseChange L)) = _
-      rw [bcIsog_pullback_y_gen]; rfl
-  intro x
-  exact RingHom.congr_fun hfun x
+  apply ringHom_ext_baseL W₂ L
+  · -- L-constants
+    intro l
+    show (psiL W₁ W₂ φ L) (galActFunctionField (⟨W₂.toAffine⟩) L σ
+        (algebraMap L _ l)) =
+      galActFunctionField (⟨W₁.toAffine⟩) L σ ((psiL W₁ W₂ φ L) (algebraMap L _ l))
+    rw [galActFunctionField_algebraMap_L]
+    rw [psiL_algebraMap_L, psiL_algebraMap_L, galActFunctionField_algebraMap_L]
+  · -- x_gen of E₂_L : a functionFieldMap-image, hence Galois-fixed
+    show (psiL W₁ W₂ φ L) (galActFunctionField (⟨W₂.toAffine⟩) L σ (x_gen (W₂.baseChange L))) =
+      galActFunctionField (⟨W₁.toAffine⟩) L σ ((psiL W₁ W₂ φ L) (x_gen (W₂.baseChange L)))
+    rw [← functionFieldMap_x_gen, galActFunctionField_fixes_baseChange,
+      functionFieldMap_x_gen]
+    show _ = galActFunctionField (⟨W₁.toAffine⟩) L σ
+      ((bcIsog W₁ W₂ φ L).toCurveMap.pullback (x_gen (W₂.baseChange L)))
+    rw [bcIsog_pullback_x_gen, bcXgen, galActFunctionField_fixes_baseChange]
+    show (bcIsog W₁ W₂ φ L).toCurveMap.pullback (x_gen (W₂.baseChange L)) = _
+    rw [bcIsog_pullback_x_gen]; rfl
+  · -- y_gen of E₂_L
+    show (psiL W₁ W₂ φ L) (galActFunctionField (⟨W₂.toAffine⟩) L σ (y_gen (W₂.baseChange L))) =
+      galActFunctionField (⟨W₁.toAffine⟩) L σ ((psiL W₁ W₂ φ L) (y_gen (W₂.baseChange L)))
+    rw [← functionFieldMap_y_gen, galActFunctionField_fixes_baseChange,
+      functionFieldMap_y_gen]
+    show _ = galActFunctionField (⟨W₁.toAffine⟩) L σ
+      ((bcIsog W₁ W₂ φ L).toCurveMap.pullback (y_gen (W₂.baseChange L)))
+    rw [bcIsog_pullback_y_gen, bcYgen, galActFunctionField_fixes_baseChange]
+    show (bcIsog W₁ W₂ φ L).toCurveMap.pullback (y_gen (W₂.baseChange L)) = _
+    rw [bcIsog_pullback_y_gen]; rfl
+
+/-- **`ψ_L` is `Gal(L/F)`-equivariant** (the full statement on all of `F(E₂_L)`). Pointwise from the
+ring-hom commutation `psiL_comp_galActFunctionField_eq` (which compares `x ↦ ψ_L (galAct σ x)` with
+`x ↦ galAct σ (ψ_L x)` via `ringHom_ext_baseL` on the three generators). -/
+theorem psiL_galEquivariant : GalEquivariant L ((psiL W₁ W₂ φ L)) := by
+  intro σ x
+  exact RingHom.congr_fun (psiL_comp_galActFunctionField_eq W₁ W₂ φ L σ) x
 
 end TwoCurveBaseChange
 
