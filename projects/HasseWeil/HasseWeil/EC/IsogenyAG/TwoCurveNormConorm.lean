@@ -647,6 +647,78 @@ theorem exists_bPrime_eq_pointValuation_of_notMem_poleLocus
   exact ⟨⟨q, hq_prime, hq_ne⟩,
     bPrime_valuation_eq_pointValuation_of_center P ⟨q, hq_prime, hq_ne⟩ hregB hq_mem_iff⟩
 
+omit [IsAlgClosed F] in
+/-- Pulling back a coordinate-ring element along `φ` agrees with routing it through `B`: for
+`b : F[E₂]`, `φ^*(algebraMap_{F[E₂]→K(E₂)} b) = algebraMap_{B→K(E₁)} (algebraMap_{F[E₂]→B} b)`.
+Both sides equal the composite `algCR1`-image — the LHS via `halg` and the `F[E₂]→K(E₂)→K(E₁)`
+tower, the RHS via the `F[E₂]→B→K(E₁)` integral-closure tower.  (Local helper for
+`placeRestrictionPlaceImage_affine_eq_of_bPrime`.) -/
+private theorem pullback_algebraMap_coordinateRing_eq_algebraMap_bPrime
+    (φ : HasseWeil.Isogeny W₁ W₂)
+    [algKL : Algebra W₂.toAffine.FunctionField W₁.toAffine.FunctionField]
+    [IsScalarTower F W₂.toAffine.FunctionField W₁.toAffine.FunctionField]
+    [algCR1 : Algebra (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing W₁.toAffine.FunctionField]
+    [IsScalarTower (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+      W₂.toAffine.FunctionField W₁.toAffine.FunctionField]
+    [IsScalarTower (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+      (NormConormIntegralClosure.B
+        (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))
+      W₁.toAffine.FunctionField]
+    (halg : ∀ g : W₂.toAffine.FunctionField,
+      algebraMap W₂.toAffine.FunctionField W₁.toAffine.FunctionField g = φ.pullback g)
+    (b : (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing) :
+    φ.pullback (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+        W₂.toAffine.FunctionField b) =
+      algebraMap (NormConormIntegralClosure.B
+        (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))
+        W₁.toAffine.FunctionField
+        (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+          (NormConormIntegralClosure.B
+            (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) b) := by
+  rw [← IsScalarTower.algebraMap_apply (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+    (NormConormIntegralClosure.B
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))
+    W₁.toAffine.FunctionField b, ← halg,
+    IsScalarTower.algebraMap_apply (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+      W₂.toAffine.FunctionField W₁.toAffine.FunctionField b]
+
+omit [IsAlgClosed F] in
+/-- The element `x_gen₂ − Q.x = algebraMap (X − Q.x)` lies in the maximal ideal `m_Q` of `F[E₂]`:
+it evaluates to `Q.x − Q.x = 0` at `Q`, so it is in `ker (evalAt Q) = m_Q`.  (Local helper for
+`placeRestrictionPlaceImage_affine_eq_of_bPrime`.) -/
+private theorem X_sub_x_mem_maximalIdealAt (Q : (W_smooth W₂).SmoothPoint) :
+    (algebraMap (Polynomial F) (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing Polynomial.X -
+        algebraMap F (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing Q.x) ∈
+      (⟨W₂⟩ : SmoothPlaneCurve F).maximalIdealAt Q := by
+  have hx : (⟨W₂⟩ : SmoothPlaneCurve F).evalAt Q
+      (algebraMap (Polynomial F) W₂.toAffine.CoordinateRing Polynomial.X) = Q.x := by
+    rw [show algebraMap (Polynomial F) W₂.toAffine.CoordinateRing Polynomial.X =
+      WeierstrassCurve.Affine.CoordinateRing.mk W₂.toAffine (Polynomial.C Polynomial.X) from rfl]
+    exact (⟨W₂⟩ : SmoothPlaneCurve F).evalAt_x Q
+  have h0 : (⟨W₂⟩ : SmoothPlaneCurve F).evalAt Q
+      (algebraMap (Polynomial F) W₂.toAffine.CoordinateRing Polynomial.X -
+        algebraMap F W₂.toAffine.CoordinateRing Q.x) = 0 :=
+    (map_sub ((⟨W₂⟩ : SmoothPlaneCurve F).evalAt Q) _ _).trans
+      (by rw [hx]; exact sub_eq_zero_of_eq ((⟨W₂⟩ : SmoothPlaneCurve F).evalAt_algebraMap Q Q.x).symm)
+  exact (⟨W₂⟩ : SmoothPlaneCurve F).ker_evalAt Q ▸ RingHom.mem_ker.mpr h0
+
+omit [IsAlgClosed F] in
+/-- The element `y_gen₂ − Q.y = root − Q.y` lies in the maximal ideal `m_Q` of `F[E₂]`: it
+evaluates to `Q.y − Q.y = 0` at `Q`, so it is in `ker (evalAt Q) = m_Q`.  (Local helper for
+`placeRestrictionPlaceImage_affine_eq_of_bPrime`.) -/
+private theorem root_sub_y_mem_maximalIdealAt (Q : (W_smooth W₂).SmoothPoint) :
+    (AdjoinRoot.root W₂.toAffine.polynomial -
+        algebraMap F (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing Q.y) ∈
+      (⟨W₂⟩ : SmoothPlaneCurve F).maximalIdealAt Q := by
+  have hy : (⟨W₂⟩ : SmoothPlaneCurve F).evalAt Q (AdjoinRoot.root W₂.toAffine.polynomial) = Q.y :=
+    (⟨W₂⟩ : SmoothPlaneCurve F).evalAt_y Q
+  have h0 : (⟨W₂⟩ : SmoothPlaneCurve F).evalAt Q
+      (AdjoinRoot.root W₂.toAffine.polynomial -
+        algebraMap F W₂.toAffine.CoordinateRing Q.y) = 0 :=
+    (map_sub ((⟨W₂⟩ : SmoothPlaneCurve F).evalAt Q) _ _).trans
+      (by rw [hy]; exact sub_eq_zero_of_eq ((⟨W₂⟩ : SmoothPlaneCurve F).evalAt_algebraMap Q Q.y).symm)
+  exact (⟨W₂⟩ : SmoothPlaneCurve F).ker_evalAt Q ▸ RingHom.mem_ker.mpr h0
+
 /-! ### The point-map image of a `B`-prime over `m_Q` is `Q` (the fibre matching, value-level)
 
 For a `B`-prime `v` lying over the affine place `m_Q` of `E₂`, the point `P` of `E₁` cut out by
@@ -701,14 +773,8 @@ theorem placeRestrictionPlaceImage_affine_eq_of_bPrime
         W₁.toAffine.FunctionField
         (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
           (NormConormIntegralClosure.B
-            (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) b) := by
-    intro b
-    rw [← IsScalarTower.algebraMap_apply (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
-      (NormConormIntegralClosure.B
-        (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))
-      W₁.toAffine.FunctionField b, ← halg,
-      IsScalarTower.algebraMap_apply (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
-        W₂.toAffine.FunctionField W₁.toAffine.FunctionField b]
+            (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) b) :=
+    fun b => pullback_algebraMap_coordinateRing_eq_algebraMap_bPrime φ halg b
   -- A coordinate-ring element `b ∈ m_Q` pulls back to a `B`-element of `v.asIdeal`, so it has
   -- `pointValuation P`-value `< 1`.
   have hkey : ∀ b : (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing,
@@ -729,29 +795,10 @@ theorem placeRestrictionPlaceImage_affine_eq_of_bPrime
   -- `x_gen₂ − Q.x = algebraMap (X − Q.x)`, `X − Q.x ∈ m_Q`; pull back ⟹ `EvaluatesTo P (φ^*x_gen₂) Q.x`.
   have hbx_mem : (algebraMap (Polynomial F) (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing Polynomial.X -
       algebraMap F (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing Q.x) ∈
-      (⟨W₂⟩ : SmoothPlaneCurve F).maximalIdealAt Q := by
-    have hx : (⟨W₂⟩ : SmoothPlaneCurve F).evalAt Q
-        (algebraMap (Polynomial F) W₂.toAffine.CoordinateRing Polynomial.X) = Q.x := by
-      rw [show algebraMap (Polynomial F) W₂.toAffine.CoordinateRing Polynomial.X =
-        WeierstrassCurve.Affine.CoordinateRing.mk W₂.toAffine (Polynomial.C Polynomial.X) from rfl]
-      exact (⟨W₂⟩ : SmoothPlaneCurve F).evalAt_x Q
-    have h0 : (⟨W₂⟩ : SmoothPlaneCurve F).evalAt Q
-        (algebraMap (Polynomial F) W₂.toAffine.CoordinateRing Polynomial.X -
-          algebraMap F W₂.toAffine.CoordinateRing Q.x) = 0 :=
-      (map_sub ((⟨W₂⟩ : SmoothPlaneCurve F).evalAt Q) _ _).trans
-        (by rw [hx]; exact sub_eq_zero_of_eq ((⟨W₂⟩ : SmoothPlaneCurve F).evalAt_algebraMap Q Q.x).symm)
-    exact (⟨W₂⟩ : SmoothPlaneCurve F).ker_evalAt Q ▸ RingHom.mem_ker.mpr h0
+      (⟨W₂⟩ : SmoothPlaneCurve F).maximalIdealAt Q := X_sub_x_mem_maximalIdealAt Q
   have hby_mem : (AdjoinRoot.root W₂.toAffine.polynomial -
       algebraMap F (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing Q.y) ∈
-      (⟨W₂⟩ : SmoothPlaneCurve F).maximalIdealAt Q := by
-    have hy : (⟨W₂⟩ : SmoothPlaneCurve F).evalAt Q (AdjoinRoot.root W₂.toAffine.polynomial) = Q.y :=
-      (⟨W₂⟩ : SmoothPlaneCurve F).evalAt_y Q
-    have h0 : (⟨W₂⟩ : SmoothPlaneCurve F).evalAt Q
-        (AdjoinRoot.root W₂.toAffine.polynomial -
-          algebraMap F W₂.toAffine.CoordinateRing Q.y) = 0 :=
-      (map_sub ((⟨W₂⟩ : SmoothPlaneCurve F).evalAt Q) _ _).trans
-        (by rw [hy]; exact sub_eq_zero_of_eq ((⟨W₂⟩ : SmoothPlaneCurve F).evalAt_algebraMap Q Q.y).symm)
-    exact (⟨W₂⟩ : SmoothPlaneCurve F).ker_evalAt Q ▸ RingHom.mem_ker.mpr h0
+      (⟨W₂⟩ : SmoothPlaneCurve F).maximalIdealAt Q := root_sub_y_mem_maximalIdealAt Q
   -- the two `EvaluatesTo` facts at `P`
   -- `x_gen₂ = algebraMap_{F[E₂]→K(E₂)} (algebraMap_{F[X]→F[E₂]} X)`; `y_gen₂ = algebraMap (root)`.
   have hxgen : x_gen W₂ = algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
