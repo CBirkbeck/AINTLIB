@@ -22,7 +22,7 @@ with `u` a `σ`-anti unit, hence `u = (-1)^k·ζ^n` (`caseII_sigma_anti_unit_cla
 
 @[expose] public section
 
-open NumberField IsCyclotomicExtension NumberField.IsCMField Polynomial
+open NumberField IsCyclotomicExtension Polynomial
 open scoped nonZeroDivisors
 
 namespace BernoulliRegular.FLT37.LehmerVandiver.CaseII
@@ -45,8 +45,7 @@ theorem caseII_sigma_anti_unit_classification {μ : (𝓞 K)ˣ}
   have hscoe : (s : 𝓞 (NumberField.maximalRealSubfield K)) *
       (s : 𝓞 (NumberField.maximalRealSubfield K)) = 1 := by
     have h := congrArg Units.val hs2
-    rw [Units.val_pow_eq_pow_val, Units.val_one, sq] at h
-    exact h
+    rwa [Units.val_pow_eq_pow_val, Units.val_one, sq] at h
   rcases mul_self_eq_one_iff.mp hscoe with h | h
   · refine ⟨m, 0, ?_⟩
     have hs1 : s = 1 := Units.ext h
@@ -182,7 +181,7 @@ theorem caseII_isCoprime_comap_int37 {m : ℕ} (D : RealCaseIIData37 K m) (hp : 
   set I := rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy η *
     rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy (caseII_etaInv η) with hI
   have hI_stable : I.map σ = I := D.map_rootIdeal_mul_conj hp η
-  have hinv : ∀ x : 𝓞 K, σ (σ x) = x := fun x ↦ by
+  have hinv : ∀ x : 𝓞 K, σ (σ x) = x := fun x => by
     apply RingOfIntegers.ext
     simp only [hσ, RingEquiv.toRingHom_eq_coe, RingHom.coe_coe, AlgEquiv.coe_ringEquiv,
       NumberField.IsCMField.coe_ringOfIntegersComplexConj,
@@ -194,15 +193,13 @@ theorem caseII_isCoprime_comap_int37 {m : ℕ} (D : RealCaseIIData37 K m) (hp : 
   -- `a + σa ∈ I`, `σ`-fixed, so it descends.
   have haσ_I : a + σ a ∈ I := I.add_mem ha (hI_stable ▸ Ideal.mem_map_of_mem σ ha)
   have haσ_fix : NumberField.IsCMField.ringOfIntegersComplexConj K (a + σ a) = a + σ a := by
-    have h : σ (a + σ a) = a + σ a := by rw [map_add, hinv]; ring
-    exact h
+    show σ (a + σ a) = a + σ a; rw [map_add, hinv]; ring
   obtain ⟨aP, haP⟩ := Set.mem_range.mp
     ((NumberField.IsCMField.ringOfIntegersComplexConj_eq_self_iff (K := K) (a + σ a)).mp haσ_fix)
   -- `c = 37 * d`, so `c + σc = 37 * (d + σd)`, also descending.
   obtain ⟨d, rfl⟩ := Ideal.mem_span_singleton.mp hc
   have hdσ_fix : NumberField.IsCMField.ringOfIntegersComplexConj K (d + σ d) = d + σ d := by
-    have h : σ (d + σ d) = d + σ d := by rw [map_add, hinv]; ring
-    exact h
+    show σ (d + σ d) = d + σ d; rw [map_add, hinv]; ring
   obtain ⟨eP, heP⟩ := Set.mem_range.mp
     ((NumberField.IsCMField.ringOfIntegersComplexConj_eq_self_iff (K := K) (d + σ d)).mp hdσ_fix)
   have hσ37 : σ (37 : 𝓞 K) = 37 := map_ofNat σ 37
@@ -341,9 +338,8 @@ theorem caseII_sigma_stable_anchored_real_identity {m : ℕ} (D : RealCaseIIData
         (rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy D.etaZero *
           rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy (caseII_etaInv D.etaZero)) := by
   have h := congrArg (Ideal.map (algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K))) hxy
-  rw [Ideal.map_mul, Ideal.map_mul, Ideal.map_span, Set.image_singleton, hJ,
+  rwa [Ideal.map_mul, Ideal.map_mul, Ideal.map_span, Set.image_singleton, hJ,
     Ideal.map_span, Set.image_singleton, hJ0] at h
-  exact h
 
 /-- **The σ-stable anchored real-generator identity (fractional form).** The fractional-ideal
 restatement of `caseII_sigma_stable_anchored_real_identity`: in `FractionalIdeal (𝓞 K)⁰ K`,
@@ -373,7 +369,7 @@ theorem caseII_sigma_stable_anchored_real_frac_mul {m : ℕ} (D : RealCaseIIData
             rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy (caseII_etaInv D.etaZero) :
           Ideal (𝓞 K)) : FractionalIdeal (𝓞 K)⁰ K) := by
   have hint := caseII_sigma_stable_anchored_real_identity D hp η hJ hJ0 hxy
-  have h := congrArg (fun I : Ideal (𝓞 K) ↦ (↑I : FractionalIdeal (𝓞 K)⁰ K)) hint
+  have h := congrArg (fun I : Ideal (𝓞 K) => (↑I : FractionalIdeal (𝓞 K)⁰ K)) hint
   simpa only [FractionalIdeal.coeIdeal_mul, FractionalIdeal.coeIdeal_span_singleton] using h
 
 end BernoulliRegular.FLT37.LehmerVandiver.CaseII
