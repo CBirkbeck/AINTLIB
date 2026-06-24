@@ -4,11 +4,7 @@ import BernoulliRegular.CyclotomicUnits.KummerLogNormalization.NormalizedUnitLog
 
 noncomputable section
 
-open NumberField
-open NumberField.IsCMField
-open IsCyclotomicExtension
-open BernoulliRegular.Reflection.Local
-open scoped BigOperators NumberField
+open scoped BigOperators
 
 namespace BernoulliRegular
 namespace CyclotomicUnits
@@ -572,13 +568,9 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_coeff_eq_of_pos_le
               x ^ ((d - 1) + 1))).coeff d := by
         refine Finset.sum_eq_single (d - 1) ?_ ?_
         · intro b hb hbne
-          have hbne' : b + 1 ≠ d := by
-            intro hbd
-            apply hbne
-            omega
+          have hbne' : b + 1 ≠ d := by omega
           simp [Polynomial.coeff_monomial, hbne']
-        · intro hnot
-          exact False.elim (hnot hdmem)
+        · exact fun hnot ↦ absurd hdmem hnot
     _ =
       (PowerSeries.coeff (R := ValuedIntegerRing p K) d)
         (integralArtinHasseNormalizedExpMinusOneSeries p K) * x ^ d := by
@@ -722,7 +714,7 @@ theorem coeff_samePrimeFiniteArtinHasseNormalizedCoordQuotientSeries_pow
         rfl
     _ =
       (PowerSeries.coeff (R := A) d) (PowerSeries.rescale xbar (F ^ n)) := by
-        rw [(map_pow (PowerSeries.rescale xbar) F n).symm]
+        rw [← map_pow (PowerSeries.rescale xbar) F n]
     _ =
       xbar ^ d * (PowerSeries.coeff (R := A) d) (F ^ n) := by
         rw [PowerSeries.coeff_rescale]
