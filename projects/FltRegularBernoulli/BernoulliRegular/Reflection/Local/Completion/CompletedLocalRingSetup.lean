@@ -54,19 +54,19 @@ lemma exists_one_add_mul_pow_prime_eq_of_dvd
     calc
       (u * x) ^ i * q.choose i =
           (u * x) ^ (2 + (i - 2)) * q.choose i := by rw [Nat.add_sub_of_le hi']
-      _ = u ^ 2 * x ^ 2 * (u * x) ^ (i - 2) * q.choose i := by ring_nf
+      _ = u ^ 2 * x ^ 2 * (u * x) ^ (i - 2) * q.choose i := by ring
       _ = u ^ 2 * x ^ 2 * (u * x) ^ (i - 2) * (q * (q.choose i / q) : ℕ) := by
         rw [Nat.mul_div_cancel' (hq.dvd_choose_self hi.2.2.1 (by omega))]
       _ = u ^ 2 * x ^ 2 * (u * x) ^ (i - 2) * q * (q.choose i / q : ℕ) := by
         simp only [Nat.cast_mul]
-        ring_nf
+        ring
       _ = q * u * (v * (a * x ^ 2 * ((u * x) ^ (i - 2) * (q.choose i / q : ℕ)))) := by
         rw [ha]
         ring
   · calc
       (u * x) ^ q * (q.choose q) = u ^ q * x ^ q := by simp [Nat.choose_self, mul_pow]
       _ = q * u * v * b * x ^ q := by rw [hb]
-      _ = q * u * (v * (b * x ^ q)) := by ring_nf
+      _ = q * u * (v * (b * x ^ q)) := by ring
 
 end Binomial
 
@@ -92,12 +92,12 @@ private theorem factor_evalₐ_pow_le {m n : ℕ} (hmn : m ≤ n)
 private theorem mem_cotangentIdeal_iff_factor_pow_one_eq_zero (q : R ⧸ I ^ 2) :
     q ∈ I.cotangentIdeal ↔
       Ideal.Quotient.factor
-        (show I ^ 2 ≤ I ^ 1 by exact Ideal.pow_le_pow_right (by decide : 1 ≤ 2)) q = 0 := by
+        (show I ^ 2 ≤ I ^ 1 by exact Ideal.pow_le_pow_right one_le_two) q = 0 := by
   induction q using Quotient.inductionOn' with
   | h r =>
     change Ideal.Quotient.mk (I ^ 2) r ∈ I.cotangentIdeal ↔
       Ideal.Quotient.factor
-        (show I ^ 2 ≤ I ^ 1 by exact Ideal.pow_le_pow_right (by decide : 1 ≤ 2))
+        (show I ^ 2 ≤ I ^ 1 by exact Ideal.pow_le_pow_right one_le_two)
         (Ideal.Quotient.mk (I ^ 2) r) = 0
     rw [Ideal.mk_mem_cotangentIdeal]
     change r ∈ I ↔ Ideal.Quotient.mk (I ^ 1) r = 0
@@ -428,7 +428,7 @@ theorem completedQuotientSquareEquivLocalQuotientSquare_mem_cotangentIdeal
   change completedQuotientSquareEquivLocalQuotientSquare (p := p) (K := K)
       (Ideal.Quotient.mk (Mhat ^ 2) x) ∈ M.cotangentIdeal
   rw [completedQuotientSquareEquivLocalQuotientSquare_mk,
-    mem_cotangentIdeal_iff_factor_pow_one_eq_zero, factor_evalₐ_pow_le M (by decide : 1 ≤ 2)]
+    mem_cotangentIdeal_iff_factor_pow_one_eq_zero, factor_evalₐ_pow_le M one_le_two]
   have hxker : x ∈ RingHom.ker (AdicCompletion.evalₐ M 1).toRingHom := by
     rw [← completedLocalCyclotomicMaximalIdeal_pow_eq_ker_evalₐ (p := p) (K := K) 1]
     simpa [Mhat] using hx
