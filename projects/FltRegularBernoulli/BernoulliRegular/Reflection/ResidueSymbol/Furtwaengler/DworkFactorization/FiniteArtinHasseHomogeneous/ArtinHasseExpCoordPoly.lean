@@ -1,9 +1,7 @@
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.DworkFactorization.FiniteArtinHasseFormal
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.DworkFactorization.FiniteArtinHasseLog
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.DworkFactorization.FiniteLogHomogeneous
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.DworkFactorization.FiniteLogProducts
 
 /-!
 # Homogeneous expansion of the finite Artin-Hasse logarithm input
@@ -54,7 +52,6 @@ theorem finiteArtinHasseExpCoordPoly_eval_one (N : ℕ) (x : 𝓞 R') :
 theorem finiteArtinHasseExpCoordPoly_coeff_mem_Q_pow
     (N : ℕ) {x : 𝓞 R'} (hx : x ∈ F.Q) (d : ℕ) :
     (F.finiteArtinHasseExpCoordPoly N x).coeff d ∈ F.Q ^ d := by
-  classical
   rw [finiteArtinHasseExpCoordPoly, Polynomial.finsetSum_coeff]
   refine Ideal.sum_mem _ ?_
   intro n _hn
@@ -66,14 +63,12 @@ theorem finiteArtinHasseExpCoordPoly_coeff_mem_Q_pow
 
 theorem finiteArtinHasseExpCoordPoly_coeff_zero (N : ℕ) (x : 𝓞 R') :
     (F.finiteArtinHasseExpCoordPoly N x).coeff 0 = 0 := by
-  classical
   simp [finiteArtinHasseExpCoordPoly, Polynomial.coeff_monomial]
 
 theorem finiteArtinHasseExpCoordPoly_coeff_eq_of_pos_le
     (N d : ℕ) (x : 𝓞 R') (hd0 : d ≠ 0) (hdN : d ≤ N) :
     (F.finiteArtinHasseExpCoordPoly N x).coeff d =
       dworkCoeffArtinHasseAtTo F.toConcreteStickelbergerSetup x N d := by
-  classical
   have hdpos : 0 < d := Nat.pos_of_ne_zero hd0
   have hdmem : d - 1 ∈ Finset.range N := Finset.mem_range.mpr (by lia)
   rw [finiteArtinHasseExpCoordPoly, Polynomial.finsetSum_coeff]
@@ -99,7 +94,6 @@ theorem finiteArtinHasseExpCoordPoly_coeff_sub_coeff_mem_Q_pow
     (F.finiteArtinHasseExpCoordPoly N x).coeff d -
         (F.finiteArtinHasseExpCoordPoly M x).coeff d ∈
       F.Q ^ (if d ≤ N then N + 1 + d else d) := by
-  classical
   by_cases hdN : d ≤ N
   · rw [if_pos hdN]
     by_cases hd0 : d = 0
@@ -186,7 +180,6 @@ theorem quotient_mk_finiteArtinHasseExpCoordPoly_coeff_eq
         ((F.finiteArtinHasseExpCoordPoly N x).coeff d) =
       (PowerSeries.coeff (R := 𝓞 R' ⧸ F.Q ^ (N + 1)) d)
         (F.finiteArtinHasseExpCoordQuotientSeries N x) := by
-  classical
   let A : Type w := 𝓞 R' ⧸ F.Q ^ (N + 1)
   let QN : Ideal (𝓞 R') := F.Q ^ (N + 1)
   let S := F.toConcreteStickelbergerSetup
@@ -227,30 +220,11 @@ theorem quotient_mk_finiteArtinHasseExpCoordPoly_coeff_eq
       (PowerSeries.coeff (R := A) 0) (Eps - 1) * Ideal.Quotient.mk QN (x ^ 0)
     rw [hconst]
     simp
-  · have hdpos : 0 < d := Nat.pos_of_ne_zero hd0
-    by_cases hdN : d ≤ N
-    · have hdmem : d - 1 ∈ Finset.range N :=
-        Finset.mem_range.mpr (by lia)
-      have hcoeff_poly :
+  · by_cases hdN : d ≤ N
+    · have hcoeff_poly :
           (F.finiteArtinHasseExpCoordPoly N x).coeff d =
-            dworkCoeffArtinHasseAtTo S x N d := by
-        rw [finiteArtinHasseExpCoordPoly, Polynomial.finsetSum_coeff]
-        calc
-          (∑ n ∈ Finset.range N,
-              ((Polynomial.monomial (n + 1))
-                (dworkCoeffArtinHasseAtTo F.toConcreteStickelbergerSetup x N (n + 1))
-                  ).coeff d)
-              =
-            ((Polynomial.monomial ((d - 1) + 1))
-              (dworkCoeffArtinHasseAtTo F.toConcreteStickelbergerSetup x N
-                ((d - 1) + 1))).coeff d := by
-              refine Finset.sum_eq_single_of_mem (d - 1) hdmem ?_
-              intro n hn hne
-              have hne_degree : n + 1 ≠ d := fun h =>
-                hne (by lia)
-              simp [Polynomial.coeff_monomial, hne_degree]
-          _ = dworkCoeffArtinHasseAtTo S x N d := by
-              simp [Nat.sub_add_cancel hdpos, S]
+            dworkCoeffArtinHasseAtTo S x N d :=
+        F.finiteArtinHasseExpCoordPoly_coeff_eq_of_pos_le N d x hd0 hdN
       have hcoeff_E :
           (PowerSeries.coeff (R := A) d) (Eps - 1) =
             S.rIntegralRatToQuotient N
@@ -318,7 +292,6 @@ theorem quotient_mk_finiteArtinHasseExpCoordPoly_pow_coeff_eq
         (((F.finiteArtinHasseExpCoordPoly N x) ^ n).coeff d) =
       (PowerSeries.coeff (R := 𝓞 R' ⧸ F.Q ^ (N + 1)) d)
         ((F.finiteArtinHasseExpCoordQuotientSeries N x) ^ n) := by
-  classical
   let A : Type w := 𝓞 R' ⧸ F.Q ^ (N + 1)
   let QN : Ideal (𝓞 R') := F.Q ^ (N + 1)
   let P : Polynomial (𝓞 R') := F.finiteArtinHasseExpCoordPoly N x
@@ -506,7 +479,6 @@ theorem finiteArtinHasseExpCoordPoly_pow_coeff_sub_coeff_mem_Q_pow
     ((F.finiteArtinHasseExpCoordPoly N x) ^ n).coeff d -
         ((F.finiteArtinHasseExpCoordPoly M x) ^ n).coeff d ∈
       F.Q ^ (if d < N + n then N + 1 + d else d) := by
-  classical
   induction n generalizing d with
   | zero =>
       simp
@@ -587,6 +559,13 @@ theorem finiteArtinHasseExpCoordPoly_pow_coeff_sub_coeff_mem_Q_pow
         exact (F.Q ^ (if d < N + (n + 1) then N + 1 + d else d)).add_mem
           hterm₁ hterm₂
 
+/-- The Artin-Hasse denominator exponent is bounded by the ambient degree. -/
+theorem finiteArtinHasse_den_exponent_le {n d : ℕ} (hn : n ≠ 0) (hnd : n ≤ d) :
+    n.factorization ℓ * (ℓ - 1) ≤ d := by
+  have h := Nat.factorization_mul_pred_le_pred
+    (ell := ℓ) (n := n) (Fact.out : Nat.Prime ℓ) hn
+  lia
+
 /-- Unsigned homogeneous finite-log term attached to the degree-`d`
 coefficient of `(E_N(x)-1)^n`. -/
 noncomputable def finiteArtinHasseExpCoordLogHomogeneousCore
@@ -597,11 +576,7 @@ noncomputable def finiteArtinHasseExpCoordLogHomogeneousCore
       F.finiteLogNatDivEvalAtDegree N n d hn
         (((F.finiteArtinHasseExpCoordPoly N x) ^ n).coeff d)
         (F.finiteArtinHasseExpCoordPoly_pow_coeff_mem_Q_pow N hx n d)
-        (by
-          have h :=
-            Nat.factorization_mul_pred_le_pred
-              (ell := ℓ) (n := n) (Fact.out : Nat.Prime ℓ) hn
-          lia)
+        (finiteArtinHasse_den_exponent_le (ℓ := ℓ) hn hnd)
     else 0
 
 /-- Signed homogeneous finite-log term attached to the degree-`d`
@@ -611,13 +586,6 @@ noncomputable def finiteArtinHasseExpCoordLogHomogeneousTerm
     𝓞 R' ⧸ F.Q ^ (N + 1) :=
   ((-1 : 𝓞 R' ⧸ F.Q ^ (N + 1)) ^ (n + 1)) *
     F.finiteArtinHasseExpCoordLogHomogeneousCore N n d x hx
-
-/-- The Artin-Hasse denominator exponent is bounded by the ambient degree. -/
-theorem finiteArtinHasse_den_exponent_le {n d : ℕ} (hn : n ≠ 0) (hnd : n ≤ d) :
-    n.factorization ℓ * (ℓ - 1) ≤ d := by
-  have h := Nat.factorization_mul_pred_le_pred
-    (ell := ℓ) (n := n) (Fact.out : Nat.Prime ℓ) hn
-  lia
 
 theorem finiteArtinHasseExpCoordLogHomogeneousTerm_eq_signed_eval
     (N n d : ℕ) {x : 𝓞 R'} (hx : x ∈ F.Q) (hn : n ≠ 0) (hnd : n ≤ d) :
@@ -656,7 +624,6 @@ theorem quotient_mk_finiteArtinHasseLogHomogeneousNumerator_factorial_weighted_s
       Ideal.Quotient.mk (F.Q ^ (N + 1)) (x ^ d) *
         F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N
           (∑ n ∈ Finset.Icc 1 d, FiniteArtinHasseFormal.factorialWeightedLogCoeff ℓ d n) := by
-  classical
   let A : Type w := 𝓞 R' ⧸ F.Q ^ (N + 1)
   let QN : Ideal (𝓞 R') := F.Q ^ (N + 1)
   let S := F.toConcreteStickelbergerSetup
@@ -722,7 +689,6 @@ theorem finiteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_precision
         (F.finiteArtinHasseExpCoordLogHomogeneousNumerator N n d x -
           F.finiteArtinHasseExpCoordLogHomogeneousNumerator M n d x)) ∈
       F.Q ^ (d.factorial.factorization ℓ * (ℓ - 1) + (N + 1)) := by
-  classical
   let s : ℕ := n.factorization ℓ * (ℓ - 1)
   let u : ℕ := if d < N + n then N + 1 + d else d
   have hn0 : n ≠ 0 := Nat.ne_zero_of_lt hn1
@@ -801,7 +767,6 @@ theorem finiteArtinHasseLogHomogeneousNumerator_factorial_weighted_sum_mem_Q_pow
       ((d.factorial / n : ℕ) : 𝓞 R') *
         F.finiteArtinHasseExpCoordLogHomogeneousNumerator N n d x) ∈
       F.Q ^ (d.factorial.factorization ℓ * (ℓ - 1) + (N + 1)) := by
-  classical
   let D : ℕ := d.factorial.factorization ℓ * (ℓ - 1)
   let M : ℕ := D + N
   let I : Ideal (𝓞 R') := F.Q ^ (D + (N + 1))
@@ -864,7 +829,6 @@ theorem finiteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_pow_mem_Q
         (F.finiteArtinHasseExpCoordLogHomogeneousNumerator N n (ℓ ^ r) x -
           if n = ℓ ^ r then x ^ (ℓ ^ r) else 0)) ∈
       F.Q ^ ((ℓ ^ r).factorial.factorization ℓ * (ℓ - 1) + (N + 1)) := by
-  classical
   let d : ℕ := ℓ ^ r
   let D : ℕ := d.factorial.factorization ℓ * (ℓ - 1)
   let M : ℕ := D + N
@@ -910,12 +874,10 @@ theorem finiteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_pow_mem_Q
         ((d.factorial / d : ℕ) : 𝓞 R') * target d := by
           refine Finset.sum_eq_single (s := Finset.Icc 1 d) (a := d)
             (f := fun n => ((d.factorial / n : ℕ) : 𝓞 R') * target n) ?main ?not_mem
-          · intro n hn hne
-            have hne' : n ≠ d := fun h =>
-              hne h
-            simp [target, hne']
+          · intro n _hn hne
+            simp [target, hne]
           · intro hd_not
-            exact False.elim (hd_not hd_mem)
+            exact absurd hd_mem hd_not
       _ = ((d.factorial / d : ℕ) : 𝓞 R') * x ^ d := by
           simp [target]
   have hsumM_sub_M :
