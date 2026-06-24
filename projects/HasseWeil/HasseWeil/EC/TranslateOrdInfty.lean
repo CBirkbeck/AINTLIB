@@ -287,6 +287,27 @@ private theorem valuation_coordYInFunctionField_eq_ordAtInftyValuation
       (by rw [← h_yeq]; exact (W_smooth W).ordAtInfty_coordYInFunctionField)]
   norm_num
 
+/-- **Two valuations agreeing on factors agree on the product.** If `w` and `v`
+take the same value on `a` and on `b`, they take the same value on `a * b`
+(multiplicativity on both sides). -/
+private theorem valuation_eq_mul_of_eq_of_eq
+    (w v : Valuation KE (WithZero (Multiplicative ℤ))) {a b : KE}
+    (ha : w a = v a) (hb : w b = v b) : w (a * b) = v (a * b) := by
+  rw [map_mul w, map_mul v, ha, hb]
+
+/-- **Two valuations agreeing on distinctly-valued summands agree on the sum.**
+If `w` and `v` agree on `a` and on `b`, and `v` separates them (`v a ≠ v b`),
+then both valuations read off `a + b` as the *same* maximum of agreeing
+summand-values, so they agree on `a + b` too (strict non-archimedean
+dominance via `map_add_of_distinct_val`). -/
+private theorem valuation_eq_add_of_eq_of_eq_of_distinct
+    (w v : Valuation KE (WithZero (Multiplicative ℤ))) {a b : KE}
+    (ha : w a = v a) (hb : w b = v b) (h_dist : v a ≠ v b) :
+    w (a + b) = v (a + b) := by
+  have h_dist_w : w a ≠ w b := by rw [ha, hb]; exact h_dist
+  rw [Valuation.map_add_of_distinct_val w h_dist_w,
+    Valuation.map_add_of_distinct_val v h_dist, ha, hb]
+
 /-- **Extension from generators to all of `K(E)`.** A valuation `w` that agrees
 with `ordAtInftyValuation` on every `F(x)`-rational image (`h_rat`) and on the
 coordinate function `coordYInFunctionField` (`h_coordY`) agrees everywhere. The
@@ -322,32 +343,11 @@ private theorem eq_ordAtInftyValuation_of_agree_fracPolyX_coordY
       rw [(hf : f = p • (1 : (W_smooth W).FunctionField) +
         q • (W_smooth W).coordYInFunctionField), hp0, hq0, zero_smul, zero_smul, zero_add]
       rfl
-    have hα_agree : w α = (W_smooth W).ordAtInftyValuation α := h_rat p
-    have hβ_agree : w β = (W_smooth W).ordAtInftyValuation β := h_rat q
     have hβc_agree : w (β * (W_smooth W).coordYInFunctionField) =
-        (W_smooth W).ordAtInftyValuation (β * (W_smooth W).coordYInFunctionField) := by
-      have h1 : w (β * (W_smooth W).coordYInFunctionField) =
-          w β * w (W_smooth W).coordYInFunctionField := map_mul w _ _
-      have h2 : (W_smooth W).ordAtInftyValuation (β * (W_smooth W).coordYInFunctionField) =
-          (W_smooth W).ordAtInftyValuation β *
-            (W_smooth W).ordAtInftyValuation (W_smooth W).coordYInFunctionField := map_mul _ _ _
-      rw [h1, h2, hβ_agree, h_coordY]
-    have h_dist : (W_smooth W).ordAtInftyValuation α ≠
         (W_smooth W).ordAtInftyValuation (β * (W_smooth W).coordYInFunctionField) :=
-      ordAtInftyValuation_basis_summands_distinct W h_not_both
-    have h_dist_w : w α ≠ w (β * (W_smooth W).coordYInFunctionField) := by
-      rw [hα_agree, hβc_agree]
-      exact h_dist
-    have hL : w (α + β * (W_smooth W).coordYInFunctionField) =
-        max (w α) (w (β * (W_smooth W).coordYInFunctionField)) :=
-      Valuation.map_add_of_distinct_val w h_dist_w
-    have hR : (W_smooth W).ordAtInftyValuation
-          (α + β * (W_smooth W).coordYInFunctionField) =
-        max ((W_smooth W).ordAtInftyValuation α)
-          ((W_smooth W).ordAtInftyValuation (β * (W_smooth W).coordYInFunctionField)) :=
-      Valuation.map_add_of_distinct_val (W_smooth W).ordAtInftyValuation h_dist
-    rw [hL, hα_agree, hβc_agree]
-    exact hR.symm
+      valuation_eq_mul_of_eq_of_eq W w (W_smooth W).ordAtInftyValuation (h_rat q) h_coordY
+    exact valuation_eq_add_of_eq_of_eq_of_distinct W w (W_smooth W).ordAtInftyValuation
+      (h_rat p) hβc_agree (ordAtInftyValuation_basis_summands_distinct W h_not_both)
 
 /-- **Valuation determined by `x_gen`, `y_gen`.** A `ℤᵐ⁰`-valued valuation `w` on
 `K(E)` with `w x_gen = exp 2`, `w y_gen = exp 3`, and trivial on `F^×` equals
