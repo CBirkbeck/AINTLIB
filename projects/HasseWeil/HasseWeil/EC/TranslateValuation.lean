@@ -627,6 +627,184 @@ theorem pointValuation_A_eq_one_of_doubling
     exact h_diff_lt
   exact (Valuation.map_add_eq_of_lt_right _ h_lt_strict).trans h_alg_c_eq
 
+/-- **Tangent slope identity, lifted to K(E)**: in the doubling case
+`P = (xk, yk)` with `yk ≠ negY xk yk`, the tangent slope
+`slope_F = W.slope P.x xk P.y yk` satisfies
+`alg slope_F · (2 yk + a₁ xk + a₃) = 3 xk² + 2 a₂ xk + a₄ − a₁ yk` after
+applying `algebraMap F KE`. This is the F-level definition of `slope_F`
+(`slope_of_Y_ne`, clearing the `yk − negY xk yk` denominator) transported to
+K(E). It is the algebraic engine behind the `B − A · slope_F` factorization. -/
+private theorem algebraMap_slope_mul_two_yk_add_eq_of_doubling
+    (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_eq_x : P.x = xk) (h_eq_y : P.y = yk)
+    (h_not_2_tor : yk ≠ W.toAffine.negY xk yk) :
+    algebraMap F KE (W.toAffine.slope P.x xk P.y yk) *
+        (2 * algebraMap F KE yk + algebraMap F KE W.a₁ * algebraMap F KE xk +
+          algebraMap F KE W.a₃) =
+      3 * (algebraMap F KE xk) ^ 2 + 2 * algebraMap F KE W.a₂ * algebraMap F KE xk +
+        algebraMap F KE W.a₄ - algebraMap F KE W.a₁ * algebraMap F KE yk := by
+  have h_slope_F_def :
+      W.toAffine.slope P.x xk P.y yk = (3 * xk ^ 2 + 2 * W.a₂ * xk + W.a₄ - W.a₁ * yk) /
+        (yk - W.toAffine.negY xk yk) := by
+    rw [h_eq_x, h_eq_y]
+    exact W.toAffine.slope_of_Y_ne rfl h_not_2_tor
+  have h_slope_F_mul : W.toAffine.slope P.x xk P.y yk * (yk - W.toAffine.negY xk yk) =
+      3 * xk ^ 2 + 2 * W.a₂ * xk + W.a₄ - W.a₁ * yk := by
+    rw [h_slope_F_def, div_mul_cancel₀]
+    exact sub_ne_zero.mpr h_not_2_tor
+  have h_F : W.toAffine.slope P.x xk P.y yk * (2 * yk + W.a₁ * xk + W.a₃) =
+      3 * xk ^ 2 + 2 * W.a₂ * xk + W.a₄ - W.a₁ * yk := by
+    have h2 : yk - W.toAffine.negY xk yk = 2 * yk + W.a₁ * xk + W.a₃ := by
+      change yk - (-yk - W.a₁ * xk - W.a₃) = _
+      ring
+    rw [h2] at h_slope_F_mul
+    exact h_slope_F_mul
+  have h_alg := congrArg (algebraMap F KE) h_F
+  simp only [map_sub, map_add, map_mul, map_pow, map_ofNat] at h_alg
+  exact h_alg
+
+/-- **`B − A · slope_F` factorization** in the doubling case. With the explicit
+K(E) factors `A = y_gen + alg yk + a₁ x_gen + a₃` and
+`B = x_gen² + alg xk · x_gen + alg xk² + a₂(x_gen + alg xk) + a₄ − a₁ alg yk`
+of `weierstrass_factorization`, the combination `B − A · alg slope_F` rewrites as
+`(x_gen − alg xk) · ((x_gen − alg xk) + (3 alg xk + a₂ − alg slope_F · a₁))
+   − alg slope_F · (y_gen − alg yk)`,
+purely from the lifted slope identity
+`algebraMap_slope_mul_two_yk_add_eq_of_doubling`. -/
+private theorem B_sub_A_mul_slope_factorization_of_doubling
+    (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_eq_x : P.x = xk) (h_eq_y : P.y = yk)
+    (h_not_2_tor : yk ≠ W.toAffine.negY xk yk) :
+    (x_gen W ^ 2 + algebraMap F KE xk * x_gen W + algebraMap F KE xk ^ 2 +
+          (W_KE W).a₂ * (x_gen W + algebraMap F KE xk) + (W_KE W).a₄ -
+          (W_KE W).a₁ * algebraMap F KE yk) -
+        (y_gen W + algebraMap F KE yk + (W_KE W).a₁ * x_gen W + (W_KE W).a₃) *
+          algebraMap F KE (W.toAffine.slope P.x xk P.y yk) =
+      (x_gen W - algebraMap F KE xk) *
+          ((x_gen W - algebraMap F KE xk) +
+            (3 * algebraMap F KE xk + algebraMap F KE W.a₂ -
+              algebraMap F KE (W.toAffine.slope P.x xk P.y yk) * algebraMap F KE W.a₁)) -
+        algebraMap F KE (W.toAffine.slope P.x xk P.y yk) *
+          (y_gen W - algebraMap F KE yk) := by
+  have h_slope_F_mul_KE :=
+    algebraMap_slope_mul_two_yk_add_eq_of_doubling W P xk yk h_eq_x h_eq_y h_not_2_tor
+  have ha1 : (W_KE W).a₁ = algebraMap F KE W.a₁ := rfl
+  have ha2 : (W_KE W).a₂ = algebraMap F KE W.a₂ := rfl
+  have ha3 : (W_KE W).a₃ = algebraMap F KE W.a₃ := rfl
+  have ha4 : (W_KE W).a₄ = algebraMap F KE W.a₄ := rfl
+  rw [ha1, ha2, ha3, ha4]
+  linear_combination -h_slope_F_mul_KE
+
+/-- The generator difference `x_gen − alg xk` has `pointValuation < 1` at a
+doubling point `P = (xk, …)`: rewriting `xk = P.x`, it is the image of
+`XClass W.toAffine P.x ∈ m_P`, which vanishes at `P`. -/
+private theorem pointValuation_x_gen_sub_alg_const_lt_one_of_eq
+    (P : (W_smooth W).SmoothPoint) (xk : F) (h_eq_x : P.x = xk) :
+    (W_smooth W).pointValuation P (x_gen W - algebraMap F KE xk) < 1 := by
+  rw [← h_eq_x]
+  have h_xmem : Affine.CoordinateRing.XClass W.toAffine P.x ∈
+      (W_smooth W).maximalIdealAt P :=
+    XClass_mem_maximalIdealAt W P P.x rfl
+  have h_lt :=
+    (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
+      (C := W_smooth W) (Affine.CoordinateRing.XClass W.toAffine P.x) P).mpr h_xmem
+  rw [x_gen_sub_const_eq_algebraMap_XClass W P.x]; exact h_lt
+
+/-- The generator difference `y_gen − alg yk` has `pointValuation < 1` at a
+doubling point `P = (…, yk)`: rewriting `yk = P.y`, it is the image of
+`YClass W.toAffine (C P.y) ∈ m_P`, which vanishes at `P`. -/
+private theorem pointValuation_y_gen_sub_alg_const_lt_one_of_eq
+    (P : (W_smooth W).SmoothPoint) (yk : F) (h_eq_y : P.y = yk) :
+    (W_smooth W).pointValuation P (y_gen W - algebraMap F KE yk) < 1 := by
+  rw [← h_eq_y]
+  have h_ymem : Affine.CoordinateRing.YClass W.toAffine (Polynomial.C P.y) ∈
+      (W_smooth W).maximalIdealAt P :=
+    YClass_mem_maximalIdealAt W P P.y rfl
+  have h_lt :=
+    (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
+      (C := W_smooth W) (Affine.CoordinateRing.YClass W.toAffine (Polynomial.C P.y))
+      P).mpr h_ymem
+  rw [y_gen_sub_const_eq_algebraMap_YClass W P.y]; exact h_lt
+
+/-- The inner factor `(x_gen − alg xk) + (3 alg xk + a₂ − alg slope_F · a₁)` of
+the `B − A · slope_F` factorization has `pointValuation ≤ 1` at `P` — a routine
+combination of the `x_gen` / F-constant bounds via additivity, subtraction and
+multiplication of the valuation. Holds for any `slope_F`, no doubling hypothesis
+needed. -/
+private theorem pointValuation_x_gen_sub_const_add_slope_inner_le_one
+    (P : (W_smooth W).SmoothPoint) (xk slope_F : F) :
+    (W_smooth W).pointValuation P
+      ((x_gen W - algebraMap F KE xk) +
+        ((3 : KE) * algebraMap F KE xk + algebraMap F KE W.a₂ -
+          algebraMap F KE slope_F * algebraMap F KE W.a₁)) ≤ 1 := by
+  apply pointValuation_add_le_one W P
+  · exact pointValuation_sub_le_one W P (pointValuation_x_gen_le_one W P)
+      ((W_smooth W).pointValuation_algebraMap_F_le_one P xk)
+  · apply pointValuation_sub_le_one W P
+    · apply pointValuation_add_le_one W P
+      · have h3 : (3 : KE) * algebraMap F KE xk = algebraMap F KE (3 * xk) := by
+          rw [_root_.map_mul, map_ofNat]
+        rw [h3]
+        exact (W_smooth W).pointValuation_algebraMap_F_le_one P (3 * xk)
+      · exact (W_smooth W).pointValuation_algebraMap_F_le_one P W.a₂
+    · exact pointValuation_mul_le_one W P
+        ((W_smooth W).pointValuation_algebraMap_F_le_one P slope_F)
+        ((W_smooth W).pointValuation_algebraMap_F_le_one P W.a₁)
+
+/-- The right-hand side of the `B − A · slope_F` factorization,
+`(x_gen − alg xk) · (inner) − alg slope_F · (y_gen − alg yk)`, has
+`pointValuation < 1` at a doubling point. Both summands are a product of a
+`≤ 1` factor with a strictly-`< 1` factor (`x_gen − alg xk`, resp.
+`y_gen − alg yk`), so each is `< 1`, and the max of the two is `< 1`. -/
+private theorem pointValuation_slope_factorization_rhs_lt_one_of_doubling
+    (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_eq_x : P.x = xk) (h_eq_y : P.y = yk) :
+    (W_smooth W).pointValuation P
+      ((x_gen W - algebraMap F KE xk) *
+          ((x_gen W - algebraMap F KE xk) +
+            ((3 : KE) * algebraMap F KE xk + algebraMap F KE W.a₂ -
+              algebraMap F KE (W.toAffine.slope P.x xk P.y yk) * algebraMap F KE W.a₁)) -
+        algebraMap F KE (W.toAffine.slope P.x xk P.y yk) *
+          (y_gen W - algebraMap F KE yk)) < 1 := by
+  refine lt_of_le_of_lt (((W_smooth W).pointValuation P).map_sub _ _) ?_
+  apply max_lt
+  · rw [mul_comm]
+    exact pointValuation_mul_lt_one_of_le_and_lt W P
+      (pointValuation_x_gen_sub_const_add_slope_inner_le_one W P xk _)
+      (pointValuation_x_gen_sub_alg_const_lt_one_of_eq W P xk h_eq_x)
+  · exact pointValuation_mul_lt_one_of_le_and_lt W P
+      ((W_smooth W).pointValuation_algebraMap_F_le_one P _)
+      (pointValuation_y_gen_sub_alg_const_lt_one_of_eq W P yk h_eq_y)
+
+/-- **Slope-difference as a quotient** in the doubling case. With `A` the K(E)
+factor of `weierstrass_factorization` (which is nonzero at `P`, having
+`pointValuation = 1`), the slope difference rewrites as
+`translateSlope_xy − alg slope_F = (B − A · alg slope_F) / A`,
+where `B` is the companion factor. The `translateSlope_xy · A = B` identity
+comes from `weierstrass_factorization` via `field_simp`/`linear_combination`. -/
+private theorem translateSlope_xy_sub_alg_slope_eq_factor_div_A_of_doubling
+    (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_curve : W.toAffine.Equation xk yk)
+    (h_A_ne : (y_gen W + algebraMap F KE yk + (W_KE W).a₁ * x_gen W + (W_KE W).a₃) ≠ 0) :
+    translateSlope_xy W xk yk - algebraMap F KE (W.toAffine.slope P.x xk P.y yk) =
+      ((x_gen W ^ 2 + algebraMap F KE xk * x_gen W + algebraMap F KE xk ^ 2 +
+            (W_KE W).a₂ * (x_gen W + algebraMap F KE xk) + (W_KE W).a₄ -
+            (W_KE W).a₁ * algebraMap F KE yk) -
+          (y_gen W + algebraMap F KE yk + (W_KE W).a₁ * x_gen W + (W_KE W).a₃) *
+            algebraMap F KE (W.toAffine.slope P.x xk P.y yk)) /
+        (y_gen W + algebraMap F KE yk + (W_KE W).a₁ * x_gen W + (W_KE W).a₃) := by
+  set A_K : KE := y_gen W + algebraMap F KE yk + (W_KE W).a₁ * x_gen W + (W_KE W).a₃
+    with hA_K
+  set B_K : KE := x_gen W ^ 2 + algebraMap F KE xk * x_gen W + algebraMap F KE xk ^ 2 +
+      (W_KE W).a₂ * (x_gen W + algebraMap F KE xk) + (W_KE W).a₄ -
+      (W_KE W).a₁ * algebraMap F KE yk with hB_K
+  have h_x_ne : x_gen W - algebraMap F KE xk ≠ 0 := x_gen_sub_const_ne_zero W xk
+  have h_factor : (y_gen W - algebraMap F KE yk) * A_K =
+      (x_gen W - algebraMap F KE xk) * B_K :=
+    weierstrass_factorization W xk yk h_curve
+  have h_T_A : translateSlope_xy W xk yk * A_K = B_K := by
+    rw [translateSlope_xy_eq]
+    field_simp
+    linear_combination h_factor
+  field_simp
+  linear_combination h_T_A
+
 /-- **Tangent (doubling) case slope eval**: at `P = (xk, yk)` with
 `yk ≠ negY xk yk`, the K(E) slope `translateSlope_xy` evaluates to the
 tangent slope `(3 xk² + 2 a₂ xk + a₄ − a₁ yk) / (yk − negY xk yk)` in
@@ -643,130 +821,21 @@ theorem pointValuation_translateSlope_xy_sub_alg_slope_lt_one_of_doubling
   have h_curve : W.toAffine.Equation xk yk := by
     have := P.nonsingular.1
     rw [h_eq_x, h_eq_y] at this; exact this
-  set slope_F : F := W.toAffine.slope P.x xk P.y yk with hslope_F
-  have h_slope_F_def :
-      slope_F = (3 * xk ^ 2 + 2 * W.a₂ * xk + W.a₄ - W.a₁ * yk) /
-        (yk - W.toAffine.negY xk yk) := by
-    change W.toAffine.slope P.x xk P.y yk = _
-    rw [h_eq_x, h_eq_y]
-    exact W.toAffine.slope_of_Y_ne rfl h_not_2_tor
-  have h_slope_F_mul : slope_F * (yk - W.toAffine.negY xk yk) =
-      3 * xk ^ 2 + 2 * W.a₂ * xk + W.a₄ - W.a₁ * yk := by
-    rw [h_slope_F_def, div_mul_cancel₀]
-    exact sub_ne_zero.mpr h_not_2_tor
-  set A_K : KE := y_gen W + algebraMap F KE yk + (W_KE W).a₁ * x_gen W + (W_KE W).a₃
-    with hA_K
-  set B_K : KE := x_gen W ^ 2 + algebraMap F KE xk * x_gen W + algebraMap F KE xk ^ 2 +
-      (W_KE W).a₂ * (x_gen W + algebraMap F KE xk) + (W_KE W).a₄ -
-      (W_KE W).a₁ * algebraMap F KE yk with hB_K
-  have h_A_pV : (W_smooth W).pointValuation P A_K = 1 :=
+  -- `A = y_gen + alg yk + a₁ x_gen + a₃` is a unit at `P` (`pV = 1`), hence nonzero.
+  have h_A_pV : (W_smooth W).pointValuation P
+      (y_gen W + algebraMap F KE yk + (W_KE W).a₁ * x_gen W + (W_KE W).a₃) = 1 :=
     pointValuation_A_eq_one_of_doubling W P xk yk h_eq_x h_eq_y h_not_2_tor
-  have h_A_ne : A_K ≠ 0 := by
+  have h_A_ne : (y_gen W + algebraMap F KE yk + (W_KE W).a₁ * x_gen W + (W_KE W).a₃) ≠ 0 := by
     intro h
     rw [h] at h_A_pV
     have h_zero : (W_smooth W).pointValuation P 0 = 0 := Valuation.map_zero _
     exact zero_ne_one (h_zero.symm.trans h_A_pV)
-  have h_x_ne : x_gen W - algebraMap F KE xk ≠ 0 := x_gen_sub_const_ne_zero W xk
-  have h_factor : (y_gen W - algebraMap F KE yk) * A_K =
-      (x_gen W - algebraMap F KE xk) * B_K :=
-    weierstrass_factorization W xk yk h_curve
-  have ha1 : (W_KE W).a₁ = algebraMap F KE W.a₁ := rfl
-  have ha2 : (W_KE W).a₂ = algebraMap F KE W.a₂ := rfl
-  have ha3 : (W_KE W).a₃ = algebraMap F KE W.a₃ := rfl
-  have ha4 : (W_KE W).a₄ = algebraMap F KE W.a₄ := rfl
-  have h_negY : W.toAffine.negY xk yk = -yk - W.a₁ * xk - W.a₃ := rfl
-  have h_slope_F_mul_KE :
-      algebraMap F KE slope_F *
-        (2 * algebraMap F KE yk + algebraMap F KE W.a₁ * algebraMap F KE xk +
-          algebraMap F KE W.a₃) =
-      3 * (algebraMap F KE xk) ^ 2 + 2 * algebraMap F KE W.a₂ * algebraMap F KE xk +
-        algebraMap F KE W.a₄ - algebraMap F KE W.a₁ * algebraMap F KE yk := by
-    have h_F : slope_F * (2 * yk + W.a₁ * xk + W.a₃) =
-        3 * xk ^ 2 + 2 * W.a₂ * xk + W.a₄ - W.a₁ * yk := by
-      have h1 := h_slope_F_mul
-      have h2 : yk - W.toAffine.negY xk yk = 2 * yk + W.a₁ * xk + W.a₃ := by
-        change yk - (-yk - W.a₁ * xk - W.a₃) = _
-        ring
-      rw [h2] at h1
-      exact h1
-    have h_alg := congrArg (algebraMap F KE) h_F
-    simp only [map_sub, map_add, map_mul, map_pow, map_ofNat] at h_alg
-    exact h_alg
-  have h_B_minus_AS :
-      B_K - A_K * algebraMap F KE slope_F =
-      (x_gen W - algebraMap F KE xk) *
-          ((x_gen W - algebraMap F KE xk) +
-            (3 * algebraMap F KE xk + algebraMap F KE W.a₂ -
-              algebraMap F KE slope_F * algebraMap F KE W.a₁)) -
-        algebraMap F KE slope_F * (y_gen W - algebraMap F KE yk) := by
-    rw [hB_K, hA_K, ha1, ha2, ha3, ha4]
-    linear_combination -h_slope_F_mul_KE
-  have h_x_sub_lt : (W_smooth W).pointValuation P
-      (x_gen W - algebraMap F KE xk) < 1 := by
-    rw [← h_eq_x]
-    have h_xmem : Affine.CoordinateRing.XClass W.toAffine P.x ∈
-        (W_smooth W).maximalIdealAt P :=
-      XClass_mem_maximalIdealAt W P P.x rfl
-    have h_lt :=
-      (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
-        (C := W_smooth W) (Affine.CoordinateRing.XClass W.toAffine P.x) P).mpr h_xmem
-    have h_xeq := x_gen_sub_const_eq_algebraMap_XClass W P.x
-    rw [h_xeq]; exact h_lt
-  have h_y_sub_lt : (W_smooth W).pointValuation P
-      (y_gen W - algebraMap F KE yk) < 1 := by
-    rw [← h_eq_y]
-    have h_ymem : Affine.CoordinateRing.YClass W.toAffine (Polynomial.C P.y) ∈
-        (W_smooth W).maximalIdealAt P :=
-      YClass_mem_maximalIdealAt W P P.y rfl
-    have h_lt :=
-      (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
-        (C := W_smooth W) (Affine.CoordinateRing.YClass W.toAffine (Polynomial.C P.y))
-        P).mpr h_ymem
-    have h_yeq := y_gen_sub_const_eq_algebraMap_YClass W P.y
-    rw [h_yeq]; exact h_lt
-  have h_inner_le : (W_smooth W).pointValuation P
-      ((x_gen W - algebraMap F KE xk) +
-        ((3 : KE) * algebraMap F KE xk + algebraMap F KE W.a₂ -
-          algebraMap F KE slope_F * algebraMap F KE W.a₁)) ≤ 1 := by
-    apply pointValuation_add_le_one W P
-    · exact pointValuation_sub_le_one W P (pointValuation_x_gen_le_one W P)
-        ((W_smooth W).pointValuation_algebraMap_F_le_one P xk)
-    · apply pointValuation_sub_le_one W P
-      · apply pointValuation_add_le_one W P
-        · have h3 : (3 : KE) * algebraMap F KE xk = algebraMap F KE (3 * xk) := by
-            rw [_root_.map_mul, map_ofNat]
-          rw [h3]
-          exact (W_smooth W).pointValuation_algebraMap_F_le_one P (3 * xk)
-        · exact (W_smooth W).pointValuation_algebraMap_F_le_one P W.a₂
-      · exact pointValuation_mul_le_one W P
-          ((W_smooth W).pointValuation_algebraMap_F_le_one P slope_F)
-          ((W_smooth W).pointValuation_algebraMap_F_le_one P W.a₁)
-  have h_BAS_lt_one : (W_smooth W).pointValuation P
-      (B_K - A_K * algebraMap F KE slope_F) < 1 := by
-    rw [h_B_minus_AS]
-    refine lt_of_le_of_lt (((W_smooth W).pointValuation P).map_sub _ _) ?_
-    apply max_lt
-    · rw [mul_comm]
-      exact pointValuation_mul_lt_one_of_le_and_lt W P h_inner_le h_x_sub_lt
-    · exact pointValuation_mul_lt_one_of_le_and_lt W P
-        ((W_smooth W).pointValuation_algebraMap_F_le_one P slope_F) h_y_sub_lt
-  have h_T_A : translateSlope_xy W xk yk * A_K = B_K := by
-    rw [translateSlope_xy_eq]
-    field_simp
-    linear_combination h_factor
-  have h_diff_eq : translateSlope_xy W xk yk - algebraMap F KE slope_F =
-      (B_K - A_K * algebraMap F KE slope_F) / A_K := by
-    field_simp
-    linear_combination h_T_A
-  rw [h_diff_eq]
-  calc (W_smooth W).pointValuation P
-        ((B_K - A_K * algebraMap F KE slope_F) / A_K)
-      = (W_smooth W).pointValuation P (B_K - A_K * algebraMap F KE slope_F) /
-          (W_smooth W).pointValuation P A_K := Valuation.map_div _ _ _
-    _ = (W_smooth W).pointValuation P (B_K - A_K * algebraMap F KE slope_F) / 1 := by
-          rw [h_A_pV]
-    _ = (W_smooth W).pointValuation P (B_K - A_K * algebraMap F KE slope_F) := div_one _
-    _ < 1 := h_BAS_lt_one
+  -- Write the slope difference as `(B − A · alg slope_F) / A` and use `pV A = 1`.
+  rw [translateSlope_xy_sub_alg_slope_eq_factor_div_A_of_doubling W P xk yk h_curve h_A_ne]
+  refine pointValuation_div_lt_one_of_denom_eq_one W P h_A_pV ?_
+  -- The numerator `B − A · alg slope_F` factors and has `pV < 1`.
+  rw [B_sub_A_mul_slope_factorization_of_doubling W P xk yk h_eq_x h_eq_y h_not_2_tor]
+  exact pointValuation_slope_factorization_rhs_lt_one_of_doubling W P xk yk h_eq_x h_eq_y
 
 /-- Tangent (doubling) bound: at `P = (xk, yk)` with `yk ≠ negY xk yk`,
 `translateSlope_xy` has `pointValuation ≤ 1` at `P`. Derived from the slope
