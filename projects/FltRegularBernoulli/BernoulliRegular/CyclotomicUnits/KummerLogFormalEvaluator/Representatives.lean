@@ -14,11 +14,6 @@ the coefficient file stays focused and below the route line limit.
 
 noncomputable section
 
-open NumberField
-open NumberField.IsCMField
-open BernoulliRegular.Reflection.Local
-open scoped BigOperators NumberField PowerSeries
-
 namespace BernoulliRegular
 namespace CyclotomicUnits
 
