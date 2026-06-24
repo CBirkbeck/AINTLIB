@@ -34,10 +34,6 @@ apply in particular to cusp forms.
 * `ResToImagAxis.Differentiable`: `F.resToImagAxis` is real-differentiable at `t > 0`
   whenever `F` is `MDiff`.
 * `ResToImagAxis.SlashActionS`: behaviour of the restriction under the slash action of `S`.
-* `cuspForm_rpow_mul_resToImagAxis_tendsto_zero`: any cusp form of level `Γ(n)` satisfies
-  `t ^ s * f (it) → 0` as `t → ∞`.
-* `isBigO_atImInfty_of_fourier_shift`: a Fourier expansion starting at index `n₀ > 0`
-  gives an `O(exp(-2π n₀ · im z))` bound at `atImInfty`.
 -/
 
 open UpperHalfPlane hiding I
