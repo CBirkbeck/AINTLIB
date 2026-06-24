@@ -211,10 +211,8 @@ theorem currentRoot_succ_eq_transportMultiplier_of_le
       (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let πbar : A := Ideal.Quotient.mk (F.Q ^ (N + 1)) F.π
   let δ : A := (PowerSeries.trunc (N + 1) Ips).eval₂ (RingHom.id A) πbar
-  have hm_succ : N + 1 ≤ ℓ ^ (m + 1) := by
-    refine le_trans hm ?_
-    rw [pow_succ]
-    exact Nat.le_mul_of_pos_right _ (Fact.out : Nat.Prime ℓ).pos
+  have hm_succ : N + 1 ≤ ℓ ^ (m + 1) :=
+    hm.trans (Nat.pow_le_pow_right (Fact.out : Nat.Prime ℓ).pos (Nat.le_succ m))
   simpa [A, Ips, πbar, δ] using
     F.currentRoot_eq_transportMultiplier_of_le N (m + 1) hm_succ y
 
