@@ -32,7 +32,6 @@ for its additivity over products.
 noncomputable section
 
 open scoped NumberField
-open PowerSeries
 
 namespace BernoulliRegular
 namespace CyclotomicUnits
@@ -724,7 +723,7 @@ theorem samePrimeFiniteLogAdditivity_term_eq (N d n : ℕ) (hn : n ≠ 0)
   let zy : ValuedIntegerRing p K :=
     ((samePrimeFiniteLogProductArgPoly (p := p) (K := K) y 0) ^ n).coeff d
   let sgn : ValuedIntegerRing p K := (-1 : ValuedIntegerRing p K) ^ (n + 1)
-  let hden : n.factorization p * (p - 1) ≤ d :=
+  have hden : n.factorization p * (p - 1) ≤ d :=
     samePrimeFiniteLogAdditivity_den_exponent_le (p := p) hn hnd
   have hzxy : zxy ∈ (lambdaIdeal p K) ^ d :=
     samePrimeFiniteLogProductArgPoly_pow_coeff_mem_lambdaIdeal_pow
