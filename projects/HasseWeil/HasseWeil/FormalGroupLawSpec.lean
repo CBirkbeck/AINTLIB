@@ -1683,6 +1683,74 @@ private lemma band_13 : bcomp (formalInverse_coeff W) (z3S W) 1 3 = -(2 * W.a₃
 
 /-! ### FG-A6: the spec theorem -/
 
+/-- Every coefficient of the chord composition `i ∘ z₃` is the `bcomp`
+composition of the inversion stream against the `z3S` stream — the FG-A4
+dictionary, read off `coeff_subst_F_of` through `F_of_z3S`. -/
+private lemma coeff_subst_eq_bcomp (d : Fin 2 →₀ ℕ) :
+    MvPowerSeries.coeff d (PowerSeries.subst (formalZ3 W) (formalInverse W))
+      = bcomp (formalInverse_coeff W) (z3S W) (d 0) (d 1) := by
+  rw [← F_of_z3S, show formalInverse W = PowerSeries.mk (formalInverse_coeff W) from rfl,
+    coeff_subst_F_of _ _ (z3S_zero_zero W)]
+
+/-- The `i = 0` unit row: both the legacy law and the chord composition send
+`(0, z₂)` to `z₂`, so their `d`-coefficients agree whenever `d 0 = 0`. -/
+private lemma formalGroupLaw_coeff_eq_chord_fst_zero (d : Fin 2 →₀ ℕ) (h0 : d 0 = 0) :
+    formalGroupLaw_coeff W d
+      = MvPowerSeries.coeff d (PowerSeries.subst (formalZ3 W) (formalInverse W)) := by
+  have hd : d = Finsupp.single 1 (d 1) := (fin2_eq_single_one_iff d).mpr h0
+  rw [show (MvPowerSeries.coeff d) (PowerSeries.subst (formalZ3 W) (formalInverse W))
+      = if d 1 = 1 then 1 else 0 from by
+        conv_lhs => rw [hd]
+        exact coeff_single_subst_z3 W 1 (d 1)]
+  simp only [formalGroupLaw_coeff]
+  rw [if_pos h0]
+
+/-- The `j = 0` unit row: both the legacy law and the chord composition send
+`(z₁, 0)` to `z₁`, so their `d`-coefficients agree whenever `d 0 ≠ 0` and
+`d 1 = 0`. -/
+private lemma formalGroupLaw_coeff_eq_chord_snd_zero (d : Fin 2 →₀ ℕ) (h0 : d 0 ≠ 0)
+    (h1 : d 1 = 0) :
+    formalGroupLaw_coeff W d
+      = MvPowerSeries.coeff d (PowerSeries.subst (formalZ3 W) (formalInverse W)) := by
+  have hd : d = Finsupp.single 0 (d 0) := (fin2_eq_single_zero_iff d).mpr h1
+  rw [show (MvPowerSeries.coeff d) (PowerSeries.subst (formalZ3 W) (formalInverse W))
+      = if d 0 = 1 then 1 else 0 from by
+        conv_lhs => rw [hd]
+        exact coeff_single_subst_z3 W 0 (d 0)]
+  simp only [formalGroupLaw_coeff]
+  rw [if_neg h0, if_pos h1]
+
+/-- The interior band `i, j ≥ 1`: the legacy coefficient equals the `bcomp`
+composition, by the hardcoded total-degree 2–4 values (the `band_*` lemmas)
+and the `formalGroupLaw_coeff_tail` branch above. -/
+private lemma formalGroupLaw_coeff_eq_bcomp_interior (d : Fin 2 →₀ ℕ) (h0 : d 0 ≠ 0)
+    (h1 : d 1 ≠ 0) :
+    formalGroupLaw_coeff W d = bcomp (formalInverse_coeff W) (z3S W) (d 0) (d 1) := by
+  by_cases h2 : d 0 + d 1 = 2
+  · have e0 : d 0 = 1 := by omega
+    have e1 : d 1 = 1 := by omega
+    simp only [formalGroupLaw_coeff]
+    rw [if_neg h0, if_neg h1, if_pos h2, e0, e1, band_11]
+  · by_cases h3 : d 0 + d 1 = 3
+    · rcases (by omega : d 0 = 2 ∧ d 1 = 1 ∨ d 0 = 1 ∧ d 1 = 2) with ⟨e0, e1⟩ | ⟨e0, e1⟩
+      · simp only [formalGroupLaw_coeff]
+        rw [if_neg h0, if_neg h1, if_neg h2, if_pos h3, e0, e1, band_21]
+      · simp only [formalGroupLaw_coeff]
+        rw [if_neg h0, if_neg h1, if_neg h2, if_pos h3, e0, e1, band_12]
+    · by_cases h4 : d 0 + d 1 = 4
+      · rcases (by omega : d 0 = 3 ∧ d 1 = 1 ∨ d 0 = 2 ∧ d 1 = 2 ∨ d 0 = 1 ∧ d 1 = 3)
+          with ⟨e0, e1⟩ | ⟨e0, e1⟩ | ⟨e0, e1⟩
+        · simp only [formalGroupLaw_coeff]
+          rw [if_neg h0, if_neg h1, if_neg h2, if_neg h3, if_pos h4, e0, e1,
+            if_neg (by omega), band_31]
+        · simp only [formalGroupLaw_coeff]
+          rw [if_neg h0, if_neg h1, if_neg h2, if_neg h3, if_pos h4, e0, e1,
+            if_pos ⟨rfl, rfl⟩, band_22]
+        · simp only [formalGroupLaw_coeff]
+          rw [if_neg h0, if_neg h1, if_neg h2, if_neg h3, if_pos h4, e0, e1,
+            if_neg (by omega), band_13]
+      · exact formalGroupLaw_coeff_tail W d h0 h1 h2 h3 h4
+
 /-- **The spec of the legacy formal group law** (FG-A6, Silverman IV §1
 pp. 119–120): the coefficient-level construction `formalGroupLaw` *is* the
 chord composition `i ∘ z₃` of the inversion series with the third root of
@@ -1693,53 +1761,13 @@ total-degree-2–4 band is the finite check against the hardcoded values
 theorem formalGroupLaw_eq_chord :
     (formalGroupLaw W).toMvPowerSeries
       = PowerSeries.subst (formalZ3 W) (formalInverse W) := by
-  have hbc : ∀ d : Fin 2 →₀ ℕ,
-      MvPowerSeries.coeff d (PowerSeries.subst (formalZ3 W) (formalInverse W))
-        = bcomp (formalInverse_coeff W) (z3S W) (d 0) (d 1) := fun d ↦ by
-    rw [← F_of_z3S, show formalInverse W = PowerSeries.mk (formalInverse_coeff W) from rfl,
-      coeff_subst_F_of _ _ (z3S_zero_zero W)]
   apply MvPowerSeries.ext fun d ↦ ?_
   rw [coeff_formalGroupLaw]
   by_cases h0 : d 0 = 0
-  · have hd : d = Finsupp.single 1 (d 1) := (fin2_eq_single_one_iff d).mpr h0
-    rw [show (MvPowerSeries.coeff d) (PowerSeries.subst (formalZ3 W) (formalInverse W))
-        = if d 1 = 1 then 1 else 0 from by
-          conv_lhs => rw [hd]
-          exact coeff_single_subst_z3 W 1 (d 1)]
-    simp only [formalGroupLaw_coeff]
-    rw [if_pos h0]
+  · exact formalGroupLaw_coeff_eq_chord_fst_zero W d h0
   · by_cases h1 : d 1 = 0
-    · have hd : d = Finsupp.single 0 (d 0) := (fin2_eq_single_zero_iff d).mpr h1
-      rw [show (MvPowerSeries.coeff d) (PowerSeries.subst (formalZ3 W) (formalInverse W))
-          = if d 0 = 1 then 1 else 0 from by
-            conv_lhs => rw [hd]
-            exact coeff_single_subst_z3 W 0 (d 0)]
-      simp only [formalGroupLaw_coeff]
-      rw [if_neg h0, if_pos h1]
-    · rw [hbc d]
-      by_cases h2 : d 0 + d 1 = 2
-      · have e0 : d 0 = 1 := by omega
-        have e1 : d 1 = 1 := by omega
-        simp only [formalGroupLaw_coeff]
-        rw [if_neg h0, if_neg h1, if_pos h2, e0, e1, band_11]
-      · by_cases h3 : d 0 + d 1 = 3
-        · rcases (by omega : d 0 = 2 ∧ d 1 = 1 ∨ d 0 = 1 ∧ d 1 = 2) with ⟨e0, e1⟩ | ⟨e0, e1⟩
-          · simp only [formalGroupLaw_coeff]
-            rw [if_neg h0, if_neg h1, if_neg h2, if_pos h3, e0, e1, band_21]
-          · simp only [formalGroupLaw_coeff]
-            rw [if_neg h0, if_neg h1, if_neg h2, if_pos h3, e0, e1, band_12]
-        · by_cases h4 : d 0 + d 1 = 4
-          · rcases (by omega : d 0 = 3 ∧ d 1 = 1 ∨ d 0 = 2 ∧ d 1 = 2 ∨ d 0 = 1 ∧ d 1 = 3)
-              with ⟨e0, e1⟩ | ⟨e0, e1⟩ | ⟨e0, e1⟩
-            · simp only [formalGroupLaw_coeff]
-              rw [if_neg h0, if_neg h1, if_neg h2, if_neg h3, if_pos h4, e0, e1,
-                if_neg (by omega), band_31]
-            · simp only [formalGroupLaw_coeff]
-              rw [if_neg h0, if_neg h1, if_neg h2, if_neg h3, if_pos h4, e0, e1,
-                if_pos ⟨rfl, rfl⟩, band_22]
-            · simp only [formalGroupLaw_coeff]
-              rw [if_neg h0, if_neg h1, if_neg h2, if_neg h3, if_pos h4, e0, e1,
-                if_neg (by omega), band_13]
-          · exact formalGroupLaw_coeff_tail W d h0 h1 h2 h3 h4
+    · exact formalGroupLaw_coeff_eq_chord_snd_zero W d h0 h1
+    · rw [coeff_subst_eq_bcomp W d]
+      exact formalGroupLaw_coeff_eq_bcomp_interior W d h0 h1
 
 end HasseWeil
