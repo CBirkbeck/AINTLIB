@@ -61,12 +61,8 @@ theorem artinHasseThetaTruncProductAtTo_two_sub_secondOrderTeichExpansion_mem_Q_
   have hb : ∀ i ∈ (Finset.univ : Finset (Fin F.toConcreteStickelbergerSetup.f)),
       b i ∈ F.Q ^ 2 := by
     intro i _hi
-    have hlin : (γ - F.π) * u i ∈ F.Q ^ 2 :=
-      Ideal.mul_mem_right _ _ hγπ
-    have hquad :
-        dworkCoeffArtinHasseAtTo S0 γ 2 2 * u i ^ 2 ∈ F.Q ^ 2 :=
-      Ideal.mul_mem_right _ _ (dworkCoeffArtinHasseAtTo_mem_Q_pow S0 hγ 2 2)
-    exact (F.Q ^ 2).add_mem hlin hquad
+    exact (F.Q ^ 2).add_mem (Ideal.mul_mem_right _ _ hγπ)
+      (Ideal.mul_mem_right _ _ (dworkCoeffArtinHasseAtTo_mem_Q_pow S0 hγ 2 2))
   have hfactor :
       (∏ i : Fin F.toConcreteStickelbergerSetup.f, artinHasseThetaFactorAtTo F γ 2 y i) -
           (∏ i : Fin F.toConcreteStickelbergerSetup.f, (1 + a i + b i)) ∈
@@ -124,17 +120,15 @@ theorem psiInt_sub_artinHasseThetaTruncProductAtTo_two_mem_Q_cubed_of_trace
   have htheta :
       artinHasseSecondOrderTeichExpansion F γ y -
           artinHasseThetaTruncProductAtTo F γ 2 y ∈ F.Q ^ 3 := by
-    have h :=
-      F.artinHasseThetaTruncProductAtTo_two_sub_secondOrderTeichExpansion'_mem_Q_cubed
-        hγ hγπ y
-    simpa [sub_eq_add_neg] using (F.Q ^ 3).neg_mem h
+    simpa [sub_eq_add_neg] using (F.Q ^ 3).neg_mem
+      (F.artinHasseThetaTruncProductAtTo_two_sub_secondOrderTeichExpansion'_mem_Q_cubed
+        hγ hγπ y)
   rw [show F.psiInt (y : k) - artinHasseThetaTruncProductAtTo F γ 2 y =
       (F.psiInt (y : k) - psiTraceBinomialApprox F 2 y) +
         (psiTraceBinomialApprox F 2 y - artinHasseSecondOrderTeichExpansion F γ y) +
           (artinHasseSecondOrderTeichExpansion F γ y -
             artinHasseThetaTruncProductAtTo F γ 2 y) by ring]
   exact (F.Q ^ 3).add_mem ((F.Q ^ 3).add_mem hpsi htrace) htheta
-
 
 end FullTeichStickelbergerSetup
 
