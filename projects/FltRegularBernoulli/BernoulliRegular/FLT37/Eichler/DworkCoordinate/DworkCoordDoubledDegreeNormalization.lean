@@ -86,11 +86,8 @@ noncomputable section
 
 set_option maxRecDepth 4000
 
-open NumberField
-
 namespace BernoulliRegular.FLT37.Eichler
 
-open BernoulliRegular (CPlusGenerator CPlusExponentProduct)
 open BernoulliRegular.CyclotomicUnits
 open BernoulliRegular.CyclotomicUnits.PadicLogSetup
 open BernoulliRegular.CyclotomicUnits.PadicLogSetup.DworkParameter
@@ -157,7 +154,7 @@ theorem genericColumnCoordLHS37_eq_two_mul_normalizedUnitCoeffModSq
       ((2 : ℕ) : ValuedIntegerRing 37 (CyclotomicField 37 ℚ) ⧸
           (lambdaIdeal 37 (CyclotomicField 37 ℚ)) ^ (2 * (37 - 1))) *
         kummerLogNormalizedUnitFiniteLog (p := 37) (K := CyclotomicField 37 ℚ) (by decide) a 71
-      from by rw [Nat.cast_ofNat]; ring]
+      by rw [Nat.cast_ofNat]; ring]
   rw [valuedLambdaQuotientDworkCoeffModSq_natCast_mul]
   norm_num
 
@@ -329,12 +326,12 @@ theorem caseIICor823Level72LeadingCoeff37_of_normalizedUnitCoeff
             (((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 2) ^ ((15 : ℕ) + 1) - 1)) =
         (37 : ZMod (37 ^ 2)) *
           ((2 : ZMod (37 ^ 2)) * ((ρ.val : ℕ) : ZMod (37 ^ 2)) *
-            (((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 2) ^ ((15 : ℕ) + 1) - 1)) from by ring]
+            (((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 2) ^ ((15 : ℕ) + 1) - 1)) by ring]
     rw [show (37 : ZMod (37 ^ 2)) * ((((2 * ρ).val : ℕ)) : ZMod (37 ^ 2)) *
           (((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 2) ^ ((15 : ℕ) + 1) - 1) =
         (37 : ZMod (37 ^ 2)) *
           ((((2 * ρ).val : ℕ) : ZMod (37 ^ 2)) *
-            (((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 2) ^ ((15 : ℕ) + 1) - 1)) from by ring]
+            (((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 2) ^ ((15 : ℕ) + 1) - 1)) by ring]
     -- By `thirtyseven_mul_eq_of_castHom_eq`: the two `ZMod 37²` arguments agree mod `37`
     -- (`2·ρ.val ≡ (2·ρ).val ≡ 2·ρ`, and `castHom V₃₇² = V₃₇`).
     apply thirtyseven_mul_eq_of_castHom_eq
