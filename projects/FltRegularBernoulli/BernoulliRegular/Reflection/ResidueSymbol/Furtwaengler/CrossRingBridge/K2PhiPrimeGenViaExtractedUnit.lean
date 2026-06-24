@@ -4,7 +4,6 @@ public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PhiPrimeSym
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.StickelbergerIdealEquality
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.Uniformizer
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CyclotomicPairGalois
-public import Mathlib.RingTheory.Ideal.GoingUp
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CrossRingBridge.ConductorFlexibleK22PathReexport
 
 /-!
