@@ -445,10 +445,24 @@ theorem RationalLocData.completedPlusSubringBase_le_completedPlusSubring
   rw [RationalLocData.completedPlusSubring, Subalgebra.mem_toSubring]
   exact (integralClosure ↥(D.completedPlusSubringBase) (presheafValue D)).algebraMap_mem ⟨x, hx⟩
 
-/-- **`completedPlusSubringBase` is bounded** (the `A⁺`-based ring of integral elements is bounded;
-Wedhorn 7.19 + Def 7.14, the `A⁺`-analogue of `coeRingHom_image_locSubring_isBounded`/`ringOfDef`).
-This is one of the two `A⁺`-based localization-topology residuals of the IRIE interface (T-LA3);
-the deep `isIntegrallyClosed` field is now free via the integral-closure-in-completion refactor. -/
+/-- **`completedPlusSubringBase` is bounded.** ⚠️ ROUTE-DIVERGENCE FLAG (2026-06-24): this UNIFORM
+(von Neumann) boundedness statement is STRONGER than Wedhorn's actual Prop 7.19 / Lemma 7.20
+argument, which proves only that `A(T/s)⁺` is POWER-bounded (`⊆ A(T/s)°`): `A⁺⟨X⟩ ⊆ A°⟨X⟩ ⊆
+A(T/s)°` then integral-closure preserves `⊆ A°` (since `A°` is integrally closed). A ring of
+integral elements (Def 7.14) is NOT required uniformly bounded — only `⊆ A°` — so uniform
+boundedness need not hold (a non-uniform Tate ring has unbounded `A°`). The A₀-analogue
+`coeRingHom_image_locSubring_isBounded` IS uniformly bounded only because `locSubring` is a ring of
+DEFINITION (bounded); `IC = (locPlusSubring)ⁱⁿᵗ ⊄ locSubring`, so its ideal-absorption route does
+NOT transfer.
+
+**FAITHFUL FIX** (the consuming IRIE `subset_powerBounded` field, Presheaf ~673): reroute to the
+power-bounded containment `completedPlusSubringBase ⊆ powerBoundedSubring (presheafValue D)` (Wedhorn
+Lemma 7.20) and conclude via `A°` integrally closed, REPLACING `IsBounded.isPowerBounded_of_isIntegral`.
+Missing infrastructure for that route: (i) `locPlusSubring ⊆ (Aₛ)°` (generators: `algebraMap A⁺ ⊆
+(Aₛ)°` via `IsPowerBounded.map` + `A⁺ ⊆ A°`; `divByS` power-bounded in `Aₛ`), (ii) `(Aₛ)°`/`(𝒪_X(D))°`
+integrally closed (standard, not yet in repo), (iii) closure of power-bounded ⊆ power-bounded. Sole
+remaining IRIE residual; the openness residual `completedPlusSubringBase_isOpen` is DONE (sorry-free,
+Wedhorn 7.19/7.20 absorption). -/
 theorem RationalLocData.completedPlusSubringBase_isBounded (D : RationalLocData A) [PlusSubring A]
     [IsRingOfIntegralElements (A⁺)] :
     TopologicalRing.IsBounded (D.completedPlusSubringBase : Set (presheafValue D)) :=
