@@ -149,18 +149,17 @@ theorem caseII_gammaA_residue_eq_x
     {m : ℕ} (D : RealCaseIIData37 (CyclotomicField 37 ℚ) m)
     (hxy : D.x + D.y ∈ lv149) {a : ℤ} (ha : ¬ (37 : ℤ) ∣ a) :
     Ideal.Quotient.mk lv149 (caseII_gammaA D ha) = Ideal.Quotient.mk lv149 D.x := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  set Q := Ideal.Quotient.mk lv149 with hQ
+  set Q := Ideal.Quotient.mk lv149
   -- `Q(y) = -Q(x)` from `x + y ∈ lv149`.
   have hy_eq : Q D.y = - Q D.x := by
-    have hmem : Q (D.x + D.y) = 0 := (Ideal.Quotient.eq_zero_iff_mem).mpr hxy
+    have hmem : Q (D.x + D.y) = 0 := Ideal.Quotient.eq_zero_iff_mem.mpr hxy
     rw [map_add] at hmem
     linear_combination hmem
   -- `1 - ζ^a ∉ lv149`, so its residue is a unit (nonzero) in the field.
   have h1za_notMem : (1 - zetaPow 37 (CyclotomicField 37 ℚ) a) ∉ lv149 :=
     caseII_one_sub_zetaPow_notMem_lv149 ha
   have h1za0 : Q (1 - zetaPow 37 (CyclotomicField 37 ℚ) a) ≠ 0 :=
-    fun h ↦ h1za_notMem ((Ideal.Quotient.eq_zero_iff_mem).mp h)
+    fun h ↦ h1za_notMem (Ideal.Quotient.eq_zero_iff_mem.mp h)
   -- Push `Q` through `(1 - ζ^a)·γ_a = x + ζ^a·y`.
   have hspec : Q (1 - zetaPow 37 (CyclotomicField 37 ℚ) a) * Q (caseII_gammaA D ha) =
       Q (D.x + zetaPow 37 (CyclotomicField 37 ℚ) a * D.y) := by
@@ -174,7 +173,7 @@ theorem caseII_gammaA_residue_eq_x
   have hcancel : Q (1 - zetaPow 37 (CyclotomicField 37 ℚ) a) * Q (caseII_gammaA D ha) =
       Q (1 - zetaPow 37 (CyclotomicField 37 ℚ) a) * Q D.x := by
     rw [hspec]; ring
-  exact (mul_left_cancel₀ h1za0 hcancel)
+  exact mul_left_cancel₀ h1za0 hcancel
 
 /-- **The §9.1 descent ratio residue is `1`** (proven, axiom-clean).
 
@@ -195,8 +194,8 @@ theorem caseII_gammaRatio_residue_eq_one
     {a b : ℤ} (ha : ¬ (37 : ℤ) ∣ a) (hb : ¬ (37 : ℤ) ∣ b) :
     Ideal.Quotient.mk lv149 (caseII_gammaA D ha) *
         (Ideal.Quotient.mk lv149 (caseII_gammaA D hb))⁻¹ = 1 := by
-  set Q := Ideal.Quotient.mk lv149 with hQ
-  have hx0 : Q D.x ≠ 0 := fun h ↦ hxl ((Ideal.Quotient.eq_zero_iff_mem).mp h)
+  set Q := Ideal.Quotient.mk lv149
+  have hx0 : Q D.x ≠ 0 := fun h ↦ hxl (Ideal.Quotient.eq_zero_iff_mem.mp h)
   rw [caseII_gammaA_residue_eq_x D hxy ha, caseII_gammaA_residue_eq_x D hxy hb]
   exact mul_inv_cancel₀ hx0
 
@@ -280,7 +279,6 @@ residue argument requiring **no** §9.1 identification: reduce the descent equat
 `x' ∉ lv149` (Washington Lemma 9.6) the resulting `ε₁·x'³⁷ ≡ −ε₂·y'³⁷ (mod 𝔩)` gives
 `ε₁/ε₂ ≡ −(y'/x')³⁷`, a `37`-th power (`−1 = (−1)³⁷`). -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **The direct Lemma-9.8 local power of `ε₁/ε₂`** (proven, axiom-clean — **no** §9.1
 identification, **no** producer, **no** Assumption II).
 
@@ -305,8 +303,7 @@ theorem caseII_lemma98LocalPower37_directResidue
       (ε₃ : 𝓞 (CyclotomicField 37 ℚ)) * ((D.hζ.toInteger - 1) ^ e * z') ^ 37) :
     BernoulliRegular.IsPthPowerModPrime 37 lv149
       (((ε₁ / ε₂ : (𝓞 (CyclotomicField 37 ℚ))ˣ) : 𝓞 (CyclotomicField 37 ℚ))) := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  set Q := Ideal.Quotient.mk lv149 with hQ
+  set Q := Ideal.Quotient.mk lv149
   -- Right side ∈ lv149 (since `z' ∈ lv149`), hence the left side is too.
   have hrhs : (ε₃ : 𝓞 (CyclotomicField 37 ℚ)) * ((D.hζ.toInteger - 1) ^ e * z') ^ 37 ∈ lv149 :=
     Ideal.mul_mem_left _ _ (Ideal.pow_mem_of_mem _ (Ideal.mul_mem_left _ _ hzl) 37 (by decide))
@@ -315,12 +312,12 @@ theorem caseII_lemma98LocalPower37_directResidue
   -- Residue-field form: `Q(ε₁)·Q(x')³⁷ = −(Q(ε₂)·Q(y')³⁷)`.
   have hresid : Q (ε₁ : 𝓞 (CyclotomicField 37 ℚ)) * Q x' ^ 37 =
       - (Q (ε₂ : 𝓞 (CyclotomicField 37 ℚ)) * Q y' ^ 37) := by
-    have hz0 := (Ideal.Quotient.eq_zero_iff_mem).mpr hlhs
+    have hz0 := Ideal.Quotient.eq_zero_iff_mem.mpr hlhs
     rw [map_add, map_mul, map_mul, map_pow, map_pow] at hz0
     linear_combination hz0
-  have hx0 : Q x' ≠ 0 := fun h ↦ hxl ((Ideal.Quotient.eq_zero_iff_mem).mp h)
+  have hx0 : Q x' ≠ 0 := fun h ↦ hxl (Ideal.Quotient.eq_zero_iff_mem.mp h)
   have hε20 : Q (ε₂ : 𝓞 (CyclotomicField 37 ℚ)) ≠ 0 := fun h ↦
-    caseII_unit_notMem_lv149 ε₂ ((Ideal.Quotient.eq_zero_iff_mem).mp h)
+    caseII_unit_notMem_lv149 ε₂ (Ideal.Quotient.eq_zero_iff_mem.mp h)
   -- `Q(ε₁/ε₂) · Q(ε₂) = Q(ε₁)` (from the unit identity `(ε₁/ε₂)·ε₂ = ε₁`).
   have hunit : (ε₁ / ε₂ : (𝓞 (CyclotomicField 37 ℚ))ˣ) * ε₂ = ε₁ := by
     rw [div_eq_mul_inv, mul_assoc, inv_mul_cancel, mul_one]
@@ -375,7 +372,6 @@ descent (over `RealCaseIIData37`, where `D.x ∉ lv149` is a genuine datum field
 existing FLT37 endpoints consume the named `Lemma98LocalPower37` as residual 4 directly; §4 pins its
 genuine content to the two Lemma-9.6/9.7 conditions via the proven one-line residue fact. -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **The Lemma-9.8 local power for the producer-anchored real descent equation** (proven,
 axiom-clean — the direct residue fact §4 applied to a real datum with Lemma 9.6 + Lemma 9.7).
 
@@ -410,7 +406,6 @@ Lemma-9.6 coprimality `149 ∤ a, b` is the standing second-case hypothesis.  So
 power is **not** vacuous — it discharges the local power of any descent equation rooted at such a
 datum. -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **The direct local power fires for the real datum's own descent equation** (proven,
 axiom-clean) — explicit non-vacuity.
 
@@ -444,7 +439,6 @@ existing FLT37 chain does); §4 establishes that this residual is **not** a §9.
 one-line
 residue fact under Lemmas 9.6–9.7. -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **Assumption II (`CaseIIThm95Lemma99Bridge`) from the Lemma-9.8 local power** (proven,
 axiom-clean — R3 supplied internally).
 
@@ -461,7 +455,6 @@ theorem caseIIThm95Lemma99Bridge_of_localPower
     CaseIIThm95Lemma99Bridge :=
   caseIIOmega32_assumptionII_of_localPower h_localPow
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **FLT37, with the Case-II local power as the pinned residual** (proven, axiom-clean given the
 named inputs + carried Kellner).
 
