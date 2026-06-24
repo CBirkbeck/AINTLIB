@@ -3,10 +3,7 @@ module
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.ConcreteSetup
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.KummerFurtwaengler
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CanonicalResidueRoot
-public import Mathlib.NumberTheory.Cyclotomic.Basic
-public import Mathlib.RingTheory.Ideal.GoingUp
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CyclotomicLocalSetup.PrimitiveRootsResidueFieldBundle
-
 
 /-!
 # Concrete cyclotomic local setup at a prime above ℓ ≠ p
