@@ -1382,55 +1382,74 @@ private theorem PowerSeries_subst_zero_of_constantCoeff_zero {τ : Type*}
     rw [PowerSeries.coeff_zero_eq_constantCoeff_apply]; exact hf
   rw [this, zero_smul]
 
-/-- Substituting `X 0 ↦ 0` in the RHS of `LogPreservesAdd`:
-  `subst ![0, X 1] (subst (X 0) F.log + subst (X 1) F.log) = subst (X 1) F.log`. -/
-private theorem subst_zero_LogPreservesAdd_RHS (F : FormalGroup R) [Module ℚ R] :
-    MvPowerSeries.subst
-        (![0, MvPowerSeries.X 1] : Fin 2 → MvPowerSeries (Fin 2) R)
-        (PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) F.log +
-          PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) F.log) =
-      PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) F.log := by
-  have hX0 : PowerSeries.HasSubst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) :=
-    PowerSeries.HasSubst.of_constantCoeff_zero (by simp)
-  have hX1 : PowerSeries.HasSubst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) :=
-    PowerSeries.HasSubst.of_constantCoeff_zero (by simp)
-  have h0X1 : MvPowerSeries.HasSubst
+/-- The substitution `X 0 ↦ 0, X 1 ↦ X 1` (i.e. `![0, X 1]`) admits
+substitution on `MvPowerSeries (Fin 2) R`, since both entries have zero
+constant coefficient. -/
+private theorem hasSubst_eval_zero_X1 :
+    MvPowerSeries.HasSubst
       (![(0 : MvPowerSeries (Fin 2) R), MvPowerSeries.X 1] :
         Fin 2 → MvPowerSeries (Fin 2) R) := by
-    apply MvPowerSeries.hasSubst_of_constantCoeff_zero
-    intro s; fin_cases s <;> simp
-  rw [MvPowerSeries.subst_add h0X1]
-  -- Handle subst (X 0) F.log: becomes subst 0 F.log = 0 after substituting.
-  have h_sub_X0 : MvPowerSeries.subst
+  apply MvPowerSeries.hasSubst_of_constantCoeff_zero
+  intro s; fin_cases s <;> simp
+
+/-- The `X 0`-leg of the RHS of `LogPreservesAdd` collapses under `X 0 ↦ 0`:
+  `subst ![0, X 1] (subst (X 0) F.log) = 0`. Composing the two substitutions
+sends `X 0 ↦ 0`, and `F.log` has zero constant coefficient, so the result is
+`subst 0 F.log = 0`. -/
+private theorem subst_zero_X1_subst_X0_log (F : FormalGroup R) [Module ℚ R] :
+    MvPowerSeries.subst
+        (![0, MvPowerSeries.X 1] : Fin 2 → MvPowerSeries (Fin 2) R)
+        (PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) F.log) = 0 := by
+  have hX0 : PowerSeries.HasSubst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) :=
+    PowerSeries.HasSubst.of_constantCoeff_zero (by simp)
+  rw [PowerSeries.subst_def]
+  rw [MvPowerSeries.subst_comp_subst_apply hX0.const hasSubst_eval_zero_X1]
+  have hconst : (fun _ : Unit ↦ MvPowerSeries.subst
       (![(0 : MvPowerSeries (Fin 2) R), MvPowerSeries.X 1] :
         Fin 2 → MvPowerSeries (Fin 2) R)
-      (PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) F.log) = 0 := by
-    rw [PowerSeries.subst_def]
-    rw [MvPowerSeries.subst_comp_subst_apply hX0.const h0X1]
-    have hconst : (fun _ : Unit ↦ MvPowerSeries.subst
-        (![(0 : MvPowerSeries (Fin 2) R), MvPowerSeries.X 1] :
-          Fin 2 → MvPowerSeries (Fin 2) R)
-        (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R)) =
-        fun _ : Unit ↦ (0 : MvPowerSeries (Fin 2) R) := by
-      funext _
-      rw [MvPowerSeries.subst_X h0X1 0]
-      rfl
-    rw [hconst]
-    change PowerSeries.subst (0 : MvPowerSeries (Fin 2) R) F.log = 0
-    exact PowerSeries_subst_zero_of_constantCoeff_zero F.log F.log_constantCoeff
-  rw [h_sub_X0, zero_add]
-  -- Handle subst (X 1) F.log: becomes subst (X 1) F.log after substituting.
+      (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R)) =
+      fun _ : Unit ↦ (0 : MvPowerSeries (Fin 2) R) := by
+    funext _
+    rw [MvPowerSeries.subst_X hasSubst_eval_zero_X1 0]
+    rfl
+  rw [hconst]
+  change PowerSeries.subst (0 : MvPowerSeries (Fin 2) R) F.log = 0
+  exact PowerSeries_subst_zero_of_constantCoeff_zero F.log F.log_constantCoeff
+
+/-- The `X 1`-leg of the RHS of `LogPreservesAdd` is fixed by `X 0 ↦ 0, X 1 ↦ X 1`:
+  `subst ![0, X 1] (subst (X 1) F.log) = subst (X 1) F.log`. Composing the two
+substitutions sends `X 1 ↦ X 1`, leaving the series unchanged. -/
+private theorem subst_zero_X1_subst_X1_log (F : FormalGroup R) [Module ℚ R] :
+    MvPowerSeries.subst
+        (![0, MvPowerSeries.X 1] : Fin 2 → MvPowerSeries (Fin 2) R)
+        (PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) F.log) =
+      PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) F.log := by
+  have hX1 : PowerSeries.HasSubst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) :=
+    PowerSeries.HasSubst.of_constantCoeff_zero (by simp)
   rw [PowerSeries.subst_def]
-  rw [MvPowerSeries.subst_comp_subst_apply hX1.const h0X1]
+  rw [MvPowerSeries.subst_comp_subst_apply hX1.const hasSubst_eval_zero_X1]
   have hX1_eq : (fun _ : Unit ↦ MvPowerSeries.subst
       (![(0 : MvPowerSeries (Fin 2) R), MvPowerSeries.X 1] :
         Fin 2 → MvPowerSeries (Fin 2) R)
       (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R)) =
       (fun _ : Unit ↦ (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R)) := by
     funext _
-    rw [MvPowerSeries.subst_X h0X1 1]
+    rw [MvPowerSeries.subst_X hasSubst_eval_zero_X1 1]
     rfl
   rw [hX1_eq]
+
+/-- Substituting `X 0 ↦ 0` in the RHS of `LogPreservesAdd`:
+  `subst ![0, X 1] (subst (X 0) F.log + subst (X 1) F.log) = subst (X 1) F.log`.
+The `X 0`-leg collapses to `0` (`subst_zero_X1_subst_X0_log`) and the `X 1`-leg
+is fixed (`subst_zero_X1_subst_X1_log`). -/
+private theorem subst_zero_LogPreservesAdd_RHS (F : FormalGroup R) [Module ℚ R] :
+    MvPowerSeries.subst
+        (![0, MvPowerSeries.X 1] : Fin 2 → MvPowerSeries (Fin 2) R)
+        (PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) F.log +
+          PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) F.log) =
+      PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) F.log := by
+  rw [MvPowerSeries.subst_add hasSubst_eval_zero_X1,
+    subst_zero_X1_subst_X0_log F, zero_add, subst_zero_X1_subst_X1_log F]
 
 /-- The coefficient of `(X 1) ^ k` at the monomial `single 1 b` in
 `MvPowerSeries (Fin 2) R`: it is `1` when `k = b` and `0` otherwise, since
@@ -1537,16 +1556,6 @@ private theorem coeff_subst_zero_X1_at_single_1 (h : MvPowerSeries (Fin 2) R) (b
       rw [prod_eval_zero_X1_of_fst_eq_zero _ h0, coeff_single_1_X1_pow, if_neg hd1, smul_zero]
     · -- d 0 ≠ 0: d.prod = 0.
       rw [prod_eval_zero_X1_of_fst_ne_zero _ h0, map_zero, smul_zero]
-
-/-- The substitution `X 0 ↦ 0, X 1 ↦ X 1` (i.e. `![0, X 1]`) admits
-substitution on `MvPowerSeries (Fin 2) R`, since both entries have zero
-constant coefficient. -/
-private theorem hasSubst_eval_zero_X1 :
-    MvPowerSeries.HasSubst
-      (![(0 : MvPowerSeries (Fin 2) R), MvPowerSeries.X 1] :
-        Fin 2 → MvPowerSeries (Fin 2) R) := by
-  apply MvPowerSeries.hasSubst_of_constantCoeff_zero
-  intro s; fin_cases s <;> simp
 
 /-- **Step 1 of `LogPreservesAdd`**: the partial derivative in variable `0` of
 the difference between the two sides of `LogPreservesAdd F` vanishes. Both sides
