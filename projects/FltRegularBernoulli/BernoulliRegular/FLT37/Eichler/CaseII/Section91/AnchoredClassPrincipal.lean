@@ -52,7 +52,7 @@ It imports only; it does **not** modify any existing file.
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Polynomial
+open NumberField Polynomial
 open scoped nonZeroDivisors
 
 namespace BernoulliRegular.FLT37.Eichler
@@ -281,9 +281,8 @@ theorem caseIIPrincipalizationAgainstEtaZero_of_anchoredClassTrivial37
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   intro η hη
   -- `D.etaZero = zetaSubOneDvdRoot …`, `D.rootIdeal η = rootDivZetaSubOneDvdGcd …`.
-  have hη' : η ≠ D.etaZero := hη
   have h_root := caseII_rootQuotientPrincipal_of_classEq D (by decide : (37 : ℕ) ≠ 2) η
-    (h_class D η hη')
+    (h_class D η hη)
   exact caseII_isPrincipal_aDivAEtaZero_of_rootQuotientPrincipal
     (by decide : (37 : ℕ) ≠ 2) D.hζ D.equation D.hy η h_root
 
