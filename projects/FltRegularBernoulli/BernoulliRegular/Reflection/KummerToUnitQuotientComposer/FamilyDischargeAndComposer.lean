@@ -7,7 +7,6 @@ public import BernoulliRegular.Reflection.Kummer.CharacterMatching
 public import BernoulliRegular.Reflection.Kummer.PrincipalLift
 public import BernoulliRegular.Reflection.KummerToUnitQuotientComposer.PipelineAndRecipe
 
-
 /-!
 # End-to-end composer
 
@@ -99,11 +98,9 @@ universe u v
 
 noncomputable section
 
-open NumberField FractionalIdeal
-open scoped nonZeroDivisors
+open NumberField
 
 namespace BernoulliRegular
-
 
 section KummerToUnitQuotientComposer
 
@@ -532,7 +529,7 @@ target `KummerCharacterUnitLift.OfComponentExtensions R S`.
 For every `χ`, every `Comp` whose component extension is non-empty, every choice
 of `Ext`, this is the obligation to produce a `KummerPipelinePerExtension Ext`. -/
 def KummerCharacterUnitLift.PerExtensionPipelineFamily
-    [IsCyclotomicExtension {p} ℚ K] [IsCMField K] : Prop :=
+    [IsCMField K] : Prop :=
   ∀ (χ : MulChar (ZMod p)ˣ ℚ)
     (Comp : CyclotomicFieldClassGroupPSylowComponent (p := p) K)
     (_ : Comp.character = χ)
@@ -607,7 +604,7 @@ Combine the per-character pipeline family + promotion family with
 component-extension existence to build the full
 `KummerToUnitQuotientEmbeddingData`. -/
 noncomputable def kummerToUnitQuotientEmbeddingData_of_perCharacterFamily
-    [IsCyclotomicExtension {p} ℚ K] [IsCMField K]
+    [IsCMField K]
     {N : NondegenerateKummerPairing (p := p) (K := K) P}
     {T : KummerPairingTwistData (p := p) (K := K) N}
     {R : KummerPairingRawComparison (p := p) (K := K) N T}
