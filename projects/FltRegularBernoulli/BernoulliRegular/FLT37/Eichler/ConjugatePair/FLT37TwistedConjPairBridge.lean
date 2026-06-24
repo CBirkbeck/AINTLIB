@@ -51,8 +51,6 @@ It imports only; it does **not** modify any existing file.
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Polynomial NumberField.IsCMField
-
 namespace BernoulliRegular.FLT37.Eichler
 
 open FLT37.LehmerVandiver.CaseII
