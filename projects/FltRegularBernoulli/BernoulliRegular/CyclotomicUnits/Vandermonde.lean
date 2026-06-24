@@ -20,8 +20,6 @@ omega(a)^(2*j) - 1,     1 <= j <= (p - 3) / 2,  2 <= a <= (p - 1) / 2.
 
 noncomputable section
 
-open scoped BigOperators
-
 namespace BernoulliRegular
 namespace CyclotomicUnits
 
@@ -104,8 +102,7 @@ theorem teichmullerEvenNode_injective (hp_three : 3 ≤ p) :
   · have hadd_nat :
         ((A + B : ℕ) : ZMod p) = 0 := by
       simpa [A, B, Nat.cast_add] using hadd
-    exfalso
-    exact (kummerLogColumnIndex_add_ne_zero (p := p) hp_three a b) hadd_nat
+    exact absurd hadd_nat (kummerLogColumnIndex_add_ne_zero (p := p) hp_three a b)
 
 theorem teichmullerEvenNode_ne_one (hp_three : 3 ≤ p) (a : Fin (kummerLogRank p)) :
     teichmullerEvenNode (p := p) hp_three a ≠ 1 := by
