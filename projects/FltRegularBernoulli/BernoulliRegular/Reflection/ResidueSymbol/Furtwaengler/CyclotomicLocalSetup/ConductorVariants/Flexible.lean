@@ -451,10 +451,6 @@ theorem gaussSumInt_ne_zero_of_not_mem_Q_pow_succ
 
 end ConductorFlexibleConcreteStickelbergerSetup
 
-namespace CyclotomicLocalSetup
-
-end CyclotomicLocalSetup
-
 end Furtwaengler
 
 end BernoulliRegular
