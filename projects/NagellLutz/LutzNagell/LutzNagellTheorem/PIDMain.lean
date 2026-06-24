@@ -275,7 +275,7 @@ private lemma curveR_equation_of_isInteger
     simp only [map_add, map_mul, map_pow]; linear_combination hQ
   exact IsFractionRing.injective R K h
 
-omit [CharZero R] in
+omit [IsDomain R] [IsPrincipalIdealRing R] [CharZero R] in
 private lemma addOrderOf_ne_two_of_kappa_ne_zero
     {x y : K} (hns : (curveK R K W).toAffine.Nonsingular x y)
     {x₀ y₀ : R} (hx : algebraMap R K x₀ = x) (hy : algebraMap R K y₀ = y)
