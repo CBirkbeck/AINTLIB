@@ -264,6 +264,61 @@ private lemma finsupp_swap_apply_one (d : Fin 2 →₀ ℕ) :
 
 omit [IsLocalRing R] [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R]
   [IsLinearTopology R R] [T2Space R] [CompleteSpace R] in
+/-- The coefficient of the substituted monomial `X 1 ^ a * X 0 ^ b` at index `d`:
+it is `1` exactly when `d = Finsupp.single 1 a + Finsupp.single 0 b`, and `0`
+otherwise. This is the common core of the diagonal and off-diagonal estimates in
+`FormalGroup.coeff_swap`. -/
+private lemma coeff_X_one_pow_mul_X_zero_pow (a b : ℕ) (d : Fin 2 →₀ ℕ) :
+    MvPowerSeries.coeff d
+        ((MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) R) ^ a *
+          (MvPowerSeries.X 0) ^ b) =
+      if d = Finsupp.single 1 a + Finsupp.single 0 b then 1 else 0 := by
+  rw [MvPowerSeries.X_pow_eq, MvPowerSeries.X_pow_eq,
+      MvPowerSeries.monomial_mul_monomial, mul_one, MvPowerSeries.coeff_monomial]
+
+omit [IsLocalRing R] [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R]
+  [IsLinearTopology R R] [T2Space R] [CompleteSpace R] in
+/-- The unique nonzero term in the substituted sum: at `d' = finsupp_swap d` the
+substituted monomial `X 1 ^ ((finsupp_swap d) 0) * X 0 ^ ((finsupp_swap d) 1)`
+has coefficient `1` at `d`. -/
+private lemma coeff_swap_diag (d : Fin 2 →₀ ℕ) :
+    MvPowerSeries.coeff d
+        ((MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) R) ^ ((finsupp_swap d) 0) *
+          (MvPowerSeries.X 0) ^ ((finsupp_swap d) 1)) = 1 := by
+  rw [coeff_X_one_pow_mul_X_zero_pow, finsupp_swap_apply_zero, finsupp_swap_apply_one,
+      if_pos]
+  ext i; fin_cases i <;> simp
+
+omit [IsLocalRing R] [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R]
+  [IsLinearTopology R R] [T2Space R] [CompleteSpace R] in
+/-- Every off-diagonal term vanishes: for `d' ≠ finsupp_swap d`, the substituted
+monomial `X 1 ^ (d' 0) * X 0 ^ (d' 1)` has coefficient `0` at `d`. -/
+private lemma coeff_swap_offDiag (d d' : Fin 2 →₀ ℕ) (hd' : d' ≠ finsupp_swap d) :
+    MvPowerSeries.coeff d
+        ((MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) R) ^ (d' 0) *
+          (MvPowerSeries.X 0) ^ (d' 1)) = 0 := by
+  rw [coeff_X_one_pow_mul_X_zero_pow]
+  split_ifs with heq
+  · exfalso; apply hd'
+    -- heq says d = single 1 (d' 0) + single 0 (d' 1)
+    have h0' : d' 1 = d 0 := by
+      have := DFunLike.congr_fun heq 0
+      simpa [Finsupp.coe_add, Pi.add_apply, Finsupp.single_apply] using this.symm
+    have h1' : d' 0 = d 1 := by
+      have := DFunLike.congr_fun heq 1
+      simpa [Finsupp.coe_add, Pi.add_apply, Finsupp.single_apply] using this.symm
+    ext i
+    fin_cases i
+    · show d' 0 = finsupp_swap d 0
+      rw [finsupp_swap_apply_zero]
+      exact h1'
+    · show d' 1 = finsupp_swap d 1
+      rw [finsupp_swap_apply_one]
+      exact h0'
+  · rfl
+
+omit [IsLocalRing R] [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R]
+  [IsLinearTopology R R] [T2Space R] [CompleteSpace R] in
 /-- The coefficient swap induced by `F.comm`: `coeff d F.toSeries =
 coeff (finsupp_swap d) F.toSeries`. This is a consequence of
 `subst ![X 1, X 0] F.toSeries = F.toSeries`. -/
@@ -281,50 +336,16 @@ theorem FormalGroup.coeff_swap (F : FormalGroup R) (d : Fin 2 →₀ ℕ) :
   -- When `d' = finsupp_swap d`, i.e., `d' 0 = d 1, d' 1 = d 0`, the product
   -- `X 1^(d 1) * X 0^(d 0)` has coefficient 1 at `(d 0, d 1) = d`.
   rw [finsum_eq_single _ (finsupp_swap d)] at key
-  · -- Evaluate the single nonzero term.
+  · -- Evaluate the single nonzero term via `coeff_swap_diag`.
     simp only [Finsupp.prod_fintype _ _ (fun i ↦ pow_zero _), Fin.prod_univ_two,
       Matrix.cons_val_zero, Matrix.cons_val_one] at key
-    have hcoeff_prod :
-        MvPowerSeries.coeff d
-          ((MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) R) ^ ((finsupp_swap d) 0) *
-            (MvPowerSeries.X 0) ^ ((finsupp_swap d) 1)) = 1 := by
-      rw [MvPowerSeries.X_pow_eq, MvPowerSeries.X_pow_eq,
-          MvPowerSeries.monomial_mul_monomial, mul_one]
-      rw [MvPowerSeries.coeff_monomial]
-      rw [finsupp_swap_apply_zero, finsupp_swap_apply_one]
-      rw [if_pos]
-      ext i; fin_cases i <;> simp
-    rw [hcoeff_prod, smul_eq_mul, mul_one] at key
+    rw [coeff_swap_diag d, smul_eq_mul, mul_one] at key
     exact key.symm
-  · -- Other terms vanish.
+  · -- Other terms vanish via `coeff_swap_offDiag`.
     intro d' hd'
     simp only [Finsupp.prod_fintype _ _ (fun i ↦ pow_zero _), Fin.prod_univ_two,
       Matrix.cons_val_zero, Matrix.cons_val_one]
-    suffices MvPowerSeries.coeff d
-        ((MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) R) ^ (d' 0) *
-          (MvPowerSeries.X 0) ^ (d' 1)) = 0 by
-      rw [this, smul_zero]
-    rw [MvPowerSeries.X_pow_eq, MvPowerSeries.X_pow_eq,
-        MvPowerSeries.monomial_mul_monomial, mul_one]
-    rw [MvPowerSeries.coeff_monomial]
-    split_ifs with heq
-    · exfalso; apply hd'
-      -- heq says single 0 (d' 1) + single 1 (d' 0) = d
-      have h0' : d' 1 = d 0 := by
-        have := DFunLike.congr_fun heq 0
-        simpa [Finsupp.coe_add, Pi.add_apply, Finsupp.single_apply] using this.symm
-      have h1' : d' 0 = d 1 := by
-        have := DFunLike.congr_fun heq 1
-        simpa [Finsupp.coe_add, Pi.add_apply, Finsupp.single_apply] using this.symm
-      ext i
-      fin_cases i
-      · show d' 0 = finsupp_swap d 0
-        rw [finsupp_swap_apply_zero]
-        exact h1'
-      · show d' 1 = finsupp_swap d 1
-        rw [finsupp_swap_apply_one]
-        exact h0'
-    · rfl
+    rw [coeff_swap_offDiag d d' hd', smul_zero]
 
 -- The proof uses a reindexed `HasSum` via `finsupp_swap` equivalence; this
 -- requires substantial term manipulation and benefits from a higher heartbeat
