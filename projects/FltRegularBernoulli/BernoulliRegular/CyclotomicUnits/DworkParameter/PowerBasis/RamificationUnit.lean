@@ -6,8 +6,6 @@ public import BernoulliRegular.CyclotomicUnits.DworkParameter.Construction.Dwork
 
 noncomputable section
 
-open scoped NumberField
-
 namespace BernoulliRegular
 namespace CyclotomicUnits
 namespace PadicLogSetup
@@ -142,13 +140,10 @@ theorem dworkRamificationUnit_add_one_mem_dworkParameterIdeal
     (hp_two : 2 < p) :
     dworkRamificationUnit (p := p) (K := K) hp_two + 1 ∈
       dworkParameterIdeal p K := by
-  let S : Type _ := DworkCompleteIntegerRing p K
   have htail_pow :=
     artinHasseTail_mem_dworkCompleteLambdaIdeal_pow
       (p := p) (K := K) hp_two
-  have hpow_ne : (p - 1) ^ 2 ≠ 0 := by
-    have hp_pred_pos : 0 < p - 1 := by omega
-    exact pow_ne_zero 2 (Nat.ne_of_gt hp_pred_pos)
+  have hpow_ne : (p - 1) ^ 2 ≠ 0 := pow_ne_zero 2 (by omega)
   have htail_lambda :
       artinHasseTail (p := p) (K := K) hp_two ∈
         dworkCompleteLambdaIdeal p K :=
