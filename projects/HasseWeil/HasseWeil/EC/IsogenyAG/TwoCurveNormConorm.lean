@@ -407,6 +407,157 @@ theorem pointValuation_le_one_pullback_coordinateRing
 set_option synthInstance.maxHeartbeats 400000 in
 set_option maxHeartbeats 1600000 in
 omit [IsAlgClosed F] in
+/-- **The integral closure `B` is `≤ 1` at a regular point `P`** (the regularity bound, `B`-level).
+At a point `P` where both pulled-back generators are regular (`φ^*(x_gen₂), φ^*(y_gen₂) ≤ 1`), the
+whole image of `F[E₂]` lands in the valuation integers `O_P = pv.integer`
+(`pointValuation_le_one_pullback_coordinateRing`), so the integral closure `B = integralClosure
+F[E₂] K(E₁)` lands in the integrally closed `O_P` as well: any `b ∈ B` is integral over `F[E₂]`,
+hence over `O_P`, hence `pv (algebraMap_B b) ≤ 1`.  (Local helper for
+`exists_bPrime_eq_pointValuation_of_notMem_poleLocus`, supplying both the `q`-ideal absorption and
+the `O_v ⊆ O_P` numerator/denominator bounds.) -/
+private theorem pointValuation_le_one_of_mem_B
+    (φ : HasseWeil.Isogeny W₁ W₂)
+    [algKL : Algebra W₂.toAffine.FunctionField W₁.toAffine.FunctionField]
+    [IsScalarTower F W₂.toAffine.FunctionField W₁.toAffine.FunctionField]
+    [algCR1 : Algebra (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing W₁.toAffine.FunctionField]
+    [IsScalarTower (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+      W₂.toAffine.FunctionField W₁.toAffine.FunctionField]
+    (halg : ∀ g : W₂.toAffine.FunctionField,
+      algebraMap W₂.toAffine.FunctionField W₁.toAffine.FunctionField g = φ.pullback g)
+    (P : (W_smooth W₁).SmoothPoint)
+    (hxle : (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P (φ.pullback (x_gen W₂)) ≤ 1)
+    (hyle : (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P (φ.pullback (y_gen W₂)) ≤ 1)
+    (b : NormConormIntegralClosure.B
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) :
+    (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P
+      (algebraMap (NormConormIntegralClosure.B
+        (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))
+        W₁.toAffine.FunctionField b) ≤ 1 := by
+  classical
+  set pv := (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P with hpv
+  -- the image of `F[E₂]` lands in the valuation integers `O_P = pv.integer`.
+  have hImOP : ∀ c : (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing,
+      algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing W₁.toAffine.FunctionField c ∈
+        pv.integer := by
+    intro c
+    rw [Valuation.mem_integer_iff]
+    have hceq : algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing W₁.toAffine.FunctionField c =
+        φ.pullback (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+          W₂.toAffine.FunctionField c) := by
+      rw [← halg, IsScalarTower.algebraMap_apply (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+        W₂.toAffine.FunctionField W₁.toAffine.FunctionField c]
+    rw [hceq]
+    exact pointValuation_le_one_pullback_coordinateRing φ P hxle hyle c
+  -- the algebra `F[E₂] → O_P = pv.integer` (image lands in the integers).
+  letI algCR_int : Algebra (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing pv.integer :=
+    (((algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing W₁.toAffine.FunctionField)).codRestrict
+      pv.integer.toSubsemiring hImOP).toAlgebra
+  haveI twCR_int : IsScalarTower (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing pv.integer
+      W₁.toAffine.FunctionField :=
+    IsScalarTower.of_algebraMap_eq fun _ => rfl
+  -- `b` integral over `F[E₂]` (image ⊆ `O_P`) ⟹ `b` integral over `O_P` ⟹ `pv b ≤ 1`.
+  have hbint : IsIntegral (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+      (algebraMap (NormConormIntegralClosure.B
+        (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))
+        W₁.toAffine.FunctionField b) := b.2
+  have hbint_int : IsIntegral pv.integer (algebraMap (NormConormIntegralClosure.B
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))
+      W₁.toAffine.FunctionField b) := hbint.tower_top
+  exact (Valuation.integer.integers pv).isIntegral_iff_v_le_one.mp hbint_int
+
+set_option synthInstance.maxHeartbeats 400000 in
+set_option maxHeartbeats 1600000 in
+omit [IsAlgClosed F] in
+/-- **A `B`-prime whose center is the place of `P` has adic valuation `pointValuation P`** (the
+DVR-domination tail).  Let `v` be a height-one prime of `B` whose ideal is exactly the center
+`{b : B | pv (algebraMap_B b) < 1}` (`hcenter`) of `pv = pointValuation P`, and suppose `pv ≤ 1` on
+`B` (`hreg`, from `pointValuation_le_one_of_mem_B`).  Then `v.valuation = pv`: the `O_v`-integers sit
+inside `O_P` (an `O_v`-integer `f = n/d` with `d ∉ v.asIdeal` has `pv (algebraMap_B d) = 1`, via
+`exists_primeCompl_mul_eq_of_integer`), `O_P ≠ ⊤` (`valuationSubring_ne_top_of_surjective_withZeroInt`,
+`pv` surjective), so by rank-one DVR domination the two valuation subrings agree and the two
+surjective `ℤᵐ⁰`-valuations are equal.  (Local helper for
+`exists_bPrime_eq_pointValuation_of_notMem_poleLocus`.) -/
+private theorem bPrime_valuation_eq_pointValuation_of_center
+    [algKL : Algebra W₂.toAffine.FunctionField W₁.toAffine.FunctionField]
+    [algCR1 : Algebra (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing W₁.toAffine.FunctionField]
+    [IsScalarTower (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+      W₂.toAffine.FunctionField W₁.toAffine.FunctionField]
+    [IsDedekindDomain (NormConormIntegralClosure.B
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))]
+    [IsFractionRing (NormConormIntegralClosure.B
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))
+      W₁.toAffine.FunctionField]
+    (P : (W_smooth W₁).SmoothPoint)
+    (v : IsDedekindDomain.HeightOneSpectrum (NormConormIntegralClosure.B
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))))
+    (hreg : ∀ b : NormConormIntegralClosure.B
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)),
+      (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P
+        (algebraMap (NormConormIntegralClosure.B
+          (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))
+          W₁.toAffine.FunctionField b) ≤ 1)
+    (hcenter : ∀ b : NormConormIntegralClosure.B
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)),
+      b ∈ v.asIdeal ↔ (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P
+        (algebraMap (NormConormIntegralClosure.B
+          (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))
+          W₁.toAffine.FunctionField b) < 1) :
+    v.valuation W₁.toAffine.FunctionField =
+      (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P := by
+  classical
+  haveI hDVR : IsDiscreteValuationRing ((⟨W₁⟩ : SmoothPlaneCurve F).localRingAt P) :=
+    (⟨W₁⟩ : SmoothPlaneCurve F).localRing_isDVR_of_smooth P
+  -- both valuations are surjective onto `ℤᵐ⁰` (rank-one DVR).
+  have hwsurj : Function.Surjective (v.valuation W₁.toAffine.FunctionField) :=
+    v.valuation_surjective W₁.toAffine.FunctionField
+  have hpvsurj : Function.Surjective ((⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P) :=
+    (IsDiscreteValuationRing.maximalIdeal ((⟨W₁⟩ : SmoothPlaneCurve F).localRingAt P)).valuation_surjective
+      W₁.toAffine.FunctionField
+  haveI : IsDiscreteValuationRing (v.valuation W₁.toAffine.FunctionField).valuationSubring :=
+    valuationSubring_isDVR_of_surjective_withZeroInt _ hwsurj
+  -- `O_v ⊆ O_P`: an `O_v`-integer `f = n/d` with `d ∉ v.asIdeal` has `pv (algebraMap_B d) = 1`.
+  have hsub : (v.valuation W₁.toAffine.FunctionField).valuationSubring ≤
+      ((⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P).valuationSubring := by
+    intro f hf
+    rw [Valuation.mem_valuationSubring_iff] at hf ⊢
+    obtain ⟨n, d, hnd⟩ := IsDedekindDomain.HeightOneSpectrum.exists_primeCompl_mul_eq_of_integer
+      v f hf
+    -- `d ∉ v.asIdeal`, so `pv (algebraMap_B d) = 1`.
+    have hd_notin : (d : NormConormIntegralClosure.B
+      (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) ∉ v.asIdeal :=
+      Ideal.mem_primeCompl_iff.mp d.2
+    have hd_ge : ¬ (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P (algebraMap _
+        W₁.toAffine.FunctionField (d : NormConormIntegralClosure.B
+          (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))) < 1 := by
+      rw [← hcenter]; exact hd_notin
+    have hd1 : (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P (algebraMap _
+        W₁.toAffine.FunctionField (d : NormConormIntegralClosure.B
+          (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F)))) = 1 :=
+      le_antisymm (hreg _) (not_lt.mp hd_ge)
+    -- from `f · algMap_B d = algMap_B n`: `pv f = pv (algMap_B n) / pv (algMap_B d) ≤ 1`.
+    have hfn : f = algebraMap _ W₁.toAffine.FunctionField n /
+        algebraMap _ W₁.toAffine.FunctionField (d : NormConormIntegralClosure.B
+          (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) := by
+      have hd_ne : algebraMap _ W₁.toAffine.FunctionField (d : NormConormIntegralClosure.B
+          (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) ≠ 0 := by
+        rw [Ne, ← ((⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P).zero_iff, hd1]; exact one_ne_zero
+      rw [eq_div_iff hd_ne, hnd]
+    rw [hfn, map_div₀ ((⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P), hd1, div_one]
+    exact hreg n
+  -- `O_P ≠ ⊤`: `pv` is nontrivial (surjective onto `ℤᵐ⁰`).
+  have hAtop : ((⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P).valuationSubring ≠ ⊤ :=
+    valuationSubring_ne_top_of_surjective_withZeroInt _ hpvsurj
+  have hEq : (v.valuation W₁.toAffine.FunctionField).valuationSubring =
+      ((⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P).valuationSubring :=
+    rankOne_valuationSubring_le_eq_of_ne_top _ _ hsub hAtop
+  have h_isEquiv : (v.valuation W₁.toAffine.FunctionField).IsEquiv
+      ((⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P) := by
+    rw [Valuation.isEquiv_iff_valuationSubring]; rw [hEq]
+  exact Valuation.isEquiv_iff_eq_of_surjective_withZeroInt _ _ hwsurj hpvsurj h_isEquiv
+
+set_option synthInstance.maxHeartbeats 400000 in
+set_option maxHeartbeats 1600000 in
+omit [IsAlgClosed F] in
 /-- **A regular point with a vanishing `B`-function is cut out by a `B`-prime** (reverse place
 dictionary / surjectivity).  If both pulled-back generators are regular at `P` (`P ∉ poleLocus`) and
 some nonzero `z ∈ B` vanishes at `P` (`pointValuation P (algebraMap_B z) < 1`), then there is a
@@ -450,42 +601,12 @@ theorem exists_bPrime_eq_pointValuation_of_notMem_poleLocus
   let Bb := NormConormIntegralClosure.B
     (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))
   let pv := (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P
-  haveI : IsIntegrallyClosed (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing := inferInstance
-  haveI hmPprime : ((⟨W₁⟩ : SmoothPlaneCurve F).maximalIdealAt P).IsPrime :=
-    ((⟨W₁⟩ : SmoothPlaneCurve F).maximalIdealAt_isMaximal P).isPrime
-  haveI hDVR : IsDiscreteValuationRing ((⟨W₁⟩ : SmoothPlaneCurve F).localRingAt P) :=
-    (⟨W₁⟩ : SmoothPlaneCurve F).localRing_isDVR_of_smooth P
   have hxle : pv (φ.pullback (x_gen W₂)) ≤ 1 := by by_contra h; exact hP (Or.inl h)
   have hyle : pv (φ.pullback (y_gen W₂)) ≤ 1 := by by_contra h; exact hP (Or.inr h)
-  -- the image of `F[E₂]` lands in the valuation integers `O_P = pv.integer`.
-  have hImOP : ∀ c : (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing,
-      algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing W₁.toAffine.FunctionField c ∈
-        pv.integer := by
-    intro c
-    rw [Valuation.mem_integer_iff]
-    have hceq : algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing W₁.toAffine.FunctionField c =
-        φ.pullback (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
-          W₂.toAffine.FunctionField c) := by
-      rw [← halg, IsScalarTower.algebraMap_apply (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
-        W₂.toAffine.FunctionField W₁.toAffine.FunctionField c]
-    rw [hceq]
-    exact pointValuation_le_one_pullback_coordinateRing φ P hxle hyle c
-  -- the algebra `F[E₂] → O_P = pv.integer` (image lands in the integers).
-  letI algCR_int : Algebra (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing pv.integer :=
-    (((algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing W₁.toAffine.FunctionField)).codRestrict
-      pv.integer.toSubsemiring hImOP).toAlgebra
-  haveI twCR_int : IsScalarTower (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing pv.integer
-      W₁.toAffine.FunctionField :=
-    IsScalarTower.of_algebraMap_eq fun _ => rfl
-  -- (1) regularity: every `b ∈ B` has `pv (algebraMap_B b) ≤ 1`.
-  have hregB : ∀ b : Bb, pv (algebraMap Bb W₁.toAffine.FunctionField b) ≤ 1 := by
-    intro b
-    -- `b` integral over `F[E₂]` (image ⊆ `O_P`) ⟹ `b` integral over `O_P` ⟹ `pv b ≤ 1`.
-    have hbint : IsIntegral (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
-        (algebraMap Bb W₁.toAffine.FunctionField b) := b.2
-    have hbint_int : IsIntegral pv.integer (algebraMap Bb W₁.toAffine.FunctionField b) :=
-      hbint.tower_top
-    exact (Valuation.integer.integers pv).isIntegral_iff_v_le_one.mp hbint_int
+  -- (1) regularity: every `b ∈ B` has `pv (algebraMap_B b) ≤ 1` (the image of `F[E₂]`, hence its
+  -- integral closure `B`, lands in the integrally closed `O_P`).
+  have hregB : ∀ b : Bb, pv (algebraMap Bb W₁.toAffine.FunctionField b) ≤ 1 :=
+    pointValuation_le_one_of_mem_B φ halg P hxle hyle
   -- (2) the center `q = {b ∈ B : pv (algebraMap_B b) < 1}` as an ideal.
   set q : Ideal Bb :=
     { carrier := {b : Bb | pv (algebraMap Bb W₁.toAffine.FunctionField b) < 1}
@@ -521,52 +642,10 @@ theorem exists_bPrime_eq_pointValuation_of_notMem_poleLocus
   -- `q ≠ ⊥`: `z ∈ q` (the vanishing hypothesis) and `z ≠ 0`.
   have hz_mem : z ∈ q := (hq_mem_iff z).mpr hzvanish
   have hq_ne : q ≠ ⊥ := fun h => hz_ne ((Submodule.mem_bot _).mp (h ▸ hz_mem))
-  -- the height-one prime `v`.
-  set v : IsDedekindDomain.HeightOneSpectrum Bb := ⟨q, hq_prime, hq_ne⟩ with hv_def
-  refine ⟨v, ?_⟩
-  -- (3) domination: `O_v ⊆ O_P`, then equality (both rank-one DVR, `O_P ≠ ⊤`).
-  have hwsurj : Function.Surjective (v.valuation W₁.toAffine.FunctionField) :=
-    v.valuation_surjective W₁.toAffine.FunctionField
-  have hpvsurj : Function.Surjective pv :=
-    (IsDiscreteValuationRing.maximalIdeal ((⟨W₁⟩ : SmoothPlaneCurve F).localRingAt P)).valuation_surjective
-      W₁.toAffine.FunctionField
-  haveI : IsDiscreteValuationRing (v.valuation W₁.toAffine.FunctionField).valuationSubring :=
-    valuationSubring_isDVR_of_surjective_withZeroInt _ hwsurj
-  -- `O_v ⊆ O_P`: an `O_v`-integer `f = n/d` with `d ∉ q` has `pv (algebraMap_B d) = 1`.
-  have hsub : (v.valuation W₁.toAffine.FunctionField).valuationSubring ≤ pv.valuationSubring := by
-    intro f hf
-    rw [Valuation.mem_valuationSubring_iff] at hf ⊢
-    obtain ⟨n, d, hnd⟩ := IsDedekindDomain.HeightOneSpectrum.exists_primeCompl_mul_eq_of_integer
-      v f hf
-    -- `d ∉ q = v.asIdeal`, so `pv (algebraMap_B d) = 1`.
-    have hd_notin : (d : Bb) ∉ q := Ideal.mem_primeCompl_iff.mp d.2
-    have hd_ge : ¬ pv (algebraMap Bb W₁.toAffine.FunctionField (d : Bb)) < 1 := by
-      rw [← hq_mem_iff]; exact hd_notin
-    have hd1 : pv (algebraMap Bb W₁.toAffine.FunctionField (d : Bb)) = 1 :=
-      le_antisymm (hregB _) (not_lt.mp hd_ge)
-    -- from `f · algMap_B d = algMap_B n`: `pv f = pv (algMap_B n) / pv (algMap_B d) ≤ 1`.
-    have hfn : f = algebraMap Bb W₁.toAffine.FunctionField n /
-        algebraMap Bb W₁.toAffine.FunctionField (d : Bb) := by
-      have hd_ne : algebraMap Bb W₁.toAffine.FunctionField (d : Bb) ≠ 0 := by
-        rw [Ne, ← pv.zero_iff, hd1]; exact one_ne_zero
-      rw [eq_div_iff hd_ne, hnd]
-    rw [hfn, map_div₀ pv, hd1, div_one]
-    exact hregB n
-  have hAtop : pv.valuationSubring ≠ ⊤ := by
-    have hNontriv : pv.IsNontrivial := by
-      refine ⟨?_⟩
-      obtain ⟨t, ht⟩ := hpvsurj (WithZero.exp (1 : ℤ))
-      refine ⟨t, ?_, ?_⟩
-      · rw [ht]; exact WithZero.exp_ne_zero
-      · rw [ht, show (1 : WithZero (Multiplicative ℤ)) = WithZero.exp (0 : ℤ) from
-          (WithZero.exp_zero).symm, Ne, WithZero.exp_inj]; norm_num
-    intro htop
-    exact (Valuation.valuationSubring_eq_top_iff _).mp htop hNontriv
-  have hEq : (v.valuation W₁.toAffine.FunctionField).valuationSubring = pv.valuationSubring :=
-    rankOne_valuationSubring_le_eq_of_ne_top _ _ hsub hAtop
-  have h_isEquiv : (v.valuation W₁.toAffine.FunctionField).IsEquiv pv := by
-    rw [Valuation.isEquiv_iff_valuationSubring]; rw [hEq]
-  exact Valuation.isEquiv_iff_eq_of_surjective_withZeroInt _ _ hwsurj hpvsurj h_isEquiv
+  -- the height-one prime `v`, and the DVR-domination tail `v.valuation = pv` (`O_v ⊆ O_P`, then
+  -- equality since both are rank-one DVR and `O_P ≠ ⊤`).
+  exact ⟨⟨q, hq_prime, hq_ne⟩,
+    bPrime_valuation_eq_pointValuation_of_center P ⟨q, hq_prime, hq_ne⟩ hregB hq_mem_iff⟩
 
 /-! ### The point-map image of a `B`-prime over `m_Q` is `Q` (the fibre matching, value-level)
 
