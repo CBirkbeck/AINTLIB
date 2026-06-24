@@ -293,6 +293,66 @@ The key insight: for `h = C c * X^(n+1)` (monomial of order `n+1`), coefficients
 `X^a` and shifting indices.
 -/
 
+/-- A high power of `X` annihilates low-degree coefficients of any product:
+`coeff k (X^N * f) = 0` whenever `k < N`. (Every term of the convolution forces
+the `X^N`-factor to land at degree `< N`, where it vanishes.) -/
+private theorem coeff_X_pow_mul_eq_zero_of_lt
+    (f : PowerSeries R) (N k : ℕ) (hk : k < N) :
+    PowerSeries.coeff k ((PowerSeries.X : PowerSeries R) ^ N * f) = 0 := by
+  rw [PowerSeries.coeff_mul]
+  apply Finset.sum_eq_zero
+  intro ⟨p, q⟩ hpq
+  have hpq' : p + q = k := Finset.mem_antidiagonal.mp hpq
+  rw [PowerSeries.coeff_X_pow]
+  rw [if_neg (by omega : p ≠ N), zero_mul]
+
+/-- The `m`-th binomial term `(C c * X^(n+1))^m * g^(d-m) * (d.choose m)` vanishes
+at every degree `k < n+1` once `0 < m`: the monomial power becomes `C (c^m)`
+times `X^(m*(n+1))`, and `m*(n+1) ≥ n+1 > k`, so the `X`-power kills the
+coefficient (`coeff_X_pow_mul_eq_zero_of_lt`). -/
+private theorem coeff_monomial_pow_mul_pow_eq_zero
+    (g : PowerSeries R) (n : ℕ) (c : R) (d m k : ℕ)
+    (hm : 0 < m) (hk : k < n + 1) :
+    PowerSeries.coeff k
+        ((PowerSeries.C c * PowerSeries.X ^ (n + 1)) ^ m * g ^ (d - m) *
+          (d.choose m : PowerSeries R)) = 0 := by
+  rw [monomial_pow_eq]
+  -- `(C c * X^(n+1))^m = C (c^m) * X^(m*(n+1))`; cast the binomial coefficient.
+  have hnatCast : ((d.choose m : ℕ) : PowerSeries R) = PowerSeries.C ((d.choose m : ℕ) : R) :=
+    (map_natCast PowerSeries.C (d.choose m)).symm
+  rw [hnatCast]
+  -- Goal: coeff k (C (c^m) * X^(m*(n+1)) * g^(d-m) * C ↑choose) = 0.
+  -- Rearrange the product so both `C`-factors are on the outside.
+  have reorg : PowerSeries.C (c ^ m) * PowerSeries.X ^ (m * (n + 1)) *
+          g ^ (d - m) *
+          PowerSeries.C ((d.choose m : ℕ) : R) =
+        PowerSeries.C ((d.choose m : ℕ) : R) *
+          (PowerSeries.C (c ^ m) *
+            (PowerSeries.X ^ (m * (n + 1)) * g ^ (d - m))) := by
+    -- First: (C (c^m) * X^N) * g^(d-m) = C (c^m) * (X^N * g^(d-m)).
+    have step1 : PowerSeries.C (c ^ m) * PowerSeries.X ^ (m * (n + 1)) * g ^ (d - m) =
+        PowerSeries.C (c ^ m) * (PowerSeries.X ^ (m * (n + 1)) * g ^ (d - m)) :=
+      mul_assoc _ _ _
+    -- Substitute in LHS and commute.
+    calc PowerSeries.C (c ^ m) * PowerSeries.X ^ (m * (n + 1)) *
+          g ^ (d - m) *
+          PowerSeries.C ((d.choose m : ℕ) : R)
+        = (PowerSeries.C (c ^ m) *
+            (PowerSeries.X ^ (m * (n + 1)) * g ^ (d - m))) *
+            PowerSeries.C ((d.choose m : ℕ) : R) := by
+          exact congr_arg (· * PowerSeries.C ((d.choose m : ℕ) : R)) step1
+      _ = PowerSeries.C ((d.choose m : ℕ) : R) *
+          (PowerSeries.C (c ^ m) *
+            (PowerSeries.X ^ (m * (n + 1)) * g ^ (d - m))) := mul_comm _ _
+  rw [reorg]
+  rw [PowerSeries.coeff_C_mul, PowerSeries.coeff_C_mul]
+  -- coeff k (X^(m*(n+1)) * g^(d-m)) = 0 since m*(n+1) ≥ n+1 > k.
+  have horder_X : k < m * (n + 1) := by
+    calc k < n + 1 := hk
+      _ ≤ m * (n + 1) := Nat.le_mul_of_pos_left _ hm
+  rw [coeff_X_pow_mul_eq_zero_of_lt (g ^ (d - m)) (m * (n + 1)) k horder_X,
+    mul_zero, mul_zero]
+
 /-- For `h = C c * X^(n+1)` and any `d`, the coefficient `coeff k ((g + h)^d)` at
 `k < n+1` equals `coeff k (g^d)`. (Adding a high-order monomial doesn't affect
 low-degree coefficients.) -/
@@ -314,52 +374,10 @@ private theorem coeff_add_monomial_pow_stable
   · -- The `m = 0` term is `h^0 * g^d * (choose d 0) = g^d`.
     rw [pow_zero, Nat.sub_zero, Nat.choose_zero_right]
     simp
-  · intro m _ hm0
-    have hm_pos : 0 < m := Nat.pos_of_ne_zero hm0
-    -- Goal: coeff k (h^m * g^(d-m) * choose(d,m)) = 0.
-    rw [hdef, monomial_pow_eq]
-    -- h^m = C (c^m) * X^(m*(n+1)).
-    have hnatCast : ((d.choose m : ℕ) : PowerSeries R) = PowerSeries.C ((d.choose m : ℕ) : R) :=
-      (map_natCast PowerSeries.C (d.choose m)).symm
-    rw [hnatCast]
-    -- Goal: coeff k (C (c^m) * X^(m*(n+1)) * g^(d-m) * C ↑choose) = 0
-    -- Rearrange using explicit term-level rewriting via congruence.
-    have reorg : PowerSeries.C (c ^ m) * PowerSeries.X ^ (m * (n + 1)) *
-            g ^ (d - m) *
-            PowerSeries.C ((d.choose m : ℕ) : R) =
-          PowerSeries.C ((d.choose m : ℕ) : R) *
-            (PowerSeries.C (c ^ m) *
-              (PowerSeries.X ^ (m * (n + 1)) * g ^ (d - m))) := by
-      -- First: (C (c^m) * X^N) * g^(d-m) = C (c^m) * (X^N * g^(d-m)).
-      have step1 : PowerSeries.C (c ^ m) * PowerSeries.X ^ (m * (n + 1)) * g ^ (d - m) =
-          PowerSeries.C (c ^ m) * (PowerSeries.X ^ (m * (n + 1)) * g ^ (d - m)) :=
-        mul_assoc _ _ _
-      -- Substitute in LHS and commute.
-      calc PowerSeries.C (c ^ m) * PowerSeries.X ^ (m * (n + 1)) *
-            g ^ (d - m) *
-            PowerSeries.C ((d.choose m : ℕ) : R)
-          = (PowerSeries.C (c ^ m) *
-              (PowerSeries.X ^ (m * (n + 1)) * g ^ (d - m))) *
-              PowerSeries.C ((d.choose m : ℕ) : R) := by
-            exact congr_arg (· * PowerSeries.C ((d.choose m : ℕ) : R)) step1
-        _ = PowerSeries.C ((d.choose m : ℕ) : R) *
-            (PowerSeries.C (c ^ m) *
-              (PowerSeries.X ^ (m * (n + 1)) * g ^ (d - m))) := mul_comm _ _
-    rw [reorg]
-    rw [PowerSeries.coeff_C_mul, PowerSeries.coeff_C_mul]
-    -- coeff k (X^(m*(n+1)) * g^(d-m)) = 0 since m*(n+1) ≥ n+1 > k.
-    have horder_X : k < m * (n + 1) := by
-      calc k < n + 1 := hk
-        _ ≤ m * (n + 1) := Nat.le_mul_of_pos_left _ hm_pos
-    have hxprod : PowerSeries.coeff k
-        ((PowerSeries.X : PowerSeries R) ^ (m * (n + 1)) * g ^ (d - m)) = 0 := by
-      rw [PowerSeries.coeff_mul]
-      apply Finset.sum_eq_zero
-      intro ⟨p, q⟩ hpq
-      have hpq' : p + q = k := Finset.mem_antidiagonal.mp hpq
-      rw [PowerSeries.coeff_X_pow]
-      rw [if_neg (by omega : p ≠ m * (n + 1)), zero_mul]
-    rw [hxprod, mul_zero, mul_zero]
+  · -- Each `m ≥ 1` term vanishes at `coeff k` (high `X`-power).
+    intro m _ hm0
+    rw [hdef]
+    exact coeff_monomial_pow_mul_pow_eq_zero g n c d m k (Nat.pos_of_ne_zero hm0) hk
   · intro h0
     simp at h0
 
