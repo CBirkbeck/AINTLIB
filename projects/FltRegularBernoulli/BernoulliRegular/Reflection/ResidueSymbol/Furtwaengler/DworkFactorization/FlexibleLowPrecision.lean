@@ -69,13 +69,11 @@ theorem quotient_mk_dworkThetaTrunc_artinHasseAtTo_eq_one_add_pi_mul_mod_sq_of_o
     apply Finset.sum_eq_zero
     intro n hn
     have hn_ne1 : n ≠ 1 := by
-      have hnot := (Finset.mem_sdiff.mp hn).2
-      simpa using hnot
+      simpa using (Finset.mem_sdiff.mp hn).2
     have hn_mem0 : n ∈ Finset.range (N + 1) \ {0} :=
       (Finset.mem_sdiff.mp hn).1
     have hn_ne0 : n ≠ 0 := by
-      have hnot := (Finset.mem_sdiff.mp hn_mem0).2
-      simpa using hnot
+      simpa using (Finset.mem_sdiff.mp hn_mem0).2
     have hn2 : 2 ≤ n := by omega
     have hcoeff₂ : coeff n ∈ S.Q ^ 2 :=
       Ideal.pow_le_pow_right hn2
@@ -140,8 +138,7 @@ theorem traceNatCast_sub_teichFrobeniusSum_mem_Q (y : kˣ) :
         𝓞 R') -
       (∑ i : Fin F.concrete.f,
         (F.teichUnitFullVal (F.traceScale * y)) ^ (ℓ ^ (i : ℕ))) ∈ F.concrete.Q
-  rw [F.concrete.mem_Q_iff_residueMap_eq_zero]
-  rw [map_sub]
+  rw [F.concrete.mem_Q_iff_residueMap_eq_zero, map_sub]
   haveI : NeZero ℓ := ⟨(Fact.out : Nat.Prime ℓ).ne_zero⟩
   have hleft :
       F.concrete.residueMap
@@ -154,8 +151,7 @@ theorem traceNatCast_sub_teichFrobeniusSum_mem_Q (y : kˣ) :
       congrArg (algebraMap (ZMod ℓ) k)
         (ZMod.natCast_zmod_val
           (Algebra.trace (ZMod ℓ) k ((F.traceScale : k) * (y : k))))
-    rw [map_natCast] at h
-    exact h
+    rwa [map_natCast] at h
   have hright :
       F.concrete.residueMap
           (∑ i : Fin F.concrete.f,
@@ -168,10 +164,8 @@ theorem traceNatCast_sub_teichFrobeniusSum_mem_Q (y : kˣ) :
         F.concrete.residueMap (F.teichUnitFullVal (F.traceScale * y)) =
           ((F.traceScale : k) * (y : k)) := by
       have h := F.residueMap_teichUnitFullVal (F.traceScale * y)
-      rw [Units.val_mul] at h
-      exact h
-    rw [map_pow]
-    rw [hbase]
+      rwa [Units.val_mul] at h
+    rw [map_pow, hbase]
   have htrace :
       algebraMap (ZMod ℓ) k
           (Algebra.trace (ZMod ℓ) k ((F.traceScale : k) * (y : k))) =
@@ -181,16 +175,15 @@ theorem traceNatCast_sub_teichFrobeniusSum_mem_Q (y : kˣ) :
       have hpow : ℓ ^ Module.finrank (ZMod ℓ) k = ℓ ^ F.concrete.f := by
         rw [FiniteField.pow_finrank_eq_card, F.concrete.card_k]
       exact Nat.pow_right_injective (Fact.out : Nat.Prime ℓ).one_lt hpow
-    have h :=
-      algebraMap_trace_pow_eq_traceSum_pow
-        (K := ZMod ℓ) (L := k) (ℓ := ℓ) (f := F.concrete.f)
-        (Nat.card_zmod ℓ) hfin ((F.traceScale : k) * (y : k)) 1
     have hrange :
         algebraMap (ZMod ℓ) k
             (Algebra.trace (ZMod ℓ) k ((F.traceScale : k) * (y : k))) =
           ∑ i ∈ Finset.range F.concrete.f,
             ((F.traceScale : k) * (y : k)) ^ (ℓ ^ i) := by
-      simpa [traceSum] using h
+      simpa [traceSum] using
+        algebraMap_trace_pow_eq_traceSum_pow
+          (K := ZMod ℓ) (L := k) (ℓ := ℓ) (f := F.concrete.f)
+          (Nat.card_zmod ℓ) hfin ((F.traceScale : k) * (y : k)) 1
     rw [← Fin.sum_univ_eq_sum_range] at hrange
     simpa using hrange
   rw [hleft, hright, htrace]
@@ -246,9 +239,7 @@ theorem psiInt_sub_one_add_pi_teichFrobeniusSum_mem_Q_sq (y : kˣ) :
   have htrace : traceLift - teichSum ∈ F.Q := by
     simpa [traceLift, teichSum] using F.traceNatCast_sub_teichFrobeniusSum_mem_Q y
   have htrace_sq : F.π * (traceLift - teichSum) ∈ F.Q ^ 2 := by
-    have hmul : F.π * (traceLift - teichSum) ∈ F.Q * F.Q :=
-      Ideal.mul_mem_mul F.π_mem_Q htrace
-    simpa [pow_two] using hmul
+    simpa [pow_two] using Ideal.mul_mem_mul F.π_mem_Q htrace
   rw [show F.psiInt (y : k) - (1 + F.π * teichSum) =
       (F.psiInt (y : k) - (1 + F.π * traceLift)) +
         F.π * (traceLift - teichSum) by ring]
@@ -272,8 +263,7 @@ theorem one_add_pi_pow_traceNatCast_sub_linearTrace_mem_Q_sq (y : kˣ) :
     simpa [t, hzeta] using
       F.toConductorFlexibleTraceFormStickelbergerSetup.psiInt_eq_zeta_ell_int_pow_trace
         (y : k)
-  have h := F.psiInt_sub_one_add_pi_traceNatCast_mem_Q_sq y
-  simpa [t, hpsi] using h
+  simpa [t, hpsi] using F.psiInt_sub_one_add_pi_traceNatCast_mem_Q_sq y
 
 /-- Quotient form of the first-order trace-root expansion modulo `Q^2`. -/
 theorem quotient_mk_one_add_pi_pow_traceNatCast_eq_linearTrace_mod_Q_sq (y : kˣ) :
@@ -306,8 +296,7 @@ theorem one_add_pi_pow_traceNatCast_sub_linearTeichSum_mem_Q_sq (y : kˣ) :
     simpa [t, hzeta] using
       F.toConductorFlexibleTraceFormStickelbergerSetup.psiInt_eq_zeta_ell_int_pow_trace
         (y : k)
-  have h := F.psiInt_sub_one_add_pi_teichFrobeniusSum_mem_Q_sq y
-  simpa [t, hpsi] using h
+  simpa [t, hpsi] using F.psiInt_sub_one_add_pi_teichFrobeniusSum_mem_Q_sq y
 
 /-- Precision-indexed theta product linearization modulo `Q^2`. -/
 theorem artinHasseThetaTruncProductAtTo_sub_linearTeichSum_mem_Q_sq_of_one_le
