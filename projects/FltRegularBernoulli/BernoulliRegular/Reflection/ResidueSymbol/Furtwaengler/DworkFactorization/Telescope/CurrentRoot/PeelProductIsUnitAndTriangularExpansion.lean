@@ -181,10 +181,7 @@ theorem artinHasseExp_current_root_tail_depth_eq_currentRootPeelProduct_of_zero_
                   ((coordinateTailRoot c).coeff r)) ^ ℓ)))) ^
             (ℓ ^ (r + 1))
       have hzero_next : ε ^ (ℓ ^ (m + 1)) = 0 := by
-        have hpow : ε ^ (ℓ ^ (m + 1)) = (ε ^ (ℓ ^ m)) ^ ℓ := by
-          rw [show ℓ ^ (m + 1) = ℓ ^ m * ℓ by rw [Nat.pow_succ]]
-          rw [pow_mul]
-        rw [hpow, hzero]
+        rw [show ℓ ^ (m + 1) = ℓ ^ m * ℓ from pow_succ ℓ m, pow_mul, hzero]
         exact zero_pow (Nat.Prime.ne_zero (Fact.out : Nat.Prime ℓ))
       have hEzero :
           (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A) 0 = 1 := by
@@ -579,37 +576,15 @@ theorem artinHasseExpCoordinatePeelProduct_eq_currentRootPeelProduct_frobenius_p
     artinHasseExpCoordinatePeelProduct F N m D ε c =
       artinHasseExpCurrentRootPeelProduct F N m D (ε ^ ℓ) c := by
   classical
+  have hparam : ∀ j : ℕ, (ε ^ (ℓ ^ j)) ^ ℓ = (ε ^ ℓ) ^ (ℓ ^ j) :=
+    fun j => pow_right_comm ε (ℓ ^ j) ℓ
   induction D generalizing m c with
   | zero =>
-      let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
-      let θ : WittVector ℓ k →+* A :=
-        F.toConcreteStickelbergerSetup.wittThetaModQPow N
-      let Eps : PowerSeries A :=
-        (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-          fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
-            (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
-      have hparam : ∀ j : ℕ, (ε ^ (ℓ ^ j)) ^ ℓ = (ε ^ ℓ) ^ (ℓ ^ j) := by
-        intro j
-        rw [← pow_mul, ← pow_mul]
-        congr 1
-        exact Nat.mul_comm (ℓ ^ j) ℓ
       simp only [artinHasseExpCoordinatePeelProduct, artinHasseExpCurrentRootPeelProduct]
       refine Finset.prod_congr rfl ?_
       intro j _hj
       simp [hparam j]
   | succ D ih =>
-      let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
-      let θ : WittVector ℓ k →+* A :=
-        F.toConcreteStickelbergerSetup.wittThetaModQPow N
-      let Eps : PowerSeries A :=
-        (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-          fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
-            (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
-      have hparam : ∀ j : ℕ, (ε ^ (ℓ ^ j)) ^ ℓ = (ε ^ ℓ) ^ (ℓ ^ j) := by
-        intro j
-        rw [← pow_mul, ← pow_mul]
-        congr 1
-        exact Nat.mul_comm (ℓ ^ j) ℓ
       simp only [artinHasseExpCoordinatePeelProduct, artinHasseExpCurrentRootPeelProduct]
       congr 1
       · refine Finset.prod_congr rfl ?_
