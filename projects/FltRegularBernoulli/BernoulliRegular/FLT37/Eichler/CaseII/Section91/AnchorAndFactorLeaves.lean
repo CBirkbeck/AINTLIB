@@ -50,8 +50,7 @@ It imports only; it does **not** modify any existing file.  No `axiom`, no `sorr
 
 noncomputable section
 
-open NumberField NumberField.IsCMField IsCyclotomicExtension UniqueFactorizationMonoid Polynomial
-open scoped nonZeroDivisors
+open NumberField NumberField.IsCMField IsCyclotomicExtension Polynomial
 
 namespace BernoulliRegular.FLT37.Eichler
 
