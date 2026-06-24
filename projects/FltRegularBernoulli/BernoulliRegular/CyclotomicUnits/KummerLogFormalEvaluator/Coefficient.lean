@@ -10,11 +10,6 @@ This file contains the final coefficient-level handoff theorems for the split fo
 
 noncomputable section
 
-open NumberField
-open NumberField.IsCMField
-open BernoulliRegular.Reflection.Local
-open scoped BigOperators NumberField PowerSeries
-
 namespace BernoulliRegular
 namespace CyclotomicUnits
 
