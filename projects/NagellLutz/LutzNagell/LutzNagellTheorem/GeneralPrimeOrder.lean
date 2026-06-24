@@ -14,6 +14,12 @@ If `P ≠ 0` has odd prime order or order 4 on a general Weierstrass curve with 
 coefficients, then `P` has integral affine coordinates.
 
 For order 2, we prove the weaker bound `4x, 8y ∈ ℤ`.
+
+## Main results
+
+* `prime_order_integrality_general`: a point of odd prime order has integral coordinates.
+* `integrality_of_order_four_general`: a point of order 4 has integral coordinates.
+* `bounded_den_of_order_two_general`: a point of order 2 satisfies `4x, 8y ∈ ℤ`.
 -/
 
 namespace LutzNagell
@@ -200,7 +206,7 @@ theorem bounded_den_of_order_two_general
     field_simp
   obtain ⟨n₀, hn₀⟩ := hfour_x
   exact ⟨⟨n₀, hn₀⟩, -(W.a₁ * n₀) - 4 * W.a₃, by
-    push_cast; linarith [show (↑W.a₁ : ℚ) * ↑n₀ = 4 * ↑W.a₁ * x from by rw [hn₀]; ring]⟩
+    push_cast; linarith [show (↑W.a₁ : ℚ) * ↑n₀ = 4 * ↑W.a₁ * x by rw [hn₀]; ring]⟩
 
 end LutzNagellTheorem
 end LutzNagell
