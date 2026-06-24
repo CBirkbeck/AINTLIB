@@ -24,7 +24,7 @@ ships parametrically: once `CaseIClassEqDischarge p K` is provided,
 
 noncomputable section
 
-open NumberField NumberField.IsCMField IsCyclotomicExtension Ideal
+open NumberField NumberField.IsCMField
 
 namespace BernoulliRegular
 
@@ -77,29 +77,14 @@ theorem caseIClassEqDischarge_of_regular {p : ℕ} [Fact p.Prime]
   intro a b c _ _ _ ζ _ I hI_nz hI
   have hI_principal : I.IsPrincipal :=
     isPrincipal_of_isPrincipal_pow_of_coprime hreg ⟨_, hI.symm⟩
-  have h_class_I :
-      ClassGroup.mk0
-        (⟨I, mem_nonZeroDivisors_iff_ne_zero.mpr hI_nz⟩
-          : nonZeroDivisors (Ideal (𝓞 K))) = 1 :=
-    (ClassGroup.mk0_eq_one_iff _).mpr hI_principal
   have hσI_principal :
       (I.map (ringOfIntegersComplexConj K).toRingEquiv.toRingHom).IsPrincipal := by
     obtain ⟨a, ha⟩ := hI_principal
     refine ⟨⟨ringOfIntegersComplexConj K a, ?_⟩⟩
-    have h_map_span : (Ideal.span ({a} : Set (𝓞 K))).map
-        (ringOfIntegersComplexConj K).toRingEquiv.toRingHom =
-      Ideal.span ({ringOfIntegersComplexConj K a} : Set (𝓞 K)) := by
-      rw [Ideal.map_span]
-      simp
-    rw [ha, h_map_span]
-  have h_class_σI :
-      ClassGroup.mk0
-        (⟨I.map (ringOfIntegersComplexConj K).toRingEquiv.toRingHom,
-          mem_nonZeroDivisors_iff_ne_zero.mpr
-            ((map_ne_bot_iff_complexConj K I).mpr hI_nz)⟩
-          : nonZeroDivisors (Ideal (𝓞 K))) = 1 :=
-    (ClassGroup.mk0_eq_one_iff _).mpr hσI_principal
-  rw [h_class_I, h_class_σI]
+    rw [ha, Ideal.map_span]
+    simp
+  rw [(ClassGroup.mk0_eq_one_iff _).mpr hσI_principal,
+    (ClassGroup.mk0_eq_one_iff _).mpr hI_principal]
 
 end CaseI
 
