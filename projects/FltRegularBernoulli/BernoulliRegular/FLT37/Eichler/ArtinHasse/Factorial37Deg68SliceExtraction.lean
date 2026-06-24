@@ -88,12 +88,8 @@ noncomputable section
 
 set_option maxRecDepth 100000
 
-open NumberField
-open scoped BigOperators
-
 namespace BernoulliRegular.FLT37.Eichler
 
-open BernoulliRegular (CPlusGenerator CPlusExponentProduct)
 open BernoulliRegular.CyclotomicUnits
 open BernoulliRegular.CyclotomicUnits.PadicLogSetup
 open BernoulliRegular.CyclotomicUnits.PadicLogSetup.DworkParameter
@@ -254,7 +250,7 @@ theorem x68_coordModSq_eq (hp2 : 2 < 37) (k : Fin (37 - 1)) :
   rw [show (-(37 : DworkCompleteIntegerRing 37 K) *
         artinHasseTailUnit (p := 37) (K := K) hp2 * dworkParameter 37 K ^ 32) =
       ((-37 : RationalPadicIntegerRing 37)) •
-        (artinHasseTailUnit (p := 37) (K := K) hp2 * dworkParameter 37 K ^ 32) from by
+        (artinHasseTailUnit (p := 37) (K := K) hp2 * dworkParameter 37 K ^ 32) by
     rw [show ((-37 : RationalPadicIntegerRing 37)) •
           (artinHasseTailUnit (p := 37) (K := K) hp2 * dworkParameter 37 K ^ 32) =
         algebraMap (RationalPadicIntegerRing 37) (DworkCompleteIntegerRing 37 K) (-37) *
@@ -348,7 +344,7 @@ theorem x68_coordModSq_eq_neg_thirtyseven (hp2 : 2 < 37) (k : Fin (37 - 1)) (hk 
   rw [tailUnit_mul_dworkParameter_pow_thirtytwo_coordModSq_eq_one (K := K) hp2 k hk, mul_one]
   -- `rationalPadicIntegerToZModSq (-37 : RationalPadicIntegerRing) = (-37 : ZMod 37²)`
   rw [show ((-37 : RationalPadicIntegerRing 37)) =
-      (((-37 : ℤ)) : RationalPadicIntegerRing 37) from by push_cast; ring]
+      (((-37 : ℤ)) : RationalPadicIntegerRing 37) by push_cast; ring]
   rw [map_intCast]
   push_cast
   ring
@@ -438,7 +434,7 @@ theorem rIntegralRat_scalar_factors_through_coordModSq_x68
     show (((q : ℚ).den : ℕ) : ZMod (37 ^ 2)) *
         (((q : ℚ).num : ZMod (37 ^ 2)) * (((q : ℚ).den : ℕ) : ZMod (37 ^ 2))⁻¹ * C) =
       ((q : ℚ).num : ZMod (37 ^ 2)) *
-        ((((q : ℚ).den : ℕ) : ZMod (37 ^ 2)) * (((q : ℚ).den : ℕ) : ZMod (37 ^ 2))⁻¹) * C from by
+        ((((q : ℚ).den : ℕ) : ZMod (37 ^ 2)) * (((q : ℚ).den : ℕ) : ZMod (37 ^ 2))⁻¹) * C by
       ring]
   rw [ZMod.mul_inv_of_unit _ hunit, mul_one]
 
@@ -508,7 +504,7 @@ theorem castHom_eq_of_thirtyseven_mul_eq {x y : ZMod (37 ^ 2)}
   rw [ZMod.castHom_apply, ← ZMod.natCast_val z, ZMod.natCast_eq_zero_iff]
   have hval : (37 * z.val) % (37 ^ 2) = 0 := by
     have h2 := congrArg ZMod.val hsub
-    rw [ZMod.val_zero, ZMod.val_mul, show (37 : ZMod (37 ^ 2)).val = 37 from by decide] at h2
+    rw [ZMod.val_zero, ZMod.val_mul, show (37 : ZMod (37 ^ 2)).val = 37 by decide] at h2
     exact h2
   obtain ⟨c, hc⟩ := Nat.dvd_of_mod_eq_zero hval
   refine ⟨c, ?_⟩
@@ -561,7 +557,7 @@ theorem factorial37_deg68_slice_coordMod37
       (ZMod.castHom (by norm_num : (37 : ℕ) ∣ 37 ^ 2) (ZMod 37)) (-R) := by
     apply castHom_eq_of_thirtyseven_mul_eq
     rw [show (37 : ZMod (37 ^ 2)) * (((Nat.factorial 68 / 37 : ℕ) : ZMod (37 ^ 2)) * X) =
-        (37 : ZMod (37 ^ 2)) * ((Nat.factorial 68 / 37 : ℕ) : ZMod (37 ^ 2)) * X from by ring]
+        (37 : ZMod (37 ^ 2)) * ((Nat.factorial 68 / 37 : ℕ) : ZMod (37 ^ 2)) * X by ring]
     rw [hval]; ring
   rw [map_mul, map_neg] at hcasteq
   -- castHom ((68!/37 : ZMod 37²)) = ((68!/37 : ℕ) : ZMod 37)
@@ -629,7 +625,7 @@ theorem formalSum68_rIntegralToZMod_eq :
   rw [map_sum, Finset.sum_eq_single 37]
   · rw [rationalArtinHasseNormalizedFactorialWeightedLogCoeff,
       map_mul, map_mul, map_natCast, map_pow, map_neg, map_one,
-      show ((-1 : ZMod 37) ^ (37 + 1)) = 1 from by norm_num, mul_one]
+      show ((-1 : ZMod 37) ^ (37 + 1)) = 1 by norm_num, mul_one]
     rfl
   · intro n hn hne
     rw [Finset.mem_Icc] at hn
