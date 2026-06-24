@@ -37,8 +37,7 @@ theorem traceNatCast_sub_teichFrobeniusSum_mem_Q (y : kˣ) :
         𝓞 R') -
       (∑ i : Fin F.toConcreteStickelbergerSetup.f,
         (F.teichUnitFullVal (F.traceScale * y)) ^ (ℓ ^ (i : ℕ))) ∈ F.Q := by
-  rw [F.toConcreteStickelbergerSetup.mem_Q_iff_residueMap_eq_zero]
-  rw [map_sub]
+  rw [F.toConcreteStickelbergerSetup.mem_Q_iff_residueMap_eq_zero, map_sub]
   haveI : NeZero ℓ := ⟨(Fact.out : Nat.Prime ℓ).ne_zero⟩
   have hleft :
       F.residueMap
@@ -51,8 +50,7 @@ theorem traceNatCast_sub_teichFrobeniusSum_mem_Q (y : kˣ) :
       congrArg (algebraMap (ZMod ℓ) k)
         (ZMod.natCast_zmod_val
           (Algebra.trace (ZMod ℓ) k ((F.traceScale : k) * (y : k))))
-    rw [map_natCast] at h
-    exact h
+    rwa [map_natCast] at h
   have hright :
       F.residueMap
           (∑ i : Fin F.toConcreteStickelbergerSetup.f,
@@ -68,15 +66,14 @@ theorem traceNatCast_sub_teichFrobeniusSum_mem_Q (y : kˣ) :
           (Algebra.trace (ZMod ℓ) k ((F.traceScale : k) * (y : k))) =
         ∑ i : Fin F.toConcreteStickelbergerSetup.f,
           ((F.traceScale : k) * (y : k)) ^ (ℓ ^ (i : ℕ)) := by
-    have h :=
-      F.toTraceFormStickelbergerSetup.algebraMap_trace_pow_eq_traceSum_pow_setup
-        ((F.traceScale : k) * (y : k)) 1
     have hrange :
         algebraMap (ZMod ℓ) k
             (Algebra.trace (ZMod ℓ) k ((F.traceScale : k) * (y : k))) =
           ∑ i ∈ Finset.range F.toConcreteStickelbergerSetup.f,
             ((F.traceScale : k) * (y : k)) ^ (ℓ ^ i) := by
-      simpa [traceSum] using h
+      simpa [traceSum] using
+        F.toTraceFormStickelbergerSetup.algebraMap_trace_pow_eq_traceSum_pow_setup
+          ((F.traceScale : k) * (y : k)) 1
     rw [← Fin.sum_univ_eq_sum_range] at hrange
     simpa using hrange
   rw [hleft, hright, htrace]
@@ -86,9 +83,8 @@ theorem traceNatCast_sub_teichFrobeniusSum_mem_Q (y : kˣ) :
 `Q^2`. -/
 theorem natCast_ell_mem_Q_sq (hℓ : 2 < ℓ) :
     (ℓ : 𝓞 R') ∈ F.Q ^ 2 := by
-  have h :=
+  exact Ideal.pow_le_pow_right (by omega : 2 ≤ ℓ - 1)
     F.toTraceFormStickelbergerSetup.natCast_ell_mem_Q_pow_pred
-  exact Ideal.pow_le_pow_right (by omega : 2 ≤ ℓ - 1) h
 
 /-- The natural-number lift of the trace is Frobenius-fixed modulo `Q^2`. -/
 theorem traceNatCast_pow_ell_sub_self_mem_Q_sq (hℓ : 2 < ℓ) (y : kˣ) :
@@ -107,10 +103,8 @@ theorem traceNatCast_pow_ell_sub_self_mem_Q_sq (hℓ : 2 < ℓ) (y : kˣ) :
   haveI : NeZero ℓ := ⟨(Fact.out : Nat.Prime ℓ).ne_zero⟩
   have hzero : ((t ^ ℓ - t : ℕ) : ZMod ℓ) = 0 := by
     rw [Nat.cast_sub ht_le, Nat.cast_pow, ZMod.pow_card, sub_self]
-  have hdvd : ℓ ∣ t ^ ℓ - t :=
-    (ZMod.natCast_eq_zero_iff (t ^ ℓ - t) ℓ).mp hzero
   have hdvd_pow : ℓ ^ 1 ∣ t ^ ℓ - t := by
-    simpa using hdvd
+    simpa using (ZMod.natCast_eq_zero_iff (t ^ ℓ - t) ℓ).mp hzero
   have hmem_high :
       ((t ^ ℓ - t : ℕ) : 𝓞 R') ∈ F.Q ^ (1 * (ℓ - 1)) := by
     simpa using
@@ -142,11 +136,10 @@ theorem teichFrobeniusSum_pow_ell_sub_self_mem_Q_sq (hℓ : 2 < ℓ) (y : kˣ) :
   have hcard_pow : z ^ (ℓ ^ f) = z := by
     have hcard_pos : 0 < Fintype.card k := Fintype.card_pos
     have hcard : z ^ Fintype.card k = z := by
-      rw [show Fintype.card k = (Fintype.card k - 1) + 1 by omega]
-      rw [pow_succ]
-      have hunit :=
-        F.teichUnitFullVal_pow_card_sub_one (F.traceScale * y)
-      simpa [z] using congrArg (fun a : 𝓞 R' => a * z) hunit
+      rw [show Fintype.card k = (Fintype.card k - 1) + 1 by omega, pow_succ]
+      simpa [z] using
+        congrArg (fun a : 𝓞 R' => a * z)
+          (F.teichUnitFullVal_pow_card_sub_one (F.traceScale * y))
     rw [← F.toConcreteStickelbergerSetup.card_k_eq]
     exact hcard
   have hleft_range :
@@ -159,13 +152,9 @@ theorem teichFrobeniusSum_pow_ell_sub_self_mem_Q_sq (hℓ : 2 < ℓ) (y : kˣ) :
         ∑ i ∈ Finset.range f, z ^ (ℓ ^ i) := by
     simpa [u] using
       (Fin.sum_univ_eq_sum_range (fun i : ℕ => z ^ (ℓ ^ i)) f)
-  have hshift :
-      (∑ i ∈ Finset.range f, z ^ (ℓ ^ (i + 1))) =
-        ∑ i ∈ Finset.range f, z ^ (ℓ ^ i) :=
-    sum_range_pow_shift_eq_of_pow_period z ℓ f hcard_pow
   have hsum_pow : (∑ i : Fin f, u i ^ ℓ) = ∑ i : Fin f, u i := by
     rw [hleft_range, hright_range]
-    exact hshift
+    exact sum_range_pow_shift_eq_of_pow_period z ℓ f hcard_pow
   rw [show (∑ i : Fin F.toConcreteStickelbergerSetup.f,
         (F.teichUnitFullVal (F.traceScale * y)) ^ (ℓ ^ (i : ℕ))) =
         ∑ i : Fin f, u i by rfl]
@@ -255,30 +244,14 @@ theorem psiTraceBinomialApprox_two_sub_artinHasseSecondOrderTeichExpansion_appro
           (((2 : 𝓞 R') * (γ - F.π) + F.π ^ 2) * S) -
           (((2 : 𝓞 R') * c₂ - F.π ^ 2) * U₂) +
           F.π ^ 2 * (S + t * (t - 1) - U₂ - (2 : 𝓞 R') * P) := by
-    calc
-      (2 : 𝓞 R') *
-          (psiTraceBinomialApprox F 2 y - artinHasseSecondOrderTeichExpansion F γ y) =
-        (2 : 𝓞 R') * F.π * (t - S) -
-          (((2 : 𝓞 R') * (γ - F.π) + F.π ^ 2) * S) -
-          (((2 : 𝓞 R') * c₂ - F.π ^ 2) * U₂) +
-          F.π ^ 2 * (S + (2 : 𝓞 R') * C - U₂ - (2 : 𝓞 R') * P) := by
-          rw [hpsi, hexp]
-          ring
-      _ =
-        (2 : 𝓞 R') * F.π * (t - S) -
-          (((2 : 𝓞 R') * (γ - F.π) + F.π ^ 2) * S) -
-          (((2 : 𝓞 R') * c₂ - F.π ^ 2) * U₂) +
-          F.π ^ 2 * (S + t * (t - 1) - U₂ - (2 : 𝓞 R') * P) := by
-          rw [hchoose]
+    rw [hpsi, hexp, ← hchoose]
+    ring
   have hterm₁ : (2 : 𝓞 R') * F.π * (t - S) ∈ F.Q ^ 3 := by
     have hπ : F.π ∈ F.Q ^ 1 := by
       simpa using F.π_mem_Q
-    have hπtrace : F.π * (t - S) ∈ F.Q ^ (1 + 2) :=
-      mul_mem_ideal_pow_add (I := F.Q) hπ htraceQsq
     have hπtrace3 : F.π * (t - S) ∈ F.Q ^ 3 := by
-      simpa using hπtrace
-    have hmul := Ideal.mul_mem_left (F.Q ^ 3) (2 : 𝓞 R') hπtrace3
-    simpa [mul_assoc] using hmul
+      simpa using mul_mem_ideal_pow_add (I := F.Q) hπ htraceQsq
+    simpa [mul_assoc] using Ideal.mul_mem_left (F.Q ^ 3) (2 : 𝓞 R') hπtrace3
   have hterm₂ :
       ((2 : 𝓞 R') * (γ - F.π) + F.π ^ 2) * S ∈ F.Q ^ 3 := by
     have hγcorr :
@@ -288,10 +261,8 @@ theorem psiTraceBinomialApprox_two_sub_artinHasseSecondOrderTeichExpansion_appro
           S0 hℓ
     exact Ideal.mul_mem_right _ _ hγcorr
   have hγsqπ : γ ^ 2 - F.π ^ 2 ∈ F.Q ^ 3 := by
-    have hplus : γ + F.π ∈ F.Q :=
-      F.Q.add_mem hγQ F.π_mem_Q
     have hplus_one : γ + F.π ∈ F.Q ^ 1 := by
-      simpa using hplus
+      simpa using F.Q.add_mem hγQ F.π_mem_Q
     have hprod : (γ - F.π) * (γ + F.π) ∈ F.Q ^ (2 + 1) :=
       mul_mem_ideal_pow_add (I := F.Q) hγπ hplus_one
     convert hprod using 1
@@ -309,8 +280,7 @@ theorem psiTraceBinomialApprox_two_sub_artinHasseSecondOrderTeichExpansion_appro
       S + t * (t - 1) - U₂ - (2 : 𝓞 R') * P =
         (t - S) * (t + S - 1) := by
     rw [show S + t * (t - 1) - U₂ - (2 : 𝓞 R') * P =
-        S + t * (t - 1) - (U₂ + (2 : 𝓞 R') * P) by ring]
-    rw [← hsquare]
+        S + t * (t - 1) - (U₂ + (2 : 𝓞 R') * P) by ring, ← hsquare]
     ring
   have hbracketQ :
       S + t * (t - 1) - U₂ - (2 : 𝓞 R') * P ∈ F.Q := by
@@ -323,10 +293,7 @@ theorem psiTraceBinomialApprox_two_sub_artinHasseSecondOrderTeichExpansion_appro
     have hbracket_one :
         S + t * (t - 1) - U₂ - (2 : 𝓞 R') * P ∈ F.Q ^ 1 := by
       simpa using hbracketQ
-    have hmul : F.π ^ 2 *
-        (S + t * (t - 1) - U₂ - (2 : 𝓞 R') * P) ∈ F.Q ^ (2 + 1) :=
-      mul_mem_ideal_pow_add (I := F.Q) hπ₂ hbracket_one
-    simpa using hmul
+    simpa using mul_mem_ideal_pow_add (I := F.Q) hπ₂ hbracket_one
   have htwo_mem :
       (2 : 𝓞 R') *
           (psiTraceBinomialApprox F 2 y - artinHasseSecondOrderTeichExpansion F γ y) ∈
@@ -343,9 +310,7 @@ theorem psiTraceBinomialApprox_two_sub_artinHasseSecondOrderTeichExpansion_appro
     have hden : c.den = 2 := by
       rw [hc]
       norm_num
-    have h :=
-      dworkCoeffArtinHasseDenInvTo_spec S0 2 2
-    simpa [S0, c, hden] using h
+    simpa [S0, c, hden] using dworkCoeffArtinHasseDenInvTo_spec S0 2 2
   have hmain : psiTraceBinomialApprox F 2 y -
         artinHasseSecondOrderTeichExpansion F γ y ∈ F.Q ^ 3 :=
     mem_of_mul_mem_of_mul_inv_sub_one_mem
@@ -375,10 +340,9 @@ theorem psiInt_sub_artinHasseThetaTruncProductAtTo_two_approx_mem_Q_cubed
     simpa [γ, S0] using
       F.psiTraceBinomialApprox_two_sub_artinHasseSecondOrderTeichExpansion_approx_mem_Q_cubed
         hℓ y
-  have htheta :=
+  simpa [γ, S0] using
     F.psiInt_sub_artinHasseThetaTruncProductAtTo_two_mem_Q_cubed_of_trace
       hγ hγπ y htrace
-  simpa [γ, S0] using htheta
 
 /-- Precision-2 Dwork splitting for the Artin-Hasse parameter approximation,
 in the final `multiIndexLE` form. -/
@@ -396,9 +360,8 @@ theorem psiInt_sub_artinHasseDworkMultiIndexSumAtTo_two_approx_mem_Q_cubed
       F.psiInt (y : k) - artinHasseThetaTruncProductAtTo F γ 2 y ∈ F.Q ^ 3 := by
     simpa [γ, S0] using
       F.psiInt_sub_artinHasseThetaTruncProductAtTo_two_approx_mem_Q_cubed hℓ y
-  have hmulti :=
+  simpa [γ, S0] using
     F.psiInt_sub_artinHasseDworkMultiIndexSumAtTo_mem_Q_pow_succ_of_theta hγ 2 y htheta
-  simpa [γ, S0] using hmulti
 
 /-- First-order binomial expansion of the trace-form additive character. -/
 theorem psiInt_sub_one_add_pi_traceNatCast_mem_Q_sq (y : kˣ) :
@@ -443,9 +406,7 @@ theorem psiInt_sub_one_add_pi_teichFrobeniusSum_mem_Q_sq (y : kˣ) :
   have htrace : traceLift - teichSum ∈ F.Q := by
     simpa [traceLift, teichSum] using F.traceNatCast_sub_teichFrobeniusSum_mem_Q y
   have htrace_sq : F.π * (traceLift - teichSum) ∈ F.Q ^ 2 := by
-    have hmul : F.π * (traceLift - teichSum) ∈ F.Q * F.Q :=
-      Ideal.mul_mem_mul F.π_mem_Q htrace
-    simpa [pow_two] using hmul
+    simpa [pow_two] using Ideal.mul_mem_mul F.π_mem_Q htrace
   rw [show F.psiInt (y : k) - (1 + F.π * teichSum) =
       (F.psiInt (y : k) - (1 + F.π * traceLift)) +
         F.π * (traceLift - teichSum) by ring]
@@ -468,8 +429,7 @@ theorem one_add_pi_pow_traceNatCast_sub_linearTrace_mem_Q_sq (y : kˣ) :
       ring
     simpa [t, hzeta] using
       F.toTraceFormStickelbergerSetup.psiInt_eq_zeta_ell_int_pow_trace (y : k)
-  have h := F.psiInt_sub_one_add_pi_traceNatCast_mem_Q_sq y
-  simpa [t, hpsi] using h
+  simpa [t, hpsi] using F.psiInt_sub_one_add_pi_traceNatCast_mem_Q_sq y
 
 /-- Quotient form of the first-order trace-root expansion modulo `Q^2`. -/
 theorem quotient_mk_one_add_pi_pow_traceNatCast_eq_linearTrace_mod_Q_sq (y : kˣ) :
@@ -501,8 +461,7 @@ theorem one_add_pi_pow_traceNatCast_sub_linearTeichSum_mem_Q_sq (y : kˣ) :
       ring
     simpa [t, hzeta] using
       F.toTraceFormStickelbergerSetup.psiInt_eq_zeta_ell_int_pow_trace (y : k)
-  have h := F.psiInt_sub_one_add_pi_teichFrobeniusSum_mem_Q_sq y
-  simpa [t, hpsi] using h
+  simpa [t, hpsi] using F.psiInt_sub_one_add_pi_teichFrobeniusSum_mem_Q_sq y
 
 /-- First nontrivial Dwork splitting congruence, modulo `Q^2`. -/
 theorem psiInt_sub_artinHasseThetaTruncProduct_one_mem_Q_sq (y : kˣ) :
@@ -860,11 +819,10 @@ theorem psiInt_sub_artinHasseThetaTruncProductAtTo_approx_mem_Q_cubed_of_two_le
   let base2 : A2 := ((PowerSeries.trunc (2 + 1) Eps2).eval₂ (RingHom.id A2) δ2) ^ t
   have hlow :
       base2 = prod2 := by
-    have hmem :=
-      F.psiInt_sub_artinHasseThetaTruncProductAtTo_two_approx_mem_Q_cubed hℓ y
     simpa [S0, A2, Eps2, Ips2, π2, δ2, z2, t, base2, prod2, hE] using
       (F.psiInt_sub_artinHasseThetaTruncProductAtTo_approx_mem_Q_pow_succ_iff_base_pow
-        2 y).1 hmem
+        2 y).1
+        (F.psiInt_sub_artinHasseThetaTruncProductAtTo_two_approx_mem_Q_cubed hℓ y)
   have hpsi2 :
       Ideal.Quotient.mk (F.Q ^ (2 + 1)) (F.psiInt (y : k)) = base2 := by
     have hnorm :
@@ -897,8 +855,7 @@ theorem psiInt_sub_artinHasseThetaTruncProductAtTo_approx_mem_Q_cubed_of_two_le
               (Ideal.pow_le_pow_right (Nat.succ_le_succ hN)) thetaN).symm
       _ = φ prodN := by rw [hthetaN_N]
       _ = prod2 := hprod_factor
-  rw [← Ideal.Quotient.eq_zero_iff_mem]
-  rw [map_sub, hpsi2, htheta2, hlow, sub_self]
+  rw [← Ideal.Quotient.eq_zero_iff_mem, map_sub, hpsi2, htheta2, hlow, sub_self]
 
 /-- Multi-index version of
 `psiInt_sub_artinHasseThetaTruncProductAtTo_approx_mem_Q_cubed_of_two_le`. -/
@@ -926,7 +883,6 @@ theorem psiInt_sub_artinHasseDworkMultiIndexSumAtTo_approx_mem_Q_cubed_of_two_le
           F.artinHasseThetaTruncProductAtTo_sub_multiIndexSumAtTo_mem_Q_pow_succ
             hγ N y)
   simpa [S0, γ] using sub_mem_trans (F.Q ^ 3) htheta hproduct
-
 
 end FullTeichStickelbergerSetup
 
