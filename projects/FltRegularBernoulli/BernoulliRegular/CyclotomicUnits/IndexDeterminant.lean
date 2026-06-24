@@ -14,7 +14,6 @@ identity, instead of assuming the named determinant source proposition.
 
 noncomputable section
 
-open scoped BigOperators
 open NumberField
 
 namespace BernoulliRegular
