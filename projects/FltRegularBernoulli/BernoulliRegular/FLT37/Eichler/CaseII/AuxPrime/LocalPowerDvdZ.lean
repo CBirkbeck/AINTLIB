@@ -173,7 +173,7 @@ def Lemma98LocalPower37Strict
         (ε₃ : 𝓞 (CyclotomicField 37 ℚ)) *
           ((D.hζ.toInteger - 1) ^ m * z') ^ 37) →
     BernoulliRegular.IsPthPowerModPrime 37 lv149
-      (((ε₁ / ε₂ : (𝓞 (CyclotomicField 37 ℚ))ˣ) : 𝓞 (CyclotomicField 37 ℚ)))
+      ((ε₁ / ε₂ : (𝓞 (CyclotomicField 37 ℚ))ˣ) : 𝓞 (CyclotomicField 37 ℚ))
 
 /-! ## 3. The §9.1 residue identification of the abstract descent unit with the proven producer
 
