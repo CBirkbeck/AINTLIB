@@ -6,14 +6,12 @@ public import BernoulliRegular.CyclotomicUnits.DworkParameter.PowerBasis.PowerBa
 
 noncomputable section
 
-open scoped NumberField Topology
+open scoped NumberField
 
 namespace BernoulliRegular
 namespace CyclotomicUnits
 namespace PadicLogSetup
 namespace DworkParameter
-
-open Furtwaengler.KummerArtinHasse
 
 variable (p : ℕ) [Fact p.Prime]
 variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
