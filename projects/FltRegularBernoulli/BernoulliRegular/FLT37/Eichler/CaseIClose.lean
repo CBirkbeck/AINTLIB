@@ -965,8 +965,7 @@ private theorem caseI_bounded_deriv (c : ℕ → ℤ)
         ∑ k ∈ Finset.range 36, ((c k - c 36 : ℤ) : 𝓞 (CyclotomicField 37 ℚ)) * ζ ^ k :=
       Fin.sum_univ_eq_sum_range
         (fun k ↦ ((c k - c 36 : ℤ) : 𝓞 (CyclotomicField 37 ℚ)) * ζ ^ k) 36
-    rw [heq, ← hsum37]
-    exact hmem
+    rwa [heq, ← hsum37]
   have hdvd : ∀ k : Fin 36, (37 : ℤ) ∣ (c k.1 - c 36) :=
     caseI_dvd_of_sum_zeta_pow_mem (fun k ↦ c k.1 - c 36) hmem'
   have hsplit2 : ∑ k ∈ Finset.range 37, ((k : ℤ) * c k : 𝓞 (CyclotomicField 37 ℚ)) *
@@ -1084,7 +1083,7 @@ private theorem caseI_deriv_step (P : ℤ[X])
       rw [show evZ S = Polynomial.aeval ζ S from rfl,
         Polynomial.aeval_eq_sum_range' (by omega : S.natDegree < 37)]
       refine Finset.sum_congr rfl (fun k _ ↦ by rw [Algebra.smul_def]; rfl)
-    rw [← hevSsum]; exact hP
+    rwa [← hevSsum]
   · rw [Ideal.mem_span_singleton]
     exact ⟨(1 - ζ) * ζ ^ 36 * evZ Q, by ring⟩
 
@@ -1093,7 +1092,6 @@ private theorem prod_mul_derivative_prod_pow {ι : Type*} [DecidableEq ι] (s : 
     (∏ j ∈ s, f j) * derivative (∏ j ∈ s, f j ^ e j) =
       (∏ j ∈ s, f j ^ e j) *
         ∑ k ∈ s, (Polynomial.C (e k : ℤ)) * derivative (f k) * ∏ j ∈ s.erase k, f j := by
-  classical
   rw [Polynomial.derivative_prod_finset, Finset.mul_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl (fun k hk ↦ ?_)
   rw [Polynomial.derivative_pow]
@@ -1421,7 +1419,7 @@ private theorem caseI_evZ_Ltil_mem
   have hevP : evZ P = FT - ζ ^ v * GT := by
     rw [hP, map_sub, map_mul, map_pow, evZ_X]
   have hPmem : evZ P ∈ Ideal.span ({(37 : 𝓞 (CyclotomicField 37 ℚ))} : Set _) := by
-    rw [hevP]; exact hKEY
+    rwa [hevP]
   have hDERIV := caseI_deriv_step P hPmem
   have hclF : DT * evZ (derivative (FpolyTot a b nPos nNeg)) = FT * NF := by
     rw [hDT, hFT, hNF, ← map_mul, ← map_mul, Dpoly_mul_derivative_FpolyTot]
@@ -1624,10 +1622,9 @@ private theorem caseI_dvd_Ltil_coeff
   have hmem' : (∑ k : Fin 36,
       ((Ltilpoly a b nPos nNeg v).coeff k.1 : 𝓞 (CyclotomicField 37 ℚ)) * ζ ^ (k : ℕ)) ∈
       Ideal.span ({(37 : 𝓞 (CyclotomicField 37 ℚ))} : Set _) := by
-    rw [Fin.sum_univ_eq_sum_range
+    rwa [Fin.sum_univ_eq_sum_range
       (fun k ↦ ((Ltilpoly a b nPos nNeg v).coeff k : 𝓞 (CyclotomicField 37 ℚ)) * ζ ^ k) 36,
       ← hsum]
-    exact hmem
   have hdvd36 : ∀ k : Fin 36, (37 : ℤ) ∣ (Ltilpoly a b nPos nNeg v).coeff k.1 :=
     caseI_dvd_of_sum_zeta_pow_mem (fun k ↦ (Ltilpoly a b nPos nNeg v).coeff k.1) hmem'
   intro k
@@ -1785,7 +1782,6 @@ private theorem caseI_a_sq_eq_b_sq
   have hexi : ∃ i : Fin 5, (nPos i : ℤ) - (nNeg i : ℤ) ≠ 0 := by
     by_contra! h
     exact hne (funext fun i ↦ by have := h i; omega)
-  classical
   set i₀ := (Finset.univ.filter
     (fun i : Fin 5 ↦ (nPos i : ℤ) - (nNeg i : ℤ) ≠ 0)).min' (by
       rw [Finset.filter_nonempty_iff]; obtain ⟨i, hi⟩ := hexi; exact ⟨i, Finset.mem_univ i, hi⟩)
