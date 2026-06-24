@@ -49,7 +49,6 @@ noncomputable section
 set_option maxRecDepth 100000
 
 open NumberField
-open scoped BigOperators
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -117,7 +116,7 @@ theorem rIntegralRat_scalar_factors_through_coordModCube_x68
     show (((q : ℚ).den : ℕ) : ZMod (37 ^ 3)) *
         (((q : ℚ).num : ZMod (37 ^ 3)) * (((q : ℚ).den : ℕ) : ZMod (37 ^ 3))⁻¹ * C) =
       ((q : ℚ).num : ZMod (37 ^ 3)) *
-        ((((q : ℚ).den : ℕ) : ZMod (37 ^ 3)) * (((q : ℚ).den : ℕ) : ZMod (37 ^ 3))⁻¹) * C from by
+        ((((q : ℚ).den : ℕ) : ZMod (37 ^ 3)) * (((q : ℚ).den : ℕ) : ZMod (37 ^ 3))⁻¹) * C by
       ring]
   rw [ZMod.mul_inv_of_unit _ hunit, mul_one]
 
@@ -183,7 +182,7 @@ theorem castHom_cube_eq_of_thirtyseven_mul_eq {a b : ZMod (37 ^ 3)}
   rw [ZMod.castHom_apply, ← ZMod.natCast_val z, ZMod.natCast_eq_zero_iff]
   have hval : (37 * z.val) % (37 ^ 3) = 0 := by
     have h2 := congrArg ZMod.val hsub
-    rw [ZMod.val_zero, ZMod.val_mul, show (37 : ZMod (37 ^ 3)).val = 37 from by decide] at h2
+    rw [ZMod.val_zero, ZMod.val_mul, show (37 : ZMod (37 ^ 3)).val = 37 by decide] at h2
     exact h2
   obtain ⟨c, hc⟩ := Nat.dvd_of_mod_eq_zero hval
   refine ⟨c, ?_⟩
@@ -221,14 +220,14 @@ theorem deg68_coordModCube_castHom_modSq_eq
         ((391 : ZMod (37 ^ 3)) * (-37 : ZMod (37 ^ 3))) := by
     apply castHom_cube_eq_of_thirtyseven_mul_eq
     rw [show (37 : ZMod (37 ^ 3)) * (((Nat.factorial 68 / 37 : ℕ) : ZMod (37 ^ 3)) * X) =
-        (37 : ZMod (37 ^ 3)) * ((Nat.factorial 68 / 37 : ℕ) : ZMod (37 ^ 3)) * X from by ring]
+        (37 : ZMod (37 ^ 3)) * ((Nat.factorial 68 / 37 : ℕ) : ZMod (37 ^ 3)) * X by ring]
     rw [hval]; ring
   rw [map_mul, map_mul, map_natCast] at hcasteq
   -- castHom (391 : ZMod 37³) = (391 : ZMod 37²), castHom (-37 : ZMod 37³) = (-37 : ZMod 37²)
   rw [show (ZMod.castHom (pow_dvd_pow 37 (by norm_num : 2 ≤ 3)) (ZMod (37 ^ 2)))
-        (391 : ZMod (37 ^ 3)) = (391 : ZMod (37 ^ 2)) from by decide,
+        (391 : ZMod (37 ^ 3)) = (391 : ZMod (37 ^ 2)) by decide,
     show (ZMod.castHom (pow_dvd_pow 37 (by norm_num : 2 ≤ 3)) (ZMod (37 ^ 2)))
-        (-37 : ZMod (37 ^ 3)) = (-37 : ZMod (37 ^ 2)) from by decide] at hcasteq
+        (-37 : ZMod (37 ^ 3)) = (-37 : ZMod (37 ^ 2)) by decide] at hcasteq
   exact hcasteq
 
 end BernoulliRegular.FLT37.Eichler
