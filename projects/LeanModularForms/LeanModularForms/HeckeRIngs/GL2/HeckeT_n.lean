@@ -24,9 +24,10 @@ the prime operator `T_p` from `GL2/HeckeT_p.lean`.
 * `heckeT_ppow_succ_succ` — the prime-power recurrence (definitional)
 * `heckeT_ppow_eq_pow_of_not_coprime` — `T_{p^r} = T_p^r` when `p ∣ N`
 * `heckeT_n_one` — `T_1 = id`
-* `heckeT_n_mul_coprime` — `T_{mn} = T_m T_n` when `(m,n) = 1`
-* `heckeT_n_comm` — `T_m T_n = T_n T_m`
 * `heckeT_n_preserves_charSpace` — `T_n` preserves `M_k(N, χ)`
+
+Multiplicativity (`T_{mn} = T_m T_n` for `(m,n) = 1`) and commutativity (`T_m T_n = T_n T_m`)
+are established in `Unified/RingTransport.lean` via the abstract Hecke-ring transport.
 
 ## Implementation notes
 
