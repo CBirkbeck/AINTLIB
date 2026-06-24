@@ -7,7 +7,6 @@ public import BernoulliRegular.CyclotomicUnits.DworkParameter.Construction.Artin
 noncomputable section
 
 open scoped NumberField
-open PowerSeries
 
 namespace BernoulliRegular
 namespace CyclotomicUnits
