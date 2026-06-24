@@ -44,8 +44,6 @@ out-of-range algebraic `B₆₈/68`.
 
 noncomputable section
 
-open scoped BigOperators
-
 namespace BernoulliRegular.FLT37.Eichler
 
 open PowerSeries
@@ -92,7 +90,7 @@ theorem coeff_derivative_L37_of_le {j : ℕ} (hj : j ≤ 72) :
     simp [Nat.log_one_right]
   · by_cases h36 : j = 36
     · subst h36
-      norm_num [show Nat.log 37 37 = 1 from by norm_num [Nat.log]]
+      norm_num [show Nat.log 37 37 = 1 by norm_num [Nat.log]]
     · -- `j ≠ 0, 36`, `j ≤ 72`: `j+1` is not a power of `37`, so the coefficient is `0`.
       rw [if_neg h0, if_neg h36]
       have hcond : ¬ (37 ^ Nat.log 37 (j + 1) = j + 1 ∧ j + 1 ≠ 0) := by
