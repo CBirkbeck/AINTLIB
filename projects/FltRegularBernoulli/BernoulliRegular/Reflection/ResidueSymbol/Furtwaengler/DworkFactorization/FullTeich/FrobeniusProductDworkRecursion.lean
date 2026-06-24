@@ -167,27 +167,14 @@ theorem artinHasseExp_trunc_eval_frobenius_shift_product_of_parameter
               refine Finset.prod_congr rfl ?_
               intro i _hi
               have hpow : (zbar ^ (ℓ ^ i)) ^ ℓ = zbar ^ (ℓ ^ (i + 1)) := by
-                rw [← pow_mul]
-                exact congrArg (fun n : ℕ => zbar ^ n)
-                  (by rw [pow_succ] : ℓ ^ i * ℓ = ℓ ^ (i + 1))
+                rw [← pow_mul, ← pow_succ]
               rw [mul_pow, hpow]
   have hright :
       (∏ i : Fin f,
           (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
             (ε ^ ℓ * zbar ^ (ℓ ^ (i : ℕ)))) =
-        ∏ i ∈ Finset.range f, g i := by
-    calc
-      (∏ i : Fin f,
-          (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
-            (ε ^ ℓ * zbar ^ (ℓ ^ (i : ℕ))))
-          = ∏ i ∈ Finset.range f,
-              (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
-                (ε ^ ℓ * zbar ^ (ℓ ^ i)) :=
-              (Finset.prod_range
-                (f := fun i : ℕ =>
-                  (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
-                    (ε ^ ℓ * zbar ^ (ℓ ^ i))).symm)
-      _ = ∏ i ∈ Finset.range f, g i := rfl
+        ∏ i ∈ Finset.range f, g i :=
+    (Finset.prod_range (f := g)).symm
   rw [show F.toConcreteStickelbergerSetup.f = f from rfl]
   rw [hleft, hright]
   exact prod_range_shift_eq_of_last_eq_first g f hgperiod
@@ -237,15 +224,8 @@ theorem artinHasseExp_trunc_eval_frobenius_shift_product_iterate_of_parameter
     simpa [zbar, map_pow] using congrArg (Ideal.Quotient.mk (F.Q ^ (N + 1))) hz
   have hzperiod_iter : ∀ n : ℕ, zbar ^ (ℓ ^ (n + f)) = zbar ^ (ℓ ^ n) := by
     intro n
-    have hpow_nf : ℓ ^ (n + f) = ℓ ^ f * ℓ ^ n := by
-      rw [pow_add, Nat.mul_comm]
-    calc
-      zbar ^ (ℓ ^ (n + f)) = zbar ^ (ℓ ^ f * ℓ ^ n) := by
-        rw [hpow_nf]
-      _ = (zbar ^ (ℓ ^ f)) ^ (ℓ ^ n) := by
-        rw [← pow_mul]
-      _ = zbar ^ (ℓ ^ n) := by
-        rw [hzperiod]
+    rw [show ℓ ^ (n + f) = ℓ ^ f * ℓ ^ n by rw [pow_add, Nat.mul_comm], pow_mul,
+      hzperiod]
   have hgperiod : ∀ n : ℕ, g (n + f) = g n := by
     intro n
     simp [g, hzperiod_iter n]
@@ -270,28 +250,14 @@ theorem artinHasseExp_trunc_eval_frobenius_shift_product_iterate_of_parameter
               intro i _hi
               have hpow :
                   (zbar ^ (ℓ ^ i)) ^ (ℓ ^ m) = zbar ^ (ℓ ^ (i + m)) := by
-                have hpow_im : ℓ ^ i * ℓ ^ m = ℓ ^ (i + m) := by
-                  rw [pow_add]
-                exact (pow_mul zbar (ℓ ^ i) (ℓ ^ m)).symm.trans
-                  (congrArg (fun n : ℕ => zbar ^ n) hpow_im)
+                rw [← pow_mul, ← pow_add]
               rw [mul_pow, hpow]
   have hright :
       (∏ i : Fin f,
           (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
             (ε ^ (ℓ ^ m) * zbar ^ (ℓ ^ (i : ℕ)))) =
-        ∏ i ∈ Finset.range f, g i := by
-    calc
-      (∏ i : Fin f,
-          (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
-            (ε ^ (ℓ ^ m) * zbar ^ (ℓ ^ (i : ℕ))))
-          = ∏ i ∈ Finset.range f,
-              (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
-                (ε ^ (ℓ ^ m) * zbar ^ (ℓ ^ i)) :=
-              (Finset.prod_range
-                (f := fun i : ℕ =>
-                  (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
-                    (ε ^ (ℓ ^ m) * zbar ^ (ℓ ^ i))).symm)
-      _ = ∏ i ∈ Finset.range f, g i := rfl
+        ∏ i ∈ Finset.range f, g i :=
+    (Finset.prod_range (f := g)).symm
   rw [show F.toConcreteStickelbergerSetup.f = f from rfl]
   rw [hleft, hright]
   exact prod_range_shift_iterate_eq_of_period g f m hgperiod
@@ -419,14 +385,6 @@ theorem artinHasseExp_frobenius_product_pow_prime_eq_correction_mul_of_parameter
       (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let zbar : A :=
     Ideal.Quotient.mk (F.Q ^ (N + 1)) (F.teichUnitFullVal (F.traceScale * y))
-  have hrec :
-      (∏ i : Fin F.toConcreteStickelbergerSetup.f,
-          (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
-            (ε * zbar ^ (ℓ ^ (i : ℕ)))) ^ ℓ =
-        ∏ i : Fin F.toConcreteStickelbergerSetup.f,
-          ((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
-            (ε * zbar ^ (ℓ ^ (i : ℕ)))) ^ ℓ := by
-    rw [Finset.prod_pow]
   calc
     (∏ i : Fin F.toConcreteStickelbergerSetup.f,
         (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
@@ -434,7 +392,7 @@ theorem artinHasseExp_frobenius_product_pow_prime_eq_correction_mul_of_parameter
         =
           ∏ i : Fin F.toConcreteStickelbergerSetup.f,
             ((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
-              (ε * zbar ^ (ℓ ^ (i : ℕ)))) ^ ℓ := hrec
+              (ε * zbar ^ (ℓ ^ (i : ℕ)))) ^ ℓ := by rw [Finset.prod_pow]
     _ =
           ∏ i : Fin F.toConcreteStickelbergerSetup.f,
             ((PowerSeries.trunc (N + 1) Rps).eval₂ (RingHom.id A)
@@ -647,9 +605,8 @@ theorem artinHasseExp_base_trace_pow_prime_eq_trace_nat_correction_mul_parameter
       ((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A) δ) ^ ℓ =
         (PowerSeries.trunc (N + 1) Rps).eval₂ (RingHom.id A) δ *
           (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A) (δ ^ ℓ) := by
-    have h := by
-      open ConcreteStickelbergerSetup in
-      exact artinHasseExp_trunc_eval_inverse_mul_pow_prime_eq_rescale_exp_mul_frob
+    have h :=
+      ConcreteStickelbergerSetup.artinHasseExp_trunc_eval_inverse_mul_pow_prime_eq_rescale_exp_mul_frob
         (S := F.toConcreteStickelbergerSetup)
         (N := N)
         (u := (1 : A))
@@ -659,7 +616,7 @@ theorem artinHasseExp_base_trace_pow_prime_eq_trace_nat_correction_mul_parameter
   calc
     (((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A) δ) ^ t) ^ ℓ
         = (((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A) δ) ^ ℓ) ^ t := by
-          rw [← pow_mul, ← pow_mul, Nat.mul_comm]
+          rw [pow_right_comm]
     _ =
         ((PowerSeries.trunc (N + 1) Rps).eval₂ (RingHom.id A) δ *
           (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A) (δ ^ ℓ)) ^ t := by
@@ -743,7 +700,7 @@ theorem artinHasseExp_base_trace_pow_prime_eq_trace_nat_correction_mul_parameter
   calc
     (((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A) ε) ^ t) ^ ℓ
         = (((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A) ε) ^ ℓ) ^ t := by
-          rw [← pow_mul, ← pow_mul, Nat.mul_comm]
+          rw [pow_right_comm]
     _ =
         ((PowerSeries.trunc (N + 1) Rps).eval₂ (RingHom.id A) ε *
           (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A) (ε ^ ℓ)) ^ t := by
@@ -789,7 +746,7 @@ theorem artinHasseExp_base_trace_pow_prime_iterate_eq_iterCorrection_mul
         =
           (((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A) ε) ^
             (ℓ ^ m)) ^ t := by
-          rw [← pow_mul, ← pow_mul, Nat.mul_comm]
+          rw [pow_right_comm]
     _ =
           (F.toConcreteStickelbergerSetup.artinHasseExpIterCorrection N ε m *
             (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
