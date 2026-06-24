@@ -20,8 +20,6 @@ This file assembles the completed cyclotomic-unit tickets:
 
 noncomputable section
 
-open NumberField
-
 namespace BernoulliRegular
 
 variable {p : ℕ} [Fact p.Prime]
