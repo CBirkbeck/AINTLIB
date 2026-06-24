@@ -14,9 +14,6 @@ step identifying the completed Artin--Hasse value at a Teichmuller multiple of
 the Dwork parameter with the corresponding power of the cyclotomic root.
 -/
 
-open scoped BigOperators
-open PowerSeries
-
 namespace BernoulliRegular
 namespace CyclotomicUnits
 namespace PadicLogSetup
@@ -40,7 +37,6 @@ theorem quotient_mk_scaledDworkParameterExpApprox_eq_evalIntegralPowerSeriesMod
         (scaledDworkParameterExpApprox p K a N) =
       evalIntegralPowerSeriesMod p K (integralExpSeries p K)
         (scaledDworkParameter p K a) (N + 1) := by
-  classical
   let q : R →+* R ⧸ I ^ (N + 1) := Ideal.Quotient.mk (I ^ (N + 1))
   change
     q ((PowerSeries.trunc (N + 1) (integralExpSeries p K)).eval₂
@@ -237,10 +233,9 @@ theorem scaledDworkParameterExpApprox_sub_zetaPow_mem_step
   have hEprev : E - z ∈ I ^ (N + 1) := by
     have hneg :
         scaledDworkParameterExpApprox p K a (N + 1) -
-            scaledDworkParameterExpApprox p K a N ∈ I ^ (N + 1) :=
-      by
-        simpa [sub_eq_add_neg, add_comm] using
-          (I ^ (N + 1)).neg_mem hcompat
+            scaledDworkParameterExpApprox p K a N ∈ I ^ (N + 1) := by
+      simpa [sub_eq_add_neg, add_comm] using
+        (I ^ (N + 1)).neg_mem hcompat
     have hsum : (scaledDworkParameterExpApprox p K a (N + 1) -
             scaledDworkParameterExpApprox p K a N) +
           (scaledDworkParameterExpApprox p K a N - z) ∈ I ^ (N + 1) :=
