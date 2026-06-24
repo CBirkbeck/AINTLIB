@@ -87,7 +87,7 @@ of `Lemma98ConjugateResidue37`; neither is Assumption II.
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Polynomial
+open NumberField Polynomial
 
 namespace BernoulliRegular.FLT37.Eichler
 
