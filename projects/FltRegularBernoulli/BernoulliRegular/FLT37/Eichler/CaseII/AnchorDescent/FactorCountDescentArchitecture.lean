@@ -129,14 +129,13 @@ theorem zeta_pow_eq_one_of_zetaSubOne_sq_dvd
     (hdvd : ((zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger - 1) ^ 2 ∣
       ((zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger ^ mm - 1)) :
     (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger ^ mm = 1 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   set ζ := (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger with hζ
   have hζ37 : ζ ^ 37 = 1 := by
     rw [hζ]; exact (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger_isPrimitiveRoot.pow_eq_one
   by_contra hne
   have hr : ζ ^ mm = ζ ^ (mm % 37) := by
     conv_lhs => rw [← Nat.div_add_mod mm 37, pow_add, pow_mul, hζ37, one_pow, one_mul]
-  set r := mm % 37 with hrdef
+  set r := mm % 37
   have hr_cop : r.Coprime 37 := by
     rw [Nat.coprime_comm, Nat.Prime.coprime_iff_not_dvd (by decide : Nat.Prime 37)]
     have hr_lt : r < 37 := Nat.mod_lt _ (by norm_num)
@@ -165,8 +164,7 @@ theorem zetaSubOne_not_dvd_two [IsCyclotomicExtension {37} ℚ (CyclotomicField 
     (hd2 : ((zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger - 1) ∣
       (2 : 𝓞 (CyclotomicField 37 ℚ))) :
     False := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  set ζ := (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger with hζ
+  set ζ := (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger
   have hd37 : (ζ - 1) ∣ ((37 : ℕ) : 𝓞 (CyclotomicField 37 ℚ)) :=
     dvd_trans (dvd_pow_self _ (by norm_num : (37 - 1 : ℕ) ≠ 0))
       (zetaSubOne_pow_p_sub_one_dvd_p (p := 37) (K := CyclotomicField 37 ℚ))
@@ -247,8 +245,7 @@ theorem caseIITerminal_eq_one
     (hα1 : ((zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger - 1) ^ 2 ∣
       ((α : 𝓞 (CyclotomicField 37 ℚ)) - 1)) :
     (α : 𝓞 (CyclotomicField 37 ℚ)) = 1 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  set ζ := (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger with hζ
+  set ζ := (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger
   obtain ⟨mm, hpm⟩ := caseIITerminal_root_of_unity α hconj
   rcases hpm with h | h
   · rw [h] at hα1 ⊢; exact zeta_pow_eq_one_of_zetaSubOne_sq_dvd mm hα1
@@ -279,7 +276,6 @@ theorem caseIITerminal_zetaSq_refute
     (heq : (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger * s =
       (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger ^ 36 * s) :
     False := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   set ζ := (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger with hζ
   have hζ37 : ζ ^ 37 = 1 := by
     rw [hζ]; exact (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger_isPrimitiveRoot.pow_eq_one
@@ -401,7 +397,7 @@ theorem no_realCaseIIData37_of_factorDescent
   have hP : ∃ n, P n := ⟨_, m, D, rfl⟩
   -- `Nat.find hP` is the minimal achieved factor count; `Dmin` realises it.
   obtain ⟨k, Dmin, hn⟩ := Nat.find_spec hP
-  set n := Nat.find hP with hndef
+  set n := Nat.find hP
   -- The dichotomy at the minimal datum: either a strictly smaller count (impossible) or `False`.
   have hprinc := caseII_real_etaZeroPrincipalization_of_classConjFixed h_class Dmin
   rcases h_dichotomy h_exactUnit Dmin hprinc with ⟨m', D', hlt⟩ | hfalse
@@ -431,7 +427,6 @@ theorem caseIIBridge_thirtyseven_of_factorDescent
     (h_dichotomy : CaseIIFactorDescentDichotomy37)
     (h_exactUnit : WashingtonCaseIIExactQuotientUnitPower37Source) :
     BernoulliRegular.CaseIIBridge 37 (CyclotomicField 37 ℚ) 32 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   refine ⟨?_⟩
   intro _hV _hSO a b c hprod hgcd hcase hEq
   have hNoData := no_realCaseIIData37_of_factorDescent h_class h_exactUnit h_dichotomy
@@ -458,8 +453,6 @@ certifying its hypothesis is non-vacuous. -/
 theorem caseIIZFactorCount_pos_of_mem_lv149 {m : ℕ}
     (D : RealCaseIIData37 (CyclotomicField 37 ℚ) m) (hz : D.z ∈ lv149) :
     1 ≤ caseIIZFactorCount D.toCaseIIData37 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  haveI : lv149.IsPrime := lv149_isMaximal.isPrime
   -- `lv149 ∣ (D.z)` (as ideals) since `D.z ∈ lv149`.
   have hdvd : lv149 ∣ Ideal.span ({D.z} : Set (𝓞 (CyclotomicField 37 ℚ))) := by
     rw [Ideal.dvd_iff_le, Ideal.span_singleton_le_iff_mem]; exact hz
@@ -507,8 +500,6 @@ theorem fermatLastTheoremFor_thirtyseven_of_factorDescent
     (caseII_exactUnit : WashingtonCaseIIExactQuotientUnitPower37Source)
     (noSecondOrderIrregular : NoSecondOrderIrregularPair 37 32) :
     FermatLastTheoremFor 37 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  haveI : NeZero 37 := ⟨by decide⟩
   exact fermatLastTheoremFor_thirtyseven_of_remaining
     (cor8_19Bridge_of_not_dvd_hPlus 37 (CyclotomicField 37 ℚ) Sinnott.flt37_not_dvd_hPlus)
     caseIBridge_thirtyseven_eichler
