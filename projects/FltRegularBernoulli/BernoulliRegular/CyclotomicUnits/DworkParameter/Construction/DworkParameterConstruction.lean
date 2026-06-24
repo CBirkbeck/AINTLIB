@@ -6,9 +6,6 @@ public import BernoulliRegular.CyclotomicUnits.DworkParameter.SamePrimeLog.Artin
 
 noncomputable section
 
-open scoped NumberField
-open PowerSeries
-
 namespace BernoulliRegular
 namespace CyclotomicUnits
 namespace PadicLogSetup
@@ -132,11 +129,9 @@ theorem quotient_mk_dworkParameterApprox_eq_trunc_eval (N : ℕ) :
       Ideal.Quotient.mk ((lambdaIdeal p K) ^ N) (valuedCyclotomicLambdaInteger p K)
     Ideal.Quotient.mk ((lambdaIdeal p K) ^ N) (dworkParameterApprox p K N) =
       (PowerSeries.trunc N Ips).eval₂ (RingHom.id A) lambdabar := by
-  classical
   dsimp only
-  rw [dworkParameterApprox_eq_sum_range]
-  rw [map_sum]
-  rw [PowerSeries.eval₂_trunc_eq_sum_range]
+  rw [dworkParameterApprox_eq_sum_range, map_sum,
+    PowerSeries.eval₂_trunc_eq_sum_range]
   refine Finset.sum_congr rfl ?_
   intro n _hn
   simp [map_pow]
@@ -358,7 +353,6 @@ theorem evalIntegralPowerSeriesMod_expMinusOne_neg_dworkParameter_eq_conjugateLa
         (-(dworkParameter p K)) N =
       Ideal.Quotient.mk ((lambdaIdeal p K) ^ N)
         (valuedCyclotomicConjugateLambdaInteger p K) := by
-  classical
   cases N with
   | zero =>
       trans 0
@@ -607,7 +601,6 @@ set_option maxHeartbeats 1000000 in
 -- The completed sign theorem reuses the same finite quotient comparison data.
 theorem dworkConjugateParameter_eq_neg_dworkParameter (hp_two : 2 < p) :
     dworkConjugateParameter p K = -dworkParameter p K := by
-  classical
   apply AdicCompletion.ext_evalₐ
   intro N
   cases N with
