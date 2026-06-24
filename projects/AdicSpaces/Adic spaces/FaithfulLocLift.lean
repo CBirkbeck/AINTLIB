@@ -58,6 +58,7 @@ faithful replacement for `isUnit_canonicalMap_s_of_huber` (whose `spa_point_nonO
 theorem isUnit_canonicalMap_s_faithful
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)]
     (D D' : RationalLocData A)
     (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s) :
     IsUnit (D'.canonicalMap D.s) := by
@@ -337,6 +338,7 @@ later, formalise Huber's hypothesis-free 3.3(i) proof directly (≈25 lines + hi
 theorem mem_plus_of_forall_spa_vle_one
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)]
     (D' : RationalLocData A) (x : presheafValue D')
     (hx : ∀ w : Spv (presheafValue D'),
       w ∈ Spa (presheafValue D') (presheafValue D')⁺ → w.vle x 1) :
@@ -546,6 +548,7 @@ Def 7.14(1)), so `x ∈ B° = {power-bounded}`. -/
 theorem isPowerBounded_of_forall_vle_one_spa_of_complete
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)]
     (D' : RationalLocData A) (x : presheafValue D')
     (hx : ∀ w : Spv (presheafValue D'),
       w ∈ Spa (presheafValue D') (presheafValue D')⁺ → w.vle x 1) :
@@ -567,6 +570,7 @@ is a unit, so `w(x) ≤ 1`. NO `IsDomain`, NO noeth-`A₀`. The sorry-free (modu
 theorem locLift_divByS_isPowerBounded_faithful
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)]
     (D D' : RationalLocData A)
     (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
     (t : A) (ht : t ∈ D.T) :
@@ -623,7 +627,8 @@ sorry-bearing Presheaf instance. Kept a `theorem` (not `instance`): the `Complet
 right-uniformity binder is not instance-synthesizable. -/
 theorem hasLocLiftPowerBounded_faithful
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
-    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] :
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)] :
     HasLocLiftPowerBounded A where
   isUnit_canonicalMap_s := fun D D' h => isUnit_canonicalMap_s_faithful D D' h
   locLift_divByS_isPowerBounded := fun D D' h t ht =>

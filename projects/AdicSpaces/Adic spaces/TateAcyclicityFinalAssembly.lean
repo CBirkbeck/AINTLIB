@@ -97,6 +97,7 @@ cover piece, then they are equal. This theorem is just the additive shift
 `a - b`, with no new mathematical content. -/
 theorem RationalCovering.separation_via_prime_extension_closed
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) (hne : C.covers.Nonempty)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
@@ -132,6 +133,7 @@ known Lane-B residuals, but callers no longer have to rebuild the
 `a - b` zero-kernel conversion for `C` and every per-E local covering. -/
 theorem RationalCovering.nonempty_separation_supplier_via_prime_extension_closed
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (hloc_noeth : ∀ C' : RationalCovering A,
       IsNoetherianRing (locSubring C'.base.P C'.base.T C'.base.s))
@@ -1405,6 +1407,7 @@ mathematical suppliers explicit:
 It does not change the legacy final theorem's hypotheses; it records the
 exact remaining proof boundary in an axiom-clean form. -/
 theorem RationalCovering.tateAcyclicity_end_to_end_via_primary_laneA
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (hne : C.covers.Nonempty)
     (part1_supplier : ∀ x : presheafValue C.base,
@@ -1457,6 +1460,7 @@ coverings and applies it:
 This is the intended final assembly shape once separation is available as
 augmented Čech exactness for all rational covers. -/
 theorem RationalCovering.tateAcyclicity_end_to_end_via_primary_laneA_of_universal_separation
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (hne : C.covers.Nonempty)
     (separation_supplier : ∀ C' : RationalCovering A,
@@ -1500,6 +1504,7 @@ Cor 8.32 cover-level injectivity requires a nonempty cover. The final cover
 nonemptiness proof. This keeps the empty-cover issue explicit instead of
 forcing a false/overstrong universal separation hypothesis. -/
 theorem RationalCovering.tateAcyclicity_end_to_end_via_primary_laneA_of_nonempty_separation
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (hne : C.covers.Nonempty)
     (separation_supplier : ∀ C' : RationalCovering A, C'.covers.Nonempty →
@@ -1549,6 +1554,7 @@ shows this nonemptiness follows from a point of the original cover piece `E`,
 so the caller only supplies the geometrically natural cover-piece
 nonemptiness condition. -/
 theorem RationalCovering.tateAcyclicity_end_to_end_via_primary_laneA_of_nonempty_pieces
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (hne : C.covers.Nonempty)
     (separation_supplier : ∀ C' : RationalCovering A, C'.covers.Nonempty →
@@ -1592,6 +1598,7 @@ supplies the nonempty local covering needed by the separation supplier. Empty
 base and empty original pieces are discharged by the structural compatibility
 lemmas in this file. -/
 theorem RationalCovering.tateAcyclicity_end_to_end_via_primary_allow_empty
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (hne : C.covers.Nonempty)
     (separation_supplier : ∀ C' : RationalCovering A, C'.covers.Nonempty →
@@ -1644,6 +1651,7 @@ This keeps the same separation and standard-refinement boundary, but consumes
 `PrimaryLaneAInputsCanonical`, whose completion and minus-continuity fields are
 filled internally. -/
 theorem RationalCovering.tateAcyclicity_end_to_end_via_primary_canonical_allow_empty
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (hne : C.covers.Nonempty)
     (separation_supplier : ∀ C' : RationalCovering A, C'.covers.Nonempty →
@@ -1691,6 +1699,7 @@ caller-ready bridge showing exactly which existing Lane-B residuals are enough
 to supply the nonempty-cover separation input for the canonical Lane-A
 assembly. -/
 theorem RationalCovering.tateAcyclicity_end_to_end_via_primary_canonical_primeExtensionClosed
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (hne : C.covers.Nonempty)
     (hloc_noeth : ∀ C' : RationalCovering A,
@@ -1735,6 +1744,7 @@ This is the full-conjunction analogue of
 handled internally, and the caller no longer supplies the abstract
 `hZavyalov_per_E` refinement existential. -/
 theorem RationalCovering.tateAcyclicity_via_primary_per_D_allow_empty
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (hne : C.covers.Nonempty)
     (separation_supplier : ∀ C' : RationalCovering A, C'.covers.Nonempty →
@@ -1775,6 +1785,7 @@ current allow-empty final-assembly boundary. The remaining inputs are the
 nonempty-cover separation supplier, the standard-shape presentation, the
 span-top condition, and the Lane A overlap package. -/
 theorem RationalCovering.tateAcyclicity_via_primary_standardShape_allow_empty
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (hne : C.covers.Nonempty)
     (separation_supplier : ∀ C' : RationalCovering A, C'.covers.Nonempty →
@@ -1814,6 +1825,7 @@ Compared to `tateAcyclicity_via_primary_per_D_allow_empty`, this consumes
 `PrimaryLaneAInputsCanonical` and fills the canonical completion/minus
 continuity fields internally. -/
 theorem RationalCovering.tateAcyclicity_via_primary_per_D_canonical_allow_empty
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (hne : C.covers.Nonempty)
     (separation_supplier : ∀ C' : RationalCovering A, C'.covers.Nonempty →
@@ -1852,6 +1864,7 @@ Compared to `tateAcyclicity_via_primary_standardShape_allow_empty`, this
 consumes `PrimaryLaneAInputsCanonical` and fills the canonical
 completion/minus-continuity fields internally. -/
 theorem RationalCovering.tateAcyclicity_via_primary_standardShape_canonical_allow_empty
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (hne : C.covers.Nonempty)
     (separation_supplier : ∀ C' : RationalCovering A, C'.covers.Nonempty →
@@ -2057,6 +2070,7 @@ The proof is one line: extract `Topology.IsEmbedding.injective` from T149
 and apply it to the `Prod.ext` of the two component-wise hypotheses. -/
 theorem laurentCover_separation_via_isEmbedding_presheaf_via_bridges_baire_auto
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (D₀ : RationalLocData A) [IsNoetherianRing (locSubring D₀.P D₀.T D₀.s)]
     [LaurentNormalized D₀]
@@ -2311,6 +2325,7 @@ overlap gluing. -/
 theorem RationalCovering.tateAcyclicityComplete_via_prime_extension_closed
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [DecidableEq A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) (hne : C.covers.Nonempty)
     (hZavyalov_per_E : rationalOpen C.base.T C.base.s ≠ ∅ →
@@ -2384,6 +2399,7 @@ standard `a - b = 0` conversion to produce the `global_separation` hypothesis
 required by `tateAcyclicityComplete`. -/
 theorem RationalCovering.separation_via_normalizedLaurent
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) (hne : C.covers.Nonempty)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
@@ -2558,6 +2574,7 @@ normalized-minus pieces. The Part 2 lane suppliers remain as hypotheses
 theorem RationalCovering.tateAcyclicityComplete_via_normalizedLaurent
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [DecidableEq A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) (hne : C.covers.Nonempty)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
@@ -2701,6 +2718,7 @@ critical path. -/
 theorem rationalCovering_hasSeparation_via_normalizedLaurent
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [IsDomain A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
@@ -2783,6 +2801,7 @@ theorem rationalCovering_hasSeparation_via_normalizedLaurent
 theorem rationalCovering_hasGluing_via_normalizedLaurent
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [DecidableEq A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
@@ -2899,6 +2918,7 @@ inherited via `hSpa_points`). -/
 theorem tateAcyclicity_via_normalizedLaurent
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [IsDomain A] [DecidableEq A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
@@ -3033,6 +3053,7 @@ All other hypotheses are unchanged from `tateAcyclicity_via_normalizedLaurent`. 
 theorem tateAcyclicity_via_normalizedLaurent_autoComplete
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [IsDomain A] [DecidableEq A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
@@ -3148,6 +3169,7 @@ of `_autoComplete` (which already dropped `hA_complete_B`). -/
 theorem tateAcyclicity_via_normalizedLaurent_autoTPB
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [IsDomain A] [DecidableEq A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
@@ -3267,6 +3289,7 @@ For each `f ∈ C.base.P.A₀`, the relative datum's `T` contains `1` (via
 Applying `invS_isPowerBounded_of_one_mem_T_minimal` gives power-boundedness
 of `invS (relativeRationalLocData_laurentNormalized ...)`. -/
 theorem hb_per_f_auto_normalizedLaurent
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
@@ -3308,6 +3331,7 @@ plus the application-specific lane suppliers. -/
 theorem tateAcyclicity_via_normalizedLaurent_autoB
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [IsDomain A] [DecidableEq A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
@@ -3408,6 +3432,7 @@ requires Stacks 00MA + Example 6.38 preservation). -/
 theorem tateAcyclicity_via_normalizedLaurent_autoCont
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [IsDomain A] [DecidableEq A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]

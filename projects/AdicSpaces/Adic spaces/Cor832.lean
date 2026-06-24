@@ -518,6 +518,7 @@ The `tate` suffix flags that this is the T-WEDHORN-1-shape consumer (with
 form, which requires `IsDomain A`). -/
 theorem productRestriction_injective_tate_via_cor832
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) (_hne : C.covers.Nonempty)
     (flat_over_base : ∀ D : { D // D ∈ C.covers },
@@ -548,6 +549,7 @@ prime-lifting uses the standard `IsLocalization.isPrime_of_isPrime_disjoint`
 route. -/
 theorem hSpa_surj_from_spanTop
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A)
     [Finite { D : RationalLocData A // D ∈ C.covers }]
@@ -591,6 +593,7 @@ restrictions are localizations (Wedhorn Prop 8.15) and localizations are
 flat (`IsLocalization.flat`). -/
 theorem flat_over_base_tate
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) :
     ∀ D : { D // D ∈ C.covers },
@@ -630,6 +633,7 @@ above (with its `restrictionMap_isLocalization` dependency) for completeness
 documentation; downstream consumers use this Laurent-shape variant. -/
 theorem flat_over_base_tate_laurent
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
@@ -709,6 +713,7 @@ for covers consisting of normalized-minus pieces, using T230
 (`restrictionMap_flat_via_normalizedMinus`) per piece. -/
 theorem flat_over_base_tate_normalizedLaurent
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
@@ -798,6 +803,7 @@ hypothesis (per `restrictionMap_flat_via_iteratedPlus`).
 This handles natural 2-element Laurent covers `{plus, minus}` directly. -/
 theorem flat_over_base_tate_laurent_combined
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
@@ -847,6 +853,7 @@ C.base`. This is Wedhorn Cor 8.31 content (once translated through
 `presheafValue C.base ≅ completion of Localization.Away C.base.s`). -/
 theorem productRestriction_injective_tate_of_spanTop
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) (hne : C.covers.Nonempty)
     (hspan_top : ∀ (p : Ideal (presheafValue C.base)), p.IsPrime →
@@ -1027,6 +1034,7 @@ residual A-level input, which is the well-known Wedhorn Prop 7.41 / Lemma
 required. -/
 theorem productRestriction_injective_tate_of_hSpa_points
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) (hne : C.covers.Nonempty)
     (hSpa_points : ∀ (p : Ideal A), p.IsPrime → C.base.s ∉ p →
@@ -1061,6 +1069,7 @@ the same proof chain through `productRestriction_faithfullyFlat_abstract`:
    `Module.FaithfullyFlat.of_comap_surjective`. -/
 theorem productRestriction_faithfullyFlat_tate_of_hSpa_points
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) [Finite { D : RationalLocData A // D ∈ C.covers }]
     (hSpa_points : ∀ (p : Ideal A), p.IsPrime → C.base.s ∉ p →
@@ -1095,6 +1104,7 @@ Composes:
 3. `productRestriction_faithfullyFlat_abstract` — Cor 8.32 abstract bundling. -/
 theorem productRestriction_faithfullyFlat_tate_laurent_of_hSpa_points
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A)
     [Finite { D : RationalLocData A // D ∈ C.covers }]
@@ -1157,6 +1167,7 @@ supplier and the existing `hSpa_surj_from_spanTop` + `hspan_top_of_hSpa_points`
 for prime-surjectivity. -/
 theorem productRestriction_faithfullyFlat_tate_normalizedLaurent_of_hSpa_points
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A)
     [Finite { D : RationalLocData A // D ∈ C.covers }]
@@ -1235,6 +1246,7 @@ combining T232 (faithful flatness) with the simple chain
 `productRestriction_injective_tate_via_cor832`. -/
 theorem productRestriction_injective_tate_normalizedLaurent_of_hSpa_points
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) (hne : C.covers.Nonempty)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
@@ -1318,6 +1330,7 @@ Faithfully-flat product restriction for covers whose pieces are EITHER
 faithful flatness theorem for mixed Laurent covers. -/
 theorem productRestriction_faithfullyFlat_tate_laurent_combined_of_hSpa_points
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A)
     [Finite { D : RationalLocData A // D ∈ C.covers }]
@@ -1367,6 +1380,7 @@ into the assembly architecture (which currently expects the
 `per_E_local_covering` shape). -/
 theorem productRestriction_faithfullyFlat_laurentCovering_at_E
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (E : RationalLocData A)
     [hE_loc : IsNoetherianRing (locSubring E.P E.T E.s)]
@@ -1461,6 +1475,7 @@ the discrete case and in other specific settings — the full Cor 8.32 route
 closes unconditionally. -/
 theorem productRestriction_injective_tate_of_all_primes_open
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) (hne : C.covers.Nonempty)
     (h_all_open : ∀ (p : Ideal A), p.IsPrime → C.base.s ∉ p →
@@ -1606,6 +1621,7 @@ specific completion setting. The `IsAdicComplete` instance is supplied via
 `presheafValue_isAdicComplete`. -/
 theorem exists_spa_point_supp_ge_in_presheafValue
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [PlusSubring A]
+    [IsRingOfIntegralElements (A⁺)]
     (C : RationalCovering A)
     {𝔭 : Ideal (presheafValue C.base)} [𝔭.IsPrime]
     (h𝔭_notOpen : ¬IsOpen (𝔭 : Set (presheafValue C.base))) :
@@ -1739,6 +1755,7 @@ of Noetherian Tate localizations preserves properness of finitely generated
 ideal extensions. -/
 theorem hSpa_points_nonOpen_via_lifted_ideal_proper
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
@@ -1784,6 +1801,7 @@ only remaining mathematical input is the pointwise properness of the lifted
 ideal in `presheafValue D'`. -/
 theorem spa_point_nonOpen_of_rational_subset_tate_of_liftedIdeal_proper
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (D D' : RationalLocData A)
     [IsNoetherianRing (locSubring D'.P D'.T D'.s)]
@@ -1824,6 +1842,7 @@ for every NON-OPEN prime `p` of `A` with `C.base.s ∉ p`, the lifted ideal
 `Ideal.map C.base.canonicalMap p` is proper in `presheafValue C.base`. -/
 theorem hSpa_points_via_lifted_ideal_proper
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
@@ -1857,6 +1876,7 @@ Noetherian Tate localizations), `productRestriction_injective_tate` is
 fully closed via the Cor 8.32 route. -/
 theorem productRestriction_injective_tate_via_lifted_ideal_proper
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) (hne : C.covers.Nonempty)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
@@ -1950,6 +1970,7 @@ hypothesis** `hcoeRingHom_preserves_proper` (properness preservation by the
 completion map, independent of the `A`-level prime structure). -/
 theorem hSpa_points_via_coeRingHom_preserves_proper
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
@@ -1975,6 +1996,7 @@ Once this residual is discharged, `productRestriction_injective_tate` is
 fully closed via the Cor 8.32 route. -/
 theorem productRestriction_injective_tate_via_coeRingHom_preserves_proper
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) (hne : C.covers.Nonempty)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
@@ -2310,6 +2332,7 @@ the lifted-ideal properness discharged by the already isolated closedness
 condition on the specific localization-prime extension. -/
 theorem spa_point_nonOpen_of_rational_subset_tate_of_prime_extension_closed
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (D D' : RationalLocData A)
     [IsNoetherianRing (locSubring D'.P D'.T D'.s)]
@@ -2336,6 +2359,7 @@ the only residual is closedness of `Ideal.map algebraMap p` in
 `hSpa_points_open_prime`. -/
 theorem hSpa_points_via_prime_extension_closed
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
@@ -2378,6 +2402,7 @@ single specific ideal — not of every proper ideal of the localization.
 Downstream work can target this narrower obligation. -/
 theorem productRestriction_injective_tate_via_prime_extension_closed
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) (hne : C.covers.Nonempty)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
@@ -2443,6 +2468,7 @@ cover-injectivity combinator holds. Combines:
   pseudo-uniformizer `π ∈ C.base.P.A₀` for clearing denominators). -/
 theorem productRestriction_injective_tate_of_isAdicComplete
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) (hne : C.covers.Nonempty)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
@@ -2545,6 +2571,7 @@ Combines `Ideal.isClosed_in_locSubring_subspace_of_ringOfDef_faithfullyFlat`
 Does not assert `locSubring` adic-complete. -/
 theorem Ideal.isClosed_in_locTopology_of_ringOfDef_faithfullyFlat
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (D : RationalLocData A) [IsNoetherianRing (locSubring D.P D.T D.s)]
     (hff : RingHom.FaithfullyFlat (locSubringToRingOfDef D))
@@ -2569,6 +2596,7 @@ The single residual dischargeable downstream is
 `(locSubringToRingOfDef C.base).FaithfullyFlat`. -/
 theorem productRestriction_injective_tate_of_ringOfDef_faithfullyFlat
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) (hne : C.covers.Nonempty)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
@@ -2625,6 +2653,7 @@ variants above) or directly via
 `liftedIdeal_ne_top_of_coeRingHom_preserves_proper` (Cor832.lean:1202). -/
 theorem coeRingHom_preserves_proper_of_stacks00MA
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (D : RationalLocData A) [IsNoetherianRing (locSubring D.P D.T D.s)]
     (h_stacks00MA : Module.FaithfullyFlat (locSubring D.P D.T D.s)
@@ -2655,6 +2684,7 @@ available; unconditional content for uncompleted Tate localizations is
 open — see boundary block at end of `AdicCompletionFaithfullyFlat.lean`. -/
 theorem coeRingHom_preserves_proper_of_locIdeal_le_jacobson
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (D : RationalLocData A) [IsNoetherianRing (locSubring D.P D.T D.s)]
     (h_jac : locIdeal D.P D.T D.s ≤
@@ -2671,6 +2701,7 @@ product restriction on the full rational covering. Composes Stacks 00MA
 generic with `productRestriction_injective_tate_of_ringOfDef_faithfullyFlat`. -/
 theorem productRestriction_injective_tate_of_locIdeal_le_jacobson
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) (hne : C.covers.Nonempty)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]

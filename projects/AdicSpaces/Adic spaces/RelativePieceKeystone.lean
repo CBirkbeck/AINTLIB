@@ -1188,6 +1188,11 @@ variable [HasLocLiftPowerBounded A]
 variable [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
   [NonarchimedeanRing A] [CompatiblePlusSubring A]
   [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+-- The IRIE instance for completions (`presheafValuePlus_isRingOfIntegralElements`) now requires
+-- the base affinoid interface `[IsRingOfIntegralElements (A⁺)]`; it is derivable from
+-- `[CompatiblePlusSubring A]` but the multi-step instance synthesis is not auto-included, so we
+-- thread it explicitly. (Diamond-free: `IsRingOfIntegralElements` is an all-`Prop` class.)
+variable [IsRingOfIntegralElements (A⁺)]
 
 /-- **Faithful per-step flatness for Prop 8.30 (Remark 7.55 basic-Laurent step).**
 

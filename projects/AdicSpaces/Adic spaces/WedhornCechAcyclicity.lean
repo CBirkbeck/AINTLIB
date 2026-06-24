@@ -5351,6 +5351,14 @@ private theorem unitDatum_quotEquiv_symm_mk
 
 end Example638ExplicitKernel
 
+section IRIEThreaded
+-- The completion IRIE instance (`presheafValuePlus_isRingOfIntegralElements`) requires the base
+-- affinoid interface `[IsRingOfIntegralElements (A⁺)]` (Wedhorn Def 7.14 / 7.19). It is threaded as
+-- a section variable for the OXAcyclic chain below; the headline theorem is OUTSIDE this section
+-- (it derives the interface from its own `[CompatiblePlusSubring A]`, keeping `IsSheafy` hyp-clean).
+-- Diamond-free: `IsRingOfIntegralElements` is an all-`Prop` class.
+variable [IsRingOfIntegralElements (A⁺)]
+
 /-! ### Faithful Example 6.38/6.39 bridges for `unitCover` (Wedhorn (8.2.1))
 
 These are the three ring identifications of Wedhorn's equation (8.2.1) for the
@@ -12920,6 +12928,12 @@ theorem productRestrictionSub_isInducing_via_equalizer
   exact @isInducing_of_closedRange_of_topNilpUnit A _ _ (presheafValue C.base) _ instModBase
     _ _ _ _ _ (∀ D : ↥C.covers, presheafValue D.1) _ instModPi _ _ _ _ _ _
     ϖ hϖ ϖ.isUnit rho hrho_cont hinj hclosed
+
+-- Close the `IRIEThreaded` section so the headline's elaborated signature stays CLEAN: it derives the
+-- base affinoid interface `[IsRingOfIntegralElements (A⁺)]` from its own explicit
+-- `[CompatiblePlusSubring A]` (`CompatiblePlusSubring.toIsRingOfIntegralElements`), gaining NO new
+-- hypothesis — the `IsSheafy` statement's hypotheses remain exactly the Wedhorn 8.28(b) data.
+end IRIEThreaded
 
 set_option linter.unusedSectionVars false in
 /-- **Theorem 8.28(b)** (Wedhorn p. 81, wedhorn.txt:4143; assembled from Cor 8.32

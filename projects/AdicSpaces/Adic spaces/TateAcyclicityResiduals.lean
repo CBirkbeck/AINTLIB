@@ -1706,6 +1706,7 @@ theorem exists_first_stage_laurent_cover
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A]
     [DecidableEq A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A)
     (S : Finset A)
@@ -1789,6 +1790,7 @@ predicate then follows mechanically via
 theorem balancedTree_BalancedInducing_of_rescaled_S
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A] [DecidableEq A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) (S : Finset A)
     (_hS_contain : refines_contain C S)
@@ -1811,6 +1813,7 @@ content is isolated in the sub-sub-lemma; the structural
 theorem balancedTree_allSplitsInducing_of_rescaled_S
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A] [DecidableEq A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) (S : Finset A)
     (hS_contain : refines_contain C S)
@@ -1849,6 +1852,7 @@ W2:
 theorem exists_first_stage_laurent_tree_unit_generated
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A] [DecidableEq A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) (S : Finset A)
     (_hS_cover : refines_cover C S)
@@ -2014,6 +2018,7 @@ these obligations require the relative-to-absolute transport API
 theorem unitGeneratedCover_has_relative_ratioLaurentRefinement
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A] [DecidableEq A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) (S : Finset A)
     (_hS_contain : refines_contain C S)
@@ -2138,6 +2143,7 @@ reviewer-mandated route is relative-Laurent + Group III transport. -/
 theorem relative_laurent_tree_to_absolute
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A] [DecidableEq A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) (S : Finset A)
     (_hS_contain : refines_contain C S)
@@ -2381,6 +2387,7 @@ I.1 output does not consume the ratio structure). -/
 theorem exists_inner_laurent_refinement_per_leaf
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A] [DecidableEq A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) (S : Finset A)
     (_hS_cover : refines_cover C S)
@@ -2426,6 +2433,7 @@ theorem exists_wedhorn_laurent_refinement_tree
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A] [CompatiblePlusSubring A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) :
     ∃ t : LaurentTree A,
@@ -2489,6 +2497,7 @@ theorem exists_wedhorn_ratio_laurent_refinement_tree_realized
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A] [CompatiblePlusSubring A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) :
     ∃ (t : RatioLaurentTree A) (ρ : RatioTreeRealization t C.base),
@@ -2599,6 +2608,7 @@ location (currently blocked by Lean import cycle). -/
 theorem tateAcyclicity_part1_separation_via_cor832
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) (hne : C.covers.Nonempty)
     (hSpa : ∀ (p : Ideal A), p.IsPrime → C.base.s ∉ p →
@@ -2621,6 +2631,7 @@ with II.1 but is not needed by the existing infrastructure. -/
 theorem tateAcyclicity_part2_gluing_via_flat_descent
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) (_hne : C.covers.Nonempty)
     (_hSpa : ∀ (p : Ideal A), p.IsPrime → C.base.s ∉ p →
@@ -2649,6 +2660,7 @@ at the `E`-level.
 This is the foundational transitivity bridge unblocking Group I.3. -/
 noncomputable def presheafValue_relative_equiv
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (E : RationalLocData A) [IsNoetherianRing (locSubring E.P E.T E.s)]
     (D : RationalLocData A) [LaurentNormalized D]
@@ -2664,6 +2676,7 @@ equivalence of III.1 is in fact a **homeomorphism** with respect to
 the natural topologies on both sides. Both directions are continuous. -/
 theorem presheafValue_relative_equiv_isHomeomorph
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (E : RationalLocData A) [IsNoetherianRing (locSubring E.P E.T E.s)]
     (D : RationalLocData A) [LaurentNormalized D]
@@ -2702,6 +2715,7 @@ in `presheafValue D`, is power-bounded — its powers form a bounded
 subset of `presheafValue D`. -/
 theorem relativeRationalLocData_generators_powerBounded
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (E : RationalLocData A) [IsNoetherianRing (locSubring E.P E.T E.s)]
     (D : RationalLocData A) [LaurentNormalized D]
@@ -2738,6 +2752,7 @@ with `D₀.s ∉ p`, the lifted ideal `D₀.canonicalMap(p)` is proper in
 theorem exists_spa_point_dominating_prime
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A]
+    [IsRingOfIntegralElements (A⁺)]
     (D₀ : RationalLocData A) [IsNoetherianRing D₀.P.A₀]
     [IsNoetherianRing (locSubring D₀.P D₀.T D₀.s)]
     (hAplus_le_A₀ : (A⁺ : Set A) ⊆ D₀.P.A₀)
@@ -2838,6 +2853,7 @@ acyclicity unconditionally — no further input needed. -/
 theorem tateAcyclicityComplete
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) (hne : C.covers.Nonempty)
     -- IV.1's side conditions, threaded through:
@@ -2889,6 +2905,7 @@ theorem isSheafyComplete
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A] [CompatiblePlusSubring A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     -- Per-cover instance/witness inputs for IV.1's side conditions.
     -- (Universally quantified over all rational coverings since the

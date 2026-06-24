@@ -42,6 +42,9 @@ universe u
 
 variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
   [PlusSubring A] [IsHuberRing A]
+-- The completion IRIE instance (`presheafValuePlus_isRingOfIntegralElements`) requires the base
+-- affinoid interface; threaded explicitly (Wedhorn Def 7.14 / 7.19). All-`Prop` class, diamond-free.
+variable [IsRingOfIntegralElements (A⁺)]
 
 /-- **Prop 8.30 (assembled): restriction-map flatness for a rational pair.** For `D' ⊆ D` rational
 subsets, `𝒪_X(D) → 𝒪_X(D')` is flat. This is the *usable* form (what the structure-sheaf/OMT proof

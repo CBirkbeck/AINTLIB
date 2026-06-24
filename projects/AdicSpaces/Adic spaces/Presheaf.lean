@@ -449,14 +449,16 @@ theorem RationalLocData.completedPlusSubringBase_le_completedPlusSubring
 Wedhorn 7.19 + Def 7.14, the `A⁺`-analogue of `coeRingHom_image_locSubring_isBounded`/`ringOfDef`).
 This is one of the two `A⁺`-based localization-topology residuals of the IRIE interface (T-LA3);
 the deep `isIntegrallyClosed` field is now free via the integral-closure-in-completion refactor. -/
-theorem RationalLocData.completedPlusSubringBase_isBounded (D : RationalLocData A) [PlusSubring A] :
+theorem RationalLocData.completedPlusSubringBase_isBounded (D : RationalLocData A) [PlusSubring A]
+    [IsRingOfIntegralElements (A⁺)] :
     TopologicalRing.IsBounded (D.completedPlusSubringBase : Set (presheafValue D)) :=
   sorry
 
 /-- **`completedPlusSubringBase` is open** (the `A⁺`-based ring of integral elements is open;
 Wedhorn 7.19, from `A⁺` open via `CompatiblePlusSubring.isOpen'`, the `A⁺`-analogue of
 `presheafValue_ringOfDef_isOpen`). The second `A⁺`-based localization-topology residual (T-LA3). -/
-theorem RationalLocData.completedPlusSubringBase_isOpen (D : RationalLocData A) [PlusSubring A] :
+theorem RationalLocData.completedPlusSubringBase_isOpen (D : RationalLocData A) [PlusSubring A]
+    [IsRingOfIntegralElements (A⁺)] :
     IsOpen (D.completedPlusSubringBase : Set (presheafValue D)) :=
   sorry
 
@@ -527,7 +529,7 @@ results: Wedhorn 7.19 (the precompletion `C = (A⁺[T/s])^int` is a ring of inte
 `A_s`) lifted by 7.47 (completion correspondence). The IntCl construction (rather than the generated
 subring) is essential — risk #1. -/
 instance RationalLocData.presheafValuePlus_isRingOfIntegralElements
-    (D : RationalLocData A) [PlusSubring A] :
+    (D : RationalLocData A) [PlusSubring A] [IsRingOfIntegralElements (A⁺)] :
     IsRingOfIntegralElements ((presheafValue D)⁺) where
   -- `B⁺ = integralClosure(base) ⊇ completedPlusSubringBase`, which is open; a subring containing
   -- an open neighbourhood of `0` is open. Reduced to `completedPlusSubringBase_isOpen`.
