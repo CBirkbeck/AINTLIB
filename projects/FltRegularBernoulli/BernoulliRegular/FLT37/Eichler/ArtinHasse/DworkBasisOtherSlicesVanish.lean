@@ -50,7 +50,6 @@ noncomputable section
 set_option maxRecDepth 100000
 
 open NumberField
-open scoped BigOperators
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -181,7 +180,7 @@ theorem rIntegralRat_scalar_factors_through_coordModSq_xpow
     show (((q : ℚ).den : ℕ) : ZMod (37 ^ 2)) *
         (((q : ℚ).num : ZMod (37 ^ 2)) * (((q : ℚ).den : ℕ) : ZMod (37 ^ 2))⁻¹ * C) =
       ((q : ℚ).num : ZMod (37 ^ 2)) *
-        ((((q : ℚ).den : ℕ) : ZMod (37 ^ 2)) * (((q : ℚ).den : ℕ) : ZMod (37 ^ 2))⁻¹) * C from by
+        ((((q : ℚ).den : ℕ) : ZMod (37 ^ 2)) * (((q : ℚ).den : ℕ) : ZMod (37 ^ 2))⁻¹) * C by
       ring]
   rw [ZMod.mul_inv_of_unit _ hunit, mul_one]
 
@@ -410,13 +409,13 @@ theorem rIntegralRatToValuedInteger_formalSum_mem_of_dvd
       (37 : Furtwaengler.DieudonneDwork.rIntegralRatSubring 37) =
       (37 : ValuedIntegerRing 37 K) := by
     rw [show (37 : Furtwaengler.DieudonneDwork.rIntegralRatSubring 37) =
-        ((37 : ℕ) : Furtwaengler.DieudonneDwork.rIntegralRatSubring 37) from by norm_num]
+        ((37 : ℕ) : Furtwaengler.DieudonneDwork.rIntegralRatSubring 37) by norm_num]
     rw [map_natCast]
     norm_num
   rw [h37]
   have hpow : (37 : ValuedIntegerRing 37 K) ^ w ∈ (lambdaIdeal 37 K) ^ (36 * w) := by
     have := natCast_prime_pow_mem_lambdaIdeal_pow_mul_pred (p := 37) (K := K) w
-    rwa [show w * (37 - 1) = 36 * w from by ring] at this
+    rwa [show w * (37 - 1) = 36 * w by ring] at this
   exact Ideal.mul_mem_right _ _ hpow
 
 /-! ## 3b. The Case-A small-`d` coordinate vanishing (`d < 37`, `d ≠ 32`) via the factorial route -/
@@ -541,7 +540,7 @@ theorem unscaled32SliceCoord_zero_eq_zero :
   rw [unscaled32SliceCoord]
   rw [show samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum
       (p := 37) (K := K) 71 0 (dworkParameterApprox 37 K (71 + 1))
-        (dworkParameterApprox_mem_lambdaIdeal (p := 37) (K := K) (71 + 1)) = 0 from by
+        (dworkParameterApprox_mem_lambdaIdeal (p := 37) (K := K) (71 + 1)) = 0 by
     rw [samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum,
       show Finset.Icc 1 0 = (∅ : Finset ℕ) from rfl]
     rw [Finset.attach_empty, Finset.sum_empty]]
