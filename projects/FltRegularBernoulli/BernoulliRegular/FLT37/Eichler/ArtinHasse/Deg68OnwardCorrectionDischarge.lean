@@ -43,7 +43,6 @@ noncomputable section
 set_option maxRecDepth 100000
 
 open NumberField
-open scoped BigOperators
 
 namespace BernoulliRegular.FLT37.Eichler
 
