@@ -48,7 +48,7 @@ It imports only; it does **not** modify any existing file.  No `axiom`, no `sorr
 
 noncomputable section
 
-open NumberField NumberField.IsCMField IsCyclotomicExtension UniqueFactorizationMonoid Polynomial
+open NumberField NumberField.IsCMField IsCyclotomicExtension
 open scoped nonZeroDivisors
 
 namespace BernoulliRegular.FLT37.Eichler
@@ -117,7 +117,7 @@ theorem caseII_anchor_B0_isPrincipal {m : ℕ} (D : RealCaseIIData37 K m) (hp : 
   have hc2 : c ^ 2 = 1 := by rw [sq]; exact hmul
   -- `gcd(2, 37) = 1` ⟹ `[B₀] = 1`.
   have hdvd := Nat.dvd_gcd (orderOf_dvd_of_pow_eq_one hc2) (orderOf_dvd_of_pow_eq_one hc37)
-  rw [show Nat.gcd 2 37 = 1 from by decide] at hdvd
+  rw [show Nat.gcd 2 37 = 1 by decide] at hdvd
   have hc1 : c = 1 := orderOf_eq_one_iff.mp (Nat.dvd_one.mp hdvd)
   exact (ClassGroup.mk0_eq_one_iff h𝔞₀_mem).mp hc1
 
