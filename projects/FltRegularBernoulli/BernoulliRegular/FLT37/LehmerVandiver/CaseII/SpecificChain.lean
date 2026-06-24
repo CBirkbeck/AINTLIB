@@ -1143,7 +1143,7 @@ theorem not_exists_Int_solution_of_specific_discharges
   haveI := CyclotomicField.isCyclotomicExtension p ℚ
   obtain ⟨ζ, hζ⟩ := IsCyclotomicExtension.exists_isPrimitiveRoot
     ℚ (B := (CyclotomicField p ℚ)) (Set.mem_singleton p) hpri.1.ne_zero
-  have h_dvd_iff := fun n ↦
+  have h_dvd_iff := fun n =>
     zeta_sub_one_dvd_Int_iff (K := CyclotomicField p ℚ) hζ (n := n)
   simp_rw [← h_dvd_iff]
   rintro ⟨x, y, z, hy, hz, hz', e⟩
@@ -1184,7 +1184,7 @@ theorem not_exists_Int_solution_of_etaZeroPrincipalizationOnSpecific
   haveI := CyclotomicField.isCyclotomicExtension p ℚ
   obtain ⟨ζ, hζ⟩ := IsCyclotomicExtension.exists_isPrimitiveRoot
     ℚ (B := (CyclotomicField p ℚ)) (Set.mem_singleton p) hpri.1.ne_zero
-  have h_dvd_iff := fun n ↦
+  have h_dvd_iff := fun n =>
     zeta_sub_one_dvd_Int_iff (K := CyclotomicField p ℚ) hζ (n := n)
   simp_rw [← h_dvd_iff]
   rintro ⟨x, y, z, hy, hz, hz', e⟩
@@ -1615,8 +1615,7 @@ theorem washington_integral_expression_fixed_of_primitive_integer_conj_pair
     rw [← NumberField.IsCMField.coe_ringOfIntegersComplexConj (K := K) rho_neg_a]
     exact congrArg (algebraMap (𝓞 K) K) hrho_neg_a
   apply RingOfIntegers.ext
-  rw [NumberField.IsCMField.coe_ringOfIntegersComplexConj]
-  rw [ha]
+  rw [NumberField.IsCMField.coe_ringOfIntegersComplexConj, ha]
   exact
     washington_real_expression_fixed_of_primitive_conj_pair
       (K := K) (ζ := ζ) (rho_a := (rho_a : K))
@@ -2433,7 +2432,7 @@ theorem exists_caseIIData37_of_Int_solution
   obtain ⟨ζ, hζ⟩ := IsCyclotomicExtension.exists_isPrimitiveRoot
     ℚ (B := (CyclotomicField 37 ℚ)) (Set.mem_singleton 37)
     (by decide : (37 : ℕ) ≠ 0)
-  have h_dvd_iff := fun n ↦
+  have h_dvd_iff := fun n =>
     zeta_sub_one_dvd_Int_iff (K := CyclotomicField 37 ℚ) hζ (n := n)
   rcases h with ⟨x, y, z, hy_int, hz_int, hz_ne, e⟩
   have hy : ¬ (hζ.toInteger - 1) ∣ (y : 𝓞 (CyclotomicField 37 ℚ)) := by
