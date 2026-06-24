@@ -5,10 +5,6 @@ public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.DworkAssemb
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.DworkWitt
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.LeadingCongruence
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.TraceCoefficientExpansion
-public import Mathlib.Algebra.CharP.Lemmas
-public import Mathlib.Algebra.BigOperators.Ring.Finset
-public import Mathlib.Data.Fintype.Fin
-public import Mathlib.RingTheory.Nilpotent.Basic
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.DworkFactorization.Basic.ThetaTruncProductExpansion
 
 /-!
@@ -21,13 +17,9 @@ Split from `DworkFactorization.lean`.
 
 noncomputable section
 
-open scoped NumberField
-
 namespace BernoulliRegular
 
 namespace Furtwaengler
-
-universe u v w
 
 /-- A correction factor at a natural multiple of the nilpotent parameter is
 the corresponding natural power of the base correction factor. -/
@@ -38,7 +30,6 @@ theorem rescale_exp_trunc_eval₂_natCast_mul_eq_pow
     let Rps : PowerSeries A := (rescale_exp_isRIntegral r).mapTo φ
     (PowerSeries.trunc (N + 1) Rps).eval₂ (RingHom.id A) (δ * (t : A)) =
       ((PowerSeries.trunc (N + 1) Rps).eval₂ (RingHom.id A) δ) ^ t := by
-  classical
   dsimp only
   let Rps : PowerSeries A := (rescale_exp_isRIntegral r).mapTo φ
   have hprod :=
@@ -264,7 +255,6 @@ theorem sub_mem_trans
     x - z ∈ I := by
   rw [show x - z = (x - y) + (y - z) by abel]
   exact I.add_mem hxy hyz
-
 
 end Furtwaengler
 
