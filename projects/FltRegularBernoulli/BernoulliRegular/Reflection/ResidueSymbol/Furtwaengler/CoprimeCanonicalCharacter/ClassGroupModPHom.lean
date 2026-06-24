@@ -16,6 +16,9 @@ open Reflection.ResidueSymbol.CoprimeClassCharacter
 variable {p : ℕ} [Fact p.Prime]
 variable {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 
+/-- The canonical residue symbol as a bad-set-coprime ideal-symbol datum attached
+to a locally-primary pseudo-unit, where bad-set-coprime class invariance is
+supplied by `pthSymbolAtIdeal_canonical_eq_of_mk0_eq_of_locallyPrimaryPseudoUnit`. -/
 def locallyPrimaryCoprimeCanonicalIdealSymbolData
     (hp_odd : Odd p)
     (η : 𝓞 K) (B : Ideal (𝓞 K)) (S : Finset (Ideal (𝓞 K)))
