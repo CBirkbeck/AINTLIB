@@ -125,15 +125,12 @@ theorem artinHasseExp_inverse_base_trace_pow_prime_iterate_eq_one_of_pos
     rw [hzeta_int, map_one]
   have hbase_prime :
       (((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A) δ) ^ t) ^ ℓ = 1 := by
-    rw [hnorm]
-    rw [← pow_mul, Nat.mul_comm, pow_mul, hzeta, one_pow]
+    rw [hnorm, pow_right_comm, hzeta, one_pow]
   cases m with
-  | zero =>
-      cases hm
+  | zero => exact absurd hm (lt_irrefl 0)
   | succ m =>
-      rw [show ℓ ^ (m + 1) = ℓ * ℓ ^ m by
-        rw [pow_succ, Nat.mul_comm]]
-      rw [pow_mul, hbase_prime, one_pow]
+      rw [show ℓ ^ (m + 1) = ℓ * ℓ ^ m from pow_succ' ℓ m, pow_mul, hbase_prime,
+        one_pow]
 
 /-- Inverse-parameter specialization of the adjusted-product telescope: the
 zero-boundary side is already killed by the base trace root-of-unity. -/
