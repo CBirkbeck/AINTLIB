@@ -102,7 +102,7 @@ theorem cyclicInd_pow {G : Type*} [CommGroup G] [Finite G] (h : IsCyclic G)
     (u : G) (n : ℕ) : cyclicInd h (u ^ n) = n * cyclicInd h u := by
   unfold cyclicInd
   rw [map_pow]
-  simp [toAdd_pow, nsmul_eq_mul]
+  simp only [toAdd_pow, nsmul_eq_mul]
 
 /-- **The discrete-log `p`-th-power criterion.**  In a finite cyclic group `G`, a
 unit `u` is a `p`-th power iff `(p : ZMod (Nat.card G)) ∣ ind u` (ring
@@ -116,7 +116,7 @@ theorem isPow_iff_dvd_cyclicInd {G : Type*} [CommGroup G] [Finite G]
   · rintro ⟨v, rfl⟩
     refine ⟨Multiplicative.toAdd ((zmodCyclicMulEquiv h).symm v), ?_⟩
     rw [map_pow]
-    simp [toAdd_pow, nsmul_eq_mul]
+    simp only [toAdd_pow, nsmul_eq_mul]
   · rintro ⟨z, hz⟩
     refine ⟨(zmodCyclicMulEquiv h) (Multiplicative.ofAdd z), ?_⟩
     rw [← map_pow]
