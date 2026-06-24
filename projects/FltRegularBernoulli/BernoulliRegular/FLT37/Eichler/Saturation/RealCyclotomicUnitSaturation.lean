@@ -489,7 +489,6 @@ def Cor815RealDescentData37
       Units.map (algebraMap (𝓞 (NumberField.maximalRealSubfield (CyclotomicField 37 ℚ)))
           (𝓞 (CyclotomicField 37 ℚ))).toMonoidHom w = ε₁ / ε₂
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **Discharging Corollary 8.15 (`Cor815SingleIndexExpansion37`)** (proven,
 axiom-clean *given* `SinnottIndexFormula 37` and `Cor815RealDescentData37`).
 
