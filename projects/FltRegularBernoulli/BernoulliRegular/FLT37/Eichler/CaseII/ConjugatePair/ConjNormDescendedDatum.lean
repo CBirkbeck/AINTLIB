@@ -129,7 +129,6 @@ theorem washington_xy_eq_free
     x * y =
       (η0 : K) ^ 2 * (Λ : K) ^ (2 * e) * R ^ 2 * ((Λc : K)⁻¹) -
         (ηc : K) ^ 2 * (ρc * complexConj K ρc) ^ 37 := by
-  have hΛc_ne : (Λc : K) ≠ 0 := Λc.ne_zero
   have key : (Λc : K) * (x * y) =
       (η0 : K) ^ 2 * (Λ : K) ^ (2 * e) * R ^ 2 -
         (Λc : K) * ((ηc : K) ^ 2 * (ρc * complexConj K ρc) ^ 37) := by
@@ -180,9 +179,9 @@ theorem washington_section91_reassembly_free
   have hstep5 : (ηa : K) ^ 2 * (ρa * complexConj K ρa) ^ 37 -
       (ηb : K) ^ 2 * (ρb * complexConj K ρb) ^ 37 =
       (η0 : K) ^ 2 * (θ' : K) * (Λ : K) ^ (2 * e - 1) * R ^ 2 := by
-    rw [hstep4, hS_def]
-    rw [show (η0 : K) ^ 2 * (Λ : K) ^ (2 * e) * R ^ 2 * ((θ' : K) * (Λ : K)⁻¹) =
-      (η0 : K) ^ 2 * (θ' : K) * ((Λ : K) ^ (2 * e) * (Λ : K)⁻¹) * R ^ 2 from by ring,
+    rw [hstep4, hS_def,
+      show (η0 : K) ^ 2 * (Λ : K) ^ (2 * e) * R ^ 2 * ((θ' : K) * (Λ : K)⁻¹) =
+        (η0 : K) ^ 2 * (θ' : K) * ((Λ : K) ^ (2 * e) * (Λ : K)⁻¹) * R ^ 2 from by ring,
       hΛpow]
   have hηa_sq : (ηa : K) ^ 2 = ((u : K) ^ 2) ^ 37 * (ηb : K) ^ 2 := by
     have hII' : (ηa : K) = (u : K) ^ 37 * (ηb : K) := by
@@ -192,7 +191,6 @@ theorem washington_section91_reassembly_free
       (η0 : K) ^ 2 * (θ' : K) * ((ηb : K) ^ 2)⁻¹ := by
     simp only [Units.val_mul, Units.val_pow_eq_pow_val, Units.val_inv_eq_inv_val, inv_pow]
   rw [hδ_coe]
-  have hηb_ne : (ηb : K) ^ 2 ≠ 0 := pow_ne_zero 2 ηb.ne_zero
   rw [hηa_sq] at hstep5
   have key : ((u : K) ^ 2) ^ 37 * (ρa * complexConj K ρa) ^ 37 -
       (ρb * complexConj K ρb) ^ 37 =
@@ -243,7 +241,6 @@ theorem washington_section91_descended_equation_free
       ((u : K') ^ 2 * (ρa * complexConj K' ρa)) ^ 37 +
           (-(ρb * complexConj K' ρb)) ^ 37 =
         (δ : K') * (Λ : K') ^ (2 * e - 1) * R ^ 2 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   obtain ⟨θ', hθ'real, hθ'id⟩ := washington_section91_crux_unit hA hB hA1 hB1 hAB hABp
   set θ'_field : K'ˣ := Units.map (algebraMap (𝓞 K') K' : 𝓞 K' →* K') θ' with hθ'f_def
   have hθ'f_coe : (θ'_field : K') = algebraMap (𝓞 K') K' (θ' : 𝓞 K') := by
@@ -327,7 +324,6 @@ theorem washington_section91_integer_descended_equation_conjNorm
         ((1 - (zeta_spec 37 ℚ K').toInteger) * (1 - (zeta_spec 37 ℚ K').toInteger ^ 36)) ^
           (2 * e - 1) *
         w ^ 37 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   -- §9.1: the field descended equation, with a σ-fixed field unit `δ`.
   obtain ⟨δ, hδ_real, hδ_eq⟩ :=
     washington_section91_descended_equation he hA hB hA1 hB1 hAB hABp hΛa hΛb hΛ
