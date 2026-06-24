@@ -145,7 +145,6 @@ theorem splittingFieldRootConductorComap_ne_bot
     (hη_not_pow : ¬ ∃ β : K, β ^ p = (η : K))
     [NumberField (SplittingField (X ^ p - C (η : K)))] :
     splittingFieldRootConductorComap (p := p) (K := K) η ≠ ⊥ := by
-  haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   let L := SplittingField (X ^ p - C (η : K))
   let x : 𝓞 L :=
     BernoulliRegular.Kummer.integralRootOfSplitsXPowSubC
@@ -292,8 +291,6 @@ theorem residue_card_sub_one_dvd_of_not_mem_p
     {q : Ideal (𝓞 K)} [hqprime : q.IsPrime] [hqmax : q.IsMaximal]
     (hq_ne : q ≠ ⊥) (hp_in : (p : 𝓞 K) ∉ q) :
     p ∣ Fintype.card (𝓞 K ⧸ q) - 1 := by
-  classical
-  haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   letI : Field (𝓞 K ⧸ q) := Ideal.Quotient.field q
   let ζq : (𝓞 K ⧸ q)ˣ := Furtwaengler.canonicalResidueZetaP (p := p) (K := K) q
   have hprim : IsPrimitiveRoot ζq p :=
@@ -442,7 +439,6 @@ theorem reduced_X_pow_sub_C_factor_card_eq_of_trivial_coprimeCanonicalCharacter
     (hp_in : (p : 𝓞 K) ∉ q) :
     (normalizedFactors
       (X ^ p - C (Ideal.Quotient.mk q η) : (𝓞 K ⧸ q)[X])).toFinset.card = p := by
-  classical
   have hsplit :
       (X ^ p - C (Ideal.Quotient.mk q η) : (𝓞 K ⧸ q)[X]).Splits :=
     residue_X_pow_sub_C_splits_of_coprimeCanonicalClassGroupModPHom_eq_one_of_not_mem_bad
@@ -492,7 +488,6 @@ theorem splitsCompletely_of_trivial_coprimeCanonicalCharacter_of_minpoly
         (X ^ p - C (Ideal.Quotient.mk q η) : (𝓞 K ⧸ q)[X]))
     (hfinrank : Module.finrank K L = p) :
     BernoulliRegular.Ideal.SplitsCompletely (𝓞 L) q := by
-  classical
   have hfactor :
       (normalizedFactors
         ((minpoly (𝓞 K) x).map (Ideal.Quotient.mk q))).toFinset.card =
@@ -541,7 +536,6 @@ theorem splitsCompletely_splittingField_of_trivial_coprimeCanonicalCharacter
               (𝓞 (SplittingField (X ^ p - C (η : K))))) ⊔ q = ⊤) :
     BernoulliRegular.Ideal.SplitsCompletely
       (𝓞 (SplittingField (X ^ p - C (η : K)))) q := by
-  haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   have hζ : (primitiveRoots p K).Nonempty := nonempty_primitiveRoots
   exact
     splitsCompletely_of_trivial_coprimeCanonicalCharacter_of_minpoly
