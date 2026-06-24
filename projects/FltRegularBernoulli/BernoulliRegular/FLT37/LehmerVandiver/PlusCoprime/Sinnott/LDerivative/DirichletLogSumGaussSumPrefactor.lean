@@ -4,9 +4,6 @@ import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative.Quo
 
 noncomputable section
 
-open Real Complex
-open scoped NumberField
-
 namespace BernoulliRegular
 
 namespace FLT37
@@ -14,6 +11,19 @@ namespace FLT37
 namespace Sinnott
 
 variable (p : ℕ) [hp : Fact p.Prime]
+
+/-- **Cyclotomic norm identity**: `‖1 - stdAddChar a‖ = 2·|sin(πa/p)|` for `a : ℕ`,
+where `stdAddChar a = exp(2π·I·a/p)`. Direct from `norm_one_sub_exp_two_pi_I_mul`. -/
+private theorem norm_one_sub_stdAddChar (a : ℕ) :
+    ‖(1 : ℂ) - ZMod.stdAddChar (N := p) ((a : ℕ) : ZMod p)‖ =
+      2 * |Real.sin (Real.pi * a / p)| := by
+  have h_std : ZMod.stdAddChar (N := p) ((a : ℕ) : ZMod p) =
+      Complex.exp (2 * Real.pi * Complex.I * (a : ℂ) / p) := by
+    simpa using ZMod.stdAddChar_coe (N := p) (a : ℤ)
+  rw [h_std, show (2 * (Real.pi : ℂ) * Complex.I * (a : ℂ) / p) =
+      ((2 * Real.pi * ((a : ℕ) / p : ℝ) : ℝ) : ℂ) * Complex.I from by push_cast; ring,
+    norm_one_sub_exp_two_pi_I_mul]
+  ring_nf
 
 /-- **`LValueAtZeroFormula` is PROVEN**: for nontrivial even χ mod p (with
 p > 1), `LFunction χ 0 = 0`. Direct from mathlib's
@@ -110,29 +120,12 @@ theorem evenLValueLogSum_eq_neg_DirichletLogSum_inv
       ∑ a : ZMod p, f a from rfl]
   rw [sum_zmod_eq_sum_Ico_of_zero (p := p) h_zero]
   refine Finset.sum_congr rfl ?_
-  intro a ha
-  rw [Finset.mem_Ico] at ha
-  have ha_pos : 0 < a := ha.1
-  have ha_lt : a < p := ha.2
+  intro a _
   change χ⁻¹ ((a : ℕ) : ZMod p) *
       ((Real.log ‖(1 : ℂ) - ZMod.stdAddChar (N := p) ((a : ℕ) : ZMod p)‖ : ℝ) : ℂ) =
     χ⁻¹ ((a : ℕ) : ZMod p) *
       ((Real.log (2 * |Real.sin (Real.pi * a / p)|) : ℝ) : ℂ)
-  congr 2
-  have h_std : ZMod.stdAddChar (N := p) ((a : ℕ) : ZMod p) =
-      Complex.exp (2 * Real.pi * Complex.I * (a : ℂ) / p) := by
-    have h := ZMod.stdAddChar_coe (N := p) (a : ℤ)
-    simpa using h
-  rw [h_std]
-  have h_norm : ‖(1 : ℂ) - Complex.exp (2 * Real.pi * Complex.I * (a : ℂ) / p)‖ =
-      2 * |Real.sin (Real.pi * a / p)| := by
-    have h_eq : (2 * (Real.pi : ℂ) * Complex.I * (a : ℂ) / p) =
-        ((2 * Real.pi * ((a : ℕ) / p : ℝ) : ℝ) : ℂ) * Complex.I := by
-      push_cast
-      ring
-    rw [h_eq, norm_one_sub_exp_two_pi_I_mul]
-    ring_nf
-  rw [h_norm]
+  rw [norm_one_sub_stdAddChar p a]
 
 /-- **Cyclotomic product in `ℂ`**: `∏_{a ∈ Finset.Ico 1 p} (1 - stdAddChar a) = p`.
 The roots `stdAddChar a = exp(2π·I·a/p)` for `a ∈ {1, …, p−1}` are exactly the
@@ -253,20 +246,8 @@ theorem DirichletLogSum_principal_eq_neg_log :
     rw [Complex.norm_natCast p] at h_norm
     have h_eq_each : ∀ a ∈ Finset.Ico 1 p,
         (2 * |Real.sin (Real.pi * a / p)| : ℝ) =
-        ‖(1 : ℂ) - ZMod.stdAddChar (N := p) ((a : ℕ) : ZMod p)‖ := by
-      intro a ha
-      rw [Finset.mem_Ico] at ha
-      have h_std : ZMod.stdAddChar (N := p) ((a : ℕ) : ZMod p) =
-          Complex.exp (2 * Real.pi * Complex.I * (a : ℂ) / p) := by
-        have h := ZMod.stdAddChar_coe (N := p) (a : ℤ)
-        simpa using h
-      rw [h_std]
-      have h_eq : (2 * (Real.pi : ℂ) * Complex.I * (a : ℂ) / p) =
-          ((2 * Real.pi * ((a : ℕ) / p : ℝ) : ℝ) : ℂ) * Complex.I := by
-        push_cast
-        ring
-      rw [h_eq, norm_one_sub_exp_two_pi_I_mul]
-      ring_nf
+        ‖(1 : ℂ) - ZMod.stdAddChar (N := p) ((a : ℕ) : ZMod p)‖ :=
+      fun a _ => (norm_one_sub_stdAddChar p a).symm
     rw [Finset.prod_congr rfl h_eq_each]
     exact h_norm
   rw [h_prod_eq]
@@ -581,18 +562,14 @@ theorem cyclotomicHPlusFactor_mul_regulator_eq
     BernoulliRegular.cyclotomicHPlusFactor (K := K) *
         ((NumberField.Units.regulator (NumberField.maximalRealSubfield K) : ℝ) : ℂ) =
       ((2 * Real.sqrt ((p : ℝ) ^ ((p - 3) / 2)) / 2 ^ ((p - 1) / 2) : ℝ) : ℂ) := by
-  have h_reg_pos : (0 : ℝ) < NumberField.Units.regulator
-      (NumberField.maximalRealSubfield K) :=
-    NumberField.Units.regulator_pos _
-  have h_reg_ne : (NumberField.Units.regulator
-      (NumberField.maximalRealSubfield K) : ℝ) ≠ 0 := h_reg_pos.ne'
   change BernoulliRegular.maximalRealSubfieldClassNumberFactor (K := K) * _ = _
   rw [BernoulliRegular.maximalRealSubfieldClassNumberFactor_eq_explicit
     (p := p) (K := K) hp_odd']
   push_cast
   have h_reg_C : ((NumberField.Units.regulator
       (NumberField.maximalRealSubfield K) : ℝ) : ℂ) ≠ 0 := by
-    exact_mod_cast h_reg_ne
+    exact_mod_cast (NumberField.Units.regulator_pos
+      (NumberField.maximalRealSubfield K)).ne'
   field_simp
 
 /-- **`hPlus · regulator` in closed form**: composing the analytic
@@ -651,9 +628,6 @@ theorem prefactor_sq_eq_inv_two_pow (hp_odd' : p ≠ 2) (hp_ge : 3 ≤ p) :
         (∏ χ ∈ BernoulliRegular.evenNontrivialCharacters (p := p),
             gaussSum χ (ZMod.stdAddChar (N := p)))⁻¹) ^ 2 =
       ((2 : ℂ) ^ (p - 3))⁻¹ := by
-  have hp_pos : 0 < p := hp.out.pos
-  have hp_real : (0 : ℝ) ≤ p := by positivity
-  have hp_pow_real : (0 : ℝ) ≤ (p : ℝ) ^ ((p - 1) / 2) := by positivity
   have hp_pow_nat : (0 : ℝ) ≤ (p : ℝ) ^ ((p - 3) / 2) := by positivity
   -- Step 1: expand the square.
   rw [mul_pow]
