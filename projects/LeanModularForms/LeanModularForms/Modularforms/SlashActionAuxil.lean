@@ -22,7 +22,6 @@ are modular forms of weight 2 and level Γ(2).
 open scoped ModularForm MatrixGroups
 open Matrix UpperHalfPlane CongruenceSubgroup ModularGroup
 
-local notation "GL(" n ", " R ")" "⁺" => Matrix.GLPos (Fin n) R
 local notation "Γ " n:100 => Gamma n
 
 def α : Γ 2 := ⟨⟨!![1, 2; 0, 1], by simp⟩, by simp; decide⟩
@@ -67,10 +66,6 @@ private theorem α_zpow_val (k : ℤ) : (α ^ k : SL(2, ℤ)).val = !![1, 2 * k;
     simp only [zpow_sub, zpow_one, SpecialLinearGroup.coe_mul, SpecialLinearGroup.coe_inv,
       Matrix.adjugate_fin_two, ih]
     ext i j; fin_cases i <;> fin_cases j <;> simp [α]; ring
-
-/-- The `(1, 0)` entry of `α ^ k` is always `0`. -/
-private theorem α_zpow_one_zero (k : ℤ) : (α ^ k : SL(2, ℤ)).val 1 0 = 0 := by
-  simp [α_zpow_val]
 
 /-- The matrix `β ^ k` equals `[[1, 0], [2k, 1]]`. -/
 private theorem β_zpow_val (k : ℤ) : (β ^ k : SL(2, ℤ)).val = !![1, 0; 2 * k, 1] := by
