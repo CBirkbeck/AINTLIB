@@ -1022,6 +1022,62 @@ For the additive formal group `Ĝ_a(X, Y) = X + Y`, the logarithm is the
 identity `log_F(T) = T` (since `ω_F(T) = 1`, so `log_F(T) = T + 0 + ...`).
 This makes the `preserves_add` identity immediate. -/
 
+/-- For the additive formal group `Ĝ_a(X, Y) = X + Y`, the partial derivative
+`F_X(0, T)` is the constant `1`. Concretely `dX_at_zero` has coefficient `1` at
+degree `0` and `0` elsewhere.
+
+Helper for `FormalGroup.log_additiveFormalGroup`. -/
+private theorem FormalGroup.dX_at_zero_additiveFormalGroup [Module ℚ R] :
+    (additiveFormalGroup R).dX_at_zero = 1 := by
+  ext k
+  rw [FormalGroup.dX_at_zero, PowerSeries.coeff_mk]
+  change MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) k)
+    ((MvPowerSeries.X 0 + MvPowerSeries.X 1 :
+      MvPowerSeries (Fin 2) R)) = _
+  rw [map_add]
+  rw [show (MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) R) =
+    MvPowerSeries.X 0 ^ 1 from (pow_one _).symm]
+  rw [show (MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) R) =
+    MvPowerSeries.X 1 ^ 1 from (pow_one _).symm]
+  rw [MvPowerSeries.coeff_X_pow, MvPowerSeries.coeff_X_pow]
+  match k with
+  | 0 =>
+    -- The LHS: (if pos then 1 else 0) + (if single 0 1 = single 1 1 then 1 else 0)
+    -- = 1 + 0 = 1.
+    simp only [Finsupp.single_zero, add_zero, if_true]
+    rw [if_neg (by
+      intro h
+      have := DFunLike.congr_fun h 0
+      simp [Finsupp.single_eq_same] at this)]
+    rw [add_zero, PowerSeries.coeff_zero_eq_constantCoeff_apply]
+    simp
+  | k + 1 =>
+    rw [if_neg (by
+      intro h
+      have := DFunLike.congr_fun h 1
+      simp [Finsupp.add_apply, Finsupp.single_eq_same] at this)]
+    rw [if_neg (by
+      intro h
+      have h0 := DFunLike.congr_fun h 0
+      simp [Finsupp.add_apply, Finsupp.single_eq_same] at h0)]
+    rw [zero_add, PowerSeries.coeff_one, if_neg (by omega : k + 1 ≠ 0)]
+
+/-- For the additive formal group, the normalized differential `ω_{Ĝ_a}` is the
+constant series `1`. This follows from `dX_at_zero = 1` (see
+`FormalGroup.dX_at_zero_additiveFormalGroup`) together with
+`dX_at_zero_mul_invariantDiff`.
+
+Helper for `FormalGroup.log_additiveFormalGroup`. -/
+private theorem FormalGroup.normalizedDifferential_toSeries_additiveFormalGroup [Module ℚ R] :
+    (additiveFormalGroup R).normalizedDifferential.toSeries = 1 := by
+  change (additiveFormalGroup R).invariantDiff = 1
+  have h1 : (additiveFormalGroup R).dX_at_zero * (additiveFormalGroup R).invariantDiff = 1 :=
+    (additiveFormalGroup R).dX_at_zero_mul_invariantDiff
+  rw [FormalGroup.dX_at_zero_additiveFormalGroup] at h1
+  rw [show ((1 : PowerSeries R) * (additiveFormalGroup R).invariantDiff) =
+    (additiveFormalGroup R).invariantDiff from one_mul _] at h1
+  exact h1
+
 /-- For the additive formal group, `log = X`. Since `ω_F = 1`, we have
 `log_F(T) = T + 0 + ... = T`. -/
 theorem FormalGroup.log_additiveFormalGroup [Module ℚ R] :
@@ -1041,53 +1097,9 @@ theorem FormalGroup.log_additiveFormalGroup [Module ℚ R] :
     -- For Ĝ_a, coeff k ω_F = [k = 0], so coeff (n+1) ω_F = 0 since n + 1 ≥ 1.
     rw [show (n + 2 : ℕ) = ((n + 1) + 1 : ℕ) from rfl]
     rw [FormalGroup.log_coeff_succ (additiveFormalGroup R) (n + 1)]
-    -- Reduce the coefficient of ω_{Ĝ_a} at (n+1) to 0.
-    -- ω_{Ĝ_a} = F_X(0, T)⁻¹. For Ĝ_a, F(X, Y) = X + Y, so F_X(X, Y) = 1,
-    -- so F_X(0, T) = 1 (constant 1), hence ω_{Ĝ_a} = 1.
-    have h_dX : (additiveFormalGroup R).dX_at_zero = 1 := by
-      ext k
-      rw [FormalGroup.dX_at_zero, PowerSeries.coeff_mk]
-      change MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) k)
-        ((MvPowerSeries.X 0 + MvPowerSeries.X 1 :
-          MvPowerSeries (Fin 2) R)) = _
-      rw [map_add]
-      rw [show (MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) R) =
-        MvPowerSeries.X 0 ^ 1 from (pow_one _).symm]
-      rw [show (MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) R) =
-        MvPowerSeries.X 1 ^ 1 from (pow_one _).symm]
-      rw [MvPowerSeries.coeff_X_pow, MvPowerSeries.coeff_X_pow]
-      match k with
-      | 0 =>
-        -- The LHS: (if pos then 1 else 0) + (if single 0 1 = single 1 1 then 1 else 0)
-        -- = 1 + 0 = 1.
-        simp only [Finsupp.single_zero, add_zero, if_true]
-        rw [if_neg (by
-          intro h
-          have := DFunLike.congr_fun h 0
-          simp [Finsupp.single_eq_same] at this)]
-        rw [add_zero, PowerSeries.coeff_zero_eq_constantCoeff_apply]
-        simp
-      | k + 1 =>
-        rw [if_neg (by
-          intro h
-          have := DFunLike.congr_fun h 1
-          simp [Finsupp.add_apply, Finsupp.single_eq_same] at this)]
-        rw [if_neg (by
-          intro h
-          have h0 := DFunLike.congr_fun h 0
-          simp [Finsupp.add_apply, Finsupp.single_eq_same] at h0)]
-        rw [zero_add, PowerSeries.coeff_one, if_neg (by omega : k + 1 ≠ 0)]
-    -- Given dX = 1, invariantDiff = 1.
-    have h_normDiff_toSeries :
-        (additiveFormalGroup R).normalizedDifferential.toSeries = 1 := by
-      change (additiveFormalGroup R).invariantDiff = 1
-      have h1 : (additiveFormalGroup R).dX_at_zero * (additiveFormalGroup R).invariantDiff = 1 :=
-        (additiveFormalGroup R).dX_at_zero_mul_invariantDiff
-      rw [h_dX] at h1
-      rw [show ((1 : PowerSeries R) * (additiveFormalGroup R).invariantDiff) =
-        (additiveFormalGroup R).invariantDiff from one_mul _] at h1
-      exact h1
-    rw [h_normDiff_toSeries]
+    -- For Ĝ_a, ω_F = 1 (see `normalizedDifferential_toSeries_additiveFormalGroup`),
+    -- so its coefficient at `n + 1 ≥ 1` is `0`.
+    rw [FormalGroup.normalizedDifferential_toSeries_additiveFormalGroup]
     -- Goal: ((n+2)⁻¹ : ℚ) • coeff (n+1) (1 : PowerSeries R) = coeff (n+2) X
     rw [PowerSeries.coeff_one, if_neg (by omega : n + 1 ≠ 0), smul_zero,
       PowerSeries.coeff_X, if_neg (by omega : n + 1 + 1 ≠ 1)]
