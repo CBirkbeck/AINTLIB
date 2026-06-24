@@ -114,9 +114,9 @@ theorem isUnramified_of_differentIdeal_eq_top
     Algebra.Unramified (𝓞 K) (𝓞 L) := by
   haveI : Algebra.IsSeparable (FractionRing (𝓞 K)) (FractionRing (𝓞 L)) :=
     isSeparable_fractionRing_ringOfIntegers (K := K) (L := L)
-  refine isUnramified_of_forall_isUnramifiedAt (fun P _ _ => ?_)
+  refine isUnramified_of_forall_isUnramifiedAt (fun P _ _ ↦ ?_)
   rw [← not_dvd_differentIdeal_iff, h]
-  exact fun hdvd => ‹P.IsPrime›.ne_top (top_le_iff.mp (Ideal.dvd_iff_le.mp hdvd))
+  exact fun hdvd ↦ ‹P.IsPrime›.ne_top (top_le_iff.mp (Ideal.dvd_iff_le.mp hdvd))
 
 omit [Algebra K L] [FiniteDimensional K L] [IsScalarTower (𝓞 K) (𝓞 L) L]
   [IsScalarTower (𝓞 K) K L] [FaithfulSMul (𝓞 K) (𝓞 L)] in
