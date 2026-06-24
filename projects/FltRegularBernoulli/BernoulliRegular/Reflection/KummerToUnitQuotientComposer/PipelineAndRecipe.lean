@@ -6,7 +6,6 @@ public import BernoulliRegular.Reflection.Kummer.WildCriterion
 public import BernoulliRegular.Reflection.Kummer.CharacterMatching
 public import BernoulliRegular.Reflection.Kummer.PrincipalLift
 
-
 /-!
 # End-to-end composer
 
@@ -98,11 +97,10 @@ universe u v
 
 noncomputable section
 
-open NumberField FractionalIdeal
+open NumberField
 open scoped nonZeroDivisors
 
 namespace BernoulliRegular
-
 
 section KummerToUnitQuotientComposer
 
@@ -634,7 +632,7 @@ def trivial {χ : MulChar (ZMod p)ˣ ℚ}
     KummerCharacterUnitLiftRecipe (p := p) (K := K) R S χ where
   toFun := fun _ ↦ 1
   map_one := rfl
-  map_mul := fun _ _ ↦ by simp
+  map_mul := fun _ _ ↦ by simp only [mul_one]
   injective := Function.injective_of_subsingleton _
 
 /-- **Free direction**: a pre-built injective `MonoidHom` packages directly
@@ -808,8 +806,8 @@ def congrSource {χ : MulChar (ZMod p)ˣ ℚ}
     (e : R'.kummerComponent χ ≃* R.kummerComponent χ) :
     KummerCharacterUnitLiftRecipe (p := p) (K := K) R' S χ where
   toFun := fun x ↦ Rec.toFun (e x)
-  map_one := by simp [Rec.map_one]
-  map_mul := fun x y ↦ by simp [Rec.map_mul]
+  map_one := by simp only [_root_.map_one, Rec.map_one]
+  map_mul := fun x y ↦ by simp only [_root_.map_mul, Rec.map_mul]
   injective := fun x y h ↦ e.injective (Rec.injective h)
 
 /-- **Target-congruence**: replace the target via a `MulEquiv`
@@ -824,8 +822,8 @@ def congrTarget {χ : MulChar (ZMod p)ˣ ℚ}
       (S'.components.component χ).Carrier) :
     KummerCharacterUnitLiftRecipe (p := p) (K := K) R S' χ where
   toFun := fun x ↦ e (Rec.toFun x)
-  map_one := by simp [Rec.map_one]
-  map_mul := fun x y ↦ by simp [Rec.map_mul]
+  map_one := by simp only [Rec.map_one, _root_.map_one]
+  map_mul := fun x y ↦ by simp only [Rec.map_mul, _root_.map_mul]
   injective := fun x y h ↦ Rec.injective (e.injective h)
 
 /-- **Bilateral congruence**: simultaneously change source and target via
