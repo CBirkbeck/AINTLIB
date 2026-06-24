@@ -19,7 +19,6 @@ modulo `p`.
 
 noncomputable section
 
-open NumberField
 open NumberField.IsCMField
 open BernoulliRegular.Reflection.Local
 
@@ -276,8 +275,7 @@ theorem pow_sub_pow_mem_of_sub_mem_ideal
     (hxy : x - y ∈ I) (n : ℕ) :
     x ^ n - y ^ n ∈ I := by
   rcases sub_dvd_pow_sub_pow x y n with ⟨z, hz⟩
-  rw [hz]
-  exact I.mul_mem_right z hxy
+  exact hz ▸ I.mul_mem_right z hxy
 
 omit [NumberField.IsCMField K] in
 /-- Fermat's theorem, as membership in the Dwork lambda ideal for rational
@@ -383,8 +381,8 @@ theorem kummerLogDworkCyclotomicUnit_pow_pred_sub_one_mem_lambdaIdeal
       dworkCompleteLambdaIdeal p K := by
   have hmap :
       algebraMap (ValuedIntegerRing p K) (DworkCompleteIntegerRing p K)
-          (((kummerLogValuedCyclotomicUnit (p := p) (K := K) hp_three a :
-            ValuedIntegerRing p K) ^ (p - 1) - 1)) ∈
+          ((kummerLogValuedCyclotomicUnit (p := p) (K := K) hp_three a :
+            ValuedIntegerRing p K) ^ (p - 1) - 1) ∈
         Ideal.map (algebraMap (ValuedIntegerRing p K) (DworkCompleteIntegerRing p K))
           (lambdaIdeal p K) :=
     Ideal.mem_map_of_mem
@@ -680,8 +678,8 @@ theorem samePrimeFiniteLogTermCore_quotientMap_complexConj {N n : ℕ}
   by_cases hn : n = 0
   · subst n
     simp
-  rw [samePrimeFiniteLogTermCore, samePrimeFiniteLogTermCore, dif_neg hn, dif_neg hn]
-  rw [map_mul, quotientNatCastInv_quotientMap_complexConj]
+  rw [samePrimeFiniteLogTermCore, samePrimeFiniteLogTermCore, dif_neg hn, dif_neg hn,
+    map_mul, quotientNatCastInv_quotientMap_complexConj]
   change Ideal.Quotient.mk ((lambdaIdeal p K) ^ (N + 1))
         (valuedIntegerComplexConj (p := p) K
           (samePrimeFiniteLogTermNumerator (p := p) (K := K) n x hx)) *
@@ -708,9 +706,8 @@ theorem samePrimeFiniteLogTerm_quotientMap_complexConj {N n : ℕ}
       samePrimeFiniteLogTerm (p := p) (K := K) N n
         (valuedIntegerComplexConj (p := p) K x)
         (valuedIntegerComplexConj_mem_lambdaIdeal (p := p) (K := K) hx) := by
-  rw [samePrimeFiniteLogTerm, samePrimeFiniteLogTerm]
-  rw [map_mul, map_pow]
-  rw [samePrimeFiniteLogTermCore_quotientMap_complexConj (p := p) (K := K) hx]
+  rw [samePrimeFiniteLogTerm, samePrimeFiniteLogTerm, map_mul, map_pow,
+    samePrimeFiniteLogTermCore_quotientMap_complexConj (p := p) (K := K) hx]
   simp
 
 omit [NumberField.IsCMField K] in
@@ -772,9 +769,9 @@ theorem dworkEvenPowerIndexZero_val :
 omit [NumberField.IsCMField K] in
 theorem dworkEvenPowerIndex_pos_of_ne_zero
     {i : dworkEvenPowerIndex p} (hi : i ≠ dworkEvenPowerIndexZero (p := p)) :
-    0 < (((i.1 : Fin (p - 1)) : ℕ)) := by
+    0 < ((i.1 : Fin (p - 1)) : ℕ) := by
   by_contra h
-  have hnat : (((i.1 : Fin (p - 1)) : ℕ)) = 0 := Nat.eq_zero_of_not_pos h
+  have hnat : ((i.1 : Fin (p - 1)) : ℕ) = 0 := Nat.eq_zero_of_not_pos h
   apply hi
   apply Subtype.ext
   apply Fin.ext
@@ -805,7 +802,7 @@ theorem dworkFixedEvenPower_constantCoeff_mem_primeIdeal_of_mem_parameterIdeal
   have hrepr' :
       (∑ i : dworkEvenPowerIndex p,
           algebraMap R₀ S (a i) *
-            dworkParameter p K ^ (((i.1 : Fin (p - 1)) : ℕ))) =
+            dworkParameter p K ^ ((i.1 : Fin (p - 1)) : ℕ)) =
         (x : S) := by
     rw [← hrepr]
     push_cast [a, b, R₀, S, Algebra.smul_def, dworkFixedEvenPowerBasis_apply]
@@ -814,31 +811,31 @@ theorem dworkFixedEvenPower_constantCoeff_mem_primeIdeal_of_mem_parameterIdeal
   have hsumq :
       q (∑ i : dworkEvenPowerIndex p,
           algebraMap R₀ S (a i) *
-            dworkParameter p K ^ (((i.1 : Fin (p - 1)) : ℕ))) = 0 := by
+            dworkParameter p K ^ ((i.1 : Fin (p - 1)) : ℕ)) = 0 := by
     rw [hrepr', hxq]
   have hsumq' :
       (∑ i : dworkEvenPowerIndex p,
           q (algebraMap R₀ S (a i) *
-            dworkParameter p K ^ (((i.1 : Fin (p - 1)) : ℕ)))) = 0 := by
+            dworkParameter p K ^ ((i.1 : Fin (p - 1)) : ℕ))) = 0 := by
     simpa [map_sum] using hsumq
   have hsingle :
       (∑ i : dworkEvenPowerIndex p,
           q (algebraMap R₀ S (a i) *
-            dworkParameter p K ^ (((i.1 : Fin (p - 1)) : ℕ)))) =
+            dworkParameter p K ^ ((i.1 : Fin (p - 1)) : ℕ))) =
         q (algebraMap R₀ S (a (dworkEvenPowerIndexZero (p := p)))) := by
     rw [Finset.sum_eq_single (dworkEvenPowerIndexZero (p := p))]
     · simp
     · intro i _hi hineq
       rw [Ideal.Quotient.eq_zero_iff_mem]
-      have hpos : 1 ≤ (((i.1 : Fin (p - 1)) : ℕ)) :=
+      have hpos : 1 ≤ ((i.1 : Fin (p - 1)) : ℕ) :=
         dworkEvenPowerIndex_pos_of_ne_zero (p := p) (i := i) hineq
       have hvarpi : dworkParameter p K ∈ I := by
         dsimp [I, dworkParameterIdeal]
         exact Ideal.mem_span_singleton_self (dworkParameter p K)
-      have hpow : dworkParameter p K ^ (((i.1 : Fin (p - 1)) : ℕ)) ∈ I := by
+      have hpow : dworkParameter p K ^ ((i.1 : Fin (p - 1)) : ℕ) ∈ I := by
         simpa [pow_one] using
           Ideal.pow_le_pow_right hpos
-            (Ideal.pow_mem_pow hvarpi (((i.1 : Fin (p - 1)) : ℕ)))
+            (Ideal.pow_mem_pow hvarpi ((i.1 : Fin (p - 1)) : ℕ))
       exact I.mul_mem_left (algebraMap R₀ S (a i)) hpow
     · intro hnot
       exact False.elim (hnot (Finset.mem_univ _))
@@ -868,12 +865,10 @@ theorem kummerLogValuedCyclotomicUnit_complexConj
           (kummerLogColumnIndex (p := p) hp_three a) :=
     FLT37.realCyclotomicUnit_complexConj p K
       (kummerLogColumnIndex (p := p) hp_three a)
-  rw [kummerLogValuedCyclotomicUnit_coe]
-  rw [Conjugation.valuedIntegerComplexConj_algebraMap_ringOfIntegers
-    (p := p) (K := K)]
-  rw [← Furtwaengler.ringOfIntegersComplexConj_eq_cyclotomicRingOfIntegersEquiv_neg_one
-    (p := p) (K := K) hp_two]
-  rw [hconj]
+  rw [kummerLogValuedCyclotomicUnit_coe,
+    Conjugation.valuedIntegerComplexConj_algebraMap_ringOfIntegers (p := p) (K := K),
+    ← Furtwaengler.ringOfIntegersComplexConj_eq_cyclotomicRingOfIntegersEquiv_neg_one
+      (p := p) (K := K) hp_two, hconj]
 
 theorem kummerLogColumnFiniteLogArg_complexConj
     (hp_three : 3 ≤ p) (a : Fin (kummerLogRank p)) :
@@ -896,9 +891,8 @@ theorem kummerLogColumnFiniteLog_quotientMap_complexConj
             (p := p) (K := K)) (N + 1))
         (kummerLogColumnFiniteLog (p := p) (K := K) hp_three a N) =
       kummerLogColumnFiniteLog (p := p) (K := K) hp_three a N := by
-  rw [kummerLogColumnFiniteLog]
-  rw [Conjugation.samePrimeFiniteLog_quotientMap_complexConj
-    (p := p) (K := K)]
+  rw [kummerLogColumnFiniteLog,
+    Conjugation.samePrimeFiniteLog_quotientMap_complexConj (p := p) (K := K)]
   exact samePrimeFiniteLog_eq_of_eq (p := p) (K := K)
     (N := N)
     (kummerLogColumnFiniteLogArg_complexConj (p := p) (K := K) hp_three a)
