@@ -326,6 +326,98 @@ private theorem CurveMap.exists_heightOneSpectrum_not_liesUnder_ramified
     exact ⟨P, hPdvd, hPeq⟩
   exact (hfin_bad.image _).subset hsub
 
+/-- **Fiber prime avoids the ramified locus** (contraction step): if a
+height-one prime `Q` of `C₂.CoordinateRing` lies under no ramified prime of
+`C₁.CoordinateRing` (the `hQ_good` witness), then any prime `P` of
+`C₁.CoordinateRing` lying over `Q.asIdeal` does **not** divide the different
+ideal. Wraps `P` as a height-one spectrum and contracts it back to `Q` via
+`HeightOneSpectrum.under`. -/
+private theorem CurveMap.not_dvd_differentIdeal_of_liesOver_good
+    [IsIntegrallyClosed C₂.CoordinateRing]
+    [IsIntegrallyClosed C₁.CoordinateRing]
+    (φ : Curves.CurveMap C₁ C₂) (coordHom : φ.CoordHom)
+    (hfin : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _
+      coordHom.toAlgebra.toModule)
+    (htorsion : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _
+      coordHom.toAlgebra.toModule)
+    (Q : IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing)
+    (hQ_good :
+      letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
+      ∀ P : IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing,
+        P.asIdeal ∣ differentIdeal C₂.CoordinateRing C₁.CoordinateRing →
+        P.under C₂.CoordinateRing ≠ Q)
+    {P : Ideal C₁.CoordinateRing} (hP_prime : P.IsPrime) (hP_ne : P ≠ ⊥)
+    (hP_lies :
+      letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
+      P.LiesOver Q.asIdeal) :
+    letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
+    ¬ P ∣ differentIdeal C₂.CoordinateRing C₁.CoordinateRing := by
+  letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
+  letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+  haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR := hfin
+  haveI htorsion' : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    htorsion
+  haveI := hP_lies
+  -- Wrap `P` as a height-one prime and show its contraction to `C₂` is `Q`.
+  let P' : IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing :=
+    ⟨P, hP_prime, hP_ne⟩
+  have hP'_under_eq : P'.under C₂.CoordinateRing = Q := by
+    apply IsDedekindDomain.HeightOneSpectrum.ext
+    show P.under C₂.CoordinateRing = Q.asIdeal
+    exact (Ideal.over_def P Q.asIdeal).symm
+  exact fun hdvd ↦ hQ_good P' hdvd hP'_under_eq
+
+/-- **Ramification index is `1`** (Pieces 2/3): a prime `P` of
+`C₁.CoordinateRing` lying over `Q.asIdeal` that does **not** divide the
+different ideal is unramified over `C₂.CoordinateRing` (Piece 2), hence has
+ramification index `1` (Piece 3). The lying-over hypothesis identifies
+`P.under C₂.CoordinateRing` with `Q.asIdeal`. -/
+private theorem CurveMap.ramificationIdx_eq_one_of_not_dvd_differentIdeal
+    [IsIntegrallyClosed C₂.CoordinateRing]
+    [IsIntegrallyClosed C₁.CoordinateRing]
+    (φ : Curves.CurveMap C₁ C₂) (coordHom : φ.CoordHom)
+    (hfin : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _
+      coordHom.toAlgebra.toModule)
+    (htorsion : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _
+      coordHom.toAlgebra.toModule)
+    (hfaithful : @FaithfulSMul C₂.CoordinateRing C₁.CoordinateRing
+      coordHom.toAlgebra.toSMul)
+    (hessfin : @Algebra.EssFiniteType C₂.CoordinateRing C₁.CoordinateRing _ _
+      coordHom.toAlgebra)
+    (hsepFF :
+      letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
+      @Algebra.IsSeparable (FractionRing C₂.CoordinateRing)
+        (FractionRing C₁.CoordinateRing) _ _
+        (FractionRing.liftAlgebra C₂.CoordinateRing (FractionRing C₁.CoordinateRing)))
+    (Q : IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing)
+    {P : Ideal C₁.CoordinateRing} (hP_prime : P.IsPrime) (hP_ne : P ≠ ⊥)
+    (hP_lies :
+      letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
+      P.LiesOver Q.asIdeal)
+    (hP_nd :
+      letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
+      ¬ P ∣ differentIdeal C₂.CoordinateRing C₁.CoordinateRing) :
+    letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
+    Ideal.ramificationIdx Q.asIdeal P = 1 := by
+  letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
+  letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
+  haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR := hfin
+  haveI htorsion' : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
+    htorsion
+  haveI hfaithful' : @FaithfulSMul C₂.CoordinateRing C₁.CoordinateRing algCR.toSMul :=
+    hfaithful
+  haveI hessfin' : @Algebra.EssFiniteType C₂.CoordinateRing C₁.CoordinateRing _ _ algCR :=
+    hessfin
+  haveI := hP_prime
+  haveI := hP_lies
+  -- Piece 2: not dividing the different ideal ⇒ unramified at `P`.
+  haveI hUnram : Algebra.IsUnramifiedAt C₂.CoordinateRing P :=
+    IsDedekindDomain.isUnramifiedAt_of_not_dvd_differentIdeal hsepFF hP_nd
+  -- Piece 3: unramified ⇒ ramification index `1` (rewriting `P.under` to `Q`).
+  have := IsDedekindDomain.ramificationIdx_eq_one_of_isUnramifiedAt_of_ne_bot
+    (A := C₂.CoordinateRing) (B := C₁.CoordinateRing) (P := P) hP_ne
+  rwa [← Ideal.over_def P Q.asIdeal] at this
+
 /-- **Per-prime `e · f = 1`** (Pieces 2/3 + Piece 9): for a height-one prime
 `Q` of `C₂.CoordinateRing` whose fiber avoids the ramified locus, every prime
 `P` in that fiber has `ramificationIdx Q P * inertiaDeg Q P = 1`. The
@@ -362,14 +454,6 @@ private theorem CurveMap.ramificationIdx_mul_inertiaDeg_eq_one_of_not_liesUnder_
       Ideal.ramificationIdx Q.asIdeal P *
         Ideal.inertiaDeg Q.asIdeal P = 1 := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
-  letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
-  haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR := hfin
-  haveI htorsion' : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
-    htorsion
-  haveI hfaithful' : @FaithfulSMul C₂.CoordinateRing C₁.CoordinateRing algCR.toSMul :=
-    hfaithful
-  haveI hessfin' : @Algebra.EssFiniteType C₂.CoordinateRing C₁.CoordinateRing _ _ algCR :=
-    hessfin
   -- Scalar tower F → C₂.CR → C₁.CR from coordHom.compat (needed for Piece 9).
   haveI : IsScalarTower F C₂.CoordinateRing C₁.CoordinateRing :=
     IsScalarTower.of_algHom coordHom.toAlgHom
@@ -381,22 +465,14 @@ private theorem CurveMap.ramificationIdx_mul_inertiaDeg_eq_one_of_not_liesUnder_
   haveI := hP_prime
   haveI := hP_lies
   have hP_ne : P ≠ ⊥ := Ideal.ne_bot_of_liesOver_of_ne_bot Q.ne_bot P
-  -- Wrap as height-one spectrum and show P' ∉ bad locus.
-  let P' : IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing :=
-    ⟨P, hP_prime, hP_ne⟩
-  have hP'_under_eq : P'.under C₂.CoordinateRing = Q := by
-    apply IsDedekindDomain.HeightOneSpectrum.ext
-    show P.under C₂.CoordinateRing = Q.asIdeal
-    exact (Ideal.over_def P Q.asIdeal).symm
-  have hP'_nd : ¬ P'.asIdeal ∣ differentIdeal C₂.CoordinateRing C₁.CoordinateRing :=
-    fun hdvd ↦ hQ_good P' hdvd hP'_under_eq
+  -- The fiber prime `P` avoids the ramified locus (contraction step).
+  have hP_nd : ¬ P ∣ differentIdeal C₂.CoordinateRing C₁.CoordinateRing :=
+    φ.not_dvd_differentIdeal_of_liesOver_good coordHom hfin htorsion Q hQ_good hP_prime hP_ne
+      hP_lies
   -- Pieces 2 + 3 ⇒ ramificationIdx = 1.
-  haveI hUnram : Algebra.IsUnramifiedAt C₂.CoordinateRing P :=
-    IsDedekindDomain.isUnramifiedAt_of_not_dvd_differentIdeal hsepFF hP'_nd
-  have hram : Ideal.ramificationIdx Q.asIdeal P = 1 := by
-    have := IsDedekindDomain.ramificationIdx_eq_one_of_isUnramifiedAt_of_ne_bot
-      (A := C₂.CoordinateRing) (B := C₁.CoordinateRing) (P := P) hP_ne
-    rwa [← Ideal.over_def P Q.asIdeal] at this
+  have hram : Ideal.ramificationIdx Q.asIdeal P = 1 :=
+    φ.ramificationIdx_eq_one_of_not_dvd_differentIdeal coordHom hfin htorsion hfaithful
+      hessfin hsepFF Q hP_prime hP_ne hP_lies hP_nd
   -- Piece 9 inputs: maximality, scalar tower on residue fields.
   haveI hPmax : P.IsMaximal := Ideal.IsMaximal.of_liesOver_isMaximal P Q.asIdeal
   letI : Field (C₂.CoordinateRing ⧸ Q.asIdeal) := Ideal.Quotient.field Q.asIdeal
