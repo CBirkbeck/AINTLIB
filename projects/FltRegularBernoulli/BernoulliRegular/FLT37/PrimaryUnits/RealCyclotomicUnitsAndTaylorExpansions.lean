@@ -36,13 +36,6 @@ namespace BernoulliRegular
 
 namespace FLT37
 
-section PrimaryPlus
-
-variable (p : ℕ) [hp : Fact p.Prime]
-  (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-
-local notation3 "K⁺" => NumberField.maximalRealSubfield K
-
 section CyclotomicUnits
 
 variable (p : ℕ) [hp : Fact p.Prime]
@@ -96,14 +89,8 @@ theorem zetaSubOne_sq_dvd_zeta_pow_add_zeta_pow_sub_two
   --                  = (ζ - 1)·cyclotomicUnit_k + (ζ - 1)·cyclotomicUnit_{p-k}
   --                  = (ζ - 1)·(cyclotomicUnit_k + cyclotomicUnit_{p-k})
   -- and (ζ - 1) ∣ (cyclotomicUnit_k + cyclotomicUnit_{p-k}).
-  have htel_k : (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) * cyclotomicUnit p K k =
-      ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ k - 1 := by
-    have h := one_sub_zeta_mul_cyclotomicUnit p K k
-    linear_combination -h
-  have htel_pk : (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) * cyclotomicUnit p K (p - k) =
-      ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (p - k) - 1 := by
-    have h := one_sub_zeta_mul_cyclotomicUnit p K (p - k)
-    linear_combination -h
+  have htel_k := zeta_sub_one_mul_cyclotomicUnit p K k
+  have htel_pk := zeta_sub_one_mul_cyclotomicUnit p K (p - k)
   have h_factor : ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ k +
       ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (p - k) - 2 =
       (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) *
@@ -189,10 +176,7 @@ theorem zetaSubOne_cube_dvd_factor_sub_taylor2 (a b : ℤ) (k : ℕ) :
   --        = b·ζ^k - b - bk·(ζ-1) - b·(k.choose 2)·(ζ-1)².
   -- Adding a:
   -- (ζ-1)³ ∣ (a + b·ζ^k) - (a + b) - bk·(ζ-1) - b·(k.choose 2)·(ζ-1)².
-  have htel : (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) * cyclotomicUnit p K k =
-      ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ k - 1 := by
-    have h := one_sub_zeta_mul_cyclotomicUnit p K k
-    linear_combination -h
+  have htel := zeta_sub_one_mul_cyclotomicUnit p K k
   obtain ⟨w, hw⟩ : (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) ^ 2 ∣
       cyclotomicUnit p K k - (k : 𝓞 K) -
         (k.choose 2 : 𝓞 K) * (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) :=
@@ -232,10 +216,7 @@ theorem zetaSubOne_cube_dvd_zeta_pow_sub_one_sub_natCast_mul_sub_choose_mul (m :
       ((((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ m - 1) -
         (m : 𝓞 K) * (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) -
         (m.choose 2 : 𝓞 K) * (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) ^ 2) := by
-  have htel : (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) * cyclotomicUnit p K m =
-      ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ m - 1 := by
-    have h := one_sub_zeta_mul_cyclotomicUnit p K m
-    linear_combination -h
+  have htel := zeta_sub_one_mul_cyclotomicUnit p K m
   obtain ⟨w, hw⟩ : (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) ^ 2 ∣
       cyclotomicUnit p K m - (m : 𝓞 K) -
         (m.choose 2 : 𝓞 K) * (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) :=
@@ -540,8 +521,6 @@ section RealCyclotomicUnits
 variable (p : ℕ) [hp : Fact p.Prime]
   (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 
-local notation3 "K⁺" => NumberField.maximalRealSubfield K
-
 /-- The real cyclotomic combination
 `(cyclotomicUnit k) · σ(cyclotomicUnit k)` in `𝓞 K`. This is
 automatically `σ`-fixed and corresponds to the K⁺-side cyclotomic
@@ -591,12 +570,7 @@ theorem realCyclotomicUnit_two [IsCMField K] :
       (1 + ((zeta_spec p ℚ K).toInteger : 𝓞 K)) *
         (1 + ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (p - 1)) := by
   unfold realCyclotomicUnit
-  rw [cyclotomicUnit_two, map_add, map_one]
-  have hconj_zeta : ringOfIntegersComplexConj K
-      ((zeta_spec p ℚ K).toInteger : 𝓞 K) =
-      ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (p - 1) :=
-    complexConj_apply_zeta (p := p) (K := K)
-  rw [hconj_zeta]
+  rw [cyclotomicUnit_two, map_add, map_one, complexConj_apply_zeta (p := p) (K := K)]
 
 /-- For `k = 3`, the real cyclotomic combination is
 `(1 + ζ + ζ²) · (1 + ζ^{p-1} + ζ^{2(p-1)})`. -/
@@ -607,12 +581,8 @@ theorem realCyclotomicUnit_three [IsCMField K] :
         (1 + ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (p - 1) +
          ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (2 * (p - 1))) := by
   unfold realCyclotomicUnit
-  rw [cyclotomicUnit_three, map_add, map_add, map_one, map_pow]
-  have hconj_zeta : ringOfIntegersComplexConj K
-      ((zeta_spec p ℚ K).toInteger : 𝓞 K) =
-      ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (p - 1) :=
-    complexConj_apply_zeta (p := p) (K := K)
-  rw [hconj_zeta, ← pow_mul]
+  rw [cyclotomicUnit_three, map_add, map_add, map_one, map_pow,
+    complexConj_apply_zeta (p := p) (K := K), ← pow_mul]
   ring
 
 /-- For `k = p`, the real cyclotomic combination is `0`. -/
@@ -664,17 +634,8 @@ theorem realCyclotomicUnit_p_sub_one [IsCMField K] :
     realCyclotomicUnit p K (p - 1) = 1 := by
   have hp_pos : 1 ≤ p := hp.1.pos
   unfold realCyclotomicUnit
-  rw [cyclotomicUnit_p_sub_one, map_neg, map_pow]
-  have hconj_zeta_eq : ringOfIntegersComplexConj K
-      ((zeta_spec p ℚ K).toInteger : 𝓞 K) =
-      ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (p - 1) := by
-    apply RingOfIntegers.ext
-    push_cast
-    have hzeta_eq : ((zeta_spec p ℚ K).toInteger : 𝓞 K) =
-        (zeta_spec p ℚ K).toInteger := rfl
-    rw [hzeta_eq]
-    exact_mod_cast complexConj_apply_zeta (p := p) (K := K)
-  rw [hconj_zeta_eq, ← pow_mul]
+  rw [cyclotomicUnit_p_sub_one, map_neg, map_pow,
+    complexConj_apply_zeta (p := p) (K := K), ← pow_mul]
   have hζp : ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ p = 1 :=
     (zeta_spec p ℚ K).toInteger_isPrimitiveRoot.pow_eq_one
   have hkey : (-((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (p - 1)) *
@@ -692,15 +653,12 @@ theorem realCyclotomicUnit_complexConj [IsCMField K] (k : ℕ) :
     ringOfIntegersComplexConj K (realCyclotomicUnit p K k) =
       realCyclotomicUnit p K k := by
   unfold realCyclotomicUnit
-  rw [map_mul]
-  rw [show ringOfIntegersComplexConj K
+  rw [map_mul, show ringOfIntegersComplexConj K
         (ringOfIntegersComplexConj K (cyclotomicUnit p K k)) =
       cyclotomicUnit p K k from by
     apply RingOfIntegers.ext
     simp]
   ring
-
-
 
 /-- **Integer norm of the real cyclotomic combination.** For `k` coprime
 to `p` (odd prime), `Algebra.norm ℤ (realCyclotomicUnit p K k) = 1`. -/
@@ -835,7 +793,6 @@ theorem realCyclotomicUnitUnit_val [IsCMField K] (k : ℕ)
   IsUnit.unit_spec _
 
 end RealCyclotomicUnits
-end PrimaryPlus
 end FLT37
 
 end BernoulliRegular
