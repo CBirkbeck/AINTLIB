@@ -1145,6 +1145,82 @@ theorem coordXFun_eq_algebraMap_fracX :
   rw [coordXFun_eq_coordX, SmoothPlaneCurve.coordX,
     IsScalarTower.algebraMap_apply (Polynomial F) (FractionRing (Polynomial F)) C₁.FunctionField]
 
+/-- **Splitting off `x₁²`**: for any coefficient `b`, the basis term `b·y₁` factors as
+`(b·x₁²)·(y₁/x₁²)`.  A pure algebraic identity (`y₁ = (y₁/x₁²)·x₁²`, `x₁ ≠ 0`), used to trade the
+pole of `y₁` for the regular factor `b·x₁²` and the bounded factor `y₁/x₁²`. -/
+private theorem coordYInFunctionField_eq_coordXFun_sq_mul (b : C₁.FunctionField) :
+    b * C₁.coordYInFunctionField =
+      (b * coordXFun C₁ ^ 2) * (coordYFun C₁ / coordXFun C₁ ^ 2) := by
+  have hxne : coordXFun C₁ ≠ 0 := by rw [coordXFun_eq_coordX]; exact C₁.coordX_ne_zero
+  rw [coordYFun_eq_coordYInFunctionField]
+  field_simp
+
+/-- **Regularity is preserved by clearing the `y₁`-pole with `x₁²`** (the parity step): if
+`b = algebraMap q` for `q ≠ 0` and the basis term `b·y₁` is regular at `∞` (`0 ≤ ord_∞(b·y₁)`),
+then so is `b·x₁²`.  Because `ord_∞` is *even* on `F(x₁)` (`ord_∞ b = 2k`) while `ord_∞ y₁ = -3`,
+regularity `0 ≤ 2k - 3` forces `2k ≥ 4`, whence `0 ≤ 2k - 4 = ord_∞(b·x₁²)`. -/
+private theorem ordAtInfty_algebraMap_fracPolyX_mul_coordXFun_sq_nonneg
+    {q : FractionRing (Polynomial F)} (hq0 : q ≠ 0)
+    (hgby : (0 : WithTop ℤ) ≤
+      C₁.ordAtInfty (algebraMap (FractionRing (Polynomial F)) C₁.FunctionField q) +
+        C₁.ordAtInfty C₁.coordYInFunctionField) :
+    (0 : WithTop ℤ) ≤
+      C₁.ordAtInfty
+        (algebraMap (FractionRing (Polynomial F)) C₁.FunctionField q * coordXFun C₁ ^ 2) := by
+  set bcoeff : C₁.FunctionField :=
+    algebraMap (FractionRing (Polynomial F)) C₁.FunctionField q with hb_def
+  have hbne : bcoeff ≠ 0 :=
+    (map_ne_zero_iff _ (FaithfulSMul.algebraMap_injective _ _)).mpr hq0
+  obtain ⟨k, hk⟩ : ∃ k : ℤ, C₁.ordAtInfty bcoeff = ((2 * k : ℤ) : WithTop ℤ) := by
+    refine ⟨-(RatFunc.ofFractionRing q : RatFunc F).intDegree, ?_⟩
+    rw [hb_def, C₁.ordAtInfty_algebraMap_fracPolyX_of_ne_zero hq0]
+    congr 1; ring
+  rw [hk, C₁.ordAtInfty_coordYInFunctionField, ← WithTop.coe_add,
+    show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl, WithTop.coe_le_coe] at hgby
+  have h2k : (4 : ℤ) ≤ 2 * k := by omega
+  have hxne : coordXFun C₁ ≠ 0 := by rw [coordXFun_eq_coordX]; exact C₁.coordX_ne_zero
+  have hx2ne : (coordXFun C₁ ^ 2 : C₁.FunctionField) ≠ 0 := pow_ne_zero _ hxne
+  rw [C₁.ordAtInfty_mul hbne hx2ne, hk,
+    show C₁.ordAtInfty (coordXFun C₁ ^ 2) = ((2 * (-2) : ℤ) : WithTop ℤ) by
+      rw [C₁.ordAtInfty_pow hxne 2, ordAtInfty_coordXFun]; norm_cast,
+    ← WithTop.coe_add,
+    show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl, WithTop.coe_le_coe]
+  omega
+
+set_option maxHeartbeats 1600000 in
+/-- **A regular `F(x₁)`-multiple of `y₁` has `w_v ≤ 1`** (sublemma (II) of the `∞`-domination): for a
+`B`-prime `v` with `1 < w_v(x₁)` and `b = algebraMap q` (`q ∈ F(x₁)`), if `b·y₁` is regular at `∞`
+then `w_v(b·y₁) ≤ 1`.  Write `b·y₁ = (b·x₁²)·(y₁/x₁²)`
+(`coordYInFunctionField_eq_coordXFun_sq_mul`); the factor `b·x₁²` is again the image of a polynomial
+multiple `q·X²`, regular at `∞` (`ordAtInfty_algebraMap_fracPolyX_mul_coordXFun_sq_nonneg`), so
+`w_v(b·x₁²) ≤ 1` by sublemma (I), and `w_v(y₁/x₁²) ≤ 1`; multiply. -/
+private theorem valuation_algebraMap_fracPolyX_mul_coordYInFunctionField_le_one
+    (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)))
+    (hx : 1 < v.valuation C₁.FunctionField (coordXFun C₁))
+    {q : FractionRing (Polynomial F)} (hq0 : q ≠ 0)
+    (hgby : (0 : WithTop ℤ) ≤
+      C₁.ordAtInfty (algebraMap (FractionRing (Polynomial F)) C₁.FunctionField q) +
+        C₁.ordAtInfty C₁.coordYInFunctionField) :
+    v.valuation C₁.FunctionField
+        (algebraMap (FractionRing (Polynomial F)) C₁.FunctionField q *
+          C₁.coordYInFunctionField) ≤ 1 := by
+  set w := v.valuation C₁.FunctionField with hw
+  set bcoeff : C₁.FunctionField :=
+    algebraMap (FractionRing (Polynomial F)) C₁.FunctionField q with hb_def
+  -- `bcoeff·x₁² = algMap (q · X²)`, so sublemma (I) applies to it
+  have hbx2 : bcoeff * coordXFun C₁ ^ 2 =
+      algebraMap (FractionRing (Polynomial F)) C₁.FunctionField
+        (q * (algebraMap (Polynomial F) (FractionRing (Polynomial F)) Polynomial.X) ^ 2) := by
+    rw [map_mul, map_pow, hb_def, ← coordXFun_eq_algebraMap_fracX]
+  have hwbx2 : w (bcoeff * coordXFun C₁ ^ 2) ≤ 1 := by
+    rw [hbx2]
+    exact valuation_algebraMap_fracPolyX_le_one_of_ordAtInfty_nonneg v hx
+      (hbx2 ▸ ordAtInfty_algebraMap_fracPolyX_mul_coordXFun_sq_nonneg hq0 hgby)
+  rw [coordYInFunctionField_eq_coordXFun_sq_mul bcoeff, w.map_mul]
+  calc w (bcoeff * coordXFun C₁ ^ 2) * w (coordYFun C₁ / coordXFun C₁ ^ 2)
+      ≤ 1 * 1 := mul_le_mul' hwbx2 (valuation_coordYFun_div_coordXFun_sq_le_one v hx)
+    _ = 1 := mul_one 1
+
 set_option maxHeartbeats 2400000 in
 /-- **`O_∞ ⊆ O_v` (the curve-completeness crux, value form)**: for a `B`-prime `v` with `1 < w_v(x₁)`
 and any `g` regular at `∞` of `C₁` (`0 ≤ ord_∞ g`), the value `w_v(g) ≤ 1`.  Decompose
@@ -1158,62 +1234,25 @@ theorem valuation_le_one_of_ordAtInfty_nonneg
     v.valuation C₁.FunctionField g ≤ 1 := by
   set w := v.valuation C₁.FunctionField with hw
   obtain ⟨p, q, hpq⟩ := C₁.exists_decomp g
-  -- rewrite `g = a + bcoeff·y₁`
+  -- rewrite `g = a + bcoeff·y₁` with `a, bcoeff ∈ F(x₁)`
   set a : C₁.FunctionField :=
     algebraMap (FractionRing (Polynomial F)) C₁.FunctionField p with ha_def
   set bcoeff : C₁.FunctionField :=
     algebraMap (FractionRing (Polynomial F)) C₁.FunctionField q with hb_def
   have hg_eq : g = a + bcoeff * C₁.coordYInFunctionField := by
     rw [hpq, Algebra.smul_def, mul_one, Algebra.smul_def]
-  -- the basis ord identity
-  have hmin : C₁.ordAtInfty g =
-      min (C₁.ordAtInfty a) (C₁.ordAtInfty bcoeff + C₁.ordAtInfty C₁.coordYInFunctionField) := by
-    rw [hg_eq, ha_def, hb_def]; exact C₁.ordAtInfty_basis_eq_min p q
-  rw [hmin, le_min_iff] at hg
+  -- regularity at `∞` splits along the basis: `0 ≤ ord_∞ a` and `0 ≤ ord_∞(bcoeff·y₁)`
+  rw [show C₁.ordAtInfty g =
+      min (C₁.ordAtInfty a) (C₁.ordAtInfty bcoeff + C₁.ordAtInfty C₁.coordYInFunctionField) by
+        rw [hg_eq, ha_def, hb_def]; exact C₁.ordAtInfty_basis_eq_min p q,
+    le_min_iff] at hg
   obtain ⟨hga, hgby⟩ := hg
-  -- `w_v(a) ≤ 1`
+  -- `w_v(a) ≤ 1` (sublemma I) and `w_v(bcoeff·y₁) ≤ 1` (sublemma II); combine ultrametrically
   have hwa : w a ≤ 1 := valuation_algebraMap_fracPolyX_le_one_of_ordAtInfty_nonneg v hx hga
-  -- `w_v(bcoeff · y₁) ≤ 1`
   have hwby : w (bcoeff * C₁.coordYInFunctionField) ≤ 1 := by
     rcases eq_or_ne q 0 with hq0 | hq0
     · rw [hb_def, hq0, map_zero, zero_mul, w.map_zero]; exact zero_le_one
-    · -- `ord_∞ bcoeff` is even
-      obtain ⟨k, hk⟩ : ∃ k : ℤ, C₁.ordAtInfty bcoeff = ((2 * k : ℤ) : WithTop ℤ) := by
-        refine ⟨-(RatFunc.ofFractionRing q : RatFunc F).intDegree, ?_⟩
-        rw [hb_def, C₁.ordAtInfty_algebraMap_fracPolyX_of_ne_zero hq0]
-        congr 1; ring
-      -- from `0 ≤ ord_∞ bcoeff + ord_∞ y₁ = 2k - 3`: `2k ≥ 4`, so `0 ≤ ord_∞(bcoeff·x₁²)`
-      rw [hk, C₁.ordAtInfty_coordYInFunctionField, ← WithTop.coe_add,
-        show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl, WithTop.coe_le_coe] at hgby
-      have h2k : (4 : ℤ) ≤ 2 * k := by omega
-      -- `bcoeff·y₁ = (bcoeff·x₁²)·(y₁/x₁²)`
-      have hxne : coordXFun C₁ ≠ 0 := by rw [coordXFun_eq_coordX]; exact C₁.coordX_ne_zero
-      have hx2ne : (coordXFun C₁ ^ 2 : C₁.FunctionField) ≠ 0 := pow_ne_zero _ hxne
-      have hsplit : bcoeff * C₁.coordYInFunctionField =
-          (bcoeff * coordXFun C₁ ^ 2) * (coordYFun C₁ / coordXFun C₁ ^ 2) := by
-        rw [coordYFun_eq_coordYInFunctionField]
-        field_simp
-      -- `bcoeff·x₁² = algMap (q · X²)`, regular at `∞`
-      have hbx2 : bcoeff * coordXFun C₁ ^ 2 =
-          algebraMap (FractionRing (Polynomial F)) C₁.FunctionField
-            (q * (algebraMap (Polynomial F) (FractionRing (Polynomial F)) Polynomial.X) ^ 2) := by
-        rw [map_mul, map_pow, hb_def, ← coordXFun_eq_algebraMap_fracX]
-      have hord_bx2 : (0 : WithTop ℤ) ≤ C₁.ordAtInfty (bcoeff * coordXFun C₁ ^ 2) := by
-        have hbne : bcoeff ≠ 0 :=
-          (map_ne_zero_iff _ (FaithfulSMul.algebraMap_injective _ _)).mpr hq0
-        rw [C₁.ordAtInfty_mul hbne hx2ne, hk]
-        rw [show C₁.ordAtInfty (coordXFun C₁ ^ 2) = ((2 * (-2) : ℤ) : WithTop ℤ) by
-          rw [C₁.ordAtInfty_pow hxne 2, ordAtInfty_coordXFun]; norm_cast,
-          ← WithTop.coe_add,
-          show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl, WithTop.coe_le_coe]
-        omega
-      have hwbx2 : w (bcoeff * coordXFun C₁ ^ 2) ≤ 1 := by
-        rw [hbx2]
-        exact valuation_algebraMap_fracPolyX_le_one_of_ordAtInfty_nonneg v hx (hbx2 ▸ hord_bx2)
-      rw [hsplit, w.map_mul]
-      calc w (bcoeff * coordXFun C₁ ^ 2) * w (coordYFun C₁ / coordXFun C₁ ^ 2)
-          ≤ 1 * 1 := mul_le_mul' hwbx2 (valuation_coordYFun_div_coordXFun_sq_le_one v hx)
-        _ = 1 := mul_one 1
+    · exact valuation_algebraMap_fracPolyX_mul_coordYInFunctionField_le_one v hx hq0 hgby
   rw [hg_eq]
   exact le_trans (w.map_add _ _) (max_le hwa hwby)
 
