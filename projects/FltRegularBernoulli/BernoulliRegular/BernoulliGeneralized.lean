@@ -89,7 +89,7 @@ lemma BernoulliGen_zero_of_ne_one [IsDomain R] [NeZero N]
     BernoulliGen χ 0 = 0 := by
   unfold BernoulliGen
   simp only [Polynomial.bernoulli_zero, Polynomial.eval_one, map_one, mul_one]
-  rw [show (N : R) ^ (0 - 1) = 1 from by norm_num, one_mul,
+  rw [show (N : R) ^ (0 - 1) = 1 by norm_num, one_mul,
     MulChar.sum_eq_zero_of_ne_one hχ]
 
 /-- Intermediate form (T006): for a non-trivial Dirichlet character `χ`,
@@ -106,7 +106,7 @@ lemma BernoulliGen_one_of_ne_one [IsDomain R] [NeZero N]
   -- LHS second term: ∑ χ a · (1/2) = (1/2) · ∑ χ a = 0 for nontrivial χ.
   conv_lhs =>
     rw [show (∑ a : ZMod N, χ a * algebraMap ℚ R (2⁻¹ : ℚ))
-          = algebraMap ℚ R (2⁻¹ : ℚ) * ∑ a : ZMod N, χ a from by
+          = algebraMap ℚ R (2⁻¹ : ℚ) * ∑ a : ZMod N, χ a by
       rw [Finset.mul_sum]; exact Finset.sum_congr rfl fun a _ ↦ mul_comm _ _]
   rw [MulChar.sum_eq_zero_of_ne_one hχ, mul_zero, sub_zero]
 
@@ -121,7 +121,7 @@ lemma natCast_mul_BernoulliGen_one_of_ne_one [IsDomain R] [NeZero N]
   refine Finset.sum_congr rfl fun a _ ↦ ?_
   have hN_R : (N : R) = algebraMap ℚ R (N : ℚ) := by push_cast; rfl
   rw [hN_R, show algebraMap ℚ R ((N : ℚ)) * (χ a * algebraMap ℚ R ((a.val : ℚ) / N)) =
-        χ a * (algebraMap ℚ R (N : ℚ) * algebraMap ℚ R ((a.val : ℚ) / N)) from by ring,
+        χ a * (algebraMap ℚ R (N : ℚ) * algebraMap ℚ R ((a.val : ℚ) / N)) by ring,
     ← map_mul, mul_div_cancel₀ _ (Nat.cast_ne_zero.mpr (NeZero.ne N))]
   push_cast; rfl
 
@@ -547,14 +547,14 @@ theorem bernoulli_pSubOne_add_inv_p_mem_padicInt
   rw [Finset.sum_range_succ] at h_sum
   have h_choose_last : (Nat.choose p (p - 1) : ℚ) = (p : ℚ) := by
     have hch : Nat.choose p (p - 1) = p := by
-      nth_rewrite 1 [show p = (p - 1) + 1 from by omega]
+      nth_rewrite 1 [show p = (p - 1) + 1 by omega]
       rw [Nat.choose_succ_self_right]; omega
     exact_mod_cast hch
   rw [h_choose_last] at h_sum
   -- Now split off k = 0 from the remaining `∑ k ∈ range (p - 1)`.
   have hp1_eq : p - 1 = (p - 2) + 1 := by omega
   rw [hp1_eq, Finset.sum_range_succ'] at h_sum
-  rw [show (Nat.choose p 0 : ℚ) = 1 from by push_cast [Nat.choose_zero_right]; rfl,
+  rw [show (Nat.choose p 0 : ℚ) = 1 by push_cast [Nat.choose_zero_right]; rfl,
       show _root_.bernoulli 0 = 1 from _root_.bernoulli_zero, mul_one] at h_sum
   -- h_sum : ∑_{k<p-2} C(p,k+1) · B_{k+1} + 1 + p · B_{p-1} = 0.
   have h_bern_rw : _root_.bernoulli (p - 2 + 1) = _root_.bernoulli (p - 1) := by
