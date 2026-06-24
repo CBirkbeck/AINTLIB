@@ -87,9 +87,8 @@ theorem log_subst_mul_one_add_scaled [IsAddTorsionFree A] (x y : A) :
     simp [b]
   have hunit_ab : IsUnit ((1 + a) * (1 + b)) := hunit_a.mul hunit_b
   refine PowerSeries.derivative.ext ?_ ?_
-  · rw [PowerSeries.derivative_subst A hz]
-    rw [map_add]
-    rw [PowerSeries.derivative_subst A ha, PowerSeries.derivative_subst A hb]
+  · rw [PowerSeries.derivative_subst A hz, map_add,
+      PowerSeries.derivative_subst A ha, PowerSeries.derivative_subst A hb]
     have hda : d⁄dX A a = PowerSeries.C x := by
       simp [a]
     have hdb : d⁄dX A b = PowerSeries.C y := by
