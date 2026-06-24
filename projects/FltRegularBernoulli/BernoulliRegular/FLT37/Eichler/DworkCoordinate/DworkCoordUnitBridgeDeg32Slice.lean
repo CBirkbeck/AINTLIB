@@ -79,12 +79,8 @@ noncomputable section
 
 set_option maxRecDepth 4000
 
-open NumberField
-open scoped BigOperators
-
 namespace BernoulliRegular.FLT37.Eichler
 
-open BernoulliRegular (CPlusGenerator CPlusExponentProduct)
 open BernoulliRegular.CyclotomicUnits
 open BernoulliRegular.CyclotomicUnits.PadicLogSetup
 open BernoulliRegular.CyclotomicUnits.PadicLogSetup.DworkParameter
@@ -123,7 +119,7 @@ theorem deg32SliceCoordModSq37_eq
         ((37 : ZMod (37 ^ 2)) * (((Nat.factorial 32 : ℕ) : ZMod (37 ^ 2))⁻¹)) =
       (37 : ZMod (37 ^ 2)) *
         (((Nat.factorial 32 : ℕ) : ZMod (37 ^ 2)) *
-          (((Nat.factorial 32 : ℕ) : ZMod (37 ^ 2))⁻¹)) from by ring,
+          (((Nat.factorial 32 : ℕ) : ZMod (37 ^ 2))⁻¹)) by ring,
     ZMod.mul_inv_of_unit _ hunit, mul_one]
 
 /-! ## 2. The genuine nonzero second-order leading coefficient `ρ = −(32!)⁻¹ ≡ 24` -/
@@ -317,7 +313,7 @@ theorem caseIICor823Level71UnitDworkCoordBridge37_of_coordIdentity
     rw [show (1 : ZMod 37) - (ZMod.castHom (by norm_num : (37 : ℕ) ∣ 37 ^ 2) (ZMod 37))
           (((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 32)) =
         -((ZMod.castHom (by norm_num : (37 : ℕ) ∣ 37 ^ 2) (ZMod 37))
-            (((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 32)) - 1) from by ring]
+            (((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 32)) - 1) by ring]
     rw [h]
   -- `castHom((32!)⁻¹_modSq) = (32! _modP)⁻¹` (castHom is a ring hom, `32!` a unit).
   have hfac : (ZMod.castHom (by norm_num : (37 : ℕ) ∣ 37 ^ 2) (ZMod 37))
