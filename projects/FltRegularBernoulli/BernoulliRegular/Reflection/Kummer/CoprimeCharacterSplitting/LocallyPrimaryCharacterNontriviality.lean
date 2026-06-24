@@ -7,7 +7,7 @@ public import BernoulliRegular.Reflection.Kummer.CoprimeCharacterSplitting.BadSe
 noncomputable section
 
 open scoped NumberField nonZeroDivisors
-open Polynomial UniqueFactorizationMonoid
+open Polynomial
 
 namespace BernoulliRegular
 namespace Reflection
