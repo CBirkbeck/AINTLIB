@@ -37,11 +37,7 @@ the corrected second digit `r₆₈ = 21` in the actual power series.
 
 noncomputable section
 
-open scoped BigOperators
-
 namespace BernoulliRegular.FLT37.Eichler
-
-open PowerSeries
 
 /-- **`(formalSum68 : ℚ) = 68!·Lr 68`** (proven, axiom-clean): the degree-`68` Artin-Hasse log
 coefficient as `68!` times the explicit log-coefficient `Lr 68`.
