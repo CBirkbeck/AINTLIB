@@ -87,7 +87,6 @@ noncomputable section
 set_option maxRecDepth 4000
 
 open NumberField
-open scoped BigOperators
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -221,7 +220,7 @@ theorem caseIICor823Level71Unscaled32Coord37_of_valueCorrected
   rw [hValue]
   -- `37·17 = 37·(ρ₀.val)` with `ρ₀ = 17`, `ρ₀.val = 17`; reduce the `ρ₀.val` cast to `17`.
   rw [unscaled32CoordSecondDigit37Corrected_eq,
-    show (((17 : ZMod 37).val : ℕ) : ZMod (37 ^ 2)) = (17 : ZMod (37 ^ 2)) from by decide]
+    show (((17 : ZMod 37).val : ℕ) : ZMod (37 ^ 2)) = (17 : ZMod (37 ^ 2)) by decide]
 
 /-! ## 2b. Reducing the corrected value to the degree-`68`-onward correction (deg-`32` discharged)
 
@@ -245,7 +244,7 @@ theorem thirtyseven_mul_factorialThirtytwoInv_eq_thirtyseven_mul_thirteen :
       (37 : ZMod (37 ^ 2)) * (13 : ZMod (37 ^ 2)) := by
   apply thirtyseven_mul_eq_of_castHom_eq
   rw [show (ZMod.castHom (by norm_num : (37 : ℕ) ∣ 37 ^ 2) (ZMod 37))
-      (((Nat.factorial 32 : ℕ) : ZMod (37 ^ 2))⁻¹) = (13 : ZMod 37) from by native_decide]
+      (((Nat.factorial 32 : ℕ) : ZMod (37 ^ 2))⁻¹) = (13 : ZMod 37) by native_decide]
   decide
 
 open BernoulliRegular (CPlusGenerator) in
@@ -291,7 +290,7 @@ theorem caseIICor823Level71Unscaled32CoordValue37Corrected_of_deg68Onward
   -- `37·13 + 37·4 = 37·17` in `ZMod 37²`.
   rw [show (37 : ZMod (37 ^ 2)) * (13 : ZMod (37 ^ 2)) +
         (37 : ZMod (37 ^ 2)) * (4 : ZMod (37 ^ 2)) =
-      (37 : ZMod (37 ^ 2)) * (17 : ZMod (37 ^ 2)) from by decide]
+      (37 : ZMod (37 ^ 2)) * (17 : ZMod (37 ^ 2)) by decide]
 
 /-! ## 3. R4 and the FLT37 endpoint, from the corrected value + the finite-log identity
 
