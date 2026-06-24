@@ -448,6 +448,31 @@ private theorem the_lift (C : SmoothPlaneCurve F) (L : Type*) [Field L] [Algebra
   rw [← galActFrac_algebraMap, hnmap a, map_mul, hy τ, galActFrac_algebraMap,
     norm_fixed C L d τ, ← hnmap]
 
+/-- **Transport of Galois-fixedness through the tensor presentation.** If `x ∈ (C.baseChange L).
+FunctionField` is fixed by every `galActFunctionField C L σ`, then its image
+`y = functionField_baseChange_tensorEquiv x` in the tensor fraction field `Frac(L ⊗_F F[C])` is fixed
+by every `galActFrac C L σ`. This is the first reduction shared by both the finite
+(`mem_range_functionField_baseChange_iff_fixed`) and the tower
+(`mem_range_functionField_baseChange_iff_fixed_kbar`) descent: `galActFunctionField` is
+`galActFrac` conjugated by `functionField_baseChange_tensorEquiv`, so fixedness transports across the
+equivalence. -/
+private theorem galActFrac_fixed_of_galActFunctionField_fixed (C : SmoothPlaneCurve F)
+    (L : Type*) [Field L] [Algebra F L] (x : (C.baseChange L).FunctionField)
+    (hfixed : ∀ σ : L ≃ₐ[F] L, galActFunctionField C L σ x = x) :
+    letI := C.isDomain_tensorCoordRing L
+    ∀ σ : L ≃ₐ[F] L,
+      galActFrac C L σ (C.functionField_baseChange_tensorEquiv L x) =
+        C.functionField_baseChange_tensorEquiv L x := by
+  letI := C.isDomain_tensorCoordRing L
+  intro σ
+  have hx := hfixed σ
+  have hrel : galActFunctionField C L σ x
+      = (C.functionField_baseChange_tensorEquiv L).symm
+          (galActFrac C L σ ((C.functionField_baseChange_tensorEquiv L) x)) := rfl
+  rw [hrel] at hx
+  apply (C.functionField_baseChange_tensorEquiv L).symm.injective
+  rw [hx, AlgEquiv.symm_apply_apply]
+
 /-- **DUAL-Q1(c), the fixed-field characterization** (`L/F` finite Galois): an element of `F(C_L)`
 is fixed by *every* `galActFunctionField C L σ` iff it lies in the image of `F(C)` under the
 base-change embedding `functionFieldMap`.
@@ -470,18 +495,9 @@ theorem mem_range_functionField_baseChange_iff_fixed (C : SmoothPlaneCurve F)
   · intro hfixed
     letI := C.isDomain_tensorCoordRing L
     classical
-    -- transport `x` to the tensor fraction field
+    -- transport `x` to the tensor fraction field; it is `galActFrac`-fixed
     set y := (C.functionField_baseChange_tensorEquiv L) x with hy_def
-    -- `y` is `galActFrac`-fixed
-    have hyfix : ∀ σ : L ≃ₐ[F] L, galActFrac C L σ y = y := by
-      intro σ
-      have hx := hfixed σ
-      have hrel : galActFunctionField C L σ x
-          = (C.functionField_baseChange_tensorEquiv L).symm
-              (galActFrac C L σ ((C.functionField_baseChange_tensorEquiv L) x)) := rfl
-      rw [hrel] at hx
-      apply (C.functionField_baseChange_tensorEquiv L).symm.injective
-      rw [hx, hy_def, AlgEquiv.symm_apply_apply]
+    have hyfix := galActFrac_fixed_of_galActFunctionField_fixed C L x hfixed
     -- fraction lift: `y = n / den` with `n`, `den` both `σ ⊗ id`-fixed
     obtain ⟨n, den, hnf, hdenf, _hdenne, hydiv⟩ := the_lift C L y hyfix
     -- ring descent: `n = 1 ⊗ mn`, `den = 1 ⊗ md`
@@ -1122,6 +1138,62 @@ theorem fracTowerIncl_galActFrac (C : SmoothPlaneCurve F)
     (A := M ⊗[F] C.toAffine.CoordinateRing) y
   rw [map_div₀, map_div₀, map_div₀, map_div₀, key a, key d]
 
+/-- **A full automorphism restricting to a prescribed `τ` agrees with `τ` on `M`.** If
+`σ : K̄ ≃ₐ[F] K̄` satisfies `restrictNormalHom M σ = τ` for a normal intermediate field `M ⊆ K̄`, then
+`σ (m : K̄) = (τ m : K̄)` for every `m ∈ M`. This is the hypothesis `towerTensorIncl_congr` /
+`fracTowerIncl_galActFrac` need; it just unfolds `restrictNormalHom` to `restrictNormal` and applies
+`AlgEquiv.restrictNormal_commutes`. -/
+private theorem restrictNormalHom_apply_coe (M : IntermediateField F (AlgebraicClosure F))
+    [Normal F M] (σ : AlgebraicClosure F ≃ₐ[F] AlgebraicClosure F) (τ : M ≃ₐ[F] M)
+    (hσ : AlgEquiv.restrictNormalHom (F := F) M σ = τ) (m : M) :
+    σ (m : AlgebraicClosure F) = (τ m : AlgebraicClosure F) := by
+  have hc := (σ.restrictNormal_commutes M m).symm
+  rw [show AlgEquiv.restrictNormalHom (F := F) M σ = σ.restrictNormal M from rfl] at hσ
+  rw [hσ] at hc
+  simpa using hc
+
+/-- **Descent of `galActFrac`-fixedness along the tower inclusion.** Let `M ⊆ K̄` be finite Galois and
+let `yM ∈ Frac(M ⊗_F F[C])` map to a `galActFrac`-fixed `y` upstairs under `fracTowerIncl`. Then `yM`
+is itself fixed by every `galActFrac C M τ`. Each `τ : M ≃ₐ[F] M` lifts to some `σ : K̄ ≃ₐ[F] K̄`
+(`restrictNormalHom_surjective`) restricting to it (`restrictNormalHom_apply_coe`); the equivariance
+of `fracTowerIncl` (`fracTowerIncl_galActFrac`) then carries the upstairs fixedness of `y` down to
+`yM`, using injectivity of `fracTowerIncl`. -/
+private theorem galActFrac_fixed_of_fracTowerIncl_eq (C : SmoothPlaneCurve F)
+    (M : IntermediateField F (AlgebraicClosure F)) [FiniteDimensional F M] [IsGalois F M]
+    (y : letI := C.isDomain_tensorCoordRing (AlgebraicClosure F)
+         FractionRing (AlgebraicClosure F ⊗[F] C.toAffine.CoordinateRing))
+    (hyfix : letI := C.isDomain_tensorCoordRing (AlgebraicClosure F)
+             ∀ σ : AlgebraicClosure F ≃ₐ[F] AlgebraicClosure F, galActFrac C (AlgebraicClosure F) σ y = y)
+    (yM : letI := C.isDomain_tensorCoordRing M
+          FractionRing (M ⊗[F] C.toAffine.CoordinateRing))
+    (hymap : fracTowerIncl C M yM = y) :
+    letI := C.isDomain_tensorCoordRing M
+    ∀ τ : M ≃ₐ[F] M, galActFrac C M τ yM = yM := by
+  letI := C.isDomain_tensorCoordRing (AlgebraicClosure F)
+  letI := C.isDomain_tensorCoordRing M
+  haveI : Normal F M := IsGalois.to_normal
+  intro τ
+  obtain ⟨σ, hσ⟩ := AlgEquiv.restrictNormalHom_surjective (F := F) (K₁ := M)
+    (E := AlgebraicClosure F) τ
+  apply fracTowerIncl_injective C M
+  rw [fracTowerIncl_galActFrac C M σ τ (restrictNormalHom_apply_coe M σ τ hσ), hymap, hyfix σ]
+
+/-- **`fracTowerIncl` carries a `1 ⊗ -` fraction to the corresponding `1 ⊗ -` fraction upstairs.** For
+`m : F[C]`, the downstairs class `algebraMap ((1 : M) ⊗ₜ m)` maps under `fracTowerIncl C M` to the
+upstairs class `algebraMap ((1 : K̄) ⊗ₜ m)`. Combines `fracTowerIncl_algebraMap` with
+`towerTensorIncl_tmul` (which sends `(1 : M) ⊗ₜ m` to `(1 : K̄) ⊗ₜ m`). -/
+private theorem fracTowerIncl_algebraMap_one_tmul (C : SmoothPlaneCurve F)
+    (M : IntermediateField F (AlgebraicClosure F)) (m : C.toAffine.CoordinateRing) :
+    letI := C.isDomain_tensorCoordRing M
+    letI := C.isDomain_tensorCoordRing (AlgebraicClosure F)
+    fracTowerIncl C M
+        (algebraMap (M ⊗[F] C.toAffine.CoordinateRing) _ ((1 : M) ⊗ₜ[F] m)) =
+      algebraMap (AlgebraicClosure F ⊗[F] C.toAffine.CoordinateRing) _ ((1 : AlgebraicClosure F) ⊗ₜ[F] m) := by
+  letI := C.isDomain_tensorCoordRing M
+  letI := C.isDomain_tensorCoordRing (AlgebraicClosure F)
+  rw [fracTowerIncl_algebraMap, towerTensorIncl_tmul]
+  norm_num
+
 /-- **The infinite-Galois fixed-field characterization** (`L = K̄ = AlgebraicClosure F`, perfect base
 field): an element of the `K̄`-function field `(C.baseChange K̄).FunctionField` lies in the image of
 `F(C)` under the base-change embedding `functionFieldMap` iff it is fixed by *every*
@@ -1148,15 +1220,7 @@ theorem mem_range_functionField_baseChange_iff_fixed_kbar [PerfectField F] (C : 
     classical
     -- transport `x` to the tensor fraction field; it is `galActFrac`-fixed
     set y := (C.functionField_baseChange_tensorEquiv (AlgebraicClosure F)) x with hy_def
-    have hyfix : ∀ σ : AlgebraicClosure F ≃ₐ[F] AlgebraicClosure F, galActFrac C (AlgebraicClosure F) σ y = y := by
-      intro σ
-      have hx := hfixed σ
-      have hrel : galActFunctionField C (AlgebraicClosure F) σ x
-          = (C.functionField_baseChange_tensorEquiv (AlgebraicClosure F)).symm
-              (galActFrac C (AlgebraicClosure F) σ ((C.functionField_baseChange_tensorEquiv (AlgebraicClosure F)) x)) := rfl
-      rw [hrel] at hx
-      apply (C.functionField_baseChange_tensorEquiv (AlgebraicClosure F)).symm.injective
-      rw [hx, hy_def, AlgEquiv.symm_apply_apply]
+    have hyfix := galActFrac_fixed_of_galActFunctionField_fixed C (AlgebraicClosure F) x hfixed
     -- write `y = algebraMap a / algebraMap d`
     obtain ⟨a, d, hd, hydiv⟩ := IsFractionRing.div_surjective
       (A := AlgebraicClosure F ⊗[F] C.toAffine.CoordinateRing) y
@@ -1166,7 +1230,6 @@ theorem mem_range_functionField_baseChange_iff_fixed_kbar [PerfectField F] (C : 
     letI := hMfin
     letI := hMgal
     letI := C.isDomain_tensorCoordRing M
-    haveI : Normal F M := IsGalois.to_normal
     -- the downstairs fraction `y_M = algebraMap aM / algebraMap dM`
     let yM : FractionRing (M ⊗[F] C.toAffine.CoordinateRing) :=
         algebraMap (M ⊗[F] C.toAffine.CoordinateRing)
@@ -1176,21 +1239,9 @@ theorem mem_range_functionField_baseChange_iff_fixed_kbar [PerfectField F] (C : 
     -- `fracTowerIncl y_M = y`
     have hymap : fracTowerIncl C M yM = y := by
       show fracTowerIncl C M (_ / _) = y
-      rw [map_div₀, fracTowerIncl_algebraMap, fracTowerIncl_algebraMap, haM, hdM]
-      rw [hydiv]
-    -- `y_M` is `Gal(M/F)`-fixed: lift each `τ` to `σ ⊇ τ` and use `fracTowerIncl` equivariance
-    have hyMfix : ∀ τ : M ≃ₐ[F] M, galActFrac C M τ yM = yM := by
-      intro τ
-      obtain ⟨σ, hσ⟩ := AlgEquiv.restrictNormalHom_surjective (F := F) (K₁ := M)
-        (E := AlgebraicClosure F) τ
-      have hστ : ∀ m : M, σ (m : AlgebraicClosure F) = (τ m : AlgebraicClosure F) := by
-        intro m
-        have hc := (σ.restrictNormal_commutes M m).symm
-        rw [show AlgEquiv.restrictNormalHom (F := F) M σ = σ.restrictNormal M from rfl] at hσ
-        rw [hσ] at hc
-        simpa using hc
-      apply fracTowerIncl_injective C M
-      rw [fracTowerIncl_galActFrac C M σ τ hστ, hymap, hyfix σ]
+      rw [map_div₀, fracTowerIncl_algebraMap, fracTowerIncl_algebraMap, haM, hdM, hydiv]
+    -- `y_M` is `Gal(M/F)`-fixed (tower descent of fixedness along `fracTowerIncl`)
+    have hyMfix := galActFrac_fixed_of_fracTowerIncl_eq C M y hyfix yM hymap
     -- finite descent at `M`: `y_M = algebraMap (1 ⊗ mn) / algebraMap (1 ⊗ md)`
     obtain ⟨n, den, hnf, hdenf, _hdenne, hyMdiv⟩ := the_lift C M yM hyMfix
     obtain ⟨mn, hmn⟩ := tensor_ringAct_fixed_mem_range C M n hnf
@@ -1210,12 +1261,8 @@ theorem mem_range_functionField_baseChange_iff_fixed_kbar [PerfectField F] (C : 
         / algebraMap (AlgebraicClosure F ⊗[F] C.toAffine.CoordinateRing)
             (FractionRing (AlgebraicClosure F ⊗[F] C.toAffine.CoordinateRing))
             ((1 : AlgebraicClosure F) ⊗ₜ[F] md) := by
-      rw [← hymap, hyMdiv, map_div₀, fracTowerIncl_algebraMap, fracTowerIncl_algebraMap,
-        ← hmn, ← hmd]
-      rw [show towerTensorIncl C.toAffine.CoordinateRing M ((1 : M) ⊗ₜ[F] mn)
-          = (1 : AlgebraicClosure F) ⊗ₜ[F] mn by rw [towerTensorIncl_tmul]; norm_num,
-        show towerTensorIncl C.toAffine.CoordinateRing M ((1 : M) ⊗ₜ[F] md)
-          = (1 : AlgebraicClosure F) ⊗ₜ[F] md by rw [towerTensorIncl_tmul]; norm_num]
+      rw [← hymap, hyMdiv, map_div₀, ← hmn, ← hmd,
+        fracTowerIncl_algebraMap_one_tmul, fracTowerIncl_algebraMap_one_tmul]
     rw [hx_eq, hy_final, map_div₀]
     congr 1
     · rw [tensorEquiv_symm_one_tmul C (AlgebraicClosure F) mn]
