@@ -203,12 +203,12 @@ private lemma Gamma0_left_coset_of_Npow_det (N : ℕ) [NeZero N]
   have hr_nonneg : 0 ≤ r := Int.emod_nonneg _ (by omega)
   have hr_lt : r < m := Int.emod_lt_of_pos _ (by omega)
   have hm_tr : (m : ℤ) ∣ (t_inv - r) := by
-    rw [hr_def, show t_inv - t_inv % ↑m = ↑m * (t_inv / ↑m) from by
+    rw [hr_def, show t_inv - t_inv % ↑m = ↑m * (t_inv / ↑m) by
       linarith [Int.mul_ediv_add_emod t_inv (↑m : ℤ)]]
     exact dvd_mul_right _ _
   have hm_ar_b : (m : ℤ) ∣ (A 0 0 * r - A 0 1) := by
     have h := dvd_sub ht (dvd_mul_of_dvd_left hm_tr (A 0 0))
-    rwa [show t_inv * A 0 0 + -A 0 1 - (t_inv - r) * A 0 0 = A 0 0 * r - A 0 1 from by ring] at h
+    rwa [show t_inv * A 0 0 + -A 0 1 - (t_inv - r) * A 0 0 = A 0 0 * r - A 0 1 by ring] at h
   obtain ⟨q₂, hq₂⟩ := dvd_lowerRight_witness A N m c₀ r hc₀ hdet ham hm_ar_b
   obtain ⟨q₁, hq₁⟩ := hm_ar_b
   refine ⟨Matrix.of ![![A 0 0, -q₁], ![↑N * c₀, q₂]], r, ?_, ?_, hr_nonneg, hr_lt, ?_⟩
@@ -223,7 +223,7 @@ private lemma Gamma0_left_coset_of_Npow_det (N : ℕ) [NeZero N]
             rw [← hq₂, ← hq₁]
         _ = A 0 0 * A 1 1 - A 0 1 * (↑N * c₀) := by ring
         _ = ↑m := h_det_val.symm
-    have := mul_right_cancel₀ (show (↑m : ℤ) ≠ 0 from by omega) (show
+    have := mul_right_cancel₀ (show (↑m : ℤ) ≠ 0 by omega) (show
       (A 0 0 * q₂ + q₁ * (↑N * c₀)) * ↑m = 1 * ↑m by rw [one_mul]; exact h1)
     linarith
   · norm_num [Matrix.of_apply, Matrix.cons_val_one, Matrix.head_cons,
@@ -378,7 +378,7 @@ private lemma lunip_conj_diag_eq (N : ℕ) [NeZero N] (k_exp : ℕ)
   fin_cases i <;> fin_cases j <;>
     simp only [hr_cast] <;>
     push_cast [hc', hc''] <;>
-    (try ring) <;>
+    (try ring)
     (have := congr_arg (Int.cast (R := ℚ)) hc''; push_cast at this ⊢; nlinarith)
 
 lemma lunip_inject_surjective (N : ℕ) [NeZero N]
@@ -447,7 +447,7 @@ private lemma lunip_diff_unipotent_mul (N : ℕ) (r₁ r₂ : ℤ)
       Matrix.adjugate_fin_two, Matrix.of_apply,
       Matrix.cons_val', Matrix.cons_val_zero, Matrix.cons_val_one,
       Matrix.empty_val']
-    <;> ring
+    ring
 
 /-- Given the matrix equation `D · τ = σ₁⁻¹ · u_diff · σ₁ · D` in `GL₂(ℚ)`
 (viewed at position `(1,0)`), with `τ.1 1 0 = N·q₂`, derive the integer
@@ -644,8 +644,8 @@ private lemma rep_T_diag_Gamma0_det (N : ℕ) [NeZero N] (a : Fin 2 → ℕ)
   rw [show (HeckeCoset.rep (T_diag_Gamma0 N a ha hgcd) : GL (Fin 2) ℚ).val =
       h1.val * (diagMat 2 a : GL (Fin 2) ℚ).val * h2.val from congr_arg Units.val hprod,
     Matrix.det_mul, Matrix.det_mul,
-    show h1.val.det = 1 from by rw [← hs1, mapGL_coe_matrix]; simp [det_intMat_cast 2, s1.prop],
-    show h2.val.det = 1 from by rw [← hs2, mapGL_coe_matrix]; simp [det_intMat_cast 2, s2.prop],
+    show h1.val.det = 1 by rw [← hs1, mapGL_coe_matrix]; simp [det_intMat_cast 2, s1.prop],
+    show h2.val.det = 1 by rw [← hs2, mapGL_coe_matrix]; simp [det_intMat_cast 2, s2.prop],
     diagMat_det 2 _ ha]
   simp
 
