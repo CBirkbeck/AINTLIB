@@ -62,12 +62,8 @@ noncomputable section
 
 set_option maxRecDepth 4000
 
-open NumberField
-open scoped BigOperators
-
 namespace BernoulliRegular.FLT37.Eichler
 
-open BernoulliRegular (CPlusGenerator CPlusExponentProduct)
 open BernoulliRegular.CyclotomicUnits
 open BernoulliRegular.CyclotomicUnits.PadicLogSetup
 open BernoulliRegular.CyclotomicUnits.PadicLogSetup.DworkParameter
@@ -137,7 +133,7 @@ theorem caseIICor823Level71DworkSpecializedFiniteLog37_consequent_inhabited
           ((37 : ZMod (37 ^ 2)) * (((Nat.factorial 32 : ℕ) : ZMod (37 ^ 2))⁻¹)) =
         (37 : ZMod (37 ^ 2)) *
           (((Nat.factorial 32 : ℕ) : ZMod (37 ^ 2)) *
-            (((Nat.factorial 32 : ℕ) : ZMod (37 ^ 2))⁻¹)) from by ring,
+            (((Nat.factorial 32 : ℕ) : ZMod (37 ^ 2))⁻¹)) by ring,
       ZMod.mul_inv_of_unit _ hunit, mul_one] at hmul
     exact hmul
   exact absurd h37 (by decide)
@@ -198,12 +194,12 @@ theorem caseIICor823Level71DworkSpecializedFiniteLog37_coordIdentity
           ((37 : ZMod (37 ^ 2)) * (((Nat.factorial 32 : ℕ) : ZMod (37 ^ 2))⁻¹)) =
       (37 : ZMod (37 ^ 2)) *
         ((1 - teichmullerCoeffModSq (p := 37) (δ : ZMod 37) ^ (i : ℕ)) *
-          (((Nat.factorial 32 : ℕ) : ZMod (37 ^ 2))⁻¹)) from by ring]
+          (((Nat.factorial 32 : ℕ) : ZMod (37 ^ 2))⁻¹)) by ring]
   rw [show (1 - ((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 32)) *
         ((37 : ZMod (37 ^ 2)) * (((Nat.factorial 32 : ℕ) : ZMod (37 ^ 2))⁻¹)) =
       (37 : ZMod (37 ^ 2)) *
         ((1 - ((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 32)) *
-          (((Nat.factorial 32 : ℕ) : ZMod (37 ^ 2))⁻¹)) from by ring]
+          (((Nat.factorial 32 : ℕ) : ZMod (37 ^ 2))⁻¹)) by ring]
   apply thirtyseven_mul_eq_of_castHom_eq
   -- mod-`37`: reduce both factors; only `castHom (Tf^32) = castHom ((a+2)^32)` is nontrivial.
   have hδval : (δ : ZMod 37) = (((a : ℕ) + 2 : ℕ) : ZMod 37) := by
