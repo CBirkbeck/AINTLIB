@@ -351,6 +351,63 @@ image is an *affine* place of `E₂`) is cut out by *some* `B`-prime.  At such a
 lands in `O_P` (integrally closed); the contraction of `m_P` is then a height-one prime of `B` whose
 adic valuation is `pointValuation P`. -/
 
+omit [IsAlgClosed F] in
+/-- **The pulled-back `F`-constant leg is `≤ 1`** (the constant base case of the generator
+induction).  For `d : F`, the coordinate-ring element `AdjoinRoot.mk (C (C d))` of `E₂` is the image
+of `d` under `F → F[E₂]`, so its `φ^*`-pullback is the image of `d` under `F → F[E₁] → K(E₁)` — a
+constant, hence `pointValuation P`-integral.  Routes the constant through the scalar towers
+(`φ.pullback.commutes`) and finishes with `pointValuation_algebraMap_le_one`. -/
+private theorem pullback_algebraMap_const_le_one
+    (φ : HasseWeil.Isogeny W₁ W₂) (P : (W_smooth W₁).SmoothPoint) (d : F) :
+    (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P
+      (φ.pullback (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+        W₂.toAffine.FunctionField (AdjoinRoot.mk W₂.toAffine.polynomial
+          (Polynomial.C (Polynomial.C d))))) ≤ 1 := by
+  have hdconst : φ.pullback (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+      W₂.toAffine.FunctionField (AdjoinRoot.mk W₂.toAffine.polynomial
+        (Polynomial.C (Polynomial.C d)))) =
+      algebraMap (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing W₁.toAffine.FunctionField
+        (algebraMap F (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing d) := by
+    rw [show (AdjoinRoot.mk W₂.toAffine.polynomial (Polynomial.C (Polynomial.C d)) :
+          (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing) =
+        algebraMap F (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing d from rfl,
+      ← IsScalarTower.algebraMap_apply F (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+        W₂.toAffine.FunctionField d, φ.pullback.commutes d,
+      ← IsScalarTower.algebraMap_apply F (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing
+        W₁.toAffine.FunctionField d]
+  rw [hdconst]
+  exact (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation_algebraMap_le_one _ P
+
+omit [IsAlgClosed F] in
+/-- **The pulled-back `x_gen`-coefficient leg is `≤ 1`** (the inner `x`-generator induction).  For a
+coefficient polynomial `a : F[X]`, the coordinate-ring element `AdjoinRoot.mk (C a)` of `E₂` is a
+polynomial in `x_gen₂` with `F`-constant coefficients; pulling back, each monomial factors as
+`(F`-constant`) · φ^*(x_gen₂)^m`, and `φ^*(x_gen₂) ≤ 1` (`hx`) controls the `x`-power while
+`pullback_algebraMap_const_le_one` controls the constant.  This is the inner half of the
+two-generator induction in `pointValuation_le_one_pullback_coordinateRing`. -/
+private theorem pullback_algebraMap_mk_C_le_one
+    (φ : HasseWeil.Isogeny W₁ W₂) (P : (W_smooth W₁).SmoothPoint)
+    (hx : (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P (φ.pullback (x_gen W₂)) ≤ 1)
+    (a : Polynomial F) :
+    (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P
+      (φ.pullback (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+        W₂.toAffine.FunctionField (AdjoinRoot.mk W₂.toAffine.polynomial
+          (Polynomial.C a)))) ≤ 1 := by
+  set w := (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P with hw
+  induction a using Polynomial.induction_on' with
+  | add p q hp hq =>
+    rw [Polynomial.C_add, map_add, map_add, map_add]
+    exact le_trans (w.map_add _ _) (max_le hp hq)
+  | monomial m d =>
+    rw [← Polynomial.C_mul_X_pow_eq_monomial, Polynomial.C_mul, Polynomial.C_pow]
+    simp only [map_mul, map_pow, w.map_mul]
+    -- the `C X`-power leg is `φ^*(x_gen₂)^m`
+    have hXgen : φ.pullback (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+        W₂.toAffine.FunctionField (AdjoinRoot.mk W₂.toAffine.polynomial
+          (Polynomial.C Polynomial.X))) = φ.pullback (x_gen W₂) := rfl
+    exact mul_le_one' (pullback_algebraMap_const_le_one φ P d)
+      (by rw [hXgen]; exact pow_le_one₀ zero_le hx)
+
 set_option synthInstance.maxHeartbeats 400000 in
 set_option maxHeartbeats 1600000 in
 omit [IsAlgClosed F] in
@@ -370,6 +427,7 @@ theorem pointValuation_le_one_pullback_coordinateRing
   classical
   set w := (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P with hw
   obtain ⟨g, rfl⟩ := AdjoinRoot.mk_surjective c
+  -- Induct on the representing polynomial `g : F[X][X]`; the two generator legs are the helpers.
   induction g using Polynomial.induction_on' with
   | add p q hp hq =>
     rw [map_add, map_add, map_add]
@@ -377,38 +435,12 @@ theorem pointValuation_le_one_pullback_coordinateRing
   | monomial n a =>
     rw [← Polynomial.C_mul_X_pow_eq_monomial]
     simp only [map_mul, map_pow, w.map_mul]
-    -- the `X`-power leg is `φ^*(y_gen₂)^n`
+    -- the `X`-power leg is `φ^*(y_gen₂)^n`; the coefficient leg is the `x_gen` induction helper
     have hXeq : φ.pullback (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
         W₂.toAffine.FunctionField (AdjoinRoot.mk W₂.toAffine.polynomial Polynomial.X)) =
         φ.pullback (y_gen W₂) := rfl
-    refine mul_le_one' ?_ (by rw [hXeq]; exact pow_le_one₀ zero_le hy)
-    induction a using Polynomial.induction_on' with
-    | add p q hp hq =>
-      rw [Polynomial.C_add, map_add, map_add, map_add]
-      exact le_trans (w.map_add _ _) (max_le hp hq)
-    | monomial m d =>
-      rw [← Polynomial.C_mul_X_pow_eq_monomial, Polynomial.C_mul, Polynomial.C_pow]
-      simp only [map_mul, map_pow, w.map_mul]
-      -- the `C X`-power leg is `φ^*(x_gen₂)^m`
-      have hXgen : φ.pullback (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
-          W₂.toAffine.FunctionField (AdjoinRoot.mk W₂.toAffine.polynomial
-            (Polynomial.C Polynomial.X))) = φ.pullback (x_gen W₂) := rfl
-      refine mul_le_one' ?_ (by rw [hXgen]; exact pow_le_one₀ zero_le hx)
-      -- the `F`-constant leg `φ^*(algMap_F d) = algMap_F d` is regular at `P` (constant).
-      have hdconst : φ.pullback (algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
-          W₂.toAffine.FunctionField (AdjoinRoot.mk W₂.toAffine.polynomial
-            (Polynomial.C (Polynomial.C d)))) =
-          algebraMap (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing W₁.toAffine.FunctionField
-            (algebraMap F (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing d) := by
-        rw [show (AdjoinRoot.mk W₂.toAffine.polynomial (Polynomial.C (Polynomial.C d)) :
-              (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing) =
-            algebraMap F (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing d from rfl,
-          ← IsScalarTower.algebraMap_apply F (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
-            W₂.toAffine.FunctionField d, φ.pullback.commutes d,
-          ← IsScalarTower.algebraMap_apply F (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing
-            W₁.toAffine.FunctionField d]
-      rw [hdconst]
-      exact (⟨W₁⟩ : SmoothPlaneCurve F).pointValuation_algebraMap_le_one _ P
+    exact mul_le_one' (pullback_algebraMap_mk_C_le_one φ P hx a)
+      (by rw [hXeq]; exact pow_le_one₀ zero_le hy)
 
 set_option synthInstance.maxHeartbeats 400000 in
 set_option maxHeartbeats 1600000 in
