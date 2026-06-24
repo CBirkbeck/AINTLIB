@@ -1276,6 +1276,68 @@ forced by both projective divisors having degree `0` (and `placeRestrictionPushf
 degree, `degree_placeRestrictionPushforward`).  Mirrors
 `CurveMap.projectiveDivisorOf_pushforward_algebraMap_eq`. -/
 
+/-- **Affine coefficient agreement for the `algebraMap` norm–conorm identity**: at every affine
+place `Q`, the coefficient of `div(conorm φ (algebraMap w))` equals that of
+`placeRestrictionPushforward φ (div(algebraMap w))`.  This is the per-place identity
+`twoCurve_ord_conorm_eq_sum_fiber` repackaged on `projectiveDivisorOf`. -/
+private theorem conorm_projectiveDivisorOf_apply_affine_eq
+    (φ : HasseWeil.Isogeny W₁ W₂)
+    (hfin : @FiniteDimensional W₂.toAffine.FunctionField W₁.toAffine.FunctionField _ _
+      φ.toAlgebra.toModule)
+    (hsep : @Algebra.IsSeparable W₂.toAffine.FunctionField W₁.toAffine.FunctionField _ _
+      φ.toAlgebra)
+    (hreg : ∀ f : (⟨W₂⟩ : SmoothPlaneCurve F).FunctionField,
+      0 ≤ (⟨W₂⟩ : SmoothPlaneCurve F).ordAtInfty f →
+      0 ≤ (⟨W₁⟩ : SmoothPlaneCurve F).ordAtInfty (φ.pullback f))
+    {w : (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing} (hw : w ≠ 0)
+    (Q : (⟨W₂⟩ : SmoothPlaneCurve F).SmoothPoint) :
+    (⟨W₂⟩ : SmoothPlaneCurve F).projectiveDivisorOf (conorm φ
+        (algebraMap (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing
+          (⟨W₁⟩ : SmoothPlaneCurve F).FunctionField w))
+        (ProjectiveSmoothPoint.affine Q) =
+      placeRestrictionPushforward φ ((⟨W₁⟩ : SmoothPlaneCurve F).projectiveDivisorOf
+        (algebraMap (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing
+          (⟨W₁⟩ : SmoothPlaneCurve F).FunctionField w))
+        (ProjectiveSmoothPoint.affine Q) := by
+  rw [(⟨W₂⟩ : SmoothPlaneCurve F).projectiveDivisorOf_apply_affine,
+    twoCurve_ord_conorm_eq_sum_fiber φ hfin hsep hreg hw Q, WithTop.untopD_coe]
+
+/-- **Infinity coefficient pinned by degree**: two projective divisors on `C` with equal degree
+whose coefficients agree at every affine place also agree at infinity.  (Their difference is
+supported only at infinity, so its degree *is* its infinity coefficient.)  This pins the place at
+infinity in `II.3.6` once the affine coefficients match and both divisors have degree `0`.  Local
+mirror of `HasseWeil.Curves.…projDivisor_infinity_coeff_eq_of_affine_eq`, which is `private` to its
+file. -/
+private theorem projDivisor_infinity_coeff_eq_of_affine_eq_local {C : SmoothPlaneCurve F}
+    (D₁ D₂ : ProjectiveDivisor C) (hdeg : D₁.degree = D₂.degree)
+    (haff : ∀ Q : C.SmoothPoint,
+      D₁ (ProjectiveSmoothPoint.affine Q) = D₂ (ProjectiveSmoothPoint.affine Q)) :
+    D₁ ProjectiveSmoothPoint.infinity = D₂ ProjectiveSmoothPoint.infinity := by
+  classical
+  set E : ProjectiveDivisor C := D₁ - D₂ with hE_def
+  have hE_aff : ∀ Q : C.SmoothPoint, E (ProjectiveSmoothPoint.affine Q) = 0 := by
+    intro Q; rw [hE_def, Finsupp.sub_apply, haff Q, sub_self]
+  have hE_supp : E.support ⊆ {ProjectiveSmoothPoint.infinity} := by
+    intro x hx
+    rw [Finsupp.mem_support_iff] at hx
+    cases x with
+    | affine Q => exact absurd (hE_aff Q) hx
+    | infinity => exact Finset.mem_singleton_self _
+  have hE_single : E = Finsupp.single ProjectiveSmoothPoint.infinity
+      (E ProjectiveSmoothPoint.infinity) :=
+    (Finsupp.support_subset_singleton.mp hE_supp)
+  have hE_deg : E.degree = 0 := by
+    rw [hE_def, ProjectiveDivisor.degree_sub, hdeg, sub_self]
+  have hEinf : E ProjectiveSmoothPoint.infinity = 0 := by
+    have : E.degree = E ProjectiveSmoothPoint.infinity := by
+      conv_lhs => rw [hE_single]
+      unfold ProjectiveDivisor.degree
+      rw [Finsupp.sum_single_index rfl]
+    rw [this] at hE_deg; exact hE_deg
+  have hdiff : D₁ ProjectiveSmoothPoint.infinity - D₂ ProjectiveSmoothPoint.infinity = 0 := by
+    rw [← Finsupp.sub_apply]; exact hEinf
+  linarith [hdiff]
+
 /-- **The `algebraMap` case of the norm–conorm identity (CoordHom-free)**: for `w ∈ F[E₁]` nonzero,
 `div(N_φ(algebraMap w)) = placeRestrictionPushforward φ (div(algebraMap w))`.  Affine coefficients
 via `twoCurve_ord_conorm_eq_sum_fiber`; infinity coefficient forced by degree `0`. -/
@@ -1298,57 +1360,26 @@ theorem placeRestrictionPushforward_projectiveDivisorOf_algebraMap
   classical
   set aw := algebraMap (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing
     (⟨W₁⟩ : SmoothPlaneCurve F).FunctionField w with haw
-  have haw_ne : aw ≠ 0 := by
-    rw [haw]; intro h
-    exact hw ((IsFractionRing.injective (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing
-      (⟨W₁⟩ : SmoothPlaneCurve F).FunctionField) (h.trans (map_zero _).symm))
   set LHS := placeRestrictionPushforward φ
     ((⟨W₁⟩ : SmoothPlaneCurve F).projectiveDivisorOf aw) with hLHS_def
   set RHS := (⟨W₂⟩ : SmoothPlaneCurve F).projectiveDivisorOf (conorm φ aw) with hRHS_def
-  -- Affine coefficient agreement.
+  -- Affine coefficients agree (`twoCurve_ord_conorm_eq_sum_fiber`, repackaged).
   have h_aff : ∀ Q : (⟨W₂⟩ : SmoothPlaneCurve F).SmoothPoint,
-      RHS (ProjectiveSmoothPoint.affine Q) = LHS (ProjectiveSmoothPoint.affine Q) := by
-    intro Q
-    rw [hRHS_def, (⟨W₂⟩ : SmoothPlaneCurve F).projectiveDivisorOf_apply_affine,
-      twoCurve_ord_conorm_eq_sum_fiber φ hfin hsep hreg hw Q, WithTop.untopD_coe, hLHS_def]
-  -- Infinity coefficient forced by degree (both projective divisors have degree 0).
-  apply Finsupp.ext
-  intro v
+      LHS (ProjectiveSmoothPoint.affine Q) = RHS (ProjectiveSmoothPoint.affine Q) := fun Q =>
+    (conorm_projectiveDivisorOf_apply_affine_eq φ hfin hsep hreg hw Q).symm
+  -- Both projective divisors have degree `0`.
+  have hLHS_deg : LHS.degree = 0 := by
+    rw [hLHS_def, degree_placeRestrictionPushforward]
+    exact (⟨W₁⟩ : SmoothPlaneCurve F).projectiveDivisorOf_degree_eq_zero _
+  have hRHS_deg : RHS.degree = 0 := by
+    rw [hRHS_def]; exact (⟨W₂⟩ : SmoothPlaneCurve F).projectiveDivisorOf_degree_eq_zero _
+  -- Affine coefficients pin the infinity coefficient via equality of (zero) degrees.
+  refine Finsupp.ext fun v => ?_
   cases v with
-  | affine Q => exact (h_aff Q).symm
+  | affine Q => exact h_aff Q
   | infinity =>
-    have hLHS_deg : LHS.degree = 0 := by
-      rw [hLHS_def, degree_placeRestrictionPushforward]
-      exact (⟨W₁⟩ : SmoothPlaneCurve F).projectiveDivisorOf_degree_eq_zero _
-    have hRHS_deg : RHS.degree = 0 := by
-      rw [hRHS_def]; exact (⟨W₂⟩ : SmoothPlaneCurve F).projectiveDivisorOf_degree_eq_zero _
-    -- `E := LHS - RHS` is supported only at infinity, with degree 0.
-    set E : ProjectiveDivisor (⟨W₂⟩ : SmoothPlaneCurve F) := LHS - RHS with hE_def
-    have hE_aff : ∀ Q : (⟨W₂⟩ : SmoothPlaneCurve F).SmoothPoint,
-        E (ProjectiveSmoothPoint.affine Q) = 0 := by
-      intro Q; rw [hE_def, Finsupp.sub_apply, h_aff Q, sub_self]
-    have hE_supp : E.support ⊆ {ProjectiveSmoothPoint.infinity} := by
-      intro x hx
-      rw [Finsupp.mem_support_iff] at hx
-      cases x with
-      | affine Q => exact absurd (hE_aff Q) hx
-      | infinity => exact Finset.mem_singleton_self _
-    have hE_single : E = Finsupp.single ProjectiveSmoothPoint.infinity
-        (E ProjectiveSmoothPoint.infinity) :=
-      (Finsupp.support_subset_singleton.mp hE_supp)
-    have hE_deg : E.degree = 0 := by
-      rw [hE_def]; unfold ProjectiveDivisor.degree
-      rw [show (LHS - RHS).sum (fun _ n => n) = LHS.degree - RHS.degree from
-        (ProjectiveDivisor.degree_sub LHS RHS), hLHS_deg, hRHS_deg, sub_zero]
-    have hEinf : E ProjectiveSmoothPoint.infinity = 0 := by
-      have : E.degree = E ProjectiveSmoothPoint.infinity := by
-        conv_lhs => rw [hE_single]
-        unfold ProjectiveDivisor.degree
-        rw [Finsupp.sum_single_index rfl]
-      rw [this] at hE_deg; exact hE_deg
-    have hdiff : LHS ProjectiveSmoothPoint.infinity - RHS ProjectiveSmoothPoint.infinity = 0 := by
-      rw [← Finsupp.sub_apply]; exact hEinf
-    linarith [hdiff]
+    exact projDivisor_infinity_coeff_eq_of_affine_eq_local LHS RHS
+      (hLHS_deg.trans hRHS_deg.symm) h_aff
 
 /-! ### The norm–conorm identity and `PlaceRestrictionPreservesPrincipal` -/
 
