@@ -58,7 +58,7 @@ It imports only; it does **not** modify any existing file.
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension NumberField.IsCMField Polynomial
+open NumberField NumberField.IsCMField Polynomial
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -187,7 +187,7 @@ theorem caseII_section91_factor_complexConj
   have h37 : (η : 𝓞 (CyclotomicField 37 ℚ)) ^ 37 = 1 :=
     (mem_nthRootsFinset (by norm_num) _).mp η.2
   have h36 : ((η : 𝓞 (CyclotomicField 37 ℚ)) ^ 36) ^ 37 = 1 := by
-    rw [← pow_mul, show 36 * 37 = 37 * 36 from by norm_num, pow_mul, h37, one_pow]
+    rw [← pow_mul, show 36 * 37 = 37 * 36 by norm_num, pow_mul, h37, one_pow]
   rw [caseII_section91_factor, caseII_section91_factorConj, map_div₀]
   -- `σ(x+yη) = x+yη³⁶`.
   have hnum : complexConj (CyclotomicField 37 ℚ)
