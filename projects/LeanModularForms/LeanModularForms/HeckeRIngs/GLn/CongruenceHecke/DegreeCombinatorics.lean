@@ -18,7 +18,7 @@ formulas (`HeckeCoset_deg_Gamma0_one_ppow`, `HeckeCoset_deg_Gamma0_p_ppow`).
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §3.2–3.3
 -/
 
-open Matrix Subgroup.Commensurable Pointwise Matrix.SpecialLinearGroup
+open Matrix Matrix.SpecialLinearGroup
 
 open scoped Pointwise MatrixGroups
 
