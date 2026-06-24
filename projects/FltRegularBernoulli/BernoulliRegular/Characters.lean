@@ -44,7 +44,7 @@ lands in `ℤ_[p]`.
 
 noncomputable section
 
-open Perfection PadicInt IsLocalRing
+open PadicInt IsLocalRing
 
 namespace BernoulliRegular
 
