@@ -88,8 +88,7 @@ def freeContentCaseIIData37_toReal
   ε := D.ε
   equation := by
     -- `x³⁷+y³⁷ = ε·(ζ−1)^{37(m+1)}·z³⁷ = ε·((ζ−1)^{m+1}·z)³⁷`.
-    have h := D.equation
-    rw [h, mul_pow, ← pow_mul, Nat.mul_comm (m + 1) 37, mul_assoc]
+    rw [D.equation, mul_pow, ← pow_mul, Nat.mul_comm (m + 1) 37, mul_assoc]
   hy := D.hy
   hz := D.hz
   x_real := D.x_real
@@ -142,9 +141,8 @@ theorem caseIIFree_correctedRadical_eq_real
       caseII_correctedRadical (freeContentCaseIIData37_toReal D)
         (freeContentCaseIIData37_toReal D).etaOne
         (caseII_correctionUnit (freeContentCaseIIData37_toReal D).etaOne) := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   have hp : (37 : ℕ) ≠ 2 := by decide
-  set D' := freeContentCaseIIData37_toReal D with hD'
+  set D' := freeContentCaseIIData37_toReal D
   -- `etaOne` coe is `ζ` (anchor `η₀ = 1`).
   have hη : (D'.etaOne : 𝓞 (CyclotomicField 37 ℚ)) = D.hζ.toInteger := by
     rw [caseII_etaOne_coe_eq_zeta D' hp]
@@ -175,17 +173,15 @@ theorem caseIIFree_conjNorm_factorCount_strict
       ¬ (D.hζ.toInteger - 1) ∣ ξ₁ ∧
       (normalizedFactors (Ideal.span ({ξ₁} : Set (𝓞 (CyclotomicField 37 ℚ))))).toFinset.card <
         caseIIFreeFactorCount D := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  set D' := freeContentCaseIIData37_toReal D with hD'
+  set D' := freeContentCaseIIData37_toReal D
   -- Transfer the non-terminal hypothesis to the real datum `D'`.
   have hnonterm' : ¬ ∃ αU : (𝓞 (CyclotomicField 37 ℚ))ˣ,
       caseII_correctedRadical D' D'.etaOne (caseII_correctionUnit D'.etaOne) =
         algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ)
           (αU : 𝓞 (CyclotomicField 37 ℚ)) := by
-    rw [← caseIIFree_correctedRadical_eq_real D]; exact hnonterm
+    rwa [← caseIIFree_correctedRadical_eq_real D]
   -- The proven strict drop on `D'` (note `D'.hζ = D.hζ`, `caseIIZFactorCount D' = free count D`).
-  obtain ⟨ξ₁, hξ_real, hξ_p, hξ_count⟩ := caseII_conjNorm_factorCount_strict D' hnonterm'
-  exact ⟨ξ₁, hξ_real, hξ_p, hξ_count⟩
+  exact caseII_conjNorm_factorCount_strict D' hnonterm'
 
 /-! ## 3'. The content-parity lemma: every `FreeContentCaseIIData37 n` has **even** content (PROVEN)
 
@@ -210,7 +206,6 @@ Every `FreeContentCaseIIData37 (CyclotomicField 37 ℚ) n` has `Even n`.  Proof:
 theorem freeContentCaseIIData37_even_content
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     {n : ℕ} (D : FreeContentCaseIIData37 (CyclotomicField 37 ℚ) n) : Even n := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   set K := CyclotomicField 37 ℚ
   set πD : 𝓞 K := (D.hζ.toInteger - 1 : 𝓞 K) with hπD
   set π : 𝓞 K := (zeta_spec 37 ℚ K).toInteger - 1 with hπ
@@ -274,8 +269,7 @@ theorem freeContentCaseIIData37_even_content
     have hmultD : multiplicity πD (D.x ^ 37 + D.y ^ 37) = n :=
       multiplicity_eq_of_dvd_of_not_dvd hdvd hnotdvd
     exact (multiplicity_eq_of_associated_left hassoc).trans hmultD
-  rw [hmult_n] at heven
-  exact heven
+  rwa [hmult_n] at heven
 
 /-- **A `RealCaseIIData37 m` forces `m` odd** (corollary of the content-parity lemma).  Its
 embedding `ofRealCaseIIData37` is a `FreeContentCaseIIData37` at content `37·(m+1)`, even by
@@ -383,14 +377,13 @@ theorem freeContentCaseIIDescentStep37_of_assembly_on_p_content
           (αU : 𝓞 (CyclotomicField 37 ℚ))) :
     ∃ (n' : ℕ) (D' : FreeContentCaseIIData37 (CyclotomicField 37 ℚ) n'),
       caseIIFreeFactorCount D' < caseIIFreeFactorCount D := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  set D' := freeContentCaseIIData37_toReal D with hD'
+  set D' := freeContentCaseIIData37_toReal D
   -- Transfer the non-terminal hypothesis to the real datum `D'`.
   have hnonterm' : ¬ ∃ αU : (𝓞 (CyclotomicField 37 ℚ))ˣ,
       caseII_correctedRadical D' D'.etaOne (caseII_correctionUnit D'.etaOne) =
         algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ)
           (αU : 𝓞 (CyclotomicField 37 ℚ)) := by
-    rw [← caseIIFree_correctedRadical_eq_real D]; exact hnonterm
+    rwa [← caseIIFree_correctedRadical_eq_real D]
   -- Washington's conjugate norm `ξ₁ = ρ₀σρ₀` (PROVEN): real, `𝔭`-coprime, `(ξ₁) = 𝔞₀^{2k'}`.
   obtain ⟨w, k, hk, hw_real, hw_p, hw_span⟩ := caseII_anchorPow_conjNorm_real_span D'
   -- The assembly residual realises `ξ₁ = w` as a free-content datum `Dnew` (note `Dnew.z = w`).
