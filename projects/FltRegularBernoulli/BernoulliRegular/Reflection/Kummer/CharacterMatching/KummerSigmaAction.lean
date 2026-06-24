@@ -66,12 +66,18 @@ predicate, cardinality reductions) are proved in this file.
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Polynomial
+open NumberField IsCyclotomicExtension
 open scoped NumberField
 
 namespace BernoulliRegular
 
 set_option linter.unusedSectionVars false
+
+/-- The `ZMod p`-value of the unit `1 : (ZMod p)ˣ` is `1`. (Needs `1 < p`,
+supplied by `Fact p.Prime`; for `p = 1` it would be `0`.) Used throughout the
+matching theorems to discharge the `a = 1` exponent. -/
+private theorem val_units_one {p : ℕ} [Fact p.Prime] :
+    ((1 : (ZMod p)ˣ) : ZMod p).val = 1 := by simp [ZMod.val_one]
 
 /-!
 ## The `Δ = (ZMod p)ˣ` action on `K^×` and `K^×/(K^×)^p`
@@ -339,8 +345,7 @@ theorem genInChiTwistDualEigenspace_at_one :
   rw [kummerSigmaAct_one_apply]
   -- Goal: P.genKummerClass = P.genKummerClass ^ (1 : ZMod p).val
   -- (1 : ZMod p).val = 1 since p is prime (so `Fact (1 < p)`).
-  have h1 : ((1 : (ZMod p)ˣ) : ZMod p).val = 1 := by simp [ZMod.val_one]
-  rw [h1, pow_one]
+  rw [val_units_one, pow_one]
 
 /-- **The Kummer class of `γ` is a `p`-th power class, hence `[γ]^p = 1`.**
 In the quotient `K^×/(K^×)^p`, every class has order dividing `p`. -/
@@ -785,8 +790,7 @@ theorem witness_eq_at_one_canonical :
       P.genUnit ^ ((1 : CyclotomicUnitDelta p) : ZMod p).val * (1 : Kˣ) ^ p := by
   rw [cyclotomicKUnitsEquiv_one_apply]
   -- Goal: P.genUnit = P.genUnit ^ (1 : ZMod p).val * 1 ^ p
-  have h1 : ((1 : (ZMod p)ˣ) : ZMod p).val = 1 := by simp [ZMod.val_one]
-  rw [h1, pow_one, one_pow, mul_one]
+  rw [val_units_one, pow_one, one_pow, mul_one]
 
 namespace KummerMatchingWitnessBundle
 
@@ -799,8 +803,7 @@ theorem witness_one_pow_eq_one (W : P.KummerMatchingWitnessBundle) :
   have h := W.witness_eq 1
   rw [cyclotomicKUnitsEquiv_one_apply] at h
   -- h : P.genUnit = P.genUnit ^ (1 : ZMod p).val * (W.witness 1) ^ p
-  have h1 : ((1 : (ZMod p)ˣ) : ZMod p).val = 1 := by simp [ZMod.val_one]
-  rw [h1, pow_one] at h
+  rw [val_units_one, pow_one] at h
   -- h : P.genUnit = P.genUnit * (W.witness 1) ^ p
   -- So (W.witness 1)^p = 1
   exact mul_left_cancel (a := P.genUnit) (by rw [← h, mul_one])
