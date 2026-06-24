@@ -113,10 +113,7 @@ theorem exists_artinHasseExp_product_pow_prime_iterate_mul_tail_eq_base_mul_frob
         N m y ε hε hzero
   refine ⟨c, ?_⟩
   change P * Tail = B * FrobTail
-  calc
-    P * Tail = P * (C * FrobTail) := by rw [htail']
-    _ = (P * C) * FrobTail := by ring
-    _ = B * FrobTail := by rw [hprod]
+  rw [← htail', ← mul_assoc, hprod]
 
 /-- Non-existential parameter-general carry-free tail comparison using the
 fixed Witt carry `traceCarry`. -/
@@ -199,10 +196,7 @@ theorem artinHasseExp_product_pow_prime_iterate_mul_tail_eq_base_mul_frobenius_t
       F.artinHasseExp_product_pow_prime_iterate_mul_traceCarry_eq_base_pow_prime_iterate
         N m y ε hε hzero
   change P * Tail = B * FrobTail
-  calc
-    P * Tail = P * (C * FrobTail) := by rw [htail']
-    _ = (P * C) * FrobTail := by ring
-    _ = B * FrobTail := by rw [hprod]
+  rw [← htail', ← mul_assoc, hprod]
 
 /-- Reindexed parameter-general carry-free tail comparison.  The
 Frobenius-shifted tail on the right is rewritten by separating the zeroth
@@ -305,15 +299,8 @@ theorem exists_artinHasseExp_product_pow_prime_iterate_mul_tail_eq_base_mul_rein
   change
     P * Tail =
       B * ∏ j ∈ Finset.range m, (U j) ^ (ℓ ^ (m - 1 - j))
-  calc
-    P * Tail =
-        B * ∏ j ∈ Finset.range m, (S j) ^ (ℓ ^ (m - 1 - j)) := htail'
-    _ =
-        B * ∏ j ∈ Finset.range m, (U j) ^ (ℓ ^ (m - 1 - j)) := by
-        congr 1
-        refine Finset.prod_congr rfl ?_
-        intro j _hj
-        rw [hreindex j]
+  rw [htail']
+  simp only [hreindex]
 
 /-- Parameter-general boundary cleanup for the reindexed tail: the last shifted
 iterate is trivial once the parameter has reached the zero boundary. -/
@@ -362,9 +349,7 @@ theorem artinHasseExp_reindexed_tail_succ_eq_range_of_zero_iterate
                 (c.coeff (r + 1)))))) ^
           (ℓ ^ (r + 2))
   have hεzero : (ε ^ (ℓ ^ m)) ^ ℓ = 0 := by
-    have hpow : (ε ^ (ℓ ^ m)) ^ ℓ = ε ^ (ℓ ^ (m + 1)) := by
-      rw [← pow_mul, Nat.pow_succ]
-    rw [hpow, hzero]
+    rw [← pow_mul, ← Nat.pow_succ, hzero]
   have hEzero :
       (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A) 0 = 1 := by
     simpa [A, Eps] using F.artinHasseExp_trunc_eval_zero N
@@ -423,13 +408,10 @@ theorem artinHasseExp_reindexed_shifted_range_eq_tail_of_pos
   refine Finset.prod_congr rfl ?_
   intro j _hj
   congr 1
-  have hNpred : N - 1 + 1 = N := Nat.sub_add_cancel (Nat.succ_le_of_lt hN)
-  rw [← Nat.range_succ_eq_Iic (N - 1), hNpred]
+  rw [← Nat.range_succ_eq_Iic (N - 1), Nat.sub_add_cancel (Nat.succ_le_of_lt hN)]
   refine Finset.prod_congr rfl ?_
   intro r _hr
-  have hpow : (ε ^ (ℓ ^ j)) ^ ℓ = ε ^ (ℓ ^ (j + 1)) := by
-    rw [← pow_mul, Nat.pow_succ]
-  rw [hpow]
+  rw [← pow_mul, ← Nat.pow_succ]
   simp
 
 /-- Parameter-general split of the reindexed tail into the peeled zeroth
@@ -503,22 +485,8 @@ theorem artinHasseExp_reindexed_tail_range_eq_coeff_zero_mul_shifted_tail_of_pos
     simpa [A, θ, Eps, cTail, V, W] using
       F.artinHasseExp_reindexed_shifted_range_eq_tail_of_pos
         (N := N) hN m ε c
-  calc
-    (∏ j ∈ Finset.range m, (Z j * V j) ^ (ℓ ^ (m - j)))
-        =
-          ∏ j ∈ Finset.range m,
-            ((Z j) ^ (ℓ ^ (m - j)) * (V j) ^ (ℓ ^ (m - j))) := by
-          refine Finset.prod_congr rfl ?_
-          intro j _hj
-          rw [mul_pow]
-    _ =
-          (∏ j ∈ Finset.range m, (Z j) ^ (ℓ ^ (m - j))) *
-            ∏ j ∈ Finset.range m, (V j) ^ (ℓ ^ (m - j)) := by
-          rw [Finset.prod_mul_distrib]
-    _ =
-          (∏ j ∈ Finset.range m, (Z j) ^ (ℓ ^ (m - j))) *
-            ∏ j ∈ Finset.range m, (W j) ^ (ℓ ^ (m - j)) := by
-          rw [hshift]
+  simp only [mul_pow, Finset.prod_mul_distrib]
+  rw [hshift]
 
 /-- Depth-indexed boundary cleanup for the reindexed tail.  The coordinate
 depth is independent of the quotient precision. -/
@@ -567,9 +535,7 @@ theorem artinHasseExp_reindexed_tail_succ_depth_eq_range_of_zero_iterate
                 (c.coeff (r + 1)))))) ^
           (ℓ ^ (r + 2))
   have hεzero : (ε ^ (ℓ ^ m)) ^ ℓ = 0 := by
-    have hpow : (ε ^ (ℓ ^ m)) ^ ℓ = ε ^ (ℓ ^ (m + 1)) := by
-      rw [← pow_mul, Nat.pow_succ]
-    rw [hpow, hzero]
+    rw [← pow_mul, ← Nat.pow_succ, hzero]
   have hEzero :
       (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A) 0 = 1 := by
     simpa [A, Eps] using F.artinHasseExp_trunc_eval_zero N
@@ -628,13 +594,10 @@ theorem artinHasseExp_reindexed_shifted_range_depth_eq_tail_of_pos
   refine Finset.prod_congr rfl ?_
   intro j _hj
   congr 1
-  have hDpred : D - 1 + 1 = D := Nat.sub_add_cancel (Nat.succ_le_of_lt hD)
-  rw [← Nat.range_succ_eq_Iic (D - 1), hDpred]
+  rw [← Nat.range_succ_eq_Iic (D - 1), Nat.sub_add_cancel (Nat.succ_le_of_lt hD)]
   refine Finset.prod_congr rfl ?_
   intro r _hr
-  have hpow : (ε ^ (ℓ ^ j)) ^ ℓ = ε ^ (ℓ ^ (j + 1)) := by
-    rw [← pow_mul, Nat.pow_succ]
-  rw [hpow]
+  rw [← pow_mul, ← Nat.pow_succ]
   simp
 
 /-- Depth-indexed split of the reindexed tail into the peeled zeroth coordinate
@@ -708,22 +671,8 @@ theorem artinHasseExp_reindexed_tail_range_depth_eq_coeff_zero_mul_shifted_tail_
     simpa [A, θ, Eps, cTail, V, W] using
       F.artinHasseExp_reindexed_shifted_range_depth_eq_tail_of_pos
         (D := D) hD N m ε c
-  calc
-    (∏ j ∈ Finset.range m, (Z j * V j) ^ (ℓ ^ (m - j)))
-        =
-          ∏ j ∈ Finset.range m,
-            ((Z j) ^ (ℓ ^ (m - j)) * (V j) ^ (ℓ ^ (m - j))) := by
-          refine Finset.prod_congr rfl ?_
-          intro j _hj
-          rw [mul_pow]
-    _ =
-          (∏ j ∈ Finset.range m, (Z j) ^ (ℓ ^ (m - j))) *
-            ∏ j ∈ Finset.range m, (V j) ^ (ℓ ^ (m - j)) := by
-          rw [Finset.prod_mul_distrib]
-    _ =
-          (∏ j ∈ Finset.range m, (Z j) ^ (ℓ ^ (m - j))) *
-            ∏ j ∈ Finset.range m, (W j) ^ (ℓ ^ (m - j)) := by
-          rw [hshift]
+  simp only [mul_pow, Finset.prod_mul_distrib]
+  rw [hshift]
 
 /-- Depth-indexed reindexing of the accumulated Frobenius-shifted tail. -/
 theorem artinHasseExp_frobenius_tail_succ_depth_eq_reindexed_tail
