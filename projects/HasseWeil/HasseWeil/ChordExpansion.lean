@@ -890,6 +890,82 @@ theorem addLineC_ne_zero_of_x_eq {α β : Isogeny W.toAffine W.toAffine}
   simp only [map_add, map_sub, map_pow, map_mul, map_ofNat, AlgHom.commutes]
   exact hg0
 
+/-! ### Branch-uniform Vieta data for the pullback pair
+
+The two branches of `addPullback_vieta_cleared` (tangent `x_α = x_β`, chord
+`x_α ≠ x_β`) share the first symmetric function `e₁` of the three roots and the
+pre-negation line value `Y₃′`; only the `e₂`/`e₃` coefficients and the intercept
+relation `hline` are branch-specific. These are pulled out here so both branch
+proofs are short outlines dispatching to `vieta_assembly`. -/
+
+/-- **`e₁` for the pullback pair**: the first symmetric function of the three
+roots `x_α, x_β, X₃` is `ℓ² + a₁ℓ − a₂` (`ℓ = addSlopePair`). This is `addX`'s
+sum-of-roots, valid in either branch since it only unfolds `addPullback_x_pair`. -/
+theorem addPullback_x_pair_sum_eq (α β : Isogeny W.toAffine W.toAffine) :
+    α.pullback (x_gen W) + β.pullback (x_gen W) + addPullback_x_pair α β
+      = addSlopePair α β ^ 2 + algebraMap F KE W.a₁ * addSlopePair α β
+        - algebraMap F KE W.a₂ := by
+  have hX₃ : addPullback_x_pair α β
+      = addSlopePair α β ^ 2 + algebraMap F KE W.a₁ * addSlopePair α β
+        - algebraMap F KE W.a₂ - α.pullback (x_gen W) - β.pullback (x_gen W) := rfl
+  linear_combination hX₃
+
+/-- **The pre-negation line value `Y₃′` at the third root**: unfolding the double
+negation, `negY X₃ Y₃ = ℓ·(X₃ − x_α) + y_α`, the value the chord/tangent line
+takes at `X₃`. Branch-uniform (a direct `negY_negY` consequence). -/
+theorem negY_addPullback_y_pair_eq (α β : Isogeny W.toAffine W.toAffine) :
+    (W_KE W).toAffine.negY (addPullback_x_pair α β) (addPullback_y_pair α β)
+      = addSlopePair α β * (addPullback_x_pair α β - α.pullback (x_gen W))
+        + α.pullback (y_gen W) :=
+  Affine.negY_negY (W' := (W_KE W).toAffine) _ _
+
+/-- **Chord intercept relation `hline`**: when `x_α ≠ x_β`, the `β`-image lies on
+the divided-difference line `y = ℓ·x + c` with `ℓ = addSlopePair`, `c = addLineC`;
+equivalently `y_β = ℓ·x_β + c`. The chord-branch input to the Vieta engines. -/
+theorem pullback_y_gen_eq_addSlopePair_mul_add_addLineC_of_x_ne
+    {α β : Isogeny W.toAffine W.toAffine}
+    (h_x : α.pullback (x_gen W) ≠ β.pullback (x_gen W)) :
+    β.pullback (y_gen W)
+      = addSlopePair α β * β.pullback (x_gen W) + addLineC W α β := by
+  have hxx : α.pullback (x_gen W) - β.pullback (x_gen W) ≠ 0 := sub_ne_zero.mpr h_x
+  rw [addLineC_def, addSlopePair_eq_of_x_ne h_x]
+  field_simp
+  ring
+
+/-- **Chord `e₂` for the pullback pair**: the second symmetric function of the
+three roots, the chord-branch evaluation of `chord_e₂` at the `(α, β)`-images
+with the divided-difference slope and intercept (`hline`). -/
+theorem addPullback_x_pair_e₂_of_x_ne {α β : Isogeny W.toAffine W.toAffine}
+    (h_x : α.pullback (x_gen W) ≠ β.pullback (x_gen W))
+    (hline : β.pullback (y_gen W)
+      = addSlopePair α β * β.pullback (x_gen W) + addLineC W α β) :
+    α.pullback (x_gen W) * β.pullback (x_gen W)
+      + α.pullback (x_gen W) * addPullback_x_pair α β
+      + β.pullback (x_gen W) * addPullback_x_pair α β
+      = algebraMap F KE W.a₄ - 2 * (addSlopePair α β * addLineC W α β)
+        - algebraMap F KE W.a₁ * addLineC W α β
+        - algebraMap F KE W.a₃ * addSlopePair α β := by
+  show α.pullback (x_gen W) * β.pullback (x_gen W)
+      + α.pullback (x_gen W) * (addSlopePair α β ^ 2 + _ - _ - _ - _)
+      + β.pullback (x_gen W) * (addSlopePair α β ^ 2 + _ - _ - _ - _) = _
+  exact chord_e₂ _ _ _ _ _ _ _ _ _ _ _ h_x (pullback_weierstrass_eq W α)
+    (pullback_weierstrass_eq W β) (addLineC_def W α β) hline
+
+/-- **Chord `e₃` for the pullback pair**: the third symmetric function (product)
+of the three roots, the chord-branch evaluation of `chord_e₃` at the
+`(α, β)`-images with the divided-difference slope and intercept (`hline`). -/
+theorem addPullback_x_pair_e₃_of_x_ne {α β : Isogeny W.toAffine W.toAffine}
+    (h_x : α.pullback (x_gen W) ≠ β.pullback (x_gen W))
+    (hline : β.pullback (y_gen W)
+      = addSlopePair α β * β.pullback (x_gen W) + addLineC W α β) :
+    α.pullback (x_gen W) * β.pullback (x_gen W) * addPullback_x_pair α β
+      = addLineC W α β ^ 2 + algebraMap F KE W.a₃ * addLineC W α β
+        - algebraMap F KE W.a₆ := by
+  show α.pullback (x_gen W) * β.pullback (x_gen W)
+      * (addSlopePair α β ^ 2 + _ - _ - _ - _) = _
+  exact chord_e₃ _ _ _ _ _ _ _ _ _ _ _ h_x (pullback_weierstrass_eq W α)
+    (pullback_weierstrass_eq W β) (addLineC_def W α β) hline
+
 /-- Tangent branch (`x_α = x_β`) of `addPullback_vieta_cleared`: the chart-Vieta
 identity when the two pullback abscissae coincide (double root, tangent slope). -/
 private theorem addPullback_vieta_cleared_tangent
@@ -909,23 +985,12 @@ private theorem addPullback_vieta_cleared_tangent
                 + 2 • (algebraMap F KE W.a₄ * zwSlopeLine W α β * zwNuLine W α β)
                 + 3 • (algebraMap F KE W.a₆ * zwSlopeLine W α β ^ 2 * zwNuLine W α β)))
           * (W_KE W).toAffine.negY (addPullback_x_pair α β) (addPullback_y_pair α β) := by
-  have hy₁ : α.pullback (y_gen W) ≠ 0 := pullback_y_gen_ne_zero W α
-  have hy₂ : β.pullback (y_gen W) ≠ 0 := pullback_y_gen_ne_zero W β
   have hX₃ : addPullback_x_pair α β
       = addSlopePair α β ^ 2 + algebraMap F KE W.a₁ * addSlopePair α β
         - algebraMap F KE W.a₂ - α.pullback (x_gen W) - β.pullback (x_gen W) := rfl
-  have hY₃ : (W_KE W).toAffine.negY (addPullback_x_pair α β) (addPullback_y_pair α β)
-      = addSlopePair α β * (addPullback_x_pair α β - α.pullback (x_gen W))
-        + α.pullback (y_gen W) :=
-    Affine.negY_negY (W' := (W_KE W).toAffine) _ _
-  have he₁ : α.pullback (x_gen W) + β.pullback (x_gen W) + addPullback_x_pair α β
-      = addSlopePair α β ^ 2 + algebraMap F KE W.a₁ * addSlopePair α β
-        - algebraMap F KE W.a₂ := by
-    linear_combination hX₃
   rw [zwSlopeLine_def, zwNuLine_def, pullback_localParam_eq W α, pullback_localParam_eq W β,
-    hY₃]
+    negY_addPullback_y_pair_eq]
   simp only [nsmul_eq_mul, Nat.cast_ofNat]
-  have hc : addLineC W α β ≠ 0 := addLineC_ne_zero_of_x_eq W h_x h_ni
   have htan := addSlopePair_mul_u_of_x_eq W h_x h_ni
   have hline : β.pullback (y_gen W)
       = addSlopePair α β * β.pullback (x_gen W) + addLineC W α β := by
@@ -945,8 +1010,9 @@ private theorem addPullback_vieta_cleared_tangent
     rw [hX₃, ← h_x]
     exact tangent_e₃ _ _ _ _ _ _ _ _ _ (pullback_weierstrass_eq W α)
       (addLineC_def W α β) htan
-  exact vieta_assembly _ _ _ _ _ _ _ _ _ _ _ _ hy₁ hy₂ hc (addLineC_def W α β) hline
-    he₁ he₂ he₃
+  exact vieta_assembly _ _ _ _ _ _ _ _ _ _ _ _ (pullback_y_gen_ne_zero W α)
+    (pullback_y_gen_ne_zero W β) (addLineC_ne_zero_of_x_eq W h_x h_ni)
+    (addLineC_def W α β) hline (addPullback_x_pair_sum_eq W α β) he₂ he₃
 
 /-- Chord branch (`x_α ≠ x_β`) of `addPullback_vieta_cleared`: the chart-Vieta
 identity via the divided-difference slope when the abscissae differ. -/
@@ -969,46 +1035,14 @@ private theorem addPullback_vieta_cleared_chord
                 + 2 • (algebraMap F KE W.a₄ * zwSlopeLine W α β * zwNuLine W α β)
                 + 3 • (algebraMap F KE W.a₆ * zwSlopeLine W α β ^ 2 * zwNuLine W α β)))
           * (W_KE W).toAffine.negY (addPullback_x_pair α β) (addPullback_y_pair α β) := by
-  have hy₁ : α.pullback (y_gen W) ≠ 0 := pullback_y_gen_ne_zero W α
-  have hy₂ : β.pullback (y_gen W) ≠ 0 := pullback_y_gen_ne_zero W β
-  have hX₃ : addPullback_x_pair α β
-      = addSlopePair α β ^ 2 + algebraMap F KE W.a₁ * addSlopePair α β
-        - algebraMap F KE W.a₂ - α.pullback (x_gen W) - β.pullback (x_gen W) := rfl
-  have hY₃ : (W_KE W).toAffine.negY (addPullback_x_pair α β) (addPullback_y_pair α β)
-      = addSlopePair α β * (addPullback_x_pair α β - α.pullback (x_gen W))
-        + α.pullback (y_gen W) :=
-    Affine.negY_negY (W' := (W_KE W).toAffine) _ _
-  have he₁ : α.pullback (x_gen W) + β.pullback (x_gen W) + addPullback_x_pair α β
-      = addSlopePair α β ^ 2 + algebraMap F KE W.a₁ * addSlopePair α β
-        - algebraMap F KE W.a₂ := by
-    linear_combination hX₃
   rw [zwSlopeLine_def, zwNuLine_def, pullback_localParam_eq W α, pullback_localParam_eq W β,
-    hY₃]
+    negY_addPullback_y_pair_eq]
   simp only [nsmul_eq_mul, Nat.cast_ofNat]
-  have hc : addLineC W α β ≠ 0 := addLineC_ne_zero_of_x_ne W h_α h_β h_x
-  have hline : β.pullback (y_gen W)
-      = addSlopePair α β * β.pullback (x_gen W) + addLineC W α β := by
-    have hxx : α.pullback (x_gen W) - β.pullback (x_gen W) ≠ 0 := sub_ne_zero.mpr h_x
-    rw [addLineC_def, addSlopePair_eq_of_x_ne h_x]
-    field_simp
-    ring
-  have he₂ : α.pullback (x_gen W) * β.pullback (x_gen W)
-      + α.pullback (x_gen W) * addPullback_x_pair α β
-      + β.pullback (x_gen W) * addPullback_x_pair α β
-      = algebraMap F KE W.a₄ - 2 * (addSlopePair α β * addLineC W α β)
-        - algebraMap F KE W.a₁ * addLineC W α β
-        - algebraMap F KE W.a₃ * addSlopePair α β := by
-    rw [hX₃]
-    exact chord_e₂ _ _ _ _ _ _ _ _ _ _ _ h_x (pullback_weierstrass_eq W α)
-      (pullback_weierstrass_eq W β) (addLineC_def W α β) hline
-  have he₃ : α.pullback (x_gen W) * β.pullback (x_gen W) * addPullback_x_pair α β
-      = addLineC W α β ^ 2 + algebraMap F KE W.a₃ * addLineC W α β
-        - algebraMap F KE W.a₆ := by
-    rw [hX₃]
-    exact chord_e₃ _ _ _ _ _ _ _ _ _ _ _ h_x (pullback_weierstrass_eq W α)
-      (pullback_weierstrass_eq W β) (addLineC_def W α β) hline
-  exact vieta_assembly _ _ _ _ _ _ _ _ _ _ _ _ hy₁ hy₂ hc (addLineC_def W α β) hline
-    he₁ he₂ he₃
+  have hline := pullback_y_gen_eq_addSlopePair_mul_add_addLineC_of_x_ne W h_x
+  exact vieta_assembly _ _ _ _ _ _ _ _ _ _ _ _ (pullback_y_gen_ne_zero W α)
+    (pullback_y_gen_ne_zero W β) (addLineC_ne_zero_of_x_ne W h_α h_β h_x)
+    (addLineC_def W α β) hline (addPullback_x_pair_sum_eq W α β)
+    (addPullback_x_pair_e₂_of_x_ne W h_x hline) (addPullback_x_pair_e₃_of_x_ne W h_x hline)
 
 /-- **FG-B4/B4a, the chart-Vieta identity (cleared form, both branches)**:
 for summands with `x`-poles at `O` and a non-inverse pair, the third
