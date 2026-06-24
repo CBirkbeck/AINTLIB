@@ -476,6 +476,44 @@ private theorem subst_X_eq_self (f : PowerSeries R) :
   rw [heq]
   exact congr_fun MvPowerSeries.subst_self f
 
+/-- Auxiliary bootstrap: **a one-sided compositional inverse with a unit
+linear coefficient is automatically two-sided**. If `g` has zero constant
+coefficient, `coeff 1 g` is a unit, and `g` is a left inverse of `f`
+(`subst g f = X`), then `f` is also a left inverse of `g`
+(`subst f g = X`).
+
+The proof builds the canonical right inverse `h := compInverseOfUnit g _ _`
+of `g` (so `subst h g = X`), then uses associativity of substitution
+`subst h (subst g f) = subst (subst h g) f` to show `h = f`, whence
+`subst f g = subst h g = X`. This is the abstract content of the
+`mulByNatHom`/`mulByNatInvSeries` two-sided-inverse argument; specialising
+`f := (mulByNatHom F n).toSeries`, `g := mulByNatInvSeries F n hn` recovers
+the left-inverse identity. -/
+private theorem subst_eq_X_of_subst_eq_X_of_isUnit_coeff_one
+    {f g : PowerSeries R} (hg_hasSubst : PowerSeries.HasSubst g)
+    (hg_const : @PowerSeries.constantCoeff R _ g = 0)
+    (hg_unit : IsUnit (PowerSeries.coeff 1 g))
+    (h_right : PowerSeries.subst g f = PowerSeries.X) :
+    PowerSeries.subst f g = PowerSeries.X := by
+  -- Build the canonical right inverse `h` of `g` with linear coefficient `coeff 1 g`.
+  set v : R := PowerSeries.coeff 1 g with hv_def
+  set h : PowerSeries R := compInverseOfUnit g v hg_unit with hh_def
+  have h_subst_h_g : PowerSeries.subst h g = PowerSeries.X :=
+    subst_compInverseOfUnit_eq_X g v hg_unit hg_const rfl
+  have h_h_hasSubst : PowerSeries.HasSubst h := compInverseOfUnit_hasSubst _ _ hg_unit
+  -- Associativity: subst h (subst g f) = subst (subst h g) f.
+  -- subst_comp_subst_apply ha hb f' : subst b (subst a f') = subst (subst b a) f'.
+  have hassoc : PowerSeries.subst h (PowerSeries.subst g f) =
+      PowerSeries.subst (PowerSeries.subst h g) f :=
+    PowerSeries.subst_comp_subst_apply hg_hasSubst h_h_hasSubst f
+  -- LHS: subst h (subst g f) = subst h X = h.
+  rw [h_right, PowerSeries.subst_X h_h_hasSubst] at hassoc
+  -- RHS: subst (subst h g) f = subst X f = f.
+  rw [h_subst_h_g, subst_X_eq_self f] at hassoc
+  -- hassoc : h = f, so subst f g = subst h g = X.
+  rw [← hassoc]
+  exact h_subst_h_g
+
 /-- **T-IV-2-008b: the left-inverse identity** at the power-series level:
 `subst (mulByNatHom F n).toSeries (mulByNatInvSeries F n hn) = X`.
 Equivalently, `inv ∘ [n] = id` at the series level.
@@ -498,48 +536,17 @@ theorem FormalGroup.subst_mulByNatHom_mulByNatInvSeries (F : FormalGroup R) {n :
     (hn : IsUnit ((n : ℕ) : R)) :
     PowerSeries.subst (F.mulByNatHom n).toSeries (F.mulByNatInvSeries n hn) =
       PowerSeries.X := by
-  -- Set up abbreviations.
-  set f : PowerSeries R := (F.mulByNatHom n).toSeries with hf_def
-  set g : PowerSeries R := F.mulByNatInvSeries n hn with hg_def
-  -- Existing right-inverse identity: subst g f = X.
-  have h_right : PowerSeries.subst g f = PowerSeries.X :=
-    F.subst_mulByNatInvSeries_mulByNatHom n hn
-  -- Step 2: compute coeff 1 g = (hn.unit)⁻¹.
-  set v : R := ((hn.unit⁻¹ : Rˣ) : R) with hv_def
-  have hv : IsUnit v := (hn.unit⁻¹ : Rˣ).isUnit
-  have hcoeff_g : PowerSeries.coeff 1 g = v := by
-    rw [hg_def]
-    change PowerSeries.coeff 1 (compInverseOfUnit (F.mulByNatHom n).toSeries
-        ((n : ℕ) : R) hn) = v
-    exact compInverseOfUnit_coeff_one _ _ hn
-  -- Step 3: construct h := compInverseOfUnit g v hv (right inverse of g).
-  set h : PowerSeries R := compInverseOfUnit g v hv with hh_def
-  have h_g_const : @PowerSeries.constantCoeff R _ g = 0 := by
-    rw [hg_def]
-    exact F.constantCoeff_mulByNatInvSeries n hn
-  have h_subst_h_g : PowerSeries.subst h g = PowerSeries.X :=
-    subst_compInverseOfUnit_eq_X g v hv h_g_const hcoeff_g
-  -- HasSubst facts.
-  have h_g_hasSubst : PowerSeries.HasSubst g := by
-    rw [hg_def]
-    exact F.mulByNatInvSeries_hasSubst n hn
-  have h_h_hasSubst : PowerSeries.HasSubst h := compInverseOfUnit_hasSubst _ _ hv
-  -- Step 4: apply associativity.
-  -- subst_comp_subst_apply ha hb f' : subst b (subst a f') = subst (subst b a) f'.
-  -- With a := g, b := h: subst h (subst g f) = subst (subst h g) f.
-  have hassoc : PowerSeries.subst h (PowerSeries.subst g f) =
-      PowerSeries.subst (PowerSeries.subst h g) f :=
-    PowerSeries.subst_comp_subst_apply h_g_hasSubst h_h_hasSubst f
-  -- LHS: subst h (subst g f) = subst h X = h.
-  rw [h_right] at hassoc
-  rw [PowerSeries.subst_X h_h_hasSubst] at hassoc
-  -- RHS: subst (subst h g) f = subst X f = f.
-  rw [h_subst_h_g] at hassoc
-  rw [subst_X_eq_self f] at hassoc
-  -- hassoc : h = f.
-  -- Step 5: subst f g = subst h g = X.
-  rw [← hassoc]
-  exact h_subst_h_g
+  -- Apply the bootstrap with `f := [n].toSeries`, `g := mulByNatInvSeries`,
+  -- whose four hypotheses are the existing right-inverse identity plus the
+  -- standard structural facts about `mulByNatInvSeries`.
+  refine subst_eq_X_of_subst_eq_X_of_isUnit_coeff_one
+    (F.mulByNatInvSeries_hasSubst n hn) (F.constantCoeff_mulByNatInvSeries n hn) ?_
+    (F.subst_mulByNatInvSeries_mulByNatHom n hn)
+  -- `coeff 1 (mulByNatInvSeries F n hn) = (hn.unit)⁻¹`, a unit.
+  have hcoeff : PowerSeries.coeff 1 (F.mulByNatInvSeries n hn) = ((hn.unit⁻¹ : Rˣ) : R) :=
+    compInverseOfUnit_coeff_one (F.mulByNatHom n).toSeries ((n : ℕ) : R) hn
+  rw [hcoeff]
+  exact (hn.unit⁻¹ : Rˣ).isUnit
 
 /-! ### T-IV-2-008b corollary: injectivity of `[n]` on power series -/
 
