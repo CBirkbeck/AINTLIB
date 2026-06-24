@@ -60,7 +60,7 @@ It imports only; it does **not** modify any existing file.
 
 noncomputable section
 
-open NumberField NumberField.IsCMField IsCyclotomicExtension UniqueFactorizationMonoid Polynomial
+open NumberField UniqueFactorizationMonoid
 open scoped nonZeroDivisors
 
 namespace BernoulliRegular.FLT37.Eichler
