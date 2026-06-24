@@ -922,6 +922,72 @@ private theorem ord_P_mulByInt_y_sub_const_eq_one_of_two_mul_eq_zero (ℓ : ℤ)
   exact le_antisymm
     (ord_P_mulByInt_y_sub_const_le_one W ℓ hℓ hℓF P y_Q hY_sub_ne hPX_ord) h_one_le_Y
 
+/-- **Scaling by a nonzero constant from `F` does not change `ord_P`.** For `c : F` with `c ≠ 0`
+the constant `algebraMap F KE c` is a unit at every smooth point, so multiplying by it leaves the
+order unchanged: `ord_P P (algebraMap F KE c * g) = ord_P P g`. -/
+private theorem ord_P_algebraMap_F_mul_eq {c : F} (hc : c ≠ 0)
+    (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPoint) (g : KE) :
+    (⟨W⟩ : SmoothPlaneCurve F).ord_P P (algebraMap F KE c * g) =
+      (⟨W⟩ : SmoothPlaneCurve F).ord_P P g := by
+  rw [(⟨W⟩ : SmoothPlaneCurve F).ord_P_mul,
+    (⟨W⟩ : SmoothPlaneCurve F).ord_P_algebraMap_F_of_ne_zero hc, zero_add]
+
+/-- **The pulled-back `Ψ₂` rewritten on the difference coordinates has order `1`.** Combining the
+uniformizer fact `ord_P ([ℓ]^*Ψ₂) = 1` (`ord_P_psiTwo_pullback_eq_one`) with the `2`-torsion
+relation `2 y_Q + a₁ x_Q + a₃ = 0` (which lets `[ℓ]^*Ψ₂ = 2(mulByInt_y − y_Q) + a₁(mulByInt_x − x_Q)`
+after cancelling `a₃`), the sum on the difference coordinates `mulByInt_y − y_Q`, `mulByInt_x − x_Q`
+itself has order `1`. -/
+private theorem ord_P_two_mul_y_sub_add_a₁_mul_x_sub_eq_one (ℓ : ℤ) (hℓ : ℓ ≠ 0)
+    (h2ℓF : (2 * ℓ : F) ≠ 0) (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPoint) {x_Q y_Q : F}
+    (h2torKE : (2 : KE) * algebraMap F KE y_Q + algebraMap F KE W.a₁ * algebraMap F KE x_Q +
+      algebraMap F KE W.a₃ = 0)
+    (hQ2P : (mulByInt W.toAffine (2 * ℓ)).toAddMonoidHom P.toAffinePoint = (0 : W.toAffine.Point))
+    (hψℓ_ord : (⟨W⟩ : SmoothPlaneCurve F).ord_P P (ψ_ff W ℓ) = 0) :
+    (⟨W⟩ : SmoothPlaneCurve F).ord_P P
+        (2 * (mulByInt_y W ℓ - algebraMap F KE y_Q) +
+          algebraMap F KE W.a₁ * (mulByInt_x W ℓ - algebraMap F KE x_Q)) =
+      ((1 : ℤ) : WithTop ℤ) := by
+  have hAprime_ord :
+      (⟨W⟩ : SmoothPlaneCurve F).ord_P P
+        ((2 : KE) * mulByInt_y W ℓ + algebraMap F KE W.a₁ * mulByInt_x W ℓ +
+          algebraMap F KE W.a₃) = ((1 : ℤ) : WithTop ℤ) :=
+    ord_P_psiTwo_pullback_eq_one W ℓ hℓ h2ℓF P hQ2P hψℓ_ord
+  have hAprime_eq : (2 : KE) * mulByInt_y W ℓ + algebraMap F KE W.a₁ * mulByInt_x W ℓ +
+      algebraMap F KE W.a₃ = 2 * (mulByInt_y W ℓ - algebraMap F KE y_Q) +
+        algebraMap F KE W.a₁ * (mulByInt_x W ℓ - algebraMap F KE x_Q) := by
+    linear_combination h2torKE
+  rwa [hAprime_eq] at hAprime_ord
+
+/-- **Extracting the order of the dominant `y`-term from the order-`1` sum.** Given that the sum
+`2(mulByInt_y − y_Q) + a₁(mulByInt_x − x_Q)` has order `1` and the strict order gap
+`ord_P (mulByInt_y − y_Q) < ord_P (mulByInt_x − x_Q)`, the `2(mulByInt_y − y_Q)` term strictly
+dominates (order `n := ord_P (mulByInt_y − y_Q)`, as `2` is a unit, the `a₁`-term having order
+`> n`), so the order of the sum equals `n`; hence `ord_P (mulByInt_y − y_Q) = 1`. The case `a₁ = 0`
+is the degenerate sub-case where the second term vanishes outright. -/
+private theorem ord_P_mulByInt_y_sub_const_eq_of_sum_ord_eq_one (ℓ : ℤ) (h2F : (2 : F) ≠ 0)
+    (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPoint) {x_Q y_Q : F}
+    (hsum_ord : (⟨W⟩ : SmoothPlaneCurve F).ord_P P
+        (2 * (mulByInt_y W ℓ - algebraMap F KE y_Q) +
+          algebraMap F KE W.a₁ * (mulByInt_x W ℓ - algebraMap F KE x_Q)) =
+      ((1 : ℤ) : WithTop ℤ))
+    (h_gap : (⟨W⟩ : SmoothPlaneCurve F).ord_P P (mulByInt_y W ℓ - algebraMap F KE y_Q) <
+      (⟨W⟩ : SmoothPlaneCurve F).ord_P P (mulByInt_x W ℓ - algebraMap F KE x_Q)) :
+    (⟨W⟩ : SmoothPlaneCurve F).ord_P P (mulByInt_y W ℓ - algebraMap F KE y_Q) =
+      ((1 : ℤ) : WithTop ℤ) := by
+  have h2KE : algebraMap F KE 2 = (2 : KE) := map_ofNat (algebraMap F KE) 2
+  have hterm1_ord : (⟨W⟩ : SmoothPlaneCurve F).ord_P P
+      (2 * (mulByInt_y W ℓ - algebraMap F KE y_Q)) =
+      (⟨W⟩ : SmoothPlaneCurve F).ord_P P (mulByInt_y W ℓ - algebraMap F KE y_Q) := by
+    rw [← h2KE, ord_P_algebraMap_F_mul_eq W h2F]
+  by_cases ha1 : W.a₁ = 0
+  · rwa [ha1, map_zero, zero_mul, add_zero, hterm1_ord] at hsum_ord
+  · have hlt : (⟨W⟩ : SmoothPlaneCurve F).ord_P P
+        (2 * (mulByInt_y W ℓ - algebraMap F KE y_Q)) <
+        (⟨W⟩ : SmoothPlaneCurve F).ord_P P
+          (algebraMap F KE W.a₁ * (mulByInt_x W ℓ - algebraMap F KE x_Q)) := by
+      rw [hterm1_ord, ord_P_algebraMap_F_mul_eq W ha1]; exact h_gap
+    rwa [SmoothPlaneCurve.ord_P_add_eq_of_lt hlt, hterm1_ord] at hsum_ord
+
 /-- **`n = 1` via the duplication formula (char `≠ 2` leg).** When `(2ℓ : F) ≠ 0` the pulled-back
 2-division polynomial `Ψ₂ ∘ [ℓ] = 2(mulByInt_y − y_Q) + a₁(mulByInt_x − x_Q)` has order `1`
 (`ord_P_psiTwo_pullback_eq_one`, the `[2ℓ]`-torsion pole). Its `2(mulByInt_y − y_Q)` term has order
@@ -941,37 +1007,10 @@ private theorem ord_P_mulByInt_y_sub_const_eq_one_of_two_mul_ne_zero (ℓ : ℤ)
   have h2F : (2 : F) ≠ 0 := by
     intro h; apply h2ℓF
     rw [show (2 * ℓ : F) = 2 * (ℓ : F) from by ring, h, zero_mul]
-  have hAprime_ord :
-      (⟨W⟩ : SmoothPlaneCurve F).ord_P P
-        ((2 : KE) * mulByInt_y W ℓ + algebraMap F KE W.a₁ * mulByInt_x W ℓ +
-          algebraMap F KE W.a₃) = ((1 : ℤ) : WithTop ℤ) :=
-    ord_P_psiTwo_pullback_eq_one W ℓ hℓ h2ℓF P hQ2P hψℓ_ord
-  have hAprime_eq : (2 : KE) * mulByInt_y W ℓ + algebraMap F KE W.a₁ * mulByInt_x W ℓ +
-      algebraMap F KE W.a₃ = 2 * (mulByInt_y W ℓ - algebraMap F KE y_Q) +
-        algebraMap F KE W.a₁ * (mulByInt_x W ℓ - algebraMap F KE x_Q) := by
-    linear_combination h2torKE
-  have h2KE : algebraMap F KE 2 = (2 : KE) := map_ofNat (algebraMap F KE) 2
-  have hterm1_ord : (⟨W⟩ : SmoothPlaneCurve F).ord_P P
-      (2 * (mulByInt_y W ℓ - algebraMap F KE y_Q)) =
-      (⟨W⟩ : SmoothPlaneCurve F).ord_P P (mulByInt_y W ℓ - algebraMap F KE y_Q) := by
-    rw [← h2KE, (⟨W⟩ : SmoothPlaneCurve F).ord_P_mul,
-      (⟨W⟩ : SmoothPlaneCurve F).ord_P_algebraMap_F_of_ne_zero h2F, zero_add]
-  rw [hAprime_eq] at hAprime_ord
-  by_cases ha1 : W.a₁ = 0
-  · rw [ha1, map_zero, zero_mul, add_zero, hterm1_ord] at hAprime_ord
-    exact hAprime_ord
-  · have hterm2 : (⟨W⟩ : SmoothPlaneCurve F).ord_P P
-        (algebraMap F KE W.a₁ * (mulByInt_x W ℓ - algebraMap F KE x_Q)) =
-        (⟨W⟩ : SmoothPlaneCurve F).ord_P P (mulByInt_x W ℓ - algebraMap F KE x_Q) := by
-      rw [(⟨W⟩ : SmoothPlaneCurve F).ord_P_mul,
-        (⟨W⟩ : SmoothPlaneCurve F).ord_P_algebraMap_F_of_ne_zero ha1, zero_add]
-    have hlt : (⟨W⟩ : SmoothPlaneCurve F).ord_P P
-        (2 * (mulByInt_y W ℓ - algebraMap F KE y_Q)) <
-        (⟨W⟩ : SmoothPlaneCurve F).ord_P P
-          (algebraMap F KE W.a₁ * (mulByInt_x W ℓ - algebraMap F KE x_Q)) := by
-      rw [hterm1_ord, hterm2]; exact h_gap
-    rw [SmoothPlaneCurve.ord_P_add_eq_of_lt hlt, hterm1_ord] at hAprime_ord
-    exact hAprime_ord
+  -- The pulled-back `Ψ₂`, on the difference coordinates, has order `1` (uniformizer + 2-torsion).
+  have hsum_ord := ord_P_two_mul_y_sub_add_a₁_mul_x_sub_eq_one W ℓ hℓ h2ℓF P h2torKE hQ2P hψℓ_ord
+  -- The dominant `2(mulByInt_y − y_Q)` term carries that order, pinning `ord_P (mulByInt_y − y_Q)`.
+  exact ord_P_mulByInt_y_sub_const_eq_of_sum_ord_eq_one W ℓ h2F P hsum_ord h_gap
 
 /-- **The `y`-variant `e = 1` unramifiedness of `[ℓ]` (2-torsion image).** For `[ℓ]` separable
 (`(ℓ : F) ≠ 0`) and a smooth point `P` of `⟨W⟩` whose image `[ℓ]·P = (x_Q, y_Q)` is an affine
