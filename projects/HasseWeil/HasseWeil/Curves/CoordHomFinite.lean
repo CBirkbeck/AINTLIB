@@ -194,6 +194,71 @@ private theorem isIntegralElem_aux (ψ : C₂.CoordinateRing →ₐ[F] C₁.Coor
       inv_mul_cancel₀ (Polynomial.leadingCoeff_ne_zero.mpr hn0), map_one]
   · rw [Polynomial.eval₂_mul, Polynomial.eval₂_C, hroot, mul_zero]
 
+/-- The trace `t = 2p − q·s` (with `deg s ≤ 1`) has degree at most
+`max (deg p) (deg q + 1)`: pure `degree_sub_le`/`degree_mul_le` bookkeeping,
+using `deg 2 ≤ 0`. -/
+private theorem degree_trace_le_max {p q s : Polynomial F} (hsle : s.degree ≤ 1) :
+    (2 * p - q * s).degree ≤ max p.degree (q.degree + 1) := by
+  refine (Polynomial.degree_sub_le _ _).trans (max_le_max ?_ ?_)
+  · refine (Polynomial.degree_mul_le _ _).trans ?_
+    have h2le : ((2 : Polynomial F)).degree ≤ 0 := by
+      rw [← map_ofNat (Polynomial.C : F →+* Polynomial F) 2]
+      exact Polynomial.degree_C_le
+    calc (2 : Polynomial F).degree + p.degree ≤ 0 + p.degree := by gcongr
+      _ = p.degree := zero_add _
+  · refine (Polynomial.degree_mul_le _ _).trans ?_
+    gcongr
+
+/-- A norm of degree `max (2 deg p) (2 deg q + 3)` has positive degree once
+`q ≠ 0`: the odd candidate `2 deg q + 3 ≥ 3 > 0` already wins. -/
+private theorem pos_degree_of_degree_eq_max {p q n : Polynomial F} (hq : q ≠ 0)
+    (hndeg : n.degree = max (2 • p.degree) (2 • q.degree + 3)) : 0 < n.degree := by
+  obtain ⟨b, hqd⟩ : ∃ b : ℕ, q.degree = (b : WithBot ℕ) :=
+    ⟨q.natDegree, Polynomial.degree_eq_natDegree hq⟩
+  rw [hndeg, hqd]
+  refine lt_max_of_lt_right ?_
+  rw [two_nsmul]
+  exact_mod_cast (by omega : 0 < b + b + 3)
+
+/-- The **parity-trick** strict bound: a polynomial of degree at most
+`max (deg p) (deg q + 1)` (the trace bound from `degree_trace_le_max`) has
+degree strictly below a norm of degree `max (2 deg p) (2 deg q + 3)`.  Even
+`2 deg p` vs. odd `2 deg q + 3` never tie, so each candidate of the small max
+falls strictly below the big one. -/
+private theorem degree_lt_of_le_max_degree_eq_max {p q n : Polynomial F}
+    {t : Polynomial F} (hq : q ≠ 0)
+    (htle : t.degree ≤ max p.degree (q.degree + 1))
+    (hndeg : n.degree = max (2 • p.degree) (2 • q.degree + 3)) :
+    t.degree < n.degree := by
+  obtain ⟨b, hqd⟩ : ∃ b : ℕ, q.degree = (b : WithBot ℕ) :=
+    ⟨q.natDegree, Polynomial.degree_eq_natDegree hq⟩
+  rw [hqd] at htle hndeg
+  refine lt_of_le_of_lt htle (max_lt ?_ ?_)
+  · -- `p.degree < deg n`
+    rw [hndeg]
+    rcases eq_or_ne p 0 with hp0 | hp0
+    · -- `p = 0`: `⊥ <` anything finite
+      rw [hp0, Polynomial.degree_zero]
+      refine lt_max_of_lt_right ?_
+      rw [two_nsmul]
+      exact lt_of_lt_of_le (WithBot.bot_lt_coe 0)
+        (by exact_mod_cast (by omega : 0 ≤ b + b + 3))
+    · obtain ⟨a, hpd⟩ : ∃ a : ℕ, p.degree = (a : WithBot ℕ) :=
+        ⟨p.natDegree, Polynomial.degree_eq_natDegree hp0⟩
+      rw [hpd]
+      rcases le_or_gt a (b + 1) with hab | hab
+      · refine lt_max_of_lt_right ?_
+        rw [two_nsmul]
+        exact_mod_cast (by omega : a < b + b + 3)
+      · refine lt_max_of_lt_left ?_
+        rw [two_nsmul]
+        exact_mod_cast (by omega : a < a + a)
+  · -- `q.degree + 1 < deg n`
+    rw [hndeg]
+    refine lt_max_of_lt_right ?_
+    rw [two_nsmul]
+    exact_mod_cast (by omega : b + 1 < b + b + 3)
+
 /-- Auxiliary (pure degree arithmetic over `F[X]`): the **parity trick**.  For
 the conjugate-pair trace `t = 2p − qs` (with `deg s ≤ 1`) and a norm `n`
 whose degree is `max (2 deg p) (2 deg q + 3)`, the even/odd parity of the two
@@ -202,50 +267,9 @@ candidate leading degrees forces `0 < deg n` and `deg t < deg n` whenever
 private theorem degree_trace_lt_degree_norm {p q s n : Polynomial F}
     (hsle : s.degree ≤ 1) (hq : q ≠ 0)
     (hndeg : n.degree = max (2 • p.degree) (2 • q.degree + 3)) :
-    0 < n.degree ∧ (2 * p - q * s).degree < n.degree := by
-  have htle : (2 * p - q * s).degree ≤ max p.degree (q.degree + 1) := by
-    refine (Polynomial.degree_sub_le _ _).trans (max_le_max ?_ ?_)
-    · refine (Polynomial.degree_mul_le _ _).trans ?_
-      have h2le : ((2 : Polynomial F)).degree ≤ 0 := by
-        rw [← map_ofNat (Polynomial.C : F →+* Polynomial F) 2]
-        exact Polynomial.degree_C_le
-      calc (2 : Polynomial F).degree + p.degree ≤ 0 + p.degree := by gcongr
-        _ = p.degree := zero_add _
-    · refine (Polynomial.degree_mul_le _ _).trans ?_
-      gcongr
-  obtain ⟨b, hqd⟩ : ∃ b : ℕ, q.degree = (b : WithBot ℕ) :=
-    ⟨q.natDegree, Polynomial.degree_eq_natDegree hq⟩
-  rw [hqd] at htle hndeg
-  refine ⟨?_, ?_⟩
-  · rw [hndeg]
-    refine lt_max_of_lt_right ?_
-    rw [two_nsmul]
-    exact_mod_cast (by omega : 0 < b + b + 3)
-  · refine lt_of_le_of_lt htle (max_lt ?_ ?_)
-    · -- `p.degree < deg n`
-      rw [hndeg]
-      rcases eq_or_ne p 0 with hp0 | hp0
-      · -- `p = 0`: `⊥ <` anything finite
-        rw [hp0, Polynomial.degree_zero]
-        refine lt_max_of_lt_right ?_
-        rw [two_nsmul]
-        exact lt_of_lt_of_le (WithBot.bot_lt_coe 0)
-          (by exact_mod_cast (by omega : 0 ≤ b + b + 3))
-      · obtain ⟨a, hpd⟩ : ∃ a : ℕ, p.degree = (a : WithBot ℕ) :=
-          ⟨p.natDegree, Polynomial.degree_eq_natDegree hp0⟩
-        rw [hpd]
-        rcases le_or_gt a (b + 1) with hab | hab
-        · refine lt_max_of_lt_right ?_
-          rw [two_nsmul]
-          exact_mod_cast (by omega : a < b + b + 3)
-        · refine lt_max_of_lt_left ?_
-          rw [two_nsmul]
-          exact_mod_cast (by omega : a < a + a)
-    · -- `q.degree + 1 < deg n`
-      rw [hndeg]
-      refine lt_max_of_lt_right ?_
-      rw [two_nsmul]
-      exact_mod_cast (by omega : b + 1 < b + b + 3)
+    0 < n.degree ∧ (2 * p - q * s).degree < n.degree :=
+  ⟨pos_degree_of_degree_eq_max hq hndeg,
+    degree_lt_of_le_max_degree_eq_max hq (degree_trace_le_max hsle) hndeg⟩
 
 set_option synthInstance.maxHeartbeats 200000 in
 set_option maxHeartbeats 1600000 in
