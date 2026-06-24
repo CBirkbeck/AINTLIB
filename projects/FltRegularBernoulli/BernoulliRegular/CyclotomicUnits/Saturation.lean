@@ -17,7 +17,6 @@ not the closure of that image.
 noncomputable section
 
 open NumberField
-open scoped BigOperators
 
 namespace BernoulliRegular
 
