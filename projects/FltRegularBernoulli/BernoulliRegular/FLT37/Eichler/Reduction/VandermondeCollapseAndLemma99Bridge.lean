@@ -83,7 +83,7 @@ real cyclotomic units `Eᵢ`.
 
 noncomputable section
 
-open NumberField Matrix Finset
+open NumberField
 
 namespace BernoulliRegular.FLT37.Eichler
 
