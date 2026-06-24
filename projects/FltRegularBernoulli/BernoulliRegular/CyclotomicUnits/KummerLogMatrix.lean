@@ -19,6 +19,7 @@ modulo `p`.
 
 noncomputable section
 
+open scoped NumberField
 open NumberField.IsCMField
 open BernoulliRegular.Reflection.Local
 
