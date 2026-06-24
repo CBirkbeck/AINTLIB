@@ -88,7 +88,7 @@ sound `fermatLastTheoremFor_thirtyseven_of_caseII_postR3` shape — conditional 
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension
+open NumberField
 
 namespace BernoulliRegular.FLT37.Eichler
 
