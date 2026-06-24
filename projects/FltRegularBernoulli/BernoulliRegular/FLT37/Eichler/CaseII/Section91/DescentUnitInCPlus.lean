@@ -80,7 +80,7 @@ wiring into piece (i) — is proved here.
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension
+open NumberField
 
 namespace BernoulliRegular.FLT37.Eichler
 
