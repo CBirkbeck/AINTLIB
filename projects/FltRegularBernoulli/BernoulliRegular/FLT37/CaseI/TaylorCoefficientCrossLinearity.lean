@@ -28,7 +28,7 @@ shape used by the Mirimanoff-polynomial argument that closes case I.
 
 noncomputable section
 
-open NumberField NumberField.IsCMField IsCyclotomicExtension
+open NumberField IsCyclotomicExtension
 
 namespace BernoulliRegular
 
