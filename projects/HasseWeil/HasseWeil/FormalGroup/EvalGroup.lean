@@ -892,6 +892,65 @@ private lemma hasEval_of_mem_maximalIdeal_general {σ : Type*} [Finite σ]
   · rw [Filter.cofinite_eq_bot]
     exact Filter.tendsto_bot
 
+/-- The family `fun s ↦ eval₂ id b (a s)` obtained by evaluating a substitutable
+family `a` (zero constant coefficient) at a point `b ∈ M` again has `HasEval`:
+each value `eval₂ id b (a s)` lies in `M` (`mvPowerSeries_eval_mem_maximalIdeal`),
+hence is topologically nilpotent, and the cofinite filter is `⊥` on the finite
+index type. -/
+private lemma hasEval_eval₂_comp_of_mem_maximalIdeal {σ τ : Type*} [Finite σ] [Finite τ]
+    (hAdic : IsAdic (IsLocalRing.maximalIdeal R))
+    {a : σ → MvPowerSeries τ R}
+    (ha0 : ∀ s, MvPowerSeries.constantCoeff (a s) = 0)
+    {b : τ → R} (hb_mem : ∀ i, b i ∈ IsLocalRing.maximalIdeal R) :
+    MvPowerSeries.HasEval
+      (fun s ↦ MvPowerSeries.eval₂ (RingHom.id R) b (a s)) := by
+  cases nonempty_fintype σ
+  refine ⟨fun s ↦ ?_, ?_⟩
+  · apply isTopologicallyNilpotent_of_mem_maximalIdeal hAdic
+    exact mvPowerSeries_eval_mem_maximalIdeal hAdic hb_mem (a s) (ha0 s)
+  · rw [Filter.cofinite_eq_bot]
+    exact Filter.tendsto_bot
+
+/-- Polynomial-agreement step for `eval₂_subst_bridge`: on a `MvPolynomial` `p`
+(coerced into `MvPowerSeries`), the two evaluation routes already agree. After
+`subst_coe` the substitution becomes `MvPolynomial.aeval`, and `eval₂_comp_left`
+peels off the outer `eval₂Hom`; the resulting inner composition with `algebraMap`
+collapses to `RingHom.id R`, leaving the two sides definitionally equal. This is
+the `h` hypothesis fed to `MvPowerSeries.eval₂_unique`. -/
+private theorem eval₂_subst_bridge_polynomial_agreement
+    {σ τ : Type*} [Finite σ] [Finite τ]
+    {a : σ → MvPowerSeries τ R}
+    (ha : MvPowerSeries.HasSubst a)
+    {b : τ → R} (hb : MvPowerSeries.HasEval b)
+    (hcid : Continuous (RingHom.id R)) (p : MvPolynomial σ R) :
+    MvPowerSeries.eval₂ (RingHom.id R) b (MvPowerSeries.subst a (p : MvPowerSeries σ R)) =
+      MvPolynomial.eval₂ (RingHom.id R)
+        (fun s ↦ MvPowerSeries.eval₂ (RingHom.id R) b (a s)) p := by
+  rw [MvPowerSeries.subst_coe (a := a) (R := R) (τ := τ) (S := R) p,
+      MvPolynomial.aeval_def]
+  -- Apply MvPolynomial.eval₂_comp_left with k = eval₂Hom hcid hb.
+  rw [show MvPowerSeries.eval₂ (RingHom.id R) b =
+      (MvPowerSeries.eval₂Hom hcid hb : MvPowerSeries τ R →+* R) from
+      (MvPowerSeries.coe_eval₂Hom hcid hb).symm]
+  rw [MvPolynomial.eval₂_comp_left (MvPowerSeries.eval₂Hom hcid hb)
+        (algebraMap R (MvPowerSeries τ R)) a p]
+  -- Now match the two sides.
+  have hcomp : ((MvPowerSeries.eval₂Hom hcid hb).comp
+      (algebraMap R (MvPowerSeries τ R)) : R →+* R) = RingHom.id R := by
+    ext r
+    simp only [RingHom.comp_apply, MvPowerSeries.coe_eval₂Hom, RingHom.id_apply]
+    rw [Algebra.algebraMap_eq_smul_one, smul_eq_C_mul, mul_one]
+    rw [show (MvPowerSeries.C (σ := τ) (R := R) r : MvPowerSeries τ R) =
+          ((MvPolynomial.C r : MvPolynomial τ R) : MvPowerSeries τ R) from
+          (MvPolynomial.coe_C r).symm]
+    rw [MvPowerSeries.eval₂_coe]
+    simp [MvPolynomial.eval₂_C]
+  rw [hcomp]
+  -- Goal: MvPolynomial.eval₂ (RingHom.id R) ((eval₂Hom hcid hb) ∘ a) p =
+  --       MvPolynomial.eval₂ (RingHom.id R) (fun s ↦ eval₂ id b (a s)) p
+  -- The functions are equal (∘ = fun s =>).
+  rfl
+
 /-! ### The substitution bridge theorem
 
 The bridge lemma says that evaluating a substitution equals the iterated
@@ -909,50 +968,18 @@ theorem eval₂_subst_bridge {σ τ : Type*} [Finite σ] [Finite τ]
       MvPowerSeries.eval₂ (RingHom.id R)
         (fun s ↦ MvPowerSeries.eval₂ (RingHom.id R) b (a s)) F := by
   have hb := hasEval_of_mem_maximalIdeal_general hAdic hb_mem
-  have hbcomp : MvPowerSeries.HasEval
-      (fun s ↦ MvPowerSeries.eval₂ (RingHom.id R) b (a s)) := by
-    cases nonempty_fintype σ
-    refine ⟨fun s ↦ ?_, ?_⟩
-    · apply isTopologicallyNilpotent_of_mem_maximalIdeal hAdic
-      exact mvPowerSeries_eval_mem_maximalIdeal hAdic hb_mem (a s) (ha0 s)
-    · rw [Filter.cofinite_eq_bot]
-      exact Filter.tendsto_bot
+  have hbcomp := hasEval_eval₂_comp_of_mem_maximalIdeal hAdic ha0 hb_mem
   have hcid : Continuous (RingHom.id R) := continuous_id
-  -- Use eval₂_unique to identify (f ↦ eval₂ id b (subst a f)) with eval₂ id (eval₂ id b ∘ a).
+  -- Use eval₂_unique to identify (f ↦ eval₂ id b (subst a f)) with eval₂ id (eval₂ id b ∘ a);
+  -- the polynomial-agreement hypothesis is `eval₂_subst_bridge_polynomial_agreement`.
   have key := MvPowerSeries.eval₂_unique (σ := σ) (R := R) (S := R)
     (φ := RingHom.id R) (a := fun s ↦ MvPowerSeries.eval₂ (RingHom.id R) b (a s))
     hcid hbcomp (ε := fun f ↦
       MvPowerSeries.eval₂ (RingHom.id R) b (MvPowerSeries.subst a f))
     (hε := (MvPowerSeries.continuous_eval₂ hcid hb).comp
       (continuous_subst_of_constantCoeff_zero ha0 ha))
-    (h := ?_)
-  · exact congrFun key F
-  · -- Polynomial agreement.
-    intro p
-    rw [MvPowerSeries.subst_coe (a := a) (R := R) (τ := τ) (S := R) p,
-        MvPolynomial.aeval_def]
-    -- Apply MvPolynomial.eval₂_comp_left with k = eval₂Hom hcid hb.
-    rw [show MvPowerSeries.eval₂ (RingHom.id R) b =
-        (MvPowerSeries.eval₂Hom hcid hb : MvPowerSeries τ R →+* R) from
-        (MvPowerSeries.coe_eval₂Hom hcid hb).symm]
-    rw [MvPolynomial.eval₂_comp_left (MvPowerSeries.eval₂Hom hcid hb)
-          (algebraMap R (MvPowerSeries τ R)) a p]
-    -- Now match the two sides.
-    have hcomp : ((MvPowerSeries.eval₂Hom hcid hb).comp
-        (algebraMap R (MvPowerSeries τ R)) : R →+* R) = RingHom.id R := by
-      ext r
-      simp only [RingHom.comp_apply, MvPowerSeries.coe_eval₂Hom, RingHom.id_apply]
-      rw [Algebra.algebraMap_eq_smul_one, smul_eq_C_mul, mul_one]
-      rw [show (MvPowerSeries.C (σ := τ) (R := R) r : MvPowerSeries τ R) =
-            ((MvPolynomial.C r : MvPolynomial τ R) : MvPowerSeries τ R) from
-            (MvPolynomial.coe_C r).symm]
-      rw [MvPowerSeries.eval₂_coe]
-      simp [MvPolynomial.eval₂_C]
-    rw [hcomp]
-    -- Goal: MvPolynomial.eval₂ (RingHom.id R) ((eval₂Hom hcid hb) ∘ a) p =
-    --       MvPolynomial.eval₂ (RingHom.id R) (fun s ↦ eval₂ id b (a s)) p
-    -- The functions are equal (∘ = fun s =>).
-    rfl
+    (h := eval₂_subst_bridge_polynomial_agreement ha hb hcid)
+  exact congrFun key F
 
 /-! ### Bridge: univariate version
 
