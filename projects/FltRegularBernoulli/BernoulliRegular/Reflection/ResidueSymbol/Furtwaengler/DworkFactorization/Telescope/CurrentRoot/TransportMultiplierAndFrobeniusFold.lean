@@ -259,15 +259,7 @@ theorem traceCarryIterCorrection_mul_currentRootPeelProduct_frobenius_eq_current
     Nat.sub_add_cancel (Nat.succ_le_of_lt hm_pos)
   have hzero_shift : (ε ^ ℓ) ^ (ℓ ^ (m - 1)) = 0 := by
     have hpow : (ε ^ ℓ) ^ (ℓ ^ (m - 1)) = ε ^ (ℓ ^ m) := by
-      rw [← pow_mul]
-      congr 1
-      calc
-        ℓ * ℓ ^ (m - 1) = ℓ ^ (m - 1) * ℓ := by
-          rw [Nat.mul_comm]
-        _ = ℓ ^ ((m - 1) + 1) := by
-          rw [pow_succ]
-        _ = ℓ ^ m := by
-          rw [hpred_succ]
+      rw [← pow_mul, ← pow_succ', hpred_succ]
     rw [hpow, hzero]
   have hcarry :=
     F.traceCarryIterCorrection_mul_teichmuller_frobenius_tail_eq_tail_traceCarry
@@ -304,9 +296,7 @@ theorem traceCarryIterCorrection_mul_currentRootPeelProduct_frobenius_eq_current
             refine Finset.prod_congr rfl ?_
             intro r hr
             have hparam : (ε ^ ℓ) ^ (ℓ ^ j) = (ε ^ (ℓ ^ j)) ^ ℓ := by
-              rw [← pow_mul, ← pow_mul]
-              congr 1
-              exact Nat.mul_comm ℓ (ℓ ^ j)
+              rw [← pow_mul, ← pow_mul, Nat.mul_comm]
             rw [hparam]
     _ =
           ∏ j ∈ Finset.range m,
@@ -366,13 +356,7 @@ theorem traceCarryCurrentRootTransportMultiplier_mul_zeroBoundary_eq_currentRoot
         simpa using
           F.parameter_pow_iterate_pow_succ_eq_zero N 1 ε hε
       have hboundary : (ε ^ ℓ) ^ (ℓ ^ m) = ε ^ (ℓ ^ (m + 1)) := by
-        rw [← pow_mul]
-        congr 1
-        calc
-          ℓ * ℓ ^ m = ℓ ^ m * ℓ := by
-            rw [Nat.mul_comm]
-          _ = ℓ ^ (m + 1) := by
-            rw [pow_succ]
+        rw [← pow_mul, ← pow_succ']
       have hzero_shift : (ε ^ ℓ) ^ (ℓ ^ m) = 0 := by
         rw [hboundary, hzero]
       have htail := ih (ε ^ ℓ) hε_shift hzero_shift
@@ -688,17 +672,8 @@ theorem artinHasseExpTraceCarryZModCorrection_mul_currentRoot_shifted_eq_current
       (artinHasseExpCurrentRootPeelProduct F N m N ε (F.traceCarry y)) ^ ℓ := by
   have hε_iter : ∀ j : ℕ, (ε ^ (ℓ ^ j)) ^ (N + 1) = 0 := fun j =>
     F.parameter_pow_iterate_pow_succ_eq_zero N j ε hε
-  have hzero_succ : ε ^ (ℓ ^ (m + 1)) = 0 := by
-    have hexp : ℓ ^ (m + 1) = ℓ ^ m * ℓ := by
-      rw [pow_succ]
-    calc
-      ε ^ (ℓ ^ (m + 1)) = ε ^ (ℓ ^ m * ℓ) := by
-        rw [hexp]
-      _ = (ε ^ (ℓ ^ m)) ^ ℓ := by
-        rw [pow_mul]
-      _ = 0 := by
-        rw [hzero]
-        exact zero_pow (Fact.out : Nat.Prime ℓ).ne_zero
+  have hzero_succ : ε ^ (ℓ ^ (m + 1)) = 0 :=
+    pow_eq_zero_of_le (Nat.pow_le_pow_right (Fact.out : Nat.Prime ℓ).pos (Nat.le_succ m)) hzero
   have hfold :=
     F.artinHasseExpTraceCarryZModCorrection_mul_peel_eq_currentRoot_pow_prime
       N m N 0 ε y hε_iter
@@ -763,17 +738,8 @@ theorem artinHasseExpCurrentRootPeelProduct_pow_prime_eq_succ_of_zero_iterate
   let Curr : A := artinHasseExpCurrentRootPeelProduct F N m N ε (F.traceCarry y)
   let Next : A :=
     artinHasseExpCurrentRootPeelProduct F N (m + 1) N ε (F.traceCarry y)
-  have hzero_succ : ε ^ (ℓ ^ (m + 1)) = 0 := by
-    have hexp : ℓ ^ (m + 1) = ℓ ^ m * ℓ := by
-      rw [pow_succ]
-    calc
-      ε ^ (ℓ ^ (m + 1)) = ε ^ (ℓ ^ m * ℓ) := by
-        rw [hexp]
-      _ = (ε ^ (ℓ ^ m)) ^ ℓ := by
-        rw [pow_mul]
-      _ = 0 := by
-        rw [hzero]
-        exact zero_pow (Nat.Prime.ne_zero (Fact.out : Nat.Prime ℓ))
+  have hzero_succ : ε ^ (ℓ ^ (m + 1)) = 0 :=
+    pow_eq_zero_of_le (Nat.pow_le_pow_right (Fact.out : Nat.Prime ℓ).pos (Nat.le_succ m)) hzero
   have hfold :=
     F.artinHasseExpTraceCarryZModCorrection_mul_currentRoot_shifted_eq_currentRoot_pow_prime
       N m y ε hε hzero
@@ -786,9 +752,7 @@ theorem artinHasseExpCurrentRootPeelProduct_pow_prime_eq_succ_of_zero_iterate
   have htrans :=
     F.artinHasseExp_product_iterate_currentRootPeel_transition_traceCarry_of_zero_iterate
       N (m + 1) (Nat.succ_pos _) y ε hε hzero_succ
-  have hrange : Finset.range (N + 1) = Finset.Iic N := by
-    ext r
-    simp
+  have hrange : Finset.range (N + 1) = Finset.Iic N := Nat.range_succ_eq_Iic N
   have hprodCorr : Prod * Corr = B := by
     have hcorr' :
         Corr =
