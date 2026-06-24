@@ -255,7 +255,6 @@ theorem detASubBSqEqProdNontrivialQeSq_of_detUMulScalar_named
     (hU : SinnottConvolutionMatrixDetUnit (p := p) K hp_odd hp_three)
     (h : DetUMulScalarSqEqProdNontrivialQeSq (p := p) K hp_odd hp_three) :
     DetASubBSqEqProdNontrivialQeSq (p := p) K := by
-  classical
   letI : Fintype (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) :=
     Fintype.ofFinite _
   letI : DecidableEq (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) :=
@@ -306,7 +305,6 @@ theorem rank_one_scalar_correction_explicit
           w ≠ NumberField.Units.dirichletUnitTheorem.w₀},
           sinnottRankOnePerturbationVec p K w *
             (sinnottShiftedConvolutionMatrix p K hp_odd hp_three)⁻¹ w w' := by
-  classical
   rw [Matrix.det_unique]
   simp only [Matrix.add_apply, Matrix.one_apply_eq, Matrix.mul_apply,
     Matrix.replicateRow_apply, Matrix.replicateCol_apply, mul_neg_one,
@@ -408,7 +406,6 @@ theorem detASubBSqEqProdNontrivialQeSq_of_detASubBEqProdNontrivialQe
         w ≠ NumberField.Units.dirichletUnitTheorem.w₀}]
     (h : DetASubBEqProdNontrivialQe (p := p) K) :
     DetASubBSqEqProdNontrivialQeSq (p := p) K := by
-  classical
   letI : Fintype (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) :=
     Fintype.ofFinite _
   letI : DecidableEq (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) :=
@@ -523,7 +520,6 @@ theorem charMatrix_K_plus_mul_A_sub_B_apply
         convolutionMatrixLogNormEven p
           (kplusEmbeddingIndexQuotient (p := p) K
             NumberField.Units.dirichletUnitTheorem.w₀) 1) := by
-  classical
   simp only [Matrix.mul_apply, charMatrix_K_plus, Matrix.of_apply,
     Matrix.transpose_apply]
   exact sum_char_sinnottMatrix_A_sub_B_eigenvalue (p := p) K hp_odd hp_three
@@ -725,7 +721,6 @@ theorem card_nontriv_mulChar_eq
       Fintype.ofFinite _
     Fintype.card {ξ : MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ // ξ ≠ 1} =
       (p - 3) / 2 := by
-  classical
   letI : Fintype (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) :=
     Fintype.ofFinite _
   have h_card_mc :
@@ -734,8 +729,7 @@ theorem card_nontriv_mulChar_eq
     have h1 : Fintype.card (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) =
         Nat.card (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) :=
       Nat.card_eq_fintype_card.symm
-    rw [h1, nat_card_mulChar_cyclotomicEvenDelta_eq p]
-    rw [Nat.card_eq_fintype_card]
+    rw [h1, nat_card_mulChar_cyclotomicEvenDelta_eq p, Nat.card_eq_fintype_card]
     exact BernoulliRegular.cyclotomicEvenDelta_card (p := p) hp_two
   have h_card_compl :=
     Fintype.card_subtype_compl
@@ -763,7 +757,6 @@ theorem card_nontriv_mulChar_eq_card_kplus_ne_w₀
       Fintype.card {w : NumberField.InfinitePlace
         (NumberField.maximalRealSubfield K) //
         w ≠ NumberField.Units.dirichletUnitTheorem.w₀} := by
-  classical
   letI : Fintype (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) :=
     Fintype.ofFinite _
   rw [card_nontriv_mulChar_eq p hp_two,
@@ -783,7 +776,6 @@ noncomputable def equivNontrivCharKplusNeW₀
         (NumberField.maximalRealSubfield K) //
         w ≠ NumberField.Units.dirichletUnitTheorem.w₀} := by
   refine Fintype.equivOfCardEq ?_
-  classical
   have h := card_nontriv_mulChar_eq_card_kplus_ne_w₀ p K hp_two
   convert h
 
@@ -861,7 +853,6 @@ theorem charMatrix_nontriv_sq_mul_A_sub_B_transpose_eq_D_nontriv_sq_sub_rank_one
           sinnottCorrectionColVec (p := p) K
               ((equivNontrivCharKplusNeW₀ p K hp_two).symm w).val *
             sinnottCorrectionRowVec (p := p) K hp_odd hp_three i) := by
-  classical
   unfold charMatrix_K_plus_nontriv_sq sinnottDiagonalEigenvalueMatrix_nontriv_sq
   ext w i
   -- Use Matrix.submatrix_apply and Matrix.mul_apply to unfold both sides entry-wise.
