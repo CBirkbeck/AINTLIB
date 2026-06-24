@@ -33,7 +33,7 @@ is supplied as `EigenspaceCondition`.
 
 noncomputable section
 
-open scoped NumberField nonZeroDivisors
+open scoped NumberField
 
 namespace BernoulliRegular
 
@@ -101,10 +101,8 @@ theorem eigenspaceCondition_mul_pow_p
   have hα'_ne : α' ≠ 0 := by
     rw [hα'_def]
     intro h
-    apply hα
-    have hinj : Function.Injective (cyclotomicRingOfIntegersEquiv (p := p) K a) :=
-      (cyclotomicRingOfIntegersEquiv (p := p) K a).injective
-    exact hinj (h.trans (map_zero _).symm)
+    exact hα ((cyclotomicRingOfIntegersEquiv (p := p) K a).injective
+      (h.trans (map_zero _).symm))
   have hα_K : (algebraMap (𝓞 K) K) α ≠ 0 := fun h ↦
     hα <| (FaithfulSMul.algebraMap_injective (𝓞 K) K)
       (h.trans (map_zero _).symm)
@@ -146,11 +144,8 @@ theorem eigenspaceCondition_pow_p_zero (β : 𝓞 K) (hβ : β ≠ 0) :
   have hα_ne : α ≠ 0 := by
     rw [hα_def]
     intro h
-    apply hβ
-    have : cyclotomicRingOfIntegersEquiv (p := p) K a β = 0 := h
-    have := (cyclotomicRingOfIntegersEquiv (p := p) K a).injective
-      (this.trans (map_zero _).symm)
-    exact this
+    exact hβ ((cyclotomicRingOfIntegersEquiv (p := p) K a).injective
+      (h.trans (map_zero _).symm))
   have hβ_K : (algebraMap (𝓞 K) K) β ≠ 0 := fun h ↦
     hβ <| (FaithfulSMul.algebraMap_injective (𝓞 K) K)
       (h.trans (map_zero _).symm)
@@ -166,7 +161,6 @@ theorem eigenspaceCondition_pow_p_zero (β : 𝓞 K) (hβ : β ≠ 0) :
     rw [hα_def]; exact map_pow _ _ _]
   rw [map_pow, map_pow, div_pow]
   field_simp
-
 
 /-- **Stronger eigenspace condition (𝓞 K-level)**: `σ_a η = η^{a^i} · u^p`
 with u ∈ 𝓞 K (not just K). Stronger than `EigenspaceCondition` (which
@@ -229,10 +223,10 @@ theorem strongEigenspaceCondition_intCast (z : ℤ) :
 theorem strongEigenspaceCondition_pow_p_of_isUnit {β : 𝓞 K} (hβ : IsUnit β) :
     StrongEigenspaceCondition (p := p) (K := K) (β ^ p) 0 := by
   intro a
-  set α := cyclotomicRingOfIntegersEquiv (p := p) K a β with hα_def
-  obtain ⟨β_inv, hβ_inv_left, hβ_inv_right⟩ : ∃ b : 𝓞 K, β * b = 1 ∧ b * β = 1 := by
+  set α := cyclotomicRingOfIntegersEquiv (p := p) K a β
+  obtain ⟨β_inv, hβ_inv_left⟩ : ∃ b : 𝓞 K, β * b = 1 := by
     obtain ⟨u, hu⟩ := hβ
-    exact ⟨u.inv, hu ▸ u.val_inv, hu ▸ u.inv_val⟩
+    exact ⟨u.inv, hu ▸ u.val_inv⟩
   refine ⟨α * β_inv, ?_⟩
   rw [show cyclotomicRingOfIntegersEquiv (p := p) K a (β ^ p) = α ^ p from
     map_pow _ _ _]
@@ -392,7 +386,6 @@ theorem strongEigenspaceCondition_ideal_form
   rw [hu, ← Ideal.span_singleton_mul_span_singleton, Ideal.span_singleton_pow,
     Ideal.span_singleton_pow]
 
-set_option backward.isDefEq.respectTransparency false in
 /-- Ideal p-th-root cancellation for nonzero integral ideals in `𝓞 K`. -/
 theorem ideal_pow_left_inj_of_ne_bot
     {n : ℕ} (hn : n ≠ 0) {A B : Ideal (𝓞 K)}
@@ -430,7 +423,7 @@ theorem strongEigenspaceCondition_ideal_pth_root_form
   obtain ⟨u, hu⟩ := strongEigenspaceCondition_ideal_form
     (p := p) (K := K) h a
   refine ⟨u, ?_⟩
-  set e : ℕ := (a : ZMod p).val ^ i with he
+  set e : ℕ := (a : ZMod p).val ^ i
   have hp_ne : p ≠ 0 := (Fact.out : Nat.Prime p).ne_zero
   have hσ_span :
       Ideal.span ({cyclotomicRingOfIntegersEquiv (p := p) K a η} : Set (𝓞 K)) =
@@ -489,7 +482,6 @@ theorem strongEigenspaceCondition_stickelbergerIdeal_eq_pow_mul_principal
       stickelbergerIdeal (p := p) (K := K) b =
         b ^ strongEigenspaceStickelbergerExponent (p := p) i *
           Ideal.span ({β} : Set (𝓞 K)) := by
-  classical
   have hroot : ∀ a : CyclotomicUnitDelta p, ∃ u : 𝓞 K,
       cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ b =
         b ^ (((a⁻¹ : CyclotomicUnitDelta p) : ZMod p).val ^ i) *
@@ -551,7 +543,7 @@ theorem strongEigenspaceCondition_ideal_pth_root_form_of_unit_witness
     cyclotomicGaloisConjugate (p := p) (K := K) a b =
       b ^ ((a : ZMod p).val ^ i : ℕ) := by
   obtain ⟨u, hu_unit, hu⟩ := h a
-  set e : ℕ := (a : ZMod p).val ^ i with he
+  set e : ℕ := (a : ZMod p).val ^ i
   have hp_ne : p ≠ 0 := (Fact.out : Nat.Prime p).ne_zero
   have hσ_span :
       Ideal.span ({cyclotomicRingOfIntegersEquiv (p := p) K a η} : Set (𝓞 K)) =
@@ -582,7 +574,6 @@ theorem strongEigenspaceCondition_stickelbergerIdeal_eq_pow_of_unit_witness
     (hb_ne : b ≠ ⊥) :
     stickelbergerIdeal (p := p) (K := K) b =
       b ^ strongEigenspaceStickelbergerExponent (p := p) i := by
-  classical
   have hroot : ∀ a : CyclotomicUnitDelta p,
       cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ b =
         b ^ (((a⁻¹ : CyclotomicUnitDelta p) : ZMod p).val ^ i) := fun a ↦
@@ -612,7 +603,6 @@ theorem strongEigenspaceCondition_stickelbergerIdeal_eq_pow_of_unit_witness
 `a = 1` contributes `1`. -/
 theorem strongEigenspaceStickelbergerExponent_pos (i : ℕ) :
     0 < strongEigenspaceStickelbergerExponent (p := p) i := by
-  classical
   have hval_one : (((1 : CyclotomicUnitDelta p) : ZMod p).val) = 1 := by
     change ((1 : ZMod p).val) = 1
     rw [ZMod.val_one_eq_one_mod]
