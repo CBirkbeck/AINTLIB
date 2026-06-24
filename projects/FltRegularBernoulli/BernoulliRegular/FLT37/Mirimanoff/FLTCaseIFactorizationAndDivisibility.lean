@@ -1,32 +1,38 @@
 module
 
-public import BernoulliRegular.FLT37.PrimaryConj
-public import BernoulliRegular.FLT37.PrimaryUnits
-public import BernoulliRegular.FLT37.Principalization
-public import BernoulliRegular.HMinus.KplusPrimeArithmetic
 public import Mathlib.FieldTheory.Finite.Basic
 public import Mathlib.NumberTheory.LegendreSymbol.Basic
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Galois
+public import BernoulliRegular.FLT37.PrimaryConj
+public import BernoulliRegular.FLT37.PrimaryUnits
+public import BernoulliRegular.FLT37.Principalization
 public import BernoulliRegular.FLT37.Mirimanoff.PolynomialRootsAndClosedForms
+public import BernoulliRegular.HMinus.KplusPrimeArithmetic
 
 /-!
-# Mirimanoff subfield trick (ticket FLT37d, scaffold)
+# FLT case I factorization and Mirimanoff divisibility
 
-For an odd prime `ℓ ≡ 1 (mod 4)`, the "Mirimanoff trick" uses the fact
-that `-1` is a square mod `ℓ` (so `(ZMod ℓ)ˣ` has an element of order 4).
-The corresponding Galois automorphism `ζ ↦ ζ^ω` (where `ω² = -1` in
-`ZMod ℓ`) generates a cyclic subgroup of order 4 in `Gal(K/ℚ)`.
+This file collects the polynomial roots, cyclotomic factorization, and ideal-divisibility
+ingredients used in the FLT case I Mirimanoff argument.
 
-The fixed field `k' ⊂ K⁺` of the order-2 subgroup gives a subfield
-where Vandiver's odd-index analysis simplifies.
+## Main definitions
 
-This file establishes the basic infrastructure: the Mirimanoff square
-root `ω` and its key properties.
+* `partialPowerSum`: the partial power sum `S_e(k)` in `ZMod p`.
+* `partialPowerSumPolynomial`: the Ribenboim partial-power-sum polynomial.
+
+## Main results
+
+* `fltCaseI_factorization`: the cyclotomic factorization of `a ^ p + b ^ p`.
+* `fltCaseI_factor_isCoprime`: coprimality of distinct FLT case I principal factors.
+* `fltCaseI_factor_eq_unit_mul_pow_of_regular`: the standard regular-prime factor conclusion.
+* `mirimanoffPolynomial_eq_one_sub_X_mul_partialPowerSumPolynomial`: the Ribenboim polynomial
+  identity connecting Mirimanoff polynomials to partial power sums.
 
 ## References
 
 * Vandiver 1929, *FLT and the Second Factor in the Cyclotomic Class Number*.
 * Borevich–Shafarevich, *Number Theory*, §4.9.
+* Ribenboim, *13 Lectures on Fermat's Last Theorem*, Lecture VIII.
 -/
 
 @[expose] public section
@@ -98,7 +104,6 @@ theorem X_mul_X_sub_one_mul_X_add_one_dvd_mirimanoffPolynomial
     (hn_ge : 2 ≤ n) (hn_le : n ≤ p - 1) (hn_odd : Odd n) :
     (Polynomial.X * (Polynomial.X - 1) * (Polynomial.X + 1) :
         Polynomial (ZMod p)) ∣ mirimanoffPolynomial p n := by
-  -- 2 is a unit in ZMod p for odd p.
   have hp_three : 3 ≤ p := by
     rcases hp_odd with ⟨k, hk⟩
     have := hp.1.two_le
@@ -110,10 +115,8 @@ theorem X_mul_X_sub_one_mul_X_add_one_dvd_mirimanoffPolynomial
     have : p ≤ 2 := Nat.le_of_dvd (by norm_num) hp_dvd
     omega
   obtain ⟨v, hv⟩ : IsUnit (2 : ZMod p) := isUnit_iff_ne_zero.mpr h_two_ne
-  -- Coprimality of `X` and `X + 1`.
   have hX_X_add : IsCoprime (Polynomial.X : Polynomial (ZMod p)) (Polynomial.X + 1) :=
     ⟨-1, 1, by ring⟩
-  -- Coprimality of `X - 1` and `X + 1` via Bezout: (-1/2)(X-1) + (1/2)(X+1) = 1.
   have hXm1_X_add : IsCoprime ((Polynomial.X - 1 : Polynomial (ZMod p)))
       (Polynomial.X + 1) := by
     refine ⟨- (Polynomial.C ((v : ZMod p)⁻¹)), Polynomial.C ((v : ZMod p)⁻¹), ?_⟩
@@ -289,7 +292,6 @@ theorem fltCaseI_p_not_dvd_add (p : ℕ) [hp : Fact p.Prime]
     ¬ (p : ℤ) ∣ (a + b) := by
   intro hab
   apply hc
-  -- a + b ≡ c (mod p), and a + b ≡ 0 (mod p), so c ≡ 0 (mod p).
   have hc_mod : (c : ZMod p) = 0 := by
     have hpow_a : ((a : ZMod p)) ^ p = (a : ZMod p) := ZMod.pow_card _
     have hpow_b : ((b : ZMod p)) ^ p = (b : ZMod p) := ZMod.pow_card _
@@ -324,44 +326,36 @@ theorem fltCaseI_factor_no_common_prime
       (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ l * (b : 𝓞 K))) :
     False := by
   classical
-  -- Step 1: 𝔮 divides the difference (ζ^k - ζ^l) · b
   have h_sub : 𝔮 ∣ ((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ k -
         (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ l) * (b : 𝓞 K) := by
     rw [← fltCaseI_factor_sub_intForm p K a b k l]
     exact dvd_sub h1 h2
-  -- Step 2: ζ^k ≠ ζ^l (since k ≠ l < p, and ζ has order p)
   have hne : (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ k ≠
       (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ l := fun hcontra =>
     hkl <| (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger_isPrimitiveRoot.pow_inj hk hl hcontra
-  -- Step 3: (ζ^k - ζ^l) ~ (ζ - 1)
   have hassoc : Associated
       ((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger - 1)
       ((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ k -
        (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ l) :=
     nthRootsFinset_pairwise_associated_sub_intForm p K
       (zeta_pow_mem_nthRootsFinset p K k) (zeta_pow_mem_nthRootsFinset p K l) hne
-  -- Step 4: 𝔮 ∣ (ζ - 1) · b
   have h_zsub_b : 𝔮 ∣ ((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger - 1) *
       (b : 𝓞 K) :=
     (hassoc.mul_right (b : 𝓞 K)).dvd_iff_dvd_right.mpr h_sub
-  -- Step 5: 𝔮 prime ⇒ 𝔮 ∣ (ζ - 1) or 𝔮 ∣ b
   rcases hq_prime.dvd_or_dvd h_zsub_b with h_zsub | h_b
-  · -- Case 𝔮 ∣ (ζ - 1): then (ζ - 1) ∣ (a + ζ^k b), so p ∣ (a + b), contradicting case I.
+  ·
     have h_zsub_dvd : (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger - 1 ∣
         ((a : 𝓞 K) + (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ k *
           (b : 𝓞 K)) := by
-      -- (ζ - 1) is prime, 𝔮 prime divides it, so they're associates
       have hzeta_prime : Prime
           ((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger - 1) :=
         (IsCyclotomicExtension.zeta_spec p ℚ K).zeta_sub_one_prime'
       exact (hq_prime.associated_of_dvd hzeta_prime h_zsub).symm.dvd.trans h1
     rw [zetaSubOne_dvd_factor_iff_p_dvd] at h_zsub_dvd
-    -- p ∣ (a + b) contradicts fltCaseI_p_not_dvd_add
     exact (fltCaseI_p_not_dvd_add p heq hc) h_zsub_dvd
-  · -- Case 𝔮 ∣ b: then 𝔮 ∣ a, contradicting IsCoprime a b.
+  ·
     have h_a : 𝔮 ∣ ((a : 𝓞 K)) :=
       dvd_intCast_of_dvd_factor_and_intCast p K a b k h1 h_b
-    -- IsCoprime a b ↔ ∃ u v, u*a + v*b = 1; from 𝔮 ∣ a and 𝔮 ∣ b derive 𝔮 ∣ 1
     obtain ⟨u, v, huv⟩ := hab
     have h_one : 𝔮 ∣ ((1 : 𝓞 K)) := by
       have huv_cast : ((u : 𝓞 K)) * (a : 𝓞 K) + (v : 𝓞 K) * (b : 𝓞 K) = 1 := by
@@ -385,17 +379,16 @@ theorem fltCaseI_factor_no_common_prime_ideal
     (h2 : ((a : 𝓞 K) + (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ l *
       (b : 𝓞 K)) ∈ 𝔓) :
     False := by
-  -- (ζ^k - ζ^l) · b ∈ 𝔓 (difference of the two factors).
   have h_sub : ((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ k -
       (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ l) * (b : 𝓞 K) ∈ 𝔓 := by
     rw [← fltCaseI_factor_sub_intForm p K a b k l]
     exact 𝔓.sub_mem h1 h2
-  -- 𝔓 prime ⇒ (ζ^k - ζ^l) ∈ 𝔓 or b ∈ 𝔓
   rcases h𝔓_prime.mem_or_mem h_sub with h_zsub | h_b
-  · -- (ζ^k - ζ^l) ∈ 𝔓; (ζ^k - ζ^l) ~ (ζ - 1), so (ζ - 1) ∈ 𝔓.
+  ·
     have hne : (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ k ≠
         (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ l := fun hcontra =>
-      hkl <| (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger_isPrimitiveRoot.pow_inj hk hl hcontra
+      hkl <|
+        (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger_isPrimitiveRoot.pow_inj hk hl hcontra
     have hassoc : Associated
         ((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger - 1)
         ((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ k -
@@ -404,7 +397,6 @@ theorem fltCaseI_factor_no_common_prime_ideal
         (zeta_pow_mem_nthRootsFinset p K k) (zeta_pow_mem_nthRootsFinset p K l) hne
     have h_zsub_one : (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger - 1 ∈ 𝔓 :=
       (Ideal.mem_iff_of_associated (I := 𝔓) hassoc).mpr h_zsub
-    -- Since (ζ - 1) ∈ 𝔓 and (a + ζ^k b) ∈ 𝔓, derive ((a + b) : 𝓞 K) ∈ 𝔓.
     have h_ab : ((a + b : ℤ) : 𝓞 K) ∈ 𝔓 := by
       have h_diff : ((a : 𝓞 K) +
           (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ k * (b : 𝓞 K)) -
@@ -420,8 +412,6 @@ theorem fltCaseI_factor_no_common_prime_ideal
           ((a + b : ℤ) : 𝓞 K)) := by ring
       rw [h_eq]
       exact 𝔓.sub_mem h1 h_diff
-    -- `zetaPrime ⊆ 𝔓`, and `zetaPrime` is maximal (Dedekind), so `𝔓 = zetaPrime`.
-    -- Then `a + b ∈ 𝔓 = zetaPrime`, i.e. `(ζ - 1) ∣ (a + b)`, i.e. `p ∣ (a + b)`.
     have h_span_sub : BernoulliRegular.zetaPrime p K ≤ 𝔓 := by
       rw [BernoulliRegular.zetaPrime, Ideal.span_le]
       simp only [Set.singleton_subset_iff, SetLike.mem_coe]
@@ -442,13 +432,12 @@ theorem fltCaseI_factor_no_common_prime_ideal
     have hp_dvd_ab : (p : ℤ) ∣ (a + b) :=
       (zetaSubOne_dvd_intCast_iff p K (a + b)).mp h_zsub_dvd_ab
     exact (fltCaseI_p_not_dvd_add p heq hc) hp_dvd_ab
-  · -- b ∈ 𝔓; combined with (a + ζ^k b) ∈ 𝔓, get a ∈ 𝔓; then IsCoprime a b ⇒ 𝔓 = ⊤.
+  ·
     have h_zb : (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ k * (b : 𝓞 K) ∈ 𝔓 :=
       𝔓.mul_mem_left _ h_b
     have h_a : ((a : 𝓞 K)) ∈ 𝔓 := by
       have := 𝔓.sub_mem h1 h_zb
       simpa using this
-    -- IsCoprime a b ⇒ Ideal.span {a, b} = ⊤; in 𝓞 K it's still ⊤ via cast.
     obtain ⟨u, v, huv⟩ := hab
     have huv_cast : ((u : 𝓞 K)) * (a : 𝓞 K) + (v : 𝓞 K) * (b : 𝓞 K) = 1 := by
       exact_mod_cast huv
@@ -475,14 +464,11 @@ theorem fltCaseI_factor_isCoprime
         (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ l * (b : 𝓞 K)} :
           Set (𝓞 K))) := by
   rw [Ideal.isCoprime_iff_sup_eq]
-  -- By contradiction: if not ⊤, then contained in some maximal ideal 𝔓.
   by_contra h_ne
   obtain ⟨𝔓, h𝔓_max, h_le⟩ := Ideal.exists_le_maximal _ h_ne
   have h𝔓_prime : 𝔓.IsPrime := h𝔓_max.isPrime
-  -- 𝔓 maximal in 𝓞 K (which is not a field) ⇒ 𝔓 ≠ ⊥.
   have h𝔓_ne : 𝔓 ≠ ⊥ :=
     Ring.ne_bot_of_isMaximal_of_not_isField h𝔓_max (RingOfIntegers.not_isField K)
-  -- Apply the prime-ideal-level coprime contradiction
   apply fltCaseI_factor_no_common_prime_ideal p K heq hc hab hk hl hkl h𝔓_prime h𝔓_ne
   · exact h_le (Ideal.mem_sup_left (Ideal.mem_span_singleton.mpr dvd_rfl))
   · exact h_le (Ideal.mem_sup_right (Ideal.mem_span_singleton.mpr dvd_rfl))
@@ -611,14 +597,14 @@ theorem fltCaseI_factor_isPrincipal_of_regular
           Set (𝓞 K)) = I ^ p := by
   obtain ⟨I, hI_pow_principal, hI⟩ :=
     fltCaseI_factor_pow_isPrincipal p hp_odd K heq hc hab hk
-  -- I ≠ ⊥ since `Ideal.span {a + ζ^k · b} ≠ ⊥` (factor is non-zero).
   have h_span_ne : Ideal.span ({(a : 𝓞 K) +
       (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ k * (b : 𝓞 K)} :
         Set (𝓞 K)) ≠ ⊥ :=
     fun hbot => h_factor_ne_zero k hk (Ideal.span_singleton_eq_bot.mp hbot)
   have hI_pow_ne : I ^ p ≠ ⊥ := hI ▸ h_span_ne
-  have hI_ne : I ≠ ⊥ := fun hbot => hI_pow_ne (by rw [hbot]; exact zero_pow hp.1.ne_zero)
-  -- Apply isPrincipal_of_isPrincipal_pow_of_coprime
+  have hI_ne : I ≠ ⊥ := fun hbot => hI_pow_ne (by
+    rw [hbot]
+    exact zero_pow hp.1.ne_zero)
   exact ⟨I,
     BernoulliRegular.FLT37.isPrincipal_of_isPrincipal_pow_of_coprime h_reg hI_ne hI_pow_principal,
     hI⟩
@@ -645,33 +631,15 @@ theorem fltCaseI_factor_eq_unit_mul_pow_of_regular
     fltCaseI_factor_isPrincipal_of_regular p hp_odd K h_reg heq hc hab
       h_factor_ne_zero hk
   obtain ⟨γ, hγ⟩ := hI_principal
-  -- I = Ideal.span {γ}; raise to p-th power and use span_singleton_pow.
   have hI' : Ideal.span ({(a : 𝓞 K) +
       (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ k * (b : 𝓞 K)} :
         Set (𝓞 K)) = Ideal.span ({γ ^ p} : Set (𝓞 K)) := by
     rw [hI, ← Ideal.span_singleton_pow, ← Ideal.submodule_span_eq, ← hγ]
   obtain ⟨u, hu⟩ := Ideal.span_singleton_eq_span_singleton.mp hI'
   refine ⟨u⁻¹, γ, ?_⟩
-  -- hu : (a + ζ^k b) * u = γ^p, so a + ζ^k b = u⁻¹ * γ^p.
   rw [← hu, mul_comm ((a : 𝓞 K) +
     (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger ^ k * (b : 𝓞 K))
     ((u : 𝓞 K)), u.inv_mul_cancel_left]
-
-/-! ## Partial power sum and Ribenboim 1.32 identity
-
-The classical Mirimanoff–Bernoulli connection (Ribenboim, *13 Lectures
-on Fermat's Last Theorem*, Lecture VIII identity (1.32)) factors the
-Mirimanoff polynomial as
-
-    `(1 - X) · ∑_{k=1}^{p-1} S_e(k) · X^k = mirimanoffPolynomial p (e + 1)`
-
-modulo the `X^p` term `S_e(p - 1) · X^p`, where `S_e(k) = ∑_{j=1}^{k}
-j^e` is the partial power sum. This is the structural bridge from the
-Mirimanoff polynomial to Bernoulli numbers (via Faulhaber's formula
-applied to `S_e(k)`).
-
-The identity is purely algebraic in `(ZMod p)[X]` and does not require
-any FLT hypothesis. -/
 
 section PartialPowerSum
 
@@ -727,7 +695,8 @@ theorem partialPowerSumPolynomial_coeff (p : ℕ) [Fact p.Prime] (e m : ℕ) :
     intro k hk
     rw [Polynomial.coeff_C_mul, Polynomial.coeff_X_pow]
     by_cases hkm : m = k
-    · subst hkm; exact absurd hk hm
+    · subst hkm
+      exact absurd hk hm
     · simp [hkm]
 
 /-- **Ribenboim polynomial identity (1.32)** in `(ZMod p)[X]`.
@@ -746,10 +715,8 @@ theorem mirimanoffPolynomial_eq_one_sub_X_mul_partialPowerSumPolynomial
       mirimanoffPolynomial p (e + 1) -
         Polynomial.C (partialPowerSum p e (p - 1)) * Polynomial.X ^ p := by
   have hp_two : 2 ≤ p := hp.out.two_le
-  -- Reduce to coefficient comparison.
   apply Polynomial.ext
   intro m
-  -- Helper: `(X * Q).coeff m`.
   have h_coeff_X_mul :
       (Polynomial.X * partialPowerSumPolynomial p e).coeff m =
         if h : 1 ≤ m then
@@ -762,7 +729,6 @@ theorem mirimanoffPolynomial_eq_one_sub_X_mul_partialPowerSumPolynomial
     · obtain ⟨k, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (by omega : m ≠ 0)
       rw [Polynomial.coeff_X_mul, partialPowerSumPolynomial_coeff]
       simp
-  -- Expand LHS using ring + the coeff-sub form.
   have h_lhs : ((1 - Polynomial.X) * partialPowerSumPolynomial p e).coeff m =
       (partialPowerSumPolynomial p e).coeff m -
         (Polynomial.X * partialPowerSumPolynomial p e).coeff m := by
@@ -774,7 +740,6 @@ theorem mirimanoffPolynomial_eq_one_sub_X_mul_partialPowerSumPolynomial
   rw [h_lhs, h_coeff_X_mul, partialPowerSumPolynomial_coeff,
       Polynomial.coeff_sub, mirimanoffPolynomial_coeff,
       Polynomial.coeff_C_mul, Polynomial.coeff_X_pow]
-  -- Case split on m relative to [1, p), {p}, > p.
   by_cases hm0 : m = 0
   · subst hm0
     have h0_notin : (0 : ℕ) ∉ Finset.Ico 1 p := by simp [Finset.mem_Ico]
@@ -785,7 +750,7 @@ theorem mirimanoffPolynomial_eq_one_sub_X_mul_partialPowerSumPolynomial
   · have hm_pos : 1 ≤ m := Nat.one_le_iff_ne_zero.mpr hm0
     rw [dif_pos hm_pos]
     by_cases hmp : m < p
-    · -- m ∈ [1, p)
+    ·
       have hm_in : m ∈ Finset.Ico 1 p := Finset.mem_Ico.mpr ⟨hm_pos, hmp⟩
       have hm_in_iff : (1 ≤ m ∧ m < p) := ⟨hm_pos, hmp⟩
       have h_mp_ne : m ≠ p := by omega
@@ -796,26 +761,30 @@ theorem mirimanoffPolynomial_eq_one_sub_X_mul_partialPowerSumPolynomial
         simp
       · have hm_ge_2 : 2 ≤ m := by omega
         have hm_pred_in : m - 1 ∈ Finset.Ico 1 p := by
-          rw [Finset.mem_Ico]; omega
+          rw [Finset.mem_Ico]
+          omega
         rw [if_pos hm_pred_in, show e + 1 - 1 = e from rfl]
         have h_diff : partialPowerSum p e m - partialPowerSum p e (m - 1) =
             ((m : ℕ) : ZMod p) ^ e :=
           partialPowerSum_sub_partialPowerSum_pred hm_pos
         linear_combination h_diff
-    · -- m ≥ p
+    ·
       push Not at hmp
       have hm_notin : m ∉ Finset.Ico 1 p := by
-        rw [Finset.mem_Ico]; omega
+        rw [Finset.mem_Ico]
+        omega
       have hm_notin_iff : ¬ (1 ≤ m ∧ m < p) := fun h => absurd h.2 (by omega)
       rw [if_neg hm_notin, if_neg hm_notin_iff]
       by_cases hmp_eq : m = p
-      · -- m = p: use rw instead of subst to preserve p in type class
+      ·
         have hp_pred_in : p - 1 ∈ Finset.Ico 1 p := by
-          rw [Finset.mem_Ico]; omega
+          rw [Finset.mem_Ico]
+          omega
         rw [hmp_eq, if_pos hp_pred_in, if_pos rfl, mul_one]
-      · -- m > p
+      ·
         have hm_pred_notin : m - 1 ∉ Finset.Ico 1 p := by
-          rw [Finset.mem_Ico]; omega
+          rw [Finset.mem_Ico]
+          omega
         rw [if_neg hm_pred_notin, if_neg hmp_eq, mul_zero]
 
 end PartialPowerSum
