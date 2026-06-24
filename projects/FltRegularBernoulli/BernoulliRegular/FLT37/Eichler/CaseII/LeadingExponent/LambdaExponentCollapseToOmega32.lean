@@ -164,7 +164,7 @@ theorem caseIILeadingExponent_completedLogArg_mem_lambdaIdeal_pow_pred
       Set (ValuedIntegerRing 37 (CyclotomicField 37 ℚ))) = I := by
     have h := span_natCast_prime_eq_lambdaIdeal_pow_pred (p := 37) (K := CyclotomicField 37 ℚ)
     rw [hI, show (37 : ValuedIntegerRing 37 (CyclotomicField 37 ℚ)) =
-        ((37 : ℕ) : ValuedIntegerRing 37 (CyclotomicField 37 ℚ)) from by norm_cast]
+        ((37 : ℕ) : ValuedIntegerRing 37 (CyclotomicField 37 ℚ)) by norm_cast]
     convert h using 2
   -- The membership-in-`(37)` statement, used repeatedly.
   have h37_mem_iff : ∀ z : ValuedIntegerRing 37 (CyclotomicField 37 ℚ),
@@ -190,9 +190,9 @@ theorem caseIILeadingExponent_completedLogArg_mem_lambdaIdeal_pow_pred
     have hcong := congrArg f hw
     rw [map_sub, map_mul] at hcong
     rw [hXval, show (37 : ValuedIntegerRing 37 (CyclotomicField 37 ℚ)) =
-        f (37 : 𝓞 (CyclotomicField 37 ℚ)) from by rw [map_ofNat],
+        f (37 : 𝓞 (CyclotomicField 37 ℚ)) by rw [map_ofNat],
       show ((c : ValuedIntegerRing 37 (CyclotomicField 37 ℚ))) =
-        f (c : 𝓞 (CyclotomicField 37 ℚ)) from by rw [map_intCast]]
+        f (c : 𝓞 (CyclotomicField 37 ℚ)) by rw [map_intCast]]
     exact hcong
   -- Step 2: `37 ∤ c` (else `X ∈ lambdaIdeal`, but `X` is a unit).
   have hX_notmem : X ∉ lambdaIdeal 37 (CyclotomicField 37 ℚ) := by
@@ -255,7 +255,7 @@ theorem caseIILeadingExponent_completedLogArg_mem_lambdaIdeal_pow_pred
     rw [completedLogArg, EPlus_completedLogDomainPowPred_coe]
   rw [hargeq, show X ^ 36 - 1 =
     (X ^ 36 - (c : ValuedIntegerRing 37 (CyclotomicField 37 ℚ)) ^ 36) +
-      ((c : ValuedIntegerRing 37 (CyclotomicField 37 ℚ)) ^ 36 - 1) from by ring]
+      ((c : ValuedIntegerRing 37 (CyclotomicField 37 ℚ)) ^ 36 - 1) by ring]
   exact I.add_mem hXc36 hc36_mem
 
 /-! ## 1. The eigenspace endgame: regular components drop out ⟹ `ω³²`-membership
