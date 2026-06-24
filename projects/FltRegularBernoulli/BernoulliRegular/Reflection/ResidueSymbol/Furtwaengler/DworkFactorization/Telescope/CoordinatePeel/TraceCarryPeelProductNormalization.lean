@@ -46,13 +46,6 @@ theorem artinHasseExpCoordinatePeelProduct_eq_traceCarryZModPeelProduct_of_coeff
   | zero =>
       simp only [artinHasseExpCoordinatePeelProduct,
         artinHasseExpTraceCarryZModPeelProduct]
-      let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
-      let θ : WittVector ℓ k →+* A :=
-        F.toConcreteStickelbergerSetup.wittThetaModQPow N
-      let Eps : PowerSeries A :=
-        (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-          fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
-            (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
       refine Finset.prod_congr rfl ?_
       intro j _hj
       have hcoord :
@@ -65,14 +58,7 @@ theorem artinHasseExpCoordinatePeelProduct_eq_traceCarryZModPeelProduct_of_coeff
       simp only [artinHasseExpCoordinatePeelProduct,
         artinHasseExpTraceCarryZModPeelProduct]
       congr 1
-      · let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
-        let θ : WittVector ℓ k →+* A :=
-          F.toConcreteStickelbergerSetup.wittThetaModQPow N
-        let Eps : PowerSeries A :=
-          (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-            fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
-              (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
-        refine Finset.prod_congr rfl ?_
+      · refine Finset.prod_congr rfl ?_
         intro j _hj
         have hcoord :
             c.coeff 0 ^ ℓ =
@@ -132,30 +118,10 @@ theorem artinHasseExp_frobenius_tail_depth_traceCarry_eq_zmodPeelProduct_of_zero
       artinHasseExpTraceCarryZModPeelProduct F N m D 0 ε y := by
   classical
   dsimp only
-  let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
-  let θ : WittVector ℓ k →+* A :=
-    F.toConcreteStickelbergerSetup.wittThetaModQPow N
-  let Eps : PowerSeries A :=
-    (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
-        (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
-  calc
-    (∏ j ∈ Finset.range (m + 1),
-        (∏ r ∈ Finset.Iic D,
-          ((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
-            ((ε ^ (ℓ ^ j)) ^ ℓ *
-              θ (WittVector.teichmuller ℓ
-                ((((_root_.frobeniusEquiv k ℓ).symm ^ r)
-                  ((F.traceCarry y).coeff r)) ^ ℓ)))) ^
-            (ℓ ^ (r + 1))) ^ (ℓ ^ (m - j)))
-        =
-          artinHasseExpCoordinatePeelProduct F N m D ε (F.traceCarry y) := by
-          simpa [A, θ, Eps] using
-            F.artinHasseExp_frobenius_tail_depth_eq_coordinatePeelProduct_of_zero_iterate
-              N D m ε hzero (F.traceCarry y)
-    _ =
-          artinHasseExpTraceCarryZModPeelProduct F N m D 0 ε y := by
-          rw [F.artinHasseExpCoordinatePeelProduct_traceCarry_eq_zmodPeelProduct]
+  rw [← F.artinHasseExpCoordinatePeelProduct_traceCarry_eq_zmodPeelProduct]
+  simpa using
+    F.artinHasseExp_frobenius_tail_depth_eq_coordinatePeelProduct_of_zero_iterate
+      N D m ε hzero (F.traceCarry y)
 
 /-- Inverse-parameter specialization of the coordinate-depth trace-carry
 peel. -/
@@ -295,35 +261,10 @@ theorem artinHasseExp_inverse_frobenius_tail_depth_traceCarry_eq_divisiblePeelPr
       artinHasseExpTraceCarryZModPeelProductDivisible F N m D 0 δ y := by
   classical
   dsimp only
-  let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
-  let θ : WittVector ℓ k →+* A :=
-    F.toConcreteStickelbergerSetup.wittThetaModQPow N
-  let Eps : PowerSeries A :=
-    (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
-        (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
-  let Ips : PowerSeries A :=
-    (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
-      (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
-  let πbar : A := Ideal.Quotient.mk (F.Q ^ (N + 1)) F.π
-  let δ : A := (PowerSeries.trunc (N + 1) Ips).eval₂ (RingHom.id A) πbar
-  calc
-    (∏ j ∈ Finset.range (m + 1),
-        (∏ r ∈ Finset.Iic D,
-          ((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
-            ((δ ^ (ℓ ^ j)) ^ ℓ *
-              θ (WittVector.teichmuller ℓ
-                ((((_root_.frobeniusEquiv k ℓ).symm ^ r)
-                  ((F.traceCarry y).coeff r)) ^ ℓ)))) ^
-            (ℓ ^ (r + 1))) ^ (ℓ ^ (m - j)))
-        =
-          artinHasseExpTraceCarryZModPeelProduct F N m D 0 δ y := by
-          simpa [A, θ, Eps, Ips, πbar, δ] using
-            F.artinHasseExp_inverse_frobenius_tail_depth_traceCarry_eq_zmodPeelProduct_of_le
-              N D m hm y
-    _ =
-          artinHasseExpTraceCarryZModPeelProductDivisible F N m D 0 δ y := by
-          rw [F.artinHasseExpTraceCarryZModPeelProduct_eq_divisible]
+  rw [← F.artinHasseExpTraceCarryZModPeelProduct_eq_divisible]
+  simpa using
+    F.artinHasseExp_inverse_frobenius_tail_depth_traceCarry_eq_zmodPeelProduct_of_le
+      N D m hm y
 
 /-- Full-depth wrapper for the c4c carry term.  This is just the normalized
 coordinate-depth trace-carry peel at `D = N`, written with the same positive
@@ -354,23 +295,11 @@ theorem artinHasseExp_inverse_traceCarry_fullDepth_tail_eq_divisiblePeelProduct_
       artinHasseExpTraceCarryZModPeelProductDivisible F N (m - 1) N 0 δ y := by
   classical
   dsimp only
-  let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
-  let θ : WittVector ℓ k →+* A :=
-    F.toConcreteStickelbergerSetup.wittThetaModQPow N
-  let Eps : PowerSeries A :=
-    (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
-        (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
-  let Ips : PowerSeries A :=
-    (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
-      (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
-  let πbar : A := Ideal.Quotient.mk (F.Q ^ (N + 1)) F.π
-  let δ : A := (PowerSeries.trunc (N + 1) Ips).eval₂ (RingHom.id A) πbar
   have hm_succ : m - 1 + 1 = m :=
     Nat.sub_add_cancel (Nat.succ_le_of_lt hm_pos)
   have hm' : N + 1 ≤ ℓ ^ ((m - 1) + 1) := by
     simpa [hm_succ] using hm
-  simpa [A, θ, Eps, Ips, πbar, δ, hm_succ] using
+  simpa [hm_succ] using
     F.artinHasseExp_inverse_frobenius_tail_depth_traceCarry_eq_divisiblePeelProduct_of_le
       N N (m - 1) hm' y
 
@@ -416,11 +345,7 @@ theorem artinHasseExpTraceCarryZModPeelProductDivisible_eq_one_of_factor_pow_pri
               (algebraMap (ZMod ℓ) k (F.traceCarryCoeffZMod y s))))
       have hB : B ^ ℓ = 1 := by
         simpa [A, θ, Eps, B] using hroot m s j hj
-      calc
-        B ^ (ℓ * ℓ ^ (m - j)) = (B ^ ℓ) ^ (ℓ ^ (m - j)) := by
-          rw [pow_mul]
-        _ = 1 := by
-          rw [hB, one_pow]
+      rw [pow_mul, hB, one_pow]
   | succ D ih =>
       simp only [artinHasseExpTraceCarryZModPeelProductDivisible]
       have hprod :
@@ -453,11 +378,7 @@ theorem artinHasseExpTraceCarryZModPeelProductDivisible_eq_one_of_factor_pow_pri
                 (algebraMap (ZMod ℓ) k (F.traceCarryCoeffZMod y s))))
         have hB : B ^ ℓ = 1 := by
           simpa [A, θ, Eps, B] using hroot m s j hj
-        calc
-          B ^ (ℓ * ℓ ^ (m - j)) = (B ^ ℓ) ^ (ℓ ^ (m - j)) := by
-            rw [pow_mul]
-          _ = 1 := by
-            rw [hB, one_pow]
+        rw [pow_mul, hB, one_pow]
       have htail :
           artinHasseExpTraceCarryZModPeelProductDivisible F N (m + 1) D (s + 1) ε y =
             1 :=
