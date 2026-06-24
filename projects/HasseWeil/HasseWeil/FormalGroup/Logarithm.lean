@@ -761,6 +761,43 @@ noncomputable def compInverseOfUnit (f : PowerSeries R) (u : R) (hu : IsUnit u) 
   let v : R := ((hu.unit⁻¹ : Rˣ) : R)
   PowerSeries.subst ((v • PowerSeries.X : PowerSeries R)) (compInverse (v • f))
 
+/-- Cancelling a two-sided scalar inverse: if `u * v = 1` then `u • (v • z) = z`.
+Used to undo the rescale-by-`v` introduced in `compInverseOfUnit`. -/
+private theorem smul_smul_eq_self_of_mul_eq_one
+    {M : Type*} [AddCommMonoid M] [Module R M]
+    {u v : R} (huv : u * v = 1) (z : M) : u • (v • z) = z := by
+  rw [← mul_smul, huv, one_smul]
+
+open PowerSeries in
+/-- Substituting `f` (with `constantCoeff f = 0` and `coeff 1 f = u`) into the
+compositional inverse of the rescaled monic series `v • f` yields `u • X`,
+whenever `v` is a two-sided inverse of `u` (`v * u = 1` and `u * v = 1`).
+
+This is the heart of `subst_compInverseOfUnit_eq_X`: it reduces the unit case
+to the monic `subst_compInverse_eq_X` via the rescale `f ↦ v • f`, then scales
+back by `u`. -/
+private theorem subst_compInverse_smul_eq_smul_X (f : PowerSeries R) {u v : R}
+    (h0 : @PowerSeries.constantCoeff R _ f = 0) (h1 : PowerSeries.coeff 1 f = u)
+    (hvu : v * u = 1) (huv : u * v = 1) :
+    PowerSeries.subst (compInverse (v • f)) f = u • PowerSeries.X := by
+  -- `v • f` is monic: zero constant coefficient and linear coefficient `v * u = 1`.
+  have hvf_const : @PowerSeries.constantCoeff R _ (v • f) = 0 :=
+    scaled_constantCoeff_zero f v h0
+  have hvf_one : PowerSeries.coeff 1 (v • f) = 1 := by
+    rw [scaled_coeff_one, h1, hvu]
+  -- Apply the monic case to `f̃ := v • f`.
+  have hmonic : PowerSeries.subst (compInverse (v • f)) (v • f) = PowerSeries.X :=
+    subst_compInverse_eq_X (v • f) hvf_const hvf_one
+  have hsubst_g : PowerSeries.HasSubst (compInverse (v • f)) := compInverse_hasSubst _
+  -- `subst g̃ (v • f) = v • subst g̃ f`, hence `v • subst g̃ f = X`.
+  have hkey : v • PowerSeries.subst (compInverse (v • f)) f = PowerSeries.X := by
+    rw [← PowerSeries.subst_smul hsubst_g v f]; exact hmonic
+  -- Scale back by `u` (using `u * v = 1`) to land on `u • X`.
+  calc PowerSeries.subst (compInverse (v • f)) f
+      = u • (v • PowerSeries.subst (compInverse (v • f)) f) :=
+        (smul_smul_eq_self_of_mul_eq_one huv _).symm
+    _ = u • PowerSeries.X := by rw [hkey]
+
 open PowerSeries in
 /-- The constant coefficient of `compInverseOfUnit f u hu` is zero. -/
 @[simp]
@@ -790,8 +827,8 @@ theorem subst_compInverseOfUnit_eq_X (f : PowerSeries R) (u : R) (hu : IsUnit u)
     (h0 : @PowerSeries.constantCoeff R _ f = 0)
     (h1 : PowerSeries.coeff 1 f = u) :
     PowerSeries.subst (compInverseOfUnit f u hu) f = PowerSeries.X := by
-  -- Strategy: unfold, use subst_comp_subst_apply, subst_smul, subst_X, and
-  -- the monic-case theorem `subst_compInverse_eq_X` on `v • f`.
+  -- Strategy: unfold, use subst_comp_subst_apply, subst_X, and the core lemma
+  -- `subst_compInverse_smul_eq_smul_X` (which reduces to the monic case on `v • f`).
   unfold compInverseOfUnit
   set v : R := ((hu.unit⁻¹ : Rˣ) : R) with hv_def
   -- Key facts about v: v * u = 1 and u * v = 1.
@@ -801,55 +838,17 @@ theorem subst_compInverseOfUnit_eq_X (f : PowerSeries R) (u : R) (hu : IsUnit u)
   have huv : u * v = 1 := by
     rw [hv_def]
     exact hu.mul_val_inv
-  -- Auxiliary: v • f has zero constant coefficient and linear coefficient 1.
-  have hvf_const : @PowerSeries.constantCoeff R _ (v • f) = 0 :=
-    scaled_constantCoeff_zero f v h0
-  have hvf_one : PowerSeries.coeff 1 (v • f) = 1 := by
-    rw [scaled_coeff_one, h1, hvu]
-  -- Apply the monic case to f̃ := v • f.
-  have hmonic : PowerSeries.subst (compInverse (v • f)) (v • f) = PowerSeries.X :=
-    subst_compInverse_eq_X (v • f) hvf_const hvf_one
-  -- Substitution of the compositional inverse `g̃ := compInverse (v • f)` admits substitution.
-  have hsubst_g : PowerSeries.HasSubst (compInverse (v • f)) :=
-    compInverse_hasSubst _
-  -- From hmonic + subst_smul: v • subst g̃ f = X, i.e. subst g̃ f = u • X.
-  have hsubst_smul : PowerSeries.subst (compInverse (v • f)) (v • f) =
-      v • PowerSeries.subst (compInverse (v • f)) f :=
-    PowerSeries.subst_smul hsubst_g v f
-  have hkey : v • PowerSeries.subst (compInverse (v • f)) f = PowerSeries.X := by
-    rw [← hsubst_smul]; exact hmonic
-  -- Hence subst g̃ f = u • X via u • (v • y) = (u*v) • y = 1 • y = y.
-  have h_gf : PowerSeries.subst (compInverse (v • f)) f = u • PowerSeries.X := by
-    have hscale : u • (v • PowerSeries.subst (compInverse (v • f)) f) = u • PowerSeries.X := by
-      rw [hkey]
-    -- u • (v • y) = (u * v) • y = 1 • y = y.
-    have heq : u • (v • PowerSeries.subst (compInverse (v • f)) f) =
-        PowerSeries.subst (compInverse (v • f)) f := by
-      have h1 : u • (v • PowerSeries.subst (compInverse (v • f)) f) =
-          (u * v) • PowerSeries.subst (compInverse (v • f)) f :=
-        (mul_smul u v _).symm
-      rw [h1, huv]
-      exact one_smul R _
-    rw [heq] at hscale
-    exact hscale
-  -- Now compute: subst (subst (v • X) g̃) f = subst (v • X) (subst g̃ f).
-  -- subst_comp_subst_apply ha hb f : subst b (subst a f) = subst (subst b a) f.
-  -- Take a := g̃, b := v • X, so that the RHS is exactly our current goal's LHS.
+  -- The two substitutions admit substitution.
+  have hsubst_g : PowerSeries.HasSubst (compInverse (v • f)) := compInverse_hasSubst _
   have hsX : PowerSeries.HasSubst ((v • PowerSeries.X : PowerSeries R)) :=
     PowerSeries.HasSubst.of_constantCoeff_zero' (smul_X_constantCoeff_zero v)
-  rw [← PowerSeries.subst_comp_subst_apply hsubst_g hsX f]
-  -- Goal: subst (v • X) (subst g̃ f) = X.
-  rw [h_gf]
-  -- Goal: subst (v • X) (u • X) = X.
-  rw [PowerSeries.subst_smul hsX u PowerSeries.X]
-  -- Goal: u • subst (v • X) X = X.
-  rw [PowerSeries.subst_X hsX]
-  -- Goal: u • (v • X) = X.
-  -- Use calc / explicit term to avoid rewrite pattern matching trouble.
-  calc u • (v • (PowerSeries.X : PowerSeries R))
-      = (u * v) • (PowerSeries.X : PowerSeries R) := (mul_smul u v _).symm
-    _ = (1 : R) • (PowerSeries.X : PowerSeries R) := by rw [huv]
-    _ = PowerSeries.X := one_smul R _
+  -- subst (subst (v • X) g̃) f = subst (v • X) (subst g̃ f)   [subst_comp_subst_apply]
+  --                            = subst (v • X) (u • X)        [core lemma]
+  --                            = u • (v • X) = X.             [subst_X + scalar cancel]
+  rw [← PowerSeries.subst_comp_subst_apply hsubst_g hsX f,
+    subst_compInverse_smul_eq_smul_X f h0 h1 hvu huv,
+    PowerSeries.subst_smul hsX u PowerSeries.X, PowerSeries.subst_X hsX,
+    smul_smul_eq_self_of_mul_eq_one huv PowerSeries.X]
 
 open PowerSeries in
 /-- The linear coefficient of `compInverseOfUnit f u hu` is `(hu.unit)⁻¹`.
