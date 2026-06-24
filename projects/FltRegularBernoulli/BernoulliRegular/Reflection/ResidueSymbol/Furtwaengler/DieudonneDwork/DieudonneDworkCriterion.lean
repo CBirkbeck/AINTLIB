@@ -1,16 +1,5 @@
 module
 
-public import Mathlib.RingTheory.PowerSeries.Substitution
-public import Mathlib.RingTheory.PowerSeries.Expand
-public import Mathlib.RingTheory.PowerSeries.Inverse
-public import Mathlib.RingTheory.PowerSeries.Trunc
-public import Mathlib.RingTheory.PowerSeries.Basic
-public import Mathlib.Tactic.Ring
-public import Mathlib.Data.Rat.Defs
-public import Mathlib.Data.Rat.Lemmas
-public import Mathlib.Data.Nat.GCD.Basic
-public import Mathlib.Data.ZMod.Basic
-public import Mathlib.FieldTheory.Finite.Basic
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.DieudonneDwork.RIntegralPredicate
 
 /-!
@@ -118,9 +107,7 @@ theorem toZModPS_zero (r : ℕ) :
 theorem toZModPS_one (r : ℕ) :
     (IsRIntegralPS.one r).toZModPS = (1 : PowerSeries (ZMod r)) := by
   ext n
-  by_cases hn : n = 0
-  · simp [toZModPS, hn]
-  · simp [toZModPS, hn]
+  rcases eq_or_ne n 0 with hn | hn <;> simp [toZModPS, hn]
 
 theorem toZModPS_add {r : ℕ} {F G : PowerSeries ℚ}
     (hF : IsRIntegralPS r F) (hG : IsRIntegralPS r G) :
@@ -191,9 +178,8 @@ theorem toZModPS_subst_X_pow {r k : ℕ} (hk : k ≠ 0) {F : PowerSeries ℚ}
     (hF.subst_X_pow hk).toZModPS =
       PowerSeries.subst (PowerSeries.X ^ k) hF.toZModPS := by
   ext n
-  by_cases hkn : k ∣ n
-  · simp [toZModPS, PowerSeries.coeff_subst_X_pow, hk, hkn, IsRIntegralRat.toZMod]
-  · simp [toZModPS, PowerSeries.coeff_subst_X_pow, hk, hkn, IsRIntegralRat.toZMod]
+  rcases em (k ∣ n) with hkn | hkn <;>
+    simp [toZModPS, PowerSeries.coeff_subst_X_pow, hk, hkn, IsRIntegralRat.toZMod]
 
 theorem inv_of_constantCoeff_one {r : ℕ} {F : PowerSeries ℚ}
     (hF : IsRIntegralPS r F) (hF0 : PowerSeries.constantCoeff F = 1) :
@@ -331,9 +317,7 @@ private theorem coeff_pow_add_C_mul_X_pow
             (PowerSeries.coeff (R := ℚ) n) (A ^ (k + 1)) := by
         simp [term]
       have hmid : term k = ((k + 1 : ℕ) : ℚ) * c := by
-        have hsub : (k + 1) - k = 1 := by
-          rw [Nat.add_comm]
-          exact Nat.add_sub_cancel 1 k
+        have hsub : (k + 1) - k = 1 := by omega
         have hchoose_nat : (k + 1).choose k = k + 1 :=
           Nat.choose_succ_self_right k
         have hchoose_rat : (((k + 1).choose k : ℕ) : ℚ) = (k + 1 : ℚ) := by
@@ -354,27 +338,14 @@ private theorem coeff_pow_add_C_mul_X_pow
                 (((k + 1).choose k : ℕ) : ℚ) := by
                 rw [PowerSeries.coeff_mul_C]
           _ = c * (k + 1 : ℚ) := by rw [hx, hchoose_rat]
-          _ = ((k + 1 : ℕ) : ℚ) * c := by
-                rw [show ((k + 1 : ℕ) : ℚ) = (k : ℚ) + 1 by norm_num]
-                ring
+          _ = ((k + 1 : ℕ) : ℚ) * c := by push_cast; ring
       have hzero :
           ∀ m ∈ (Finset.range (k + 2)).erase (k + 1), m ≠ k → term m = 0 := by
         intro m hm hmk
         have hm_range : m < k + 2 :=
           Finset.mem_range.mp ((Finset.mem_erase.mp hm).2)
         have hm_top : m ≠ k + 1 := (Finset.mem_erase.mp hm).1
-        have he : 1 < (k + 1) - m := by
-          have hm_le_top : m ≤ k + 1 := Nat.le_of_lt_succ hm_range
-          have hm_lt_top : m < k + 1 := Nat.lt_of_le_of_ne hm_le_top hm_top
-          have hm_le_k : m ≤ k := Nat.le_of_lt_succ hm_lt_top
-          have hm_lt_k : m < k := Nat.lt_of_le_of_ne hm_le_k hmk
-          have hsucc : m + 1 ≤ k := Nat.succ_le_of_lt hm_lt_k
-          have hsumle : 2 + m ≤ k + 1 := by
-            have h := Nat.succ_le_succ hsucc
-            simpa [Nat.succ_eq_add_one, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using h
-          have hle : 2 ≤ (k + 1) - m :=
-            (Nat.le_sub_iff_add_le hm_le_top).2 hsumle
-          exact lt_of_lt_of_le (by decide : 1 < 2) hle
+        have he : 1 < (k + 1) - m := by omega
         have hgt : n < n * ((k + 1) - m) := by
           have hmul := Nat.mul_lt_mul_of_pos_left he hn
           simpa using hmul
