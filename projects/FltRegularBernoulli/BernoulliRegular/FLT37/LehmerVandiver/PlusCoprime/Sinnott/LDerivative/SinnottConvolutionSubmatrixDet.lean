@@ -4,7 +4,6 @@ import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative.Sin
 
 noncomputable section
 
-open Real Complex
 open scoped NumberField
 
 namespace BernoulliRegular
