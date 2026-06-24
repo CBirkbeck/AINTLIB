@@ -12,6 +12,13 @@ then `P` already has integral affine coordinates.
 Generalization of `GeneralIntegralMultiple.lean` from `ℤ/ℚ` to an integrally closed
 domain `R`. The integral-root step uses `IsIntegrallyClosed.isIntegral_iff` rather than
 the unique-factorization integral-root theorem, so a UFD hypothesis is not needed.
+
+## Main results
+
+* `isInteger_of_nsmul_isInteger`: if `n • P` has integral coordinates, so does `P`.
+* `x_isInteger_of_nsmul_x_isInteger`: the `x`-coordinate half (needs only `IsIntegrallyClosed`).
+* `x_coord_nsmul_eq`: the coordinate identity `x' · ΨSq_n(x) = Φ_n(x)` for `n • P`.
+* `monic_Φ_sub_smul_ΨSq`: the polynomial `Φ_n - c • ΨSq_n` is monic.
 -/
 
 namespace LutzNagell
