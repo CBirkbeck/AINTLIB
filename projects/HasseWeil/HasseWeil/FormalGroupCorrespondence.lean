@@ -53,7 +53,239 @@ section OmegaOneDim
 
 variable (E : Affine F) [E.IsElliptic]
 
-set_option maxHeartbeats 1600000 in
+/-- The image `x` of the coordinate `X` in the function field `K(E)`. -/
+private noncomputable def coordXFF : E.FunctionField :=
+  algebraMap E.CoordinateRing E.FunctionField
+    (algebraMap (Polynomial F) E.CoordinateRing Polynomial.X)
+
+/-- The image `y` of the root of the Weierstrass polynomial in `K(E)`. -/
+private noncomputable def coordYFF : E.FunctionField :=
+  algebraMap E.CoordinateRing E.FunctionField (AdjoinRoot.root E.polynomial)
+
+/-- The `K(E)`-span of `D(x)`, where `x = coordXFF E`. The whole proof that `Ω` has
+rank one amounts to showing `D f ∈ derivSpanX E` for every `f ∈ K(E)`, since
+`D(x)` is a nonzero multiple of the invariant differential `ω`. -/
+private noncomputable def derivSpanX :
+    Submodule E.FunctionField (KaehlerDifferential F E.FunctionField) :=
+  Submodule.span E.FunctionField {KaehlerDifferential.D F E.FunctionField (coordXFF E)}
+
+omit [DecidableEq F] in
+/-- `D(x) ∈ span{ω}`: since `ω = u⁻¹ • D(x)` with `u = 2y + a₁x + a₃ ≠ 0`, we have
+`D(x) = u • ω`. -/
+private lemma D_coordXFF_mem_span_invariantDifferential :
+    KaehlerDifferential.D F E.FunctionField (coordXFF E) ∈
+      Submodule.span E.FunctionField {invariantDifferential E} := by
+  unfold coordXFF invariantDifferential
+  rw [Submodule.mem_span_singleton]
+  exact ⟨2 * algebraMap E.CoordinateRing E.FunctionField (AdjoinRoot.root E.polynomial) +
+      algebraMap F E.FunctionField E.a₁ * algebraMap E.CoordinateRing E.FunctionField
+        (algebraMap (Polynomial F) E.CoordinateRing Polynomial.X) +
+      algebraMap F E.FunctionField E.a₃,
+    by rw [smul_smul, mul_inv_cancel₀ (denom_ne_zero E), one_smul]⟩
+
+omit [DecidableEq F] in
+/-- `D(x) ∈ derivSpanX E`: `D(x)` is the generator of the span by definition. -/
+private lemma D_coordXFF_mem :
+    KaehlerDifferential.D F E.FunctionField (coordXFF E) ∈ derivSpanX E :=
+  Submodule.subset_span rfl
+
+omit [DecidableEq F] in
+/-- `D(xⁿ) ∈ derivSpanX E` for every `n`, by induction on `n` using the Leibniz rule. -/
+private lemma D_coordXFF_pow_mem (n : ℕ) :
+    KaehlerDifferential.D F E.FunctionField (coordXFF E ^ n) ∈ derivSpanX E := by
+  set D := KaehlerDifferential.D F E.FunctionField
+  set S := derivSpanX E
+  induction n with
+  | zero => rw [pow_zero, Derivation.map_one_eq_zero]; exact S.zero_mem
+  | succ n ih =>
+    rw [pow_succ, Derivation.leibniz]
+    exact S.add_mem (S.smul_mem _ (D_coordXFF_mem E)) (S.smul_mem _ ih)
+
+omit [DecidableEq F] in
+/-- `D(p(x)) ∈ derivSpanX E` for every polynomial `p ∈ F[X]`, by induction on `p`,
+reducing each monomial to a power of `x` via `D_coordXFF_pow_mem`. -/
+private lemma D_algebraMap_polynomial_mem (p : Polynomial F) :
+    KaehlerDifferential.D F E.FunctionField
+      (algebraMap (Polynomial F) E.FunctionField p) ∈ derivSpanX E := by
+  set D := KaehlerDifferential.D F E.FunctionField
+  set S := derivSpanX E
+  induction p using Polynomial.induction_on' with
+  | add p q hp hq => rw [map_add, map_add]; exact S.add_mem hp hq
+  | monomial n a =>
+    rw [← Polynomial.C_mul_X_pow_eq_monomial, map_mul, map_pow,
+      show algebraMap (Polynomial F) E.FunctionField (Polynomial.C a) =
+        algebraMap F E.FunctionField a from
+        IsScalarTower.algebraMap_apply F (Polynomial F) E.FunctionField a,
+      show algebraMap (Polynomial F) E.FunctionField Polynomial.X = coordXFF E from
+        IsScalarTower.algebraMap_apply (Polynomial F) E.CoordinateRing E.FunctionField _]
+    rw [Derivation.leibniz, Derivation.map_algebraMap, smul_zero, add_zero]
+    exact S.smul_mem _ (D_coordXFF_pow_mem E n)
+
+open Polynomial.Bivariate in
+omit [DecidableEq F] in
+/-- The Weierstrass relation `y² + (a₁x+a₃)·y = x³ + a₂x² + a₄x + a₆` in the
+coordinate ring `K[E]` (Silverman II.4.2b), obtained from the defining polynomial. -/
+private lemma weierstrass_relation_coordinateRing :
+    (AdjoinRoot.root E.polynomial) ^ 2 +
+      algebraMap (Polynomial F) E.CoordinateRing
+        (Polynomial.C E.a₁ * Polynomial.X + Polynomial.C E.a₃) *
+      AdjoinRoot.root E.polynomial =
+      algebraMap (Polynomial F) E.CoordinateRing
+        (Polynomial.X ^ 3 + Polynomial.C E.a₂ * Polynomial.X ^ 2 +
+         Polynomial.C E.a₄ * Polynomial.X + Polynomial.C E.a₆) := by
+  have Y_sq : (AdjoinRoot.mk E.polynomial) Y ^ 2 =
+    (AdjoinRoot.mk E.polynomial) (Polynomial.C (Polynomial.X ^ 3 + Polynomial.C E.a₂ *
+      Polynomial.X ^ 2 + Polynomial.C E.a₄ * Polynomial.X + Polynomial.C E.a₆) -
+    Polynomial.C (Polynomial.C E.a₁ * Polynomial.X + Polynomial.C E.a₃) * Y) :=
+    AdjoinRoot.mk_eq_mk.mpr ⟨1, by rw [Affine.polynomial]; ring1⟩
+  rw [AdjoinRoot.mk_X] at Y_sq
+  simp only [map_sub, map_mul, AdjoinRoot.mk_X] at Y_sq
+  have hcc : ∀ p : Polynomial F, AdjoinRoot.mk E.polynomial (Polynomial.C p) =
+    algebraMap (Polynomial F) E.CoordinateRing p := fun _ ↦ rfl
+  rw [hcc, hcc] at Y_sq; linear_combination Y_sq
+
+omit [DecidableEq F] in
+/-- The Weierstrass relation lifted to the function field `K(E)`:
+`y² + c·y = rhs`, where `c = a₁x+a₃` and `rhs = x³+a₂x²+a₄x+a₆`. -/
+private lemma weierstrass_relation_functionField :
+    coordYFF E ^ 2 + algebraMap (Polynomial F) E.FunctionField
+        (Polynomial.C E.a₁ * Polynomial.X + Polynomial.C E.a₃) * coordYFF E =
+      algebraMap (Polynomial F) E.FunctionField
+        (Polynomial.X ^ 3 + Polynomial.C E.a₂ * Polynomial.X ^ 2 +
+         Polynomial.C E.a₄ * Polynomial.X + Polynomial.C E.a₆) := by
+  have h := congr_arg (algebraMap E.CoordinateRing E.FunctionField)
+    (weierstrass_relation_coordinateRing E)
+  rw [map_add, map_mul, map_pow] at h
+  rwa [← IsScalarTower.algebraMap_apply (Polynomial F) E.CoordinateRing E.FunctionField,
+    ← IsScalarTower.algebraMap_apply (Polynomial F) E.CoordinateRing E.FunctionField] at h
+
+omit [DecidableEq F] in
+/-- The denominator `2y + c` (with `c = a₁x+a₃`) of the invariant differential is nonzero
+in `K(E)`; this is `denom_ne_zero` rephrased with `c` written as `algebraMap _ _ (C a₁·X+C a₃)`. -/
+private lemma two_coordYFF_add_c_ne_zero :
+    2 * coordYFF E + algebraMap (Polynomial F) E.FunctionField
+      (Polynomial.C E.a₁ * Polynomial.X + Polynomial.C E.a₃) ≠ 0 := by
+  have hc_eq : algebraMap (Polynomial F) E.FunctionField
+      (Polynomial.C E.a₁ * Polynomial.X + Polynomial.C E.a₃) =
+      algebraMap F E.FunctionField E.a₁ * coordXFF E +
+        algebraMap F E.FunctionField E.a₃ := by
+    rw [map_add, map_mul,
+      show (Polynomial.C E.a₁ : Polynomial F) = algebraMap F (Polynomial F) E.a₁ from rfl,
+      show (Polynomial.C E.a₃ : Polynomial F) = algebraMap F (Polynomial F) E.a₃ from rfl,
+      ← IsScalarTower.algebraMap_apply F (Polynomial F) E.FunctionField E.a₁,
+      ← IsScalarTower.algebraMap_apply F (Polynomial F) E.FunctionField E.a₃,
+      show algebraMap (Polynomial F) E.FunctionField Polynomial.X = coordXFF E from
+        (IsScalarTower.algebraMap_apply (Polynomial F) E.CoordinateRing
+          E.FunctionField Polynomial.X).symm]
+  rw [hc_eq, ← add_assoc]; exact denom_ne_zero E
+
+omit [DecidableEq F] in
+/-- `D(y) ∈ derivSpanX E`. Differentiating the Weierstrass relation gives
+`(2y+c)•D(y) = D(rhs) - y•D(c) ∈ S` (since `c, rhs` are polynomials in `x`), and
+`2y+c ≠ 0`, so `D(y) ∈ S`. Reference: Silverman II.4.2b. -/
+private lemma D_coordYFF_mem :
+    KaehlerDifferential.D F E.FunctionField (coordYFF E) ∈ derivSpanX E := by
+  set D := KaehlerDifferential.D F E.FunctionField
+  set S := derivSpanX E
+  set c_ff : E.FunctionField := algebraMap (Polynomial F) E.FunctionField
+      (Polynomial.C E.a₁ * Polynomial.X + Polynomial.C E.a₃) with hc_def
+  set rhs_ff : E.FunctionField := algebraMap (Polynomial F) E.FunctionField
+      (Polynomial.X ^ 3 + Polynomial.C E.a₂ * Polynomial.X ^ 2 +
+       Polynomial.C E.a₄ * Polynomial.X + Polynomial.C E.a₆)
+  have hW_FF : coordYFF E ^ 2 + c_ff * coordYFF E = rhs_ff :=
+    weierstrass_relation_functionField E
+  -- Leibniz: D(y²+c·y) = (2y+c)•D(y) + y•D(c)
+  have hD_expand : D (coordYFF E ^ 2 + c_ff * coordYFF E) =
+      (2 * coordYFF E + c_ff) • D (coordYFF E) + coordYFF E • D c_ff := by
+    rw [map_add, sq, Derivation.leibniz, Derivation.leibniz,
+      ← add_smul, ← two_mul, ← add_assoc, ← add_smul]
+  -- D(c) and D(rhs) are in S (polynomials in x)
+  have hD_c : D c_ff ∈ S := D_algebraMap_polynomial_mem E _
+  have hD_rhs : D rhs_ff ∈ S := D_algebraMap_polynomial_mem E _
+  -- From Weierstrass: (2y+c)•D(y) = D(rhs) - y•D(c) ∈ S
+  have h_uDy_mem : (2 * coordYFF E + c_ff) • D (coordYFF E) ∈ S := by
+    have h_eq : (2 * coordYFF E + c_ff) • D (coordYFF E) =
+        D rhs_ff - coordYFF E • D c_ff :=
+      (sub_eq_of_eq_add (hD_expand.symm.trans (congr_arg D hW_FF)).symm).symm
+    rw [h_eq]; exact S.sub_mem hD_rhs (S.smul_mem _ hD_c)
+  -- 2y+c ≠ 0, so D(y) = (2y+c)⁻¹ • ((2y+c)•D(y)) ∈ S
+  rw [← inv_smul_smul₀ (two_coordYFF_add_c_ne_zero E) (D (coordYFF E))]
+  exact S.smul_mem _ h_uDy_mem
+
+omit [DecidableEq F] in
+/-- `D(r) ∈ derivSpanX E` for every `r` in the coordinate ring `K[E]`. Writing
+`r = p • 1 + q • y` with `p, q ∈ F[X]`, this follows from `D_algebraMap_polynomial_mem`
+and `D_coordYFF_mem`. -/
+private lemma D_algebraMap_coordinateRing_mem (r : E.CoordinateRing) :
+    KaehlerDifferential.D F E.FunctionField
+      (algebraMap E.CoordinateRing E.FunctionField r) ∈ derivSpanX E := by
+  set D := KaehlerDifferential.D F E.FunctionField
+  set S := derivSpanX E
+  obtain ⟨p, q, hpq⟩ := Affine.CoordinateRing.exists_smul_basis_eq r
+  rw [← hpq, map_add]
+  simp only [Algebra.smul_def, map_mul, mul_one]
+  rw [AdjoinRoot.mk_X, map_add, Derivation.leibniz,
+    ← IsScalarTower.algebraMap_apply (Polynomial F) E.CoordinateRing E.FunctionField,
+    ← IsScalarTower.algebraMap_apply (Polynomial F) E.CoordinateRing E.FunctionField]
+  exact S.add_mem (D_algebraMap_polynomial_mem E p)
+    (S.add_mem (S.smul_mem _ (D_coordYFF_mem E)) (S.smul_mem _ (D_algebraMap_polynomial_mem E q)))
+
+omit [DecidableEq F] in
+/-- `D(b⁻¹) ∈ derivSpanX E` for `b` the image of a coordinate-ring element: from
+`b · b⁻¹ = 1`, the Leibniz rule gives `b·D(b⁻¹) = -(b⁻¹·D(b))`, and `D(b) ∈ S`. -/
+private lemma D_inv_algebraMap_coordinateRing_mem (b : E.CoordinateRing)
+    (hb_ne : algebraMap E.CoordinateRing E.FunctionField b ≠ 0) :
+    KaehlerDifferential.D F E.FunctionField
+      ((algebraMap E.CoordinateRing E.FunctionField b)⁻¹) ∈ derivSpanX E := by
+  set D := KaehlerDifferential.D F E.FunctionField
+  set S := derivSpanX E
+  have h0 : algebraMap E.CoordinateRing E.FunctionField b •
+      D ((algebraMap E.CoordinateRing E.FunctionField b)⁻¹) =
+      -((algebraMap E.CoordinateRing E.FunctionField b)⁻¹ •
+        D (algebraMap E.CoordinateRing E.FunctionField b)) :=
+    eq_neg_of_add_eq_zero_left (by
+      rw [← Derivation.leibniz, mul_inv_cancel₀ hb_ne, Derivation.map_one_eq_zero])
+  have h1 : D ((algebraMap E.CoordinateRing E.FunctionField b)⁻¹) =
+      (algebraMap E.CoordinateRing E.FunctionField b)⁻¹ •
+        (-((algebraMap E.CoordinateRing E.FunctionField b)⁻¹ •
+          D (algebraMap E.CoordinateRing E.FunctionField b))) := by
+    calc D ((algebraMap E.CoordinateRing E.FunctionField b)⁻¹)
+        = (algebraMap E.CoordinateRing E.FunctionField b)⁻¹ •
+            (algebraMap E.CoordinateRing E.FunctionField b •
+              D ((algebraMap E.CoordinateRing E.FunctionField b)⁻¹)) := by
+          rw [smul_smul, inv_mul_cancel₀ hb_ne, one_smul]
+      _ = _ := by rw [h0]
+  rw [h1]; exact S.smul_mem _ (S.neg_mem (S.smul_mem _ (D_algebraMap_coordinateRing_mem E b)))
+
+omit [DecidableEq F] in
+/-- `D(f) ∈ derivSpanX E` for every `f ∈ K(E) = Frac(K[E])`. Writing `f = a · b⁻¹`,
+this follows from `D_algebraMap_coordinateRing_mem` and `D_inv_algebraMap_coordinateRing_mem`
+via the Leibniz rule. -/
+private lemma D_mem_derivSpanX (f : E.FunctionField) :
+    KaehlerDifferential.D F E.FunctionField f ∈ derivSpanX E := by
+  set D := KaehlerDifferential.D F E.FunctionField
+  set S := derivSpanX E
+  obtain ⟨a, b, hb, hab⟩ := IsFractionRing.div_surjective (A := E.CoordinateRing) f
+  rw [← hab, div_eq_mul_inv, Derivation.leibniz]
+  have hb_ne : algebraMap E.CoordinateRing E.FunctionField b ≠ 0 :=
+    (IsLocalization.map_units E.FunctionField ⟨b, hb⟩).ne_zero
+  exact S.add_mem (S.smul_mem _ (D_inv_algebraMap_coordinateRing_mem E b hb_ne))
+    (S.smul_mem _ (D_algebraMap_coordinateRing_mem E a))
+
+omit [DecidableEq F] in
+/-- The invariant differential `ω` spans all of `Ω_{K(E)/F}`. Since `Ω` is spanned by
+`{D f : f ∈ K(E)}` and each `D f ∈ span{D(x)} ≤ span{ω}` (as `D(x) ∈ span{ω}`), the
+span of `ω` is everything. Reference: Silverman III.1.5. -/
+private lemma span_invariantDifferential_eq_top :
+    Submodule.span E.FunctionField {invariantDifferential E} = ⊤ := by
+  rw [eq_top_iff, ← KaehlerDifferential.span_range_derivation F E.FunctionField,
+    Submodule.span_le]
+  rintro _ ⟨f, rfl⟩
+  rw [SetLike.mem_coe]
+  exact Submodule.span_le.mpr
+    (Set.singleton_subset_iff.mpr (D_coordXFF_mem_span_invariantDifferential E))
+    (D_mem_derivSpanX E f)
+
 -- The Kähler differential module Ω[K(E)/F] is generated by dx/(2y+a₁x+a₃)
 -- as a K(E)-module. Every element η ∈ Ω is of the form c · ω for some c ∈ K(E).
 -- This follows from E having genus 1: by Riemann-Roch, dim_K(E) Ω = g = 1.
@@ -64,156 +296,10 @@ theorem kaehler_rank_one :
     Module.Free.of_divisionRing _ _
   rw [finrank_eq_one_iff']
   refine ⟨invariantDifferential E, invariantDifferential_ne_zero E, fun w ↦ ?_⟩
-  -- Every w ∈ Ω is a K(E)-multiple of ω = u⁻¹ • D(x).
-  -- We show span{ω} = ⊤ by proving range(D) ⊆ span{D(x)} = span{ω}.
-  suffices h : Submodule.span E.FunctionField {invariantDifferential E} = ⊤ by
-    have hw : w ∈ (⊤ : Submodule E.FunctionField _) := Submodule.mem_top
-    rw [← h] at hw; rwa [Submodule.mem_span_singleton] at hw
-  rw [eq_top_iff, ← KaehlerDifferential.span_range_derivation F E.FunctionField,
-    Submodule.span_le]
-  rintro _ ⟨f, rfl⟩
-  -- Goal: D(f) ∈ span{ω}. We show D(f) ∈ span{D(x)} and span{D(x)} ≤ span{ω}.
-  let D := KaehlerDifferential.D F E.FunctionField
-  let x_ff : E.FunctionField := algebraMap E.CoordinateRing E.FunctionField
-      (algebraMap (Polynomial F) E.CoordinateRing Polynomial.X)
-  let y_ff : E.FunctionField := algebraMap E.CoordinateRing E.FunctionField
-      (AdjoinRoot.root E.polynomial)
-  -- D(x) ∈ span{ω}: since ω = u⁻¹ • D(x), we have D(x) = u • ω
-  have hDx_in_ω : D x_ff ∈
-      Submodule.span E.FunctionField {invariantDifferential E} := by
-    rw [Submodule.mem_span_singleton]
-    exact ⟨2 * y_ff + algebraMap F E.FunctionField E.a₁ * x_ff +
-        algebraMap F E.FunctionField E.a₃,
-      show _ • invariantDifferential E = D x_ff from by
-        change _ • ((_ : E.FunctionField)⁻¹ • D x_ff) = D x_ff
-        rw [smul_smul, mul_inv_cancel₀ (denom_ne_zero E), one_smul]⟩
-  rw [SetLike.mem_coe]
-  suffices hDf : D f ∈ Submodule.span E.FunctionField {D x_ff} from
-    Submodule.span_le.mpr (Set.singleton_subset_iff.mpr hDx_in_ω) hDf
-  let S := Submodule.span E.FunctionField {D x_ff}
-  change D f ∈ S
-  have hDx_mem : D x_ff ∈ S := Submodule.subset_span rfl
-  /- Step 1: D(x^n) ∈ S for all n -/
-  have hDxn : ∀ n : ℕ, D (x_ff ^ n) ∈ S := by
-    intro n; induction n with
-    | zero => rw [pow_zero, Derivation.map_one_eq_zero]; exact S.zero_mem
-    | succ n ih =>
-      rw [pow_succ, Derivation.leibniz]
-      exact S.add_mem (S.smul_mem _ hDx_mem) (S.smul_mem _ ih)
-  /- Step 2: D(p(x)) ∈ S for all p ∈ F[X] -/
-  have hDpoly : ∀ p : Polynomial F,
-      D (algebraMap (Polynomial F) E.FunctionField p) ∈ S := by
-    intro p; induction p using Polynomial.induction_on' with
-    | add p q hp hq => rw [map_add, map_add]; exact S.add_mem hp hq
-    | monomial n a =>
-      rw [← Polynomial.C_mul_X_pow_eq_monomial, map_mul, map_pow,
-        show algebraMap (Polynomial F) E.FunctionField (Polynomial.C a) =
-          algebraMap F E.FunctionField a from
-          IsScalarTower.algebraMap_apply F (Polynomial F) E.FunctionField a,
-        show algebraMap (Polynomial F) E.FunctionField Polynomial.X = x_ff from
-          IsScalarTower.algebraMap_apply (Polynomial F) E.CoordinateRing E.FunctionField _]
-      rw [Derivation.leibniz, Derivation.map_algebraMap, smul_zero, add_zero]
-      exact S.smul_mem _ (hDxn n)
-  /- Step 3: D(y) ∈ S via the Weierstrass relation (Silverman II.4.2b) -/
-  have hDy : D y_ff ∈ S := by
-    -- Weierstrass relation in the coordinate ring: y²+(a₁x+a₃)y = x³+a₂x²+a₄x+a₆
-    open Polynomial.Bivariate in
-    have hW_coord : (AdjoinRoot.root E.polynomial) ^ 2 +
-        algebraMap (Polynomial F) E.CoordinateRing
-          (Polynomial.C E.a₁ * Polynomial.X + Polynomial.C E.a₃) *
-        AdjoinRoot.root E.polynomial =
-        algebraMap (Polynomial F) E.CoordinateRing
-          (Polynomial.X ^ 3 + Polynomial.C E.a₂ * Polynomial.X ^ 2 +
-           Polynomial.C E.a₄ * Polynomial.X + Polynomial.C E.a₆) := by
-      have Y_sq : (AdjoinRoot.mk E.polynomial) Y ^ 2 =
-        (AdjoinRoot.mk E.polynomial) (Polynomial.C (Polynomial.X ^ 3 + Polynomial.C E.a₂ *
-          Polynomial.X ^ 2 + Polynomial.C E.a₄ * Polynomial.X + Polynomial.C E.a₆) -
-        Polynomial.C (Polynomial.C E.a₁ * Polynomial.X + Polynomial.C E.a₃) * Y) :=
-        AdjoinRoot.mk_eq_mk.mpr ⟨1, by rw [Affine.polynomial]; ring1⟩
-      rw [AdjoinRoot.mk_X] at Y_sq
-      simp only [map_sub, map_mul, AdjoinRoot.mk_X] at Y_sq
-      have hcc : ∀ p : Polynomial F, AdjoinRoot.mk E.polynomial (Polynomial.C p) =
-        algebraMap (Polynomial F) E.CoordinateRing p := fun _ ↦ rfl
-      rw [hcc, hcc] at Y_sq; linear_combination Y_sq
-    -- Lift to the function field
-    set c_ff : E.FunctionField := algebraMap (Polynomial F) E.FunctionField
-        (Polynomial.C E.a₁ * Polynomial.X + Polynomial.C E.a₃) with hc_def
-    set rhs_ff : E.FunctionField := algebraMap (Polynomial F) E.FunctionField
-        (Polynomial.X ^ 3 + Polynomial.C E.a₂ * Polynomial.X ^ 2 +
-         Polynomial.C E.a₄ * Polynomial.X + Polynomial.C E.a₆)
-    have hW_FF : y_ff ^ 2 + c_ff * y_ff = rhs_ff := by
-      have h := congr_arg (algebraMap E.CoordinateRing E.FunctionField) hW_coord
-      rw [map_add, map_mul, map_pow] at h
-      rwa [← IsScalarTower.algebraMap_apply (Polynomial F) E.CoordinateRing E.FunctionField,
-        ← IsScalarTower.algebraMap_apply (Polynomial F) E.CoordinateRing E.FunctionField] at h
-    -- Leibniz: D(y²+c·y) = (2y+c)•D(y) + y•D(c)
-    have hD_expand : D (y_ff ^ 2 + c_ff * y_ff) =
-        (2 * y_ff + c_ff) • D y_ff + y_ff • D c_ff := by
-      rw [map_add, sq, Derivation.leibniz, Derivation.leibniz,
-        ← add_smul, ← two_mul, ← add_assoc, ← add_smul]
-    -- D(c) and D(rhs) are in S (polynomials in x)
-    have hD_c : D c_ff ∈ S := hDpoly _
-    have hD_rhs : D rhs_ff ∈ S := hDpoly _
-    -- From Weierstrass: (2y+c)•D(y) = D(rhs) - y•D(c) ∈ S
-    have h_uDy_mem : (2 * y_ff + c_ff) • D y_ff ∈ S := by
-      have h_eq : (2 * y_ff + c_ff) • D y_ff =
-          D rhs_ff - y_ff • D c_ff :=
-        (sub_eq_of_eq_add (hD_expand.symm.trans (congr_arg D hW_FF)).symm).symm
-      rw [h_eq]; exact S.sub_mem hD_rhs (S.smul_mem _ hD_c)
-    -- 2y+c ≠ 0, so D(y) = (2y+c)⁻¹ • ((2y+c)•D(y)) ∈ S
-    have hu_c : 2 * y_ff + c_ff ≠ 0 := by
-      have hc_eq : c_ff = algebraMap F E.FunctionField E.a₁ * x_ff +
-          algebraMap F E.FunctionField E.a₃ := by
-        change algebraMap (Polynomial F) E.FunctionField
-          (Polynomial.C E.a₁ * Polynomial.X + Polynomial.C E.a₃) = _
-        rw [map_add, map_mul,
-          show (Polynomial.C E.a₁ : Polynomial F) = algebraMap F (Polynomial F) E.a₁ from rfl,
-          show (Polynomial.C E.a₃ : Polynomial F) = algebraMap F (Polynomial F) E.a₃ from rfl,
-          ← IsScalarTower.algebraMap_apply F (Polynomial F) E.FunctionField E.a₁,
-          ← IsScalarTower.algebraMap_apply F (Polynomial F) E.FunctionField E.a₃,
-          show algebraMap (Polynomial F) E.FunctionField Polynomial.X = x_ff from
-            (IsScalarTower.algebraMap_apply (Polynomial F) E.CoordinateRing
-              E.FunctionField Polynomial.X).symm]
-      rw [hc_eq, ← add_assoc]; exact denom_ne_zero E
-    rw [← inv_smul_smul₀ hu_c (D y_ff)]
-    exact S.smul_mem _ h_uDy_mem
-  /- Step 4: D(r) ∈ S for all r ∈ CoordinateRing -/
-  have hDcoord : ∀ r : E.CoordinateRing,
-      D (algebraMap E.CoordinateRing E.FunctionField r) ∈ S := by
-    intro r
-    obtain ⟨p, q, hpq⟩ := Affine.CoordinateRing.exists_smul_basis_eq r
-    rw [← hpq, map_add]
-    simp only [Algebra.smul_def, map_mul, mul_one]
-    rw [AdjoinRoot.mk_X, map_add, Derivation.leibniz,
-      ← IsScalarTower.algebraMap_apply (Polynomial F) E.CoordinateRing E.FunctionField,
-      ← IsScalarTower.algebraMap_apply (Polynomial F) E.CoordinateRing E.FunctionField]
-    exact S.add_mem (hDpoly p)
-      (S.add_mem (S.smul_mem _ hDy) (S.smul_mem _ (hDpoly q)))
-  /- Step 5: D(f) ∈ S for all f ∈ K(E) = Frac(CoordinateRing) -/
-  obtain ⟨a, b, hb, hab⟩ := IsFractionRing.div_surjective (A := E.CoordinateRing) f
-  rw [← hab, div_eq_mul_inv, Derivation.leibniz]
-  have hb_ne : algebraMap E.CoordinateRing E.FunctionField b ≠ 0 :=
-    (IsLocalization.map_units E.FunctionField ⟨b, hb⟩).ne_zero
-  -- D(b⁻¹) ∈ S: from b·b⁻¹ = 1, Leibniz gives b·D(b⁻¹) = -(b⁻¹·D(b))
-  have hDinv : D ((algebraMap E.CoordinateRing E.FunctionField b)⁻¹) ∈ S := by
-    have h0 : algebraMap E.CoordinateRing E.FunctionField b •
-        D ((algebraMap E.CoordinateRing E.FunctionField b)⁻¹) =
-        -((algebraMap E.CoordinateRing E.FunctionField b)⁻¹ •
-          D (algebraMap E.CoordinateRing E.FunctionField b)) :=
-      eq_neg_of_add_eq_zero_left (by
-        rw [← Derivation.leibniz, mul_inv_cancel₀ hb_ne, Derivation.map_one_eq_zero])
-    have h1 : D ((algebraMap E.CoordinateRing E.FunctionField b)⁻¹) =
-        (algebraMap E.CoordinateRing E.FunctionField b)⁻¹ •
-          (-((algebraMap E.CoordinateRing E.FunctionField b)⁻¹ •
-            D (algebraMap E.CoordinateRing E.FunctionField b))) := by
-      calc D ((algebraMap E.CoordinateRing E.FunctionField b)⁻¹)
-          = (algebraMap E.CoordinateRing E.FunctionField b)⁻¹ •
-              (algebraMap E.CoordinateRing E.FunctionField b •
-                D ((algebraMap E.CoordinateRing E.FunctionField b)⁻¹)) := by
-            rw [smul_smul, inv_mul_cancel₀ hb_ne, one_smul]
-        _ = _ := by rw [h0]
-    rw [h1]; exact S.smul_mem _ (S.neg_mem (S.smul_mem _ (hDcoord b)))
-  exact S.add_mem (S.smul_mem _ hDinv) (S.smul_mem _ (hDcoord a))
+  -- Every w ∈ Ω is a K(E)-multiple of ω because span{ω} = ⊤.
+  have hw : w ∈ (⊤ : Submodule E.FunctionField _) := Submodule.mem_top
+  rw [← span_invariantDifferential_eq_top E] at hw
+  rwa [Submodule.mem_span_singleton] at hw
 
 end OmegaOneDim
 
