@@ -22,7 +22,6 @@ noncomputable section
 open NumberField
 open NumberField.IsCMField
 open BernoulliRegular.Reflection.Local
-open scoped BigOperators NumberField
 
 namespace BernoulliRegular
 namespace CyclotomicUnits
