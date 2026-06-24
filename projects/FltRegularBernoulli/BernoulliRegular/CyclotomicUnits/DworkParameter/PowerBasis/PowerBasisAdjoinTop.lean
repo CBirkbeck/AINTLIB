@@ -6,7 +6,7 @@ public import BernoulliRegular.CyclotomicUnits.DworkParameter.PowerBasis.PowerBa
 
 noncomputable section
 
-open scoped NumberField Topology
+open scoped Topology
 
 namespace BernoulliRegular
 namespace CyclotomicUnits
@@ -60,7 +60,7 @@ instance instCompleteSpaceRationalPadicIntegerRing :
         Valued.v.restrict x ≤ 1} :=
     Valued.isClopen_closedBall
       (R := (lambdaRationalHeightOneSpectrum p).adicCompletion ℚ)
-      (r := 1) (by exact one_ne_zero)
+      (r := 1) one_ne_zero
   have hA : IsClosed A := by
     convert hA'.1 using 1
     ext x
@@ -133,16 +133,16 @@ theorem rationalPadicInteger_natCast_prime_valuation_eq_exp_neg_one :
     IsDedekindDomain.HeightOneSpectrum.intValuation_singleton
       (v := lambdaRationalHeightOneSpectrum p) hp0 has
   have hvalF : Valued.v (algebraMap ℤ F (p : ℤ)) = WithZero.exp (-1 : ℤ) := by
-    rw [IsDedekindDomain.HeightOneSpectrum.valuedAdicCompletion_eq_valuation]
-    rw [IsDedekindDomain.HeightOneSpectrum.valuation_of_algebraMap]
+    rw [IsDedekindDomain.HeightOneSpectrum.valuedAdicCompletion_eq_valuation,
+      IsDedekindDomain.HeightOneSpectrum.valuation_of_algebraMap]
     exact hval
   simpa [F] using hvalF
 
 theorem rationalPadicInteger_natCast_prime_valuation_lt_one :
     Valued.v (((p : RationalPadicIntegerRing p) :
       (lambdaRationalHeightOneSpectrum p).adicCompletion ℚ)) < 1 := by
-  rw [rationalPadicInteger_natCast_prime_valuation_eq_exp_neg_one (p := p)]
-  rw [← WithZero.exp_zero, WithZero.exp_lt_exp]
+  rw [rationalPadicInteger_natCast_prime_valuation_eq_exp_neg_one (p := p),
+    ← WithZero.exp_zero, WithZero.exp_lt_exp]
   norm_num
 
 theorem rationalPadicPrimeIdeal_eq_maximalIdeal :
@@ -396,7 +396,6 @@ theorem dworkParameterPowerLinearMap_single_primePow_coeff
         algebraMap (RationalPadicIntegerRing p)
           (DworkCompleteIntegerRing p K) b *
           dworkParameter p K ^ (i : ℕ) := by
-  classical
   rw [dworkParameterPowerLinearMap_single_coeff]
   simp [mul_assoc]
 
@@ -473,8 +472,8 @@ theorem algebraMap_mem_dworkParameterIdeal_pow_mul_pred_of_mem_rationalPadicPrim
   have hle :
       ((rationalPadicPrimeIdeal p) ^ q).map (algebraMap R₀ S) ≤
         (dworkParameterIdeal p K) ^ (q * (p - 1)) := by
-    rw [rationalPadicPrimeIdeal, Ideal.span_singleton_pow, Ideal.map_span]
-    rw [Ideal.span_le]
+    rw [rationalPadicPrimeIdeal, Ideal.span_singleton_pow, Ideal.map_span,
+      Ideal.span_le]
     rintro _ ⟨x, hx, rfl⟩
     simp only [Set.mem_singleton_iff] at hx
     subst x
@@ -488,7 +487,6 @@ theorem dworkParameterPowerLinearMap_mem_parameterIdeal_pow_mul_pred_of_forall_m
     (ha : ∀ i, a i ∈ (rationalPadicPrimeIdeal p) ^ q) :
     dworkParameterPowerLinearMap p K a ∈
       (dworkParameterIdeal p K) ^ (q * (p - 1)) := by
-  classical
   rw [dworkParameterPowerLinearMap_apply]
   refine Ideal.sum_mem _ ?_
   intro i _hi
@@ -533,7 +531,6 @@ theorem dworkParameterPowerLinearMap_oneStepCorrection_of_residue_lift
         ((p : RationalPadicIntegerRing p) ^ m * b) ∧
       x - dworkParameterPowerLinearMap p K (a + corr) ∈
         (dworkParameterIdeal p K) ^ (m * (p - 1) + s + 1) := by
-  classical
   let S : Type _ := DworkCompleteIntegerRing p K
   let R₀ : Type := RationalPadicIntegerRing p
   let I : Ideal S := dworkParameterIdeal p K
@@ -595,7 +592,6 @@ theorem dworkParameterPowerLinearMap_oneStepCorrection
           dworkParameterPowerBlock p N * b) ∧
       x - dworkParameterPowerLinearMap p K (a + corr) ∈
         (dworkParameterIdeal p K) ^ (N + 1) := by
-  classical
   let m : ℕ := dworkParameterPowerBlock p N
   let s : ℕ := N % (p - 1)
   have hp_pred_pos : 0 < p - 1 :=
@@ -705,7 +701,6 @@ theorem dworkParameterPowerApproxStepCorrection_apply_mem_primeIdeal_pow
     (i : Fin (p - 1)) :
     dworkParameterPowerApproxStepCorrection p K x N i ∈
       (rationalPadicPrimeIdeal p) ^ dworkParameterPowerBlock p N := by
-  classical
   rw [dworkParameterPowerApproxStepCorrection_eq_single]
   by_cases hi : i = dworkParameterPowerIndex p N
   · subst i
@@ -816,7 +811,6 @@ theorem dworkParameterPowerLinearMap_surjective_of_precomplete
     [IsPrecomplete (rationalPadicPrimeIdeal p)
       (Fin (p - 1) → RationalPadicIntegerRing p)] :
     Function.Surjective (dworkParameterPowerLinearMap p K) := by
-  classical
   intro x
   let R₀ : Type := RationalPadicIntegerRing p
   let M : Type := Fin (p - 1) → R₀
