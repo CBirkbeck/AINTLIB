@@ -2,12 +2,25 @@ module
 
 public import BernoulliRegular.Reflection.FinalReflection.ClassGroupBridge
 
+/-!
+# Weak reflection
+
+This file proves the weak reflection theorems for the cyclotomic field
+`K = Q(zeta_p)`.  The component form `weakReflection_componentNontrivial` shows
+that nontriviality of the even `i`-th character component of `Cl(O_K)/p` forces
+nontriviality of the reflected component; the class-number consequence
+`weakReflection_dvd_hMinus_of_dvd_hPlus` deduces `p ∣ hMinus K` from
+`p ∣ hPlus K`, the form consumed by Kummer's criterion.  The supporting
+ingredients proved here are the singular-pair extraction with denominator
+clearing, the vanishing of the zero and odd eigenspaces, and the triviality of
+the full cyclotomic conjugate product in the class group.
+-/
+
 @[expose] public section
 
 noncomputable section
 
 open NumberField
-open scoped nonZeroDivisors
 
 namespace BernoulliRegular
 
@@ -18,6 +31,8 @@ open Reflection.Kummer
 
 universe u
 
+/-- The `ZMod p`-scalar action on the additive singular group corresponds, on the
+multiplicative side, to raising to the `c.val`-th power. -/
 theorem zmod_smul_toMul_singularGroup
     (p : ℕ) [Fact p.Prime]
     (K : Type u) [Field K] [NumberField K]
@@ -94,9 +109,8 @@ theorem exists_integral_clear_denominators_of_singularGroup_eigen
       (QuotientGroup.mk σt :
           SingularGroup (R := 𝓞 K) (K := K) p) =
         QuotientGroup.mk (t ^ n) := by
-    have hmul' := hmul
-    rw [← QuotientGroup.mk_pow] at hmul'
-    simpa [σt, cyclotomicSingularGroupAction] using hmul'
+    rw [← QuotientGroup.mk_pow] at hmul
+    simpa [σt, cyclotomicSingularGroupAction] using hmul
   have hmem :
       ((t ^ n)⁻¹ * σt) ∈
         principalPairSubgroup (R := 𝓞 K) (K := K) p :=
@@ -109,7 +123,7 @@ theorem exists_integral_clear_denominators_of_singularGroup_eigen
   have hunit :
       generator σt = generator t ^ n * γ ^ p := by
     have htmp := congrArg (fun x : Kˣ ↦ generator (t ^ n) * x) hgen
-    simp [SingularPair.generator] at htmp
+    simp only [SingularPair.generator] at htmp
     simpa [SingularPair.generator] using htmp.symm
   have hK :
       algebraMap (𝓞 K) K (cyclotomicRingOfIntegersEquiv (p := p) K a η) =
