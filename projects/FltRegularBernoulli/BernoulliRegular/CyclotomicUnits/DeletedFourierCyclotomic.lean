@@ -11,8 +11,6 @@ with the existing `FLT37.Sinnott.quotientEigenvalue` normalization.
 
 noncomputable section
 
-open scoped BigOperators
-
 namespace BernoulliRegular
 namespace CyclotomicUnits
 
@@ -22,9 +20,8 @@ variable (p : ℕ) [Fact p.Prime]
 quotient and non-identity elements of the even quotient.  It is used only for
 determinant reindexing; the determinant statements below are independent of
 which equivalence is chosen. -/
-noncomputable def cyclotomicEvenNontrivCharEquivNonidentity (hp_two : 2 < p) :
+def cyclotomicEvenNontrivCharEquivNonidentity (hp_two : 2 < p) :
     NontrivChar (CyclotomicEvenDelta p) ≃ Nonidentity (CyclotomicEvenDelta p) := by
-  classical
   letI : Fintype (MulChar (CyclotomicEvenDelta p) ℂ) := Fintype.ofFinite _
   letI : DecidableEq (MulChar (CyclotomicEvenDelta p) ℂ) := Classical.decEq _
   refine Fintype.equivOfCardEq ?_
