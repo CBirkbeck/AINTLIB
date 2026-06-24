@@ -466,6 +466,80 @@ variable {τ : Type*}
 
 open scoped MvPowerSeries.WithPiTopology
 
+/-- Auxiliary for the substitution chain rule: `subst a 0 = 0`. -/
+private lemma subst_zero_of_hasSubst {σ : Type*} {a : σ → MvPowerSeries τ R}
+    (ha : MvPowerSeries.HasSubst a) :
+    MvPowerSeries.subst a (0 : MvPowerSeries σ R) = 0 := by
+  rw [← MvPowerSeries.substAlgHom_apply ha, map_zero]
+
+/-- Auxiliary for the substitution chain rule: `subst a 1 = 1`. -/
+private lemma subst_one_of_hasSubst {σ : Type*} {a : σ → MvPowerSeries τ R}
+    (ha : MvPowerSeries.HasSubst a) :
+    MvPowerSeries.subst a (1 : MvPowerSeries σ R) = 1 := by
+  rw [← MvPowerSeries.substAlgHom_apply ha, map_one]
+
+/-- Constant (base) case of the substitution chain rule: substitution and
+`pderiv` both annihilate `C r`, so the identity reduces to `0 = 0`. -/
+private theorem pderiv_subst_C {σ : Type*} [Fintype σ]
+    (t : τ) {a : σ → MvPowerSeries τ R} (ha : MvPowerSeries.HasSubst a) (r : R) :
+    MvPowerSeries.pderiv t
+        (MvPowerSeries.subst a (C r : MvPowerSeries σ R)) =
+      ∑ s : σ, MvPowerSeries.pderiv t (a s) *
+          MvPowerSeries.subst a (MvPowerSeries.pderiv s (C r : MvPowerSeries σ R)) := by
+  classical
+  have hCr : (C r : MvPowerSeries σ R) =
+      algebraMap R (MvPowerSeries σ R) r := rfl
+  rw [hCr]
+  have hsubst : MvPowerSeries.subst a
+      (algebraMap R (MvPowerSeries σ R) r) =
+        algebraMap R (MvPowerSeries τ R) r := by
+    have := MvPowerSeries.substAlgHom_apply (R := R) ha
+      (algebraMap R (MvPowerSeries σ R) r)
+    rw [← this, AlgHom.commutes]
+  rw [hsubst]
+  have halg : algebraMap R (MvPowerSeries τ R) r = (C r : MvPowerSeries τ R) := rfl
+  have halg₂ : algebraMap R (MvPowerSeries σ R) r =
+      (C r : MvPowerSeries σ R) := rfl
+  rw [halg, halg₂, pderiv_C]
+  -- RHS: for each `s`, `pderiv s (C r) = 0`, so `subst a 0 = 0`.
+  symm
+  apply Finset.sum_eq_zero
+  intro s _
+  rw [pderiv_C, subst_zero_of_hasSubst ha, mul_zero]
+
+/-- Substitution of a partial derivative of a variable: `subst a (pderiv s (X i))`
+equals `1` if `s = i` and `0` otherwise (since `pderiv s (X i)` is `1` or `0`). -/
+private theorem subst_pderiv_X {σ : Type*} [DecidableEq σ] (s i : σ)
+    {a : σ → MvPowerSeries τ R} (ha : MvPowerSeries.HasSubst a) :
+    MvPowerSeries.subst a (MvPowerSeries.pderiv s (X i : MvPowerSeries σ R)) =
+      if s = i then 1 else 0 := by
+  split_ifs with hs
+  · subst hs
+    rw [pderiv_X_self, subst_one_of_hasSubst ha]
+  · rw [pderiv_X_of_ne hs, subst_zero_of_hasSubst ha]
+
+/-- The `mul_X` summand of the substitution chain rule: expanding
+`pderiv s (p * X i)` by the Leibniz rule and substituting splits each summand into
+a `p`-derivative term times `a i` plus a `p` term against `subst a (pderiv s (X i))`. -/
+private theorem pderiv_subst_mul_X_summand {σ : Type*} [DecidableEq σ] (s i : σ) (t : τ)
+    {a : σ → MvPowerSeries τ R} (ha : MvPowerSeries.HasSubst a)
+    (p : MvPolynomial σ R) :
+    MvPowerSeries.pderiv t (a s) *
+        MvPowerSeries.subst a
+          (MvPowerSeries.pderiv s
+            ((p : MvPowerSeries σ R) * (X i : MvPowerSeries σ R))) =
+      MvPowerSeries.pderiv t (a s) *
+          MvPowerSeries.subst a (MvPowerSeries.pderiv s
+              (p : MvPowerSeries σ R)) * a i +
+        MvPowerSeries.pderiv t (a s) *
+          MvPowerSeries.subst a (p : MvPowerSeries σ R) *
+          (if s = i then 1 else 0) := by
+  rw [pderiv_mul, MvPowerSeries.subst_add ha,
+      MvPowerSeries.subst_mul ha, MvPowerSeries.subst_mul ha,
+      MvPowerSeries.subst_X ha]
+  rw [subst_pderiv_X s i ha]
+  ring
+
 /-- The polynomial case of the general substitution chain rule: for every
 `p : MvPolynomial σ R` (with `σ` finite) and every target variable `t : τ`,
 `pderiv t (subst a p) = ∑ s, pderiv t (a s) * subst a (pderiv s p)`
@@ -478,33 +552,10 @@ private theorem pderiv_subst_polynomial {σ : Type*} [Fintype σ]
       ∑ s : σ, MvPowerSeries.pderiv t (a s) *
           MvPowerSeries.subst a (MvPowerSeries.pderiv s (p : MvPowerSeries σ R)) := by
   classical
-  have hsubst0 : MvPowerSeries.subst a (0 : MvPowerSeries σ R) = 0 := by
-    rw [← MvPowerSeries.substAlgHom_apply ha, map_zero]
-  have hsubst1 : MvPowerSeries.subst a (1 : MvPowerSeries σ R) = 1 := by
-    rw [← MvPowerSeries.substAlgHom_apply ha, map_one]
   induction p using MvPolynomial.induction_on with
   | C r =>
-    -- `pderiv t (subst a (C r)) = 0`, and RHS is also 0.
     rw [MvPolynomial.coe_C]
-    have hCr : (C r : MvPowerSeries σ R) =
-        algebraMap R (MvPowerSeries σ R) r := rfl
-    rw [hCr]
-    have hsubst : MvPowerSeries.subst a
-        (algebraMap R (MvPowerSeries σ R) r) =
-          algebraMap R (MvPowerSeries τ R) r := by
-      have := MvPowerSeries.substAlgHom_apply (R := R) ha
-        (algebraMap R (MvPowerSeries σ R) r)
-      rw [← this, AlgHom.commutes]
-    rw [hsubst]
-    have halg : algebraMap R (MvPowerSeries τ R) r = (C r : MvPowerSeries τ R) := rfl
-    have halg₂ : algebraMap R (MvPowerSeries σ R) r =
-        (C r : MvPowerSeries σ R) := rfl
-    rw [halg, halg₂, pderiv_C]
-    -- RHS: for each `s`, `pderiv s (C r) = 0`, so `subst a 0 = 0`.
-    symm
-    apply Finset.sum_eq_zero
-    intro s _
-    rw [pderiv_C, hsubst0, mul_zero]
+    exact pderiv_subst_C t ha r
   | add p q hp hq =>
     rw [MvPolynomial.coe_add, MvPowerSeries.subst_add ha, pderiv_add]
     rw [hp, hq, ← Finset.sum_add_distrib]
@@ -514,32 +565,7 @@ private theorem pderiv_subst_polynomial {σ : Type*} [Fintype σ]
     rw [MvPolynomial.coe_mul, MvPolynomial.coe_X,
         MvPowerSeries.subst_mul ha, MvPowerSeries.subst_X ha, pderiv_mul]
     rw [h]
-    -- Transform RHS summand-by-summand.
-    have hsubst_X_pderiv : ∀ s : σ,
-        MvPowerSeries.subst a (MvPowerSeries.pderiv s (X i : MvPowerSeries σ R)) =
-          if s = i then 1 else 0 := by
-      intro s
-      split_ifs with hs
-      · subst hs
-        rw [pderiv_X_self, hsubst1]
-      · rw [pderiv_X_of_ne hs, hsubst0]
-    have hsummand : ∀ s : σ, MvPowerSeries.pderiv t (a s) *
-          MvPowerSeries.subst a
-            (MvPowerSeries.pderiv s
-              ((p : MvPowerSeries σ R) * (X i : MvPowerSeries σ R))) =
-        MvPowerSeries.pderiv t (a s) *
-          MvPowerSeries.subst a (MvPowerSeries.pderiv s
-              (p : MvPowerSeries σ R)) * a i +
-        MvPowerSeries.pderiv t (a s) *
-          MvPowerSeries.subst a (p : MvPowerSeries σ R) *
-          (if s = i then 1 else 0) := by
-      intro s
-      rw [pderiv_mul, MvPowerSeries.subst_add ha,
-          MvPowerSeries.subst_mul ha, MvPowerSeries.subst_mul ha,
-          MvPowerSeries.subst_X ha]
-      rw [hsubst_X_pderiv s]
-      ring
-    -- Rewrite both sides in canonical form.
+    -- Rewrite the RHS summand-by-summand via the `mul_X` summand identity.
     conv_rhs =>
       rw [show (∑ s : σ, MvPowerSeries.pderiv t (a s) *
           MvPowerSeries.subst a
@@ -551,7 +577,7 @@ private theorem pderiv_subst_polynomial {σ : Type*} [Fintype σ]
           MvPowerSeries.pderiv t (a s) *
             MvPowerSeries.subst a (p : MvPowerSeries σ R) *
             (if s = i then 1 else 0)) from
-          Finset.sum_congr rfl fun s _ ↦ hsummand s]
+          Finset.sum_congr rfl fun s _ ↦ pderiv_subst_mul_X_summand s i t ha p]
     rw [Finset.sum_add_distrib]
     congr 1
     · -- `(∑ s, f s) * a i = ∑ s, f s * a i`
