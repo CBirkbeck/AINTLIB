@@ -1524,6 +1524,60 @@ theorem galActFunctionField_algebraMap_L (C : SmoothPlaneCurve K) (σ : L ≃ₐ
 
 end Semilinear
 
+/-- **Each higher monomial of an algebraic-over-constants relation has order `≥ a`** at infinity.
+If `ord_∞ z = a ≥ 0`, then for every constant coefficient `c : L` and every `i`, the term
+`c • z ^ (i + 1)` satisfies `a ≤ ord_∞ (c • z ^ (i + 1))`.
+
+If `c = 0` the term is `0` (order `⊤`). Otherwise the constant `algebraMap L _ c ≠ 0` has order `0`
+(`ordAtInfty_algebraMap_F_nonzero`) and `ord_∞ (z ^ (i + 1)) = (i + 1) · a`, so additivity gives order
+`(i + 1) · a ≥ a` (as `a ≥ 0`). Constant-field analogue of the function-field
+`le_ordAtInfty_smul_pow_succ_of_ordAtInfty_eq_zero` (`OrdAtInftyRamification.lean`). -/
+private theorem le_ordAtInfty_constSmul_pow_succ_of_ordAtInfty_eq {L : Type*} [Field L]
+    (C : SmoothPlaneCurve L) {z : C.FunctionField} (hz : z ≠ 0) {a : ℤ}
+    (ha : C.ordAtInfty z = ((a : ℤ) : WithTop ℤ)) (ha_nonneg : 0 ≤ a) (c : L) (i : ℕ) :
+    ((a : ℤ) : WithTop ℤ) ≤ C.ordAtInfty (c • z ^ (i + 1)) := by
+  rcases eq_or_ne c 0 with hc | hc
+  · rw [hc, zero_smul]; simp
+  · have hc' : algebraMap L C.FunctionField c ≠ 0 := (_root_.map_ne_zero _).mpr hc
+    have hzpow : z ^ (i + 1) ≠ 0 := pow_ne_zero _ hz
+    rw [Algebra.smul_def, C.ordAtInfty_mul hc' hzpow,
+      C.ordAtInfty_algebraMap_F_nonzero hc, C.ordAtInfty_pow hz, ha,
+      ← WithTop.coe_nsmul, zero_add, WithTop.coe_le_coe, nsmul_eq_mul]
+    have hi : (0 : ℤ) ≤ (i : ℤ) := Int.natCast_nonneg i
+    push_cast; nlinarith
+
+/-- **An element algebraic over the constant field cannot have strictly positive order at infinity.**
+Take the minimal polynomial `z ^ n + ⋯ + a₀` of `z` over `L`: its constant term `a₀` is nonzero, so
+`ord_∞ (algebraMap L _ a₀) = 0`; but `algebraMap L _ a₀ = -(z ^ n + ⋯ + a₁ z)` and every term on the
+right has order `≥ a = ord_∞ z` (`le_ordAtInfty_constSmul_pow_succ_of_ordAtInfty_eq`), so the
+ultrametric bound `le_ordAtInfty_sum` forces `0 = ord_∞ (algebraMap L _ a₀) ≥ a > 0`, a
+contradiction. Constant-field analogue of `not_ordAtInfty_pos_of_isAlgebraic`
+(`OrdAtInftyRamification.lean`). -/
+private theorem not_ordAtInfty_pos_of_isAlgebraic_constants {L : Type*} [Field L]
+    (C : SmoothPlaneCurve L) {z : C.FunctionField} (hz : z ≠ 0) (hzalg : IsAlgebraic L z)
+    (hpos : 0 < C.ordAtInfty z) : False := by
+  have hint : IsIntegral L z := hzalg.isIntegral
+  obtain ⟨a, ha⟩ : ∃ a : ℤ, C.ordAtInfty z = ((a : ℤ) : WithTop ℤ) := ⟨_, C.ordAtInfty_of_ne hz⟩
+  have ha_pos : 0 < a := by rw [ha] at hpos; exact_mod_cast hpos
+  set m : Polynomial L := minpoly L z with hm_def
+  have hc0 : m.coeff 0 ≠ 0 := minpoly.coeff_zero_ne_zero hint hz
+  have haev : (Polynomial.aeval z) m = 0 := minpoly.aeval _ _
+  rw [Polynomial.aeval_eq_sum_range, Finset.sum_range_succ'] at haev
+  have hconst : m.coeff 0 • (z ^ 0 : C.FunctionField) =
+      algebraMap L C.FunctionField (m.coeff 0) := by rw [pow_zero, Algebra.smul_def, mul_one]
+  have hkey : algebraMap L C.FunctionField (m.coeff 0) =
+      -∑ i ∈ Finset.range m.natDegree, m.coeff (i + 1) • z ^ (i + 1) := by
+    rw [← hconst]; exact eq_neg_of_add_eq_zero_right haev
+  have hsum : ((a : ℤ) : WithTop ℤ) ≤
+      C.ordAtInfty (∑ i ∈ Finset.range m.natDegree, m.coeff (i + 1) • z ^ (i + 1)) :=
+    SmoothPlaneCurve.le_ordAtInfty_sum _ _ fun i _ ↦
+      le_ordAtInfty_constSmul_pow_succ_of_ordAtInfty_eq C hz ha ha_pos.le _ i
+  have h0 := C.ordAtInfty_algebraMap_F_nonzero hc0
+  rw [hkey, C.ordAtInfty_neg] at h0
+  rw [h0] at hsum
+  have : (a : ℤ) ≤ 0 := by exact_mod_cast hsum
+  omega
+
 /-- **Order at infinity vanishes for elements algebraic over the constant field.** If
 `u ∈ L(C)` is algebraic over the constant field `L`, then `ord_∞ u = 0`. (Minimal-polynomial /
 ultrametric argument: `u^n = -(lower terms)`, every lower term `c_i u^i` has order `i·ord_∞ u`,
@@ -1534,55 +1588,15 @@ works over a general finite `L` rather than only over `K̄`. -/
 theorem ordAtInfty_eq_zero_of_isAlgebraic_constants {L : Type*} [Field L]
     (C : SmoothPlaneCurve L) {u : C.FunctionField} (hu : u ≠ 0) (halg : IsAlgebraic L u) :
     C.ordAtInfty u = ((0 : ℤ) : WithTop ℤ) := by
-  have hcoe : ∀ (k : ℕ) (a : ℤ),
-      k • ((a : ℤ) : WithTop ℤ) = (((k • a : ℤ)) : WithTop ℤ) := by
-    intro k a
-    induction k with
-    | zero => simp
-    | succ n ih => rw [succ_nsmul, succ_nsmul, ih, ← WithTop.coe_add]
-  have key : ∀ {z : C.FunctionField}, z ≠ 0 → IsAlgebraic L z → 0 < C.ordAtInfty z → False := by
-    intro z hz hzalg hpos
-    have hint : IsIntegral L z := hzalg.isIntegral
-    obtain ⟨a, ha⟩ : ∃ a : ℤ, C.ordAtInfty z = ((a : ℤ) : WithTop ℤ) := ⟨_, C.ordAtInfty_of_ne hz⟩
-    have ha_pos : 0 < a := by rw [ha] at hpos; exact_mod_cast hpos
-    set m : Polynomial L := minpoly L z with hm_def
-    have hc0 : m.coeff 0 ≠ 0 := minpoly.coeff_zero_ne_zero hint hz
-    have haev : (Polynomial.aeval z) m = 0 := minpoly.aeval _ _
-    rw [Polynomial.aeval_eq_sum_range, Finset.sum_range_succ'] at haev
-    have hconst : m.coeff 0 • (z ^ 0 : C.FunctionField) =
-        algebraMap L C.FunctionField (m.coeff 0) := by rw [pow_zero, Algebra.smul_def, mul_one]
-    have hkey : algebraMap L C.FunctionField (m.coeff 0) =
-        -∑ i ∈ Finset.range m.natDegree, m.coeff (i + 1) • z ^ (i + 1) := by
-      rw [← hconst]; exact eq_neg_of_add_eq_zero_right haev
-    have hterm : ∀ i ∈ Finset.range m.natDegree,
-        ((a : ℤ) : WithTop ℤ) ≤ C.ordAtInfty (m.coeff (i + 1) • z ^ (i + 1)) := by
-      intro i _
-      rcases eq_or_ne (m.coeff (i + 1)) 0 with hci | hci
-      · rw [hci, zero_smul]; simp
-      · have hci' : algebraMap L C.FunctionField (m.coeff (i + 1)) ≠ 0 :=
-          (_root_.map_ne_zero _).mpr hci
-        have hzpow : z ^ (i + 1) ≠ 0 := pow_ne_zero _ hz
-        rw [Algebra.smul_def, C.ordAtInfty_mul hci' hzpow,
-          C.ordAtInfty_algebraMap_F_nonzero hci, C.ordAtInfty_pow hz, ha,
-          hcoe, zero_add, WithTop.coe_le_coe, nsmul_eq_mul]
-        have hi : (0 : ℤ) ≤ (i : ℤ) := Int.natCast_nonneg i
-        push_cast; nlinarith
-    have hsum : ((a : ℤ) : WithTop ℤ) ≤
-        C.ordAtInfty (∑ i ∈ Finset.range m.natDegree, m.coeff (i + 1) • z ^ (i + 1)) :=
-      SmoothPlaneCurve.le_ordAtInfty_sum _ _ hterm
-    have h0 := C.ordAtInfty_algebraMap_F_nonzero hc0
-    rw [hkey, C.ordAtInfty_neg] at h0
-    rw [h0] at hsum
-    have : (a : ℤ) ≤ 0 := by exact_mod_cast hsum
-    omega
   obtain ⟨a, ha⟩ : ∃ a : ℤ, C.ordAtInfty u = ((a : ℤ) : WithTop ℤ) := ⟨_, C.ordAtInfty_of_ne hu⟩
   rcases lt_trichotomy a 0 with hlt | heq | hgt
   · exfalso
-    refine key (inv_ne_zero hu) halg.inv ?_
+    refine not_ordAtInfty_pos_of_isAlgebraic_constants C (inv_ne_zero hu) halg.inv ?_
     rw [C.ordAtInfty_inv, ha, show -((a : ℤ) : WithTop ℤ) = (((-a : ℤ)) : WithTop ℤ) from rfl]
     exact_mod_cast Int.neg_pos.mpr hlt
   · rw [ha, heq]
-  · exact (key hu halg (by rw [ha]; exact_mod_cast hgt)).elim
+  · exact (not_ordAtInfty_pos_of_isAlgebraic_constants C hu halg
+      (by rw [ha]; exact_mod_cast hgt)).elim
 
 variable {K : Type*} [Field K] [DecidableEq K]
 variable (W₁ W₂ : WeierstrassCurve K) [W₁.toAffine.IsElliptic] [W₂.toAffine.IsElliptic]
