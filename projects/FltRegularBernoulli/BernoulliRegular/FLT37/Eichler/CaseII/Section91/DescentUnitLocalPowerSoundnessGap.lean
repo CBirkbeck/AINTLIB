@@ -67,11 +67,11 @@ on the over-stated abstract §9.1-id).
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Polynomial
+open NumberField Polynomial
 
 namespace BernoulliRegular.FLT37.Eichler
 
-open FLT37 FLT37.LehmerVandiver.CaseII BernoulliRegular
+open FLT37.LehmerVandiver.CaseII
 
 /-! ## 1. The sound Assumption-II shape on the producer descent object (real data)
 
