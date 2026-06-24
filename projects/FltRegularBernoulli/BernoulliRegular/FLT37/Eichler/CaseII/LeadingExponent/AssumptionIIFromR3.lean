@@ -74,8 +74,6 @@ here — see the file-level report.
 
 noncomputable section
 
-open NumberField
-
 namespace BernoulliRegular.FLT37.Eichler
 
 open FLT37.LehmerVandiver.CaseII
