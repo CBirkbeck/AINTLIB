@@ -86,7 +86,7 @@ It imports only; it does **not** modify any existing file.  No `sorry`, no `axio
 
 noncomputable section
 
-open NumberField NumberField.IsCMField IsCyclotomicExtension
+open NumberField NumberField.IsCMField
 
 namespace BernoulliRegular.FLT37.Eichler
 
