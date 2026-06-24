@@ -191,7 +191,6 @@ and Washington Theorem 8.16 (class form) contraposed against the Bernoulli table
 that proves Vandiver for `37`; we re-bank it here to drive the eigenspace
 linear independence and the kernel-vanishing collapse. -/
 
-open scoped Classical in
 /-- **The all-nonzero certificate for `p = 37`** (proven, unconditional): every
 even Pollaczek class `[E_i]` (`2 ≤ i ≤ 34`) is nonzero in `(E_K free)/37`.
 
@@ -302,7 +301,6 @@ theorem caseIIGaloisEigen_isPow37_of_realUnitToFreePartModP_eq_zero
     (hv : v ∈ BernoulliRegular.CPlus (p := 37) (K := CyclotomicField 37 ℚ) (by decide))
     (hφ : FLT37.realUnitToFreePartModP (K := CyclotomicField 37 ℚ) (Additive.ofMul v) = 0) :
     ∃ β : (𝓞 (NumberField.maximalRealSubfield (CyclotomicField 37 ℚ)))ˣ, β ^ 37 = v := by
-  classical
   -- Expand v as a CPlusExponentProduct.
   obtain ⟨s, e, hse⟩ :=
     BernoulliRegular.exists_CPlusExponentProduct_of_mem_CPlus
@@ -397,7 +395,6 @@ theorem caseIIGaloisEigen_eigenCollapse_of_E32_monomial_residue
       c • cyclotomicUnitToFreePartModPAdd (p := 37) (CyclotomicField 37 ℚ)
         (Additive.ofMul (FLT37.pollaczekUnit 37 (CyclotomicField 37 ℚ) 32))) :
     Cor815EigenCollapseAt w := by
-  classical
   -- Set the bare irregular eigenvector class E := [pollaczekUnit 32].
   set E := cyclotomicUnitToFreePartModPAdd (p := 37) (CyclotomicField 37 ℚ)
     (Additive.ofMul (FLT37.pollaczekUnit 37 (CyclotomicField 37 ℚ) 32)) with hE
@@ -417,8 +414,8 @@ theorem caseIIGaloisEigen_eigenCollapse_of_E32_monomial_residue
       caseIIGaloisEigen_realUnitToFreePartModP_W32, ← hE]
     -- Goal: c • E + -(d • (2 • E)) = 0, i.e. (c - 2 d) • E = 0 with 2 d ≡ c.
     have h2d : ((d : ℕ) : ZMod 37) * 2 = c := by
-      rw [hd, ZMod.natCast_val, ZMod.cast_id]
-      rw [mul_assoc, inv_mul_cancel₀ (by decide : (2 : ZMod 37) ≠ 0), mul_one]
+      rw [hd, ZMod.natCast_val, ZMod.cast_id, mul_assoc,
+        inv_mul_cancel₀ (by decide : (2 : ZMod 37) ≠ 0), mul_one]
     -- Convert ℕ-smuls to ZMod 37-smuls and simplify.
     have hcast :
         (d • ((2 : ℕ) • E) : CyclotomicUnitFreePartModP (p := 37) (CyclotomicField 37 ℚ)) =
@@ -450,7 +447,6 @@ theorem caseIIGaloisEigen_E32_monomial_of_mem_omega32_eigenspace
     ∃ c : ZMod 37, x =
       c • cyclotomicUnitToFreePartModPAdd (p := 37) (CyclotomicField 37 ℚ)
         (Additive.ofMul (FLT37.pollaczekUnit 37 (CyclotomicField 37 ℚ) 32)) := by
-  classical
   letI : Fintype {w : NumberField.InfinitePlace (CyclotomicField 37 ℚ) //
       w ≠ NumberField.Units.dirichletUnitTheorem.w₀} := Fintype.ofFinite _
   letI : DiscreteTopology (NumberField.Units.unitLattice (CyclotomicField 37 ℚ)) :=
