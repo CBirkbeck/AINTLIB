@@ -43,7 +43,6 @@ namespace Furtwaengler
 variable {p : ℕ} [hp : Fact p.Prime]
 variable {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **`EigenspaceCondition` closure under ℕ-power at any eigenspace i**:
 if η satisfies eigenspace i, then η^n also does. -/
 theorem eigenspaceCondition_pow_of_eigenspace_general
@@ -389,7 +388,6 @@ theorem phiOnClassGroupModPLinear_galois_divided_of_unit_u
   exact fun h_in ↦ hQ_max.isPrime.ne_top
     (Ideal.eq_top_of_isUnit_mem _ h_in hu_unit)
 
-
 /-- **Stronger `StrongEigenspaceCondition` for β^p with β unit**: also
 records that the witness u is a unit. -/
 theorem strongEigenspaceCondition_pow_p_of_isUnit_with_unit_witness
@@ -653,7 +651,7 @@ theorem eigenspaceCondition_neg_one_of_odd (_hp_odd : Odd p) :
     EigenspaceCondition (p := p) (K := K) (-1 : 𝓞 K) 0 := by
   apply eigenspaceCondition_zero_of_fixed
   intro a
-  simp [map_neg, map_one]
+  simp only [map_neg, map_one]
 
 /-- **`(-β)^p = -β^p` satisfies eigenspace-0 for odd p**: combined
 closure of negation (in ZMod p with p odd) and pow_p. -/
