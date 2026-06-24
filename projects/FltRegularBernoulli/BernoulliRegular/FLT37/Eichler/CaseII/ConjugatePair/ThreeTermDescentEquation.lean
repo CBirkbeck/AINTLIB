@@ -65,8 +65,7 @@ It imports only; it does **not** modify any existing file.
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Polynomial NumberField.IsCMField
-open scoped nonZeroDivisors
+open NumberField NumberField.IsCMField
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -202,8 +201,8 @@ theorem caseII_conjPair_zeta_twist_real {η α : 𝓞 K} (hη : η ^ 37 = 1)
   -- Goal: `(η^36)^19 * (η * α) = η^19 * α`, i.e. `η^{36·19+1} * α = η^19 * α`.
   -- `36·19 + 1 = 685 = 37·18 + 19`, so `η^685 = η^19`.
   rw [← pow_mul]
-  rw [show (η : 𝓞 K) ^ (36 * 19) * (η * α) = η ^ (36 * 19 + 1) * α from by ring]
-  rw [show (36 * 19 + 1 : ℕ) = 37 * 18 + 19 from by norm_num, pow_add, pow_mul, hη, one_pow,
+  rw [show (η : 𝓞 K) ^ (36 * 19) * (η * α) = η ^ (36 * 19 + 1) * α by ring]
+  rw [show (36 * 19 + 1 : ℕ) = 37 * 18 + 19 by norm_num, pow_add, pow_mul, hη, one_pow,
     one_mul]
 
 /-! ## 4. The precise single-unit-clearing residual and the *strictly-shrinking* reduction
