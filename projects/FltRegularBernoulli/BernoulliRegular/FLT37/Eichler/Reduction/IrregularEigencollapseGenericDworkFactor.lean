@@ -6,7 +6,7 @@ import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.AtomicColumnCoordValue
 This file states and proves the second-order `ω³²`-collapse `Cor823Omega32SecondOrderCollapse37`
 (Washington Proposition 8.12 at the irregular index `i = 32`) from the **generic** per-single-column
 level-`72` mod-`37²` Dwork coordinate value, parametrised over an **arbitrary** `37·unit` leading
-factor `F`.  It imports only; it does **not** modify any existing file.  No `sorry`, no `axiom`.
+factor `F`.
 
 ## Why a generic factor
 
@@ -76,14 +76,6 @@ open BernoulliRegular (CPlusGenerator CPlusExponentProduct)
 open BernoulliRegular.CyclotomicUnits
 open BernoulliRegular.CyclotomicUnits.PadicLogSetup
 open BernoulliRegular.CyclotomicUnits.PadicLogSetup.DworkParameter
-
-/-! ## 1. The generic per-single-column level-`72` Dwork coordinate residual
-
-`CaseIICor823GenericColumnCoord37` is the per-single-column `evalₐ`-coordinate form of
-Proposition 8.12 at `i = 32`, with the leading factor `F` *abstract* and only required to be
-`37·unit`.  It bundles the existence of such an `F` together with the per-column coordinate identity.
-This is exactly the shape of `CaseIICor823SecondOrderColumnCoordValue37`, but with the hard-coded
-`caseIICor823SecondOrderBernoulliFactorModSq` replaced by the abstract `F = 37·r`. -/
 
 open BernoulliRegular (CPlusGenerator) in
 /-- **The per-column level-`72` Dwork coordinate functional**: the `λ`-adic level-`72`
@@ -165,26 +157,6 @@ def GenericColumnSumReprValue37
         (((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 2) ^ ((15 : ℕ) + 1) - 1) *
           ((e a : ℤ) : ZMod (37 ^ 2)))
 
-/-! ## 2. The `e`-linearity: the generic `repr`-coordinate column-sum value
-
-The level-`68` mod-`37²` Dwork `repr` coefficient of the column sum
-`S = ∑_a e_a · concreteKummerLogVector a` at row `j = 15` is `ℤ`-linear in `e`, factoring as
-`F · (∑_a (((a+2)²)^{16} − 1)·e_a)`.  This is the generic-`F` analog of `Prop812SecondOrderCoeff37`,
-and we prove it from the generic per-column `evalₐ` value via the proven `ϖ ↔ λ` bridges, exactly
-mirroring the proven `prop812SecondOrderCoeff37_of_columnCoeff`: the linearity is carried in the
-`λ`-adic `evalₐ` coordinate (the proven `valuedLambdaQuotientDworkCoeffModSq_sum` / `_intCast_mul`,
-wall-free), and each per-column `evalₐ` coordinate is rewritten by the generic per-column value
-`hCol`.  Landing the result in the `repr` coordinate (rather than `evalₐ`) lets the generic collapse
-consume it through the proven `caseIICor823DetSqLog_coe_fixedSubalgebra_eq` — the same opaque-`evalₐ`
-route the proven `cor823Omega32SecondOrderCollapse37_of_secondOrderCoeff` uses, dodging the `whnf`
-wall. -/
-
-set_option maxHeartbeats 3200000 in
--- Threads the `ϖ ↔ λ` bridge and the `λ`-adic linearity (the proven coordinate laws) through the
--- heavy `DworkCompleteIntegerRing` `evalₐ` of the column sum; well above the default heartbeat budget
--- (still below the `adicCompletionIntegers` `whnf` wall — every step is a finite `evalₐ`-laws
--- rewrite, not a Dwork power-basis `repr` comparison).  Generic-`F` mirror of
--- `prop812SecondOrderCoeff37_of_columnCoeff`.
 open BernoulliRegular (CPlusGenerator) in
 /-- **The generic `repr`-coordinate column-sum value from the per-column `evalₐ` value** (proven,
 axiom-clean).
@@ -213,16 +185,12 @@ theorem genericColumnSumReprValue
         F * (((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 2) ^ ((15 : ℕ) + 1) - 1)) :
     GenericColumnSumReprValue37 F := by
   classical
-  -- Expose the named coordinate functional `genericColumnCoordLHS37` as its underlying `evalₐ`
-  -- coordinate, so `hCol a` rewrites the per-column term reached by the `λ`-adic linearity below.
   simp only [genericColumnCoordLHS37] at hCol
   intro e
-  -- `set S := ∑_a e_a • concreteKummerLogVector a` (the repo's proven detector-lemma pattern).
   set S : dworkFixedSubalgebra 37 (CyclotomicField 37 ℚ) :=
     ∑ a : Fin (kummerLogRank 37),
       e a • concreteKummerLogVector (p := 37) (K := CyclotomicField 37 ℚ) (by norm_num) a
     with hS
-  -- The coerced fixed-subalgebra sum is the completed-log column sum (`hScoe`, repo pattern).
   have hScoe :
       (S : DworkCompleteIntegerRing 37 (CyclotomicField 37 ℚ)) =
         ∑ a : Fin (kummerLogRank 37),
@@ -236,16 +204,13 @@ theorem genericColumnSumReprValue
             e a • concreteKummerLogVector (p := 37) (K := CyclotomicField 37 ℚ) (by norm_num) a)
         from rfl]
     rw [map_sum]
-    refine Finset.sum_congr rfl (fun a _ ↦ ?_)
+    refine Finset.sum_congr rfl (fun a _ => ?_)
     rw [map_zsmul]
     rfl
-  -- (1) `repr S idx` → `λ`-adic `evalₐ` coordinate (the proven `ϖ ↔ λ` bridge on `S`, then `hScoe`).
   rw [caseIICor823SecondOrder_coeffModSq_eq_evalₐ S (15 : Fin (kummerLogRank 37)), hScoe]
-  -- (2) `λ`-adic linearity (the proven coordinate laws, wall-free).
   rw [map_sum, valuedLambdaQuotientDworkCoeffModSq_sum]
-  -- (3) Factor the common `F` out of the sum, rewriting each per-column coordinate by `hCol`.
   rw [Finset.mul_sum]
-  refine Finset.sum_congr rfl (fun a _ha ↦ ?_)
+  refine Finset.sum_congr rfl (fun a _ha => ?_)
   rw [map_zsmul]
   rw [show (e a • AdicCompletion.evalₐ (lambdaIdeal 37 (CyclotomicField 37 ℚ)) (2 * (37 - 1))
         (kummerLogCompletedColumn (p := 37) (K := CyclotomicField 37 ℚ) (by decide) a)) =
@@ -253,24 +218,10 @@ theorem genericColumnSumReprValue
         (lambdaIdeal 37 (CyclotomicField 37 ℚ)) ^ (2 * (37 - 1))) *
         AdicCompletion.evalₐ (lambdaIdeal 37 (CyclotomicField 37 ℚ)) (2 * (37 - 1))
           (kummerLogCompletedColumn (p := 37) (K := CyclotomicField 37 ℚ) (by decide) a)
-      from by rw [zsmul_eq_mul]]
+      by rw [zsmul_eq_mul]]
   rw [valuedLambdaQuotientDworkCoeffModSq_intCast_mul, hCol a]
   ring
 
-/-! ## 3. The generic collapse: `Cor823Omega32SecondOrderCollapse37` from the generic column-sum value
-
-For `u : (𝓞 K⁺)ˣ` with `37² ∣ algebraMap u − c`, the `j = 15` free-part eigencomponent
-`decomp (φ u) 15` vanishes.  This mirrors `cor823Omega32SecondOrderCollapse37_of_secondOrderCoeff`
-exactly, with `F = 37·r` in place of the hard-coded factor: the proof of the original consumes the
-factor *only* through its `37·(unit)` decomposition, so the generic version is identical with `F`
-abstract.  We first prove it from the generic column-sum value `GenericColumnSumReprValue37 F`
-consumed as a *hypothesis* (the cheap local application `hSum e`, as the original consumes
-`Prop812SecondOrderCoeff37`), then compose with §2 to reach the per-column form. -/
-
-set_option maxHeartbeats 4000000 in
--- The p-saturation assembly threads several heavy `adicCompletionIntegers` `evalₐ`/`completedLog`
--- terms; the cumulative elaboration is well above the default budget (below the `whnf` wall).  This
--- is the generic-`F` mirror of `cor823Omega32SecondOrderCollapse37_of_secondOrderCoeff`.
 open BernoulliRegular (CPlusGenerator) in
 /-- **`Cor823Omega32SecondOrderCollapse37` from the generic column-sum value** (proven, axiom-clean
 given `GenericColumnSumReprValue37 F` with `F = 37·r`, `castHom r ≠ 0`).
@@ -298,7 +249,6 @@ theorem cor823Omega32SecondOrderCollapse37_of_genericReprSum
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   classical
   intro u c hc
-  -- (1) p-saturation: `u = w^37 · v`, `v ∈ C⁺`, `v = CPlusExponentProduct s e`.
   obtain ⟨v, hvCPlus, hdiv⟩ :=
     caseIIEx811Bridge_exists_cyclotomic_div_mem_pPowerSubgroup u
   obtain ⟨w, _hwmem, hwpow⟩ := id hdiv
@@ -306,10 +256,8 @@ theorem cor823Omega32SecondOrderCollapse37_of_genericReprSum
   obtain ⟨s, e, hse⟩ :=
     exists_CPlusExponentProduct_of_mem_CPlus (p := 37) (K := CyclotomicField 37 ℚ)
       (by decide) hvCPlus
-  -- (2) detector vanishing.
   have hdet0 : caseIICor823DescentDetectorSq u = 0 :=
     caseIICor823SecondOrder_detector_descent_eq_zero u c hc
-  -- (3) the split: `detector(u) = D_vC + 37 · coeff_Y`.
   have hsplit := caseIICor823DescentDetectorSq_split u v w hu
   set DvC : ZMod (37 ^ 2) :=
     caseIICor823DetSqLog (completedLog (p := 37) (K := CyclotomicField 37 ℚ)
@@ -319,7 +267,6 @@ theorem cor823Omega32SecondOrderCollapse37_of_genericReprSum
     caseIICor823DetSqLog (completedLog (p := 37) (K := CyclotomicField 37 ℚ)
       (EPlus_completedLogDomainPowPred (p := 37) (K := CyclotomicField 37 ℚ) w))
     with hcoeffY
-  -- (4) `completedLog(v^36) = (S : Dwork)`, the cyclotomic-column sum (the fixed-subalgebra `S`).
   set S : dworkFixedSubalgebra 37 (CyclotomicField 37 ℚ) :=
     ∑ a : Fin (kummerLogRank 37),
       e a • concreteKummerLogVector (p := 37) (K := CyclotomicField 37 ℚ) (by norm_num) a
@@ -337,7 +284,7 @@ theorem cor823Omega32SecondOrderCollapse37_of_genericReprSum
             e a • concreteKummerLogVector (p := 37) (K := CyclotomicField 37 ℚ) (by norm_num) a)
         from rfl]
     rw [map_sum]
-    refine Finset.sum_congr rfl (fun a _ ↦ ?_)
+    refine Finset.sum_congr rfl (fun a _ => ?_)
     rw [map_zsmul]
     rfl
   have hcompletedLog_eq :
@@ -348,7 +295,6 @@ theorem cor823Omega32SecondOrderCollapse37_of_genericReprSum
       (p := 37) (K := CyclotomicField 37 ℚ) (by decide) (by decide) s e
     rw [hse] at hsum
     rw [hScoe]; exact hsum
-  -- (5) `D_vC = F · V₁₅` (the proven `ϖ ↔ λ` fixed-subalgebra bridge + the generic `repr` value §2).
   have hDvC_factor :
       DvC = F *
         (∑ a : Fin (kummerLogRank 37),
@@ -356,7 +302,6 @@ theorem cor823Omega32SecondOrderCollapse37_of_genericReprSum
             ((e a : ℤ) : ZMod (37 ^ 2))) := by
     rw [hDvC, hcompletedLog_eq, caseIICor823DetSqLog_coe_fixedSubalgebra_eq, hS]
     exact hSum e
-  -- (6) `0 = detector(u) = D_vC + 37·coeffY = 37·(r·V₁₅ + coeffY)`.
   rw [hdet0] at hsplit
   rw [hDvC_factor, hrfac] at hsplit
   set V₁₅ : ZMod (37 ^ 2) :=
@@ -366,7 +311,6 @@ theorem cor823Omega32SecondOrderCollapse37_of_genericReprSum
     with hV₁₅
   have h37 : (37 : ZMod (37 ^ 2)) * (r * V₁₅ + coeffY) = 0 := by
     linear_combination -hsplit
-  -- (7) `castHom(r·V₁₅ + coeffY) = 0` (the `37·x = 0 ⟹ castHom x = 0` precision step).
   have hkey : ∀ x : ZMod (37 ^ 2), (37 : ZMod (37 ^ 2)) * x = 0 →
       (ZMod.castHom (by norm_num : (37 : ℕ) ∣ 37 ^ 2) (ZMod 37)) x = 0 := by
     intro x hx
@@ -384,16 +328,14 @@ theorem cor823Omega32SecondOrderCollapse37_of_genericReprSum
     exact (ZMod.natCast_eq_zero_iff _ _).mpr hdvd
   have hcast0 : (ZMod.castHom (by norm_num : (37 : ℕ) ∣ 37 ^ 2) (ZMod 37)) (r * V₁₅ + coeffY) = 0 :=
     hkey _ h37
-  -- (8) `castHom coeffY = 0` (first-order `j = 15` vanishing + level compatibility).
   have hcoeffY0 : (ZMod.castHom (by norm_num : (37 : ℕ) ∣ 37 ^ 2) (ZMod 37)) coeffY = 0 := by
     rw [hcoeffY, castHom_caseIICor823DetSqLog]
     convert caseIIDescentReduction_firstOrder_coeff15_eq_zero w using 2
-  -- (9) `castHom r · castHom V₁₅ = 0`, with `castHom V₁₅ = (V·ē)_15 = 9·c₁₅`.
   rw [map_add, map_mul, hcoeffY0, add_zero] at hcast0
   have h15val : ((15 : Fin (kummerLogRank 37)) : ℕ) = 15 := rfl
   have hmulVec_eq :
       (vandermondeTeichmullerEvenSubOneMatrix (p := 37) (by norm_num)).mulVec
-          (fun a : Fin (kummerLogRank 37) ↦ (e a : ZMod 37)) (15 : Fin (kummerLogRank 37)) =
+          (fun a : Fin (kummerLogRank 37) => (e a : ZMod 37)) (15 : Fin (kummerLogRank 37)) =
         ∑ a : Fin (kummerLogRank 37),
           (((((a : ℕ) + 2 : ℕ) : ZMod 37) ^ 2) ^ ((15 : ℕ) + 1) - 1) * ((e a : ℤ) : ZMod 37) := by
     rw [Matrix.mulVec]
@@ -401,17 +343,16 @@ theorem cor823Omega32SecondOrderCollapse37_of_genericReprSum
       kummerLogColumnIndex, BernoulliRegular.CPlusGeneratorIndex, h15val]
   have hV₁₅cast : (ZMod.castHom (by norm_num : (37 : ℕ) ∣ 37 ^ 2) (ZMod 37)) V₁₅ =
       (vandermondeTeichmullerEvenSubOneMatrix (p := 37) (by norm_num)).mulVec
-        (fun a : Fin (kummerLogRank 37) ↦ (e a : ZMod 37)) (15 : Fin (kummerLogRank 37)) := by
+        (fun a : Fin (kummerLogRank 37) => (e a : ZMod 37)) (15 : Fin (kummerLogRank 37)) := by
     rw [hmulVec_eq, hV₁₅, map_sum]
-    refine Finset.sum_congr rfl (fun a _ ↦ ?_)
+    refine Finset.sum_congr rfl (fun a _ => ?_)
     rw [map_mul, map_sub, map_one, map_pow, map_pow, map_natCast, map_intCast]
   rw [hV₁₅cast] at hcast0
-  -- (10) `(V·ē)_15 = 9 · decomp (∑ e_a g_a) 15`, `9 ≠ 0`.
   have hcollapse := caseIIEx811Eigen_vandermonde_eq_nine_smul e (15 : Fin (kummerLogRank 37))
   rw [hcollapse] at hcast0
   have h9 : (9 : ZMod 37) ≠ 0 := by
-    rw [show (9 : ZMod 37) = ((9 : ℕ) : ZMod 37) from by push_cast; ring,
-      show (0 : ZMod 37) = ((0 : ℕ) : ZMod 37) from by push_cast; ring, Ne,
+    rw [show (9 : ZMod 37) = ((9 : ℕ) : ZMod 37) by push_cast; ring,
+      show (0 : ZMod 37) = ((0 : ℕ) : ZMod 37) by push_cast; ring, Ne,
       ZMod.natCast_eq_natCast_iff]
     decide
   have hc15 : caseIIResidueProvenance_decomp
@@ -433,15 +374,10 @@ theorem cor823Omega32SecondOrderCollapse37_of_genericReprSum
             simp only [kummerLogRank] at this; omega⟩) = 0 := hcast0
     have h2 := (mul_eq_zero.mp hprod).resolve_left hr_ne
     exact (mul_eq_zero.mp h2).resolve_left h9
-  -- (11) free-part-class bridge: `∑ e_a g_a = realUnitToFreePartModP u`.
   have hcls := caseIIEx811Bridge_freePartClass_eq hse hdiv
   rw [hcls] at hc15
   exact hc15
 
-set_option maxHeartbeats 4000000 in
--- The composition unifies the two heavy generic props (the column-sum value and the collapse) over
--- the `adicCompletionIntegers`-laden statements; raise both budgets above the default.
-set_option synthInstance.maxHeartbeats 800000 in
 /-- **`Cor823Omega32SecondOrderCollapse37` from the generic per-column coordinate value** (proven,
 axiom-clean given `CaseIICor823GenericColumnCoord37`).
 
@@ -457,8 +393,6 @@ theorem cor823Omega32SecondOrderCollapse37_of_genericColumnCoord
   obtain ⟨F, r, hrfac, hr_ne, hCol⟩ := hGen
   exact cor823Omega32SecondOrderCollapse37_of_genericReprSum F r hrfac hr_ne
     (genericColumnSumReprValue F hCol)
-
-/-! ## 4. R4 and the FLT37 endpoint, from the generic per-column coordinate value -/
 
 /-- **Washington Theorem 8.22 / Corollary 8.23 for `37` (`R4`) from the generic per-column
 coordinate value** (proven, axiom-clean given `CaseIICor823GenericColumnCoord37`).
