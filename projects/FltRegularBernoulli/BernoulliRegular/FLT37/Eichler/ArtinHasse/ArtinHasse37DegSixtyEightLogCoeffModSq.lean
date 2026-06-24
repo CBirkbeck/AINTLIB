@@ -87,7 +87,6 @@ noncomputable section
 set_option maxRecDepth 4000
 
 open NumberField
-open scoped BigOperators
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -185,10 +184,10 @@ theorem formalSum68ResidueModSq37_of_ratValue (hRat : FormalSum68RatValue) :
   rw [FormalSum68ResidueModSq37, formalSum68Residue, hRat]
   -- The explicit fraction `N/120` has `Rat.num = N`, `Rat.den = 120` (reduced); reduce the residue.
   rw [show ((-462074109491757258568843974992223061646211876969162959102801473214373353 : ℚ) /
-        120).num = -462074109491757258568843974992223061646211876969162959102801473214373353 from by
+        120).num = -462074109491757258568843974992223061646211876969162959102801473214373353 by
       norm_num,
     show ((-462074109491757258568843974992223061646211876969162959102801473214373353 : ℚ) /
-        120).den = 120 from by norm_num]
+        120).den = 120 by norm_num]
   native_decide
 
 /-! ## 2. The first `37`-digit of `formalSum68Residue` is `0` — proven *unconditionally*
