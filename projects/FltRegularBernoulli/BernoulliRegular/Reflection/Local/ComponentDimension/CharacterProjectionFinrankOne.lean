@@ -21,8 +21,6 @@ principal-unit quotient `completed U_1 / completed U_1^p` with its additive
 
 noncomputable section
 
-open scoped NumberField
-
 namespace BernoulliRegular
 namespace Reflection
 namespace Local
@@ -39,7 +37,6 @@ set_option maxHeartbeats 800000 in
 theorem exists_delta_zmod_pow_ne_one
     {k : ℕ} (hk_pos : 0 < k) (hk_lt : k < p - 1) :
     ∃ a : CyclotomicUnitDelta p, (a : ZMod p) ^ k ≠ 1 := by
-  classical
   letI : IsCyclic (CyclotomicUnitDelta p) := by
     dsimp [CyclotomicUnitDelta]
     exact ZMod.isCyclic_units_prime (Fact.out : p.Prime)
@@ -147,8 +144,8 @@ theorem completedPrincipalUnitModPEigenspace_mem_filtration_succ_of_exists_pow_n
         (Fact.out : 1 ≤ n) u) ^ cj.val at hact
     rw [← map_pow
       (completedPrincipalUnitModPClassOfLevel (p := p) (K := K) n
-        (Fact.out : 1 ≤ n)) u cj.val] at hact
-    rw [completedPrincipalUnitModPClassOfLevel_apply,
+        (Fact.out : 1 ≤ n)) u cj.val,
+      completedPrincipalUnitModPClassOfLevel_apply,
       completedPrincipalUnitModPDeltaAction_apply_class] at hact
     rw [completedPrincipalUnitModPClassOfLevel_apply,
       completedPrincipalUnitModPClassOfLevel_apply,
