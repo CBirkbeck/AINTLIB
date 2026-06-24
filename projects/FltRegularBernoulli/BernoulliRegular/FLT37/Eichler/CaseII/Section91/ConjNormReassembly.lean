@@ -58,11 +58,9 @@ anchor, `v_𝔭 = 2(m-18) = 2m-36`), this is `2e-1 = 2m-37`; the `(ζ-1)`-conten
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension NumberField.IsCMField Finset
+open NumberField IsCyclotomicExtension NumberField.IsCMField
 
 namespace BernoulliRegular.FLT37.Eichler
-
-open FLT37 BernoulliRegular
 
 /-! ## 1. Reality of the conjugate-norm building blocks (general CM field) -/
 
@@ -184,7 +182,7 @@ theorem washington_section91_reassembly
   rw [hcrux] at hstep4
   have hΛpow : (Λ : K) ^ (2 * e) * (Λ : K)⁻¹ = (Λ : K) ^ (2 * e - 1) := by
     have hpow : (Λ : K) ^ (2 * e) = (Λ : K) ^ (2 * e - 1) * (Λ : K) := by
-      conv_lhs => rw [show 2 * e = (2 * e - 1) + 1 from by omega]
+      conv_lhs => rw [show 2 * e = (2 * e - 1) + 1 by omega]
       rw [pow_succ]
     rw [hpow, mul_assoc, mul_inv_cancel₀ Λ.ne_zero, mul_one]
   -- Now `N_a' − N_b' = S·θ'·λ⁻¹ = η_0²·θ'·λ^{2e-1}·ξ³⁷`.
@@ -193,7 +191,7 @@ theorem washington_section91_reassembly
       (η0 : K) ^ 2 * (θ' : K) * (Λ : K) ^ (2 * e - 1) * (ρ0 ^ 2) ^ 37 := by
     rw [hstep4, hS_def]
     rw [show (η0 : K) ^ 2 * (Λ : K) ^ (2 * e) * (ρ0 ^ 2) ^ 37 * ((θ' : K) * (Λ : K)⁻¹) =
-      (η0 : K) ^ 2 * (θ' : K) * ((Λ : K) ^ (2 * e) * (Λ : K)⁻¹) * (ρ0 ^ 2) ^ 37 from by ring,
+      (η0 : K) ^ 2 * (θ' : K) * ((Λ : K) ^ (2 * e) * (Λ : K)⁻¹) * (ρ0 ^ 2) ^ 37 by ring,
       hΛpow]
   -- Step 6: divide by `η_b²` (use Assumption II `η_a² = (u²)³⁷·η_b²`) and `(-N_b)³⁷ = -N_b³⁷`.
   have hηa_sq : (ηa : K) ^ 2 = ((u : K) ^ 2) ^ 37 * (ηb : K) ^ 2 := by
@@ -300,7 +298,7 @@ theorem washington_L_real {η : 𝓞 K} (hη : η ^ 37 = 1) :
     ringOfIntegersComplexConj K ((1 - η) * (1 - η ^ 36)) = (1 - η) * (1 - η ^ 36) := by
   -- `σ((1-η)(1-η^36)) = (1-η^36)(1-(η^36)^36) = (1-η^36)(1-η)` (since `(η^36)^36 = η`).
   have hpow : (η ^ 36) ^ 36 = η := by
-    rw [← pow_mul, show 36 * 36 = 37 * 35 + 1 from by norm_num, pow_add, pow_mul, hη]; ring
+    rw [← pow_mul, show 36 * 36 = 37 * 35 + 1 by norm_num, pow_add, pow_mul, hη]; ring
   rw [map_mul, map_sub, map_one, map_sub, map_one, map_pow,
     caseII_ringOfIntegersComplexConj_root_of_unity hη, hpow]
   ring
