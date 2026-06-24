@@ -1041,7 +1041,193 @@ theorem FormalGroup.evalAdd_evalNeg
   rw [hfun] at bridge
   exact bridge.symm
 
-/-! ### Associativity of `evalAdd` -/
+/-! ### Associativity of `evalAdd`
+
+The proof of `evalAdd_assoc` applies `eval₂ id ![x,y,z]` to both sides of the
+formal-group associativity axiom `F.assoc` (which lives in `MvPowerSeries (Fin 3) R`).
+The work splits into: membership of the evaluation triple, `HasSubst` for the inner
+pair embeddings `![X₀,X₁]` / `![X₁,X₂]` and the outer maps `![F(X₀,X₁), X₂]` /
+`![X₀, F(X₁,X₂)]`, the two side-equalities identifying `eval₂ id ![x,y,z]` of the
+nested substitutions with the iterated `evalAdd`, and finally combining via the bridge.
+This mirrors the `PowerSeries`-level `HasseWeil.FG.fAdd_assoc` decomposition. -/
+
+/-- The evaluation triple `![x, y, z]` lies componentwise in the maximal ideal `M`. -/
+private lemma evalAdd_assoc_triple_mem
+    (x y z : IsLocalRing.maximalIdeal R) :
+    ∀ i : Fin 3, (![x.1, y.1, z.1] : Fin 3 → R) i ∈ IsLocalRing.maximalIdeal R := by
+  intro i; fin_cases i <;> simp [x.2, y.2, z.2]
+
+/-- The inner pair embedding `![X₀, X₁] : Fin 2 → MvPowerSeries (Fin 3) R` admits
+substitution: both components are variables, so each has vanishing constant
+coefficient. -/
+private lemma hasSubst_pair_X01_fin3 :
+    MvPowerSeries.HasSubst
+      (![MvPowerSeries.X (0 : Fin 3), MvPowerSeries.X 1] :
+        Fin 2 → MvPowerSeries (Fin 3) R) :=
+  MvPowerSeries.hasSubst_of_constantCoeff_zero (fun s ↦ by fin_cases s <;> simp)
+
+/-- The inner pair embedding `![X₁, X₂] : Fin 2 → MvPowerSeries (Fin 3) R` admits
+substitution: both components are variables, so each has vanishing constant
+coefficient. -/
+private lemma hasSubst_pair_X12_fin3 :
+    MvPowerSeries.HasSubst
+      (![MvPowerSeries.X (1 : Fin 3), MvPowerSeries.X 2] :
+        Fin 2 → MvPowerSeries (Fin 3) R) :=
+  MvPowerSeries.hasSubst_of_constantCoeff_zero (fun s ↦ by fin_cases s <;> simp)
+
+/-- `F(X₀, X₁)`, i.e. `subst ![X₀, X₁] F.toSeries`, has vanishing constant
+coefficient. -/
+private lemma constantCoeff_subst_X01_toSeries (F : FormalGroup R) :
+    MvPowerSeries.constantCoeff
+        (MvPowerSeries.subst
+          (![MvPowerSeries.X (0 : Fin 3), MvPowerSeries.X 1] :
+            Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries) = 0 :=
+  (HasseWeil.FG.constantCoeff_subst_vanishing hasSubst_pair_X01_fin3
+    (fun s ↦ by fin_cases s <;> simp) F.toSeries).trans
+    (HasseWeil.FG.constantCoeff_FG_toSeries F)
+
+/-- `F(X₁, X₂)`, i.e. `subst ![X₁, X₂] F.toSeries`, has vanishing constant
+coefficient. -/
+private lemma constantCoeff_subst_X12_toSeries (F : FormalGroup R) :
+    MvPowerSeries.constantCoeff
+        (MvPowerSeries.subst
+          (![MvPowerSeries.X (1 : Fin 3), MvPowerSeries.X 2] :
+            Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries) = 0 :=
+  (HasseWeil.FG.constantCoeff_subst_vanishing hasSubst_pair_X12_fin3
+    (fun s ↦ by fin_cases s <;> simp) F.toSeries).trans
+    (HasseWeil.FG.constantCoeff_FG_toSeries F)
+
+/-- Each component of the outer left map `![F(X₀,X₁), X₂]` has vanishing constant
+coefficient. -/
+private lemma constantCoeff_outerL_zero (F : FormalGroup R) :
+    ∀ s, MvPowerSeries.constantCoeff
+      ((![MvPowerSeries.subst
+            (![MvPowerSeries.X (0 : Fin 3), MvPowerSeries.X 1] :
+              Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries,
+          MvPowerSeries.X 2] : Fin 2 → MvPowerSeries (Fin 3) R) s) = 0 := by
+  intro s; fin_cases s
+  · simp only [Matrix.cons_val_zero]; exact constantCoeff_subst_X01_toSeries F
+  · simp
+
+/-- Each component of the outer right map `![X₀, F(X₁,X₂)]` has vanishing constant
+coefficient. -/
+private lemma constantCoeff_outerR_zero (F : FormalGroup R) :
+    ∀ s, MvPowerSeries.constantCoeff
+      ((![MvPowerSeries.X (0 : Fin 3),
+          MvPowerSeries.subst
+            (![MvPowerSeries.X (1 : Fin 3), MvPowerSeries.X 2] :
+              Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries] :
+        Fin 2 → MvPowerSeries (Fin 3) R) s) = 0 := by
+  intro s; fin_cases s
+  · simp
+  · simp only [Matrix.cons_val_one, Matrix.head_cons]
+    exact constantCoeff_subst_X12_toSeries F
+
+/-- The outer map `![F(X₀,X₁), X₂] : Fin 2 → MvPowerSeries (Fin 3) R` — the left
+side of `F.assoc` — admits substitution. -/
+private lemma hasSubst_substX01_X2 (F : FormalGroup R) :
+    MvPowerSeries.HasSubst
+      (![MvPowerSeries.subst
+            (![MvPowerSeries.X (0 : Fin 3), MvPowerSeries.X 1] :
+              Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries,
+          MvPowerSeries.X 2] : Fin 2 → MvPowerSeries (Fin 3) R) :=
+  MvPowerSeries.hasSubst_of_constantCoeff_zero (constantCoeff_outerL_zero F)
+
+/-- The outer map `![X₀, F(X₁,X₂)] : Fin 2 → MvPowerSeries (Fin 3) R` — the right
+side of `F.assoc` — admits substitution. -/
+private lemma hasSubst_X0_substX12 (F : FormalGroup R) :
+    MvPowerSeries.HasSubst
+      (![MvPowerSeries.X (0 : Fin 3),
+          MvPowerSeries.subst
+            (![MvPowerSeries.X (1 : Fin 3), MvPowerSeries.X 2] :
+              Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries] :
+        Fin 2 → MvPowerSeries (Fin 3) R) :=
+  MvPowerSeries.hasSubst_of_constantCoeff_zero (constantCoeff_outerR_zero F)
+
+/-- Pulling `eval₂ id ![x,y,z]` through the inner left substitution:
+`eval₂ id ![x,y,z] (F(X₀,X₁)) = F.evalAdd x y`. -/
+private lemma eval₂_triple_subst_X01_eq_evalAdd
+    (hAdic : IsAdic (IsLocalRing.maximalIdeal R))
+    (F : FormalGroup R) (x y z : IsLocalRing.maximalIdeal R) :
+    MvPowerSeries.eval₂ (RingHom.id R) (![x.1, y.1, z.1] : Fin 3 → R)
+        (MvPowerSeries.subst
+          (![MvPowerSeries.X (0 : Fin 3), MvPowerSeries.X 1] :
+            Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries) = F.evalAdd x y := by
+  have bridge := eval₂_subst_bridge hAdic
+    (a := (![MvPowerSeries.X (0 : Fin 3), MvPowerSeries.X 1] :
+      Fin 2 → MvPowerSeries (Fin 3) R))
+    (fun s ↦ by fin_cases s <;> simp) hasSubst_pair_X01_fin3
+    (b := (![x.1, y.1, z.1] : Fin 3 → R)) (evalAdd_assoc_triple_mem x y z) F.toSeries
+  rw [bridge]
+  have hfn : (fun s : Fin 2 ↦ MvPowerSeries.eval₂ (RingHom.id R)
+        (![x.1, y.1, z.1] : Fin 3 → R)
+        ((![MvPowerSeries.X (0 : Fin 3), MvPowerSeries.X 1] :
+          Fin 2 → MvPowerSeries (Fin 3) R) s)) = ![x.1, y.1] := by
+    funext s; fin_cases s
+    · show MvPowerSeries.eval₂ (RingHom.id R) _ (MvPowerSeries.X (0 : Fin 3)) = x.1
+      rw [MvPowerSeries.eval₂_X]; simp
+    · show MvPowerSeries.eval₂ (RingHom.id R) _ (MvPowerSeries.X (1 : Fin 3)) = y.1
+      rw [MvPowerSeries.eval₂_X]; simp
+  rw [hfn]; rfl
+
+/-- Pulling `eval₂ id ![x,y,z]` through the inner right substitution:
+`eval₂ id ![x,y,z] (F(X₁,X₂)) = F.evalAdd y z`. -/
+private lemma eval₂_triple_subst_X12_eq_evalAdd
+    (hAdic : IsAdic (IsLocalRing.maximalIdeal R))
+    (F : FormalGroup R) (x y z : IsLocalRing.maximalIdeal R) :
+    MvPowerSeries.eval₂ (RingHom.id R) (![x.1, y.1, z.1] : Fin 3 → R)
+        (MvPowerSeries.subst
+          (![MvPowerSeries.X (1 : Fin 3), MvPowerSeries.X 2] :
+            Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries) = F.evalAdd y z := by
+  have bridge := eval₂_subst_bridge hAdic
+    (a := (![MvPowerSeries.X (1 : Fin 3), MvPowerSeries.X 2] :
+      Fin 2 → MvPowerSeries (Fin 3) R))
+    (fun s ↦ by fin_cases s <;> simp) hasSubst_pair_X12_fin3
+    (b := (![x.1, y.1, z.1] : Fin 3 → R)) (evalAdd_assoc_triple_mem x y z) F.toSeries
+  rw [bridge]
+  have hfn : (fun s : Fin 2 ↦ MvPowerSeries.eval₂ (RingHom.id R)
+        (![x.1, y.1, z.1] : Fin 3 → R)
+        ((![MvPowerSeries.X (1 : Fin 3), MvPowerSeries.X 2] :
+          Fin 2 → MvPowerSeries (Fin 3) R) s)) = ![y.1, z.1] := by
+    funext s; fin_cases s
+    · show MvPowerSeries.eval₂ (RingHom.id R) _ (MvPowerSeries.X (1 : Fin 3)) = y.1
+      rw [MvPowerSeries.eval₂_X]; simp
+    · show MvPowerSeries.eval₂ (RingHom.id R) _ (MvPowerSeries.X (2 : Fin 3)) = z.1
+      rw [MvPowerSeries.eval₂_X]; simp
+  rw [hfn]; rfl
+
+/-- The composite `eval₂ id ![x,y,z] ∘ ![F(X₀,X₁), X₂]` of the outer left map is
+`![F.evalAdd x y, z]`. -/
+private lemma eval₂_triple_outerL_eq
+    (hAdic : IsAdic (IsLocalRing.maximalIdeal R))
+    (F : FormalGroup R) (x y z : IsLocalRing.maximalIdeal R) :
+    (fun s : Fin 2 ↦ MvPowerSeries.eval₂ (RingHom.id R) (![x.1, y.1, z.1] : Fin 3 → R)
+        ((![MvPowerSeries.subst
+              (![MvPowerSeries.X (0 : Fin 3), MvPowerSeries.X 1] :
+                Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries,
+            MvPowerSeries.X 2] : Fin 2 → MvPowerSeries (Fin 3) R) s)) =
+      ![F.evalAdd x y, z.1] := by
+  funext s; fin_cases s
+  · exact eval₂_triple_subst_X01_eq_evalAdd hAdic F x y z
+  · show MvPowerSeries.eval₂ (RingHom.id R) _ (MvPowerSeries.X (2 : Fin 3)) = z.1
+    rw [MvPowerSeries.eval₂_X]; simp
+
+/-- The composite `eval₂ id ![x,y,z] ∘ ![X₀, F(X₁,X₂)]` of the outer right map is
+`![x, F.evalAdd y z]`. -/
+private lemma eval₂_triple_outerR_eq
+    (hAdic : IsAdic (IsLocalRing.maximalIdeal R))
+    (F : FormalGroup R) (x y z : IsLocalRing.maximalIdeal R) :
+    (fun s : Fin 2 ↦ MvPowerSeries.eval₂ (RingHom.id R) (![x.1, y.1, z.1] : Fin 3 → R)
+        ((![MvPowerSeries.X (0 : Fin 3),
+            MvPowerSeries.subst
+              (![MvPowerSeries.X (1 : Fin 3), MvPowerSeries.X 2] :
+                Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries] :
+          Fin 2 → MvPowerSeries (Fin 3) R) s)) =
+      ![x.1, F.evalAdd y z] := by
+  funext s; fin_cases s
+  · show MvPowerSeries.eval₂ (RingHom.id R) _ (MvPowerSeries.X (0 : Fin 3)) = x.1
+    rw [MvPowerSeries.eval₂_X]; simp
+  · exact eval₂_triple_subst_X12_eq_evalAdd hAdic F x y z
 
 set_option maxHeartbeats 800000 in
 /-- **Associativity of `evalAdd`** (Silverman IV.3):
@@ -1052,113 +1238,20 @@ theorem FormalGroup.evalAdd_assoc
     (x y z : IsLocalRing.maximalIdeal R) :
     F.evalAdd ⟨F.evalAdd x y, F.evalAdd_mem hAdic x y⟩ z =
     F.evalAdd x ⟨F.evalAdd y z, F.evalAdd_mem hAdic y z⟩ := by
-  -- Strategy: apply `eval₂ id ![x,y,z]` to both sides of `F.assoc`.
-  -- F.assoc : subst ![F_XY, X 2] F.toSeries = subst ![X 0, F_YZ] F.toSeries,
-  -- where F_XY = subst ![X 0, X 1] F.toSeries, F_YZ = subst ![X 1, X 2] F.toSeries.
-  -- Taking eval_xyz of both sides: eval_xyz (LHS) = eval_xyz (RHS).
-  -- Bridge identifies these with F.evalAdd (F.evalAdd x y) z resp. F.evalAdd x (F.evalAdd y z).
+  -- Strategy: apply `eval₂ id ![x,y,z]` to both sides of `F.assoc`, then identify
+  -- each side with an iterated `evalAdd` via the side-equality helpers.
   change MvPowerSeries.eval₂ (RingHom.id R) (![F.evalAdd x y, z.1] : Fin 2 → R) F.toSeries =
          MvPowerSeries.eval₂ (RingHom.id R) (![x.1, F.evalAdd y z] : Fin 2 → R) F.toSeries
-  -- Define xyz := ![x.1, y.1, z.1] : Fin 3 → R.
-  set xyz : Fin 3 → R := ![x.1, y.1, z.1]
-  have hxyz_mem : ∀ i : Fin 3, xyz i ∈ IsLocalRing.maximalIdeal R := by
-    intro i; fin_cases i <;> simp [xyz, x.2, y.2, z.2]
-  -- Inner substitutions a_L = ![F_XY, X 2] and a_R = ![X 0, F_YZ] (all in MvPowerSeries (Fin 3) R).
-  -- Inner XY / YZ: ![X 0, X 1] / ![X 1, X 2] as maps Fin 2 → MvPS (Fin 3) R.
-  set XY : Fin 2 → MvPowerSeries (Fin 3) R := ![MvPowerSeries.X 0, MvPowerSeries.X 1]
-  set YZ : Fin 2 → MvPowerSeries (Fin 3) R := ![MvPowerSeries.X 1, MvPowerSeries.X 2]
-  have hXY0 : ∀ s, MvPowerSeries.constantCoeff (XY s) = 0 := by
-    intro s; fin_cases s <;> simp [XY]
-  have hYZ0 : ∀ s, MvPowerSeries.constantCoeff (YZ s) = 0 := by
-    intro s; fin_cases s <;> simp [YZ]
-  have hXY : MvPowerSeries.HasSubst XY :=
-    MvPowerSeries.hasSubst_of_constantCoeff_zero hXY0
-  have hYZ : MvPowerSeries.HasSubst YZ :=
-    MvPowerSeries.hasSubst_of_constantCoeff_zero hYZ0
-  -- Outer substitutions: ![subst_XY F, X 2] and ![X 0, subst_YZ F].
-  let F_XY : MvPowerSeries (Fin 3) R := MvPowerSeries.subst XY F.toSeries
-  let F_YZ : MvPowerSeries (Fin 3) R := MvPowerSeries.subst YZ F.toSeries
-  set aL : Fin 2 → MvPowerSeries (Fin 3) R := ![F_XY, MvPowerSeries.X 2]
-  set aR : Fin 2 → MvPowerSeries (Fin 3) R := ![MvPowerSeries.X 0, F_YZ]
-  have hF_XY_cc : MvPowerSeries.constantCoeff F_XY = 0 := by
-    show MvPowerSeries.constantCoeff (MvPowerSeries.subst XY F.toSeries) = 0
-    rw [HasseWeil.FG.constantCoeff_subst_vanishing hXY hXY0]
-    exact HasseWeil.FG.constantCoeff_FG_toSeries F
-  have hF_YZ_cc : MvPowerSeries.constantCoeff F_YZ = 0 := by
-    show MvPowerSeries.constantCoeff (MvPowerSeries.subst YZ F.toSeries) = 0
-    rw [HasseWeil.FG.constantCoeff_subst_vanishing hYZ hYZ0]
-    exact HasseWeil.FG.constantCoeff_FG_toSeries F
-  have haL0 : ∀ s, MvPowerSeries.constantCoeff (aL s) = 0 := by
-    intro s; fin_cases s
-    · exact hF_XY_cc
-    · simp [aL]
-  have haR0 : ∀ s, MvPowerSeries.constantCoeff (aR s) = 0 := by
-    intro s; fin_cases s
-    · simp [aR]
-    · exact hF_YZ_cc
-  have haL : MvPowerSeries.HasSubst aL :=
-    MvPowerSeries.hasSubst_of_constantCoeff_zero haL0
-  have haR : MvPowerSeries.HasSubst aR :=
-    MvPowerSeries.hasSubst_of_constantCoeff_zero haR0
-  -- F.assoc: subst aL F.toSeries = subst aR F.toSeries
-  have h_assoc : MvPowerSeries.subst aL F.toSeries =
-      MvPowerSeries.subst aR F.toSeries := F.assoc
-  -- Apply eval₂ id xyz (a ring hom).
-  have h_step : MvPowerSeries.eval₂ (RingHom.id R) xyz
-      (MvPowerSeries.subst aL F.toSeries) =
-      MvPowerSeries.eval₂ (RingHom.id R) xyz
-      (MvPowerSeries.subst aR F.toSeries) := by
-    rw [h_assoc]
-  -- Apply the bridge to both sides.
-  have hbridge_L := eval₂_subst_bridge hAdic haL0 haL (b := xyz) hxyz_mem F.toSeries
-  have hbridge_R := eval₂_subst_bridge hAdic haR0 haR (b := xyz) hxyz_mem F.toSeries
-  rw [hbridge_L, hbridge_R] at h_step
-  -- h_step: eval₂ id (eval_xyz ∘ aL) F.toSeries = eval₂ id (eval_xyz ∘ aR) F.toSeries.
-  -- Compute eval_xyz ∘ aL and eval_xyz ∘ aR.
-  -- For s = 0: eval_xyz (aL 0) = eval_xyz F_XY = ? (needs inner bridge).
-  -- For s = 1: eval_xyz (aL 1) = eval_xyz (X 2) = z.1.
-  -- Inner bridge for eval_xyz F_XY:
-  have hbridge_XY := eval₂_subst_bridge hAdic hXY0 hXY (b := xyz) hxyz_mem F.toSeries
-  have hbridge_YZ := eval₂_subst_bridge hAdic hYZ0 hYZ (b := xyz) hxyz_mem F.toSeries
-  -- eval_xyz F_XY = eval₂ id (eval_xyz ∘ XY) F.toSeries = eval₂ id ![x,y] F.toSeries = evalAdd F x y.
-  have hxy_fn : (fun s : Fin 2 ↦ MvPowerSeries.eval₂ (RingHom.id R) xyz (XY s)) =
-      ![x.1, y.1] := by
-    funext s
-    fin_cases s
-    · show MvPowerSeries.eval₂ (RingHom.id R) xyz (MvPowerSeries.X (0 : Fin 3)) = x.1
-      rw [MvPowerSeries.eval₂_X]; simp [xyz]
-    · show MvPowerSeries.eval₂ (RingHom.id R) xyz (MvPowerSeries.X (1 : Fin 3)) = y.1
-      rw [MvPowerSeries.eval₂_X]; simp [xyz]
-  have hyz_fn : (fun s : Fin 2 ↦ MvPowerSeries.eval₂ (RingHom.id R) xyz (YZ s)) =
-      ![y.1, z.1] := by
-    funext s
-    fin_cases s
-    · show MvPowerSeries.eval₂ (RingHom.id R) xyz (MvPowerSeries.X (1 : Fin 3)) = y.1
-      rw [MvPowerSeries.eval₂_X]; simp [xyz]
-    · show MvPowerSeries.eval₂ (RingHom.id R) xyz (MvPowerSeries.X (2 : Fin 3)) = z.1
-      rw [MvPowerSeries.eval₂_X]; simp [xyz]
-  rw [hxy_fn] at hbridge_XY
-  rw [hyz_fn] at hbridge_YZ
-  -- hbridge_XY: eval_xyz F_XY = eval₂ id ![x,y] F.toSeries = evalAdd F x y
-  -- hbridge_YZ: eval_xyz F_YZ = eval₂ id ![y,z] F.toSeries = evalAdd F y z
-  -- Now compute eval_xyz ∘ aL and eval_xyz ∘ aR:
-  have hL_fn : (fun s : Fin 2 ↦ MvPowerSeries.eval₂ (RingHom.id R) xyz (aL s)) =
-      ![F.evalAdd x y, z.1] := by
-    funext s
-    fin_cases s
-    · show MvPowerSeries.eval₂ (RingHom.id R) xyz F_XY = F.evalAdd x y
-      rw [hbridge_XY]; rfl
-    · show MvPowerSeries.eval₂ (RingHom.id R) xyz (MvPowerSeries.X (2 : Fin 3)) = z.1
-      rw [MvPowerSeries.eval₂_X]; simp [xyz]
-  have hR_fn : (fun s : Fin 2 ↦ MvPowerSeries.eval₂ (RingHom.id R) xyz (aR s)) =
-      ![x.1, F.evalAdd y z] := by
-    funext s
-    fin_cases s
-    · show MvPowerSeries.eval₂ (RingHom.id R) xyz (MvPowerSeries.X (0 : Fin 3)) = x.1
-      rw [MvPowerSeries.eval₂_X]; simp [xyz]
-    · show MvPowerSeries.eval₂ (RingHom.id R) xyz F_YZ = F.evalAdd y z
-      rw [hbridge_YZ]; rfl
-  rw [hL_fn, hR_fn] at h_step
+  -- Apply `eval₂ id ![x,y,z]` to both sides of `F.assoc`.
+  have h_step := congr_arg
+    (MvPowerSeries.eval₂ (RingHom.id R) (![x.1, y.1, z.1] : Fin 3 → R)) F.assoc
+  -- The bridge turns `eval₂ id ![x,y,z] (subst aL/aR F)` into `eval₂ id (eval ∘ aL/aR) F`.
+  rw [eval₂_subst_bridge hAdic (constantCoeff_outerL_zero F)
+        (hasSubst_substX01_X2 F) (evalAdd_assoc_triple_mem x y z) F.toSeries,
+      eval₂_subst_bridge hAdic (constantCoeff_outerR_zero F)
+        (hasSubst_X0_substX12 F) (evalAdd_assoc_triple_mem x y z) F.toSeries,
+      eval₂_triple_outerL_eq hAdic F x y z,
+      eval₂_triple_outerR_eq hAdic F x y z] at h_step
   exact h_step
 
 /-! ### The `AddCommGroup` instance on `F.EvalGroup hAdic`
