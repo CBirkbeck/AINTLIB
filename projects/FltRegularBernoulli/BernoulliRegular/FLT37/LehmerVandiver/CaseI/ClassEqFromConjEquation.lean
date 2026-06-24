@@ -70,13 +70,9 @@ theorem caseI_class_eq_complexConj_of_conj_kummer_eq
   rw [← Ideal.span_singleton_mul_span_singleton, ← Ideal.span_singleton_pow,
     ← Ideal.span_singleton_mul_span_singleton (ringOfIntegersComplexConj K α) (γ ^ p),
     ← Ideal.span_singleton_pow, h_ideal, h_conj_ideal, ← mul_pow, ← mul_pow] at h_ideal_eq
-  apply caseI_class_eq_of_ideal_pow_factored hp_pos h𝔞_nz
-  · intro h
-    exact h𝔞_nz <| (Ideal.map_eq_bot_iff_of_injective
-      (ringOfIntegersComplexConj K).injective).mp h
-  · exact hδ
-  · exact hγ
-  exact h_ideal_eq
+  exact caseI_class_eq_of_ideal_pow_factored hp_pos h𝔞_nz
+    (mt (Ideal.map_eq_bot_iff_of_injective
+      (ringOfIntegersComplexConj K).injective).mp h𝔞_nz) hδ hγ h_ideal_eq
 
 end CaseI
 
