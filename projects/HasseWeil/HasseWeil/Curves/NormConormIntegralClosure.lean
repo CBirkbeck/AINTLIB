@@ -430,6 +430,153 @@ noncomputable def centerIdealOnC₁
       v.valuation C₁.FunctionField (algebraMap C₁.CoordinateRing C₁.FunctionField a) < 1 :=
   Iff.rfl
 
+/-- **A surjective `ℤᵐ⁰`-valued valuation is nontrivial.**  Surjectivity hits `exp 1`, an element
+with valuation `≠ 0, 1`.  The shared rank-one input to the DVR-domination step (`O ≠ ⊤`), used by
+both the point case and the `∞` case of the place classification below. -/
+private theorem isNontrivial_of_surjective_withZeroInt
+    (w : Valuation C₁.FunctionField (WithZero (Multiplicative ℤ)))
+    (hwsurj : Function.Surjective w) :
+    w.IsNontrivial := by
+  refine ⟨?_⟩
+  obtain ⟨z, hz⟩ := hwsurj (WithZero.exp (1 : ℤ))
+  refine ⟨z, ?_, ?_⟩
+  · rw [hz]; exact WithZero.exp_ne_zero
+  · rw [hz, show (1 : WithZero (Multiplicative ℤ)) = WithZero.exp (0 : ℤ) from
+      (WithZero.exp_zero).symm, Ne, WithZero.exp_inj]; norm_num
+
+/-- **The valuation subring of a surjective `ℤᵐ⁰`-valued valuation is proper** (`≠ ⊤`).  Direct from
+nontriviality (`isNontrivial_of_surjective_withZeroInt`) via `valuationSubring_eq_top_iff`. -/
+private theorem valuationSubring_ne_top_of_surjective
+    (w : Valuation C₁.FunctionField (WithZero (Multiplicative ℤ)))
+    (hwsurj : Function.Surjective w) :
+    w.valuationSubring ≠ ⊤ := fun htop =>
+  (Valuation.valuationSubring_eq_top_iff _).mp htop
+    (isNontrivial_of_surjective_withZeroInt w hwsurj)
+
+/-- **The center ideal of a `B`-prime on `C₁` is prime** (point case): `centerIdealOnC₁ v hx hy` is a
+prime ideal.  Properness is `w 1 = 1 ≮ 1`; primality is the non-archimedean factorisation
+`w(ab) = w a · w b < 1`, which forces one factor `< 1` since both are `≤ 1`
+(`valuation_algebraMap_coordinateRing_C₁_le_one`). -/
+private theorem centerIdealOnC₁_isPrime
+    (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)))
+    (hx : v.valuation C₁.FunctionField (coordXFun C₁) ≤ 1)
+    (hy : v.valuation C₁.FunctionField (coordYFun C₁) ≤ 1) :
+    (centerIdealOnC₁ v hx hy).IsPrime := by
+  set w := v.valuation C₁.FunctionField with hw
+  refine ⟨?_, ?_⟩
+  · rw [Ideal.ne_top_iff_one, mem_centerIdealOnC₁, map_one, map_one]
+    exact lt_irrefl 1
+  · intro a b hab
+    rw [mem_centerIdealOnC₁, map_mul, w.map_mul] at hab
+    by_contra h
+    push_neg at h
+    obtain ⟨ha, hb⟩ := h
+    rw [mem_centerIdealOnC₁, not_lt] at ha hb
+    have ha1 : w (algebraMap C₁.CoordinateRing C₁.FunctionField a) = 1 :=
+      le_antisymm (valuation_algebraMap_coordinateRing_C₁_le_one v hx hy a) ha
+    have hb1 : w (algebraMap C₁.CoordinateRing C₁.FunctionField b) = 1 :=
+      le_antisymm (valuation_algebraMap_coordinateRing_C₁_le_one v hx hy b) hb
+    rw [ha1, hb1, one_mul] at hab
+    exact lt_irrefl 1 hab
+
+/-- **The center ideal of a `B`-prime on `C₁` is nonzero** (point case): `centerIdealOnC₁ v hx hy ≠ ⊥`.
+Otherwise `w (algMap a) = 1` for every nonzero `a ∈ F[C₁]` (such an `a` would lie in the center if
+`< 1`), hence `w f = 1` for every `f ∈ K(C₁) = Frac F[C₁]` (write `f = a/b`) — contradicting that the
+surjective `w` takes the value `exp 1 ≠ 1`. -/
+private theorem centerIdealOnC₁_ne_bot
+    (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)))
+    (hx : v.valuation C₁.FunctionField (coordXFun C₁) ≤ 1)
+    (hy : v.valuation C₁.FunctionField (coordYFun C₁) ≤ 1) :
+    centerIdealOnC₁ v hx hy ≠ ⊥ := by
+  set w := v.valuation C₁.FunctionField with hw
+  have hwsurj : Function.Surjective w := v.valuation_surjective C₁.FunctionField
+  intro hc0
+  -- `c = ⊥` ⟹ every nonzero coordinate-ring element has `w (algMap ·) = 1`
+  have hunit : ∀ a : C₁.CoordinateRing, a ≠ 0 →
+      w (algebraMap C₁.CoordinateRing C₁.FunctionField a) = 1 := by
+    intro a ha0
+    refine le_antisymm (valuation_algebraMap_coordinateRing_C₁_le_one v hx hy a) ?_
+    by_contra hlt
+    rw [not_le] at hlt
+    exact ha0 ((Submodule.eq_bot_iff _).mp hc0 a
+      ((mem_centerIdealOnC₁ v hx hy a).mpr hlt))
+  -- pick `f` with `w f ≠ 1` (surjectivity onto `ℤᵐ⁰`), then derive `w f = 1` — contradiction
+  obtain ⟨f, hf⟩ := hwsurj (WithZero.exp (1 : ℤ))
+  have hf1 : w f ≠ 1 := by
+    rw [hf, show (1 : WithZero (Multiplicative ℤ)) = WithZero.exp (0 : ℤ) from
+      (WithZero.exp_zero).symm, Ne, WithZero.exp_inj]
+    norm_num
+  apply hf1
+  obtain ⟨a, b, hb_mem, hfab⟩ :=
+    IsFractionRing.div_surjective (A := C₁.CoordinateRing) f
+  have hb_ne : b ≠ 0 := nonZeroDivisors.ne_zero hb_mem
+  have hb_map_ne : algebraMap C₁.CoordinateRing C₁.FunctionField b ≠ 0 :=
+    (map_ne_zero_iff _ (IsFractionRing.injective C₁.CoordinateRing C₁.FunctionField)).mpr hb_ne
+  -- if `a = 0` then `f = 0`, but `w f = exp 1 ≠ 0`; so `a ≠ 0`
+  have ha_ne : a ≠ 0 := by
+    rintro rfl
+    rw [map_zero, zero_div] at hfab
+    rw [← hfab, map_zero] at hf
+    exact WithZero.exp_ne_zero hf.symm
+  rw [← hfab, map_div₀ w, hunit a ha_ne, hunit b hb_ne, div_one]
+
+/-- **The center ideal of a `B`-prime on `C₁` is maximal** (point case): a nonzero prime in the
+Dedekind domain `F[C₁]` (which needs `[IsIntegrallyClosed C₁.CoordinateRing]`).  Combines
+`centerIdealOnC₁_isPrime` and `centerIdealOnC₁_ne_bot` via `IsPrime.isMaximal`. -/
+private theorem centerIdealOnC₁_isMaximal [IsIntegrallyClosed C₁.CoordinateRing]
+    (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)))
+    (hx : v.valuation C₁.FunctionField (coordXFun C₁) ≤ 1)
+    (hy : v.valuation C₁.FunctionField (coordYFun C₁) ≤ 1) :
+    (centerIdealOnC₁ v hx hy).IsMaximal :=
+  (centerIdealOnC₁_isPrime v hx hy).isMaximal (centerIdealOnC₁_ne_bot v hx hy)
+
+/-- **The point local ring of `C₁` sits inside the `v`-adic integers** (point case): if the center of
+`v` on `C₁` is the maximal ideal at the smooth point `P` (`hP`), then
+`O_{pointValuation P} ⊆ O_v`.  A `pointValuation P`-integer is `algMap (localRingAt P) x` with
+`x = mk' a s`, `s ∉ m_P`; since `m_P = centerIdealOnC₁ v`, `s` is *not* in the center so
+`w (algMap s) = 1`, whence `w (algMap a / algMap s) = w (algMap a) ≤ 1`
+(`valuation_algebraMap_coordinateRing_C₁_le_one`). -/
+private theorem pointValuationSubring_le_valuationSubring
+    (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)))
+    (hx : v.valuation C₁.FunctionField (coordXFun C₁) ≤ 1)
+    (hy : v.valuation C₁.FunctionField (coordYFun C₁) ≤ 1)
+    {P : C₁.SmoothPoint} (hP : centerIdealOnC₁ v hx hy = C₁.maximalIdealAt P) :
+    (C₁.pointValuation P).valuationSubring ≤ (v.valuation C₁.FunctionField).valuationSubring := by
+  set w := v.valuation C₁.FunctionField with hw
+  intro f hf
+  -- `f ∈ Bv` ⟺ `f = algMap (localRingAt P) x` for some `x`
+  obtain ⟨x, hx_eq⟩ := (SmoothPlaneCurve.mem_localRingAt_image_iff_pointValuation_le_one f).mpr
+    ((Valuation.mem_valuationSubring_iff _ f).mp hf)
+  -- write `x = mk' a s`, with `sv := (s : F[C₁])` avoiding the prime `m_P`
+  obtain ⟨a, s, hxas⟩ := IsLocalization.exists_mk'_eq
+    (C₁.maximalIdealAt P).primeCompl x
+  set sv : C₁.CoordinateRing := (s : C₁.CoordinateRing) with hsv
+  -- `sv ∉ m_P` (it is in the prime complement)
+  have hs_notin : sv ∉ C₁.maximalIdealAt P := Ideal.mem_primeCompl_iff.mp s.2
+  -- `algMap_CR sv ≠ 0` (`sv ≠ 0`, it avoids the prime)
+  have hs_ne : sv ≠ 0 := fun h => hs_notin (h ▸ Submodule.zero_mem _)
+  have hs_map_ne : algebraMap C₁.CoordinateRing C₁.FunctionField sv ≠ 0 :=
+    (map_ne_zero_iff _ (IsFractionRing.injective C₁.CoordinateRing C₁.FunctionField)).mpr hs_ne
+  -- `f = algMap_CR a / algMap_CR sv`, via `mk'_spec` pushed through `localRingAt P → FF`.
+  have hf_eq : f = algebraMap C₁.CoordinateRing C₁.FunctionField a /
+      algebraMap C₁.CoordinateRing C₁.FunctionField sv := by
+    rw [eq_div_iff hs_map_ne, ← hx_eq, ← hxas,
+      IsScalarTower.algebraMap_apply C₁.CoordinateRing (C₁.localRingAt P) C₁.FunctionField sv,
+      IsScalarTower.algebraMap_apply C₁.CoordinateRing (C₁.localRingAt P) C₁.FunctionField a,
+      ← map_mul]
+    congr 1
+    exact IsLocalization.mk'_spec (C₁.localRingAt P) a s
+  -- `w (algMap sv) = 1`: `sv ∉ maximalIdealAt P = c`, so `¬ (w (algMap sv) < 1)`, and `≤ 1`
+  have hws : w (algebraMap C₁.CoordinateRing C₁.FunctionField sv) = 1 := by
+    refine le_antisymm (valuation_algebraMap_coordinateRing_C₁_le_one v hx hy sv) ?_
+    by_contra hlt
+    rw [not_le] at hlt
+    have hsv_in_c : sv ∈ centerIdealOnC₁ v hx hy := (mem_centerIdealOnC₁ v hx hy sv).mpr hlt
+    exact hs_notin (hP ▸ hsv_in_c)
+  refine (Valuation.mem_valuationSubring_iff _ f).mpr ?_
+  rw [hf_eq, map_div₀ w, hws, div_one]
+  exact valuation_algebraMap_coordinateRing_C₁_le_one v hx hy a
+
 /-- **The point case of the place classification**: if a height-one prime `v` of `B` has
 `v`-valuation `≤ 1` on the two coordinate generators of `C₁`, then `v` is the point valuation
 `C₁.pointValuation P` at a smooth point `P` of `C₁`.  Here `[IsIntegrallyClosed C₁.CoordinateRing]`
@@ -451,119 +598,24 @@ theorem bPrime_valuation_eq_pointValuation_of_coordGen_le_one
   classical
   set w := v.valuation C₁.FunctionField with hw
   have hwsurj : Function.Surjective w := v.valuation_surjective C₁.FunctionField
-  set c : Ideal C₁.CoordinateRing := centerIdealOnC₁ v hx hy with hc_def
-  -- `c` is prime: `1 ∉ c` (`w 1 = 1`), and `w (algMap a)·w (algMap b) < 1` forces one factor `< 1`.
-  have hc_prime : c.IsPrime := by
-    refine ⟨?_, ?_⟩
-    · rw [Ideal.ne_top_iff_one, hc_def, mem_centerIdealOnC₁, map_one, map_one]
-      exact lt_irrefl 1
-    · intro a b hab
-      rw [hc_def, mem_centerIdealOnC₁, map_mul, (w).map_mul] at hab
-      by_contra h
-      push Not at h
-      obtain ⟨ha, hb⟩ := h
-      rw [hc_def, mem_centerIdealOnC₁, not_lt] at ha hb
-      have ha1 : w (algebraMap C₁.CoordinateRing C₁.FunctionField a) = 1 :=
-        le_antisymm (valuation_algebraMap_coordinateRing_C₁_le_one v hx hy a) ha
-      have hb1 : w (algebraMap C₁.CoordinateRing C₁.FunctionField b) = 1 :=
-        le_antisymm (valuation_algebraMap_coordinateRing_C₁_le_one v hx hy b) hb
-      rw [ha1, hb1, one_mul] at hab
-      exact lt_irrefl 1 hab
-  -- `c ≠ ⊥`: otherwise `w` is trivial (`w (algMap a) = 1` for all nonzero `a`, so `w f = 1` ∀ f).
-  have hc_ne_bot : c ≠ ⊥ := by
-    intro hc0
-    -- `c = ⊥` ⟹ every nonzero coordinate-ring element has `w (algMap ·) = 1`
-    have hunit : ∀ a : C₁.CoordinateRing, a ≠ 0 →
-        w (algebraMap C₁.CoordinateRing C₁.FunctionField a) = 1 := by
-      intro a ha0
-      refine le_antisymm (valuation_algebraMap_coordinateRing_C₁_le_one v hx hy a) ?_
-      by_contra hlt
-      rw [not_le] at hlt
-      exact ha0 ((Submodule.eq_bot_iff _).mp hc0 a
-        ((mem_centerIdealOnC₁ v hx hy a).mpr hlt))
-    -- pick `f` with `w f ≠ 1` (surjectivity onto `ℤᵐ⁰`), then derive `w f = 1` — contradiction
-    obtain ⟨f, hf⟩ := hwsurj (WithZero.exp (1 : ℤ))
-    have hf1 : w f ≠ 1 := by
-      rw [hf, show (1 : WithZero (Multiplicative ℤ)) = WithZero.exp (0 : ℤ) from
-        (WithZero.exp_zero).symm, Ne, WithZero.exp_inj]
-      norm_num
-    apply hf1
-    obtain ⟨a, b, hb_mem, hfab⟩ :=
-      IsFractionRing.div_surjective (A := C₁.CoordinateRing) f
-    have hb_ne : b ≠ 0 := nonZeroDivisors.ne_zero hb_mem
-    have hb_map_ne : algebraMap C₁.CoordinateRing C₁.FunctionField b ≠ 0 :=
-      (map_ne_zero_iff _ (IsFractionRing.injective C₁.CoordinateRing C₁.FunctionField)).mpr hb_ne
-    -- if `a = 0` then `f = 0`, but `w f = exp 1 ≠ 0`; so `a ≠ 0`
-    have ha_ne : a ≠ 0 := by
-      rintro rfl
-      rw [map_zero, zero_div] at hfab
-      rw [← hfab, map_zero] at hf
-      exact WithZero.exp_ne_zero hf.symm
-    rw [← hfab, map_div₀ w, hunit a ha_ne, hunit b hb_ne, div_one]
-  -- `c` is maximal: a nonzero prime in the Dedekind domain `F[C₁]`.
-  have hc_max : c.IsMaximal := hc_prime.isMaximal hc_ne_bot
-  obtain ⟨P, hP⟩ := C₁.exists_smoothPoint_of_isMaximal hc_max
+  -- The center `c = centerIdealOnC₁ v` is a nonzero prime, hence maximal, hence `m_P` at a point `P`.
+  obtain ⟨P, hP⟩ := C₁.exists_smoothPoint_of_isMaximal (centerIdealOnC₁_isMaximal v hx hy)
   refine ⟨P, ?_⟩
-  -- The two valuation subrings: `A := O_v`, `B' := O_{pointValuation P}`.
-  set A : ValuationSubring C₁.FunctionField := w.valuationSubring with hA
-  set Bv : ValuationSubring C₁.FunctionField := (C₁.pointValuation P).valuationSubring with hBv
-  -- `B'` is a DVR (rank-one): `pointValuation P` is surjective onto `ℤᵐ⁰`.
-  have hpvsurj : Function.Surjective (C₁.pointValuation P) :=
-    (IsDiscreteValuationRing.maximalIdeal (C₁.localRingAt P)).valuation_surjective C₁.FunctionField
-  haveI : IsDiscreteValuationRing Bv :=
-    valuationSubring_isDVR_of_surjective_withZeroInt _ hpvsurj
-  -- `Bv ⊆ A`: every `pointValuation P`-integer is a `v`-integer.
-  have hBA : Bv ≤ A := by
-    intro f hf
-    -- `f ∈ Bv` ⟺ `f = algMap (localRingAt P) x` for some `x`
-    obtain ⟨x, hx_eq⟩ := (SmoothPlaneCurve.mem_localRingAt_image_iff_pointValuation_le_one f).mpr
-      ((Valuation.mem_valuationSubring_iff _ f).mp hf)
-    -- write `x = mk' a s`, with `sv := (s : F[C₁])` avoiding the prime `m_P`
-    obtain ⟨a, s, hxas⟩ := IsLocalization.exists_mk'_eq
-      (C₁.maximalIdealAt P).primeCompl x
-    set sv : C₁.CoordinateRing := (s : C₁.CoordinateRing) with hsv
-    -- `sv ∉ m_P` (it is in the prime complement)
-    have hs_notin : sv ∉ C₁.maximalIdealAt P := Ideal.mem_primeCompl_iff.mp s.2
-    -- `algMap_CR sv ≠ 0` (`sv ≠ 0`, it avoids the prime)
-    have hs_ne : sv ≠ 0 := fun h => hs_notin (h ▸ Submodule.zero_mem _)
-    have hs_map_ne : algebraMap C₁.CoordinateRing C₁.FunctionField sv ≠ 0 :=
-      (map_ne_zero_iff _ (IsFractionRing.injective C₁.CoordinateRing C₁.FunctionField)).mpr hs_ne
-    -- `f = algMap_CR a / algMap_CR sv`, via `mk'_spec` pushed through `localRingAt P → FF`.
-    have hf_eq : f = algebraMap C₁.CoordinateRing C₁.FunctionField a /
-        algebraMap C₁.CoordinateRing C₁.FunctionField sv := by
-      rw [eq_div_iff hs_map_ne, ← hx_eq, ← hxas,
-        IsScalarTower.algebraMap_apply C₁.CoordinateRing (C₁.localRingAt P) C₁.FunctionField sv,
-        IsScalarTower.algebraMap_apply C₁.CoordinateRing (C₁.localRingAt P) C₁.FunctionField a,
-        ← map_mul]
-      congr 1
-      exact IsLocalization.mk'_spec (C₁.localRingAt P) a s
-    -- `w (algMap sv) = 1`: `sv ∉ maximalIdealAt P = c`, so `¬ (w (algMap sv) < 1)`, and `≤ 1`
-    have hws : w (algebraMap C₁.CoordinateRing C₁.FunctionField sv) = 1 := by
-      refine le_antisymm (valuation_algebraMap_coordinateRing_C₁_le_one v hx hy sv) ?_
-      by_contra hlt
-      rw [not_le] at hlt
-      have hsv_in_c : sv ∈ c := (mem_centerIdealOnC₁ v hx hy sv).mpr hlt
-      exact hs_notin (hP.symm ▸ hsv_in_c)
-    refine (Valuation.mem_valuationSubring_iff _ f).mpr ?_
-    rw [hf_eq, map_div₀ w, hws, div_one]
-    exact valuation_algebraMap_coordinateRing_C₁_le_one v hx hy a
-  -- `A ≠ ⊤`: `w = v.valuation` is nontrivial (surjective onto `ℤᵐ⁰`).
-  have hAtop : A ≠ ⊤ := by
-    have hNontriv : w.IsNontrivial := by
-      refine ⟨?_⟩
-      obtain ⟨z, hz⟩ := hwsurj (WithZero.exp (1 : ℤ))
-      refine ⟨z, ?_, ?_⟩
-      · rw [hz]; exact WithZero.exp_ne_zero
-      · rw [hz, show (1 : WithZero (Multiplicative ℤ)) = WithZero.exp (0 : ℤ) from
-          (WithZero.exp_zero).symm, Ne, WithZero.exp_inj]; norm_num
-    intro htop
-    rw [hA] at htop
-    exact (Valuation.valuationSubring_eq_top_iff _).mp htop hNontriv
-  -- DVR-domination: `Bv = A`, then upgrade the equal subrings to the value identity.
-  have hEq : Bv = A := rankOne_valuationSubring_le_eq_of_ne_top Bv A hBA hAtop
-  have h_isEquiv : w.IsEquiv (C₁.pointValuation P) := by
-    rw [Valuation.isEquiv_iff_valuationSubring]; rw [hA, hBv] at hEq; exact hEq.symm
-  exact Valuation.isEquiv_iff_eq_of_surjective_withZeroInt _ _ hwsurj hpvsurj h_isEquiv
+  -- `O_{pointValuation P}` is a rank-one DVR sitting inside the `v`-adic integers `O_v`.
+  haveI : IsDiscreteValuationRing (C₁.pointValuation P).valuationSubring :=
+    valuationSubring_isDVR_of_surjective_withZeroInt _
+      ((IsDiscreteValuationRing.maximalIdeal (C₁.localRingAt P)).valuation_surjective
+        C₁.FunctionField)
+  have hBA : (C₁.pointValuation P).valuationSubring ≤ w.valuationSubring :=
+    pointValuationSubring_le_valuationSubring v hx hy hP.symm
+  -- DVR-domination forces the subrings (`O_v ≠ ⊤` as `w` is nontrivial) and hence the valuations equal.
+  have hEq : (C₁.pointValuation P).valuationSubring = w.valuationSubring :=
+    rankOne_valuationSubring_le_eq_of_ne_top _ _ hBA
+      (valuationSubring_ne_top_of_surjective w hwsurj)
+  refine Valuation.isEquiv_iff_eq_of_surjective_withZeroInt _ _ hwsurj
+    ((IsDiscreteValuationRing.maximalIdeal (C₁.localRingAt P)).valuation_surjective
+      C₁.FunctionField) ?_
+  rw [Valuation.isEquiv_iff_valuationSubring]; exact hEq.symm
 
 /-! ### The ∞ case of the place classification (curve-completeness, infinity half)
 
@@ -597,19 +649,11 @@ theorem bPrime_valuation_eq_ordAtInfty_of_subring_le
   set w := v.valuation C₁.FunctionField with hw
   have hwsurj : Function.Surjective w := v.valuation_surjective C₁.FunctionField
   haveI : IsDiscreteValuationRing w.valuationSubring := valuationSubring_isDVR v
-  -- `O_∞ ≠ ⊤`: `ordAtInftyValuation` is nontrivial (surjective onto `ℤᵐ⁰`).
-  have hBtop : C₁.ordAtInftyValuation.valuationSubring ≠ ⊤ := by
-    have hNontriv : C₁.ordAtInftyValuation.IsNontrivial := by
-      refine ⟨?_⟩
-      obtain ⟨z, hz⟩ := C₁.ordAtInftyValuation_surjective (WithZero.exp (1 : ℤ))
-      refine ⟨z, ?_, ?_⟩
-      · rw [hz]; exact WithZero.exp_ne_zero
-      · rw [hz, show (1 : WithZero (Multiplicative ℤ)) = WithZero.exp (0 : ℤ) from
-          (WithZero.exp_zero).symm, Ne, WithZero.exp_inj]; norm_num
-    intro htop; exact (Valuation.valuationSubring_eq_top_iff _).mp htop hNontriv
-  -- DVR-domination: `O_v = O_∞`, then upgrade equal subrings to the value identity.
+  -- DVR-domination (`O_∞ ≠ ⊤`, as `ordAtInftyValuation` is surjective onto `ℤᵐ⁰`): `O_v = O_∞`,
+  -- then upgrade equal subrings to the value identity.
   have hEq : w.valuationSubring = C₁.ordAtInftyValuation.valuationSubring :=
-    rankOne_valuationSubring_le_eq_of_ne_top _ _ hsub hBtop
+    rankOne_valuationSubring_le_eq_of_ne_top _ _ hsub
+      (valuationSubring_ne_top_of_surjective _ C₁.ordAtInftyValuation_surjective)
   refine Valuation.isEquiv_iff_eq_of_surjective_withZeroInt _ _ hwsurj
     C₁.ordAtInftyValuation_surjective ?_
   rw [Valuation.isEquiv_iff_valuationSubring]; exact hEq
