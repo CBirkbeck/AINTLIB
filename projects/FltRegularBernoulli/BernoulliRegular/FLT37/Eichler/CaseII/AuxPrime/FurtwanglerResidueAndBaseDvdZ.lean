@@ -89,7 +89,7 @@ open NumberField
 
 namespace BernoulliRegular.FLT37.Eichler
 
-open FLT37 FLT37.LehmerVandiver.CaseII
+open FLT37.LehmerVandiver.CaseII
 
 /-! ## 1. The `decide`-able residue heart of Lemma 9.7 for `(37, 149)`
 
