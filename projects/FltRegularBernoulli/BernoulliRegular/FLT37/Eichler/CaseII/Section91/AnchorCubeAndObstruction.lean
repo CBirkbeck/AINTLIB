@@ -71,7 +71,7 @@ the anchor object: the conjugate-norm `ξ₁` is the proven `caseII_anchorPow_co
 
 noncomputable section
 
-open NumberField NumberField.IsCMField IsCyclotomicExtension UniqueFactorizationMonoid Polynomial
+open NumberField IsCyclotomicExtension UniqueFactorizationMonoid Polynomial
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -124,7 +124,7 @@ theorem caseII_span_x_add_y_eq_anchorCube {m : ℕ} (D : RealCaseIIData37 K m) (
         rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy D.etaZero ^ 37 * 𝔭 := by
     rw [← hmcp, hcspec]
   rw [hη0, mul_one, hgcd1, one_mul] at hbase
-  rw [hbase, ← ha0spec, mul_pow, ← pow_mul, show 37 * m = m * 37 from by ring]
+  rw [hbase, ← ha0spec, mul_pow, ← pow_mul, show 37 * m = m * 37 by ring]
   ring
 
 /-! ## 2. The real prime `λ` spans `𝔭²` -/
@@ -148,7 +148,7 @@ theorem caseII_span_lambda_eq_p_sq {ζ ζ' : K} (hζ : IsPrimitiveRoot ζ 37)
     hζ'.toInteger_isPrimitiveRoot.mem_nthRootsFinset (by decide : 0 < 37)
   have hmem36 : (hζ'.toInteger ^ 36) ∈ nthRootsFinset 37 (1 : 𝓞 K) := by
     rw [mem_nthRootsFinset (by norm_num)]
-    rw [← pow_mul, show 36 * 37 = 37 * 36 from by norm_num, pow_mul,
+    rw [← pow_mul, show 36 * 37 = 37 * 36 by norm_num, pow_mul,
       hζ'.toInteger_isPrimitiveRoot.pow_eq_one, one_pow]
   -- `1 − ζ'` and `1 − ζ'³⁶` are associates of `ζ − 1`.
   have h1 : Associated (hζ.toInteger - 1 : 𝓞 K) (1 - hζ'.toInteger) := by
@@ -275,8 +275,8 @@ theorem caseII_genuineUnit_anchor_span_z_eq_anchorSq {m : ℕ} (D : RealCaseIIDa
   -- combine, cancel the common `𝔭^{2(37m+1)}`, strip the `37`-th power.
   rw [hu0span, one_mul, hxyspan, hlam_span, ← pow_mul] at hspan_sq
   -- LHS `(𝔭^{37m+1}·𝔞₀³⁷)² = 𝔭^{2(37m+1)}·𝔞₀^{74}`; RHS `𝔭^{2·(2e)}·span(z')³⁷ = 𝔭^{2(37m+1)}·…`.
-  rw [mul_pow, ← pow_mul, ← pow_mul, show 2 * (2 * e) = 2 * (37 * m + 1) from by omega,
-    show 37 * 2 = 2 * 37 from by ring] at hspan_sq
+  rw [mul_pow, ← pow_mul, ← pow_mul, show 2 * (2 * e) = 2 * (37 * m + 1) by omega,
+    show 37 * 2 = 2 * 37 by ring] at hspan_sq
   -- cancel `𝔭^{2(37m+1)}` (nonzero).
   have hp_ne : 𝔭 ^ (2 * (37 * m + 1)) ≠ 0 := by
     apply pow_ne_zero; rw [h𝔭, Ne, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]
@@ -284,7 +284,7 @@ theorem caseII_genuineUnit_anchor_span_z_eq_anchorSq {m : ℕ} (D : RealCaseIIDa
   have hcancel : 𝔞₀ ^ (2 * 37) = Ideal.span ({z'} : Set (𝓞 K)) ^ 37 := by
     have h : 𝔭 ^ (2 * (37 * m + 1)) * 𝔞₀ ^ (2 * 37) =
         𝔭 ^ (2 * (37 * m + 1)) * Ideal.span ({z'} : Set (𝓞 K)) ^ 37 := by
-      rw [← hspan_sq, show (37 * m + 1) * 2 = 2 * (37 * m + 1) from by ring]
+      rw [← hspan_sq, show (37 * m + 1) * 2 = 2 * (37 * m + 1) by ring]
     exact mul_right_injective₀ hp_ne h
   -- `(𝔞₀²)³⁷ = span(z')³⁷`, strip the `37`.
   have hcube : (𝔞₀ ^ 2) ^ 37 = Ideal.span ({z'} : Set (𝓞 K)) ^ 37 := by
