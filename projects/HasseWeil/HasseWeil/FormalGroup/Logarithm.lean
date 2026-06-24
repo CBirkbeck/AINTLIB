@@ -589,6 +589,67 @@ theorem coeff_subst_add_monomial (f g : PowerSeries R) (n : ℕ) (c : R)
 /-! ### The core invariant and the compositional-inverse identity -/
 
 open PowerSeries in
+/-- Base case of the core invariant: the zeroth coefficient of `subst 0 f`
+vanishes when `f` has zero constant coefficient (`compInvTrunc f 0 = 0`, so the
+substitution is into the zero series). -/
+private theorem coeff_zero_subst_zero_eq_zero (f : PowerSeries R)
+    (h0 : @PowerSeries.constantCoeff R _ f = 0) :
+    PowerSeries.coeff 0 (PowerSeries.subst (0 : PowerSeries R) f) = 0 := by
+  have hz : @PowerSeries.constantCoeff R _ (0 : PowerSeries R) = 0 := by simp
+  have hmv : MvPowerSeries.constantCoeff (PowerSeries.subst (0 : PowerSeries R) f) = 0 :=
+    PowerSeries.constantCoeff_subst_eq_zero hz f h0
+  rw [PowerSeries.coeff_zero_eq_constantCoeff_apply]
+  exact hmv
+
+open PowerSeries in
+/-- Stabilisation step of the core invariant: for `k ≤ n`, passing from
+`compInvTrunc f n` to `compInvTrunc f (n+1)` does not change the `k`-th
+coefficient of the substitution `subst · f`, because the two truncations agree
+up to degree `n` (`coeff_compInvTrunc_succ_of_le`) and substitution preserves
+agreement up to a fixed degree (`coeff_subst_eq_of_coeff_eq`). -/
+private theorem coeff_subst_compInvTrunc_succ_of_le (f : PowerSeries R) (n k : ℕ)
+    (hk : k ≤ n) :
+    PowerSeries.coeff k (PowerSeries.subst (compInvTrunc f (n + 1)) f) =
+      PowerSeries.coeff k (PowerSeries.subst (compInvTrunc f n) f) := by
+  have hstab : ∀ j ≤ n,
+      PowerSeries.coeff j (compInvTrunc f (n + 1)) =
+        PowerSeries.coeff j (compInvTrunc f n) :=
+    fun j hj ↦ coeff_compInvTrunc_succ_of_le f n j hj
+  exact coeff_subst_eq_of_coeff_eq f _ _
+    (compInvTrunc_constantCoeff f (n + 1))
+    (compInvTrunc_constantCoeff f n)
+    n hstab k hk
+
+open PowerSeries in
+/-- Top-degree step of the core invariant: the `(n+1)`-th coefficient of
+`subst (compInvTrunc f (n+1)) f` equals the Kronecker delta `[n+1 = 1]` when
+`coeff 1 f = 1`. The `(n+1)`-th truncation adds a monomial `C c * X^(n+1)` whose
+correction coefficient `c` is chosen precisely so the new top coefficient hits
+the target value (`coeff_subst_add_monomial` evaluates the resulting shift). -/
+private theorem coeff_succ_subst_compInvTrunc_succ_eq (f : PowerSeries R)
+    (h1 : PowerSeries.coeff 1 f = 1) (n : ℕ) :
+    PowerSeries.coeff (n + 1) (PowerSeries.subst (compInvTrunc f (n + 1)) f) =
+      (if n + 1 = 1 then 1 else 0) := by
+  set prev := compInvTrunc f n with hprev
+  set prev' := PowerSeries.subst prev f with hprev'
+  -- Unfold: compInvTrunc f (n+1) = compInvTrunc f n + C c * X^(n+1).
+  have hunfold : compInvTrunc f (n + 1) = prev +
+      PowerSeries.C (if n + 1 = 1 then 1 - PowerSeries.coeff 1 prev'
+        else -PowerSeries.coeff (n + 1) prev') *
+          PowerSeries.X ^ (n + 1) := rfl
+  rw [hunfold, coeff_subst_add_monomial f prev n _ (compInvTrunc_constantCoeff f n),
+    h1, mul_one]
+  -- Goal: coeff (n+1) prev' + (if n+1=1 then 1 - coeff 1 prev' else -coeff (n+1) prev')
+  --     = if n+1=1 then 1 else 0
+  split_ifs with hn1
+  · -- n + 1 = 1, so n = 0. Goal: coeff 1 prev' + (1 - coeff 1 prev') = 1.
+    have hn : n = 0 := by omega
+    subst hn
+    ring
+  · -- n + 1 ≠ 1. Goal: coeff (n+1) prev' + (-coeff (n+1) prev') = 0.
+    ring
+
+open PowerSeries in
 /-- **Core invariant**: for `k ≤ n`, the `k`-th coefficient of the
 substitution `subst (compInvTrunc f n) f` equals the Kronecker delta `[k = 1]`,
 assuming `constantCoeff f = 0` and `coeff 1 f = 1`.
@@ -604,62 +665,20 @@ theorem compInvTrunc_subst_coeff_eq (f : PowerSeries R)
       (if k = 1 then 1 else 0) := by
   induction n with
   | zero =>
-    -- k ≤ 0 means k = 0.
-    have hk0 : k = 0 := Nat.le_zero.mp hk
-    subst hk0
-    simp only [compInvTrunc_zero]
-    -- coeff 0 (subst 0 f) = constantCoeff (subst 0 f) = 0.
-    have : PowerSeries.coeff 0 (PowerSeries.subst (0 : PowerSeries R) f) = 0 := by
-      have hz : @PowerSeries.constantCoeff R _ (0 : PowerSeries R) = 0 := by simp
-      have hmv : MvPowerSeries.constantCoeff (PowerSeries.subst (0 : PowerSeries R) f) = 0 :=
-        PowerSeries.constantCoeff_subst_eq_zero hz f h0
-      rw [PowerSeries.coeff_zero_eq_constantCoeff_apply]
-      exact hmv
-    rw [this]
+    -- k ≤ 0 means k = 0; reduce to the base-case helper.
+    obtain rfl : k = 0 := Nat.le_zero.mp hk
+    rw [compInvTrunc_zero, coeff_zero_subst_zero_eq_zero f h0]
     simp
   | succ n ih =>
     -- Case split on whether k ≤ n or k = n + 1.
     rcases Nat.lt_or_ge k (n + 1) with hk' | hk'
-    · -- k ≤ n: use substitution stabilization + ih.
+    · -- k ≤ n: stabilisation reduces to the inductive hypothesis.
       have hk'' : k ≤ n := Nat.lt_succ_iff.mp hk'
-      -- coeff k (subst (compInvTrunc f (n+1)) f) = coeff k (subst (compInvTrunc f n) f)
-      -- by coeff_subst_eq_of_coeff_eq since compInvTrunc f (n+1) and compInvTrunc f n
-      -- agree up to degree n.
-      have hstab : ∀ j ≤ n,
-          PowerSeries.coeff j (compInvTrunc f (n + 1)) =
-            PowerSeries.coeff j (compInvTrunc f n) := by
-        intro j hj
-        exact coeff_compInvTrunc_succ_of_le f n j hj
-      rw [coeff_subst_eq_of_coeff_eq f _ _
-            (compInvTrunc_constantCoeff f (n + 1))
-            (compInvTrunc_constantCoeff f n)
-            n hstab k hk'']
+      rw [coeff_subst_compInvTrunc_succ_of_le f n k hk'']
       exact ih hk''
-    · -- k = n + 1.
-      have hk_eq : k = n + 1 := le_antisymm hk hk'
-      subst hk_eq
-      -- Unfold: compInvTrunc f (n+1) = compInvTrunc f n + C c * X^(n+1).
-      -- Use coeff_subst_add_monomial.
-      set prev := compInvTrunc f n with hprev
-      set prev' := PowerSeries.subst prev f with hprev'
-      have hunfold : compInvTrunc f (n + 1) = prev +
-          PowerSeries.C (if n + 1 = 1 then 1 - PowerSeries.coeff 1 prev'
-            else -PowerSeries.coeff (n + 1) prev') *
-              PowerSeries.X ^ (n + 1) := rfl
-      rw [hunfold]
-      rw [coeff_subst_add_monomial f prev n _
-            (compInvTrunc_constantCoeff f n)]
-      rw [h1, mul_one]
-      -- Goal: coeff (n+1) prev' + (if n+1=1 then 1 - coeff 1 prev' else -coeff (n+1) prev')
-      --     = if n+1=1 then 1 else 0
-      split_ifs with hn1
-      · -- n + 1 = 1, so n = 0. Goal: coeff (n+1) + (1 - coeff 1 prev') = 1.
-        -- With n = 0: coeff 1 + (1 - coeff 1) = 1.
-        have hn : n = 0 := by omega
-        subst hn
-        ring
-      · -- n + 1 ≠ 1. Goal: coeff (n+1) + (-coeff (n+1)) = 0.
-        ring
+    · -- k = n + 1: the top-degree helper hits the target value.
+      obtain rfl : k = n + 1 := le_antisymm hk hk'
+      exact coeff_succ_subst_compInvTrunc_succ_eq f h1 n
 
 open PowerSeries in
 /-- **Main result** (T-IV-5-002, T-IV-5-003 core): `compInverse f` is a true
