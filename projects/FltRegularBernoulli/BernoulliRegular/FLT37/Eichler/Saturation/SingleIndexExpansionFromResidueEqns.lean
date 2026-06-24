@@ -102,8 +102,6 @@ property of an arbitrary unit.  They are **sound** (implied by Assumption II its
 
 noncomputable section
 
-open NumberField
-
 namespace BernoulliRegular.FLT37.Eichler
 
 /-! ## The single-index expansion from the bare residue equations
