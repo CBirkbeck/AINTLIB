@@ -165,8 +165,8 @@ theorem caseIIConjugateResidue_regular_components_zero
   have hzero : caseIIConjugateResidue_regularPart c = 0 :=
     caseIIThm95_coeff_collapse_even (caseIIConjugateResidue_regularPart c) h_residue
   intro j hj
-  have := congrFun hzero j
-  rwa [caseIIConjugateResidue_regularPart, if_neg hj, Pi.zero_apply] at this
+  simpa only [caseIIConjugateResidue_regularPart, if_neg hj, Pi.zero_apply] using
+    congrFun hzero j
 
 /-! ## 3. The collapse to `ω^{32}`-eigenspace membership
 
