@@ -85,7 +85,6 @@ private theorem finiteLog_mem_Q_pow_succ_of_order {N s : ℕ}
     fun n => F.finiteLogTerm N n y hy
   let tailSet : Finset ℕ := (Finset.range (finiteLogCutoff (ℓ := ℓ) N)).erase 1
   let tail : 𝓞 R' ⧸ F.Q ^ (N + 1) := ∑ n ∈ tailSet, terms n
-  have hN2 : 2 ≤ N := hs2.trans hsN
   have hcut_one : 1 < finiteLogCutoff (ℓ := ℓ) N := by
     have hell_two : 2 ≤ ℓ := (Fact.out : Nat.Prime ℓ).two_le
     have hNthree : 3 ≤ N + 1 := by omega
