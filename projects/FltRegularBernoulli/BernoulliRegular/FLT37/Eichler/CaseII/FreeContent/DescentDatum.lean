@@ -71,7 +71,6 @@ It imports only; it does **not** modify any existing file.  No `sorry`, no `axio
 noncomputable section
 
 open NumberField NumberField.IsCMField IsCyclotomicExtension UniqueFactorizationMonoid Polynomial
-open scoped nonZeroDivisors
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -245,12 +244,12 @@ theorem caseIIFree_correctedRadical_complexConj (_hp : (37 : ℕ) ≠ 2) :
     rw [← NumberField.IsCMField.coe_ringOfIntegersComplexConj]
     congr 1
     have h36 : (D.hζ.toInteger ^ 36) ^ 37 = 1 := by
-      rw [← pow_mul, show 36 * 37 = 37 * 36 from by norm_num, pow_mul, h37, one_pow]
+      rw [← pow_mul, show 36 * 37 = 37 * 36 by norm_num, pow_mul, h37, one_pow]
     have h := caseII_ringOfIntegersComplexConj_x_add_y_mul (K := K) D.x_real D.y_real
       (D.hζ.toInteger ^ 36)
     rw [caseII_ringOfIntegersComplexConj_root_of_unity h36] at h
     rw [h]; congr 2
-    rw [← pow_mul, show (36 * 36 : ℕ) = 37 * 35 + 1 from by norm_num, pow_add, pow_mul, h37,
+    rw [← pow_mul, show (36 * 36 : ℕ) = 37 * 35 + 1 by norm_num, pow_add, pow_mul, h37,
       one_pow, pow_one, one_mul]
   -- `σ(−ζ) = (−ζ)⁻¹` as elements of `K`: `σ(−ζ) = −ζ³⁶` and `(−ζ)⁻¹ = −ζ³⁶` (since
   -- `(−ζ)·(−ζ³⁶) = ζ³⁷ = 1`).
@@ -268,7 +267,7 @@ theorem caseIIFree_correctedRadical_complexConj (_hp : (37 : ℕ) ≠ 2) :
     have hval : algebraMap (𝓞 K) K (-(D.hζ.toInteger)) *
         algebraMap (𝓞 K) K (-(D.hζ.toInteger ^ 36)) = 1 := by
       rw [← map_mul,
-        show (-(D.hζ.toInteger)) * (-(D.hζ.toInteger ^ 36)) = D.hζ.toInteger ^ 37 from by ring,
+        show (-(D.hζ.toInteger)) * (-(D.hζ.toInteger ^ 36)) = D.hζ.toInteger ^ 37 by ring,
         h37, map_one]
     have hζ_ne : D.hζ.toInteger ≠ 0 :=
       (D.hζ.toInteger_isPrimitiveRoot.isUnit (by decide : (37 : ℕ) ≠ 0)).ne_zero
@@ -317,7 +316,7 @@ theorem caseIIFree_correctedRadical_sub_one_mul :
       algebraMap (𝓞 K) K (-(D.hζ.toInteger ^ 36)) := by
     refine inv_eq_of_mul_eq_one_left ?_
     rw [← map_mul,
-      show (-(D.hζ.toInteger ^ 36)) * (-(D.hζ.toInteger)) = D.hζ.toInteger ^ 37 from by ring,
+      show (-(D.hζ.toInteger ^ 36)) * (-(D.hζ.toInteger)) = D.hζ.toInteger ^ 37 by ring,
       h37, map_one]
   have h37K : (algebraMap (𝓞 K) K D.hζ.toInteger) ^ 37 = 1 := by
     rw [← map_pow, h37, map_one]
@@ -372,7 +371,7 @@ theorem caseIIFree_correctedRadical_unit_primary
   have hcancel : ((αU : 𝓞 K) - 1) * c =
       π ^ 2 * ((-(D.hζ.toInteger ^ 36)) * (w * (1 + D.hζ.toInteger))) := by
     have h := hfield_OK'
-    rw [show ((αU : 𝓞 K) - 1) * (π * c) = π * (((αU : 𝓞 K) - 1) * c) from by ring] at h
+    rw [show ((αU : 𝓞 K) - 1) * (π * c) = π * (((αU : 𝓞 K) - 1) * c) by ring] at h
     exact mul_left_cancel₀ hπ_ne h
   -- `π² ∣ (αU−1)·c`; `π` prime, `¬π∣c` ⟹ `π² ∣ αU−1`.
   have hdvd_n : π ^ 2 ∣ ((αU : 𝓞 K) - 1) * c := ⟨_, hcancel⟩
