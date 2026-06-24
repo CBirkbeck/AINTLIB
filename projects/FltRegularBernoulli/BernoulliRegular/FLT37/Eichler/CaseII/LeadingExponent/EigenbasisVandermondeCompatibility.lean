@@ -61,11 +61,9 @@ and `c_{17} = 0` is automatic.  This is the eigenbasis ↔ Dwork-log Vandermonde
 
 noncomputable section
 
-open NumberField BigOperators
-
 namespace BernoulliRegular.FLT37.Eichler
 
-open BernoulliRegular (CPlusGenerator CPlusExponentProduct CPlusGeneratorIndex)
+open BernoulliRegular (CPlusGenerator)
 open BernoulliRegular.CyclotomicUnits
 
 /-! ## 1. The change-of-basis relation (★)
@@ -132,7 +130,7 @@ theorem caseIIEx811Eigen_eigenvector_eq_smul_genImg
       ∑ a : Fin ((37 - 3) / 2),
         ((((a : ℕ) + 2 : ℕ) : ZMod 37) ^ (34 - 2 * (j' : ℕ))) • genImg a := by
     rw [show (2 : ZMod 37) • caseIIConjugateResidue_eigenvector j' =
-          (2 : ℕ) • caseIIConjugateResidue_eigenvector j' from by
+          (2 : ℕ) • caseIIConjugateResidue_eigenvector j' by
         rw [← Nat.cast_smul_eq_nsmul (ZMod 37)]; norm_num]
     rw [show ((2 : ℕ) • caseIIConjugateResidue_eigenvector j' :
           CyclotomicUnitFreePartModP (p := 37) (CyclotomicField 37 ℚ)) =
@@ -236,7 +234,7 @@ theorem caseIIEx811Eigen_exponent_eq
   have heq0 : ∑ b : Fin ((37 - 3) / 2), (f b - h b) • genImg b = 0 := by
     rw [show (∑ b : Fin ((37 - 3) / 2), (f b - h b) • genImg b) =
         (∑ b : Fin ((37 - 3) / 2), f b • genImg b) -
-          ∑ b : Fin ((37 - 3) / 2), h b • genImg b from by
+          ∑ b : Fin ((37 - 3) / 2), h b • genImg b by
       rw [← Finset.sum_sub_distrib]
       exact Finset.sum_congr rfl (fun b _ ↦ sub_smul (f b) (h b) (genImg b))]
     rw [← hx1, ← hx2, sub_self]
@@ -305,7 +303,7 @@ theorem caseIIEx811Eigen_matrix_diagonal :
   have h2 : (2 : ZMod 37) ≠ 0 := by decide
   by_cases h : (m : ℕ) = (m' : ℕ)
   · rw [if_pos h, if_pos h]
-    rw [show (18 : ZMod 37) = 2 * 9 from by decide, ← mul_assoc, inv_mul_cancel₀ h2, one_mul]
+    rw [show (18 : ZMod 37) = 2 * 9 by decide, ← mul_assoc, inv_mul_cancel₀ h2, one_mul]
   · rw [if_neg h, if_neg h, mul_zero]
 
 /-- **The two-Vandermonde collapse** (proven, axiom-clean): the canonical eigencoordinate of
@@ -335,7 +333,7 @@ theorem caseIIEx811Eigen_vandermonde_eq_nine_smul
         (fun a : Fin ((37 - 3) / 2) ↦ (e a : ZMod 37)) j =
       ∑ a : Fin ((37 - 3) / 2),
         (((((a : ℕ) + 2 : ℕ) : ZMod 37) ^ 2) ^ ((j : ℕ) + 1) - 1) * ((e a : ℤ) : ZMod 37)
-      from by
+      by
         rw [Matrix.mulVec]
         simp only [dotProduct, vandermondeTeichmullerEvenSubOneMatrix, teichmullerEvenNode,
           kummerLogColumnIndex, BernoulliRegular.CPlusGeneratorIndex]]
@@ -356,7 +354,7 @@ theorem caseIIEx811Eigen_vandermonde_eq_nine_smul
         (∑ a : Fin ((37 - 3) / 2),
           (((((a : ℕ) + 2 : ℕ) : ZMod 37) ^ 2) ^ ((j : ℕ) + 1) - 1) *
             ((2 : ZMod 37)⁻¹ * (((a : ℕ) + 2 : ℕ) : ZMod 37) ^ (34 - 2 * (j' : ℕ))))
-      from by
+      by
         rw [show (∑ a : Fin ((37 - 3) / 2),
               (((((a : ℕ) + 2 : ℕ) : ZMod 37) ^ 2) ^ ((j : ℕ) + 1) - 1) *
                 ∑ j' : Fin 18, c j' *
@@ -374,7 +372,7 @@ theorem caseIIEx811Eigen_vandermonde_eq_nine_smul
   have hj17 : (j : ℕ) < 17 := j.isLt
   rw [Fin.sum_univ_castSucc]
   -- the last term j' = Fin.last 17 has c (Fin.last 17) = c 17 = 0.
-  rw [show c (Fin.last 17) = 0 from by
+  rw [show c (Fin.last 17) = 0 by
     rw [hc]
     have : (Fin.last 17 : Fin 18) = (17 : Fin 18) := by decide
     rw [this]; exact caseIIResidueProvenance_decomp_principal_zero _]
@@ -394,7 +392,7 @@ theorem caseIIEx811Eigen_vandermonde_eq_nine_smul
   rw [Finset.sum_eq_single (⟨(j : ℕ), hj17⟩ : Fin 17)]
   · rw [if_pos rfl]
     rw [show (Fin.castSucc (⟨(j : ℕ), hj17⟩ : Fin 17) : Fin 18) =
-        (⟨(j : ℕ), by omega⟩ : Fin 18) from by
+        (⟨(j : ℕ), by omega⟩ : Fin 18) by
       apply Fin.ext; rw [Fin.val_castSucc]]
     ring
   · intro k _ hk
