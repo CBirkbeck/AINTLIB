@@ -4,9 +4,6 @@ import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative.Dir
 
 noncomputable section
 
-open Real Complex
-open scoped NumberField
-
 namespace BernoulliRegular
 
 namespace FLT37
@@ -173,8 +170,7 @@ theorem characterMatrix_mul_convolutionMatrix_apply
       ∑ a : (ZMod p)ˣ, χ (((a * b⁻¹ : (ZMod p)ˣ) : ZMod p)) * f a := by
     apply (Fintype.sum_equiv (Equiv.mulRight b⁻¹) _ _ _).symm
     intro a
-    rw [Equiv.coe_mulRight]
-    rw [mul_assoc, inv_mul_cancel, mul_one]
+    rw [Equiv.coe_mulRight, mul_assoc, inv_mul_cancel, mul_one]
   rw [h_reindex]
   -- Each summand factors: χ((a·b⁻¹).val) · f a = χ(b⁻¹.val) · (χ(a.val) · f a).
   have h_factor : ∀ a : (ZMod p)ˣ,
@@ -183,8 +179,7 @@ theorem characterMatrix_mul_convolutionMatrix_apply
     intro a
     rw [Units.val_mul, map_mul]
     ring
-  rw [Finset.sum_congr rfl (fun a _ ↦ h_factor a)]
-  rw [← Finset.mul_sum]
+  rw [Finset.sum_congr rfl (fun a _ ↦ h_factor a), ← Finset.mul_sum]
 
 /-- **Inverse character matrix**: the `(p-1) × (p-1)` matrix with rows
 indexed by Dirichlet characters and columns by units, with entries
@@ -211,8 +206,7 @@ theorem characterMatrix_mul_convolutionMatrix_eq_diag_mul_inverseCharacterMatrix
       inverseCharacterMatrix p := by
   letI : DecidableEq (DirichletCharacter ℂ p) := Classical.decEq _
   ext χ b
-  rw [characterMatrix_mul_convolutionMatrix_apply]
-  rw [Matrix.mul_apply]
+  rw [characterMatrix_mul_convolutionMatrix_apply, Matrix.mul_apply]
   change χ ((b⁻¹ : (ZMod p)ˣ) : ZMod p) *
       ∑ a : (ZMod p)ˣ, χ ((a : ZMod p)) * f a =
     ∑ ψ : DirichletCharacter ℂ p,
@@ -276,8 +270,7 @@ theorem characterMatrixSquare_mul_convolutionMatrix_eq_diag_mul_inverseCharacter
       inverseCharacterMatrixSquare p := by
   classical
   ext k b
-  rw [characterMatrixSquare_mul_convolutionMatrix_apply]
-  rw [Matrix.mul_apply]
+  rw [characterMatrixSquare_mul_convolutionMatrix_apply, Matrix.mul_apply]
   simp only [inverseCharacterMatrixSquare, Matrix.of_apply]
   -- The RHS sum has support only at j = k due to the diagonal.
   have h_rhs : ∑ j : (ZMod p)ˣ,
@@ -332,10 +325,9 @@ theorem inverseCharacterMatrixSquare_eq_submatrix :
 theorem det_inverseCharacterMatrixSquare_sq_eq_det_characterMatrixSquare_sq :
     (inverseCharacterMatrixSquare p).det ^ 2 =
       (characterMatrixSquare p).det ^ 2 := by
-  rw [inverseCharacterMatrixSquare_eq_submatrix]
-  rw [Matrix.det_permute' (Equiv.inv (ZMod p)ˣ) (characterMatrixSquare p)]
-  rw [mul_pow]
-  rw [show ((↑↑(Equiv.Perm.sign (Equiv.inv (ZMod p)ˣ)) : ℂ)) ^ 2 = 1 from ?_]
+  rw [inverseCharacterMatrixSquare_eq_submatrix,
+    Matrix.det_permute' (Equiv.inv (ZMod p)ˣ) (characterMatrixSquare p), mul_pow,
+    show ((↑↑(Equiv.Perm.sign (Equiv.inv (ZMod p)ˣ)) : ℂ)) ^ 2 = 1 from ?_]
   · ring
   · have h_sign : (Equiv.Perm.sign (Equiv.inv (ZMod p)ˣ)) ^ 2 = 1 :=
       Int.units_pow_two _
@@ -368,8 +360,8 @@ theorem det_convolutionMatrix_sq_eq_prod_lambda_sq
           ((dirichletCharEquivUnits p).symm k) ((a : ZMod p)) * f a) *
       (inverseCharacterMatrixSquare p).det) ^ 2 := by
     rw [h_det]
-  rw [mul_pow, mul_pow] at h_det_sq
-  rw [det_inverseCharacterMatrixSquare_sq_eq_det_characterMatrixSquare_sq] at h_det_sq
+  rw [mul_pow, mul_pow,
+    det_inverseCharacterMatrixSquare_sq_eq_det_characterMatrixSquare_sq] at h_det_sq
   -- h_det_sq : det(F)² · det(M)² = (∏ λ_k)² · det(F)²
   -- Divide by det(F)² (nonzero).
   have h_det_F_sq_ne : (characterMatrixSquare p).det ^ 2 ≠ 0 := pow_ne_zero _ h_det_F_ne
@@ -382,27 +374,23 @@ theorem det_convolutionMatrix_sq_eq_prod_lambda_sq
     linear_combination h_det_sq
   exact (mul_left_cancel₀ h_det_F_sq_ne h_mul_cancel)
 
-/-- **Helper**: for a Dirichlet character ψ mod p, the sum over units of
-ψ at the unit cast to `ZMod p` equals the sum over all of `ZMod p` of ψ.
-
-This is because `ψ(0) = 0` (mathlib's `MulChar.map_zero`) and the units
-of `ZMod p` (for p prime) correspond bijectively to the non-zero elements
-of `ZMod p`. -/
-private theorem mulChar_sum_units_eq_sum_all (ψ : DirichletCharacter ℂ p) :
-    ∑ a : (ZMod p)ˣ, ψ ((a : ZMod p)) = ∑ a : ZMod p, ψ a := by
+/-- **Helper**: for a function `g : ZMod p → ℂ` vanishing at `0`, the sum
+over units of `g` at the unit cast to `ZMod p` equals the sum over all of
+`ZMod p`. The units of `ZMod p` (for `p` prime) correspond bijectively to
+the non-zero elements of `ZMod p`, and the `0` term drops by `g 0 = 0`. -/
+private theorem sum_units_eq_sum_zmod (g : ZMod p → ℂ) (h0 : g 0 = 0) :
+    ∑ a : (ZMod p)ˣ, g ((a : ZMod p)) = ∑ a : ZMod p, g a := by
   classical
-  -- Bridge via Finset.sum_attach style:
-  -- ∑ a : ZMod p, ψ a = (a=0 term ψ 0 = 0) + ∑_{a ≠ 0} ψ a
-  --                  = ∑_{a ∈ Finset.univ.erase 0}, ψ a
-  --                  = ∑_a : (ZMod p)ˣ, ψ ((a : ZMod p))   (bijection)
-  rw [← Finset.sum_erase_add _ _ (Finset.mem_univ (0 : ZMod p))]
-  rw [ψ.map_zero, add_zero]
-  -- Goal: ∑ a : (ZMod p)ˣ, ψ ((a : ZMod p)) = ∑ a ∈ Finset.univ.erase 0, ψ a
+  -- ∑ a : ZMod p, g a = (a=0 term g 0 = 0) + ∑_{a ≠ 0} g a
+  --                  = ∑_{a ∈ Finset.univ.erase 0}, g a
+  --                  = ∑_a : (ZMod p)ˣ, g ((a : ZMod p))   (bijection)
+  rw [← Finset.sum_erase_add _ _ (Finset.mem_univ (0 : ZMod p)), h0, add_zero]
+  -- Goal: ∑ a : (ZMod p)ˣ, g ((a : ZMod p)) = ∑ a ∈ Finset.univ.erase 0, g a
   refine Finset.sum_bij (fun (a : (ZMod p)ˣ) _ ↦ (a : ZMod p)) ?_ ?_ ?_ ?_
   · -- mem: a unit, (a : ZMod p) ≠ 0
     intro a _
     rw [Finset.mem_erase]
-    refine ⟨a.isUnit.ne_zero, Finset.mem_univ _⟩
+    exact ⟨a.isUnit.ne_zero, Finset.mem_univ _⟩
   · -- inj
     intro a₁ _ a₂ _ h
     exact Units.ext h
@@ -415,8 +403,7 @@ private theorem mulChar_sum_units_eq_sum_all (ψ : DirichletCharacter ℂ p) :
     have h_b_val_lt : b.val < p := ZMod.val_lt b
     have hp_prime : Nat.Prime p := hp.out
     have h_coprime : Nat.Coprime b.val p := by
-      rw [Nat.coprime_comm]
-      rw [hp_prime.coprime_iff_not_dvd]
+      rw [Nat.coprime_comm, hp_prime.coprime_iff_not_dvd]
       intro h_dvd
       exact absurd (Nat.le_of_dvd (Nat.pos_of_ne_zero h_b_val_ne) h_dvd) (by omega)
     refine ⟨ZMod.unitOfCoprime b.val h_coprime, Finset.mem_univ _, ?_⟩
@@ -424,6 +411,13 @@ private theorem mulChar_sum_units_eq_sum_all (ψ : DirichletCharacter ℂ p) :
     rw [ZMod.coe_unitOfCoprime]
     exact ZMod.natCast_zmod_val b
   · intro a _; rfl
+
+/-- **Helper**: for a Dirichlet character ψ mod p, the sum over units of
+ψ at the unit cast to `ZMod p` equals the sum over all of `ZMod p` of ψ.
+Specialisation of `sum_units_eq_sum_zmod` to `g = ψ`, using `ψ 0 = 0`. -/
+private theorem mulChar_sum_units_eq_sum_all (ψ : DirichletCharacter ℂ p) :
+    ∑ a : (ZMod p)ˣ, ψ ((a : ZMod p)) = ∑ a : ZMod p, ψ a :=
+  sum_units_eq_sum_zmod p (fun a ↦ ψ a) ψ.map_zero
 
 /-- **Character orthogonality at the matrix level**:
 `characterMatrixSquare · inverseCharacterMatrixSquareᵀ = (p-1) · 1`,
@@ -496,7 +490,6 @@ theorem det_characterMatrixSquare_ne_zero (hp_two : 2 ≤ p) :
   -- h_det_orth : 0 = det((p-1) • 1)
   rw [Matrix.det_smul, Matrix.det_one, mul_one] at h_det_orth
   -- h_det_orth : 0 = ((p-1 : ℕ) : ℂ) ^ Fintype.card ((ZMod p)ˣ)
-  haveI : Fact (Nat.Prime p) := hp
   rw [ZMod.card_units] at h_det_orth
   -- h_det_orth : 0 = ((p-1 : ℕ) : ℂ) ^ (p-1)
   have h_pm1_pos : 0 < p - 1 := by omega
@@ -621,9 +614,7 @@ theorem dirichletOfQuotientChar_apply_unit
     dirichletOfQuotientChar p ξ ((a : ZMod p)) =
       ξ (BernoulliRegular.cyclotomicEvenDeltaQuotient p a) := by
   unfold dirichletOfQuotientChar
-  rw [MulChar.ofUnitHom_coe]
-  rw [MonoidHom.comp_apply]
-  rw [MulChar.coe_toUnitHom]
+  rw [MulChar.ofUnitHom_coe, MonoidHom.comp_apply, MulChar.coe_toUnitHom]
   change (BernoulliRegular.evenDeltaCharacterPullback (p := p) ξ)
       ((toUnits a).val) = _
   change (BernoulliRegular.evenDeltaCharacterPullback (p := p) ξ) a = _
@@ -738,44 +729,10 @@ theorem frobenius_eigenvalue_eq_neg_DirichletLogSum
     ∑ a : (ZMod p)ˣ, χ ((a : ZMod p)) *
         ((Real.log ‖(1 : ℂ) - ZMod.stdAddChar (N := p) ((a : ZMod p))‖ : ℝ) : ℂ) =
       -DirichletLogSum p χ := by
-  classical
   -- Step 1: convert sum-over-units to sum-over-ZMod-p (extending by 0 at 0).
-  have h_units_sum_eq : ∑ a : (ZMod p)ˣ,
-        χ ((a : ZMod p)) *
-          ((Real.log ‖(1 : ℂ) -
-            ZMod.stdAddChar (N := p) ((a : ZMod p))‖ : ℝ) : ℂ) =
-      ∑ a : ZMod p,
-        χ a * ((Real.log ‖(1 : ℂ) -
-          ZMod.stdAddChar (N := p) a‖ : ℝ) : ℂ) := by
-    haveI : NeZero p := ⟨hp.out.ne_zero⟩
-    rw [← Finset.sum_erase_add _ _ (Finset.mem_univ (0 : ZMod p))]
-    -- a = 0 term: χ(0) · log‖1 - stdAddChar 0‖ = 0 · log 0 = 0
-    rw [χ.map_zero, zero_mul, add_zero]
-    -- Sum over (ZMod p)ˣ = sum over univ.erase 0 (ZMod p). Bij a ↦ (a : ZMod p).
-    refine Finset.sum_bij (fun (a : (ZMod p)ˣ) _ ↦ (a : ZMod p)) ?_ ?_ ?_ ?_
-    · intro a _
-      rw [Finset.mem_erase]
-      exact ⟨a.isUnit.ne_zero, Finset.mem_univ _⟩
-    · intro a₁ _ a₂ _ h
-      exact Units.ext h
-    · intro b hb
-      rw [Finset.mem_erase] at hb
-      obtain ⟨hb_ne, _⟩ := hb
-      have h_b_val_ne : b.val ≠ 0 := fun h_val ↦
-        hb_ne ((ZMod.val_eq_zero b).mp h_val)
-      have h_b_val_lt : b.val < p := ZMod.val_lt b
-      have hp_prime : Nat.Prime p := hp.out
-      have h_coprime : Nat.Coprime b.val p := by
-        rw [Nat.coprime_comm]
-        rw [hp_prime.coprime_iff_not_dvd]
-        intro h_dvd
-        exact absurd (Nat.le_of_dvd (Nat.pos_of_ne_zero h_b_val_ne) h_dvd) (by omega)
-      refine ⟨ZMod.unitOfCoprime b.val h_coprime, Finset.mem_univ _, ?_⟩
-      change ((ZMod.unitOfCoprime b.val h_coprime : (ZMod p)ˣ) : ZMod p) = b
-      rw [ZMod.coe_unitOfCoprime]
-      exact ZMod.natCast_zmod_val b
-    · intro a _; rfl
-  rw [h_units_sum_eq]
+  rw [sum_units_eq_sum_zmod p
+    (fun a ↦ χ a * ((Real.log ‖(1 : ℂ) - ZMod.stdAddChar (N := p) a‖ : ℝ) : ℂ))
+    (by rw [χ.map_zero, zero_mul])]
   -- Step 2: convert ∑ a : ZMod p, χ(a) · log|...| to evenLValueLogSum p χ⁻¹.
   have h_sum_eq_evenL : ∑ a : ZMod p,
         χ a * ((Real.log ‖(1 : ℂ) -
@@ -785,9 +742,7 @@ theorem frobenius_eigenvalue_eq_neg_DirichletLogSum
     refine Finset.sum_congr rfl ?_
     intro a _
     rw [inv_inv]
-  rw [h_sum_eq_evenL]
-  rw [evenLValueLogSum_eq_neg_DirichletLogSum_inv]
-  rw [inv_inv]
+  rw [h_sum_eq_evenL, evenLValueLogSum_eq_neg_DirichletLogSum_inv, inv_inv]
 
 /-- **General quotient-eigenvalue identification**: for
 `ξ : MulChar (CyclotomicEvenDelta p) ℂ` and `p > 2`, the quotient
