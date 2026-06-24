@@ -250,7 +250,6 @@ Washington's Lemma-9.6/9.7 conditions `x' ∉ 𝔩` and `z' ∈ 𝔩`, the desce
 used:
 `z' ∈ 𝔩` is a genuine hypothesis, supplied where it is true. -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **Assumption II at a restricted-datum descent, free of the false `Lemma98LocalPower37`
     universal**
 (proven, axiom-clean *given* `Cor815SingleIndexExpansion37`).
@@ -304,7 +303,6 @@ own
 Lemma-9.6/9.7 data, no universal), and the residual asserts the descended datum *stays in the
 restricted domain*. -/
 
-open FLT37.LehmerVandiver.CaseII in
 /-- **[FLT37-CASEII-THM95-DVDZ-RESIDUAL] The `ℓ ∣ z`-preserving descent step** (a `def … : Prop`,
 **not** an axiom) — the genuine remaining content of Washington Theorem 9.5's route (a).
 
@@ -396,7 +394,6 @@ theorem exists_realCaseIIDvdZData37_of_caseII_int_solution
     (e : a ^ 37 + b ^ 37 = c ^ 37)
     (h_lemma96 : ∀ x : ℤ, (¬ (37 : ℤ) ∣ x) → (x = a ∨ x = b ∨ x = c) → ¬ (149 : ℤ) ∣ x) :
     ∃ m : ℕ, Nonempty (RealCaseIIDvdZData37 m) := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   simp only [ne_eq, mul_eq_zero, not_or] at hprod
   obtain ⟨⟨ha0, hb0⟩, hc0⟩ := hprod
   have h37 := (Nat.prime_iff_prime_int.mp (by decide : Nat.Prime 37))
@@ -488,7 +485,6 @@ theorem caseIIBridge_thirtyseven_of_thm95RationalDescent
       (37 : ℤ) ∣ a * b * c → a ^ 37 + b ^ 37 = c ^ 37 →
       ∀ x : ℤ, (¬ (37 : ℤ) ∣ x) → (x = a ∨ x = b ∨ x = c) → ¬ (149 : ℤ) ∣ x) :
     BernoulliRegular.CaseIIBridge 37 (CyclotomicField 37 ℚ) 32 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   refine ⟨?_⟩
   intro _hV _hSO a b c hprod hgcd hcase hEq
   exact (no_realCaseIIDvdZData37_of_dvdZDescentStep h_expand h_step)
@@ -524,10 +520,8 @@ theorem fermatLastTheoremFor_thirtyseven_of_thm95RationalDescent
       (37 : ℤ) ∣ a * b * c → a ^ 37 + b ^ 37 = c ^ 37 →
       ∀ x : ℤ, (¬ (37 : ℤ) ∣ x) → (x = a ∨ x = b ∨ x = c) → ¬ (149 : ℤ) ∣ x)
     (noSecondOrderIrregular : NoSecondOrderIrregularPair 37 32) :
-    FermatLastTheoremFor 37 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  haveI : NeZero 37 := ⟨by decide⟩
-  exact BernoulliRegular.fermatLastTheoremFor_thirtyseven_of_remaining
+    FermatLastTheoremFor 37 :=
+  BernoulliRegular.fermatLastTheoremFor_thirtyseven_of_remaining
     (BernoulliRegular.cor8_19Bridge_of_not_dvd_hPlus 37 (CyclotomicField 37 ℚ)
       Sinnott.flt37_not_dvd_hPlus)
     caseIBridge_thirtyseven_eichler
