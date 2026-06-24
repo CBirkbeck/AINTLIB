@@ -71,7 +71,7 @@ This file imports only; it does **not** modify any existing file.  No `sorry`, n
 
 noncomputable section
 
-open NumberField NumberField.IsCMField IsCyclotomicExtension UniqueFactorizationMonoid Polynomial
+open NumberField NumberField.IsCMField Polynomial
 open scoped nonZeroDivisors
 
 namespace BernoulliRegular.FLT37.Eichler
