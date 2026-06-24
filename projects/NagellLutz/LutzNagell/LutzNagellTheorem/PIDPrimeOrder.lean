@@ -19,6 +19,11 @@ denominator must appear with multiplicity ≥ 2 in the division polynomial's lea
 * `isInteger_of_root_squarefree_leading_coeff`: the core new theorem — x ∈ R when the
   relevant leading coeff is squarefree. Combines the rational root theorem with the
   generalized denominator lemma.
+* `prime_order_integrality_squarefree`: a point of odd prime order `p` with `(p : R)`
+  squarefree has integral coordinates.
+* `integrality_of_order_four_squarefree`: an order-4 point (with `(2 : R)` squarefree)
+  has integral coordinates.
+* `den_dvd_of_order_two`: for an order-2 point, `den_R(x) ∣ 4`.
 -/
 
 namespace LutzNagell
