@@ -160,7 +160,7 @@ theorem valuedLambdaQuotientDworkCoeffModP_specializedFiniteLog_linear_eq_zero
   have hvec :=
     concreteKummerLogVector_evalₐ_pow_pred_eq_two_nsmul_dworkArtinHasseSpecializedFiniteLog
       (p := p) (K := K) hp_three a
-  let hle : p - 1 ≤ (p - 2) + 1 := by omega
+  have hle : p - 1 ≤ (p - 2) + 1 := by omega
   have hvec_factor := congrArg (Ideal.Quotient.factorPow (lambdaIdeal p K) hle) hvec
   have hvec' :
       AdicCompletion.evalₐ (lambdaIdeal p K) (p - 1)
@@ -440,10 +440,10 @@ theorem normalizedFiniteLogApprox_evenCoeff_eq_ordinaryTerms
                 (p := p) (K := K) (p - 2)))) := by
   let x : ValuedIntegerRing p K :=
     dworkParameterNormalizedCoordApprox (p := p) (K := K) (p - 2)
-  let hx : x ∈ lambdaIdeal p K :=
+  have hx : x ∈ lambdaIdeal p K :=
     dworkParameterNormalizedCoordApprox_mem_lambdaIdeal
       (p := p) (K := K) (p - 2)
-  let hle : p - 1 ≤ (p - 2) + 1 := by omega
+  have hle : p - 1 ≤ (p - 2) + 1 := by omega
   let i : Fin (p - 1) := (kummerLogEvenPowerIndex (p := p) hp_five j).1
   have hlog :
       samePrimeFiniteLog (p := p) (K := K) (p - 2) x hx =
@@ -473,7 +473,6 @@ theorem normalizedFiniteLogApprox_evenCoeff_eq_ordinaryTerms
   rw [hpterm]
   simp
 
-set_option linter.style.longLine false in
 omit [NumberField.IsCMField K] in
 /-- For ordinary same-prime logarithm terms `n < p`, no same-prime
 denominator folding occurs.  Hence a homogeneous piece of lambda-degree
@@ -506,7 +505,6 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm_eq_zero_of_qu
   · simp [samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm,
       samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousCore, hn, hnd]
 
-set_option linter.style.longLine false in
 omit [NumberField.IsCMField K] in
 /-- An ordinary logarithm term `n < p` for the normalized Artin-Hasse
 coordinate only needs homogeneous degrees below the quotient precision. -/
@@ -524,9 +522,6 @@ theorem samePrimeFiniteLogTerm_normalizedArtinHasseCoord_eq_homogeneous_quotient
   rw [samePrimeFiniteLogTerm_normalizedArtinHasseCoord_eq_homogeneous_cutoff_sum
     (p := p) (K := K) N n hx]
   let C : ℕ := samePrimeFiniteLogCutoff (p := p) N
-  let f : ℕ → ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1) := fun d ↦
-    samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm
-      (p := p) (K := K) N n d x hx
   have hprec_le_cut : N + 1 ≤ C := by
     dsimp [C, samePrimeFiniteLogCutoff]
     exact Nat.le_mul_of_pos_left (N + 1) (Fact.out : Nat.Prime p).pos
@@ -541,7 +536,6 @@ theorem samePrimeFiniteLogTerm_normalizedArtinHasseCoord_eq_homogeneous_quotient
     exact samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm_eq_zero_of_quotient_le_of_lt_prime
       (p := p) (K := K) hx hnlt hd)).symm
 
-set_option linter.style.longLine false in
 set_option maxHeartbeats 800000 in
 -- The proof pushes the factorial-cleared homogeneous identity through
 -- quotient maps and Dwork-coordinate extraction; elaboration is above the
@@ -570,10 +564,10 @@ theorem valuedLambdaQuotientDworkCoeffModP_factorPow_normalizedHomogeneousDegree
             (1 : RationalPadicIntegerRing p) :
               Fin (p - 1) → RationalPadicIntegerRing p) i)) := by
   classical
-  let hle : p - 1 ≤ (p - 2) + 1 := by omega
+  have hle : p - 1 ≤ (p - 2) + 1 := by omega
   let x : ValuedIntegerRing p K :=
     dworkParameterApprox p K ((p - 2) + 1)
-  let hx : x ∈ lambdaIdeal p K :=
+  have hx : x ∈ lambdaIdeal p K :=
     dworkParameterApprox_mem_lambdaIdeal (p := p) (K := K) ((p - 2) + 1)
   let S : Furtwaengler.DieudonneDwork.rIntegralRatSubring p :=
     ∑ n ∈ Finset.Icc 1 d,
@@ -658,29 +652,8 @@ theorem valuedLambdaQuotientDworkCoeffModP_factorPow_normalizedHomogeneousDegree
     rw [hleft] at hsource_coord
     rw [hright] at hsource_coord
     simpa [S] using hsource_coord
-  apply (isUnit_iff_ne_zero.mpr hfac_ne).mul_left_cancel
-  calc
-    ((d.factorial : ℕ) : ZMod p) *
-        valuedLambdaQuotientDworkCoeffModP (p := p) (K := K) i
-          (Ideal.Quotient.factorPow (lambdaIdeal p K) hle
-            (samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum
-              (p := p) (K := K) (p - 2) d x hx))
-        = Furtwaengler.DieudonneDwork.rIntegralToZMod p S * b := hmul
-    _ =
-        ((d.factorial : ℕ) : ZMod p) *
-          ((((d.factorial : ℕ) : ZMod p)⁻¹ *
-            Furtwaengler.DieudonneDwork.rIntegralToZMod p S) * b) := by
-        calc
-          Furtwaengler.DieudonneDwork.rIntegralToZMod p S * b =
-              (((d.factorial : ℕ) : ZMod p) *
-                ((d.factorial : ℕ) : ZMod p)⁻¹) *
-                  (Furtwaengler.DieudonneDwork.rIntegralToZMod p S * b) := by
-                rw [mul_inv_cancel₀ hfac_ne, one_mul]
-          _ =
-              ((d.factorial : ℕ) : ZMod p) *
-                ((((d.factorial : ℕ) : ZMod p)⁻¹ *
-                  Furtwaengler.DieudonneDwork.rIntegralToZMod p S) * b) := by
-                ring
+  rw [mul_assoc, eq_inv_mul_iff_mul_eq₀ hfac_ne]
+  exact hmul
 
 end CyclotomicUnits
 end BernoulliRegular
