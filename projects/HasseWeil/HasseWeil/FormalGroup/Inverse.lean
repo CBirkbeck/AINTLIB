@@ -578,6 +578,57 @@ theorem FormalGroup.coeff_fAdd_X_add_monomial (F : FormalGroup R)
 
 /-! ### Core invariant and functional equation -/
 
+/-- Base case of the core invariant: `coeff 0 (fAdd F X (inverseTrunc F 0)) = 0`.
+
+Since `inverseTrunc F 0 = 0` and `fAdd F X 0 = X` (by `fAdd_zero_right`), this
+reduces to `coeff 0 X = 0`. -/
+private theorem coeff_zero_fAdd_X_inverseTrunc_zero (F : FormalGroup R) :
+    PowerSeries.coeff 0 (HasseWeil.FG.fAdd F PowerSeries.X (F.inverseTrunc 0)) = 0 := by
+  have hXcc : @PowerSeries.constantCoeff R _ PowerSeries.X = 0 := by simp
+  rw [FormalGroup.inverseTrunc_zero]
+  rw [HasseWeil.FG.fAdd_zero_right F PowerSeries.X hXcc]
+  rw [PowerSeries.coeff_zero_X]
+
+/-- Stabilization step of the core invariant: for `k ≤ n`, replacing
+`inverseTrunc F (n + 1)` by `inverseTrunc F n` inside `fAdd F X ·` leaves the
+`k`-th coefficient unchanged.
+
+The two truncations agree on coefficients up to degree `n`
+(`coeff_inverseTrunc_succ_of_le`), so `coeff_fAdd_X_eq_of_coeff_eq` applies. -/
+private theorem coeff_fAdd_X_inverseTrunc_succ_eq_of_le (F : FormalGroup R)
+    (n k : ℕ) (hk : k ≤ n) :
+    PowerSeries.coeff k (HasseWeil.FG.fAdd F PowerSeries.X (F.inverseTrunc (n + 1))) =
+      PowerSeries.coeff k (HasseWeil.FG.fAdd F PowerSeries.X (F.inverseTrunc n)) := by
+  have hstab : ∀ j ≤ n,
+      PowerSeries.coeff j (F.inverseTrunc (n + 1)) =
+        PowerSeries.coeff j (F.inverseTrunc n) := by
+    intro j hj
+    exact F.coeff_inverseTrunc_succ_of_le n j hj
+  exact FormalGroup.coeff_fAdd_X_eq_of_coeff_eq F _ _
+    (F.inverseTrunc_constantCoeff (n + 1))
+    (F.inverseTrunc_constantCoeff n)
+    n hstab k hk
+
+/-- Top-degree step of the core invariant:
+`coeff (n + 1) (fAdd F X (inverseTrunc F (n + 1))) = 0`.
+
+By definition `inverseTrunc F (n + 1) = inverseTrunc F n + C c * X^(n+1)` with
+the correction `c = -coeff (n+1) (fAdd F X (inverseTrunc F n))`. Monomial
+addition (`coeff_fAdd_X_add_monomial`) shows the degree-`(n+1)` coefficient is
+the previous one plus `c`, which cancels by construction. -/
+private theorem coeff_succ_fAdd_X_inverseTrunc_succ (F : FormalGroup R) (n : ℕ) :
+    PowerSeries.coeff (n + 1)
+        (HasseWeil.FG.fAdd F PowerSeries.X (F.inverseTrunc (n + 1))) = 0 := by
+  set prev := F.inverseTrunc n with hprev
+  set curr := HasseWeil.FG.fAdd F PowerSeries.X prev with hcurr
+  have hunfold : F.inverseTrunc (n + 1) = prev +
+      PowerSeries.C (-PowerSeries.coeff (n + 1) curr) * PowerSeries.X ^ (n + 1) := rfl
+  rw [hunfold]
+  rw [FormalGroup.coeff_fAdd_X_add_monomial F prev n
+        (-PowerSeries.coeff (n + 1) curr) (F.inverseTrunc_constantCoeff n)]
+  show PowerSeries.coeff (n + 1) curr + -PowerSeries.coeff (n + 1) curr = 0
+  exact add_neg_cancel _
+
 /-- **Core invariant**: for `k ≤ n`,
 `coeff k (fAdd F X (inverseTrunc F n)) = 0`.
 
@@ -594,47 +645,18 @@ theorem FormalGroup.inverseTrunc_fAdd_coeff_eq_zero
         (HasseWeil.FG.fAdd F PowerSeries.X (F.inverseTrunc n)) = 0 := by
   induction n with
   | zero =>
-    -- k = 0.
-    have hk0 : k = 0 := Nat.le_zero.mp hk
-    subst hk0
-    -- fAdd F X 0 = X (by fAdd_zero_right).
-    have hXcc : @PowerSeries.constantCoeff R _ PowerSeries.X = 0 := by simp
-    rw [FormalGroup.inverseTrunc_zero]
-    rw [HasseWeil.FG.fAdd_zero_right F PowerSeries.X hXcc]
-    -- coeff 0 X = 0.
-    rw [PowerSeries.coeff_zero_X]
+    -- `k = 0`; base case (`coeff_zero_fAdd_X_inverseTrunc_zero`).
+    obtain rfl : k = 0 := Nat.le_zero.mp hk
+    exact coeff_zero_fAdd_X_inverseTrunc_zero F
   | succ n ih =>
     rcases Nat.lt_or_ge k (n + 1) with hk' | hk'
-    · -- k ≤ n: use stabilization + ih.
+    · -- `k ≤ n`: stabilize down to `inverseTrunc F n`, then `ih`.
       have hk'' : k ≤ n := Nat.lt_succ_iff.mp hk'
-      -- fAdd F X (inverseTrunc F (n+1)) and fAdd F X (inverseTrunc F n) agree on
-      -- coefficients up to degree n, so coeff k of both is equal (and ih gives 0).
-      have hstab : ∀ j ≤ n,
-          PowerSeries.coeff j (F.inverseTrunc (n + 1)) =
-            PowerSeries.coeff j (F.inverseTrunc n) := by
-        intro j hj
-        exact F.coeff_inverseTrunc_succ_of_le n j hj
-      rw [FormalGroup.coeff_fAdd_X_eq_of_coeff_eq F _ _
-            (F.inverseTrunc_constantCoeff (n + 1))
-            (F.inverseTrunc_constantCoeff n)
-            n hstab k hk'']
+      rw [coeff_fAdd_X_inverseTrunc_succ_eq_of_le F n k hk'']
       exact ih hk''
-    · -- k = n + 1.
-      have hk_eq : k = n + 1 := le_antisymm hk hk'
-      subst hk_eq
-      -- inverseTrunc F (n+1) = inverseTrunc F n + C c * X^(n+1) where
-      -- c = -coeff (n+1) (fAdd F X (inverseTrunc F n)).
-      set prev := F.inverseTrunc n with hprev
-      set curr := HasseWeil.FG.fAdd F PowerSeries.X prev with hcurr
-      have hunfold : F.inverseTrunc (n + 1) = prev +
-          PowerSeries.C (-PowerSeries.coeff (n + 1) curr) * PowerSeries.X ^ (n + 1) := rfl
-      rw [hunfold]
-      -- Apply monomial-addition.
-      rw [FormalGroup.coeff_fAdd_X_add_monomial F prev n
-            (-PowerSeries.coeff (n + 1) curr) (F.inverseTrunc_constantCoeff n)]
-      -- Goal: coeff (n+1) curr + (-coeff (n+1) curr) = 0.
-      show PowerSeries.coeff (n + 1) curr + -PowerSeries.coeff (n + 1) curr = 0
-      exact add_neg_cancel _
+    · -- `k = n + 1`: the top-degree correction cancels.
+      obtain rfl : k = n + 1 := le_antisymm hk hk'
+      exact coeff_succ_fAdd_X_inverseTrunc_succ F n
 
 /-- **Functional equation of the formal inverse** (Silverman IV.2, closing
 T-IV-2-011): `F(T, i(T)) = 0`, i.e., `fAdd F X (inverse F) = 0`.
