@@ -1257,19 +1257,76 @@ theorem valuation_coordXFun_le_one (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ :=
     (bPrime_valuation_eq_ordAtInfty_of_subring_ge v hsup (valuationSubring_ne_top v))
 
 set_option maxHeartbeats 1600000 in
-/-- **No `B`-prime has a `y₁`-pole** (the `coordYFun` half): for a `B`-prime `v`, `w_v(y₁) ≤ 1`.
-Once `w_v(x₁) ≤ 1` (`valuation_coordXFun_le_one`), `y₁` is `v`-integral because it is integral over
-`F[x₁]` (the Weierstrass relation `y₁² + b·y₁ = c` with `w_v(b), w_v(c) ≤ 1`): a pole of `y₁` would
-make `w_v(y₁)² = w_v(c − b·y₁) ≤ max(w_v c, w_v b · w_v y₁) ≤ w_v(y₁)`, impossible. -/
-theorem valuation_coordYFun_le_one (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂))
-    (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂))) :
-    v.valuation C₁.FunctionField (coordYFun C₁) ≤ 1 := by
-  set w := v.valuation C₁.FunctionField with hw
-  have hxle : w (coordXFun C₁) ≤ 1 := valuation_coordXFun_le_one hreg v
-  have hc : ∀ c : F, w (algebraMap F C₁.FunctionField c) ≤ 1 := fun c => by
-    rcases eq_or_ne c 0 with h0 | h0
-    · rw [h0, map_zero (algebraMap F C₁.FunctionField), w.map_zero]; exact zero_le
-    · exact le_of_eq (valuation_algebraMap_F_eq_one v h0)
+set_option synthInstance.maxHeartbeats 400000 in
+/-- **Generic ultrametric monomial bound, `≤ 1` regime** (instance-light): if a valuation `w` on
+`K(C₁)` is `≤ 1` on the `F`-constant `algebraMap_F c` (`hc`) and `w t ≤ 1`, then
+`w (algebraMap_F c * t^k) ≤ 1`.  The `w t ≤ 1` dual of `valuation_const_mul_pow_le` (bound by `1`
+rather than `w t ^ 3`); stated over an arbitrary `w` and `t` to keep the heavy `B`-instance out of
+the power arithmetic. -/
+private theorem valuation_const_mul_pow_le_one_generic {Γ₀ : Type*}
+    [LinearOrderedCommGroupWithZero Γ₀]
+    (w : Valuation C₁.FunctionField Γ₀) (t : C₁.FunctionField) (h1 : w t ≤ 1)
+    (hc : ∀ c : F, w (algebraMap F C₁.FunctionField c) ≤ 1) (c : F) (k : ℕ) :
+    w (algebraMap F C₁.FunctionField c * t ^ k) ≤ 1 := by
+  rw [w.map_mul, map_pow]
+  calc w (algebraMap F C₁.FunctionField c) * w t ^ k
+      ≤ 1 * 1 := mul_le_mul' (hc c) (pow_le_one₀ zero_le h1)
+    _ = 1 := mul_one 1
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 400000 in
+/-- **Generic ultrametric Weierstrass-cubic bound, `≤ 1` regime** (instance-light): for an arbitrary
+valuation `w` that is `≤ 1` on `F`-constants and has `w t ≤ 1`, the Weierstrass cubic in `t` is
+`≤ 1`.  The `w t ≤ 1` dual of `valuation_weierstrassCubic_le_generic`. -/
+private theorem valuation_weierstrassCubic_le_one_generic {Γ₀ : Type*}
+    [LinearOrderedCommGroupWithZero Γ₀]
+    (w : Valuation C₁.FunctionField Γ₀) (t : C₁.FunctionField) (h1 : w t ≤ 1)
+    (hc : ∀ c : F, w (algebraMap F C₁.FunctionField c) ≤ 1) :
+    w (t ^ 3 + algebraMap F C₁.FunctionField C₁.toAffine.a₂ * t ^ 2 +
+        algebraMap F C₁.FunctionField C₁.toAffine.a₄ * t +
+        algebraMap F C₁.FunctionField C₁.toAffine.a₆) ≤ 1 := by
+  have hx3 : w (t ^ 3) ≤ 1 := by rw [map_pow]; exact pow_le_one₀ zero_le h1
+  have ha₂ : w (algebraMap F C₁.FunctionField C₁.toAffine.a₂ * t ^ 2) ≤ 1 :=
+    valuation_const_mul_pow_le_one_generic w t h1 hc _ 2
+  have ha₄ : w (algebraMap F C₁.FunctionField C₁.toAffine.a₄ * t) ≤ 1 := by
+    have := valuation_const_mul_pow_le_one_generic w t h1 hc C₁.toAffine.a₄ 1; rwa [pow_one] at this
+  have hstep1 : w (t ^ 3 + algebraMap F C₁.FunctionField C₁.toAffine.a₂ * t ^ 2) ≤ 1 :=
+    le_trans (w.map_add _ _) (max_le hx3 ha₂)
+  have hstep2 : w (t ^ 3 + algebraMap F C₁.FunctionField C₁.toAffine.a₂ * t ^ 2 +
+      algebraMap F C₁.FunctionField C₁.toAffine.a₄ * t) ≤ 1 :=
+    le_trans (w.map_add _ _) (max_le hstep1 ha₄)
+  exact le_trans (w.map_add _ _) (max_le hstep2 (hc _))
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 400000 in
+/-- **Generic linear-coefficient bound, `≤ 1` regime** (instance-light): `w (a₁ x₁ + a₃) ≤ 1` for an
+arbitrary valuation `w` with `w x₁ ≤ 1` that is `≤ 1` on `F`-constants.  The `w x₁ ≤ 1` dual of
+`valuation_a₁X_add_a₃_le_generic`. -/
+private theorem valuation_a₁X_add_a₃_le_one_generic {Γ₀ : Type*}
+    [LinearOrderedCommGroupWithZero Γ₀]
+    (w : Valuation C₁.FunctionField Γ₀) (h1 : w (coordXFun C₁) ≤ 1)
+    (hc : ∀ c : F, w (algebraMap F C₁.FunctionField c) ≤ 1) :
+    w (algebraMap F C₁.FunctionField C₁.toAffine.a₁ * coordXFun C₁ +
+        algebraMap F C₁.FunctionField C₁.toAffine.a₃) ≤ 1 := by
+  have ha₁ : w (algebraMap F C₁.FunctionField C₁.toAffine.a₁ * coordXFun C₁) ≤ 1 := by
+    rw [w.map_mul]
+    calc w (algebraMap F C₁.FunctionField C₁.toAffine.a₁) * w (coordXFun C₁)
+        ≤ 1 * 1 := mul_le_mul' (hc _) h1
+      _ = 1 := mul_one 1
+  exact le_trans (w.map_add _ _) (max_le ha₁ (hc _))
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 400000 in
+/-- **Generic `y₁`-integrality bound, `≤ 1` regime** (instance-light): for an arbitrary valuation `w`
+with `w x₁ ≤ 1` that is `≤ 1` on `F`-constants, `w y₁ ≤ 1`.  Proved by ultrametric on the rearranged
+Weierstrass relation `y₁² = c − b·y₁`: a pole `1 < w y₁` would give
+`(w y₁)² = w(c − b·y₁) ≤ max(w c, w b · w y₁) ≤ w y₁`, contradicting `w y₁ < (w y₁)²`.  The `w x₁ ≤ 1`
+dual of `valuation_coordYFun_le_sq_generic`. -/
+private theorem valuation_coordYFun_le_one_generic {Γ₀ : Type*}
+    [LinearOrderedCommGroupWithZero Γ₀]
+    (w : Valuation C₁.FunctionField Γ₀) (hxle : w (coordXFun C₁) ≤ 1)
+    (hc : ∀ c : F, w (algebraMap F C₁.FunctionField c) ≤ 1) :
+    w (coordYFun C₁) ≤ 1 := by
   -- the Weierstrass relation, rearranged: `y₁² = c − b·y₁`
   have hyeq : coordYFun C₁ ^ 2 =
       (coordXFun C₁ ^ 3 + algebraMap F C₁.FunctionField C₁.toAffine.a₂ * coordXFun C₁ ^ 2 +
@@ -1278,39 +1335,8 @@ theorem valuation_coordYFun_le_one (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ :=
       (algebraMap F C₁.FunctionField C₁.toAffine.a₁ * coordXFun C₁ +
         algebraMap F C₁.FunctionField C₁.toAffine.a₃) * coordYFun C₁ := by
     linear_combination weierstrass_relation_coordFun (C₁ := C₁)
-  -- bounds on the cubic and linear coefficients (using `w x₁ ≤ 1`)
-  have hcubic : w (coordXFun C₁ ^ 3 +
-      algebraMap F C₁.FunctionField C₁.toAffine.a₂ * coordXFun C₁ ^ 2 +
-      algebraMap F C₁.FunctionField C₁.toAffine.a₄ * coordXFun C₁ +
-      algebraMap F C₁.FunctionField C₁.toAffine.a₆) ≤ 1 := by
-    have hx3 : w (coordXFun C₁ ^ 3) ≤ 1 := by
-      rw [map_pow]; exact pow_le_one₀ zero_le hxle
-    have hmono : ∀ (cf : F) (k : ℕ),
-        w (algebraMap F C₁.FunctionField cf * coordXFun C₁ ^ k) ≤ 1 := by
-      intro cf k
-      rw [w.map_mul, map_pow]
-      calc w (algebraMap F C₁.FunctionField cf) * w (coordXFun C₁) ^ k
-          ≤ 1 * 1 := mul_le_mul' (hc cf) (pow_le_one₀ zero_le hxle)
-        _ = 1 := mul_one 1
-    have ha₂ := hmono C₁.toAffine.a₂ 2
-    have ha₄' : w (algebraMap F C₁.FunctionField C₁.toAffine.a₄ * coordXFun C₁) ≤ 1 := by
-      have := hmono C₁.toAffine.a₄ 1; rwa [pow_one] at this
-    have hstep1 : w (coordXFun C₁ ^ 3 +
-        algebraMap F C₁.FunctionField C₁.toAffine.a₂ * coordXFun C₁ ^ 2) ≤ 1 :=
-      le_trans (w.map_add _ _) (max_le hx3 ha₂)
-    have hstep2 : w (coordXFun C₁ ^ 3 +
-        algebraMap F C₁.FunctionField C₁.toAffine.a₂ * coordXFun C₁ ^ 2 +
-        algebraMap F C₁.FunctionField C₁.toAffine.a₄ * coordXFun C₁) ≤ 1 :=
-      le_trans (w.map_add _ _) (max_le hstep1 ha₄')
-    exact le_trans (w.map_add _ _) (max_le hstep2 (hc _))
-  have hlin : w (algebraMap F C₁.FunctionField C₁.toAffine.a₁ * coordXFun C₁ +
-      algebraMap F C₁.FunctionField C₁.toAffine.a₃) ≤ 1 := by
-    have ha₁ : w (algebraMap F C₁.FunctionField C₁.toAffine.a₁ * coordXFun C₁) ≤ 1 := by
-      rw [w.map_mul]
-      calc w (algebraMap F C₁.FunctionField C₁.toAffine.a₁) * w (coordXFun C₁)
-          ≤ 1 * 1 := mul_le_mul' (hc _) hxle
-        _ = 1 := mul_one 1
-    exact le_trans (w.map_add _ _) (max_le ha₁ (hc _))
+  have hcubic := valuation_weierstrassCubic_le_one_generic w (coordXFun C₁) hxle hc
+  have hlin := valuation_a₁X_add_a₃_le_one_generic w hxle hc
   -- ultrametric: `w(y₁)² ≤ max(1, w(y₁))`, force `w(y₁) ≤ 1`
   by_contra hcon
   rw [not_le] at hcon
@@ -1324,12 +1350,28 @@ theorem valuation_coordYFun_le_one (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ :=
       _ = w (coordYFun C₁) := one_mul _
   have hYne : w (coordYFun C₁) ≠ 0 := by
     rw [Ne, Valuation.zero_iff]; exact coordYFun_ne_zero (C₁ := C₁)
-  have hY0 : (0 : WithZero (Multiplicative ℤ)) < w (coordYFun C₁) := zero_lt_iff.mpr hYne
+  have hY0 : (0 : Γ₀) < w (coordYFun C₁) := zero_lt_iff.mpr hYne
   -- `w(y₁)² > w(y₁)` since `w(y₁) > 1`, contradicting `hYsq`
   have hlt : w (coordYFun C₁) < w (coordYFun C₁) ^ 2 := by
     have hstep := (mul_lt_mul_iff_left₀ hY0).mpr hcon
     rwa [one_mul, ← sq] at hstep
   exact absurd hYsq (not_le.mpr hlt)
+
+/-- **No `B`-prime has a `y₁`-pole** (the `coordYFun` half): for a `B`-prime `v`, `w_v(y₁) ≤ 1`.
+Once `w_v(x₁) ≤ 1` (`valuation_coordXFun_le_one`), `y₁` is `v`-integral because it is integral over
+`F[x₁]` (the Weierstrass relation `y₁² + b·y₁ = c` with `w_v(b), w_v(c) ≤ 1`): a pole of `y₁` would
+make `w_v(y₁)² = w_v(c − b·y₁) ≤ max(w_v c, w_v b · w_v y₁) ≤ w_v(y₁)`, impossible.  The ultrametric
+content is `valuation_coordYFun_le_one_generic`; here we feed it the `B`-prime facts `w_v(x₁) ≤ 1`
+(`valuation_coordXFun_le_one`) and `w_v(F-const) ≤ 1` (`valuation_algebraMap_F_eq_one`). -/
+theorem valuation_coordYFun_le_one (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂))
+    (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂))) :
+    v.valuation C₁.FunctionField (coordYFun C₁) ≤ 1 :=
+  valuation_coordYFun_le_one_generic (v.valuation C₁.FunctionField)
+    (valuation_coordXFun_le_one hreg v) (fun c => by
+      rcases eq_or_ne c 0 with h0 | h0
+      · rw [h0, map_zero (algebraMap F C₁.FunctionField), (v.valuation C₁.FunctionField).map_zero]
+        exact zero_le
+      · exact le_of_eq (valuation_algebraMap_F_eq_one v h0))
 
 /-- **`BPrimeValuationCoordGenLeOne`, DISCHARGED** (the genuine curve-completeness content, now
 unconditional modulo the basepoint-regularity `hreg`): every `B`-prime `v` is `≤ 1` on both
