@@ -716,26 +716,55 @@ theorem tensorFunctionFieldStructureHom_injective (L : Type*) [Field L] [Algebra
   rw [hfun]
   exact hlin
 
-/-- The base-changed function field `C.FunctionField ⊗[F] L` is a domain, for any extension
-`L/F` (no algebraicity needed). It is the localization of the domain
-`C.CoordinateRing ⊗[F] L` at the image of the nonzerodivisors of `C.CoordinateRing`, and
-that image lands inside the nonzerodivisors (via flatness of `C.CoordinateRing` over `F`),
-so the localization stays a domain.
-
-This is the domain half of `tensor_functionField_isField`; kept separate so that
-`isField_of_isAlgebraic` can pick it up as the required `IsDomain` instance. Phrased with
-the function field on the **left** (`FunctionField ⊗[F] L`) to match that consumer. -/
-private theorem tensorFunctionField_isDomain (L : Type*) [Field L] [Algebra F L] :
-    IsDomain (C.toAffine.FunctionField ⊗[F] L) := by
+/-- `C.CoordinateRing ⊗[F] L` is a domain, for any field extension `L/F`. Obtained from the
+sibling `isDomain_tensorCoordRing` (which gives the `L`-on-the-left orientation
+`L ⊗[F] C.CoordinateRing`) by transporting the domain structure across the commutativity
+ring-iso `Algebra.TensorProduct.comm`. -/
+private theorem tensorCoordRing_comm_isDomain (L : Type*) [Field L] [Algebra F L] :
+    IsDomain (C.toAffine.CoordinateRing ⊗[F] L) := by
   letI := C.isDomain_tensorCoordRing L
-  haveI hfreeCR : Module.Free F C.toAffine.CoordinateRing :=
-    Module.Free.of_divisionRing F C.toAffine.CoordinateRing
+  exact (Algebra.TensorProduct.comm F L C.toAffine.CoordinateRing).symm.toRingEquiv.toMulEquiv.isDomain
+    (L ⊗[F] C.toAffine.CoordinateRing)
+
+/-- The image, under the structure map `C.CoordinateRing → C.CoordinateRing ⊗[F] L`, of the
+nonzerodivisors of `C.CoordinateRing` lands inside the nonzerodivisors of
+`C.CoordinateRing ⊗[F] L`. The structure map is `Algebra.TensorProduct.includeLeft`, injective
+because `C.CoordinateRing` is free (hence flat) over the field `F`; injective maps into a
+`NoZeroDivisors` ring carry nonzerodivisors to nonzerodivisors. -/
+private theorem tensorCoordRing_algebraMapSubmonoid_le_nonZeroDivisors
+    (L : Type*) [Field L] [Algebra F L] :
+    Algebra.algebraMapSubmonoid (C.toAffine.CoordinateRing ⊗[F] L)
+        (nonZeroDivisors C.toAffine.CoordinateRing) ≤
+      nonZeroDivisors (C.toAffine.CoordinateRing ⊗[F] L) := by
   haveI hflatCR : Module.Flat F C.toAffine.CoordinateRing := Module.Flat.of_free
-  haveI hdomCR : IsDomain (C.toAffine.CoordinateRing ⊗[F] L) :=
-    (Algebra.TensorProduct.comm F L C.toAffine.CoordinateRing).symm.toRingEquiv.toMulEquiv.isDomain
-      (L ⊗[F] C.toAffine.CoordinateRing)
+  letI := C.tensorCoordRing_comm_isDomain L
   haveI hnzdCR : NoZeroDivisors (C.toAffine.CoordinateRing ⊗[F] L) :=
-    isCancelMulZero_iff_noZeroDivisors.mp hdomCR.toIsCancelMulZero
+    isCancelMulZero_iff_noZeroDivisors.mp ‹IsDomain _›.toIsCancelMulZero
+  have hinjL : Function.Injective
+      (Algebra.TensorProduct.includeLeft :
+        C.toAffine.CoordinateRing →ₐ[F] C.toAffine.CoordinateRing ⊗[F] L) :=
+    @Algebra.TensorProduct.includeLeft_injective F F C.toAffine.CoordinateRing L
+      _ _ _ _ _ _ _ _ hflatCR
+      (RingHom.injective (algebraMap F L))
+  exact map_le_nonZeroDivisors_of_injective
+    (M₀' := C.toAffine.CoordinateRing ⊗[F] L)
+    (algebraMap C.toAffine.CoordinateRing (C.toAffine.CoordinateRing ⊗[F] L))
+    hinjL le_rfl
+
+/-- `C.FunctionField ⊗[F] L` is a localization of `C.CoordinateRing ⊗[F] L` at the image of the
+nonzerodivisors of `C.CoordinateRing`, with respect to the natural `lTensor`-of-localization
+algebra structure `algBC`. This is the tensor–tensor localization
+`IsLocalization.tensorProduct_tensorProduct` for the localization `C.CoordinateRing → C.FunctionField`
+base-changed along `L/F`, with the scalar tower and structure-map equations discharged by `rfl`/`simp`. -/
+private theorem tensorFunctionField_isLocalization (L : Type*) [Field L] [Algebra F L] :
+    letI _algBC : Algebra (C.toAffine.CoordinateRing ⊗[F] L) (C.toAffine.FunctionField ⊗[F] L) :=
+      (Algebra.TensorProduct.map
+        (IsScalarTower.toAlgHom F C.toAffine.CoordinateRing C.toAffine.FunctionField)
+        (AlgHom.id F L)).toRingHom.toAlgebra
+    IsLocalization
+      (Algebra.algebraMapSubmonoid (C.toAffine.CoordinateRing ⊗[F] L)
+        (nonZeroDivisors C.toAffine.CoordinateRing))
+      (C.toAffine.FunctionField ⊗[F] L) := by
   letI algBC : Algebra (C.toAffine.CoordinateRing ⊗[F] L) (C.toAffine.FunctionField ⊗[F] L) :=
     (Algebra.TensorProduct.map
       (IsScalarTower.toAlgHom F C.toAffine.CoordinateRing C.toAffine.FunctionField)
@@ -750,33 +779,38 @@ private theorem tensorFunctionField_isDomain (L : Type*) [Field L] [Algebra F L]
     IsScalarTower.of_algebraMap_eq fun _ ↦ by
       rw [halgmap]
       rfl
-  haveI hloc : IsLocalization
-      (Algebra.algebraMapSubmonoid (C.toAffine.CoordinateRing ⊗[F] L)
-        (nonZeroDivisors C.toAffine.CoordinateRing))
-      (C.toAffine.FunctionField ⊗[F] L) :=
-    @IsLocalization.tensorProduct_tensorProduct F L _ _ _ C.toAffine.CoordinateRing _ _
-      (nonZeroDivisors C.toAffine.CoordinateRing) C.toAffine.FunctionField _ _ _ _ _ algBC tower
-      (by ext x
-          change (Algebra.TensorProduct.map
-            (IsScalarTower.toAlgHom F C.toAffine.CoordinateRing C.toAffine.FunctionField)
-            (AlgHom.id F L)) (1 ⊗ₜ x) = 1 ⊗ₜ x
-          rw [Algebra.TensorProduct.map_tmul]
-          simp)
-  haveI : Module.Flat F C.toAffine.CoordinateRing := hflatCR
-  have hinjL : Function.Injective
-      (Algebra.TensorProduct.includeLeft :
-        C.toAffine.CoordinateRing →ₐ[F] C.toAffine.CoordinateRing ⊗[F] L) :=
-    @Algebra.TensorProduct.includeLeft_injective F F C.toAffine.CoordinateRing L
-      _ _ _ _ _ _ _ _ hflatCR
-      (RingHom.injective (algebraMap F L))
-  have hle : Algebra.algebraMapSubmonoid (C.toAffine.CoordinateRing ⊗[F] L)
-      (nonZeroDivisors C.toAffine.CoordinateRing) ≤
-      nonZeroDivisors (C.toAffine.CoordinateRing ⊗[F] L) :=
-    map_le_nonZeroDivisors_of_injective
-      (M₀' := C.toAffine.CoordinateRing ⊗[F] L)
-      (algebraMap C.toAffine.CoordinateRing (C.toAffine.CoordinateRing ⊗[F] L))
-      hinjL le_rfl
-  exact IsLocalization.isDomain_of_le_nonZeroDivisors (C.toAffine.FunctionField ⊗[F] L) hle
+  exact @IsLocalization.tensorProduct_tensorProduct F L _ _ _ C.toAffine.CoordinateRing _ _
+    (nonZeroDivisors C.toAffine.CoordinateRing) C.toAffine.FunctionField _ _ _ _ _ algBC tower
+    (by ext x
+        change (Algebra.TensorProduct.map
+          (IsScalarTower.toAlgHom F C.toAffine.CoordinateRing C.toAffine.FunctionField)
+          (AlgHom.id F L)) (1 ⊗ₜ x) = 1 ⊗ₜ x
+        rw [Algebra.TensorProduct.map_tmul]
+        simp)
+
+/-- The base-changed function field `C.FunctionField ⊗[F] L` is a domain, for any extension
+`L/F` (no algebraicity needed). It is the localization of the domain
+`C.CoordinateRing ⊗[F] L` at the image of the nonzerodivisors of `C.CoordinateRing`, and
+that image lands inside the nonzerodivisors (via flatness of `C.CoordinateRing` over `F`),
+so the localization stays a domain.
+
+This is the domain half of `tensor_functionField_isField`; kept separate so that
+`isField_of_isAlgebraic` can pick it up as the required `IsDomain` instance. Phrased with
+the function field on the **left** (`FunctionField ⊗[F] L`) to match that consumer. -/
+private theorem tensorFunctionField_isDomain (L : Type*) [Field L] [Algebra F L] :
+    IsDomain (C.toAffine.FunctionField ⊗[F] L) := by
+  -- `C.CoordinateRing ⊗[F] L` is a domain (the base ring of the localization below).
+  letI := C.tensorCoordRing_comm_isDomain L
+  -- The natural `lTensor`-of-localization algebra structure exhibiting the function field
+  -- tensor as a localization of the coordinate-ring tensor.
+  letI _algBC : Algebra (C.toAffine.CoordinateRing ⊗[F] L) (C.toAffine.FunctionField ⊗[F] L) :=
+    (Algebra.TensorProduct.map
+      (IsScalarTower.toAlgHom F C.toAffine.CoordinateRing C.toAffine.FunctionField)
+      (AlgHom.id F L)).toRingHom.toAlgebra
+  haveI := C.tensorFunctionField_isLocalization L
+  -- A localization of a domain at a submonoid of nonzerodivisors is again a domain.
+  exact IsLocalization.isDomain_of_le_nonZeroDivisors (C.toAffine.FunctionField ⊗[F] L)
+    (C.tensorCoordRing_algebraMapSubmonoid_le_nonZeroDivisors L)
 
 /-- `L ⊗[F] C.FunctionField` is a field, for any algebraic extension `L/F`. This is the
 geometric-integrality content: the scalar extension of the function field stays a field.
