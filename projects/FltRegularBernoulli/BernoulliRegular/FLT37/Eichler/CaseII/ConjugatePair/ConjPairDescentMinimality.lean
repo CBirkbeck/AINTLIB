@@ -50,8 +50,7 @@ It imports only; it does **not** modify any existing file.
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Polynomial NumberField.IsCMField
-open scoped nonZeroDivisors
+open NumberField NumberField.IsCMField
 
 namespace BernoulliRegular.FLT37.Eichler
 
