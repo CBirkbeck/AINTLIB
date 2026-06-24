@@ -76,7 +76,6 @@ noncomputable section
 set_option maxRecDepth 4000
 
 open NumberField
-open scoped BigOperators
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -197,7 +196,7 @@ theorem caseIICor823Level71Unscaled32Coord37_of_value
   rw [hValue]
   -- `37·26 = 37·(ρ₀.val)` with `ρ₀ = 26`, `ρ₀.val = 26`; reduce the `ρ₀.val` cast to `26`.
   rw [unscaled32CoordSecondDigit37_eq,
-    show (((26 : ZMod 37).val : ℕ) : ZMod (37 ^ 2)) = (26 : ZMod (37 ^ 2)) from by decide]
+    show (((26 : ZMod 37).val : ℕ) : ZMod (37 ^ 2)) = (26 : ZMod (37 ^ 2)) by decide]
 
 /-! ## 3. R4 and the FLT37 endpoint, from the exact value + the finite-log identity
 
