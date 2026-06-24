@@ -24,7 +24,6 @@ theorem stickOrdOrd_sub_val_eq_val_mul_stickD_of_f_eq_one
     (hf : S.f = 1) (a : CyclotomicUnitDelta p) :
     S.stickOrdOrd (p - (a : ZMod p).val) =
       (a : ZMod p).val * S.stickD := by
-  classical
   haveI : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
   have hℓ_two : 2 ≤ ℓ := (Fact.out : Nat.Prime ℓ).two_le
   have h_card : Fintype.card k = ℓ := by
@@ -71,7 +70,8 @@ theorem descentRamificationIdx_dvd_p_mul_stickOrdOrd_sub_val_of_f_eq_one
     stickOrdOrd_sub_val_eq_val_mul_stickD_of_f_eq_one S hf a
   rw [he, hord]
   refine ⟨(a : ZMod p).val, ?_⟩
-  nlinarith
+  rw [← hpd]
+  ring
 
 /-- The exact Dwork exponent normalizes to `a.val` after division by the
 relative ramification index in the residue-degree-one split case. -/
@@ -100,8 +100,8 @@ theorem dworkExponent_sub_val_div_descentRamificationIdx_eq_val_of_f_eq_one
   have hnum :
       p * S.stickOrdOrd (p - (a : ZMod p).val) =
         (ℓ - 1) * (a : ZMod p).val := by
-    rw [hord]
-    nlinarith
+    rw [hord, ← hpd]
+    ring
   rw [he, hnum, Nat.mul_comm (ℓ - 1) ((a : ZMod p).val),
     Nat.mul_div_left _ hℓ_sub_pos]
 
@@ -163,7 +163,6 @@ theorem stickOrdOrd_sub_val_eq_val_mul_stickD_of_f_eq_one
     (hf : S.f = 1) (a : CyclotomicUnitDelta p) :
     S.stickOrdOrd (p - (a : ZMod p).val) =
       (a : ZMod p).val * S.stickD := by
-  classical
   haveI : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
   have hℓ_two : 2 ≤ ℓ := (Fact.out : Nat.Prime ℓ).two_le
   have h_card : Fintype.card k = ℓ := by
@@ -211,7 +210,8 @@ theorem descentRamificationIdx_dvd_p_mul_stickOrdOrd_sub_val_of_f_eq_one
     S.stickOrdOrd_sub_val_eq_val_mul_stickD_of_f_eq_one hf a
   rw [he, hord]
   refine ⟨(a : ZMod p).val, ?_⟩
-  nlinarith
+  rw [← hpd]
+  ring
 
 /-- Flexible quotient form of the split reciprocal Dwork exponent
 normalization. -/
@@ -240,8 +240,8 @@ theorem dworkExponent_sub_val_div_descentRamificationIdx_eq_val_of_f_eq_one
   have hnum :
       p * S.stickOrdOrd (p - (a : ZMod p).val) =
         (ℓ - 1) * (a : ZMod p).val := by
-    rw [hord]
-    nlinarith
+    rw [hord, ← hpd]
+    ring
   rw [he, hnum, Nat.mul_comm (ℓ - 1) ((a : ZMod p).val),
     Nat.mul_div_left _ hℓ_sub_pos]
 
