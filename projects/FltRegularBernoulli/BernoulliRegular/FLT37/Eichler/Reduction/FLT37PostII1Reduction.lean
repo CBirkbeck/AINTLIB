@@ -39,8 +39,6 @@ entire Case-II II1 (Washington Lemma 9.2)** — is proven.
 
 noncomputable section
 
-open NumberField
-
 namespace BernoulliRegular.FLT37.Eichler
 
 open FLT37.LehmerVandiver.CaseII
