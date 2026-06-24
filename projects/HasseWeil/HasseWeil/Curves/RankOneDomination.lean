@@ -170,6 +170,42 @@ theorem Valuation.isEquiv_of_valuationSubring_le
   rw [Valuation.isEquiv_iff_valuationSubring]
   exact ValuationSubring.toLocalSubring_injective heq
 
+/-- **Overring transport: equal cut-out primes ⟹ equal overrings.** Two overrings
+`B C` of a valuation subring `A` that cut out the *same* prime of `A`
+(`idealOfLE A B = idealOfLE A C`) coincide. This is the injectivity half of the
+overring↔prime correspondence (`ValuationSubring.primeSpectrumEquiv`), used to
+transport `ofPrime A · ·` across an equality of primes. It is routed through
+`PrimeSpectrum` (which bundles the `IsPrime` instance) and `ofPrime_idealOfLE`,
+dodging the "motive not type correct" wall that a naive `congrArg`/`rw` on the
+instance-dependent `ofPrime A : (P : Ideal A) → [P.IsPrime] → ValuationSubring L`
+would hit. -/
+private theorem overring_eq_of_idealOfLE_eq {L : Type*} [Field L]
+    (A B C : ValuationSubring L) (hB : A ≤ B) (hC : A ≤ C)
+    (hEq : A.idealOfLE B hB = A.idealOfLE C hC) : B = C := by
+  have hPS : (⟨A.idealOfLE B hB, ValuationSubring.prime_idealOfLE A B hB⟩ : PrimeSpectrum A)
+      = ⟨A.idealOfLE C hC, ValuationSubring.prime_idealOfLE A C hC⟩ :=
+    PrimeSpectrum.ext hEq
+  have hval := congrArg (fun P ↦ ((ValuationSubring.primeSpectrumEquiv A) P).1) hPS
+  simpa only [ValuationSubring.primeSpectrumEquiv_apply, ValuationSubring.ofPrime_idealOfLE]
+    using hval
+
+/-- **Bottom-prime overring is the whole field.** An overring `B ≥ A` whose cut-out
+prime is `⊥` (`idealOfLE A B = ⊥`) is all of `⊤`: it cuts out the same prime as the
+top subring (`ValuationSubring.idealOfLE_top : idealOfLE A ⊤ = ⊥`), so transport
+(`overring_eq_of_idealOfLE_eq`) identifies them. -/
+private theorem overring_eq_top_of_idealOfLE_eq_bot {L : Type*} [Field L]
+    (A B : ValuationSubring L) (hB : A ≤ B) (hbot : A.idealOfLE B hB = ⊥) : B = ⊤ :=
+  overring_eq_of_idealOfLE_eq A B ⊤ hB le_top (by rw [hbot, ValuationSubring.idealOfLE_top])
+
+/-- **Maximal-prime overring is `A` itself.** An overring `B ≥ A` whose cut-out prime
+is the maximal ideal of `A` (`idealOfLE A B = maximalIdeal A`) equals `A`: it cuts out
+the same prime as the self-inclusion (`ValuationSubring.idealOfLE_self : idealOfLE A A = maximalIdeal A`),
+so transport (`overring_eq_of_idealOfLE_eq`) identifies them. -/
+private theorem overring_eq_self_of_idealOfLE_eq_maximalIdeal {L : Type*} [Field L]
+    (A B : ValuationSubring L) (hB : A ≤ B)
+    (hmax : A.idealOfLE B hB = IsLocalRing.maximalIdeal A) : B = A :=
+  overring_eq_of_idealOfLE_eq A B A hB le_rfl (by rw [hmax, ValuationSubring.idealOfLE_self])
+
 /-- **DVR-domination crux — rank-one overring is self-or-top.**
 
 For a valuation subring `A` of a field `L` that is a **discrete valuation ring**
@@ -187,59 +223,16 @@ The bottom prime gives the whole field (`ofPrime A ⊥ = ⊤`), the maximal idea
 theorem rankOne_valuationSubring_le_eq_of_ne_top {L : Type*} [Field L]
     (A B : ValuationSubring L) [IsDiscreteValuationRing A]
     (hAB : A ≤ B) (hB : B ≠ ⊤) : A = B := by
-  -- STRATEGY (assembly of existing mathlib pieces; the residual is just the wiring).
-  -- Overrings of `A` ↔ primes of `A` via `B ↦ idealOfLE A B`, with reconstruction
-  -- `ofPrime A (idealOfLE A B hAB) = B` (`ofPrime_idealOfLE`). The DVR `A` has a unique
-  -- nonzero prime `m_A` (`iff_pid_with_one_nonzero_prime`), so the prime `idealOfLE A B`
-  -- is `⊥` or `m_A`:
-  --   • `= m_A = idealOfLE A A le_rfl`  ⟹  `B = ofPrime A m_A = A`;
-  --   • `= ⊥ = idealOfLE A ⊤ le_top`    ⟹  `B = ofPrime A ⊥ = ⊤`, excluded by `hB`.
-  -- (`idealOfLE A A le_rfl = m_A` since the self-inclusion's comap is `id`;
-  --  `idealOfLE A ⊤ le_top = ⊥` since the maximal ideal of the field `⊤` is `⊥`.)
-  -- The remaining wiring transports `ofPrime A · ·` across an equality of primes; this
-  -- is delicate because `ofPrime A : (P : Ideal A) → [P.IsPrime] → ValuationSubring L`
-  -- is instance-dependent (naive `congrArg`/`rw` hit a "motive not type correct" wall).
-  -- The robust route is `ValuationSubring.primeSpectrumEquiv.injective` on `PrimeSpectrum`
-  -- (which bundles the `IsPrime` instance), reducing `B = A` to a `PrimeSpectrum`
-  -- equality `⟨idealOfLE A B, _⟩ = ⟨idealOfLE A A, _⟩`.
+  -- Outline: the overring `B` cuts out a prime `idealOfLE A B` of the DVR `A`, which has
+  -- Krull dimension ≤ 1 — so that prime is `⊥` or maximal. The `⊥` case forces `B = ⊤`
+  -- (`overring_eq_top_of_idealOfLE_eq_bot`), excluded by `hB`; the maximal case forces
+  -- `B = A` (`overring_eq_self_of_idealOfLE_eq_maximalIdeal`).
   classical
-  -- The prime of `A` cut out by the overring `B`.
   have hPprime : (A.idealOfLE B hAB).IsPrime := ValuationSubring.prime_idealOfLE A B hAB
-  -- Transport: equal primes ⟹ equal overrings, dodging the instance-motive wall by
-  -- routing through `primeSpectrumEquiv` (which bundles `IsPrime`) and `ofPrime_idealOfLE`.
-  have transport : ∀ (C : ValuationSubring L) (hC : A ≤ C),
-      A.idealOfLE B hAB = A.idealOfLE C hC → B = C := by
-    intro C hC hEq
-    have hPS : (⟨A.idealOfLE B hAB, hPprime⟩ : PrimeSpectrum A)
-        = ⟨A.idealOfLE C hC, ValuationSubring.prime_idealOfLE A C hC⟩ :=
-      PrimeSpectrum.ext hEq
-    have hval := congrArg (fun P ↦ ((ValuationSubring.primeSpectrumEquiv A) P).1) hPS
-    simpa only [ValuationSubring.primeSpectrumEquiv_apply, ValuationSubring.ofPrime_idealOfLE]
-      using hval
-  -- The DVR `A` has Krull dimension ≤ 1, so its prime `idealOfLE A B` is `⊥` or maximal.
   rcases eq_or_ne (A.idealOfLE B hAB) ⊥ with hbot | hne
-  · -- Bottom prime: `B = ofPrime A ⊥ = ⊤`, contradicting `hB`.
-    exfalso
-    apply hB
-    refine transport ⊤ le_top ?_
-    rw [hbot]
-    -- `idealOfLE A ⊤ le_top = ⊥`: the maximal ideal of the field `⊤` is `⊥`, and the
-    -- inclusion `A ↪ ⊤` is injective so its `comap ⊥ = ⊥`.
-    rw [ValuationSubring.idealOfLE, IsLocalRing.maximalIdeal_eq_bot]
-    refine (Ideal.comap_bot_of_injective (ValuationSubring.inclusion A ⊤ le_top) ?_).symm
-    intro a b hab
-    have hab' := congrArg (Subtype.val (p := fun y ↦ y ∈ (⊤ : ValuationSubring L))) hab
-    rw [ValuationSubring.inclusion, Subring.coe_inclusion, Subring.coe_inclusion] at hab'
-    exact Subtype.ext hab'
-  · -- Nonzero prime in a dimension-≤-1 ring is maximal, hence `= maximalIdeal A`.
-    have hmax : (A.idealOfLE B hAB).IsMaximal := hPprime.isMaximal hne
-    refine (transport A le_rfl ?_).symm
-    rw [IsLocalRing.eq_maximalIdeal hmax]
-    -- `idealOfLE A A le_rfl = maximalIdeal A`: the self-inclusion's comap is the identity.
-    rw [ValuationSubring.idealOfLE]
-    ext x
-    have hx : (ValuationSubring.inclusion A A le_rfl) x = x :=
-      Subtype.ext (by rw [ValuationSubring.inclusion, Subring.coe_inclusion])
-    rw [Ideal.mem_comap, hx]
+  · exact absurd (overring_eq_top_of_idealOfLE_eq_bot A B hAB hbot) hB
+  · have hmax : (A.idealOfLE B hAB).IsMaximal := hPprime.isMaximal hne
+    exact (overring_eq_self_of_idealOfLE_eq_maximalIdeal A B hAB
+      (IsLocalRing.eq_maximalIdeal hmax)).symm
 
 end HasseWeil.Curves
