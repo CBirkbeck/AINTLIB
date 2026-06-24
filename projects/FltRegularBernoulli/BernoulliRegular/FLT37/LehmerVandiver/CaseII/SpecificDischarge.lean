@@ -91,14 +91,9 @@ lemma fractionalIdeal_div_self_isPrincipal (I : FractionalIdeal (𝓞 K)⁰ K) :
     Submodule.IsPrincipal ((I / I : FractionalIdeal (𝓞 K)⁰ K) :
       Submodule (𝓞 K) K) := by
   by_cases hI : I = 0
-  · rw [hI, zero_div]
-    rw [FractionalIdeal.isPrincipal_iff]
+  · rw [hI, zero_div, FractionalIdeal.isPrincipal_iff]
     exact ⟨0, by simp⟩
-  · have hdiv : I / I = 1 := by
-      rw [div_eq_mul_inv]
-      exact mul_inv_cancel₀ hI
-    rw [hdiv]
-    rw [FractionalIdeal.isPrincipal_iff]
+  · rw [div_self hI, FractionalIdeal.isPrincipal_iff]
     exact ⟨1, by simp⟩
 
 omit [Fact p.Prime] [NeZero p] [IsCyclotomicExtension {p} ℚ K]
@@ -121,11 +116,9 @@ theorem realIdealModel_of_integral_real_generator
     ∃ J : Ideal (𝓞 (K⁺)), J ≠ ⊥ ∧
       F = (J.map (algebraMap (𝓞 (K⁺)) (𝓞 K)) :
         FractionalIdeal (𝓞 K)⁰ K) := by
-  refine ⟨Ideal.span ({b} : Set (𝓞 (K⁺))), ?_, ?_⟩
-  · intro hbot
-    exact hb (Ideal.span_singleton_eq_bot.mp hbot)
-  · rw [hF, Ideal.map_span, Set.image_singleton,
-      FractionalIdeal.coeIdeal_span_singleton]
+  refine ⟨Ideal.span ({b} : Set (𝓞 (K⁺))), mt Ideal.span_singleton_eq_bot.mp hb, ?_⟩
+  rw [hF, Ideal.map_span, Set.image_singleton,
+    FractionalIdeal.coeIdeal_span_singleton]
 
 omit [NumberField.IsCMField K] in
 /-- The `p`-th power of a specific case-II auxiliary quotient is principal.
@@ -199,12 +192,7 @@ theorem caseII_realIdealModel_plusClass_pow_eq_one
       (Ideal.map_pow (algebraMap (𝓞 (K⁺)) (𝓞 K)) J p).symm] at hJ_pow_principal
     exact isPrincipal_of_isPrincipal_map_Kplus (p := p) (hp_odd := hp_ne_two)
       (K := K) (J ^ p) hJ_pow_principal
-  have hp_pos : 0 < p := (Fact.out : Nat.Prime p).pos
-  have hJp_ne : J ^ p ≠ ⊥ := by
-    intro h
-    apply hJ_ne
-    rcases pow_eq_zero_iff hp_pos.ne' |>.mp h with rfl
-    rfl
+  have hJp_ne : J ^ p ≠ ⊥ := pow_ne_zero p hJ_ne
   have hJ_ne0 : J ∈ nonZeroDivisors (Ideal (𝓞 (K⁺))) :=
     mem_nonZeroDivisors_iff_ne_zero.mpr hJ_ne
   have hJp_ne0 : J ^ p ∈ nonZeroDivisors (Ideal (𝓞 (K⁺))) :=
@@ -495,7 +483,6 @@ theorem caseIIPrincipalDischargeOnSpecific_of_realIdealModel_ne
 -- only available after `SpecificChain.lean`. See ticket C2-1 in
 -- `.mathlib-quality/flt37-final-phase-tickets.md`.
 
-set_option backward.isDefEq.respectTransparency false in
 omit [NeZero p] [NumberField.IsCMField K] in
 /-- **Regular-prime fill**: under regularity, `AdaptedKummersLemma`
 holds. This is a direct repackaging of flt-regular's
@@ -507,10 +494,9 @@ program (or its refined `OnSpecific` variant). -/
 theorem adaptedKummersLemma_of_regular [Fintype (ClassGroup (𝓞 K))]
     (hreg : p.Coprime <| Fintype.card <| ClassGroup (𝓞 K))
     (hp_ne_two : p ≠ 2) :
-    AdaptedKummersLemma p K := fun u hcong ↦
+    AdaptedKummersLemma p K := fun u hcong =>
   eq_pow_prime_of_unit_of_congruent (K := K) hp_ne_two hreg u hcong
 
-set_option backward.isDefEq.respectTransparency false in
 omit [Fact p.Prime] [NeZero p] [IsCyclotomicExtension {p} ℚ K] [NumberField.IsCMField K] in
 /-- **Regular-prime fill of `CaseIIPrincipalDischarge`**: under
 regularity (p coprime to |Cl(K)|), the principalization predicate
@@ -522,10 +508,9 @@ the predicate must be filled via class-equality analysis on the
 specific case-II ideals (`CaseIIPrincipalDischargeOnSpecific`). -/
 theorem caseIIPrincipalDischarge_of_regular [Fintype (ClassGroup (𝓞 K))]
     (hreg : p.Coprime <| Fintype.card <| ClassGroup (𝓞 K)) :
-    CaseIIPrincipalDischarge p K := fun I hIp ↦
+    CaseIIPrincipalDischarge p K := fun I hIp =>
   isPrincipal_of_isPrincipal_pow_of_Coprime' p hreg I hIp
 
-set_option backward.isDefEq.respectTransparency false in
 omit [NeZero p] [NumberField.IsCMField K] in
 /-- **Both case-II discharges hold under regularity.** Combined fact:
 under regularity, both `CaseIIPrincipalDischarge` and
@@ -539,7 +524,6 @@ theorem caseII_discharges_of_regular
   ⟨caseIIPrincipalDischarge_of_regular p K hreg,
    adaptedKummersLemma_of_regular p K hreg hp_ne_two⟩
 
-set_option backward.isDefEq.respectTransparency false in
 omit [NumberField.IsCMField K] in
 /-- **Regular-prime fill of `CaseIIPrincipalDischargeOnSpecific`.**
 Trivial composition: under regularity, the specific predicate is also
