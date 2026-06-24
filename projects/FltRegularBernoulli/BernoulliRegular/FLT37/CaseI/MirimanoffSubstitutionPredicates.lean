@@ -67,7 +67,7 @@ theorem fltCaseI_zeta_pow_mirimanoff_eq_of_regular
   · -- m_k ≤ k·m₁; difference is k·m₁ - m_k ≥ 0.
     -- ζ^{k·m₁} = ζ^{m_k} · ζ^{k·m₁ - m_k} = ζ^{m_k} · 1 (since p ∣ k·m₁ - m_k).
     have h_diff_dvd : (p : ℤ) ∣ ((k : ℤ) * m₁ - m_k) := by
-      rw [show ((k : ℤ) * m₁ - m_k) = (m₁ : ℤ) * k - m_k * 1 from by ring]
+      rw [show ((k : ℤ) * m₁ - m_k) = (m₁ : ℤ) * k - m_k * 1 by ring]
       exact h_dvd
     obtain ⟨q, hq⟩ : (p : ℕ) ∣ (k * m₁ - m_k) := by
       have h_eq : (((k * m₁ - m_k : ℕ) : ℤ)) = (k : ℤ) * m₁ - m_k := by
