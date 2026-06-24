@@ -122,9 +122,7 @@ theorem natCast_mem_of_lies_over
     {ℓ : ℕ} (h : (ℓ : 𝓞 K) ∈ P) :
     (ℓ : 𝓞 R') ∈ 𝔭 := by
   -- (ℓ : 𝓞 R') = algebraMap (ℓ : 𝓞 K). Then ℓ ∈ P ⟹ algebraMap ℓ ∈ algebraMap '' P ⊆ 𝔭.
-  rw [← map_natCast (algebraMap (𝓞 K) (𝓞 R')) ℓ]
-  -- Goal: algebraMap (ℓ : 𝓞 K) ∈ 𝔭
-  rw [← Ideal.mem_comap, h_over]
+  rw [← map_natCast (algebraMap (𝓞 K) (𝓞 R')) ℓ, ← Ideal.mem_comap, h_over]
   exact h
 
 /-- **CharP transfer**: if `𝔭 ⊂ 𝓞 R'` lies over `P ⊂ 𝓞 K` and `P` contains
@@ -445,8 +443,7 @@ theorem ConcreteStickelbergerSetup.descentPrime_under_eq_span_ell
   have h_ell_in : (ℓ : 𝓞 K) ∈ S.descentPrime :=
     S.descentPrime_contains_ell
   have h_ell_in_under : (ℓ : ℤ) ∈ S.descentPrime.under ℤ := by
-    rw [Ideal.mem_under,
-      show (algebraMap ℤ (𝓞 K) (ℓ : ℤ)) = (ℓ : 𝓞 K) from by push_cast; rfl]
+    rw [Ideal.mem_under, map_natCast (algebraMap ℤ (𝓞 K)) ℓ]
     exact h_ell_in
   have h_under_ne : S.descentPrime.under ℤ ≠ ⊥ := by
     intro hbot
