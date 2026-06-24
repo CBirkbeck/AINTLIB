@@ -36,7 +36,7 @@ open NumberField IsCyclotomicExtension NumberField.IsCMField Finset
 
 namespace BernoulliRegular.FLT37.Eichler
 
-open FLT37 BernoulliRegular
+open FLT37
 
 /-! ## 1. `σ(ζ^e) = ζ^{-e}` -/
 
