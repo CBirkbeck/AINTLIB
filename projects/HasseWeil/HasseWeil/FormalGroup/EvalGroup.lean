@@ -509,6 +509,55 @@ theorem FormalGroup.coeff_j0_of_ne_one (F : FormalGroup R) (j : ℕ) (hj : j ≠
       Matrix.cons_val_zero, Matrix.cons_val_one]
     rw [coeff_single_X_pow_mul_zero_pow_of_ne hd, smul_zero]
 
+/-- Per-term evaluation in the `hasSum_eval₂` expansion of `F(x, 0)`: the term of the
+`eval₂`-sum of `F.toSeries` at `![x, 0]` indexed by `d` equals `x` when `d = single 0 1`
+and vanishes otherwise.
+
+Case split on `d 1`:
+* `d 1 ≠ 0`: the factor `0 ^ (d 1)` is zero, killing the whole term;
+* `d 1 = 0`: then `d = single 0 (d 0)`, and either `d 0 = 1` (so `d = single 0 1`, the
+  coefficient is `1` by `coeff_10` and the term is `1 * x ^ 1 = x`) or `d 0 ≠ 1` (so the
+  coefficient `coeff (d 0, 0) F` vanishes by `coeff_j0_of_ne_one`). -/
+private lemma evalAdd_zero_right_term_eq (F : FormalGroup R)
+    (x : IsLocalRing.maximalIdeal R) (d : Fin 2 →₀ ℕ) :
+    (RingHom.id R) (MvPowerSeries.coeff d F.toSeries) *
+        (d.prod fun s e ↦ (![x.1, (0 : R)] : Fin 2 → R) s ^ e) =
+      (if d = Finsupp.single 0 1 then x.1 else 0) := by
+  simp only [RingHom.id_apply]
+  by_cases hd1 : d 1 = 0
+  · -- d 1 = 0. Then d = single 0 (d 0).
+    have hdeq : d = Finsupp.single (0 : Fin 2) (d 0) := by
+      ext i; fin_cases i
+      · simp
+      · simp [hd1]
+    rw [Finsupp.prod_fintype _ _ (fun i ↦ pow_zero _), Fin.prod_univ_two,
+        Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_zero,
+        hd1, pow_zero, mul_one]
+    by_cases hd0 : d 0 = 1
+    · -- coeff F = 1, term = 1 * x^1 = x.
+      -- First rewrite the coeff and power using d = single 0 1.
+      have hd_single : d = Finsupp.single (0 : Fin 2) 1 := by
+        rw [hdeq, hd0]
+      rw [hd_single, HasseWeil.FG.FormalGroup.coeff_10]
+      rw [show (Finsupp.single (0 : Fin 2) 1) 0 = 1 from by
+            simp]
+      rw [pow_one, one_mul, if_pos rfl]
+    · -- coeff F = 0.
+      rw [hdeq, F.coeff_j0_of_ne_one (d 0) hd0, zero_mul, if_neg]
+      intro hcontra
+      apply hd0
+      have := DFunLike.congr_fun hcontra 0
+      simpa [Finsupp.single_apply] using this
+  · -- d 1 ≠ 0. 0^(d 1) = 0, so product has a zero factor.
+    rw [Finsupp.prod_fintype _ _ (fun i ↦ pow_zero _), Fin.prod_univ_two,
+        Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_zero,
+        zero_pow hd1, mul_zero, mul_zero, if_neg]
+    intro hcontra
+    -- d = single 0 1 means d 1 = 0, contradicting hd1.
+    apply hd1
+    have := DFunLike.congr_fun hcontra 1
+    simpa [Finsupp.single_apply] using this
+
 /-- Right-unit: `evalAdd F x ⟨0, _⟩ = x.1`. -/
 theorem FormalGroup.evalAdd_zero_right
     (hAdic : IsAdic (IsLocalRing.maximalIdeal R))
@@ -519,60 +568,13 @@ theorem FormalGroup.evalAdd_zero_right
     (by intro i; fin_cases i <;> simp [x.2])
   have hcid : Continuous (RingHom.id R) := continuous_id
   have hsum := MvPowerSeries.hasSum_eval₂ hcid ha F.toSeries
-  -- Each term: coeff d F * x^(d 0) * 0^(d 1).
-  -- If d 1 > 0: 0^(d 1) = 0.
-  -- If d 1 = 0: term = coeff (d 0, 0) F * x^(d 0).
-  --   For d 0 ≠ 1 (and d 1 = 0), coeff (d 0, 0) F = 0 by coeff_j0_of_ne_one.
-  --   For (d 0, d 1) = (1, 0), coeff = 1 (by coeff_10), term = x.
-  -- So the sum has only one nonzero term: x.
-  have hterm_eq : ∀ d : Fin 2 →₀ ℕ,
-      (RingHom.id R) (MvPowerSeries.coeff d F.toSeries) *
-        (d.prod fun s e ↦ (![x.1, (0 : R)] : Fin 2 → R) s ^ e) =
-      (if d = Finsupp.single 0 1 then x.1 else 0) := by
-    intro d
-    simp only [RingHom.id_apply]
-    by_cases hd1 : d 1 = 0
-    · -- d 1 = 0. Then d = single 0 (d 0).
-      have hdeq : d = Finsupp.single (0 : Fin 2) (d 0) := by
-        ext i; fin_cases i
-        · simp
-        · simp [hd1]
-      rw [Finsupp.prod_fintype _ _ (fun i ↦ pow_zero _), Fin.prod_univ_two,
-          Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_zero,
-          hd1, pow_zero, mul_one]
-      by_cases hd0 : d 0 = 1
-      · -- coeff F = 1, term = 1 * x^1 = x.
-        -- First rewrite the coeff and power using d = single 0 1.
-        have hd_single : d = Finsupp.single (0 : Fin 2) 1 := by
-          rw [hdeq, hd0]
-        rw [hd_single, HasseWeil.FG.FormalGroup.coeff_10]
-        rw [show (Finsupp.single (0 : Fin 2) 1) 0 = 1 from by
-              simp]
-        rw [pow_one, one_mul, if_pos rfl]
-      · -- coeff F = 0.
-        rw [hdeq, F.coeff_j0_of_ne_one (d 0) hd0, zero_mul, if_neg]
-        intro hcontra
-        apply hd0
-        have := DFunLike.congr_fun hcontra 0
-        simpa [Finsupp.single_apply] using this
-    · -- d 1 ≠ 0. 0^(d 1) = 0, so product has a zero factor.
-      rw [Finsupp.prod_fintype _ _ (fun i ↦ pow_zero _), Fin.prod_univ_two,
-          Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_zero,
-          zero_pow hd1, mul_zero, mul_zero, if_neg]
-      intro hcontra
-      -- d = single 0 1 means d 1 = 0, contradicting hd1.
-      apply hd1
-      have := DFunLike.congr_fun hcontra 1
-      simpa [Finsupp.single_apply] using this
-  -- So hsum is the sum of x at d = single 0 1 and 0 elsewhere.
-  have hsum_x : HasSum (fun d : Fin 2 →₀ ℕ ↦
-      (if d = Finsupp.single 0 1 then x.1 else 0)) x.1 :=
-    hasSum_ite_eq (Finsupp.single (0 : Fin 2) 1) x.1
+  -- Every term of the expansion is `x` at `d = single 0 1` and `0` elsewhere
+  -- (`evalAdd_zero_right_term_eq`), so the sum collapses to the single term `x`.
   have hsum_rewrite : HasSum (fun d : Fin 2 →₀ ℕ ↦
       (RingHom.id R) (MvPowerSeries.coeff d F.toSeries) *
         (d.prod fun s e ↦ (![x.1, (0 : R)] : Fin 2 → R) s ^ e)) x.1 := by
-    convert hsum_x using 1
-    ext d; exact hterm_eq d
+    convert hasSum_ite_eq (Finsupp.single (0 : Fin 2) 1) x.1 using 1
+    ext d; exact evalAdd_zero_right_term_eq F x d
   exact hsum.unique hsum_rewrite
 
 omit [IsLocalRing R] [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R]
