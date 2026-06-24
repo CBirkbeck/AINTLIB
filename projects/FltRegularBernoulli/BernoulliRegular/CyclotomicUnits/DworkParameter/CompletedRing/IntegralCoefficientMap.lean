@@ -27,7 +27,6 @@ The actual completed element `G_p(lambda)` is not constructed here yet.
 noncomputable section
 
 open scoped NumberField
-open PowerSeries
 
 namespace BernoulliRegular
 namespace CyclotomicUnits
