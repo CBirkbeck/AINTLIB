@@ -69,8 +69,6 @@ noncomputable section
 
 set_option maxRecDepth 4000
 
-open NumberField
-
 namespace BernoulliRegular.FLT37.Eichler
 
 open BernoulliRegular.CyclotomicUnits
@@ -317,7 +315,7 @@ theorem caseIIEx811EigenVandermonde37_antecedent_inhabited
             (fun a : Fin (kummerLogRank 37) ↦ (e a : ZMod 37)) j = 0 := by
   refine ⟨0, fun j _hj ↦ ?_⟩
   rw [show (fun a : Fin (kummerLogRank 37) ↦ ((0 : Fin (kummerLogRank 37) → ℤ) a : ZMod 37)) =
-      (0 : Fin (kummerLogRank 37) → ZMod 37) from by funext a; simp]
+      (0 : Fin (kummerLogRank 37) → ZMod 37) by funext a; simp]
   rw [Matrix.mulVec_zero, Pi.zero_apply]
 
 /-! ## 5. `LeadingExponentEx811Core37` from the matrix-kernel collapse + the residual
