@@ -150,8 +150,7 @@ theorem map_c (η : nthRootsFinset 37 (1 : 𝓞 K)) :
     (divZetaSubOneDvdGcd hp D.hζ D.equation D.hy η).map
         (ringOfIntegersComplexConj K).toRingEquiv.toRingHom =
       divZetaSubOneDvdGcd hp D.hζ D.equation D.hy η := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  have h37z : (D.hζ.toInteger) ^ 37 = 1 := D.hζ.toInteger_isPrimitiveRoot.pow_eq_one
+  have h37z : D.hζ.toInteger ^ 37 = 1 := D.hζ.toInteger_isPrimitiveRoot.pow_eq_one
   have h37e : (η : 𝓞 K) ^ 37 = 1 := (mem_nthRootsFinset (by norm_num) _).mp η.2
   have hkey := m_mul_c_mul_p hp D.hζ D.equation D.hy η
   have hmap := congrArg
@@ -170,7 +169,6 @@ theorem map_rootIdeal (η : nthRootsFinset 37 (1 : 𝓞 K)) :
     (rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy η).map
         (ringOfIntegersComplexConj K).toRingEquiv.toRingHom =
       rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy η := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   have hspec := root_div_zeta_sub_one_dvd_gcd_spec hp D.hζ D.equation D.hy η
   have h1 : ((rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy η).map
         (ringOfIntegersComplexConj K).toRingEquiv.toRingHom) ^ 37 =
