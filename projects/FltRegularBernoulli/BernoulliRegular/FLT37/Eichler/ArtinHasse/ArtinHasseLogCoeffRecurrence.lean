@@ -33,8 +33,6 @@ single explicit rational built from `c(1), …, c(69)`.
 
 noncomputable section
 
-open scoped BigOperators
-
 namespace BernoulliRegular.FLT37.Eichler
 
 open PowerSeries
