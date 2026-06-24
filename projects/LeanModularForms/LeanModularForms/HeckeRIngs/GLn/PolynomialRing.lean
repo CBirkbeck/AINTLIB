@@ -229,7 +229,7 @@ lemma T_elem_ppow_in_range (p : ℕ) (hp : p.Prime) (e : Fin 2 → ℕ) (hmono :
       ← T_diag_scalar_mul 2 (p ^ (e 0)) (pow_pos hp.pos _) (ppowDiag 2 p ![0, e 1 - e 0])
         (ppowDiag_pos 2 p hp _)
         (divChain_ppow 2 p _ (by
-          intro i j hij; fin_cases i <;> fin_cases j <;> simp_all [Fin.le_def]))]
+          intro i j hij; fin_cases i <;> fin_cases j <;> simp_all))]
     apply (evalHom 2 p).range.mul_mem
     · rw [← T_pp_pow p hp (e 0), ← T_gen_one_eq_T_pp p hp]
       exact (evalHom 2 p).range.pow_mem (X_one_mem_range p) _
@@ -917,7 +917,7 @@ private lemma evalHom_apply_eq_sum_monomial (p : ℕ) (R : MvPolynomial (Fin 2) 
 theorem evalHom_injective_two (p : ℕ) (hp : p.Prime) :
     Function.Injective (evalHom 2 p) := by
   intro P Q hPQ
-  rw [← sub_eq_zero]; set R := P - Q with hR_def
+  rw [← sub_eq_zero]; set R := P - Q
   have hR : evalHom 2 p R = 0 := by simp [R, map_sub, hPQ]
   by_contra hR_ne
   obtain ⟨s, hs_mem, hs_min⟩ := Finset.exists_min_image R.support
@@ -987,6 +987,5 @@ noncomputable def R_p_isPolynomialRing :
   RingEquiv.ofBijective (Inj.evalHomR n p hp)
     ⟨Inj.evalHomR_injective n p hp (evalHom_injective n p hp),
      Inj.evalHomR_surjective n p hp (T_gen_generates_R_p n p hp)⟩
-
 
 end HeckeRing.GLn
