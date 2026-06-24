@@ -381,8 +381,6 @@ theorem zetaSubOne_dvd_sub_complexConj_general [IsCMField K] (x : 𝓞 K) :
   | algebraMap r =>
     have h_real : ringOfIntegersComplexConj K ((algebraMap ℤ (𝓞 K)) r) =
         (algebraMap ℤ (𝓞 K)) r := by
-      change ringOfIntegersComplexConj K ((algebraMap ℤ (𝓞 K)) r) =
-        (algebraMap ℤ (𝓞 K)) r
       rw [IsScalarTower.algebraMap_apply ℤ (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K),
         AlgEquiv.commutes]
     rw [h_real, sub_self]
@@ -539,10 +537,10 @@ theorem exists_int_zetaSubOne_sq_dvd_sub_of_real [IsCMField K]
   -- So 1 - u = 1 + ζ^{p-1} = 2 + (ζ-1)·cyclotomicUnit_{p-1}.
   -- Hence 2w + (ζ-1)·cycl_{p-1}·w = u·(ζ-1)·q.
   -- So 2w = u·(ζ-1)·q - (ζ-1)·cycl_{p-1}·w = (ζ-1)·(u·q - cycl_{p-1}·w).
-  set u : 𝓞 K := ((zetaSubOneConjUnit p K : (𝓞 K)ˣ) : 𝓞 K) with hu_def
-  set z : 𝓞 K := (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) with hz_def
-  set ζ : 𝓞 K := ((zeta_spec p ℚ K).toInteger : 𝓞 K) with hζ_def
-  set c : 𝓞 K := cyclotomicUnit p K (p - 1) with hc_def
+  set u : 𝓞 K := ((zetaSubOneConjUnit p K : (𝓞 K)ˣ) : 𝓞 K)
+  set z : 𝓞 K := (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1)
+  set ζ : 𝓞 K := ((zeta_spec p ℚ K).toInteger : 𝓞 K)
+  set c : 𝓞 K := cyclotomicUnit p K (p - 1)
   -- h_w_eq_u_sigma: w = u · σ(w)
   -- hq: σ(w) - w = z · q
   -- h_u_val: u = -ζ^{p-1}
@@ -594,13 +592,9 @@ theorem exists_int_zetaSubOne_sq_dvd_algebraMap_real_unit_sub
           (v_plus : 𝓞 (NumberField.maximalRealSubfield K))) - (V₀ : 𝓞 K)) := by
   apply exists_int_zetaSubOne_sq_dvd_sub_of_real (p := p) (K := K) hp_odd
   -- Show algebraMap v_plus is σ-fixed (real).
-  change ringOfIntegersComplexConj K
-      ((algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K))
-        (v_plus : 𝓞 (NumberField.maximalRealSubfield K))) = _
   rw [IsScalarTower.algebraMap_apply
     (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K),
     AlgEquiv.commutes]
-
 
 /-- `cyclotomicUnit k ≡ k (mod ζ - 1)` in `𝓞 K`: the difference
 `cyclotomicUnit k - k` is divisible by `ζ - 1`. -/
@@ -621,12 +615,7 @@ theorem zetaSubOne_dvd_cyclotomicUnit_sub_natCast (k : ℕ) :
     rw [hsplit]
     refine dvd_add ih ?_
     -- ζ - 1 ∣ ζ^n - 1
-    have htel : (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) *
-        cyclotomicUnit p K n =
-        ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ n - 1 := by
-      have h := one_sub_zeta_mul_cyclotomicUnit p K n
-      linear_combination -h
-    exact ⟨cyclotomicUnit p K n, htel.symm⟩
+    exact ⟨cyclotomicUnit p K n, (zeta_sub_one_mul_cyclotomicUnit p K n).symm⟩
 
 /-- Equivalent form via `zetaSubOne`. -/
 theorem zetaSubOne_dvd_cyclotomicUnit_sub_natCast' (k : ℕ) :
@@ -738,10 +727,7 @@ theorem zetaSubOne_sq_dvd_factor_sub_taylor (a b : ℤ) (k : ℕ) :
           (b : 𝓞 K) * (k : 𝓞 K) *
             (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1))) := by
   -- ζ^k - 1 = (ζ - 1) * cyclotomicUnit_k, and cyclotomicUnit_k - k is divisible by (ζ - 1).
-  have htel : (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) * cyclotomicUnit p K k =
-      ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ k - 1 := by
-    have h := one_sub_zeta_mul_cyclotomicUnit p K k
-    linear_combination -h
+  have htel := zeta_sub_one_mul_cyclotomicUnit p K k
   obtain ⟨w, hw⟩ : (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) ∣
       cyclotomicUnit p K k - (k : 𝓞 K) :=
     zetaSubOne_dvd_cyclotomicUnit_sub_natCast p K k
@@ -814,10 +800,7 @@ theorem zetaSubOne_sq_dvd_zeta_pow_sub_one_sub_natCast_mul (m : ℕ) :
     (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) ^ 2 ∣
       ((((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ m - 1) -
         (m : 𝓞 K) * (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1)) := by
-  have htel : (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) * cyclotomicUnit p K m =
-      ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ m - 1 := by
-    have h := one_sub_zeta_mul_cyclotomicUnit p K m
-    linear_combination -h
+  have htel := zeta_sub_one_mul_cyclotomicUnit p K m
   obtain ⟨w, hw⟩ : (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) ∣
       cyclotomicUnit p K m - (m : 𝓞 K) :=
     zetaSubOne_dvd_cyclotomicUnit_sub_natCast p K m
