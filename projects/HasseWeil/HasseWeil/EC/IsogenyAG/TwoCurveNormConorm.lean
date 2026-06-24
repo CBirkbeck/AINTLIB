@@ -236,6 +236,67 @@ for the smooth curve `E₂`, in its general (non-`B`) form.  The proof is the sa
 `NormConormIntegralClosure.bPrime_valuation_eq_pointValuation_of_coordGen_le_one`, transcribed to a
 generic surjective `ℤᵐ⁰`-valued valuation with prescribed affine center. -/
 
+omit [DecidableEq F] [IsAlgClosed F] in
+/-- **The valuation subring of a surjective `ℤᵐ⁰`-valued valuation is proper** (`≠ ⊤`).  A surjective
+`w` is nontrivial — it hits `exp 1 ≠ 0, 1` — so by `Valuation.valuationSubring_eq_top_iff` its
+valuation subring cannot be all of `K`.  (Local helper for `eq_pointValuation_of_center`; the
+`NormConormIntegralClosure` analogue is private to its file.) -/
+private theorem valuationSubring_ne_top_of_surjective_withZeroInt {K : Type*} [Field K]
+    (w : Valuation K (WithZero (Multiplicative ℤ))) (hwsurj : Function.Surjective w) :
+    w.valuationSubring ≠ ⊤ := by
+  have hNontriv : w.IsNontrivial := by
+    refine ⟨?_⟩
+    obtain ⟨z, hz⟩ := hwsurj (WithZero.exp (1 : ℤ))
+    refine ⟨z, ?_, ?_⟩
+    · rw [hz]; exact WithZero.exp_ne_zero
+    · rw [hz, show (1 : WithZero (Multiplicative ℤ)) = WithZero.exp (0 : ℤ) from
+        (WithZero.exp_zero).symm, Ne, WithZero.exp_inj]; norm_num
+  intro htop
+  exact (Valuation.valuationSubring_eq_top_iff _).mp htop hNontriv
+
+set_option synthInstance.maxHeartbeats 400000 in
+set_option maxHeartbeats 800000 in
+omit [DecidableEq F] [IsAlgClosed F] in
+/-- **`O_Q ⊆ O_w` for a valuation with affine center `m_Q`** (the DVR-domination containment, downward
+half).  If `w ≤ 1` on the coordinate ring `F[C]` and has center exactly `m_Q`, then every
+`pointValuation Q`-integer is a `w`-integer: write such an `f = a / s` with `a ∈ F[C]`,
+`s ∉ m_Q`; then `w(s) = 1` (it is `≤ 1` by `hle` and not `< 1` since `s ∉ m_Q` via `hcenter`), so
+`w(f) = w(a) / 1 = w(a) ≤ 1`.  (Local helper for `eq_pointValuation_of_center`.) -/
+private theorem pointValuationSubring_le_valuationSubring_of_center
+    (C : SmoothPlaneCurve F) [C.toAffine.IsElliptic] [IsIntegrallyClosed C.CoordinateRing]
+    (Q : C.SmoothPoint)
+    (w : Valuation C.FunctionField (WithZero (Multiplicative ℤ)))
+    (hle : ∀ b : C.CoordinateRing, w (algebraMap C.CoordinateRing C.FunctionField b) ≤ 1)
+    (hcenter : ∀ b : C.CoordinateRing,
+      w (algebraMap C.CoordinateRing C.FunctionField b) < 1 ↔ b ∈ C.maximalIdealAt Q) :
+    (C.pointValuation Q).valuationSubring ≤ w.valuationSubring := by
+  classical
+  intro f hf
+  obtain ⟨x, hx_eq⟩ := (SmoothPlaneCurve.mem_localRingAt_image_iff_pointValuation_le_one f).mpr
+    ((Valuation.mem_valuationSubring_iff _ f).mp hf)
+  obtain ⟨a, s, hxas⟩ := IsLocalization.exists_mk'_eq (C.maximalIdealAt Q).primeCompl x
+  set sv : C.CoordinateRing := (s : C.CoordinateRing) with hsv
+  have hs_notin : sv ∉ C.maximalIdealAt Q := Ideal.mem_primeCompl_iff.mp s.2
+  have hs_ne : sv ≠ 0 := fun h => hs_notin (h ▸ Submodule.zero_mem _)
+  have hs_map_ne : algebraMap C.CoordinateRing C.FunctionField sv ≠ 0 :=
+    (map_ne_zero_iff _ (IsFractionRing.injective C.CoordinateRing C.FunctionField)).mpr hs_ne
+  have hf_eq : f = algebraMap C.CoordinateRing C.FunctionField a /
+      algebraMap C.CoordinateRing C.FunctionField sv := by
+    rw [eq_div_iff hs_map_ne, ← hx_eq, ← hxas,
+      IsScalarTower.algebraMap_apply C.CoordinateRing (C.localRingAt Q) C.FunctionField sv,
+      IsScalarTower.algebraMap_apply C.CoordinateRing (C.localRingAt Q) C.FunctionField a,
+      ← map_mul]
+    congr 1
+    exact IsLocalization.mk'_spec (C.localRingAt Q) a s
+  have hws : w (algebraMap C.CoordinateRing C.FunctionField sv) = 1 := by
+    refine le_antisymm (hle sv) ?_
+    by_contra hlt
+    rw [not_le] at hlt
+    exact hs_notin ((hcenter sv).mp hlt)
+  refine (Valuation.mem_valuationSubring_iff _ f).mpr ?_
+  rw [hf_eq, map_div₀ w, hws, div_one]
+  exact hle a
+
 set_option synthInstance.maxHeartbeats 400000 in
 set_option maxHeartbeats 800000 in
 omit [DecidableEq F] [IsAlgClosed F] in
@@ -267,44 +328,9 @@ theorem eq_pointValuation_of_center
   haveI : IsDiscreteValuationRing Bv :=
     valuationSubring_isDVR_of_surjective_withZeroInt _ hpvsurj
   -- `Bv ⊆ A`: every `pointValuation Q`-integer is a `w`-integer (write `f = a / s`, `s ∉ m_Q`).
-  have hBA : Bv ≤ A := by
-    intro f hf
-    obtain ⟨x, hx_eq⟩ := (SmoothPlaneCurve.mem_localRingAt_image_iff_pointValuation_le_one f).mpr
-      ((Valuation.mem_valuationSubring_iff _ f).mp hf)
-    obtain ⟨a, s, hxas⟩ := IsLocalization.exists_mk'_eq (C.maximalIdealAt Q).primeCompl x
-    set sv : C.CoordinateRing := (s : C.CoordinateRing) with hsv
-    have hs_notin : sv ∉ C.maximalIdealAt Q := Ideal.mem_primeCompl_iff.mp s.2
-    have hs_ne : sv ≠ 0 := fun h => hs_notin (h ▸ Submodule.zero_mem _)
-    have hs_map_ne : algebraMap C.CoordinateRing C.FunctionField sv ≠ 0 :=
-      (map_ne_zero_iff _ (IsFractionRing.injective C.CoordinateRing C.FunctionField)).mpr hs_ne
-    have hf_eq : f = algebraMap C.CoordinateRing C.FunctionField a /
-        algebraMap C.CoordinateRing C.FunctionField sv := by
-      rw [eq_div_iff hs_map_ne, ← hx_eq, ← hxas,
-        IsScalarTower.algebraMap_apply C.CoordinateRing (C.localRingAt Q) C.FunctionField sv,
-        IsScalarTower.algebraMap_apply C.CoordinateRing (C.localRingAt Q) C.FunctionField a,
-        ← map_mul]
-      congr 1
-      exact IsLocalization.mk'_spec (C.localRingAt Q) a s
-    have hws : w (algebraMap C.CoordinateRing C.FunctionField sv) = 1 := by
-      refine le_antisymm (hle sv) ?_
-      by_contra hlt
-      rw [not_le] at hlt
-      exact hs_notin ((hcenter sv).mp hlt)
-    refine (Valuation.mem_valuationSubring_iff _ f).mpr ?_
-    rw [hf_eq, map_div₀ w, hws, div_one]
-    exact hle a
+  have hBA : Bv ≤ A := pointValuationSubring_le_valuationSubring_of_center C Q w hle hcenter
   -- `A ≠ ⊤`: `w` is nontrivial (surjective onto `ℤᵐ⁰`).
-  have hAtop : A ≠ ⊤ := by
-    have hNontriv : w.IsNontrivial := by
-      refine ⟨?_⟩
-      obtain ⟨z, hz⟩ := hwsurj (WithZero.exp (1 : ℤ))
-      refine ⟨z, ?_, ?_⟩
-      · rw [hz]; exact WithZero.exp_ne_zero
-      · rw [hz, show (1 : WithZero (Multiplicative ℤ)) = WithZero.exp (0 : ℤ) from
-          (WithZero.exp_zero).symm, Ne, WithZero.exp_inj]; norm_num
-    intro htop
-    rw [hA] at htop
-    exact (Valuation.valuationSubring_eq_top_iff _).mp htop hNontriv
+  have hAtop : A ≠ ⊤ := valuationSubring_ne_top_of_surjective_withZeroInt w hwsurj
   have hEq : Bv = A := rankOne_valuationSubring_le_eq_of_ne_top Bv A hBA hAtop
   have h_isEquiv : w.IsEquiv (C.pointValuation Q) := by
     rw [Valuation.isEquiv_iff_valuationSubring]; rw [hA, hBv] at hEq; exact hEq.symm
