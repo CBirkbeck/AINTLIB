@@ -56,6 +56,15 @@ namespace BernoulliRegular.FLT37.Eichler
 
 open FLT37 FLT37.LehmerVandiver.CaseII
 
+/-- `ind₃₇ 1 = 0` (additivity of `residueInd37` at `1·1 = 1`); the base value used throughout the
+telescoping. -/
+private theorem residueInd37_one_aux : residueInd37 (1 : (𝓞 (CyclotomicField 37 ℚ))ˣ) = 0 := by
+  have := residueInd37_mul (1 : (𝓞 (CyclotomicField 37 ℚ))ˣ) 1
+  rw [mul_one] at this; linear_combination -this
+
+/-- `halfExp 1 = (1-1)·2⁻¹ = 0`; the exponent vanishing behind `ξ_1 = 1`. -/
+private theorem halfExp_one_aux : halfExp (p := 37) ((1 : ℕ) : ℤ) = 0 := by simp [halfExp]
+
 /-! ## 0. `-1` is a `37`-th power mod `lv149`, and units mod `𝔩` -/
 
 /-- **`-1` is a `37`-th power modulo `lv149`.**  Since `37` is odd, `-1 = (-1)^37`, so its residue
@@ -196,12 +205,9 @@ theorem caseII_xi_ratio_ind {s d : ℕ} (hs : s.Coprime 37) (hd : d.Coprime 37)
   -- `residueInd37 (ξ_s⁻¹) = - residueInd37 ξ_s` (additivity + `ξ_s·ξ_s⁻¹ = 1`).
   have hinv : residueInd37 (xiUnit 37 (CyclotomicField 37 ℚ) s hs)⁻¹ =
       - residueInd37 (xiUnit 37 (CyclotomicField 37 ℚ) s hs) := by
-    have hone : residueInd37 (1 : (𝓞 (CyclotomicField 37 ℚ))ˣ) = 0 := by
-      have := residueInd37_mul (1 : (𝓞 (CyclotomicField 37 ℚ))ˣ) 1
-      rw [mul_one] at this; linear_combination -this
     have h1 : residueInd37 (xiUnit 37 (CyclotomicField 37 ℚ) s hs *
         (xiUnit 37 (CyclotomicField 37 ℚ) s hs)⁻¹) = 0 := by
-      rw [mul_inv_cancel]; exact hone
+      rw [mul_inv_cancel]; exact residueInd37_one_aux
     rw [residueInd37_mul] at h1
     linear_combination h1
   rw [hinv] at hzero
@@ -220,17 +226,13 @@ theorem caseII_xiUnit_one_eq_one :
     xiUnit 37 (CyclotomicField 37 ℚ) 1 (by decide) = 1 := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   apply Units.ext
-  rw [xiUnit_val, cyclotomicUnit_one, mul_one]
   -- `ζ^{halfExp 1} = ζ^0 = 1`.
-  have h0 : halfExp (p := 37) ((1 : ℕ) : ℤ) = 0 := by simp [halfExp]
-  rw [h0, zpow_zero, Units.val_one]
+  rw [xiUnit_val, cyclotomicUnit_one, mul_one, halfExp_one_aux, zpow_zero, Units.val_one]
 
 /-- `ind₃₇ ξ_1 = 0`. -/
 theorem caseII_residueInd37_xiUnit_one :
     residueInd37 (xiUnit 37 (CyclotomicField 37 ℚ) 1 (by decide)) = 0 := by
-  rw [caseII_xiUnit_one_eq_one]
-  have := residueInd37_mul (1 : (𝓞 (CyclotomicField 37 ℚ))ˣ) 1
-  rw [mul_one] at this; linear_combination -this
+  rw [caseII_xiUnit_one_eq_one]; exact residueInd37_one_aux
 
 /-- **The clean orbit telescoping in `ZMod 37`.**  Let `t ≠ 0` and let `g : ZMod 37 → ZMod 37`
 satisfy `g ((c+1)·t) = g (c·t)` whenever `c·t ≠ 0` and `(c+1)·t ≠ 0`.  Then `g` is constant on the
@@ -321,9 +323,8 @@ theorem caseII_xiUnitZMod_one (hc : (1 : ZMod 37) ≠ 0) :
     xiUnitZMod (1 : ZMod 37) hc = 1 := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   apply Units.ext
-  rw [xiUnitZMod, xiUnit_val, caseII_one_val_zmod37, cyclotomicUnit_one, mul_one]
-  have h0 : halfExp (p := 37) ((1 : ℕ) : ℤ) = 0 := by simp [halfExp]
-  rw [h0, zpow_zero, Units.val_one]
+  rw [xiUnitZMod, xiUnit_val, caseII_one_val_zmod37, cyclotomicUnit_one, mul_one, halfExp_one_aux,
+    zpow_zero, Units.val_one]
 
 /-! ## 5. Washington's step-5 `ρ_a`-reality ratio congruence (the residual), and the telescoping
 
@@ -388,8 +389,7 @@ theorem caseII_xiIndZMod_eq_zero {j : ZMod 37} (hρ : MirimanoffRhoReality37 j) 
   have hone : xiIndZMod (1 : ZMod 37) = 0 := by
     rw [xiIndZMod, dif_neg caseII_one_ne_zero_zmod37,
       caseII_xiUnitZMod_one caseII_one_ne_zero_zmod37]
-    have := residueInd37_mul (1 : (𝓞 (CyclotomicField 37 ℚ))ˣ) 1
-    rw [mul_one] at this; linear_combination -this
+    exact residueInd37_one_aux
   -- Connect: `xiIndZMod 1 = xiIndZMod (1·t)`, and every nonzero `c = (c·t⁻¹)·t`.
   have hc1 : xiIndZMod (1 : ZMod 37) = xiIndZMod (1 * (2 * j)) := by
     have h := hconst ((2 * j)⁻¹) (inv_ne_zero ht)
