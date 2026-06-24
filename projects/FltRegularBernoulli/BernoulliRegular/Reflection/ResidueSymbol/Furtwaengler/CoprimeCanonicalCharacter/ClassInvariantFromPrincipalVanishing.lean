@@ -112,7 +112,6 @@ theorem normalizedFactors_count_eq_zero_of_isCoprime_prime
     {I P : Ideal (𝓞 K)} [hPprime : P.IsPrime]
     (hI_ne : I ≠ ⊥) (_hP_ne : P ≠ ⊥) (hcop : IsCoprime I P) :
     (UniqueFactorizationMonoid.normalizedFactors I).count P = 0 := by
-  classical
   rw [Multiset.count_eq_zero]
   intro hmem
   have hle : I ≤ P :=
@@ -141,7 +140,6 @@ theorem normalizedFactors_count_span_eq_of_principal_balance
         (Ideal.span ({x} : Set (𝓞 K)))).count P =
       (UniqueFactorizationMonoid.normalizedFactors
         (Ideal.span ({y} : Set (𝓞 K)))).count P := by
-  classical
   have hspanx_ne : Ideal.span ({x} : Set (𝓞 K)) ≠ ⊥ := by
     simpa [Ideal.span_singleton_eq_bot] using hx
   have hspany_ne : Ideal.span ({y} : Set (𝓞 K)) ≠ ⊥ := by
@@ -211,8 +209,7 @@ theorem span_singleton_coprime_of_clear_denominator_count
       Ideal.span ({x * b} : Set (𝓞 K)) =
         Ideal.span ({y * a} : Set (𝓞 K))) :
     IsCoprime (Ideal.span ({a} : Set (𝓞 K))) P := by
-  classical
-  letI : P.IsMaximal := hPprime.isMaximal hP_ne
+  haveI : P.IsMaximal := hPprime.isMaximal hP_ne
   rw [Ideal.isCoprime_iff_sup_eq]
   by_contra hsup
   have hspana_le : Ideal.span ({a} : Set (𝓞 K)) ≤ P := by
@@ -325,7 +322,6 @@ theorem exists_clear_denominators_span_of_colon_coprime
       (∀ P ∈ S, IsCoprime (Ideal.span ({b} : Set (𝓞 K))) P) ∧
       Ideal.span ({x * b} : Set (𝓞 K)) =
         Ideal.span ({y * a} : Set (𝓞 K)) := by
-  classical
   let D : Ideal (𝓞 K) :=
     (Ideal.span ({y} : Set (𝓞 K))).colon
       (Ideal.span ({x} : Set (𝓞 K)) : Set (𝓞 K))
