@@ -15,7 +15,10 @@ subdirectories of one site:
 **https://cbirkbeck.github.io/AINTLIB-blueprints/**
 
 - [p-adic L-functions](https://cbirkbeck.github.io/AINTLIB-blueprints/padic/)
+- [Adic spaces (Huber/Tate rings, the adic spectrum)](https://cbirkbeck.github.io/AINTLIB-blueprints/adicspaces/)
 - [Modular forms — the valence formula](https://cbirkbeck.github.io/AINTLIB-blueprints/leanmodularforms/)
+- [Strong multiplicity one](https://cbirkbeck.github.io/AINTLIB-blueprints/smo/)
+- [The Hasse bound for elliptic curves](https://cbirkbeck.github.io/AINTLIB-blueprints/hasseweil/)
 - [Chebotarev density theorem](https://cbirkbeck.github.io/AINTLIB-blueprints/chebotarev/)
 - [Kummer's criterion & regular primes](https://cbirkbeck.github.io/AINTLIB-blueprints/flt-bernoulli/)
 
