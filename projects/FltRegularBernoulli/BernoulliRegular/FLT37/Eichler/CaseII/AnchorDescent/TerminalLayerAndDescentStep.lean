@@ -99,9 +99,8 @@ theorem caseII_correctedRadical_unit_primary
         (αU : 𝓞 (CyclotomicField 37 ℚ))) :
     ((D.hζ.toInteger - 1 : 𝓞 (CyclotomicField 37 ℚ))) ^ 37 ∣
       ((αU : 𝓞 (CyclotomicField 37 ℚ)) - 1) := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   set K := CyclotomicField 37 ℚ
-  set π : 𝓞 K := (D.hζ.toInteger - 1 : 𝓞 K) with hπ
+  set π : 𝓞 K := (D.hζ.toInteger - 1 : 𝓞 K)
   obtain ⟨N, c, hc_not_dvd, hwit⟩ :=
     caseII_correctedRadical_primary_witness D (by decide : (37 : ℕ) ≠ 2) η hη
   -- substitute α = algebraMap αU and pull back into 𝓞 K via injectivity.
@@ -139,10 +138,9 @@ theorem caseIIFirstLayer_false
       algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ)
         (αU : 𝓞 (CyclotomicField 37 ℚ))) :
     False := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   set K := CyclotomicField 37 ℚ
   have hp : (37 : ℕ) ≠ 2 := by decide
-  set η := D.etaOne with hη_def
+  set η := D.etaOne
   have hη_ne : η ≠ D.etaZero := D.toCaseIIData37.etaOne_ne_etaZero
   -- (i) anti-fixedness of αU.
   have hu₀_anti := caseII_correctionUnit_anti (K := K) η
@@ -289,7 +287,6 @@ theorem exists_realCaseIIData37_of_real_OK_equation
     (heq : x' ^ 37 + y' ^ 37 =
       (ε : 𝓞 (CyclotomicField 37 ℚ)) * ((hζ.toInteger - 1) ^ k * z') ^ 37) :
     Nonempty (RealCaseIIData37 (CyclotomicField 37 ℚ) (k - 1)) := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   refine ⟨{ ζ := ζ, hζ := hζ, x := x', y := y', z := z', ε := ε,
             equation := ?_, hy := hy, hz := hz, x_real := hx_real, y_real := hy_real }⟩
   have hk_eq : k - 1 + 1 = k := Nat.sub_add_cancel hk
