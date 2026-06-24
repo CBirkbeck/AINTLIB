@@ -17,10 +17,7 @@ logarithms of those conjugates sum to zero.
 noncomputable section
 
 open NumberField
-open NumberField.IsCMField
-open BernoulliRegular.Reflection.Local
 open BernoulliRegular.Furtwaengler.KummerArtinHasse
-open scoped BigOperators NumberField
 
 namespace BernoulliRegular
 namespace CyclotomicUnits
