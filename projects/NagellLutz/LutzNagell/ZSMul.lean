@@ -196,7 +196,7 @@ lemma smulX_sub_smulX (hm : m ≠ 0) (hn : n ≠ 0) :
 lemma smulX_sub_sub_smulX_add (add_ne : n + m ≠ 0) (sub_ne : n - m ≠ 0) :
     smulX (n - m) - smulX (n + m) = (ψᵤ (2 * n) * ψᵤ (2 * m)) / (ψᵤ (n + m) * ψᵤ (n - m)) ^ 2 := by
   rw [smulX_sub_smulX sub_ne add_ne]
-  simp only [show n + m + (n - m) = 2 * n from by ring, show n + m - (n - m) = 2 * m from by ring]
+  simp only [show n + m + (n - m) = 2 * n by ring, show n + m - (n - m) = 2 * m by ring]
 
 lemma smulX_neg : smulX (-n) = smulX n := by simp_rw [smulX, φ_neg, ψᵤ, ψ_neg, ← map_pow, neg_sq]
 
@@ -508,7 +508,7 @@ lemma addXYZ_smulField :
       fun _ ↦ by simp only [smul_fin3, one_pow, one_mul, fin3_def]
     rw [← jac_one_smul (smulField m), smulField_neg, neg_add_cancel,
       addXYZ_smul, one_mul, neg_one_sq (R := Universal.Field), addXYZ_neg nonsingular_smulField.1,
-      jac_one_smul, show (-m - m : ℤ) = -(2 * m) from by ring,
+      jac_one_smul, show (-m - m : ℤ) = -(2 * m) by ring,
       ψ_neg, map_neg, ← dblZ_smulPoly, ← map_dblZ, smulField_zero]
     rfl
   refine (equiv_iff_eq_of_Z_eq ?_ ?_).mp (Quotient.exact ?_)
@@ -530,14 +530,14 @@ lemma addXYZ_smulRing :
 lemma addXYZ_smulField₁ :
     addXYZ curveField (smulField n) (smulField (n + 1)) = smulField (2 * n + 1) := by
   rw [addXYZ_smulField, add_sub_cancel_left, ψ_one, map_one,
-    show (1 : Universal.Field) • smulField (n + 1 + n) = smulField (n + 1 + n) from by
+    show (1 : Universal.Field) • smulField (n + 1 + n) = smulField (n + 1 + n) by
       simp only [smul_fin3, one_pow, one_mul, fin3_def]]
   congr 1; omega
 
 lemma addXYZ_smulRing₁ :
     addXYZ curveRing (smulRing n) (smulRing (n + 1)) = smulRing (2 * n + 1) := by
   rw [addXYZ_smulRing, add_sub_cancel_left, ψ_one, map_one,
-    show (1 : Universal.Ring) • smulRing (n + 1 + n) = smulRing (n + 1 + n) from by
+    show (1 : Universal.Ring) • smulRing (n + 1 + n) = smulRing (n + 1 + n) by
       simp only [smul_fin3, one_pow, one_mul, fin3_def]]
   congr 1; omega
 
@@ -596,7 +596,7 @@ theorem zsmul_eq_smulEval {x y : F} (h : Affine.Nonsingular W x y) (n : ℤ) :
     · rw [Nat.cast_zero, zero_smul, smulEval, comp_fin3]; congrm(⟦?_⟧); simp [evalEval]
     · rw [Nat.cast_one, one_smul, smulEval, comp_fin3]; congrm(⟦?_⟧); simp [evalEval]
     obtain ⟨n, rfl|rfl⟩ := n.even_or_odd'
-    · rw [show (2 * n + 1 + 1 : ℕ) = 2 * (n + 1) from by omega]
+    · rw [show (2 * n + 1 + 1 : ℕ) = 2 * (n + 1) by omega]
       rw [Nat.cast_mul, mul_smul, natCast_zsmul, two_nsmul,
         Point.add_point, ih _ (by omega), addMap_eq, add_self,
         dblXYZ_smulEval h.1]; rfl
