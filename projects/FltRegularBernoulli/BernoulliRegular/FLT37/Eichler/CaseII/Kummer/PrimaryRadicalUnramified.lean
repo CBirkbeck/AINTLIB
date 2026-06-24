@@ -27,7 +27,7 @@ This is the non-unit generalisation of flt-regular `KummersLemma.separable_poly_
 
 @[expose] public section
 
-open scoped NumberField nonZeroDivisors
+open scoped NumberField
 open Polynomial
 
 namespace BernoulliRegular.FLT37.Eichler.NonUnitKummer
