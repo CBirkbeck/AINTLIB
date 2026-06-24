@@ -51,11 +51,9 @@ This file imports only; it does **not** modify any existing file.  No `sorry`, n
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Polynomial
-
 namespace BernoulliRegular.FLT37.Eichler
 
-open FLT37 FLT37.LehmerVandiver.CaseII BernoulliRegular
+open FLT37.LehmerVandiver.CaseII
 
 /-- **The producer-`δ` real-data §9.1 form's hypotheses are jointly unsatisfiable in the `ℓ ∣ z`
 regime** (proven, axiom-clean — the precise obstruction to the architectural re-pointing).
