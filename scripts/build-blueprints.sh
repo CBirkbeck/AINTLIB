@@ -24,7 +24,7 @@ PATCH="$ROOT/scripts/patches/verso-blueprint-v4.30-on-v4.31-toolchain.patch"
 # (add a row as each project's blueprint side-build lands on its dev branch — see projects/PadicLFunctions/_blueprint)
 BLUEPRINTS=(
   "padic|dev/padic|projects/PadicLFunctions/_blueprint|PadicLFunctionsBlueprint|PadicLFunctionsBlueprintMain|padic"
-  # "leanmodularforms|dev/leanmodularforms|projects/LeanModularForms/_blueprint|<Lib>|<Main>|leanmodularforms"
+  "leanmodularforms|dev/leanmodularforms|projects/LeanModularForms/_blueprint|LeanModularFormsBlueprint|LeanModularFormsBlueprintMain|leanmodularforms"
   # "chebotarev|dev/chebotarev|projects/Chebotarev/_blueprint|CebotarevBlueprint|CebotarevBlueprintMain|chebotarev"
 )
 
