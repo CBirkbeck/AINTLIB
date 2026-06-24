@@ -55,7 +55,7 @@ it does **not** modify any existing file.
 
 noncomputable section
 
-open NumberField NumberField.IsCMField Polynomial
+open NumberField NumberField.IsCMField IsCyclotomicExtension Polynomial
 
 namespace BernoulliRegular.FLT37.Eichler
 
