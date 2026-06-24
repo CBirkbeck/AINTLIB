@@ -302,7 +302,7 @@ private lemma Phi2_eval_eq (x : K) :
     eval x ((curveK R K W).Φ 2) =
       x * eval x (curveK R K W).Ψ₂Sq - eval x (curveK R K W).Ψ₃ := by
   conv_lhs =>
-    rw [show (curveK R K W).Φ 2 = X * (curveK R K W).Ψ₂Sq - (curveK R K W).Ψ₃ from by
+    rw [show (curveK R K W).Φ 2 = X * (curveK R K W).Ψ₂Sq - (curveK R K W).Ψ₃ by
       rw [WeierstrassCurve.Φ, WeierstrassCurve.ΨSq_two]
       simp [even_two, WeierstrassCurve.preΨ_three, WeierstrassCurve.preΨ_one]]
   simp only [eval_sub, eval_mul, eval_X]
@@ -460,17 +460,17 @@ theorem lutz_nagell_cubicDisc_discriminant (ha₁ : W.a₁ = 0) (ha₃ : W.a₃ 
         (kappa_sq_eq_Psi2Sq W hcurve_gen) hκ_ne
       rw [ha₁, ha₃] at h4Psi3
       simp only [add_zero, zero_mul] at h4Psi3
-      rw [show (2 * y₀) ^ 2 = 4 * y₀ ^ 2 from by ring] at h4Psi3
+      rw [show (2 * y₀) ^ 2 = 4 * y₀ ^ 2 by ring] at h4Psi3
       have hΨ₃' : y₀ ^ 2 ∣ 3 * x₀ ^ 4 + W.b₂ * x₀ ^ 3 + 3 * W.b₄ * x₀ ^ 2 +
           3 * W.b₆ * x₀ + W.b₈ :=
-        (mul_dvd_mul_iff_left (show (4 : R) ≠ 0 from by norm_num)).mp h4Psi3
+        (mul_dvd_mul_iff_left (show (4 : R) ≠ 0 by norm_num)).mp h4Psi3
       have h_fprime_sq : y₀ ^ 2 ∣
           (3 * x₀ ^ 2 + 2 * W.a₂ * x₀ + W.a₄) ^ 2 := by
         rw [show (3 * x₀ ^ 2 + 2 * W.a₂ * x₀ + W.a₄) ^ 2 =
             (12 * x₀ + 4 * W.a₂) *
               (x₀ ^ 3 + W.a₂ * x₀ ^ 2 + W.a₄ * x₀ + W.a₆) -
             (3 * x₀ ^ 4 + W.b₂ * x₀ ^ 3 + 3 * W.b₄ * x₀ ^ 2 +
-              3 * W.b₆ * x₀ + W.b₈) from by
+              3 * W.b₆ * x₀ + W.b₈) by
           simp only [WeierstrassCurve.b₂, WeierstrassCurve.b₄,
             WeierstrassCurve.b₆, WeierstrassCurve.b₈, ha₁, ha₃]; ring,
           ← hcurve]
@@ -481,7 +481,7 @@ theorem lutz_nagell_cubicDisc_discriminant (ha₁ : W.a₁ = 0) (ha₃ : W.a₃ 
           4 * W.a₂ ^ 3 + 18 * W.a₂ * W.a₄ - 27 * W.a₆) *
           y₀ ^ 2 +
         (3 * x₀ ^ 2 + 2 * W.a₂ * x₀ - W.a₂ ^ 2 + 4 * W.a₄) *
-          (3 * x₀ ^ 2 + 2 * W.a₂ * x₀ + W.a₄) ^ 2 from by
+          (3 * x₀ ^ 2 + 2 * W.a₂ * x₀ + W.a₄) ^ 2 by
         rw [hcurve]; ring]
       exact dvd_add (dvd_mul_of_dvd_right dvd_rfl _)
         (dvd_mul_of_dvd_right h_fprime_sq _)
