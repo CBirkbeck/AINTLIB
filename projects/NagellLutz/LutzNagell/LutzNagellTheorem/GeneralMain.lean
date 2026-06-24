@@ -15,6 +15,8 @@ For a nonzero finite-order point on a general Weierstrass curve
 ## Main results
 
 * `lutz_nagell_integrality_general`: the generalized integrality theorem.
+* `lutz_nagell_integrality_short`: its specialization to short Weierstrass curves
+  `y² = x³ + Ax + B`, where the order-2 branch collapses and the coordinates are integral.
 -/
 
 namespace LutzNagell
