@@ -11,10 +11,8 @@ normalized quotient bridge.
 
 noncomputable section
 
-open NumberField
-open NumberField.IsCMField
 open BernoulliRegular.Reflection.Local
-open scoped BigOperators NumberField PowerSeries
+open scoped BigOperators
 
 namespace BernoulliRegular
 namespace CyclotomicUnits
@@ -36,7 +34,6 @@ theorem quotient_mk_valuedIntegerCyclotomicEquiv_dworkParameterNormalizedCoordAp
       Ideal.Quotient.mk ((lambdaIdeal p K) ^ (N + 1))
         (scaledDworkParameterNormalizedCoordApprox
           (p := p) (K := K) (a : ZMod p) N) := by
-  classical
   let I : Ideal (ValuedIntegerRing p K) := lambdaIdeal p K
   let e : ValuedIntegerRing p K ≃+* ValuedIntegerRing p K :=
     Conjugation.valuedIntegerCyclotomicEquiv (p := p) K a
@@ -57,8 +54,8 @@ theorem quotient_mk_valuedIntegerCyclotomicEquiv_dworkParameterNormalizedCoordAp
         (integralArtinHasseNormalizedExpMinusOneSeries_map_valuedIntegerCyclotomicEquiv
           (p := p) (K := K) a)
         (dworkParameter p K) (N + 1)
-    rw [Conjugation.dworkCompleteCyclotomicEquiv_dworkParameter] at h
-    rw [← quotient_mk_dworkParameterNormalizedApprox_eq_evalIntegralPowerSeriesMod
+    rw [Conjugation.dworkCompleteCyclotomicEquiv_dworkParameter,
+      ← quotient_mk_dworkParameterNormalizedApprox_eq_evalIntegralPowerSeriesMod
         (p := p) (K := K) N,
       ← quotient_mk_scaledDworkParameterNormalizedApprox_eq_evalIntegralPowerSeriesMod
         (p := p) (K := K) (a : ZMod p) N] at h
@@ -163,12 +160,12 @@ theorem kummerLogDworkArtinHasseSpecializedFiniteLog_eq_folded
       kummerLogDworkArtinHasseSpecializedFoldedFiniteLog
         (p := p) (K := K) hp_three a := by
   rw [kummerLogDworkArtinHasseSpecializedFiniteLog_eq_normalizedApprox_logs
-    (p := p) (K := K) hp_three a]
-  rw [samePrimeFiniteLog_eq_samePrimeFoldedFiniteLogPowPred
+      (p := p) (K := K) hp_three a,
+    samePrimeFiniteLog_eq_samePrimeFoldedFiniteLogPowPred
       (p := p) (K := K) hp_three
       (dworkParameterNormalizedCoordApprox_mem_lambdaIdeal
-        (p := p) (K := K) (p - 2))]
-  rw [samePrimeFiniteLog_eq_samePrimeFoldedFiniteLogPowPred
+        (p := p) (K := K) (p - 2)),
+    samePrimeFiniteLog_eq_samePrimeFoldedFiniteLogPowPred
       (p := p) (K := K) hp_three
       (scaledDworkParameterNormalizedCoordApprox_mem_lambdaIdeal
         (p := p) (K := K)
@@ -212,7 +209,6 @@ theorem samePrimeFiniteLog_scaledNormalizedCoordApprox_eq_quotientMap
           (dworkParameterNormalizedCoordApprox (p := p) (K := K) (p - 2))
           (dworkParameterNormalizedCoordApprox_mem_lambdaIdeal
             (p := p) (K := K) (p - 2))) := by
-  classical
   let e : ValuedIntegerRing p K ≃+* ValuedIntegerRing p K :=
     Conjugation.valuedIntegerCyclotomicEquiv (p := p) K a
   let x : ValuedIntegerRing p K :=
@@ -289,10 +285,10 @@ theorem valuedLambdaQuotientDworkCoeffModP_scaledNormalizedFiniteLog_eq_smul
           (dworkParameterNormalizedFiniteLogApprox (p := p) (K := K)) := by
   unfold scaledDworkParameterNormalizedFiniteLogApprox
   rw [samePrimeFiniteLog_scaledNormalizedCoordApprox_eq_quotientMap
-    (p := p) (K := K) a]
-  rw [quotientMap_valuedIntegerCyclotomicEquiv_factorPow
-    (p := p) (K := K) (M := p - 1) (N := (p - 2) + 1)
-    (by omega) a]
+      (p := p) (K := K) a,
+    quotientMap_valuedIntegerCyclotomicEquiv_factorPow
+      (p := p) (K := K) (M := p - 1) (N := (p - 2) + 1)
+      (by omega) a]
   have hcoord :=
     valuedLambdaQuotientDworkCoeffModP_quotientMap_cyclotomic
       (p := p) (K := K) a i
@@ -316,8 +312,8 @@ theorem valuedLambdaQuotientDworkCoeffModP_specializedFiniteLog_eq_one_sub_pow_m
           (dworkParameterNormalizedFiniteLogApprox (p := p) (K := K)) := by
   let δ : CyclotomicUnitDelta p := kummerLogColumnDelta (p := p) hp_three a
   rw [kummerLogDworkArtinHasseSpecializedFiniteLog_factorPow_eq_normalizedApprox_logs
-    (p := p) (K := K) hp_three a]
-  rw [valuedLambdaQuotientDworkCoeffModP_sub]
+      (p := p) (K := K) hp_three a,
+    valuedLambdaQuotientDworkCoeffModP_sub]
   change
     valuedLambdaQuotientDworkCoeffModP (p := p) (K := K) i
         (dworkParameterNormalizedFiniteLogApprox (p := p) (K := K)) -
@@ -329,9 +325,9 @@ theorem valuedLambdaQuotientDworkCoeffModP_specializedFiniteLog_eq_one_sub_pow_m
       valuedLambdaQuotientDworkCoeffModP (p := p) (K := K) i
         (dworkParameterNormalizedFiniteLogApprox (p := p) (K := K))
   rw [show (kummerLogColumnIndex (p := p) hp_three a : ZMod p) =
-      (δ : ZMod p) by rfl]
-  rw [valuedLambdaQuotientDworkCoeffModP_scaledNormalizedFiniteLog_eq_smul
-    (p := p) (K := K) δ i]
+        (δ : ZMod p) by rfl,
+    valuedLambdaQuotientDworkCoeffModP_scaledNormalizedFiniteLog_eq_smul
+      (p := p) (K := K) δ i]
   ring
 
 omit [NumberField.IsCMField K] in
