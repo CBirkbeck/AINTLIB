@@ -746,7 +746,7 @@ theorem evalIntegralPowerSeries_inverse_zetaPowSubOne_eq_scaledDworkParameter
         have hH0R : PowerSeries.constantCoeff (integralExpMinusOneSeries p K) = 0 := by
           rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply]
           exact
-            show (PowerSeries.coeff (R := R) 0) (integralExpMinusOneSeries p K) = 0 from by
+            show (PowerSeries.coeff (R := R) 0) (integralExpMinusOneSeries p K) = 0 by
               rw [integralExpMinusOneSeries]
               rw [Furtwaengler.DieudonneDwork.IsRIntegralPS.coeff_mapTo]
               have hcoeff0 :
