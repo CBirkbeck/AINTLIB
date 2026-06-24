@@ -378,7 +378,7 @@ private lemma lunip_conj_diag_eq (N : ℕ) [NeZero N] (k_exp : ℕ)
   fin_cases i <;> fin_cases j <;>
     simp only [hr_cast] <;>
     push_cast [hc', hc''] <;>
-    (try ring)
+    (try ring) <;>
     (have := congr_arg (Int.cast (R := ℚ)) hc''; push_cast at this ⊢; nlinarith)
 
 lemma lunip_inject_surjective (N : ℕ) [NeZero N]
@@ -447,7 +447,7 @@ private lemma lunip_diff_unipotent_mul (N : ℕ) (r₁ r₂ : ℤ)
       Matrix.adjugate_fin_two, Matrix.of_apply,
       Matrix.cons_val', Matrix.cons_val_zero, Matrix.cons_val_one,
       Matrix.empty_val']
-    ring
+    <;> ring
 
 /-- Given the matrix equation `D · τ = σ₁⁻¹ · u_diff · σ₁ · D` in `GL₂(ℚ)`
 (viewed at position `(1,0)`), with `τ.1 1 0 = N·q₂`, derive the integer
