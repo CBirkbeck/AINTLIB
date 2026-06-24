@@ -566,9 +566,7 @@ theorem K_chain_at_h_stick_gen_target_iff_extracted_unit_symbol_zero
   · intro h_target
     have h_add : unitSymbol + target = target := by
       rw [← h_corr, h_target]
-    have h_add' : unitSymbol + target = 0 + target := by
-      simpa using h_add
-    exact add_right_cancel h_add'
+    exact add_right_cancel (h_add.trans (zero_add target).symm)
   · intro h_unit
     change unitSymbol = 0 at h_unit
     rw [h_corr, h_unit, zero_add]
@@ -622,7 +620,7 @@ theorem K_chain_at_h_stick_gen_via_extracted_unit
         BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical
           (p := p) (K := K) (((Fintype.card (𝓞 K ⧸ P') : ℤ) : 𝓞 K)) P) := by
   set h_stick := StickelbergerIdealEquality.of_phiPrimeGenDescent
-    S ha₁ ha₂ h_ne_zero h_span with h_stick_def
+    S ha₁ ha₂ h_ne_zero h_span
   have h_phi_ne := phiPrimeGenDescent_ne_zero S ha₁ ha₂ h_ne_zero
   have h_span_eq : Ideal.span ({h_stick.gen} : Set (𝓞 K)) =
       Ideal.span ({phiPrimeGenDescent S ha₁ ha₂ h_ne_zero} : Set (𝓞 K)) := by
