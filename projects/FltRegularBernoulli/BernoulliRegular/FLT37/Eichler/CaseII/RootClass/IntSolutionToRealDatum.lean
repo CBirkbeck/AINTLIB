@@ -26,8 +26,7 @@ It imports only; it does **not** modify any existing file.
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension NumberField.IsCMField
-open scoped nonZeroDivisors
+open NumberField IsCyclotomicExtension
 
 namespace BernoulliRegular.FLT37.LehmerVandiver.CaseII
 
