@@ -633,8 +633,7 @@ theorem ConductorFlexibleFullTeichDworkSetup.ideal_quotient_mk_zeta_p_int_pow_p_
   have h_val : ((S.zeta_p_int_unit ^ p : (𝓞 R')ˣ) : 𝓞 R') = 1 := by
     rw [h]
     rfl
-  rw [Units.val_pow_eq_pow_val] at h_val
-  rw [show (S.zeta_p_int_unit : 𝓞 R') = S.zeta_p_int from
+  rw [Units.val_pow_eq_pow_val, show (S.zeta_p_int_unit : 𝓞 R') = S.zeta_p_int from
     S.zeta_p_int_unit_coe] at h_val
   rw [h_val, map_one]
 
@@ -706,8 +705,8 @@ theorem ConductorFlexibleFullTeichDworkSetup.residueFieldEmbedding_phiPrimeGenDe
       ((Ideal.Quotient.mk P' (S.phiPrimeGenDescent h_psi ha₁ ha₂ h_ne_zero)) :
         𝓞 K ⧸ P') =
       ((Ideal.Quotient.mk 𝔭 (S.gaussSumInt a ^ p)) : 𝓞 R' ⧸ 𝔭) := by
-  rw [residueFieldEmbedding_mk h_over]
-  rw [S.algebraMap_phiPrimeGenDescent h_psi ha₁ ha₂ h_ne_zero]
+  rw [residueFieldEmbedding_mk h_over,
+    S.algebraMap_phiPrimeGenDescent h_psi ha₁ ha₂ h_ne_zero]
 
 /-- Flexible reduced Gauss-sum nonvanishing from descended generator
 nonmembership at the target prime. -/
@@ -872,11 +871,8 @@ theorem ConductorFlexibleFullTeichDworkSetup.cross_ring_identity_from_K2_1_K2_2c
   haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   have h_K21 := S.ideal_quotient_mk_gaussSumInt_pow_pow_div
     a hp h_χp_eq_one hf hN_mod_p unit_a h_unit hg_ne
-  rw [← hN_eq]
-  have h := h_K21
-  rw [← mul_one ((((Ideal.Quotient.mk 𝔭) (S.gaussSumInt a)) ^ p) ^
-    ((ℓ' ^ f - 1) / p))]
-  rw [← h_χ_value]
+  rw [← hN_eq, ← mul_one ((((Ideal.Quotient.mk 𝔭) (S.gaussSumInt a)) ^ p) ^
+    ((ℓ' ^ f - 1) / p)), ← h_χ_value]
   rw [show ((((Ideal.Quotient.mk 𝔭) (S.gaussSumInt a)) ^ p) ^
         ((ℓ' ^ f - 1) / p)) *
       (((S.residueCharInt ^ a).ringHomComp
@@ -889,7 +885,7 @@ theorem ConductorFlexibleFullTeichDworkSetup.cross_ring_identity_from_K2_1_K2_2c
           ((ℓ' ^ f - 1) / p)) *
       (((Ideal.Quotient.mk 𝔭) S.zeta_p_int) :
           𝓞 R' ⧸ 𝔭) ^ t.val by ring]
-  rw [h, one_mul]
+  rw [h_K21, one_mul]
 
 /-- Flexible descent atom at ring level. -/
 theorem ConductorFlexibleFullTeichDworkSetup.descent_atom_of_cross_ring
@@ -923,8 +919,8 @@ theorem ConductorFlexibleFullTeichDworkSetup.descent_atom_of_cross_ring
   haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   apply (residueFieldEmbedding_injective h_over)
   rw [map_pow, residueFieldEmbedding_mk h_over,
-    S.algebraMap_phiPrimeGenDescent h_psi ha₁ ha₂ h_ne_zero, map_pow]
-  rw [map_pow, ← canonicalResidueZetaP_image_val h_over,
+    S.algebraMap_phiPrimeGenDescent h_psi ha₁ ha₂ h_ne_zero, map_pow, map_pow,
+    ← canonicalResidueZetaP_image_val h_over,
     ← S.ideal_quotient_mk_zeta_p_int_eq h_over h_compat]
   exact h_cross_ring
 
