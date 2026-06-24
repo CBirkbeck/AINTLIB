@@ -37,8 +37,7 @@ It imports only; it does **not** modify any existing file.
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Polynomial NumberField.IsCMField
-open scoped nonZeroDivisors
+open NumberField Polynomial NumberField.IsCMField
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -116,7 +115,7 @@ theorem anchored_class_eq_one
   have hpow2 := D.anchored_class_sq_eq_one hp h_VC η
   have hdvd := Nat.dvd_gcd (orderOf_dvd_of_pow_eq_one hpow2)
     (orderOf_dvd_of_pow_eq_one hpow37)
-  rw [show Nat.gcd 2 37 = 1 from by decide] at hdvd
+  rw [show Nat.gcd 2 37 = 1 by decide] at hdvd
   exact mul_inv_eq_one.mp (orderOf_eq_one_iff.mp (Nat.dvd_one.mp hdvd))
 
 /-- **The `η₀`-principalization holds over a σ-conjugate pair** (II1 over `ConjPairCaseIIData37`).
