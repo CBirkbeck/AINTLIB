@@ -132,6 +132,37 @@ multiplicative), so `div(N_φ (u/v)) = div(N_φ u) − div(N_φ v)` and `φ_∗(
 φ_∗(div u) − φ_∗(div v)`, matched termwise by the `algebraMap` case.  This mirrors the tail of
 `CurveMap.projectiveDivisorOf_pushforward_eq_pushforwardDivisorVal`. -/
 
+/-- **LHS additivity for the `u/v` reduction**: if `f * av = au` with `f, av ≠ 0`, then the
+place-restriction pushforward of `projectiveDivisorOf f` is the difference of those of
+`projectiveDivisorOf au` and `projectiveDivisorOf av`.  Pure additivity:
+`projectiveDivisorOf` is multiplicative and `placeRestrictionPushforward φ` is an `AddMonoidHom`, so
+`pf (div f) = pf (div au) − pf (div av)` from `div(f·av) = div f + div av`.  (Local helper for
+`placeRestrictionPushforward_projectiveDivisorOf_of_algebraMap`.) -/
+private theorem placeRestrictionPushforward_projectiveDivisorOf_eq_sub
+    (φ : HasseWeil.Isogeny W₁ W₂) {f av au : W₁.toAffine.FunctionField}
+    (hf : f ≠ 0) (hav : av ≠ 0) (hfav : f * av = au) :
+    placeRestrictionPushforward φ ((⟨W₁⟩ : SmoothPlaneCurve F).projectiveDivisorOf f) =
+      placeRestrictionPushforward φ
+          ((⟨W₁⟩ : SmoothPlaneCurve F).projectiveDivisorOf au) -
+        placeRestrictionPushforward φ
+          ((⟨W₁⟩ : SmoothPlaneCurve F).projectiveDivisorOf av) := by
+  rw [← hfav, (⟨W₁⟩ : SmoothPlaneCurve F).projectiveDivisorOf_mul hf hav, map_add]
+  abel
+
+/-- **RHS additivity for the `u/v` reduction**: if `f * av = au` with `N_φ f, N_φ av ≠ 0`, then
+`projectiveDivisorOf (N_φ f)` is the difference of those of `N_φ au` and `N_φ av`.  Pure
+additivity: `conorm φ` (the field norm) and `projectiveDivisorOf` are both multiplicative, so
+`div(N_φ f) = div(N_φ au) − div(N_φ av)` from `N_φ(f·av) = N_φ f · N_φ av` and `f·av = au`.  (Local
+helper for `placeRestrictionPushforward_projectiveDivisorOf_of_algebraMap`.) -/
+private theorem projectiveDivisorOf_conorm_eq_sub
+    (φ : HasseWeil.Isogeny W₁ W₂) {f av au : W₁.toAffine.FunctionField}
+    (hf : conorm φ f ≠ 0) (hav : conorm φ av ≠ 0) (hfav : f * av = au) :
+    (⟨W₂⟩ : SmoothPlaneCurve F).projectiveDivisorOf (conorm φ f) =
+      (⟨W₂⟩ : SmoothPlaneCurve F).projectiveDivisorOf (conorm φ au) -
+        (⟨W₂⟩ : SmoothPlaneCurve F).projectiveDivisorOf (conorm φ av) := by
+  rw [← hfav, conorm_mul, (⟨W₂⟩ : SmoothPlaneCurve F).projectiveDivisorOf_mul hf hav]
+  abel
+
 /-- **The `f = u/v` reduction** (CoordHom-free): the norm–conorm identity for all `f` follows from
 its `algebraMap` case `key`, given that `K(E₁)/φ*K(E₂)` is finite (for the `f = 0` branch via
 `Algebra.norm_zero`). -/
@@ -173,36 +204,11 @@ theorem placeRestrictionPushforward_projectiveDivisorOf_of_algebraMap
     have hu_ne : u ≠ 0 := by
       intro hu; apply hf; rw [← hf_eq, hau, hu, map_zero, zero_div]
     have hf_av : f * av = au := by rw [← hf_eq, div_mul_cancel₀ _ hav_ne]
-    have hpf_ne : conorm φ f ≠ 0 := conorm_ne_zero φ hf
-    have hpav_ne : conorm φ av ≠ 0 := conorm_ne_zero φ hav_ne
-    -- LHS additivity over `f * av = au`.
-    have hLHS_split : placeRestrictionPushforward φ
-          ((⟨W₁⟩ : SmoothPlaneCurve F).projectiveDivisorOf f) +
-        placeRestrictionPushforward φ
-          ((⟨W₁⟩ : SmoothPlaneCurve F).projectiveDivisorOf av) =
-        placeRestrictionPushforward φ
-          ((⟨W₁⟩ : SmoothPlaneCurve F).projectiveDivisorOf au) := by
-      rw [← map_add, ← (⟨W₁⟩ : SmoothPlaneCurve F).projectiveDivisorOf_mul hf hav_ne, hf_av]
-    -- RHS additivity over `f * av = au`.
-    have hRHS_split : (⟨W₂⟩ : SmoothPlaneCurve F).projectiveDivisorOf (conorm φ f) +
-        (⟨W₂⟩ : SmoothPlaneCurve F).projectiveDivisorOf (conorm φ av) =
-        (⟨W₂⟩ : SmoothPlaneCurve F).projectiveDivisorOf (conorm φ au) := by
-      rw [← (⟨W₂⟩ : SmoothPlaneCurve F).projectiveDivisorOf_mul hpf_ne hpav_ne,
-        ← conorm_mul, hf_av]
-    have hau_eq := key u hu_ne
-    have hav_eq := key v hv_ne
-    have hgoalL : placeRestrictionPushforward φ
-        ((⟨W₁⟩ : SmoothPlaneCurve F).projectiveDivisorOf f) =
-        placeRestrictionPushforward φ
-          ((⟨W₁⟩ : SmoothPlaneCurve F).projectiveDivisorOf au) -
-        placeRestrictionPushforward φ
-          ((⟨W₁⟩ : SmoothPlaneCurve F).projectiveDivisorOf av) := by
-      rw [← hLHS_split]; abel
-    have hgoalR : (⟨W₂⟩ : SmoothPlaneCurve F).projectiveDivisorOf (conorm φ f) =
-        (⟨W₂⟩ : SmoothPlaneCurve F).projectiveDivisorOf (conorm φ au) -
-        (⟨W₂⟩ : SmoothPlaneCurve F).projectiveDivisorOf (conorm φ av) := by
-      rw [← hRHS_split]; abel
-    rw [hgoalL, hgoalR, hau_eq, hav_eq]
+    -- Both sides split additively over `f * av = au` (the structural `u/v` reduction); the
+    -- `algebraMap` case `key` matches the `au`- and `av`-terms.
+    rw [placeRestrictionPushforward_projectiveDivisorOf_eq_sub φ hf hav_ne hf_av,
+      projectiveDivisorOf_conorm_eq_sub φ (conorm_ne_zero φ hf) (conorm_ne_zero φ hav_ne) hf_av,
+      key u hu_ne, key v hv_ne]
 
 /-! ### The RHS fibre-sum reduction (structural, CoordHom-free)
 
