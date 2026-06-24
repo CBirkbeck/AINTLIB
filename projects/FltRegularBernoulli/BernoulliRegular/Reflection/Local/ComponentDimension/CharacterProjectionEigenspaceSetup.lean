@@ -20,8 +20,6 @@ principal-unit quotient `completed U_1 / completed U_1^p` with its additive
 
 noncomputable section
 
-open scoped NumberField
-
 namespace BernoulliRegular
 namespace Reflection
 namespace Local
@@ -428,12 +426,10 @@ noncomputable def completedPrincipalUnitGradedToIdealQuotient
       intro u v
       rw [← ofAdd_add]
       apply congrArg Multiplicative.ofAdd
-      rw [← map_add]
-      rw [Submodule.mkQ_apply, Submodule.mkQ_apply]
+      rw [← map_add, Submodule.mkQ_apply, Submodule.mkQ_apply]
       change (Submodule.Quotient.mk (toIdeal (u * v)) :
           (M ^ n : Ideal S) ⧸ N) = Submodule.Quotient.mk (toIdeal u + toIdeal v)
-      rw [Submodule.Quotient.eq]
-      rw [mem_completedMaximalIdeal_smul_top_iff (p := p) (K := K) n]
+      rw [Submodule.Quotient.eq, mem_completedMaximalIdeal_smul_top_iff (p := p) (K := K) n]
       have huM : (((u : completedPrincipalUnitSubgroup p K n) :
             completedLocalCyclotomicUnitGroup p K) : S) - 1 ∈ M ^ n := by
         have hu := (mem_completedPrincipalUnitSubgroup_iff (p := p) (K := K) (n := n)
