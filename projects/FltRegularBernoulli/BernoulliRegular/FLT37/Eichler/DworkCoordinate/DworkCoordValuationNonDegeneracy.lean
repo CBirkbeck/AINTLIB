@@ -84,14 +84,9 @@ noncomputable section
 
 set_option maxRecDepth 4000
 
-open NumberField
-
 namespace BernoulliRegular.FLT37.Eichler
 
-open BernoulliRegular (CPlusGenerator CPlusExponentProduct)
 open BernoulliRegular.CyclotomicUnits
-open BernoulliRegular.CyclotomicUnits.PadicLogSetup
-open BernoulliRegular.CyclotomicUnits.PadicLogSetup.DworkParameter
 
 /-! ## 1. The shape-only residual: the level-`72` Teichmüller shape, **without** non-degeneracy
 
