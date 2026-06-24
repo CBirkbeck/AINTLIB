@@ -70,6 +70,55 @@ theorem valuationSubring_isDVR_of_surjective_withZeroInt
     rw [hvg]; exact Subgroup.topEquiv.symm.toEquiv.nontrivial
   exact Valuation.valuationSubring_isDiscreteValuationRing v
 
+/-- **Power-agreement step for an equivalent valuation pair.** Given two
+`ℤᵐ⁰`-valued valuations `v w` that are `Valuation.IsEquiv`, an element `e` whose
+`v`-powers realise `exp` (`v (e ^ k) = exp k`), and `w e ≠ 0`, then on every
+element `x` with `v x ≠ 0` the `w`-value is the `(log (v x))`-th power of `w e`:
+`w x = (w e) ^ log (v x)`.  Proof: the twisted unit `x · e ^ (-log (v x))` has
+`v`-value `1`, hence `w`-value `1` by `IsEquiv`, and solving for `w x` gives the
+claim.  This is the core that forces the value groups to match up to a scalar. -/
+private theorem w_apply_eq_zpow_log_of_v_ne_zero {F : Type*} [Field F]
+    (v w : Valuation F (WithZero (Multiplicative ℤ))) (h : v.IsEquiv w)
+    {e : F} (hvpow : ∀ k : ℤ, v (e ^ k) = WithZero.exp k) (hwe0 : w e ≠ 0)
+    {x : F} (hx : v x ≠ 0) :
+    w x = (w e) ^ (WithZero.log (v x)) := by
+  set m := WithZero.log (v x) with hm
+  have hvu : v (x * e ^ (-m)) = 1 := by
+    rw [map_mul, hvpow (-m), ← WithZero.exp_log hx, ← hm, ← WithZero.exp_add,
+      add_neg_cancel, WithZero.exp_zero]
+  have hwu : w (x * e ^ (-m)) = 1 := (h.eq_one_iff_eq_one).mp hvu
+  rw [map_mul, map_zpow₀, zpow_neg, mul_inv_eq_one₀ (zpow_ne_zero _ hwe0)] at hwu
+  exact hwu
+
+/-- **The value-group scaling factor is the identity.** For an equivalent pair of
+surjective `ℤᵐ⁰`-valued valuations `v w` and an element `e` with `v (e ^ k) = exp k`
+and `1 < w e`, the integer `log (w e)` equals `1`.  By surjectivity of `w` pick
+`x₁` with `w x₁ = exp 1`; the power-agreement step
+(`w_apply_eq_zpow_log_of_v_ne_zero`) gives `1 = log (v x₁) · log (w e)`, so
+`log (w e) ∣ 1`, and `1 < w e` forces `log (w e) > 0`, ruling out `-1`. -/
+private theorem log_w_uniformizer_eq_one {F : Type*} [Field F]
+    (v w : Valuation F (WithZero (Multiplicative ℤ))) (h : v.IsEquiv w)
+    (hw : Function.Surjective w) {e : F}
+    (hvpow : ∀ k : ℤ, v (e ^ k) = WithZero.exp k) (hwe0 : w e ≠ 0)
+    (h1we : (1 : WithZero (Multiplicative ℤ)) < w e) :
+    WithZero.log (w e) = 1 := by
+  have hc_pos : 0 < WithZero.log (w e) := by
+    have := (WithZero.lt_log_iff_exp_lt hwe0 (a := (0 : ℤ))).mpr (by rwa [WithZero.exp_zero])
+    simpa using this
+  obtain ⟨x₁, hx₁⟩ := hw (WithZero.exp 1)
+  have hvx₁ : v x₁ ≠ 0 :=
+    (h.eq_zero).ne.mpr (by rw [hx₁]; exact WithZero.exp_ne_zero)
+  have hk := w_apply_eq_zpow_log_of_v_ne_zero v w h hvpow hwe0 hvx₁
+  rw [hx₁] at hk
+  have hlog : (1 : ℤ) = WithZero.log (v x₁) * WithZero.log (w e) := by
+    have h2 : WithZero.log (WithZero.exp (1 : ℤ)) =
+        WithZero.log ((w e) ^ (WithZero.log (v x₁))) := by rw [hk]
+    rwa [WithZero.log_exp, WithZero.log_zpow, smul_eq_mul] at h2
+  have hdvd : WithZero.log (w e) ∣ 1 := ⟨_, by rw [hlog]; ring⟩
+  rcases Int.isUnit_iff.mp (isUnit_of_dvd_one hdvd) with hh | hh
+  · exact hh
+  · omega
+
 /-- **General field-valuation helper (axiom-clean).** Two surjective
 `ℤᵐ⁰ = WithZero (Multiplicative ℤ)`-valued valuations on a field that are
 `Valuation.IsEquiv` are in fact *equal* (value-precise, not just equivalent).
@@ -77,10 +126,11 @@ theorem valuationSubring_isDVR_of_surjective_withZeroInt
 The order-isomorphism of value groups underlying `IsEquiv` is forced to be the
 identity because the only strictly-monotone group automorphism of `ℤ` is the
 identity: writing `v e = exp 1` (surjectivity of `v`) and `w x = (w e)^{log(v x)}`
-(the unit `x · e^{-log(v x)}` has `v`-value `1`, hence `w`-value `1` by `IsEquiv`),
-the integer `c := log(w e)` divides `1` and is positive (`1 < w e` from `1 < v e`),
-so `c = 1` and `w x = exp(log(v x)) = v x`.  Used to upgrade a valuation *equivalence*
-(from valuation-subring maximality) to the *value identity* of two normalized adic
+(the unit `x · e^{-log(v x)}` has `v`-value `1`, hence `w`-value `1` by `IsEquiv`,
+`w_apply_eq_zpow_log_of_v_ne_zero`), the integer `c := log(w e)` divides `1` and is
+positive (`1 < w e` from `1 < v e`), so `c = 1` (`log_w_uniformizer_eq_one`) and
+`w x = exp(log(v x)) = v x`.  Used to upgrade a valuation *equivalence* (from
+valuation-subring maximality) to the *value identity* of two normalized adic
 valuations on `K(C)`. -/
 theorem Valuation.isEquiv_iff_eq_of_surjective_withZeroInt
     {F : Type*} [Field F] (v w : Valuation F (WithZero (Multiplicative ℤ)))
@@ -91,43 +141,17 @@ theorem Valuation.isEquiv_iff_eq_of_surjective_withZeroInt
     intro k; rw [map_zpow₀, he, ← WithZero.exp_zsmul, smul_eq_mul, mul_one]
   have hwe0 : w e ≠ 0 :=
     (h.eq_zero).ne.mp (by rw [he]; exact WithZero.exp_ne_zero)
-  -- For nonzero `v x`, `w x = (w e)^(log (v x))`.
-  have key : ∀ x : F, v x ≠ 0 → w x = (w e) ^ (WithZero.log (v x)) := by
-    intro x hx
-    set m := WithZero.log (v x) with hm
-    have hvu : v (x * e ^ (-m)) = 1 := by
-      rw [map_mul, hvpow (-m), ← WithZero.exp_log hx, ← hm, ← WithZero.exp_add,
-        add_neg_cancel, WithZero.exp_zero]
-    have hwu : w (x * e ^ (-m)) = 1 := (h.eq_one_iff_eq_one).mp hvu
-    rw [map_mul, map_zpow₀, zpow_neg, mul_inv_eq_one₀ (zpow_ne_zero _ hwe0)] at hwu
-    exact hwu
   -- `1 < w e` from `1 < v e = exp 1`.
   have h1we : (1 : WithZero (Multiplicative ℤ)) < w e := by
     rw [← h.one_lt_iff_one_lt, he, ← WithZero.exp_zero, WithZero.exp_lt_exp]; norm_num
-  have hc_pos : 0 < WithZero.log (w e) := by
-    have := (WithZero.lt_log_iff_exp_lt hwe0 (a := (0 : ℤ))).mpr (by rwa [WithZero.exp_zero])
-    simpa using this
-  -- `log (w e) = 1` via surjectivity of `w`.
-  obtain ⟨x₁, hx₁⟩ := hw (WithZero.exp 1)
-  have hvx₁ : v x₁ ≠ 0 :=
-    (h.eq_zero).ne.mpr (by rw [hx₁]; exact WithZero.exp_ne_zero)
-  have hk := key x₁ hvx₁
-  rw [hx₁] at hk
-  have hlog : (1 : ℤ) = WithZero.log (v x₁) * WithZero.log (w e) := by
-    have h2 : WithZero.log (WithZero.exp (1 : ℤ)) =
-        WithZero.log ((w e) ^ (WithZero.log (v x₁))) := by rw [hk]
-    rwa [WithZero.log_exp, WithZero.log_zpow, smul_eq_mul] at h2
-  have hc1 : WithZero.log (w e) = 1 := by
-    have hdvd : WithZero.log (w e) ∣ 1 := ⟨_, by rw [hlog]; ring⟩
-    rcases Int.isUnit_iff.mp (isUnit_of_dvd_one hdvd) with hh | hh
-    · exact hh
-    · omega
+  -- The value-group scaling factor is the identity.
+  have hc1 : WithZero.log (w e) = 1 := log_w_uniformizer_eq_one v w h hw hvpow hwe0 h1we
   apply Valuation.ext
   intro x
   rcases eq_or_ne (v x) 0 with hx0 | hx0
   · rw [hx0, (h.eq_zero).mp hx0]
-  · rw [key x hx0, ← WithZero.exp_log hwe0, hc1, ← WithZero.exp_zsmul, smul_eq_mul, mul_one,
-      WithZero.exp_log hx0]
+  · rw [w_apply_eq_zpow_log_of_v_ne_zero v w h hvpow hwe0 hx0, ← WithZero.exp_log hwe0, hc1,
+      ← WithZero.exp_zsmul, smul_eq_mul, mul_one, WithZero.exp_log hx0]
 
 /-- **General valuation-subring maximality glue (axiom-clean).** If the valuation
 subring of `v` *dominates downward* into the valuation subring of `w` (`O_v ≤ O_w`
