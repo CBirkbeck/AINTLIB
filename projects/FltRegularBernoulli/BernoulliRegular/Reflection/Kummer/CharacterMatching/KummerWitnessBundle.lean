@@ -67,7 +67,7 @@ predicate, cardinality reductions) are proved in this file.
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Polynomial
+open NumberField IsCyclotomicExtension
 open scoped NumberField
 
 namespace BernoulliRegular
