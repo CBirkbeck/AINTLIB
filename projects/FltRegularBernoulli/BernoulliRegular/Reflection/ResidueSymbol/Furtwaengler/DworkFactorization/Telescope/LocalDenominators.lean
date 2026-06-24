@@ -18,7 +18,7 @@ uses an actual local representation `ℓ^m * y = d * x` with
 noncomputable section
 
 open scoped NumberField
-open WithZero Multiplicative IsDedekindDomain
+open WithZero IsDedekindDomain
 
 namespace BernoulliRegular
 
@@ -44,12 +44,12 @@ theorem quotientFractionEvalPrimeCompl_den_mul_eq_mk
         ((d : 𝓞 R') * x) d =
       Ideal.Quotient.mk (F.Q ^ (N + 1)) x := by
   rw [show
-      F.toConcreteStickelbergerSetup.quotientFractionEvalPrimeCompl N
-          ((d : 𝓞 R') * x) d =
-        F.toConcreteStickelbergerSetup.quotientFractionEval N
-          ((d : 𝓞 R') * x) (d : 𝓞 R') d.property from rfl]
-  rw [F.toConcreteStickelbergerSetup.quotientFractionEval_eq_mk_mul_inv]
-  rw [map_mul, mul_assoc,
+        F.toConcreteStickelbergerSetup.quotientFractionEvalPrimeCompl N
+            ((d : 𝓞 R') * x) d =
+          F.toConcreteStickelbergerSetup.quotientFractionEval N
+            ((d : 𝓞 R') * x) (d : 𝓞 R') d.property from rfl,
+    F.toConcreteStickelbergerSetup.quotientFractionEval_eq_mk_mul_inv,
+    map_mul, mul_assoc,
     mul_comm (Ideal.Quotient.mk (F.Q ^ (N + 1)) x),
     ← mul_assoc,
     F.toConcreteStickelbergerSetup.quotient_mk_mul_quotientInvOfNotMemQ,
@@ -88,9 +88,7 @@ theorem exists_primeCompl_natCast_ell_pow_denom_of_mem_Q_pow
       ((ℓ : 𝓞 R') ^ m) * y = (d : 𝓞 R') * x ∧ y ∈ F.Q ^ s := by
   classical
   by_cases hx0 : x = 0
-  · subst x
-    refine ⟨0, 1, ?_, by simp⟩
-    simp
+  · exact ⟨0, 1, by simp [hx0], by simp⟩
   let v : HeightOneSpectrum (𝓞 R') :=
     { asIdeal := F.Q
       isPrime := F.toTraceFormStickelbergerSetup.Q_isPrime
@@ -182,10 +180,10 @@ theorem quotientFractionEvalPrimeCompl_mem_map_Q_pow_of_natCast_ell_pow_mul_mem
     F.mem_Q_pow_of_natCast_ell_pow_mul_mem_Q_pow_add_mul_pred
       (m := m) (n := s) hy
   rw [show
-      F.toConcreteStickelbergerSetup.quotientFractionEvalPrimeCompl N y d =
-        F.toConcreteStickelbergerSetup.quotientFractionEval N y (d : 𝓞 R') d.property
-      from rfl]
-  rw [F.toConcreteStickelbergerSetup.quotientFractionEval_eq_mk_mul_inv]
+        F.toConcreteStickelbergerSetup.quotientFractionEvalPrimeCompl N y d =
+          F.toConcreteStickelbergerSetup.quotientFractionEval N y (d : 𝓞 R') d.property
+        from rfl,
+    F.toConcreteStickelbergerSetup.quotientFractionEval_eq_mk_mul_inv]
   exact
     (Ideal.map (Ideal.Quotient.mk (F.Q ^ (N + 1))) (F.Q ^ s)).mul_mem_right
       (F.toConcreteStickelbergerSetup.quotientInvOfNotMemQ N (d : 𝓞 R') d.property)
