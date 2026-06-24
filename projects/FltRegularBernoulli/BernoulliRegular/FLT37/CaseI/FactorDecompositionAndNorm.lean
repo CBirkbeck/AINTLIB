@@ -542,7 +542,7 @@ theorem fltCaseI_decomposition_complexConj_mod_p
         (((ζcu ^ (2 * m) : (𝓞 K)ˣ) : 𝓞 K) *
           ((ζcu ^ ((p - 1) * m) : (𝓞 K)ˣ) : 𝓞 K)) *
           (algebraMap (𝓞 (K⁺)) (𝓞 K) v_plus) *
-          (ringOfIntegersComplexConj K γ) ^ p from by ring,
+          (ringOfIntegersComplexConj K γ) ^ p by ring,
       h_zeta_pow_collapse]
   rw [h_step, h_decomp]
   -- Goal: ζ^m · v · γ^p - ζ^m · v · σ(γ)^p ∈ (p).
@@ -554,7 +554,7 @@ theorem fltCaseI_decomposition_complexConj_mod_p
         (ringOfIntegersComplexConj K γ) ^ p =
       ((ζcu ^ m : (𝓞 K)ˣ) : 𝓞 K) *
         (algebraMap (𝓞 (K⁺)) (𝓞 K) v_plus) *
-        (γ ^ p - (ringOfIntegersComplexConj K γ) ^ p) from by ring]
+        (γ ^ p - (ringOfIntegersComplexConj K γ) ^ p) by ring]
   refine Ideal.mul_mem_left _ _ ?_
   -- γ^p - σ(γ^p) ∈ (p) by pow_sub_intGalConj_mem.
   have h_apply : γ ^ p - ringOfIntegersComplexConj K (γ ^ p) ∈
