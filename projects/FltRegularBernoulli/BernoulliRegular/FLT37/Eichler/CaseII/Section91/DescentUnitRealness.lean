@@ -448,7 +448,7 @@ theorem caseIISigmaAntiDescent_decomp_zero
     rw [show caseIIConjugateResidue_eigenvector (Fin.castSucc k) =
         cyclotomicUnitFreePartModPClass (p := 37) (CyclotomicField 37 ℚ)
           (Additive.ofMul (cyclotomicUnitFreeClass (CyclotomicField 37 ℚ)
-            (FLT37.pollaczekUnit 37 (CyclotomicField 37 ℚ) (2 * (k : ℕ) + 2)))) from by
+            (FLT37.pollaczekUnit 37 (CyclotomicField 37 ℚ) (2 * (k : ℕ) + 2)))) by
       unfold caseIIConjugateResidue_eigenvector; congr 2]
   -- Linear independence forces every block coefficient to vanish.
   have hzero_block : ∀ k : Fin 17, c (Fin.castSucc k) = 0 :=
