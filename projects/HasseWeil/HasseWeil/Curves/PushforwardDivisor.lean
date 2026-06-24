@@ -271,6 +271,72 @@ variable [IsAlgClosed F]
   (φ : CurveMap C₁ C₂) (cd : φ.CoordHom)
 
 set_option synthInstance.maxHeartbeats 100000 in
+include φ cd in
+/-- **`F[C₂]` acts faithfully on `K(C₁)`** through the `cd`-induced algebra: the
+structure map `F[C₂] → K(C₁)` factors (by the `F[C₂] → F[C₁] → K(C₁)` scalar tower)
+as the injective comorphism `cd.toAlgHom` followed by the injective localisation
+`F[C₁] → K(C₁)`, so it is injective.  Packaged for reuse by the function-field
+finiteness/degree arguments. -/
+private theorem faithfulSMul_coordinateRing_functionField :
+    letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    FaithfulSMul C₂.CoordinateRing C₁.FunctionField := by
+  letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+  haveI tower2 : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField :=
+    inferInstance
+  rw [faithfulSMul_iff_algebraMap_injective,
+    IsScalarTower.algebraMap_eq C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField]
+  exact (IsFractionRing.injective C₁.CoordinateRing C₁.FunctionField).comp
+    (CurveMap.coordHom_injective φ cd)
+
+set_option synthInstance.maxHeartbeats 100000 in
+set_option maxHeartbeats 800000 in
+include φ cd in
+/-- **The coordinate-ring/function-field scalar tower** `F[C₂] → K(C₂) → K(C₁)`.
+The `K(C₂) → K(C₁)` map is `φ.pullback`, and `cd.compat` says it agrees with the
+`cd`-action after composing with `F[C₂] → K(C₂)`; that is exactly
+`IsScalarTower.of_algebraMap_smul`.  Packaged for reuse by the function-field
+finiteness/integral-norm arguments. -/
+private theorem isScalarTower_coordinateRing_functionField :
+    letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    letI algFF : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
+    IsScalarTower C₂.CoordinateRing C₂.FunctionField C₁.FunctionField := by
+  letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+  letI algFF : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
+  refine IsScalarTower.of_algebraMap_smul fun r x ↦ ?_
+  rw [Algebra.smul_def]
+  show φ.pullback ((algebraMap C₂.CoordinateRing C₂.FunctionField) r) * x = r • x
+  rw [cd.compat r, ← IsScalarTower.algebraMap_smul C₁.CoordinateRing r x, ← Algebra.smul_def]
+  rfl
+
+set_option synthInstance.maxHeartbeats 100000 in
+set_option maxHeartbeats 800000 in
+include φ cd in
+/-- **`K(C₁)` is algebraic over `K(C₂)`** (the `φ.toAlgebra` extension): the ring
+extension `F[C₂] → F[C₁]` is integral (`cd.module_finite`), hence algebraic, and
+algebraicity transfers to the fraction fields by `IsFractionRing.isAlgebraic_iff'`
+(over `F[C₂]`) and then `IsFractionRing.comap_isAlgebraic_iff` (descending the base
+to `K(C₂)`).  This is the algebraicity input to the localisation-finiteness step. -/
+private theorem isAlgebraic_functionField :
+    letI algFF : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
+    Algebra.IsAlgebraic C₂.FunctionField C₁.FunctionField := by
+  letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+  haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ algCR.toModule :=
+    cd.module_finite
+  haveI hint : Algebra.IsIntegral C₂.CoordinateRing C₁.CoordinateRing :=
+    Algebra.IsIntegral.of_finite C₂.CoordinateRing C₁.CoordinateRing
+  haveI faith : FaithfulSMul C₂.CoordinateRing C₁.FunctionField :=
+    faithfulSMul_coordinateRing_functionField φ cd
+  letI algFF : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
+  haveI tower1 : IsScalarTower C₂.CoordinateRing C₂.FunctionField C₁.FunctionField :=
+    isScalarTower_coordinateRing_functionField φ cd
+  haveI hab : Algebra.IsAlgebraic C₂.CoordinateRing C₁.CoordinateRing :=
+    Algebra.IsIntegral.isAlgebraic
+  haveI halgAB : Algebra.IsAlgebraic C₂.CoordinateRing C₁.FunctionField :=
+    (IsFractionRing.isAlgebraic_iff' C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField).mp hab
+  exact (IsFractionRing.comap_isAlgebraic_iff (A := C₂.CoordinateRing)
+    (K := C₂.FunctionField) (C := C₁.FunctionField)).mp halgAB
+
+set_option synthInstance.maxHeartbeats 100000 in
 -- Establishing the finite extension `K(C₂) → K(C₁)` goes through the integral-closure
 -- localisation instance and the `tower1` scalar-tower derivation, both of which are
 -- heartbeat-heavy; hence the scoped bumps.
@@ -290,29 +356,15 @@ theorem finiteDimensional_functionField :
   haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR := hfin
   haveI hint : Algebra.IsIntegral C₂.CoordinateRing C₁.CoordinateRing :=
     Algebra.IsIntegral.of_finite C₂.CoordinateRing C₁.CoordinateRing
-  haveI faith : FaithfulSMul C₂.CoordinateRing C₁.FunctionField := by
-    haveI tower2 : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField :=
-      inferInstance
-    rw [faithfulSMul_iff_algebraMap_injective,
-      IsScalarTower.algebraMap_eq C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField]
-    exact (IsFractionRing.injective C₁.CoordinateRing C₁.FunctionField).comp
-      (CurveMap.coordHom_injective φ cd)
+  haveI faith : FaithfulSMul C₂.CoordinateRing C₁.FunctionField :=
+    faithfulSMul_coordinateRing_functionField φ cd
   letI algFF : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
-  haveI tower1 : IsScalarTower C₂.CoordinateRing C₂.FunctionField C₁.FunctionField := by
-    refine IsScalarTower.of_algebraMap_smul fun r x ↦ ?_
-    rw [Algebra.smul_def]
-    show φ.pullback ((algebraMap C₂.CoordinateRing C₂.FunctionField) r) * x = r • x
-    rw [cd.compat r, ← IsScalarTower.algebraMap_smul C₁.CoordinateRing r x, ← Algebra.smul_def]
-    rfl
+  haveI tower1 : IsScalarTower C₂.CoordinateRing C₂.FunctionField C₁.FunctionField :=
+    isScalarTower_coordinateRing_functionField φ cd
+  haveI halgFF : Algebra.IsAlgebraic C₂.FunctionField C₁.FunctionField :=
+    isAlgebraic_functionField φ cd
   haveI hicl : IsIntegralClosure C₁.CoordinateRing C₂.CoordinateRing C₁.FunctionField :=
     IsIntegralClosure.of_isIntegrallyClosed C₁.CoordinateRing C₂.CoordinateRing _
-  haveI hab : Algebra.IsAlgebraic C₂.CoordinateRing C₁.CoordinateRing :=
-    Algebra.IsIntegral.isAlgebraic
-  haveI halgAB : Algebra.IsAlgebraic C₂.CoordinateRing C₁.FunctionField :=
-    (IsFractionRing.isAlgebraic_iff' C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField).mp hab
-  haveI halgFF : Algebra.IsAlgebraic C₂.FunctionField C₁.FunctionField :=
-    (IsFractionRing.comap_isAlgebraic_iff (A := C₂.CoordinateRing)
-      (K := C₂.FunctionField) (C := C₁.FunctionField)).mp halgAB
   haveI hloc : IsLocalization
       (Algebra.algebraMapSubmonoid C₁.CoordinateRing (nonZeroDivisors C₂.CoordinateRing))
       C₁.FunctionField :=
