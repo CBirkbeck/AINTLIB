@@ -75,14 +75,9 @@ noncomputable section
 
 set_option maxRecDepth 4000
 
-open NumberField
-
 namespace BernoulliRegular.FLT37.Eichler
 
-open BernoulliRegular (CPlusGenerator CPlusExponentProduct)
 open BernoulliRegular.CyclotomicUnits
-open BernoulliRegular.CyclotomicUnits.PadicLogSetup
-open BernoulliRegular.CyclotomicUnits.PadicLogSetup.DworkParameter
 
 /-! ## 1. The proven `37·(second-order part)` structure of the level-`71` normalized-unit coordinate
 
@@ -325,7 +320,7 @@ theorem caseIICor823Level71NormalizedUnitCoeff37_of_secondOrderPartValue
         (((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 2) ^ ((15 : ℕ) + 1) - 1) =
       (37 : ZMod (37 ^ 2)) *
         (((ρ.val : ℕ) : ZMod (37 ^ 2)) *
-          (((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 2) ^ ((15 : ℕ) + 1) - 1)) from by ring]
+          (((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 2) ^ ((15 : ℕ) + 1) - 1)) by ring]
   -- Reduce to a mod-`37` identity between the two `ZMod 37²` arguments, then evaluate `castHom`:
   -- `castHom ((ρ·V̄).val) = ρ·V̄` on the left, `castHom (ρ.val·V) = ρ·V̄` on the right.
   apply thirtyseven_mul_eq_of_castHom_eq
