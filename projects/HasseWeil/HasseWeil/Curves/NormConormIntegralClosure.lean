@@ -1585,6 +1585,174 @@ theorem finrank_fractionRing_B_eq :
     ← IsScalarTower.algebraMap_apply C₂.CoordinateRing C₂.FunctionField C₁.FunctionField,
     IsScalarTower.algebraMap_apply C₂.CoordinateRing (B (C₁ := C₁) (C₂ := C₂)) C₁.FunctionField]
 
+/-- **The relative-norm exponent of a prime over `m_Q` is positive**: if a prime `P'` of `B`
+lies over the maximal ideal `m_Q` of `C₂.CoordinateRing` and `relNorm(P') = m_Q ^ t`, then
+`1 ≤ t`.  Otherwise `t = 0` gives `relNorm(P') = ⊤`, contradicting
+`relNorm(P') ≤ comap P' = m_Q ≠ ⊤` (`Ideal.relNorm_le_comap`).  `B`-analogue of the affine
+template's `one_le_of_relNorm_eq_pow`. -/
+private theorem one_le_relNormExp_of_liesOver (Q : C₂.SmoothPoint)
+    (P' : Ideal (B (C₁ := C₁) (C₂ := C₂))) [P'.LiesOver (C₂.maximalIdealAt Q)] (t : ℕ)
+    (ht : Ideal.relNorm C₂.CoordinateRing P' = C₂.maximalIdealAt Q ^ t) :
+    1 ≤ t := by
+  haveI hQmax : (C₂.maximalIdealAt Q).IsMaximal := C₂.maximalIdealAt_isMaximal Q
+  rcases Nat.eq_zero_or_pos t with ht0 | ht0
+  · exfalso
+    have hcomap : P'.comap (algebraMap C₂.CoordinateRing (B (C₁ := C₁) (C₂ := C₂))) =
+        C₂.maximalIdealAt Q := (Ideal.LiesOver.over (p := C₂.maximalIdealAt Q) (P := P')).symm
+    have hbound := Ideal.relNorm_le_comap (R := C₂.CoordinateRing) P'
+    rw [hcomap, ht, ht0, pow_zero, Ideal.one_eq_top, top_le_iff] at hbound
+    exact hQmax.ne_top hbound
+  · exact ht0
+
+/-- **Each prime over `m_Q` has relative norm a positive power of `m_Q`**: for every prime `P'`
+of `B` in `(m_Q).primesOver B`, there is `t ≥ 1` with `relNorm(P') = m_Q ^ t`.  Combines
+`Ideal.exists_relNorm_eq_pow_of_isPrime` (the power form) with `one_le_relNormExp_of_liesOver`
+(positivity). -/
+private theorem exists_relNormExp_pos_of_mem_primesOver (Q : C₂.SmoothPoint)
+    (P' : Ideal (B (C₁ := C₁) (C₂ := C₂)))
+    (hP' : P' ∈ (C₂.maximalIdealAt Q).primesOver (B (C₁ := C₁) (C₂ := C₂))) :
+    ∃ t : ℕ, 1 ≤ t ∧ Ideal.relNorm C₂.CoordinateRing P' = C₂.maximalIdealAt Q ^ t := by
+  obtain ⟨hP'prime, hP'lies⟩ := hP'
+  haveI : P'.IsPrime := hP'prime
+  haveI : P'.LiesOver (C₂.maximalIdealAt Q) := hP'lies
+  obtain ⟨t, ht⟩ := Ideal.exists_relNorm_eq_pow_of_isPrime P' (C₂.maximalIdealAt Q)
+  exact ⟨t, one_le_relNormExp_of_liesOver Q P' t ht, ht⟩
+
+/-- **A uniform relative-norm-exponent function over the fibre `m_Q`**: there is a single
+`sfn : Ideal B → ℕ` such that every prime `P'` over `m_Q` has `sfn(P') ≥ 1` and
+`relNorm(P') = m_Q ^ sfn(P')`.  Packages the per-prime exponents of
+`exists_relNormExp_pos_of_mem_primesOver` into one function via a dependent choice
+(`Classical.choose` guarded by membership), so the global balance can sum over it. -/
+private theorem exists_relNormExp_fn (Q : C₂.SmoothPoint) :
+    ∃ sfn : Ideal (B (C₁ := C₁) (C₂ := C₂)) → ℕ,
+      (∀ P' ∈ (C₂.maximalIdealAt Q).primesOver (B (C₁ := C₁) (C₂ := C₂)), 1 ≤ sfn P') ∧
+      ∀ P' ∈ (C₂.maximalIdealAt Q).primesOver (B (C₁ := C₁) (C₂ := C₂)),
+        Ideal.relNorm C₂.CoordinateRing P' = C₂.maximalIdealAt Q ^ sfn P' := by
+  classical
+  refine ⟨fun P' => if hP' : P' ∈ (C₂.maximalIdealAt Q).primesOver (B (C₁ := C₁) (C₂ := C₂)) then
+    (exists_relNormExp_pos_of_mem_primesOver Q P' hP').choose else 0, ?_, ?_⟩
+  · intro P' hP'
+    simp only [dif_pos hP']
+    exact (exists_relNormExp_pos_of_mem_primesOver Q P' hP').choose_spec.1
+  · intro P' hP'
+    simp only [dif_pos hP']
+    exact (exists_relNormExp_pos_of_mem_primesOver Q P' hP').choose_spec.2
+
+/-- **Inertia degree `1` for every prime over `m_Q`**: every prime `P'` of `B` in
+`(m_Q).primesOver B` has `inertiaDeg(m_Q, P') = 1`.  Such a `P'` lies over `m_Q`, so
+`P'.under = m_Q`, and the per-prime `inertiaDeg_eq_one` (residue fields all `F`) applies. -/
+private theorem inertiaDeg_eq_one_of_mem_primesOver (Q : C₂.SmoothPoint)
+    (P' : Ideal (B (C₁ := C₁) (C₂ := C₂)))
+    (hP' : P' ∈ (C₂.maximalIdealAt Q).primesOver (B (C₁ := C₁) (C₂ := C₂))) :
+    Ideal.inertiaDeg (C₂.maximalIdealAt Q) P' = 1 := by
+  obtain ⟨hP'prime, hP'lies⟩ := hP'
+  have hunder : P'.under C₂.CoordinateRing = C₂.maximalIdealAt Q := hP'lies.over.symm
+  exact inertiaDeg_eq_one P' Q hP'prime hunder
+
+/-- **Ramification index positive for primes over `m_Q`**: every prime `P'` of `B` in
+`(m_Q).primesOver B` has `e_{P'} ≥ 1`.  The ramification index of a prime over a nonzero ideal
+is nonzero in a Dedekind domain (`ramificationIdx_ne_zero_of_liesOver`).  `B`-analogue of the
+affine template's `one_le_ramificationIdx_of_liesOver_maximalIdealAt`. -/
+private theorem one_le_ramificationIdx_of_mem_primesOver (Q : C₂.SmoothPoint)
+    (P' : Ideal (B (C₁ := C₁) (C₂ := C₂)))
+    (hP' : P' ∈ (C₂.maximalIdealAt Q).primesOver (B (C₁ := C₁) (C₂ := C₂))) :
+    1 ≤ (C₂.maximalIdealAt Q).ramificationIdx P' := by
+  obtain ⟨hP'prime, hP'lies⟩ := hP'
+  haveI : P'.IsPrime := hP'prime
+  haveI : P'.LiesOver (C₂.maximalIdealAt Q) := hP'lies
+  have hp0 : C₂.maximalIdealAt Q ≠ ⊥ := C₂.maximalIdealAt_ne_bot Q
+  rw [Nat.one_le_iff_ne_zero]
+  exact Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver P' hp0
+
+/-- **The fibre over `m_Q` as a `primesOver`-`toFinset`**: the explicit fibre finset
+`IsDedekindDomain.primesOverFinset m_Q B` equals `((m_Q).primesOver B).toFinset`.  Both name the
+finite set of primes of `B` lying over the nonzero ideal `m_Q`; coerced to a set they agree
+(`IsDedekindDomain.coe_primesOverFinset`, `Set.coe_toFinset`).  Established once with `m_Q.IsMaximal`
+in scope so the `Fintype (primesOver)` instance behind `.toFinset` is available. -/
+private theorem primesOverFinset_eq_toFinset (Q : C₂.SmoothPoint) :
+    haveI : (C₂.maximalIdealAt Q).IsMaximal := C₂.maximalIdealAt_isMaximal Q
+    IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q) (B (C₁ := C₁) (C₂ := C₂)) =
+      ((C₂.maximalIdealAt Q).primesOver (B (C₁ := C₁) (C₂ := C₂))).toFinset := by
+  haveI : (C₂.maximalIdealAt Q).IsMaximal := C₂.maximalIdealAt_isMaximal Q
+  have hp0 : C₂.maximalIdealAt Q ≠ ⊥ := C₂.maximalIdealAt_ne_bot Q
+  apply Finset.coe_injective
+  rw [IsDedekindDomain.coe_primesOverFinset hp0, Set.coe_toFinset]
+
+/-- **Sum of ramification indices equals the geometric degree**: over a smooth point `Q` of `C₂`,
+`Σ_{P' / m_Q} e_{P'} = [K(C₁) : K(C₂)]`.  Combines the fundamental identity
+`Σ e_{P'}·f_{P'} = [K(C₁):K(C₂)]` (`Ideal.sum_ramification_inertia`, applicable *directly* because
+`B` is the integral closure) with every residue degree `f_{P'} = 1`
+(`inertiaDeg_eq_one_of_mem_primesOver`).  Stated over the explicit fibre finset
+`IsDedekindDomain.primesOverFinset` (no `Fintype`-at-type-level needed).  `B`-analogue of the affine
+template's `sum_ramificationIdx_eq_degree`. -/
+private theorem sum_ramificationIdx_eq_finrank (Q : C₂.SmoothPoint) :
+    ∑ P' ∈ IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q) (B (C₁ := C₁) (C₂ := C₂)),
+      (C₂.maximalIdealAt Q).ramificationIdx P' =
+      Module.finrank C₂.FunctionField C₁.FunctionField := by
+  haveI hQmax : (C₂.maximalIdealAt Q).IsMaximal := C₂.maximalIdealAt_isMaximal Q
+  set p : Ideal C₂.CoordinateRing := C₂.maximalIdealAt Q with hp_def
+  have hp0 : p ≠ ⊥ := C₂.maximalIdealAt_ne_bot Q
+  have hsumef := Ideal.sum_ramification_inertia (B (C₁ := C₁) (C₂ := C₂)) C₂.FunctionField
+    C₁.FunctionField (p := p) hp0
+  rw [← hsumef]
+  apply Finset.sum_congr rfl
+  intro P' hP'
+  have hmem : P' ∈ p.primesOver (B (C₁ := C₁) (C₂ := C₂)) :=
+    (IsDedekindDomain.mem_primesOverFinset_iff (B := B (C₁ := C₁) (C₂ := C₂)) hp0).mp hP'
+  rw [inertiaDeg_eq_one_of_mem_primesOver Q P' hmem, mul_one]
+
+set_option maxHeartbeats 1600000 in
+/-- **The degree balance `[K(C₁):K(C₂)] = Σ sfn(P')·e(P')`**: if, over a smooth point `Q` of `C₂`,
+the relative norm of each prime `P' / m_Q` is the power `relNorm(P') = m_Q ^ sfn(P')`, then
+`[K(C₁):K(C₂)] = Σ_{P' / m_Q} sfn(P')·e_{P'}`.  Apply `relNorm` to the prime factorisation
+`m_Q·B = ∏ P'^{e_{P'}}` (`Ideal.map_algebraMap_eq_finsetProd_pow`): the left side is
+`m_Q ^ finrank = m_Q ^ [K(C₁):K(C₂)]` (`Ideal.relNorm_algebraMap` + `finrank_fractionRing_B_eq`),
+the right side `m_Q ^ Σ sfn·e`, and `m_Q` not being a unit lets us cancel the bases
+(`pow_inj_of_not_isUnit`).  `B`-analogue of the affine template's
+`degree_eq_sum_relNormExp_mul_ramificationIdx`. -/
+private theorem finrank_eq_sum_relNormExp_mul_ramificationIdx (Q : C₂.SmoothPoint)
+    (sfn : Ideal (B (C₁ := C₁) (C₂ := C₂)) → ℕ)
+    (hsfn_relNorm : ∀ P' ∈ (C₂.maximalIdealAt Q).primesOver (B (C₁ := C₁) (C₂ := C₂)),
+      Ideal.relNorm C₂.CoordinateRing P' = C₂.maximalIdealAt Q ^ sfn P') :
+    Module.finrank C₂.FunctionField C₁.FunctionField =
+      ∑ P' ∈ IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q) (B (C₁ := C₁) (C₂ := C₂)),
+        sfn P' * (C₂.maximalIdealAt Q).ramificationIdx P' := by
+  haveI hQmax : (C₂.maximalIdealAt Q).IsMaximal := C₂.maximalIdealAt_isMaximal Q
+  set p : Ideal C₂.CoordinateRing := C₂.maximalIdealAt Q with hp_def
+  have hp0 : p ≠ ⊥ := C₂.maximalIdealAt_ne_bot Q
+  have hpNotUnit : ¬ IsUnit p := by rw [Ideal.isUnit_iff]; exact hQmax.ne_top
+  set ee : Ideal (B (C₁ := C₁) (C₂ := C₂)) → ℕ := fun P' => p.ramificationIdx P' with hee_def
+  rw [primesOverFinset_eq_toFinset Q]
+  have hfact := Ideal.map_algebraMap_eq_finsetProd_pow (R := B (C₁ := C₁) (C₂ := C₂))
+    (S := C₂.CoordinateRing) (p := p) hp0
+  have hrel := congr_arg (Ideal.relNorm C₂.CoordinateRing) hfact
+  rw [Ideal.relNorm_algebraMap (B (C₁ := C₁) (C₂ := C₂)) p, map_prod,
+    finrank_fractionRing_B_eq] at hrel
+  have hrhs : ∏ P' ∈ (p.primesOver (B (C₁ := C₁) (C₂ := C₂))).toFinset,
+      Ideal.relNorm C₂.CoordinateRing (P' ^ ee P') =
+      p ^ (∑ P' ∈ (p.primesOver (B (C₁ := C₁) (C₂ := C₂))).toFinset, sfn P' * ee P') := by
+    rw [← Finset.prod_pow_eq_pow_sum]
+    apply Finset.prod_congr rfl
+    intro P' hP'
+    have hmem : P' ∈ p.primesOver (B (C₁ := C₁) (C₂ := C₂)) := Set.mem_toFinset.mp hP'
+    rw [map_pow, hsfn_relNorm P' hmem, ← pow_mul]
+  rw [hrhs] at hrel
+  exact (pow_inj_of_not_isUnit hpNotUnit hp0).mp hrel
+
+/-- **A `ℕ`-valued sum squeeze**: if `∑ c = ∑ a·c` over a finset `s` with every `a i ≥ 1` and every
+`c i ≥ 1`, then `a i₀ = 1` for each `i₀ ∈ s`.  Each summand satisfies `c i ≤ a i · c i`, so equality
+of the sums forces `c i = a i · c i` pointwise (`Finset.sum_eq_sum_iff_of_le`); cancelling the
+positive `c i₀` gives `a i₀ = 1`. -/
+private theorem eq_one_of_sum_eq_sum_mul {ι : Type*} (s : Finset ι) (a c : ι → ℕ)
+    (hsum : ∑ i ∈ s, c i = ∑ i ∈ s, a i * c i)
+    (ha : ∀ i ∈ s, 1 ≤ a i) (hc : ∀ i ∈ s, 1 ≤ c i)
+    {i₀ : ι} (hi₀ : i₀ ∈ s) : a i₀ = 1 := by
+  have hpointwise : ∀ i ∈ s, c i ≤ a i * c i := fun i hi ↦ by
+    nlinarith [ha i hi, hc i hi]
+  have heach := (Finset.sum_eq_sum_iff_of_le hpointwise).mp hsum
+  have hi := heach i₀ hi₀
+  nlinarith [hi, hc i₀ hi₀]
+
 set_option maxHeartbeats 1600000 in
 /-- **The `s = 1` core — Silverman II.3.6**: for a maximal ideal `P` of `B` lying over the
 maximal ideal `m_Q` of `C₂.CoordinateRing`, `relNorm_{C₂.CoordinateRing}(P) = m_Q`.
@@ -1613,125 +1781,35 @@ theorem relNorm_eq_of_under (P : Ideal (B (C₁ := C₁) (C₂ := C₂)))
   haveI hPprime : P.IsPrime := hP.isPrime
   set p : Ideal C₂.CoordinateRing := C₂.maximalIdealAt Q with hp_def
   have hp0 : p ≠ ⊥ := C₂.maximalIdealAt_ne_bot Q
-  have hpNotUnit : ¬ IsUnit p := by
-    rw [Ideal.isUnit_iff]; exact hQmax.ne_top
-  -- `relNorm P = p ^ s`; reduce to `s = 1`.
+  have hpNotUnit : ¬ IsUnit p := by rw [Ideal.isUnit_iff]; exact hQmax.ne_top
+  -- `relNorm P = p ^ s`; it suffices to show `s = 1`, and `1 ≤ s`.
   obtain ⟨s, hs⟩ := Ideal.exists_relNorm_eq_pow_of_isPrime P p
   suffices hs1 : s = 1 by rw [hs, hs1, pow_one]
-  -- `1 ≤ s` (else `relNorm P = ⊤`, contradicting `relNorm P ≤ comap P = p ≠ ⊤`).
-  have hge1 : 1 ≤ s := by
-    rcases Nat.eq_zero_or_pos s with hs0 | hs0
-    · exfalso
-      have hcomap : P.comap (algebraMap C₂.CoordinateRing (B (C₁ := C₁) (C₂ := C₂))) = p :=
-        hLies.over.symm
-      have hbound := Ideal.relNorm_le_comap (R := C₂.CoordinateRing) P
-      rw [hcomap, hs, hs0, pow_zero, Ideal.one_eq_top, top_le_iff] at hbound
-      exact hQmax.ne_top hbound
-    · exact hs0
-  -- The geometric degree.
-  set d : ℕ := Module.finrank C₂.FunctionField C₁.FunctionField with hd_def
-  -- Per-prime exponents `s(P') ≥ 1` for `P'` over `p` (same argument as for `P`).
-  have hexp : ∀ P' ∈ p.primesOver (B (C₁ := C₁) (C₂ := C₂)),
-      ∃ t : ℕ, 1 ≤ t ∧ Ideal.relNorm C₂.CoordinateRing P' = p ^ t := by
-    intro P' hP'
-    obtain ⟨hP'prime, hP'lies⟩ := hP'
-    haveI : P'.IsPrime := hP'prime
-    haveI : P'.LiesOver p := hP'lies
-    obtain ⟨t, ht⟩ := Ideal.exists_relNorm_eq_pow_of_isPrime P' p
-    refine ⟨t, ?_, ht⟩
-    rcases Nat.eq_zero_or_pos t with ht0 | ht0
-    · exfalso
-      have hcomap : P'.comap (algebraMap C₂.CoordinateRing (B (C₁ := C₁) (C₂ := C₂))) = p :=
-        hP'lies.over.symm
-      have hbound := Ideal.relNorm_le_comap (R := C₂.CoordinateRing) P'
-      rw [hcomap, ht, ht0, pow_zero, Ideal.one_eq_top, top_le_iff] at hbound
-      exact hQmax.ne_top hbound
-    · exact ht0
-  let sfn : Ideal (B (C₁ := C₁) (C₂ := C₂)) → ℕ := fun P' =>
-    if hP' : P' ∈ p.primesOver (B (C₁ := C₁) (C₂ := C₂)) then (hexp P' hP').choose else 0
-  have hsfn_ge : ∀ P' ∈ p.primesOver (B (C₁ := C₁) (C₂ := C₂)), 1 ≤ sfn P' := by
-    intro P' hP'
-    simp only [sfn, dif_pos hP']
-    exact (hexp P' hP').choose_spec.1
-  have hsfn_relNorm : ∀ P' ∈ p.primesOver (B (C₁ := C₁) (C₂ := C₂)),
-      Ideal.relNorm C₂.CoordinateRing P' = p ^ sfn P' := by
-    intro P' hP'
-    simp only [sfn, dif_pos hP']
-    exact (hexp P' hP').choose_spec.2
-  -- Inertia degree `1` for every `P'` over `p`.
-  have hinertia : ∀ P' ∈ p.primesOver (B (C₁ := C₁) (C₂ := C₂)), Ideal.inertiaDeg p P' = 1 := by
-    intro P' hP'
-    obtain ⟨hP'prime, hP'lies⟩ := hP'
-    have hunder : P'.under C₂.CoordinateRing = C₂.maximalIdealAt Q := by
-      rw [← hp_def]; exact hP'lies.over.symm
-    exact inertiaDeg_eq_one P' Q hP'prime hunder
-  -- The conorm factorisation `p · B = ∏ P'^{e(P')}`.
-  set ee : Ideal (B (C₁ := C₁) (C₂ := C₂)) → ℕ :=
-    fun P' => p.ramificationIdx P' with hee_def
-  have hfact := Ideal.map_algebraMap_eq_finsetProd_pow (R := B (C₁ := C₁) (C₂ := C₂))
-    (S := C₂.CoordinateRing) (p := p) hp0
-  -- LHS of the balance via `relNorm_algebraMap` + finrank coherence.
-  have hrel := congr_arg (Ideal.relNorm C₂.CoordinateRing) hfact
-  rw [Ideal.relNorm_algebraMap (B (C₁ := C₁) (C₂ := C₂)) p, map_prod,
-    finrank_fractionRing_B_eq, ← hd_def] at hrel
-  -- RHS of the balance: `∏ relNorm(P'^e) = p ^ (Σ s·e)`.
-  have hrhs : ∏ P' ∈ (p.primesOver (B (C₁ := C₁) (C₂ := C₂))).toFinset,
-      Ideal.relNorm C₂.CoordinateRing (P' ^ ee P') =
-      p ^ (∑ P' ∈ (p.primesOver (B (C₁ := C₁) (C₂ := C₂))).toFinset, sfn P' * ee P') := by
-    rw [← Finset.prod_pow_eq_pow_sum]
-    apply Finset.prod_congr rfl
-    intro P' hP'
-    have hmem : P' ∈ p.primesOver (B (C₁ := C₁) (C₂ := C₂)) := Set.mem_toFinset.mp hP'
-    rw [map_pow, hsfn_relNorm P' hmem, ← pow_mul]
-  rw [hrhs] at hrel
-  have hdeg_eq : d = ∑ P' ∈ (p.primesOver (B (C₁ := C₁) (C₂ := C₂))).toFinset, sfn P' * ee P' :=
-    (pow_inj_of_not_isUnit hpNotUnit hp0).mp hrel
-  -- The fundamental identity `Σ e·f = d`; with `f = 1`, `Σ e = d`.
-  have hsumef := Ideal.sum_ramification_inertia (B (C₁ := C₁) (C₂ := C₂)) C₂.FunctionField
-    C₁.FunctionField (p := p) hp0
-  have hsume : ∑ P' ∈ IsDedekindDomain.primesOverFinset p (B (C₁ := C₁) (C₂ := C₂)), ee P' = d := by
-    rw [hd_def, ← hsumef]
-    apply Finset.sum_congr rfl
-    intro P' hP'
-    have hmem : P' ∈ p.primesOver (B (C₁ := C₁) (C₂ := C₂)) :=
-      (IsDedekindDomain.mem_primesOverFinset_iff (B := B (C₁ := C₁) (C₂ := C₂)) hp0).mp hP'
-    rw [hee_def, hinertia P' hmem, mul_one]
-  have hfinset_eq : IsDedekindDomain.primesOverFinset p (B (C₁ := C₁) (C₂ := C₂)) =
-      (p.primesOver (B (C₁ := C₁) (C₂ := C₂))).toFinset := by
-    apply Finset.coe_injective
-    rw [IsDedekindDomain.coe_primesOverFinset hp0, Set.coe_toFinset]
-  rw [hfinset_eq] at hsume
-  -- `Σ e = Σ s·e` with `e, s ≥ 1` pins every `s(P') = 1`.
-  have hsum_eq : ∑ P' ∈ (p.primesOver (B (C₁ := C₁) (C₂ := C₂))).toFinset, ee P' =
-      ∑ P' ∈ (p.primesOver (B (C₁ := C₁) (C₂ := C₂))).toFinset, sfn P' * ee P' := by
-    rw [hsume, ← hdeg_eq]
-  have hee_ge : ∀ P' ∈ (p.primesOver (B (C₁ := C₁) (C₂ := C₂))).toFinset, 1 ≤ ee P' := by
-    intro P' hP'
-    have hmem : P' ∈ p.primesOver (B (C₁ := C₁) (C₂ := C₂)) := Set.mem_toFinset.mp hP'
-    obtain ⟨hP'prime, hP'lies⟩ := hmem
-    haveI : P'.IsPrime := hP'prime
-    haveI : P'.LiesOver p := hP'lies
-    rw [hee_def, Nat.one_le_iff_ne_zero]
-    exact Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver P' hp0
-  have hpointwise : ∀ P' ∈ (p.primesOver (B (C₁ := C₁) (C₂ := C₂))).toFinset,
-      ee P' ≤ sfn P' * ee P' := by
-    intro P' hP'
-    have hmem : P' ∈ p.primesOver (B (C₁ := C₁) (C₂ := C₂)) := Set.mem_toFinset.mp hP'
-    nlinarith [hsfn_ge P' hmem, hee_ge P' hP']
-  have heach := (Finset.sum_eq_sum_iff_of_le hpointwise).mp hsum_eq
-  -- Our prime `P` is among them; read off `s = 1`.
+  have hge1 : 1 ≤ s := one_le_relNormExp_of_liesOver Q P s hs
+  -- A uniform exponent function `sfn` on the fibre over `p`: `relNorm(P') = p ^ sfn(P')`, `sfn ≥ 1`.
+  obtain ⟨sfn, hsfn_ge, hsfn_relNorm⟩ := exists_relNormExp_fn (C₁ := C₁) Q
+  set ee : Ideal (B (C₁ := C₁) (C₂ := C₂)) → ℕ := fun P' => p.ramificationIdx P' with hee_def
+  -- Membership in the explicit fibre finset gives `IsPrime ∧ LiesOver`.
+  have hmem_iff : ∀ P', P' ∈ IsDedekindDomain.primesOverFinset p (B (C₁ := C₁) (C₂ := C₂)) ↔
+      P' ∈ p.primesOver (B (C₁ := C₁) (C₂ := C₂)) :=
+    fun P' => IsDedekindDomain.mem_primesOverFinset_iff (B := B (C₁ := C₁) (C₂ := C₂)) hp0
+  -- The two balances: `d = Σ sfn·e` (relative-norm side) and `Σ e = d` (ramification side).
+  have hdeg_eq : Module.finrank C₂.FunctionField C₁.FunctionField =
+      ∑ P' ∈ IsDedekindDomain.primesOverFinset p (B (C₁ := C₁) (C₂ := C₂)), sfn P' * ee P' :=
+    finrank_eq_sum_relNormExp_mul_ramificationIdx Q sfn hsfn_relNorm
+  have hsume : ∑ P' ∈ IsDedekindDomain.primesOverFinset p (B (C₁ := C₁) (C₂ := C₂)), ee P' =
+      Module.finrank C₂.FunctionField C₁.FunctionField :=
+    sum_ramificationIdx_eq_finrank Q
+  -- `Σ e = Σ sfn·e` with `e, sfn ≥ 1` pins every `sfn(P') = 1`, in particular `sfn P = s`.
   have hP_mem : P ∈ p.primesOver (B (C₁ := C₁) (C₂ := C₂)) := ⟨hPprime, hLies⟩
-  have hP_fs : P ∈ (p.primesOver (B (C₁ := C₁) (C₂ := C₂))).toFinset :=
-    Set.mem_toFinset.mpr hP_mem
-  have hP := heach P hP_fs
-  have hsfn_P : sfn P = s := by
-    simp only [sfn, dif_pos hP_mem]
-    have h1 := (hexp P hP_mem).choose_spec.2
-    have h2 : p ^ (hexp P hP_mem).choose = p ^ s := by rw [← h1]; exact hs
-    exact (pow_inj_of_not_isUnit hpNotUnit hp0).mp h2
-  have heP : 1 ≤ ee P := hee_ge _ hP_fs
-  rw [hsfn_P] at hP
-  nlinarith [hP, heP, hge1]
+  have hsfn_P : sfn P = s :=
+    (pow_inj_of_not_isUnit hpNotUnit hp0).mp ((hsfn_relNorm P hP_mem).symm.trans hs)
+  have hsfn_one : sfn P = 1 :=
+    eq_one_of_sum_eq_sum_mul (IsDedekindDomain.primesOverFinset p (B (C₁ := C₁) (C₂ := C₂))) sfn ee
+      (by rw [hsume, ← hdeg_eq]) (fun P' hP' => hsfn_ge P' ((hmem_iff P').mp hP'))
+      (fun P' hP' => one_le_ramificationIdx_of_mem_primesOver Q P' ((hmem_iff P').mp hP'))
+      ((hmem_iff P).mpr hP_mem)
+  rw [← hsfn_P, hsfn_one]
 
 /-- **The `s = 1` core, smooth-point-free form**: for a maximal ideal `P` of `B` lying over the
 maximal ideal `m` of `C₂.CoordinateRing` corresponding (via `exists_smoothPoint_of_isMaximal`) to
