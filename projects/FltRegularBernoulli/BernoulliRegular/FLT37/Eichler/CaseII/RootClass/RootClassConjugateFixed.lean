@@ -55,8 +55,7 @@ It imports `CaseIIRealAnchoredClass.lean` (reusing its proven ideal/class machin
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Polynomial NumberField.IsCMField
-open scoped nonZeroDivisors
+open NumberField Polynomial
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -64,6 +63,17 @@ open FLT37.LehmerVandiver.CaseII
 
 variable {K : Type} [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K]
   [NumberField.IsCMField K]
+
+omit [IsCyclotomicExtension {37} ℚ K] [NumberField.IsCMField K] in
+/-- Injectivity of `37`-th powers on ideals of `𝓞 K`: from `I ^ 37 = J ^ 37` deduce `I = J`.
+`Ideal (𝓞 K)` is a `UniqueFactorizationMonoid`, so the `37`-th-power map is injective.  Used to
+descend the cancelled `(𝔞·(b))^37 = (𝔞·(a))^37` identities to `𝔞·(b) = 𝔞·(a)`. -/
+private theorem ideal_eq_of_pow37_eq {I J : Ideal (𝓞 K)} (h : I ^ 37 = J ^ 37) : I = J :=
+  le_antisymm
+    (Ideal.dvd_iff_le.mp
+      ((UniqueFactorizationMonoid.pow_dvd_pow_iff_dvd (n := 37) (by norm_num)).mp h.symm.dvd))
+    (Ideal.dvd_iff_le.mp
+      ((UniqueFactorizationMonoid.pow_dvd_pow_iff_dvd (n := 37) (by norm_num)).mp h.dvd))
 
 /-! ## 1. The corrected element form ⟹ the ideal identity (the `-ζ^a` twist is absorbed)
 
@@ -144,13 +154,7 @@ theorem caseII_rootIdeal_mul_span_eq_of_unitPthPower {m : ℕ} (D : RealCaseIIDa
       _ = 𝔪 * (Y ^ 37 * Ideal.span {a} ^ 37 * 𝔭) := by ring
   have hmne : 𝔪 ≠ 0 := by rw [h𝔪, Ideal.zero_eq_bot]; exact m_ne_zero D.hζ D.hy
   have hpne : 𝔭 ≠ 0 := by rw [h𝔭, Ideal.zero_eq_bot]; exact p_ne_zero D.hζ
-  have hcancel : (X * Ideal.span {b}) ^ 37 = (Y * Ideal.span {a}) ^ 37 :=
-    mul_right_cancel₀ hpne (mul_left_cancel₀ hmne hreshape)
-  have hAB := (UniqueFactorizationMonoid.pow_dvd_pow_iff_dvd (n := 37) (by norm_num)).mp
-    hcancel.dvd
-  have hBA := (UniqueFactorizationMonoid.pow_dvd_pow_iff_dvd (n := 37) (by norm_num)).mp
-    hcancel.symm.dvd
-  exact le_antisymm (Ideal.dvd_iff_le.mp hBA) (Ideal.dvd_iff_le.mp hAB)
+  exact ideal_eq_of_pow37_eq (mul_right_cancel₀ hpne (mul_left_cancel₀ hmne hreshape))
 
 /-! ## 2. The corrected TRUE residual: `[𝔞(η)] = [𝔞(η⁻¹)]` (class form)
 
@@ -284,14 +288,8 @@ theorem caseII_rootClassConjFixed_of_idealPthPower {m : ℕ} (D : RealCaseIIData
       _ = 𝔪 * (Y ^ 37 * Ideal.span {a} ^ 37 * 𝔭) := by ring
   have hmne : 𝔪 ≠ 0 := by rw [h𝔪, Ideal.zero_eq_bot]; exact m_ne_zero D.hζ D.hy
   have hpne : 𝔭 ≠ 0 := by rw [h𝔭, Ideal.zero_eq_bot]; exact p_ne_zero D.hζ
-  have hcancel : (X * Ideal.span {b}) ^ 37 = (Y * Ideal.span {a}) ^ 37 :=
-    mul_right_cancel₀ hpne (mul_left_cancel₀ hmne hreshape)
-  have hAB := (UniqueFactorizationMonoid.pow_dvd_pow_iff_dvd (n := 37) (by norm_num)).mp
-    hcancel.dvd
-  have hBA := (UniqueFactorizationMonoid.pow_dvd_pow_iff_dvd (n := 37) (by norm_num)).mp
-    hcancel.symm.dvd
   have hideal : X * Ideal.span {b} = Y * Ideal.span {a} :=
-    le_antisymm (Ideal.dvd_iff_le.mp hBA) (Ideal.dvd_iff_le.mp hAB)
+    ideal_eq_of_pow37_eq (mul_right_cancel₀ hpne (mul_left_cancel₀ hmne hreshape))
   rw [ClassGroup.mk0_eq_mk0_iff]
   refine ⟨b, a, hb, ha, ?_⟩
   rw [mul_comm (Ideal.span {b}), mul_comm (Ideal.span {a})]
@@ -431,8 +429,6 @@ theorem caseII_unitPthPower_of_rootClassConjFixed {m : ℕ} (D : RealCaseIIData3
         divZetaSubOneDvdGcd hp D.hζ D.equation D.hy η =
       Ideal.span ({b} : Set (𝓞 K)) ^ 37 *
         divZetaSubOneDvdGcd hp D.hζ D.equation D.hy (caseII_etaInv η) := by
-    have h37 := congrArg (· ^ 37) hab
-    simp only [mul_pow] at h37
     rw [hspecη, hspecinv]
     calc Ideal.span ({a} : Set (𝓞 K)) ^ 37 *
             rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy η ^ 37
@@ -450,8 +446,8 @@ theorem caseII_unitPthPower_of_rootClassConjFixed {m : ℕ} (D : RealCaseIIData3
     rw [← Ideal.span_singleton_mul_span_singleton, ← Ideal.span_singleton_mul_span_singleton,
       ← Ideal.span_singleton_pow, ← Ideal.span_singleton_pow, ← hkey, ← hkeyinv]
     -- Both sides: `(a)^37 · (𝔪·𝔠(η)·𝔭)` vs `(b)^37 · (𝔪·𝔠(η⁻¹)·𝔭)`.  Reorder and use `hpow`.
-    set 𝔪 := gcd (Ideal.span ({D.x} : Set (𝓞 K))) (Ideal.span ({D.y} : Set (𝓞 K))) with h𝔪
-    set 𝔭 := Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) with h𝔭
+    set 𝔪 := gcd (Ideal.span ({D.x} : Set (𝓞 K))) (Ideal.span ({D.y} : Set (𝓞 K)))
+    set 𝔭 := Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K))
     set Cη := divZetaSubOneDvdGcd hp D.hζ D.equation D.hy η
     set Ci := divZetaSubOneDvdGcd hp D.hζ D.equation D.hy (caseII_etaInv η)
     calc Ideal.span ({a} : Set (𝓞 K)) ^ 37 * (𝔪 * Cη * 𝔭)
