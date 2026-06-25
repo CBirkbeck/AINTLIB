@@ -51,7 +51,7 @@ Galois conjugate of that class.
 
 noncomputable section
 
-open NumberField MonoidAlgebra
+open NumberField
 open scoped nonZeroDivisors
 
 namespace BernoulliRegular
