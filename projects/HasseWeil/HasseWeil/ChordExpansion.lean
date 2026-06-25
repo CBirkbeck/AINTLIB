@@ -793,9 +793,8 @@ theorem pullback_weierstrass_eq (α : Isogeny W.toAffine W.toAffine) :
       + algebraMap F KE W.a₁ * α.pullback (x_gen W) * α.pullback (y_gen W)
       + algebraMap F KE W.a₃ * α.pullback (y_gen W)
       = α.pullback (x_gen W) ^ 3 + algebraMap F KE W.a₂ * α.pullback (x_gen W) ^ 2
-        + algebraMap F KE W.a₄ * α.pullback (x_gen W) + algebraMap F KE W.a₆ := by
-  have h := (Affine.equation_iff _ _).mp (pullback_equation_inl W α)
-  exact h
+        + algebraMap F KE W.a₄ * α.pullback (x_gen W) + algebraMap F KE W.a₆ :=
+  (Affine.equation_iff _ _).mp (pullback_equation_inl W α)
 
 /-- At a tangent pair (`α*x = β*x`, non-inverse), the `y`-pullbacks agree
 (mathlib's `Y_eq_of_Y_ne`). -/
@@ -1334,9 +1333,7 @@ private lemma localExpand_fw_factor_of_ord_x_neg
             + 3 * (PowerSeries.C W.a₆
                 * PowerSeries.subst (formalIsogenySeries W α) (formalW W) ^ 2)) := by
   simp only [map_add, map_mul, map_pow, map_ofNat, localExpand_algebraMap,
-    localExpand_pullback_localParam W α h_α, localExpand_pullback_wFunc W α h_α,
-    show (HahnSeries.ofPowerSeries ℤ F) (2 : PowerSeries F) = 2 from map_ofNat _ 2,
-    show (HahnSeries.ofPowerSeries ℤ F) (3 : PowerSeries F) = 3 from map_ofNat _ 3]
+    localExpand_pullback_localParam W α h_α, localExpand_pullback_wFunc W α h_α]
 
 /-- The `f_z`-factor of the tangent λ-leg, expanded in the Laurent field
 (FG-B4a step (ii), `f_z∘` leg): the `localExpand` of the `(z,w)`-operator's
@@ -1359,9 +1356,7 @@ private lemma localExpand_fz_factor_of_ord_x_neg
             + PowerSeries.C W.a₄
               * PowerSeries.subst (formalIsogenySeries W α) (formalW W) ^ 2) := by
   simp only [map_add, map_mul, map_pow, map_ofNat, localExpand_algebraMap,
-    localExpand_pullback_localParam W α h_α, localExpand_pullback_wFunc W α h_α,
-    show (HahnSeries.ofPowerSeries ℤ F) (2 : PowerSeries F) = 2 from map_ofNat _ 2,
-    show (HahnSeries.ofPowerSeries ℤ F) (3 : PowerSeries F) = 3 from map_ofNat _ 3]
+    localExpand_pullback_localParam W α h_α, localExpand_pullback_wFunc W α h_α]
 
 /-- The implicit-differentiation unit factor `1 − f_w∘` is nonzero in the Laurent
 field (the cancellation side condition for the tangent λ-leg): `ofPowerSeries`
@@ -1606,9 +1601,8 @@ theorem subst_formalW_of_expansions {ξ η : KE} {f s : PowerSeries F}
     PowerSeries.one_le_order_iff_constCoeff_eq_zero.mpr hs0
   have h_weier' : η ^ 2 + algebraMap F KE W.a₁ * ξ * η + algebraMap F KE W.a₃ * η
       = ξ ^ 3 + algebraMap F KE W.a₂ * ξ ^ 2 + algebraMap F KE W.a₄ * ξ
-        + algebraMap F KE W.a₆ := by
-    have h := (Affine.equation_iff _ _).mp h_weier
-    exact h
+        + algebraMap F KE W.a₆ :=
+    (Affine.equation_iff _ _).mp h_weier
   have hKE : (-η⁻¹ : KE) = (-ξ / η) ^ 3
       + algebraMap F KE W.a₁ * (-ξ / η) * (-η⁻¹)
       + algebraMap F KE W.a₂ * (-ξ / η) ^ 2 * (-η⁻¹)
@@ -1624,6 +1618,7 @@ theorem subst_formalW_of_expansions {ξ η : KE} {f s : PowerSeries F}
     linear_combination hL
   exact eq_subst_formalW_of_fixedPoint W f hf_ord s hs_ord hfix
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- The series inversion spec `(i∘f)·(1 − a₁f − a₃(w∘f)) = −f`, pushed to the
 Laurent field (from `formalInverse_spec` substituted at `f`). -/
 private theorem subst_formalInverse_spec_laurent (f : PowerSeries F)
@@ -1650,6 +1645,7 @@ private theorem subst_formalInverse_spec_laurent (f : PowerSeries F)
   simp only [map_mul, map_sub, map_one] at h
   exact h
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- The unit factor `1 − a₁f − a₃(w∘f)` is nonzero in `LaurentSeries F` (constant term `1`). -/
 private theorem one_sub_a1f_sub_a3_subst_formalW_ne (f : PowerSeries F)
     (hf0 : PowerSeries.constantCoeff f = 0) :
@@ -1701,6 +1697,7 @@ theorem localExpand_neg_div_negY_of_expansions {ξ η : KE} {f : PowerSeries F}
     (one_sub_a1f_sub_a3_subst_formalW_ne W f hf0)
     (subst_formalInverse_spec_laurent W f hf0)
 
+omit [DecidableEq F] in
 /-- The pair family `![f, g]` of two series with vanishing constant term is a
 lawful substitution family, and each of its two entries has vanishing constant
 term. The series-side bookkeeping packaged for the chord-addition assembly. -/
@@ -1761,6 +1758,7 @@ private lemma neg_inv_eq_zwLine_field {K : Type*} [Field K] (ℓ x c : K)
   field_simp
   ring
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- The substituted Weierstrass denominator `A∘` is nonzero in the Laurent
 field: its constant term is `1`, since the substituted slope has zero constant
 term. -/
@@ -1850,6 +1848,7 @@ private lemma negY_addPullback_pair_ne_zero {α β : Isogeny W.toAffine W.toAffi
   rw [addLineC_def]
   linear_combination -h3
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- The substituted slope, intercept and `z₃` series all have vanishing
 constant term, given a lawful substitution family. The remaining series-side
 bookkeeping, packaged. -/
@@ -2067,7 +2066,7 @@ the substituted slope, `z₃` and intercept series all have zero constant term.
 This is the `hs0` side condition for the Hensel identification. -/
 private lemma constantCoeff_subst_slope_mul_z3_add_nu_eq_zero
     {α β : Isogeny W.toAffine W.toAffine}
-    (hΛ0 : PowerSeries.constantCoeff
+    (_hΛ0 : PowerSeries.constantCoeff
       (MvPowerSeries.subst
         (![formalIsogenySeries W α, formalIsogenySeries W β] : Fin 2 → PowerSeries F)
         (formalSlopeBiv W)) = 0)
