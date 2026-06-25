@@ -47,13 +47,15 @@ axiom-clean** (`[propext, Classical.choice, Quot.sound]`): its residue matching 
 affine specialisation `[ℓ]·P = (φ_ℓ(P)/ψ_ℓ(P)², ω_ℓ(P)/ψ_ℓ(P)³)` of the division-polynomial group
 law (`zsmul_affine_point_eq_gen`), lifted to all of `K(E)` by the `IsLocalization`/DVR machinery.
 
-The **infinity-image** case (`mulByInt_samePlace_le_one_iff_infty`) is the single residual `sorry`:
-it is the *torsion-pole* transfer `ord_P (mulByInt_x ℓ) = -2`, `ord_P (mulByInt_y ℓ) = -3` (the
-simple zeros of `ψ_ℓ` at the `ℓ`-torsion points), the same deep geometric kernel isolated as
-`ord_P_mulByInt_pullback_eq_infty` in `HasseWeil/WeilPairing/DivisorPullback.lean`.
+The **infinity-image** case (`mulByInt_samePlace_le_one_iff_infty`) is likewise proven **sorry-free
+and axiom-clean**: it is read off the *torsion-pole* transfer `ord_P (mulByInt_x ℓ) = -2`,
+`ord_P (mulByInt_y ℓ) = -3` (the simple zeros of `ψ_ℓ` at the `ℓ`-torsion points), supplied here by
+`ord_P_mulByInt_x_eq_neg_two_of_torsion` / `ord_P_mulByInt_y_eq_neg_three_of_torsion` via the
+kernel-translation transport of `ord_∞`, and packaged into the infinity comap identity
+`comap_pointValuation_mulByInt_eq_infty`.
 
 The `IsEquiv` packaging (`isEquiv_of_val_le_one`) and the `comap`-valuation forms are sorry-free
-over these two residuals.
+over both cases.
 
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, II.2.5–2.6, III.4.10c.
 -/
@@ -63,7 +65,6 @@ open WeierstrassCurve HasseWeil.Curves
 namespace HasseWeil
 
 set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
 
 variable {F : Type*} [Field F] [DecidableEq F] {W : WeierstrassCurve.Affine F} [W.IsElliptic]
 
@@ -95,11 +96,11 @@ private theorem mulByInt_coords_at_affine (ℓ : ℤ) (_hℓ : ℓ ≠ 0)
             (Affine.Point.some P.x P.y hPns)) := by
       have h := map_zsmul (WeierstrassCurve.Jacobian.Point.toAffineAddEquiv W)
         ℓ (WeierstrassCurve.Jacobian.Point.fromAffine (Affine.Point.some P.x P.y hPns))
-      rw [WeierstrassCurve.Jacobian.Point.toAffineAddEquiv_apply] at h
-      rw [show WeierstrassCurve.Jacobian.Point.toAffineAddEquiv W
-        (WeierstrassCurve.Jacobian.Point.fromAffine _) =
-        WeierstrassCurve.Jacobian.Point.toAffineLift
-          (WeierstrassCurve.Jacobian.Point.fromAffine _) from rfl] at h
+      rw [WeierstrassCurve.Jacobian.Point.toAffineAddEquiv_apply,
+        show WeierstrassCurve.Jacobian.Point.toAffineAddEquiv W
+          (WeierstrassCurve.Jacobian.Point.fromAffine _) =
+          WeierstrassCurve.Jacobian.Point.toAffineLift
+            (WeierstrassCurve.Jacobian.Point.fromAffine _) from rfl] at h
       have h2 : WeierstrassCurve.Jacobian.Point.toAffineLift
           (WeierstrassCurve.Jacobian.Point.fromAffine
             (Affine.Point.some P.x P.y hPns)) =
@@ -117,9 +118,8 @@ private theorem mulByInt_coords_at_affine (ℓ : ℤ) (_hℓ : ℓ ≠ 0)
       exact WeierstrassCurve.Jacobian.Point.toAffine_of_Z_eq_zero hZ
     rw [h_lift_zero] at h_toAffine
     exact Affine.Point.some_ne_zero h_ns (hQ.symm.trans h_toAffine)
-  obtain ⟨h', heq⟩ := zsmul_affine_point_eq_gen W ℓ hPns hψ
-  rw [hQ] at heq
-  rw [Affine.Point.some.injEq] at heq
+  obtain ⟨_, heq⟩ := zsmul_affine_point_eq_gen W ℓ hPns hψ
+  rw [hQ, Affine.Point.some.injEq] at heq
   exact ⟨hψ, heq.1, heq.2⟩
 
 /-- **Univariate value bridge (abstract)**: if `u ∈ K(E)` is regular at `P` and `u ≡ a` modulo
@@ -146,8 +146,8 @@ private theorem pointValuation_aeval_sub_eval_lt_one
   | monomial n c ih =>
     -- `c·u^(n+1) − c·a^(n+1) = u·(c·u^n − c·a^n) + c·a^n·(u − a)`.
     rw [map_mul, map_pow, Polynomial.aeval_C, Polynomial.aeval_X,
-      Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X]
-    rw [show algebraMap F KE c * u ^ (n + 1) - algebraMap F KE (c * a ^ (n + 1)) =
+      Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X,
+      show algebraMap F KE c * u ^ (n + 1) - algebraMap F KE (c * a ^ (n + 1)) =
           u * (algebraMap F KE c * u ^ n - algebraMap F KE (c * a ^ n)) +
             algebraMap F KE (c * a ^ n) * (u - algebraMap F KE a) from by
         push_cast [map_mul, map_pow]; ring]
@@ -551,6 +551,53 @@ private theorem pointValuation_mulByInt_pullback_algebraMap_lt_one_of_mem [IsAlg
   have h := pointValuation_mulByInt_pullback_algebraMap_sub_evalAt_lt_one ℓ hℓ P h_ns hQ r
   rwa [hrQ, map_zero, sub_zero] at h
 
+/-- A function regular at the affine image `Q = ⟨x, y, h_ns⟩` is `algMap u / algMap v` for some
+coordinate-ring `u` and unit denominator `v ∉ m_Q`: the local-ring representative at `Q`, cleared
+through `IsLocalization.surj`. Shared setup for the two forward transfers. -/
+private theorem exists_coordinateRing_repr_of_le_one
+    {x y : F} (h_ns : W.Nonsingular x y)
+    {g : (⟨W⟩ : SmoothPlaneCurve F).FunctionField}
+    (hg : (⟨W⟩ : SmoothPlaneCurve F).pointValuation ⟨x, y, h_ns⟩ g ≤ 1) :
+    ∃ (u : (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing)
+      (v : (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing),
+      v ∉ (⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt ⟨x, y, h_ns⟩ ∧
+        g * algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE v =
+          algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE u := by
+  obtain ⟨x_loc, hx_loc⟩ :=
+    (Curves.SmoothPlaneCurve.mem_localRingAt_image_iff_pointValuation_le_one g).mpr hg
+  haveI : ((⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt ⟨x, y, h_ns⟩).IsPrime :=
+    ((⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt_isMaximal ⟨x, y, h_ns⟩).isPrime
+  obtain ⟨⟨u, v⟩, hv_eq⟩ := IsLocalization.surj
+    ((⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt ⟨x, y, h_ns⟩).primeCompl x_loc
+  refine ⟨u, v, v.2, ?_⟩
+  have h_apply := congrArg
+    (algebraMap ((⟨W⟩ : SmoothPlaneCurve F).localRingAt ⟨x, y, h_ns⟩) KE) hv_eq
+  rw [map_mul, hx_loc] at h_apply
+  rwa [← IsScalarTower.algebraMap_apply, ← IsScalarTower.algebraMap_apply] at h_apply
+
+/-- Final assembly common to both forward transfers: from `g = algMap u / algMap v` with the unit
+denominator `v ∉ m_Q`, `pV P ([ℓ]^*g) = pV P ([ℓ]^*(algMap u))`. -/
+private theorem pointValuation_mulByInt_pullback_eq_of_repr [IsAlgClosed F]
+    (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0) (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPoint) {x y : F}
+    (h_ns : W.Nonsingular x y)
+    (hQ : (mulByInt W ℓ).toAddMonoidHom P.toAffinePoint = Affine.Point.some x y h_ns)
+    {g : (⟨W⟩ : SmoothPlaneCurve F).FunctionField}
+    {u v : (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing}
+    (hv_notMem : v ∉ (⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt ⟨x, y, h_ns⟩)
+    (h_lift : g * algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE v =
+      algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE u) :
+    (⟨W⟩ : SmoothPlaneCurve F).pointValuation P ((mulByInt W ℓ).pullback g) =
+      (⟨W⟩ : SmoothPlaneCurve F).pointValuation P
+        ((mulByInt W ℓ).pullback (algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE u)) := by
+  have hv_ne : v ≠ 0 := fun h ↦ hv_notMem (h ▸ Submodule.zero_mem _)
+  have h_alg_v_ne : algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE v ≠ 0 :=
+    fun h ↦ hv_ne ((IsFractionRing.injective _ _) (h.trans (map_zero _).symm))
+  have hg_eq : g = algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE u /
+      algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE v := by
+    rw [eq_div_iff h_alg_v_ne]; exact h_lift
+  rw [hg_eq, map_div₀, map_div₀,
+    pointValuation_mulByInt_pullback_algebraMap_eq_one_of_notMem ℓ hℓ P h_ns hQ hv_notMem, div_one]
+
 /-- **Forward regularity transfer (≤ 1):** if `g` is regular at the affine image `Q`, so is
 `[ℓ]^*g` at `P`. -/
 private theorem pointValuation_mulByInt_pullback_le_one_of_le_one [IsAlgClosed F]
@@ -560,30 +607,8 @@ private theorem pointValuation_mulByInt_pullback_le_one_of_le_one [IsAlgClosed F
     {g : (⟨W⟩ : SmoothPlaneCurve F).FunctionField}
     (hg : (⟨W⟩ : SmoothPlaneCurve F).pointValuation ⟨x, y, h_ns⟩ g ≤ 1) :
     (⟨W⟩ : SmoothPlaneCurve F).pointValuation P ((mulByInt W ℓ).pullback g) ≤ 1 := by
-  obtain ⟨x_loc, hx_loc⟩ :=
-    (Curves.SmoothPlaneCurve.mem_localRingAt_image_iff_pointValuation_le_one g).mpr hg
-  haveI : ((⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt ⟨x, y, h_ns⟩).IsPrime :=
-    ((⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt_isMaximal ⟨x, y, h_ns⟩).isPrime
-  obtain ⟨⟨u, v⟩, hv_eq⟩ := IsLocalization.surj
-    ((⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt ⟨x, y, h_ns⟩).primeCompl x_loc
-  have h_lift : g * algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE (v : _) =
-      algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE u := by
-    have h_apply := congrArg
-      (algebraMap ((⟨W⟩ : SmoothPlaneCurve F).localRingAt ⟨x, y, h_ns⟩) KE) hv_eq
-    rw [map_mul, hx_loc] at h_apply
-    rwa [← IsScalarTower.algebraMap_apply, ← IsScalarTower.algebraMap_apply] at h_apply
-  have hv_notMem : (v : (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing) ∉
-      (⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt ⟨x, y, h_ns⟩ := v.2
-  have hv_ne : (v : (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing) ≠ 0 :=
-    fun h ↦ hv_notMem (h ▸ Submodule.zero_mem _)
-  have h_alg_v_ne : algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE
-      (v : _) ≠ 0 := fun h ↦ hv_ne ((IsFractionRing.injective _ _) (h.trans (map_zero _).symm))
-  have hg_eq : g = algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE u /
-      algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE (v : _) := by
-    rw [eq_div_iff h_alg_v_ne]; exact h_lift
-  rw [hg_eq, map_div₀, map_div₀,
-    pointValuation_mulByInt_pullback_algebraMap_eq_one_of_notMem ℓ hℓ P h_ns hQ hv_notMem,
-    div_one]
+  obtain ⟨u, v, hv_notMem, h_lift⟩ := exists_coordinateRing_repr_of_le_one h_ns hg
+  rw [pointValuation_mulByInt_pullback_eq_of_repr ℓ hℓ P h_ns hQ hv_notMem h_lift]
   exact pointValuation_mulByInt_pullback_algebraMap_le_one ℓ hℓ P h_ns hQ u
 
 /-- **Forward vanishing transfer (< 1):** if `g ∈ m_Q`, then `[ℓ]^*g ∈ m_P` (strict). -/
@@ -594,44 +619,19 @@ private theorem pointValuation_mulByInt_pullback_lt_one_of_lt_one [IsAlgClosed F
     {g : (⟨W⟩ : SmoothPlaneCurve F).FunctionField}
     (hg : (⟨W⟩ : SmoothPlaneCurve F).pointValuation ⟨x, y, h_ns⟩ g < 1) :
     (⟨W⟩ : SmoothPlaneCurve F).pointValuation P ((mulByInt W ℓ).pullback g) < 1 := by
-  obtain ⟨x_loc, hx_loc⟩ :=
-    (Curves.SmoothPlaneCurve.mem_localRingAt_image_iff_pointValuation_le_one g).mpr (le_of_lt hg)
-  haveI : ((⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt ⟨x, y, h_ns⟩).IsPrime :=
-    ((⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt_isMaximal ⟨x, y, h_ns⟩).isPrime
-  obtain ⟨⟨u, v⟩, hv_eq⟩ := IsLocalization.surj
-    ((⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt ⟨x, y, h_ns⟩).primeCompl x_loc
-  have h_lift : g * algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE (v : _) =
-      algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE u := by
-    have h_apply := congrArg
-      (algebraMap ((⟨W⟩ : SmoothPlaneCurve F).localRingAt ⟨x, y, h_ns⟩) KE) hv_eq
-    rw [map_mul, hx_loc] at h_apply
-    rwa [← IsScalarTower.algebraMap_apply, ← IsScalarTower.algebraMap_apply] at h_apply
-  have hv_notMem : (v : (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing) ∉
-      (⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt ⟨x, y, h_ns⟩ := v.2
-  have hv_ne : (v : (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing) ≠ 0 :=
-    fun h ↦ hv_notMem (h ▸ Submodule.zero_mem _)
-  have h_alg_v_ne : algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE
-      (v : _) ≠ 0 := fun h ↦ hv_ne ((IsFractionRing.injective _ _) (h.trans (map_zero _).symm))
+  obtain ⟨u, v, hv_notMem, h_lift⟩ := exists_coordinateRing_repr_of_le_one h_ns (le_of_lt hg)
   -- `pV Q (algMap v) = 1`, so `pV Q (algMap u) = pV Q g < 1`, giving `u ∈ m_Q`.
   have hv_unitQ : (⟨W⟩ : SmoothPlaneCurve F).pointValuation ⟨x, y, h_ns⟩
-      (algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE (v : _)) = 1 :=
+      (algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE v) = 1 :=
     le_antisymm ((⟨W⟩ : SmoothPlaneCurve F).pointValuation_algebraMap_le_one _ _)
       (not_lt.mp (fun hlt ↦ hv_notMem
         ((Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
           (C := (⟨W⟩ : SmoothPlaneCurve F)) _ ⟨x, y, h_ns⟩).mp hlt)))
   have hu_mem : u ∈ (⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt ⟨x, y, h_ns⟩ := by
-    rw [← Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt]
-    have : (⟨W⟩ : SmoothPlaneCurve F).pointValuation ⟨x, y, h_ns⟩
-        (algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE u) =
-        (⟨W⟩ : SmoothPlaneCurve F).pointValuation ⟨x, y, h_ns⟩ g := by
-      rw [← h_lift, map_mul, hv_unitQ, mul_one]
-    rw [this]; exact hg
-  have hg_eq : g = algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE u /
-      algebraMap (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing KE (v : _) := by
-    rw [eq_div_iff h_alg_v_ne]; exact h_lift
-  rw [hg_eq, map_div₀, map_div₀,
-    pointValuation_mulByInt_pullback_algebraMap_eq_one_of_notMem ℓ hℓ P h_ns hQ hv_notMem,
-    div_one]
+    rw [← Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt,
+      ← h_lift, map_mul, hv_unitQ, mul_one]
+    exact hg
+  rw [pointValuation_mulByInt_pullback_eq_of_repr ℓ hℓ P h_ns hQ hv_notMem h_lift]
   exact pointValuation_mulByInt_pullback_algebraMap_lt_one_of_mem ℓ hℓ P h_ns hQ hu_mem
 
 /-- **Same-place regularity transfer, affine-image case.** For `φ = [ℓ]` and an affine smooth point
@@ -847,9 +847,7 @@ theorem ordAtInfty_mulByInt_y_eq_neg_three_general (ℓ : ℤ) (hℓ : ℓ ≠ 0
       mulByInt_pullback_x W ℓ hℓ
     have hy_pb : (mulByInt W ℓ).pullback (y_gen W) = mulByInt_y W ℓ :=
       mulByInt_pullback_y W ℓ hℓ
-    rw [hx_pb, hy_pb] at h_alg
-    rw [WeierstrassCurve.Affine.equation_iff] at h_alg
-    exact h_alg
+    rwa [hx_pb, hy_pb, WeierstrassCurve.Affine.equation_iff] at h_alg
   exact ordAtInfty_mulByInt_y_of_lhs_eq_neg_six_aux (W := W) ℓ
     (ordAtInfty_mulByInt_x W ℓ hℓ hℓF) (mulByInt_x_ne_zero W ℓ hℓ)
     (h_eq ▸ ordAtInfty_mulByInt_rhs_eq_neg_six_aux (W := W) ℓ hℓ hℓF)
