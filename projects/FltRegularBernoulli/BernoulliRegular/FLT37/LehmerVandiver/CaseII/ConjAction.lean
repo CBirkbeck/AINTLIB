@@ -296,7 +296,6 @@ theorem caseII_classGroup_mul_conj_eq_one
   obtain ⟨I, rfl⟩ := ClassGroup.mk0_surjective c
   have h𝔞_nz : (I : Ideal (𝓞 K)) ≠ ⊥ := by
     simpa [Ideal.zero_eq_bot] using mem_nonZeroDivisors_iff_ne_zero.mp I.2
-  -- `𝔞³⁷` is principal, from `(mk0 I)³⁷ = 1`.
   have hpow_one : ClassGroup.mk0 (I ^ 37) = 1 := by rw [map_pow]; exact hc
   have hmem : ((I : Ideal (𝓞 K)) ^ 37) ∈ (Ideal (𝓞 K))⁰ :=
     mem_nonZeroDivisors_iff_ne_zero.mpr (pow_ne_zero 37 h𝔞_nz)
@@ -310,10 +309,8 @@ theorem caseII_classGroup_mul_conj_eq_one
     rintro rfl
     rw [Set.singleton_zero, Submodule.span_zero] at hα
     exact (pow_ne_zero 37 h𝔞_nz) hα
-  -- `classGroup_mul_complexConj_eq_one_of_pow_of_VC` gives `[𝔞·σ𝔞] = 1`.
   have hkey := classGroup_mul_complexConj_eq_one_of_pow_of_VC (p := 37) (K := K) h_VC
     (α := α) hα_ne h𝔞_nz hα.symm
-  -- `[𝔞·σ𝔞] = [𝔞] · [σ𝔞] = c · σc`.
   have hmnz : (I : Ideal (𝓞 K)).map (ringOfIntegersComplexConj K).toRingEquiv.toRingHom
       ∈ (Ideal (𝓞 K))⁰ :=
     mem_nonZeroDivisors_iff_ne_zero.mpr ((map_ne_bot_iff_complexConj K _).mpr h𝔞_nz)
