@@ -173,11 +173,11 @@ theorem ord_P_x_gen_sub_self_eq_one (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPo
   set xk := P.x with hxk
   set yk := W.toAffine.negY P.x P.y with hyk
   have hyk_invol : W.toAffine.negY xk yk = P.y := by
-    rw [hxk, hyk, WeierstrassCurve.Affine.negY_negY]
+    rw [hxk, hyk, Affine.negY_negY]
   have h_ns' : W.toAffine.Nonsingular xk yk := by
     rw [hxk, hyk]; exact (Affine.nonsingular_neg P.x P.y).mpr P.nonsingular
   have h_not_2_tor' : yk ≠ W.toAffine.negY xk yk := by
-    rw [hyk_invol]; rw [hyk]; exact fun h ↦ h_not_2_tor h.symm
+    rw [hyk_invol, hyk]; exact fun h ↦ h_not_2_tor h.symm
   have h_pt_eq : negSmoothPoint W xk yk h_ns' = P := by
     apply SmoothPlaneCurve.SmoothPoint.ext
     · rfl
@@ -304,9 +304,8 @@ theorem psi_evalEval_ne_zero_of_zsmul_ne_zero {x y : F} (h_ns : W.toAffine.Nonsi
       m • (Affine.Point.some x y h_ns) := by
     have h := map_zsmul (WeierstrassCurve.Jacobian.Point.toAffineAddEquiv W)
       m (WeierstrassCurve.Jacobian.Point.fromAffine (Affine.Point.some x y h_ns))
-    rw [WeierstrassCurve.Jacobian.Point.toAffineAddEquiv_apply,
+    rwa [WeierstrassCurve.Jacobian.Point.toAffineAddEquiv_apply,
       WeierstrassCurve.Jacobian.Point.toAffineAddEquiv_apply, h_inv] at h
-    exact h
   rw [← h_toAffine, h0]
 
 omit [W.toAffine.IsElliptic] in
@@ -322,7 +321,7 @@ theorem preΨ_two_mul_eval_ne_zero {x y x_Q y_Q : F}
     intro hQ2
     have hQneg : Affine.Point.some x_Q y_Q h_ns' = -(Affine.Point.some x_Q y_Q h_ns') := by
       rw [eq_neg_iff_add_eq_zero, ← two_zsmul]; exact hQ2
-    rw [WeierstrassCurve.Affine.Point.neg_some, WeierstrassCurve.Affine.Point.some.injEq] at hQneg
+    rw [Affine.Point.neg_some, Affine.Point.some.injEq] at hQneg
     exact h_not_2_tor_Q hQneg.2
   have h2ℓ_ne : (2 * ℓ) • (Affine.Point.some x y h_ns) ≠ 0 := by
     rw [mul_zsmul, hsmul]; exact hQ2_ne
@@ -444,7 +443,7 @@ theorem not_2_tor_of_image_not_2_tor {x_Q y_Q : F} (h_ns' : W.toAffine.Nonsingul
   intro h2P
   have hneg : P.toAffinePoint = -P.toAffinePoint := by
     rw [SmoothPlaneCurve.SmoothPoint.toAffinePoint_def,
-      WeierstrassCurve.Affine.Point.neg_some, WeierstrassCurve.Affine.Point.some.injEq]
+      Affine.Point.neg_some, Affine.Point.some.injEq]
     exact ⟨rfl, h2P⟩
   have hP2 : (2 : ℤ) • P.toAffinePoint = 0 := by
     rw [two_zsmul]; nth_rewrite 1 [hneg]; rw [neg_add_cancel]
@@ -452,7 +451,7 @@ theorem not_2_tor_of_image_not_2_tor {x_Q y_Q : F} (h_ns' : W.toAffine.Nonsingul
     rw [← hsmul, smul_comm, hP2, smul_zero]
   have hQneg : Affine.Point.some x_Q y_Q h_ns' = -(Affine.Point.some x_Q y_Q h_ns') := by
     rw [eq_neg_iff_add_eq_zero, ← two_zsmul]; exact hQ2
-  rw [WeierstrassCurve.Affine.Point.neg_some, WeierstrassCurve.Affine.Point.some.injEq] at hQneg
+  rw [Affine.Point.neg_some, Affine.Point.some.injEq] at hQneg
   exact h_not_2_tor_Q hQneg.2
 
 /-- **Main lemma (the `e = 1` unramifiedness of `[ℓ]`).** For `[ℓ]` separable (`(ℓ : F) ≠ 0`) and a
@@ -832,7 +831,7 @@ private theorem one_le_ord_P_mulByInt_y_sub_const {ℓ : ℤ}
   classical
   have hψℓ_ne : ψ_ff W ℓ ≠ 0 := by
     intro h; rw [h, (⟨W⟩ : SmoothPlaneCurve F).ord_P_zero] at hψℓ_ord
-    exact (by simp : (⊤ : WithTop ℤ) ≠ 0) hψℓ_ord
+    exact WithTop.top_ne_zero hψℓ_ord
   set uY : R := Affine.CoordinateRing.mk W.toAffine (W.ω ℓ) -
     algebraMap F R y_Q * Affine.CoordinateRing.mk W.toAffine (W.ψ ℓ) ^ 3 with huY
   have hψ3_ne : ψ_ff W ℓ ^ 3 ≠ 0 := pow_ne_zero 3 hψℓ_ne
@@ -869,7 +868,7 @@ private theorem mulByInt_two_mul_eq_zero_of_image_2_tor (ℓ : ℤ)
     (mulByInt W.toAffine (2 * ℓ)).toAddMonoidHom P.toAffinePoint = (0 : W.toAffine.Point) := by
   have hQ2_O : (2 : ℤ) • (Affine.Point.some x_Q y_Q h_ns') = 0 := by
     have hQneg : Affine.Point.some x_Q y_Q h_ns' = -(Affine.Point.some x_Q y_Q h_ns') := by
-      rw [WeierstrassCurve.Affine.Point.neg_some, WeierstrassCurve.Affine.Point.some.injEq]
+      rw [Affine.Point.neg_some, Affine.Point.some.injEq]
       exact ⟨rfl, h_2_tor_Q⟩
     rw [two_zsmul]; nth_rewrite 1 [hQneg]; rw [neg_add_cancel]
   rw [mulByInt_apply, mul_zsmul, hsmul', hQ2_O]
@@ -922,6 +921,7 @@ private theorem ord_P_mulByInt_y_sub_const_eq_one_of_two_mul_eq_zero (ℓ : ℤ)
   exact le_antisymm
     (ord_P_mulByInt_y_sub_const_le_one W ℓ hℓ hℓF P y_Q hY_sub_ne hPX_ord) h_one_le_Y
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Scaling by a nonzero constant from `F` does not change `ord_P`.** For `c : F` with `c ≠ 0`
 the constant `algebraMap F KE c` is a unit at every smooth point, so multiplying by it leaves the
 order unchanged: `ord_P P (algebraMap F KE c * g) = ord_P P g`. -/
@@ -958,6 +958,7 @@ private theorem ord_P_two_mul_y_sub_add_a₁_mul_x_sub_eq_one (ℓ : ℤ) (hℓ 
     linear_combination h2torKE
   rwa [hAprime_eq] at hAprime_ord
 
+omit [W.toAffine.IsElliptic] in
 /-- **Extracting the order of the dominant `y`-term from the order-`1` sum.** Given that the sum
 `2(mulByInt_y − y_Q) + a₁(mulByInt_x − x_Q)` has order `1` and the strict order gap
 `ord_P (mulByInt_y − y_Q) < ord_P (mulByInt_x − x_Q)`, the `2(mulByInt_y − y_Q)` term strictly
@@ -1077,14 +1078,13 @@ theorem ord_P_mulByInt_y_sub_const_eq_one (ℓ : ℤ) (hℓ : ℓ ≠ 0) (hℓF 
   have hWeq : Y ^ 2 + algebraMap F KE W.a₁ * X * Y + algebraMap F KE W.a₃ * Y =
       X ^ 3 + algebraMap F KE W.a₂ * X ^ 2 + algebraMap F KE W.a₄ * X + algebraMap F KE W.a₆ := by
     have h_alg := pullback_equation W (mulByInt W.toAffine ℓ)
-    rw [hXpb, hYpb, WeierstrassCurve.Affine.equation_iff] at h_alg
-    exact h_alg
+    rwa [hXpb, hYpb, Affine.equation_iff] at h_alg
   have hQeq : (W_KE W).toAffine.Equation xq yq :=
     translate_constant_equation W x_Q y_Q h_ns'.1
   have hQeq' : yq ^ 2 + algebraMap F KE W.a₁ * xq * yq + algebraMap F KE W.a₃ * yq =
       xq ^ 3 + algebraMap F KE W.a₂ * xq ^ 2 + algebraMap F KE W.a₄ * xq +
         algebraMap F KE W.a₆ := by
-    have hh := (WeierstrassCurve.Affine.equation_iff _ _).mp hQeq
+    have hh := (Affine.equation_iff _ _).mp hQeq
     simpa only [show (W_KE W).a₁ = algebraMap F KE W.a₁ from rfl,
       show (W_KE W).a₂ = algebraMap F KE W.a₂ from rfl,
       show (W_KE W).a₃ = algebraMap F KE W.a₃ from rfl,
@@ -1140,7 +1140,7 @@ theorem ord_P_mulByInt_y_sub_const_eq_one (ℓ : ℤ) (hℓ : ℓ ≠ 0) (hℓF 
   have hCconst : (3 * x_Q ^ 2 + 2 * W.a₂ * x_Q + W.a₄ - W.a₁ * y_Q : F) ≠ 0 := by
     have h_polX : W.toAffine.polynomialX.evalEval x_Q y_Q ≠ 0 :=
       polynomialX_evalEval_ne_zero_at_2tor W x_Q y_Q h_ns' h_2_tor_Q
-    rw [WeierstrassCurve.Affine.evalEval_polynomialX] at h_polX
+    rw [Affine.evalEval_polynomialX] at h_polX
     intro h; exact h_polX (by linear_combination -h)
   have hBma_ord : (⟨W⟩ : SmoothPlaneCurve F).ord_P P Bma = 0 := by
     rw [hBma]; exact ord_P_y_cofactor_eq_zero W P hCconst hX_reg h_one_le_X
@@ -1150,7 +1150,7 @@ theorem ord_P_mulByInt_y_sub_const_eq_one (ℓ : ℤ) (hℓ : ℓ ≠ 0) (hℓF 
   have hM1 : (1 : ℤ) ≤ M := by rw [hM] at h_one_le_X; exact_mod_cast h_one_le_X
   have hBma_ne : Bma ≠ 0 := by
     intro h; rw [h, (⟨W⟩ : SmoothPlaneCurve F).ord_P_zero] at hBma_ord
-    exact (by simp : (⊤ : WithTop ℤ) ≠ 0) hBma_ord
+    exact WithTop.top_ne_zero hBma_ord
   have hA_ne : A ≠ 0 := by
     intro h0
     rw [h0, mul_zero] at h_id
