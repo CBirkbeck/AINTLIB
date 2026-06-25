@@ -149,6 +149,7 @@ theorem mulByInt_comp_eq_mul_of_generator_witness (m n : ℤ)
 Since `W.Φ (-n) = W.Φ n` and `W.ΨSq (-n) = W.ΨSq n` in mathlib, the
 rational-map images are equal. Useful for `[-n]` computations. -/
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- `mulByInt_x W (-n) = mulByInt_x W n`: the `[n]`-image of the x-coordinate
     is preserved under negation. Direct from `W.Φ_neg` and `W.ΨSq_neg`. -/
 @[simp] theorem mulByInt_x_neg (n : ℤ) : mulByInt_x W (-n) = mulByInt_x W n := by
