@@ -71,48 +71,32 @@ variable {F F' : Type*} [Field F] [Field F'] [DecidableEq F] [DecidableEq F']
       and `f` commutes with `addX`, `addY`, `slope`, `negY` (mathlib equivariance). -/
 theorem map_add (P Q : W.toAffine.Point) :
     map f f.injective (P + Q) = map f f.injective P + map f f.injective Q := by
-  rcases P with _ | ⟨x₁, y₁, h₁⟩
-  · change map f f.injective Q = (0 : (W.map f).toAffine.Point) + map f f.injective Q
-    rw [zero_add]
-  rcases Q with _ | ⟨x₂, y₂, h₂⟩
-  · change map f f.injective (WeierstrassCurve.Affine.Point.some x₁ y₁ h₁) =
-      map f f.injective (WeierstrassCurve.Affine.Point.some x₁ y₁ h₁) + 0
-    rw [add_zero]
+  rcases P with _ | ⟨x₁, y₁, h₁⟩ <;> rcases Q with _ | ⟨x₂, y₂, h₂⟩
+  any_goals rfl
   by_cases hxy : x₁ = x₂ ∧ y₁ = W.toAffine.negY x₂ y₂
   · obtain ⟨hx, hy⟩ := hxy
     have h_Y_eq_f : f y₁ = (W.map f).toAffine.negY (f x₂) (f y₂) := by
-      rw [hy, WeierstrassCurve.Affine.map_negY]
-    rw [WeierstrassCurve.Affine.Point.add_of_Y_eq hx hy]
-    change (0 : (W.map f).toAffine.Point) =
-      map f f.injective (WeierstrassCurve.Affine.Point.some x₁ y₁ h₁) +
-      map f f.injective (WeierstrassCurve.Affine.Point.some x₂ y₂ h₂)
-    rw [map_some, map_some,
-      WeierstrassCurve.Affine.Point.add_of_Y_eq (congr_arg f hx) h_Y_eq_f]
+      rw [hy, Affine.map_negY]
+    rw [Affine.Point.add_of_Y_eq hx hy, map_some, map_some,
+      Affine.Point.add_of_Y_eq (congr_arg f hx) h_Y_eq_f]
+    exact map_zero f f.injective
   · have hxy_f : ¬(f x₁ = f x₂ ∧ f y₁ = (W.map f).toAffine.negY (f x₂) (f y₂)) := by
       rintro ⟨hfx, hfy⟩
-      apply hxy
-      refine ⟨f.injective hfx, f.injective ?_⟩
-      rw [hfy, WeierstrassCurve.Affine.map_negY]
-    rw [WeierstrassCurve.Affine.Point.add_some hxy]
-    change map f f.injective (WeierstrassCurve.Affine.Point.some _ _ _) =
-      map f f.injective (WeierstrassCurve.Affine.Point.some x₁ y₁ h₁) +
-      map f f.injective (WeierstrassCurve.Affine.Point.some x₂ y₂ h₂)
-    rw [map_some, map_some, map_some,
-      WeierstrassCurve.Affine.Point.add_some hxy_f]
+      exact hxy ⟨f.injective hfx, f.injective (by rw [hfy, Affine.map_negY])⟩
+    rw [Affine.Point.add_some hxy, map_some, map_some, map_some,
+      Affine.Point.add_some hxy_f]
     congr 1
-    · rw [WeierstrassCurve.Affine.map_slope, WeierstrassCurve.Affine.map_addX]
-    · rw [WeierstrassCurve.Affine.map_slope, WeierstrassCurve.Affine.map_addY]
+    · rw [Affine.map_slope, Affine.map_addX]
+    · rw [Affine.map_slope, Affine.map_addY]
 
 /-- `Point.map f` preserves negation: `-map f P = map f (-P)`. -/
 theorem map_neg (P : W.toAffine.Point) :
     -map f f.injective P = map f f.injective (-P) := by
   rcases P with _ | ⟨x, y, h⟩
   · rfl
-  · change WeierstrassCurve.Affine.Point.some _ _ _ =
-      map f f.injective (WeierstrassCurve.Affine.Point.some _ _ _)
-    rw [map_some]
+  · rw [map_some, Affine.Point.neg_some, Affine.Point.neg_some, map_some]
     congr 1
-    exact WeierstrassCurve.Affine.map_negY f x y
+    exact Affine.map_negY f x y
 
 /-- `Point.map f` packaged as an `AddMonoidHom`. Uses `map_add` and `map_zero`
     to witness the additive structure. -/
