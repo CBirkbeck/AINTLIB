@@ -69,12 +69,9 @@ theorem h_inj_of_divZeroReduce
         (HasseWeil.EC.Isogeny.picZeroSumOfWitness W h_van D) = D := by
   refine QuotientAddGroup.induction_on D fun D' ↦ ?_
   rw [HasseWeil.EC.Isogeny.picZeroSumOfWitness_apply_mk]
-  -- Goal: picZeroOfPoint W (σ D'.val) = QuotientAddGroup.mk D'
   unfold picZeroOfPoint
-  -- Use Quot.sound to convert mk-equality to relation membership.
   apply Quot.sound
   rw [QuotientAddGroup.leftRel_apply]
-  -- Goal: -⟨kappaDivisor⟩ + D' ∈ subgroup.addSubgroupOf
   show (-kappaDivisor W (projectiveDivisorSum W D'.val) + D'.val) ∈
     (⟨W⟩ : SmoothPlaneCurve F).projPrincipalSubgroup
   rw [show (-kappaDivisor W (projectiveDivisorSum W D'.val) + D'.val) =
@@ -111,7 +108,6 @@ theorem h_van_degZero_of_divZeroReduce_and_pointMinusO
     rw [h_neg]
     exact (⟨W⟩ : SmoothPlaneCurve F).projPrincipalSubgroup.sub_mem
       hD h_diff_principal
-  -- Apply h_pmO.
   exact h_pmO _ h_kappa_principal
 
 /-! ### `PointMinusOPrincipalEqZero` from the no-finite-poles bridge -/
@@ -140,45 +136,30 @@ theorem pointMinusO_of_bridge
     PointMinusOPrincipalEqZero W := by
   intro P h_principal
   obtain ⟨f, hf_ne, hf_div⟩ := h_principal
-  -- hf_div: projectiveDivisorOf f = kappaDivisor W P
-  -- Show f has no finite poles, then apply the intermediate lemma.
   apply point_minus_O_principal_eq_zero_of_coord W P f hf_ne hf_div
   apply h_bridge f hf_ne
   intro Q
-  -- (projDiv f) at affine Q = (ord_Q f).untopD 0. Per project lemma.
-  -- (kappaDivisor W P) at affine Q ∈ {0, 1}.
-  -- So (ord_Q f).untopD 0 ∈ {0, 1}.
-  -- If ⊤: f = 0, contradicts hf_ne. Else ord_Q f = 0 or 1, both ≥ 0.
+  -- At an affine point `Q`, `kappaDivisor W P = (P) − (O)` takes the value `0` or `1`
+  -- (only `(P)` can contribute, since `(O)` sits at infinity), so `ord_Q f ∈ {0, 1} ≥ 0`.
   have h_eq := SmoothPlaneCurve.projectiveDivisorOf_apply_affine
     (C := (⟨W⟩ : SmoothPlaneCurve F)) f Q
   rw [hf_div] at h_eq
-  -- h_eq: kappaDivisor W P (affine Q) = (ord_P Q f).untopD 0
-  -- The LHS: kappaDivisor at affine Q ∈ {0, 1, -1, ...} via Finsupp.single semantics.
-  -- Specifically: Finsupp.single P.toProj 1 - Finsupp.single ∞ 1 evaluated at
-  -- (affine Q). Since affine Q ≠ ∞, the second term contributes 0.
-  -- The first term contributes 1 if affine Q = P.toProj, else 0.
   unfold kappaDivisor at h_eq
   rw [Finsupp.sub_apply, Finsupp.single_apply, Finsupp.single_apply] at h_eq
-  -- h_eq: (if P.toProj = affine Q then 1 else 0) - (if ∞ = affine Q then 1 else 0)
-  --     = (ord_P Q f).untopD 0
-  -- ∞ ≠ affine Q (different constructors), so RHS-second = 0.
+  -- `∞ ≠ affine Q` (distinct constructors), so the `(O)` term contributes `0`.
   have h_inf_ne :
       ((ProjectiveSmoothPoint.infinity : ProjectiveSmoothPoint
         (⟨W⟩ : SmoothPlaneCurve F))) ≠ ProjectiveSmoothPoint.affine Q := by
     nofun
   rw [if_neg h_inf_ne, sub_zero] at h_eq
-  -- h_eq: (if P.toProj = affine Q then 1 else 0) = (ord_P Q f).untopD 0
-  -- Case split on whether P.toProj = affine Q.
   by_cases h_eq_pt : P.toProjectiveSmoothPoint = ProjectiveSmoothPoint.affine Q
   · rw [if_pos h_eq_pt] at h_eq
-    -- h_eq: 1 = (ord_P Q f).untopD 0; so ord_P Q f = 1 (not ⊤, not 0).
     cases h_top : (⟨W⟩ : SmoothPlaneCurve F).ord_P Q f with
     | top =>
       rw [h_top, WithTop.untopD_top] at h_eq
       exact absurd h_eq (by decide)
     | coe n =>
       rw [h_top, WithTop.untopD_coe] at h_eq
-      -- h_eq : 1 = n; goal: 0 ≤ ↑n (after cases substitution)
       have hn : n = 1 := h_eq.symm
       subst hn
       exact_mod_cast (by decide : (0 : ℤ) ≤ 1)
@@ -256,7 +237,6 @@ theorem h_van {W : Affine F} [W.IsElliptic] (a : AFInputs W)
     (D : ProjectiveDivisor (⟨W⟩ : SmoothPlaneCurve F))
     (hD : D ∈ (⟨W⟩ : SmoothPlaneCurve F).projPrincipalSubgroup) :
     projectiveDivisorSum W D = 0 :=
-  -- Construct the degZero subtype element from the principal-implies-degZero bridge.
   a.h_van_degZero ⟨D, h_pdz D hD⟩ hD
 
 end AFInputs
