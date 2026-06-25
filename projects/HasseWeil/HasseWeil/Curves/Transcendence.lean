@@ -69,9 +69,7 @@ in the fraction field). We don't need this strengthening for the main
 application. -/
 instance isIntegral_fracPolynomialX_functionField :
     Algebra.IsIntegral (FractionRing (Polynomial F)) C.FunctionField := by
-  haveI : Algebra.IsAlgebraic (FractionRing (Polynomial F)) C.FunctionField :=
-    Algebra.IsAlgebraic.of_finite _ _
-  exact Algebra.IsAlgebraic.isIntegral
+  exact (Algebra.IsAlgebraic.of_finite (FractionRing (Polynomial F)) C.FunctionField).isIntegral
 
 /-! ### T-II-1-005: Uniformizer is not a `p`-th power in char `p > 0` -/
 
@@ -87,34 +85,18 @@ theorem notMem_pthPowers_of_uniformizer {p : ℕ} (hp : 1 < p)
     (ht : Uniformizer C P t) (f : C.FunctionField) :
     t ≠ f ^ p := by
   intro hfp
-  have ht_ne : t ≠ 0 := ht.ne_zero
-  have hf_ne : f ≠ 0 := fun hf ↦ ht_ne (by rw [hfp, hf, zero_pow (by omega)])
+  have hf_ne : f ≠ 0 := fun hf ↦ ht.ne_zero (by rw [hfp, hf, zero_pow (by omega)])
   have h_ord_t : C.ord_P P t = 1 := ht
-  have h_ord_fp : C.ord_P P (f ^ p) = (p : ℕ) • C.ord_P P f :=
-    C.ord_P_pow f p
-  rw [hfp, h_ord_fp] at h_ord_t
-  -- h_ord_t : p • ord_P f = 1 (in WithTop ℤ)
+  rw [hfp, C.ord_P_pow f p] at h_ord_t
   have hord_f_ne_top : C.ord_P P f ≠ ⊤ := (C.ord_P_eq_top_iff f).not.mpr hf_ne
   obtain ⟨n, hn⟩ := WithTop.ne_top_iff_exists.mp hord_f_ne_top
-  rw [← hn] at h_ord_t
-  -- h_ord_t : p • ↑n = ↑1 in WithTop ℤ
-  rw [← WithTop.coe_nsmul] at h_ord_t
-  -- h_ord_t : ↑(p • n) = 1 in WithTop ℤ. Cast to ℤ.
+  rw [← hn, ← WithTop.coe_nsmul] at h_ord_t
   have h_int : (p : ℤ) * n = 1 := by
     have h_pn : p • n = (1 : ℤ) := by exact_mod_cast h_ord_t
     rw [Int.nsmul_eq_mul] at h_pn
     exact_mod_cast h_pn
-  -- p ≥ 2 (from hp : 1 < p), n ∈ ℤ, p * n = 1 is impossible
-  have hp_ge : (p : ℤ) ≥ 2 := by exact_mod_cast hp
-  -- Split on sign of n
-  rcases lt_trichotomy n 0 with hn_neg | hn_zero | hn_pos
-  · -- n < 0: p * n ≤ p * (-1) = -p ≤ -2 ≠ 1
-    nlinarith
-  · -- n = 0: p * 0 = 0 ≠ 1
-    rw [hn_zero, mul_zero] at h_int
-    exact absurd h_int (by norm_num)
-  · -- n > 0 so n ≥ 1: p * n ≥ p * 1 ≥ 2 ≠ 1
-    nlinarith
+  have hp_eq : (p : ℤ) = 1 := Int.eq_one_of_mul_eq_one_right (Int.natCast_nonneg p) h_int
+  omega
 
 /-! ### Transcendence degree of `F(C)` over `F`
 
@@ -131,19 +113,14 @@ Tower computation: `trdeg F (Polynomial F) = 1` (mathlib's
 `FiniteOverKx`). Apply `trdeg_add_eq` twice. -/
 theorem functionField_trdeg_eq_one : Algebra.trdeg F C.FunctionField = 1 := by
   have h_fund : Algebra.trdeg F (FractionRing (Polynomial F)) = 1 := by
-    have h_PF : Algebra.trdeg F (Polynomial F) = 1 := Polynomial.trdeg_of_isDomain
     haveI : Algebra.IsAlgebraic (Polynomial F) (FractionRing (Polynomial F)) :=
       IsLocalization.isAlgebraic _ (nonZeroDivisors _)
-    have h_PF_to_F_X :
-        Algebra.trdeg (Polynomial F) (FractionRing (Polynomial F)) = 0 := trdeg_eq_zero
-    rw [← trdeg_add_eq F (Polynomial F) (A := FractionRing (Polynomial F))]
-    rw [h_PF, h_PF_to_F_X, add_zero]
+    rw [← trdeg_add_eq F (Polynomial F) (A := FractionRing (Polynomial F)),
+      Polynomial.trdeg_of_isDomain, trdeg_eq_zero, add_zero]
   haveI : Algebra.IsAlgebraic (FractionRing (Polynomial F)) C.FunctionField :=
     Algebra.IsAlgebraic.of_finite _ _
-  have h_FX_to_KE : Algebra.trdeg (FractionRing (Polynomial F)) C.FunctionField = 0 :=
-    trdeg_eq_zero
-  rw [← trdeg_add_eq F (FractionRing (Polynomial F)) (A := C.FunctionField)]
-  rw [h_fund, h_FX_to_KE, add_zero]
+  rw [← trdeg_add_eq F (FractionRing (Polynomial F)) (A := C.FunctionField), h_fund,
+    trdeg_eq_zero, add_zero]
 
 end SmoothPlaneCurve
 
