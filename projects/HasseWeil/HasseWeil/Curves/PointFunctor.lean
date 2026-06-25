@@ -1,5 +1,4 @@
 import HasseWeil.Curves.CurveMap
-import HasseWeil.Curves.Basic
 
 /-!
 # Point functor for `CurveMap`s
@@ -136,8 +135,6 @@ private theorem ringHom_ext_bivariate {f g : Polynomial (Polynomial F) →+* F}
     (hX : f (Polynomial.C Polynomial.X) = g (Polynomial.C Polynomial.X))
     (hY : f Polynomial.X = g Polynomial.X) : f = g := by
   refine Polynomial.ringHom_ext (fun p ↦ ?_) hY
-  -- agree on `C p` for `p : F[X]`; reduce to `(f ∘ C) = (g ∘ C)` and apply
-  -- `Polynomial.ringHom_ext` again on the inner layer.
   change f.comp Polynomial.C p = g.comp Polynomial.C p
   congr 1
   exact Polynomial.ringHom_ext hC hX
@@ -151,12 +148,8 @@ private theorem evalAtPullback_comp_mk_double_C {φ : CurveMap C₁ C₂}
     (evalAtPullback coordHom P).comp
       (WeierstrassCurve.Affine.CoordinateRing.mk C₂.toAffine)
       (Polynomial.C (Polynomial.C c)) = c := by
-  change evalAtPullback coordHom P
-    (WeierstrassCurve.Affine.CoordinateRing.mk C₂.toAffine
-      (Polynomial.C (Polynomial.C c))) = c
-  rw [show WeierstrassCurve.Affine.CoordinateRing.mk C₂.toAffine
-      (Polynomial.C (Polynomial.C c)) = algebraMap F C₂.CoordinateRing c from rfl,
-    evalAtPullback_algebraMap]
+  change evalAtPullback coordHom P (algebraMap F C₂.CoordinateRing c) = c
+  exact evalAtPullback_algebraMap coordHom P c
 
 /-- **Universal property at the image point**: for any bivariate polynomial `g`,
 the value of `mk g ∈ F[C₂]` under `evalAtPullback` equals `g` evaluated
@@ -192,18 +185,15 @@ theorem evalAtPullback_mk {φ : CurveMap C₁ C₂} (coordHom : φ.CoordHom)
   change ρ g = σ g
   congr 1
   refine ringHom_ext_bivariate (fun c ↦ ?_) ?_ ?_
-  · -- double-constants: both sides return `c`
-    rw [show ρ (Polynomial.C (Polynomial.C c)) = c from
+  · rw [show ρ (Polynomial.C (Polynomial.C c)) = c from
       evalAtPullback_comp_mk_double_C coordHom P c]
     change c = (Polynomial.evalRingHom x') ((Polynomial.evalRingHom
       (Polynomial.C y')) (Polynomial.C (Polynomial.C c)))
     simp
-  · -- inner generator `C X`: `ρ` gives `x'` definitionally; `σ` reduces to `x'`
-    change x' = (Polynomial.evalRingHom x') ((Polynomial.evalRingHom
+  · change x' = (Polynomial.evalRingHom x') ((Polynomial.evalRingHom
       (Polynomial.C y')) (Polynomial.C Polynomial.X))
     simp
-  · -- outer generator `Y`: `ρ` gives `y'` definitionally; `σ` reduces to `y'`
-    change y' = (Polynomial.evalRingHom x') ((Polynomial.evalRingHom
+  · change y' = (Polynomial.evalRingHom x') ((Polynomial.evalRingHom
       (Polynomial.C y')) Polynomial.X)
     simp
 
