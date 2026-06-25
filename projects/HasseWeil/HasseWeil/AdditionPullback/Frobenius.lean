@@ -260,7 +260,7 @@ theorem addPullback_x_pole_frobenius_of_lc_witness
       ((-(Fintype.card K : ℤ)) : WithTop ℤ)) :
     (W_smooth W).ordAtInfty (addPullback_x W (frobeniusIsog W)) ≤
       ((-2 : ℤ) : WithTop ℤ) := by
-  set L := addSlope W (frobeniusIsog W) with hL_def
+  set L := addSlope W (frobeniusIsog W)
   set A : KE := L ^ 2 - (frobeniusIsog W).pullback (x_gen W) with hA_def
   set B : KE := algebraMap K KE W.toAffine.a₁ * L -
     algebraMap K KE W.toAffine.a₂ - x_gen W with hB_def
@@ -371,8 +371,8 @@ theorem addPullbackNumerator_frobenius_eq :
     addPullbackNumerator_frobenius W =
       (x_gen W - (frobeniusIsog W).pullback (x_gen W)) ^ 2 *
         addPullback_x W (frobeniusIsog W) := by
-  set d := x_gen W - (frobeniusIsog W).pullback (x_gen W) with hd_def
-  set n := y_gen W - (frobeniusIsog W).pullback (y_gen W) with hn_def
+  set d := x_gen W - (frobeniusIsog W).pullback (x_gen W)
+  set n := y_gen W - (frobeniusIsog W).pullback (y_gen W)
   have hd_ne : d ≠ 0 := x_gen_sub_frobeniusIsog_pullback_x_gen_ne_zero W
   have hL : addSlope W (frobeniusIsog W) = n / d := addSlope_frobenius_eq W
   unfold addPullbackNumerator_frobenius addPullback_x
@@ -597,8 +597,7 @@ private theorem weierstrass_relation_x_gen_y_gen :
   have h_a3 : (W_KE W).toAffine.a₃ = algebraMap K KE W.toAffine.a₃ := rfl
   have h_a4 : (W_KE W).toAffine.a₄ = algebraMap K KE W.toAffine.a₄ := rfl
   have h_a6 : (W_KE W).toAffine.a₆ = algebraMap K KE W.toAffine.a₆ := rfl
-  rw [h_a1, h_a2, h_a3, h_a4, h_a6] at h
-  exact h
+  rwa [h_a1, h_a2, h_a3, h_a4, h_a6] at h
 
 /-- Weierstrass relation at the Frobenius pullback `(π·x, π·y)`, in
 `algebraMap K KE`-coefficient form (via `pullback_equation`). -/
@@ -622,8 +621,7 @@ private theorem weierstrass_relation_frobenius_pullback :
   have h_a3 : (W_KE W).toAffine.a₃ = algebraMap K KE W.toAffine.a₃ := rfl
   have h_a4 : (W_KE W).toAffine.a₄ = algebraMap K KE W.toAffine.a₄ := rfl
   have h_a6 : (W_KE W).toAffine.a₆ = algebraMap K KE W.toAffine.a₆ := rfl
-  rw [h_a1, h_a2, h_a3, h_a4, h_a6] at h
-  exact h
+  rwa [h_a1, h_a2, h_a3, h_a4, h_a6] at h
 
 /-- **The Weierstrass reduction**: `addPullbackNumerator_frobenius W =
 addPullbackNumerator_reduced_frobenius W` in `K(E)`.
@@ -1329,8 +1327,7 @@ theorem addPullbackNumerator_negFrobenius_eq_reduced :
     have h_a3 : (W_KE W).toAffine.a₃ = algebraMap K KE W.toAffine.a₃ := rfl
     have h_a4 : (W_KE W).toAffine.a₄ = algebraMap K KE W.toAffine.a₄ := rfl
     have h_a6 : (W_KE W).toAffine.a₆ = algebraMap K KE W.toAffine.a₆ := rfl
-    rw [h_a1, h_a2, h_a3, h_a4, h_a6] at h
-    exact h
+    rwa [h_a1, h_a2, h_a3, h_a4, h_a6] at h
   -- Weierstrass for (u, v) := ((negFrobeniusIsog W).pullback (x_gen W),
   --                            (negFrobeniusIsog W).pullback (y_gen W)).
   -- Direct from `pullback_equation` applied to `negFrobeniusIsog W`.
@@ -1353,8 +1350,7 @@ theorem addPullbackNumerator_negFrobenius_eq_reduced :
     have h_a3 : (W_KE W).toAffine.a₃ = algebraMap K KE W.toAffine.a₃ := rfl
     have h_a4 : (W_KE W).toAffine.a₄ = algebraMap K KE W.toAffine.a₄ := rfl
     have h_a6 : (W_KE W).toAffine.a₆ = algebraMap K KE W.toAffine.a₆ := rfl
-    rw [h_a1, h_a2, h_a3, h_a4, h_a6] at h
-    exact h
+    rwa [h_a1, h_a2, h_a3, h_a4, h_a6] at h
   unfold addPullbackNumerator_negFrobenius addPullbackNumerator_reduced_negFrobenius
   linear_combination h_xy + h_uv
 
@@ -1679,8 +1675,8 @@ theorem addPullbackNumerator_negFrobenius_eq :
     addPullbackNumerator_negFrobenius W =
       (x_gen W - (negFrobeniusIsog W).pullback (x_gen W)) ^ 2 *
         addPullback_x W (negFrobeniusIsog W) := by
-  set d := x_gen W - (negFrobeniusIsog W).pullback (x_gen W) with hd_def
-  set n := y_gen W - (negFrobeniusIsog W).pullback (y_gen W) with hn_def
+  set d := x_gen W - (negFrobeniusIsog W).pullback (x_gen W)
+  set n := y_gen W - (negFrobeniusIsog W).pullback (y_gen W)
   have hd_ne : d ≠ 0 := x_gen_sub_negFrobeniusIsog_pullback_x_gen_ne_zero W
   have hL : addSlope W (negFrobeniusIsog W) = n / d := addSlope_negFrobeniusIsog_eq W
   unfold addPullbackNumerator_negFrobenius addPullback_x
@@ -1933,8 +1929,7 @@ private theorem addPullback_y_negFrobenius_lhs_ord (hq : 2 ≤ Fintype.card K) :
                 addPullback_x W (negFrobeniusIsog W) +
               algebraMap K KE W.toAffine.a₆ := by
     have h := addPullback_equation (negFrobeniusIsog_addNonInverse_for_y_ord W)
-    rw [WeierstrassCurve.Affine.equation_iff] at h
-    exact h
+    rwa [WeierstrassCurve.Affine.equation_iff] at h
   exact h_eq ▸ ord_RHS_negFrobenius W hq
 
 /-- The negative-Frobenius pullback `y`-coordinate is nonzero: otherwise the
@@ -2427,8 +2422,7 @@ theorem mulByInt_neg_one_pullback_y_gen_ne_y_gen_char_two
     exact_mod_cast h
   have h_two_KE : (2 : KE) = 0 := by
     have h : algebraMap K KE 2 = algebraMap K KE 0 := by rw [h_two_K]
-    rw [map_ofNat, map_zero] at h
-    exact h
+    rwa [map_ofNat, map_zero] at h
   -- σ(y) = y → -y - a₁x - a₃ = y → 2y + a₁x + a₃ = 0 → in char 2: a₁x + a₃ = 0.
   have h_lin : algebraMap K KE W.toAffine.a₁ * x_gen W +
       algebraMap K KE W.toAffine.a₃ = 0 := by
@@ -3340,9 +3334,7 @@ private lemma mulByInt_weierstrass_equation (r : ℤ) (hr : r ≠ 0) :
       (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
         (AdjoinRoot.root W.toAffine.polynomial)) = _
     exact mulByInt_pullback_y W r hr
-  rw [hx_pb, hy_pb] at h_alg
-  rw [WeierstrassCurve.Affine.equation_iff] at h_alg
-  exact h_alg
+  rwa [hx_pb, hy_pb, WeierstrassCurve.Affine.equation_iff] at h_alg
 
 /-- `ord_∞(mulByInt_x W r · mulByInt_y W r) = M + m` from the orders `M, m` of the two factors. -/
 private lemma ordAtInfty_mulByInt_x_mul_y (r : ℤ) {M m : ℤ}
@@ -3806,8 +3798,7 @@ private theorem weierstrass_relation_pullback (α : Isogeny W.toAffine W.toAffin
   have h_a3 : (W_KE W).toAffine.a₃ = algebraMap K KE W.toAffine.a₃ := rfl
   have h_a4 : (W_KE W).toAffine.a₄ = algebraMap K KE W.toAffine.a₄ := rfl
   have h_a6 : (W_KE W).toAffine.a₆ = algebraMap K KE W.toAffine.a₆ := rfl
-  rw [h_a1, h_a2, h_a3, h_a4, h_a6] at h
-  exact h
+  rwa [h_a1, h_a2, h_a3, h_a4, h_a6] at h
 
 /-- **Weierstrass reduction for the pair**:
 `addPullbackNumerator_pair = addPullbackNumerator_reduced_pair`. Mirror of
@@ -3836,9 +3827,9 @@ theorem addPullbackNumerator_pair_zsmul_frobenius_mulByInt_neg_eq
       addPullback_x_pair ((frobeniusIsog W).zsmul r)
         (mulByInt W.toAffine (-s)) := by
   set d := ((frobeniusIsog W).zsmul r).pullback (x_gen W) -
-    (mulByInt W.toAffine (-s)).pullback (x_gen W) with hd_def
+    (mulByInt W.toAffine (-s)).pullback (x_gen W)
   set n := ((frobeniusIsog W).zsmul r).pullback (y_gen W) -
-    (mulByInt W.toAffine (-s)).pullback (y_gen W) with hn_def
+    (mulByInt W.toAffine (-s)).pullback (y_gen W)
   have hd_ne : d ≠ 0 :=
     zsmul_frobenius_sub_mulByInt_neg_x_ne_zero W r s hr hs hrK hsK
   have hL : addSlopePair ((frobeniusIsog W).zsmul r)
@@ -4342,7 +4333,7 @@ theorem ord_addPullback_x_pair_zsmul_frobenius_mulByInt_neg
           (mulByInt W.toAffine (-s))) : KE) =
       ((-2 : ℤ) : WithTop ℤ) := by
   set d := ((frobeniusIsog W).zsmul r).pullback (x_gen W) -
-    (mulByInt W.toAffine (-s)).pullback (x_gen W) with hd_def
+    (mulByInt W.toAffine (-s)).pullback (x_gen W)
   have h_d_ne : d ≠ 0 :=
     zsmul_frobenius_sub_mulByInt_neg_x_ne_zero W r s hr hs hrK hsK
   have h_d_sq_ne : d ^ 2 ≠ 0 := pow_ne_zero 2 h_d_ne
@@ -4478,8 +4469,7 @@ private theorem weierstrass_lhs_pair_zsmul_frobenius_mulByInt_neg_eq
         algebraMap K KE W.toAffine.a₆ := by
   have h := addPullback_pair_equation
     (AddNonInversePair_zsmul_frobenius_mulByInt_neg W r s hr hs hrK hsK)
-  rw [WeierstrassCurve.Affine.equation_iff] at h
-  exact h
+  rwa [WeierstrassCurve.Affine.equation_iff] at h
 
 /-- Helper: `ord_∞(Y² + a₁·X·Y + a₃·Y) = -6` for the pair, via the curve equation and the
 dominant `ord(RHS) = -6` (`ord_RHS_pair_zsmul_frobenius_mulByInt_neg`). -/
@@ -4833,9 +4823,9 @@ theorem addPullbackNumerator_pair_zsmul_frobenius_mulByInt_neg_eq_of_hd_ne
       addPullback_x_pair ((frobeniusIsog W).zsmul r)
         (mulByInt W.toAffine (-s)) := by
   set d := ((frobeniusIsog W).zsmul r).pullback (x_gen W) -
-    (mulByInt W.toAffine (-s)).pullback (x_gen W) with hd_def
+    (mulByInt W.toAffine (-s)).pullback (x_gen W)
   set n := ((frobeniusIsog W).zsmul r).pullback (y_gen W) -
-    (mulByInt W.toAffine (-s)).pullback (y_gen W) with hn_def
+    (mulByInt W.toAffine (-s)).pullback (y_gen W)
   have hL : addSlopePair ((frobeniusIsog W).zsmul r)
         (mulByInt W.toAffine (-s)) = n / d := by
     unfold addSlopePair
