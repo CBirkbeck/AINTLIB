@@ -34,7 +34,7 @@ The ideal `I` is genuinely nonzero (it lies in `(Ideal (𝓞 K))⁰`) because
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Ideal Polynomial
+open NumberField Polynomial
 
 open scoped nonZeroDivisors
 
