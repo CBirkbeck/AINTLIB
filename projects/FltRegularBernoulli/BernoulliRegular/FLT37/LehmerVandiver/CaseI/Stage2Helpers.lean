@@ -1,5 +1,4 @@
 import BernoulliRegular.FLT37.LehmerVandiver.CaseI.PrimaryNormalization
-import Mathlib.NumberTheory.NumberField.CMField
 
 /-!
 # LV010 Stage 2 helpers: regularity-free local consequences of weak primary
@@ -36,7 +35,6 @@ namespace CaseI
 variable {p : ℕ} [hp : Fact p.Prime]
 variable {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Local complex-conjugation consequence of weak-primary form.** If
 `α ∈ 𝓞 K` is "weak primary" (`(ζ-1)^2 ∣ α - r` for some integer `r`),
 then `(ζ-1)^2 ∣ α - σ(α)` (where σ is complex conjugation), since
@@ -49,43 +47,17 @@ theorem zetaSubOne_sq_dvd_self_sub_complexConj_of_weakPrimary
     (h_weak : (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) ^ 2 ∣ (α - (r : 𝓞 K))) :
     (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) ^ 2 ∣
       (α - ringOfIntegersComplexConj K α) := by
-  -- (α - r) is divisible by (ζ-1)^2 (given).
-  -- σ(α - r) = σ(α) - σ(r) = σ(α) - r (since σ fixes ℤ).
-  -- σ((ζ-1)^2 · 𝓞 K) is associated to (ζ-1)^2 · 𝓞 K (since σ permutes
-  -- generators of the unique prime above p), so σ also kills the same
-  -- divisibility.
-  have h_sigma : (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) ^ 2 ∣
-      (ringOfIntegersComplexConj K α - (r : 𝓞 K)) := by
-    -- Apply σ to h_weak: σ((ζ-1)^2) | σ(α - r) = σ(α) - r.
-    have h_apply : ringOfIntegersComplexConj K (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) ^ 2 ∣
-        ringOfIntegersComplexConj K (α - (r : 𝓞 K)) := by
-      have := map_dvd (ringOfIntegersComplexConj K).toRingEquiv.toRingHom h_weak
-      rw [map_pow] at this
-      exact this
-    -- σ(α - r) = σα - r.
-    have h_sub : ringOfIntegersComplexConj K (α - (r : 𝓞 K)) =
-        ringOfIntegersComplexConj K α - (r : 𝓞 K) := by
-      rw [map_sub]
-      congr 1
-      apply RingOfIntegers.ext
-      simp
-    rw [h_sub] at h_apply
-    -- σ((ζ-1)^2) is associated to (ζ-1)^2.
-    have h_assoc_pow := associated_complexConj_zetaSubOne_pow p K 2
-    have hpow_eq :
-        (ringOfIntegersComplexConj K (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1)) ^ 2 =
-        ringOfIntegersComplexConj K (zetaSubOne p K ^ 2) := by
-      rw [← map_pow]
-      rfl
-    rw [hpow_eq] at h_apply
-    exact h_assoc_pow.dvd.trans h_apply
-  -- (α - r) - (σα - r) = α - σα.
-  have h_eq : α - ringOfIntegersComplexConj K α =
-      (α - (r : 𝓞 K)) - (ringOfIntegersComplexConj K α - (r : 𝓞 K)) := by ring
-  rw [h_eq]
+  -- `α - σα = (α - r) - (σα - r)`, and `(ζ-1)^2` divides both differences:
+  -- the first is `h_weak`; the second because `σα - r = σ(α - r)` (σ fixes ℤ)
+  -- and `(ζ-1)^2 ∣ σ(α - r) ↔ (ζ-1)^2 ∣ (α - r)` (σ preserves the prime above `p`).
+  rw [← zetaSubOne_def] at h_weak ⊢
+  have h_sigma : zetaSubOne p K ^ 2 ∣ ringOfIntegersComplexConj K α - (r : 𝓞 K) := by
+    rwa [← map_intCast (ringOfIntegersComplexConj K) r, ← map_sub,
+      zetaSubOne_pow_dvd_complexConj_iff]
+  rw [show α - ringOfIntegersComplexConj K α =
+      (α - (r : 𝓞 K)) - (ringOfIntegersComplexConj K α - (r : 𝓞 K)) from by ring]
   exact dvd_sub h_weak h_sigma
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Case-I weak-primary form gives self-σ-difference local control.**
 Composition of Stage 1 (`caseI_exists_zeta_pow_weakPrimary`) with
 `zetaSubOne_sq_dvd_self_sub_complexConj_of_weakPrimary`: under FLT
@@ -107,13 +79,9 @@ theorem caseI_exists_zeta_pow_weakPrimary_self_minus_complexConj
             (((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ k *
               ((a : 𝓞 K) +
                 ((zeta_spec p ℚ K).toInteger : 𝓞 K) * (b : 𝓞 K)))) := by
-  obtain ⟨k, hk_lt, h_weak⟩ :=
-    caseI_exists_zeta_pow_weakPrimary (p := p) (K := K) heq hc
-  refine ⟨k, hk_lt, ?_⟩
-  exact zetaSubOne_sq_dvd_self_sub_complexConj_of_weakPrimary
-    (p := p) (K := K) h_weak
+  obtain ⟨k, hk_lt, h_weak⟩ := caseI_exists_zeta_pow_weakPrimary (K := K) heq hc
+  exact ⟨k, hk_lt, zetaSubOne_sq_dvd_self_sub_complexConj_of_weakPrimary h_weak⟩
 
-set_option backward.isDefEq.respectTransparency false in
 omit hp [IsCyclotomicExtension {p} ℚ K] in
 /-- **Conjugate factor identity from `(α) = I^p`.** Applying complex
 conjugation to the case-I factor identity, the conjugate ideal also
@@ -123,13 +91,9 @@ theorem conjugate_factor_ideal_pow [NumberField.IsCMField K] {α : 𝓞 K} {I : 
     (h : Ideal.span ({α} : Set (𝓞 K)) = I ^ p) :
     Ideal.span ({ringOfIntegersComplexConj K α} : Set (𝓞 K)) =
       (I.map (ringOfIntegersComplexConj K).toRingEquiv.toRingHom) ^ p := by
-  have h_map : (Ideal.span ({α} : Set (𝓞 K))).map
-      (ringOfIntegersComplexConj K).toRingEquiv.toRingHom =
-      Ideal.span ({ringOfIntegersComplexConj K α} : Set (𝓞 K)) := by
-    rw [Ideal.map_span]; simp
-  rw [← h_map, h, Ideal.map_pow]
+  rw [← Ideal.map_pow, ← h, Ideal.map_span]
+  simp
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Explicit `α - σα = (ζ-1)^2 · γ` form.** Existence form of the
 σ-divisibility statement: from weak-primary `α`, there exists
 `γ ∈ 𝓞 K` such that `α - σα = (ζ-1)^2 · γ`. Used in Stage 2 to
@@ -142,7 +106,6 @@ theorem exists_zetaSubOne_sq_mul_eq_self_sub_complexConj_of_weakPrimary
         (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) ^ 2 * γ :=
   zetaSubOne_sq_dvd_self_sub_complexConj_of_weakPrimary h_weak
 
-set_option backward.isDefEq.respectTransparency false in
 omit hp [IsCyclotomicExtension {p} ℚ K] in
 /-- **Both factor and conjugate-factor ideal identities.** Combined
 form: from `(α) = I^p`, both `(α) = I^p` and `(σα) = (σI)^p` hold
@@ -167,7 +130,6 @@ following wrappers package its conclusion in a form useful for Stage 2's
 
 namespace CaseI
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Hilbert 90 wrapper for case-I factors.** Given α = a + ζ b
 non-zero in `K`, the cohomological Hilbert 90 produces γ ∈ Kˣ such that
 `γ · α = σ(γ · α)` (i.e., γα ∈ K⁺). This is a direct application of
@@ -184,7 +146,6 @@ theorem exists_real_multiple_for_caseI_factor
   obtain ⟨γ, hγ⟩ := exists_div_complexConj_eq_complexConj_div_self (K := K') hα
   exact ⟨γ, complexConj_mul_eq_self_of_div_eq (K := K') hα hγ⟩
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Hilbert 90 + K⁺ descent wrapper.** Stronger form: given case-I
 factor α ≠ 0, there exists γ ∈ Kˣ AND δ ∈ K⁺ such that γα = algebraMap δ.
 
@@ -204,7 +165,6 @@ theorem exists_real_witness_for_caseI_factor
   obtain ⟨δ, hδ⟩ := exists_mem_Kplus_eq_mul_of_div_eq (K := K') hα hγ
   exact ⟨γ, δ, hδ⟩
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Stage 1 + Hilbert 90 K⁺ descent for case-I factor.** Composition:
 under FLT case I, applying Stage 1 (weak primary normalization) to get
 ζ^k · (a + ζ b), then Hilbert 90 K⁺ descent gives γ ∈ Kˣ and δ ∈ K⁺
@@ -228,7 +188,7 @@ theorem caseI_exists_zeta_pow_weakPrimary_with_real_witness
           ((a : 𝓞 K') +
             ((zeta_spec p' ℚ K').toInteger : 𝓞 K') * (b : 𝓞 K')) -
           ((a + b : ℤ) : 𝓞 K')) :=
-  caseI_exists_zeta_pow_weakPrimary (p := p') (K := K') heq hc
+  caseI_exists_zeta_pow_weakPrimary (K := K') heq hc
 
 end CaseI
 
