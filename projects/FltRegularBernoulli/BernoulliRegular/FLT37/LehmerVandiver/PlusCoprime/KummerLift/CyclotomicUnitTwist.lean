@@ -38,7 +38,7 @@ This file's main result is the building block for LV005c1b's aggregate
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension
+open IsCyclotomicExtension
 open scoped NumberField
 
 namespace BernoulliRegular
@@ -63,16 +63,12 @@ theorem cyclotomicSigmaOfUnit_smul_cyclotomicUnit_mul_zeta_pow_sub_one
     (((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ ((a : ZMod p).val) - 1) *
         (cyclotomicSigmaOfUnit (p := p) K a • cyclotomicUnit p K b) =
       ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ ((a : ZMod p).val * b) - 1 := by
-  -- Apply σ_a as a ring hom to (ζ - 1) · cyclotomicUnit b = ζ^b - 1.
   set σ : 𝓞 K →+* 𝓞 K :=
     MulSemiringAction.toRingHom Gal(K/ℚ) (𝓞 K)
       (cyclotomicSigmaOfUnit (p := p) K a)
   have h_eq := zeta_sub_one_mul_cyclotomicUnit p K b
   have h_apply := congrArg σ h_eq
-  -- σ is a ring hom; propagate over · and -; reduce ζ^b under σ.
   simp only [map_mul, map_sub, map_one, map_pow] at h_apply
-  -- h_apply : (σ ζ - 1) · σ(cyclotomicUnit b) = σ(ζ)^b - 1.
-  -- σ(ζ) = ζ^{a.val} (cyclotomicSigmaOfUnit_smul_zetaInteger).
   have hσζ : σ ((zeta_spec p ℚ K).toInteger : 𝓞 K) =
       ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ ((a : ZMod p).val) := by
     change cyclotomicSigmaOfUnit (p := p) K a •
@@ -87,7 +83,6 @@ theorem cyclotomicSigmaOfUnit_smul_cyclotomicUnit_mul_zeta_pow_sub_one
 A clean form of the defining identity for ZMod multiplication. -/
 private theorem val_mul_eq_val_mul_mod (a : (ZMod p)ˣ) (b : ℕ) :
     (a : ZMod p).val * b ≡ ((a : ZMod p) * b).val [MOD p] := by
-  -- Both sides cast to `(a : ZMod p) * (b : ZMod p)` in `ZMod p`.
   simp only [← ZMod.natCast_eq_natCast_iff, Nat.cast_mul, ZMod.natCast_val, ZMod.cast_id]
 
 /-- **Factor-wise σ-twist for cyclotomic units (ring-level)**: for
@@ -106,7 +101,6 @@ theorem cyclotomicSigmaOfUnit_smul_cyclotomicUnit_mul_cyclotomicUnit
   set ζ : 𝓞 K := ((zeta_spec p ℚ K).toInteger : 𝓞 K)
   have hζ_sub_one_ne_zero : (ζ - 1 : 𝓞 K) ≠ 0 :=
     (zeta_spec p ℚ K).zeta_sub_one_prime'.ne_zero
-  -- Multiply both sides by (ζ - 1) and cancel using IsDomain.
   refine mul_right_cancel₀ hζ_sub_one_ne_zero ?_
   have h_aux :=
     cyclotomicSigmaOfUnit_smul_cyclotomicUnit_mul_zeta_pow_sub_one p K a b
@@ -116,12 +110,9 @@ theorem cyclotomicSigmaOfUnit_smul_cyclotomicUnit_mul_cyclotomicUnit
   have h_rhs_zsub : (ζ - 1) * cyclotomicUnit p K (((a : ZMod p) * b).val) =
       ζ ^ (((a : ZMod p) * b).val) - 1 :=
     zeta_sub_one_mul_cyclotomicUnit p K _
-  -- ζ has order p, so ζ^{m} = ζ^{n} when m ≡ n (mod p).
   have hζ_p : ζ ^ p = 1 := (zeta_spec p ℚ K).toInteger_isPrimitiveRoot.pow_eq_one
-  -- ζ^{a.val · b} = ζ^{((a · b).val)} via mod-p exponent reduction (ζ^p = 1).
   have h_pow_eq : ζ ^ ((a : ZMod p).val * b) = ζ ^ (((a : ZMod p) * b).val) :=
     pow_eq_pow_of_modEq (val_mul_eq_val_mul_mod p a b) hζ_p
-  -- Now compute LHS · (ζ - 1).
   calc (cyclotomicSigmaOfUnit (p := p) K a • cyclotomicUnit p K b) *
           cyclotomicUnit p K ((a : ZMod p).val) * (ζ - 1)
       = (cyclotomicSigmaOfUnit (p := p) K a • cyclotomicUnit p K b) *
