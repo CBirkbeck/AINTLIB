@@ -415,7 +415,6 @@ theorem PullbackEvaluation.pullback_evaluatesTo {β : Isogeny W.toAffine W.toAff
     EvaluatesTo W P (β.pullback g) c := by
   classical
   obtain ⟨x', y', h', heq, hx, hy⟩ := hw P hP
-  -- identify the witness coordinates with `Q`'s
   have hQ' : (WeierstrassCurve.Affine.Point.some Q.x Q.y Q.nonsingular :
       W.toAffine.Point) = WeierstrassCurve.Affine.Point.some x' y' h' :=
     hQ.symm.trans heq
@@ -600,7 +599,6 @@ theorem pullbackEvaluation_mulByInt (n : ℤ) (hn : n ≠ 0) :
   simp only [mulByIntSingular, Set.mem_setOf_eq] at hP
   have hψ : (W.ψ n).evalEval P.x P.y ≠ 0 := hP
   obtain ⟨h_ns', h_eq⟩ := zsmul_affine_point_eq_general W n P.nonsingular hψ
-  -- the two coordinate evaluations of the pulled-back generators
   have hxev := mulByInt_x_evaluatesTo W n P hψ
   have hyev := mulByInt_y_evaluatesTo W n P hψ
   have hpb : (mulByInt W.toAffine n).pullback = mulByInt_pullbackAlgHom W n hn :=
@@ -973,15 +971,8 @@ private theorem relativeFrobenius_mulByIntPullbackCovariant_x_gen (e : ℕ) (n :
           (x_gen (E.iterateFrobeniusTwist p e))) =
       (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
         (mulByInt_x (E.iterateFrobeniusTwist p e) n) := by
-  have h1 : (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
-      (x_gen (E.iterateFrobeniusTwist p e)) = x_gen E ^ p ^ e :=
-    relativeFrobenius_pullback_x_gen p E e
-  have h2 : HasseWeil.mulByInt_pullbackAlgHom E.toAffine n hn (x_gen E ^ p ^ e) =
-      HasseWeil.mulByInt_pullbackAlgHom E.toAffine n hn (x_gen E) ^ p ^ e :=
-    map_pow _ _ _
-  have h3 : HasseWeil.mulByInt_pullbackAlgHom E.toAffine n hn (x_gen E) =
-      mulByInt_x E n := HasseWeil.mulByInt_pullbackAlgHom_x_gen E n hn
-  rw [h1, h2, h3, relativeFrobenius_pullback_mulByInt_x]
+  rw [relativeFrobenius_pullback_x_gen p E e, map_pow,
+    HasseWeil.mulByInt_pullbackAlgHom_x_gen E n hn, relativeFrobenius_pullback_mulByInt_x]
 
 /-- The `y`-generator instance of the relative-Frobenius `[n]`-pullback covariance: both sides
 equal `(mulByInt_y E n)^{p^e}` — the left by `Frob* y_gen' = y_gen^{p^e}`, the ring-hom
@@ -994,15 +985,8 @@ private theorem relativeFrobenius_mulByIntPullbackCovariant_y_gen (e : ℕ) (n :
           (y_gen (E.iterateFrobeniusTwist p e))) =
       (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
         (mulByInt_y (E.iterateFrobeniusTwist p e) n) := by
-  have h1 : (Isogeny.relativeFrobenius p E e).toCurveMap.pullback
-      (y_gen (E.iterateFrobeniusTwist p e)) = y_gen E ^ p ^ e :=
-    relativeFrobenius_pullback_y_gen p E e
-  have h2 : HasseWeil.mulByInt_pullbackAlgHom E.toAffine n hn (y_gen E ^ p ^ e) =
-      HasseWeil.mulByInt_pullbackAlgHom E.toAffine n hn (y_gen E) ^ p ^ e :=
-    map_pow _ _ _
-  have h3 : HasseWeil.mulByInt_pullbackAlgHom E.toAffine n hn (y_gen E) =
-      mulByInt_y E n := HasseWeil.mulByInt_pullbackAlgHom_y_gen E n hn
-  rw [h1, h2, h3, relativeFrobenius_pullback_mulByInt_y]
+  rw [relativeFrobenius_pullback_y_gen p E e, map_pow,
+    HasseWeil.mulByInt_pullbackAlgHom_y_gen E n hn, relativeFrobenius_pullback_mulByInt_y]
 
 /-- **The relative Frobenius satisfies the `[n]`-pullback covariance** (Silverman III.4.8
 for `Frob_{p^e} : E → E^{(p^e)}`, the cross-curve case), unconditionally and for every
