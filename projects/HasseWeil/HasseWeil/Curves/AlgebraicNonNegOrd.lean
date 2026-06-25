@@ -49,9 +49,7 @@ tower. -/
 theorem pointValuation_algebraMap_F_le_one
     (P : C.SmoothPoint) (c : F) :
     C.pointValuation P (algebraMap F C.FunctionField c) ≤ 1 := by
-  rw [show (algebraMap F C.FunctionField c : C.FunctionField) =
-    algebraMap C.CoordinateRing C.FunctionField (algebraMap F C.CoordinateRing c)
-    from IsScalarTower.algebraMap_apply F C.CoordinateRing C.FunctionField c]
+  rw [IsScalarTower.algebraMap_apply F C.CoordinateRing C.FunctionField c]
   exact C.pointValuation_algebraMap_le_one _ P
 
 /-- **Algebraic-Liouville inequality at a finite place** (Silverman II.1):
@@ -69,14 +67,12 @@ theorem ord_P_nonneg_of_isAlgebraic
     (P : C.SmoothPoint) {f : C.FunctionField}
     (h_alg : IsAlgebraic F f) :
     (0 : WithTop ℤ) ≤ C.ord_P P f := by
-  -- Construct the ring hom φ : F → (pointValuation P).integer.
+  -- The ring hom `φ : F → (pointValuation P).integer` corestricting the
+  -- algebra map, valid because constants land in the valuation ring.
   let φ : F →+* (C.pointValuation P).integer :=
     (algebraMap F C.FunctionField).codRestrict (C.pointValuation P).integer
-      (fun c ↦ C.pointValuation_algebraMap_F_le_one P c)
-  -- f algebraic over F ⟹ f integral over F (since F is a field).
-  have h_int_F : IsIntegral F f := h_alg.isIntegral
-  obtain ⟨p, hp_monic, hp_eval⟩ := h_int_F
-  -- Lift p to a polynomial over (pointValuation P).integer; it's still monic.
+      (C.pointValuation_algebraMap_F_le_one P)
+  obtain ⟨p, hp_monic, hp_eval⟩ : IsIntegral F f := h_alg.isIntegral
   have h_int_O : IsIntegral (C.pointValuation P).integer f := by
     refine ⟨p.map φ, hp_monic.map _, ?_⟩
     change (Polynomial.aeval f) (p.map φ) = 0
@@ -87,28 +83,20 @@ theorem ord_P_nonneg_of_isAlgebraic
       ext c; rfl
     rw [h_comp, ← Polynomial.aeval_def]
     exact hp_eval
-  -- Apply isIntegral_iff_v_le_one to get pointValuation P f ≤ 1.
   have h_v_le : C.pointValuation P f ≤ 1 :=
     (Valuation.integer.integers (C.pointValuation P)).isIntegral_iff_v_le_one.mp h_int_O
-  -- Translate pointValuation P f ≤ 1 to 0 ≤ ord_P P f.
   by_cases hf : f = 0
   · rw [hf, ord_P_zero]; exact le_top
   · have hv : C.pointValuation P f ≠ 0 := (C.pointValuation P).ne_zero_iff.mpr hf
     unfold ord_P
-    rw [dif_neg hv]
-    -- Goal: (0 : WithTop ℤ) ≤ ((-(WithZero.unzero hv).toAdd : ℤ) : WithTop ℤ)
-    rw [show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl,
-        WithTop.coe_le_coe]
-    -- Goal: 0 ≤ -(WithZero.unzero hv).toAdd
+    rw [dif_neg hv, show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl,
+      WithTop.coe_le_coe]
+    -- The order is `-toAdd (unzero hv)`, so `≤ 1` for the valuation becomes
+    -- `toAdd (unzero hv) ≤ toAdd 1 = 0`, giving `0 ≤ -toAdd (unzero hv)`.
     have h_unz_le : WithZero.unzero hv ≤ 1 := by
       rw [← WithZero.coe_le_coe, WithZero.coe_one, WithZero.coe_unzero]
       exact h_v_le
-    have h_toAdd : (WithZero.unzero hv).toAdd ≤ 0 := by
-      have h1 : ((1 : Multiplicative ℤ)).toAdd = (0 : ℤ) := rfl
-      have h2 : Multiplicative.toAdd (WithZero.unzero hv) ≤
-          Multiplicative.toAdd (1 : Multiplicative ℤ) := h_unz_le
-      rw [h1] at h2
-      exact h2
+    have h_toAdd : (WithZero.unzero hv).toAdd ≤ 0 := Multiplicative.toAdd_le.mpr h_unz_le
     omega
 
 /-- **Transcendence-from-pole criterion**: if `f ∈ F(C)` has *negative*
