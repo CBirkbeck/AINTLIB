@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Curves.PointFunctor
 import HasseWeil.Curves.Valuation
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
@@ -99,6 +104,7 @@ noncomputable def SmoothPoint.translate_of_finite
   let ex := Affine.Point.exists_some_of_isSome (P.toAffinePoint + k) h
   ⟨ex.choose, ex.choose_spec.choose, ex.choose_spec.choose_spec.choose⟩
 
+omit [C.toAffine.IsElliptic] in
 /-- The `toAffinePoint` of the translated SmoothPoint is exactly `P + k`. -/
 @[simp] theorem SmoothPoint.translate_of_finite_toAffinePoint
     (P : C.SmoothPoint) (k : C.toAffine.Point)
@@ -109,6 +115,7 @@ noncomputable def SmoothPoint.translate_of_finite
   set ex := Affine.Point.exists_some_of_isSome (P.toAffinePoint + k) h
   exact (ex.choose_spec.choose_spec.choose_spec).symm
 
+omit [C.toAffine.IsElliptic] in
 /-- The x-coordinate of the translated SmoothPoint matches the
 `Affine.Point.some` form of `P + k`. -/
 theorem SmoothPoint.translate_of_finite_x
@@ -121,6 +128,7 @@ theorem SmoothPoint.translate_of_finite_x
   rw [hsum] at h_eq
   exact (Affine.Point.some.injEq _ _ _ _ _ _).mp h_eq |>.1
 
+omit [C.toAffine.IsElliptic] in
 /-- The y-coordinate of the translated SmoothPoint matches the
 `Affine.Point.some` form of `P + k`. -/
 theorem SmoothPoint.translate_of_finite_y
@@ -137,19 +145,20 @@ theorem SmoothPoint.translate_of_finite_y
 
 `translate_of_finite` at `k = Point.zero` is the identity on `SmoothPoint`. -/
 
+omit [C.toAffine.IsElliptic] in
 /-- Translation by the identity element preserves the smooth point. -/
 @[simp] theorem SmoothPoint.translate_of_finite_zero
     (P : C.SmoothPoint)
     (h : (P.toAffinePoint + (0 : C.toAffine.Point)).IsSome) :
     P.translate_of_finite (0 : C.toAffine.Point) h = P := by
   apply SmoothPoint.ext
-  · -- x-coordinate
+  ·
     have h_eq := P.translate_of_finite_toAffinePoint (0 : C.toAffine.Point) h
     rw [add_zero] at h_eq
     show (P.translate_of_finite _ h).x = P.x
     rw [SmoothPoint.toAffinePoint_def] at h_eq
     exact (Affine.Point.some.injEq _ _ _ _ _ _).mp h_eq |>.1
-  · -- y-coordinate
+  ·
     have h_eq := P.translate_of_finite_toAffinePoint (0 : C.toAffine.Point) h
     rw [add_zero] at h_eq
     show (P.translate_of_finite _ h).y = P.y
@@ -195,9 +204,10 @@ piece of the multi-session arc — Step (B') under that decomposition. -/
 
 namespace Conditional
 
-variable (C : SmoothPlaneCurve F) [DecidableEq F]
+variable (C : SmoothPlaneCurve F)
   [C.toAffine.IsElliptic]
 
+omit [C.toAffine.IsElliptic] in
 /-- **Step (B), Conditional form**: transport of `pointValuation` under
 the function-field-level translation `τ_k = translateAlgEquivOfPoint W k`,
 witness-parametric on the maximal-ideal-transport identity.
@@ -214,8 +224,6 @@ theorem pointValuation_translate_of_smul_eq_of_transport_witness
       C.pointValuation (P.translate_of_finite k h) f) :
     C.pointValuation P (τ_k f) =
       C.pointValuation (P.translate_of_finite k h) f := by
-  -- `(comap τ_k v) f = v (τ_k f)` by definition of comap.
-  -- So h_eq directly gives the goal.
   exact h_eq
 
 /-! ### Step (B') — Valuation-level reductions
@@ -250,6 +258,7 @@ Worker A's `translateAlgEquivOfPoint` x_gen / y_gen action lemmas
 (`Hasse/IsogOneSubXyFamily.lean:283-320`) plus the smooth-point
 maximal-ideal structure (`Curves/Basic.lean:60`). -/
 
+omit [C.toAffine.IsElliptic] in
 /-- **Step (B') upgrade direction**: a pointwise transport witness for all
 `f` upgrades to a Valuation equality. Direct from `Valuation.ext`. -/
 theorem comap_pointValuation_eq_of_pointwise_transport
@@ -262,6 +271,7 @@ theorem comap_pointValuation_eq_of_pointwise_transport
       C.pointValuation (P.translate_of_finite k h) :=
   Valuation.ext h_eq
 
+omit [C.toAffine.IsElliptic] in
 /-- **Step (B') downgrade direction**: a Valuation equality gives the
 pointwise transport identity at every `f`. Direct from `congrFun`. -/
 theorem pointwise_transport_of_comap_pointValuation_eq
@@ -275,6 +285,7 @@ theorem pointwise_transport_of_comap_pointValuation_eq
       C.pointValuation (P.translate_of_finite k h) f := by
   rw [h_val_eq]
 
+omit [C.toAffine.IsElliptic] in
 /-- **Step (B'), Conditional Valuation form**: transport of `pointValuation`
 under the function-field-level translation `τ_k`, witness-parametric on
 the **Valuation equality** form of the maximal-ideal-transport identity.
@@ -311,6 +322,7 @@ W 0 = AlgEquiv.refl` at the RingHom level. The full `translateAlgEquivOfPoint`-
 specific instantiation lives at the EC layer (where the AlgEquiv
 infrastructure resides). -/
 
+omit [C.toAffine.IsElliptic] in
 /-- **Step (B') base case**: when `τ_k = RingEquiv.refl` (the trivial
 translation), the Valuation equality is `Valuation.comap_id`. The
 `P.translate_of_finite 0 h = P` reduction (Step (A)) closes the goal. -/
