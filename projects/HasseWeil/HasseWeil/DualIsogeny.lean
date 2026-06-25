@@ -151,10 +151,7 @@ theorem degree_dual_of_witness
   have hα_ne : (α.degree : ℤ) ≠ 0 := Int.natCast_ne_zero.mpr hα.ne'
   have hdeg := Isogeny.comp_degree dual α
   rw [h, mulByInt_degree E (α.degree : ℤ) hα_ne] at hdeg
-  have hpow : ((α.degree : ℤ) ^ 2).toNat = α.degree ^ 2 := by
-    have : (α.degree : ℤ) ^ 2 = (α.degree ^ 2 : ℕ) := by push_cast; ring
-    rw [this, Int.toNat_natCast]
-  rw [hpow, sq] at hdeg
+  rw [Int.toNat_pow_of_nonneg (Int.natCast_nonneg _), Int.toNat_natCast, sq] at hdeg
   exact Nat.eq_of_mul_eq_mul_left hα hdeg.symm
 
 variable {E}
@@ -170,8 +167,7 @@ theorem IsDualOf.pullback_unique {α β β' : Isogeny E E}
     (h : IsDualOf E β α) (h' : IsDualOf E β' α) :
     β.pullback = β'.pullback := by
   have hcomp : β.comp α = β'.comp α := h.1.trans h'.1.symm
-  refine AlgHom.ext fun z ↦ ?_
-  exact α.pullback_injective
+  exact AlgHom.ext fun z ↦ α.pullback_injective
     (congrArg (fun γ : Isogeny E E ↦ γ.pullback z) hcomp)
 
 end DualIsogeny
@@ -215,10 +211,7 @@ theorem dual_add_of_trace_witnesses
   have hβ_P := congr_fun (congr_arg DFunLike.coe hβ_trace) P
   have hαβ_P := congr_fun (congr_arg DFunLike.coe hαβ_trace) P
   have hhom_P := congr_fun (congr_arg DFunLike.coe hαβ_hom) P
-  simp only [AddMonoidHom.add_apply] at hα_P hβ_P hαβ_P hhom_P
-  rw [show (mulByInt E tα).toAddMonoidHom P = tα • P from rfl] at hα_P
-  rw [show (mulByInt E tβ).toAddMonoidHom P = tβ • P from rfl] at hβ_P
-  rw [show (mulByInt E tαβ).toAddMonoidHom P = tαβ • P from rfl] at hαβ_P
+  simp only [AddMonoidHom.add_apply, mulByInt_apply] at hα_P hβ_P hαβ_P hhom_P
   have h_αd : α_dual.toAddMonoidHom P =
       tα • P - α.toAddMonoidHom P := by rw [← hα_P]; abel
   have h_βd : β_dual.toAddMonoidHom P =
