@@ -16,8 +16,8 @@ import HasseWeil.Hasse.PoleDivisorFallback
 # L6 substantive witnesses — T5, T6, T6-SUB
 
 R25h Worker-B Phase 1 (2026-05-19, after L6 chain composer shipment).
-Ships the two substantive L6 witnesses needed by the top-level wrapper
-`hasse_bound_from_L6_witnesses` (L6ViaPoleDivisor.lean, R23 shipment):
+Ships two substantive L6 witnesses used by the historical witness-parametric
+Hasse-bound route:
 
 * **T6** (`ord_kernel_pullback_x_eq_neg_two`): `ordAtPoint T (γ.pullback
   x_gen) = -2` for every kernel point `T`. Decomposes the kernel into

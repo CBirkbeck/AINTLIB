@@ -66,9 +66,8 @@ theorem traceOfFrobenius_sq_le_of_qf_nonneg (W : WeierstrassCurve K) [W.toAffine
   trace_sq_le_four_mul_deg _ _ Fintype.card_pos h_qf_nonneg
 
 omit [DecidableEq K] in
-/-- **Hasse bound, non-negativity form**. Same as `hasse_bound_of_t_witness`
-but consumes a non-negativity hypothesis on the QF rather than an isogeny
-family + degree-equality witness. -/
+/-- **Hasse bound, non-negativity form**. Consumes a non-negativity hypothesis
+on the QF rather than an isogeny family + degree-equality witness. -/
 theorem hasse_bound_of_qf_nonneg_witnesses
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
     (t : ℤ) (h_pc : (pointCount W.toAffine : ℤ) = Fintype.card K + 1 - t)
@@ -92,10 +91,9 @@ theorem hasse_bound_sq_of_qf_nonneg_witnesses
   rw [show (pointCount W.toAffine : ℤ) - ↑(Fintype.card K) - 1 = -t by linarith, neg_sq]
   exact traceOfFrobenius_sq_le_of_qf_nonneg W t h_qf_nonneg
 
-/-- **Fully-chained Hasse bound, non-negativity form**. Replaces the QF
-isogeny family + degree-equality witness in `hasse_bound_of_full_witnesses`
-by a non-negativity hypothesis on the QF expression with `t` instantiated to
-`isogTrace (frobeniusIsog W) β_pc`. -/
+/-- **Fully-chained Hasse bound, non-negativity form**. Replaces the old QF
+isogeny-family witness layer by a non-negativity hypothesis on the QF expression
+with `t` instantiated to `isogTrace (frobeniusIsog W) β_pc`. -/
 theorem hasse_bound_of_full_qf_nonneg_witnesses
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
     (β_pc : Isogeny W.toAffine W.toAffine)
@@ -111,11 +109,11 @@ theorem hasse_bound_of_full_qf_nonneg_witnesses
     (pointCount_eq_of_hom_kernel_witness W β_pc h_pc_hom h_pc_ker_deg)
     h_qf_nonneg
 
-/-- **Consolidated Hasse bound, non-negativity form**. Same hypothesis list
-as `hasse_bound_of_all_witnesses` except the QF isogeny family is replaced by
-an integer non-negativity hypothesis. The bound's discriminant argument
-needs only this — the isogeny family was an artefact of how the consumer
-chain was originally written. -/
+/-- **Consolidated Hasse bound, non-negativity form**. Uses the historical
+all-witness hypothesis shape, but replaces the QF isogeny family by an integer
+non-negativity hypothesis. The bound's discriminant argument needs only this —
+the isogeny family was an artefact of how the consumer chain was originally
+written. -/
 theorem hasse_bound_of_all_qf_nonneg_witnesses
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
     (β_pc : Isogeny W.toAffine W.toAffine)

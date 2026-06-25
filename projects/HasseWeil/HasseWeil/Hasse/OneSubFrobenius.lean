@@ -21,11 +21,9 @@ axiom-clean as `isogOneSub_negFrobenius_finiteDimensional` in
 `AdditionPullback/Differential.lean`; the placeholder analogue lives in
 `Hasse/Unconditional.lean`.)
 
-These specialisations are the inputs the `HasseWitnesses` record
-(`Hasse/Witnesses.lean`) was designed to accept — once Worker A's
-`omegaPullbackCoeff = 1` proof and Worker C's fiber witness land,
-constructing a `HasseWitnesses W hq` is a one-line wiring of the witnesses
-through these helpers into the bound consumer in `Hasse/Final.lean`.
+These specialisations document the inputs the historical `HasseWitnesses`
+record (`Hasse/Witnesses.lean`) was designed to accept. The current axiom-clean
+Hasse-bound route is the Weil-pairing consumer in `WeilPairing/HasseBound.lean`.
 -/
 
 namespace HasseWeil

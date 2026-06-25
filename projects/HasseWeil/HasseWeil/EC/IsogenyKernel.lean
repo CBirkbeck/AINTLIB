@@ -321,8 +321,8 @@ theorem fiber_card_eq_sepDegree_of_witness (φ : Isogeny W₁ W₂)
 /-- **Hasse-bound shortcut**: if `|ker φ| = φ.sepDegree` (a finite-field
     fact that can be proved directly without going through the generic
     II.2.6(b) fiber-size theorem), then the fiber over `φ(0)` (i.e. the
-    kernel) provides the fiber witness `h_pc_fiber_witness` required by
-    `hasse_bound_of_all_witnesses`.
+    kernel) provides the fiber witness used by the historical witness-parametric
+    Hasse-bound route.
 
     Reduces T-II-2-009's "existential fiber-size = sepDegree" witness to the
     simpler `|ker| = sepDegree` fact, which is directly accessible for
