@@ -1,5 +1,4 @@
 import Mathlib.RingTheory.Kaehler.Basic
-import Mathlib.RingTheory.Derivation.Basic
 
 /-!
 # Pullback action on Kähler differentials along an algebra endomorphism
@@ -34,8 +33,6 @@ structure, `x ↦ KaehlerDifferential.D R S (f x)` becomes a genuine derivation
 `Ω[S⁄R] →ₗ[S] TwistedKaehler f`. We then forget the `S`-linearity (it's twisted)
 and keep only the underlying `AddMonoidHom`.
 -/
-
-open KaehlerDifferential
 
 namespace AlgHom
 
@@ -148,8 +145,8 @@ noncomputable def pullbackKaehler (f : S →ₐ[R] S) :
   let lift : Ω[S⁄R] →ₗ[S] TwistedKaehler f := f.derivationCompHom.liftKaehlerDifferential
   { toFun := fun ω ↦ (lift ω).out
     map_zero' := by change (lift 0).out = 0; rw [map_zero]; rfl
-    map_add' := fun x y => by change (lift (x + y)).out = (lift x).out + (lift y).out
-                              rw [map_add]; rfl }
+    map_add' := fun x y ↦ by change (lift (x + y)).out = (lift x).out + (lift y).out
+                             rw [map_add]; rfl }
 
 /-- The pullback of `D x` is `D (f x)`. -/
 @[simp]
@@ -204,14 +201,9 @@ private theorem ext_of_D {f₁ f₂ : Ω[S⁄R] →+ Ω[S⁄R]}
 @[simp]
 theorem pullbackKaehler_id : (AlgHom.id R S).pullbackKaehler = AddMonoidHom.id _ := by
   refine ext_of_D (fun s ω hω ↦ ?_) (fun x ↦ ?_)
-  · change (AlgHom.id R S).pullbackKaehler (s • ω) = s • ω
-    rw [pullbackKaehler_smul_S]
-    change s • ((AlgHom.id R S).pullbackKaehler ω) = s • ω
-    rw [show ((AlgHom.id R S).pullbackKaehler ω) = ω from hω]
-  · change (AlgHom.id R S).pullbackKaehler (KaehlerDifferential.D R S x) =
-      KaehlerDifferential.D R S x
-    rw [pullbackKaehler_D]
+  · rw [pullbackKaehler_smul_S, hω]
     rfl
+  · simp only [pullbackKaehler_D, coe_id, id_eq, AddMonoidHom.id_apply]
 
 /-- The pullback respects composition. Note: `AlgHom.comp f g = f ∘ g` (apply `g`
 first, then `f`), so the induced pullback on Ω composes in the SAME order:
@@ -223,14 +215,9 @@ theorem pullbackKaehler_comp (f g : S →ₐ[R] S) :
       f.pullbackKaehler.comp g.pullbackKaehler := by
   refine ext_of_D (fun s ω hω ↦ ?_) (fun x ↦ ?_)
   · rw [pullbackKaehler_smul_S, hω]
-    -- Goal: (f.comp g) s • (f.pullbackKaehler.comp g.pullbackKaehler) ω
-    --     = (f.pullbackKaehler.comp g.pullbackKaehler) (s • ω)
     change f (g s) • f.pullbackKaehler (g.pullbackKaehler ω) =
       f.pullbackKaehler (g.pullbackKaehler (s • ω))
     rw [pullbackKaehler_smul_S, pullbackKaehler_smul_S]
-  · change ((f.comp g).pullbackKaehler) (KaehlerDifferential.D R S x) =
-      f.pullbackKaehler (g.pullbackKaehler (KaehlerDifferential.D R S x))
-    rw [pullbackKaehler_D, pullbackKaehler_D, pullbackKaehler_D]
-    rfl
+  · simp only [pullbackKaehler_D, coe_comp, Function.comp_apply, AddMonoidHom.coe_comp]
 
 end AlgHom
