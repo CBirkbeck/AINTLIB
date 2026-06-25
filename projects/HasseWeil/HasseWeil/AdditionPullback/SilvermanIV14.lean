@@ -259,7 +259,7 @@ theorem orderTop_localExpand_mulByInt_neg_one_pullback_localParam :
   rw [HahnSeries.ofPowerSeries_C, HahnSeries.ofPowerSeries_C]
   set denom_le : LaurentSeries K :=
     formalY W + HahnSeries.C W.a₁ * formalX W +
-      HahnSeries.C W.a₃ with hdenom_def
+      HahnSeries.C W.a₃
   have h_denom_orderTop : denom_le.orderTop = ((-3 : ℤ) : WithTop ℤ) :=
     orderTop_localExpand_y_gen_plus_a₁_x_gen_plus_a₃ W
   have h_denom_ne : denom_le ≠ 0 := by
@@ -1768,7 +1768,7 @@ theorem exists_m_orderTop_localExpand_addPullback_y_negFrobenius
 
 /-- **Sub-helper 76** (Y² orderTop = 2m): with `m = orderTop(Y)`, `Y²` has orderTop `2m`. -/
 theorem orderTop_localExpand_addPullback_y_negFrobenius_sq_eq_two_m
-    (hq : 2 ≤ Fintype.card K) (m : ℤ)
+    (_hq : 2 ≤ Fintype.card K) (m : ℤ)
     (hm : (localExpand W (addPullback_y W (negFrobeniusIsog W))).orderTop =
       ((m : ℤ) : WithTop ℤ)) :
     ((localExpand W (addPullback_y W (negFrobeniusIsog W)))^2 :
@@ -2801,8 +2801,8 @@ theorem kaehler_curve_equation_K_E :
   -- `y_gen + y_gen` using ring identities BEFORE expansion, eliminating the
   -- (2 : KE) literal at the source. Then both sides use only +-additive
   -- composition + KE-smul, no `(2 : ℕ)` casts anywhere.
-  set Dx := KaehlerDifferential.D K W.toAffine.FunctionField (x_gen W) with hDx
-  set Dy := KaehlerDifferential.D K W.toAffine.FunctionField (y_gen W) with hDy
+  set Dx := KaehlerDifferential.D K W.toAffine.FunctionField (x_gen W)
+  set Dy := KaehlerDifferential.D K W.toAffine.FunctionField (y_gen W)
   -- Substitute literals with explicit sums in K(E).
   have h2y : (2 : KE) * y_gen W = y_gen W + y_gen W := by ring
   have h3x2 : (3 : KE) * x_gen W ^ 2 = x_gen W ^ 2 + x_gen W ^ 2 + x_gen W ^ 2 := by ring
@@ -3111,11 +3111,11 @@ theorem kaehler_D_addPullback_x_eq_one_add_smul_omega
     W_KE, WeierstrassCurve.toAffine, WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₂,
     WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆] at hP hαP ⊢
   field_simp [sub_ne_zero.mpr h_ne]
-  set X := x_gen W with hX
-  set Y := y_gen W with hY
-  set PX := α.pullback X with hPX
-  set PY := α.pullback Y with hPY
-  set c1 := algebraMap K KE W.a₁ with hc1
+  set X := x_gen W
+  set Y := y_gen W
+  set PX := α.pullback X
+  set PY := α.pullback Y
+  set c1 := algebraMap K KE W.a₁
   -- `bracket − Den²·u₃·(1 + a_α) = (2N + a₁·Den)(1 − a_α)(g_{α(P)} − g_P)`, hence the coefficients:
   linear_combination
     (-(2 * (Y - PY) + c1 * (X - PX)) * (1 - omegaPullbackCoeff W α)) * hP +
@@ -3436,14 +3436,14 @@ theorem omegaPullbackCoeff_isogOneSub_negFrobenius_eq_one
     (hq : 2 ≤ Fintype.card K) :
     omegaPullbackCoeff W (isogOneSub_negFrobenius W hq) = 1 := by
   apply omegaPullbackCoeff_isogOneSub_negFrobenius_eq_one_via_kaehler_witness W hq
-  set Den : KE := x_gen W - (negFrobeniusIsog W).pullback (x_gen W) with hDen
-  set N : KE := y_gen W - (negFrobeniusIsog W).pullback (y_gen W) with hN
+  set Den : KE := x_gen W - (negFrobeniusIsog W).pullback (x_gen W)
+  set N : KE := y_gen W - (negFrobeniusIsog W).pullback (y_gen W)
   set num : KE := (3 : KE) * x_gen W ^ 2 +
       (2 : KE) * algebraMap K KE W.a₂ * x_gen W +
       algebraMap K KE W.a₄ -
-      algebraMap K KE W.a₁ * y_gen W with hnum
+      algebraMap K KE W.a₁ * y_gen W
   set u : KE := algebraMap K KE W.a₃ + (2 : KE) * y_gen W +
-      algebraMap K KE W.a₁ * x_gen W with hu
+      algebraMap K KE W.a₁ * x_gen W
   have hDen_ne : Den ≠ 0 := x_gen_sub_negFrobeniusIsog_pullback_x_gen_ne_zero W
   have hDen_sq_ne : Den ^ 2 ≠ 0 := pow_ne_zero _ hDen_ne
   have hu_eq : u = u_gen W := by
@@ -3512,6 +3512,7 @@ theorem kaehler_D_addPullback_x_pair_ring_identity {R : Type*} [CommRing R]
     (-(2 * (Y₁ - Y₂) + c1 * (X₁ - X₂)) * (a₁ - a₂)) * hα₁ +
       ((2 * (Y₁ - Y₂) + c1 * (X₁ - X₂)) * (a₁ - a₂)) * hα₂
 
+omit [Fintype K] in
 /-- **Leibniz-on-quotient for the pair slope** (denominator cleared): with
 `Xᵢ = αᵢ*x`, `Yᵢ = αᵢ*y` and `D` the universal `K`-derivation, the differential of
 `addSlopePair = (Y₁ - Y₂)/(X₁ - X₂)` multiplied through by `(X₁ - X₂)²` is the cleared
@@ -3528,11 +3529,11 @@ private theorem kaehler_D_addSlopePair_clearDenomSq
         (α₁.pullback (y_gen W) - α₂.pullback (y_gen W)) •
           (KaehlerDifferential.D K W.toAffine.FunctionField (α₁.pullback (x_gen W)) -
             KaehlerDifferential.D K W.toAffine.FunctionField (α₂.pullback (x_gen W))) := by
-  set D := KaehlerDifferential.D K W.toAffine.FunctionField with hD_def
-  set X₁ := α₁.pullback (x_gen W) with hX₁
-  set X₂ := α₂.pullback (x_gen W) with hX₂
-  set Y₁ := α₁.pullback (y_gen W) with hY₁
-  set Y₂ := α₂.pullback (y_gen W) with hY₂
+  set D := KaehlerDifferential.D K W.toAffine.FunctionField
+  set X₁ := α₁.pullback (x_gen W)
+  set X₂ := α₂.pullback (x_gen W)
+  set Y₁ := α₁.pullback (y_gen W)
+  set Y₂ := α₂.pullback (y_gen W)
   have hDen_ne : X₁ - X₂ ≠ 0 := sub_ne_zero.mpr h_ne
   have h_slope : addSlopePair α₁ α₂ = (Y₁ - Y₂) / (X₁ - X₂) :=
     addSlopePair_eq_of_x_ne h_ne
@@ -3540,6 +3541,7 @@ private theorem kaehler_D_addSlopePair_clearDenomSq
     show (X₁ - X₂) ^ 2 * (X₁ - X₂)⁻¹ ^ 2 = 1 from by
       rw [← mul_pow, mul_inv_cancel₀ hDen_ne, one_pow], one_smul]
 
+omit [Fintype K] in
 /-- **Leibniz-on-`addX` for the pair `x`-coordinate**: with `ℓ = addSlopePair`, the differential of
 `addPullback_x_pair = ℓ² + a₁·ℓ - a₂ - X₁ - X₂` is `(2·ℓ + a₁)·D ℓ - D X₁ - D X₂` via the
 power/product Leibniz rules on the `addX` formula. A leaf of
@@ -3551,11 +3553,11 @@ private theorem kaehler_D_addPullback_x_pair_via_slope
           KaehlerDifferential.D K W.toAffine.FunctionField (addSlopePair α₁ α₂) -
         KaehlerDifferential.D K W.toAffine.FunctionField (α₁.pullback (x_gen W)) -
         KaehlerDifferential.D K W.toAffine.FunctionField (α₂.pullback (x_gen W)) := by
-  set D := KaehlerDifferential.D K W.toAffine.FunctionField with hD_def
-  set X₁ := α₁.pullback (x_gen W) with hX₁
-  set X₂ := α₂.pullback (x_gen W) with hX₂
+  set D := KaehlerDifferential.D K W.toAffine.FunctionField
+  set X₁ := α₁.pullback (x_gen W)
+  set X₂ := α₂.pullback (x_gen W)
   unfold addPullback_x_pair WeierstrassCurve.Affine.addX
-  set ℓ := addSlopePair α₁ α₂ with hℓ
+  set ℓ := addSlopePair α₁ α₂
   change D ((ℓ) ^ 2 + (W_KE W).toAffine.a₁ * ℓ
           - (W_KE W).toAffine.a₂ - X₁ - X₂) = _
   rw [show (W_KE W).toAffine.a₁ = algebraMap K KE W.a₁ from rfl,
@@ -3569,6 +3571,7 @@ private theorem kaehler_D_addPullback_x_pair_via_slope
     show (2 : ℕ) • (ℓ • D ℓ) = ((2 : KE)) • (ℓ • D ℓ) from
       (Nat.cast_smul_eq_nsmul (R := KE) 2 _).symm, smul_smul]
 
+omit [Fintype K] in
 /-- **`(X₁ - X₂)²`-cleared differential of the pair `x`-coordinate**: combines the cleared slope
 rule (`kaehler_D_addSlopePair_clearDenomSq`) with the `addX` Leibniz expansion
 (`kaehler_D_addPullback_x_pair_via_slope`) into a single denominator-free expression for
@@ -3591,15 +3594,16 @@ private theorem kaehler_D_addPullback_x_pair_clearDenomSq
           KaehlerDifferential.D K W.toAffine.FunctionField (α₁.pullback (x_gen W)) -
         (α₁.pullback (x_gen W) - α₂.pullback (x_gen W)) ^ 2 •
           KaehlerDifferential.D K W.toAffine.FunctionField (α₂.pullback (x_gen W)) := by
-  set D := KaehlerDifferential.D K W.toAffine.FunctionField with hD_def
-  set X₁ := α₁.pullback (x_gen W) with hX₁
-  set X₂ := α₂.pullback (x_gen W) with hX₂
-  set Y₁ := α₁.pullback (y_gen W) with hY₁
-  set Y₂ := α₂.pullback (y_gen W) with hY₂
+  set D := KaehlerDifferential.D K W.toAffine.FunctionField
+  set X₁ := α₁.pullback (x_gen W)
+  set X₂ := α₂.pullback (x_gen W)
+  set Y₁ := α₁.pullback (y_gen W)
+  set Y₂ := α₂.pullback (y_gen W)
   rw [kaehler_D_addPullback_x_pair_via_slope W α₁ α₂, smul_sub, smul_sub, smul_smul,
     mul_comm ((X₁ - X₂) ^ 2) (2 * addSlopePair α₁ α₂ + algebraMap K KE W.a₁),
     ← smul_smul, kaehler_D_addSlopePair_clearDenomSq W α₁ α₂ h_ne, smul_sub]
 
+omit [Fintype K] in
 /-- **Pullback-equation collapse of the `ω`-coefficient** (the `id ⊞ α` scalar identity): the
 `(X₁ - X₂)²`-cleared coefficient of `ω` coming from the substituted image differentials equals
 `(X₁ - X₂)²` times the sum-point coefficient `(2·y₃ + a₁·x₃ + a₃)·(c_{α₁} + c_{α₂})`. Proved by
@@ -3632,10 +3636,10 @@ private theorem kaehler_D_addPullback_x_pair_coeff_collapse
       ((2 * addPullback_y_pair α₁ α₂ + algebraMap K KE W.a₁ * addPullback_x_pair α₁ α₂ +
           algebraMap K KE W.a₃) *
         (omegaPullbackCoeff W α₁ + omegaPullbackCoeff W α₂)) := by
-  set X₁ := α₁.pullback (x_gen W) with hX₁
-  set X₂ := α₂.pullback (x_gen W) with hX₂
-  set Y₁ := α₁.pullback (y_gen W) with hY₁
-  set Y₂ := α₂.pullback (y_gen W) with hY₂
+  set X₁ := α₁.pullback (x_gen W)
+  set X₂ := α₂.pullback (x_gen W)
+  set Y₁ := α₁.pullback (y_gen W)
+  set Y₂ := α₂.pullback (y_gen W)
   have hDen_ne : X₁ - X₂ ≠ 0 := sub_ne_zero.mpr h_ne
   have h_slope : addSlopePair α₁ α₂ = (Y₁ - Y₂) / (X₁ - X₂) :=
     addSlopePair_eq_of_x_ne h_ne
@@ -3672,16 +3676,13 @@ theorem kaehler_D_addPullback_x_pair_eq_smul_omega
         algebraMap K KE W.a₃) •
         ((omegaPullbackCoeff W α₁ + omegaPullbackCoeff W α₂) •
           invariantDifferential W.toAffine) := by
-  set D := KaehlerDifferential.D K W.toAffine.FunctionField with hD_def
+  set D := KaehlerDifferential.D K W.toAffine.FunctionField
   set X₁ := α₁.pullback (x_gen W) with hX₁
   set X₂ := α₂.pullback (x_gen W) with hX₂
   set Y₁ := α₁.pullback (y_gen W) with hY₁
   set Y₂ := α₂.pullback (y_gen W) with hY₂
   have hDen_ne : X₁ - X₂ ≠ 0 := sub_ne_zero.mpr h_ne
   have hDen2_ne : (X₁ - X₂) ^ 2 ≠ 0 := pow_ne_zero 2 hDen_ne
-  -- Slope = (Y₁ - Y₂)/(X₁ - X₂).
-  have h_slope : addSlopePair α₁ α₂ = (Y₁ - Y₂) / (X₁ - X₂) :=
-    addSlopePair_eq_of_x_ne h_ne
   -- STEP 1: the `(X₁ - X₂)²`-cleared differential of the pair `x`-coordinate (Leibniz on the slope
   -- quotient + on the `addX` formula), assembled in `kaehler_D_addPullback_x_pair_clearDenomSq`.
   have hcleared := kaehler_D_addPullback_x_pair_clearDenomSq W α₁ α₂ h_ne
