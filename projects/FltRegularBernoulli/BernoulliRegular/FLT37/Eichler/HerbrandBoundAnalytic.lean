@@ -55,7 +55,6 @@ with `kellner_at_zero_not_dvd` (`37² ∤ B_{32}.num`).
 noncomputable section
 
 open NumberField
-open scoped BigOperators
 
 namespace BernoulliRegular
 
@@ -79,7 +78,6 @@ theorem norm_oddBernoulliFactor_eq_one_of_not_dvd_num (hp_odd : p ≠ 2)
     {j : ℕ} (hj_odd : Odd j) (hj_pos : 0 < j) (hj_small : j + 1 < p - 1)
     (hnum : ¬ (p : ℤ) ∣ (bernoulli (j + 1)).num) :
     ‖(-(1 / 2 : ℚ_[p])) * BernoulliGen ((teichmullerCharQp p) ^ j) 1‖ = 1 := by
-  classical
   have hp_gt : 2 < p := lt_of_le_of_ne hp.out.two_le (Ne.symm hp_odd)
   have hden : ¬ p ∣ (bernoulli (j + 1)).den :=
     BernoulliRegular.prime_not_dvd_bernoulli_den_of_lt_sub_one (p := p) (n := j + 1)
@@ -179,7 +177,6 @@ theorem norm_hMinus_eq_norm_irregularFactor :
     ‖((hMinus K : ℕ) : ℚ_[37])‖ =
       ‖(-(1 / 2 : ℚ_[37])) * BernoulliGen ((teichmullerCharQp 37) ^ 31) 1‖ := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  classical
   set f : ℕ → ℚ_[37] := fun j ↦ (-(1 / 2 : ℚ_[37])) * BernoulliGen ((teichmullerCharQp 37) ^ j) 1
     with hf
   have hformula : ((hMinus K : ℕ) : ℚ_[37]) = (2 * 37 : ℚ_[37]) * ∏ j ∈ oddSet 36, f j := by
@@ -385,8 +382,6 @@ end PowerSum
 
 section SharpInput
 
-variable [Fact (Nat.Prime 37)]
-
 /-- **The sharp `p`-adic input for Case-I (`v₃₇(h⁻) = 1`).**
 
 `(37 : ℝ)^{-2} < ‖-½ · B_{1,ω^{31}}‖`, i.e. the irregular generalized-Bernoulli
@@ -510,7 +505,7 @@ theorem flt37SharpHMinusValuation_proved : Flt37SharpHMinusValuation := by
     rw [Padic.norm_eq_of_norm_sub_lt_right hlt, norm_const_eq]
   have h37norm : ‖(37 : ℚ_[37])‖ = (37 : ℝ) ^ (-1 : ℤ) := by
     rw [show (37 : ℚ_[37]) = ((37 : ℕ) : ℚ_[37]) by norm_cast, Padic.norm_p]
-    simp
+    simp only [Nat.cast_ofNat, Int.reduceNeg, zpow_neg, zpow_one]
   have hnormB : ‖BernoulliGen ((teichmullerCharQp 37) ^ 31) 1‖ = (37 : ℝ) ^ (-1 : ℤ) := by
     have hmul : (37 : ℝ) ^ (-1 : ℤ) * ‖BernoulliGen ((teichmullerCharQp 37) ^ 31) 1‖ =
         (37 : ℝ) ^ (-2 : ℤ) := by
@@ -630,8 +625,6 @@ theorem flt37SharpHMinusValuation_of_kummerCongruenceModSq
 end SharpInput
 
 section ChainStep1
-
-variable [Fact (Nat.Prime 37)] [NumberField.IsCMField (CyclotomicField 37 ℚ)]
 
 set_option linter.unusedSectionVars false in
 /-- **Step 1: `37² ∤ h⁻`** from the sharp valuation input.
