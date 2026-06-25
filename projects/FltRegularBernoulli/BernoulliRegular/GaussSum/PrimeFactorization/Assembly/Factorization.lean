@@ -10,8 +10,7 @@ public import BernoulliRegular.GaussSum.PrimeFactorization.Assembly.Orbits
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension
-open scoped Pointwise
+open NumberField
 
 namespace BernoulliRegular
 
@@ -68,12 +67,9 @@ lemma characterSidePrimeMapToOrbit_surjective :
 /-- The character-side orbit map is bijective onto the orbit subtype. -/
 theorem characterSidePrimeMapToOrbit_bijective :
     Function.Bijective (characterSidePrimeMapToOrbit (p := p) (L := L)) := by
-  let f := characterSidePrimeMapToOrbit (p := p) (L := L)
-  refine (Fintype.bijective_iff_surjective_and_card f).mpr ?_
-  refine ⟨characterSidePrimeMapToOrbit_surjective (p := p) (L := L), ?_⟩
-  rw [Fintype.card_of_subtype (characterSidePrimeOrbit p L) (by
-      intro P
-      simp),
+  refine (Fintype.bijective_iff_surjective_and_card _).mpr
+    ⟨characterSidePrimeMapToOrbit_surjective (p := p) (L := L), ?_⟩
+  rw [Fintype.card_of_subtype (characterSidePrimeOrbit p L) (by simp),
     card_characterSidePrimeOrbit (p := p) (L := L),
     ZMod.card_units_eq_totient]
 
@@ -172,11 +168,7 @@ recovers the original character. -/
 lemma pow_characterSideUnit_val_pow_inv_eq_self
     (b : (ZMod (p - 1))ˣ) (χ : DirichletCharacter ℂ p) :
     (χ ^ (b : ZMod (p - 1)).val) ^ (((b⁻¹ : (ZMod (p - 1))ˣ) : ZMod (p - 1)).val) = χ := by
-  have hmul :
-      (χ ^ (b : ZMod (p - 1)).val) ^ (((b⁻¹ : (ZMod (p - 1))ˣ) : ZMod (p - 1)).val) =
-        χ ^ ((b : ZMod (p - 1)).val * (((b⁻¹ : (ZMod (p - 1))ˣ) : ZMod (p - 1)).val)) := by
-    rw [← pow_mul]
-  rw [hmul]
+  rw [← pow_mul]
   conv_rhs => rw [← pow_one χ]
   rw [pow_eq_pow_iff_modEq]
   have hpow : χ ^ (p - 1) = 1 := by
@@ -184,8 +176,7 @@ lemma pow_characterSideUnit_val_pow_inv_eq_self
     rwa [ZMod.card_units_eq_totient, Nat.totient_prime hp.out] at h
   have horder : orderOf χ ∣ p - 1 := orderOf_dvd_of_pow_eq_one hpow
   apply Nat.ModEq.of_dvd horder
-  rw [← ZMod.natCast_eq_natCast_iff]
-  rw [Nat.cast_mul, ZMod.natCast_val, ZMod.natCast_val]
+  rw [← ZMod.natCast_eq_natCast_iff, Nat.cast_mul, ZMod.natCast_val, ZMod.natCast_val]
   convert congrArg
     (fun u : (ZMod (p - 1))ˣ ↦ ((u : ZMod (p - 1))))
     (mul_inv_cancel b) using 1 <;> simp
@@ -198,13 +189,8 @@ lemma pow_characterSideUnit_ne_one
   have hpow' := congrArg
     (fun ψ : DirichletCharacter ℂ p ↦
       ψ ^ (((b⁻¹ : (ZMod (p - 1))ˣ) : ZMod (p - 1)).val)) hpow
-  have hχ' :
-      (χ ^ (b : ZMod (p - 1)).val) ^
-          (((b⁻¹ : (ZMod (p - 1))ˣ) : ZMod (p - 1)).val) = χ :=
-    pow_characterSideUnit_val_pow_inv_eq_self (p := p) (b := b) χ
-  have hχeq : χ = 1 := by
-    simpa [hχ'] using hpow'
-  exact hχ hχeq
+  exact hχ (by
+    simpa [pow_characterSideUnit_val_pow_inv_eq_self (p := p) (b := b) χ] using hpow')
 
 /-- Rewrite the character-side orbit factorization as an explicit product over
 `(ZMod (p - 1))ˣ`, with the exponents transported to the distinguished-prime
@@ -232,26 +218,18 @@ lemma gaussSumIdeal_eq_prod_characterSideUnits
     _ = ∏ b : (ZMod (p - 1))ˣ,
           (characterSidePrimeEquivOrbit (p := p) (L := L) b).1 ^
             primeAbovePExponent (p := p) (L := L)
-              (characterSidePrimeEquivOrbit (p := p) (L := L) b).1 χ := by
-            symm
-            refine Fintype.prod_equiv
-              (characterSidePrimeEquivOrbit (p := p) (L := L))
-              _ _ ?_
-            intro b
-            rfl
+              (characterSidePrimeEquivOrbit (p := p) (L := L) b).1 χ :=
+            (Fintype.prod_equiv
+              (characterSidePrimeEquivOrbit (p := p) (L := L)) _ _ fun _ ↦ rfl).symm
     _ = ∏ b : (ZMod (p - 1))ˣ,
           characterSidePrimeMap (p := p) (L := L) b ^
             primeAbovePExponent (p := p) (L := L)
-              (characterSidePrimeMap (p := p) (L := L) b) χ := by
-            rfl
+              (characterSidePrimeMap (p := p) (L := L) b) χ := rfl
     _ = ∏ b : (ZMod (p - 1))ˣ,
           characterSidePrimeMap (p := p) (L := L) b⁻¹ ^
             primeAbovePExponent (p := p) (L := L)
-              (characterSidePrimeMap (p := p) (L := L) b⁻¹) χ := by
-            symm
-            refine Fintype.prod_equiv (Equiv.inv ((ZMod (p - 1))ˣ)) _ _ ?_
-            intro b
-            rfl
+              (characterSidePrimeMap (p := p) (L := L) b⁻¹) χ :=
+            (Fintype.prod_equiv (Equiv.inv ((ZMod (p - 1))ˣ)) _ _ fun _ ↦ rfl).symm
     _ = ∏ b : (ZMod (p - 1))ˣ,
           characterSidePrimeMap (p := p) (L := L) b⁻¹ ^
             distinguishedPrimeExponent (p := p) (L := L)
@@ -298,15 +276,11 @@ lemma gaussSumIdeal_eq_prod_characterSideExponentVector
     _ = ∏ b : (ZMod (p - 1))ˣ,
           characterSidePrimeMap (p := p) (L := L) b ^
             distinguishedPrimeExponent (p := p) (L := L)
-              (χ ^ (((b⁻¹ : (ZMod (p - 1))ˣ) : ZMod (p - 1)).val)) := by
-            symm
-            refine Fintype.prod_equiv (Equiv.inv ((ZMod (p - 1))ˣ)) _ _ ?_
-            intro b
-            rfl
+              (χ ^ (((b⁻¹ : (ZMod (p - 1))ˣ) : ZMod (p - 1)).val)) :=
+            (Fintype.prod_equiv (Equiv.inv ((ZMod (p - 1))ˣ)) _ _ fun _ ↦ rfl).symm
     _ = ∏ b : (ZMod (p - 1))ˣ,
           characterSidePrimeMap (p := p) (L := L) b ^
-            characterSideExponentVector (p := p) (L := L) χ b := by
-            rfl
+            characterSideExponentVector (p := p) (L := L) χ b := rfl
 
 end Assembly
 
