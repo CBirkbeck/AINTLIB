@@ -10,8 +10,7 @@ public import BernoulliRegular.GaussSum.PrimeFactorization.JacobiSums.Basic
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension
-open scoped Pointwise
+open NumberField
 
 namespace BernoulliRegular
 
@@ -29,15 +28,8 @@ private lemma additiveZetaPrime_mem_primesOver :
   have hmem :
       (distinguishedPrimeAboveP p L).under
           (𝓞 (additiveSubfield (L := L) (p := p))) ∈
-        Ideal.primesOver 𝔭 (𝓞 (additiveSubfield (L := L) (p := p))) := by
-    let P : Ideal (𝓞 (additiveSubfield (L := L) (p := p))) :=
-      (distinguishedPrimeAboveP p L).under
-        (𝓞 (additiveSubfield (L := L) (p := p)))
-    haveI : P.IsPrime := inferInstance
-    haveI : P.LiesOver 𝔭 := by
-      dsimp [P]
-      infer_instance
-    exact ⟨inferInstance, inferInstance⟩
+        Ideal.primesOver 𝔭 (𝓞 (additiveSubfield (L := L) (p := p))) :=
+    ⟨inferInstance, inferInstance⟩
   simpa [distinguishedPrimeAboveP_under_additiveSubfield_eq_additiveZetaPrime
     (p := p) (L := L)] using hmem
 
@@ -91,8 +83,8 @@ lemma gaussSumLiftAdditiveRoot_sub_one_mem_primeAboveP
           (sub_pow_char_of_commute p (Commute.one_right ζbar) :
             (ζbar - 1) ^ p = ζbar ^ p - 1 ^ p)
       _ = 0 := by simp [hpow]
-  have hsub : ζbar - 1 = 0 := eq_zero_of_pow_eq_zero hsubpow
-  exact Ideal.Quotient.eq_zero_iff_mem.mp (by simpa [ζbar] using hsub)
+  exact Ideal.Quotient.eq_zero_iff_mem.mp
+    (by simpa [ζbar] using eq_zero_of_pow_eq_zero hsubpow)
 
 lemma gaussSumLiftAdditiveRoot_pow_sub_one_sub_mul_mem_primeAboveP_sq
     {P : Ideal (𝓞 L)} (hP : P ∈ primesAboveP p L) (n : ℕ) :
@@ -148,7 +140,7 @@ noncomputable def gaussSumLiftAdditiveRootAdditiveSubfieldInteger :
 lemma algebraMap_gaussSumLiftAdditiveRootAdditiveSubfieldInteger :
     algebraMap (𝓞 (additiveSubfield (L := L) (p := p))) (𝓞 L)
         (gaussSumLiftAdditiveRootAdditiveSubfieldInteger (p := p) (L := L)) =
-      gaussSumLiftAdditiveRoot (p := p) L := by
+      gaussSumLiftAdditiveRoot (p := p) L :=
   rfl
 
 lemma gaussSumLiftAdditiveRootAdditiveSubfieldInteger_isPrimitiveRoot :
@@ -183,8 +175,7 @@ lemma additiveRootAdditiveSubfieldPrime_eq_additiveZetaPrime :
       (FaithfulSMul.algebraMap_injective (additiveSubfield (L := L) (p := p)) L)
   have hto :
       hζF.toInteger =
-        gaussSumLiftAdditiveRootAdditiveSubfieldInteger (p := p) (L := L) := by
-    ext
+        gaussSumLiftAdditiveRootAdditiveSubfieldInteger (p := p) (L := L) :=
     rfl
   haveI : (additiveZetaPrime (L := L) (p := p)).IsPrime :=
     (additiveZetaPrime_mem_primesOver p L).1
@@ -289,6 +280,11 @@ lemma normalizedBoundaryPrime_ramificationIdx_over_additiveSubfield :
       (p := Padd) (P := normalizedBoundaryPrime (p := p) (L := L)) (G := ↥GBC)).symm.trans
     hramIn
 
+private lemma gaussSumLiftAdditiveRoot_sub_one_ne_zero :
+    gaussSumLiftAdditiveRoot (p := p) L - 1 ≠ 0 :=
+  (gaussSumLiftAdditiveRoot_isPrimitiveRoot (p := p) (L := L)).sub_one_ne_zero
+    hp.out.one_lt
+
 lemma normalizedBoundaryPrime_count_span_additiveRoot_sub_one :
     (UniqueFactorizationMonoid.normalizedFactors
         (Ideal.span ({gaussSumLiftAdditiveRoot (p := p) L - 1} : Set (𝓞 L)))).count
@@ -318,12 +314,9 @@ lemma normalizedBoundaryPrime_count_span_additiveRoot_sub_one :
     (Ideal.prime_of_isPrime hPadd_ne inferInstance).irreducible
   have hP_irr : Irreducible P :=
     (Ideal.prime_of_isPrime hP_ne inferInstance).irreducible
-  have hroot_ne :
-      gaussSumLiftAdditiveRoot (p := p) L - 1 ≠ 0 :=
-    sub_ne_zero.mpr
-      ((gaussSumLiftAdditiveRoot_isPrimitiveRoot (p := p) (L := L)).ne_one hp.out.one_lt)
   have hIL_ne : IL ≠ ⊥ :=
-    Ideal.span_singleton_eq_bot.not.mpr hroot_ne
+    Ideal.span_singleton_eq_bot.not.mpr
+      (gaussSumLiftAdditiveRoot_sub_one_ne_zero (p := p) (L := L))
   have hmap :
       Ideal.map
           (algebraMap (𝓞 (additiveSubfield (L := L) (p := p))) (𝓞 L))
@@ -355,14 +348,10 @@ lemma gaussSumLiftAdditiveRoot_sub_one_not_mem_normalizedBoundaryPrime_sq :
   let I : Ideal (𝓞 L) :=
     Ideal.span ({gaussSumLiftAdditiveRoot (p := p) L - 1} : Set (𝓞 L))
   have hI_le : I ≤ P ^ 2 := by
-    rw [Ideal.span_singleton_le_iff_mem]
-    exact hmem
-  have hroot_ne :
-      gaussSumLiftAdditiveRoot (p := p) L - 1 ≠ 0 :=
-    sub_ne_zero.mpr
-      ((gaussSumLiftAdditiveRoot_isPrimitiveRoot (p := p) (L := L)).ne_one hp.out.one_lt)
+    rwa [Ideal.span_singleton_le_iff_mem]
   have hI_ne : I ≠ ⊥ :=
-    Ideal.span_singleton_eq_bot.not.mpr hroot_ne
+    Ideal.span_singleton_eq_bot.not.mpr
+      (gaussSumLiftAdditiveRoot_sub_one_ne_zero (p := p) (L := L))
   have hP_mem : P ∈ primesAboveP p L :=
     normalizedBoundaryPrime_mem_primesAboveP p L
   haveI : P.IsPrime := ((mem_primesAboveP_iff (p := p) (L := L)).1 hP_mem).1
