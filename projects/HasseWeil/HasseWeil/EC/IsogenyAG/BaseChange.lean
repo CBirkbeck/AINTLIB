@@ -95,10 +95,10 @@ theorem _root_.HasseWeil.Curves.SmoothPlaneCurve.coordRingMap_X
   show WeierstrassCurve.Affine.CoordinateRing.map C.toAffine (algebraMap K L)
     (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
       (Polynomial.C Polynomial.X)) = _
-  rw [WeierstrassCurve.Affine.CoordinateRing.map_mk]
-  rw [show ((Polynomial.C Polynomial.X : Polynomial (Polynomial K)).map
-      (Polynomial.mapRingHom (algebraMap K L))) = Polynomial.C Polynomial.X by
-    rw [Polynomial.map_C, Polynomial.coe_mapRingHom, Polynomial.map_X]]
+  rw [WeierstrassCurve.Affine.CoordinateRing.map_mk,
+    show ((Polynomial.C Polynomial.X : Polynomial (Polynomial K)).map
+        (Polynomial.mapRingHom (algebraMap K L))) = Polynomial.C Polynomial.X by
+      rw [Polynomial.map_C, Polynomial.coe_mapRingHom, Polynomial.map_X]]
   rfl
 
 /-- `coordRingMap` fixes the `Y`-generator (the `AdjoinRoot` root). -/
@@ -228,8 +228,7 @@ theorem baseChange_module_finite :
     @Module.Finite (C₂.baseChange L).CoordinateRing (C₁.baseChange L).CoordinateRing _ _
       (cd.baseChangeAlgHom L).toRingHom.toAlgebra.toModule := by
   have hfin : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _
-      cd.toAlgebra.toModule := by
-    exact cd.module_finite
+      cd.toAlgebra.toModule := cd.module_finite
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
   letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
   letI algL : Algebra (C₂.baseChange L).CoordinateRing (C₁.baseChange L).CoordinateRing :=
@@ -241,7 +240,7 @@ theorem baseChange_module_finite :
   refine Module.finite_def.mpr ⟨S.image (C₁.coordRingMap L), ?_⟩
   rw [eq_top_iff]
   rintro w -
-  refine mem_of_coordRingMap_mem cd L _ (fun u => ?_) w
+  refine mem_of_coordRingMap_mem cd L _ (fun u ↦ ?_) w
   rw [Finset.coe_image]
   exact coordRingMap_mem_span_image_of_mem_span cd L _ (hS ▸ Submodule.mem_top)
 
@@ -363,11 +362,8 @@ theorem baseChangeXgen_ne_zero : baseChangeXgen W φ L ≠ 0 := fun h0 ↦
 
 private theorem nsmul_coe_neg_two (e : ℕ) :
     e • ((-2 : ℤ) : WithTop ℤ) = ((2 * (-(e : ℤ)) : ℤ) : WithTop ℤ) := by
-  induction e with
-  | zero => simp
-  | succ n ih =>
-    rw [succ_nsmul, ih, ← WithTop.coe_add]
-    exact WithTop.coe_inj.mpr (by push_cast; ring)
+  rw [← WithTop.coe_nsmul]
+  exact WithTop.coe_inj.mpr (by rw [nsmul_eq_mul]; ring)
 
 omit [DecidableEq L] in
 /-- **The even-negative order at infinity of the base-changed `x_gen`-image**:
@@ -379,10 +375,7 @@ theorem exists_ordAtInfty_baseChangeXgen :
       (W_smooth (W.baseChange L)).ordAtInfty (baseChangeXgen W φ L) =
         ((2 * m : ℤ) : WithTop ℤ) := by
   obtain ⟨e, he1, hform⟩ := exists_pos_ramificationIdx_at_infinity φ
-  refine ⟨-(e : ℤ), by
-    have h1 : (1 : ℤ) ≤ (e : ℤ) := by exact_mod_cast he1
-    omega, ?_⟩
-  -- the K-level order
+  refine ⟨-(e : ℤ), by omega, ?_⟩
   have hKord : (⟨W.toAffine⟩ : SmoothPlaneCurve K).ordAtInfty
       (φ.toCurveMap.pullback (x_gen W)) = ((2 * (-(e : ℤ)) : ℤ) : WithTop ℤ) := by
     have h := hform (x_gen W) (x_gen_ne_zero W)
@@ -390,7 +383,6 @@ theorem exists_ordAtInfty_baseChangeXgen :
         ((-2 : ℤ) : WithTop ℤ) from ordAtInfty_x_gen W] at h
     rw [h]
     exact nsmul_coe_neg_two e
-  -- transport along the base-change inclusion
   have hne : φ.toCurveMap.pullback (x_gen W) ≠ 0 :=
     φ.toCurveMap.pullback_ne_zero (x_gen_ne_zero W)
   have htrans := SmoothPlaneCurve.ordAtInfty_functionFieldMap
@@ -624,7 +616,6 @@ theorem baseChange_toPointMap_compat [IsAlgClosed L] (P : W.toAffine.Point) :
   cases P with
   | zero => rfl
   | some x y h =>
-    -- the generator images of the base-changed coordinate hom
     have hgenX : cd.baseChangeAlgHom L
         (algebraMap (Polynomial L) (W.baseChange L).toAffine.CoordinateRing Polynomial.X) =
         (⟨W.toAffine⟩ : SmoothPlaneCurve K).coordRingMap L
@@ -635,7 +626,6 @@ theorem baseChange_toPointMap_compat [IsAlgClosed L] (P : W.toAffine.Point) :
         (⟨W.toAffine⟩ : SmoothPlaneCurve K).coordRingMap L
           (cd.toAlgHom (AdjoinRoot.root W.toAffine.polynomial)) :=
       CurveMap.CoordHom.baseChangeAlgHom_root cd L
-    -- evaluation naturality at the two generators
     have hx : ((⟨W.toAffine⟩ : SmoothPlaneCurve K).baseChange L).evalAt
         ((⟨W.toAffine⟩ : SmoothPlaneCurve K).includePoint L ⟨x, y, h⟩)
         (cd.baseChangeAlgHom L
@@ -653,7 +643,6 @@ theorem baseChange_toPointMap_compat [IsAlgClosed L] (P : W.toAffine.Point) :
       rw [hgenY]
       exact SmoothPlaneCurve.evalAt_coordRingMap (⟨W.toAffine⟩ : SmoothPlaneCurve K) L
         ⟨x, y, h⟩ (cd.toAlgHom (AdjoinRoot.root W.toAffine.polynomial))
-    -- assemble the two coordinate identities into the point identity
     have hsome : ∀ (x₁ y₁ x₂ y₂ : L) (h₁ : (W.baseChange L).toAffine.Nonsingular x₁ y₁)
         (h₂ : (W.baseChange L).toAffine.Nonsingular x₂ y₂), x₁ = x₂ → y₁ = y₂ →
         (WeierstrassCurve.Affine.Point.some x₁ y₁ h₁ : (W.baseChange L).toAffine.Point) =
