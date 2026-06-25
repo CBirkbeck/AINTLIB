@@ -293,14 +293,13 @@ lemma rel₃_iff_evenRec (m : ℤ) : Rel₃ W (m + 1) (m - 1) 1 ↔ EvenRec W m 
 
 lemma rel₄_iff_evenRec (m : ℤ) : rel₄ W (2 * m + 1) (2 * m - 1) 3 1 = 0 ↔ EvenRec W m := by
   rw [iff_comm, EvenRec, ← sub_eq_zero, show 2 * m - 1 = 2 * (m - 1) + 1 by ring]
-  have e₃₁ : addMulSub W 3 1 = W 2 * W 1 := by
-    have h := addMulSub_odd (W := W) 1 0; norm_num at h; exact h
+  have e₃₁ : addMulSub W 3 1 = W 2 * W 1 := by simpa using addMulSub_odd (W := W) 1 0
   have e₃ : ∀ k : ℤ, addMulSub W (2 * k + 1) 3 = W (k + 2) * W (k - 1) := fun k ↦ by
     have h := addMulSub_odd (W := W) k 1
     rw [show (2 * (1 : ℤ) + 1) = 3 by norm_num, show k + 1 + 1 = k + 2 by ring] at h
     exact h
   have e₁ : ∀ k : ℤ, addMulSub W (2 * k + 1) 1 = W (k + 1) * W k := fun k ↦ by
-    have h := addMulSub_odd (W := W) k 0; norm_num at h; exact h
+    simpa using addMulSub_odd (W := W) k 0
   simp only [rel₄, addMulSub_odd, e₃₁, e₃, e₁]
   ring_nf
 
@@ -530,13 +529,8 @@ provided some even term is not a zero divisor. -/
 lemma zero (m : ℤ) (mem : W (2 * m) ∈ R⁰) : W 0 = 0 := by
   have h := ell m m (2 * m)
   rw [show m + m = 2 * m by ring, sub_self] at h
-  -- h : W (2*m) * W 0 * W (2*m)^2 = X - X, so the RHS is zero
-  have h' : W (2 * m) * W 0 * W (2 * m) ^ 2 = 0 := by
-    have : W (m + 2 * m) * W (m - 2 * m) * W m ^ 2 -
-      W (m + 2 * m) * W (m - 2 * m) * W m ^ 2 = 0 := sub_self _
-    rw [h, this]
-  have h'' : W 0 * (W (2 * m) * W (2 * m) ^ 2) = 0 := by linear_combination h'
-  rw [mul_comm (W (2 * m)) (W (2 * m) ^ 2), ← pow_succ] at h''
+  -- the RHS of `h` is `X - X = 0`, leaving `W 0 * W (2 * m) ^ 3 = 0`
+  have h'' : W 0 * W (2 * m) ^ 3 = 0 := by linear_combination h
   exact (pow_mem mem 3).2 _ h''
 
 lemma sub_add_neg_sub_mul_eq_zero (m n r : ℤ) :
@@ -591,8 +585,7 @@ private theorem normEDS_of_mem_nonZeroDivisors (hb : b ∈ R⁰) :
     intro m hm <;> rw [← sub_nonneg] at hm
   · lift m - 2 to ℕ using hm with k hk
     rw [← eq_sub_iff_add_eq.mp hk, OddRec, normEDS_one, one_pow, mul_one]
-    have h := normEDS_odd b c d (↑k + 2)
-    convert h using 2
+    convert normEDS_odd b c d (↑k + 2) using 2
   · lift m - 3 to ℕ using hm with k hk
     rw [← eq_sub_iff_add_eq.mp hk, EvenRec, normEDS_one, normEDS_two, one_pow, mul_one]
     convert normEDS_even b c d (↑k + 3) using 1
@@ -717,8 +710,7 @@ lemma complEDS₂_two_three_two (n : ℤ) : complEDS₂ (2 : ℤ) 3 2 n = 2 := b
   obtain rfl | hn := eq_or_ne n 0
   · exact complEDS₂_zero ..
   · have := normEDS_mul_complEDS₂ (2 : ℤ) 3 2 n
-    rw [normEDS_two_three_two] at this
-    simp only [id] at this
+    simp only [normEDS_two_three_two, id] at this
     exact mul_right_cancel₀ hn (by linarith)
 
 open Param MvPolynomial in
