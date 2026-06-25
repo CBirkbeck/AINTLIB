@@ -170,7 +170,6 @@ theorem finiteArtinHasseLog_mem_map_Q (N : ℕ)
     {x : 𝓞 R'} (hx : x ∈ F.Q) :
     F.finiteArtinHasseLog N x hx ∈
       Ideal.map (Ideal.Quotient.mk (F.Q ^ (N + 1))) F.Q := by
-  classical
   rw [finiteArtinHasseLog]
   exact Ideal.sum_mem _ fun r _hr => F.finiteArtinHasseLogTerm_mem_map_Q N r hx
 
@@ -180,7 +179,6 @@ theorem finiteArtinHasseLog_eq_sum_range_of_le {N M : ℕ} (hNM : N ≤ M)
     {x : 𝓞 R'} (hx : x ∈ F.Q) :
     F.finiteArtinHasseLog N x hx =
       ∑ r ∈ Finset.range (M + 1), F.finiteArtinHasseLogTerm N r x hx := by
-  classical
   rw [finiteArtinHasseLog]
   refine Finset.sum_subset (Finset.range_mono (Nat.succ_le_succ hNM)) ?_
   intro r _hrM hrN
