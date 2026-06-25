@@ -100,9 +100,8 @@ theorem Dω_eq_of_smul {f : KE} {c : KE}
 /-- Power rule for `Dω` (natural exponent). -/
 theorem Dω_pow (f : KE) (n : ℕ) : Dω W (f ^ n) = (n : KE) * f ^ (n - 1) * Dω W f := by
   refine (Dω_eq_of_smul W ?_).symm
-  rw [(KaehlerDifferential.D F KE).leibniz_pow, Dω_spec W f, smul_smul]
-  rw [← Nat.cast_smul_eq_nsmul KE]
-  rw [smul_smul, mul_assoc]
+  rw [(KaehlerDifferential.D F KE).leibniz_pow, Dω_spec W f, smul_smul,
+    ← Nat.cast_smul_eq_nsmul KE, smul_smul, mul_assoc]
 
 /-- `Dω` of an inverse. -/
 theorem Dω_inv (f : KE) : Dω W f⁻¹ = -f⁻¹ ^ 2 * Dω W f := by
@@ -210,11 +209,12 @@ regular generator-values `Dω(x_gen), Dω(y_gen) ∈ Rimg`. -/
 theorem Dω_algebraMap_mem_Rimg (r : R) : Dω W (algebraMap R KE r) ∈ Rimg W := by
   obtain ⟨p, rfl⟩ := AdjoinRoot.mk_surjective r
   rw [← evalEval_xy_gen_eq_algebraMap_mk]
+  have key : ∀ q : Polynomial F,
+      (Polynomial.mapRingHom (algebraMap F KE) q).eval (x_gen W) = Polynomial.aeval (x_gen W) q :=
+    fun q => by rw [Polynomial.coe_mapRingHom, Polynomial.eval_map, ← Polynomial.aeval_def]
   induction p using Polynomial.induction_on with
   | C q =>
-    rw [Polynomial.map_C, Polynomial.evalEval_C,
-      show (Polynomial.mapRingHom (algebraMap F KE)) q = q.map (algebraMap F KE) from rfl,
-      Polynomial.eval_map, ← Polynomial.aeval_def]
+    rw [Polynomial.map_C, Polynomial.evalEval_C, key q]
     exact Dω_aeval_x_gen_mem_Rimg W q
   | add p₁ p₂ h₁ h₂ =>
     rw [Polynomial.map_add, Polynomial.evalEval_add, Dω_add]
@@ -222,12 +222,7 @@ theorem Dω_algebraMap_mem_Rimg (r : R) : Dω W (algebraMap R KE r) ∈ Rimg W :
   | monomial m q _ =>
     rw [Polynomial.map_mul, Polynomial.map_pow, Polynomial.map_C, Polynomial.map_X,
       Polynomial.evalEval_mul, Polynomial.evalEval_pow, Polynomial.evalEval_X,
-      Polynomial.evalEval_C,
-      show (Polynomial.mapRingHom (algebraMap F KE) q).eval (x_gen W) =
-          Polynomial.aeval (x_gen W) q from by
-        rw [show (Polynomial.mapRingHom (algebraMap F KE)) q = q.map (algebraMap F KE) from rfl,
-          Polynomial.eval_map, ← Polynomial.aeval_def],
-      Dω_mul, Dω_pow]
+      Polynomial.evalEval_C, key q, Dω_mul, Dω_pow]
     exact Subring.add_mem _
       (Subring.mul_mem _ (aeval_x_gen_mem_Rimg W q)
         (Subring.mul_mem _ (Subring.mul_mem _ (natCast_mem _ (m + 1))
@@ -264,13 +259,13 @@ theorem ord_P_Dω_nonneg {f : KE} (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPoin
     · exact pointValuation_le_one_of_ord_nonneg W hf0 P hf
   obtain ⟨x, hx⟩ := SmoothPlaneCurve.mem_localRingAt_image_of_pointValuation_le_one
     (C := (⟨W⟩ : SmoothPlaneCurve F)) f hf_le
-  haveI hP : ((⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt P).IsPrime :=
+  haveI : ((⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt P).IsPrime :=
     (⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt_isPrime P
   haveI : IsLocalization ((⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt P).primeCompl
       ((⟨W⟩ : SmoothPlaneCurve F).localRingAt P) := Localization.isLocalization
   obtain ⟨⟨a, s⟩, hxas⟩ := IsLocalization.surj
     ((⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt P).primeCompl x
-  set b : R := (s : R) with hb
+  set b : R := (s : R)
   have hbnotmem : b ∉ (⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt P := s.2
   have hb_ne : algebraMap R KE b ≠ 0 :=
     (map_ne_zero_iff _ (IsFractionRing.injective R KE)).mpr
@@ -328,23 +323,37 @@ theorem one_le_ord_P_Dω_of_two_le {f : KE} (hf_ne : f ≠ 0)
     have hmf2 : (2 : ℤ) ≤ mf := by rw [← hmf] at hf; exact_mod_cast hf
     omega
   have hg_nonneg : (0 : WithTop ℤ) ≤ (⟨W⟩ : SmoothPlaneCurve F).ord_P P g :=
-    le_trans (by exact_mod_cast (by norm_num : (0 : ℤ) ≤ 1)) hg_ord
+    le_trans (by norm_num) hg_ord
   have hs_nonneg : (0 : WithTop ℤ) ≤ (⟨W⟩ : SmoothPlaneCurve F).ord_P P s := by
-    rw [hs_ord]; exact_mod_cast (by norm_num : (0 : ℤ) ≤ 1)
+    rw [hs_ord]; norm_num
   rw [hfgs, Dω_mul]
   have ht1 : ((1 : ℤ) : WithTop ℤ) ≤
       (⟨W⟩ : SmoothPlaneCurve F).ord_P P (s * Dω W g) := by
     rw [(⟨W⟩ : SmoothPlaneCurve F).ord_P_mul, hs_ord]
-    have hDg := ord_P_Dω_nonneg W (f := g) P hg_nonneg
-    have := add_le_add (le_refl (((1 : ℤ) : WithTop ℤ))) hDg
-    rwa [add_zero] at this
+    exact le_add_of_le_of_nonneg le_rfl (ord_P_Dω_nonneg W (f := g) P hg_nonneg)
   have ht2 : ((1 : ℤ) : WithTop ℤ) ≤
       (⟨W⟩ : SmoothPlaneCurve F).ord_P P (g * Dω W s) := by
     rw [(⟨W⟩ : SmoothPlaneCurve F).ord_P_mul]
-    have hDs := ord_P_Dω_nonneg W (f := s) P hs_nonneg
-    have := add_le_add hg_ord hDs
-    rwa [add_zero] at this
+    exact le_add_of_le_of_nonneg hg_ord (ord_P_Dω_nonneg W (f := s) P hs_nonneg)
   exact le_trans (le_min ht2 ht1) (SmoothPlaneCurve.ord_P_add_le (P := P) _ _)
+
+/-- **`Dω`-unit criterion for order `≤ 1`** (contrapositive of `one_le_ord_P_Dω_of_two_le`).  If
+`f ≠ 0` has a unit `ω`-derivative at `P` (`ord_P (Dω f) = 0`), then `f` cannot vanish to order `≥ 2`,
+i.e. `ord_P f ≤ 1`. -/
+theorem ord_P_le_one_of_Dω_unit {f : KE} (hf_ne : f ≠ 0)
+    (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPoint)
+    (hDω : (⟨W⟩ : SmoothPlaneCurve F).ord_P P (Dω W f) = 0) :
+    (⟨W⟩ : SmoothPlaneCurve F).ord_P P f ≤ ((1 : ℤ) : WithTop ℤ) := by
+  by_contra! hlt
+  have h2le : ((2 : ℤ) : WithTop ℤ) ≤ (⟨W⟩ : SmoothPlaneCurve F).ord_P P f := by
+    obtain ⟨m, hm⟩ := WithTop.ne_top_iff_exists.mp
+      (((⟨W⟩ : SmoothPlaneCurve F).ord_P_eq_top_iff _).not.mpr hf_ne)
+    rw [← hm] at hlt ⊢
+    rw [WithTop.coe_lt_coe] at hlt
+    rw [WithTop.coe_le_coe]; omega
+  have := one_le_ord_P_Dω_of_two_le W hf_ne P h2le
+  rw [hDω] at this
+  exact absurd this (by simp)
 
 /-- **Order-`≥ 2` criterion (the doubling / tangent lemma).**  If `φ ≠ 0` vanishes at `P`
 (`ord_P φ ≥ 1`), its `ω`-derivative `Dω φ` also vanishes at `P` (`ord_P (Dω φ) ≥ 1`), and there is a
@@ -378,9 +387,7 @@ theorem two_le_ord_P_of_Dω_vanishes_of_uniformizer {φ s : KE} (hφ_ne : φ ≠
     rw [(⟨W⟩ : SmoothPlaneCurve F).ord_P_mul, hw_ord, hDs, add_zero]
   have hterm2 : ((1 : ℤ) : WithTop ℤ) ≤ (⟨W⟩ : SmoothPlaneCurve F).ord_P P (s * Dω W w) := by
     rw [(⟨W⟩ : SmoothPlaneCurve F).ord_P_mul, hs]
-    have hDw_nonneg := ord_P_Dω_nonneg W (f := w) P (by rw [hw_ord])
-    have := add_le_add (le_refl (((1 : ℤ) : WithTop ℤ))) hDw_nonneg
-    rwa [add_zero] at this
+    exact le_add_of_le_of_nonneg le_rfl (ord_P_Dω_nonneg W (f := w) P (by rw [hw_ord]))
   have hDφ_ord : (⟨W⟩ : SmoothPlaneCurve F).ord_P P (Dω W φ) = 0 := by
     rw [hDφ_eq,
       (⟨W⟩ : SmoothPlaneCurve F).ord_P_add_eq_of_lt
@@ -422,17 +429,7 @@ theorem ord_P_isog_pullback_x_sub_const_le_one (α : Isogeny W.toAffine W.toAffi
       (Dω W (α.pullback (x_gen W) - algebraMap F KE x_Q)) = 0 := by
     rw [hDω_eq, (⟨W⟩ : SmoothPlaneCurve F).ord_P_mul, h_u, ← hc,
       (⟨W⟩ : SmoothPlaneCurve F).ord_P_algebraMap_F_of_ne_zero hc_ne, add_zero]
-  by_contra! hlt
-  have h2le : ((2 : ℤ) : WithTop ℤ) ≤
-      (⟨W⟩ : SmoothPlaneCurve F).ord_P P (α.pullback (x_gen W) - algebraMap F KE x_Q) := by
-    obtain ⟨m, hm⟩ := WithTop.ne_top_iff_exists.mp
-      (((⟨W⟩ : SmoothPlaneCurve F).ord_P_eq_top_iff _).not.mpr hf_ne)
-    rw [← hm] at hlt ⊢
-    rw [WithTop.coe_lt_coe] at hlt
-    rw [WithTop.coe_le_coe]; omega
-  have := one_le_ord_P_Dω_of_two_le W hf_ne P h2le
-  rw [hDω_ord] at this
-  exact absurd this (by simp)
+  exact ord_P_le_one_of_Dω_unit W hf_ne P hDω_ord
 
 /-- **`Dω (α^*y_gen) = α^*ν · a_α`** for any isogeny `α`, where
 `α^*ν = 3(α^*x)²+2a₂(α^*x)+a₄−a₁(α^*y)` is the pulled-back `y`-numerator (the chain rule on `y_gen`,
@@ -476,17 +473,7 @@ theorem ord_P_isog_pullback_y_sub_const_le_one (α : Isogeny W.toAffine W.toAffi
       (Dω W (α.pullback (y_gen W) - algebraMap F KE y_Q)) = 0 := by
     rw [hDω_eq, (⟨W⟩ : SmoothPlaneCurve F).ord_P_mul, h_ν, ← hc,
       (⟨W⟩ : SmoothPlaneCurve F).ord_P_algebraMap_F_of_ne_zero hc_ne, add_zero]
-  by_contra! hlt
-  have h2le : ((2 : ℤ) : WithTop ℤ) ≤
-      (⟨W⟩ : SmoothPlaneCurve F).ord_P P (α.pullback (y_gen W) - algebraMap F KE y_Q) := by
-    obtain ⟨m, hm⟩ := WithTop.ne_top_iff_exists.mp
-      (((⟨W⟩ : SmoothPlaneCurve F).ord_P_eq_top_iff _).not.mpr hf_ne)
-    rw [← hm] at hlt ⊢
-    rw [WithTop.coe_lt_coe] at hlt
-    rw [WithTop.coe_le_coe]; omega
-  have := one_le_ord_P_Dω_of_two_le W hf_ne P h2le
-  rw [hDω_ord] at this
-  exact absurd this (by simp)
+  exact ord_P_le_one_of_Dω_unit W hf_ne P hDω_ord
 
 /-- `Dω ((mulByInt ℓ).pullback y_gen) = (3X²+2a₂X+a₄−a₁Y) · ℓ`, where `X = mulByInt_x`,
 `Y = mulByInt_y`. (Chain rule + `[ℓ]^*ω = ℓω`, from `kaehlerD_alpha_pullback_y_eq_smul_omega` and
@@ -529,16 +516,6 @@ theorem ord_P_mulByInt_y_sub_const_le_one (ℓ : ℤ) (hℓ : ℓ ≠ 0) (hℓF 
       (Dω W (mulByInt_y W ℓ - algebraMap F KE y_Q)) = 0 := by
     rw [hDω_eq, (⟨W⟩ : SmoothPlaneCurve F).ord_P_mul, hPX,
       (⟨W⟩ : SmoothPlaneCurve F).ord_P_algebraMap_F_of_ne_zero hℓF, add_zero]
-  by_contra! hlt
-  have h2le : ((2 : ℤ) : WithTop ℤ) ≤
-      (⟨W⟩ : SmoothPlaneCurve F).ord_P P (mulByInt_y W ℓ - algebraMap F KE y_Q) := by
-    obtain ⟨m, hm⟩ := WithTop.ne_top_iff_exists.mp
-      (((⟨W⟩ : SmoothPlaneCurve F).ord_P_eq_top_iff _).not.mpr hf_ne)
-    rw [← hm] at hlt ⊢
-    rw [WithTop.coe_lt_coe] at hlt
-    rw [WithTop.coe_le_coe]; omega
-  have := one_le_ord_P_Dω_of_two_le W hf_ne P h2le
-  rw [hDω_ord] at this
-  exact absurd this (by simp)
+  exact ord_P_le_one_of_Dω_unit W hf_ne P hDω_ord
 
 end HasseWeil
