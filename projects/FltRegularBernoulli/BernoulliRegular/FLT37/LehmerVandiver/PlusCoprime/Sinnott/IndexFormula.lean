@@ -1,8 +1,6 @@
 import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.CyclotomicUnitFamily
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.PollaczekMembership
 import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.KummerLift.Bridge
 import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Cor8_19Forward
-
 
 /-!
 # Sinnott index formula: structural decomposition
@@ -98,12 +96,7 @@ theorem sinnottIndexFormula_of_regulatorIdentity
   have h_reg_pos : 0 < NumberField.Units.regulator
       (NumberField.maximalRealSubfield K) :=
     NumberField.Units.regulator_pos _
-  rw [h] at h_div
-  rw [show (2 : ℝ) ^ ((p - 3) / 2) * (hPlus K : ℝ) *
-        NumberField.Units.regulator (NumberField.maximalRealSubfield K) /
-        NumberField.Units.regulator (NumberField.maximalRealSubfield K) =
-      2 ^ ((p - 3) / 2) * (hPlus K : ℝ) from by
-    field_simp] at h_div
+  rw [h, mul_div_assoc, div_self h_reg_pos.ne', mul_one] at h_div
   exact_mod_cast h_div.symm
 
 /-- **Converse**: the regulator identity follows from the index formula.
@@ -181,20 +174,12 @@ theorem sinnottRegulatorIdentity_of_analyticIdentity
   have h_reg_pos : 0 < NumberField.Units.regulator
       (NumberField.maximalRealSubfield K) :=
     NumberField.Units.regulator_pos _
-  -- The remaining denominator factor `2^r · (2π)^c` is positive (feeds `field_simp`).
-  have h_two_pow_pos : (0 : ℝ) <
-      2 ^ NumberField.InfinitePlace.nrRealPlaces
-          (NumberField.maximalRealSubfield K) *
-        (2 * Real.pi) ^ NumberField.InfinitePlace.nrComplexPlaces
-          (NumberField.maximalRealSubfield K) := by
-    refine mul_pos (pow_pos (by positivity) _) (pow_pos ?_ _)
-    positivity
   rw [h]
   conv_rhs => rw [show ((hPlus K : ℕ) : ℝ) = _ from h_cnf]
   field_simp
 
-/-- **Regulator identity → analytic identity**: the converse, using
-`dedekindZeta_residue_def` to unfold the residue. -/
+/-- **Regulator identity → analytic identity**: the converse, combining
+`SinnottRegulatorIdentity` with the analytic CNF (`hPlus_formula`). -/
 theorem sinnottAnalyticIdentity_of_regulatorIdentity
     (hp_odd : p ≠ 2) (hp_three : 3 ≤ p)
     (h : SinnottRegulatorIdentity p K hp_odd hp_three) :
