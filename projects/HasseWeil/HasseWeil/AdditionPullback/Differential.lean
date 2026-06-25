@@ -61,9 +61,8 @@ theorem omegaPullbackCoeff_isogOneSub_negFrobenius_eq_one_of_additivity_witness
       ((1 : ℤ) : KE) * omegaPullbackCoeff W (Isogeny.id W.toAffine) +
         ((-1 : ℤ) : KE) * omegaPullbackCoeff W (frobeniusIsog W)) :
     omegaPullbackCoeff W (isogOneSub_negFrobenius W hq) = 1 := by
-  have h := omegaPullbackCoeff_m_plus_n_frob_of_witness W
+  simpa using omegaPullbackCoeff_m_plus_n_frob_of_witness W
     (isogOneSub_negFrobenius W hq) 1 (-1) h_add
-  simpa using h
 
 /-- **Hom decomposition for `1 − π`**: the rational-point map of
 `isogOneSub_negFrobenius W hq` equals the sum of `(Isogeny.id W.toAffine).toAddMonoidHom`
@@ -191,8 +190,8 @@ theorem addPullback_x_negFrobenius_mem_range
   change addCoordRingHom (negFrobeniusIsog_addNonInverse W) _ = _
   unfold addCoordRingHom
   rw [show algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X =
-      Affine.CoordinateRing.mk W.toAffine (Polynomial.C Polynomial.X) from rfl]
-  rw [AdjoinRoot.lift_mk]
+      Affine.CoordinateRing.mk W.toAffine (Polynomial.C Polynomial.X) from rfl,
+    AdjoinRoot.lift_mk]
   simp [addBaseHom, Polynomial.eval₂_C]
 
 /-- **Algebraicity over α.pullback.range** (Path (a) step 5, witness-parametric):
@@ -217,12 +216,11 @@ theorem addPullback_x_negFrobenius_isAlgebraic_range_of_witness
     rintro y ⟨i, rfl⟩
     fin_cases i
     exact h_mem
-  have h_alg_adjoin :=
-    addPullback_x_negFrobenius_isAlgebraic_subalgebra W hq hxy
   refine @Algebra.IsAlgebraic.mk
     (↥(isogOneSub_negFrobenius W hq).pullback.range)
     W.toAffine.FunctionField _ _ (Subalgebra.toAlgebra _) (fun y ↦ ?_)
-  exact (h_alg_adjoin.isAlgebraic y).tower_top_of_subalgebra_le h_le
+  exact ((addPullback_x_negFrobenius_isAlgebraic_subalgebra W hq hxy).isAlgebraic
+    y).tower_top_of_subalgebra_le h_le
 
 /-- **Algebraicity over α.pullback.range (UNCONDITIONAL, axiom-clean)**:
 discharges Commit 26 by feeding Commit 27's membership witness. -/
@@ -253,23 +251,17 @@ theorem isogOneSub_negFrobenius_isAlgebraic_synonym
   let e : W.toAffine.FunctionField ≃ₐ[K] α.pullback.range :=
     AlgEquiv.ofInjective α.pullback α.pullback_injective
   refine ⟨fun y ↦ ?_⟩
-  have h_y_alg := h_range.isAlgebraic y
-  obtain ⟨p, hp_ne, hp_eval⟩ := h_y_alg
+  obtain ⟨p, hp_ne, hp_eval⟩ := h_range.isAlgebraic y
   let f : α.pullback.range →+* W.toAffine.FunctionField := e.symm
   refine ⟨p.map f, ?_, ?_⟩
   · have hf_inj : Function.Injective f := e.symm.injective
     exact (Polynomial.map_ne_zero_iff hf_inj).mpr hp_ne
   · -- The synonym's algebra map is `α.pullback ∘ e.symm`, i.e. the inclusion `range → K(E)`.
-    have h_e_inv : ∀ (z : α.pullback.range),
-        α.pullback (e.symm z) = (z : W.toAffine.FunctionField) := by
-      intro z
-      exact congrArg Subtype.val (e.apply_symm_apply z)
     simp only [Polynomial.aeval_def, Polynomial.eval₂_map] at hp_eval ⊢
     refine Eq.trans (Polynomial.eval₂_congr ?_ rfl rfl) hp_eval
-    apply RingHom.ext
-    intro z
+    refine RingHom.ext fun z ↦ ?_
     change α.pullback (e.symm z) = (z : W.toAffine.FunctionField)
-    exact h_e_inv z
+    exact congrArg Subtype.val (e.apply_symm_apply z)
 
 /-- **WITNESS #2 UNCONDITIONAL (axiom-clean)**: K(E) is finite-dimensional
 over `(isogOneSub_negFrobenius W hq).pullback K(E)` (via `α.toAlgebra.toModule`).
