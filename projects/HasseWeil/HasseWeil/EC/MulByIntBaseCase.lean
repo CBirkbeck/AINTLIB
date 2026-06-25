@@ -38,8 +38,8 @@ omit [DecidableEq F] [W.toAffine.IsElliptic] in
     is itself. Direct from `Φ_one` (= X) and `ΨSq_one` (= 1). -/
 theorem mulByInt_x_one : mulByInt_x W 1 = x_gen W := by
   unfold mulByInt_x x_gen Φ_ff ΨSq_ff
-  rw [WeierstrassCurve.Φ_one, WeierstrassCurve.ΨSq_one]
-  simp [map_one, div_one]
+  rw [Φ_one, ΨSq_one]
+  simp only [map_one, div_one]
 
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- `ω_1 / ψ_1³ = y_gen` in `K(E)`: the `[1]`-image of the generic y-coordinate
@@ -49,7 +49,7 @@ theorem mulByInt_y_one :
       algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
         (AdjoinRoot.root W.toAffine.polynomial) := by
   unfold mulByInt_y ω_ff ψ_ff
-  rw [WeierstrassCurve.ω_one, WeierstrassCurve.ψ_one]
+  rw [ω_one, ψ_one]
   simp [Affine.CoordinateRing.mk, map_one, one_pow, div_one]
 
 /-- `(mulByInt W 1).pullback` sends the generic x-coordinate to itself. Direct
@@ -153,9 +153,8 @@ theorem mulByInt_one_comp_mulByInt_one :
       (mulByInt W.toAffine 1).toAddMonoidHom = (mulByInt W.toAffine 1).toAddMonoidHom := by
     ext P
     change (1 : ℤ) • ((1 : ℤ) • P) = (1 : ℤ) • P
-    simp
-  rw [mulByInt_one_pullback_eq_id, AlgHom.id_comp, hhom]
-  rw [← mulByInt_one_pullback_eq_id W]
+    simp only [one_zsmul]
+  rw [mulByInt_one_pullback_eq_id, AlgHom.id_comp, hhom, ← mulByInt_one_pullback_eq_id W]
 
 /-- `[1] ∘ [1] = [[1].degree]` — the `IsDualOf`-conjunct shape (cf.
     `EC.mulByInt_isDualOf_self`; the legacy `isogDual_mulByInt_of_comp` was
