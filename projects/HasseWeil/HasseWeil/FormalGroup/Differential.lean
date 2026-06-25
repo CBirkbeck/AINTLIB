@@ -1,6 +1,5 @@
 import HasseWeil.FormalGroup.Definition
 import HasseWeil.FormalGroup.PDeriv
-import Mathlib.RingTheory.PowerSeries.Inverse
 import Mathlib.RingTheory.PowerSeries.Derivative
 
 /-!
@@ -56,20 +55,16 @@ implies that the `X¹`-coefficient of `F` (at `Y = 0`) equals `1`. -/
 theorem FormalGroup.dX_at_zero_constantCoeff (F : FormalGroup R) :
     @PowerSeries.constantCoeff R _ F.dX_at_zero = 1 := by
   rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply, dX_at_zero, PowerSeries.coeff_mk]
-  -- Goal: coeff (single 0 1 + single 1 0) F.toSeries = 1
   simp only [Finsupp.single_zero, add_zero]
-  -- Goal: coeff (single 0 1) F.toSeries = 1
-  -- Extract the coefficient at (single 0 1) from F.lunit : subst ![X 0, 0] F.toSeries = X 0
+  -- Extract the coefficient at (single 0 1) from F.lunit : subst ![X 0, 0] F.toSeries = X 0.
   have key := congr_arg (MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1)) F.lunit
   rw [MvPowerSeries.coeff_index_single_self_X] at key
-  -- key : coeff (single 0 1) (subst ![X 0, 0] F.toSeries) = 1
   -- Expand the substitution using coeff_subst and isolate the d = single 0 1 term.
   have ha : MvPowerSeries.HasSubst
       (![MvPowerSeries.X 0, 0] : Fin 2 → MvPowerSeries (Fin 2) R) := by
     apply MvPowerSeries.hasSubst_of_constantCoeff_zero
     intro s; fin_cases s <;> simp
-  rw [MvPowerSeries.coeff_subst ha] at key
-  rw [finsum_eq_single _ (Finsupp.single (0 : Fin 2) 1)] at key
+  rw [MvPowerSeries.coeff_subst ha, finsum_eq_single _ (Finsupp.single (0 : Fin 2) 1)] at key
   · -- At d = single 0 1 the product is (X 0)^1 and the coefficient is 1.
     simp only [Finsupp.prod_single_index, pow_zero, pow_one, Matrix.cons_val_zero] at key
     rw [MvPowerSeries.coeff_index_single_self_X, smul_eq_mul, mul_one] at key
@@ -174,8 +169,7 @@ private theorem coeff_subst_runit_eq (n : ℕ)
   have ha : MvPowerSeries.HasSubst
       (![0, MvPowerSeries.X 1] : Fin 2 → MvPowerSeries (Fin 2) R) := by
     apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro s; fin_cases s <;> simp
-  rw [MvPowerSeries.coeff_subst ha]
-  rw [finsum_eq_single _ (Finsupp.single (1 : Fin 2) n)]
+  rw [MvPowerSeries.coeff_subst ha, finsum_eq_single _ (Finsupp.single (1 : Fin 2) n)]
   · -- At d = single 1 n: the product is (0^0 * (X 1)^n) = (X 1)^n.
     -- coeff at (single 1 n) of (X 1)^n = 1.
     rw [Finsupp.prod_single_index (by simp)]
@@ -199,11 +193,10 @@ private theorem coeff_subst_runit_eq (n : ℕ)
 private theorem coeff_single1_F (F : FormalGroup R) (m : ℕ) :
     MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) m) F.toSeries =
       if m = 1 then 1 else 0 := by
-  -- F.runit says subst ![0, X 1] F.toSeries = X 1.
-  -- coeff_{single 1 m} (subst ![0, X 1] F) = coeff_{single 1 m} F (by coeff_subst_runit_eq).
-  -- coeff_{single 1 m} (X 1) = [m = 1].
-  rw [← coeff_subst_runit_eq, F.runit]
-  rw [show (MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) R) =
+  -- Move through `coeff_subst_runit_eq` to `F.runit : subst ![0, X 1] F = X 1`, then read off
+  -- `coeff_{single 1 m} (X 1) = [m = 1]`.
+  rw [← coeff_subst_runit_eq, F.runit,
+    show (MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) R) =
     (MvPowerSeries.X 1) ^ 1 from (pow_one _).symm, MvPowerSeries.coeff_X_pow]
   simp only [(Finsupp.single_injective (1 : Fin 2)).eq_iff]
 
@@ -263,8 +256,7 @@ private theorem coeff_subst_X0 (g : PowerSeries R) (a b : ℕ) :
   · rw [if_neg hb]
     apply finsum_eq_zero_of_forall_eq_zero
     intro d
-    rw [MvPowerSeries.coeff_X_pow]
-    rw [if_neg]
+    rw [MvPowerSeries.coeff_X_pow, if_neg]
     · exact smul_zero _
     · intro h
       have := DFunLike.congr_fun h 1
@@ -290,8 +282,7 @@ private theorem coeff_subst_X1 (g : PowerSeries R) (a b : ℕ) :
   · rw [if_neg hab]
     apply finsum_eq_zero_of_forall_eq_zero
     intro d
-    rw [MvPowerSeries.coeff_X_pow]
-    rw [if_neg]
+    rw [MvPowerSeries.coeff_X_pow, if_neg]
     · exact smul_zero _
     · intro h
       have := DFunLike.congr_fun h 0
@@ -354,7 +345,6 @@ private lemma coeff_subst_X0_X1_mul_eq_zero_of_ne (g : PowerSeries R) (d0 d1 n :
   · rw [if_neg h1, zero_mul]
 
 -- Orthogonality: coeff_{(1,n)} (f(X_0)^d0 * f(X_1)^d1) = coeff_1(f^d0) * coeff_n(f^d1)
-set_option maxHeartbeats 800000 in
 private theorem coeff_10_prod_orthogonal (g : PowerSeries R) (d0 d1 n : ℕ) :
     MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) n)
       ((PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) g) ^ d0 *
@@ -429,8 +419,8 @@ private lemma finsum_fin2_reduce_full (p : (Fin 2 →₀ ℕ) → R) :
     · rw [if_pos hd]
     · rw [if_neg hd, if_neg (mt (hmem d).mpr hd)]
   conv_lhs => arg 1; ext d; rw [key d]
-  rw [← finsum_mem_def, ← finsum_subtype_eq_finsum_cond (· ∈ Set.range ι)]
-  rw [← finsum_comp_equiv (Equiv.ofInjective ι hinj)]
+  rw [← finsum_mem_def, ← finsum_subtype_eq_finsum_cond (· ∈ Set.range ι),
+    ← finsum_comp_equiv (Equiv.ofInjective ι hinj)]
   congr 1; ext k
   show (if (ι k : Fin 2 →₀ ℕ) 0 = 1 then p (ι k) else 0) =
     p (Finsupp.single 0 1 + Finsupp.single 1 k)
@@ -448,7 +438,6 @@ private lemma mul_finsum_of_support_subset {α : Type*} (c : R) (f : α → R)
 
 -- RHS computation: coeff_{(1,n)} of G(f(X_0), f(X_1))
 -- = c1 * coeff_n (subst f dG)
-set_option maxHeartbeats 3200000 in
 private theorem coeff_10_rhs (F G : FormalGroup R) (f : FormalGroupHom F G) (n : ℕ) :
     MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) n)
       (MvPowerSeries.subst
@@ -457,15 +446,12 @@ private theorem coeff_10_rhs (F G : FormalGroup R) (f : FormalGroupHom F G) (n :
           Fin 2 → MvPowerSeries (Fin 2) R) G.toSeries) =
     PowerSeries.coeff 1 f.toSeries *
       PowerSeries.coeff n (PowerSeries.subst f.toSeries G.dX_at_zero) := by
-  -- Step 1: Expand using MvPowerSeries.coeff_subst
+  -- Expand using `coeff_subst`, then simplify the product via orthogonality + `coeff_one_pow`.
   have ha := hasSubst_subst_vec f
   rw [MvPowerSeries.coeff_subst ha]
-  -- Step 2: Simplify the product and apply orthogonality + coeff_one_pow
   simp_rw [prod_subst_vec f, coeff_10_prod_orthogonal, coeff_one_pow f.zero_const, smul_eq_mul]
   simp_rw [ite_mul, zero_mul, mul_ite, mul_zero]
-  -- Goal: finsum d, if d 0 = 1 then coeff_d G * (c₁ * coeff_n(f^(d 1))) else 0
-  --     = c₁ * coeff_n(subst f dXG)
-  -- Step 3: Rearrange each ite branch
+  -- Rearrange each `ite` branch to expose `c₁` as a left factor.
   conv_lhs =>
     arg 1; ext d
     rw [show (if d 0 = 1 then MvPowerSeries.coeff d G.toSeries *
@@ -474,27 +460,20 @@ private theorem coeff_10_rhs (F G : FormalGroup R) (f : FormalGroupHom F G) (n :
         if d 0 = 1 then PowerSeries.coeff 1 f.toSeries *
           (MvPowerSeries.coeff d G.toSeries * PowerSeries.coeff n (f.toSeries ^ d 1))
         else 0 from by split_ifs <;> ring]
-  -- Step 4: Reduce finsum over Fin 2 →₀ ℕ to finsum over ℕ
+  -- Reduce the finsum over `Fin 2 →₀ ℕ` to a finsum over `ℕ`, then expand the RHS subst.
   rw [finsum_fin2_reduce_full]
-  -- Simplify Finsupp evaluations: (single 0 1 + single 1 k) 1 = k
   simp only [Finsupp.add_apply, Finsupp.single_apply, show (0 : Fin 2) ≠ 1 from by decide,
     ite_true, ite_false, zero_add]
-  -- Goal: finsum k, c₁ * (coeff_{(1,k)} G * coeff_n(f^k)) = c₁ * coeff_n(subst f dXG)
-  -- Step 5: Expand the RHS using PowerSeries.coeff_subst'
   rw [PowerSeries.coeff_subst' f.hasSubst]
   simp_rw [FormalGroup.dX_at_zero, PowerSeries.coeff_mk, smul_eq_mul]
-  -- Goal: finsum k, c₁ * (coeff_{(1,k)} G * coeff_n(f^k))
-  --     = c₁ * finsum k, coeff_{(1,k)} G * coeff_n(f^k)
-  -- Step 6: Factor c₁ out using mul_finsum with finite support
+  -- Factor `c₁` out of the finsum, using that the coefficient family has finite support.
   symm
-  -- Use finsum_eq_finsetSum_of_support_subset on both sides, then Finset.mul_sum
   have heq : ∀ d : ℕ,
       MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1 + Finsupp.single 1 d) G.toSeries *
         PowerSeries.coeff n (f.toSeries ^ d) =
       PowerSeries.coeff d G.dX_at_zero * PowerSeries.coeff n (f.toSeries ^ d) := by
     intro d; simp [FormalGroup.dX_at_zero, PowerSeries.coeff_mk]
   simp_rw [heq]
-  -- Factor c₁ out of the finsum using finite support
   have hfs := PowerSeries.coeff_subst_finite f.hasSubst G.dX_at_zero (Finsupp.single () n)
   exact mul_finsum_of_support_subset _ _ (s := hfs.toFinset) fun d hd ↦ by
     rw [Finset.mem_coe, hfs.mem_toFinset, Function.mem_support, smul_eq_mul]
@@ -502,7 +481,6 @@ private theorem coeff_10_rhs (F G : FormalGroup R) (f : FormalGroupHom F G) (n :
 
 -- Sub-lemma: in the antidiag sum for coeff_{(1,n)} (F * F^d), terms vanish
 -- unless (e1 0 = 0 and e1 1 = 1) or (e1 0 = 1 and e2 1 = d).
-set_option maxHeartbeats 1600000 in
 private theorem antidiag_term_vanish (F : FormalGroup R) (d n : ℕ)
     (e1 e2 : Fin 2 →₀ ℕ)
     (hsum : e1 + e2 = Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) n)
@@ -528,7 +506,6 @@ private theorem antidiag_term_vanish (F : FormalGroup R) (d n : ℕ)
 -- `(single 0 1 + single 1 (n-d), single 1 d)` — every other term vanishing by
 -- `antidiag_term_vanish`. This is the combinatorial core of the `succ` step of
 -- `coeff_10_FG_pow`.
-set_option maxHeartbeats 800000 in
 private theorem coeff_10_FG_pow_antidiag_split (F : FormalGroup R) {d n : ℕ}
     (hn1 : 1 ≤ n) (hdn : d ≤ n) :
     ∑ p ∈ Finset.antidiagonal
@@ -564,20 +541,18 @@ private theorem coeff_10_FG_pow_antidiag_split (F : FormalGroup R) {d n : ℕ}
     intro h; have := congr_arg Prod.fst h; simp only at this
     exact absurd (DFunLike.congr_fun this 0) (by
       simp [Finsupp.add_apply, Finsupp.single_eq_same])
-  -- Step 1: extract pair A
+  -- Extract pair A, then pair B from the erased sum; the remaining sum vanishes.
   rw [← Finset.add_sum_erase _
     (fun p : (Fin 2 →₀ ℕ) × (Fin 2 →₀ ℕ) ↦
       MvPowerSeries.coeff p.1 F.toSeries *
         MvPowerSeries.coeff p.2 (F.toSeries ^ d))
     hA_mem]
   congr 1
-  -- Step 2: extract pair B from the erased sum
   rw [← Finset.add_sum_erase _
     (fun p : (Fin 2 →₀ ℕ) × (Fin 2 →₀ ℕ) ↦
       MvPowerSeries.coeff p.1 F.toSeries *
         MvPowerSeries.coeff p.2 (F.toSeries ^ d))
     (Finset.mem_erase.mpr ⟨hAB_ne.symm, hB_mem⟩)]
-  -- Step 3: show the remaining sum is 0
   suffices hzero : ∀ p ∈ ((Finset.antidiagonal
       (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) n)).erase
       (Finsupp.single (1 : Fin 2) 1,
@@ -766,11 +741,8 @@ private theorem coeff_10_subst_eq_sum (F G : FormalGroup R) (f : FormalGroupHom 
   have haF : PowerSeries.HasSubst (S := R) F.toSeries :=
     PowerSeries.HasSubst.of_constantCoeff_zero (FG.constantCoeff_FG_toSeries F)
   rw [PowerSeries.coeff_subst haF]
-  -- LHS = finsum d, coeff_d(f) • coeff_{(1,n)} (F^d)
   simp_rw [coeff_10_FG_pow F, smul_eq_mul]
-  -- LHS = finsum d, coeff_d(f) * (if d ≤ n+1 then d * coeff_{n+1-d}(dxF) else 0)
   simp_rw [mul_ite, mul_zero]
-  -- LHS = finsum d, if d ≤ n+1 then coeff_d(f) * (d * coeff_{n+1-d}(dxF)) else 0
   -- The finsum has finite support; only d ∈ {0, ..., n+1} contribute
   -- For d = 0: 0 * ... = 0, so d = 0 doesn't contribute
   -- For d ∈ {1, ..., n+1}: contributes coeff_d(f) * d * coeff_{n+1-d}(dxF)
@@ -818,12 +790,10 @@ private theorem coeff_derivative_mul_dX_eq_sum (F G : FormalGroup R)
     PowerSeries.coeff n (PowerSeries.derivative R f.toSeries * F.dX_at_zero) =
     coeff_10_sum F G f n := by
   rw [coeff_10_sum]
-  -- Expand RHS using coeff_mul and coeff_derivative
+  -- Expand the RHS via `coeff_mul` and `coeff_derivative`, then match the range sum against
+  -- the antidiagonal through the bijection `k ↔ (k, n - k)`.
   rw [PowerSeries.coeff_mul]
-  -- = Σ_{(i,j) ∈ antidiag n} coeff_i(f') * coeff_j(dxF)
   simp_rw [PowerSeries.coeff_derivative]
-  -- = Σ_{(i,j) ∈ antidiag n} (coeff_{i+1}(f) * (i+1)) * coeff_j(dxF)
-  -- Match Σ_{k ∈ range(n+1)} ... against the antidiagonal via k <-> (k, n - k)
   refine (Finset.sum_nbij' (fun k ↦ (k, n - k)) (fun p ↦ p.1) ?_ ?_ ?_ ?_ ?_).symm
   · intro k hk; rw [Finset.mem_range] at hk
     rw [Finset.mem_antidiagonal]; omega
@@ -854,13 +824,11 @@ theorem FormalGroup.dX_at_zero_chain (f : FormalGroupHom F G) :
       PowerSeries.C (PowerSeries.coeff 1 f.toSeries) *
         PowerSeries.subst f.toSeries G.dX_at_zero := by
   ext n
-  -- Use preserves_add at multi-index (1, n)
+  -- Take the coefficient of `preserves_add` at multi-index `(1, n)`, then shape both sides.
   have key := congr_arg
     (MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) n))
     f.preserves_add
-  rw [coeff_10_lhs F G f n] at key
-  rw [coeff_10_rhs F G f n] at key
-  -- key : coeff_n (f' * dF) = c1 * coeff_n (subst f dG)
+  rw [coeff_10_lhs F G f n, coeff_10_rhs F G f n] at key
   rw [key, PowerSeries.coeff_C_mul]
 
 /-- Substitution along `f` preserves the normalization `ω_G · G_X(0,·) = 1`:
@@ -873,8 +841,8 @@ private lemma subst_invariantDiff_mul_dX_at_zero (f : FormalGroupHom F G) :
     PowerSeries.subst f.toSeries G.invariantDiff *
       PowerSeries.subst f.toSeries G.dX_at_zero = 1 := by
   have hf := f.hasSubst
-  rw [← PowerSeries.subst_mul hf, G.invariantDiff_mul_dX_at_zero]
-  rw [show PowerSeries.subst f.toSeries =
+  rw [← PowerSeries.subst_mul hf, G.invariantDiff_mul_dX_at_zero,
+    show PowerSeries.subst f.toSeries =
       (PowerSeries.substAlgHom hf : PowerSeries R →ₐ[R] PowerSeries R)
       from (PowerSeries.coe_substAlgHom hf).symm]
   exact (PowerSeries.substAlgHom hf).map_one
@@ -888,19 +856,9 @@ rule, abstracted away from the power-series substitution. -/
 private lemma mul_eq_of_unit_cancel {A : Type*} [CommRing A] {a c d e v w : A}
     (hae : a * d = c * e) (hwe : w * e = 1) (hdv : d * v = 1) (hd : IsUnit d) :
     w * a = c * v := by
+  -- Multiply on the right by the unit `d`: both sides reduce to `c`.
   apply hd.mul_right_cancel
-  trans c
-  · calc w * a * d
-        = w * (a * d) := mul_assoc _ _ _
-      _ = w * (c * e) := congr_arg (w * ·) hae
-      _ = c * (w * e) := mul_left_comm _ _ _
-      _ = c * 1 := congr_arg (c * ·) hwe
-      _ = c := mul_one _
-  · exact (calc c * v * d
-        = c * (v * d) := mul_assoc _ _ _
-      _ = c * (d * v) := congr_arg (c * ·) (mul_comm v d)
-      _ = c * 1 := congr_arg (c * ·) hdv
-      _ = c := mul_one _).symm
+  linear_combination w * hae + c * hwe - c * hdv
 
 /-- **Corollary IV.4.3** (chain rule for invariant differentials).
 
@@ -1274,8 +1232,8 @@ private lemma finsum_ite_first_eq_zero_eq_finsum_single_one (g : (Fin 2 →₀ �
     · exfalso; exact h1 ((himg d).mp h3)
     · rfl
   conv_rhs => arg 1; ext d; rw [key d]
-  rw [← finsum_mem_def, ← finsum_subtype_eq_finsum_cond (· ∈ Set.range ι)]
-  rw [← finsum_comp_equiv (Equiv.ofInjective ι hinj)]
+  rw [← finsum_mem_def, ← finsum_subtype_eq_finsum_cond (· ∈ Set.range ι),
+    ← finsum_comp_equiv (Equiv.ofInjective ι hinj)]
   apply finsum_congr
   intro n
   have h1 : ((Equiv.ofInjective ι hinj n : Set.range ι) : Fin 2 →₀ ℕ) =
@@ -1319,10 +1277,7 @@ private lemma subst_zero_X0_pderiv0 (F : FormalGroup R) :
     PowerSeries.HasSubst.of_constantCoeff_zero (by simp)
   ext e
   rw [MvPowerSeries.coeff_subst hsubst, PowerSeries.coeff_subst hX0]
-  -- LHS: finsum over d : Fin 2 →₀ ℕ of coeff_d (pderiv 0 F) • coeff_e (vec^d)
-  -- RHS: finsum over d : ℕ of coeff_d dX_at_zero • coeff_e (X 0)^d
   simp_rw [coeff_prod_subst_vec_zero_X0]
-  -- LHS: finsum d, (if d 0 = 0 then coeff_d(pderiv 0 F) • coeff_e (X 0)^(d 1) else 0)
   simp_rw [smul_ite, smul_zero]
   -- Reindex the LHS along `n ↦ single 1 n` (the `d 0 = 0` slice), …
   rw [finsum_ite_first_eq_zero_eq_finsum_single_one]
@@ -1337,9 +1292,7 @@ private lemma hasSubst_diagF (F : FormalGroup R) :
     MvPowerSeries.HasSubst
       (![F.toSeries, F.toSeries] : Fin 2 → MvPowerSeries (Fin 2) R) := by
   apply MvPowerSeries.hasSubst_of_constantCoeff_zero
-  intro s; fin_cases s
-  · exact FG.constantCoeff_FG_toSeries F
-  · exact FG.constantCoeff_FG_toSeries F
+  intro s; fin_cases s <;> exact FG.constantCoeff_FG_toSeries F
 
 /-- Composing the substitution `![F.toSeries, F.toSeries]` after `![0, X 0]` sends
 slot `0` to `0` and slot `1` to `F.toSeries`, i.e. it equals `![0, F.toSeries]`. -/
@@ -1412,13 +1365,13 @@ theorem dX_at_zero_translation (F : FormalGroup R) :
       MvPowerSeries.subst_comp_subst_apply hasSubst_pairXY hasSubst_shift3to2,
       MvPowerSeries.subst_comp_subst_apply (hasSubst_assocL F) hasSubst_shift3to2,
       MvPowerSeries.subst_comp_subst_apply (hasSubst_assocR F) hasSubst_shift3to2,
-      shift3to2_comp_pairXY, shift3to2_comp_assocL, shift3to2_comp_assocR] at key
-  rw [subst_zero_X0_pderiv0] at key
+      shift3to2_comp_pairXY, shift3to2_comp_assocL, shift3to2_comp_assocR,
+      subst_zero_X0_pderiv0] at key
   have hid : (![MvPowerSeries.X 0, MvPowerSeries.X 1] :
       Fin 2 → MvPowerSeries (Fin 2) R) = MvPowerSeries.X := by
     funext s; fin_cases s <;> rfl
-  rw [hid, congr_fun MvPowerSeries.subst_self (MvPowerSeries.pderiv 0 F.toSeries)] at key
-  rw [subst_zero_F_pderiv0_eq] at key
+  rw [hid, congr_fun MvPowerSeries.subst_self (MvPowerSeries.pderiv 0 F.toSeries),
+    subst_zero_F_pderiv0_eq] at key
   exact key
 
 /-! #### The main theorem: translation invariance of the invariant differential -/
@@ -1453,27 +1406,22 @@ theorem invariantDiff_translation (F : FormalGroup R) :
   have hAB : A * B = C := dX_at_zero_translation F
   have hAα : A * α = 1 := by
     show PowerSeries.subst _ F.dX_at_zero * PowerSeries.subst _ F.invariantDiff = 1
-    rw [← PowerSeries.subst_mul hX0, F.dX_at_zero_mul_invariantDiff]
-    rw [show PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) =
+    rw [← PowerSeries.subst_mul hX0, F.dX_at_zero_mul_invariantDiff,
+      show PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) =
         (PowerSeries.substAlgHom hX0 :
           PowerSeries R →ₐ[R] MvPowerSeries (Fin 2) R)
         from (PowerSeries.coe_substAlgHom hX0).symm]
     exact (PowerSeries.substAlgHom hX0).map_one
   have hCγ : C * γ = 1 := by
     show PowerSeries.subst _ F.dX_at_zero * PowerSeries.subst _ F.invariantDiff = 1
-    rw [← PowerSeries.subst_mul hF_subst, F.dX_at_zero_mul_invariantDiff]
-    rw [show PowerSeries.subst (F.toSeries : MvPowerSeries (Fin 2) R) =
+    rw [← PowerSeries.subst_mul hF_subst, F.dX_at_zero_mul_invariantDiff,
+      show PowerSeries.subst (F.toSeries : MvPowerSeries (Fin 2) R) =
         (PowerSeries.substAlgHom hF_subst :
           PowerSeries R →ₐ[R] MvPowerSeries (Fin 2) R)
         from (PowerSeries.coe_substAlgHom hF_subst).symm]
     exact (PowerSeries.substAlgHom hF_subst).map_one
-  calc γ * B = B * γ := mul_comm _ _
-    _ = 1 * (B * γ) := (one_mul _).symm
-    _ = (α * A) * (B * γ) := by rw [mul_comm α A, hAα]
-    _ = α * (A * B * γ) := by ring
-    _ = α * (C * γ) := by rw [hAB]
-    _ = α * 1 := by rw [hCγ]
-    _ = α := mul_one _
+  -- Pure ring algebra: combine `A*B = C`, `A*α = 1` and `C*γ = 1` to cancel `A` and `C`.
+  linear_combination (α * γ) * hAB - (B * γ) * hAα + α * hCγ
 
 end FormalGroup
 
