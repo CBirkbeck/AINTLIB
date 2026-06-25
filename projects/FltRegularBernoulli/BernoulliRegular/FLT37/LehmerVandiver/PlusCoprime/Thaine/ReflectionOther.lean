@@ -81,6 +81,16 @@ theorem not_dvd_bernoulli_thirtyseven_of_even_ne_thirtytwo
     UniqueIrregularIndex.not_dvd_elsewhere h_unique k (by omega)
       (by simpa [two_mul] using hj_le) (by simpa [two_mul] using hj_ne)
 
+/-- An even reflection index `0 < j < 37` other than the boundary `36` lies in
+the interior Herbrand range `j ≤ 34`. -/
+private theorem le_thirtyfour_of_reflection_even_ne_boundary {j : ℕ}
+    (hj_index : IsReflectionComponentIndex 37 j) (hj_even : Even j) (hj_ne : j ≠ 36) :
+    j ≤ 37 - 3 := by
+  obtain ⟨k, hk⟩ := hj_even
+  have hk_lt : k + k < 37 := by simpa [hk] using hj_index.2
+  have hk_ne : k ≠ 18 := fun hk_eq => hj_ne (by rw [hk, hk_eq])
+  omega
+
 /-- **Bernoulli exclusion for all even reflection indices at `p = 37`.**
 
 This folds the boundary component `j = 36` into the usual Herbrand range
@@ -94,18 +104,10 @@ theorem not_dvd_bernoulli_thirtyseven_of_even_reflection_ne_thirtytwo
   by_cases hj_boundary : j = 36
   · subst hj_boundary
     norm_num [BernoulliFast.bernoulli_36]
-  · have hj_le : j ≤ 37 - 3 := by
-      obtain ⟨k, hk⟩ := hj_even
-      have hk_lt : k + k < 37 := by
-        simpa [hk] using hj_index.2
-      have hk_ne : k ≠ 18 := by
-        intro hk_eq
-        apply hj_boundary
-        rw [hk, hk_eq]
-      omega
-    exact
-      not_dvd_bernoulli_thirtyseven_of_even_ne_thirtytwo h_unique
-        hj_index.1 hj_le hj_even hj_ne
+  · exact
+      not_dvd_bernoulli_thirtyseven_of_even_ne_thirtytwo h_unique hj_index.1
+        (le_thirtyfour_of_reflection_even_ne_boundary hj_index hj_even hj_boundary)
+        hj_even hj_ne
 
 /-- **Content-facing constructor for the FLT37 reflection-other discharge.**
 
@@ -132,15 +134,8 @@ theorem reflectionOtherDischarge_thirtyseven_of_boundary_and_herbrandRibet
     by_cases hj_boundary : j = 36
     · subst hj_boundary
       exact h_boundary h_component
-    · have hj_le : j ≤ 37 - 3 := by
-        obtain ⟨k, hk⟩ := hj_even
-        have hk_lt : k + k < 37 := by
-          simpa [hk] using hj_index.2
-        have hk_ne : k ≠ 18 := by
-          intro hk_eq
-          apply hj_boundary
-          rw [hk, hk_eq]
-        omega
+    · have hj_le : j ≤ 37 - 3 :=
+        le_thirtyfour_of_reflection_even_ne_boundary hj_index hj_even hj_boundary
       exact
         (not_dvd_bernoulli_thirtyseven_of_even_ne_thirtytwo
           UniqueIrregularIndex.thirtyseven_thirtytwo hj_index.1 hj_le
