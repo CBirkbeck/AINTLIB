@@ -37,7 +37,7 @@ left to a follow-up.
 
 noncomputable section
 
-open NumberField NumberField.IsCMField IsCyclotomicExtension
+open NumberField NumberField.IsCMField
 
 namespace BernoulliRegular
 
@@ -84,7 +84,6 @@ def Stage2KummerRatioK : Prop :=
 
 variable {p K}
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Stage 2 → CaseIClassEqDischarge.** Composes Stage 2 (the
 K-level Kummer ratio) with the integral descent
 (`exists_integral_kummer_ratio_of_K`, LV010-class-eq-1e) and the
@@ -100,66 +99,28 @@ theorem caseIClassEqDischarge_of_stage2 (h_stage2 : Stage2KummerRatioK p K) :
   obtain ⟨k, _hk_lt, β, hβ_nz, h_kummer_K⟩ :=
     h_stage2 hgcd hcaseI heq hζ hI_nz hI
   set α : 𝓞 K := ζ ^ k * ((a : 𝓞 K) + ζ * (b : 𝓞 K)) with hα_def
-  -- Step 1: ζ is a unit in 𝓞 K (from primitivity).
-  have hζ_unit : IsUnit ζ := hζ.isUnit (Fact.out : p.Prime).ne_zero
-  have hζk_unit : IsUnit (ζ ^ k) := hζ_unit.pow k
-  -- Step 2: span {α} = span {a + ζ b} = I^p.
+  have hζk_unit : IsUnit (ζ ^ k) := (hζ.isUnit (Fact.out : p.Prime).ne_zero).pow k
+  -- `α` and `a + ζ b` are associates (differ by the unit `ζ ^ k`), so `(α) = (a + ζ b) = I ^ p`.
   have hα_ideal : Ideal.span ({α} : Set (𝓞 K)) = I ^ p := by
-    rw [hα_def]
-    -- The two sides are associates; spans are equal.
-    have h_eq : Ideal.span ({ζ ^ k * ((a : 𝓞 K) + ζ * (b : 𝓞 K))} : Set _) =
-        Ideal.span ({(a : 𝓞 K) + ζ * (b : 𝓞 K)} : Set _) := by
-      rw [show ζ ^ k * ((a : 𝓞 K) + ζ * (b : 𝓞 K)) =
-          ((a : 𝓞 K) + ζ * (b : 𝓞 K)) * (hζk_unit.unit : 𝓞 K) from by
-        change ζ ^ k * _ = _ * ζ ^ k
-        ring]
-      exact Ideal.span_singleton_mul_right_unit hζk_unit.unit.isUnit _
-    rw [h_eq]
+    rw [hα_def, Ideal.span_singleton_mul_left_unit hζk_unit]
     exact hI
-  -- Step 3: α ≠ 0 (from (α) = I^p with I ≠ ⊥).
-  have hα_ne : α ≠ 0 := by
-    intro h
-    apply hI_nz
-    have h_span_zero :
-        Ideal.span ({α} : Set (𝓞 K)) = ⊥ := by
-      rw [h]
-      exact Ideal.span_singleton_eq_bot.mpr rfl
-    rw [h_span_zero] at hα_ideal
-    have hp_pos : 0 < p := (Fact.out : p.Prime).pos
-    have hI_pow_zero : I ^ p = ⊥ := hα_ideal.symm
-    exact pow_eq_zero_iff hp_pos.ne' |>.mp hI_pow_zero
-  -- Step 4: σα ≠ 0.
-  have hσα_ne : ringOfIntegersComplexConj K α ≠ 0 := by
-    intro h
-    apply hα_ne
-    have h_apply :
-        ringOfIntegersComplexConj K (ringOfIntegersComplexConj K α) =
-          ringOfIntegersComplexConj K 0 := by rw [h]
-    rw [map_zero] at h_apply
-    have h_inv : ringOfIntegersComplexConj K (ringOfIntegersComplexConj K α) = α := by
-      apply RingOfIntegers.ext
-      simp
-    rw [h_inv] at h_apply
-    exact h_apply
-  -- Step 5: lift K-level Kummer ratio to integral form.
+  -- `α ≠ 0`, else `(α) = (0) = ⊥`, forcing `I ^ p = ⊥` and hence `I = ⊥`.
+  have hα_ne : α ≠ 0 := fun h => hI_nz <| by
+    rw [h, Ideal.span_singleton_eq_bot.mpr rfl] at hα_ideal
+    exact (pow_eq_zero_iff (Fact.out : p.Prime).pos.ne').mp hα_ideal.symm
+  have hσα_ne : ringOfIntegersComplexConj K α ≠ 0 :=
+    (map_ne_zero_iff _ (ringOfIntegersComplexConj K).injective).mpr hα_ne
   obtain ⟨γ, δ, hγ_ne, hδ_ne, h_int_kummer⟩ :=
     exists_integral_kummer_ratio_of_K hα_ne hσα_ne hβ_nz h_kummer_K
-  -- Step 6: σα ideal = (σI)^p.
+  -- `(σα) = σ(α) = σ(I ^ p) = (σI) ^ p`.
   have hσα_ideal :
       Ideal.span ({ringOfIntegersComplexConj K α} : Set (𝓞 K)) =
         (I.map (ringOfIntegersComplexConj K).toRingEquiv.toRingHom) ^ p := by
-    have h_map :
-        (Ideal.span ({α} : Set (𝓞 K))).map
-          (ringOfIntegersComplexConj K).toRingEquiv.toRingHom =
-        Ideal.span ({ringOfIntegersComplexConj K α} : Set (𝓞 K)) := by
-      rw [Ideal.map_span]
-      simp
-    rw [← h_map, hα_ideal, Ideal.map_pow]
-  -- Step 7: apply LV010-class-eq-1d.
+    rw [← Ideal.map_pow, ← hα_ideal, Ideal.map_span]
+    simp
   exact caseI_class_eq_complexConj_of_conj_kummer_eq
     (Fact.out : p.Prime).pos hα_ne hI_nz hα_ideal hσα_ideal hγ_ne hδ_ne h_int_kummer
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Stage 2 vacuous discharge under regularity.** Under regularity
 (`IsRegularPrime p`), `flt_regular` gives `FermatLastTheoremFor p`.
 The Stage 2 predicate then holds vacuously: its antecedent
@@ -173,19 +134,13 @@ theorem stage2KummerRatioK_of_regular (hp_odd : p ≠ 2)
     (hreg : IsRegularPrime p) :
     Stage2KummerRatioK p K' := by
   intro a b c _ hcaseI heq _ _ _ _ _
-  -- Apply flt_regular to derive FermatLastTheoremFor p.
-  have hflt : FermatLastTheoremFor p := flt_regular hreg hp_odd
-  -- From gcd(a,b,c) = 1 and a^p+b^p=c^p, derive integer FLT contradiction.
-  have hflt_int := fermatLastTheoremFor_iff_int.mp hflt
-  -- ¬p ∣ abc implies abc ≠ 0.
-  have habc : a * b * c ≠ 0 := by
-    intro h0
-    apply hcaseI
-    rw [h0]
-    exact dvd_zero _
-  have ha : a ≠ 0 := fun h ↦ habc (by rw [h]; ring)
-  have hb : b ≠ 0 := fun h ↦ habc (by rw [h]; ring)
-  have hc : c ≠ 0 := fun h ↦ habc (by rw [h]; ring)
+  -- Regularity gives `FermatLastTheoremFor p`; with `p ∤ abc` forcing `a, b, c ≠ 0`,
+  -- the integer form of FLT contradicts `a ^ p + b ^ p = c ^ p`.
+  have hflt_int := fermatLastTheoremFor_iff_int.mp (flt_regular hreg hp_odd)
+  have habc : a * b * c ≠ 0 := fun h0 => hcaseI (h0 ▸ dvd_zero _)
+  have ha : a ≠ 0 := fun h => habc (by rw [h]; ring)
+  have hb : b ≠ 0 := fun h => habc (by rw [h]; ring)
+  have hc : c ≠ 0 := fun h => habc (by rw [h]; ring)
   exact absurd heq (hflt_int a b c ha hb hc)
 
 end CaseI
