@@ -109,7 +109,6 @@ theorem mulByInt_comp_eq_mul_of_pullback_witness (m n : ℤ)
       (mulByInt W.toAffine (m * n)).pullback) :
     (mulByInt W.toAffine m).comp (mulByInt W.toAffine n) =
       mulByInt W.toAffine (m * n) := by
-  change Isogeny.mk _ _ = mulByInt W.toAffine (m * n)
   have h_hom := mulByInt_comp_toAddMonoidHom W m n
   change ((mulByInt W.toAffine m).comp (mulByInt W.toAffine n)).toAddMonoidHom = _ at h_hom
   show Isogeny.mk _ ((mulByInt W.toAffine m).comp (mulByInt W.toAffine n)).toAddMonoidHom =
@@ -154,7 +153,7 @@ rational-map images are equal. Useful for `[-n]` computations. -/
     is preserved under negation. Direct from `W.Φ_neg` and `W.ΨSq_neg`. -/
 @[simp] theorem mulByInt_x_neg (n : ℤ) : mulByInt_x W (-n) = mulByInt_x W n := by
   unfold mulByInt_x Φ_ff ΨSq_ff
-  rw [WeierstrassCurve.Φ_neg, WeierstrassCurve.ΨSq_neg]
+  rw [Φ_neg, ΨSq_neg]
 
 /-! ### x-coordinate composition identity for `[-1]`
 
@@ -180,17 +179,10 @@ theorem mulByInt_pullback_x_neg_one :
 theorem mulByInt_comp_pullback_x_neg_one (n : ℤ) (hn : n ≠ 0) :
     (mulByInt W.toAffine (-1)).pullback ((mulByInt W.toAffine n).pullback (x_gen W)) =
       mulByInt_x W (n * -1) := by
-  -- Inner: [n].pullback (x_gen) = mulByInt_x W n
-  have h_inner : (mulByInt W.toAffine n).pullback (x_gen W) = mulByInt_x W n := by
-    show (mulByInt W.toAffine n).pullback
-      (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
-        (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X)) = _
-    exact mulByInt_pullback_x W n hn
+  have h_inner : (mulByInt W.toAffine n).pullback (x_gen W) = mulByInt_x W n :=
+    mulByInt_pullback_x W n hn
   rw [h_inner, mulByInt_pullback_mulByInt_x W (-1) n (by norm_num : (-1 : ℤ) ≠ 0),
-    mulByInt_x_neg, mulByInt_x_one]
-  rw [show n * -1 = -n from by ring, mulByInt_x_neg]
-  -- Goal: eval₂ (x_gen) (Φ n) / eval₂ (x_gen) (ΨSq n) = mulByInt_x W n
-  -- This is exactly the Φ_ff / ΨSq_ff form after tower commutation
+    mulByInt_x_neg, mulByInt_x_one, show n * -1 = -n from by ring, mulByInt_x_neg]
   change Polynomial.eval₂ (algebraMap F W.toAffine.FunctionField) (x_gen W) (W.Φ n) /
       Polynomial.eval₂ (algebraMap F W.toAffine.FunctionField) (x_gen W) (W.ΨSq n) =
     mulByInt_x W n
@@ -198,19 +190,19 @@ theorem mulByInt_comp_pullback_x_neg_one (n : ℤ) (hn : n ≠ 0) :
       Polynomial.eval₂ (algebraMap F W.toAffine.FunctionField) (x_gen W) p =
         algebraMap (Polynomial F) W.toAffine.FunctionField p := by
     intro p
-    rw [← Polynomial.aeval_def]
-    rw [show x_gen W = algebraMap (Polynomial F) W.toAffine.FunctionField Polynomial.X from by
-      unfold x_gen
-      exact IsScalarTower.algebraMap_apply (Polynomial F) W.toAffine.CoordinateRing
-        W.toAffine.FunctionField Polynomial.X]
-    rw [Polynomial.aeval_algebraMap_apply]
+    rw [← Polynomial.aeval_def,
+      show x_gen W = algebraMap (Polynomial F) W.toAffine.FunctionField Polynomial.X from by
+        unfold x_gen
+        exact IsScalarTower.algebraMap_apply (Polynomial F) W.toAffine.CoordinateRing
+          W.toAffine.FunctionField Polynomial.X,
+      Polynomial.aeval_algebraMap_apply]
     simp
   rw [h_eq, h_eq]
   unfold mulByInt_x Φ_ff ΨSq_ff
   rw [← IsScalarTower.algebraMap_apply (Polynomial F) W.toAffine.CoordinateRing
-    W.toAffine.FunctionField]
-  rw [← IsScalarTower.algebraMap_apply (Polynomial F) W.toAffine.CoordinateRing
-    W.toAffine.FunctionField]
+      W.toAffine.FunctionField,
+    ← IsScalarTower.algebraMap_apply (Polynomial F) W.toAffine.CoordinateRing
+      W.toAffine.FunctionField]
 
 /-! ### More x-coordinate composition instances -/
 
@@ -221,8 +213,7 @@ theorem mulByInt_comp_pullback_x_neg_one_neg_one :
         ((mulByInt W.toAffine (-1)).pullback (x_gen W)) =
       mulByInt_x W ((-1 : ℤ) * -1) := by
   rw [mulByInt_pullback_x_neg_one, mulByInt_pullback_x_neg_one]
-  change x_gen W = mulByInt_x W 1
-  rw [mulByInt_x_one]
+  exact (mulByInt_x_one W).symm
 
 /-- **X-coordinate composition for `[m]·1 = m`**: `(mulByInt W 1).pullback`
     acts as identity, and `mulByInt_x W m = mulByInt_x W (m * 1)`. -/
@@ -230,12 +221,7 @@ theorem mulByInt_comp_pullback_x_one_right (m : ℤ) (hm : m ≠ 0) :
     (mulByInt W.toAffine 1).pullback
         ((mulByInt W.toAffine m).pullback (x_gen W)) =
       mulByInt_x W (m * 1) := by
-  rw [show m * 1 = m from mul_one m]
-  rw [mulByInt_one_pullback_eq_id]
-  change (mulByInt W.toAffine m).pullback (x_gen W) = mulByInt_x W m
-  change (mulByInt W.toAffine m).pullback
-    (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
-      (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X)) = _
+  rw [mul_one, mulByInt_one_pullback_eq_id]
   exact mulByInt_pullback_x W m hm
 
 /-- **X-coordinate composition for `1·n = n`**: the outer `(mulByInt W n).pullback`
@@ -245,12 +231,7 @@ theorem mulByInt_comp_pullback_x_one_left (n : ℤ) (hn : n ≠ 0) :
     (mulByInt W.toAffine n).pullback
         ((mulByInt W.toAffine 1).pullback (x_gen W)) =
       mulByInt_x W (1 * n) := by
-  rw [show 1 * n = n from one_mul n]
-  rw [mulByInt_one_pullback_eq_id]
-  change (mulByInt W.toAffine n).pullback (x_gen W) = mulByInt_x W n
-  change (mulByInt W.toAffine n).pullback
-    (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
-      (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X)) = _
+  rw [one_mul, mulByInt_one_pullback_eq_id]
   exact mulByInt_pullback_x W n hn
 
 end HasseWeil
