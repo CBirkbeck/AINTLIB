@@ -100,7 +100,6 @@ final quotient-to-membership reduction. -/
 theorem artinHasseApproxDworkOneAddPiProductIdentity_of_finiteLog
     (N : ℕ) (y : kˣ) :
     F.artinHasseApproxDworkOneAddPiProductIdentity N y := by
-  classical
   let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
