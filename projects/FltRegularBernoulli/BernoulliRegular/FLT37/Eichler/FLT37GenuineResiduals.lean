@@ -61,11 +61,7 @@ residuals 1+2 then drive the `c = 1` real-data descent to the Case-II contradict
 
 noncomputable section
 
-open NumberField
-
 namespace BernoulliRegular.FLT37.Eichler
-
-open FLT37.LehmerVandiver.CaseII
 
 /-- **Fermat's Last Theorem for `37`, reduced to the four genuine non-vacuous Case-II residuals**
 (proven, axiom-clean given the four named inputs + the carried second-order Bernoulli Prop).
