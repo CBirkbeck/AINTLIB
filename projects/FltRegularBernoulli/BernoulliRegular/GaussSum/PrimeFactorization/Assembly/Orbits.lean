@@ -10,7 +10,7 @@ public import BernoulliRegular.GaussSum.PrimeFactorization.Assembly.Transport
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension
+open NumberField
 open scoped Pointwise
 
 namespace BernoulliRegular
@@ -22,6 +22,13 @@ variable (p : ℕ) [hp : Fact p.Prime]
 
 local notation "𝔭" => (Ideal.span ({(p : ℤ)} : Set ℤ))
 local instance : NeZero (p - 1) := ⟨Nat.sub_ne_zero_of_lt hp.out.one_lt⟩
+
+private lemma p_not_dvd_pred : ¬ p ∣ p - 1 :=
+  hp.out.coprime_iff_not_dvd.mp (prime_coprime_pred (p := p))
+
+private lemma natCast_p_zmod_pred_eq_one : (p : ZMod (p - 1)) = 1 := by
+  have hmod : 1 ≡ p [MOD p - 1] := by rw [Nat.modEq_iff_dvd' hp.out.one_le]
+  simpa using (ZMod.natCast_eq_natCast_iff p 1 (p - 1)).2 hmod.symm
 
 /-- Every prime above `(p)` in the Stickelberger field contracts to the
 canonical `1 - ζ_p` prime in the additive cyclotomic subfield. -/
@@ -188,7 +195,6 @@ lemma sigmaOfCharacterUnit_mem_characterSideFixingSubgroup (b : (ZMod (p - 1))ˣ
   letI : IsGalois ℚ (additiveSubfield (L := L) (p := p)) :=
     IsCyclotomicExtension.isGalois (S := ({p} : Set ℕ))
       (K := ℚ) (L := additiveSubfield (L := L) (p := p))
-  letI : Normal ℚ (additiveSubfield (L := L) (p := p)) := inferInstance
   rw [characterSideFixingSubgroup, IntermediateField.mem_fixingSubgroup_iff]
   have hrestr :
       AlgEquiv.restrictNormalHom (additiveSubfield (L := L) (p := p))
@@ -229,13 +235,11 @@ noncomputable def sigmaOfCharacterUnitToFixingSubgroup :
 
 theorem sigmaOfCharacterUnitToFixingSubgroup_bijective :
     Function.Bijective (sigmaOfCharacterUnitToFixingSubgroup (p := p) (L := L)) := by
-  let f : (ZMod (p - 1))ˣ → characterSideFixingSubgroup (p := p) L :=
-    sigmaOfCharacterUnitToFixingSubgroup (p := p) (L := L)
   letI : IsGalois ℚ L :=
     IsCyclotomicExtension.isGalois (S := ({p * (p - 1)} : Set ℕ)) (K := ℚ) (L := L)
   letI : Fintype (characterSideFixingSubgroup (p := p) L) := Fintype.ofFinite _
-  refine (Fintype.bijective_iff_injective_and_card f).mpr ?_
-  refine ⟨?_, ?_⟩
+  refine (Fintype.bijective_iff_injective_and_card
+    (sigmaOfCharacterUnitToFixingSubgroup (p := p) (L := L))).mpr ⟨?_, ?_⟩
   · intro b₁ b₂ h
     exact sigmaOfCharacterUnit_injective (p := p) (L := L) (congrArg Subtype.val h)
   · rw [← Nat.card_eq_fintype_card, ← Nat.card_eq_fintype_card,
@@ -244,8 +248,8 @@ theorem sigmaOfCharacterUnitToFixingSubgroup_bijective :
           simpa [characterSideFixingSubgroup] using
             (IsGalois.card_fixingSubgroup_eq_finrank
               (F := ℚ) (E := L) (K := additiveSubfield (L := L) (p := p))),
-      finrank_additiveSubfield (p := p) (L := L)]
-    rw [Nat.card_eq_fintype_card, ZMod.card_units_eq_totient]
+      finrank_additiveSubfield (p := p) (L := L), Nat.card_eq_fintype_card,
+      ZMod.card_units_eq_totient]
 
 /-- The character-side lifts parameterize exactly the subgroup fixing the
 additive cyclotomic subfield. -/
@@ -312,8 +316,7 @@ lemma exists_sigmaOfCharacterUnit_smul_distinguishedPrimeAboveP_eq
     (G := characterSideFixingSubgroup (p := p) L)
   rcases exists_sigmaOfCharacterUnit_eq_of_mem_characterSideFixingSubgroup
     (p := p) (L := L) (σ := σ.1) σ.2 with ⟨b, hb⟩
-  refine ⟨b, ?_⟩
-  rw [hb]; exact hσ
+  exact ⟨b, by rwa [hb]⟩
 
 /-- The character-side orbit of the distinguished prime is exactly the full
 finset of primes above `(p)`. -/
@@ -333,18 +336,11 @@ lemma card_primesAboveP :
   letI : IsGalois ℚ L :=
     IsCyclotomicExtension.isGalois (S := ({p * (p - 1)} : Set ℕ)) (K := ℚ) (L := L)
   letI : IsGaloisGroup Gal(L / ℚ) ℤ (𝓞 L) := inferInstance
-  have hp0 : (𝔭 : Ideal ℤ) ≠ ⊥ := by
-    simp [hp.out.ne_zero]
-  have hm : ¬ p ∣ p - 1 :=
-    (hp.out.coprime_iff_not_dvd).mp (prime_coprime_pred (p := p))
-  have hp_cast : (p : ZMod (p - 1)) = 1 := by
-    have hmod : 1 ≡ p [MOD p - 1] := by
-      rw [Nat.modEq_iff_dvd' hp.out.one_le]
-    simpa using (ZMod.natCast_eq_natCast_iff p 1 (p - 1)).2 hmod.symm
+  have hm : ¬ p ∣ p - 1 := p_not_dvd_pred (p := p)
   have hinertia : Ideal.inertiaDegIn 𝔭 (𝓞 L) = 1 := by
     rw [IsCyclotomicExtension.Rat.inertiaDegIn_eq
       (n := p * (p - 1)) (K := L) (p := p) (k := 0) (m := p - 1) (by simp) hm]
-    simp [hp_cast]
+    simp [natCast_p_zmod_pred_eq_one (p := p)]
   have hram : Ideal.ramificationIdxIn 𝔭 (𝓞 L) = p - 1 := by
     simpa using
       (IsCyclotomicExtension.Rat.ramificationIdxIn_eq
@@ -377,19 +373,12 @@ lemma ncard_primesOver_characterSubfield_eq_totient_pred :
       (K := ℚ) (L := characterSubfield (L := L) (p := p))
   letI : IsGaloisGroup Gal(characterSubfield (L := L) (p := p) / ℚ)
       ℤ (𝓞 (characterSubfield (L := L) (p := p))) := inferInstance
-  have hp0 : (𝔭 : Ideal ℤ) ≠ ⊥ := by
-    simp [hp.out.ne_zero]
-  have hm : ¬ p ∣ p - 1 :=
-    (hp.out.coprime_iff_not_dvd).mp (prime_coprime_pred (p := p))
-  have hp_cast : (p : ZMod (p - 1)) = 1 := by
-    have hmod : 1 ≡ p [MOD p - 1] := by
-      rw [Nat.modEq_iff_dvd' hp.out.one_le]
-    simpa using (ZMod.natCast_eq_natCast_iff p 1 (p - 1)).2 hmod.symm
+  have hm : ¬ p ∣ p - 1 := p_not_dvd_pred (p := p)
   have hinertia :
       Ideal.inertiaDegIn 𝔭 (𝓞 (characterSubfield (L := L) (p := p))) = 1 := by
     rw [IsCyclotomicExtension.Rat.inertiaDegIn_eq_of_not_dvd
       (p := p) (K := characterSubfield (L := L) (p := p)) hm]
-    simp [hp_cast]
+    simp [natCast_p_zmod_pred_eq_one (p := p)]
   have hram :
       Ideal.ramificationIdxIn 𝔭 (𝓞 (characterSubfield (L := L) (p := p))) = 1 := by
     simpa using
@@ -419,8 +408,6 @@ lemma ncard_primesOver_characterSubfieldPrime_eq_one
   have hPchar : Pchar ∈ Ideal.primesOver 𝔭 (𝓞 (characterSubfield (L := L) (p := p))) :=
     ⟨inferInstance, inferInstance⟩
   haveI : Pchar.IsMaximal := Ideal.isMaximal_of_mem_primesOver hPchar
-  have hp0 : (𝔭 : Ideal ℤ) ≠ ⊥ := by
-    simp [hp.out.ne_zero]
   letI : IsGalois ℚ (characterSubfield (L := L) (p := p)) :=
     IsCyclotomicExtension.isGalois (S := ({p - 1} : Set ℕ))
       (K := ℚ) (L := characterSubfield (L := L) (p := p))
