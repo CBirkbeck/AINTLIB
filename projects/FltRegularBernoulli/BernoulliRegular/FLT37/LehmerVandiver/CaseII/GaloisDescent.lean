@@ -1,6 +1,3 @@
-import Mathlib.NumberTheory.RamificationInertia.Galois
-import Mathlib.RingTheory.IntegralClosure.IntegralRestrict
-import Mathlib.RingTheory.DedekindDomain.Different
 import FltRegular.NumberTheory.Unramified
 
 /-!
@@ -89,7 +86,7 @@ lemma comap_map_eq_of_unramifiedAt_support [IsGalois K L] [IsDedekindDomain S]
   have := Module.isTorsionFree_iff_algebraMap_injective.mpr hRS
   by_cases hIbot : I = ⊥
   · rw [hIbot, Ideal.comap_bot_of_injective _ hRS, Ideal.map_bot]
-  have h1 : Algebra.IsIntegral R S := IsIntegralClosure.isIntegral_algebra R L
+  have : Algebra.IsIntegral R S := IsIntegralClosure.isIntegral_algebra R L
   have hIbot' : I.comap (algebraMap R S) ≠ ⊥ := mt Ideal.eq_bot_of_comap_eq_bot hIbot
   have : ∀ p, (p.IsPrime ∧ I.comap (algebraMap R S) ≤ p) → ∃ P ≥ I, P ∈ primesOver p S := by
     intro p ⟨hp₁, hp₂⟩
@@ -108,7 +105,7 @@ lemma comap_map_eq_of_unramifiedAt_support [IsGalois K L] [IsDedekindDomain S]
     have hp_mem := hp
     simp only [factors_eq_normalizedFactors, Multiset.mem_toFinset,
       Ideal.mem_normalizedFactors_iff hIbot'] at hp
-    have hpbot : p ≠ ⊥ := fun hp' ↦ hIbot' (eq_bot_iff.mpr (hp.2.trans_eq hp'))
+    have hpbot : p ≠ ⊥ := fun hp' => hIbot' (eq_bot_iff.mpr (hp.2.trans_eq hp'))
     have hpbot' : p.map (algebraMap R S) ≠ ⊥ := (Ideal.map_eq_bot_iff_of_injective hRS).not.mpr
       hpbot
     have := hp.1
@@ -119,7 +116,7 @@ lemma comap_map_eq_of_unramifiedAt_support [IsGalois K L] [IsDedekindDomain S]
       rw [factors_eq_normalizedFactors, Finset.mem_filter, Multiset.mem_toFinset,
         Ideal.mem_normalizedFactors_iff hIbot, ← Finset.mem_coe,
           IsDedekindDomain.coe_primesOverFinset hpbot S]
-      refine ⟨fun H ↦ ⟨H.1.1, ⟨H.2.symm⟩⟩, fun H ↦ ⟨⟨H.1, ?_⟩, ?_⟩⟩
+      refine ⟨fun H => ⟨H.1.1, ⟨H.2.symm⟩⟩, fun H => ⟨⟨H.1, ?_⟩, ?_⟩⟩
       · have ⟨σ, hσ⟩ := exists_comap_galRestrict_eq R K L S (h𝔓' _ hp) H
         rw [← hσ, ← hI σ]
         exact Ideal.comap_mono (h𝔓 _ hp)
