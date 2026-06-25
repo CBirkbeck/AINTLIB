@@ -57,8 +57,6 @@ real-local certificate is the proven
 
 noncomputable section
 
-open NumberField
-
 namespace BernoulliRegular.FLT37.Eichler
 
 /-- **The LV-route Case-I bridge for `37`, filled by the proven Eichler first
