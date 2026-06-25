@@ -47,12 +47,6 @@ open scoped Polynomial.Bivariate
 local macro "C_simp" : tactic =>
   `(tactic| simp only [map_ofNat, C_0, C_1, C_neg, C_add, C_sub, C_mul, C_pow])
 
-local macro "map_simp" : tactic =>
-  `(tactic| simp only [map_ofNat, map_neg, map_add, map_sub, map_mul, map_pow, map_div₀,
-    Polynomial.map_ofNat, Polynomial.map_one, map_C, map_X, Polynomial.map_neg, Polynomial.map_add,
-    Polynomial.map_sub, Polynomial.map_mul, Polynomial.map_pow, Polynomial.map_div, coe_mapRingHom,
-    apply_ite <| mapRingHom _, WeierstrassCurve.map])
-
 namespace WeierstrassCurve
 
 variable {R : Type*} {S : Type*} [CommRing R] [CommRing S] (W : WeierstrassCurve R)
@@ -750,13 +744,7 @@ lemma exists_point_on_curve [IsAlgClosed F] (a : F) :
     simp [hp_def, coeff_sub, coeff_add, coeff_X_pow]
   have hp0 : p ≠ 0 := fun h ↦ by simp [h] at hcoeff
   have hnd : p.natDegree = 2 := by
-    refine le_antisymm ?_ (le_natDegree_of_ne_zero (hcoeff ▸ one_ne_zero))
-    apply (natDegree_sub_le _ _).trans
-    apply max_le
-    · apply (natDegree_add_le _ _).trans
-      apply max_le (natDegree_X_pow_le 2)
-      exact natDegree_mul_le.trans (by simp [Polynomial.natDegree_C, natDegree_X])
-    · exact (Polynomial.natDegree_C _).le.trans (by omega)
+    rw [hp_def]; compute_degree!
   obtain ⟨b, hb⟩ := IsAlgClosed.exists_root p (by
     rw [degree_eq_natDegree hp0, hnd, Nat.cast_ofNat]; exact two_ne_zero)
   refine ⟨b, (W.toAffine.equation_iff a b).mpr ?_⟩
