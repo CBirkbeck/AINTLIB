@@ -3,7 +3,6 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.NumberTheory.RamificationInertia.Unramified
 import Mathlib.RingTheory.DedekindDomain.Different
 import Mathlib.RingTheory.DedekindDomain.IntegralClosure
 import Mathlib.RingTheory.UniqueFactorizationDomain.Finite
@@ -238,8 +237,7 @@ theorem ramificationIdx_eq_one_of_notMem {q : Ideal A}
   have hdvd : ¬P ∣ differentIdeal A B := fun hdvd ↦
     hq (Set.mem_insert_iff.mpr (Or.inr ⟨P, hdvd, hPq⟩))
   haveI : Algebra.IsUnramifiedAt A P := not_dvd_differentIdeal_iff.mp hdvd
-  have h1 := Ideal.ramificationIdx_eq_one_of_isUnramifiedAt (R := A) hPbot
-  rwa [hPq] at h1
+  exact hPq ▸ Ideal.ramificationIdx_eq_one_of_isUnramifiedAt (R := A) hPbot
 
 end BadLocus
 
