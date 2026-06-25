@@ -50,9 +50,6 @@ number) reduced mod `p`.
 
 noncomputable section
 
-open NumberField Finset MonoidAlgebra
-open scoped nonZeroDivisors
-
 namespace BernoulliRegular
 
 namespace FLT37
@@ -171,7 +168,7 @@ theorem stickelbergerCorrectedScalar_eq (χ : MulChar (ZMod p)ˣ ℚ) (c : (ZMod
   rw [show (p : ℚ) * ((((c : ZMod p).val : ℚ) - χ c) *
         ((p : ℚ)⁻¹ * ∑ a : (ZMod p)ˣ, ((a : ZMod p).val : ℚ) * χ a⁻¹)) =
       (((c : ZMod p).val : ℚ) - χ c) *
-        ((p : ℚ) * (p : ℚ)⁻¹ * ∑ a : (ZMod p)ˣ, ((a : ZMod p).val : ℚ) * χ a⁻¹) from by
+        ((p : ℚ) * (p : ℚ)⁻¹ * ∑ a : (ZMod p)ˣ, ((a : ZMod p).val : ℚ) * χ a⁻¹) by
       ring]
   rw [mul_inv_cancel₀ hp_ne, one_mul]
   rw [show (∑ b : (ZMod p)ˣ, (p : ℚ) * (((stickelbergerCorrectedCoeff p c b : ℤ) : ℚ) * χ b⁻¹))
@@ -183,21 +180,21 @@ theorem stickelbergerCorrectedScalar_eq (χ : MulChar (ZMod p)ˣ ℚ) (c : (ZMod
   rw [show (∑ b : (ZMod p)ˣ, (((c : ZMod p).val * (b : ZMod p).val : ℚ) -
         (((c * b : (ZMod p)ˣ) : ZMod p).val : ℚ)) * χ b⁻¹)
       = (∑ b : (ZMod p)ˣ, ((c : ZMod p).val : ℚ) * (((b : ZMod p).val : ℚ) * χ b⁻¹))
-        - ∑ b : (ZMod p)ˣ, (((c * b : (ZMod p)ˣ) : ZMod p).val : ℚ) * χ b⁻¹ from by
+        - ∑ b : (ZMod p)ˣ, (((c * b : (ZMod p)ˣ) : ZMod p).val : ℚ) * χ b⁻¹ by
       rw [← Finset.sum_sub_distrib]
       exact Finset.sum_congr rfl fun b _ ↦ by push_cast; ring]
   rw [← Finset.mul_sum, sub_mul]
   congr 1
   rw [show (χ c * ∑ a : (ZMod p)ˣ, ((a : ZMod p).val : ℚ) * χ a⁻¹)
-      = ∑ a : (ZMod p)ˣ, ((a : ZMod p).val : ℚ) * (χ c * χ a⁻¹) from by
+      = ∑ a : (ZMod p)ˣ, ((a : ZMod p).val : ℚ) * (χ c * χ a⁻¹) by
     rw [Finset.mul_sum]
     exact Finset.sum_congr rfl fun a _ ↦ by ring]
   rw [← (Group.mulLeft_bijective c).sum_comp
     (fun a : (ZMod p)ˣ ↦ (((a : (ZMod p)ˣ) : ZMod p).val : ℚ) * (χ c * χ a⁻¹))]
   refine Finset.sum_congr rfl fun b _ ↦ ?_
   congr 1
-  rw [show ((c * b : (ZMod p)ˣ))⁻¹ = b⁻¹ * c⁻¹ from by rw [mul_inv_rev], map_mul]
-  rw [show χ c * (χ b⁻¹ * χ c⁻¹) = (χ c * χ c⁻¹) * χ b⁻¹ from by ring,
+  rw [show ((c * b : (ZMod p)ˣ))⁻¹ = b⁻¹ * c⁻¹ by rw [mul_inv_rev], map_mul]
+  rw [show χ c * (χ b⁻¹ * χ c⁻¹) = (χ c * χ c⁻¹) * χ b⁻¹ by ring,
     ← map_mul, mul_inv_cancel, map_one, one_mul]
 
 /-- **The Stickelberger eigenvalue is the generalized Bernoulli number.** For a
