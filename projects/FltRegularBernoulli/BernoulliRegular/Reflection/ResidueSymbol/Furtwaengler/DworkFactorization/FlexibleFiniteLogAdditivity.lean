@@ -112,7 +112,6 @@ theorem finiteLogAdditivity_rational_sum_eq_zero (x y : 𝓞 R') (d : ℕ) :
         (((algebraMap (𝓞 R') R') (((finiteLogProductArgPoly x y) ^ n).coeff d) -
           (algebraMap (𝓞 R') R') (((finiteLogProductArgPoly x 0) ^ n).coeff d)) -
           (algebraMap (𝓞 R') R') (((finiteLogProductArgPoly y 0) ^ n).coeff d))) = 0 := by
-  classical
   let Pxy : Polynomial R' := (finiteLogProductArgPoly x y).map (algebraMap (𝓞 R') R')
   let Px : Polynomial R' := (finiteLogProductArgPoly x 0).map (algebraMap (𝓞 R') R')
   let Py : Polynomial R' := (finiteLogProductArgPoly y 0).map (algebraMap (𝓞 R') R')
@@ -166,7 +165,6 @@ theorem finiteLogAdditivity_factorial_weighted_sum_eq_zero
     (x y : 𝓞 R') (d : ℕ) :
     (∑ n ∈ Finset.Icc 1 d,
       ((d.factorial / n : ℕ) : 𝓞 R') * finiteLogAdditivityNumerator x y d n) = 0 := by
-  classical
   apply NumberField.RingOfIntegers.coe_injective (K := R')
   rw [map_zero]
   have hrat := finiteLogAdditivity_rational_sum_eq_zero (R' := R') x y d
@@ -225,7 +223,6 @@ theorem finiteLogAdditivity_degree_sum_eq_zero (N d : ℕ)
           have had : a.1 ≤ d := (Finset.mem_Icc.mp a.2).2
           exact finiteLogAdditivity_den_exponent_le (ℓ := ℓ)
             (Nat.ne_zero_of_lt ha1) had)) = 0 := by
-  classical
   let z : ℕ → 𝓞 R' := fun n => finiteLogAdditivityNumerator x y d n
   have hz0 : ∀ n ∈ Finset.Icc 1 d,
       z n ∈ F.Q ^ (n.factorization ℓ * (ℓ - 1) + 0) := by
@@ -380,7 +377,6 @@ theorem finiteLogProductHomogeneousGrid_eq_degree_sum (N : ℕ)
                   (finiteLogProductArgPoly_pow_coeff_mem_Q_pow (F := F) hx hy n d)
                   (finiteLogAdditivity_den_exponent_le (ℓ := ℓ) hn hnd)
               else 0) := by
-  classical
   calc
     finiteLogProductHomogeneousGrid (F := F) N x y hx hy
         =
@@ -440,7 +436,6 @@ theorem finiteLogProductHomogeneousGrid_degree_sub_eq_zero (N d : ℕ)
               (finiteLogProductArgPoly_pow_coeff_mem_Q_pow (F := F) hy (zero_mem F.Q) n d)
               (finiteLogAdditivity_den_exponent_le (ℓ := ℓ) hn hnd)
           else 0)))) = 0 := by
-  classical
   let C : ℕ := finiteLogCutoff (ℓ := ℓ) N
   have hdC : d < C := by simpa [C] using hd
   have hsubset : Finset.Icc 1 d ⊆ Finset.range C := fun n hnI =>
@@ -511,7 +506,6 @@ theorem finiteLogProductHomogeneousGrid_add (N : ℕ)
     finiteLogProductHomogeneousGrid (F := F) N x y hx hy =
       finiteLogProductHomogeneousGrid (F := F) N x 0 hx (zero_mem F.Q) +
         finiteLogProductHomogeneousGrid (F := F) N y 0 hy (zero_mem F.Q) := by
-  classical
   rw [← sub_eq_zero]
   rw [sub_add_eq_sub_sub]
   calc
@@ -567,7 +561,6 @@ theorem finiteLogProductHomogeneousGrid_term_eq (N n : ℕ) (hn : n ≠ 0)
           (finiteLogProductArgPoly_pow_coeff_mem_Q_pow (F := F) hx hy n d)
           (finiteLogAdditivity_den_exponent_le (ℓ := ℓ) hn hnd)
       else 0 := by
-  classical
   let P : Polynomial (𝓞 R') := (finiteLogProductArgPoly x y) ^ n
   let C : ℕ := finiteLogCutoff (ℓ := ℓ) N
   let den : ℕ := n.factorization ℓ * (ℓ - 1)
@@ -729,7 +722,6 @@ theorem finiteLog_eq_productHomogeneousGrid (N : ℕ)
     {x y : 𝓞 R'} (hx : x ∈ F.Q) (hy : y ∈ F.Q) :
     F.finiteLog N (finiteLogProductCoord x y) (F.finiteLogProductCoord_mem_Q hx hy) =
       finiteLogProductHomogeneousGrid (F := F) N x y hx hy := by
-  classical
   rw [F.finiteLog_eq_finiteLogLocalizedPolynomial]
   unfold finiteLogLocalizedPolynomial finiteLogProductHomogeneousGrid
   refine Finset.sum_congr rfl ?_
