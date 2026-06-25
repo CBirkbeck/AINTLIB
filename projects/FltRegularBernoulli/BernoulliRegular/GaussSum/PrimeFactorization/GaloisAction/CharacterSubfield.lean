@@ -10,7 +10,7 @@ public import BernoulliRegular.GaussSum.PrimeFactorization.GaloisAction.Basic
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension
+open NumberField
 open scoped Pointwise
 
 namespace BernoulliRegular
@@ -50,14 +50,8 @@ noncomputable abbrev distinguishedPrimeAboveP_under_characterSubfield :
 
 lemma distinguishedPrimeAboveP_under_characterSubfield_mem_primesOver :
     distinguishedPrimeAboveP_under_characterSubfield (p := p) (L := L) ∈
-      Ideal.primesOver 𝔭 (𝓞 (characterSubfield (L := L) (p := p))) := by
-  let P : Ideal (𝓞 (characterSubfield (L := L) (p := p))) :=
-    distinguishedPrimeAboveP_under_characterSubfield (p := p) (L := L)
-  haveI : P.IsPrime := inferInstance
-  haveI : P.LiesOver 𝔭 := by
-    dsimp [P, distinguishedPrimeAboveP_under_characterSubfield]
-    infer_instance
-  exact ⟨inferInstance, inferInstance⟩
+      Ideal.primesOver 𝔭 (𝓞 (characterSubfield (L := L) (p := p))) :=
+  ⟨inferInstance, inferInstance⟩
 
 instance distinguishedPrimeAboveP_under_characterSubfield_isPrime :
     (distinguishedPrimeAboveP_under_characterSubfield (p := p) (L := L)).IsPrime :=
@@ -82,7 +76,7 @@ noncomputable def gaussSumLiftCharacterRootCharacterSubfieldInteger :
 lemma algebraMap_gaussSumLiftCharacterRootCharacterSubfieldInteger :
     algebraMap (𝓞 (characterSubfield (L := L) (p := p))) (𝓞 L)
         (gaussSumLiftCharacterRootCharacterSubfieldInteger (p := p) (L := L)) =
-      gaussSumLiftCharacterRoot (p := p) L := by
+      gaussSumLiftCharacterRoot (p := p) L :=
   rfl
 
 lemma gaussSumLiftCharacterRootCharacterSubfieldInteger_isPrimitiveRoot :
@@ -295,8 +289,8 @@ theorem characterSubfieldPrimeUnitGenerator_zpowers (u : (ZMod p)ˣ) :
       (characterSubfieldPrimeUnitGenerator (p := p) (L := L) (Pchar := Pchar)) := by
   obtain ⟨n, _, hn⟩ :=
     (characterSubfieldPrimeGenerator_isPrimitiveRoot
-      (p := p) (L := L) (Pchar := Pchar)).eq_pow_of_pow_eq_one (by
-        exact ZMod.pow_card_sub_one_eq_one (Units.ne_zero u))
+      (p := p) (L := L) (Pchar := Pchar)).eq_pow_of_pow_eq_one
+        (ZMod.pow_card_sub_one_eq_one (Units.ne_zero u))
   refine ⟨n, ?_⟩
   apply Units.ext
   simpa [zpow_natCast, coe_characterSubfieldPrimeUnitGenerator,
@@ -451,8 +445,7 @@ lemma characterSubfieldPrimeGenerator_pow_eq_of_sigmaOfCharacterUnit_smul
     _ =
       characterSubfieldPrimeQuotientEquivZMod (p := p) (L := L) (Pchar := Qchar)
         (Ideal.Quotient.mk Qchar (σ • x)) := by
-          congr 1
-          exact (congrArg (Ideal.Quotient.mk Qchar) hxσ).symm
+          rw [hxσ]
     _ =
       characterSubfieldPrimeQuotientEquivZMod (p := p) (L := L) (Pchar := Qchar)
         (Ideal.Quotient.algEquivOfEqMap
@@ -634,7 +627,6 @@ lemma characterSubfieldPrimeUnitGenerator_normalizedCharacterPrime :
   calc
     characterSubfieldPrimeUnitGenerator (p := p) (L := L) (Pchar := Qchar) =
       characterUnitGenerator (p := p) ^ k := by
-        symm
         simp [k, characterUnitGenerator_pow_characterUnitGeneratorExponent]
     _ = characterUnitGenerator (p := p) ^ 1 := hkpow
     _ = characterUnitGenerator (p := p) := by simp
@@ -837,8 +829,7 @@ lemma sigmaOfUnit_mem_characterSubfieldFixingSubgroup (a : (ZMod p)ˣ) :
         (F := characterSubfield (L := L) (p := p))
         (h := Nat.dvd_mul_left (p - 1) p)]
     ext
-    rw [ZMod.unitsMap_val]
-    rw [sigmaOfUnit, stickelbergerGalEquivZMod_sigmaOfExponent]
+    rw [ZMod.unitsMap_val, sigmaOfUnit, stickelbergerGalEquivZMod_sigmaOfExponent]
     simpa using unitExponentOfUnit_cast_pred (p := p) a
   intro x hx
   have happly := congrArg
