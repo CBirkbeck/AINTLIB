@@ -87,8 +87,6 @@ namespace HasseWeil.EC
 
 open Curves
 
-/-! ### Cancellation: the uniqueness core (Silverman III.6.2, pullback form) -/
-
 section Cancellation
 
 variable {F : Type*} [Field F] {W₁ W₂ W₃ : Affine F}
@@ -114,8 +112,6 @@ theorem Isogeny.dual_comp_pullback {φ : Isogeny W₁ W₂} (w : φ.HasDualWitne
   Isogeny.dualOfWitness_comp_pullback φ w.νPb w.hincl w.hbase z
 
 end Cancellation
-
-/-! ### The EC-level degree of `[n]` and the `[n]`-congruence -/
 
 section MulByIntDegree
 
@@ -145,8 +141,6 @@ theorem Isogeny.mulByInt_congr (W : Affine F) [W.IsElliptic] {a b : ℤ}
 
 end MulByIntDegree
 
-/-! ### Uniqueness of the dual (Silverman III.6.2, item 1) -/
-
 section Uniqueness
 
 variable {F : Type*} [Field F] {W₁ W₂ : Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
@@ -167,12 +161,6 @@ theorem Isogeny.eq_mulByIntDual {φ : Isogeny W₁ W₂} {n : ℤ} {hn : n ≠ 0
   Isogeny.compose_eq_mulByInt_unique hψ (Isogeny.mulByIntDual_compose w)
 
 end Uniqueness
-
-/-! ### The second composition `φ ∘ φ̂ = [n]` (Silverman III.6.2(a), item 2)
-
-The middle step `φ ∘ [n] = [n] ∘ φ` is the carried covariance `MulByIntPullbackCovariant`
-(a theorem for `π`, `[m]`, `id`, compositions and `πʳ`; the open DUAL-2 leaf for an
-abstract isogeny — see the module docstring for the audit verdict). -/
 
 section SecondComposition
 
@@ -197,9 +185,6 @@ theorem Isogeny.compose_mulByIntDual {φ : Isogeny W₁ W₂} {n : ℤ} {hn : n 
     Isogeny.compose_mulByInt_of_covariant hcov]
 
 set_option maxHeartbeats 800000 in
--- unifying the dual's pullback applications (which unfold through `dualPullback` =
--- `factorThroughPullback` = `AlgEquiv.ofInjective.symm ∘ codRestrict`) against the
--- range-membership target is `whnf`-heavy, as in `composeNuPb_rangeIncl`
 /-- **The dual carries the `[n]`-witness itself** (Silverman III.6.2 bookkeeping): from the
 second composition, `[n]₂* = φ̂* ∘ φ*`, so `Im([n]₂*) ⊆ Im(φ̂*)`; the basepoint condition is
 assembled from the `[n]`-basepoint theorem and `∞`-regularity reflection. This is the
@@ -219,8 +204,6 @@ theorem Isogeny.HasMulByIntDualWitness.dual {φ : Isogeny W₁ W₂} {n : ℤ} {
     (Isogeny.reflects_ordAtInfty (Isogeny.mulByIntDual w))⟩
 
 end SecondComposition
-
-/-! ### The degree of the dual (Silverman III.6.2(d) form, item 3) -/
 
 section DualDegree
 
@@ -250,8 +233,6 @@ theorem Isogeny.mulByIntDual_degree {φ : Isogeny W₁ W₂} {n : ℤ} {hn : n �
 
 end DualDegree
 
-/-! ### The double dual `φ̂̂ = φ` (Silverman III.6.2(e), item 4) -/
-
 section DoubleDual
 
 variable {F : Type*} [Field F] {W₁ W₂ : Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
@@ -268,8 +249,6 @@ theorem Isogeny.mulByIntDual_mulByIntDual {φ : Isogeny W₁ W₂} {n : ℤ} {hn
     ((Isogeny.mulByIntDual_compose ŵ).trans (Isogeny.compose_mulByIntDual w hcov).symm)
 
 end DoubleDual
-
-/-! ### Duals reverse composition: `(ψ∘φ)^ = φ̂ ∘ ψ̂` (Silverman III.6.2(b), item 5) -/
 
 section ReverseComposition
 
@@ -295,12 +274,6 @@ theorem Isogeny.mulByIntDual_compose_reverse {ψ : Isogeny W₂ W₃} {φ : Isog
     Isogeny.mulByInt_compose_mulByInt W₁ hm hn]
 
 end ReverseComposition
-
-/-! ### The canonical dual `Isogeny.canonicalDual` (item 6)
-
-The faithful witness at the Silverman index `n = deg φ`. Since `HasMulByIntDualWitness` is
-a proposition, the canonical dual is independent of the witness, and the
-all-witnesses-agree theorem (`eq_canonicalDual`) plus the `∃!`-form make it *the* dual. -/
 
 section Canonical
 
@@ -411,11 +384,6 @@ theorem Isogeny.canonicalDual_compose_reverse {ψ : Isogeny W₂ W₃} {φ : Iso
 
 end Canonical
 
-/-! ### Concrete instance: the Verschiebung (`φ = π`, Silverman III.6.1 Case 2)
-
-The covariance of `π` is a theorem, so every corollary below is hypothesis-free. Spot
-checks: `deg V = q` and `V̂ = π`. -/
-
 section FrobeniusInstance
 
 variable {K : Type*} [Field K] [Fintype K] [DecidableEq K]
@@ -472,8 +440,6 @@ theorem dualFrobenius_eq_canonicalDual :
 
 end FrobeniusInstance
 
-/-! ### Concrete instance: the iterated Verschiebung (`φ = πʳ`) -/
-
 section FrobeniusPowerInstance
 
 variable {K : Type*} [Field K] [Fintype K] [DecidableEq K]
@@ -520,8 +486,6 @@ theorem dualFrobeniusPower_dual_eq_frobeniusPower (r : ℕ) :
 
 end FrobeniusPowerInstance
 
-/-! ### Concrete instance: `[ℓ]^ = [ℓ]` (field-general) -/
-
 section MulByIntInstance
 
 variable {F : Type*} [Field F] (W : Affine F) [W.IsElliptic]
@@ -536,19 +500,12 @@ theorem mulByIntDual_mulByIntSelf {ℓ : ℤ} (hℓ : ℓ ≠ 0) :
 
 end MulByIntInstance
 
-/-! ### Concrete instance: the Galois-built dual of `[ℓ]` is `[ℓ]` (over `K̄`)
-
-`dualMulByInt` (`EC/IsogenyAG/DualGaloisClosed.lean`) was built through the III.4.11 Galois
-fixed-field machinery with `ν = [deg [ℓ]]`; uniqueness now *identifies* it with `[ℓ]`. -/
-
 section AlgClosedWiring
 
 variable {F : Type*} [Field F] [DecidableEq F] [IsAlgClosed F]
 variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
 
 set_option maxHeartbeats 800000 in
--- unifying the Galois-built dual (whose witness fields unfold through
--- `dualGaloisData_of_separable_general`) against `dual_comp_pullback` is `whnf`-heavy
 /-- **The defining composition of the Galois-built `[ℓ]`-dual**:
 `dualMulByInt ∘ [ℓ] = [deg [ℓ]]` in fully bundled form. -/
 theorem dualMulByInt_compose_mulByInt (ℓ : ℤ) (hℓ : ℓ ≠ 0) (hℓF : (ℓ : F) ≠ 0) :
@@ -589,13 +546,6 @@ theorem dualMulByInt_eq_mulByInt (ℓ : ℤ) (hℓ : ℓ ≠ 0) (hℓF : (ℓ : 
   exact Isogeny.mulByInt_congr W.toAffine hd
 
 end AlgClosedWiring
-
-/-! ### Concrete instance: the relative Verschiebung (uniqueness + degree)
-
-The double dual for the relative Frobenius is *not* instantiated: it needs the covariance
-of `Frob_{p^e} : E → E^{(p^e)}` against `[p^e]` (division polynomials vs. the coefficient
-twist), which is genuinely new work; the general `mulByIntDual_mulByIntDual` applies the
-moment it is provided. Uniqueness and degree need no covariance. -/
 
 section RelativeVerschiebungInstance
 
