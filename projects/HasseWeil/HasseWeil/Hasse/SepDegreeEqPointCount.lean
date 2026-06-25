@@ -331,64 +331,6 @@ theorem l6_v_1_1_sepDegree_eq_pointCount_of_primitive_witnesses
   exact l6_v_1_1_sepDegree_eq_pointCount_of_witnesses W hq
     h_finrank_eq_2_deg h_compA h_lemma5
 
-/-! ## Top-level bound discharge consuming the L6 witnesses
-
-A convenience wrapper exposing the Hasse bound consumer with the L6
-substantive obligations as explicit hypotheses (alongside the
-non-L6 HasseOpenLemmaPack fields). Useful for downstream wiring where
-the witnesses for B3/ComputationA/Lemma5 are at hand but the
-HasseOpenLemmaPack's `l6_v_1_3` field hasn't been filled.
-
-Composes `l6_v_1_1_sepDegree_eq_pointCount_of_witnesses` (the L6 closure)
-with the bound's standard pack consumer `hasse_bound_of_witnesses` and
-the project's shipped Witness #1/#2 facts.
--/
-
-/-- **Hasse bound from L6 witnesses + the qf_nonneg witness, witness-
-parametric**: a convenience top-level form taking ONLY the L6
-substantive obligations as explicit hypotheses (plus the qf_nonneg
-witness for completeness). The other Hasse witnesses (#1, #2) are
-shipped axiom-clean. -/
-theorem hasse_bound_from_L6_witnesses
-    (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
-    (hq : 2 ≤ Fintype.card K)
-    -- L6 substantive obligations:
-    (h_finrank_eq_2_deg :
-      Module.finrank
-          (IntermediateField.adjoin K
-            ({(isogOneSub_negFrobenius W hq).pullback (x_gen W)} :
-              Set W.toAffine.FunctionField))
-          W.toAffine.FunctionField =
-        2 * (isogOneSub_negFrobenius W hq).degree)
-    (h_compA : ComputationA_bridge_pullback_x_gen W hq)
-    (h_lemma5 :
-      ((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
-          ((isogOneSub_negFrobenius W hq).pullback (x_gen W)))).support.sum
-        (fun P ↦ (-((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
-          ((isogOneSub_negFrobenius W hq).pullback (x_gen W))) P)).toNat) =
-        2 * pointCount W.toAffine)
-    -- qf_nonneg witness (the remaining substantive Hasse witness):
-    (h_qf_nonneg :
-      ∀ r s : ℤ,
-      0 ≤ (Fintype.card K : ℤ) * r ^ 2 -
-          isogTrace (frobeniusIsog W) (isogOneSub_negFrobenius W hq) *
-            r * s + s ^ 2) :
-    |(↑(pointCount W.toAffine) - ↑(Fintype.card K) - 1 : ℝ)| ≤
-      2 * Real.sqrt (Fintype.card K : ℝ) := by
-  -- Construct the witness bundle from B4 (the L6 closure) + the shipped
-  -- axiom-clean Witness #1/#2.
-  refine hasse_bound_of_witnesses (hq := hq) W ⟨?_, ?_, ?_, h_qf_nonneg⟩
-  · -- pc_sep: derive directly from the shipped axiom-clean Witness #1.
-    obtain ⟨p, hCharP, ⟨_n, _hn_pos⟩, hp_prime, _hcard⟩ := FiniteField.card' K
-    haveI : CharP K p := hCharP
-    haveI : Fact p.Prime := ⟨hp_prime⟩
-    exact HasseWeil.isogOneSub_negFrobenius_isSeparable (K := K) W p hq
-  · -- pc_fin: axiom-clean (already shipped).
-    exact isogOneSub_negFrobenius_finiteDimensional W hq
-  · -- pc_sepDeg_eq_pointCount: via B4 L6 closure.
-    exact l6_v_1_1_sepDegree_eq_pointCount_of_witnesses W hq
-      h_finrank_eq_2_deg h_compA h_lemma5
-
 end Conditional
 
 end HasseWeil
