@@ -77,11 +77,6 @@ theorem ord_P_nonneg_of_isAlgebraic
     refine ⟨p.map φ, hp_monic.map _, ?_⟩
     change (Polynomial.aeval f) (p.map φ) = 0
     rw [Polynomial.aeval_def, Polynomial.eval₂_map]
-    have h_comp :
-        (algebraMap (C.pointValuation P).integer C.FunctionField).comp φ =
-          algebraMap F C.FunctionField := by
-      ext c; rfl
-    rw [h_comp, ← Polynomial.aeval_def]
     exact hp_eval
   have h_v_le : C.pointValuation P f ≤ 1 :=
     (Valuation.integer.integers (C.pointValuation P)).isIntegral_iff_v_le_one.mp h_int_O
@@ -94,8 +89,7 @@ theorem ord_P_nonneg_of_isAlgebraic
     -- The order is `-toAdd (unzero hv)`, so `≤ 1` for the valuation becomes
     -- `toAdd (unzero hv) ≤ toAdd 1 = 0`, giving `0 ≤ -toAdd (unzero hv)`.
     have h_unz_le : WithZero.unzero hv ≤ 1 := by
-      rw [← WithZero.coe_le_coe, WithZero.coe_one, WithZero.coe_unzero]
-      exact h_v_le
+      rw [← WithZero.coe_le_coe, WithZero.coe_one, WithZero.coe_unzero]; exact h_v_le
     have h_toAdd : (WithZero.unzero hv).toAdd ≤ 0 := Multiplicative.toAdd_le.mpr h_unz_le
     omega
 
