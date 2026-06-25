@@ -29,8 +29,6 @@ Proof outline:
 * Silverman, *The Arithmetic of Elliptic Curves*, IV.4, III.5.5
 -/
 
-open WeierstrassCurve PowerSeries LaurentSeries
-
 namespace HasseWeil
 
 variable {K : Type*} [Field K] [Fintype K] [DecidableEq K]
@@ -42,8 +40,8 @@ omit [Fintype K] in
 theorem localExpand_localParam_pow (q : ℕ) :
     localExpand W ((localParam W) ^ q) =
       HahnSeries.single (q : ℤ) (1 : K) := by
-  rw [map_pow, localExpand_localParam]
-  rw [HahnSeries.single_pow, one_pow, nsmul_eq_mul, mul_one]
+  rw [map_pow, localExpand_localParam, HahnSeries.single_pow, one_pow, nsmul_eq_mul,
+    mul_one]
 
 /-- `frobeniusIsog W`'s pullback of `localParam W` is `(localParam W)^q`. -/
 theorem frobeniusIsog_pullback_localParam :
@@ -96,16 +94,9 @@ is purely inseparable" — independent of T-IV-BRIDGE-001. -/
 theorem omegaPullbackCoeff_frobenius :
     omegaPullbackCoeff W (frobeniusIsog W) = 0 := by
   apply omegaPullbackCoeff_unique
-  rw [omegaPullbackCoeff_spec, zero_smul]
-  -- Goal: αu⁻¹ • D(α.pullback x_gen) = 0
-  -- α.pullback x_gen = x_gen^(card K) by frobeniusIsog_pullback_apply
-  rw [frobeniusIsog_pullback_apply W _]
-  -- D(x^q) = q • x^(q-1) • D(x) (by Derivation.leibniz_pow)
-  rw [Derivation.leibniz_pow]
-  -- Cast q-smul to K-scalar action: q • m = (q : K) • m via Nat.cast_smul_eq_nsmul
-  rw [← Nat.cast_smul_eq_nsmul (R := K) _ _]
-  -- (q : K) = 0 in finite field K
-  rw [FiniteField.cast_card_eq_zero, zero_smul, smul_zero]
+  rw [omegaPullbackCoeff_spec, zero_smul, frobeniusIsog_pullback_apply W _,
+    Derivation.leibniz_pow, ← Nat.cast_smul_eq_nsmul (R := K) _ _,
+    FiniteField.cast_card_eq_zero, zero_smul, smul_zero]
 
 /-- **Frobenius pulled back to invariant differential is `0`** (Silverman III.5.5).
 
@@ -113,10 +104,8 @@ theorem omegaPullbackCoeff_frobenius :
     witness-parametric pullbackKaehler identity. -/
 theorem frobenius_pullbackKaehler_invariantDifferential :
     (frobeniusIsog W).pullbackKaehler (invariantDifferential W.toAffine) = 0 := by
-  have h := pullbackKaehler_invariantDifferential_of_coeff_witness W
-    (frobeniusIsog W) 0
-    (by rw [omegaPullbackCoeff_frobenius]; exact (map_zero _).symm)
-  rw [h, zero_smul]
+  rw [pullbackKaehler_invariantDifferential_of_coeff_witness W (frobeniusIsog W) 0
+    (by rw [omegaPullbackCoeff_frobenius]; exact (map_zero _).symm), zero_smul]
 
 /-- **Frobenius is purely inseparable** (Silverman III.5.5 + II.4.4): the
     pullback coefficient vanishes, so by T-II-4-004 (separability iff coeff ≠ 0),
@@ -153,10 +142,8 @@ theorem omegaPullbackCoeff_m_plus_n_frob_of_witness
       (m : W.toAffine.FunctionField) * omegaPullbackCoeff W (Isogeny.id W.toAffine) +
         (n : W.toAffine.FunctionField) * omegaPullbackCoeff W (frobeniusIsog W)) :
     omegaPullbackCoeff W β = (m : W.toAffine.FunctionField) := by
-  rw [h_sum_coeff]
-  have h_id : omegaPullbackCoeff W (Isogeny.id W.toAffine) = 1 :=
-    omegaPullbackCoeff_of_pullback_eq_id W (Isogeny.id W.toAffine) rfl
-  rw [h_id, omegaPullbackCoeff_frobenius, mul_one, mul_zero, add_zero]
+  rw [h_sum_coeff, omegaPullbackCoeff_of_pullback_eq_id W (Isogeny.id W.toAffine) rfl,
+    omegaPullbackCoeff_frobenius, mul_one, mul_zero, add_zero]
 
 /-- **BRIDGE-001 for Frobenius (axiom-clean)**: the bridge identity holds for
 the Frobenius isogeny — both sides equal `0` (when `Fintype.card K ≠ 1`,
