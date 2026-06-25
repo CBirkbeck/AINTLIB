@@ -1,6 +1,4 @@
-import BernoulliRegular.FLT37.KummerUnits
 import BernoulliRegular.FLT37.LehmerVandiver.CaseI.RealKummerLemma
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Symmetrisation
 import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.PollaczekFamilyDescent
 import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Thaine.CertificateAudit
 import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Thaine.UnitClassBridge
@@ -82,8 +80,8 @@ theorem exists_pow_zeta_eq_complexConj_div_self_of_pow_real
     ∃ k : ℕ, k < p ∧
       NumberField.IsCMField.complexConj K α / α =
         (((zeta_spec p ℚ K).toInteger : 𝓞 K) : K) ^ k :=
-  exists_pow_zeta_eq_of_pth_root_of_unity (p := p) (K := K)
-    (complexConj_div_self_pow_eq_one_of_pow_real (p := p) (K := K) hα h_pow_real)
+  exists_pow_zeta_eq_of_pth_root_of_unity
+    (complexConj_div_self_pow_eq_one_of_pow_real hα h_pow_real)
 
 /-- **σ-action on `ζ_p`**: complex conjugation inverts the primitive
 p-th root of unity at the K-value level. -/
@@ -108,13 +106,9 @@ theorem complexConj_zeta_eq_inv :
   have h_val_eq :
       (((NumberField.IsCMField.unitsComplexConj K ζU : (𝓞 K)ˣ) : 𝓞 K) : K) =
       (((ζU⁻¹ : (𝓞 K)ˣ) : 𝓞 K) : K) := by rw [h_unit_conj]
-  have hRHS : (((ζU⁻¹ : (𝓞 K)ˣ) : 𝓞 K) : K) =
-      (((ζU : (𝓞 K)ˣ) : 𝓞 K) : K)⁻¹ := by
-    have h_one_OK : (((ζU⁻¹ : (𝓞 K)ˣ) : 𝓞 K)) * (((ζU : (𝓞 K)ˣ) : 𝓞 K)) = 1 := by
-      rw [← Units.val_mul, inv_mul_cancel, Units.val_one]
-    have h_cast := congrArg (algebraMap (𝓞 K) K) h_one_OK
-    rw [map_mul, map_one] at h_cast
-    exact eq_inv_of_mul_eq_one_left h_cast
+  have hRHS : (((ζU⁻¹ : (𝓞 K)ˣ) : 𝓞 K) : K) = (((ζU : (𝓞 K)ˣ) : 𝓞 K) : K)⁻¹ :=
+    eq_inv_of_mul_eq_one_left <| by
+      rw [← map_mul, ← Units.val_mul, inv_mul_cancel, Units.val_one, map_one]
   rw [hRHS, hζU_val] at h_val_eq
   exact h_val_eq
 
@@ -139,46 +133,36 @@ theorem exists_complexConj_fixed_pow_eq_pow_of_pow_real
     (h_pow_real : NumberField.IsCMField.complexConj K (α ^ p) = α ^ p) :
     ∃ β : K, NumberField.IsCMField.complexConj K β = β ∧ β ^ p = α ^ p := by
   haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
-  -- Step 1: σα/α = ζ^k for some k.
   obtain ⟨k, _hk_lt, hk_eq⟩ :=
-    exists_pow_zeta_eq_complexConj_div_self_of_pow_real (p := p) (K := K)
-      hα h_pow_real
+    exists_pow_zeta_eq_complexConj_div_self_of_pow_real hα h_pow_real
   set ζ : K := (((zeta_spec p ℚ K).toInteger : 𝓞 K) : K)
   have hk_mul : NumberField.IsCMField.complexConj K α = ζ ^ k * α := by
     field_simp at hk_eq
     rw [hk_eq]; ring
-  have hζ_pow_p : ζ ^ p = 1 := zeta_pow_p_eq_one (p := p) (K := K)
+  have hζ_pow_p : ζ ^ p = 1 := zeta_pow_p_eq_one
   have hζ_ne_zero : ζ ≠ 0 := fun hζ_zero =>
     zero_ne_one (α := K) <| by
       rw [← hζ_pow_p, hζ_zero, zero_pow (Fact.out : p.Prime).pos.ne']
-  have hσζ : NumberField.IsCMField.complexConj K ζ = ζ⁻¹ :=
-    complexConj_zeta_eq_inv (p := p) (K := K)
-  -- Step 2: choose j := k * (p+1) / 2. For p odd, p+1 even, so exact natural division.
+  have hσζ : NumberField.IsCMField.complexConj K ζ = ζ⁻¹ := complexConj_zeta_eq_inv
+  -- For `p` odd, `p + 1` is even; write `p + 1 = 2 * q` and set `j := k * q`.
   have hp_odd : Odd p := (Fact.out : p.Prime).odd_of_ne_two (Nat.ne_of_gt hp_two)
-  have hp1_even : Even (p + 1) := Odd.add_one hp_odd
-  obtain ⟨q, hq⟩ := hp1_even
+  obtain ⟨q, hq⟩ := Odd.add_one hp_odd
   have hq_eq : p + 1 = 2 * q := by omega
   set j : ℕ := k * q
-  -- Key identity: 2j = k * (p+1).
   have h_two_j : 2 * j = k * (p + 1) := by
     change 2 * (k * q) = k * (p + 1)
     rw [hq_eq]; ring
-  -- ζ^{2j} = ζ^k.
   have hζ_2j_eq_k : ζ ^ (2 * j) = ζ ^ k := by
     rw [h_two_j, mul_add, mul_one, mul_comm k p, pow_add, pow_mul, hζ_pow_p,
         one_pow, one_mul]
-  -- Step 3: define β = ζ^j · α and verify.
   refine ⟨ζ ^ j * α, ?_, ?_⟩
-  · -- σ(β) = β.
-    rw [map_mul, map_pow, hσζ, hk_mul, inv_pow]
-    -- Goal: (ζ^j)⁻¹ * (ζ^k * α) = ζ^j * α.
-    -- Use ζ^k = ζ^{2j} = ζ^j * ζ^j.
+  · rw [map_mul, map_pow, hσζ, hk_mul, inv_pow]
+    -- `ζ ^ k = ζ ^ (2 * j) = ζ ^ j * ζ ^ j`, so `(ζ ^ j)⁻¹ * ζ ^ k = ζ ^ j`.
     have h_pow_eq : ζ ^ k = ζ ^ j * ζ ^ j := by
       rw [← pow_add, ← two_mul, hζ_2j_eq_k]
     rw [h_pow_eq, mul_assoc (ζ ^ j) (ζ ^ j), ← mul_assoc (ζ ^ j)⁻¹,
         inv_mul_cancel₀ (pow_ne_zero j hζ_ne_zero), one_mul]
-  · -- β^p = α^p.
-    rw [mul_pow, ← pow_mul, mul_comm j p, pow_mul, hζ_pow_p, one_pow, one_mul]
+  · rw [mul_pow, ← pow_mul, mul_comm j p, pow_mul, hζ_pow_p, one_pow, one_mul]
 
 /-- **K^×-side root ⟹ K^+-side unit**: bridges the K^×-level descent
 to the unit level. Given `u : (𝓞 K^+)ˣ` and `v ∈ K` with `v^p = (u : K)`
@@ -197,7 +181,6 @@ theorem exists_real_unit_pow_eq_of_K_root
     ∃ w : (𝓞 (NumberField.maximalRealSubfield K'))ˣ, u = w ^ p' := by
   haveI : NeZero p' := ⟨(Fact.out : p'.Prime).ne_zero⟩
   have hp_pos : 0 < p' := (Fact.out : p'.Prime).pos
-  -- Step 1: v is integral over ℤ.
   have hv_int : IsIntegral ℤ v := by
     apply IsIntegral.of_pow hp_pos
     rw [hv]
@@ -205,11 +188,10 @@ theorem exists_real_unit_pow_eq_of_K_root
         ((u : 𝓞 (NumberField.maximalRealSubfield K')) :
           NumberField.maximalRealSubfield K') =
         ((algebraMap (𝓞 (NumberField.maximalRealSubfield K')) (𝓞 K')
-          (u : 𝓞 (NumberField.maximalRealSubfield K')) : 𝓞 K') : K') := by
+          (u : 𝓞 (NumberField.maximalRealSubfield K')) : 𝓞 K') : K') :=
       rfl
     rw [h_uK]
     exact NumberField.RingOfIntegers.isIntegral_coe _
-  -- Step 2: define v_OK ∈ 𝓞 K' via integrality witness; its p'-th power is `u`.
   let v_OK : 𝓞 K' := ⟨v, hv_int⟩
   have h_pow_eq :
       v_OK ^ p' =
@@ -218,12 +200,10 @@ theorem exists_real_unit_pow_eq_of_K_root
     change v ^ p' = _
     rw [hv]
     rfl
-  -- Step 3: v_OK is a unit.
   have hv_OK_unit : IsUnit v_OK := by
     rw [← isUnit_pow_iff hp_pos.ne', h_pow_eq]
     exact (Units.map (algebraMap (𝓞 (NumberField.maximalRealSubfield K'))
       (𝓞 K')).toMonoidHom u).isUnit
-  -- Step 4: lift to (𝓞 K')ˣ and apply the existing extract.
   let v_unit : (𝓞 K')ˣ := hv_OK_unit.unit
   have hv_unit_val_pow :
       (v_unit : 𝓞 K') ^ p' =
@@ -259,13 +239,11 @@ theorem not_isPthPower_Kplus_of_not_isPthPower_K
       ((FLT37.pollaczekUnitPlus p' K' i : (𝓞 K')ˣ) : 𝓞 K')) :
     ∀ β : (𝓞 (NumberField.maximalRealSubfield K'))ˣ, v ≠ β ^ p' := by
   intro β h_eq
-  -- v = β^p ⟹ algebraMap v = (algebraMap β)^p ⟹ contradiction with K-side cert.
+  -- `v = β ^ p` ⟹ `algebraMap v = (algebraMap β) ^ p`, contradicting the K-side cert.
   set β_K : (𝓞 K')ˣ :=
     Units.map (algebraMap (𝓞 (NumberField.maximalRealSubfield K')) (𝓞 K')).toMonoidHom β
   apply h_K_cert β_K
-  -- Goal: pollaczekUnitPlus = (β_K)^p (as 𝓞 K' elements).
-  rw [← hv_eq, h_eq]
-  rw [Units.val_pow_eq_pow_val, map_pow, ← Units.val_pow_eq_pow_val]
+  rw [← hv_eq, h_eq, Units.val_pow_eq_pow_val, map_pow, ← Units.val_pow_eq_pow_val]
   rfl
 
 /-- **K^+-side certificate on `pollaczekUnitPlusKplus` for FLT37**.
@@ -422,7 +400,6 @@ theorem pollaczekForward_of_pollaczekUnitPlusKplus_isPthPower
           Sinnott.pollaczekUnitPlusKplus p' K' i hp_odd hp_three) :
     Sinnott.PollaczekForward p' K' i hp_odd hp_three := by
   intro h_dvd v hv_eq _hv_mem
-  -- Uniqueness of K^+-preimage: v = pollaczekUnitPlusKplus.
   have h_alg_eq :
       (algebraMap (𝓞 (NumberField.maximalRealSubfield K')) (𝓞 K')
         ((Sinnott.pollaczekUnitPlusKplus p' K' i hp_odd hp_three :
