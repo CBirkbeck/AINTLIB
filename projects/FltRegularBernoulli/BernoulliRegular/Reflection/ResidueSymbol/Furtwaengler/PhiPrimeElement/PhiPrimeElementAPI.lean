@@ -117,9 +117,7 @@ theorem gamma_notMem_of_stickelbergerIdeal_not_le
     (ΦP : PhiPrimeElement (p := p) (K := K) P)
     (h_not_le : ¬ stickelbergerIdeal (p := p) (K := K) P ≤ P') :
     ΦP.gamma ∉ P' := fun h_mem =>
-  h_not_le (by
-    rw [← ΦP.span_gamma]
-    exact (Ideal.span_singleton_le_iff_mem (I := P')).mpr h_mem)
+  h_not_le (ΦP.span_gamma ▸ (Ideal.span_singleton_le_iff_mem (I := P')).mpr h_mem)
 
 /-- An arbitrary extracted Stickelberger generator is nonzero modulo `P'` as
 soon as the Stickelberger ideal is not contained in `P'`. -/
@@ -130,9 +128,7 @@ theorem stickelbergerGen_notMem_of_stickelbergerIdeal_not_le
     (h_stick : StickelbergerIdealEquality (p := p) (K := K) P)
     (h_not_le : ¬ stickelbergerIdeal (p := p) (K := K) P ≤ P') :
     h_stick.gen ∉ P' := fun h_mem =>
-  h_not_le (by
-    rw [← h_stick.span_gen]
-    exact (Ideal.span_singleton_le_iff_mem (I := P')).mpr h_mem)
+  h_not_le (h_stick.span_gen ▸ (Ideal.span_singleton_le_iff_mem (I := P')).mpr h_mem)
 
 /-- If a nonzero prime `P'` contains `stickelbergerIdeal P`, then `P'` lies
 over the same rational prime as `P`. -/
@@ -156,8 +152,7 @@ theorem under_eq_of_stickelbergerIdeal_le_prime
   have hP'_factor :
       P' ∈ UniqueFactorizationMonoid.normalizedFactors
         (stickelbergerIdeal (p := p) (K := K) P) := by
-    rw [associated_iff_eq.mp hQ_assoc]
-    exact hQ_mem
+    rwa [associated_iff_eq.mp hQ_assoc]
   have hP'_conj :
       P' ∈ cyclotomicConjugates (p := p) (K := K) P :=
     normalizedFactors_stickelbergerIdeal_subset hP_ne hP'_factor
@@ -303,12 +298,11 @@ theorem phiPrimeGen_symbol_eq_unit_symbol_add
       pthSymbolAtPrime_canonical (p := p) (K := K)
         ((unitToStickelbergerGen ΦP h_stick : (𝓞 K)ˣ) : 𝓞 K) P' + T := by
   haveI : P'.IsPrime := hP'_max.isPrime
-  have h_unit_eq := unitToStickelbergerGen_eq ΦP h_stick
-  have h_unit_notin := unitToStickelbergerGen_notMem ΦP h_stick h_stick_gen_notin
   rw [phiPrimeGen_eq_gen]
   conv_lhs =>
-    rw [h_unit_eq,
-      pthSymbolAtPrime_canonical_mul hP'_bot hP'_max h_unit_notin h_gamma_notin]
+    rw [unitToStickelbergerGen_eq ΦP h_stick,
+      pthSymbolAtPrime_canonical_mul hP'_bot hP'_max
+        (unitToStickelbergerGen_notMem ΦP h_stick h_stick_gen_notin) h_gamma_notin]
   rw [h_gamma_symbol]
 
 /-- Ideal-support version of `phiPrimeGen_symbol_eq_unit_symbol_add`. -/
@@ -380,11 +374,7 @@ theorem phiPrimeGen_symbol_target_iff_unit_symbol_zero
       ΦP h_stick hP'_bot hP'_max h_gamma_notin h_stick_gen_notin h_gamma_symbol
   constructor
   · intro h_target
-    have h_add : unitSymbol + T = T := by
-      rw [← h_corr, h_target]
-    have h_add' : unitSymbol + T = 0 + T := by
-      simpa using h_add
-    exact add_right_cancel h_add'
+    exact add_eq_right.mp (h_corr ▸ h_target)
   · intro h_unit
     change unitSymbol = 0 at h_unit
     rw [h_corr, h_unit, zero_add]
@@ -428,9 +418,9 @@ theorem phiPrimeGen_symbol_eq_of_unit_symbol_zero
       pthSymbolAtPrime_canonical (p := p) (K := K)
         ((unitToStickelbergerGen ΦP h_stick : (𝓞 K)ˣ) : 𝓞 K) P' = 0) :
     pthSymbolAtPrime_canonical (p := p) (K := K) (phiPrimeGen h_stick) P' = T := by
-  have h_corr := phiPrimeGen_symbol_eq_unit_symbol_add
-    ΦP h_stick hP'_bot hP'_max h_gamma_notin h_stick_gen_notin h_gamma_symbol
-  rw [h_corr, h_unit_symbol_zero, zero_add]
+  rw [phiPrimeGen_symbol_eq_unit_symbol_add
+      ΦP h_stick hP'_bot hP'_max h_gamma_notin h_stick_gen_notin h_gamma_symbol,
+    h_unit_symbol_zero, zero_add]
 
 /-- Ideal-support version of `phiPrimeGen_symbol_eq_of_unit_symbol_zero`. -/
 theorem phiPrimeGen_symbol_eq_of_unit_symbol_zero_of_stickelbergerIdeal_not_le
