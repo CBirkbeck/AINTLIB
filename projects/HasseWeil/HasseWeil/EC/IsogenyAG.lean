@@ -147,7 +147,6 @@ noncomputable def idCoordHom (W : Affine F) [W.IsElliptic] :
 @[simp] theorem id_toPointMap_zero (W : Affine F) [W.IsElliptic] :
     (Isogeny.id W).toPointMap (idCoordHom W) .zero = .zero := rfl
 
-set_option maxHeartbeats 800000 in
 /-- The identity isogeny is the identity on points: with the identity coord-ring
 witness, `(Isogeny.id W).toPointMap` is the identity function on `W.Point`. -/
 @[simp] theorem id_toPointMap (W : Affine F) [W.IsElliptic] (P : W.Point) :
@@ -196,7 +195,6 @@ noncomputable def composeCoordHom {ψ : Isogeny W₂ W₃} {φ : Isogeny W₁ W�
     (ψ.compose φ).toPointMap (composeCoordHom ψ_cd φ_cd) .zero =
       ψ.toPointMap ψ_cd (φ.toPointMap φ_cd .zero) := rfl
 
-set_option maxHeartbeats 800000 in
 /-- Composition of isogenies acts as composition on points (full version). -/
 @[simp] theorem compose_toPointMap (ψ : Isogeny W₂ W₃) (φ : Isogeny W₁ W₂)
     (ψ_cd : ψ.toCurveMap.CoordHom) (φ_cd : φ.toCurveMap.CoordHom) (P : W₁.Point) :
@@ -287,10 +285,7 @@ noncomputable def Isogeny.frobenius : Isogeny W W where
   pullback_ordAtInfty_nonneg := fun f h ↦ by
     change 0 ≤ (⟨W⟩ : Curves.SmoothPlaneCurve K).ordAtInfty
       (FiniteField.frobeniusAlgHom K W.FunctionField f)
-    rw [show (FiniteField.frobeniusAlgHom K W.FunctionField) f =
-      f ^ Fintype.card K from
-      congr_fun (FiniteField.coe_frobeniusAlgHom (K := K)
-        (R := W.FunctionField)) f]
+    rw [FiniteField.coe_frobeniusAlgHom]
     by_cases hf : f = 0
     · simp [hf]
     · rw [(⟨W⟩ : Curves.SmoothPlaneCurve K).ordAtInfty_pow hf]
@@ -334,13 +329,8 @@ private theorem Isogeny.frobenius_evalAtPullback {x y : K}
   rw [Curves.CurveMap.evalAtPullback_apply]
   change Curves.SmoothPlaneCurve.evalAt (⟨W⟩ : Curves.SmoothPlaneCurve K)
       ⟨x, y, h⟩ (FiniteField.frobeniusAlgHom K W.CoordinateRing r) = _
-  rw [show (FiniteField.frobeniusAlgHom K W.CoordinateRing) r =
-      r ^ Fintype.card K from
-      congr_fun (FiniteField.coe_frobeniusAlgHom (K := K)
-        (R := W.CoordinateRing)) r,
-    map_pow]
+  simp only [FiniteField.coe_frobeniusAlgHom, map_pow]
 
-set_option maxHeartbeats 800000 in
 /-- The Frobenius isogeny acts as the **identity** on `K`-rational points: for
 any `(x, y) ∈ W(K)`, Frobenius sends `(x, y) ↦ (x^q, y^q) = (x, y)` since
 `x^q = x` for all `x ∈ K` by `FiniteField.pow_card`. The basepoint is
