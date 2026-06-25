@@ -144,10 +144,8 @@ noncomputable def id (W : Affine F) [W.IsElliptic] : Isogeny W W where
 /-- The identity isogeny has degree 1.
     Reference: Silverman III.4 (basic property of degree). -/
 @[simp] theorem id_degree (W : Affine F) [W.IsElliptic] :
-    (Isogeny.id W).degree = 1 := by
-  change @Module.finrank W.FunctionField W.FunctionField _ _
-    (Isogeny.id W).toAlgebra.toModule = 1
-  exact Module.finrank_self W.FunctionField
+    (Isogeny.id W).degree = 1 :=
+  Module.finrank_self W.FunctionField
 
 /-- Apply an isogeny to a point. -/
 def apply (α : Isogeny W₁ W₂) (P : W₁.Point) : W₂.Point :=
@@ -343,6 +341,7 @@ private noncomputable def mulByIntFracRange {n : ℤ} (hn : n ≠ 0) :
     IntermediateField F W.toAffine.FunctionField :=
   (mulByIntCompAlgHom W hn).fieldRange
 
+omit [DecidableEq F] in
 private theorem mulByIntFracRange_le_fieldRange {n : ℤ} (hn : n ≠ 0) :
     mulByIntFracRange W hn ≤ (mulByInt_pullbackAlgHom W n hn).fieldRange := by
   intro z hz
@@ -357,6 +356,7 @@ private noncomputable def mulByIntRangeEquiv {n : ℤ} (hn : n ≠ 0) :
   (AlgEquiv.ofInjective (mulByInt_pullbackAlgHom W n hn)
     (mulByInt_pullbackAlgHom W n hn).toRingHom.injective).toRingEquiv
 
+omit [DecidableEq F] in
 private theorem mulByIntCompAlgHom_algebraMap_X {n : ℤ} (hn : n ≠ 0) :
     mulByIntCompAlgHom W hn
       (algebraMap F[X] (FractionRing F[X]) Polynomial.X) = mulByInt_x W n := by
@@ -378,6 +378,7 @@ private theorem mulByIntCompAlgHom_algebraMap_X {n : ℤ} (hn : n ≠ 0) :
   rw [mulByInt_coordHom, AdjoinRoot.lift_mk]
   simp [Polynomial.eval₂_C, mulByInt_xHom, mulByInt_x]
 
+omit [DecidableEq F] in
 private theorem mulByInt_x_mem_mulByIntFracRange {n : ℤ} (hn : n ≠ 0) :
     mulByInt_x W n ∈ mulByIntFracRange W hn := by
   rw [mulByIntFracRange, AlgHom.mem_fieldRange]
@@ -408,6 +409,7 @@ private theorem adjoin_algebraMap_X_eq_top :
     exact IntermediateField.algebra_adjoin_le_adjoin F _ (Polynomial.aeval_mem_adjoin_singleton _ _)
   exact S.div_mem (hmem p) (hmem q)
 
+omit [DecidableEq F] in
 private theorem mulByIntFracRange_eq_adjoin {n : ℤ} (hn : n ≠ 0) :
     mulByIntFracRange W hn =
       IntermediateField.adjoin F ({mulByInt_x W n} : Set W.toAffine.FunctionField) := by
@@ -468,11 +470,12 @@ private theorem finrank_ratFunc_mulByInt {n : ℤ} (hn : n ≠ 0) :
 -- `backward.isDefEq.respectTransparency false` lets the `ext`/`change … rfl` compatibility
 -- goals for `Algebra.finrank_eq_of_equiv_equiv` close by reducible-transparency defeq.
 set_option backward.isDefEq.respectTransparency false in
+omit [DecidableEq F] in
 private theorem mulByInt_finrank_aux_fracRange_le {n : ℤ} (hn : n ≠ 0) :
     mulByIntFracRange W hn ≤
       (IsScalarTower.toAlgHom F (FractionRing F[X]) W.toAffine.FunctionField).fieldRange := by
   set aR := (IsScalarTower.toAlgHom F (FractionRing F[X])
-    W.toAffine.FunctionField).fieldRange with haR_def
+    W.toAffine.FunctionField).fieldRange
   have h_poly_mem_aR : ∀ p : F[X],
       algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
         (algebraMap F[X] W.toAffine.CoordinateRing p) ∈ aR := by
@@ -512,7 +515,7 @@ private theorem mulByInt_finrank_aux_top :
 -- The canonical `FractionRing F[X] ≃+* RatFunc F` field isomorphism sends the `FractionRing`
 -- generator `Φ(n)/ΨSq(n)` to its `RatFunc F` counterpart: it fixes `F[X]`, so commutes with the
 -- two `algebraMap`s building the quotient.
-omit [DecidableEq F] in
+omit [W.toAffine.IsElliptic] [DecidableEq F] in
 private theorem fractionRing_algEquiv_genFrac {n : ℤ} :
     (FractionRing.algEquiv F[X] (RatFunc F)).toRingEquiv
         (algebraMap F[X] (FractionRing F[X]) (W.Φ n) /
@@ -635,17 +638,18 @@ set_option maxHeartbeats 250000 in
 -- `Algebra.finrank_eq_of_equiv_equiv` defeq compatibility check for the `fracR ≃+* adjR` equiv
 -- (an `ext ⟨x, hx⟩; rfl` through `IntermediateField` subtype coercions). 250000 is the minimal
 -- budget that compiles (default 200000 times out at the `isDefEq` for that equiv).
+omit [DecidableEq F] in
 private theorem mulByInt_finrank_aux_total {n : ℤ} (hn : n ≠ 0) :
     Module.finrank (mulByIntFracRange W hn) W.toAffine.FunctionField = 2 * n.natAbs ^ 2 := by
   set aR := (IsScalarTower.toAlgHom F (FractionRing F[X])
-    W.toAffine.FunctionField).fieldRange with haR_def
+    W.toAffine.FunctionField).fieldRange
   letI := (IntermediateField.inclusion (mulByInt_finrank_aux_fracRange_le W hn)).toRingHom.toAlgebra
   haveI : IsScalarTower (mulByIntFracRange W hn) aR W.toAffine.FunctionField :=
     IsScalarTower.of_algebraMap_eq fun _ ↦ rfl
   have h2 := Module.finrank_mul_finrank (mulByIntFracRange W hn) aR W.toAffine.FunctionField
   have h_mid : Module.finrank (mulByIntFracRange W hn) aR = n.natAbs ^ 2 := by
     set gen_frac := algebraMap F[X] (FractionRing F[X]) (W.Φ n) /
-      algebraMap F[X] (FractionRing F[X]) (W.ΨSq n) with hgen_frac_def
+      algebraMap F[X] (FractionRing F[X]) (W.ΨSq n)
     set fracR := IntermediateField.adjoin F ({gen_frac} : Set (FractionRing F[X]))
     have hgen_image : (IsScalarTower.toAlgHom F (FractionRing F[X])
         W.toAffine.FunctionField) gen_frac = mulByInt_x W n := by
@@ -683,6 +687,7 @@ private theorem mulByInt_finrank_aux_total {n : ℤ} (hn : n ≠ 0) :
 -- proved inline once that instance is in scope. `aux_total` is the canonical-codomain half
 -- and is extracted above.
 set_option backward.isDefEq.respectTransparency false in
+omit [DecidableEq F] in
 private theorem mulByInt_finrank {n : ℤ} (hn : n ≠ 0) :
     Module.finrank (mulByInt_pullbackAlgHom W n hn).fieldRange
       W.toAffine.FunctionField = n.natAbs ^ 2 := by
@@ -808,20 +813,19 @@ noncomputable def torsionSubgroup (W : Affine F) [W.IsElliptic] (m : ℤ) :
 
 @[simp] theorem mem_torsionSubgroup (W : Affine F) [W.IsElliptic] (m : ℤ) (P : W.Point) :
     P ∈ W[m] ↔ m • P = 0 := by
-  change P ∈ (mulByInt W m).toAddMonoidHom.ker ↔ m • P = 0
-  rw [AddMonoidHom.mem_ker, mulByInt_apply]
+  rw [torsionSubgroup, AddMonoidHom.mem_ker, mulByInt_apply]
 
 /-- `E[1] = ⊥` (only zero has order 1). -/
 @[simp] theorem torsionSubgroup_one (W : Affine F) [W.IsElliptic] :
     W[(1 : ℤ)] = ⊥ := by
   ext P
-  simp [mem_torsionSubgroup]
+  simp
 
 /-- `E[0] = ⊤` (every point has "0-torsion"). -/
 @[simp] theorem torsionSubgroup_zero (W : Affine F) [W.IsElliptic] :
     W[(0 : ℤ)] = ⊤ := by
   ext P
-  simp [mem_torsionSubgroup]
+  simp
 
 /-- `E[-m] = E[m]`: m-torsion is symmetric under negation. -/
 theorem torsionSubgroup_neg (W : Affine F) [W.IsElliptic] (m : ℤ) :
