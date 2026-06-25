@@ -290,12 +290,11 @@ private theorem resid_div {P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoi
   have hcast_ne : algebraMap F KE c ≠ 0 :=
     fun h ↦ hc (FaithfulSMul.algebraMap_injective F KE (h.trans (map_zero _).symm))
   -- numerator `u·c − a·d` residues to `a·c − a·c = 0`.
-  have hnum : resid P (u * algebraMap F KE c - algebraMap F KE a * d) (0 : F) := by
-    have := resid_sub (resid_mul hu (resid_const P c)) (resid_mul (resid_const P a) hd)
-    rwa [show a * c - a * c = (0 : F) from by ring] at this
   have hnum' : (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P
       (u * algebraMap F KE c - algebraMap F KE a * d) < 1 := by
-    have := hnum; unfold resid at this; rwa [map_zero, sub_zero] at this
+    have := resid_sub (resid_mul hu (resid_const P c)) (resid_mul (resid_const P a) hd)
+    unfold resid at this
+    rwa [show a * c - a * c = (0 : F) from by ring, map_zero, sub_zero] at this
   have hid : u / d - algebraMap F KE (a / c) =
       (u * algebraMap F KE c - algebraMap F KE a * d) * (d * algebraMap F KE c)⁻¹ := by
     rw [map_div₀, div_sub_div _ _ hd_ne hcast_ne, mul_inv, div_eq_mul_inv]
@@ -569,7 +568,6 @@ theorem oneSub_coords_at_affine
   -- non-inverse at the closed points: `x₁ ≠ x₂` rules out `x₁ = x₂ ∧ …`.
   have hxy_pts : ¬(x₁ = x₂ ∧ y₁ = W.toAffine.negY x₂ y₂) := fun h ↦ hx_ne h.1
   rw [Affine.Point.add_some hxy_pts, Affine.Point.some.injEq] at hsum
-  -- `hsum.1 : x = addX x₁ x₂ (slope ..)`, `hsum.2 : y = addY x₁ x₂ y₁ (slope ..)`.
   obtain ⟨hxeq, hyeq⟩ := hsum
   refine ⟨?_, ?_⟩
   · rw [hxeq]
@@ -1196,8 +1194,6 @@ theorem ord_P_isog_pullback_x_sub_const_eq_one
       Dω_isog_pullback_x_gen W α
     rw [sub_eq_zero] at h0
     rw [h0, Dω_algebraMap] at hDω
-    obtain ⟨c, hc⟩ := hcoeff
-    have hc_ne : c ≠ 0 := fun h ↦ hcoeff_ne (by rw [h, map_zero] at hc; exact hc.symm)
     have hau_ne : alpha_star_u W α ≠ 0 := by
       intro h
       rw [h, (⟨W.toAffine⟩ : SmoothPlaneCurve F).ord_P_zero] at h_u
