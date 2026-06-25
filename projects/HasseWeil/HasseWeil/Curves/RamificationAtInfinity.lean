@@ -6,8 +6,6 @@ Authors: Chris Birkbeck
 import Mathlib.NumberTheory.RamificationInertia.Basic
 import Mathlib.RingTheory.DedekindDomain.IntegralClosure
 
-import HasseWeil.Curves.Infinity
-
 /-!
 # Abstract ramification at infinity (Worker A Action 1)
 
@@ -108,9 +106,8 @@ noncomputable def polyToFieldOfInv {L : Type*} [Field L] [Algebra k L]
 theorem polyToFieldOfInv_injective_of_transcendental
     {L : Type*} [Field L] [Algebra k L]
     {f : L} (hf : Transcendental k f⁻¹) :
-    Function.Injective (polyToFieldOfInv (k := k) f) := by
-  rw [polyToFieldOfInv]
-  exact (transcendental_iff_injective).mp hf
+    Function.Injective (polyToFieldOfInv (k := k) f) :=
+  transcendental_iff_injective.mp hf
 
 /-- Sending a polynomial to its `f⁻¹`-evaluation factors as the algebra
 map `k → L` composed with the constant polynomial. -/
@@ -318,15 +315,12 @@ the morphism `f : C → ℙ¹`. -/
 noncomputable abbrev xIdeal : Ideal (Polynomial k) :=
   Ideal.span {Polynomial.X}
 
-instance xIdeal_isMaximal : (xIdeal (k := k)).IsMaximal := by
-  unfold xIdeal
-  exact (Ideal.span_singleton_prime Polynomial.X_ne_zero).mpr
-    Polynomial.prime_X |>.isMaximal
+instance xIdeal_isMaximal : (xIdeal (k := k)).IsMaximal :=
+  ((Ideal.span_singleton_prime Polynomial.X_ne_zero).mpr Polynomial.prime_X).isMaximal
     (by rw [Ne, Ideal.span_singleton_eq_bot]; exact Polynomial.X_ne_zero)
 
 theorem xIdeal_ne_bot : (xIdeal (k := k)) ≠ ⊥ := by
-  unfold xIdeal
-  rw [Ne, Ideal.span_singleton_eq_bot]
+  rw [xIdeal, Ne, Ideal.span_singleton_eq_bot]
   exact Polynomial.X_ne_zero
 
 /-- **Abstract fundamental ramification–inertia identity at infinity.**
@@ -364,7 +358,6 @@ noncomputable def quotientXAlgEquiv :
     (Polynomial k ⧸ xIdeal (k := k)) ≃ₐ[k] k :=
   have h : (Ideal.span {Polynomial.X} : Ideal (Polynomial k)) =
       Ideal.span {Polynomial.X - Polynomial.C (0 : k)} := by
-    congr 1
     rw [Polynomial.C_0, sub_zero]
   (Ideal.quotientEquivAlgOfEq k h).trans (Polynomial.quotientSpanXSubCAlgEquiv 0)
 
@@ -482,7 +475,7 @@ theorem Sinf.inertiaDeg_eq_one_of_algebraMap_surjective
   refine le_antisymm ?_ ?_
   · refine finrank_le_one (1 : data.carrier ⧸ P) fun w ↦ ?_
     obtain ⟨c, hc⟩ := h_surj w
-    exact ⟨c, by rw [Algebra.algebraMap_eq_smul_one] at hc; exact hc⟩
+    exact ⟨c, by rwa [Algebra.algebraMap_eq_smul_one] at hc⟩
   · have hpos := Ideal.inertiaDeg_pos (xIdeal (k := k)) P
     rwa [Ideal.inertiaDeg_algebraMap] at hpos
 
