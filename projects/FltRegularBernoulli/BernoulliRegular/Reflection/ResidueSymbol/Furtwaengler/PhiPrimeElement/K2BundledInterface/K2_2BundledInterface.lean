@@ -129,20 +129,11 @@ theorem K2_2_index_one_of_canonical_zeta_choices_ofDescent
       -BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical
         (p := p) (K := K) (((Fintype.card (𝓞 K ⧸ P') : ℤ) : 𝓞 K)) P := by
   letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
-  have h_apex := K2_2_of_canonical_zeta_choices_ofDescent
+  simpa using K2_2_of_canonical_zeta_choices_ofDescent
     hP_bot hℓ_in_P hp_in_P S h_zeta_k_eq h_zeta_p_int_eq
     (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero h_span
     hP'_bot hp_in_P' h_phi_notin_P'
     h_over hℓ_ne_ℓ'
-  change BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical
-      (p := p) (K := K)
-      (ofDescent S
-        (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero h_span).gamma P' =
-    -BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical
-      (p := p) (K := K) (((Fintype.card (𝓞 K ⧸ P') : ℤ) : 𝓞 K)) P
-  rw [h_apex]
-  push_cast
-  ring
 
 /-- **Index-one K2-2 for the actual descended Φ element, with nonmembership
 derived from coprime rational norms**. -/
@@ -185,20 +176,11 @@ theorem K2_2_index_one_of_canonical_zeta_choices_ofDescent_of_absNorm_coprime
       -BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical
         (p := p) (K := K) (((Fintype.card (𝓞 K ⧸ P') : ℤ) : 𝓞 K)) P := by
   letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
-  have h_apex := K2_2_of_canonical_zeta_choices_ofDescent_of_absNorm_coprime
+  simpa using K2_2_of_canonical_zeta_choices_ofDescent_of_absNorm_coprime
     hP_bot hℓ_in_P hp_in_P S h_zeta_k_eq h_zeta_p_int_eq
     (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero h_span
     hP'_bot hp_in_P' hcop
     h_over hℓ_ne_ℓ'
-  change BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical
-      (p := p) (K := K)
-      (ofDescent S
-        (le_refl 1) (one_le_p_sub_one_of_prime (p := p)) h_ne_zero h_span).gamma P' =
-    -BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical
-      (p := p) (K := K) (((Fintype.card (𝓞 K ⧸ P') : ℤ) : 𝓞 K)) P
-  rw [h_apex]
-  push_cast
-  ring
 
 /-- **K2-2 for the reciprocal-index actual Φ element, with nonmembership
 derived from coprime rational norms**.
@@ -247,24 +229,14 @@ theorem K2_2_sub_one_of_canonical_zeta_choices_ofDescent_of_absNorm_coprime
       BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical
         (p := p) (K := K) (((Fintype.card (𝓞 K ⧸ P') : ℤ) : 𝓞 K)) P := by
   letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
-  have h_apex := K2_2_of_canonical_zeta_choices_ofDescent_of_absNorm_coprime
+  have hp_sub_one_cast : ((p - 1 : ℕ) : ZMod p) = -1 := by
+    rw [Nat.cast_sub (Fact.out : Nat.Prime p).one_le, Nat.cast_one]
+    simp
+  simpa [hp_sub_one_cast] using K2_2_of_canonical_zeta_choices_ofDescent_of_absNorm_coprime
     hP_bot hℓ_in_P hp_in_P S h_zeta_k_eq h_zeta_p_int_eq
     (one_le_p_sub_one_of_prime (p := p)) (le_refl (p - 1)) h_ne_zero h_span
     hP'_bot hp_in_P' hcop
     h_over hℓ_ne_ℓ'
-  change BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical
-      (p := p) (K := K)
-      (ofDescent S
-        (one_le_p_sub_one_of_prime (p := p)) (le_refl (p - 1)) h_ne_zero h_span).gamma P' =
-    BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical
-      (p := p) (K := K) (((Fintype.card (𝓞 K ⧸ P') : ℤ) : 𝓞 K)) P
-  rw [h_apex]
-  have hp_sub_one_cast : ((p - 1 : ℕ) : ZMod p) = -1 := by
-    have hp_one : 1 ≤ p := (Fact.out : Nat.Prime p).one_le
-    rw [Nat.cast_sub hp_one, Nat.cast_one]
-    simp
-  rw [hp_sub_one_cast]
-  ring
 
 /-! ### Bundled K2-2 interface -/
 
