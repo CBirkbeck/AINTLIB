@@ -1,5 +1,4 @@
 import Mathlib.RingTheory.MvPowerSeries.Substitution
-import Mathlib.RingTheory.PowerSeries.Basic
 import Mathlib.RingTheory.PowerSeries.Substitution
 
 /-!
@@ -154,34 +153,22 @@ noncomputable def additiveFormalGroup : FormalGroup R where
         (![MvPowerSeries.X 0, 0] : Fin 2 → MvPowerSeries (Fin 2) R) := by
       apply MvPowerSeries.hasSubst_of_constantCoeff_zero
       intro s; fin_cases s <;> simp
-    rw [MvPowerSeries.subst_add ha]
-    show MvPowerSeries.subst _ (MvPowerSeries.X 0) +
-         MvPowerSeries.subst _ (MvPowerSeries.X 1) = MvPowerSeries.X 0
-    rw [MvPowerSeries.subst_X ha 0, MvPowerSeries.subst_X ha 1]
+    rw [MvPowerSeries.subst_add ha, MvPowerSeries.subst_X ha 0, MvPowerSeries.subst_X ha 1]
     simp
   runit := by
     have ha : MvPowerSeries.HasSubst
         (![0, MvPowerSeries.X 1] : Fin 2 → MvPowerSeries (Fin 2) R) := by
       apply MvPowerSeries.hasSubst_of_constantCoeff_zero
       intro s; fin_cases s <;> simp
-    rw [MvPowerSeries.subst_add ha]
-    show MvPowerSeries.subst _ (MvPowerSeries.X 0) +
-         MvPowerSeries.subst _ (MvPowerSeries.X 1) = MvPowerSeries.X 1
-    rw [MvPowerSeries.subst_X ha 0, MvPowerSeries.subst_X ha 1]
+    rw [MvPowerSeries.subst_add ha, MvPowerSeries.subst_X ha 0, MvPowerSeries.subst_X ha 1]
     simp
   assoc := by
-    -- Inner substs: first compute subst ![X 0, X 1] (X 0 + X 1) = X 0 + X 1
-    -- and subst ![X 1, X 2] (X 0 + X 1) = X 1 + X 2.
     have h_XY : MvPowerSeries.HasSubst
         (![MvPowerSeries.X (0 : Fin 3), MvPowerSeries.X 1] :
-          Fin 2 → MvPowerSeries (Fin 3) R) := by
-      apply MvPowerSeries.hasSubst_of_constantCoeff_zero
-      intro s; fin_cases s <;> simp
+          Fin 2 → MvPowerSeries (Fin 3) R) := MvPowerSeries.HasSubst.X_X
     have h_YZ : MvPowerSeries.HasSubst
         (![MvPowerSeries.X (1 : Fin 3), MvPowerSeries.X 2] :
-          Fin 2 → MvPowerSeries (Fin 3) R) := by
-      apply MvPowerSeries.hasSubst_of_constantCoeff_zero
-      intro s; fin_cases s <;> simp
+          Fin 2 → MvPowerSeries (Fin 3) R) := MvPowerSeries.HasSubst.X_X
     have e_XY : MvPowerSeries.subst
         (![MvPowerSeries.X (0 : Fin 3), MvPowerSeries.X 1] :
           Fin 2 → MvPowerSeries (Fin 3) R)
@@ -199,7 +186,6 @@ noncomputable def additiveFormalGroup : FormalGroup R where
           MvPowerSeries.subst_X h_YZ 0, MvPowerSeries.subst_X h_YZ 1]
       rfl
     rw [e_XY, e_YZ]
-    -- Outer substs
     have h_L : MvPowerSeries.HasSubst
         (![(MvPowerSeries.X 0 + MvPowerSeries.X 1 : MvPowerSeries (Fin 3) R),
            MvPowerSeries.X 2] : Fin 2 → MvPowerSeries (Fin 3) R) := by
@@ -222,14 +208,8 @@ noncomputable def additiveFormalGroup : FormalGroup R where
   comm := by
     have ha : MvPowerSeries.HasSubst
         (![MvPowerSeries.X 1, MvPowerSeries.X 0] :
-          Fin 2 → MvPowerSeries (Fin 2) R) := by
-      apply MvPowerSeries.hasSubst_of_constantCoeff_zero
-      intro s; fin_cases s <;> simp
-    rw [MvPowerSeries.subst_add ha]
-    show MvPowerSeries.subst _ (MvPowerSeries.X 0) +
-         MvPowerSeries.subst _ (MvPowerSeries.X 1) =
-         MvPowerSeries.X 0 + MvPowerSeries.X 1
-    rw [MvPowerSeries.subst_X ha 0, MvPowerSeries.subst_X ha 1]
+          Fin 2 → MvPowerSeries (Fin 2) R) := MvPowerSeries.HasSubst.X_X
+    rw [MvPowerSeries.subst_add ha, MvPowerSeries.subst_X ha 0, MvPowerSeries.subst_X ha 1]
     show ((MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) + MvPowerSeries.X 0) =
          MvPowerSeries.X 0 + MvPowerSeries.X 1
     ring
@@ -264,17 +244,12 @@ noncomputable def multiplicativeFormalGroup : FormalGroup R where
       = MvPowerSeries.X 1
     ring
   assoc := by
-    -- Inner substs
     have h_XY : MvPowerSeries.HasSubst
         (![MvPowerSeries.X (0 : Fin 3), MvPowerSeries.X 1] :
-          Fin 2 → MvPowerSeries (Fin 3) R) := by
-      apply MvPowerSeries.hasSubst_of_constantCoeff_zero
-      intro s; fin_cases s <;> simp
+          Fin 2 → MvPowerSeries (Fin 3) R) := MvPowerSeries.HasSubst.X_X
     have h_YZ : MvPowerSeries.HasSubst
         (![MvPowerSeries.X (1 : Fin 3), MvPowerSeries.X 2] :
-          Fin 2 → MvPowerSeries (Fin 3) R) := by
-      apply MvPowerSeries.hasSubst_of_constantCoeff_zero
-      intro s; fin_cases s <;> simp
+          Fin 2 → MvPowerSeries (Fin 3) R) := MvPowerSeries.HasSubst.X_X
     have e_XY : MvPowerSeries.subst
         (![MvPowerSeries.X (0 : Fin 3), MvPowerSeries.X 1] :
           Fin 2 → MvPowerSeries (Fin 3) R)
@@ -298,7 +273,6 @@ noncomputable def multiplicativeFormalGroup : FormalGroup R where
           MvPowerSeries.subst_X h_YZ 0, MvPowerSeries.subst_X h_YZ 1]
       rfl
     rw [e_XY, e_YZ]
-    -- Outer substs
     have h_L : MvPowerSeries.HasSubst
         (![(MvPowerSeries.X 0 + MvPowerSeries.X 1 +
             MvPowerSeries.X 0 * MvPowerSeries.X 1 : MvPowerSeries (Fin 3) R),
@@ -334,9 +308,7 @@ noncomputable def multiplicativeFormalGroup : FormalGroup R where
   comm := by
     have ha : MvPowerSeries.HasSubst
         (![MvPowerSeries.X 1, MvPowerSeries.X 0] :
-          Fin 2 → MvPowerSeries (Fin 2) R) := by
-      apply MvPowerSeries.hasSubst_of_constantCoeff_zero
-      intro s; fin_cases s <;> simp
+          Fin 2 → MvPowerSeries (Fin 2) R) := MvPowerSeries.HasSubst.X_X
     rw [MvPowerSeries.subst_add ha, MvPowerSeries.subst_add ha,
         MvPowerSeries.subst_mul ha,
         MvPowerSeries.subst_X ha 0, MvPowerSeries.subst_X ha 1]
@@ -375,8 +347,6 @@ noncomputable def mulByNatSeries (F : FormalGroup.FormalGroup R) : ℕ → Power
   | n + 1 => fAdd F (mulByNatSeries F n) (PowerSeries.X)
 
 /-! ### Properties of fAdd and mulByNatSeries -/
-
-variable {R : Type*} [CommRing R]
 
 lemma hasSubst_pair (f g : PowerSeries R)
     (hf : PowerSeries.constantCoeff f = 0) (hg : PowerSeries.constantCoeff g = 0) :
@@ -451,7 +421,6 @@ theorem constantCoeff_fAdd (F : FormalGroup.FormalGroup R) (f g : PowerSeries R)
 theorem formalGroup_preserves_positive_order (F : FormalGroup.FormalGroup R)
     (f g : PowerSeries R) (hf : 0 < f.order) (hg : 0 < g.order) :
     0 < (fAdd F f g).order := by
-  -- Bridge `0 < order` with `constantCoeff = 0` via `order ≠ 0 ↔ constantCoeff = 0`.
   rw [pos_iff_ne_zero, PowerSeries.order_ne_zero_iff_constCoeff_eq_zero] at hf hg ⊢
   exact constantCoeff_fAdd F f g hf hg
 
@@ -601,8 +570,7 @@ theorem coeff_one_fAdd (F : FormalGroup.FormalGroup R) (f g : PowerSeries R)
   simp only [Finsupp.single_eq_same, pow_one, pow_zero,
     Finsupp.single_eq_of_ne (show (0 : Fin 2) ≠ 1 from by decide),
     Finsupp.single_eq_of_ne (show (1 : Fin 2) ≠ 0 from by decide),
-    FormalGroup.coeff_10, FormalGroup.coeff_01, one_mul]
-  rw [mul_one]
+    FormalGroup.coeff_10, FormalGroup.coeff_01, one_mul, mul_one]
 
 /-- The constant coefficient of `[m](T)` is `0`. -/
 theorem constantCoeff_mulByNatSeries (F : FormalGroup.FormalGroup R) (n : ℕ) :
@@ -652,8 +620,8 @@ theorem fAdd_comm (F : FormalGroup.FormalGroup R) (f g : PowerSeries R)
     fAdd F f g = fAdd F g f := by
   unfold fAdd
   have ha : MvPowerSeries.HasSubst
-      (![MvPowerSeries.X 1, MvPowerSeries.X 0] : Fin 2 → MvPowerSeries (Fin 2) R) := by
-    apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro s; fin_cases s <;> simp
+      (![MvPowerSeries.X 1, MvPowerSeries.X 0] : Fin 2 → MvPowerSeries (Fin 2) R) :=
+    MvPowerSeries.HasSubst.X_X
   have hb := hasSubst_pair f g hf hg
   have step := congr_arg
     (MvPowerSeries.subst (show Fin 2 → MvPowerSeries Unit R from ![f, g])) F.comm
@@ -753,28 +721,23 @@ private lemma subst_fgh_X0_substYZ (F : FormalGroup.FormalGroup R) (f g h : Powe
     · exact subst_fin3_X _ h_fgh 1
     · exact subst_fin3_X _ h_fgh 2
 
-set_option maxHeartbeats 800000 in
 /-- `F(F(f, g), h) = F(f, F(g, h))`: associativity of the formal addition. -/
 theorem fAdd_assoc (F : FormalGroup.FormalGroup R) (f g h : PowerSeries R)
     (hf : PowerSeries.constantCoeff f = 0) (hg : PowerSeries.constantCoeff g = 0)
     (hh : PowerSeries.constantCoeff h = 0) :
     fAdd F (fAdd F f g) h = fAdd F f (fAdd F g h) := by
-  -- Strategy: apply subst ![f,g,h] to F.assoc, then show each side equals fAdd ∘ fAdd.
-  -- HasSubst for the specialization map (Fin 3 → Unit).
   have h_fgh : MvPowerSeries.HasSubst
       (show Fin 3 → MvPowerSeries Unit R from ![f, g, h]) := by
     apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro s; fin_cases s
     · simpa [PowerSeries.constantCoeff_eq] using hf
     · simpa [PowerSeries.constantCoeff_eq] using hg
     · simpa [PowerSeries.constantCoeff_eq] using hh
-  -- Apply subst ![f,g,h] to F.assoc and rewrite each side as an iterated fAdd.
   have step := congr_arg
     (MvPowerSeries.subst (show Fin 3 → MvPowerSeries Unit R from ![f, g, h])) F.assoc
   rw [subst_fgh_substXY_X2 F f g h h_fgh,
       subst_fgh_X0_substYZ F f g h h_fgh] at step
   exact step
 
-set_option maxHeartbeats 1600000 in
 /-- `[m + n](T) = F([m](T), [n](T))`: addition formula for mulByNatSeries. -/
 theorem mulByNatSeries_add (F : FormalGroup.FormalGroup R) (m n : ℕ) :
     mulByNatSeries F (m + n) = fAdd F (mulByNatSeries F m) (mulByNatSeries F n) := by
