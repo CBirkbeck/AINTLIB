@@ -199,8 +199,7 @@ theorem ord_P_algebraMap_poly_eq_zero_of_eval_ne (P : (⟨W⟩ : SmoothPlaneCurv
     rw [hu_def, ← IsScalarTower.algebraMap_apply (Polynomial F) R KE q]
   rw [h_factor]
   have h_notmem : u ∉ (⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt P := by
-    rw [← SmoothPlaneCurve.ker_evalAt, RingHom.mem_ker, hu_def, evalAt_algebraMap_poly W P q]
-    exact h_eval
+    rwa [← SmoothPlaneCurve.ker_evalAt, RingHom.mem_ker, hu_def, evalAt_algebraMap_poly W P q]
   by_contra h_ne
   exact h_notmem
     (((⟨W⟩ : SmoothPlaneCurve F).ord_P_algebraMap_ne_zero_iff_mem_maximalIdealAt hu_ne P).mp h_ne)
@@ -320,11 +319,11 @@ theorem preΨ_two_mul_eval_ne_zero {x y x_Q y_Q : F}
   have hQ2_ne : (2 : ℤ) • (Affine.Point.some x_Q y_Q h_ns') ≠ 0 := by
     intro hQ2
     have hQneg : Affine.Point.some x_Q y_Q h_ns' = -(Affine.Point.some x_Q y_Q h_ns') := by
-      rw [eq_neg_iff_add_eq_zero, ← two_zsmul]; exact hQ2
+      rwa [two_zsmul, ← eq_neg_iff_add_eq_zero] at hQ2
     rw [Affine.Point.neg_some, Affine.Point.some.injEq] at hQneg
     exact h_not_2_tor_Q hQneg.2
   have h2ℓ_ne : (2 * ℓ) • (Affine.Point.some x y h_ns) ≠ 0 := by
-    rw [mul_zsmul, hsmul]; exact hQ2_ne
+    rwa [← hsmul, ← mul_zsmul] at hQ2_ne
   have hψ_ne : (W.ψ (2 * ℓ)).evalEval x y ≠ 0 :=
     psi_evalEval_ne_zero_of_zsmul_ne_zero W h_ns (2 * ℓ) h2ℓ_ne
   have h_eq : W.toAffine.Equation x y := h_ns.1
@@ -450,7 +449,7 @@ theorem not_2_tor_of_image_not_2_tor {x_Q y_Q : F} (h_ns' : W.toAffine.Nonsingul
   have hQ2 : (2 : ℤ) • (Affine.Point.some x_Q y_Q h_ns') = 0 := by
     rw [← hsmul, smul_comm, hP2, smul_zero]
   have hQneg : Affine.Point.some x_Q y_Q h_ns' = -(Affine.Point.some x_Q y_Q h_ns') := by
-    rw [eq_neg_iff_add_eq_zero, ← two_zsmul]; exact hQ2
+    rwa [two_zsmul, ← eq_neg_iff_add_eq_zero] at hQ2
   rw [Affine.Point.neg_some, Affine.Point.some.injEq] at hQneg
   exact h_not_2_tor_Q hQneg.2
 
@@ -474,10 +473,9 @@ theorem ord_P_mulByInt_x_sub_const_eq_one (ℓ : ℤ) (hℓ : ℓ ≠ 0) (hℓF 
       ((1 : ℤ) : WithTop ℤ) := by
   have hsmul : ℓ • (Affine.Point.some P.x P.y P.nonsingular) =
       Affine.Point.some x_Q y_Q h_ns' := by
-    rw [mulByInt_apply] at hQ
-    rw [← SmoothPlaneCurve.SmoothPoint.toAffinePoint_def]; exact hQ
+    rwa [mulByInt_apply, SmoothPlaneCurve.SmoothPoint.toAffinePoint_def] at hQ
   have hsmul' : ℓ • P.toAffinePoint = Affine.Point.some x_Q y_Q h_ns' := by
-    rw [SmoothPlaneCurve.SmoothPoint.toAffinePoint_def]; exact hsmul
+    rwa [← SmoothPlaneCurve.SmoothPoint.toAffinePoint_def] at hsmul
   have h_not_2_tor_P : P.y ≠ W.toAffine.negY P.x P.y :=
     not_2_tor_of_image_not_2_tor W h_ns' P h_not_2_tor_Q hsmul'
   have hΨ_ne : ΨSq_ff W ℓ ≠ 0 := ΨSq_ff_ne_zero W hℓ
@@ -499,7 +497,7 @@ theorem one_le_ord_P_algebraMap_of_evalAt_zero
     ((1 : ℤ) : WithTop ℤ) ≤
       (⟨W⟩ : SmoothPlaneCurve F).ord_P P (algebraMap R KE u) := by
   have hu_mem : u ∈ (⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt P := by
-    rw [← (⟨W⟩ : SmoothPlaneCurve F).ker_evalAt P, RingHom.mem_ker]; exact heval
+    rwa [← RingHom.mem_ker, (⟨W⟩ : SmoothPlaneCurve F).ker_evalAt P] at heval
   have h_ord_ne_zero : (⟨W⟩ : SmoothPlaneCurve F).ord_P P (algebraMap R KE u) ≠ 0 :=
     ((⟨W⟩ : SmoothPlaneCurve F).ord_P_algebraMap_ne_zero_iff_mem_maximalIdealAt hu_ne P).mpr hu_mem
   have h_au_ne : algebraMap R KE u ≠ 0 :=
@@ -518,13 +516,10 @@ theorem one_le_ord_P_algebraMap_of_evalAt_zero
     omega
   have h_ne_top : (⟨W⟩ : SmoothPlaneCurve F).ord_P P (algebraMap R KE u) ≠ ⊤ :=
     (SmoothPlaneCurve.ord_P_eq_top_iff _).not.mpr h_au_ne
-  cases h : (⟨W⟩ : SmoothPlaneCurve F).ord_P P (algebraMap R KE u) with
-  | top => exact absurd h h_ne_top
-  | coe n =>
-    rw [h] at h_ord_nonneg h_ord_ne_zero
-    have hn0 : (0 : ℤ) ≤ n := by exact_mod_cast h_ord_nonneg
-    have hn_ne : n ≠ 0 := fun hn ↦ h_ord_ne_zero (by rw [hn]; rfl)
-    exact_mod_cast (show (1 : ℤ) ≤ n by omega)
+  lift (⟨W⟩ : SmoothPlaneCurve F).ord_P P (algebraMap R KE u) to ℤ using h_ne_top with n
+  have hn0 : (0 : ℤ) ≤ n := by exact_mod_cast h_ord_nonneg
+  have hn_ne : n ≠ 0 := fun hn ↦ h_ord_ne_zero (by rw [hn]; rfl)
+  exact_mod_cast (show (1 : ℤ) ≤ n by omega)
 
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`ord_P (algebraMap (Polynomial F) KE p) ≥ 1` when `p(P.x) = 0`** and `p ≠ 0`. Univariate
@@ -541,7 +536,7 @@ theorem one_le_ord_P_algebraMap_poly_of_root
     rw [hu_def, ← IsScalarTower.algebraMap_apply (Polynomial F) R KE p]
   rw [h_factor]
   refine one_le_ord_P_algebraMap_of_evalAt_zero W P hu_ne ?_
-  rw [hu_def, evalAt_algebraMap_poly W P p]; exact heval
+  rwa [← evalAt_algebraMap_poly W P p, ← hu_def] at heval
 
 private theorem mulByInt_neg_mem_kernel_of_torsion (n : ℤ)
     (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPoint)
@@ -734,7 +729,7 @@ private theorem ord_P_y_numerator_remainder_pos
   refine le_trans (le_min (le_trans (le_min ht1 ht2)
     (SmoothPlaneCurve.ord_P_add_le (P := P) _ _)) ?_)
     (SmoothPlaneCurve.ord_P_add_le (P := P) _ _)
-  rw [SmoothPlaneCurve.ord_P_neg]; exact ht3
+  rwa [← SmoothPlaneCurve.ord_P_neg] at ht3
 
 omit [DecidableEq F] in
 private theorem ord_P_y_numerator_eq_zero
@@ -1059,10 +1054,9 @@ theorem ord_P_mulByInt_y_sub_const_eq_one (ℓ : ℤ) (hℓ : ℓ ≠ 0) (hℓF 
   classical
   have hsmul : ℓ • (Affine.Point.some P.x P.y P.nonsingular) =
       Affine.Point.some x_Q y_Q h_ns' := by
-    rw [mulByInt_apply] at hQ
-    rw [← SmoothPlaneCurve.SmoothPoint.toAffinePoint_def]; exact hQ
+    rwa [mulByInt_apply, SmoothPlaneCurve.SmoothPoint.toAffinePoint_def] at hQ
   have hsmul' : ℓ • P.toAffinePoint = Affine.Point.some x_Q y_Q h_ns' := by
-    rw [SmoothPlaneCurve.SmoothPoint.toAffinePoint_def]; exact hsmul
+    rwa [← SmoothPlaneCurve.SmoothPoint.toAffinePoint_def] at hsmul
   set X := mulByInt_x W ℓ with hX
   set Y := mulByInt_y W ℓ with hY
   set xq := algebraMap F KE x_Q with hxq
@@ -1084,12 +1078,7 @@ theorem ord_P_mulByInt_y_sub_const_eq_one (ℓ : ℤ) (hℓ : ℓ ≠ 0) (hℓF 
   have hQeq' : yq ^ 2 + algebraMap F KE W.a₁ * xq * yq + algebraMap F KE W.a₃ * yq =
       xq ^ 3 + algebraMap F KE W.a₂ * xq ^ 2 + algebraMap F KE W.a₄ * xq +
         algebraMap F KE W.a₆ := by
-    have hh := (Affine.equation_iff _ _).mp hQeq
-    simpa only [show (W_KE W).a₁ = algebraMap F KE W.a₁ from rfl,
-      show (W_KE W).a₂ = algebraMap F KE W.a₂ from rfl,
-      show (W_KE W).a₃ = algebraMap F KE W.a₃ from rfl,
-      show (W_KE W).a₄ = algebraMap F KE W.a₄ from rfl,
-      show (W_KE W).a₆ = algebraMap F KE W.a₆ from rfl] using hh
+    exact (Affine.equation_iff _ _).mp hQeq
   set A : KE := Y + yq + algebraMap F KE W.a₁ * X + algebraMap F KE W.a₃ with hA
   set Bma : KE := X ^ 2 + X * xq + xq ^ 2 +
       algebraMap F KE W.a₂ * (X + xq) + algebraMap F KE W.a₄ -
