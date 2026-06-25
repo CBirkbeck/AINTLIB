@@ -101,8 +101,6 @@ theorem factorThroughPullback_spec (φ : CurveMap C₁ C₂) (ψ : CurveMap C₁
   change φ.pullback
       ((AlgEquiv.ofInjective φ.pullback φ.pullback.toRingHom.injective).symm
         (ψ.pullback.codRestrict φ.pullback.range (fun z ↦ h ⟨z, rfl⟩) z)) = _
-  -- `φ.pullback` of `(ofInjective φ).symm x` is the coercion of `x` back to K(C₁),
-  -- and the codomain-restriction's coercion is just `ψ.pullback z`.
   have key : ∀ x : φ.pullback.range,
       φ.pullback ((AlgEquiv.ofInjective φ.pullback φ.pullback.toRingHom.injective).symm x)
         = (x : C₁.FunctionField) := by
@@ -117,9 +115,7 @@ theorem factorThroughPullback_spec (φ : CurveMap C₁ C₂) (ψ : CurveMap C₁
 theorem factorThrough_comp (φ : CurveMap C₁ C₂) (ψ : CurveMap C₁ C₃)
     (h : ψ.pullback.range ≤ φ.pullback.range) :
     ψ = (factorThrough φ ψ h).comp φ := by
-  apply CurveMap.ext
-  apply AlgHom.ext
-  intro z
+  refine CurveMap.ext (AlgHom.ext fun z ↦ ?_)
   change ψ.pullback z = φ.pullback ((factorThrough φ ψ h).pullback z)
   rw [factorThrough_pullback, factorThroughPullback_spec]
 
@@ -415,7 +411,6 @@ noncomputable def mulByIntDual {φ : Isogeny W₁ W₂} {n : ℤ} {hn : n ≠ 0}
 -- `[DecidableEq F]` is genuinely required (it builds `mulByInt_pullbackAlgHom` and
 -- `HasMulByIntDualWitness`), but the linter only inspects the type signature.
 set_option linter.unusedSectionVars false in
-set_option linter.unusedDecidableInType false in
 /-- **Silverman III.6.1 defining identity (function-field form)**:
 `(φ̂ ∘ φ)* = [n]*`. Equivalently `φ* ∘ φ̂* = [n]*`, the pullback shadow of
 `φ̂ ∘ φ = [n]`. With `n = deg φ` this is `φ̂ ∘ φ = [deg φ]`. -/
@@ -500,8 +495,7 @@ theorem nonneg_of_nsmul_nonneg {q : ℕ} (hq : 1 ≤ q) {x : WithTop ℤ}
   | coe k =>
     rw [withTop_coe_nsmul, ← WithTop.coe_zero, WithTop.coe_le_coe, nsmul_eq_mul] at h
     rw [← WithTop.coe_zero, WithTop.coe_le_coe]
-    have hqz : (0 : ℤ) < q := by exact_mod_cast hq
-    exact (mul_nonneg_iff_of_pos_left hqz).mp h
+    exact (mul_nonneg_iff_of_pos_left (by exact_mod_cast hq : (0 : ℤ) < q)).mp h
 
 /-! ### RAMI-1 — `∞`-regularity reflection from the ramification index at `O`
 
@@ -568,9 +562,7 @@ theorem reflects_ordAtInfty_of_nontrivial (φ : Isogeny W₁ W₂)
     0 ≤ (⟨W₂⟩ : SmoothPlaneCurve F).ordAtInfty g :=
   Isogeny.reflects_ordAtInfty φ g h
 
--- `[DecidableEq K]` is genuinely required by `Isogeny.frobenius`, but the linter
--- only inspects the type signature (where it is resolved through that term).
-set_option linter.unusedDecidableInType false in
+-- `[DecidableEq K]` is genuinely required by `Isogeny.frobenius` in the statement.
 /-- **The `q`-power Frobenius reflects regularity at infinity** (axiom-clean):
 `0 ≤ ord_∞ (π* g) ⟹ 0 ≤ ord_∞ g`. This discharges the `hrefl` leaf of the dual
 witness for `φ = π`, the Verschiebung side of Silverman III.6.1 Case 2. -/
