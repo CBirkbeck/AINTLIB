@@ -2,11 +2,7 @@ import HasseWeil.FormalGroup.Definition
 import HasseWeil.FormalGroup.Inverse
 import Mathlib.Algebra.Group.MinimalAxioms
 import Mathlib.RingTheory.AdicCompletion.Topology
-import Mathlib.RingTheory.MvPowerSeries.Evaluation
-import Mathlib.RingTheory.MvPowerSeries.LinearTopology
-import Mathlib.RingTheory.MvPowerSeries.PiTopology
 import Mathlib.RingTheory.PowerSeries.Evaluation
-import Mathlib.Topology.Algebra.UniformRing
 
 /-!
 # The group `F(M)` associated to a formal group over a complete local ring
@@ -459,8 +455,7 @@ private lemma coeff_single_X_pow_mul_zero_pow_of_ne
     rw [show ((MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) R) ^ (d 0)) =
           MvPowerSeries.monomial (R := R) (Finsupp.single 0 (d 0)) 1 from by
         rw [MvPowerSeries.X_pow_eq]]
-    rw [MvPowerSeries.coeff_monomial]
-    rw [if_neg]
+    rw [MvPowerSeries.coeff_monomial, if_neg]
     intro heq
     apply hdj
     have := DFunLike.congr_fun heq 0
@@ -509,6 +504,8 @@ theorem FormalGroup.coeff_j0_of_ne_one (F : FormalGroup R) (j : ℕ) (hj : j ≠
       Matrix.cons_val_zero, Matrix.cons_val_one]
     rw [coeff_single_X_pow_mul_zero_pow_of_ne hd, smul_zero]
 
+omit [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R] [IsLinearTopology R R]
+  [T2Space R] [CompleteSpace R] in
 /-- Per-term evaluation in the `hasSum_eval₂` expansion of `F(x, 0)`: the term of the
 `eval₂`-sum of `F.toSeries` at `![x, 0]` indexed by `d` equals `x` when `d = single 0 1`
 and vanishes otherwise.
@@ -601,8 +598,7 @@ private lemma coeff_single_zero_pow_mul_X_pow_of_ne
     rw [show ((MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) R) ^ (d 1)) =
           MvPowerSeries.monomial (R := R) (Finsupp.single 1 (d 1)) 1 from by
         rw [MvPowerSeries.X_pow_eq]]
-    rw [MvPowerSeries.coeff_monomial]
-    rw [if_neg]
+    rw [MvPowerSeries.coeff_monomial, if_neg]
     intro heq
     apply hdj
     have := DFunLike.congr_fun heq 1
@@ -666,6 +662,8 @@ The key defining property is `F(x, i(x)) = 0`, which follows from
 `FormalGroup.fAdd_X_inverse_eq_zero` (the functional equation of the formal
 inverse) by evaluating both sides at `x`. -/
 
+omit [IsUniformAddGroup R] [IsTopologicalRing R] [IsLinearTopology R R] [T2Space R]
+  [CompleteSpace R] in
 /-- `PowerSeries.HasEval` holds for any `x ∈ M`: `x` is topologically nilpotent. -/
 private lemma powerSeries_hasEval_of_mem
     (hAdic : IsAdic (IsLocalRing.maximalIdeal R))
@@ -806,6 +804,8 @@ private theorem coeff_prod_pow_support_finite
     ENat.coe_lt_coe.mpr hdeg
   exact hlt.trans_le hord
 
+omit [IsLocalRing R] [IsUniformAddGroup R] [IsLinearTopology R R] [T2Space R]
+  [CompleteSpace R] in
 /-- Continuity of `MvPowerSeries.subst a` in the Pi topology for `a` with zero
 constant coefficient. -/
 private theorem continuous_subst_of_constantCoeff_zero
@@ -883,6 +883,8 @@ private theorem mvPowerSeries_eval_mem_maximalIdeal {σ : Type*} [Finite σ]
     have hds : 0 < d s := Nat.pos_of_ne_zero hs
     exact Ideal.pow_mem_of_mem _ (hb_mem s) _ hds
 
+omit [IsUniformAddGroup R] [IsTopologicalRing R] [IsLinearTopology R R] [T2Space R]
+  [CompleteSpace R] in
 /-- HasEval for a general finite-type family of elements of `M`. -/
 private lemma hasEval_of_mem_maximalIdeal_general {σ : Type*} [Finite σ]
     (hAdic : IsAdic (IsLocalRing.maximalIdeal R))
@@ -913,6 +915,7 @@ private lemma hasEval_eval₂_comp_of_mem_maximalIdeal {σ τ : Type*} [Finite �
   · rw [Filter.cofinite_eq_bot]
     exact Filter.tendsto_bot
 
+omit [IsLocalRing R] in
 /-- Polynomial-agreement step for `eval₂_subst_bridge`: on a `MvPolynomial` `p`
 (coerced into `MvPowerSeries`), the two evaluation routes already agree. After
 `subst_coe` the substitution becomes `MvPolynomial.aeval`, and `eval₂_comp_left`
@@ -922,7 +925,7 @@ the `h` hypothesis fed to `MvPowerSeries.eval₂_unique`. -/
 private theorem eval₂_subst_bridge_polynomial_agreement
     {σ τ : Type*} [Finite σ] [Finite τ]
     {a : σ → MvPowerSeries τ R}
-    (ha : MvPowerSeries.HasSubst a)
+    (_ha : MvPowerSeries.HasSubst a)
     {b : τ → R} (hb : MvPowerSeries.HasEval b)
     (hcid : Continuous (RingHom.id R)) (p : MvPolynomial σ R) :
     MvPowerSeries.eval₂ (RingHom.id R) b (MvPowerSeries.subst a (p : MvPowerSeries σ R)) =
@@ -1071,7 +1074,7 @@ theorem FormalGroup.evalAdd_evalNeg
   have ha0 : ∀ s, MvPowerSeries.constantCoeff (a s) = 0 :=
     constantCoeff_inverseSubstMap F
   have ha : MvPowerSeries.HasSubst a :=
-    MvPowerSeries.hasSubst_of_constantCoeff_zero (fun s ↦ ha0 s)
+    MvPowerSeries.hasSubst_of_constantCoeff_zero ha0
   -- The substitution gives us `subst a F.toSeries` ∈ MvPowerSeries Unit R = PowerSeries R.
   -- By hfg_zero, `subst a F.toSeries = fAdd F X inverse = 0`.
   have hsubst_zero : MvPowerSeries.subst a F.toSeries = 0 := by
@@ -1095,12 +1098,16 @@ pair embeddings `![X₀,X₁]` / `![X₁,X₂]` and the outer maps `![F(X₀,X�
 nested substitutions with the iterated `evalAdd`, and finally combining via the bridge.
 This mirrors the `PowerSeries`-level `HasseWeil.FG.fAdd_assoc` decomposition. -/
 
+omit [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R] [IsLinearTopology R R]
+  [T2Space R] [CompleteSpace R] in
 /-- The evaluation triple `![x, y, z]` lies componentwise in the maximal ideal `M`. -/
 private lemma evalAdd_assoc_triple_mem
     (x y z : IsLocalRing.maximalIdeal R) :
     ∀ i : Fin 3, (![x.1, y.1, z.1] : Fin 3 → R) i ∈ IsLocalRing.maximalIdeal R := by
   intro i; fin_cases i <;> simp [x.2, y.2, z.2]
 
+omit [IsLocalRing R] [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R]
+  [IsLinearTopology R R] [T2Space R] [CompleteSpace R] in
 /-- The inner pair embedding `![X₀, X₁] : Fin 2 → MvPowerSeries (Fin 3) R` admits
 substitution: both components are variables, so each has vanishing constant
 coefficient. -/
@@ -1110,6 +1117,8 @@ private lemma hasSubst_pair_X01_fin3 :
         Fin 2 → MvPowerSeries (Fin 3) R) :=
   MvPowerSeries.hasSubst_of_constantCoeff_zero (fun s ↦ by fin_cases s <;> simp)
 
+omit [IsLocalRing R] [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R]
+  [IsLinearTopology R R] [T2Space R] [CompleteSpace R] in
 /-- The inner pair embedding `![X₁, X₂] : Fin 2 → MvPowerSeries (Fin 3) R` admits
 substitution: both components are variables, so each has vanishing constant
 coefficient. -/
@@ -1119,6 +1128,8 @@ private lemma hasSubst_pair_X12_fin3 :
         Fin 2 → MvPowerSeries (Fin 3) R) :=
   MvPowerSeries.hasSubst_of_constantCoeff_zero (fun s ↦ by fin_cases s <;> simp)
 
+omit [IsLocalRing R] [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R]
+  [IsLinearTopology R R] [T2Space R] [CompleteSpace R] in
 /-- `F(X₀, X₁)`, i.e. `subst ![X₀, X₁] F.toSeries`, has vanishing constant
 coefficient. -/
 private lemma constantCoeff_subst_X01_toSeries (F : FormalGroup R) :
@@ -1130,6 +1141,8 @@ private lemma constantCoeff_subst_X01_toSeries (F : FormalGroup R) :
     (fun s ↦ by fin_cases s <;> simp) F.toSeries).trans
     (HasseWeil.FG.constantCoeff_FG_toSeries F)
 
+omit [IsLocalRing R] [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R]
+  [IsLinearTopology R R] [T2Space R] [CompleteSpace R] in
 /-- `F(X₁, X₂)`, i.e. `subst ![X₁, X₂] F.toSeries`, has vanishing constant
 coefficient. -/
 private lemma constantCoeff_subst_X12_toSeries (F : FormalGroup R) :
@@ -1141,6 +1154,8 @@ private lemma constantCoeff_subst_X12_toSeries (F : FormalGroup R) :
     (fun s ↦ by fin_cases s <;> simp) F.toSeries).trans
     (HasseWeil.FG.constantCoeff_FG_toSeries F)
 
+omit [IsLocalRing R] [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R]
+  [IsLinearTopology R R] [T2Space R] [CompleteSpace R] in
 /-- Each component of the outer left map `![F(X₀,X₁), X₂]` has vanishing constant
 coefficient. -/
 private lemma constantCoeff_outerL_zero (F : FormalGroup R) :
@@ -1150,9 +1165,11 @@ private lemma constantCoeff_outerL_zero (F : FormalGroup R) :
               Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries,
           MvPowerSeries.X 2] : Fin 2 → MvPowerSeries (Fin 3) R) s) = 0 := by
   intro s; fin_cases s
-  · simp only [Matrix.cons_val_zero]; exact constantCoeff_subst_X01_toSeries F
+  · exact constantCoeff_subst_X01_toSeries F
   · simp
 
+omit [IsLocalRing R] [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R]
+  [IsLinearTopology R R] [T2Space R] [CompleteSpace R] in
 /-- Each component of the outer right map `![X₀, F(X₁,X₂)]` has vanishing constant
 coefficient. -/
 private lemma constantCoeff_outerR_zero (F : FormalGroup R) :
@@ -1164,9 +1181,10 @@ private lemma constantCoeff_outerR_zero (F : FormalGroup R) :
         Fin 2 → MvPowerSeries (Fin 3) R) s) = 0 := by
   intro s; fin_cases s
   · simp
-  · simp only [Matrix.cons_val_one, Matrix.head_cons]
-    exact constantCoeff_subst_X12_toSeries F
+  · exact constantCoeff_subst_X12_toSeries F
 
+omit [IsLocalRing R] [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R]
+  [IsLinearTopology R R] [T2Space R] [CompleteSpace R] in
 /-- The outer map `![F(X₀,X₁), X₂] : Fin 2 → MvPowerSeries (Fin 3) R` — the left
 side of `F.assoc` — admits substitution. -/
 private lemma hasSubst_substX01_X2 (F : FormalGroup R) :
@@ -1177,6 +1195,8 @@ private lemma hasSubst_substX01_X2 (F : FormalGroup R) :
           MvPowerSeries.X 2] : Fin 2 → MvPowerSeries (Fin 3) R) :=
   MvPowerSeries.hasSubst_of_constantCoeff_zero (constantCoeff_outerL_zero F)
 
+omit [IsLocalRing R] [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R]
+  [IsLinearTopology R R] [T2Space R] [CompleteSpace R] in
 /-- The outer map `![X₀, F(X₁,X₂)] : Fin 2 → MvPowerSeries (Fin 3) R` — the right
 side of `F.assoc` — admits substitution. -/
 private lemma hasSubst_X0_substX12 (F : FormalGroup R) :
