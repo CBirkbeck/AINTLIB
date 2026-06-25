@@ -134,8 +134,8 @@ theorem _root_.HasseWeil.Curves.SmoothPlaneCurve.coordRingMap_algebraMap_F
   change WeierstrassCurve.Affine.CoordinateRing.map C.toAffine (algebraMap F L)
     (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
       (Polynomial.C (Polynomial.C a))) = _
-  rw [WeierstrassCurve.Affine.CoordinateRing.map_mk]
-  rw [show ((Polynomial.C (Polynomial.C a) : Polynomial (Polynomial F)).map
+  rw [WeierstrassCurve.Affine.CoordinateRing.map_mk,
+    show ((Polynomial.C (Polynomial.C a) : Polynomial (Polynomial F)).map
         (Polynomial.mapRingHom (algebraMap F L))) =
         Polynomial.C (Polynomial.C ((algebraMap F L) a)) by
       rw [Polynomial.map_C, Polynomial.coe_mapRingHom, Polynomial.map_C]]
@@ -442,8 +442,7 @@ theorem coordRingScalarExtFwd_surjective (L : Type*) [Field L] [Algebra F L] :
     rfl
   rw [← C.adjoin_baseChange_of_X_root_eq_top L, Algebra.adjoin_le_iff]
   rintro x (rfl | rfl)
-  · exact hX
-  · exact hroot
+  exacts [hX, hroot]
 
 /-- `CoordinateRing.map` matches the two affine coordinate-ring basis elements:
 it sends the base `1`-element (`bᵢ` at `i = 0`) and the class of `X` (`bᵢ` at
@@ -500,10 +499,10 @@ theorem coordRingScalarExtFwd_injective (L : Type*) [Field L] [Algebra F L] :
   set bLA : Module.Basis (ℕ × Fin 2) L (L ⊗[F] C.toAffine.CoordinateRing) :=
     Algebra.TensorProduct.basis L
       ((Polynomial.basisMonomials F).smulTower
-        (WeierstrassCurve.Affine.CoordinateRing.basis C.toAffine)) with hbLA
+        (WeierstrassCurve.Affine.CoordinateRing.basis C.toAffine))
   set bD : Module.Basis (ℕ × Fin 2) L (C.baseChange L).toAffine.CoordinateRing :=
     (Polynomial.basisMonomials L).smulTower
-      (WeierstrassCurve.Affine.CoordinateRing.basis (C.baseChange L).toAffine) with hbD
+      (WeierstrassCurve.Affine.CoordinateRing.basis (C.baseChange L).toAffine)
   have heq : (C.coordRingScalarExtFwd L).toLinearMap =
       (bLA.equiv bD (Equiv.refl _)).toLinearMap := by
     refine bLA.ext fun ij ↦ (C.coordRingScalarExtFwd_tensorBasis_eq L ij).trans ?_
@@ -577,8 +576,7 @@ theorem fwdPinned_surjective (L : Type*) [Field L] [Algebra F L] :
     rfl
   rw [← C.adjoin_baseChange_of_X_root_eq_top L, Algebra.adjoin_le_iff]
   rintro x (rfl | rfl)
-  · exact hX
-  · exact hroot
+  exacts [hX, hroot]
 
 /-- `fwdPinned` is injective: it carries the `L`-basis `{Xⁿ • bᵢ}` of
 `L ⊗[F] C.CoordinateRing` to the corresponding basis of the base-changed coordinate
@@ -610,15 +608,7 @@ theorem fwdPinned_injective (L : Type*) [Field L] [Algebra F L] :
     rw [WeierstrassCurve.Affine.CoordinateRing.map_smul, Polynomial.map_pow,
       Polynomial.map_X]
     congr 1
-    fin_cases i
-    · simp only [Fin.isValue, Fin.mk_zero, Affine.CoordinateRing.basis_zero, map_one]
-      rfl
-    · simp only [Fin.isValue, Fin.mk_one,
-        WeierstrassCurve.Affine.CoordinateRing.basis_one]
-      change WeierstrassCurve.Affine.CoordinateRing.map C.toAffine (algebraMap F L)
-        (AdjoinRoot.mk C.toAffine.polynomial Polynomial.X) = _
-      rw [WeierstrassCurve.Affine.CoordinateRing.map_mk, Polynomial.map_X]
-      rfl
+    exact C.coordRingMap_basis_eq L i
   have heq : (C.fwdPinned L).toLinearMap =
       (bLA.equiv bD (Equiv.refl _)).toLinearMap := by
     refine bLA.ext fun ij ↦ (hbasis ij).trans ?_
@@ -769,16 +759,9 @@ private theorem tensorFunctionField_isLocalization (L : Type*) [Field L] [Algebr
     (Algebra.TensorProduct.map
       (IsScalarTower.toAlgHom F C.toAffine.CoordinateRing C.toAffine.FunctionField)
       (AlgHom.id F L)).toRingHom.toAlgebra
-  have halgmap : (algebraMap (C.toAffine.CoordinateRing ⊗[F] L)
-      (C.toAffine.FunctionField ⊗[F] L)) =
-      (Algebra.TensorProduct.map
-        (IsScalarTower.toAlgHom F C.toAffine.CoordinateRing C.toAffine.FunctionField)
-        (AlgHom.id F L)).toRingHom := rfl
   haveI tower : IsScalarTower C.toAffine.CoordinateRing (C.toAffine.CoordinateRing ⊗[F] L)
       (C.toAffine.FunctionField ⊗[F] L) :=
-    IsScalarTower.of_algebraMap_eq fun _ ↦ by
-      rw [halgmap]
-      rfl
+    IsScalarTower.of_algebraMap_eq fun _ ↦ rfl
   exact @IsLocalization.tensorProduct_tensorProduct F L _ _ _ C.toAffine.CoordinateRing _ _
     (nonZeroDivisors C.toAffine.CoordinateRing) C.toAffine.FunctionField _ _ _ _ _ algBC tower
     (by ext x
