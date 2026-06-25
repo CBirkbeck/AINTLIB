@@ -51,9 +51,8 @@ Reference: standard property of projective space. -/
 theorem mk_smul_eq_mk (s : C.FunctionField) (hs : s ≠ 0)
     (f : Fin (N + 1) → C.FunctionField) (hf : f ≠ 0) :
     mk (fun i ↦ s * f i) (fun h ↦ hf <| funext fun i ↦
-      (mul_eq_zero.mp (congrFun h i)).resolve_left hs) = mk f hf := by
-  apply (mk_eq_mk_iff _ hf).mpr
-  exact ⟨Units.mk0 s hs, funext fun i ↦ rfl⟩
+      (mul_eq_zero.mp (congrFun h i)).resolve_left hs) = mk f hf :=
+  (mk_eq_mk_iff _ hf).mpr ⟨Units.mk0 s hs, funext fun _ ↦ rfl⟩
 
 /-- **Silverman II.2.1**: every rational map from a smooth plane curve is
 regular at every smooth point (hence a morphism). Proof: pick `j`
@@ -64,7 +63,6 @@ theorem isRegularAt_of_smooth (φ : ProjectiveTuple C N) (P : C.SmoothPoint) :
     φ.IsRegularAt P := by
   have hf : φ.repr ≠ 0 := φ.repr_ne_zero
   obtain ⟨t, ht⟩ := C.exists_uniformizer P
-  -- Find j minimizing ord_P(repr ·).
   obtain ⟨j, _, hj_min⟩ := (Finset.univ : Finset (Fin (N + 1))).exists_min_image
     (fun i ↦ C.ord_P P (φ.repr i)) Finset.univ_nonempty
   -- `repr j ≠ 0`: else ord_P(repr j) = ⊤ ≤ ord_P(repr i) ⟹ all are ⊤ ⟹ repr = 0.
@@ -76,10 +74,10 @@ theorem isRegularAt_of_smooth (φ : ProjectiveTuple C N) (P : C.SmoothPoint) :
       ((ord_P_eq_top_iff _).mpr h_j_zero ▸ hj_min i (Finset.mem_univ _))
   have hj_lt : C.ord_P P (φ.repr j) ≠ ⊤ :=
     (not_iff_not.mpr (ord_P_eq_top_iff _)).mpr hj_ne
-  set m : ℤ := (C.ord_P P (φ.repr j)).untop hj_lt with hm_def
-  have hm_eq : C.ord_P P (φ.repr j) = (m : ℤ) := (WithTop.coe_untop _ _).symm
+  set m : ℤ := (C.ord_P P (φ.repr j)).untop hj_lt
+  have hm_eq : C.ord_P P (φ.repr j) = (m : ℤ) := (coe_untop _ _).symm
   obtain ⟨s, hs_ne, hs_ord⟩ := ht.exists_ord_P_eq (-m)
-  set f : Fin (N + 1) → C.FunctionField := fun i ↦ s * φ.repr i with hf_def
+  set f : Fin (N + 1) → C.FunctionField := fun i ↦ s * φ.repr i
   have hf_j_ne : f j ≠ 0 := mul_ne_zero hs_ne hj_ne
   have hf_ne : f ≠ 0 := fun h ↦ hf_j_ne (congrFun h j)
   refine ⟨f, hf_ne, ?_, ?_, j, ?_⟩
@@ -88,22 +86,20 @@ theorem isRegularAt_of_smooth (φ : ProjectiveTuple C N) (P : C.SmoothPoint) :
     change 0 ≤ C.ord_P P (s * φ.repr i)
     rw [ord_P_mul, hs_ord]
     by_cases hi : φ.repr i = 0
-    · rw [(ord_P_eq_top_iff _).mpr hi]
-      rw [show ((↑(-m) : WithTop ℤ) + ⊤ : WithTop ℤ) = ⊤ from by
-        cases hs_ord_cases : C.ord_P P s <;> rfl]
+    · rw [(ord_P_eq_top_iff _).mpr hi, WithTop.add_top]
       exact le_top
     · have h_top_i : C.ord_P P (φ.repr i) ≠ ⊤ :=
         (not_iff_not.mpr (ord_P_eq_top_iff _)).mpr hi
-      set k : ℤ := (C.ord_P P (φ.repr i)).untop h_top_i with hk_def
-      have hk_eq : C.ord_P P (φ.repr i) = (k : ℤ) := (WithTop.coe_untop _ _).symm
+      set k : ℤ := (C.ord_P P (φ.repr i)).untop h_top_i
+      have hk_eq : C.ord_P P (φ.repr i) = (k : ℤ) := (coe_untop _ _).symm
       have h_ge : C.ord_P P (φ.repr j) ≤ C.ord_P P (φ.repr i) :=
         hj_min i (Finset.mem_univ _)
       rw [hm_eq, hk_eq] at h_ge
-      have hmk : m ≤ k := WithTop.coe_le_coe.mp h_ge
-      rw [hk_eq, ← WithTop.coe_add]
+      have hmk : m ≤ k := coe_le_coe.mp h_ge
+      rw [hk_eq, ← coe_add]
       exact_mod_cast (by omega : (0 : ℤ) ≤ -m + k)
   · change C.ord_P P (s * φ.repr j) = 0
-    rw [ord_P_mul, hs_ord, hm_eq, ← WithTop.coe_add,
+    rw [ord_P_mul, hs_ord, hm_eq, ← coe_add,
       show (-m + m : ℤ) = 0 from by omega]
     rfl
 
