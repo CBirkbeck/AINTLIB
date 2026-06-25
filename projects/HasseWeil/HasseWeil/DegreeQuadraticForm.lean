@@ -96,7 +96,6 @@ theorem comp_toAddMonoidHom_eq_mulByInt_of_quadratic
     exact eq_sub_of_add_eq h
   rw [map_sub, map_zsmul, map_zsmul, hcP, hdP]
   simp only [smul_sub, ← mul_zsmul]
-  set d := (α.degree : ℤ)
   rw [show s * r = r * s from mul_comm s r]
   module
 
@@ -175,13 +174,10 @@ theorem signed_degree_of_isDualOf_and_comp_eq
     (h_alpha_pos : 0 < α.degree)
     (h_comp_eq : β.comp α = mulByInt W.toAffine N) :
     (α.degree : ℤ) = N := by
-  -- IsDualOf β α: β.comp α = mulByInt α.degree (and α.comp β = mulByInt α.degree)
-  -- Combined with h_comp_eq: mulByInt α.degree = mulByInt N as full isogenies.
-  -- Wall C (mulByInt_left_injective) extracts α.degree = N signed.
   have h_mulByInt_eq : mulByInt W.toAffine (α.degree : ℤ) = mulByInt W.toAffine N := by
     rw [← h_isDual.1, h_comp_eq]
-  have h_alpha_ne : (α.degree : ℤ) ≠ 0 := Int.natCast_ne_zero.mpr h_alpha_pos.ne'
-  exact mulByInt_left_injective W (α.degree : ℤ) N h_alpha_ne hN h_mulByInt_eq
+  exact mulByInt_left_injective W (α.degree : ℤ) N
+    (Int.natCast_ne_zero.mpr h_alpha_pos.ne') hN h_mulByInt_eq
 
 /-- **SUB-PIV-D specialized**: SIGNED degree extraction for the genuine
 `r·α − s·id` family, witness-parametric on the substantive pivot inputs.
@@ -220,19 +216,14 @@ theorem sq_degree_eq_sq_of_dual_comp_witness
     (h_comp : β_dual.comp β = mulByInt E N)
     (h_dual_deg : β_dual.degree = β.degree) :
     (β.degree : ℤ) ^ 2 = N ^ 2 := by
-  have h1 : (β_dual.comp β).degree = β.degree * β_dual.degree :=
-    Isogeny.comp_degree β_dual β
-  have h2 : (mulByInt E N).degree = (N ^ 2).toNat := mulByInt_degree E N hN
   have h3 : β.degree * β_dual.degree = (N ^ 2).toNat := by
-    rw [← h2, ← h_comp]; exact h1.symm
+    rw [← mulByInt_degree E N hN, ← h_comp]; exact (Isogeny.comp_degree β_dual β).symm
   rw [h_dual_deg] at h3
-  have hN2_nn : (0 : ℤ) ≤ N ^ 2 := sq_nonneg _
   have h4 : (β.degree * β.degree : ℤ) = N ^ 2 := by
     have hcast := congrArg ((↑·) : ℕ → ℤ) h3
     push_cast at hcast
-    rw [hcast, Int.toNat_of_nonneg hN2_nn]
-  have hsq_eq : (β.degree : ℤ) ^ 2 = (β.degree * β.degree : ℤ) := by ring
-  rw [hsq_eq, h4]
+    rw [hcast, Int.toNat_of_nonneg (sq_nonneg _)]
+  rw [pow_two]; exact h4
 
 /-- **Degree identity from dual composition** (step 4b, absolute-value form):
     under the same dual-composition witness, `(β.degree : ℤ) = |N|`. -/
@@ -242,20 +233,8 @@ theorem degree_eq_abs_of_dual_comp_witness
     (h_dual_deg : β_dual.degree = β.degree) :
     (β.degree : ℤ) = |N| := by
   have hsq := sq_degree_eq_sq_of_dual_comp_witness β β_dual N hN h_comp h_dual_deg
-  have hβ_nn : (0 : ℤ) ≤ β.degree := Int.natCast_nonneg _
-  have h_absN_nn : (0 : ℤ) ≤ |N| := abs_nonneg _
   have h_sq_abs : (β.degree : ℤ) ^ 2 = |N| ^ 2 := by rw [hsq, sq_abs]
-  have h_prod :
-      ((β.degree : ℤ) - |N|) * ((β.degree : ℤ) + |N|) = 0 := by
-    have : ((β.degree : ℤ) - |N|) * ((β.degree : ℤ) + |N|) =
-        (β.degree : ℤ) ^ 2 - |N| ^ 2 := by ring
-    linarith
-  rcases mul_eq_zero.mp h_prod with h | h
-  · linarith
-  · -- β.degree + |N| = 0 forces both to 0 (both ≥ 0)
-    have hβ0 : (β.degree : ℤ) = 0 := by linarith
-    have hN0 : |N| = 0 := by linarith
-    linarith
+  exact (sq_eq_sq₀ (Int.natCast_nonneg _) (abs_nonneg _)).mp h_sq_abs
 
 /-- **Consumer of the dual chain** (step 4c): combines
     `sq_degree_eq_sq_of_dual_comp_witness` with the explicit
@@ -286,7 +265,6 @@ theorem degree_quadratic_of_dualChain_witnesses
     (β.degree : ℤ) =
       (α.degree : ℤ) * r ^ 2 - (isogTrace α one_sub_α) * r * s + s ^ 2 := by
   set N := (α.degree : ℤ) * r ^ 2 - (isogTrace α one_sub_α) * r * s + s ^ 2
-    with hN_def
   have h_abs := degree_eq_abs_of_dual_comp_witness β β_dual N h_N_ne
     h_comp h_dual_deg
   rw [h_abs, abs_of_nonneg h_nonneg_N]
@@ -323,13 +301,11 @@ theorem sq_degree_eq_sq_of_dual_deg_prod_witness
     (h_dual_deg : β_dual.degree = β.degree) :
     (β.degree : ℤ) ^ 2 = N ^ 2 := by
   rw [h_dual_deg] at h_deg_prod
-  have hN2_nn : (0 : ℤ) ≤ N ^ 2 := sq_nonneg _
   have h4 : (β.degree * β.degree : ℤ) = N ^ 2 := by
     have hcast := congrArg ((↑·) : ℕ → ℤ) h_deg_prod
     push_cast at hcast
-    rw [hcast, Int.toNat_of_nonneg hN2_nn]
-  have hsq_eq : (β.degree : ℤ) ^ 2 = (β.degree * β.degree : ℤ) := by ring
-  rw [hsq_eq, h4]
+    rw [hcast, Int.toNat_of_nonneg (sq_nonneg _)]
+  rw [pow_two]; exact h4
 
 /-- **Degree-level variant of `sq_degree_eq_sq_of_dual_comp_witness`** (alternative
     form): takes `(β_dual.comp β).degree = (N²).toNat` as a single hypothesis.
@@ -355,19 +331,8 @@ theorem degree_eq_abs_of_dual_deg_prod_witness
     (β.degree : ℤ) = |N| := by
   have hsq := sq_degree_eq_sq_of_dual_deg_prod_witness β β_dual N h_deg_prod
     h_dual_deg
-  have hβ_nn : (0 : ℤ) ≤ β.degree := Int.natCast_nonneg _
-  have h_absN_nn : (0 : ℤ) ≤ |N| := abs_nonneg _
   have h_sq_abs : (β.degree : ℤ) ^ 2 = |N| ^ 2 := by rw [hsq, sq_abs]
-  have h_prod :
-      ((β.degree : ℤ) - |N|) * ((β.degree : ℤ) + |N|) = 0 := by
-    have : ((β.degree : ℤ) - |N|) * ((β.degree : ℤ) + |N|) =
-        (β.degree : ℤ) ^ 2 - |N| ^ 2 := by ring
-    linarith
-  rcases mul_eq_zero.mp h_prod with h | h
-  · linarith
-  · have hβ0 : (β.degree : ℤ) = 0 := by linarith
-    have hN0 : |N| = 0 := by linarith
-    linarith
+  exact (sq_eq_sq₀ (Int.natCast_nonneg _) (abs_nonneg _)).mp h_sq_abs
 
 /-- **Degree-level consumer of the dual chain** (step 4c, weakened):
     same conclusion as `degree_quadratic_of_dualChain_witnesses`, but the
@@ -388,7 +353,6 @@ theorem degree_quadratic_of_dualChain_deg_witnesses
     (β.degree : ℤ) =
       (α.degree : ℤ) * r ^ 2 - (isogTrace α one_sub_α) * r * s + s ^ 2 := by
   set N := (α.degree : ℤ) * r ^ 2 - (isogTrace α one_sub_α) * r * s + s ^ 2
-    with hN_def
   have h_abs := degree_eq_abs_of_dual_deg_prod_witness β β_dual N
     h_deg_prod h_dual_deg
   rw [h_abs, abs_of_nonneg h_nonneg_N]
