@@ -154,7 +154,7 @@ theorem algebraic_in_fracRing_eq_const (z : FractionRing (Polynomial F))
 /-- If `addPullback_x W α` has a pole at infinity (`ord_∞ < 0`), it cannot equal a
 constant from `F`. The pole hypothesis is supplied by the Frobenius pullback formula
 `π·x = x^q` for `α = -frobeniusIsog W`, and by Silverman III.3.6 in general. -/
-theorem addPullback_x_ne_const_of_pole (hxy : AddNonInverse W α) (c : F)
+theorem addPullback_x_ne_const_of_pole (_hxy : AddNonInverse W α) (c : F)
     (h_pole : (W_smooth W).ordAtInfty (addPullback_x W α) < 0)
     (hc : addPullback_x W α = algebraMap F KE c) : False := by
   by_cases hc_zero : c = 0
@@ -283,7 +283,7 @@ private lemma addPullback_x_quadratic_over_F_case_two
         algebraMap (FractionRing (Polynomial F)) KE r) :
     ∃ c₁ c₀ : F, (addPullback_x W α) ^ 2 -
       algebraMap F KE c₁ * addPullback_x W α + algebraMap F KE c₀ = 0 := by
-  set px := addPullback_x W α with hpx_def
+  set px := addPullback_x W α
   have h_int_F : IsIntegral F px := h_alg.isIntegral
   have h_monic_F : (minpoly F px).Monic := minpoly.monic h_int_F
   have h_int_K : IsIntegral (FractionRing (Polynomial F)) px := (h_alg.tower_top _).isIntegral
@@ -303,7 +303,7 @@ private lemma addPullback_x_quadratic_over_F_case_two
         (algebraMap F (FractionRing (Polynomial F)))).natDegree = 2 := by
       rw [← h_map_eq]; exact h_eq_2_K
     rwa [h_monic_F.natDegree_map] at h1
-  set p := minpoly F px with hp_def
+  set p := minpoly F px
   refine ⟨-(p.coeff 1), p.coeff 0, ?_⟩
   have h_aeval : Polynomial.aeval px p = 0 := minpoly.aeval F px
   have h_lc_2 : p.coeff 2 = 1 := by
@@ -320,7 +320,7 @@ private lemma addPullback_x_quadratic_over_F (h_alg : IsAlgebraic F (addPullback
     (hfin : Module.finrank (FractionRing (Polynomial F)) KE = 2) :
     ∃ c₁ c₀ : F, (addPullback_x W α) ^ 2 -
       algebraMap F KE c₁ * addPullback_x W α + algebraMap F KE c₀ = 0 := by
-  set px := addPullback_x W α with hpx_def
+  set px := addPullback_x W α
   by_cases hmem : ∃ r : FractionRing (Polynomial F),
       px = algebraMap (FractionRing (Polynomial F)) KE r
   · obtain ⟨r, hr⟩ := hmem
@@ -419,9 +419,9 @@ private lemma minpoly_not_const_degree_two [NeZero (2 : F)] (c₁ c₀ : F)
       rw [hpq, hq, zero_smul, add_zero, Algebra.smul_def, mul_one]
     exact this
   set α' : FractionRing (Polynomial F) :=
-    algebraMap F (FractionRing (Polynomial F)) c₁ with hα'_def
+    algebraMap F (FractionRing (Polynomial F)) c₁
   set γ' : FractionRing (Polynomial F) :=
-    algebraMap F (FractionRing (Polynomial F)) c₀ with hγ'_def
+    algebraMap F (FractionRing (Polynomial F)) c₀
   have h_α_img :
       algebraMap (FractionRing (Polynomial F)) C.FunctionField α' =
         algebraMap F C.FunctionField c₁ := by
@@ -515,6 +515,7 @@ private theorem addCoordRingHom_smulBasis (hxy : AddNonInverse W α) (p q : Poly
     · exact AdjoinRoot.lift_of _
     · exact AdjoinRoot.lift_root _
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- The norm of the power-basis element `p • 1 + q • Y`, pushed into the coordinate ring,
 factors as the element times its conjugate `C p + C q * (-Y - C (a₁X + a₃))`. -/
 private theorem algebraMap_norm_smulBasis (p q : Polynomial F) :
@@ -532,6 +533,7 @@ private theorem algebraMap_norm_smulBasis (p q : Polynomial F) :
   rw [map_add, map_mul]
   simp [Algebra.smul_def]
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- The norm of the power-basis element `p • 1 + q • Y` is nonzero whenever `q ≠ 0`:
 its degree is `max (2·deg p) (2·deg q + 3)`, and the second term is finite (`≠ ⊥`). -/
 private theorem norm_smulBasis_ne_zero_of_snd_ne_zero (p : Polynomial F) {q : Polynomial F}
@@ -799,33 +801,13 @@ private theorem addCoordRingHomPair_smul_basis_q_ne_zero
         (Polynomial.C W.a₁ * Polynomial.X + Polynomial.C W.a₃))) with hconj_def
   have h_factor : algebraMap (Polynomial F) R (Algebra.norm (Polynomial F) r') =
       r' * conj_r := by
-    rw [hr'_def, hconj_def]
-    change AdjoinRoot.of _ _ = _
-    rw [Affine.CoordinateRing.coe_norm_smul_basis, map_mul]
-    congr 1
-    rw [map_add, map_mul]
-    simp [Algebra.smul_def]
+    rw [hr'_def, hconj_def]; exact algebraMap_norm_smulBasis (W := W) p q
   have hr'_zero : addCoordRingHomPair hxy r' = 0 := h0
   have h_norm_zero : addBaseHomPair α₁ α₂ (Algebra.norm (Polynomial F) r') = 0 := by
     rw [← h_alg, h_factor, map_mul, hr'_zero, zero_mul]
   have h_norm_eq : Algebra.norm (Polynomial F) r' = 0 :=
     hxinj (h_norm_zero.trans (map_zero _).symm)
-  rw [hr'_def] at h_norm_eq
-  have h_deg := Affine.CoordinateRing.degree_norm_smul_basis (W' := W.toAffine) p q
-  rw [h_norm_eq, Polynomial.degree_zero] at h_deg
-  have hq_deg : q.degree ≠ ⊥ := Polynomial.degree_ne_bot.mpr hq
-  have : 2 • q.degree + 3 ≠ (⊥ : WithBot ℕ) := by
-    intro h
-    apply hq_deg
-    cases hd : q.degree with
-    | bot => rfl
-    | coe n =>
-        rw [hd] at h
-        exact absurd h (by
-          change ¬ (2 • (↑n : WithBot ℕ) + 3 = ⊥)
-          simp [WithBot.mul_ne_bot])
-  exact absurd (h_deg ▸ le_max_right _ _ : 2 • q.degree + 3 ≤ ⊥)
-    (not_le.mpr (WithBot.bot_lt_iff_ne_bot.mpr this))
+  exact norm_smulBasis_ne_zero_of_snd_ne_zero (W := W) p hq h_norm_eq
 
 /-- `addCoordAlgHomPair hxy` is injective, given injectivity of the base hom
 `addBaseHomPair α₁ α₂`. The pair analogue of `addCoordAlgHom_injective_of_baseHom_inj`. -/
