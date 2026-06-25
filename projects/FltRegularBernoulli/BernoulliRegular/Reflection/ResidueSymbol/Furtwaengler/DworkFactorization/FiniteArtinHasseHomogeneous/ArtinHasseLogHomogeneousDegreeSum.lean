@@ -2,6 +2,10 @@ module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.DworkFactorization.FiniteArtinHasseHomogeneous.ArtinHasseExpCoordPoly
 
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.DworkFactorization.FiniteArtinHasseLog
+
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.DworkFactorization.FiniteLogProducts
+
 @[expose] public section
 
 noncomputable section
