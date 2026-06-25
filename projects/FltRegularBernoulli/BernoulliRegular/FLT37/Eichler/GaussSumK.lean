@@ -548,7 +548,8 @@ lemma gaussSumL_count_add_inv_eq_sub_one
     exact ne_bot_of_liesOver_of_ne_bot hℓ0 𝔓
   -- `e(𝔓|ℓ) = ℓ - 1` for `L = ℚ(ζ_{pℓ})`: write `pℓ = ℓ^1 · p`, `ℓ ∤ p`.
   have hram : Ideal.ramificationIdx (Ideal.span {(ℓ : ℤ)}) 𝔓 = ℓ - 1 := by
-    rw [ramificationIdx_eq_ramificationIdx' (Ideal.span {(ℓ : ℤ)}) 𝔓 (by simpa using hℓ.out.ne_zero)]
+    rw [ramificationIdx_eq_ramificationIdx' (Ideal.span {(ℓ : ℤ)}) 𝔓
+      (by simpa using hℓ.out.ne_zero)]
     have := IsCyclotomicExtension.Rat.ramificationIdx_eq
       (n := p * ℓ) (m := p) (p := ℓ) (k := 0) (K := L) (P := 𝔓) (by ring) hℓp
     simpa using this
