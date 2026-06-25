@@ -96,7 +96,7 @@ theorem flt37_pollaczekUnitPlusKplus_not_isPthPower
           (by decide : (37 : ℕ) ≠ 2) (by decide : 3 ≤ 37) := by
   intro β hβ
   let K := CyclotomicField 37 ℚ
-  let Kplus := NumberField.maximalRealSubfield K
+  let Kplus := maximalRealSubfield K
   let f : 𝓞 Kplus →+* 𝓞 K := algebraMap (𝓞 Kplus) (𝓞 K)
   let α : (𝓞 K)ˣ := Units.map f β
   have h_map_pow :
@@ -114,9 +114,7 @@ theorem flt37_pollaczekUnitPlusKplus_not_isPthPower
   have h_root :
       ((pollaczekUnitPlus 37 K 32 : (𝓞 K)ˣ) : 𝓞 K) =
         (((α : (𝓞 K)ˣ) : 𝓞 K) ^ 37) := by
-    rw [← h_map_eq, ← h_map_pow]
-    exact (congrArg (fun u : (𝓞 Kplus)ˣ =>
-      f ((u : (𝓞 Kplus)ˣ) : 𝓞 Kplus)) hβ).symm
+    rw [← h_map_eq, ← h_map_pow, hβ]
   exact flt37_realLocalCert_global α h_root
 
 /-- **No K⁺ 37-th root exists for the canonical Pollaczek preimage.** -/
