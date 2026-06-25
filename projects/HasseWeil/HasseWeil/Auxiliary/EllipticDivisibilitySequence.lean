@@ -296,8 +296,7 @@ lemma rel₄_iff_evenRec (m : ℤ) : rel₄ W (2 * m + 1) (2 * m - 1) 3 1 = 0 �
   have e₃₁ : addMulSub W 3 1 = W 2 * W 1 := by simpa using addMulSub_odd (W := W) 1 0
   have e₃ : ∀ k : ℤ, addMulSub W (2 * k + 1) 3 = W (k + 2) * W (k - 1) := fun k ↦ by
     have h := addMulSub_odd (W := W) k 1
-    rw [show (2 * (1 : ℤ) + 1) = 3 by norm_num, show k + 1 + 1 = k + 2 by ring] at h
-    exact h
+    rwa [show (2 * (1 : ℤ) + 1) = 3 by norm_num, show k + 1 + 1 = k + 2 by ring] at h
   have e₁ : ∀ k : ℤ, addMulSub W (2 * k + 1) 1 = W (k + 1) * W k := fun k ↦ by
     simpa using addMulSub_odd (W := W) k 0
   simp only [rel₄, addMulSub_odd, e₃₁, e₃, e₁]
@@ -757,13 +756,12 @@ private lemma normEDS_mul_complEDS_of_mem (hb : b ∈ R⁰) {m : ℤ}
               complEDS₂ b c d (↑(k + 1) * m) := by push_cast; ring
         _ = normEDS b c d (↑(k + 1) * m) *
               complEDS₂ b c d (↑(k + 1) * m) := by
-            congr 1; rw [← complEDS_ofNat]; exact step1
+            congr 1; rwa [← complEDS_ofNat]
         _ = normEDS b c d (2 * (↑(k + 1) * m)) := normEDS_mul_complEDS₂ ..
         _ = normEDS b c d (↑(2 * (k + 1)) * m) := by push_cast; ring_nf
     · rw [show 2 * k + 1 + 1 + 1 = 2 * (k + 1) + 1 by lia, complEDS'_odd]
       rw [← mul_cancel_right_mem_nonZeroDivisors (mul_mem hm (pow_mem hmem1 2))]
       have h := (ellW ((↑k + 2) * m) ((↑k + 1) * m) 1).symm
-      simp only [normEDS_one, one_pow, mul_one] at h
       have ih1 : normEDS b c d m * complEDS' b c d m (k + 1) =
           normEDS b c d ((↑k + 1) * m) := by
         have := ih (k + 1) (by lia); rwa [complEDS_ofNat, Nat.cast_succ] at this
@@ -790,8 +788,8 @@ lemma normEDS_mul_complEDS (m n : ℤ) :
       (mem_nonZeroDivisors_of_ne_zero <| X_ne_zero _)
       (universalNormEDS_mem_nonZeroDivisors hm) n
     have h' := congr_arg (aeval (Param.rec b c d)) h
-    rw [map_mul] at h'
-    rwa [show aeval (Param.rec b c d) (normEDS (X B) (X C) (X D) m) =
+    rwa [map_mul,
+      show aeval (Param.rec b c d) (normEDS (X B) (X C) (X D) m) =
         normEDS b c d m from (congr_fun (normEDS_eq_aeval b c d) m).symm,
       show aeval (Param.rec b c d) (complEDS (X B) (X C) (X D) m n) =
         complEDS b c d m n from (congr_fun₂ (complEDS_eq_aeval b c d) m n).symm,
@@ -876,33 +874,27 @@ lemma invarDenom_normEDS_eq_redInvarDenom_mul :
   have hd2 {m' : ℤ} := hd 2 m' ⟨3, rfl⟩
   have hd3 {m' : ℤ} := hd 3 m' ⟨2, rfl⟩
   -- Helper: replace normEDS b c d n by normEDS b c d k * complEDS b c d k (n/k) when k | n
-  have replace6 {n : ℤ} (dvd : (6 : ℤ) ∣ n) :
-    normEDS b c d n = normEDS b c d 6 * complEDS b c d 6 (n / 6) :=
-    (normEDS_mul_complEDS_div b c d h6 n dvd).symm
-  have replace3 {n : ℤ} (dvd : (3 : ℤ) ∣ n) :
-    normEDS b c d n = normEDS b c d 3 * complEDS b c d 3 (n / 3) :=
-    (normEDS_mul_complEDS_div b c d h3 n dvd).symm
-  have replace2 {n : ℤ} (dvd : (2 : ℤ) ∣ n) :
-    normEDS b c d n = normEDS b c d 2 * complEDS b c d 2 (n / 2) :=
-    (normEDS_mul_complEDS_div b c d two_ne_zero n dvd).symm
+  have replace {k n : ℤ} (hk : k ≠ 0) (dvd : k ∣ n) :
+      normEDS b c d n = normEDS b c d k * complEDS b c d k (n / k) :=
+    (normEDS_mul_complEDS_div b c d hk n dvd).symm
   rw [EllSequence.invarDenom, redInvarDenom]; split_ifs with h h h h h h
-  · rw [replace6 (Int.dvd_of_emod_eq_zero h), normEDS_six_eq_mul]; ring
-  · rw [replace6 (Int.dvd_self_sub_of_emod_eq h), normEDS_six_eq_mul]; ring
+  · rw [replace h6 (Int.dvd_of_emod_eq_zero h), normEDS_six_eq_mul]; ring
+  · rw [replace h6 (Int.dvd_self_sub_of_emod_eq h), normEDS_six_eq_mul]; ring
   · rw [show m + 1 = m + 6 - 5 by abel,
-      replace6 (Int.dvd_self_sub_of_emod_eq (Int.emod_eq_add_self_emod.symm.trans h)),
+      replace h6 (Int.dvd_self_sub_of_emod_eq (Int.emod_eq_add_self_emod.symm.trans h)),
       normEDS_six_eq_mul]; ring
   on_goal 1 =>
     have d3 : 3 ∣ (m + 1) := hd3 (by rw [Int.add_emod, h]; decide)
     have d2 : 2 ∣ m := hd2 (by rw [h]; decide)
-    rw [replace3 d3, replace2 d2]
+    rw [replace h3 d3, replace two_ne_zero d2]
   on_goal 2 =>
     have d3 : 3 ∣ (m - 1) := hd3 (by rw [Int.sub_emod, h]; decide)
     have d2 : 2 ∣ m := hd2 (by rw [h]; decide)
-    rw [replace3 d3, replace2 d2]
+    rw [replace h3 d3, replace two_ne_zero d2]
   on_goal 3 =>
     have d3 : 3 ∣ m := hd3 (by rw [h]; decide)
     have d2 : 2 ∣ (m - 1) := hd2 (by rw [Int.sub_emod, h]; decide)
-    rw [replace3 d3, replace2 d2]
+    rw [replace h3 d3, replace two_ne_zero d2]
   on_goal 4 =>
     have h0 := Int.emod_nonneg m h6
     have lt := Int.emod_lt_of_pos m (show 0 < 6 by decide)
@@ -995,9 +987,7 @@ lemma redInvar_normEDS (m : ℤ) :
     have mapD := map_redInvarDenom (X (R := ℤ) B) (X Param.C) (X D) m
       ((aeval (Param.rec b c d)).toRingHom)
     simp only [AlgHom.toRingHom_eq_coe, AlgHom.coe_toRingHom, aeval_X] at mapN mapD
-    rw [map_mul, map_add, map_pow, aeval_X, aeval_X] at h
-    rw [← mapN, ← mapD] at h
-    exact h
+    rwa [map_mul, map_add, map_pow, aeval_X, aeval_X, ← mapN, ← mapD] at h
   all_goals exact mem_nonZeroDivisors_of_ne_zero (X_ne_zero _)
 
 end NetInvarNormEDS
