@@ -146,10 +146,9 @@ omit [IsUniformAddGroup R] [IsLinearTopology R R] [T2Space R] [CompleteSpace R] 
 of the basic open neighbourhoods of `0`, hence also closed. -/
 lemma maximalIdeal_pow_isClosed
     (hAdic : IsAdic (maximalIdeal R)) (n : ℕ) :
-    IsClosed (((maximalIdeal R) ^ n : Ideal R) : Set R) := by
-  obtain ⟨hopen, _⟩ := isAdic_iff.mp hAdic
-  exact AddSubgroup.isClosed_of_isOpen (G := R)
-    (((maximalIdeal R) ^ n).toAddSubgroup) (hopen n)
+    IsClosed (((maximalIdeal R) ^ n : Ideal R) : Set R) :=
+  AddSubgroup.isClosed_of_isOpen (G := R)
+    (((maximalIdeal R) ^ n).toAddSubgroup) ((isAdic_iff.mp hAdic).1 n)
 
 /-- **Closure of `+_F` on `M^n`**: if `x.1 ∈ M^n` and `y.1 ∈ M^n`, then
 `evalAdd F x y ∈ M^n`.
@@ -184,11 +183,8 @@ theorem FormalGroup.evalAdd_pow_mem
     rw [hc0, zero_mul]
     exact ((maximalIdeal R) ^ n).zero_mem
   · apply ((maximalIdeal R) ^ n).mul_mem_left
-    have hne : ∃ s, d s ≠ 0 := by
-      by_contra h
-      push Not at h
-      exact hd (Finsupp.ext (fun s ↦ by simpa using h s))
-    obtain ⟨s, hs⟩ := hne
+    obtain ⟨s, hs⟩ := Finsupp.ne_iff.mp hd
+    rw [Finsupp.coe_zero, Pi.zero_apply] at hs
     have hs_mem : s ∈ d.support := Finsupp.mem_support_iff.mpr hs
     rw [Finsupp.prod]
     refine ((maximalIdeal R) ^ n).prod_mem (s := d.support) hs_mem ?_
@@ -254,8 +250,8 @@ scalar multiplication by naturals. On `F.EvalGroup hAdic`, `n • x` therefore
 corresponds (at the underlying ring level) to the formal-group multiplication
 series `[n](T) = mulByNatSeries F n` evaluated at `x.val.1`. -/
 
-omit [IsLocalRing R] [IsUniformAddGroup R] [IsTopologicalRing R] [IsLinearTopology R R]
-  [T2Space R] [CompleteSpace R] in
+omit [IsLocalRing R] [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R]
+  [IsLinearTopology R R] [T2Space R] [CompleteSpace R] in
 /-- Both components of the substitution vector `![mulByNatSeries F n, X]` (the one
 realising `[n+1](T) = fAdd F [n](T) X` as `subst ![[n](T), X] F.toSeries`) have
 zero constant coefficient. This is the substitution hypothesis feeding the
@@ -360,7 +356,6 @@ theorem FormalGroup.EvalGroup.nsmul_val
   induction n with
   | zero =>
     rw [zero_nsmul, F.mulByNatHom_zero_toSeries]
-    -- Goal: (0 : F.EvalGroup hAdic).val.1 = PowerSeries.eval₂ id x.val.1 0.
     change (0 : R) = PowerSeries.eval₂ (RingHom.id R) x.val.1 (0 : PowerSeries R)
     rw [show (0 : PowerSeries R) = ((0 : Polynomial R) : PowerSeries R) from by simp,
         PowerSeries.eval₂_coe]
@@ -705,10 +700,8 @@ private theorem FormalGroup.eval₂_zero_of_constantCoeff_zero
       rw [PowerSeries.coeff_zero_eq_constantCoeff_apply, hf, zero_mul]
     · rw [zero_pow hd, mul_zero]
   have hsum_zero : HasSum
-      (fun d : ℕ ↦ (RingHom.id R) (PowerSeries.coeff d f) * (0 : R) ^ d) 0 := by
-    rw [show (fun d : ℕ ↦ (RingHom.id R) (PowerSeries.coeff d f) * (0 : R) ^ d) =
-        (fun _ : ℕ ↦ (0 : R)) from funext hterms]
-    exact hasSum_zero
+      (fun d : ℕ ↦ (RingHom.id R) (PowerSeries.coeff d f) * (0 : R) ^ d) 0 :=
+    funext hterms ▸ hasSum_zero
   exact hsum.unique hsum_zero
 
 /-- **Evaluation-level injectivity of `[n]`** (when `(n : R)` is a unit).
@@ -854,12 +847,9 @@ def oneUnitsSubgroup (R : Type*) [CommRing R] [IsLocalRing R] : Subgroup Rˣ whe
   inv_mem' := fun {u} hu ↦ by
     -- `(u⁻¹ : R) - 1 = -(u - 1) * (u⁻¹ : R) ∈ M`.
     change ((u⁻¹ : Rˣ) : R) - 1 ∈ maximalIdeal R
-    have hinv : (u : R) * ((u⁻¹ : Rˣ) : R) = 1 := by
-      exact_mod_cast u.mul_inv
+    have hinv : (u : R) * ((u⁻¹ : Rˣ) : R) = 1 := by exact_mod_cast u.mul_inv
     have h : ((u⁻¹ : Rˣ) : R) - 1 = -((u : R) - 1) * ((u⁻¹ : Rˣ) : R) := by
-      have heq : ((u⁻¹ : Rˣ) : R) - 1 =
-          ((u⁻¹ : Rˣ) : R) - (u : R) * ((u⁻¹ : Rˣ) : R) := by rw [hinv]
-      rw [heq]; ring
+      linear_combination hinv
     rw [h]
     exact (maximalIdeal R).mul_mem_right _ ((maximalIdeal R).neg_mem hu)
 
