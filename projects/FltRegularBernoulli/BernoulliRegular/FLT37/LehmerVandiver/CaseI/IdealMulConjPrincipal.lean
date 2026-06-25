@@ -1,4 +1,3 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IdealConjugate
 import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IsPrincipalUnderHPlus
 
 /-!
@@ -35,7 +34,7 @@ descends to a principal ideal of `𝓞 K`. The remaining gap to
 
 noncomputable section
 
-open NumberField NumberField.IsCMField Ideal
+open NumberField NumberField.IsCMField
 
 namespace BernoulliRegular
 
