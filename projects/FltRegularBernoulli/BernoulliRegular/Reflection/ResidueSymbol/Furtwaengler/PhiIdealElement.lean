@@ -62,9 +62,8 @@ theorem PhiPrimeSymbolIdentity.of_K2_2SourceData
     (hcop : (Ideal.absNorm P).Coprime (Ideal.absNorm Q)) :
     PhiPrimeSymbolIdentity (p := p) (K := K) D.phi Q := by
   unfold PhiPrimeSymbolIdentity
-  have h := K2_2SourceData.index_one_symbol_eq_norm_symbol D T hcop
   simpa [Ideal.absNorm_apply, Submodule.cardQuot_apply, Nat.card_eq_fintype_card]
-    using h
+    using K2_2SourceData.index_one_symbol_eq_norm_symbol D T hcop
 
 /-- Prime-level Φ-symbol identity with the positive norm-symbol orientation.
 
@@ -95,9 +94,8 @@ theorem PhiPrimeSymbolIdentityPos.of_K2_2ReciprocalSourceData
     (hcop : (Ideal.absNorm P).Coprime (Ideal.absNorm Q)) :
     PhiPrimeSymbolIdentityPos (p := p) (K := K) D.phi Q := by
   unfold PhiPrimeSymbolIdentityPos
-  have h := K2_2ReciprocalSourceData.symbol_eq_norm_symbol D T hcop
   simpa [Ideal.absNorm_apply, Submodule.cardQuot_apply, Nat.card_eq_fintype_card]
-    using h
+    using K2_2ReciprocalSourceData.symbol_eq_norm_symbol D T hcop
 
 /-- Conductor-flexible reciprocal K2-2 source data supplies the positive
 prime-level Φ-symbol identity. -/
@@ -117,9 +115,8 @@ theorem PhiPrimeSymbolIdentityPos.of_K2_2FlexibleReciprocalSourceData
     (hcop : (Ideal.absNorm P).Coprime (Ideal.absNorm Q)) :
     PhiPrimeSymbolIdentityPos (p := p) (K := K) D.phi Q := by
   unfold PhiPrimeSymbolIdentityPos
-  have h := K2_2FlexibleReciprocalSourceData.symbol_eq_norm_symbol D T hcop
   simpa [Ideal.absNorm_apply, Submodule.cardQuot_apply, Nat.card_eq_fintype_card]
-    using h
+    using K2_2FlexibleReciprocalSourceData.symbol_eq_norm_symbol D T hcop
 
 /-- Conductor-flexible index-one K2-2 source data supplies the negative
 prime-level Φ-symbol identity used by the principal product cancellation. -/
@@ -139,9 +136,8 @@ theorem PhiPrimeSymbolIdentity.of_K2_2FlexibleSourceData
     (hcop : (Ideal.absNorm P).Coprime (Ideal.absNorm Q)) :
     PhiPrimeSymbolIdentity (p := p) (K := K) D.phi Q := by
   unfold PhiPrimeSymbolIdentity
-  have h := K2_2FlexibleSourceData.symbol_eq_neg_norm_symbol D T hcop
   simpa [Ideal.absNorm_apply, Submodule.cardQuot_apply, Nat.card_eq_fintype_card]
-    using h
+    using K2_2FlexibleSourceData.symbol_eq_neg_norm_symbol D T hcop
 
 /-- Product of a multiset of elements outside a maximal ideal remains outside
 that ideal. -/
@@ -221,10 +217,7 @@ theorem stickelbergerIdeal_multiset_prod
     stickelbergerIdeal (p := p) (K := K) m.prod =
       (m.map fun A => stickelbergerIdeal (p := p) (K := K) A).prod := by
   induction m using Multiset.induction_on with
-  | empty =>
-      change stickelbergerIdeal (p := p) (K := K) (1 : Ideal (𝓞 K)) =
-        (1 : Ideal (𝓞 K))
-      exact stickelbergerIdeal_one
+  | empty => simp
   | cons A m ih =>
       rw [Multiset.prod_cons, Multiset.map_cons, Multiset.prod_cons,
         stickelbergerIdeal_mul, ih]
@@ -241,8 +234,7 @@ theorem span_gamma
     (hA : A ≠ ⊥) :
     Ideal.span ({ΦA.gamma} : Set (𝓞 K)) =
       stickelbergerIdeal (p := p) (K := K) A := by
-  rw [ΦA.gamma_eq_prod]
-  rw [← Ideal.multiset_prod_span_singleton]
+  rw [ΦA.gamma_eq_prod, ← Ideal.multiset_prod_span_singleton]
   simp only [Multiset.map_map, Function.comp_apply]
   have h_spans_map :
       ((normalizedFactors A).attach.map
@@ -251,15 +243,13 @@ theorem span_gamma
           fun P => stickelbergerIdeal (p := p) (K := K) P.1) := by
     refine Multiset.map_congr rfl fun P _ => ?_
     exact (ΦA.primePhi P.1 P.2).span_gamma
-  have h_spans := congrArg Multiset.prod h_spans_map
-  rw [h_spans]
   have h_attach :
       (((normalizedFactors A).attach.map
         fun P => stickelbergerIdeal (p := p) (K := K) P.1).prod) =
         ((normalizedFactors A).map
           fun P => stickelbergerIdeal (p := p) (K := K) P).prod := by
     simp
-  rw [h_attach]
+  rw [congrArg Multiset.prod h_spans_map, h_attach]
   have h_stick :=
     stickelbergerIdeal_multiset_prod (p := p) (K := K) (normalizedFactors A)
   rw [Ideal.prod_normalizedFactors_eq_self hA] at h_stick
@@ -345,17 +335,11 @@ theorem idealNormFactorElement_eq_absNorm
       (m.map fun Q : Ideal (𝓞 K) => (((Ideal.absNorm Q : ℤ) : 𝓞 K))).prod =
         ((((m.map fun Q : Ideal (𝓞 K) => Ideal.absNorm Q).prod : ℤ) : 𝓞 K)) := by
     induction m using Multiset.induction_on with
-    | empty =>
-        simp
-    | cons Q m ih =>
-        simp
+    | empty => simp
+    | cons Q m ih => simp
   have hnorm :
       (m.map fun Q : Ideal (𝓞 K) => Ideal.absNorm Q).prod = Ideal.absNorm B := by
-    have hmap :
-        Ideal.absNorm m.prod =
-          (m.map fun Q : Ideal (𝓞 K) => Ideal.absNorm Q).prod := by
-      simpa using (map_multiset_prod (Ideal.absNorm (S := 𝓞 K)) m)
-    rw [← hmap]
+    rw [← map_multiset_prod (Ideal.absNorm (S := 𝓞 K)) m]
     simp [m, Ideal.prod_normalizedFactors_eq_self hB]
   rw [hcast, hnorm]
 
@@ -393,7 +377,6 @@ theorem norm_factor_notMem_of_absNorm_coprime
     {Q : Ideal (𝓞 K)} (hQ : Q ∈ normalizedFactors B) :
     (((Ideal.absNorm Q : ℤ) : 𝓞 K)) ∉ P := by
   obtain ⟨_, hP_ne, hP_max⟩ := isPrime_of_mem_normalizedFactors hP
-  obtain ⟨_, _, _⟩ := isPrime_of_mem_normalizedFactors hQ
   haveI : P.IsPrime := hP_max.isPrime
   haveI : NeZero P := ⟨by simpa [Ideal.zero_eq_bot] using hP_ne⟩
   have hA_le_P : A ≤ P := by
