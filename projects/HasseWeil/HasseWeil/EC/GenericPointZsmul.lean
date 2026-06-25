@@ -208,11 +208,8 @@ theorem mulByInt_x_ne_mulByInt_x (m n : ℤ) (hm : m ≠ 0) (hn : n ≠ 0) (hne 
   rw [← sub_ne_zero, mulByInt_x_sub_mulByInt_x W m n hm hn]
   have hnm : n + m ≠ 0 := fun h ↦ hneg (by lia)
   have hn_sub_m : n - m ≠ 0 := fun h ↦ hne (by lia)
-  refine div_ne_zero (mul_ne_zero ?_ ?_) (pow_ne_zero _ <| mul_ne_zero ?_ ?_)
-  · exact ψ_ff_ne_zero W hnm
-  · exact ψ_ff_ne_zero W hn_sub_m
-  · exact ψ_ff_ne_zero W hn
-  · exact ψ_ff_ne_zero W hm
+  exact div_ne_zero (mul_ne_zero (ψ_ff_ne_zero W hnm) (ψ_ff_ne_zero W hn_sub_m))
+    (pow_ne_zero _ <| mul_ne_zero (ψ_ff_ne_zero W hn) (ψ_ff_ne_zero W hm))
 
 private lemma ψc_ff_eq (n : ℤ) :
     algebraMap R KE (Affine.CoordinateRing.mk W.toAffine (W.ψc n)) =
@@ -535,7 +532,7 @@ private lemma zsmul_genericPoint_ne_zero (n : ℤ) (hn : n ≠ 0) :
     (n : ℤ) • genericPoint W ≠ (0 : (W_KE W).toAffine.Point) := by
   obtain ⟨_, h_eq⟩ := zsmul_genericPoint_eq W n hn
   rw [h_eq]
-  exact fun h ↦ by cases h
+  nofun
 
 /-- **Injectivity of `n ↦ [n]` (Silverman III.4.2b)**: if two nonzero integers `a, b`
     give the same `mulByInt_x` AND `mulByInt_y` coordinates, then `a = b`. Matching the
@@ -570,8 +567,6 @@ theorem ψ_m_evalEval_mulByInt_ne_zero (m n : ℤ) (hn : n ≠ 0) (hmn : m * n �
       WeierstrassCurve.Jacobian.Point.toAffineLift
         (m • WeierstrassCurve.Jacobian.Point.fromAffine
           (Affine.Point.some (mulByInt_x W n) (mulByInt_y W n) hns_n)) = 0 := by
-    have h_ns_jac := (m • WeierstrassCurve.Jacobian.Point.fromAffine
-      (Affine.Point.some (mulByInt_x W n) (mulByInt_y W n) hns_n)).nonsingular
     change (m • WeierstrassCurve.Jacobian.Point.fromAffine
         (Affine.Point.some (mulByInt_x W n) (mulByInt_y W n) hns_n)).point.lift _ _ = 0
     rw [h_smulEval]
