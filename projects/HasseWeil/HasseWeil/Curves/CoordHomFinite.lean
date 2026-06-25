@@ -164,10 +164,7 @@ private theorem isIntegralElem_aux (ψ : C₂.CoordinateRing →ₐ[F] C₁.Coor
     (hroot : Polynomial.eval₂ ψ.toRingHom ξ
       (n.map (algebraMap F C₂.CoordinateRing) + r) = 0) :
     ψ.toRingHom.IsIntegralElem ξ := by
-  have hn0 : n ≠ 0 := by
-    intro h
-    rw [h, Polynomial.degree_zero] at h0
-    simp at h0
+  have hn0 : n ≠ 0 := Polynomial.ne_zero_of_degree_gt h0
   have hinj : Function.Injective (algebraMap F C₂.CoordinateRing) :=
     (algebraMap F C₂.CoordinateRing).injective
   have hdeg_nh : (n.map (algebraMap F C₂.CoordinateRing)).degree = n.degree :=
@@ -352,11 +349,11 @@ theorem algHom_coordinateRing_isIntegralElem_X
       rw [← CoordinateRing.norm_smul_basis (W' := C₁.toAffine)]
       exact CoordinateRing.degree_norm_smul_basis p q
     set s : Polynomial F := Polynomial.C C₁.toAffine.a₁ * Polynomial.X +
-      Polynomial.C C₁.toAffine.a₃ with hs
+      Polynomial.C C₁.toAffine.a₃
     set f : Polynomial F := Polynomial.X ^ 3 + Polynomial.C C₁.toAffine.a₂ * Polynomial.X ^ 2 +
-      Polynomial.C C₁.toAffine.a₄ * Polynomial.X + Polynomial.C C₁.toAffine.a₆ with hf
-    set t : Polynomial F := 2 * p - q * s with ht
-    set n : Polynomial F := p ^ 2 - p * q * s - q ^ 2 * f with hn
+      Polynomial.C C₁.toAffine.a₄ * Polynomial.X + Polynomial.C C₁.toAffine.a₆
+    set t : Polynomial F := 2 * p - q * s
+    set n : Polynomial F := p ^ 2 - p * q * s - q ^ 2 * f
     -- degree bookkeeping: `0 < deg n` and `deg t < deg n` (the parity trick)
     have hsle : s.degree ≤ 1 := Polynomial.degree_linear_le
     obtain ⟨h0n, htn⟩ := degree_trace_lt_degree_norm hsle hq hnorm
@@ -452,12 +449,8 @@ theorem algHom_coordinateRing_module_finite
   rw [Algebra.smul_def p (1 : C₁.CoordinateRing),
     Algebra.smul_def q (CoordinateRing.mk C₁.toAffine Y)]
   refine Submodule.add_mem _ ?_ ?_
-  · refine Submodule.mul_mem_mul ?_ ?_
-    · exact hadj p
-    · exact Submodule.subset_span (Set.mem_insert _ _)
-  · refine Submodule.mul_mem_mul ?_ ?_
-    · exact hadj q
-    · exact Submodule.subset_span (Set.mem_insert_of_mem _ rfl)
+  · exact Submodule.mul_mem_mul (hadj p) (Submodule.subset_span (Set.mem_insert _ _))
+  · exact Submodule.mul_mem_mul (hadj q) (Submodule.subset_span (Set.mem_insert_of_mem _ rfl))
 
 namespace CurveMap.CoordHom
 
