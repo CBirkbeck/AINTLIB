@@ -1,5 +1,4 @@
 import HasseWeil.Curves.DVR
-import Mathlib.RingTheory.Valuation.Discrete.Basic
 import Mathlib.RingTheory.Valuation.Discrete.IsDiscreteValuationRing
 
 /-!
@@ -77,10 +76,12 @@ noncomputable def ord_P (C : SmoothPlaneCurve F) (P : C.SmoothPoint)
 variable {C : SmoothPlaneCurve F} {P : C.SmoothPoint}
 
 theorem pointValuation_eq_zero_iff (f : C.FunctionField) :
-    C.pointValuation P f = 0 ↔ f = 0 := by
-  constructor
-  · intro h; by_contra hf; exact (C.pointValuation P).ne_zero_iff.mpr hf h
-  · rintro rfl; exact map_zero _
+    C.pointValuation P f = 0 ↔ f = 0 :=
+  (C.pointValuation P).zero_iff
+
+private theorem pointValuation_ne_zero {f : C.FunctionField} (hf : f ≠ 0) :
+    C.pointValuation P f ≠ 0 :=
+  (C.pointValuation P).ne_zero_iff.mpr hf
 
 @[simp] theorem ord_P_zero : C.ord_P P 0 = ⊤ := by
   simp [ord_P]
@@ -90,7 +91,7 @@ theorem ord_P_eq_top_iff (f : C.FunctionField) : C.ord_P P f = ⊤ ↔ f = 0 := 
   split_ifs with h
   · simp [(pointValuation_eq_zero_iff f).mp h]
   · simp only [WithTop.coe_ne_top, false_iff]
-    intro hf; exact h (by rw [hf]; exact map_zero _)
+    intro hf; exact h ((pointValuation_eq_zero_iff f).mpr hf)
 
 private lemma ord_P_of_ne (f : C.FunctionField)
     (h : C.pointValuation P f ≠ 0) :
@@ -103,7 +104,7 @@ value group. -/
 theorem one_le_ord_P_iff_pointValuation_lt_one {f : C.FunctionField}
     (hf : f ≠ 0) :
     (1 : WithTop ℤ) ≤ C.ord_P P f ↔ C.pointValuation P f < 1 := by
-  have hv : C.pointValuation P f ≠ 0 := (C.pointValuation P).ne_zero_iff.mpr hf
+  have hv : C.pointValuation P f ≠ 0 := pointValuation_ne_zero hf
   rw [ord_P_of_ne _ hv, show (1 : WithTop ℤ) = ((1 : ℤ) : WithTop ℤ) from rfl,
     WithTop.coe_le_coe]
   constructor
@@ -123,8 +124,8 @@ theorem ord_P_mul (f g : C.FunctionField) :
   · simp
   rcases eq_or_ne g 0 with rfl | hg
   · simp
-  have hvf : C.pointValuation P f ≠ 0 := (C.pointValuation P).ne_zero_iff.mpr hf
-  have hvg : C.pointValuation P g ≠ 0 := (C.pointValuation P).ne_zero_iff.mpr hg
+  have hvf : C.pointValuation P f ≠ 0 := pointValuation_ne_zero hf
+  have hvg : C.pointValuation P g ≠ 0 := pointValuation_ne_zero hg
   have hvfg : C.pointValuation P (f * g) ≠ 0 := by
     rw [map_mul]; exact mul_ne_zero hvf hvg
   rw [ord_P_of_ne _ hvf, ord_P_of_ne _ hvg, ord_P_of_ne _ hvfg]
@@ -144,10 +145,9 @@ theorem ord_P_add_le (f g : C.FunctionField) :
   · simp
   rcases eq_or_ne (f + g) 0 with hfg0 | hfg0
   · rw [hfg0, ord_P_zero]; exact le_top
-  have hvf : C.pointValuation P f ≠ 0 := (C.pointValuation P).ne_zero_iff.mpr hf
-  have hvg : C.pointValuation P g ≠ 0 := (C.pointValuation P).ne_zero_iff.mpr hg
-  have hvfg : C.pointValuation P (f + g) ≠ 0 :=
-    (C.pointValuation P).ne_zero_iff.mpr hfg0
+  have hvf : C.pointValuation P f ≠ 0 := pointValuation_ne_zero hf
+  have hvg : C.pointValuation P g ≠ 0 := pointValuation_ne_zero hg
+  have hvfg : C.pointValuation P (f + g) ≠ 0 := pointValuation_ne_zero hfg0
   have hadd : C.pointValuation P (f + g) ≤
       max (C.pointValuation P f) (C.pointValuation P g) :=
     Valuation.map_add _ _ _
@@ -155,21 +155,18 @@ theorem ord_P_add_le (f g : C.FunctionField) :
   rcases le_max_iff.mp hadd with hle | hle
   · apply (min_le_left _ _).trans
     rw [WithTop.coe_le_coe, neg_le_neg_iff]
-    have := hle
     rwa [← WithZero.coe_unzero hvfg, ← WithZero.coe_unzero hvf,
-      WithZero.coe_le_coe] at this
+      WithZero.coe_le_coe] at hle
   · apply (min_le_right _ _).trans
     rw [WithTop.coe_le_coe, neg_le_neg_iff]
-    have := hle
     rwa [← WithZero.coe_unzero hvfg, ← WithZero.coe_unzero hvg,
-      WithZero.coe_le_coe] at this
+      WithZero.coe_le_coe] at hle
 
 theorem ord_P_inv (f : C.FunctionField) (hf : f ≠ 0) :
     C.ord_P P f⁻¹ = -(C.ord_P P f) := by
   have hfi : f⁻¹ ≠ 0 := inv_ne_zero hf
-  have hvf : C.pointValuation P f ≠ 0 := (C.pointValuation P).ne_zero_iff.mpr hf
-  have hvfi : C.pointValuation P f⁻¹ ≠ 0 :=
-    (C.pointValuation P).ne_zero_iff.mpr hfi
+  have hvf : C.pointValuation P f ≠ 0 := pointValuation_ne_zero hf
+  have hvfi : C.pointValuation P f⁻¹ ≠ 0 := pointValuation_ne_zero hfi
   rw [ord_P_of_ne _ hvf, ord_P_of_ne _ hvfi]
   have key : (WithZero.unzero hvfi).toAdd = -(WithZero.unzero hvf).toAdd := by
     rw [show -(WithZero.unzero hvf).toAdd = (WithZero.unzero hvf)⁻¹.toAdd from
@@ -198,7 +195,7 @@ theorem ord_P_pow (f : C.FunctionField) (n : ℕ) :
     C.ord_P P (-f) = C.ord_P P f := by
   rcases eq_or_ne f 0 with rfl | hf
   · rw [neg_zero]
-  have hvf : C.pointValuation P f ≠ 0 := (C.pointValuation P).ne_zero_iff.mpr hf
+  have hvf : C.pointValuation P f ≠ 0 := pointValuation_ne_zero hf
   have hvneg : C.pointValuation P (-f) ≠ 0 := by
     rw [Valuation.map_neg]; exact hvf
   rw [ord_P_of_ne _ hvneg, ord_P_of_ne _ hvf]
@@ -213,11 +210,11 @@ theorem ord_P_add_eq_of_lt {f g : C.FunctionField}
     (h : C.ord_P P f < C.ord_P P g) :
     C.ord_P P (f + g) = C.ord_P P f := by
   have h_ge : C.ord_P P f ≤ C.ord_P P (f + g) := by
-    have := SmoothPlaneCurve.ord_P_add_le (P := P) f g
+    have := ord_P_add_le (P := P) f g
     rwa [min_eq_left h.le] at this
   have h_step : (f + g) + (-g) = f := by ring
-  have h_le_step := SmoothPlaneCurve.ord_P_add_le (P := P) (f + g) (-g)
-  rw [h_step, SmoothPlaneCurve.ord_P_neg (P := P) g] at h_le_step
+  have h_le_step := ord_P_add_le (P := P) (f + g) (-g)
+  rw [h_step, ord_P_neg (P := P) g] at h_le_step
   rcases le_total (C.ord_P P (f + g)) (C.ord_P P g) with h_case | h_case
   · rw [min_eq_left h_case] at h_le_step
     exact le_antisymm h_le_step h_ge
@@ -231,7 +228,7 @@ theorem ord_P_sub_eq_of_lt {f g : C.FunctionField}
     C.ord_P P (f - g) = C.ord_P P f := by
   rw [sub_eq_add_neg]
   apply ord_P_add_eq_of_lt
-  rwa [SmoothPlaneCurve.ord_P_neg (P := P)]
+  rwa [ord_P_neg (P := P)]
 
 end SmoothPlaneCurve
 
@@ -288,25 +285,19 @@ theorem exists_K_uniformizer (C : SmoothPlaneCurve F) (P : C.RationalPoint) :
     ∃ t : C.FunctionField, Uniformizer C P t :=
   C.exists_uniformizer P
 
+/-- A uniformizer is nonzero. -/
+theorem Uniformizer.ne_zero {t : C.FunctionField} (ht : Uniformizer C P t) :
+    t ≠ 0 := by
+  intro h; rw [h] at ht; simp [Uniformizer] at ht
+
 /-- Two uniformizers have order difference zero: if `t` and `s` are both
 uniformizers, then `ord_P(t/s) = 0`. Equivalently, `t/s` is a unit in the
 local ring at `P`. Reference: Silverman II.1. -/
 theorem Uniformizer.unit_quotient {t s : C.FunctionField}
     (ht : Uniformizer C P t) (hs : Uniformizer C P s) :
     C.ord_P P (t / s) = 0 := by
-  have ht0 : t ≠ 0 := by
-    intro h; rw [h] at ht; simp [Uniformizer] at ht
-  have hs0 : s ≠ 0 := by
-    intro h; rw [h] at hs; simp [Uniformizer] at hs
-  have htu : C.ord_P P t = 1 := ht
-  have hsu : C.ord_P P s = 1 := hs
-  rw [div_eq_mul_inv, ord_P_mul, ord_P_inv _ hs0, htu, hsu]
+  rw [div_eq_mul_inv, ord_P_mul, ord_P_inv _ hs.ne_zero, ht, hs]
   rfl
-
-/-- A uniformizer is nonzero. -/
-theorem Uniformizer.ne_zero {t : C.FunctionField} (ht : Uniformizer C P t) :
-    t ≠ 0 := by
-  intro h; rw [h] at ht; simp [Uniformizer] at ht
 
 /-- For a uniformizer `t` at `P` and any integer `n`, there is an element
 `s ∈ K(C)ˣ` with `ord_P s = n`. Constructed via `t^n.toNat` for `n ≥ 0` and
@@ -326,10 +317,7 @@ theorem Uniformizer.exists_ord_P_eq {t : C.FunctionField}
     omega
   · refine ⟨t ^ n.toNat, pow_ne_zero _ ht_ne, ?_⟩
     rw [ord_P_pow, ht, nsmul_one]
-    have hn : (n.toNat : ℤ) = n := Int.toNat_of_nonneg hpos
-    have h1 : (n.toNat : WithTop ℤ) = (n : WithTop ℤ) := by
-      exact_mod_cast hn
-    rw [h1]
+    exact_mod_cast Int.toNat_of_nonneg hpos
 
 end SmoothPlaneCurve
 
