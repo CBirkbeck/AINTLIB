@@ -1,8 +1,5 @@
-import HasseWeil.Curves.FiniteOverKx
 import HasseWeil.Curves.Valuation
 import HasseWeil.Curves.IntegralClosure
-import Mathlib.FieldTheory.SeparableDegree
-import Mathlib.RingTheory.Norm.Defs
 import Mathlib.NumberTheory.RamificationInertia.Basic
 
 /-!
@@ -107,17 +104,15 @@ theorem comp_algebraMap_eq (ψ : CurveMap C₂ C₃) (φ : CurveMap C₁ C₂)
     (x : C₃.FunctionField) :
     (ψ.comp φ).pullback x = φ.pullback (ψ.pullback x) := rfl
 
-set_option maxHeartbeats 800000 in
--- The tower law for `FunctionField` needs extra heartbeats.
 /-- **Degree multiplicativity**: `deg(ψ ∘ φ) = deg(φ) · deg(ψ)`.
     Follows from the tower law for field extensions.
     Reference: Silverman II.2 (after Theorem 2.4). -/
 theorem degree_comp (ψ : CurveMap C₂ C₃) (φ : CurveMap C₁ C₂) :
     (ψ.comp φ).degree = φ.degree * ψ.degree := by
   unfold degree
-  letI inst₁ : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
-  letI inst₂ : Algebra C₃.FunctionField C₂.FunctionField := ψ.toAlgebra
-  letI inst₃ : Algebra C₃.FunctionField C₁.FunctionField := (ψ.comp φ).toAlgebra
+  letI : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
+  letI : Algebra C₃.FunctionField C₂.FunctionField := ψ.toAlgebra
+  letI : Algebra C₃.FunctionField C₁.FunctionField := (ψ.comp φ).toAlgebra
   haveI : IsScalarTower C₃.FunctionField C₂.FunctionField C₁.FunctionField :=
     IsScalarTower.of_algebraMap_eq fun _ ↦ rfl
   haveI : Module.Free C₂.FunctionField C₁.FunctionField :=
@@ -182,18 +177,17 @@ theorem ramificationIndex_comp (ψ : CurveMap C₂ C₃) (φ : CurveMap C₁ C�
     (ψ.comp φ).ramificationIndex P t =
       φ.ramificationIndex P (ψ.pullback t) := rfl
 
+/-- The pullback of a nonzero function is nonzero: `φ*` is injective. -/
+theorem pullback_ne_zero (φ : CurveMap C₁ C₂) {t : C₂.FunctionField}
+    (ht : t ≠ 0) : φ.pullback t ≠ 0 :=
+  fun h ↦ ht (φ.pullback_injective (h.trans (map_zero _).symm))
+
 /-- The ramification order of a nonzero function is not `⊤`: pullback
 preserves nonzeroness (pullbacks are injective), so `ord_P (φ* t) ≠ ⊤`. -/
 theorem ramificationIndex_ne_top (φ : CurveMap C₁ C₂) (P : C₁.SmoothPoint)
     {t : C₂.FunctionField} (ht : t ≠ 0) :
     φ.ramificationIndex P t ≠ ⊤ :=
-  (C₁.ord_P_eq_top_iff (φ.pullback t)).not.mpr fun h ↦
-    ht (φ.pullback_injective (h.trans (map_zero _).symm))
-
-/-- The pullback of a nonzero function is nonzero: `φ*` is injective. -/
-theorem pullback_ne_zero (φ : CurveMap C₁ C₂) {t : C₂.FunctionField}
-    (ht : t ≠ 0) : φ.pullback t ≠ 0 :=
-  fun h ↦ ht (φ.pullback_injective (h.trans (map_zero _).symm))
+  (C₁.ord_P_eq_top_iff (φ.pullback t)).not.mpr (φ.pullback_ne_zero ht)
 
 /-- An `ℤ`-valued form of the ramification index, using `WithTop.untopD 0` to
 coerce. For nonzero `t`, this coincides with the pullback-ord as an integer. -/
@@ -385,7 +379,6 @@ noncomputable def CoordHom.toAlgebra {φ : CurveMap C₁ C₂} (coordHom : φ.Co
   coordHom.toAlgHom.toRingHom.toAlgebra
 
 set_option synthInstance.maxHeartbeats 200000 in
-set_option maxHeartbeats 1600000 in
 /-- **Silverman II.2.6(a), Σ e·f form** (T-II-2-008, generic `CurveMap`):
 for a `CurveMap φ : C₁ → C₂` with coordinate-ring pullback witness
 `coordHom` and finite-module structure, the sum `Σ_{P over p} e_P · f_P`
@@ -413,10 +406,10 @@ theorem sum_ramificationIdx_mul_inertiaDeg_eq_degree
         Ideal.inertiaDeg p P = φ.degree := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing :=
     coordHom.toAlgebra
-  letI algFF : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
-  haveI tower2 : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing
+  letI : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
+  haveI : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing
       C₁.FunctionField := inferInstance
-  haveI tower1 : IsScalarTower C₂.CoordinateRing C₂.FunctionField
+  haveI : IsScalarTower C₂.CoordinateRing C₂.FunctionField
       C₁.FunctionField := by
     refine IsScalarTower.of_algebraMap_smul fun r x ↦ ?_
     rw [Algebra.smul_def]
@@ -425,9 +418,9 @@ theorem sum_ramificationIdx_mul_inertiaDeg_eq_degree
     rw [coordHom.compat r, ← IsScalarTower.algebraMap_smul C₁.CoordinateRing r x,
       ← Algebra.smul_def]
     rfl
-  haveI hpMax' : p.IsMaximal := hpMax
+  haveI : p.IsMaximal := hpMax
   letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
-  haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _
+  haveI : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _
       modCR := hfin
   exact Ideal.sum_ramification_inertia (R := C₂.CoordinateRing)
     (S := C₁.CoordinateRing) C₂.FunctionField C₁.FunctionField hp0
