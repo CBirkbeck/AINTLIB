@@ -132,7 +132,6 @@ theorem algebraMap_residueField_injective
   haveI := hLies
   letI : Field (C₂.CoordinateRing ⧸ Q) := Ideal.Quotient.field Q
   letI : Field (C₁.CoordinateRing ⧸ P) := Ideal.Quotient.field P
-  -- AlgHoms between fields are injective (as ring homs).
   exact (algebraMap (C₂.CoordinateRing ⧸ Q) (C₁.CoordinateRing ⧸ P)).injective
 
 /-- **Residue-field LinearEquiv** over the quotient scalar ring.
@@ -164,7 +163,6 @@ noncomputable def CurveMap.CoordHom.residueLinearEquiv
   letI : Field (C₂.CoordinateRing ⧸ Q) := Ideal.Quotient.field Q
   letI : Field (C₁.CoordinateRing ⧸ P) := Ideal.Quotient.field P
   haveI := hScalarTower
-  have hFQ := C₂.algebraMap_bijective_quotient_of_maximal hQ
   have hFP := C₁.algebraMap_bijective_quotient_of_maximal hP
   have h_surj :
       Function.Surjective
@@ -175,8 +173,8 @@ noncomputable def CurveMap.CoordHom.residueLinearEquiv
     rw [← IsScalarTower.algebraMap_apply F (C₂.CoordinateRing ⧸ Q)
       (C₁.CoordinateRing ⧸ P) c]
     exact hc
-  have h_inj := algebraMap_residueField_injective hQ hP φ coordHom hLies
-  exact LinearEquiv.ofBijectiveAlgebraMap ⟨h_inj, h_surj⟩
+  exact LinearEquiv.ofBijectiveAlgebraMap
+    ⟨algebraMap_residueField_injective hQ hP φ coordHom hLies, h_surj⟩
 
 /-- **Full Piece 9 closure via LinearEquiv transport**: `inertiaDeg = 1`
 for any `CurveMap.CoordHom` lying-over pair under `[IsAlgClosed F]`.
@@ -202,11 +200,8 @@ theorem CurveMap.CoordHom.inertiaDeg_eq_one_of_isAlgClosed
   letI : Field (C₂.CoordinateRing ⧸ Q) := Ideal.Quotient.field Q
   letI : Field (C₁.CoordinateRing ⧸ P) := Ideal.Quotient.field P
   haveI := hScalarTower
-  rw [Ideal.inertiaDeg_algebraMap]
-  -- Use the LinearEquiv to transport finrank.
-  have linEq :=
-    CurveMap.CoordHom.residueLinearEquiv φ coordHom hQ hP hLies hScalarTower
-  rw [← linEq.finrank_eq]
+  rw [Ideal.inertiaDeg_algebraMap,
+    ← (CurveMap.CoordHom.residueLinearEquiv φ coordHom hQ hP hLies hScalarTower).finrank_eq]
   exact CommSemiring.finrank_self _
 
 /-! ### Composition of Piece 5 + Piece 9 — atomic per-prime witness
@@ -299,19 +294,11 @@ private theorem CurveMap.exists_heightOneSpectrum_not_liesUnder_ramified
         P.asIdeal ∣ differentIdeal C₂.CoordinateRing C₁.CoordinateRing →
         P.under C₂.CoordinateRing ≠ Q := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
-  letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
-  haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR := hfin
-  haveI htorsion' : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
-    htorsion
-  haveI hfaithful' : @FaithfulSMul C₂.CoordinateRing C₁.CoordinateRing algCR.toSMul :=
-    hfaithful
-  -- Step 1: bad locus in C₁.CR is finite (Piece 1).
   have hfin_bad :
       {P : IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing |
         P.asIdeal ∣ differentIdeal C₂.CoordinateRing C₁.CoordinateRing}.Finite :=
     IsDedekindDomain.finite_ramified_primes
       (A := C₂.CoordinateRing) (B := C₁.CoordinateRing) hsepFF
-  -- Step 2–3: badQ is finite, HeightOneSpectrum C₂ is infinite ⇒ good Q exists.
   have hinf_C2 : Set.Infinite
       ({P : IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing | True}) :=
     C₂.heightOneSpectrum_infinite
@@ -353,18 +340,11 @@ private theorem CurveMap.not_dvd_differentIdeal_of_liesOver_good
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
     ¬ P ∣ differentIdeal C₂.CoordinateRing C₁.CoordinateRing := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
-  letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
-  haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR := hfin
-  haveI htorsion' : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
-    htorsion
   haveI := hP_lies
-  -- Wrap `P` as a height-one prime and show its contraction to `C₂` is `Q`.
   let P' : IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing :=
     ⟨P, hP_prime, hP_ne⟩
-  have hP'_under_eq : P'.under C₂.CoordinateRing = Q := by
-    apply IsDedekindDomain.HeightOneSpectrum.ext
-    show P.under C₂.CoordinateRing = Q.asIdeal
-    exact (Ideal.over_def P Q.asIdeal).symm
+  have hP'_under_eq : P'.under C₂.CoordinateRing = Q :=
+    IsDedekindDomain.HeightOneSpectrum.ext (Ideal.over_def P Q.asIdeal).symm
   exact fun hdvd ↦ hQ_good P' hdvd hP'_under_eq
 
 /-- **Ramification index is `1`** (Pieces 2/3): a prime `P` of
@@ -400,20 +380,10 @@ private theorem CurveMap.ramificationIdx_eq_one_of_not_dvd_differentIdeal
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
     Ideal.ramificationIdx Q.asIdeal P = 1 := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
-  letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
-  haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR := hfin
-  haveI htorsion' : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
-    htorsion
-  haveI hfaithful' : @FaithfulSMul C₂.CoordinateRing C₁.CoordinateRing algCR.toSMul :=
-    hfaithful
-  haveI hessfin' : @Algebra.EssFiniteType C₂.CoordinateRing C₁.CoordinateRing _ _ algCR :=
-    hessfin
   haveI := hP_prime
   haveI := hP_lies
-  -- Piece 2: not dividing the different ideal ⇒ unramified at `P`.
   haveI hUnram : Algebra.IsUnramifiedAt C₂.CoordinateRing P :=
     IsDedekindDomain.isUnramifiedAt_of_not_dvd_differentIdeal hsepFF hP_nd
-  -- Piece 3: unramified ⇒ ramification index `1` (rewriting `P.under` to `Q`).
   have := IsDedekindDomain.ramificationIdx_eq_one_of_isUnramifiedAt_of_ne_bot
     (A := C₂.CoordinateRing) (B := C₁.CoordinateRing) (P := P) hP_ne
   rwa [← Ideal.over_def P Q.asIdeal] at this
@@ -454,37 +424,29 @@ private theorem CurveMap.ramificationIdx_mul_inertiaDeg_eq_one_of_not_liesUnder_
       Ideal.ramificationIdx Q.asIdeal P *
         Ideal.inertiaDeg Q.asIdeal P = 1 := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
-  -- Scalar tower F → C₂.CR → C₁.CR from coordHom.compat (needed for Piece 9).
   haveI : IsScalarTower F C₂.CoordinateRing C₁.CoordinateRing :=
     IsScalarTower.of_algHom coordHom.toAlgHom
   haveI hQmax : Q.asIdeal.IsMaximal := Q.isPrime.isMaximal Q.ne_bot
   intro P hP_mem
-  -- Unpack membership: P prime, P lies over Q.asIdeal.
   rw [IsDedekindDomain.mem_primesOverFinset_iff Q.ne_bot] at hP_mem
   obtain ⟨hP_prime, hP_lies⟩ := hP_mem
   haveI := hP_prime
   haveI := hP_lies
   have hP_ne : P ≠ ⊥ := Ideal.ne_bot_of_liesOver_of_ne_bot Q.ne_bot P
-  -- The fiber prime `P` avoids the ramified locus (contraction step).
   have hP_nd : ¬ P ∣ differentIdeal C₂.CoordinateRing C₁.CoordinateRing :=
     φ.not_dvd_differentIdeal_of_liesOver_good coordHom hfin htorsion Q hQ_good hP_prime hP_ne
       hP_lies
-  -- Pieces 2 + 3 ⇒ ramificationIdx = 1.
   have hram : Ideal.ramificationIdx Q.asIdeal P = 1 :=
     φ.ramificationIdx_eq_one_of_not_dvd_differentIdeal coordHom hfin htorsion hfaithful
       hessfin hsepFF Q hP_prime hP_ne hP_lies hP_nd
-  -- Piece 9 inputs: maximality, scalar tower on residue fields.
   haveI hPmax : P.IsMaximal := Ideal.IsMaximal.of_liesOver_isMaximal P Q.asIdeal
   letI : Field (C₂.CoordinateRing ⧸ Q.asIdeal) := Ideal.Quotient.field Q.asIdeal
   letI : Field (C₁.CoordinateRing ⧸ P) := Ideal.Quotient.field P
   haveI : IsScalarTower F (C₂.CoordinateRing ⧸ Q.asIdeal) (C₁.CoordinateRing ⧸ P) :=
     Ideal.Quotient.isScalarTower_of_liesOver (R := F) P Q.asIdeal
-  -- Apply the combined e·f = 1 witness.
   exact CurveMap.CoordHom.ef_one_of_ram_one_and_algClosed
     φ coordHom hQmax hPmax hP_lies hram ‹_›
 
-set_option synthInstance.maxHeartbeats 400000 in
-set_option maxHeartbeats 2000000 in
 /-- **T-II-2-009 full unconditional form** (Deliverable 1):
 for a separable `CurveMap` with `CoordHom` pullback over `[IsAlgClosed F]`,
 there exists a height-one prime `Q` in `C₂.CoordinateRing` whose fiber
@@ -510,17 +472,12 @@ theorem CurveMap.exists_heightOneSpectrum_fiber_card_eq_sepDegree_unconditional
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
     ∃ Q : IsDedekindDomain.HeightOneSpectrum C₂.CoordinateRing,
       (IsDedekindDomain.primesOverFinset Q.asIdeal C₁.CoordinateRing).card = φ.separableDegree := by
-  -- `Module.Finite` (Pieces 1–6 input) from the coordinate-ring pullback.
   have hfin : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _
       coordHom.toAlgebra.toModule := coordHom.module_finite
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
-  -- Steps 1–3 (Pieces 1 + 6): a good height-one prime `Q` exists, lying under
-  -- no ramified prime of `C₁`.
   obtain ⟨Q, hQ_good⟩ :=
     φ.exists_heightOneSpectrum_not_liesUnder_ramified coordHom hfin htorsion hfaithful hsepFF
   refine ⟨Q, ?_⟩
-  -- Step 4 (Piece 8): the fiber card equals the separable degree once every
-  -- prime above `Q` satisfies `e · f = 1`, which Pieces 2/3 + 9 supply.
   exact φ.exists_heightOneSpectrum_fiber_card_eq_sepDegree coordHom hsep Q
     (φ.ramificationIdx_mul_inertiaDeg_eq_one_of_not_liesUnder_ramified
       coordHom hfin htorsion hfaithful hessfin hsepFF Q hQ_good)
