@@ -1,6 +1,5 @@
 import BernoulliRegular.FLT37.LehmerVandiver.CaseII.GaloisDescent
 import BernoulliRegular.FLT37.LehmerVandiver.CaseII.SpecificChain
-import Mathlib.NumberTheory.RamificationInertia.Ramification
 
 /-!
 # Case-II II1: real-ideal descent of the anchored quotients
@@ -31,38 +30,30 @@ omit [NumberField.IsCMField K] in
 `𝒪 K` over `p` (a prime of `𝒪 K⁺` with `37 ∉ p`) lies over a rational prime `ℓ ≠ 37`; since
 `K = ℚ(ζ₃₇)` is unramified over `ℚ` away from `37`, the ramification index `e(ℓ,P) = 1`, and tower
 multiplicativity `e(ℓ,P) = e(ℓ,p)·e(p,P)` forces `e(p,P) = 1`. -/
-theorem isUnramifiedAt_of_not_over_37
-    (p : Ideal (𝓞 K⁺)) [p.IsPrime] (hp_ne : p ≠ ⊥)
+theorem isUnramifiedAt_of_not_over_37 (p : Ideal (𝓞 K⁺)) [p.IsPrime] (hp_ne : p ≠ ⊥)
     (h37 : (algebraMap ℤ (𝓞 K⁺)) 37 ∉ p) :
     IsUnramifiedAt (𝓞 K) p := by
   intro P hP
-  -- P ∈ primesOver p (𝓞 K): P is prime and lies over p.
   haveI hP_prime : P.IsPrime := hP.1
   haveI hP_lies : P.LiesOver p := hP.2
   have hP_ne : P ≠ ⊥ := by
     intro h
     exact hp_ne (by rw [hP_lies.over, h, Ideal.under_bot])
-  -- [II1-C-DISCR]: `K = ℚ(ζ₃₇)` is unramified over `ℚ` at the rational prime under `P`. The prime
-  -- is `≠ 37` (since `37 ∉ p` ⟹ `P` does not lie over `37`) and `discr K = ± 37^{35}`, so the prime
-  -- does not divide `discr K`; conclude via `NumberField.not_dvd_discr_iff_forall_mem`.
-  have h_unram_Z : Algebra.IsUnramifiedAt ℤ P := by
+  haveI : Algebra.IsUnramifiedAt ℤ P := by
     haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-    -- The rational prime `ℓ` under `P`: `P.under ℤ` is a nonzero prime ideal of `ℤ`.
     have hunder_ne : Ideal.under ℤ P ≠ ⊥ := by
       rw [Ideal.under_def]
       exact mt (Ideal.eq_bot_of_comap_eq_bot (R := ℤ) (S := 𝓞 K)) hP_ne
-    set ℓ : ℤ := Submodule.IsPrincipal.generator (Ideal.under ℤ P) with hℓ_def
+    set ℓ : ℤ := Submodule.IsPrincipal.generator (Ideal.under ℤ P)
     have hℓ_eq : Ideal.under ℤ P = Ideal.span {ℓ} :=
       (Ideal.span_singleton_generator (Ideal.under ℤ P)).symm
     have hℓ_ne0 : ℓ ≠ 0 := by
       intro h; apply hunder_ne; rw [hℓ_eq, h, Ideal.span_singleton_zero]
     have hℓ_prime : Prime ℓ := by
       rw [← Ideal.span_singleton_prime hℓ_ne0, ← hℓ_eq]; infer_instance
-    -- `↑ℓ ∈ P`.
     have h_mem : (ℓ : 𝓞 K) ∈ P := by
       have hmemZ : ℓ ∈ Ideal.under ℤ P := by rw [hℓ_eq]; exact Ideal.mem_span_singleton_self ℓ
       simpa [Ideal.under_def, Ideal.mem_comap] using hmemZ
-    -- `ℓ ∤ 37` (else `↑37 ∈ p`, contradicting `h37`).
     have hℓ_ne : ¬ ℓ ∣ (37 : ℤ) := by
       intro hdvd
       have h37P : (37 : 𝓞 K) ∈ P := by
@@ -73,7 +64,6 @@ theorem isUnramifiedAt_of_not_over_37
       have h37P' : (algebraMap (𝓞 K⁺) (𝓞 K)) ((algebraMap ℤ (𝓞 K⁺)) 37) ∈ P := by
         rw [map_ofNat, map_ofNat]; exact h37P
       rwa [hP_lies.over, Ideal.mem_comap]
-    -- `ℓ ∤ discr K = ± 37^{35}`, since `ℓ` is a prime not dividing `37`.
     have h_ndvd : ¬ ℓ ∣ NumberField.discr K := by
       rw [IsCyclotomicExtension.Rat.discr_prime (p := 37) (K := K)]
       intro hdvd
@@ -84,11 +74,8 @@ theorem isUnramifiedAt_of_not_over_37
       exact hℓ_ne (hℓ_prime.dvd_of_dvd_pow hpow)
     exact (NumberField.not_dvd_discr_iff_forall_mem (K := K) (𝒪 := 𝓞 K) hℓ_prime).mp
       h_ndvd P hP_prime h_mem
-  haveI : Algebra.IsUnramifiedAt ℤ P := h_unram_Z
-  -- Base change `ℤ → 𝒪 K⁺`: `P` unramified over `ℤ` ⟹ unramified over `𝒪 K⁺`.
   haveI : Algebra.IsUnramifiedAt (𝓞 K⁺) P :=
     Algebra.IsUnramifiedAt.of_restrictScalars (R := ℤ) (A := 𝓞 K⁺) P
-  -- Hence `e(P | 𝒪 K⁺) = ramificationIdx (P.under 𝒪 K⁺) P = ramificationIdx p P = 1`.
   have he : Ideal.ramificationIdx (Ideal.under (𝓞 K⁺) P) P = 1 :=
     Ideal.ramificationIdx_eq_one_of_isUnramifiedAt (R := 𝓞 K⁺) hP_ne
   rwa [← hP_lies.over] at he
@@ -100,8 +87,7 @@ theorem not_zetaSubOne_dvd_rootIdeal {m : ℕ} (D : CaseIIData37 K m)
     ¬ Ideal.span ({D.hζ.toInteger - 1} : Set (𝓞 K)) ∣ D.rootIdeal η := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   simp only [CaseIIData37.rootIdeal]
-  rw [p_dvd_a_iff (by decide : (37 : ℕ) ≠ 2) D.hζ D.equation D.hy η]
-  exact hη
+  rwa [p_dvd_a_iff (by decide : (37 : ℕ) ≠ 2) D.hζ D.equation D.hy η]
 
 /-- **II1-E (coprimality), denominator:** `𝔞₀` (the `𝔭`-coprime part of `𝔞(η₀)`) is coprime to
 `𝔭`. Direct from flt-regular `not_p_div_a_zero`. -/
