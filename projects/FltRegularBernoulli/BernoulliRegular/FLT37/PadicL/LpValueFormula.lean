@@ -1,6 +1,4 @@
 import BernoulliRegular.FLT37.PadicL.Prop812
-import BernoulliRegular.FLT37.PadicL.Theorem518
-import BernoulliRegular.FLT37.PadicL.GaussSumValuationF1Stickelberger
 
 /-!
 # B-C1.1′ — `L_p(1, ω^i)` via Washington Theorem 5.18 and the valuation of `log_p`-sums
@@ -214,9 +212,8 @@ field — discharged, not assumed. -/
 theorem valuation_Lp_eq_bernoulliFactor {i : ℕ}
     (h1 : 2 ≤ i) (h2 : i ≤ p - 3) (hev : Even i) :
     (D.Lp i).valuation = (bernoulliFactorQp p i).valuation := by
-  have h : ((D.Lp i).valuation : ℚ) = ((bernoulliFactorQp p i).valuation : ℚ) := by
-    rw [D.congrLp i h1 h2 hev, D.valuation_LpValue_eq_bernoulliFactor h1 h2 hev]
-  exact_mod_cast h
+  exact_mod_cast (D.congrLp i h1 h2 hev).trans
+    (D.valuation_LpValue_eq_bernoulliFactor h1 h2 hev)
 
 /-- **The constructed Kubota–Leopoldt package.**  From `LpData`, the
 `PadicLFunction p` whose Iwasawa-congruence field is the **proved**
@@ -260,8 +257,7 @@ namespace LpData
 private instance instFact37'' : Fact (Nat.Prime 37) := ⟨by norm_num⟩
 
 private theorem padic37_valuation_p : Padic.valuation (37 : ℚ_[37]) = 1 := by
-  have h : (37 : ℚ_[37]) = ((37 : ℕ) : ℚ_[37]) := by push_cast; ring
-  rw [h, Padic.valuation_natCast]; norm_num [padicValNat_self]
+  rw [Padic.valuation_ofNat]; norm_num [padicValNat_self]
 
 /-- The `37`-adic valuation, `/36`-normalised (so `v(τ i) = i/36 = i/(p-1)` on the
 model Gauss sums `τ i = 37^i`), satisfies the `IsValuation` interface. -/
@@ -273,7 +269,7 @@ private theorem isValuation37 :
     rw [Padic.valuation_mul hx hy]; push_cast; ring
   map_neg x := by
     change (Padic.valuation (-x) : ℚ) / 36 = (Padic.valuation x : ℚ) / 36
-    rw [BernoulliRegular.FLT37.PadicL.Padic.valuation_neg]
+    rw [Padic.valuation_neg]
   p_ne_zero := by norm_num
 
 /-- **Non-vacuity of `LpData 37`** (honesty witness): the bundle introduces **no
@@ -321,7 +317,7 @@ noncomputable def nonvacuous37 : LpData 37 where
         = 36 * (bernoulliFactorQp 37 i).valuation := by
       have hpcast : ((37 : ℕ) : ℚ_[37]) = (37 : ℚ_[37]) := by norm_num
       have hdiv : (37 : ℚ_[37]) ^ (i : ℕ) / (37 : ℚ_[37]) ≠ 0 := div_ne_zero hτ h37
-      rw [LpValue_def, hpcast, neg_mul, BernoulliRegular.FLT37.PadicL.Padic.valuation_neg,
+      rw [LpValue_def, hpcast, neg_mul, Padic.valuation_neg,
         Padic.valuation_mul hdiv hlog, Padic.valuation_zpow, padic37_valuation_p]
       have hτp : Padic.valuation ((37 : ℚ_[37]) ^ (i : ℕ) / (37 : ℚ_[37]))
           = (i : ℤ) - 1 := by
