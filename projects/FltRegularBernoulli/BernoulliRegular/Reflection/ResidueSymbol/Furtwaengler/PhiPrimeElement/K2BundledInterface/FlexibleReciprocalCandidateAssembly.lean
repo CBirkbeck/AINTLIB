@@ -55,8 +55,7 @@ theorem flexibleReciprocalPhiCandidate_span_of_repeatedExactOnOrbit
   have h_eq :=
     S.span_eq_stickelbergerIdeal_of_supportInOrbit_of_repeatedExactOnOrbit
       hγ_ne h_sup h_expγ
-  rw [h_descentPrime] at h_eq
-  simpa [γ] using h_eq
+  simpa [γ, h_descentPrime] using h_eq
 
 /-- Assemble the flexible reciprocal candidate into a Φ-prime element under the
 flexible atomic exponent and split-orbit hypotheses. -/
@@ -409,15 +408,13 @@ theorem K2_2FlexibleReciprocalSourceData.symbol_eq_norm_symbol
     T.h_over T.hℓ_ne_ℓ'
   rw [K2_2FlexibleReciprocalSourceData_phi_gamma, h_apex]
   have hp_sub_one_cast : ((p - 1 : ℕ) : ZMod p) = -1 := by
-    have hp_one : 1 ≤ p := (Fact.out : Nat.Prime p).one_le
-    rw [Nat.cast_sub hp_one, Nat.cast_one]
-    simp
+    simp [Nat.cast_sub (Fact.out : Nat.Prime p).one_le]
   rw [hp_sub_one_cast]
   ring
 
 /-- Build conductor-flexible reciprocal source data from an orbit-indexed
 repeated exact exponent certificate, without any split/order-one hypothesis. -/
-noncomputable def K2_2FlexibleReciprocalSourceData.ofRepeatedExactOnOrbit
+theorem K2_2FlexibleReciprocalSourceData.ofRepeatedExactOnOrbit
     {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
     {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
     {P : Ideal (𝓞 K)} [P.IsMaximal] [Algebra (ZMod ℓ) (𝓞 K ⧸ P)]
@@ -473,7 +470,7 @@ noncomputable def K2_2FlexibleReciprocalSourceData.ofRepeatedExactOnOrbit
 
 /-- Build conductor-flexible reciprocal source data from a repeated exact
 exponent certificate, without any split/order-one hypothesis. -/
-noncomputable def K2_2FlexibleReciprocalSourceData.ofRepeatedExact
+theorem K2_2FlexibleReciprocalSourceData.ofRepeatedExact
     {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
     {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
     {P : Ideal (𝓞 K)} [P.IsMaximal] [Algebra (ZMod ℓ) (𝓞 K ⧸ P)]
@@ -529,7 +526,7 @@ noncomputable def K2_2FlexibleReciprocalSourceData.ofRepeatedExact
 
 /-- Build conductor-flexible reciprocal source data from the source-conductor
 covariance/exact-exponent package and split-orbit hypotheses. -/
-noncomputable def K2_2FlexibleReciprocalSourceData.ofSourceConductorSigmaSplit
+theorem K2_2FlexibleReciprocalSourceData.ofSourceConductorSigmaSplit
     {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
     {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
       [IsGalois ℚ K]
