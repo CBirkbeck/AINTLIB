@@ -6,15 +6,12 @@ Authors: Chris Birkbeck
 import Mathlib.Algebra.Squarefree.Basic
 import Mathlib.FieldTheory.Minpoly.IsIntegrallyClosed
 import Mathlib.FieldTheory.Separable
-import Mathlib.FieldTheory.SeparableClosure
 import Mathlib.RingTheory.DedekindDomain.AdicValuation
-import Mathlib.RingTheory.DedekindDomain.Dvr
 import Mathlib.RingTheory.DedekindDomain.IntegralClosure
 import Mathlib.RingTheory.Ideal.GoingUp
 import Mathlib.RingTheory.Localization.NormTrace
 import Mathlib.RingTheory.Localization.NumDen
 import Mathlib.RingTheory.Polynomial.Resultant.Basic
-import Mathlib.RingTheory.Polynomial.Tower
 
 import HasseWeil.Curves.FiniteOverKx
 
@@ -46,8 +43,6 @@ Future content (see the plan):
 - Silverman, *Arithmetic of Elliptic Curves*, II.1 (algebraic curves).
 - Hartshorne, *Algebraic Geometry*, I.6.
 -/
-
-open scoped Polynomial.Bivariate
 
 /-- **Squarefree extraction**: if `q ∈ FractionRing R` (R a UFD like F[X])
 satisfies `q² · algebraMap D = algebraMap r` for some `r : R` and `D`
@@ -376,14 +371,9 @@ theorem polynomialDiscriminant_derivative_natDegree
   have hcoeff_deriv2 : C.polynomialDiscriminant.derivative.coeff 2 = 12 := by
     rw [Polynomial.coeff_derivative, C.polynomialDiscriminant_coeff_three]
     norm_num
-  apply le_antisymm
-  · refine (Polynomial.natDegree_derivative_le _).trans ?_
-    rw [C.polynomialDiscriminant_natDegree]
-  · by_contra hlt
-    push Not at hlt
-    have := Polynomial.coeff_eq_zero_of_natDegree_lt hlt
-    rw [hcoeff_deriv2] at this
-    exact h12 this
+  refine le_antisymm ((Polynomial.natDegree_derivative_le _).trans ?_)
+    (Polynomial.le_natDegree_of_ne_zero (by rw [hcoeff_deriv2]; exact h12))
+  rw [C.polynomialDiscriminant_natDegree]
 
 /-- **Task D (main)**: under `[IsElliptic]` and char ≠ 2, char ≠ 3,
 `C.polynomialDiscriminant` is squarefree. -/
@@ -415,15 +405,15 @@ theorem polynomialDiscriminant_squarefree [NeZero (2 : F)] [NeZero (3 : F)]
     rw [C.polynomialDiscriminant_derivative_natDegree,
       C.polynomialDiscriminant_natDegree]
   by_contra hnotcop
-  apply hres_ne
+  refine hres_ne ?_
   rw [show C.polynomialDiscriminant.natDegree - 1 =
-    C.polynomialDiscriminant.derivative.natDegree from hderiv_natDeg.symm]
-  rw [show Polynomial.resultant C.polynomialDiscriminant
-    C.polynomialDiscriminant.derivative C.polynomialDiscriminant.natDegree
-    C.polynomialDiscriminant.derivative.natDegree =
-    Polynomial.resultant C.polynomialDiscriminant
-      C.polynomialDiscriminant.derivative from rfl]
-  rw [Polynomial.resultant_eq_zero_iff.mpr]
+      C.polynomialDiscriminant.derivative.natDegree from hderiv_natDeg.symm,
+    show Polynomial.resultant C.polynomialDiscriminant
+        C.polynomialDiscriminant.derivative C.polynomialDiscriminant.natDegree
+        C.polynomialDiscriminant.derivative.natDegree =
+      Polynomial.resultant C.polynomialDiscriminant
+        C.polynomialDiscriminant.derivative from rfl,
+    Polynomial.resultant_eq_zero_iff.mpr]
   exact ⟨Or.inl hf_ne, hnotcop⟩
 
 /-- **Key algebraic identity**: for `x = p • 1 + q • coordY` in `F(C)` with
@@ -593,9 +583,8 @@ theorem mem_coordinateRing_of_minpoly_natDegree_one
     {x : C.FunctionField} (hx_Fx : IsIntegral (Polynomial F) x)
     (hdeg : (minpoly (Polynomial F) x).natDegree = 1) :
     ∃ y : C.CoordinateRing, algebraMap C.CoordinateRing C.FunctionField y = x := by
-  have hm_monic := minpoly.monic hx_Fx
   have haeval_x := minpoly.aeval (Polynomial F) x
-  rw [hm_monic.eq_X_add_C hdeg, map_add, Polynomial.aeval_X,
+  rw [(minpoly.monic hx_Fx).eq_X_add_C hdeg, map_add, Polynomial.aeval_X,
     Polynomial.aeval_C] at haeval_x
   refine ⟨-algebraMap (Polynomial F) C.CoordinateRing
     ((minpoly (Polynomial F) x).coeff 0), ?_⟩
@@ -685,8 +674,8 @@ private theorem mem_coordinateRing_of_minpoly_natDegree_two
   rw [Polynomial.Monic.eq_X_sq_add_C_mul_X_add_C_of_natDegree_two (minpoly.monic hx_Fx) hdeg2,
     map_add, map_add, map_mul, map_pow, Polynomial.aeval_X,
     Polynomial.aeval_C, Polynomial.aeval_C] at haeval_x
-  set α : Polynomial F := -((minpoly (Polynomial F) x).coeff 1) with hα_def
-  set γ : Polynomial F := (minpoly (Polynomial F) x).coeff 0 with hγ_def
+  set α : Polynomial F := -((minpoly (Polynomial F) x).coeff 1)
+  set γ : Polynomial F := (minpoly (Polynomial F) x).coeff 0
   set αfx : FractionRing (Polynomial F) :=
     algebraMap (Polynomial F) (FractionRing (Polynomial F)) α with hαfx_def
   set γfx : FractionRing (Polynomial F) :=
@@ -735,14 +724,14 @@ private theorem mem_coordinateRing_of_minpoly_natDegree_two
       (D := C.polynomialDiscriminant) (r := α ^ 2 - 4 * γ)
       C.polynomialDiscriminant_squarefree hq2D
     set bp : Polynomial F :=
-      Polynomial.C C.toAffine.a₁ * Polynomial.X + Polynomial.C C.toAffine.a₃ with hbp_def
+      Polynomial.C C.toAffine.a₁ * Polynomial.X + Polynomial.C C.toAffine.a₃
     have hbf_eq : C.bFracPoly =
         algebraMap (Polynomial F) (FractionRing (Polynomial F)) bp := rfl
     have h2p : 2 * p = algebraMap (Polynomial F) (FractionRing (Polynomial F))
         (α + q' * bp) := by
       rw [map_add, map_mul, hq', ← hbf_eq, ← hαfx_def]
       linear_combination -hα_formula
-    set p' : Polynomial F := Polynomial.C ((2 : F)⁻¹) * (α + q' * bp) with hp'_def
+    set p' : Polynomial F := Polynomial.C ((2 : F)⁻¹) * (α + q' * bp)
     have hp_eq : p = algebraMap (Polynomial F) (FractionRing (Polynomial F)) p' :=
       eq_algebraMap_C_inv_two_mul_of_two_mul h2p
     have hp_img : (p : FractionRing (Polynomial F)) • (1 : C.FunctionField) =
