@@ -32,7 +32,7 @@ real-form) must be made principal under `p ∤ h⁺` to begin the descent.
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Ideal
+open NumberField
 open scoped NumberField
 
 namespace BernoulliRegular
@@ -61,10 +61,8 @@ theorem class_eq_one_of_pow_eq_one_of_not_dvd_hPlus
     c = 1 := by
   have hcop : Nat.Coprime p (hPlus K) :=
     ((Fact.out : p.Prime).coprime_iff_not_dvd).mpr h_not_dvd
-  -- `orderOf c` divides both `p` (from `c ^ p = 1`) and `h⁺` (Lagrange).
   have h_ord_p : orderOf c ∣ p := orderOf_dvd_of_pow_eq_one hc
   have h_ord_h : orderOf c ∣ hPlus K := orderOf_dvd_card
-  -- Hence it divides `gcd p (h⁺) = 1`, forcing `c = 1`.
   have h_ord_one : orderOf c ∣ 1 :=
     hcop.gcd_eq_one ▸ Nat.dvd_gcd h_ord_p h_ord_h
   exact orderOf_eq_one_iff.mp (Nat.dvd_one.mp h_ord_one)
@@ -83,12 +81,10 @@ theorem map_isPrincipal_of_pow_principal_of_not_dvd_hPlus (hp_odd : p ≠ 2)
     {J : Ideal (𝓞 (K⁺))} (hJ_ne : J ≠ ⊥)
     (hJ_pow : ((J.map (algebraMap (𝓞 (K⁺)) (𝓞 K))) ^ p).IsPrincipal) :
     (J.map (algebraMap (𝓞 (K⁺)) (𝓞 K))).IsPrincipal := by
-  -- Rewrite `(J.map _) ^ p` as `(J ^ p).map _` and descend to `K⁺` (Diekmann Prop 55).
   rw [← Ideal.map_pow] at hJ_pow
   have hJp_principal : (J ^ p).IsPrincipal :=
     isPrincipal_of_isPrincipal_map_Kplus (p := p) (hp_odd := hp_odd) (K := K)
       (J ^ p) hJ_pow
-  -- Translate to the class group: `[J] ^ p = 1`, then `[J] = 1` by the triviality lemma.
   have hJp_ne : J ^ p ≠ ⊥ := pow_ne_zero p hJ_ne
   have hJ_ne0 : J ∈ nonZeroDivisors (Ideal (𝓞 (K⁺))) :=
     mem_nonZeroDivisors_iff_ne_zero.mpr hJ_ne
@@ -100,12 +96,7 @@ theorem map_isPrincipal_of_pow_principal_of_not_dvd_hPlus (hp_odd : p ≠ 2)
   have hJ_principal : J.IsPrincipal :=
     (ClassGroup.mk0_eq_one_iff hJ_ne0).mp
       (class_eq_one_of_pow_eq_one_of_not_dvd_hPlus hp_odd h_not_dvd _ hJpow_class)
-  -- The image of a principal ideal is principal.
-  obtain ⟨a, ha⟩ := hJ_principal
-  refine ⟨⟨algebraMap _ _ a, ?_⟩⟩
-  rw [show J.map (algebraMap (𝓞 (K⁺)) (𝓞 K)) =
-      Ideal.span {algebraMap (𝓞 (K⁺)) (𝓞 K) a} from by
-    rw [show J = Ideal.span {a} from ha, Ideal.map_span, Set.image_singleton]]
+  exact Submodule.IsPrincipal.map_ringHom (algebraMap (𝓞 (K⁺)) (𝓞 K)) hJ_principal
 
 end CaseII
 
