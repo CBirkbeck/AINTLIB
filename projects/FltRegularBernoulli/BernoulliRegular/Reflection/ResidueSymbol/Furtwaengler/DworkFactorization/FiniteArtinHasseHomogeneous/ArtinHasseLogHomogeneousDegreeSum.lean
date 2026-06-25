@@ -52,7 +52,6 @@ theorem finiteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_eval_sum
               (Ideal.pow_le_pow_right hden
                 (F.finiteArtinHasseExpCoordLogHomogeneousNumerator_mem_Q_pow
                   N a.1 d hx))) := by
-  classical
   unfold finiteArtinHasseExpCoordLogHomogeneousDegreeSum
   refine Finset.sum_congr rfl ?_
   intro a _ha
@@ -94,7 +93,6 @@ theorem finiteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_zero_of_factorial_wei
             ((F.finiteArtinHasseExpCoordPoly N x) ^ n).coeff d)) ∈
         F.Q ^ (d.factorial.factorization ℓ * (ℓ - 1) + (N + 1))) :
     F.finiteArtinHasseExpCoordLogHomogeneousDegreeSum N d x hx = 0 := by
-  classical
   let z : ℕ → 𝓞 R' := fun n =>
     F.finiteArtinHasseExpCoordLogHomogeneousNumerator N n d x
   have hz0 : ∀ n ∈ Finset.Icc 1 d,
@@ -134,7 +132,6 @@ theorem finiteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_logTerm_of_factorial_
         F.Q ^ ((ℓ ^ r).factorial.factorization ℓ * (ℓ - 1) + (N + 1))) :
     F.finiteArtinHasseExpCoordLogHomogeneousDegreeSum N (ℓ ^ r) x hx =
       F.finiteArtinHasseLogTerm N r x hx := by
-  classical
   let d : ℕ := ℓ ^ r
   let num : ℕ → 𝓞 R' := fun n =>
     F.finiteArtinHasseExpCoordLogHomogeneousNumerator N n d x
@@ -379,7 +376,6 @@ theorem finiteLogTermCore_finiteArtinHasseExpCoord_eq_homogeneous_support_sum
         (F.finiteArtinHasseExpCoord_mem_Q N hx) =
       ∑ d ∈ ((F.finiteArtinHasseExpCoordPoly N x) ^ n).support,
         F.finiteArtinHasseExpCoordLogHomogeneousCore N n d x hx := by
-  classical
   let P : Polynomial (𝓞 R') := F.finiteArtinHasseExpCoordPoly N x
   let z : 𝓞 R' := F.finiteArtinHasseExpCoord N x
   let s : ℕ := finiteLogTermOrder (ℓ := ℓ) n
@@ -482,7 +478,6 @@ theorem finiteLog_finiteArtinHasseExpCoord_eq_homogeneous_support_sum
       ∑ n ∈ Finset.range (finiteLogCutoff (ℓ := ℓ) N),
         ∑ d ∈ ((F.finiteArtinHasseExpCoordPoly N x) ^ n).support,
           F.finiteArtinHasseExpCoordLogHomogeneousTerm N n d x hx := by
-  classical
   unfold finiteLog
   refine Finset.sum_congr rfl ?_
   intro n _hn
@@ -496,7 +491,6 @@ theorem finiteArtinHasseExpCoordLogHomogeneousTerm_eq_zero_of_not_mem_support
     (N n d : ℕ) {x : 𝓞 R'} (hx : x ∈ F.Q)
     (hd : d ∉ ((F.finiteArtinHasseExpCoordPoly N x) ^ n).support) :
     F.finiteArtinHasseExpCoordLogHomogeneousTerm N n d x hx = 0 := by
-  classical
   by_cases hn : n = 0
   · subst n
     simp [finiteArtinHasseExpCoordLogHomogeneousTerm,
@@ -537,7 +531,6 @@ theorem finiteArtinHasseExpCoordLogHomogeneousTerm_eq_zero_of_cutoff_le_degree
     (N n d : ℕ) {x : 𝓞 R'} (hx : x ∈ F.Q)
     (hcut : finiteLogCutoff (ℓ := ℓ) N ≤ d) :
     F.finiteArtinHasseExpCoordLogHomogeneousTerm N n d x hx = 0 := by
-  classical
   by_cases hn : n = 0
   · subst n
     simp [finiteArtinHasseExpCoordLogHomogeneousTerm,
@@ -559,7 +552,6 @@ theorem finiteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_sum_Icc
     F.finiteArtinHasseExpCoordLogHomogeneousDegreeSum N d x hx =
       ∑ n ∈ Finset.Icc 1 d,
         F.finiteArtinHasseExpCoordLogHomogeneousTerm N n d x hx := by
-  classical
   simpa [finiteArtinHasseExpCoordLogHomogeneousDegreeSum] using
     (Finset.sum_attach (s := Finset.Icc 1 d)
       (f := fun n : ℕ =>
@@ -569,7 +561,6 @@ theorem finiteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_zero_of_cutoff_le
     (N d : ℕ) {x : 𝓞 R'} (hx : x ∈ F.Q)
     (hcut : finiteLogCutoff (ℓ := ℓ) N ≤ d) :
     F.finiteArtinHasseExpCoordLogHomogeneousDegreeSum N d x hx = 0 := by
-  classical
   rw [F.finiteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_sum_Icc N d hx]
   refine Finset.sum_eq_zero ?_
   intro n _hn
@@ -590,7 +581,6 @@ theorem finiteLogTerm_finiteArtinHasseExpCoord_eq_homogeneous_cutoff_sum
         (F.finiteArtinHasseExpCoord_mem_Q N hx) =
       ∑ d ∈ Finset.range (finiteLogCutoff (ℓ := ℓ) N),
         F.finiteArtinHasseExpCoordLogHomogeneousTerm N n d x hx := by
-  classical
   by_cases hn : n = 0
   · subst n
     simp [finiteArtinHasseExpCoordLogHomogeneousTerm,
@@ -636,7 +626,6 @@ theorem finiteLog_finiteArtinHasseExpCoord_eq_homogeneous_degree_sum_range
         (F.finiteArtinHasseExpCoord_mem_Q N hx) =
       ∑ d ∈ Finset.range (finiteLogCutoff (ℓ := ℓ) N),
         F.finiteArtinHasseExpCoordLogHomogeneousDegreeSum N d x hx := by
-  classical
   let C : ℕ := finiteLogCutoff (ℓ := ℓ) N
   let f : ℕ → ℕ → 𝓞 R' ⧸ F.Q ^ (N + 1) := fun n d =>
     F.finiteArtinHasseExpCoordLogHomogeneousTerm N n d x hx
@@ -705,7 +694,6 @@ theorem finiteArtinHasseLog_eq_homogeneous_degree_sum_range
     F.finiteArtinHasseLog N x hx =
       ∑ d ∈ Finset.range (finiteLogCutoff (ℓ := ℓ) N),
         F.finiteArtinHasseExpCoordLogHomogeneousDegreeSum N d x hx := by
-  classical
   let C : ℕ := finiteLogCutoff (ℓ := ℓ) N
   let powSet : Finset ℕ := (Finset.range (C + 1)).filter fun r => ℓ ^ r < C
   let logTerm : ℕ → 𝓞 R' ⧸ F.Q ^ (N + 1) := fun r =>
@@ -767,7 +755,7 @@ theorem finiteArtinHasseLog_eq_homogeneous_degree_sum_range
     _ = ∑ d ∈ powSet.image (fun r : ℕ => ℓ ^ r), degreeTerm d := himage_sum
     _ = ∑ d ∈ Finset.range C, degreeTerm d := himage_to_range
 
-/-- Finite logarithm of the finite Artin-Hasse principal-unit coordinate.  This
+/-- Finite logarithm of the finite Artin-Hasse principal-unit coordinate. This
 is the assembly theorem used to rewrite each downstream Artin-Hasse factor. -/
 theorem finiteLog_finiteArtinHasseExpCoord_eq_finiteArtinHasseLog
     (N : ℕ) {x : 𝓞 R'} (hx : x ∈ F.Q) :
@@ -831,8 +819,8 @@ theorem finiteArtinHasseExpCoord_inverseParameter_sub_pi_mem_Q_pow_succ
           (artinHasseDworkParameterApproxTo F.toConcreteStickelbergerSetup N) -
         F.π ∈
       F.Q ^ (N + 1) := by
-  rw [← Ideal.Quotient.eq_zero_iff_mem]
-  rw [map_sub, F.quotient_mk_finiteArtinHasseExpCoord_inverseParameter_eq_pi N]
+  rw [← Ideal.Quotient.eq_zero_iff_mem, map_sub,
+    F.quotient_mk_finiteArtinHasseExpCoord_inverseParameter_eq_pi N]
   simp
 
 theorem finiteLog_finiteArtinHasseExpCoord_inverseParameter_eq_finiteLog_pi
