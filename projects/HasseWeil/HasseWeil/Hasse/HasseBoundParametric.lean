@@ -11,9 +11,9 @@ The existing `hasse_bound` in `HasseWeil/HasseBound.lean` has a residual
 Silverman III.6.3 lands axiom-clean) and depends on `pointCount_eq`
 (`HasseWeil/Frobenius.lean`, also `sorry`-ed). The witness-parametric
 companions (`pointCount_eq_of_witness`, `degree_quadratic_nonneg_of_witness`,
-the `_qf_nonneg` chain below) bypass both blockers. This file composes them
-into `hasse_bound_of_t_witness`, which is axiom-hygienic and *conditionally*
-proves the Hasse bound given:
+the `_qf_nonneg` chain below) bypass both blockers. This file exposes the
+older witness-family composition and the current direct QF non-negativity
+forms, which conditionally prove the Hasse bound given:
 
 1. an integer `t : ℤ` (the intended trace) such that
    `#E(F_q) = q + 1 − t`;
@@ -29,13 +29,13 @@ special case.
 
 * `traceOfFrobenius_sq_le_of_witness` — the discriminant bound `t² ≤ 4q` given
   a family of quadratic-form degree witnesses.
-* `hasse_bound_of_t_witness` — `|#E(F_q) − q − 1| ≤ 2√q` given both witness
-  families.
-* `hasse_bound_of_full_witnesses` — the same bound from the `1 − π` hom/kernel
-  witness (trace computed internally) plus the quadratic-form witness family.
-* `hasse_bound_of_all_witnesses` — the top-level plug-in form, gathering every
-  upstream dependency (separable + finite-dim + fiber + QF witnesses) into one
-  theorem whose hypotheses map one-to-one to the outstanding upstream tickets.
+* `hasse_bound_of_qf_nonneg_witnesses` — `|#E(F_q) − q − 1| ≤ 2√q` from a
+  trace witness and direct QF non-negativity.
+* `hasse_bound_of_full_qf_nonneg_witnesses` — the same bound from the `1 − π`
+  hom/kernel witness plus direct QF non-negativity.
+* `hasse_bound_of_all_qf_nonneg_witnesses` — the consolidated plug-in form
+  gathering the separable, finite-dimensional, fiber, and QF non-negativity
+  witnesses.
 
 ## References
 * [Silverman, *The Arithmetic of Elliptic Curves*], V.1.1.

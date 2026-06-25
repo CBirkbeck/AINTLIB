@@ -46,15 +46,14 @@ DELETED — each was superseded by a shipped axiom-clean theorem (see `GapSpines
 `Hasse/L6Witnesses.lean` `_v2` bridges, `WeilPairing/HasseAssembly.lean`) or had no consumer.
 This file retains the PROVEN content: `Isogeny_eq_of_components`, L1', L7/L7a, the L10
 witness-parametric scaffold, the Miller wrappers L11a-f, L12b, L13, L14,
-`Polynomial.scalarExtensionEquiv` (now discharged via mathlib), the `witness_pc_*` lemmas,
-and the `HasseOpenLemmaPack` record (kept as a historical dependency interface). The docstrings below
-this header are HISTORICAL (they describe the pre-deletion plan).
+`Polynomial.scalarExtensionEquiv` (now discharged via mathlib), and the `witness_pc_*`
+lemmas. The docstrings below this header are HISTORICAL (they describe the pre-deletion
+plan).
 
 This file originally packaged the open mathematical lemmas
 required to discharge the four-field `HasseWitnesses` bundle
-(`Hasse/Witnesses.lean`) and thereby derive the Hasse bound
-`|#E(F_q) − q − 1| ≤ 2√q` axiom-clean from the canonical consumer
-`hasse_bound_of_witnesses` (`Hasse/Final.lean`).
+(`Hasse/Witnesses.lean`) for the old witness-parametric route to the Hasse
+bound `|#E(F_q) − q − 1| ≤ 2√q`.
 
 ## Char 2/3 generality target (round 4 reviewer plan)
 
@@ -112,7 +111,8 @@ and audit flags:
   `∃ d, d = α.degree` placeholder is the appropriate marker.
 * **A8 — L7 docstring**: explicit dependency tower clarification
   (depends on L7a + γ.IsSeparable via K(E)/γ*K(E)/K(γ*x)).
-* **A9 — Pack rename**: `OpenLemmaPack` → `HasseOpenLemmaPack`.
+* **A9 — Pack-interface audit**: the old open-lemma pack interface was
+  historical scaffolding and is no longer part of the live Hasse-bound route.
 * **B1 — Miller edge-case audit**: documented above the Miller-derived
   Open Lemmas (`vertical_principal`, `line_principal`, `miller_principal`).
   P=O / Q=O / Q=-P / P=Q (tangent, including 2-torsion) all handled;

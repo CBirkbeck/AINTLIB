@@ -274,7 +274,8 @@ final closing-arc consumer. Takes:
 - IsGalois witness (substantive normality assumption).
 - Aut ≃ β.kernel bijection (the substantive Galois-correspondence content).
 
-Produces the fiber witness for `hasse_bound_of_all_witnesses` axiom-clean.
+Produces the fiber witness used by the historical witness-parametric
+Hasse-bound route, axiom-clean.
 
 The cascade reduces T-III-4-015 to two named witnesses via this consumer:
 1. `IsGalois (α*K(E₂)) K(E₁)` (Mathlib has the structure; needs Normal).

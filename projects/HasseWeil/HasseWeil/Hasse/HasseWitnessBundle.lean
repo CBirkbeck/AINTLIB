@@ -5,11 +5,9 @@ import HasseWeil.EC.IsogenyKernel
 /-!
 # Bundled witnesses for the Hasse bound
 
-`HasseWitnesses W hq` packages every deferred input the Hasse bound needs into
-a single record. Once each field is dischargeable (when Worker A's separability
-chain, Worker C's fiber witness, and the III.6.3 QF non-negativity all land
-axiom-clean), the bound becomes unconditional via the canonical consumer in
-`Hasse/Final.lean`.
+`HasseWitnesses W hq` packages the historical witness inputs for the Hasse
+bound into a single record. The current axiom-clean Hasse-bound route is the
+Weil-pairing consumer in `WeilPairing/HasseBound.lean`.
 
 The fields are scoped to the *genuine* `1 − π` isogeny `isogOneSub_negFrobenius
 W hq` (`HasseWeil/AdditionPullback/Frobenius.lean`) — never the placeholder
@@ -34,8 +32,8 @@ variable {K : Type*} [Field K] [Fintype K] [DecidableEq K]
 variable (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
 
 /-- **Bundled witnesses sufficient for the Hasse bound** for an elliptic curve
-`W/F_q`. Each field is a deferred input that an upstream stream owns; together
-they drive `hasse_bound_of_witnesses` (`Hasse/Final.lean`).
+`W/F_q`. Each field records an upstream input from the old witness-parametric
+route; the current unconditional consumer lives in `WeilPairing/HasseBound.lean`.
 
 The shape is anchored on the genuine `isogOneSub_negFrobenius W hq`, so each
 field is provable in principle (no placeholder structures). -/
