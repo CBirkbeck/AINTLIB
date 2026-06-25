@@ -59,20 +59,17 @@ private theorem coeff_eq_zero_of_derivative_eq_zero_charP {p : ℕ}
     (hf : PowerSeries.derivative R f = 0)
     (n : ℕ) (hpn : ¬ p ∣ n) :
     PowerSeries.coeff n f = 0 := by
-  -- `n ≠ 0` since `p ∣ 0`.
+  -- `n ≠ 0` since `p ∣ 0`; write `n = m + 1`.
   have hn : n ≠ 0 := fun h ↦ hpn (h ▸ dvd_zero p)
-  -- Express `n` as `m + 1`.
   obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn
-  -- From `hf`: `coeff m (derivative f) = 0`, i.e. `coeff (m+1) f * (m+1) = 0`.
+  -- `coeff m (derivative f) = 0` reads `coeff (m+1) f * (m+1) = 0`.
   have hcoeff : PowerSeries.coeff (m + 1) f * ((m + 1 : ℕ) : R) = 0 := by
-    have h1 := congr_arg (PowerSeries.coeff m) hf
-    rw [PowerSeries.coeff_derivative, map_zero] at h1
-    rw [Nat.cast_add_one]
-    exact h1
+    simpa [PowerSeries.coeff_derivative, Nat.cast_add_one] using
+      congr_arg (PowerSeries.coeff m) hf
   -- `(m + 1 : R)` is a unit since `p ∤ (m+1)`.
   have hunit : IsUnit ((m + 1 : ℕ) : R) :=
     (CharP.isUnit_natCast_iff (p := p) Fact.out).mpr hpn
-  exact (hunit.mul_left_eq_zero).mp hcoeff
+  exact hunit.mul_left_eq_zero.mp hcoeff
 
 /-- `PowerSeries.subst g f` has the same constant coefficient as `f` when the
 constant coefficient of `g` is zero. -/
@@ -81,8 +78,8 @@ private lemma constantCoeff_subst_zero_const
     (f : PowerSeries R) :
     PowerSeries.constantCoeff (PowerSeries.subst g f) = PowerSeries.constantCoeff f := by
   rw [PowerSeries.subst_def]
-  have h : MvPowerSeries.HasSubst (fun _ : Unit ↦ g) := by
-    apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro; exact hg
+  have h : MvPowerSeries.HasSubst (fun _ : Unit ↦ g) :=
+    MvPowerSeries.hasSubst_of_constantCoeff_zero (fun _ ↦ hg)
   exact HasseWeil.FG.constantCoeff_subst_vanishing h (fun _ ↦ hg) f
 
 /-- **Silverman IV.4.4**: In characteristic `p`, the multiplication-by-`p`
@@ -98,27 +95,23 @@ theorem FormalGroup.mulByP_exists_expand (F : FormalGroup R) (p : ℕ)
       g.expand p hp_prime.out.ne_zero := by
   apply exists_expand_of_coeff_vanishing p hp_prime.out.ne_zero
   intro n hpn
-  -- Step 1: derivative [p] = 0 (from chain rule + char p).
+  -- `derivative [p] = 0`, from the chain rule and `[p] = 0` in characteristic `p`.
   have hder : PowerSeries.derivative R (F.mulByNatHom p).toSeries = 0 := by
     have chain := FormalGroupHom.invariantDifferential_chain (F.mulByNatHom p)
-    -- Simplify the RHS of `chain` to zero using `[p] = 0` in char p.
     have hp_zero :
         PowerSeries.C (PowerSeries.coeff 1 (F.mulByNatHom p).toSeries) *
           F.normalizedDifferential.toSeries = 0 := by
-      rw [F.coeff_one_mulByNatHom p, CharP.cast_eq_zero R p]
-      rw [show PowerSeries.C (0 : R) = 0 from map_zero _]
-      exact zero_mul _
+      rw [F.coeff_one_mulByNatHom p, CharP.cast_eq_zero R p, map_zero, zero_mul]
     rw [hp_zero] at chain
-    -- chain : subst [p].toSeries ω_F.toSeries * derivative [p].toSeries = 0
+    -- `subst [p] ω_F` is a unit (constant coefficient `1`), so `derivative [p] = 0`.
     have hunit : IsUnit (PowerSeries.subst (F.mulByNatHom p).toSeries
         F.normalizedDifferential.toSeries) := by
-      rw [PowerSeries.isUnit_iff_constantCoeff]
-      rw [constantCoeff_subst_zero_const _ (F.mulByNatHom p).zero_const]
+      rw [PowerSeries.isUnit_iff_constantCoeff,
+        constantCoeff_subst_zero_const _ (F.mulByNatHom p).zero_const]
       change IsUnit (@PowerSeries.constantCoeff R _ F.invariantDiff)
       rw [F.invariantDiff_constantCoeff]
       exact isUnit_one
-    exact (hunit.mul_right_eq_zero).mp chain
-  -- Step 2: coefficient vanishing.
+    exact hunit.mul_right_eq_zero.mp chain
   exact coeff_eq_zero_of_derivative_eq_zero_charP hder n hpn
 
 /-- **Silverman IV.4.4 (decomposition form)**: for a formal group over a ring of
@@ -133,10 +126,6 @@ theorem FormalGroup.mulByP_decomposition (F : FormalGroup R) (p : ℕ)
       (F.mulByNatHom p).toSeries =
         PowerSeries.C (p : R) * f + g.expand p hp_prime.out.ne_zero := by
   obtain ⟨g, hg⟩ := F.mulByP_exists_expand p
-  refine ⟨(0 : PowerSeries R), g, ?_⟩
-  have hmul : PowerSeries.C (p : R) * (0 : PowerSeries R) = 0 := mul_zero _
-  have hadd : (0 : PowerSeries R) + PowerSeries.expand p hp_prime.out.ne_zero g =
-      PowerSeries.expand p hp_prime.out.ne_zero g := zero_add _
-  rw [hmul, hadd]; exact hg
+  exact ⟨0, g, by simpa using hg⟩
 
 end HasseWeil.FormalGroup
