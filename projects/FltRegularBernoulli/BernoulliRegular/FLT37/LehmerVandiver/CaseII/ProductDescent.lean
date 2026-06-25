@@ -1244,9 +1244,9 @@ theorem caseII_pair_K_fermat_sum_of_realCaseIIData37 {m : ℕ} (D : RealCaseIIDa
     rcases hmul0 with h | h
     · exact caseII_rootIdeal_ne_bot D.toCaseIIData37 hp η h
     · exact caseII_rootIdeal_ne_bot D.toCaseIIData37 hp (caseII_etaInv η) h
-  have hJ₁_ne : J₁ ≠ ⊥ := fun h ↦ by
+  have hJ₁_ne : J₁ ≠ ⊥ := fun h => by
     apply hmul_ne η₁; rw [← hJ₁, h, Ideal.map_bot]
-  have hJ₂_ne : J₂ ≠ ⊥ := fun h ↦ by
+  have hJ₂_ne : J₂ ≠ ⊥ := fun h => by
     apply hmul_ne η₂; rw [← hJ₂, h, Ideal.map_bot]
   obtain ⟨x₁, y₁, _hx₁_ne, _hy₁_ne, hxy₁⟩ :=
     caseII_descended_anchored_real_generators D hp h_VC η₁ hJ₁_ne hJ₀_ne hJ₁ hJ₀
@@ -1739,8 +1739,7 @@ theorem caseII_zetaSubOne_pow_dvd_pair_product_at_etaZero_sharp {m : ℕ}
     rw [← pow_add]
     congr 1
     omega
-  rw [h_pow_eq] at h_mul
-  exact h_mul
+  rwa [h_pow_eq] at h_mul
 
 /-- **`(ζ-1)^(74m+2) ∣ caseII_data_pair_realGenerator_K D D.etaZero`** — the K-level pair
 generator at the special root has elevated `(ζ-1)`-content `74m+2`. Direct corollary of
@@ -2098,7 +2097,7 @@ theorem caseII_sigma_stable_pair_descent_exists {m : ℕ} (D : RealCaseIIData37 
         rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy η *
           rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy (caseII_etaInv η) := by
   obtain ⟨J, hJ⟩ := caseII_sigma_stable_ideal_descends D hp η hη hηinv
-  have hJ_ne : J ≠ ⊥ := fun h_eq ↦ by
+  have hJ_ne : J ≠ ⊥ := fun h_eq => by
     rw [h_eq, Ideal.map_bot] at hJ
     have h_mul_eq_bot :
       rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy η *
@@ -2344,7 +2343,7 @@ theorem caseII_sigma_pair_anchored_fractional_ratio {m : ℕ} (D : RealCaseIIDat
             rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy
               (caseII_etaInv D.etaZero) : Ideal (𝓞 K)) : FractionalIdeal (𝓞 K)⁰ K) := by
   have hint := G.cross_eq
-  have h := congrArg (fun I : Ideal (𝓞 K) ↦ (↑I : FractionalIdeal (𝓞 K)⁰ K)) hint
+  have h := congrArg (fun I : Ideal (𝓞 K) => (↑I : FractionalIdeal (𝓞 K)⁰ K)) hint
   simpa only [FractionalIdeal.coeIdeal_mul, FractionalIdeal.coeIdeal_span_singleton] using h
 
 /-- **σ-stable principal ratio: test pair / anchor pair = spanSingleton(real ratio).**
@@ -2543,8 +2542,7 @@ theorem caseII_a_etaInv_dvd_p_pow_spec {m : ℕ} (D : RealCaseIIData37 K m)
   -- Both proofs of (37 : ℕ) ≠ 2 are propositionally equal; rewrite hp to D.etaZero's form:
   have h_map := RealCaseIIData37.map_rootIdeal D hp D.etaZero
   simp only [CaseIIData37.etaZero] at h_map
-  rw [h_map] at h_sigma
-  exact h_sigma
+  rwa [h_map] at h_sigma
 
 /-- **Q identification: `Q = 𝔞₀ · σ(𝔞₀)`.** The 𝔭-coprime quotient of the anchor pair
 product equals the product of the 𝔭-coprime parts of `𝔞(η₀)` and `𝔞(caseII_etaInv η₀)`.
@@ -2905,7 +2903,7 @@ noncomputable def caseII_sigma_pair_anchored_source_of_VC
       (Fintype.card (ClassGroup
         (𝓞 (NumberField.maximalRealSubfield (CyclotomicField 37 ℚ)))))) :
     CaseIISigmaPairAnchoredSource37 :=
-  fun {_m} D hη1inv hη2inv ↦
+  fun {_m} D hη1inv hη2inv =>
     caseII_sigma_pair_anchored_adjacent_of_realData D
       (by decide : (37 : ℕ) ≠ 2) h_VC hη1inv hη2inv
 
@@ -2966,8 +2964,8 @@ theorem caseII_pair_realGenerator_K_eq_mp_pow_apair_pow {m : ℕ} (D : RealCaseI
   set 𝔭 := Ideal.span ({(D.hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K))
   set A := (rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy η) ^ 37
   set B := (rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy (caseII_etaInv η)) ^ 37
-  rw [show (𝔪 * A * 𝔭) * (𝔪 * B * 𝔭) = (𝔪 * 𝔭) * (𝔪 * 𝔭) * (A * B) by ring]
-  rw [show (𝔪 * 𝔭) * (𝔪 * 𝔭) = (𝔪 * 𝔭) ^ 2 by rw [sq]]
+  rw [show (𝔪 * A * 𝔭) * (𝔪 * B * 𝔭) = (𝔪 * 𝔭) * (𝔪 * 𝔭) * (A * B) by ring,
+    show (𝔪 * 𝔭) * (𝔪 * 𝔭) = (𝔪 * 𝔭) ^ 2 by rw [sq]]
 
 /-- **37th-power cross identity on K⁺-pair-generators.** From the σ-stable cross identity
 `(x_i)·𝔞_pair_η_i = (y_i)·𝔞_pair_η_0` (cross_eq in `CaseIISigmaPairAnchoredFixedGenerator37`),
@@ -3129,8 +3127,7 @@ theorem caseII_sigma_K_unit_lifts_K_plus_unit (u : (𝓞 K)ˣ)
         (NumberField.IsCMField.ringOfIntegersComplexConj K)
         (show (u : 𝓞 K) * ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) = 1 by
           rw [← Units.val_mul, mul_inv_cancel, Units.val_one])
-      rw [map_mul, hu, map_one] at h_sigma_id
-      exact h_sigma_id
+      rwa [map_mul, hu, map_one] at h_sigma_id
     have h2 : (u : 𝓞 K) * ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) = 1 := by
       rw [← Units.val_mul, mul_inv_cancel, Units.val_one]
     have h_u_unit : IsUnit (u : 𝓞 K) := u.isUnit
@@ -3342,8 +3339,7 @@ theorem caseII_pair_product_symmetric_expansion {m : ℕ} (D : RealCaseIIData37 
     rw [← pow_succ']
     exact hη
   ring_nf
-  rw [show (η : 𝓞 K) ^ 37 = (η : 𝓞 K) * (η : 𝓞 K) ^ 36 by rw [← pow_succ']]
-  rw [h_eta_prod]
+  rw [show (η : 𝓞 K) ^ 37 = (η : 𝓞 K) * (η : 𝓞 K) ^ 36 by rw [← pow_succ'], h_eta_prod]
   ring
 
 /-- **K-level adjacent identity in symmetric polynomial form.** Substituting
@@ -3421,8 +3417,8 @@ which would contradict the Case-II descent hypotheses). -/
 theorem caseII_K_symmetric_at_etaTwo_ne_zero {m : ℕ} (D : RealCaseIIData37 K m)
     (hp : (37 : ℕ) ≠ 2) :
     D.x ^ 2 + D.x * D.y * ((D.etaTwo : 𝓞 K) + (D.etaTwo : 𝓞 K) ^ 36) + D.y ^ 2 ≠ 0 := by
-  rw [← caseII_pair_product_symmetric_expansion D D.etaTwo]
-  rw [← caseII_data_pair_realGenerator_K_eq D D.etaTwo]
+  rw [← caseII_pair_product_symmetric_expansion D D.etaTwo,
+    ← caseII_data_pair_realGenerator_K_eq D D.etaTwo]
   unfold caseII_data_pair_realGenerator_K
   rw [Ne, map_eq_zero_iff _
     (FaithfulSMul.algebraMap_injective (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K))]
@@ -3433,8 +3429,8 @@ theorem caseII_K_symmetric_at_etaTwo_ne_zero {m : ℕ} (D : RealCaseIIData37 K m
 theorem caseII_K_symmetric_at_etaOne_ne_zero {m : ℕ} (D : RealCaseIIData37 K m)
     (hp : (37 : ℕ) ≠ 2) :
     D.x ^ 2 + D.x * D.y * ((D.etaOne : 𝓞 K) + (D.etaOne : 𝓞 K) ^ 36) + D.y ^ 2 ≠ 0 := by
-  rw [← caseII_pair_product_symmetric_expansion D D.etaOne]
-  rw [← caseII_data_pair_realGenerator_K_eq D D.etaOne]
+  rw [← caseII_pair_product_symmetric_expansion D D.etaOne,
+    ← caseII_data_pair_realGenerator_K_eq D D.etaOne]
   unfold caseII_data_pair_realGenerator_K
   rw [Ne, map_eq_zero_iff _
     (FaithfulSMul.algebraMap_injective (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K))]
@@ -3485,9 +3481,8 @@ theorem caseII_etaZero_eq_one {m : ℕ} (D : RealCaseIIData37 K m)
     (D.etaZero : 𝓞 K) = 1 := by
   have h_etaInv_eq := caseII_etaInv_etaZero_eq_etaZero D hp
   have h_coe : (D.etaZero : 𝓞 K) ^ 36 = (D.etaZero : 𝓞 K) := by
-    have h_subtype := congrArg (fun η : nthRootsFinset 37 (1 : 𝓞 K) ↦ (η : 𝓞 K)) h_etaInv_eq
-    rw [caseII_etaInv_coe] at h_subtype
-    exact h_subtype
+    have h_subtype := congrArg (fun η : nthRootsFinset 37 (1 : 𝓞 K) => (η : 𝓞 K)) h_etaInv_eq
+    rwa [caseII_etaInv_coe] at h_subtype
   have h37 : (D.etaZero : 𝓞 K) ^ 37 = 1 := (mem_nthRootsFinset (by norm_num) _).mp D.etaZero.2
   have h_sq : (D.etaZero : 𝓞 K) ^ 2 = 1 := by
     calc (D.etaZero : 𝓞 K) ^ 2
@@ -3500,8 +3495,6 @@ theorem caseII_etaZero_eq_one {m : ℕ} (D : RealCaseIIData37 K m)
         = ((D.etaZero : 𝓞 K) ^ 2) ^ 18 := by ring
       _ = 1 ^ 18 := by rw [h_sq]
       _ = 1 := one_pow _
-  have h_ne_zero : (D.etaZero : 𝓞 K) ≠ 0 :=
-    ne_zero_of_mem_nthRootsFinset one_ne_zero D.etaZero.2
   have h_split : (D.etaZero : 𝓞 K) ^ 37 = (D.etaZero : 𝓞 K) ^ 36 * (D.etaZero : 𝓞 K) := by
     rw [← pow_succ]
   rw [h_36, one_mul] at h_split
@@ -3512,7 +3505,7 @@ With γ_1 = η_0·ζ + (η_0·ζ)^36 and γ_2 = η_0·ζ² + (η_0·ζ²)^36, ex
 factorization. The (ζ - 1) factor is the K-uniformizer at 𝔭; the cofactor lies in the 𝔭-coprime
 part. This is the structural fact underlying the Diekmann descent's 𝔭-uniformizer extraction. -/
 theorem caseII_K_trace_diff_factors {m : ℕ} (D : RealCaseIIData37 K m)
-    (hp : (37 : ℕ) ≠ 2) :
+    (_hp : (37 : ℕ) ≠ 2) :
     ((D.etaOne : 𝓞 K) + (D.etaOne : 𝓞 K) ^ 36) -
         ((D.etaTwo : 𝓞 K) + (D.etaTwo : 𝓞 K) ^ 36) =
       (D.hζ.toInteger - 1) *
@@ -3527,8 +3520,8 @@ theorem caseII_K_trace_diff_factors {m : ℕ} (D : RealCaseIIData37 K m)
     have : ζ ^ 72 = ζ ^ 37 * ζ ^ 35 := by ring
     rw [this, hζ37, one_mul]
   have h36' : (η₀ * ζ * ζ) ^ 36 = η₀ ^ 36 * ζ ^ 35 := by
-    rw [show η₀ * ζ * ζ = η₀ * ζ ^ 2 by ring, mul_pow, ← pow_mul]
-    rw [show (2 * 36 : ℕ) = 72 by norm_num, h72_eq_35]
+    rw [show η₀ * ζ * ζ = η₀ * ζ ^ 2 by ring, mul_pow, ← pow_mul,
+      show (2 * 36 : ℕ) = 72 by norm_num, h72_eq_35]
   rw [h36, h36']
   ring
 
@@ -3598,8 +3591,7 @@ theorem caseII_K_zeta_sub_one_dvd_x_add_y_etaTwoInv {m : ℕ} (D : RealCaseIIDat
     (hp : (37 : ℕ) ≠ 2) :
     (D.hζ.toInteger - 1 : 𝓞 K) ∣ D.x + D.y * (D.etaTwo : 𝓞 K) ^ 36 := by
   have h_inv_coe : (D.etaTwo : 𝓞 K) ^ 36 = (caseII_etaInv D.etaTwo : 𝓞 K) := rfl
-  rw [h_inv_coe]
-  rw [← Ideal.mem_span_singleton]
+  rw [h_inv_coe, ← Ideal.mem_span_singleton]
   have h_eq := m_mul_c_mul_p hp D.hζ D.equation D.hy (caseII_etaInv D.etaTwo)
   have h_mem : D.x + D.y * (caseII_etaInv D.etaTwo : 𝓞 K) ∈
       Ideal.span ({D.x + D.y * (caseII_etaInv D.etaTwo : 𝓞 K)} : Set (𝓞 K)) :=
@@ -3617,8 +3609,7 @@ theorem caseII_K_zeta_sub_one_sq_dvd_symmetric_at_etaTwo {m : ℕ} (D : RealCase
     (hp : (37 : ℕ) ≠ 2) :
     (D.hζ.toInteger - 1 : 𝓞 K) ^ 2 ∣
       D.x ^ 2 + D.x * D.y * ((D.etaTwo : 𝓞 K) + (D.etaTwo : 𝓞 K) ^ 36) + D.y ^ 2 := by
-  rw [← caseII_pair_product_symmetric_expansion D D.etaTwo]
-  rw [sq]
+  rw [← caseII_pair_product_symmetric_expansion D D.etaTwo, sq]
   refine mul_dvd_mul ?_ ?_
   · -- (ζ-1) ∣ (D.x + D.y·η_2):
     rw [← Ideal.mem_span_singleton]
@@ -3642,8 +3633,7 @@ theorem caseII_K_zeta_sub_one_sq_dvd_symmetric_at_etaOne {m : ℕ} (D : RealCase
     (hp : (37 : ℕ) ≠ 2) :
     (D.hζ.toInteger - 1 : 𝓞 K) ^ 2 ∣
       D.x ^ 2 + D.x * D.y * ((D.etaOne : 𝓞 K) + (D.etaOne : 𝓞 K) ^ 36) + D.y ^ 2 := by
-  rw [← caseII_pair_product_symmetric_expansion D D.etaOne]
-  rw [sq]
+  rw [← caseII_pair_product_symmetric_expansion D D.etaOne, sq]
   refine mul_dvd_mul ?_ ?_
   · rw [← Ideal.mem_span_singleton]
     have h_eq := m_mul_c_mul_p hp D.hζ D.equation D.hy D.etaOne
@@ -3658,8 +3648,7 @@ theorem caseII_K_zeta_sub_one_sq_dvd_symmetric_at_etaOne {m : ℕ} (D : RealCase
       Ideal.mul_le_left
     exact h_le h_mem
   · have h_inv_coe : (D.etaOne : 𝓞 K) ^ 36 = (caseII_etaInv D.etaOne : 𝓞 K) := rfl
-    rw [h_inv_coe]
-    rw [← Ideal.mem_span_singleton]
+    rw [h_inv_coe, ← Ideal.mem_span_singleton]
     have h_eq := m_mul_c_mul_p hp D.hζ D.equation D.hy (caseII_etaInv D.etaOne)
     have h_mem : D.x + D.y * (caseII_etaInv D.etaOne : 𝓞 K) ∈
         Ideal.span ({D.x + D.y * (caseII_etaInv D.etaOne : 𝓞 K)} : Set (𝓞 K)) :=
@@ -3680,8 +3669,7 @@ theorem caseII_K_zeta_sub_one_pow_dvd_x_add_y {m : ℕ} (D : RealCaseIIData37 K 
     (D.hζ.toInteger - 1 : 𝓞 K) ^ (37 * m + 1) ∣ D.x + D.y := by
   have h_orig := caseII_zetaSubOne_pow_dvd_x_add_y_mul_etaZero D hp
   have h_etaZero := caseII_etaZero_eq_one D hp
-  rw [h_etaZero, mul_one] at h_orig
-  exact h_orig
+  rwa [h_etaZero, mul_one] at h_orig
 
 /-- **K⁺-pair-realGenerator at the anchor is `(xP + yP)²`.** Under `D.etaZero = 1`, the
 K⁺-trace at the anchor is `caseII_eta_trace D.etaZero = 1 + 1 = 2`, so
@@ -3783,8 +3771,7 @@ theorem caseII_sigma_pair_pow37_K_plus_anchor_xP_plus_yP_sq {m : ℕ}
       G.yPlus ^ 37 * (caseII_data_xP D + caseII_data_yP D) ^ 2 := by
   obtain ⟨u_KP, h⟩ := caseII_sigma_pair_pow37_K_plus_identity D hp η G
   refine ⟨u_KP, ?_⟩
-  rw [caseII_data_pair_realGenerator_at_etaZero_eq_xP_plus_yP_sq D hp] at h
-  exact h
+  rwa [caseII_data_pair_realGenerator_at_etaZero_eq_xP_plus_yP_sq D hp] at h
 
 /-- **`xP + yP ≠ 0` in 𝓞 K⁺.** Direct from `caseII_data_pair_realGenerator_ne_zero D hp D.etaZero =
 (xP + yP)² ≠ 0` and integral domain. -/
@@ -3833,8 +3820,7 @@ theorem caseII_zeta_sub_one_pow_dvd_x_add_y_sq_via_pow_eq {m : ℕ} (D : RealCas
     pow_dvd_pow_of_dvd h_x_add_y 2
   rw [← pow_mul] at h_sq
   have h_eq : (37 * m + 1) * 2 = 74 * m + 2 := by ring
-  rw [h_eq] at h_sq
-  exact h_sq
+  rwa [h_eq] at h_sq
 
 /-- **`(ζ-1)^(74m+2) ∣ (algebraMap yPlus)^37 · (D.x + D.y)²`** — combining the divisibility of
 `(D.x + D.y)²` with the multiplicativity. -/
@@ -4001,8 +3987,7 @@ theorem caseII_sigma_pair_pow37_K_plus_LambdaCyc_decomposition {m : ℕ}
         caseII_pair_realGenerator_at_etaZero_div_LambdaCyc_pow D hp) := by
   obtain ⟨u_KP, h⟩ := caseII_sigma_pair_pow37_K_plus_LambdaCyc_at_eta D hp η G
   refine ⟨u_KP, ?_⟩
-  rw [caseII_pair_realGenerator_at_etaZero_div_LambdaCyc_pow_spec D hp] at h
-  exact h
+  rwa [caseII_pair_realGenerator_at_etaZero_div_LambdaCyc_pow_spec D hp] at h
 
 /-- **K⁺-level cross identity after canceling Λ from both sides**: starting from
 `xPlus^37 · Λ · Q_η · u_KP = yPlus^37 · Λ^(37m+1) · Q_etaZero` and canceling Λ ≠ 0:
@@ -4140,8 +4125,7 @@ theorem caseII_span_LambdaCyc_pow_dvd_K_plus_LHS_factored {m : ℕ}
         Ideal.span ({caseII_pair_realGenerator_div_LambdaCyc_general D hp η} :
           Set (𝓞 (NumberField.maximalRealSubfield K))) := by
   obtain ⟨u_KP, h⟩ := caseII_span_LambdaCyc_pow_dvd_K_plus_LHS_span D hp η G
-  rw [caseII_span_LHS_factored D hp η G u_KP] at h
-  exact h
+  rwa [caseII_span_LHS_factored D hp η G u_KP] at h
 
 /-- **`span(xPlus) ≠ ⊥`** — direct from `xPlus ≠ 0`. -/
 theorem caseII_span_xPlus_ne_bot {m : ℕ} (D : RealCaseIIData37 K m)
@@ -4238,14 +4222,14 @@ theorem caseII_K_zeta_sub_one_pow_dvd_algebraMap_LambdaCyc_pow_v2 {m : ℕ}
 /-- **Span identity for the K-level adjacent K-pair-realGenerator at D.etaOne**. Direct
 expansion via `caseII_data_pair_realGenerator_K_eq`. -/
 theorem caseII_data_pair_realGenerator_K_at_etaOne_eq {m : ℕ}
-    (D : RealCaseIIData37 K m) (hp : (37 : ℕ) ≠ 2) :
+    (D : RealCaseIIData37 K m) (_hp : (37 : ℕ) ≠ 2) :
     caseII_data_pair_realGenerator_K D D.etaOne =
       (D.x + D.y * (D.etaOne : 𝓞 K)) * (D.x + D.y * (D.etaOne : 𝓞 K) ^ 36) :=
   caseII_data_pair_realGenerator_K_eq D D.etaOne
 
 /-- **Span identity for the K-level adjacent K-pair-realGenerator at D.etaTwo**. -/
 theorem caseII_data_pair_realGenerator_K_at_etaTwo_eq {m : ℕ}
-    (D : RealCaseIIData37 K m) (hp : (37 : ℕ) ≠ 2) :
+    (D : RealCaseIIData37 K m) (_hp : (37 : ℕ) ≠ 2) :
     caseII_data_pair_realGenerator_K D D.etaTwo =
       (D.x + D.y * (D.etaTwo : 𝓞 K)) * (D.x + D.y * (D.etaTwo : 𝓞 K) ^ 36) :=
   caseII_data_pair_realGenerator_K_eq D D.etaTwo
@@ -4320,8 +4304,7 @@ theorem caseII_K_zeta_sub_one_pow_dvd_x_add_y_sq {m : ℕ} (D : RealCaseIIData37
   rw [caseII_data_pair_realGenerator_K_eq, h_etaZero] at h_orig
   have h_simp : (D.x + D.y * (1 : 𝓞 K)) * (D.x + D.y * (1 : 𝓞 K) ^ 36) =
       (D.x + D.y) ^ 2 := by ring
-  rw [h_simp] at h_orig
-  exact h_orig
+  rwa [h_simp] at h_orig
 
 /-- **`(ζ - 1)⁴ ∣ Q_1 · (γ_1 - γ_2)`.** Combining `(ζ-1)² ∣ Q_1` + `(ζ-1)² ∣ (γ_1 - γ_2)`. -/
 theorem caseII_K_zeta_sub_one_four_dvd_Q1_times_trace_diff {m : ℕ} (D : RealCaseIIData37 K m)
@@ -4512,7 +4495,7 @@ theorem caseII_descent_equation {m : ℕ} (D : RealCaseIIData37 K m) (hp : (37 :
 /-- **K-trace minus 2 factors as `η⁻¹·(η-1)²`.** For a 37th root `η`,
 `(η + η³⁶) - 2 = η³⁶·(η - 1)²` (since `η⁻¹ = η³⁶` and `η³⁷ = 1`). With `D.etaZero = 1` so
 `γ₀ = 2`, this gives the clean factorization of every descent coefficient `γ_η - γ₀`. -/
-theorem caseII_K_trace_sub_two_eq {m : ℕ} (D : RealCaseIIData37 K m)
+theorem caseII_K_trace_sub_two_eq {m : ℕ} (_D : RealCaseIIData37 K m)
     (η : nthRootsFinset 37 (1 : 𝓞 K)) :
     ((η : 𝓞 K) + (η : 𝓞 K) ^ 36) - 2 = (η : 𝓞 K) ^ 36 * ((η : 𝓞 K) - 1) ^ 2 := by
   have hη : (η : 𝓞 K) ^ 37 = 1 := (mem_nthRootsFinset (by norm_num) _).mp η.2
