@@ -66,8 +66,6 @@ end WeierstrassCurve.Affine.Point
 
 /-! ## The universal elliptic curve -/
 
-open scoped Polynomial.Bivariate
-
 namespace WeierstrassCurve
 
 /-- A type whose elements represent the five coefficients `a₁`, `a₂`, `a₃`, `a₄` and `a₆`
