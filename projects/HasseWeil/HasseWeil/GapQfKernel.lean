@@ -368,10 +368,10 @@ theorem laurentSeries_derivative_mul {R : Type*} [CommRing R] (f g : LaurentSeri
     HahnSeries.coeff_mul, HahnSeries.coeff_mul, HahnSeries.coeff_mul]
   -- LHS: (m+1) • ∑_{AD_{f,g}(m+1)} f_i g_j.
   -- RHS sum₁ (f * Dg): reindex j ↦ j+1 onto AD_{f,g}(m+1), weight = j.
-  have h1 : ∑ ij ∈ Finset.addAntidiagonal f.isPWO_support
+  have h1 : ∑ ij ∈ Finset.antidiagonal f.isPWO_support
         (LaurentSeries.hasseDeriv R 1 g).isPWO_support m,
         f.coeff ij.1 * (LaurentSeries.hasseDeriv R 1 g).coeff ij.2 =
-      ∑ ij ∈ Finset.addAntidiagonal f.isPWO_support g.isPWO_support (m + 1),
+      ∑ ij ∈ Finset.antidiagonal f.isPWO_support g.isPWO_support (m + 1),
         ij.2 • (f.coeff ij.1 * g.coeff ij.2) := by
     have hcoeff : ∀ p : ℤ × ℤ,
         f.coeff p.1 * (LaurentSeries.hasseDeriv R 1 g).coeff p.2 =
@@ -379,7 +379,7 @@ theorem laurentSeries_derivative_mul {R : Type*} [CommRing R] (f g : LaurentSeri
       intro p
       rw [LaurentSeries.hasseDeriv_coeff, Ring.choose_one_right, Nat.cast_one, mul_smul_comm]
     have h_inj : Set.InjOn (fun p : ℤ × ℤ ↦ (p.1, p.2 + 1))
-        ↑(Finset.addAntidiagonal f.isPWO_support
+        ↑(Finset.antidiagonal f.isPWO_support
           (LaurentSeries.hasseDeriv R 1 g).isPWO_support m) := by
       intro x _ y _ h
       simp only [Prod.mk.injEq, add_left_inj] at h
@@ -390,7 +390,7 @@ theorem laurentSeries_derivative_mul {R : Type*} [CommRing R] (f g : LaurentSeri
     · intro q hq
       rw [Finset.mem_image] at hq
       obtain ⟨p, hp, rfl⟩ := hq
-      rw [Finset.mem_addAntidiagonal] at hp ⊢
+      rw [Finset.mem_antidiagonal] at hp ⊢
       refine ⟨hp.1, ?_, by rw [← hp.2.2]; ring⟩
       have : (LaurentSeries.hasseDeriv R 1 g).coeff p.2 ≠ 0 := hp.2.1
       rw [LaurentSeries.hasseDeriv_coeff, Ring.choose_one_right, Nat.cast_one] at this
@@ -398,14 +398,14 @@ theorem laurentSeries_derivative_mul {R : Type*} [CommRing R] (f g : LaurentSeri
       intro hg
       exact this (by rw [hg, smul_zero])
     · intro q hq hqnot
-      rw [Finset.mem_addAntidiagonal] at hq
+      rw [Finset.mem_antidiagonal] at hq
       rw [← mul_smul_comm]
       have : (q.2 : ℤ) • g.coeff q.2 = 0 := by
         by_contra hne
         apply hqnot
         rw [Finset.mem_image]
         refine ⟨(q.1, q.2 - 1), ?_, by simp⟩
-        rw [Finset.mem_addAntidiagonal]
+        rw [Finset.mem_antidiagonal]
         refine ⟨hq.1, ?_, by have h := hq.2.2; show q.1 + (q.2 - 1) = m; omega⟩
         simp only [HahnSeries.mem_support, ne_eq]
         rw [LaurentSeries.hasseDeriv_coeff, Ring.choose_one_right, Nat.cast_one]
@@ -416,10 +416,10 @@ theorem laurentSeries_derivative_mul {R : Type*} [CommRing R] (f g : LaurentSeri
         exact hz
       rw [this, mul_zero]
   -- RHS sum₂ (Df * g): reindex i ↦ i+1 onto AD_{f,g}(m+1), weight = i.
-  have h2 : ∑ ij ∈ Finset.addAntidiagonal (LaurentSeries.hasseDeriv R 1 f).isPWO_support
+  have h2 : ∑ ij ∈ Finset.antidiagonal (LaurentSeries.hasseDeriv R 1 f).isPWO_support
         g.isPWO_support m,
         (LaurentSeries.hasseDeriv R 1 f).coeff ij.1 * g.coeff ij.2 =
-      ∑ ij ∈ Finset.addAntidiagonal f.isPWO_support g.isPWO_support (m + 1),
+      ∑ ij ∈ Finset.antidiagonal f.isPWO_support g.isPWO_support (m + 1),
         ij.1 • (f.coeff ij.1 * g.coeff ij.2) := by
     have hcoeff : ∀ p : ℤ × ℤ,
         (LaurentSeries.hasseDeriv R 1 f).coeff p.1 * g.coeff p.2 =
@@ -427,7 +427,7 @@ theorem laurentSeries_derivative_mul {R : Type*} [CommRing R] (f g : LaurentSeri
       intro p
       rw [LaurentSeries.hasseDeriv_coeff, Ring.choose_one_right, Nat.cast_one, smul_mul_assoc]
     have h_inj : Set.InjOn (fun p : ℤ × ℤ ↦ (p.1 + 1, p.2))
-        ↑(Finset.addAntidiagonal (LaurentSeries.hasseDeriv R 1 f).isPWO_support
+        ↑(Finset.antidiagonal (LaurentSeries.hasseDeriv R 1 f).isPWO_support
           g.isPWO_support m) := by
       intro x _ y _ h
       simp only [Prod.mk.injEq, add_left_inj] at h
@@ -438,7 +438,7 @@ theorem laurentSeries_derivative_mul {R : Type*} [CommRing R] (f g : LaurentSeri
     · intro q hq
       rw [Finset.mem_image] at hq
       obtain ⟨p, hp, rfl⟩ := hq
-      rw [Finset.mem_addAntidiagonal] at hp ⊢
+      rw [Finset.mem_antidiagonal] at hp ⊢
       refine ⟨?_, hp.2.1, by rw [← hp.2.2]; ring⟩
       have : (LaurentSeries.hasseDeriv R 1 f).coeff p.1 ≠ 0 := hp.1
       rw [LaurentSeries.hasseDeriv_coeff, Ring.choose_one_right, Nat.cast_one] at this
@@ -446,14 +446,14 @@ theorem laurentSeries_derivative_mul {R : Type*} [CommRing R] (f g : LaurentSeri
       intro hf
       exact this (by rw [hf, smul_zero])
     · intro q hq hqnot
-      rw [Finset.mem_addAntidiagonal] at hq
+      rw [Finset.mem_antidiagonal] at hq
       rw [← smul_mul_assoc]
       have : (q.1 : ℤ) • f.coeff q.1 = 0 := by
         by_contra hne
         apply hqnot
         rw [Finset.mem_image]
         refine ⟨(q.1 - 1, q.2), ?_, by simp⟩
-        rw [Finset.mem_addAntidiagonal]
+        rw [Finset.mem_antidiagonal]
         refine ⟨?_, hq.2.1, by have h := hq.2.2; show (q.1 - 1) + q.2 = m; omega⟩
         simp only [HahnSeries.mem_support, ne_eq]
         rw [LaurentSeries.hasseDeriv_coeff, Ring.choose_one_right, Nat.cast_one]
@@ -465,7 +465,7 @@ theorem laurentSeries_derivative_mul {R : Type*} [CommRing R] (f g : LaurentSeri
       rw [this, zero_mul]
   rw [h1, h2, ← Finset.sum_add_distrib, Finset.smul_sum]
   refine Finset.sum_congr rfl (fun ij hij ↦ ?_)
-  rw [Finset.mem_addAntidiagonal] at hij
+  rw [Finset.mem_antidiagonal] at hij
   rw [← add_smul, add_comm ij.2 ij.1, hij.2.2, Nat.cast_one]
 
 /-- **L-KL.1** (Silverman IV.1): the formal derivative on `LaurentSeries F`, composed with the

@@ -392,6 +392,7 @@ lemma tendsto_sum_range_cos_div_nat {x : ℝ} (hx₀ : 0 < x) (hx₁ : x < 1) :
             Real.log ‖(1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I)‖) 1 :=
       hnorm.log hnorm_ne
     convert tendsto_nhdsWithin_of_tendsto_nhds hlog.neg.tendsto using 2
+    rw [Pi.neg_apply]
     simp
   have ht₀ : 0 < 2 * Real.pi * x := by nlinarith [hx₀, Real.pi_pos]
   have ht₂π : 2 * Real.pi * x < 2 * Real.pi := by nlinarith [hx₁, Real.pi_pos]

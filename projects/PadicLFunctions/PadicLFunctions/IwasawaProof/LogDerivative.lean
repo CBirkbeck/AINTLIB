@@ -1386,7 +1386,8 @@ theorem phiSeries_continuous :
       PowerSeries.coeff n (((1 + PowerSeries.X) ^ p - 1 : PowerSeries ℤ_[p]) ^ d))
       = fun x => PowerSeries.coeff n (((1 + PowerSeries.X) ^ p - 1 : PowerSeries ℤ_[p]) ^ d)
         • PowerSeries.coeff d x from by funext x; rw [smul_eq_mul, smul_eq_mul, mul_comm]]
-  exact (PowerSeries.WithPiTopology.continuous_coeff ℤ_[p] d).const_smul _
+  exact (PowerSeries.WithPiTopology.continuous_coeff ℤ_[p] d).const_smul
+      (PowerSeries.coeff n (((1 + PowerSeries.X) ^ p - 1 : PowerSeries ℤ_[p]) ^ d))
 
 variable (p)
 

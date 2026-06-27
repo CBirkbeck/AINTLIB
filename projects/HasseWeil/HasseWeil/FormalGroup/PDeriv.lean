@@ -453,7 +453,7 @@ theorem continuous_pderiv (s : σ) :
     rw [coeff_pderiv]
   rw [heq]
   exact (WithPiTopology.continuous_coeff R
-    (d + Finsupp.single s 1)).const_smul _
+    (d + Finsupp.single s 1)).const_smul (d s + 1 : ℕ)
 
 end Continuity
 

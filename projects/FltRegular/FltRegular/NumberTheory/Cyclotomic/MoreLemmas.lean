@@ -67,14 +67,6 @@ lemma exists_dvd_pow_sub_Int_pow (a : 𝓞 K) : ∃ b : ℤ, ↑p ∣ a ^ p - (b
     Nat.sub_add_cancel (n := p) (m := 1) hpri.out.one_lt.le]
   ring
 
-section
-
-variable {α} [CommMonoidWithZero α]
-
-theorem prime_units_mul (a : αˣ) (b : α) : Prime (↑a * b) ↔ Prime b := by simp [Prime]
-
-end
-
 lemma zeta_sub_one_dvd_Int_iff {n : ℤ} : (hζ.toInteger : 𝓞 K) - 1 ∣ n ↔ ↑p ∣ n := by
   letI := IsCyclotomicExtension.numberField {p} ℚ K
   by_cases hp : p = 2
