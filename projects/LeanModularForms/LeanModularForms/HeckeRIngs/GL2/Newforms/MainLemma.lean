@@ -91,6 +91,19 @@ structure Newform (N : ℕ) [NeZero N] (k : ℤ)
 arises as a `Newform`; for a bundled `Newform N k` this is `N` itself. -/
 noncomputable def Newform.conductor (_f : Newform N k) : ℕ := N
 
+/-- A **primitive form** of level `N` and weight `k` (Miyake §4.6; Diamond–Shurman §5.8; the
+LMFDB notion). A primitive form is precisely a *normalized newform*: a cusp form lying in the new
+subspace, that is a Hecke eigenform and is normalized with `a₁ = 1`. These are exactly the data
+bundled by `Newform`, so `PrimitiveForm` is definitionally `Newform`; the name records the standard
+terminology — this is the object that carries an LMFDB label and a normalized `q`-expansion. -/
+abbrev PrimitiveForm (N : ℕ) [NeZero N] (k : ℤ) := Newform N k
+
+/-- The characteristic property of primitivity: a primitive form is a Hecke eigenform for **every**
+`Tₙ`, not merely at the good primes (Atkin–Lehner–Li). For a `Newform` this holds as a theorem —
+the bad-prime eigenvalues are forced — and that upgrade (`IsEigenform → IsFullEigenform` for
+newforms) is tracked separately. -/
+def PrimitiveForm.IsFull (f : PrimitiveForm N k) : Prop := IsFullEigenform f.toCuspForm
+
 omit [NeZero N] in
 private lemma qExpansion_one_coeff_one_smul_of_norm
     (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
