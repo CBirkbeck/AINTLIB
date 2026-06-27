@@ -98,7 +98,7 @@ import HasseWeil.Isogeny.EC.IsogenyAG.DualGalois
 import HasseWeil.Isogeny.EC.IsogenyAG.Bridge
 import HasseWeil.Foundation.Curves.OrdAtInftyRamification
 import HasseWeil.Isogeny.EC.IsogenyAG.RamificationInfty
-import HasseWeil.HasseBound.WeilPairing.GenericCovarianceGeneral
+import HasseWeil.Foundation.EC.GenericCovarianceGeneral
 import HasseWeil.Isogeny.EC.IsogenyAG.DualGaloisClosed
 import HasseWeil.Isogeny.EC.IsogenyAG.FrobeniusDual
 import HasseWeil.Isogeny.EC.IsogenyAG.MulByIntPullbackComp
@@ -120,7 +120,7 @@ import HasseWeil.Foundation.Curves.KernelOfDifferential
 import HasseWeil.Isogeny.EC.IsogenyAG.FrobeniusTwist
 import HasseWeil.Isogeny.EC.IsogenyAG.TwistedFactorization
 import HasseWeil.Isogeny.EC.IsogenyAG.CanonicalDual
-import HasseWeil.HasseBound.WeilPairing.AdjointTransfer
+import HasseWeil.Isogeny.EC.IsogenyAG.AdjointTransfer
 import HasseWeil.Isogeny.EC.IsogenyAG.DualAdditivity
 import HasseWeil.Isogeny.EC.IsogenyAG.CovarianceDischarge
 import HasseWeil.Isogeny.EC.IsogenyAG.DualUniversal

@@ -6,7 +6,7 @@ import HasseWeil.Isogeny.EC.IsogenyAG.TwoCurveDualRange
 import HasseWeil.Isogeny.EC.IsogenyAG.TwoCurveNormConorm
 import HasseWeil.Isogeny.EC.IsogenyAG.TwoCurveGroupHom
 import HasseWeil.Isogeny.EC.IsogenyKernelTwoCurve
-import HasseWeil.HasseBound.WeilPairing.TwoCurveGenericCovariance
+import HasseWeil.Isogeny.EC.IsogenyAG.TwoCurveGenericCovariance
 import HasseWeil.Isogeny.EC.IsogenyAG.TwoCurvePointImage
 import HasseWeil.Foundation.Curves.CurveMapBaseChange
 import HasseWeil.Foundation.Curves.NoFinitePolesBridge

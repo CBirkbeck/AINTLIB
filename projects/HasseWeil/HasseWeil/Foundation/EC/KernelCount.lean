@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.Foundation.Curves.GoodFiber
-import HasseWeil.HasseBound.WeilPairing.GenericCovarianceGeneral
+import HasseWeil.Foundation.EC.GenericCovarianceGeneral
 import HasseWeil.Isogeny.EC.IsogenyKernel
 import HasseWeil.Foundation.Curves.Differentials
 
