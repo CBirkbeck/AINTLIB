@@ -1,5 +1,5 @@
 import HasseWeil.Pic0.PicDual
-import HasseWeil.AdditionPullback.Frobenius
+import HasseWeil.Isogeny.AdditionPullback.Frobenius
 
 /-!
 # Route C — dual additivity for the Frobenius family (Silverman III.6.2(c) / III.8)

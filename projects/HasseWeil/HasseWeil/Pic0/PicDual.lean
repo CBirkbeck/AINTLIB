@@ -1,6 +1,6 @@
-import HasseWeil.Pic0.IsogenyClassGroup
+import HasseWeil.Isogeny.Pic0.IsogenyClassGroup
 import HasseWeil.Pic0.ToClassSurjective
-import HasseWeil.Basic
+import HasseWeil.Foundation.Basic
 
 /-!
 # The Pic⁰ dual isogeny and the dual relation `α ∘ α̂ = [deg α]` (Silverman III.6.1)

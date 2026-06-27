@@ -1,6 +1,6 @@
 import HasseWeil.Pic0.PicDualClassMapMultiplicativity
-import HasseWeil.Curves.MillerAllChar
-import HasseWeil.Ramification
+import HasseWeil.Foundation.Curves.MillerAllChar
+import HasseWeil.Foundation.Ramification
 
 /-!
 # Route C — the theorem of the square in DIVISOR / Pic⁰ language (Silverman III.6.2(c))
