@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.HasseBound.WeilPairing.HasseAssembly
-import HasseWeil.Isogeny.IsogenyBaseChange
+import HasseWeil.Isogeny.BaseChange.Basic
 
 /-!
 # Frobenius matrix data over the algebraic closure

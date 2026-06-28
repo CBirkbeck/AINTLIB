@@ -7,7 +7,7 @@ import HasseWeil.HasseBound.WeilPairing.PencilCovariance
 import HasseWeil.HasseBound.WeilPairing.ProjOrdTransportLocal
 import HasseWeil.HasseBound.WeilPairing.SeparableScaling
 import HasseWeil.HasseBound.WeilPairing.PencilDualDivisor
-import HasseWeil.Isogeny.WeilPairing.IsogenyWitnessReductions
+import HasseWeil.Isogeny.SeparableWitnessReductions
 
 /-!
 # `PencilScaling` for `(rπ − s)_{K̄}` from the local comap witnesses (δ-free, surjectivity-free)

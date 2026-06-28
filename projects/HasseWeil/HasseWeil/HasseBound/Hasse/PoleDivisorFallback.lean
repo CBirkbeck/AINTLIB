@@ -3,14 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.AdditionPullback.Frobenius
+import HasseWeil.Isogeny.Frobenius.OrdAtInfty
 import HasseWeil.Foundation.AdditionPullback.SilvermanIV14
 import HasseWeil.Foundation.Curves.PointFunctor
 import HasseWeil.Foundation.Curves.ProjectiveDivisor
 import HasseWeil.Foundation.Curves.RamificationAtInfinity
 import HasseWeil.Foundation.EC.TranslateValuation
-import HasseWeil.Isogeny.FrobeniusIsogeny
-import HasseWeil.Isogeny.Hasse.IsogOneSubXyFamily
+import HasseWeil.Isogeny.Frobenius.FunctionField
+import HasseWeil.Isogeny.OneSubFrobeniusFamily
 import HasseWeil.HasseBound.Hasse.OneSubFrobenius
 import HasseWeil.HasseBound.Hasse.PointFix
 import HasseWeil.HasseBound.Hasse.HasseWitnessBundle

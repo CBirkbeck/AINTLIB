@@ -17,7 +17,7 @@ import Mathlib.RingTheory.LocalProperties.Reduced
 import Mathlib.RingTheory.Localization.FractionRing
 import Mathlib.RingTheory.Polynomial.GaussLemma
 
-import HasseWeil.Isogeny.Isogeny
+import HasseWeil.Isogeny.FunctionField
 import HasseWeil.Foundation.Valuation
 
 /-!

@@ -1,5 +1,5 @@
 import HasseWeil.Foundation.Curves.PicZero
-import HasseWeil.Isogeny.EC.IsogenyAG
+import HasseWeil.Isogeny.Basic
 
 /-!
 # Pushforward of (projective) divisors via an isogeny

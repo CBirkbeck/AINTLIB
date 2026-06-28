@@ -3,9 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.EC.IsogenyKernel
+import HasseWeil.Isogeny.Kernel
 import HasseWeil.Foundation.EC.TranslationOrd
-import HasseWeil.Isogeny.Frobenius
+import HasseWeil.Isogeny.Frobenius.PointCount
 import HasseWeil.Foundation.OmegaPullbackCoeff
 import HasseWeil.Foundation.Verschiebung.QthRoots
 

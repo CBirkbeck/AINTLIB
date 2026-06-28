@@ -1,4 +1,4 @@
-import HasseWeil.Isogeny.DualIsogeny
+import HasseWeil.Isogeny.Dual.Relation
 import HasseWeil.Foundation.InvariantDifferentialPullback
 import HasseWeil.Foundation.OmegaCoeffMulByIntGeneral
 

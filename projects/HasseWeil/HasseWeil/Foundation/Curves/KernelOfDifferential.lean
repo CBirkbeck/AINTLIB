@@ -4,8 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.Foundation.Curves.Differentials
-import HasseWeil.Isogeny.GapQfKernel
-import HasseWeil.Isogeny.EC.IsogenyAG.DualReduction
+import HasseWeil.Isogeny.OmegaCoeffViaFormalGroup
+import HasseWeil.Isogeny.Dual.Reduction
 
 /-!
 # The kernel of `d` and the image of an inseparable pullback (ticket G1)

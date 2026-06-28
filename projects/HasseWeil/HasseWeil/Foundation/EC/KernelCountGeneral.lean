@@ -6,8 +6,8 @@ Authors: Chris Birkbeck
 import HasseWeil.Foundation.Curves.LocalizedDictionary
 import HasseWeil.Foundation.EC.KernelCount
 import HasseWeil.Foundation.EC.SeparableKernelTorsor
-import HasseWeil.Isogeny.EC.IsogenyAG.DualGaloisDataUnconditional
-import HasseWeil.Isogeny.WeilPairing.IsogenyWitnessReductions
+import HasseWeil.Isogeny.Dual.GaloisUnconditional
+import HasseWeil.Isogeny.SeparableWitnessReductions
 import Mathlib.FieldTheory.Fixed
 
 /-!

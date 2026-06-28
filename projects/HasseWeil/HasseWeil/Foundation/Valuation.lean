@@ -1,4 +1,4 @@
-import HasseWeil.Isogeny.Isogeny
+import HasseWeil.Isogeny.FunctionField
 import Mathlib.RingTheory.DiscreteValuationRing.TFAE
 import Mathlib.RingTheory.Localization.AtPrime.Basic
 import Mathlib.Algebra.Polynomial.Div

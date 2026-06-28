@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.Foundation.EC.DifferentialOrd
-import HasseWeil.Isogeny.EC.IsogenyOrdTransport
+import HasseWeil.Isogeny.OrdTransport
 import HasseWeil.Foundation.EC.TranslationOrd
 import HasseWeil.Foundation.EC.WronskianGeneral
 import HasseWeil.HasseBound.WeilPairing.TorsionGeometric

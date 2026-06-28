@@ -5,7 +5,7 @@ Authors: Chris Birkbeck
 -/
 import HasseWeil.Foundation.Curves.GoodFiber
 import HasseWeil.Foundation.EC.GenericCovarianceGeneral
-import HasseWeil.Isogeny.EC.IsogenyKernel
+import HasseWeil.Isogeny.Kernel
 import HasseWeil.Foundation.Curves.Differentials
 
 /-!

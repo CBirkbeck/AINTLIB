@@ -1,4 +1,4 @@
-import HasseWeil.Isogeny.EC.IsogenyKernel
+import HasseWeil.Isogeny.Kernel
 import HasseWeil.Foundation.Curves.Differentials
 import HasseWeil.Foundation.EC.TranslationOrd
 

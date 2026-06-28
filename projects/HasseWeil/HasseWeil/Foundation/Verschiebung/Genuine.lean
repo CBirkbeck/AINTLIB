@@ -5,9 +5,9 @@ Authors: Chris Birkbeck
 -/
 import HasseWeil.Foundation.Verschiebung.IsDual
 import HasseWeil.Foundation.Verschiebung.QthRoots
-import HasseWeil.Isogeny.AdditionPullback.Frobenius
+import HasseWeil.Isogeny.Frobenius.OrdAtInfty
 import HasseWeil.Foundation.ChordExpansion
-import HasseWeil.Isogeny.FormalIsogenySeries
+import HasseWeil.Isogeny.FormalSeries
 
 /-!
 # V-side genuine `r·V − s·id` isogeny family

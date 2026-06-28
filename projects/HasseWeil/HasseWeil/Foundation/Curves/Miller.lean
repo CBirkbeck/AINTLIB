@@ -7,7 +7,7 @@ import HasseWeil.Foundation.Curves.AFConditional
 import HasseWeil.Foundation.Curves.EffectiveSumReduce
 import HasseWeil.Foundation.Curves.NoFinitePolesBridge
 import HasseWeil.Foundation.Curves.NormValuation
-import HasseWeil.Isogeny.IsogenyBaseChange
+import HasseWeil.Isogeny.BaseChange.Basic
 
 open scoped Polynomial.Bivariate
 

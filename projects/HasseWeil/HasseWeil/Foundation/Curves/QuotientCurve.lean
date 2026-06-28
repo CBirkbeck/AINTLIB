@@ -4,9 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.Foundation.Basic
-import HasseWeil.Isogeny.Frobenius
-import HasseWeil.Isogeny.IsogenyBaseChange
-import HasseWeil.Isogeny.EC.IsogenyKernel
+import HasseWeil.Isogeny.Frobenius.PointCount
+import HasseWeil.Isogeny.BaseChange.Basic
+import HasseWeil.Isogeny.Kernel
 
 /-!
 # Quotient curve and Frobenius twist for finite-field isogenies

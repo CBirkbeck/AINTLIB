@@ -1,5 +1,5 @@
 import HasseWeil.Pic0.PicDualDegreeViaIsDualOf
-import HasseWeil.Isogeny.IsogenyBaseChange
+import HasseWeil.Isogeny.BaseChange.Basic
 import HasseWeil.Pic0.ToClassFunctorial
 
 /-!

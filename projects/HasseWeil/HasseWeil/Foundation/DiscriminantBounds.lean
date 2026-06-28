@@ -1,5 +1,5 @@
 import HasseWeil.Foundation.DegreeQuadraticForm
-import HasseWeil.Isogeny.Frobenius
+import HasseWeil.Isogeny.Frobenius.PointCount
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
 /-!

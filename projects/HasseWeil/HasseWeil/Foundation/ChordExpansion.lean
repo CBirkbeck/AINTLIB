@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.FormalGroup.FormalGroupLawSpec
-import HasseWeil.Isogeny.FormalIsogenySeries
+import HasseWeil.Isogeny.FormalSeries
 
 /-!
 # Chord expansion: the specialization layer (Silverman IV §1 at isogeny pullbacks)

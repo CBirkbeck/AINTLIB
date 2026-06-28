@@ -1,4 +1,4 @@
-import HasseWeil.Isogeny.Pic0.IsogenyClassGroup
+import HasseWeil.Isogeny.ClassGroup
 import HasseWeil.Pic0.ToClassSurjective
 import HasseWeil.Foundation.Basic
 

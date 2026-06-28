@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.Foundation.Curves.FrobeniusFixedPoint
-import HasseWeil.Isogeny.WeilPairing.IsogenyBaseChangeConcrete
+import HasseWeil.Isogeny.BaseChange.Concrete
 
 /-!
 # Discharging the point/divisor witnesses of `OneSubScalingData` over `K̄` (CoordHom-free)

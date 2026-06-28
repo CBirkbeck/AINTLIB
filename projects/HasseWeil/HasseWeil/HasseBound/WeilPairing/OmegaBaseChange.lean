@@ -5,7 +5,7 @@ Authors: Chris Birkbeck
 -/
 import HasseWeil.Foundation.InvariantDifferentialPullback
 import HasseWeil.HasseBound.WeilPairing.WallAGenericRealization
-import HasseWeil.Isogeny.WeilPairing.IsogenyBaseChangeConcrete
+import HasseWeil.Isogeny.BaseChange.Concrete
 
 /-!
 # Base change of the invariant-differential pullback coefficient (Silverman III.5)

@@ -5,7 +5,7 @@ Authors: Chris Birkbeck
 -/
 import HasseWeil.Foundation.Curves.Differentials
 import HasseWeil.Foundation.EC.MulByIntAddRecurrence
-import HasseWeil.Isogeny.FormalIsogenySeries
+import HasseWeil.Isogeny.FormalSeries
 
 /-!
 # Route B over a general field: `[n]^*ω = n·ω` and separability of `[n]`

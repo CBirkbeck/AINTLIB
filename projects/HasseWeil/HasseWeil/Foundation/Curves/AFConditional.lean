@@ -1,6 +1,6 @@
 import HasseWeil.Foundation.Curves.EffectiveSumReduce
 import HasseWeil.Foundation.Curves.PoleOrderParity
-import HasseWeil.Isogeny.EC.IsogenyAG.HomProperty
+import HasseWeil.Isogeny.GroupHom.PicZero
 
 /-!
 # AF unified package: conditional witnesses

@@ -1,4 +1,4 @@
-import HasseWeil.Isogeny.EC.IsogenyKernel
+import HasseWeil.Isogeny.Kernel
 
 /-!
 # Cardinality of `E[m]` from the separable-kernel-degree witness (T-III-6-010)

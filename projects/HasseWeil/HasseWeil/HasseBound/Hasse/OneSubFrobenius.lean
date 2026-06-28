@@ -1,4 +1,4 @@
-import HasseWeil.Isogeny.AdditionPullback.Frobenius
+import HasseWeil.Isogeny.Frobenius.OrdAtInfty
 import HasseWeil.HasseBound.Hasse.Separability
 import HasseWeil.HasseBound.Hasse.PointFix
 

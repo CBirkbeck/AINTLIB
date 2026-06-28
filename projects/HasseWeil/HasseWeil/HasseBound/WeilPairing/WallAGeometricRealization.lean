@@ -4,9 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.HasseBound.WeilPairing.WallAGenericRealization
-import HasseWeil.Isogeny.Hasse.IsogOneSubXyFamily
+import HasseWeil.Isogeny.OneSubFrobeniusFamily
 import HasseWeil.HasseBound.WeilPairing.FrobeniusGenericCovariance
-import HasseWeil.Isogeny.WeilPairing.IsogenyWitnessReductions
+import HasseWeil.Isogeny.SeparableWitnessReductions
 
 /-!
 # Wall A closed for `1 − π`: the base-changed pullback is a genuine translatable action over `K̄`

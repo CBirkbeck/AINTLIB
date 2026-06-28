@@ -1,6 +1,6 @@
-import HasseWeil.Isogeny.AdditionPullback.Frobenius
-import HasseWeil.Isogeny.Frobenius
-import HasseWeil.Isogeny.EC.IsogenyKernel
+import HasseWeil.Isogeny.Frobenius.OrdAtInfty
+import HasseWeil.Isogeny.Frobenius.PointCount
+import HasseWeil.Isogeny.Kernel
 
 /-!
 # Bundled witnesses for the Hasse bound

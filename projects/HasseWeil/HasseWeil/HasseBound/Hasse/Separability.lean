@@ -5,8 +5,8 @@ Authors: Chris Birkbeck
 -/
 import HasseWeil.Foundation.Curves.Differentials
 import HasseWeil.Foundation.Curves.InseparableDegree
-import HasseWeil.Isogeny.EC.IsogenyKernel
-import HasseWeil.Isogeny.Frobenius
+import HasseWeil.Isogeny.Kernel
+import HasseWeil.Isogeny.Frobenius.PointCount
 import HasseWeil.Foundation.InvariantDifferentialPullback
 import HasseWeil.Foundation.PullbackCoeff
 import HasseWeil.Foundation.OmegaCoeffMulByIntGeneral

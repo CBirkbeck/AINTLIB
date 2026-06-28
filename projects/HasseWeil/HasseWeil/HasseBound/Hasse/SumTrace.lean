@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.Foundation.Verschiebung.IsDual
-import HasseWeil.Isogeny.AdditionPullback.Frobenius
+import HasseWeil.Isogeny.Frobenius.OrdAtInfty
 import HasseWeil.Foundation.DegreeQuadraticForm
 
 /-!

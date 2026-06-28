@@ -1,12 +1,12 @@
 import HasseWeil.Foundation.DegreeQuadraticForm
-import HasseWeil.Isogeny.Frobenius
-import HasseWeil.Isogeny.DualIsogeny
+import HasseWeil.Isogeny.Frobenius.PointCount
+import HasseWeil.Isogeny.Dual.Relation
 import HasseWeil.HasseBound.Hasse.HasseBoundParametric
 import HasseWeil.HasseBound.Hasse.QuadraticForm
 import HasseWeil.HasseBound.Hasse.PointFix
 import HasseWeil.HasseBound.Hasse.Separability
 import HasseWeil.HasseBound.Hasse.OneSubFrobenius
-import HasseWeil.Isogeny.AdditionPullback.Frobenius
+import HasseWeil.Isogeny.Frobenius.OrdAtInfty
 
 /-!
 # HOLE E closer — degree quadratic form for `isogSmulSub π r s`

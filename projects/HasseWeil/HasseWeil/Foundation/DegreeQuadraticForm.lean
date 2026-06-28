@@ -1,4 +1,4 @@
-import HasseWeil.Isogeny.DualIsogeny
+import HasseWeil.Isogeny.Dual.Relation
 import HasseWeil.Isogeny.Endomorphism
 import HasseWeil.Foundation.AdditionPullback
 import HasseWeil.Foundation.EC.MulByIntAddRecurrence

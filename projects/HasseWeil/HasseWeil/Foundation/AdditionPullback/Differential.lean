@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import Mathlib.RingTheory.AlgebraicIndependent.TranscendenceBasis
-import HasseWeil.Isogeny.AdditionPullback.Frobenius
+import HasseWeil.Isogeny.Frobenius.OrdAtInfty
 import HasseWeil.Foundation.BridgeFrobenius
 import HasseWeil.Foundation.Curves.Differentials
 import HasseWeil.HasseBound.Hasse.HasseBoundQFNonneg

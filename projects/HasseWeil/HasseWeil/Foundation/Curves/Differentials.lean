@@ -8,7 +8,7 @@ import HasseWeil.Foundation.Curves.Transcendence
 import HasseWeil.Foundation.Auxiliary.PullbackKaehler
 import HasseWeil.Foundation.InvariantDifferentialPullback
 import HasseWeil.Foundation.OmegaPullbackCoeff
-import HasseWeil.Isogeny.EC.IsogenyKernel
+import HasseWeil.Isogeny.Kernel
 import Mathlib.RingTheory.Kaehler.Basic
 import Mathlib.RingTheory.Unramified.Field
 

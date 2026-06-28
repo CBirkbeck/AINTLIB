@@ -1,6 +1,6 @@
 import HasseWeil.Pic0.PicDual
 import HasseWeil.Foundation.DegreeQuadraticForm
-import HasseWeil.Isogeny.GapSpines
+import HasseWeil.Isogeny.VerschiebungFactorization
 
 /-!
 # Route C assembly: the Pic⁰ dual machinery ⟹ `deg(rπ − s) = N` ⟹ `qf_nonneg` (generic)
