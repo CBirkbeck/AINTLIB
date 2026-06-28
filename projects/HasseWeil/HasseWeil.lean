@@ -84,7 +84,7 @@ import HasseWeil.HasseBound.WeilPairing.Scaling.OneSubTransport
 import HasseWeil.HasseBound.WeilPairing.PencilCovariance
 import HasseWeil.HasseBound.WeilPairing.Scaling.Pencil
 import HasseWeil.HasseBound.WeilPairing.PencilComapPointValuation
-import HasseWeil.HasseBound.Basic
+import HasseWeil.HasseBound
 
 -- Silverman continuation (2026-06-09): faithful isogeny + III.4.8, the Tate module, isogeny classes
 import HasseWeil.Foundation.Curves.Divisor.PushforwardDivisor
