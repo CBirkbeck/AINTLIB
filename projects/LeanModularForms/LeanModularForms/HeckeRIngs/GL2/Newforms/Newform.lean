@@ -146,22 +146,4 @@ theorem Newform.eigenvalue_eq_coeff (f : Newform N k) (n : ℕ+)
     f.isEigen n hn]
   exact (qExpansion_one_coeff_one_smul_of_norm f.toCuspForm f.isNorm _).symm
 
-/-- **The Main Lemma** (DS Theorem 5.7.1, Atkin-Lehner [AL70]):
-If `f ∈ S_k(Γ₁(N))` has Fourier expansion `f(τ) = Σ aₙ qⁿ` with `aₙ = 0`
-whenever `(n, N) = 1`, then `f` is an oldform.
-
-This is the technical heart of the newform theory; the full proof requires the
-spectral theorem for Hecke operators and the Petersson adjoint formula. -/
-theorem mainLemma
-    (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
-    (h : ∀ n : ℕ, Nat.Coprime n N →
-      (UpperHalfPlane.qExpansion (1 : ℝ) f).coeff n = 0) :
-    f ∈ cuspFormsOld N k := by
-  -- Decompose `f = f_old + f_new`; for each eigenform `g ∈ cuspFormsNew` with
-  -- eigenvalue `λ_n ≠ 0`, the adjoint relation gives `⟨f, g⟩ = λ_n⁻¹ ⟨T_n f, g⟩`,
-  -- which vanishes since `a_n(f) = 0` for coprime `n`, forcing `f_new = 0`.  The
-  -- inputs (`exists_simultaneous_eigenform_basis`, `heckeT_n_adjoint`) are not yet
-  -- available, so the conclusion is left unproved.
-  sorry
-
 end HeckeRing.GL2

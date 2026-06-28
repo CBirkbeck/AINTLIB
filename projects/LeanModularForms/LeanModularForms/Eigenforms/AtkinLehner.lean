@@ -14,9 +14,9 @@ import LeanModularForms.Modularforms.QExpansionSlash
 /-!
 # Atkin-Lehner same-level `p`-supported projection API
 
-This file develops the Atkin-Lehner projection API for `Newforms.mainLemma`: any cusp
-form `f ∈ S_k(Γ₁(N))` whose Fourier coefficients vanish at every index coprime to `N`
-is an oldform.  The framework captures "support on multiples of `d`":
+This file develops the Atkin-Lehner same-level projection API for the new/old
+detection: any cusp form `f ∈ S_k(Γ₁(N))` whose Fourier coefficients vanish at every
+index coprime to `N` is an oldform.  The framework captures "support on multiples of `d`":
 
 * `IsSupportedOnDvd d P` — the power-series support predicate, with its algebraic
   closure lemmas.
