@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.Foundation.Curves.IntegralClosure
-import HasseWeil.Foundation.Curves.NormValuation
+import HasseWeil.Foundation.Curves.Valuation.NormValuation
 import HasseWeil.Foundation.EC.TranslateLocalRing
 import HasseWeil.Foundation.Ramification
 

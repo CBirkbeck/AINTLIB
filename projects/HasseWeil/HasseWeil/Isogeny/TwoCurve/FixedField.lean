@@ -5,7 +5,7 @@ Authors: Chris Birkbeck
 -/
 import HasseWeil.Isogeny.Dual.GaloisClosed
 import HasseWeil.Isogeny.Kernel
-import HasseWeil.Foundation.Curves.OrdAtInftyRamification
+import HasseWeil.Foundation.Curves.Ramification.OrdAtInftyRamification
 
 /-!
 # The fixed-field equality `Im(φ*) = Fix(ker φ)` for a **two-curve** isogeny

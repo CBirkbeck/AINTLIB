@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.Isogeny.Basic
-import HasseWeil.Foundation.Curves.OrdAtInftyRamification
+import HasseWeil.Foundation.Curves.Ramification.OrdAtInftyRamification
 
 /-!
 # The ramification-pullback formula at infinity, for isogenies (Silverman II.2.6)

@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.HasseBound.WeilPairing.MapTranslateGenericAdditive
-import HasseWeil.Foundation.Curves.FrobeniusFixedPoint
+import HasseWeil.Foundation.Curves.Frobenius.FrobeniusFixedPoint
 import HasseWeil.HasseBound.WeilPairing.OneSubFrobeniusBaseChangeWitnesses
 
 /-!

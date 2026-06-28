@@ -7,7 +7,7 @@ import HasseWeil.Isogeny.TwoCurve.Covariance
 import HasseWeil.Isogeny.TwoCurve.FixedField
 import HasseWeil.Isogeny.TwoCurve.NormConorm
 import HasseWeil.Foundation.EC.KernelCount
-import HasseWeil.Foundation.Curves.LocalizedDictionary
+import HasseWeil.Foundation.Curves.Fiber.LocalizedDictionary
 import Mathlib.FieldTheory.Fixed
 
 /-!

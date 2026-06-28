@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.Foundation.Curves.Differentials
-import HasseWeil.Foundation.Curves.InseparableDegree
+import HasseWeil.Foundation.Curves.Ramification.InseparableDegree
 import HasseWeil.Isogeny.Kernel
 import HasseWeil.Isogeny.Frobenius.PointCount
 import HasseWeil.Foundation.InvariantDifferentialPullback

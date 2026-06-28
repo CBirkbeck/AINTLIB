@@ -6,8 +6,8 @@ Authors: Chris Birkbeck
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 import Mathlib.RingTheory.DedekindDomain.AdicValuation
 import Mathlib.RingTheory.Localization.FractionRing
-import HasseWeil.Foundation.Curves.Infinity
-import HasseWeil.Foundation.Curves.Valuation
+import HasseWeil.Foundation.Curves.Valuation.Infinity
+import HasseWeil.Foundation.Curves.Valuation.Valuation
 
 /-!
 # Adic-valuation transport under ring equivalences

@@ -1,5 +1,5 @@
 import HasseWeil.HasseBound.WeilPairing.Fiber
-import HasseWeil.Foundation.Curves.PicZero
+import HasseWeil.Foundation.Curves.Divisor.PicZero
 
 /-!
 # Route 2A — the multiplicity-free geometric divisor pullback (keystone)

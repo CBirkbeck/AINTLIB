@@ -3,7 +3,7 @@ import HasseWeil.Foundation.EC.MulByIntAddRecurrence
 import HasseWeil.Isogeny.FormalSeries
 import HasseWeil.Foundation.Ramification
 import HasseWeil.Foundation.OmegaCoeffMulByIntFiniteField
-import HasseWeil.Foundation.Curves.Infinity
+import HasseWeil.Foundation.Curves.Valuation.Infinity
 
 /-!
 # GAP-QF kernel: `omegaPullbackCoeff (mulByInt m) = m` via the formal group

@@ -1,5 +1,5 @@
-import HasseWeil.Foundation.Curves.PointFunctor
-import HasseWeil.Foundation.Curves.Infinity
+import HasseWeil.Foundation.Curves.Map.PointFunctor
+import HasseWeil.Foundation.Curves.Valuation.Infinity
 import HasseWeil.Foundation.MulByIntPullback
 import HasseWeil.Isogeny.Frobenius.FunctionField
 import Mathlib.FieldTheory.Finite.Basic

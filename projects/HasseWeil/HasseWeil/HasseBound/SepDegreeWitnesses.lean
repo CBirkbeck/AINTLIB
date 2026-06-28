@@ -4,9 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import Mathlib.RingTheory.Valuation.LocalSubring
-import HasseWeil.Foundation.Curves.RankOneDomination
-import HasseWeil.Foundation.Curves.FrobeniusFixedPoint
-import HasseWeil.Foundation.Curves.PicZero
+import HasseWeil.Foundation.Curves.Valuation.RankOneDomination
+import HasseWeil.Foundation.Curves.Frobenius.FrobeniusFixedPoint
+import HasseWeil.Foundation.Curves.Divisor.PicZero
 import HasseWeil.HasseBound.SepDegreeEqPointCount
 import HasseWeil.HasseBound.PointCount
 import HasseWeil.HasseBound.PoleDivisorTwoTorsion

@@ -1,4 +1,4 @@
-import HasseWeil.Foundation.Curves.PointFunctor
+import HasseWeil.Foundation.Curves.Map.PointFunctor
 import HasseWeil.Foundation.Curves.IntegralClosure
 import HasseWeil.Pic0.ToClassSurjective
 

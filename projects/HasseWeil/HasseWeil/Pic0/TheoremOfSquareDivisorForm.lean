@@ -1,5 +1,5 @@
 import HasseWeil.Pic0.PicDualClassMapMultiplicativity
-import HasseWeil.Foundation.Curves.MillerAllChar
+import HasseWeil.Foundation.Curves.Divisor.MillerAllChar
 import HasseWeil.Foundation.Ramification
 
 /-!

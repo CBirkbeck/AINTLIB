@@ -1,6 +1,6 @@
-import HasseWeil.Foundation.Curves.PicZero
-import HasseWeil.Foundation.Curves.MillerAllChar
-import HasseWeil.Foundation.Curves.EffectiveSumReduce
+import HasseWeil.Foundation.Curves.Divisor.PicZero
+import HasseWeil.Foundation.Curves.Divisor.MillerAllChar
+import HasseWeil.Foundation.Curves.Divisor.EffectiveSumReduce
 import HasseWeil.HasseBound.WeilPairing.Pullback
 import HasseWeil.HasseBound.WeilPairing.SigmaBridge
 

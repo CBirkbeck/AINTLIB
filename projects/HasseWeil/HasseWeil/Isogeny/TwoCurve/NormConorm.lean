@@ -4,8 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.Isogeny.TwoCurve.GroupHom
-import HasseWeil.Foundation.Curves.LocalizedDictionary
-import HasseWeil.Foundation.Curves.PushforwardDivisor
+import HasseWeil.Foundation.Curves.Fiber.LocalizedDictionary
+import HasseWeil.Foundation.Curves.Divisor.PushforwardDivisor
 import HasseWeil.Foundation.Curves.NormConormIntegralClosure
 
 /-!

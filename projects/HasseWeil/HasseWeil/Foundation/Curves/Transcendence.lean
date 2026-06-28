@@ -1,5 +1,5 @@
 import HasseWeil.Foundation.Curves.FiniteOverKx
-import HasseWeil.Foundation.Curves.CurveMap
+import HasseWeil.Foundation.Curves.Map.CurveMap
 import Mathlib.RingTheory.Algebraic.Integral
 import Mathlib.RingTheory.Algebraic.Basic
 import Mathlib.RingTheory.AlgebraicIndependent.TranscendenceBasis

@@ -8,7 +8,7 @@ import HasseWeil.HasseBound.WeilPairing.PairingProps
 import HasseWeil.HasseBound.WeilPairing.DivisorPullback
 import HasseWeil.HasseBound.WeilPairing.TorsionCardEll
 import HasseWeil.Foundation.EC.SeparableKernelTorsor
-import HasseWeil.Foundation.Curves.MillerAllChar
+import HasseWeil.Foundation.Curves.Divisor.MillerAllChar
 
 /-!
 # Nondegeneracy of the Weil pairing `e_ℓ` (Silverman III.8.1c, ticket T-R2-NONDEG)

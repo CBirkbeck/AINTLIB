@@ -6,7 +6,7 @@ Authors: Chris Birkbeck
 import HasseWeil.HasseBound.WeilPairing.Scaling.OneSub
 import HasseWeil.HasseBound.WeilPairing.PicDualDivisorClassLemma
 import HasseWeil.HasseBound.WeilPairing.OneSubFrobeniusBaseChangeWitnesses
-import HasseWeil.Foundation.Curves.MillerAllChar
+import HasseWeil.Foundation.Curves.Divisor.MillerAllChar
 
 /-!
 # The divisor-pushforward dual of a separable isogeny, and the `1 − π` scaling (CoordHom-free)

@@ -5,7 +5,7 @@ Authors: Chris Birkbeck
 -/
 import HasseWeil.Isogeny.SeparableWitnessReductions
 import HasseWeil.Isogeny.Dual.Galois
-import HasseWeil.Foundation.Curves.GenericFiber
+import HasseWeil.Foundation.Curves.Fiber.GenericFiber
 
 /-!
 # Generic-point covariance for a general isogeny

@@ -3,10 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.CoordHomFinite
+import HasseWeil.Foundation.Curves.Map.CoordHomFinite
 import HasseWeil.Isogeny.Frobenius.Twist
 import HasseWeil.Isogeny.Ramification
-import HasseWeil.Foundation.Curves.OrdAtInftyBaseChange
+import HasseWeil.Foundation.Curves.Valuation.OrdAtInftyBaseChange
 
 /-!
 # ISO-BC: base change of an `EC.Isogeny` along a field extension

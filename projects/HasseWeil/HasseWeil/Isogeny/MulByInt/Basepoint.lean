@@ -7,7 +7,7 @@ import HasseWeil.Isogeny.Basic
 import HasseWeil.Foundation.OrdAtInftyBridge
 import HasseWeil.Foundation.OmegaPullbackCoeff
 import HasseWeil.Foundation.AdditionPullback
-import HasseWeil.Foundation.Curves.OrdAtInftyRamification
+import HasseWeil.Foundation.Curves.Ramification.OrdAtInftyRamification
 import HasseWeil.Foundation.Curves.WithTopArith
 
 /-!

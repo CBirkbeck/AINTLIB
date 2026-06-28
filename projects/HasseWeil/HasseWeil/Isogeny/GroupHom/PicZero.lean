@@ -1,5 +1,5 @@
-import HasseWeil.Foundation.Curves.PicZero
-import HasseWeil.Foundation.Curves.PicZeroPushforward
+import HasseWeil.Foundation.Curves.Divisor.PicZero
+import HasseWeil.Foundation.Curves.Divisor.PicZeroPushforward
 
 /-!
 # Universal Silverman III.4.8 (Pic⁰ route, witness-parametric)

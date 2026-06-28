@@ -1,6 +1,6 @@
-import HasseWeil.Foundation.Curves.ProjectiveDivisor
-import HasseWeil.Foundation.Curves.NoFinitePolesBridge
-import HasseWeil.Foundation.Curves.Divisors
+import HasseWeil.Foundation.Curves.Divisor.ProjectiveDivisor
+import HasseWeil.Foundation.Curves.Valuation.NoFinitePolesBridge
+import HasseWeil.Foundation.Curves.Divisor.Divisors
 
 /-!
 # Route 2A — functions with trivial divisor are constant (pairing step 7c)

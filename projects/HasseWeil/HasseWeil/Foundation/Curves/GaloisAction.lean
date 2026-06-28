@@ -1,5 +1,5 @@
-import HasseWeil.Foundation.Curves.BaseChange
-import HasseWeil.Foundation.Curves.Divisors
+import HasseWeil.Foundation.Curves.Map.BaseChange
+import HasseWeil.Foundation.Curves.Divisor.Divisors
 
 /-!
 # Galois action on points and divisors

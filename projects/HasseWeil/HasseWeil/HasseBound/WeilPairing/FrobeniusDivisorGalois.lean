@@ -8,8 +8,8 @@ import HasseWeil.HasseBound.WeilPairing.FrobeniusFunctionFieldEquiv
 import HasseWeil.HasseBound.WeilPairing.DivisorTranslate
 import HasseWeil.HasseBound.WeilPairing.Pairing
 import HasseWeil.HasseBound.WeilPairing.FrobMatrixData
-import HasseWeil.Foundation.Curves.FrobeniusFixedPoint
-import HasseWeil.Foundation.Curves.NoFinitePolesBridge
+import HasseWeil.Foundation.Curves.Frobenius.FrobeniusFixedPoint
+import HasseWeil.Foundation.Curves.Valuation.NoFinitePolesBridge
 
 /-!
 # Divisor Galois descent for the arithmetic Frobenius `σ` of `K̄(E)`

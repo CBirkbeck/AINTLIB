@@ -4,9 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.Foundation.EC.Translation
-import HasseWeil.Foundation.Curves.AlgebraicNonNegOrd
+import HasseWeil.Foundation.Curves.Valuation.AlgebraicNonNegOrd
 import HasseWeil.Foundation.EC.GenericPoint
-import HasseWeil.Foundation.Curves.SmoothPointTranslate
+import HasseWeil.Foundation.Curves.Valuation.SmoothPointTranslate
 import HasseWeil.Foundation.OrdAtInftyBridge
 
 /-!

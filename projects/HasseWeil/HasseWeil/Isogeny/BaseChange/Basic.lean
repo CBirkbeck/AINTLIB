@@ -1,6 +1,6 @@
 import HasseWeil.Foundation.Basic
-import HasseWeil.Foundation.Curves.BaseChange
-import HasseWeil.Foundation.Curves.Maps
+import HasseWeil.Foundation.Curves.Map.BaseChange
+import HasseWeil.Foundation.Curves.Map.Maps
 import Mathlib.LinearAlgebra.Dimension.Constructions
 import Mathlib.FieldTheory.Finite.Basic
 

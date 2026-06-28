@@ -8,10 +8,10 @@ import HasseWeil.Isogeny.TwoCurve.GroupHom
 import HasseWeil.Isogeny.TwoCurve.Kernel
 import HasseWeil.Isogeny.TwoCurve.Covariance
 import HasseWeil.Isogeny.TwoCurve.PointImage
-import HasseWeil.Foundation.Curves.CurveMapBaseChange
-import HasseWeil.Foundation.Curves.NoFinitePolesBridge
-import HasseWeil.Foundation.Curves.OrdAtInftyBaseChange
-import HasseWeil.Foundation.Curves.OrdAtInftyRamification
+import HasseWeil.Foundation.Curves.Map.CurveMapBaseChange
+import HasseWeil.Foundation.Curves.Valuation.NoFinitePolesBridge
+import HasseWeil.Foundation.Curves.Valuation.OrdAtInftyBaseChange
+import HasseWeil.Foundation.Curves.Ramification.OrdAtInftyRamification
 import HasseWeil.HasseBound.WeilPairing.OmegaBaseChange
 
 /-!

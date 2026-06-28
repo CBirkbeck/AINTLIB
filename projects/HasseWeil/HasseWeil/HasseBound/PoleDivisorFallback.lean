@@ -5,9 +5,9 @@ Authors: Chris Birkbeck
 -/
 import HasseWeil.Isogeny.Frobenius.OrdAtInfty
 import HasseWeil.Foundation.AdditionPullback.SilvermanIV14
-import HasseWeil.Foundation.Curves.PointFunctor
-import HasseWeil.Foundation.Curves.ProjectiveDivisor
-import HasseWeil.Foundation.Curves.RamificationAtInfinity
+import HasseWeil.Foundation.Curves.Map.PointFunctor
+import HasseWeil.Foundation.Curves.Divisor.ProjectiveDivisor
+import HasseWeil.Foundation.Curves.Ramification.RamificationAtInfinity
 import HasseWeil.Foundation.EC.TranslateValuation
 import HasseWeil.Isogeny.Frobenius.FunctionField
 import HasseWeil.Isogeny.OneSubFrobeniusFamily

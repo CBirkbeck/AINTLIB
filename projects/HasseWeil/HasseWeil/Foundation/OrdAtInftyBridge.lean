@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.Foundation.MulByIntPullback
-import HasseWeil.Foundation.Curves.Infinity
+import HasseWeil.Foundation.Curves.Valuation.Infinity
 
 /-!
 # Bridge from `W.toAffine` to `SmoothPlaneCurve` for `ordAtInfty`
