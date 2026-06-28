@@ -1,5 +1,5 @@
 import HasseWeil.Foundation.AdditionPullback.SilvermanIV14
-import HasseWeil.HasseBound.Hasse.OpenLemmaPrimitives
+import HasseWeil.HasseBound.Primitives
 import HasseWeil.Foundation.EC.MulByIntAddRecurrence
 
 /-!

@@ -6,7 +6,7 @@ Authors: Chris Birkbeck
 import HasseWeil.Foundation.Curves.KernelOfDifferential
 import HasseWeil.Isogeny.Frobenius.Twist
 import HasseWeil.Isogeny.Frobenius.Dual
-import HasseWeil.HasseBound.Hasse.Separability
+import HasseWeil.HasseBound.Separability
 
 /-!
 # G3: the general twisted Frobenius factorization (Silverman II.2.12) and the relative Verschiebung

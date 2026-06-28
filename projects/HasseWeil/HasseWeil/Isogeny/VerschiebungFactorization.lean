@@ -9,10 +9,10 @@ import HasseWeil.Foundation.Curves.FintypeProjectiveSmoothPoint
 import HasseWeil.Isogeny.Dual.Relation
 import HasseWeil.Isogeny.Kernel
 import HasseWeil.Isogeny.OmegaCoeffViaFormalGroup
-import HasseWeil.HasseBound.Hasse.SepDegreeEqPointCount
-import HasseWeil.HasseBound.Hasse.L6Witnesses
-import HasseWeil.HasseBound.Hasse.PointFix
-import HasseWeil.HasseBound.Hasse.PoleDivisor2Tor
+import HasseWeil.HasseBound.SepDegreeEqPointCount
+import HasseWeil.HasseBound.SepDegreeWitnesses
+import HasseWeil.HasseBound.PointCount
+import HasseWeil.HasseBound.PoleDivisorTwoTorsion
 import HasseWeil.Foundation.Verschiebung.VerschiebungIsDualOfFrobenius
 import HasseWeil.Foundation.Verschiebung.UniversalQthRootWitness
 

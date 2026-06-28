@@ -43,11 +43,11 @@ import HasseWeil.Foundation.EC.MulByIntUnramified
 import HasseWeil.Foundation.EC.PointMapSurjective
 import HasseWeil.Foundation.DegreeQuadraticForm
 import HasseWeil.Isogeny.Frobenius.PointCount
-import HasseWeil.HasseBound.Hasse.HasseBoundParametric
-import HasseWeil.HasseBound.Hasse.PointFix
+import HasseWeil.HasseBound.Parametric
+import HasseWeil.HasseBound.PointCount
 import HasseWeil.Foundation.EC.PointMap
-import HasseWeil.HasseBound.Hasse.Separability
-import HasseWeil.HasseBound.Hasse.TorsionCard
+import HasseWeil.HasseBound.Separability
+import HasseWeil.HasseBound.TorsionCard
 import HasseWeil.Foundation.DiscriminantBounds
 import HasseWeil.Foundation.InvariantDifferentialPullback
 import HasseWeil.Foundation.PullbackCoeff
@@ -70,8 +70,8 @@ import HasseWeil.HasseBound.WeilPairing.HasseAssembly
 import HasseWeil.HasseBound.WeilPairing.FrobMatrixData
 import HasseWeil.HasseBound.WeilPairing.DivisorGalois
 import HasseWeil.HasseBound.WeilPairing.FrobeniusDivisorGalois
-import HasseWeil.HasseBound.WeilPairing.FrobeniusGaloisScaling
-import HasseWeil.HasseBound.WeilPairing.OneSubScaling
+import HasseWeil.HasseBound.WeilPairing.Scaling.FrobeniusGalois
+import HasseWeil.HasseBound.WeilPairing.Scaling.OneSub
 import HasseWeil.Isogeny.BaseChange.Concrete
 import HasseWeil.HasseBound.WeilPairing.OneSubFrobeniusBaseChangeWitnesses
 import HasseWeil.HasseBound.WeilPairing.OneSubDualDivisor
@@ -80,11 +80,11 @@ import HasseWeil.Isogeny.SeparableWitnessReductions
 import HasseWeil.HasseBound.WeilPairing.MapTranslateGenericAdditive
 import HasseWeil.HasseBound.WeilPairing.FrobeniusGenericCovariance
 import HasseWeil.HasseBound.WeilPairing.PencilSeparable
-import HasseWeil.HasseBound.WeilPairing.OneSubProjOrdTransport
+import HasseWeil.HasseBound.WeilPairing.Scaling.OneSubTransport
 import HasseWeil.HasseBound.WeilPairing.PencilCovariance
-import HasseWeil.HasseBound.WeilPairing.PencilComapScaling
+import HasseWeil.HasseBound.WeilPairing.Scaling.Pencil
 import HasseWeil.HasseBound.WeilPairing.PencilComapPointValuation
-import HasseWeil.HasseBound.WeilPairing.HasseBound
+import HasseWeil.HasseBound.Basic
 
 -- Silverman continuation (2026-06-09): faithful isogeny + III.4.8, the Tate module, isogeny classes
 import HasseWeil.Foundation.Curves.PushforwardDivisor

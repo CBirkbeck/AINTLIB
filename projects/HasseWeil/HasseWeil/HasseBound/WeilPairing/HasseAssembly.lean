@@ -6,7 +6,7 @@ Authors: Chris Birkbeck
 import HasseWeil.HasseBound.WeilPairing.DetDeg
 import HasseWeil.HasseBound.WeilPairing.Assembly
 import HasseWeil.Isogeny.VerschiebungFactorization
-import HasseWeil.HasseBound.Hasse.QuadraticForm
+import HasseWeil.HasseBound.QuadraticForm
 
 set_option linter.style.longLine false
 

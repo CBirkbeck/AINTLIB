@@ -7,10 +7,10 @@ import Mathlib.RingTheory.Valuation.LocalSubring
 import HasseWeil.Foundation.Curves.RankOneDomination
 import HasseWeil.Foundation.Curves.FrobeniusFixedPoint
 import HasseWeil.Foundation.Curves.PicZero
-import HasseWeil.HasseBound.Hasse.SepDegreeEqPointCount
-import HasseWeil.HasseBound.Hasse.PointFix
-import HasseWeil.HasseBound.Hasse.PoleDivisor2Tor
-import HasseWeil.HasseBound.Hasse.PoleDivisorFallback
+import HasseWeil.HasseBound.SepDegreeEqPointCount
+import HasseWeil.HasseBound.PointCount
+import HasseWeil.HasseBound.PoleDivisorTwoTorsion
+import HasseWeil.HasseBound.PoleDivisorFallback
 
 /-!
 # L6 substantive witnesses — T5, T6, T6-SUB

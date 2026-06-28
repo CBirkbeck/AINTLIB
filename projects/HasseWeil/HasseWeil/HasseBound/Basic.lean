@@ -4,8 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.HasseBound.WeilPairing.PencilComapPointValuation
-import HasseWeil.HasseBound.WeilPairing.FrobeniusGaloisScaling
-import HasseWeil.HasseBound.WeilPairing.OneSubProjOrdTransport
+import HasseWeil.HasseBound.WeilPairing.Scaling.FrobeniusGalois
+import HasseWeil.HasseBound.WeilPairing.Scaling.OneSubTransport
 import HasseWeil.HasseBound.WeilPairing.FrobMatrixData
 
 /-!

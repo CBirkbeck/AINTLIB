@@ -1,7 +1,7 @@
 import HasseWeil.Isogeny.FormalSeries
 import HasseWeil.Isogeny.Frobenius.PointCount
-import HasseWeil.HasseBound.Hasse.PointFix
-import HasseWeil.HasseBound.Hasse.Separability
+import HasseWeil.HasseBound.PointCount
+import HasseWeil.HasseBound.Separability
 import HasseWeil.Foundation.LocalExpansion
 
 /-!

@@ -6,7 +6,7 @@ Authors: Chris Birkbeck
 import HasseWeil.Foundation.AdditionPullback
 import HasseWeil.Foundation.EC.DifferentialOrd
 import HasseWeil.Foundation.EC.MulByIntSamePlace
-import HasseWeil.HasseBound.Hasse.OpenLemmaPrimitives
+import HasseWeil.HasseBound.Primitives
 
 /-!
 # The **(SamePlace)** fact for an addition-formula isogeny `α₁ + α₂` (`1 − π` case)

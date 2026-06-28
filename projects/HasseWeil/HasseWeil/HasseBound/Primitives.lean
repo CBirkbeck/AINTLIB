@@ -5,7 +5,7 @@ Authors: Chris Birkbeck
 -/
 import HasseWeil.Foundation.Curves.MillerAllChar
 import HasseWeil.Foundation.Curves.OrdAtPoint
-import HasseWeil.HasseBound.Hasse.HasseInfrastructure
+import HasseWeil.HasseBound.Infrastructure
 
 /-!
 # Open lemma primitives — substantive primitives from the Hasse-era trace

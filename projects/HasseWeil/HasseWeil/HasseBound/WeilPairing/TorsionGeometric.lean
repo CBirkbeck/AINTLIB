@@ -7,7 +7,7 @@ import Mathlib.FieldTheory.IsAlgClosed.Basic
 
 import HasseWeil.Foundation.Curves.Differentials
 import HasseWeil.Foundation.EC.SeparableKernelTorsor
-import HasseWeil.HasseBound.Hasse.TorsionCard
+import HasseWeil.HasseBound.TorsionCard
 import HasseWeil.Foundation.OmegaCoeffMulByIntGeneral
 
 /-!

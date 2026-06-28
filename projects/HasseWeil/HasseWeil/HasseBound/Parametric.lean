@@ -1,5 +1,5 @@
 import HasseWeil.Foundation.DiscriminantBounds
-import HasseWeil.HasseBound.Hasse.PointFix
+import HasseWeil.HasseBound.PointCount
 
 /-!
 # Witness-parametric Hasse bound

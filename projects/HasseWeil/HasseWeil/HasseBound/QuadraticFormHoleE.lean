@@ -1,11 +1,11 @@
 import HasseWeil.Foundation.DegreeQuadraticForm
 import HasseWeil.Isogeny.Frobenius.PointCount
 import HasseWeil.Isogeny.Dual.Relation
-import HasseWeil.HasseBound.Hasse.HasseBoundParametric
-import HasseWeil.HasseBound.Hasse.QuadraticForm
-import HasseWeil.HasseBound.Hasse.PointFix
-import HasseWeil.HasseBound.Hasse.Separability
-import HasseWeil.HasseBound.Hasse.OneSubFrobenius
+import HasseWeil.HasseBound.Parametric
+import HasseWeil.HasseBound.QuadraticForm
+import HasseWeil.HasseBound.PointCount
+import HasseWeil.HasseBound.Separability
+import HasseWeil.HasseBound.OneSubFrobenius
 import HasseWeil.Isogeny.Frobenius.OrdAtInfty
 
 /-!

@@ -3,9 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.Hasse.PoleDivisorFallback
-import HasseWeil.HasseBound.Hasse.HasseInfrastructure
-import HasseWeil.HasseBound.Hasse.OpenLemmaPrimitives
+import HasseWeil.HasseBound.PoleDivisorFallback
+import HasseWeil.HasseBound.Infrastructure
+import HasseWeil.HasseBound.Primitives
 
 /-!
 # L6 (V.1.1 proof identity) via the pole-divisor route — witness-parametric closure

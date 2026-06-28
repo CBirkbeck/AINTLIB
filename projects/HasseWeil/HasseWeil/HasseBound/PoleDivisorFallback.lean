@@ -11,9 +11,9 @@ import HasseWeil.Foundation.Curves.RamificationAtInfinity
 import HasseWeil.Foundation.EC.TranslateValuation
 import HasseWeil.Isogeny.Frobenius.FunctionField
 import HasseWeil.Isogeny.OneSubFrobeniusFamily
-import HasseWeil.HasseBound.Hasse.OneSubFrobenius
-import HasseWeil.HasseBound.Hasse.PointFix
-import HasseWeil.HasseBound.Hasse.HasseWitnessBundle
+import HasseWeil.HasseBound.OneSubFrobenius
+import HasseWeil.HasseBound.PointCount
+import HasseWeil.HasseBound.Witnesses
 import HasseWeil.Foundation.Ramification
 
 /-!

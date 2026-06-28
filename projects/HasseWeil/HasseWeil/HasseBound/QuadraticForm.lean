@@ -5,7 +5,7 @@ Authors: Chris Birkbeck
 -/
 import HasseWeil.Isogeny.Frobenius.OrdAtInfty
 import HasseWeil.Foundation.DegreeQuadraticForm
-import HasseWeil.HasseBound.Hasse.PointFix
+import HasseWeil.HasseBound.PointCount
 import HasseWeil.Foundation.DiscriminantBounds
 
 /-!

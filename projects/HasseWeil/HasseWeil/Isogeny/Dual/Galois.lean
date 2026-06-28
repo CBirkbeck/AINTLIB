@@ -6,7 +6,7 @@ Authors: Chris Birkbeck
 import HasseWeil.Isogeny.Dual.Morphism
 import HasseWeil.Isogeny.Bridge
 import HasseWeil.Foundation.EC.SeparableKernelTorsor
-import HasseWeil.HasseBound.Hasse.PointFix
+import HasseWeil.HasseBound.PointCount
 import HasseWeil.Isogeny.SeparableWitnessReductions
 import HasseWeil.HasseBound.WeilPairing.PencilCovariance
 

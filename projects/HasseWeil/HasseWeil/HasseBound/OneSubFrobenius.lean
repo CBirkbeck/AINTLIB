@@ -1,6 +1,6 @@
 import HasseWeil.Isogeny.Frobenius.OrdAtInfty
-import HasseWeil.HasseBound.Hasse.Separability
-import HasseWeil.HasseBound.Hasse.PointFix
+import HasseWeil.HasseBound.Separability
+import HasseWeil.HasseBound.PointCount
 
 /-!
 # Witness assemblers for `isogOneSub_negFrobenius`

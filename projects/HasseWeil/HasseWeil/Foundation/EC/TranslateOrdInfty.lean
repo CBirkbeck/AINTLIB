@@ -5,7 +5,7 @@ Authors: Chris Birkbeck
 -/
 import HasseWeil.Foundation.EC.TranslateValuation
 import HasseWeil.Foundation.EC.TranslationOrd
-import HasseWeil.HasseBound.Hasse.PoleDivisor2Tor
+import HasseWeil.HasseBound.PoleDivisorTwoTorsion
 
 /-!
 # Order-at-infinity transport under translation (Step (C))

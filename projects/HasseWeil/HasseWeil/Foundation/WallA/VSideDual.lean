@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.Isogeny.VerschiebungFactorization
-import HasseWeil.HasseBound.Hasse.SumTrace
+import HasseWeil.HasseBound.SumTrace
 import HasseWeil.Foundation.Verschiebung.Genuine
 
 /-!
