@@ -40,10 +40,9 @@ namespace Subgroup
 (Mathlib only provides the `⊓` special cases; this is the general monotonicity.) -/
 theorem HasDetOne.of_le {n : Type*} [Fintype n] [DecidableEq n] {R : Type*} [CommRing R]
     {Γ' Γ : Subgroup (GL n R)} (h : Γ' ≤ Γ) [Γ.HasDetOne] : Γ'.HasDetOne :=
-  ⟨fun hg => HasDetOne.det_eq (h hg)⟩
+  ⟨fun hg ↦ HasDetOne.det_eq (h hg)⟩
 
-/-- The meet of two subgroups commensurable with a fixed `Γ₀` is again commensurable with `Γ₀`.
-The proof mirrors `Subgroup.IsArithmetic.inter`, generalised to an arbitrary base `Γ₀`. -/
+/-- The meet of two subgroups commensurable with a fixed `Γ₀` is again commensurable with `Γ₀`. -/
 theorem commensurable_inf {G : Type*} [Group G] {Γ₁ Γ₂ Γ₀ : Subgroup G}
     (h₁ : Commensurable Γ₁ Γ₀) (h₂ : Commensurable Γ₂ Γ₀) :
     Commensurable (Γ₁ ⊓ Γ₂) Γ₀ := by

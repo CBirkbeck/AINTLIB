@@ -15,16 +15,28 @@ slash action is `ℂ`-linear only in positive determinant, the acting group is t
 part `PComm Γ₀ := commensurator Γ₀ ⊓ GL(2,ℝ)⁺`. We prove that the `Γ`-invariants of the limit are
 exactly `ModularForm Γ k` (the image of `ofLevel Γ`).
 
-This file builds the prerequisites in stages; see the companion design note.
+## Main definitions
 
-## Stage 1 (this section)
-* `Subgroup.HasDetOne.conj` — determinant-one passes to conjugates.
+* `ModularForm.PComm` — the positive-determinant part of the commensurator of `Γ₀` (the acting
+  group).
+* `ModularForm.CommIndex.conj` — the conjugation action of a commensurator element on the index.
+* `ModularForm.translateₗ` — slash by a positive-determinant `g` as a `ℂ`-linear map
+  `ModularForm Γ k → ModularForm (g⁻¹Γg) k`.
+* `ModularFormCommensurable.smulMap` — the action of `g ∈ PComm Γ₀` on the direct limit.
+* `ModularFormCommensurable.toFunₗ` — the injective `ℂ`-linear map from the limit to functions
+  `ℍ → ℂ`.
+* `ModularFormCommensurable.commRep` — the weight-`k` representation of `PComm Γ₀` on the limit.
+* `ModularFormCommensurable.ofLevelInvariantsEquiv` — the `ℂ`-linear isomorphism of
+  `ModularForm Γ.carrier k` with the level invariants.
+
+## Main results
+
 * `Subgroup.commensurable_conj` — a conjugate (by a commensurator element) of a subgroup
   commensurable with `Γ₀` is again commensurable with `Γ₀`.
 * `Subgroup.commensurable_le_commensurator` — a subgroup commensurable with `Γ₀` lies in its
   commensurator.
-* `ModularForm.PComm` — the positive-determinant part of the commensurator (the acting group).
-* `ModularForm.CommIndex.conj` — the conjugation action on the index of the direct limit.
+* `ModularFormCommensurable.range_ofLevel_eq_invariants` — the level-`Γ` invariants of the
+  commensurator action are exactly the image of `ModularForm Γ.carrier k` under `ofLevel`.
 -/
 
 open scoped MatrixGroups Pointwise
@@ -44,16 +56,8 @@ theorem commensurable_le_commensurator {Γ Γ₀ : Subgroup G} (h : Commensurabl
     Γ ≤ Commensurable.commensurator Γ₀ := by
   intro g hg
   rw [Commensurable.commensurator_mem_iff]
-  have hΓ : ConjAct.toConjAct g • Γ = Γ := by
-    ext x
-    rw [Subgroup.mem_pointwise_smul_iff_inv_smul_mem, ConjAct.smul_def, map_inv,
-      ConjAct.ofConjAct_toConjAct, inv_inv]
-    refine ⟨fun hx => ?_, fun hx => Γ.mul_mem (Γ.mul_mem (Γ.inv_mem hg) hx) hg⟩
-    have hxx : x = g * (g⁻¹ * x * g) * g⁻¹ := by group
-    rw [hxx]
-    exact Γ.mul_mem (Γ.mul_mem hg hx) (Γ.inv_mem hg)
-  have h1 := (h.symm.conj (ConjAct.toConjAct g))
-  rw [hΓ] at h1
+  have h1 := h.symm.conj (ConjAct.toConjAct g)
+  rw [conjAct_pointwise_smul_eq_self (Γ.le_normalizer hg)] at h1
   exact h1.trans h
 
 end Subgroup
@@ -66,11 +70,10 @@ open Subgroup
 `g • Γ` (the determinant is conjugation-invariant). -/
 instance HasDetOne.conj {g : GL (Fin 2) ℝ} {Γ : Subgroup (GL (Fin 2) ℝ)} [Γ.HasDetOne] :
     (ConjAct.toConjAct g • Γ).HasDetOne := by
-  refine ⟨fun {x} hx => ?_⟩
+  refine ⟨fun {x} hx ↦ ?_⟩
   rw [Subgroup.mem_pointwise_smul_iff_inv_smul_mem] at hx
-  have h1 := HasDetOne.det_eq hx
-  rwa [ConjAct.smul_def, map_inv, ConjAct.ofConjAct_toConjAct, map_mul, map_mul, map_inv,
-    inv_inv, mul_right_comm, inv_mul_cancel, one_mul] at h1
+  simpa [ConjAct.smul_def, map_inv, ConjAct.ofConjAct_toConjAct, map_mul, mul_comm, mul_left_comm]
+    using HasDetOne.det_eq hx
 
 /-- The acting group of the commensurator action: the positive-determinant part of the commensurator
 of `Γ₀`. (Positive determinant is exactly where the slash action is `ℂ`-linear.) -/
@@ -94,17 +97,13 @@ def conj (g : GL (Fin 2) ℝ) (hg : g ∈ Commensurable.commensurator Γ₀) (i 
 
 end CommIndex
 
-/-! ## Stage 2: the ℂ-linear translate -/
-
-/-- `σ g = id` for positive-determinant `g` — this is exactly where the slash action is `ℂ`-linear.
-Inlined from the definition of `UpperHalfPlane.σ` (`if 0 < det then refl else conj`) so that this
-file depends only on mathlib. -/
+/-- `σ g = id` for positive-determinant `g`, by unfolding `UpperHalfPlane.σ`
+(`if 0 < det then refl else conj`); this is where the slash action is `ℂ`-linear. -/
 private lemma sigma_eq_refl_of_pos_det {g : GL (Fin 2) ℝ} (hg : 0 < g.det.val) :
     UpperHalfPlane.σ g = ContinuousAlgEquiv.refl ℝ ℂ := if_pos hg
 
 variable {k : ℤ}
 
-set_option linter.unusedSimpArgs false in
 /-- Translation by `g` (slash by `g`) as a `ℂ`-linear map
 `ModularForm Γ k → ModularForm (g⁻¹Γg) k`, for positive-determinant `g` (where the slash action is
 `ℂ`-linear, the `σ`-twist being trivial). The underlying function is `⇑f ∣[k] g`. -/
@@ -126,12 +125,8 @@ noncomputable def translateₗ (g : GL (Fin 2) ℝ) (hg : 0 < g.det.val)
     {Γ : Subgroup (GL (Fin 2) ℝ)} [Γ.HasDetOne] (f : ModularForm Γ k) :
     ⇑(translateₗ g hg f) = ⇑f ∣[k] g := rfl
 
-/-! ## Stage 3a: the per-element action map -/
-
-/-- The determinant of the inverse is positive when the determinant is (so that `translateₗ g⁻¹` is
-`ℂ`-linear). -/
 private lemma det_inv_pos {g : GL (Fin 2) ℝ} (hg : 0 < g.det.val) : 0 < (g⁻¹).det.val := by
-  rw [map_inv, Units.val_inv_eq_inv_val, inv_pos]; exact hg
+  rwa [map_inv, Units.val_inv_eq_inv_val, inv_pos]
 
 variable {Γ₀ : Subgroup (GL (Fin 2) ℝ)}
 
@@ -141,9 +136,8 @@ lemma mem_commensurator_of_mem_PComm (g : ↥(PComm Γ₀)) :
   (Subgroup.mem_inf.mp g.2).1
 
 /-- An element of `PComm Γ₀` has positive determinant. -/
-lemma det_pos_of_mem_PComm (g : ↥(PComm Γ₀)) : 0 < (g : GL (Fin 2) ℝ).det.val := by
-  have h := (Subgroup.mem_inf.mp g.2).2
-  rwa [Matrix.mem_glpos] at h
+lemma det_pos_of_mem_PComm (g : ↥(PComm Γ₀)) : 0 < (g : GL (Fin 2) ℝ).det.val :=
+  (Matrix.mem_glpos _).mp (Subgroup.mem_inf.mp g.2).2
 
 end ModularForm
 
@@ -158,20 +152,18 @@ variable (Γ₀ : Subgroup (GL (Fin 2) ℝ)) [Γ₀.HasDetOne] (k : ℤ)
 noncomputable def smulMap (g : ↥(PComm Γ₀)) :
     ModularFormCommensurable Γ₀ k →ₗ[ℂ] ModularFormCommensurable Γ₀ k :=
   lift Γ₀ k
-    (fun i => (ofLevel Γ₀ k (CommIndex.conj g.1 (mem_commensurator_of_mem_PComm g) i)).comp
+    (fun i ↦ (ofLevel Γ₀ k (CommIndex.conj g.1 (mem_commensurator_of_mem_PComm g) i)).comp
       (translateₗ g.1⁻¹ (det_inv_pos (det_pos_of_mem_PComm g))))
-    (fun i j h x => by
+    (fun i j h x ↦ by
       have hconj : CommIndex.conj g.1 (mem_commensurator_of_mem_PComm g) i
           ≤ CommIndex.conj g.1 (mem_commensurator_of_mem_PComm g) j := by
         rw [CommIndex.le_def, CommIndex.conj_carrier, CommIndex.conj_carrier]
         exact Subgroup.pointwise_smul_le_pointwise_smul_iff.mpr (CommIndex.le_def.mp h)
-      -- Translation commutes with restriction (both have underlying function `⇑x ∣[k] g⁻¹`).
       have hcomm : translateₗ g.1⁻¹ (det_inv_pos (det_pos_of_mem_PComm g)) (restrictSubgroupₗ h x)
           = restrictSubgroupₗ hconj
               (translateₗ g.1⁻¹ (det_inv_pos (det_pos_of_mem_PComm g)) x) := by
         ext z; rfl
       simp only [LinearMap.comp_apply]
-      -- `congrArg`/`Eq.trans` reconcile the dependent types at default transparency, unlike `rw`.
       exact (congrArg (ofLevel Γ₀ k (CommIndex.conj g.1 (mem_commensurator_of_mem_PComm g) j))
         hcomm).trans
         (ofLevel_restrict Γ₀ k hconj
@@ -182,8 +174,6 @@ lemma smulMap_ofLevel (g : ↥(PComm Γ₀)) (i : CommIndex Γ₀) (f : ModularF
       = ofLevel Γ₀ k (CommIndex.conj g.1 (mem_commensurator_of_mem_PComm g) i)
           (translateₗ g.1⁻¹ (det_inv_pos (det_pos_of_mem_PComm g)) f) :=
   lift_ofLevel Γ₀ k _ _ i f
-
-/-! ## Stage 4: the injection into functions -/
 
 /-- The `ℂ`-linear inclusion of a single level into functions `ℍ → ℂ`. -/
 def coeₗ {Γ : Subgroup (GL (Fin 2) ℝ)} [Γ.HasDetOne] :
@@ -211,8 +201,8 @@ lemma exists_ofLevel (z : ModularFormCommensurable Γ₀ k) :
 /-- The underlying-function map out of the limit: a form over the class restricts to an honest
 function `ℍ → ℂ`. It is `ℂ`-linear and injective, and intertwines `smulMap g` with `· ∣[k] g⁻¹`. -/
 noncomputable def toFunₗ : ModularFormCommensurable Γ₀ k →ₗ[ℂ] (UpperHalfPlane → ℂ) :=
-  lift Γ₀ k (fun _ => coeₗ k)
-    (fun i j h x => by simp only [coeₗ_apply, coe_restrictSubgroupₗ])
+  lift Γ₀ k (fun _ ↦ coeₗ k)
+    (fun i j h x ↦ by simp only [coeₗ_apply, coe_restrictSubgroupₗ])
 
 @[simp] lemma toFunₗ_ofLevel (i : CommIndex Γ₀) (f : ModularForm i.carrier k) :
     toFunₗ Γ₀ k (ofLevel Γ₀ k i f) = ⇑f := by
@@ -223,15 +213,12 @@ lemma toFunₗ_injective : Function.Injective (toFunₗ Γ₀ k) := by
   unfold toFunₗ lift
   apply Module.DirectLimit.lift_injective
   intro i a b hab
-  simp only [coeₗ_apply] at hab
   exact DFunLike.coe_injective hab
 
 lemma toFunₗ_smulMap (g : ↥(PComm Γ₀)) (x : ModularFormCommensurable Γ₀ k) :
     toFunₗ Γ₀ k (smulMap Γ₀ k g x) = toFunₗ Γ₀ k x ∣[k] g.1⁻¹ := by
   induction x using ofLevel_induction with
   | ih i f => rw [smulMap_ofLevel, toFunₗ_ofLevel, toFunₗ_ofLevel]; rfl
-
-/-! ## Stage 3b: the representation -/
 
 lemma smulMap_one : smulMap Γ₀ k (1 : ↥(PComm Γ₀)) = LinearMap.id := by
   ext x
@@ -256,13 +243,11 @@ noncomputable def commRep : Representation ℂ (↥(PComm Γ₀)) (ModularFormCo
 
 @[simp] lemma commRep_apply (g : ↥(PComm Γ₀)) : commRep Γ₀ k g = smulMap Γ₀ k g := rfl
 
-/-! ## Stage 5: the level invariants are the modular forms of that level -/
-
 omit [Γ₀.HasDetOne] in
 /-- A level (a determinant-one subgroup commensurable with `Γ₀`) lies in the acting group
 `PComm Γ₀` — it is in the commensurator and, being determinant-one, has positive determinant. -/
 lemma carrier_le_PComm (Γ : CommIndex Γ₀) : Γ.carrier ≤ PComm Γ₀ := by
-  refine le_inf (Subgroup.commensurable_le_commensurator Γ.commensurable) (fun γ hγ => ?_)
+  refine le_inf (Subgroup.commensurable_le_commensurator Γ.commensurable) (fun γ hγ ↦ ?_)
   rw [Matrix.mem_glpos, show (γ.det : ℝˣ) = 1 from Subgroup.HasDetOne.det_eq hγ, Units.val_one]
   exact one_pos
 
@@ -284,42 +269,36 @@ theorem range_ofLevel_eq_invariants (Γ : CommIndex Γ₀) :
     LinearMap.range (ofLevel Γ₀ k Γ)
       = Representation.invariants ((commRep Γ₀ k).comp (levelIncl Γ₀ Γ)) := by
   apply le_antisymm
-  · -- A modular form of level `Γ` is fixed by `Γ.carrier`: its function is `Γ`-slash-invariant.
-    rintro _ ⟨f, rfl⟩
+  · rintro _ ⟨f, rfl⟩
     rw [Representation.mem_invariants]
     intro γ
-    show smulMap Γ₀ k (levelIncl Γ₀ Γ γ) (ofLevel Γ₀ k Γ f) = ofLevel Γ₀ k Γ f
+    change smulMap Γ₀ k (levelIncl Γ₀ Γ γ) (ofLevel Γ₀ k Γ f) = ofLevel Γ₀ k Γ f
     apply toFunₗ_injective
     rw [toFunₗ_smulMap, toFunₗ_ofLevel, coe_levelIncl]
     exact SlashInvariantForm.slash_action_eqn f _ (Γ.carrier.inv_mem γ.2)
-  · -- A fixed element comes from some level `Λ`; on a common refinement `Λ ⊓ Γ` its function is
-    -- `Γ`-slash-invariant, so it is the restriction of a genuine level-`Γ` form.
-    intro x hx
+  · intro x hx
     rw [Representation.mem_invariants] at hx
     obtain ⟨Λ, f, rfl⟩ := exists_ofLevel Γ₀ k x
     set Λ' : CommIndex Γ₀ :=
       ⟨Λ.carrier ⊓ Γ.carrier, Subgroup.commensurable_inf Λ.commensurable Γ.commensurable,
-        inferInstance⟩ with hΛ'
+        inferInstance⟩
     have hΛΛ' : Λ ≤ Λ' := CommIndex.le_def.mpr inf_le_left
     have hΓΛ' : Γ ≤ Λ' := CommIndex.le_def.mpr inf_le_right
     have hcomm : Subgroup.Commensurable Λ.carrier Γ.carrier :=
       Λ.commensurable.trans Γ.commensurable.symm
-    -- Every `γ ∈ Γ.carrier` slash-fixes the underlying function.
     have key : ∀ g : Γ.carrier, (⇑f : UpperHalfPlane → ℂ) ∣[k] (g : GL (Fin 2) ℝ)⁻¹ = ⇑f := by
       intro g
       have h2 := congrArg (toFunₗ Γ₀ k) (hx g)
       rwa [MonoidHom.comp_apply, commRep_apply, toFunₗ_smulMap, toFunₗ_ofLevel,
         coe_levelIncl] at h2
-    -- Repackage the (level-`Λ`) function as a genuine level-`Γ` form.
     let F : ModularForm Γ.carrier k :=
       { toFun := ⇑f
-        slash_action_eq' := fun δ hδ => by
-          have h := key ⟨δ⁻¹, Γ.carrier.inv_mem hδ⟩; rwa [inv_inv] at h
+        slash_action_eq' := fun δ hδ ↦ by
+          simpa only [inv_inv] using key ⟨δ⁻¹, Γ.carrier.inv_mem hδ⟩
         holo' := f.holo'
-        bdd_at_cusps' := fun {c} hc =>
+        bdd_at_cusps' := fun {c} hc ↦
           f.bdd_at_cusps' ((Subgroup.Commensurable.isCusp_iff hcomm).mpr hc) }
     refine ⟨F, ?_⟩
-    -- `F` and `f` agree on the common refinement `Λ'`, so they have the same image in the limit.
     have e1 : restrictSubgroupₗ hΓΛ' F = restrictSubgroupₗ hΛΛ' f := by ext z; rfl
     rw [← ofLevel_restrict Γ₀ k hΓΛ' F, e1]
     exact ofLevel_restrict Γ₀ k hΛΛ' f
