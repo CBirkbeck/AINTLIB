@@ -31,8 +31,6 @@ exactly `ModularForm Γ k` (the image of `ofLevel Γ`).
 
 ## Main results
 
-* `Subgroup.commensurable_conj` — a conjugate (by a commensurator element) of a subgroup
-  commensurable with `Γ₀` is again commensurable with `Γ₀`.
 * `Subgroup.commensurable_le_commensurator` — a subgroup commensurable with `Γ₀` lies in its
   commensurator.
 * `ModularFormCommensurable.range_ofLevel_eq_invariants` — the level-`Γ` invariants of the
@@ -44,12 +42,6 @@ open scoped MatrixGroups Pointwise
 namespace Subgroup
 
 variable {G : Type*} [Group G]
-
-/-- A conjugate (by a commensurator element `g`) of a subgroup commensurable with `Γ₀` is again
-commensurable with `Γ₀`. -/
-theorem commensurable_conj {g : G} {Γ Γ₀ : Subgroup G} (hg : g ∈ Commensurable.commensurator Γ₀)
-    (h : Commensurable Γ Γ₀) : Commensurable (ConjAct.toConjAct g • Γ) Γ₀ :=
-  (h.conj (ConjAct.toConjAct g)).trans ((Commensurable.commensurator_mem_iff Γ₀ g).mp hg)
 
 /-- A subgroup commensurable with `Γ₀` is contained in the commensurator of `Γ₀`. -/
 theorem commensurable_le_commensurator {Γ Γ₀ : Subgroup G} (h : Commensurable Γ Γ₀) :
@@ -89,7 +81,8 @@ variable {Γ₀ : Subgroup (GL (Fin 2) ℝ)}
 def conj (g : GL (Fin 2) ℝ) (hg : g ∈ Commensurable.commensurator Γ₀) (i : CommIndex Γ₀) :
     CommIndex Γ₀ where
   carrier := ConjAct.toConjAct g • i.carrier
-  commensurable := commensurable_conj hg i.commensurable
+  commensurable := (i.commensurable.conj (ConjAct.toConjAct g)).trans
+    ((Commensurable.commensurator_mem_iff Γ₀ g).mp hg)
   hasDetOne := HasDetOne.conj
 
 @[simp] lemma conj_carrier (g : GL (Fin 2) ℝ) (hg : g ∈ Commensurable.commensurator Γ₀)
