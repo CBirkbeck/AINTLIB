@@ -9,30 +9,31 @@ import Mathlib.NumberTheory.ModularForms.ArithmeticSubgroups
 /-!
 # The commensurability class of a subgroup as a directed index
 
-Fix a subgroup `Γ₀ ≤ GL₂(ℝ)`. This file packages the subgroups commensurable with `Γ₀` that lie in
-the determinant-one part as a **directed index type** `ModularForm.CommIndex Γ₀`, ordered by
-*reverse* inclusion (`i ≤ j ↔ j.carrier ≤ i.carrier`).
+Fix a subgroup `Γ₀ ≤ GL₂(ℝ)` and a predicate `P` on subgroups that is closed under intersection and
+conjugation (`Subgroup.IsConjInfClosed`). This file packages the subgroups commensurable with `Γ₀`
+that satisfy `P` as a **directed index type** `ModularForm.CommIndex Γ₀ P`, ordered by *reverse*
+inclusion (`i ≤ j ↔ j.carrier ≤ i.carrier`).
 
-This is the index over which `CommensurableLimit/DirectLimit.lean` forms the direct limit of the
-spaces `ModularForm Γ k`: the transition map `Mₖ(Γ) → Mₖ(Γ′)` exists exactly when `Γ′ ≤ Γ`, so the
-diagram is covariant for the reverse-inclusion order, and the class being closed under intersection
-makes the index directed.
+The predicate `P` selects a conjugation-stable sub-family of the commensurability class. The two
+instances of interest are `P = fun _ => True` (the whole class — used for the `ℝ`-vector-space direct
+limit) and `P = fun Γ => Γ.HasDetOne` (the determinant-one subgroups — used for the `ℂ`-vector-space
+direct limit); see `CommensurableLimit/DirectLimit.lean`.
 
 ## Main definitions
 
-* `ModularForm.CommIndex Γ₀` — a subgroup of `GL₂(ℝ)` commensurable with `Γ₀` and determinant-one,
-  bundled with those two facts.
+* `Subgroup.IsConjInfClosed P` — `P` is closed under `⊓` and under conjugation.
+* `ModularForm.CommIndex Γ₀ P` — a subgroup commensurable with `Γ₀` and satisfying `P`.
 
 ## Main results
 
 * `Subgroup.HasDetOne.of_le` — `HasDetOne` is antitone: it passes to subgroups.
 * `Subgroup.commensurable_inf` — the meet of two subgroups commensurable with `Γ₀` is commensurable
-  with `Γ₀` (general base; the body mirrors `Subgroup.IsArithmetic.inter`).
-* `Preorder`, `Nonempty` and `IsDirected` (reverse inclusion) instances on `CommIndex Γ₀`, making it
-  a directed index for a direct limit.
+  with `Γ₀`.
+* `Preorder`, `DecidableEq` and `IsDirected` (reverse inclusion) instances on `CommIndex Γ₀ P`,
+  making it a directed index for a direct limit.
 -/
 
-open scoped MatrixGroups
+open scoped MatrixGroups Pointwise
 
 namespace Subgroup
 
@@ -50,55 +51,89 @@ theorem commensurable_inf {G : Type*} [Group G] {Γ₁ Γ₂ Γ₀ : Subgroup G}
   rw [relIndex_eq_one.mpr inf_le_left]
   exact one_ne_zero
 
+/-- A predicate on subgroups of `GL₂(ℝ)` closed under intersection and conjugation — the data
+carving a directed, conjugation-stable sub-family from a commensurability class. -/
+class IsConjInfClosed (P : Subgroup (GL (Fin 2) ℝ) → Prop) : Prop where
+  /-- `P` is closed under intersection. -/
+  inf_mem : ∀ {Γ Γ' : Subgroup (GL (Fin 2) ℝ)}, P Γ → P Γ' → P (Γ ⊓ Γ')
+  /-- `P` is closed under conjugation. -/
+  conj_mem : ∀ (g : GL (Fin 2) ℝ) {Γ : Subgroup (GL (Fin 2) ℝ)}, P Γ → P (ConjAct.toConjAct g • Γ)
+
+instance : IsConjInfClosed (fun _ ↦ True) where
+  inf_mem := by intros; trivial
+  conj_mem := by intros; trivial
+
 end Subgroup
 
 namespace ModularForm
 
 open Subgroup
 
+/-- Determinant-one passes to conjugates: if `Γ` has determinant one, so does any conjugate
+`g • Γ` (the determinant is conjugation-invariant). -/
+instance HasDetOne.conj {g : GL (Fin 2) ℝ} {Γ : Subgroup (GL (Fin 2) ℝ)} [Γ.HasDetOne] :
+    (ConjAct.toConjAct g • Γ).HasDetOne := by
+  refine ⟨fun {x} hx ↦ ?_⟩
+  rw [Subgroup.mem_pointwise_smul_iff_inv_smul_mem] at hx
+  simpa [ConjAct.smul_def, map_inv, ConjAct.ofConjAct_toConjAct, map_mul, mul_comm, mul_left_comm]
+    using HasDetOne.det_eq hx
+
+/-- The determinant-one predicate, as a named conjugation- and `⊓`-closed family of subgroups of
+`GL₂(ℝ)`: the predicate selecting the index of the `ℂ`-vector-space direct limit. -/
+abbrev DetOnePred : Subgroup (GL (Fin 2) ℝ) → Prop := fun Γ ↦ Γ.HasDetOne
+
+instance : IsConjInfClosed DetOnePred where
+  inf_mem := by intro Γ Γ' h _; haveI := h; infer_instance
+  conj_mem := by intro g Γ h; haveI := h; infer_instance
+
 /-- Index type for the commensurability-class direct limit: a subgroup of `GL₂(ℝ)` that is
-commensurable with `Γ₀` and lies in the determinant-one part, bundled with those facts.
+commensurable with `Γ₀` and satisfies the (conjugation- and `⊓`-closed) predicate `P`, bundled with
+those facts.
 
 Ordered by **reverse inclusion** (`i ≤ j ↔ j.carrier ≤ i.carrier`), so that the restriction maps of
 the modular-form direct limit run in the direction of increasing `≤`. -/
-structure CommIndex (Γ₀ : Subgroup (GL (Fin 2) ℝ)) where
+structure CommIndex (Γ₀ : Subgroup (GL (Fin 2) ℝ)) (P : Subgroup (GL (Fin 2) ℝ) → Prop) where
   /-- the underlying subgroup -/
   carrier : Subgroup (GL (Fin 2) ℝ)
   /-- it is commensurable with the fixed base `Γ₀` -/
   commensurable : Commensurable carrier Γ₀
-  /-- it lies in the determinant-one part of `GL₂(ℝ)` -/
-  hasDetOne : carrier.HasDetOne
+  /-- it satisfies the selecting predicate `P` -/
+  prop : P carrier
 
 namespace CommIndex
 
-variable {Γ₀ : Subgroup (GL (Fin 2) ℝ)}
-
-/-- Every index carries the determinant-one structure of its underlying subgroup, so the spaces
-`ModularForm i.carrier k` are `ℂ`-vector spaces. -/
-instance (i : CommIndex Γ₀) : i.carrier.HasDetOne := i.hasDetOne
+variable {Γ₀ : Subgroup (GL (Fin 2) ℝ)} {P : Subgroup (GL (Fin 2) ℝ) → Prop}
 
 /-- Reverse-inclusion preorder: `i ≤ j` means `j.carrier ≤ i.carrier`. -/
-instance : Preorder (CommIndex Γ₀) where
+instance : Preorder (CommIndex Γ₀ P) where
   le i j := j.carrier ≤ i.carrier
   le_refl i := le_refl i.carrier
   le_trans _ _ _ hij hjk := le_trans hjk hij
 
-@[simp] lemma le_def {i j : CommIndex Γ₀} : i ≤ j ↔ j.carrier ≤ i.carrier := Iff.rfl
-
-/-- The base `Γ₀` (when determinant-one) is itself an index, so the class is nonempty. -/
-instance [Γ₀.HasDetOne] : Nonempty (CommIndex Γ₀) :=
-  ⟨⟨Γ₀, .refl Γ₀, inferInstance⟩⟩
-
-/-- The commensurability class is directed under reverse inclusion: two indices have their meet as a
-common upper bound (it is commensurable with `Γ₀` and determinant-one). -/
-instance : IsDirected (CommIndex Γ₀) (· ≤ ·) where
-  directed i j :=
-    ⟨⟨i.carrier ⊓ j.carrier, commensurable_inf i.commensurable j.commensurable, inferInstance⟩,
-      le_def.mpr inf_le_left, le_def.mpr inf_le_right⟩
+@[simp] lemma le_def {i j : CommIndex Γ₀ P} : i ≤ j ↔ j.carrier ≤ i.carrier := Iff.rfl
 
 /-- `Module.DirectLimit` needs decidable equality on the index; subgroup equality is not decidable,
 so we use the classical instance. -/
-noncomputable instance : DecidableEq (CommIndex Γ₀) := Classical.decEq _
+noncomputable instance : DecidableEq (CommIndex Γ₀ P) := Classical.decEq _
+
+/-- The commensurability class is directed under reverse inclusion: two indices have their meet as a
+common upper bound (it is commensurable with `Γ₀` and satisfies `P`). -/
+instance [IsConjInfClosed P] : IsDirected (CommIndex Γ₀ P) (· ≤ ·) where
+  directed i j :=
+    ⟨⟨i.carrier ⊓ j.carrier, commensurable_inf i.commensurable j.commensurable,
+        IsConjInfClosed.inf_mem i.prop j.prop⟩,
+      le_def.mpr inf_le_left, le_def.mpr inf_le_right⟩
+
+/-- The base `Γ₀` is itself an index whenever it satisfies `P`. -/
+def base (hΓ₀ : P Γ₀) : CommIndex Γ₀ P := ⟨Γ₀, .refl Γ₀, hΓ₀⟩
+
+/-- The carrier of a determinant-one index is itself determinant-one — the `prop` field exposed as
+an instance, so that the `ℂ`-module structure on `ModularForm i.carrier k` resolves. -/
+instance (i : CommIndex Γ₀ DetOnePred) : i.carrier.HasDetOne := i.prop
+
+/-- The determinant-one index over a determinant-one base is nonempty (the base itself is an index),
+as required by the directedness-gated direct-limit lemmas. -/
+instance [Γ₀.HasDetOne] : Nonempty (CommIndex Γ₀ DetOnePred) := ⟨base inferInstance⟩
 
 end CommIndex
 

@@ -13,7 +13,7 @@ import Mathlib.NumberTheory.ModularForms.Basic
 Fix `Γ₀ ≤ GL₂(ℝ)` in the determinant-one part. For each subgroup `Γ` commensurable with `Γ₀` (and
 determinant-one) we have the space `ModularForm Γ k`, and for `Γ′ ≤ Γ` the restriction map
 `ModularForm Γ k → ModularForm Γ′ k` (a form invariant under the bigger group is invariant under the
-smaller one). Indexed by `ModularForm.CommIndex Γ₀` under reverse inclusion — a directed poset —
+smaller one). Indexed by `ModularForm.CommIndex Γ₀ DetOnePred` under reverse inclusion — a directed poset —
 this is a directed system of `ℂ`-vector spaces, and we define
 
 `ModularFormCommensurable Γ₀ k` := its `Module.DirectLimit`.
@@ -76,12 +76,12 @@ open ModularForm
 /-- The transition maps of the commensurability-class directed system: for `i ≤ j` (i.e.
 `j.carrier ≤ i.carrier`), restriction `ModularForm i.carrier k → ModularForm j.carrier k`. -/
 noncomputable def commTransition (Γ₀ : Subgroup (GL (Fin 2) ℝ)) (k : ℤ) :
-    ∀ i j : CommIndex Γ₀, i ≤ j → (ModularForm i.carrier k →ₗ[ℂ] ModularForm j.carrier k) :=
+    ∀ i j : CommIndex Γ₀ DetOnePred, i ≤ j → (ModularForm i.carrier k →ₗ[ℂ] ModularForm j.carrier k) :=
   fun _ _ h ↦ ModularForm.restrictSubgroupₗ h
 
 /-- The restriction maps form a directed system (each is the identity on underlying functions). -/
 instance commDirectedSystem (Γ₀ : Subgroup (GL (Fin 2) ℝ)) (k : ℤ) :
-    DirectedSystem (fun i : CommIndex Γ₀ ↦ ModularForm i.carrier k)
+    DirectedSystem (fun i : CommIndex Γ₀ DetOnePred ↦ ModularForm i.carrier k)
       (fun i j h ↦ (commTransition Γ₀ k i j h :
         ModularForm i.carrier k → ModularForm j.carrier k)) where
   map_self := by intros; ext z; rfl
@@ -92,36 +92,36 @@ limit of `ModularForm Γ k` over all determinant-one subgroups `Γ` commensurabl
 by reverse inclusion with restriction as the transition maps. -/
 noncomputable def ModularFormCommensurable (Γ₀ : Subgroup (GL (Fin 2) ℝ)) [Γ₀.HasDetOne]
     (k : ℤ) : Type :=
-  Module.DirectLimit (fun i : CommIndex Γ₀ ↦ ModularForm i.carrier k) (commTransition Γ₀ k)
+  Module.DirectLimit (fun i : CommIndex Γ₀ DetOnePred ↦ ModularForm i.carrier k) (commTransition Γ₀ k)
 
 namespace ModularFormCommensurable
 
 noncomputable instance (Γ₀ : Subgroup (GL (Fin 2) ℝ)) [Γ₀.HasDetOne] (k : ℤ) :
     AddCommGroup (ModularFormCommensurable Γ₀ k) :=
   inferInstanceAs (AddCommGroup
-    (Module.DirectLimit (fun i : CommIndex Γ₀ ↦ ModularForm i.carrier k) (commTransition Γ₀ k)))
+    (Module.DirectLimit (fun i : CommIndex Γ₀ DetOnePred ↦ ModularForm i.carrier k) (commTransition Γ₀ k)))
 
 noncomputable instance (Γ₀ : Subgroup (GL (Fin 2) ℝ)) [Γ₀.HasDetOne] (k : ℤ) :
     Module ℂ (ModularFormCommensurable Γ₀ k) :=
   inferInstanceAs (Module ℂ
-    (Module.DirectLimit (fun i : CommIndex Γ₀ ↦ ModularForm i.carrier k) (commTransition Γ₀ k)))
+    (Module.DirectLimit (fun i : CommIndex Γ₀ DetOnePred ↦ ModularForm i.carrier k) (commTransition Γ₀ k)))
 
 variable (Γ₀ : Subgroup (GL (Fin 2) ℝ)) [Γ₀.HasDetOne] (k : ℤ)
 
 /-- The canonical `ℂ`-linear map of the level-`i` modular forms into the direct limit. -/
-noncomputable def ofLevel (i : CommIndex Γ₀) :
+noncomputable def ofLevel (i : CommIndex Γ₀ DetOnePred) :
     ModularForm i.carrier k →ₗ[ℂ] ModularFormCommensurable Γ₀ k :=
-  Module.DirectLimit.of ℂ (CommIndex Γ₀) (fun i ↦ ModularForm i.carrier k) (commTransition Γ₀ k) i
+  Module.DirectLimit.of ℂ (CommIndex Γ₀ DetOnePred) (fun i ↦ ModularForm i.carrier k) (commTransition Γ₀ k) i
 
 /-- `ofLevel` is compatible with restriction: restricting to a finer level then including agrees
 with including directly. -/
 @[simp]
-lemma ofLevel_restrict {i j : CommIndex Γ₀} (h : i ≤ j) (f : ModularForm i.carrier k) :
+lemma ofLevel_restrict {i j : CommIndex Γ₀ DetOnePred} (h : i ≤ j) (f : ModularForm i.carrier k) :
     ofLevel Γ₀ k j (restrictSubgroupₗ h f) = ofLevel Γ₀ k i f :=
   Module.DirectLimit.of_f
 
 /-- Each level embeds into the direct limit: `ofLevel` is injective. -/
-lemma ofLevel_injective (i : CommIndex Γ₀) : Function.Injective (ofLevel Γ₀ k i) := by
+lemma ofLevel_injective (i : CommIndex Γ₀ DetOnePred) : Function.Injective (ofLevel Γ₀ k i) := by
   intro x y hxy
   obtain ⟨j, hij, hj⟩ := Module.DirectLimit.exists_eq_of_of_eq hxy
   exact restrictSubgroupₗ_injective hij hj
@@ -129,19 +129,19 @@ lemma ofLevel_injective (i : CommIndex Γ₀) : Function.Injective (ofLevel Γ�
 /-- **Universal property**: a family of `ℂ`-linear maps `gᵢ : ModularForm i.carrier k → P` that is
 compatible with restriction factors (uniquely) through the direct limit. -/
 noncomputable def lift {P : Type*} [AddCommGroup P] [Module ℂ P]
-    (g : ∀ i : CommIndex Γ₀, ModularForm i.carrier k →ₗ[ℂ] P)
-    (Hg : ∀ (i j : CommIndex Γ₀) (h : i ≤ j) (x : ModularForm i.carrier k),
+    (g : ∀ i : CommIndex Γ₀ DetOnePred, ModularForm i.carrier k →ₗ[ℂ] P)
+    (Hg : ∀ (i j : CommIndex Γ₀ DetOnePred) (h : i ≤ j) (x : ModularForm i.carrier k),
       g j (restrictSubgroupₗ h x) = g i x) :
     ModularFormCommensurable Γ₀ k →ₗ[ℂ] P :=
-  Module.DirectLimit.lift ℂ (CommIndex Γ₀) (fun i ↦ ModularForm i.carrier k) (commTransition Γ₀ k)
+  Module.DirectLimit.lift ℂ (CommIndex Γ₀ DetOnePred) (fun i ↦ ModularForm i.carrier k) (commTransition Γ₀ k)
     g Hg
 
 @[simp]
 lemma lift_ofLevel {P : Type*} [AddCommGroup P] [Module ℂ P]
-    (g : ∀ i : CommIndex Γ₀, ModularForm i.carrier k →ₗ[ℂ] P)
-    (Hg : ∀ (i j : CommIndex Γ₀) (h : i ≤ j) (x : ModularForm i.carrier k),
+    (g : ∀ i : CommIndex Γ₀ DetOnePred, ModularForm i.carrier k →ₗ[ℂ] P)
+    (Hg : ∀ (i j : CommIndex Γ₀ DetOnePred) (h : i ≤ j) (x : ModularForm i.carrier k),
       g j (restrictSubgroupₗ h x) = g i x)
-    (i : CommIndex Γ₀) (x : ModularForm i.carrier k) :
+    (i : CommIndex Γ₀ DetOnePred) (x : ModularForm i.carrier k) :
     lift Γ₀ k g Hg (ofLevel Γ₀ k i x) = g i x :=
   Module.DirectLimit.lift_of _ _ _
 
