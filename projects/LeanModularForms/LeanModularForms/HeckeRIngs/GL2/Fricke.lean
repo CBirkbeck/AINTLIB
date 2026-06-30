@@ -280,6 +280,31 @@ noncomputable def frickeOperator (k : ℤ) :
 @[simp] lemma frickeOperator_coe (k : ℤ) (f : ModularForm ((Gamma1 N).map (mapGL ℝ)) k) :
     (⇑(frickeOperator (N := N) k f) : ℍ → ℂ) = ⇑f ∣[k] (frickeGL N : GL (Fin 2) ℚ) := rfl
 
+/-- **[T006-b-L1]** The Fricke operator `W_N` on **cusp** forms `S_k(Γ₁(N))`: the cusp-form
+version of `frickeOperator` (cusp-vanishing transports through `frickeGL_isCusp_smul`, exactly
+as boundedness does for `frickeOperator`).  Diamond–Shurman Ex 5.5.1(a). -/
+noncomputable def frickeOperatorCusp (k : ℤ) :
+    CuspForm ((Gamma1 N).map (mapGL ℝ)) k →ₗ[ℂ]
+    CuspForm ((Gamma1 N).map (mapGL ℝ)) k where
+  toFun f :=
+    { toSlashInvariantForm :=
+      { toFun := ⇑f ∣[k] (frickeGL N : GL (Fin 2) ℚ)
+        slash_action_eq' _ hγ :=
+          frickeSlash_invariant
+            (fun _ hδ ↦ SlashInvariantFormClass.slash_action_eq f _ hδ) hγ }
+      holo' := (ModularFormClass.holo f).slash k _
+      zero_at_cusps' hc :=
+        OnePoint.IsZeroAt.smul_iff.mp (f.zero_at_cusps' (frickeGL_isCusp_smul hc)) }
+  map_add' f g := by
+    ext z; show ((⇑(f + g)) ∣[k] glMap (frickeGL N)) z = _
+    simp [SlashAction.add_slash, CuspForm.add_apply]; rfl
+  map_smul' c f := by
+    ext z; change ((c • ⇑f) ∣[k] (frickeGL N : GL (Fin 2) ℚ)) z = c • _
+    rw [smul_slash_pos_det k c _ _ frickeGL_det_pos]; rfl
+
+@[simp] lemma frickeOperatorCusp_coe (k : ℤ) (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
+    (⇑(frickeOperatorCusp (N := N) k f) : ℍ → ℂ) = ⇑f ∣[k] (frickeGL N : GL (Fin 2) ℚ) := rfl
+
 /-- **Diamond shift**: `W ∘ ⟨d⟩ = ⟨d⁻¹⟩ ∘ W`.  Concretely on functions
 `(⟨d⟩ f) ∣ W = ⟨d⁻¹⟩ (f ∣ W)`, because `W · σ_d = σ_{d⁻¹}' · W` with
 `Gamma0MapUnits σ_{d⁻¹}' = d⁻¹`. -/
@@ -373,6 +398,21 @@ theorem frickeOperator_frickeOperator (k : ℤ) :
   show (⇑(frickeOperator k f) ∣[k] (frickeGL N : GL (Fin 2) ℚ)) z = _
   rw [frickeOperator_coe, ← SlashAction.slash_mul, frickeGL_sq_slash]
   rfl
+
+/-- `W_N² = frickeScalar` on **cusp** forms (cusp version of `frickeOperator_frickeOperator`).
+This makes `W_N` invertible (`W_N⁻¹ = frickeScalar⁻¹ · W_N`), used to define the bad-prime adjoint. -/
+theorem frickeOperatorCusp_frickeOperatorCusp (k : ℤ) :
+    (frickeOperatorCusp (N := N) k).comp (frickeOperatorCusp (N := N) k) =
+      frickeScalar N k • LinearMap.id := by
+  ext f z
+  show (⇑(frickeOperatorCusp k f) ∣[k] (frickeGL N : GL (Fin 2) ℚ)) z = _
+  rw [frickeOperatorCusp_coe, ← SlashAction.slash_mul, frickeGL_sq_slash]
+  rfl
+
+lemma frickeOperatorCusp_frickeOperatorCusp_apply (k : ℤ)
+    (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
+    frickeOperatorCusp k (frickeOperatorCusp k f) = frickeScalar N k • f :=
+  LinearMap.congr_fun (frickeOperatorCusp_frickeOperatorCusp (N := N) k) f
 
 /-- The **inverse-conjugate character** `χ' = χ ∘ (·)⁻¹`.  The Fricke operator sends
 `modFormCharSpace k χ` into `modFormCharSpace k (chiConj χ)`. -/

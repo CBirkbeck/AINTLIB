@@ -4,6 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import LeanModularForms.Labels.Encoding
+import LeanModularForms.Labels.HeckeFieldArithmetic
+import LeanModularForms.Labels.HeckeAlgFiniteFinal
 import LeanModularForms.SMOObligations.StrongMultiplicityOneFull
 import Mathlib.FieldTheory.IntermediateField.Adjoin.Basic
 import Mathlib.NumberTheory.NumberField.Basic
@@ -48,19 +50,19 @@ the linear independence of distinct newforms (`linearIndependent_toCuspForm` /
 (`petN_toCuspForm_eq_zero_of_ne`) together with Strong Multiplicity One — the newform analogue of
 the Artin–Dedekind `linearIndependent_monoidHom` used for the character label.
 
-Exactly **two** declarations remain carrying `sorry`, each genuine number theory absent from mathlib
-and each isolated into a precisely stated declaration with a one-line statement of the input it
-needs:
+Both arithmetic headlines below are now **proved here** (sorry-free in their own bodies), each
+deriving from the *single* isolated finiteness input `heckeAlgℤ_finite` (`Module.Finite ℤ
+(heckeAlgℤ N k)`, stated in `Labels/HeckeFieldArithmetic.lean` — the one remaining `sorry`, = the
+integral Eichler–Shimura / integral-q-expansion-lattice input, Shimura Thm 3.48(1)+3.51(1)+3.52,
+Miyake Thm 4.5.9+4.5.19; absent from mathlib):
 
 * `Newform.coeffSeq_isIntegral` — **each Hecke eigenvalue is an algebraic integer**
-  (`IsIntegral ℤ aₙ`, hence `IsIntegral ℚ aₙ`).  The standard fact that Hecke eigenvalues of a
-  newform are algebraic integers (Shimura, *Introduction to the Arithmetic Theory of Automorphic
-  Functions*, Thm 3.52 / Deligne).  Absent from mathlib.
+  (`IsIntegral ℤ aₙ`, the full source strength).  Shimura **Thm 3.48(3)** p.83 (the eigenvalues are
+  roots of the monic *integral* characteristic polynomial of the Hecke operators on the lattice);
+  Diamond–Shurman Thm 6.5.1.
 * `Newform.instFiniteDimensionalCoeffField` — **the coefficient field is a number field**
-  (`FiniteDimensional ℚ K_f`), i.e. `[K_f : ℚ] < ∞`.  The standard fact that the Hecke field of a
-  newform is a number field (the eigenvalues lie in a fixed finite extension; equivalently the
-  Hecke algebra acting on the finite-dimensional space `S_k(Γ₁(N))` is a finite-rank ℤ-algebra).
-  Absent from mathlib.
+  (`FiniteDimensional ℚ K_f`, `[K_f : ℚ] < ∞`).  Shimura Thm 3.51(1) (`[D₀:ℚ] = r = dim S_k < ∞`):
+  the eigenvalues lie in the fixed finite-dimensional ℚ-Hecke-algebra, hence in a number field.
 
 The Galois action `f ↦ σf` (conjugate the `aₙ` by `σ ∈ Gal(ℂ/ℚ)`) is modelled by the relation
 `Newform.IsGaloisConj`; its *well-definedness* (that `σf` is again a `Newform` of the same `N, k`
@@ -218,13 +220,8 @@ lemma _root_.HeckeRing.GL2.Eigenform.ext_of_toCuspForm {f g : Eigenform N k}
   Eigenform.ext (by rw [hfg]) (Eigenform.χ_eq_of_toCuspForm hfg hne)
     (Eigenform.ringEigenvalue_eq_of_toCuspForm hfg hne)
 
-/-- The underlying form of a `Newform` is nonzero: normalisation `a₁ = 1` (`isNorm`) forces a
-nonzero `q`-expansion, hence a nonzero form. -/
-lemma toCuspForm_ne_zero (f : Newform N k) : f.toCuspForm ≠ 0 := fun hF_zero => by
-  have h1 : (UpperHalfPlane.qExpansion (1 : ℝ) f.toCuspForm).coeff 1 = 1 := f.isNorm
-  rw [show (⇑f.toCuspForm : UpperHalfPlane → ℂ) = (0 : UpperHalfPlane → ℂ) by rw [hF_zero]; rfl,
-    UpperHalfPlane.qExpansion_zero] at h1
-  simp at h1
+-- `Newform.toCuspForm_ne_zero` now lives upstream in `HeckeFieldArithmetic.lean` (used by T003);
+-- inherited here via the import. (Was duplicated here before the Group-A T004/T005 wiring.)
 
 /-- **A `Newform` is determined by its underlying form**: if `f.toCuspForm = g.toCuspForm` then
 `f = g`.  Newforms are normalised, hence nonzero, so the `Eigenform` data fields are pinned by
@@ -433,23 +430,263 @@ def coeffField (f : Newform N k) : IntermediateField ℚ ℂ :=
 lemma coeffSeq_mem_coeffField (f : Newform N k) (n : ℕ+) : coeffSeq f n ∈ coeffField f :=
   IntermediateField.subset_adjoin ℚ _ ⟨n, rfl⟩
 
-/-- **DEEP INPUT (algebraicity of Hecke eigenvalues).**  Each normalised Fourier coefficient
-`aₙ(f)` of a newform is an algebraic number, i.e. integral over `ℚ` (in fact over `ℤ`: it is an
-algebraic *integer*).  This is the standard "Hecke eigenvalues of a newform are algebraic integers"
-theorem (Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, Thm 3.52;
-Deligne), which is not available in mathlib. -/
-private lemma coeffSeq_isIntegral (f : Newform N k) (n : ℕ+) : IsIntegral ℚ (coeffSeq f n) :=
-  sorry
+/-! ### [T004a] Newform coefficients are Hecke eigenvalues for ALL `n` (DS eq 5.21 + Thm 5.8.2) -/
 
-/-- **DEEP INPUT (the coefficient field is a number field).**  The coefficient field
-`K_f = ℚ(aₙ : n)` is finite-dimensional over `ℚ`, i.e. `[K_f : ℚ] < ∞`.  This is the standard fact
-that the Hecke field of a newform is a number field: although the generating *set* `{aₙ : n}` is a
-priori infinite, all `aₙ` lie in a single finite extension of `ℚ` (equivalently, the Hecke algebra
-acting on the finite-dimensional space `S_k(Γ₁(N))` is a finite-rank `ℤ`-algebra).  Not available
-in mathlib. -/
+/-- The canonical `q`-coefficient of `heckeT_n_cusp` agrees with that of the underlying
+`ModularForm`-level `heckeT_n` (they have the same `toModularForm'`, hence the same `q`-expansion). -/
+private lemma coeff_heckeT_n_cusp_eq_heckeT_n (m j : ℕ) [NeZero j]
+    (h : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
+    (UpperHalfPlane.qExpansion (1 : ℝ) (heckeT_n_cusp k j h)).coeff m =
+      (UpperHalfPlane.qExpansion (1 : ℝ) (heckeT_n k j h.toModularForm')).coeff m := rfl
+
+/-- `heckeT_n_cusp` preserves the Nebentypus eigenspace (at the cusp level): if
+`h.toModularForm' ∈ modFormCharSpace k χ` then so is `(heckeT_n_cusp k j h).toModularForm'`.
+Holds for **all** `j` (good or bad) via `heckeT_n_preserves_modFormCharSpace_all`. -/
+private lemma heckeT_n_cusp_mem_charSpace (j : ℕ) [NeZero j] (χ : (ZMod N)ˣ →* ℂˣ)
+    {h : CuspForm ((Gamma1 N).map (mapGL ℝ)) k}
+    (hh : h.toModularForm' ∈ modFormCharSpace k χ) :
+    (heckeT_n_cusp k j h).toModularForm' ∈ modFormCharSpace k χ := by
+  rw [heckeT_n_cusp_toModularForm']
+  exact heckeT_n_preserves_modFormCharSpace_all k j χ hh
+
+/-- **Cusp-level period-1 Fourier coefficient formula for a coprime `Tₙ`** (DS eq 5.20). For `n'`
+coprime to `N` and a cusp form `h` in the eigenspace `modFormCharSpace k χ`, the `m`-th canonical
+coefficient of `Tₙ' h` is the Hecke divisor sum.  This is the cusp-level transport of
+`fourierCoeff_heckeT_n_period_one`. -/
+private lemma coeff_heckeT_n_cusp_coprime (n' : ℕ) [NeZero n'] (hn' : Nat.Coprime n' N)
+    (χ : (ZMod N)ˣ →* ℂˣ) {h : CuspForm ((Gamma1 N).map (mapGL ℝ)) k}
+    (hh : h.toModularForm' ∈ modFormCharSpace k χ) (m : ℕ) :
+    (UpperHalfPlane.qExpansion (1 : ℝ) (heckeT_n_cusp k n' h)).coeff m =
+      ∑ d ∈ (Nat.gcd m n').divisors,
+        if hd : d.Coprime N then
+          (↑d : ℂ) ^ (k - 1) * ↑(χ (ZMod.unitOfCoprime d hd)) *
+            (UpperHalfPlane.qExpansion (1 : ℝ) h.toModularForm').coeff (m * n' / (d * d))
+        else 0 := by
+  rw [coeff_heckeT_n_cusp_eq_heckeT_n]
+  exact fourierCoeff_heckeT_n_period_one k n' hn' χ hh m
+
+/-- **Cusp-level coprime collapse at coprime index** (DS eq 5.20 single term). For `n'` coprime to
+`N`, `h` in the eigenspace, and an index `m` coprime to `n'` (so `gcd(m, n') = 1`), the divisor sum
+collapses to the single `d = 1` term: `a_m(Tₙ' h) = a_{m·n'}(h)`. -/
+private lemma coeff_heckeT_n_cusp_coprime_index (n' : ℕ) [NeZero n'] (hn' : Nat.Coprime n' N)
+    (χ : (ZMod N)ˣ →* ℂˣ) {h : CuspForm ((Gamma1 N).map (mapGL ℝ)) k}
+    (hh : h.toModularForm' ∈ modFormCharSpace k χ) (m : ℕ) (hm : Nat.Coprime m n') :
+    (UpperHalfPlane.qExpansion (1 : ℝ) (heckeT_n_cusp k n' h)).coeff m =
+      (UpperHalfPlane.qExpansion (1 : ℝ) h).coeff (m * n') := by
+  rw [coeff_heckeT_n_cusp_coprime n' hn' χ hh m]
+  have hunit : ZMod.unitOfCoprime 1 (Nat.coprime_one_left N) = 1 := by
+    ext; simp [ZMod.coe_unitOfCoprime]
+  rw [show Nat.gcd m n' = 1 from hm, Nat.divisors_one, Finset.sum_singleton,
+    dif_pos (Nat.coprime_one_left N)]
+  simp only [hunit, Nat.cast_one, one_zpow, map_one, Units.val_one, mul_one, Nat.div_one, one_mul]
+  rfl
+
+/-- **Bad prime-power Fourier relation** (cusp level): for a bad prime `p ∣ N` and any `v`, the
+`l`-th canonical coefficient of `T_{p^v} h = U_p^v h` is `a_{p^v·l}(h)`, for **all** `l`.  Proved by
+induction on `v`, iterating the single-prime relation `heckeT_n_cusp_divN_coeff`. -/
+private lemma coeff_heckeT_ppow_bad (p : ℕ) (hp : Nat.Prime p) (hpN : ¬ Nat.Coprime p N) (v : ℕ)
+    (h : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (l : ℕ) :
+    haveI : NeZero (p ^ v) := ⟨(pow_pos hp.pos v).ne'⟩
+    (UpperHalfPlane.qExpansion (1 : ℝ) (heckeT_n_cusp k (p ^ v) h)).coeff l =
+      (UpperHalfPlane.qExpansion (1 : ℝ) h).coeff (p ^ v * l) := by
+  haveI : NeZero p := ⟨hp.pos.ne'⟩
+  induction v generalizing l with
+  | zero =>
+    haveI : NeZero (p ^ 0) := ⟨(pow_pos hp.pos 0).ne'⟩
+    have h1 : heckeT_n_cusp k (p ^ 0) h = h := by
+      apply CuspForm.ext; intro z
+      show ((heckeT_n k (p ^ 0)) h.toModularForm').toFun z = h z
+      simp only [pow_zero, heckeT_n_one]; rfl
+    rw [h1, pow_zero, one_mul]
+  | succ w ih =>
+    haveI : NeZero (p ^ (w + 1)) := ⟨(pow_pos hp.pos _).ne'⟩
+    haveI : NeZero (p ^ w) := ⟨(pow_pos hp.pos _).ne'⟩
+    -- `T_{p^{w+1}} = T_p ∘ T_{p^w}` at the cusp level (bad prime: diamond term vanishes).
+    have hmul : heckeT_n (N := N) k (p ^ (w + 1)) = heckeT_n k p * heckeT_n k (p ^ w) := by
+      rw [heckeT_n_prime_pow k hp (w + 1) (Nat.succ_pos _),
+        heckeT_ppow_eq_pow_of_not_coprime k hp hpN (w + 1), heckeT_n_prime k hp, pow_succ']
+      cases w with
+      | zero => simp [heckeT_n_one]
+      | succ w' => rw [heckeT_n_prime_pow k hp (w' + 1) (Nat.succ_pos _),
+          heckeT_ppow_eq_pow_of_not_coprime k hp hpN (w' + 1)]
+    -- Decompose, apply the single-prime relation, then the inductive hypothesis at index `p·l`.
+    have hdecomp : heckeT_n_cusp k (p ^ (w + 1)) h =
+        heckeT_n_cusp k p (heckeT_n_cusp k (p ^ w) h) := by
+      apply CuspForm.ext; intro z
+      show ((heckeT_n (N := N) k (p ^ (w + 1))) h.toModularForm').toFun z =
+        ((heckeT_n k p) ((heckeT_n k (p ^ w)) h.toModularForm')).toFun z
+      rw [hmul]; rfl
+    rw [hdecomp, heckeT_n_cusp_divN_coeff p hp hpN _ l, ih (p * l), ← mul_assoc, ← pow_succ]
+
+/-- **[T004a sub-leaf — DS eq (5.21), general form]** Multiplicative Hecke coefficient relation: for
+any `n`, any cusp form `g` in the eigenspace, and any index `m` coprime to `n`, the `m`-th canonical
+coefficient of `Tₙ g` is `a_{m·n}(g)`.  Proved by strong induction on `n`, peeling the smallest
+prime factor `p` (good: the coprime divisor-sum collapses; bad: iterate `U_p`), exactly mirroring
+`Newform.exists_heckeT_n_cusp_smul`. -/
+lemma coeff_heckeT_n_cusp_coprime_mul (n : ℕ) [NeZero n] (χ : (ZMod N)ˣ →* ℂˣ)
+    (g : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (hg : g.toModularForm' ∈ modFormCharSpace k χ)
+    (m : ℕ) (hm : Nat.Coprime m n) :
+    (UpperHalfPlane.qExpansion (1 : ℝ) (heckeT_n_cusp k n g)).coeff m =
+      (UpperHalfPlane.qExpansion (1 : ℝ) g).coeff (m * n) := by
+  -- Strong induction over `n` with `m`, `g`, `hg`, `hm` generalised.
+  suffices key : ∀ j : ℕ, (hj : j ≠ 0) →
+      haveI : NeZero j := ⟨hj⟩
+      ∀ (g' : CuspForm ((Gamma1 N).map (mapGL ℝ)) k),
+        g'.toModularForm' ∈ modFormCharSpace k χ → ∀ m', Nat.Coprime m' j →
+          (UpperHalfPlane.qExpansion (1 : ℝ) (heckeT_n_cusp k j g')).coeff m' =
+            (UpperHalfPlane.qExpansion (1 : ℝ) g').coeff (m' * j) by
+    exact key n (NeZero.ne n) g hg m hm
+  clear hm hg m g
+  intro j
+  induction j using Nat.strongRecOn with
+  | _ j ih =>
+  intro hj0
+  haveI : NeZero j := ⟨hj0⟩
+  intro g hg m hm
+  by_cases hj1 : j = 1
+  · subst hj1
+    have h1 : heckeT_n_cusp k 1 g = g := by
+      apply CuspForm.ext; intro z
+      show ((heckeT_n k 1) g.toModularForm').toFun z = g z
+      rw [heckeT_n_one]; rfl
+    rw [h1, mul_one]
+  · have hj_gt : 1 < j := by omega
+    set p := j.minFac with hp_def
+    have hp : Nat.Prime p := Nat.minFac_prime (by omega)
+    haveI : NeZero p := ⟨hp.pos.ne'⟩
+    set v := j.factorization p with hv_def
+    have hv_pos : 0 < v := hp.factorization_pos_of_dvd (by omega) (Nat.minFac_dvd j)
+    set q := j / p ^ v with hq_def
+    have hpvq : p ^ v * q = j := Nat.ordProj_mul_ordCompl_eq_self j p
+    have hpq : Nat.Coprime p q := Nat.coprime_ordCompl hp (by omega)
+    have hq_pos : 0 < q := Nat.div_pos (Nat.le_of_dvd (by omega) (Nat.ordProj_dvd j p))
+      (pow_pos hp.pos v)
+    haveI : NeZero (p ^ v) := ⟨(pow_pos hp.pos v).ne'⟩
+    haveI : NeZero q := ⟨hq_pos.ne'⟩
+    have hq_lt : q < j := by
+      have : q = j / p ^ v := hq_def
+      rw [this]
+      exact Nat.div_lt_self (by omega) (Nat.one_lt_pow hv_pos.ne' hp.one_lt)
+    -- `coprime m (p^v)` and `coprime m q` (from `coprime m j`, since `p^v ∣ j`, `q ∣ j`).
+    have hmpv : Nat.Coprime m (p ^ v) :=
+      Nat.Coprime.coprime_dvd_right (Dvd.intro q hpvq) hm
+    have hmq : Nat.Coprime m q := Nat.Coprime.coprime_dvd_right (Dvd.intro_left (p ^ v) hpvq) hm
+    have hpvq_cop : Nat.Coprime (p ^ v) q := hpq.pow_left v
+    -- Decompose `T_j = T_{p^v} ∘ T_q` at the cusp level.
+    have hmul : heckeT_n (N := N) k j = heckeT_n k (p ^ v) * heckeT_n k q :=
+      heckeT_n_mul_ppow_quot (N := N) (k := k) j hj_gt p hp hp_def v hv_def hv_pos hq_pos
+    have hdecomp : heckeT_n_cusp k j g = heckeT_n_cusp k (p ^ v) (heckeT_n_cusp k q g) := by
+      apply CuspForm.ext; intro z
+      show ((heckeT_n (N := N) k j) g.toModularForm').toFun z =
+        ((heckeT_n k (p ^ v)) ((heckeT_n k q) g.toModularForm')).toFun z
+      rw [hmul]; rfl
+    -- `T_q g` is again in the eigenspace.
+    have hTqg : (heckeT_n_cusp k q g).toModularForm' ∈ modFormCharSpace k χ :=
+      heckeT_n_cusp_mem_charSpace q χ hg
+    -- Coefficient at `m` of `T_{p^v}(T_q g)`: good prime ⇒ coprime collapse; bad ⇒ iterate `U_p`.
+    rw [hdecomp]
+    have hstep : (UpperHalfPlane.qExpansion (1 : ℝ)
+        (heckeT_n_cusp k (p ^ v) (heckeT_n_cusp k q g))).coeff m =
+        (UpperHalfPlane.qExpansion (1 : ℝ) (heckeT_n_cusp k q g)).coeff (m * p ^ v) := by
+      by_cases hpN : Nat.Coprime p N
+      · -- good prime: `p^v` coprime to `N`; coprime collapse at index `m` (coprime to `p^v`).
+        exact coeff_heckeT_n_cusp_coprime_index (p ^ v) (hpN.pow_left v) χ hTqg m hmpv
+      · -- bad prime: `T_{p^v} = U_p^v`, coefficient relation `a_m(U_p^v ·) = a_{p^v·m}(·)`.
+        rw [coeff_heckeT_ppow_bad p hp hpN v (heckeT_n_cusp k q g) m, mul_comm (p ^ v) m]
+    rw [hstep]
+    -- inductive hypothesis for `q` at index `m·p^v` (coprime to `q`).
+    have hmpvq : Nat.Coprime (m * p ^ v) q := Nat.Coprime.mul_left hmq hpvq_cop
+    rw [ih q hq_lt hq_pos.ne' g hg (m * p ^ v) hmpvq, mul_assoc, hpvq]
+
+/-- **[T004a sub-leaf — DS eq (5.21), all `n`]** The `n`-th canonical Fourier coefficient equals
+the *first* coefficient of `Tₙ g`: `aₙ(g) = a₁(Tₙ g)`.  (At `m = 1`, `gcd(1,n)=1` collapses the
+Hecke divisor sum to the single `d=1` term.)  Holds for every `n` — both `(n,N)=1` and bad `n`. -/
+lemma coeff_n_eq_coeff_one_heckeT_n_cusp (n : ℕ) [NeZero n] (χ : (ZMod N)ˣ →* ℂˣ)
+    (g : CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
+    (hg : g.toModularForm' ∈ modFormCharSpace k χ) :
+    (UpperHalfPlane.qExpansion (1 : ℝ) g).coeff n =
+      (UpperHalfPlane.qExpansion (1 : ℝ) (heckeT_n_cusp k n g)).coeff 1 := by
+  rw [coeff_heckeT_n_cusp_coprime_mul n χ g hg 1 (Nat.coprime_one_left n), one_mul]
+
+/-- a₁-coefficient of a scalar multiple (local; `qExpansion` is ℂ-linear). -/
+private lemma qExp_one_coeff_one_smul (c : ℂ) (g : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
+    (UpperHalfPlane.qExpansion (1 : ℝ) (⇑(c • g) : UpperHalfPlane → ℂ)).coeff 1 =
+      c * (UpperHalfPlane.qExpansion (1 : ℝ) (⇑g : UpperHalfPlane → ℂ)).coeff 1 := by
+  change (UpperHalfPlane.qExpansion (1 : ℝ) (c • g.toModularForm')).coeff 1 = _
+  rw [ModularForm.qExpansion_smul one_pos (one_mem_strictPeriods_Gamma1_map N) c g.toModularForm',
+    PowerSeries.coeff_smul, smul_eq_mul]
+  rfl
+
+/-- **[T004a]** For a newform, the `n`-th Fourier coefficient is the `Tₙ`-eigenvalue
+`newformEigenHom f (heckeEnd n)`, for **all** `n` (DS Theorem 5.8.2(b)). -/
+theorem coeffSeq_eq_newformEigenHom_heckeEnd (f : Newform N k) (n : ℕ+) :
+    coeffSeq f n = newformEigenHom f ⟨heckeEnd N k n, heckeEnd_mem n⟩ := by
+  haveI : NeZero n.val := ⟨n.pos.ne'⟩
+  have hsmul : heckeT_n_cusp k n.val f.toCuspForm =
+      newformEigenHom f ⟨heckeEnd N k n, heckeEnd_mem n⟩ • f.toCuspForm :=
+    (f.eigenScalar_smul ⟨heckeEnd N k n, heckeEnd_mem n⟩).symm
+  have h1 : coeffSeq f n =
+      (UpperHalfPlane.qExpansion (1 : ℝ) (heckeT_n_cusp k n.val f.toCuspForm)).coeff 1 :=
+    coeff_n_eq_coeff_one_heckeT_n_cusp n.val f.χ f.toCuspForm f.mem_charSpace
+  rw [h1, hsmul, qExp_one_coeff_one_smul, f.isNorm, mul_one]
+
+/-- **Hecke eigenvalues are algebraic integers** (Shimura, *Introduction to the Arithmetic Theory of
+Automorphic Functions*, **Thm 3.48(3)** p.83; Diamond–Shurman Thm 6.5.1): each normalised Fourier
+coefficient `aₙ(f)` of a newform is integral **over `ℤ`** (a genuine algebraic integer — the full
+source strength, not merely algebraic over `ℚ`).  Proved modulo the single finiteness input
+`heckeAlgℤ_finite`.  (Shimura Thm 3.52, p.85, is the *integral q-expansion basis* / full-rank lattice
+— a different statement, used for `heckeAlgℤ_finite`, not here.) -/
+theorem coeffSeq_isIntegral (f : Newform N k) (n : ℕ+) : IsIntegral ℤ (coeffSeq f n) := by
+  haveI : Module.Finite ℤ ↥(newformEigenHom f).range := newformEigenHom_range_finite f
+  have hmem : coeffSeq f n ∈ (newformEigenHom f).range := by
+    rw [coeffSeq_eq_newformEigenHom_heckeEnd]; exact ⟨_, rfl⟩
+  exact (IsIntegral.of_finite ℤ (⟨coeffSeq f n, hmem⟩ : (newformEigenHom f).range)).map
+    ((newformEigenHom f).range.subtype.toIntAlgHom)
+
+/-- **The eigenvalue arithmetic of a newform** (Shimura Thm 3.51(1)): the generating set `{aₙ}` is a
+priori infinite, but all `aₙ` lie in the eigenvalue ring `O_f = (newformEigenHom f).range`, which is
+module-finite over `ℤ` — so `K_f` is finite-dimensional over `ℚ`.  Factored to take the finiteness as
+a hypothesis; the deep input (`heckeAlgℤ_finite`) enters at the use sites below.
+
+`K_f` is finite-dimensional over `ℚ` once the eigenvalue ring `O_f := (newformEigenHom f).range`
+is module-finite over `ℤ`.  The finiteness `hfin` (the one deep input, via `heckeAlgℤ_finite` /
+`newformEigenHom_range_finite`) is taken as a hypothesis so the `k ≥ 2` corollary
+`coeffField_numberField_of_two_le` can supply the axiom-clean Eichler-route finiteness directly. -/
+theorem finiteDimensional_coeffField_of_rangeFinite (f : Newform N k)
+    (hfin : Module.Finite ℤ ↥(newformEigenHom f).range) :
+    FiniteDimensional ℚ (coeffField f) := by
+  classical
+  obtain ⟨S, hSfin, hSspan⟩ := Submodule.fg_def.mp hfin.fg_top
+  set Tc : Set ℂ := (newformEigenHom f).range.subtype '' S
+  haveI : Finite ↑Tc := (hSfin.image _).to_subtype
+  have hOf_sub' : ∀ z : ↥(newformEigenHom f).range,
+      (z : ℂ) ∈ (IntermediateField.adjoin ℚ Tc : Set ℂ) := by
+    intro z
+    have hz : z ∈ Submodule.span ℤ S := hSspan.ge Submodule.mem_top
+    induction hz using Submodule.span_induction with
+    | mem s hs => exact IntermediateField.subset_adjoin ℚ Tc ⟨s, hs, rfl⟩
+    | zero => simp
+    | add a b _ _ ha hb => exact add_mem ha hb
+    | smul c a _ ha =>
+        simpa [zsmul_eq_mul] using mul_mem ((IntermediateField.adjoin ℚ Tc).intCast_mem c) ha
+  have hint : ∀ x ∈ Tc, IsIntegral ℚ x := by
+    rintro x ⟨y, _, rfl⟩
+    exact ((IsIntegral.of_finite ℤ y).map (newformEigenHom f).range.subtype.toIntAlgHom).tower_top
+  haveI : FiniteDimensional ℚ ↥(IntermediateField.adjoin ℚ Tc) :=
+    IntermediateField.finiteDimensional_adjoin hint
+  have hle : coeffField f ≤ IntermediateField.adjoin ℚ Tc := by
+    rw [coeffField, IntermediateField.adjoin_le_iff]
+    rintro x ⟨n, rfl⟩
+    rw [coeffSeq_eq_newformEigenHom_heckeEnd]
+    exact hOf_sub' ⟨_, _, rfl⟩
+  exact Module.Finite.of_injective (IntermediateField.inclusion hle).toLinearMap
+    (IntermediateField.inclusion_injective hle)
+
+/-- `K_f` is finite-dimensional over `ℚ` (all weights), via the live finiteness input
+`heckeAlgℤ_finite` (`newformEigenHom_range_finite`). -/
 instance instFiniteDimensionalCoeffField (f : Newform N k) :
     FiniteDimensional ℚ (coeffField f) :=
-  sorry
+  finiteDimensional_coeffField_of_rangeFinite f (newformEigenHom_range_finite f)
 
 /-- The coefficient field `K_f` is a number field (`CharZero` + `[K_f : ℚ] < ∞`).  `CharZero` is
 automatic (it is a subfield of `ℂ`); finite-dimensionality is the deep input
@@ -457,6 +694,29 @@ automatic (it is a subfield of `ℂ`); finite-dimensionality is the deep input
 instance instNumberFieldCoeffField (f : Newform N k) : NumberField (coeffField f) where
   to_charZero := inferInstance
   to_finiteDimensional := instFiniteDimensionalCoeffField f
+
+/-- **The coefficient field `K_f = ℚ(aₙ : n)` of a weight-`k ≥ 2` newform is a number field —
+UNCONDITIONALLY (axiom-clean).**  For `k ≥ 2` the finiteness of the integral Hecke algebra is
+supplied by the integral Eichler–Shimura *period-map injectivity* route
+(`ModularSymbols.heckeAlgℤ_finite_of_period` with injectivity `periodMap'_injective_eichler`, which is
+axiom-clean — `{propext, Classical.choice, Quot.sound}`), so this carries **no**
+`exists_HeckeStableLattice` / Deligne–Serre dependency (that is only the `k < 2` branch of the
+all-weights instance `instNumberFieldCoeffField`).  This is the headline arithmetic consequence of the
+Eichler route: `[K_f : ℚ] < ∞` for every weight `k ≥ 2`, every level `N`. -/
+theorem coeffField_numberField_of_two_le (f : Newform N k) (hk : 2 ≤ k) :
+    NumberField (coeffField f) := by
+  -- `k ≥ 2`: the integral Hecke algebra is module-finite over `ℤ` via the Eichler period route
+  -- (axiom-clean), bypassing the weight case-split of the live `heckeAlgℤ_finite` instance.
+  haveI : Module.Finite ℤ (heckeAlgℤ N k) := heckeAlgℤ_finite_of_two_le hk
+  -- Hence the eigenvalue ring `O_f` is a finite `ℤ`-module (surjective image of `heckeAlgℤ`), built
+  -- from the *local* (Eichler, axiom-clean) finiteness above — NOT `newformEigenHom_range_finite`,
+  -- which bakes in the weight-case-split instance and would re-pull the `k < 2` lattice `sorry`.
+  haveI hOf : Module.Finite ℤ ↥(newformEigenHom f).range :=
+    Module.Finite.of_surjective
+      (RingHom.rangeRestrict (newformEigenHom f)).toIntAlgHom.toLinearMap
+      (RingHom.rangeRestrict_surjective _)
+  -- ...so `K_f = O_f ⊗ ℚ` is finite-dimensional, and `CharZero` (subfield of `ℂ`) gives a number field.
+  exact { to_finiteDimensional := finiteDimensional_coeffField_of_rangeFinite f hOf }
 
 /-! ### The Galois action and the Hecke orbit
 
@@ -685,3 +945,6 @@ lemma newformOrbitLabel_injOn_orbits {f g : Newform N k} (χ : (ZMod N)ˣ →* �
     (orbitIndex_inj (LeanModularForms.Labels.letterEncode_injective h))
 
 end HeckeRing.GL2.Newform
+
+
+
