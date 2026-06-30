@@ -53,3 +53,5 @@ import LeanModularForms.Labels.Encoding
 import LeanModularForms.Labels.CharacterOrbit
 import LeanModularForms.Labels.NewformOrbit
 import LeanModularForms.Labels.Label
+import LeanModularForms.Modularforms.LFunctionEuler
+import LeanModularForms.Modularforms.LFunctionFEqN
