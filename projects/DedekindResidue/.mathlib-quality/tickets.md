@@ -35,6 +35,14 @@
     [`ZLattice.covolume`, `VectorFourier.fourierIntegral`]. (P.opt) general Schwartz-class
     Poisson — **optional, off the critical path**, only if cheaply reusable. **Next action**:
     `/develop --decompose` scoped to SP1-AGP.
+    - **P.1 STARTED ✓ (2026-07-01, `CompletedZeta/DualLattice.lean`, build green + axiom-clean)**:
+      `dualZLattice` (via `innerₗ` + `LinearMap.BilinForm.dualSubmodule`), `mem_dualZLattice`,
+      `innerₗ_nondegenerate`, and the structural lever `dualZLattice_eq_span` (`L♯ = span ℤ
+      (dual basis)`). **Remaining P.1**: (a) the `IsZLattice ℝ`/`DiscreteTopology` instances for
+      `dualZLattice L` — free from `dualZLattice_eq_span` + `instIsZLatticeRealSpan` (both
+      `Prop`-classes, transport across the carrier equality); (b) the covolume reciprocal
+      `covolume (dualZLattice L) · covolume L = 1` — via `ZLattice.covolume_eq_det` + dual-basis
+      determinant `= (det B)⁻¹`. NB `Basis` is now `Module.Basis` under the module system.
   - **[SP1-AGΘ] lattice Gaussian theta** `Θ_L(t)=∑_{x∈L}e^{-πt‖x‖²}` + transformation law —
     depends on SP1-AGP (Gaussian class) + n-dim Gaussian self-duality (assemble from 1-D
     `Gaussian/FourierTransform`).
